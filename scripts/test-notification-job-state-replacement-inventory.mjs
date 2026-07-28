@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { replaceNotificationJobListRows } from "../src/domains/notifications/notificationJobState.js";
 
 function applyExistingNotificationJobReplacement(currentJobs, replacementJobs) {
   return currentJobs.map(
@@ -46,14 +47,19 @@ const replacementJobs = [
 const currentSnapshot = structuredClone(currentJobs);
 const replacementSnapshot = structuredClone(replacementJobs);
 
+const existingResult = applyExistingNotificationJobReplacement(
+  currentJobs,
+  replacementJobs
+);
+assert.deepEqual(existingResult, [
+  replacementJobs[0],
+  currentJobs[1],
+  replacementJobs[0],
+  currentJobs[3]
+]);
 assert.deepEqual(
-  applyExistingNotificationJobReplacement(currentJobs, replacementJobs),
-  [
-    replacementJobs[0],
-    currentJobs[1],
-    replacementJobs[0],
-    currentJobs[3]
-  ]
+  replaceNotificationJobListRows(currentJobs, replacementJobs),
+  existingResult
 );
 const emptyReplacementResult = applyExistingNotificationJobReplacement(
   currentJobs,
@@ -65,9 +71,17 @@ assert.deepEqual(currentJobs, currentSnapshot);
 assert.deepEqual(replacementJobs, replacementSnapshot);
 
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const helperSource = await readFile(
+  new URL("../src/domains/notifications/notificationJobState.js", import.meta.url),
+  "utf8"
+);
 const inlineReplacement =
   "current.map((job) => canceledJobs.find((canceledJob) => canceledJob.notificationJobId === job.notificationJobId) ?? job)";
-assert.equal(appSource.split(inlineReplacement).length - 1, 3);
+assert.equal(appSource.split(inlineReplacement).length - 1, 0);
+assert.equal(
+  appSource.split("replaceNotificationJobListRows(current, canceledJobs)").length - 1,
+  3
+);
 
 const cancelLessonStart = appSource.indexOf(
   "function cancelActiveLessonNotificationJobs(lesson, reason ="
@@ -114,7 +128,11 @@ for (const [label, functionSource] of [
     guardIndex >= 0 && setterIndex > guardIndex && persistIndex > setterIndex,
     `${label} guard, state, persistence order changed`
   );
-  assert.ok(functionSource.includes(inlineReplacement));
+  assert.ok(
+    functionSource.includes(
+      "replaceNotificationJobListRows(current, canceledJobs)"
+    )
+  );
 }
 const noneModeIndex = applyPlanSource.indexOf('if (effectiveMode === "none")');
 const noneModeGuardIndex = applyPlanSource.indexOf("if (canceledJobs.length)");
@@ -132,8 +150,25 @@ assert.ok(
     noneModeSetterIndex > noneModeGuardIndex &&
     noneModePersistIndex > noneModeSetterIndex
 );
-assert.ok(applyPlanSource.includes(inlineReplacement));
-assert.ok(!appSource.includes("replaceNotificationJobListRows"));
+assert.ok(
+  applyPlanSource.includes(
+    "replaceNotificationJobListRows(current, canceledJobs)"
+  )
+);
+for (const helperRule of [
+  "export function replaceNotificationJobListRows(",
+  "currentJobs = [],",
+  "replacementJobs = []",
+  "return currentJobs.map(",
+  "replacementJobs.find(",
+  "replacementJob.notificationJobId === job.notificationJobId",
+  ") ?? job"
+]) {
+  assert.ok(
+    helperSource.includes(helperRule),
+    `missing replacement helper rule: ${helperRule}`
+  );
+}
 
 console.log(
   "notification job state replacement inventory TARGET/CONTROL fixtures passed"

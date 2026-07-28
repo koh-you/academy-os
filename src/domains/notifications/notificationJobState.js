@@ -18,3 +18,16 @@ export function mergeNotificationJobLists(currentJobs = [], nextJobs = []) {
     ...currentJobs.filter((job) => !nextJobIds.has(job.notificationJobId))
   ];
 }
+
+export function replaceNotificationJobListRows(
+  currentJobs = [],
+  replacementJobs = []
+) {
+  return currentJobs.map(
+    (job) =>
+      replacementJobs.find(
+        (replacementJob) =>
+          replacementJob.notificationJobId === job.notificationJobId
+      ) ?? job
+  );
+}

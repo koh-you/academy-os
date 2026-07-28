@@ -63,6 +63,7 @@ import {
 } from "../domains/notifications/notificationJobSelectors.js";
 import {
   mergeNotificationJobLists,
+  replaceNotificationJobListRows,
   selectValidNotificationJobs,
   upsertNotificationJobList
 } from "../domains/notifications/notificationJobState.js";
@@ -8668,7 +8669,7 @@ export function App() {
       .map((job) => ({ ...job, status: "canceled", error: reason, updatedAt: new Date().toISOString() }));
     if (canceledJobs.length === 0) return [];
     setNotificationJobs((current) =>
-      current.map((job) => canceledJobs.find((canceledJob) => canceledJob.notificationJobId === job.notificationJobId) ?? job)
+      replaceNotificationJobListRows(current, canceledJobs)
     );
     canceledJobs.forEach((notificationJob) => {
       persistCanceledNotificationJob(notificationJob, reason).catch((error) => console.error(error));
@@ -8722,7 +8723,7 @@ export function App() {
       .map((job) => ({ ...job, status: "canceled", error: reason, updatedAt: new Date().toISOString() }));
     if (!canceledJobs.length) return [];
     setNotificationJobs((current) =>
-      current.map((job) => canceledJobs.find((canceledJob) => canceledJob.notificationJobId === job.notificationJobId) ?? job)
+      replaceNotificationJobListRows(current, canceledJobs)
     );
     canceledJobs.forEach((notificationJob) => {
       persistCanceledNotificationJob(notificationJob, reason).catch((error) => console.error(error));
@@ -8761,7 +8762,7 @@ export function App() {
         .map((job) => ({ ...job, status: "canceled", error: "", updatedAt: new Date().toISOString() }));
       if (canceledJobs.length) {
         setNotificationJobs((current) =>
-          current.map((job) => canceledJobs.find((canceledJob) => canceledJob.notificationJobId === job.notificationJobId) ?? job)
+          replaceNotificationJobListRows(current, canceledJobs)
         );
       }
       updateLessonNotificationRecordStatuses(lesson, "알림톡 없음");

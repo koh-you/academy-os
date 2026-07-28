@@ -1679,6 +1679,13 @@
 - AI 검수: 중복 TARGET 현재 row 2건, CONTROL, incoming TARGET 중복 2건, 현재에 없는 incoming row를 가상 실행해 첫 일치·순서·길이·입력 불변을 대조한다. 세 inline 계산과 각 guard→setter→persist 순서를 전용 fixture·정적 시나리오·build·`git diff --check`로 확인한다.
 - 사람 gate: 없음. 다음 `17Q-2`는 이 목록 치환 계산만 `notificationJobState.js` 순수 helper로 분리하고 취소 row 생성·React/API/Solapi 경계는 App에 유지한다.
 
+## 2026-07-28 P2. App.jsx 17Q-2 notification job cancellation replacement 분리
+
+- 코드: 현재 목록의 각 row를 같은 `notificationJobId`의 incoming 첫 row로 치환하는 계산을 `replaceNotificationJobListRows`로 `notificationJobState.js`에 분리하고 수업 전체 취소, ID 집합 취소, `알림톡 없음` 세 경로에서 재사용했다.
+- 동작 보존: 현재 순서·길이, 현재 중복 ID 모두 치환, incoming 중복의 첫 row 우선, 현재에 없는 incoming 무시, 입력 불변 계약을 유지한다. 빈 취소 목록 guard, 취소 row 생성 시각·사유, React setter와 persist/API/Solapi는 App에 남는다.
+- AI 검수: 중복 TARGET/CONTROL/현재에 없는 incoming 가상 목록으로 기존 inline 결과와 helper 결과를 대조하고 세 호출의 guard→setter→helper→persist 순서를 전용 fixture·정적 시나리오·build·`git diff --check`로 확인한다.
+- 사람 gate: 없음. 다음 `17Q-3`은 helper export/import/call 수와 세 취소 side-effect 경계를 closeout한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
