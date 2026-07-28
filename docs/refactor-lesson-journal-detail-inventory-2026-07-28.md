@@ -127,8 +127,9 @@
 79. `17L-6` 완료: 활성 학생별 예약 상태 row 계산을 고정 시각·helper 주입형 순수 builder로 분리했다.
 80. `17L-7` 완료: record 상태 row 계산과 App-owned ref/state/API 저장 경계를 closeout audit했다.
 81. `17M-1` 완료: `saving`/`saved`/`failed` record 상태 map 반복 계산과 기존 순수 persistence helper 재사용 경계를 inventory했다.
-82. 다음 `17M-2`: 세 inline map을 기존 `createLessonJournalRecordSaveStates` 호출로 통일한다.
-83. `notification_jobs` 조회·OS job 취소·provider 예약 반영·발송결과 reconcile orchestration은 App callback에 남기고 순수 표시·판정만 분리
+82. `17M-2` 완료: 세 inline map을 기존 `createLessonJournalRecordSaveStates` 호출로 통일했다.
+83. 다음 `17M-3`: save-state helper 재사용과 App-owned API/React effect 경계를 closeout audit한다.
+84. `notification_jobs` 조회·OS job 취소·provider 예약 반영·발송결과 reconcile orchestration은 App callback에 남기고 순수 표시·판정만 분리
 
 ## 학생별 수업일지 행 경계
 
@@ -220,6 +221,7 @@
 - `17L-6` gate: 학부모 제외 TARGET+학생 일반 상태와 학부모 일반 상태+학생 제외 CONTROL 두 row를 고정 시각으로 생성해 ID/수업/학생 identity override, 기존 필드 보존, owner, 대상별 문구와 helper 호출 순서·입력 불변을 대조한다. 빈 학생 배열 무호출과 builder의 외부 side effect 부재를 검사한다.
 - `17L-7` gate: builder import/export/call 1개, App의 활성 학생→시계→builder→빈 배열 guard→ref/state→saving→record API→saved/failed 순서와 API payload 6필드를 고정한다. builder 외부 side effect 부재와 상태 함수의 notification_jobs/Solapi action 부재, 네 consumer 유지를 검사한다.
 - `17M-1` gate: 중복 ID가 있는 TARGET/CONTROL record와 `saving`/`saved`/`failed`를 가상 실행해 세 inline `Object.fromEntries` 결과가 기존 `createLessonJournalRecordSaveStates`와 같은지 대조한다. App의 inline map 3개와 기존 helper의 key/status 계약·외부 side effect 부재를 정적으로 검사한다.
+- `17M-2` gate: 중복 TARGET ID·CONTROL ID와 `saving`/`saved`/`failed`를 기존 helper로 실행해 key/status·빈 배열·입력 불변을 대조한다. App 함수의 helper 호출 3개와 inline map 0개, `setSaveStates`/API/success/failure effect 보존을 검사한다.
 - `17J-9` gate: 8개 순수 파일의 export 함수 13개와 App binding을 대조하고 네트워크·React·현재시각·Supabase/Solapi side effect 부재를 검사한다. 예약 조회·결과 reconcile·OS job 취소·bulk 예약·취소 저장·plan 적용 10개 action과 API/setter가 App에 한 번씩 남고 raw provider group audit는 없는지 고정한다.
 - `17I-7` gate: local draft action 10개와 순수 binding 9개가 `LessonJournalDetail`에 한 번씩 있는지, 현재시각·세 draft map setter·저장 메시지·상위 저장 callback이 App에 남는지 검사한다. 다섯 순수 모델에 React·네트워크·시계·API/localStorage가 없고 전체 async 5개 중 local draft 저장이 1개인지 고정한다.
 - 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.

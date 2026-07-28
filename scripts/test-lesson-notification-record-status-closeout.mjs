@@ -42,7 +42,7 @@ for (const AppOwnedBoundary of [
   "const nextRecords = recordsToSave.reduce(",
   "recordsRef.current = nextRecords",
   "setRecords(nextRecords)",
-  '[record.lessonStudentRecordId, "saving"]',
+  'createLessonJournalRecordSaveStates(recordsToSave, "saving")',
   "setSaveStates((currentStates) => ({ ...currentStates, ...savingStates }))",
   "Promise.all(recordsToSave.map((record) => patchLessonRecordNotificationStatusRequest({",
   "lessonId: record.lessonId",
@@ -51,8 +51,8 @@ for (const AppOwnedBoundary of [
   "teacherCommentSendStatus: record.teacherCommentSendStatus",
   "studentCommentSendStatus: record.studentCommentSendStatus",
   "updatedBy: record.updatedBy",
-  '[record.lessonStudentRecordId, "saved"]',
-  '[record.lessonStudentRecordId, "failed"]',
+  'createLessonJournalRecordSaveStates(recordsToSave, "saved")',
+  'createLessonJournalRecordSaveStates(recordsToSave, "failed")',
   "console.error(error)"
 ]) {
   assert.ok(
@@ -68,10 +68,10 @@ const orderedBoundaries = [
   "if (recordsToSave.length === 0) return",
   "recordsRef.current = nextRecords",
   "setRecords(nextRecords)",
-  '[record.lessonStudentRecordId, "saving"]',
+  'createLessonJournalRecordSaveStates(recordsToSave, "saving")',
   "Promise.all(",
-  '[record.lessonStudentRecordId, "saved"]',
-  '[record.lessonStudentRecordId, "failed"]'
+  'createLessonJournalRecordSaveStates(recordsToSave, "saved")',
+  'createLessonJournalRecordSaveStates(recordsToSave, "failed")'
 ].map((token) => functionSource.indexOf(token));
 assert.ok(orderedBoundaries.every((index) => index >= 0));
 for (let index = 1; index < orderedBoundaries.length; index += 1) {

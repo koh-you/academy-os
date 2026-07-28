@@ -41,20 +41,21 @@ const functionEnd = appSource.indexOf(
 assert.ok(functionStart >= 0 && functionEnd > functionStart);
 const functionSource = appSource.slice(functionStart, functionEnd);
 
-for (const inlineState of [
-  'const savingStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "saving"]))',
-  'const savedStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "saved"]))',
-  'const failedStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "failed"]))'
+for (const sharedState of [
+  'const savingStates = createLessonJournalRecordSaveStates(recordsToSave, "saving")',
+  'const savedStates = createLessonJournalRecordSaveStates(recordsToSave, "saved")',
+  'const failedStates = createLessonJournalRecordSaveStates(recordsToSave, "failed")'
 ]) {
   assert.ok(
-    functionSource.includes(inlineState),
-    `missing current inline save-state map: ${inlineState}`
+    functionSource.includes(sharedState),
+    `missing shared save-state map: ${sharedState}`
   );
 }
 assert.equal(
-  functionSource.split("Object.fromEntries(recordsToSave.map(").length - 1,
+  functionSource.split("createLessonJournalRecordSaveStates(recordsToSave,").length - 1,
   3
 );
+assert.ok(!functionSource.includes("Object.fromEntries(recordsToSave.map("));
 
 for (const reusableBoundary of [
   "createLessonJournalRecordSaveStates,",

@@ -59,12 +59,12 @@ for (const persistenceRule of [
   "recordsRef.current",
   "recordsRef.current = nextRecords",
   "setRecords(nextRecords)",
-  '[record.lessonStudentRecordId, "saving"]',
+  'createLessonJournalRecordSaveStates(recordsToSave, "saving")',
   "Promise.all(recordsToSave.map((record) => patchLessonRecordNotificationStatusRequest({",
   "teacherCommentSendStatus: record.teacherCommentSendStatus",
   "studentCommentSendStatus: record.studentCommentSendStatus",
-  '[record.lessonStudentRecordId, "saved"]',
-  '[record.lessonStudentRecordId, "failed"]'
+  'createLessonJournalRecordSaveStates(recordsToSave, "saved")',
+  'createLessonJournalRecordSaveStates(recordsToSave, "failed")'
 ]) {
   assert.ok(
     functionSource.includes(persistenceRule),
@@ -76,10 +76,10 @@ const persistenceOrder = [
   "if (recordsToSave.length === 0) return",
   "recordsRef.current = nextRecords",
   "setRecords(nextRecords)",
-  '[record.lessonStudentRecordId, "saving"]',
+  'createLessonJournalRecordSaveStates(recordsToSave, "saving")',
   "Promise.all(",
-  '[record.lessonStudentRecordId, "saved"]',
-  '[record.lessonStudentRecordId, "failed"]'
+  'createLessonJournalRecordSaveStates(recordsToSave, "saved")',
+  'createLessonJournalRecordSaveStates(recordsToSave, "failed")'
 ].map((token) => functionSource.indexOf(token));
 assert.ok(persistenceOrder.every((index) => index >= 0));
 for (let index = 1; index < persistenceOrder.length; index += 1) {

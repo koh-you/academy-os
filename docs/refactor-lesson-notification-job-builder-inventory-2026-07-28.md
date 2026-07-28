@@ -57,4 +57,5 @@
 8. `17L-6` 완료: 활성 학생별 record 상태 row 조합을 `lessonNotificationRecordStatusRows.js` 순수 builder로 분리하고 시계·최신 ref·저장은 App에 유지했다.
 9. `17L-7` 완료: 순수 row builder와 App-owned 최신 ref·React state·record 상태 API 경계를 closeout audit했다.
 10. `17M-1` 완료: `saving`/`saved`/`failed` 상태 map은 이미 수업일지 저장에 쓰는 순수 `createLessonJournalRecordSaveStates`와 동일한 계약임을 inventory했다.
-11. 실제 reserve/cancel/reconcile orchestration은 사람 gate 없이 이동하지 않는다.
+11. `17M-2` 완료: 알림 record 상태 함수의 세 inline map을 기존 순수 save-state helper 호출로 통일했다.
+12. 실제 reserve/cancel/reconcile orchestration은 사람 gate 없이 이동하지 않는다.

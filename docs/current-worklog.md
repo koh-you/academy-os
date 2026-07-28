@@ -1596,6 +1596,13 @@
 - AI 검수: 중복 TARGET ID와 CONTROL ID를 포함한 가상 records에 세 상태를 적용해 inline 결과와 기존 helper 결과, 빈 배열·입력 불변을 전용 fixture·정적 시나리오·build·diff 검사로 대조한다.
 - 사람 gate: 새 항목 없음. 다음 `17M-2`는 inline map 3개를 기존 `createLessonJournalRecordSaveStates(recordsToSave, status)` 호출로 통일하며 API와 React setter는 이동하지 않는다.
 
+## 2026-07-28 P1. App.jsx 17M-2 lesson notification record save-state helper 재사용
+
+- 코드: 알림 record 상태 함수의 `saving`/`saved`/`failed` inline `Object.fromEntries`를 기존 `createLessonJournalRecordSaveStates(recordsToSave, status)` 세 호출로 통일했다. 새 helper나 새 상태 계약은 만들지 않았다.
+- 동작 보존: `lessonStudentRecordId`가 key이고 같은 ID가 중복되면 마지막 값이 남는 기존 JavaScript 계약, 빈 배열 결과 `{}`를 그대로 유지한다. React 상태 병합과 record API 실행·성공·실패 순서는 App에 남는다.
+- AI 검수: 중복 TARGET ID와 CONTROL ID에 세 상태를 적용해 결과·빈 배열·입력 불변, App의 helper 호출 3개·inline map 0개·API/React effect 유지를 전용 fixture·정적 시나리오·build·diff 검사로 확인한다.
+- 사람 gate: 새 항목 없음. 다음 `17M-3`은 save-state helper 재사용과 App-owned API/React effect 경계를 closeout audit한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

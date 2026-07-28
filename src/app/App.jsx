@@ -8474,7 +8474,7 @@ export function App() {
     );
     recordsRef.current = nextRecords;
     setRecords(nextRecords);
-    const savingStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "saving"]));
+    const savingStates = createLessonJournalRecordSaveStates(recordsToSave, "saving");
     setSaveStates((currentStates) => ({ ...currentStates, ...savingStates }));
     Promise.all(recordsToSave.map((record) => patchLessonRecordNotificationStatusRequest({
       lessonId: record.lessonId,
@@ -8485,12 +8485,12 @@ export function App() {
       updatedBy: record.updatedBy
     })))
       .then(() => {
-        const savedStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "saved"]));
+        const savedStates = createLessonJournalRecordSaveStates(recordsToSave, "saved");
         setSaveStates((currentStates) => ({ ...currentStates, ...savedStates }));
       })
       .catch((error) => {
         console.error(error);
-        const failedStates = Object.fromEntries(recordsToSave.map((record) => [record.lessonStudentRecordId, "failed"]));
+        const failedStates = createLessonJournalRecordSaveStates(recordsToSave, "failed");
         setSaveStates((currentStates) => ({ ...currentStates, ...failedStates }));
       });
   }
