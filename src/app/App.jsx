@@ -232,6 +232,11 @@ import {
 import { createLessonJournalRecordDraft } from "../domains/lessons/lessonJournalRecordDraft.js";
 import { createLessonJournalDraftSaveRequest } from "../domains/lessons/lessonJournalDraftSaveRequest.js";
 import { saveLessonJournalHomeworksWithVerification } from "../domains/lessons/lessonJournalHomeworkBulkApi.js";
+import {
+  createLessonJournalHomeworkDraft,
+  createLessonJournalHomeworkDraftKey,
+  getLessonJournalHomeworkDraftTitle
+} from "../domains/lessons/lessonJournalHomeworkDraft.js";
 import { saveLessonJournalMakeupTasksWithVerification } from "../domains/lessons/lessonJournalMakeupTaskBulkApi.js";
 import { createLessonJournalMakeupTaskRequests } from "../domains/lessons/lessonJournalMakeupTaskRequest.js";
 import { saveLessonJournalRecordsWithVerification } from "../domains/lessons/lessonJournalRecordBulkApi.js";
@@ -16277,11 +16282,19 @@ function LessonJournalDetail({
   }
 
   function getHomeworkDraftKey(student, homeworkType) {
-    return `${createLessonStudentRecordId(lesson.lessonId, student.studentId)}:${homeworkType}`;
+    return createLessonJournalHomeworkDraftKey({
+      createRecordId: createLessonStudentRecordId,
+      homeworkType,
+      lessonId: lesson.lessonId,
+      studentId: student.studentId
+    });
   }
 
   function getHomeworkDraftTitle(student, homeworkType, homework) {
-    return journalHomeworkDrafts[getHomeworkDraftKey(student, homeworkType)]?.title ?? homework?.title ?? "";
+    return getLessonJournalHomeworkDraftTitle({
+      draft: journalHomeworkDrafts[getHomeworkDraftKey(student, homeworkType)],
+      homework
+    });
   }
 
   function updateJournalHomeworkDraft(student, homeworkType, title) {
@@ -16289,7 +16302,12 @@ function LessonJournalDetail({
     const key = getHomeworkDraftKey(student, homeworkType);
     setJournalHomeworkDrafts((current) => ({
       ...current,
-      [key]: { homeworkType, key, studentId: student.studentId, title }
+      [key]: createLessonJournalHomeworkDraft({
+        homeworkType,
+        key,
+        studentId: student.studentId,
+        title
+      })
     }));
     setJournalManualSaveMessage("수업일지 · 저장 필요");
   }

@@ -1409,6 +1409,14 @@
 - AI 가상검수: 빈 기본값+base+현재 TARGET draft+identity patch, base fallback CONTROL, 빈 record CONTROL로 helper 호출 횟수·최종 우선순위·입력 불변을 대조했다. 전용 fixture와 정적 시나리오를 실행했고 외부 호출은 0건이다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위 `17I-2`는 homework draft key·표시 title fallback·업데이트 row 조합을 순수 모델로 분리하고 편집 guard·React setter는 App에 유지한다.
 
+## 2026-07-28 P1. App.jsx 17I-2 수업일지 homework draft 모델 분리
+
+- 코드: lesson/student/homework type 기반 deterministic key, 현재 draft→저장 homework→빈 값 title fallback, React map에 넣을 homework draft row 조합을 `lessonJournalHomeworkDraft.js` 순수 모델로 분리했다.
+- 동작 보존: draft title이 빈 문자열이면 저장 homework title로 되돌아가지 않고 빈 수정본을 유지하는 기존 nullish 우선순위를 고정했다. row 필드와 순서도 기존 `homeworkType/key/studentId/title` 계약을 유지한다.
+- 경계: 편집 모드 guard, 현재 draft map 조회 연결, React map merge와 `저장 필요` 메시지는 계속 `App.jsx`가 소유하며 저장·Supabase 호출은 이동하지 않았다.
+- AI 가상검수: TARGET key, draft title, 빈 draft title, 저장 homework CONTROL, 빈 CONTROL과 row 조합을 대조하고 record ID helper 호출 횟수·입력 불변을 확인했다. 전용 fixture와 정적 시나리오를 실행했고 외부 호출은 0건이다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위 `17I-3`은 등원보충/다음 정규수업 확인/수업 후 보충 선택에서 record patch·makeup task·안내 메시지를 만드는 순수 plan을 분리하고 React setter는 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
