@@ -1477,6 +1477,13 @@
 - AI 검수: 가상 미래/경과 scheduled TARGET과 모든 비예약 CONTROL 상태, error 유무, 빈 예약 label을 실행해 반환 문자열·의존성 호출 순서·비예약 조기 반환·입력 불변을 대조한다. 전용 fixture·정적 시나리오·build·diff 검사를 실행한다.
 - 사람 gate: 새 항목 없음. 다음 의미 단위 `17J-4`는 notification job 취소 가능·삭제 가능·provider reference·상태 class 표시 helper 경계를 inventory하고 외부 action은 이동하지 않는다.
 
+## 2026-07-28 P1. App.jsx 17J-4 notification job 표시 selector 경계
+
+- 코드: notice draft/실패/취소와 시각이 지난 확인 필요 job의 삭제 가능 여부, job의 직접 provider message ID와 중첩 result fallback을 `notificationJobDisplaySelectors.js`로 분리했다.
+- 기존 경계 확인: 취소 가능 여부는 `notificationJobSelectors.js`, 예약 시각 경과 상태 class는 `notificationCenterConfig.js`에 이미 순수 함수로 분리되어 있어 중복 이동하지 않고 App 주입 경계만 고정했다.
+- AI 검수: 가상 notice 4상태, 비 notice CONTROL, 과거·미래·시각 없는 send_unconfirmed와 직접/fallback provider reference를 실행해 조기 반환·grace 0 인자·입력 불변을 대조한다. 전용 fixture·정적 시나리오·build·diff 검사를 실행한다.
+- 사람 gate: 새 항목 없음. 다음 의미 단위 `17J-5`는 중첩 provider 응답에서 group/message reference를 읽는 순수 selector를 분리하며 provider 조회·취소는 이동하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

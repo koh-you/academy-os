@@ -65,6 +65,10 @@ import { ParentResponseContextPanel } from "../domains/notifications/ParentRespo
 import { getParentResponseContexts } from "../domains/notifications/parentResponseContext.js";
 import { formatNotificationJobStatusLabel } from "../domains/notifications/notificationJobStatusFormatter.js";
 import {
+  canDeleteNotificationJobForDisplay,
+  getNotificationJobProviderReferenceForDisplay
+} from "../domains/notifications/notificationJobDisplaySelectors.js";
+import {
   applySupplementScheduleNotificationsRequest,
   cancelActiveSupplementScheduleNoticesRequest,
   cancelSupplementNotificationControlRequest,
@@ -1099,15 +1103,11 @@ function formatNotificationJobStatus(job) {
   });
 }
 
-const deletableNotificationJobStatuses = new Set(["failed", "draft", "dry_run", "canceled"]);
-
 function canDeleteNotificationJob(job) {
-  const isNoticeDraft = String(job?.notificationType ?? "").startsWith("notice_") &&
-    deletableNotificationJobStatuses.has(job?.status);
-  const isPastUnconfirmed = job?.status === "send_unconfirmed" &&
-    Boolean(job?.scheduledAt) &&
-    isNotificationSchedulePast(job.scheduledAt, 0);
-  return isNoticeDraft || isPastUnconfirmed;
+  return canDeleteNotificationJobForDisplay({
+    isSchedulePast: isNotificationSchedulePast,
+    job
+  });
 }
 
 function createLessonNotificationJobId(lessonId, studentId, target) {
@@ -1210,7 +1210,10 @@ function getNotificationProviderReference(result = {}) {
 }
 
 function getNotificationJobProviderReference(job = {}) {
-  return job.providerMessageId || getNotificationProviderReference(job.result);
+  return getNotificationJobProviderReferenceForDisplay({
+    getProviderReference: getNotificationProviderReference,
+    job
+  });
 }
 
 function getSolapiNotificationJobProviderReference(job = {}) {

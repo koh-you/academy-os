@@ -110,8 +110,9 @@
 62. `17J-1` 완료: 예약 job 상태 우선·저장 comment 상태 fallback 표시를 순수 selector로 분리했다.
 63. `17J-2` 완료: comment 발송상태의 표시 정규화·버튼 상태·라벨 계산을 시각 판정 주입형 순수 모델로 분리했다.
 64. `17J-3` 완료: notification job 자체의 상태 표시 formatter를 시간·시각 formatter 주입형 순수 모델로 분리했다.
-65. 다음 `17J-4`: notification job 취소 가능·삭제 가능·provider reference·상태 class 표시 helper 경계를 inventory한다.
-66. `notification_jobs` 조회·OS job 취소·provider 예약 반영·발송결과 reconcile orchestration은 App callback에 남기고 순수 표시·판정만 분리
+65. `17J-4` 완료: notification job 삭제 가능·provider reference 표시 selector를 분리하고 기존 취소 가능 selector·상태 class 모델과 함께 순수 표시 경계를 고정했다.
+66. 다음 `17J-5`: 중첩 provider 응답에서 group/message reference를 읽는 순수 selector를 분리한다.
+67. `notification_jobs` 조회·OS job 취소·provider 예약 반영·발송결과 reconcile orchestration은 App callback에 남기고 순수 표시·판정만 분리
 
 ## 학생별 수업일지 행 경계
 
@@ -186,6 +187,7 @@
 - `17J-1` gate: 가상 예약 job TARGET, 저장된 학부모·학생 상태 CONTROL, `"없음"`·빈 job 표시 fallback, 기타 target을 대조한다. job 조회→format의 호출 순서, job 우선 시 저장 상태 formatter 미호출, 입력 불변과 selector의 네트워크·시계·React side effect 부재를 검사한다.
 - `17J-2` gate: 일반·잘못된 예약시각·미래·경과 예약상태와 빈/내용 없음/확인 필요/실패/발송 중/예약 중/완료/기록됨/draft를 가상 입력으로 판정한다. comment 유무의 버튼 상태와 상태 라벨, 조기 반환 시 normalize 미호출, formatter 호출 순서, 시간 판정 주입과 모델 side effect 부재를 검사한다.
 - `17J-3` gate: null, 미래·경과 scheduled, sent/dry_run/send_unconfirmed/pending_send/failed/canceled/draft/unknown job을 가상 입력으로 판정한다. scheduled에서 시각 formatter→경과 판정 호출 순서, 비예약 상태의 dependency 미호출, 입력 불변과 formatter의 시계·네트워크·React side effect 부재를 검사한다.
+- `17J-4` gate: 삭제 가능한 notice 4상태, 비 notice CONTROL, 과거·미래·시각 없는 send_unconfirmed, null job을 가상 입력으로 판정한다. 직접 providerMessageId 우선과 중첩 result fallback의 조기 반환·입력 불변을 대조하고 취소 가능·상태 class가 이미 순수 domain 경계인지 함께 검사한다.
 - `17I-7` gate: local draft action 10개와 순수 binding 9개가 `LessonJournalDetail`에 한 번씩 있는지, 현재시각·세 draft map setter·저장 메시지·상위 저장 callback이 App에 남는지 검사한다. 다섯 순수 모델에 React·네트워크·시계·API/localStorage가 없고 전체 async 5개 중 local draft 저장이 1개인지 고정한다.
 - 현재 사람 gate는 0건이다. 이미 완료한 11B 실제 예약·취소 검수를 반복하지 않는다.
 - recipient·notificationType·scheduledAt·message·fingerprint 또는 reserve/cancel 상태 계약이 바뀌지 않는 한 정적 fixture로 계속 판정한다.
