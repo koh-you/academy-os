@@ -51,4 +51,4 @@ Academy OS의 모든 화면을 같은 사용 규칙으로 보이게 한다. 이�
 
 ## 다음 착수
 
-UI-0~UI-6, UI-7A·UI-7B와 UI-7C-1 inventory를 완료했다. 다음 UI-7C-2는 공통 `WorkspaceTabs`의 현재 선택을 내부 가시 영역에 유지하고 `SearchField` 지우기 버튼을 44px 터치 대상으로 맞춘다. 선택·검색 callback/state/result와 `FilterBar`, 운영 원천은 바꾸지 않는다.
+UI-0~UI-6, UI-7A·UI-7B와 UI-7C-1·2를 완료했다. 다음 UI-7C-3은 대표 `WorkspaceTabs`·`FilterBar`·`SearchField` caller의 선택·검색 callback, 결과 건수, 빈 상태와 공통 모바일 계약을 함께 회귀 검사한다. 운영 원천은 바꾸지 않는다.

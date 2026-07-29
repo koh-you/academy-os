@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-7C-2. 모바일 선택 탭 가시성·검색 지우기 터치
+
+- 공통 `WorkspaceTabs`가 넘치는 경우 현재 선택된 직계 button만 찾아 tablist의 `scrollLeft`를 필요한 만큼 조정하도록 했다.
+- `scrollIntoView`를 사용하지 않아 문서 전체의 세로·가로 scroll과 app shell 위치는 바꾸지 않는다. caller의 tab callback, `aria-selected`, active class, 내용 mount 정책도 유지했다.
+- `aria-orientation="horizontal"`을 명시하고 모바일 `SearchField` 지우기 버튼을 44px로 키웠다. 기존 `onChange("")`, disabled, label과 검색 결과 state는 유지했다.
+- `FilterBar`의 option/field/result와 내부 스크롤은 변경하지 않았다. Supabase/app_state·notification_jobs/Solapi·수업·AI·출결 원천을 변경하거나 실행하지 않았다.
+- AI 검수: 선택 button 내부 가시성·문서 scroll 비사용·검색 callback·44px 정적 계약, `npm run build` 128 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 468개 중 기존 기준선 `90a`만 실패했고 모든 개별 fixture와 신규 계약은 통과했다.
+- 사람 검수: 390px의 긴 탭·필터·검색을 확인하는 독립 절차를 `docs/next-session/README.md`에 누적했다. 실제 저장·발송·삭제 행동은 누르지 않으며 다음 UI 단위를 막지 않는다.
+
 ## 2026-07-29 UI-7C-1. 모바일 탭·필터·검색 inventory
 
 - 공통 `WorkspaceTabs` 15곳, `FilterBar` 10곳, `SearchField` 7곳의 label, 선택 소유권, 입력 폭, 내부 스크롤, 44px 터치 계약을 대조했다.

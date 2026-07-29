@@ -81,10 +81,12 @@
 @media (max-width: 640px) {
   .sharedSearchFieldControl input {
     min-height: 44px;
+    padding-right: 48px;
   }
 
   .sharedSearchFieldClear {
-    height: 36px;
-    width: 36px;
+    height: var(--academy-touch-target, 44px);
+    right: 0;
+    width: var(--academy-touch-target, 44px);
   }
 }
