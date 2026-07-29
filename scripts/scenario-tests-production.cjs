@@ -75,6 +75,7 @@ const specialLectureSettlementUtilsPath = path.join(root, "src", "domains", "set
 const specialLectureSettlementCssPath = path.join(root, "src", "domains", "settlements", "specialLectureSettlement.css");
 const sharedModalPath = path.join(root, "src", "shared", "components", "Modal.jsx");
 const sharedMetricCardPath = path.join(root, "src", "shared", "components", "MetricCard.jsx");
+const sharedNavigationHeaderPath = path.join(root, "src", "shared", "components", "NavigationHeader.jsx");
 const sharedIdPath = path.join(root, "src", "shared", "utils", "id.js");
 const studentSchedulePath = path.join(root, "src", "shared", "utils", "studentSchedule.js");
 const apiClientPath = path.join(root, "src", "shared", "utils", "apiClient.js");
@@ -189,6 +190,7 @@ const specialLectureSettlementUtilsSource = fs.existsSync(specialLectureSettleme
 const specialLectureSettlementCssSource = fs.existsSync(specialLectureSettlementCssPath) ? fs.readFileSync(specialLectureSettlementCssPath, "utf8") : "";
 const sharedModalSource = fs.existsSync(sharedModalPath) ? fs.readFileSync(sharedModalPath, "utf8") : "";
 const sharedMetricCardSource = fs.existsSync(sharedMetricCardPath) ? fs.readFileSync(sharedMetricCardPath, "utf8") : "";
+const sharedNavigationHeaderSource = fs.existsSync(sharedNavigationHeaderPath) ? fs.readFileSync(sharedNavigationHeaderPath, "utf8") : "";
 const sharedIdSource = fs.existsSync(sharedIdPath) ? fs.readFileSync(sharedIdPath, "utf8") : "";
 const studentScheduleSource = fs.existsSync(studentSchedulePath) ? fs.readFileSync(studentSchedulePath, "utf8") : "";
 const examFrontendSource = [app, studentExamPostSubmissionPanelSource, examQuestionClassificationSource, examQuestionItemsSource, examFinalDocumentSource, examFinalDocumentEditorSource, examSourceMediaSource, examLibrarySource, examAnalysisStateSource, examDefaultsSource, examDetailSectionsSource, examOutputLayoutsSource, examOutputPreviewSource, examFinalPreviewSource, examFinalPreviewPanelSource, examReportPreviewSource, examQuestionInsightSource, examQuestionCropViewSource, examPostSubmissionOptionsSource, examApiSource, sharedIdSource].join("\n");
@@ -254,7 +256,7 @@ function hasTeacherLessonHubAttendanceSettings(source) {
 function hasTeacherReminderAboveCalendarControls(source) {
   const hubIndex = source.indexOf("function TeacherLessonHubV2");
   const reminderIndex = source.indexOf("<AcademyReminderPanel", hubIndex);
-  const topIndex = source.indexOf("<header className=\"pageTop teacherCalendarTop\">", hubIndex);
+  const topIndex = source.indexOf("<NavigationHeader", hubIndex);
   const calendarIndex = source.indexOf("<section className=\"calendarShell teacherCalendarShell\">", hubIndex);
   return hubIndex >= 0 && reminderIndex > hubIndex && reminderIndex < topIndex && topIndex < calendarIndex;
 }
@@ -608,6 +610,7 @@ check("77j-2a teacher operating memo stays separate from Tally and verifies its 
 check("77j-2b mobile teacher navigation keeps every OS workspace in a compact two-column menu", hasAll(app, ["const menuGroups = [", "id: \"lessons\"", "id: \"students\"", "id: \"notifications\"", "id: \"settings\""]) && hasAll(css, ["@media (max-width: 640px)", ".sideNav .sideGroup", "grid-template-columns: repeat(2, minmax(0, 1fr))"]));
 check("77j-2d sidebar workspace selection restores the shared page scroll to the new view header", hasAll(app, ["function handleChangeView(nextView)", "window.scrollTo({ behavior: \"auto\", left: 0, top: 0 })", "setActiveView(nextView)"]));
 check("77j-2e autosave notices no longer claim that app_state writes an entire snapshot", !app.includes("app_state 전체 snapshot 저장") && hasAll(app, ["app_state key별 자동저장", "변경된 key만 500ms debounce로 저장", "examPrepAutosaveRisk", "schoolCalendarAutosaveRisk"]));
+check("77j-2f calendar and lesson journals share navigation header structure without changing actions", hasAll(app, ["import { NavigationHeader }", "className=\"teacherCalendarTop\"", "onClick={() => onMoveDate(-30)}", "onClick={() => onMoveDate(30)}", "onClick={onAddLesson}", "onClick={onOpenMonthlyRegularLessons}", "className=\"lessonJournalHeader\"", "onClick={onBack}", "onClick={() => onEditLesson(lesson)}", "onClick={() => onDeleteLesson(lesson.lessonId)}", "onClick={onOpenExamPrep}"]) && hasAll(sharedNavigationHeaderSource, ["export function NavigationHeader", "navigationHeaderPrimary", "navigationHeaderCopy", "navigationHeaderContext", "navigationHeaderActions"]) && hasAll(css, [".navigationHeaderPrimary", ".navigationHeaderActions", ".navigationHeaderContext .shortcutHint", ".teacherCalendarTop {", "display: none"]));
 check("77j-2c notification center restores the parent response tab without storing channel replies", hasAll(app, ["ParentResponseContextPanel", "getParentResponseContexts", "[\"parent_context\", \"학부모 응대\"", "activeNoticeWorkspace === \"parent_context\""]) && hasAll(css, [".parentResponseContextPanel", ".parentResponseContextCard", ".parentResponseContextBody"]));
 check("77j-3 exam analysis selection columns keep Korean labels clear beside thin scrollbars", hasAll(css, [".examAnalysisColumnList::-webkit-scrollbar", ".examAnalysisColumnList::-webkit-scrollbar-button", "scrollbar-gutter: stable", ".examAnalysisColumnCard strong", "line-height: 1.4", "padding-block: 1px"]));
 check("78 lesson journal does not show keyboard shortcut hint text", !app.includes("↑↓←→") && !app.includes("Ctrl+C/V/Z"));

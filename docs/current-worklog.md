@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-2C. 달력·수업일지 탐색형 머리말
+
+- 작업 소유권: 사용자가 별도 App.jsx 리팩터링을 UI 개선 완료까지 중단했다. 현재 main은 UI 프로그램이 소유하며, UI 완료 전 리팩터링 worktree의 rebase/통합을 재개하지 않는다.
+- 범위: 공통 `NavigationHeader`를 추가해 월간 수업 달력과 정상/오류 수업일지 머리말을 `탐색 -> 현재 맥락 -> 보조 상태 -> 행동` 영역으로 구분한다. 사용자 요청으로 숨긴 달력 상단바의 `display: none`은 그대로 보존한다.
+- 불변 계약: 달력 이전/다음, 필터, 수업 등록, 정규수업 열기, 수업일지 뒤로가기, 시험대비 열기, 수업 수정·취소 callback을 그대로 전달한다. 실제 저장·취소·출결·notification_jobs·Solapi·Supabase side effect는 없다.
+- AI 검수: callback/텍스트/숨김 상태 정적 계약, `npm run build`, `git diff --check`, 관련 production fixture를 실행한다. 실제 취소 버튼은 누르지 않는다.
+
 ## 2026-07-29 P0. Solapi 예약 발송결과 5분 후 자동 대조
 
 - 요청/결과: 수업일지의 `예약 확인`이나 알림관리의 `Solapi 결과 확인`을 사람이 누르지 않아도, 실제 Solapi 예약 그룹이 있는 알림톡은 예약 시각 5분 후부터 서버가 발송결과를 자동 대조한다. 수업일지 학생·학부모 알림뿐 아니라 공지, 보충 일정·리마인더 등 같은 `notification_jobs`/Solapi 예약 계약을 쓰는 모든 유형이 대상이다.

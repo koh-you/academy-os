@@ -559,6 +559,59 @@ a:focus-visible {
   justify-content: flex-end;
 }
 
+.navigationHeaderPrimary,
+.navigationHeaderLeading,
+.navigationHeaderTrailing,
+.navigationHeaderContext,
+.navigationHeaderActions {
+  align-items: center;
+  display: flex;
+}
+
+.navigationHeaderPrimary {
+  gap: var(--academy-space-2);
+  min-width: 0;
+}
+
+.navigationHeaderCopy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.navigationHeaderCopy > * {
+  margin-block: 0;
+}
+
+.lessonJournalHeader .navigationHeaderCopy h2 {
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.navigationHeaderLeading,
+.navigationHeaderTrailing {
+  flex: 0 0 auto;
+}
+
+.navigationHeaderContext {
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  gap: var(--academy-space-1);
+  min-width: 0;
+}
+
+.navigationHeaderContext .shortcutHint {
+  margin-left: 0;
+}
+
+.navigationHeaderActions {
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: var(--academy-space-1);
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
 .inlineNotice {
   background: #eef4ff;
   border: 1px solid #d8e3f8;
@@ -19732,6 +19785,21 @@ body.attendanceOnlyBody {
     flex-wrap: wrap;
     margin-left: 0;
     width: 100%;
+  }
+
+  .navigationHeader {
+    align-items: stretch;
+  }
+
+  .navigationHeaderPrimary,
+  .navigationHeaderContext,
+  .navigationHeaderActions {
+    width: 100%;
+  }
+
+  .navigationHeaderActions {
+    justify-content: flex-start;
+    margin-left: 0;
   }
 
   .notificationCenterPage {

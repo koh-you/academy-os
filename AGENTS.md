@@ -48,7 +48,7 @@
    - Realtime 후속: 브라우저 직접 Supabase Realtime 구독은 교사 bearer·RLS 소유권 gate 뒤에 진행한다. 그 전에는 API 경유 날짜 범위 증분 동기화를 유지한다. Realtime 전환 시 `lesson_student_records`의 필요한 event/table/filter만 구독하고 오류 시 현재 polling으로 fallback한다.
    - 중단 조건: 저장 보강이 `notification_jobs`/Solapi 실제 발송, 운영 데이터 삭제, 수업일지/출결 원천 변경까지 넓어지면 해당 단위를 중단하고 별도 사람 gate로 나눈다.
 2. `전체 UI 규칙 통일 프로그램`
-   - 상태: 2026-07-28 전수 인벤토리와 단계별 실행 전략을 `docs/ui-unification-strategy-2026-07-28.md`에 확정했다.
+   - 상태: 2026-07-28 전수 인벤토리와 단계별 실행 전략을 `docs/ui-unification-strategy-2026-07-28.md`에 확정했고, 전체 세부 작업은 `docs/ui-unification-roadmap-2026-07-29.md`가 기준이다. 2026-07-29 사용자 지시로 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
    - 목표: 화면마다 페이지 머리말·탭/필터·버튼 역할·카드·빈/오류/저장 상태·모달 행동·모바일 반응형의 같은 규칙을 적용한다. 데이터 원천, 저장, 발송, 예약, 출결의 동작은 바꾸지 않는다.
    - 실행 방식: `UI-0 인벤토리/시각 기준선 -> UI-1 토큰·앱 프레임 -> UI-2 페이지 머리말/작업 바 -> UI-3 탭·필터 -> UI-4 읽기 전용 카드/목록 -> UI-5 모달 shell -> UI-6 저장 상태 표현 -> UI-7 모바일/접근성 -> UI-8 페이지별 예외` 순서로 한 단위씩 한다. 각 단위는 AI 정적 계약·build·해당 화면 회귀 점검을 먼저 통과하고 commit/push한다.
    - 사람 검수 원칙: 실제 발송/예약/저장 같은 독립 gate가 생기면 해당 단위의 구현을 멈추고 `docs/next-session/README.md`에 정확한 확인 절차를 남긴다. 다른 UI 단위가 그 gate의 결과를 소비하지 않으면, 그 단위는 기다리지 않고 다음 독립 UI 단위로 진행한다.

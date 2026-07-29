@@ -227,6 +227,7 @@ import {
 } from "../shared/components/InlineSaveStatus.jsx";
 import { MetricCard } from "../shared/components/MetricCard.jsx";
 import { Modal } from "../shared/components/Modal.jsx";
+import { NavigationHeader } from "../shared/components/NavigationHeader.jsx";
 import { PageHeader } from "../shared/components/PageHeader.jsx";
 import { StickySaveBar } from "../shared/components/StickySaveBar.jsx";
 import { sampleData } from "../shared/data/sampleData.js";
@@ -16537,46 +16538,51 @@ function TeacherLessonHubV2({
         </div>
       ) : null}
 
-      <header className="pageTop teacherCalendarTop">
-        <button className="iconButton" onClick={() => onMoveDate(-30)} type="button">‹</button>
-        <h1>{formatMonthTitle(selectedDate)}</h1>
-        <button className="iconButton" onClick={() => onMoveDate(30)} type="button">›</button>
-        <div className="lessonTypeFilterBar" aria-label="수업일지 일정 종류 필터">
-          {lessonTypeFilterOptions.map((option) => (
-            <button
-              className={lessonTypeFilter === option.id ? "active" : ""}
-              key={option.id}
-              onClick={() => setLessonTypeFilter(option.id)}
-              type="button"
+      <NavigationHeader
+        actions={(
+          <>
+            <button className="primaryButton" onClick={onAddLesson} type="button">+ 수업 등록</button>
+            {!isMonthlyRegularLessonOpened && monthlyRegularLessonOpenPlan.lessonsToCreate.length > 0 ? (
+              <button className="softButton" onClick={onOpenMonthlyRegularLessons} type="button">
+                {formatMonthTitle(selectedDate)} 정규수업 열기
+              </button>
+            ) : null}
+          </>
+        )}
+        className="teacherCalendarTop"
+        context={(
+          <>
+            <div className="lessonTypeFilterBar" aria-label="수업일지 일정 종류 필터">
+              {lessonTypeFilterOptions.map((option) => (
+                <button
+                  className={lessonTypeFilter === option.id ? "active" : ""}
+                  key={option.id}
+                  onClick={() => setLessonTypeFilter(option.id)}
+                  type="button"
+                >
+                  {option.label}
+                </button>
+              ))}
+              <span>{visibleLessonCount}개</span>
+            </div>
+            <span
+              className={`attendanceSyncPill ${attendanceSyncStatus.state}`}
+              title={attendanceSyncStatus.message}
             >
-              {option.label}
-            </button>
-          ))}
-          <span>{visibleLessonCount}개</span>
-        </div>
-        <span
-          className={`attendanceSyncPill ${attendanceSyncStatus.state}`}
-          title={attendanceSyncStatus.message}
-        >
-          {attendanceSyncStatus.state === "syncing"
-            ? "출결 확인 중"
-            : attendanceSyncStatus.state === "failed"
-              ? "출결 연결 지연"
-              : attendanceSyncStatus.lastSyncedAt
-                ? `출결 최신 ${formatKoreaTimeFromIso(attendanceSyncStatus.lastSyncedAt)}`
-                : "출결 동기화 대기"}
-        </span>
-        <button className="primaryButton" onClick={onAddLesson} type="button">+ 수업 등록</button>
-        {!isMonthlyRegularLessonOpened && monthlyRegularLessonOpenPlan.lessonsToCreate.length > 0 ? (
-          <button
-            className="softButton"
-            onClick={onOpenMonthlyRegularLessons}
-            type="button"
-          >
-            {formatMonthTitle(selectedDate)} 정규수업 열기
-          </button>
-        ) : null}
-      </header>
+              {attendanceSyncStatus.state === "syncing"
+                ? "출결 확인 중"
+                : attendanceSyncStatus.state === "failed"
+                  ? "출결 연결 지연"
+                  : attendanceSyncStatus.lastSyncedAt
+                    ? `출결 최신 ${formatKoreaTimeFromIso(attendanceSyncStatus.lastSyncedAt)}`
+                    : "출결 동기화 대기"}
+            </span>
+          </>
+        )}
+        leading={<button className="iconButton" onClick={() => onMoveDate(-30)} type="button">‹</button>}
+        title={formatMonthTitle(selectedDate)}
+        trailing={<button className="iconButton" onClick={() => onMoveDate(30)} type="button">›</button>}
+      />
 
       <section className="calendarShell teacherCalendarShell">
         <div className="calendarGrid teacherCalendarGrid">
@@ -17263,15 +17269,19 @@ function LessonJournalFallback({ error, lesson, onBack, onDeleteLesson, onEditLe
   const lessonStudents = getLessonJournalStudents(lesson, students);
   return (
     <section className="lessonJournalPage">
-      <header className="pageTop lessonJournalHeader">
-        <button className="iconButton" onClick={onBack} type="button">‹</button>
-        <div>
-          <h2>{lesson?.className || "수업일지"}</h2>
-          <p className="muted">{lesson?.date || "-"} · {lesson?.startTime || ""}-{lesson?.endTime || ""} · {lessonStudents.length}명</p>
-        </div>
-        <button className="softButton" onClick={() => onEditLesson?.(lesson)} type="button">수업 수정</button>
-        <button className="dangerButton" onClick={() => onDeleteLesson?.(lesson.lessonId)} type="button">수업 취소 처리</button>
-      </header>
+      <NavigationHeader
+        actions={(
+          <>
+            <button className="softButton" onClick={() => onEditLesson?.(lesson)} type="button">수업 수정</button>
+            <button className="dangerButton" onClick={() => onDeleteLesson?.(lesson.lessonId)} type="button">수업 취소 처리</button>
+          </>
+        )}
+        className="lessonJournalHeader"
+        description={`${lesson?.date || "-"} · ${lesson?.startTime || ""}-${lesson?.endTime || ""} · ${lessonStudents.length}명`}
+        leading={<button className="iconButton" onClick={onBack} type="button">‹</button>}
+        title={lesson?.className || "수업일지"}
+        titleAs="h2"
+      />
       <section className="panel lessonJournalFallback">
         <strong>수업일지를 여는 중 오류가 발생했습니다.</strong>
         <p>수업 정보는 저장되어 있습니다. 수업 수정에서 학생과 시간을 확인한 뒤 다시 열어 주세요.</p>
@@ -18143,16 +18153,19 @@ function LessonJournalDetail({
 
   return (
     <section className="lessonJournalPage">
-      <header className="pageTop lessonJournalHeader">
-        <button className="iconButton" onClick={onBack} type="button">‹</button>
-        <div>
-          <button className="linkTitleButton" onClick={onOpenExamPrep} type="button">{lesson.className}</button>
-          <p className="muted">{lesson.date} · {formatLessonTimeRange(lesson)} · {lessonStudents.length}명</p>
-        </div>
-        <span className="shortcutHint">{lesson.lessonTopic || "수업일지"}</span>
-        <button className="softButton" onClick={() => onEditLesson(lesson)} type="button">수업 수정</button>
-        <button className="dangerButton" onClick={() => onDeleteLesson(lesson.lessonId)} type="button">수업 취소 처리</button>
-      </header>
+      <NavigationHeader
+        actions={(
+          <>
+            <button className="softButton" onClick={() => onEditLesson(lesson)} type="button">수업 수정</button>
+            <button className="dangerButton" onClick={() => onDeleteLesson(lesson.lessonId)} type="button">수업 취소 처리</button>
+          </>
+        )}
+        className="lessonJournalHeader"
+        context={<span className="shortcutHint">{lesson.lessonTopic || "수업일지"}</span>}
+        description={`${lesson.date} · ${formatLessonTimeRange(lesson)} · ${lessonStudents.length}명`}
+        leading={<button className="iconButton" onClick={onBack} type="button">‹</button>}
+        titleNode={<button className="linkTitleButton" onClick={onOpenExamPrep} type="button">{lesson.className}</button>}
+      />
 
       {isClosureLesson || isClosureMakeupLesson ? (
         <section className={`panel closureJournalNotice ${isClosureMakeupLesson ? "makeup" : ""}`}>
