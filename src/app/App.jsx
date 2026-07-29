@@ -12313,17 +12313,15 @@ function NotificationCenter({
 
   return (
     <section className={compactPageHeader ? "notificationCenterPage compactPageHeader" : "notificationCenterPage"}>
-      <div className="pageTop">
-        <div>
-          <h1>{pageTitle}</h1>
-          {pageDescription ? <p className="muted">{pageDescription}</p> : null}
-        </div>
-        <div className="pageActions">
+      <PageHeader
+        actions={(
           <button className="softButton" disabled={isNotificationJobsLoading} onClick={onRefresh} type="button">
             {isNotificationJobsLoading ? "기록 불러오는 중" : "기록 새로고침"}
           </button>
-        </div>
-      </div>
+        )}
+        description={pageDescription}
+        title={pageTitle}
+      />
       {["loading", "failed"].includes(notificationJobsStatus?.state) ? (
         <div className={`${notificationJobsNoticeClass} notificationJobsStatusNotice`}>
           <span>{notificationJobsStatus.message}</span>
@@ -14637,16 +14635,16 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
 
   return (
     <section className="examAnalysisPipelinePage">
-      <div className="pageTop">
-        <div>
-          <h1>시험분석</h1>
-          <p className="muted">PDF 원본 저장과 분석 작업 관리</p>
-        </div>
-        <div className="pageActions">
+      <PageHeader
+        actions={(
+          <>
           <button className="secondaryButton" onClick={() => loadRuns(selectedRunId)} type="button">새로고침</button>
           <button className="primaryButton" onClick={saveRun} type="button">분석 저장</button>
-        </div>
-      </div>
+          </>
+        )}
+        description="PDF 원본 저장과 분석 작업 관리"
+        title="시험분석"
+      />
 
       <div className="examAnalysisStatusBar">
         {[loadStatus, saveStatus, uploadStatus, sourceDeleteStatus, extractStatus, visionStatus, confirmStatus, boundaryStatus, rowFillStatus, rowRefineStatus, reviewStatus, outputStatus, deleteStatus].filter((item) => item.message).map((item, index) => (
@@ -21970,14 +21968,13 @@ function SettingsCenter({
 
   return (
     <section className="settingsPage">
-      <header className="pageTop settingsHero">
-        <div>
-          <span className="eyebrow">SETTINGS</span>
-          <h1>설정</h1>
-          <p>AI 사용 모드는 이곳에서 한 번 정해두고 각 기능에서 그대로 사용합니다.</p>
-        </div>
-        <InlineSaveStatus label="설정 자동저장" saveState={appStateSaveState} />
-      </header>
+      <PageHeader
+        actions={<InlineSaveStatus label="설정 자동저장" saveState={appStateSaveState} />}
+        className="settingsHero"
+        description="AI 사용 모드는 이곳에서 한 번 정해두고 각 기능에서 그대로 사용합니다."
+        eyebrow="SETTINGS"
+        title="설정"
+      />
 
       <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...appStateAutosaveRisk} />
 
@@ -23087,17 +23084,19 @@ function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, on
 
   return (
     <section className="lessonResearchPage">
-      <div className="pageTop lessonResearchHero">
-        <div>
-          <p className="eyebrow">LESSON RESEARCH</p>
-          <h1>수업연구</h1>
-          <p className="muted">유형별 강의 교안, 특정문항 설명 틀, 학생이 자주 막히는 지점을 과목별로 정리합니다.</p>
-        </div>
-        <div className="researchTopActions">
+      <PageHeader
+        actions={(
+          <>
           <InlineSaveStatus label="수업연구 자동저장" saveState={appStateSaveState} />
           <button className="primaryButton" onClick={handleAddItem} type="button">+ 교안 항목 추가</button>
-        </div>
-      </div>
+          </>
+        )}
+        actionsClassName="researchTopActions"
+        className="lessonResearchHero"
+        description="유형별 강의 교안, 특정문항 설명 틀, 학생이 자주 막히는 지점을 과목별로 정리합니다."
+        eyebrow="LESSON RESEARCH"
+        title="수업연구"
+      />
 
       <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...appStateAutosaveRisk} />
 
@@ -25949,16 +25948,17 @@ function FollowUpCenter({
 }) {
   return (
     <section className="followUpPage">
-      <div className="pageTop">
-        <div>
-          <h1>오답관리</h1>
-          <p className="muted">교재 PDF를 원본으로 등록하고, 단원별 문항 상태와 학생별 오답 흐름을 관리합니다.</p>
-        </div>
-        <div className="followUpTopActions">
+      <PageHeader
+        actions={(
+          <>
           <InlineSaveStatus label="오답관리 자동저장" saveState={appStateSaveState} />
           <span className="countBadge">{tasks.length}개 진행</span>
-        </div>
-      </div>
+          </>
+        )}
+        actionsClassName="followUpTopActions"
+        description="교재 PDF를 원본으로 등록하고, 단원별 문항 상태와 학생별 오답 흐름을 관리합니다."
+        title="오답관리"
+      />
 
       <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...appStateAutosaveRisk} />
 
