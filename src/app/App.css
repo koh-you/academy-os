@@ -307,6 +307,10 @@ a:focus-visible {
   color: #17213d;
 }
 
+.mobileNavigationToggle {
+  display: none;
+}
+
 .brandBlock strong {
   font-size: 22px;
 }
@@ -19874,6 +19878,41 @@ body.attendanceOnlyBody {
     display: none;
   }
 
+  .mobileNavigationToggle {
+    align-items: center;
+    background: #f8fafc;
+    border: 1px solid var(--academy-border);
+    border-radius: var(--academy-radius);
+    color: var(--academy-primary);
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    min-height: var(--academy-touch-target);
+    padding: 8px 12px;
+    text-align: left;
+    width: 100%;
+  }
+
+  .mobileNavigationToggle span {
+    color: var(--academy-muted);
+    font-size: 12px;
+    font-weight: 800;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobileNavigationToggle b {
+    flex: 0 0 auto;
+    font-size: 13px;
+  }
+
+  .sideNav:not(.mobileNavigationOpen),
+  .sideStatus:not(.mobileNavigationOpen) {
+    display: none;
+  }
+
   .sideStatus {
     margin-top: 0;
   }
@@ -19907,6 +19946,55 @@ body.attendanceOnlyBody {
     flex: 0 0 28px;
     height: 28px;
     width: 28px;
+  }
+
+  .sidebar.collapsed {
+    align-items: stretch;
+    padding: max(12px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) 12px max(14px, env(safe-area-inset-left));
+  }
+
+  .sidebar.collapsed .brandBlock {
+    justify-items: stretch;
+    padding: 0 2px 12px;
+  }
+
+  .sidebar.collapsed .brandBlock strong,
+  .sidebar.collapsed .brandBlock > span,
+  .sidebar.collapsed .sideGroup p,
+  .sidebar.collapsed .sideNav button b {
+    display: block;
+  }
+
+  .sidebar.collapsed .sideGroup {
+    justify-items: stretch;
+  }
+
+  .sidebar.collapsed .sideNav button {
+    height: auto;
+    justify-content: flex-start;
+    min-height: 42px;
+    padding-inline: 8px;
+    width: 100%;
+  }
+
+  .sidebar.collapsed .sideNav button span {
+    background: #eef2ff;
+  }
+
+  .sidebar.collapsed .navBadge {
+    border: 0;
+    font-size: 10px;
+    padding: 4px 5px;
+    position: static;
+  }
+
+  .sidebar.collapsed .logoutButton {
+    font-size: inherit;
+    padding: 12px;
+  }
+
+  .sidebar.collapsed .logoutButton::before {
+    content: none;
   }
 
   .teacherOperatingMemoHeader,

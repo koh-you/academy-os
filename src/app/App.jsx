@@ -5420,6 +5420,7 @@ function countProblemStatuses(problems = []) {
 export function App() {
   const [activeView, setActiveView] = useState("lessons");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileNavigationOpen, setIsMobileNavigationOpen] = useState(false);
   const [session, setSession] = useState(() => readStoredTeacherSession());
   const [selectedDate, setSelectedDate] = useState(today);
   const [selectedLessonId, setSelectedLessonId] = useState("");
@@ -10001,6 +10002,7 @@ export function App() {
 
   function handleChangeView(nextView) {
     setActiveView(nextView);
+    setIsMobileNavigationOpen(false);
     if (typeof window !== "undefined") {
       window.scrollTo({ behavior: "auto", left: 0, top: 0 });
     }
@@ -10014,10 +10016,12 @@ export function App() {
       <Sidebar
         activeView={activeView}
         isCollapsed={isSidebarCollapsed}
+        isMobileNavigationOpen={isMobileNavigationOpen}
         onChangeView={handleChangeView}
         onLogout={handleLogout}
         supplementAttention={supplementAttention}
         onToggle={() => setIsSidebarCollapsed((current) => !current)}
+        onToggleMobileNavigation={() => setIsMobileNavigationOpen((current) => !current)}
       />
 
       <section className="mainPanel">
@@ -15639,7 +15643,16 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
   );
 }
 
-function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle, supplementAttention = null }) {
+function Sidebar({
+  activeView,
+  isCollapsed,
+  isMobileNavigationOpen = false,
+  onChangeView,
+  onLogout,
+  onToggle,
+  onToggleMobileNavigation,
+  supplementAttention = null
+}) {
   const supplementAttentionCount = Number(supplementAttention?.total ?? 0);
   const supplementAttentionLabel = supplementAttention?.label || "";
   const menuGroups = [
@@ -15692,6 +15705,9 @@ function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle, su
       ]
     }
   ];
+  const activeMenuItem = menuGroups
+    .flatMap((group) => group.items)
+    .find((item) => item.id === activeView);
 
   return (
     <aside aria-label="Academy OS 교사 메뉴" className={isCollapsed ? "sidebar collapsed" : "sidebar"}>
@@ -15711,7 +15727,21 @@ function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle, su
         <strong>{academyBrandName}</strong>
         <span>고태영T Lesson OS</span>
       </div>
-      <nav aria-label="주요 화면" className="sideNav" id="academy-primary-navigation">
+      <button
+        aria-controls="academy-primary-navigation"
+        aria-expanded={isMobileNavigationOpen}
+        className="mobileNavigationToggle"
+        onClick={onToggleMobileNavigation}
+        type="button"
+      >
+        <span>현재 화면 · {activeMenuItem?.label || "Academy OS"}</span>
+        <b>{isMobileNavigationOpen ? "메뉴 닫기" : "전체 메뉴"}</b>
+      </button>
+      <nav
+        aria-label="주요 화면"
+        className={isMobileNavigationOpen ? "sideNav mobileNavigationOpen" : "sideNav"}
+        id="academy-primary-navigation"
+      >
         {menuGroups.map((group) => (
           <div className="sideGroup" key={group.title}>
             <p>{group.title}</p>
@@ -15732,7 +15762,7 @@ function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle, su
           </div>
         ))}
       </nav>
-      <div className="sideStatus">
+      <div className={isMobileNavigationOpen ? "sideStatus mobileNavigationOpen" : "sideStatus"}>
         <span>접속 중 1명</span>
         <strong>{today}</strong>
         <button className="logoutButton" onClick={onLogout} type="button">로그아웃</button>

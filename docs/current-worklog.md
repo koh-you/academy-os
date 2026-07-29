@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-7A-3. 모바일 compact 전체 메뉴
+
+- 640px 이하 sidebar에 `현재 화면 · {화면명}`과 `전체 메뉴/메뉴 닫기` toggle을 추가하고 기본 상태를 닫힘으로 정리했다.
+- toggle을 열면 기존 모든 메뉴 그룹·18개 화면·보충 확인 badge·로그아웃이 그대로 보인다.
+- 메뉴 항목 선택 시 기존 `onChangeView(item.id)`를 실행하면서 모바일 메뉴를 닫고 기존 문서 상단 scroll reset을 유지해 긴 메뉴 대신 선택한 본문 머리말에 바로 접근한다.
+- desktop에서 접은 뒤 창을 모바일 폭으로 줄여도 label·2열 메뉴·로그아웃을 복구하도록 collapsed mobile override를 추가했다.
+- view callback·수업일지 닫기·로그인/session·Supabase/app_state·notification_jobs/Solapi·수업·AI·출결 원천을 변경하거나 실행하지 않았다.
+- AI 검수: mobile open/close·전체 메뉴·view callback·desktop collapsed 회귀 정적 계약, `npm run build` 128 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 462개 중 기존 기준선 `90a`만 실패했고 모든 개별 fixture와 신규 계약은 통과했다.
+- 사람 검수: 390px에서 기본 compact 상태, 전체 메뉴 열기, 하단 메뉴 선택 후 본문 상단 진입, desktop/sidebar 접힘을 확인하는 절차를 누적했다.
+
 ## 2026-07-29 UI-7A-2. 사이드바 semantics·app shell safe-area
 
 - 사이드바 aside·nav에 accessible label을 추가하고 접기 toggle을 nav ID와 `aria-controls`·`aria-expanded`로 연결했다.
