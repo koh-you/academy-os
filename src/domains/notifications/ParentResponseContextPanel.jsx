@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { ListCard, ListCardActions, ListCardHeader } from "../../shared/components/ListCard.jsx";
 import { SearchField } from "../../shared/components/SearchField.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { buildParentChannelLookupText, getParentResponseContexts } from "./parentResponseContext.js";
@@ -49,14 +50,14 @@ export function ParentResponseContextPanel({ formatDateTime, notificationJobs = 
       {visibleContexts.length ? (
         <div className="parentResponseContextList">
           {visibleContexts.map((context) => (
-            <article className="parentResponseContextCard" key={context.notificationJobId}>
-              <div className="parentResponseContextMeta">
+            <ListCard className="parentResponseContextCard" key={context.notificationJobId}>
+              <ListCardHeader className="parentResponseContextMeta">
                 <div>
                   <strong>{context.studentName}</strong>
                   <span>{context.lessonDate || "수업일 미입력"} · {formatDateTime(context.sentAt)}</span>
                 </div>
                 <span className="statusPill status-sent">발송 완료</span>
-              </div>
+              </ListCardHeader>
               <dl>
                 <div><dt>학부모 번호</dt><dd>{context.parentPhone || "미입력"}</dd></div>
                 <div><dt>알림 종류</dt><dd>{context.notificationType === "daily_report" ? "데일리 리포트" : "학부모 강사코멘트"}</dd></div>
@@ -65,11 +66,11 @@ export function ParentResponseContextPanel({ formatDateTime, notificationJobs = 
                 <small>그날 Academy OS에 저장된 발신 본문</small>
                 <p>{context.body}</p>
               </div>
-              <div className="parentResponseContextActions">
+              <ListCardActions className="parentResponseContextActions">
                 <button className="softButton compact" onClick={() => copyChannelLookup(context)} type="button">별관 채널 확인 정보 복사</button>
                 <span>별관 채널 관리자 앱에서 {context.studentName} 학부모 상담방을 열어 답장을 확인하세요.</span>
-              </div>
-            </article>
+              </ListCardActions>
+            </ListCard>
           ))}
         </div>
       ) : (

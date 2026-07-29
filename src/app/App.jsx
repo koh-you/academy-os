@@ -226,6 +226,7 @@ import {
   normalizeSaveState,
   saveStateLabels
 } from "../shared/components/InlineSaveStatus.jsx";
+import { ListCard, ListCardActions } from "../shared/components/ListCard.jsx";
 import { MetricCard } from "../shared/components/MetricCard.jsx";
 import { Modal } from "../shared/components/Modal.jsx";
 import { NavigationHeader } from "../shared/components/NavigationHeader.jsx";
@@ -19948,9 +19949,13 @@ function LessonHub({
           />
           <div className="lessonCards">
             {lessonsForDate.map((lesson) => (
-              <button
+              <ListCard
+                active={lesson.lessonId === selectedLessonId}
                 aria-label={`${lesson.className} 수업 선택`}
-                className={lesson.lessonId === selectedLessonId ? "lessonCard active" : "lessonCard"}
+                aria-pressed={lesson.lessonId === selectedLessonId}
+                as="button"
+                className="lessonCard"
+                density="compact"
                 key={lesson.lessonId}
                 onClick={() => onSelectLesson(lesson.lessonId)}
                 style={{ borderColor: lesson.lessonId === selectedLessonId ? lesson.color : undefined }}
@@ -19960,7 +19965,7 @@ function LessonHub({
                 <span className="lessonDot" style={{ background: lesson.color }} />
                 <strong>{lesson.className}</strong>
                 <small>{formatLessonTimeRange(lesson)} · {getLessonStudentIds(lesson).length}명</small>
-              </button>
+              </ListCard>
             ))}
           </div>
         </div>
@@ -25969,7 +25974,7 @@ function SupplementHistoryModal({ onChangeQuery, onClose, onUndoPassTask, query,
           {filteredTasks.map((task) => {
             const student = students.find((item) => item.studentId === task.studentId);
             return (
-              <article className="supplementHistoryItem" key={task.makeupTaskId}>
+              <ListCard className="supplementHistoryItem" density="compact" key={task.makeupTaskId}>
                 <div>
                   <strong>{student?.name ?? "미등록 학생"}</strong>
                   <span>{student?.schoolName || "학교 미입력"} · {student?.grade || "-"}</span>
@@ -25985,7 +25990,7 @@ function SupplementHistoryModal({ onChangeQuery, onClose, onUndoPassTask, query,
                 <span className={`supplementProgressBadge ${task.status === "done" ? "done" : task.status === "canceled" ? "canceled" : task.status === "scheduled" ? "scheduled" : "draft"}`}>
                   {statusLabel(task)}
                 </span>
-                <div className="supplementHistoryActions">
+                <ListCardActions className="supplementHistoryActions">
                   {task.status === "done" ? (
                     <button className="softButton subtle" onClick={() => onUndoPassTask(task)} type="button">
                       보충관리로 복귀
@@ -25997,8 +26002,8 @@ function SupplementHistoryModal({ onChangeQuery, onClose, onUndoPassTask, query,
                   ) : (
                     <span className="historyActionHint">관리 중</span>
                   )}
-                </div>
-              </article>
+                </ListCardActions>
+              </ListCard>
             );
           })}
         </div>

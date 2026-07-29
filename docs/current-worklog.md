@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-4B-1. 대표 목록 카드 공통 shell
+
+- 전수조사: 학생·수업·알림·보충·포털·특강 목록을 row key, callback, 상태 원천, 위험도로 분류하고 `docs/ui-list-card-inventory-2026-07-29.md`에 후속 순서를 고정했다.
+- 구현: 공통 `ListCard`/`ListCardHeader`/`ListCardBody`/`ListCardActions`와 모바일 44px 행동 규칙을 추가했다. 학생 운영 알림, 날짜별 수업 선택, 학부모 응대 발신 원문, 보충 최근 이력에 기존 전용 class와 함께 적용했다.
+- 동작 보존: `lessonId` 선택, `reminderId` 완료·삭제, `notificationJobId` 복사, `makeupTaskId` 완료 복귀 callback과 상태 계산을 그대로 유지했다. 날짜별 수업에는 선택 상태를 알리는 `aria-pressed`만 추가했다.
+- 외부 원천: Supabase/app_state, 수업일지/출결, notification_jobs/Solapi, Storage를 호출하거나 변경하지 않았다. 실제 완료·삭제·복귀·발송도 실행하지 않았다.
+- AI 검수: `npm run build` 통과(123 modules). 전용 정적 계약을 포함한 scenario 418개 중 417개가 통과했고 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 네 대표 목록의 desktop/390px 배치 검수를 누적하고 UI-4B-2 포털 읽기 전용 카드로 진행한다.
+
 ## 2026-07-29 UI-4A-2. 클릭형·micro 지표·UI-4A 완료
 
 - 구현: 알림 예약 확인 4개를 기존 `toggleReservationInspectMode`를 유지한 클릭형 compact `MetricCard`로 이관하고 `aria-pressed`를 보강했다. 학생 마이페이지 숙제 3개·출결 4개와 시험분석 최종 미리보기 3개를 micro 카드로 이관해 총 14개를 통일했다.

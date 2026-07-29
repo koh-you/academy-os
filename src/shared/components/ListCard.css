@@ -1,0 +1,60 @@
+:where(.listCard) {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+:where(.listCard.listCard-compact) {
+  --list-card-gap: 8px;
+  --list-card-padding: 12px;
+}
+
+:where(.listCard.listCard-default) {
+  --list-card-gap: 12px;
+  --list-card-padding: 14px;
+}
+
+:where(.listCardHeader) {
+  align-items: flex-start;
+  display: flex;
+  gap: var(--list-card-gap, 12px);
+  justify-content: space-between;
+  min-width: 0;
+}
+
+:where(.listCardBody) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+:where(.listCardActions) {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+:where(.listCard.listCard-warning) {
+  border-color: var(--academy-warning-border, #fcd34d);
+}
+
+:where(.listCard.listCard-danger) {
+  border-color: var(--academy-danger-border, #fecaca);
+}
+
+@media (max-width: 640px) {
+  :where(.listCardHeader),
+  :where(.listCardActions) {
+    align-items: stretch;
+  }
+
+  :where(.listCardActions) {
+    justify-content: flex-start;
+  }
+
+  :where(.listCardActions > button),
+  :where(.listCardActions > a) {
+    min-height: 44px;
+  }
+}

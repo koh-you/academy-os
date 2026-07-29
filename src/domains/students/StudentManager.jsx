@@ -1,6 +1,7 @@
 import { Component, useEffect, useState } from "react";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
+import { ListCard, ListCardActions } from "../../shared/components/ListCard.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { SelectionToolbar } from "../../shared/components/SelectionToolbar.jsx";
@@ -1829,7 +1830,7 @@ function StudentProfileModal({
                 <div className="emptyState">이 학생에게 연결된 운영 알림이 없습니다.</div>
               ) : (
                 academyReminders.map((reminder) => (
-                  <article className={`studentReminderItem status-${reminder.status || "pending"}`} key={reminder.reminderId}>
+                  <ListCard className={`studentReminderItem status-${reminder.status || "pending"}`} density="compact" key={reminder.reminderId}>
                 <div className="studentConsultationMeta">
                   <span className="studentConsultationDate">{formatStudentReminderDateTime(reminder)}</span>
                   <span className="studentConsultationType">{studentReminderTypeLabel(reminder.reminderType ?? reminder.type)}</span>
@@ -1839,7 +1840,7 @@ function StudentProfileModal({
                 <strong>{reminder.title || "운영 알림"}</strong>
                 <p className="studentConsultationContent">{reminder.content || reminder.memo || "내용 없음"}</p>
                 {isEditingProfile ? (
-                  <div className="studentProfileRowActions">
+                  <ListCardActions className="studentProfileRowActions">
                     <button
                       className="softButton primarySoft"
                       disabled={reminder.status === "done"}
@@ -1861,9 +1862,9 @@ function StudentProfileModal({
                     >
                       삭제
                     </button>
-                  </div>
+                  </ListCardActions>
                 ) : null}
-                  </article>
+                  </ListCard>
                 ))
               )}
             </div>
