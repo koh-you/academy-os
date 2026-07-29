@@ -1827,6 +1827,27 @@ check(
       "Promise.all"
     ].some((value) => persistedPreExamRowRepairSource.includes(value))
 );
+check(
+  "84d-162 exam period Sunday dates inventory preserves four prep Sundays period union and sort",
+  (appEntrySource.match(/function getSundayDatesForExamPeriod\(/g) || []).length === 1 &&
+    (appEntrySource.match(/getSundayDatesForExamPeriod\(/g) || []).length === 2 &&
+    hasAll(appEntrySource, [
+      "if (!period.endDate && !period.date) return []",
+      "const startDate = period.startDate || period.date || period.endDate",
+      "const endDate = period.endDate || period.date",
+      'const start = new Date(`${startDate}T00:00:00+09:00`)',
+      'const end = new Date(`${endDate}T00:00:00+09:00`)',
+      "if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return []",
+      "const day = end.getDay()",
+      "const lastSunday = new Date(end)",
+      "lastSunday.setDate(end.getDate() - day)",
+      "const prepSundays = [3, 2, 1, 0].map((offset) => {",
+      "const inPeriodSundays = []",
+      "while (cursor <= end)",
+      "return [...new Set([...prepSundays, ...inPeriodSundays])].sort()",
+      "getSundayDatesForExamPeriod(period).forEach((date) => {"
+    ])
+);
 check("84e shared modal closes with Escape key", hasAll(app, ["import { Modal, ModalFooter } from \"../shared/components/Modal.jsx\""]) && hasAll(sharedModalSource, ["export function Modal({", "backdropClassName = \"\"", "hideCloseButton = false", "hideHeader = false", "function handleEscapeKey(event)", "event.key === \"Escape\"", "onClose?.()", "window.addEventListener(\"keydown\", handleEscapeKey)", "window.removeEventListener(\"keydown\", handleEscapeKey)", "hideCloseButton ? null"]) );
 check("84f lesson journal modal uses shared Escape-close modal", hasAll(app, ["backdropClassName=\"lessonJournalModalBackdrop\"", "className=\"lessonJournalModal\"", "hideHeader", "onClose={onBackToCalendar}"]) && !app.includes("<div className=\"modalBackdrop lessonJournalModalBackdrop\" role=\"dialog\" aria-modal=\"true\">"));
 check("84f-1 lesson journal student preview stays isolated and callback-only", hasAll(lessonFrontendSource, ["LessonJournalStudentPreviewModal", "createLessonJournalStudentPreviewModel", "students.filter((student) => student.studentId === studentPreviewId)", "PortalComponent={StudentPortalV2}", "students={model.previewStudents}", "onLogout={onClose}"]) && !lessonJournalStudentPreviewModalSource.includes("fetch(") && !lessonJournalStudentPreviewModalSource.includes("/api/"));

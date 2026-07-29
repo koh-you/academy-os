@@ -2266,6 +2266,13 @@
 - AI 가상검수: 신규 entry TARGET, 무관 row 참조 유지 CONTROL, 대상 lesson 없음 rows 참조 유지와 rows/lessons 입력 불변을 재검증한다. 전용 closeout fixture와 시나리오 665/665, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 의미 단위는 시험기간의 일요일 시험대비 날짜 배열을 만드는 순수 helper를 inventory한다.
 
+## 2026-07-28 P3. App.jsx 17AY-1 exam period Sunday date selector inventory
+
+- inventory: 시험기간 종료일이 속한 주의 일요일을 포함한 최근 4개 일요일과 기간 내부의 모든 일요일을 합쳐 중복 제거·오름차순 정렬하는 계약을 고정했다. `date` 단일 입력과 `endDate` 단일 입력의 기존 fallback도 유지한다.
+- 경계: 날짜 문자열 변환은 App의 `toKoreaDateString` helper를 사용하고, 결과 소비는 examPrep lesson candidate 조합에 남아 있다. 이번 단계에서는 코드를 이동하지 않았다.
+- AI 가상검수: 한 달 기간 TARGET, 단일 date·단일 endDate TARGET, 역전 기간의 현재 fallback TARGET, startDate만·잘못된 날짜·빈 입력 CONTROL과 입력 불변을 검증한다. 전용 inventory fixture와 시나리오 666/666, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AY-2`는 Sunday date selector를 날짜 문자열 helper 주입형 순수 model로 분리한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
