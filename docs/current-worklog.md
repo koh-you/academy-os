@@ -2260,6 +2260,12 @@
 - AI 가상검수: inventory의 기존 entry 보존+신규 추가·빈 entry 보강·무관 row 참조 유지 fixture를 추출본과 전체 deep equality로 비교하고, 별도 TARGET/CONTROL에서 helper 소비와 입력 불변을 확인한다. 기존 inventory와 추출 fixture, 시나리오 664/664, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AX-3`은 import/export/factory·App 소비 각 1개, helper 주입과 App-owned persistence 경계를 closeout한다.
 
+## 2026-07-28 P3. App.jsx 17AX-3 persisted preExam lesson examPrep row repair closeout
+
+- closeout: `persistedPreExamRowRepair.js` import·export·factory·App 실행 각 1개, inline repair 0개와 여덟 helper 주입을 고정했다. 변경 row 선택과 `persistExamPrepRows` 저장은 App useEffect 소유로 유지했다.
+- AI 가상검수: 신규 entry TARGET, 무관 row 참조 유지 CONTROL, 대상 lesson 없음 rows 참조 유지와 rows/lessons 입력 불변을 재검증한다. 전용 closeout fixture와 시나리오 665/665, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 의미 단위는 시험기간의 일요일 시험대비 날짜 배열을 만드는 순수 helper를 inventory한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

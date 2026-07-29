@@ -1782,6 +1782,51 @@ check(
       "Promise.all"
     ].some((value) => persistedPreExamRowRepairSource.includes(value))
 );
+check(
+  "84d-161 persisted preExam row repair boundary closes out with one App execution and App-owned persistence",
+  (appEntrySource.match(/from "\.\.\/domains\/lessons\/persistedPreExamRowRepair\.js"/g) || []).length === 1 &&
+    (appEntrySource.match(/createPersistedPreExamRowRepair\(\{/g) || []).length === 1 &&
+    (appEntrySource.match(/repairExamPrepRowsFromPersistedPreExamLessons\(/g) || []).length === 1 &&
+    (persistedPreExamRowRepairSource.match(/export function createPersistedPreExamRowRepair\(/g) || []).length === 1 &&
+    !appEntrySource.includes("function repairExamPrepRowsFromPersistedPreExamLessons(") &&
+    hasAll(appEntrySource, [
+      "const repairExamPrepRowsFromPersistedPreExamLessons =",
+      "addDaysInKorea,",
+      "getExamPrepIdFromDerivedMathEvent,",
+      "inferMathExamLabelFromPreExamLesson,",
+      "normalizeGradeLabel,",
+      "normalizeMathExamEntries,",
+      "normalizeMathSubject,",
+      "safeIdPart,",
+      "syncPrimaryMathExamDate",
+      "const repairedRows = repairExamPrepRowsFromPersistedPreExamLessons(current, lessons)",
+      "selectChangedGeneratedLessonPlanRows(",
+      "persistExamPrepRows(changedRows)",
+      "return changedRows.length > 0 ? repairedRows : current"
+    ]) &&
+    hasAll(persistedPreExamRowRepairSource, [
+      "return function repairExamPrepRowsFromPersistedPreExamLessons(",
+      "if (!rows.length || !preExamLessons.length)",
+      "if (!sourceLessons.length) return row",
+      "if (!didRepair) return row",
+      "mathExamDates: nextEntries"
+    ]) &&
+    ![
+      "useState",
+      "useEffect",
+      "fetch(",
+      "postJson",
+      "/api/",
+      "setLessons",
+      "setExamPrepRows",
+      "persistExamPrepRows",
+      "localStorage",
+      "Supabase",
+      "Solapi",
+      "Date.now",
+      "Promise.all"
+    ].some((value) => persistedPreExamRowRepairSource.includes(value))
+);
 check("84e shared modal closes with Escape key", hasAll(app, ["import { Modal, ModalFooter } from \"../shared/components/Modal.jsx\""]) && hasAll(sharedModalSource, ["export function Modal({", "backdropClassName = \"\"", "hideCloseButton = false", "hideHeader = false", "function handleEscapeKey(event)", "event.key === \"Escape\"", "onClose?.()", "window.addEventListener(\"keydown\", handleEscapeKey)", "window.removeEventListener(\"keydown\", handleEscapeKey)", "hideCloseButton ? null"]) );
 check("84f lesson journal modal uses shared Escape-close modal", hasAll(app, ["backdropClassName=\"lessonJournalModalBackdrop\"", "className=\"lessonJournalModal\"", "hideHeader", "onClose={onBackToCalendar}"]) && !app.includes("<div className=\"modalBackdrop lessonJournalModalBackdrop\" role=\"dialog\" aria-modal=\"true\">"));
 check("84f-1 lesson journal student preview stays isolated and callback-only", hasAll(lessonFrontendSource, ["LessonJournalStudentPreviewModal", "createLessonJournalStudentPreviewModel", "students.filter((student) => student.studentId === studentPreviewId)", "PortalComponent={StudentPortalV2}", "students={model.previewStudents}", "onLogout={onClose}"]) && !lessonJournalStudentPreviewModalSource.includes("fetch(") && !lessonJournalStudentPreviewModalSource.includes("/api/"));
