@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-4B-2. 포털 읽기 전용 카드
+
+- 구현: 학부모·학생 수업 준비 공지, 자료, 보고서, 학생 수업기록, 보충 일정의 6개 읽기 전용 목록군을 `ListCardHeader`/`ListCardBody`/`ListCardActions` 슬롯으로 이관했다.
+- 동작 보존: `lessonStudentRecordId`, `materialId`, `reportId`, `makeupTaskId`, 달력 date key를 그대로 유지했다. 자료 새 탭 링크, 달력 날짜 선택, 출결·과제 상태·숙제 표시 계산도 바꾸지 않았다.
+- 외부 원천: 포털 숙제 완료, 질문 CRUD, 시험 제출, Storage 업로드, Supabase/app_state, notification_jobs/Solapi를 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(123 modules). 전용 정적 계약을 포함한 scenario 419개 중 418개가 통과했고 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 포털 desktop/390px 배치와 자료 열기·수업 날짜 선택만 보는 독립 검수를 누적하고 UI-4B-3 선택형 행으로 진행한다.
+
 ## 2026-07-29 UI-4B-1. 대표 목록 카드 공통 shell
 
 - 전수조사: 학생·수업·알림·보충·포털·특강 목록을 row key, callback, 상태 원천, 위험도로 분류하고 `docs/ui-list-card-inventory-2026-07-29.md`에 후속 순서를 고정했다.

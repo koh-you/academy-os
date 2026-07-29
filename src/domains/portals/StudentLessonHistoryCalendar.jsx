@@ -3,6 +3,7 @@ import { assignmentStatusLabels, normalizeAssignmentStatusValue } from "../lesso
 import { getAttendanceDisplay } from "../lessons/attendance.js";
 import { isClosureLesson } from "../lessons/lessonClosure.js";
 import { applyStudentScheduleToLesson } from "../../shared/utils/studentSchedule.js";
+import { ListCard, ListCardBody, ListCardHeader } from "../../shared/components/ListCard.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 
 export function StudentLessonHistoryCalendar({
@@ -85,14 +86,14 @@ export function StudentLessonHistoryCalendar({
             );
           })}
         </div>
-        <article className="studentLessonRecordCard">
+        <ListCard className="studentLessonRecordCard">
           {selectedRecord ? (
             <>
-              <div>
+              <ListCardHeader>
                 <strong>{selectedRecord.lesson.date} · {selectedRecord.lesson.className}</strong>
                 <span>{selectedAttendanceTimeLabel}</span>
-              </div>
-              <dl>
+              </ListCardHeader>
+              <ListCardBody as="dl">
                 <div>
                   <dt>출결</dt>
                   <dd>
@@ -108,12 +109,12 @@ export function StudentLessonHistoryCalendar({
                 {selectedRecord.studentComment?.trim() ? (
                   <div><dt>선생님 코멘트</dt><dd>{selectedRecord.studentComment}</dd></div>
                 ) : null}
-              </dl>
+              </ListCardBody>
             </>
           ) : (
             <div className="emptyHomeworkBox">아직 확인할 수업 기록이 없습니다.</div>
           )}
-        </article>
+        </ListCard>
       </div>
     </section>
   );
