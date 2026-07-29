@@ -25471,6 +25471,9 @@ function SupplementStudentModal({
   const notificationControlJob = notificationControlTask && notificationControl
     ? getSupplementNotificationControlJob(notificationControlTask, notificationJobs, notificationControl.controlType)
     : null;
+  const notificationControlProviderReference = notificationControlJob?.provider === "solapi"
+    ? getNotificationJobProviderReference(notificationControlJob)
+    : "";
   const notificationControlDisplay = getSupplementNotificationControlDisplay(notificationControlJob);
   const notificationControlDraftState = notificationControlTask ? getTaskDraftState(notificationControlTask) : null;
   const notificationControlHasUnsavedChanges = Boolean(notificationControlTask && notificationControlDraftState &&
@@ -25946,8 +25949,10 @@ function SupplementStudentModal({
                     ? formatKoreaTimeLabel(getSupplementStudentReminderScheduledAt(notificationControlTask))
                     : "예약 버튼을 누른 뒤 다음 정각"}
               </strong>
-              <span>Solapi 상태</span>
+              <span>Academy OS 상태</span>
               <strong>{notificationControlJob ? formatNotificationJobStatus(notificationControlJob) : "예약 기록 없음"}</strong>
+              <span>Solapi 그룹</span>
+              <strong>{notificationControlProviderReference || "연결된 Solapi 그룹 없음"}</strong>
             </div>
             <div className="supplementNotificationControlPreview">
               <strong>{notificationControlPreviewLabel}</strong>

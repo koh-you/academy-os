@@ -17120,6 +17120,8 @@ textarea.profileEditInput {
 .supplementNotificationControlFacts strong {
   color: #17213d;
   font-size: 13px;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .supplementNotificationControlPreview {

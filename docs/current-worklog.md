@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-6D-2. 보충 알림 제어의 OS·Solapi 상태 분리
+
+- 보충 알림 제어 모달에서 `notification_jobs.status` 값을 `Academy OS 상태`로 명시했다.
+- `provider === "solapi"`이고 provider 참조가 실제로 있을 때만 별도 `Solapi 그룹` 행에 표시하며, 그 외에는 `연결된 Solapi 그룹 없음`으로 구분한다.
+- 닫기, Solapi 예약 취소, Solapi 예약 callback과 disabled 조건은 그대로 유지했다.
+- notification_jobs/Solapi 실제 조회·예약·취소·발송과 Supabase/app_state·수업·AI·출결 원천을 실행하거나 변경하지 않았다.
+- AI 검수: OS 상태와 provider 참조 분리·callback 불변 정적 계약, `npm run build` 128 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 458개 중 기존 기준선 `90a`만 실패했고 모든 개별 fixture와 신규 계약은 통과했다.
+- 사람 검수: 보충관리 알림 제어창의 두 label과 긴 그룹 참조 줄바꿈을 desktop/390px에서 확인하는 절차를 누적했다. 실제 예약·취소는 누르지 않는다.
+
 ## 2026-07-29 UI-6D-1. Academy OS row·Solapi provider 상태 inventory
 
 - `notification_jobs.status`를 Academy OS가 저장·해석한 작업 상태로, `provider`·`providerMessageId`를 외부 provider 종류·그룹 참조로 분리했다.
