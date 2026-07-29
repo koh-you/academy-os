@@ -29,6 +29,13 @@ const helperSource = await readFile(
   ),
   "utf8"
 );
+const identitySource = await readFile(
+  new URL(
+    "../src/domains/lessons/generatedLessonIdentityModel.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const modulePath =
   'from "../domains/lessons/generatedExamPrepKeyBuilder.js"';
 assert.equal(appSource.split(modulePath).length - 1, 1);
@@ -36,7 +43,13 @@ assert.equal(
   appSource.split(
     "getExamPrepGeneratedKeyForDate("
   ).length - 1,
-  3
+  1
+);
+assert.equal(
+  identitySource.split(
+    "getExamPrepGeneratedKeyForDate("
+  ).length - 1,
+  2
 );
 assert.equal(
   helperSource.split(
@@ -45,20 +58,21 @@ assert.equal(
   1
 );
 
-const keyStart = appSource.indexOf(
+const keyStart = identitySource.indexOf(
   "function getGeneratedLessonKey("
 );
-const keyEnd = appSource.indexOf(
+const keyEnd = identitySource.indexOf(
   "function getPreExamCompatibilityKey(",
   keyStart
 );
 assert.ok(keyStart >= 0 && keyEnd > keyStart);
-const keySource = appSource.slice(keyStart, keyEnd);
+const keySource = identitySource.slice(keyStart, keyEnd);
 const keyBoundaries = [
   "const sourceId = lesson.sourceSchoolEventId ||",
   'if (sourceId.startsWith("generated:")) return sourceId',
   'if (lesson.lessonType === "preExam" && sourceId)',
-  "if (isExamPrepLesson(lesson)) return getExamPrepGeneratedKeyForDate(lesson.date)",
+  "if (isExamPrepLesson(lesson))",
+  "return getExamPrepGeneratedKeyForDate(lesson.date)",
   'return ""'
 ];
 let previousKeyIndex = -1;
@@ -74,28 +88,29 @@ for (const boundary of keyBoundaries) {
   previousKeyIndex = boundaryIndex;
 }
 
-const identityStart = appSource.indexOf(
+const identityStart = identitySource.indexOf(
   "function getGeneratedLessonIdentityKeys("
 );
-const identityEnd = appSource.indexOf(
-  "function getGeneratedLessonPlanItemKey(",
+const identityEnd = identitySource.indexOf(
+  "return {",
   identityStart
 );
 assert.ok(
   identityStart >= 0 &&
     identityEnd > identityStart
 );
-const identitySource = appSource.slice(
+const identityFunctionSource = identitySource.slice(
   identityStart,
   identityEnd
 );
 for (const identityBoundary of [
   "const examPrepKeys = isExamPrepLesson(lesson)",
   "getExamPrepGeneratedKeyForDate(lesson.date)",
-  "return [...new Set("
+  "return [",
+  "...new Set("
 ]) {
   assert.ok(
-    identitySource.includes(identityBoundary),
+    identityFunctionSource.includes(identityBoundary),
     `missing generated identity key consumer: ${identityBoundary}`
   );
 }

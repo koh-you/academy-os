@@ -4,6 +4,7 @@ import {
   compactCalendarLabel,
   normalizeSchoolName
 } from "../src/domains/schoolCalendar/schoolCalendarUtils.js";
+import { createGeneratedLessonIdentityModel } from "../src/domains/lessons/generatedLessonIdentityModel.js";
 
 function normalizeExistingGradeLabel(grade = "") {
   const value = String(grade).trim();
@@ -84,6 +85,14 @@ function getExistingGeneratedLessonIdentityKeys(lesson = {}) {
   ];
 }
 
+const extractedIdentityModel =
+  createGeneratedLessonIdentityModel({
+    addDaysInKorea: addExistingDaysInKorea,
+    isExamPrepLesson: (lesson = {}) =>
+      lesson?.lessonType === "examPrep",
+    normalizeGradeLabel: normalizeExistingGradeLabel
+  });
+
 const preExamTarget = {
   lessonType: "preExam",
   sourceSchoolEventId: "event_TARGET_PRE_EXAM",
@@ -107,6 +116,12 @@ assert.deepEqual(
     "preExam|가상여고|고2|2026-08-05"
   ]
 );
+assert.deepEqual(
+  extractedIdentityModel.getGeneratedLessonIdentityKeys(
+    preExamTarget
+  ),
+  getExistingGeneratedLessonIdentityKeys(preExamTarget)
+);
 
 const fallbackDateTarget = {
   lessonType: "preExam",
@@ -116,6 +131,12 @@ const fallbackDateTarget = {
 };
 assert.equal(
   getExistingPreExamCompatibilityKey(fallbackDateTarget),
+  "preExam|가상중|중3|2026-08-07"
+);
+assert.equal(
+  extractedIdentityModel.getPreExamCompatibilityKey(
+    fallbackDateTarget
+  ),
   "preExam|가상중|중3|2026-08-07"
 );
 
@@ -130,6 +151,12 @@ assert.equal(
 );
 assert.deepEqual(
   getExistingGeneratedLessonIdentityKeys(examPrepTarget),
+  ["generated:exam_prep:2026-08-09"]
+);
+assert.deepEqual(
+  extractedIdentityModel.getGeneratedLessonIdentityKeys(
+    examPrepTarget
+  ),
   ["generated:exam_prep:2026-08-09"]
 );
 
@@ -159,41 +186,42 @@ const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
-const identityStart = appSource.indexOf(
-  "function getGeneratedLessonKey(lesson = {})"
-);
-const identityEnd = appSource.indexOf(
-  "function getGeneratedLessonPlanItemKey(",
-  identityStart
-);
-assert.ok(
-  identityStart >= 0 &&
-    identityEnd > identityStart
-);
-const identitySource = appSource.slice(
-  identityStart,
-  identityEnd
+const helperSource = await readFile(
+  new URL(
+    "../src/domains/lessons/generatedLessonIdentityModel.js",
+    import.meta.url
+  ),
+  "utf8"
 );
 const identityBoundaries = [
+  "export function createGeneratedLessonIdentityModel({",
   "function getGeneratedLessonKey(lesson = {})",
   "const sourceId = lesson.sourceSchoolEventId ||",
   'if (sourceId.startsWith("generated:")) return sourceId',
   'if (lesson.lessonType === "preExam" && sourceId)',
-  "if (isExamPrepLesson(lesson)) return getExamPrepGeneratedKeyForDate(lesson.date)",
+  "if (isExamPrepLesson(lesson))",
+  "return getExamPrepGeneratedKeyForDate(lesson.date)",
   "function getPreExamCompatibilityKey(lesson = {})",
   'if (lesson.lessonType !== "preExam") return ""',
-  "lesson.sourceExamDate || addDaysInKorea(lesson.date, 1)",
+  "lesson.sourceExamDate ||",
+  "addDaysInKorea(lesson.date, 1)",
   '.replace(/\\s*직전수업\\s*$/, "")',
   "const schoolKey = normalizeSchoolName(schoolName)",
-  "const gradeKey = compactCalendarLabel(normalizeGradeLabel(grade))",
+  "const gradeKey = compactCalendarLabel(",
+  "normalizeGradeLabel(grade)",
   'return `preExam|${schoolKey}|${gradeKey}|${sourceExamDate}`',
   "function getGeneratedLessonIdentityKeys(lesson = {})",
   "const examPrepKeys = isExamPrepLesson(lesson)",
-  "return [...new Set([getGeneratedLessonKey(lesson), getPreExamCompatibilityKey(lesson), ...examPrepKeys].filter(Boolean))]"
+  "getGeneratedLessonKey(lesson)",
+  "getPreExamCompatibilityKey(lesson)",
+  "return {",
+  "getGeneratedLessonIdentityKeys,",
+  "getGeneratedLessonKey,",
+  "getPreExamCompatibilityKey"
 ];
 let previousIndex = -1;
 for (const boundary of identityBoundaries) {
-  const boundaryIndex = identitySource.indexOf(
+  const boundaryIndex = helperSource.indexOf(
     boundary,
     previousIndex + 1
   );
@@ -215,8 +243,23 @@ for (const forbiddenEffect of [
   "Solapi"
 ]) {
   assert.ok(
-    !identitySource.includes(forbiddenEffect),
+    !helperSource.includes(forbiddenEffect),
     `generated lesson identity crossed a side effect: ${forbiddenEffect}`
+  );
+}
+for (const appBoundary of [
+  'from "../domains/lessons/generatedLessonIdentityModel.js"',
+  "const {",
+  "getGeneratedLessonIdentityKeys,",
+  "getGeneratedLessonKey",
+  "} = createGeneratedLessonIdentityModel({",
+  "addDaysInKorea,",
+  "isExamPrepLesson,",
+  "normalizeGradeLabel"
+]) {
+  assert.ok(
+    appSource.includes(appBoundary),
+    `missing generated lesson identity App injection: ${appBoundary}`
   );
 }
 

@@ -37,6 +37,13 @@ const helperSource = await readFile(
   ),
   "utf8"
 );
+const identitySource = await readFile(
+  new URL(
+    "../src/domains/lessons/generatedLessonIdentityModel.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const builderBoundaries = [
   'export function getExamPrepGeneratedKeyForDate(date = "")',
   "return date ? `generated:exam_prep:${date}` : \"\""
@@ -57,7 +64,13 @@ assert.equal(
   appSource.split(
     "getExamPrepGeneratedKeyForDate("
   ).length - 1,
-  3
+  1
+);
+assert.equal(
+  identitySource.split(
+    "getExamPrepGeneratedKeyForDate("
+  ).length - 1,
+  2
 );
 assert.ok(
   appSource.includes(
@@ -65,15 +78,19 @@ assert.ok(
   )
 );
 for (const consumerBoundary of [
-  "if (isExamPrepLesson(lesson)) return getExamPrepGeneratedKeyForDate(lesson.date)",
-  "getExamPrepGeneratedKeyForDate(lesson.date)",
-  "const key = getExamPrepGeneratedKeyForDate(date)"
+  "return getExamPrepGeneratedKeyForDate(lesson.date)",
+  "getExamPrepGeneratedKeyForDate(lesson.date)"
 ]) {
   assert.ok(
-    appSource.includes(consumerBoundary),
+    identitySource.includes(consumerBoundary),
     `missing generated exam-prep key consumer: ${consumerBoundary}`
   );
 }
+assert.ok(
+  appSource.includes(
+    "const key = getExamPrepGeneratedKeyForDate(date)"
+  )
+);
 assert.ok(!helperSource.includes("fetch("));
 assert.ok(!helperSource.includes("/api/"));
 assert.ok(!helperSource.includes("postJson"));

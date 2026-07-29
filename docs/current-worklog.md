@@ -2117,6 +2117,13 @@
 - AI 가상검수: 명시 preExam source ID와 호환 key TARGET, 시험일 fallback TARGET, examPrep 날짜 key 중복 TARGET, generated source ID 중복 TARGET, 학년 누락 CONTROL로 key 우선순위·정규화·중복 제거·입력 불변을 검증한다. 전용 inventory fixture와 시나리오 642/642, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AQ-2`는 identity 순수 조합을 dependency-injected model로 분리하고 App helper·calendar/status 소비는 App에 유지한다.
 
+## 2026-07-28 P3. App.jsx 17AQ-2 generated lesson identity model 분리
+
+- 코드: 대표 generated key, preExam 호환 key, 중복 제거 identity key 목록 계산을 `generatedLessonIdentityModel.js`의 factory형 순수 모델로 분리했다. 학교명·캘린더 label과 exam-prep date key는 domain import를 사용하고, App 전용 학년·날짜·시험대비 판정 helper는 명시 주입한다.
+- 경계: `normalizeGradeLabel`, `addDaysInKorea`, `isExamPrepLesson` 정의와 identity 소비(calendar merge, 편집 동기화, plan status)는 `App.jsx`에 그대로 유지했다. React state·API·Supabase·알림/Solapi effect는 이동하거나 실행하지 않았다.
+- AI 가상검수: preExam source/호환 key, 시험일 fallback, examPrep·generated source 중복과 학년 누락 가상 lesson으로 추출 전후 key·순서·중복 제거·입력 불변을 대조한다. 전용 extraction fixture와 시나리오 643/643, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AQ-3`은 factory import/export 1개, App dependency 주입 1개와 identity 소비 경계를 closeout한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
