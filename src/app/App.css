@@ -7275,17 +7275,22 @@ textarea {
   background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
   border: 1px solid #c9d8ee;
   border-radius: 8px;
+  box-sizing: border-box;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   color: #0b1220;
   font-size: 15px;
   font-weight: 650;
   height: auto;
   line-height: 1.42;
+  max-width: 100%;
   min-height: 66px;
+  min-width: 0;
   overflow: hidden;
+  overflow-wrap: anywhere;
   padding: 12px 12px;
   resize: none;
   text-align: left;
+  word-break: break-word;
 }
 
 .journalTable.editing .journalMemoCardInput {
@@ -7316,6 +7321,7 @@ textarea {
   background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
   border: 1px solid #c9d8ee;
   border-radius: 8px;
+  box-sizing: border-box;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   color: #0b1220;
   cursor: text;
@@ -7323,11 +7329,15 @@ textarea {
   font-size: 15px;
   font-weight: 650;
   line-height: 1.42;
+  max-width: 100%;
   min-height: 66px;
+  min-width: 0;
+  overflow-wrap: anywhere;
   padding: 12px;
   text-align: left;
   white-space: pre-wrap;
   width: 100%;
+  word-break: break-word;
 }
 
 .journalTable .journalMemoCardRead.empty {
