@@ -1,13 +1,16 @@
-export function MetricCard({ active = false, hint, icon, label, onClick, tone = "default", value }) {
-  const className = `${onClick ? "metricCard metricButton" : "metricCard"} metric-${tone}${active ? " active" : ""}`;
+export function MetricCard({ active = false, badge = null, density = "default", hint, icon, label, onClick, tone = "default", value }) {
+  const className = `${onClick ? "metricCard metricButton" : "metricCard"} metric-${tone} metricCard-${density}${active ? " active" : ""}`;
   const content = (
     <>
       <div>
-        <span>{label}</span>
+        <span>
+          {label}
+          {badge ? <em className="metricCardBadge">{badge}</em> : null}
+        </span>
         <strong>{value}</strong>
-        <small>{hint}</small>
+        {hint ? <small>{hint}</small> : null}
       </div>
-      <b>{icon}</b>
+      {icon ? <b>{icon}</b> : null}
     </>
   );
   if (onClick) {

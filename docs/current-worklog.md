@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-4A-1. 단순 지표·요약 카드
+
+- 전수조사: 단순 숫자/값, 클릭형 지표, 포털 micro 지표, 연동 상태 카드를 분리하고 `docs/ui-metric-card-inventory-2026-07-29.md`에 값 원천과 후속 단위를 기록했다.
+- 구현: `MetricCard`에 default/compact density, 선택적 badge·hint·icon을 추가하고 알림 대상 3개, 시험대비 수업 3개, 시험 후 제출 4개, 보고서 원천 3개, 월간 학사 3개 등 16개 단순 요약 카드를 compact 표현으로 이관했다.
+- 동작 보존: 대상/수신자, 수업 학생/시험정보, 제출/확인, 보고서 배열, 월별 학사 event의 기존 계산식과 배열을 호출부에 그대로 두고 결과 값만 카드에 전달한다. Supabase/app_state, notification_jobs, Solapi, Storage와 저장·발송·수정·삭제 callback은 변경하거나 실행하지 않았다.
+- AI 검수: 16개 값 원천과 compact density 정적 계약을 포함한 production 시나리오 416개 중 415개가 통과했다. 기존 비관련 `90a` 한 건만 기준선 실패이며 `npm run build`도 통과했다.
+- 사람 검수: 필수 중단 gate는 없다. 배포 후 값·label·hint, desktop grid와 390px 배치를 확인하는 독립 검수를 누적하고 UI-4A-2 클릭형·포털 micro 지표로 진행한다.
+
 ## 2026-07-29 UI-3E. 선택 행 작업 바·UI-3 완료
 
 - 전수조사: 알림 학생, 퇴원생, 시험 후 대상, AI 변형문항, 자료 공개 학생, 특강 회차 초안의 선택 원천·건수·안전/danger actions를 `docs/ui-selection-toolbar-inventory-2026-07-29.md`에 기록했다. 특강 접수 footer와 수업 명단 그룹 내부 actions는 후속 UI-5C/UI-4B로 분류했다.

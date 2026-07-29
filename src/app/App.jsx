@@ -12516,18 +12516,9 @@ function NotificationCenter({
             </FilterBar>
 
             <div className="noticeTargetSummary">
-              <div>
-                <span>대상 학생</span>
-                <strong>{targetStudents.length}명</strong>
-              </div>
-              <div>
-                <span>학부모</span>
-                <strong>{parentRecipientCount}건</strong>
-              </div>
-              <div>
-                <span>학생</span>
-                <strong>{studentRecipientCount}건</strong>
-              </div>
+              <MetricCard density="compact" hint="현재 선택" label="대상 학생" value={`${targetStudents.length}명`} />
+              <MetricCard density="compact" hint="학부모 수신" label="학부모" value={`${parentRecipientCount}건`} />
+              <MetricCard density="compact" hint="학생 수신" label="학생" value={`${studentRecipientCount}건`} />
             </div>
 
             <div className="noticeStudentPicker">
@@ -16705,21 +16696,9 @@ function ExamPrepLessonDetail({ lesson, onDeleteLesson, onEditLesson }) {
   return (
     <div className="examPrepLessonBody">
       <div className="examPrepSummaryGrid">
-        <div>
-          <span>수업일</span>
-          <strong>{lesson.date}</strong>
-          <small>시험대비</small>
-        </div>
-        <div>
-          <span>시간</span>
-          <strong>{lesson.startTime || "미정"}-{lesson.endTime || "미정"}</strong>
-          <small>{lesson.status === "canceled" ? "취소됨" : "진행 예정"}</small>
-        </div>
-        <div>
-          <span>참여 학생</span>
-          <strong>{lessonStudentCount}명</strong>
-          <small>{sourceItems.length ? `${sourceItems.length}개 시험정보 연결` : "시험정보 연결 없음"}</small>
-        </div>
+        <MetricCard density="compact" hint="시험대비" label="수업일" value={lesson.date} />
+        <MetricCard density="compact" hint={lesson.status === "canceled" ? "취소됨" : "진행 예정"} label="시간" value={`${lesson.startTime || "미정"}-${lesson.endTime || "미정"}`} />
+        <MetricCard density="compact" hint={sourceItems.length ? `${sourceItems.length}개 시험정보 연결` : "시험정보 연결 없음"} label="참여 학생" value={`${lessonStudentCount}명`} />
       </div>
 
       <section className="panel examPrepPanel">
@@ -21387,22 +21366,10 @@ function ExamPostSubmissionManager({
         title="시험 후 제출 관리"
       />
       <div className="tallyStats examPostStats">
-        <article>
-          <span>대상</span>
-          <strong>{targets.length}명</strong>
-        </article>
-        <article>
-          <span>제출 완료</span>
-          <strong>{submittedTargets.length}명</strong>
-        </article>
-        <article>
-          <span>미제출</span>
-          <strong>{missingTargets.length}명</strong>
-        </article>
-        <article>
-          <span>확인 완료</span>
-          <strong>{confirmedTargets.length}명</strong>
-        </article>
+        <MetricCard density="compact" label="대상" value={`${targets.length}명`} />
+        <MetricCard density="compact" label="제출 완료" value={`${submittedTargets.length}명`} tone="success" />
+        <MetricCard density="compact" label="미제출" value={`${missingTargets.length}명`} tone="warning" />
+        <MetricCard density="compact" label="확인 완료" value={`${confirmedTargets.length}명`} />
       </div>
 
       <div className="examPostTargetList">
@@ -22996,21 +22963,9 @@ function EvaluationCenter({
         titleAs="h1"
       />
       <div className="reportDataSummaryGrid">
-        <article>
-          <strong>{wrongProblems.length}개</strong>
-          <span>교재오답</span>
-          <p>학생별 개인 탭으로 이동했습니다.</p>
-        </article>
-        <article>
-          <strong>{scoreRecords.length}개</strong>
-          <span>내신/모의고사</span>
-          <p>학생 프로파일의 성적 기록에서 관리합니다.</p>
-        </article>
-        <article>
-          <strong>{academyTests.length}개</strong>
-          <span>테스트 성적</span>
-          <p>학생 프로파일의 테스트 성적에서 관리합니다.</p>
-        </article>
+        <MetricCard density="compact" hint="학생별 개인 탭에서 관리" label="교재오답" value={`${wrongProblems.length}개`} />
+        <MetricCard density="compact" hint="학생 프로파일 성적 기록" label="내신/모의고사" value={`${scoreRecords.length}개`} />
+        <MetricCard density="compact" hint="학생 프로파일 테스트 성적" label="테스트 성적" value={`${academyTests.length}개`} />
       </div>
     </section>
   );

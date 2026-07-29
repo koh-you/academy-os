@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
+import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
 import { NavigationHeader } from "../../shared/components/NavigationHeader.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
@@ -76,18 +77,9 @@ export function SchoolAcademicOverviewPanel({
         title="월간 학사 개요"
       />
       <div className="schoolAcademicStatsGrid">
-        <article>
-          <strong>{examPeriodCards.length}</strong>
-          <span>시험기간</span>
-        </article>
-        <article>
-          <strong>{monthMathExamEvents.length}</strong>
-          <span>수학시험 날짜</span>
-        </article>
-        <article>
-          <strong>{monthAcademicEvents.length}</strong>
-          <span>방학/개학·학교행사</span>
-        </article>
+        <MetricCard density="compact" label="시험기간" value={examPeriodCards.length} />
+        <MetricCard density="compact" label="수학시험 날짜" value={monthMathExamEvents.length} />
+        <MetricCard density="compact" label="방학/개학·학교행사" value={monthAcademicEvents.length} />
       </div>
       {examPeriodCards.length === 0 ? (
         <div className="emptyHomeworkBox">이 달에 표시할 시험기간 카드가 없습니다.</div>
