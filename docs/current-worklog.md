@@ -2170,6 +2170,13 @@
 - AI 가상검수: 정확·학교 alias TARGET, 비활성·퇴원일·다른 학교·다른 학년 CONTROL과 event grade blank TARGET을 다시 실행해 subset·순서·참조·입력 불변을 확인하고 model side effect 0건을 대조한다. 전용 closeout fixture와 시나리오 650/650, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 의미 단위는 preExam lesson object builder에서 이미 분리된 key·학생 selector를 제외한 순수 payload 조합 경계를 inventory한다.
 
+## 2026-07-28 P3. App.jsx 17AT-1 generated preExam lesson builder inventory
+
+- inventory: 수학시험·날짜·대상 학생 guard 뒤 과목과 source ID를 정하고 시험 전날 날짜·요일, 고정 시간·교사·상태, 기존 색상, 학생 ID와 generated key를 조합하는 preExam lesson payload 계약을 고정했다.
+- 의존 경계: 학생 선택과 generated key는 이미 분리된 helper이고, lesson ID·한국 날짜 계산·요일·표준 색상은 App helper다. 이번 단계는 코드를 이동하지 않았으며 다음 추출에서는 이 의존을 factory에 명시적으로 주입한다.
+- AI 가상검수: 명시 event ID·학교 alias 학생 TARGET, 비활성·다른 학년 CONTROL, event ID·과목 fallback TARGET, 다른 event type·날짜 누락·대상 학생 없음 CONTROL로 null guard와 전체 payload·학생 순서·입력 불변을 검증한다. 전용 inventory fixture와 시나리오 651/651, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AT-2`는 preExam lesson builder를 dependency-injected 순수 model로 분리하고 저장·state orchestration은 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
