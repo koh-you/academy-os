@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
+import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import {
   formatSettlementHours,
@@ -179,17 +180,18 @@ export function SpecialLectureSettlementPanel({
 
   return (
     <section className="panel fullPanel specialLectureSettlementPanel">
-      <div className="sectionHeader specialLectureSettlementHeader">
-        <div>
-          <span className="eyebrow">운영</span>
-          <h2>특강 정산</h2>
+      <SectionHeader
+        className="specialLectureSettlementHeader"
+        descriptionNode={(
           <p className="muted">
             월별 정규 급여와 분리해 특강 전체 과정의 확정 수강 회차를 계산합니다.
             실제 수강 회차는 특강관리 원천을 보존하고, 유료 적용 회차나 직접 확정금액만 이 화면에서 조정합니다.
           </p>
-        </div>
-        <InlineSaveStatus label="특강 정산" saveState={effectiveSaveState} />
-      </div>
+        )}
+        eyebrow="운영"
+        meta={<InlineSaveStatus label="특강 정산" saveState={effectiveSaveState} />}
+        title="특강 정산"
+      />
 
       <div className="specialLectureSettlementRuleNotice">
         <strong>별도 계산 원칙</strong>

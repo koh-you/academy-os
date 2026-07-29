@@ -539,10 +539,12 @@ export function SchoolEventFormModal({
             </div>
             {!isEditingEvent ? (
               <div className="examSubjectBox schoolExamBundleBox">
-                <div className="sectionHeader slim">
-                  <strong>수학시험 날짜</strong>
-                  <button className="softButton small" onClick={onAddMathExamItem} type="button">+ 수학시험 추가</button>
-                </div>
+                <SectionHeader
+                  actions={<button className="softButton small" onClick={onAddMathExamItem} type="button">+ 수학시험 추가</button>}
+                  density="slim"
+                  title="수학시험 날짜"
+                  titleAs="strong"
+                />
                 <div className="mathExamItemStack">
                   {mathExamItems.map((item, index) => (
                     <div className="mathExamItemRow" key={item.id}>
@@ -582,9 +584,7 @@ export function SchoolEventFormModal({
           </>
         ) : newEvent.type === "mathExam" ? (
           <div className="examSubjectBox">
-            <div className="sectionHeader slim">
-              <strong>수학시험 날짜</strong>
-            </div>
+            <SectionHeader density="slim" title="수학시험 날짜" titleAs="strong" />
             <div className="examSubjectRow singleDate">
               <label>
                 시험 날짜

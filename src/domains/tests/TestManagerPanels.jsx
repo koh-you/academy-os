@@ -17,13 +17,12 @@ export function TestManagerTabs({ activeTab = "attempts", onChange }) {
 
 export function TestAttemptPanelHeader({ testResultSaveState = "idle" }) {
   return (
-    <div className="sectionHeader">
-      <div>
-        <h1>응시 기록</h1>
-        <p className="muted">오늘 본 데일리/단원/누적 테스트와 학생별 결과만 기록합니다. 저장된 결과는 같은 날짜 수업 알림톡에 반영됩니다.</p>
-      </div>
-      <InlineSaveStatus label="응시 기록" saveState={testResultSaveState} />
-    </div>
+    <SectionHeader
+      description="오늘 본 데일리/단원/누적 테스트와 학생별 결과만 기록합니다. 저장된 결과는 같은 날짜 수업 알림톡에 반영됩니다."
+      meta={<InlineSaveStatus label="응시 기록" saveState={testResultSaveState} />}
+      title="응시 기록"
+      titleAs="h1"
+    />
   );
 }
 

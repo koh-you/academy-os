@@ -17106,12 +17106,12 @@ function SupplementMakeupLessonDetail({
           ) : null}
         </section>
         <section className="panel homeworkMakeupProcess">
-          <div className="sectionHeader slim">
-            <div>
-              <h3>보충 처리</h3>
-              <p className="muted">오늘 무엇을 보충했고, 남은 보충이 있는지 기록합니다.</p>
-            </div>
-          </div>
+          <SectionHeader
+            density="slim"
+            description="오늘 무엇을 보충했고, 남은 보충이 있는지 기록합니다."
+            title="보충 처리"
+            titleAs="h3"
+          />
           <div className="makeupProcessStatusGrid">
             {[
               { id: "in_progress", label: "진행 중", description: "보충을 진행했지만 아직 완료 판단 전" },
@@ -18195,13 +18195,13 @@ function LessonJournalDetail({
 
       {lessonAcademyReminders.length > 0 ? (
         <section className="panel lessonReminderPanel">
-          <div className="sectionHeader slim">
-            <div>
-              <strong>수업 관련 운영 알림</strong>
-              <p className="muted">대시보드 원본 알림 중 오늘 수업 학생과 연결된 항목입니다.</p>
-            </div>
-            <span className="countBadge">{lessonAcademyReminders.length}건</span>
-          </div>
+          <SectionHeader
+            density="slim"
+            description="대시보드 원본 알림 중 오늘 수업 학생과 연결된 항목입니다."
+            meta={<span className="countBadge">{lessonAcademyReminders.length}건</span>}
+            title="수업 관련 운영 알림"
+            titleAs="strong"
+          />
           <AcademyReminderList reminders={lessonAcademyReminders} students={students} templates={templates} />
         </section>
       ) : null}
@@ -20521,10 +20521,11 @@ function LessonModal({
       </div>
 
       <div className="modalSection lessonModalSection">
-        <div className="sectionHeader">
-          <label>포함 학생</label>
-          <span className="muted">선택 {studentIds.length}명</span>
-        </div>
+        <SectionHeader
+          meta={<span className="muted">선택 {studentIds.length}명</span>}
+          title="포함 학생"
+          titleAs="strong"
+        />
         <div className="lessonStudentSearchRow">
           <input
             disabled={isStudentRosterLocked}
@@ -21316,12 +21317,11 @@ function ExamPostSubmissionManager({
 
   return (
     <section className="examPostManager">
-      <div className="sectionHeader slim">
-        <div>
-          <h2>시험 후 제출 관리</h2>
-          <p className="muted">{selectedClass?.name ?? "반 미선택"} · {examCycleLabel(selectedExamCycle)} · 학생 앱 제출 현황</p>
-        </div>
-      </div>
+      <SectionHeader
+        density="slim"
+        description={`${selectedClass?.name ?? "반 미선택"} · ${examCycleLabel(selectedExamCycle)} · 학생 앱 제출 현황`}
+        title="시험 후 제출 관리"
+      />
       <div className="tallyStats examPostStats">
         <article>
           <span>대상</span>
@@ -23173,13 +23173,12 @@ function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, on
       <div className="researchLayout">
         <section className="panel researchListPanel">
           <div className="researchTypeTreePanel">
-            <div className="sectionHeader slim">
-              <div>
-                <p className="eyebrow">TYPE TREE</p>
-                <h2>유형트리</h2>
-                <p className="muted">유형을 골라 바로 강의 교안 항목을 만듭니다.</p>
-              </div>
-            </div>
+            <SectionHeader
+              density="slim"
+              description="유형을 골라 바로 강의 교안 항목을 만듭니다."
+              eyebrow="TYPE TREE"
+              title="유형트리"
+            />
             <div className="researchTypeTree">
               {catalogUnits.map((chapter) => (
                 <details className="researchTypeChapter" key={chapter.id} open>
@@ -23212,12 +23211,9 @@ function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, on
               ))}
             </div>
           </div>
-          <div className="sectionHeader">
-            <div>
-              <p className="eyebrow">COLLECT</p>
-              <h2>교안 목록</h2>
-            </div>
-            <div className="researchFilters">
+          <SectionHeader
+            actions={(
+              <>
               <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>
                 {["전체", ...lessonResearchCategories].map((option) => (
                   <option key={option} value={option}>{option}</option>
@@ -23228,8 +23224,12 @@ function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, on
                   <option key={option} value={option}>{option}</option>
                 ))}
               </select>
-            </div>
-          </div>
+              </>
+            )}
+            actionsClassName="researchFilters"
+            eyebrow="COLLECT"
+            title="교안 목록"
+          />
 
           <div className="researchCardList">
             {filteredItems.length === 0 ? (
@@ -23710,12 +23710,12 @@ function AIVariantProblemCenter({ aiSettings = defaultAiSettings }) {
         >
           <div className="hwpxExportForm">
             <section className="hwpxExportSection">
-              <div className="sectionHeader slim">
-                <div>
-                  <h3>시험지 정보</h3>
-                  <p className="muted">다운로드 파일에 들어갈 기본 정보를 정합니다.</p>
-                </div>
-              </div>
+              <SectionHeader
+                density="slim"
+                description="다운로드 파일에 들어갈 기본 정보를 정합니다."
+                title="시험지 정보"
+                titleAs="h3"
+              />
               <label className="wideLabel">
                 시험지 제목
                 <input
@@ -23735,12 +23735,12 @@ function AIVariantProblemCenter({ aiSettings = defaultAiSettings }) {
             </section>
 
             <section className="hwpxExportSection">
-              <div className="sectionHeader slim">
-                <div>
-                  <h3>정답 · 풀이</h3>
-                  <p className="muted">수업용, 배부용, 해설용 시험지 형식을 나눠 저장할 수 있게 둡니다.</p>
-                </div>
-              </div>
+              <SectionHeader
+                density="slim"
+                description="수업용, 배부용, 해설용 시험지 형식을 나눠 저장할 수 있게 둡니다."
+                title="정답 · 풀이"
+                titleAs="h3"
+              />
               <div className="hwpxCheckboxGrid">
                 <label>
                   <input

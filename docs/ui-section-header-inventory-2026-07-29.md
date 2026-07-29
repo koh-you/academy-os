@@ -14,10 +14,10 @@
 | --- | --- | --- | --- |
 | UI-2E-1 | 읽기 전용 요약, 설명, 건수 badge | 완료 — 표시 문자열, 집계값, row 선택 callback | 없음. 배포 후 시각 검수 누적 |
 | UI-2E-2 | 검색, 필터, 탭 인접 선택·보기 도구 | 완료 — state setter, normalization, 결과 집합 | 없음. 결과 건수 정적 대조 |
-| UI-2E-3A | 저장 전 로컬 draft, 접힘, 모달 열기 행동 | 로컬 state setter와 draft 보존 | 없음. 실제 저장 실행 안 함 |
+| UI-2E-3A | 저장 전 로컬 draft, 접힘, 모달 열기 행동 | 완료 — 로컬 state setter와 draft 보존 | 없음. 실제 저장 실행 안 함 |
 | UI-2E-3B | 저장, 삭제, 취소, 발송 행동 작업 바 | callback 인자·disabled·상태·외부 side effect 분리 | 실제 행동은 실행하지 않음. 구조 검수로 부족한 항목만 독립 gate |
 
-현재 원시 JSX `sectionHeader` 잔여 수는 40개다.
+현재 원시 JSX `sectionHeader` 잔여 수는 28개다.
 
 ## 파일별 전수 목록
 
