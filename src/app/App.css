@@ -7589,7 +7589,8 @@ button:disabled {
   color: var(--status-pending-text);
 }
 
-.save-saving {
+.save-saving,
+.save-verifying {
   color: var(--status-info-text);
 }
 
@@ -7606,7 +7607,8 @@ button:disabled {
   border-color: var(--status-pending-border);
 }
 
-.inlineSaveStatus.save-saving {
+.inlineSaveStatus.save-saving,
+.inlineSaveStatus.save-verifying {
   background: var(--status-info-bg);
   border-color: var(--status-info-border);
 }

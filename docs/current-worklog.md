@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-6A-2. 공통 저장 확인·접근성 상태
+
+- `InlineSaveStatus`에 `verifying = 서버 반영 확인 중`을 추가해 재조회 단계가 `저장 전`으로 오표시되지 않게 했다.
+- 여러 영역의 상태를 합칠 때 `saving > verifying > failed > dirty > saved` 순으로 판정해 실패가 미저장 상태에 가려지지 않게 했다.
+- 공통 상태에 `role=status`, `aria-live=polite`, `aria-atomic=true`를 적용하고 saving/verifying가 같은 정보색 계열을 사용하게 했다.
+- 저장 callback·상태 전이·API·재조회·Supabase/app_state·Storage·notification_jobs/Solapi·출결은 변경하거나 실행하지 않았다.
+- AI 검수: UI-6A-2 정적 계약과 `npm run build` 126 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 450개 중 기존 기준선 `90a`만 실패했고 신규 실패는 없다.
+- 사람 검수: 실제 저장 없이 코드 계약을 판정할 수 있어 필수 중단 gate는 없다. 대표 상태의 색상·스크린리더 문구 확인은 누적 시각 검수에 남겼다.
+
 ## 2026-07-29 UI-6A-1. save state vocabulary·신뢰도 inventory
 
 - 전수조사: `InlineSaveStatus` 33곳과 문자열 state, state+message, 단계형 custom state, 외부 provider state, 조회 state를 분류했다.

@@ -66,6 +66,7 @@
 | UI-5E-2 | 완료 | 기존 saving/audit no-op 흐름의 X·Escape closeDisabled |
 | UI-5E-3 | 완료 | 결과 소유/dirty 비교 필요 흐름 UI-6 이관, UI-5 안전 범위 완료 |
 | UI-6A-1 | 완료 | InlineSaveStatus 33곳·vocabulary·완료 신뢰도 inventory |
+| UI-6A-2 | 완료 | verifying·live status·실패 우선 aggregate 공통 계약 |
 
 ## 전체 세부 작업 목록
 
@@ -164,6 +165,6 @@
 
 ## 다음 실행 목표
 
-> 최신 상태: `UI-4`와 `UI-5` 전체, `UI-6A-1`을 완료했다. 현재 다음 작은 목표는 `UI-6A-2 verifying·live status 공통 계약`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
+> 최신 상태: `UI-4`와 `UI-5` 전체, `UI-6A-1~2`를 완료했다. 현재 다음 작은 목표는 `UI-6A-3 단계형 저장 화면 공통 상태 연결`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
 
-공통 `InlineSaveStatus`에 `verifying`, `aria-live`/`role=status`, aggregate 우선순위 `saving > verifying > failed > dirty > saved`를 추가한다. caller의 저장 callback·상태 전이·재조회 여부는 변경하지 않는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
+이미 `saving -> verifying -> saved/failed` 전이를 가진 정규수업 열기와 시험분석 프롬프트 제작실의 상태 badge를 공통 `InlineSaveStatus`에 연결하고, 화면별 상세 message는 그대로 유지한다. caller의 저장 callback·상태 전이·재조회 여부는 변경하지 않는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.

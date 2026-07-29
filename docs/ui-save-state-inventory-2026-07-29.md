@@ -9,11 +9,10 @@
 ## 공통 component 현황
 
 - `InlineSaveStatus` 렌더 위치: 33곳.
-- 현재 canonical state: `idle`, `dirty`, `saving`, `saved`, `failed`.
-- 현재 문구: `저장 전`, `변경됨`, `저장 중`, `저장 완료`, `저장 실패`.
-- 누락: `verifying`. 현재 전달되면 `normalizeSaveState`에서 `idle`로 바뀌어 `저장 전`으로 보인다.
-- 접근성: 일부 caller wrapper는 `aria-live`/`role=status`를 갖지만 `InlineSaveStatus` 자체에는 없다.
-- aggregate 우선순위: `saving > dirty > failed > saved`. 실패와 미저장이 같이 있으면 `dirty`가 실패를 가릴 수 있다.
+- UI-6A-2 이후 canonical state: `idle`, `dirty`, `saving`, `verifying`, `saved`, `failed`.
+- 현재 문구: `저장 전`, `변경됨`, `저장 중`, `서버 반영 확인 중`, `저장 완료`, `저장 실패`.
+- 접근성: 공통 component가 `role=status`, `aria-live=polite`, `aria-atomic=true`를 제공한다.
+- aggregate 우선순위: `saving > verifying > failed > dirty > saved`. 진행 중인 요청을 먼저 알리고, 진행 요청이 없을 때 실패가 미저장 상태에 가려지지 않는다.
 
 ## 상태 모델 가족
 
@@ -38,7 +37,7 @@
 
 ## 다음 순서
 
-1. `UI-6A-2`: 공통 component에 `verifying`, `aria-live`/`role`, aggregate 우선순위 `saving > verifying > failed > dirty > saved`를 추가한다.
-2. `UI-6A-3`: 이미 verifying state를 가진 정규수업 열기·시험분석 프롬프트 등 단계형 화면을 공통 문구와 연결한다.
+1. `UI-6A-2` 완료: `verifying`, live status, 실패 우선 aggregate 계약을 공통화했다.
+2. `UI-6A-3`: 이미 verifying state를 가진 정규수업 열기·시험분석 프롬프트 등 단계형 화면을 공통 badge와 연결한다.
 3. `UI-6B`: 자동저장 위험 알림은 저장 신뢰성 audit과 함께 유지·정리한다. 재조회/version 미완료 경고를 숨기지 않는다.
 4. target별 저장 callback 변경이 필요하면 UI 작업을 중단하고 저장 신뢰성 독립 단위로 넘긴다.
