@@ -2144,6 +2144,12 @@
 - AI 가상검수: inventory의 과거 반환 계약 fixture를 유지하면서 App 참조 0건, identity 주입과 다음 school-event helper 사이 잔여 코드 0건을 대조한다. 전용 removal fixture와 시나리오 646/646, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AR-3`은 제거 상태와 인접 경계, production 회귀를 closeout한다.
 
+## 2026-07-28 P3. App.jsx 17AR-3 generated lesson plan item key dead helper closeout
+
+- closeout: `getGeneratedLessonPlanItemKey` 참조 0건, identity factory import/export/호출 1개와 주입 종료 직후 school-event 학생 selector가 이어지는 경계를 고정했다.
+- AI 검수: identity 주입 순서, school-event selector 시작, calendar merge·수동 override·school event sync·plan status identity 소비를 정적으로 재대조한다. 전용 closeout fixture와 시나리오 647/647, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 의미 단위는 school calendar event의 대상 학생 selector를 dependency-injected 순수 model로 inventory한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
