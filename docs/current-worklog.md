@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-5E-3. 닫기 결과 소유권 이관·UI-5 완료
+
+- 분류: saving 중에도 닫히는 결석보강 취소·보충 완료는 결과 상태 소유권이 필요하고, 학사일정·반 명단·학생 추가 등 조용한 draft 폐기는 원본 snapshot/dirty 비교가 필요하다.
+- 결정: 공통 shell에 추론 로직을 넣지 않고 target별 UI-6 저장 상태 단위로 이관했다. `closeDisabled`는 기존 saving no-op 세 흐름에만 유지했다.
+- UI-5 완료: dialog semantics, 긴 본문 내부 스크롤, 읽기/출력/local/danger footer, native confirm inventory, closeDisabled까지 안전 범위를 닫았다. focus/mobile 예외는 UI-7로 이관했다.
+- 외부 원천: Supabase/app_state, lessons, students, notification_jobs/Solapi, 출결, AI, Storage를 실제 호출하거나 변경하지 않았다.
+- AI 검수: closeDisabled caller 3곳과 나머지 close callback·draft state 보존을 정적 계약으로 고정했다. `npm run build` 통과(126 modules), 전체 `npm run test:production`과 scenario 449개 중 448개 통과, `git diff --check` 통과. 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 코드 UI 변경이 없어 새 gate는 없다. 기존 누적 modal 검수는 작업을 막지 않으며 UI-6A-1 inventory로 진행한다.
+
 ## 2026-07-29 UI-5E-2. saving/audit closeDisabled
 
 - 구현: 공통 `Modal`에 opt-in `closeDisabled`를 추가해 활성 상태에서는 X disabled, `aria-busy`, Escape 무시가 같은 계약을 사용한다.

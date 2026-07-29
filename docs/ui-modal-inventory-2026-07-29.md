@@ -159,9 +159,16 @@
 - 기존 saving 상태, close callback guard, 저장·audit callback은 그대로 유지했다. 공통 shell이 caller 상태를 추론하지 않는다.
 - 결석보강 취소·보충 완료 공통 확인처럼 현재 saving 중에도 닫히는 흐름은 결과/실패 상태 소유권을 바꾸지 않고 UI-6로 남겼다.
 
+## UI-5E-3 닫기 결과 소유권 이관
+
+- 결석보강 취소·보충 완료 공통 확인은 실행 상태가 상위 caller에 있고 현재 `onClose=onCancel`이다. `closeDisabled`만 붙이면 완료/실패 후 UI 복귀 계약이 달라질 수 있어 target별 UI-6 단위로 넘겼다.
+- 학사일정, 반 명단, 학생 추가/Tally, 시험정보 수정, 출결 편집, 학생 퇴원 사유는 각 draft의 원본 snapshot과 dirty 비교가 없거나 caller에 흩어져 있다. 공통 shell이 임의로 미저장 경고를 만들지 않는다.
+- `closeDisabled` caller를 기존 saving no-op 3곳으로 고정하고, 나머지 close callback과 draft state를 변경하지 않았다.
+- 이로써 UI-5의 modal shell·footer·위험 확인·닫기 공통화 안전 범위를 완료한다. focus trap/복귀와 모바일 키보드·safe-area는 UI-7, target별 저장/draft는 UI-6에서 진행한다.
+
 ## 다음 단위
 
-`UI-5E-3`에서는 saving 중에도 닫히는 결석보강 취소·보충 완료 공통 확인, 조용히 draft를 버리는 학사일정·반 명단·학생 추가를 다시 분리한다. callback 결과를 소비하지 않고도 안전한 표시는 있는지 확인하고, 없으면 target별 UI-6 저장 상태 단위로 명시적으로 이관해 UI-5를 닫는다.
+`UI-6A-1`에서는 현재 공통 `InlineSaveStatus`와 실제 화면의 save state vocabulary를 전수 대조한다. `idle/dirty/saving/verifying/saved/failed`가 어떤 label·tone·aria-live로 표시되는지, 서버 재조회 전 saved를 표시하는 화면이 있는지 inventory하고 저장 callback은 변경하지 않는다.
 
 ## 사람 검수
 

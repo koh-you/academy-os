@@ -64,6 +64,7 @@
 | UI-5D-4 | 완료 | native confirm 26개 원천·side effect 분류와 이관 경계 |
 | UI-5E-1 | 완료 | modal draft·닫기 의미 분류와 caller 소유 원칙 |
 | UI-5E-2 | 완료 | 기존 saving/audit no-op 흐름의 X·Escape closeDisabled |
+| UI-5E-3 | 완료 | 결과 소유/dirty 비교 필요 흐름 UI-6 이관, UI-5 안전 범위 완료 |
 
 ## 전체 세부 작업 목록
 
@@ -100,10 +101,10 @@
 | 단위 | 화면/대상 | 목표 | AI 검수 및 gate |
 | --- | --- | --- | --- |
 | UI-5A | 전체 모달 inventory | 모달별 읽기/쓰기 원천, draft, 저장, 발송, 삭제, 출결 side effect 표 작성 | 완료 — `docs/ui-modal-inventory-2026-07-29.md` |
-| UI-5B | 공통 모달 shell | 고정 제목/닫기, 스크롤 본문, 너비 단계, 모바일 safe-area 통일 | 진행 — semantics·긴 읽기 모달 완료, focus/mobile 예외 후속 |
+| UI-5B | 공통 모달 shell | 고정 제목/닫기, 스크롤 본문, 너비 단계, 모바일 safe-area 통일 | 완료 — semantics·긴 읽기·closeDisabled, focus/mobile은 UI-7 |
 | UI-5C | 모달 footer | 취소·보조·저장·발송·위험 행동 순서와 disabled/진행 상태 통일 | 완료 — 안전한 읽기·출력·로컬 행동만 공통화, 쓰기 행동은 UI-5D/UI-6 |
 | UI-5D | 삭제·취소 확인 | 영향 범위, 보존 원천, 최종 확인 입력, 위험 색상 통일 | 완료 — 기존 modal 공통화, native confirm 26개는 기능별 저장 gate로 이관 |
-| UI-5E | draft와 닫기 | 미저장 변경 경고, 실패 draft 유지, Escape/X/취소의 의미 통일 | 저장 로직 변경 시 저장 신뢰성 작업으로 분리 |
+| UI-5E | draft와 닫기 | 미저장 변경 경고, 실패 draft 유지, Escape/X/취소의 의미 통일 | 완료 — 기존 guard 일치, dirty/result 소유 필요 흐름은 UI-6 |
 
 ### UI-6. 저장·경고·비동기 상태
 
@@ -162,6 +163,6 @@
 
 ## 다음 실행 목표
 
-> 최신 상태: `UI-4` 전체와 `UI-5A`, `UI-5B-1~2`, `UI-5C-1~3`, `UI-5D-1~4`, `UI-5E-1~2`를 완료했다. 현재 다음 작은 목표는 `UI-5E-3 닫기 결과 소유권 이관`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
+> 최신 상태: `UI-4`와 `UI-5` 전체를 완료했다. 현재 다음 작은 목표는 `UI-6A-1 save state vocabulary inventory`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
 
-saving 중에도 닫히는 결석보강 취소·보충 완료 공통 확인과 조용히 draft를 버리는 학사일정·반 명단·학생 추가를 분리한다. callback 결과/실패 상태와 dirty 비교를 새로 소유하지 않고 안전하게 표시할 수 없다면 target별 UI-6 저장 상태 단위로 명시적으로 이관해 UI-5를 닫는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
+공통 `InlineSaveStatus`와 실제 화면의 save state vocabulary를 대조한다. `idle/dirty/saving/verifying/saved/failed`가 어떤 label·tone·aria-live로 표시되는지, 서버 재조회 전 saved를 표시하는 화면이 있는지 inventory하고 저장 callback은 변경하지 않는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
