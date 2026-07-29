@@ -23,10 +23,16 @@
 - 기존 boolean state, setter/callback, 조건부 mount와 목록 row key를 보존했다.
 - 알림 재조회·취소, 보충 생성/완료, 알림톡 AI 수정·저장·발송, 오답 저장, 특강 저장/복원은 실행하거나 변경하지 않았다.
 
+## UI-4E-1B 시험분석 산출물·단계
+
+- 블로그/인스타 산출물의 7개 section toggle과 실제 content를 `aria-expanded`/`aria-controls`로 연결했다.
+- 시험분석 파이프라인의 문항 수 확인·경계 탐지·AI 행 채움·AI 결과 검수 panel에도 같은 연결을 추가했다.
+- 산출물 collapse map, 단계별 완료/collapse state, 조건부 렌더, 입력 draft, AI 실행·저장·복사·삭제 callback은 변경하지 않았다.
+
 ## 다음 단위
 
-`UI-4E-1B`에서는 시험분석 산출물 7개 section과 파이프라인 단계 4개 panel의 반복 toggle을 inventory한다. draft와 AI 실행 버튼이 있는 영역이므로 `aria-expanded`/`aria-controls` 연결만 하고 collapse map·stage state·조건부 mount는 그대로 둔다.
+`UI-4E-1C`에서는 특강 명단·수업일지 반영·일정 계산·회차별 일정의 disclosure를 연결한다. 반복 가능한 editor의 `id` 충돌을 피할 식별자를 먼저 정하고, 저장·추가·삭제 callback과 조건부 mount는 그대로 둔다.
 
 ## 사람 검수
 
-필수 중단 gate는 없다. 배포 후 키보드 `Tab`으로 다섯 toggle에 접근해 문구와 focus가 보이고, 펼친 뒤 기존 내용이 같은 위치에 나타나는지만 확인한다. 저장·발송·취소·삭제·보충 완료 버튼은 누르지 않는다.
+필수 중단 gate는 없다. 배포 후 키보드 `Tab`으로 단일 disclosure 5종과 시험분석 11개 toggle에 접근해 문구와 focus가 보이고, 펼친 뒤 기존 내용이 같은 위치에 나타나는지만 확인한다. 저장·AI 실행·발송·취소·삭제·보충 완료 버튼은 누르지 않는다.

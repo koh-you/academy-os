@@ -3506,6 +3506,8 @@ function ExamAnalysisOutputDraftPanel({
           </span>
         </div>
         <button
+          aria-controls="exam-output-top-summary-checkpoint exam-output-top-summary-benchmark exam-output-top-summary-visibility"
+          aria-expanded={!isOutputSectionCollapsed("topSummary")}
           className="examAnalysisOutputCollapseButton"
           onClick={() => toggleOutputSection("topSummary")}
           type="button"
@@ -3515,7 +3517,7 @@ function ExamAnalysisOutputDraftPanel({
       </div>
       {!isOutputSectionCollapsed("topSummary") ? (
         <>
-          <div className={`examAnalysisOutputSaveCheckpoint ${saveCheckpointState}`}>
+          <div className={`examAnalysisOutputSaveCheckpoint ${saveCheckpointState}`} id="exam-output-top-summary-checkpoint">
             <strong>{saveCheckpointTitle}</strong>
             <span>{saveCheckpointText}</span>
             <small>
@@ -3523,7 +3525,7 @@ function ExamAnalysisOutputDraftPanel({
             </small>
           </div>
 
-          <div className="examAnalysisBenchmarkMap">
+          <div className="examAnalysisBenchmarkMap" id="exam-output-top-summary-benchmark">
             <div>
               <strong>벤치마킹 글 위치표</strong>
               <span>아래 입력칸이 네이버 글의 어느 흐름에 들어가는지 먼저 확인합니다.</span>
@@ -3546,6 +3548,8 @@ function ExamAnalysisOutputDraftPanel({
           <span>초안 점검 기준, 이모티콘, 형광펜, AI 가능/불가 경계를 확인합니다.</span>
         </div>
         <button
+          aria-controls="exam-output-guide"
+          aria-expanded={!isOutputSectionCollapsed("guide")}
           className="examAnalysisOutputCollapseButton"
           onClick={() => toggleOutputSection("guide")}
           type="button"
@@ -3554,7 +3558,7 @@ function ExamAnalysisOutputDraftPanel({
         </button>
       </div>
       {!isOutputSectionCollapsed("guide") ? (
-        <div className="examAnalysisOutputGuide">
+        <div className="examAnalysisOutputGuide" id="exam-output-guide">
           <strong>작성 방향</strong>
           <span>산출물은 단원 분류를 보여주는 자료가 아니라, 학생과 학부모가 실제로 궁금해하는 내용을 해석해주는 자료입니다. 카드뉴스는 6개 슬라이드 유형을 바탕으로 만들고, 주요문항/손풀이 카드는 선생님 crop 이미지만 슬롯에 넣습니다.</span>
           <small>초안 점검 기준</small>
@@ -3580,7 +3584,7 @@ function ExamAnalysisOutputDraftPanel({
       ) : null}
 
       {!isOutputSectionCollapsed("topSummary") ? (
-        <div className="examAnalysisOutputVisibility">
+        <div className="examAnalysisOutputVisibility" id="exam-output-top-summary-visibility">
           <span>공개 범위</span>
           {[
             ["blog_instagram", "블로그+인스타"],
@@ -3606,6 +3610,8 @@ function ExamAnalysisOutputDraftPanel({
           <span>웹앱/시험지분석에서 자동으로 채운 값과 선생님 확정 입력을 합쳐 GPT 프로젝트 첫 메시지로 복사합니다.</span>
         </div>
         <button
+          aria-controls="exam-output-gpt-checklist"
+          aria-expanded={!isOutputSectionCollapsed("gptChecklist")}
           className="examAnalysisOutputCollapseButton"
           onClick={() => toggleOutputSection("gptChecklist")}
           type="button"
@@ -3614,7 +3620,7 @@ function ExamAnalysisOutputDraftPanel({
         </button>
       </div>
       {!isOutputSectionCollapsed("gptChecklist") ? (
-        <div className="examAnalysisGptChecklistPanel">
+        <div className="examAnalysisGptChecklistPanel" id="exam-output-gpt-checklist">
           <div className="examAnalysisGptChecklistNotice">
             <strong>반복 제작 기준</strong>
             <span>자동 입력값은 읽기 전용입니다. 등급컷, 출제 근거, 금지 항목, 주요문항 최종 선택은 선생님 저장본을 원본으로 사용합니다.</span>
@@ -3669,6 +3675,8 @@ function ExamAnalysisOutputDraftPanel({
           <span>시험관리 기록지를 다시 쓰는 칸이 아니라, 벤치마킹 글 첫 문단과 카드뉴스에 필요한 표현만 보충합니다.</span>
         </div>
         <button
+          aria-controls="exam-output-base-inputs"
+          aria-expanded={!isOutputSectionCollapsed("baseInputs")}
           className="examAnalysisOutputCollapseButton"
           onClick={() => toggleOutputSection("baseInputs")}
           type="button"
@@ -3677,7 +3685,7 @@ function ExamAnalysisOutputDraftPanel({
         </button>
       </div>
       {!isOutputSectionCollapsed("baseInputs") ? (
-        <div className="examAnalysisOutputInputGrid">
+        <div className="examAnalysisOutputInputGrid" id="exam-output-base-inputs">
           {examAnalysisOutputInputFields.map((field) => (
             <label key={field.key}>
               <span>{field.label}</span>
@@ -3699,6 +3707,8 @@ function ExamAnalysisOutputDraftPanel({
           <span>18개 고정 섹션이 아니라 카드 사이에 들어갈 글의 성격을 적는 칸입니다. 각 카드에 벤치마킹 글 위치를 표시했습니다.</span>
         </div>
         <button
+          aria-controls="exam-output-blog-blocks"
+          aria-expanded={!isOutputSectionCollapsed("blogBlocks")}
           className="examAnalysisOutputCollapseButton"
           onClick={() => toggleOutputSection("blogBlocks")}
           type="button"
@@ -3708,7 +3718,7 @@ function ExamAnalysisOutputDraftPanel({
       </div>
 
       {!isOutputSectionCollapsed("blogBlocks") ? (
-        <div className="examAnalysisBlogBlockGrid">
+        <div className="examAnalysisBlogBlockGrid" id="exam-output-blog-blocks">
           {examAnalysisBlogBlockFields.map((field) => (
             <article className="examAnalysisBlogBlockCard" key={field.key}>
               <div className="examAnalysisBlogBlockCardHeader">
@@ -3739,6 +3749,8 @@ function ExamAnalysisOutputDraftPanel({
         </div>
         <div className="examAnalysisSectionActionGroup">
           <button
+            aria-controls="exam-output-key-questions"
+            aria-expanded={!isOutputSectionCollapsed("keyQuestions")}
             className="examAnalysisOutputCollapseButton"
             onClick={() => toggleOutputSection("keyQuestions")}
             type="button"
@@ -3757,7 +3769,7 @@ function ExamAnalysisOutputDraftPanel({
       </div>
 
       {!isOutputSectionCollapsed("keyQuestions") ? (
-        <div className="examAnalysisKeyQuestionList">
+        <div className="examAnalysisKeyQuestionList" id="exam-output-key-questions">
           {keyQuestionBlocks.map((block, index) => (
             <article className="examAnalysisKeyQuestionCard" key={block.blockId || index}>
               <div className="examAnalysisKeyQuestionCardHeader">
@@ -3808,6 +3820,8 @@ function ExamAnalysisOutputDraftPanel({
           <span>블로그/인스타 초안은 삭제하지 않습니다. AI 생성 후 선생님이 최종 문장으로 고치는 원본이며, 복사/TXT/ZIP export가 이 값을 읽습니다.</span>
         </div>
         <button
+          aria-controls="exam-output-final-drafts"
+          aria-expanded={!isOutputSectionCollapsed("finalDrafts")}
           className="examAnalysisOutputCollapseButton"
           onClick={() => toggleOutputSection("finalDrafts")}
           type="button"
@@ -3816,7 +3830,7 @@ function ExamAnalysisOutputDraftPanel({
         </button>
       </div>
       {!isOutputSectionCollapsed("finalDrafts") ? (
-        <div className="examAnalysisOutputEditorGrid">
+        <div className="examAnalysisOutputEditorGrid" id="exam-output-final-drafts">
           <section>
             <div>
               <div>
@@ -15021,12 +15035,14 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
             </div>
           </div>
 
-          <div className={questionCountStageCollapsed ? "panel examAnalysisQuestionCountPanel examAnalysisStagePanel collapsed" : "panel examAnalysisQuestionCountPanel examAnalysisStagePanel"}>
+          <div className={questionCountStageCollapsed ? "panel examAnalysisQuestionCountPanel examAnalysisStagePanel collapsed" : "panel examAnalysisQuestionCountPanel examAnalysisStagePanel"} id="exam-analysis-question-count-stage">
             <SectionHeader
               actions={(
                 <>
                   {confirmStatus.message ? <span className={`saveStateBadge ${confirmStatus.state}`}>{confirmStatus.message}</span> : null}
                   <button
+                    aria-controls="exam-analysis-question-count-stage"
+                    aria-expanded={!questionCountStageCollapsed}
                     className="secondaryButton compact examAnalysisStageToggleButton"
                     onClick={() => toggleExamAnalysisStage("question-count", questionCountStageComplete)}
                     type="button"
@@ -15106,7 +15122,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
             )}
           </div>
 
-          <div className={boundaryStageCollapsed ? "panel examAnalysisBoundaryPanel examAnalysisStagePanel collapsed" : "panel examAnalysisBoundaryPanel examAnalysisStagePanel"}>
+          <div className={boundaryStageCollapsed ? "panel examAnalysisBoundaryPanel examAnalysisStagePanel collapsed" : "panel examAnalysisBoundaryPanel examAnalysisStagePanel"} id="exam-analysis-boundary-stage">
             <SectionHeader
               actions={(
                 <>
@@ -15120,6 +15136,8 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                     {isDetectingBoundaries ? "탐지 중" : "문항 경계 탐지"}
                   </button>
                   <button
+                    aria-controls="exam-analysis-boundary-stage"
+                    aria-expanded={!boundaryStageCollapsed}
                     className="secondaryButton compact examAnalysisStageToggleButton"
                     onClick={() => toggleExamAnalysisStage("boundary", boundaryStageComplete)}
                     type="button"
@@ -15172,7 +15190,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
             )}
           </div>
 
-          <div className={rowFillStageCollapsed ? "panel examAnalysisRowFillPanel examAnalysisStagePanel collapsed" : "panel examAnalysisRowFillPanel examAnalysisStagePanel"}>
+          <div className={rowFillStageCollapsed ? "panel examAnalysisRowFillPanel examAnalysisStagePanel collapsed" : "panel examAnalysisRowFillPanel examAnalysisStagePanel"} id="exam-analysis-row-fill-stage">
             <SectionHeader
               actions={(
                 <>
@@ -15186,6 +15204,8 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                   {isFillingRows ? "채움 중" : "AI 행 채움"}
                 </button>
                 <button
+                  aria-controls="exam-analysis-row-fill-stage"
+                  aria-expanded={!rowFillStageCollapsed}
                   className="secondaryButton compact examAnalysisStageToggleButton"
                   onClick={() => toggleExamAnalysisStage("row-fill", rowFillStageComplete)}
                   type="button"
@@ -15238,7 +15258,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
             )}
           </div>
 
-          <div className={reviewStageCollapsed ? "panel examAnalysisReviewPanel examAnalysisStagePanel collapsed" : "panel examAnalysisReviewPanel examAnalysisStagePanel"}>
+          <div className={reviewStageCollapsed ? "panel examAnalysisReviewPanel examAnalysisStagePanel collapsed" : "panel examAnalysisReviewPanel examAnalysisStagePanel"} id="exam-analysis-review-stage">
             <SectionHeader
               actions={(
                 <>
@@ -15260,6 +15280,8 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                   모두 확정
                 </button>
                 <button
+                  aria-controls="exam-analysis-review-stage"
+                  aria-expanded={!reviewStageCollapsed}
                   className="secondaryButton compact examAnalysisStageToggleButton"
                   onClick={() => toggleExamAnalysisStage("review", reviewStageComplete)}
                   type="button"

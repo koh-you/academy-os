@@ -50,6 +50,7 @@
 | UI-4D-3A | 완료 | 프롬프트 제작실·기출문제 읽기 전용 loading 상태 통일 |
 | UI-4D-4 | 완료 | 프롬프트·알림 기록 읽기 전용 error/retry 상태 통일 |
 | UI-4E-1A | 완료 | 단일 읽기 disclosure 5종의 toggle-region 접근성 연결 |
+| UI-4E-1B | 완료 | 시험분석 산출물·파이프라인 disclosure 11종 연결 |
 
 ## 전체 세부 작업 목록
 
@@ -79,7 +80,7 @@
 | UI-4B | 학생·수업·알림·보충 목록 카드 | 제목, 메타, 상태, 행동 위치와 카드 밀도 통일 | 완료 — 카드형 목록 1~4B 완료, 표형 행은 UI-4C로 이관 |
 | UI-4C | 데이터 표 | 공통 header/row/pill/빈 행, sticky header 여부, 내부 가로 스크롤 규칙 | 완료 — 13개 표 shell과 공통 시각 토큰, 기존 정산 sticky만 유지 |
 | UI-4D | 빈 화면·로딩·오류 | `EmptyState` 기반 문구, 재시도, 다음 행동 위치 통일 | 완료 — 안전한 읽기 상태 통일, 쓰기/외부 동작 오류는 UI-6로 이관 |
-| UI-4E | 접힘/펼치기 영역 | 요약에서 무엇을 보여줄지, 펼침 버튼 위치, 상태 유지 규칙 통일 | 진행 — 단일 읽기 영역 완료, 시험분석·특강 editor 후속 |
+| UI-4E | 접힘/펼치기 영역 | 요약에서 무엇을 보여줄지, 펼침 버튼 위치, 상태 유지 규칙 통일 | 진행 — 단일 읽기·시험분석 완료, 특강 editor 후속 |
 
 ### UI-5. 모달·패널·확인 흐름
 
@@ -148,6 +149,6 @@
 
 ## 다음 실행 목표
 
-> 최신 상태: `UI-4C`와 `UI-4D`, `UI-4E-1A`를 완료했다. 현재 다음 작은 목표는 `UI-4E-1B 시험분석 disclosure`이며, 기존 collapse map·stage state·draft·AI 실행 callback은 바꾸지 않는다.
+> 최신 상태: `UI-4C`와 `UI-4D`, `UI-4E-1A~1B`를 완료했다. 현재 다음 작은 목표는 `UI-4E-1C 특강 disclosure`이며, 반복 editor의 식별자와 기존 open state·저장 callback을 바꾸지 않는다.
 
-`docs/ui-disclosure-inventory-2026-07-29.md`를 기준으로 시험분석 산출물 7개 section과 파이프라인 단계 4개 panel의 toggle-region 연결을 먼저 보강한다. 반복 구조 정리는 기능 리팩터링으로 넓히지 않고 접근성 속성만 추가한다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
+`docs/ui-disclosure-inventory-2026-07-29.md`를 기준으로 특강 명단·수업일지 반영·일정 계산·회차별 일정 toggle-region을 연결한다. 고정 `id` 충돌을 피할 식별자를 먼저 정하고 저장·추가·삭제 callback과 조건부 mount는 그대로 둔다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.

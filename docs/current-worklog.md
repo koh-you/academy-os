@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-4E-1B. 시험분석 disclosure 연결
+
+- 구현: 블로그/인스타 산출물 7개 section과 시험분석 파이프라인 4개 단계 panel의 toggle에 `aria-expanded`, `aria-controls`, 대응 `id`를 연결했다.
+- 동작 보존: 산출물 collapse map, 단계별 collapse/completion state, 조건부 렌더, 입력 draft와 AI 실행·저장·복사·삭제 callback을 정적 계약으로 고정했다.
+- 외부 원천: 시험분석 API, AI 호출, PDF/Storage, 산출물 저장·삭제·export를 실제 실행하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(126 modules). 전용 정적 계약 포함 scenario 436개 중 435개 통과, 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 시험분석 11개 toggle의 키보드 focus·문구·펼침 배치를 누적하고 `UI-4E-1C` 특강 disclosure로 진행한다.
+
 ## 2026-07-29 UI-4E-1A. 단일 읽기 disclosure 접근성 연결
 
 - 전수조사: 접힘/펼치기 영역을 단일 읽기 영역, 시험분석 산출물/단계, 특강 editor, 모달/저장 동작, sidebar로 분류하고 `docs/ui-disclosure-inventory-2026-07-29.md`에 순서를 고정했다.
