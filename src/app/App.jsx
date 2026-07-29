@@ -231,6 +231,7 @@ import { NavigationHeader } from "../shared/components/NavigationHeader.jsx";
 import { PageHeader } from "../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../shared/components/SectionHeader.jsx";
 import { StickySaveBar } from "../shared/components/StickySaveBar.jsx";
+import { WorkspaceTabs } from "../shared/components/WorkspaceTabs.jsx";
 import { sampleData } from "../shared/data/sampleData.js";
 import {
   apiUrl,
@@ -12368,26 +12369,30 @@ function NotificationCenter({
         </div>
       ) : null}
       {showSpecialLectureTab && !hideNotificationSectionTabs ? (
-      <div className="notificationSectionTabs">
+      <WorkspaceTabs className="notificationSectionTabs" label="알림관리 영역 선택">
         <button
+          aria-selected={activeNotificationTab === "notice"}
           className={activeNotificationTab === "notice" ? "active" : ""}
           onClick={() => setActiveNotificationTab("notice")}
+          role="tab"
           type="button"
         >
           공지 발송
         </button>
         <button
+          aria-selected={activeNotificationTab === "specialLecture"}
           className={activeNotificationTab === "specialLecture" ? "active" : ""}
           onClick={() => setActiveNotificationTab("specialLecture")}
+          role="tab"
           type="button"
         >
           특강 안내문
         </button>
-      </div>
+      </WorkspaceTabs>
       ) : null}
 
       {activeNotificationTab === "specialLecture" && hideNotificationSectionTabs ? (
-        <div className="notificationSectionTabs specialLectureTopTabs" role="tablist" aria-label="특강관리 작업 구분">
+        <WorkspaceTabs className="notificationSectionTabs specialLectureTopTabs" label="특강관리 작업 구분">
           <button
             aria-selected={activeSpecialLectureWorkspaceTab === "roster"}
             className={activeSpecialLectureWorkspaceTab === "roster" ? "active" : ""}
@@ -12406,7 +12411,7 @@ function NotificationCenter({
           >
             특강 안내문
           </button>
-        </div>
+        </WorkspaceTabs>
       ) : null}
 
       {activeNotificationTab === "specialLecture" ? (
@@ -12434,7 +12439,7 @@ function NotificationCenter({
         />
       ) : (
         <>
-      <div className="notificationSectionTabs noticeWorkspaceTabs" role="tablist" aria-label="알림관리 작업 구분">
+      <WorkspaceTabs className="notificationSectionTabs noticeWorkspaceTabs" label="알림관리 작업 구분">
         <button
           aria-selected={activeNoticeWorkspace === "compose"}
           className={activeNoticeWorkspace === "compose" ? "active" : ""}
@@ -12462,7 +12467,7 @@ function NotificationCenter({
             {label} {count}건
           </button>
         ))}
-      </div>
+      </WorkspaceTabs>
       {activeNoticeWorkspace === "compose" ? (
       <section className="notificationPanel noticeComposerPanel">
         <SectionHeader
@@ -14692,7 +14697,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
         ))}
       </div>
 
-      <nav aria-label="시험분석 작업 단계" className="examAnalysisWorkspaceTabs" role="tablist">
+      <WorkspaceTabs as="nav" className="examAnalysisWorkspaceTabs" label="시험분석 작업 단계">
         {examAnalysisWorkspaceTabs.map((tab) => (
           <button
             aria-selected={examAnalysisWorkspaceTab === tab.id}
@@ -14706,7 +14711,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
             <small className={tab.tone}>{tab.meta}</small>
           </button>
         ))}
-      </nav>
+      </WorkspaceTabs>
 
       <div className="examAnalysisGrid">
         <section className="examAnalysisLibraryPanel panel">
@@ -20952,18 +20957,20 @@ function ExamPrepCenter({
         title="시험관리"
       />
 
-      <div className="examManagementTabs" aria-label="시험관리 하위 탭">
+      <WorkspaceTabs className="examManagementTabs" label="시험관리 하위 탭">
         {examManagementTabs.map((tab) => (
           <button
+            aria-selected={activeTab === tab.id}
             className={activeTab === tab.id ? "active" : ""}
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
+            role="tab"
             type="button"
           >
             {tab.label}
           </button>
         ))}
-      </div>
+      </WorkspaceTabs>
 
       {activeTab !== "pastPapers" ? (
         <div className="classTabList">
@@ -22051,7 +22058,7 @@ function SettingsCenter({
 
       <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...appStateAutosaveRisk} />
 
-      <div className="notificationSectionTabs settingsSectionTabs" role="tablist" aria-label="설정 항목 선택">
+      <WorkspaceTabs className="notificationSectionTabs settingsSectionTabs" label="설정 항목 선택">
         {settingsSections.map((section) => (
           <button
             aria-selected={activeSettingsSection === section.id}
@@ -22064,7 +22071,7 @@ function SettingsCenter({
             {section.label}
           </button>
         ))}
-      </div>
+      </WorkspaceTabs>
 
       {activeSettingsSection === "account" ? (
       <section className="panel settingsCard">

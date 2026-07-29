@@ -1,0 +1,62 @@
+.workspaceTabs.workspaceTabs {
+  align-items: center;
+  background: var(--academy-surface-muted, #f4f7fb);
+  border: 1px solid var(--academy-border, #d8e3f1);
+  border-radius: var(--academy-radius-lg, 12px);
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 6px;
+  scrollbar-width: thin;
+  width: fit-content;
+}
+
+.workspaceTabs.workspaceTabs > button {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--academy-radius-md, 9px);
+  color: var(--academy-text-muted, #52647c);
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 850;
+  justify-content: center;
+  min-height: 44px;
+  padding: 8px 16px;
+  white-space: nowrap;
+}
+
+.workspaceTabs.workspaceTabs > button:hover {
+  background: var(--academy-surface, #ffffff);
+  color: var(--academy-text, #17213d);
+}
+
+.workspaceTabs.workspaceTabs > button.active,
+.workspaceTabs.workspaceTabs > button[aria-selected="true"] {
+  background: var(--academy-navy, #17213d);
+  border-color: var(--academy-navy, #17213d);
+  box-shadow: 0 4px 10px rgba(23, 33, 61, 0.16);
+  color: #ffffff;
+}
+
+.workspaceTabs.workspaceTabs > button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--academy-primary, #2563eb) 28%, transparent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .workspaceTabs.workspaceTabs {
+    margin-inline: 0;
+    padding-bottom: 7px;
+    width: 100%;
+  }
+
+  .workspaceTabs.workspaceTabs > button {
+    min-height: 44px;
+    padding-inline: 14px;
+  }
+}

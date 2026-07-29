@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-3A. 상위 탭 공통 구조
+
+- 전수조사: 알림/특강 영역, 특강관리, 알림관리, 시험분석, 시험관리, 설정, 학생관리, 정산의 상위 탭 8종을 `docs/ui-top-tabs-inventory-2026-07-29.md`에 선택 state/setter와 조건부 렌더 기준으로 기록했다.
+- 구현: 공통 `WorkspaceTabs`를 추가해 `role=tablist`, 화면별 label, 44px 터치 높이, 공통 active, `focus-visible`, 좁은 화면 내부 가로 스크롤을 적용했다. 시험관리·학생관리처럼 빠져 있던 `role=tab`과 `aria-selected`도 보강했다.
+- 동작 보존: `setActiveNotificationTab`, `setActiveNoticeWorkspace`/`selectJobFilter`, `selectExamAnalysisWorkspaceTab`, 각 `setActiveTab`, `setActiveSettingsSection`과 학생 탭의 `setSelectedStudentId("")`를 그대로 유지했다. 저장·발송·삭제·Supabase/app_state·Solapi side effect는 실행하거나 변경하지 않았다.
+- AI 검수: 상위 탭 semantics/CSS와 모든 setter 보존 정적 계약을 포함해 production 시나리오 409개 중 408개가 통과했다. 기존 비관련 `90a` 1개만 기준선 실패이며 `npm run build`, `git diff --check`도 통과했다.
+- 사람 검수: 필수 중단 gate는 없다. 배포 후 8개 화면의 탭 전환, 390px 내부 가로 스크롤, 키보드 focus 표시만 한 번에 확인하는 독립 시각 검수를 누적하고 UI-3B로 진행한다.
+
 ## 2026-07-29 UI-2E-3B-2. 운영 side-effect 작업 바·UI-2E 완료
 
 - 구현: 알림 개별 발송/이력, Solapi 결과 확인, 특강 안내/수업, 운영 알림 원본, 이전 수업메모 확인, 최종 알림톡/미리보기, 수업 목록/상세, 수업연구 삭제, 보충 목록, 오답 추가, 보고서/스냅샷, 학생 시험 후 제출·질문의 남은 16개 구형 머리말을 공통 `SectionHeader`로 옮겼다.

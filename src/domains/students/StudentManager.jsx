@@ -3,6 +3,7 @@ import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
+import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 import { parseStudentScheduleOverride } from "../../shared/utils/studentSchedule.js";
 import { buildStudentHandoverPdfModel, getStudentHandoverTitle, openStudentHandoverPdf } from "./studentHandoverPdf.js";
 import { sortWithdrawnStudents } from "./studentListSort.js";
@@ -696,38 +697,44 @@ export function StudentManager({
         title="학생관리"
       />
 
-      <div className="studentManagerTabs">
+      <WorkspaceTabs className="studentManagerTabs" label="학생관리 목록 구분">
         <button
+          aria-selected={activeTab === "all"}
           className={activeTab === "all" ? "active" : ""}
           onClick={() => {
             setActiveTab("all");
             setSelectedStudentId("");
           }}
+          role="tab"
           type="button"
         >
           전체 학생 목록
         </button>
         <button
+          aria-selected={activeTab === "class"}
           className={activeTab === "class" ? "active" : ""}
           onClick={() => {
             setActiveTab("class");
             setSelectedStudentId("");
           }}
+          role="tab"
           type="button"
         >
           반별 학생 목록
         </button>
         <button
+          aria-selected={activeTab === "withdrawn"}
           className={activeTab === "withdrawn" ? "active" : ""}
           onClick={() => {
             setActiveTab("withdrawn");
             setSelectedStudentId("");
           }}
+          role="tab"
           type="button"
         >
           퇴원생 목록
         </button>
-      </div>
+      </WorkspaceTabs>
 
       {studentRestoreNotice ? (
         <div className={`studentRestoreNotice ${studentRestoreNotice.saveState}`} role={studentRestoreNotice.saveState === "failed" ? "alert" : "status"}>

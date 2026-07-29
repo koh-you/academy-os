@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
+import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 import { MonthlySettlementPanel } from "./MonthlySettlementPanel.jsx";
 import { SpecialLectureSettlementPanel } from "./SpecialLectureSettlementPanel.jsx";
 import "./settlementWorkspace.css";
@@ -33,7 +34,7 @@ export function SettlementWorkspace({
         title="정산"
       />
 
-      <div className="settlementWorkspaceTabs" role="tablist" aria-label="정산 구분">
+      <WorkspaceTabs className="settlementWorkspaceTabs" label="정산 구분">
         {settlementTabs.map((tab) => (
           <button
             aria-selected={activeTab === tab.id}
@@ -46,7 +47,7 @@ export function SettlementWorkspace({
             {tab.label}
           </button>
         ))}
-      </div>
+      </WorkspaceTabs>
 
       <div className="settlementWorkspacePanel" role="tabpanel">
         {activeTab === "monthly" ? (
