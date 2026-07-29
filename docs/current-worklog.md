@@ -2279,6 +2279,12 @@
 - AI 가상검수: 한 달 기간·단일 date TARGET, startDate만·잘못된 날짜 CONTROL로 추출 전후 전체 배열, formatter 호출, 입력 불변을 확인한다. 기존 inventory와 추출 fixture, 시나리오 667/667, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AY-3`은 import/export/factory·App 소비 각 1개와 날짜 formatter 주입을 closeout한다.
 
+## 2026-07-28 P3. App.jsx 17AY-3 exam period Sunday date selector closeout
+
+- closeout: `examPeriodSundayDateSelector.js` import·export·factory·App 소비 각 1개, inline helper 0개와 `toKoreaDateString` 주입을 고정했다. examPrep candidate 조합은 App에 유지했다.
+- AI 가상검수: 한 달 기간·단일 date·단일 endDate TARGET, startDate만·잘못된 날짜 CONTROL과 입력 불변을 재검증한다. 전용 closeout fixture와 시나리오 668/668, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 의미 단위는 examPrep period를 날짜별 candidate block으로 묶는 순수 builder를 inventory한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

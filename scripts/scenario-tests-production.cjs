@@ -1888,6 +1888,47 @@ check(
       "Promise.all"
     ].some((value) => examPeriodSundayDateSelectorSource.includes(value))
 );
+check(
+  "84d-164 exam period Sunday date selector boundary closes out with one candidate consumer",
+  (appEntrySource.match(/from "\.\.\/domains\/lessons\/examPeriodSundayDateSelector\.js"/g) || []).length === 1 &&
+    (appEntrySource.match(/createExamPeriodSundayDateSelector\(\{/g) || []).length === 1 &&
+    (appEntrySource.match(/getSundayDatesForExamPeriod\(/g) || []).length === 1 &&
+    (examPeriodSundayDateSelectorSource.match(/export function createExamPeriodSundayDateSelector\(/g) || []).length === 1 &&
+    !appEntrySource.includes("function getSundayDatesForExamPeriod(") &&
+    hasAll(appEntrySource, [
+      "const getSundayDatesForExamPeriod =",
+      "toKoreaDateString",
+      "function toKoreaDateString(date)",
+      "getSundayDatesForExamPeriod(period).forEach((date) => {"
+    ]) &&
+    hasAll(examPeriodSundayDateSelectorSource, [
+      "return function getSundayDatesForExamPeriod(",
+      "if (!period.endDate && !period.date) return []",
+      "const prepSundays = [3, 2, 1, 0].map(",
+      "toKoreaDateString(date)",
+      "const inPeriodSundays = []",
+      "while (cursor <= end) {",
+      "toKoreaDateString(cursor)",
+      "...prepSundays,",
+      "...inPeriodSundays",
+      "].sort()"
+    ]) &&
+    ![
+      "useState",
+      "useEffect",
+      "fetch(",
+      "postJson",
+      "/api/",
+      "setLessons",
+      "setExamPrepRows",
+      "persistExamPrepRows",
+      "localStorage",
+      "Supabase",
+      "Solapi",
+      "Date.now",
+      "Promise.all"
+    ].some((value) => examPeriodSundayDateSelectorSource.includes(value))
+);
 check("84e shared modal closes with Escape key", hasAll(app, ["import { Modal, ModalFooter } from \"../shared/components/Modal.jsx\""]) && hasAll(sharedModalSource, ["export function Modal({", "backdropClassName = \"\"", "hideCloseButton = false", "hideHeader = false", "function handleEscapeKey(event)", "event.key === \"Escape\"", "onClose?.()", "window.addEventListener(\"keydown\", handleEscapeKey)", "window.removeEventListener(\"keydown\", handleEscapeKey)", "hideCloseButton ? null"]) );
 check("84f lesson journal modal uses shared Escape-close modal", hasAll(app, ["backdropClassName=\"lessonJournalModalBackdrop\"", "className=\"lessonJournalModal\"", "hideHeader", "onClose={onBackToCalendar}"]) && !app.includes("<div className=\"modalBackdrop lessonJournalModalBackdrop\" role=\"dialog\" aria-modal=\"true\">"));
 check("84f-1 lesson journal student preview stays isolated and callback-only", hasAll(lessonFrontendSource, ["LessonJournalStudentPreviewModal", "createLessonJournalStudentPreviewModel", "students.filter((student) => student.studentId === studentPreviewId)", "PortalComponent={StudentPortalV2}", "students={model.previewStudents}", "onLogout={onClose}"]) && !lessonJournalStudentPreviewModalSource.includes("fetch(") && !lessonJournalStudentPreviewModalSource.includes("/api/"));
