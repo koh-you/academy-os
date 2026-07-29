@@ -138,9 +138,23 @@
 - 따라서 UI-5D에서는 기존 공통 `Modal` 확인창의 구조만 완료하고, 26개 native confirm은 기능별 UI-6/저장 신뢰성 단위로 넘긴다.
 - 정적 계약으로 현재 개수와 대표 영향 문구를 고정했으며 실제 확인창·API·삭제·예약 취소·AI는 실행하지 않았다.
 
+## UI-5E-1 draft·닫기 의미 inventory
+
+| 닫기 유형 | 대표 모달 | 현재 계약 | 다음 처리 |
+| --- | --- | --- | --- |
+| 미저장 확인 후 닫기 | 학부모/학생 알림톡 작성 | 최종 문구 dirty이면 native confirm, 취소 시 draft 유지 | UI-6에서 공통 pending 확인창으로 이관 |
+| 저장/audit 중 닫기 차단 | 수업일지 보충 완료, 영구삭제 단건·일괄 | `onClose` callback이 saving 동안 no-op | UI-5E-2에서 X/Escape disabled를 시각적으로 일치 |
+| 저장 중에도 닫기 가능 | 결석보강 취소, 보충 완료 공통 확인 | 실행 버튼은 disabled지만 `onClose=onCancel` 유지 | callback 결과·실패 표시 소유권 확인 후 UI-6 |
+| 조용한 local draft 폐기 | 날짜별 학사일정, 학사일정 등록, 반 명단, 학생 추가/Tally, 시험정보 수정, 출결 편집, 학생 퇴원 사유 | X/Escape/취소 시 화면 draft가 사라지거나 parent state로 돌아감 | target별 dirty 비교와 폐기 안내 필요 |
+| 로컬 작업 종료 | HWPX 옵션, PDF 코멘트, 검색어 | 저장 원천이 없거나 다시 만들 수 있는 local state | 경고 없이 닫기 유지 |
+| 읽기 전용 | 정산 달력, 특강 진행, 포털 preview, 인쇄 | draft 없음 | 즉시 닫기 유지 |
+
+- 공통 `Modal`이 모든 caller의 dirty/saving 상태를 추론하지 않도록 한다. caller가 `closeDisabled` 또는 명시적 close guard를 전달하는 구조만 허용한다.
+- UI-5E-1에서는 기존 닫기 callback을 바꾸지 않고 대표 계약을 정적검사로 고정했다. 실제 입력·저장·닫기 동작은 실행하지 않았다.
+
 ## 다음 단위
 
-`UI-5E-1`에서는 공통 모달별 local draft와 닫기 의미를 다시 대조한다. 이미 미저장 확인이 있는 알림톡 작성, 저장 중 닫기 차단이 있는 보충/영구삭제, 조용히 draft를 버리는 학사일정·명단·입력 모달을 분류하고 callback을 바꾸지 않은 채 공통 원칙과 다음 구현 순서를 확정한다.
+`UI-5E-2`에서는 공통 `Modal`에 opt-in `closeDisabled`를 추가한다. 이미 `onClose`가 saving/audit 중 no-op인 수업일지 보충 완료와 영구삭제 단건·일괄부터 적용해 X와 Escape가 실제 닫기 가능 상태와 일치하도록 한다. 저장 callback·상태 전이·API는 변경하지 않는다.
 
 ## 사람 검수
 

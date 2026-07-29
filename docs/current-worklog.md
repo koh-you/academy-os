@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-5E-1. modal draft·닫기 의미 inventory
+
+- 전수분류: 미저장 confirm, saving/audit 중 no-op, 저장 중에도 닫기 가능, 조용한 local draft 폐기, 로컬 작업 종료, 읽기 전용의 여섯 유형으로 나눴다.
+- 원칙: 공통 `Modal`이 dirty/saving을 추론하지 않고 caller가 `closeDisabled` 또는 명시적 close guard를 전달한다. 로컬 출력/검색과 운영 draft를 같은 경고로 묶지 않는다.
+- 대표 계약: 알림톡 최종 문구의 미저장 confirm, 수업일지 보충 완료·영구삭제의 saving guard, 학사일정/반 명단/학생 추가의 조용한 폐기를 정적검사로 고정했다.
+- 외부 원천: Supabase/app_state, lessons, students, notification_jobs/Solapi, 출결, AI, Storage를 실제 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(126 modules), 전용 정적 계약 포함 전체 `npm run test:production`과 scenario 447개 중 446개 통과, `git diff --check` 통과. 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 코드 UI 변경이 없어 별도 시각 gate가 없다. UI-5E-2 closeDisabled는 기존 saving no-op과 의미가 같으므로 필수 중단 없이 진행한다.
+
 ## 2026-07-29 UI-5D-4. native confirm 위험 흐름 inventory
 
 - 전수조사: `window.confirm` 26개를 삭제·취소 19개, 학생/Tally 교체 3개, AI 재생성 1개, 미저장 닫기 1개, 학생 복원 1개, 잠긴 특강 명단 추가 1개로 분류했다.
