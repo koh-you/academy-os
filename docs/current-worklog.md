@@ -2030,6 +2030,13 @@
 - AI 가상검수: 동일값 clone CONTROL과 중첩값 변경·새 row TARGET을 다시 실행해 subset·순서·참조·입력 불변을 확인하고 helper side effect 0건을 대조한다. 전용 closeout fixture와 시나리오 629/629, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 의미 단위는 generated lesson controls의 normalize/add/remove 순수 상태 전이를 inventory하되 React state·app_state 저장은 이동하지 않는다.
 
+## 2026-07-28 P3. App.jsx 17AM-1 generated lesson controls model inventory
+
+- inventory: generated lesson controls의 `manualOverrideKeys`·`suppressedKeys` 배열 정규화와 순서 보존 중복 제거, manual/suppressed key 추가, 각 key 제거 계약을 고정했다. 잘못된 비배열 값과 legacy 추가 필드는 정규화에서 빈 배열/제외 처리한다.
+- 경계: 이번 단계는 기존 helper와 updater를 이동하지 않았다. lesson에서 generated key를 구하는 handler guard, React `setGeneratedLessonControls`, local stored state와 app_state 저장·복원은 계속 `App.jsx`가 소유한다.
+- AI 가상검수: 중복 key·잘못된 타입·legacy 필드 CONTROL과 manual/suppressed 추가·중복 추가·제거 TARGET으로 순서·중복 제거·입력 불변을 검증한다. 전용 inventory fixture와 시나리오 630/630, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AM-2`는 normalize/add/remove 순수 상태 전이만 `generatedLessonControlsModel.js`로 분리하고 React/app_state 경계는 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
