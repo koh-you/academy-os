@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { createExamPeriodSundayDateSelector } from "../src/domains/lessons/examPeriodSundayDateSelector.js";
 
 function toExistingKoreaDateString(date) {
   return `${date.getFullYear()}-${String(
@@ -60,6 +61,12 @@ function getExistingSundayDatesForExamPeriod(
   ].sort();
 }
 
+const extractedSelector =
+  createExamPeriodSundayDateSelector({
+    toKoreaDateString:
+      toExistingKoreaDateString
+  });
+
 const fullPeriod = {
   startDate: "2026-08-01",
   endDate: "2026-08-31"
@@ -77,6 +84,10 @@ assert.deepEqual(
   ]
 );
 assert.deepEqual(
+  extractedSelector(fullPeriod),
+  getExistingSundayDatesForExamPeriod(fullPeriod)
+);
+assert.deepEqual(
   getExistingSundayDatesForExamPeriod({
     date: "2026-08-12"
   }),
@@ -86,6 +97,14 @@ assert.deepEqual(
     "2026-08-02",
     "2026-08-09"
   ]
+);
+assert.deepEqual(
+  extractedSelector({
+    date: "2026-08-12"
+  }),
+  getExistingSundayDatesForExamPeriod({
+    date: "2026-08-12"
+  })
 );
 assert.deepEqual(
   getExistingSundayDatesForExamPeriod({
@@ -133,29 +152,46 @@ const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
+const selectorSource = await readFile(
+  new URL(
+    "../src/domains/lessons/examPeriodSundayDateSelector.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const helperBoundaries = [
-  "function getSundayDatesForExamPeriod(period = {})",
+  "export function createExamPeriodSundayDateSelector({",
+  "return function getSundayDatesForExamPeriod(",
   "if (!period.endDate && !period.date) return []",
-  "const startDate = period.startDate || period.date || period.endDate",
+  "const startDate =",
+  "period.startDate ||",
+  "period.date ||",
+  "period.endDate",
   "const endDate = period.endDate || period.date",
-  'const start = new Date(`${startDate}T00:00:00+09:00`)',
-  'const end = new Date(`${endDate}T00:00:00+09:00`)',
-  "if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return []",
+  "const start = new Date(",
+  '`${startDate}T00:00:00+09:00`',
+  "const end = new Date(",
+  '`${endDate}T00:00:00+09:00`',
+  "Number.isNaN(start.getTime()) ||",
+  "Number.isNaN(end.getTime())",
   "const day = end.getDay()",
   "const lastSunday = new Date(end)",
   "lastSunday.setDate(end.getDate() - day)",
-  "const prepSundays = [3, 2, 1, 0].map((offset) => {",
+  "const prepSundays = [3, 2, 1, 0].map(",
   "return toKoreaDateString(date)",
   "const inPeriodSundays = []",
   "const cursor = new Date(start)",
-  "while (cursor <= end)",
-  "if (cursor.getDay() === 0) inPeriodSundays.push(toKoreaDateString(cursor))",
+  "while (cursor <= end) {",
+  "if (cursor.getDay() === 0)",
+  "toKoreaDateString(cursor)",
   "cursor.setDate(cursor.getDate() + 1)",
-  "return [...new Set([...prepSundays, ...inPeriodSundays])].sort()"
+  "...prepSundays,",
+  "...inPeriodSundays",
+  "].sort()"
 ];
 let previousIndex = -1;
 for (const boundary of helperBoundaries) {
-  const boundaryIndex = appSource.indexOf(
+  const boundaryIndex = selectorSource.indexOf(
     boundary,
     previousIndex + 1
   );
@@ -169,19 +205,62 @@ assert.equal(
   appSource.split(
     "function getSundayDatesForExamPeriod("
   ).length - 1,
-  1
+  0
 );
 assert.equal(
   appSource.split(
     "getSundayDatesForExamPeriod("
   ).length - 1,
-  2
+  1
 );
+assert.equal(
+  appSource.split(
+    "createExamPeriodSundayDateSelector({"
+  ).length - 1,
+  1
+);
+assert.equal(
+  selectorSource.split(
+    "export function createExamPeriodSundayDateSelector("
+  ).length - 1,
+  1
+);
+for (const appBoundary of [
+  'from "../domains/lessons/examPeriodSundayDateSelector.js"',
+  "const getSundayDatesForExamPeriod =",
+  "createExamPeriodSundayDateSelector({",
+  "toKoreaDateString"
+]) {
+  assert.ok(
+    appSource.includes(appBoundary),
+    `missing Sunday date selector App boundary: ${appBoundary}`
+  );
+}
 assert.ok(
   appSource.includes(
     "getSundayDatesForExamPeriod(period).forEach((date) => {"
   )
 );
+for (const forbiddenEffect of [
+  "useState",
+  "useEffect",
+  "fetch(",
+  "postJson",
+  "/api/",
+  "setLessons",
+  "setExamPrepRows",
+  "persistExamPrepRows",
+  "localStorage",
+  "Supabase",
+  "Solapi",
+  "Date.now",
+  "Promise.all"
+]) {
+  assert.ok(
+    !selectorSource.includes(forbiddenEffect),
+    `exam period Sunday selector crossed a side effect: ${forbiddenEffect}`
+  );
+}
 
 console.log(
   "exam period Sunday dates inventory TARGET/CONTROL fixtures passed"

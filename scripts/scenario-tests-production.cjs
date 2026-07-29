@@ -179,6 +179,7 @@ const generatedPreExamLessonIdBuilderPath = path.join(root, "src", "domains", "l
 const derivedMathEventExamPrepIdSelectorPath = path.join(root, "src", "domains", "lessons", "derivedMathEventExamPrepIdSelector.js");
 const preExamMathLabelInferencePath = path.join(root, "src", "domains", "lessons", "preExamMathLabelInference.js");
 const persistedPreExamRowRepairPath = path.join(root, "src", "domains", "lessons", "persistedPreExamRowRepair.js");
+const examPeriodSundayDateSelectorPath = path.join(root, "src", "domains", "lessons", "examPeriodSundayDateSelector.js");
 const lessonModalActionsPath = path.join(root, "src", "domains", "lessons", "LessonModalActions.jsx");
 const lessonModalBasicsPath = path.join(root, "src", "domains", "lessons", "LessonModalBasics.jsx");
 const lessonModalClosurePanelPath = path.join(root, "src", "domains", "lessons", "LessonModalClosurePanel.jsx");
@@ -573,6 +574,7 @@ const generatedPreExamLessonIdBuilderSource = fs.existsSync(generatedPreExamLess
 const derivedMathEventExamPrepIdSelectorSource = fs.existsSync(derivedMathEventExamPrepIdSelectorPath) ? fs.readFileSync(derivedMathEventExamPrepIdSelectorPath, "utf8") : "";
 const preExamMathLabelInferenceSource = fs.existsSync(preExamMathLabelInferencePath) ? fs.readFileSync(preExamMathLabelInferencePath, "utf8") : "";
 const persistedPreExamRowRepairSource = fs.existsSync(persistedPreExamRowRepairPath) ? fs.readFileSync(persistedPreExamRowRepairPath, "utf8") : "";
+const examPeriodSundayDateSelectorSource = fs.existsSync(examPeriodSundayDateSelectorPath) ? fs.readFileSync(examPeriodSundayDateSelectorPath, "utf8") : "";
 const lessonModalActionsSource = fs.existsSync(lessonModalActionsPath) ? fs.readFileSync(lessonModalActionsPath, "utf8") : "";
 const lessonModalBasicsSource = fs.existsSync(lessonModalBasicsPath) ? fs.readFileSync(lessonModalBasicsPath, "utf8") : "";
 const lessonModalClosurePanelSource = fs.existsSync(lessonModalClosurePanelPath) ? fs.readFileSync(lessonModalClosurePanelPath, "utf8") : "";
@@ -1253,7 +1255,7 @@ check("63 exam prep lesson detail removes block edit controls", hasAll(app, ["fu
 check("64 exam prep UI labels replace Sunday makeup wording", hasAll(lessonFrontendSource, ['{ id: "examPrep", label: "시험대비"', '["examPrep", "🗓 시험대비"]', 'className: "시험대비"', 'lessonTopic: "시험대비"']) && !lessonFrontendSource.includes("일요보강") && !lessonFrontendSource.includes("일요시험보강"));
 check("64b generated special lessons avoid class template FK ids", !hasAll(app, ['classTemplateId: "pre_exam"', 'classTemplateId: "exam_sunday_makeup"']) && generatedPreExamLessonBuilderSource.includes('lessonType: "preExam"') && hasAll(app, ['lessonType: "examPrep"', 'function isExamPrepLesson(lesson = {})', 'return lesson?.lessonType === "examPrep"']));
 check("64c generated lesson preview lists all candidates in scroll area", !app.includes("generatedLessonPlan.slice(0, 8)") && hasAll(css, [".generatedLessonList", "max-height: 420px", "overflow: auto"]));
-check("64d exam prep includes Sundays inside exam period", hasAll(app, ["inPeriodSundays", "cursor <= end", "cursor.getDay() === 0", "[...new Set([...prepSundays, ...inPeriodSundays])].sort()"]));
+check("64d exam prep includes Sundays inside exam period", hasAll(examPeriodSundayDateSelectorSource, ["inPeriodSundays", "cursor <= end", "cursor.getDay() === 0", "...new Set([", "...prepSundays,", "...inPeriodSundays", "].sort()"]));
 check("64e generated lessons use current exam cycle rows only", hasAll(app, ["generatedLessonPlanRows", "selectGeneratedLessonPlanRows(examPrepRows, currentExamCycle)", "buildGeneratedLessonPlan({ rows: generatedLessonPlanRows"]) && hasAll(generatedLessonPlanSelectorsSource, ["(row.examCycle || currentExamCycle) === currentExamCycle"]));
 check("64f generated lesson save failures are visible without blocking alert", hasAll(`${app}\n${generatedLessonSaveStatusSource}`, ["generatedLessonSaveStatus", "자동 수업 저장 실패", "generatedLessonSaveNotice", "onRetryGeneratedLessonSave", "다시 저장", "postJsonWithTimeout(", "\"/api/lessons/bulk\""]) && hasAll(css, [".generatedLessonSaveNotice", ".generatedLessonSaveNotice.failed"]) && !app.includes("window.alert(`자동 수업 저장 실패"));
 check("65 final exam prep does not inherit midterm seed data", hasAll(app, ["normalizeExamPrepRows", "inferExamCycleFromPrepId", "getDefaultExamCycleForDate"]) && hasAll(coreDataRoute, ["inferExamCycleFromPrepId", "getDefaultExamCycleForDate", "exam_cycle: examCycle"]) && hasAll(sampleDataSource, ['examPrepId: "exam_prep_sanggye_2026_mid_1"', 'examCycle: "2026-1-mid"']));
@@ -1829,24 +1831,62 @@ check(
 );
 check(
   "84d-162 exam period Sunday dates inventory preserves four prep Sundays period union and sort",
-  (appEntrySource.match(/function getSundayDatesForExamPeriod\(/g) || []).length === 1 &&
-    (appEntrySource.match(/getSundayDatesForExamPeriod\(/g) || []).length === 2 &&
-    hasAll(appEntrySource, [
+  (appEntrySource.match(/function getSundayDatesForExamPeriod\(/g) || []).length === 0 &&
+    (appEntrySource.match(/getSundayDatesForExamPeriod\(/g) || []).length === 1 &&
+    (examPeriodSundayDateSelectorSource.match(/return function getSundayDatesForExamPeriod\(/g) || []).length === 1 &&
+    hasAll(examPeriodSundayDateSelectorSource, [
       "if (!period.endDate && !period.date) return []",
-      "const startDate = period.startDate || period.date || period.endDate",
+      "const startDate =",
+      "period.startDate ||",
+      "period.date ||",
+      "period.endDate",
       "const endDate = period.endDate || period.date",
-      'const start = new Date(`${startDate}T00:00:00+09:00`)',
-      'const end = new Date(`${endDate}T00:00:00+09:00`)',
-      "if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return []",
+      "const start = new Date(",
+      '`${startDate}T00:00:00+09:00`',
+      "const end = new Date(",
+      '`${endDate}T00:00:00+09:00`',
+      "Number.isNaN(start.getTime()) ||",
+      "Number.isNaN(end.getTime())",
       "const day = end.getDay()",
       "const lastSunday = new Date(end)",
       "lastSunday.setDate(end.getDate() - day)",
-      "const prepSundays = [3, 2, 1, 0].map((offset) => {",
+      "const prepSundays = [3, 2, 1, 0].map(",
       "const inPeriodSundays = []",
-      "while (cursor <= end)",
-      "return [...new Set([...prepSundays, ...inPeriodSundays])].sort()",
+      "while (cursor <= end) {",
+      "...prepSundays,",
+      "...inPeriodSundays",
+      "].sort()"
+    ]) &&
+    appEntrySource.includes(
       "getSundayDatesForExamPeriod(period).forEach((date) => {"
-    ])
+    )
+);
+check(
+  "84d-163 exam period Sunday date selector extraction stays pure with App-injected date formatter",
+  (appEntrySource.match(/from "\.\.\/domains\/lessons\/examPeriodSundayDateSelector\.js"/g) || []).length === 1 &&
+    (appEntrySource.match(/createExamPeriodSundayDateSelector\(\{/g) || []).length === 1 &&
+    (examPeriodSundayDateSelectorSource.match(/export function createExamPeriodSundayDateSelector\(/g) || []).length === 1 &&
+    hasAll(appEntrySource, [
+      "const getSundayDatesForExamPeriod =",
+      "createExamPeriodSundayDateSelector({",
+      "toKoreaDateString",
+      "getSundayDatesForExamPeriod(period).forEach((date) => {"
+    ]) &&
+    ![
+      "useState",
+      "useEffect",
+      "fetch(",
+      "postJson",
+      "/api/",
+      "setLessons",
+      "setExamPrepRows",
+      "persistExamPrepRows",
+      "localStorage",
+      "Supabase",
+      "Solapi",
+      "Date.now",
+      "Promise.all"
+    ].some((value) => examPeriodSundayDateSelectorSource.includes(value))
 );
 check("84e shared modal closes with Escape key", hasAll(app, ["import { Modal, ModalFooter } from \"../shared/components/Modal.jsx\""]) && hasAll(sharedModalSource, ["export function Modal({", "backdropClassName = \"\"", "hideCloseButton = false", "hideHeader = false", "function handleEscapeKey(event)", "event.key === \"Escape\"", "onClose?.()", "window.addEventListener(\"keydown\", handleEscapeKey)", "window.removeEventListener(\"keydown\", handleEscapeKey)", "hideCloseButton ? null"]) );
 check("84f lesson journal modal uses shared Escape-close modal", hasAll(app, ["backdropClassName=\"lessonJournalModalBackdrop\"", "className=\"lessonJournalModal\"", "hideHeader", "onClose={onBackToCalendar}"]) && !app.includes("<div className=\"modalBackdrop lessonJournalModalBackdrop\" role=\"dialog\" aria-modal=\"true\">"));

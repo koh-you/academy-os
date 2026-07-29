@@ -96,6 +96,7 @@ import { createLessonNotificationJobBatch } from "../domains/lessons/lessonNotif
 import { createLessonNotificationRecordStatusPayload } from "../domains/lessons/lessonNotificationRecordStatusPayload.js";
 import { createLessonNotificationRecordStatusRows } from "../domains/lessons/lessonNotificationRecordStatusRows.js";
 import { getExamPrepIdFromDerivedMathEvent } from "../domains/lessons/derivedMathEventExamPrepIdSelector.js";
+import { createExamPeriodSundayDateSelector } from "../domains/lessons/examPeriodSundayDateSelector.js";
 import { mergeGeneratedCalendarLessons } from "../domains/lessons/generatedLessonCalendarMerge.js";
 import {
   addGeneratedLessonManualOverrideKey,
@@ -22331,29 +22332,10 @@ const repairExamPrepRowsFromPersistedPreExamLessons =
     syncPrimaryMathExamDate
   });
 
-function getSundayDatesForExamPeriod(period = {}) {
-  if (!period.endDate && !period.date) return [];
-  const startDate = period.startDate || period.date || period.endDate;
-  const endDate = period.endDate || period.date;
-  const start = new Date(`${startDate}T00:00:00+09:00`);
-  const end = new Date(`${endDate}T00:00:00+09:00`);
-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return [];
-  const day = end.getDay();
-  const lastSunday = new Date(end);
-  lastSunday.setDate(end.getDate() - day);
-  const prepSundays = [3, 2, 1, 0].map((offset) => {
-    const date = new Date(lastSunday);
-    date.setDate(lastSunday.getDate() - offset * 7);
-    return toKoreaDateString(date);
+const getSundayDatesForExamPeriod =
+  createExamPeriodSundayDateSelector({
+    toKoreaDateString
   });
-  const inPeriodSundays = [];
-  const cursor = new Date(start);
-  while (cursor <= end) {
-    if (cursor.getDay() === 0) inPeriodSundays.push(toKoreaDateString(cursor));
-    cursor.setDate(cursor.getDate() + 1);
-  }
-  return [...new Set([...prepSundays, ...inPeriodSundays])].sort();
-}
 
 function toKoreaDateString(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
