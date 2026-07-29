@@ -2,16 +2,6 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { selectChangedGeneratedLessonPlanRows } from "../src/domains/lessons/generatedLessonRepairSelectors.js";
 
-function selectExistingChangedGeneratedLessonPlanRows(
-  repairedRows = [],
-  currentRows = []
-) {
-  return repairedRows.filter(
-    (row, index) =>
-      JSON.stringify(row) !== JSON.stringify(currentRows[index])
-  );
-}
-
 const sameCurrentControl = {
   examPrepId: "exam_CONTROL_SAME",
   schoolName: "가상고",
@@ -21,7 +11,6 @@ const sameRepairedControl = structuredClone(sameCurrentControl);
 const changedCurrentControl = {
   examPrepId: "exam_TARGET_CHANGED",
   schoolName: "가상중",
-  dates: ["2026-08-02"],
   schedule: {
     startTime: "13:00"
   }
@@ -29,15 +18,13 @@ const changedCurrentControl = {
 const changedRepairedTarget = {
   examPrepId: "exam_TARGET_CHANGED",
   schoolName: "가상중",
-  dates: ["2026-08-02"],
   schedule: {
     startTime: "14:00"
   }
 };
 const appendedTarget = {
   examPrepId: "exam_TARGET_APPENDED",
-  schoolName: "추가고",
-  dates: ["2026-08-03"]
+  schoolName: "추가고"
 };
 const currentRows = [
   sameCurrentControl,
@@ -50,44 +37,56 @@ const repairedRows = [
 ];
 const currentSnapshot = structuredClone(currentRows);
 const repairedSnapshot = structuredClone(repairedRows);
-const changedRows =
-  selectExistingChangedGeneratedLessonPlanRows(
-    repairedRows,
-    currentRows
-  );
-const extractedChangedRows =
-  selectChangedGeneratedLessonPlanRows(
-    repairedRows,
-    currentRows
-  );
+const changedRows = selectChangedGeneratedLessonPlanRows(
+  repairedRows,
+  currentRows
+);
 
 assert.deepEqual(changedRows, [
   changedRepairedTarget,
   appendedTarget
 ]);
-assert.deepEqual(extractedChangedRows, changedRows);
 assert.equal(changedRows[0], changedRepairedTarget);
 assert.equal(changedRows[1], appendedTarget);
-assert.equal(extractedChangedRows[0], changedRepairedTarget);
-assert.equal(extractedChangedRows[1], appendedTarget);
 assert.deepEqual(currentRows, currentSnapshot);
 assert.deepEqual(repairedRows, repairedSnapshot);
 assert.deepEqual(
-  selectExistingChangedGeneratedLessonPlanRows(
+  selectChangedGeneratedLessonPlanRows(
     [sameRepairedControl],
     [sameCurrentControl, changedCurrentControl]
   ),
   []
 );
-assert.deepEqual(
-  selectExistingChangedGeneratedLessonPlanRows(),
-  []
-);
+assert.deepEqual(selectChangedGeneratedLessonPlanRows(), []);
 
 const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
+const helperSource = await readFile(
+  new URL(
+    "../src/domains/lessons/generatedLessonRepairSelectors.js",
+    import.meta.url
+  ),
+  "utf8"
+);
+for (const appBoundary of [
+  'import { selectChangedGeneratedLessonPlanRows } from "../domains/lessons/generatedLessonRepairSelectors.js"',
+  'session?.role !== "teacher" || !isAppStateReady',
+  "setExamPrepRows((current) => {",
+  "repairExamPrepRowsFromPersistedPreExamLessons(current, lessons)",
+  "selectChangedGeneratedLessonPlanRows(",
+  "repairedRows,",
+  "current",
+  "persistExamPrepRows(changedRows)",
+  "return changedRows.length > 0 ? repairedRows : current",
+  "[isAppStateReady, lessons, session?.role, setExamPrepRows]"
+]) {
+  assert.ok(
+    appSource.includes(appBoundary),
+    `missing generated lesson repair App boundary: ${appBoundary}`
+  );
+}
 const repairAnchor = appSource.indexOf(
   "repairExamPrepRowsFromPersistedPreExamLessons(current, lessons)"
 );
@@ -105,38 +104,50 @@ assert.ok(
     effectEnd > repairAnchor
 );
 const effectSource = appSource.slice(effectStart, effectEnd);
-const boundaries = [
-  'session?.role !== "teacher" || !isAppStateReady',
-  "setExamPrepRows((current) => {",
-  "const repairedRows =",
-  "repairExamPrepRowsFromPersistedPreExamLessons(current, lessons)",
-  "const changedRows =",
-  "selectChangedGeneratedLessonPlanRows(",
-  "repairedRows,",
-  "current",
-  "if (changedRows.length > 0)",
-  "persistExamPrepRows(changedRows)",
-  "return changedRows.length > 0 ? repairedRows : current",
-  "[isAppStateReady, lessons, session?.role, setExamPrepRows]"
-];
-let previousIndex = -1;
-for (const boundary of boundaries) {
-  const boundaryIndex = effectSource.indexOf(
-    boundary,
-    previousIndex + 1
-  );
-  assert.ok(
-    boundaryIndex > previousIndex,
-    `generated lesson repair effect order changed: ${boundary}`
-  );
-  previousIndex = boundaryIndex;
-}
+assert.ok(!effectSource.includes("repairedRows.filter("));
+assert.equal(
+  effectSource.split(
+    "selectChangedGeneratedLessonPlanRows("
+  ).length - 1,
+  1
+);
 assert.equal(
   effectSource.split("persistExamPrepRows(changedRows)").length - 1,
   1
 );
-assert.ok(!effectSource.includes("repairedRows.filter("));
+
+for (const helperBoundary of [
+  "export function selectChangedGeneratedLessonPlanRows(",
+  "return repairedRows.filter(",
+  "JSON.stringify(row) !== JSON.stringify(currentRows[index])"
+]) {
+  assert.ok(
+    helperSource.includes(helperBoundary),
+    `missing generated lesson repair selector: ${helperBoundary}`
+  );
+}
+for (const forbiddenHelperEffect of [
+  "useState",
+  "useEffect",
+  "fetch(",
+  "postJson",
+  "/api/",
+  "setExamPrepRows",
+  "persistExamPrepRows",
+  "setLessons",
+  "localStorage",
+  "Supabase",
+  "Solapi",
+  "new Date",
+  "Date.now",
+  "Promise.all"
+]) {
+  assert.ok(
+    !helperSource.includes(forbiddenHelperEffect),
+    `generated lesson repair selector crossed a side effect: ${forbiddenHelperEffect}`
+  );
+}
 
 console.log(
-  "generated lesson repair delta selector inventory TARGET/CONTROL fixtures passed"
+  "generated lesson repair delta selector TARGET/CONTROL extraction fixtures passed"
 );
