@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-2E-1. 읽기 전용 섹션 머리말
+
+- 전수조사: JSX `sectionHeader` 59개(기본 18, slim 36, compact 5)와 별도 toolbar/actions 클래스 71종을 확인했다. 파일·위험도·후속 단위는 `docs/ui-section-header-inventory-2026-07-29.md`가 기준이다.
+- 구현: 공통 `SectionHeader`의 `eyebrow -> title -> description`과 `meta -> actions` slot을 만들었다. 학부모 응대, 월간 학사 개요, 시험분석 최종 미리보기 정상/빈 상태, 학생 포털 오늘 숙제·수업 기록 캘린더, 최근 응시 회차를 먼저 이관했다. 모바일 보조 영역은 제목 아래 전체 폭으로 배치한다.
+- 불변 계약: 이미 계산된 문자열과 건수 badge만 전달하며 검색, 날짜 선택, 숙제 저장, 시험 저장, 학부모 확인 정보 복사 callback은 공통 컴포넌트로 이동하지 않았다. Supabase/app_state, Storage, notification_jobs, Solapi 호출은 없다.
+- AI 검수: 새 UI-2E-1 정적 계약을 포함해 production 시나리오 404개 중 403개가 통과했다. 실패 1개는 기존 비관련 `90a` 기준선이다. `npm run build`, `git diff --check`를 통과했다.
+- 사람 검수: 필수 중단 gate는 없다. 배포 후 데스크톱/모바일에서 이관한 섹션의 제목·설명·건수 badge 줄바꿈을 확인하는 독립 시각 검수만 누적하고 UI-2E-2로 진행한다.
+
 ## 2026-07-29 UI-2D. 도메인 페이지 머리말
 
 - 범위: 학사일정·학생관리·시험관리·정산의 최상단 제목, 현재 맥락, 필터/검색, 주요 행동을 공통 `PageHeader` 구조로 통일했다. 정산은 상위 `정산` 머리말을 탭보다 먼저 배치하고 월별·특강 제목을 하위 `h2`로 정리했다.

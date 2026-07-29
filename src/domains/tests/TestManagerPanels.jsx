@@ -1,5 +1,6 @@
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
+import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 
 export function TestManagerTabs({ activeTab = "attempts", onChange }) {
   return (
@@ -195,13 +196,12 @@ export function RecentTestSessionList({
 }) {
   return (
     <section className="testSessionList">
-      <div className="sectionHeader slim">
-        <div>
-          <h2>최근 응시 회차</h2>
-          <p className="muted">수업일지 알림톡은 같은 날짜와 학생의 기록을 자동으로 읽습니다.</p>
-        </div>
-        <span className="countBadge">{totalCount}건</span>
-      </div>
+      <SectionHeader
+        density="slim"
+        description="수업일지 알림톡은 같은 날짜와 학생의 기록을 자동으로 읽습니다."
+        meta={<span className="countBadge">{totalCount}건</span>}
+        title="최근 응시 회차"
+      />
       {sessions.slice(0, 12).map((session) => (
         <button
           className="testSessionItem"

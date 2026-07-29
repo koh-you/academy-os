@@ -3,6 +3,7 @@ import { StudentHomeworkActionCard } from "./StudentHomeworkActionCard.jsx";
 import { StudentLessonHistoryCalendar } from "./StudentLessonHistoryCalendar.jsx";
 import { StudentQuestionPanel } from "./StudentQuestionPanel.jsx";
 import { StudentSupplementSchedules, StudentTopNotice } from "./StudentTodayReadOnlyPanels.jsx";
+import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 
 export function StudentTodayTab({
   buildCalendarDays,
@@ -75,12 +76,10 @@ export function StudentTodayTab({
         writeEnabled={studentQuestionWriteEnabled}
       />
 
-      <div className="sectionHeader">
-        <div>
-          <h2>오늘 해야 할 숙제</h2>
-          <p className="muted">저장 완료가 표시되면 선생님 화면과 새로고침 후에도 유지됩니다.</p>
-        </div>
-      </div>
+      <SectionHeader
+        description="저장 완료가 표시되면 선생님 화면과 새로고침 후에도 유지됩니다."
+        title="오늘 해야 할 숙제"
+      />
       <div className="homeworkStack">
         {todayHomeworks.length === 0 ? <div className="emptyHomeworkBox">오늘 배정된 숙제가 없습니다.</div> : null}
         {todayHomeworks.map((homework) => (

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
+import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import {
   formatCalendarEventLabel,
   formatCalendarSummaryLabel,
@@ -61,12 +62,11 @@ export function SchoolAcademicOverviewPanel({
 }) {
   return (
     <section className="panel schoolAcademicOverviewPanel">
-      <div className="sectionHeader slim">
-        <div>
-          <h2>월간 학사 개요</h2>
-          <p className="muted">시험기간은 카드로 모아 보고, 달력에는 실제 날짜 확인이 필요한 수학시험과 학사일정만 표시합니다.</p>
-        </div>
-      </div>
+      <SectionHeader
+        density="slim"
+        description="시험기간은 카드로 모아 보고, 달력에는 실제 날짜 확인이 필요한 수학시험과 학사일정만 표시합니다."
+        title="월간 학사 개요"
+      />
       <div className="schoolAcademicStatsGrid">
         <article>
           <strong>{examPeriodCards.length}</strong>

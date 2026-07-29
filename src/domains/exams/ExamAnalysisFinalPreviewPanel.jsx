@@ -1,5 +1,6 @@
 import { examAnalysisPreviewPalette } from "./finalPreview.js";
 import { ExamAnalysisPromptStudioPanel } from "./ExamAnalysisPromptStudioPanel.jsx";
+import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 
 function formatExamAnalysisPreviewEventTime(value) {
   if (!value) return "";
@@ -148,12 +149,12 @@ export function ExamAnalysisFinalPreviewPanel({ model }) {
   if (!model?.questions?.length) {
     return (
       <div className="panel examAnalysisFinalPreviewPanel">
-        <div className="sectionHeader slim">
-          <div>
-            <strong>최종 미리보기</strong>
-            <span>검수 저장 후 표시됩니다.</span>
-          </div>
-        </div>
+        <SectionHeader
+          density="slim"
+          description="검수 저장 후 표시됩니다."
+          title="최종 미리보기"
+          titleAs="strong"
+        />
         <div className="emptyState compact">저장된 문항 검수본이 없습니다.</div>
       </div>
     );
@@ -162,12 +163,12 @@ export function ExamAnalysisFinalPreviewPanel({ model }) {
   const { meta } = model;
   return (
     <div className="panel examAnalysisFinalPreviewPanel">
-      <div className="sectionHeader slim">
-        <div>
-          <strong>최종 미리보기</strong>
-          <span>{meta.totalQuestions}문항 · {model.notes.sourceOfTruth}</span>
-        </div>
-      </div>
+      <SectionHeader
+        density="slim"
+        description={`${meta.totalQuestions}문항 · ${model.notes.sourceOfTruth}`}
+        title="최종 미리보기"
+        titleAs="strong"
+      />
       <div className="examAnalysisPreviewHero">
         <div>
           <strong>{meta.title}</strong>

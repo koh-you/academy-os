@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { buildParentChannelLookupText, getParentResponseContexts } from "./parentResponseContext.js";
 
 export function ParentResponseContextPanel({ formatDateTime, notificationJobs = [], onCopy, students = [] }) {
@@ -26,14 +27,13 @@ export function ParentResponseContextPanel({ formatDateTime, notificationJobs = 
 
   return (
     <section className="notificationPanel parentResponseContextPanel">
-      <div className="sectionHeader slim">
-        <div>
-          <p className="eyebrow">PARENT RESPONSE CONTEXT</p>
-          <h2>학부모 응대</h2>
-          <p className="muted">Academy OS에서 발송한 학부모 알림 원문을 확인한 뒤, 별관 채널 상담방에서 답장하세요. 채널 답장은 이곳에 저장하지 않습니다.</p>
-        </div>
-        <span className="countBadge">발신 {contexts.length}건</span>
-      </div>
+      <SectionHeader
+        density="slim"
+        description="Academy OS에서 발송한 학부모 알림 원문을 확인한 뒤, 별관 채널 상담방에서 답장하세요. 채널 답장은 이곳에 저장하지 않습니다."
+        eyebrow="PARENT RESPONSE CONTEXT"
+        meta={<span className="countBadge">발신 {contexts.length}건</span>}
+        title="학부모 응대"
+      />
       <div className="parentResponseContextTools">
         <label>
           학생·학부모 검색

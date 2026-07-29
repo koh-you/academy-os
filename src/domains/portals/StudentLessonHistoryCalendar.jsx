@@ -3,6 +3,7 @@ import { assignmentStatusLabels, normalizeAssignmentStatusValue } from "../lesso
 import { getAttendanceDisplay } from "../lessons/attendance.js";
 import { isClosureLesson } from "../lessons/lessonClosure.js";
 import { applyStudentScheduleToLesson } from "../../shared/utils/studentSchedule.js";
+import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 
 export function StudentLessonHistoryCalendar({
   buildCalendarDays,
@@ -57,12 +58,11 @@ export function StudentLessonHistoryCalendar({
 
   return (
     <section className="studentLessonHistory">
-      <div className="sectionHeader compact">
-        <div>
-          <h2>수업 기록 캘린더</h2>
-          <p className="muted">날짜를 눌러 그날 수업에서 무엇을 했는지 확인합니다.</p>
-        </div>
-      </div>
+      <SectionHeader
+        density="compact"
+        description="날짜를 눌러 그날 수업에서 무엇을 했는지 확인합니다."
+        title="수업 기록 캘린더"
+      />
       <div className="studentLessonHistoryGrid">
         <div className="studentLessonMiniCalendar">
           {["일", "월", "화", "수", "목", "금", "토"].map((day) => <b key={day}>{day}</b>)}

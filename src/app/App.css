@@ -7050,6 +7050,26 @@ a:focus-visible {
   margin-bottom: 12px;
 }
 
+.sectionHeaderCopy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.sectionHeaderCopy > * {
+  margin-block: 0;
+}
+
+.sectionHeaderAside {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: var(--academy-space-1);
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
 .sectionHeader h1,
 .sectionHeader h2 {
   font-weight: 900;
@@ -19788,6 +19808,12 @@ body.attendanceOnlyBody {
 
   .pageActions {
     flex-wrap: wrap;
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .sectionHeaderAside {
+    justify-content: flex-start;
     margin-left: 0;
     width: 100%;
   }
