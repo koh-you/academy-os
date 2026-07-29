@@ -2189,6 +2189,13 @@
 - AI 가상검수: 명시 event ID·과목·복수 학생 TARGET으로 전체 payload와 helper 호출 순서·입력 불변을 다시 확인하고, event type guard와 대상 없음 CONTROL에서 후속 helper 단락을 검증한다. 전용 closeout fixture와 시나리오 653/653, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 의미 단위는 preExam lesson ID helper의 순수 ID 생성 경계를 inventory한다.
 
+## 2026-07-28 P3. App.jsx 17AU-1 generated preExam lesson ID builder inventory
+
+- inventory: source ID를 40자 안전 prefix로 정규화하고 원문 전체의 6자 안정 hash를 붙여 `lesson_pre_exam_*` ID를 만드는 계약을 고정했다. 같은 잘린 prefix를 가진 서로 다른 원문도 hash suffix로 구분한다.
+- 경계: `safeIdPart`와 `shortStableHash`는 기존 shared 순수 helper이며, ID helper는 App에 남아 preExam lesson builder에 주입된다. 이번 단계에서는 코드를 이동하지 않았다.
+- AI 가상검수: 40자 prefix 충돌 TARGET 2개, 한글·공백·기호 정규화 TARGET, 빈 값 CONTROL로 정확한 ID·충돌 회피를 검증한다. 전용 inventory fixture와 시나리오 654/654, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AU-2`는 preExam lesson ID helper를 shared ID 의존만 가진 순수 domain helper로 분리한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
