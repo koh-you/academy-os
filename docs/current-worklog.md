@@ -2024,6 +2024,12 @@
 - AI 가상검수: 동일값 clone CONTROL, 중첩값 변경·새 row TARGET과 현재에만 남은 뒤쪽 CONTROL로 추출 전후 subset·순서·참조·입력 불변을 대조한다. 전용 extraction fixture와 시나리오 628/628, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AL-3`은 import·호출·export 1개와 App-owned repair/persist/state 경계를 closeout한다.
 
+## 2026-07-28 P3. App.jsx 17AL-3 generated lesson repair delta selector closeout
+
+- closeout: `generatedLessonRepairSelectors.js` import 1개·호출 1개·export 1개와 App effect의 teacher/app-state guard, persisted lesson 복구, 변경 있을 때만 persist, 복구/current state 반환 순서를 고정했다.
+- AI 가상검수: 동일값 clone CONTROL과 중첩값 변경·새 row TARGET을 다시 실행해 subset·순서·참조·입력 불변을 확인하고 helper side effect 0건을 대조한다. 전용 closeout fixture와 시나리오 629/629, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 의미 단위는 generated lesson controls의 normalize/add/remove 순수 상태 전이를 inventory하되 React state·app_state 저장은 이동하지 않는다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
