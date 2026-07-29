@@ -1,5 +1,6 @@
 import { examAnalysisPreviewPalette } from "./finalPreview.js";
 import { ExamAnalysisPromptStudioPanel } from "./ExamAnalysisPromptStudioPanel.jsx";
+import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
 
@@ -52,7 +53,7 @@ function ExamAnalysisMiniDonut({ segments = [], centerLabel = "단원", ariaLabe
 }
 
 function ExamAnalysisLegendList({ items = [], emptyLabel = "데이터 없음" }) {
-  if (!items.length) return <div className="emptyState compact">{emptyLabel}</div>;
+  if (!items.length) return <EmptyState className="emptyState compact" title={emptyLabel} />;
   return (
     <div className="examAnalysisPreviewLegend">
       {items.map((item) => (
@@ -67,7 +68,7 @@ function ExamAnalysisLegendList({ items = [], emptyLabel = "데이터 없음" })
 }
 
 function ExamAnalysisBarList({ items = [], emptyLabel = "데이터 없음" }) {
-  if (!items.length) return <div className="emptyState compact">{emptyLabel}</div>;
+  if (!items.length) return <EmptyState className="emptyState compact" title={emptyLabel} />;
   return (
     <div className="examAnalysisPreviewBars">
       {items.map((item) => (
@@ -101,7 +102,7 @@ function ExamAnalysisUnitBreakdownList({ items = [] }) {
 }
 
 function ExamAnalysisPartDifficultyList({ items = [] }) {
-  if (!items.length) return <div className="emptyState compact">난이도 데이터 없음</div>;
+  if (!items.length) return <EmptyState className="emptyState compact" title="난이도 데이터 없음" />;
   return (
     <div className="examAnalysisPartDifficultyList">
       {items.map((part) => (
@@ -127,7 +128,7 @@ function ExamAnalysisPartDifficultyList({ items = [] }) {
 }
 
 function ExamAnalysisQuestionMap({ questions = [] }) {
-  if (!questions.length) return <div className="emptyState compact">문항 없음</div>;
+  if (!questions.length) return <EmptyState className="emptyState compact" title="문항 없음" />;
   return (
     <div className="examAnalysisQuestionMap">
       {questions.map((question) => {
@@ -156,7 +157,7 @@ export function ExamAnalysisFinalPreviewPanel({ model }) {
           title="최종 미리보기"
           titleAs="strong"
         />
-        <div className="emptyState compact">저장된 문항 검수본이 없습니다.</div>
+        <EmptyState className="emptyState compact" title="저장된 문항 검수본이 없습니다." />
       </div>
     );
   }
@@ -243,7 +244,7 @@ export function ExamAnalysisFinalPreviewPanel({ model }) {
               ))}
             </div>
           ) : (
-            <div className="emptyState compact">주요문항 선택 없음</div>
+            <EmptyState className="emptyState compact" title="주요문항 선택 없음" />
           )}
         </section>
       </div>

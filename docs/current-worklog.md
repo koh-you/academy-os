@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-4D-1B. 일반 목록·표 0건 상태
+
+- 구현: 학생 프로필 운영 알림·상담·성적·학원 테스트, 시험분석 미리보기, 테스트 응시/이력, 특강관리의 callback 없는 0건 분기를 공통 `EmptyState` title/description 구조로 이관했다.
+- 범위 분리: 검색·filter 결과 0건, loading, error/retry는 문구와 행동 계약이 달라 후속 단위로 남겼다.
+- 동작 보존: 학생 record key와 상담·성적·테스트 저장/삭제, 시험분석 model map, 테스트 draft/회차 열기, 특강 펼침 callback을 정적 계약으로 고정했다.
+- 외부 원천: Supabase/app_state, 시험분석 저장, 학생 기록 저장/삭제, 특강 원천을 실제 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(126 modules). 전용 정적 계약의 초기 callback 이름 불일치를 AI 검수에서 바로잡은 뒤 scenario 430개 중 429개 통과, 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 일반 0건 상태 위계와 390px 줄바꿈을 누적하고 `UI-4D-2` 검색·filter 0건 구분으로 진행한다.
+
 ## 2026-07-29 UI-4D-1A. 공통 EmptyState·포털 읽기 상태
 
 - 전수조사: 빈 데이터, 검색 0건, loading, 원천 error/retry, 저장·외부 side effect 실패를 분리하고 `docs/ui-state-inventory-2026-07-29.md`에 UI-4D 후속 순서를 고정했다.

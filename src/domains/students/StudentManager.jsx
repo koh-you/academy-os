@@ -1,5 +1,6 @@
 import { Component, useEffect, useState } from "react";
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
+import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { ListCard, ListCardActions } from "../../shared/components/ListCard.jsx";
@@ -1828,7 +1829,7 @@ function StudentProfileModal({
             )}
             <div className="studentReminderList">
               {academyReminders.length === 0 ? (
-                <div className="emptyState">이 학생에게 연결된 운영 알림이 없습니다.</div>
+                <EmptyState title="이 학생에게 연결된 운영 알림이 없습니다." />
               ) : (
                 academyReminders.map((reminder) => (
                   <ListCard className={`studentReminderItem status-${reminder.status || "pending"}`} density="compact" key={reminder.reminderId}>
@@ -1917,7 +1918,7 @@ function StudentProfileModal({
             )}
             <div className="studentConsultationList">
               {consultations.length === 0 ? (
-                <div className="emptyState">아직 상담 기록이 없습니다.</div>
+                <EmptyState title="아직 상담 기록이 없습니다." />
               ) : (
                 consultations.map((item) => {
               const draft = consultationDrafts[item.consultationId] ?? item;
@@ -2026,7 +2027,7 @@ function StudentProfileModal({
                 <div className="profileEditHint">수정 버튼을 누르면 성적 입력과 기존 성적 수정이 열립니다.</div>
               )}
               {scores.length === 0 ? (
-                <div className="emptyState">아직 저장된 성적이 없습니다.</div>
+                <EmptyState title="아직 저장된 성적이 없습니다." />
               ) : (
                 scores.map((item) => {
               const draft = scoreDrafts[item.scoreRecordId] ?? item;
@@ -2121,7 +2122,7 @@ function StudentProfileModal({
                 <div className="profileEditHint">수정 버튼을 누르면 테스트 입력과 기존 테스트 수정이 열립니다.</div>
               )}
               {academyTests.length === 0 ? (
-                <div className="emptyState">아직 저장된 테스트 성적이 없습니다.</div>
+                <EmptyState title="아직 저장된 테스트 성적이 없습니다." />
               ) : (
                 academyTests.map((item) => {
               const draft = academyTestDrafts[item.testId] ?? item;

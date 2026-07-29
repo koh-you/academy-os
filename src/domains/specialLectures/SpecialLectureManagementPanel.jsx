@@ -553,9 +553,11 @@ export function SpecialLectureGuideSelector({
           {primaryGuides.map((guide) => renderGuideCard(guide))}
         </div>
       ) : (
-        <EmptyState className="specialLectureEmptyState">
-          진행/예정 특강이 없습니다. 새 방학 특강을 만들거나 지난 특강을 펼쳐 복원하세요.
-        </EmptyState>
+        <EmptyState
+          className="specialLectureEmptyState"
+          description="새 방학 특강을 만들거나 지난 특강을 펼쳐 복원하세요."
+          title="진행/예정 특강이 없습니다."
+        />
       )}
       {storedGuides.length ? (
         <div className="specialLectureStoredPanel">

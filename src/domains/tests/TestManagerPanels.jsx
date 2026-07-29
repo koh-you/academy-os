@@ -132,10 +132,11 @@ export function TestAttemptTable({
 }) {
   if (!students.length) {
     return (
-      <EmptyState className="examPrepEmptyState">
-        <strong>대상 학생이 없습니다.</strong>
-        <span>반 선택 또는 학생관리의 기본 반 배정을 확인해 주세요.</span>
-      </EmptyState>
+      <EmptyState
+        className="examPrepEmptyState"
+        description="반 선택 또는 학생관리의 기본 반 배정을 확인해 주세요."
+        title="대상 학생이 없습니다."
+      />
     );
   }
 
@@ -226,7 +227,7 @@ export function RecentTestSessionList({
           <span>{session.className || "전체 학생"} · {getKindLabel?.(session.testKind)} · {session.totalQuestions || "-"}문항</span>
         </button>
       ))}
-      {!totalCount ? <EmptyState className="emptyState compact">저장된 응시 회차가 없습니다.</EmptyState> : null}
+      {!totalCount ? <EmptyState className="emptyState compact" title="저장된 응시 회차가 없습니다." /> : null}
     </section>
   );
 }
@@ -266,10 +267,11 @@ export function StudentTestHistoryPanel({
           </article>
         ))}
         {!rows.length ? (
-          <EmptyState className="examPrepEmptyState">
-            <strong>테스트 이력이 없습니다.</strong>
-            <span>응시 기록 탭에서 학생별 결과를 저장하면 여기에 누적됩니다.</span>
-          </EmptyState>
+          <EmptyState
+            className="examPrepEmptyState"
+            description="응시 기록 탭에서 학생별 결과를 저장하면 여기에 누적됩니다."
+            title="테스트 이력이 없습니다."
+          />
         ) : null}
       </div>
     </section>
