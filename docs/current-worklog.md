@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-6C-1. loading·retry·부분 실패 범위 inventory
+
+- 읽기 source, 영역 action, 행 action, 다중 원천 부분 성공, provider 결과, 배경 동기화를 전체·영역·행 범위로 분류했다.
+- 알림 기록 조회는 실패 시 실제 `onRefresh`가 있고, 알림 job action과 Solapi 대조는 영역 상태, 학생/시험정보는 행 상태로 유지해야 함을 확인했다.
+- 특강 회차는 `1/2`와 `2/2`, 수업일지는 성공한 원천 목록을 이미 보존하므로 공통화 과정에서 전체 실패/완료로 뭉개지 않도록 계약을 고정했다.
+- 공지 발송은 boolean과 문자열 message가 분리돼 있어 즉시 시각 치환하지 않고 후속 원천별 상태 단위로 남겼다.
+- 결과는 `docs/ui-async-state-inventory-2026-07-29.md`에 기록했다. API 호출 순서·재시도 callback과 운영 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 대표 범위·재시도·부분 성공·provider 상태를 정적 계약으로 추가했다. `npm run build`는 126 modules로 통과했고 전체 `npm run test:production`은 454개 중 기존 기준선 `90a`만 실패했으며 신규 실패는 없다. `git diff --check`도 통과했다.
+- 사람 검수: 코드 UI 변경이 없어 필수 중단 gate가 없다. 공통 component 적용 후 누적 시각 검수를 남긴다.
+
 ## 2026-07-29 UI-6B-2. 자동저장 `저장 주의` 공통 톤
 
 - 미해결 7개 자동저장 경고를 삭제하지 않고, 실제 실패·삭제의 danger 빨강과 구분되는 pending 계열 `저장 주의` 톤으로 정리했다.

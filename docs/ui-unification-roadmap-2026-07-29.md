@@ -70,6 +70,7 @@
 | UI-6A-3 | 완료 | 정규수업 열기·시험분석 단계형 저장 badge 공통 연결 |
 | UI-6B-1 | 완료 | 3개 원천 계약·7개 자동저장 경고 재대조 |
 | UI-6B-2 | 완료 | 미해결 경고를 danger와 분리한 저장 주의 공통 톤 |
+| UI-6C-1 | 완료 | 전체·영역·행 loading/retry/부분 실패 inventory |
 
 ## 전체 세부 작업 목록
 
@@ -168,6 +169,6 @@
 
 ## 다음 실행 목표
 
-> 최신 상태: `UI-4`와 `UI-5` 전체, `UI-6A`, `UI-6B`를 완료했다. 현재 다음 작은 목표는 `UI-6C-1 loading·retry·부분 실패 inventory`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
+> 최신 상태: `UI-4`와 `UI-5` 전체, `UI-6A`, `UI-6B`, `UI-6C-1`을 완료했다. 현재 다음 작은 목표는 `UI-6C-2 공통 AsyncOperationStatus`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
 
-쓰기·외부 동작의 loading/retry/부분 실패를 전체 화면, 영역, 행 단위로 inventory한다. 실제 재시도 callback이 있는 상태, 확인 안내만 제공해야 하는 부분 성공, 외부 provider 결과 대기 상태를 구분하고 callback은 변경하지 않는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
+`idle/loading/success/partial/error`와 `role=status/alert`, 선택적 action slot을 가진 공통 `AsyncOperationStatus`를 추가한다. 아직 caller를 옮기지 않고 component·tone·모바일 계약만 검증한다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
