@@ -2011,6 +2011,52 @@ check(
       "Promise.all"
     ].some((value) => examPrepLessonCandidateBuilderSource.includes(value))
 );
+check(
+  "84d-167 examPrep lesson candidate boundary closes out before App-owned plan status resolution",
+  (appEntrySource.match(/from "\.\.\/domains\/lessons\/examPrepLessonCandidateBuilder\.js"/g) || []).length === 1 &&
+    (appEntrySource.match(/createExamPrepLessonCandidateBuilder\(\{/g) || []).length === 1 &&
+    (appEntrySource.match(/buildExamPrepLessonCandidates\(rows\)/g) || []).length === 1 &&
+    !appEntrySource.includes("function buildExamPrepLessonCandidates(") &&
+    (examPrepLessonCandidateBuilderSource.match(/export function createExamPrepLessonCandidateBuilder\(/g) || []).length === 1 &&
+    (examPrepLessonCandidateBuilderSource.match(/return function buildExamPrepLessonCandidates\(/g) || []).length === 1 &&
+    hasAll(appEntrySource, [
+      "const getSundayDatesForExamPeriod =",
+      "const buildExamPrepLessonCandidates =",
+      "createExamPrepLessonCandidateBuilder({",
+      "getSundayDatesForExamPeriod,",
+      "function buildGeneratedLessonPlan(",
+      "candidates.push(...buildExamPrepLessonCandidates(rows))",
+      "return candidates.map((candidate) => {",
+      "const existing = lessons.find(",
+      "const status = suppressed ?"
+    ]) &&
+    hasAll(examPrepLessonCandidateBuilderSource, [
+      "const dateMap = new Map()",
+      "parseDateRangeText(",
+      "getSundayDatesForExamPeriod(",
+      "getExamPrepGeneratedKeyForDate(date)",
+      "entry.blocks.some(",
+      "return [...dateMap.values()].map(",
+      "examCycleLabel(",
+      "getStandardLessonColor({",
+      'lessonType: "examPrep"'
+    ]) &&
+    ![
+      "useState",
+      "useEffect",
+      "fetch(",
+      "postJson",
+      "/api/",
+      "setLessons",
+      "setExamPrepRows",
+      "persistExamPrepRows",
+      "localStorage",
+      "Supabase",
+      "Solapi",
+      "Date.now",
+      "Promise.all"
+    ].some((value) => examPrepLessonCandidateBuilderSource.includes(value))
+);
 check("84e shared modal closes with Escape key", hasAll(app, ["import { Modal, ModalFooter } from \"../shared/components/Modal.jsx\""]) && hasAll(sharedModalSource, ["export function Modal({", "backdropClassName = \"\"", "hideCloseButton = false", "hideHeader = false", "function handleEscapeKey(event)", "event.key === \"Escape\"", "onClose?.()", "window.addEventListener(\"keydown\", handleEscapeKey)", "window.removeEventListener(\"keydown\", handleEscapeKey)", "hideCloseButton ? null"]) );
 check("84f lesson journal modal uses shared Escape-close modal", hasAll(app, ["backdropClassName=\"lessonJournalModalBackdrop\"", "className=\"lessonJournalModal\"", "hideHeader", "onClose={onBackToCalendar}"]) && !app.includes("<div className=\"modalBackdrop lessonJournalModalBackdrop\" role=\"dialog\" aria-modal=\"true\">"));
 check("84f-1 lesson journal student preview stays isolated and callback-only", hasAll(lessonFrontendSource, ["LessonJournalStudentPreviewModal", "createLessonJournalStudentPreviewModel", "students.filter((student) => student.studentId === studentPreviewId)", "PortalComponent={StudentPortalV2}", "students={model.previewStudents}", "onLogout={onClose}"]) && !lessonJournalStudentPreviewModalSource.includes("fetch(") && !lessonJournalStudentPreviewModalSource.includes("/api/"));
