@@ -1,3 +1,4 @@
+import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
@@ -139,7 +140,7 @@ export function TestAttemptTable({
   }
 
   return (
-    <div className="testAttemptTable">
+    <DataTableShell className="testAttemptTable" label="학생별 테스트 응시 입력">
       <div className="testAttemptRow head">
         <span>학생</span>
         <span>응시 상태</span>
@@ -171,7 +172,7 @@ export function TestAttemptTable({
           </div>
         );
       })}
-    </div>
+    </DataTableShell>
   );
 }
 

@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-4C-3A. 시험분석·예약·테스트 응시 표 shell
+
+- 구현: 시험분석 문항 검수 `<table>`, 학생별 알림 예약 상태, 학생별 테스트 응시 입력의 기존 wrapper/class를 보존해 `DataTableShell`로 이관했다.
+- 동작 보존: question row ID와 교사 confirmed/important draft setter, 예약 학생 ID와 parent/student job selector, 테스트 학생 ID와 status/correctCount/notTakenReason draft setter를 정적 계약으로 고정했다.
+- 외부 원천: 시험분석 검수 저장, 알림 예약/취소, 테스트 회차 저장·삭제, Supabase/app_state, notification_jobs/Solapi를 실제 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(125 modules). 전용 정적 계약 포함 scenario 425개 중 424개 통과, 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 세 표의 desktop/390px 가로스크롤·focus 검수를 누적하고 UI-4C-3B 오답/성적 표로 진행한다.
+
 ## 2026-07-29 UI-4C-2. 수업·시험정보 표 scroll shell
 
 - 구현: 수업 상세 학생 기록, 실제 수업일지 학생 기록, 시험정보 목록의 기존 wrapper/class를 보존해 `DataTableShell`로 이관했다.

@@ -15301,7 +15301,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                   <small>{ssenCatalogLabel}</small>
                 </div>
                 {reviewRowsReady ? (
-                  <div className="examAnalysisReviewTableWrap">
+                  <DataTableShell className="examAnalysisReviewTableWrap" label="시험분석 문항 검수">
                     <table className="examAnalysisReviewTable">
                       <thead>
                         <tr>
@@ -15493,7 +15493,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                     })}
                   </tbody>
                 </table>
-              </div>
+              </DataTableShell>
                 ) : (
                   <EmptyState className="emptyState compact">AI 행 채움 후 검수할 수 있습니다.</EmptyState>
                 )}
@@ -18391,7 +18391,7 @@ function LessonJournalDetail({
             </span>
           </div>
           {shouldShowStudentReservationTable ? (
-            <div className="reservationStatusTable">
+            <DataTableShell className="reservationStatusTable" label="학생별 알림 예약 상태">
               <div className="reservationStatusRow head">
                 <span>학생</span>
                 <span>학부모</span>
@@ -18411,7 +18411,7 @@ function LessonJournalDetail({
               }) : (
                 <EmptyState as="p" className="emptyState compact">해당 조건의 학생 예약이 없습니다.</EmptyState>
               )}
-            </div>
+            </DataTableShell>
           ) : null}
           {shouldShowIssueAudit ? (
             <section className="reservationIssueList">
