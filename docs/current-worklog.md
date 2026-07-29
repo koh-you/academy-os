@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-5C-2. 로컬 결과·내보내기 모달 footer
+
+- 구현: 출결 키오스크의 저장 결과창 `닫기`를 가운데 정렬 공통 `ModalFooter`로, HWPX 초안 내보내기의 `취소`·`다운로드`를 기본 공통 footer로 이관했다.
+- 범위 분리: 출결 저장 전 학생/수업 선택과 `confirmAttendanceCheck`는 그대로 두었고, 저장 응답 뒤 결과창만 변경했다.
+- 동작 보존: `setResult(null)`, `setIsHwpxExportOpen(false)`, 선택 0건 disabled, `handleDownloadHwpx`, 브라우저 `Blob`·`link.click()` 흐름을 정적 계약으로 고정했다.
+- 외부 원천: Supabase/app_state, 출결 저장, AI, Storage, notification_jobs/Solapi를 실제 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(126 modules). 전용 정적 계약 포함 scenario 441개 중 440개 통과, 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 출결 결과와 HWPX footer의 desktop/390px 배치를 누적하고 실제 출결 입력·HWPX 다운로드 없이 `UI-5C-3` 진입형 footer inventory로 진행한다.
+
 ## 2026-07-29 UI-5C-1. 읽기 전용 출력 모달 footer
 
 - 구현: 공통 `ModalFooter`와 desktop/mobile action 배치를 추가하고 뽑은 문제 인쇄, 학생 인수인계 PDF에 적용했다.

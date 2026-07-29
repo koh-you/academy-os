@@ -86,10 +86,17 @@
 - 뽑은 문제의 `noPrint`/`pickedProblemActions` class를 보존해 인쇄 출력에는 footer가 포함되지 않는다.
 - 모바일에서는 각 footer 버튼이 최소 140px 기준으로 줄바꿈되며 전체 너비를 사용할 수 있다.
 
+## UI-5C-2 로컬 결과·내보내기 footer
+
+- 출결 키오스크의 저장 전 확인/수업 선택 영역은 출결 저장 callback이 있으므로 제외하고, 저장 응답을 보여 준 뒤 PIN 화면으로 돌아가는 결과창의 `닫기`만 공통 footer에 연결했다.
+- HWPX 내보내기는 현재 브라우저 `Blob` 초안 파일만 생성하므로 `취소`와 `다운로드`를 공통 footer에 연결했다. 선택 0건 disabled, `handleDownloadHwpx`, 파일 생성 뒤 모달 닫기 순서는 그대로다.
+- 결과창의 가운데 정렬을 위해 `ModalFooter align="center"`를 추가했다. desktop/mobile의 공통 간격과 줄바꿈 규칙은 UI-5C-1과 같다.
+- Supabase/app_state, 출결 저장, AI 실행, Storage, notification_jobs/Solapi는 호출하거나 변경하지 않았다.
+
 ## 다음 단위
 
-`UI-5C-2`에서는 단일 원천·진입형 모달의 footer를 inventory한다. 학사일정 날짜 조회/등록 진입, 시험대비 상세, 최근 보충 이력처럼 저장을 직접 실행하지 않는 행동부터 고르고, 저장·삭제 callback이 같은 footer에 있으면 UI-5D/UI-6로 남긴다.
+`UI-5C-3`에서는 학사일정 날짜 조회, 시험대비 상세, 최근 보충 이력의 진입 행동을 비교한다. 행 안의 등록·수정·삭제·완료 복귀 callback은 footer로 옮기지 않고, 모달 전체를 닫는 행동이나 읽기 전용 진입 행동만 공통화할 수 있는지 먼저 확정한다. 저장·삭제 callback이 같은 영역에 있으면 UI-5D/UI-6로 남긴다.
 
 ## 사람 검수
 
-필수 중단 gate는 없다. 대표 모달의 dialog 이름, 네 개 긴 읽기 모달의 내부 스크롤, 두 출력 footer의 desktop/390px 버튼 배치를 확인한다. PDF/문제 인쇄, 보충 완료 복귀, 수업일지 열기는 누르지 않는다.
+필수 중단 gate는 없다. 대표 모달의 dialog 이름, 네 개 긴 읽기 모달의 내부 스크롤, 출력·결과·내보내기 footer의 desktop/390px 버튼 배치를 확인한다. PDF/문제 인쇄, HWPX 다운로드, 보충 완료 복귀, 수업일지 열기는 누르지 않는다.

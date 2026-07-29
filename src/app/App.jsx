@@ -19822,7 +19822,9 @@ function AttendanceKiosk({
           <div className="attendanceResultContent">
             <strong>{result.message}</strong>
             <p>번호를 확인한 뒤 다시 입력해 주세요.</p>
-            <button className="primaryButton" onClick={() => setResult(null)} type="button">닫기</button>
+            <ModalFooter align="center">
+              <button className="primaryButton" onClick={() => setResult(null)} type="button">닫기</button>
+            </ModalFooter>
           </div>
         </Modal>
       ) : null}
@@ -23903,10 +23905,10 @@ function AIVariantProblemCenter({ aiSettings = defaultAiSettings }) {
               현재 다운로드는 HWPX 내보내기 연결을 검수하기 위한 초안입니다. 한컴에서 바로 열리는 정식 HWPX 패키징은 백엔드 변환 모듈에서 완성합니다.
             </p>
 
-            <div className="hwpxExportActions">
+            <ModalFooter>
               <button className="softButton" onClick={() => setIsHwpxExportOpen(false)} type="button">취소</button>
               <button className="primaryButton" disabled={selectedVariantCount === 0} onClick={handleDownloadHwpx} type="button">다운로드</button>
-            </div>
+            </ModalFooter>
           </div>
         </Modal>
       ) : null}

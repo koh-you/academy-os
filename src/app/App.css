@@ -7680,6 +7680,10 @@ button:disabled {
   justify-content: flex-start;
 }
 
+.modalFooter.align-center {
+  justify-content: center;
+}
+
 .modalFooter.align-between {
   justify-content: space-between;
 }
@@ -14693,12 +14697,6 @@ textarea.profileEditInput {
   line-height: 1.6;
   margin: 0;
   padding: 12px;
-}
-
-.hwpxExportActions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
 }
 
 .variantAnswerBox span,
