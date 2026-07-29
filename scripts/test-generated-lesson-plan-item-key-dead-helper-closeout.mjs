@@ -49,7 +49,7 @@ const injectionEnd = appSource.indexOf(
   injectionCall
 );
 const nextHelper = appSource.indexOf(
-  "function getStudentsForSchoolCalendarEvent(",
+  "const getStudentsForSchoolCalendarEvent =",
   injectionEnd
 );
 assert.ok(
@@ -89,10 +89,11 @@ for (const boundary of injectionBoundaries) {
 }
 
 for (const schoolEventBoundary of [
-  "function getStudentsForSchoolCalendarEvent(students = [], event = {})",
-  "const eventGrade = normalizeGradeLabel(event.grade || \"\")",
-  "return students.filter((student) => {",
-  "if (!isActiveStudent(student)) return false"
+  "const getStudentsForSchoolCalendarEvent =",
+  "createGeneratedSchoolEventStudentSelector({",
+  "isActiveStudent,",
+  "normalizeGradeLabel,",
+  "schoolNamesMatch"
 ]) {
   assert.ok(
     appSource.includes(schoolEventBoundary),

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { normalizeSchoolName } from "../src/domains/schoolCalendar/schoolCalendarUtils.js";
+import { createGeneratedSchoolEventStudentSelector } from "../src/domains/lessons/generatedSchoolEventStudentSelector.js";
 
 function normalizeExistingGradeLabel(grade = "") {
   const value = String(grade).trim();
@@ -69,6 +70,13 @@ function getExistingStudentsForSchoolCalendarEvent(
   });
 }
 
+const extractedSelector =
+  createGeneratedSchoolEventStudentSelector({
+    isActiveStudent: isExistingActiveStudent,
+    normalizeGradeLabel: normalizeExistingGradeLabel,
+    schoolNamesMatch: existingSchoolNamesMatch
+  });
+
 const exactTarget = {
   studentId: "student_TARGET_EXACT",
   status: "active",
@@ -132,10 +140,17 @@ const selected =
     students,
     event
   );
+const extractedSelected = extractedSelector(
+  students,
+  event
+);
 
 assert.deepEqual(selected, [exactTarget, aliasTarget]);
+assert.deepEqual(extractedSelected, selected);
 assert.equal(selected[0], exactTarget);
 assert.equal(selected[1], aliasTarget);
+assert.equal(extractedSelected[0], exactTarget);
+assert.equal(extractedSelected[1], aliasTarget);
 assert.deepEqual(
   getExistingStudentsForSchoolCalendarEvent(
     [
@@ -174,34 +189,33 @@ const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
-const selectorStart = appSource.indexOf(
-  "function getStudentsForSchoolCalendarEvent(students = [], event = {})"
-);
-const selectorEnd = appSource.indexOf(
-  "function createPreExamLessonFromSchoolEvent(",
-  selectorStart
-);
-assert.ok(
-  selectorStart >= 0 &&
-    selectorEnd > selectorStart
-);
-const selectorSource = appSource.slice(
-  selectorStart,
-  selectorEnd
+const helperSource = await readFile(
+  new URL(
+    "../src/domains/lessons/generatedSchoolEventStudentSelector.js",
+    import.meta.url
+  ),
+  "utf8"
 );
 const selectorBoundaries = [
+  "export function createGeneratedSchoolEventStudentSelector({",
+  "return function getStudentsForSchoolCalendarEvent(",
   "const eventGrade = normalizeGradeLabel(event.grade || \"\")",
   "return students.filter((student) => {",
   "if (!isActiveStudent(student)) return false",
   "const studentSchool = student.schoolName ||",
   "const eventSchool = event.schoolName ||",
-  "(studentSchool || eventSchool) && !schoolNamesMatch(studentSchool, eventSchool, { allowBlank: false })",
+  "(studentSchool || eventSchool) &&",
+  "!schoolNamesMatch(",
+  "studentSchool,",
+  "eventSchool,",
+  "{ allowBlank: false }",
   "if (!eventGrade) return true",
-  "return normalizeGradeLabel(student.grade || \"\") === eventGrade"
+  "normalizeGradeLabel(student.grade || \"\") ===",
+  "eventGrade"
 ];
 let previousIndex = -1;
 for (const boundary of selectorBoundaries) {
-  const boundaryIndex = selectorSource.indexOf(
+  const boundaryIndex = helperSource.indexOf(
     boundary,
     previousIndex + 1
   );
@@ -215,13 +229,32 @@ assert.equal(
   appSource.split(
     "getStudentsForSchoolCalendarEvent("
   ).length - 1,
-  2
+  1
+);
+assert.equal(
+  appSource.split(
+    "createGeneratedSchoolEventStudentSelector({"
+  ).length - 1,
+  1
 );
 assert.ok(
   appSource.includes(
     "const lessonStudents = getStudentsForSchoolCalendarEvent(students, event)"
   )
 );
+for (const appBoundary of [
+  'from "../domains/lessons/generatedSchoolEventStudentSelector.js"',
+  "const getStudentsForSchoolCalendarEvent =",
+  "createGeneratedSchoolEventStudentSelector({",
+  "isActiveStudent,",
+  "normalizeGradeLabel,",
+  "schoolNamesMatch"
+]) {
+  assert.ok(
+    appSource.includes(appBoundary),
+    `missing school-event student selector App injection: ${appBoundary}`
+  );
+}
 for (const forbiddenEffect of [
   "fetch(",
   "postJson",
@@ -234,7 +267,7 @@ for (const forbiddenEffect of [
   "Solapi"
 ]) {
   assert.ok(
-    !selectorSource.includes(forbiddenEffect),
+    !helperSource.includes(forbiddenEffect),
     `school-event student selector crossed a side effect: ${forbiddenEffect}`
   );
 }

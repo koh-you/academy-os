@@ -24,7 +24,7 @@ const injectionEnd = appSource.indexOf(
   injectionCall
 );
 const nextHelper = appSource.indexOf(
-  "function getStudentsForSchoolCalendarEvent(",
+  "const getStudentsForSchoolCalendarEvent =",
   injectionEnd
 );
 assert.ok(
@@ -45,8 +45,11 @@ for (const preservedBoundary of [
   "addDaysInKorea,",
   "isExamPrepLesson,",
   "normalizeGradeLabel",
-  "function getStudentsForSchoolCalendarEvent(students = [], event = {})",
-  "const eventGrade = normalizeGradeLabel(event.grade || \"\")"
+  "const getStudentsForSchoolCalendarEvent =",
+  "createGeneratedSchoolEventStudentSelector({",
+  "isActiveStudent,",
+  "normalizeGradeLabel,",
+  "schoolNamesMatch"
 ]) {
   assert.ok(
     appSource.includes(preservedBoundary),

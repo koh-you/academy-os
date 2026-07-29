@@ -78,7 +78,7 @@ const identityInjection = appSource.indexOf(
   "} = createGeneratedLessonIdentityModel({"
 );
 const nextHelper = appSource.indexOf(
-  "function getStudentsForSchoolCalendarEvent(",
+  "const getStudentsForSchoolCalendarEvent =",
   identityInjection
 );
 assert.ok(
