@@ -233,7 +233,19 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
   }
 
   if (!analysisRunId) return null;
-  if (loadError) return <section className="panel examPromptStudio"><div className="errorBanner">프롬프트 제작실 불러오기 실패 · {loadError}</div></section>;
+  if (loadError) {
+    return (
+      <section className="panel examPromptStudio">
+        <EmptyState
+          className="errorBanner"
+          description={loadError}
+          role="alert"
+          title="프롬프트 제작실을 불러오지 못했습니다."
+          tone="error"
+        />
+      </section>
+    );
+  }
   if (!draft || !detail) {
     return (
       <section className="panel examPromptStudio">

@@ -11857,9 +11857,6 @@ function NotificationCenter({
   const commentAiProvider = aiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = aiSettings.commentModel ?? defaultAiSettings.commentModel;
   const isNotificationJobsLoading = notificationJobsStatus?.state === "loading";
-  const notificationJobsNoticeClass = notificationJobsStatus?.state === "failed"
-    ? "inlineNotice danger"
-    : "inlineNotice";
   const persistedNotificationJobIds = new Set(notificationJobs.map((job) => job.notificationJobId));
   const mergedNotificationJobs = [
     ...localNoticeJobs.filter((job) => !persistedNotificationJobIds.has(job.notificationJobId)),
@@ -12366,12 +12363,17 @@ function NotificationCenter({
         title={pageTitle}
       />
       {["loading", "failed"].includes(notificationJobsStatus?.state) ? (
-        <div className={`${notificationJobsNoticeClass} notificationJobsStatusNotice`}>
-          <span>{notificationJobsStatus.message}</span>
-          {notificationJobsStatus.state === "failed" ? (
+        <EmptyState
+          action={notificationJobsStatus.state === "failed" ? (
             <button className="softButton compact" onClick={onRefresh} type="button">다시 시도</button>
           ) : null}
-        </div>
+          aria-busy={isNotificationJobsLoading ? "true" : undefined}
+          aria-live="polite"
+          className="inlineNotice notificationJobsStatusNotice"
+          role={notificationJobsStatus.state === "failed" ? "alert" : "status"}
+          title={notificationJobsStatus.message || (isNotificationJobsLoading ? "알림 기록을 불러오는 중입니다." : "알림 기록을 불러오지 못했습니다.")}
+          tone={notificationJobsStatus.state === "failed" ? "error" : "loading"}
+        />
       ) : null}
       {showSpecialLectureTab && !hideNotificationSectionTabs ? (
       <WorkspaceTabs className="notificationSectionTabs" label="알림관리 영역 선택">

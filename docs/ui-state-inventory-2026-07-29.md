@@ -71,10 +71,26 @@
 - 프롬프트 API 호출·오류 분기, 기출문제 다시 불러오기 setter·iframe key·`onLoad` 상태 전이를 보존했다.
 - 출결 단말은 PIN 인증과 결합되어 있고, 알림 기록은 실패/retry와 한 상태 모델을 쓰므로 변경하지 않았다.
 
+## UI-4D-4 error/retry 인벤토리
+
+| 화면 | 오류 원천·기존 행동 | 판정 |
+| --- | --- | --- |
+| 시험분석 프롬프트 제작실 | 초기 조회 실패, 별도 retry 없음 | 공통 error 상태 적용 |
+| 알림관리 기록 | 조회 실패, 기존 `onRefresh` retry | 공통 error + 기존 retry 적용 |
+| 수업일지 render fallback | 오류 경계 + 수정·취소·뒤로가기 | UI-8 페이지 예외로 이관 |
+| 로그인·출결 | 인증/저장 오류 | UI-7 접근성·UI-6 저장 상태로 이관 |
+| 학생·정산·특강·보충·알림 발송 오류 | draft/저장/삭제/외부 side effect | UI-6 또는 독립 gate로 이관 |
+
+## UI-4D-4 읽기 전용 error/retry 상태
+
+- 프롬프트 제작실 초기 조회 실패를 공통 `EmptyState` error tone과 `role=alert`로 이관하고 기존 상세 오류를 설명으로 보존했다.
+- 알림 기록의 loading/failed notice를 공통 loading/error tone으로 통일하고, 실패 시 기존 `onRefresh` 재시도와 상단 새로고침 disabled 조건을 그대로 유지했다.
+- 새 retry callback을 만들지 않았고 저장·발송·취소·삭제 오류는 변경하지 않았다. 이로써 UI-4D의 일반·검색 빈 상태와 안전한 조회 loading/error 범위를 완료했다.
+
 ## 다음 단위
 
-`UI-4D-4`에서는 원천 조회 error/retry 표현을 inventory한다. 기존 retry/back callback이 있는 오류부터 안전한 공통 구조 적용 범위를 정하고, 저장·발송·삭제·출결 오류는 `UI-6` 또는 독립 gate로 남긴다.
+`UI-4E`에서는 접힘/펼치기 영역을 inventory하고, 요약 문구·toggle 위치·`aria-expanded`·`aria-controls`를 기존 open state와 callback을 바꾸지 않은 채 통일한다.
 
 ## 사람 검수
 
-필수 중단 gate는 없다. 배포 후 기존 빈 상태와 함께 프롬프트 제작실·기출문제 아카이브의 조회 중 배경·문구·desktop/390px 줄바꿈을 확인한다. 숙제 완료·질문·시험 제출·자료 업로드·상담/성적/테스트/특강 저장 버튼은 누르지 않는다.
+필수 중단 gate는 없다. 배포 후 기존 빈 상태와 함께 프롬프트 제작실·기출문제 아카이브의 조회 중/실패 상태, 알림 기록 실패·재시도 배치를 desktop/390px에서 확인한다. 숙제 완료·질문·시험 제출·자료 업로드·상담/성적/테스트/특강 저장이나 알림 취소·발송 버튼은 누르지 않는다.

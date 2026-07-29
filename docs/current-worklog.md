@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-4D-4. 읽기 전용 error/retry·UI-4D 완료
+
+- 전수조사: 원천 조회 실패를 프롬프트 초기 조회, 알림 기록 조회/retry, 수업일지 render fallback, 인증·출결, 저장·외부 side effect 오류로 분리했다.
+- 구현: 프롬프트 조회 실패를 공통 error tone·`role=alert`로 이관하고 상세 오류를 설명에 보존했다. 알림 기록 loading/failed notice도 공통 tone으로 통일하고 기존 `onRefresh` 재시도만 연결했다.
+- 동작 보존: 알림 상단 새로고침 disabled 조건과 retry callback, 프롬프트 조회 effect/error 분기를 정적 계약으로 고정했다. 수업일지 수정·취소, 로그인·출결, 저장·삭제·발송 오류는 변경하지 않았다.
+- 외부 원천: Supabase/app_state, notification_jobs/Solapi, 시험분석 원천을 실제 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(126 modules). 전용 정적 계약 포함 scenario 434개 중 433개 통과, 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 프롬프트/알림 오류 배치와 390px 줄바꿈을 누적하고 `UI-4E` 접힘/펼치기 inventory로 진행한다.
+
 ## 2026-07-29 UI-4D-3A. 읽기 전용 loading 상태
 
 - 전수조사: 초기/재조회 loading을 읽기 전용 조회, 인증·출결, 오류/retry 결합, 저장·생성·외부 대조 상태로 분리했다. 이번 단위는 시험분석 프롬프트 제작실과 기출문제 iframe만 안전 대상으로 확정했다.
