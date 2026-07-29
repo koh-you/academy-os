@@ -227,6 +227,7 @@ import {
 } from "../shared/components/InlineSaveStatus.jsx";
 import { MetricCard } from "../shared/components/MetricCard.jsx";
 import { Modal } from "../shared/components/Modal.jsx";
+import { PageHeader } from "../shared/components/PageHeader.jsx";
 import { StickySaveBar } from "../shared/components/StickySaveBar.jsx";
 import { sampleData } from "../shared/data/sampleData.js";
 import {
@@ -22937,13 +22938,12 @@ function ClassManager({ students, templates, onUpdateClassRoster }) {
 
   return (
     <section className="classManagerPage">
-      <div className="pageTop classManagerTop">
-        <div>
-          <h1>반관리</h1>
-          <p className="muted">4개 기본 반을 기준으로 학생 배정과 수업 흐름을 관리합니다.</p>
-        </div>
-        <button className="primaryButton" type="button">+ 반 추가</button>
-      </div>
+      <PageHeader
+        actions={<button className="primaryButton" type="button">+ 반 추가</button>}
+        className="classManagerTop"
+        description="4개 기본 반을 기준으로 학생 배정과 수업 흐름을 관리합니다."
+        title="반관리"
+      />
 
       <div className="classBoardGrid">
         {templates.map((template) => {
@@ -23457,13 +23457,12 @@ function AIVariantProblemCenter({ aiSettings = defaultAiSettings }) {
 
   return (
     <section className="aiVariantPage">
-      <div className="pageTop aiVariantHero">
-        <div>
-          <p className="eyebrow">AI TOOLS</p>
-          <h1>AI 도구</h1>
-          <p className="muted">학원 수업자료 분석, 문제 변형, 문항 정리 작업을 한 곳에서 관리합니다.</p>
-        </div>
-      </div>
+      <PageHeader
+        className="aiVariantHero"
+        description="학원 수업자료 분석, 문제 변형, 문항 정리 작업을 한 곳에서 관리합니다."
+        eyebrow="AI TOOLS"
+        title="AI 도구"
+      />
 
       <div className="studentManagerTabs aiTabs">
         {[
@@ -24364,15 +24363,15 @@ function SupplementCenter({
 
   return (
     <section className="followUpPage">
-      <div className="pageTop">
-        <div>
-          <h1>보충관리</h1>
-          <p className="muted">숙제보충, 결석보강, 재시험을 별도로 관리합니다.</p>
-        </div>
-        <button className="primaryButton compact" onClick={() => setIsHistoryModalOpen(true)} type="button">
-          최근 한 달 보충 내역
-        </button>
-      </div>
+      <PageHeader
+        actions={(
+          <button className="primaryButton compact" onClick={() => setIsHistoryModalOpen(true)} type="button">
+            최근 한 달 보충 내역
+          </button>
+        )}
+        description="숙제보충, 결석보강, 재시험을 별도로 관리합니다."
+        title="보충관리"
+      />
 
       <div className="supplementOverviewGrid">
         {supplementTabs.map((tab) => (
@@ -26483,14 +26482,12 @@ function ResourceLibraryCenter({ materials = [], onAddMaterial, onDeleteMaterial
 
   return (
     <section className="resourceLibraryPage">
-      <header className="pageTop">
-        <div>
-          <p className="eyebrow">RESOURCE LIBRARY</p>
-          <h1>자료함</h1>
-          <p className="muted">학생별 자료, 반별 자료, 학부모 공개 자료를 한 곳에서 관리합니다.</p>
-        </div>
-        <span className="countBadge">{materials.length}건</span>
-      </header>
+      <PageHeader
+        actions={<span className="countBadge">{materials.length}건</span>}
+        description="학생별 자료, 반별 자료, 학부모 공개 자료를 한 곳에서 관리합니다."
+        eyebrow="RESOURCE LIBRARY"
+        title="자료함"
+      />
 
       <div className="resourceLibraryLayout">
         <form className="panel resourceForm" onSubmit={submitMaterial}>

@@ -544,6 +544,21 @@ a:focus-visible {
   margin-left: auto;
 }
 
+.pageHeaderCopy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pageHeaderCopy > * {
+  margin-block: 0;
+}
+
+.pageHeaderActions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .inlineNotice {
   background: #eef4ff;
   border: 1px solid #d8e3f8;
