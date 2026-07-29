@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { createPreExamLessonId } from "../src/domains/lessons/generatedPreExamLessonIdBuilder.js";
 import {
   safeIdPart,
   shortStableHash
@@ -32,6 +33,14 @@ assert.notEqual(
   createExistingPreExamLessonId(secondCollisionTarget)
 );
 assert.equal(
+  createPreExamLessonId(firstCollisionTarget),
+  createExistingPreExamLessonId(firstCollisionTarget)
+);
+assert.equal(
+  createPreExamLessonId(secondCollisionTarget),
+  createExistingPreExamLessonId(secondCollisionTarget)
+);
+assert.equal(
   createExistingPreExamLessonId(
     " 가상 학교 / 고2 : 2026-08-11 "
   ),
@@ -41,6 +50,15 @@ assert.equal(
   createExistingPreExamLessonId(),
   "lesson_pre_exam__0"
 );
+assert.equal(
+  createPreExamLessonId(
+    " 가상 학교 / 고2 : 2026-08-11 "
+  ),
+  createExistingPreExamLessonId(
+    " 가상 학교 / 고2 : 2026-08-11 "
+  )
+);
+assert.equal(createPreExamLessonId(), "lesson_pre_exam__0");
 
 const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
@@ -53,13 +71,19 @@ const builderSource = await readFile(
   ),
   "utf8"
 );
+const lessonIdBuilderSource = await readFile(
+  new URL(
+    "../src/domains/lessons/generatedPreExamLessonIdBuilder.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const idSource = await readFile(
   new URL("../src/shared/utils/id.js", import.meta.url),
   "utf8"
 );
 const appBoundaries = [
-  "function createPreExamLessonId(sourceId = \"\")",
-  "return `lesson_pre_exam_${safeIdPart(sourceId)}_${shortStableHash(sourceId)}`",
+  'from "../domains/lessons/generatedPreExamLessonIdBuilder.js"',
   "const createPreExamLessonFromSchoolEvent =",
   "createGeneratedPreExamLessonBuilder({",
   "createPreExamLessonId,"
@@ -80,7 +104,7 @@ assert.equal(
   appSource.split(
     "function createPreExamLessonId("
   ).length - 1,
-  1
+  0
 );
 assert.equal(
   builderSource.split(
@@ -92,6 +116,22 @@ assert.ok(
   builderSource.includes(
     "lessonId: createPreExamLessonId(sourceId)"
   )
+);
+for (const lessonIdBoundary of [
+  'from "../../shared/utils/id.js"',
+  'export function createPreExamLessonId(sourceId = "")',
+  "return `lesson_pre_exam_${safeIdPart(sourceId)}_${shortStableHash(sourceId)}`"
+]) {
+  assert.ok(
+    lessonIdBuilderSource.includes(lessonIdBoundary),
+    `missing preExam lesson ID helper boundary: ${lessonIdBoundary}`
+  );
+}
+assert.equal(
+  lessonIdBuilderSource.split(
+    "export function createPreExamLessonId("
+  ).length - 1,
+  1
 );
 for (const utilityBoundary of [
   "export function safeIdPart(value = \"\")",
@@ -116,8 +156,9 @@ for (const forbiddenEffect of [
   "Promise.all"
 ]) {
   assert.ok(
-    !idSource.includes(forbiddenEffect),
-    `shared ID utility crossed a side effect: ${forbiddenEffect}`
+    !idSource.includes(forbiddenEffect) &&
+      !lessonIdBuilderSource.includes(forbiddenEffect),
+    `preExam lesson ID boundary crossed a side effect: ${forbiddenEffect}`
   );
 }
 

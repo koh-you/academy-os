@@ -112,6 +112,7 @@ import { selectGeneratedLessonPlanRows } from "../domains/lessons/generatedLesso
 import { areGeneratedLessonPersistedFieldsEqual } from "../domains/lessons/generatedLessonPersistenceModel.js";
 import { selectGeneratedPreExamLessonsToSync } from "../domains/lessons/generatedPreExamSyncSelector.js";
 import { createPreExamGeneratedKey } from "../domains/lessons/generatedPreExamKeyBuilder.js";
+import { createPreExamLessonId } from "../domains/lessons/generatedPreExamLessonIdBuilder.js";
 import { selectChangedGeneratedLessonPlanRows } from "../domains/lessons/generatedLessonRepairSelectors.js";
 import { selectGeneratedLessonsToSave } from "../domains/lessons/generatedLessonSaveSelector.js";
 import { selectGeneratedLessonPlanItemsByKey } from "../domains/lessons/generatedLessonTargetSelector.js";
@@ -472,7 +473,7 @@ import {
   postJsonWithTimeout
 } from "../shared/utils/apiClient.js";
 import { readFileAsDataUrl } from "../shared/utils/file.js";
-import { safeIdPart, shortStableHash } from "../shared/utils/id.js";
+import { safeIdPart } from "../shared/utils/id.js";
 import { applyStudentScheduleToLesson } from "../shared/utils/studentSchedule.js";
 import ssenTypeIndex from "../../api/data/ssenTypeIndex.json";
 import {
@@ -4197,10 +4198,6 @@ function createParentLoginId(student) {
 
 function getDemoStudent(students) {
   return students.find((student) => student.studentId === "student_mwf710_001") ?? students[0];
-}
-
-function createPreExamLessonId(sourceId = "") {
-  return `lesson_pre_exam_${safeIdPart(sourceId)}_${shortStableHash(sourceId)}`;
 }
 
 function examCycleLabel(examCycle) {
