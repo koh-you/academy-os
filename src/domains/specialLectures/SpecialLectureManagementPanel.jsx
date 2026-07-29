@@ -561,13 +561,19 @@ export function SpecialLectureGuideSelector({
       )}
       {storedGuides.length ? (
         <div className="specialLectureStoredPanel">
-          <button className="specialLectureStoredToggle" onClick={onToggleStoredGuides} type="button">
+          <button
+            aria-controls="special-lecture-stored-guides"
+            aria-expanded={showStoredGuides}
+            className="specialLectureStoredToggle"
+            onClick={onToggleStoredGuides}
+            type="button"
+          >
             <span>지난/보관 특강</span>
             <strong>{storedGuides.length}건</strong>
             <em>{showStoredGuides ? "접기" : "펼치기"}</em>
           </button>
           {showStoredGuides ? (
-            <div className="specialLectureSelector stored">
+            <div className="specialLectureSelector stored" id="special-lecture-stored-guides">
               {storedGuides.map((guide) => renderGuideCard(guide, "stored"))}
             </div>
           ) : null}

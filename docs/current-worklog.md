@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-4E-1A. 단일 읽기 disclosure 접근성 연결
+
+- 전수조사: 접힘/펼치기 영역을 단일 읽기 영역, 시험분석 산출물/단계, 특강 editor, 모달/저장 동작, sidebar로 분류하고 `docs/ui-disclosure-inventory-2026-07-29.md`에 순서를 고정했다.
+- 구현: 알림톡 발송 기록, 미래 결석 예정, 알림톡 원본 메모, 오답 진단, 지난/보관 특강의 toggle에 `aria-expanded`와 `aria-controls`를 연결하고 제어 region에 대응 `id`를 부여했다.
+- 동작 보존: 기존 boolean state, setter/callback, 조건부 mount, 목록 row key를 정적 계약으로 고정했다.
+- 외부 원천: 알림 재조회·취소, 보충 생성/완료, 알림톡 AI 수정·저장·발송, 오답 저장, 특강 저장/복원과 Supabase/app_state, notification_jobs/Solapi를 실제 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(126 modules). 전용 정적 계약 포함 scenario 435개 중 434개 통과, 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 다섯 toggle의 키보드 focus·문구·펼침 배치를 누적하고 `UI-4E-1B` 시험분석 disclosure로 진행한다.
+
 ## 2026-07-29 UI-4D-4. 읽기 전용 error/retry·UI-4D 완료
 
 - 전수조사: 원천 조회 실패를 프롬프트 초기 조회, 알림 기록 조회/retry, 수업일지 render fallback, 인증·출결, 저장·외부 side effect 오류로 분리했다.

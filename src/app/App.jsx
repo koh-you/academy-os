@@ -12659,6 +12659,7 @@ function NotificationCenter({
             ) : null}
             <span className="countBadge">{filteredNotificationJobs.length}건</span>
             <button
+              aria-controls="notification-history-content"
               aria-expanded={isNoticeHistoryOpen}
               className="softButton compact"
               onClick={() => setIsNoticeHistoryOpen((current) => !current)}
@@ -12700,7 +12701,7 @@ function NotificationCenter({
           )}
         </p>
         {isNoticeHistoryOpen ? (
-        <DataTableShell className="notificationTable noticeHistoryTable" label="알림톡 발송 기록">
+        <DataTableShell className="notificationTable noticeHistoryTable" id="notification-history-content" label="알림톡 발송 기록">
           <div className="notificationTableHead">
             <span>상태</span>
             <span>종류</span>
@@ -19285,13 +19286,19 @@ function CommentComposerModal({
             title="최종 알림톡 문구"
           />
           <div className="commentSourceToggle">
-            <button className="softButton mini" onClick={() => setIsSourceOpen((current) => !current)} type="button">
+            <button
+              aria-controls="comment-source-preview"
+              aria-expanded={isSourceOpen}
+              className="softButton mini"
+              onClick={() => setIsSourceOpen((current) => !current)}
+              type="button"
+            >
               {isSourceOpen ? "원본 메모 접기" : "원본 메모 보기"}
             </button>
             <span>수업메모와 일정 정보는 AI 수정 참고용으로 보관됩니다.</span>
           </div>
           {isSourceOpen ? (
-            <pre className="templatePreviewText commentSourcePreview">{sourceText}</pre>
+            <pre className="templatePreviewText commentSourcePreview" id="comment-source-preview">{sourceText}</pre>
           ) : null}
           <textarea
             className="commentComposerTextarea"
@@ -24530,6 +24537,7 @@ function SupplementCenter({
         {activeSupplementTab === "absence_makeup" && activeDeferredAbsenceItems.length > 0 ? (
           <section className="supplementDeferredPanel">
             <button
+              aria-controls="future-absence-list"
               aria-expanded={isFutureAbsenceOpen}
               className="supplementDeferredToggle"
               onClick={() => setIsFutureAbsenceOpen((current) => !current)}
@@ -24542,7 +24550,7 @@ function SupplementCenter({
               <strong>{isFutureAbsenceOpen ? "접기" : "펼치기"}</strong>
             </button>
             {isFutureAbsenceOpen ? (
-              <div className="supplementItemList supplementDeferredList">
+              <div className="supplementItemList supplementDeferredList" id="future-absence-list">
                 {activeDeferredAbsenceItems.map((item) => renderSupplementRow(item))}
               </div>
             ) : null}
@@ -26242,6 +26250,8 @@ function WrongProblemBoard({
       </FilterBar>
 
       <button
+        aria-controls="wrong-board-diagnosis-content"
+        aria-expanded={isDiagnosisOpen}
         className="wrongBoardDiagnosis"
         onClick={() => setIsDiagnosisOpen((current) => !current)}
         type="button"
@@ -26251,7 +26261,7 @@ function WrongProblemBoard({
       </button>
 
       {isDiagnosisOpen ? (
-        <div className="wrongBoardNotice">
+        <div className="wrongBoardNotice" id="wrong-board-diagnosis-content">
           <strong>{selectedStudent?.name ?? "학생"} 기준 오답 보드</strong>
           <p>
             {activeTab === "studentWrong"
