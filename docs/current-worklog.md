@@ -27,7 +27,8 @@
 
 - 범위: 알림관리·시험분석·설정·수업연구·오답관리의 상단을 같은 `PageHeader` 구조로 전환한다. 제목/설명/상태와 우측 행동의 배치만 바꾸며 새로고침, 분석 저장, 교안 추가 callback과 기존 `InlineSaveStatus` 값을 그대로 넘긴다.
 - 불변 계약: 설정·수업연구·오답관리의 app_state 자동저장 로직, 시험분석 저장 로직, 알림 기록 조회를 변경하지 않는다. `notification_jobs`/Solapi 발송·예약, Supabase 운영 데이터에는 side effect가 없다.
-- AI 검수: 페이지별 제목·설명·callback·저장 상태 전달 정적 계약, `npm run build`, `git diff --check`를 실행한다. 실제 저장·발송 조작이 없으므로 사람 gate 없이 UI-2C로 진행할 수 있다.
+- AI 검수: 페이지별 제목·설명·callback·저장 상태 전달 정적 계약, `npm run build`, `git diff --check`가 통과했다. 전체 `npm run test:production`은 400개 중 기존 기준선 `90a lesson modal creates verified closure...` 한 건만 실패했고, UI-2 관련 신규 실패는 없다. 실제 저장·발송 조작이 없으므로 사람 gate 없이 UI-2C로 진행할 수 있다.
+- 다음 UI-2C: 월간 수업 달력과 수업일지처럼 이전/다음 탐색·상태·위험 행동이 함께 있는 특수 머리말을 별도 계약으로 정리한다. 일반 `PageHeader`에 억지로 합치지 않고 탐색형 header 구조를 먼저 inventory한다.
 
 ## 2026-07-28 P0. 자동저장 위험 알림·저장 신뢰성 재전수조사
 
