@@ -2221,6 +2221,12 @@
 - AI 가상검수: 정확·겹치는 짧은/긴 ID와 rows 순서 TARGET, 비-derived·미일치·delimiter 불일치·빈 입력 CONTROL로 추출 결과와 입력 불변을 확인한다. 기존 inventory와 추출 fixture, 시나리오 658/658, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AV-3`은 import/export/호출 각 1개와 App-owned repair 경계를 closeout한다.
 
+## 2026-07-28 P3. App.jsx 17AV-3 derived math event examPrep ID selector closeout
+
+- closeout: `derivedMathEventExamPrepIdSelector.js` import·export·App 호출 각 1개와 inline helper 0개를 고정하고, persisted preExam lesson을 읽어 examPrep row를 repair하는 나머지 흐름은 App 소유로 유지했다.
+- AI 가상검수: 겹치는 짧은/긴 ID rows 순서, 정확 CONTROL row, delimiter 불일치·비-derived·미일치와 입력 불변을 다시 확인한다. 전용 closeout fixture와 시나리오 659/659, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 의미 단위는 persisted preExam lesson에서 시험 과목 label을 추론하는 순수 helper를 inventory한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
