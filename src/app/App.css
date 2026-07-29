@@ -20008,10 +20008,40 @@ body.attendanceOnlyBody {
     flex-direction: column;
   }
 
+  .pageHeaderCopy,
+  .navigationHeaderCopy,
+  .sectionHeaderCopy {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    width: 100%;
+  }
+
+  .pageTop h1,
+  .sectionHeader h1 {
+    font-size: 24px;
+    line-height: 1.2;
+  }
+
+  .sectionHeader h2,
+  .navigationHeader .navigationHeaderCopy h1,
+  .navigationHeader .navigationHeaderCopy h2 {
+    font-size: 20px;
+    line-height: 1.25;
+  }
+
   .pageActions {
     flex-wrap: wrap;
     margin-left: 0;
     width: 100%;
+  }
+
+  .pageActions button,
+  .pageActions a,
+  .navigationHeaderActions button,
+  .navigationHeaderActions a,
+  .sectionHeaderAside button,
+  .sectionHeaderAside a {
+    min-height: var(--academy-touch-target);
   }
 
   .sectionHeaderAside {
@@ -20028,6 +20058,15 @@ body.attendanceOnlyBody {
   .navigationHeaderContext,
   .navigationHeaderActions {
     width: 100%;
+  }
+
+  .navigationHeaderPrimary {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .navigationHeaderCopy {
+    flex: 1 1 180px;
   }
 
   .navigationHeaderActions {

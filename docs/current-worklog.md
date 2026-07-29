@@ -1,5 +1,16 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-7B-2. 공통 header 모바일 wrap·touch
+
+- 640px 이하에서 PageHeader·NavigationHeader·SectionHeader copy에 `overflow-wrap: anywhere`와 전체 폭을 적용해 긴 제목·설명이 화면 밖으로 밀리지 않게 했다.
+- page/section h1은 24px, section/navigation h2는 20px로 모바일 위계를 맞췄다.
+- NavigationHeader primary는 leading/title/trailing이 필요한 경우 줄바꿈되고 copy가 `180px` 기준으로 유연하게 줄도록 했다.
+- page/navigation/section header action 안의 button·link는 모바일에서 최소 44px 터치 높이를 사용한다.
+- caller의 title·description·badge·action DOM 순서·callback·disabled와 최근 수업일지 예약 모달 변경을 건드리지 않았다.
+- Supabase/app_state·notification_jobs/Solapi·수업·AI·출결 원천을 실행하거나 변경하지 않았다.
+- AI 검수: mobile copy·title·navigation wrap·touch·DOM 순서 불변 정적 계약, `npm run build` 128 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 465개 중 기존 기준선 `90a`만 실패했고 모든 개별 fixture와 신규 계약은 통과했다.
+- 사람 검수: 대표 PageHeader·NavigationHeader·SectionHeader를 390px에서 확인하는 절차를 누적했다. 실제 저장·발송·삭제 행동은 누르지 않는다.
+
 ## 2026-07-29 수업일지 예약 확인의 원시 Solapi 그룹 UI 제거
 
 - `그룹 취소`는 Solapi provider의 예약 그룹만 직접 취소하고 Academy OS `notification_jobs`를 함께 갱신하지 않는 원시 작업이라, 운영 화면에서 사용하면 두 원천이 불일치할 수 있음을 확인했다.

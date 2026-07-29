@@ -81,6 +81,7 @@
 | UI-7A-3 | 완료 | 모바일 compact 현재 화면·전체 메뉴 toggle과 선택 후 본문 진입 |
 | UI-7A-4 | 완료 | desktop sticky·tablet 3열·mobile compact/2열 shell 회귀 계약 |
 | UI-7B-1 | 완료 | PageHeader·NavigationHeader·SectionHeader 모바일 gap inventory |
+| UI-7B-2 | 완료 | 공통 header 긴 copy·탐색 row wrap·모바일 title·44px action |
 
 ## 전체 세부 작업 목록
 
@@ -179,6 +180,6 @@
 
 ## 다음 실행 목표
 
-> 최신 상태: `UI-4`와 `UI-5`, `UI-6`, `UI-7A` 전체와 `UI-7B-1`을 완료했다. 현재 다음 작은 목표는 `UI-7B-2 공통 header 모바일 wrap·touch 보강`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
+> 최신 상태: `UI-4`와 `UI-5`, `UI-6`, `UI-7A` 전체와 `UI-7B-1~2`를 완료했다. 현재 다음 작은 목표는 `UI-7B-3 대표 복합 action header 회귀`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
 
-공통 header copy에 긴 문자열 줄바꿈, NavigationHeader primary wrap, 모바일 title 크기와 header action button 44px 터치 높이를 적용한다. title·description·badge·callback·disabled·DOM 순서는 변경하지 않는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
+알림관리·시험관리·학사일정·학생 프로필의 복합 header actions가 모바일에서 callback·disabled·DOM 우선순서를 보존하고 전체 폭 안에서 줄바꿈되는지 정적 대조한다. 실제 저장·발송·삭제는 실행하지 않는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
