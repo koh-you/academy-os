@@ -22,9 +22,9 @@
 | 예약 학생 상태 표 | `studentId`, notification job selector | 검사 모드 선택 | 중간 | UI-4C-3A shell 적용 |
 | 오답·성적·학원시험 표 | 각 record ID | 입력·수정·삭제 | 높음 | UI-4C-3B shell 적용 |
 | 테스트 응시 표 | `studentId`, attempt draft | 상태/정답/미응시 사유 draft | 높음 | UI-4C-3A shell 적용 |
-| 월별 정산 표 | `studentId`, settlement snapshot | 금액/제외/스케줄 draft 저장 | 매우 높음 | UI-4C-4 |
-| 특강 정산 표 | enrollment/student key | 유료회차/금액/사유 draft 저장 | 매우 높음 | UI-4C-4 |
-| 학생 포털 성적 표 | score record ID | 읽기 전용 | 낮음 | UI-4C-4 |
+| 월별 정산 표 | `studentId`, settlement snapshot | 금액/제외/스케줄 draft 저장 | 매우 높음 | UI-4C-4 shell 적용 |
+| 특강 정산 표 | enrollment/student key | 유료회차/금액/사유 draft 저장 | 매우 높음 | UI-4C-4 shell 적용 |
+| 학생 포털 성적 표 | score record ID | 읽기 전용 | 낮음 | UI-4C-4 shell 적용 |
 
 ## UI-4C-1 공통 가로스크롤 shell
 
@@ -35,7 +35,7 @@
 
 ## 다음 단위
 
-`UI-4C-3B`는 완료했다. 다음 `UI-4C-4`는 월별 정산, 특강 정산, 학생 포털 읽기 성적 표의 wrapper를 공통 shell로 이관한다. 정산 row key·계산 snapshot·입력/제외 callback과 포털 읽기 값을 고정하고 실제 정산 저장은 실행하지 않는다.
+`UI-4C-4`는 완료했다. 다음 `UI-4C-5`는 공통 header/row/pill 색상 토큰을 `DataTableShell` 안에서 통일하고, 실제 내부 세로스크롤이 있는 표만 sticky header가 필요한지 판정한다. 열 값·너비·행동은 바꾸지 않는다.
 
 ## 사람 검수
 

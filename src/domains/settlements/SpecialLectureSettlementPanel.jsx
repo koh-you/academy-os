@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
@@ -255,7 +256,7 @@ export function SpecialLectureSettlementPanel({
             </div>
             <span>특강관리 원천</span>
           </div>
-          <div className="monthlySettlementTableWrap">
+          <DataTableShell className="monthlySettlementTableWrap" label={`${getGuideLabel(group.guide)} 특강 정산`}>
             <table className="specialLectureSettlementTable">
               <thead>
                 <tr>
@@ -357,7 +358,7 @@ export function SpecialLectureSettlementPanel({
                 ))}
               </tbody>
             </table>
-          </div>
+          </DataTableShell>
         </section>
       ))}
 

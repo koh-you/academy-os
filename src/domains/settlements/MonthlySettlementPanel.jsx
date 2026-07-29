@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
@@ -449,7 +450,7 @@ export function MonthlySettlementPanel({
           <p>선택 월의 정규 수업일지 명단과 학생별 월 고정금액을 기준으로 계산합니다. 전체 수업일지에서 이번 달이 첫 정규수업인 학생은 신입생 방식으로 자동 반영하며 수기로 바꿀 수 있습니다.</p>
         </div>
       </div>
-      <div className="monthlySettlementTableWrap">
+      <DataTableShell className="monthlySettlementTableWrap" label="월별 정규 수업 정산">
         <table className="monthlySettlementTable">
           <thead>
             <tr>
@@ -634,7 +635,7 @@ export function MonthlySettlementPanel({
             })}
           </tbody>
         </table>
-      </div>
+      </DataTableShell>
 
       {!activeRows.length ? (
         <div className="monthlySettlementEmpty">

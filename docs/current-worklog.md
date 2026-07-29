@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-4C-4. 정산·포털 성적 표 shell
+
+- 구현: 월별 정규 수업 정산, 특강별 정산, 학생 포털 학교 성적 `<table>`의 기존 wrapper/class를 보존해 `DataTableShell`로 이관했다.
+- 동작 보존: 월별 student ID, 특강 guide/student key, 정산 summary/snapshot과 mode·금액·회차·사유 setting callback, 포털 중간/기말 점수·등수·등급 표시를 정적 계약으로 고정했다.
+- 외부 원천: 월별/특강 정산 저장, Supabase app_state, 학생 성적 저장을 실제 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(125 modules). 전용 정적 계약 포함 scenario 427개 중 426개 통과, 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 세 표의 desktop/390px 가로스크롤·focus 검수를 누적하고 UI-4C-5 공통 header/row/pill 토큰으로 진행한다.
+
 ## 2026-07-29 UI-4C-3B. 오답·학생 성적 표 shell
 
 - 구현: 학생별 오답 목록, 학생 프로필 성적 기록, 학생 프로필 학원 테스트 기록의 기존 management table wrapper/class를 보존해 `DataTableShell`로 이관했다.

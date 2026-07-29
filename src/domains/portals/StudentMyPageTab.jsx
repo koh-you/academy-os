@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { getCountableAttendanceRecords } from "../lessons/lessonClosure.js";
@@ -223,7 +224,7 @@ export function StudentMyPageTab({
           </div>
           <div className="profileCard">
             <h2>학교 성적</h2>
-            <div className="studentGradeTableWrap">
+            <DataTableShell className="studentGradeTableWrap" label="학교 성적">
               <table className="gradeTable studentGradeTable">
                 <thead>
                   <tr>
@@ -258,7 +259,7 @@ export function StudentMyPageTab({
                   })}
                 </tbody>
               </table>
-            </div>
+            </DataTableShell>
           </div>
           <div className="profileCard passwordPanel">
             <h2>비밀번호 변경</h2>
