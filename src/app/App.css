@@ -241,7 +241,7 @@ a:focus-visible {
   --academy-sidebar-width: 294px;
   display: grid;
   grid-template-columns: var(--academy-sidebar-width) minmax(0, 1fr);
-  min-height: 100vh;
+  min-height: 100dvh;
   transition: grid-template-columns 180ms ease;
 }
 
@@ -257,10 +257,10 @@ a:focus-visible {
   display: flex;
   flex-direction: column;
   gap: var(--academy-space-3);
-  max-height: 100vh;
+  max-height: 100dvh;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 18px 20px;
+  padding: max(18px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
   position: sticky;
   top: 0;
   transition: padding 180ms ease;
@@ -268,7 +268,7 @@ a:focus-visible {
 
 .sidebar.collapsed {
   align-items: center;
-  padding: 18px 12px;
+  padding: max(18px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
 }
 
 .brandBlock {
@@ -510,7 +510,7 @@ a:focus-visible {
 
 .mainPanel {
   min-width: 0;
-  padding: var(--academy-space-2) var(--academy-space-4) 28px var(--academy-space-3);
+  padding: var(--academy-space-2) max(var(--academy-space-4), env(safe-area-inset-right)) max(28px, env(safe-area-inset-bottom)) max(var(--academy-space-3), env(safe-area-inset-left));
 }
 
 .pageTop,
@@ -19853,7 +19853,7 @@ body.attendanceOnlyBody {
 
   .sidebar {
     gap: 10px;
-    padding: 12px 14px;
+    padding: max(12px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) 12px max(14px, env(safe-area-inset-left));
   }
 
   .brandBlock {
@@ -19921,7 +19921,7 @@ body.attendanceOnlyBody {
   }
 
   .mainPanel {
-    padding: 12px;
+    padding: 12px max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
   }
 
   .mainPanel > * {

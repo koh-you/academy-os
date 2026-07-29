@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-7A-2. 사이드바 semantics·app shell safe-area
+
+- 사이드바 aside·nav에 accessible label을 추가하고 접기 toggle을 nav ID와 `aria-controls`·`aria-expanded`로 연결했다.
+- 현재 화면 버튼에 `aria-current="page"`를 제공하면서 기존 active class와 `onChangeView(item.id)`를 유지했다.
+- viewport에 `viewport-fit=cover`를 추가하고 app frame을 `100dvh`, sidebar·본문 padding을 iOS safe-area와 기존 최소 간격의 큰 값으로 계산했다.
+- 전체 메뉴, desktop sticky·접힘, tablet/mobile grid, view 전환·logout callback과 로그인/session 동작은 변경하지 않았다.
+- Supabase/app_state·notification_jobs/Solapi·수업·AI·출결 원천을 실행하거나 변경하지 않았다.
+- AI 검수: navigation semantics·safe-area·callback 불변 정적 계약, `npm run build` 128 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 461개 중 기존 기준선 `90a`만 실패했고 모든 개별 fixture와 신규 계약은 통과했다.
+- 사람 검수: iPhone Safari/홈 화면 바로가기와 desktop에서 노치·본문·sidebar 간격 및 현재 화면 음성 안내를 확인하는 절차를 누적했다.
+
 ## 2026-07-29 UI-7A-1. 앱 shell·사이드바 모바일/accessibility inventory
 
 - desktop sticky·자체 스크롤·접힌 icon sidebar, 1100px 이하 document flow·3열 메뉴, 640px 이하 그룹별 2열 전체 메뉴 계약을 대조했다.

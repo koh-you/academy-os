@@ -15694,10 +15694,12 @@ function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle, su
   ];
 
   return (
-    <aside className={isCollapsed ? "sidebar collapsed" : "sidebar"}>
+    <aside aria-label="Academy OS 교사 메뉴" className={isCollapsed ? "sidebar collapsed" : "sidebar"}>
       <div className="brandBlock">
         <div className="brandHeader">
           <button
+            aria-controls="academy-primary-navigation"
+            aria-expanded={!isCollapsed}
             aria-label={isCollapsed ? "좌측 메뉴 펼치기" : "좌측 메뉴 접기"}
             className="sidebarToggle"
             onClick={onToggle}
@@ -15709,12 +15711,13 @@ function Sidebar({ activeView, isCollapsed, onChangeView, onLogout, onToggle, su
         <strong>{academyBrandName}</strong>
         <span>고태영T Lesson OS</span>
       </div>
-      <nav className="sideNav">
+      <nav aria-label="주요 화면" className="sideNav" id="academy-primary-navigation">
         {menuGroups.map((group) => (
           <div className="sideGroup" key={group.title}>
             <p>{group.title}</p>
             {group.items.map((item) => (
               <button
+                aria-current={activeView === item.id ? "page" : undefined}
                 className={activeView === item.id ? "active" : ""}
                 key={item.id}
                 onClick={() => onChangeView(item.id)}
