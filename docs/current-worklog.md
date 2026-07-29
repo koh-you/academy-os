@@ -2037,6 +2037,13 @@
 - AI 가상검수: 중복 key·잘못된 타입·legacy 필드 CONTROL과 manual/suppressed 추가·중복 추가·제거 TARGET으로 순서·중복 제거·입력 불변을 검증한다. 전용 inventory fixture와 시나리오 630/630, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AM-2`는 normalize/add/remove 순수 상태 전이만 `generatedLessonControlsModel.js`로 분리하고 React/app_state 경계는 App에 유지한다.
 
+## 2026-07-28 P3. App.jsx 17AM-2 generated lesson controls model 분리
+
+- 코드: generated lesson controls의 배열 정규화·순서 보존 중복 제거와 manual/suppressed key add/remove 전이를 `generatedLessonControlsModel.js`의 다섯 순수 함수로 분리했다.
+- 경계: lesson key 계산과 빈 key guard, `setGeneratedLessonControls`의 전후 정규화, local stored state, app_state 저장·복원 및 generated plan 소비는 `App.jsx`에 그대로 유지했다. API·Supabase·알림/Solapi effect는 이동하거나 실행하지 않았다.
+- AI 가상검수: 중복·잘못된 타입·legacy 필드 CONTROL과 add·중복 add·remove TARGET으로 추출 전후 정규화와 전이 결과·입력 불변을 대조한다. 전용 extraction fixture와 시나리오 631/631, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AM-3`은 module import/export와 각 transition 호출, App-owned setter/storage/app_state 경계를 closeout한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

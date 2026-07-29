@@ -1,5 +1,12 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import {
+  addGeneratedLessonManualOverrideKey,
+  addGeneratedLessonSuppressedKey,
+  normalizeGeneratedLessonControls,
+  removeGeneratedLessonManualOverrideKey,
+  removeGeneratedLessonSuppressedKey
+} from "../src/domains/lessons/generatedLessonControlsModel.js";
 
 function normalizeExistingGeneratedLessonControls(value = {}) {
   return {
@@ -81,6 +88,8 @@ const source = {
 const sourceSnapshot = structuredClone(source);
 const normalized =
   normalizeExistingGeneratedLessonControls(source);
+const extractedNormalized =
+  normalizeGeneratedLessonControls(source);
 
 assert.deepEqual(normalized, {
   manualOverrideKeys: ["generated:manual:keep"],
@@ -89,6 +98,7 @@ assert.deepEqual(normalized, {
     "generated:suppressed:keep"
   ]
 });
+assert.deepEqual(extractedNormalized, normalized);
 assert.deepEqual(source, sourceSnapshot);
 assert.deepEqual(
   normalizeExistingGeneratedLessonControls({
@@ -117,6 +127,13 @@ const manualAdded =
         "generated:manual:add"
       )
   );
+const extractedManualAdded =
+  normalizeGeneratedLessonControls(
+    addGeneratedLessonManualOverrideKey(
+      normalizeGeneratedLessonControls(source),
+      "generated:manual:add"
+    )
+  );
 assert.deepEqual(manualAdded, {
   manualOverrideKeys: [
     "generated:manual:keep",
@@ -127,6 +144,7 @@ assert.deepEqual(manualAdded, {
     "generated:suppressed:keep"
   ]
 });
+assert.deepEqual(extractedManualAdded, manualAdded);
 assert.deepEqual(
   applyExistingGeneratedLessonControlUpdate(
     manualAdded,
@@ -148,11 +166,19 @@ const suppressedAdded =
         "generated:suppressed:add"
       )
   );
+const extractedSuppressedAdded =
+  normalizeGeneratedLessonControls(
+    addGeneratedLessonSuppressedKey(
+      normalizeGeneratedLessonControls(source),
+      "generated:suppressed:add"
+    )
+  );
 assert.deepEqual(suppressedAdded.suppressedKeys, [
   "generated:suppressed:remove",
   "generated:suppressed:keep",
   "generated:suppressed:add"
 ]);
+assert.deepEqual(extractedSuppressedAdded, suppressedAdded);
 assert.deepEqual(
   applyExistingGeneratedLessonControlUpdate(
     suppressedAdded,
@@ -161,6 +187,18 @@ assert.deepEqual(
         current,
         "generated:suppressed:remove"
       )
+  ).suppressedKeys,
+  [
+    "generated:suppressed:keep",
+    "generated:suppressed:add"
+  ]
+);
+assert.deepEqual(
+  normalizeGeneratedLessonControls(
+    removeGeneratedLessonSuppressedKey(
+      extractedSuppressedAdded,
+      "generated:suppressed:remove"
+    )
   ).suppressedKeys,
   [
     "generated:suppressed:keep",
@@ -178,21 +216,37 @@ assert.deepEqual(
   ).manualOverrideKeys,
   ["generated:manual:add"]
 );
+assert.deepEqual(
+  normalizeGeneratedLessonControls(
+    removeGeneratedLessonManualOverrideKey(
+      extractedManualAdded,
+      "generated:manual:keep"
+    )
+  ).manualOverrideKeys,
+  ["generated:manual:add"]
+);
 assert.deepEqual(source, sourceSnapshot);
 
 const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
+const helperSource = await readFile(
+  new URL(
+    "../src/domains/lessons/generatedLessonControlsModel.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 for (const normalizeBoundary of [
-  "function normalizeGeneratedLessonControls(value = {})",
+  "export function normalizeGeneratedLessonControls(value = {})",
   "manualOverrideKeys: Array.isArray(value.manualOverrideKeys)",
   "[...new Set(value.manualOverrideKeys)]",
   "suppressedKeys: Array.isArray(value.suppressedKeys)",
   "[...new Set(value.suppressedKeys)]"
 ]) {
   assert.ok(
-    appSource.includes(normalizeBoundary),
+    helperSource.includes(normalizeBoundary),
     `missing generated lesson controls normalize boundary: ${normalizeBoundary}`
   );
 }
@@ -213,13 +267,13 @@ const controlsBoundaries = [
   "function markGeneratedLessonManualOverride(lesson)",
   "const generatedKey = getGeneratedLessonKey(lesson)",
   "if (!generatedKey) return",
-  "manualOverrideKeys: [...new Set([...(current.manualOverrideKeys ?? []), generatedKey])]",
+  "addGeneratedLessonManualOverrideKey(",
   "function suppressGeneratedLessonKey(generatedKey)",
-  "suppressedKeys: [...new Set([...(current.suppressedKeys ?? []), generatedKey])]",
+  "addGeneratedLessonSuppressedKey(current, generatedKey)",
   "function unsuppressGeneratedLessonKey(generatedKey)",
-  "suppressedKeys: (current.suppressedKeys ?? []).filter((key) => key !== generatedKey)",
+  "removeGeneratedLessonSuppressedKey(",
   "function clearGeneratedLessonManualOverride(generatedKey)",
-  "manualOverrideKeys: (current.manualOverrideKeys ?? []).filter((key) => key !== generatedKey)"
+  "removeGeneratedLessonManualOverrideKey("
 ];
 let previousIndex = -1;
 for (const boundary of controlsBoundaries) {
@@ -236,6 +290,17 @@ for (const boundary of controlsBoundaries) {
 assert.ok(!controlsSource.includes("fetch("));
 assert.ok(!controlsSource.includes("/api/"));
 assert.ok(!controlsSource.includes("postJson"));
+for (const helperBoundary of [
+  "export function addGeneratedLessonManualOverrideKey(",
+  "export function addGeneratedLessonSuppressedKey(",
+  "export function removeGeneratedLessonSuppressedKey(",
+  "export function removeGeneratedLessonManualOverrideKey("
+]) {
+  assert.ok(
+    helperSource.includes(helperBoundary),
+    `missing generated lesson controls helper: ${helperBoundary}`
+  );
+}
 
 console.log(
   "generated lesson controls model inventory TARGET/CONTROL fixtures passed"
