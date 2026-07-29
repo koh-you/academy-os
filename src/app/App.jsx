@@ -219,6 +219,7 @@ import {
 } from "../domains/settlements/specialLectureSettlement.js";
 import { AutosaveRiskNotice } from "../shared/components/AutosaveRiskNotice.jsx";
 import { EmptyState } from "../shared/components/EmptyState.jsx";
+import { FilterBar } from "../shared/components/FilterBar.jsx";
 import {
   getAggregateSaveState,
   InlineSaveStatus,
@@ -16585,10 +16586,15 @@ function TeacherLessonHubV2({
         className="teacherCalendarTop"
         context={(
           <>
-            <div className="lessonTypeFilterBar" aria-label="수업일지 일정 종류 필터">
+            <FilterBar
+              className="lessonTypeFilterBar"
+              label="수업일지 일정 종류 필터"
+              result={<span>{visibleLessonCount}개</span>}
+            >
               {lessonTypeFilterOptions.map((option) => (
                 <button
-                  className={lessonTypeFilter === option.id ? "active" : ""}
+                  aria-pressed={lessonTypeFilter === option.id}
+                  className={`filterBarOption${lessonTypeFilter === option.id ? " active" : ""}`}
                   key={option.id}
                   onClick={() => setLessonTypeFilter(option.id)}
                   type="button"
@@ -16596,8 +16602,7 @@ function TeacherLessonHubV2({
                   {option.label}
                 </button>
               ))}
-              <span>{visibleLessonCount}개</span>
-            </div>
+            </FilterBar>
             <span
               className={`attendanceSyncPill ${attendanceSyncStatus.state}`}
               title={attendanceSyncStatus.message}
@@ -23177,10 +23182,11 @@ function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, on
 
       <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...appStateAutosaveRisk} />
 
-      <div className="researchSubjectTabs">
+      <FilterBar className="researchSubjectTabs" label="수업연구 과목 필터">
         {lessonResearchSubjects.map((subject) => (
           <button
-            className={selectedSubject === subject ? "active" : ""}
+            aria-pressed={selectedSubject === subject}
+            className={`filterBarOption${selectedSubject === subject ? " active" : ""}`}
             key={subject}
             onClick={() => {
               setSelectedSubject(subject);
@@ -23192,7 +23198,7 @@ function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, on
             <span>{subjectCounts[subject] ?? 0}</span>
           </button>
         ))}
-      </div>
+      </FilterBar>
 
       <div className="researchMetricGrid">
         <MetricCard label="전체 교안 항목" value={`${items.length}개`} hint="과목 전체 누적" />

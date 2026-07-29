@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { FilterBar } from "../../shared/components/FilterBar.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
@@ -124,10 +125,11 @@ export function SchoolCalendarFilterBar({
   onChange
 }) {
   return (
-    <div className="schoolCalendarFilterBar" aria-label="학사일정 표시 항목">
+    <FilterBar className="schoolCalendarFilterBar" label="학사일정 표시 항목">
       {filters.map((filter) => (
         <button
-          className={`schoolCalendarFilterButton${calendarFilter === filter.id ? " active" : ""}`}
+          aria-pressed={calendarFilter === filter.id}
+          className={`filterBarOption schoolCalendarFilterButton${calendarFilter === filter.id ? " active" : ""}`}
           key={filter.id}
           onClick={() => onChange?.(filter.id)}
           type="button"
@@ -135,7 +137,7 @@ export function SchoolCalendarFilterBar({
           {filter.label}
         </button>
       ))}
-    </div>
+    </FilterBar>
   );
 }
 

@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-3C-1. 단일 선택 button filter
+
+- 전수조사: 필터를 button, select/chip, 날짜/month 세 묶음으로 나누고 `docs/ui-filter-inventory-2026-07-29.md`에 원천·setter·결과 계약을 기록했다.
+- 구현: 공통 `FilterBar`와 option/result aside 규칙을 추가해 학사일정 표시 항목, 수업일지 일정 종류와 결과 건수, 수업연구 과목과 과목별 건수를 통일했다. option은 `aria-pressed`, focus-visible, 모바일 내부 가로 스크롤을 사용한다.
+- 동작 보존: `onChange(filter.id)`, `setLessonTypeFilter(option.id)`, `setSelectedSubject(subject)`와 과목 변경 시 `setSelectedItemId("")`, `visibleLessons`/`visibleLessonCount` 계산을 그대로 유지했다. 외부 원천과 side effect는 없다.
+- AI 검수: filter bar CSS와 선택/결과 계약을 포함해 production 시나리오 411개 중 410개가 통과했다. 기존 비관련 `90a` 1개만 기준선 실패이며 `npm run build`, `git diff --check`도 통과했다.
+- 사람 검수: 필수 중단 gate는 없다. 배포 후 세 필터 전환 결과·건수와 390px 내부 스크롤만 확인하는 독립 검수를 누적하고 UI-3C-2로 진행한다.
+
 ## 2026-07-29 UI-3B. 보조·중첩 탭 위계
 
 - 전수조사: 특강 안내문, AI 도구, 오답관리, 학생·학부모 포털, 학생 마이페이지와 중첩 통계, 테스트 관리의 보조 탭을 `docs/ui-secondary-tabs-inventory-2026-07-29.md`에 기록했다. 필터/입력, 지표 카드, 인증·모달 탭은 후속 단위로 분리했다.

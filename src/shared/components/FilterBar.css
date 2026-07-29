@@ -1,0 +1,68 @@
+.sharedFilterBar.sharedFilterBar {
+  align-items: center;
+  background: var(--academy-surface-muted, #f8fafc);
+  border: 1px solid var(--academy-border, #d8e3f8);
+  border-radius: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  max-width: 100%;
+  min-width: 0;
+  padding: 7px;
+}
+
+.sharedFilterBar.sharedFilterBar > .filterBarOption {
+  background: var(--academy-surface, #ffffff);
+  border: 1px solid var(--academy-border-strong, #cbd8ee);
+  border-radius: 999px;
+  color: var(--academy-text-muted, #52647c);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 800;
+  min-height: 38px;
+  padding: 7px 13px;
+}
+
+.sharedFilterBar.sharedFilterBar > .filterBarOption.active,
+.sharedFilterBar.sharedFilterBar > .filterBarOption[aria-pressed="true"] {
+  background: var(--academy-primary, #17213d);
+  border-color: var(--academy-primary, #17213d);
+  color: #ffffff;
+}
+
+.sharedFilterBar.sharedFilterBar > .filterBarOption:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--academy-primary, #2563eb) 28%, transparent);
+  outline-offset: 2px;
+}
+
+.sharedFilterBarAside {
+  align-items: center;
+  display: flex;
+  gap: 7px;
+  margin-left: auto;
+}
+
+.sharedFilterBarAside > span {
+  color: var(--academy-text-muted, #52647c);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .sharedFilterBar.sharedFilterBar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .sharedFilterBar.sharedFilterBar > .filterBarOption {
+    flex: 0 0 auto;
+    min-height: 44px;
+    white-space: nowrap;
+  }
+
+  .sharedFilterBarAside {
+    flex: 0 0 auto;
+  }
+}
