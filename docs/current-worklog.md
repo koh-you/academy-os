@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-6C-3. 알림 action·Solapi 대조 상태 적용
+
+- 알림 예약 취소/기록 삭제의 `saving/saved/failed`를 공통 `loading/success/error` 표현에 연결했다.
+- Solapi 결과 대조의 `loading/saved/partial/failed`를 공통 `loading/success/partial/error` 표현에 연결해 조회 일부 실패가 전체 실패나 완료로 보이지 않게 했다.
+- 기존 상태 setter, 상세 결과 문구, `결과 확인`, 예약 취소, 기록 삭제 callback과 disabled 조건을 그대로 유지했다.
+- notification_jobs/Solapi 실제 조회·예약·취소·발송과 운영 원천을 실행하지 않았다.
+- AI 검수: UI-6C-3 정적 계약과 `npm run build` 128 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 456개 중 기존 기준선 `90a`만 실패했고 신규 실패는 없다.
+- 사람 검수: 알림관리 history의 공통 상태 배치·부분 확인 tone을 desktop/390px에서 확인하는 절차를 누적했다. 실제 결과 확인·예약 취소·기록 삭제는 실행하지 않는다.
+
 ## 2026-07-29 UI-6C-2. 공통 AsyncOperationStatus
 
 - `idle/loading/success/partial/error`를 구분하는 공통 `AsyncOperationStatus`와 상태별 neutral/info/success/pending/danger tone을 추가했다.

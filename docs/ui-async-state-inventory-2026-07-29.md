@@ -34,6 +34,6 @@
 ## 다음 순서
 
 1. `UI-6C-2` 완료: `idle/loading/success/partial/error`, `role=status/alert`, action slot과 모바일 규칙을 가진 공통 `AsyncOperationStatus`를 추가했다.
-2. `UI-6C-3`: 알림 예약 취소/기록 삭제 상태와 Solapi 결과 대조 상태를 공통 component로 옮기되 callback을 보존한다.
-3. `UI-6C-4`: 공지 발송 문자열 상태와 특강·수업일지 부분 성공은 원천별 상태 계약을 먼저 분리한 뒤 적용한다.
+2. `UI-6C-3` 완료: 알림 예약 취소/기록 삭제 상태와 Solapi 결과 대조 상태를 공통 component로 옮기고 callback을 보존했다.
+3. 공지 발송 문자열 상태와 특강·수업일지 부분 성공은 원천별 상태 계약 변경이 필요한 후속 단위로 남긴다. 기존 상세 문구를 단순 UI 치환으로 잃지 않는다.
 4. provider 행 상태는 UI-6D에서 OS 저장과 외부 결과를 분리한다.

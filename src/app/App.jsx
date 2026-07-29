@@ -217,6 +217,7 @@ import {
   normalizeSpecialLectureSettlementState,
   specialLectureSettlementStateKey
 } from "../domains/settlements/specialLectureSettlement.js";
+import { AsyncOperationStatus } from "../shared/components/AsyncOperationStatus.jsx";
 import { AutosaveRiskNotice } from "../shared/components/AutosaveRiskNotice.jsx";
 import { DataTableShell } from "../shared/components/DataTableShell.jsx";
 import { EmptyState } from "../shared/components/EmptyState.jsx";
@@ -11986,6 +11987,17 @@ function NotificationCenter({
   const solapiResultLastCheckedLabel = solapiResultSyncState.checkedAt
     ? formatKoreaTimeLabel(solapiResultSyncState.checkedAt)
     : "아직 없음";
+  const notificationJobActionOperationState = {
+    failed: "error",
+    saved: "success",
+    saving: "loading"
+  }[notificationJobAction.state] ?? "idle";
+  const solapiResultOperationState = {
+    failed: "error",
+    loading: "loading",
+    partial: "partial",
+    saved: "success"
+  }[solapiResultSyncState.state] ?? "idle";
 
   useEffect(() => {
     setSelectedStudentIds((current) => current.filter((studentId) => classFilteredStudents.some((student) => student.studentId === studentId)));
@@ -12689,31 +12701,23 @@ function NotificationCenter({
           title={`알림톡 발송 기록 · ${filterLabels[jobFilter]}`}
         />
         {notificationJobAction.message ? (
-          <p
-            className={[
-              "inlineNotice",
-              "notificationJobActionNotice",
-              notificationJobAction.state === "failed" ? "danger" : "",
-              notificationJobAction.state === "saved" ? "ok" : ""
-            ].filter(Boolean).join(" ")}
-            role="status"
-          >
-            {notificationJobAction.message}
-          </p>
+          <AsyncOperationStatus
+            className="notificationJobActionNotice"
+            description={notificationJobAction.message}
+            label="알림 기록 작업"
+            state={notificationJobActionOperationState}
+          />
         ) : null}
-        <p className={[
-          "inlineNotice",
-          "noticeSolapiResultNotice",
-          solapiResultSyncState.state === "failed" ? "danger" : "",
-          solapiResultSyncState.state === "saved" ? "ok" : "",
-          solapiResultSyncState.state === "partial" ? "warning" : ""
-        ].filter(Boolean).join(" ")}>
-          {solapiResultSyncState.message || (
+        <AsyncOperationStatus
+          className="noticeSolapiResultNotice"
+          description={solapiResultSyncState.message || (
             solapiResultTargets.length
               ? `Solapi 예약/확인필요 알림톡 ${solapiResultTargets.length}건이 있습니다. 버튼을 누르면 모든 알림 유형의 예약 목록을 Solapi 그룹/메시지 결과와 직접 대조해 OS 상태를 갱신합니다.`
               : "Solapi 예약 또는 확인필요 알림톡이 있으면 이곳에서 OS 상태와 직접 대조할 수 있습니다."
           )}
-        </p>
+          label="Solapi 결과 대조"
+          state={solapiResultOperationState}
+        />
         {isNoticeHistoryOpen ? (
         <DataTableShell className="notificationTable noticeHistoryTable" id="notification-history-content" label="알림톡 발송 기록">
           <div className="notificationTableHead">
