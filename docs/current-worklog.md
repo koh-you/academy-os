@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-6D-1. Academy OS row·Solapi provider 상태 inventory
+
+- `notification_jobs.status`를 Academy OS가 저장·해석한 작업 상태로, `provider`·`providerMessageId`를 외부 provider 종류·그룹 참조로 분리했다.
+- `scheduled`, `sent`, `send_unconfirmed`, 내부 claim인 `academy-os-reserving`·`academy-os-dispatching`의 화면 의미를 고정했다.
+- 알림관리와 수업일지는 OS 상태와 Solapi 참조를 이미 분리하지만, 보충 알림 제어 모달은 OS 작업 상태를 `Solapi 상태`라고 잘못 표시하는 것을 확인했다.
+- 결과는 `docs/ui-provider-state-inventory-2026-07-29.md`에 기록했다. notification_jobs/Solapi 실제 조회·예약·취소·발송과 운영 원천은 실행하지 않았다.
+- AI 검수: 원천·화면·내부 claim 분리 정적 계약과 `npm run build` 128 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 457개 중 기존 기준선 `90a`만 실패했고 모든 개별 fixture와 신규 계약은 통과했다.
+- 사람 검수: 코드 UI 변경이 없어 필수 중단 gate가 없다. UI-6D-2 적용 뒤 독립 시각 검수를 누적한다.
+
 ## 2026-07-29 수업일지 긴 문항 줄바꿈·`아는 것만 풂` 문구 정리
 
 - 수업일지의 교재·강의·지난 숙제·다음 숙제 카드에서 쉼표로 이어진 긴 문항 번호도 카드 폭 안에서 줄바꿈되도록 `border-box`, 최소·최대 폭, 강제 줄바꿈 계약을 추가했다.
