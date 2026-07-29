@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { copyTextToClipboard } from "../exams/outputPreview.js";
 import { Modal } from "../../shared/components/Modal.jsx";
 import { SearchField } from "../../shared/components/SearchField.jsx";
+import { SelectionToolbar } from "../../shared/components/SelectionToolbar.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { apiUrl } from "../../shared/utils/apiClient.js";
 import {
@@ -1880,9 +1881,9 @@ export function SpecialLectureApplicationPanel({
                   <em>실제 저장</em>
                 </article>
               </div>
-              <div className="specialLectureSessionBulkActions">
-                <span>1단계 화면 초안: 체크한 회차를 편집합니다. 아직 서버에는 저장되지 않습니다.</span>
-                <div>
+              <SelectionToolbar
+                actions={(
+                  <>
                   <button
                     className="softButton compact"
                     disabled={savingEnrollmentId === enrollment.enrollmentId}
@@ -1899,8 +1900,15 @@ export function SpecialLectureApplicationPanel({
                   >
                     전체 해제
                   </button>
-                </div>
-              </div>
+                  </>
+                )}
+                className="specialLectureSessionBulkActions"
+                description="1단계 화면 초안: 체크한 회차를 편집합니다. 아직 서버에는 저장되지 않습니다."
+                label="특강 회차 선택"
+                selectedCount={draft.sessionPlans.filter((plan) => plan.status === "active").length}
+                totalCount={guideSessions.length}
+                unit="회"
+              />
               <div className="specialLectureCommonTimePanel">
                 <div>
                   <strong>선택 회차 공통 시간</strong>

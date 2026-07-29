@@ -232,6 +232,7 @@ import { NavigationHeader } from "../shared/components/NavigationHeader.jsx";
 import { PageHeader } from "../shared/components/PageHeader.jsx";
 import { SearchField } from "../shared/components/SearchField.jsx";
 import { SectionHeader } from "../shared/components/SectionHeader.jsx";
+import { SelectionToolbar } from "../shared/components/SelectionToolbar.jsx";
 import { StickySaveBar } from "../shared/components/StickySaveBar.jsx";
 import { WorkspaceTabs } from "../shared/components/WorkspaceTabs.jsx";
 import { sampleData } from "../shared/data/sampleData.js";
@@ -12530,16 +12531,19 @@ function NotificationCenter({
             </div>
 
             <div className="noticeStudentPicker">
-              <div className="noticePickerActions noticeListHeader">
-                <div>
-                  <strong>학생 선택</strong>
-                  <span>선택한 학생 {targetStudents.length}명 · 수신 {noticeRecipients.length}건</span>
-                </div>
-                <div>
+              <SelectionToolbar
+                actions={(
+                  <>
                   <button className="softButton compact" onClick={selectAllVisibleStudents} type="button">보이는 학생 전체</button>
                   <button className="softButton compact subtle" onClick={clearSelectedStudents} type="button">선택 해제</button>
-                </div>
-              </div>
+                  </>
+                )}
+                className="noticePickerActions noticeListHeader"
+                description={`수신 ${noticeRecipients.length}건`}
+                label="학생 선택"
+                selectedCount={targetStudents.length}
+                totalCount={visibleNoticeStudents.length}
+              />
               {visibleNoticeStudents.length ? (
                 visibleNoticeStudents.map((student) => {
                   const checked = selectedStudentIds.includes(student.studentId);
@@ -21414,14 +21418,19 @@ function ExamPostSubmissionManager({
             : row.subject || "수학";
           return (
             <article className="examPostTargetGroup" key={`targets_${row.examPrepId}`}>
-              <div>
-                <strong>{row.schoolName} {row.grade} 셀프체크 대상</strong>
-                <span>{mathLabel} · 선택 {selectedIds.length}명 / 후보 {candidates.length}명</span>
-              </div>
-              <div className="examPostTargetActions">
-                <button className="softButton compact" onClick={() => updateRowTargetStudentIds(row, candidates.map((student) => student.studentId))} type="button">전체 선택</button>
-                <button className="softButton compact subtle" onClick={() => updateRowTargetStudentIds(row, [])} type="button">전체 해제</button>
-              </div>
+              <SelectionToolbar
+                actions={(
+                  <>
+                    <button className="softButton compact" onClick={() => updateRowTargetStudentIds(row, candidates.map((student) => student.studentId))} type="button">전체 선택</button>
+                    <button className="softButton compact subtle" onClick={() => updateRowTargetStudentIds(row, [])} type="button">전체 해제</button>
+                  </>
+                )}
+                className="examPostTargetActions"
+                description={mathLabel}
+                label={`${row.schoolName} ${row.grade} 셀프체크 대상`}
+                selectedCount={selectedIds.length}
+                totalCount={candidates.length}
+              />
               <div className="examPostTargetStudents">
                 {candidates.length === 0 ? <span className="muted">해당 학교/학년 학생이 없습니다.</span> : null}
                 {candidates.map((student) => {
@@ -23712,19 +23721,26 @@ function AIVariantProblemCenter({ aiSettings = defaultAiSettings }) {
                   <strong>완료</strong>
                   <span>변형 문제 생성 완료</span>
                 </div>
-                <div className="variantResultToolbar">
-                  <button className="softButton" type="button">별표</button>
-                  <button className="softButton" type="button">전체 저장</button>
-                  <button
-                    className="primaryButton compact"
-                    disabled={selectedVariantCount === 0}
-                    onClick={() => setIsHwpxExportOpen(true)}
-                    type="button"
-                  >
-                    HWPX 내보내기 ({selectedVariantCount})
-                  </button>
-                  <button className="softButton" onClick={handleGenerateVariant} type="button">다시 생성</button>
-                </div>
+                <SelectionToolbar
+                  actions={(
+                    <>
+                      <button
+                        className="primaryButton compact"
+                        disabled={selectedVariantCount === 0}
+                        onClick={() => setIsHwpxExportOpen(true)}
+                        type="button"
+                      >
+                        HWPX 내보내기 ({selectedVariantCount})
+                      </button>
+                      <button className="softButton" onClick={handleGenerateVariant} type="button">다시 생성</button>
+                    </>
+                  )}
+                  className="variantResultToolbar"
+                  label="변형문항 선택"
+                  selectedCount={selectedVariantCount}
+                  totalCount={generatedVariants.length}
+                  unit="개"
+                />
                 {generatedVariants.map((variant) => (
                   <article
                     className={selectedVariantIds.includes(variant.id) ? "variantResultCard selected" : "variantResultCard"}
@@ -26665,14 +26681,17 @@ function ResourceLibraryCenter({ materials = [], onAddMaterial, onDeleteMaterial
             </label>
           </div>
           <div className="resourceStudentPicker">
-            <div className="resourceStudentPickerTop">
-              <strong>개별 학생</strong>
-              <span>선택 {form.studentIds.length}명</span>
-            </div>
-            <div className="resourceBulkActions">
-              <button onClick={selectAllResourceStudents} type="button">전체 선택</button>
-              <button onClick={clearAllResourceStudents} type="button">전체 해제</button>
-            </div>
+            <SelectionToolbar
+              actions={(
+                <>
+                  <button onClick={selectAllResourceStudents} type="button">전체 선택</button>
+                  <button onClick={clearAllResourceStudents} type="button">전체 해제</button>
+                </>
+              )}
+              className="resourceStudentPickerTop resourceBulkActions"
+              label="개별 학생 공개"
+              selectedCount={form.studentIds.length}
+            />
             <div className="resourceClassGroups">
               {resourceStudentGroups.map((group) => {
                 const groupStudentIds = group.students.map((student) => student.studentId);

@@ -9565,16 +9565,6 @@ button:disabled {
   justify-content: space-between;
 }
 
-.specialLectureSessionBulkActions > span {
-  color: #52627a;
-  font-size: 12px;
-}
-
-.specialLectureSessionBulkActions > div {
-  display: flex;
-  gap: 7px;
-}
-
 .specialLectureSessionModalControls {
   grid-template-columns: minmax(140px, 0.35fr) minmax(260px, 1fr);
 }
@@ -14529,7 +14519,6 @@ textarea.profileEditInput {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  justify-content: flex-end;
 }
 
 .variantResultCard {
@@ -15602,11 +15591,6 @@ textarea.profileEditInput {
   display: grid;
   gap: 10px;
   padding: 14px;
-}
-
-.examPostTargetGroup > div:first-child {
-  display: grid;
-  gap: 4px;
 }
 
 .examPostTargetGroup strong {

@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-3E. 선택 행 작업 바·UI-3 완료
+
+- 전수조사: 알림 학생, 퇴원생, 시험 후 대상, AI 변형문항, 자료 공개 학생, 특강 회차 초안의 선택 원천·건수·안전/danger actions를 `docs/ui-selection-toolbar-inventory-2026-07-29.md`에 기록했다. 특강 접수 footer와 수업 명단 그룹 내부 actions는 후속 UI-5C/UI-4B로 분류했다.
+- 구현: 공통 `SelectionToolbar`로 label, 선택/전체 수, 설명, 안전 actions, danger actions와 모바일 44px 줄바꿈을 통일했다. 퇴원생 영구 삭제는 danger 영역에 분리하고 특강 `1단계 화면 초안·서버 저장 아님` 안내를 보존했다.
+- 동작 보존: 알림 전체/해제, 퇴원생 선택·저장·복구·삭제 모달·PDF, 시험 후 대상 배열, 자료함 공개 학생, 특강 회차 draft, AI HWPX 모달·다시 생성 callback과 인자·disabled 조건을 그대로 유지했다. 실제 기능이 연결되지 않았던 AI `별표`·`전체 저장` 버튼만 제거했다.
+- 외부 원천: Supabase/app_state, notification_jobs, Solapi, Storage를 읽거나 수정하지 않았고 저장·삭제·발송·접수·내보내기·AI 실행을 하지 않았다.
+- AI 검수: 선택 state·callback·disabled·danger 분리 정적 계약을 포함한 production 시나리오 415개 중 414개가 통과했다. 기존 비관련 `90a` 한 건만 기준선 실패이며 `npm run build`도 통과했다.
+- 사람 검수: 필수 중단 gate는 없다. 배포 후 체크박스 선택 수, danger 분리, 모바일 줄바꿈을 확인하는 독립 검수를 누적하고 UI-4A 지표·요약 카드로 진행한다.
+
 ## 2026-07-29 UI-3D. 검색 입력·지우기·0건 상태
 
 - 전수조사: 알림 개별 발송, 학부모 응대, 수업 명단, 시험관리, 특강 학생 연결/수동 접수, 보충관리 이력의 7개 검색 state와 normalization·결과 집합을 `docs/ui-search-inventory-2026-07-29.md`에 기록했다.

@@ -3,6 +3,7 @@ import { FilterBar } from "../../shared/components/FilterBar.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
+import { SelectionToolbar } from "../../shared/components/SelectionToolbar.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 import { parseStudentScheduleOverride } from "../../shared/utils/studentSchedule.js";
@@ -855,18 +856,27 @@ export function StudentManager({
             <div className="emptyState studentListEmpty">퇴원생이 없습니다.</div>
           ) : null}
           </div>
-          <div className="withdrawnStudentBulkActions">
-            <span>선택 {selectedWithdrawnStudents.length}명</span>
-            <button className="softButton compact" onClick={selectAllVisibleWithdrawnStudents} type="button">전체 선택</button>
-            <button className="softButton compact" onClick={() => setSelectedWithdrawnStudentIds(new Set())} type="button">선택 해제</button>
-            <button className="primaryButton compact" disabled={!selectedWithdrawnStudents.some((student) => dirtyStudentIds.has(student.studentId))} onClick={saveSelectedWithdrawnStudents} type="button">선택 저장</button>
-            <button className="studentRestoreButton" disabled={selectedWithdrawnStudents.length !== 1} onClick={() => { const student = getSingleSelectedWithdrawnStudent("퇴원 취소"); if (student) restoreStudent(student); }} type="button">퇴원 취소</button>
-            <button className="studentPermanentDeleteButton" disabled={selectedWithdrawnStudents.length === 0} onClick={() => {
-              if (selectedWithdrawnStudents.length === 1) openPermanentDeleteModal(selectedWithdrawnStudents[0]);
-              else openBatchPermanentDeleteModal(selectedWithdrawnStudents);
-            }} type="button">영구 삭제</button>
-            <button className="softButton compact" disabled={selectedWithdrawnStudents.length !== 1} onClick={() => { const student = getSingleSelectedWithdrawnStudent("인수인계서 PDF"); if (student) openHandoverModal(student); }} type="button">인수인계서 PDF</button>
-          </div>
+          <SelectionToolbar
+            actions={(
+              <>
+                <button className="softButton compact" onClick={selectAllVisibleWithdrawnStudents} type="button">전체 선택</button>
+                <button className="softButton compact" onClick={() => setSelectedWithdrawnStudentIds(new Set())} type="button">선택 해제</button>
+                <button className="primaryButton compact" disabled={!selectedWithdrawnStudents.some((student) => dirtyStudentIds.has(student.studentId))} onClick={saveSelectedWithdrawnStudents} type="button">선택 저장</button>
+                <button className="studentRestoreButton" disabled={selectedWithdrawnStudents.length !== 1} onClick={() => { const student = getSingleSelectedWithdrawnStudent("퇴원 취소"); if (student) restoreStudent(student); }} type="button">퇴원 취소</button>
+                <button className="softButton compact" disabled={selectedWithdrawnStudents.length !== 1} onClick={() => { const student = getSingleSelectedWithdrawnStudent("인수인계서 PDF"); if (student) openHandoverModal(student); }} type="button">인수인계서 PDF</button>
+              </>
+            )}
+            className="withdrawnStudentBulkActions"
+            dangerActions={(
+              <button className="studentPermanentDeleteButton" disabled={selectedWithdrawnStudents.length === 0} onClick={() => {
+                if (selectedWithdrawnStudents.length === 1) openPermanentDeleteModal(selectedWithdrawnStudents[0]);
+                else openBatchPermanentDeleteModal(selectedWithdrawnStudents);
+              }} type="button">영구 삭제</button>
+            )}
+            label="퇴원생 선택"
+            selectedCount={selectedWithdrawnStudents.length}
+            totalCount={visibleStudents.length}
+          />
         </>
       ) : (
         <div className="studentListTable">
