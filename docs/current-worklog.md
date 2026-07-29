@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-6A-1. save state vocabulary·신뢰도 inventory
+
+- 전수조사: `InlineSaveStatus` 33곳과 문자열 state, state+message, 단계형 custom state, 외부 provider state, 조회 state를 분류했다.
+- 공통 공백: 현재 canonical state는 `idle/dirty/saving/saved/failed`뿐이라 `verifying`이 `저장 전`으로 오표시될 수 있고 component 자체 `aria-live`가 없다.
+- aggregate 공백: 현재 `saving > dirty > failed > saved`라 실패와 미저장이 같이 있으면 실패가 가려질 수 있다.
+- 신뢰도 경계: 재조회 대조가 있는 흐름과 app_state 자동저장·외부 provider 흐름을 구분했다. UI 문구만으로 미검증 저장을 완료로 승격하지 않는다.
+- 외부 원천: Supabase/app_state, Storage, notification_jobs/Solapi, 출결, AI를 실제 호출하거나 변경하지 않았다.
+- AI 검수: 현재 vocabulary 공백과 실제 `verifying` caller를 정적 계약으로 고정했다. `npm run build`는 126 modules로 통과했고, 전체 `npm run test:production`은 450개 중 기존 기준선 `90a`만 실패했으며 신규 실패는 없다. `git diff --check`도 통과했다.
+- 사람 검수: 코드 UI 변경이 없어 별도 시각 gate가 없다. UI-6A-2는 공통 표현만 확장하므로 필수 중단 없이 진행한다.
+
 ## 2026-07-29 UI-5E-3. 닫기 결과 소유권 이관·UI-5 완료
 
 - 분류: saving 중에도 닫히는 결석보강 취소·보충 완료는 결과 상태 소유권이 필요하고, 학사일정·반 명단·학생 추가 등 조용한 draft 폐기는 원본 snapshot/dirty 비교가 필요하다.

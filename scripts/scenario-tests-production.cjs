@@ -76,6 +76,7 @@ const specialLectureSettlementPanelPath = path.join(root, "src", "domains", "set
 const specialLectureSettlementUtilsPath = path.join(root, "src", "domains", "settlements", "specialLectureSettlement.js");
 const specialLectureSettlementCssPath = path.join(root, "src", "domains", "settlements", "specialLectureSettlement.css");
 const sharedModalPath = path.join(root, "src", "shared", "components", "Modal.jsx");
+const sharedInlineSaveStatusPath = path.join(root, "src", "shared", "components", "InlineSaveStatus.jsx");
 const sharedEmptyStatePath = path.join(root, "src", "shared", "components", "EmptyState.jsx");
 const sharedEmptyStateCssPath = path.join(root, "src", "shared", "components", "EmptyState.css");
 const sharedDataTableShellPath = path.join(root, "src", "shared", "components", "DataTableShell.jsx");
@@ -160,6 +161,7 @@ const apiClientSource = fs.existsSync(apiClientPath) ? fs.readFileSync(apiClient
 const appWithApiClient = `${app}\n${apiClientSource}`;
 const materialManagerSource = `${sourceBetween(app, "function MaterialManager({", "function CandidatePanel({")}\n${testManagerPanelsSource}`;
 const studentManagerSource = fs.existsSync(studentManagerPath) ? fs.readFileSync(studentManagerPath, "utf8") : "";
+const sharedInlineSaveStatusSource = fs.existsSync(sharedInlineSaveStatusPath) ? fs.readFileSync(sharedInlineSaveStatusPath, "utf8") : "";
 const tallyStudentMergeSource = fs.existsSync(tallyStudentMergePath) ? fs.readFileSync(tallyStudentMergePath, "utf8") : "";
 const examQuestionClassificationSource = fs.existsSync(examQuestionClassificationPath) ? fs.readFileSync(examQuestionClassificationPath, "utf8") : "";
 const examQuestionItemsSource = fs.existsSync(examQuestionItemsPath) ? fs.readFileSync(examQuestionItemsPath, "utf8") : "";
@@ -701,6 +703,7 @@ check("77j-5e-3 modal closeDisabled stays limited to existing no-op guards while
     && hasAll(app, ["function SupplementCancellationConfirmModal", "onClose={onCancel}", "function SupplementPassConfirmModal", "className=\"classRosterModal\"", "onClose={() => setIsRosterModalOpen(false)}", "function StudentModal", "className=\"studentAddModal\""])
     && hasAll(schoolCalendarComponentsSource, ["className=\"schoolDateScheduleModal\"", "className=\"schoolEventFormModal\"", "onClose={onClose}"]);
 })());
+check("77j-6a-1 shared save-state vocabulary gap stays inventoried before verifying and live-status semantics are added", hasAll(sharedInlineSaveStatusSource, ["idle: \"저장 전\"", "dirty: \"변경됨\"", "saving: \"저장 중\"", "saved: \"저장 완료\"", "failed: \"저장 실패\"", "normalizedStates.includes(\"saving\")", "normalizedStates.includes(\"dirty\")", "normalizedStates.includes(\"failed\")"]) && !sharedInlineSaveStatusSource.includes("verifying:") && !sharedInlineSaveStatusSource.includes("aria-live") && hasAll(app, ["state: \"verifying\"", "Supabase 저장 후 반영 내용을 다시 확인 중입니다."]));
 check("77j-2c notification center restores the parent response tab without storing channel replies", hasAll(app, ["ParentResponseContextPanel", "getParentResponseContexts", "[\"parent_context\", \"학부모 응대\"", "activeNoticeWorkspace === \"parent_context\""]) && hasAll(css, [".parentResponseContextPanel", ".parentResponseContextCard", ".parentResponseContextBody"]));
 check("77j-3 exam analysis selection columns keep Korean labels clear beside thin scrollbars", hasAll(css, [".examAnalysisColumnList::-webkit-scrollbar", ".examAnalysisColumnList::-webkit-scrollbar-button", "scrollbar-gutter: stable", ".examAnalysisColumnCard strong", "line-height: 1.4", "padding-block: 1px"]));
 check("78 lesson journal does not show keyboard shortcut hint text", !app.includes("↑↓←→") && !app.includes("Ctrl+C/V/Z"));
