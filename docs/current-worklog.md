@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-7C-3. 대표 탭·필터·검색 회귀
+
+- 알림관리 상위 탭의 `aria-selected`·state setter, 알림 대상 반·학생 필터와 검색 결과 수, 학사일정 표시·학교 filter callback, 학부모 응대 검색 결과·0건 상태를 대표 표본으로 고정했다.
+- 공통 탭의 내부 `scrollLeft` 보수가 caller 선택 state나 문서 scroll을 소유하지 않고, 검색 지우기가 기존 `onChange("")`를 사용하는 계약을 함께 대조했다.
+- 코드 UI·callback·filter/search result와 Supabase/app_state·notification_jobs/Solapi·수업·AI·출결 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 대표 caller state·callback·result·zero-state와 공통 모바일 정적 계약, `npm run build` 128 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 469개 중 기존 기준선 `90a`만 실패했고 모든 개별 fixture와 신규 계약은 통과했다.
+- 사람 검수: UI-7C-2에 누적된 390px 절차가 이 단위까지 포함하며 새 중단 gate는 없다.
+
 ## 2026-07-29 UI-7C-2. 모바일 선택 탭 가시성·검색 지우기 터치
 
 - 공통 `WorkspaceTabs`가 넘치는 경우 현재 선택된 직계 button만 찾아 tablist의 `scrollLeft`를 필요한 만큼 조정하도록 했다.
