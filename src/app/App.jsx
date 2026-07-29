@@ -21158,7 +21158,14 @@ function ExamPrepCenter({
           </div>
           <div className="pastPaperFrameWrap">
             {pastPaperLoadState === "loading" ? (
-              <div className="pastPaperLoading">기출문제 아카이브를 불러오는 중입니다.</div>
+              <EmptyState
+                aria-busy="true"
+                aria-live="polite"
+                className="pastPaperLoading"
+                role="status"
+                title="기출문제 아카이브를 불러오는 중입니다."
+                tone="loading"
+              />
             ) : null}
             <iframe
               className="pastPaperFrame"

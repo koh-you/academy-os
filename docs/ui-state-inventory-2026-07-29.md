@@ -19,6 +19,19 @@
 | 원천 조회 error·retry | banner/inline notice/error boundary | 기존 retry/back callback | 매우 높음 | UI-4D-4 |
 | 저장·발송·삭제 실패 | `InlineSaveStatus`, action status | draft와 외부 side effect | 매우 높음 | UI-6에서 별도 처리 |
 
+## UI-4D-3 loading 인벤토리
+
+| 화면 | 현재 상태 원천 | 중복 행동 방지 | 판정 |
+| --- | --- | --- | --- |
+| 시험분석 프롬프트 제작실 | `draft/detail` 초기 API 조회 | 완료 전 본문 미렌더 | UI-4D-3A 안전 이관 |
+| 시험정보 기출문제 아카이브 | iframe `pastPaperLoadState` | 기존 다시 불러오기 key 증가 | UI-4D-3A 안전 이관 |
+| 출결 단말 | `isLoading` + PIN 인증/제출 | input·submit disabled | 인증 흐름과 함께 후속 검토 |
+| 알림관리 기록 | `notificationJobsStatus` | 새로고침 disabled·실패 retry | UI-4D-4 error/retry와 함께 검토 |
+| 시험분석 생성·저장, Solapi 대조, 학생·정산 저장 | 화면별 action status | 버튼 disabled·draft·외부 side effect | UI-6 저장/외부 동작 상태로 이관 |
+
+- UI-4D-3에서는 비동기 전이·disabled·retry callback을 새로 만들거나 변경하지 않는다.
+- 읽기 전용 초기 조회만 공통 `loading` tone과 `role=status`, `aria-live=polite`, `aria-busy=true`를 적용한다.
+
 ## UI-4D-1A 공통 EmptyState와 포털 읽기 상태
 
 - `EmptyState`가 기존 children 사용을 보존하면서 `title`, `description`, `action`, `tone` 구조를 선택적으로 제공하도록 확장했다.
@@ -52,10 +65,16 @@
 - 학생 radio/checkbox key와 선택 setter, 보충 이력 row key와 완료 복귀 callback은 변경하지 않았다.
 - 이로써 명시적인 검색 입력을 가진 주요 0건 상태의 `UI-4D-2` 구분을 완료했다.
 
+## UI-4D-3A 읽기 전용 loading 상태
+
+- 시험분석 프롬프트 제작실의 `draft/detail` 초기 조회와 시험정보 기출문제 iframe 조회를 공통 `EmptyState` loading tone으로 이관했다.
+- 프롬프트 API 호출·오류 분기, 기출문제 다시 불러오기 setter·iframe key·`onLoad` 상태 전이를 보존했다.
+- 출결 단말은 PIN 인증과 결합되어 있고, 알림 기록은 실패/retry와 한 상태 모델을 쓰므로 변경하지 않았다.
+
 ## 다음 단위
 
-`UI-4D-3`에서는 초기/재조회 loading 표현을 inventory하고, 실제 상태가 `loading`인 동안의 중복 클릭 방지와 기존 상태 전이를 보존한 채 공통 tone·`role=status`·`aria-live=polite` 적용 범위를 정한다. 오류와 retry는 `UI-4D-4`로 분리한다.
+`UI-4D-4`에서는 원천 조회 error/retry 표현을 inventory한다. 기존 retry/back callback이 있는 오류부터 안전한 공통 구조 적용 범위를 정하고, 저장·발송·삭제·출결 오류는 `UI-6` 또는 독립 gate로 남긴다.
 
 ## 사람 검수
 
-필수 중단 gate는 없다. 배포 후 학생·학부모 포털과 학생 프로필·시험 미리보기·테스트·특강관리의 빈 영역에서 제목과 설명의 위계, box 높이, desktop/390px 줄바꿈만 확인한다. 숙제 완료·질문·시험 제출·자료 업로드·상담/성적/테스트/특강 저장 버튼은 누르지 않는다.
+필수 중단 gate는 없다. 배포 후 기존 빈 상태와 함께 프롬프트 제작실·기출문제 아카이브의 조회 중 배경·문구·desktop/390px 줄바꿈을 확인한다. 숙제 완료·질문·시험 제출·자료 업로드·상담/성적/테스트/특강 저장 버튼은 누르지 않는다.

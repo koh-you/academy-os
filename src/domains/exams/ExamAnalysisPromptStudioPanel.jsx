@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { getJsonWithTimeout, postJsonWithTimeout } from "../../shared/utils/apiClient.js";
 import { copyTextToClipboard } from "./outputPreview.js";
 import { createExamAnalysisPromptInputSnapshot } from "./examAnalysisPromptInputMapping.js";
@@ -233,7 +234,20 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
 
   if (!analysisRunId) return null;
   if (loadError) return <section className="panel examPromptStudio"><div className="errorBanner">프롬프트 제작실 불러오기 실패 · {loadError}</div></section>;
-  if (!draft || !detail) return <section className="panel examPromptStudio"><div className="emptyState compact">프롬프트 제작실 불러오는 중</div></section>;
+  if (!draft || !detail) {
+    return (
+      <section className="panel examPromptStudio">
+        <EmptyState
+          aria-busy="true"
+          aria-live="polite"
+          className="emptyState compact"
+          role="status"
+          title="프롬프트 제작실을 불러오는 중입니다."
+          tone="loading"
+        />
+      </section>
+    );
+  }
 
   return (
     <section className="panel examPromptStudio">

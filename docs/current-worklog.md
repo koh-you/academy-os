@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-4D-3A. 읽기 전용 loading 상태
+
+- 전수조사: 초기/재조회 loading을 읽기 전용 조회, 인증·출결, 오류/retry 결합, 저장·생성·외부 대조 상태로 분리했다. 이번 단위는 시험분석 프롬프트 제작실과 기출문제 iframe만 안전 대상으로 확정했다.
+- 구현: 두 조회 상태를 공통 `EmptyState` loading tone과 `role=status`, `aria-live=polite`, `aria-busy=true`로 이관했다.
+- 동작 보존: 프롬프트 API/오류 분기와 기출문제 다시 불러오기 setter·frame key·`onLoad` 전이를 정적 계약으로 고정했다. 출결 단말, 알림 실패/retry, 저장·생성·Solapi 상태는 변경하지 않았다.
+- 외부 원천: Supabase/app_state, notification_jobs/Solapi, 출결, 시험분석 저장·생성, iframe 외부 원천을 실제 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(126 modules). 전용 정적 계약 포함 scenario 433개 중 432개 통과, 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 두 loading 상태의 문구·배경·390px 배치를 누적하고 `UI-4D-4` error/retry inventory로 진행한다.
+
 ## 2026-07-29 UI-4D-2B. 특강·보충 검색 0건·UI-4D-2 완료
 
 - 구현: 특강 신청자 매칭/수동 접수와 보충관리 최근 이력에서 검색 결과 0건과 실제 원천 0건을 분리하고 기존 `setMatchSearchText`, `setManualSearchText`, `onChangeQuery`를 지우기 action에 연결했다.

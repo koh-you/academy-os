@@ -47,6 +47,7 @@
 | UI-4D-1B | 완료 | 학생 프로필·시험 미리보기·테스트·특강 0건 상태 통일 |
 | UI-4D-2A | 완료 | 학부모 응대·수업 명단·시험정보·학생 filter 0건 상태 구분 |
 | UI-4D-2B | 완료 | 특강 신청 매칭·수동 접수·보충 이력 검색 0건 상태 구분 |
+| UI-4D-3A | 완료 | 프롬프트 제작실·기출문제 읽기 전용 loading 상태 통일 |
 
 ## 전체 세부 작업 목록
 
@@ -75,7 +76,7 @@
 | UI-4A | 지표·요약 카드 | 숫자, label, 보조 설명, 상태 badge 위계 통일 | 완료 — 단순 16개·클릭형/micro 14개, 계산 원천 불변 |
 | UI-4B | 학생·수업·알림·보충 목록 카드 | 제목, 메타, 상태, 행동 위치와 카드 밀도 통일 | 완료 — 카드형 목록 1~4B 완료, 표형 행은 UI-4C로 이관 |
 | UI-4C | 데이터 표 | 공통 header/row/pill/빈 행, sticky header 여부, 내부 가로 스크롤 규칙 | 완료 — 13개 표 shell과 공통 시각 토큰, 기존 정산 sticky만 유지 |
-| UI-4D | 빈 화면·로딩·오류 | `EmptyState` 기반 문구, 재시도, 다음 행동 위치 통일 | 진행 — 일반·검색 0건 완료, loading/error·재시도 callback 불변 |
+| UI-4D | 빈 화면·로딩·오류 | `EmptyState` 기반 문구, 재시도, 다음 행동 위치 통일 | 진행 — 일반·검색 0건과 안전한 조회 loading 완료, error·재시도 callback 불변 |
 | UI-4E | 접힘/펼치기 영역 | 요약에서 무엇을 보여줄지, 펼침 버튼 위치, 상태 유지 규칙 통일 | 원본 데이터와 open state 불변 |
 
 ### UI-5. 모달·패널·확인 흐름
@@ -145,6 +146,6 @@
 
 ## 다음 실행 목표
 
-> 최신 상태: `UI-4C`, `UI-4D-1A~1B`, `UI-4D-2A~2B` 일반·검색 0건 상태를 완료했다. 현재 다음 작은 목표는 `UI-4D-3 loading 상태`이며, 기존 비동기 상태 전이와 disabled 조건은 바꾸지 않는다.
+> 최신 상태: `UI-4C`, `UI-4D-1A~1B`, `UI-4D-2A~2B`, `UI-4D-3A`를 완료했다. 현재 다음 작은 목표는 `UI-4D-4 error/retry 상태`이며, 기존 retry/back callback과 비동기 상태 전이는 바꾸지 않는다.
 
-`docs/ui-state-inventory-2026-07-29.md`를 기준으로 실제 `loading` 상태 표현과 중복 클릭 방지 조건을 먼저 inventory한다. 안전한 조회 loading부터 공통 tone과 `role=status`/`aria-live=polite`를 적용하고 오류/retry는 다음 단위로 남긴다. 저장·발송·삭제·출결 변경은 실행하지 않는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
+`docs/ui-state-inventory-2026-07-29.md`를 기준으로 원천 조회 실패와 기존 retry/back callback을 먼저 inventory한다. 저장·발송·삭제·출결 오류는 UI-6 또는 독립 gate로 분리하고, 읽기 전용 조회 오류부터 공통 error tone과 접근성 역할을 검토한다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
