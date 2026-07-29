@@ -36,3 +36,11 @@
 1. UI-7A-2: nav/현재 위치/toggle semantics와 app shell safe-area를 보강한다.
 2. UI-7A-3: 모바일에서 compact header와 `전체 메뉴` toggle을 제공하고 화면 선택 후 메뉴를 닫아 본문을 바로 보이게 한다.
 3. UI-7A-4: 1100px tablet의 3열 메뉴와 desktop 접힘 회귀를 정적·시각 대조한다.
+
+## UI-7A 완료 계약
+
+- desktop: sidebar sticky·자체 스크롤, 펼침 294px·접힘 86px, 전체 icon 메뉴를 유지한다.
+- tablet 641~1100px: sidebar는 document flow이고 nav group을 3열로 표시한다.
+- mobile 640px 이하: sidebar는 현재 화면·전체 메뉴 compact header로 시작하고, 열린 menu group은 2열이다.
+- mobile 화면 선택: 기존 view callback을 실행하고 메뉴를 닫은 뒤 문서 상단으로 이동한다.
+- 모든 폭: 현재 화면 `aria-current`, nav/toggle 관계와 safe-area 간격을 유지한다.

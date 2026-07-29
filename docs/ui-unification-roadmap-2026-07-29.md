@@ -79,6 +79,7 @@
 | UI-7A-1 | 완료 | 앱 shell·사이드바 desktop/mobile/accessibility gap inventory |
 | UI-7A-2 | 완료 | 사이드바 nav/current/toggle semantics와 iOS app shell safe-area |
 | UI-7A-3 | 완료 | 모바일 compact 현재 화면·전체 메뉴 toggle과 선택 후 본문 진입 |
+| UI-7A-4 | 완료 | desktop sticky·tablet 3열·mobile compact/2열 shell 회귀 계약 |
 
 ## 전체 세부 작업 목록
 
@@ -177,6 +178,6 @@
 
 ## 다음 실행 목표
 
-> 최신 상태: `UI-4`와 `UI-5`, `UI-6` 전체와 `UI-7A-1~3`을 완료했다. 현재 다음 작은 목표는 `UI-7A-4 desktop/tablet/mobile shell 회귀 고정`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
+> 최신 상태: `UI-4`와 `UI-5`, `UI-6`, `UI-7A` 전체를 완료했다. 현재 다음 작은 목표는 `UI-7B-1 페이지 머리말·행동 모바일 inventory`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
 
-desktop sticky·접힘, 1100px tablet 3열, 640px mobile compact/2열과 safe-area 조합을 다시 대조하고 UI-7A 완료 계약을 고정한다. view 전환 callback·로그인/session 동작은 변경하지 않는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
+공통 PageHeader·NavigationHeader·SectionHeader와 page/section actions가 640px 이하에서 어떻게 줄바꿈·한 열·가로스크롤되는지 inventory한다. title·description·badge·callback·disabled 조건은 변경하지 않는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.

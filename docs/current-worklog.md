@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-7A-4. desktop·tablet·mobile shell 회귀 계약
+
+- desktop 294/86px sticky sidebar, 641~1100px document-flow 3열 nav, 640px 이하 compact toggle·그룹별 2열 nav를 한 계약으로 다시 대조했다.
+- mobile open/close, 선택 후 메뉴 닫기·scroll reset, desktop collapsed의 mobile 복구, logout·보충 badge·전체 menu route 보존을 고정했다.
+- nav/current/toggle semantics와 iOS safe-area도 breakpoint 회귀 계약에 포함했다.
+- 코드 UI·view callback·로그인/session·운영 원천은 변경하거나 실행하지 않았다.
+- AI 검수: shell 전체 breakpoint 계약과 `npm run build` 128 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 463개 중 기존 기준선 `90a`만 실패했고 모든 개별 fixture와 신규 계약은 통과했다.
+- 사람 검수: UI-7A-2~3의 누적 절차에 desktop/tablet/390px 실화면 확인이 이미 기록되어 있어 새 중단 gate는 없다.
+
 ## 2026-07-29 UI-7A-3. 모바일 compact 전체 메뉴
 
 - 640px 이하 sidebar에 `현재 화면 · {화면명}`과 `전체 메뉴/메뉴 닫기` toggle을 추가하고 기본 상태를 닫힘으로 정리했다.
