@@ -45,7 +45,16 @@
 
 ## 다음 단위
 
-`UI-4D-2B`에서는 특강 신청 매칭·수동 추가, 보충관리 등 남은 검색 전용 raw empty box를 같은 원천 0건/검색 0건 계약으로 이관한다. 실제 loading·오류·재시도는 `UI-4D-3~4`로 남긴다.
+### UI-4D-2B 특강·보충 검색 0건 구분
+
+- 특강 신청자 매칭과 수동 접수는 검색 결과 0건과 실제 연결/추가 가능 학생 0건을 분리하고, 기존 search setter를 지우기 action에 연결했다.
+- 보충관리 최근 이력은 query 결과 0건과 최근 한 달 원천 0건을 분리하고, 기존 `onChangeQuery` callback으로 검색어를 지운다.
+- 학생 radio/checkbox key와 선택 setter, 보충 이력 row key와 완료 복귀 callback은 변경하지 않았다.
+- 이로써 명시적인 검색 입력을 가진 주요 0건 상태의 `UI-4D-2` 구분을 완료했다.
+
+## 다음 단위
+
+`UI-4D-3`에서는 초기/재조회 loading 표현을 inventory하고, 실제 상태가 `loading`인 동안의 중복 클릭 방지와 기존 상태 전이를 보존한 채 공통 tone·`role=status`·`aria-live=polite` 적용 범위를 정한다. 오류와 retry는 `UI-4D-4`로 분리한다.
 
 ## 사람 검수
 

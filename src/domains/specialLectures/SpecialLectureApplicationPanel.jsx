@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { copyTextToClipboard } from "../exams/outputPreview.js";
+import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
 import { SearchField } from "../../shared/components/SearchField.jsx";
 import { SelectionToolbar } from "../../shared/components/SelectionToolbar.jsx";
@@ -1692,7 +1693,18 @@ export function SpecialLectureApplicationPanel({
                     {student.defaultClassTemplateId ? "정규반 배정" : "정규반 미배정"}
                   </span>
                 </label>
-              )) : <p className="specialLectureGateEmpty">{matchSearchText.trim() ? "검색 결과가 없습니다. 검색어를 지우거나 다시 입력하세요." : "연결할 수 있는 학생이 없습니다. 신청자를 특강 전용 학생으로 등록할 수 있습니다."}</p>}
+              )) : (
+                <EmptyState
+                  action={matchSearchText.trim() ? (
+                    <button className="softButton compact" onClick={() => setMatchSearchText("")} type="button">검색어 지우기</button>
+                  ) : null}
+                  className="specialLectureGateEmpty"
+                  description={matchSearchText.trim()
+                    ? "이름·학교·학년·반을 다시 확인하세요."
+                    : "신청자를 특강 전용 학생으로 등록할 수 있습니다."}
+                  title={matchSearchText.trim() ? "검색 결과가 없습니다." : "연결할 수 있는 학생이 없습니다."}
+                />
+              )}
             </div>
             {matchApplication.source === "tally" && matchSelectedStudent ? (
               <div className="specialLectureTallyMergePreview">
@@ -1777,7 +1789,16 @@ export function SpecialLectureApplicationPanel({
                     {student.defaultClassTemplateId ? "정규반 배정" : "정규반 미배정"}
                   </span>
                 </label>
-              )) : <p className="specialLectureGateEmpty">{manualSearchText.trim() ? "검색 결과가 없습니다. 검색어를 지우거나 다시 입력하세요." : "추가할 수 있는 학생이 없습니다."}</p>}
+              )) : (
+                <EmptyState
+                  action={manualSearchText.trim() ? (
+                    <button className="softButton compact" onClick={() => setManualSearchText("")} type="button">검색어 지우기</button>
+                  ) : null}
+                  className="specialLectureGateEmpty"
+                  description={manualSearchText.trim() ? "이름·학교·학년·반을 다시 확인하세요." : "이미 등록된 학생은 목록에서 제외됩니다."}
+                  title={manualSearchText.trim() ? "검색 결과가 없습니다." : "추가할 수 있는 학생이 없습니다."}
+                />
+              )}
             </div>
             <div className="specialLectureModalActions">
               <button className="softButton" onClick={() => setManualPickerOpen(false)} type="button">취소</button>

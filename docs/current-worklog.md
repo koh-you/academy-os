@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-4D-2B. 특강·보충 검색 0건·UI-4D-2 완료
+
+- 구현: 특강 신청자 매칭/수동 접수와 보충관리 최근 이력에서 검색 결과 0건과 실제 원천 0건을 분리하고 기존 `setMatchSearchText`, `setManualSearchText`, `onChangeQuery`를 지우기 action에 연결했다.
+- 동작 보존: 특강 학생 radio/checkbox 선택, 보충 이력 row key와 완료 복귀 callback을 정적 계약으로 고정했다.
+- 외부 원천: 특강 수강명단, 보충관리, Supabase/app_state, notification_jobs/Solapi를 실제 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(126 modules). 전용 정적 계약의 초기 수동 선택 setter 이름 불일치를 바로잡은 뒤 scenario 432개 중 431개 통과, 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 검색/원천 0건 문구와 지우기·390px 배치를 누적하고 `UI-4D-3` loading 상태로 진행한다.
+
 ## 2026-07-29 UI-4D-2A. 대표 검색·filter 0건 구분
 
 - 구현: 학부모 응대, 수업 명단 검색, 시험정보 검색에서 원천 0건과 검색 결과 0건의 제목·설명을 분리하고, query가 있을 때 기존 setter를 `검색어 지우기` action에 연결했다. 학생관리 전체/반/퇴원 탭도 filter 맥락별 0건 문구로 정리했다.
