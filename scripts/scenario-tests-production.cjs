@@ -177,6 +177,7 @@ const generatedSchoolEventStudentSelectorPath = path.join(root, "src", "domains"
 const generatedPreExamLessonBuilderPath = path.join(root, "src", "domains", "lessons", "generatedPreExamLessonBuilder.js");
 const generatedPreExamLessonIdBuilderPath = path.join(root, "src", "domains", "lessons", "generatedPreExamLessonIdBuilder.js");
 const derivedMathEventExamPrepIdSelectorPath = path.join(root, "src", "domains", "lessons", "derivedMathEventExamPrepIdSelector.js");
+const preExamMathLabelInferencePath = path.join(root, "src", "domains", "lessons", "preExamMathLabelInference.js");
 const lessonModalActionsPath = path.join(root, "src", "domains", "lessons", "LessonModalActions.jsx");
 const lessonModalBasicsPath = path.join(root, "src", "domains", "lessons", "LessonModalBasics.jsx");
 const lessonModalClosurePanelPath = path.join(root, "src", "domains", "lessons", "LessonModalClosurePanel.jsx");
@@ -569,6 +570,7 @@ const generatedSchoolEventStudentSelectorSource = fs.existsSync(generatedSchoolE
 const generatedPreExamLessonBuilderSource = fs.existsSync(generatedPreExamLessonBuilderPath) ? fs.readFileSync(generatedPreExamLessonBuilderPath, "utf8") : "";
 const generatedPreExamLessonIdBuilderSource = fs.existsSync(generatedPreExamLessonIdBuilderPath) ? fs.readFileSync(generatedPreExamLessonIdBuilderPath, "utf8") : "";
 const derivedMathEventExamPrepIdSelectorSource = fs.existsSync(derivedMathEventExamPrepIdSelectorPath) ? fs.readFileSync(derivedMathEventExamPrepIdSelectorPath, "utf8") : "";
+const preExamMathLabelInferenceSource = fs.existsSync(preExamMathLabelInferencePath) ? fs.readFileSync(preExamMathLabelInferencePath, "utf8") : "";
 const lessonModalActionsSource = fs.existsSync(lessonModalActionsPath) ? fs.readFileSync(lessonModalActionsPath, "utf8") : "";
 const lessonModalBasicsSource = fs.existsSync(lessonModalBasicsPath) ? fs.readFileSync(lessonModalBasicsPath, "utf8") : "";
 const lessonModalClosurePanelSource = fs.existsSync(lessonModalClosurePanelPath) ? fs.readFileSync(lessonModalClosurePanelPath, "utf8") : "";
@@ -1678,7 +1680,28 @@ check(
 );
 check("84d-154 derived math event examPrep ID selector extraction stays pure before App-owned repair orchestration", (appEntrySource.match(/from "\.\.\/domains\/lessons\/derivedMathEventExamPrepIdSelector\.js"/g) || []).length === 1 && (appEntrySource.match(/getExamPrepIdFromDerivedMathEvent\(/g) || []).length === 1 && (derivedMathEventExamPrepIdSelectorSource.match(/export function getExamPrepIdFromDerivedMathEvent\(/g) || []).length === 1 && hasAll(appEntrySource, ["function repairExamPrepRowsFromPersistedPreExamLessons(", "return rows.map((row) => {", "const sourceLessons = preExamLessons.filter((lesson) =>", "getExamPrepIdFromDerivedMathEvent(lesson.sourceSchoolEventId, [row]) === row.examPrepId", "if (!sourceLessons.length) return row"]) && !["useState", "useEffect", "fetch(", "postJson", "/api/", "setLessons", "setExamPrepRows", "persistExamPrepRows", "localStorage", "Supabase", "Solapi", "Date.now", "Promise.all"].some((value) => derivedMathEventExamPrepIdSelectorSource.includes(value)));
 check("84d-155 derived math event examPrep ID selector boundary closes out with one App consumer and App-owned repair", (appEntrySource.match(/from "\.\.\/domains\/lessons\/derivedMathEventExamPrepIdSelector\.js"/g) || []).length === 1 && (appEntrySource.match(/getExamPrepIdFromDerivedMathEvent\(/g) || []).length === 1 && !appEntrySource.includes("function getExamPrepIdFromDerivedMathEvent(") && (derivedMathEventExamPrepIdSelectorSource.match(/export function getExamPrepIdFromDerivedMathEvent\(/g) || []).length === 1 && hasAll(appEntrySource, ["function repairExamPrepRowsFromPersistedPreExamLessons(", 'String(lesson.sourceSchoolEventId || "").startsWith("derived_math_")', "if (!rows.length || !preExamLessons.length) return rows", "return rows.map((row) => {", "getExamPrepIdFromDerivedMathEvent(lesson.sourceSchoolEventId, [row]) === row.examPrepId", "if (!sourceLessons.length) return row", "let didRepair = false"]) && hasAll(derivedMathEventExamPrepIdSelectorSource, ['if (!sourceId.startsWith("derived_math_")) return ""', "const sourceTail = sourceId.replace(", "rows.find((row) =>", "sourceTail.startsWith(`${row.examPrepId}_`)", '?.examPrepId || ""']) && !["useState", "useEffect", "fetch(", "postJson", "/api/", "setLessons", "setExamPrepRows", "persistExamPrepRows", "localStorage", "Supabase", "Solapi", "Date.now", "Promise.all"].some((value) => derivedMathEventExamPrepIdSelectorSource.includes(value)));
-check("84d-156 preExam math label inference inventory preserves ordered cleanup and default-label exclusion", (appEntrySource.match(/function inferMathExamLabelFromPreExamLesson\(/g) || []).length === 1 && (appEntrySource.match(/inferMathExamLabelFromPreExamLesson\(/g) || []).length === 2 && hasAll(appEntrySource, ['function inferMathExamLabelFromPreExamLesson(lesson = {}, row = {})', 'const schoolName = String(row.schoolName || "").trim()', 'const grade = normalizeGradeLabel(row.grade || "")', 'const text = String(lesson.className || "")', '.replace(/\\s*직전수업\\s*$/, "")', '.replace(schoolName, "")', '.replace(grade, "")', ".trim()", 'if (!text || /^\\d+$/.test(text)) return ""', 'if (["수학", "수학시험", row.subject].includes(text)) return ""', "label: previousEntry?.label || inferMathExamLabelFromPreExamLesson(lesson, row)"]));
+check(
+  "84d-156 preExam math label inference inventory preserves ordered cleanup and default-label exclusion",
+  (appEntrySource.match(/function inferMathExamLabelFromPreExamLesson\(/g) || []).length === 0 &&
+    (appEntrySource.match(/inferMathExamLabelFromPreExamLesson\(/g) || []).length === 1 &&
+    (preExamMathLabelInferenceSource.match(/return function inferMathExamLabelFromPreExamLesson\(/g) || []).length === 1 &&
+    hasAll(preExamMathLabelInferenceSource, [
+      'row.schoolName || ""',
+      'const grade = normalizeGradeLabel(row.grade || "")',
+      'const text = String(lesson.className || "")',
+      '.replace(/\\s*직전수업\\s*$/, "")',
+      '.replace(schoolName, "")',
+      '.replace(grade, "")',
+      ".trim()",
+      'if (!text || /^\\d+$/.test(text)) return ""',
+      '["수학", "수학시험", row.subject].includes(text)',
+      "return text"
+    ]) &&
+    appEntrySource.includes(
+      "label: previousEntry?.label || inferMathExamLabelFromPreExamLesson(lesson, row)"
+    )
+);
+check("84d-157 preExam math label inference extraction stays pure with App-injected grade normalization", (appEntrySource.match(/from "\.\.\/domains\/lessons\/preExamMathLabelInference\.js"/g) || []).length === 1 && (appEntrySource.match(/createPreExamMathLabelInference\(\{/g) || []).length === 1 && (preExamMathLabelInferenceSource.match(/export function createPreExamMathLabelInference\(/g) || []).length === 1 && hasAll(appEntrySource, ["const inferMathExamLabelFromPreExamLesson =", "createPreExamMathLabelInference({", "normalizeGradeLabel", "label: previousEntry?.label || inferMathExamLabelFromPreExamLesson(lesson, row)"]) && !["useState", "useEffect", "fetch(", "postJson", "/api/", "setLessons", "setExamPrepRows", "persistExamPrepRows", "localStorage", "Supabase", "Solapi", "Date.now", "Promise.all"].some((value) => preExamMathLabelInferenceSource.includes(value)));
 check("84e shared modal closes with Escape key", hasAll(app, ["import { Modal, ModalFooter } from \"../shared/components/Modal.jsx\""]) && hasAll(sharedModalSource, ["export function Modal({", "backdropClassName = \"\"", "hideCloseButton = false", "hideHeader = false", "function handleEscapeKey(event)", "event.key === \"Escape\"", "onClose?.()", "window.addEventListener(\"keydown\", handleEscapeKey)", "window.removeEventListener(\"keydown\", handleEscapeKey)", "hideCloseButton ? null"]) );
 check("84f lesson journal modal uses shared Escape-close modal", hasAll(app, ["backdropClassName=\"lessonJournalModalBackdrop\"", "className=\"lessonJournalModal\"", "hideHeader", "onClose={onBackToCalendar}"]) && !app.includes("<div className=\"modalBackdrop lessonJournalModalBackdrop\" role=\"dialog\" aria-modal=\"true\">"));
 check("84f-1 lesson journal student preview stays isolated and callback-only", hasAll(lessonFrontendSource, ["LessonJournalStudentPreviewModal", "createLessonJournalStudentPreviewModel", "students.filter((student) => student.studentId === studentPreviewId)", "PortalComponent={StudentPortalV2}", "students={model.previewStudents}", "onLogout={onClose}"]) && !lessonJournalStudentPreviewModalSource.includes("fetch(") && !lessonJournalStudentPreviewModalSource.includes("/api/"));

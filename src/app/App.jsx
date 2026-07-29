@@ -114,6 +114,7 @@ import { areGeneratedLessonPersistedFieldsEqual } from "../domains/lessons/gener
 import { selectGeneratedPreExamLessonsToSync } from "../domains/lessons/generatedPreExamSyncSelector.js";
 import { createPreExamGeneratedKey } from "../domains/lessons/generatedPreExamKeyBuilder.js";
 import { createPreExamLessonId } from "../domains/lessons/generatedPreExamLessonIdBuilder.js";
+import { createPreExamMathLabelInference } from "../domains/lessons/preExamMathLabelInference.js";
 import { selectChangedGeneratedLessonPlanRows } from "../domains/lessons/generatedLessonRepairSelectors.js";
 import { selectGeneratedLessonsToSave } from "../domains/lessons/generatedLessonSaveSelector.js";
 import { selectGeneratedLessonPlanItemsByKey } from "../domains/lessons/generatedLessonTargetSelector.js";
@@ -22312,18 +22313,10 @@ const createPreExamLessonFromSchoolEvent =
     getStudentsForSchoolCalendarEvent
   });
 
-function inferMathExamLabelFromPreExamLesson(lesson = {}, row = {}) {
-  const schoolName = String(row.schoolName || "").trim();
-  const grade = normalizeGradeLabel(row.grade || "");
-  const text = String(lesson.className || "")
-    .replace(/\s*직전수업\s*$/, "")
-    .replace(schoolName, "")
-    .replace(grade, "")
-    .trim();
-  if (!text || /^\d+$/.test(text)) return "";
-  if (["수학", "수학시험", row.subject].includes(text)) return "";
-  return text;
-}
+const inferMathExamLabelFromPreExamLesson =
+  createPreExamMathLabelInference({
+    normalizeGradeLabel
+  });
 
 function repairExamPrepRowsFromPersistedPreExamLessons(rows = [], lessons = []) {
   const preExamLessons = lessons.filter((lesson) =>

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { createPreExamMathLabelInference } from "../src/domains/lessons/preExamMathLabelInference.js";
 
 function normalizeExistingGradeLabel(grade = "") {
   const value = String(grade).trim();
@@ -39,6 +40,12 @@ function inferExistingMathExamLabelFromPreExamLesson(
   return text;
 }
 
+const extractedInference =
+  createPreExamMathLabelInference({
+    normalizeGradeLabel:
+      normalizeExistingGradeLabel
+  });
+
 const lesson = {
   lessonId: "lesson_TARGET_LABEL",
   className:
@@ -57,6 +64,10 @@ assert.equal(
     lesson,
     row
   ),
+  "미적분"
+);
+assert.equal(
+  extractedInference(lesson, row),
   "미적분"
 );
 assert.equal(
@@ -114,6 +125,20 @@ assert.equal(
   "대수"
 );
 assert.equal(
+  extractedInference(
+    {
+      className:
+        "가상중학교 중3 대수   직전수업   "
+    },
+    {
+      schoolName: "가상중학교",
+      grade: "중등 3학년",
+      subject: "수학"
+    }
+  ),
+  "대수"
+);
+assert.equal(
   inferExistingMathExamLabelFromPreExamLesson(),
   ""
 );
@@ -124,9 +149,18 @@ const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
+const helperSource = await readFile(
+  new URL(
+    "../src/domains/lessons/preExamMathLabelInference.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const helperBoundaries = [
-  "function inferMathExamLabelFromPreExamLesson(lesson = {}, row = {})",
-  'const schoolName = String(row.schoolName || "").trim()',
+  "export function createPreExamMathLabelInference({",
+  "return function inferMathExamLabelFromPreExamLesson(",
+  "const schoolName = String(",
+  'row.schoolName || ""',
   'const grade = normalizeGradeLabel(row.grade || "")',
   'const text = String(lesson.className || "")',
   '.replace(/\\s*직전수업\\s*$/, "")',
@@ -134,12 +168,13 @@ const helperBoundaries = [
   '.replace(grade, "")',
   ".trim()",
   'if (!text || /^\\d+$/.test(text)) return ""',
-  'if (["수학", "수학시험", row.subject].includes(text)) return ""',
+  '["수학", "수학시험", row.subject].includes(text)',
+  'return ""',
   "return text"
 ];
 let previousIndex = -1;
 for (const boundary of helperBoundaries) {
-  const boundaryIndex = appSource.indexOf(
+  const boundaryIndex = helperSource.indexOf(
     boundary,
     previousIndex + 1
   );
@@ -153,19 +188,62 @@ assert.equal(
   appSource.split(
     "function inferMathExamLabelFromPreExamLesson("
   ).length - 1,
-  1
+  0
 );
 assert.equal(
   appSource.split(
     "inferMathExamLabelFromPreExamLesson("
   ).length - 1,
-  2
+  1
 );
+assert.equal(
+  appSource.split(
+    "createPreExamMathLabelInference({"
+  ).length - 1,
+  1
+);
+assert.equal(
+  helperSource.split(
+    "export function createPreExamMathLabelInference("
+  ).length - 1,
+  1
+);
+for (const appBoundary of [
+  'from "../domains/lessons/preExamMathLabelInference.js"',
+  "const inferMathExamLabelFromPreExamLesson =",
+  "createPreExamMathLabelInference({",
+  "normalizeGradeLabel"
+]) {
+  assert.ok(
+    appSource.includes(appBoundary),
+    `missing preExam label inference App boundary: ${appBoundary}`
+  );
+}
 assert.ok(
   appSource.includes(
     "label: previousEntry?.label || inferMathExamLabelFromPreExamLesson(lesson, row)"
   )
 );
+for (const forbiddenEffect of [
+  "useState",
+  "useEffect",
+  "fetch(",
+  "postJson",
+  "/api/",
+  "setLessons",
+  "setExamPrepRows",
+  "persistExamPrepRows",
+  "localStorage",
+  "Supabase",
+  "Solapi",
+  "Date.now",
+  "Promise.all"
+]) {
+  assert.ok(
+    !helperSource.includes(forbiddenEffect),
+    `preExam label inference crossed a side effect: ${forbiddenEffect}`
+  );
+}
 
 console.log(
   "preExam math label inference inventory TARGET/CONTROL fixtures passed"
