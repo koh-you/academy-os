@@ -1083,7 +1083,7 @@ function getSaveButtonLabel(saveState) {
   return "저장";
 }
 
-const notificationScheduleGraceMs = 10 * 60 * 1000;
+const notificationScheduleGraceMs = 5 * 60 * 1000;
 
 function isNotificationSchedulePast(value, graceMs = notificationScheduleGraceMs) {
   if (!value) return false;
@@ -6605,8 +6605,10 @@ export function App() {
     saveGeneratedLessonsFromPlan(preExamLessonsToSync);
   }, [attendanceOnlyMode, generatedLessonPlan, isAppStateReady, session?.role]);
 
-  async function refreshNotificationJobs({ lessonId = "", scope = "active" } = {}) {
-    setNotificationJobsStatus({ state: "loading", message: "알림 기록을 불러오는 중입니다." });
+  async function refreshNotificationJobs({ lessonId = "", scope = "active", silent = false } = {}) {
+    if (!silent) {
+      setNotificationJobsStatus({ state: "loading", message: "알림 기록을 불러오는 중입니다." });
+    }
     try {
       const query = new URLSearchParams();
       if (lessonId) {
@@ -6629,17 +6631,21 @@ export function App() {
         } else {
           mergeNotificationJobsIntoState(result.notificationJobs);
         }
-        setNotificationJobsStatus({
-          state: "ready",
-          message: lessonId
-            ? `현재 수업 알림 ${result.notificationJobs.length}건을 확인했습니다.`
-            : scope === "history"
-              ? `최근 알림 기록 ${result.notificationJobs.length}건을 불러왔습니다.`
-              : `처리 중·확인 필요 알림 ${result.notificationJobs.length}건을 불러왔습니다.`
-        });
+        if (!silent) {
+          setNotificationJobsStatus({
+            state: "ready",
+            message: lessonId
+              ? `현재 수업 알림 ${result.notificationJobs.length}건을 확인했습니다.`
+              : scope === "history"
+                ? `최근 알림 기록 ${result.notificationJobs.length}건을 불러왔습니다.`
+                : `처리 중·확인 필요 알림 ${result.notificationJobs.length}건을 불러왔습니다.`
+          });
+        }
       }
     } catch (error) {
-      setNotificationJobsStatus({ state: "failed", message: error.message });
+      if (!silent) {
+        setNotificationJobsStatus({ state: "failed", message: error.message });
+      }
       console.info("academy-os notification jobs skipped:", error.message);
     }
   }
@@ -6738,6 +6744,32 @@ export function App() {
     ) return;
     refreshNotificationJobs({ lessonId: selectedLessonId, scope: "lesson" });
   }, [isAppStateReady, isLessonJournalOpen, selectedLessonId, session?.role]);
+
+  useEffect(() => {
+    if (
+      session?.role !== "teacher" ||
+      !isAppStateReady ||
+      (!isLessonJournalOpen && activeView !== "notifications")
+    ) return undefined;
+
+    function refreshVisibleNotificationJobs() {
+      if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
+      if (isLessonJournalOpen && selectedLessonId) {
+        refreshNotificationJobs({ lessonId: selectedLessonId, scope: "lesson", silent: true });
+        return;
+      }
+      if (activeView === "notifications") {
+        refreshNotificationJobs({ scope: "history", silent: true });
+      }
+    }
+
+    const intervalId = window.setInterval(refreshVisibleNotificationJobs, 60_000);
+    window.addEventListener("focus", refreshVisibleNotificationJobs);
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", refreshVisibleNotificationJobs);
+    };
+  }, [activeView, isAppStateReady, isLessonJournalOpen, selectedLessonId, session?.role]);
 
   useEffect(() => {
     recordsRef.current = records;

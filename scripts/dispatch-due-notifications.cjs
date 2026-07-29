@@ -17,6 +17,8 @@ async function main() {
     throw new Error(result.error || `Notification dispatch failed: ${response.status}`);
   }
   console.log(JSON.stringify({
+    automaticSolapiCheckedCount: result.automaticSolapiReconcile?.checkedCount ?? 0,
+    automaticSolapiUpdatedCount: result.automaticSolapiReconcile?.updatedCount ?? 0,
     ok: true,
     processedCount: result.processedCount ?? result.processed?.length ?? 0
   }));

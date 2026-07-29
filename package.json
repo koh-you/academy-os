@@ -42,10 +42,11 @@
     "test:student-withdrawal-boundary": "node scripts/test-student-withdrawal-boundary.mjs",
     "test:student-handover-pdf": "node scripts/test-student-handover-pdf.mjs",
     "test:parent-response-context": "node scripts/test-parent-response-context.mjs",
+    "test:solapi-auto-reconcile": "node scripts/test-solapi-auto-reconcile.mjs",
     "test:teacher-session-security": "node scripts/test-teacher-session-security.mjs",
     "test:withdrawn-student-deletion": "node scripts/test-withdrawn-student-deletion.mjs",
     "test:exam-prep-deletion": "node scripts/test-exam-prep-delete-orchestration.mjs",
-    "test:production": "npm run test:exam-prompt-studio && npm run test:exam-final-preview && npm run test:supplement-builders && npm run test:supplement-cancellation && npm run test:tally-student-merge && npm run test:lesson-bulk-rows && npm run test:lesson-closure && npm run test:special-lecture-enrollment-save && npm run test:special-lecture-plan-sync && npm run test:monthly-settlement && npm run test:monthly-regular-lesson-open && npm run test:student-withdrawal-boundary && npm run test:student-handover-pdf && npm run test:parent-response-context && npm run test:teacher-session-security && npm run test:withdrawn-student-deletion && npm run test:exam-prep-deletion && node scripts/scenario-tests-production.cjs"
+    "test:production": "npm run test:exam-prompt-studio && npm run test:exam-final-preview && npm run test:supplement-builders && npm run test:supplement-cancellation && npm run test:tally-student-merge && npm run test:lesson-bulk-rows && npm run test:lesson-closure && npm run test:special-lecture-enrollment-save && npm run test:special-lecture-plan-sync && npm run test:monthly-settlement && npm run test:monthly-regular-lesson-open && npm run test:student-withdrawal-boundary && npm run test:student-handover-pdf && npm run test:parent-response-context && npm run test:solapi-auto-reconcile && npm run test:teacher-session-security && npm run test:withdrawn-student-deletion && npm run test:exam-prep-deletion && node scripts/scenario-tests-production.cjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.0",

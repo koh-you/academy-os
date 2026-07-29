@@ -73,6 +73,13 @@ import {
 } from "./routes/coreData.js";
 import crypto from "node:crypto";
 import { loadEnvFile } from "./lib/loadEnv.js";
+import {
+  defaultSolapiAutoReconcileGraceMs,
+  defaultSolapiAutoReconcileLookbackMs,
+  defaultSolapiAutoReconcileRetryMs,
+  getSolapiProviderReference,
+  selectDueSolapiAutoReconcileJobs
+} from "./lib/solapiAutoReconcile.js";
 import { isSupabaseConfigured, listRows, upsertRows } from "./lib/supabaseRest.js";
 import { getAiStatus, polishLessonComment } from "./routes/commentPolish.js";
 import {
@@ -2912,6 +2919,7 @@ async function reserveNotificationJobsInSolapi(
 
 function getNotificationJobSolapiGroupId(job = {}) {
   return (
+    getSolapiProviderReference(job) ||
     job.providerMessageId ||
     getProviderMessageId(job.result) ||
     getProviderMessageId(job.result?.result) ||
@@ -3026,26 +3034,40 @@ async function listNotificationJobsByIds(notificationJobIds = []) {
   return results;
 }
 
-async function reconcileSolapiNotificationJobs({ date = "", lessonId = "", limit = 500, notificationJobIds = [], scheduledFrom = "", scheduledTo = "" } = {}) {
+async function reconcileSolapiNotificationJobs({
+  candidateJobs = null,
+  date = "",
+  lessonId = "",
+  limit = 500,
+  notificationJobIds = [],
+  reconciledSource = "manual-send-result",
+  scheduledFrom = "",
+  scheduledTo = "",
+  now = new Date()
+} = {}) {
   const targetJobIds = Array.isArray(notificationJobIds)
     ? notificationJobIds.map((item) => String(item || "").trim()).filter(Boolean)
     : [];
-  if (!date && !lessonId && !scheduledFrom && !scheduledTo && targetJobIds.length === 0) {
+  const hasCandidateJobs = Array.isArray(candidateJobs);
+  if (!hasCandidateJobs && !date && !lessonId && !scheduledFrom && !scheduledTo && targetJobIds.length === 0) {
     throw new Error("조회할 알림톡 예약 ID, 수업일 또는 수업 ID가 필요합니다.");
   }
   const { startIso, endIso } = targetJobIds.length ? { startIso: "", endIso: "" } : getKoreaDayUtcRange(date);
-  const targetJobs = targetJobIds.length
-    ? await listNotificationJobsByIds(targetJobIds)
-    : (await listNotificationJobs({
-        lessonId,
-        limit,
-        scheduledFrom: scheduledFrom || startIso,
-        scheduledTo: scheduledTo || endIso,
-        status: "scheduled,send_unconfirmed"
-      })).notificationJobs ?? [];
+  const targetJobs = hasCandidateJobs
+    ? candidateJobs
+    : targetJobIds.length
+      ? await listNotificationJobsByIds(targetJobIds)
+      : (await listNotificationJobs({
+          lessonId,
+          limit,
+          scheduledFrom: scheduledFrom || startIso,
+          scheduledTo: scheduledTo || endIso,
+          status: "scheduled,send_unconfirmed"
+        })).notificationJobs ?? [];
   const targetJobIdSet = new Set(targetJobIds);
   const targetStatuses = new Set(["scheduled", "send_unconfirmed"]);
-  const now = new Date();
+  const reconciledAt = now instanceof Date ? now : new Date(now);
+  if (Number.isNaN(reconciledAt.getTime())) throw new Error("now must be a valid date value.");
   const candidates = targetJobs.filter((job) =>
     job.provider === "solapi" &&
     targetStatuses.has(job.status) &&
@@ -3078,7 +3100,7 @@ async function reconcileSolapiNotificationJobs({ date = "", lessonId = "", limit
     try {
       if (checked.length > 0) await wait(80);
       const { group, messages } = await getSolapiLookup(groupId);
-      const reconciled = getReconciledSolapiJobState(job, group, messages, now);
+      const reconciled = getReconciledSolapiJobState(job, group, messages, reconciledAt);
       checked.push({
         group,
         groupId,
@@ -3087,7 +3109,9 @@ async function reconcileSolapiNotificationJobs({ date = "", lessonId = "", limit
         status: reconciled.status,
         updated: reconciled.shouldUpdate
       });
-      if (!reconciled.shouldUpdate) continue;
+      const shouldPersistCheckedResult =
+        reconciled.shouldUpdate || reconciledSource === "automatic-after-5-minutes";
+      if (!shouldPersistCheckedResult) continue;
 
       const updatedJob = {
         ...job,
@@ -3096,17 +3120,23 @@ async function reconcileSolapiNotificationJobs({ date = "", lessonId = "", limit
           ...(job.result && typeof job.result === "object" ? job.result : {}),
           solapiGroup: group,
           solapiMessages: messages,
-          solapiReconciledAt: now.toISOString(),
-          solapiReconciledSource: "manual-send-result"
+          solapiReconciledAt: reconciledAt.toISOString(),
+          solapiReconciledSource: reconciledSource
         },
         status: reconciled.status,
-        updatedAt: now.toISOString()
+        updatedAt: reconciledAt.toISOString()
       };
       const savedJob = await upsertNotificationJob(updatedJob);
       notificationJobs.push(savedJob.notificationJob ?? updatedJob);
 
       const recordStatus = getLessonRecordStatusForSolapiResult(reconciled.status, reconciled.error);
-      if (lessonCommentNotificationTypes.has(job.notificationType) && job.lessonId && job.studentId && recordStatus) {
+      if (
+        reconciled.shouldUpdate &&
+        lessonCommentNotificationTypes.has(job.notificationType) &&
+        job.lessonId &&
+        job.studentId &&
+        recordStatus
+      ) {
         try {
           const patchResult = await patchLessonStudentRecordNotificationStatus({
             lessonId: job.lessonId,
@@ -3140,6 +3170,80 @@ async function reconcileSolapiNotificationJobs({ date = "", lessonId = "", limit
     source: "solapi",
     updatedCount: notificationJobs.length
   };
+}
+
+function getPositiveNumberEnv(name, fallbackValue) {
+  const parsed = Number(process.env[name]);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallbackValue;
+}
+
+let automaticSolapiReconcileRunning = false;
+
+async function reconcileDueSolapiNotificationJobs({ now = new Date(), limit = 0 } = {}) {
+  if (automaticSolapiReconcileRunning) {
+    return {
+      checkedCount: 0,
+      candidateCount: 0,
+      skipped: "already_running",
+      source: "solapi-auto-reconcile",
+      updatedCount: 0
+    };
+  }
+  automaticSolapiReconcileRunning = true;
+  try {
+    const reconciledAt = now instanceof Date ? now : new Date(now);
+    const nowTime = reconciledAt.getTime();
+    if (Number.isNaN(nowTime)) throw new Error("now must be a valid date value.");
+    const graceMs = getPositiveNumberEnv(
+      "SOLAPI_AUTO_RECONCILE_GRACE_MS",
+      defaultSolapiAutoReconcileGraceMs
+    );
+    const retryMs = getPositiveNumberEnv(
+      "SOLAPI_AUTO_RECONCILE_RETRY_MS",
+      defaultSolapiAutoReconcileRetryMs
+    );
+    const lookbackMs = getPositiveNumberEnv(
+      "SOLAPI_AUTO_RECONCILE_LOOKBACK_MS",
+      defaultSolapiAutoReconcileLookbackMs
+    );
+    const safeLimit = Math.max(
+      1,
+      Number(limit) ||
+        getPositiveNumberEnv("SOLAPI_AUTO_RECONCILE_LIMIT", 50)
+    );
+    const listed = await listNotificationJobs({
+      limit: Math.min(1000, Math.max(200, safeLimit * 10)),
+      scheduledFrom: new Date(nowTime - lookbackMs).toISOString(),
+      scheduledTo: new Date(nowTime - graceMs + 1).toISOString(),
+      status: "scheduled,send_unconfirmed"
+    });
+    const candidates = selectDueSolapiAutoReconcileJobs(listed.notificationJobs ?? [], {
+      graceMs,
+      limit: safeLimit,
+      lookbackMs,
+      now: reconciledAt,
+      retryMs
+    });
+    if (!candidates.length) {
+      return {
+        checkedCount: 0,
+        candidateCount: 0,
+        source: listed.source,
+        updatedCount: 0
+      };
+    }
+    const result = await reconcileSolapiNotificationJobs({
+      candidateJobs: candidates,
+      reconciledSource: "automatic-after-5-minutes",
+      now: reconciledAt
+    });
+    return {
+      ...result,
+      candidateCount: candidates.length
+    };
+  } finally {
+    automaticSolapiReconcileRunning = false;
+  }
 }
 
 function getSupabaseEnv(name) {
@@ -5452,7 +5556,24 @@ async function dispatchDueNotificationJobs({
     }
   }
 
+  let automaticSolapiReconcile = {
+    checkedCount: 0,
+    candidateCount: 0,
+    source: "solapi-auto-reconcile",
+    updatedCount: 0
+  };
+  try {
+    automaticSolapiReconcile = await reconcileDueSolapiNotificationJobs({ now });
+  } catch (error) {
+    automaticSolapiReconcile = {
+      ...automaticSolapiReconcile,
+      error: error.message
+    };
+    console.error("[solapi_auto_reconcile_failed]", error);
+  }
+
   return {
+    automaticSolapiReconcile,
     dryRun: forceDryRun || getNotificationStatus().dryRun,
     processed,
     processedCount: processed.length,
@@ -5472,8 +5593,10 @@ async function runInternalNotificationDispatch(reason = "interval") {
       limit: Number(process.env.NOTIFICATION_INTERNAL_DISPATCH_LIMIT || process.env.NOTIFICATION_DISPATCH_LIMIT || 50),
       now: new Date().toISOString()
     });
-    if (result.processedCount > 0) {
+    if (result.processedCount > 0 || result.automaticSolapiReconcile?.checkedCount > 0) {
       console.log(JSON.stringify({
+        automaticSolapiCheckedCount: result.automaticSolapiReconcile?.checkedCount ?? 0,
+        automaticSolapiUpdatedCount: result.automaticSolapiReconcile?.updatedCount ?? 0,
         event: "notification_internal_dispatch",
         processedCount: result.processedCount,
         reason
