@@ -113,12 +113,12 @@ assert.equal(
   1
 );
 
-const injectionStart = appSource.indexOf(
-  "const {\n  getGeneratedLessonIdentityKeys,"
-);
 const injectionEnd = appSource.indexOf(
-  "const getStudentsForSchoolCalendarEvent =",
-  injectionStart
+  "const getStudentsForSchoolCalendarEvent ="
+);
+const injectionStart = appSource.lastIndexOf(
+  "const {",
+  injectionEnd
 );
 assert.ok(
   injectionStart >= 0 &&

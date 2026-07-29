@@ -37,20 +37,20 @@ assert.equal(
   1
 );
 
-const injectionStart = appSource.indexOf(
-  "const {\n  getGeneratedLessonIdentityKeys,"
+const nextHelper = appSource.indexOf(
+  "const getStudentsForSchoolCalendarEvent ="
 );
-const injectionCall = appSource.indexOf(
+const injectionCall = appSource.lastIndexOf(
   "} = createGeneratedLessonIdentityModel({",
-  injectionStart
+  nextHelper
+);
+const injectionStart = appSource.lastIndexOf(
+  "const {",
+  injectionCall
 );
 const injectionEnd = appSource.indexOf(
   "});",
   injectionCall
-);
-const nextHelper = appSource.indexOf(
-  "const getStudentsForSchoolCalendarEvent =",
-  injectionEnd
 );
 assert.ok(
   injectionStart >= 0 &&

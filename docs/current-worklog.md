@@ -2309,6 +2309,13 @@
 - AI 가상검수: 비수학·생성불가 CONTROL, preExam·examPrep TARGET, identity/source/lessonId 각 매칭, `create/update/synced/skipped/protected`, suppressed 우선순위, update의 기존 lessonId 보존, 입력 불변을 전용 fixture로 고정한다. 시나리오 672/672와 `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17BA-2`에서 이 순수 plan builder만 별도 모듈로 분리하고 App은 의존성 주입과 실제 저장 소비를 유지한다.
 
+## 2026-07-28 P3. refactor branch main rebase integration and pause
+
+- 통합: 최신 `origin/main` 위로 전용 브랜치를 rebase하면서 `SupplementCenter`와 알림센터 navigation의 동일 영역 이동 충돌을 해소했다. 최신 main 주변 구현은 보존하고 이미 분리된 컴포넌트 호출을 유지했다.
+- AI 검수: rebase 뒤 CRLF/LF에 의존하던 identity/dead-helper 정적 fixture 3개를 위치 기반 탐색으로 바꾸고 `npm run test:production`, `npm run build`, `git diff --check`를 통과시킨다.
+- 중지점: 사용자 요청에 따라 `17BA-2 generated lesson plan builder extraction`은 시작하지 않고 일시 중지한다. 재개 시 clean 상태 확인, `git fetch origin`, 최신 `origin/main` rebase 뒤 17BA-1 가상 fixture를 먼저 재실행한다.
+- 사람 gate: 현재 전역 및 17BA-2 착수 전 사람 gate 없음.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
