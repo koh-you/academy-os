@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-7B-1. 페이지 머리말·행동 모바일 inventory
+
+- 공통 `PageHeader` 13개, `NavigationHeader` 4개, `SectionHeader` 57개의 copy·context·meta·action 구조를 대조했다.
+- 640px 이하에서 page/section header 세로 전환, actions 전체 폭·줄바꿈은 이미 적용돼 있다.
+- 긴 copy 강제 줄바꿈, navigation leading/title/trailing wrap, header 내부 soft/ghost button 44px 터치 높이, 모바일 title 크기가 아직 공통 계약이 아님을 확인했다.
+- 결과는 `docs/ui-mobile-header-inventory-2026-07-29.md`에 기록했다. callback·disabled·DOM 순서·운영 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 세 공통 primitive와 현재 mobile layout 소유권 정적 계약, `npm run build` 128 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 464개 중 기존 기준선 `90a`만 실패했고 모든 개별 fixture와 신규 계약은 통과했다.
+- 사람 검수: 코드 UI 변경이 없어 필수 중단 gate가 없다. UI-7B-2 적용 뒤 대표 header 시각 검수를 누적한다.
+
 ## 2026-07-29 UI-7A-4. desktop·tablet·mobile shell 회귀 계약
 
 - desktop 294/86px sticky sidebar, 641~1100px document-flow 3열 nav, 640px 이하 compact toggle·그룹별 2열 nav를 한 계약으로 다시 대조했다.
