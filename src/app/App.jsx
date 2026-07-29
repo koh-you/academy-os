@@ -26330,7 +26330,7 @@ function StudentWrongProblemBoard({ selectedStudent, wrongProblems, onAddWrongPr
         description="학생 프로파일에서 분리한 교재오답 기록입니다. 교재/범위/상태/후속 메모를 여기서 관리합니다."
         title={`${selectedStudent.name} 학생별 오답`}
       />
-      <div className="managementTable studentWrongTable">
+      <DataTableShell className="managementTable studentWrongTable" label="학생별 오답 목록">
         <div className="managementRow wrongProblemProfileRow managementHead">
           <span>교재/출처</span>
           <span>문항/범위</span>
@@ -26365,7 +26365,7 @@ function StudentWrongProblemBoard({ selectedStudent, wrongProblems, onAddWrongPr
             </div>
           ))
         )}
-      </div>
+      </DataTableShell>
     </section>
   );
 }

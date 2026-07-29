@@ -1992,7 +1992,7 @@ function StudentProfileModal({
             <InlineSaveStatus label="성적" saveState={scoreRecordSaveState} />
           </summary>
           <div className="studentProfileSectionBody">
-            <div className="managementTable studentScoreModalTable">
+            <DataTableShell className="managementTable studentScoreModalTable" label="학생 성적 기록">
               <div className="managementRow scoreRow managementHead">
             <span>구분</span>
             <span>날짜</span>
@@ -2077,7 +2077,7 @@ function StudentProfileModal({
               );
                 })
               )}
-            </div>
+            </DataTableShell>
           </div>
         </details>
 
@@ -2090,7 +2090,7 @@ function StudentProfileModal({
             <InlineSaveStatus label="테스트" saveState={academyTestSaveState} />
           </summary>
           <div className="studentProfileSectionBody">
-            <div className="managementTable studentProfileDataTable">
+            <DataTableShell className="managementTable studentProfileDataTable" label="학생 학원 테스트 기록">
               <div className="managementRow academyTestProfileRow managementHead">
             <span>날짜</span>
             <span>테스트명</span>
@@ -2169,7 +2169,7 @@ function StudentProfileModal({
               );
                 })
               )}
-            </div>
+            </DataTableShell>
           </div>
         </details>
         {isEditingProfile ? (

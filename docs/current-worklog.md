@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-4C-3B. 오답·학생 성적 표 shell
+
+- 구현: 학생별 오답 목록, 학생 프로필 성적 기록, 학생 프로필 학원 테스트 기록의 기존 management table wrapper/class를 보존해 `DataTableShell`로 이관했다.
+- 동작 보존: wrongProblemId/scoreRecordId/testId key, 신규·기존 draft, dirty 판정, 오답 field 업데이트, 성적/테스트 저장·변경·삭제 callback을 정적 계약으로 고정했다.
+- 외부 원천: 오답·성적·테스트 저장/삭제, Supabase/app_state를 실제 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(125 modules). 전용 정적 계약 포함 scenario 426개 중 425개 통과, 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 세 표의 desktop/390px 가로스크롤·focus 검수를 누적하고 UI-4C-4 정산/포털 성적 표로 진행한다.
+
 ## 2026-07-29 UI-4C-3A. 시험분석·예약·테스트 응시 표 shell
 
 - 구현: 시험분석 문항 검수 `<table>`, 학생별 알림 예약 상태, 학생별 테스트 응시 입력의 기존 wrapper/class를 보존해 `DataTableShell`로 이관했다.

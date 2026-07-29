@@ -20,7 +20,7 @@
 | 시험정보 표 | `examPrepId`, 시험정보/총평 | 검색/고사 filter, 수정·삭제 | 매우 높음 | UI-4C-2 shell 적용 |
 | 시험분석 검수 표 | question row ID | 교사 검수 draft | 높음 | UI-4C-3A shell 적용 |
 | 예약 학생 상태 표 | `studentId`, notification job selector | 검사 모드 선택 | 중간 | UI-4C-3A shell 적용 |
-| 오답·성적·학원시험 표 | 각 record ID | 입력·수정·삭제 | 높음 | UI-4C-3B |
+| 오답·성적·학원시험 표 | 각 record ID | 입력·수정·삭제 | 높음 | UI-4C-3B shell 적용 |
 | 테스트 응시 표 | `studentId`, attempt draft | 상태/정답/미응시 사유 draft | 높음 | UI-4C-3A shell 적용 |
 | 월별 정산 표 | `studentId`, settlement snapshot | 금액/제외/스케줄 draft 저장 | 매우 높음 | UI-4C-4 |
 | 특강 정산 표 | enrollment/student key | 유료회차/금액/사유 draft 저장 | 매우 높음 | UI-4C-4 |
@@ -35,7 +35,7 @@
 
 ## 다음 단위
 
-`UI-4C-3A`는 완료했다. 다음 `UI-4C-3B`는 오답관리 목록과 학생 프로필 성적·학원시험 표의 wrapper를 공통 shell로 이관한다. 각 record key, 입력/수정/삭제 draft와 callback을 고정하고 실제 저장·삭제는 실행하지 않는다.
+`UI-4C-3B`는 완료했다. 다음 `UI-4C-4`는 월별 정산, 특강 정산, 학생 포털 읽기 성적 표의 wrapper를 공통 shell로 이관한다. 정산 row key·계산 snapshot·입력/제외 callback과 포털 읽기 값을 고정하고 실제 정산 저장은 실행하지 않는다.
 
 ## 사람 검수
 
