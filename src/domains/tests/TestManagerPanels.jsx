@@ -1,17 +1,30 @@
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
+import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 
 export function TestManagerTabs({ activeTab = "attempts", onChange }) {
   return (
-    <div className="localTabs materialTabs">
-      <button className={activeTab === "attempts" ? "active" : ""} onClick={() => onChange?.("attempts")} type="button">
+    <WorkspaceTabs className="localTabs materialTabs" label="테스트 관리 항목" variant="secondary">
+      <button
+        aria-selected={activeTab === "attempts"}
+        className={activeTab === "attempts" ? "active" : ""}
+        onClick={() => onChange?.("attempts")}
+        role="tab"
+        type="button"
+      >
         응시 기록
       </button>
-      <button className={activeTab === "history" ? "active" : ""} onClick={() => onChange?.("history")} type="button">
+      <button
+        aria-selected={activeTab === "history"}
+        className={activeTab === "history" ? "active" : ""}
+        onClick={() => onChange?.("history")}
+        role="tab"
+        type="button"
+      >
         학생 이력
       </button>
-    </div>
+    </WorkspaceTabs>
   );
 }
 

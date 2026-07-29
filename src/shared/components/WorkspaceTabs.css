@@ -48,6 +48,46 @@
   outline-offset: 2px;
 }
 
+.workspaceTabs.workspaceTabs.workspaceTabs-secondary {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--academy-border, #d8e3f1);
+  border-radius: 0;
+  padding: 0 0 6px;
+}
+
+.workspaceTabs.workspaceTabs.workspaceTabs-secondary > button {
+  min-height: 40px;
+  padding: 7px 13px;
+}
+
+.workspaceTabs.workspaceTabs.workspaceTabs-secondary > button.active,
+.workspaceTabs.workspaceTabs.workspaceTabs-secondary > button[aria-selected="true"] {
+  background: #e8eefb;
+  border-color: #cbd8ee;
+  box-shadow: none;
+  color: var(--academy-primary, #17213d);
+}
+
+.workspaceTabs.workspaceTabs.workspaceTabs-compact {
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+.workspaceTabs.workspaceTabs.workspaceTabs-compact > button {
+  min-height: 38px;
+  padding: 6px 11px;
+}
+
+.workspaceTabs.workspaceTabs.workspaceTabs-compact > button.active,
+.workspaceTabs.workspaceTabs.workspaceTabs-compact > button[aria-selected="true"] {
+  background: var(--academy-surface, #ffffff);
+  border-color: var(--academy-border-strong, #cbd8ee);
+  box-shadow: 0 1px 5px rgba(23, 33, 61, 0.1);
+  color: var(--academy-primary, #17213d);
+}
+
 @media (max-width: 640px) {
   .workspaceTabs.workspaceTabs {
     margin-inline: 0;

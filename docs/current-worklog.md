@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-3B. 보조·중첩 탭 위계
+
+- 전수조사: 특강 안내문, AI 도구, 오답관리, 학생·학부모 포털, 학생 마이페이지와 중첩 통계, 테스트 관리의 보조 탭을 `docs/ui-secondary-tabs-inventory-2026-07-29.md`에 기록했다. 필터/입력, 지표 카드, 인증·모달 탭은 후속 단위로 분리했다.
+- 구현: `WorkspaceTabs`에 `secondary`와 `compact` variant를 추가했다. 보조 탭은 옅은 active surface와 하단 경계, 중첩 탭은 더 작은 surface로 상위 navy 탭과 위계를 분리했으며 `role=tab`·`aria-selected`를 보강했다.
+- 동작 보존: `setActiveGuideEditorTab`, AI/오답 `setActiveTab`, 포털 `onChange`, 마이페이지 `onChangeTab`/`setStatsTab`, 테스트 `onChange`를 그대로 유지했다. 탭별 조건부 렌더와 저장·AI·삭제 원천은 바꾸거나 실행하지 않았다.
+- AI 검수: variant CSS와 모든 보조 탭 setter 보존 정적 계약을 포함해 production 시나리오 410개 중 409개가 통과했다. 기존 비관련 `90a` 1개만 기준선 실패이며 `npm run build`, `git diff --check`도 통과했다.
+- 사람 검수: 필수 중단 gate는 없다. 배포 후 보조 탭 전환, 상위/보조/중첩 위계, 모바일 내부 스크롤만 확인하는 독립 시각 검수를 누적하고 UI-3C 필터 통일로 진행한다.
+
 ## 2026-07-29 UI-3A. 상위 탭 공통 구조
 
 - 전수조사: 알림/특강 영역, 특강관리, 알림관리, 시험분석, 시험관리, 설정, 학생관리, 정산의 상위 탭 8종을 `docs/ui-top-tabs-inventory-2026-07-29.md`에 선택 state/setter와 조건부 렌더 기준으로 기록했다.

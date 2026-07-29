@@ -13201,7 +13201,7 @@ function SpecialLectureNoticePanel({
 
       {activeWorkspaceTab === "guide" && selectedGuide ? (
       <div className="specialLectureGuideWorkspace">
-        <div className="notificationSectionTabs specialLectureGuideTabs" role="tablist" aria-label="특강 안내문 편집 항목">
+        <WorkspaceTabs className="notificationSectionTabs specialLectureGuideTabs" label="특강 안내문 편집 항목" variant="secondary">
           {[
             ["content", "안내문 편집"],
             ["links", "링크 설정"],
@@ -13220,7 +13220,7 @@ function SpecialLectureNoticePanel({
               {label}
             </button>
           ))}
-        </div>
+        </WorkspaceTabs>
 
         <SpecialLectureManagementBar
           guide={selectedGuide}
@@ -23538,15 +23538,22 @@ function AIVariantProblemCenter({ aiSettings = defaultAiSettings }) {
         title="AI 도구"
       />
 
-      <div className="studentManagerTabs aiTabs">
+      <WorkspaceTabs className="studentManagerTabs aiTabs" label="AI 도구 작업 구분" variant="secondary">
         {[
           ["variant", "변형문항"]
         ].map(([id, label]) => (
-          <button className={activeTab === id ? "active" : ""} key={id} onClick={() => setActiveTab(id)} type="button">
+          <button
+            aria-selected={activeTab === id}
+            className={activeTab === id ? "active" : ""}
+            key={id}
+            onClick={() => setActiveTab(id)}
+            role="tab"
+            type="button"
+          >
             {label}
           </button>
         ))}
-      </div>
+      </WorkspaceTabs>
 
       {activeTab === "variant" ? (
         <section className="aiVariantWorkspace">
@@ -26108,7 +26115,7 @@ function WrongProblemBoard({
 
   return (
     <section className="wrongProblemBoard">
-      <div className="wrongBoardTabs">
+      <WorkspaceTabs className="wrongBoardTabs" label="오답관리 작업 구분" variant="secondary">
         {[
           ["current", "현행"],
           ["extra1", "추가1"],
@@ -26117,15 +26124,17 @@ function WrongProblemBoard({
           ["studentWrong", "학생별 오답"]
         ].map(([tab, label]) => (
           <button
+            aria-selected={activeTab === tab}
             className={activeTab === tab ? "active" : ""}
             key={tab}
             onClick={() => setActiveTab(tab)}
+            role="tab"
             type="button"
           >
             {label}
           </button>
         ))}
-      </div>
+      </WorkspaceTabs>
 
       <div className="wrongBoardFilterPanel">
         <div className="chipRow">

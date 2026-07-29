@@ -4,9 +4,14 @@ export function WorkspaceTabs({
   as: Component = "div",
   children,
   className = "",
-  label
+  label,
+  variant = "primary"
 }) {
-  const tabListClassName = ["workspaceTabs", className].filter(Boolean).join(" ");
+  const tabListClassName = [
+    "workspaceTabs",
+    variant === "primary" ? "" : `workspaceTabs-${variant}`,
+    className
+  ].filter(Boolean).join(" ");
 
   return (
     <Component aria-label={label} className={tabListClassName} role="tablist">

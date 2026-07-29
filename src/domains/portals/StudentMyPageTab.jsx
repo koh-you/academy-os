@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 import { getCountableAttendanceRecords } from "../lessons/lessonClosure.js";
 
 function formatHomeworkDoneCount(value) {
@@ -96,30 +97,44 @@ export function StudentMyPageTab({
 
   return (
     <div className="myPagePanel">
-      <div className="subTabs">
+      <WorkspaceTabs className="subTabs" label="마이페이지 항목" variant="secondary">
         {[
           ["stats", "통계"],
           ["log", "활동 로그"],
           ["info", "내 정보"]
         ].map(([id, label]) => (
-          <button className={myPageTab === id ? "active" : ""} key={id} onClick={() => onChangeTab(id)} type="button">
+          <button
+            aria-selected={myPageTab === id}
+            className={myPageTab === id ? "active" : ""}
+            key={id}
+            onClick={() => onChangeTab(id)}
+            role="tab"
+            type="button"
+          >
             {label}
           </button>
         ))}
-      </div>
+      </WorkspaceTabs>
 
       {myPageTab === "stats" ? (
         <>
-          <div className="subTabs compactSubTabs">
+          <WorkspaceTabs className="subTabs compactSubTabs" label="통계 항목" variant="compact">
             {[
               ["homework", "숙제통계"],
               ["attendance", "출결통계"]
             ].map(([id, label]) => (
-              <button className={statsTab === id ? "active" : ""} key={id} onClick={() => setStatsTab(id)} type="button">
+              <button
+                aria-selected={statsTab === id}
+                className={statsTab === id ? "active" : ""}
+                key={id}
+                onClick={() => setStatsTab(id)}
+                role="tab"
+                type="button"
+              >
                 {label}
               </button>
             ))}
-          </div>
+          </WorkspaceTabs>
           {statsTab === "homework" ? (
             <>
               <div className="miniMetricGrid">

@@ -17,12 +17,24 @@ export const parentPortalTabs = [
 
 export function PortalTabBar({ activeTab, className = "", onChange, tabs }) {
   return (
-    <div className={["portalTabs", className].filter(Boolean).join(" ")}>
+    <WorkspaceTabs
+      className={["portalTabs", className].filter(Boolean).join(" ")}
+      label="포털 메뉴"
+      variant="secondary"
+    >
       {tabs.map(([id, label]) => (
-        <button className={activeTab === id ? "active" : ""} key={id} onClick={() => onChange(id)} type="button">
+        <button
+          aria-selected={activeTab === id}
+          className={activeTab === id ? "active" : ""}
+          key={id}
+          onClick={() => onChange(id)}
+          role="tab"
+          type="button"
+        >
           {label}
         </button>
       ))}
-    </div>
+    </WorkspaceTabs>
   );
 }
+import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
