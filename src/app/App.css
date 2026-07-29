@@ -653,10 +653,10 @@ a:focus-visible {
 }
 
 .autosaveRiskNotice {
-  background: var(--status-danger-bg);
-  border: 1px solid var(--status-danger-border);
+  background: var(--status-pending-bg);
+  border: 1px solid var(--status-pending-border);
   border-radius: 8px;
-  color: #7f1d1d;
+  color: var(--status-pending-text);
   display: grid;
   gap: 8px;
   padding: 10px 12px;
@@ -674,10 +674,10 @@ a:focus-visible {
 }
 
 .autosaveRiskBadge {
-  background: #fee2e2;
-  border: 1px solid var(--status-danger-border);
+  background: #ffffff;
+  border: 1px solid var(--status-pending-border);
   border-radius: 999px;
-  color: var(--status-danger-text);
+  color: var(--status-pending-text);
   font-size: 12px;
   font-weight: 900;
   padding: 5px 8px;
@@ -685,16 +685,16 @@ a:focus-visible {
 }
 
 .autosaveRiskTitle {
-  color: #7f1d1d;
+  color: var(--status-pending-text);
   font-size: 14px;
   font-weight: 900;
 }
 
 .autosaveRiskToggle {
   background: #ffffff;
-  border: 1px solid var(--status-danger-border);
+  border: 1px solid var(--status-pending-border);
   border-radius: 8px;
-  color: var(--status-danger-text);
+  color: var(--status-pending-text);
   font-size: 13px;
   font-weight: 900;
   margin-left: auto;
@@ -703,7 +703,7 @@ a:focus-visible {
 }
 
 .autosaveRiskDetails {
-  border-top: 1px solid var(--status-danger-border);
+  border-top: 1px solid var(--status-pending-border);
   display: grid;
   gap: 8px;
   margin: 0;
@@ -716,13 +716,13 @@ a:focus-visible {
 }
 
 .autosaveRiskDetails dt {
-  color: var(--status-danger-text);
+  color: var(--status-pending-text);
   font-size: 12px;
   font-weight: 900;
 }
 
 .autosaveRiskDetails dd {
-  color: #7f1d1d;
+  color: #9a3412;
   display: grid;
   gap: 4px;
   font-size: 13px;

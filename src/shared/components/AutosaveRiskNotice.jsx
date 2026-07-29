@@ -33,9 +33,9 @@ export function AutosaveRiskNotice({
   const classes = ["autosaveRiskNotice", className].filter(Boolean).join(" ");
 
   return (
-    <aside className={classes} role="note" aria-label="자동저장 위험 안내">
+    <aside aria-label="자동저장 주의 안내" className={classes} data-tone="warning" role="note">
       <div className="autosaveRiskSummary">
-        <span className="autosaveRiskBadge">자동저장 위험</span>
+        <span className="autosaveRiskBadge">저장 주의</span>
         <strong className="autosaveRiskTitle">{title}</strong>
         <button
           aria-controls={detailId}

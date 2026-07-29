@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-6B-2. 자동저장 `저장 주의` 공통 톤
+
+- 미해결 7개 자동저장 경고를 삭제하지 않고, 실제 실패·삭제의 danger 빨강과 구분되는 pending 계열 `저장 주의` 톤으로 정리했다.
+- 공통 notice의 `role=note`, `aria-label`, 접힘 상태, 저장 원천·현재 부작용·중단 조건·권장 방향 상세를 유지했다.
+- app_state·시험정보·학사일정 저장 callback, API, 상태 전이, Supabase 원천과 파생 수업 동작은 변경하지 않았다.
+- Supabase/app_state, 시험정보, 학사일정, 수업, notification_jobs/Solapi를 실제 실행하지 않았다.
+- AI 검수: UI-6B-2 정적 계약과 `npm run build` 126 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 453개 중 기존 기준선 `90a`만 실패했고 신규 실패는 없다.
+- 사람 검수: 설정·수업연구·오답관리·시험정보·학사일정에서 접힌 `저장 주의`와 상세를 desktop/390px로 확인하는 절차를 누적했다. 이 시각 검수는 UI-6C 진행을 막지 않는다.
+
 ## 2026-07-29 UI-6B-1. 자동저장 위험 알림 재대조
 
 - 현재 `AutosaveRiskNotice`를 전수 대조해 3개 원천 계약·7개 표시 위치를 확인했다: app_state 3곳, 시험정보 3곳, 학사일정 1곳.
