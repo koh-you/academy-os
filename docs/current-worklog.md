@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 수업일지 예약 확인의 원시 Solapi 그룹 UI 제거
+
+- `그룹 취소`는 Solapi provider의 예약 그룹만 직접 취소하고 Academy OS `notification_jobs`를 함께 갱신하지 않는 원시 작업이라, 운영 화면에서 사용하면 두 원천이 불일치할 수 있음을 확인했다.
+- 수업일지 `알림톡 예약 확인` 모달에서 `Solapi 예약 그룹` 요약, Solapi 그룹·메시지 원시 목록, `그룹 취소` 버튼을 제거했다.
+- 학생별 학부모·학생 예약 상태, OS 취소·실패 목록, 명단 밖 예약 경고와 Solapi·OS를 함께 정리하는 정상 `예약 취소`는 유지했다.
+- 모달을 열 때 수행하던 Solapi 그룹 100건·메시지 100건 조회와 무거운 provider 결과 본문 포함을 제거하고 해당 수업의 가벼운 OS 예약 기록만 조회해, 외부 provider 응답 때문에 모달이 늦어지거나 일부 조회 실패로 보이는 원인을 줄였다.
+- 실제 notification job 조회·취소, Solapi 조회·취소·발송, 운영 데이터 변경은 검증 중 실행하지 않는다.
+- AI 검수: 전용 모달 계약, `npm run build` 128 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`의 개별 fixture와 정적 시나리오 464개 중 이번 변경을 포함한 463개가 통과했고 기존 기준선 `90a` 1건만 실패했다.
+- 사람 검수: 배포 후 `예약 확인` 모달이 이전보다 빠르게 열리고, Solapi 그룹·메시지 원시 목록과 `그룹 취소`가 사라졌으며 학생별 상태·취소/실패·정상 `예약 취소`가 남아 있는지만 확인한다. 실제 예약 취소나 발송은 실행하지 않는다.
+
 ## 2026-07-29 UI-7B-1. 페이지 머리말·행동 모바일 inventory
 
 - 공통 `PageHeader` 13개, `NavigationHeader` 4개, `SectionHeader` 57개의 copy·context·meta·action 구조를 대조했다.
