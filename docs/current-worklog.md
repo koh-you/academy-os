@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-7A-1. 앱 shell·사이드바 모바일/accessibility inventory
+
+- desktop sticky·자체 스크롤·접힌 icon sidebar, 1100px 이하 document flow·3열 메뉴, 640px 이하 그룹별 2열 전체 메뉴 계약을 대조했다.
+- 모바일에서 모든 메뉴는 접근 가능하지만 접기 버튼을 숨겨 긴 메뉴가 항상 본문 앞에 남고, 화면 선택 뒤 scroll 0이 메뉴 상단을 다시 보여주는 사용성 문제를 확인했다.
+- 현재 위치 `aria-current`, nav label, toggle의 expanded/control 연결, app shell safe-area와 `viewport-fit=cover`가 없는 접근성·iOS gap을 확인했다.
+- 결과는 `docs/ui-mobile-shell-inventory-2026-07-29.md`에 기록했다. view callback·로그인/session·운영 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 전체 메뉴·breakpoint·scroll·safe-area 현재 계약과 `npm run build` 128 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 460개 중 기존 기준선 `90a`만 실패했고 모든 개별 fixture와 신규 계약은 통과했다.
+- 사람 검수: 코드 UI 변경이 없어 필수 중단 gate가 없다. UI-7A-2~3 적용 뒤 desktop/tablet/390px 검수를 누적한다.
+
 ## 2026-07-29 UI-6D-3. 알림관리·수업일지 provider 상태 위계
 
 - 알림관리 발송 기록의 Solapi group 참조를 `종류` 열에서 `상태` 열로 옮기고 `Academy OS 상태 -> 상태 pill -> Solapi 그룹` 순서로 배치했다.

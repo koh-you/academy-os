@@ -76,6 +76,7 @@
 | UI-6D-1 | 완료 | Academy OS row 상태와 Solapi provider 참조·결과 원천 inventory |
 | UI-6D-2 | 완료 | 보충 알림 제어의 Academy OS 상태와 Solapi 그룹 참조 분리 |
 | UI-6D-3 | 완료 | 알림관리·수업일지의 Academy OS 상태와 검증된 Solapi 그룹 위계 통일 |
+| UI-7A-1 | 완료 | 앱 shell·사이드바 desktop/mobile/accessibility gap inventory |
 
 ## 전체 세부 작업 목록
 
@@ -174,6 +175,6 @@
 
 ## 다음 실행 목표
 
-> 최신 상태: `UI-4`와 `UI-5`, `UI-6` 전체를 완료했다. 현재 다음 작은 목표는 `UI-7A-1 앱 shell·사이드바 모바일/accessibility inventory`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
+> 최신 상태: `UI-4`와 `UI-5`, `UI-6` 전체와 `UI-7A-1`을 완료했다. 현재 다음 작은 목표는 `UI-7A-2 nav semantics·safe-area 보강`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
 
-앱 shell·사이드바의 desktop sticky, 1100px 이하 document-flow, 전체 메뉴 접근, 현재 위치, 접힘, iOS safe-area, 홈 화면 바로가기 진입을 inventory한다. view 전환 callback과 로그인/session 동작은 변경하지 않는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
+사이드바 nav label, 현재 항목 `aria-current`, toggle의 expanded/control 연결을 추가하고 앱 shell에 iOS safe-area를 적용한다. 전체 메뉴·view 전환 callback·로그인/session 동작은 변경하지 않는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
