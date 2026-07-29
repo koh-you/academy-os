@@ -95,6 +95,7 @@ import { createLessonNotificationJob } from "../domains/lessons/lessonNotificati
 import { createLessonNotificationJobBatch } from "../domains/lessons/lessonNotificationJobBatch.js";
 import { createLessonNotificationRecordStatusPayload } from "../domains/lessons/lessonNotificationRecordStatusPayload.js";
 import { createLessonNotificationRecordStatusRows } from "../domains/lessons/lessonNotificationRecordStatusRows.js";
+import { getExamPrepIdFromDerivedMathEvent } from "../domains/lessons/derivedMathEventExamPrepIdSelector.js";
 import { mergeGeneratedCalendarLessons } from "../domains/lessons/generatedLessonCalendarMerge.js";
 import {
   addGeneratedLessonManualOverrideKey,
@@ -22310,13 +22311,6 @@ const createPreExamLessonFromSchoolEvent =
     getStandardLessonColor,
     getStudentsForSchoolCalendarEvent
   });
-
-function getExamPrepIdFromDerivedMathEvent(sourceSchoolEventId = "", rows = []) {
-  const sourceId = String(sourceSchoolEventId || "");
-  if (!sourceId.startsWith("derived_math_")) return "";
-  const sourceTail = sourceId.replace(/^derived_math_/, "");
-  return rows.find((row) => sourceTail.startsWith(`${row.examPrepId}_`))?.examPrepId || "";
-}
 
 function inferMathExamLabelFromPreExamLesson(lesson = {}, row = {}) {
   const schoolName = String(row.schoolName || "").trim();
