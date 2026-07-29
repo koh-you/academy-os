@@ -24695,7 +24695,7 @@ function SupplementCancellationConfirmModal({
           </span>
         </div>
       </div>
-      <div className="modalActions confirmActions">
+      <ModalFooter className="confirmActions" tone="danger">
         <button className="softButton" disabled={isBusy} onClick={onCancel} type="button">
           돌아가기
         </button>
@@ -24704,7 +24704,7 @@ function SupplementCancellationConfirmModal({
             ? keepsSourceAbsence ? "보강 취소 중" : "결석 취소 중"
             : keepsSourceAbsence ? "보강만 취소" : "결석 기록 취소"}
         </button>
-      </div>
+      </ModalFooter>
     </Modal>
   );
 }

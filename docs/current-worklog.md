@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-5D-2. 결석보강 취소 mode 위험 footer
+
+- 구현: `SupplementCancellationConfirmModal`의 기존 action wrapper를 `ModalFooter tone="danger"`로 이관했다.
+- 의미 분리 보존: `보강만 취소`의 원 결석 유지·보강/예약 정리와 `결석 기록 취소`의 원 결석 대기 전환·새 발송 없음 요약을 그대로 유지했다.
+- 동작 보존: mode 판별, local draft 후보 구분, `onCancel`/`onConfirm`, 두 버튼의 `isBusy` disabled와 처리 중 문구를 정적 계약으로 고정했다.
+- 외부 원천: makeup task, lesson, attendance record, Supabase, notification_jobs/Solapi를 실제 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(126 modules). 전용 정적 계약 포함 전체 `npm run test:production`과 scenario 444개 중 443개 통과, `git diff --check` 통과. 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 실제 원천 취소 확인은 독립 gate로 남긴다. 이 결과는 다음 footer 구조 작업과 무관하므로 두 mode의 문구·위험 footer 배치만 누적하고 실제 취소를 누르지 않은 채 UI-5D-3으로 진행한다.
+
 ## 2026-07-29 UI-5D-1. 복구·보존형 위험 확인 footer
 
 - 구현: 공통 `ModalFooter`에 `tone="danger"`를 추가하고 수업 취소 확인·학생 퇴원 확인의 기존 action wrapper를 공통 위험 footer로 이관했다.

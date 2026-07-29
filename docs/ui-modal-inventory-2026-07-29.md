@@ -107,9 +107,16 @@
 - 학생 퇴원 확인은 과거 학생·수업·기록·출결·숙제를 보존하고 다음 날 이후 명단에서만 제외한다는 기존 안내와 `setDeleteStudentId("")`/`confirmDeleteStudent`를 그대로 유지했다.
 - 영구삭제, 보충·결석 취소, notification_jobs/Solapi 예약 취소는 이번 단위에서 제외했다. 실제 취소·퇴원 버튼도 실행하지 않았다.
 
+## UI-5D-2 결석보강 취소 mode 위험 footer
+
+- `보강만 취소`는 원 결석 상태·사유를 보존하고 보강 항목·연결 수업·미발송 예약만 정리한다는 기존 요약을 유지했다.
+- `결석 기록 취소`는 원 수업일지의 결석을 대기로 바꾸며 새 발송·예약을 만들지 않는 별도 기능이라는 기존 요약을 유지했다.
+- 두 mode의 `onCancel`/`onConfirm`, `isBusy` 버튼 차단과 처리 중 문구를 그대로 두고 action wrapper만 `ModalFooter tone="danger"`로 이관했다.
+- 실제 makeup task, lesson, attendance record, notification_jobs/Solapi 취소는 실행하지 않았다.
+
 ## 다음 단위
 
-`UI-5D-2`에서는 결석보강의 `보강만 취소·원 결석 유지`와 `원 결석 기록 취소` 확인창을 공통 위험 footer 후보로 다룬다. 두 mode의 영향 범위 문구, `isBusy` 닫기/실행 차단, `onCancel`/`onConfirm`을 먼저 고정하고 실제 Supabase·수업·예약 취소는 실행하지 않는다.
+`UI-5D-3`에서는 퇴원 중복 학생 단건·일괄 영구삭제의 audit, 확인 입력, 강제 삭제 체크, 저장 중 닫기 차단과 최종 실행 disabled를 정적 계약으로 고정한다. 실제 audit API나 삭제를 호출하지 않고 action wrapper만 공통 위험 footer로 이관할 수 있는지 검토한다.
 
 ## 사람 검수
 
