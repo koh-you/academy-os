@@ -1929,6 +1929,37 @@ check(
       "Promise.all"
     ].some((value) => examPeriodSundayDateSelectorSource.includes(value))
 );
+check(
+  "84d-165 examPrep lesson candidate inventory preserves date grouping block dedupe and fixed lesson fields",
+  (appEntrySource.match(/function buildExamPrepLessonCandidates\(rows = \[\]\)/g) || []).length === 1 &&
+    (appEntrySource.match(/buildExamPrepLessonCandidates\(rows\)/g) || []).length === 1 &&
+    hasAll(appEntrySource, [
+      "const dateMap = new Map()",
+      "parseDateRangeText(row.examPeriod)",
+      "getSundayDatesForExamPeriod(period).forEach((date) => {",
+      "getExamPrepGeneratedKeyForDate(date)",
+      'row.schoolName || "학교 미입력"',
+      "entry.blocks.some(",
+      "item.schoolName === block.schoolName",
+      "item.examCycle === block.examCycle",
+      "return [...dateMap.values()].map((entry) => {",
+      "generatedKey: entry.key",
+      "label: `${entry.date} 시험대비`",
+      "reason: `${schoolNames} 시험기간 전 시험대비`",
+      'lessonId: `lesson_exam_prep_${entry.date}`',
+      'lessonType: "examPrep"',
+      "sourceSchoolEventId: entry.key",
+      "examCycleLabel(block.examCycle)",
+      'dayOfWeek: "sun"',
+      'startTime: "13:00"',
+      'endTime: "18:00"',
+      "getStandardLessonColor({ lessonType: \"examPrep\" })",
+      'teacherId: "instructor_owner_001"',
+      "studentIds: []",
+      'status: "scheduled"',
+      "candidates.push(...buildExamPrepLessonCandidates(rows))"
+    ])
+);
 check("84e shared modal closes with Escape key", hasAll(app, ["import { Modal, ModalFooter } from \"../shared/components/Modal.jsx\""]) && hasAll(sharedModalSource, ["export function Modal({", "backdropClassName = \"\"", "hideCloseButton = false", "hideHeader = false", "function handleEscapeKey(event)", "event.key === \"Escape\"", "onClose?.()", "window.addEventListener(\"keydown\", handleEscapeKey)", "window.removeEventListener(\"keydown\", handleEscapeKey)", "hideCloseButton ? null"]) );
 check("84f lesson journal modal uses shared Escape-close modal", hasAll(app, ["backdropClassName=\"lessonJournalModalBackdrop\"", "className=\"lessonJournalModal\"", "hideHeader", "onClose={onBackToCalendar}"]) && !app.includes("<div className=\"modalBackdrop lessonJournalModalBackdrop\" role=\"dialog\" aria-modal=\"true\">"));
 check("84f-1 lesson journal student preview stays isolated and callback-only", hasAll(lessonFrontendSource, ["LessonJournalStudentPreviewModal", "createLessonJournalStudentPreviewModel", "students.filter((student) => student.studentId === studentPreviewId)", "PortalComponent={StudentPortalV2}", "students={model.previewStudents}", "onLogout={onClose}"]) && !lessonJournalStudentPreviewModalSource.includes("fetch(") && !lessonJournalStudentPreviewModalSource.includes("/api/"));
