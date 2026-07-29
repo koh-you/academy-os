@@ -1,4 +1,5 @@
 import { Component, useEffect, useState } from "react";
+import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { ListCard, ListCardActions } from "../../shared/components/ListCard.jsx";
@@ -799,7 +800,7 @@ export function StudentManager({
               </select>
             </label>
           </div>
-          <div className="studentListTable">
+          <DataTableShell className="studentListTable" label="퇴원생 목록">
           <div className="studentListRow studentListHead withdrawnStudentRow">
             <span>선택</span>
             <span>이름</span>
@@ -856,7 +857,7 @@ export function StudentManager({
           {visibleStudents.length === 0 ? (
             <div className="emptyState studentListEmpty">퇴원생이 없습니다.</div>
           ) : null}
-          </div>
+          </DataTableShell>
           <SelectionToolbar
             actions={(
               <>
@@ -880,7 +881,7 @@ export function StudentManager({
           />
         </>
       ) : (
-        <div className="studentListTable">
+        <DataTableShell className="studentListTable" label="학생 목록">
           <div className="studentListRow studentListHead">
             <span>#</span>
             <span>이름</span>
@@ -991,7 +992,7 @@ export function StudentManager({
           {visibleStudents.length === 0 ? (
             <div className="emptyState studentListEmpty">이 반에 배정된 학생이 없습니다.</div>
           ) : null}
-        </div>
+        </DataTableShell>
       )}
 
       {selectedStudent ? (

@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-4C-1. 데이터 표 인벤토리·공통 스크롤 shell
+
+- 전수조사: 알림·학생·수업·시험·오답·정산·포털 표를 row key, 값 원천, 정렬/변경 callback, 위험도로 분류하고 `docs/ui-data-table-inventory-2026-07-29.md`에 후속 순서를 고정했다.
+- 구현: `role=region`, `aria-label`, 키보드 focus, 가로 overscroll, stable scrollbar를 제공하는 공통 `DataTableShell`을 추가했다. 알림톡 발송 기록, 재원 학생 목록, 퇴원생 목록 wrapper에 적용했다.
+- 동작 보존: notification job/student row key, 퇴원생 이름/퇴원일 정렬, 학생 field draft·행 저장·퇴원, 알림 예약 취소·기록 삭제의 조건과 callback을 그대로 유지했다.
+- 외부 원천: Supabase/app_state, notification_jobs/Solapi, 학생 저장·퇴원·복원·영구삭제를 실제 호출하거나 변경하지 않았다.
+- AI 검수: 첫 빌드가 학생 표의 내부 header `div`와 바깥 shell 닫힘이 교차된 JSX 오류를 탐지했고 두 태그만 수정했다. 재실행한 `npm run build` 통과(125 modules), 전용 정적 계약 포함 scenario 423개 중 422개 통과, 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 세 표의 desktop/390px 가로스크롤·focus만 누적하고 UI-4C-2 수업/시험 표 wrapper로 진행한다.
+
 ## 2026-07-29 UI-4B-4B. 보충 후보 행·UI-4B 완료
 
 - 구현: 보충 후보/진행 행을 기존 `candidateItem supplementRowItem` class와 3열 구조를 유지한 `ListCard` shell로 이관했다.

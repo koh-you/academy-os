@@ -1,0 +1,25 @@
+.dataTableShell.dataTableShell {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-gutter: stable;
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dataTableShell.dataTableShell:focus-visible {
+  outline: 2px solid var(--academy-focus-ring, rgba(37, 99, 235, 0.55));
+  outline-offset: 2px;
+}
+
+.dataTableShell.dataTableShell > table {
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .dataTableShell.dataTableShell {
+    border-radius: var(--academy-radius-md, 12px);
+    scrollbar-color: var(--academy-border-strong, #94a3b8) transparent;
+    scrollbar-width: thin;
+  }
+}

@@ -218,6 +218,7 @@ import {
   specialLectureSettlementStateKey
 } from "../domains/settlements/specialLectureSettlement.js";
 import { AutosaveRiskNotice } from "../shared/components/AutosaveRiskNotice.jsx";
+import { DataTableShell } from "../shared/components/DataTableShell.jsx";
 import { EmptyState } from "../shared/components/EmptyState.jsx";
 import { FilterBar } from "../shared/components/FilterBar.jsx";
 import {
@@ -12697,7 +12698,7 @@ function NotificationCenter({
           )}
         </p>
         {isNoticeHistoryOpen ? (
-        <div className="notificationTable noticeHistoryTable">
+        <DataTableShell className="notificationTable noticeHistoryTable" label="알림톡 발송 기록">
           <div className="notificationTableHead">
             <span>상태</span>
             <span>종류</span>
@@ -12751,7 +12752,7 @@ function NotificationCenter({
               </article>
             ))
           )}
-        </div>
+        </DataTableShell>
         ) : (
           <div className="noticeHistoryCollapsedSummary">
             <strong>{filterLabels[jobFilter]} {filteredNotificationJobs.length}건</strong>
