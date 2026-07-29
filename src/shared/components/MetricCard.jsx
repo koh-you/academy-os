@@ -1,5 +1,11 @@
-export function MetricCard({ active = false, badge = null, density = "default", hint, icon, label, onClick, tone = "default", value }) {
-  const className = `${onClick ? "metricCard metricButton" : "metricCard"} metric-${tone} metricCard-${density}${active ? " active" : ""}`;
+export function MetricCard({ active = false, badge = null, className = "", density = "default", hint, icon, label, onClick, tone = "default", value }) {
+  const metricClassName = [
+    onClick ? "metricCard metricButton" : "metricCard",
+    `metric-${tone}`,
+    `metricCard-${density}`,
+    active ? "active" : "",
+    className
+  ].filter(Boolean).join(" ");
   const content = (
     <>
       <div>
@@ -15,13 +21,13 @@ export function MetricCard({ active = false, badge = null, density = "default", 
   );
   if (onClick) {
     return (
-      <button className={className} onClick={onClick} type="button">
+      <button aria-pressed={active} className={metricClassName} onClick={onClick} type="button">
         {content}
       </button>
     );
   }
   return (
-    <div className={className}>
+    <div className={metricClassName}>
       {content}
     </div>
   );

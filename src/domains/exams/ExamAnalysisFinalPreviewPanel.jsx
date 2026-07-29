@@ -1,6 +1,7 @@
 import { examAnalysisPreviewPalette } from "./finalPreview.js";
 import { ExamAnalysisPromptStudioPanel } from "./ExamAnalysisPromptStudioPanel.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
+import { MetricCard } from "../../shared/components/MetricCard.jsx";
 
 function formatExamAnalysisPreviewEventTime(value) {
   if (!value) return "";
@@ -177,9 +178,9 @@ export function ExamAnalysisFinalPreviewPanel({ model }) {
           {meta.reviewedAt ? <small>검수 저장 · {formatExamAnalysisPreviewEventTime(meta.reviewedAt)}</small> : null}
         </div>
         <div className="examAnalysisPreviewMetricGrid">
-          <span><b>{meta.totalQuestions}</b><small>문항</small></span>
-          <span><b>{model.partDistribution.length}</b><small>쎈 중단원</small></span>
-          <span><b>{model.importantQuestions.length}</b><small>주요문항</small></span>
+          <MetricCard density="micro" label="문항" value={meta.totalQuestions} />
+          <MetricCard density="micro" label="쎈 중단원" value={model.partDistribution.length} />
+          <MetricCard density="micro" label="주요문항" value={model.importantQuestions.length} />
         </div>
       </div>
 

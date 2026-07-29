@@ -14920,6 +14920,33 @@ textarea.profileEditInput {
   font-weight: 800;
 }
 
+.metricCard.metricCard-micro {
+  align-items: center;
+  justify-content: center;
+  min-height: 76px;
+  padding: 10px;
+  text-align: center;
+}
+
+.metricCard.metricCard-micro > div {
+  display: grid;
+  gap: 3px;
+  justify-items: center;
+  min-width: 0;
+}
+
+.metricCard.metricCard-micro strong {
+  font-size: 24px;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.metricCard.metricCard-micro span,
+.metricCard.metricCard-micro small {
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .metricCardBadge {
   background: var(--academy-surface-muted, #f1f5f9);
   border-radius: 999px;
@@ -14990,6 +15017,10 @@ textarea.profileEditInput {
 
 .metric-warning strong {
   color: #dc2626;
+}
+
+.metric-danger strong {
+  color: #be123c;
 }
 
 .metric-success strong {

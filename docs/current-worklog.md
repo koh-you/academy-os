@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-4A-2. 클릭형·micro 지표·UI-4A 완료
+
+- 구현: 알림 예약 확인 4개를 기존 `toggleReservationInspectMode`를 유지한 클릭형 compact `MetricCard`로 이관하고 `aria-pressed`를 보강했다. 학생 마이페이지 숙제 3개·출결 4개와 시험분석 최종 미리보기 3개를 micro 카드로 이관해 총 14개를 통일했다.
+- 동작 보존: 예약 job 집계·active 검사 모드, `stats`/`attendanceStats`, 시험분석 `meta`·preview model 배열 길이 계산을 그대로 유지했다. 출결 present/late/absent/unexcused class와 색상도 보존했다.
+- 외부 원천: Solapi/OS 새로고침, 학생 기록 저장, 시험분석 생성·저장, Supabase/app_state, notification_jobs, Storage를 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(121 modules). `npm run test:production`은 전체 하위 fixture를 통과해 scenario suite까지 도달했고 417개 중 416개가 통과했다. 유일한 실패는 UI 작업 전 기준선과 같은 `90a lesson modal creates verified closure and optional linked makeup journals`다.
+- 사람 검수: 필수 중단 gate는 없다. 배포 후 값·색상·micro 배치와 예약 카드 클릭 시 active/표시 목록만 바뀌는지 확인하는 독립 검수를 누적하고 UI-4B 목록 카드로 진행한다.
+
 ## 2026-07-29 UI-4A-1. 단순 지표·요약 카드
 
 - 전수조사: 단순 숫자/값, 클릭형 지표, 포털 micro 지표, 연동 상태 카드를 분리하고 `docs/ui-metric-card-inventory-2026-07-29.md`에 값 원천과 후속 단위를 기록했다.

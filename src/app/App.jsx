@@ -18142,15 +18142,15 @@ function LessonJournalDetail({
   function renderReservationSummaryButton(mode, label, count) {
     const active = reservationInspectMode === mode;
     return (
-      <button
-        aria-pressed={active}
-        className={active ? "reservationSummaryCard active" : "reservationSummaryCard"}
+      <MetricCard
+        active={active}
+        className="reservationSummaryCard"
+        density="compact"
+        label={label}
         onClick={() => toggleReservationInspectMode(mode)}
-        type="button"
-      >
-        <span>{label}</span>
-        <strong>{count}건</strong>
-      </button>
+        tone={mode === "issues" ? "warning" : "default"}
+        value={`${count}건`}
+      />
     );
   }
 

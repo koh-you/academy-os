@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
+import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { getCountableAttendanceRecords } from "../lessons/lessonClosure.js";
 
 function formatHomeworkDoneCount(value) {
@@ -138,9 +139,9 @@ export function StudentMyPageTab({
           {statsTab === "homework" ? (
             <>
               <div className="miniMetricGrid">
-                <div><strong>{stats.completionRate}%</strong><span>전체 이행률</span></div>
-                <div><strong>{stats.perfectDays}</strong><span>완벽한 날 (30일)</span></div>
-                <div><strong>{stats.total}</strong><span>등록 숙제</span></div>
+                <MetricCard density="micro" label="전체 이행률" tone="success" value={`${stats.completionRate}%`} />
+                <MetricCard density="micro" label="완벽한 날 (30일)" value={stats.perfectDays} />
+                <MetricCard density="micro" label="등록 숙제" value={stats.total} />
               </div>
               <div className="progressList">
                 <h3>숙제 이행률</h3>
@@ -159,10 +160,10 @@ export function StudentMyPageTab({
           {statsTab === "attendance" ? (
             <>
               <div className="attendanceMetricGrid">
-                <div className="present"><strong>{attendanceStats.present}</strong><span>등원</span></div>
-                <div className="late"><strong>{attendanceStats.late}</strong><span>지각</span></div>
-                <div className="absent"><strong>{attendanceStats.absent}</strong><span>결석</span></div>
-                <div className="unexcused"><strong>{attendanceStats.unexcused}</strong><span>무단결석</span></div>
+                <MetricCard className="present" density="micro" label="등원" tone="success" value={attendanceStats.present} />
+                <MetricCard className="late" density="micro" label="지각" tone="warning" value={attendanceStats.late} />
+                <MetricCard className="absent" density="micro" label="결석" tone="danger" value={attendanceStats.absent} />
+                <MetricCard className="unexcused" density="micro" label="무단결석" tone="danger" value={attendanceStats.unexcused} />
               </div>
               <div className="progressList">
                 <div className="attendanceRateBox">
