@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { normalizeTimeInput } from "../src/domains/lessons/attendance.js";
+import {
+  areGeneratedLessonPersistedFieldsEqual,
+  normalizeGeneratedLessonStudentIds
+} from "../src/domains/lessons/generatedLessonPersistenceModel.js";
 
 function normalizeExistingStudentIdList(studentIds = []) {
   return [...new Set(studentIds)].sort();
@@ -85,7 +89,30 @@ assert.equal(
   true
 );
 assert.equal(
+  areGeneratedLessonPersistedFieldsEqual(
+    candidate,
+    equivalentExisting
+  ),
+  true
+);
+assert.deepEqual(
+  normalizeGeneratedLessonStudentIds(
+    candidate.studentIds
+  ),
+  ["student_TARGET_A", "student_TARGET_B"]
+);
+assert.equal(
   areExistingGeneratedLessonPersistedFieldsEqual(
+    candidate,
+    {
+      ...equivalentExisting,
+      lessonTopic: "CONTROL 변경"
+    }
+  ),
+  false
+);
+assert.equal(
+  areGeneratedLessonPersistedFieldsEqual(
     candidate,
     {
       ...equivalentExisting,
@@ -105,7 +132,27 @@ assert.equal(
   false
 );
 assert.equal(
+  areGeneratedLessonPersistedFieldsEqual(
+    candidate,
+    {
+      ...equivalentExisting,
+      startTime: "19:30"
+    }
+  ),
+  false
+);
+assert.equal(
   areExistingGeneratedLessonPersistedFieldsEqual(
+    candidate,
+    {
+      ...equivalentExisting,
+      studentIds: ["student_TARGET_A"]
+    }
+  ),
+  false
+);
+assert.equal(
+  areGeneratedLessonPersistedFieldsEqual(
     candidate,
     {
       ...equivalentExisting,
@@ -125,22 +172,17 @@ const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
-const compareStart = appSource.indexOf(
-  "function normalizeStudentIdList(studentIds = [])"
-);
-const compareEnd = appSource.indexOf(
-  "function createPreExamGeneratedKey(",
-  compareStart
-);
-assert.ok(compareStart >= 0 && compareEnd > compareStart);
-const compareSource = appSource.slice(
-  compareStart,
-  compareEnd
+const helperSource = await readFile(
+  new URL(
+    "../src/domains/lessons/generatedLessonPersistenceModel.js",
+    import.meta.url
+  ),
+  "utf8"
 );
 const compareBoundaries = [
-  "function normalizeStudentIdList(studentIds = [])",
+  "export function normalizeGeneratedLessonStudentIds(",
   "return [...new Set(studentIds)].sort()",
-  "function areGeneratedLessonPersistedFieldsEqual(candidate = {}, existing = {})",
+  "export function areGeneratedLessonPersistedFieldsEqual(",
   '"classTemplateId"',
   '"className"',
   '"lessonType"',
@@ -154,12 +196,14 @@ const compareBoundaries = [
   'const sameTimes = ["startTime", "endTime"].every',
   'normalizeTimeInput(candidate[field] ?? "") === normalizeTimeInput(existing[field] ?? "")',
   "if (!sameTimes) return false",
-  "normalizeStudentIdList(candidate.studentIds ?? [])",
-  "normalizeStudentIdList(existing.studentIds ?? [])"
+  "normalizeGeneratedLessonStudentIds(",
+  "candidate.studentIds ?? []",
+  "normalizeGeneratedLessonStudentIds(",
+  "existing.studentIds ?? []"
 ];
 let previousIndex = -1;
 for (const boundary of compareBoundaries) {
-  const boundaryIndex = compareSource.indexOf(
+  const boundaryIndex = helperSource.indexOf(
     boundary,
     previousIndex + 1
   );
@@ -173,12 +217,17 @@ assert.equal(
   appSource.split(
     "areGeneratedLessonPersistedFieldsEqual("
   ).length - 1,
-  3
+  2
 );
-assert.ok(!compareSource.includes("fetch("));
-assert.ok(!compareSource.includes("/api/"));
-assert.ok(!compareSource.includes("postJson"));
-assert.ok(!compareSource.includes("setLessons"));
+assert.ok(
+  appSource.includes(
+    'from "../domains/lessons/generatedLessonPersistenceModel.js"'
+  )
+);
+assert.ok(!helperSource.includes("fetch("));
+assert.ok(!helperSource.includes("/api/"));
+assert.ok(!helperSource.includes("postJson"));
+assert.ok(!helperSource.includes("setLessons"));
 
 console.log(
   "generated lesson persistence model inventory TARGET/CONTROL fixtures passed"

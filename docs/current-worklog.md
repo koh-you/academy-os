@@ -2057,6 +2057,13 @@
 - AI 가상검수: 동일 lesson의 `HH:mm`/`HH:mm:ss` 표기와 학생 ID 순서·중복 TARGET, 핵심 필드·시간·학생 집합 차이 CONTROL로 true/false와 입력 불변을 검증한다. 전용 inventory fixture와 시나리오 633/633, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AN-2`는 학생 ID 정규화와 persisted equality만 `generatedLessonPersistenceModel.js`로 분리하고 plan/status/save 경계는 App에 유지한다.
 
+## 2026-07-28 P3. App.jsx 17AN-2 generated lesson persistence model 분리
+
+- 코드: 학생 ID의 정렬·중복 제거와 generated lesson persisted 핵심 필드·정규화 시각·학생 집합 equality를 `generatedLessonPersistenceModel.js`의 두 순수 함수로 분리했다.
+- 경계: equality를 사용하는 수업 수정 handler와 generated plan status 계산, React state·bulk save/API는 `App.jsx`에 그대로 유지했다. API·Supabase·알림/Solapi effect는 이동하거나 실행하지 않았다.
+- AI 가상검수: 동일 lesson의 시간 초 표기·학생 순서/중복 TARGET과 핵심 필드·실제 시간·학생 집합 차이 CONTROL로 추출 전후 true/false·정규화 결과·입력 불변을 대조한다. 전용 extraction fixture와 시나리오 634/634, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AN-3`은 module import와 두 export, App-owned status/edit/save 소비 경계를 closeout한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
