@@ -97,6 +97,7 @@ import { createLessonNotificationRecordStatusPayload } from "../domains/lessons/
 import { createLessonNotificationRecordStatusRows } from "../domains/lessons/lessonNotificationRecordStatusRows.js";
 import { getExamPrepIdFromDerivedMathEvent } from "../domains/lessons/derivedMathEventExamPrepIdSelector.js";
 import { createExamPeriodSundayDateSelector } from "../domains/lessons/examPeriodSundayDateSelector.js";
+import { createExamPrepLessonCandidateBuilder } from "../domains/lessons/examPrepLessonCandidateBuilder.js";
 import { mergeGeneratedCalendarLessons } from "../domains/lessons/generatedLessonCalendarMerge.js";
 import {
   addGeneratedLessonManualOverrideKey,
@@ -22337,56 +22338,17 @@ const getSundayDatesForExamPeriod =
     toKoreaDateString
   });
 
+const buildExamPrepLessonCandidates =
+  createExamPrepLessonCandidateBuilder({
+    examCycleLabel,
+    getExamPrepGeneratedKeyForDate,
+    getStandardLessonColor,
+    getSundayDatesForExamPeriod,
+    parseDateRangeText
+  });
+
 function toKoreaDateString(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
-
-function buildExamPrepLessonCandidates(rows = []) {
-  const dateMap = new Map();
-  rows.forEach((row) => {
-    const period = parseDateRangeText(row.examPeriod);
-    if (!period.date) return;
-    getSundayDatesForExamPeriod(period).forEach((date) => {
-      const key = getExamPrepGeneratedKeyForDate(date);
-      const block = {
-        schoolName: row.schoolName || "학교 미입력",
-        examCycle: row.examCycle || "",
-        examPrepId: row.examPrepId,
-        periodText: row.examPeriod
-      };
-      if (!dateMap.has(key)) dateMap.set(key, { date, key, blocks: [] });
-      const entry = dateMap.get(key);
-      if (!entry.blocks.some((item) => item.schoolName === block.schoolName && item.examCycle === block.examCycle)) {
-        entry.blocks.push(block);
-      }
-    });
-  });
-  return [...dateMap.values()].map((entry) => {
-    const schoolNames = entry.blocks.map((block) => block.schoolName).join(", ");
-    return {
-      generatedKey: entry.key,
-      label: `${entry.date} 시험대비`,
-      reason: `${schoolNames} 시험기간 전 시험대비`,
-      lesson: {
-        lessonId: `lesson_exam_prep_${entry.date}`,
-        classTemplateId: "",
-        className: "시험대비",
-        lessonType: "examPrep",
-        lessonTopic: "시험대비",
-        sourceSchoolEventId: entry.key,
-        sourceLabel: entry.blocks.map((block) => `${block.schoolName} ${examCycleLabel(block.examCycle)}`).join(" · "),
-        date: entry.date,
-        dayOfWeek: "sun",
-        startTime: "13:00",
-        endTime: "18:00",
-        color: getStandardLessonColor({ lessonType: "examPrep" }),
-        teacherId: "instructor_owner_001",
-        studentIds: [],
-        status: "scheduled",
-        generatedKey: entry.key
-      }
-    };
-  });
 }
 
 function buildGeneratedLessonPlan({ rows = [], lessons = [], students = [], controls = {} }) {

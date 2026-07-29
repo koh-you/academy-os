@@ -2291,6 +2291,12 @@
 - AI 가상검수: 같은 학교·시험차수 중복 CONTROL, 다른 학교·시험차수 TARGET, 빈 입력과 학교·cycle fallback을 만들고 날짜 순서·block 중복 제거·label/reason/sourceLabel·고정 수업 필드·입력 불변을 고정한다. inventory fixture와 시나리오 669/669, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AZ-2`에서 이 순수 builder만 별도 모듈로 분리하고 App은 의존성 주입과 소비를 유지한다.
 
+## 2026-07-28 P3. App.jsx 17AZ-2 examPrep lesson candidate builder extraction
+
+- 코드: 날짜별 block 중복 제거와 시험대비 lesson candidate 조합을 `examPrepLessonCandidateBuilder.js`로 분리했다. App은 기존 `examCycleLabel`, generated key·색상·일요일 selector·기간 parser를 주입하고 상위 generated lesson plan에서 결과를 소비한다.
+- AI 가상검수: inventory와 같은 가상 중복·다중 학교 row의 전체 candidate 배열, fallback, 빈 입력, 입력 불변을 추출 모듈에서 재검증한다. inventory·추출 fixture, 시나리오 670/670, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AZ-3`은 import/export/factory·App 소비 각 1개와 순수 경계를 closeout한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

@@ -36,6 +36,13 @@ const identitySource = await readFile(
   ),
   "utf8"
 );
+const candidateSource = await readFile(
+  new URL(
+    "../src/domains/lessons/examPrepLessonCandidateBuilder.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 assert.equal(
   appSource.split(
     'from "../domains/lessons/generatedExamPrepKeyBuilder.js"'
@@ -44,6 +51,12 @@ assert.equal(
 );
 assert.equal(
   appSource.split(
+    "getExamPrepGeneratedKeyForDate("
+  ).length - 1,
+  0
+);
+assert.equal(
+  candidateSource.split(
     "getExamPrepGeneratedKeyForDate("
   ).length - 1,
   1
@@ -70,8 +83,13 @@ for (const consumerBoundary of [
   );
 }
 assert.ok(
+  candidateSource.includes(
+    "getExamPrepGeneratedKeyForDate(date)"
+  )
+);
+assert.ok(
   appSource.includes(
-    "const key = getExamPrepGeneratedKeyForDate(date)"
+    "getExamPrepGeneratedKeyForDate,"
   )
 );
 assert.ok(

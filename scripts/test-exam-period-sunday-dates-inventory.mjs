@@ -159,6 +159,13 @@ const selectorSource = await readFile(
   ),
   "utf8"
 );
+const candidateSource = await readFile(
+  new URL(
+    "../src/domains/lessons/examPrepLessonCandidateBuilder.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const helperBoundaries = [
   "export function createExamPeriodSundayDateSelector({",
   "return function getSundayDatesForExamPeriod(",
@@ -211,6 +218,12 @@ assert.equal(
   appSource.split(
     "getSundayDatesForExamPeriod("
   ).length - 1,
+  0
+);
+assert.equal(
+  candidateSource.split(
+    "getSundayDatesForExamPeriod("
+  ).length - 1,
   1
 );
 assert.equal(
@@ -229,7 +242,8 @@ for (const appBoundary of [
   'from "../domains/lessons/examPeriodSundayDateSelector.js"',
   "const getSundayDatesForExamPeriod =",
   "createExamPeriodSundayDateSelector({",
-  "toKoreaDateString"
+  "toKoreaDateString",
+  "getSundayDatesForExamPeriod,"
 ]) {
   assert.ok(
     appSource.includes(appBoundary),
@@ -237,8 +251,8 @@ for (const appBoundary of [
   );
 }
 assert.ok(
-  appSource.includes(
-    "getSundayDatesForExamPeriod(period).forEach((date) => {"
+  candidateSource.includes(
+    "getSundayDatesForExamPeriod("
   )
 );
 for (const forbiddenEffect of [

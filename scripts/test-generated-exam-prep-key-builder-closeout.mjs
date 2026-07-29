@@ -36,11 +36,24 @@ const identitySource = await readFile(
   ),
   "utf8"
 );
+const candidateSource = await readFile(
+  new URL(
+    "../src/domains/lessons/examPrepLessonCandidateBuilder.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const modulePath =
   'from "../domains/lessons/generatedExamPrepKeyBuilder.js"';
 assert.equal(appSource.split(modulePath).length - 1, 1);
 assert.equal(
   appSource.split(
+    "getExamPrepGeneratedKeyForDate("
+  ).length - 1,
+  0
+);
+assert.equal(
+  candidateSource.split(
     "getExamPrepGeneratedKeyForDate("
   ).length - 1,
   1
@@ -115,30 +128,31 @@ for (const identityBoundary of [
   );
 }
 
-const candidateStart = appSource.indexOf(
-  "function buildExamPrepLessonCandidates("
+const candidateStart = candidateSource.indexOf(
+  "return function buildExamPrepLessonCandidates("
 );
-const candidateEnd = appSource.indexOf(
-  "function buildGeneratedLessonPlan(",
+const candidateEnd = candidateSource.indexOf(
+  "\n  };",
   candidateStart
 );
 assert.ok(
   candidateStart >= 0 &&
     candidateEnd > candidateStart
 );
-const candidateSource = appSource.slice(
+const candidateBuilderSource = candidateSource.slice(
   candidateStart,
   candidateEnd
 );
 const candidateBoundaries = [
-  "getSundayDatesForExamPeriod(period).forEach((date) => {",
-  "const key = getExamPrepGeneratedKeyForDate(date)",
+  "getSundayDatesForExamPeriod(",
+  "getExamPrepGeneratedKeyForDate(date)",
   "if (!dateMap.has(key))",
   "return [...dateMap.values()].map("
 ];
 let previousCandidateIndex = -1;
 for (const boundary of candidateBoundaries) {
-  const boundaryIndex = candidateSource.indexOf(
+  const boundaryIndex =
+    candidateBuilderSource.indexOf(
     boundary,
     previousCandidateIndex + 1
   );
@@ -148,6 +162,11 @@ for (const boundary of candidateBoundaries) {
   );
   previousCandidateIndex = boundaryIndex;
 }
+assert.ok(
+  appSource.includes(
+    "getExamPrepGeneratedKeyForDate,"
+  )
+);
 
 for (const helperBoundary of [
   'export function getExamPrepGeneratedKeyForDate(date = "")',

@@ -180,6 +180,7 @@ const derivedMathEventExamPrepIdSelectorPath = path.join(root, "src", "domains",
 const preExamMathLabelInferencePath = path.join(root, "src", "domains", "lessons", "preExamMathLabelInference.js");
 const persistedPreExamRowRepairPath = path.join(root, "src", "domains", "lessons", "persistedPreExamRowRepair.js");
 const examPeriodSundayDateSelectorPath = path.join(root, "src", "domains", "lessons", "examPeriodSundayDateSelector.js");
+const examPrepLessonCandidateBuilderPath = path.join(root, "src", "domains", "lessons", "examPrepLessonCandidateBuilder.js");
 const lessonModalActionsPath = path.join(root, "src", "domains", "lessons", "LessonModalActions.jsx");
 const lessonModalBasicsPath = path.join(root, "src", "domains", "lessons", "LessonModalBasics.jsx");
 const lessonModalClosurePanelPath = path.join(root, "src", "domains", "lessons", "LessonModalClosurePanel.jsx");
@@ -575,6 +576,7 @@ const derivedMathEventExamPrepIdSelectorSource = fs.existsSync(derivedMathEventE
 const preExamMathLabelInferenceSource = fs.existsSync(preExamMathLabelInferencePath) ? fs.readFileSync(preExamMathLabelInferencePath, "utf8") : "";
 const persistedPreExamRowRepairSource = fs.existsSync(persistedPreExamRowRepairPath) ? fs.readFileSync(persistedPreExamRowRepairPath, "utf8") : "";
 const examPeriodSundayDateSelectorSource = fs.existsSync(examPeriodSundayDateSelectorPath) ? fs.readFileSync(examPeriodSundayDateSelectorPath, "utf8") : "";
+const examPrepLessonCandidateBuilderSource = fs.existsSync(examPrepLessonCandidateBuilderPath) ? fs.readFileSync(examPrepLessonCandidateBuilderPath, "utf8") : "";
 const lessonModalActionsSource = fs.existsSync(lessonModalActionsPath) ? fs.readFileSync(lessonModalActionsPath, "utf8") : "";
 const lessonModalBasicsSource = fs.existsSync(lessonModalBasicsPath) ? fs.readFileSync(lessonModalBasicsPath, "utf8") : "";
 const lessonModalClosurePanelSource = fs.existsSync(lessonModalClosurePanelPath) ? fs.readFileSync(lessonModalClosurePanelPath, "utf8") : "";
@@ -1252,8 +1254,8 @@ check("61b legacy Sunday makeup block app_state is removed from runtime controls
 check("61c legacy Sunday makeup lessons are hidden before SQL cleanup", hasAll(`${app}\n${lessonCalendarModelSource}`, ["function isLegacyExamPrepLesson(lesson = {})", "lesson?.lessonType === \"examSundayMakeup\"", "startsWith(\"lesson_exam_sunday_makeup_\")", "startsWith(\"generated:sunday_makeup:\")", "!isLegacyExamPrepLesson(lesson) &&"]));
 check("62 exam prep lesson detail opens the persisted lesson directly", hasAll(app, ["title=\"시험대비\"", "subtitle=\"시험기간 전후로 별도 개설한 시험대비 수업입니다.\"", "<ExamPrepLessonDetail", "lesson={selectedLesson}"]) && !hasAll(app, ["selectedSourceLesson", "sourceLessonId"]));
 check("63 exam prep lesson detail removes block edit controls", hasAll(app, ["function ExamPrepLessonDetail({ lesson, onDeleteLesson, onEditLesson })", "examPrepSourceList", "examPrepSourceItem", "연결된 시험정보"]) && !hasAll(app, ["function deleteBlock(blockId)", "블록 삭제", "블록 저장", "자동값 복구"]));
-check("64 exam prep UI labels replace Sunday makeup wording", hasAll(lessonFrontendSource, ['{ id: "examPrep", label: "시험대비"', '["examPrep", "🗓 시험대비"]', 'className: "시험대비"', 'lessonTopic: "시험대비"']) && !lessonFrontendSource.includes("일요보강") && !lessonFrontendSource.includes("일요시험보강"));
-check("64b generated special lessons avoid class template FK ids", !hasAll(app, ['classTemplateId: "pre_exam"', 'classTemplateId: "exam_sunday_makeup"']) && generatedPreExamLessonBuilderSource.includes('lessonType: "preExam"') && hasAll(app, ['lessonType: "examPrep"', 'function isExamPrepLesson(lesson = {})', 'return lesson?.lessonType === "examPrep"']));
+check("64 exam prep UI labels replace Sunday makeup wording", hasAll(`${lessonFrontendSource}\n${examPrepLessonCandidateBuilderSource}`, ['{ id: "examPrep", label: "시험대비"', '["examPrep", "🗓 시험대비"]', 'className: "시험대비"', 'lessonTopic: "시험대비"']) && !lessonFrontendSource.includes("일요보강") && !lessonFrontendSource.includes("일요시험보강"));
+check("64b generated special lessons avoid class template FK ids", !hasAll(`${app}\n${examPrepLessonCandidateBuilderSource}`, ['classTemplateId: "pre_exam"', 'classTemplateId: "exam_sunday_makeup"']) && generatedPreExamLessonBuilderSource.includes('lessonType: "preExam"') && examPrepLessonCandidateBuilderSource.includes('lessonType: "examPrep"') && hasAll(app, ['function isExamPrepLesson(lesson = {})', 'return lesson?.lessonType === "examPrep"']));
 check("64c generated lesson preview lists all candidates in scroll area", !app.includes("generatedLessonPlan.slice(0, 8)") && hasAll(css, [".generatedLessonList", "max-height: 420px", "overflow: auto"]));
 check("64d exam prep includes Sundays inside exam period", hasAll(examPeriodSundayDateSelectorSource, ["inPeriodSundays", "cursor <= end", "cursor.getDay() === 0", "...new Set([", "...prepSundays,", "...inPeriodSundays", "].sort()"]));
 check("64e generated lessons use current exam cycle rows only", hasAll(app, ["generatedLessonPlanRows", "selectGeneratedLessonPlanRows(examPrepRows, currentExamCycle)", "buildGeneratedLessonPlan({ rows: generatedLessonPlanRows"]) && hasAll(generatedLessonPlanSelectorsSource, ["(row.examCycle || currentExamCycle) === currentExamCycle"]));
@@ -1300,7 +1302,7 @@ check("71-2 exam prep lesson API transport stays extracted with injected request
 check("72 exam prep source list replaces block editor CSS", hasAll(css, [".examPrepSourceList", ".examPrepSourceItem", ".examPrepEmptyState"]) && !hasAll(css, [".examSundayBlockItem", ".examSundaySaveBar"]));
 check("73 exam prep source pill uses persisted lesson source label", hasAll(lessonCalendarModelSource, ["const isExamPrepType = isExamPrepLesson(lesson);", "isExamPrepType", "lesson.sourceLabel", "` · ${lesson.sourceLabel}`"]) && !app.includes("getExamSundayMakeupVisibleSourceLabel"));
 check("74 exam prep detail shows schedule and connected source items", hasAll(app, ["const sourceItems = String(lesson.sourceLabel || \"\")", "const scheduledTime = `${lesson.date} ${lesson.startTime || \"미정\"}-${lesson.endTime || \"미정\"}`", "{sourceItems.length ? (", "시험정보 연결 없음"]));
-check("75 exam prep generated candidates use 시험대비 labels", hasAll(app, ["label: `${entry.date} 시험대비`", "reason: `${schoolNames} 시험기간 전 시험대비`", "lessonId: `lesson_exam_prep_${entry.date}`", "lessonType: \"examPrep\""]));
+check("75 exam prep generated candidates use 시험대비 labels", hasAll(examPrepLessonCandidateBuilderSource, ["label: `${entry.date} 시험대비`", "`${schoolNames} 시험기간 전 시험대비`", "`lesson_exam_prep_${entry.date}`", "lessonType: \"examPrep\""]));
 check("76 exam prep block editing no longer persists through app_state", hasAll(app, ["postAppState(changedStates)", "persistedSharedAppStateRef", "generatedLessonControls"]) && !hasAll(app, ["updateExamSundayMakeupBlocks", "blockSaveState", "sundayMakeupBlocks"]));
 check("77 lesson modal includes high school senior student group", hasAll(lessonModalStudentModelSource, ['lessonModalStudentGradeOrder = ["고3", "고2", "고1", "중3", "중2", "중1"]', "orderedStudentGrades", 'student.grade || "학년 미입력"']));
 check("77b student list removes evaluation columns and saves edits explicitly", hasAll(studentManagerSource, ["className=\"studentClassSelect\"", "defaultClassTemplateId", "학생 퇴원 처리 확인", "퇴원생은 과거 기록 보존", "onSaveStudent", "persist: false", "studentSaveButton", "저장 중", "저장됨"]) && !hasAll(studentManagerSource, ["현행평가", "추가1평가", "추가2평가", "correctionAvailable"]) && !studentManagerSource.includes("withdrawButton") && !studentManagerSource.includes("정보확정") && hasAll(css, [".studentClassSelect", ".studentSaveButton", ".dirtyStudentRow", "grid-template-columns: 34px 190px 180px 120px 70px 80px 150px 150px 150px 104px 86px 76px"]));
@@ -1646,9 +1648,9 @@ check("84d-131 generated lesson persistence model boundary closes out before App
 check("84d-132 generated pre-exam key builder inventory preserves explicit event id and ordered fallback parts", (appEntrySource.match(/createPreExamGeneratedKey\(/g) || []).length === 1 && (generatedPreExamLessonBuilderSource.match(/createPreExamGeneratedKey\(/g) || []).length === 1 && appEntrySource.includes("const generatedKey = createPreExamGeneratedKey(event)") && hasAll(generatedPreExamLessonBuilderSource, ["const generatedKey = createPreExamGeneratedKey({", "eventId: sourceId"]) && hasAll(generatedPreExamKeyBuilderSource, ["export function createPreExamGeneratedKey(event = {})", "event.eventId ||", 'event.examSubject || event.subject || "math"', "return `generated:pre_exam:${sourceId}`"]));
 check("84d-133 generated pre-exam key builder stays pure before generated lesson builder and App-owned plan consumer", (appEntrySource.match(/from "\.\.\/domains\/lessons\/generatedPreExamKeyBuilder\.js"/g) || []).length === 1 && (generatedPreExamKeyBuilderSource.match(/export function createPreExamGeneratedKey\(/g) || []).length === 1 && hasAll(appEntrySource, ["createGeneratedPreExamLessonBuilder({", "createPreExamGeneratedKey,", "function buildGeneratedLessonPlan(", "const generatedKey = createPreExamGeneratedKey(event)"]) && hasAll(generatedPreExamLessonBuilderSource, ["const generatedKey = createPreExamGeneratedKey({", "eventId: sourceId"]) && !["useState", "useEffect", "fetch(", "postJson", "/api/", "setLessons", "setExamPrepRows", "persistExamPrepRows", "localStorage", "Supabase", "Solapi", "new Date", "Date.now", "Promise.all"].some((value) => generatedPreExamKeyBuilderSource.includes(value)));
 check("84d-134 generated pre-exam key builder boundary closes out before generated lesson builder and App plan consumer", (appEntrySource.match(/from "\.\.\/domains\/lessons\/generatedPreExamKeyBuilder\.js"/g) || []).length === 1 && (appEntrySource.match(/createPreExamGeneratedKey\(/g) || []).length === 1 && (generatedPreExamLessonBuilderSource.match(/createPreExamGeneratedKey\(/g) || []).length === 1 && (generatedPreExamKeyBuilderSource.match(/export function createPreExamGeneratedKey\(/g) || []).length === 1 && hasAll(generatedPreExamLessonBuilderSource, ['if (event.type !== "mathExam" || !event.date) return null', "if (lessonStudents.length === 0) return null", "const generatedKey = createPreExamGeneratedKey({", "eventId: sourceId"]) && hasAll(appEntrySource, ["lesson: { ...lesson, generatedKey }", "const generatedKey = createPreExamGeneratedKey(event)"]) && hasAll(generatedPreExamKeyBuilderSource, ["event.eventId ||", 'event.examSubject || event.subject || "math"', "return `generated:pre_exam:${sourceId}`"]) && !["useState", "useEffect", "fetch(", "postJson", "/api/", "setLessons", "setExamPrepRows", "persistExamPrepRows", "localStorage", "Supabase", "Solapi", "new Date", "Date.now", "Promise.all"].some((value) => generatedPreExamKeyBuilderSource.includes(value)));
-check("84d-135 generated exam-prep date key builder inventory preserves truthy date prefix and empty fallback", (appEntrySource.match(/getExamPrepGeneratedKeyForDate\(/g) || []).length === 1 && (generatedLessonIdentityModelSource.match(/getExamPrepGeneratedKeyForDate\(/g) || []).length === 2 && appEntrySource.includes("const key = getExamPrepGeneratedKeyForDate(date)") && hasAll(generatedExamPrepKeyBuilderSource, ['export function getExamPrepGeneratedKeyForDate(date = "")', 'return date ? `generated:exam_prep:${date}` : ""']));
-check("84d-136 generated exam-prep date key builder stays pure before injected identity and App-owned candidate consumers", (appEntrySource.match(/from "\.\.\/domains\/lessons\/generatedExamPrepKeyBuilder\.js"/g) || []).length === 1 && (generatedLessonIdentityModelSource.match(/from "\.\/generatedExamPrepKeyBuilder\.js"/g) || []).length === 1 && (appEntrySource.match(/getExamPrepGeneratedKeyForDate\(/g) || []).length === 1 && (generatedLessonIdentityModelSource.match(/getExamPrepGeneratedKeyForDate\(/g) || []).length === 2 && (generatedExamPrepKeyBuilderSource.match(/export function getExamPrepGeneratedKeyForDate\(/g) || []).length === 1 && hasAll(generatedLessonIdentityModelSource, ["return getExamPrepGeneratedKeyForDate(lesson.date)", "getExamPrepGeneratedKeyForDate(lesson.date)"]) && appEntrySource.includes("const key = getExamPrepGeneratedKeyForDate(date)") && !["useState", "useEffect", "fetch(", "postJson", "/api/", "setLessons", "setExamPrepRows", "persistExamPrepRows", "localStorage", "Supabase", "Solapi", "new Date", "Date.now", "Promise.all"].some((value) => generatedExamPrepKeyBuilderSource.includes(value)));
-check("84d-137 generated exam-prep date key builder boundary closes out before injected key identity and App-owned candidate consumers", (appEntrySource.match(/from "\.\.\/domains\/lessons\/generatedExamPrepKeyBuilder\.js"/g) || []).length === 1 && (generatedLessonIdentityModelSource.match(/from "\.\/generatedExamPrepKeyBuilder\.js"/g) || []).length === 1 && (appEntrySource.match(/getExamPrepGeneratedKeyForDate\(/g) || []).length === 1 && (generatedLessonIdentityModelSource.match(/getExamPrepGeneratedKeyForDate\(/g) || []).length === 2 && (generatedExamPrepKeyBuilderSource.match(/export function getExamPrepGeneratedKeyForDate\(/g) || []).length === 1 && hasAll(generatedLessonIdentityModelSource, ["function getGeneratedLessonKey(", "return getExamPrepGeneratedKeyForDate(lesson.date)", "function getGeneratedLessonIdentityKeys(", "getExamPrepGeneratedKeyForDate(lesson.date)"]) && hasAll(appEntrySource, ["function buildExamPrepLessonCandidates(", "const key = getExamPrepGeneratedKeyForDate(date)"]) && !["useState", "useEffect", "fetch(", "postJson", "/api/", "setLessons", "setExamPrepRows", "persistExamPrepRows", "localStorage", "Supabase", "Solapi", "new Date", "Date.now", "Promise.all"].some((value) => generatedExamPrepKeyBuilderSource.includes(value)));
+check("84d-135 generated exam-prep date key builder inventory preserves truthy date prefix and empty fallback", (appEntrySource.match(/getExamPrepGeneratedKeyForDate\(/g) || []).length === 0 && (examPrepLessonCandidateBuilderSource.match(/getExamPrepGeneratedKeyForDate\(/g) || []).length === 1 && (generatedLessonIdentityModelSource.match(/getExamPrepGeneratedKeyForDate\(/g) || []).length === 2 && examPrepLessonCandidateBuilderSource.includes("getExamPrepGeneratedKeyForDate(date)") && hasAll(generatedExamPrepKeyBuilderSource, ['export function getExamPrepGeneratedKeyForDate(date = "")', 'return date ? `generated:exam_prep:${date}` : ""']));
+check("84d-136 generated exam-prep date key builder stays pure before injected identity and candidate-builder consumers", (appEntrySource.match(/from "\.\.\/domains\/lessons\/generatedExamPrepKeyBuilder\.js"/g) || []).length === 1 && (generatedLessonIdentityModelSource.match(/from "\.\/generatedExamPrepKeyBuilder\.js"/g) || []).length === 1 && (appEntrySource.match(/getExamPrepGeneratedKeyForDate\(/g) || []).length === 0 && (examPrepLessonCandidateBuilderSource.match(/getExamPrepGeneratedKeyForDate\(/g) || []).length === 1 && (generatedLessonIdentityModelSource.match(/getExamPrepGeneratedKeyForDate\(/g) || []).length === 2 && (generatedExamPrepKeyBuilderSource.match(/export function getExamPrepGeneratedKeyForDate\(/g) || []).length === 1 && hasAll(generatedLessonIdentityModelSource, ["return getExamPrepGeneratedKeyForDate(lesson.date)", "getExamPrepGeneratedKeyForDate(lesson.date)"]) && hasAll(appEntrySource, ["createExamPrepLessonCandidateBuilder({", "getExamPrepGeneratedKeyForDate,"]) && examPrepLessonCandidateBuilderSource.includes("getExamPrepGeneratedKeyForDate(date)") && !["useState", "useEffect", "fetch(", "postJson", "/api/", "setLessons", "setExamPrepRows", "persistExamPrepRows", "localStorage", "Supabase", "Solapi", "new Date", "Date.now", "Promise.all"].some((value) => generatedExamPrepKeyBuilderSource.includes(value)));
+check("84d-137 generated exam-prep date key builder boundary closes out before injected key identity and candidate-builder consumers", (appEntrySource.match(/from "\.\.\/domains\/lessons\/generatedExamPrepKeyBuilder\.js"/g) || []).length === 1 && (generatedLessonIdentityModelSource.match(/from "\.\/generatedExamPrepKeyBuilder\.js"/g) || []).length === 1 && (appEntrySource.match(/getExamPrepGeneratedKeyForDate\(/g) || []).length === 0 && (examPrepLessonCandidateBuilderSource.match(/getExamPrepGeneratedKeyForDate\(/g) || []).length === 1 && (generatedLessonIdentityModelSource.match(/getExamPrepGeneratedKeyForDate\(/g) || []).length === 2 && (generatedExamPrepKeyBuilderSource.match(/export function getExamPrepGeneratedKeyForDate\(/g) || []).length === 1 && hasAll(generatedLessonIdentityModelSource, ["function getGeneratedLessonKey(", "return getExamPrepGeneratedKeyForDate(lesson.date)", "function getGeneratedLessonIdentityKeys(", "getExamPrepGeneratedKeyForDate(lesson.date)"]) && hasAll(appEntrySource, ["createExamPrepLessonCandidateBuilder({", "getExamPrepGeneratedKeyForDate,"]) && hasAll(examPrepLessonCandidateBuilderSource, ["return function buildExamPrepLessonCandidates(", "getExamPrepGeneratedKeyForDate(date)"]) && !["useState", "useEffect", "fetch(", "postJson", "/api/", "setLessons", "setExamPrepRows", "persistExamPrepRows", "localStorage", "Supabase", "Solapi", "new Date", "Date.now", "Promise.all"].some((value) => generatedExamPrepKeyBuilderSource.includes(value)));
 check("84d-138 generated lesson identity model inventory preserves primary compatibility and deduplicated exam-prep keys", hasAll(generatedLessonIdentityModelSource, ["export function createGeneratedLessonIdentityModel({", "function getGeneratedLessonKey(lesson = {})", 'if (sourceId.startsWith("generated:")) return sourceId', 'if (lesson.lessonType === "preExam" && sourceId)', "function getPreExamCompatibilityKey(lesson = {})", "lesson.sourceExamDate ||", "addDaysInKorea(lesson.date, 1)", "const schoolKey = normalizeSchoolName(schoolName)", "normalizeGradeLabel(grade)", "function getGeneratedLessonIdentityKeys(lesson = {})", "getPreExamCompatibilityKey(lesson)"]) && hasAll(appEntrySource, ["createGeneratedLessonIdentityModel({", "addDaysInKorea,", "isExamPrepLesson,", "normalizeGradeLabel"]));
 check("84d-139 generated lesson identity model stays pure with App-injected grade date and exam-prep predicates", (appEntrySource.match(/from "\.\.\/domains\/lessons\/generatedLessonIdentityModel\.js"/g) || []).length === 1 && (appEntrySource.match(/createGeneratedLessonIdentityModel\(\{/g) || []).length === 1 && (generatedLessonIdentityModelSource.match(/export function createGeneratedLessonIdentityModel\(/g) || []).length === 1 && hasAll(appEntrySource, ["getGeneratedLessonIdentityKeys,", "getGeneratedLessonKey", "addDaysInKorea,", "isExamPrepLesson,", "normalizeGradeLabel"]) && hasAll(generatedLessonIdentityModelSource, ["function getGeneratedLessonKey(", "function getPreExamCompatibilityKey(", "function getGeneratedLessonIdentityKeys(", "return {", "getGeneratedLessonIdentityKeys,", "getGeneratedLessonKey,", "getPreExamCompatibilityKey"]) && !["useState", "useEffect", "fetch(", "postJson", "/api/", "setLessons", "setExamPrepRows", "persistExamPrepRows", "localStorage", "Supabase", "Solapi", "Date.now", "Promise.all"].some((value) => generatedLessonIdentityModelSource.includes(value)));
 check("84d-140 generated lesson identity model boundary closes out before App-owned calendar sync and plan consumers", (appEntrySource.match(/from "\.\.\/domains\/lessons\/generatedLessonIdentityModel\.js"/g) || []).length === 1 && (appEntrySource.match(/createGeneratedLessonIdentityModel\(\{/g) || []).length === 1 && (generatedLessonIdentityModelSource.match(/export function createGeneratedLessonIdentityModel\(/g) || []).length === 1 && hasAll(appEntrySource, ["getGeneratedLessonIdentityKeys,", "getGeneratedLessonKey", "addDaysInKorea,", "isExamPrepLesson,", "normalizeGradeLabel", "getIdentityKeys: getGeneratedLessonIdentityKeys", "const generatedKey = getGeneratedLessonKey(lesson)", "const lessonKeys = new Set(getGeneratedLessonIdentityKeys(lesson))", "const candidateKeys = new Set([candidate.generatedKey, ...getGeneratedLessonIdentityKeys(candidate.lesson)].filter(Boolean))"]) && hasAll(generatedLessonIdentityModelSource, ["function getGeneratedLessonKey(", "function getPreExamCompatibilityKey(", "function getGeneratedLessonIdentityKeys(", "getGeneratedLessonKey(lesson)", "getPreExamCompatibilityKey(lesson)", "return {"]) && !["useState", "useEffect", "fetch(", "postJson", "/api/", "setLessons", "setExamPrepRows", "persistExamPrepRows", "localStorage", "Supabase", "Solapi", "Date.now", "Promise.all"].some((value) => generatedLessonIdentityModelSource.includes(value)));
@@ -1832,7 +1834,8 @@ check(
 check(
   "84d-162 exam period Sunday dates inventory preserves four prep Sundays period union and sort",
   (appEntrySource.match(/function getSundayDatesForExamPeriod\(/g) || []).length === 0 &&
-    (appEntrySource.match(/getSundayDatesForExamPeriod\(/g) || []).length === 1 &&
+    (appEntrySource.match(/getSundayDatesForExamPeriod\(/g) || []).length === 0 &&
+    (examPrepLessonCandidateBuilderSource.match(/getSundayDatesForExamPeriod\(/g) || []).length === 1 &&
     (examPeriodSundayDateSelectorSource.match(/return function getSundayDatesForExamPeriod\(/g) || []).length === 1 &&
     hasAll(examPeriodSundayDateSelectorSource, [
       "if (!period.endDate && !period.date) return []",
@@ -1857,9 +1860,8 @@ check(
       "...inPeriodSundays",
       "].sort()"
     ]) &&
-    appEntrySource.includes(
-      "getSundayDatesForExamPeriod(period).forEach((date) => {"
-    )
+    appEntrySource.includes("getSundayDatesForExamPeriod,") &&
+    examPrepLessonCandidateBuilderSource.includes("getSundayDatesForExamPeriod(")
 );
 check(
   "84d-163 exam period Sunday date selector extraction stays pure with App-injected date formatter",
@@ -1870,8 +1872,9 @@ check(
       "const getSundayDatesForExamPeriod =",
       "createExamPeriodSundayDateSelector({",
       "toKoreaDateString",
-      "getSundayDatesForExamPeriod(period).forEach((date) => {"
+      "getSundayDatesForExamPeriod,"
     ]) &&
+    examPrepLessonCandidateBuilderSource.includes("getSundayDatesForExamPeriod(") &&
     ![
       "useState",
       "useEffect",
@@ -1892,15 +1895,17 @@ check(
   "84d-164 exam period Sunday date selector boundary closes out with one candidate consumer",
   (appEntrySource.match(/from "\.\.\/domains\/lessons\/examPeriodSundayDateSelector\.js"/g) || []).length === 1 &&
     (appEntrySource.match(/createExamPeriodSundayDateSelector\(\{/g) || []).length === 1 &&
-    (appEntrySource.match(/getSundayDatesForExamPeriod\(/g) || []).length === 1 &&
+    (appEntrySource.match(/getSundayDatesForExamPeriod\(/g) || []).length === 0 &&
+    (examPrepLessonCandidateBuilderSource.match(/getSundayDatesForExamPeriod\(/g) || []).length === 1 &&
     (examPeriodSundayDateSelectorSource.match(/export function createExamPeriodSundayDateSelector\(/g) || []).length === 1 &&
     !appEntrySource.includes("function getSundayDatesForExamPeriod(") &&
     hasAll(appEntrySource, [
       "const getSundayDatesForExamPeriod =",
       "toKoreaDateString",
       "function toKoreaDateString(date)",
-      "getSundayDatesForExamPeriod(period).forEach((date) => {"
+      "getSundayDatesForExamPeriod,"
     ]) &&
+    examPrepLessonCandidateBuilderSource.includes("getSundayDatesForExamPeriod(") &&
     hasAll(examPeriodSundayDateSelectorSource, [
       "return function getSundayDatesForExamPeriod(",
       "if (!period.endDate && !period.date) return []",
@@ -1931,34 +1936,80 @@ check(
 );
 check(
   "84d-165 examPrep lesson candidate inventory preserves date grouping block dedupe and fixed lesson fields",
-  (appEntrySource.match(/function buildExamPrepLessonCandidates\(rows = \[\]\)/g) || []).length === 1 &&
+  (appEntrySource.match(/function buildExamPrepLessonCandidates\(rows = \[\]\)/g) || []).length === 0 &&
+    (appEntrySource.match(/createExamPrepLessonCandidateBuilder\(\{/g) || []).length === 1 &&
     (appEntrySource.match(/buildExamPrepLessonCandidates\(rows\)/g) || []).length === 1 &&
-    hasAll(appEntrySource, [
+    hasAll(examPrepLessonCandidateBuilderSource, [
       "const dateMap = new Map()",
-      "parseDateRangeText(row.examPeriod)",
-      "getSundayDatesForExamPeriod(period).forEach((date) => {",
+      "parseDateRangeText(",
+      "getSundayDatesForExamPeriod(",
       "getExamPrepGeneratedKeyForDate(date)",
       'row.schoolName || "학교 미입력"',
       "entry.blocks.some(",
-      "item.schoolName === block.schoolName",
-      "item.examCycle === block.examCycle",
-      "return [...dateMap.values()].map((entry) => {",
+      "item.schoolName ===",
+      "item.examCycle ===",
+      "return [...dateMap.values()].map(",
       "generatedKey: entry.key",
       "label: `${entry.date} 시험대비`",
-      "reason: `${schoolNames} 시험기간 전 시험대비`",
-      'lessonId: `lesson_exam_prep_${entry.date}`',
+      "`${schoolNames} 시험기간 전 시험대비`",
+      '`lesson_exam_prep_${entry.date}`',
       'lessonType: "examPrep"',
       "sourceSchoolEventId: entry.key",
-      "examCycleLabel(block.examCycle)",
+      "examCycleLabel(",
       'dayOfWeek: "sun"',
       'startTime: "13:00"',
       'endTime: "18:00"',
-      "getStandardLessonColor({ lessonType: \"examPrep\" })",
-      'teacherId: "instructor_owner_001"',
+      "getStandardLessonColor({",
+      '"instructor_owner_001"',
       "studentIds: []",
-      'status: "scheduled"',
+      'status: "scheduled"'
+    ]) &&
+    appEntrySource.includes(
       "candidates.push(...buildExamPrepLessonCandidates(rows))"
-    ])
+    )
+);
+check(
+  "84d-166 examPrep lesson candidate extraction stays pure with App-injected format and date dependencies",
+  (appEntrySource.match(/from "\.\.\/domains\/lessons\/examPrepLessonCandidateBuilder\.js"/g) || []).length === 1 &&
+    (appEntrySource.match(/createExamPrepLessonCandidateBuilder\(\{/g) || []).length === 1 &&
+    (appEntrySource.match(/buildExamPrepLessonCandidates\(rows\)/g) || []).length === 1 &&
+    !appEntrySource.includes("function buildExamPrepLessonCandidates(") &&
+    (examPrepLessonCandidateBuilderSource.match(/export function createExamPrepLessonCandidateBuilder\(/g) || []).length === 1 &&
+    hasAll(appEntrySource, [
+      "const buildExamPrepLessonCandidates =",
+      "examCycleLabel,",
+      "getExamPrepGeneratedKeyForDate,",
+      "getStandardLessonColor,",
+      "getSundayDatesForExamPeriod,",
+      "parseDateRangeText",
+      "candidates.push(...buildExamPrepLessonCandidates(rows))"
+    ]) &&
+    hasAll(examPrepLessonCandidateBuilderSource, [
+      "return function buildExamPrepLessonCandidates(",
+      "const dateMap = new Map()",
+      "parseDateRangeText(",
+      "getSundayDatesForExamPeriod(",
+      "getExamPrepGeneratedKeyForDate(date)",
+      "entry.blocks.some(",
+      "examCycleLabel(",
+      "getStandardLessonColor({",
+      'lessonType: "examPrep"'
+    ]) &&
+    ![
+      "useState",
+      "useEffect",
+      "fetch(",
+      "postJson",
+      "/api/",
+      "setLessons",
+      "setExamPrepRows",
+      "persistExamPrepRows",
+      "localStorage",
+      "Supabase",
+      "Solapi",
+      "Date.now",
+      "Promise.all"
+    ].some((value) => examPrepLessonCandidateBuilderSource.includes(value))
 );
 check("84e shared modal closes with Escape key", hasAll(app, ["import { Modal, ModalFooter } from \"../shared/components/Modal.jsx\""]) && hasAll(sharedModalSource, ["export function Modal({", "backdropClassName = \"\"", "hideCloseButton = false", "hideHeader = false", "function handleEscapeKey(event)", "event.key === \"Escape\"", "onClose?.()", "window.addEventListener(\"keydown\", handleEscapeKey)", "window.removeEventListener(\"keydown\", handleEscapeKey)", "hideCloseButton ? null"]) );
 check("84f lesson journal modal uses shared Escape-close modal", hasAll(app, ["backdropClassName=\"lessonJournalModalBackdrop\"", "className=\"lessonJournalModal\"", "hideHeader", "onClose={onBackToCalendar}"]) && !app.includes("<div className=\"modalBackdrop lessonJournalModalBackdrop\" role=\"dialog\" aria-modal=\"true\">"));

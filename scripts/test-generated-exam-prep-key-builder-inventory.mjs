@@ -44,6 +44,13 @@ const identitySource = await readFile(
   ),
   "utf8"
 );
+const candidateSource = await readFile(
+  new URL(
+    "../src/domains/lessons/examPrepLessonCandidateBuilder.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const builderBoundaries = [
   'export function getExamPrepGeneratedKeyForDate(date = "")',
   "return date ? `generated:exam_prep:${date}` : \"\""
@@ -64,6 +71,12 @@ assert.equal(
   appSource.split(
     "getExamPrepGeneratedKeyForDate("
   ).length - 1,
+  0
+);
+assert.equal(
+  candidateSource.split(
+    "getExamPrepGeneratedKeyForDate("
+  ).length - 1,
   1
 );
 assert.equal(
@@ -77,6 +90,16 @@ assert.ok(
     'from "../domains/lessons/generatedExamPrepKeyBuilder.js"'
   )
 );
+assert.ok(
+  appSource.includes(
+    "getExamPrepGeneratedKeyForDate,"
+  )
+);
+assert.ok(
+  candidateSource.includes(
+    "getExamPrepGeneratedKeyForDate(date)"
+  )
+);
 for (const consumerBoundary of [
   "return getExamPrepGeneratedKeyForDate(lesson.date)",
   "getExamPrepGeneratedKeyForDate(lesson.date)"
@@ -87,8 +110,8 @@ for (const consumerBoundary of [
   );
 }
 assert.ok(
-  appSource.includes(
-    "const key = getExamPrepGeneratedKeyForDate(date)"
+  candidateSource.includes(
+    "getExamPrepGeneratedKeyForDate(date)"
   )
 );
 assert.ok(!helperSource.includes("fetch("));

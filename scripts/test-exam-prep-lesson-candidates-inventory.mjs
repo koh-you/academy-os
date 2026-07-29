@@ -222,48 +222,46 @@ const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
-const startBoundary =
-  "function buildExamPrepLessonCandidates(rows = []) {";
-const endBoundary =
-  "\nfunction buildGeneratedLessonPlan(";
-const startIndex = appSource.indexOf(startBoundary);
-const endIndex = appSource.indexOf(
-  endBoundary,
-  startIndex
-);
-assert.ok(startIndex >= 0);
-assert.ok(endIndex > startIndex);
-const helperSource = appSource.slice(
-  startIndex,
-  endIndex
+const helperSource = await readFile(
+  new URL(
+    "../src/domains/lessons/examPrepLessonCandidateBuilder.js",
+    import.meta.url
+  ),
+  "utf8"
 );
 const helperBoundaries = [
+  "export function createExamPrepLessonCandidateBuilder({",
+  "return function buildExamPrepLessonCandidates(",
   "const dateMap = new Map()",
   "rows.forEach((row) => {",
-  "parseDateRangeText(row.examPeriod)",
+  "parseDateRangeText(",
+  "row.examPeriod",
   "if (!period.date) return",
-  "getSundayDatesForExamPeriod(period).forEach((date) => {",
+  "getSundayDatesForExamPeriod(",
   "getExamPrepGeneratedKeyForDate(date)",
   'row.schoolName || "학교 미입력"',
   "examCycle: row.examCycle || \"\"",
   "if (!dateMap.has(key))",
   "entry.blocks.some(",
-  "item.schoolName === block.schoolName",
-  "item.examCycle === block.examCycle",
+  "item.schoolName ===",
+  "block.schoolName",
+  "item.examCycle ===",
+  "block.examCycle",
   "entry.blocks.push(block)",
-  "return [...dateMap.values()].map((entry) => {",
+  "return [...dateMap.values()].map(",
   "generatedKey: entry.key",
   "label: `${entry.date} 시험대비`",
-  "reason: `${schoolNames} 시험기간 전 시험대비`",
-  'lessonId: `lesson_exam_prep_${entry.date}`',
+  "`${schoolNames} 시험기간 전 시험대비`",
+  '`lesson_exam_prep_${entry.date}`',
   'lessonType: "examPrep"',
   "sourceSchoolEventId: entry.key",
-  "examCycleLabel(block.examCycle)",
+  "examCycleLabel(",
+  "block.examCycle",
   'dayOfWeek: "sun"',
   'startTime: "13:00"',
   'endTime: "18:00"',
-  "getStandardLessonColor({ lessonType: \"examPrep\" })",
-  'teacherId: "instructor_owner_001"',
+  "getStandardLessonColor({",
+  '"instructor_owner_001"',
   "studentIds: []",
   'status: "scheduled"',
   "generatedKey: entry.key"
@@ -281,7 +279,15 @@ for (const boundary of helperBoundaries) {
   previousIndex = boundaryIndex;
 }
 assert.equal(
-  appSource.split(startBoundary).length - 1,
+  appSource.split(
+    "function buildExamPrepLessonCandidates("
+  ).length - 1,
+  0
+);
+assert.equal(
+  appSource.split(
+    "createExamPrepLessonCandidateBuilder({"
+  ).length - 1,
   1
 );
 assert.equal(

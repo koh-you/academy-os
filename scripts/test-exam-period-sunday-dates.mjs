@@ -68,6 +68,13 @@ const selectorSource = await readFile(
   ),
   "utf8"
 );
+const candidateSource = await readFile(
+  new URL(
+    "../src/domains/lessons/examPrepLessonCandidateBuilder.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 assert.equal(
   appSource.split(
     'from "../domains/lessons/examPeriodSundayDateSelector.js"'
@@ -96,19 +103,30 @@ assert.equal(
   appSource.split(
     "getSundayDatesForExamPeriod("
   ).length - 1,
+  0
+);
+assert.equal(
+  candidateSource.split(
+    "getSundayDatesForExamPeriod("
+  ).length - 1,
   1
 );
 for (const appBoundary of [
   "const getSundayDatesForExamPeriod =",
   "createExamPeriodSundayDateSelector({",
   "toKoreaDateString",
-  "getSundayDatesForExamPeriod(period).forEach((date) => {"
+  "getSundayDatesForExamPeriod,"
 ]) {
   assert.ok(
     appSource.includes(appBoundary),
     `missing extracted Sunday date App boundary: ${appBoundary}`
   );
 }
+assert.ok(
+  candidateSource.includes(
+    "getSundayDatesForExamPeriod("
+  )
+);
 for (const forbiddenEffect of [
   "useState",
   "useEffect",
