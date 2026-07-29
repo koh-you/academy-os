@@ -2240,6 +2240,12 @@
 - AI 가상검수: 미적분·중3 대수 TARGET과 기본 수학·수학시험·row 과목 동일·숫자만·빈 값 CONTROL로 추출 결과, normalize 인자, 입력 불변을 확인한다. 기존 inventory와 추출 fixture, 시나리오 661/661, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AW-3`은 import/export/factory·App 호출 각 1개와 기존 label 우선 repair 소비를 closeout한다.
 
+## 2026-07-28 P3. App.jsx 17AW-3 preExam math label inference closeout
+
+- closeout: `preExamMathLabelInference.js` import·export·factory·App 호출 각 1개, inline helper 0개와 `normalizeGradeLabel` 주입을 고정했다. 시험정보 repair의 `previousEntry.label` 우선 소비는 App에 유지했다.
+- AI 가상검수: 미적분·중3 대수 TARGET, 기본 수학·수학시험·row 과목 동일·숫자만·빈 값 CONTROL과 입력 불변을 재검증한다. 전용 closeout fixture와 시나리오 662/662, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 의미 단위는 persisted preExam lesson으로 examPrep math entries를 repair하는 순수 변환 전체를 inventory한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
