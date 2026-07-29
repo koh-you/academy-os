@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { getExamPrepIdFromDerivedMathEvent } from "../src/domains/lessons/derivedMathEventExamPrepIdSelector.js";
+import { createPersistedPreExamRowRepair } from "../src/domains/lessons/persistedPreExamRowRepair.js";
 import { createPreExamMathLabelInference } from "../src/domains/lessons/preExamMathLabelInference.js";
 import { safeIdPart } from "../src/shared/utils/id.js";
 
@@ -208,6 +209,23 @@ function repairExistingExamPrepRowsFromPersistedPreExamLessons(
   });
 }
 
+const extractedRepair =
+  createPersistedPreExamRowRepair({
+    addDaysInKorea: addExistingDaysInKorea,
+    getExamPrepIdFromDerivedMathEvent,
+    inferMathExamLabelFromPreExamLesson:
+      inferExistingMathExamLabelFromPreExamLesson,
+    normalizeGradeLabel:
+      normalizeExistingGradeLabel,
+    normalizeMathExamEntries:
+      normalizeExistingMathExamEntries,
+    normalizeMathSubject:
+      normalizeExistingMathSubject,
+    safeIdPart,
+    syncPrimaryMathExamDate:
+      syncExistingPrimaryMathExamDate
+  });
+
 const targetRow = {
   examPrepId: "exam_prep_TARGET",
   schoolName: "가상고",
@@ -292,11 +310,17 @@ const repaired =
     rows,
     lessons
   );
+const extractedRepaired = extractedRepair(
+  rows,
+  lessons
+);
 
+assert.deepEqual(extractedRepaired, repaired);
 assert.notEqual(repaired, rows);
 assert.notEqual(repaired[0], targetRow);
 assert.notEqual(repaired[1], fillRow);
 assert.equal(repaired[2], unrelatedRow);
+assert.equal(extractedRepaired[2], unrelatedRow);
 assert.equal(repaired[0].mathExamDate, "2026-08-12");
 assert.deepEqual(repaired[0].mathExamDates, [
   {
@@ -358,38 +382,62 @@ const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
+const repairSource = await readFile(
+  new URL(
+    "../src/domains/lessons/persistedPreExamRowRepair.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const repairBoundaries = [
-  "function repairExamPrepRowsFromPersistedPreExamLessons(rows = [], lessons = [])",
-  "const preExamLessons = lessons.filter((lesson) =>",
+  "export function createPersistedPreExamRowRepair({",
+  "return function repairExamPrepRowsFromPersistedPreExamLessons(",
+  "const preExamLessons = lessons.filter(",
   'lesson.lessonType === "preExam"',
   "lesson.date",
-  'String(lesson.sourceSchoolEventId || "").startsWith("derived_math_")',
-  "if (!rows.length || !preExamLessons.length) return rows",
+  "String(",
+  'lesson.sourceSchoolEventId || ""',
+  ').startsWith("derived_math_")',
+  "if (!rows.length || !preExamLessons.length)",
+  "return rows",
   "return rows.map((row) => {",
-  "const sourceLessons = preExamLessons.filter((lesson) =>",
-  "getExamPrepIdFromDerivedMathEvent(lesson.sourceSchoolEventId, [row]) === row.examPrepId",
+  "const sourceLessons = preExamLessons.filter(",
+  "getExamPrepIdFromDerivedMathEvent(",
+  "lesson.sourceSchoolEventId,",
+  "[row]",
+  ") === row.examPrepId",
   "if (!sourceLessons.length) return row",
   "let didRepair = false",
-  "normalizeMathExamEntries(row, { includeBlank: true })",
+  "normalizeMathExamEntries(row, {",
+  "includeBlank: true",
   "sourceLessons.forEach((lesson) => {",
-  "lesson.sourceExamDate || addDaysInKorea(lesson.date, 1)",
-  "sourceEventId.replace(`derived_math_${row.examPrepId}_`, \"\")",
-  "const existingIndex = entries.findIndex((entry) =>",
+  "lesson.sourceExamDate ||",
+  "addDaysInKorea(lesson.date, 1)",
+  "sourceEventId.replace(",
+  "`derived_math_${row.examPrepId}_`",
+  "const existingIndex = entries.findIndex(",
   "const nextEntry = {",
   "id: previousEntry?.id || entryId",
   "date: previousEntry?.date || examDate",
-  "grade: previousEntry?.grade || row.grade || \"\"",
-  "subject: previousEntry?.subject || normalizeMathSubject(row.subject)",
-  "label: previousEntry?.label || inferMathExamLabelFromPreExamLesson(lesson, row)",
-  "sourceSchoolEventId: previousEntry?.sourceSchoolEventId || sourceEventId",
+  'previousEntry?.grade || row.grade || ""',
+  "subject:",
+  "previousEntry?.subject ||",
+  "normalizeMathSubject(row.subject)",
+  "label:",
+  "previousEntry?.label ||",
+  "inferMathExamLabelFromPreExamLesson(",
+  "sourceSchoolEventId:",
+  "previousEntry?.sourceSchoolEventId ||",
   "if (!didRepair) return row",
-  "const nextEntries = entries.filter((entry) => entry.date || entry.label)",
-  "row.mathExamDate || syncPrimaryMathExamDate(nextEntries)",
+  "const nextEntries = entries.filter(",
+  "(entry) => entry.date || entry.label",
+  "row.mathExamDate ||",
+  "syncPrimaryMathExamDate(nextEntries)",
   "mathExamDates: nextEntries"
 ];
 let previousIndex = -1;
 for (const boundary of repairBoundaries) {
-  const boundaryIndex = appSource.indexOf(
+  const boundaryIndex = repairSource.indexOf(
     boundary,
     previousIndex + 1
   );
@@ -403,8 +451,58 @@ assert.equal(
   appSource.split(
     "function repairExamPrepRowsFromPersistedPreExamLessons("
   ).length - 1,
+  0
+);
+assert.equal(
+  appSource.split(
+    "createPersistedPreExamRowRepair({"
+  ).length - 1,
   1
 );
+assert.equal(
+  repairSource.split(
+    "export function createPersistedPreExamRowRepair("
+  ).length - 1,
+  1
+);
+for (const appBoundary of [
+  'from "../domains/lessons/persistedPreExamRowRepair.js"',
+  "const repairExamPrepRowsFromPersistedPreExamLessons =",
+  "createPersistedPreExamRowRepair({",
+  "addDaysInKorea,",
+  "getExamPrepIdFromDerivedMathEvent,",
+  "inferMathExamLabelFromPreExamLesson,",
+  "normalizeGradeLabel,",
+  "normalizeMathExamEntries,",
+  "normalizeMathSubject,",
+  "safeIdPart,",
+  "syncPrimaryMathExamDate"
+]) {
+  assert.ok(
+    appSource.includes(appBoundary),
+    `missing persisted preExam repair App boundary: ${appBoundary}`
+  );
+}
+for (const forbiddenEffect of [
+  "useState",
+  "useEffect",
+  "fetch(",
+  "postJson",
+  "/api/",
+  "setLessons",
+  "setExamPrepRows",
+  "persistExamPrepRows",
+  "localStorage",
+  "Supabase",
+  "Solapi",
+  "Date.now",
+  "Promise.all"
+]) {
+  assert.ok(
+    !repairSource.includes(forbiddenEffect),
+    `persisted preExam repair crossed a side effect: ${forbiddenEffect}`
+  );
+}
 
 console.log(
   "examPrep row repair inventory TARGET/CONTROL fixtures passed"

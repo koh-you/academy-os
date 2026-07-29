@@ -62,6 +62,13 @@ const selectorSource = await readFile(
   ),
   "utf8"
 );
+const repairSource = await readFile(
+  new URL(
+    "../src/domains/lessons/persistedPreExamRowRepair.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 assert.equal(
   appSource.split(
     'from "../domains/lessons/derivedMathEventExamPrepIdSelector.js"'
@@ -78,6 +85,12 @@ assert.equal(
   appSource.split(
     "getExamPrepIdFromDerivedMathEvent("
   ).length - 1,
+  0
+);
+assert.equal(
+  repairSource.split(
+    "getExamPrepIdFromDerivedMathEvent("
+  ).length - 1,
   1
 );
 assert.equal(
@@ -87,18 +100,18 @@ assert.equal(
   0
 );
 const repairBoundaries = [
-  "function repairExamPrepRowsFromPersistedPreExamLessons(",
-  'String(lesson.sourceSchoolEventId || "").startsWith("derived_math_")',
-  "if (!rows.length || !preExamLessons.length) return rows",
+  "return function repairExamPrepRowsFromPersistedPreExamLessons(",
   "return rows.map((row) => {",
-  "const sourceLessons = preExamLessons.filter((lesson) =>",
-  "getExamPrepIdFromDerivedMathEvent(lesson.sourceSchoolEventId, [row]) === row.examPrepId",
+  "getExamPrepIdFromDerivedMathEvent(",
+  "lesson.sourceSchoolEventId,",
+  "[row]",
+  ") === row.examPrepId",
   "if (!sourceLessons.length) return row",
   "let didRepair = false"
 ];
 let previousIndex = -1;
 for (const boundary of repairBoundaries) {
-  const boundaryIndex = appSource.indexOf(
+  const boundaryIndex = repairSource.indexOf(
     boundary,
     previousIndex + 1
   );

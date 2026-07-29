@@ -156,6 +156,13 @@ const helperSource = await readFile(
   ),
   "utf8"
 );
+const repairSource = await readFile(
+  new URL(
+    "../src/domains/lessons/persistedPreExamRowRepair.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const helperBoundaries = [
   "export function createPreExamMathLabelInference({",
   "return function inferMathExamLabelFromPreExamLesson(",
@@ -194,6 +201,12 @@ assert.equal(
   appSource.split(
     "inferMathExamLabelFromPreExamLesson("
   ).length - 1,
+  0
+);
+assert.equal(
+  repairSource.split(
+    "inferMathExamLabelFromPreExamLesson("
+  ).length - 1,
   1
 );
 assert.equal(
@@ -221,8 +234,11 @@ for (const appBoundary of [
 }
 assert.ok(
   appSource.includes(
-    "label: previousEntry?.label || inferMathExamLabelFromPreExamLesson(lesson, row)"
-  )
+    "inferMathExamLabelFromPreExamLesson,"
+  ) &&
+    repairSource.includes(
+      "inferMathExamLabelFromPreExamLesson("
+    )
 );
 for (const forbiddenEffect of [
   "useState",

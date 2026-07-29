@@ -87,6 +87,13 @@ const inferenceSource = await readFile(
   ),
   "utf8"
 );
+const repairSource = await readFile(
+  new URL(
+    "../src/domains/lessons/persistedPreExamRowRepair.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 assert.equal(
   appSource.split(
     'from "../domains/lessons/preExamMathLabelInference.js"'
@@ -109,6 +116,12 @@ assert.equal(
   appSource.split(
     "inferMathExamLabelFromPreExamLesson("
   ).length - 1,
+  0
+);
+assert.equal(
+  repairSource.split(
+    "inferMathExamLabelFromPreExamLesson("
+  ).length - 1,
   1
 );
 assert.equal(
@@ -121,8 +134,9 @@ const appBoundaries = [
   "const inferMathExamLabelFromPreExamLesson =",
   "createPreExamMathLabelInference({",
   "normalizeGradeLabel",
-  "function repairExamPrepRowsFromPersistedPreExamLessons(",
-  "label: previousEntry?.label || inferMathExamLabelFromPreExamLesson(lesson, row)"
+  "const repairExamPrepRowsFromPersistedPreExamLessons =",
+  "createPersistedPreExamRowRepair({",
+  "inferMathExamLabelFromPreExamLesson,"
 ];
 let previousIndex = -1;
 for (const boundary of appBoundaries) {
@@ -136,6 +150,16 @@ for (const boundary of appBoundaries) {
   );
   previousIndex = boundaryIndex;
 }
+assert.ok(
+  repairSource.includes(
+    "previousEntry?.label ||"
+  )
+);
+assert.ok(
+  repairSource.includes(
+    "inferMathExamLabelFromPreExamLesson("
+  )
+);
 for (const inferenceBoundary of [
   "return function inferMathExamLabelFromPreExamLesson(",
   "normalizeGradeLabel(row.grade || \"\")",

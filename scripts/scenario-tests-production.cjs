@@ -178,6 +178,7 @@ const generatedPreExamLessonBuilderPath = path.join(root, "src", "domains", "les
 const generatedPreExamLessonIdBuilderPath = path.join(root, "src", "domains", "lessons", "generatedPreExamLessonIdBuilder.js");
 const derivedMathEventExamPrepIdSelectorPath = path.join(root, "src", "domains", "lessons", "derivedMathEventExamPrepIdSelector.js");
 const preExamMathLabelInferencePath = path.join(root, "src", "domains", "lessons", "preExamMathLabelInference.js");
+const persistedPreExamRowRepairPath = path.join(root, "src", "domains", "lessons", "persistedPreExamRowRepair.js");
 const lessonModalActionsPath = path.join(root, "src", "domains", "lessons", "LessonModalActions.jsx");
 const lessonModalBasicsPath = path.join(root, "src", "domains", "lessons", "LessonModalBasics.jsx");
 const lessonModalClosurePanelPath = path.join(root, "src", "domains", "lessons", "LessonModalClosurePanel.jsx");
@@ -571,6 +572,7 @@ const generatedPreExamLessonBuilderSource = fs.existsSync(generatedPreExamLesson
 const generatedPreExamLessonIdBuilderSource = fs.existsSync(generatedPreExamLessonIdBuilderPath) ? fs.readFileSync(generatedPreExamLessonIdBuilderPath, "utf8") : "";
 const derivedMathEventExamPrepIdSelectorSource = fs.existsSync(derivedMathEventExamPrepIdSelectorPath) ? fs.readFileSync(derivedMathEventExamPrepIdSelectorPath, "utf8") : "";
 const preExamMathLabelInferenceSource = fs.existsSync(preExamMathLabelInferencePath) ? fs.readFileSync(preExamMathLabelInferencePath, "utf8") : "";
+const persistedPreExamRowRepairSource = fs.existsSync(persistedPreExamRowRepairPath) ? fs.readFileSync(persistedPreExamRowRepairPath, "utf8") : "";
 const lessonModalActionsSource = fs.existsSync(lessonModalActionsPath) ? fs.readFileSync(lessonModalActionsPath, "utf8") : "";
 const lessonModalBasicsSource = fs.existsSync(lessonModalBasicsPath) ? fs.readFileSync(lessonModalBasicsPath, "utf8") : "";
 const lessonModalClosurePanelSource = fs.existsSync(lessonModalClosurePanelPath) ? fs.readFileSync(lessonModalClosurePanelPath, "utf8") : "";
@@ -1276,7 +1278,7 @@ check("70h pre-exam auto lessons are persisted before journal display without sc
 check("70i pre exam auto lessons merge legacy placeholder ids", hasAll(generatedLessonIdentityModelSource, ["function getPreExamCompatibilityKey", "function getGeneratedLessonIdentityKeys"]) && hasAll(app, ["const candidateKeys = new Set([candidate.generatedKey", "getGeneratedLessonIdentityKeys(lesson).some((key) => candidateKeys.has(key))", "areGeneratedLessonPersistedFieldsEqual", "lessonId: existing.lessonId"]));
 check("70i-1 pre exam auto lesson compare normalizes persisted time seconds", hasAll(generatedLessonPersistenceModelSource, ["export function areGeneratedLessonPersistedFieldsEqual", "const sameTimes = [\"startTime\", \"endTime\"].every", "normalizeTimeInput(candidate[field] ?? \"\") === normalizeTimeInput(existing[field] ?? \"\")", "if (!sameTimes) return false"]));
 check("70i-2 core data API normalizes lesson and class time columns", hasAll(coreDataRoute, ["function normalizeClockTime", "start_time: compact(normalizeClockTime(classTemplate.startTime))", "end_time: compact(normalizeClockTime(classTemplate.endTime))", "startTime: normalizeClockTime(row.start_time)", "endTime: normalizeClockTime(row.end_time)", "start_time: compact(normalizeClockTime(lesson.startTime))", "end_time: compact(normalizeClockTime(lesson.endTime))"]));
-check("70j exam prep dates recover from persisted pre-exam lessons", hasAll(app, ["function repairExamPrepRowsFromPersistedPreExamLessons", "getExamPrepIdFromDerivedMathEvent", "inferMathExamLabelFromPreExamLesson", "lesson.sourceExamDate || addDaysInKorea(lesson.date, 1)", "saveExamPrepRowsRequest({", "examPrepRows: changedRows"]));
+check("70j exam prep dates recover from persisted pre-exam lessons", hasAll(app, ["createPersistedPreExamRowRepair({", "getExamPrepIdFromDerivedMathEvent,", "inferMathExamLabelFromPreExamLesson,", "const repairedRows = repairExamPrepRowsFromPersistedPreExamLessons(current, lessons)", "saveExamPrepRowsRequest({", "examPrepRows: changedRows"]) && hasAll(persistedPreExamRowRepairSource, ["lesson.sourceExamDate ||", "addDaysInKorea(lesson.date, 1)", "mathExamDates: nextEntries"]));
 check("70k exam prep API preserves existing dates against empty overwrites", hasAll(coreDataRoute, ["function mergeExamPrepScheduleFields", "getExistingExamPrepRowMap", "hasDatedMathExamEntries(existingRow)", "nextRow.mathExamDates = existingEntries", "getPrimaryMathExamDate(normalizeExamEntries(nextRow)) || existingRow.mathExamDate"]));
 check("70l exam review draft field sync replaces whole sections", hasAll(app, ["function getExamReviewDraftTitle", "function isExamReviewDraftTitleLine", "[${schoolName} 시험지 총평]", "function normalizeExamReviewDraftValue", "function replaceExamReviewDraftField", "function getNextExamReviewDraftSectionIndex", "function normalizeExamPrepRowReviewDraft", "normalizeExamPrepRowReviewDraft(normalizeExamPrepRowCycle(row))", "nextLines[titleIndex] = getExamReviewDraftTitle(row)", "nextLines = replaceExamReviewDraftField(nextLines, /^1\\.\\s*시험 범위\\s*:/", "nextLines = replaceExamReviewDraftField(nextLines, /^3\\.\\s*문항 출처\\s*:/"]) && !app.includes(".map((line) => {\n      const trimmedLine = line.trim();\n      if (nextScope"));
 check("70m exam review composer keeps manual draft editable with extracted save timing", fs.existsSync(examReviewDraftSaveControllerPath) && hasAll(app, ["const [reviewDraft, setReviewDraft] = useState(() =>", "createExamReviewDraftSaveController", "function scheduleReviewDraftSave(value)", "function flushPendingReviewSave()", "onBlur={flushPendingReviewSave}", "onChange={(event) => updateReviewDraft(event.target.value)}", "onClose={handleClose}", "function normalizeExamReviewDraftText"]) && hasAll(examReviewDraftSaveControllerSource, ["export function createExamReviewDraftSaveController", "delayMs = 500", "function schedule(value, saveValue)", "function flush(saveValue)", "function cancel()"]) && !appEntrySource.includes("const latestReviewDraftRef = useRef(\"\")") && !appEntrySource.includes("const saveReviewTimerRef = useRef(null)") && !examReviewDraftSaveControllerSource.includes("fetch(") && !examReviewDraftSaveControllerSource.includes("postJson"));
@@ -1663,7 +1665,8 @@ check("84d-152 generated preExam lesson ID builder boundary closes out with one 
 check(
   "84d-153 derived math event examPrep ID selector inventory preserves prefix guard row order and delimiter",
   (appEntrySource.match(/function getExamPrepIdFromDerivedMathEvent\(/g) || []).length === 0 &&
-    (appEntrySource.match(/getExamPrepIdFromDerivedMathEvent\(/g) || []).length === 1 &&
+    (appEntrySource.match(/getExamPrepIdFromDerivedMathEvent\(/g) || []).length === 0 &&
+    (persistedPreExamRowRepairSource.match(/getExamPrepIdFromDerivedMathEvent\(/g) || []).length === 1 &&
     (derivedMathEventExamPrepIdSelectorSource.match(/export function getExamPrepIdFromDerivedMathEvent\(/g) || []).length === 1 &&
     hasAll(derivedMathEventExamPrepIdSelectorSource, [
       'const sourceId = String(sourceSchoolEventId || "")',
@@ -1675,15 +1678,19 @@ check(
       '?.examPrepId || ""'
     ]) &&
     appEntrySource.includes(
-      "getExamPrepIdFromDerivedMathEvent(lesson.sourceSchoolEventId, [row]) === row.examPrepId"
+      "getExamPrepIdFromDerivedMathEvent,"
+    ) &&
+    persistedPreExamRowRepairSource.includes(
+      "getExamPrepIdFromDerivedMathEvent("
     )
 );
-check("84d-154 derived math event examPrep ID selector extraction stays pure before App-owned repair orchestration", (appEntrySource.match(/from "\.\.\/domains\/lessons\/derivedMathEventExamPrepIdSelector\.js"/g) || []).length === 1 && (appEntrySource.match(/getExamPrepIdFromDerivedMathEvent\(/g) || []).length === 1 && (derivedMathEventExamPrepIdSelectorSource.match(/export function getExamPrepIdFromDerivedMathEvent\(/g) || []).length === 1 && hasAll(appEntrySource, ["function repairExamPrepRowsFromPersistedPreExamLessons(", "return rows.map((row) => {", "const sourceLessons = preExamLessons.filter((lesson) =>", "getExamPrepIdFromDerivedMathEvent(lesson.sourceSchoolEventId, [row]) === row.examPrepId", "if (!sourceLessons.length) return row"]) && !["useState", "useEffect", "fetch(", "postJson", "/api/", "setLessons", "setExamPrepRows", "persistExamPrepRows", "localStorage", "Supabase", "Solapi", "Date.now", "Promise.all"].some((value) => derivedMathEventExamPrepIdSelectorSource.includes(value)));
-check("84d-155 derived math event examPrep ID selector boundary closes out with one App consumer and App-owned repair", (appEntrySource.match(/from "\.\.\/domains\/lessons\/derivedMathEventExamPrepIdSelector\.js"/g) || []).length === 1 && (appEntrySource.match(/getExamPrepIdFromDerivedMathEvent\(/g) || []).length === 1 && !appEntrySource.includes("function getExamPrepIdFromDerivedMathEvent(") && (derivedMathEventExamPrepIdSelectorSource.match(/export function getExamPrepIdFromDerivedMathEvent\(/g) || []).length === 1 && hasAll(appEntrySource, ["function repairExamPrepRowsFromPersistedPreExamLessons(", 'String(lesson.sourceSchoolEventId || "").startsWith("derived_math_")', "if (!rows.length || !preExamLessons.length) return rows", "return rows.map((row) => {", "getExamPrepIdFromDerivedMathEvent(lesson.sourceSchoolEventId, [row]) === row.examPrepId", "if (!sourceLessons.length) return row", "let didRepair = false"]) && hasAll(derivedMathEventExamPrepIdSelectorSource, ['if (!sourceId.startsWith("derived_math_")) return ""', "const sourceTail = sourceId.replace(", "rows.find((row) =>", "sourceTail.startsWith(`${row.examPrepId}_`)", '?.examPrepId || ""']) && !["useState", "useEffect", "fetch(", "postJson", "/api/", "setLessons", "setExamPrepRows", "persistExamPrepRows", "localStorage", "Supabase", "Solapi", "Date.now", "Promise.all"].some((value) => derivedMathEventExamPrepIdSelectorSource.includes(value)));
+check("84d-154 derived math event examPrep ID selector extraction stays pure before injected repair model", (appEntrySource.match(/from "\.\.\/domains\/lessons\/derivedMathEventExamPrepIdSelector\.js"/g) || []).length === 1 && (appEntrySource.match(/getExamPrepIdFromDerivedMathEvent\(/g) || []).length === 0 && (persistedPreExamRowRepairSource.match(/getExamPrepIdFromDerivedMathEvent\(/g) || []).length === 1 && (derivedMathEventExamPrepIdSelectorSource.match(/export function getExamPrepIdFromDerivedMathEvent\(/g) || []).length === 1 && hasAll(appEntrySource, ["createPersistedPreExamRowRepair({", "getExamPrepIdFromDerivedMathEvent,"]) && hasAll(persistedPreExamRowRepairSource, ["return rows.map((row) => {", "const sourceLessons = preExamLessons.filter(", "getExamPrepIdFromDerivedMathEvent(", "if (!sourceLessons.length) return row"]) && !["useState", "useEffect", "fetch(", "postJson", "/api/", "setLessons", "setExamPrepRows", "persistExamPrepRows", "localStorage", "Supabase", "Solapi", "Date.now", "Promise.all"].some((value) => derivedMathEventExamPrepIdSelectorSource.includes(value)));
+check("84d-155 derived math event examPrep ID selector boundary closes out with one repair-model consumer", (appEntrySource.match(/from "\.\.\/domains\/lessons\/derivedMathEventExamPrepIdSelector\.js"/g) || []).length === 1 && (persistedPreExamRowRepairSource.match(/getExamPrepIdFromDerivedMathEvent\(/g) || []).length === 1 && !appEntrySource.includes("function getExamPrepIdFromDerivedMathEvent(") && (derivedMathEventExamPrepIdSelectorSource.match(/export function getExamPrepIdFromDerivedMathEvent\(/g) || []).length === 1 && hasAll(appEntrySource, ["createPersistedPreExamRowRepair({", "getExamPrepIdFromDerivedMathEvent,"]) && hasAll(persistedPreExamRowRepairSource, ['lesson.sourceSchoolEventId || ""', '.startsWith("derived_math_")', "return rows.map((row) => {", "getExamPrepIdFromDerivedMathEvent(", "if (!sourceLessons.length) return row", "let didRepair = false"]) && hasAll(derivedMathEventExamPrepIdSelectorSource, ['if (!sourceId.startsWith("derived_math_")) return ""', "const sourceTail = sourceId.replace(", "rows.find((row) =>", "sourceTail.startsWith(`${row.examPrepId}_`)", '?.examPrepId || ""']) && !["useState", "useEffect", "fetch(", "postJson", "/api/", "setLessons", "setExamPrepRows", "persistExamPrepRows", "localStorage", "Supabase", "Solapi", "Date.now", "Promise.all"].some((value) => derivedMathEventExamPrepIdSelectorSource.includes(value)));
 check(
   "84d-156 preExam math label inference inventory preserves ordered cleanup and default-label exclusion",
   (appEntrySource.match(/function inferMathExamLabelFromPreExamLesson\(/g) || []).length === 0 &&
-    (appEntrySource.match(/inferMathExamLabelFromPreExamLesson\(/g) || []).length === 1 &&
+    (appEntrySource.match(/inferMathExamLabelFromPreExamLesson\(/g) || []).length === 0 &&
+    (persistedPreExamRowRepairSource.match(/inferMathExamLabelFromPreExamLesson\(/g) || []).length === 1 &&
     (preExamMathLabelInferenceSource.match(/return function inferMathExamLabelFromPreExamLesson\(/g) || []).length === 1 &&
     hasAll(preExamMathLabelInferenceSource, [
       'row.schoolName || ""',
@@ -1698,12 +1705,83 @@ check(
       "return text"
     ]) &&
     appEntrySource.includes(
-      "label: previousEntry?.label || inferMathExamLabelFromPreExamLesson(lesson, row)"
+      "inferMathExamLabelFromPreExamLesson,"
+    ) &&
+    persistedPreExamRowRepairSource.includes(
+      "previousEntry?.label ||"
     )
 );
-check("84d-157 preExam math label inference extraction stays pure with App-injected grade normalization", (appEntrySource.match(/from "\.\.\/domains\/lessons\/preExamMathLabelInference\.js"/g) || []).length === 1 && (appEntrySource.match(/createPreExamMathLabelInference\(\{/g) || []).length === 1 && (preExamMathLabelInferenceSource.match(/export function createPreExamMathLabelInference\(/g) || []).length === 1 && hasAll(appEntrySource, ["const inferMathExamLabelFromPreExamLesson =", "createPreExamMathLabelInference({", "normalizeGradeLabel", "label: previousEntry?.label || inferMathExamLabelFromPreExamLesson(lesson, row)"]) && !["useState", "useEffect", "fetch(", "postJson", "/api/", "setLessons", "setExamPrepRows", "persistExamPrepRows", "localStorage", "Supabase", "Solapi", "Date.now", "Promise.all"].some((value) => preExamMathLabelInferenceSource.includes(value)));
-check("84d-158 preExam math label inference boundary closes out with one App repair consumer", (appEntrySource.match(/from "\.\.\/domains\/lessons\/preExamMathLabelInference\.js"/g) || []).length === 1 && (appEntrySource.match(/createPreExamMathLabelInference\(\{/g) || []).length === 1 && (appEntrySource.match(/inferMathExamLabelFromPreExamLesson\(/g) || []).length === 1 && !appEntrySource.includes("function inferMathExamLabelFromPreExamLesson(") && (preExamMathLabelInferenceSource.match(/export function createPreExamMathLabelInference\(/g) || []).length === 1 && hasAll(appEntrySource, ["const inferMathExamLabelFromPreExamLesson =", "normalizeGradeLabel", "function repairExamPrepRowsFromPersistedPreExamLessons(", "label: previousEntry?.label || inferMathExamLabelFromPreExamLesson(lesson, row)"]) && hasAll(preExamMathLabelInferenceSource, ["return function inferMathExamLabelFromPreExamLesson(", "normalizeGradeLabel(row.grade || \"\")", '.replace(/\\s*직전수업\\s*$/, "")', '.replace(schoolName, "")', '.replace(grade, "")', 'if (!text || /^\\d+$/.test(text)) return ""', '["수학", "수학시험", row.subject].includes(text)', "return text"]) && !["useState", "useEffect", "fetch(", "postJson", "/api/", "setLessons", "setExamPrepRows", "persistExamPrepRows", "localStorage", "Supabase", "Solapi", "Date.now", "Promise.all"].some((value) => preExamMathLabelInferenceSource.includes(value)));
-check("84d-159 examPrep row repair inventory preserves persisted lesson filtering existing fields and row references", (appEntrySource.match(/function repairExamPrepRowsFromPersistedPreExamLessons\(/g) || []).length === 1 && hasAll(appEntrySource, ["const preExamLessons = lessons.filter((lesson) =>", 'lesson.lessonType === "preExam"', 'String(lesson.sourceSchoolEventId || "").startsWith("derived_math_")', "if (!rows.length || !preExamLessons.length) return rows", "return rows.map((row) => {", "getExamPrepIdFromDerivedMathEvent(lesson.sourceSchoolEventId, [row]) === row.examPrepId", "if (!sourceLessons.length) return row", "normalizeMathExamEntries(row, { includeBlank: true })", "lesson.sourceExamDate || addDaysInKorea(lesson.date, 1)", "sourceEventId.replace(`derived_math_${row.examPrepId}_`, \"\")", "const existingIndex = entries.findIndex((entry) =>", "id: previousEntry?.id || entryId", "date: previousEntry?.date || examDate", "grade: previousEntry?.grade || row.grade || \"\"", "subject: previousEntry?.subject || normalizeMathSubject(row.subject)", "label: previousEntry?.label || inferMathExamLabelFromPreExamLesson(lesson, row)", "sourceSchoolEventId: previousEntry?.sourceSchoolEventId || sourceEventId", "if (!didRepair) return row", "row.mathExamDate || syncPrimaryMathExamDate(nextEntries)", "mathExamDates: nextEntries"]));
+check("84d-157 preExam math label inference extraction stays pure with App-injected grade normalization", (appEntrySource.match(/from "\.\.\/domains\/lessons\/preExamMathLabelInference\.js"/g) || []).length === 1 && (appEntrySource.match(/createPreExamMathLabelInference\(\{/g) || []).length === 1 && (preExamMathLabelInferenceSource.match(/export function createPreExamMathLabelInference\(/g) || []).length === 1 && hasAll(appEntrySource, ["const inferMathExamLabelFromPreExamLesson =", "createPreExamMathLabelInference({", "normalizeGradeLabel", "createPersistedPreExamRowRepair({", "inferMathExamLabelFromPreExamLesson,"]) && persistedPreExamRowRepairSource.includes("inferMathExamLabelFromPreExamLesson(") && !["useState", "useEffect", "fetch(", "postJson", "/api/", "setLessons", "setExamPrepRows", "persistExamPrepRows", "localStorage", "Supabase", "Solapi", "Date.now", "Promise.all"].some((value) => preExamMathLabelInferenceSource.includes(value)));
+check("84d-158 preExam math label inference boundary closes out with one repair-model consumer", (appEntrySource.match(/from "\.\.\/domains\/lessons\/preExamMathLabelInference\.js"/g) || []).length === 1 && (appEntrySource.match(/createPreExamMathLabelInference\(\{/g) || []).length === 1 && (persistedPreExamRowRepairSource.match(/inferMathExamLabelFromPreExamLesson\(/g) || []).length === 1 && !appEntrySource.includes("function inferMathExamLabelFromPreExamLesson(") && (preExamMathLabelInferenceSource.match(/export function createPreExamMathLabelInference\(/g) || []).length === 1 && hasAll(appEntrySource, ["const inferMathExamLabelFromPreExamLesson =", "normalizeGradeLabel", "createPersistedPreExamRowRepair({", "inferMathExamLabelFromPreExamLesson,"]) && hasAll(persistedPreExamRowRepairSource, ["previousEntry?.label ||", "inferMathExamLabelFromPreExamLesson("]) && hasAll(preExamMathLabelInferenceSource, ["return function inferMathExamLabelFromPreExamLesson(", "normalizeGradeLabel(row.grade || \"\")", '.replace(/\\s*직전수업\\s*$/, "")', '.replace(schoolName, "")', '.replace(grade, "")', 'if (!text || /^\\d+$/.test(text)) return ""', '["수학", "수학시험", row.subject].includes(text)', "return text"]) && !["useState", "useEffect", "fetch(", "postJson", "/api/", "setLessons", "setExamPrepRows", "persistExamPrepRows", "localStorage", "Supabase", "Solapi", "Date.now", "Promise.all"].some((value) => preExamMathLabelInferenceSource.includes(value)));
+check(
+  "84d-159 examPrep row repair inventory preserves persisted lesson filtering existing fields and row references",
+  (appEntrySource.match(/function repairExamPrepRowsFromPersistedPreExamLessons\(/g) || []).length === 0 &&
+    (persistedPreExamRowRepairSource.match(/return function repairExamPrepRowsFromPersistedPreExamLessons\(/g) || []).length === 1 &&
+    hasAll(persistedPreExamRowRepairSource, [
+      "const preExamLessons = lessons.filter(",
+      'lesson.lessonType === "preExam"',
+      'String(',
+      'lesson.sourceSchoolEventId || ""',
+      '.startsWith("derived_math_")',
+      "if (!rows.length || !preExamLessons.length)",
+      "return rows.map((row) => {",
+      "getExamPrepIdFromDerivedMathEvent(",
+      "lesson.sourceSchoolEventId,",
+      "[row]",
+      "if (!sourceLessons.length) return row",
+      "normalizeMathExamEntries(row, {",
+      "includeBlank: true",
+      "lesson.sourceExamDate ||",
+      "addDaysInKorea(lesson.date, 1)",
+      "sourceEventId.replace(",
+      "`derived_math_${row.examPrepId}_`",
+      "const existingIndex = entries.findIndex(",
+      "id: previousEntry?.id || entryId",
+      "date: previousEntry?.date || examDate",
+      'previousEntry?.grade || row.grade || ""',
+      "normalizeMathSubject(row.subject)",
+      "inferMathExamLabelFromPreExamLesson(",
+      "previousEntry?.sourceSchoolEventId ||",
+      "if (!didRepair) return row",
+      "syncPrimaryMathExamDate(nextEntries)",
+      "mathExamDates: nextEntries"
+    ])
+);
+check(
+  "84d-160 persisted preExam row repair extraction stays pure before App-owned state persistence",
+  (appEntrySource.match(/from "\.\.\/domains\/lessons\/persistedPreExamRowRepair\.js"/g) || []).length === 1 &&
+    (appEntrySource.match(/createPersistedPreExamRowRepair\(\{/g) || []).length === 1 &&
+    (persistedPreExamRowRepairSource.match(/export function createPersistedPreExamRowRepair\(/g) || []).length === 1 &&
+    hasAll(appEntrySource, [
+      "const repairExamPrepRowsFromPersistedPreExamLessons =",
+      "addDaysInKorea,",
+      "getExamPrepIdFromDerivedMathEvent,",
+      "inferMathExamLabelFromPreExamLesson,",
+      "normalizeGradeLabel,",
+      "normalizeMathExamEntries,",
+      "normalizeMathSubject,",
+      "safeIdPart,",
+      "syncPrimaryMathExamDate",
+      "const repairedRows = repairExamPrepRowsFromPersistedPreExamLessons(current, lessons)",
+      "selectChangedGeneratedLessonPlanRows(",
+      "persistExamPrepRows(changedRows)"
+    ]) &&
+    ![
+      "useState",
+      "useEffect",
+      "fetch(",
+      "postJson",
+      "/api/",
+      "setLessons",
+      "setExamPrepRows",
+      "persistExamPrepRows",
+      "localStorage",
+      "Supabase",
+      "Solapi",
+      "Date.now",
+      "Promise.all"
+    ].some((value) => persistedPreExamRowRepairSource.includes(value))
+);
 check("84e shared modal closes with Escape key", hasAll(app, ["import { Modal, ModalFooter } from \"../shared/components/Modal.jsx\""]) && hasAll(sharedModalSource, ["export function Modal({", "backdropClassName = \"\"", "hideCloseButton = false", "hideHeader = false", "function handleEscapeKey(event)", "event.key === \"Escape\"", "onClose?.()", "window.addEventListener(\"keydown\", handleEscapeKey)", "window.removeEventListener(\"keydown\", handleEscapeKey)", "hideCloseButton ? null"]) );
 check("84f lesson journal modal uses shared Escape-close modal", hasAll(app, ["backdropClassName=\"lessonJournalModalBackdrop\"", "className=\"lessonJournalModal\"", "hideHeader", "onClose={onBackToCalendar}"]) && !app.includes("<div className=\"modalBackdrop lessonJournalModalBackdrop\" role=\"dialog\" aria-modal=\"true\">"));
 check("84f-1 lesson journal student preview stays isolated and callback-only", hasAll(lessonFrontendSource, ["LessonJournalStudentPreviewModal", "createLessonJournalStudentPreviewModel", "students.filter((student) => student.studentId === studentPreviewId)", "PortalComponent={StudentPortalV2}", "students={model.previewStudents}", "onLogout={onClose}"]) && !lessonJournalStudentPreviewModalSource.includes("fetch(") && !lessonJournalStudentPreviewModalSource.includes("/api/"));

@@ -2253,6 +2253,13 @@
 - AI 가상검수: 기존 교사 entry 보존+신규 entry 추가 TARGET, 빈 기존 entry 보강 TARGET, 무관 row 참조 유지 CONTROL, non-preExam·날짜 누락·대상 lesson 없음 CONTROL과 rows/lessons 입력 불변을 검증한다. 전용 inventory fixture와 시나리오 663/663, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AX-2`는 repair 변환을 기존 helper 주입형 순수 model로 분리하고 React state·저장은 App에 유지한다.
 
+## 2026-07-28 P3. App.jsx 17AX-2 persisted preExam lesson examPrep row repair extraction
+
+- 코드: persisted preExam lesson을 examPrep math entry로 복구하는 순수 변환을 `persistedPreExamRowRepair.js`의 factory로 분리했다. 날짜·source 역매핑·label 추론·학년/과목/entry 정규화·ID·대표 날짜 helper를 App에서 주입한다.
+- 저장 경계: React `setExamPrepRows`, 변경 row selector와 `persistExamPrepRows` 호출은 App useEffect에 그대로 유지했다. 새 model은 state·API·Supabase·Solapi를 호출하지 않는다.
+- AI 가상검수: inventory의 기존 entry 보존+신규 추가·빈 entry 보강·무관 row 참조 유지 fixture를 추출본과 전체 deep equality로 비교하고, 별도 TARGET/CONTROL에서 helper 소비와 입력 불변을 확인한다. 기존 inventory와 추출 fixture, 시나리오 664/664, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AX-3`은 import/export/factory·App 소비 각 1개, helper 주입과 App-owned persistence 경계를 closeout한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

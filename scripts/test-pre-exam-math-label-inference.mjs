@@ -80,6 +80,13 @@ const helperSource = await readFile(
   ),
   "utf8"
 );
+const repairSource = await readFile(
+  new URL(
+    "../src/domains/lessons/persistedPreExamRowRepair.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 assert.equal(
   appSource.split(
     'from "../domains/lessons/preExamMathLabelInference.js"'
@@ -108,19 +115,30 @@ assert.equal(
   appSource.split(
     "inferMathExamLabelFromPreExamLesson("
   ).length - 1,
+  0
+);
+assert.equal(
+  repairSource.split(
+    "inferMathExamLabelFromPreExamLesson("
+  ).length - 1,
   1
 );
 for (const appBoundary of [
   "const inferMathExamLabelFromPreExamLesson =",
   "createPreExamMathLabelInference({",
   "normalizeGradeLabel",
-  "label: previousEntry?.label || inferMathExamLabelFromPreExamLesson(lesson, row)"
+  "inferMathExamLabelFromPreExamLesson,"
 ]) {
   assert.ok(
     appSource.includes(appBoundary),
     `missing extracted preExam label App boundary: ${appBoundary}`
   );
 }
+assert.ok(
+  repairSource.includes(
+    "inferMathExamLabelFromPreExamLesson("
+  )
+);
 for (const forbiddenEffect of [
   "useState",
   "useEffect",

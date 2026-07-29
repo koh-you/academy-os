@@ -60,6 +60,13 @@ const helperSource = await readFile(
   ),
   "utf8"
 );
+const repairSource = await readFile(
+  new URL(
+    "../src/domains/lessons/persistedPreExamRowRepair.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 assert.equal(
   appSource.split(
     'from "../domains/lessons/derivedMathEventExamPrepIdSelector.js"'
@@ -82,11 +89,22 @@ assert.equal(
   appSource.split(
     "getExamPrepIdFromDerivedMathEvent("
   ).length - 1,
+  0
+);
+assert.equal(
+  repairSource.split(
+    "getExamPrepIdFromDerivedMathEvent("
+  ).length - 1,
   1
 );
 assert.ok(
   appSource.includes(
-    "getExamPrepIdFromDerivedMathEvent(lesson.sourceSchoolEventId, [row]) === row.examPrepId"
+    "getExamPrepIdFromDerivedMathEvent,"
+  )
+);
+assert.ok(
+  repairSource.includes(
+    "getExamPrepIdFromDerivedMathEvent("
   )
 );
 for (const helperBoundary of [
