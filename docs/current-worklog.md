@@ -2070,6 +2070,13 @@
 - AI 가상검수: 시간 초 표기·학생 순서/중복 동일 TARGET과 핵심 필드·실제 시간·학생 집합 차이 CONTROL을 다시 실행해 판정·입력 불변을 확인하고 helper side effect 0건을 대조한다. 전용 closeout fixture와 시나리오 635/635, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 의미 단위는 generated lesson identity key 계산을 inventory하되 날짜·학교/학년 정규화 helper와 calendar/status 소비는 이동하지 않는다.
 
+## 2026-07-28 P3. App.jsx 17AO-1 generated pre-exam key builder inventory
+
+- inventory: preExam generated key가 명시 `eventId`를 최우선 사용하고, 없으면 `학교_학년_(examSubject > subject > math)_날짜`를 source ID로 조합한 뒤 `generated:pre_exam:` prefix를 붙이는 계약을 고정했다.
+- 경계: 이번 단계는 builder를 이동하지 않았다. school event에서 preExam lesson을 만드는 소비와 generated plan candidate 생성, identity/calendar/status 계산은 계속 `App.jsx`가 소유한다.
+- AI 가상검수: 명시 eventId TARGET, examSubject·subject·math fallback TARGET과 명시 eventId일 때 무시되는 다른 필드 CONTROL로 결과·우선순위·입력 불변을 검증한다. 전용 inventory fixture와 시나리오 636/636, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AO-2`는 preExam generated key builder만 순수 helper로 분리하고 lesson/plan 소비는 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
