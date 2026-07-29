@@ -2090,6 +2090,13 @@
 - AI 가상검수: 명시 eventId와 examSubject·subject·math fallback event를 다시 실행해 결과·우선순위·입력 불변을 확인하고 helper side effect 0건을 대조한다. 전용 closeout fixture와 시나리오 638/638, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 의미 단위는 generated exam-prep date key처럼 외부 의존 없는 저위험 key 계산을 inventory하고 identity 전체 이동은 보류한다.
 
+## 2026-07-28 P3. App.jsx 17AP-1 generated exam-prep date key builder inventory
+
+- inventory: truthy date에는 `generated:exam_prep:` prefix를 붙이고 빈 문자열·undefined·null은 빈 key로 반환하는 기존 계약을 고정했다. 기존 동작대로 공백 문자열은 truthy date로 취급한다.
+- 경계: 이번 단계는 builder를 이동하지 않았다. generated lesson key·identity key·시험대비 candidate 생성의 세 소비와 calendar/status 계산은 계속 `App.jsx`가 소유한다.
+- AI 가상검수: 정상 날짜 TARGET 2개, 공백 문자열 기존 동작 TARGET과 빈 문자열·undefined·null CONTROL로 정확한 key 결과를 검증한다. 전용 inventory fixture와 시나리오 639/639, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AP-2`는 exam-prep date key builder만 순수 helper로 분리하고 identity/candidate 소비는 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
