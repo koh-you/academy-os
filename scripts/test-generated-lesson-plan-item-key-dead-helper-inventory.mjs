@@ -71,48 +71,20 @@ const functionName =
   "getGeneratedLessonPlanItemKey";
 assert.equal(
   appSource.split(functionName).length - 1,
-  1,
-  "generated lesson plan item key should have no App caller"
+  0,
+  "generated lesson plan item key dead helper should be removed"
 );
-const helperStart = appSource.indexOf(
-  "function getGeneratedLessonPlanItemKey(item = {})"
+const identityInjection = appSource.indexOf(
+  "} = createGeneratedLessonIdentityModel({"
 );
-const helperEnd = appSource.indexOf(
+const nextHelper = appSource.indexOf(
   "function getStudentsForSchoolCalendarEvent(",
-  helperStart
+  identityInjection
 );
-assert.ok(helperStart >= 0 && helperEnd > helperStart);
-const helperSource = appSource.slice(
-  helperStart,
-  helperEnd
+assert.ok(
+  identityInjection >= 0 &&
+    nextHelper > identityInjection
 );
-for (const helperBoundary of [
-  "function getGeneratedLessonPlanItemKey(item = {})",
-  "return item.generatedKey || getGeneratedLessonKey(item.lesson)"
-]) {
-  assert.ok(
-    helperSource.includes(helperBoundary),
-    `missing generated lesson plan item key boundary: ${helperBoundary}`
-  );
-}
-for (const forbiddenEffect of [
-  "useState",
-  "useEffect",
-  "fetch(",
-  "postJson",
-  "/api/",
-  "setLessons",
-  "setExamPrepRows",
-  "persistExamPrepRows",
-  "localStorage",
-  "Supabase",
-  "Solapi"
-]) {
-  assert.ok(
-    !helperSource.includes(forbiddenEffect),
-    `dead generated lesson plan item helper crossed a side effect: ${forbiddenEffect}`
-  );
-}
 
 console.log(
   "generated lesson plan item key dead helper inventory fixtures passed"

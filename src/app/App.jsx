@@ -22295,10 +22295,6 @@ const {
   normalizeGradeLabel
 });
 
-function getGeneratedLessonPlanItemKey(item = {}) {
-  return item.generatedKey || getGeneratedLessonKey(item.lesson);
-}
-
 function getStudentsForSchoolCalendarEvent(students = [], event = {}) {
   const eventGrade = normalizeGradeLabel(event.grade || "");
   return students.filter((student) => {

@@ -117,7 +117,7 @@ const injectionStart = appSource.indexOf(
   "const {\n  getGeneratedLessonIdentityKeys,"
 );
 const injectionEnd = appSource.indexOf(
-  "function getGeneratedLessonPlanItemKey(",
+  "function getStudentsForSchoolCalendarEvent(",
   injectionStart
 );
 assert.ok(

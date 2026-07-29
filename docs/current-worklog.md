@@ -2137,6 +2137,13 @@
 - AI 가상검수: explicit key TARGET과 fallback lesson TARGET, 빈 item CONTROL로 기존 반환·short-circuit·입력 불변을 확인하고 App 참조 수 1(정의만)을 대조한다. 전용 inventory fixture와 시나리오 645/645, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AR-2`는 이 미사용 helper만 제거하고 identity model 주입과 다음 school-event helper 경계를 보존한다.
 
+## 2026-07-28 P3. App.jsx 17AR-2 generated lesson plan item key dead helper 제거
+
+- 코드: 정의 외 호출이 없던 `getGeneratedLessonPlanItemKey` 3줄만 `App.jsx`에서 제거했다. 새 함수나 대체 호출은 추가하지 않았다.
+- 경계: identity model factory 주입 직후 기존 `getStudentsForSchoolCalendarEvent`가 이어지며 generated identity, calendar/sync/plan 소비는 그대로다. React state·API·Supabase·알림/Solapi에는 영향이 없다.
+- AI 가상검수: inventory의 과거 반환 계약 fixture를 유지하면서 App 참조 0건, identity 주입과 다음 school-event helper 사이 잔여 코드 0건을 대조한다. 전용 removal fixture와 시나리오 646/646, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AR-3`은 제거 상태와 인접 경계, production 회귀를 closeout한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
