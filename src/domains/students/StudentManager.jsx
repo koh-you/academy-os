@@ -856,7 +856,7 @@ export function StudentManager({
             );
           })}
           {visibleStudents.length === 0 ? (
-            <div className="emptyState studentListEmpty">퇴원생이 없습니다.</div>
+            <EmptyState className="emptyState studentListEmpty" title="퇴원생이 없습니다." />
           ) : null}
           </DataTableShell>
           <SelectionToolbar
@@ -991,7 +991,11 @@ export function StudentManager({
             );
           })}
           {visibleStudents.length === 0 ? (
-            <div className="emptyState studentListEmpty">이 반에 배정된 학생이 없습니다.</div>
+            <EmptyState
+              className="emptyState studentListEmpty"
+              description={activeTab === "class" ? "다른 반 또는 전체 학생 탭을 확인하세요." : "학생 추가 후 목록에 표시됩니다."}
+              title={activeTab === "class" ? "이 반에 배정된 학생이 없습니다." : "등록된 재원생이 없습니다."}
+            />
           ) : null}
         </DataTableShell>
       )}

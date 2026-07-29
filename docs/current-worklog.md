@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-4D-2A. 대표 검색·filter 0건 구분
+
+- 구현: 학부모 응대, 수업 명단 검색, 시험정보 검색에서 원천 0건과 검색 결과 0건의 제목·설명을 분리하고, query가 있을 때 기존 setter를 `검색어 지우기` action에 연결했다. 학생관리 전체/반/퇴원 탭도 filter 맥락별 0건 문구로 정리했다.
+- 동작 보존: `setSearchText`, `setStudentSearch`, `setQuery`, 학생 탭/반 setter와 기존 row key·명단 잠금·학생 저장/퇴원·시험정보 삭제 callback을 정적 계약으로 고정했다.
+- 외부 원천: 알림 기록, 수업 명단, 학생, 시험정보, Supabase/app_state, notification_jobs/Solapi를 실제 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(126 modules). 전용 정적 계약 포함 scenario 431개 중 430개 통과, 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 원천 0건/검색 0건 문구와 검색어 지우기·390px 배치를 누적하고 `UI-4D-2B` 잔여 검색 상태로 진행한다.
+
 ## 2026-07-29 UI-4D-1B. 일반 목록·표 0건 상태
 
 - 구현: 학생 프로필 운영 알림·상담·성적·학원 테스트, 시험분석 미리보기, 테스트 응시/이력, 특강관리의 callback 없는 0건 분기를 공통 `EmptyState` title/description 구조로 이관했다.

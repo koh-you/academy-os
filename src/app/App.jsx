@@ -20582,10 +20582,16 @@ function LessonModal({
         </small>
         <div className="lessonStudentGroups">
           {groupedStudents.length === 0 ? (
-            <EmptyState className="lessonStudentSearchEmpty">
-              <strong>검색 결과가 없습니다.</strong>
-              <span>검색어를 지우거나 학생 이름·학년·학교를 다시 확인하세요.</span>
-            </EmptyState>
+            <EmptyState
+              action={studentSearch.trim() ? (
+                <button className="softButton compact" disabled={isStudentRosterLocked} onClick={() => setStudentSearch("")} type="button">검색어 지우기</button>
+              ) : null}
+              className="lessonStudentSearchEmpty"
+              description={studentSearch.trim()
+                ? "학생 이름·학년·학교를 다시 확인하세요."
+                : "학생관리에서 재원생을 등록하면 명단에 표시됩니다."}
+              title={studentSearch.trim() ? "검색 결과가 없습니다." : "선택 가능한 학생이 없습니다."}
+            />
           ) : null}
           {groupedStudents.map((group) => (
             <div className="lessonStudentGroup" key={group.grade}>
@@ -21096,10 +21102,16 @@ function ExamPrepCenter({
               );
             })}
             {filteredRows.length === 0 ? (
-              <EmptyState className="examPrepEmptyState">
-                <strong>{query.trim() ? "검색 결과가 없습니다." : "표시할 시험정보가 없습니다."}</strong>
-                <span>{query.trim() ? "검색어를 지우거나 학교·과목·출판사를 다시 확인하세요." : "반 또는 고사를 바꾸면 해당 조건의 시험정보가 표시됩니다."}</span>
-              </EmptyState>
+              <EmptyState
+                action={query.trim() ? (
+                  <button className="softButton compact" onClick={() => setQuery("")} type="button">검색어 지우기</button>
+                ) : null}
+                className="examPrepEmptyState"
+                description={query.trim()
+                  ? "학교·과목·출판사를 다시 확인하세요."
+                  : "반 또는 고사를 바꾸면 해당 조건의 시험정보가 표시됩니다."}
+                title={query.trim() ? "검색 결과가 없습니다." : "표시할 시험정보가 없습니다."}
+              />
             ) : null}
           </DataTableShell>
         </>

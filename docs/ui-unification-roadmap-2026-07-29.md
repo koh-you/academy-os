@@ -45,6 +45,7 @@
 | UI-4C-5 | 완료 | 공통 header·row border·status pill 토큰과 sticky 적용 범위 확정 |
 | UI-4D-1A | 완료 | 공통 `EmptyState` 구조와 학생·학부모 포털 읽기 빈 상태 통일 |
 | UI-4D-1B | 완료 | 학생 프로필·시험 미리보기·테스트·특강 0건 상태 통일 |
+| UI-4D-2A | 완료 | 학부모 응대·수업 명단·시험정보·학생 filter 0건 상태 구분 |
 
 ## 전체 세부 작업 목록
 
@@ -143,6 +144,6 @@
 
 ## 다음 실행 목표
 
-> 최신 상태: `UI-4C`와 `UI-4D-1A~1B` 일반 0건 상태를 완료했다. 현재 다음 작은 목표는 `UI-4D-2 검색·filter 결과 0건 구분`이며, 기존 query/filter와 clear callback은 바꾸지 않는다.
+> 최신 상태: `UI-4C`, `UI-4D-1A~1B`, `UI-4D-2A` 대표 검색 상태를 완료했다. 현재 다음 작은 목표는 `UI-4D-2B 특강·보충 등 잔여 검색 0건 상태`이며, 기존 query/filter와 clear callback은 바꾸지 않는다.
 
-`docs/ui-state-inventory-2026-07-29.md`를 기준으로 학부모 응대·학생 검색·시험정보 등 query/filter가 있는 화면에서 원천 0건과 검색 결과 0건을 분리한다. 기존 검색 지우기 callback이 있을 때만 공통 action에 연결한다. loading/error/retry는 후속 단위로 남기고 저장·발송·삭제·출결 변경은 실행하지 않는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
+`docs/ui-state-inventory-2026-07-29.md`를 기준으로 특강 신청 매칭·수동 추가와 보충관리 등 남은 raw 검색 0건 표현을 분류한다. 기존 검색 지우기 setter가 있는 화면만 공통 action에 연결하고 loading/error/retry는 후속 단위로 남긴다. 저장·발송·삭제·출결 변경은 실행하지 않는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.

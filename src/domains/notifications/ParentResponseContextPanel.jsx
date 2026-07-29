@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { ListCard, ListCardActions, ListCardHeader } from "../../shared/components/ListCard.jsx";
 import { SearchField } from "../../shared/components/SearchField.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
@@ -74,11 +75,17 @@ export function ParentResponseContextPanel({ formatDateTime, notificationJobs = 
           ))}
         </div>
       ) : (
-        <div className="emptyState">
-          {searchText.trim()
-            ? "검색 결과가 없습니다. 검색어를 지우거나 학생명·학부모 번호·수업일을 다시 확인하세요."
-            : "발송 완료된 학부모 데일리 리포트 또는 강사코멘트 기록이 없습니다."}
-        </div>
+        <EmptyState
+          action={searchText.trim() ? (
+            <button className="softButton compact" onClick={() => setSearchText("")} type="button">검색어 지우기</button>
+          ) : null}
+          description={searchText.trim()
+            ? "학생명·학부모 번호·수업일을 다시 확인하세요."
+            : "발송 완료된 원문이 쌓이면 여기에서 별관 채널 확인 정보를 찾을 수 있습니다."}
+          title={searchText.trim()
+            ? "검색 결과가 없습니다."
+            : "학부모 응대에 표시할 발신 기록이 없습니다."}
+        />
       )}
     </section>
   );
