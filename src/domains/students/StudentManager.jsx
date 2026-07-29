@@ -1176,7 +1176,7 @@ export function StudentManager({
             </label>
           ) : null}
 
-          <div className="deleteConfirmActions">
+          <ModalFooter tone="danger">
             <button
               className="softButton"
               disabled={permanentDeleteAuditState === "saving"}
@@ -1203,7 +1203,7 @@ export function StudentManager({
                     : "연결 기록 포함 강제 삭제"}
               </button>
             ) : null}
-          </div>
+          </ModalFooter>
         </ModalComponent>
       ) : null}
 
@@ -1242,10 +1242,10 @@ export function StudentManager({
               <label className="permanentDeleteConfirmationField">선택한 {batchPermanentDeleteStudents.length}명을 영구 삭제하려면 <strong>영구 삭제</strong>를 정확히 입력<input autoComplete="off" onChange={(event) => setBatchPermanentDeleteConfirmation(event.target.value)} placeholder="영구 삭제" value={batchPermanentDeleteConfirmation} /></label>
             </>
           ) : null}
-          <div className="deleteConfirmActions">
+          <ModalFooter tone="danger">
             <button className="softButton" disabled={batchPermanentDeleteAuditState === "saving"} onClick={closeBatchPermanentDeleteModal} type="button">닫기</button>
             <button className="dangerButton" disabled={batchPermanentDeleteAuditState !== "saved" || batchPermanentDeleteConfirmation.trim() !== "영구 삭제" || (batchPermanentDeleteStudents.some((student) => !batchPermanentDeleteAudits[student.studentId]?.allowed) && !batchForceDeleteWithReferences)} onClick={permanentlyDeleteSelectedWithdrawnStudents} type="button">선택 학생 영구 삭제</button>
-          </div>
+          </ModalFooter>
         </ModalComponent>
       ) : null}
     </section>

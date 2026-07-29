@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-5D-3. 퇴원 중복 영구삭제 위험 footer
+
+- 구현: 퇴원 중복 학생 단건·일괄 영구삭제 모달의 기존 action wrapper를 `ModalFooter tone="danger"`로 이관했다.
+- 단건 계약: audit 저장 중 닫기 차단, 이름 입력 일치, 연결 기록이 있으면 강제 삭제 확인, 최종 실행 disabled를 그대로 유지했다.
+- 일괄 계약: 전체 audit 완료, `영구 삭제` 입력 일치, 연결 기록이 있으면 강제 삭제 확인, 저장 중 닫기 차단을 그대로 유지했다.
+- 동작 보존: 단건·일괄 close와 영구삭제 callback, audit/error/status 문구, 최종 `window.confirm`을 정적 계약으로 고정했다.
+- 외부 원천: audit API, 영구삭제, Supabase 재조회, lessons/records/homeworks/Storage/notification_jobs를 실제 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(126 modules). 전용 정적 계약 포함 전체 `npm run test:production`과 scenario 445개 중 444개 통과, `git diff --check` 통과. 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 영구삭제 실제 실행은 기존 독립 사람 gate로 유지한다. 다음 UI 단위는 그 결과를 소비하지 않으므로 실제 audit·삭제 없이 UI-5D-4 inventory로 진행한다.
+
 ## 2026-07-29 UI-5D-2. 결석보강 취소 mode 위험 footer
 
 - 구현: `SupplementCancellationConfirmModal`의 기존 action wrapper를 `ModalFooter tone="danger"`로 이관했다.

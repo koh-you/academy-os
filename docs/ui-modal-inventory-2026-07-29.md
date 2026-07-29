@@ -114,9 +114,16 @@
 - 두 mode의 `onCancel`/`onConfirm`, `isBusy` 버튼 차단과 처리 중 문구를 그대로 두고 action wrapper만 `ModalFooter tone="danger"`로 이관했다.
 - 실제 makeup task, lesson, attendance record, notification_jobs/Solapi 취소는 실행하지 않았다.
 
+## UI-5D-3 퇴원 중복 영구삭제 위험 footer
+
+- 단건은 연결 원천 audit 완료, 이름 일치, 연결 기록이 있으면 강제 삭제 확인을 모두 만족해야 최종 실행이 활성화되는 기존 계약을 유지했다.
+- 일괄은 모든 학생 audit 완료, `영구 삭제` 입력 일치, 연결 기록이 있으면 강제 삭제 확인을 만족해야 최종 실행이 활성화되는 기존 계약을 유지했다.
+- 두 모달의 audit 저장 중 닫기 차단, 최종 실행 disabled와 callback을 그대로 두고 action wrapper만 `ModalFooter tone="danger"`로 이관했다.
+- 실제 audit API, `window.confirm`, 영구삭제, Supabase 재조회는 호출하지 않았다.
+
 ## 다음 단위
 
-`UI-5D-3`에서는 퇴원 중복 학생 단건·일괄 영구삭제의 audit, 확인 입력, 강제 삭제 체크, 저장 중 닫기 차단과 최종 실행 disabled를 정적 계약으로 고정한다. 실제 audit API나 삭제를 호출하지 않고 action wrapper만 공통 위험 footer로 이관할 수 있는지 검토한다.
+`UI-5D-4`에서는 아직 공통 모달이 아니라 `window.confirm`을 쓰는 삭제·취소 흐름을 inventory한다. 시험정보, 시험분석/PDF, 알림 기록·Solapi 예약, 학사일정, 학생 기록, 특강 원천별 영향과 진행 상태를 분류하고, 이번 UI 프로그램에서 안전하게 모달화할 범위와 저장 신뢰성/독립 gate로 남길 범위를 정한다.
 
 ## 사람 검수
 
