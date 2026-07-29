@@ -2104,6 +2104,12 @@
 - AI 가상검수: 정상 날짜·공백 문자열 TARGET과 빈 문자열·undefined·null CONTROL로 추출 전후 결과를 대조한다. 전용 extraction fixture와 시나리오 640/640, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AP-3`은 module import·App 호출 3개·export 1개와 identity/candidate 소비 경계를 closeout한다.
 
+## 2026-07-28 P3. App.jsx 17AP-3 generated exam-prep date key builder closeout
+
+- closeout: `generatedExamPrepKeyBuilder.js` module import 1개·App 호출 3개·export 1개와 generated lesson key, identity key, 시험대비 candidate 세 소비 위치를 고정했다.
+- AI 가상검수: 정상 날짜·공백 문자열 TARGET과 빈 문자열·undefined·null CONTROL을 다시 실행해 결과를 확인하고 helper side effect 0건을 대조한다. 전용 closeout fixture와 시나리오 641/641, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 의미 단위는 generated lesson identity 전체의 외부 helper 의존을 inventory하고, 주입으로 안전하게 분리 가능한 순수 조합 경계를 결정한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
