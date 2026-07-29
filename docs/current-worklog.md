@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-4E-1C. 특강 disclosure·UI-4 완료
+
+- 구현: 특강 확정 명단과 수업일지 반영 panel toggle을 제어 영역과 연결하고, 학생별 개별 시간 editor는 enrollment/session ID 기반 반복 안전 식별자를 적용했다.
+- 범위 판정: 현재 안내문 일정/회차 편집기는 상위 탭 전환으로 표시되고 `showToggle=false`여서 독립 disclosure가 아니다. 모달/저장 종속 editor는 UI-5/UI-6, sidebar는 UI-7로 이관했다.
+- 동작 보존: enrollment draft, `isEnrollmentPanelOpen`, `isLessonPreviewOpen`, `editingSessionOverrideId`, 조건부 렌더와 저장·특강 개설·추가·삭제 callback을 정적 계약으로 고정했다.
+- 외부 원천: special_lecture_enrollments, lessons, 수업일지, notification_jobs/Solapi와 Supabase/app_state를 실제 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(126 modules). 초기 정적 계약의 실제 callback 이름을 바로잡은 뒤 scenario 437개 중 436개 통과, 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 특강 toggle과 개별 시간 editor focus·펼침 배치를 누적하고 `UI-5-0` 모달 inventory로 진행한다.
+
 ## 2026-07-29 UI-4E-1B. 시험분석 disclosure 연결
 
 - 구현: 블로그/인스타 산출물 7개 section과 시험분석 파이프라인 4개 단계 panel의 toggle에 `aria-expanded`, `aria-controls`, 대응 `id`를 연결했다.

@@ -1414,7 +1414,7 @@ export function SpecialLectureApplicationPanel({
           ) : null}
         </div>
       ) : null}
-      <div className="specialLectureEnrollmentPanel">
+      <div className="specialLectureEnrollmentPanel" id="special-lecture-enrollment-panel">
         <div className="specialLectureGateHeader">
           <div>
             <strong>특강 명단 · 학생별 회차 관리</strong>
@@ -1427,6 +1427,7 @@ export function SpecialLectureApplicationPanel({
             <span className={needsReviewRows.length ? "danger" : ""}>연결 필요 {needsReviewRows.length}</span>
             <span>회차 {guideSessions.length}</span>
             <button
+              aria-controls="special-lecture-enrollment-panel"
               aria-expanded={isEnrollmentPanelOpen}
               className="softButton compact"
               onClick={() => setIsEnrollmentPanelOpen((current) => !current)}
@@ -1573,7 +1574,7 @@ export function SpecialLectureApplicationPanel({
         ) : null}
       </div>
 
-      <div className="specialLectureLessonPreviewGate">
+      <div className="specialLectureLessonPreviewGate" id="special-lecture-lesson-preview-panel">
         <div className="specialLectureGateHeader">
           <div>
             <strong>특강 수업일지 반영</strong>
@@ -1588,6 +1589,7 @@ export function SpecialLectureApplicationPanel({
             <span className={unreviewedEnrollmentRows.length ? "danger" : ""}>미검토 {unreviewedEnrollmentRows.length}</span>
             <span className={needsReviewRows.length ? "danger" : ""}>검토 {needsReviewRows.length}</span>
             <button
+              aria-controls="special-lecture-lesson-preview-panel"
               aria-expanded={isLessonPreviewOpen}
               className="softButton compact"
               onClick={() => setIsLessonPreviewOpen((current) => !current)}
@@ -2010,6 +2012,7 @@ export function SpecialLectureApplicationPanel({
                           ? "수강 제외 · 과거 수업일지 보존"
                           : "수강 제외 · 수업일지 명단 없음";
                   const isOverrideEditorOpen = editingSessionOverrideId === session.sessionId;
+                  const overrideEditorId = `special-lecture-session-override-${enrollment.enrollmentId}-${session.sessionId}`;
                   return (
                     <article className={`specialLectureSessionPlan ${isActive ? "active" : "excluded"} journal-${journalState} ${hasProtectedLesson ? "linked" : ""}`} key={`${enrollment.enrollmentId}_${session.sessionId}`}>
                       <label className="specialLectureSessionToggle">
@@ -2025,13 +2028,19 @@ export function SpecialLectureApplicationPanel({
                       {isActive ? (
                         <div className="specialLectureSessionTimeSummary">
                           <span>수강 {effectiveSession.startTime}-{effectiveSession.endTime}{hasOverride ? " · 조정" : " · 공식"}</span>
-                          <button className="softButton compact" onClick={() => setEditingSessionOverrideId((current) => current === session.sessionId ? "" : session.sessionId)} type="button">
+                          <button
+                            aria-controls={overrideEditorId}
+                            aria-expanded={isOverrideEditorOpen}
+                            className="softButton compact"
+                            onClick={() => setEditingSessionOverrideId((current) => current === session.sessionId ? "" : session.sessionId)}
+                            type="button"
+                          >
                             {isOverrideEditorOpen ? "개별 시간 닫기" : "이 회차만 다르게"}
                           </button>
                         </div>
                       ) : null}
                       {isActive && isOverrideEditorOpen ? (
-                        <div className="specialLectureSessionOverrideGrid">
+                        <div className="specialLectureSessionOverrideGrid" id={overrideEditorId}>
                           <label>
                             시작 (기본 {session.startTime})
                             <input type="time" value={plan?.effectiveStartTime || ""} onChange={(event) => updateEnrollmentSessionPlan(enrollment, session.sessionId, { effectiveStartTime: event.target.value })} />

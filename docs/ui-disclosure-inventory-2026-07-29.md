@@ -29,10 +29,21 @@
 - 시험분석 파이프라인의 문항 수 확인·경계 탐지·AI 행 채움·AI 결과 검수 panel에도 같은 연결을 추가했다.
 - 산출물 collapse map, 단계별 완료/collapse state, 조건부 렌더, 입력 draft, AI 실행·저장·복사·삭제 callback은 변경하지 않았다.
 
+## UI-4E-1C 특강 disclosure
+
+- 특강 확정 명단과 수업일지 반영 panel의 toggle을 현재 단일 panel ID와 연결했다.
+- 학생별 회차의 개별 시간 editor는 enrollment ID와 session ID를 조합한 반복 안전 ID로 연결했다.
+- 현재 특강 안내문 일정/회차 편집기는 상위 탭이 영역을 전환하고 `showToggle=false`이므로 활성 disclosure가 아니다. 상위 탭은 UI-3 규칙을 유지한다.
+- enrollment draft, open state, 조건부 mount, 저장·특강 개설·추가·삭제 callback은 변경하지 않았다.
+
+## 완료 판정
+
+현재 실제 화면에서 쓰이는 독립 접힘/펼치기 영역의 상태와 제어 region 연결을 완료했다. 모달/저장 동작에 종속된 editor는 UI-5/UI-6, sidebar는 UI-7에서 각각 다룬다.
+
 ## 다음 단위
 
-`UI-4E-1C`에서는 특강 명단·수업일지 반영·일정 계산·회차별 일정의 disclosure를 연결한다. 반복 가능한 editor의 `id` 충돌을 피할 식별자를 먼저 정하고, 저장·추가·삭제 callback과 조건부 mount는 그대로 둔다.
+`UI-5-0`에서는 모달 inventory를 만들고 각 모달의 직접 원천, local draft, 저장/삭제/발송/출결 side effect, 닫기 의미와 사람 gate를 표로 고정한다. inventory 전에는 공통 shell 이관을 시작하지 않는다.
 
 ## 사람 검수
 
-필수 중단 gate는 없다. 배포 후 키보드 `Tab`으로 단일 disclosure 5종과 시험분석 11개 toggle에 접근해 문구와 focus가 보이고, 펼친 뒤 기존 내용이 같은 위치에 나타나는지만 확인한다. 저장·AI 실행·발송·취소·삭제·보충 완료 버튼은 누르지 않는다.
+필수 중단 gate는 없다. 배포 후 키보드 `Tab`으로 단일 disclosure 5종, 시험분석 11개, 특강 명단/수업일지 반영/개별 시간 toggle에 접근해 문구와 focus가 보이고 펼친 내용 위치가 유지되는지만 확인한다. 저장·AI 실행·발송·취소·삭제·보충 완료 버튼은 누르지 않는다.
