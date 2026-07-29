@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-4B-4A. 학생 포털 쓰기 행동 카드 shell
+
+- 구현: 학생 숙제 완료 카드와 질문 목록 행을 `ListCardBody`/`ListCardActions`로 이관했다. 기존 전용 class와 저장 feedback 위치를 유지했다.
+- 동작 보존: 숙제 `homeworkId` 완료 callback, 질문 `questionId` key와 수정/삭제 callback, 질문 입력 draft, `writeEnabled`/saving/completed disabled 조건, 실패 draft 안내와 `InlineSaveStatus`를 그대로 유지했다.
+- 외부 원천: 학생 포털 숙제 완료·질문 CRUD, Supabase/app_state, Storage를 실제 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(123 modules). 전용 정적 계약을 포함한 scenario 421개 중 420개가 통과했고 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 실제 쓰기는 이번 UI 단위의 차단 gate가 아니다. 강사 미리보기의 disabled 상태와 desktop/390px 배치만 누적 확인하고 UI-4B-4B 보충 후보 행으로 진행한다. 학생 계정 실제 저장 검수는 독립 항목으로 남긴다.
+
 ## 2026-07-29 UI-4B-3. 선택형 학생 행
 
 - 구현: 알림 대상 학생과 시험 후 셀프체크 대상 학생의 label 행을 `ListCard as=label`로 이관하고 공통 `selectableListCard` focus, checkbox accent, 390px 44px/20px 터치 규칙을 추가했다.

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
+import { ListCard, ListCardActions, ListCardBody } from "../../shared/components/ListCard.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 
 function QuestionSaveFeedback({ saveState, targetId }) {
@@ -69,12 +70,12 @@ export function StudentQuestionPanel({
       <div className="studentQuestionList">
         {questions.length === 0 ? <div className="emptyHomeworkBox compact">아직 정리한 질문이 없습니다.</div> : null}
         {questions.slice(0, 6).map((question) => (
-          <article className={`studentQuestionItem ${question.status === "resolved" ? "resolved" : ""}`} key={question.questionId}>
-            <div>
+          <ListCard className={`studentQuestionItem ${question.status === "resolved" ? "resolved" : ""}`} density="compact" key={question.questionId}>
+            <ListCardBody>
               <strong>{question.text}</strong>
               <small>{question.status === "resolved" ? "해결됨" : "수업 질문 준비"}</small>
-            </div>
-            <div className="studentQuestionItemActions">
+            </ListCardBody>
+            <ListCardActions className="studentQuestionItemActions">
               <div>
                 <button
                   className="softButton"
@@ -96,8 +97,8 @@ export function StudentQuestionPanel({
                 </button>
               </div>
               <QuestionSaveFeedback saveState={saveState} targetId={question.questionId} />
-            </div>
-          </article>
+            </ListCardActions>
+          </ListCard>
         ))}
       </div>
       {saveState.targetId && saveState.targetId !== "create" && !pendingTargetVisible ? (

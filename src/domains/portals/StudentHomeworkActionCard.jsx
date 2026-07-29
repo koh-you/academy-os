@@ -1,4 +1,5 @@
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
+import { ListCard, ListCardActions, ListCardBody } from "../../shared/components/ListCard.jsx";
 
 export function StudentHomeworkActionCard({
   completed = false,
@@ -16,14 +17,14 @@ export function StudentHomeworkActionCard({
   const isSaving = normalizedSaveState === "saving";
 
   return (
-    <article className="homeworkActionCard">
-      <div>
+    <ListCard className="homeworkActionCard">
+      <ListCardBody>
         <strong>{homework.title}</strong>
         <p>{homework.assignedDate} → {homework.dueDate}</p>
         <small>{completed ? "완료 처리됨" : "완료 전"}</small>
         <span className={`homeworkStatusBadge ${statusTone}`}>{statusLabel}</span>
-      </div>
-      <div className="studentHomeworkActionControls">
+      </ListCardBody>
+      <ListCardActions className="studentHomeworkActionControls">
         <button
           className={completed ? "softButton" : "primaryButton"}
           disabled={completed || isSaving || !writeEnabled}
@@ -40,7 +41,7 @@ export function StudentHomeworkActionCard({
             {saveMessage ? <span>{saveMessage}</span> : null}
           </div>
         ) : null}
-      </div>
-    </article>
+      </ListCardActions>
+    </ListCard>
   );
 }
