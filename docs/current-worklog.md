@@ -9,6 +9,14 @@
 - AI 검수: 전용 fixture와 build(128 modules), diff 검사가 통과했다. 전체 production suite의 개별 fixture와 신규 계약은 통과했고 기존 기준선 `90a` 1건만 실패했다.
 - 사람 검수: 배포 후 작성 모달에서 중복 안내 4종이 사라지고 최종 문구·미리보기·저장/발송 동작이 남아 있는지만 확인한다. 실제 발송은 누르지 않는다.
 
+## 2026-07-29 UI-7B-3. 대표 복합 action header 회귀
+
+- 알림관리 PageHeader의 로딩 disabled·새로고침 callback, 시험관리 검색 state/result, 학사일정 학교 필터·일정 등록 callback, 학생 프로필 저장 상태·수정/취소 callback을 대표 표본으로 고정했다.
+- 모바일 공통 wrap·44px touch 규칙이 caller의 DOM 순서와 주요/보조 행동 우선순위를 CSS `order`로 뒤집지 않는지 대조했다.
+- 코드 UI·callback·disabled·운영 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 네 복합 header의 action/source/순서 회귀 계약, `npm run build` 128 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 466개 중 기존 기준선 `90a`만 실패했고 모든 개별 fixture와 신규 계약은 통과했다.
+- 사람 검수: UI-7B-2에 누적된 대표 PageHeader·NavigationHeader·SectionHeader 390px 절차가 이 단위까지 포함하며 새 중단 gate는 없다.
+
 ## 2026-07-29 UI-7B-2. 공통 header 모바일 wrap·touch
 
 - 640px 이하에서 PageHeader·NavigationHeader·SectionHeader copy에 `overflow-wrap: anywhere`와 전체 폭을 적용해 긴 제목·설명이 화면 밖으로 밀리지 않게 했다.

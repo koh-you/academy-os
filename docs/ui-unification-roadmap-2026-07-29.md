@@ -82,6 +82,7 @@
 | UI-7A-4 | 완료 | desktop sticky·tablet 3열·mobile compact/2열 shell 회귀 계약 |
 | UI-7B-1 | 완료 | PageHeader·NavigationHeader·SectionHeader 모바일 gap inventory |
 | UI-7B-2 | 완료 | 공통 header 긴 copy·탐색 row wrap·모바일 title·44px action |
+| UI-7B-3 | 완료 | 알림·시험·학사일정·학생 프로필 복합 header action 회귀 |
 
 ## 전체 세부 작업 목록
 
@@ -180,6 +181,6 @@
 
 ## 다음 실행 목표
 
-> 최신 상태: `UI-4`와 `UI-5`, `UI-6`, `UI-7A` 전체와 `UI-7B-1~2`를 완료했다. 현재 다음 작은 목표는 `UI-7B-3 대표 복합 action header 회귀`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
+> 최신 상태: `UI-4`와 `UI-5`, `UI-6`, `UI-7A`, `UI-7B` 전체를 완료했다. 현재 다음 작은 목표는 `UI-7C-1 탭·필터·검색 모바일 inventory`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
 
-알림관리·시험관리·학사일정·학생 프로필의 복합 header actions가 모바일에서 callback·disabled·DOM 우선순서를 보존하고 전체 폭 안에서 줄바꿈되는지 정적 대조한다. 실제 저장·발송·삭제는 실행하지 않는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
+WorkspaceTabs·FilterBar·SearchField의 44px touch, active/selected 가시성, 좁은 화면 내부 스크롤, label과 입력 폭을 inventory한다. 선택·검색 state와 결과 집합은 변경하지 않는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
