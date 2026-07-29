@@ -2057,6 +2057,39 @@ check(
       "Promise.all"
     ].some((value) => examPrepLessonCandidateBuilderSource.includes(value))
 );
+check(
+  "84d-168 generated lesson plan inventory preserves candidate aggregation identity matching control priority and update ID",
+  (appEntrySource.match(/function buildGeneratedLessonPlan\(\{ rows = \[\], lessons = \[\], students = \[\], controls = \{\} \}\)/g) || []).length === 1 &&
+    hasAll(appEntrySource, [
+      "normalizeGeneratedLessonControls(controls)",
+      "const candidates = []",
+      "buildExamCalendarEvents(rows)",
+      '.filter((event) => event.type === "mathExam")',
+      "createPreExamLessonFromSchoolEvent(event, students)",
+      "if (!lesson) return",
+      "createPreExamGeneratedKey(event)",
+      "candidates.push({",
+      "lesson: { ...lesson, generatedKey }",
+      "candidates.push(...buildExamPrepLessonCandidates(rows))",
+      "return candidates.map((candidate) => {",
+      "const candidateKeys = new Set(",
+      "getGeneratedLessonIdentityKeys(candidate.lesson)",
+      "const existing = lessons.find(",
+      "candidateKeys.has(key)",
+      "lesson.sourceSchoolEventId === candidate.lesson.sourceSchoolEventId",
+      "lesson.lessonId === candidate.lesson.lessonId",
+      "safeControls.suppressedKeys.includes(key)",
+      "safeControls.manualOverrideKeys.includes(key)",
+      "!areGeneratedLessonPersistedFieldsEqual(candidate.lesson, existing)",
+      'suppressed ? "skipped"',
+      'manualOverride ? "protected"',
+      '!existing ? "create"',
+      'needsUpdate ? "update" : "synced"',
+      "existingLesson: existing",
+      'existing && status === "update"',
+      "lessonId: existing.lessonId"
+    ])
+);
 check("84e shared modal closes with Escape key", hasAll(app, ["import { Modal, ModalFooter } from \"../shared/components/Modal.jsx\""]) && hasAll(sharedModalSource, ["export function Modal({", "backdropClassName = \"\"", "hideCloseButton = false", "hideHeader = false", "function handleEscapeKey(event)", "event.key === \"Escape\"", "onClose?.()", "window.addEventListener(\"keydown\", handleEscapeKey)", "window.removeEventListener(\"keydown\", handleEscapeKey)", "hideCloseButton ? null"]) );
 check("84f lesson journal modal uses shared Escape-close modal", hasAll(app, ["backdropClassName=\"lessonJournalModalBackdrop\"", "className=\"lessonJournalModal\"", "hideHeader", "onClose={onBackToCalendar}"]) && !app.includes("<div className=\"modalBackdrop lessonJournalModalBackdrop\" role=\"dialog\" aria-modal=\"true\">"));
 check("84f-1 lesson journal student preview stays isolated and callback-only", hasAll(lessonFrontendSource, ["LessonJournalStudentPreviewModal", "createLessonJournalStudentPreviewModel", "students.filter((student) => student.studentId === studentPreviewId)", "PortalComponent={StudentPortalV2}", "students={model.previewStudents}", "onLogout={onClose}"]) && !lessonJournalStudentPreviewModalSource.includes("fetch(") && !lessonJournalStudentPreviewModalSource.includes("/api/"));
