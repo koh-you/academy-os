@@ -62,12 +62,19 @@ const helperSource = await readFile(
   ),
   "utf8"
 );
+const lessonBuilderSource = await readFile(
+  new URL(
+    "../src/domains/lessons/generatedPreExamLessonBuilder.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const modulePath =
   'from "../domains/lessons/generatedPreExamKeyBuilder.js"';
 assert.equal(appSource.split(modulePath).length - 1, 1);
 assert.equal(
   appSource.split("createPreExamGeneratedKey(").length - 1,
-  2
+  1
 );
 assert.equal(
   helperSource.split(
@@ -76,27 +83,13 @@ assert.equal(
   1
 );
 
-const lessonBuilderStart = appSource.indexOf(
-  "function createPreExamLessonFromSchoolEvent("
-);
-const lessonBuilderEnd = appSource.indexOf(
-  "function getExamPrepIdFromDerivedMathEvent(",
-  lessonBuilderStart
-);
-assert.ok(
-  lessonBuilderStart >= 0 &&
-    lessonBuilderEnd > lessonBuilderStart
-);
-const lessonBuilderSource = appSource.slice(
-  lessonBuilderStart,
-  lessonBuilderEnd
-);
 const lessonBoundaries = [
   'if (event.type !== "mathExam" || !event.date) return null',
   "const lessonStudents =",
   "if (lessonStudents.length === 0) return null",
   "const sourceId =",
-  "const generatedKey = createPreExamGeneratedKey({ ...event, eventId: sourceId })",
+  "const generatedKey = createPreExamGeneratedKey({",
+  "eventId: sourceId",
   "return {",
   "generatedKey"
 ];

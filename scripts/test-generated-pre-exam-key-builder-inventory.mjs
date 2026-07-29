@@ -83,6 +83,13 @@ const helperSource = await readFile(
   ),
   "utf8"
 );
+const lessonBuilderSource = await readFile(
+  new URL(
+    "../src/domains/lessons/generatedPreExamLessonBuilder.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const builderBoundaries = [
   "export function createPreExamGeneratedKey(event = {})",
   "const sourceId =",
@@ -104,22 +111,32 @@ for (const boundary of builderBoundaries) {
 }
 assert.equal(
   appSource.split("createPreExamGeneratedKey(").length - 1,
-  2
+  1
 );
 assert.ok(
   appSource.includes(
     'from "../domains/lessons/generatedPreExamKeyBuilder.js"'
   )
 );
-for (const consumerBoundary of [
-  "const generatedKey = createPreExamGeneratedKey({ ...event, eventId: sourceId })",
-  "const generatedKey = createPreExamGeneratedKey(event)"
-]) {
-  assert.ok(
-    appSource.includes(consumerBoundary),
-    `missing generated pre-exam key consumer: ${consumerBoundary}`
-  );
-}
+assert.equal(
+  lessonBuilderSource.split(
+    "createPreExamGeneratedKey("
+  ).length - 1,
+  1
+);
+assert.ok(
+  lessonBuilderSource.includes(
+    "const generatedKey = createPreExamGeneratedKey({"
+  )
+);
+assert.ok(
+  lessonBuilderSource.includes("eventId: sourceId")
+);
+assert.ok(
+  appSource.includes(
+    "const generatedKey = createPreExamGeneratedKey(event)"
+  )
+);
 assert.ok(!helperSource.includes("fetch("));
 assert.ok(!helperSource.includes("/api/"));
 assert.ok(!helperSource.includes("postJson"));

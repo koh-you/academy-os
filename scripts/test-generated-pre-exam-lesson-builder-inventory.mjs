@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { lessonCalendarColors } from "../src/app/appConfig.js";
 import { createPreExamGeneratedKey } from "../src/domains/lessons/generatedPreExamKeyBuilder.js";
+import { createGeneratedPreExamLessonBuilder } from "../src/domains/lessons/generatedPreExamLessonBuilder.js";
 import { createGeneratedSchoolEventStudentSelector } from "../src/domains/lessons/generatedSchoolEventStudentSelector.js";
 import {
   safeIdPart,
@@ -127,6 +128,19 @@ function createExistingPreExamLessonFromSchoolEvent(
   };
 }
 
+const extractedPreExamLessonBuilder =
+  createGeneratedPreExamLessonBuilder({
+    addDaysInKorea: addExistingDaysInKorea,
+    createPreExamGeneratedKey,
+    createPreExamLessonId:
+      createExistingPreExamLessonId,
+    getDayKey: getExistingDayKey,
+    getStandardLessonColor:
+      getExistingStandardLessonColor,
+    getStudentsForSchoolCalendarEvent:
+      getExistingStudentsForSchoolCalendarEvent
+  });
+
 const students = [
   {
     studentId: "student_TARGET_EXACT",
@@ -192,6 +206,10 @@ assert.deepEqual(
       "generated:pre_exam:event_TARGET_PRE_EXAM"
   }
 );
+assert.deepEqual(
+  extractedPreExamLessonBuilder(event, students),
+  createExistingPreExamLessonFromSchoolEvent(event, students)
+);
 
 const fallbackEvent = {
   type: "mathExam",
@@ -234,6 +252,30 @@ assert.deepEqual(
       "generated:pre_exam:가상중_중3_수학_2026-08-07"
   }
 );
+assert.deepEqual(
+  extractedPreExamLessonBuilder(
+    fallbackEvent,
+    [
+      {
+        studentId: "student_TARGET_FALLBACK",
+        status: "active",
+        schoolName: "가상중학교",
+        grade: "중3"
+      }
+    ]
+  ),
+  createExistingPreExamLessonFromSchoolEvent(
+    fallbackEvent,
+    [
+      {
+        studentId: "student_TARGET_FALLBACK",
+        status: "active",
+        schoolName: "가상중학교",
+        grade: "중3"
+      }
+    ]
+  )
+);
 
 assert.equal(
   createExistingPreExamLessonFromSchoolEvent(
@@ -263,36 +305,54 @@ const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
+const builderSource = await readFile(
+  new URL(
+    "../src/domains/lessons/generatedPreExamLessonBuilder.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const builderBoundaries = [
-  "function createPreExamLessonFromSchoolEvent(event = {}, students = [])",
+  "export function createGeneratedPreExamLessonBuilder({",
+  "return function createPreExamLessonFromSchoolEvent(",
   'if (event.type !== "mathExam" || !event.date) return null',
-  "const lessonStudents = getStudentsForSchoolCalendarEvent(students, event)",
+  "const lessonStudents =",
+  "getStudentsForSchoolCalendarEvent(students, event)",
   "if (lessonStudents.length === 0) return null",
-  'const subject = event.examSubject || event.subject || "수학"',
-  'const gradeLabel = event.grade ? `${event.grade} ` : ""',
-  "const sourceId = event.eventId ||",
-  "const generatedKey = createPreExamGeneratedKey({ ...event, eventId: sourceId })",
+  "const subject =",
+  'event.examSubject || event.subject || "수학"',
+  "const gradeLabel = event.grade",
+  "? `${event.grade} `",
+  "const sourceId =",
+  "event.eventId ||",
+  "const generatedKey = createPreExamGeneratedKey({",
+  "eventId: sourceId",
   "lessonId: createPreExamLessonId(sourceId)",
   'classTemplateId: ""',
-  'className: `${event.schoolName || "학교 미입력"} ${gradeLabel}${subject} 직전수업`',
+  "className: `${",
+  'event.schoolName || "학교 미입력"',
+  "} ${gradeLabel}${subject} 직전수업`,",
   'lessonType: "preExam"',
   'lessonTopic: "직전대비"',
   "sourceSchoolEventId: sourceId",
   "sourceExamDate: event.date",
   'examCycle: event.examCycle || ""',
   "date: addDaysInKorea(event.date, -1)",
-  "dayOfWeek: getDayKey(addDaysInKorea(event.date, -1))",
+  "dayOfWeek: getDayKey(",
+  "addDaysInKorea(event.date, -1)",
   'startTime: "19:00"',
   'endTime: "21:00"',
-  'color: getStandardLessonColor({ lessonType: "preExam" })',
+  "color: getStandardLessonColor({",
+  'lessonType: "preExam"',
   'teacherId: "instructor_owner_001"',
-  "studentIds: lessonStudents.map((student) => student.studentId)",
+  "studentIds: lessonStudents.map(",
+  "(student) => student.studentId",
   'status: "scheduled"',
   "generatedKey"
 ];
 let previousIndex = -1;
 for (const boundary of builderBoundaries) {
-  const boundaryIndex = appSource.indexOf(
+  const boundaryIndex = builderSource.indexOf(
     boundary,
     previousIndex + 1
   );
@@ -306,14 +366,30 @@ assert.equal(
   appSource.split(
     "function createPreExamLessonFromSchoolEvent("
   ).length - 1,
-  1
+  0
 );
 assert.equal(
   appSource.split(
     "createPreExamLessonFromSchoolEvent("
   ).length - 1,
-  3
+  2
 );
+for (const appBoundary of [
+  'from "../domains/lessons/generatedPreExamLessonBuilder.js"',
+  "const createPreExamLessonFromSchoolEvent =",
+  "createGeneratedPreExamLessonBuilder({",
+  "addDaysInKorea,",
+  "createPreExamGeneratedKey,",
+  "createPreExamLessonId,",
+  "getDayKey,",
+  "getStandardLessonColor,",
+  "getStudentsForSchoolCalendarEvent"
+]) {
+  assert.ok(
+    appSource.includes(appBoundary),
+    `missing generated preExam lesson builder App injection: ${appBoundary}`
+  );
+}
 
 console.log(
   "generated preExam lesson builder inventory TARGET/CONTROL fixtures passed"

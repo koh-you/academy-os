@@ -128,6 +128,13 @@ const helperSource = await readFile(
   ),
   "utf8"
 );
+const lessonBuilderSource = await readFile(
+  new URL(
+    "../src/domains/lessons/generatedPreExamLessonBuilder.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const modulePath =
   'from "../domains/lessons/generatedSchoolEventStudentSelector.js"';
 assert.equal(appSource.split(modulePath).length - 1, 1);
@@ -139,6 +146,12 @@ assert.equal(
 );
 assert.equal(
   appSource.split(
+    "getStudentsForSchoolCalendarEvent("
+  ).length - 1,
+  0
+);
+assert.equal(
+  lessonBuilderSource.split(
     "getStudentsForSchoolCalendarEvent("
   ).length - 1,
   1
@@ -154,7 +167,7 @@ const injectionStart = appSource.indexOf(
   "const getStudentsForSchoolCalendarEvent ="
 );
 const injectionEnd = appSource.indexOf(
-  "function createPreExamLessonFromSchoolEvent(",
+  "const createPreExamLessonFromSchoolEvent =",
   injectionStart
 );
 assert.ok(
@@ -185,26 +198,12 @@ for (const boundary of injectionBoundaries) {
   previousInjectionIndex = boundaryIndex;
 }
 
-const lessonBuilderStart = appSource.indexOf(
-  "function createPreExamLessonFromSchoolEvent("
-);
-const lessonBuilderEnd = appSource.indexOf(
-  "function getExamPrepIdFromDerivedMathEvent(",
-  lessonBuilderStart
-);
-assert.ok(
-  lessonBuilderStart >= 0 &&
-    lessonBuilderEnd > lessonBuilderStart
-);
-const lessonBuilderSource = appSource.slice(
-  lessonBuilderStart,
-  lessonBuilderEnd
-);
 const lessonBoundaries = [
   'if (event.type !== "mathExam" || !event.date) return null',
-  "const lessonStudents = getStudentsForSchoolCalendarEvent(students, event)",
+  "getStudentsForSchoolCalendarEvent(students, event)",
   "if (lessonStudents.length === 0) return null",
-  "studentIds: lessonStudents.map((student) => student.studentId)"
+  "studentIds: lessonStudents.map(",
+  "(student) => student.studentId"
 ];
 let previousLessonIndex = -1;
 for (const boundary of lessonBoundaries) {

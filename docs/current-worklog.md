@@ -2177,6 +2177,12 @@
 - AI 가상검수: 명시 event ID·학교 alias 학생 TARGET, 비활성·다른 학년 CONTROL, event ID·과목 fallback TARGET, 다른 event type·날짜 누락·대상 학생 없음 CONTROL로 null guard와 전체 payload·학생 순서·입력 불변을 검증한다. 전용 inventory fixture와 시나리오 651/651, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AT-2`는 preExam lesson builder를 dependency-injected 순수 model로 분리하고 저장·state orchestration은 App에 유지한다.
 
+## 2026-07-28 P3. App.jsx 17AT-2 generated preExam lesson builder extraction
+
+- 코드: 수학시험 event와 선택 학생으로 preExam lesson 전체 payload를 만드는 순수 조합을 `generatedPreExamLessonBuilder.js`로 분리했다. App은 날짜·ID·요일·색상·학생 selector·generated key helper를 factory에 주입하고, 화면 state upsert와 `/api/lessons` 저장은 기존 위치에 유지한다.
+- AI 가상검수: 명시 ID·subject TARGET의 전체 payload와 helper 호출 순서·인자·참조를 검증하고, 다른 event type·날짜 누락에서는 학생 selector 포함 helper 호출 0건, 대상 없음에서는 이후 payload helper 호출 0건을 확인한다. 기존 inventory의 명시/fallback fixture와 추출 fixture, 시나리오 652/652, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AT-3`은 import/export/factory 호출 각 1개, helper 주입과 두 App consumer 및 저장 경계를 closeout한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.

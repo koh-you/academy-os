@@ -196,6 +196,13 @@ const helperSource = await readFile(
   ),
   "utf8"
 );
+const lessonBuilderSource = await readFile(
+  new URL(
+    "../src/domains/lessons/generatedPreExamLessonBuilder.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const selectorBoundaries = [
   "export function createGeneratedSchoolEventStudentSelector({",
   "return function getStudentsForSchoolCalendarEvent(",
@@ -229,7 +236,7 @@ assert.equal(
   appSource.split(
     "getStudentsForSchoolCalendarEvent("
   ).length - 1,
-  1
+  0
 );
 assert.equal(
   appSource.split(
@@ -238,9 +245,12 @@ assert.equal(
   1
 );
 assert.ok(
-  appSource.includes(
+  lessonBuilderSource.includes(
     "const lessonStudents = getStudentsForSchoolCalendarEvent(students, event)"
-  )
+  ) ||
+    lessonBuilderSource.includes(
+      "getStudentsForSchoolCalendarEvent(students, event)"
+    )
 );
 for (const appBoundary of [
   'from "../domains/lessons/generatedSchoolEventStudentSelector.js"',

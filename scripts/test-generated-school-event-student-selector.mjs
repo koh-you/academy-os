@@ -110,6 +110,13 @@ const helperSource = await readFile(
   ),
   "utf8"
 );
+const lessonBuilderSource = await readFile(
+  new URL(
+    "../src/domains/lessons/generatedPreExamLessonBuilder.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 assert.equal(
   appSource.split(
     'from "../domains/lessons/generatedSchoolEventStudentSelector.js"'
@@ -126,6 +133,12 @@ assert.equal(
   appSource.split(
     "getStudentsForSchoolCalendarEvent("
   ).length - 1,
+  0
+);
+assert.equal(
+  lessonBuilderSource.split(
+    "getStudentsForSchoolCalendarEvent("
+  ).length - 1,
   1
 );
 assert.equal(
@@ -139,12 +152,20 @@ for (const appBoundary of [
   "isActiveStudent,",
   "normalizeGradeLabel,",
   "schoolNamesMatch",
-  "const lessonStudents = getStudentsForSchoolCalendarEvent(students, event)",
-  "studentIds: lessonStudents.map((student) => student.studentId)"
+  "getStudentsForSchoolCalendarEvent"
 ]) {
   assert.ok(
     appSource.includes(appBoundary),
     `missing school-event student selector App boundary: ${appBoundary}`
+  );
+}
+for (const lessonBoundary of [
+  "getStudentsForSchoolCalendarEvent(students, event)",
+  "studentIds: lessonStudents.map("
+]) {
+  assert.ok(
+    lessonBuilderSource.includes(lessonBoundary),
+    `missing preExam lesson student boundary: ${lessonBoundary}`
   );
 }
 for (const helperBoundary of [
