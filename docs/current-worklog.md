@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-2E-3B-2. 운영 side-effect 작업 바·UI-2E 완료
+
+- 구현: 알림 개별 발송/이력, Solapi 결과 확인, 특강 안내/수업, 운영 알림 원본, 이전 수업메모 확인, 최종 알림톡/미리보기, 수업 목록/상세, 수업연구 삭제, 보충 목록, 오답 추가, 보고서/스냅샷, 학생 시험 후 제출·질문의 남은 16개 구형 머리말을 공통 `SectionHeader`로 옮겼다.
+- 동작 보존: 저장·삭제·발송·업로드·질문 CRUD callback, 인자, disabled 조건, 상태 badge, 선택 state를 그대로 유지했다. Supabase·app_state·notification_jobs·Solapi·Storage 원천은 수정하거나 실행하지 않았다.
+- 완료 수치: `src/app`·`src/domains`의 원시 JSX `className="sectionHeader…"`는 UI-2E 시작 59개에서 0개가 됐다. 공통 copy/meta/actions와 default/slim/compact 밀도 계약으로 전부 이관해 UI-2E를 완료했다.
+- AI 검수: 운영 callback 정적 계약과 잔여 0개 검사를 포함해 production 시나리오 408개 중 407개가 통과했다. 기존 비관련 `90a` 1개만 기준선 실패이며 `npm run build`, `git diff --check`도 통과했다.
+- 사람 검수: 필수 중단 gate는 없다. 실제 버튼을 누르지 않고 제목·설명·건수·actions 줄바꿈과 모바일 폭만 확인하는 누적 시각 검수로 넘기고 UI-3A 상위 탭 통일을 계속한다.
+
 ## 2026-07-29 UI-2E-3B-1. 시험분석·시험 상세 side-effect 작업 바
 
 - 구현: 시험분석 산출물 생성/ZIP, PDF 업로드, 문항 확인·경계 탐지·AI 채움·검수, 진행/저장 이벤트, 시험대비 일정 수정·삭제, 시험 후 총평 AI 수정·복사 등 12개 구형 머리말을 공통 `SectionHeader`의 copy/actions slot으로 옮겼다.

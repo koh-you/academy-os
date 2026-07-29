@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import {
   examPostAcademyHelpOptions,
   examPostFeelingOptions,
@@ -174,15 +175,16 @@ export function StudentExamPostSubmissionPanel({
 
   return (
     <section className={`studentExamPostPanel ${target.isOverdue && !isSubmitted ? "overdue" : ""}`}>
-      <div className="sectionHeader compact">
-        <div>
-          <h2>{isSubmitted ? "시험 후 제출 완료" : isOpen ? "시험 후 제출 필요" : "시험 후 제출 예정"}</h2>
+      <SectionHeader
+        density="compact"
+        descriptionNode={(
           <p className="muted">
             {target.schoolName} · {target.grade} · {target.subject} · {target.examDate}
             {isSubmitted ? ` · 제출 ${formatKoreanDateTime(target.submission.submittedAt)}` : isOpen ? ` · 마감 ${target.dueDate} 23:59` : ` · 시험 후 마감 ${target.dueDate} 23:59`}
           </p>
-        </div>
-      </div>
+        )}
+        title={isSubmitted ? "시험 후 제출 완료" : isOpen ? "시험 후 제출 필요" : "시험 후 제출 예정"}
+      />
       {isSubmitted ? (
         <div className="studentExamPostDone">
           <strong>{target.submission.score || "점수 미입력"}</strong>

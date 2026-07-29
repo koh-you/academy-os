@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
+import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 
 function QuestionSaveFeedback({ saveState, targetId }) {
   if (!saveState || saveState.targetId !== targetId || saveState.state === "idle") return null;
@@ -44,12 +45,11 @@ export function StudentQuestionPanel({
 
   return (
     <section className="studentQuestionPanel">
-      <div className="sectionHeader compact">
-        <div>
-          <h2>수업 전에 정리할 질문</h2>
-          <p className="muted">막힌 문제나 헷갈린 개념을 짧게 적어두면 수업 시작이 훨씬 빨라집니다.</p>
-        </div>
-      </div>
+      <SectionHeader
+        density="compact"
+        description="막힌 문제나 헷갈린 개념을 짧게 적어두면 수업 시작이 훨씬 빨라집니다."
+        title="수업 전에 정리할 질문"
+      />
       <form className="studentQuestionForm" onSubmit={submitQuestion}>
         <input
           disabled={!writeEnabled || isSaving}

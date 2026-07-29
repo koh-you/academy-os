@@ -12465,13 +12465,12 @@ function NotificationCenter({
       </div>
       {activeNoticeWorkspace === "compose" ? (
       <section className="notificationPanel noticeComposerPanel">
-        <div className="sectionHeader slim">
-          <div>
-            <p className="eyebrow">MESSAGE CENTER</p>
-            <h2>개별 발송</h2>
-          </div>
-          <span className="countBadge">수신 {noticeRecipients.length}건</span>
-        </div>
+        <SectionHeader
+          density="slim"
+          eyebrow="MESSAGE CENTER"
+          meta={<span className="countBadge">수신 {noticeRecipients.length}건</span>}
+          title="개별 발송"
+        />
 
         <div className="noticeComposerGrid">
           <div className="noticeTargetPanel">
@@ -12624,12 +12623,9 @@ function NotificationCenter({
       ) : null}
       {activeNoticeWorkspace === "history" ? (
       <section className="notificationPanel notificationQueuePanel">
-        <div className="sectionHeader slim">
-          <div>
-            <p className="eyebrow">NOTIFICATION HISTORY</p>
-            <h2>알림톡 발송 기록 · {filterLabels[jobFilter]}</h2>
-          </div>
-          <div className="notificationQueueActions">
+        <SectionHeader
+          actions={(
+            <>
             <span className="solapiResultSyncControl">
               <span>결과 확인 시간</span>
               <strong>{solapiResultLastCheckedLabel}</strong>
@@ -12654,8 +12650,13 @@ function NotificationCenter({
             >
               {isNoticeHistoryOpen ? "접기" : "펼치기"}
             </button>
-          </div>
-        </div>
+            </>
+          )}
+          actionsClassName="notificationQueueActions"
+          density="slim"
+          eyebrow="NOTIFICATION HISTORY"
+          title={`알림톡 발송 기록 · ${filterLabels[jobFilter]}`}
+        />
         {notificationJobAction.message ? (
           <p
             className={[
@@ -13128,12 +13129,9 @@ function SpecialLectureNoticePanel({
 
   return (
     <section className="notificationPanel specialLecturePanel">
-      <div className="sectionHeader slim">
-        <div>
-          <p className="eyebrow">SPECIAL LECTURE</p>
-          <h2>{activeWorkspaceTab === "guide" ? "특강 안내문" : "특강 수업"}</h2>
-        </div>
-        <div className="specialLectureHeaderActions">
+      <SectionHeader
+        actions={(
+          <>
           {activeWorkspaceTab === "guide" ? (
             <>
               <button className="softButton compact" onClick={createNewGuide} type="button">새 특강 만들기</button>
@@ -13155,8 +13153,13 @@ function SpecialLectureNoticePanel({
               </button>
             </>
           )}
-        </div>
-      </div>
+          </>
+        )}
+        actionsClassName="specialLectureHeaderActions"
+        density="slim"
+        eyebrow="SPECIAL LECTURE"
+        title={activeWorkspaceTab === "guide" ? "특강 안내문" : "특강 수업"}
+      />
 
       <SpecialLectureGuideSelector
         onSelectGuide={selectSpecialLectureGuide}
@@ -16097,13 +16100,9 @@ function AcademyReminderPanel({
 
   return (
     <section className="panel academyReminderPanel">
-      <div className="sectionHeader slim">
-        <div>
-          <p className="eyebrow">OPERATIONS SOURCE</p>
-          <h2>운영 알림 원본</h2>
-          <p className="muted">상담 일정, 신입생 일정, 특이사항 알림을 한 곳에 저장하고 각 화면과 09:00 슬랙 요약에서 읽습니다.</p>
-        </div>
-        <div className="academyReminderHeaderActions">
+      <SectionHeader
+        actions={(
+          <>
           <span className={`saveStateBadge ${saveState === "saved" ? "success" : saveState}`}>{saveMessage || "Supabase academy_reminders"}</span>
           <button
             className="softButton compact"
@@ -16114,8 +16113,14 @@ function AcademyReminderPanel({
           >
             {shouldShowReminderForm ? "입력 접기" : "알림 입력 열기"}
           </button>
-        </div>
-      </div>
+          </>
+        )}
+        actionsClassName="academyReminderHeaderActions"
+        density="slim"
+        description="상담 일정, 신입생 일정, 특이사항 알림을 한 곳에 저장하고 각 화면과 09:00 슬랙 요약에서 읽습니다."
+        eyebrow="OPERATIONS SOURCE"
+        title="운영 알림 원본"
+      />
       {overdueReminders.length > 0 ? (
         <section className="academyReminderOverdueSection">
           <div className="miniSectionHeader">
@@ -18989,12 +18994,8 @@ function PreparationMemoModal({
     >
       <div className="prepMemoColumns">
         <section className={["prepMemoPrevious", priorMemoKind === "reference" ? "referenceOnly" : ""].filter(Boolean).join(" ")}>
-          <div className="sectionHeader slim">
-            <div>
-              <p className="eyebrow">{priorMemoEyebrow}</p>
-              <h2>{priorMemoTitle}</h2>
-            </div>
-            {canCheckPriorMemo ? (
+          <SectionHeader
+            actions={canCheckPriorMemo ? (
               <label className="prepMemoAcknowledgeLine">
                 <input
                   checked={false}
@@ -19007,7 +19008,10 @@ function PreparationMemoModal({
                 확인 후 숨기기
               </label>
             ) : null}
-          </div>
+            density="slim"
+            eyebrow={priorMemoEyebrow}
+            title={priorMemoTitle}
+          />
           {hasCheckedPriorMemo && !visiblePriorMemo ? (
             <div className="prepMemoCheckedState">
               <strong>✓ 이전 수업메모 확인 완료</strong>
@@ -19263,13 +19267,12 @@ function CommentComposerModal({
     <Modal className="commentComposerModal" title={title} subtitle={`${lesson.date} · ${lesson.className}`} onClose={handleClose}>
       <div className="commentComposerGrid">
         <section className="commentDraftPanel">
-          <div className="sectionHeader slim">
-            <div>
-              <p className="eyebrow">FINAL</p>
-              <h2>최종 알림톡 문구</h2>
-            </div>
-            <span className="countBadge">{isParent ? "학부모용" : "학생용"}</span>
-          </div>
+          <SectionHeader
+            density="slim"
+            eyebrow="FINAL"
+            meta={<span className="countBadge">{isParent ? "학부모용" : "학생용"}</span>}
+            title="최종 알림톡 문구"
+          />
           <div className="commentSourceToggle">
             <button className="softButton mini" onClick={() => setIsSourceOpen((current) => !current)} type="button">
               {isSourceOpen ? "원본 메모 접기" : "원본 메모 보기"}
@@ -19337,12 +19340,7 @@ function CommentComposerModal({
         </section>
 
         <section className="commentPreviewPanel">
-          <div className="sectionHeader slim">
-            <div>
-              <p className="eyebrow">PREVIEW</p>
-              <h2>{previewTitle}</h2>
-            </div>
-          </div>
+          <SectionHeader density="slim" eyebrow="PREVIEW" title={previewTitle} />
           <pre className="templatePreviewText commentTemplatePreview">{generatedPreviewText}</pre>
         </section>
       </div>
@@ -19945,13 +19943,11 @@ function LessonHub({
 
       <section className="contentGrid">
         <div className="panel">
-          <div className="sectionHeader">
-            <div>
-              <p className="eyebrow">날짜별 수업</p>
-              <h2>{selectedDate}</h2>
-            </div>
-            <span className="countBadge">{lessonsForDate.length}개</span>
-          </div>
+          <SectionHeader
+            eyebrow="날짜별 수업"
+            meta={<span className="countBadge">{lessonsForDate.length}개</span>}
+            title={selectedDate}
+          />
           <div className="lessonCards">
             {lessonsForDate.map((lesson) => (
               <button
@@ -20036,17 +20032,17 @@ function MonthCalendar({ lessons, selectedDate, onDateSelect }) {
 function LessonDetail({ lesson, records, saveStates, students, homeworks, onChangeRecord, onOpenReport, onSaveRecord }) {
   return (
     <section className="panel detailPanel">
-      <div className="sectionHeader">
-        <div>
-          <p className="eyebrow">수업 상세</p>
-          <h2>{lesson.className}</h2>
-        </div>
-        <div className="metaGrid">
-          <span>{lesson.date}</span>
-          <span>{formatLessonTimeRange(lesson)}</span>
-          <span>{lesson.status}</span>
-        </div>
-      </div>
+      <SectionHeader
+        eyebrow="수업 상세"
+        meta={(
+          <div className="metaGrid">
+            <span>{lesson.date}</span>
+            <span>{formatLessonTimeRange(lesson)}</span>
+            <span>{lesson.status}</span>
+          </div>
+        )}
+        title={lesson.className}
+      />
 
       <div className="studentTable">
         <div className="tableRow tableHead">
@@ -23288,14 +23284,12 @@ function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, on
         <section className="panel researchEditor">
           {selectedItem ? (
             <>
-              <div className="sectionHeader">
-                <div>
-                  <p className="eyebrow">EDIT</p>
-                  <h2>강의 교안 정리</h2>
-                  <p className="muted">마지막 수정일 {selectedItem.updatedAt || selectedItem.createdAt}</p>
-                </div>
-                <button className="ghostButton dangerText" onClick={() => onDeleteItem(selectedItem.researchItemId)} type="button">삭제</button>
-              </div>
+              <SectionHeader
+                actions={<button className="ghostButton dangerText" onClick={() => onDeleteItem(selectedItem.researchItemId)} type="button">삭제</button>}
+                description={`마지막 수정일 ${selectedItem.updatedAt || selectedItem.createdAt}`}
+                eyebrow="EDIT"
+                title="강의 교안 정리"
+              />
 
               <div className="researchMetaGrid">
                 <label>
@@ -24462,13 +24456,12 @@ function SupplementCenter({
       </div>
 
       <section className="supplementTabPanel">
-        <div className="sectionHeader slim">
-          <div>
-            <h2>{activeTabData.title}</h2>
-            <p className="muted">{activeTabData.subtitle}</p>
-          </div>
-          <span className="countBadge">{activeTabData.count}건</span>
-        </div>
+        <SectionHeader
+          density="slim"
+          description={activeTabData.subtitle}
+          meta={<span className="countBadge">{activeTabData.count}건</span>}
+          title={activeTabData.title}
+        />
 
         {activeTabData.items.length === 0 ? <div className="emptyHomeworkBox">{activeTabData.emptyText}</div> : null}
 
@@ -26282,15 +26275,15 @@ function StudentWrongProblemBoard({ selectedStudent, wrongProblems, onAddWrongPr
 
   return (
     <section className="panel studentWrongBoard">
-      <div className="sectionHeader">
-        <div>
-          <h2>{selectedStudent.name} 학생별 오답</h2>
-          <p className="muted">학생 프로파일에서 분리한 교재오답 기록입니다. 교재/범위/상태/후속 메모를 여기서 관리합니다.</p>
-        </div>
-        <button className="primaryButton" onClick={() => onAddWrongProblem(selectedStudent.studentId)} type="button">
-          + 오답 추가
-        </button>
-      </div>
+      <SectionHeader
+        actions={(
+          <button className="primaryButton" onClick={() => onAddWrongProblem(selectedStudent.studentId)} type="button">
+            + 오답 추가
+          </button>
+        )}
+        description="학생 프로파일에서 분리한 교재오답 기록입니다. 교재/범위/상태/후속 메모를 여기서 관리합니다."
+        title={`${selectedStudent.name} 학생별 오답`}
+      />
       <div className="managementTable studentWrongTable">
         <div className="managementRow wrongProblemProfileRow managementHead">
           <span>교재/출처</span>
@@ -27752,12 +27745,11 @@ function ReportCenter({ lessons, records, reportLesson, selectedReportLessonId, 
   return (
     <section className="reportGrid">
       <div className="panel">
-        <div className="sectionHeader">
-          <div>
-            <h1>보고서 생성</h1>
-            <p className="muted">Day 10-12: 템플릿, 초안, 스냅샷 저장</p>
-          </div>
-        </div>
+        <SectionHeader
+          description="Day 10-12: 템플릿, 초안, 스냅샷 저장"
+          title="보고서 생성"
+          titleAs="h1"
+        />
         <label>수업 선택
           <select value={selectedReportLessonId} onChange={(event) => onSelectLesson(event.target.value)}>
             {lessons.map((lesson) => (
@@ -27776,13 +27768,11 @@ function ReportCenter({ lessons, records, reportLesson, selectedReportLessonId, 
       </div>
 
       <div className="panel">
-        <div className="sectionHeader">
-          <div>
-            <p className="eyebrow">Draft</p>
-            <h2>리포트 초안</h2>
-          </div>
-          <button className="primaryButton" onClick={saveSnapshot} type="button">스냅샷 저장</button>
-        </div>
+        <SectionHeader
+          actions={<button className="primaryButton" onClick={saveSnapshot} type="button">스냅샷 저장</button>}
+          eyebrow="Draft"
+          title="리포트 초안"
+        />
         <textarea className="reportDraft" readOnly rows="12" value={reportBody} />
       </div>
 
