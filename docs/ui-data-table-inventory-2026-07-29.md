@@ -15,9 +15,9 @@
 | 알림톡 발송 기록 | `notificationJobId`, job 상태/수신/본문 | filter, 예약 취소, 기록 삭제 | 매우 높음 | UI-4C-1 shell 적용 |
 | 학생 목록 | `studentId`, 학생 기본정보 | 반/필드 draft, 행 저장, 퇴원 | 매우 높음 | UI-4C-1 shell 적용 |
 | 퇴원생 목록 | `studentId`, 퇴원 정보 | 이름/퇴원일 정렬, 선택 저장/복원/삭제 | 매우 높음 | UI-4C-1 shell 적용 |
-| 수업 상세 학생 표 | `studentId`, lesson record/homework | record 변경·저장·보고서 | 매우 높음 | UI-4C-2 |
-| 수업일지 학생 표 | `studentId`, editable record | 출결·숙제·코멘트·발송 draft | 매우 높음 | UI-4C-2 |
-| 시험정보 표 | `examPrepId`, 시험정보/총평 | 검색/고사 filter, 수정·삭제 | 매우 높음 | UI-4C-2 |
+| 수업 상세 학생 표 | `studentId`, lesson record/homework | record 변경·저장·보고서 | 매우 높음 | UI-4C-2 shell 적용 |
+| 수업일지 학생 표 | `studentId`, editable record | 출결·숙제·코멘트·발송 draft | 매우 높음 | UI-4C-2 shell 적용 |
+| 시험정보 표 | `examPrepId`, 시험정보/총평 | 검색/고사 filter, 수정·삭제 | 매우 높음 | UI-4C-2 shell 적용 |
 | 시험분석 검수 표 | question row ID | 교사 검수 draft | 높음 | UI-4C-3 |
 | 예약 학생 상태 표 | `studentId`, notification job selector | 검사 모드 선택 | 중간 | UI-4C-3 |
 | 오답·성적·학원시험 표 | 각 record ID | 입력·수정·삭제 | 높음 | UI-4C-3 |
@@ -35,8 +35,8 @@
 
 ## 다음 단위
 
-`UI-4C-2`는 수업 상세 학생 표, 수업일지 학생 표, 시험정보 표의 wrapper만 공통 shell로 이관한다. 각 표의 row key, editable record, filter 결과, 저장·삭제·발송 callback을 정적 계약으로 고정하고 실제 동작은 실행하지 않는다.
+`UI-4C-2`는 완료했다. 다음 `UI-4C-3`은 시험분석 검수, 예약 학생 상태, 테스트 응시, 오답/성적 표의 wrapper를 공통 shell로 이관한다. 각 row key, 선택/편집 draft와 callback을 고정하고 실제 저장·생성·삭제는 실행하지 않는다.
 
 ## 사람 검수
 
-필수 중단 gate는 없다. 배포 후 알림 기록, 학생 목록, 퇴원생 목록을 desktop/390px에서 가로로 끝까지 스크롤할 수 있는지, wrapper focus가 보이는지, 기존 열 최소 너비가 유지되는지만 확인한다. 행 저장·퇴원·복원·영구삭제·알림 취소/삭제는 누르지 않는다.
+필수 중단 gate는 없다. 배포 후 알림 기록, 학생 목록, 퇴원생 목록, 수업 상세, 수업일지, 시험정보 표를 desktop/390px에서 가로로 끝까지 스크롤할 수 있는지, wrapper focus가 보이는지, 기존 열 최소 너비가 유지되는지만 확인한다. 행 저장·출결·알림·시험정보 수정/삭제·퇴원·복원·영구삭제·알림 취소/삭제는 누르지 않는다.

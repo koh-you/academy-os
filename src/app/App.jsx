@@ -18484,7 +18484,10 @@ function LessonJournalDetail({
       ) : null}
 
       <section className="panel journalTablePanel">
-        <div className={journalEditMode ? "journalTable editing" : "journalTable"}>
+        <DataTableShell
+          className={journalEditMode ? "journalTable editing" : "journalTable"}
+          label="수업일지 학생 기록"
+        >
           <div className="journalRow journalHead">
             <span>학생</span>
             <span>수업메모</span>
@@ -18739,7 +18742,7 @@ function LessonJournalDetail({
               </div>
             );
           })}
-        </div>
+        </DataTableShell>
       </section>
 
       {journalEditMode || journalManualSaveMessage ? (
@@ -20054,7 +20057,7 @@ function LessonDetail({ lesson, records, saveStates, students, homeworks, onChan
         title={lesson.className}
       />
 
-      <div className="studentTable">
+      <DataTableShell className="studentTable" label="수업 상세 학생 기록">
         <div className="tableRow tableHead">
           <span>학생</span>
           <span>행동태그</span>
@@ -20130,7 +20133,7 @@ function LessonDetail({ lesson, records, saveStates, students, homeworks, onChan
             </div>
           );
         })}
-      </div>
+      </DataTableShell>
     </section>
   );
 }
@@ -21028,7 +21031,7 @@ function ExamPrepCenter({
               </select>
             </label>
           </FilterBar>
-          <div className="examPrepTable">
+          <DataTableShell className="examPrepTable" label="시험정보 목록">
             <div className="examPrepRow examPrepHead">
               <span>학교명</span>
               <span>특이사항</span>
@@ -21098,7 +21101,7 @@ function ExamPrepCenter({
                 <span>{query.trim() ? "검색어를 지우거나 학교·과목·출판사를 다시 확인하세요." : "반 또는 고사를 바꾸면 해당 조건의 시험정보가 표시됩니다."}</span>
               </EmptyState>
             ) : null}
-          </div>
+          </DataTableShell>
         </>
       ) : null}
 

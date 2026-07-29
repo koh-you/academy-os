@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-4C-2. 수업·시험정보 표 scroll shell
+
+- 구현: 수업 상세 학생 기록, 실제 수업일지 학생 기록, 시험정보 목록의 기존 wrapper/class를 보존해 `DataTableShell`로 이관했다.
+- 동작 보존: 학생/examPrep row key, lesson record/editable draft, 수업 상세 저장·보고서, 수업일지 출결·숙제·알림·제외 callback, 시험정보 filter·수정·삭제 callback을 정적 계약으로 고정했다.
+- 외부 원천: 수업일지/출결, 학생 알림, 시험정보 저장·삭제, Supabase/app_state, notification_jobs/Solapi를 실제 호출하거나 변경하지 않았다.
+- AI 검수: diff 중 넓은 map 문맥이 대상 밖 수업 허브·반관리 닫힘을 잡은 것을 발견해 커밋 전에 원복하고 대상 세 wrapper만 남겼다. `npm run build` 통과(125 modules), 전용 정적 계약 포함 scenario 424개 중 423개 통과, 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 세 표의 desktop/390px 가로스크롤·focus 검수를 누적하고 UI-4C-3 시험/예약/오답 표로 진행한다.
+
 ## 2026-07-29 UI-4C-1. 데이터 표 인벤토리·공통 스크롤 shell
 
 - 전수조사: 알림·학생·수업·시험·오답·정산·포털 표를 row key, 값 원천, 정렬/변경 callback, 위험도로 분류하고 `docs/ui-data-table-inventory-2026-07-29.md`에 후속 순서를 고정했다.
