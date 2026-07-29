@@ -7074,6 +7074,10 @@ a:focus-visible {
   margin-left: auto;
 }
 
+.examPrepSearchField {
+  min-width: min(100%, 300px);
+}
+
 .sectionHeader h1,
 .sectionHeader h2 {
   font-weight: 900;
@@ -7975,6 +7979,10 @@ button:disabled {
   min-width: min(100%, 320px);
 }
 
+.parentResponseContextTools > .sharedSearchField {
+  min-width: min(100%, 320px);
+}
+
 .parentResponseContextTools p {
   color: #64748b;
   font-size: 13px;
@@ -8061,6 +8069,11 @@ button:disabled {
 
   .parentResponseContextTools label {
     min-width: 0;
+  }
+
+  .parentResponseContextTools > .sharedSearchField {
+    min-width: 0;
+    width: 100%;
   }
 
   .parentResponseContextActions > button {
@@ -18054,7 +18067,7 @@ textarea.profileEditInput {
   align-items: end;
   display: grid;
   gap: 12px;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   margin-bottom: 14px;
 }
 

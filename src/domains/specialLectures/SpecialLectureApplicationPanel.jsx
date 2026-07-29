@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { copyTextToClipboard } from "../exams/outputPreview.js";
 import { Modal } from "../../shared/components/Modal.jsx";
+import { SearchField } from "../../shared/components/SearchField.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { apiUrl } from "../../shared/utils/apiClient.js";
 import {
@@ -1664,15 +1665,14 @@ export function SpecialLectureApplicationPanel({
               <p>정규반 배정 여부와 관계없이 Academy OS의 모든 재원 학생에서 선택합니다. 이름만 먼저 등록한 학생이라면 Tally 기본정보를 같은 학생 ID에 덮어쓴 뒤 연결할 수 있습니다.</p>
             </div>
             <div className="specialLectureRosterSearch">
-              <label>
-                전체 학생 검색
-                <input
-                  autoFocus
-                  onChange={(event) => setMatchSearchText(event.target.value)}
-                  placeholder="이름, 학교, 학년, 반"
-                  value={matchSearchText}
-                />
-              </label>
+              <SearchField
+                autoFocus
+                label="전체 학생 검색"
+                onChange={setMatchSearchText}
+                placeholder="이름, 학교, 학년, 반"
+                result={`${availableMatchStudents.length}명`}
+                value={matchSearchText}
+              />
               <span>{matchStudentId ? "학생 1명 선택" : "연결할 학생을 선택하세요."}</span>
             </div>
             <div className="specialLectureRosterPickerList">
@@ -1691,7 +1691,7 @@ export function SpecialLectureApplicationPanel({
                     {student.defaultClassTemplateId ? "정규반 배정" : "정규반 미배정"}
                   </span>
                 </label>
-              )) : <p className="specialLectureGateEmpty">검색 결과가 없습니다. 신청자를 특강 전용 학생으로 등록할 수 있습니다.</p>}
+              )) : <p className="specialLectureGateEmpty">{matchSearchText.trim() ? "검색 결과가 없습니다. 검색어를 지우거나 다시 입력하세요." : "연결할 수 있는 학생이 없습니다. 신청자를 특강 전용 학생으로 등록할 수 있습니다."}</p>}
             </div>
             {matchApplication.source === "tally" && matchSelectedStudent ? (
               <div className="specialLectureTallyMergePreview">
@@ -1749,15 +1749,14 @@ export function SpecialLectureApplicationPanel({
         >
           <div className="specialLectureModalBody">
             <div className="specialLectureRosterSearch">
-              <label>
-                학생 검색
-                <input
-                  autoFocus
-                  onChange={(event) => setManualSearchText(event.target.value)}
-                  placeholder="이름, 학교, 학년, 반"
-                  value={manualSearchText}
-                />
-              </label>
+              <SearchField
+                autoFocus
+                label="학생 검색"
+                onChange={setManualSearchText}
+                placeholder="이름, 학교, 학년, 반"
+                result={`${availableManualStudents.length}명`}
+                value={manualSearchText}
+              />
               <span>선택 {manualSelectedStudentIds.length}명 · 이미 등록된 학생은 목록에서 제외됩니다.</span>
             </div>
             <div className="specialLectureRosterPickerList">
@@ -1777,7 +1776,7 @@ export function SpecialLectureApplicationPanel({
                     {student.defaultClassTemplateId ? "정규반 배정" : "정규반 미배정"}
                   </span>
                 </label>
-              )) : <p className="specialLectureGateEmpty">추가할 수 있는 학생이 없습니다.</p>}
+              )) : <p className="specialLectureGateEmpty">{manualSearchText.trim() ? "검색 결과가 없습니다. 검색어를 지우거나 다시 입력하세요." : "추가할 수 있는 학생이 없습니다."}</p>}
             </div>
             <div className="specialLectureModalActions">
               <button className="softButton" onClick={() => setManualPickerOpen(false)} type="button">취소</button>

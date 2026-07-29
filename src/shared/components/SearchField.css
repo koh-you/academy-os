@@ -1,0 +1,90 @@
+.sharedSearchField {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.sharedSearchFieldLabelRow {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.sharedSearchFieldLabelRow label {
+  color: var(--academy-text-muted, #52647c);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.sharedSearchFieldResult {
+  color: var(--academy-text-soft, #708198);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.sharedSearchFieldControl {
+  min-width: 0;
+  position: relative;
+}
+
+.sharedSearchFieldControl input {
+  background: var(--academy-surface, #ffffff);
+  border: 1px solid var(--academy-border-strong, #cbd8ee);
+  border-radius: 8px;
+  color: var(--academy-text, #17213d);
+  min-height: 42px;
+  min-width: 0;
+  padding: 8px 38px 8px 12px;
+  width: 100%;
+}
+
+.sharedSearchFieldControl input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.sharedSearchFieldControl input:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--academy-primary, #2563eb) 22%, transparent);
+  outline-offset: 1px;
+}
+
+.sharedSearchFieldClear {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  color: var(--academy-text-soft, #708198);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 18px;
+  height: 32px;
+  justify-content: center;
+  padding: 0;
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+}
+
+.sharedSearchFieldClear:hover {
+  background: var(--academy-surface-muted, #f1f5f9);
+  color: var(--academy-text, #17213d);
+}
+
+.sharedSearchFieldClear:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--academy-primary, #2563eb) 22%, transparent);
+  outline-offset: 1px;
+}
+
+@media (max-width: 640px) {
+  .sharedSearchFieldControl input {
+    min-height: 44px;
+  }
+
+  .sharedSearchFieldClear {
+    height: 36px;
+    width: 36px;
+  }
+}

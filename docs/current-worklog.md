@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-3D. 검색 입력·지우기·0건 상태
+
+- 전수조사: 알림 개별 발송, 학부모 응대, 수업 명단, 시험관리, 특강 학생 연결/수동 접수, 보충관리 이력의 7개 검색 state와 normalization·결과 집합을 `docs/ui-search-inventory-2026-07-29.md`에 기록했다.
+- 구현: 공통 controlled `SearchField`를 추가해 label, 결과 건수, 검색 지우기, focus-visible, 모바일 44px 입력을 통일했다. 검색어가 있을 때의 0건과 원천 자체 0건을 학부모 응대·시험·특강에서 구분하고 수업 명단 0건 안내를 추가했다.
+- 동작 보존: `setSearchText`, `setStudentSearch`, `setQuery`, `setMatchSearchText`, `setManualSearchText`, `onChangeQuery`에 입력 문자열을 그대로 전달한다. 각 화면의 `normalizeMessageText`, `trim`, `toLowerCase`, haystack 구성과 결과 배열 계산은 옮기지 않았다. 검색 지우기는 빈 문자열만 전달하며 선택 state를 변경하지 않는다.
+- 외부 원천: Supabase/app_state, notification_jobs, Solapi, Storage를 읽거나 수정하지 않았고 발송·저장·업로드·등록·삭제·보충 되돌리기를 실행하지 않았다.
+- AI 검수: 검색 setter·normalization·결과 집합·0건 정적 계약을 포함한 production 시나리오 414개 중 413개가 통과했다. 기존 비관련 `90a` 한 건만 기준선 실패이며 `npm run build`도 통과했다.
+- 사람 검수: 필수 중단 gate는 없다. 배포 후 7개 검색의 입력·건수·지우기·0건 문구와 390px 폭을 확인하는 독립 검수를 누적하고 UI-3E 선택 행 작업 바로 진행한다.
+
 ## 2026-07-29 UI-3C-3. 날짜/month 필터·UI-3C 완료
 
 - 분류 정정: 시험기간 시작·종료일과 수학시험 날짜는 필터가 아니라 저장되는 시험정보 입력값이므로 UI-7D로 남겼다. UI-3C-3은 수업·학사 달력 월 탐색과 월별 정산의 정산월 선택만 다룬다.

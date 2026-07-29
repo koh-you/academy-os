@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { SearchField } from "../../shared/components/SearchField.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { buildParentChannelLookupText, getParentResponseContexts } from "./parentResponseContext.js";
 
@@ -35,10 +36,13 @@ export function ParentResponseContextPanel({ formatDateTime, notificationJobs = 
         title="학부모 응대"
       />
       <div className="parentResponseContextTools">
-        <label>
-          학생·학부모 검색
-          <input onChange={(event) => setSearchText(event.target.value)} placeholder="학생명, 학부모 번호, 수업일" value={searchText} />
-        </label>
+        <SearchField
+          label="학생·학부모 검색"
+          onChange={setSearchText}
+          placeholder="학생명, 학부모 번호, 수업일"
+          result={`${visibleContexts.length}건`}
+          value={searchText}
+        />
         <p>모바일에서는 아래 확인 정보를 복사한 뒤 카카오비즈니스 파트너센터 앱에서 해당 학부모 상담방을 찾으세요.</p>
       </div>
       {copyMessage ? <p className="inlineNotice ok" role="status">{copyMessage}</p> : null}
@@ -68,7 +72,13 @@ export function ParentResponseContextPanel({ formatDateTime, notificationJobs = 
             </article>
           ))}
         </div>
-      ) : <div className="emptyState">발송 완료된 학부모 데일리 리포트 또는 강사코멘트 기록이 없습니다.</div>}
+      ) : (
+        <div className="emptyState">
+          {searchText.trim()
+            ? "검색 결과가 없습니다. 검색어를 지우거나 학생명·학부모 번호·수업일을 다시 확인하세요."
+            : "발송 완료된 학부모 데일리 리포트 또는 강사코멘트 기록이 없습니다."}
+        </div>
+      )}
     </section>
   );
 }

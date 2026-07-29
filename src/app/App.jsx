@@ -230,6 +230,7 @@ import { MetricCard } from "../shared/components/MetricCard.jsx";
 import { Modal } from "../shared/components/Modal.jsx";
 import { NavigationHeader } from "../shared/components/NavigationHeader.jsx";
 import { PageHeader } from "../shared/components/PageHeader.jsx";
+import { SearchField } from "../shared/components/SearchField.jsx";
 import { SectionHeader } from "../shared/components/SectionHeader.jsx";
 import { StickySaveBar } from "../shared/components/StickySaveBar.jsx";
 import { WorkspaceTabs } from "../shared/components/WorkspaceTabs.jsx";
@@ -12503,10 +12504,14 @@ function NotificationCenter({
                   <option value={noticeWithdrawnClassFilterId}>퇴원학생반 ({withdrawnStudents.length}명)</option>
                 </select>
               </label>
-              <label className="filterBarField">
-                <span>학생 검색</span>
-                <input value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder="이름, 학교, 전화번호" />
-              </label>
+              <SearchField
+                className="filterBarField"
+                label="학생 검색"
+                onChange={setSearchText}
+                placeholder="이름, 학교, 전화번호"
+                result={`${visibleNoticeStudents.length}명`}
+                value={searchText}
+              />
             </FilterBar>
 
             <div className="noticeTargetSummary">
@@ -20560,11 +20565,13 @@ function LessonModal({
           titleAs="strong"
         />
         <div className="lessonStudentSearchRow">
-          <input
+          <SearchField
             disabled={isStudentRosterLocked}
-            value={studentSearch}
-            onChange={(event) => setStudentSearch(event.target.value)}
+            label="포함 학생 검색"
+            onChange={setStudentSearch}
             placeholder="학생 이름 또는 반으로 검색"
+            result={`${filteredStudents.length}명`}
+            value={studentSearch}
           />
           <button className="softButton" disabled={isStudentRosterLocked} onClick={() => setStudentIds(filteredStudents.map((student) => student.studentId))} type="button">
             보이는 학생 선택
@@ -20576,6 +20583,12 @@ function LessonModal({
             : `전체 ${activeStudents.length}명`}
         </small>
         <div className="lessonStudentGroups">
+          {groupedStudents.length === 0 ? (
+            <EmptyState className="lessonStudentSearchEmpty">
+              <strong>검색 결과가 없습니다.</strong>
+              <span>검색어를 지우거나 학생 이름·학년·학교를 다시 확인하세요.</span>
+            </EmptyState>
+          ) : null}
           {groupedStudents.map((group) => (
             <div className="lessonStudentGroup" key={group.grade}>
               <div>
@@ -20945,12 +20958,14 @@ function ExamPrepCenter({
         actions={(
           <>
           {activeTab === "info" ? (
-            <input
-              aria-label="시험관리 검색"
-              className="searchInput"
+            <SearchField
+              className="examPrepSearchField"
+              inputClassName="searchInput"
+              label="시험관리 검색"
+              onChange={setQuery}
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
               placeholder="학교, 과목, 출판사 검색"
+              result={`${filteredRows.length}건`}
             />
           ) : null}
           </>
@@ -21084,8 +21099,8 @@ function ExamPrepCenter({
             })}
             {filteredRows.length === 0 ? (
               <EmptyState className="examPrepEmptyState">
-                <strong>표시할 시험정보가 없습니다.</strong>
-                <span>반 또는 고사를 바꾸면 해당 조건의 시험정보가 표시됩니다.</span>
+                <strong>{query.trim() ? "검색 결과가 없습니다." : "표시할 시험정보가 없습니다."}</strong>
+                <span>{query.trim() ? "검색어를 지우거나 학교·과목·출판사를 다시 확인하세요." : "반 또는 고사를 바꾸면 해당 조건의 시험정보가 표시됩니다."}</span>
               </EmptyState>
             ) : null}
           </div>
@@ -25966,16 +25981,14 @@ function SupplementHistoryModal({ onChangeQuery, onClose, onUndoPassTask, query,
       onClose={onClose}
     >
       <div className="supplementHistoryToolbar">
-        <label>
-          학생/학교/항목 검색
-          <input
-            autoFocus
-            value={query}
-            onChange={(event) => onChangeQuery(event.target.value)}
-            placeholder="예: 최선호, 창동고, 숙제보충"
-          />
-        </label>
-        <span className="countBadge">{filteredTasks.length}건</span>
+        <SearchField
+          autoFocus
+          label="학생/학교/항목 검색"
+          onChange={onChangeQuery}
+          placeholder="예: 최선호, 창동고, 숙제보충"
+          result={`${filteredTasks.length}건`}
+          value={query}
+        />
       </div>
 
       {filteredTasks.length === 0 ? (
