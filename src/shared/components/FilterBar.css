@@ -35,10 +35,40 @@
   outline-offset: 2px;
 }
 
+.sharedFilterBar.sharedFilterBar > .filterBarField {
+  color: var(--academy-text-muted, #52647c);
+  display: grid;
+  flex: 0 1 220px;
+  font-size: 12px;
+  font-weight: 800;
+  gap: 4px;
+  min-width: 160px;
+}
+
+.sharedFilterBar.sharedFilterBar > .filterBarField select,
+.sharedFilterBar.sharedFilterBar > .filterBarField input {
+  background: var(--academy-surface, #ffffff);
+  border: 1px solid var(--academy-border-strong, #cbd8ee);
+  border-radius: 8px;
+  color: var(--academy-text, #17213d);
+  min-height: 40px;
+  min-width: 0;
+  padding: 7px 11px;
+  width: 100%;
+}
+
+.sharedFilterBar.sharedFilterBar > .filterBarField select:focus-visible,
+.sharedFilterBar.sharedFilterBar > .filterBarField input:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--academy-primary, #2563eb) 22%, transparent);
+  outline-offset: 1px;
+}
+
 .sharedFilterBarAside {
   align-items: center;
   display: flex;
+  flex-wrap: wrap;
   gap: 7px;
+  justify-content: flex-end;
   margin-left: auto;
 }
 
@@ -62,7 +92,17 @@
     white-space: nowrap;
   }
 
+  .sharedFilterBar.sharedFilterBar > .filterBarField {
+    flex: 0 0 180px;
+  }
+
+  .sharedFilterBar.sharedFilterBar > .filterBarField select,
+  .sharedFilterBar.sharedFilterBar > .filterBarField input {
+    min-height: 44px;
+  }
+
   .sharedFilterBarAside {
     flex: 0 0 auto;
+    flex-wrap: nowrap;
   }
 }

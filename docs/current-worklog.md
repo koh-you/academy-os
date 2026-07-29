@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-3C-2. select/chip 복합 필터
+
+- 구현: 공통 `FilterBar`에 label+select/input용 `filterBarField`와 모바일 44px 규칙을 추가했다. 알림 대상 반·학생 검색, 시험관리 반·고사, 학생관리 반, 오답 학년·학생, 학사일정 학교 필터를 같은 구조로 이관했다.
+- 동작 보존: `setClassFilter`/`setSearchText`, `changeClassTemplate`/`changeExamCycle`, 학생 반 선택과 학생 초기화, `setGradeFilter`/`setSelectedStudentId`, `onSchoolFilterChange`의 값과 결과 계산을 그대로 유지했다. PDF 업로드, 선택 문제 열기, 일정 등록 callback과 disabled 조건은 actions 영역에서 바꾸지 않았고 실행하지 않았다.
+- 외부 원천: Supabase/app_state, notification_jobs, Solapi, Storage를 읽거나 수정하지 않았다. 시험정보 저장 상태는 기존 `InlineSaveStatus`를 결과 영역에 표시만 한다.
+- 사람 검수: 필수 중단 gate는 없다. 배포 후 선택값·건수·대상 집합과 390px 내부 스크롤을 확인하는 독립 검수를 누적하고 UI-3C-3 날짜/month 필터로 진행한다.
+
 ## 2026-07-29 UI-3C-1. 단일 선택 button filter
 
 - 전수조사: 필터를 button, select/chip, 날짜/month 세 묶음으로 나누고 `docs/ui-filter-inventory-2026-07-29.md`에 원천·setter·결과 계약을 기록했다.

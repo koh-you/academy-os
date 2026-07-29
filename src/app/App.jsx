@@ -12492,9 +12492,9 @@ function NotificationCenter({
                 </button>
               ))}
             </div>
-            <div className="noticeFilterGrid">
-              <label>
-                반
+            <FilterBar className="noticeFilterGrid" label="알림 대상 반과 학생 검색">
+              <label className="filterBarField">
+                <span>반</span>
                 <select value={classFilter} onChange={(event) => setClassFilter(event.target.value)}>
                   <option value="all">전체 반</option>
                   {classTemplates.map((template) => (
@@ -12503,11 +12503,11 @@ function NotificationCenter({
                   <option value={noticeWithdrawnClassFilterId}>퇴원학생반 ({withdrawnStudents.length}명)</option>
                 </select>
               </label>
-              <label>
-                학생 검색
+              <label className="filterBarField">
+                <span>학생 검색</span>
                 <input value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder="이름, 학교, 전화번호" />
               </label>
-            </div>
+            </FilterBar>
 
             <div className="noticeTargetSummary">
               <div>
@@ -20978,10 +20978,11 @@ function ExamPrepCenter({
       </WorkspaceTabs>
 
       {activeTab !== "pastPapers" ? (
-        <div className="classTabList">
+        <FilterBar className="classTabList" label="시험관리 반 필터">
           {templates.map((template) => (
             <button
-              className={selectedClassTemplateId === template.classTemplateId ? "active" : ""}
+              aria-pressed={selectedClassTemplateId === template.classTemplateId}
+              className={`filterBarOption${selectedClassTemplateId === template.classTemplateId ? " active" : ""}`}
               key={template.classTemplateId}
               onClick={() => changeClassTemplate(template.classTemplateId)}
               type="button"
@@ -20989,25 +20990,34 @@ function ExamPrepCenter({
               <strong>{template.name}</strong>
             </button>
           ))}
-        </div>
+        </FilterBar>
       ) : null}
 
       {activeTab === "info" ? (
         <>
           <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...examPrepAutosaveRisk} />
-          <div className="examCycleBar">
-            <strong>현재 고사</strong>
-            <select value={selectedExamCycle} onChange={(event) => changeExamCycle(event.target.value)}>
-              <option value="2026-1-mid">2026 1학기 중간</option>
-              <option value="2026-1-final">2026 1학기 기말</option>
-              <option value="2026-2-mid">2026 2학기 중간</option>
-              <option value="2026-2-final">2026 2학기 기말</option>
-            </select>
-            <span>{filteredRows.length}개 시험정보 · {classStudents.length}명</span>
-            {examPrepSaveState !== "idle" ? (
-              <InlineSaveStatus className="examCycleSaveStatus" label="시험정보" saveState={examPrepSaveState} />
-            ) : null}
-          </div>
+          <FilterBar
+            className="examCycleBar"
+            label="시험관리 고사 필터"
+            result={(
+              <>
+                <span>{filteredRows.length}개 시험정보 · {classStudents.length}명</span>
+                {examPrepSaveState !== "idle" ? (
+                  <InlineSaveStatus className="examCycleSaveStatus" label="시험정보" saveState={examPrepSaveState} />
+                ) : null}
+              </>
+            )}
+          >
+            <label className="filterBarField">
+              <span>현재 고사</span>
+              <select value={selectedExamCycle} onChange={(event) => changeExamCycle(event.target.value)}>
+                <option value="2026-1-mid">2026 1학기 중간</option>
+                <option value="2026-1-final">2026 1학기 기말</option>
+                <option value="2026-2-mid">2026 2학기 중간</option>
+                <option value="2026-2-final">2026 2학기 기말</option>
+              </select>
+            </label>
+          </FilterBar>
           <div className="examPrepTable">
             <div className="examPrepRow examPrepHead">
               <span>학교명</span>
@@ -26142,20 +26152,48 @@ function WrongProblemBoard({
         ))}
       </WorkspaceTabs>
 
-      <div className="wrongBoardFilterPanel">
-        <div className="chipRow">
-          {["전체", "고1", "고2", "중1", "중2"].map((grade) => (
+      <FilterBar
+        actions={(
+          <>
+            <label className="pdfUploadButton">
+              PDF 교재 등록
+              <input accept="application/pdf,image/*" onChange={handleFileUpload} type="file" />
+            </label>
             <button
-              className={gradeFilter === grade ? "chip active" : "chip"}
-              key={grade}
-              onClick={() => setGradeFilter(grade)}
+              className="softButton"
+              disabled={selectedProblemsCount === 0}
+              onClick={() => setIsPickedProblemModalOpen(true)}
               type="button"
             >
-              {grade}
+              수업용 화면 ({selectedProblemsCount})
             </button>
-          ))}
-        </div>
-        <div className="wrongBoardControls">
+            <button
+              className="primaryButton"
+              disabled={selectedProblemsCount === 0}
+              onClick={() => setIsPickedProblemModalOpen(true)}
+              type="button"
+            >
+              선택 문제 보기 ({selectedProblemsCount})
+            </button>
+          </>
+        )}
+        className="wrongBoardFilterPanel"
+        label="오답관리 학년과 학생 필터"
+        result={<span>연결 교재 {filteredBooks.length}개 · 총 {totalProblems}문제</span>}
+      >
+        {["전체", "고1", "고2", "중1", "중2"].map((grade) => (
+          <button
+            aria-pressed={gradeFilter === grade}
+            className={`filterBarOption${gradeFilter === grade ? " active" : ""}`}
+            key={grade}
+            onClick={() => setGradeFilter(grade)}
+            type="button"
+          >
+            {grade}
+          </button>
+        ))}
+        <label className="filterBarField">
+          <span>학생</span>
           <select value={selectedStudent?.studentId ?? ""} onChange={(event) => setSelectedStudentId(event.target.value)}>
             {students.map((student) => (
               <option key={student.studentId} value={student.studentId}>
@@ -26163,31 +26201,8 @@ function WrongProblemBoard({
               </option>
             ))}
           </select>
-          <label className="pdfUploadButton">
-            PDF 교재 등록
-            <input accept="application/pdf,image/*" onChange={handleFileUpload} type="file" />
-          </label>
-        </div>
-        <div className="wrongProblemToolbar">
-          <span>연결 교재 {filteredBooks.length}개 · 총 {totalProblems}문제</span>
-          <button
-            className="softButton"
-            disabled={selectedProblemsCount === 0}
-            onClick={() => setIsPickedProblemModalOpen(true)}
-            type="button"
-          >
-            수업용 화면 ({selectedProblemsCount})
-          </button>
-          <button
-            className="primaryButton"
-            disabled={selectedProblemsCount === 0}
-            onClick={() => setIsPickedProblemModalOpen(true)}
-            type="button"
-          >
-            선택 문제 보기 ({selectedProblemsCount})
-          </button>
-        </div>
-      </div>
+        </label>
+      </FilterBar>
 
       <button
         className="wrongBoardDiagnosis"

@@ -32,15 +32,21 @@ export function SchoolCalendarHeader({
   return (
     <PageHeader
       actions={(
-        <>
-          <select aria-label="학사일정 학교 필터" value={schoolFilter} onChange={(event) => onSchoolFilterChange?.(event.target.value)}>
-            <option value="전체 학교">전체 학교</option>
-            {schools.map((school) => (
-              <option key={school} value={school}>{school}</option>
-            ))}
-          </select>
-          <button className="primaryButton" onClick={() => onOpenEventForm?.(selectedDate)} type="button">+ 일정 등록</button>
-        </>
+        <FilterBar
+          actions={<button className="primaryButton" onClick={() => onOpenEventForm?.(selectedDate)} type="button">+ 일정 등록</button>}
+          className="schoolCalendarHeaderFilter"
+          label="학사일정 학교 필터와 일정 등록"
+        >
+          <label className="filterBarField">
+            <span>학교</span>
+            <select aria-label="학사일정 학교 필터" value={schoolFilter} onChange={(event) => onSchoolFilterChange?.(event.target.value)}>
+              <option value="전체 학교">전체 학교</option>
+              {schools.map((school) => (
+                <option key={school} value={school}>{school}</option>
+              ))}
+            </select>
+          </label>
+        </FilterBar>
       )}
       actionsClassName="schoolCalendarHeaderActions"
       className="schoolCalendarHeader"

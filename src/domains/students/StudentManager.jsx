@@ -1,4 +1,5 @@
 import { Component, useEffect, useState } from "react";
+import { FilterBar } from "../../shared/components/FilterBar.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
@@ -751,12 +752,13 @@ export function StudentManager({
       ) : null}
 
       {activeTab === "class" ? (
-        <div className="classTabList">
+        <FilterBar className="classTabList" label="학생 반 필터">
           {templates.map((template) => {
             const count = activeStudents.filter((student) => student.defaultClassTemplateId === template.classTemplateId).length;
             return (
               <button
-                className={selectedClassTemplateId === template.classTemplateId ? "active" : ""}
+                aria-pressed={selectedClassTemplateId === template.classTemplateId}
+                className={`filterBarOption${selectedClassTemplateId === template.classTemplateId ? " active" : ""}`}
                 key={template.classTemplateId}
                 onClick={() => {
                   setSelectedClassTemplateId(template.classTemplateId);
@@ -770,7 +772,8 @@ export function StudentManager({
             );
           })}
           <button
-            className={selectedClassTemplateId === "unassigned" ? "active" : ""}
+            aria-pressed={selectedClassTemplateId === "unassigned"}
+            className={`filterBarOption${selectedClassTemplateId === "unassigned" ? " active" : ""}`}
             onClick={() => {
               setSelectedClassTemplateId("unassigned");
               setSelectedStudentId("");
@@ -780,7 +783,7 @@ export function StudentManager({
             <strong>미배정</strong>
             <span>{activeStudents.filter((student) => !student.defaultClassTemplateId).length}명</span>
           </button>
-        </div>
+        </FilterBar>
       ) : null}
 
       {activeTab === "withdrawn" ? (
