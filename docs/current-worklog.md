@@ -2130,6 +2130,13 @@
 - AI 가상검수: preExam source/호환 key, 시험일 fallback, examPrep/generated source 중복과 학년 누락 lesson을 다시 실행해 key·순서·중복 제거·입력 불변을 확인하고 model side effect 0건을 대조한다. 전용 closeout fixture와 시나리오 644/644, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 의미 단위는 generated lesson plan item key의 실제 사용 여부를 audit하고 미사용이면 기능 변경 없이 dead helper 제거 단위로 진행한다.
 
+## 2026-07-28 P3. App.jsx 17AR-1 generated lesson plan item key dead helper inventory
+
+- inventory: `getGeneratedLessonPlanItemKey`는 explicit `item.generatedKey` 우선·lesson key fallback 계약을 가진 순수 helper지만 현재 `App.jsx` 안에서 정의 1건 외 호출 0건임을 고정했다.
+- 경계: 이번 단계는 helper를 제거하지 않았다. 새 identity model과 calendar/sync/plan 소비는 이 helper를 사용하지 않으며 React state·API·Supabase·알림/Solapi와 무관하다.
+- AI 가상검수: explicit key TARGET과 fallback lesson TARGET, 빈 item CONTROL로 기존 반환·short-circuit·입력 불변을 확인하고 App 참조 수 1(정의만)을 대조한다. 전용 inventory fixture와 시나리오 645/645, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AR-2`는 이 미사용 helper만 제거하고 identity model 주입과 다음 school-event helper 경계를 보존한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
