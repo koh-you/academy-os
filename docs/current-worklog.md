@@ -2183,6 +2183,12 @@
 - AI 가상검수: 명시 ID·subject TARGET의 전체 payload와 helper 호출 순서·인자·참조를 검증하고, 다른 event type·날짜 누락에서는 학생 selector 포함 helper 호출 0건, 대상 없음에서는 이후 payload helper 호출 0건을 확인한다. 기존 inventory의 명시/fallback fixture와 추출 fixture, 시나리오 652/652, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AT-3`은 import/export/factory 호출 각 1개, helper 주입과 두 App consumer 및 저장 경계를 closeout한다.
 
+## 2026-07-28 P3. App.jsx 17AT-3 generated preExam lesson builder closeout
+
+- closeout: `generatedPreExamLessonBuilder.js` import·export·factory 각 1개, 날짜·key·ID·요일·색상·학생 selector 주입, 자동 계획과 단건 동기화의 두 App consumer를 고정했다. React state upsert와 `/api/lessons` 저장은 App 소유임을 함께 대조했다.
+- AI 가상검수: 명시 event ID·과목·복수 학생 TARGET으로 전체 payload와 helper 호출 순서·입력 불변을 다시 확인하고, event type guard와 대상 없음 CONTROL에서 후속 helper 단락을 검증한다. 전용 closeout fixture와 시나리오 653/653, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 의미 단위는 preExam lesson ID helper의 순수 ID 생성 경계를 inventory한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
