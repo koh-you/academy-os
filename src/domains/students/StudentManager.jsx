@@ -1084,10 +1084,10 @@ export function StudentManager({
               </label>
             </div>
           </div>
-          <div className="deleteConfirmActions">
+          <ModalFooter tone="danger">
             <button className="softButton" onClick={() => setDeleteStudentId("")} type="button">취소</button>
             <button className="dangerButton" onClick={confirmDeleteStudent} type="button">퇴원 처리</button>
-          </div>
+          </ModalFooter>
         </ModalComponent>
       ) : null}
 

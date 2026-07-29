@@ -10562,10 +10562,10 @@ export function App() {
             </div>
             <p className="dangerCopy">정말 이 수업을 취소 처리할까요? 7일 안에는 되돌릴 수 있고, 이후에는 자동 삭제됩니다.</p>
           </div>
-          <div className="deleteConfirmActions">
+          <ModalFooter tone="danger">
             <button className="softButton" onClick={() => setLessonDeleteModalId("")} type="button">취소</button>
             <button className="dangerButton" onClick={() => confirmDeleteLesson(pendingDeleteLesson.lessonId)} type="button">수업 취소 처리</button>
-          </div>
+          </ModalFooter>
         </Modal>
       ) : null}
     </main>

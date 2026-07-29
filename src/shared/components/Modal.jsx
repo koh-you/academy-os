@@ -54,11 +54,12 @@ export function ModalFooter({
   align = "end",
   children,
   className = "",
+  tone = "default",
   ...props
 }) {
   return (
     <div
-      className={["modalFooter", `align-${align}`, className].filter(Boolean).join(" ")}
+      className={["modalFooter", `align-${align}`, `tone-${tone}`, className].filter(Boolean).join(" ")}
       {...props}
     >
       {children}

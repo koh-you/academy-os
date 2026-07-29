@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-5D-1. 복구·보존형 위험 확인 footer
+
+- 구현: 공통 `ModalFooter`에 `tone="danger"`를 추가하고 수업 취소 확인·학생 퇴원 확인의 기존 action wrapper를 공통 위험 footer로 이관했다.
+- 영향 안내 보존: 수업은 7일간 취소 상태로 보관, 학생은 등원일~퇴원일 기록을 보존하고 다음 날 이후 명단에서만 제외한다는 문구를 그대로 유지했다.
+- 동작 보존: 수업 취소의 `setLessonDeleteModalId`/`confirmDeleteLesson`, 학생 퇴원의 `setDeleteStudentId`/`confirmDeleteStudent`, 버튼 문구와 DOM 순서를 정적 계약으로 고정했다.
+- 외부 원천: lessons/student/미래 명단, Supabase/app_state, notification_jobs/Solapi를 실제 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(126 modules). 전용 정적 계약의 학생 title 문자열을 실제 고정 제목에 맞춰 바로잡은 뒤 전체 `npm run test:production`과 scenario 443개 중 442개 통과, `git diff --check` 통과. 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 두 확인창의 위험 경계선·취소/실행 버튼 배치를 누적하되 실제 수업 취소·학생 퇴원은 누르지 않고 UI-5D-2로 진행한다.
+
 ## 2026-07-29 UI-5C-3. 혼합 쓰기 모달 footer 분류
 
 - 조사: 날짜별 학사일정은 등록·행별 저장·삭제와 로컬 draft, 시험대비 상세는 수정·삭제, 최근 보충 이력은 완료 복귀 저장 callback을 가진다.
