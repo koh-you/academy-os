@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-5C-3. 혼합 쓰기 모달 footer 분류
+
+- 조사: 날짜별 학사일정은 등록·행별 저장·삭제와 로컬 draft, 시험대비 상세는 수정·삭제, 최근 보충 이력은 완료 복귀 저장 callback을 가진다.
+- 결정: 세 화면은 단순 읽기/진입형이 아니므로 action 위치를 바꾸지 않았다. footer 껍데기만 먼저 옮겨 저장·삭제 의미를 흐리지 않고 UI-5D/UI-6에 남겼다.
+- 동작 보존: `onCreateEvent`, `onSaveEvent`, `onDeleteEvent`, `onEditLesson`, `onDeleteLesson`, `onUndoPassTask`와 각 행 문맥을 정적 계약으로 고정했다.
+- 외부 원천: school event/app_state, lessons, makeup task, Supabase, notification_jobs/Solapi를 실제 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(126 modules), 전체 `npm run test:production`과 전용 정적 계약 포함 scenario 442개 중 441개 통과, `git diff --check` 통과. 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 코드 UI 변경이 없어 별도 시각 gate가 없다. 필수 중단 없이 `UI-5D-1` 위험 확인 모달 inventory로 진행한다.
+
 ## 2026-07-29 UI-5C-2. 로컬 결과·내보내기 모달 footer
 
 - 구현: 출결 키오스크의 저장 결과창 `닫기`를 가운데 정렬 공통 `ModalFooter`로, HWPX 초안 내보내기의 `취소`·`다운로드`를 기본 공통 footer로 이관했다.

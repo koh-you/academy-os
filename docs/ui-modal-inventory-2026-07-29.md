@@ -14,7 +14,7 @@
 | 수업 취소 확인 | `lessons`, 수업기록·알림 사전점검 | 취소 사유 | 수업 status, 연결 기록, 예약 확인 | 실행 전 단순 닫기 | 매우 높음 · UI-5D |
 | 월 정규수업 열기 | 이전/대상월 `lessons` | 생성 plan | lessons bulk 저장·재조회 | 저장 중 닫기 차단 | 매우 높음 · UI-5D |
 | 숙제/결석 보충 상세 | lesson, homework, makeup task, record | 화면별 편집 state | 출결·보충·알림 연결 | 달력 복귀 | 매우 높음 · UI-5D |
-| 시험대비 상세 | lesson | 없음 | 수정·취소 진입 | 달력 복귀 | 중간 · UI-5C |
+| 시험대비 상세 | lesson | 없음 | 수정·삭제 진입 | 달력 복귀 | 높음 · UI-5D |
 | 수업일지 | lessons, records, homeworks, makeup, jobs | 다중 journal draft | 다중 원천 저장·출결·Solapi | 미저장 계약 유지 | 매우 높음 · UI-5D/UI-6 |
 | 수업일지 보충 완료 확인 | makeup task | 처리 mode/memo | makeup 저장 | 저장 중 닫기 차단 | 높음 · UI-5D |
 | 알림톡 예약 확인 | notification_jobs, Solapi group/message | filter/audit | 대조·예약 취소 | 단순 닫기 | 매우 높음 · UI-5D |
@@ -34,10 +34,10 @@
 | 보충 완료 확인 | makeup task | 없음 | 완료 저장 | 저장 중 버튼 차단 | 높음 · UI-5D |
 | 보충 일정 변경 확인 | makeup, jobs | 예약 선택 | 일정 저장·예약 갱신 | 실행 전 단순 닫기 | 매우 높음 · UI-5D |
 | 학생별 보충관리 | makeup, lesson, record, jobs | 내용/일정/문구 draft | 저장·수업일지·예약/취소 | 단계별 저장 계약 | 매우 높음 · UI-5D/UI-6 |
-| 최근 보충 이력 | makeup task 읽기 | 검색어 | 완료 복귀 callback | 단순 닫기 | 중간 · UI-5C |
+| 최근 보충 이력 | makeup task 읽기 | 검색어 | 완료 복귀 저장 callback | 단순 닫기 | 높음 · UI-5D/UI-6 |
 | 뽑은 문제 인쇄 | wrong problem/book 읽기 | 없음 | `window.print` | 단순 닫기 | 낮음 · UI-5B |
 | 학생 추가/Tally | students, applicants, templates | 단건/일괄/Tally draft | 학생·반·미래 lesson 저장 | 모드별 draft 폐기 | 매우 높음 · UI-5D |
-| 날짜별 학사일정 | school events 읽기 | 없음 | 등록/수정/삭제 진입 | 단순 닫기 | 중간 · UI-5C |
+| 날짜별 학사일정 | school events | 행별 로컬 draft | 등록/저장/삭제 | 단순 닫기 | 높음 · UI-5D/UI-6 |
 | 학사일정 등록/수정 | app_state school events | event form | app_state 저장 | 저장 전 draft 폐기 | 높음 · UI-5D/UI-6 |
 | 월별 정산 출결 달력 | settlement 계산·lessons 읽기 | 없음 | 없음 | 단순 닫기 | 낮음 · UI-5B |
 | 특강 신청 학생 연결 | applications/students | 검색·선택 | student/enrollment/application 저장 | 선택 draft 폐기 | 높음 · UI-5D |
@@ -93,9 +93,16 @@
 - 결과창의 가운데 정렬을 위해 `ModalFooter align="center"`를 추가했다. desktop/mobile의 공통 간격과 줄바꿈 규칙은 UI-5C-1과 같다.
 - Supabase/app_state, 출결 저장, AI 실행, Storage, notification_jobs/Solapi는 호출하거나 변경하지 않았다.
 
+## UI-5C-3 혼합 쓰기 모달 분류
+
+- 날짜별 학사일정은 전체 상단에 등록 진입, 각 일정 행에 저장·삭제와 로컬 draft가 함께 있어 단순 진입형이 아니다.
+- 시험대비 상세는 읽기 요약 안에 일정 수정·삭제가 함께 있고, 최근 보충 이력은 완료 행의 `보충관리로 복귀`가 원천 저장 callback이다.
+- 세 화면의 행동은 문맥 가까이에 그대로 유지하고 정적 계약으로 고정했다. footer 위치만 먼저 바꾸지 않고 각각 UI-5D 위험 행동/UI-6 저장 상태 계약에서 다룬다.
+- 이 분류로 UI-5C의 안전한 읽기·로컬 행동 footer 범위를 닫는다.
+
 ## 다음 단위
 
-`UI-5C-3`에서는 학사일정 날짜 조회, 시험대비 상세, 최근 보충 이력의 진입 행동을 비교한다. 행 안의 등록·수정·삭제·완료 복귀 callback은 footer로 옮기지 않고, 모달 전체를 닫는 행동이나 읽기 전용 진입 행동만 공통화할 수 있는지 먼저 확정한다. 저장·삭제 callback이 같은 영역에 있으면 UI-5D/UI-6로 남긴다.
+`UI-5D-1`에서는 삭제·취소 확인 모달의 위험 행동 문구, 영향 범위, 취소/최종 실행 순서, disabled·진행 상태를 전수 비교한다. 실제 삭제·취소를 실행하지 않고 가장 단순한 단일 원천 확인창부터 공통 위험 footer 후보를 정한다.
 
 ## 사람 검수
 
