@@ -63,6 +63,7 @@
 | UI-5D-3 | 완료 | 퇴원 중복 단건·일괄 영구삭제 audit·확인·disabled 위험 footer |
 | UI-5D-4 | 완료 | native confirm 26개 원천·side effect 분류와 이관 경계 |
 | UI-5E-1 | 완료 | modal draft·닫기 의미 분류와 caller 소유 원칙 |
+| UI-5E-2 | 완료 | 기존 saving/audit no-op 흐름의 X·Escape closeDisabled |
 
 ## 전체 세부 작업 목록
 
@@ -161,6 +162,6 @@
 
 ## 다음 실행 목표
 
-> 최신 상태: `UI-4` 전체와 `UI-5A`, `UI-5B-1~2`, `UI-5C-1~3`, `UI-5D-1~4`, `UI-5E-1`을 완료했다. 현재 다음 작은 목표는 `UI-5E-2 saving/audit 중 closeDisabled`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
+> 최신 상태: `UI-4` 전체와 `UI-5A`, `UI-5B-1~2`, `UI-5C-1~3`, `UI-5D-1~4`, `UI-5E-1~2`를 완료했다. 현재 다음 작은 목표는 `UI-5E-3 닫기 결과 소유권 이관`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
 
-공통 `Modal`에 opt-in `closeDisabled`를 추가하고 이미 `onClose`가 saving/audit 중 no-op인 수업일지 보충 완료와 영구삭제 단건·일괄에만 적용한다. X와 Escape가 실제 닫기 가능 상태와 일치하도록 하되 저장 callback·상태 전이·API는 변경하지 않는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
+saving 중에도 닫히는 결석보강 취소·보충 완료 공통 확인과 조용히 draft를 버리는 학사일정·반 명단·학생 추가를 분리한다. callback 결과/실패 상태와 dirty 비교를 새로 소유하지 않고 안전하게 표시할 수 없다면 target별 UI-6 저장 상태 단위로 명시적으로 이관해 UI-5를 닫는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.

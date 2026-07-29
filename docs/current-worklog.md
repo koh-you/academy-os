@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-5E-2. saving/audit closeDisabled
+
+- 구현: 공통 `Modal`에 opt-in `closeDisabled`를 추가해 활성 상태에서는 X disabled, `aria-busy`, Escape 무시가 같은 계약을 사용한다.
+- 적용: 기존에 `onClose`가 saving 중 no-op이던 수업일지 보충 완료 확인과 영구삭제 단건·일괄 audit 세 흐름에만 연결했다.
+- 동작 보존: `isPassSaving`, 단건/일괄 audit state, 기존 close guard와 저장·audit callback을 그대로 유지했다.
+- 외부 원천: 보충 완료, audit API, 영구삭제, Supabase/app_state, notification_jobs/Solapi를 실제 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(126 modules). 전용 정적 계약 포함 전체 `npm run test:production`과 scenario 448개 중 447개 통과, `git diff --check` 통과. 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 저장/audit 중 X disabled와 Escape 무반응은 실제 저장·삭제를 실행하지 않는 범위에서 누적 검수하고 UI-5E-3으로 진행한다.
+
 ## 2026-07-29 UI-5E-1. modal draft·닫기 의미 inventory
 
 - 전수분류: 미저장 confirm, saving/audit 중 no-op, 저장 중에도 닫기 가능, 조용한 local draft 폐기, 로컬 작업 종료, 읽기 전용의 여섯 유형으로 나눴다.

@@ -17232,6 +17232,7 @@ function SupplementMakeupLessonDetail({
       {passConfirmMode ? (
         <Modal
           className="supplementPassConfirmModal"
+          closeDisabled={isPassSaving}
           title={passConfirmMode === "needs_more" ? "추가 보충 필요 기록" : "보충 완료 처리"}
           subtitle="처리 내용은 보충관리 이력에 남습니다."
           onClose={() => {

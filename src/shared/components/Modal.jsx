@@ -5,6 +5,7 @@ export function Modal({
   backdropClassName = "",
   children,
   className = "",
+  closeDisabled = false,
   hideCloseButton = false,
   hideHeader = false,
   onClose,
@@ -17,6 +18,7 @@ export function Modal({
   useEffect(() => {
     function handleEscapeKey(event) {
       if (event.key === "Escape") {
+        if (closeDisabled) return;
         event.preventDefault();
         onClose?.();
       }
@@ -24,7 +26,7 @@ export function Modal({
 
     window.addEventListener("keydown", handleEscapeKey);
     return () => window.removeEventListener("keydown", handleEscapeKey);
-  }, [onClose]);
+  }, [closeDisabled, onClose]);
 
   return (
     <div className={`modalBackdrop ${backdropClassName}`}>
@@ -32,6 +34,7 @@ export function Modal({
         aria-label={hideHeader ? ariaLabel || undefined : undefined}
         aria-labelledby={!hideHeader && title ? titleId : undefined}
         aria-modal="true"
+        aria-busy={closeDisabled || undefined}
         className={["modalCard", scrollable ? "modalScrollable" : "", className].filter(Boolean).join(" ")}
         role="dialog"
       >
@@ -41,7 +44,7 @@ export function Modal({
               <h2 id={titleId}>{title}</h2>
               {subtitle ? <p className="muted">{subtitle}</p> : null}
             </div>
-            {hideCloseButton ? null : <button className="iconButton" onClick={onClose} type="button">×</button>}
+            {hideCloseButton ? null : <button className="iconButton" disabled={closeDisabled} onClick={onClose} type="button">×</button>}
           </div>
         )}
         {scrollable ? <div className="modalScrollBody">{children}</div> : children}

@@ -1104,6 +1104,7 @@ export function StudentManager({
       {permanentDeleteStudent ? (
         <ModalComponent
           className="studentPermanentDeleteModal"
+          closeDisabled={permanentDeleteAuditState === "saving"}
           onClose={closePermanentDeleteModal}
           subtitle="연결 기록을 먼저 확인합니다. 기록이 있어도 영향 범위를 확인한 뒤 강제 삭제할 수 있으며, 삭제 후에는 복구할 수 없습니다."
           title="퇴원 중복 데이터 영구 삭제"
@@ -1210,6 +1211,7 @@ export function StudentManager({
       {batchPermanentDeleteStudents.length ? (
         <ModalComponent
           className="studentPermanentDeleteModal"
+          closeDisabled={batchPermanentDeleteAuditState === "saving"}
           onClose={closeBatchPermanentDeleteModal}
           subtitle="선택한 학생별 연결 기록을 Supabase에서 먼저 점검합니다. 실제 삭제는 아래 최종 확인 뒤에만 실행됩니다."
           title={`퇴원생 ${batchPermanentDeleteStudents.length}명 영구 삭제`}

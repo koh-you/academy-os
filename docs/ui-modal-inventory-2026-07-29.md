@@ -152,9 +152,16 @@
 - 공통 `Modal`이 모든 caller의 dirty/saving 상태를 추론하지 않도록 한다. caller가 `closeDisabled` 또는 명시적 close guard를 전달하는 구조만 허용한다.
 - UI-5E-1에서는 기존 닫기 callback을 바꾸지 않고 대표 계약을 정적검사로 고정했다. 실제 입력·저장·닫기 동작은 실행하지 않았다.
 
+## UI-5E-2 saving/audit closeDisabled
+
+- 공통 `Modal`에 opt-in `closeDisabled`를 추가했다. 활성화되면 X는 실제 `disabled`, dialog는 `aria-busy`, Escape는 `onClose`를 호출하지 않는다.
+- 이미 `onClose`가 saving 중 no-op이던 수업일지 보충 완료 확인과 영구삭제 단건·일괄 audit에만 적용했다.
+- 기존 saving 상태, close callback guard, 저장·audit callback은 그대로 유지했다. 공통 shell이 caller 상태를 추론하지 않는다.
+- 결석보강 취소·보충 완료 공통 확인처럼 현재 saving 중에도 닫히는 흐름은 결과/실패 상태 소유권을 바꾸지 않고 UI-6로 남겼다.
+
 ## 다음 단위
 
-`UI-5E-2`에서는 공통 `Modal`에 opt-in `closeDisabled`를 추가한다. 이미 `onClose`가 saving/audit 중 no-op인 수업일지 보충 완료와 영구삭제 단건·일괄부터 적용해 X와 Escape가 실제 닫기 가능 상태와 일치하도록 한다. 저장 callback·상태 전이·API는 변경하지 않는다.
+`UI-5E-3`에서는 saving 중에도 닫히는 결석보강 취소·보충 완료 공통 확인, 조용히 draft를 버리는 학사일정·반 명단·학생 추가를 다시 분리한다. callback 결과를 소비하지 않고도 안전한 표시는 있는지 확인하고, 없으면 target별 UI-6 저장 상태 단위로 명시적으로 이관해 UI-5를 닫는다.
 
 ## 사람 검수
 
