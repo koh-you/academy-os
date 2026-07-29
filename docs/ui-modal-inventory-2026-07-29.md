@@ -121,9 +121,26 @@
 - 두 모달의 audit 저장 중 닫기 차단, 최종 실행 disabled와 callback을 그대로 두고 action wrapper만 `ModalFooter tone="danger"`로 이관했다.
 - 실제 audit API, `window.confirm`, 영구삭제, Supabase 재조회는 호출하지 않았다.
 
+## UI-5D-4 native confirm inventory
+
+현재 `window.confirm` 26개를 다음처럼 분류했다.
+
+| 구분 | 26개 중 | 대표 원천·영향 | 처리 경계 |
+| --- | ---: | --- | --- |
+| 삭제·취소 | 19 | 학생 성적/테스트/상담/알림, 시험정보+연결 수업, notification_jobs/Solapi, 특강 안내문·신청, 시험분석 DB+Storage, 학사일정, 영구삭제 | target별 pending state·실패 feedback과 함께 모달화. UI 껍데기만 선행 금지 |
+| 학생/Tally 원천 교체 | 3 | 학생 기본정보 교체, 특강 Tally 재반영 | 기존 회차·수업·출결 보존 계약과 함께 별도 저장 gate |
+| AI 초안 재생성 | 1 | 선생님 수정본 보존, AI 초안만 재생성 | UI-5E/AI 상태 단위 |
+| 미저장 draft 닫기 | 1 | 알림톡 최종 문구 local draft | UI-5E draft 계약 |
+| 학생 상태 복원 | 1 | 퇴원→재원, 과거 반·미래 명단은 자동복원 안 함 | 학생 저장 신뢰성 단위 |
+| 잠긴 특강 명단 추가 | 1 | 과거/오늘 lesson 명단 추가, 알림 없음 | 특강 다중 원천 저장 gate |
+
+- native confirm은 callback 내부의 동기식 중단점이다. 공통 모달로 바꾸려면 target/payload pending state와 취소 시 draft 유지, 저장 중 닫기 차단, 실패 feedback을 새로 소유해야 한다.
+- 따라서 UI-5D에서는 기존 공통 `Modal` 확인창의 구조만 완료하고, 26개 native confirm은 기능별 UI-6/저장 신뢰성 단위로 넘긴다.
+- 정적 계약으로 현재 개수와 대표 영향 문구를 고정했으며 실제 확인창·API·삭제·예약 취소·AI는 실행하지 않았다.
+
 ## 다음 단위
 
-`UI-5D-4`에서는 아직 공통 모달이 아니라 `window.confirm`을 쓰는 삭제·취소 흐름을 inventory한다. 시험정보, 시험분석/PDF, 알림 기록·Solapi 예약, 학사일정, 학생 기록, 특강 원천별 영향과 진행 상태를 분류하고, 이번 UI 프로그램에서 안전하게 모달화할 범위와 저장 신뢰성/독립 gate로 남길 범위를 정한다.
+`UI-5E-1`에서는 공통 모달별 local draft와 닫기 의미를 다시 대조한다. 이미 미저장 확인이 있는 알림톡 작성, 저장 중 닫기 차단이 있는 보충/영구삭제, 조용히 draft를 버리는 학사일정·명단·입력 모달을 분류하고 callback을 바꾸지 않은 채 공통 원칙과 다음 구현 순서를 확정한다.
 
 ## 사람 검수
 

@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-5D-4. native confirm 위험 흐름 inventory
+
+- 전수조사: `window.confirm` 26개를 삭제·취소 19개, 학생/Tally 교체 3개, AI 재생성 1개, 미저장 닫기 1개, 학생 복원 1개, 잠긴 특강 명단 추가 1개로 분류했다.
+- 판단: 이 확인들은 callback 내부의 동기식 중단점이라 공통 모달로 바꾸려면 target/payload pending state, 취소 시 draft, 저장 중 닫기 차단, 실패 feedback을 함께 설계해야 한다.
+- 이관: 기존 공통 `Modal` 확인창의 UI-5D 통일은 완료하고, native confirm은 기능별 UI-6/저장 신뢰성 독립 단위로 남겼다.
+- 외부 원천: 학생/시험/학사/특강/알림/시험분석 원천, Storage, notification_jobs/Solapi, AI를 실제 호출하거나 변경하지 않았다.
+- AI 검수: 현재 26개와 대표 영향 문구를 정적 계약으로 고정했다. `npm run build` 통과(126 modules), 전체 `npm run test:production`과 scenario 446개 중 445개 통과, `git diff --check` 통과. 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 코드 UI 변경이 없어 별도 시각 gate가 없다. 실제 삭제·취소·교체·AI 실행은 각 독립 gate로 유지하고 UI-5E-1 inventory로 진행한다.
+
 ## 2026-07-29 UI-5D-3. 퇴원 중복 영구삭제 위험 footer
 
 - 구현: 퇴원 중복 학생 단건·일괄 영구삭제 모달의 기존 action wrapper를 `ModalFooter tone="danger"`로 이관했다.
