@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-4B-4B. 보충 후보 행·UI-4B 완료
+
+- 구현: 보충 후보/진행 행을 기존 `candidateItem supplementRowItem` class와 3열 구조를 유지한 `ListCard` shell로 이관했다.
+- 동작 보존: candidate `item.id` key, 기존 task 탐색, progress tone/detail, 행 action 상태, 상세/생성 `openCandidateReview`, 완료 확인 `openPassConfirm`, busy disabled 조건을 그대로 유지했다.
+- 외부 원천: 보충 생성·완료, lessons/makeup_tasks, notification_jobs/Solapi, Supabase/app_state를 실제 호출하거나 변경하지 않았다.
+- 범위 결정: 알림 발송 기록, 학생/퇴원생 편집 행, 수업일지 학생 행은 카드가 아니라 표 구조이므로 UI-4C로 넘겼다. 이로써 UI-4B 카드형 목록을 완료했다.
+- AI 검수: `npm run build` 통과(123 modules). 전용 정적 계약을 포함한 scenario 422개 중 421개가 통과했고 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 보충 후보 desktop/390px 배치와 상세/완료 버튼 위치만 누적 확인하고 실제 보충 생성·완료는 누르지 않는다. 다음 UI-4C 데이터 표로 진행한다.
+
 ## 2026-07-29 UI-4B-4A. 학생 포털 쓰기 행동 카드 shell
 
 - 구현: 학생 숙제 완료 카드와 질문 목록 행을 `ListCardBody`/`ListCardActions`로 이관했다. 기존 전용 class와 저장 feedback 위치를 유지했다.

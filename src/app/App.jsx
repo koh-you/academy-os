@@ -24319,7 +24319,11 @@ function SupplementCenter({
     const taskProgress = getSupplementTaskProgress(existingTask, lessons);
     const rowAction = supplementRowActions[getSupplementActionKey(existingTask ?? item.task)];
     return (
-      <article className={item.isFutureDeferred ? "candidateItem supplementRowItem futureDeferred" : "candidateItem supplementRowItem"} key={item.id}>
+      <ListCard
+        className={item.isFutureDeferred ? "candidateItem supplementRowItem futureDeferred" : "candidateItem supplementRowItem"}
+        density="compact"
+        key={item.id}
+      >
         <div>
           <button className="textLinkButton" onClick={() => openCandidateReview(item)} type="button">
             {studentName(item.studentId)}
@@ -24358,7 +24362,7 @@ function SupplementCenter({
             보충 완료 처리
           </button>
         ) : null}
-      </article>
+      </ListCard>
     );
   }
 
