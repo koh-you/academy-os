@@ -7651,6 +7651,21 @@ button:disabled {
   width: 100%;
 }
 
+.modalCard.modalScrollable {
+  grid-template-rows: auto minmax(0, 1fr);
+  max-height: calc(100dvh - 48px);
+  overflow: hidden;
+}
+
+.modalScrollBody {
+  display: grid;
+  gap: 20px;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding-right: 2px;
+}
+
 .modalCard.wideModal {
   max-width: 1040px;
 }

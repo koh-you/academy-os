@@ -1091,7 +1091,7 @@ export function StudentManager({
       ) : null}
 
       {handoverStudent ? (
-        <ModalComponent className="studentHandoverModal" onClose={() => setHandoverStudentId("")} subtitle="수업·출결·숙제와 Tally 접수정보를 읽어 PDF 인쇄 창을 엽니다. 원천 데이터는 수정하지 않습니다." title={`${handoverStudent.name} ${getStudentHandoverTitle(handoverStudent)}`}>
+        <ModalComponent className="studentHandoverModal" onClose={() => setHandoverStudentId("")} scrollable subtitle="수업·출결·숙제와 Tally 접수정보를 읽어 PDF 인쇄 창을 엽니다. 원천 데이터는 수정하지 않습니다." title={`${handoverStudent.name} ${getStudentHandoverTitle(handoverStudent)}`}>
           <div className="deleteConfirmBody">
             <p className="muted">등원일부터 퇴원일({String(handoverStudent.withdrawnAt || "").slice(0, 10) || "미입력"})까지의 수업만 포함합니다.</p>
             <label>교사 인계 코멘트<textarea value={handoverComment} onChange={(event) => setHandoverComment(event.target.value)} placeholder="재등록 시 참고사항, 보호자 전달사항 등을 입력하세요. 이 코멘트는 이번 PDF에만 포함되며 저장하지 않습니다." rows={7} /></label>

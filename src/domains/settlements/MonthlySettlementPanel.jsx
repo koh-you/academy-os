@@ -122,6 +122,7 @@ function MonthlySettlementCalendar({ monthKey, onClose, row }) {
     <Modal
       className="monthlySettlementCalendarModal"
       onClose={onClose}
+      scrollable
       subtitle={`${monthKey} 수업일지 기준 · 정규 ${row.regularCount}회 ${formatSettlementHours(row.regularHours)} · 보충 ${row.makeupCount}회`}
       title={`${row.student.name} 월별 출결·수업`}
     >

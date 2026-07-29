@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-5B-2. 긴 읽기 전용 모달 내부 스크롤
+
+- 구현: 공통 `Modal`에 opt-in `scrollable` body를 추가해 header는 고정하고 본문만 `100dvh` 높이 안에서 스크롤하도록 했다. 월별 정산 출결 달력, 특강 진행 조회, 최근 보충 이력, 학생 인수인계 PDF에 적용했다.
+- 예외 보존: 기존 전체화면 스크롤이 있는 포털 미리보기, 작은 출결 결과, print CSS가 있는 뽑은 문제 인쇄는 변경하지 않았다.
+- 동작 보존: 각 모달 `onClose`, 보충 검색/완료 복귀, 특강 수업일지 열기, 인수인계 PDF 인쇄 callback을 정적 계약으로 고정했다.
+- 외부 원천: 정산·특강·보충·학생 원천, Supabase/app_state, notification_jobs/Solapi, PDF 인쇄를 실제 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(126 modules). 전용 정적 계약 포함 scenario 439개 중 438개 통과, 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 네 모달의 header/본문 스크롤·390px 높이를 누적하고 `UI-5C-1` 읽기 전용 footer inventory로 진행한다.
+
 ## 2026-07-29 UI-5A·UI-5B-1. 모달 inventory·dialog semantics
 
 - 전수조사: 공통 `Modal`을 쓰는 39개 흐름을 읽기 전용, 단일 원천, 다중 원천, 발송/삭제/출결로 나누고 직접 원천·draft·side effect·닫기 의미·위험도를 `docs/ui-modal-inventory-2026-07-29.md`에 기록했다.

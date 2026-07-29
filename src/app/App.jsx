@@ -26027,6 +26027,7 @@ function SupplementHistoryModal({ onChangeQuery, onClose, onUndoPassTask, query,
       title="최근 한 달 보충관리 내역"
       subtitle="보충 완료, 보강 취소, 일정 확정, 진행 중 항목을 학생별로 확인합니다."
       onClose={onClose}
+      scrollable
     >
       <div className="supplementHistoryToolbar">
         <SearchField

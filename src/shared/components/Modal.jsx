@@ -8,6 +8,7 @@ export function Modal({
   hideCloseButton = false,
   hideHeader = false,
   onClose,
+  scrollable = false,
   subtitle,
   title
 }) {
@@ -31,7 +32,7 @@ export function Modal({
         aria-label={hideHeader ? ariaLabel || undefined : undefined}
         aria-labelledby={!hideHeader && title ? titleId : undefined}
         aria-modal="true"
-        className={`modalCard ${className}`}
+        className={["modalCard", scrollable ? "modalScrollable" : "", className].filter(Boolean).join(" ")}
         role="dialog"
       >
         {hideHeader ? null : (
@@ -43,7 +44,7 @@ export function Modal({
             {hideCloseButton ? null : <button className="iconButton" onClick={onClose} type="button">×</button>}
           </div>
         )}
-        {children}
+        {scrollable ? <div className="modalScrollBody">{children}</div> : children}
       </section>
     </div>
   );

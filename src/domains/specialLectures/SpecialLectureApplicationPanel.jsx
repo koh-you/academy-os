@@ -2095,10 +2095,11 @@ export function SpecialLectureApplicationPanel({
       })() : null}
 
       {progressEnrollment ? (
-        <Modal
-          className="specialLectureProgressModal"
-          onClose={() => setProgressModalEnrollment(null)}
-          subtitle={`${selectedGuide?.title || "특강"} · 회차별 수업일지 기록`}
+          <Modal
+            className="specialLectureProgressModal"
+            onClose={() => setProgressModalEnrollment(null)}
+            scrollable
+            subtitle={`${selectedGuide?.title || "특강"} · 회차별 수업일지 기록`}
           title={`${progressStudent?.name || "학생"} 특강 진행`}
         >
           <div className="specialLectureModalBody">
