@@ -4,6 +4,7 @@ import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { ListCard, ListCardActions } from "../../shared/components/ListCard.jsx";
+import { ModalFooter } from "../../shared/components/Modal.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { SelectionToolbar } from "../../shared/components/SelectionToolbar.jsx";
@@ -1096,7 +1097,7 @@ export function StudentManager({
             <p className="muted">등원일부터 퇴원일({String(handoverStudent.withdrawnAt || "").slice(0, 10) || "미입력"})까지의 수업만 포함합니다.</p>
             <label>교사 인계 코멘트<textarea value={handoverComment} onChange={(event) => setHandoverComment(event.target.value)} placeholder="재등록 시 참고사항, 보호자 전달사항 등을 입력하세요. 이 코멘트는 이번 PDF에만 포함되며 저장하지 않습니다." rows={7} /></label>
           </div>
-          <div className="deleteConfirmActions"><button className="softButton" onClick={() => setHandoverStudentId("")} type="button">닫기</button><button className="primaryButton" onClick={printStudentHandover} type="button">PDF 인쇄 창 열기</button></div>
+          <ModalFooter><button className="softButton" onClick={() => setHandoverStudentId("")} type="button">닫기</button><button className="primaryButton" onClick={printStudentHandover} type="button">PDF 인쇄 창 열기</button></ModalFooter>
         </ModalComponent>
       ) : null}
 

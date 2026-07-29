@@ -7666,6 +7666,24 @@ button:disabled {
   padding-right: 2px;
 }
 
+.modalFooter {
+  align-items: center;
+  border-top: 1px solid var(--academy-border, #d8e3f8);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 14px;
+}
+
+.modalFooter.align-start {
+  justify-content: flex-start;
+}
+
+.modalFooter.align-between {
+  justify-content: space-between;
+}
+
 .modalCard.wideModal {
   max-width: 1040px;
 }
@@ -19805,6 +19823,15 @@ body.attendanceOnlyBody {
 }
 
 @media (max-width: 640px) {
+  .modalFooter {
+    align-items: stretch;
+  }
+
+  .modalFooter > button,
+  .modalFooter > a {
+    flex: 1 1 140px;
+  }
+
   .sidebar {
     gap: 10px;
     padding: 12px 14px;

@@ -229,7 +229,7 @@ import {
 } from "../shared/components/InlineSaveStatus.jsx";
 import { ListCard, ListCardActions } from "../shared/components/ListCard.jsx";
 import { MetricCard } from "../shared/components/MetricCard.jsx";
-import { Modal } from "../shared/components/Modal.jsx";
+import { Modal, ModalFooter } from "../shared/components/Modal.jsx";
 import { NavigationHeader } from "../shared/components/NavigationHeader.jsx";
 import { PageHeader } from "../shared/components/PageHeader.jsx";
 import { SearchField } from "../shared/components/SearchField.jsx";
@@ -26445,10 +26445,10 @@ function PickedProblemModal({ pickedProblems, selectedStudent, onClose }) {
       subtitle={`${selectedStudent?.name ?? "학생"} 오답/보충 출력용`}
       onClose={onClose}
     >
-      <div className="pickedProblemActions noPrint">
+      <ModalFooter className="pickedProblemActions noPrint">
         <button className="primaryButton" onClick={() => window.print()} type="button">🖨 인쇄</button>
         <button className="softButton" onClick={onClose} type="button">닫기</button>
-      </div>
+      </ModalFooter>
       <div className="printProblemSheet">
         <div className="printSheetHeader">
           <strong>{selectedStudent?.grade ?? ""} {selectedStudent?.name ?? "학생"}</strong>

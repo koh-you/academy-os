@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-5C-1. 읽기 전용 출력 모달 footer
+
+- 구현: 공통 `ModalFooter`와 desktop/mobile action 배치를 추가하고 뽑은 문제 인쇄, 학생 인수인계 PDF에 적용했다.
+- 예외 보존: 뽑은 문제의 `pickedProblemActions noPrint`를 그대로 유지해 print CSS 결과가 바뀌지 않게 했다.
+- 동작 보존: `window.print`, `printStudentHandover`, 각 `onClose`/setter와 버튼 문구·DOM 순서를 정적 계약으로 고정했다.
+- 외부 원천: 학생·오답·수업 원천, Supabase/app_state, PDF/문제 인쇄를 실제 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(126 modules). 기존 Escape 정적 계약의 import 문자열을 새 named import에 맞게 보강한 뒤 scenario 440개 중 439개 통과, 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 두 footer의 desktop/390px 배치를 누적하고 `UI-5C-2` 단일 원천·진입형 footer inventory로 진행한다.
+
 ## 2026-07-29 UI-5B-2. 긴 읽기 전용 모달 내부 스크롤
 
 - 구현: 공통 `Modal`에 opt-in `scrollable` body를 추가해 header는 고정하고 본문만 `100dvh` 높이 안에서 스크롤하도록 했다. 월별 정산 출결 달력, 특강 진행 조회, 최근 보충 이력, 학생 인수인계 PDF에 적용했다.
