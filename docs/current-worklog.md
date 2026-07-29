@@ -2084,6 +2084,12 @@
 - AI 가상검수: 명시 eventId와 examSubject·subject·math fallback 가상 event로 추출 전후 결과·우선순위·입력 불변을 대조한다. 전용 extraction fixture와 시나리오 637/637, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AO-3`은 module import·호출 2개·export 1개와 App-owned lesson/plan 소비 경계를 closeout한다.
 
+## 2026-07-28 P3. App.jsx 17AO-3 generated pre-exam key builder closeout
+
+- closeout: `generatedPreExamKeyBuilder.js` module import 1개·App 호출 2개·export 1개와 school event lesson 생성·generated plan candidate 두 소비 위치를 고정했다.
+- AI 가상검수: 명시 eventId와 examSubject·subject·math fallback event를 다시 실행해 결과·우선순위·입력 불변을 확인하고 helper side effect 0건을 대조한다. 전용 closeout fixture와 시나리오 638/638, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 의미 단위는 generated exam-prep date key처럼 외부 의존 없는 저위험 key 계산을 inventory하고 identity 전체 이동은 보류한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
