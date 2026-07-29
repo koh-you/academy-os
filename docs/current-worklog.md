@@ -2208,6 +2208,13 @@
 - AI 가상검수: 동일 40자 prefix의 서로 다른 source ID, 한글·공백·기호 source ID, 빈 값과 동일 입력 반복 TARGET/CONTROL로 prefix·hash·결정성을 다시 확인한다. 전용 closeout fixture와 시나리오 656/656, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 의미 단위는 시험정보에서 파생된 math event의 examPrep ID 역매핑 helper를 inventory한다.
 
+## 2026-07-28 P3. App.jsx 17AV-1 derived math event examPrep ID selector inventory
+
+- inventory: `derived_math_` prefix를 제거한 source tail이 `${examPrepId}_`로 시작하는 첫 row의 ID를 반환하는 계약을 고정했다. prefix가 아니거나 일치 row가 없으면 빈 문자열이며, 겹치는 ID는 rows 원래 순서의 첫 일치를 따른다.
+- 경계: helper와 단일 소비는 App의 시험정보 파생 수업 repair 흐름에 남아 있다. 이번 단계에서는 코드를 이동하거나 repair state를 변경하지 않았다.
+- AI 가상검수: 정확 일치 TARGET, 비-derived·미일치·delimiter 불일치 CONTROL, 겹치는 짧은/긴 examPrep ID의 rows 순서 TARGET, 빈 입력으로 결과·입력 불변을 검증한다. 전용 inventory fixture와 시나리오 657/657, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AV-2`는 역매핑 helper만 순수 selector module로 분리하고 repair orchestration은 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
