@@ -7991,7 +7991,7 @@ button:disabled {
 .notificationTableRow {
   display: grid;
   gap: 12px;
-  grid-template-columns: 110px 140px 100px 150px 120px minmax(240px, 1fr) 104px;
+  grid-template-columns: 150px 120px 100px 150px 120px minmax(240px, 1fr) 104px;
   padding: 12px 14px;
 }
 
@@ -8134,11 +8134,14 @@ button:disabled {
   }
 }
 
+.notificationJobStateCell,
 .notificationJobTypeCell {
   display: grid;
   gap: 4px;
+  min-width: 0;
 }
 
+.notificationJobStateCell small,
 .notificationJobTypeCell small {
   color: #64748b;
   font-size: 11px;

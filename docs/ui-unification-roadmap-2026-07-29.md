@@ -75,6 +75,7 @@
 | UI-6C-3 | 완료 | 알림 action·Solapi 부분 대조 상태 공통 적용 |
 | UI-6D-1 | 완료 | Academy OS row 상태와 Solapi provider 참조·결과 원천 inventory |
 | UI-6D-2 | 완료 | 보충 알림 제어의 Academy OS 상태와 Solapi 그룹 참조 분리 |
+| UI-6D-3 | 완료 | 알림관리·수업일지의 Academy OS 상태와 검증된 Solapi 그룹 위계 통일 |
 
 ## 전체 세부 작업 목록
 
@@ -173,6 +174,6 @@
 
 ## 다음 실행 목표
 
-> 최신 상태: `UI-4`와 `UI-5` 전체, `UI-6A`, `UI-6B`, `UI-6C`, `UI-6D-1~2`를 완료했다. 현재 다음 작은 목표는 `UI-6D-3 알림관리·수업일지의 provider 상태 위계 정리`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
+> 최신 상태: `UI-4`와 `UI-5`, `UI-6` 전체를 완료했다. 현재 다음 작은 목표는 `UI-7A-1 앱 shell·사이드바 모바일/accessibility inventory`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
 
-알림관리 발송 기록과 수업일지 예약 상태에서 Academy OS 상태를 먼저, 검증된 Solapi group 참조를 보조 정보로 같은 위계에 배치한다. 예약·취소 callback과 실제 notification job·Solapi 원천은 변경하거나 실행하지 않는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
+앱 shell·사이드바의 desktop sticky, 1100px 이하 document-flow, 전체 메뉴 접근, 현재 위치, 접힘, iOS safe-area, 홈 화면 바로가기 진입을 inventory한다. view 전환 callback과 로그인/session 동작은 변경하지 않는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.

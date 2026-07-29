@@ -1282,6 +1282,10 @@ function getNotificationJobProviderReference(job = {}) {
   return job.providerMessageId || getNotificationProviderReference(job.result);
 }
 
+function getSolapiNotificationJobProviderReference(job = {}) {
+  return job.provider === "solapi" ? getNotificationJobProviderReference(job) : "";
+}
+
 function maskPhoneForDisplay(value = "") {
   const phone = normalizePhoneNumber(value);
   if (phone.length < 8) return value || "-";
@@ -12734,10 +12738,15 @@ function NotificationCenter({
           ) : (
             filteredNotificationJobs.map((job) => (
               <article className="notificationTableRow" key={job.notificationJobId}>
-                <span className={`statusPill status-${getNotificationJobStatusClass(job)}`}>{formatNotificationJobStatus(job) || getNotificationStatusLabel(job.status)}</span>
+                <span className="notificationJobStateCell">
+                  <small>Academy OS 상태</small>
+                  <span className={`statusPill status-${getNotificationJobStatusClass(job)}`}>{formatNotificationJobStatus(job) || getNotificationStatusLabel(job.status)}</span>
+                  {getSolapiNotificationJobProviderReference(job) ? (
+                    <small>Solapi 그룹 · {getSolapiNotificationJobProviderReference(job)}</small>
+                  ) : null}
+                </span>
                 <span className="notificationJobTypeCell">
                   <strong>{getNotificationJobLabel(job.notificationType)}</strong>
-                  {getNotificationJobProviderReference(job) ? <small>Solapi {getNotificationJobProviderReference(job)}</small> : null}
                 </span>
                 <span>{studentName(job.studentId, job.payload)}</span>
                 <span>{job.scheduledAt ? formatKoreaTimeLabel(job.scheduledAt) : job.createdAt ? formatKoreaTimeLabel(job.createdAt) : "-"}</span>
@@ -18196,11 +18205,12 @@ function LessonJournalDetail({
 
   function renderReservationStatusCell(job, isMuted = false) {
     if (isMuted) return <span className="reservationStatusCell muted">알림 제외</span>;
-    const providerReference = getNotificationJobProviderReference(job);
+    const providerReference = getSolapiNotificationJobProviderReference(job);
     return (
       <span className="reservationStatusCell">
+        <small className="reservationStatusSource">Academy OS 상태</small>
         <span>{formatNotificationJobStatus(job)}</span>
-        {providerReference ? <small>Solapi {providerReference}</small> : null}
+        {providerReference ? <small>Solapi 그룹 · {providerReference}</small> : null}
         {canCancelNotificationJob(job) ? (
           <button
             className="dangerSoftButton compact"
@@ -25471,9 +25481,7 @@ function SupplementStudentModal({
   const notificationControlJob = notificationControlTask && notificationControl
     ? getSupplementNotificationControlJob(notificationControlTask, notificationJobs, notificationControl.controlType)
     : null;
-  const notificationControlProviderReference = notificationControlJob?.provider === "solapi"
-    ? getNotificationJobProviderReference(notificationControlJob)
-    : "";
+  const notificationControlProviderReference = getSolapiNotificationJobProviderReference(notificationControlJob);
   const notificationControlDisplay = getSupplementNotificationControlDisplay(notificationControlJob);
   const notificationControlDraftState = notificationControlTask ? getTaskDraftState(notificationControlTask) : null;
   const notificationControlHasUnsavedChanges = Boolean(notificationControlTask && notificationControlDraftState &&
