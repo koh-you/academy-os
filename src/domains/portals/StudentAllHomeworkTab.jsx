@@ -1,3 +1,5 @@
+import { EmptyState } from "../../shared/components/EmptyState.jsx";
+
 export function StudentAllHomeworkTab({
   getStatusLabel,
   getStatusTone,
@@ -14,7 +16,7 @@ export function StudentAllHomeworkTab({
         <h2>등록된 숙제 전체</h2>
         <p className="muted">선생님이 등록한 숙제를 확인합니다. 수정과 삭제는 선생님 화면에서만 가능합니다.</p>
       </div>
-      {sortedHomeworks.length === 0 ? <div className="emptyHomeworkBox">등록된 숙제가 없습니다.</div> : null}
+      {sortedHomeworks.length === 0 ? <EmptyState className="emptyHomeworkBox" title="등록된 숙제가 없습니다." /> : null}
       {sortedHomeworks.map((homework) => {
         const completed = isCompleted(homework) ? 1 : 0;
         const totalDays = Math.max(1, isOverdue(homework) ? 5 : 2);

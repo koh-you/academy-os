@@ -1,0 +1,53 @@
+.emptyStateShell {
+  min-width: 0;
+}
+
+.emptyStateShell.structured {
+  align-content: center;
+  display: grid;
+  gap: var(--academy-space-2, 12px);
+  justify-items: center;
+  text-align: center;
+}
+
+.emptyStateCopy {
+  display: grid;
+  gap: 4px;
+  justify-items: inherit;
+  min-width: 0;
+}
+
+.emptyStateTitle {
+  color: var(--academy-text, #0f172a);
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.45;
+}
+
+.emptyStateDescription,
+.emptyStateContent {
+  color: var(--academy-muted, #64748b);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.emptyStateAction {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--academy-space-1, 8px);
+  justify-content: center;
+}
+
+.emptyStateShell[data-tone="loading"] {
+  background: var(--status-info-bg, #eff6ff);
+  border-color: var(--status-info-border, #bfdbfe);
+}
+
+.emptyStateShell[data-tone="error"] {
+  background: var(--status-danger-bg, #fef2f2);
+  border-color: var(--status-danger-border, #fecaca);
+}
+
+.emptyStateShell[data-tone="error"] .emptyStateTitle {
+  color: var(--status-danger-text, #b91c1c);
+}

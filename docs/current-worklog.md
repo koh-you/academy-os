@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-4D-1A. 공통 EmptyState·포털 읽기 상태
+
+- 전수조사: 빈 데이터, 검색 0건, loading, 원천 error/retry, 저장·외부 side effect 실패를 분리하고 `docs/ui-state-inventory-2026-07-29.md`에 UI-4D 후속 순서를 고정했다.
+- 구현: 기존 children 사용을 보존한 `EmptyState`에 선택형 title/description/action/tone 구조와 공통 copy/action CSS를 추가했다. 학생·학부모 포털의 읽기 전용 빈 상태를 같은 구조로 이관했다.
+- 동작 보존: 포털 배열/filter, 탭, row key, 숙제 상태 계산, 자료 열기와 학생 숙제·질문·시험 제출 callback을 변경하지 않았다. loading/error retry와 접근성 역할은 후속 단위로 분리했다.
+- 외부 원천: Supabase/app_state, Storage, notification_jobs/Solapi, 포털 쓰기 API를 실제 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(126 modules). 전용 정적 계약 포함 scenario 429개 중 428개 통과, 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 포털 빈 상태 위계·점선 box·390px 줄바꿈을 누적하고 `UI-4D-1B` 일반 목록·표 빈 상태로 진행한다.
+
 ## 2026-07-29 UI-4C-5. 공통 표 시각 규칙·UI-4C 완료
 
 - 구현: `DataTableShell` 안의 semantic/grid header 배경·문자색·굵기, cell/row 경계색, status/save/progress pill 줄바꿈 방지를 공통 토큰으로 통일했다.

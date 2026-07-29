@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { ParentPortalHomeworkTab } from "./ParentPortalHomeworkTab.jsx";
 import { PortalMaterialsTab } from "./PortalMaterialsTab.jsx";
 import { parentPortalTabs, PortalTabBar } from "./PortalTabBar.jsx";
@@ -46,7 +47,11 @@ export function ParentPortal({
         {activeTab === "reports" ? (
           <div className="homeworkStack">
             {studentReports.length === 0 ? (
-              <div className="emptyPortalPanel">아직 발송된 보고서가 없습니다. 수업 후 선생님이 보고서를 발송하면 여기에 표시됩니다.</div>
+              <EmptyState
+                className="emptyPortalPanel"
+                description="수업 후 선생님이 보고서를 발송하면 여기에 표시됩니다."
+                title="아직 발송된 보고서가 없습니다."
+              />
             ) : null}
             <PortalReportCards reports={studentReports} />
           </div>
@@ -66,11 +71,15 @@ export function ParentPortal({
         {activeTab === "materials" ? <PortalMaterialsTab materials={parentMaterials} emptyMessage="아직 공개된 자료가 없습니다." /> : null}
 
         {activeTab === "attendance" ? (
-          <div className="emptyPortalPanel">출결앱 연동 전입니다. 추후 등하원 시간이 표시됩니다.</div>
+          <EmptyState
+            className="emptyPortalPanel"
+            description="추후 등하원 시간이 표시됩니다."
+            title="출결앱 연동 전입니다."
+          />
         ) : null}
 
         {activeTab === "curriculum" ? (
-          <div className="emptyPortalPanel">아직 커리큘럼이 설정되지 않았습니다.</div>
+          <EmptyState className="emptyPortalPanel" title="아직 커리큘럼이 설정되지 않았습니다." />
         ) : null}
       </section>
     </section>

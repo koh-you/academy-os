@@ -1,9 +1,10 @@
+import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { ListCard, ListCardActions, ListCardBody } from "../../shared/components/ListCard.jsx";
 
 export function PortalMaterialsTab({ emptyMessage, materials = [] }) {
   return (
     <div className="portalMaterialsList">
-      {materials.length === 0 ? <div className="emptyPortalPanel">{emptyMessage}</div> : null}
+      {materials.length === 0 ? <EmptyState className="emptyPortalPanel" title={emptyMessage} /> : null}
       {materials.map((material) => (
         <ListCard className="portalMaterialCard" key={material.materialId}>
           <ListCardBody>

@@ -1,5 +1,7 @@
+import { EmptyState } from "../../shared/components/EmptyState.jsx";
+
 export function StudentEmptyTab({ message }) {
-  return <div className="emptyPortalPanel">{message}</div>;
+  return <EmptyState className="emptyPortalPanel" title={message} />;
 }
 
 export function StudentEvaluationTab() {
@@ -7,7 +9,7 @@ export function StudentEvaluationTab() {
     <div className="evaluationPanel">
       <strong>진단평가</strong>
       <strong>내신기출 모의평가</strong>
-      <div className="emptyPortalPanel">배정된 시험이 없습니다.</div>
+      <EmptyState className="emptyPortalPanel" title="배정된 시험이 없습니다." />
     </div>
   );
 }

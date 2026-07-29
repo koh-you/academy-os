@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
+import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { getCountableAttendanceRecords } from "../lessons/lessonClosure.js";
@@ -194,7 +195,7 @@ export function StudentMyPageTab({
       {myPageTab === "log" ? (
         <div className="taskStack">
           {studentLessonComments.length === 0 ? (
-            <div className="emptyPortalPanel">아직 선생님이 보낸 학생 코멘트가 없습니다.</div>
+            <EmptyState className="emptyPortalPanel" title="아직 선생님이 보낸 학생 코멘트가 없습니다." />
           ) : (
             studentLessonComments.map((record) => (
               <article className="studentHomeworkCard" key={record.lessonStudentRecordId}>

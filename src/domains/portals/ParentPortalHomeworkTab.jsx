@@ -1,3 +1,5 @@
+import { EmptyState } from "../../shared/components/EmptyState.jsx";
+
 export function ParentPortalHomeworkTab({
   getStatusLabel,
   getStatusTone,
@@ -12,7 +14,7 @@ export function ParentPortalHomeworkTab({
         <h2>숙제 현황</h2>
         <p className="muted">학부모 화면은 열람 전용입니다. 숙제 수정과 삭제는 선생님 화면에서만 가능합니다.</p>
       </div>
-      {homeworks.length === 0 ? <div className="emptyPortalPanel">등록된 숙제가 없습니다.</div> : null}
+      {homeworks.length === 0 ? <EmptyState className="emptyPortalPanel" title="등록된 숙제가 없습니다." /> : null}
       {homeworks.map((homework) => (
         <article className="studentHomeworkCard" key={homework.homeworkId}>
           <div className="homeworkCardTop">

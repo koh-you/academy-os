@@ -3,6 +3,7 @@ import { StudentHomeworkActionCard } from "./StudentHomeworkActionCard.jsx";
 import { StudentLessonHistoryCalendar } from "./StudentLessonHistoryCalendar.jsx";
 import { StudentQuestionPanel } from "./StudentQuestionPanel.jsx";
 import { StudentSupplementSchedules, StudentTopNotice } from "./StudentTodayReadOnlyPanels.jsx";
+import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 
 export function StudentTodayTab({
@@ -81,7 +82,7 @@ export function StudentTodayTab({
         title="오늘 해야 할 숙제"
       />
       <div className="homeworkStack">
-        {todayHomeworks.length === 0 ? <div className="emptyHomeworkBox">오늘 배정된 숙제가 없습니다.</div> : null}
+        {todayHomeworks.length === 0 ? <EmptyState className="emptyHomeworkBox" title="오늘 배정된 숙제가 없습니다." /> : null}
         {todayHomeworks.map((homework) => (
           <StudentHomeworkActionCard
             completed={isHomeworkCompleted(homework)}
