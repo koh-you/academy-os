@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-2E-3B-1. 시험분석·시험 상세 side-effect 작업 바
+
+- 구현: 시험분석 산출물 생성/ZIP, PDF 업로드, 문항 확인·경계 탐지·AI 채움·검수, 진행/저장 이벤트, 시험대비 일정 수정·삭제, 시험 후 총평 AI 수정·복사 등 12개 구형 머리말을 공통 `SectionHeader`의 copy/actions slot으로 옮겼다.
+- 동작 보존: callback 이름·인자, disabled 조건, 파일 input ref, 상태 badge, 접힘 state를 그대로 유지했다. AI 생성, 업로드, 다운로드, 저장, 삭제는 실행하지 않았고 Supabase·app_state·notification_jobs·Solapi 원천을 건드리지 않았다.
+- 진행 수치: 원시 JSX `sectionHeader`는 28개에서 16개로 줄었다. 남은 운영 저장·삭제·발송 작업 바를 UI-2E-3B-2 한 단위로 계속한다.
+- AI 검수: 새 callback/disabled 정적 계약을 포함해 production 시나리오 407개 중 406개가 통과했다. 기존 비관련 `90a` 1개만 기준선 실패이며 `npm run build`, `git diff --check`도 통과했다.
+- 사람 검수: 필수 중단 gate는 없다. 배포 후 버튼 배치·줄바꿈·disabled 표시만 보고 실제 AI/업로드/다운로드/삭제 버튼은 누르지 않는 독립 시각 검수를 누적한다.
+
 ## 2026-07-29 UI-2E-3A. 로컬 draft·상태 섹션 머리말
 
 - 구현: 보충 처리, 수업 운영 알림 건수, 수업 모달 포함 학생 수, 시험 후 제출 현황, 수업연구 유형트리/목록 필터, HWPX 내보내기 입력 섹션, 학사일정 수학시험 초안 추가, 월별/특강 정산 저장 상태, 테스트 응시 저장 상태를 공통 `SectionHeader`로 이관했다.

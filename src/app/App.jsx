@@ -3456,12 +3456,9 @@ function ExamAnalysisOutputDraftPanel({
   const isOutputSectionCollapsed = (sectionKey) => Boolean(collapsedOutputSections[sectionKey]);
   return (
     <div className="panel examAnalysisOutputDraftPanel">
-      <div className="sectionHeader slim">
-        <div>
-          <strong>블로그/인스타 산출물 초안</strong>
-          <span>선생님 총평 입력 · AI 초안 · 선생님 수정본 저장</span>
-        </div>
-        <div className="headerActions">
+      <SectionHeader
+        actions={(
+          <>
           <button
             className="secondaryButton"
             disabled={!hasRun || !hasReviewModel || isOutputBusy}
@@ -3486,8 +3483,14 @@ function ExamAnalysisOutputDraftPanel({
           >
             {exportingOutputType === "package" ? "패키지 생성 중" : "산출물 ZIP"}
           </button>
-        </div>
-      </div>
+          </>
+        )}
+        actionsClassName="headerActions"
+        density="slim"
+        description="선생님 총평 입력 · AI 초안 · 선생님 수정본 저장"
+        title="블로그/인스타 산출물 초안"
+        titleAs="strong"
+      />
 
       <div className="examAnalysisOutputCollapsibleHeader">
         <div>
@@ -14813,12 +14816,12 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
 
         <section className="examAnalysisWorkPanel" data-active-tab={examAnalysisWorkspaceTab}>
           <div className="panel examAnalysisFormPanel">
-            <div className="sectionHeader slim">
-              <div>
-                <strong>기본정보</strong>
-                <span>{activeRun ? workflowStatusLabel(activeRun.workflowStatus) : "새 분석"}</span>
-              </div>
-            </div>
+            <SectionHeader
+              density="slim"
+              description={activeRun ? workflowStatusLabel(activeRun.workflowStatus) : "새 분석"}
+              title="기본정보"
+              titleAs="strong"
+            />
             <div className="examAnalysisFormGrid">
               <label>
                 <span>연결 시험정보</span>
@@ -14876,12 +14879,9 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
             onDragOver={handlePdfDragEvent}
             onDrop={handlePdfDrop}
           >
-            <div className="sectionHeader slim">
-              <div>
-                <strong>PDF 원본</strong>
-                <span>{sourceFiles.length}개</span>
-              </div>
-              <div className="headerActions">
+            <SectionHeader
+              actions={(
+                <>
                 <input
                   accept="application/pdf,.pdf"
                   className="visuallyHiddenInput"
@@ -14890,8 +14890,14 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                   type="file"
                 />
                 <button className="primaryButton" onClick={() => fileInputRef.current?.click()} type="button">PDF 업로드</button>
-              </div>
-            </div>
+                </>
+              )}
+              actionsClassName="headerActions"
+              density="slim"
+              description={`${sourceFiles.length}개`}
+              title="PDF 원본"
+              titleAs="strong"
+            />
             <div
               className="examAnalysisDropZone"
               onClick={() => fileInputRef.current?.click()}
@@ -14996,28 +15002,33 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
           </div>
 
           <div className={questionCountStageCollapsed ? "panel examAnalysisQuestionCountPanel examAnalysisStagePanel collapsed" : "panel examAnalysisQuestionCountPanel examAnalysisStagePanel"}>
-            <div className="sectionHeader slim">
-              <div>
-                <strong>문항 수 확인</strong>
+            <SectionHeader
+              actions={(
+                <>
+                  {confirmStatus.message ? <span className={`saveStateBadge ${confirmStatus.state}`}>{confirmStatus.message}</span> : null}
+                  <button
+                    className="secondaryButton compact examAnalysisStageToggleButton"
+                    onClick={() => toggleExamAnalysisStage("question-count", questionCountStageComplete)}
+                    type="button"
+                  >
+                    {questionCountStageCollapsed ? "펼치기" : "접기"}
+                  </button>
+                </>
+              )}
+              actionsClassName="headerActions"
+              density="slim"
+              descriptionNode={(
                 <span>
                   {confirmedQuestionCount
                     ? `${confirmedQuestionCount}문항 확정`
                     : questionCountCandidate.count
                       ? `${questionCountCandidate.count}문항 후보`
-                    : "대기"}
+                      : "대기"}
                 </span>
-              </div>
-              <div className="headerActions">
-                {confirmStatus.message ? <span className={`saveStateBadge ${confirmStatus.state}`}>{confirmStatus.message}</span> : null}
-                <button
-                  className="secondaryButton compact examAnalysisStageToggleButton"
-                  onClick={() => toggleExamAnalysisStage("question-count", questionCountStageComplete)}
-                  type="button"
-                >
-                  {questionCountStageCollapsed ? "펼치기" : "접기"}
-                </button>
-              </div>
-            </div>
+              )}
+              title="문항 수 확인"
+              titleAs="strong"
+            />
             {questionCountStageCollapsed ? renderExamAnalysisStageCollapsedHint("문항 수 확인", questionCountStageComplete) : (
               <>
                 <div className="examAnalysisQuestionCountGrid">
@@ -15076,34 +15087,39 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
           </div>
 
           <div className={boundaryStageCollapsed ? "panel examAnalysisBoundaryPanel examAnalysisStagePanel collapsed" : "panel examAnalysisBoundaryPanel examAnalysisStagePanel"}>
-            <div className="sectionHeader slim">
-              <div>
-                <strong>문항 경계 탐지</strong>
+            <SectionHeader
+              actions={(
+                <>
+                  {boundaryStatus.message ? <span className={`saveStateBadge ${boundaryStatus.state}`}>{boundaryStatus.message}</span> : null}
+                  <button
+                    className="secondaryButton"
+                    disabled={!questionRows.length || !sourceFiles.length || isDetectingBoundaries}
+                    onClick={detectQuestionBoundaries}
+                    type="button"
+                  >
+                    {isDetectingBoundaries ? "탐지 중" : "문항 경계 탐지"}
+                  </button>
+                  <button
+                    className="secondaryButton compact examAnalysisStageToggleButton"
+                    onClick={() => toggleExamAnalysisStage("boundary", boundaryStageComplete)}
+                    type="button"
+                  >
+                    {boundaryStageCollapsed ? "펼치기" : "접기"}
+                  </button>
+                </>
+              )}
+              actionsClassName="headerActions"
+              density="slim"
+              descriptionNode={(
                 <span>
                   {boundaryRows.length
                     ? `${boundaryDetectedCount}/${boundaryRows.length}개`
                     : "대기"}
                 </span>
-              </div>
-              <div className="headerActions">
-                {boundaryStatus.message ? <span className={`saveStateBadge ${boundaryStatus.state}`}>{boundaryStatus.message}</span> : null}
-                <button
-                  className="secondaryButton"
-                  disabled={!questionRows.length || !sourceFiles.length || isDetectingBoundaries}
-                  onClick={detectQuestionBoundaries}
-                  type="button"
-                >
-                  {isDetectingBoundaries ? "탐지 중" : "문항 경계 탐지"}
-                </button>
-                <button
-                  className="secondaryButton compact examAnalysisStageToggleButton"
-                  onClick={() => toggleExamAnalysisStage("boundary", boundaryStageComplete)}
-                  type="button"
-                >
-                  {boundaryStageCollapsed ? "펼치기" : "접기"}
-                </button>
-              </div>
-            </div>
+              )}
+              title="문항 경계 탐지"
+              titleAs="strong"
+            />
             {boundaryStageCollapsed ? renderExamAnalysisStageCollapsedHint("문항 경계 탐지", boundaryStageComplete) : (
               <>
                 {boundaryDetection ? (
@@ -15137,12 +15153,9 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
           </div>
 
           <div className={rowFillStageCollapsed ? "panel examAnalysisRowFillPanel examAnalysisStagePanel collapsed" : "panel examAnalysisRowFillPanel examAnalysisStagePanel"}>
-            <div className="sectionHeader slim">
-              <div>
-                <strong>AI 행 채움</strong>
-                <span>{questionRows.length ? `${aiFilledRows.length}/${questionRows.length}개` : "대기"}</span>
-              </div>
-              <div className="headerActions">
+            <SectionHeader
+              actions={(
+                <>
                 {rowFillStatus.message ? <span className={`saveStateBadge ${rowFillStatus.state}`}>{rowFillStatus.message}</span> : null}
                 <button
                   className="secondaryButton"
@@ -15159,8 +15172,14 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                 >
                   {rowFillStageCollapsed ? "펼치기" : "접기"}
                 </button>
-              </div>
-            </div>
+                </>
+              )}
+              actionsClassName="headerActions"
+              density="slim"
+              description={questionRows.length ? `${aiFilledRows.length}/${questionRows.length}개` : "대기"}
+              title="AI 행 채움"
+              titleAs="strong"
+            />
             {rowFillStageCollapsed ? renderExamAnalysisStageCollapsedHint("AI 행 채움", rowFillStageComplete) : (
               <>
                 {rowFill ? (
@@ -15200,12 +15219,9 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
           </div>
 
           <div className={reviewStageCollapsed ? "panel examAnalysisReviewPanel examAnalysisStagePanel collapsed" : "panel examAnalysisReviewPanel examAnalysisStagePanel"}>
-            <div className="sectionHeader slim">
-              <div>
-                <strong>AI 결과 검수</strong>
-                <span>{questionRows.length ? `${confirmedReviewCount}/${questionRows.length}개 확정` : "대기"}</span>
-              </div>
-              <div className="headerActions">
+            <SectionHeader
+              actions={(
+                <>
                 {rowRefineStatus.message ? <span className={`saveStateBadge ${rowRefineStatus.state}`}>{rowRefineStatus.message}</span> : null}
                 <button
                   className="secondaryButton"
@@ -15230,8 +15246,14 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                 >
                   {reviewStageCollapsed ? "펼치기" : "접기"}
                 </button>
-              </div>
-            </div>
+                </>
+              )}
+              actionsClassName="headerActions"
+              density="slim"
+              description={questionRows.length ? `${confirmedReviewCount}/${questionRows.length}개 확정` : "대기"}
+              title="AI 결과 검수"
+              titleAs="strong"
+            />
             {reviewStageCollapsed ? renderExamAnalysisStageCollapsedHint("AI 결과 검수", reviewStageComplete) : (
               <>
                 {teacherReview ? (
@@ -15503,12 +15525,12 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
           />
 
           <div className="panel examAnalysisStepPanel">
-            <div className="sectionHeader slim">
-              <div>
-                <strong>진행 단계</strong>
-                <span>{activeRun ? workflowStatusLabel(activeRun.workflowStatus) : "대기"}</span>
-              </div>
-            </div>
+            <SectionHeader
+              density="slim"
+              description={activeRun ? workflowStatusLabel(activeRun.workflowStatus) : "대기"}
+              title="진행 단계"
+              titleAs="strong"
+            />
             <div className="examAnalysisSteps">
               {[
                 ["source_uploaded", "PDF 저장"],
@@ -15539,12 +15561,12 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
           </div>
 
           <div className="panel examAnalysisEventPanel">
-            <div className="sectionHeader slim">
-              <div>
-                <strong>저장 이벤트</strong>
-                <span>{events.length}건</span>
-              </div>
-            </div>
+            <SectionHeader
+              density="slim"
+              description={`${events.length}건`}
+              title="저장 이벤트"
+              titleAs="strong"
+            />
             <div className="examAnalysisEventList">
               {events.length === 0 ? (
                 <EmptyState className="emptyState compact">이벤트 없음</EmptyState>
@@ -16677,23 +16699,28 @@ function ExamPrepLessonDetail({ lesson, onDeleteLesson, onEditLesson }) {
       </div>
 
       <section className="panel examPrepPanel">
-        <div className="sectionHeader slim">
-          <div>
-            <span className="eyebrow">시험대비 수업</span>
-            <h3>{lesson.lessonTopic || lesson.className || "시험대비"}</h3>
+        <SectionHeader
+          actions={(
+            <>
+              <button className="ghostButton" onClick={() => onEditLesson(lesson)} type="button">
+                일정 수정
+              </button>
+              <button className="dangerButton" onClick={() => onDeleteLesson(lesson.lessonId)} type="button">
+                일정 삭제
+              </button>
+            </>
+          )}
+          actionsClassName="examPrepActions"
+          density="slim"
+          descriptionNode={(
             <p className="muted">
               저장된 실제 수업 기준으로 수업일지와 알림톡을 연결합니다. 날짜나 시간이 다르면 일정 수정에서 이 수업 자체를 조정합니다.
             </p>
-          </div>
-          <div className="examPrepActions">
-            <button className="ghostButton" onClick={() => onEditLesson(lesson)} type="button">
-              일정 수정
-            </button>
-            <button className="dangerButton" onClick={() => onDeleteLesson(lesson.lessonId)} type="button">
-              일정 삭제
-            </button>
-          </div>
-        </div>
+          )}
+          eyebrow="시험대비 수업"
+          title={lesson.lessonTopic || lesson.className || "시험대비"}
+          titleAs="h3"
+        />
 
         {sourceItems.length ? (
           <div className="examPrepSourceList" aria-label="연결된 시험정보">
@@ -21578,13 +21605,12 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
       <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...examPrepAutosaveRisk} />
       <div className="commentComposerGrid">
         <section className="commentDraftPanel">
-          <div className="sectionHeader slim">
-            <div>
-              <p className="eyebrow">ORIGINAL</p>
-              <h2>시험 후 기록지</h2>
-            </div>
-            <button className="softButton" onClick={polishReview} type="button">AI 수정</button>
-          </div>
+          <SectionHeader
+            actions={<button className="softButton" onClick={polishReview} type="button">AI 수정</button>}
+            density="slim"
+            eyebrow="ORIGINAL"
+            title="시험 후 기록지"
+          />
           <div className="examReviewChecklist">
             {examReviewChecklistSections.map((section) => (
               <label className="examReviewChecklistItem" key={section.key}>
@@ -21612,20 +21638,21 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
         </section>
 
         <section className="commentPreviewPanel">
-          <div className="sectionHeader slim">
-            <div>
-              <p className="eyebrow">REVISED</p>
-              <h2>시험 후 총평 수정본</h2>
-            </div>
-            <button
-              className="softButton"
-              disabled={!String(row.revisedReview ?? "").trim()}
-              onClick={copyRevisedReview}
-              type="button"
-            >
-              수정본 복사
-            </button>
-          </div>
+          <SectionHeader
+            actions={(
+              <button
+                className="softButton"
+                disabled={!String(row.revisedReview ?? "").trim()}
+                onClick={copyRevisedReview}
+                type="button"
+              >
+                수정본 복사
+              </button>
+            )}
+            density="slim"
+            eyebrow="REVISED"
+            title="시험 후 총평 수정본"
+          />
           <div className="examReviewBlogSource">
             <strong>블로그 발췌 재료</strong>
             <pre>{buildExamReviewBlogSourceText(reviewDraft) || "왼쪽 항목을 채우면 블로그 첫 문단, 변별 포인트, 다음 대비 문장으로 가져갈 재료가 정리됩니다."}</pre>
