@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { getExamPrepGeneratedKeyForDate } from "../src/domains/lessons/generatedExamPrepKeyBuilder.js";
 
 function getExistingExamPrepGeneratedKeyForDate(date = "") {
   return date ? `generated:exam_prep:${date}` : "";
@@ -7,6 +8,10 @@ function getExistingExamPrepGeneratedKeyForDate(date = "") {
 
 assert.equal(
   getExistingExamPrepGeneratedKeyForDate("2026-08-09"),
+  "generated:exam_prep:2026-08-09"
+);
+assert.equal(
+  getExamPrepGeneratedKeyForDate("2026-08-09"),
   "generated:exam_prep:2026-08-09"
 );
 assert.equal(
@@ -25,25 +30,20 @@ const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
-const builderStart = appSource.indexOf(
-  'function getExamPrepGeneratedKeyForDate(date = "")'
-);
-const builderEnd = appSource.indexOf(
-  "function getGeneratedLessonKey(",
-  builderStart
-);
-assert.ok(builderStart >= 0 && builderEnd > builderStart);
-const builderSource = appSource.slice(
-  builderStart,
-  builderEnd
+const helperSource = await readFile(
+  new URL(
+    "../src/domains/lessons/generatedExamPrepKeyBuilder.js",
+    import.meta.url
+  ),
+  "utf8"
 );
 const builderBoundaries = [
-  'function getExamPrepGeneratedKeyForDate(date = "")',
+  'export function getExamPrepGeneratedKeyForDate(date = "")',
   "return date ? `generated:exam_prep:${date}` : \"\""
 ];
 let previousIndex = -1;
 for (const boundary of builderBoundaries) {
-  const boundaryIndex = builderSource.indexOf(
+  const boundaryIndex = helperSource.indexOf(
     boundary,
     previousIndex + 1
   );
@@ -57,7 +57,12 @@ assert.equal(
   appSource.split(
     "getExamPrepGeneratedKeyForDate("
   ).length - 1,
-  4
+  3
+);
+assert.ok(
+  appSource.includes(
+    'from "../domains/lessons/generatedExamPrepKeyBuilder.js"'
+  )
 );
 for (const consumerBoundary of [
   "if (isExamPrepLesson(lesson)) return getExamPrepGeneratedKeyForDate(lesson.date)",
@@ -69,10 +74,10 @@ for (const consumerBoundary of [
     `missing generated exam-prep key consumer: ${consumerBoundary}`
   );
 }
-assert.ok(!builderSource.includes("fetch("));
-assert.ok(!builderSource.includes("/api/"));
-assert.ok(!builderSource.includes("postJson"));
-assert.ok(!builderSource.includes("setLessons"));
+assert.ok(!helperSource.includes("fetch("));
+assert.ok(!helperSource.includes("/api/"));
+assert.ok(!helperSource.includes("postJson"));
+assert.ok(!helperSource.includes("setLessons"));
 
 console.log(
   "generated exam-prep key builder inventory TARGET/CONTROL fixtures passed"
