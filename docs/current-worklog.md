@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-6B-1. 자동저장 위험 알림 재대조
+
+- 현재 `AutosaveRiskNotice`를 전수 대조해 3개 원천 계약·7개 표시 위치를 확인했다: app_state 3곳, 시험정보 3곳, 학사일정 1곳.
+- `app_state 전체 snapshot 저장`과 학생 프로필 과거 자동저장 경고는 이미 해결·제거되어 현재 화면에 없다.
+- 남은 7곳은 각각 다중 탭/요청 역전/version·재조회 부재, exam_prep_rows 최종 재조회/CAS 부재, 학사일정 다중 원천 최종 대조 부재와 연결돼 있어 삭제하지 않는다.
+- 저장 원천·현재 보호·남은 위험·실패 시 복구 위치는 `docs/ui-autosave-risk-inventory-2026-07-29.md`에 고정했다.
+- 저장 callback, API, Supabase/app_state, 시험정보, 학사일정, 수업, notification_jobs/Solapi를 변경하거나 실행하지 않았다.
+- AI 검수: 7개 표시 위치와 해결된 snapshot 경고 부재를 정적 계약으로 추가했다. `npm run build`는 126 modules로 통과했고 전체 `npm run test:production`은 452개 중 기존 기준선 `90a`만 실패했으며 신규 실패는 없다. `git diff --check`도 통과했다.
+- 사람 검수: 코드 UI 변경이 없어 필수 중단 gate가 없다. UI-6B-2에서 공통 시각 톤을 바꾼 뒤 누적 확인한다.
+
 ## 2026-07-29 UI-6A-3. 단계형 저장 화면 공통 상태 연결
 
 - 월 정규수업 열기의 기존 `saving -> verifying -> saved/failed` 상태와 상세 재조회 결과 문구를 유지하면서 `월 정규수업` 공통 저장 badge를 추가했다.
