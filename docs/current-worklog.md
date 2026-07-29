@@ -2202,6 +2202,12 @@
 - AI 가상검수: 같은 40자 prefix를 가진 한글 source ID TARGET 2개의 prefix 동일·최종 ID 상이, 한글·공백·기호 정규화, 빈 값 결과를 검증한다. 기존 inventory와 추출 fixture, 시나리오 655/655, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AU-3`은 module import/export 각 1개, shared helper 의존과 payload builder 소비를 closeout한다.
 
+## 2026-07-28 P3. App.jsx 17AU-3 generated preExam lesson ID builder closeout
+
+- closeout: `generatedPreExamLessonIdBuilder.js` App import·domain export·shared ID import 각 1개, inline helper 0개, payload builder의 단일 ID 소비를 고정했다.
+- AI 가상검수: 동일 40자 prefix의 서로 다른 source ID, 한글·공백·기호 source ID, 빈 값과 동일 입력 반복 TARGET/CONTROL로 prefix·hash·결정성을 다시 확인한다. 전용 closeout fixture와 시나리오 656/656, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 의미 단위는 시험정보에서 파생된 math event의 examPrep ID 역매핑 helper를 inventory한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
