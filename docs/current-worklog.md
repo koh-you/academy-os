@@ -2110,6 +2110,13 @@
 - AI 가상검수: 정상 날짜·공백 문자열 TARGET과 빈 문자열·undefined·null CONTROL을 다시 실행해 결과를 확인하고 helper side effect 0건을 대조한다. 전용 closeout fixture와 시나리오 641/641, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 의미 단위는 generated lesson identity 전체의 외부 helper 의존을 inventory하고, 주입으로 안전하게 분리 가능한 순수 조합 경계를 결정한다.
 
+## 2026-07-28 P3. App.jsx 17AQ-1 generated lesson identity model inventory
+
+- inventory: source ID 기반 대표 generated key, preExam의 학교·학년·시험일 호환 key, 시험대비 날짜 key를 합쳐 빈 값 제거·순서 보존 중복 제거하는 identity 목록 계약을 고정했다.
+- 의존 경계: `isExamPrepLesson`, `addDaysInKorea`, `normalizeGradeLabel`은 App helper이고 `normalizeSchoolName`, `compactCalendarLabel`, exam-prep date key는 기존 domain helper다. 이번 단계는 어떤 함수도 이동하지 않았으며 다음 추출에서는 이 의존을 명시적으로 주입한다.
+- AI 가상검수: 명시 preExam source ID와 호환 key TARGET, 시험일 fallback TARGET, examPrep 날짜 key 중복 TARGET, generated source ID 중복 TARGET, 학년 누락 CONTROL로 key 우선순위·정규화·중복 제거·입력 불변을 검증한다. 전용 inventory fixture와 시나리오 642/642, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AQ-2`는 identity 순수 조합을 dependency-injected model로 분리하고 App helper·calendar/status 소비는 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
