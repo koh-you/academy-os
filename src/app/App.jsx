@@ -16316,6 +16316,7 @@ function MonthlyRegularLessonOpenModal({ plan, saveStatus, onClose, onOpen }) {
             </article>
           ))}
         </div>
+        {saveStatus?.state ? <InlineSaveStatus label="월 정규수업" saveState={saveStatus.state} /> : null}
         {saveStatus?.message ? <p className={`inlineNotice ${saveStatus.state === "failed" ? "danger" : ""}`}>{saveStatus.message}</p> : null}
         <div className="modalActions">
           <button className="softButton" disabled={isSaving} onClick={onClose} type="button">닫기</button>

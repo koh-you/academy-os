@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-6A-3. 단계형 저장 화면 공통 상태 연결
+
+- 월 정규수업 열기의 기존 `saving -> verifying -> saved/failed` 상태와 상세 재조회 결과 문구를 유지하면서 `월 정규수업` 공통 저장 badge를 추가했다.
+- 시험분석 프롬프트 제작실의 `verified`는 공통 `saved` badge로 표시하고 `Supabase 재조회 확인`, dirty 안내, 실패 시 작업본 유지·오류 상세는 별도 문구로 보존했다.
+- 기존 저장 callback, 상태 전이 순서, API, 재조회, 닫기 guard, 정규수업 생성 범위와 프롬프트 local draft는 변경하지 않았다.
+- Supabase/app_state, Storage, notification_jobs/Solapi, 출결, AI 생성·저장을 실제 실행하지 않았다.
+- AI 검수: UI-6A-3 정적 계약, 갱신한 시험분석 UI fixture, `npm run build` 126 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 451개 중 기존 기준선 `90a`만 실패했고 신규 실패는 없다.
+- 사람 검수: 배포 후 대표 상태 badge와 상세 문구의 desktop/390px 배치를 누적 시각 검수로 남겼다. 이 결과는 UI-6B 진행을 막지 않는다.
+
 ## 2026-07-29 UI-6A-2. 공통 저장 확인·접근성 상태
 
 - `InlineSaveStatus`에 `verifying = 서버 반영 확인 중`을 추가해 재조회 단계가 `저장 전`으로 오표시되지 않게 했다.

@@ -4,10 +4,7 @@
 .examPromptStudioHeader strong { font-size: 18px; }
 .examPromptStudioHeader span { color: var(--text-muted, #64748b); font-size: 13px; }
 .examPromptSaveBadge { min-width: 190px; border: 1px solid #cbd5e1; border-radius: 12px; padding: 9px 12px; display: grid; gap: 3px; background: #f8fafc; }
-.examPromptSaveBadge.dirty { border-color: #f59e0b; background: #fffbeb; }
-.examPromptSaveBadge.saving, .examPromptSaveBadge.verifying { border-color: #3b82f6; background: #eff6ff; }
-.examPromptSaveBadge.verified { border-color: #10b981; background: #ecfdf5; }
-.examPromptSaveBadge.failed { border-color: #ef4444; background: #fef2f2; }
+.examPromptSaveBadge .inlineSaveStatus { justify-self: start; }
 .examPromptSaveBadge small { font-size: 11px; color: #64748b; }
 .examPromptMissingNotice, .examPromptReadyNotice { border-radius: 12px; padding: 12px 14px; display: grid; gap: 5px; font-size: 12px; }
 .examPromptMissingNotice { border: 1px solid #f5c26b; background: #fffaf0; }

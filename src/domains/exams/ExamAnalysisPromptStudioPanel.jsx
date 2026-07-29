@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { getJsonWithTimeout, postJsonWithTimeout } from "../../shared/utils/apiClient.js";
 import { copyTextToClipboard } from "./outputPreview.js";
 import { createExamAnalysisPromptInputSnapshot } from "./examAnalysisPromptInputMapping.js";
@@ -29,15 +30,6 @@ const roleLabels = {
   keyQuestion: "주요문항",
   nextPreparation: "다음 대비",
   cta: "CTA",
-};
-
-const saveLabels = {
-  saved: "저장됨",
-  dirty: "편집 중 · 저장 필요",
-  saving: "저장 중",
-  verifying: "서버 반영 확인 중",
-  verified: "저장 완료 · Supabase 재조회 확인",
-  failed: "저장 실패 · 작업본 유지",
 };
 
 function PromptField({ hint = "", label, value, onChange, multiline = false, placeholder = "", sourceLabel = "프롬프트 작업본" }) {
@@ -260,12 +252,25 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
       </section>
     );
   }
+  const commonSaveState = localState.status === EXAM_ANALYSIS_PROMPT_SAVE_STATUS.VERIFIED
+    ? "saved"
+    : localState.status;
+  const saveDetail = localState.error
+    ? `작업본 유지 · ${localState.error}`
+    : localState.status === EXAM_ANALYSIS_PROMPT_SAVE_STATUS.VERIFIED
+      ? "Supabase 재조회 확인"
+      : localState.status === EXAM_ANALYSIS_PROMPT_SAVE_STATUS.DIRTY
+        ? "편집 중 · 저장 필요"
+        : "";
 
   return (
     <section className="panel examPromptStudio">
       <div className="examPromptStudioHeader">
         <div><strong>GPT Image 슬라이드 프롬프트 제작실</strong><span>확정 데이터 + 교사 입력 + 벤치마크 문구를 재사용 가능한 작업본으로 구성합니다.</span></div>
-        <div className={`examPromptSaveBadge ${localState.status}`}><b>{saveLabels[localState.status]}</b>{localState.error ? <small>{localState.error}</small> : null}</div>
+        <div className="examPromptSaveBadge">
+          <InlineSaveStatus label="프롬프트 작업본" saveState={commonSaveState} />
+          {saveDetail ? <small>{saveDetail}</small> : null}
+        </div>
       </div>
 
       <MissingInputNotice readiness={detail.snapshot.readiness} />
