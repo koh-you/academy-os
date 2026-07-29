@@ -1,6 +1,7 @@
 import { Component, useEffect, useState } from "react";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
+import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { parseStudentScheduleOverride } from "../../shared/utils/studentSchedule.js";
 import { buildStudentHandoverPdfModel, getStudentHandoverTitle, openStudentHandoverPdf } from "./studentHandoverPdf.js";
@@ -1562,12 +1563,9 @@ function StudentProfileModal({
       onClose={onClose}
     >
       <div className="studentProfileModalWrap">
-        <div className="sectionHeader slim">
-          <div>
-            <p className="eyebrow">STUDENT PROFILE</p>
-            <h2>{student.name}</h2>
-          </div>
-          <div className="profileHeaderActions">
+        <SectionHeader
+          actions={(
+            <>
             {effectiveProfileSaveState !== "idle" ? <InlineSaveStatus label="기본정보" saveState={effectiveProfileSaveState} /> : null}
             <InlineSaveStatus label="상담기록" saveState={studentConsultationSaveState} />
             <InlineSaveStatus label="성적" saveState={scoreRecordSaveState} />
@@ -1582,8 +1580,13 @@ function StudentProfileModal({
             ) : (
               <button className="softButton" onClick={() => setIsEditingProfile(true)} type="button">수정</button>
             )}
-          </div>
-        </div>
+            </>
+          )}
+          actionsClassName="profileHeaderActions"
+          density="slim"
+          eyebrow="STUDENT PROFILE"
+          title={student.name}
+        />
         {profileSaveError ? (
           <div className="profileSaveError" role="alert">
             기본정보 저장 실패 · {profileSaveError}

@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-2E-2. 로컬 선택·보기 작업 바
+
+- 구현: 테스트 이력 학생 선택, 월별 정산월 선택, 특강 일정 계산/회차 계획의 접힘·로컬 초안 적용, 학생 프로파일 수정 진입/취소, 보고서 원천 요약, 반 명단 모달 열기, 문항 상세 닫기, 숙제 현황의 학생화면/전체 대상 전환을 공통 `SectionHeader`의 actions 영역으로 이관했다.
+- 불변 계약: `onStudentChange`, `setSelectedMonth`, `onApplyCalculatedSchedule`, `onToggleOpen`, `onAddSession`, `cancelProfileEdit`, `setIsEditingProfile`, `openRosterModal`, `setSelectedProblemRef`, `setStudentPreviewId`, `handleShowAllStudents`를 기존 인자 그대로 전달한다. 월별/특강 저장, 학생 저장, 명단 저장, 문항 저장, Supabase/app_state, notification_jobs, Solapi는 실행하거나 변경하지 않았다.
+- 진행 수치: 원시 JSX `sectionHeader`는 59개에서 40개로 줄었다. 남은 항목은 로컬 draft 행동(UI-2E-3A)과 저장·삭제·발송 side effect 행동(UI-2E-3B)으로 분리한다.
+- AI 검수: 전체 기능 fixture가 통과했고 production 시나리오 405개 중 새 UI-2E-2 계약을 포함한 404개가 통과했다. 기존 비관련 `90a` 1개만 기준선 실패다. `npm run build`, `git diff --check`도 통과했다.
+- 사람 검수: 필수 중단 gate는 없다. 배포 후 선택값 변경, 접힘/펼치기, 상세 닫기, 모바일 행동 줄바꿈만 확인하는 독립 시각 검수를 누적하고 UI-2E-3A로 진행한다.
+
 ## 2026-07-29 UI-2E-1. 읽기 전용 섹션 머리말
 
 - 전수조사: JSX `sectionHeader` 59개(기본 18, slim 36, compact 5)와 별도 toolbar/actions 클래스 71종을 확인했다. 파일·위험도·후속 단위는 `docs/ui-section-header-inventory-2026-07-29.md`가 기준이다.

@@ -229,6 +229,7 @@ import { MetricCard } from "../shared/components/MetricCard.jsx";
 import { Modal } from "../shared/components/Modal.jsx";
 import { NavigationHeader } from "../shared/components/NavigationHeader.jsx";
 import { PageHeader } from "../shared/components/PageHeader.jsx";
+import { SectionHeader } from "../shared/components/SectionHeader.jsx";
 import { StickySaveBar } from "../shared/components/StickySaveBar.jsx";
 import { sampleData } from "../shared/data/sampleData.js";
 import {
@@ -22920,12 +22921,11 @@ function EvaluationCenter({
 }) {
   return (
     <section className="panel fullPanel evaluationCenter">
-      <div className="sectionHeader">
-        <div>
-          <h1>보고서 데이터</h1>
-          <p className="muted">보고서에 쓰이는 학생별 데이터 원천을 확인합니다. 입력과 수정은 학생관리의 학생 프로파일에서 진행합니다.</p>
-        </div>
-      </div>
+      <SectionHeader
+        description="보고서에 쓰이는 학생별 데이터 원천을 확인합니다. 입력과 수정은 학생관리의 학생 프로파일에서 진행합니다."
+        title="보고서 데이터"
+        titleAs="h1"
+      />
       <div className="reportDataSummaryGrid">
         <article>
           <strong>{wrongProblems.length}개</strong>
@@ -23011,14 +23011,12 @@ function ClassManager({ students, templates, onUpdateClassRoster }) {
       </div>
 
       <section className="panel classDetailPanel">
-        <div className="sectionHeader">
-          <div>
-            <p className="eyebrow">CLASS DETAIL</p>
-            <h2>{selectedTemplate?.name}</h2>
-            <p className="muted">{selectedTemplate?.timeLabel} · 현재 배정 {classStudents.length}명</p>
-          </div>
-          <button className="softButton" onClick={openRosterModal} type="button">명단 수정</button>
-        </div>
+        <SectionHeader
+          actions={<button className="softButton" onClick={openRosterModal} type="button">명단 수정</button>}
+          description={`${selectedTemplate?.timeLabel} · 현재 배정 ${classStudents.length}명`}
+          eyebrow="CLASS DETAIL"
+          title={selectedTemplate?.name}
+        />
         <div className="classStudentGrid">
           {classStudents.length === 0 ? (
             <EmptyState className="emptyState">아직 이 반에 배정된 학생이 없습니다.</EmptyState>
@@ -26193,13 +26191,11 @@ function WrongProblemBoard({
 
       {activeTab !== "studentWrong" && selectedProblem && selectedBook ? (
         <div className="floatingProblemInspector">
-          <div className="sectionHeader">
-            <div>
-              <h2>{selectedBook.title} · {selectedProblem.number}번</h2>
-              <p className="muted">문항 원문, 상태, 해설 메모를 계속 업데이트합니다.</p>
-            </div>
-            <button className="iconButton" onClick={() => setSelectedProblemRef(null)} type="button">×</button>
-          </div>
+          <SectionHeader
+            actions={<button aria-label="문항 상세 닫기" className="iconButton" onClick={() => setSelectedProblemRef(null)} type="button">×</button>}
+            description="문항 원문, 상태, 해설 메모를 계속 업데이트합니다."
+            title={`${selectedBook.title} · ${selectedProblem.number}번`}
+          />
           <div className="problemInspectorGrid">
             <ProblemPreview book={selectedBook} problem={selectedProblem} />
             <div className="problemEditPanel">
@@ -27147,12 +27143,11 @@ function OverdueHomework({
 
       <div className="homeworkStatusContent">
         <section className="panel homeworkProgressPanel">
-          <div className="sectionHeader compact">
-            <div>
-              <h2>{activeMetricMeta.studentTitle}</h2>
-              <p className="muted">{activeMetricMeta.studentHint}</p>
-            </div>
-          </div>
+          <SectionHeader
+            density="compact"
+            description={activeMetricMeta.studentHint}
+            title={activeMetricMeta.studentTitle}
+          />
           <div className="homeworkMetricNotice">
             <strong>{metricLabels[activeMetric]}</strong>
             <span>{visibleStudents.length}명 표시 중</span>
@@ -27202,24 +27197,24 @@ function OverdueHomework({
         </section>
 
         <section className="panel homeworkDetailPanel">
-          <div className="sectionHeader compact">
-            <div>
-              <h2>{activeMetricMeta.detailTitle}</h2>
-              <p className="muted">
-                {detailScope === "all"
-                  ? `${visibleStudents.length}명 · ${activeMetricMeta.detailHint}`
-                  : selectedStudent ? `${selectedStudent.name} · ${activeMetricMeta.detailHint}` : "학생을 선택하세요"}
-              </p>
-            </div>
-            <div className="detailActions">
+          <SectionHeader
+            actions={(
+              <>
               {selectedStudent ? (
                 <button className="softButton" onClick={() => setStudentPreviewId(selectedStudent.studentId)} type="button">
                   👤 학생화면
                 </button>
               ) : null}
               <button className="softButton" onClick={handleShowAllStudents} type="button">전체 대상</button>
-            </div>
-          </div>
+              </>
+            )}
+            actionsClassName="detailActions"
+            density="compact"
+            description={detailScope === "all"
+              ? `${visibleStudents.length}명 · ${activeMetricMeta.detailHint}`
+              : selectedStudent ? `${selectedStudent.name} · ${activeMetricMeta.detailHint}` : "학생을 선택하세요"}
+            title={activeMetricMeta.detailTitle}
+          />
           {selectedHomeworks.length === 0 ? (
             <div className="emptyHomeworkBox">{activeMetricMeta.emptyHomeworks}</div>
           ) : null}

@@ -227,17 +227,18 @@ export function StudentTestHistoryPanel({
 }) {
   return (
     <section className="panel materialPanel testHistoryPanel">
-      <div className="sectionHeader">
-        <div>
-          <h1>학생별 테스트 이력</h1>
-          <p className="muted">학생이 지금까지 본 데일리/단원/누적 테스트 결과를 한곳에서 확인합니다.</p>
-        </div>
-        <select value={selectedStudentId} onChange={(event) => onStudentChange?.(event.target.value)}>
-          {students.map((student) => (
-            <option key={student.studentId} value={student.studentId}>{student.name}</option>
-          ))}
-        </select>
-      </div>
+      <SectionHeader
+        actions={(
+          <select aria-label="테스트 이력 학생 선택" value={selectedStudentId} onChange={(event) => onStudentChange?.(event.target.value)}>
+            {students.map((student) => (
+              <option key={student.studentId} value={student.studentId}>{student.name}</option>
+            ))}
+          </select>
+        )}
+        description="학생이 지금까지 본 데일리/단원/누적 테스트 결과를 한곳에서 확인합니다."
+        title="학생별 테스트 이력"
+        titleAs="h1"
+      />
       <div className="testHistoryList">
         {rows.map(({ session, attempt }) => (
           <article className="testHistoryItem" key={attempt.testAttemptId}>

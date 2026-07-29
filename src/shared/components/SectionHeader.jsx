@@ -5,6 +5,7 @@ export function SectionHeader({
   className = "",
   density = "default",
   description = "",
+  descriptionNode = null,
   eyebrow = "",
   meta = null,
   title,
@@ -23,7 +24,7 @@ export function SectionHeader({
       <div className="sectionHeaderCopy">
         {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
         <Title>{title}</Title>
-        {description ? <p className="muted">{description}</p> : null}
+        {descriptionNode || (description ? <p className="muted">{description}</p> : null)}
       </div>
       {meta || actions ? (
         <div className={asideClassName}>

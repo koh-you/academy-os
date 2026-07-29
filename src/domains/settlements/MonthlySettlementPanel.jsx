@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
+import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import {
   applyMonthlySettlementJournalMode,
@@ -362,24 +363,27 @@ export function MonthlySettlementPanel({
 
   return (
     <section className="panel fullPanel monthlySettlementPanel">
-      <div className="sectionHeader monthlySettlementHeader">
-        <div>
-          <span className="eyebrow">운영</span>
-          <h2>월별 수업 정산</h2>
+      <SectionHeader
+        actions={(
+          <div className="monthlySettlementMonthControl">
+            <label>
+              정산월
+              <input type="month" value={selectedMonth} onChange={(event) => setSelectedMonth(event.target.value)} />
+            </label>
+            <InlineSaveStatus label="월별 정산" saveState={effectiveSaveState} />
+          </div>
+        )}
+        className="monthlySettlementHeader"
+        descriptionNode={(
           <p className="muted">
             선택한 달의 수업일지 명단을 정산 원천으로 봅니다. 재원생은 수업 횟수·시수와 무관하게 월 고정금액,
             신입생은 첫 수업부터 말일까지의 수업 횟수에 회당 단가를 곱하고, 퇴원생은 1일부터 마지막 수업까지의 월별 스케줄 횟수 비율로 계산합니다.
             같은 달에 첫 수업과 퇴원이 모두 있으면 첫 수업일부터 퇴원일까지의 수업 횟수만 계산합니다.
           </p>
-        </div>
-        <div className="monthlySettlementMonthControl">
-          <label>
-            정산월
-            <input type="month" value={selectedMonth} onChange={(event) => setSelectedMonth(event.target.value)} />
-          </label>
-          <InlineSaveStatus label="월별 정산" saveState={effectiveSaveState} />
-        </div>
-      </div>
+        )}
+        eyebrow="운영"
+        title="월별 수업 정산"
+      />
 
       <div className="monthlySettlementRuleNotice">
         <strong>계산 기준</strong>

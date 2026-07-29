@@ -1,4 +1,5 @@
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { SpecialLectureCalendarPreview } from "./SpecialLecturePublicPage.jsx";
 import {
   createDateFromKey,
@@ -271,30 +272,36 @@ export function SpecialLectureScheduleCalculator({
 
   return (
     <section className={`specialLectureCalculator ${isOpen ? "open" : "collapsed"}`}>
-      <div className="sectionHeader slim specialLectureCalculatorHeader">
-        <div>
-          <p className="eyebrow">SCHEDULE BUILDER</p>
-          <h3>일정 계산</h3>
+      <SectionHeader
+        actions={(
+          <>
+            {isOpen ? (
+              <button className="softButton compact" onClick={onApplyCalculatedSchedule} type="button">일정 계산 적용</button>
+            ) : null}
+            {showToggle ? (
+              <button
+                aria-expanded={isOpen}
+                className="softButton compact"
+                onClick={onToggleOpen}
+                type="button"
+              >
+                {isOpen ? "접기" : "펼치기"}
+              </button>
+            ) : null}
+          </>
+        )}
+        actionsClassName="specialLectureCalculatorHeaderActions"
+        className="specialLectureCalculatorHeader"
+        density="slim"
+        descriptionNode={(
           <p className="specialLectureCalculatorSummary">
             {calculatedSessionCount}회 · {formatSpecialLectureHours(calculatedTotalHours) || "0시간"} · {formatCurrencyWon(calculatedTuition)}
           </p>
-        </div>
-        <div className="specialLectureCalculatorHeaderActions">
-          {isOpen ? (
-            <button className="softButton compact" onClick={onApplyCalculatedSchedule} type="button">일정 계산 적용</button>
-          ) : null}
-          {showToggle ? (
-            <button
-              aria-expanded={isOpen}
-              className="softButton compact"
-              onClick={onToggleOpen}
-              type="button"
-            >
-              {isOpen ? "접기" : "펼치기"}
-            </button>
-          ) : null}
-        </div>
-      </div>
+        )}
+        eyebrow="SCHEDULE BUILDER"
+        title="일정 계산"
+        titleAs="h3"
+      />
 
       {isOpen ? (
         <>
@@ -409,13 +416,9 @@ export function SpecialLectureSessionPlanEditor({
 
   return (
     <section className="specialLectureSessionCards">
-      <div className="sectionHeader slim">
-        <div>
-          <p className="eyebrow">SESSION PLAN</p>
-          <h3>회차별 일정</h3>
-          <span>카드 수정은 오른쪽 미리보기에 즉시 반영되고, 저장본/공개 링크에는 `안내문 저장` 후 반영됩니다.</span>
-        </div>
-        <div className="specialLectureSessionHeaderActions">
+      <SectionHeader
+        actions={(
+          <>
           {showToggle ? (
             <button
               aria-expanded={isOpen}
@@ -433,8 +436,15 @@ export function SpecialLectureSessionPlanEditor({
           >
             회차 추가
           </button>
-        </div>
-      </div>
+          </>
+        )}
+        actionsClassName="specialLectureSessionHeaderActions"
+        density="slim"
+        descriptionNode={<span>카드 수정은 오른쪽 미리보기에 즉시 반영되고, 저장본/공개 링크에는 `안내문 저장` 후 반영됩니다.</span>}
+        eyebrow="SESSION PLAN"
+        title="회차별 일정"
+        titleAs="h3"
+      />
       {!isOpen ? (
         <div className="specialLectureSessionCollapsedSummary">
           <strong>{sessionPlanSummaryText}</strong>
