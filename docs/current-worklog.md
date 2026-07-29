@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-5A·UI-5B-1. 모달 inventory·dialog semantics
+
+- 전수조사: 공통 `Modal`을 쓰는 39개 흐름을 읽기 전용, 단일 원천, 다중 원천, 발송/삭제/출결로 나누고 직접 원천·draft·side effect·닫기 의미·위험도를 `docs/ui-modal-inventory-2026-07-29.md`에 기록했다.
+- 구현: 공통 shell에 `role=dialog`, `aria-modal=true`, `useId` 기반 title 연결을 추가했다. header가 없는 수업일지는 명시적 `ariaLabel`을 제공한다.
+- 동작 보존: Escape/X의 `onClose` 호출, backdrop 클릭 무동작, `hideHeader`/`hideCloseButton`, caller의 저장 중 no-op close와 focus 동작을 정적 계약으로 고정했다.
+- 외부 원천: Supabase/app_state, notification_jobs/Solapi, Storage, 출결, AI, 파일 출력과 실제 저장·삭제·발송을 실행하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(126 modules). 전용 정적 계약 포함 scenario 438개 중 437개 통과, 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 대표 모달의 스크린리더 dialog 이름을 누적하고 `UI-5B-2` 읽기 전용 모달 shell로 진행한다.
+
 ## 2026-07-29 UI-4E-1C. 특강 disclosure·UI-4 완료
 
 - 구현: 특강 확정 명단과 수업일지 반영 panel toggle을 제어 영역과 연결하고, 학생별 개별 시간 editor는 enrollment/session ID 기반 반복 안전 식별자를 적용했다.

@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useId } from "react";
 
 export function Modal({
+  ariaLabel = "",
   backdropClassName = "",
   children,
   className = "",
@@ -10,6 +11,8 @@ export function Modal({
   subtitle,
   title
 }) {
+  const titleId = useId();
+
   useEffect(() => {
     function handleEscapeKey(event) {
       if (event.key === "Escape") {
@@ -24,11 +27,17 @@ export function Modal({
 
   return (
     <div className={`modalBackdrop ${backdropClassName}`}>
-      <section className={`modalCard ${className}`}>
+      <section
+        aria-label={hideHeader ? ariaLabel || undefined : undefined}
+        aria-labelledby={!hideHeader && title ? titleId : undefined}
+        aria-modal="true"
+        className={`modalCard ${className}`}
+        role="dialog"
+      >
         {hideHeader ? null : (
           <div className="modalHeader">
             <div>
-              <h2>{title}</h2>
+              <h2 id={titleId}>{title}</h2>
               {subtitle ? <p className="muted">{subtitle}</p> : null}
             </div>
             {hideCloseButton ? null : <button className="iconButton" onClick={onClose} type="button">×</button>}

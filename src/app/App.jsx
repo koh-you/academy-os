@@ -16500,6 +16500,7 @@ function TeacherLessonHubV2({
       </Modal>
     ) : (
       <Modal
+        ariaLabel="수업일지"
         backdropClassName="lessonJournalModalBackdrop"
         className="lessonJournalModal"
         hideHeader

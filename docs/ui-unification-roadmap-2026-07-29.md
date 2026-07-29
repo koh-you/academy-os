@@ -52,6 +52,8 @@
 | UI-4E-1A | 완료 | 단일 읽기 disclosure 5종의 toggle-region 접근성 연결 |
 | UI-4E-1B | 완료 | 시험분석 산출물·파이프라인 disclosure 11종 연결 |
 | UI-4E-1C | 완료 | 특강 명단·수업일지 반영·개별 시간 disclosure 연결 |
+| UI-5A | 완료 | 모달별 원천·draft·side effect·닫기 의미 전수 inventory |
+| UI-5B-1 | 완료 | 공통 dialog semantics·제목 연결, 닫기/focus 동작 불변 |
 
 ## 전체 세부 작업 목록
 
@@ -87,8 +89,8 @@
 
 | 단위 | 화면/대상 | 목표 | AI 검수 및 gate |
 | --- | --- | --- | --- |
-| UI-5A | 전체 모달 inventory | 모달별 읽기/쓰기 원천, draft, 저장, 발송, 삭제, 출결 side effect 표 작성 | 문서/정적 분석만 수행 |
-| UI-5B | 공통 모달 shell | 고정 제목/닫기, 스크롤 본문, 너비 단계, 모바일 safe-area 통일 | open/close callback 불변 |
+| UI-5A | 전체 모달 inventory | 모달별 읽기/쓰기 원천, draft, 저장, 발송, 삭제, 출결 side effect 표 작성 | 완료 — `docs/ui-modal-inventory-2026-07-29.md` |
+| UI-5B | 공통 모달 shell | 고정 제목/닫기, 스크롤 본문, 너비 단계, 모바일 safe-area 통일 | 진행 — dialog semantics 완료, 읽기 전용 shell 후속 |
 | UI-5C | 모달 footer | 취소·보조·저장·발송·위험 행동 순서와 disabled/진행 상태 통일 | 실제 저장/발송 callback 분리 유지 |
 | UI-5D | 삭제·취소 확인 | 영향 범위, 보존 원천, 최종 확인 입력, 위험 색상 통일 | 실제 삭제/취소는 독립 사람 gate로 이관 |
 | UI-5E | draft와 닫기 | 미저장 변경 경고, 실패 draft 유지, Escape/X/취소의 의미 통일 | 저장 로직 변경 시 저장 신뢰성 작업으로 분리 |
@@ -150,6 +152,6 @@
 
 ## 다음 실행 목표
 
-> 최신 상태: `UI-4` 전체를 완료했다. 현재 다음 작은 목표는 `UI-5-0 모달 inventory`이며, 모달별 원천·draft·side effect·닫기 의미를 확정하기 전에는 shell을 이관하지 않는다.
+> 최신 상태: `UI-4` 전체와 `UI-5A`, `UI-5B-1`을 완료했다. 현재 다음 작은 목표는 `UI-5B-2 읽기 전용 모달 shell`이며, 저장·발송·삭제·출결 모달은 이 단위에서 제외한다.
 
-모든 `<Modal>` 및 error/fallback 확인창을 먼저 inventory하고, 읽기 전용·단순 입력·다중 원천 저장·발송/삭제/출결로 위험도를 나눈다. 첫 구현은 callback과 focus/close 계약을 보존할 수 있는 낮은 위험 모달만 고른다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
+`docs/ui-modal-inventory-2026-07-29.md`의 낮은 위험군에서 학생 포털 미리보기·정산 달력·특강 진행 조회·출결 결과·인수인계/인쇄 모달을 먼저 비교한다. 공통 body scroll·footer가 필요한 최소 범위를 정하되 print CSS와 기존 `onClose`는 그대로 둔다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
