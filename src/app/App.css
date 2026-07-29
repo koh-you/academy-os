@@ -12779,64 +12779,6 @@ textarea {
   justify-content: flex-end;
 }
 
-.currentSchedulePlan {
-  background: #f8fafc;
-  border: 1px solid #d8e3f8;
-  border-radius: 8px;
-  color: #253858;
-  display: grid;
-  font-weight: 800;
-  gap: 4px;
-  padding: 10px 12px;
-}
-
-.currentSchedulePlan span,
-.currentSchedulePlan small {
-  color: #6b7c9d;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.currentSchedulePlan strong {
-  color: #17223f;
-  font-size: 14px;
-}
-
-.alimtalkSafetyBox {
-  background: #f8fafc;
-  border: 1px solid #d8e3f8;
-  border-radius: 8px;
-  color: #17223f;
-  display: grid;
-  gap: 4px;
-  padding: 10px 12px;
-}
-
-.alimtalkSafetyBox strong {
-  font-size: 14px;
-}
-
-.alimtalkSafetyBox span {
-  color: #64748b;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.alimtalkSafetyBox.safe {
-  background: var(--status-success-bg);
-  border-color: var(--status-success-border);
-}
-
-.alimtalkSafetyBox.warning {
-  background: var(--status-pending-bg);
-  border-color: var(--status-pending-border);
-}
-
-.alimtalkSafetyBox.danger {
-  background: var(--status-destructive-bg);
-  border-color: var(--status-destructive-border);
-}
-
 .messagePreview {
   background: #f8fafc;
   border: 1px solid #d8e3f8;

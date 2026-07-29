@@ -19076,7 +19076,6 @@ function CommentComposerModal({
   const planMode = ["default", "delay30", "none"].includes(initialSendTiming) ? initialSendTiming : "default";
   const sendDelayMinutes = planMode === "delay30" ? 30 : 0;
   const isManualResendAvailable = isLessonAlimtalkScheduleExpired(lesson, sendDelayMinutes);
-  const isScheduleExpired = planMode !== "none" && isManualResendAvailable;
   const sendTiming = isManualResendAvailable ? "now" : planMode === "none" ? "none" : "scheduled";
   const isParent = audience === "parent";
   const field = isParent ? "teacherComment" : "studentComment";
@@ -19096,14 +19095,10 @@ function CommentComposerModal({
         ? normalizeSaveState(draftSaveState)
         : normalizedDraftSaveState;
   const title = isParent ? `${student.name} 학부모 알림톡` : `${student.name} 학생 알림톡`;
-  const receiverLabel = isParent ? `${student.name} 학부모님` : student.name;
   const previewTitle = isParent ? "학부모 알림톡 미리보기" : "학생 알림톡 미리보기";
-  const sendStatus = isParent ? record?.teacherCommentSendStatus : record?.studentCommentSendStatus;
-  const displaySendStatus = getDisplayCommentSendStatus(sendStatus);
   const isNotificationMuted = isParent ? Boolean(record?.notificationMutedParent) : Boolean(record?.notificationMutedStudent);
   const notificationStatus = integrationStatus?.notifications;
   const audienceNotificationStatus = getAlimtalkAudienceStatus(notificationStatus, audience);
-  const recipientPhone = isParent ? student.parentPhone : student.studentPhone;
   const forceDryRun = false;
   const canSendNowToRealRecipient =
     !audienceNotificationStatus?.dryRun &&
@@ -19119,19 +19114,6 @@ function CommentComposerModal({
       : planMode === "delay30"
         ? "30분 지연 예약"
         : "예약 발송";
-  const safetyTone = getAlimtalkSafetyTone(audienceNotificationStatus, forceDryRun, forceTestRecipient);
-  const safetyText = getAlimtalkSafetyText(audienceNotificationStatus, forceDryRun, forceTestRecipient);
-  const missingNotificationEnv = notificationStatus?.missing ?? [];
-  const defaultScheduledDate = getLessonAlimtalkScheduledDate(lesson, 0, { allowPastFallback: false });
-  const delayedScheduledDate = getLessonAlimtalkScheduledDate(lesson, 30, { allowPastFallback: false });
-  const currentPlanLabel =
-    planMode === "none"
-      ? "알림톡 없음"
-      : isScheduleExpired
-        ? `${planMode === "delay30" ? "30분 지연" : "기본 예약"} 시간 지남 · ${formatKoreaTimeLabel(planMode === "delay30" ? delayedScheduledDate : defaultScheduledDate)}`
-      : planMode === "delay30"
-        ? `30분 지연 ${formatKoreaTimeLabel(delayedScheduledDate)}`
-        : `기본 예약 ${formatKoreaTimeLabel(defaultScheduledDate)}`;
   const sourceText = buildCommentSourceText({
     audience,
     lesson,
@@ -19299,24 +19281,6 @@ function CommentComposerModal({
               {hasUnsavedDraft ? "저장 후 가능" : actionLabel}
             </button>
           </div>
-          <div className="currentSchedulePlan" aria-label="현재 수업 발송 계획">
-            <span>현재 수업 발송 계획</span>
-            <strong>{currentPlanLabel}</strong>
-            <small>
-              {isNotificationMuted
-                ? "이 학생의 해당 알림톡은 개별 제외 상태입니다."
-                : isManualResendAvailable
-                  ? "예약 계획과 관계없이 버튼을 누르면 즉시 수동 재발송합니다."
-                  : "발송 버튼은 현재 수업 발송 계획대로 예약합니다."}
-            </small>
-          </div>
-          <div className={`alimtalkSafetyBox ${safetyTone}`}>
-            <strong>{safetyText}</strong>
-            <span>수신 대상: {receiverLabel} · 등록 번호: {recipientPhone || "번호 없음"}</span>
-            {missingNotificationEnv.length ? <span>미입력 환경변수: {missingNotificationEnv.join(", ")}</span> : null}
-          </div>
-          <small className="muted">발송 수신 기준: {canSendNowToRealRecipient ? "등록된 실제 번호" : "테스트 번호 또는 dry-run"}</small>
-          <small className="muted">{displaySendStatus || "발송 전"}</small>
         </section>
 
         <section className="commentPreviewPanel">
