@@ -2010,6 +2010,13 @@
 - AI 가상검수: 같은 generated key TARGET 2건, 다른 key·누락 key CONTROL을 다시 실행해 subset·순서·참조·입력 불변을 확인하고 handler 직접 API/state effect와 helper side effect 0건을 대조한다. 전용 closeout fixture와 시나리오 626/626, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 의미 단위는 generated lesson save/retry 인접 코드에서 남은 저위험 순수 계산 후보를 다시 inventory한 뒤 한 번에 하나씩 진행한다.
 
+## 2026-07-28 P3. App.jsx 17AL-1 generated lesson repair delta selector inventory
+
+- inventory: persisted preExam lesson에서 복구한 row 배열과 현재 row 배열을 같은 index의 JSON 값으로 비교해 달라진 복구 row만 원래 순서·참조로 고르는 계약을 고정했다. 현재 배열에만 남은 뒤쪽 row는 기존처럼 변경 목록에 포함하지 않는다.
+- 경계: 이번 단계는 inline filter를 이동하지 않았다. teacher/app-state guard, `setExamPrepRows`, 복구 계산, `persistExamPrepRows`와 state 반환은 계속 `App.jsx` effect가 소유한다.
+- AI 가상검수: 동일값 clone CONTROL, 중첩 시간 변경 TARGET, 새로 추가된 TARGET과 현재 배열에만 있는 뒤쪽 CONTROL로 subset·순서·참조·입력 불변을 검증한다. 전용 inventory fixture와 시나리오 627/627, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AL-2`는 changed-row selector만 순수 helper로 분리하고 복구·persist·state effect는 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
