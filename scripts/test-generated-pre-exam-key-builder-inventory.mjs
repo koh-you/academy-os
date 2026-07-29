@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { createPreExamGeneratedKey } from "../src/domains/lessons/generatedPreExamKeyBuilder.js";
 
 function createExistingPreExamGeneratedKey(event = {}) {
   const sourceId =
@@ -60,6 +61,10 @@ for (const [event, expected] of fixtures) {
     createExistingPreExamGeneratedKey(event),
     expected
   );
+  assert.equal(
+    createPreExamGeneratedKey(event),
+    expected
+  );
 }
 assert.equal(
   createExistingPreExamGeneratedKey(),
@@ -71,20 +76,15 @@ const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
-const builderStart = appSource.indexOf(
-  "function createPreExamGeneratedKey(event = {})"
-);
-const builderEnd = appSource.indexOf(
-  "function getStudentsForSchoolCalendarEvent(",
-  builderStart
-);
-assert.ok(builderStart >= 0 && builderEnd > builderStart);
-const builderSource = appSource.slice(
-  builderStart,
-  builderEnd
+const helperSource = await readFile(
+  new URL(
+    "../src/domains/lessons/generatedPreExamKeyBuilder.js",
+    import.meta.url
+  ),
+  "utf8"
 );
 const builderBoundaries = [
-  "function createPreExamGeneratedKey(event = {})",
+  "export function createPreExamGeneratedKey(event = {})",
   "const sourceId =",
   "event.eventId ||",
   'event.examSubject || event.subject || "math"',
@@ -92,7 +92,7 @@ const builderBoundaries = [
 ];
 let previousIndex = -1;
 for (const boundary of builderBoundaries) {
-  const boundaryIndex = builderSource.indexOf(
+  const boundaryIndex = helperSource.indexOf(
     boundary,
     previousIndex + 1
   );
@@ -104,7 +104,12 @@ for (const boundary of builderBoundaries) {
 }
 assert.equal(
   appSource.split("createPreExamGeneratedKey(").length - 1,
-  3
+  2
+);
+assert.ok(
+  appSource.includes(
+    'from "../domains/lessons/generatedPreExamKeyBuilder.js"'
+  )
 );
 for (const consumerBoundary of [
   "const generatedKey = createPreExamGeneratedKey({ ...event, eventId: sourceId })",
@@ -115,10 +120,10 @@ for (const consumerBoundary of [
     `missing generated pre-exam key consumer: ${consumerBoundary}`
   );
 }
-assert.ok(!builderSource.includes("fetch("));
-assert.ok(!builderSource.includes("/api/"));
-assert.ok(!builderSource.includes("postJson"));
-assert.ok(!builderSource.includes("setLessons"));
+assert.ok(!helperSource.includes("fetch("));
+assert.ok(!helperSource.includes("/api/"));
+assert.ok(!helperSource.includes("postJson"));
+assert.ok(!helperSource.includes("setLessons"));
 
 console.log(
   "generated pre-exam key builder inventory TARGET/CONTROL fixtures passed"

@@ -2077,6 +2077,13 @@
 - AI 가상검수: 명시 eventId TARGET, examSubject·subject·math fallback TARGET과 명시 eventId일 때 무시되는 다른 필드 CONTROL로 결과·우선순위·입력 불변을 검증한다. 전용 inventory fixture와 시나리오 636/636, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 `17AO-2`는 preExam generated key builder만 순수 helper로 분리하고 lesson/plan 소비는 App에 유지한다.
 
+## 2026-07-28 P3. App.jsx 17AO-2 generated pre-exam key builder 분리
+
+- 코드: 명시 eventId 또는 학교·학년·과목·날짜 fallback source ID로 preExam generated key를 만드는 계산을 `generatedPreExamKeyBuilder.js`의 순수 `createPreExamGeneratedKey`로 분리했다.
+- 경계: school event에서 preExam lesson을 만드는 함수와 generated plan candidate 생성, identity/calendar/status 계산은 `App.jsx`에 그대로 유지했다. React state·API·Supabase·알림/Solapi effect는 이동하거나 실행하지 않았다.
+- AI 가상검수: 명시 eventId와 examSubject·subject·math fallback 가상 event로 추출 전후 결과·우선순위·입력 불변을 대조한다. 전용 extraction fixture와 시나리오 637/637, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AO-3`은 module import·호출 2개·export 1개와 App-owned lesson/plan 소비 경계를 closeout한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
