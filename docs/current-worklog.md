@@ -2150,6 +2150,13 @@
 - AI 검수: identity 주입 순서, school-event selector 시작, calendar merge·수동 override·school event sync·plan status identity 소비를 정적으로 재대조한다. 전용 closeout fixture와 시나리오 647/647, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 의미 단위는 school calendar event의 대상 학생 selector를 dependency-injected 순수 model로 inventory한다.
 
+## 2026-07-28 P3. App.jsx 17AS-1 generated school-event student selector inventory
+
+- inventory: 활성 학생 중 event 학교와 엄격히 일치하고, event 학년이 있으면 정규화 학년도 같은 학생만 원래 순서·참조로 고르는 계약을 고정했다. event 학년이 비어 있으면 학교가 맞는 활성 학생의 학년은 제한하지 않고, 양쪽 학교가 모두 비어 있으면 학교 조건을 건너뛴다.
+- 경계: 이번 단계는 selector를 이동하지 않았다. `isActiveStudent`, `schoolNamesMatch`, `normalizeGradeLabel`은 App helper이고, selector 결과를 preExam lesson 학생 ID로 변환하는 소비도 App에 유지했다.
+- AI 가상검수: 정확·학교 alias TARGET, 비활성·퇴원일·다른 학교·다른 학년·한쪽 학교 누락 CONTROL, 양쪽 학교 blank와 event grade blank TARGET으로 subset·순서·참조·입력 불변을 검증한다. 전용 inventory fixture와 시나리오 648/648, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AS-2`는 학생 selector만 dependency-injected 순수 model로 분리하고 preExam lesson 생성은 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
