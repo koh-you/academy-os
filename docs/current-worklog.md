@@ -2227,6 +2227,13 @@
 - AI 가상검수: 겹치는 짧은/긴 ID rows 순서, 정확 CONTROL row, delimiter 불일치·비-derived·미일치와 입력 불변을 다시 확인한다. 전용 closeout fixture와 시나리오 659/659, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
 - 사람 gate: 없음. 다음 의미 단위는 persisted preExam lesson에서 시험 과목 label을 추론하는 순수 helper를 inventory한다.
 
+## 2026-07-28 P3. App.jsx 17AW-1 preExam math label inference inventory
+
+- inventory: persisted preExam 수업명 끝의 `직전수업`, row 학교명, 정규화 학년을 순서대로 제거하고 남은 문구를 시험 과목 label로 쓰는 계약을 고정했다. 빈 값·숫자만·`수학`·`수학시험`·현재 row 과목과 같은 값은 label로 복원하지 않는다.
+- 경계: `normalizeGradeLabel`은 App helper이고 추론 결과는 기존 label이 없을 때만 시험정보 repair에 소비된다. 이번 단계에서는 helper·repair 로직을 이동하지 않았다.
+- AI 가상검수: 미적분·중3 대수 TARGET, 기본 수학·수학시험·row 과목 동일·숫자만·빈 입력 CONTROL로 제거 순서·학년 정규화·trim·입력 불변을 검증한다. 전용 inventory fixture와 시나리오 660/660, `npm run test:production`, `npm run build`, `git diff --check`를 실행한다.
+- 사람 gate: 없음. 다음 `17AW-2`는 label inference를 `normalizeGradeLabel` 주입형 순수 model로 분리하고 row repair는 App에 유지한다.
+
 ## 2026-07-28 P1. App.jsx 17D-3 학생 화면 미리보기 modal shell 분리
 
 - 코드: 수업일지의 학생 화면 미리보기 열림 여부와 학생 ID 격리를 `lessonJournalStudentPreviewModel.js`로, modal과 `StudentPortalV2` 읽기 전용 prop 연결을 `LessonJournalStudentPreviewModal.jsx`로 분리했다.
