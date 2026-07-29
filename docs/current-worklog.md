@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-4C-5. 공통 표 시각 규칙·UI-4C 완료
+
+- 구현: `DataTableShell` 안의 semantic/grid header 배경·문자색·굵기, cell/row 경계색, status/save/progress pill 줄바꿈 방지를 공통 토큰으로 통일했다.
+- sticky 판정: 공통 shell 표는 세로 높이가 제한되지 않은 가로스크롤 영역이라 sticky를 새로 적용하지 않았다. 기존 별도 규칙이 있는 월별 정산 표의 sticky header만 유지했다.
+- 동작 보존: 열 값·순서·너비, row key, filter/sort, 편집 draft, 저장·삭제·출결·발송 callback은 변경하지 않았다.
+- 외부 원천: Supabase/app_state, notification_jobs/Solapi, 정산·학생·수업일지·시험정보 원천을 실제 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(125 modules). 전용 정적 계약 포함 scenario 428개 중 427개 통과, 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 공통 header/행 경계/pill과 월별 정산 sticky를 누적 시각 검수로 남기고 `UI-4D` 상태 화면 통일로 진행한다.
+
 ## 2026-07-29 UI-4C-4. 정산·포털 성적 표 shell
 
 - 구현: 월별 정규 수업 정산, 특강별 정산, 학생 포털 학교 성적 `<table>`의 기존 wrapper/class를 보존해 `DataTableShell`로 이관했다.

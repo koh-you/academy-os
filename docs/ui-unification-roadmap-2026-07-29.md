@@ -42,6 +42,7 @@
 | UI-4C-3A | 완료 | 시험분석 검수·예약 상태·테스트 응시 표 공통 scroll shell 적용 |
 | UI-4C-3B | 완료 | 오답관리·학생 성적·학원시험 표 공통 scroll shell 적용 |
 | UI-4C-4 | 완료 | 월별·특강 정산과 포털 학교 성적 표 공통 scroll shell 적용 |
+| UI-4C-5 | 완료 | 공통 header·row border·status pill 토큰과 sticky 적용 범위 확정 |
 
 ## 전체 세부 작업 목록
 
@@ -69,7 +70,7 @@
 | --- | --- | --- | --- |
 | UI-4A | 지표·요약 카드 | 숫자, label, 보조 설명, 상태 badge 위계 통일 | 완료 — 단순 16개·클릭형/micro 14개, 계산 원천 불변 |
 | UI-4B | 학생·수업·알림·보충 목록 카드 | 제목, 메타, 상태, 행동 위치와 카드 밀도 통일 | 완료 — 카드형 목록 1~4B 완료, 표형 행은 UI-4C로 이관 |
-| UI-4C | 데이터 표 | 공통 header/row/pill/빈 행, sticky header 여부, 내부 가로 스크롤 규칙 | 진행 — inventory와 4C-1 shell 완료 |
+| UI-4C | 데이터 표 | 공통 header/row/pill/빈 행, sticky header 여부, 내부 가로 스크롤 규칙 | 완료 — 13개 표 shell과 공통 시각 토큰, bounded 표만 sticky 유지 |
 | UI-4D | 빈 화면·로딩·오류 | `EmptyState` 기반 문구, 재시도, 다음 행동 위치 통일 | 재시도 callback 불변 |
 | UI-4E | 접힘/펼치기 영역 | 요약에서 무엇을 보여줄지, 펼침 버튼 위치, 상태 유지 규칙 통일 | 원본 데이터와 open state 불변 |
 
@@ -140,6 +141,6 @@
 
 ## 다음 실행 목표
 
-> 최신 상태: `UI-4C-4` 정산·포털 성적 표 shell은 완료했다. 현재 다음 작은 목표는 `UI-4C-5 공통 header/row/pill 토큰·sticky 판정`이며, 열 값·너비·행동은 바꾸지 않는다.
+> 최신 상태: `UI-4C` 데이터 표 공통화는 완료했다. 현재 다음 작은 목표는 `UI-4D-1 빈 화면·로딩·오류 상태 inventory와 공통 EmptyState 계약`이며, 기존 재시도 callback과 상태 판정은 바꾸지 않는다.
 
-다음은 `UI-4B 학생·수업·알림·보충 목록 카드`다. 대표 목록군의 row key, 선택/open callback, 상태 계산, 안전/danger action을 inventory로 고정한 뒤 제목·메타·상태·행동 위치와 카드 밀도를 공통화한다. 저장·발송·삭제·출결 변경은 실행하지 않는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
+먼저 현재 `emptyState`, loading, error 표현을 화면·원천·재시도 callback·다음 행동 기준으로 분류한다. 첫 구현은 읽기 전용이고 callback이 없는 안전한 빈 상태만 공통 구조로 이관한다. 저장·발송·삭제·출결 변경은 실행하지 않는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.

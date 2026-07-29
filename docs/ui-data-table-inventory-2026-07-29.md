@@ -33,10 +33,14 @@
 - 기존 `.notificationTable`, `.studentListTable`, row/head class와 최소 너비를 보존했다.
 - 알림 취소/삭제와 학생 저장/퇴원/영구삭제 callback은 실행하거나 수정하지 않았다.
 
-## 다음 단위
+## UI-4C-5 공통 표 시각 규칙
 
-`UI-4C-4`는 완료했다. 다음 `UI-4C-5`는 공통 header/row/pill 색상 토큰을 `DataTableShell` 안에서 통일하고, 실제 내부 세로스크롤이 있는 표만 sticky header가 필요한지 판정한다. 열 값·너비·행동은 바꾸지 않는다.
+- `DataTableShell` 안의 semantic `thead th`와 기존 grid형 head class에 같은 header 배경·문자색·굵기 토큰을 적용했다.
+- semantic cell과 grid형 row의 기존 border style/width는 유지하고 border color만 공통 토큰으로 맞췄다.
+- 표 안의 `statusPill`, `saveStateBadge`, `supplementProgressBadge`는 좁은 셀에서 글자가 두 줄로 갈라지지 않게 했다.
+- 공통 shell 대상에는 `max-height` 등 내부 세로스크롤 제한이 없으므로 sticky header를 새로 일괄 적용하지 않았다. 기존에 별도 sticky 규칙을 가진 월별 정산 표는 그 규칙을 그대로 유지했다.
+- 이로써 `UI-4C` 표 공통화는 완료했으며, 다음은 `UI-4D 빈 화면·로딩·오류 상태` inventory다.
 
 ## 사람 검수
 
-필수 중단 gate는 없다. 배포 후 알림 기록, 학생 목록, 퇴원생 목록, 수업 상세, 수업일지, 시험정보 표를 desktop/390px에서 가로로 끝까지 스크롤할 수 있는지, wrapper focus가 보이는지, 기존 열 최소 너비가 유지되는지만 확인한다. 행 저장·출결·알림·시험정보 수정/삭제·퇴원·복원·영구삭제·알림 취소/삭제는 누르지 않는다.
+필수 중단 gate는 없다. 배포 후 알림 기록, 학생 목록, 퇴원생 목록, 수업 상세, 수업일지, 시험정보 표를 desktop/390px에서 가로로 끝까지 스크롤할 수 있는지, wrapper focus가 보이는지, header/행 경계/status pill과 기존 열 최소 너비가 유지되는지만 확인한다. 월별 정산 표는 기존 sticky header도 확인한다. 행 저장·출결·알림·시험정보 수정/삭제·퇴원·복원·영구삭제·알림 취소/삭제는 누르지 않는다.

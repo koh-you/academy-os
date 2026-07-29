@@ -1,4 +1,7 @@
 .dataTableShell.dataTableShell {
+  --data-table-border: var(--academy-border, #d8e3f8);
+  --data-table-header-bg: var(--academy-surface-muted, #f8fafc);
+  --data-table-header-text: var(--academy-muted, #64748b);
   max-width: 100%;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
@@ -14,6 +17,45 @@
 
 .dataTableShell.dataTableShell > table {
   width: 100%;
+}
+
+.dataTableShell.dataTableShell :where(
+  thead th,
+  .notificationTableHead,
+  .studentListHead,
+  .tableHead,
+  .journalHead,
+  .examPrepHead,
+  .managementHead,
+  .testAttemptRow.head,
+  .reservationStatusRow.head
+) {
+  background: var(--data-table-header-bg);
+  color: var(--data-table-header-text);
+  font-weight: 900;
+}
+
+.dataTableShell.dataTableShell :where(
+  th,
+  td,
+  .notificationTableRow,
+  .studentListRow,
+  .tableRow,
+  .journalRow,
+  .examPrepRow,
+  .managementRow,
+  .testAttemptRow,
+  .reservationStatusRow
+) {
+  border-color: var(--data-table-border);
+}
+
+.dataTableShell.dataTableShell :where(
+  .statusPill,
+  .saveStateBadge,
+  .supplementProgressBadge
+) {
+  white-space: nowrap;
 }
 
 @media (max-width: 640px) {
