@@ -71,6 +71,7 @@
 | UI-6B-1 | 완료 | 3개 원천 계약·7개 자동저장 경고 재대조 |
 | UI-6B-2 | 완료 | 미해결 경고를 danger와 분리한 저장 주의 공통 톤 |
 | UI-6C-1 | 완료 | 전체·영역·행 loading/retry/부분 실패 inventory |
+| UI-6C-2 | 완료 | 공통 AsyncOperationStatus 상태·접근성·모바일 계약 |
 
 ## 전체 세부 작업 목록
 
@@ -169,6 +170,6 @@
 
 ## 다음 실행 목표
 
-> 최신 상태: `UI-4`와 `UI-5` 전체, `UI-6A`, `UI-6B`, `UI-6C-1`을 완료했다. 현재 다음 작은 목표는 `UI-6C-2 공통 AsyncOperationStatus`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
+> 최신 상태: `UI-4`와 `UI-5` 전체, `UI-6A`, `UI-6B`, `UI-6C-1~2`를 완료했다. 현재 다음 작은 목표는 `UI-6C-3 알림 action·Solapi 대조 상태 적용`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
 
-`idle/loading/success/partial/error`와 `role=status/alert`, 선택적 action slot을 가진 공통 `AsyncOperationStatus`를 추가한다. 아직 caller를 옮기지 않고 component·tone·모바일 계약만 검증한다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
+알림 예약 취소/기록 삭제 상태와 Solapi 결과 대조 상태를 공통 `AsyncOperationStatus`로 옮긴다. `saving/saved/failed`, `loading/saved/partial/failed`의 기존 전이·상세 문구·버튼 callback은 그대로 둔다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.

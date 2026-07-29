@@ -1,0 +1,74 @@
+.asyncOperationStatus {
+  align-items: center;
+  background: var(--academy-surface-muted, #f8fafc);
+  border: 1px solid var(--academy-border, #dbe3ee);
+  border-radius: var(--academy-radius-md, 12px);
+  color: var(--academy-text, #0f172a);
+  display: flex;
+  gap: var(--academy-space-2, 12px);
+  justify-content: space-between;
+  min-width: 0;
+  padding: 10px 12px;
+}
+
+.asyncOperationStatusCopy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.asyncOperationStatusCopy strong {
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.4;
+}
+
+.asyncOperationStatusCopy span {
+  color: var(--academy-muted, #64748b);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.asyncOperationStatusAction {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: var(--academy-space-1, 8px);
+}
+
+.asyncOperationStatus[data-state="loading"] {
+  background: var(--status-info-bg, #eff6ff);
+  border-color: var(--status-info-border, #bfdbfe);
+  color: var(--status-info-text, #1d4ed8);
+}
+
+.asyncOperationStatus[data-state="success"] {
+  background: var(--status-success-bg, #ecfdf5);
+  border-color: var(--status-success-border, #bbf7d0);
+  color: var(--status-success-text, #166534);
+}
+
+.asyncOperationStatus[data-state="partial"] {
+  background: var(--status-pending-bg, #fff7ed);
+  border-color: var(--status-pending-border, #fed7aa);
+  color: var(--status-pending-text, #c2410c);
+}
+
+.asyncOperationStatus[data-state="error"] {
+  background: var(--status-danger-bg, #fef2f2);
+  border-color: var(--status-danger-border, #fecaca);
+  color: var(--status-danger-text, #b91c1c);
+}
+
+@media (max-width: 640px) {
+  .asyncOperationStatus {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .asyncOperationStatusAction > * {
+    flex: 1 1 auto;
+  }
+}
+

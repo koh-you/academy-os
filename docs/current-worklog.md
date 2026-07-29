@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-6C-2. 공통 AsyncOperationStatus
+
+- `idle/loading/success/partial/error`를 구분하는 공통 `AsyncOperationStatus`와 상태별 neutral/info/success/pending/danger tone을 추가했다.
+- loading에는 `aria-busy`, error에는 `role=alert`·assertive live region, 나머지에는 `role=status`·polite live region을 적용했다.
+- 실제 callback이 전달될 때만 action slot을 표시하고 640px 이하에서는 copy와 actions가 세로로 배치되게 했다.
+- 아직 caller를 옮기지 않아 API 호출 순서·재시도 callback·운영 데이터·provider 상태는 변경하거나 실행하지 않았다.
+- AI 검수: component 상태·접근성·action·모바일 계약과 `npm run build` 126 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 455개 중 기존 기준선 `90a`만 실패했고 신규 실패는 없다.
+- 사람 검수: 아직 실제 caller가 없어 필수 중단·시각 gate가 없다. UI-6C-3 적용 뒤 누적한다.
+
 ## 2026-07-29 UI-6C-1. loading·retry·부분 실패 범위 inventory
 
 - 읽기 source, 영역 action, 행 action, 다중 원천 부분 성공, provider 결과, 배경 동기화를 전체·영역·행 범위로 분류했다.
