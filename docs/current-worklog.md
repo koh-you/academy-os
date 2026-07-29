@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-7C-1. 모바일 탭·필터·검색 inventory
+
+- 공통 `WorkspaceTabs` 15곳, `FilterBar` 10곳, `SearchField` 7곳의 label, 선택 소유권, 입력 폭, 내부 스크롤, 44px 터치 계약을 대조했다.
+- 탭·필터의 모바일 내부 가로 스크롤과 input/select/tab 44px는 이미 공통화돼 있다.
+- 긴 탭의 현재 선택 자동 가시성 부재와 검색 지우기 버튼 36px를 다음 공통 보강점으로 확인했다. 필터 자동 이동은 검색 field를 밀어낼 수 있어 제외했다.
+- 결과는 `docs/ui-mobile-controls-inventory-2026-07-29.md`에 기록했다. 선택·검색 state/result와 callback, Supabase/app_state·notification_jobs/Solapi·수업·AI·출결 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 세 primitive의 현재 label·선택 소유권·내부 스크롤·터치 기준선 정적 계약, `npm run build` 128 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 467개 중 기존 기준선 `90a`만 실패했고 모든 개별 fixture와 신규 계약은 통과했다.
+- 사람 검수: 코드 UI 변경이 없어 필수 중단 gate가 없다. UI-7C-2 적용 뒤 390px 시각 절차를 누적한다.
+
 ## 2026-07-29 알림톡 작성 모달의 중복 발송 안내 제거
 
 - 학부모·학생 알림톡 작성 모달에서 `현재 수업 발송 계획`, 실발송/테스트 번호 경고 카드, 발송 수신 기준과 중복 발송 상태 문구를 제거했다.
