@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-2D. 도메인 페이지 머리말
+
+- 범위: 학사일정·학생관리·시험관리·정산의 최상단 제목, 현재 맥락, 필터/검색, 주요 행동을 공통 `PageHeader` 구조로 통일했다. 정산은 상위 `정산` 머리말을 탭보다 먼저 배치하고 월별·특강 제목을 하위 `h2`로 정리했다.
+- 불변 계약: 학사일정 학교 필터/일정 등록, 학생 추가, 시험 검색, 정산 탭 선택과 월별·특강 저장 callback을 그대로 유지했다. 계산식, Supabase/app_state, 삭제, 알림/notification_jobs/Solapi는 변경하거나 실행하지 않았다.
+- AI 검수: `npm run test:production`의 전체 기능 fixture가 통과했고 정적 시나리오 403개 중 새 UI-2D 계약을 포함한 402개가 통과했다. 실패 1개는 작업 전부터 있던 비관련 `90a lesson modal creates verified closure and optional linked makeup journals` 기준선뿐이다. `npm run build`, `git diff --check`도 통과했다.
+- 사람 검수: 필수 중단 gate는 없다. 배포 후 데스크톱/모바일에서 네 화면의 제목·설명·행동 줄바꿈만 확인하는 독립 시각 검수를 `docs/next-session/README.md` 누적 목록에 남겼으며, 결과를 기다리지 않고 UI-2E로 진행한다.
+
 ## 2026-07-29 UI-2C. 달력·수업일지 탐색형 머리말
 
 - 작업 소유권: 사용자가 별도 App.jsx 리팩터링을 UI 개선 완료까지 중단했다. 현재 main은 UI 프로그램이 소유하며, UI 완료 전 리팩터링 worktree의 rebase/통합을 재개하지 않는다.

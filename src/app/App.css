@@ -559,6 +559,17 @@ a:focus-visible {
   justify-content: flex-end;
 }
 
+.domainPanelHeader {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--academy-border);
+  border-radius: 0;
+  box-shadow: none;
+  margin-bottom: 14px;
+  min-height: 0;
+  padding: 0 0 14px;
+}
+
 .navigationHeaderPrimary,
 .navigationHeaderLeading,
 .navigationHeaderTrailing,
@@ -6078,12 +6089,6 @@ a:focus-visible {
   display: flex;
   gap: 14px;
   justify-content: space-between;
-}
-
-.schoolCalendarHeader h1 {
-  font-size: 28px;
-  font-weight: 900;
-  margin: 0 0 8px;
 }
 
 .schoolCalendarHeader select {

@@ -20906,22 +20906,26 @@ function ExamPrepCenter({
 
   return (
     <section className="panel fullPanel examPrepCenter">
-      <div className="sectionHeader">
-        <div>
-          <h1>시험관리</h1>
-          <p className="muted">{selectedClass?.name} · {examCycleLabel(selectedExamCycle)}</p>
-        </div>
-        <div className="examPrepHeaderActions">
+      <PageHeader
+        actions={(
+          <>
           {activeTab === "info" ? (
             <input
+              aria-label="시험관리 검색"
               className="searchInput"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="학교, 과목, 출판사 검색"
             />
           ) : null}
-        </div>
-      </div>
+          </>
+        )}
+        actionsClassName="examPrepHeaderActions"
+        as="div"
+        className="domainPanelHeader examPrepHeader"
+        description={[selectedClass?.name, examCycleLabel(selectedExamCycle)].filter(Boolean).join(" · ")}
+        title="시험관리"
+      />
 
       <div className="examManagementTabs" aria-label="시험관리 하위 탭">
         {examManagementTabs.map((tab) => (

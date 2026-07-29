@@ -1,5 +1,6 @@
 import { Component, useEffect, useState } from "react";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
+import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { parseStudentScheduleOverride } from "../../shared/utils/studentSchedule.js";
 import { buildStudentHandoverPdfModel, getStudentHandoverTitle, openStudentHandoverPdf } from "./studentHandoverPdf.js";
@@ -679,17 +680,20 @@ export function StudentManager({
 
   return (
     <section className="panel fullPanel">
-      <div className="sectionHeader">
-        <div>
-          <h1>학생 목록</h1>
-          <p className="muted">총 {visibleStudents.length}명</p>
-        </div>
-        <div className="studentListToolbar">
+      <PageHeader
+        actions={(
+          <>
           <button className="primaryButton" onClick={onAddStudent} type="button">+ 학생 추가</button>
           <span className="studentStatusPill">{title} · {visibleStudents.length}명</span>
           <span className="studentStatusPill mutedPill">퇴원생은 과거 기록 보존</span>
-        </div>
-      </div>
+          </>
+        )}
+        actionsClassName="studentListToolbar"
+        as="div"
+        className="domainPanelHeader studentManagerHeader"
+        description={`현재 ${title} ${visibleStudents.length}명 · 학생 기본정보와 운영 기록을 관리합니다.`}
+        title="학생관리"
+      />
 
       <div className="studentManagerTabs">
         <button

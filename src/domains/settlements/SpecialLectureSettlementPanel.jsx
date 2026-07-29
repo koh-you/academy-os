@@ -182,7 +182,7 @@ export function SpecialLectureSettlementPanel({
       <div className="sectionHeader specialLectureSettlementHeader">
         <div>
           <span className="eyebrow">운영</span>
-          <h1>특강 정산</h1>
+          <h2>특강 정산</h2>
           <p className="muted">
             월별 정규 급여와 분리해 특강 전체 과정의 확정 수강 회차를 계산합니다.
             실제 수강 회차는 특강관리 원천을 보존하고, 유료 적용 회차나 직접 확정금액만 이 화면에서 조정합니다.

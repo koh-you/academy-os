@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { MonthlySettlementPanel } from "./MonthlySettlementPanel.jsx";
 import { SpecialLectureSettlementPanel } from "./SpecialLectureSettlementPanel.jsx";
 import "./settlementWorkspace.css";
@@ -26,6 +27,12 @@ export function SettlementWorkspace({
 
   return (
     <section className="settlementWorkspace">
+      <PageHeader
+        description="정규 수업은 월별로, 특강은 전체 과정 단위로 계산하고 저장 상태를 확인합니다."
+        eyebrow="OPERATIONS"
+        title="정산"
+      />
+
       <div className="settlementWorkspaceTabs" role="tablist" aria-label="정산 구분">
         {settlementTabs.map((tab) => (
           <button

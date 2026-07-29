@@ -365,7 +365,7 @@ export function MonthlySettlementPanel({
       <div className="sectionHeader monthlySettlementHeader">
         <div>
           <span className="eyebrow">운영</span>
-          <h1>월별 수업 정산</h1>
+          <h2>월별 수업 정산</h2>
           <p className="muted">
             선택한 달의 수업일지 명단을 정산 원천으로 봅니다. 재원생은 수업 횟수·시수와 무관하게 월 고정금액,
             신입생은 첫 수업부터 말일까지의 수업 횟수에 회당 단가를 곱하고, 퇴원생은 1일부터 마지막 수업까지의 월별 스케줄 횟수 비율로 계산합니다.
