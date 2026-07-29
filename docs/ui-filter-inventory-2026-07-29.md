@@ -6,7 +6,7 @@
 | --- | --- | --- | --- |
 | UI-3C-1 | 단일 선택 button filter | 학사일정 표시 항목, 수업일지 일정 종류, 수업연구 과목 | 완료 — filter id·setter·결과 건수 불변 |
 | UI-3C-2 | select/chip 복합 filter | 알림 대상 반, 시험·학생 반, 시험 고사, 오답 학년·학생, 학사 학교 | 완료 — option value·setter·대상 집합 불변 |
-| UI-3C-3 | 날짜/month filter | 정산월, 달력월, 시험일 범위 | 다음 — 날짜 계산·경계 불변 |
+| UI-3C-3 | 날짜/month filter | 정산월, 수업·학사 달력월 | 완료 — 날짜 계산·월 경계·setter 불변 |
 
 검색어 입력과 0건 결과는 UI-3D에서 다룬다. 탭별 조건부 렌더는 UI-3A/3B에서 완료했다.
 
@@ -38,6 +38,16 @@
 - `filterBarField`는 label과 select/input을 같은 필드 규칙으로 묶고 390px에서 44px 터치 높이와 내부 가로 스크롤을 사용한다.
 - option value, 검색 normalization, 결과 계산은 옮기지 않았다. PDF 업로드, 일정 등록, 선택 문제 열기는 기존 callback과 disabled 조건을 그대로 유지했다.
 
+## UI-3C-3 적용
+
+| 화면 | 선택 원천 | setter | 경계 계약 |
+| --- | --- | --- | --- |
+| 수업 달력 | `selectedDate` | `onMoveDate(-30/30)` | 기존 `formatMonthTitle`·`buildMonthDays` 유지, UI-2C 공통 탐색 기준 재사용 |
+| 학사일정 달력 | `selectedMonth` | `onShiftMonth(-1/1)` | 기존 월 증감 계산과 선택일 유지, 공통 `NavigationHeader` 사용 |
+| 월별 정산 | `selectedMonth` | `setSelectedMonth` | `YYYY-MM` input 값과 `getMonthRange`·로컬 draft key·Supabase 저장 월 유지 |
+
+시험기간 시작일·종료일과 수학시험 날짜는 결과를 거르는 필터가 아니라 저장되는 시험정보 입력값이다. UI-3C에서 이관하지 않고 UI-7D 입력 폼 단위로 남겼으며 `updateDateRangeField` callback을 그대로 유지했다.
+
 ## 사람 검수
 
-필수 중단 gate는 없다. 배포 후 학사일정 표시 항목·학교, 수업일지 종류, 수업연구 과목, 알림 대상 반, 시험·학생 반, 시험 고사, 오답 학년·학생을 전환해 결과와 건수가 기존대로 바뀌는지 확인한다. 390px에서는 필터 바만 좌우로 스크롤되고 페이지 전체가 넘치지 않으면 통과다. 실제 발송·업로드·일정 등록은 누르지 않는다.
+필수 중단 gate는 없다. 배포 후 학사일정 표시 항목·학교·이전/다음 달, 수업일지 종류·이전/다음 달, 수업연구 과목, 알림 대상 반, 시험·학생 반, 시험 고사, 오답 학년·학생, 월별 정산월을 전환해 결과와 건수·월 경계가 기존대로 바뀌는지 확인한다. 390px에서는 필터 바만 좌우로 스크롤되고 페이지 전체가 넘치지 않으면 통과다. 실제 저장·발송·업로드·일정 등록은 누르지 않는다.

@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-3C-3. 날짜/month 필터·UI-3C 완료
+
+- 분류 정정: 시험기간 시작·종료일과 수학시험 날짜는 필터가 아니라 저장되는 시험정보 입력값이므로 UI-7D로 남겼다. UI-3C-3은 수업·학사 달력 월 탐색과 월별 정산의 정산월 선택만 다룬다.
+- 구현: 학사일정 월 탐색을 공통 `NavigationHeader`의 이전 달·월 제목·다음 달·일정 등록 actions 구조로 이관하고 aria-label을 보강했다. 월별 정산의 `type=month` 입력과 기존 저장 상태를 공통 `FilterBar` field/result 구조로 이관했다. 수업 달력은 UI-2C에서 이미 같은 탐색 구조라 변경하지 않았다.
+- 동작 보존: `onShiftMonth(-1/1)`, `onOpenEventForm(selectedDate)`, `setSelectedMonth(event.target.value)`, 수업 달력 `onMoveDate(-30/30)`와 `formatMonthTitle`, `getMonthRange`, 정산 local draft/Supabase 월 key를 바꾸지 않았다. 실제 일정 등록·정산 저장은 실행하지 않았다.
+- AI 검수: 날짜 경계·setter 정적 계약을 포함한 production 시나리오 413개 중 412개가 통과했다. 기존 비관련 `90a` 한 건만 기준선 실패이며 `npm run build`도 통과했다.
+- 사람 검수: 필수 중단 gate는 없다. 배포 후 세 화면의 월 이동·표시 범위와 390px 배치를 확인하는 독립 검수를 누적하고 UI-3D 검색으로 진행한다.
+
 ## 2026-07-29 UI-3C-2. select/chip 복합 필터
 
 - 구현: 공통 `FilterBar`에 label+select/input용 `filterBarField`와 모바일 44px 규칙을 추가했다. 알림 대상 반·학생 검색, 시험관리 반·고사, 학생관리 반, 오답 학년·학생, 학사일정 학교 필터를 같은 구조로 이관했다.

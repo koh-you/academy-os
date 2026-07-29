@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
+import { NavigationHeader } from "../../shared/components/NavigationHeader.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import {
@@ -155,16 +156,18 @@ export function SchoolMonthHeader({
   selectedMonth = ""
 }) {
   return (
-    <div className="schoolMonthHeader">
-      <button className="iconButton" onClick={() => onShiftMonth?.(-1)} type="button">‹</button>
-      <div className="schoolMonthTitleBlock">
-        <h2>{formatMonthTitle?.(selectedMonth)}</h2>
+    <NavigationHeader
+      actions={(
         <button className="primaryButton compact schoolMonthAddButton" onClick={() => onOpenEventForm?.(selectedDate)} type="button">
           + 일정 등록
         </button>
-      </div>
-      <button className="iconButton" onClick={() => onShiftMonth?.(1)} type="button">›</button>
-    </div>
+      )}
+      className="schoolMonthHeader"
+      leading={<button aria-label="이전 달" className="iconButton" onClick={() => onShiftMonth?.(-1)} type="button">‹</button>}
+      title={formatMonthTitle?.(selectedMonth)}
+      titleAs="h2"
+      trailing={<button aria-label="다음 달" className="iconButton" onClick={() => onShiftMonth?.(1)} type="button">›</button>}
+    />
   );
 }
 

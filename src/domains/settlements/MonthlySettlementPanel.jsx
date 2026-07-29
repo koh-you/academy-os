@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { FilterBar } from "../../shared/components/FilterBar.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
@@ -365,13 +366,16 @@ export function MonthlySettlementPanel({
     <section className="panel fullPanel monthlySettlementPanel">
       <SectionHeader
         actions={(
-          <div className="monthlySettlementMonthControl">
-            <label>
-              정산월
+          <FilterBar
+            className="monthlySettlementMonthControl"
+            label="월별 정산 대상 월"
+            result={<InlineSaveStatus label="월별 정산" saveState={effectiveSaveState} />}
+          >
+            <label className="filterBarField">
+              <span>정산월</span>
               <input type="month" value={selectedMonth} onChange={(event) => setSelectedMonth(event.target.value)} />
             </label>
-            <InlineSaveStatus label="월별 정산" saveState={effectiveSaveState} />
-          </div>
+          </FilterBar>
         )}
         className="monthlySettlementHeader"
         descriptionNode={(

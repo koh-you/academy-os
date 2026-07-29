@@ -6743,15 +6743,19 @@ a:focus-visible {
 
 .schoolMonthHeader {
   align-items: center;
-  display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) 48px;
+  display: flex;
+  gap: 12px;
 }
 
-.schoolMonthTitleBlock {
-  align-items: center;
-  display: grid;
-  gap: 10px;
-  justify-items: center;
+.schoolMonthHeader .navigationHeaderPrimary {
+  flex: 1 1 auto;
+  justify-content: center;
+  min-width: 0;
+}
+
+.schoolMonthHeader .navigationHeaderCopy {
+  min-width: 140px;
+  text-align: center;
 }
 
 .schoolMonthHeader h2 {
