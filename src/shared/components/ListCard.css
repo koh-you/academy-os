@@ -43,6 +43,21 @@
   border-color: var(--academy-danger-border, #fecaca);
 }
 
+:where(.listCard.selectableListCard) {
+  cursor: pointer;
+}
+
+:where(.listCard.selectableListCard:focus-within) {
+  outline: 2px solid var(--academy-focus-ring, rgba(37, 99, 235, 0.55));
+  outline-offset: 2px;
+}
+
+:where(.listCard.selectableListCard > input[type="checkbox"]) {
+  accent-color: var(--academy-accent, #2563eb);
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
 @media (max-width: 640px) {
   :where(.listCardHeader),
   :where(.listCardActions) {
@@ -56,5 +71,14 @@
   :where(.listCardActions > button),
   :where(.listCardActions > a) {
     min-height: 44px;
+  }
+
+  :where(.listCard.selectableListCard) {
+    min-height: 44px;
+  }
+
+  :where(.listCard.selectableListCard > input[type="checkbox"]) {
+    height: 20px;
+    width: 20px;
   }
 }

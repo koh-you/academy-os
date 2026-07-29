@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-4B-3. 선택형 학생 행
+
+- 구현: 알림 대상 학생과 시험 후 셀프체크 대상 학생의 label 행을 `ListCard as=label`로 이관하고 공통 `selectableListCard` focus, checkbox accent, 390px 44px/20px 터치 규칙을 추가했다.
+- 동작 보존: `studentId`/`examPrepId_studentId` key, `toggleStudentSelection`, `toggleRowTargetStudent`, `visibleNoticeStudents`, 시험정보별 candidate/selected ID 계산을 그대로 유지했다.
+- 외부 원천: 선택은 기존 React draft만 바꾸며 알림 발송, 시험 제출, Supabase/app_state, notification_jobs/Solapi, Storage를 호출하거나 변경하지 않았다.
+- AI 검수: `npm run build` 통과(123 modules). 전용 정적 계약을 포함한 scenario 420개 중 419개가 통과했고 유일한 실패는 기존 기준선 `90a`다.
+- 사람 검수: 필수 중단 gate는 없다. 체크 강조·키보드 focus·390px 터치 검수를 누적하고 UI-4B-4 운영 행동 행 shell로 진행한다.
+
 ## 2026-07-29 UI-4B-2. 포털 읽기 전용 카드
 
 - 구현: 학부모·학생 수업 준비 공지, 자료, 보고서, 학생 수업기록, 보충 일정의 6개 읽기 전용 목록군을 `ListCardHeader`/`ListCardBody`/`ListCardActions` 슬롯으로 이관했다.

@@ -12540,7 +12540,13 @@ function NotificationCenter({
                 visibleNoticeStudents.map((student) => {
                   const checked = selectedStudentIds.includes(student.studentId);
                   return (
-                    <label className={checked ? "noticeStudentOption active" : "noticeStudentOption"} key={student.studentId}>
+                    <ListCard
+                      active={checked}
+                      as="label"
+                      className="noticeStudentOption selectableListCard"
+                      density="compact"
+                      key={student.studentId}
+                    >
                       <input checked={checked} onChange={() => toggleStudentSelection(student.studentId)} type="checkbox" />
                       <span>
                         <strong>{student.name}</strong>
@@ -12565,7 +12571,7 @@ function NotificationCenter({
                           );
                         })}
                       </span>
-                    </label>
+                    </ListCard>
                   );
                 })
               ) : (
@@ -21408,10 +21414,16 @@ function ExamPostSubmissionManager({
                 {candidates.map((student) => {
                   const checked = selectedIds.includes(student.studentId);
                   return (
-                    <label className={checked ? "examPostTargetStudent active" : "examPostTargetStudent"} key={`${row.examPrepId}_${student.studentId}`}>
+                    <ListCard
+                      active={checked}
+                      as="label"
+                      className="examPostTargetStudent selectableListCard"
+                      density="compact"
+                      key={`${row.examPrepId}_${student.studentId}`}
+                    >
                       <input checked={checked} onChange={() => toggleRowTargetStudent(row, student.studentId)} type="checkbox" />
                       <span>{student.name}</span>
-                    </label>
+                    </ListCard>
                   );
                 })}
               </div>
