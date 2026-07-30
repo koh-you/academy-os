@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8A-1. 월간 달력 모바일 내부 scroll
+
+- 현재 월 수업 달력 section에 동적 월 이름, `role=region`, `tabIndex=0`, 공통 focus-visible을 제공했다.
+- 640px 이하에서 teacher calendar grid만 760px 최소 폭을 유지하고 shell 내부에 가로 scroll·inline overscroll 차단·touch pan·iOS momentum scroll을 적용했다.
+- 7열 날짜와 수업 pill은 읽을 폭을 유지하면서 페이지 전체 가로 overflow를 만들지 않는다.
+- 사용자 요청으로 숨긴 `.teacherCalendarTop`, 날짜 `onDateSelect`, 수업 pill `onOpenLessonJournal`, filter·수업 등록·월 열기 callback은 변경하지 않았다.
+- 저장·발송·예약·삭제·출결·Supabase/app_state·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 동적 영역 이름·focus, 모바일 내부 scroll/min-width, 숨긴 header와 날짜/수업 callback 보존 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 484개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 390px에서 달력 영역만 좌우로 움직이고 페이지·sidebar는 움직이지 않으며 날짜·시간·반 이름이 읽히는지 확인하는 독립 절차를 `docs/next-session/README.md`에 누적한다. 수업 pill과 등록·저장·출결은 누르지 않고 UI-8A-2를 계속한다.
+
 ## 2026-07-29 UI-8A-0. Lesson Hub·월간 달력 inventory
 
 - 실제 `activeView=lessons`의 `TeacherLessonHubV2`만 선별해 운영 알림 원본, 조건부 저장 상태, 숨긴 NavigationHeader, 월간 달력, 수업별 modal 흐름을 대조했다.

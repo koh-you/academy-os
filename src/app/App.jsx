@@ -16746,7 +16746,12 @@ function TeacherLessonHubV2({
         trailing={<button aria-label="다음 달" className="iconButton" onClick={() => onMoveDate(30)} type="button">›</button>}
       />
 
-      <section className="calendarShell teacherCalendarShell">
+      <section
+        aria-label={`${formatMonthTitle(selectedDate)} 수업 달력`}
+        className="calendarShell teacherCalendarShell"
+        role="region"
+        tabIndex={0}
+      >
         <div className="calendarGrid teacherCalendarGrid">
           {["일", "월", "화", "수", "목", "금", "토"].map((label) => (
             <div className="weekday" key={label}>{label}</div>

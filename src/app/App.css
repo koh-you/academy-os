@@ -3449,7 +3449,13 @@ summary:focus-visible {
 }
 
 .teacherCalendarShell {
+  max-width: 100%;
   padding: 14px;
+}
+
+.teacherCalendarShell:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.35);
+  outline-offset: 2px;
 }
 
 .teacherCalendarTop h1 {
@@ -19746,6 +19752,18 @@ body.attendanceOnlyBody {
 
   summary {
     min-height: var(--academy-touch-target) !important;
+  }
+
+  .teacherCalendarShell {
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-gutter: stable;
+    touch-action: pan-x pan-y;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .teacherCalendarGrid {
+    min-width: 760px;
   }
 
   :where(
