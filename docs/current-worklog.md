@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8B-1. 수업일지 모바일 viewport·safe-area
+
+- 수업일지 modal에 기존 `100vh` fallback과 함께 `100dvh` 높이, 내부 overscroll 차단, iOS momentum scroll을 적용했다.
+- 640px 이하에서는 backdrop을 기기 상·하·좌·우 safe-area와 최소 8px 여백에 맞추고 바깥 scroll을 막아 수업일지 modal 하나가 세로 scroll을 소유하게 했다.
+- header 없는 dialog 이름 `수업일지`, 내부 뒤로가기와 `onBackToCalendar` 닫기 경로, 수업 수정·취소·출결·저장·알림 callback은 그대로 보존했다.
+- 화면 CSS 외 저장·발송·예약·삭제·출결·Supabase/app_state·lesson_student_records·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 동적 viewport, 네 방향 safe-area, 내부 scroll과 기존 닫기 경로 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 488개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 390px에서 브라우저 상·하단 UI가 보이는 상태로 수업일지 첫 줄과 하단이 잘리지 않는지 나중에 UI-8B 통합 절차로 확인한다. 독립 시각 확인이라 UI-8B-2를 계속한다.
+
 ## 2026-07-29 UI-8B-0. 수업일지 고밀도 화면 inventory
 
 - 실제 `TeacherLessonHubV2 -> Modal -> LessonJournalDetail` 경로의 수업 맥락, 조건부 운영 안내, 알림 상태·작업, 10열 학생 기록, 하단 저장 바와 하위 modal을 대조했다.

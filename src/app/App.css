@@ -11513,10 +11513,13 @@ button:disabled {
   border-radius: 8px;
   box-shadow: 0 20px 60px rgba(15, 23, 42, 0.24);
   max-height: calc(100vh - 36px);
+  max-height: calc(100dvh - 36px);
   max-width: 1560px;
   overflow: auto;
+  overscroll-behavior: contain;
   padding: 10px;
   width: min(1560px, 100%);
+  -webkit-overflow-scrolling: touch;
 }
 
 .modalHeader {
@@ -19759,6 +19762,26 @@ body.attendanceOnlyBody {
 
   summary {
     min-height: var(--academy-touch-target) !important;
+  }
+
+  .lessonJournalModalBackdrop {
+    align-items: stretch;
+    overflow: hidden;
+    padding:
+      max(8px, env(safe-area-inset-top))
+      max(8px, env(safe-area-inset-right))
+      max(8px, env(safe-area-inset-bottom))
+      max(8px, env(safe-area-inset-left));
+  }
+
+  .lessonJournalModal {
+    max-height: calc(
+      100dvh
+      - max(8px, env(safe-area-inset-top))
+      - max(8px, env(safe-area-inset-bottom))
+    );
+    min-height: 0;
+    width: 100%;
   }
 
   .teacherCalendarShell {

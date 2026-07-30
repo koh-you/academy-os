@@ -51,3 +51,8 @@ UI-8B는 CSS와 읽기 semantics만 바꾸며 Supabase, `app_state`, `lesson_stu
 ## 사람 검수
 
 inventory는 화면이나 운영 원천을 바꾸지 않아 중단 gate가 없다. 구현 완료 뒤 desktop과 390px에서 수업일지를 열어 modal 상하단 접근, 학생 기록 내부 가로 scroll, 저장 바 배치, 발송 상태 row 가독성만 확인한다. `수업 수정`, `수업 취소 처리`, 출결, 예약 설정·확인·적용, 발송 결과, 학생별 알림, `변경 저장`은 누르지 않는다.
+
+## 진행 갱신
+
+- UI-8B-1: 수업일지 modal에 `100dvh`, 네 방향 safe-area 여백, 내부 overscroll·iOS touch scroll을 적용했다.
+- header 없는 dialog 이름과 뒤로가기·닫기 callback은 유지했고 운영 원천이나 실제 동작은 실행하지 않았다.
