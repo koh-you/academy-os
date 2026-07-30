@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 P3. App.jsx 17BA-3 generated lesson plan builder closeout
+
+- 감사: 기존 17BA inventory fixture에 inline 함수 잔존 0, 모듈 export·App import·호출 각 1건, TARGET/CONTROL·입력 불변과 순수 helper 주입 경계를 얇게 고정했다.
+- App 경계: `useMemo`, repair/persist, React state merge·save status, `/api/lessons/bulk` 저장과 재시도 소비는 계속 `App.jsx`가 소유한다. 새 모듈은 API·Supabase·notification_jobs·Solapi side effect가 없다.
+- AI 검수: 기존 fixture와 정적 시나리오·production/build를 재사용하며 새 대형 closeout fixture는 만들지 않는다. 사람 gate는 0건이다.
+- 변화량: 새 파일 0개, 전체 `+60/-0`, `App.jsx` 변경·감소 0줄이다.
+
 ## 2026-07-31 P3. App.jsx 17BA-2 generated lesson plan builder extraction
 
 - 코드: generated lesson candidate 집계와 identity/sourceSchoolEventId/lessonId 매칭, suppressed→protected→create/update/synced 판정, update 시 기존 lessonId 보존 계산을 `generatedLessonPlanBuilder.js`로 분리했다. rows·lessons·students·controls와 기존 순수 helper 의존성은 호출부에서 명시적으로 주입한다.

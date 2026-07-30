@@ -2102,6 +2102,41 @@ check(
       "lessonId: existing.lessonId"
     ])
 );
+check(
+  "84d-169 generated lesson plan builder closeout keeps one pure module boundary and App-owned persistence",
+  (generatedLessonPlanBuilderSource.match(/export function buildGeneratedLessonPlan\(/g) || []).length === 1 &&
+    (rawAppEntrySource.match(/function buildGeneratedLessonPlan\(/g) || []).length === 0 &&
+    (rawAppEntrySource.match(/from "\.\.\/domains\/lessons\/generatedLessonPlanBuilder\.js"/g) || []).length === 1 &&
+    (rawAppEntrySource.match(/buildGeneratedLessonPlan\(\{/g) || []).length === 1 &&
+    hasAll(rawAppEntrySource, [
+      "const generatedLessonPlan = useMemo(",
+      "function mergeGeneratedLessonsIntoState(lessonsToSave)",
+      "function saveGeneratedLessons(lessonsToSave)",
+      "function saveGeneratedLessonsFromPlan(planItems)",
+      "setGeneratedLessonSaveStatus(",
+      "postJsonWithTimeout(",
+      '"/api/lessons/bulk"',
+      "persistExamPrepRows(changedRows)"
+    ]) &&
+    ![
+      "useState",
+      "useEffect",
+      "fetch(",
+      "postJson",
+      "notification_jobs",
+      "/api/",
+      "setLessons",
+      "setExamPrepRows",
+      "setGeneratedLessonSaveStatus",
+      "persistExamPrepRows",
+      "saveGeneratedLessons",
+      "localStorage",
+      "Supabase",
+      "Solapi",
+      "Date.now",
+      "Promise.all"
+    ].some((value) => generatedLessonPlanBuilderSource.includes(value))
+);
 check("84e shared modal closes with Escape key", hasAll(app, ["import { Modal, ModalFooter } from \"../shared/components/Modal.jsx\""]) && hasAll(sharedModalSource, ["export function Modal({", "backdropClassName = \"\"", "hideCloseButton = false", "hideHeader = false", "function handleEscapeKey(event)", "event.key === \"Escape\"", "onClose?.()", "window.addEventListener(\"keydown\", handleEscapeKey)", "window.removeEventListener(\"keydown\", handleEscapeKey)", "hideCloseButton ? null"]) );
 check("84f lesson journal modal uses shared Escape-close modal", hasAll(app, ["backdropClassName=\"lessonJournalModalBackdrop\"", "className=\"lessonJournalModal\"", "hideHeader", "onClose={onBackToCalendar}"]) && !app.includes("<div className=\"modalBackdrop lessonJournalModalBackdrop\" role=\"dialog\" aria-modal=\"true\">"));
 check("84f-1 lesson journal student preview stays isolated and callback-only", hasAll(lessonFrontendSource, ["LessonJournalStudentPreviewModal", "createLessonJournalStudentPreviewModel", "students.filter((student) => student.studentId === studentPreviewId)", "PortalComponent={StudentPortalV2}", "students={model.previewStudents}", "onLogout={onClose}"]) && !lessonJournalStudentPreviewModalSource.includes("fetch(") && !lessonJournalStudentPreviewModalSource.includes("/api/"));

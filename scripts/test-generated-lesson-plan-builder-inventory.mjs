@@ -541,15 +541,33 @@ assert.equal(
   appSource.split("function buildGeneratedLessonPlan(").length - 1,
   0
 );
+for (const appOwnedBoundary of [
+  "const generatedLessonPlan = useMemo(",
+  "function mergeGeneratedLessonsIntoState(lessonsToSave)",
+  "function saveGeneratedLessons(lessonsToSave)",
+  "function saveGeneratedLessonsFromPlan(planItems)",
+  "setGeneratedLessonSaveStatus(",
+  "postJsonWithTimeout(",
+  '"/api/lessons/bulk"',
+  "persistExamPrepRows(changedRows)"
+]) {
+  assert.ok(
+    appSource.includes(appOwnedBoundary),
+    `App-owned generated lesson boundary moved: ${appOwnedBoundary}`
+  );
+}
 for (const forbiddenEffect of [
   "useState",
   "useEffect",
   "fetch(",
   "postJson",
+  "notification_jobs",
   "/api/",
   "setLessons",
   "setExamPrepRows",
+  "setGeneratedLessonSaveStatus",
   "persistExamPrepRows",
+  "saveGeneratedLessons",
   "localStorage",
   "Supabase",
   "Solapi",
