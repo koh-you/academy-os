@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-30 UI-9A. desktop·tablet·390px 시각 회귀 매트릭스
+
+- 전체 UI-1~UI-8J를 desktop 1440px, tablet 768px, mobile 390px 기준으로 다시 묶고 AI 자동 판정과 로그인 이후 사람 시각 확인을 분리했다. 기준 문서는 `docs/ui-visual-regression-matrix-2026-07-30.md`다.
+- 공개 로그인과 특강 안내를 Edge CDP의 실제 device metrics로 세 폭 렌더했다. 로그인은 390px에서 카드가 `x=16~374px` 안에 남았고, 두 화면 모두 `innerWidth/documentElement.scrollWidth/body.scrollWidth=390px`로 가로 넘침이 없었다.
+- 단순 `--window-size=390,844` 캡처에서 보인 잘림은 내부 CSS viewport가 756px인 상태의 이미지 crop이었다. 제품 회귀로 오판하지 않도록 원인과 재현 기준을 매트릭스에 기록했다.
+- 원천/side effect: 공개 읽기 화면만 렌더했고 로그인, 저장, 삭제, 발송, 예약, 출결, 파일 선택, Storage, AI, Supabase/Solapi를 실행하거나 변경하지 않았다.
+- AI 검수: UI-9A 매트릭스가 세 기준 폭, 공개 자동 렌더와 인증 화면 사람 검수의 분리, UI-8A~J 전 화면군, 금지 side effect를 모두 갖추는 정적 fixture를 추가했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 525개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 로그인 이후 실제 운영 데이터가 필요한 화면은 `docs/next-session/README.md`의 UI-9A 일괄 절차로 남겼다. 다음 UI-9B의 전제조건이 아니므로 기능 회귀 기준선 정리를 계속한다.
+
 ## 2026-07-30 UI-8J-3. 학생·학부모 포털 통합 회귀 마감
 
 - 학생·학부모 계정 행동, 탭, 읽기 달력·카드, 학생 쓰기 카드의 responsive shell을 한 fixture로 통합했다.
