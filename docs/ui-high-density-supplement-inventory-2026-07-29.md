@@ -57,3 +57,5 @@ inventory 자체는 중단 gate가 없다. 구현 뒤 desktop과 390px에서 목
 - 저장·일정·완료·복귀 callback과 disabled 조건은 변경하지 않았다.
 - UI-8C-2B: custom 알림 제어 dialog에 `100dvh`, 네 방향 safe-area와 내부 touch scroll을 적용했다.
 - 닫기·Solapi 예약·취소 callback과 busy guard는 변경하지 않았다.
+- UI-8C-3: 원천·일정·알림 3종·완료/복귀·두 취소·responsive shell을 통합 회귀하고 독립 사람 시각 절차를 handoff 최상단에 누적했다.
+- UI-8C는 AI 검수 기준으로 완료했으며 실제 저장·발송·예약·삭제·출결은 실행하지 않았다.

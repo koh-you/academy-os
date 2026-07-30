@@ -97,6 +97,7 @@
 | UI-8C-1 | 완료 | 보충 학생 상세 고정 header·내부 scroll·저장 상태 3열 |
 | UI-8C-2A | 완료 | 보충 모바일 주요 행동·최근 이력 한 열 배치 |
 | UI-8C-2B | 완료 | 보충 custom 알림 제어 동적 viewport·safe-area |
+| UI-8C-3 | 완료 | 보충 원천·일정·알림 3종·두 취소·responsive 통합 회귀 |
 
 ## 전체 세부 작업 목록
 

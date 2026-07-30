@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8C-3. 보충관리 고밀도 화면 회귀 마감
+
+- 원 숙제/결석·지난/새 숙제, 보충 내용, 수업일지 일정, 학생/학부모/당일 학생 알림 3종, 완료·복귀와 두 취소의 원천·callback을 통합 회귀로 묶었다.
+- 내용 저장과 수업일지 일정 반영, Solapi 예약/취소를 별도 행동으로 유지하고 responsive shell이 이들을 결합하지 않는 것도 고정했다.
+- UI-8C-1~2B의 desktop/390px 통합 사람 시각 절차를 `docs/next-session/README.md` 최상단에 남겼다. 기존 상세·탭·read-only 알림 제어 열기 외 실제 side effect 버튼은 금지했다.
+- 화면·callback과 저장·발송·예약·삭제·출결·Supabase/app_state·lessons·lesson_student_records·makeup_tasks·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 원천·일정·알림 3종·두 취소·responsive shell과 side effect 분리 통합 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 496개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 최상단 UI-8C 통합 절차 1건을 나중에 일괄 수행한다. 독립 시각 확인이라 UI-8D-0 알림관리·학부모 응대 inventory를 계속한다.
+
 ## 2026-07-29 UI-8C-2B. 보충 알림 제어 viewport·safe-area
 
 - custom 알림 제어 dialog에 기존 `100vh` fallback과 `100dvh`, 내부 overscroll 차단, iOS momentum scroll을 적용했다.
