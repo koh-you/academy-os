@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-7E-4. 동작 없는 action 정리
+
+- callback·submit·disabled가 모두 없던 로그인 닫기 2개, 구형 수업 달력 화살표 4개, 반 추가 1개, 오답 교재 일괄 action 3개, 학생 비밀번호 변경 1개, 학생 포털 말풍선 1개를 제거했다.
+- 비밀번호 변경은 입력 3개도 함께 제거해 입력할 수 있지만 저장되지 않는 오해를 막았다. 로그인 닫기·말풍선·비밀번호 panel의 미사용 CSS도 정리했다.
+- 구형 수업 화면의 수업 등록, 날짜·수업 선택과 현재 운영 화면의 월 이동 등 실제 callback action은 유지했다.
+- 새 callback/API를 추측해 만들지 않았고 저장·발송·예약·삭제·출결·Supabase/app_state·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: no-op 12개와 관련 dead CSS 제거, 실제 수업 action 보존 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 478개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 로그인·반관리·오답관리·학생 마이페이지·학생 포털에 작동하지 않던 action이 더는 보이지 않는지 확인하는 독립 절차를 `docs/next-session/README.md`에 누적한다. 실제 입력·저장·발송·삭제 없이 UI-7E-5를 계속한다.
+
 ## 2026-07-29 UI-7E-3. 모바일 action 44px touch target
 
 - 640px 이하에서 모든 `button`, `a[href]`, `[role=button]`에 디자인 토큰 `--academy-touch-target`의 44px 최소 높이를 적용했다.

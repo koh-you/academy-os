@@ -51,4 +51,4 @@ Academy OS의 모든 화면을 같은 사용 규칙으로 보이게 한다. 이�
 
 ## 다음 착수
 
-UI-0~UI-6과 UI-7A·UI-7B·UI-7C·UI-7D, UI-7E-1·2·3을 완료했다. 다음 UI-7E-4는 callback·submit·disabled가 모두 없는 no-op action을 숨기거나 명시적 비활성 안내로 정리한다. 기능을 추측해 연결하지 않으며 외부 side effect와 운영 원천은 바꾸지 않는다.
+UI-0~UI-6과 UI-7A·UI-7B·UI-7C·UI-7D, UI-7E-1·2·3·4를 완료했다. 다음 UI-7E-5는 대표 action의 callback·disabled·submit·focus/touch 회귀계약을 한 번에 고정한다. 외부 side effect와 운영 원천은 바꾸지 않는다.

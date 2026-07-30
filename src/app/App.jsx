@@ -15815,7 +15815,6 @@ function LoginScreen({ students, onLogin }) {
   return (
     <main className="loginPage">
       <form className="loginCard" onSubmit={submit}>
-        <button className="loginClose" type="button">×</button>
         <p className="loginEyebrow">{academyBrandName}</p>
         <h1>로그인</h1>
         <div className="loginTabs">
@@ -15893,7 +15892,6 @@ function RoleLoginScreen({ initialRole = "student", onLogin }) {
   return (
     <main className="loginPage">
       <form className="loginCard" onSubmit={submit}>
-        <button className="loginClose" type="button">x</button>
         <p className="loginEyebrow">{academyBrandName}</p>
         <h1>로그인</h1>
         <div className="loginTabs">
@@ -19809,9 +19807,7 @@ function TeacherLessonHub({
   return (
     <>
       <header className="pageTop teacherCalendarTop">
-        <button className="iconButton" type="button">‹</button>
         <h1>{formatMonthTitle(selectedDate)}</h1>
-        <button className="iconButton" type="button">›</button>
         <button className="primaryButton" onClick={onAddLesson} type="button">+ 수업 등록</button>
       </header>
 
@@ -19930,9 +19926,7 @@ function LessonHub({
   return (
     <>
       <header className="pageTop">
-        <button className="iconButton" type="button">‹</button>
         <h1>2026년 6월</h1>
-        <button className="iconButton" type="button">›</button>
         <button className="primaryButton" onClick={onAddLesson} type="button">+ 수업 등록</button>
       </header>
 
@@ -23050,7 +23044,6 @@ function ClassManager({ students, templates, onUpdateClassRoster }) {
   return (
     <section className="classManagerPage">
       <PageHeader
-        actions={<button className="primaryButton" type="button">+ 반 추가</button>}
         className="classManagerTop"
         description="4개 기본 반을 기준으로 학생 배정과 수업 흐름을 관리합니다."
         title="반관리"
@@ -26479,9 +26472,6 @@ function WrongBookCard({ book, selectedProblemRef, onSelectProblem, onUpdateBook
               {problemStatusMeta[status].shortLabel} {counts[status] ?? 0}
             </span>
           ))}
-          <button className="softButton" type="button">전부 맞음</button>
-          <button className="softButton" type="button">오답수정</button>
-          <button className="softButton" type="button">기록</button>
         </div>
       </div>
       <div className="wrongBookHint">클릭: 맞음→한번 틀림→두번 틀림→실수/확실히 앎 · Ctrl+클릭: 여러 문제 선택</div>

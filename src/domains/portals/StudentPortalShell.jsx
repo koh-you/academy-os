@@ -36,7 +36,6 @@ export function StudentPortalShell({
           {previewMode ? (
             <button className="logoutButton" onClick={onLogout} type="button">관리 화면으로</button>
           ) : null}
-          <button className="portalIconButton" type="button">💬</button>
           <span className="portalDate">🗓 {currentDate}</span>
           <button className="logoutButton" onClick={onLogout} type="button">로그아웃</button>
           {!previewMode ? (

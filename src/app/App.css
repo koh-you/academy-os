@@ -113,20 +113,6 @@ a:focus-visible {
   width: min(560px, calc(100vw - 32px));
 }
 
-.loginClose {
-  background: #f8fafc;
-  border: 0;
-  border-radius: 999px;
-  color: #94a3b8;
-  font-size: 28px;
-  font-weight: 900;
-  height: 52px;
-  position: absolute;
-  right: 40px;
-  top: 40px;
-  width: 52px;
-}
-
 .loginEyebrow {
   color: #4f46e5;
   font-size: 14px;
@@ -179,14 +165,6 @@ a:focus-visible {
   .loginCard {
     gap: 14px;
     padding: 28px 20px 24px;
-  }
-
-  .loginClose {
-    font-size: 24px;
-    height: 42px;
-    right: 16px;
-    top: 16px;
-    width: 42px;
   }
 
   .loginEyebrow {
@@ -14828,7 +14806,6 @@ textarea.profileEditInput {
   justify-content: flex-end;
 }
 
-.portalIconButton,
 .logoutButton,
 .portalDate {
   align-items: center;
@@ -14840,12 +14817,6 @@ textarea.profileEditInput {
   font-weight: 800;
   min-height: 46px;
   padding: 0 18px;
-}
-
-.portalIconButton {
-  justify-content: center;
-  padding: 0;
-  width: 54px;
 }
 
 .portalDate {
@@ -17681,14 +17652,6 @@ textarea.profileEditInput {
   color: #334155;
   font-weight: 800;
   text-align: left;
-}
-
-.passwordPanel {
-  gap: 18px;
-}
-
-.passwordPanel .primaryButton {
-  justify-self: start;
 }
 
 .followUpPage .pageTop {

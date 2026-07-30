@@ -262,15 +262,6 @@ export function StudentMyPageTab({
               </table>
             </DataTableShell>
           </div>
-          <div className="profileCard passwordPanel">
-            <h2>비밀번호 변경</h2>
-            <div className="fieldGrid three">
-              <label>현재 비밀번호<input type="password" placeholder="현재 PIN" /></label>
-              <label>새 비밀번호<input type="password" placeholder="4자리 이상" /></label>
-              <label>새 비밀번호 확인<input type="password" placeholder="다시 입력" /></label>
-            </div>
-            <button className="primaryButton" type="button">비밀번호 변경</button>
-          </div>
         </>
       ) : null}
     </div>

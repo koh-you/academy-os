@@ -59,6 +59,8 @@ JSX 48개의 `button`, `a`, `role="button"`과 CSS의 focus·touch height를 읽
 - callback 없는 no-op icon에는 유효 action처럼 들리는 이름을 붙이지 않았다.
 - UI-7E-3: 640px 이하의 `button`, `a[href]`, `[role=button]`에 44px 공통 최소 높이를 적용하고 기존 focus-visible outline을 보존했다.
 - 30~42px 개별 규칙은 desktop 밀도를 위해 삭제하지 않았으며, 모바일 최종 규칙만 우선 적용한다.
+- UI-7E-4: callback·submit·disabled가 모두 없던 12개 action과 연결되지 않은 비밀번호 입력을 제거했다. 기능을 추측한 callback은 추가하지 않았다.
+- 현재 운영 callback이 있는 월 이동·수업 등록·날짜/수업 선택·로그아웃은 유지했다.
 
 ## 사람 검수
 
