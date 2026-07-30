@@ -269,11 +269,13 @@ export function SpecialLectureSettlementPanel({
                 </tr>
               </thead>
               <tbody>
-                {group.rows.map((row) => (
-                  <tr
-                    className={row.hasMissingReason ? "specialLectureSettlementWarningRow" : undefined}
-                    key={`${group.guideId}_${row.student.studentId}`}
-                  >
+                {group.rows.map((row) => {
+                  const reasonErrorId = `special-lecture-settlement-reason-${group.guideId}-${row.student.studentId}`;
+                  return (
+                    <tr
+                      className={row.hasMissingReason ? "specialLectureSettlementWarningRow" : undefined}
+                      key={`${group.guideId}_${row.student.studentId}`}
+                    >
                     <td>
                       <strong>{row.student.name}</strong>
                       <small>{row.student.grade || "학년 미입력"} · {row.student.schoolName || "학교 미입력"}</small>
@@ -346,6 +348,8 @@ export function SpecialLectureSettlementPanel({
                     </td>
                     <td>
                       <textarea
+                        aria-describedby={row.hasMissingReason ? reasonErrorId : undefined}
+                        aria-invalid={row.hasMissingReason || undefined}
                         aria-label={`${row.student.name} 특강 정산 조정 사유`}
                         className={row.hasMissingReason ? "warning" : undefined}
                         disabled={row.setting.mode === "auto"}
@@ -354,10 +358,11 @@ export function SpecialLectureSettlementPanel({
                         rows="2"
                         value={row.setting.note}
                       />
-                      {row.hasMissingReason ? <small className="specialLectureSettlementReasonWarning">조정 사유를 입력해 주세요.</small> : null}
+                      {row.hasMissingReason ? <small className="specialLectureSettlementReasonWarning" id={reasonErrorId}>조정 사유를 입력해 주세요.</small> : null}
                     </td>
-                  </tr>
-                ))}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </DataTableShell>

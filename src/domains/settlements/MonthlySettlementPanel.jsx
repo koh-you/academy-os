@@ -477,6 +477,7 @@ export function MonthlySettlementPanel({
                 setting.mode !== "fixed" &&
                 row.hasRegularJournal &&
                 row.monthlyScheduleCount === 0;
+              const scheduleHelpId = `monthly-settlement-schedule-help-${row.student.studentId}`;
               return (
                 <tr
                   className={hasScheduleWarning ? "monthlySettlementWarningRow" : undefined}
@@ -546,12 +547,14 @@ export function MonthlySettlementPanel({
                   </td>
                   <td className="monthlySettlementScheduleCell">
                     <input
+                      aria-describedby={scheduleHelpId}
+                      aria-invalid={hasScheduleWarning || undefined}
                       aria-label={`${row.student.name} 월별 스케줄`}
                       placeholder="예: 월수금 19:00-22:00"
                       value={setting.scheduleText}
                       onChange={(event) => updateStudentSetting(row.student.studentId, "scheduleText", event.target.value)}
                     />
-                    <small>
+                    <small id={scheduleHelpId}>
                       {parsedScheduleText || "요일·시간 형식을 확인해 주세요."}
                       {row.weeklyScheduleHours > 0 ? ` · 주 ${formatSettlementHours(row.weeklyScheduleHours)}` : ""}
                     </small>

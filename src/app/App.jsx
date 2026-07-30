@@ -15809,6 +15809,8 @@ function LoginScreen({ students, onLogin }) {
     parent: "학부모",
     teacher: "선생님"
   };
+  const loginHelpId = "legacy-login-role-help";
+  const loginErrorId = "legacy-login-error";
 
   return (
     <main className="loginPage">
@@ -15823,14 +15825,29 @@ function LoginScreen({ students, onLogin }) {
             </button>
           ))}
         </div>
-        <p className="muted">
+        <p className="muted" id={loginHelpId}>
           {role === "student" ? "학생은 학원 번호를 붙여 로그인합니다." : null}
           {role === "parent" ? "학부모는 자녀 계정과 연결된 보호자 계정으로 로그인합니다." : null}
           {role === "teacher" ? "선생님은 운영자 계정으로 로그인합니다." : null}
         </p>
-        <input aria-label={`${roleLabels[role]} 아이디`} value={loginId} onChange={(event) => setLoginId(event.target.value)} placeholder="아이디" />
-        <input aria-label={`${roleLabels[role]} 비밀번호`} type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="비밀번호" />
-        {error ? <div className="loginError">{error}</div> : null}
+        <input
+          aria-describedby={error ? `${loginHelpId} ${loginErrorId}` : loginHelpId}
+          aria-invalid={Boolean(error) || undefined}
+          aria-label={`${roleLabels[role]} 아이디`}
+          value={loginId}
+          onChange={(event) => setLoginId(event.target.value)}
+          placeholder="아이디"
+        />
+        <input
+          aria-describedby={error ? `${loginHelpId} ${loginErrorId}` : loginHelpId}
+          aria-invalid={Boolean(error) || undefined}
+          aria-label={`${roleLabels[role]} 비밀번호`}
+          type="password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          placeholder="비밀번호"
+        />
+        {error ? <div className="loginError" id={loginErrorId} role="alert">{error}</div> : null}
         <button className="primaryButton full" type="submit">{roleLabels[role]} 로그인</button>
       </form>
     </main>
@@ -15849,6 +15866,8 @@ function RoleLoginScreen({ initialRole = "student", onLogin }) {
     parent: "학부모",
     teacher: "선생님"
   };
+  const loginHelpId = "role-login-help";
+  const loginErrorId = "role-login-error";
 
   function selectRole(nextRole) {
     setRole(nextRole);
@@ -15889,20 +15908,29 @@ function RoleLoginScreen({ initialRole = "student", onLogin }) {
             </button>
           ))}
         </div>
-        <p className="muted">
+        <p className="muted" id={loginHelpId}>
           {role === "student" ? "학생 본인 계정으로 입장합니다." : null}
           {role === "parent" ? "학부모 열람 계정으로 입장합니다." : null}
           {role === "teacher" ? "강사 운영 화면으로 입장합니다." : null}
         </p>
-        <input aria-label={`${roleLabels[role]} 아이디`} value={loginId} onChange={(event) => setLoginId(event.target.value)} placeholder="아이디" />
         <input
+          aria-describedby={error ? `${loginHelpId} ${loginErrorId}` : loginHelpId}
+          aria-invalid={Boolean(error) || undefined}
+          aria-label={`${roleLabels[role]} 아이디`}
+          value={loginId}
+          onChange={(event) => setLoginId(event.target.value)}
+          placeholder="아이디"
+        />
+        <input
+          aria-describedby={error ? `${loginHelpId} ${loginErrorId}` : loginHelpId}
+          aria-invalid={Boolean(error) || undefined}
           aria-label={`${roleLabels[role]} 비밀번호`}
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           placeholder="비밀번호"
         />
-        {error ? <div className="loginError">{error}</div> : null}
+        {error ? <div className="loginError" id={loginErrorId} role="alert">{error}</div> : null}
         <button className="primaryButton full" disabled={isSubmitting} type="submit">
           {isSubmitting ? "확인 중" : `${roleLabels[role]} 로그인`}
         </button>

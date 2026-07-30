@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-7D-5. form 도움말·오류 연결
+
+- 두 로그인 form의 역할별 안내를 아이디·비밀번호에 연결하고 로그인 실패 시 같은 control에 `aria-invalid`와 `role="alert"` 오류를 함께 연결했다.
+- 월별 정산의 학생별 스케줄 input은 항상 해당 형식·시수 도움말을 읽고, 기존 `hasScheduleWarning`일 때만 invalid로 읽힌다.
+- 특강 정산 조정 사유 textarea는 기존 `hasMissingReason`일 때만 해당 학생·특강의 오류 문구를 참조하고 invalid로 읽힌다.
+- 영역 전체 저장 상태나 다른 학생의 오류를 무관한 control에 연결하지 않았다. 기존 validation 조건, onChange, 저장 차단과 Supabase/app_state·notification_jobs/Solapi·수업·AI·출결 원천은 변경하거나 실행하지 않았다.
+- AI 검수: ID 참조·invalid 조건·role alert와 callback 불변 정적 fixture, `npm run build` 128 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 474개 중 기존 기준선 `90a`만 실패했고 모든 개별 fixture와 신규 계약은 통과했다.
+- 사람 검수: 실패를 실제 발생시키지 않고 접근성 트리에서 설명 관계를 확인하는 절차를 `docs/next-session/README.md`에 누적했다. 실제 로그인 실패·정산 입력/저장은 독립 gate가 아니므로 다음 UI 단위를 계속한다.
+
 ## 2026-07-29 UI-7D-4. 도메인 form control 접근 가능한 이름
 
 - 학생관리 41개, 월별 정산 5개, 테스트관리 3개, 특강 정산 2개, 학생 질문 1개 등 남은 이름 미지정 control 52개를 0개로 줄였다.

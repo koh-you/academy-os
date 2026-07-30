@@ -51,4 +51,4 @@ Academy OS의 모든 화면을 같은 사용 규칙으로 보이게 한다. 이�
 
 ## 다음 착수
 
-UI-0~UI-6과 UI-7A·UI-7B·UI-7C, UI-7D-1~4를 완료했다. 다음 UI-7D-5는 실제 control 단위 오류·도움말이 있는 대표 form만 `aria-describedby`·`aria-invalid`로 연결하되 validation·저장 동작·운영 원천은 바꾸지 않는다.
+UI-0~UI-6과 UI-7A·UI-7B·UI-7C·UI-7D를 완료했다. 다음 UI-7E-1은 button/link/role=button의 모바일 터치 높이, icon-only name, focus-visible, disabled/role 의미를 inventory한다. callback·외부 side effect와 운영 원천은 바꾸지 않는다.
