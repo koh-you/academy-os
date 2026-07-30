@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-7D-3. App form control 접근 가능한 이름
+
+- `App.jsx`의 이름 미지정 form control 53개를 0개로 줄였다.
+- 로그인, 운영 알림, 시험분석, 수업일지, 알림톡 문구, 출결 PIN, 시험 후 기록, 설정, 수업연구, 오답, 자료함, 숙제, Tally, 보고서 흐름에 업무 의미가 있는 `aria-label`을 추가했다.
+- 반복 표·카드 control은 학생명·문항 번호·자료명·업무 항목을 조합해 같은 화면에서도 서로 구분되게 했다. `EditableMemoCard`는 호출자가 명시적인 필드 이름을 전달한다.
+- AST 정적 audit가 label wrapper, `htmlFor`, `aria-label`·`aria-labelledby`를 검사해 `App.jsx` 미지정 0개를 고정한다.
+- control의 value/onChange/disabled/type/placeholder, local draft, validation과 Supabase/app_state·notification_jobs/Solapi·수업·AI·출결 원천은 변경하거나 실행하지 않았다.
+- AI 검수: AST 이름 전수검사와 대표 workflow label·callback 불변 fixture, `npm run build` 128 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 472개 중 기존 기준선 `90a`만 실패했고 모든 개별 fixture와 신규 계약은 통과했다.
+- 사람 검수: 모바일 VoiceOver에서 대표 로그인·운영 알림·수업일지·설정·오답 control 이름을 확인하는 독립 절차를 `docs/next-session/README.md`에 누적했다. 값을 바꾸거나 저장하지 않으며 다음 UI 단위를 막지 않는다.
+
 ## 2026-07-29 UI-7D-2. 모바일 form 글꼴·터치 높이
 
 - 640px 이하에서 일반 input, select, textarea의 실제 글꼴을 최소 16px로 고정해 12~14px 부모 안에서도 iOS Safari focus 확대가 발생하지 않게 했다.

@@ -3669,7 +3669,7 @@ function ExamAnalysisOutputDraftPanel({
                 GPT 기획 패킷 복사
               </button>
             </div>
-            <textarea readOnly rows={12} value={gptPlanningPacket} />
+            <textarea aria-label="GPT 프로젝트 기획 패킷" readOnly rows={12} value={gptPlanningPacket} />
           </div>
         </div>
       ) : null}
@@ -3696,6 +3696,7 @@ function ExamAnalysisOutputDraftPanel({
               <span>{field.label}</span>
               <small>{field.guide}</small>
               <textarea
+                aria-label={field.label}
                 onChange={(event) => onUpdateInput(field.key, event.target.value)}
                 placeholder={field.placeholder}
                 rows={4}
@@ -3736,6 +3737,7 @@ function ExamAnalysisOutputDraftPanel({
               <p>{field.guide}</p>
               <span className="examAnalysisBenchmarkHint">{field.benchmark}</span>
               <textarea
+                aria-label={field.label}
                 onChange={(event) => onUpdateInput(field.key, event.target.value)}
                 placeholder={field.placeholder}
                 rows={3}
@@ -3848,6 +3850,7 @@ function ExamAnalysisOutputDraftPanel({
               </div>
             </div>
             <textarea
+              aria-label="블로그 최종 초안"
               onChange={(event) => onUpdateTeacherDraft("blog", event.target.value)}
               placeholder="블로그 초안 생성 후 선생님이 최종 문장으로 수정합니다."
               rows={18}
@@ -3866,6 +3869,7 @@ function ExamAnalysisOutputDraftPanel({
               </div>
             </div>
             <textarea
+              aria-label="인스타 카드 최종 초안"
               onChange={(event) => onUpdateTeacherDraft("instagram", event.target.value)}
               placeholder="인스타 카드 초안 생성 후 카드별 문구, 슬라이드 유형, 주요문항/손풀이 슬롯 안내를 수정합니다."
               rows={18}
@@ -12584,7 +12588,12 @@ function NotificationCenter({
                       density="compact"
                       key={student.studentId}
                     >
-                      <input checked={checked} onChange={() => toggleStudentSelection(student.studentId)} type="checkbox" />
+                      <input
+                        aria-label={`${student.name} 알림 대상 선택`}
+                        checked={checked}
+                        onChange={() => toggleStudentSelection(student.studentId)}
+                        type="checkbox"
+                      />
                       <span>
                         <strong>{student.name}</strong>
                         <small>
@@ -14935,6 +14944,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                 <>
                 <input
                   accept="application/pdf,.pdf"
+                  aria-label="시험분석 PDF 원본 선택"
                   className="visuallyHiddenInput"
                   onChange={(event) => uploadPdf(event.target.files?.[0])}
                   ref={fileInputRef}
@@ -15404,6 +15414,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                               <td>
                                 {isSsenEditing ? (
                                   <select
+                                    aria-label={`${question.questionNumber}번 쎈 단원`}
                                     value={unitKey}
                                     onChange={(event) => selectReviewSsenUnit(question.questionNumber, event.target.value)}
                                   >
@@ -15424,6 +15435,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                                 {isSsenEditing ? (
                                   <div className="examAnalysisReviewEditCell withAction">
                                     <select
+                                      aria-label={`${question.questionNumber}번 주유형`}
                                       value={draftValue.mainTypeCode}
                                       onChange={(event) => selectReviewMainType(question.questionNumber, event.target.value)}
                                     >
@@ -15501,6 +15513,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                           <td>
                             {isSsenEditing ? (
                               <select
+                                aria-label={`${question.questionNumber}번 난이도`}
                                 value={draftValue.difficulty}
                                 onChange={(event) => updateReviewDraft(question.questionNumber, { difficulty: event.target.value })}
                               >
@@ -15517,6 +15530,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                           </td>
                           <td>
                             <input
+                              aria-label={`${question.questionNumber}번 재확인 근거`}
                               value={draftValue.reviewNote}
                               onChange={(event) => updateReviewDraft(question.questionNumber, { reviewNote: event.target.value })}
                               placeholder="재확인 근거 또는 수정 이유"
@@ -15814,8 +15828,8 @@ function LoginScreen({ students, onLogin }) {
           {role === "parent" ? "학부모는 자녀 계정과 연결된 보호자 계정으로 로그인합니다." : null}
           {role === "teacher" ? "선생님은 운영자 계정으로 로그인합니다." : null}
         </p>
-        <input value={loginId} onChange={(event) => setLoginId(event.target.value)} placeholder="아이디" />
-        <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="비밀번호" />
+        <input aria-label={`${roleLabels[role]} 아이디`} value={loginId} onChange={(event) => setLoginId(event.target.value)} placeholder="아이디" />
+        <input aria-label={`${roleLabels[role]} 비밀번호`} type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="비밀번호" />
         {error ? <div className="loginError">{error}</div> : null}
         <button className="primaryButton full" type="submit">{roleLabels[role]} 로그인</button>
       </form>
@@ -15880,8 +15894,9 @@ function RoleLoginScreen({ initialRole = "student", onLogin }) {
           {role === "parent" ? "학부모 열람 계정으로 입장합니다." : null}
           {role === "teacher" ? "강사 운영 화면으로 입장합니다." : null}
         </p>
-        <input value={loginId} onChange={(event) => setLoginId(event.target.value)} placeholder="아이디" />
+        <input aria-label={`${roleLabels[role]} 아이디`} value={loginId} onChange={(event) => setLoginId(event.target.value)} placeholder="아이디" />
         <input
+          aria-label={`${roleLabels[role]} 비밀번호`}
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
@@ -16237,20 +16252,20 @@ function AcademyReminderPanel({
       ) : null}
       {shouldShowReminderForm ? (
         <div className="academyReminderForm">
-          <select value={draft.reminderType} onChange={(event) => updateReminderType(event.target.value)}>
+          <select aria-label="운영 알림 종류" value={draft.reminderType} onChange={(event) => updateReminderType(event.target.value)}>
             {academyReminderTypeOptions.map((option) => (
               <option key={option.value} value={option.value}>{option.label}</option>
             ))}
           </select>
           {isClassReminderDraft ? (
-            <select value={selectedClassTemplateId} onChange={(event) => updateReminderClassTarget(event.target.value)}>
+            <select aria-label="운영 알림 대상 반" value={selectedClassTemplateId} onChange={(event) => updateReminderClassTarget(event.target.value)}>
               <option value="">반 선택</option>
               {activeClassTemplates.map((template) => (
                 <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>
               ))}
             </select>
           ) : (
-            <select value={draft.studentId} onChange={(event) => updateReminderStudentTarget(event.target.value)}>
+            <select aria-label="운영 알림 대상 학생" value={draft.studentId} onChange={(event) => updateReminderStudentTarget(event.target.value)}>
               <option value="">학생 선택 없음</option>
               {activeStudents.map((student) => (
                 <option key={student.studentId} value={student.studentId}>{student.name}</option>
@@ -16258,18 +16273,19 @@ function AcademyReminderPanel({
             </select>
           )}
           <input
+            aria-label="운영 알림 제목"
             value={draft.title}
             onChange={(event) => updateDraft("title", event.target.value)}
             placeholder="알림 제목"
           />
-          <input type="date" value={draft.reminderDate} onChange={(event) => updateDraft("reminderDate", event.target.value)} />
-          <input type="time" value={draft.reminderTime} onChange={(event) => updateDraft("reminderTime", event.target.value)} />
-          <select value={draft.priority} onChange={(event) => updateDraft("priority", event.target.value)}>
+          <input aria-label="운영 알림 날짜" type="date" value={draft.reminderDate} onChange={(event) => updateDraft("reminderDate", event.target.value)} />
+          <input aria-label="운영 알림 시간" type="time" value={draft.reminderTime} onChange={(event) => updateDraft("reminderTime", event.target.value)} />
+          <select aria-label="운영 알림 중요도" value={draft.priority} onChange={(event) => updateDraft("priority", event.target.value)}>
             {academyReminderPriorityOptions.map((option) => (
               <option key={option.value} value={option.value}>{option.label}</option>
             ))}
           </select>
-          <select value={draft.status} onChange={(event) => updateDraft("status", event.target.value)}>
+          <select aria-label="운영 알림 처리 상태" value={draft.status} onChange={(event) => updateDraft("status", event.target.value)}>
             {Object.entries(academyReminderStatusLabels).map(([value, label]) => (
               <option key={value} value={value}>{label}</option>
             ))}
@@ -16283,6 +16299,7 @@ function AcademyReminderPanel({
             09:00 슬랙 포함
           </label>
           <textarea
+            aria-label="운영 알림 내용"
             value={draft.content}
             onChange={(event) => updateDraft("content", event.target.value)}
             placeholder="내용을 입력하세요. 예: 상담 주제, 학부모 요청, 신입생 준비물, 당일 확인할 특이사항"
@@ -17325,7 +17342,7 @@ function SupplementMakeupLessonDetail({
   );
 }
 
-function EditableMemoCard({ className = "", disabled = false, editKey, editingKey, onChange, onEdit, placeholder, value }) {
+function EditableMemoCard({ ariaLabel, className = "", disabled = false, editKey, editingKey, onChange, onEdit, placeholder, value }) {
   const textareaRef = useRef(null);
   const isEditable = !disabled;
   const shouldFocus = isEditable && editingKey === editKey;
@@ -17349,6 +17366,7 @@ function EditableMemoCard({ className = "", disabled = false, editKey, editingKe
   if (isEditable) {
     return (
       <textarea
+        aria-label={ariaLabel}
         className={`journalMemoCardInput ${className}`.trim()}
         onChange={handleChange}
         onFocus={() => onEdit(editKey)}
@@ -18590,6 +18608,7 @@ function LessonJournalDetail({
                   {checkoutMissing ? <small className="checkoutMissingText">하원 미체크</small> : null}
                 </button>
                 <EditableMemoCard
+                  ariaLabel={`${student.name} 강의 교재`}
                   disabled={!journalEditMode}
                   editKey={`${recordId}:lessonMaterial`}
                   editingKey={editingMemoKey}
@@ -18599,6 +18618,7 @@ function LessonJournalDetail({
                   value={record.lessonMaterial ?? ""}
                 />
                 <EditableMemoCard
+                  ariaLabel={`${student.name} 오늘 강의 내용`}
                   disabled={!journalEditMode}
                   editKey={`${recordId}:lessonProgress`}
                   editingKey={editingMemoKey}
@@ -18608,6 +18628,7 @@ function LessonJournalDetail({
                   value={record.lessonProgress ?? record.progress ?? ""}
                 />
                 <EditableMemoCard
+                  ariaLabel={`${student.name} 지난 숙제`}
                   disabled={!journalEditMode}
                   editKey={`${recordId}:previousHomework`}
                   editingKey={editingMemoKey}
@@ -18617,6 +18638,7 @@ function LessonJournalDetail({
                   value={previousHomeworkTitle}
                 />
                 <EditableMemoCard
+                  ariaLabel={`${student.name} 다음 숙제`}
                   disabled={!journalEditMode}
                   editKey={`${recordId}:nextHomework`}
                   editingKey={editingMemoKey}
@@ -18627,6 +18649,7 @@ function LessonJournalDetail({
                 />
                 <div className="assignmentStatusCell">
                   <select
+                    aria-label={`${student.name} 숙제 상태`}
                     className="assignmentStatusSelect"
                     disabled={!journalEditMode}
                     value={assignmentStatusValue}
@@ -19245,6 +19268,7 @@ function CommentComposerModal({
             <pre className="templatePreviewText commentSourcePreview" id="comment-source-preview">{sourceText}</pre>
           ) : null}
           <textarea
+            aria-label={isParent ? "학부모 최종 알림톡 문구" : "학생 최종 알림톡 문구"}
             className="commentComposerTextarea"
             value={draftComment}
             onChange={(event) => setDraftComment(event.target.value)}
@@ -19635,6 +19659,7 @@ function AttendanceKiosk({
         </div>
         <form className="attendancePinForm" onSubmit={submitPin}>
           <input
+            aria-label="학생 휴대폰 번호 뒤 4자리"
             autoFocus
             inputMode="numeric"
             maxLength={4}
@@ -20022,6 +20047,7 @@ function LessonDetail({ lesson, records, saveStates, students, homeworks, onChan
                 <small className="noteText">{student.specialNote ?? "특이사항 없음"}</small>
               </span>
               <select
+                aria-label={`${student.name} 행동 태그`}
                 value={record.behaviorTag ?? ""}
                 onChange={(event) => onChangeRecord(lesson, student, "behaviorTag", event.target.value)}
               >
@@ -20035,13 +20061,14 @@ function LessonDetail({ lesson, records, saveStates, students, homeworks, onChan
               <HomeworkCell homework={homeworkBundle.previous} emptyText="지난 숙제 없음" />
               <HomeworkCell homework={homeworkBundle.today} emptyText="오늘 숙제 미등록" />
               <textarea
+                aria-label={`${student.name} 데일리 코멘트`}
                 value={record.teacherComment}
                 onChange={(event) => onChangeRecord(lesson, student, "teacherComment", event.target.value)}
                 placeholder="코멘트 입력..."
                 rows="2"
               />
-              <input disabled title="추후 출결앱 연동 예정" type="time" />
-              <input disabled title="추후 출결앱 연동 예정" type="time" />
+              <input aria-label={`${student.name} 등원 시간`} disabled title="추후 출결앱 연동 예정" type="time" />
+              <input aria-label={`${student.name} 하원 시간`} disabled title="추후 출결앱 연동 예정" type="time" />
               <span className="saveCell">
                 <button
                   className="saveButton"
@@ -21381,7 +21408,12 @@ function ExamPostSubmissionManager({
                       density="compact"
                       key={`${row.examPrepId}_${student.studentId}`}
                     >
-                      <input checked={checked} onChange={() => toggleRowTargetStudent(row, student.studentId)} type="checkbox" />
+                      <input
+                        aria-label={`${student.name} ${row.schoolName} 시험 후 기록 대상 선택`}
+                        checked={checked}
+                        onChange={() => toggleRowTargetStudent(row, student.studentId)}
+                        type="checkbox"
+                      />
                       <span>{student.name}</span>
                     </ListCard>
                   );
@@ -21613,6 +21645,7 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
           <details className="examReviewRawDraft">
             <summary>전체 원문 보기/직접 수정</summary>
             <textarea
+              aria-label="시험 후 기록지 전체 원문"
               className="commentComposerTextarea"
               value={reviewDraft}
               onBlur={flushPendingReviewSave}
@@ -21644,6 +21677,7 @@ function ExamReviewComposerModal({ aiSettings = defaultAiSettings, onClose, onUp
             <pre>{buildExamReviewBlogSourceText(reviewDraft) || "왼쪽 항목을 채우면 블로그 첫 문단, 변별 포인트, 다음 대비 문장으로 가져갈 재료가 정리됩니다."}</pre>
           </div>
           <textarea
+            aria-label="시험 후 총평 수정본"
             className="commentComposerTextarea"
             value={row.revisedReview ?? ""}
             onChange={(event) => {
@@ -22143,6 +22177,7 @@ function SettingsCenter({
                 </div>
               </div>
               <textarea
+                aria-label={`${row.title} 템플릿 문구`}
                 value={settings.notificationTemplates[row.key] ?? ""}
                 onChange={(event) => updateNotificationTemplate(row.key, event.target.value)}
                 rows="8"
@@ -22172,13 +22207,13 @@ function SettingsCenter({
                   <strong>{row.title}</strong>
                   <span className="muted">{row.description}</span>
                 </div>
-                <select value={provider} onChange={(event) => updateProvider(row, event.target.value)}>
+                <select aria-label={`${row.title} AI 제공자`} value={provider} onChange={(event) => updateProvider(row, event.target.value)}>
                   <option value="auto">자동 선택</option>
                   <option value="openai">OpenAI</option>
                   <option value="anthropic">Claude</option>
                   <option value="mock">테스트 모드</option>
                 </select>
-                <select value={model} onChange={(event) => updateModel(row, event.target.value)}>
+                <select aria-label={`${row.title} AI 모델`} value={model} onChange={(event) => updateModel(row, event.target.value)}>
                   {models.map((item) => (
                     <option key={item} value={item}>{getAiModelLabel(item)}</option>
                   ))}
@@ -22268,7 +22303,7 @@ function SettingsCenter({
               <strong>태블릿 전용 화면</strong>
               <span className="muted">학생이 휴대폰 번호 뒤 4자리만 입력하는 출결 화면입니다.</span>
             </div>
-            <input readOnly value={attendanceUrl} />
+            <input aria-label="태블릿 출결 화면 주소" readOnly value={attendanceUrl} />
             <a className="softButton linkButton" href={attendanceUrl} target="_blank" rel="noreferrer">
               새 창 열기
             </a>
@@ -22279,6 +22314,7 @@ function SettingsCenter({
               <span className="muted">수업 정각 이후 이 시간까지는 등원으로 처리합니다.</span>
             </div>
             <input
+              aria-label="지각 유예시간 분"
               inputMode="numeric"
               min="5"
               type="number"
@@ -22948,9 +22984,9 @@ function EvaluationCenter({
   );
 }
 
-function StudentSelect({ students, value, onChange }) {
+function StudentSelect({ label = "학생 선택", students, value, onChange }) {
   return (
-    <select value={value} onChange={(event) => onChange(event.target.value)}>
+    <select aria-label={label} value={value} onChange={(event) => onChange(event.target.value)}>
       {students.map((student) => (
         <option key={student.studentId} value={student.studentId}>{student.name}</option>
       ))}
@@ -23216,12 +23252,12 @@ function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, on
           <SectionHeader
             actions={(
               <>
-              <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>
+              <select aria-label="교안 카테고리 필터" value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>
                 {["전체", ...lessonResearchCategories].map((option) => (
                   <option key={option} value={option}>{option}</option>
                 ))}
               </select>
-              <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+              <select aria-label="교안 상태 필터" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
                 {["전체", ...lessonResearchStatuses].map((option) => (
                   <option key={option} value={option}>{option}</option>
                 ))}
@@ -23550,6 +23586,7 @@ function AIVariantProblemCenter({ aiSettings = defaultAiSettings }) {
                     <span>파일 1개 · 최대 50MB · Ctrl+V 붙여넣기</span>
                     <input
                       accept=".txt,.csv,.md,.json,image/*,.pdf"
+                      aria-label="AI 변형 원본 파일 선택"
                       className="visuallyHiddenInput"
                       onChange={handleVariantFileInput}
                       ref={variantFileInputRef}
@@ -26313,21 +26350,28 @@ function StudentWrongProblemBoard({ selectedStudent, wrongProblems, onAddWrongPr
           wrongProblems.map((item) => (
             <div className="managementRow wrongProblemProfileRow" key={item.wrongProblemId}>
               <input
+                aria-label={`${selectedStudent.name} ${item.problemRange || "새 오답"} 교재 또는 출처`}
                 value={item.source}
                 onChange={(event) => onUpdateWrongProblem(item.wrongProblemId, "source", event.target.value)}
                 placeholder="예: 쎈, GRIP"
               />
               <input
+                aria-label={`${selectedStudent.name} ${item.source || "새 오답"} 문항 또는 범위`}
                 value={item.problemRange}
                 onChange={(event) => onUpdateWrongProblem(item.wrongProblemId, "problemRange", event.target.value)}
                 placeholder="예: 643-647"
               />
-              <select value={item.status} onChange={(event) => onUpdateWrongProblem(item.wrongProblemId, "status", event.target.value)}>
+              <select
+                aria-label={`${selectedStudent.name} ${item.problemRange || "새 오답"} 상태`}
+                value={item.status}
+                onChange={(event) => onUpdateWrongProblem(item.wrongProblemId, "status", event.target.value)}
+              >
                 <option value="open">미해결</option>
                 <option value="reviewing">재풀이중</option>
                 <option value="done">완료</option>
               </select>
               <input
+                aria-label={`${selectedStudent.name} ${item.problemRange || "새 오답"} 메모`}
                 value={item.note}
                 onChange={(event) => onUpdateWrongProblem(item.wrongProblemId, "note", event.target.value)}
                 placeholder="오답 원인/보충 메모"
@@ -26433,6 +26477,7 @@ function WrongBookCard({ book, selectedProblemRef, onSelectProblem, onUpdateBook
             <>
               <ProblemPreview book={book} problem={selectedProblem} />
               <select
+                aria-label={`${book.title} ${selectedProblem.number}번 상태`}
                 value={selectedProblem.status}
                 onChange={(event) => onUpdateProblem(selectedProblem.problemId, "status", event.target.value)}
               >
@@ -26595,6 +26640,7 @@ function ResourceLibraryCenter({ materials = [], onAddMaterial, onDeleteMaterial
             <span>{form.fileName || "파일을 여기에 놓거나 클릭해서 선택하세요."}</span>
           </button>
           <input
+            aria-label="자료 파일 선택"
             hidden
             multiple
             onChange={(event) => attachFiles(event.target.files)}
@@ -27270,6 +27316,7 @@ function OverdueHomework({
                 </div>
                 <div className="homeworkDetailControls">
                   <select
+                    aria-label={`${getHomeworkStudentName(homework)} ${homework.title} 교사 확인 상태`}
                     value={homework.teacherStatus ?? "unverified"}
                     onChange={(event) => onTeacherVerifyHomework(homework.homeworkId, event.target.value)}
                   >
@@ -27550,7 +27597,7 @@ function StudentModal({
         <div className="studentBulkPlaceholder">
           <strong>엑셀 일괄 등록</strong>
           <p className="muted">이름, 출생연도, 학교, PIN 순서로 복사한 목록을 붙여넣는 기능으로 확장 예정입니다.</p>
-          <textarea placeholder={"박수빈\t2010\t자운고등학교\t1234"} rows="6" />
+          <textarea aria-label="학생 엑셀 일괄 등록 원본" placeholder={"박수빈\t2010\t자운고등학교\t1234"} rows="6" />
           <button className="primaryButton full" disabled type="button">일괄 등록 준비 중</button>
         </div>
       ) : (
@@ -27576,6 +27623,7 @@ function StudentModal({
                     <span>{[applicant.grade || inferGradeFromBirthYear(applicant.birthYear), applicant.schoolName].filter(Boolean).join(" · ") || "기본 정보 미입력"}</span>
                   </div>
                   <select
+                    aria-label={`${applicant.name || "이름 미입력"} Tally 접수 상태`}
                     value={applicant.status ?? "received"}
                     onChange={(event) => updateApplicant(applicant.applicantId, "status", event.target.value)}
                   >
@@ -27792,7 +27840,7 @@ function ReportCenter({ lessons, records, reportLesson, selectedReportLessonId, 
           eyebrow="Draft"
           title="리포트 초안"
         />
-        <textarea className="reportDraft" readOnly rows="12" value={reportBody} />
+        <textarea aria-label="리포트 초안" className="reportDraft" readOnly rows="12" value={reportBody} />
       </div>
 
       <div className="panel snapshotsPanel">

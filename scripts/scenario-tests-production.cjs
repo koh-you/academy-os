@@ -1,5 +1,7 @@
 const fs = require("fs");
 const path = require("path");
+const { parse } = require("@babel/parser");
+const traverse = require("@babel/traverse").default;
 
 const root = path.resolve(__dirname, "..");
 const appPath = path.join(root, "src", "app", "App.jsx");
@@ -287,6 +289,56 @@ function check(name, condition, detail = "") {
 
 function hasAll(source, patterns) {
   return patterns.every((pattern) => source.includes(pattern));
+}
+function findUnnamedFormControls(source) {
+  const ast = parse(source, { plugins: ["jsx"], sourceType: "module" });
+  const labelledIds = new Set();
+  const unnamed = [];
+
+  traverse(ast, {
+    JSXOpeningElement(pathRef) {
+      const { node } = pathRef;
+      if (node.name.type !== "JSXIdentifier" || node.name.name !== "label") return;
+      const htmlFor = node.attributes.find((attribute) => (
+        attribute.type === "JSXAttribute" && attribute.name.name === "htmlFor"
+      ));
+      if (htmlFor?.value?.type === "StringLiteral") labelledIds.add(htmlFor.value.value);
+    }
+  });
+
+  traverse(ast, {
+    JSXOpeningElement(pathRef) {
+      const { node } = pathRef;
+      if (node.name.type !== "JSXIdentifier" || !["input", "select", "textarea"].includes(node.name.name)) return;
+      const getAttribute = (name) => node.attributes.find((attribute) => (
+        attribute.type === "JSXAttribute" && attribute.name.name === name
+      ));
+      const typeAttribute = getAttribute("type");
+      if (typeAttribute?.value?.type === "StringLiteral" && typeAttribute.value.value === "hidden") return;
+
+      let parent = pathRef.parentPath;
+      let isWrappedByLabel = false;
+      while (parent) {
+        if (
+          parent.isJSXElement?.()
+          && parent.node.openingElement.name.type === "JSXIdentifier"
+          && parent.node.openingElement.name.name === "label"
+        ) {
+          isWrappedByLabel = true;
+          break;
+        }
+        parent = parent.parentPath;
+      }
+
+      const idAttribute = getAttribute("id");
+      const isLinkedById = idAttribute?.value?.type === "StringLiteral" && labelledIds.has(idAttribute.value.value);
+      if (!getAttribute("aria-label") && !getAttribute("aria-labelledby") && !isLinkedById && !isWrappedByLabel) {
+        unnamed.push({ line: node.loc?.start?.line ?? 0, tag: node.name.name });
+      }
+    }
+  });
+
+  return unnamed;
 }
 function sourceBetween(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -736,6 +788,7 @@ check("77j-7c-2 mobile workspace tabs keep the selected direct button internally
 check("77j-7c-3 representative tabs filters and searches preserve caller state results and zero states after mobile hardening", hasAll(app, ["label=\"알림관리 영역 선택\"", "aria-selected={activeNotificationTab === \"notice\"}", "setActiveNotificationTab(\"notice\")", "setActiveNotificationTab(\"specialLecture\")", "label=\"알림 대상 반과 학생 검색\"", "label=\"학생 검색\"", "onChange={setSearchText}", "result={`${visibleNoticeStudents.length}명`}", "검색 결과가 없습니다."]) && hasAll(schoolCalendarComponentsSource, ["label=\"학사일정 표시 항목\"", "aria-pressed={calendarFilter === filter.id}", "onClick={() => onChange?.(filter.id)}", "label=\"학사일정 학교 필터와 일정 등록\"", "onChange={(event) => onSchoolFilterChange?.(event.target.value)}"]) && hasAll(parentResponseContextPanelSource, ["label=\"학생·학부모 검색\"", "onChange={setSearchText}", "result={`${visibleContexts.length}건`}", "검색 결과가 없습니다."]) && hasAll(sharedWorkspaceTabsSource + sharedFilterBarSource + sharedSearchFieldSource, ["{children}", "{result}", "onChange?.(event.target.value)", "onChange?.(\"\")"]) && !sharedWorkspaceTabsSource.includes("scrollIntoView"));
 check("77j-7d-1 mobile form inventory keeps inherited sizing and isolates the remaining unlabeled caller groups before hardening", hasAll(css, ["body {", "font-size: 16px", "button,", "input,", "select,", "textarea {", "font: inherit"]) && hasAll(app, ["className=\"academyReminderForm\"", "value={draft.reminderType}", "value={draft.reminderDate}", "value={draft.reminderTime}"]) && hasAll(studentManagerSource, ["className=\"studentConsultationControls\"", "value={newConsultationDraft.consultationType}", "value={newConsultationDraft.consultationDate}"]) && hasAll(monthlySettlementPanelSource, ["value={setting.mode}", "value={setting.scheduleText}", "value={setting.adjustmentAmount}"]) && hasAll(testManagerPanelsSource, ["value={draft.status ?? \"\"}", "value={draft.correctCount ?? \"\"}", "value={draft.notTakenReason ?? \"\"}"]) && hasAll(studentQuestionPanelSource, ["value={questionText}", "placeholder=\"예: 2차함수 최대최소에서 범위가 있을 때가 헷갈려요\""]));
 check("77j-7d-2 mobile form controls prevent iOS focus zoom and expose 44px single-line targets without resizing native choices or files", hasAll(css, ["@media (max-width: 640px)", "input:not([type=\"checkbox\"]):not([type=\"radio\"]):not([type=\"file\"]):not([type=\"hidden\"])", "select,", "textarea", "font-size: 16px", "max-width: 100%", "min-height: var(--academy-touch-target)"]) && (css.match(/input:not\(\[type="checkbox"\]\):not\(\[type="radio"\]\):not\(\[type="file"\]\):not\(\[type="hidden"\]\)/g) ?? []).length === 2);
+check("77j-7d-3 App form controls expose accessible workflow names without changing values callbacks or disabled guards", findUnnamedFormControls(app).length === 0 && hasAll(app, ["aria-label={`${roleLabels[role]} 아이디`}", "aria-label=\"운영 알림 종류\"", "aria-label={`${question.questionNumber}번 쎈 단원`}", "aria-label={`${student.name} 숙제 상태`}", "aria-label={isParent ? \"학부모 최종 알림톡 문구\" : \"학생 최종 알림톡 문구\"}", "aria-label={`${row.title} AI 제공자`}", "aria-label=\"교안 카테고리 필터\"", "aria-label={`${selectedStudent.name} ${item.problemRange || \"새 오답\"} 상태`", "aria-label={`${getHomeworkStudentName(homework)} ${homework.title} 교사 확인 상태`", "aria-label={`${applicant.name || \"이름 미입력\"} Tally 접수 상태`"]) && hasAll(app, ["onChange={(event) => setLoginId(event.target.value)}", "onChange={(event) => updateReminderType(event.target.value)}", "onChange={(event) => handleAssignmentStatusChange(student, record, effectivePreviousHomework, event.target.value)}", "onChange={(event) => updateProvider(row, event.target.value)}", "onChange={(event) => onUpdateWrongProblem(item.wrongProblemId, \"status\", event.target.value)}"]));
 check("77j-2c notification center restores the parent response tab without storing channel replies", hasAll(app, ["ParentResponseContextPanel", "getParentResponseContexts", "[\"parent_context\", \"학부모 응대\"", "activeNoticeWorkspace === \"parent_context\""]) && hasAll(css, [".parentResponseContextPanel", ".parentResponseContextCard", ".parentResponseContextBody"]));
 check("77j-3 exam analysis selection columns keep Korean labels clear beside thin scrollbars", hasAll(css, [".examAnalysisColumnList::-webkit-scrollbar", ".examAnalysisColumnList::-webkit-scrollbar-button", "scrollbar-gutter: stable", ".examAnalysisColumnCard strong", "line-height: 1.4", "padding-block: 1px"]));
 check("78 lesson journal does not show keyboard shortcut hint text", !app.includes("↑↓←→") && !app.includes("Ctrl+C/V/Z"));

@@ -51,4 +51,4 @@ Academy OS의 모든 화면을 같은 사용 규칙으로 보이게 한다. 이�
 
 ## 다음 착수
 
-UI-0~UI-6과 UI-7A·UI-7B·UI-7C, UI-7D-1·2를 완료했다. 다음 UI-7D-3은 `App.jsx`의 이름 미지정 form control 53개를 작업 흐름별 label로 닫되 value/onChange/disabled/placeholder와 저장 callback·draft·validation·운영 원천은 바꾸지 않는다.
+UI-0~UI-6과 UI-7A·UI-7B·UI-7C, UI-7D-1·2·3을 완료했다. 다음 UI-7D-4는 학생관리·정산·테스트·학생 질문의 이름 미지정 52개를 업무 맥락 label로 닫되 value/onChange/disabled/placeholder와 저장 callback·draft·validation·운영 원천은 바꾸지 않는다.
