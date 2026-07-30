@@ -14776,7 +14776,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                   <span>{schoolCards.length}개</span>
                 </div>
               </div>
-              <div className="examAnalysisColumnList">
+              <div aria-label="시험분석 학교 목록" className="examAnalysisColumnList" role="region" tabIndex={0}>
                 {schoolCards.length === 0 ? (
                   <EmptyState className="emptyState compact">학교 없음</EmptyState>
                 ) : schoolCards.map((school) => (
@@ -14800,7 +14800,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                   <span>{gradeCards.length}개</span>
                 </div>
               </div>
-              <div className="examAnalysisColumnList">
+              <div aria-label="시험분석 학년 목록" className="examAnalysisColumnList" role="region" tabIndex={0}>
                 {gradeCards.length === 0 ? (
                   <EmptyState className="emptyState compact">학년 없음</EmptyState>
                 ) : gradeCards.map((grade) => (
@@ -14824,7 +14824,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                   <span>{examCycleCards.length}개</span>
                 </div>
               </div>
-              <div className="examAnalysisColumnList">
+              <div aria-label="시험분석 고사 목록" className="examAnalysisColumnList" role="region" tabIndex={0}>
                 {examCycleCards.map((examCycle) => (
                   <button
                     className={selectedExamCycle === examCycle.name ? "examAnalysisColumnCard active" : "examAnalysisColumnCard"}
@@ -14856,7 +14856,7 @@ function ExamAnalysisPipelineCenter({ examPrepRows = [] }) {
                   </button>
                 </div>
               </div>
-              <div className="examAnalysisColumnList">
+              <div aria-label="시험분석 분석본 목록" className="examAnalysisColumnList" role="region" tabIndex={0}>
                 {scopedRuns.length === 0 ? (
                   <EmptyState className="emptyState compact">PDF를 업로드하면 분석이 생성됩니다.</EmptyState>
                 ) : scopedRuns.map((run) => (

@@ -1200,8 +1200,12 @@ summary:focus-visible {
   display: flex;
   gap: 7px;
   overflow-x: auto;
+  overscroll-behavior-inline: contain;
   padding: 7px;
+  scroll-padding-inline: 8px;
   scrollbar-width: thin;
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 
 .examAnalysisWorkspaceTabs button {
@@ -1331,7 +1335,11 @@ summary:focus-visible {
   min-height: 240px;
   min-width: 0;
   overflow-x: auto;
+  overscroll-behavior-inline: contain;
   padding-bottom: 2px;
+  scroll-padding-inline: 4px;
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 
 .examAnalysisColumn {
@@ -1416,9 +1424,17 @@ summary:focus-visible {
 .examAnalysisColumnList {
   align-content: start;
   overflow: auto;
+  overscroll-behavior: contain;
   padding-right: 4px;
   scrollbar-gutter: stable;
   scrollbar-width: thin;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+.examAnalysisColumnList:focus-visible {
+  outline: 2px solid var(--academy-focus-ring, #2563eb);
+  outline-offset: 2px;
 }
 
 .examAnalysisColumnList::-webkit-scrollbar {
@@ -5793,8 +5809,15 @@ summary:focus-visible {
   border-radius: 8px;
   display: inline-flex;
   gap: 4px;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
   padding: 4px;
+  scroll-padding-inline: 4px;
+  scrollbar-width: thin;
+  touch-action: pan-x pan-y;
   width: fit-content;
+  -webkit-overflow-scrolling: touch;
 }
 
 .examManagementTabs button {

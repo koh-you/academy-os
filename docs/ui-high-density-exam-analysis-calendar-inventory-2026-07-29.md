@@ -39,3 +39,9 @@
 ## 사람 검수
 
 inventory 자체에는 사람 gate가 없다. 구현 뒤 desktop과 390px에서 단계 탭·library 목록·시험정보 modal·학사 달력·학사 modal의 제목·focus·내부 scroll만 확인한다. 시험정보 입력/저장/삭제, 시험 후 교사 확인, PDF/AI/Storage, 학사일정 등록/수정/삭제와 직전수업 연동은 실행하지 않는다.
+
+## 진행 갱신
+
+- UI-8G-1: 시험관리 하위 탭과 시험분석 작업 단계 탭을 내부 가로 touch scroll 영역으로 제한했다.
+- 시험분석 학교·학년·고사·분석본 네 목록에 업무 이름·keyboard focus·내부 세로 touch scroll 경계를 추가했다.
+- 단계와 분류 선택 callback, 시험정보·시험분석 저장/삭제/AI/파일 원천은 변경하지 않았다.

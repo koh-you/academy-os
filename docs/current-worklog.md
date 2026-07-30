@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8G-1. 시험 단계 탭·시험분석 library 탐색
+
+- 시험관리 하위 탭과 시험분석 작업 단계 탭을 좁은 화면에서 내부 가로 touch scroll되는 영역으로 제한했다.
+- 시험분석 학교·학년·고사·분석본 네 목록에 업무 이름, keyboard focus와 내부 세로 touch scroll 경계를 추가했다.
+- 학교·학년·고사·분석 선택과 시험관리/시험분석 단계 전환 callback은 그대로 보존했다.
+- 화면 탐색 shell·CSS 외 시험정보 저장·삭제, PDF/Storage·AI, 검수·산출물, 학사일정 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 단계 탭과 네 named library 목록, 기존 선택 callback 보존 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 510개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: desktop/390px에서 탭과 네 목록의 선택 강조·focus·내부 scroll을 나중에 UI-8G 통합 절차로 확인한다. 실제 저장·삭제·PDF·AI는 누르지 않고 UI-8G-2를 계속한다.
+
 ## 2026-07-29 UI-8G-0. 시험·시험분석·학사일정 inventory
 
 - 시험관리의 시험정보/Tally, 시험분석의 run·PDF·문항·산출물, 학사일정의 수동 일정·시험관리 파생 일정 원천과 저장·삭제·AI·파일·연동 callback을 전수 대조했다.
