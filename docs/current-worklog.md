@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8E-1. 특강 탭·gate 모바일 읽기
+
+- 특강 수업/안내문 상위 탭과 안내문 편집 5개 탭에 touch overscroll 경계, scroll padding과 iOS momentum scroll을 적용했다.
+- 640px 이하에서 `특강 명단 · 학생별 회차 관리`와 `특강 수업일지 반영`의 설명·상태 pill·펼치기 버튼을 한 열로 배치하고 버튼을 44px 전체 폭으로 맞췄다.
+- 상·하위 탭 state와 두 gate의 `aria-expanded`, 접기/펼치기 callback·conditional mount는 그대로 보존했다.
+- 화면 shell·CSS 외 저장·발송·예약·삭제·출결·Supabase/app_state·special_lecture_enrollments·lessons·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 탭 touch 경계, 모바일 gate 읽기 순서와 기존 disclosure callback 보존 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 502개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 390px에서 특강 탭과 두 gate header의 읽기 순서를 나중에 UI-8E 통합 절차로 확인한다. 접기/펼치기 외 실제 저장·반영은 누르지 않고 UI-8E-2를 계속한다.
+
 ## 2026-07-29 UI-8E-0. 특강관리 고밀도 화면 inventory
 
 - 실제 `activeView=specialLectureManagement`의 특강 수업/안내문, 신청·학생 연결, 확정 명단·회차, 수업일지 반영과 네 modal 흐름을 대조했다.

@@ -51,4 +51,4 @@ Academy OS의 모든 화면을 같은 사용 규칙으로 보이게 한다. 이�
 
 ## 다음 착수
 
-UI-0~UI-7, UI-8A·UI-8B·UI-8C·UI-8D와 UI-8E-0 inventory를 완료했다. UI-7·8A·8B·8C·8D 사람 시각 확인은 `docs/next-session/README.md`의 독립 절차로 누적되어 다음 화면군을 막지 않는다. 다음 UI-8E-1은 특강 상·하위 탭 touch 경계와 확정 명단·수업일지 반영 gate header를 모바일 한 열로 보강한다. 실제 원천 저장·수업 생성·알림 발송은 실행하지 않는다.
+UI-0~UI-7, UI-8A·UI-8B·UI-8C·UI-8D와 UI-8E-0~1을 완료했다. UI-7·8A·8B·8C·8D 사람 시각 확인은 `docs/next-session/README.md`의 독립 절차로 누적되어 다음 화면군을 막지 않는다. 다음 UI-8E-2는 학생 연결·수동 접수·회차 편집 modal을 공통 scrollable shell로 전환하고 학생 목록·모바일 실제 저장 bar를 보강한다. 실제 원천 저장·수업 생성·알림 발송은 실행하지 않는다.

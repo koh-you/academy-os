@@ -50,3 +50,9 @@
 ## 사람 검수
 
 inventory 자체는 중단 gate가 없다. 구현 뒤 desktop과 390px에서 특강 선택, 두 gate의 접기/펼치기, 학생 연결·수동 접수·기존 학생 회차·진행 modal의 제목·내부 scroll·행동 순서만 확인한다. 검색·선택 전환·modal 열기/닫기 외 안내문 저장, 학생 연결/교체/등록, 회차 저장, 수업일지 생성·반영·열기, 취소·삭제, 알림톡 준비는 누르지 않는다.
+
+## 진행 갱신
+
+- UI-8E-1: 특강 상위 탭과 안내문 편집 탭에 touch overscroll 경계·scroll padding·iOS momentum scroll을 적용했다.
+- 640px 이하에서 명단·회차 관리와 수업일지 반영 gate의 설명, 상태 pill, 펼치기 행동을 문서 순서대로 한 열 배치했다.
+- 특강 수업/안내문, 편집 항목, 두 gate의 기존 state·callback과 conditional mount는 변경하지 않았다.

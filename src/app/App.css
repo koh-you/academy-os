@@ -8490,6 +8490,14 @@ button:disabled {
   margin-top: 0;
 }
 
+.specialLectureTopTabs,
+.specialLectureGuideTabs {
+  overscroll-behavior-inline: contain;
+  scroll-padding-inline: 8px;
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
 .specialLectureGuideWorkspace,
 .specialLectureGuideTabPanel {
   display: grid;
@@ -8503,6 +8511,24 @@ button:disabled {
 .specialLectureGuideTabs button {
   font-size: 12px;
   padding: 7px 10px;
+}
+
+@media (max-width: 640px) {
+  .specialLectureGateHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .specialLectureGateStats {
+    justify-content: flex-start;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .specialLectureGateStats > button {
+    min-height: 44px;
+    width: 100%;
+  }
 }
 
 .specialLectureLinkSettings {
