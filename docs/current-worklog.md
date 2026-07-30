@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-7E-5. 모바일 action 회귀계약
+
+- `src`의 JSX 49개를 AST로 다시 읽어 button 433개의 callback·disabled·submit 계약을 한 번에 검사하는 회귀 fixture를 추가했다.
+- 현재 button은 callback 425개, disabled guard 175개, submit 7개이며, 세 계약이 모두 없는 disconnected button은 0개다. 항목 간 중복은 허용한다.
+- 대표 로그인 submit/busy guard, 알림 기록 새로고침 disabled/callback, 월 이동 icon 이름/callback과 전역 focus-visible·모바일 44px를 함께 고정했다.
+- 화면·callback·disabled·submit·route와 저장·발송·예약·삭제·출결·Supabase/app_state·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 전체 JSX AST action inventory와 대표 focus/touch 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 479개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 코드 UI 변경이 없어 새 필수·시각 gate가 없다. UI-7E-2~4에 누적한 접근성·모바일 확인을 유지하고 UI-7F inventory를 계속한다.
+
 ## 2026-07-29 UI-7E-4. 동작 없는 action 정리
 
 - callback·submit·disabled가 모두 없던 로그인 닫기 2개, 구형 수업 달력 화살표 4개, 반 추가 1개, 오답 교재 일괄 action 3개, 학생 비밀번호 변경 1개, 학생 포털 말풍선 1개를 제거했다.

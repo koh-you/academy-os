@@ -290,6 +290,60 @@ function check(name, condition, detail = "") {
 function hasAll(source, patterns) {
   return patterns.every((pattern) => source.includes(pattern));
 }
+function getButtonActionInventory(directory) {
+  const filePaths = [];
+  const inventory = {
+    callbackCount: 0,
+    disabledCount: 0,
+    disconnected: [],
+    fileCount: 0,
+    submitCount: 0,
+    total: 0
+  };
+
+  function collect(currentDirectory) {
+    fs.readdirSync(currentDirectory, { withFileTypes: true }).forEach((entry) => {
+      const entryPath = path.join(currentDirectory, entry.name);
+      if (entry.isDirectory()) {
+        collect(entryPath);
+      } else if (entry.name.endsWith(".jsx")) {
+        filePaths.push(entryPath);
+      }
+    });
+  }
+
+  collect(directory);
+  inventory.fileCount = filePaths.length;
+
+  filePaths.forEach((filePath) => {
+    const source = fs.readFileSync(filePath, "utf8");
+    const ast = parse(source, { plugins: ["jsx"], sourceType: "module" });
+
+    traverse(ast, {
+      JSXOpeningElement(pathRef) {
+        const { node } = pathRef;
+        if (node.name.type !== "JSXIdentifier" || node.name.name !== "button") return;
+        inventory.total += 1;
+
+        const attributes = node.attributes.filter((attribute) => attribute.type === "JSXAttribute");
+        const attributeNames = new Set(attributes.map((attribute) => attribute.name.name));
+        const typeAttribute = attributes.find((attribute) => attribute.name.name === "type");
+        const isSubmit = typeAttribute?.value?.type === "StringLiteral" && typeAttribute.value.value === "submit";
+        const hasCallback = [...attributeNames].some((name) => /^on[A-Z]/.test(name));
+        const isDisabled = attributeNames.has("disabled");
+
+        if (hasCallback) inventory.callbackCount += 1;
+        if (isDisabled) inventory.disabledCount += 1;
+        if (isSubmit) inventory.submitCount += 1;
+        if (!hasCallback && !isDisabled && !isSubmit) {
+          inventory.disconnected.push(`${path.relative(root, filePath)}:${node.loc.start.line}`);
+        }
+      }
+    });
+  });
+
+  return inventory;
+}
 function findUnnamedFormControls(source) {
   const ast = parse(source, { plugins: ["jsx"], sourceType: "module" });
   const labelledIds = new Set();
@@ -801,6 +855,8 @@ check("77j-7e-1 mobile action inventory isolates named callbacks touch heights a
 check("77j-7e-2 callback icon actions expose workflow names while retaining callbacks and busy guards", hasAll(app, ["aria-label=\"이전 달\" className=\"iconButton\" onClick={() => onMoveDate(-30)}", "aria-label=\"다음 달\" className=\"iconButton\" onClick={() => onMoveDate(30)}", "aria-label=\"수업 목록으로 돌아가기\" className=\"iconButton\" onClick={onBack}", "aria-label=\"출결 화면 닫기\" className=\"iconButton\" onClick={onBack}", "aria-label=\"한 자리 지우기\" className=\"secondaryKey\" disabled={isLoading || isSubmitting || Boolean(pendingPreview)} onClick={() => pressKey(\"backspace\")}", "aria-label=\"완료 알림 닫기\" className=\"iconButton\" onClick={() => setFeedback(null)}", "aria-label=\"알림 제어 닫기\" className=\"iconButton\" disabled={notificationControlBusy} onClick={closeNotificationControl}"]) && hasAll(schoolCalendarComponentsSource, ["aria-label={`${index + 1}번째 수학시험 삭제`}", "disabled={mathExamItems.length === 1}", "onClick={() => onRemoveMathExamItem?.(item.id)}"]) && hasAll(sharedModalSource, ["aria-label=\"창 닫기\"", "disabled={closeDisabled}", "onClick={onClose}"]));
 check("77j-7e-3 mobile buttons action links and role buttons keep a 44px target without weakening focus visibility", hasAll(css, ["@media (max-width: 640px)", "button,\n  a[href],\n  [role=\"button\"] {", "min-height: var(--academy-touch-target) !important", "button:focus-visible", "a:focus-visible", "outline: 3px solid rgba(37, 99, 235, 0.35)", "outline-offset: 2px"]) && hasAll(app, ["<a className=\"secondaryButton linkButton\"", "role=\"button\"", "onKeyDown={(event) => {"]));
 check("77j-7e-4 disconnected login calendar class wrong-book password and chat controls are absent without inventing callbacks", ["className=\"loginClose\"", "<button className=\"primaryButton\" type=\"button\">+ 반 추가</button>", "<button className=\"softButton\" type=\"button\">전부 맞음</button>", "<button className=\"softButton\" type=\"button\">오답수정</button>", "<button className=\"softButton\" type=\"button\">기록</button>"].every((pattern) => !app.includes(pattern)) && !studentMyPageTabSource.includes("비밀번호 변경") && !studentPortalShellSource.includes("portalIconButton") && [".loginClose", ".portalIconButton", ".passwordPanel"].every((pattern) => !css.includes(pattern)) && hasAll(app, ["function TeacherLessonHub(", "<h1>{formatMonthTitle(selectedDate)}</h1>", "function LessonHub(", "<h1>2026년 6월</h1>", "onClick={onAddLesson}"]));
+const buttonActionInventory = getButtonActionInventory(path.join(root, "src"));
+check("77j-7e-5 all JSX buttons retain a callback disabled guard or submit contract with mobile focus and touch coverage", buttonActionInventory.fileCount === 49 && buttonActionInventory.total === 433 && buttonActionInventory.callbackCount === 425 && buttonActionInventory.disabledCount === 175 && buttonActionInventory.submitCount === 7 && buttonActionInventory.disconnected.length === 0 && hasAll(app, ["<button className=\"primaryButton full\" disabled={isSubmitting} type=\"submit\">", "disabled={isNotificationJobsLoading} onClick={onRefresh}", "aria-label=\"이전 달\" className=\"iconButton\" onClick={() => onMoveDate(-30)}"]) && hasAll(css, ["button:focus-visible", "a:focus-visible", "button,\n  a[href],\n  [role=\"button\"] {", "min-height: var(--academy-touch-target) !important"]));
 check("77j-2c notification center restores the parent response tab without storing channel replies", hasAll(app, ["ParentResponseContextPanel", "getParentResponseContexts", "[\"parent_context\", \"학부모 응대\"", "activeNoticeWorkspace === \"parent_context\""]) && hasAll(css, [".parentResponseContextPanel", ".parentResponseContextCard", ".parentResponseContextBody"]));
 check("77j-3 exam analysis selection columns keep Korean labels clear beside thin scrollbars", hasAll(css, [".examAnalysisColumnList::-webkit-scrollbar", ".examAnalysisColumnList::-webkit-scrollbar-button", "scrollbar-gutter: stable", ".examAnalysisColumnCard strong", "line-height: 1.4", "padding-block: 1px"]));
 check("78 lesson journal does not show keyboard shortcut hint text", !app.includes("↑↓←→") && !app.includes("Ctrl+C/V/Z"));
