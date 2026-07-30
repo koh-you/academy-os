@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8D-0. 알림관리·학부모 응대 고밀도 화면 inventory
+
+- 실제 `activeView=notifications`의 개별 발송, 학부모 응대, 예약·발송 완료·확인 필요·전체 기록 흐름을 대조했다.
+- 대상 선택, 공지 작성, 발송 완료 원문과 별관 채널 찾기, OS/Solapi 결과 기록의 원천과 callback·side effect 경계를 확정했다.
+- 작업 탭 touch 경계, 수신 범위 선택 상태, 이름 없는 학생 목록 scroll, 긴 학부모 발신 원문을 UI-8D의 좁은 표시·접근성 예외로 기록했다.
+- 상세 원천과 UI-8D-1~3 순서를 `docs/ui-high-density-notification-parent-response-inventory-2026-07-29.md`에 기록했다.
+- 화면·callback과 저장·발송·예약·삭제·출결·Supabase/app_state·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: active route, 작성·대상·학부모 응대·기록 흐름과 발송/예약/취소/삭제 callback 경계 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 497개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 코드 UI 변경이 없어 새 필수·시각 gate가 없다. UI-8D-1 적용 뒤 누적 검수한다.
+
 ## 2026-07-29 UI-8C-3. 보충관리 고밀도 화면 회귀 마감
 
 - 원 숙제/결석·지난/새 숙제, 보충 내용, 수업일지 일정, 학생/학부모/당일 학생 알림 3종, 완료·복귀와 두 취소의 원천·callback을 통합 회귀로 묶었다.
