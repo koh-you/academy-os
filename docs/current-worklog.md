@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 P3. App.jsx 18D-2 legacy LoginScreen dead component removal
+
+- 코드: JSX 소비 0건인 legacy `LoginScreen` 정의와 전용 help/error ID만 제거했다. 현재 렌더되는 `RoleLoginScreen`과 role 전환·trimmed credential submit·busy/error·접근성 계약은 보존했다.
+- 경계: 실제 `onLogin` callback, 인증 API, session/localStorage, 교사 bearer와 학생/학부모 분기는 변경하지 않았다. 운영 로그인이나 외부 원천을 호출하지 않았다.
+- AI 검수: legacy 정의·소비·ID 0건과 active `RoleLoginScreen` 정의·렌더 각 1건을 같은 fixture로 대조한다. 사람 gate는 0건이다.
+- 변화량: 새 파일 0개, 전체 `+37/-88`, `App.jsx +0/-68`로 실제 파일 길이 63줄 감소했다.
+
 ## 2026-07-31 P3. App.jsx 18D-1 legacy LoginScreen dead component inventory
 
 - 판정: `LoginScreen` 정의는 1건이지만 JSX 소비는 0건이며 실제 인증 진입은 `RoleLoginScreen` 정의·렌더 각 1건이다. legacy component의 `students` prop도 사용되지 않는다.

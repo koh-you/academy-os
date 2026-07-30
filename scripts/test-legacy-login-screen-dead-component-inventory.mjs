@@ -8,7 +8,7 @@ const appSource = await readFile(
 
 assert.equal(
   appSource.split("function LoginScreen({").length - 1,
-  1
+  0
 );
 assert.equal(
   appSource.split("<LoginScreen").length - 1,
@@ -23,23 +23,33 @@ assert.equal(
   1
 );
 
-const legacyStart = appSource.indexOf("function LoginScreen({");
-const legacyEnd = appSource.indexOf(
-  "\nfunction RoleLoginScreen(",
-  legacyStart
+assert.equal(
+  appSource.split("legacy-login-role-help").length - 1,
+  0
 );
-assert.ok(legacyStart >= 0 && legacyEnd > legacyStart);
-const legacySource = appSource.slice(legacyStart, legacyEnd);
+assert.equal(
+  appSource.split("legacy-login-error").length - 1,
+  0
+);
+const roleLoginStart = appSource.indexOf("function RoleLoginScreen({");
+const roleLoginEnd = appSource.indexOf(
+  "\nfunction AcademyReminderList(",
+  roleLoginStart
+);
+assert.ok(roleLoginStart >= 0 && roleLoginEnd > roleLoginStart);
+const roleLoginSource = appSource.slice(roleLoginStart, roleLoginEnd);
 for (const boundary of [
-  'useState("student")',
+  'useState(initialRole)',
   "async function submit(event)",
   "await onLogin(role, loginId.trim(), password.trim())",
-  'const loginHelpId = "legacy-login-role-help"',
-  'const loginErrorId = "legacy-login-error"'
+  'const loginHelpId = "role-login-help"',
+  'const loginErrorId = "role-login-error"',
+  "setIsSubmitting(true)",
+  "setIsSubmitting(false)"
 ]) {
   assert.ok(
-    legacySource.includes(boundary),
-    `legacy login boundary changed: ${boundary}`
+    roleLoginSource.includes(boundary),
+    `active role login boundary changed: ${boundary}`
   );
 }
 for (const forbiddenExternalEffect of [
@@ -51,9 +61,9 @@ for (const forbiddenExternalEffect of [
   "notification_jobs"
 ]) {
   assert.ok(
-    !legacySource.includes(forbiddenExternalEffect),
-    `legacy login crossed an external effect: ${forbiddenExternalEffect}`
+    !roleLoginSource.includes(forbiddenExternalEffect),
+    `active role login crossed an external effect: ${forbiddenExternalEffect}`
   );
 }
 
-console.log("legacy LoginScreen dead component inventory passed");
+console.log("legacy LoginScreen removal and active RoleLoginScreen preservation passed");
