@@ -1593,6 +1593,7 @@ function StudentProfileModal({
       title={`${student.name} 학생 프로파일`}
       subtitle="기본정보를 먼저 보고, 필요한 기록만 펼쳐서 확인합니다."
       onClose={onClose}
+      scrollable
     >
       <div className="studentProfileModalWrap">
         <SectionHeader

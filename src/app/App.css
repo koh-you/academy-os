@@ -12164,6 +12164,20 @@ textarea {
   margin-right: 4px;
 }
 
+@media (max-width: 640px) {
+  .withdrawnStudentBulkActions {
+    bottom: max(8px, env(safe-area-inset-bottom));
+    left: max(8px, env(safe-area-inset-left));
+    max-height: min(56dvh, 420px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+    right: max(8px, env(safe-area-inset-right));
+    scrollbar-gutter: stable;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 .withdrawnStudentSelect {
   align-items: center;
   display: flex;

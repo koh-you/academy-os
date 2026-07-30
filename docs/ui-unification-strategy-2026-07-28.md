@@ -51,4 +51,4 @@ Academy OS의 모든 화면을 같은 사용 규칙으로 보이게 한다. 이�
 
 ## 다음 착수
 
-UI-0~UI-7, UI-8A·UI-8B·UI-8C·UI-8D·UI-8E와 UI-8F-0 inventory를 완료했다. UI-7·8A·8B·8C·8D·8E 사람 시각 확인은 `docs/next-session/README.md`의 독립 절차로 누적되어 다음 화면군을 막지 않는다. 다음 UI-8F-1은 학생 프로파일을 공통 scrollable modal로 전환하고 모바일 퇴원 선택 toolbar를 safe-area 안의 제한된 작업 영역으로 정리한다. 실제 학생 저장·병합·퇴원·삭제는 실행하지 않는다.
+UI-0~UI-7, UI-8A·UI-8B·UI-8C·UI-8D·UI-8E와 UI-8F-0~1을 완료했다. UI-7·8A·8B·8C·8D·8E 사람 시각 확인은 `docs/next-session/README.md`의 독립 절차로 누적되어 다음 화면군을 막지 않는다. 다음 UI-8F-2는 학생 추가/Tally와 반 명단 modal을 공통 scrollable shell로 전환하고 두 내부 목록을 named focus·touch scroll 영역으로 만든다. 실제 학생 저장·병합·퇴원·삭제는 실행하지 않는다.

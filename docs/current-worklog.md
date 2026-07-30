@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8F-1. 학생 프로파일·퇴원 선택 모바일 shell
+
+- 학생 프로파일을 공통 scrollable modal로 전환해 학생명·닫기를 유지하고 기본정보·Tally 원천·운영메모·상담·성적·테스트 본문만 내부 scroll되게 했다.
+- 640px 이하 퇴원생 선택 toolbar를 좌우·하단 safe-area 안에 배치하고 최대 `56dvh / 420px` 내부 scroll로 제한해 표와 브라우저 UI 밖으로 벗어나지 않게 했다.
+- 기본정보·운영메모·상담·성적·테스트 저장 callback과 퇴원 선택 저장·복원·인수인계·영구삭제 행동은 그대로 보존했다.
+- 화면 shell·CSS 외 저장·발송·예약·삭제·출결·Supabase/app_state·students·student_intake_applicants·lessons 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 공통 profile header/body, 모바일 safe-area 선택 bar와 기존 저장·복원·삭제 callback 보존 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 506개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 390px에서 프로파일 제목·본문 scroll과 퇴원 선택 bar 위치·내부 scroll을 나중에 UI-8F 통합 절차로 확인한다. 실제 저장·복원·삭제는 누르지 않고 UI-8F-2를 계속한다.
+
 ## 2026-07-29 UI-8F-0. 학생·Tally·반관리 고밀도 화면 inventory
 
 - 실제 학생관리의 재원/반별/퇴원 목록, 학생 프로파일, 학생 추가의 한 명/일괄/Tally 접수, 반관리 명단과 퇴원·복원·영구삭제 흐름을 대조했다.
