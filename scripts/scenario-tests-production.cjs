@@ -2166,6 +2166,28 @@ check(
       appViewChangePlanSource.includes(value)
     )
 );
+check(
+  "84d-171 sidebar menu model inventory preserves group route order and supplement attention",
+  hasAll(rawAppEntrySource, [
+    "const menuGroups = [",
+    'title: "Lesson Hub"',
+    'id: "lessons"',
+    'id: "specialLectureManagement"',
+    'id: "supplements"',
+    'title: "학생"',
+    'id: "students"',
+    'title: "시험"',
+    'id: "examPrep"',
+    'title: "연구실"',
+    'id: "lessonResearch"',
+    'title: "운영"',
+    'id: "settlements"',
+    'id: "notifications"',
+    'id: "settings"',
+    "supplementAttentionCount > 0",
+    "`확인 ${supplementAttentionCount}건`"
+  ])
+);
 check("84e shared modal closes with Escape key", hasAll(app, ["import { Modal, ModalFooter } from \"../shared/components/Modal.jsx\""]) && hasAll(sharedModalSource, ["export function Modal({", "backdropClassName = \"\"", "hideCloseButton = false", "hideHeader = false", "function handleEscapeKey(event)", "event.key === \"Escape\"", "onClose?.()", "window.addEventListener(\"keydown\", handleEscapeKey)", "window.removeEventListener(\"keydown\", handleEscapeKey)", "hideCloseButton ? null"]) );
 check("84f lesson journal modal uses shared Escape-close modal", hasAll(app, ["backdropClassName=\"lessonJournalModalBackdrop\"", "className=\"lessonJournalModal\"", "hideHeader", "onClose={onBackToCalendar}"]) && !app.includes("<div className=\"modalBackdrop lessonJournalModalBackdrop\" role=\"dialog\" aria-modal=\"true\">"));
 check("84f-1 lesson journal student preview stays isolated and callback-only", hasAll(lessonFrontendSource, ["LessonJournalStudentPreviewModal", "createLessonJournalStudentPreviewModel", "students.filter((student) => student.studentId === studentPreviewId)", "PortalComponent={StudentPortalV2}", "students={model.previewStudents}", "onLogout={onClose}"]) && !lessonJournalStudentPreviewModalSource.includes("fetch(") && !lessonJournalStudentPreviewModalSource.includes("/api/"));

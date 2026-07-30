@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 P3. App.jsx 18B-1 sidebar menu model inventory
+
+- 원천/동작: Sidebar의 5개 그룹·17개 route ID·label/icon 순서와 보충관리 attention badge 계산은 렌더용 정적 모델이다. active route 검색과 click/logout/toggle callback은 Sidebar가 소유한다.
+- AI 가상검수: 그룹·route 순서, 보충 0건 CONTROL과 확인 건수 TARGET에 필요한 badge 경계를 source-of-truth 한 fixture로 고정한다. 저장·API·Supabase·notification_jobs·Solapi 호출과 사람 gate는 0건이다.
+- 다음: 18B-2에서 메뉴 모델 생성만 별도 순수 모듈로 분리하고 Sidebar JSX와 callback을 유지한다.
+- 변화량: 새 파일 1개, 전체 `+96/-0`, `App.jsx` 변경·감소 0줄이다.
+
 ## 2026-07-31 P3. App.jsx 18A-3 app view change plan closeout
 
 - 감사: 기존 18A fixture에 plan export·App import·호출 각 1건과 App-owned React setter·`window.scrollTo` 잔존을 추가 고정했다.
