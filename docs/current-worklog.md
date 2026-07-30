@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8E-0. 특강관리 고밀도 화면 inventory
+
+- 실제 `activeView=specialLectureManagement`의 특강 수업/안내문, 신청·학생 연결, 확정 명단·회차, 수업일지 반영과 네 modal 흐름을 대조했다.
+- 안내문 app_state, Tally 신청·학생, enrollment, lessons·records·notificationJobs 보호 상태와 각 저장·삭제·수업 생성 callback 경계를 확정했다.
+- 모바일 gate header 좌우 압축, 특강 탭 touch 경계, 공통 scrollable shell을 쓰지 않는 긴 modal 3개, 이름 없는 학생 목록, 두 열 실제 저장 bar를 표시·접근성 예외로 기록했다.
+- 상세 원천과 UI-8E-1~3 순서를 `docs/ui-high-density-special-lecture-inventory-2026-07-29.md`에 기록했다.
+- 화면·callback과 저장·발송·예약·삭제·출결·Supabase/app_state·students·special_lecture_applications·special_lecture_enrollments·lessons·lesson_student_records·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: active route, 안내문·명단·회차·수업일지 반영·modal과 저장/삭제/수업 생성 경계 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 501개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 코드 UI 변경이 없어 새 필수·시각 gate가 없다. UI-8E-1 적용 뒤 누적 검수한다.
+
 ## 2026-07-29 UI-8D-3. 알림관리·학부모 응대 회귀 마감
 
 - 알림 작성·대상 선택, 학부모 발신 원문·별관 채널 찾기, 예약/발송 결과 기록을 하나의 통합 정적 회귀로 묶었다.
