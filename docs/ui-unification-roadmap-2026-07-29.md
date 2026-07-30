@@ -185,6 +185,6 @@
 
 ## 다음 실행 목표
 
-> 최신 상태: `UI-0`~`UI-7`을 완료했다. 현재 다음 작은 목표는 `UI-8A-0 Lesson Hub·월간 달력 inventory`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
+> 최신 상태: `UI-0`~`UI-7`과 `UI-8A-0`을 완료했다. 현재 다음 작은 목표는 `UI-8A-1 월간 달력 모바일 내부 scroll`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
 
-Lesson Hub·월간 달력의 header, 필터, 일정 grid, 등록/선택 callback, 상태 표시와 desktop/390px 예외를 먼저 수량화한다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
+640px 이하에서 teacher calendar만 읽을 수 있는 최소 폭을 유지하고 shell 안에서 가로 scroll되게 한다. 숨긴 header와 날짜/수업 선택 callback은 변경하지 않는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.

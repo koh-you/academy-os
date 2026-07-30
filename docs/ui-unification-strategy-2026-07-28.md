@@ -51,4 +51,4 @@ Academy OS의 모든 화면을 같은 사용 규칙으로 보이게 한다. 이�
 
 ## 다음 착수
 
-UI-0~UI-7을 완료했다. UI-7 사람 시각 확인은 `docs/next-session/README.md` 최상단의 한 번짜리 독립 절차로 누적되어 UI-8을 막지 않는다. 다음 UI-8A-0은 Lesson Hub·월간 달력의 현재 화면 구조·callback·상태·모바일 예외를 읽기 전용 inventory로 정리한다. 실제 저장·발송·예약·삭제·출결은 실행하지 않는다.
+UI-0~UI-7과 UI-8A-0을 완료했다. UI-7 사람 시각 확인은 `docs/next-session/README.md` 최상단의 한 번짜리 독립 절차로 누적되어 UI-8을 막지 않는다. 다음 UI-8A-1은 640px 이하 teacher calendar에 내부 가로 scroll·영역 이름·focus를 제공하고 7열 날짜/수업 pill의 읽을 폭을 보존한다. 숨긴 header, callback과 실제 저장·발송·예약·삭제·출결은 변경하거나 실행하지 않는다.

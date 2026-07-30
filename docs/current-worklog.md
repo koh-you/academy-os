@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8A-0. Lesson Hub·월간 달력 inventory
+
+- 실제 `activeView=lessons`의 `TeacherLessonHubV2`만 선별해 운영 알림 원본, 조건부 저장 상태, 숨긴 NavigationHeader, 월간 달력, 수업별 modal 흐름을 대조했다.
+- 숨긴 header의 월 이동·수업 등록·월 정규수업 열기·7종 filter·출결 상태 callback은 보존하며 사용자 요청의 `display:none`을 임의로 되돌리지 않는다.
+- 390px에서 7열 달력이 약 50px 날짜 cell로 압축되고 pill이 ellipsis되며, calendar shell에 내부 가로 scroll·영역 이름·focus가 없는 예외를 확인했다.
+- 날짜 `onDateSelect`, 수업 pill `onOpenLessonJournal`, 달력 keyboard, 편집 단축키와 UI-8A-1~3 전략을 `docs/ui-high-density-lesson-hub-inventory-2026-07-29.md`에 기록했다.
+- 화면·callback과 저장·발송·예약·삭제·출결·Supabase/app_state·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: active production hub, 숨긴 header, filter/callback, 압축 calendar CSS 기준선 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 483개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 코드 UI 변경이 없어 새 필수·시각 gate가 없다. UI-8A-1 적용 뒤 누적 검수한다.
+
 ## 2026-07-29 UI-7F-4. 모바일·접근성 최종 검수 묶음
 
 - UI-7A~F에 흩어진 모바일·접근성 사람 확인을 `docs/next-session/README.md` 최상단의 한 번짜리 390px/desktop/VoiceOver 절차로 통합했다.
