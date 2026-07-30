@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8F-3. 학생·Tally·반관리 통합 회귀 마감
+
+- 학생 목록·프로파일·Tally·반 명단·퇴원 선택 화면의 공통 modal/scroll/focus 계약과 모바일 safe-area 경계를 한 fixture로 통합했다.
+- 학생 기본정보·운영메모·상담·성적·학원 테스트, Tally 접수정보·신규등록/병합/덮어쓰기, 반 명단, 퇴원 저장·복원·영구삭제 callback이 서로 합쳐지지 않았음을 고정했다.
+- 실제 학생 저장·등록·병합·반배정·퇴원·복원·삭제와 Supabase/app_state·Storage·notification_jobs·Solapi는 실행하거나 변경하지 않았다.
+- AI 검수: UI-8F 통합 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 508개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: desktop/390px의 목록·프로파일·Tally·반 명단·퇴원 선택 toolbar 시각 절차를 `docs/next-session/README.md` 최상단에 누적했다. 다음 UI-8G의 전제조건이 아니므로 시험·시험분석·학사일정 inventory를 계속한다.
+
 ## 2026-07-29 UI-8F-2. 학생 추가·Tally·반 명단 모바일 shell
 
 - 학생 추가/Tally와 반 명단 수정을 공통 scrollable modal로 전환해 제목·설명·닫기는 고정하고 긴 입력·선택 본문만 내부 scroll되게 했다.

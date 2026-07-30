@@ -67,3 +67,5 @@ inventory 자체는 중단 gate가 없다. 구현 뒤 desktop과 390px에서 학
 - UI-8F-2: 학생 추가/Tally와 반 명단 수정을 공통 scrollable modal로 전환해 긴 입력·선택 본문만 내부 scroll되게 했다.
 - Tally 접수·등록 후보와 반 학생 명단은 이름 있는 keyboard focus·touch scroll 영역으로 만들고 overscroll을 내부에 제한했다.
 - 학생 저장·Tally 접수정보 저장·신규등록/병합/덮어쓰기와 반 명단 저장 callback은 변경하지 않았다.
+- UI-8F-3: 목록·프로파일·Tally·반 명단·퇴원 선택의 responsive shell과 학생 기본정보·운영메모·Tally·반·퇴원/복원/영구삭제 callback 분리를 통합 fixture로 고정했다.
+- desktop/390px 사람 시각 확인은 `docs/next-session/README.md`에 독립 절차로 누적했으며 UI-8G를 막지 않는다.
