@@ -40,12 +40,22 @@ assert.ok(roleLoginStart >= 0 && roleLoginEnd > roleLoginStart);
 const roleLoginSource = appSource.slice(roleLoginStart, roleLoginEnd);
 for (const boundary of [
   'useState(initialRole)',
+  'useState("")',
+  "function selectRole(nextRole)",
+  "setLoginId(\"\")",
+  "setPassword(\"\")",
+  "setError(\"\")",
   "async function submit(event)",
+  "event.preventDefault()",
   "await onLogin(role, loginId.trim(), password.trim())",
   'const loginHelpId = "role-login-help"',
   'const loginErrorId = "role-login-error"',
   "setIsSubmitting(true)",
-  "setIsSubmitting(false)"
+  "setIsSubmitting(false)",
+  'aria-describedby={error ? `${loginHelpId} ${loginErrorId}` : loginHelpId}',
+  "aria-invalid={Boolean(error) || undefined}",
+  'className="loginError" id={loginErrorId} role="alert"',
+  "disabled={isSubmitting}"
 ]) {
   assert.ok(
     roleLoginSource.includes(boundary),

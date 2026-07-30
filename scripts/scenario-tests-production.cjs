@@ -2253,6 +2253,29 @@ check(
     !rawAppEntrySource.includes("legacy-login-role-help") &&
     !rawAppEntrySource.includes("legacy-login-error")
 );
+check(
+  "84d-174 active RoleLoginScreen inventory keeps local drafts busy error accessibility and injected auth",
+  hasAll(rawAppEntrySource, [
+    'function RoleLoginScreen({ initialRole = "student", onLogin })',
+    'useState(initialRole)',
+    'useState("")',
+    "function selectRole(nextRole)",
+    "setLoginId(\"\")",
+    "setPassword(\"\")",
+    "setError(\"\")",
+    "async function submit(event)",
+    "event.preventDefault()",
+    "await onLogin(role, loginId.trim(), password.trim())",
+    "setIsSubmitting(true)",
+    "setIsSubmitting(false)",
+    'const loginHelpId = "role-login-help"',
+    'const loginErrorId = "role-login-error"',
+    'aria-describedby={error ? `${loginHelpId} ${loginErrorId}` : loginHelpId}',
+    "aria-invalid={Boolean(error) || undefined}",
+    'className="loginError" id={loginErrorId} role="alert"',
+    "disabled={isSubmitting}"
+  ])
+);
 check("84e shared modal closes with Escape key", hasAll(app, ["import { Modal, ModalFooter } from \"../shared/components/Modal.jsx\""]) && hasAll(sharedModalSource, ["export function Modal({", "backdropClassName = \"\"", "hideCloseButton = false", "hideHeader = false", "function handleEscapeKey(event)", "event.key === \"Escape\"", "onClose?.()", "window.addEventListener(\"keydown\", handleEscapeKey)", "window.removeEventListener(\"keydown\", handleEscapeKey)", "hideCloseButton ? null"]) );
 check("84f lesson journal modal uses shared Escape-close modal", hasAll(app, ["backdropClassName=\"lessonJournalModalBackdrop\"", "className=\"lessonJournalModal\"", "hideHeader", "onClose={onBackToCalendar}"]) && !app.includes("<div className=\"modalBackdrop lessonJournalModalBackdrop\" role=\"dialog\" aria-modal=\"true\">"));
 check("84f-1 lesson journal student preview stays isolated and callback-only", hasAll(lessonFrontendSource, ["LessonJournalStudentPreviewModal", "createLessonJournalStudentPreviewModel", "students.filter((student) => student.studentId === studentPreviewId)", "PortalComponent={StudentPortalV2}", "students={model.previewStudents}", "onLogout={onClose}"]) && !lessonJournalStudentPreviewModalSource.includes("fetch(") && !lessonJournalStudentPreviewModalSource.includes("/api/"));

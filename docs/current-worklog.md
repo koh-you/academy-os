@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 P3. App.jsx 18E-1 active role login shell inventory
+
+- 원천/동작: active `RoleLoginScreen`은 role/loginId/password/error/submitting local state, role 전환 초기화, trimmed credential submit과 접근성 표시를 소유하고 인증은 주입된 `onLogin`만 호출한다.
+- AI 검수: student 기본 role, 입력 초기화, submit busy/finally, 오류·help 연결과 외부 API 직접 호출 부재를 기존 로그인 fixture·정적 시나리오에 추가 고정했다. 실제 로그인 요청과 사람 gate는 0건이다.
+- 다음: 18E-2에서 active login shell만 전용 component로 이동하고 App이 실제 인증·session 저장을 계속 소유한다.
+- 변화량: 새 파일 0개, 전체 `+41/-1`, `App.jsx` 변경·감소 0줄이다.
+
 ## 2026-07-31 P3. App.jsx 18D-3 legacy LoginScreen removal closeout
 
 - 감사: legacy 정의·소비·전용 ID 0건, active `RoleLoginScreen` 정의·렌더 각 1건과 callback-only submit을 고정했다.
