@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 P3. App.jsx 18C-1 sidebar shell inventory
+
+- 원천/동작: Sidebar는 menu model을 소비해 collapse/mobile 상태, active route, 보충 badge를 표시하고 주입된 view/logout/toggle callback만 호출한다.
+- AI 검수: prop 기본값, navigation 접근성, active route, view/logout callback 경계를 기존 18B fixture와 정적 시나리오에 얇게 추가했다. 저장·API·Supabase·notification_jobs·Solapi 호출과 사람 gate는 0건이다.
+- 다음: 18C-2에서 Sidebar JSX만 전용 component로 이동하고 App이 state·view change·logout callback을 계속 소유한다.
+- 변화량: 새 파일 0개, 전체 `+52/-0`, `App.jsx` 변경·감소 0줄이다.
+
 ## 2026-07-31 P3. App.jsx 18B-3 sidebar menu model closeout
 
 - 감사: 기존 18B fixture에 model export·App import·호출 각 1건과 Sidebar-owned active item, group/item JSX, view/logout/toggle callback 잔존을 추가 고정했다.

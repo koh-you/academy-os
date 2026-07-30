@@ -111,6 +111,31 @@ for (const sidebarOwnedBoundary of [
     `Sidebar-owned boundary moved: ${sidebarOwnedBoundary}`
   );
 }
+const sidebarStart = appSource.indexOf("function Sidebar({");
+const sidebarEnd = appSource.indexOf("\nfunction LoginScreen(", sidebarStart);
+assert.ok(sidebarStart >= 0 && sidebarEnd > sidebarStart);
+const sidebarSource = appSource.slice(sidebarStart, sidebarEnd);
+for (const sidebarShellBoundary of [
+  "activeView,",
+  "isCollapsed,",
+  "isMobileNavigationOpen = false,",
+  "onChangeView,",
+  "onLogout,",
+  "onToggle,",
+  "onToggleMobileNavigation,",
+  "supplementAttention = null",
+  'aria-label="Academy OS 교사 메뉴"',
+  'aria-controls="academy-primary-navigation"',
+  'aria-label="주요 화면"',
+  'aria-current={activeView === item.id ? "page" : undefined}',
+  "onClick={() => onChangeView(item.id)}",
+  "onClick={onLogout}"
+]) {
+  assert.ok(
+    sidebarSource.includes(sidebarShellBoundary),
+    `sidebar shell boundary changed: ${sidebarShellBoundary}`
+  );
+}
 for (const forbiddenEffect of [
   "useState",
   "useEffect",
