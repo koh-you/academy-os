@@ -25560,6 +25560,7 @@ function SupplementStudentModal({
       title={`${student.name} ${tabTitle}`}
       subtitle={`${student.grade ?? "-"} · ${student.schoolName ?? "학교 미입력"}`}
       onClose={onClose}
+      scrollable
     >
       {feedback ? (
         <div className={`supplementFeedbackPopup ${feedback.tone || "success"}`} role="status" aria-live="polite">

@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8C-1. 보충 학생 상세 내부 scroll·3개 상태
+
+- 학생별 보충 상세에 공통 `scrollable` modal shell을 적용해 학생명·학년·학교 제목과 닫기를 유지하고 긴 원천·일정·알림·취소 본문만 내부 scroll되게 했다.
+- 실제 렌더되는 `보충 내용`, `수업일지 일정`, `알림톡 문구 3종` 상태에 맞춰 desktop 상태 grid를 빈 칸 없는 3열로 고쳤다.
+- `onSaveTask`, `onScheduleTask`, 알림 예약/취소, 완료·두 취소 callback과 local draft·dirty 유지 로직은 변경하지 않았다.
+- 화면 shell·CSS 외 저장·발송·예약·삭제·출결·Supabase/app_state·lessons·lesson_student_records·makeup_tasks·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 공통 modal header/body scroll, 학생 맥락, 상태 3열과 내용/일정 callback 분리 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 493개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: desktop/390px에서 학생명·닫기가 유지되고 본문만 scroll되는지 나중에 UI-8C 통합 절차로 확인한다. 실제 입력·버튼은 조작하지 않고 UI-8C-2를 계속한다.
+
 ## 2026-07-29 UI-8C-0. 보충관리 고밀도 화면 inventory
 
 - 실제 `activeView=supplements`의 보충관리 목록, 학생 상세, 최근 이력, 알림 제어·일정·완료·취소 확인 modal 흐름을 대조했다.
