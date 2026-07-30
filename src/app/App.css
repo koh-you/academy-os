@@ -4360,6 +4360,12 @@ summary:focus-visible {
   padding-bottom: 2px;
 }
 
+.lessonNotificationStatusRow:focus-visible,
+.lessonNotificationActionRow:focus-visible {
+  outline: 2px solid var(--academy-focus-ring, rgba(37, 99, 235, 0.55));
+  outline-offset: 2px;
+}
+
 .lessonNotificationActionRow > button,
 .lessonNotificationPlanSelect {
   flex: 0 0 auto;
@@ -4399,11 +4405,19 @@ summary:focus-visible {
   .lessonNotificationStatusRow,
   .lessonNotificationActionRow {
     overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-padding-inline: 8px;
     scrollbar-width: thin;
+    touch-action: pan-x pan-y;
+    -webkit-overflow-scrolling: touch;
   }
 
   .lessonNotificationStatusRow > * {
     flex: 0 0 auto;
+  }
+
+  .lessonNotificationPlanStatus {
+    max-width: min(360px, 78vw);
   }
 }
 
@@ -4558,6 +4572,26 @@ summary:focus-visible {
 
   .stickySaveBarStatus .inlineSaveStatus {
     flex: 0 0 auto;
+  }
+
+  .lessonJournalStickySaveBar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lessonJournalStickySaveBar .stickySaveBarStatus {
+    align-items: start;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .lessonJournalStickySaveBar .stickySaveBarStatus > span {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .lessonJournalStickySaveBar .stickySaveBarActions,
+  .lessonJournalStickySaveBar .stickySaveBarActions button {
+    width: 100%;
   }
 
   .specialLecturePlanStickySaveBar {

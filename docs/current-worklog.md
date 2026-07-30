@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8B-3. 수업일지 모바일 저장·알림 작업
+
+- 발송 상태와 예약 작업 가로 영역에 각각 `알림톡 상태`, `알림톡 예약 작업` 이름·region·keyboard focus를 제공하고 touch overscroll 경계를 보강했다.
+- 모바일 알림 계획 pill은 최대 78vw에서 더 읽을 수 있게 하되 상태·작업 row는 계속 내부 가로 scroll로 유지했다.
+- 수업일지 하단 저장 바는 640px 이하에서 상태·긴 메시지와 행동을 한 열로 분리하고 `변경 저장` 버튼을 전체 폭으로 제공한다.
+- 알림 계획 select, 예약 확인, 발송 결과, Solapi 적용, 저장 callback과 disabled 조건은 모두 그대로 보존했다.
+- 화면·semantics 외 저장·발송·예약·삭제·출결·Supabase/app_state·lesson_student_records·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: named notification region·focus/touch scroll, 모바일 저장 바 한 열과 기존 callback·disabled 보존 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 490개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 390px에서 두 알림 영역의 focus·가로 scroll과 저장 상태 문구·버튼 배치를 UI-8B 통합 절차로 나중에 확인한다. 실제 select·버튼은 조작하지 않고 UI-8B-4 회귀 마감을 계속한다.
+
 ## 2026-07-29 UI-8B-2. 수업일지 학생 기록 단일 scroll
 
 - 1450px 10열 최소 폭을 `DataTableShell` 자체가 아니라 내부 `.journalRow`가 갖게 해 공통 named table shell이 가로 scroll을 소유하도록 고쳤다.

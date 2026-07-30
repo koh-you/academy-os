@@ -18340,7 +18340,7 @@ function LessonJournalDetail({
       ) : null}
 
       <section className="panel lessonSaveSummary" aria-label="발송 상태와 작업">
-        <div className="lessonNotificationStatusRow">
+        <div aria-label="알림톡 상태" className="lessonNotificationStatusRow" role="region" tabIndex={0}>
           <strong>발송 상태</strong>
           <span className={`lessonNotificationPlanStatus ${notificationPlanMode}`} title={notificationPlanSummaryText}>
             {notificationPlanSummaryText}
@@ -18358,7 +18358,7 @@ function LessonJournalDetail({
             {solapiReservationSyncStatus.label}
           </span>
         </div>
-        <div className="lessonNotificationActionRow">
+        <div aria-label="알림톡 예약 작업" className="lessonNotificationActionRow" role="region" tabIndex={0}>
           {!journalEditMode ? (
             <button className="schedulePlanButton" onClick={startJournalEditMode} type="button">
               수정 시작
