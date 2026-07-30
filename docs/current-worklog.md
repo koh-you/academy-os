@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8H-0. 월별·특강 정산 inventory
+
+- 월별 정산의 lessons/수업일지/출결·월별 스케줄과 특강 정산의 안내 sessions/enrollment 회차·시간 원천을 대조했다.
+- 월별·특강 app_state 직접 저장, local draft 복구, snapshot 재조회 검증과 계산 방식·조정·제외/복원 callback 경계를 확정했다.
+- 공통 탭·표·상태·save bar는 이미 기준을 만족하며, 이름 있는 scroll shell 없이 모바일에서 일정 문자를 숨기는 월별 출결 달력만 표시 예외로 기록했다.
+- 상세 원천과 UI-8H-1~2 순서를 `docs/ui-high-density-settlement-inventory-2026-07-29.md`에 기록했다.
+- 계산값·callback과 app_state·학생·lessons·출결·특강 원천은 변경하거나 실행하지 않았다.
+- AI 검수: active 정산 route, 계산·조정·제외/복원·검증 저장 경계 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 513개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 코드 UI 변경이 없어 새 필수·시각 gate가 없다. UI-8H-1 적용 뒤 누적 검수한다.
+
 ## 2026-07-29 UI-8G-3. 시험·시험분석·학사일정 통합 회귀 마감
 
 - 시험 단계 탭·시험분석 4열 library·시험정보/학사 modal·7열 학사 달력의 responsive shell을 한 fixture로 통합했다.

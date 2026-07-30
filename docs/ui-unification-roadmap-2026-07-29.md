@@ -114,7 +114,9 @@
 | UI-8G-1 | 완료 | 시험 단계 탭 touch 경계·시험분석 library named scroll |
 | UI-8G-2 | 완료 | 시험정보/학사 scrollable modal·7열 학사 달력 내부 scroll |
 | UI-8G-3 | 완료 | 저장·삭제·AI·파일·시험정보 연동 통합 회귀 |
-| UI-8H-0 | 다음 | 월별·특강 정산 계산 원천·조정·제외·모바일 예외 inventory |
+| UI-8H-0 | 완료 | 월별·특강 정산 계산 원천·조정·제외·모바일 예외 inventory |
+| UI-8H-1 | 다음 | 월별 출결 달력 named 7열 touch scroll·모바일 문구 |
+| UI-8H-2 | 대기 | 계산·조정·제외/복원·합계·검증 저장 통합 회귀 |
 
 ## 전체 세부 작업 목록
 
