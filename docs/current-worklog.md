@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-30 UI-9E. Vercel Production 최신 main 대조
+
+- 최신 `origin/main` `655a6d1ebd65927dcc604231b2cec60df7ddacc3`의 GitHub commit status가 `Vercel success / Deployment has completed`임을 확인했다.
+- Production HTML은 `main-B7P3xfdq.css`, `main-ClcmyMj6.js`를 사용한다. CSS hash는 local build와 정확히 일치했고, 환경별 hash가 다른 JS는 최신 계정·학부모 응대·학생 쓰기 marker를 본문에서 대조했다.
+- UI-9C 폐기 selector 2종은 Production CSS에도 없고 모바일 포털 selector는 존재한다. HTML/JS/CSS는 모두 HTTP 200이다.
+- 원천/side effect: GitHub status와 공개 Production bundle만 읽었다. 빈 commit·수동 재배포·Vercel CLI/API를 만들지 않았고 Supabase·Storage·notification_jobs·Solapi를 건드리지 않았다.
+- AI 검수: commit/status/bundle/marker/금지 재배포를 함께 기록하는 production 정적 계약을 추가했다. `npm run test:production`은 정적 시나리오 528/528을 포함해 전체 통과, `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했다.
+- 사람 검수: 배포 자체에 필요한 사람 gate는 없다. 실제 화면은 UI-9D의 단일 비차단 체크리스트로 나중에 한 번 확인한다.
+
 ## 2026-07-30 UI-9D. 사람 검수 큐 단일 체크리스트
 
 - `docs/next-session/README.md`에 누적된 51개 상세 UI 확인을 별개 요청으로 반복하지 않도록 `docs/ui-human-review-checklist-2026-07-30.md`의 12단계 한 묶음으로 통합했다.
