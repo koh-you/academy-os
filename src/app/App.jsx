@@ -16483,14 +16483,22 @@ function TeacherLessonHubV2({
   isLessonJournalOpen
 }) {
   const [lessonTypeFilter, setLessonTypeFilter] = useState("all");
+  const selectedCalendarDayRef = useRef(null);
   useEffect(() => {
-    function isEditableTarget(target) {
+    function isInteractiveTarget(target) {
       const tagName = target?.tagName?.toLowerCase();
-      return tagName === "input" || tagName === "textarea" || tagName === "select" || target?.isContentEditable;
+      return tagName === "input"
+        || tagName === "textarea"
+        || tagName === "select"
+        || tagName === "button"
+        || tagName === "a"
+        || tagName === "summary"
+        || target?.isContentEditable
+        || Boolean(target?.closest?.("[role=\"button\"]"));
     }
 
     function handleKeyDown(event) {
-      if (isLessonJournalOpen || isEditableTarget(event.target)) return;
+      if (isLessonJournalOpen || isInteractiveTarget(event.target)) return;
       const key = event.key.toLowerCase();
       const isControl = event.ctrlKey || event.metaKey;
 
@@ -16543,6 +16551,14 @@ function TeacherLessonHubV2({
     onUndoLessonAction,
     selectedLessonId
   ]);
+
+  useEffect(() => {
+    const selectedDay = selectedCalendarDayRef.current;
+    const calendarGrid = selectedDay?.closest(".teacherCalendarGrid");
+    if (calendarGrid?.contains(document.activeElement)) {
+      selectedDay.focus();
+    }
+  }, [selectedDate]);
 
   const selectedMakeupTask = selectedLesson
     ? makeupTasks.find((task) => task.makeupTaskId === selectedLesson.sourceMakeupTaskId || task.linkedLessonId === selectedLesson.lessonId)
@@ -16752,22 +16768,34 @@ function TeacherLessonHubV2({
         role="region"
         tabIndex={0}
       >
-        <div className="calendarGrid teacherCalendarGrid">
+        <div aria-label="월간 수업 일정" className="calendarGrid teacherCalendarGrid" role="grid">
           {["일", "월", "화", "수", "목", "금", "토"].map((label) => (
-            <div className="weekday" key={label}>{label}</div>
+            <div className="weekday" key={label} role="columnheader">{label}</div>
           ))}
           {buildMonthDays(selectedDate).map((day) => {
             const dayLessons = visibleLessons.filter((lesson) => lesson.date === day.date).sort(sortByTime);
+            const isSelectedDay = selectedDate === day.date;
             return (
               <div
+                aria-label={`${day.date} · ${dayLessons.length ? `${dayLessons.length}개 수업` : "수업 없음"}`}
+                aria-selected={isSelectedDay}
                 className={[
                   "monthCell",
                   "teacherMonthCell",
                   day.inMonth ? "" : "outside",
-                  selectedDate === day.date ? "selected" : ""
+                  isSelectedDay ? "selected" : ""
                 ].join(" ")}
                 key={day.date}
                 onClick={() => onDateSelect(day.date)}
+                onKeyDown={(event) => {
+                  if (event.target !== event.currentTarget || !["Enter", " "].includes(event.key)) return;
+                  event.preventDefault();
+                  event.stopPropagation();
+                  onDateSelect(day.date);
+                }}
+                ref={isSelectedDay ? selectedCalendarDayRef : null}
+                role="gridcell"
+                tabIndex={isSelectedDay ? 0 : -1}
               >
                 <span className="dayNumber">{day.dayNumber}</span>
                 <span className="cellPlus">+</span>

@@ -48,3 +48,5 @@ inventory는 화면을 바꾸지 않아 필수 중단 gate가 없다. 구현 뒤
 
 - UI-8A-1: 월간 달력에 동적 영역 이름·keyboard focus를 제공하고, 640px 이하에서 760px 7열 폭을 shell 내부 가로 touch scroll로 볼 수 있게 했다.
 - 숨긴 header, 날짜·수업 callback과 운영 원천은 변경하지 않았다.
+- UI-8A-2: calendar grid·요일·날짜 semantics, 날짜·수업 건수 이름, 선택 날짜 roving focus와 Enter/Space 선택을 제공했다.
+- 수업 pill 등 자체 interactive element에서는 전역 달력 단축키가 개입하지 않도록 경계를 분리했다.

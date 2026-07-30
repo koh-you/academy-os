@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8A-2. 월간 달력 grid·선택 날짜 semantics
+
+- teacher calendar를 `grid`, 요일을 `columnheader`, 날짜를 `gridcell`로 연결하고 각 날짜에 날짜·수업 건수 이름과 `aria-selected`를 제공했다.
+- 선택 날짜 하나만 Tab 순서에 두고 Enter/Space로 기존 `onDateSelect`를 실행한다. 방향키로 선택 날짜가 바뀌면 keyboard focus도 새 선택 날짜를 따라간다.
+- 수업 pill·링크·summary·role button·form control에서는 전역 copy/paste/undo/delete/enter/방향키 달력 단축키가 끼어들지 않게 interactive target 경계를 보강했다.
+- 날짜 click, 수업 pill `onOpenLessonJournal`, 숨긴 header, 기존 달력 단축키와 저장·발송·예약·삭제·출결·Supabase/app_state·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: grid/columnheader/gridcell, 날짜 이름·선택·roving focus, interactive shortcut guard와 기존 callback 보존 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 485개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: UI-8A-1 누적 절차에 keyboard Tab→방향키→Enter/Space와 수업 pill focus에서 단축키 미간섭을 추가하되 실제 수업일지 진입은 누르지 않는다. 독립 시각 검수라 UI-8A-3을 계속한다.
+
 ## 2026-07-29 UI-8A-1. 월간 달력 모바일 내부 scroll
 
 - 현재 월 수업 달력 section에 동적 월 이름, `role=region`, `tabIndex=0`, 공통 focus-visible을 제공했다.

@@ -3514,8 +3514,15 @@ summary:focus-visible {
 }
 
 .teacherMonthCell {
+  cursor: pointer;
   min-height: 108px;
   padding: 10px 12px;
+}
+
+.teacherMonthCell:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.42);
+  outline-offset: -3px;
+  z-index: 2;
 }
 
 .monthCell.selected {
