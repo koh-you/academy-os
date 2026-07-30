@@ -1660,6 +1660,7 @@ export function SpecialLectureApplicationPanel({
             setMatchSearchText("");
             setMatchStudentId("");
           }}
+          scrollable
           subtitle={`${matchApplication.studentName || "신청자"} · ${matchApplication.schoolName || "학교 미입력"} ${matchApplication.grade || ""}`}
           title="특강 신청 학생 연결"
         >
@@ -1679,7 +1680,12 @@ export function SpecialLectureApplicationPanel({
               />
               <span>{matchStudentId ? "학생 1명 선택" : "연결할 학생을 선택하세요."}</span>
             </div>
-            <div className="specialLectureRosterPickerList">
+            <div
+              aria-label={`${matchApplication.studentName || "신청자"} 연결 학생 선택 목록`}
+              className="specialLectureRosterPickerList"
+              role="region"
+              tabIndex={0}
+            >
               {availableMatchStudents.length ? availableMatchStudents.map((student) => (
                 <label className="specialLectureRosterPickerItem" key={`match_${student.studentId}`}>
                   <input
@@ -1759,6 +1765,7 @@ export function SpecialLectureApplicationPanel({
         <Modal
           className="specialLectureRosterModal"
           onClose={() => setManualPickerOpen(false)}
+          scrollable
           subtitle={`${selectedGuide?.title || "특강"} · Tally 없이 구두/수동으로 접수한 학생`}
           title="학생 수동 접수"
         >
@@ -1774,7 +1781,12 @@ export function SpecialLectureApplicationPanel({
               />
               <span>선택 {manualSelectedStudentIds.length}명 · 이미 등록된 학생은 목록에서 제외됩니다.</span>
             </div>
-            <div className="specialLectureRosterPickerList">
+            <div
+              aria-label="특강 수동 접수 학생 선택 목록"
+              className="specialLectureRosterPickerList"
+              role="region"
+              tabIndex={0}
+            >
               {availableManualStudents.length ? availableManualStudents.map((student) => (
                 <label className="specialLectureRosterPickerItem" key={student.studentId}>
                   <input
@@ -1829,6 +1841,7 @@ export function SpecialLectureApplicationPanel({
           <Modal
             className="specialLectureSessionModal"
             onClose={closePlanModal}
+            scrollable
             subtitle={`${selectedGuide?.title || "특강"} · ${enrollment.planSource === "tally_request" ? "Tally 접수" : "수동 접수"}`}
             title={`${student?.name || "학생"} 회차·진행 관리`}
           >

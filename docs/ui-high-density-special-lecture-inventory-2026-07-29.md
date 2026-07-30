@@ -56,3 +56,7 @@ inventory 자체는 중단 gate가 없다. 구현 뒤 desktop과 390px에서 특
 - UI-8E-1: 특강 상위 탭과 안내문 편집 탭에 touch overscroll 경계·scroll padding·iOS momentum scroll을 적용했다.
 - 640px 이하에서 명단·회차 관리와 수업일지 반영 gate의 설명, 상태 pill, 펼치기 행동을 문서 순서대로 한 열 배치했다.
 - 특강 수업/안내문, 편집 항목, 두 gate의 기존 state·callback과 conditional mount는 변경하지 않았다.
+- UI-8E-2: 학생 연결·수동 접수·회차 편집 modal을 공통 scrollable shell로 전환해 제목·닫기는 유지하고 긴 본문만 내부 scroll되게 했다.
+- 연결 학생과 수동 접수 학생 목록은 각각 named region, keyboard focus와 세로 touch scroll 경계를 갖는다.
+- 640px 이하 회차 실제 저장 bar는 닫기와 긴 2단계 저장 버튼을 한 열 전체 폭으로 배치했다.
+- 학생 선택·연결·접수, 회차 draft·저장 callback과 진행 조회 modal의 기존 동작은 변경하지 않았다.

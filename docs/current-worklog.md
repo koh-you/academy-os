@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8E-2. 특강 학생·회차 modal
+
+- 학생 연결, 학생 수동 접수, 회차·진행 관리 modal을 공통 scrollable shell로 전환해 제목·닫기를 유지하고 긴 학생 목록·회차 본문만 내부 scroll되게 했다.
+- 연결 학생과 수동 접수 학생 목록에 각각 업무 이름·region·keyboard focus·세로 touch overscroll 경계를 제공했다.
+- 640px 이하의 회차 실제 저장 bar는 닫기와 긴 `2단계 · Supabase 저장 + 미래 수업일지 반영` 행동을 문서 순서대로 한 열 전체 폭으로 배치했다.
+- 학생 선택·연결·등록·Tally 교체, local 회차 draft, enrollment 저장·수업일지 반영 callback과 읽기 전용 진행 modal은 그대로 보존했다.
+- 화면 shell·CSS 외 저장·발송·예약·삭제·출결·Supabase/app_state·students·special_lecture_applications·special_lecture_enrollments·lessons·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 공통 modal header/body, named 학생 목록, 모바일 실제 저장 bar와 기존 callback 보존 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 503개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 390px에서 세 편집 modal의 제목·본문 scroll·학생 목록 focus·저장 행동 순서를 나중에 UI-8E 통합 절차로 확인한다. 실제 연결·접수·저장은 누르지 않고 UI-8E-3을 계속한다.
+
 ## 2026-07-29 UI-8E-1. 특강 탭·gate 모바일 읽기
 
 - 특강 수업/안내문 상위 탭과 안내문 편집 5개 탭에 touch overscroll 경계, scroll padding과 iOS momentum scroll을 적용했다.
