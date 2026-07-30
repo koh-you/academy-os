@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8H-1. 월별 출결 달력 모바일 가독성
+
+- 월별 출결·수업 달력을 학생·월 이름이 있는 focus 영역으로 감싸고 최소 840px 7열 grid를 modal 내부에서만 가로 touch scroll되게 했다.
+- 모바일에서 일정 문자를 숨기던 점 표시 규칙을 제거해 정규 예정·출결·보충·특강과 시간이 그대로 읽히게 했다.
+- 정규/보충/특강 event 계산과 월별 정산 계산·저장 callback은 그대로 보존했다.
+- 화면 shell·접근성·CSS 외 정산 금액·스케줄·조정·제외·app_state·학생·lessons·출결 원천은 변경하거나 실행하지 않았다.
+- AI 검수: named 7열 calendar, 모바일 문구 보존과 기존 event 계산 보존 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 514개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: desktop/390px에서 달력 focus·내부 가로 scroll·일정 문구를 나중에 UI-8H 통합 절차로 확인한다. 실제 정산 변경·저장은 누르지 않고 UI-8H-2를 계속한다.
+
 ## 2026-07-29 UI-8H-0. 월별·특강 정산 inventory
 
 - 월별 정산의 lessons/수업일지/출결·월별 스케줄과 특강 정산의 안내 sessions/enrollment 회차·시간 원천을 대조했다.

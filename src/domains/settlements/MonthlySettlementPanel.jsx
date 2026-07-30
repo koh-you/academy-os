@@ -131,36 +131,48 @@ function MonthlySettlementCalendar({ monthKey, onClose, row }) {
         <span><i className="makeup" />보충 · 계산 제외</span>
         <span><i className="special" />특강 · 별도 정산</span>
       </div>
-      <div className="monthlySettlementCalendar" role="grid">
-        {calendarDayLabels.map((label) => (
-          <strong className="monthlySettlementCalendarDayLabel" key={label}>{label}</strong>
-        ))}
-        {Array.from({ length: leadingBlankCount }, (_, index) => (
-          <span className="monthlySettlementCalendarBlank" key={`blank_${index}`} />
-        ))}
-        {monthDates.map((date) => {
-          const events = eventsByDate.get(date) ?? [];
-          return (
-            <article className="monthlySettlementCalendarDate" key={date}>
-              <b>{Number(date.slice(-2))}</b>
-              <div>
-                {events.map((event) => (
-                  <span
-                    className={`monthlySettlementCalendarEvent ${event.eventType} ${event.isForecast ? "forecast" : ""}`}
-                    key={event.eventId}
-                    title={`${event.startTime}-${event.endTime} · ${event.className || event.label}`}
-                  >
-                    {event.eventType === "regular"
-                      ? event.isForecast ? "정규 예정" : getSettlementAttendanceLabel(event.attendanceStatus)
-                      : event.eventType === "makeup" ? "보충" : "특강"}
-                    {event.startTime ? ` ${event.startTime}` : ""}
-                  </span>
-                ))}
-              </div>
-            </article>
-          );
-        })}
-      </div>
+      <section
+        aria-label={`${row.student.name} ${monthKey} 월별 출결·수업 달력`}
+        className="monthlySettlementCalendarShell"
+        role="region"
+        tabIndex={0}
+      >
+        <div aria-label="월별 출결·수업 일정" className="monthlySettlementCalendar" role="grid">
+          {calendarDayLabels.map((label) => (
+            <strong className="monthlySettlementCalendarDayLabel" key={label} role="columnheader">{label}</strong>
+          ))}
+          {Array.from({ length: leadingBlankCount }, (_, index) => (
+            <span className="monthlySettlementCalendarBlank" key={`blank_${index}`} />
+          ))}
+          {monthDates.map((date) => {
+            const events = eventsByDate.get(date) ?? [];
+            return (
+              <article
+                aria-label={`${date} · ${events.length ? `${events.length}개 수업` : "수업 없음"}`}
+                className="monthlySettlementCalendarDate"
+                key={date}
+                role="gridcell"
+              >
+                <b>{Number(date.slice(-2))}</b>
+                <div>
+                  {events.map((event) => (
+                    <span
+                      className={`monthlySettlementCalendarEvent ${event.eventType} ${event.isForecast ? "forecast" : ""}`}
+                      key={event.eventId}
+                      title={`${event.startTime}-${event.endTime} · ${event.className || event.label}`}
+                    >
+                      {event.eventType === "regular"
+                        ? event.isForecast ? "정규 예정" : getSettlementAttendanceLabel(event.attendanceStatus)
+                        : event.eventType === "makeup" ? "보충" : "특강"}
+                      {event.startTime ? ` ${event.startTime}` : ""}
+                    </span>
+                  ))}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
       <div className="monthlySettlementCalendarSummary">
         <span>
           {row.setting.mode === "new"
