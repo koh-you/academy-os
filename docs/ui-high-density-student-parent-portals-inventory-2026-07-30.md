@@ -52,3 +52,5 @@ inventory 자체에는 사람 gate가 없다. 구현 뒤 실제 저장 없이 �
 - UI-8J-2: 모바일에서 숙제 완료·질문 추가·질문 행 행동·시험 후 제출 버튼을 현재 작업 폭에 맞추고 질문의 두 행동은 같은 2열로 유지했다.
 - 저장 상태 문구와 선택·제출된 시험 파일명은 카드 안에서 줄바꿈하며, 시험 후 제출 input·select·textarea·file control과 파일 목록은 한 열 폭을 넘지 않는다.
 - write callback, bearer 세션, local draft, 파일 업로드·제출 저장·실패 cleanup 순서는 변경하지 않았다.
+- UI-8J-3: 계정·탭·읽기 달력/카드·학생 쓰기 카드의 responsive shell과 bearer·Supabase·Storage 경계를 통합 fixture로 고정했다.
+- desktop/390px 사람 시각 확인은 `docs/next-session/README.md`에 독립 절차로 누적했으며 UI-9를 막지 않는다.

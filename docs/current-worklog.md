@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-30 UI-8J-3. 학생·학부모 포털 통합 회귀 마감
+
+- 학생·학부모 계정 행동, 탭, 읽기 달력·카드, 학생 쓰기 카드의 responsive shell을 한 fixture로 통합했다.
+- 숙제 완료·질문 CRUD·시험 후 제출/파일의 bearer 소유권, Supabase 재조회, Storage 업로드·cleanup 경계가 UI 변경과 합쳐지지 않았음을 고정했다.
+- 실제 학생 쓰기·로그아웃·자료/파일 열기, Supabase·Storage·알림 원천을 변경하거나 호출하지 않았다.
+- AI 검수: UI-8J 통합 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 524개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: desktop/390px의 계정 머리말·탭·읽기 카드·학생 쓰기 배치 절차를 `docs/next-session/README.md` 최상단에 누적했다. UI-9의 전제조건이 아니므로 최종 품질 정리를 계속한다.
+
 ## 2026-07-30 UI-8J-2. 학생 쓰기 카드 모바일 배치
 
 - 모바일에서 숙제 완료·질문 추가·시험 후 제출 버튼을 현재 카드 전체 폭으로 맞추고 질문 상태/삭제는 같은 2열 행동으로 정리했다.
