@@ -19774,6 +19774,22 @@ body.attendanceOnlyBody {
 }
 
 @media (max-width: 640px) {
+  :where(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
+    select,
+    textarea
+  ) {
+    font-size: 16px;
+    max-width: 100%;
+  }
+
+  :where(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
+    select
+  ) {
+    min-height: var(--academy-touch-target);
+  }
+
   .modalFooter {
     align-items: stretch;
   }

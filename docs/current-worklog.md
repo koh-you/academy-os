@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-7D-2. 모바일 form 글꼴·터치 높이
+
+- 640px 이하에서 일반 input, select, textarea의 실제 글꼴을 최소 16px로 고정해 12~14px 부모 안에서도 iOS Safari focus 확대가 발생하지 않게 했다.
+- 한 줄 input·select는 공통 44px 터치 높이를 사용하고 모든 일반 control은 viewport 폭을 넘지 않게 했다.
+- native 크기·행동이 다른 checkbox, radio, file, hidden input은 공통 selector에서 제외했다. textarea 높이와 화면별 rows/min-height도 유지했다.
+- control의 value/onChange/disabled/type, local draft, validation과 Supabase/app_state·notification_jobs/Solapi·수업·AI·출결 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 모바일 selector·제외 type·16px·44px·폭 정적 계약, `npm run build` 128 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 471개 중 기존 기준선 `90a`만 실패했고 모든 개별 fixture와 신규 계약은 통과했다.
+- 사람 검수: 390px에서 대표 text/date/time/number/select/textarea focus 크기와 페이지 가로 넘침을 확인하는 독립 절차를 `docs/next-session/README.md`에 누적했다. 입력·저장은 실행하지 않으며 다음 UI 단위를 막지 않는다.
+
 ## 2026-07-29 UI-7D-1. 모바일 form·접근성 inventory
 
 - JSX 48개의 input/select/textarea 378개를 AST로 전수 조사했다. 감지 가능한 이름이 있는 control은 273개, label/ARIA 이름 미지정은 105개였다.
