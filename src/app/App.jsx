@@ -23827,9 +23827,10 @@ function AIVariantProblemCenter({ aiSettings = defaultAiSettings }) {
       {isHwpxExportOpen ? (
         <Modal
           className="hwpxExportModal"
-          title="HWPX 시험지 내보내기"
-          subtitle={`선택한 ${selectedVariantCount}개 문항을 한글 파일(.hwpx)로 다운로드합니다.`}
           onClose={() => setIsHwpxExportOpen(false)}
+          scrollable
+          subtitle={`선택한 ${selectedVariantCount}개 문항을 한글 파일(.hwpx)로 다운로드합니다.`}
+          title="HWPX 시험지 내보내기"
         >
           <div className="hwpxExportForm">
             <section className="hwpxExportSection">

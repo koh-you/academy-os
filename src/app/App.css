@@ -13321,6 +13321,7 @@ textarea {
   align-content: start;
   display: grid;
   gap: 14px;
+  min-width: 0;
 }
 
 .resourceForm label {
@@ -13371,6 +13372,8 @@ textarea {
   color: #64748b;
   font-weight: 800;
   line-height: 1.45;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .resourceStudentPicker {
@@ -13488,14 +13491,20 @@ textarea {
   padding: 14px;
 }
 
+.resourceListItem > div {
+  min-width: 0;
+}
+
 .resourceListItem p {
   color: #475569;
   margin: 6px 0;
+  overflow-wrap: anywhere;
 }
 
 .resourceListItem small {
   color: #64748b;
   font-weight: 800;
+  overflow-wrap: anywhere;
 }
 
 .studentScoreModalTable {
@@ -14719,6 +14728,11 @@ textarea.profileEditInput {
   display: grid;
   gap: 14px;
   padding: 18px;
+}
+
+.variantResultCard p {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .variantResultCard.selected {
@@ -19819,6 +19833,7 @@ body.attendanceOnlyBody {
   .supplementScheduleChangeFields,
   .supplementSaveStatusGrid,
   .aiVariantWorkspace,
+  .resourceLibraryLayout,
   .insightGrid,
   .promptSettingsLayout,
   .tallyAiGrid {
@@ -20031,6 +20046,42 @@ body.attendanceOnlyBody {
   .modalFooter > button,
   .modalFooter > a {
     flex: 1 1 140px;
+  }
+
+  .aiVariantTopGrid,
+  .aiToolCardTitle,
+  .hwpxExportGrid,
+  .resourceListItem {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .aiToolCardTitle .readyPill {
+    justify-self: start;
+  }
+
+  .variantSelectGrid.compact {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .aiVariantResultPanel {
+    min-height: 0;
+  }
+
+  .variantResultEmpty {
+    min-height: 240px;
+  }
+
+  .resourceListItem {
+    align-items: stretch;
+  }
+
+  .resourceListItem .dangerButton {
+    width: 100%;
+  }
+
+  .researchCardList,
+  .resourceClassGroups {
+    max-height: min(52dvh, 460px);
   }
 
   .sidebar {

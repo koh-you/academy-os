@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-30 UI-8I-2. AI 도구·자료함 모바일 한 열
+
+- 1100px 이하 자료함을 한 열로 전환하고 640px 이하 AI 입력·옵션·결과, HWPX form과 자료 행을 한 열로 정리했다.
+- HWPX 창을 제목이 유지되는 공통 scrollable modal로 바꾸고 AI 빈 결과의 과도한 모바일 최소 높이를 줄였다.
+- 긴 파일명·설명·URL·결과 문구는 카드 내부에서 줄바꿈하며, 자료 삭제 행동은 모바일 전체 폭으로 분리했다.
+- 화면 shell·접근성·CSS 외 app_state 자동저장, 자료 등록·삭제 API, 파일 선택·AI 처리·HWPX 다운로드는 변경하거나 실행하지 않았다.
+- AI 검수: 모바일 한 열·긴 내용·scrollable modal과 기존 local/API callback 보존 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 518개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: desktop/390px의 AI·자료함 배치와 HWPX 창은 UI-8I 통합 절차로 나중에 확인한다. 파일·AI·다운로드·자료 등록/삭제는 누르지 않고 UI-8I-3을 계속한다.
+
 ## 2026-07-30 UI-8I-1. 수업연구·자료함 긴 목록 탐색
 
 - 수업연구 유형트리·교안 목록과 자료함 반별 학생 목록에 업무 이름, keyboard focus와 내부 세로 touch scroll 경계를 추가했다.
