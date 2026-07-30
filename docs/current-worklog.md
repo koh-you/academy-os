@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 P3. App.jsx 18C-2 sidebar shell extraction
+
+- 코드: menu model을 소비하는 Sidebar 접근성·brand/status·group/item JSX를 `Sidebar.jsx`로 분리하고 브랜드명·오늘 날짜·상태·callback을 prop으로 명시했다.
+- App 경계: collapse/mobile/active view React state, view change plan 실행, logout과 toggle callback은 계속 `App.jsx`가 소유한다. 문구·아이콘·DOM class·접근성 속성은 바꾸지 않았다.
+- AI 검수: 18C-1 shell boundary와 App prop wiring을 기존 fixture로 대조한다. component는 callback만 호출하며 저장·API·Supabase·notification_jobs·Solapi side effect가 없고 사람 gate는 0건이다.
+- 변화량: 새 파일 1개, 전체 `+140/-92`, `App.jsx +3/-78`로 실제 파일 길이 73줄 감소했다.
+
 ## 2026-07-31 P3. App.jsx 18C-1 sidebar shell inventory
 
 - 원천/동작: Sidebar는 menu model을 소비해 collapse/mobile 상태, active route, 보충 badge를 표시하고 주입된 view/logout/toggle callback만 호출한다.

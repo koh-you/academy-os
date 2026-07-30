@@ -31,6 +31,11 @@ const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
+const sidebarSource = await readFile(
+  new URL("../src/app/Sidebar.jsx", import.meta.url),
+  "utf8"
+);
+const shellSource = `${appSource}\n${sidebarSource}`;
 const targetGroups = createSidebarMenuGroups({
   total: 3,
   label: "미확인 보충 3건"
@@ -72,8 +77,8 @@ for (const appBoundary of [
   "onClick={() => onChangeView(item.id)}"
 ]) {
   assert.ok(
-    appSource.includes(appBoundary),
-    `sidebar App boundary changed: ${appBoundary}`
+    shellSource.includes(appBoundary),
+    `sidebar boundary changed: ${appBoundary}`
   );
 }
 assert.equal(
@@ -89,11 +94,11 @@ assert.equal(
   1
 );
 assert.equal(
-  appSource.split('from "./sidebarMenuModel.js"').length - 1,
+  sidebarSource.split('from "./sidebarMenuModel.js"').length - 1,
   1
 );
 assert.equal(
-  appSource.split("createSidebarMenuGroups(supplementAttention)").length - 1,
+  sidebarSource.split("createSidebarMenuGroups(supplementAttention)").length - 1,
   1
 );
 for (const sidebarOwnedBoundary of [
@@ -107,15 +112,13 @@ for (const sidebarOwnedBoundary of [
   "onClick={onToggleMobileNavigation}"
 ]) {
   assert.ok(
-    appSource.includes(sidebarOwnedBoundary),
+    sidebarSource.includes(sidebarOwnedBoundary),
     `Sidebar-owned boundary moved: ${sidebarOwnedBoundary}`
   );
 }
-const sidebarStart = appSource.indexOf("function Sidebar({");
-const sidebarEnd = appSource.indexOf("\nfunction LoginScreen(", sidebarStart);
-assert.ok(sidebarStart >= 0 && sidebarEnd > sidebarStart);
-const sidebarSource = appSource.slice(sidebarStart, sidebarEnd);
 for (const sidebarShellBoundary of [
+  "export function Sidebar({",
+  "academyBrandName,",
   "activeView,",
   "isCollapsed,",
   "isMobileNavigationOpen = false,",
@@ -134,6 +137,21 @@ for (const sidebarShellBoundary of [
   assert.ok(
     sidebarSource.includes(sidebarShellBoundary),
     `sidebar shell boundary changed: ${sidebarShellBoundary}`
+  );
+}
+for (const appShellBoundary of [
+  'from "./Sidebar.jsx"',
+  "<Sidebar",
+  "academyBrandName={academyBrandName}",
+  "activeView={activeView}",
+  "onChangeView={handleChangeView}",
+  "onLogout={handleLogout}",
+  "supplementAttention={supplementAttention}",
+  "today={today}"
+]) {
+  assert.ok(
+    appSource.includes(appShellBoundary),
+    `App Sidebar boundary changed: ${appShellBoundary}`
   );
 }
 for (const forbiddenEffect of [
