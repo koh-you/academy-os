@@ -51,4 +51,4 @@ Academy OS의 모든 화면을 같은 사용 규칙으로 보이게 한다. 이�
 
 ## 다음 착수
 
-UI-0~UI-6과 UI-7A·UI-7B·UI-7C·UI-7D를 완료했다. 다음 UI-7E-1은 button/link/role=button의 모바일 터치 높이, icon-only name, focus-visible, disabled/role 의미를 inventory한다. callback·외부 side effect와 운영 원천은 바꾸지 않는다.
+UI-0~UI-6과 UI-7A·UI-7B·UI-7C·UI-7D, UI-7E-1 inventory를 완료했다. 다음 UI-7E-2는 실제 callback이 있는 icon action에 업무 이름만 제공한다. callback·disabled·submit·외부 side effect와 운영 원천은 바꾸지 않는다.

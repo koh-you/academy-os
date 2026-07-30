@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-7E-1. 모바일 action·접근성 inventory
+
+- JSX 48개의 button 445개, link 5개, `role=button` 1개와 CSS focus/touch 규칙을 대조했다.
+- 실제 icon/x/화살표만 있는 button 17개, callback·submit·disabled가 모두 없는 no-op button 12개, 44px 미만 CSS `min-height` 선언 119개를 확인했다.
+- callback이 있는 icon action의 이름, 모바일 44px touch, no-op 표시를 UI-7E-2~4로 분리하고 대표 회귀를 UI-7E-5로 닫는 계획을 `docs/ui-mobile-actions-inventory-2026-07-29.md`에 기록했다.
+- 코드 UI·callback·disabled·submit·route와 운영 side effect/원천은 변경하거나 실행하지 않았다.
+- AI 검수: 대표 callback icon, 공통 modal close, no-op portal icon, 현재 focus/sub-44 정적 기준선, `npm run build` 128 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 475개 중 기존 기준선 `90a`만 실패했고 모든 개별 fixture와 신규 계약은 통과했다.
+- 사람 검수: 코드 UI 변경이 없어 필수 중단 gate가 없다. 구현 뒤 모바일·키보드 절차를 누적한다.
+
 ## 2026-07-29 UI-7D-5. form 도움말·오류 연결
 
 - 두 로그인 form의 역할별 안내를 아이디·비밀번호에 연결하고 로그인 실패 시 같은 control에 `aria-invalid`와 `role="alert"` 오류를 함께 연결했다.
