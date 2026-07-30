@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 P3. App.jsx 18E-3 active role login shell closeout
+
+- 감사: 기존 로그인 fixture에 RoleLoginScreen export·App import·렌더 각 1건과 component의 인증/session/storage side effect 부재를 추가 고정했다.
+- App 경계: `handleLogin`, `/api/auth/login`, teacher session persist, student/parent session state와 logout은 계속 `App.jsx`가 소유한다.
+- AI 검수: 기존 TARGET/CONTROL fixture, 정적 시나리오·production/build를 재사용하고 새 closeout 파일은 만들지 않는다. 실제 로그인 요청 없이 판정하며 사람 gate는 0건이다.
+- 변화량: 새 파일 0개, 전체 `+35/-0`, `App.jsx` 변경·감소 0줄이다.
+
 ## 2026-07-31 P3. App.jsx 18E-2 active role login shell extraction
 
 - 코드: active login의 local role/credential/error/busy state와 form JSX를 `RoleLoginScreen.jsx`로 분리하고 브랜드명·`onLogin`을 prop으로 명시했다.

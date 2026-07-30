@@ -70,6 +70,34 @@ for (const appLoginShellBoundary of [
     `App role login shell boundary changed: ${appLoginShellBoundary}`
   );
 }
+assert.equal(
+  roleLoginSource.split("export function RoleLoginScreen({").length - 1,
+  1
+);
+assert.equal(
+  appSource.split('from "./RoleLoginScreen.jsx"').length - 1,
+  1
+);
+assert.equal(
+  appSource.split("<RoleLoginScreen").length - 1,
+  1
+);
+for (const forbiddenLoginComponentEffect of [
+  "fetch(",
+  "postJson",
+  "/api/",
+  "setSession",
+  "persistTeacherSession",
+  "localStorage",
+  "Supabase",
+  "Solapi",
+  "notification_jobs"
+]) {
+  assert.ok(
+    !roleLoginSource.includes(forbiddenLoginComponentEffect),
+    `RoleLoginScreen crossed an auth side effect: ${forbiddenLoginComponentEffect}`
+  );
+}
 for (const forbiddenExternalEffect of [
   "fetch(",
   "postJson",
