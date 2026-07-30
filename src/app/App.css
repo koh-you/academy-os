@@ -20495,6 +20495,33 @@ body.attendanceOnlyBody {
     width: 100%;
   }
 
+  .supplementTaskActions {
+    grid-auto-columns: auto;
+    grid-auto-flow: row;
+    grid-template-columns: minmax(0, 1fr);
+    overflow-x: visible;
+  }
+
+  .supplementHistoryItem {
+    align-items: stretch;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .supplementHistoryItem > div span,
+  .supplementHistoryItem > div small {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .supplementHistoryActions {
+    justify-content: flex-start;
+    min-width: 0;
+  }
+
+  .supplementHistoryActions button {
+    width: 100%;
+  }
+
   .supplementPassConfirmSummary div {
     grid-template-columns: 1fr;
     gap: 4px;

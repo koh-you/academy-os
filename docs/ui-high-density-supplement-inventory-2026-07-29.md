@@ -53,3 +53,5 @@ inventory 자체는 중단 gate가 없다. 구현 뒤 desktop과 390px에서 목
 
 - UI-8C-1: 학생 상세를 공통 scrollable modal로 전환해 학생 header·닫기를 유지하고 긴 본문만 내부 scroll되게 했다.
 - 실제 3개 저장 상태를 빈 칸 없는 3열로 맞췄으며 내용 저장·일정 저장 callback은 그대로 분리했다.
+- UI-8C-2A: 모바일 주요 행동 3개와 최근 한 달 이력 5열을 문서 순서 그대로 한 열에 배치했다.
+- 저장·일정·완료·복귀 callback과 disabled 조건은 변경하지 않았다.

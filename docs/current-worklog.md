@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8C-2A. 보충 모바일 행동·최근 이력
+
+- 640px 이하에서 `보충 내용·알림톡 저장`, `수업일지 일정 만들기/변경`, `보충 완료 처리`를 가로 scroll 대신 문서 순서 그대로 한 열 전체 폭으로 배치했다.
+- 최근 한 달 보충 이력의 학생·항목·날짜·상태·행동 5열도 모바일 한 열로 전환하고 긴 학교·항목·일정 문구가 줄바꿈되게 했다.
+- 내용 저장·일정 저장·완료·복귀 callback과 disabled 조건은 그대로 보존했다.
+- 화면 CSS 외 저장·발송·예약·삭제·출결·Supabase/app_state·lessons·lesson_student_records·makeup_tasks·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 모바일 주요 행동·이력 한 열, 긴 문구와 기존 callback 분리 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 494개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 390px에서 버튼 3개의 의미 순서와 최근 이력 카드 가독성을 나중에 UI-8C 통합 절차로 확인한다. 실제 버튼은 누르지 않고 UI-8C-2B를 계속한다.
+
 ## 2026-07-29 UI-8C-1. 보충 학생 상세 내부 scroll·3개 상태
 
 - 학생별 보충 상세에 공통 `scrollable` modal shell을 적용해 학생명·학년·학교 제목과 닫기를 유지하고 긴 원천·일정·알림·취소 본문만 내부 scroll되게 했다.
