@@ -51,4 +51,4 @@ Academy OS의 모든 화면을 같은 사용 규칙으로 보이게 한다. 이�
 
 ## 다음 착수
 
-UI-0~UI-6과 UI-7A·UI-7B·UI-7C를 완료했다. 다음 UI-7D-1은 공통·대표 form의 label, input/select/textarea 터치 높이, 모바일 폭, 오류·도움말 연결과 iOS 입력 확대 기준을 inventory한다. 저장 callback·draft·validation과 운영 원천은 바꾸지 않는다.
+UI-0~UI-6과 UI-7A·UI-7B·UI-7C, UI-7D-1 inventory를 완료했다. 다음 UI-7D-2는 640px 이하 일반 form control의 16px 글꼴과 44px 터치 높이를 공통화하되 checkbox/radio/file/hidden과 callback·draft·validation·운영 원천은 바꾸지 않는다.

@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-7D-1. 모바일 form·접근성 inventory
+
+- JSX 48개의 input/select/textarea 378개를 AST로 전수 조사했다. 감지 가능한 이름이 있는 control은 273개, label/ARIA 이름 미지정은 105개였다.
+- 이름 미지정은 `App.jsx` 53개, 학생관리 41개, 월별 정산 5개, 테스트관리 3개, 특강 정산 2개, 학생 질문 1개로 좁혔다.
+- control별 `aria-describedby`·`aria-invalid`는 아직 0개이며, 전역 `font: inherit` 때문에 12~14px 부모 안의 input이 iOS focus 확대를 일으킬 수 있음을 확인했다.
+- 결과와 UI-7D-2~5 분할 계획은 `docs/ui-mobile-form-inventory-2026-07-29.md`에 기록했다. 저장 callback·draft·validation과 운영 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 현재 전역 font 상속과 대표 이름 미지정 caller 그룹 정적 기준선, `npm run build` 128 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 470개 중 기존 기준선 `90a`만 실패했고 모든 개별 fixture와 신규 계약은 통과했다.
+- 사람 검수: 코드 UI 변경이 없어 필수 중단 gate가 없다. 구현 뒤 모바일·VoiceOver 절차를 누적한다.
+
 ## 2026-07-29 UI-7C-3. 대표 탭·필터·검색 회귀
 
 - 알림관리 상위 탭의 `aria-selected`·state setter, 알림 대상 반·학생 필터와 검색 결과 수, 학사일정 표시·학교 filter callback, 학부모 응대 검색 결과·0건 상태를 대표 표본으로 고정했다.
