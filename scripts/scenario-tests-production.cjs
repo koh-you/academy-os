@@ -344,6 +344,64 @@ function getButtonActionInventory(directory) {
 
   return inventory;
 }
+function getDisclosureTableInventory(directory) {
+  const filePaths = [];
+  const inventory = {
+    dataTableShellCount: 0,
+    detailsCount: 0,
+    fileCount: 0,
+    summaryCount: 0,
+    tableCount: 0,
+    unwrappedTables: []
+  };
+
+  function collect(currentDirectory) {
+    fs.readdirSync(currentDirectory, { withFileTypes: true }).forEach((entry) => {
+      const entryPath = path.join(currentDirectory, entry.name);
+      if (entry.isDirectory()) {
+        collect(entryPath);
+      } else if (entry.name.endsWith(".jsx")) {
+        filePaths.push(entryPath);
+      }
+    });
+  }
+
+  function getJsxName(node) {
+    if (node?.type === "JSXIdentifier") return node.name;
+    if (node?.type === "JSXMemberExpression") return `${getJsxName(node.object)}.${getJsxName(node.property)}`;
+    return "";
+  }
+
+  collect(directory);
+  inventory.fileCount = filePaths.length;
+
+  filePaths.forEach((filePath) => {
+    const source = fs.readFileSync(filePath, "utf8");
+    const ast = parse(source, { plugins: ["jsx"], sourceType: "module" });
+
+    traverse(ast, {
+      JSXOpeningElement(pathRef) {
+        const { node } = pathRef;
+        const elementName = getJsxName(node.name);
+        if (elementName === "details") inventory.detailsCount += 1;
+        if (elementName === "summary") inventory.summaryCount += 1;
+        if (elementName === "DataTableShell") inventory.dataTableShellCount += 1;
+        if (elementName !== "table") return;
+
+        inventory.tableCount += 1;
+        const hasDataTableShell = Boolean(pathRef.findParent((parentPath) => (
+          parentPath.isJSXElement()
+          && getJsxName(parentPath.node.openingElement.name) === "DataTableShell"
+        )));
+        if (!hasDataTableShell) {
+          inventory.unwrappedTables.push(`${path.relative(root, filePath)}:${node.loc.start.line}`);
+        }
+      }
+    });
+  });
+
+  return inventory;
+}
 function findUnnamedFormControls(source) {
   const ast = parse(source, { plugins: ["jsx"], sourceType: "module" });
   const labelledIds = new Set();
@@ -857,6 +915,8 @@ check("77j-7e-3 mobile buttons action links and role buttons keep a 44px target 
 check("77j-7e-4 disconnected login calendar class wrong-book password and chat controls are absent without inventing callbacks", ["className=\"loginClose\"", "<button className=\"primaryButton\" type=\"button\">+ 반 추가</button>", "<button className=\"softButton\" type=\"button\">전부 맞음</button>", "<button className=\"softButton\" type=\"button\">오답수정</button>", "<button className=\"softButton\" type=\"button\">기록</button>"].every((pattern) => !app.includes(pattern)) && !studentMyPageTabSource.includes("비밀번호 변경") && !studentPortalShellSource.includes("portalIconButton") && [".loginClose", ".portalIconButton", ".passwordPanel"].every((pattern) => !css.includes(pattern)) && hasAll(app, ["function TeacherLessonHub(", "<h1>{formatMonthTitle(selectedDate)}</h1>", "function LessonHub(", "<h1>2026년 6월</h1>", "onClick={onAddLesson}"]));
 const buttonActionInventory = getButtonActionInventory(path.join(root, "src"));
 check("77j-7e-5 all JSX buttons retain a callback disabled guard or submit contract with mobile focus and touch coverage", buttonActionInventory.fileCount === 49 && buttonActionInventory.total === 433 && buttonActionInventory.callbackCount === 425 && buttonActionInventory.disabledCount === 175 && buttonActionInventory.submitCount === 7 && buttonActionInventory.disconnected.length === 0 && hasAll(app, ["<button className=\"primaryButton full\" disabled={isSubmitting} type=\"submit\">", "disabled={isNotificationJobsLoading} onClick={onRefresh}", "aria-label=\"이전 달\" className=\"iconButton\" onClick={() => onMoveDate(-30)}"]) && hasAll(css, ["button:focus-visible", "a:focus-visible", "button,\n  a[href],\n  [role=\"button\"] {", "min-height: var(--academy-touch-target) !important"]));
+const disclosureTableInventory = getDisclosureTableInventory(path.join(root, "src"));
+check("77j-7f-1 mobile disclosure and table inventory isolates summary focus gaps while every native table stays in the shared scroll shell", disclosureTableInventory.fileCount === 49 && disclosureTableInventory.detailsCount === 23 && disclosureTableInventory.summaryCount === 23 && disclosureTableInventory.tableCount === 4 && disclosureTableInventory.dataTableShellCount === 15 && disclosureTableInventory.unwrappedTables.length === 0 && hasAll(css, [".specialLectureCancellationActions > summary", "min-height: 34px", ".researchTypeChapter > summary,", "min-height: 40px", ".studentProfileSection > summary", "min-height: 64px"]) && !css.includes("summary:focus-visible") && hasAll(sharedDataTableShellSource + sharedDataTableShellCssSource, ["aria-label={label}", "role=\"region\"", "tabIndex={tabIndex}", "overflow-x: auto", "overscroll-behavior-inline: contain", "touch-action: pan-x pan-y"]));
 check("77j-2c notification center restores the parent response tab without storing channel replies", hasAll(app, ["ParentResponseContextPanel", "getParentResponseContexts", "[\"parent_context\", \"학부모 응대\"", "activeNoticeWorkspace === \"parent_context\""]) && hasAll(css, [".parentResponseContextPanel", ".parentResponseContextCard", ".parentResponseContextBody"]));
 check("77j-3 exam analysis selection columns keep Korean labels clear beside thin scrollbars", hasAll(css, [".examAnalysisColumnList::-webkit-scrollbar", ".examAnalysisColumnList::-webkit-scrollbar-button", "scrollbar-gutter: stable", ".examAnalysisColumnCard strong", "line-height: 1.4", "padding-block: 1px"]));
 check("78 lesson journal does not show keyboard shortcut hint text", !app.includes("↑↓←→") && !app.includes("Ctrl+C/V/Z"));

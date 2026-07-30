@@ -51,4 +51,4 @@ Academy OS의 모든 화면을 같은 사용 규칙으로 보이게 한다. 이�
 
 ## 다음 착수
 
-UI-0~UI-6과 UI-7A·UI-7B·UI-7C·UI-7D·UI-7E를 완료했다. 다음 UI-7F-1은 native `details/summary`, 고밀도 표·가로 스크롤과 기타 모바일 interactive 예외를 읽기 전용 inventory로 수량화한다. 외부 side effect와 운영 원천은 바꾸지 않는다.
+UI-0~UI-6과 UI-7A·UI-7B·UI-7C·UI-7D·UI-7E, UI-7F-1을 완료했다. 다음 UI-7F-2는 native `summary` 전역 focus-visible과 640px 이하 44px touch target을 공통화한다. native open/close, callback, 외부 side effect와 운영 원천은 바꾸지 않는다.

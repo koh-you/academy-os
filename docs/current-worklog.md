@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-7F-1. 모바일 disclosure·table inventory
+
+- JSX 49개에서 native details/summary 각 23개, native table 4개, DataTableShell 15개를 AST로 전수 대조했다.
+- native table 4개는 모두 DataTableShell 안에 있다. 공통 shell의 region label, keyboard focus, 가로 scroll, overscroll/touch pan 계약도 확인했다.
+- summary는 학생 프로필·탈리·시험분석 역할 카드만 44px 이상이고, 특강 취소 34px·수업연구 40px·그 밖의 일부는 명시 높이가 없다. 전역 summary focus-visible도 없다.
+- 상세 분류와 UI-7F-2~4 순서를 `docs/ui-mobile-disclosure-table-inventory-2026-07-29.md`에 기록했다.
+- 화면·callback·native open 상태와 저장·발송·예약·삭제·출결·Supabase/app_state·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: disclosure/table 수량, summary 보강 대상, native table 공통 shell 포장과 scroll/focus 계약 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 480개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 코드 UI 변경이 없어 새 필수·시각 gate가 없다. UI-7F-2 적용 뒤 누적 검수한다.
+
 ## 2026-07-29 UI-7E-5. 모바일 action 회귀계약
 
 - `src`의 JSX 49개를 AST로 다시 읽어 button 433개의 callback·disabled·submit 계약을 한 번에 검사하는 회귀 fixture를 추가했다.
