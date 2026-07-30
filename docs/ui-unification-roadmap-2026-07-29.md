@@ -118,8 +118,8 @@
 | UI-8H-1 | 완료 | 월별 출결 달력 named 7열 touch scroll·모바일 문구 |
 | UI-8H-2 | 완료 | 계산·조정·제외/복원·합계·검증 저장 통합 회귀 |
 | UI-8I-0 | 완료 | 수업연구 자동저장·자료함 POST/DELETE·AI 로컬 파일/결과 경계와 모바일 예외 inventory |
-| UI-8I-1 | 다음 | 수업연구·자료함 긴 목록 named focus/touch scroll |
-| UI-8I-2 | 대기 | AI 입력/결과·자료함 등록/목록 모바일 한 열과 긴 내용 |
+| UI-8I-1 | 완료 | 수업연구·자료함 긴 목록 named focus/touch scroll |
+| UI-8I-2 | 다음 | AI 입력/결과·자료함 등록/목록 모바일 한 열과 긴 내용 |
 | UI-8I-3 | 대기 | 세 화면 callback/source 통합 회귀와 시각 절차 |
 
 ## 전체 세부 작업 목록

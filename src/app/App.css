@@ -13420,6 +13420,20 @@ textarea {
 .resourceClassGroups {
   display: grid;
   gap: 8px;
+  max-height: 520px;
+  max-width: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2px;
+  scrollbar-gutter: stable;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+.resourceClassGroups:focus-visible {
+  border-radius: var(--academy-radius);
+  outline: 2px solid var(--academy-focus-ring);
+  outline-offset: 2px;
 }
 
 .resourceClassGroup {
@@ -14239,8 +14253,20 @@ textarea.profileEditInput {
   display: grid;
   gap: 8px;
   max-height: 390px;
-  overflow: auto;
-  padding-right: 4px;
+  max-width: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2px 4px 2px 2px;
+  scrollbar-gutter: stable;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+.researchTypeTree:focus-visible,
+.researchCardList:focus-visible {
+  border-radius: var(--academy-radius);
+  outline: 2px solid var(--academy-focus-ring);
+  outline-offset: 2px;
 }
 
 .researchTypeChapter,
@@ -14357,6 +14383,14 @@ textarea.profileEditInput {
 .researchCardList {
   display: grid;
   gap: 10px;
+  max-height: 560px;
+  max-width: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2px 4px 2px 2px;
+  scrollbar-gutter: stable;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 
 .researchCard {

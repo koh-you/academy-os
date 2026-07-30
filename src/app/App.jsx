@@ -23279,7 +23279,12 @@ function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, on
               eyebrow="TYPE TREE"
               title="유형트리"
             />
-            <div className="researchTypeTree">
+            <div
+              aria-label={`${selectedSubject} 수업연구 유형트리`}
+              className="researchTypeTree"
+              role="region"
+              tabIndex={0}
+            >
               {catalogUnits.map((chapter) => (
                 <details className="researchTypeChapter" key={chapter.id} open>
                   <summary>
@@ -23331,7 +23336,12 @@ function LessonResearchCenter({ appStateSaveState = "idle", items, onAddItem, on
             title="교안 목록"
           />
 
-          <div className="researchCardList">
+          <div
+            aria-label={`${selectedSubject} 교안 목록`}
+            className="researchCardList"
+            role="region"
+            tabIndex={0}
+          >
             {filteredItems.length === 0 ? (
               <EmptyState className="emptyState">아직 이 과목에 정리된 연구 항목이 없습니다.</EmptyState>
             ) : (
@@ -26748,7 +26758,12 @@ function ResourceLibraryCenter({ materials = [], onAddMaterial, onDeleteMaterial
               label="개별 학생 공개"
               selectedCount={form.studentIds.length}
             />
-            <div className="resourceClassGroups">
+            <div
+              aria-label="자료 공개 학생 반별 목록"
+              className="resourceClassGroups"
+              role="region"
+              tabIndex={0}
+            >
               {resourceStudentGroups.map((group) => {
                 const groupStudentIds = group.students.map((student) => student.studentId);
                 const selectedCount = groupStudentIds.filter((studentId) => form.studentIds.includes(studentId)).length;

@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-30 UI-8I-1. 수업연구·자료함 긴 목록 탐색
+
+- 수업연구 유형트리·교안 목록과 자료함 반별 학생 목록에 업무 이름, keyboard focus와 내부 세로 touch scroll 경계를 추가했다.
+- 유형→교안 추가, 교안 선택·편집, 반 접기/펼치기와 학생 선택 callback은 그대로 보존했다.
+- 화면 shell·접근성·CSS 외 app_state 자동저장, 자료 등록·삭제 API, 파일 선택·AI 처리·다운로드는 변경하거나 실행하지 않았다.
+- AI 검수: named 목록, 내부 touch scroll과 기존 선택 callback 보존 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 517개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: desktop/390px의 세 목록 focus·내부 scroll은 UI-8I 통합 절차로 나중에 확인한다. 저장·삭제·파일·AI 행동은 누르지 않고 UI-8I-2를 계속한다.
+
 ## 2026-07-30 UI-8I-0. 수업연구·AI 도구·자료함 inventory
 
 - 수업연구 `app_state.lessonResearchItems` 자동저장, 자료함 `resource_materials` POST/DELETE, AI 도구의 브라우저 local 파일 읽기·초안 생성·Blob 다운로드 경계를 대조했다.
