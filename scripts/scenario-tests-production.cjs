@@ -2137,6 +2137,20 @@ check(
       "Promise.all"
     ].some((value) => generatedLessonPlanBuilderSource.includes(value))
 );
+check(
+  "84d-170 app view change inventory preserves mobile close scroll reset and lesson journal boundary",
+  hasAll(rawAppEntrySource, [
+    'const [activeView, setActiveView] = useState("lessons")',
+    "function handleChangeView(nextView)",
+    "setActiveView(nextView)",
+    "setIsMobileNavigationOpen(false)",
+    'typeof window !== "undefined"',
+    'window.scrollTo({ behavior: "auto", left: 0, top: 0 })',
+    'nextView === "lessons"',
+    "setIsLessonJournalOpen(false)",
+    "onChangeView={handleChangeView}"
+  ])
+);
 check("84e shared modal closes with Escape key", hasAll(app, ["import { Modal, ModalFooter } from \"../shared/components/Modal.jsx\""]) && hasAll(sharedModalSource, ["export function Modal({", "backdropClassName = \"\"", "hideCloseButton = false", "hideHeader = false", "function handleEscapeKey(event)", "event.key === \"Escape\"", "onClose?.()", "window.addEventListener(\"keydown\", handleEscapeKey)", "window.removeEventListener(\"keydown\", handleEscapeKey)", "hideCloseButton ? null"]) );
 check("84f lesson journal modal uses shared Escape-close modal", hasAll(app, ["backdropClassName=\"lessonJournalModalBackdrop\"", "className=\"lessonJournalModal\"", "hideHeader", "onClose={onBackToCalendar}"]) && !app.includes("<div className=\"modalBackdrop lessonJournalModalBackdrop\" role=\"dialog\" aria-modal=\"true\">"));
 check("84f-1 lesson journal student preview stays isolated and callback-only", hasAll(lessonFrontendSource, ["LessonJournalStudentPreviewModal", "createLessonJournalStudentPreviewModel", "students.filter((student) => student.studentId === studentPreviewId)", "PortalComponent={StudentPortalV2}", "students={model.previewStudents}", "onLogout={onClose}"]) && !lessonJournalStudentPreviewModalSource.includes("fetch(") && !lessonJournalStudentPreviewModalSource.includes("/api/"));
