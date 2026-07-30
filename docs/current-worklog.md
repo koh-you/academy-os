@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-7D-4. 도메인 form control 접근 가능한 이름
+
+- 학생관리 41개, 월별 정산 5개, 테스트관리 3개, 특강 정산 2개, 학생 질문 1개 등 남은 이름 미지정 control 52개를 0개로 줄였다.
+- 학생 프로필의 기본정보·운영 메모·운영 알림·상담·성적·테스트, 정산의 방식·단가·스케줄·조정, 테스트 응시 행, 학생 질문에 학생명과 업무 열 의미를 조합한 이름을 제공했다.
+- 전체 JSX 48개의 form control 378개를 AST로 다시 검사해 label wrapper, `htmlFor`, `aria-label`·`aria-labelledby` 중 하나가 모두 있음을 확인했다.
+- control의 value/onChange/disabled/type/placeholder, local draft, 저장 callback·validation과 Supabase/app_state·notification_jobs/Solapi·수업·AI·출결 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 다섯 도메인 AST 전수검사와 대표 학생 행 label·callback 불변 fixture, `npm run build` 128 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 473개 중 기존 기준선 `90a`만 실패했고 모든 개별 fixture와 신규 계약은 통과했다.
+- 사람 검수: 모바일 VoiceOver에서 학생 프로필·정산·테스트·학생 질문의 반복 control 이름을 확인하는 독립 절차를 `docs/next-session/README.md`에 누적했다. 입력·저장은 하지 않으며 다음 UI 단위를 막지 않는다.
+
 ## 2026-07-29 UI-7D-3. App form control 접근 가능한 이름
 
 - `App.jsx`의 이름 미지정 form control 53개를 0개로 줄였다.

@@ -500,6 +500,7 @@ export function MonthlySettlementPanel({
                   </td>
                   <td>
                     <select
+                      aria-label={`${row.student.name} 정산 방식`}
                       value={setting.mode}
                       onChange={(event) => handleModeChange(row, event.target.value)}
                     >
@@ -520,6 +521,7 @@ export function MonthlySettlementPanel({
                   <td>
                     <div className="monthlySettlementMoneyInput">
                       <input
+                        aria-label={`${row.student.name} ${isNewMode ? "신입 회당 단가" : "월 고정금액"}`}
                         min="0"
                         placeholder="단가 미설정"
                         type="number"
@@ -544,6 +546,7 @@ export function MonthlySettlementPanel({
                   </td>
                   <td className="monthlySettlementScheduleCell">
                     <input
+                      aria-label={`${row.student.name} 월별 스케줄`}
                       placeholder="예: 월수금 19:00-22:00"
                       value={setting.scheduleText}
                       onChange={(event) => updateStudentSetting(row.student.studentId, "scheduleText", event.target.value)}
@@ -604,6 +607,7 @@ export function MonthlySettlementPanel({
                   <td>
                     <div className="monthlySettlementMoneyInput signed">
                       <input
+                        aria-label={`${row.student.name} 정산 조정금액`}
                         placeholder="+/-"
                         type="number"
                         value={setting.adjustmentAmount}
@@ -615,6 +619,7 @@ export function MonthlySettlementPanel({
                   </td>
                   <td>
                     <textarea
+                      aria-label={`${row.student.name} 정산 조정 사유`}
                       placeholder="차감 사유·확인 메모"
                       rows="2"
                       value={setting.note}

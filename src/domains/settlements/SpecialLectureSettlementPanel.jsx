@@ -289,6 +289,7 @@ export function SpecialLectureSettlementPanel({
                     </td>
                     <td>
                       <select
+                        aria-label={`${row.student.name} 특강 정산 방식`}
                         onChange={(event) => updateSetting(row, "mode", event.target.value)}
                         value={row.setting.mode}
                       >
@@ -345,6 +346,7 @@ export function SpecialLectureSettlementPanel({
                     </td>
                     <td>
                       <textarea
+                        aria-label={`${row.student.name} 특강 정산 조정 사유`}
                         className={row.hasMissingReason ? "warning" : undefined}
                         disabled={row.setting.mode === "auto"}
                         onChange={(event) => updateSetting(row, "note", event.target.value)}

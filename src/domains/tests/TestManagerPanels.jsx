@@ -153,10 +153,11 @@ export function TestAttemptTable({
         return (
           <div className="testAttemptRow" key={student.studentId}>
             <strong>{student.name}</strong>
-            <select value={draft.status ?? ""} onChange={(event) => onUpdateAttemptDraft?.(student.studentId, "status", event.target.value)}>
+            <select aria-label={`${student.name} 응시 상태`} value={draft.status ?? ""} onChange={(event) => onUpdateAttemptDraft?.(student.studentId, "status", event.target.value)}>
               {statusOptions.map((option) => <option key={option.id || "blank"} value={option.id}>{option.label}</option>)}
             </select>
             <input
+              aria-label={`${student.name} 정답 수`}
               disabled={draft.status === "not_taken"}
               min="0"
               type="number"
@@ -165,6 +166,7 @@ export function TestAttemptTable({
               placeholder="정답"
             />
             <input
+              aria-label={`${student.name} 미응시 사유`}
               disabled={draft.status === "taken"}
               value={draft.notTakenReason ?? ""}
               onChange={(event) => onUpdateAttemptDraft?.(student.studentId, "notTakenReason", event.target.value)}

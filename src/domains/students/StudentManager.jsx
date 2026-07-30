@@ -964,6 +964,7 @@ export function StudentManager({
                   onChange={(event) => updateStudentField(student.studentId, "parentPhone", event.target.value)}
                 />
                 <select
+                  aria-label={`${student.name} 출생연도`}
                   value={student.birthYear ?? ""}
                   onChange={(event) => updateStudentField(student.studentId, "birthYear", event.target.value)}
                 >
@@ -1534,6 +1535,7 @@ function StudentProfileModal({
         <small>{label}</small>
         {isEditingProfile ? (
           <input
+            aria-label={`${student.name} ${label}`}
             className="profileEditInput"
             value={profileDraft[field] ?? ""}
             onChange={(event) => updateProfile(field, event.target.value)}
@@ -1664,7 +1666,7 @@ function StudentProfileModal({
               </div>
               {isEditingTeacherOperatingMemo ? (
                 <>
-                  <textarea className="profileEditInput teacherOperatingMemoInput" rows="5" value={teacherOperatingMemoDraft} onChange={(event) => { setTeacherOperatingMemoDraft(event.target.value); setTeacherOperatingMemoError(""); }} placeholder="예) 3-2 진도: 개념플러스유형, 쎈 완료. 다음 수업은 RPM 진행." />
+                  <textarea aria-label={`${student.name} 강사 운영 메모`} className="profileEditInput teacherOperatingMemoInput" rows="5" value={teacherOperatingMemoDraft} onChange={(event) => { setTeacherOperatingMemoDraft(event.target.value); setTeacherOperatingMemoError(""); }} placeholder="예) 3-2 진도: 개념플러스유형, 쎈 완료. 다음 수업은 RPM 진행." />
                   <div className="teacherOperatingMemoSaveRow">
                     <button className="primaryButton compact" disabled={teacherOperatingMemoSaveState === "saving"} onClick={saveTeacherOperatingMemo} type="button">강사 운영 메모 저장</button>
                     <span>학생·학부모 포털과 알림톡에는 노출되지 않습니다.</span>
@@ -1684,12 +1686,14 @@ function StudentProfileModal({
                 {isEditingProfile ? (
                   <div className="profileLoginEdit">
                     <input
+                      aria-label={`${student.name} 로그인 아이디`}
                       className="profileEditInput"
                       value={profileDraft.loginId ?? ""}
                       onChange={(event) => updateProfile("loginId", event.target.value)}
                       placeholder="아이디"
                     />
                     <input
+                      aria-label={`${student.name} 로그인 PIN`}
                       className="profileEditInput"
                       value={profileDraft.pin ?? ""}
                       onChange={(event) => updateProfile("pin", event.target.value)}
@@ -1778,6 +1782,7 @@ function StudentProfileModal({
               <section className="studentReminderComposer">
             <div className="studentReminderControls">
               <select
+                aria-label={`${student.name} 운영 알림 종류`}
                 value={newReminderDraft.reminderType}
                 onChange={(event) => updateNewReminderDraft("reminderType", event.target.value)}
               >
@@ -1786,16 +1791,19 @@ function StudentProfileModal({
                 ))}
               </select>
               <input
+                aria-label={`${student.name} 운영 알림 날짜`}
                 type="date"
                 value={newReminderDraft.reminderDate}
                 onChange={(event) => updateNewReminderDraft("reminderDate", event.target.value)}
               />
               <input
+                aria-label={`${student.name} 운영 알림 시간`}
                 type="time"
                 value={newReminderDraft.reminderTime}
                 onChange={(event) => updateNewReminderDraft("reminderTime", event.target.value)}
               />
               <select
+                aria-label={`${student.name} 운영 알림 중요도`}
                 value={newReminderDraft.priority}
                 onChange={(event) => updateNewReminderDraft("priority", event.target.value)}
               >
@@ -1821,11 +1829,13 @@ function StudentProfileModal({
               </button>
             </div>
             <input
+              aria-label={`${student.name} 운영 알림 제목`}
               value={newReminderDraft.title}
               onChange={(event) => updateNewReminderDraft("title", event.target.value)}
               placeholder="알림 제목"
             />
             <textarea
+              aria-label={`${student.name} 운영 알림 내용`}
               value={newReminderDraft.content}
               onChange={(event) => updateNewReminderDraft("content", event.target.value)}
               placeholder="예: 상담에서 확인할 내용, 학부모 요청, 다음 수업 전 확인할 특이사항"
@@ -1893,6 +1903,7 @@ function StudentProfileModal({
               <section className="studentConsultationComposer">
             <div className="studentConsultationControls">
               <select
+                aria-label={`${student.name} 새 상담 구분`}
                 value={newConsultationDraft.consultationType}
                 onChange={(event) => updateNewConsultationDraft("consultationType", event.target.value)}
               >
@@ -1901,6 +1912,7 @@ function StudentProfileModal({
                 ))}
               </select>
               <input
+                aria-label={`${student.name} 새 상담 날짜`}
                 type="date"
                 value={newConsultationDraft.consultationDate}
                 onChange={(event) => updateNewConsultationDraft("consultationDate", event.target.value)}
@@ -1915,6 +1927,7 @@ function StudentProfileModal({
               </button>
             </div>
             <textarea
+              aria-label={`${student.name} 새 상담 내용`}
               value={newConsultationDraft.content}
               onChange={(event) => updateNewConsultationDraft("content", event.target.value)}
               placeholder="상담 내용을 정리하세요. 예: 학습 태도, 숙제 습관, 학부모 요청사항, 다음 조치"
@@ -1936,6 +1949,7 @@ function StudentProfileModal({
                     {isEditingProfile ? (
                       <>
                         <select
+                          aria-label={`${student.name} ${item.consultationDate || "상담"} 구분`}
                           value={draft.consultationType}
                           onChange={(event) => updateConsultationDraft(item.consultationId, "consultationType", event.target.value)}
                         >
@@ -1944,6 +1958,7 @@ function StudentProfileModal({
                           ))}
                         </select>
                         <input
+                          aria-label={`${student.name} ${item.consultationDate || "상담"} 날짜`}
                           type="date"
                           value={draft.consultationDate ?? ""}
                           onChange={(event) => updateConsultationDraft(item.consultationId, "consultationDate", event.target.value)}
@@ -1956,6 +1971,7 @@ function StudentProfileModal({
                   </div>
                   {isEditingProfile ? (
                     <textarea
+                      aria-label={`${student.name} ${item.consultationDate || "상담"} 내용`}
                       value={draft.content ?? ""}
                       onChange={(event) => updateConsultationDraft(item.consultationId, "content", event.target.value)}
                     />
@@ -2012,15 +2028,15 @@ function StudentProfileModal({
               </div>
               {isEditingProfile ? (
                 <div className="managementRow studentScoreRow draftRow">
-              <select value={newScoreDraft.examType} onChange={(event) => updateNewScoreDraft("examType", event.target.value)}>
+              <select aria-label={`${student.name} 새 성적 구분`} value={newScoreDraft.examType} onChange={(event) => updateNewScoreDraft("examType", event.target.value)}>
                 <option value="내신">내신</option>
                 <option value="모의고사">모의고사</option>
               </select>
-              <input type="date" value={newScoreDraft.examDate} onChange={(event) => updateNewScoreDraft("examDate", event.target.value)} />
-              <input value={newScoreDraft.subject} onChange={(event) => updateNewScoreDraft("subject", event.target.value)} />
-              <input value={newScoreDraft.score} onChange={(event) => updateNewScoreDraft("score", event.target.value)} placeholder="점수" />
-              <input value={newScoreDraft.grade} onChange={(event) => updateNewScoreDraft("grade", event.target.value)} placeholder="등급" />
-              <input value={newScoreDraft.note} onChange={(event) => updateNewScoreDraft("note", event.target.value)} placeholder="메모" />
+              <input aria-label={`${student.name} 새 성적 날짜`} type="date" value={newScoreDraft.examDate} onChange={(event) => updateNewScoreDraft("examDate", event.target.value)} />
+              <input aria-label={`${student.name} 새 성적 과목`} value={newScoreDraft.subject} onChange={(event) => updateNewScoreDraft("subject", event.target.value)} />
+              <input aria-label={`${student.name} 새 성적 점수`} value={newScoreDraft.score} onChange={(event) => updateNewScoreDraft("score", event.target.value)} placeholder="점수" />
+              <input aria-label={`${student.name} 새 성적 등급`} value={newScoreDraft.grade} onChange={(event) => updateNewScoreDraft("grade", event.target.value)} placeholder="등급" />
+              <input aria-label={`${student.name} 새 성적 메모`} value={newScoreDraft.note} onChange={(event) => updateNewScoreDraft("note", event.target.value)} placeholder="메모" />
               <button
                 className="primaryButton compact"
                 disabled={!hasNewScoreDraftChanges || scoreRecordSaveState === "saving"}
@@ -2043,15 +2059,15 @@ function StudentProfileModal({
                 <div className={isDirty ? "managementRow studentScoreRow dirty" : "managementRow studentScoreRow"} key={item.scoreRecordId}>
                   {isEditingProfile ? (
                     <>
-                      <select value={draft.examType} onChange={(event) => updateScoreDraft(item.scoreRecordId, "examType", event.target.value)}>
+                      <select aria-label={`${student.name} ${item.examDate || "성적"} 구분`} value={draft.examType} onChange={(event) => updateScoreDraft(item.scoreRecordId, "examType", event.target.value)}>
                         <option value="내신">내신</option>
                         <option value="모의고사">모의고사</option>
                       </select>
-                      <input type="date" value={draft.examDate ?? ""} onChange={(event) => updateScoreDraft(item.scoreRecordId, "examDate", event.target.value)} />
-                      <input value={draft.subject ?? ""} onChange={(event) => updateScoreDraft(item.scoreRecordId, "subject", event.target.value)} />
-                      <input value={draft.score ?? ""} onChange={(event) => updateScoreDraft(item.scoreRecordId, "score", event.target.value)} />
-                      <input value={draft.grade ?? ""} onChange={(event) => updateScoreDraft(item.scoreRecordId, "grade", event.target.value)} />
-                      <input value={draft.note ?? ""} onChange={(event) => updateScoreDraft(item.scoreRecordId, "note", event.target.value)} />
+                      <input aria-label={`${student.name} ${item.examDate || "성적"} 날짜`} type="date" value={draft.examDate ?? ""} onChange={(event) => updateScoreDraft(item.scoreRecordId, "examDate", event.target.value)} />
+                      <input aria-label={`${student.name} ${item.examDate || "성적"} 과목`} value={draft.subject ?? ""} onChange={(event) => updateScoreDraft(item.scoreRecordId, "subject", event.target.value)} />
+                      <input aria-label={`${student.name} ${item.examDate || "성적"} 점수`} value={draft.score ?? ""} onChange={(event) => updateScoreDraft(item.scoreRecordId, "score", event.target.value)} />
+                      <input aria-label={`${student.name} ${item.examDate || "성적"} 등급`} value={draft.grade ?? ""} onChange={(event) => updateScoreDraft(item.scoreRecordId, "grade", event.target.value)} />
+                      <input aria-label={`${student.name} ${item.examDate || "성적"} 메모`} value={draft.note ?? ""} onChange={(event) => updateScoreDraft(item.scoreRecordId, "note", event.target.value)} />
                       <div className="studentProfileRowActions">
                         <button
                           className="softButton primarySoft"
@@ -2110,12 +2126,12 @@ function StudentProfileModal({
               </div>
               {isEditingProfile ? (
                 <div className="managementRow academyTestProfileRow draftRow">
-              <input type="date" value={newAcademyTestDraft.testDate} onChange={(event) => updateNewAcademyTestDraft("testDate", event.target.value)} />
-              <input value={newAcademyTestDraft.title} onChange={(event) => updateNewAcademyTestDraft("title", event.target.value)} />
-              <input value={newAcademyTestDraft.scope} onChange={(event) => updateNewAcademyTestDraft("scope", event.target.value)} placeholder="범위" />
-              <input value={newAcademyTestDraft.score} onChange={(event) => updateNewAcademyTestDraft("score", event.target.value)} placeholder="점수" />
-              <input value={newAcademyTestDraft.averageScore} onChange={(event) => updateNewAcademyTestDraft("averageScore", event.target.value)} placeholder="평균" />
-              <input value={newAcademyTestDraft.note} onChange={(event) => updateNewAcademyTestDraft("note", event.target.value)} placeholder="메모" />
+              <input aria-label={`${student.name} 새 테스트 날짜`} type="date" value={newAcademyTestDraft.testDate} onChange={(event) => updateNewAcademyTestDraft("testDate", event.target.value)} />
+              <input aria-label={`${student.name} 새 테스트명`} value={newAcademyTestDraft.title} onChange={(event) => updateNewAcademyTestDraft("title", event.target.value)} />
+              <input aria-label={`${student.name} 새 테스트 범위`} value={newAcademyTestDraft.scope} onChange={(event) => updateNewAcademyTestDraft("scope", event.target.value)} placeholder="범위" />
+              <input aria-label={`${student.name} 새 테스트 점수`} value={newAcademyTestDraft.score} onChange={(event) => updateNewAcademyTestDraft("score", event.target.value)} placeholder="점수" />
+              <input aria-label={`${student.name} 새 테스트 평균`} value={newAcademyTestDraft.averageScore} onChange={(event) => updateNewAcademyTestDraft("averageScore", event.target.value)} placeholder="평균" />
+              <input aria-label={`${student.name} 새 테스트 메모`} value={newAcademyTestDraft.note} onChange={(event) => updateNewAcademyTestDraft("note", event.target.value)} placeholder="메모" />
               <button
                 className="primaryButton compact"
                 disabled={!hasNewAcademyTestDraftChanges || academyTestSaveState === "saving"}
@@ -2138,12 +2154,12 @@ function StudentProfileModal({
                 <div className={isDirty ? "managementRow academyTestProfileRow dirty" : "managementRow academyTestProfileRow"} key={item.testId}>
                   {isEditingProfile ? (
                     <>
-                      <input type="date" value={draft.testDate ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "testDate", event.target.value)} />
-                      <input value={draft.title ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "title", event.target.value)} />
-                      <input value={draft.scope ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "scope", event.target.value)} />
-                      <input value={draft.score ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "score", event.target.value)} placeholder="점수" />
-                      <input value={draft.averageScore ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "averageScore", event.target.value)} placeholder="평균" />
-                      <input value={draft.note ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "note", event.target.value)} />
+                      <input aria-label={`${student.name} ${item.title || "테스트"} 날짜`} type="date" value={draft.testDate ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "testDate", event.target.value)} />
+                      <input aria-label={`${student.name} ${item.testDate || "테스트"} 테스트명`} value={draft.title ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "title", event.target.value)} />
+                      <input aria-label={`${student.name} ${item.title || "테스트"} 범위`} value={draft.scope ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "scope", event.target.value)} />
+                      <input aria-label={`${student.name} ${item.title || "테스트"} 점수`} value={draft.score ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "score", event.target.value)} placeholder="점수" />
+                      <input aria-label={`${student.name} ${item.title || "테스트"} 평균`} value={draft.averageScore ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "averageScore", event.target.value)} placeholder="평균" />
+                      <input aria-label={`${student.name} ${item.title || "테스트"} 메모`} value={draft.note ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "note", event.target.value)} />
                       <div className="studentProfileRowActions">
                         <button
                           className="softButton primarySoft"

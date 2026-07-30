@@ -53,6 +53,7 @@ export function StudentQuestionPanel({
       />
       <form className="studentQuestionForm" onSubmit={submitQuestion}>
         <input
+          aria-label="수업 전에 정리할 질문"
           disabled={!writeEnabled || isSaving}
           maxLength={1000}
           value={questionText}
