@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 P3. App.jsx 18B-3 sidebar menu model closeout
+
+- 감사: 기존 18B fixture에 model export·App import·호출 각 1건과 Sidebar-owned active item, group/item JSX, view/logout/toggle callback 잔존을 추가 고정했다.
+- 경계: 모듈은 메뉴 데이터와 보충 badge만 계산하며 React·DOM·저장/API·Supabase·notification_jobs·Solapi side effect가 없다.
+- AI 검수: 기존 TARGET/CONTROL fixture, 정적 시나리오·production/build를 재사용하고 새 closeout 파일은 만들지 않는다. 사람 gate는 0건이다.
+- 변화량: 새 파일 0개, 전체 `+34/-0`, `App.jsx` 변경·감소 0줄이다.
+
 ## 2026-07-31 P3. App.jsx 18B-2 sidebar menu model extraction
 
 - 코드: Sidebar의 5개 그룹·17개 route item과 보충 attention badge 계산을 `sidebarMenuModel.js` 순수 모델로 분리했다.

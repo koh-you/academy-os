@@ -84,6 +84,33 @@ const moduleSource = await readFile(
   new URL("../src/app/sidebarMenuModel.js", import.meta.url),
   "utf8"
 );
+assert.equal(
+  moduleSource.split("export function createSidebarMenuGroups(").length - 1,
+  1
+);
+assert.equal(
+  appSource.split('from "./sidebarMenuModel.js"').length - 1,
+  1
+);
+assert.equal(
+  appSource.split("createSidebarMenuGroups(supplementAttention)").length - 1,
+  1
+);
+for (const sidebarOwnedBoundary of [
+  "const activeMenuItem = menuGroups",
+  "menuGroups.map((group) =>",
+  "group.items.map((item) =>",
+  "activeView === item.id",
+  "onClick={() => onChangeView(item.id)}",
+  "onClick={onLogout}",
+  "onClick={onToggle}",
+  "onClick={onToggleMobileNavigation}"
+]) {
+  assert.ok(
+    appSource.includes(sidebarOwnedBoundary),
+    `Sidebar-owned boundary moved: ${sidebarOwnedBoundary}`
+  );
+}
 for (const forbiddenEffect of [
   "useState",
   "useEffect",
