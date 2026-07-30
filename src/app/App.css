@@ -8131,7 +8131,17 @@ button:disabled {
 
 .parentResponseContextBody p {
   margin: 8px 0 0;
+  overflow-wrap: anywhere;
   white-space: pre-wrap;
+}
+
+.parentResponseContextBody:focus-visible {
+  outline: 2px solid var(--academy-focus-ring, rgba(37, 99, 235, 0.36));
+  outline-offset: 2px;
+}
+
+.parentResponseContextActions > span {
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 720px) {
@@ -8153,6 +8163,15 @@ button:disabled {
 
   .parentResponseContextActions > button {
     width: 100%;
+  }
+
+  .parentResponseContextBody {
+    max-height: min(42dvh, 320px);
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
   }
 }
 

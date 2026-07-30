@@ -64,3 +64,6 @@ inventory 자체는 중단 gate가 없다. 구현 뒤 desktop과 390px에서 작
 - 선택·전체·학부모·학생 수신 범위는 named group과 `aria-pressed`로 현재 선택을 전달한다.
 - 학생 선택 목록은 named region, keyboard focus, 세로 touch scroll 경계를 갖는다.
 - 학생 checkbox, AI 수정, 예약·즉시 발송 callback과 local draft·선택 계산은 변경하지 않았다.
+- UI-8D-2: 학부모 발신 원문을 학생 이름이 붙은 named region으로 만들고 keyboard focus를 제공했다.
+- 720px 이하에서는 원문을 최대 `42dvh / 320px` 내부 세로 scroll로 제한하고 긴 본문·채널 안내를 안전하게 줄바꿈한다.
+- 발신 원문 계산, 검색, 별관 채널 확인 정보 복사와 채널 답장 비저장 계약은 변경하지 않았다.

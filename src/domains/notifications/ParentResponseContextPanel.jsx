@@ -63,7 +63,12 @@ export function ParentResponseContextPanel({ formatDateTime, notificationJobs = 
                 <div><dt>학부모 번호</dt><dd>{context.parentPhone || "미입력"}</dd></div>
                 <div><dt>알림 종류</dt><dd>{context.notificationType === "daily_report" ? "데일리 리포트" : "학부모 강사코멘트"}</dd></div>
               </dl>
-              <div className="parentResponseContextBody">
+              <div
+                aria-label={`${context.studentName} 학부모에게 보낸 발신 원문`}
+                className="parentResponseContextBody"
+                role="region"
+                tabIndex={0}
+              >
                 <small>그날 Academy OS에 저장된 발신 본문</small>
                 <p>{context.body}</p>
               </div>

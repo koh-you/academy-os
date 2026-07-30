@@ -100,8 +100,8 @@
 | UI-8C-3 | 완료 | 보충 원천·일정·알림 3종·두 취소·responsive 통합 회귀 |
 | UI-8D-0 | 완료 | 알림 작성·대상·학부모 채널 찾기·기록·모바일 예외 inventory |
 | UI-8D-1 | 완료 | 작업 탭 touch scroll·수신 범위 상태·학생 목록 named scroll |
-| UI-8D-2 | 다음 | 학부모 발신 원문 모바일 가독성·named scroll |
-| UI-8D-3 | 대기 | 작성·채널 찾기·기록·side effect 분리 통합 회귀 |
+| UI-8D-2 | 완료 | 학부모 발신 원문 모바일 가독성·named scroll |
+| UI-8D-3 | 다음 | 작성·채널 찾기·기록·side effect 분리 통합 회귀 |
 
 ## 전체 세부 작업 목록
 

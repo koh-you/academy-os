@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8D-2. 학부모 발신 원문 모바일 읽기
+
+- 학부모 응대의 각 발신 원문에 학생 이름이 있는 region·keyboard focus를 제공해 어떤 학생에게 보낸 내용인지 보조기기에서도 구분하게 했다.
+- 720px 이하에서는 긴 원문을 최대 `42dvh / 320px` 내부 scroll로 제한하고 본문과 별관 채널 안내가 긴 번호·문구에서도 줄바꿈되게 했다.
+- 발송 완료 원문 계산·검색, 별관 채널 확인 정보 복사 callback과 채널 답장을 OS에 저장하지 않는 계약은 그대로 보존했다.
+- 화면 shell·CSS 외 저장·발송·예약·삭제·출결·Supabase/app_state·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: named 원문, 모바일 touch/keyboard scroll, 긴 문구와 복사·비저장 계약 보존 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 499개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 390px에서 긴 원문과 복사 안내가 카드 안에서 읽히는지 나중에 UI-8D 통합 절차로 확인한다. 복사는 가능하지만 실제 채널 답장·발송은 실행하지 않고 UI-8D-3을 계속한다.
+
 ## 2026-07-29 UI-8D-1. 알림 대상 탐색·선택 scroll
 
 - 알림관리 작업 탭에 touch overscroll 경계, scroll padding과 iOS momentum scroll을 적용해 390px에서 선택한 탭 주변을 독립적으로 탐색하게 했다.
