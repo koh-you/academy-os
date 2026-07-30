@@ -15619,6 +15619,18 @@ textarea.profileEditInput {
   color: #b91c1c;
 }
 
+.studentHomeworkSaveFeedback,
+.studentQuestionSaveFeedback,
+.studentExamPostSaveFeedback {
+  min-width: 0;
+}
+
+.studentHomeworkSaveFeedback > span,
+.studentQuestionSaveFeedback > span,
+.studentExamPostSaveFeedback > span {
+  overflow-wrap: anywhere;
+}
+
 .homeworkStatusBadge {
   align-items: center;
   border-radius: 999px;
@@ -15855,6 +15867,7 @@ textarea.profileEditInput {
   font-size: 13px;
   font-weight: 800;
   margin-top: 8px;
+  overflow-wrap: anywhere;
 }
 
 .studentExamPostDone,
@@ -15997,8 +16010,12 @@ textarea.profileEditInput {
   color: #047857;
   font-size: 12px;
   font-weight: 900;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   padding: 7px 10px;
+  text-align: left;
   text-decoration: none;
+  white-space: normal;
 }
 
 .examPostFile.failed {
@@ -20687,6 +20704,47 @@ body.attendanceOnlyBody {
 
   .studentQuestionItemActions .studentQuestionSaveFeedback {
     justify-content: flex-start;
+  }
+
+  .studentHomeworkActionControls > button,
+  .studentQuestionForm > button,
+  .studentExamPostSubmitButton {
+    width: 100%;
+  }
+
+  .studentQuestionItemActions > div:first-child {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .studentQuestionItemActions > div:first-child button {
+    width: 100%;
+  }
+
+  .studentExamPostPanel,
+  .studentExamPostForm,
+  .studentExamPostFieldset,
+  .examPostUploadBox {
+    min-width: 0;
+  }
+
+  .studentExamPostForm input,
+  .studentExamPostForm select,
+  .studentExamPostForm textarea,
+  .examPostUploadBox input {
+    box-sizing: border-box;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .examPostFileList {
+    align-items: stretch;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .examPostFile {
+    width: 100%;
   }
 
   .examPostConfirmAction {

@@ -51,4 +51,4 @@ Academy OS의 모든 화면을 같은 사용 규칙으로 보이게 한다. 이�
 
 ## 다음 착수
 
-UI-0~UI-7, UI-8A·UI-8B·UI-8C·UI-8D·UI-8E·UI-8F·UI-8G·UI-8H·UI-8I와 UI-8J-0~1을 완료했다. UI-7·8A·8B·8C·8D·8E·8F·8G·8H·8I 사람 시각 확인은 `docs/next-session/README.md`의 독립 절차로 누적되어 다음 화면군을 막지 않는다. 다음 UI-8J-2는 학생 숙제·질문·시험 후 제출의 모바일 행동·상태·긴 파일명만 정리한다. 실제 숙제 완료·질문·시험 제출·파일 선택·저장은 실행하지 않는다.
+UI-0~UI-7, UI-8A·UI-8B·UI-8C·UI-8D·UI-8E·UI-8F·UI-8G·UI-8H·UI-8I와 UI-8J-0~2를 완료했다. UI-7·8A·8B·8C·8D·8E·8F·8G·8H·8I 사람 시각 확인은 `docs/next-session/README.md`의 독립 절차로 누적되어 다음 화면군을 막지 않는다. 다음 UI-8J-3은 학생·학부모 포털의 계정·읽기·쓰기 shell과 bearer·Supabase·Storage 경계를 통합 회귀하고 독립 시각 절차를 누적한다. 실제 숙제 완료·질문·시험 제출·파일 선택·저장은 실행하지 않는다.

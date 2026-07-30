@@ -343,7 +343,7 @@ export function StudentExamPostSubmissionPanel({
               <span>{selectedFiles.length ? selectedFiles.map((file) => file.name).join(", ") : "사진을 찍거나 파일을 선택하세요."}</span>
             </label>
             {uploadStatus ? <small className="examPostUploadStatus">{uploadStatus}</small> : null}
-            <button className="primaryButton" type="submit">{isSaving ? "저장 중..." : "시험 후 제출"}</button>
+            <button className="primaryButton studentExamPostSubmitButton" type="submit">{isSaving ? "저장 중..." : "시험 후 제출"}</button>
           </fieldset>
           {saveState.state !== "idle" ? (
             <div className={`studentExamPostSaveFeedback ${saveState.state}`} aria-live="polite" role="status">
