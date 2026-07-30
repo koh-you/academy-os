@@ -64,3 +64,6 @@ inventory 자체는 중단 gate가 없다. 구현 뒤 desktop과 390px에서 학
 - UI-8F-1: 학생 프로파일을 공통 scrollable modal로 전환해 학생명·닫기는 유지하고 긴 기본정보·기록 section만 내부 scroll되게 했다.
 - 640px 이하 퇴원 선택 toolbar는 네 방향 safe-area 안에 배치하고 최대 `56dvh / 420px` 내부 scroll로 제한했다.
 - 기본정보·운영메모·상담·성적·테스트 저장과 퇴원 선택 저장·복원·영구삭제 callback은 변경하지 않았다.
+- UI-8F-2: 학생 추가/Tally와 반 명단 수정을 공통 scrollable modal로 전환해 긴 입력·선택 본문만 내부 scroll되게 했다.
+- Tally 접수·등록 후보와 반 학생 명단은 이름 있는 keyboard focus·touch scroll 영역으로 만들고 overscroll을 내부에 제한했다.
+- 학생 저장·Tally 접수정보 저장·신규등록/병합/덮어쓰기와 반 명단 저장 callback은 변경하지 않았다.

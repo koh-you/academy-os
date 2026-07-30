@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8F-2. 학생 추가·Tally·반 명단 모바일 shell
+
+- 학생 추가/Tally와 반 명단 수정을 공통 scrollable modal로 전환해 제목·설명·닫기는 고정하고 긴 입력·선택 본문만 내부 scroll되게 했다.
+- Tally 접수·등록 후보와 반 학생 명단을 이름 있는 keyboard focus·touch scroll 영역으로 만들고 내부 overscroll이 바깥 화면 이동으로 이어지지 않게 했다.
+- 학생 한 명 저장·Tally 접수정보 저장·신규등록/병합/덮어쓰기와 반 명단 저장 callback은 그대로 보존했다.
+- 화면 shell·접근성·CSS 외 저장·등록·병합·반배정·발송·예약·삭제·출결·Supabase/app_state 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 공통 modal header/body, 두 named scroll 영역과 기존 등록·반 저장 callback 보존 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 507개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 390px에서 학생 추가의 Tally 탭과 반 명단 modal 제목·본문 내부 scroll·focus outline을 나중에 UI-8F 통합 절차로 확인한다. 실제 등록·병합·덮어쓰기·명단 저장은 누르지 않고 UI-8F-3을 계속한다.
+
 ## 2026-07-29 UI-8F-1. 학생 프로파일·퇴원 선택 모바일 shell
 
 - 학생 프로파일을 공통 scrollable modal로 전환해 학생명·닫기를 유지하고 기본정보·Tally 원천·운영메모·상담·성적·테스트 본문만 내부 scroll되게 했다.

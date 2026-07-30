@@ -23128,6 +23128,7 @@ function ClassManager({ students, templates, onUpdateClassRoster }) {
         <Modal
           className="classRosterModal"
           onClose={() => setIsRosterModalOpen(false)}
+          scrollable
           subtitle="학생을 체크하면 이 반으로 배정되고, 체크를 해제하면 이 반 명단에서 제외됩니다."
           title={`${selectedTemplate?.name ?? "반"} 명단 수정`}
         >
@@ -23135,7 +23136,12 @@ function ClassManager({ students, templates, onUpdateClassRoster }) {
             <span>현재 {classStudents.length}명</span>
             <strong>선택 {draftStudentIds.length}명</strong>
           </div>
-          <div className="classRosterList">
+          <div
+            aria-label={`${selectedTemplate?.name ?? "반"} 학생 명단 선택 목록`}
+            className="classRosterList"
+            role="region"
+            tabIndex={0}
+          >
             {activeStudents.map((student) => {
               const checked = draftStudentIds.includes(student.studentId);
               const currentTemplate = templates.find((template) => template.classTemplateId === student.defaultClassTemplateId);
@@ -27611,6 +27617,7 @@ function StudentModal({
       title="학생 추가"
       subtitle="한 명씩 등록하거나 엑셀에서 복사한 목록을 일괄 등록합니다."
       onClose={onClose}
+      scrollable
     >
       <div className="studentAddTabs" role="tablist" aria-label="학생 추가 방식">
         <button className={mode === "single" ? "active" : ""} onClick={() => setMode("single")} type="button">한 명씩</button>
@@ -27667,7 +27674,12 @@ function StudentModal({
           {activeApplicants.length === 0 ? (
             <EmptyState className="emptyState">아직 확인할 Tally 접수 후보가 없습니다.</EmptyState>
           ) : null}
-          <div className="studentIntakeList">
+          <div
+            aria-label="Tally 접수·등록 후보 목록"
+            className="studentIntakeList"
+            role="region"
+            tabIndex={0}
+          >
             {activeApplicants.map((applicant) => (
               <article className="studentIntakeCard" key={applicant.applicantId}>
                 <div className="studentIntakeCardHeader">

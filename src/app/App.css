@@ -11305,7 +11305,17 @@ button:disabled {
   gap: 12px;
   max-height: 520px;
   overflow: auto;
+  overscroll-behavior: contain;
   padding-right: 4px;
+  scrollbar-gutter: stable;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+.studentIntakeList:focus-visible,
+.classRosterList:focus-visible {
+  outline: 2px solid var(--academy-focus-ring, #2563eb);
+  outline-offset: 2px;
 }
 
 .studentIntakeCard {
@@ -11567,6 +11577,10 @@ button:disabled {
   display: grid;
   max-height: 520px;
   overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 
 .rosterStudentItem {
