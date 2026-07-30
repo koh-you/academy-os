@@ -57,6 +57,8 @@ JSX 48개의 `button`, `a`, `role="button"`과 CSS의 focus·touch height를 읽
 
 - UI-7E-2: callback이 있는 icon action에 이전/다음 달, 수업 목록 복귀, 출결 닫기, 한 자리 지우기, 완료 알림 닫기, 알림 제어 닫기, 수학시험 삭제, 공통 창 닫기 이름을 제공했다.
 - callback 없는 no-op icon에는 유효 action처럼 들리는 이름을 붙이지 않았다.
+- UI-7E-3: 640px 이하의 `button`, `a[href]`, `[role=button]`에 44px 공통 최소 높이를 적용하고 기존 focus-visible outline을 보존했다.
+- 30~42px 개별 규칙은 desktop 밀도를 위해 삭제하지 않았으며, 모바일 최종 규칙만 우선 적용한다.
 
 ## 사람 검수
 

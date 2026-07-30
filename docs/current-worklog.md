@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-7E-3. 모바일 action 44px touch target
+
+- 640px 이하에서 모든 `button`, `a[href]`, `[role=button]`에 디자인 토큰 `--academy-touch-target`의 44px 최소 높이를 적용했다.
+- 기존 30~42px 개별 높이 규칙은 desktop·고밀도 화면을 위해 유지하고, 모바일 접근성 규칙만 최종 우선 적용한다.
+- 전역 `button/input/select/textarea/a:focus-visible` outline은 그대로 보존해 손가락과 키보드 접근성을 함께 유지했다.
+- callback, disabled, submit, route, 링크 목적지와 저장·발송·예약·삭제·출결·Supabase/app_state·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 모바일 action/link/role button 44px와 전역 focus-visible 보존 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 477개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 390px에서 대표 작은 버튼·행동 링크·파일 drop target의 높이와 키보드 focus를 확인하는 독립 절차를 `docs/next-session/README.md`에 누적한다. 실제 저장·발송·삭제·파일 선택은 실행하지 않고 UI-7E-4를 계속한다.
+
 ## 2026-07-29 UI-7E-2. callback icon action 이름
 
 - 실제 callback이 있는 월 이전/다음, 수업일지 뒤로, 출결 닫기·한 자리 지우기, 보충 feedback·알림 제어 닫기, 수학시험 항목 삭제, 공통 Modal 닫기에 업무 이름을 제공했다.
