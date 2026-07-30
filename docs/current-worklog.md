@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-30 App.jsx 리팩터링 새 세션 인수인계 정합화
+
+- main의 낡은 11A 시점 안내와 전용 리팩터링 브랜치의 실제 기록을 대조했다. `codex/refactor-supplement-11b`에는 11B-1 OS/Supabase·Solapi 실제 예약/취소 gate 통과와 11B-1~13 완료가 기록돼 있으며 이후 다수의 저위험 순수 분리가 진행됐다.
+- 현재 전용 worktree는 `d106a2968`, clean/upstream 동기화, 확인 시점 기준 `origin/main` 대비 362 ahead/134 behind다. 실제 일시 중지점은 `17BA-1 generated lesson plan builder inventory` 완료 후이고 다음 구현은 최신 main rebase·전체 검증 뒤 `17BA-2` 순수 builder 분리다.
+- `docs/next-session/refactor-session-prompt-2026-07-30.md`에 worktree 소유권, rebase 충돌 중단 규칙, 완료 단위, 제거·완료 gate, 17BA-2 원천/side effect 경계와 검증·commit/push 절차를 한 번에 붙여넣을 수 있게 기록했다.
+- 사람 gate: 현재 전역 및 17BA-2에는 없다. 11B 실제 예약·취소는 반복하지 않으며, rebase에서 recipient·문구·시각·fingerprint·OS/Solapi 예약/취소 계약 변경이 발견될 때만 최소 재검수 범위를 다시 연다.
+- 원천/side effect: Git 상태·문서·코드·테스트를 읽고 main 인수인계 문서만 갱신했다. 리팩터링 worktree, Supabase, Storage, notification_jobs, Solapi, 운영 데이터는 변경하거나 실행하지 않았다.
+- AI 검수: main 기준 `npm run test:production` 정적 시나리오 529/529와 전체 하위 검사가 통과했고, `npm run build` 128 modules와 `git diff --check`도 통과했다.
+
 ## 2026-07-30 UI-9F. 전체 UI 통일 최종 감사
 
 - UI-0~UI-9를 최종 대조해 전체 UI 통일 프로그램을 완료 판정했다. 현재 UI 완료를 막는 사람 gate는 0건이며, 실제 기기 시각 확인은 12단계 단일 비차단 체크리스트로 유지한다.

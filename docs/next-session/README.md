@@ -1,6 +1,8 @@
 # Next Session Handoff
 
-> **UI-9F 전체 UI 통일 완료:** UI-0~UI-9 최종 감사와 AI 검수를 완료했다. 현재 UI 완료를 막는 사람 gate는 0건이고, 실제 기기 확인은 `docs/ui-human-review-checklist-2026-07-30.md` 한 묶음만 편한 시간에 수행한다. 다음 개발 중단점은 UI가 아니라 `codex/refactor-supplement-11b`의 실제 OS row/Solapi 그룹 예약·취소 11B 사람 gate다. 통과 확인 전에는 `/api/notification-jobs/*`, React 상태, Supabase, Solapi orchestration 코드를 이동하지 않는다.
+> **App.jsx 리팩터링 새 세션 프롬프트:** `docs/next-session/refactor-session-prompt-2026-07-30.md`를 그대로 붙여넣는다. 전용 branch의 11B-1 실제 OS/Supabase·Solapi 예약/취소 gate와 11B-1~13은 이미 완료됐고, 현재 중지점은 `17BA-1` 뒤의 `17BA-2 generated lesson plan builder extraction`이다. 먼저 `E:\academy-os-refactor`를 최신 `origin/main`으로 안전하게 rebase하고 전용 fixture·전체 production/build를 통과시킨다. 동일한 실제 예약·취소를 자동 반복하지 않으며 관련 계약 충돌이 생길 때만 최소 gate를 다시 연다.
+
+> **UI-9F 전체 UI 통일 완료:** UI-0~UI-9 최종 감사와 AI 검수를 완료했다. 현재 UI 완료를 막는 사람 gate는 0건이고, 실제 기기 확인은 `docs/ui-human-review-checklist-2026-07-30.md` 한 묶음만 편한 시간에 수행한다. 전용 리팩터링 브랜치의 11B 운영 gate와 11B-1~13 완료도 확인했으며, 최신 재개점은 위 새 세션 프롬프트의 `17BA-2`다.
 
 > **UI-9D 사람 검수 단일 입구 — 현재 중단 gate 0건:** UI가 모두 배포된 뒤 `docs/ui-human-review-checklist-2026-07-30.md`의 12단계를 desktop과 iPhone에서 한 번만 수행한다. 아래 51개 누적 항목은 그 체크리스트의 상세 근거이며 별개의 51개 요청이 아니다. 문제는 화면명·기기·직전 동작·스크린샷만 모아서 한 번에 전달하면 된다. 저장·삭제·발송·예약·출결·파일·AI·외부 원천 행동은 실행하지 않는다.
 
@@ -223,42 +225,7 @@ Gate 5 확정 장 묶음 다운로드와 블로그 글 조립 안내
 
 ## 리팩터링 세션에 바로 붙여넣을 프롬프트
 
-```text
-Academy OS 리팩터링 전용 세션입니다. 기능 유지보수와 운영 버그 수정은 다른 세션에서 진행하므로 이 세션에서는 App.jsx 의미 단위 분리만 수행하세요.
-
-Git 충돌 방지 규칙:
-- `E:\academy-os` main worktree는 유지보수 세션 소유입니다. 여기서 코드를 수정하지 마세요.
-- 리팩터링은 별도 worktree `E:\academy-os-refactor`와 `codex/` 전용 브랜치에서만 진행합니다. 권장 브랜치는 `codex/refactor-supplement-11b`입니다.
-- worktree/브랜치가 없으면 최신 `origin/main`을 기준으로 별도 worktree를 준비하고, 이미 있으면 재사용하세요. 같은 worktree를 두 세션이 공유하면 안 됩니다.
-- 첫 작업과 새 의미 단위마다 `git fetch origin` 후 최신 `origin/main`을 rebase/동기화하세요. 예상하지 못한 파일, 충돌, staged 변경이 보이면 수정하지 말고 사용자에게 보고하세요.
-- 전용 브랜치만 commit/push하고 `main`에는 직접 merge/push하지 마세요. 통합은 유지보수 세션 또는 사용자가 지정한 한 세션만 합니다.
-
-작업 전에 반드시 아래를 읽고 상태를 사용자에게 먼저 요약하세요.
-1. AGENTS.md
-2. docs/current-worklog.md
-3. docs/next-session/README.md
-4. docs/refactor-supplement-job-builders-inventory-2026-07-21.md
-5. git status --short
-6. git log -8 --oneline
-
-공유 미룬 작업 큐는 `운영 OS 저장 신뢰성 보강 -> 전체 UI 규칙 통일 -> 모달 통일 -> 발송 알림톡 템플릿 설정 관리 -> App.jsx 리팩터링` 순서입니다. 다만 이 세션의 권한은 5번 App.jsx 리팩터링뿐입니다. 다른 큐의 기능 수정이 필요해 보이면 구현하지 말고 유지보수 세션에 넘길 진단만 기록하세요.
-
-현재 리팩터링 상태:
-- 10번 `student-parent portals` 표시 구조 audit까지 완료했습니다.
-- 11번 `supplement job builders`의 11A는 완료했습니다. `supplementJobBuilders.js`에 순수 예약시각/ID/payload builder, `notificationJobSelectors.js`에 순수 현재 job selector가 있고 deterministic fixture가 `npm run test:production`에 연결돼 있습니다.
-- 문구 seed/선생님 수정본 선택과 실제 `/api/notification-jobs/reserve|cancel`, React 상태, Supabase `notification_jobs`, Solapi 예약/취소 orchestration은 아직 App.jsx와 서버 경계에 남아 있습니다.
-- 다음 11B는 외부 side effect가 있는 고위험 단계입니다. 아래 사람 gate가 통과됐다는 사용자 확인 전에는 코드를 옮기지 마세요.
-
-11B 사람 gate:
-1. 삭제 가능한 미래 보충 task와 통제된 학생/학부모 전화번호를 준비합니다.
-2. 학생 일정, 학부모 일정, 당일 학생 11시 알림톡을 각각 열어 대상, 예약시각, 저장된 선생님 최종 문구를 확인합니다.
-3. 하나씩 예약하고 OS/Supabase `notification_jobs` row와 Solapi 예약 그룹의 type, recipient, scheduledAt, message를 대조합니다.
-4. 하나씩 취소하고 OS와 Solapi 모두 취소됐는지 확인합니다.
-5. 새로고침 후 상태 유지, 중복 row/group 없음, 학생/학부모 대상 교차 없음까지 확인합니다.
-6. 하나라도 다르면 11B를 시작하지 말고 원인과 유지보수 세션에 넘길 수정 범위를 정리합니다.
-
-사람이 11B gate 통과를 확인하면 한 번에 하나의 의미 단위만 진행하세요. `원천/동작 보존 -> 파일 분리 -> production test/build -> AI 검수 + 사람 gate -> 전용 브랜치 commit/push` 순서를 지킵니다. 기능 변경, 문구 변경, 운영 데이터 수정, 실제 발송/예약은 리팩터링에 섞지 마세요. 유지보수 main이 새로 바뀌면 다음 단위 전에 rebase하고, 충돌을 임의로 덮어쓰지 마세요.
-```
+최신 프롬프트는 `docs/next-session/refactor-session-prompt-2026-07-30.md`다. 이 파일은 11B 운영 gate와 11B-1~13 완료, 이후 분리 단위, `17BA-1` 중지점과 `17BA-2` 재개 절차를 반영한다. 과거 11A 시점 프롬프트는 폐기했으며 실제 예약·취소 gate를 자동 반복하지 않는다.
 
 ## 유지보수 세션에 바로 붙여넣을 프롬프트
 
@@ -354,7 +321,7 @@ E:\academy-os 작업을 이어가겠습니다.
    - 9번 `test manager`, 10번 `student-parent portals` 읽기 전용 표시와 학생 쓰기 단위 세 개를 완료했습니다. 숙제 완료·질문 CRUD·시험 후 제출은 학생 bearer session 소유권, 전용 API, Supabase 재조회, local draft 보호와 패널 내부 상태를 사용합니다.
    - 실제 학생 쓰기 검수와 Solapi 특강 템플릿 검수는 2026-07-28 사용자 지시로 현재 목록에서 제거했습니다. 필요해질 때만 새 작업으로 시작합니다.
    - 10번 `student-parent portals` 표시 구조 리팩터링은 완료 audit까지 끝냈습니다. 교사 bearer/Storage 권한 보안은 구현과 배포 검증 완료로 기록합니다.
-   - 11번 `supplement job builders` inventory는 `docs/refactor-supplement-job-builders-inventory-2026-07-21.md`에 있습니다. 11A에서 예약시각·ID·job payload builder와 현재 job selector를 각각 `supplementJobBuilders.js`, `notificationJobSelectors.js`로 분리하고 deterministic fixture를 `npm run test:production`에 연결했습니다. 다음 11B는 예약/취소 side effect가 있으므로 OS row와 Solapi 그룹 사람 gate 전에는 착수하지 않습니다.
+   - 전용 리팩터링 브랜치에서는 11B 운영 gate와 11B-1~13을 완료하고 이후 순수 분리를 진행했습니다. 현재 재개점은 `17BA-1` 뒤의 `17BA-2 generated lesson plan builder extraction`이며 최신 main rebase와 전체 검증이 먼저입니다.
 App.jsx 리팩터링 18개 기준 로드맵:
 1. `specialLecture helpers/config` - 특강 안내문 계산, URL, 회차 normalize, Tally query helper.
 2. `shared UI primitives` - `InlineSaveStatus`, `MetricCard`, `Modal`, `EmptyState`, 단순 카드/상태 표시 컴포넌트.
@@ -451,7 +418,7 @@ App.jsx 리팩터링 18개 기준 로드맵:
 - App.jsx 리팩터링 18개 기준 로드맵은 `AGENTS.md`, `docs/current-worklog.md`, 이 README에 함께 기록되어 있습니다.
 - 10번 포털의 세 학생 쓰기 단위는 저장 신뢰성 보강을 완료했습니다. 숙제 완료, 질문 CRUD, 시험 후 제출이 각각 학생 bearer session 소유권, 전용 API, Supabase 재조회, 패널 내부 상태, 실패 시 draft 보호를 사용합니다. 시험 후 제출은 Storage 전부 성공 후에만 `app_state.examPostSubmissions`를 만들며 부분 실패 시 성공 업로드분을 정리합니다.
 - 학생 포털 실제 쓰기 검수는 2026-07-28 사용자 지시로 현재 목록에서 제거했습니다. 필요해질 때만 새 작업으로 시작하며 새 세션에서 자동으로 요청하지 않습니다.
-- 10번 `student-parent portals` 표시 구조 리팩터링은 완료 audit까지 끝났습니다. shell은 화면 조합만 담당하고 `StudentPortalV2` controller가 파생 데이터·상태·쓰기 권한/callback을 계속 소유합니다. 교사 확인 API와 시험지 Storage 열기 권한은 별도 고위험 gate입니다.
-- 다음 리팩터링 시작점은 `docs/refactor-supplement-job-builders-inventory-2026-07-21.md`의 11B 사람 gate입니다. 삭제 가능한 테스트 보충 task로 학생 일정·학부모 일정·당일 학생 11시의 OS `notification_jobs` row와 Solapi 그룹을 먼저 대조하고, 통과 확인 전에는 `/api/notification-jobs/*`, React 상태, Supabase, Solapi 예약/취소 orchestration을 옮기지 마세요.
+- 10번 `student-parent portals` 표시 구조 리팩터링은 완료 audit까지 끝났습니다. shell은 화면 조합만 담당하고 `StudentPortalV2` controller가 파생 데이터·상태·쓰기 권한/callback을 계속 소유합니다. 교사 bearer와 시험지 Storage 소유권 보안은 구현·배포 검증 완료 상태입니다.
+- 다음 리팩터링 시작점은 `docs/next-session/refactor-session-prompt-2026-07-30.md`의 rebase preflight와 `17BA-2`입니다. 11B 실제 예약·취소 gate는 통과 기록이 있으므로 자동 반복하지 않고, rebase에서 관련 계약 충돌이 확인될 때만 최소 재검수 범위를 보고합니다.
 - 최신 기능 커밋은 작업 시작 시 반드시 `git log -1 --oneline`으로 다시 확인하세요. 이 README의 해시는 작업 중 변경될 수 있습니다.
 - 현재 로컬에 남을 수 있는 미추적 항목: `.codex-temp/`. 커밋하지 않습니다.
