@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8F-0. 학생·Tally·반관리 고밀도 화면 inventory
+
+- 실제 학생관리의 재원/반별/퇴원 목록, 학생 프로파일, 학생 추가의 한 명/일괄/Tally 접수, 반관리 명단과 퇴원·복원·영구삭제 흐름을 대조했다.
+- students, 학생별 운영 원천, student intake, 반 배정, 연결 원천 audit의 저장·병합·삭제 callback 경계를 확정했다.
+- 공통 scrollable shell을 쓰지 않는 프로파일·학생 추가·반 명단 modal, desktop sidebar 좌표의 fixed 퇴원 선택 bar, 이름 없는 Tally·반 목록을 UI-8F 표시·접근성 예외로 기록했다.
+- 상세 원천과 UI-8F-1~3 순서를 `docs/ui-high-density-student-tally-class-inventory-2026-07-29.md`에 기록했다.
+- 화면·callback과 저장·발송·예약·삭제·출결·Supabase/app_state·students·student_intake_applicants·lessons 원천은 변경하거나 실행하지 않았다.
+- AI 검수: active 학생/반 route, 프로파일·Tally·반·퇴원/영구삭제와 저장/병합/삭제 경계 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 505개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 코드 UI 변경이 없어 새 필수·시각 gate가 없다. UI-8F-1 적용 뒤 누적 검수한다.
+
 ## 2026-07-29 UI-8E-3. 특강관리 회귀 마감
 
 - 특강 안내문·신청·학생 연결, 확정 명단·회차, 수업일지 반영의 responsive shell과 원천 경계를 하나의 통합 정적 회귀로 묶었다.

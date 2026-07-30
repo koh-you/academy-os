@@ -106,7 +106,10 @@
 | UI-8E-1 | 완료 | 특강 탭 touch 경계·명단/수업일지 gate 모바일 header |
 | UI-8E-2 | 완료 | 학생 연결/수동 접수/회차 modal·학생 목록·실제 저장 bar |
 | UI-8E-3 | 완료 | 안내문·명단·회차·수업일지 반영·side effect 통합 회귀 |
-| UI-8F-0 | 다음 | 학생·Tally·반관리 기본정보·원본·운영메모·반·퇴원·모바일 예외 inventory |
+| UI-8F-0 | 완료 | 학생·Tally·반관리 기본정보·원본·운영메모·반·퇴원·모바일 예외 inventory |
+| UI-8F-1 | 다음 | 학생 프로파일 scrollable modal·모바일 퇴원 선택 toolbar |
+| UI-8F-2 | 대기 | 학생 추가/Tally·반 명단 modal·named 내부 목록 |
+| UI-8F-3 | 대기 | 기본정보·Tally·운영메모·반·퇴원/삭제 통합 회귀 |
 
 ## 전체 세부 작업 목록
 
