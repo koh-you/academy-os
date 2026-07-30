@@ -1,5 +1,11 @@
 # Academy OS Current Worklog
 
+## 2026-07-30 수업일지 강의 교재·내용 이전 시간 기본값
+
+- 수업일지 학생별 `강의 교재`와 `오늘 강의 내용`은 현재 수업 기록에 값이 없을 때만 같은 학생의 이전 수업 기록을 기본값으로 표시한다. 현재 수업의 `lessonMaterial`, `lessonProgress`와 호환 필드(`progress`, `lessonContent`)는 항상 우선하며, 기존에 입력한 값은 덮어쓰지 않는다.
+- 원천/side effect: `lesson_student_records`를 읽어 화면 draft를 구성할 뿐, 수업일지를 여는 것만으로 저장·출결·숙제·알림 예약/발송·Solapi·Supabase 운영 데이터를 변경하지 않는다. 교사가 수정 후 기존 저장 흐름을 실행할 때만 값이 저장된다.
+- AI 검수: 전용 연속성 회귀 검사와 `npm run test:production`, `npm run build`, `git diff --check`를 통과했다.
+
 ## 2026-07-30 App.jsx 리팩터링 새 세션 인수인계 정합화
 
 - main의 낡은 11A 시점 안내와 전용 리팩터링 브랜치의 실제 기록을 대조했다. `codex/refactor-supplement-11b`에는 11B-1 OS/Supabase·Solapi 실제 예약/취소 gate 통과와 11B-1~13 완료가 기록돼 있으며 이후 다수의 저위험 순수 분리가 진행됐다.

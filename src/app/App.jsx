@@ -300,6 +300,16 @@ function getLessonContent(record) {
   return record?.lessonProgress?.trim() || record?.progress?.trim() || record?.lessonContent?.trim() || "";
 }
 
+function getLessonRecordWithPreviousDefaults(record = {}, previousRecord = null) {
+  const lessonMaterial = record?.lessonMaterial?.trim() || previousRecord?.lessonMaterial?.trim() || "";
+  const lessonContent = getLessonContent(record) || getLessonContent(previousRecord);
+  return {
+    ...record,
+    lessonMaterial,
+    lessonProgress: lessonContent
+  };
+}
+
 function isStudentVisibleHomework(homework) {
   return homework?.homeworkType !== "previous";
 }
@@ -18586,7 +18596,7 @@ function LessonJournalDetail({
           {lessonStudents.map((student) => {
             const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
             const persistedRecord = findLessonStudentRecord(records, lesson, student) ?? createEmptyRecord(lesson, student);
-            const record = getEditableRecord(recordId, persistedRecord);
+            const editableRecord = getEditableRecord(recordId, persistedRecord);
             const attendanceLesson = applyStudentScheduleToLesson(lesson, student);
             const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
             const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
@@ -18604,6 +18614,7 @@ function LessonJournalDetail({
             const checkoutMissing = !isClosureLesson && hasMissingCheckOut(record, attendanceLesson);
             const previousMemoContext = getPreviousLessonMemoContext(student);
             const previousRecord = previousMemoContext.previousRecord;
+            const record = getLessonRecordWithPreviousDefaults(editableRecord, previousRecord);
             const previousMemoRecord = previousMemoContext.previousMemoRecord;
             const referenceRecord = previousMemoContext.referenceRecord;
             const previousLessonMaterial = previousRecord?.lessonMaterial?.trim() ?? "";
@@ -18725,7 +18736,7 @@ function LessonJournalDetail({
                   onChange={(value) => updateJournalRecordDraft(student, record, "lessonProgress", value)}
                   onEdit={setEditingMemoKey}
                   placeholder={previousLessonContent || "오늘 강의 내용"}
-                  value={record.lessonProgress ?? record.progress ?? ""}
+                  value={getLessonContent(record)}
                 />
                 <EditableMemoCard
                   ariaLabel={`${student.name} 지난 숙제`}

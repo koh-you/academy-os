@@ -1,5 +1,7 @@
 # Next Session Handoff
 
+> **2026-07-30 수업일지 이전 시간 기본값:** 학생별 `강의 교재`·`오늘 강의 내용`은 현재 기록이 비어 있을 때만 이전 수업의 저장값을 표시한다. 현재 수업 값과 호환 내용 필드는 우선이며, 수업일지 열기만으로 저장되지 않는다. 회귀 검사는 `npm run test:lesson-journal-continuity`이고 전체 `npm run test:production`, build를 통과했다.
+
 > **App.jsx 리팩터링 새 세션 프롬프트:** `docs/next-session/refactor-session-prompt-2026-07-30.md`를 그대로 붙여넣는다. 전용 branch의 11B-1 실제 OS/Supabase·Solapi 예약/취소 gate와 11B-1~13은 이미 완료됐고, 현재 중지점은 `17BA-1` 뒤의 `17BA-2 generated lesson plan builder extraction`이다. 먼저 `E:\academy-os-refactor`를 최신 `origin/main`으로 안전하게 rebase하고 전용 fixture·전체 production/build를 통과시킨다. 동일한 실제 예약·취소를 자동 반복하지 않으며 관련 계약 충돌이 생길 때만 최소 gate를 다시 연다.
 
 > **UI-9F 전체 UI 통일 완료:** UI-0~UI-9 최종 감사와 AI 검수를 완료했다. 현재 UI 완료를 막는 사람 gate는 0건이고, 실제 기기 확인은 `docs/ui-human-review-checklist-2026-07-30.md` 한 묶음만 편한 시간에 수행한다. 전용 리팩터링 브랜치의 11B 운영 gate와 11B-1~13 완료도 확인했으며, 최신 재개점은 위 새 세션 프롬프트의 `17BA-2`다.
