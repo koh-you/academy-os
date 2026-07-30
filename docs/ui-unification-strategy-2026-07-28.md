@@ -49,6 +49,8 @@ Academy OS의 모든 화면을 같은 사용 규칙으로 보이게 한다. 이�
 - 그 gate의 결과가 다음 UI 단위의 전제조건이 아니라면 다음 독립 단위는 계속한다. 전제조건이면 그 지점에서만 멈춘다.
 - 매 단위마다 `npm run build`, 관련 deterministic fixture, `git diff --check`를 실행한다. 전체 production scenario의 기존 실패는 새 실패와 구분해 기록한다.
 
-## 다음 착수
+## 완료 및 다음 착수
 
-UI-0~UI-8J와 UI-9A~E를 완료했다. 공개 화면 세 폭 렌더, 전체 기능 회귀, CSS 완전 중복 0, 12단계 사람 일괄 검수, 최신 `origin/main`의 Vercel Production 반영을 모두 닫았다. 현재 UI 완료를 막는 사람 gate는 0건이다. 다음은 최종 전체 감사와 App.jsx 리팩터링 재개 준비다. UI 작업 중 실제 저장·삭제·발송·출결·Storage·AI·Supabase/Solapi 호출은 실행하지 않았다.
+UI-0~UI-9 최종 감사를 완료했다. 공개 화면 세 폭 렌더, 전체 기능 회귀, CSS 완전 중복 0, 12단계 사람 일괄 검수, 최신 `origin/main`의 Vercel Production 반영을 모두 닫았다. 현재 UI 완료를 막는 사람 gate는 0건이다. UI 작업 중 실제 저장·삭제·발송·출결·Storage·AI·Supabase/Solapi 호출은 실행하지 않았다.
+
+다음 개발 단위는 App.jsx 리팩터링 11B지만, 실제 학생 일정·학부모 일정·당일 학생 11시 예약과 취소의 OS `notification_jobs` row/Solapi 그룹 대조 사람 gate가 먼저다. gate 통과 전에는 관련 orchestration 코드 이동을 시작하지 않는다.

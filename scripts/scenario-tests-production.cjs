@@ -111,6 +111,7 @@ const uiVisualRegressionMatrixPath = path.join(root, "docs", "ui-visual-regressi
 const uiFunctionalRegressionBaselinePath = path.join(root, "docs", "ui-functional-regression-baseline-2026-07-30.md");
 const uiHumanReviewChecklistPath = path.join(root, "docs", "ui-human-review-checklist-2026-07-30.md");
 const uiVercelDeploymentAuditPath = path.join(root, "docs", "ui-vercel-deployment-audit-2026-07-30.md");
+const uiUnificationFinalAuditPath = path.join(root, "docs", "ui-unification-final-audit-2026-07-30.md");
 const notificationRoutePath = path.join(root, "api", "routes", "notifications.js");
 const commentPolishRoutePath = path.join(root, "api", "routes", "commentPolish.js");
 const examAnalysisPipelineRoutePath = path.join(root, "api", "routes", "examAnalysisPipeline.js");
@@ -145,6 +146,7 @@ const uiVisualRegressionMatrixSource = fs.existsSync(uiVisualRegressionMatrixPat
 const uiFunctionalRegressionBaselineSource = fs.existsSync(uiFunctionalRegressionBaselinePath) ? fs.readFileSync(uiFunctionalRegressionBaselinePath, "utf8") : "";
 const uiHumanReviewChecklistSource = fs.existsSync(uiHumanReviewChecklistPath) ? fs.readFileSync(uiHumanReviewChecklistPath, "utf8") : "";
 const uiVercelDeploymentAuditSource = fs.existsSync(uiVercelDeploymentAuditPath) ? fs.readFileSync(uiVercelDeploymentAuditPath, "utf8") : "";
+const uiUnificationFinalAuditSource = fs.existsSync(uiUnificationFinalAuditPath) ? fs.readFileSync(uiUnificationFinalAuditPath, "utf8") : "";
 const commentComposerStart = app.indexOf("function CommentComposerModal");
 const commentComposerEnd = app.indexOf("function AttendanceModal", commentComposerStart);
 const commentComposerSource = app.slice(commentComposerStart, commentComposerEnd);
@@ -980,6 +982,7 @@ check("77j-9a visual regression matrix separates automated public renders from a
 check("77j-9b functional regression baseline records the whitespace-safe closure contract and green production suite", fs.existsSync(uiFunctionalRegressionBaselinePath) && hasAll(uiFunctionalRegressionBaselineSource, ["`90a`", "CRLF", "`saveLessonModalLessons`", "`/api/lessons/bulk`", "Supabase 재조회", "runtime 기능 변경 없음", "`npm run test:production`", "전체 통과"]));
 check("77j-9d human review queue has one nonblocking visual entry and separates future operational gates", fs.existsSync(uiHumanReviewChecklistPath) && hasAll(uiHumanReviewChecklistSource, ["현재 UI 완료를 막는 사람 gate", "**0건**", "desktop `1440px`", "iPhone Safari `390px`", "Lesson Hub·수업일지", "알림관리·학부모 응대", "학생·학부모 포털", "금지 행동", "UI 완료와 분리된 미래 운영 gate", "학생 포털 실제 쓰기", "Solapi 특강 템플릿 검수", "11B 예약·취소 orchestration"]));
 check("77j-9e vercel audit ties latest main status to production bundles without manual redeploy", fs.existsSync(uiVercelDeploymentAuditPath) && hasAll(uiVercelDeploymentAuditSource, ["`655a6d1ebd65927dcc604231b2cec60df7ddacc3`", "`Vercel: success / Deployment has completed`", "`main-B7P3xfdq.css`", "`main-ClcmyMj6.js`", "`교사 미리보기 계정 행동`", "`studentExamPostSubmitButton`", "수동 재배포", "Supabase·Storage·notification_jobs·Solapi"]));
+check("77j-9f final ui audit closes the program and stops before the refactor 11b human gate", fs.existsSync(uiUnificationFinalAuditPath) && hasAll(uiUnificationFinalAuditSource, ["`UI-0~UI-9`", "전체 UI 통일 프로그램", "현재 UI 완료를 막는 사람 gate", "**0건**", "정적 시나리오 `529/529`", "완전 중복 selector `0`", "ui-human-review-checklist-2026-07-30.md", "codex/refactor-supplement-11b", "`362 ahead / 133 behind`", "rebase/merge/cherry-pick 진행 없음", "11B 사람 gate", "코드 이동을 시작하지 않는다"]));
 check("77j-2c notification center restores the parent response tab without storing channel replies", hasAll(app, ["ParentResponseContextPanel", "getParentResponseContexts", "[\"parent_context\", \"학부모 응대\"", "activeNoticeWorkspace === \"parent_context\""]) && hasAll(css, [".parentResponseContextPanel", ".parentResponseContextCard", ".parentResponseContextBody"]));
 check("77j-3 exam analysis selection columns keep Korean labels clear beside thin scrollbars", hasAll(css, [".examAnalysisColumnList::-webkit-scrollbar", ".examAnalysisColumnList::-webkit-scrollbar-button", "scrollbar-gutter: stable", ".examAnalysisColumnCard strong", "line-height: 1.4", "padding-block: 1px"]));
 check("78 lesson journal does not show keyboard shortcut hint text", !app.includes("↑↓←→") && !app.includes("Ctrl+C/V/Z"));

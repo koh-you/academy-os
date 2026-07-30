@@ -1,5 +1,7 @@
 # Next Session Handoff
 
+> **UI-9F 전체 UI 통일 완료:** UI-0~UI-9 최종 감사와 AI 검수를 완료했다. 현재 UI 완료를 막는 사람 gate는 0건이고, 실제 기기 확인은 `docs/ui-human-review-checklist-2026-07-30.md` 한 묶음만 편한 시간에 수행한다. 다음 개발 중단점은 UI가 아니라 `codex/refactor-supplement-11b`의 실제 OS row/Solapi 그룹 예약·취소 11B 사람 gate다. 통과 확인 전에는 `/api/notification-jobs/*`, React 상태, Supabase, Solapi orchestration 코드를 이동하지 않는다.
+
 > **UI-9D 사람 검수 단일 입구 — 현재 중단 gate 0건:** UI가 모두 배포된 뒤 `docs/ui-human-review-checklist-2026-07-30.md`의 12단계를 desktop과 iPhone에서 한 번만 수행한다. 아래 51개 누적 항목은 그 체크리스트의 상세 근거이며 별개의 51개 요청이 아니다. 문제는 화면명·기기·직전 동작·스크린샷만 모아서 한 번에 전달하면 된다. 저장·삭제·발송·예약·출결·파일·AI·외부 원천 행동은 실행하지 않는다.
 
 > **UI-9A 전체 화면 일괄 시각 검수 — 작업 중단 아님:** 공개 로그인과 특강 공개 안내의 1440/768/390px 자동 렌더·가로 넘침은 AI가 통과시켰다. 로그인 뒤에는 desktop과 실제 iPhone Safari/홈 화면 바로가기에서 아래 UI-7·UI-8A~J 절차를 한 번에 수행한다. 먼저 앱 프레임·현재 화면·전체 메뉴와 본문 상단 이동을 보고, 이후 각 화면은 탭/필터 전환·기존 기록 열기·접기/펼치기·영역 내부 scroll·닫기까지만 확인한다. 페이지 전체 가로 넘침, 제목/X 또는 하단 행동 잘림, 선택 상태·focus 미표시, 긴 문자열의 카드 밖 침범이 하나라도 있으면 화면명·폭·동작·스크린샷을 기록한다. 실제 저장·삭제·발송·예약·출결·파일 선택/열기·Storage·AI 실행은 하지 않는다. 세 폭과 화면군별 기대 결과는 `docs/ui-visual-regression-matrix-2026-07-30.md`가 기준이다.
