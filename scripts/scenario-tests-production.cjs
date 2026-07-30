@@ -350,6 +350,7 @@ function getDisclosureTableInventory(directory) {
     dataTableShellCount: 0,
     detailsCount: 0,
     fileCount: 0,
+    labelledDataTableShellCount: 0,
     summaryCount: 0,
     tableCount: 0,
     unwrappedTables: []
@@ -385,7 +386,14 @@ function getDisclosureTableInventory(directory) {
         const elementName = getJsxName(node.name);
         if (elementName === "details") inventory.detailsCount += 1;
         if (elementName === "summary") inventory.summaryCount += 1;
-        if (elementName === "DataTableShell") inventory.dataTableShellCount += 1;
+        if (elementName === "DataTableShell") {
+          inventory.dataTableShellCount += 1;
+          if (node.attributes.some((attribute) => (
+            attribute.type === "JSXAttribute" && attribute.name.name === "label"
+          ))) {
+            inventory.labelledDataTableShellCount += 1;
+          }
+        }
         if (elementName !== "table") return;
 
         inventory.tableCount += 1;
@@ -918,6 +926,7 @@ check("77j-7e-5 all JSX buttons retain a callback disabled guard or submit contr
 const disclosureTableInventory = getDisclosureTableInventory(path.join(root, "src"));
 check("77j-7f-1 mobile disclosure and table inventory isolates summary height variants while every native table stays in the shared scroll shell", disclosureTableInventory.fileCount === 49 && disclosureTableInventory.detailsCount === 23 && disclosureTableInventory.summaryCount === 23 && disclosureTableInventory.tableCount === 4 && disclosureTableInventory.dataTableShellCount === 15 && disclosureTableInventory.unwrappedTables.length === 0 && hasAll(css, [".specialLectureCancellationActions > summary", "min-height: 34px", ".researchTypeChapter > summary,", "min-height: 40px", ".studentProfileSection > summary", "min-height: 64px"]) && hasAll(sharedDataTableShellSource + sharedDataTableShellCssSource, ["aria-label={label}", "role=\"region\"", "tabIndex={tabIndex}", "overflow-x: auto", "overscroll-behavior-inline: contain", "touch-action: pan-x pan-y"]));
 check("77j-7f-2 native summaries keep browser open state while gaining shared keyboard focus and 44px mobile touch coverage", hasAll(css, ["a:focus-visible,\nsummary:focus-visible {", "outline: 3px solid rgba(37, 99, 235, 0.35)", "outline-offset: 2px", "@media (max-width: 640px)", "summary {\n    min-height: var(--academy-touch-target) !important;"]) && disclosureTableInventory.detailsCount === disclosureTableInventory.summaryCount && disclosureTableInventory.summaryCount === 23 && hasAll(app, ["<details className=\"examReviewRawDraft\">", "<details className=\"researchTypeChapter\" key={chapter.id} open>", "<summary>전체 원문 보기/직접 수정</summary>"]));
+check("77j-7f-3 every table-style region stays named keyboard focusable and horizontally touch scrollable without changing row actions", disclosureTableInventory.tableCount === 4 && disclosureTableInventory.dataTableShellCount === 15 && disclosureTableInventory.labelledDataTableShellCount === 15 && disclosureTableInventory.unwrappedTables.length === 0 && hasAll(sharedDataTableShellSource, ["label,", "tabIndex = 0", "aria-label={label}", "role=\"region\"", "tabIndex={tabIndex}", "{children}"]) && hasAll(sharedDataTableShellCssSource, ["max-width: 100%", "overflow-x: auto", "overscroll-behavior-inline: contain", "touch-action: pan-x pan-y", "-webkit-overflow-scrolling: touch", ".dataTableShell.dataTableShell:focus-visible"]) && hasAll(app + studentManagerSource + monthlySettlementPanelSource, ["label=\"알림톡 발송 기록\"", "label=\"수업일지 학생 기록\"", "label=\"퇴원생 목록\"", "label=\"학생 목록\"", "label=\"월별 정규 수업 정산\""]));
 check("77j-2c notification center restores the parent response tab without storing channel replies", hasAll(app, ["ParentResponseContextPanel", "getParentResponseContexts", "[\"parent_context\", \"학부모 응대\"", "activeNoticeWorkspace === \"parent_context\""]) && hasAll(css, [".parentResponseContextPanel", ".parentResponseContextCard", ".parentResponseContextBody"]));
 check("77j-3 exam analysis selection columns keep Korean labels clear beside thin scrollbars", hasAll(css, [".examAnalysisColumnList::-webkit-scrollbar", ".examAnalysisColumnList::-webkit-scrollbar-button", "scrollbar-gutter: stable", ".examAnalysisColumnCard strong", "line-height: 1.4", "padding-block: 1px"]));
 check("78 lesson journal does not show keyboard shortcut hint text", !app.includes("↑↓←→") && !app.includes("Ctrl+C/V/Z"));

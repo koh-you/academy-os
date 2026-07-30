@@ -51,4 +51,4 @@ Academy OS의 모든 화면을 같은 사용 규칙으로 보이게 한다. 이�
 
 ## 다음 착수
 
-UI-0~UI-6과 UI-7A·UI-7B·UI-7C·UI-7D·UI-7E, UI-7F-1·2를 완료했다. 다음 UI-7F-3은 native table 4개가 DataTableShell 안에 있고 전체 15개 shell의 label·focus·scroll 계약이 유지되는 정적 회귀를 닫는다. 외부 side effect와 운영 원천은 바꾸지 않는다.
+UI-0~UI-6과 UI-7A·UI-7B·UI-7C·UI-7D·UI-7E, UI-7F-1·2·3을 완료했다. 다음 UI-7F-4는 disclosure와 table의 누적 390px 사람 검수 절차를 하나로 확정하고 UI-7 모바일·접근성 pass를 닫는다. 실제 저장·발송·예약·삭제·출결은 실행하지 않는다.

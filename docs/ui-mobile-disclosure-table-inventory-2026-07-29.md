@@ -45,3 +45,5 @@ inventory 자체는 코드 UI를 바꾸지 않아 필수 중단 gate가 없다. 
 
 - UI-7F-2: 모든 native summary에 버튼·링크와 같은 focus-visible outline을 제공하고, 640px 이하 최소 높이를 44px touch token으로 맞췄다.
 - desktop 밀도, native open 상태, 화면별 marker·padding과 내부 callback은 변경하지 않았다.
+- UI-7F-3: DataTableShell 15개 모두 label을 갖고, native table 4개 모두 공통 shell 안에 있는 것을 AST 회귀로 고정했다.
+- 공통 shell의 `tabIndex=0`, focus-visible, 가로 touch scroll, overscroll 차단과 iOS momentum scroll을 대표 화면 이름과 함께 보존했다.

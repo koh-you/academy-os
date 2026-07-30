@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-7F-3. table scroll·focus 회귀계약
+
+- DataTableShell 15개가 모두 업무 이름 `label`을 제공하며 기본 `tabIndex=0`으로 keyboard focus가 가능한 것을 AST로 확인했다.
+- native table 4개는 모두 DataTableShell 안에 있고, CSS grid 기반 표까지 포함한 15개 shell이 max-width, 가로 scroll, inline overscroll 차단, touch pan, iOS momentum scroll, focus-visible을 공유한다.
+- 대표 알림 기록·수업일지·퇴원/재원 학생·월별 정산의 업무 이름과 기존 row action을 변경하지 않은 채 회귀 fixture로 고정했다.
+- 화면·정렬·행 callback과 저장·발송·예약·삭제·출결·Supabase/app_state·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 15/15 label, 4/4 native table 포장, 공통 focus/touch scroll과 대표 화면 이름 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 482개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 코드 UI 변경이 없어 새 필수 gate가 없다. UI-7F-4에서 기존 summary와 표 누적 시각 절차를 하나로 닫는다.
+
 ## 2026-07-29 UI-7F-2. native summary touch·focus
 
 - 모든 native `summary`를 기존 전역 focus-visible outline에 포함해 키보드 현재 위치가 버튼·링크와 같은 방식으로 보이게 했다.
