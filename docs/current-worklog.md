@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 P3. App.jsx 18B-2 sidebar menu model extraction
+
+- 코드: Sidebar의 5개 그룹·17개 route item과 보충 attention badge 계산을 `sidebarMenuModel.js` 순수 모델로 분리했다.
+- App 경계: active route 검색, 메뉴 JSX, collapse/mobile toggle, view change와 logout callback은 계속 `App.jsx`의 Sidebar가 소유한다. 기능·문구·아이콘·순서는 바꾸지 않았다.
+- AI 검수: 18B-1 expected group/route와 보충 3건 TARGET·0건 CONTROL을 실제 모듈 결과로 대조하고 모듈 side effect 부재를 확인한다. 사람 gate는 0건이다.
+- 변화량: 새 파일 1개, 전체 `+144/-80`, `App.jsx +2/-52`로 실제 파일 길이 50줄 감소했다.
+
 ## 2026-07-31 P3. App.jsx 18B-1 sidebar menu model inventory
 
 - 원천/동작: Sidebar의 5개 그룹·17개 route ID·label/icon 순서와 보충관리 attention badge 계산은 렌더용 정적 모델이다. active route 검색과 click/logout/toggle callback은 Sidebar가 소유한다.
