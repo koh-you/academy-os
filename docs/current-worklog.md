@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8A-3. Lesson Hub 회귀 마감
+
+- 사용자 요청으로 숨긴 NavigationHeader 안의 월 이동·수업 등록·월 정규수업 열기·7종 filter·출결 상태가 state/callback과 함께 보존되는 것을 고정했다.
+- 보이는 월간 달력의 named region, 내부 가로 scroll, grid/요일/선택 날짜 semantics, 날짜 선택과 수업일지 진입을 한 회귀계약으로 묶었다.
+- 날짜 선택과 수업일지 진입은 계속 분리되어 날짜 cell 선택만으로 수업일지가 열리지 않는다.
+- 화면·callback과 저장·발송·예약·삭제·출결·Supabase/app_state·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 숨긴 header state/callback과 visible calendar scroll·semantics·진입 경계 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 486개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: `docs/next-session/README.md`의 UI-8A-1·2 절차를 유지한다. 독립 시각 확인이라 UI-8B-0 수업일지 inventory를 계속한다.
+
 ## 2026-07-29 UI-8A-2. 월간 달력 grid·선택 날짜 semantics
 
 - teacher calendar를 `grid`, 요일을 `columnheader`, 날짜를 `gridcell`로 연결하고 각 날짜에 날짜·수업 건수 이름과 `aria-selected`를 제공했다.

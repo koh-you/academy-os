@@ -87,6 +87,7 @@
 | UI-7D | 완료 | form 378개 이름, 오류/도움말 연결, iOS 16px·44px |
 | UI-7E | 완료 | action 이름·44px·focus와 disconnected button 0개 |
 | UI-7F | 완료 | native summary 23개와 DataTableShell 15개 touch·focus·scroll |
+| UI-8A | 완료 | Lesson Hub 월간 달력 내부 scroll·grid semantics·callback 경계 |
 
 ## 전체 세부 작업 목록
 
@@ -185,6 +186,6 @@
 
 ## 다음 실행 목표
 
-> 최신 상태: `UI-0`~`UI-7`과 `UI-8A-0·1·2`를 완료했다. 현재 다음 작은 목표는 `UI-8A-3 Lesson Hub 회귀 마감`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
+> 최신 상태: `UI-0`~`UI-7`과 `UI-8A`를 완료했다. 현재 다음 작은 목표는 `UI-8B-0 수업일지 inventory`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
 
-숨긴 header state/callback, 날짜 선택, 수업일지 진입, 모바일 내부 scroll과 grid semantics를 대표 회귀로 묶고 누적 사람 절차를 확정한다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
+수업일지의 수업 맥락, 학생 기록 표, 저장 bar, 알림 상태/행동, modal 내부 scroll과 390px 예외를 먼저 수량화한다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.

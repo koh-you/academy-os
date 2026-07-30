@@ -50,3 +50,5 @@ inventory는 화면을 바꾸지 않아 필수 중단 gate가 없다. 구현 뒤
 - 숨긴 header, 날짜·수업 callback과 운영 원천은 변경하지 않았다.
 - UI-8A-2: calendar grid·요일·날짜 semantics, 날짜·수업 건수 이름, 선택 날짜 roving focus와 Enter/Space 선택을 제공했다.
 - 수업 pill 등 자체 interactive element에서는 전역 달력 단축키가 개입하지 않도록 경계를 분리했다.
+- UI-8A-3: 숨긴 header의 state/callback과 보이는 calendar의 scroll·semantics·날짜/수업 진입 경계를 최종 회귀로 묶었다.
+- UI-8A는 AI 검수 기준으로 완료했으며 누적 사람 시각 확인은 다음 화면군을 막지 않는다.
