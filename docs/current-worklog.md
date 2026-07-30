@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 P3. App.jsx 18D-3 legacy LoginScreen removal closeout
+
+- 감사: legacy 정의·소비·전용 ID 0건, active `RoleLoginScreen` 정의·렌더 각 1건과 callback-only submit을 고정했다.
+- App 경계: `/api/auth/login`, teacher session persist, student/parent session state, logout 초기화와 role별 실패 문구는 계속 `App.jsx`가 소유한다.
+- AI 검수: 기존 fixture, 정적 시나리오·production/build를 재사용하고 새 closeout 파일은 만들지 않는다. 실제 로그인 요청 없이 판정하며 사람 gate는 0건이다.
+- 변화량: 새 파일 0개, 전체 `+23/-0`, `App.jsx` 변경·감소 0줄이다.
+
 ## 2026-07-31 P3. App.jsx 18D-2 legacy LoginScreen dead component removal
 
 - 코드: JSX 소비 0건인 legacy `LoginScreen` 정의와 전용 help/error ID만 제거했다. 현재 렌더되는 `RoleLoginScreen`과 role 전환·trimmed credential submit·busy/error·접근성 계약은 보존했다.

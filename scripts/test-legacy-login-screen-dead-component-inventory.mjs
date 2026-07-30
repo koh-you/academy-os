@@ -65,5 +65,21 @@ for (const forbiddenExternalEffect of [
     `active role login crossed an external effect: ${forbiddenExternalEffect}`
   );
 }
+for (const appOwnedAuthBoundary of [
+  "async function handleLogin(role, loginId, password)",
+  'postJson("/api/auth/login", { role, loginId, password })',
+  "setSession(teacherSession)",
+  "persistTeacherSession(teacherSession)",
+  "setSession({",
+  "function handleLogout()",
+  "persistTeacherSession(null)",
+  "<RoleLoginScreen",
+  "onLogin={handleLogin}"
+]) {
+  assert.ok(
+    appSource.includes(appOwnedAuthBoundary),
+    `App-owned auth boundary moved: ${appOwnedAuthBoundary}`
+  );
+}
 
 console.log("legacy LoginScreen removal and active RoleLoginScreen preservation passed");
