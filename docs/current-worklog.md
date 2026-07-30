@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8G-3. 시험·시험분석·학사일정 통합 회귀 마감
+
+- 시험 단계 탭·시험분석 4열 library·시험정보/학사 modal·7열 학사 달력의 responsive shell을 한 fixture로 통합했다.
+- 시험정보 저장/삭제/시험 후 확인, 시험분석 run·PDF·추출·Vision/AI·검수·산출물, 학사일정 저장/삭제·시험정보 연동·직전수업 동기화 callback이 서로 합쳐지지 않았음을 고정했다.
+- 실제 시험정보·시험분석·Storage·AI·학사일정·lessons 원천을 저장·삭제·호출하지 않았다.
+- AI 검수: UI-8G 통합 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 512개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: desktop/390px의 단계 탭·library·시험정보 modal·학사 달력·학사 modal 시각 절차를 `docs/next-session/README.md` 최상단에 누적했다. 다음 UI-8H의 전제조건이 아니므로 정산 inventory를 계속한다.
+
 ## 2026-07-29 UI-8G-2. 시험정보·학사 modal과 7열 달력
 
 - 시험정보 수정, 학사일정 날짜 상세, 일정 등록/수정의 긴 폼을 공통 scrollable modal로 전환해 제목·설명·X는 유지하고 본문만 세로 scroll되게 했다.

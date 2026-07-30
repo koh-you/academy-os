@@ -48,3 +48,5 @@ inventory 자체에는 사람 gate가 없다. 구현 뒤 desktop과 390px에서 
 - UI-8G-2: 시험정보 수정·학사일정 날짜 상세·일정 등록/수정 modal을 공통 scrollable shell로 전환했다.
 - 7열 학사 달력은 이름 있는 focus 영역 안의 최소 840px grid로 유지하고 달력 내부에서만 가로 touch scroll되게 했다.
 - 날짜 선택과 시험정보·학사일정 저장/삭제·시험정보 연동·직전수업 동기화 callback은 변경하지 않았다.
+- UI-8G-3: 세 화면의 responsive shell과 시험정보·시험분석·학사일정 저장/삭제/AI/파일/연동 callback 분리를 통합 fixture로 고정했다.
+- desktop/390px 사람 시각 확인은 `docs/next-session/README.md`에 독립 절차로 누적했으며 UI-8H를 막지 않는다.
