@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8G-0. 시험·시험분석·학사일정 inventory
+
+- 시험관리의 시험정보/Tally, 시험분석의 run·PDF·문항·산출물, 학사일정의 수동 일정·시험관리 파생 일정 원천과 저장·삭제·AI·파일·연동 callback을 전수 대조했다.
+- touch 경계가 없는 시험 탭과 시험분석 4열 목록, scrollable shell이 아닌 시험정보/학사 modal, 이름 있는 내부 가로 scroll이 아닌 7열 학사 달력을 UI-8G 표시 예외로 기록했다.
+- 상세 원천과 UI-8G-1~3 순서를 `docs/ui-high-density-exam-analysis-calendar-inventory-2026-07-29.md`에 기록했다.
+- 화면·callback과 시험정보·시험분석·Storage·AI·학사일정·직전수업 원천은 변경하거나 실행하지 않았다.
+- AI 검수: active 세 route, 저장·삭제·AI·파일·시험정보 연동 경계 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 509개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 코드 UI 변경이 없어 새 필수·시각 gate가 없다. UI-8G-1 적용 뒤 누적 검수한다.
+
 ## 2026-07-29 UI-8F-3. 학생·Tally·반관리 통합 회귀 마감
 
 - 학생 목록·프로파일·Tally·반 명단·퇴원 선택 화면의 공통 modal/scroll/focus 계약과 모바일 safe-area 경계를 한 fixture로 통합했다.

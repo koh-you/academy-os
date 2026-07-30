@@ -110,7 +110,10 @@
 | UI-8F-1 | 완료 | 학생 프로파일 scrollable modal·모바일 퇴원 선택 toolbar |
 | UI-8F-2 | 완료 | 학생 추가/Tally·반 명단 scrollable modal·named 내부 목록 |
 | UI-8F-3 | 완료 | 기본정보·Tally·운영메모·반·퇴원/삭제 통합 회귀 |
-| UI-8G-0 | 다음 | 시험·시험분석·학사일정 원천·단계·모바일 예외 inventory |
+| UI-8G-0 | 완료 | 시험·시험분석·학사일정 원천·단계·모바일 예외 inventory |
+| UI-8G-1 | 다음 | 시험 단계 탭 touch 경계·시험분석 library named scroll |
+| UI-8G-2 | 대기 | 시험정보/학사 modal·7열 학사 달력 내부 scroll |
+| UI-8G-3 | 대기 | 저장·삭제·AI·파일·시험정보 연동 통합 회귀 |
 
 ## 전체 세부 작업 목록
 
