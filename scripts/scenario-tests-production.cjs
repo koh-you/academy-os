@@ -2240,6 +2240,19 @@ check(
       "today={today}"
     ])
 );
+check(
+  "84d-173 legacy LoginScreen inventory has no render consumer while RoleLoginScreen remains active",
+  (rawAppEntrySource.match(/function LoginScreen\(\{/g) || []).length === 1 &&
+    (rawAppEntrySource.match(/<LoginScreen/g) || []).length === 0 &&
+    (rawAppEntrySource.match(/function RoleLoginScreen\(\{/g) || []).length === 1 &&
+    (rawAppEntrySource.match(/<RoleLoginScreen/g) || []).length === 1 &&
+    hasAll(rawAppEntrySource, [
+      'const loginHelpId = "legacy-login-role-help"',
+      'const loginErrorId = "legacy-login-error"',
+      'const loginHelpId = "role-login-help"',
+      'const loginErrorId = "role-login-error"'
+    ])
+);
 check("84e shared modal closes with Escape key", hasAll(app, ["import { Modal, ModalFooter } from \"../shared/components/Modal.jsx\""]) && hasAll(sharedModalSource, ["export function Modal({", "backdropClassName = \"\"", "hideCloseButton = false", "hideHeader = false", "function handleEscapeKey(event)", "event.key === \"Escape\"", "onClose?.()", "window.addEventListener(\"keydown\", handleEscapeKey)", "window.removeEventListener(\"keydown\", handleEscapeKey)", "hideCloseButton ? null"]) );
 check("84f lesson journal modal uses shared Escape-close modal", hasAll(app, ["backdropClassName=\"lessonJournalModalBackdrop\"", "className=\"lessonJournalModal\"", "hideHeader", "onClose={onBackToCalendar}"]) && !app.includes("<div className=\"modalBackdrop lessonJournalModalBackdrop\" role=\"dialog\" aria-modal=\"true\">"));
 check("84f-1 lesson journal student preview stays isolated and callback-only", hasAll(lessonFrontendSource, ["LessonJournalStudentPreviewModal", "createLessonJournalStudentPreviewModel", "students.filter((student) => student.studentId === studentPreviewId)", "PortalComponent={StudentPortalV2}", "students={model.previewStudents}", "onLogout={onClose}"]) && !lessonJournalStudentPreviewModalSource.includes("fetch(") && !lessonJournalStudentPreviewModalSource.includes("/api/"));

@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 P3. App.jsx 18D-1 legacy LoginScreen dead component inventory
+
+- 판정: `LoginScreen` 정의는 1건이지만 JSX 소비는 0건이며 실제 인증 진입은 `RoleLoginScreen` 정의·렌더 각 1건이다. legacy component의 `students` prop도 사용되지 않는다.
+- AI 검수: legacy local state/submit/help-error 경계와 외부 API 직접 호출 부재를 정적으로 고정했다. 실제 `onLogin` callback, `RoleLoginScreen`, 인증 저장 원천은 건드리지 않으며 사람 gate는 0건이다.
+- 다음: 18D-2에서 소비 없는 `LoginScreen` 정의만 제거하고 현재 로그인 화면·인증 callback을 보존한다.
+- 변화량: 새 파일 1개, 전체 `+79/-0`, `App.jsx` 변경·감소 0줄이다.
+
 ## 2026-07-31 P3. App.jsx 18C-3 sidebar shell closeout
 
 - 감사: 기존 18B/18C fixture에 Sidebar export·App import·렌더 각 1건, App-owned active/collapse/mobile state와 view/logout/toggle action 잔존을 추가 고정했다.
