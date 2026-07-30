@@ -572,7 +572,7 @@ export function SchoolEventFormModal({
                         시험 날짜
                         <input type="date" value={item.date} onChange={(event) => onUpdateMathExamItem?.(item.id, "date", event.target.value)} />
                       </label>
-                      <button className="iconButton" disabled={mathExamItems.length === 1} onClick={() => onRemoveMathExamItem?.(item.id)} type="button">
+                      <button aria-label={`${index + 1}번째 수학시험 삭제`} className="iconButton" disabled={mathExamItems.length === 1} onClick={() => onRemoveMathExamItem?.(item.id)} type="button">
                         ×
                       </button>
                       <label className="mathExamItemMemo">

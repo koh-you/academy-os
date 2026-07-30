@@ -53,6 +53,11 @@ JSX 48개의 `button`, `a`, `role="button"`과 CSS의 focus·touch height를 읽
 3. `UI-7E-4`: no-op 12개를 소유 화면별로 재확인하고, 기능을 추측하지 않은 채 숨김 또는 명시적 비활성으로 정리한다.
 4. `UI-7E-5`: 대표 action의 callback·disabled·submit·focus/touch 회귀를 닫는다.
 
+## 진행 갱신
+
+- UI-7E-2: callback이 있는 icon action에 이전/다음 달, 수업 목록 복귀, 출결 닫기, 한 자리 지우기, 완료 알림 닫기, 알림 제어 닫기, 수학시험 삭제, 공통 창 닫기 이름을 제공했다.
+- callback 없는 no-op icon에는 유효 action처럼 들리는 이름을 붙이지 않았다.
+
 ## 사람 검수
 
 이름·focus·touch·비활성 표시만 확인하면 되며 실제 side effect를 실행할 필요가 없다. 각 구현 뒤 모바일/키보드 절차를 누적하고 다음 UI 단위를 계속한다.

@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-7E-2. callback icon action 이름
+
+- 실제 callback이 있는 월 이전/다음, 수업일지 뒤로, 출결 닫기·한 자리 지우기, 보충 feedback·알림 제어 닫기, 수학시험 항목 삭제, 공통 Modal 닫기에 업무 이름을 제공했다.
+- 같은 `×`, `‹`, `›`라도 화면 맥락에 맞는 이름을 사용하며, 공통 Modal은 `창 닫기`로 읽힌다.
+- callback 없는 로그인 닫기·구형 달력 화살표·학생 포털 말풍선에는 작동하는 action처럼 들리는 이름을 붙이지 않았다.
+- 기존 onClick, disabled, close guard, 날짜 이동량과 운영 side effect/원천은 변경하거나 실행하지 않았다.
+- AI 검수: 각 이름과 기존 callback·busy guard 보존 정적 fixture, `npm run build` 128 modules, `git diff --check`가 통과했다. 전체 `npm run test:production`은 476개 중 기존 기준선 `90a`만 실패했고 모든 개별 fixture와 신규 계약은 통과했다.
+- 사람 검수: 모바일 VoiceOver·키보드로 icon 이름과 focus를 확인하는 독립 절차를 `docs/next-session/README.md`에 누적했다. 실제 삭제·발송·저장은 누르지 않고 다음 UI 단위를 계속한다.
+
 ## 2026-07-29 UI-7E-1. 모바일 action·접근성 inventory
 
 - JSX 48개의 button 445개, link 5개, `role=button` 1개와 CSS focus/touch 규칙을 대조했다.

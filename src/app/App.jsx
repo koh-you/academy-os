@@ -16743,9 +16743,9 @@ function TeacherLessonHubV2({
             </span>
           </>
         )}
-        leading={<button className="iconButton" onClick={() => onMoveDate(-30)} type="button">‹</button>}
+        leading={<button aria-label="이전 달" className="iconButton" onClick={() => onMoveDate(-30)} type="button">‹</button>}
         title={formatMonthTitle(selectedDate)}
-        trailing={<button className="iconButton" onClick={() => onMoveDate(30)} type="button">›</button>}
+        trailing={<button aria-label="다음 달" className="iconButton" onClick={() => onMoveDate(30)} type="button">›</button>}
       />
 
       <section className="calendarShell teacherCalendarShell">
@@ -17437,7 +17437,7 @@ function LessonJournalFallback({ error, lesson, onBack, onDeleteLesson, onEditLe
         )}
         className="lessonJournalHeader"
         description={`${lesson?.date || "-"} · ${lesson?.startTime || ""}-${lesson?.endTime || ""} · ${lessonStudents.length}명`}
-        leading={<button className="iconButton" onClick={onBack} type="button">‹</button>}
+        leading={<button aria-label="수업 목록으로 돌아가기" className="iconButton" onClick={onBack} type="button">‹</button>}
         title={lesson?.className || "수업일지"}
         titleAs="h2"
       />
@@ -18266,7 +18266,7 @@ function LessonJournalDetail({
         className="lessonJournalHeader"
         context={<span className="shortcutHint">{lesson.lessonTopic || "수업일지"}</span>}
         description={`${lesson.date} · ${formatLessonTimeRange(lesson)} · ${lessonStudents.length}명`}
-        leading={<button className="iconButton" onClick={onBack} type="button">‹</button>}
+        leading={<button aria-label="수업 목록으로 돌아가기" className="iconButton" onClick={onBack} type="button">‹</button>}
         titleNode={<button className="linkTitleButton" onClick={onOpenExamPrep} type="button">{lesson.className}</button>}
       />
 
@@ -19683,7 +19683,7 @@ function AttendanceKiosk({
             <h1>출결 체크</h1>
             <p className="muted">{isLoading ? "출결 데이터를 불러오는 중입니다." : "학생 휴대폰 번호 뒤 4자리를 입력하세요."}</p>
           </div>
-          {onBack ? <button className="iconButton" onClick={onBack} type="button">×</button> : null}
+          {onBack ? <button aria-label="출결 화면 닫기" className="iconButton" onClick={onBack} type="button">×</button> : null}
         </div>
         <form className="attendancePinForm" onSubmit={submitPin}>
           <input
@@ -19709,7 +19709,7 @@ function AttendanceKiosk({
           ))}
           <button className="secondaryKey" disabled={isLoading || isSubmitting || Boolean(pendingPreview)} onClick={() => pressKey("clear")} type="button">지움</button>
           <button disabled={isLoading || isSubmitting || Boolean(pendingPreview)} onClick={() => pressKey("0")} type="button">0</button>
-          <button className="secondaryKey" disabled={isLoading || isSubmitting || Boolean(pendingPreview)} onClick={() => pressKey("backspace")} type="button">⌫</button>
+          <button aria-label="한 자리 지우기" className="secondaryKey" disabled={isLoading || isSubmitting || Boolean(pendingPreview)} onClick={() => pressKey("backspace")} type="button">⌫</button>
         </div>
       </div>
 
@@ -25541,7 +25541,7 @@ function SupplementStudentModal({
             <strong>{feedback.title}</strong>
             <p>{feedback.message}</p>
           </div>
-          <button className="iconButton" onClick={() => setFeedback(null)} type="button">×</button>
+          <button aria-label="완료 알림 닫기" className="iconButton" onClick={() => setFeedback(null)} type="button">×</button>
         </div>
       ) : null}
       <div className="supplementModalLayout single">
@@ -25896,7 +25896,7 @@ function SupplementStudentModal({
                 <h3 id="supplement-notification-control-title">{notificationControlConfig.label}</h3>
                 <p>{student.name} · {formatSupplementScheduleDateTime(notificationControlTask)}</p>
               </div>
-              <button className="iconButton" disabled={notificationControlBusy} onClick={closeNotificationControl} type="button">×</button>
+              <button aria-label="알림 제어 닫기" className="iconButton" disabled={notificationControlBusy} onClick={closeNotificationControl} type="button">×</button>
             </div>
             <div className="supplementNotificationControlFacts">
               <span>수신 대상</span>

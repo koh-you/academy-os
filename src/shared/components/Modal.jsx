@@ -44,7 +44,7 @@ export function Modal({
               <h2 id={titleId}>{title}</h2>
               {subtitle ? <p className="muted">{subtitle}</p> : null}
             </div>
-            {hideCloseButton ? null : <button className="iconButton" disabled={closeDisabled} onClick={onClose} type="button">×</button>}
+            {hideCloseButton ? null : <button aria-label="창 닫기" className="iconButton" disabled={closeDisabled} onClick={onClose} type="button">×</button>}
           </div>
         )}
         {scrollable ? <div className="modalScrollBody">{children}</div> : children}
