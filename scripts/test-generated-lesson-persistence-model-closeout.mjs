@@ -81,10 +81,16 @@ assert.equal(
 assert.deepEqual(candidate, candidateSnapshot);
 assert.deepEqual(equivalentExisting, existingSnapshot);
 
-const appSource = await readFile(
+const appSource = [
+  await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
-);
+  ),
+  await readFile(
+    new URL("../src/domains/lessons/generatedLessonPlanBuilder.js", import.meta.url),
+    "utf8"
+  )
+].join("\n");
 const helperSource = await readFile(
   new URL(
     "../src/domains/lessons/generatedLessonPersistenceModel.js",
@@ -155,10 +161,7 @@ for (const boundary of syncBoundaries) {
 const planStart = appSource.indexOf(
   "function buildGeneratedLessonPlan("
 );
-const planEnd = appSource.indexOf(
-  "function formatKoreanDateTime(",
-  planStart
-);
+const planEnd = appSource.length;
 assert.ok(planStart >= 0 && planEnd > planStart);
 const planSource = appSource.slice(planStart, planEnd);
 const planBoundaries = [

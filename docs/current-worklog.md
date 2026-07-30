@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 P3. App.jsx 17BA-2 generated lesson plan builder extraction
+
+- 코드: generated lesson candidate 집계와 identity/sourceSchoolEventId/lessonId 매칭, suppressed→protected→create/update/synced 판정, update 시 기존 lessonId 보존 계산을 `generatedLessonPlanBuilder.js`로 분리했다. rows·lessons·students·controls와 기존 순수 helper 의존성은 호출부에서 명시적으로 주입한다.
+- App 경계: `useMemo`, React state, helper 주입, repair/persist/bulk save와 모든 API·Supabase·notification_jobs·Solapi side effect는 계속 `App.jsx`가 소유한다.
+- AI 검수: 기존 533줄 inventory fixture를 그대로 oracle로 재사용해 TARGET/CONTROL·candidate 순서·입력 불변을 대조했다. 정적 시나리오 801건은 기존 UI 기준선 8건만 실패하고 build는 337 modules다. 사람 gate는 0건이다.
+- 변화량: 새 파일 1개, 전체 `+263/-110`, `App.jsx +16/-45`로 실제 파일 길이 27줄 감소했다.
+
 ## 2026-07-31 App.jsx 리팩터링 최신 main 재배치 통합
 
 - `codex/refactor-supplement-11b`를 최신 `origin/main`의 반 알림 저장 호환 커밋 위로 재배치했다. main의 `academy-reminder-storage` production 검사를 보존하고, 분리된 수업일지 editable-fields model을 연속성 검사가 따라가도록 정적 경계만 갱신했다.

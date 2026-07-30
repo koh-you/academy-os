@@ -136,7 +136,7 @@ const planEnd = appSource.indexOf(
 assert.ok(planStart >= 0 && planEnd > planStart);
 const planSource = appSource.slice(planStart, planEnd);
 for (const consumerBoundary of [
-  "buildGeneratedLessonPlan({ rows: generatedLessonPlanRows, lessons, students, controls: generatedLessonControls })",
+  "buildGeneratedLessonPlan({",
   "[generatedLessonControls, generatedLessonPlanRows, lessons, students]"
 ]) {
   assert.ok(

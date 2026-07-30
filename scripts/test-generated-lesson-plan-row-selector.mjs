@@ -64,7 +64,7 @@ for (const appBoundary of [
   "const generatedLessonPlanRows = useMemo(",
   "() => selectGeneratedLessonPlanRows(examPrepRows, currentExamCycle)",
   "[examPrepRows]",
-  "buildGeneratedLessonPlan({ rows: generatedLessonPlanRows, lessons, students, controls: generatedLessonControls })",
+  "buildGeneratedLessonPlan({",
   "[generatedLessonControls, generatedLessonPlanRows, lessons, students]"
 ]) {
   assert.ok(

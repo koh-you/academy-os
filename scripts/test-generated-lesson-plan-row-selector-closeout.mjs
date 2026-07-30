@@ -122,7 +122,7 @@ for (const boundary of repairBoundaries) {
 const planSource = appSource.slice(planStart, planEnd);
 assert.ok(
   planSource.includes(
-    "buildGeneratedLessonPlan({ rows: generatedLessonPlanRows, lessons, students, controls: generatedLessonControls })"
+    "buildGeneratedLessonPlan({"
   )
 );
 assert.ok(

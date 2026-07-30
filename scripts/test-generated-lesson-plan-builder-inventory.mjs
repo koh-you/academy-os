@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { buildGeneratedLessonPlan } from "../src/domains/lessons/generatedLessonPlanBuilder.js";
 
 function normalizeExistingGeneratedLessonControls(
   controls = {}
@@ -334,12 +335,34 @@ const inputSnapshot = structuredClone({
   controls
 });
 
-const plan = buildExistingGeneratedLessonPlan({
+const oraclePlan = buildExistingGeneratedLessonPlan({
   rows,
   lessons,
   students,
   controls
 });
+const plan = buildGeneratedLessonPlan({
+  rows,
+  lessons,
+  students,
+  controls
+}, {
+  normalizeGeneratedLessonControls:
+    normalizeExistingGeneratedLessonControls,
+  buildExamCalendarEvents:
+    buildExistingExamCalendarEvents,
+  createPreExamLessonFromSchoolEvent:
+    createExistingPreExamLessonFromSchoolEvent,
+  createPreExamGeneratedKey:
+    createExistingPreExamGeneratedKey,
+  buildExamPrepLessonCandidates:
+    buildExistingExamPrepLessonCandidates,
+  getGeneratedLessonIdentityKeys:
+    getExistingGeneratedLessonIdentityKeys,
+  areGeneratedLessonPersistedFieldsEqual:
+    areExistingGeneratedLessonPersistedFieldsEqual
+});
+assert.deepEqual(plan, oraclePlan);
 assert.deepEqual(
   plan.map((item) => ({
     generatedKey: item.generatedKey,
@@ -441,21 +464,18 @@ const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
+const moduleSource = await readFile(
+  new URL(
+    "../src/domains/lessons/generatedLessonPlanBuilder.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const startBoundary =
-  "function buildGeneratedLessonPlan({ rows = [], lessons = [], students = [], controls = {} }) {";
-const endBoundary =
-  "\nfunction formatKoreanDateTime(";
-const startIndex = appSource.indexOf(startBoundary);
-const endIndex = appSource.indexOf(
-  endBoundary,
-  startIndex
-);
+  "export function buildGeneratedLessonPlan(";
+const startIndex = moduleSource.indexOf(startBoundary);
 assert.ok(startIndex >= 0);
-assert.ok(endIndex > startIndex);
-const helperSource = appSource.slice(
-  startIndex,
-  endIndex
-);
+const helperSource = moduleSource.slice(startIndex);
 const helperBoundaries = [
   "normalizeGeneratedLessonControls(controls)",
   "const candidates = []",
@@ -504,8 +524,22 @@ for (const boundary of helperBoundaries) {
   previousIndex = boundaryIndex;
 }
 assert.equal(
-  appSource.split(startBoundary).length - 1,
+  moduleSource.split(startBoundary).length - 1,
   1
+);
+assert.equal(
+  appSource.split(
+    'from "../domains/lessons/generatedLessonPlanBuilder.js"'
+  ).length - 1,
+  1
+);
+assert.equal(
+  appSource.split("buildGeneratedLessonPlan({").length - 1,
+  1
+);
+assert.equal(
+  appSource.split("function buildGeneratedLessonPlan(").length - 1,
+  0
 );
 for (const forbiddenEffect of [
   "useState",

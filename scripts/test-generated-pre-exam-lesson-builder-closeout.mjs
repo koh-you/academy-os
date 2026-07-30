@@ -143,10 +143,16 @@ assert.equal(
 );
 assert.equal(guardSelectorCalls, 1);
 
-const appSource = await readFile(
+const appSource = [
+  await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
-);
+  ),
+  await readFile(
+    new URL("../src/domains/lessons/generatedLessonPlanBuilder.js", import.meta.url),
+    "utf8"
+  )
+].join("\n");
 const builderSource = await readFile(
   new URL(
     "../src/domains/lessons/generatedPreExamLessonBuilder.js",

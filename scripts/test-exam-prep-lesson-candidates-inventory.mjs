@@ -218,10 +218,16 @@ assert.equal(
   "학교 미입력 시험기간 전 시험대비"
 );
 
-const appSource = await readFile(
+const appSource = [
+  await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
-);
+  ),
+  await readFile(
+    new URL("../src/domains/lessons/generatedLessonPlanBuilder.js", import.meta.url),
+    "utf8"
+  )
+].join("\n");
 const helperSource = await readFile(
   new URL(
     "../src/domains/lessons/examPrepLessonCandidateBuilder.js",
