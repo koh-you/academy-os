@@ -32,13 +32,13 @@ export function StudentPortalShell({
           <h1>{academyName} <span>학생</span></h1>
           <p>{selectedStudent?.name} ({selectedStudent?.grade})</p>
         </div>
-        <div className="portalActions">
+        <div aria-label={previewMode ? "교사 미리보기 계정 행동" : "학생 계정 행동"} className="portalActions" role="group">
           {previewMode ? (
             <button className="logoutButton" onClick={onLogout} type="button">관리 화면으로</button>
           ) : null}
           <span className="portalDate">🗓 {currentDate}</span>
-          <button className="logoutButton" onClick={onLogout} type="button">로그아웃</button>
-          {!previewMode ? (
+          {!previewMode ? <button className="logoutButton" onClick={onLogout} type="button">로그아웃</button> : null}
+          {!previewMode && students.length > 1 ? (
             <label className="compactSelect">
               학생 선택
               <select value={selectedStudent?.studentId ?? ""} onChange={(event) => onChangeSelectedStudentId(event.target.value)}>

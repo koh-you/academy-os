@@ -66,12 +66,19 @@ export function StudentLessonHistoryCalendar({
         title="수업 기록 캘린더"
       />
       <div className="studentLessonHistoryGrid">
-        <div className="studentLessonMiniCalendar">
-          {["일", "월", "화", "수", "목", "금", "토"].map((day) => <b key={day}>{day}</b>)}
+        <div
+          aria-label={`${selectedStudent?.name ?? "학생"} 수업 기록 달력`}
+          className="studentLessonMiniCalendar"
+          role="grid"
+          tabIndex={0}
+        >
+          {["일", "월", "화", "수", "목", "금", "토"].map((day) => <b key={day} role="columnheader">{day}</b>)}
           {calendarDays.map((day) => {
             const hasRecord = recordsByDate.has(day.date);
             return (
               <button
+                aria-label={`${day.date} · ${hasRecord ? "수업 기록 있음" : "수업 기록 없음"}`}
+                aria-selected={selectedDate === day.date}
                 className={[
                   day.inMonth ? "" : "outside",
                   hasRecord ? "hasRecord" : "",
@@ -80,6 +87,7 @@ export function StudentLessonHistoryCalendar({
                 disabled={!hasRecord}
                 key={day.date}
                 onClick={() => setSelectedDate(day.date)}
+                role="gridcell"
                 type="button"
               >
                 <span>{Number(day.date.slice(-2))}</span>

@@ -13318,6 +13318,23 @@ textarea {
   margin-top: 4px;
 }
 
+.portalMaterialCard > *,
+.snapshotCard > *,
+.studentHomeworkCard > * {
+  min-width: 0;
+}
+
+.portalMaterialCard strong,
+.portalMaterialCard span,
+.portalMaterialCard small,
+.snapshotCard strong,
+.snapshotCard p,
+.studentHomeworkCard strong,
+.studentHomeworkCard span,
+.studentHomeworkCard p {
+  overflow-wrap: anywhere;
+}
+
 .resourceLibraryPage {
   display: grid;
   gap: 18px;
@@ -15343,6 +15360,12 @@ textarea.profileEditInput {
   padding: 14px;
 }
 
+.studentLessonMiniCalendar:focus-visible {
+  border-color: var(--academy-focus-ring);
+  box-shadow: 0 0 0 3px var(--academy-focus-shadow);
+  outline: none;
+}
+
 .studentLessonMiniCalendar b,
 .studentLessonMiniCalendar button {
   align-items: center;
@@ -15430,6 +15453,8 @@ textarea.profileEditInput {
   color: #0f172a;
   font-weight: 850;
   margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .studentQuestionForm {
@@ -20575,6 +20600,16 @@ body.attendanceOnlyBody {
 
   .studentPortalTabletFirst .portalActions > *,
   .parentPortalMobileFirst .portalActions > * {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .portalMaterialCard {
+    align-items: stretch;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .portalMaterialCard .listCardActions a {
     justify-content: center;
     width: 100%;
   }

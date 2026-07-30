@@ -35,7 +35,7 @@ export function ParentPortal({
           <h1>{academyName} <span>학부모</span></h1>
           <p>{student?.name} 학부모님</p>
         </div>
-        <div className="portalActions">
+        <div aria-label="학부모 계정 행동" className="portalActions" role="group">
           <span className="portalDate">달력 {referenceDate}</span>
           <button className="logoutButton" onClick={onLogout} type="button">로그아웃</button>
         </div>
