@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8C-2B. 보충 알림 제어 viewport·safe-area
+
+- custom 알림 제어 dialog에 기존 `100vh` fallback과 `100dvh`, 내부 overscroll 차단, iOS momentum scroll을 적용했다.
+- 640px 이하에서는 네 방향 safe-area와 최소 8px 여백을 사용하고 dialog 높이를 동적 viewport의 실제 상·하단 안으로 제한했다.
+- 닫기, Solapi 예약 취소, Solapi 예약 callback과 busy disabled·현재 Academy OS/Solapi 상태 표시는 그대로 보존했다.
+- 화면 CSS 외 저장·발송·예약·삭제·출결·Supabase/app_state·lessons·lesson_student_records·makeup_tasks·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: dialog semantics, 동적 viewport·safe-area·touch scroll과 예약/취소 callback 보존 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 495개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 390px에서 알림 제어 제목·닫기·본문·하단 행동까지 접근되는지 나중에 UI-8C 통합 절차로 확인한다. 실제 예약·취소는 누르지 않고 UI-8C-3을 계속한다.
+
 ## 2026-07-29 UI-8C-2A. 보충 모바일 행동·최근 이력
 
 - 640px 이하에서 `보충 내용·알림톡 저장`, `수업일지 일정 만들기/변경`, `보충 완료 처리`를 가로 scroll 대신 문서 순서 그대로 한 열 전체 폭으로 배치했다.

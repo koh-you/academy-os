@@ -17031,10 +17031,13 @@ textarea.profileEditInput {
   display: grid;
   gap: 14px;
   max-height: min(720px, calc(100vh - 40px));
+  max-height: min(720px, calc(100dvh - 40px));
   max-width: 620px;
+  overscroll-behavior: contain;
   overflow-y: auto;
   padding: 20px;
   width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 .supplementNotificationControlHeader {
@@ -20520,6 +20523,25 @@ body.attendanceOnlyBody {
 
   .supplementHistoryActions button {
     width: 100%;
+  }
+
+  .supplementNotificationControlBackdrop {
+    align-items: stretch;
+    padding:
+      max(8px, env(safe-area-inset-top))
+      max(8px, env(safe-area-inset-right))
+      max(8px, env(safe-area-inset-bottom))
+      max(8px, env(safe-area-inset-left));
+  }
+
+  .supplementNotificationControlModal {
+    max-height: calc(
+      100dvh
+      - max(8px, env(safe-area-inset-top))
+      - max(8px, env(safe-area-inset-bottom))
+    );
+    min-height: 0;
+    padding: 14px;
   }
 
   .supplementPassConfirmSummary div {

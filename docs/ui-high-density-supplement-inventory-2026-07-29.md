@@ -55,3 +55,5 @@ inventory 자체는 중단 gate가 없다. 구현 뒤 desktop과 390px에서 목
 - 실제 3개 저장 상태를 빈 칸 없는 3열로 맞췄으며 내용 저장·일정 저장 callback은 그대로 분리했다.
 - UI-8C-2A: 모바일 주요 행동 3개와 최근 한 달 이력 5열을 문서 순서 그대로 한 열에 배치했다.
 - 저장·일정·완료·복귀 callback과 disabled 조건은 변경하지 않았다.
+- UI-8C-2B: custom 알림 제어 dialog에 `100dvh`, 네 방향 safe-area와 내부 touch scroll을 적용했다.
+- 닫기·Solapi 예약·취소 callback과 busy guard는 변경하지 않았다.
