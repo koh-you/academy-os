@@ -51,4 +51,4 @@ Academy OS의 모든 화면을 같은 사용 규칙으로 보이게 한다. 이�
 
 ## 다음 착수
 
-UI-0~UI-6과 UI-7A·UI-7B·UI-7C·UI-7D·UI-7E, UI-7F-1·2·3을 완료했다. 다음 UI-7F-4는 disclosure와 table의 누적 390px 사람 검수 절차를 하나로 확정하고 UI-7 모바일·접근성 pass를 닫는다. 실제 저장·발송·예약·삭제·출결은 실행하지 않는다.
+UI-0~UI-7을 완료했다. UI-7 사람 시각 확인은 `docs/next-session/README.md` 최상단의 한 번짜리 독립 절차로 누적되어 UI-8을 막지 않는다. 다음 UI-8A-0은 Lesson Hub·월간 달력의 현재 화면 구조·callback·상태·모바일 예외를 읽기 전용 inventory로 정리한다. 실제 저장·발송·예약·삭제·출결은 실행하지 않는다.

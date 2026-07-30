@@ -83,6 +83,10 @@
 | UI-7B-1 | 완료 | PageHeader·NavigationHeader·SectionHeader 모바일 gap inventory |
 | UI-7B-2 | 완료 | 공통 header 긴 copy·탐색 row wrap·모바일 title·44px action |
 | UI-7B-3 | 완료 | 알림·시험·학사일정·학생 프로필 복합 header action 회귀 |
+| UI-7C | 완료 | 탭·필터·검색의 선택 가시성·내부 스크롤·44px 지우기 |
+| UI-7D | 완료 | form 378개 이름, 오류/도움말 연결, iOS 16px·44px |
+| UI-7E | 완료 | action 이름·44px·focus와 disconnected button 0개 |
+| UI-7F | 완료 | native summary 23개와 DataTableShell 15개 touch·focus·scroll |
 
 ## 전체 세부 작업 목록
 
@@ -141,9 +145,9 @@
 | UI-7B | 페이지 머리말·행동 | 제목 줄바꿈, 행동 한 열/가로 스크롤, 주요 행동 우선 | callback 불변 |
 | UI-7C | 탭·필터·검색 | 터치 44px, 선택 가시성, 스크롤 힌트, 입력 폭 | 선택/검색 결과 불변 |
 | UI-7D | 입력 폼 | label, 오류, 키보드 종류, textarea, 하단 저장 접근성 | 저장 callback 불변 |
-| UI-7E | 표·고밀도 목록 | 표 내부만 가로 스크롤하거나 카드형으로 전환 | 데이터 열 누락 금지 |
-| UI-7F | 모달 | 화면 높이, 본문 스크롤, footer 고정, 키보드/노치 대응 | close/save callback 불변 |
-| UI-7G | 접근성 전역 | focus-visible, aria label/tab state, 색 대비, reduced motion | 정적 접근성 계약과 keyboard 흐름 확인 |
+| UI-7E | action | icon 이름, 44px touch, no-op 제거, callback/disabled/submit 보존 | 완료 — JSX button 433개, disconnected 0개 |
+| UI-7F | disclosure·표 | summary 44px/focus와 표 내부 scroll·영역 이름 | 완료 — summary 23개, DataTableShell 15개 |
+| UI-7G | 접근성 전역 | focus-visible, aria label/tab state, 색 대비, reduced motion | 완료 — UI-7A~F 회귀와 통합 사람 검수 절차로 흡수 |
 
 ### UI-8. 고밀도 업무 화면별 최종 정리
 
@@ -181,6 +185,6 @@
 
 ## 다음 실행 목표
 
-> 최신 상태: `UI-4`와 `UI-5`, `UI-6`, `UI-7A`, `UI-7B` 전체를 완료했다. 현재 다음 작은 목표는 `UI-7C-1 탭·필터·검색 모바일 inventory`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
+> 최신 상태: `UI-0`~`UI-7`을 완료했다. 현재 다음 작은 목표는 `UI-8A-0 Lesson Hub·월간 달력 inventory`이며, 실제 저장·삭제·발송·출결 실행은 하지 않는다.
 
-WorkspaceTabs·FilterBar·SearchField의 44px touch, active/selected 가시성, 좁은 화면 내부 스크롤, label과 입력 폭을 inventory한다. 선택·검색 state와 결과 집합은 변경하지 않는다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.
+Lesson Hub·월간 달력의 header, 필터, 일정 grid, 등록/선택 callback, 상태 표시와 desktop/390px 예외를 먼저 수량화한다. 별도 App.jsx 리팩터링은 UI 프로그램 완료까지 중단한다.

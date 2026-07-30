@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-7F-4. 모바일·접근성 최종 검수 묶음
+
+- UI-7A~F에 흩어진 모바일·접근성 사람 확인을 `docs/next-session/README.md` 최상단의 한 번짜리 390px/desktop/VoiceOver 절차로 통합했다.
+- 최종 절차는 앱 shell, header, 탭/필터/검색, form 이름·오류, action 44px·이름·no-op 제거, summary, DataTableShell을 순서대로 확인한다.
+- 화면 이동·탭/검색·summary·표 scroll만 허용하고 저장·발송·예약·삭제·출결·파일 선택은 실행하지 않도록 경계를 명시했다.
+- 이 사람 검수 결과는 UI-8 화면별 예외 inventory의 입력이 아니므로 작업을 중단하지 않는다. UI-7 모바일·접근성 pass는 AI 기준으로 완료하고 UI-8A-0으로 진행한다.
+- 화면·callback과 저장·발송·예약·삭제·출결·Supabase/app_state·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 기존 UI-7 전체 정적 회귀가 유지됐다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 482개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 최상단 통합 절차 1건을 나중에 일괄 수행한다. 독립 시각 검수이므로 현재 중단 gate가 아니다.
+
 ## 2026-07-29 UI-7F-3. table scroll·focus 회귀계약
 
 - DataTableShell 15개가 모두 업무 이름 `label`을 제공하며 기본 `tabIndex=0`으로 keyboard focus가 가능한 것을 AST로 확인했다.
