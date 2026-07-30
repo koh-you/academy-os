@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8D-1. 알림 대상 탐색·선택 scroll
+
+- 알림관리 작업 탭에 touch overscroll 경계, scroll padding과 iOS momentum scroll을 적용해 390px에서 선택한 탭 주변을 독립적으로 탐색하게 했다.
+- 선택·전체·학부모·학생 수신 범위를 named group과 `aria-pressed`로 표시하고, 학생 선택 목록에 이름·region·keyboard focus·세로 touch scroll 경계를 제공했다.
+- 반·검색·학생 checkbox와 AI 수정·예약 발송·즉시 발송 callback, 대상·수신 건수 계산은 그대로 보존했다.
+- 화면 shell·CSS 외 저장·발송·예약·삭제·출결·Supabase/app_state·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 선택 상태, named 학생 목록, touch/keyboard scroll과 작성 callback 보존 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 498개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: desktop/390px에서 탭과 학생 목록의 scroll·focus·선택 상태를 나중에 UI-8D 통합 절차로 확인한다. 실제 AI 수정·발송은 누르지 않고 UI-8D-2를 계속한다.
+
 ## 2026-07-29 UI-8D-0. 알림관리·학부모 응대 고밀도 화면 inventory
 
 - 실제 `activeView=notifications`의 개별 발송, 학부모 응대, 예약·발송 완료·확인 필요·전체 기록 흐름을 대조했다.

@@ -8284,7 +8284,16 @@ button:disabled {
   gap: 6px;
   max-height: 360px;
   overflow: auto;
+  overscroll-behavior: contain;
   padding: 10px;
+  scrollbar-gutter: stable;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+.noticeStudentPicker:focus-visible {
+  outline: 2px solid var(--academy-focus-ring, rgba(37, 99, 235, 0.36));
+  outline-offset: 2px;
 }
 
 .noticePickerActions,
@@ -8425,6 +8434,10 @@ button:disabled {
 
 .noticeWorkspaceTabs {
   margin: 0;
+  overscroll-behavior-inline: contain;
+  scroll-padding-inline: 8px;
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 
 .noticeWorkspaceTabs button {

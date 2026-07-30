@@ -57,3 +57,10 @@
 ## 사람 검수
 
 inventory 자체는 중단 gate가 없다. 구현 뒤 desktop과 390px에서 작업 탭, 대상 범위, 학생 목록, 학부모 원문, 기록 표의 scroll·focus·읽기 순서만 확인한다. 검색·선택·접기/펼치기·별관 확인 정보 복사는 사용할 수 있지만 AI 수정·즉시/예약 발송·Solapi 결과 확인·예약 취소·기록 삭제는 누르지 않는다.
+
+## 진행 갱신
+
+- UI-8D-1: 작업 탭에 touch overscroll 경계·scroll padding·iOS momentum scroll을 적용했다.
+- 선택·전체·학부모·학생 수신 범위는 named group과 `aria-pressed`로 현재 선택을 전달한다.
+- 학생 선택 목록은 named region, keyboard focus, 세로 touch scroll 경계를 갖는다.
+- 학생 checkbox, AI 수정, 예약·즉시 발송 callback과 local draft·선택 계산은 변경하지 않았다.

@@ -12524,9 +12524,10 @@ function NotificationCenter({
 
         <div className="noticeComposerGrid">
           <div className="noticeTargetPanel">
-            <div className="noticeModeTabs compact">
+            <div aria-label="알림 수신 대상 범위" className="noticeModeTabs compact" role="group">
               {noticeRecipientModes.map((mode) => (
                 <button
+                  aria-pressed={noticeRecipientMode === mode.id}
                   className={noticeRecipientMode === mode.id ? "active" : ""}
                   key={mode.id}
                   onClick={() => setNoticeRecipientMode(mode.id)}
@@ -12563,7 +12564,7 @@ function NotificationCenter({
               <MetricCard density="compact" hint="학생 수신" label="학생" value={`${studentRecipientCount}건`} />
             </div>
 
-            <div className="noticeStudentPicker">
+            <div aria-label="알림 대상 학생 선택 목록" className="noticeStudentPicker" role="region" tabIndex={0}>
               <SelectionToolbar
                 actions={(
                   <>

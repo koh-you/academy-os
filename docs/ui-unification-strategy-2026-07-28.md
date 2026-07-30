@@ -51,4 +51,4 @@ Academy OS의 모든 화면을 같은 사용 규칙으로 보이게 한다. 이�
 
 ## 다음 착수
 
-UI-0~UI-7, UI-8A·UI-8B·UI-8C와 UI-8D-0 inventory를 완료했다. UI-7·8A·8B·8C 사람 시각 확인은 `docs/next-session/README.md`의 독립 절차로 누적되어 다음 화면군을 막지 않는다. 다음 UI-8D-1은 알림관리 작업 탭의 touch scroll 경계, 수신 범위 선택 상태, 학생 목록 이름·focus·내부 scroll을 보강한다. 실제 저장·발송·예약·삭제는 실행하지 않는다.
+UI-0~UI-7, UI-8A·UI-8B·UI-8C와 UI-8D-0~1을 완료했다. UI-7·8A·8B·8C 사람 시각 확인은 `docs/next-session/README.md`의 독립 절차로 누적되어 다음 화면군을 막지 않는다. 다음 UI-8D-2는 학부모 응대의 긴 발신 원문을 학생 이름이 있는 focus 가능한 모바일 내부 scroll 영역으로 정리한다. 실제 저장·발송·예약·삭제는 실행하지 않는다.
