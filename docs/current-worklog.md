@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8C-0. 보충관리 고밀도 화면 inventory
+
+- 실제 `activeView=supplements`의 보충관리 목록, 학생 상세, 최근 이력, 알림 제어·일정·완료·취소 확인 modal 흐름을 대조했다.
+- 원 숙제/결석 맥락, 보충 내용, 수업일지 일정, 학생·학부모·당일 학생 알림 3종, 두 취소 의미와 각 callback·side effect 경계를 확정했다.
+- 긴 학생 상세가 공통 scrollable modal을 쓰지 않는 점, 3개 상태의 4열 grid, 모바일 주요 행동 가로 scroll, 5열 최근 이력, custom 알림 modal의 `100vh`를 표시 예외로 기록했다.
+- 상세 원천과 UI-8C-1~3 순서를 `docs/ui-high-density-supplement-inventory-2026-07-29.md`에 기록했다.
+- 화면·callback과 저장·발송·예약·삭제·출결·Supabase/app_state·lessons·lesson_student_records·makeup_tasks·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: active route, 원천·상태 3개·알림 3종·두 취소, 현재 modal·grid·mobile 기준선 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 492개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 코드 UI 변경이 없어 새 필수·시각 gate가 없다. UI-8C-1 적용 뒤 누적 검수한다.
+
 ## 2026-07-29 UI-8B-4. 수업일지 고밀도 화면 회귀 마감
 
 - 수업일지 dialog·수업 맥락·수정/취소, 10열 학생 기록·출결/메모/숙제, 알림 계획·예약/Solapi, 하단 저장을 하나의 통합 정적 회귀로 묶었다.
