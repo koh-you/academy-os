@@ -88,6 +88,7 @@
 | UI-7E | 완료 | action 이름·44px·focus와 disconnected button 0개 |
 | UI-7F | 완료 | native summary 23개와 DataTableShell 15개 touch·focus·scroll |
 | UI-8A | 완료 | Lesson Hub 월간 달력 내부 scroll·grid semantics·callback 경계 |
+| UI-8B-0 | 완료 | 수업일지 맥락·10열 기록·저장·알림·modal 예외 inventory |
 
 ## 전체 세부 작업 목록
 

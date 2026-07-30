@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8B-0. 수업일지 고밀도 화면 inventory
+
+- 실제 `TeacherLessonHubV2 -> Modal -> LessonJournalDetail` 경로의 수업 맥락, 조건부 운영 안내, 알림 상태·작업, 10열 학생 기록, 하단 저장 바와 하위 modal을 대조했다.
+- 수업일지 modal의 `100vh`·18px 여백, 바깥 panel과 `DataTableShell`의 중복 scroll 소유, 모바일에서도 2열인 저장 바를 UI-8B의 좁은 표시 예외로 확정했다.
+- `onBack`, 수업 수정·취소, 출결, 기록·숙제 draft, 알림 계획·예약·결과 대조·적용, 학생별 알림, `saveJournalDrafts` callback과 원천·side effect 보존 계약을 `docs/ui-high-density-lesson-journal-inventory-2026-07-29.md`에 기록했다.
+- 화면·callback과 저장·발송·예약·삭제·출결·Supabase/app_state·lesson_student_records·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 실제 수업일지 경로, 10열·1450px 표, 현재 modal·이중 scroll·저장 바 기준선과 callback 경계 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 487개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 코드 UI 변경이 없어 새 필수·시각 gate가 없다. UI-8B-1 적용 뒤 누적 검수한다.
+
 ## 2026-07-29 UI-8A-3. Lesson Hub 회귀 마감
 
 - 사용자 요청으로 숨긴 NavigationHeader 안의 월 이동·수업 등록·월 정규수업 열기·7종 filter·출결 상태가 state/callback과 함께 보존되는 것을 고정했다.

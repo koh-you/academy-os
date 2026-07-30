@@ -51,4 +51,4 @@ Academy OS의 모든 화면을 같은 사용 규칙으로 보이게 한다. 이�
 
 ## 다음 착수
 
-UI-0~UI-7과 UI-8A를 완료했다. UI-7·8A 사람 시각 확인은 `docs/next-session/README.md`의 독립 절차로 누적되어 다음 화면군을 막지 않는다. 다음 UI-8B-0은 수업일지의 수업 맥락, 학생 기록, 저장, 알림 상태, modal 내부 scroll과 모바일 예외를 읽기 전용 inventory로 정리한다. 실제 저장·발송·예약·삭제·출결은 실행하지 않는다.
+UI-0~UI-7과 UI-8A를 완료했고 UI-8B-0 수업일지 inventory를 확정했다. UI-7·8A 사람 시각 확인은 `docs/next-session/README.md`의 독립 절차로 누적되어 다음 화면군을 막지 않는다. 다음 UI-8B-1은 수업일지 modal의 모바일 viewport·safe-area만 보강한다. 실제 저장·발송·예약·삭제·출결은 실행하지 않는다.
