@@ -51,4 +51,4 @@ Academy OS의 모든 화면을 같은 사용 규칙으로 보이게 한다. 이�
 
 ## 다음 착수
 
-UI-0~UI-7, UI-8A·UI-8B·UI-8C·UI-8D·UI-8E·UI-8F와 UI-8G-0~1을 완료했다. UI-7·8A·8B·8C·8D·8E·8F 사람 시각 확인은 `docs/next-session/README.md`의 독립 절차로 누적되어 다음 화면군을 막지 않는다. 다음 UI-8G-2는 시험정보 수정·학사일정 날짜 상세·일정 등록/수정 modal을 공통 scrollable shell로 전환하고 7열 학사 달력을 이름 있는 내부 가로 scroll grid로 정리한다. 실제 저장·삭제·AI 호출·파일 작업은 실행하지 않는다.
+UI-0~UI-7, UI-8A·UI-8B·UI-8C·UI-8D·UI-8E·UI-8F와 UI-8G-0~2를 완료했다. UI-7·8A·8B·8C·8D·8E·8F 사람 시각 확인은 `docs/next-session/README.md`의 독립 절차로 누적되어 다음 화면군을 막지 않는다. 다음 UI-8G-3은 시험정보·시험분석·학사일정의 저장·삭제·AI·파일·시험정보 연동 callback 분리와 responsive shell을 통합 회귀하고 독립 사람 시각 절차를 누적한다. 실제 저장·삭제·AI 호출·파일 작업은 실행하지 않는다.

@@ -6841,8 +6841,24 @@ summary:focus-visible {
   color: #ffffff;
 }
 
+.schoolMonthGridShell {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-padding-inline: 4px;
+  scrollbar-gutter: stable;
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+.schoolMonthGridShell:focus-visible {
+  outline: 2px solid var(--academy-focus-ring, #2563eb);
+  outline-offset: 2px;
+}
+
 .schoolMonthGrid {
   border-radius: 8px;
+  min-width: 840px;
   overflow: hidden;
 }
 

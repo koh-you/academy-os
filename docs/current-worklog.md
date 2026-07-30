@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8G-2. 시험정보·학사 modal과 7열 달력
+
+- 시험정보 수정, 학사일정 날짜 상세, 일정 등록/수정의 긴 폼을 공통 scrollable modal로 전환해 제목·설명·X는 유지하고 본문만 세로 scroll되게 했다.
+- 학사일정 7열 달력을 이름 있는 focus 영역으로 감싸고 최소 840px grid를 달력 내부에서만 가로 touch scroll되게 했다.
+- 날짜 선택, 시험정보 입력 자동저장, 학사일정 저장·삭제, 시험관리 연동·직전수업 동기화 callback은 그대로 보존했다.
+- 화면 shell·접근성·CSS 외 시험정보·school_events·lessons·Storage·AI 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 세 scrollable modal, 7열 named calendar와 기존 저장·삭제·연동 callback 보존 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 511개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: desktop/390px에서 modal 제목·본문 scroll과 달력 focus·내부 가로 scroll을 나중에 UI-8G 통합 절차로 확인한다. 실제 입력·저장·삭제·연동은 누르지 않고 UI-8G-3을 계속한다.
+
 ## 2026-07-29 UI-8G-1. 시험 단계 탭·시험분석 library 탐색
 
 - 시험관리 하위 탭과 시험분석 작업 단계 탭을 좁은 화면에서 내부 가로 touch scroll되는 영역으로 제한했다.

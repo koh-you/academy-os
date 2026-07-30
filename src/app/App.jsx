@@ -21244,6 +21244,7 @@ function ExamPrepEditModal({
       title={`${row.schoolName || "학교 미입력"} 시험정보 수정`}
       subtitle={[row.grade, row.subject, row.publisher].filter(Boolean).join(" · ") || "시험관리 상세 입력"}
       onClose={onClose}
+      scrollable
     >
       <div className="examPrepEditForm">
         <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...examPrepAutosaveRisk} />

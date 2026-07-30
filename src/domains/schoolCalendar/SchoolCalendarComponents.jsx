@@ -170,78 +170,83 @@ export function SchoolMonthGrid({
   selectedDate = ""
 }) {
   return (
-    <div className="calendarGrid teacherCalendarGrid schoolMonthGrid">
-      {["일", "월", "화", "수", "목", "금", "토"].map((label) => (
-        <div className="weekday" key={label}>{label}</div>
-      ))}
-      {monthDays.map((day) => {
-        const eventPriority = { mathExam: 0, vacation: 1, schoolEvent: 2, custom: 3 };
-        const dayEvents = calendarDisplayEvents
-          .filter((event) => isDateWithinEvent(day.date, event))
-          .sort((eventA, eventB) => (
-            (eventPriority[eventA.type] ?? 4) - (eventPriority[eventB.type] ?? 4)
-            || formatCalendarEventLabel(eventA).localeCompare(formatCalendarEventLabel(eventB))
-          ));
-        const { academicEvents, hiddenCount, mathExamEvents } = getMonthCellDisplayEvents(dayEvents);
-        return (
-          <button
-            className={[
-              "monthCell",
-              "teacherMonthCell",
-              "schoolMonthCell",
-              day.inMonth ? "" : "outside",
-              selectedDate === day.date ? "selected" : ""
-            ].join(" ")}
-            key={day.date}
-            onClick={() => onOpenDateModal?.(day.date)}
-            type="button"
-          >
-            <span className="dayNumber">{day.dayNumber}</span>
-            <span className="lessonPills">
-              <span className="schoolMathExamLayer">
-                {mathExamEvents.map((event, mathTabIndex) => {
-                  const eventLabel = formatCalendarSummaryLabel(event);
-                  const eventColor = getSchoolCalendarEventColor(event);
-                  return (
-                    <span
-                      className={`schoolEventPill event-${event.type} mathExamTab`}
-                      key={event.eventId}
-                      style={{
-                        "--event-color": eventColor,
-                        backgroundColor: eventColor,
-                        "--math-tab-index": mathTabIndex
-                      }}
-                      title={event.title}
-                    >
-                      {eventLabel}
-                    </span>
-                  );
-                })}
+    <section aria-label="학사일정 월간 달력" className="schoolMonthGridShell" role="region" tabIndex={0}>
+      <div aria-label="학사일정 월간 일정" className="calendarGrid teacherCalendarGrid schoolMonthGrid" role="grid">
+        {["일", "월", "화", "수", "목", "금", "토"].map((label) => (
+          <div className="weekday" key={label} role="columnheader">{label}</div>
+        ))}
+        {monthDays.map((day) => {
+          const eventPriority = { mathExam: 0, vacation: 1, schoolEvent: 2, custom: 3 };
+          const dayEvents = calendarDisplayEvents
+            .filter((event) => isDateWithinEvent(day.date, event))
+            .sort((eventA, eventB) => (
+              (eventPriority[eventA.type] ?? 4) - (eventPriority[eventB.type] ?? 4)
+              || formatCalendarEventLabel(eventA).localeCompare(formatCalendarEventLabel(eventB))
+            ));
+          const { academicEvents, hiddenCount, mathExamEvents } = getMonthCellDisplayEvents(dayEvents);
+          return (
+            <button
+              aria-label={`${day.date} · ${dayEvents.length ? `${dayEvents.length}개 일정` : "일정 없음"}`}
+              aria-selected={selectedDate === day.date}
+              className={[
+                "monthCell",
+                "teacherMonthCell",
+                "schoolMonthCell",
+                day.inMonth ? "" : "outside",
+                selectedDate === day.date ? "selected" : ""
+              ].join(" ")}
+              key={day.date}
+              onClick={() => onOpenDateModal?.(day.date)}
+              role="gridcell"
+              type="button"
+            >
+              <span className="dayNumber">{day.dayNumber}</span>
+              <span className="lessonPills">
+                <span className="schoolMathExamLayer">
+                  {mathExamEvents.map((event, mathTabIndex) => {
+                    const eventLabel = formatCalendarSummaryLabel(event);
+                    const eventColor = getSchoolCalendarEventColor(event);
+                    return (
+                      <span
+                        className={`schoolEventPill event-${event.type} mathExamTab`}
+                        key={event.eventId}
+                        style={{
+                          "--event-color": eventColor,
+                          backgroundColor: eventColor,
+                          "--math-tab-index": mathTabIndex
+                        }}
+                        title={event.title}
+                      >
+                        {eventLabel}
+                      </span>
+                    );
+                  })}
+                </span>
+                <span className="schoolRegularEventLayer">
+                  {academicEvents.map((event) => {
+                    const eventLabel = formatCalendarSummaryLabel(event);
+                    const eventColor = getSchoolCalendarEventColor(event);
+                    return (
+                      <span
+                        className={`schoolEventPill event-${event.type}`}
+                        key={event.eventId}
+                        style={{ "--event-color": eventColor, backgroundColor: eventColor }}
+                        title={event.title}
+                      >
+                        {eventLabel}
+                      </span>
+                    );
+                  })}
+                  {hiddenCount > 0 ? (
+                    <span className="schoolEventMorePill">+{hiddenCount}</span>
+                  ) : null}
+                </span>
               </span>
-              <span className="schoolRegularEventLayer">
-                {academicEvents.map((event) => {
-                  const eventLabel = formatCalendarSummaryLabel(event);
-                  const eventColor = getSchoolCalendarEventColor(event);
-                  return (
-                    <span
-                      className={`schoolEventPill event-${event.type}`}
-                      key={event.eventId}
-                      style={{ "--event-color": eventColor, backgroundColor: eventColor }}
-                      title={event.title}
-                    >
-                      {eventLabel}
-                    </span>
-                  );
-                })}
-                {hiddenCount > 0 ? (
-                  <span className="schoolEventMorePill">+{hiddenCount}</span>
-                ) : null}
-              </span>
-            </span>
-          </button>
-        );
-      })}
-    </div>
+            </button>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -287,7 +292,7 @@ export function SchoolDateScheduleModal({
   }
 
   return (
-    <Modal className="schoolDateScheduleModal" title={`${selectedDate} 일정`} subtitle="일정 내용과 색상을 확인하고 수정합니다." onClose={onClose}>
+    <Modal className="schoolDateScheduleModal" title={`${selectedDate} 일정`} subtitle="일정 내용과 색상을 확인하고 수정합니다." onClose={onClose} scrollable>
       <div className="schoolDateModalToolbar">
         <button className="primaryButton compact" onClick={() => onCreateEvent?.(selectedDate)} type="button">
           이 날짜에 일정 등록
@@ -454,6 +459,7 @@ export function SchoolEventFormModal({
       title={isEditingEvent ? "일정 수정" : "일정 등록"}
       subtitle={isEditingEvent ? "변경할 항목을 확인한 뒤 저장합니다." : "입력 유형을 먼저 고른 뒤 필요한 정보만 입력합니다."}
       onClose={onClose}
+      scrollable
     >
       <div className="schoolEventFormPanel modalForm">
         <label className="inputTypeField">
