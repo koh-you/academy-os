@@ -6640,7 +6640,7 @@ export function App() {
     saveGeneratedLessonsFromPlan(preExamLessonsToSync);
   }, [attendanceOnlyMode, generatedLessonPlan, isAppStateReady, session?.role]);
 
-  async function refreshNotificationJobs({ lessonId = "", scope = "active", silent = false } = {}) {
+  async function refreshNotificationJobs({ date = "", lessonId = "", scope = "active", silent = false } = {}) {
     if (!silent) {
       setNotificationJobsStatus({ state: "loading", message: "알림 기록을 불러오는 중입니다." });
     }
@@ -6651,6 +6651,15 @@ export function App() {
         query.set("limit", "200");
       } else if (scope === "history") {
         query.set("limit", "300");
+        if (date) {
+          const dayStart = new Date(`${date}T00:00:00+09:00`);
+          const nextDayStart = new Date(`${date}T00:00:00+09:00`);
+          nextDayStart.setUTCDate(nextDayStart.getUTCDate() + 1);
+          if (!Number.isNaN(dayStart.getTime()) && !Number.isNaN(nextDayStart.getTime())) {
+            query.set("scheduledFrom", dayStart.toISOString());
+            query.set("scheduledTo", nextDayStart.toISOString());
+          }
+        }
       } else {
         query.set("limit", "300");
         query.set("status", "draft,scheduled,failed,send_unconfirmed");
@@ -10327,7 +10336,7 @@ export function App() {
             onSaveSpecialLectureGuides={handleSaveSpecialLectureGuides}
             onUpdateLessonNotificationPlan={handleUpdateLessonNotificationPlan}
             students={students}
-            onRefresh={() => refreshNotificationJobs({ scope: "history" })}
+            onRefresh={({ date = "" } = {}) => refreshNotificationJobs({ date, scope: "history" })}
           />
         ) : null}
 
@@ -11866,6 +11875,7 @@ function NotificationCenter({
   const [dispatchMessage, setDispatchMessage] = useState("");
   const [isPolishingNotice, setIsPolishingNotice] = useState(false);
   const [isSendingNotice, setIsSendingNotice] = useState(false);
+  const [historyDate, setHistoryDate] = useState(today);
   const [isNoticeHistoryOpen, setIsNoticeHistoryOpen] = useState(false);
   const [notificationJobAction, setNotificationJobAction] = useState({ message: "", state: "idle" });
   const [jobFilter, setJobFilter] = useState("all");
@@ -11890,33 +11900,39 @@ function NotificationCenter({
     ...notificationJobs
   ];
   const managedNotificationJobs = mergedNotificationJobs;
+  const historyJobs = historyDate
+    ? managedNotificationJobs.filter((job) => {
+        const dateSource = job.scheduledAt || job.createdAt;
+        return dateSource && getKoreaDateString(new Date(dateSource)) === historyDate;
+      })
+    : managedNotificationJobs;
   const solapiResultTargets = managedNotificationJobs.filter((job) =>
     job.provider === "solapi" &&
     getNotificationJobProviderReference(job) &&
     ["scheduled", "send_unconfirmed"].includes(job.status)
   );
-  const pastScheduledJobs = managedNotificationJobs.filter((job) =>
+  const pastScheduledJobs = historyJobs.filter((job) =>
     canCancelNotificationJob(job) &&
     job.scheduledAt &&
     isNotificationSchedulePast(job.scheduledAt)
   );
-  const scheduledJobs = managedNotificationJobs.filter((job) =>
+  const scheduledJobs = historyJobs.filter((job) =>
     canCancelNotificationJob(job) &&
     (!job.scheduledAt || !isNotificationSchedulePast(job.scheduledAt))
   );
-  const sentJobs = managedNotificationJobs.filter((job) => job.status === "sent");
-  const pendingJobs = managedNotificationJobs.filter((job) => job.status === "send_unconfirmed").concat(pastScheduledJobs);
-  const failedJobs = managedNotificationJobs.filter((job) => job.status === "failed");
-  const archivedJobs = managedNotificationJobs.filter((job) => job.status === "draft" || job.status === "dry_run" || job.status === "canceled");
+  const sentJobs = historyJobs.filter((job) => job.status === "sent");
+  const pendingJobs = historyJobs.filter((job) => job.status === "send_unconfirmed").concat(pastScheduledJobs);
+  const failedJobs = historyJobs.filter((job) => job.status === "failed");
+  const archivedJobs = historyJobs.filter((job) => job.status === "draft" || job.status === "dry_run" || job.status === "canceled");
   const parentResponseContextCount = getParentResponseContexts(managedNotificationJobs, students).length;
   const filteredNotificationJobs = {
-    all: managedNotificationJobs.slice(0, 40),
+    all: historyJobs.slice(0, 40),
     scheduled: scheduledJobs,
     sent: sentJobs,
     pending: pendingJobs,
     failed: failedJobs,
     draft: archivedJobs
-  }[jobFilter] ?? managedNotificationJobs.slice(0, 40);
+  }[jobFilter] ?? historyJobs.slice(0, 40);
   const filterLabels = {
     all: "최근 알림",
     scheduled: "예약",
@@ -12078,6 +12094,19 @@ function NotificationCenter({
     setIsNoticeHistoryOpen(true);
   }
 
+  function refreshHistoryForDate(nextDate = historyDate) {
+    Promise.resolve(onRefresh?.({ date: nextDate })).catch((error) => {
+      setDispatchMessage((current) => `${current || "알림 기록"} 새로고침 실패: ${error.message}`);
+    });
+  }
+
+  function changeHistoryDate(nextDate) {
+    setHistoryDate(nextDate);
+    setActiveNoticeWorkspace("history");
+    setIsNoticeHistoryOpen(true);
+    refreshHistoryForDate(nextDate);
+  }
+
   function upsertLocalNoticeJob(job) {
     setLocalNoticeJobs((current) => [
       job,
@@ -12158,9 +12187,7 @@ function NotificationCenter({
   }
 
   function refreshNoticeJobsInBackground() {
-    Promise.resolve(onRefresh?.()).catch((error) => {
-      setDispatchMessage((current) => `${current || "처리는 완료됐습니다."} 발송 기록 새로고침 실패: ${error.message}`);
-    });
+    refreshHistoryForDate();
   }
 
   async function sendNoticeNow() {
@@ -12393,7 +12420,7 @@ function NotificationCenter({
     <section className={compactPageHeader ? "notificationCenterPage compactPageHeader" : "notificationCenterPage"}>
       <PageHeader
         actions={(
-          <button className="softButton" disabled={isNotificationJobsLoading} onClick={onRefresh} type="button">
+          <button className="softButton" disabled={isNotificationJobsLoading} onClick={() => refreshHistoryForDate()} type="button">
             {isNotificationJobsLoading ? "기록 불러오는 중" : "기록 새로고침"}
           </button>
         )}
@@ -12403,7 +12430,7 @@ function NotificationCenter({
       {["loading", "failed"].includes(notificationJobsStatus?.state) ? (
         <EmptyState
           action={notificationJobsStatus.state === "failed" ? (
-            <button className="softButton compact" onClick={onRefresh} type="button">다시 시도</button>
+            <button className="softButton compact" onClick={() => refreshHistoryForDate()} type="button">다시 시도</button>
           ) : null}
           aria-busy={isNotificationJobsLoading ? "true" : undefined}
           aria-live="polite"
@@ -12698,6 +12725,19 @@ function NotificationCenter({
             >
               {solapiResultSyncState.state === "loading" ? "확인 중" : "Solapi 결과 확인"}
             </button>
+            <label className="notificationHistoryDateFilter">
+              <span>조회 날짜</span>
+              <input
+                aria-label="알림톡 발송 기록 조회 날짜"
+                disabled={isNotificationJobsLoading}
+                onChange={(event) => changeHistoryDate(event.target.value)}
+                type="date"
+                value={historyDate}
+              />
+            </label>
+            {historyDate ? (
+              <button className="softButton compact" disabled={isNotificationJobsLoading} onClick={() => changeHistoryDate("")} type="button">전체 날짜</button>
+            ) : null}
             {jobFilter !== "all" ? (
               <button className="softButton compact" onClick={() => setJobFilter("all")} type="button">전체 보기</button>
             ) : null}
@@ -12716,7 +12756,7 @@ function NotificationCenter({
           actionsClassName="notificationQueueActions"
           density="slim"
           eyebrow="NOTIFICATION HISTORY"
-          title={`알림톡 발송 기록 · ${filterLabels[jobFilter]}`}
+          title={`알림톡 발송 기록 · ${historyDate || "전체 날짜"} · ${filterLabels[jobFilter]}`}
         />
         {notificationJobAction.message ? (
           <AsyncOperationStatus

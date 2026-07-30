@@ -7915,6 +7915,19 @@ button:disabled {
   white-space: nowrap;
 }
 
+.notificationHistoryDateFilter {
+  align-items: center;
+  color: #475569;
+  display: flex;
+  font-size: 12px;
+  font-weight: 900;
+  gap: 6px;
+}
+
+.notificationHistoryDateFilter input {
+  min-height: var(--academy-touch-target, 44px);
+}
+
 .noticeSolapiResultNotice {
   line-height: 1.45;
 }
@@ -20395,6 +20408,11 @@ body.attendanceOnlyBody {
   }
 
   .notificationQueueActions .solapiResultSyncControl {
+    grid-column: 1 / -1;
+    justify-content: space-between;
+  }
+
+  .notificationQueueActions .notificationHistoryDateFilter {
     grid-column: 1 / -1;
     justify-content: space-between;
   }
