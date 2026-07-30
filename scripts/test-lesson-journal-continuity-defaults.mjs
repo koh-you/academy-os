@@ -5,6 +5,10 @@ import { fileURLToPath } from "node:url";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const source = fs.readFileSync(path.join(scriptDir, "..", "src", "app", "App.jsx"), "utf8");
+const editableFieldsModelSource = fs.readFileSync(
+  path.join(scriptDir, "..", "src", "domains", "lessons", "lessonJournalEditableFieldsModel.js"),
+  "utf8",
+);
 
 assert.match(
   source,
@@ -17,8 +21,8 @@ assert.match(
   "학생별 수업일지 행은 출결을 계산하기 전에 이전 기록으로 보완한 현재 record를 만들어야 합니다.",
 );
 assert.match(
-  source,
-  /ariaLabel=\{`\$\{student\.name\} 오늘 강의 내용`\}[\s\S]*?value=\{getLessonContent\(record\)\}/,
+  editableFieldsModelSource,
+  /ariaLabel: `\$\{student\.name\} 오늘 강의 내용`[\s\S]*?value: record\.lessonProgress \?\? record\.progress \?\? ""/,
   "강의 내용 입력칸은 이전 기록으로 보완된 현재 값을 표시해야 합니다.",
 );
 

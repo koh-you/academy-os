@@ -1,5 +1,11 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 App.jsx 리팩터링 최신 main 재배치 통합
+
+- `codex/refactor-supplement-11b`를 최신 `origin/main`의 반 알림 저장 호환 커밋 위로 재배치했다. main의 `academy-reminder-storage` production 검사를 보존하고, 분리된 수업일지 editable-fields model을 연속성 검사가 따라가도록 정적 경계만 갱신했다.
+- 원천/side effect: 코드·fixture·Git 이력만 다뤘다. Supabase·Storage·notification_jobs·Solapi·실제 저장·예약·취소는 실행하지 않았다.
+- AI 검수: generated lesson plan builder inventory, 전체 production 하위 검사, 정적 시나리오 801건(기존 UI 기준선 8건만 실패), build 336 modules, `git diff --check`를 대조했다. 사람 gate는 0건이다.
+
 ## 2026-07-30 운영 알림 반 알림 저장 제약 호환
 
 - 원인: 프론트/API는 `class_notice` 반 알림을 만들었지만, 기존 Supabase `academy_reminders.reminder_type` check constraint에는 이 값이 없어 저장이 거부됐다.
