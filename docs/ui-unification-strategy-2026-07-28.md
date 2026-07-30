@@ -51,4 +51,4 @@ Academy OS의 모든 화면을 같은 사용 규칙으로 보이게 한다. 이�
 
 ## 다음 착수
 
-UI-0~UI-6과 UI-7A·UI-7B·UI-7C·UI-7D·UI-7E, UI-7F-1을 완료했다. 다음 UI-7F-2는 native `summary` 전역 focus-visible과 640px 이하 44px touch target을 공통화한다. native open/close, callback, 외부 side effect와 운영 원천은 바꾸지 않는다.
+UI-0~UI-6과 UI-7A·UI-7B·UI-7C·UI-7D·UI-7E, UI-7F-1·2를 완료했다. 다음 UI-7F-3은 native table 4개가 DataTableShell 안에 있고 전체 15개 shell의 label·focus·scroll 계약이 유지되는 정적 회귀를 닫는다. 외부 side effect와 운영 원천은 바꾸지 않는다.

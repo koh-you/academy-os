@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-7F-2. native summary touch·focus
+
+- 모든 native `summary`를 기존 전역 focus-visible outline에 포함해 키보드 현재 위치가 버튼·링크와 같은 방식으로 보이게 했다.
+- 640px 이하에서 summary 최소 높이를 공통 44px touch token으로 맞췄다. desktop의 기존 34/40/52/58/64px 밀도와 화면별 padding·marker는 유지한다.
+- native details의 open/defaultOpen 구조, summary 문구, 내부 input/button과 저장·복사 callback은 변경하지 않았다.
+- 저장·발송·예약·삭제·출결·Supabase/app_state·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: summary 23개의 native 짝, 전역 focus-visible, 모바일 44px, 대표 open/details 보존 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 481개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 390px에서 특강 취소·수업연구·시험 후 원문·정산 제외·시험분석 summary의 44px 터치와 키보드 focus를 확인하는 독립 절차를 `docs/next-session/README.md`에 누적한다. 실제 저장·삭제·복사는 누르지 않고 UI-7F-3을 계속한다.
+
 ## 2026-07-29 UI-7F-1. 모바일 disclosure·table inventory
 
 - JSX 49개에서 native details/summary 각 23개, native table 4개, DataTableShell 15개를 AST로 전수 대조했다.

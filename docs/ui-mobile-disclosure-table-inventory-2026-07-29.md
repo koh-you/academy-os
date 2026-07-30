@@ -40,3 +40,8 @@
 ## 사람 검수
 
 inventory 자체는 코드 UI를 바꾸지 않아 필수 중단 gate가 없다. UI-7F-2 적용 뒤 실제 저장·삭제 없이 summary 열기/닫기와 표 가로 스크롤만 누적 확인한다.
+
+## 진행 갱신
+
+- UI-7F-2: 모든 native summary에 버튼·링크와 같은 focus-visible outline을 제공하고, 640px 이하 최소 높이를 44px touch token으로 맞췄다.
+- desktop 밀도, native open 상태, 화면별 marker·padding과 내부 callback은 변경하지 않았다.
