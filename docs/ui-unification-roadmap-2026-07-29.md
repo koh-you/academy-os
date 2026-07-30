@@ -92,6 +92,7 @@
 | UI-8B-1 | 완료 | 수업일지 modal 동적 viewport·safe-area·touch scroll |
 | UI-8B-2 | 완료 | 수업일지 10열 기록의 named table shell 단일 scroll |
 | UI-8B-3 | 완료 | 수업일지 모바일 저장 바·named 알림 작업 region |
+| UI-8B-4 | 완료 | 수업 맥락·10열 기록·저장·알림·modal 통합 회귀 |
 
 ## 전체 세부 작업 목록
 

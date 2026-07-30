@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8B-4. 수업일지 고밀도 화면 회귀 마감
+
+- 수업일지 dialog·수업 맥락·수정/취소, 10열 학생 기록·출결/메모/숙제, 알림 계획·예약/Solapi, 하단 저장을 하나의 통합 정적 회귀로 묶었다.
+- 저장과 Solapi 적용이 별도 callback으로 유지되고, responsive shell 보강이 두 동작을 결합하지 않는 것도 고정했다.
+- UI-8B-1~3의 desktop/390px 통합 사람 시각 절차를 `docs/next-session/README.md` 최상단에 남겼다. `수정 시작`만 local UI 확인용으로 허용하고 실제 입력·저장·발송·예약·삭제·출결은 금지했다.
+- 화면·callback과 저장·발송·예약·삭제·출결·Supabase/app_state·lesson_student_records·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 수업 맥락·기록·알림·저장 동작 분리와 UI-8B responsive shell 통합 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 491개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 최상단 UI-8B 통합 절차 1건을 나중에 일괄 수행한다. 독립 시각 확인이라 UI-8C-0 보충관리 inventory를 계속한다.
+
 ## 2026-07-29 UI-8B-3. 수업일지 모바일 저장·알림 작업
 
 - 발송 상태와 예약 작업 가로 영역에 각각 `알림톡 상태`, `알림톡 예약 작업` 이름·region·keyboard focus를 제공하고 touch overscroll 경계를 보강했다.
