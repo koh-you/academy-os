@@ -3,6 +3,7 @@
 ## 2026-07-30 수업일지 강의 교재·내용 이전 시간 기본값
 
 - 수업일지 학생별 `강의 교재`와 `오늘 강의 내용`은 현재 수업 기록에 값이 없을 때만 같은 학생의 이전 수업 기록을 기본값으로 표시한다. 현재 수업의 `lessonMaterial`, `lessonProgress`와 호환 필드(`progress`, `lessonContent`)는 항상 우선하며, 기존에 입력한 값은 덮어쓰지 않는다.
+- 후속 수정: 이전 기록 기본값을 만든 뒤 출결 상태를 계산하도록 선언 순서를 바로잡았다. 이 순서가 뒤바뀌면 `record` 초기화 전 참조로 수업일지 렌더가 실패하므로 전용 회귀 검사에 포함했다.
 - 원천/side effect: `lesson_student_records`를 읽어 화면 draft를 구성할 뿐, 수업일지를 여는 것만으로 저장·출결·숙제·알림 예약/발송·Solapi·Supabase 운영 데이터를 변경하지 않는다. 교사가 수정 후 기존 저장 흐름을 실행할 때만 값이 저장된다.
 - AI 검수: 전용 연속성 회귀 검사와 `npm run test:production`, `npm run build`, `git diff --check`를 통과했다.
 

@@ -18608,13 +18608,13 @@ function LessonJournalDetail({
             const effectiveNextHomework = nextHomeworkTitle !== (nextHomework?.title ?? "")
               ? { ...(nextHomework ?? {}), title: nextHomeworkTitle }
               : nextHomework;
+            const previousMemoContext = getPreviousLessonMemoContext(student);
+            const previousRecord = previousMemoContext.previousRecord;
+            const record = getLessonRecordWithPreviousDefaults(editableRecord, previousRecord);
             const attendanceDisplay = isClosureLesson
               ? { detail: "", label: "휴강", statusClass: "pending" }
               : getAttendanceDisplay(record, attendanceLesson, attendanceSettings.lateGraceMinutes);
             const checkoutMissing = !isClosureLesson && hasMissingCheckOut(record, attendanceLesson);
-            const previousMemoContext = getPreviousLessonMemoContext(student);
-            const previousRecord = previousMemoContext.previousRecord;
-            const record = getLessonRecordWithPreviousDefaults(editableRecord, previousRecord);
             const previousMemoRecord = previousMemoContext.previousMemoRecord;
             const referenceRecord = previousMemoContext.referenceRecord;
             const previousLessonMaterial = previousRecord?.lessonMaterial?.trim() ?? "";
