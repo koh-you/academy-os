@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8D-3. 알림관리·학부모 응대 회귀 마감
+
+- 알림 작성·대상 선택, 학부모 발신 원문·별관 채널 찾기, 예약/발송 결과 기록을 하나의 통합 정적 회귀로 묶었다.
+- AI 수정·예약·즉시 발송, Solapi 결과 대조, 예약 취소·기록 삭제는 계속 서로 다른 callback으로 유지하고 responsive shell이 이들을 결합하지 않는 것도 고정했다.
+- UI-8D-1~2의 desktop/390px 통합 사람 시각 절차를 `docs/next-session/README.md` 최상단에 남겼다. 검색·선택·접기·복사 외 실제 side effect 버튼은 금지했다.
+- 화면·callback과 저장·발송·예약·삭제·출결·Supabase/app_state·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 작성·대상·채널 찾기·기록과 발송/예약/대조/취소/삭제 분리 통합 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 500개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 최상단 UI-8D 통합 절차 1건을 나중에 일괄 수행한다. 독립 시각 확인이라 UI-8E-0 특강관리 inventory를 계속한다.
+
 ## 2026-07-29 UI-8D-2. 학부모 발신 원문 모바일 읽기
 
 - 학부모 응대의 각 발신 원문에 학생 이름이 있는 region·keyboard focus를 제공해 어떤 학생에게 보낸 내용인지 보조기기에서도 구분하게 했다.
