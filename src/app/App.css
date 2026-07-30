@@ -4048,18 +4048,6 @@ summary:focus-visible {
   white-space: nowrap;
 }
 
-.examPrepEmptyState {
-  background: #ffffff;
-  border: 1px solid #dbe5f5;
-  border-radius: 8px;
-  color: #64748b;
-  font-size: 14px;
-  font-weight: 800;
-  line-height: 1.5;
-  margin: 0;
-  padding: 12px 14px;
-}
-
 .makeupOriginalHomework {
   color: #64748b;
   display: block;
@@ -5030,24 +5018,6 @@ summary:focus-visible {
   gap: 4px;
 }
 
-.commentOpenButton {
-  background: #f8fafc;
-  border: 1px solid #d8e3f8;
-  border-radius: 8px;
-  color: #475569;
-  display: grid;
-  gap: 2px;
-  min-height: 44px;
-  padding: 7px 10px;
-  text-align: left;
-}
-
-.commentOpenButton.filled {
-  background: #eef6ff;
-  border-color: #93c5fd;
-  color: #1d4ed8;
-}
-
 .commentOpenButton strong {
   font-size: 14px;
 }
@@ -5096,9 +5066,12 @@ summary:focus-visible {
   border: 1px solid #c7d2fe;
   border-radius: 8px;
   color: #4f46e5;
+  display: grid;
   font-weight: 900;
+  gap: 2px;
   min-height: 38px;
   padding: 0 10px;
+  text-align: left;
 }
 
 .commentOpenButton.filled {
@@ -5846,10 +5819,16 @@ summary:focus-visible {
 
 .examPrepEmptyState {
   background: #fff;
+  border: 1px solid #dbe5f5;
   border-top: 1px solid #e2e8f0;
+  border-radius: 8px;
   color: #64748b;
   display: grid;
+  font-size: 14px;
+  font-weight: 800;
   gap: 6px;
+  line-height: 1.5;
+  margin: 0;
   padding: 28px;
   text-align: center;
 }
@@ -6114,10 +6093,6 @@ summary:focus-visible {
   color: #64748b;
   font-size: 13px;
   margin: -2px 0 0;
-}
-
-.linkButton {
-  text-decoration: none;
 }
 
 .mutedBadge {
@@ -8841,49 +8816,6 @@ button:disabled {
   border-color: #fecaca;
   background: #fef2f2;
   color: #b91c1c;
-}
-
-.specialLectureMatchGrid {
-  display: grid;
-  gap: 8px;
-}
-
-.specialLectureMatchGrid {
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-}
-
-.specialLectureMatchCard {
-  border: 1px solid #d9e6fb;
-  border-radius: 8px;
-  background: #fff;
-  padding: 10px;
-}
-
-.specialLectureMatchCard {
-  display: grid;
-  gap: 4px;
-}
-
-.specialLectureMatchCard span {
-  color: #1d4ed8;
-  font-size: 11px;
-  font-weight: 900;
-}
-
-.specialLectureMatchCard.review span {
-  color: #b91c1c;
-}
-
-.specialLectureMatchCard strong {
-  color: #0f172a;
-  font-size: 13px;
-}
-
-.specialLectureMatchCard small {
-  color: #52627a;
-  font-size: 12px;
-  line-height: 1.5;
-  margin: 0;
 }
 
 .specialLectureEnrollmentPanel,
@@ -12567,17 +12499,10 @@ textarea {
 }
 
 .trashButton {
-  color: #cbd5e1;
-}
-
-.trashButton {
-  border-radius: 999px;
-  padding: 0 10px;
-}
-
-.trashButton {
   border: 1px solid #d8e3f8;
+  border-radius: 999px;
   color: #64748b;
+  padding: 0 10px;
 }
 
 .studentSaveButton {
@@ -19298,7 +19223,7 @@ textarea.profileEditInput {
   border-top: 1px solid #e2e8f0;
   display: grid;
   gap: 0;
-  min-width: 920px;
+  min-width: max-content;
 }
 
 .testProgressRow:first-child {
@@ -19350,10 +19275,6 @@ textarea.profileEditInput {
   border-radius: 8px;
   min-height: 36px;
   padding: 0 10px;
-}
-
-.testProgressRow {
-  min-width: max-content;
 }
 
 .testProgressCell {

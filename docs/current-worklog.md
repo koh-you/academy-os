@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-30 UI-9C. CSS 중복·미사용 안전 정리
+
+- `src`의 CSS 13개 파일을 PostCSS로 전수 parse했다. 같은 at-rule context의 완전 중복 selector 8종을 최종 cascade가 같도록 병합했고 전체 rule은 3,424개에서 3,409개로 줄었다.
+- 단순 문자열상 미사용 후보 241개는 동적 상태 class 오탐 가능성이 있어 건드리지 않았다. 실제 JSX·JS·HTML 0건이며 이미 제거된 특강 신청자 매칭 카드의 `.specialLectureMatchGrid`, `.specialLectureMatchCard` 계열만 확정 폐기했다.
+- 원천/side effect: CSS cascade와 검사만 정리했다. callback, DOM, 저장·발송·예약·출결·파일, Supabase/app_state, notification_jobs, Solapi는 변경하거나 실행하지 않았다.
+- AI 검수: `npm run test:ui-css-hygiene`가 13개 파일·3,409개 rule, 완전 중복 0, 폐기 selector 누출 0으로 통과했다. 이를 포함한 `npm run test:production` 전체 통과, `npm run build` 128 modules, `git diff --check` 오류 없음까지 확인했다.
+- 사람 검수: 의도적 표시 변경이 없는 동등 cascade 정리라 필수 사람 gate는 없다. UI-9A 일괄 시각 절차에 포함하고 UI-9D 사람 검수 큐 통합을 계속한다.
+
 ## 2026-07-30 UI-9B. 전체 기능 회귀 기준선
 
 - production fixture의 유일한 기존 실패 `90a`를 분석했다. `saveLessonModalLessons`의 bulk 저장, Supabase 원천 확인, 전체 lessons 재조회·snapshot 대조 구현은 모두 유지되고 있었다.
