@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-07-30 UI-8J-0. 학생·학부모 포털 inventory
+
+- 학생·학부모 계정 shell, 읽기 자료와 학생의 숙제 완료·질문 CRUD·시험 후 제출/Storage 파일 경계를 대조했다.
+- 실제 학생 bearer 소유권, 교사 미리보기 쓰기 비활성, 학부모 열람 전용, 각 Supabase 재조회·시험 파일 단계별 cleanup 계약을 확정했다.
+- 중복 계정 행동, 한 명뿐인 학생 선택 control, 이름 없는 수업 기록 달력, 긴 자료·리포트·파일명과 모바일 쓰기 행동을 UI-8J 표시 예외로 기록했다.
+- 상세 원천과 UI-8J-1~3 순서를 `docs/ui-high-density-student-parent-portals-inventory-2026-07-30.md`에 기록했다.
+- 실제 숙제 완료·질문·시험 제출·파일 선택/열기·로그아웃과 Supabase·Storage 원천은 변경하거나 실행하지 않았다.
+- AI 검수: active 학생·학부모 route와 bearer·Supabase·Storage·읽기 전용 경계 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 521개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 코드 UI 변경이 없어 새 필수·시각 gate가 없다. UI-8J-1 적용 뒤 누적 검수한다.
+
 ## 2026-07-30 P1. 알림관리 자동 알림톡 이력·날짜 조회
 
 - 원인: 초기/보충관리의 `notification_jobs` 조회는 처리 중 상태만 읽어 `sent` 완료 행을 메모리 목록에서 제외했다. 자동 학생 보충 리마인더는 Supabase 원천에 남아도 보충관리에서는 완료 이력처럼 보이지 않았다.
