@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-07-30 UI-9D. 사람 검수 큐 단일 체크리스트
+
+- `docs/next-session/README.md`에 누적된 51개 상세 UI 확인을 별개 요청으로 반복하지 않도록 `docs/ui-human-review-checklist-2026-07-30.md`의 12단계 한 묶음으로 통합했다.
+- 현재 UI 완료를 막는 사람 gate는 0건이다. 배포 후 desktop 1440px과 실제 iPhone Safari 390px에서 이동·탭/필터·기존 기록 열기/닫기·내부 scroll·focus만 확인하고 문제를 한 번에 모아 전달한다.
+- 원천/side effect: 문서와 정적 계약만 바꿨다. 저장·삭제·발송·예약·출결·파일·AI·Supabase/app_state·notification_jobs·Storage·Solapi를 실행하거나 변경하지 않았다.
+- 제거 상태를 재확인했다. 학생 포털 실제 쓰기와 Solapi 특강 템플릿 검수는 자동 요청 목록에 없고, 교사 bearer·Storage 배포 검증은 완료다.
+- UI 완료와 별개인 실제 저장, destructive 취소/삭제, Solapi 자동 대조 관찰, 리팩토링 11B 예약·취소 대조는 해당 작업을 시작할 때만 독립 gate로 연다.
+- AI 검수: 단일 체크리스트가 기기·12개 화면군·허용/금지 행동·5개 통과 기준·미래 gate 분리를 갖추는 production 정적 계약을 추가했다. `npm run test:production`은 정적 시나리오 527/527을 포함해 전체 통과, `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했다.
+- 사람 검수: 위 1묶음은 UI-9E와 최종 감사를 막지 않는다. 최신 Production 반영 뒤 편한 시간에 한 번만 수행한다.
+
 ## 2026-07-30 UI-9C. CSS 중복·미사용 안전 정리
 
 - `src`의 CSS 13개 파일을 PostCSS로 전수 parse했다. 같은 at-rule context의 완전 중복 selector 8종을 최종 cascade가 같도록 병합했고 전체 rule은 3,424개에서 3,409개로 줄었다.
