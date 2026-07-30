@@ -5,6 +5,10 @@ const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
+const roleLoginSource = await readFile(
+  new URL("../src/app/RoleLoginScreen.jsx", import.meta.url),
+  "utf8"
+);
 
 assert.equal(
   appSource.split("function LoginScreen({").length - 1,
@@ -15,7 +19,7 @@ assert.equal(
   0
 );
 assert.equal(
-  appSource.split("function RoleLoginScreen({").length - 1,
+  roleLoginSource.split("export function RoleLoginScreen({").length - 1,
   1
 );
 assert.equal(
@@ -31,13 +35,6 @@ assert.equal(
   appSource.split("legacy-login-error").length - 1,
   0
 );
-const roleLoginStart = appSource.indexOf("function RoleLoginScreen({");
-const roleLoginEnd = appSource.indexOf(
-  "\nfunction AcademyReminderList(",
-  roleLoginStart
-);
-assert.ok(roleLoginStart >= 0 && roleLoginEnd > roleLoginStart);
-const roleLoginSource = appSource.slice(roleLoginStart, roleLoginEnd);
 for (const boundary of [
   'useState(initialRole)',
   'useState("")',
@@ -60,6 +57,17 @@ for (const boundary of [
   assert.ok(
     roleLoginSource.includes(boundary),
     `active role login boundary changed: ${boundary}`
+  );
+}
+for (const appLoginShellBoundary of [
+  'from "./RoleLoginScreen.jsx"',
+  "<RoleLoginScreen",
+  "academyBrandName={academyBrandName}",
+  "onLogin={handleLogin}"
+]) {
+  assert.ok(
+    appSource.includes(appLoginShellBoundary),
+    `App role login shell boundary changed: ${appLoginShellBoundary}`
   );
 }
 for (const forbiddenExternalEffect of [

@@ -9,6 +9,7 @@ const appConfigPath = path.join(root, "src", "app", "appConfig.js");
 const appViewChangePlanPath = path.join(root, "src", "app", "appViewChangePlan.js");
 const sidebarMenuModelPath = path.join(root, "src", "app", "sidebarMenuModel.js");
 const sidebarPath = path.join(root, "src", "app", "Sidebar.jsx");
+const roleLoginScreenPath = path.join(root, "src", "app", "RoleLoginScreen.jsx");
 const schoolCalendarComponentsPath = path.join(root, "src", "domains", "schoolCalendar", "SchoolCalendarComponents.jsx");
 const schoolCalendarUtilsPath = path.join(root, "src", "domains", "schoolCalendar", "schoolCalendarUtils.js");
 const testManagerPanelsPath = path.join(root, "src", "domains", "tests", "TestManagerPanels.jsx");
@@ -357,6 +358,7 @@ const rawAppEntrySource = fs.readFileSync(appPath, "utf8");
 const appViewChangePlanSource = fs.existsSync(appViewChangePlanPath) ? fs.readFileSync(appViewChangePlanPath, "utf8") : "";
 const sidebarMenuModelSource = fs.existsSync(sidebarMenuModelPath) ? fs.readFileSync(sidebarMenuModelPath, "utf8") : "";
 const sidebarSource = fs.existsSync(sidebarPath) ? fs.readFileSync(sidebarPath, "utf8") : "";
+const roleLoginScreenSource = fs.existsSync(roleLoginScreenPath) ? fs.readFileSync(roleLoginScreenPath, "utf8") : "";
 const appEntrySource = [
   rawAppEntrySource,
   fs.existsSync(generatedLessonPlanBuilderPath)
@@ -372,6 +374,11 @@ const appEntrySource = [
   fs.existsSync(sidebarPath)
     ? `/* extracted sidebar shell boundary\n${fs
         .readFileSync(sidebarPath, "utf8")
+        .replace(/\*\//g, "* /")}\n*/`
+    : "",
+  fs.existsSync(roleLoginScreenPath)
+    ? `/* extracted role login shell boundary\n${fs
+        .readFileSync(roleLoginScreenPath, "utf8")
         .replace(/\*\//g, "* /")}\n*/`
     : ""
 ].join("\n");
@@ -1459,7 +1466,7 @@ check("77j-7e-4 disconnected login calendar class wrong-book password and chat c
 const buttonActionInventory = getButtonActionInventory(path.join(root, "src"));
 check("77j-7e-5 all JSX buttons retain a callback disabled guard or submit contract with mobile focus and touch coverage", buttonActionInventory.fileCount === 83 && buttonActionInventory.total === 425 && buttonActionInventory.callbackCount === 417 && buttonActionInventory.disabledCount === 175 && buttonActionInventory.submitCount === 7 && buttonActionInventory.disconnected.length === 0 && hasAll(lessonFrontendSource, ["<button className=\"primaryButton full\" disabled={isSubmitting} type=\"submit\">", "disabled={isLoading} onClick={onRefresh}", "aria-label=\"이전 달\" className=\"iconButton\" onClick={() => onMoveDate(-30)}"]) && hasAll(css, ["button:focus-visible", "a:focus-visible", "button,\n  a[href],\n  [role=\"button\"] {", "min-height: var(--academy-touch-target) !important"]));
 const disclosureTableInventory = getDisclosureTableInventory(path.join(root, "src"));
-check("77j-7f-1 mobile disclosure and table inventory isolates summary height variants while every native table stays in the shared scroll shell", disclosureTableInventory.fileCount === 103 && disclosureTableInventory.detailsCount === 23 && disclosureTableInventory.summaryCount === 23 && disclosureTableInventory.tableCount === 4 && disclosureTableInventory.dataTableShellCount === 14 && disclosureTableInventory.unwrappedTables.length === 0 && hasAll(css, [".specialLectureCancellationActions > summary", "min-height: 34px", ".researchTypeChapter > summary,", "min-height: 40px", ".studentProfileSection > summary", "min-height: 64px"]) && hasAll(sharedDataTableShellSource + sharedDataTableShellCssSource, ["aria-label={label}", "role=\"region\"", "tabIndex={tabIndex}", "overflow-x: auto", "overscroll-behavior-inline: contain", "touch-action: pan-x pan-y"]));
+check("77j-7f-1 mobile disclosure and table inventory isolates summary height variants while every native table stays in the shared scroll shell", disclosureTableInventory.fileCount === 104 && disclosureTableInventory.detailsCount === 23 && disclosureTableInventory.summaryCount === 23 && disclosureTableInventory.tableCount === 4 && disclosureTableInventory.dataTableShellCount === 14 && disclosureTableInventory.unwrappedTables.length === 0 && hasAll(css, [".specialLectureCancellationActions > summary", "min-height: 34px", ".researchTypeChapter > summary,", "min-height: 40px", ".studentProfileSection > summary", "min-height: 64px"]) && hasAll(sharedDataTableShellSource + sharedDataTableShellCssSource, ["aria-label={label}", "role=\"region\"", "tabIndex={tabIndex}", "overflow-x: auto", "overscroll-behavior-inline: contain", "touch-action: pan-x pan-y"]));
 check("77j-7f-2 native summaries keep browser open state while gaining shared keyboard focus and 44px mobile touch coverage", hasAll(css, ["a:focus-visible,\nsummary:focus-visible {", "outline: 3px solid rgba(37, 99, 235, 0.35)", "outline-offset: 2px", "@media (max-width: 640px)", "summary {\n    min-height: var(--academy-touch-target) !important;"]) && disclosureTableInventory.detailsCount === disclosureTableInventory.summaryCount && disclosureTableInventory.summaryCount === 23 && hasAll(app, ["<details className=\"examReviewRawDraft\">", "<details className=\"researchTypeChapter\" key={chapter.id} open>", "<summary>전체 원문 보기/직접 수정</summary>"]));
 check("77j-7f-3 every table-style region stays named keyboard focusable and horizontally touch scrollable without changing row actions", disclosureTableInventory.tableCount === 4 && disclosureTableInventory.dataTableShellCount === 14 && disclosureTableInventory.labelledDataTableShellCount === 14 && disclosureTableInventory.unwrappedTables.length === 0 && hasAll(sharedDataTableShellSource, ["label,", "tabIndex = 0", "aria-label={label}", "role=\"region\"", "tabIndex={tabIndex}", "{children}"]) && hasAll(sharedDataTableShellCssSource, ["max-width: 100%", "overflow-x: auto", "overscroll-behavior-inline: contain", "touch-action: pan-x pan-y", "-webkit-overflow-scrolling: touch", ".dataTableShell.dataTableShell:focus-visible"]) && hasAll(app + lessonJournalTableSource + studentManagerSource + monthlySettlementPanelSource, ["label=\"알림톡 발송 기록\"", "label=\"수업일지 학생 기록\"", "label=\"퇴원생 목록\"", "label=\"학생 목록\"", "label=\"월별 정규 수업 정산\""]));
 check("77j-8a-0 active lesson hub inventory preserves the intentionally hidden toolbar and the seven-column calendar model", hasAll(lessonFrontendSource, ["activeView === \"lessons\"", "<TeacherLessonHubV2", "function TeacherLessonHubV2({", "const [lessonTypeFilter, setLessonTypeFilter] = useState(\"all\")", "{ id: \"specialLecture\", label: \"특강\" }", "className=\"calendarShell teacherCalendarShell\"", "className=\"calendarGrid teacherCalendarGrid\"", "onClick={() => onDateSelect(day.date)}", "onOpenLessonJournal(pill.lesson.lessonId)"]) && hasAll(css, [".teacherCalendarTop {\n  display: none;", ".calendarGrid {", "grid-template-columns: repeat(7, minmax(0, 1fr))", "overflow: hidden", ".teacherMonthCell {", "min-height: 108px", ".lessonPill {", "text-overflow: ellipsis"]));
@@ -2244,9 +2251,9 @@ check(
   "84d-173 legacy LoginScreen inventory has no render consumer while RoleLoginScreen remains active",
   (rawAppEntrySource.match(/function LoginScreen\(\{/g) || []).length === 0 &&
     (rawAppEntrySource.match(/<LoginScreen/g) || []).length === 0 &&
-    (rawAppEntrySource.match(/function RoleLoginScreen\(\{/g) || []).length === 1 &&
+    (roleLoginScreenSource.match(/export function RoleLoginScreen\(\{/g) || []).length === 1 &&
     (rawAppEntrySource.match(/<RoleLoginScreen/g) || []).length === 1 &&
-    hasAll(rawAppEntrySource, [
+    hasAll(roleLoginScreenSource, [
       'const loginHelpId = "role-login-help"',
       'const loginErrorId = "role-login-error"'
     ]) &&
@@ -2255,8 +2262,9 @@ check(
 );
 check(
   "84d-174 active RoleLoginScreen inventory keeps local drafts busy error accessibility and injected auth",
-  hasAll(rawAppEntrySource, [
-    'function RoleLoginScreen({ initialRole = "student", onLogin })',
+  hasAll(roleLoginScreenSource, [
+    "export function RoleLoginScreen({",
+    'initialRole = "student"',
     'useState(initialRole)',
     'useState("")',
     "function selectRole(nextRole)",
@@ -2274,7 +2282,13 @@ check(
     "aria-invalid={Boolean(error) || undefined}",
     'className="loginError" id={loginErrorId} role="alert"',
     "disabled={isSubmitting}"
-  ])
+  ]) &&
+    hasAll(rawAppEntrySource, [
+      'from "./RoleLoginScreen.jsx"',
+      "<RoleLoginScreen",
+      "academyBrandName={academyBrandName}",
+      "onLogin={handleLogin}"
+    ])
 );
 check("84e shared modal closes with Escape key", hasAll(app, ["import { Modal, ModalFooter } from \"../shared/components/Modal.jsx\""]) && hasAll(sharedModalSource, ["export function Modal({", "backdropClassName = \"\"", "hideCloseButton = false", "hideHeader = false", "function handleEscapeKey(event)", "event.key === \"Escape\"", "onClose?.()", "window.addEventListener(\"keydown\", handleEscapeKey)", "window.removeEventListener(\"keydown\", handleEscapeKey)", "hideCloseButton ? null"]) );
 check("84f lesson journal modal uses shared Escape-close modal", hasAll(app, ["backdropClassName=\"lessonJournalModalBackdrop\"", "className=\"lessonJournalModal\"", "hideHeader", "onClose={onBackToCalendar}"]) && !app.includes("<div className=\"modalBackdrop lessonJournalModalBackdrop\" role=\"dialog\" aria-modal=\"true\">"));

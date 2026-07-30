@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 P3. App.jsx 18E-2 active role login shell extraction
+
+- 코드: active login의 local role/credential/error/busy state와 form JSX를 `RoleLoginScreen.jsx`로 분리하고 브랜드명·`onLogin`을 prop으로 명시했다.
+- App 경계: 실제 `/api/auth/login`, teacher session persist, student/parent session state, logout과 role별 인증 실패 문구는 계속 `App.jsx`가 소유한다.
+- AI 검수: 18E-1 local state·trimmed submit·finally·접근성 경계와 App prop wiring을 기존 fixture로 대조한다. 실제 로그인 요청과 사람 gate는 0건이다.
+- 변화량: 새 파일 1개, 전체 `+134/-98`, `App.jsx +2/-84`로 실제 파일 길이 77줄 감소했다.
+
 ## 2026-07-31 P3. App.jsx 18E-1 active role login shell inventory
 
 - 원천/동작: active `RoleLoginScreen`은 role/loginId/password/error/submitting local state, role 전환 초기화, trimmed credential submit과 접근성 표시를 소유하고 인증은 주입된 `onLogin`만 호출한다.
