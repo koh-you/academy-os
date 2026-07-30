@@ -1047,9 +1047,14 @@ function toAcademyReminderRow(reminder = {}, { includeCompletedAt = true } = {})
   const title = String(reminder.title ?? "").trim();
   if (!reminderDate) throw new Error("알림 날짜가 필요합니다.");
   if (!title) throw new Error("알림 제목이 필요합니다.");
+  const reminderType = normalizeAcademyReminderType(reminder.reminderType ?? reminder.type);
+  const sourcePayload = { ...(reminder.sourcePayload ?? {}) };
+  // Existing production databases predate class_notice in the DB check constraint.
+  // Persist that UI-only type as custom while preserving its semantic type in JSON.
+  if (reminderType === "class_notice") sourcePayload.reminderType = "class_notice";
   const row = {
     reminder_id: reminder.reminderId || reminder.id || createAcademyReminderId(),
-    reminder_type: normalizeAcademyReminderType(reminder.reminderType ?? reminder.type),
+    reminder_type: reminderType === "class_notice" ? "custom" : reminderType,
     title,
     reminder_date: reminderDate,
     reminder_time: compact(normalizeClockTime(reminder.reminderTime ?? reminder.time)),
@@ -1061,7 +1066,7 @@ function toAcademyReminderRow(reminder = {}, { includeCompletedAt = true } = {})
     priority: normalizeAcademyReminderPriority(reminder.priority),
     slack_notify: reminder.slackNotify !== false,
     source: compact(reminder.source),
-    source_payload: reminder.sourcePayload ?? {},
+    source_payload: sourcePayload,
     updated_at: new Date().toISOString()
   };
   if (includeCompletedAt) {
@@ -1071,7 +1076,10 @@ function toAcademyReminderRow(reminder = {}, { includeCompletedAt = true } = {})
 }
 
 function fromAcademyReminderRow(row = {}) {
-  const reminderType = normalizeAcademyReminderType(row.reminder_type);
+  const sourcePayload = row.source_payload ?? {};
+  const reminderType = sourcePayload.reminderType === "class_notice"
+    ? "class_notice"
+    : normalizeAcademyReminderType(row.reminder_type);
   const reminderTime = normalizeClockTime(row.reminder_time);
   return {
     reminderId: row.reminder_id,
@@ -1092,7 +1100,7 @@ function fromAcademyReminderRow(row = {}) {
     priority: normalizeAcademyReminderPriority(row.priority),
     slackNotify: row.slack_notify !== false,
     source: row.source ?? "",
-    sourcePayload: row.source_payload ?? {},
+    sourcePayload,
     completedAt: row.completed_at ?? "",
     createdAt: row.created_at ?? "",
     updatedAt: row.updated_at ?? ""

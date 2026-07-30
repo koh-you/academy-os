@@ -4,6 +4,7 @@ create table if not exists academy_reminders (
     reminder_type in (
       'consultation',
       'student_consultation',
+      'class_notice',
       'parent_consultation',
       'student_intake',
       'special_note',

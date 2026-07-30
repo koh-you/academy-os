@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-30 운영 알림 반 알림 저장 제약 호환
+
+- 원인: 프론트/API는 `class_notice` 반 알림을 만들었지만, 기존 Supabase `academy_reminders.reminder_type` check constraint에는 이 값이 없어 저장이 거부됐다.
+- 수정: 기존 운영 DB와의 호환을 위해 반 알림은 DB 열에는 허용값 `custom`으로 저장하고, `source_payload.reminderType=class_notice`와 반 연결 정보를 함께 보존한다. 읽을 때는 같은 payload로 `class_notice`를 복원하므로 반 알림 UI·수업일지 연결은 유지된다. 새 DB용 schema SQL에는 `class_notice`도 허용하도록 맞췄다.
+- 원천/side effect: 코드·정적 schema 파일만 변경했다. Supabase SQL 실행, 기존 운영 row 수정, Slack·Solapi 발송/예약은 실행하지 않았다.
+- AI 검수: 호환 저장 전용 검사와 `npm run test:production`, `npm run build`, `git diff --check`를 통과했다.
+
 ## 2026-07-30 수업일지 강의 교재·내용 이전 시간 기본값
 
 - 수업일지 학생별 `강의 교재`와 `오늘 강의 내용`은 현재 수업 기록에 값이 없을 때만 같은 학생의 이전 수업 기록을 기본값으로 표시한다. 현재 수업의 `lessonMaterial`, `lessonProgress`와 호환 필드(`progress`, `lessonContent`)는 항상 우선하며, 기존에 입력한 값은 덮어쓰지 않는다.
