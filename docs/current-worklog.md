@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-30 UI-8I-0. 수업연구·AI 도구·자료함 inventory
+
+- 수업연구 `app_state.lessonResearchItems` 자동저장, 자료함 `resource_materials` POST/DELETE, AI 도구의 브라우저 local 파일 읽기·초안 생성·Blob 다운로드 경계를 대조했다.
+- 수업연구 유형트리·교안 목록과 자료함 학생 그룹의 이름 없는 긴 목록, 모바일에서 두 열 최소폭을 유지하는 AI 입력과 자료함 layout, 긴 결과·자료 행을 UI-8I 표시 예외로 기록했다.
+- 상세 원천과 UI-8I-1~3 순서를 `docs/ui-high-density-research-ai-resources-inventory-2026-07-30.md`에 기록했다.
+- 화면·callback과 app_state·resource_materials·Storage·AI·알림톡 원천은 변경하거나 실행하지 않았다.
+- AI 검수: active 세 route와 자동저장·POST/DELETE·로컬 파일/생성/다운로드 경계 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 516개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 코드 UI 변경이 없어 새 필수·시각 gate가 없다. UI-8I-1 적용 뒤 누적 검수한다.
+
 ## 2026-07-29 UI-8H-2. 월별·특강 정산 통합 회귀 마감
 
 - 정산 탭·요약·이름 있는 표·월별 달력·제외/복원·공통 save bar의 responsive shell을 한 fixture로 통합했다.
