@@ -1,5 +1,20 @@
 # Academy OS Current Worklog
 
+## 2026-07-30 P1. 알림관리 자동 알림톡 이력·날짜 조회
+
+- 원인: 초기/보충관리의 `notification_jobs` 조회는 처리 중 상태만 읽어 `sent` 완료 행을 메모리 목록에서 제외했다. 자동 학생 보충 리마인더는 Supabase 원천에 남아도 보충관리에서는 완료 이력처럼 보이지 않았다.
+- 변경: 알림관리의 발송 완료·예약·확인 필요·전체 기록은 자동 `student_reminder`를 포함한 `notification_jobs` 이력을 표시한다. 기본 조회일은 오늘(KST)이며 날짜를 선택하면 KST 00:00~다음 날 00:00 범위를 API에 요청하고, `전체 날짜`로 되돌릴 수 있다.
+- 원천/부작용: `notification_jobs` 읽기와 로컬 화면 필터만 변경했다. Solapi 발송·예약·취소·결과 대조와 Supabase 운영 데이터 쓰기는 실행하지 않았다.
+- AI 검수: 새 날짜 범위 계약과 변경된 새로고침 callback·버튼 inventory 정적 계약을 최신 화면에 맞춰 재대조했다. `npm run build`, `git diff --check`가 통과했고 전체 `npm run test:production` 520개 중 기존 기준선 `90a`만 실패해 날짜 조회 변경의 신규 회귀가 없다.
+
+## 2026-07-30 UI-8I-3. 수업연구·AI 도구·자료함 통합 회귀 마감
+
+- 수업연구·AI 도구·자료함의 named 긴 목록, 모바일 한 열, 긴 내용 줄바꿈과 scrollable HWPX modal을 한 fixture로 통합했다.
+- 수업연구 app_state 자동저장, 자료함 POST/DELETE, AI 로컬 파일 읽기·화면 초안 생성·Blob 다운로드가 서로 합쳐지지 않았음을 고정했다.
+- 실제 연구 항목·자료·app_state·resource_materials를 저장·삭제하지 않았고 파일 선택·AI·Storage·HWPX·알림톡도 실행하지 않았다.
+- AI 검수: UI-8I 통합 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 520개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: desktop/390px의 세 화면 탐색·배치·modal 시각 절차를 `docs/next-session/README.md` 최상단에 누적했다. 다음 UI-8J의 전제조건이 아니므로 학생·학부모 포털 inventory를 계속한다.
+
 ## 2026-07-30 UI-8I-2. AI 도구·자료함 모바일 한 열
 
 - 1100px 이하 자료함을 한 열로 전환하고 640px 이하 AI 입력·옵션·결과, HWPX form과 자료 행을 한 열로 정리했다.

@@ -47,3 +47,5 @@ inventory 자체에는 사람 gate가 없다. 구현 뒤 desktop과 390px에서 
 - UI-8I-2: 1100px 이하 자료함을 한 열로 전환하고 640px 이하 AI 입력·옵션·결과, HWPX form과 자료 행을 한 열로 정리했다.
 - HWPX modal은 제목을 유지한 공통 scrollable shell로 전환하고 AI 빈 결과의 불필요한 모바일 최소 높이를 줄였다.
 - 긴 파일명·설명·URL·결과 문구만 해당 카드 안에서 줄바꿈되며 파일 선택·생성·다운로드, 자료 등록·삭제 callback은 변경하지 않았다.
+- UI-8I-3: 세 화면의 responsive shell과 수업연구 자동저장, 자료함 POST/DELETE, AI 로컬 파일·초안 생성·HWPX 다운로드 경계를 통합 fixture로 고정했다.
+- desktop/390px 사람 시각 확인은 `docs/next-session/README.md`에 독립 절차로 누적했으며 UI-8J를 막지 않는다.
