@@ -1,11 +1,18 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 P3. App.jsx 18A-2 app view change plan extraction
+
+- 코드: 다음 active view, 모바일 navigation 닫힘, scroll-top 필요 여부, `lessons` 전환 시 수업일지 닫힘만 `appViewChangePlan.js` 순수 plan으로 분리했다.
+- App 경계: React setter 실행과 실제 `window.scrollTo`는 계속 `App.jsx`가 소유한다. 화면 목록·문구·route별 component·저장/API callback은 바꾸지 않았다.
+- AI 검수: 18A-1 TARGET/CONTROL 호출 순서를 추출 plan으로 재현하고 입력별 동등성·모듈 side effect 부재를 대조한다. 사람 gate는 0건이다.
+- 변화량: 새 파일 1개, 전체 `+94/-18`, `App.jsx +7/-5`로 실제 파일 길이는 2줄 증가했다.
+
 ## 2026-07-31 P3. App.jsx 18A-1 app view change plan inventory
 
 - 원천/동작: `activeView`, 모바일 navigation open, 수업일지 open은 App-local React state다. 화면 전환은 active view 변경 → 모바일 메뉴 닫기 → 브라우저 맨 위 이동 → `lessons`에서만 수업일지 닫기 순서를 보존한다.
 - AI 가상검수: `lessons` TARGET과 `notifications` CONTROL로 호출 순서·조건부 닫기를 고정하고 App source 경계를 얇게 대조한다. 저장·API·Supabase·notification_jobs·Solapi 호출과 사람 gate는 0건이다.
 - 다음: 18A-2에서 이 순서를 순수 plan으로만 분리하고 App이 React setter와 `window.scrollTo` 실행을 계속 소유한다.
-- 변화량: 새 파일 1개, 전체 `+80/-0`, `App.jsx` 변경·감소 0줄이다.
+- 변화량: 새 파일 1개, 전체 `+84/-0`, `App.jsx` 변경·감소 0줄이다.
 
 ## 2026-07-31 P3. App.jsx 17BA-3 generated lesson plan builder closeout
 

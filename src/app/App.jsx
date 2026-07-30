@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createAppViewChangePlan } from "./appViewChangePlan.js";
 import {
   createExamAnalysisFinalPreviewModel,
   examAnalysisPreviewPalette
@@ -9212,13 +9213,14 @@ export function App() {
   }
 
   function handleChangeView(nextView) {
-    setActiveView(nextView);
-    setIsMobileNavigationOpen(false);
-    if (typeof window !== "undefined") {
+    const plan = createAppViewChangePlan(nextView);
+    setActiveView(plan.activeView);
+    setIsMobileNavigationOpen(plan.mobileNavigationOpen);
+    if (plan.shouldScrollToTop && typeof window !== "undefined") {
       window.scrollTo({ behavior: "auto", left: 0, top: 0 });
     }
-    if (nextView === "lessons") {
-      setIsLessonJournalOpen(false);
+    if (plan.lessonJournalOpen !== null) {
+      setIsLessonJournalOpen(plan.lessonJournalOpen);
     }
   }
 

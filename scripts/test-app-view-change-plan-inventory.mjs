@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { createAppViewChangePlan } from "../src/app/appViewChangePlan.js";
 
 function applyExistingAppViewChange(nextView, {
   setActiveView,
@@ -26,6 +27,19 @@ function runFixture(nextView) {
   return calls;
 }
 
+function runExtractedFixture(nextView) {
+  const plan = createAppViewChangePlan(nextView);
+  const calls = [
+    ["activeView", plan.activeView],
+    ["mobileNavigation", plan.mobileNavigationOpen]
+  ];
+  if (plan.shouldScrollToTop) calls.push(["scrollTop"]);
+  if (plan.lessonJournalOpen !== null) {
+    calls.push(["lessonJournal", plan.lessonJournalOpen]);
+  }
+  return calls;
+}
+
 assert.deepEqual(runFixture("lessons"), [
   ["activeView", "lessons"],
   ["mobileNavigation", false],
@@ -37,6 +51,11 @@ assert.deepEqual(runFixture("notifications"), [
   ["mobileNavigation", false],
   ["scrollTop"]
 ]);
+assert.deepEqual(runExtractedFixture("lessons"), runFixture("lessons"));
+assert.deepEqual(
+  runExtractedFixture("notifications"),
+  runFixture("notifications")
+);
 
 const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
@@ -47,16 +66,41 @@ const end = appSource.indexOf("\n  return (", start);
 assert.ok(start >= 0 && end > start);
 const handlerSource = appSource.slice(start, end);
 for (const boundary of [
-  "setActiveView(nextView)",
-  "setIsMobileNavigationOpen(false)",
+  "createAppViewChangePlan(nextView)",
+  "setActiveView(plan.activeView)",
+  "setIsMobileNavigationOpen(plan.mobileNavigationOpen)",
+  "plan.shouldScrollToTop",
   'typeof window !== "undefined"',
   'window.scrollTo({ behavior: "auto", left: 0, top: 0 })',
-  'nextView === "lessons"',
-  "setIsLessonJournalOpen(false)"
+  "plan.lessonJournalOpen !== null",
+  "setIsLessonJournalOpen(plan.lessonJournalOpen)"
 ]) {
   assert.ok(
     handlerSource.includes(boundary),
     `missing app view change boundary: ${boundary}`
+  );
+}
+const moduleSource = await readFile(
+  new URL("../src/app/appViewChangePlan.js", import.meta.url),
+  "utf8"
+);
+for (const forbiddenEffect of [
+  "useState",
+  "useEffect",
+  "window",
+  "document",
+  "setActiveView",
+  "setIsMobileNavigationOpen",
+  "setIsLessonJournalOpen",
+  "fetch(",
+  "postJson",
+  "/api/",
+  "Supabase",
+  "Solapi"
+]) {
+  assert.ok(
+    !moduleSource.includes(forbiddenEffect),
+    `app view change plan crossed a side effect: ${forbiddenEffect}`
   );
 }
 
