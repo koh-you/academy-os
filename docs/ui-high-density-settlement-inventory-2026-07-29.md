@@ -41,3 +41,5 @@ inventory 자체에는 사람 gate가 없다. 구현 뒤 desktop과 390px에서 
 - UI-8H-1: 월별 출결·수업 달력을 학생·월 이름이 있는 focus·touch 가로 scroll 영역으로 만들고 7열 최소 840px을 유지했다.
 - 모바일 점 표시를 제거해 정규 예정·출결·보충·특강·시간 문구를 보존했다.
 - 정규/보충/특강 event 계산과 월별 정산 계산·저장 callback은 변경하지 않았다.
+- UI-8H-2: 정산 탭·요약·표·달력·제외/복원·save bar와 월별·특강 계산/조정/검증 저장 callback 분리를 통합 fixture로 고정했다.
+- desktop/390px 사람 시각 확인은 `docs/next-session/README.md`에 독립 절차로 누적했으며 UI-8I를 막지 않는다.

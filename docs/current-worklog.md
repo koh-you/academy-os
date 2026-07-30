@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8H-2. 월별·특강 정산 통합 회귀 마감
+
+- 정산 탭·요약·이름 있는 표·월별 달력·제외/복원·공통 save bar의 responsive shell을 한 fixture로 통합했다.
+- 월별 계산 방식·스케줄·조정·제외/복원과 특강 유료 회차·직접금액·사유, 각 app_state 재조회 검증 저장 callback이 서로 합쳐지지 않았음을 고정했다.
+- 실제 정산 값·app_state·학생·lessons·출결·특강 명단/회차 원천을 변경하거나 저장하지 않았다.
+- AI 검수: UI-8H 통합 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 515개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: desktop/390px의 정산 탭·요약·표·달력·제외 접힘·save bar 시각 절차를 `docs/next-session/README.md` 최상단에 누적했다. 다음 UI-8I의 전제조건이 아니므로 수업연구·AI 도구·자료함 inventory를 계속한다.
+
 ## 2026-07-29 UI-8H-1. 월별 출결 달력 모바일 가독성
 
 - 월별 출결·수업 달력을 학생·월 이름이 있는 focus 영역으로 감싸고 최소 840px 7열 grid를 modal 내부에서만 가로 touch scroll되게 했다.
