@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-30 UI-9B. 전체 기능 회귀 기준선
+
+- production fixture의 유일한 기존 실패 `90a`를 분석했다. `saveLessonModalLessons`의 bulk 저장, Supabase 원천 확인, 전체 lessons 재조회·snapshot 대조 구현은 모두 유지되고 있었다.
+- 실패 원인은 `postJsonWithTimeout` 다음 줄의 LF·정확한 들여쓰기를 한 문자열로 찾던 검사였다. CRLF에서도 같은 의미를 검증하도록 save result, endpoint, payload, Supabase source 확인을 독립 패턴으로 고쳤다.
+- 원천/side effect: `scripts/scenario-tests-production.cjs`와 기준 문서만 바꿨다. runtime callback, 수업 payload, Supabase/app_state, notification_jobs, Solapi, 출결, 파일 동작은 변경하거나 실행하지 않았다.
+- AI 검수: `docs/ui-functional-regression-baseline-2026-07-30.md`에 원인·불변 경계·검증 기준을 기록했다. `npm run test:production`은 526/526 전체 통과, `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했다.
+- 사람 검수: 낡은 정적 계약 수정이라 필수 사람 gate가 없다. 실제 휴강·연결 보충 저장은 실행하지 않고 UI-9C 중복·미사용 CSS 정리를 계속한다.
+
 ## 2026-07-30 UI-9A. desktop·tablet·390px 시각 회귀 매트릭스
 
 - 전체 UI-1~UI-8J를 desktop 1440px, tablet 768px, mobile 390px 기준으로 다시 묶고 AI 자동 판정과 로그인 이후 사람 시각 확인을 분리했다. 기준 문서는 `docs/ui-visual-regression-matrix-2026-07-30.md`다.

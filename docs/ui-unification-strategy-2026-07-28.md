@@ -51,4 +51,4 @@ Academy OS의 모든 화면을 같은 사용 규칙으로 보이게 한다. 이�
 
 ## 다음 착수
 
-UI-0~UI-8J와 UI-9A 시각 회귀 매트릭스를 완료했다. 공개 로그인·특강 안내는 desktop 1440px, tablet 768px, mobile 390px 실제 렌더와 문서 폭을 확인했고, 인증 이후 UI-7·UI-8 화면군의 사람 시각 확인은 `docs/next-session/README.md`의 독립 일괄 절차로 누적되어 다음 단위를 막지 않는다. 다음 UI-9B는 전체 production fixture의 유일한 기존 실패 `90a`를 원인 판정해 기능 회귀 기준선을 닫는다. 실제 저장·삭제·발송·출결·Storage·AI 호출은 실행하지 않는다.
+UI-0~UI-8J, UI-9A 시각 회귀 매트릭스, UI-9B 기능 회귀 기준선을 완료했다. 공개 로그인·특강 안내는 desktop 1440px, tablet 768px, mobile 390px 실제 렌더와 문서 폭을 확인했고, 인증 이후 UI-7·UI-8 화면군의 사람 시각 확인은 `docs/next-session/README.md`의 독립 일괄 절차로 누적되어 다음 단위를 막지 않는다. UI-9B는 유일한 기존 실패 `90a`가 CRLF에 취약한 낡은 검사임을 확인하고 runtime 변경 없이 의미 단위 계약으로 고쳤다. 다음 UI-9C는 중복·미사용 CSS를 전수 조사하되 실제 DOM 사용과 cascade 영향이 명확한 안전한 항목만 제거한다.

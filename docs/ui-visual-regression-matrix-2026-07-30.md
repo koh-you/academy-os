@@ -42,4 +42,4 @@
 
 - 공개 화면 두 종류의 세 폭 실제 렌더와 가로 넘침 검사는 통과했다.
 - 로그인 이후 화면은 UI-8A~J의 callback·원천·side effect 불변 정적 계약을 통과했다. 실제 운영 화면의 어색함은 `docs/next-session/README.md`의 한 묶음 사람 시각 검수로 남기며 UI-9B를 막지 않는다.
-- UI-9B에서는 production fixture의 유일한 기존 실패 `90a`를 원인 판정하고, 기능 회귀인지 낡은 계약인지 바로잡은 뒤 전체 기능 회귀 기준선을 닫는다.
+- UI-9B에서 production fixture의 유일한 기존 실패 `90a`를 CRLF 줄바꿈에 의존한 낡은 정적 계약으로 판정하고 의미 단위 패턴으로 바로잡았다. 기능 회귀 기준은 `docs/ui-functional-regression-baseline-2026-07-30.md`로 이어진다.
