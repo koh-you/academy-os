@@ -56,3 +56,5 @@ inventory는 화면이나 운영 원천을 바꾸지 않아 중단 gate가 없�
 
 - UI-8B-1: 수업일지 modal에 `100dvh`, 네 방향 safe-area 여백, 내부 overscroll·iOS touch scroll을 적용했다.
 - header 없는 dialog 이름과 뒤로가기·닫기 callback은 유지했고 운영 원천이나 실제 동작은 실행하지 않았다.
+- UI-8B-2: 1450px 최소 폭을 내부 10열 row로 옮기고 named `DataTableShell` 하나만 가로 scroll을 소유하게 했다.
+- 학생 기록의 열·callback과 외부 원천은 변경하거나 실행하지 않았다.

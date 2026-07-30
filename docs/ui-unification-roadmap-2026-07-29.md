@@ -90,6 +90,7 @@
 | UI-8A | 완료 | Lesson Hub 월간 달력 내부 scroll·grid semantics·callback 경계 |
 | UI-8B-0 | 완료 | 수업일지 맥락·10열 기록·저장·알림·modal 예외 inventory |
 | UI-8B-1 | 완료 | 수업일지 modal 동적 viewport·safe-area·touch scroll |
+| UI-8B-2 | 완료 | 수업일지 10열 기록의 named table shell 단일 scroll |
 
 ## 전체 세부 작업 목록
 

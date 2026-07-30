@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8B-2. 수업일지 학생 기록 단일 scroll
+
+- 1450px 10열 최소 폭을 `DataTableShell` 자체가 아니라 내부 `.journalRow`가 갖게 해 공통 named table shell이 가로 scroll을 소유하도록 고쳤다.
+- 바깥 `.journalTablePanel`은 `min-width:0`과 `overflow:visible`로 바꿔 중복 scrollbar와 전체 modal 폭 확장을 막았다.
+- 학생·수업메모·출결·교재·강의 내용·지난/다음 숙제·과제 상태·학부모/학생 알림톡 10열과 모든 행 callback은 그대로 보존했다.
+- 화면 CSS 외 저장·발송·예약·삭제·출결·Supabase/app_state·lesson_student_records·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: named `DataTableShell` 단일 scroll 소유, 1450px 10열 구조와 기존 학생 기록 항목 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 489개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: desktop/390px에서 학생 기록 영역만 가로로 끝까지 한 번 움직이는지 나중에 UI-8B 통합 절차로 확인한다. 실제 행 버튼은 누르지 않고 UI-8B-3을 계속한다.
+
 ## 2026-07-29 UI-8B-1. 수업일지 모바일 viewport·safe-area
 
 - 수업일지 modal에 기존 `100vh` fallback과 함께 `100dvh` 높이, 내부 overscroll 차단, iOS momentum scroll을 적용했다.
