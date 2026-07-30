@@ -84,6 +84,29 @@ const moduleSource = await readFile(
   new URL("../src/app/appViewChangePlan.js", import.meta.url),
   "utf8"
 );
+assert.equal(
+  moduleSource.split("export function createAppViewChangePlan(").length - 1,
+  1
+);
+assert.equal(
+  appSource.split('from "./appViewChangePlan.js"').length - 1,
+  1
+);
+assert.equal(
+  appSource.split("createAppViewChangePlan(nextView)").length - 1,
+  1
+);
+for (const appOwnedEffect of [
+  "setActiveView(plan.activeView)",
+  "setIsMobileNavigationOpen(plan.mobileNavigationOpen)",
+  'window.scrollTo({ behavior: "auto", left: 0, top: 0 })',
+  "setIsLessonJournalOpen(plan.lessonJournalOpen)"
+]) {
+  assert.ok(
+    handlerSource.includes(appOwnedEffect),
+    `App-owned view change effect moved: ${appOwnedEffect}`
+  );
+}
 for (const forbiddenEffect of [
   "useState",
   "useEffect",

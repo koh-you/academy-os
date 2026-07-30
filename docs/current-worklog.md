@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 P3. App.jsx 18A-3 app view change plan closeout
+
+- 감사: 기존 18A fixture에 plan export·App import·호출 각 1건과 App-owned React setter·`window.scrollTo` 잔존을 추가 고정했다.
+- 경계: 모듈은 active view 전환 결과만 계산하며 route component, 화면 callback, 저장·API·Supabase·notification_jobs·Solapi 동작은 이동하지 않는다.
+- AI 검수: 기존 TARGET/CONTROL fixture, 정적 시나리오·production/build를 재사용하고 새 closeout 파일은 만들지 않는다. 사람 gate는 0건이다.
+- 변화량: 새 파일 0개, 전체 `+30/-0`, `App.jsx` 변경·감소 0줄이다.
+
 ## 2026-07-31 P3. App.jsx 18A-2 app view change plan extraction
 
 - 코드: 다음 active view, 모바일 navigation 닫힘, scroll-top 필요 여부, `lessons` 전환 시 수업일지 닫힘만 `appViewChangePlan.js` 순수 plan으로 분리했다.
