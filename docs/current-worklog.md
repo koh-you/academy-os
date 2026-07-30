@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 P3. App.jsx 18C-3 sidebar shell closeout
+
+- 감사: 기존 18B/18C fixture에 Sidebar export·App import·렌더 각 1건, App-owned active/collapse/mobile state와 view/logout/toggle action 잔존을 추가 고정했다.
+- 경계: Sidebar component는 menu model과 callback만 소비하며 React state/effect·브라우저·저장/API·Supabase·notification_jobs·Solapi 동작을 소유하지 않는다.
+- AI 검수: 기존 TARGET/CONTROL fixture, 정적 시나리오·production/build를 재사용하고 새 closeout 파일은 만들지 않는다. 사람 gate는 0건이다.
+- 변화량: 새 파일 0개, 전체 `+51/-0`, `App.jsx` 변경·감소 0줄이다.
+
 ## 2026-07-31 P3. App.jsx 18C-2 sidebar shell extraction
 
 - 코드: menu model을 소비하는 Sidebar 접근성·brand/status·group/item JSX를 `Sidebar.jsx`로 분리하고 브랜드명·오늘 날짜·상태·callback을 prop으로 명시했다.

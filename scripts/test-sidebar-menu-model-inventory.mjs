@@ -154,6 +154,50 @@ for (const appShellBoundary of [
     `App Sidebar boundary changed: ${appShellBoundary}`
   );
 }
+assert.equal(
+  sidebarSource.split("export function Sidebar({").length - 1,
+  1
+);
+assert.equal(
+  appSource.split('from "./Sidebar.jsx"').length - 1,
+  1
+);
+assert.equal(
+  appSource.split("<Sidebar").length - 1,
+  1
+);
+for (const appOwnedShellBoundary of [
+  'const [activeView, setActiveView] = useState("lessons")',
+  "const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)",
+  "const [isMobileNavigationOpen, setIsMobileNavigationOpen] = useState(false)",
+  "function handleChangeView(nextView)",
+  "onChangeView={handleChangeView}",
+  "onLogout={handleLogout}",
+  "onToggle={() => setIsSidebarCollapsed((current) => !current)}",
+  "onToggleMobileNavigation={() => setIsMobileNavigationOpen((current) => !current)}"
+]) {
+  assert.ok(
+    appSource.includes(appOwnedShellBoundary),
+    `App-owned Sidebar state/action moved: ${appOwnedShellBoundary}`
+  );
+}
+for (const forbiddenComponentEffect of [
+  "useState",
+  "useEffect",
+  "window",
+  "document",
+  "fetch(",
+  "postJson",
+  "/api/",
+  "Supabase",
+  "Solapi",
+  "notification_jobs"
+]) {
+  assert.ok(
+    !sidebarSource.includes(forbiddenComponentEffect),
+    `Sidebar component crossed an external side effect: ${forbiddenComponentEffect}`
+  );
+}
 for (const forbiddenEffect of [
   "useState",
   "useEffect",
