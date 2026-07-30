@@ -60,3 +60,6 @@ inventory 자체는 중단 gate가 없다. 구현 뒤 desktop과 390px에서 특
 - 연결 학생과 수동 접수 학생 목록은 각각 named region, keyboard focus와 세로 touch scroll 경계를 갖는다.
 - 640px 이하 회차 실제 저장 bar는 닫기와 긴 2단계 저장 버튼을 한 열 전체 폭으로 배치했다.
 - 학생 선택·연결·접수, 회차 draft·저장 callback과 진행 조회 modal의 기존 동작은 변경하지 않았다.
+- UI-8E-3: 안내문·신청·명단·회차·수업일지 반영의 responsive shell과 저장·삭제·학생 연결·수업 생성 callback 분리를 통합 회귀했다.
+- desktop/390px 통합 사람 시각 절차를 handoff 최상단에 누적했으며 접기·선택·modal 열기/닫기 외 실제 side effect는 금지했다.
+- UI-8E는 AI 검수 기준으로 완료했으며 실제 저장·발송·예약·삭제·출결·수업 생성은 실행하지 않았다.

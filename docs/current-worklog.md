@@ -1,5 +1,14 @@
 # Academy OS Current Worklog
 
+## 2026-07-29 UI-8E-3. 특강관리 회귀 마감
+
+- 특강 안내문·신청·학생 연결, 확정 명단·회차, 수업일지 반영의 responsive shell과 원천 경계를 하나의 통합 정적 회귀로 묶었다.
+- 안내문 app_state, 신청·학생, enrollment, lessons 저장·삭제·수업 생성 callback은 계속 서로 분리하고 화면 shell이 이들을 결합하지 않는 것도 고정했다.
+- UI-8E-1~2의 desktop/390px 통합 사람 시각 절차를 `docs/next-session/README.md` 최상단에 남겼다. 접기·선택·modal 열기/닫기 외 실제 side effect 버튼은 금지했다.
+- 화면·callback과 저장·발송·예약·삭제·출결·Supabase/app_state·students·special_lecture_applications·special_lecture_enrollments·lessons·lesson_student_records·notification_jobs·Solapi 원천은 변경하거나 실행하지 않았다.
+- AI 검수: 안내문·신청·명단·회차·수업일지 반영과 저장/삭제/학생 연결/수업 생성 분리 통합 정적 fixture가 통과했다. `npm run build`는 128 modules, `git diff --check`는 오류 없이 통과했고, 전체 `npm run test:production`은 504개 중 기존 기준선 `90a`만 실패해 신규 회귀가 없다.
+- 사람 검수: 최상단 UI-8E 통합 절차 1건을 나중에 일괄 수행한다. 독립 시각 확인이라 UI-8F-0 학생·Tally·반관리 inventory를 계속한다.
+
 ## 2026-07-29 UI-8E-2. 특강 학생·회차 modal
 
 - 학생 연결, 학생 수동 접수, 회차·진행 관리 modal을 공통 scrollable shell로 전환해 제목·닫기를 유지하고 긴 학생 목록·회차 본문만 내부 scroll되게 했다.
