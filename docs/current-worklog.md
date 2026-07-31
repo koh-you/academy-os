@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 VS Code 원클릭 실행·GitHub production CI 구성
+
+- VS Code 기본 실행/디버그 화면에서 `Academy OS: 로컬 실행`을 선택하고 실행 버튼 또는 `F5`를 누르면 `npm run dev`가 프로젝트 루트에서 시작되고, Vite 준비 로그를 확인한 뒤 기본 브라우저가 로컬 주소로 열리도록 workspace launch 구성을 추가했다. 별도 확장·CLI·관리자 권한은 필요하지 않다.
+- `main` push, pull request, 수동 실행에서 Node 24 기준 `npm ci -> test:production -> build`를 순서대로 실행하는 GitHub Actions를 추가했다. workflow 권한은 repository contents read-only이며 API key·Supabase·Vercel·Render secret을 주입하지 않는다. 기존 저장소의 별도 인코딩 검사는 과거 파일 2건의 기존 `�` 때문에 실패하는 상태여서 이번 CI 성공 기준에 섞지 않고 기존 부채로 보존했다.
+- CI에는 Alimtalk 실제 테스트 발송과 학생·학부모 번호 사용을 금지하고 Slack을 dry-run으로 고정했다. 이 개발환경 변경은 Supabase·Storage·`notification_jobs`·Solapi·Vercel·Render 운영 데이터를 읽거나 쓰지 않으며 사람 gate는 0건이다.
+- AI 검수: launch JSON·Vite 준비 URL 정규식, 실행 중인 Academy OS 로컬 Vite의 HTTP 200/root mount, 정적 시나리오 `809/809`를 포함한 전체 `npm run test:production`, production build 342 modules, `git diff --check`를 통과했다.
+
 ## 2026-07-31 수업일지 편집 끝 공백 입력 복구
 
 - 로그인된 운영 수업일지의 `강의 교재` 입력칸에서 커서가 문자열 끝에 있을 때 Space를 눌러도 값과 커서가 그대로인 증상을 저장 없이 재현했다. 문자열 중간의 공백은 입력되어 전역 키보드 단축키가 아니라, 현재 기록과 이전 수업 기본값을 합치는 `getLessonRecordWithPreviousDefaults`가 매 렌더마다 현재 `lessonMaterial`·`lessonProgress`를 `trim()`하던 것이 원인이었다.

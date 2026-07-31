@@ -1,0 +1,45 @@
+name: Production checks
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: true
+      ALIMTALK_DRY_RUN: true
+      ALIMTALK_ALLOW_LIVE_TEST_SEND: false
+      ALIMTALK_ALLOW_REAL_STUDENT_NUMBERS: false
+      ALIMTALK_ALLOW_REAL_PARENT_NUMBERS: false
+      SLACK_DRY_RUN: true
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run production tests
+        run: npm run test:production
+
+      - name: Build production bundle
+        run: npm run build
