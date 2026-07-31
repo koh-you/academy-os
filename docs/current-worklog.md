@@ -7,6 +7,7 @@
 - CI에는 Alimtalk 실제 테스트 발송과 학생·학부모 번호 사용을 금지하고 Slack을 dry-run으로 고정했다. 이 개발환경 변경은 Supabase·Storage·`notification_jobs`·Solapi·Vercel·Render 운영 데이터를 읽거나 쓰지 않으며 사람 gate는 0건이다.
 - AI 검수: launch JSON·Vite 준비 URL 정규식, 실행 중인 Academy OS 로컬 Vite의 HTTP 200/root mount, 정적 시나리오 `809/809`를 포함한 전체 `npm run test:production`, production build 342 modules, `git diff --check`를 통과했다.
 - GitHub UTC Linux 첫 실행에서 월 정규수업 열기 fixture가 8월 3일 월요일을 일요일로 오판해 실패했다. 원인은 `YYYY-MM-DDT00:00:00+09:00`에 현지 `getDay()`를 적용한 시간대 의존 계산이었다. 날짜-only 값을 UTC 자정·`getUTCDay()`로 판정하고 fixture도 내부에서 `TZ=UTC`를 강제해 로컬 시간대와 무관하게 같은 요일 계약을 검사하도록 보강했다. 전용 fixture는 UTC·서울·뉴욕에서 모두 25개 신규 수업으로 통과했다. 전체 CI는 한국 학원 운영의 다른 날짜 계약과 일치하도록 `TZ=Asia/Seoul`을 명시하며, 같은 CI 환경의 전체 production 테스트와 342-module build가 다시 통과했다. 한국 시간대의 기존 결과와 저장 payload는 바뀌지 않는다.
+- GitHub 재실행은 54초에 전체 test/build를 통과했다. 성공 run의 Node 20 action runtime 폐기 경고를 제거하기 위해 공식 Node 24 runtime 기반 `actions/checkout@v6`, `actions/setup-node@v6`로 갱신했다. 애플리케이션 테스트 Node 버전은 계속 24로 고정한다.
 
 ## 2026-07-31 수업일지 편집 끝 공백 입력 복구
 
