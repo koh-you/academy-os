@@ -81,6 +81,10 @@ import {
   selectDueSolapiAutoReconcileJobs
 } from "./lib/solapiAutoReconcile.js";
 import { isSupabaseConfigured, listRows, upsertRows } from "./lib/supabaseRest.js";
+import {
+  createClientRuntimeErrorRateLimiter,
+  normalizeClientRuntimeErrorReport
+} from "./domain/clientRuntimeError.js";
 import { getAiStatus, polishLessonComment } from "./routes/commentPolish.js";
 import {
   getAssignmentStatusMessage,
@@ -153,6 +157,7 @@ const attendanceAlimtalkDedupeWindowMs = 2 * 60 * 1000;
 const openAiResponsesUrl = "https://api.openai.com/v1/responses";
 const anthropicMessagesUrl = "https://api.anthropic.com/v1/messages";
 const recentAttendanceAlimtalkSends = new Map();
+const allowClientRuntimeError = createClientRuntimeErrorRateLimiter();
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
   teacherId: "instructor_owner_001",
@@ -5788,6 +5793,23 @@ const server = http.createServer(async (request, response) => {
       ok: true,
       service: "academy-os-api"
     });
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/client-errors") {
+    try {
+      const remoteAddress = request.socket?.remoteAddress || "unknown";
+      if (!allowClientRuntimeError(remoteAddress)) {
+        sendJson(request, response, 429, { ok: false, error: "client error report rate limit" });
+        return;
+      }
+      const payload = await readJsonBody(request, { limitBytes: 64 * 1024 });
+      const report = normalizeClientRuntimeErrorReport(payload.report);
+      console.error("[client_runtime_error]", JSON.stringify(report));
+      sendJson(request, response, 202, { errorId: report.errorId, ok: true });
+    } catch (error) {
+      sendJson(request, response, 400, { ok: false, error: error.message });
+    }
     return;
   }
 

@@ -19,6 +19,8 @@ tmp-video-frames/
 .codex-temp/
 .codex_deps/
 output/ssen/
+playwright-report/
+test-results/
 
 *.pdf
 *.zip

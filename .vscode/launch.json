@@ -4,8 +4,8 @@
     {
       "type": "node-terminal",
       "request": "launch",
-      "name": "Academy OS: 로컬 실행",
-      "command": "npm run dev",
+      "name": "Academy OS: 안전한 로컬 실행",
+      "command": "npm run dev:safe",
       "cwd": "${workspaceFolder}",
       "serverReadyAction": {
         "pattern": "Local:\\s+http://127\\.0\\.0\\.1:([0-9]+)",

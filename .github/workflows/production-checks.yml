@@ -39,8 +39,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check runtime references
+        run: npm run lint:runtime
+
+      - name: Test client runtime error contract
+        run: npm run test:client-runtime-error
+
       - name: Run production tests
         run: npm run test:production
 
       - name: Build production bundle
         run: npm run build
+
+      - name: Install Chromium for browser smoke tests
+        run: npx playwright install --with-deps chromium
+
+      - name: Run safe browser smoke tests
+        run: npm run test:browser-smoke

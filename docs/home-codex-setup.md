@@ -1,130 +1,61 @@
-# Home Codex Setup
+# Academy OS 개발환경 복원
 
-집 컴퓨터나 새 Codex 세션에서 `academy-os` 작업을 이어가기 위한 절차입니다.
+## 표준 위치와 버전
 
-## 1. 필요한 프로그램
+- 프로젝트: `C:\Dev\academy-os`
+- Node.js: 24.x (`.nvmrc`와 `package.json` 기준)
+- Git, VS Code, Chrome 또는 Edge, Codex desktop app
 
-- Git for Windows
-- Node.js LTS 20 이상
-- Chrome 또는 Edge
-- Codex desktop app
+바탕화면·문서 폴더에 별도 clone을 만들지 않는다. 다른 컴퓨터에서도 같은 표준 위치를 권장한다.
 
-## 2. 프로젝트 가져오기
-
-집 컴퓨터 PowerShell에서 실행합니다.
+## 처음 가져오기
 
 ```powershell
-cd $HOME\Desktop
+New-Item -ItemType Directory -Force C:\Dev
+Set-Location C:\Dev
 git clone https://github.com/koh-you/academy-os.git
-cd academy-os
-npm install
+Set-Location C:\Dev\academy-os
+npm ci
+npm run doctor
 ```
 
-이미 clone한 폴더가 있다면 새로 clone하지 말고 최신 코드만 받습니다.
+이미 clone되어 있으면 해당 폴더에서 아래만 실행한다.
 
 ```powershell
-cd $HOME\Desktop\academy-os
-git pull origin main
-npm install
+git pull --ff-only origin main
+npm ci
+npm run doctor
 ```
 
-## 3. 로컬 실행
+## 안전한 로컬 실행
 
-VS Code에서는 왼쪽 `실행 및 디버그`를 열고 상단에서
-`Academy OS: 로컬 실행`을 선택한 뒤 초록색 실행 버튼을 누릅니다.
-Vite 개발 서버가 시작되면 기본 브라우저가 `http://127.0.0.1:5173`으로 자동 열립니다.
+VS Code에서 `실행 및 디버그` → `Academy OS: 안전한 로컬 실행` → `F5`를 누른다. 가상 API와 가상 데이터만 사용하고 운영 Supabase·Storage·Solapi에는 연결하지 않는다. 로그인은 아무 테스트 값을 입력해도 된다.
 
-단축키는 `F5`입니다. 실행을 끝낼 때는 VS Code의 빨간색 중지 버튼을 누릅니다.
-
-터미널에서 직접 실행하려면 아래 명령을 사용합니다.
-
-프론트엔드만 확인할 때:
+터미널에서는:
 
 ```powershell
-npm run dev
+npm run dev:safe
 ```
 
-브라우저에서 Vite가 알려주는 주소를 엽니다.
-보통 아래 주소입니다.
+운영 환경변수가 필요한 실제 로컬 API 진단은 별도 작업이다. `.env` 값이나 API key를 화면·로그·Git에 출력하지 않는다.
 
-```text
-http://127.0.0.1:5173
-```
-
-백엔드를 로컬로 띄울 때:
+## 작업 전후
 
 ```powershell
-npm run api
+npm run doctor
+git status --short
+npm run check:fast
 ```
 
-운영 백엔드는 Render에 배포되어 있습니다.
+운영 흐름을 바꾸면 `npm run test:production`과 관련 브라우저 smoke test도 실행한다. main push 후 GitHub Actions 결과를 확인한다.
 
-```text
-https://koh-you-math-academy-os-api.onrender.com
-```
+## 비밀값과 비Git 자료
 
-## 4. 작업 전 체크
+- `.env`, API key, PDF/HWP/HWPX/ZIP, 운영 export는 Git에 올리지 않는다.
+- 코드와 문맥 문서는 GitHub가 동기화 원천이다.
+- Git에 둘 수 없는 개인 자료만 Google Drive 또는 별도 암호화 백업을 사용한다.
+- USB는 필수 동기화 원천이 아니라 재해 복구용 선택 백업이다.
 
-항상 작업 전에 최신 상태로 맞춥니다.
+## 중복 폴더
 
-```powershell
-git pull origin main
-git status
-```
-
-`git status`에 내가 모르는 변경 파일이 많으면 바로 수정하지 말고 먼저 새 세션에 알려주세요.
-
-## 5. 작업 후 체크
-
-```powershell
-npm run build
-git status
-```
-
-운영 시나리오를 돌릴 필요가 있는 변경이면 아래도 실행합니다.
-
-```powershell
-npm run test:production
-```
-
-## 6. 배포 흐름
-
-- GitHub `main`에 push하면 Vercel 프론트엔드가 자동 배포됩니다.
-- Render 백엔드는 API 코드 또는 환경변수 변경 후 Render에서 재배포가 필요할 수 있습니다.
-- Supabase SQL 변경은 Supabase SQL Editor에서 직접 실행해야 합니다.
-
-## 7. 비밀값 관리
-
-아래 값들은 절대 Git에 올리지 않습니다.
-
-- OpenAI API key
-- Anthropic API key
-- Solapi API key/secret
-- Solapi template id
-- Supabase service role key
-- Render API key
-- Vercel token
-
-`.env`, `.env.*`, PDF, ZIP, HWP, HWPX는 `.gitignore`에 포함되어 있습니다.
-
-## 8. PowerShell 한글 깨짐 방지
-
-새 PowerShell에서 한글 로그가 깨질 때 먼저 실행합니다.
-
-```powershell
-chcp 65001
-[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
-$OutputEncoding = [System.Text.UTF8Encoding]::new()
-```
-
-그래도 일부 외부 프로그램 출력은 깨질 수 있습니다.
-검수용 테스트 이름은 가능하면 영어/ASCII로 두는 편이 안전합니다.
-
-## 9. 집 컴퓨터에서 바로 안 보일 수 있는 것
-
-- 학원 컴퓨터 바탕화면의 PDF, 이미지, PageSnap 결과물
-- 다운로드 폴더의 CSV
-- 메모장에 저장한 API 키
-- Git에 올라가지 않은 `tools/` 폴더
-
-집에서도 써야 하는 자료는 추후 Supabase Storage 또는 별도 Drive에 올리는 방식으로 정리합니다.
+`npm run doctor`가 canonical 경로 밖의 clone을 알리면 용도를 확인한다. 현재 `C:\Users\PC\Documents\academy os`는 오전 9시 자동 작업 전용이라 유지하며 사람이 수정하지 않는다. 그 외 accidental clone은 clean·ahead/behind를 확인한 뒤에만 `C:\Dev\_archive`로 이동한다. 강제 삭제하지 않는다.

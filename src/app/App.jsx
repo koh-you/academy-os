@@ -441,6 +441,7 @@ import {
   replaceSpecialLectureYearToken,
 } from "../domains/specialLectures/specialLectureGuideUtils.js";
 import { SettlementWorkspace } from "../domains/settlements/SettlementWorkspace.jsx";
+import { copyTextToClipboard } from "../domains/exams/outputPreview.js";
 import {
   createDefaultMonthlySettlementState,
   createMonthlySettlementStateWithMonth,
@@ -17763,7 +17764,7 @@ function SettingsCenter({
         currentLoginId: account.loginId,
         currentPassword,
         loginId: nextLoginId,
-        newPassword
+        newPassword: nextPassword
       });
       onUpdateTeacherAccountSettings?.((current) => ({
         ...defaultTeacherAccountSettings,
