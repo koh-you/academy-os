@@ -83,6 +83,33 @@ const moduleSource = await readFile(
   new URL("../src/app/appSessionSurfaceSelector.js", import.meta.url),
   "utf8"
 );
+assert.equal(
+  moduleSource.split("export function selectAppSessionSurface(").length - 1,
+  1
+);
+assert.equal(
+  appSource.split('from "./appSessionSurfaceSelector.js"').length - 1,
+  1
+);
+assert.equal(
+  appSource.split("selectAppSessionSurface({").length - 1,
+  1
+);
+for (const appOwnedSurfaceBoundary of [
+  "<AttendanceKiosk",
+  "onAttendanceCheck={handleAttendancePinCheck}",
+  "<SpecialLecturePublicPage",
+  "<RoleLoginScreen",
+  "onLogin={handleLogin}",
+  "<StudentPortalV2",
+  "onLogout={handleLogout}",
+  "<ParentPortal"
+]) {
+  assert.ok(
+    surfaceSource.includes(appOwnedSurfaceBoundary),
+    `App-owned session surface moved: ${appOwnedSurfaceBoundary}`
+  );
+}
 for (const forbiddenEffect of [
   "useState",
   "useEffect",

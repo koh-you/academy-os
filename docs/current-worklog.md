@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 P3. App.jsx 18F-3 app session surface selector closeout
+
+- 감사: 기존 18F fixture에 selector export·App import·호출 각 1건과 App-owned Attendance/Special/Login/Student/Parent JSX·callback 잔존을 추가 고정했다.
+- 경계: selector는 surface ID만 반환하며 React·브라우저·인증·출결·portal 저장/API·Supabase·notification_jobs·Solapi 동작을 소유하지 않는다.
+- AI 검수: 기존 TARGET/CONTROL fixture, 정적 시나리오·production/build를 재사용하고 새 closeout 파일은 만들지 않는다. 사람 gate는 0건이다.
+- 변화량: 새 파일 0개, 전체 `+34/-0`, `App.jsx` 변경·감소 0줄이다.
+
 ## 2026-07-31 P3. App.jsx 18F-2 app session surface selector extraction
 
 - 코드: attendance/special/login/student/parent/teacher 최상위 surface ID 결정만 `appSessionSurfaceSelector.js` 순수 selector로 분리했다.
