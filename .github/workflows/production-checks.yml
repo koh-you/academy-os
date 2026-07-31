@@ -20,6 +20,7 @@ jobs:
     timeout-minutes: 30
     env:
       CI: true
+      TZ: Asia/Seoul
       ALIMTALK_DRY_RUN: true
       ALIMTALK_ALLOW_LIVE_TEST_SEND: false
       ALIMTALK_ALLOW_REAL_STUDENT_NUMBERS: false

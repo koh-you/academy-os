@@ -6,6 +6,7 @@
 - `main` push, pull request, 수동 실행에서 Node 24 기준 `npm ci -> test:production -> build`를 순서대로 실행하는 GitHub Actions를 추가했다. workflow 권한은 repository contents read-only이며 API key·Supabase·Vercel·Render secret을 주입하지 않는다. 기존 저장소의 별도 인코딩 검사는 과거 파일 2건의 기존 `�` 때문에 실패하는 상태여서 이번 CI 성공 기준에 섞지 않고 기존 부채로 보존했다.
 - CI에는 Alimtalk 실제 테스트 발송과 학생·학부모 번호 사용을 금지하고 Slack을 dry-run으로 고정했다. 이 개발환경 변경은 Supabase·Storage·`notification_jobs`·Solapi·Vercel·Render 운영 데이터를 읽거나 쓰지 않으며 사람 gate는 0건이다.
 - AI 검수: launch JSON·Vite 준비 URL 정규식, 실행 중인 Academy OS 로컬 Vite의 HTTP 200/root mount, 정적 시나리오 `809/809`를 포함한 전체 `npm run test:production`, production build 342 modules, `git diff --check`를 통과했다.
+- GitHub UTC Linux 첫 실행에서 월 정규수업 열기 fixture가 8월 3일 월요일을 일요일로 오판해 실패했다. 원인은 `YYYY-MM-DDT00:00:00+09:00`에 현지 `getDay()`를 적용한 시간대 의존 계산이었다. 날짜-only 값을 UTC 자정·`getUTCDay()`로 판정하고 fixture도 내부에서 `TZ=UTC`를 강제해 로컬 시간대와 무관하게 같은 요일 계약을 검사하도록 보강했다. 전용 fixture는 UTC·서울·뉴욕에서 모두 25개 신규 수업으로 통과했다. 전체 CI는 한국 학원 운영의 다른 날짜 계약과 일치하도록 `TZ=Asia/Seoul`을 명시하며, 같은 CI 환경의 전체 production 테스트와 342-module build가 다시 통과했다. 한국 시간대의 기존 결과와 저장 payload는 바뀌지 않는다.
 
 ## 2026-07-31 수업일지 편집 끝 공백 입력 복구
 

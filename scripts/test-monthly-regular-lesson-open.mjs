@@ -13,7 +13,11 @@ const lessons = [
   { lessonId: "aug-existing", lessonType: "class", classTemplateId: "mwf", className: "월수금반", date: "2026-08-03", dayOfWeek: "mon", startTime: "19:00", endTime: "22:00", studentIds: ["active"] }
 ];
 
+const previousTimeZone = process.env.TZ;
+process.env.TZ = "UTC";
 const plan = buildMonthlyRegularLessonOpenPlan({ lessons, monthKey: "2026-08", students, templates });
+if (previousTimeZone === undefined) delete process.env.TZ;
+else process.env.TZ = previousTimeZone;
 assert.deepEqual(plan.errors, []);
 assert.equal(plan.rows.length, 2);
 assert.equal(plan.rows.find((row) => row.classTemplateId === "mwf").existingCount, 1);

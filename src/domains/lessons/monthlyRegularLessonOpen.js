@@ -11,7 +11,7 @@ function previousMonthKey(monthKey) {
 }
 
 function getDayKey(date) {
-  return dayKeys[new Date(`${date}T00:00:00+09:00`).getDay()];
+  return dayKeys[new Date(`${date}T00:00:00Z`).getUTCDay()];
 }
 
 function monthDates(monthKey) {
