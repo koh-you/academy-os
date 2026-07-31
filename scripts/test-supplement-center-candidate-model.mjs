@@ -111,6 +111,12 @@ const absenceLesson = {
   date: "2026-07-30",
   lessonId: "lesson-absence"
 };
+const withdrawnAbsenceStudent = {
+  name: "조소현",
+  status: "paused",
+  studentId: "student-absence",
+  withdrawnAt: "2026-07-31T00:00:00.000Z"
+};
 const absenceModel = createAbsenceSupplementCandidateModel({
   attendanceLabels: { absent: "결석" },
   formatDdayLabel: (days) => `D-${days}`,
@@ -129,7 +135,7 @@ const absenceModel = createAbsenceSupplementCandidateModel({
   getLessonLabel: () => "연결 수업 없음",
   getNextHomework: () => ({ title: "개념서 40~42쪽" }),
   getPreviousHomework: () => ({ title: "개념서 35~37쪽" }),
-  getStudent: () => ({ name: "고태영", studentId: "student-absence" }),
+  getStudent: () => withdrawnAbsenceStudent,
   records: [absenceRecord]
 });
 const absenceSourceContext = absenceModel.createSourceContext(absenceRecord);
@@ -144,6 +150,11 @@ assert.deepEqual(absenceSourceContext, {
 });
 
 const absenceItem = absenceModel.createItem(absenceRecord);
+assert.equal(
+  absenceItem.studentId,
+  withdrawnAbsenceStudent.studentId,
+  "퇴원생도 기존 결석 수업기록이 있으면 결석보강 후보에 유지되어야 합니다."
+);
 assert.deepEqual(absenceItem, {
   futureMeta: "D-7 · 7일 전부터 기본 목록에 표시",
   id: "record-absence",

@@ -184,6 +184,7 @@ import { createSupplementSchedulePersistencePlan } from "../domains/supplements/
 import { SupplementCenter } from "../domains/supplements/SupplementCenter.jsx";
 import { findSupplementTaskForCandidate } from "../domains/supplements/supplementCenterSelectionModel.js";
 import {
+  createPersistableSupplementTask,
   createSupplementTaskDraft as createSupplementTaskDraftModel,
   getSupplementHomeworkNoteValue,
   getSupplementNotificationDraftFieldForControl,
