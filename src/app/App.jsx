@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createAppViewChangePlan } from "./appViewChangePlan.js";
+import { selectAppSessionSurface } from "./appSessionSurfaceSelector.js";
 import { RoleLoginScreen } from "./RoleLoginScreen.jsx";
 import { Sidebar } from "./Sidebar.jsx";
 import {
@@ -6934,7 +6935,13 @@ export function App() {
     });
   }
 
-  if (attendanceOnlyMode) {
+  const sessionSurface = selectAppSessionSurface({
+    attendanceOnlyMode,
+    specialLectureOnlyMode,
+    session
+  });
+
+  if (sessionSurface === "attendance") {
     return (
       <AttendanceKiosk
         isStandalone
@@ -6949,11 +6956,11 @@ export function App() {
     );
   }
 
-  if (specialLectureOnlyMode) {
+  if (sessionSurface === "specialLecture") {
     return <SpecialLecturePublicPage />;
   }
 
-  if (!session) {
+  if (sessionSurface === "login") {
     return (
       <RoleLoginScreen
         academyBrandName={academyBrandName}
@@ -6962,7 +6969,7 @@ export function App() {
     );
   }
 
-  if (session.role === "student") {
+  if (sessionSurface === "student") {
     return (
       <StudentPortalV2
         examPrepRows={examPrepRows}
@@ -6992,7 +6999,7 @@ export function App() {
     );
   }
 
-  if (session.role === "parent") {
+  if (sessionSurface === "parent") {
     return (
       <ParentPortal
         homeworks={homeworks}

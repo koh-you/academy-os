@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { selectAppSessionSurface } from "../src/app/appSessionSurfaceSelector.js";
 
 function selectExistingAppSessionSurface({
   attendanceOnlyMode = false,
@@ -40,27 +41,35 @@ for (const fixture of fixtures) {
     selectExistingAppSessionSurface(fixture.input),
     fixture.expected
   );
+  assert.equal(
+    selectAppSessionSurface(fixture.input),
+    fixture.expected
+  );
 }
 
 const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
-const start = appSource.indexOf("if (attendanceOnlyMode) {");
+const start = appSource.indexOf("const sessionSurface = selectAppSessionSurface({");
 const end = appSource.indexOf("\n  function handleDateSelect(", start);
 assert.ok(start >= 0 && end > start);
 const surfaceSource = appSource.slice(start, end);
 let previousIndex = -1;
 for (const boundary of [
-  "if (attendanceOnlyMode)",
+  "selectAppSessionSurface({",
+  "attendanceOnlyMode,",
+  "specialLectureOnlyMode,",
+  "session",
+  'if (sessionSurface === "attendance")',
   "<AttendanceKiosk",
-  "if (specialLectureOnlyMode)",
+  'if (sessionSurface === "specialLecture")',
   "<SpecialLecturePublicPage",
-  "if (!session)",
+  'if (sessionSurface === "login")',
   "<RoleLoginScreen",
-  'session.role === "student"',
+  'if (sessionSurface === "student")',
   "<StudentPortalV2",
-  'session.role === "parent"',
+  'if (sessionSurface === "parent")',
   "<ParentPortal"
 ]) {
   const boundaryIndex = surfaceSource.indexOf(boundary, previousIndex + 1);
@@ -69,6 +78,28 @@ for (const boundary of [
     `app session surface order changed: ${boundary}`
   );
   previousIndex = boundaryIndex;
+}
+const moduleSource = await readFile(
+  new URL("../src/app/appSessionSurfaceSelector.js", import.meta.url),
+  "utf8"
+);
+for (const forbiddenEffect of [
+  "useState",
+  "useEffect",
+  "window",
+  "document",
+  "fetch(",
+  "postJson",
+  "/api/",
+  "setSession",
+  "Supabase",
+  "Solapi",
+  "notification_jobs"
+]) {
+  assert.ok(
+    !moduleSource.includes(forbiddenEffect),
+    `app session surface selector crossed a side effect: ${forbiddenEffect}`
+  );
 }
 
 console.log("app session surface selector inventory TARGET/CONTROL fixtures passed");

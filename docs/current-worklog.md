@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 P3. App.jsx 18F-2 app session surface selector extraction
+
+- 코드: attendance/special/login/student/parent/teacher 최상위 surface ID 결정만 `appSessionSurfaceSelector.js` 순수 selector로 분리했다.
+- App 경계: 각 surface JSX, 인증·출결·portal callback, session state와 teacher workspace 렌더는 계속 `App.jsx`가 소유한다. 우선순위·문구·prop·데이터 shape는 바꾸지 않았다.
+- AI 검수: 18F-1 여섯 fixture와 중첩 mode 우선순위를 실제 selector 결과로 대조하고 모듈 side effect 부재를 확인한다. 사람 gate는 0건이다.
+- 변화량: 새 파일 1개, 전체 `+91/-21`, `App.jsx +12/-5`로 실제 파일 길이는 6줄 증가했다.
+
 ## 2026-07-31 P3. App.jsx 18F-1 app session surface selector inventory
 
 - 원천/동작: 최상위 surface는 attendance-only → special-lecture-only → unauthenticated login → student → parent → teacher 순서로 선택되며 각 화면 JSX와 callback은 App이 소유한다.
