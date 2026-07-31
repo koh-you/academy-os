@@ -64,6 +64,7 @@ assert.ok(
 );
 assert.ok(appSource.includes("getProviderReference: getNotificationProviderReference"));
 assert.ok(appSource.includes("providerMessageId: getNotificationProviderReference(result.result)"));
+assert.ok(appSource.includes('return job?.provider === "solapi" ? getNotificationJobProviderReference(job) : ""'));
 assert.ok(!appSource.includes("function getNotificationProviderReference(result = {})"));
 
 for (const path of [

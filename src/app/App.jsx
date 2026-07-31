@@ -1224,7 +1224,7 @@ function getNotificationJobProviderReference(job = {}) {
 }
 
 function getSolapiNotificationJobProviderReference(job = {}) {
-  return job.provider === "solapi" ? getNotificationJobProviderReference(job) : "";
+  return job?.provider === "solapi" ? getNotificationJobProviderReference(job) : "";
 }
 
 function maskPhoneForDisplay(value = "") {

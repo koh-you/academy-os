@@ -1,5 +1,11 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 보충관리 상세 모달 null 예약 렌더 복구
+
+- 운영 화면을 읽기 전용으로 재현해 저장된 결석보강의 `상세 검토` 클릭 직후 `Cannot read properties of null (reading 'provider')` 예외로 React 화면이 중단되는 것을 확인했다. 모달 최초 상태에서는 선택된 알림 예약이 없어 `notificationControlJob=null`인 것이 정상인데, Solapi provider 참조 표시 함수가 객체만 가정한 것이 원인이었다.
+- `getSolapiNotificationJobProviderReference`가 예약 없음·비 Solapi 작업을 빈 참조로 처리하도록 null-safe 계약을 적용했다. 보충 내용·일정·알림 문구·저장·예약·취소 callback과 데이터 shape는 변경하지 않았다.
+- AI 검수: notification provider TARGET/CONTROL, 보충 알림 제어·선택 fixture, 정적 시나리오 `809/809`, 전체 `npm run test:production`, production build가 통과했다. Supabase·Storage·`notification_jobs`·Solapi 저장/발송/예약/취소와 운영 데이터 수정은 0건이며 사람 gate는 0건이다.
+
 ## 2026-07-31 App.jsx 리팩터링 main 통합·Production 배포
 
 - 사용자 지정 단일 통합 세션이 검증된 `codex/refactor-supplement-11b`를 최신 `origin/main` 위의 `main`에 `--ff-only`로 충돌 없이 통합했다. 다른 기능 수정이나 운영 데이터 보정은 포함하지 않았다.
