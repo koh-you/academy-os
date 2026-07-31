@@ -10,9 +10,11 @@ export function createExamPrepLessonCandidateBuilder({
   ) {
     const dateMap = new Map();
     rows.forEach((row) => {
+      if (!row || typeof row !== "object") return;
       const period = parseDateRangeText(
         row.examPeriod
       );
+      if (!period) return;
       if (!period.date) return;
       getSundayDatesForExamPeriod(
         period

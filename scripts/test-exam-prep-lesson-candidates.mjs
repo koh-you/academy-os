@@ -125,6 +125,18 @@ assert.deepEqual(
   buildExamPrepLessonCandidates(),
   []
 );
+assert.deepEqual(
+  buildExamPrepLessonCandidates([
+    null,
+    {},
+    {
+      examPrepId:
+        "exam_prep_INVALID_PERIOD",
+      examPeriod: "날짜 미입력"
+    }
+  ]),
+  []
+);
 
 const fallbackCandidates =
   buildExamPrepLessonCandidates([
