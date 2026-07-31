@@ -1,5 +1,11 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 수업일지 편집 끝 공백 입력 복구
+
+- 로그인된 운영 수업일지의 `강의 교재` 입력칸에서 커서가 문자열 끝에 있을 때 Space를 눌러도 값과 커서가 그대로인 증상을 저장 없이 재현했다. 문자열 중간의 공백은 입력되어 전역 키보드 단축키가 아니라, 현재 기록과 이전 수업 기본값을 합치는 `getLessonRecordWithPreviousDefaults`가 매 렌더마다 현재 `lessonMaterial`·`lessonProgress`를 `trim()`하던 것이 원인이었다.
+- 현재 수업의 강의 교재·내용 값은 끝 공백을 포함한 입력 원문을 유지하고, 현재 호환 필드가 모두 실제 빈값일 때만 이전 수업 기록을 정리된 기본값으로 사용하도록 `resolveLessonJournalEditableText` 계약을 추가했다. 숙제·출결·알림톡·저장 API와 Supabase 데이터 shape는 변경하지 않았다.
+- AI 검수: 끝 공백 TARGET, 레거시 진도 TARGET, 이전 기록 fallback CONTROL, 수업일지 편집/초안 fixture, 정적 시나리오 `809/809`, 전체 `npm run test:production`, production build가 통과했다. 운영 화면 재현 중 입력값은 변경 전 상태로 복원했으며 수업일지 저장·출결 변경·Supabase·Storage·`notification_jobs`·Solapi side effect는 0건이고 사람 gate는 0건이다.
+
 ## 2026-07-31 보충관리 상세 모달 null 예약 렌더 복구
 
 - 운영 화면을 읽기 전용으로 재현해 저장된 결석보강의 `상세 검토` 클릭 직후 `Cannot read properties of null (reading 'provider')` 예외로 React 화면이 중단되는 것을 확인했다. 모달 최초 상태에서는 선택된 알림 예약이 없어 `notificationControlJob=null`인 것이 정상인데, Solapi provider 참조 표시 함수가 객체만 가정한 것이 원인이었다.

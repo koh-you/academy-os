@@ -1,3 +1,14 @@
+export function resolveLessonJournalEditableText({
+  currentValues = [],
+  fallbackValues = []
+} = {}) {
+  const currentValue = currentValues.find((value) => String(value ?? "").trim());
+  if (currentValue !== undefined) return String(currentValue ?? "");
+
+  const fallbackValue = fallbackValues.find((value) => String(value ?? "").trim());
+  return fallbackValue === undefined ? "" : String(fallbackValue ?? "").trim();
+}
+
 export function createLessonJournalEditableFieldsModel({
   nextHomeworkTitle = "",
   previousHomeworkTitle = "",

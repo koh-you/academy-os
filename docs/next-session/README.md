@@ -1,5 +1,7 @@
 # Next Session Handoff
 
+> **2026-07-31 수업일지 Space 입력 복구:** 수업일지 `강의 교재`·`오늘 강의 내용`의 현재 값을 이전 수업 기본값과 합칠 때 매 렌더마다 `trim()`해 단어 끝에 입력한 공백이 즉시 사라지던 문제를 수정했다. 현재 입력 원문은 끝 공백까지 유지하고 정말 빈값일 때만 이전 기록을 기본값으로 쓴다. 운영 화면 저장 없는 재현, 끝 공백/레거시 필드/fallback 회귀 fixture, 정적 시나리오 809/809, 전체 production 테스트와 build를 통과했으며 외부 side effect·사람 gate는 0건이다.
+
 > **2026-07-31 보충관리 상세 모달 복구:** 저장된 보충 항목의 `상세 검토`를 열 때 선택된 알림 예약이 없는 정상 초기 상태를 `null`로 처리하지 못해 화면이 중단되던 문제를 수정했다. Solapi provider 참조는 예약 없음·비 Solapi 작업이면 빈 값으로 표시하며, 저장·예약·취소 callback과 운영 원천은 바꾸지 않았다. 정적 시나리오 809/809, 전체 production 테스트와 build를 통과했고 외부 side effect·사람 gate는 0건이다.
 
 > **2026-07-30 운영 알림 반 알림 저장:** 기존 Supabase `reminder_type` 제약에 없는 `class_notice`는 DB에 `custom`으로 저장하고 `source_payload.reminderType`으로 의미를 복원한다. 따라서 운영 DB SQL 실행 없이도 반 알림 저장이 가능하며, 새 schema에는 `class_notice`도 추가했다. 실제 발송/예약은 이 변경에서 실행하지 않았다.

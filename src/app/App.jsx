@@ -311,6 +311,7 @@ import {
 } from "../domains/lessons/lessonJournalHomeworkDraft.js";
 import { createLessonJournalHomeworkFollowupPlan } from "../domains/lessons/lessonJournalHomeworkFollowupPlan.js";
 import { createLessonJournalAssignmentStatusPlan } from "../domains/lessons/lessonJournalAssignmentStatusPlan.js";
+import { resolveLessonJournalEditableText } from "../domains/lessons/lessonJournalEditableFieldsModel.js";
 import {
   getLessonJournalEditableRecord,
   removeLessonJournalMakeupTaskDraft
@@ -540,8 +541,14 @@ function getLessonContent(record) {
 }
 
 function getLessonRecordWithPreviousDefaults(record = {}, previousRecord = null) {
-  const lessonMaterial = record?.lessonMaterial?.trim() || previousRecord?.lessonMaterial?.trim() || "";
-  const lessonContent = getLessonContent(record) || getLessonContent(previousRecord);
+  const lessonMaterial = resolveLessonJournalEditableText({
+    currentValues: [record?.lessonMaterial],
+    fallbackValues: [previousRecord?.lessonMaterial]
+  });
+  const lessonContent = resolveLessonJournalEditableText({
+    currentValues: [record?.lessonProgress, record?.progress, record?.lessonContent],
+    fallbackValues: [previousRecord?.lessonProgress, previousRecord?.progress, previousRecord?.lessonContent]
+  });
   return {
     ...record,
     lessonMaterial,
