@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 P3. App.jsx 18F-1 app session surface selector inventory
+
+- 원천/동작: 최상위 surface는 attendance-only → special-lecture-only → unauthenticated login → student → parent → teacher 순서로 선택되며 각 화면 JSX와 callback은 App이 소유한다.
+- AI 가상검수: mode 중첩 우선순위 TARGET과 login/student/parent/teacher CONTROL을 순수 fixture로 고정하고 실제 source 순서를 대조했다. 저장·인증·출결·Supabase·notification_jobs·Solapi 호출과 사람 gate는 0건이다.
+- 다음: 18F-2에서 surface ID 결정만 순수 selector로 분리하고 App이 각 화면 렌더·외부 callback을 계속 소유한다.
+- 변화량: 새 파일 1개, 전체 `+99/-0`, `App.jsx` 변경·감소 0줄이다.
+
 ## 2026-07-31 P3. App.jsx 18E-3 active role login shell closeout
 
 - 감사: 기존 로그인 fixture에 RoleLoginScreen export·App import·렌더 각 1건과 component의 인증/session/storage side effect 부재를 추가 고정했다.

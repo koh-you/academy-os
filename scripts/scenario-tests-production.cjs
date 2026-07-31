@@ -2290,6 +2290,24 @@ check(
       "onLogin={handleLogin}"
     ])
 );
+check(
+  "84d-175 app session surface inventory preserves attendance special login student parent teacher priority",
+  rawAppEntrySource.indexOf("if (attendanceOnlyMode) {") <
+    rawAppEntrySource.indexOf("if (specialLectureOnlyMode) {", rawAppEntrySource.indexOf("if (attendanceOnlyMode) {")) &&
+    rawAppEntrySource.indexOf("if (specialLectureOnlyMode) {", rawAppEntrySource.indexOf("if (attendanceOnlyMode) {")) <
+      rawAppEntrySource.indexOf("if (!session) {") &&
+    rawAppEntrySource.indexOf("if (!session) {") <
+      rawAppEntrySource.indexOf('if (session.role === "student") {') &&
+    rawAppEntrySource.indexOf('if (session.role === "student") {') <
+      rawAppEntrySource.indexOf('if (session.role === "parent") {') &&
+    hasAll(rawAppEntrySource, [
+      "<AttendanceKiosk",
+      "<SpecialLecturePublicPage",
+      "<RoleLoginScreen",
+      "<StudentPortalV2",
+      "<ParentPortal"
+    ])
+);
 check("84e shared modal closes with Escape key", hasAll(app, ["import { Modal, ModalFooter } from \"../shared/components/Modal.jsx\""]) && hasAll(sharedModalSource, ["export function Modal({", "backdropClassName = \"\"", "hideCloseButton = false", "hideHeader = false", "function handleEscapeKey(event)", "event.key === \"Escape\"", "onClose?.()", "window.addEventListener(\"keydown\", handleEscapeKey)", "window.removeEventListener(\"keydown\", handleEscapeKey)", "hideCloseButton ? null"]) );
 check("84f lesson journal modal uses shared Escape-close modal", hasAll(app, ["backdropClassName=\"lessonJournalModalBackdrop\"", "className=\"lessonJournalModal\"", "hideHeader", "onClose={onBackToCalendar}"]) && !app.includes("<div className=\"modalBackdrop lessonJournalModalBackdrop\" role=\"dialog\" aria-modal=\"true\">"));
 check("84f-1 lesson journal student preview stays isolated and callback-only", hasAll(lessonFrontendSource, ["LessonJournalStudentPreviewModal", "createLessonJournalStudentPreviewModel", "students.filter((student) => student.studentId === studentPreviewId)", "PortalComponent={StudentPortalV2}", "students={model.previewStudents}", "onLogout={onClose}"]) && !lessonJournalStudentPreviewModalSource.includes("fetch(") && !lessonJournalStudentPreviewModalSource.includes("/api/"));
