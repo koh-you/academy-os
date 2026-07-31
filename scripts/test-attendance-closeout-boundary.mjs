@@ -58,7 +58,7 @@ for (const required of [
 const checkAdapter = section(
   appSource,
   "async function handleAttendancePinCheck",
-  "if (attendanceOnlyMode) {"
+  "const sessionSurface = selectAppSessionSurface({"
 );
 for (const required of [
   "checkKioskAttendanceAction({",

@@ -1,5 +1,11 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 App.jsx 리팩터링 Production 통합 기준선
+
+- 안전범위 분리 뒤 남은 정적 시나리오 8건과 출결 closeout 1건을 현재 모듈 경계로 다시 연결했다. 삭제된 비활성 수업 상세 표·legacy login 버튼 수, 분리된 보충 확인창·수업일지·달력 원천, session surface selector, Windows CRLF를 과거 `App.jsx` 단일 파일/LF 기준으로 찾던 oracle만 수정했다.
+- runtime 기능·문구·UI·데이터 shape와 저장·삭제·출결·발송·예약 callback은 변경하지 않았다. Supabase·Storage·`notification_jobs`·Solapi·운영 데이터 side effect도 실행하지 않았다.
+- 정적 시나리오 `809/809`가 통과했다. 이 결과를 포함해 production/build 전체 검증 뒤 `codex/refactor-supplement-11b`를 main에 fast-forward 통합하는 배포 단위로 넘긴다. 사람 gate와 비차단 보류 gate는 0건이다.
+
 ## 2026-07-31 P3. App.jsx 18G roadmap safe-scope closeout
 
 - 완료: 17BA builder 분리·closeout 뒤 로드맵 18에서 view change plan, Sidebar menu/shell, unused legacy login 제거, active login shell, session surface selector의 inventory→extraction→closeout을 각각 별도 commit으로 완료했다.
