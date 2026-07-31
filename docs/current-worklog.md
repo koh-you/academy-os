@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 P3. App.jsx 18G roadmap safe-scope closeout
+
+- 완료: 17BA builder 분리·closeout 뒤 로드맵 18에서 view change plan, Sidebar menu/shell, unused legacy login 제거, active login shell, session surface selector의 inventory→extraction→closeout을 각각 별도 commit으로 완료했다.
+- App 소유 잔존: 전역 hydration/persistence effect, `app_state`·session·출결 polling, notification_jobs/Solapi reconcile, 인증 transport, 17개 teacher 화면의 저장·삭제·발송 callback 조립은 계속 `App.jsx`가 소유한다.
+- 종료 판정: 남은 경계는 state ownership·effect lifecycle·외부 저장/발송 계약을 함께 바꾸는 고위험 작업이라 이번 자동 순수 파일 이동 범위에서 보류한다. 기능 버그나 운영 데이터 수정은 섞지 않았고 사람 gate·비차단 보류 gate는 0건이다.
+- AI 검수: 기존 17BA/18A~F TARGET/CONTROL fixture, 정적 시나리오 809건, production 하위 검사, build와 diff check를 기준으로 최종 감사한다.
+- 변화량: 새 파일 0개, 전체 `+40/-5`, `App.jsx` 변경·감소 0줄이다.
+
 ## 2026-07-31 P3. App.jsx 18F-3 app session surface selector closeout
 
 - 감사: 기존 18F fixture에 selector export·App import·호출 각 1건과 App-owned Attendance/Special/Login/Student/Parent JSX·callback 잔존을 추가 고정했다.

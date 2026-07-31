@@ -4,9 +4,9 @@
 
 > **2026-07-30 수업일지 이전 시간 기본값:** 학생별 `강의 교재`·`오늘 강의 내용`은 현재 기록이 비어 있을 때만 이전 수업의 저장값을 표시한다. 현재 수업 값과 호환 내용 필드는 우선이며, 수업일지 열기만으로 저장되지 않는다. 출결 계산보다 `record` 기본값을 먼저 만들도록 렌더 순서도 고정했다. 회귀 검사는 `npm run test:lesson-journal-continuity`이고 전체 `npm run test:production`, build를 통과했다.
 
-> **App.jsx 리팩터링 새 세션 프롬프트:** `docs/next-session/refactor-session-prompt-2026-07-30.md`를 그대로 붙여넣는다. 전용 branch의 11B-1 실제 OS/Supabase·Solapi 예약/취소 gate와 11B-1~13은 이미 완료됐고, 현재 중지점은 `17BA-1` 뒤의 `17BA-2 generated lesson plan builder extraction`이다. 먼저 `E:\academy-os-refactor`를 최신 `origin/main`으로 안전하게 rebase하고 전용 fixture·전체 production/build를 통과시킨다. 동일한 실제 예약·취소를 자동 반복하지 않으며 관련 계약 충돌이 생길 때만 최소 gate를 다시 연다.
+> **App.jsx 리팩터링 안전범위 완료:** 전용 branch에서 17BA builder와 로드맵 18의 view/session selector, Sidebar menu/shell, active login shell까지 순수 분리하고 legacy login을 제거했다. 남은 전역 hydration/persistence·출결 polling·notification_jobs/Solapi·17개 teacher 화면 callback 조립은 고위험 경계이므로 자동 연쇄 분리를 종료한다. `docs/next-session/refactor-session-prompt-2026-07-30.md`는 완료된 17BA 시작점의 역사 문서다.
 
-> **UI-9F 전체 UI 통일 완료:** UI-0~UI-9 최종 감사와 AI 검수를 완료했다. 현재 UI 완료를 막는 사람 gate는 0건이고, 실제 기기 확인은 `docs/ui-human-review-checklist-2026-07-30.md` 한 묶음만 편한 시간에 수행한다. 전용 리팩터링 브랜치의 11B 운영 gate와 11B-1~13 완료도 확인했으며, 최신 재개점은 위 새 세션 프롬프트의 `17BA-2`다.
+> **UI-9F 전체 UI 통일 완료:** UI-0~UI-9 최종 감사와 AI 검수를 완료했다. 현재 UI 완료를 막는 사람 gate는 0건이고, 실제 기기 확인은 `docs/ui-human-review-checklist-2026-07-30.md` 한 묶음만 편한 시간에 수행한다. 전용 리팩터링 브랜치는 로드맵 18 안전범위까지 닫혔다.
 
 > **UI-9D 사람 검수 단일 입구 — 현재 중단 gate 0건:** UI가 모두 배포된 뒤 `docs/ui-human-review-checklist-2026-07-30.md`의 12단계를 desktop과 iPhone에서 한 번만 수행한다. 아래 51개 누적 항목은 그 체크리스트의 상세 근거이며 별개의 51개 요청이 아니다. 문제는 화면명·기기·직전 동작·스크린샷만 모아서 한 번에 전달하면 된다. 저장·삭제·발송·예약·출결·파일·AI·외부 원천 행동은 실행하지 않는다.
 

@@ -52,7 +52,7 @@
    - 목표: 화면마다 페이지 머리말·탭/필터·버튼 역할·카드·빈/오류/저장 상태·모달 행동·모바일 반응형의 같은 규칙을 적용한다. 데이터 원천, 저장, 발송, 예약, 출결의 동작은 바꾸지 않는다.
    - 실행 방식: `UI-0 인벤토리/시각 기준선 -> UI-1 토큰·앱 프레임 -> UI-2 페이지 머리말/작업 바 -> UI-3 탭·필터 -> UI-4 읽기 전용 카드/목록 -> UI-5 모달 shell -> UI-6 저장 상태 표현 -> UI-7 모바일/접근성 -> UI-8 페이지별 예외` 순서로 한 단위씩 한다. 각 단위는 AI 정적 계약·build·해당 화면 회귀 점검을 먼저 통과하고 commit/push한다.
    - 사람 검수 원칙: 실제 발송/예약/저장 같은 독립 gate가 생기면 해당 단위의 구현을 멈추고 `docs/next-session/README.md`에 정확한 확인 절차를 남긴다. 다른 UI 단위가 그 gate의 결과를 소비하지 않으면, 그 단위는 기다리지 않고 다음 독립 UI 단위로 진행한다.
-   - UI-9 완료: UI-0~UI-9 최종 감사를 완료했다. 세 폭 시각 회귀, 529/529 기능 정적 시나리오, CSS 완전 중복 0, 사람 검수 12단계 단일 큐, 최신 main Vercel Production bundle 반영을 확인했다. 현재 UI 완료를 막는 사람 gate는 0건이며, 배포 후 사람 시각 확인은 `docs/ui-human-review-checklist-2026-07-30.md` 한 묶음만 사용한다. 별도 전용 브랜치의 리팩터링은 11B gate와 후속 단위를 완료한 뒤 `17BA-1`에서 멈췄고 다음은 안전한 rebase 후 `17BA-2`다.
+   - UI-9 완료: UI-0~UI-9 최종 감사를 완료했다. 세 폭 시각 회귀, 529/529 기능 정적 시나리오, CSS 완전 중복 0, 사람 검수 12단계 단일 큐, 최신 main Vercel Production bundle 반영을 확인했다. 현재 UI 완료를 막는 사람 gate는 0건이며, 배포 후 사람 시각 확인은 `docs/ui-human-review-checklist-2026-07-30.md` 한 묶음만 사용한다. 별도 전용 브랜치의 리팩터링은 17BA와 로드맵 18의 안전한 순수 shell 분리까지 완료했다.
    - 완료 기준 자료: 상태·모달·저장·위험·비동기·provider·모바일·고밀도 화면 인벤토리와 세 폭 시각 회귀 매트릭스는 `docs/ui-unification-final-audit-2026-07-30.md`에서 한 번에 연결한다. UI 후속을 자동 시작하지 않으며 실제 기기 확인은 단일 비차단 체크리스트로만 수행한다.
 3. `모달 통일 작업`
    - 목표: 수업 생성/수업 상세/수업일지 관련 모달을 공통 구조로 정리하되, 정규수업, 숙제보충, 결석보충, 시험대비, 특강의 원천과 안내 정보를 잃지 않게 한다.
@@ -73,10 +73,10 @@
    - 순서: `원천/동작 보존 -> 파일 분리 -> 검증 명령 -> AI 검수 결과 + 사람이 확인할 것 gate -> 커밋/푸시`.
    - 우선순위: 위험이 낮은 helper/config/API/client/component부터 진행하고, `LessonJournalDetail`, 출결, Solapi 예약, 보충관리처럼 저장/발송 side effect가 큰 영역은 충분한 gate 이후 진행한다.
    - 기준 로드맵: 아래 `App.jsx Refactoring Roadmap - 18 Units`를 다음 세션의 리팩터링 후보 목록으로 사용한다. 이미 일부 분리된 항목도 남은 하위 컴포넌트/헬퍼가 있으면 같은 묶음 안에서 계속 쪼갠다.
-   - 현재 이어받을 지점: 전용 `codex/refactor-supplement-11b` 브랜치에서는 10번 포털 분리 뒤 11B-1 운영 gate를 실제 OS/Supabase row와 Solapi 그룹 예약·취소로 통과했고, 11B-1~13 및 이후 supplement center·notification center·시험대비·수업일지·출결·Lesson Hub/달력·generated lesson 저위험 순수 분리를 진행했다. 사용자 요청으로 `17BA-1 generated lesson plan builder inventory` 완료 뒤 멈췄으며 다음은 최신 `origin/main` rebase·전체 검증 후 `17BA-2` 순수 builder 분리다. main에는 이 전용 브랜치가 아직 통합되지 않았으므로 완료 코드를 main에서 다시 만들거나 리팩터링 branch를 main에 직접 merge/push하지 않는다.
+   - 현재 이어받을 지점: 전용 `codex/refactor-supplement-11b` 브랜치에서는 11B 운영 gate, 11B-1~17BA와 로드맵 18의 안전한 순수 분리를 완료했다. 17BA builder, view change/session surface selector, Sidebar menu/shell, active login shell을 분리하고 unused legacy login을 제거했다. 남은 App 초기화/context 후보는 전역 hydration/persistence, 출결 polling, notification_jobs/Solapi reconcile, 인증과 17개 teacher 화면의 외부 callback 조립에 결합된 고위험 경계다. main에는 아직 통합하지 않았으므로 완료 코드를 main에서 다시 만들거나 리팩터링 branch를 main에 직접 merge/push하지 않는다.
    - 확인된 후속 이슈: 학생 수업 준비 안내 목록은 현재 `prepStudentNotice` 존재 여부만 필터하고 `prepStudentVisible`을 확인하지 않는다. 이번 리팩터링에서는 기존 동작을 보존했으며, 공개 플래그 계약을 별도 기능 작업에서 확인해야 한다.
    - 확인된 후속 이슈: 학생 마이페이지 `비밀번호 변경`은 callback/API가 없는 기존 미연결 UI다. 이번 리팩터링에서는 보존했고, 숨김/비활성 안내/실제 PIN 변경 구현은 저장 신뢰성의 오작동 버튼 정리 작업에서 별도 결정한다.
-   - 다음 세션 시작 규칙: `E:\academy-os-refactor`의 clean 상태와 최신 커밋·git diff를 확인하고 `git fetch origin` 뒤 최신 main으로 rebase한다. 충돌은 임의로 덮지 않고 보고하며, 성공 시 17BA-1 fixture·전체 production/build를 먼저 통과시킨다. 11B 운영 gate는 이미 통과했으므로 자동 반복하지 않되, rebase에서 recipient·문구·시각·fingerprint·예약/취소 계약이 달라졌다면 관련 코드 이동을 중단하고 최소 재검수 범위를 보고한다. 구체적인 붙여넣기 프롬프트는 `docs/next-session/refactor-session-prompt-2026-07-30.md`가 기준이다.
+   - 다음 세션 시작 규칙: 전용 브랜치 통합 또는 새 고위험 App 경계를 명시적으로 맡은 경우에만 `E:\academy-os-refactor`의 clean 상태와 최신 커밋·git diff를 확인하고 `git fetch origin` 뒤 최신 main으로 rebase한다. 충돌은 임의로 덮지 않고 보고하며 전체 production/build를 먼저 통과시킨다. 11B 실제 예약·취소는 반복하지 않고 recipient·문구·시각·fingerprint·예약/취소 계약 충돌이 생길 때만 최소 재검수 범위를 연다. 2026-07-30 재개 프롬프트는 완료된 17BA 시작점의 역사 문서다.
 6. `시험분석 슬라이드별 상세 프롬프트 시스템`
    - 상태: 별도 `codex/exam-analysis-gpt-image` 브랜치에서 Gate 1~6 설계를 완료했다. 30페이지·893건 전수 목록, 24개 관련 글·221개 첨부/215개 고유 이미지 전수 분류, 중·고등 시퀀스, 역할 라이브러리, 장별 프롬프트 생성기와 예제를 갖췄다. 새 유료 Vision 호출은 0회다.
    - 목표: Academy OS의 교사 확정 시험분석을 입력으로 학교 스타일·카드 역할·레이아웃 계약을 조합해, 1번부터 마지막 장까지 ChatGPT에 복사할 수 있는 완성형 이미지 생성 프롬프트와 수정 프롬프트를 만든다.
