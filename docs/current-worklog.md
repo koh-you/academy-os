@@ -1,5 +1,11 @@
 # Academy OS Current Worklog
 
+## 2026-07-31 App.jsx 리팩터링 main 통합·Production 배포
+
+- 사용자 지정 단일 통합 세션이 검증된 `codex/refactor-supplement-11b`를 최신 `origin/main` 위의 `main`에 `--ff-only`로 충돌 없이 통합했다. 다른 기능 수정이나 운영 데이터 보정은 포함하지 않았다.
+- 통합 뒤 전체 `test:production`, build, diff check를 다시 통과한 커밋만 `origin/main`에 push해 Vercel Production을 배포한다. 사용자 소유 `.codex-temp/`는 추적·수정하지 않는다.
+- 사람 gate와 비차단 보류 gate는 0건이다. Supabase·Storage·`notification_jobs`·Solapi 저장/발송/예약/취소는 실행하지 않는다.
+
 ## 2026-07-31 App.jsx 리팩터링 Production 통합 기준선
 
 - 안전범위 분리 뒤 남은 정적 시나리오 8건과 출결 closeout 1건을 현재 모듈 경계로 다시 연결했다. 삭제된 비활성 수업 상세 표·legacy login 버튼 수, 분리된 보충 확인창·수업일지·달력 원천, session surface selector, Windows CRLF를 과거 `App.jsx` 단일 파일/LF 기준으로 찾던 oracle만 수정했다.

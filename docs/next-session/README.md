@@ -4,7 +4,7 @@
 
 > **2026-07-30 수업일지 이전 시간 기본값:** 학생별 `강의 교재`·`오늘 강의 내용`은 현재 기록이 비어 있을 때만 이전 수업의 저장값을 표시한다. 현재 수업 값과 호환 내용 필드는 우선이며, 수업일지 열기만으로 저장되지 않는다. 출결 계산보다 `record` 기본값을 먼저 만들도록 렌더 순서도 고정했다. 회귀 검사는 `npm run test:lesson-journal-continuity`이고 전체 `npm run test:production`, build를 통과했다.
 
-> **App.jsx 리팩터링 안전범위 완료:** 전용 branch에서 17BA builder와 로드맵 18의 view/session selector, Sidebar menu/shell, active login shell까지 순수 분리하고 legacy login을 제거했다. 남은 전역 hydration/persistence·출결 polling·notification_jobs/Solapi·17개 teacher 화면 callback 조립은 고위험 경계이므로 자동 연쇄 분리를 종료한다. `docs/next-session/refactor-session-prompt-2026-07-30.md`는 완료된 17BA 시작점의 역사 문서다.
+> **App.jsx 리팩터링 안전범위 main 통합:** 전용 branch에서 완료한 17BA builder와 로드맵 18의 view/session selector, Sidebar menu/shell, active login shell 순수 분리와 legacy login 제거를 2026-07-31 사용자 지정 단일 통합 세션이 `main`에 fast-forward 통합했다. 남은 전역 hydration/persistence·출결 polling·notification_jobs/Solapi·17개 teacher 화면 callback 조립은 고위험 경계이므로 자동 연쇄 분리를 종료한다. `docs/next-session/refactor-session-prompt-2026-07-30.md`는 완료된 17BA 시작점의 역사 문서다.
 
 > **UI-9F 전체 UI 통일 완료:** UI-0~UI-9 최종 감사와 AI 검수를 완료했다. 현재 UI 완료를 막는 사람 gate는 0건이고, 실제 기기 확인은 `docs/ui-human-review-checklist-2026-07-30.md` 한 묶음만 편한 시간에 수행한다. 전용 리팩터링 브랜치는 로드맵 18 안전범위까지 닫혔다.
 
