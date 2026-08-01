@@ -11,6 +11,15 @@
 
 `docs/archive/`와 과거 handoff는 문제의 역사나 근거가 필요할 때만 읽는다. 새 사용자 요청이 있으면 장기 큐 전체를 반복하지 말고, 요청과 충돌하는 우선순위만 짧게 알린다.
 
+## 요청 분류·배포 결정
+
+- 모든 요청은 구현 전에 `docs/delivery-policy.md`의 5가지 중 하나로 분류하고, 분류 이유와 이번 작업의 종료 지점을 사용자에게 짧게 알린다.
+- 판단 우선순위는 `긴급 롤백 > 사람 Gate > 운영 긴급 버그 > 일반 버그 > 기능·개선`이다.
+- 운영 긴급 버그는 사람 Gate가 없으면 branch 검사부터 main 통합, main 검사, 배포 확인, 집중 운영 smoke까지 같은 작업에서 완료한다.
+- 일반 버그와 기능·개선은 branch push와 GitHub 검사까지 완료하고 일일 main 통합 대기 상태로 둔다. 사용자가 즉시 main 통합을 명시하면 따른다.
+- 사람 Gate 작업은 안전한 준비와 검증까지만 완료하고, 실제로 필요한 사람 행동과 재개 지점을 정확히 남긴다.
+- main 검사나 운영 확인이 실패하면 새 변경을 섞지 않고 긴급 롤백 규칙을 우선한다.
+
 ## 현재 사람 Gate
 
 - 전역 필수 gate는 없다.
@@ -45,6 +54,7 @@
 - `C:\Users\PC\Documents\academy os`는 오전 9시 자동 작업 전용 clone이며 사람 작업에 사용하지 않는다.
 - 시험분석 독립 작업: `C:\Dev\academy-os-exam-analysis`의 전용 branch.
 - 동시 작업은 같은 worktree/index를 공유하지 않는다. 별도 `codex/` branch와 worktree를 사용하고 main 통합 owner는 한 세션만 둔다.
+- 자동 작업의 main 통합은 `docs/delivery-policy.md`의 운영 긴급 버그·긴급 롤백 조건을 충족하고, 원격 main 불변·정확한 commit 검사 통과·fast-forward를 모두 확인한 경우에만 허용한다.
 - 사용자 소유 변경을 임의로 stage/revert하지 않는다. 예상 밖 변경이나 충돌이 있으면 중단하고 보고한다.
 - 검증이 끝난 AI 변경은 별도 지시가 없어도 의도적으로 commit하고 GitHub에 push한다.
 - 비밀값, `.env`, PDF/HWP/HWPX/ZIP, 대용량 운영 자료는 commit하지 않는다. API key 값은 출력하지 않는다.

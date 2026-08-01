@@ -38,8 +38,11 @@
 
 - 매일 오전 9시에 독립 task가 열린다.
 - 자동 task 제목은 실행 시작 시 서울 기준 `YYYY-MM-DD Academy OS 매일 개발 이어가기`로 바꾼다.
-- 자동 작업 전용 clone에서 최신 `origin/main`을 기준으로 날짜별 `codex/` branch를 만들고, 안전한 한 단위만 commit/push한다.
-- main 자동 merge, 운영 삭제·발송·유료 호출·SQL 적용은 금지한다.
+- 로컬 clone 기반 자동화이므로 예약 시각에 컴퓨터가 켜져 있고 Codex 데스크톱 앱이 실행 중이어야 한다. 완전 종료 중 실행과 재부팅 후 누락 실행은 보장하지 않는다.
+- 모든 요청은 `docs/delivery-policy.md`의 5가지로 먼저 분류하고 이유·종료 지점을 알린다.
+- 일반 버그와 기능·개선은 branch push·GitHub 검사 후 일일 main 통합을 기다린다.
+- 사람 Gate가 없는 운영 긴급 버그는 원격 main 불변, 정확한 commit 검사 통과, fast-forward를 확인한 경우에만 main·배포·운영 smoke까지 이어간다.
+- 운영 삭제·발송·예약·취소·유료 호출·SQL 적용·로그인/관리자 승인은 사람 Gate 없이 실행하지 않는다.
 
 ## 빠른 확인
 
