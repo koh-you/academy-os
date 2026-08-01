@@ -203,8 +203,63 @@ const filteredContext = selectPreviousLessonMemoContext({
 assert.equal(filteredContext.previousRecord?.lessonId, olderLesson.lessonId);
 assert.equal(filteredContext.previousMemoRecord?.preparationMemo, "이전 참고 메모");
 
+const monthBoundaryCurrentLesson = {
+  ...currentLesson,
+  date: "2026-08-01",
+  lessonId: "lesson_august_current"
+};
+const blankImmediateLesson = {
+  ...priorLesson,
+  date: "2026-07-30",
+  lessonId: "lesson_july_blank"
+};
+const populatedOlderLesson = {
+  ...olderLesson,
+  date: "2026-07-28",
+  lessonId: "lesson_july_populated"
+};
+const unrelatedSpecialLesson = {
+  date: "2026-07-31",
+  lessonId: "lesson_july_special",
+  lessonTrackId: "special_track_control",
+  lessonType: "specialLecture",
+  startTime: "13:00",
+  studentIds: [student.studentId]
+};
+const monthBoundaryContext = selectPreviousLessonMemoContext({
+  ...dependencies,
+  currentLesson: monthBoundaryCurrentLesson,
+  lessons: [monthBoundaryCurrentLesson, blankImmediateLesson, populatedOlderLesson, unrelatedSpecialLesson],
+  records: [
+    {
+      lessonId: blankImmediateLesson.lessonId,
+      lessonMaterial: "",
+      lessonProgress: "",
+      studentId: student.studentId
+    },
+    {
+      lessonId: populatedOlderLesson.lessonId,
+      lessonMaterial: "7월 최신 교재",
+      lessonProgress: "7월 최신 진도",
+      studentId: student.studentId
+    },
+    {
+      lessonId: unrelatedSpecialLesson.lessonId,
+      lessonMaterial: "특강 CONTROL 교재",
+      lessonProgress: "특강 CONTROL 진도",
+      studentId: student.studentId
+    }
+  ],
+  student
+});
+assert.equal(monthBoundaryContext.previousRecord?.lessonId, blankImmediateLesson.lessonId);
+assert.equal(monthBoundaryContext.previousEditableRecord?.lessonMaterial, "7월 최신 교재");
+assert.equal(monthBoundaryContext.previousEditableRecord?.lessonProgress, "7월 최신 진도");
+assert.notEqual(monthBoundaryContext.previousEditableRecord?.lessonMaterial, "특강 CONTROL 교재");
+
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
 assert.match(appSource, /selectPreviousLessonMemoContext\(\{/);
+assert.match(appSource, /previousMemoContext\.previousEditableRecord \?\? previousRecord/);
 assert.doesNotMatch(appSource, /function getPreviousLessonMemoContext\(student\)/);
 
 console.log("lesson journal previous memo selector TARGET/CONTROL fixtures passed");

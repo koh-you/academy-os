@@ -54,11 +54,12 @@ export function selectPreviousLessonMemoContext({
       `${lessonB.date} ${lessonB.startTime ?? ""}`.localeCompare(`${lessonA.date} ${lessonA.startTime ?? ""}`)
     ));
 
-  const previousLessonRecordInCurrentGroup = previousLessons
+  const previousLessonRecordsInCurrentGroup = previousLessons
     .map((previousLesson) =>
       sourceRecords.find((item) => item.lessonId === previousLesson.lessonId && item.studentId === student.studentId)
     )
-    .find(Boolean);
+    .filter(Boolean);
+  const previousLessonRecordInCurrentGroup = previousLessonRecordsInCurrentGroup[0] ?? null;
   const bridgedPreviousLesson = previousLessons.length === 0
     ? findPreviousLessonForStudent(lessons, currentLesson, student.studentId, { allowRegularClassFallback: true })
     : null;
@@ -66,6 +67,27 @@ export function selectPreviousLessonMemoContext({
     ? sourceRecords.find((item) => item.lessonId === bridgedPreviousLesson.lessonId && item.studentId === student.studentId) ?? null
     : null;
   const previousLessonRecord = previousLessonRecordInCurrentGroup ?? bridgedPreviousLessonRecord;
+  const editableSourceRecords = previousLessonRecordsInCurrentGroup.length
+    ? previousLessonRecordsInCurrentGroup
+    : bridgedPreviousLessonRecord
+      ? [bridgedPreviousLessonRecord]
+      : [];
+  const latestNonEmptyValue = (fieldNames) => {
+    for (const record of editableSourceRecords) {
+      for (const fieldName of fieldNames) {
+        const value = record?.[fieldName];
+        if (String(value ?? "").trim()) return String(value);
+      }
+    }
+    return "";
+  };
+  const previousEditableRecord = editableSourceRecords.length
+    ? {
+        ...(previousLessonRecord ?? {}),
+        lessonMaterial: latestNonEmptyValue(["lessonMaterial"]),
+        lessonProgress: latestNonEmptyValue(["lessonProgress", "progress", "lessonContent"])
+      }
+    : null;
   const visiblePreviousMemoRecord = previousLessonRecord?.preparationMemo?.trim() && !isMemoRecordAcknowledged(previousLessonRecord)
     ? previousLessonRecord
     : null;
@@ -85,6 +107,7 @@ export function selectPreviousLessonMemoContext({
   return {
     acknowledgedMemoCutoff,
     acknowledgedMemoCutoffDate,
+    previousEditableRecord,
     previousMemoRecord: visiblePreviousMemoRecord,
     previousRecord: previousLessonRecord ?? null,
     referenceRecord: visiblePreviousMemoRecord ? null : referenceMemoRecord ?? null

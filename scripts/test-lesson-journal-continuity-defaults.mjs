@@ -42,7 +42,7 @@ assert.equal(
 );
 assert.match(
   source,
-  /const editableRecord = getEditableRecord\(recordId, persistedRecord\);[\s\S]*?const previousRecord = previousMemoContext\.previousRecord;[\s\S]*?const record = getLessonRecordWithPreviousDefaults\(editableRecord, previousRecord\);[\s\S]*?const attendanceDisplay = isClosureLesson[\s\S]*?getAttendanceDisplay\(record, attendanceLesson, attendanceSettings\.lateGraceMinutes\);/,
+  /const editableRecord = getEditableRecord\(recordId, persistedRecord\);[\s\S]*?const previousRecord = previousMemoContext\.previousRecord;[\s\S]*?const previousEditableRecord = previousMemoContext\.previousEditableRecord \?\? previousRecord;[\s\S]*?const record = getLessonRecordWithPreviousDefaults\(editableRecord, previousEditableRecord\);[\s\S]*?const attendanceDisplay = isClosureLesson[\s\S]*?getAttendanceDisplay\(record, attendanceLesson, attendanceSettings\.lateGraceMinutes\);/,
   "학생별 수업일지 행은 출결을 계산하기 전에 이전 기록으로 보완한 현재 record를 만들어야 합니다.",
 );
 assert.match(

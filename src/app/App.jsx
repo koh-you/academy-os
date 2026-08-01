@@ -16179,15 +16179,16 @@ function LessonJournalDetail({
               student
             });
             const previousRecord = previousMemoContext.previousRecord;
-            const record = getLessonRecordWithPreviousDefaults(editableRecord, previousRecord);
+            const previousEditableRecord = previousMemoContext.previousEditableRecord ?? previousRecord;
+            const record = getLessonRecordWithPreviousDefaults(editableRecord, previousEditableRecord);
             const attendanceDisplay = isClosureLesson
               ? { detail: "", label: "휴강", statusClass: "pending" }
               : getAttendanceDisplay(record, attendanceLesson, attendanceSettings.lateGraceMinutes);
             const checkoutMissing = !isClosureLesson && hasMissingCheckOut(record, attendanceLesson);
             const previousMemoRecord = previousMemoContext.previousMemoRecord;
             const referenceRecord = previousMemoContext.referenceRecord;
-            const previousLessonMaterial = previousRecord?.lessonMaterial?.trim() ?? "";
-            const previousLessonContent = getLessonContent(previousRecord);
+            const previousLessonMaterial = previousEditableRecord?.lessonMaterial?.trim() ?? "";
+            const previousLessonContent = getLessonContent(previousEditableRecord);
             const previousPreparationMemo = previousMemoRecord?.preparationMemo?.trim() ?? "";
             const referencePreparationMemo = referenceRecord?.preparationMemo?.trim() ?? "";
             const previousHomeworkFollowup = getHomeworkFollowupFromRecord(previousRecord ?? {})

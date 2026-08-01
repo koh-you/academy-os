@@ -68,3 +68,17 @@ test("lesson journal calendar can move to the next month and back", async ({ pag
   await expect(monthHeading).toHaveText(originalMonthTitle);
   expect(pageErrors).toEqual([]);
 });
+
+test("lesson journal carries the latest non-empty record across a month boundary", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+
+  const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · 1개 수업/ });
+  await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
+
+  const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
+  await expect(lessonJournal.getByRole("button", { name: "월 경계 연동반" })).toBeVisible();
+  await expect(lessonJournal.getByRole("button", { name: "7월 최신 교재" })).toBeVisible();
+  await expect(lessonJournal.getByRole("button", { name: "7월 최신 진도" })).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});

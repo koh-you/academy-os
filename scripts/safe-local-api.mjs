@@ -6,7 +6,15 @@ const port = 8787;
 const initialState = {
   academyReminders: [],
   appStates: {},
-  classTemplates: [],
+  classTemplates: [
+    {
+      className: "월 경계 연동반",
+      classTemplateId: "safe-cross-month-class",
+      endTime: "13:00",
+      startTime: "10:00",
+      studentIds: ["safe-active-student"]
+    }
+  ],
   examPrepRows: [],
   homeworks: [],
   lessons: [
@@ -19,6 +27,42 @@ const initialState = {
       status: "scheduled",
       studentIds: ["safe-withdrawn-student"],
       title: "안전 미리보기 수업",
+      type: "regular"
+    },
+    {
+      className: "월 경계 연동반",
+      classTemplateId: "safe-cross-month-class",
+      date: "2026-07-28",
+      endTime: "13:00",
+      lessonId: "safe-cross-month-populated-lesson",
+      startTime: "10:00",
+      status: "scheduled",
+      studentIds: ["safe-active-student"],
+      title: "월 경계 연동반",
+      type: "regular"
+    },
+    {
+      className: "월 경계 연동반",
+      classTemplateId: "safe-cross-month-class",
+      date: "2026-07-30",
+      endTime: "13:00",
+      lessonId: "safe-cross-month-blank-lesson",
+      startTime: "10:00",
+      status: "scheduled",
+      studentIds: ["safe-active-student"],
+      title: "월 경계 연동반",
+      type: "regular"
+    },
+    {
+      className: "월 경계 연동반",
+      classTemplateId: "safe-cross-month-class",
+      date: "2026-08-01",
+      endTime: "13:00",
+      lessonId: "safe-cross-month-current-lesson",
+      startTime: "10:00",
+      status: "scheduled",
+      studentIds: ["safe-active-student"],
+      title: "월 경계 연동반",
       type: "regular"
     }
   ],
@@ -33,6 +77,33 @@ const initialState = {
       lessonStudentRecordId: "safe-absence-record",
       recordId: "safe-absence-record",
       studentId: "safe-withdrawn-student"
+    },
+    {
+      attendanceStatus: "present",
+      lessonId: "safe-cross-month-populated-lesson",
+      lessonMaterial: "7월 최신 교재",
+      lessonProgress: "7월 최신 진도",
+      lessonStudentRecordId: "safe-cross-month-populated-record",
+      recordId: "safe-cross-month-populated-record",
+      studentId: "safe-active-student"
+    },
+    {
+      attendanceStatus: "present",
+      lessonId: "safe-cross-month-blank-lesson",
+      lessonMaterial: "",
+      lessonProgress: "",
+      lessonStudentRecordId: "safe-cross-month-blank-record",
+      recordId: "safe-cross-month-blank-record",
+      studentId: "safe-active-student"
+    },
+    {
+      attendanceStatus: "pending",
+      lessonId: "safe-cross-month-current-lesson",
+      lessonMaterial: "",
+      lessonProgress: "",
+      lessonStudentRecordId: "safe-cross-month-current-record",
+      recordId: "safe-cross-month-current-record",
+      studentId: "safe-active-student"
     }
   ],
   resourceMaterials: [],
@@ -48,6 +119,13 @@ const initialState = {
       status: "paused",
       studentId: "safe-withdrawn-student",
       withdrawnAt: "2026-07-31T00:00:00.000Z"
+    },
+    {
+      grade: "중3",
+      name: "월경계 학생",
+      schoolName: "안전중",
+      status: "active",
+      studentId: "safe-active-student"
     }
   ],
   testAttempts: [],
