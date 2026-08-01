@@ -16,6 +16,7 @@
     "test:scenario-summary": "node scripts/run-scenario-summary.mjs",
     "test:browser-smoke": "playwright test",
     "test:client-runtime-error": "node scripts/test-client-runtime-error.mjs",
+    "test:app-state-autosave-inventory": "node scripts/test-app-state-autosave-concurrency-inventory.mjs",
     "check:fast": "npm run lint:runtime && npm run test:scenario-summary && npm run build",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1",

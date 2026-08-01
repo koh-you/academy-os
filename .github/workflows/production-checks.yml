@@ -45,6 +45,9 @@ jobs:
       - name: Test client runtime error contract
         run: npm run test:client-runtime-error
 
+      - name: Test app state autosave concurrency inventory
+        run: npm run test:app-state-autosave-inventory
+
       - name: Run production tests
         run: npm run test:production
 
