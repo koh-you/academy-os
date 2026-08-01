@@ -6,6 +6,15 @@ function collectPageErrors(page) {
   return errors;
 }
 
+async function loginAsTeacher(page) {
+  await page.goto("/");
+  await page.getByRole("button", { name: "선생님" }).click();
+  await page.getByLabel("선생님 아이디").fill("preview");
+  await page.getByLabel("선생님 비밀번호").fill("preview");
+  await page.getByRole("button", { name: "선생님 로그인" }).click();
+  await expect(page.getByRole("navigation", { name: "주요 화면" })).toBeVisible();
+}
+
 test.beforeEach(async ({ request }) => {
   await expect.poll(async () => {
     try {
@@ -27,13 +36,7 @@ test("safe preview opens the login screen without runtime errors", async ({ page
 
 test("withdrawn absence candidate can reach and complete safe makeup cancellation", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
-  await page.goto("/");
-  await page.getByRole("button", { name: "선생님" }).click();
-  await page.getByLabel("선생님 아이디").fill("preview");
-  await page.getByLabel("선생님 비밀번호").fill("preview");
-  await page.getByRole("button", { name: "선생님 로그인" }).click();
-
-  await expect(page.getByRole("navigation", { name: "주요 화면" })).toBeVisible();
+  await loginAsTeacher(page);
   await page.getByRole("button", { name: /보충관리/ }).click();
   await expect(page.getByRole("heading", { name: "보충관리" })).toBeVisible();
   await page.getByRole("button", { name: /결석보강/ }).first().click();
@@ -48,5 +51,20 @@ test("withdrawn absence candidate can reach and complete safe makeup cancellatio
 
   await expect(page.getByText("지금 처리할 결석 보강이 없습니다.")).toBeVisible();
   await expect(page.getByRole("button", { name: "보충 생성" })).toHaveCount(0);
+  expect(pageErrors).toEqual([]);
+});
+
+test("lesson journal calendar can move to the next month and back", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+
+  const monthNavigation = page.getByRole("navigation", { name: "수업일지 달력 월 이동" });
+  await expect(monthNavigation).toBeVisible();
+  const monthHeading = monthNavigation.getByRole("heading");
+  const originalMonthTitle = await monthHeading.textContent();
+  await monthNavigation.getByRole("button", { name: "다음 달" }).click();
+  await expect(monthHeading).not.toHaveText(originalMonthTitle);
+  await monthNavigation.getByRole("button", { name: "이전 달" }).click();
+  await expect(monthHeading).toHaveText(originalMonthTitle);
   expect(pageErrors).toEqual([]);
 });

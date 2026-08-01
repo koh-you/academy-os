@@ -3464,6 +3464,34 @@ summary:focus-visible {
   display: none;
 }
 
+.lessonCalendarMonthNavigation {
+  align-items: center;
+  background: var(--academy-surface);
+  border: 1px solid var(--academy-border);
+  border-radius: var(--academy-radius);
+  box-shadow: var(--academy-shadow);
+  display: flex;
+  gap: var(--academy-space-2);
+  justify-content: center;
+  margin-bottom: var(--academy-space-2);
+  min-height: 62px;
+  padding: 10px 14px;
+}
+
+.lessonCalendarMonthNavigation h2 {
+  font-size: 22px;
+  font-weight: 900;
+  margin: 0;
+  min-width: 140px;
+  text-align: center;
+}
+
+.lessonCalendarMonthNavigation .iconButton {
+  font-size: 20px;
+  height: 40px;
+  width: 40px;
+}
+
 .teacherCalendarShell {
   max-width: 100%;
   padding: 14px;

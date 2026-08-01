@@ -1,8 +1,17 @@
 import assert from "node:assert/strict";
 import {
   createLessonCalendarViewModel,
-  lessonCalendarFilterOptions
+  lessonCalendarFilterOptions,
+  shiftLessonCalendarMonth
 } from "../src/domains/lessons/lessonCalendarModel.js";
+
+assert.equal(shiftLessonCalendarMonth("2026-08-01", 1), "2026-09-01");
+assert.equal(shiftLessonCalendarMonth("2026-08-01", -1), "2026-07-01");
+assert.equal(shiftLessonCalendarMonth("2026-01-31", 1), "2026-02-28");
+assert.equal(shiftLessonCalendarMonth("2024-01-31", 1), "2024-02-29");
+assert.equal(shiftLessonCalendarMonth("2026-03-31", -1), "2026-02-28");
+assert.equal(shiftLessonCalendarMonth("invalid", 1), "invalid");
+assert.equal(shiftLessonCalendarMonth("2026-02-31", 1), "2026-02-31");
 
 const lessons = [
   {
@@ -132,4 +141,4 @@ assert.deepEqual(
   "view model creation must not mutate the source lesson order"
 );
 
-console.log("lesson calendar filtering, month count, day sorting, and pill model passed");
+console.log("lesson calendar month shift, filtering, month count, day sorting, and pill model passed");

@@ -16,6 +16,13 @@
 - 전용 inventory, runtime lint, production `809/809`, build `345 modules`, safe browser smoke `2/2`를 통과했다.
 - 운영 쓰기·발송·예약·취소·유료 호출·SQL 적용은 없었다.
 
+## 사용자 후속 수정
+
+- 숨겨진 달력 제어줄과 분리해 수업일지의 이전·다음 달 탐색을 복구했고 실제 월 단위 이동·말일 보정을 적용했다.
+- safe browser에 월 이동 왕복 회귀를 추가했다.
+- 매일 자동 task는 시작 시 서울 기준 날짜를 제목 앞에 붙이도록 자동화 프롬프트를 갱신했다.
+- 검증: 달력 전용 테스트, scenario `809/809`, runtime lint, build `345 modules`, safe browser `3/3`, production 전체 묶음 통과.
+
 ## 다음 자동 실행 단위
 
 1. `git status --short`가 clean이고 최신 main인지 확인한다.

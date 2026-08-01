@@ -14,6 +14,7 @@ export function LessonCalendarView({
   onMoveDate,
   onOpenMonthlyRegularLessons,
   onOpenLessonJournal,
+  onShiftMonth,
   selectedCalendarDayRef,
   showMonthlyRegularLessonOpen,
   viewModel
@@ -59,10 +60,14 @@ export function LessonCalendarView({
             </span>
           </>
         )}
-        leading={<button aria-label="이전 달" className="iconButton" onClick={() => onMoveDate(-30)} type="button">‹</button>}
         title={monthTitle}
-        trailing={<button aria-label="다음 달" className="iconButton" onClick={() => onMoveDate(30)} type="button">›</button>}
       />
+
+      <nav aria-label="수업일지 달력 월 이동" className="lessonCalendarMonthNavigation">
+        <button aria-label="이전 달" className="iconButton" onClick={() => onShiftMonth(-1)} type="button">‹</button>
+        <h2 aria-live="polite">{monthTitle}</h2>
+        <button aria-label="다음 달" className="iconButton" onClick={() => onShiftMonth(1)} type="button">›</button>
+      </nav>
 
       <section
         aria-label={`${monthTitle} 수업 달력`}

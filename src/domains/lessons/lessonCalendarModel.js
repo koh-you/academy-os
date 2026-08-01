@@ -8,6 +8,26 @@ export const lessonCalendarFilterOptions = [
   { id: "specialLecture", label: "특강" }
 ];
 
+export function shiftLessonCalendarMonth(dateString = "", monthOffset = 0) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(dateString));
+  const offset = Number(monthOffset);
+  if (!match || !Number.isInteger(offset)) return dateString;
+
+  const [, yearText, monthText, dayText] = match;
+  const year = Number(yearText);
+  const monthIndex = Number(monthText) - 1;
+  const day = Number(dayText);
+  const sourceLastDay = new Date(Date.UTC(year, monthIndex + 1, 0)).getUTCDate();
+  if (monthIndex < 0 || monthIndex > 11 || day < 1 || day > sourceLastDay) return dateString;
+
+  const targetMonth = new Date(Date.UTC(year, monthIndex + offset, 1));
+  const targetYear = targetMonth.getUTCFullYear();
+  const targetMonthIndex = targetMonth.getUTCMonth();
+  const targetLastDay = new Date(Date.UTC(targetYear, targetMonthIndex + 1, 0)).getUTCDate();
+  const targetDay = Math.min(day, targetLastDay);
+  return `${targetYear}-${String(targetMonthIndex + 1).padStart(2, "0")}-${String(targetDay).padStart(2, "0")}`;
+}
+
 function matchesLessonTypeFilter(lesson, lessonTypeFilter, isExamPrepLesson) {
   if (lessonTypeFilter === "all") return true;
   if (lessonTypeFilter === "regular") {

@@ -6,6 +6,7 @@ const viewSource = await readFile(
   new URL("../src/domains/lessons/LessonCalendarView.jsx", import.meta.url),
   "utf8"
 );
+const cssSource = await readFile(new URL("../src/app/App.css", import.meta.url), "utf8");
 
 for (const requiredSource of [
   "export function LessonCalendarView({",
@@ -17,8 +18,9 @@ for (const requiredSource of [
   "onLessonTypeFilterChange(option.id)",
   "onDateSelect(day.date)",
   "onOpenLessonJournal(pill.lesson.lessonId)",
-  "onMoveDate(-30)",
-  "onMoveDate(30)",
+  'aria-label="수업일지 달력 월 이동"',
+  "onShiftMonth(-1)",
+  "onShiftMonth(1)",
   "onAddLesson",
   "attendanceSyncPill",
   "attendanceSyncLabel",
@@ -69,8 +71,11 @@ assert.ok(
 assert.ok(
   appSource.includes("attendanceSyncStatus={attendanceSyncStatus}") &&
     appSource.includes("selectedCalendarDayRef={selectedCalendarDayRef}") &&
-    appSource.includes("showMonthlyRegularLessonOpen={!isMonthlyRegularLessonOpened"),
+    appSource.includes("showMonthlyRegularLessonOpen={!isMonthlyRegularLessonOpened") &&
+    appSource.includes("onShiftMonth={handleCalendarMonthShift}"),
   "App must preserve attendance sync, focus ownership, and monthly regular opening controls"
 );
+assert.ok(cssSource.includes(".lessonCalendarMonthNavigation"));
+assert.ok(!cssSource.includes(".lessonCalendarMonthNavigation {\n  display: none"));
 
 console.log("lesson calendar presentational component boundary passed");

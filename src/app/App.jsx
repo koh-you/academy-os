@@ -362,7 +362,10 @@ import {
   shouldIgnoreLessonAttendance
 } from "../domains/lessons/lessonClosure.js";
 import { LessonCalendarView } from "../domains/lessons/LessonCalendarView.jsx";
-import { createLessonCalendarViewModel } from "../domains/lessons/lessonCalendarModel.js";
+import {
+  createLessonCalendarViewModel,
+  shiftLessonCalendarMonth
+} from "../domains/lessons/lessonCalendarModel.js";
 import { useLessonCalendarKeyboardNavigation } from "../domains/lessons/useLessonCalendarKeyboardNavigation.js";
 import {
   createLessonModalSubmitPayload,
@@ -7041,6 +7044,10 @@ export function App() {
     handleDateSelect(nextDate);
   }
 
+  function handleCalendarMonthShift(monthOffset) {
+    handleDateSelect(shiftLessonCalendarMonth(selectedDate, monthOffset));
+  }
+
   function handleCopySelectedLesson() {
     const lesson = lessons.find((item) => item.lessonId === selectedLessonId);
     if (!lesson) return;
@@ -9307,6 +9314,7 @@ export function App() {
             onBackToCalendar={() => setIsLessonJournalOpen(false)}
             onCancelNotificationJob={handleCancelNotificationJob}
             onMoveDate={handleCalendarMove}
+            onShiftMonth={handleCalendarMonthShift}
             onOpenAttendance={setAttendanceModal}
             onOpenExamPrep={() => handleChangeView("examPrep")}
             onOpenLessonJournal={handleOpenLessonJournal}
@@ -14712,6 +14720,7 @@ function TeacherLessonHubV2({
   onUpdateLessonNotificationPlan,
   onUpdateMakeupTask,
   onToggleStudentNotificationMute,
+  onShiftMonth,
   undoCount,
   isLessonJournalOpen
 }) {
@@ -14900,6 +14909,7 @@ function TeacherLessonHubV2({
         onMoveDate={onMoveDate}
         onOpenMonthlyRegularLessons={onOpenMonthlyRegularLessons}
         onOpenLessonJournal={onOpenLessonJournal}
+        onShiftMonth={onShiftMonth}
         selectedCalendarDayRef={selectedCalendarDayRef}
         showMonthlyRegularLessonOpen={!isMonthlyRegularLessonOpened && monthlyRegularLessonOpenPlan.lessonsToCreate.length > 0}
         viewModel={lessonCalendarViewModel}
