@@ -37,6 +37,25 @@ test("safe preview opens the login screen without runtime errors", async ({ page
   expect(pageErrors).toEqual([]);
 });
 
+test("withdrawn student list keeps its table and selection toolbar boundary", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
+  await page.getByRole("tab", { name: "퇴원생 목록" }).click();
+
+  const withdrawnList = page.getByRole("region", { name: "퇴원생 목록" });
+  await expect(withdrawnList).toContainText("미리보기 퇴원생");
+  await expect(withdrawnList.getByLabel("미리보기 퇴원생 퇴원 사유")).toBeVisible();
+  await withdrawnList.getByRole("checkbox").check();
+
+  const selectionToolbar = page.getByRole("group", { name: "퇴원생 선택" });
+  await expect(selectionToolbar).toContainText("선택 1명");
+  await expect(selectionToolbar.getByRole("button", { name: "퇴원 취소" })).toBeEnabled();
+  await expect(selectionToolbar.getByRole("button", { name: "영구 삭제" })).toBeEnabled();
+  expect(pageErrors).toEqual([]);
+});
+
 test("notification and special lecture screens render through the extracted boundary", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);

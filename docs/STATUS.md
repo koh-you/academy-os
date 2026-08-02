@@ -54,6 +54,7 @@
 - 3-4 첫 단위에서 학생관리의 16개 변경 callback을 `studentEffectAdapter`의 draft 1개·persistence 7개·deletion 5개·lifecycle 2개·audit 1개 표면으로 묶었다. App의 학생 저장·재조회·퇴원·복구·영구 삭제 구현은 그대로 유지하며 다음 학생 프로필 물리 분리의 고정 계약으로 사용한다.
 - 3-4 두 번째 단위에서 `StudentManager` 후반의 학생 프로필 화면·오류 경계·전용 helper를 `StudentProfileModal.jsx`로 옮겼다. 기존 프로필 본문과 callback 10개의 의미는 그대로이며, 실제 저장·Supabase 재조회·오류 복구는 App owner를 유지한다. `StudentManager.jsx`는 2,168줄에서 994줄로 줄었다.
 - 3-4 세 번째 단위에서 퇴원 확인·인계 PDF·단일/일괄 영구삭제 4개 overlay를 `StudentLifecycleOverlays.jsx`로 옮겼다. 화면 JSX 11,029자는 기준 commit과 동일하며, audit·복원·삭제 controller 및 App의 Supabase 재조회 owner는 이동하지 않았다. `StudentManager.jsx`는 826줄로 줄었다.
+- 3-4 마지막 단위에서 퇴원생 목록·정렬·선택 toolbar를 `StudentWithdrawnList.jsx`로 옮겼다. 20개 prop은 직접 identity를 유지하고 local dirty/선택 및 lifecycle controller는 Manager에 남겼다. `StudentManager.jsx`는 755줄로 줄었으며 profile·퇴원 목록·lifecycle overlay 경계를 대조해 3-4를 닫는다.
 
 ## 폴더 상태
 
