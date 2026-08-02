@@ -4,11 +4,12 @@
 
 ## 2026-08-02 App 3차 리팩터링 3-2 수업일지 draft/persisted 경계
 
-- `LessonJournalDetail`에 남아 있던 record·homework·makeup local draft 조작, 편집 상태, 저장 결과 처리를 `useLessonJournalDraftController`로 이동했다. 상세 화면은 948줄에서 775줄로 줄었고 새 controller는 257줄이다.
-- controller는 API·Supabase·localStorage를 직접 사용하지 않고 App의 `handleSaveLessonJournalDrafts`를 주입받는다. App은 ordered persistence와 서버 재조회 대조를 계속 소유하며, controller는 `ok` 성공에서만 draft를 비우고 실패·부분저장에서는 모든 수정본을 유지한다.
-- 순수 save transition TARGET/CONTROL fixture를 추가하고 lesson fast에 연결했다. 위치 결합 closeout은 상세 화면, draft controller, App persistence owner를 각각 직접 읽도록 바꿨다.
-- 안전 브라우저에서 월 경계 수업일지를 열어 `수정 시작 -> 교재 변경 -> 변경 저장 -> 저장 완료 -> 저장값 표시`까지 가상 Supabase fixture로 검증했다.
-- 검증: lesson fast 8/8, 수업일지 전용 59/59, runtime lint, scenario 814/814, `check:fast`, production 814/814 84.6초, build 356 modules, Worktree 격리 safe browser 9/9를 통과했다. 운영 데이터·실제 알림·운영 SQL·유료 호출은 사용하지 않았다.
+- `LessonJournalDetail`에 남아 있던 record·homework·makeup local draft 조작, 편집 상태, 저장 결과 처리를 `useLessonJournalDraftController`로 이동했다. 상세 화면은 948줄에서 775줄로 줄었고 revision guard를 포함한 새 controller는 320줄이다.
+- controller는 API·Supabase·localStorage를 직접 사용하지 않고 App의 `handleSaveLessonJournalDrafts`를 주입받는다. App은 ordered persistence와 서버 재조회 대조를 계속 소유한다.
+- 독립 검토에서 `A 저장 요청 -> 요청 중 B 입력 -> A 성공` 순서일 때 오래된 성공 handler가 B까지 비우는 회귀를 발견했다. 요청 lesson과 draft revision을 캡처해 같은 revision의 성공만 비우고, 후속 입력은 편집 모드와 함께 유지해 `저장 완료 · 이후 변경 저장 필요`로 재저장을 안내한다. 다른 수업으로 이동한 뒤 도착한 응답도 활성 draft에 적용하지 않는다.
+- 순수 save transition·in-flight resolution TARGET/CONTROL fixture를 lesson fast에 연결했다. 위치 결합 closeout은 상세 화면, draft controller, App persistence owner를 각각 직접 읽도록 바꿨다.
+- 안전 브라우저의 가상 lesson record bulk API를 지연시켜 `A 입력 -> 저장 -> 저장 중 B 입력 -> B 보존 안내 -> B 재저장 -> 저장 완료`를 재현했다.
+- 검증: lesson fast 8/8, 수업일지 전용 59/59, runtime lint, scenario 814/814, `check:fast`, production 814/814 84.9초, build 356 modules, Worktree 격리 safe browser 9/9를 통과했다. 운영 데이터·실제 알림·운영 SQL·유료 호출은 사용하지 않았다.
 
 ## 2026-08-02 App 3차 리팩터링 3-1 Lesson Journal Detail 화면 분리
 

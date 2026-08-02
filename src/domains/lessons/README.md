@@ -24,4 +24,4 @@ MVP 기준:
 - `lessonModalSaveSnapshot.js`는 수업 modal 저장 후 Supabase 재조회 값을 비교할 필드·시간·명단·학생별 특강 일정을 순수 정규화합니다.
 - `lessonModalPayloadBuilders.js`는 신규·수정 수업과 선택형 휴강 보충의 저장 payload를 주입된 요일·색상 resolver로 순수 조립합니다.
 - `lessonModalSaveVerification.js`는 Supabase 재조회 결과에서 예상 수업을 찾아 snapshot 일치 여부를 순수 판정합니다.
-- `useLessonJournalDraftController.js`는 수업일지 local draft 조작과 저장 성공/실패 전이를 소유합니다. App 저장 callback을 주입받으며 성공 때만 draft를 비우고 API·Supabase·localStorage는 직접 사용하지 않습니다.
+- `useLessonJournalDraftController.js`는 수업일지 local draft 조작과 저장 성공/실패 전이를 소유합니다. App 저장 callback을 주입받으며 요청 lesson·draft revision이 같은 성공에서만 draft를 비웁니다. 저장 중 후속 입력과 다른 수업의 draft는 보존하고 API·Supabase·localStorage는 직접 사용하지 않습니다.

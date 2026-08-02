@@ -126,12 +126,19 @@ test("lesson journal carries the latest non-empty record across a month boundary
   await expect(lessonJournal.getByRole("button", { name: "7월 최신 진도" })).toBeVisible();
   await lessonJournal.getByRole("button", { name: "수정 시작" }).click();
   const materialDraft = lessonJournal.getByRole("textbox", { name: "월경계 학생 강의 교재" });
-  await materialDraft.fill("8월 안전 저장 교재");
+  await materialDraft.fill("8월 저장 요청 A");
   const saveBar = lessonJournal.getByRole("complementary", { name: "수업일지 하단 고정 저장 바" });
   await expect(saveBar).toContainText("저장 전 변경 1건");
-  await saveBar.getByRole("button", { name: "변경 저장" }).click();
+  const saveButton = saveBar.getByRole("button", { name: "변경 저장" });
+  await saveButton.click();
+  await expect(saveBar.getByRole("button", { name: "저장 중" })).toBeDisabled();
+  await materialDraft.fill("8월 후속 수정 B");
+  await expect(materialDraft).toHaveValue("8월 후속 수정 B");
+  await expect(saveBar).toContainText("저장 완료 · 이후 변경 저장 필요 · 저장 전 변경 1건");
+  await expect(saveButton).toBeEnabled();
+  await saveButton.click();
   await expect(saveBar).toContainText("저장 완료");
-  await expect(lessonJournal.getByRole("button", { name: "8월 안전 저장 교재" })).toBeVisible();
+  await expect(lessonJournal.getByRole("button", { name: "8월 후속 수정 B" })).toBeVisible();
   expect(pageErrors).toEqual([]);
 });
 

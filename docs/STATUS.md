@@ -47,7 +47,7 @@
 - 3-1 첫 단위에서 Notification Center top-level 화면을 notification 도메인 파일로 물리 분리했다. App-level 알림 조회·취소·reconcile callback과 특강 panel binding은 유지하고, 화면의 기존 공지 발송·예약·삭제 request binding도 의미 변경 없이 함께 이동했다.
 - 3-1 두 번째 단위에서 Teacher Lesson Hub 화면 조립을 `src/domains/lessons/TeacherLessonHubV2.jsx`로 물리 분리했다. 달력 local filter·focus·키보드 navigation은 새 화면이 소유하고, 수업일지 저장·알림 예약/취소/발송/reconcile handler와 상세 화면은 App runtime binding을 통해 기존 owner를 유지한다.
 - 3-1 세 번째 단위에서 Lesson Journal Detail 화면을 `src/domains/lessons/LessonJournalDetail.jsx`로 물리 분리했다. 화면 local draft·overlay·예약 표시 상태는 도메인 화면에 두고, 저장·삭제·알림 예약/취소/발송/reconcile callback과 OS 예약 조회 transport는 App owner를 유지한다.
-- 3-2 첫 단위에서 수업일지 record·homework·makeup local draft 조작과 저장 성공/실패 전이를 `useLessonJournalDraftController`로 묶었다. App의 Supabase 저장·재조회 callback은 유지하며 성공 때만 draft를 비우고 실패·부분저장 때는 수정본을 유지한다.
+- 3-2 첫 단위에서 수업일지 record·homework·makeup local draft 조작과 저장 성공/실패 전이를 `useLessonJournalDraftController`로 묶었다. App의 Supabase 저장·재조회 callback은 유지한다. 성공 때도 요청 중 후속 입력이 있으면 최신 draft와 편집 모드를 보존해 재저장을 안내하고, 실패·부분저장 때도 수정본을 유지한다.
 
 ## 폴더 상태
 

@@ -15,7 +15,7 @@
 - 3-1 첫 단위로 Notification Center top-level 화면을 도메인 파일로 옮겼다. 저장·발송 handler와 특강 panel owner는 유지하고 App runtime binding을 teacher view adapter로 명시했다.
 - 3-1 두 번째 단위로 Teacher Lesson Hub 화면 조립을 lesson 도메인 파일로 옮겼다. 달력 local state만 화면이 소유하고 수업일지 저장·알림 side-effect callback 및 상세 화면 owner는 App에 유지했다.
 - 3-1 세 번째 단위로 Lesson Journal Detail 화면을 lesson 도메인 파일로 옮겼다. 화면 local draft·overlay·예약 표시 상태만 새 파일에서 조립하고, 저장·삭제·알림 side effect callback과 OS 예약 조회 transport는 App에 유지했다.
-- 3-2 첫 단위로 수업일지 record·homework·makeup local draft와 성공/실패 전이를 전용 controller hook으로 묶었다. App 저장·Supabase 재조회 owner는 유지하고 실패·부분저장 수정본 보존을 TARGET/CONTROL과 안전 브라우저 저장 동선으로 확인했다.
+- 3-2 첫 단위로 수업일지 record·homework·makeup local draft와 성공/실패 전이를 전용 controller hook으로 묶었다. App 저장·Supabase 재조회 owner는 유지한다. 저장 중 후속 입력은 revision guard로 보존하고 재저장을 안내하며, 실패·부분저장 수정본 보존과 다른 수업 응답 격리를 TARGET/CONTROL 및 지연 API 안전 브라우저 동선으로 확인했다.
 - 로컬 browser smoke의 Worktree 격리 runner를 기본 명령으로 추가했다. 다음 단위는 3-2에 남은 수업일지 persisted/provider callback 표면을 명시적 adapter 계약으로 고정한다.
 
 - `app_state` 자동저장 12개 key의 500ms debounce, request ID, API upsert, `updated_at` 경계를 inventory했다.

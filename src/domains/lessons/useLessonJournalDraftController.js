@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import { normalizeAssignmentStatusValue } from "./assignmentStatus.js";
 import { createLessonJournalAssignmentStatusPlan } from "./lessonJournalAssignmentStatusPlan.js";
 import {
@@ -31,6 +32,34 @@ export function createLessonJournalDraftSaveStateTransition(saved) {
   };
 }
 
+export function resolveLessonJournalDraftSave({
+  currentLessonId,
+  currentRevision,
+  saved,
+  saveLessonId,
+  saveRevision
+} = {}) {
+  const transition = createLessonJournalDraftSaveStateTransition(saved);
+  if (currentLessonId !== saveLessonId) {
+    return {
+      ...transition,
+      shouldApply: false,
+      shouldClearDrafts: false
+    };
+  }
+  if (transition.shouldClearDrafts && currentRevision !== saveRevision) {
+    return {
+      message: "수업일지 · 저장 완료 · 이후 변경 저장 필요",
+      shouldApply: true,
+      shouldClearDrafts: false
+    };
+  }
+  return {
+    ...transition,
+    shouldApply: true
+  };
+}
+
 export function useLessonJournalDraftController({
   createEmptyRecord,
   createLessonStudentRecordId,
@@ -41,6 +70,14 @@ export function useLessonJournalDraftController({
   onSaveLessonJournalDrafts,
   recordSaveStates
 }) {
+  const activeLessonIdRef = useRef(lesson.lessonId);
+  const draftRevisionRef = useRef(0);
+  const saveInFlightRef = useRef(null);
+  const [journalDraftSaveInFlight, setJournalDraftSaveInFlight] = useState(false);
+  if (activeLessonIdRef.current !== lesson.lessonId) {
+    activeLessonIdRef.current = lesson.lessonId;
+    draftRevisionRef.current += 1;
+  }
   const {
     journalEditMode,
     journalHomeworkDrafts,
@@ -63,7 +100,8 @@ export function useLessonJournalDraftController({
     makeupTaskDrafts: journalMakeupTaskDrafts,
     manualSaveMessage: journalManualSaveMessage,
     recordDrafts: journalRecordDrafts,
-    recordSaveStates
+    recordSaveStates,
+    isSaving: journalDraftSaveInFlight
   });
   const journalDraftSaveRequest = createLessonJournalDraftSaveRequest({
     hasDraftChanges: hasJournalDraftChanges,
@@ -129,6 +167,7 @@ export function useLessonJournalDraftController({
 
   function updateJournalRecordDraftPatch(student, baseRecord, patch = {}) {
     if (!journalEditMode) return;
+    draftRevisionRef.current += 1;
     const nowIso = new Date().toISOString();
     const { record, recordId } = createLessonJournalRecordDraft({
       baseRecord,
@@ -146,6 +185,7 @@ export function useLessonJournalDraftController({
 
   function removeJournalMakeupTaskDraft(student) {
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
+    draftRevisionRef.current += 1;
     setJournalMakeupTaskDrafts((current) => (
       removeLessonJournalMakeupTaskDraft({
         currentDrafts: current,
@@ -199,6 +239,7 @@ export function useLessonJournalDraftController({
   function updateJournalHomeworkDraft(student, homeworkType, title) {
     if (!journalEditMode) return;
     const key = getHomeworkDraftKey(student, homeworkType);
+    draftRevisionRef.current += 1;
     setJournalHomeworkDrafts((current) => ({
       ...current,
       [key]: createLessonJournalHomeworkDraft({
@@ -212,29 +253,51 @@ export function useLessonJournalDraftController({
   }
 
   async function saveJournalDrafts() {
+    if (saveInFlightRef.current) return saveInFlightRef.current;
     if (!journalDraftSaveRequest.hasDraftChanges) {
       setJournalEditMode(false);
       setJournalManualSaveMessage("수업일지 · 변경 없음");
       return undefined;
     }
+    const saveLessonId = lesson.lessonId;
+    const saveRevision = draftRevisionRef.current;
     setJournalManualSaveMessage("수업일지 · 저장 중");
-    const saved = await onSaveLessonJournalDrafts?.(
-      lesson,
-      journalDraftSaveRequest.recordDrafts,
-      journalDraftSaveRequest.homeworkDrafts,
-      journalDraftSaveRequest.makeupTaskDrafts
-    );
-    const transition = createLessonJournalDraftSaveStateTransition(saved);
-    if (!transition.shouldClearDrafts) {
-      setJournalManualSaveMessage(transition.message);
+    setJournalDraftSaveInFlight(true);
+    const savePromise = (async () => {
+      const saved = await onSaveLessonJournalDrafts?.(
+        lesson,
+        journalDraftSaveRequest.recordDrafts,
+        journalDraftSaveRequest.homeworkDrafts,
+        journalDraftSaveRequest.makeupTaskDrafts
+      );
+      const resolution = resolveLessonJournalDraftSave({
+        currentLessonId: activeLessonIdRef.current,
+        currentRevision: draftRevisionRef.current,
+        saved,
+        saveLessonId,
+        saveRevision
+      });
+      if (!resolution.shouldApply) return saved;
+      if (!resolution.shouldClearDrafts) {
+        setJournalManualSaveMessage(resolution.message);
+        return saved;
+      }
+      setJournalRecordDrafts({});
+      setJournalHomeworkDrafts({});
+      setJournalMakeupTaskDrafts({});
+      setJournalEditMode(false);
+      setJournalManualSaveMessage(resolution.message);
       return saved;
+    })();
+    saveInFlightRef.current = savePromise;
+    try {
+      return await savePromise;
+    } finally {
+      if (saveInFlightRef.current === savePromise) {
+        saveInFlightRef.current = null;
+        setJournalDraftSaveInFlight(false);
+      }
     }
-    setJournalRecordDrafts({});
-    setJournalHomeworkDrafts({});
-    setJournalMakeupTaskDrafts({});
-    setJournalEditMode(false);
-    setJournalManualSaveMessage(transition.message);
-    return saved;
   }
 
   return {

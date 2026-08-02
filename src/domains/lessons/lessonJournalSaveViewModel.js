@@ -3,7 +3,8 @@ export function createLessonJournalSaveViewModel({
   makeupTaskDrafts = {},
   manualSaveMessage = "",
   recordDrafts = {},
-  recordSaveStates = []
+  recordSaveStates = [],
+  isSaving = false
 } = {}) {
   const lessonJournalSaveStatus = recordSaveStates.includes("saving")
     ? { label: "저장 중...", tone: "saving" }
@@ -21,20 +22,26 @@ export function createLessonJournalSaveViewModel({
   const draftChangeCount =
     recordDraftCount + homeworkDraftCount + makeupTaskDraftCount;
   const hasDraftChanges = draftChangeCount > 0;
-  const stickySaveState = manualSaveMessage.includes("저장 실패")
-    ? "failed"
-    : manualSaveMessage.includes("저장 중")
-      ? "saving"
-      : hasDraftChanges
-        ? "dirty"
-        : manualSaveMessage.includes("저장 완료")
-          ? "saved"
-          : lessonJournalSaveStatus.tone;
-  const stickySaveMessage = hasDraftChanges
-    ? `저장 전 변경 ${draftChangeCount}건`
-    : manualSaveMessage ||
-      lessonJournalSaveStatus.label ||
-      "편집을 시작하면 변경 내용이 여기에 표시됩니다.";
+  const stickySaveState = isSaving
+    ? "saving"
+    : manualSaveMessage.includes("저장 실패")
+      ? "failed"
+      : manualSaveMessage.includes("저장 중")
+        ? "saving"
+        : hasDraftChanges
+          ? "dirty"
+          : manualSaveMessage.includes("저장 완료")
+            ? "saved"
+            : lessonJournalSaveStatus.tone;
+  const stickySaveMessage = isSaving
+    ? "수업일지 · 저장 중"
+    : hasDraftChanges
+      ? manualSaveMessage.includes("이후 변경 저장 필요")
+        ? `${manualSaveMessage} · 저장 전 변경 ${draftChangeCount}건`
+        : `저장 전 변경 ${draftChangeCount}건`
+      : manualSaveMessage ||
+        lessonJournalSaveStatus.label ||
+        "편집을 시작하면 변경 내용이 여기에 표시됩니다.";
 
   return {
     draftChangeCount,
