@@ -4,9 +4,13 @@ import { lazyTeacherViewComponents } from "../src/app/lazyTeacherViewComponents.
 
 const expectedLazyComponents = Object.freeze([
   "ExamAnalysisPipelineCenter",
+  "FollowUpCenter",
+  "MaterialManager",
   "NotificationCenter",
   "SettlementWorkspace",
   "StudentManager",
+  "OverdueHomework",
+  "ResourceLibraryCenter",
   "SupplementCenter",
   "TeacherLessonHubV2"
 ]);
@@ -30,9 +34,13 @@ const [appSource, registrySource, outletSource, boundarySource] = await Promise.
 
 const lazyModuleContracts = [
   ["ExamAnalysisPipelineCenter", "../domains/exams/ExamAnalysisPipelineCenter.jsx"],
+  ["FollowUpCenter", "../domains/teacher/LearningSupportCenters.jsx"],
+  ["MaterialManager", "../domains/teacher/LearningSupportCenters.jsx"],
   ["NotificationCenter", "../domains/notifications/NotificationCenter.jsx"],
   ["SettlementWorkspace", "../domains/settlements/SettlementWorkspace.jsx"],
   ["StudentManager", "../domains/students/StudentManager.jsx"],
+  ["OverdueHomework", "../domains/teacher/LearningSupportCenters.jsx"],
+  ["ResourceLibraryCenter", "../domains/teacher/LearningSupportCenters.jsx"],
   ["SupplementCenter", "../domains/supplements/SupplementCenter.jsx"],
   ["TeacherLessonHubV2", "../domains/lessons/TeacherLessonHubV2.jsx"]
 ];

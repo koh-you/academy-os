@@ -137,6 +137,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
     overdue: {
       Component: components.OverdueHomework,
       props: {
+        runtime: runtimeBindings.learningSupport,
         homeworks: models.homeworks,
         lessons: models.lessons,
         materials: models.resourceMaterials,
@@ -151,6 +152,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
     followups: {
       Component: components.FollowUpCenter,
       props: {
+        runtime: runtimeBindings.learningSupport,
         appStateSaveState: models.appStateSaveState,
         homeworks: models.homeworks,
         lessons: models.lessons,
@@ -188,6 +190,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
     materials: {
       Component: components.MaterialManager,
       props: {
+        runtime: runtimeBindings.learningSupport,
         students: models.students,
         testAttempts: models.testAttempts,
         testResultSaveState: models.testResultSaveState,

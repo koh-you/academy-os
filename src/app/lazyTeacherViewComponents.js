@@ -12,6 +12,14 @@ export const lazyTeacherViewComponents = Object.freeze({
     () => import("../domains/exams/ExamAnalysisPipelineCenter.jsx"),
     "ExamAnalysisPipelineCenter"
   ),
+  FollowUpCenter: lazyNamedExport(
+    () => import("../domains/teacher/LearningSupportCenters.jsx"),
+    "FollowUpCenter"
+  ),
+  MaterialManager: lazyNamedExport(
+    () => import("../domains/teacher/LearningSupportCenters.jsx"),
+    "MaterialManager"
+  ),
   NotificationCenter: lazyNamedExport(
     () => import("../domains/notifications/NotificationCenter.jsx"),
     "NotificationCenter"
@@ -23,6 +31,14 @@ export const lazyTeacherViewComponents = Object.freeze({
   StudentManager: lazyNamedExport(
     () => import("../domains/students/StudentManager.jsx"),
     "StudentManager"
+  ),
+  OverdueHomework: lazyNamedExport(
+    () => import("../domains/teacher/LearningSupportCenters.jsx"),
+    "OverdueHomework"
+  ),
+  ResourceLibraryCenter: lazyNamedExport(
+    () => import("../domains/teacher/LearningSupportCenters.jsx"),
+    "ResourceLibraryCenter"
   ),
   SupplementCenter: lazyNamedExport(
     () => import("../domains/supplements/SupplementCenter.jsx"),
