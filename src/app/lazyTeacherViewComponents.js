@@ -8,6 +8,14 @@ function lazyNamedExport(loadModule, exportName) {
 }
 
 export const lazyTeacherViewComponents = Object.freeze({
+  AcademyReminderList: lazyNamedExport(
+    () => import("../domains/teacher/DashboardAuxiliaryPanels.jsx"),
+    "AcademyReminderList"
+  ),
+  AcademyReminderPanel: lazyNamedExport(
+    () => import("../domains/teacher/DashboardAuxiliaryPanels.jsx"),
+    "AcademyReminderPanel"
+  ),
   AIVariantProblemCenter: lazyNamedExport(
     () => import("../domains/teacher/PlanningToolCenters.jsx"),
     "AIVariantProblemCenter"
@@ -55,6 +63,10 @@ export const lazyTeacherViewComponents = Object.freeze({
   SchoolCalendarCenter: lazyNamedExport(
     () => import("../domains/teacher/PlanningToolCenters.jsx"),
     "SchoolCalendarCenter"
+  ),
+  SpecialLectureNoticePanel: lazyNamedExport(
+    () => import("../domains/teacher/DashboardAuxiliaryPanels.jsx"),
+    "SpecialLectureNoticePanel"
   ),
   SupplementCenter: lazyNamedExport(
     () => import("../domains/supplements/SupplementCenter.jsx"),

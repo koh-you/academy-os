@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 App 3차 리팩터링 3-7 보조 대시보드 화면 lazy loading
+
+- `App.jsx`의 특강 안내문과 첫 화면·수업일지 운영 알림 목록/편집 화면 1,029줄을 `src/domains/teacher/DashboardAuxiliaryPanels.jsx`로 물리 분리했다. export와 운영 알림 runtime 주입을 제거한 화면 본문 42,078자는 기준 main과 문자 단위로 동일하다.
+- 운영 알림 selector·표시 helper 15개는 frozen `academyReminderPanelRuntime`으로 App owner를 유지하고, 저장·삭제·특강 학생/안내문 callback은 기존 App→Outlet→화면 identity를 보존한다. 새 화면은 API·Storage·Solapi owner가 없다.
+- `React.lazy` binding은 함수가 아닌 React element type이어서 기존 Notification Center의 함수형 guard가 정상 화면을 거부하는 문제를 safe browser가 발견했다. binding 존재 여부를 검사하는 최소 수정과 전용 fixture로 알림·특강 화면 전환을 복구했다.
+- production main JS는 `1,092.41 kB / gzip 272.16 kB`에서 `999.16 kB / gzip 248.14 kB`로 줄었고 shared chunk는 `94.24 kB / gzip 24.63 kB`다. App은 11,836줄·551,722 bytes로 줄었으나 Babel 500 KB와 main 500 kB 경고는 남아 있다.
+- 검증: runtime lint, teacher/dashboard 경계, 5도메인 fast 38/38, scenario·production 821/821, `check:fast`, build 376 modules·lazy physical chunk 9/9, Worktree 격리 safe browser 16/16. 운영 데이터·실제 알림·AI 호출·SQL은 사용하지 않았다.
+
 ## 2026-08-02 App 3차 리팩터링 3-7 계획 도구 화면 lazy loading
 
 - `App.jsx`의 학사일정과 반관리·수업연구·AI 도구 화면 1,509줄을 `src/domains/teacher/PlanningToolCenters.jsx`로 물리 분리했다. 서로 떨어진 두 원본 구간을 합친 62,963자는 export/runtime 주입을 제거하고 기준 main과 줄바꿈 정규화 후 문자 단위로 동일하다.

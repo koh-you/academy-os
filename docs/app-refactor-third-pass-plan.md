@@ -90,6 +90,7 @@
 - 진행: `App.jsx`의 시험분석 helper·화면 4,612줄을 `ExamAnalysisPipelineCenter.jsx`로 옮겨 여섯 번째 lazy chunk로 연결했다. 13개 API request 구현은 App runtime owner를 유지한다. main JS는 1,181.41 kB, gzip은 296.06 kB, App source는 721,795 bytes로 줄었고 시험분석 chunk 지연 진입을 유료 행동 없이 safe browser로 고정했다.
 - 진행: 오답관리·시험지관리·자료함·숙제현황 4개 화면을 39.49 kB shared lazy chunk로 옮겼다. 10개 App runtime binding과 기존 저장 callback identity를 유지하며 main JS는 1,142.78 kB, gzip은 285.71 kB, App source는 663,337 bytes로 줄었다.
 - 진행: 학사일정·반관리·수업연구·AI 도구 4개 화면을 51.98 kB shared lazy chunk로 옮겼다. 24개 App runtime binding과 기존 저장 callback identity를 유지하며 main JS는 1,092.41 kB, gzip은 272.16 kB, App source는 595,886 bytes로 줄었다.
+- 진행: 첫 화면·수업일지 운영 알림 목록/편집과 특강 안내문 화면을 94.24 kB shared lazy chunk로 옮겼다. 운영 알림 pure helper 15개는 frozen runtime으로 주입하고 저장·삭제·특강 persistence callback identity를 유지했다. main JS는 999.16 kB, gzip은 248.14 kB, App source는 11,836줄·551,722 bytes로 줄었다. `React.lazy`가 함수가 아닌 React element type인 점을 반영해 Notification Center의 binding guard를 존재 검사로 교정하고 지연 로딩 브라우저 fixture로 고정했다.
 - 남음: `App.jsx`에 정의된 다른 저빈도 teacher 화면은 아직 initial chunk에 포함돼 Babel 500 KB·chunk 500 kB 경고가 남는다. 화면 정의를 저장 handler와 분리한 뒤 추가 lazy 연결해 700~900 kB 종료 목표를 달성한다.
 
 ### 3-8 종료 감사

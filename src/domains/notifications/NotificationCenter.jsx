@@ -28,7 +28,7 @@ export function NotificationCenter({
   records = [],
   students = []
 }) {
-  if (!runtime || typeof SpecialLectureNoticePanel !== "function") {
+  if (!runtime || !SpecialLectureNoticePanel) {
     throw new Error("NotificationCenter requires App runtime and special lecture panel bindings.");
   }
   const {
