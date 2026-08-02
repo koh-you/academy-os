@@ -6,6 +6,7 @@ import {
   buildStudentMonthEvidence,
   buildStudentSettlementRow,
   getDefaultFixedAmountForStudent,
+  getDefaultMonthlySettlementMonthKey,
   getDefaultNewStudentSessionAmount,
   getFixedAmountAfterScheduleChange,
   getMonthRange,
@@ -33,6 +34,27 @@ import {
   getSpecialLectureSettlementSaveSnapshot,
   normalizeSpecialLectureSettlementState
 } from "../src/domains/settlements/specialLectureSettlement.js";
+
+assert.equal(
+  getDefaultMonthlySettlementMonthKey(new Date("2026-08-01T09:00:00+09:00")),
+  "2026-07",
+  "매월 1일에는 지난달을 기본 정산월로 선택해야 합니다."
+);
+assert.equal(
+  getDefaultMonthlySettlementMonthKey(new Date("2026-08-02T23:59:59+09:00")),
+  "2026-07",
+  "매월 2일까지는 지난달을 기본 정산월로 선택해야 합니다."
+);
+assert.equal(
+  getDefaultMonthlySettlementMonthKey(new Date("2026-08-03T00:00:00+09:00")),
+  "2026-08",
+  "매월 3일부터는 이번 달을 기본 정산월로 선택해야 합니다."
+);
+assert.equal(
+  getDefaultMonthlySettlementMonthKey(new Date("2026-01-01T12:00:00+09:00")),
+  "2025-12",
+  "1월 초에는 전년 12월을 기본 정산월로 선택해야 합니다."
+);
 
 const monthKey = "2026-07";
 const student = {

@@ -174,10 +174,31 @@ test("monthly settlement counts closure replacement and distinguishes attendance
 
 test("settlement exposes special attendance, combined student attendance, and concise PDF report", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
+  await page.clock.install({ time: new Date("2026-08-02T09:00:00+09:00") });
   await page.addInitScript(() => { window.print = () => {}; });
   await loginAsTeacher(page);
 
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /정산/ }).click();
+  const monthControl = page.getByRole("group", { name: "월별 정산 대상 월" });
+  await expect(monthControl.getByLabel("정산월")).toHaveValue("2026-07");
+  await expect(monthControl.getByRole("status")).toBeVisible();
+  await expect(monthControl.getByRole("button", { name: "횟수·금액 PDF" })).toBeVisible();
+  await monthControl.getByLabel("정산월").fill("2026-08");
+  await page.setViewportSize({ height: 844, width: 390 });
+  const mobileMonthControlLayout = await monthControl.evaluate((element) => {
+    const control = element.getBoundingClientRect();
+    const field = element.querySelector(".filterBarField")?.getBoundingClientRect();
+    const aside = element.querySelector(".sharedFilterBarAside")?.getBoundingClientRect();
+    return {
+      asideRight: aside?.right ?? 0,
+      asideTop: aside?.top ?? 0,
+      controlRight: control.right,
+      fieldBottom: field?.bottom ?? 0
+    };
+  });
+  expect(mobileMonthControlLayout.fieldBottom).toBeLessThanOrEqual(mobileMonthControlLayout.asideTop + 1);
+  expect(mobileMonthControlLayout.asideRight).toBeLessThanOrEqual(mobileMonthControlLayout.controlRight + 1);
+  await page.setViewportSize({ height: 720, width: 1280 });
   await expect(page.getByRole("columnheader", { name: "조정" })).toHaveCount(0);
   await expect(page.getByRole("columnheader", { name: "월별 스케줄" })).toHaveCount(0);
   await expect(page.getByRole("columnheader", { name: "정산 처리" })).toHaveCount(0);
