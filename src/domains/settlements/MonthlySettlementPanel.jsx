@@ -107,7 +107,17 @@ function createMonthDraft({
   };
 }
 
-function MonthlySettlementCalendar({ monthKey, onClose, onRegularCountChange, row }) {
+function MonthlySettlementCalendar({
+  isDirty,
+  monthKey,
+  onClose,
+  onOpenReportPdf,
+  onRegularCountChange,
+  onSave,
+  row,
+  saveMessage,
+  saveState
+}) {
   const eventsByDate = useMemo(() => {
     const grouped = new Map();
     [
@@ -228,6 +238,29 @@ function MonthlySettlementCalendar({ monthKey, onClose, onRegularCountChange, ro
           </button>
         ) : null}
       </section>
+      <StickySaveBar
+        className="monthlySettlementCalendarSaveBar"
+        label={`${row.student.name} 최종 정규 횟수`}
+        message={saveMessage || "저장하면 Supabase 재조회 값과 일치하는지 확인합니다."}
+        saveState={saveState}
+      >
+        <button
+          className="softButton"
+          disabled={isDirty || saveState === "saving"}
+          onClick={onOpenReportPdf}
+          type="button"
+        >
+          저장 확인값으로 PDF 출력
+        </button>
+        <button
+          className="primaryButton"
+          disabled={!isDirty || saveState === "saving"}
+          onClick={onSave}
+          type="button"
+        >
+          {saveState === "saving" ? "저장 및 확인 중" : "최종 정규 횟수 저장 및 확인"}
+        </button>
+      </StickySaveBar>
     </Modal>
   );
 }
@@ -293,8 +326,11 @@ export function MonthlySettlementPanel({
           ? "이 달의 기본 정산 스냅샷을 확인한 뒤 저장해 주세요."
           : hasNewStudents ? "이 달의 기존 스냅샷에 새 학생이 추가되었습니다. 확인 후 저장해 주세요." : ""
     );
-    setSelectedCalendarStudentId("");
   }, [classTemplates, lessons, savedMonth, savedUpdatedAt, selectedMonth, students]);
+
+  useEffect(() => {
+    setSelectedCalendarStudentId("");
+  }, [selectedMonth]);
 
   const visibleStudents = useMemo(
     () => getMonthlySettlementStudents({
@@ -768,14 +804,19 @@ export function MonthlySettlementPanel({
 
       {selectedCalendarRow ? (
         <MonthlySettlementCalendar
+          isDirty={isDirty}
           monthKey={selectedMonth}
           onClose={() => setSelectedCalendarStudentId("")}
+          onOpenReportPdf={handleOpenReportPdf}
           onRegularCountChange={(value) => updateStudentSetting(
             selectedCalendarRow.student.studentId,
             "regularCountOverride",
             value
           )}
+          onSave={handleSave}
           row={selectedCalendarRow}
+          saveMessage={saveMessage}
+          saveState={effectiveSaveState}
         />
       ) : null}
     </section>

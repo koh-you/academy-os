@@ -137,13 +137,27 @@ test("monthly settlement counts closure replacement and distinguishes attendance
   await expect(calendar).toContainText("휴강 1회 · 정규 회차 포함");
   await expect(calendar).toContainText("연결 보강 1회 · 추가 계산 없음");
   await expect(calendar).toContainText("시스템 계산 횟수");
-  const finalCountInput = calendar.getByLabel("정산 미리보기 학생 최종 정규 횟수");
+  const finalCountInput = calendar.getByRole("spinbutton", { name: "정산 미리보기 학생 최종 정규 횟수" });
   await finalCountInput.fill("4");
   await expect(calendar).toContainText("교사 확정 최종 정규 횟수: 4회");
+  await calendar.getByRole("button", { name: "최종 정규 횟수 저장 및 확인" }).click();
+  await expect(calendar.getByRole("complementary", { name: /최종 정규 횟수 하단 고정 저장 바/ })).toContainText("저장 완료");
+  await expect(finalCountInput).toHaveValue("4");
+  const reportPopupPromise = page.waitForEvent("popup");
+  await calendar.getByRole("button", { name: "저장 확인값으로 PDF 출력" }).click();
+  const reportPage = await reportPopupPromise;
+  await reportPage.waitForLoadState();
+  await expect(reportPage.getByRole("row").filter({ hasText: "정산 미리보기 학생" })).toContainText("4회");
+  await reportPage.close();
+  await calendar.getByRole("button", { name: "창 닫기" }).click();
+  await expect(settlementRow).toContainText("최종 정규 4회 · 교사 확정");
+  await settlementRow.getByRole("button", { name: /정규 3회/ }).click();
+  const reopenedCalendar = page.getByRole("dialog", { name: /정산 미리보기 학생 월별 출결·수업/ });
+  await expect(reopenedCalendar.getByRole("spinbutton", { name: "정산 미리보기 학생 최종 정규 횟수" })).toHaveValue("4");
   const [presentColor, absentColor, pendingColor] = await Promise.all([
-    presentEvent.evaluate((element) => getComputedStyle(element).backgroundColor),
-    absentReplacement.evaluate((element) => getComputedStyle(element).backgroundColor),
-    pendingEvent.evaluate((element) => getComputedStyle(element).backgroundColor)
+    reopenedCalendar.locator(".monthlySettlementCalendarEvent.regular.attendance-present").evaluate((element) => getComputedStyle(element).backgroundColor),
+    reopenedCalendar.locator(".monthlySettlementCalendarEvent.regularReplacement.attendance-absent").evaluate((element) => getComputedStyle(element).backgroundColor),
+    reopenedCalendar.locator(".monthlySettlementCalendarEvent.regular.attendance-pending").evaluate((element) => getComputedStyle(element).backgroundColor)
   ]);
   expect(presentColor).not.toBe(absentColor);
   expect(pendingColor).not.toBe(presentColor);
