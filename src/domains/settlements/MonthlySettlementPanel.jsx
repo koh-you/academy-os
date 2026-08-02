@@ -24,8 +24,7 @@ import {
   getSettlementAttendanceTone,
   listMonthDates,
   monthlySettlementFactor,
-  normalizeMonthlySettlementStudentSetting,
-  scheduleTextFromRules
+  normalizeMonthlySettlementStudentSetting
 } from "./monthlySettlement.js";
 import {
   buildMonthlySettlementReportModel,
@@ -559,12 +558,10 @@ export function MonthlySettlementPanel({
               <th>학생</th>
               <th>계산 방식</th>
               <th>기준 금액</th>
-              <th>월별 스케줄</th>
               <th>자동 정산 기간</th>
               <th>횟수·시수 참고</th>
               <th>정규 적용금액</th>
               <th>메모</th>
-              <th>정산 처리</th>
             </tr>
           </thead>
           <tbody>
@@ -572,12 +569,10 @@ export function MonthlySettlementPanel({
               const setting = row.setting;
               const isNewMode = setting.mode === "new";
               const isNewWithdrawnMode = isNewMode && row.isNewWithdrawnPeriod;
-              const parsedScheduleText = scheduleTextFromRules(setting.scheduleText);
               const hasScheduleWarning =
                 setting.mode === "withdrawn" &&
                 row.hasRegularJournal &&
                 row.monthlyScheduleCount === 0;
-              const scheduleHelpId = `monthly-settlement-schedule-help-${row.student.studentId}`;
               return (
                 <tr
                   className={hasScheduleWarning ? "monthlySettlementWarningRow" : undefined}
@@ -587,7 +582,7 @@ export function MonthlySettlementPanel({
                     <strong>{row.student.name}</strong>
                     <span>{row.student.grade || "학년 미입력"} · {row.student.schoolName || "학교 미입력"}</span>
                     {hasScheduleWarning ? (
-                      <em className="monthlySettlementRowWarning">스케줄 수정 필요</em>
+                      <em className="monthlySettlementRowWarning">스케줄 원천 확인 필요</em>
                     ) : null}
                     {row.isJournalAutoNew ? (
                       <em className="monthlySettlementAutoMode">
@@ -648,20 +643,6 @@ export function MonthlySettlementPanel({
                         : setting.fixedAmount === ""
                           ? "단가 미설정"
                           : `${getMonthlySettlementRateLabel(row.student, setting.scheduleText)} · 학생별 수정 가능`}
-                    </small>
-                  </td>
-                  <td className="monthlySettlementScheduleCell">
-                    <input
-                      aria-describedby={scheduleHelpId}
-                      aria-invalid={hasScheduleWarning || undefined}
-                      aria-label={`${row.student.name} 월별 스케줄`}
-                      placeholder="예: 월수금 19:00-22:00"
-                      value={setting.scheduleText}
-                      onChange={(event) => updateStudentSetting(row.student.studentId, "scheduleText", event.target.value)}
-                    />
-                    <small id={scheduleHelpId}>
-                      {parsedScheduleText || "요일·시간 형식을 확인해 주세요."}
-                      {row.weeklyScheduleHours > 0 ? ` · 주 ${formatSettlementHours(row.weeklyScheduleHours)}` : ""}
                     </small>
                   </td>
                   <td>
@@ -728,16 +709,6 @@ export function MonthlySettlementPanel({
                       value={setting.note}
                       onChange={(event) => updateStudentSetting(row.student.studentId, "note", event.target.value)}
                     />
-                  </td>
-                  <td className="monthlySettlementExclusionCell">
-                    <button
-                      className="monthlySettlementExcludeButton"
-                      onClick={() => updateStudentSetting(row.student.studentId, "excluded", true)}
-                      type="button"
-                    >
-                      정산 제외
-                    </button>
-                    <small>이 달 정산표에서 숨김</small>
                   </td>
                 </tr>
               );

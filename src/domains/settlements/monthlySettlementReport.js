@@ -23,8 +23,7 @@ export function buildMonthlySettlementReportModel({ monthKey = "", rows = [] } =
   return {
     monthKey,
     rows: reportRows,
-    totalAmount: reportRows.reduce((sum, row) => sum + row.amount, 0),
-    totalCount: reportRows.reduce((sum, row) => sum + row.count, 0)
+    totalAmount: reportRows.reduce((sum, row) => sum + row.amount, 0)
   };
 }
 
@@ -69,14 +68,13 @@ export function createMonthlySettlementReportHtml(model = {}) {
   <header>
     <div><h1>${escapeHtml(monthLabel)}월 정산 보고서</h1><p>학생별 정산 반영 횟수와 최종 금액</p></div>
     <div class="totals">
-      <div><span>총 횟수</span><strong>${escapeHtml(model.totalCount)}회</strong></div>
       <div><span>총 금액</span><strong>${escapeHtml(formatWon(model.totalAmount))}</strong></div>
     </div>
   </header>
   <table>
     <thead><tr><th>이름</th><th class="number">최종 정규 횟수</th><th class="number">금액</th></tr></thead>
     <tbody>${rowHtml || '<tr><td class="empty" colspan="3">정산 대상 학생이 없습니다.</td></tr>'}</tbody>
-    <tfoot><tr><td>합계</td><td class="number">${escapeHtml(model.totalCount)}회</td><td class="number">${escapeHtml(formatWon(model.totalAmount))}</td></tr></tfoot>
+    <tfoot><tr><td colspan="2">합계</td><td class="number">${escapeHtml(formatWon(model.totalAmount))}</td></tr></tfoot>
   </table>
 </body>
 </html>`;
