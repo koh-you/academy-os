@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 App 3차 리팩터링 3-5 알림 effect 경계
+
+- App→`TeacherViewOutlet`→`NotificationCenter` 두 진입 경로에 낱개로 전달되던 callback 13개를 동결된 `notificationEffectAdapter`로 교체했다. 이력 취소·reconcile 2개는 `historyProvider`, route별 재조회 1개는 `historyTransport`, 특강 저장 7개·삭제 1개·수업 저장 뒤 선택적 화면 이동까지 조정하는 orchestration 1개·화면 이동 1개는 각각 명시적 표면으로 분류했다.
+- 알림 이력의 `handleRefreshNotificationHistory`와 특강관리의 `handleRefreshActiveNotificationJobs` identity는 각각 유지한다. adapter는 API·Storage·React state를 소유하지 않으며 실제 저장·Supabase 재조회·Solapi 예약/취소/reconcile 함수는 App에, 공지 local draft·발송/예약/삭제 request 조립은 기존 Notification Center 도메인 hook/action에 그대로 남는다.
+- 기존 reconcile inventory가 `TeacherViewOutlet`의 flat callback 출현 횟수에 결합돼 전체 production 첫 실행에서 중단됐다. 새 notification/lesson effect adapter 두 표면을 직접 확인하도록 4개 fixture와 scenario 위치 계약만 교정했고, 전용 재실행으로 의미 보존을 확인했다.
+- 검증: runtime lint, notification fast 6/6, teacher/effect/reconcile 전용 fixture, scenario·production 821/821, `check:fast`, build 364 modules, 알림관리·특강관리 경로가 포함된 Worktree 격리 safe browser 10/10을 통과했다. 운영 데이터·실제 알림 발송/예약/취소·AI 호출·SQL은 사용하지 않았다.
+
 ## 2026-08-02 App 3차 리팩터링 3-4 퇴원생 목록 경계
 
 - 퇴원생 표·정렬·선택 toolbar JSX와 날짜 표시 helper를 `src/domains/students/StudentWithdrawnList.jsx`로 물리 이동했다. 기준 commit의 목록 본문 5,273자를 직접 대조해 문자 단위 동일함을 확인했다.

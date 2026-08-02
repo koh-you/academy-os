@@ -1,5 +1,6 @@
 import { createElement } from "react";
 import { createLessonJournalEffectAdapter } from "../domains/lessons/lessonJournalEffectAdapter.js";
+import { createNotificationEffectAdapter } from "../domains/notifications/notificationEffectAdapter.js";
 import { createStudentEffectAdapter } from "../domains/students/studentEffectAdapter.js";
 import { createSupplementEffectAdapter } from "../domains/supplements/supplementEffectAdapter.js";
 
@@ -34,6 +35,14 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
   const lessonJournalEffects = createLessonJournalEffectAdapter({
     actions,
     transport: runtimeBindings.lessonJournalTransport
+  });
+  const notificationEffects = createNotificationEffectAdapter({
+    actions,
+    onRefresh: actions.handleRefreshNotificationHistory
+  });
+  const specialLectureNotificationEffects = createNotificationEffectAdapter({
+    actions,
+    onRefresh: actions.handleRefreshActiveNotificationJobs
   });
   const studentEffects = createStudentEffectAdapter({ actions });
   const supplementEffects = createSupplementEffectAdapter({ actions });
@@ -103,6 +112,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
         aiSettings: models.aiSettings,
         classTemplates: models.classTemplates,
         compactPageHeader: true,
+        effects: specialLectureNotificationEffects,
         hideNotificationSectionTabs: true,
         initialNotificationTab: "specialLecture",
         integrationStatus: models.integrationStatus,
@@ -117,22 +127,10 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
         specialLectureEnrollments: models.specialLectureEnrollments,
         specialLectureGuides: models.specialLectureGuides,
         specialLectureGuideSaveState: models.specialLectureGuideSaveState,
-        onCreateSpecialLectureStudent: actions.handleCreateSpecialLectureStudent,
-        onDeleteSpecialLectureApplication: actions.handleDeleteSpecialLectureApplication,
-        onCreateSpecialLectureLessons: actions.handleCreateSpecialLectureLessons,
-        onReplaceSpecialLectureStudent: actions.handleReplaceSpecialLectureStudent,
-        onOpenSpecialLectureLesson: actions.openSpecialLectureLesson,
         onScheduleLessonNotificationsAt: actions.handleScheduleLessonNotificationsAt,
-        onReconcileSolapiNotificationResults: actions.handleReconcileSolapiNotificationResults,
-        onSaveSpecialLectureEnrollment: actions.handleSaveSpecialLectureEnrollment,
-        onSaveSpecialLectureEnrollments: actions.handleSaveSpecialLectureEnrollments,
-        onSaveSpecialLectureGuides: actions.handleSaveSpecialLectureGuides,
-        onSyncSpecialLectureStudentSchedules: actions.handleSyncSpecialLectureStudentSchedules,
         onUpdateLessonNotificationPlan: actions.handleUpdateLessonNotificationPlan,
-        onUpdateSpecialLectureApplication: actions.handleUpdateSpecialLectureApplication,
         records: models.records,
-        students: models.students,
-        onRefresh: actions.handleRefreshActiveNotificationJobs
+        students: models.students
       }
     },
     overdue: {
@@ -316,6 +314,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
       props: {
         aiSettings: models.aiSettings,
         classTemplates: models.classTemplates,
+        effects: notificationEffects,
         integrationStatus: models.integrationStatus,
         lessons: models.calendarLessons,
         notificationJobs: models.notificationJobs,
@@ -323,16 +322,12 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
         notificationLogs: models.notificationLogs,
         runtime: runtimeBindings.notificationCenter,
         SpecialLectureNoticePanel: runtimeBindings.SpecialLectureNoticePanel,
-        onCancelNotificationJob: actions.handleCancelNotificationJob,
         specialLectureGuides: models.specialLectureGuides,
         specialLectureGuideSaveState: models.specialLectureGuideSaveState,
         showSpecialLectureTab: false,
         onScheduleLessonNotificationsAt: actions.handleScheduleLessonNotificationsAt,
-        onReconcileSolapiNotificationResults: actions.handleReconcileSolapiNotificationResults,
-        onSaveSpecialLectureGuides: actions.handleSaveSpecialLectureGuides,
         onUpdateLessonNotificationPlan: actions.handleUpdateLessonNotificationPlan,
-        students: models.students,
-        onRefresh: actions.handleRefreshNotificationHistory
+        students: models.students
       }
     },
     settings: {

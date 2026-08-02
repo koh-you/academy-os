@@ -37,8 +37,8 @@ const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
-const teacherViewOutletSource = await readFile(
-  new URL("../src/app/TeacherViewOutlet.js", import.meta.url),
+const notificationEffectAdapterSource = await readFile(
+  new URL("../src/domains/notifications/notificationEffectAdapter.js", import.meta.url),
   "utf8"
 );
 const lessonJournalEffectAdapterSource = await readFile(
@@ -135,10 +135,10 @@ assert.ok(
     savedStateSetterIndex > savedStateGuardIndex
 );
 assert.equal(
-  `${teacherViewOutletSource}\n${lessonJournalEffectAdapterSource}`.split(
+  `${notificationEffectAdapterSource}\n${lessonJournalEffectAdapterSource}`.split(
     "onReconcileSolapiNotificationResults: actions.handleReconcileSolapiNotificationResults"
   ).length - 1,
-  3
+  2
 );
 assert.ok(!functionSource.includes("const nextRecords = result.records.reduce("));
 assert.ok(!functionSource.includes("const savedStates = Object.fromEntries("));
