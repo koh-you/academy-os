@@ -93,6 +93,23 @@ test("exam analysis pipeline opens from its deferred chunk without running paid 
   expect(pageErrors).toEqual([]);
 });
 
+test("learning support screens open from their shared deferred chunk without mutations", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await page.route("**/src/domains/teacher/LearningSupportCenters.jsx*", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    await route.continue();
+  });
+
+  await loginAsTeacher(page);
+  const navigation = page.getByRole("navigation", { name: "주요 화면" });
+  await navigation.getByRole("button", { name: /오답관리/ }).click();
+  await expect(page.locator('.teacherViewLoadState[role="status"]')).toContainText("교사 화면을 불러오는 중입니다.");
+  await expect(page.getByRole("heading", { name: "오답관리" })).toBeVisible();
+  await navigation.getByRole("button", { name: /자료함/ }).click();
+  await expect(page.getByRole("heading", { name: "자료함" })).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
 test("withdrawn student list keeps its table and selection toolbar boundary", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);

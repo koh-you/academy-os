@@ -88,6 +88,7 @@
 - 저장 handler 이동과 같은 commit에 섞지 않고 로딩·오류 복구 UI를 안전 브라우저로 확인한다.
 - 진행: 이미 도메인 파일로 분리된 `TeacherLessonHubV2`, `SupplementCenter`, `StudentManager`, `NotificationCenter`, `SettlementWorkspace` 5개 화면을 `React.lazy` 동적 import로 연결했다. initial main JS는 1,656.92 kB에서 1,379.15 kB, gzip은 427.24 kB에서 351.03 kB로 줄었으며 각 화면은 38.62~66.30 kB 별도 chunk다. 1.50 MB main 예산·5/5 chunk fixture와 실제 chunk 지연/실패/새로고침 복구 safe browser를 고정했다.
 - 진행: `App.jsx`의 시험분석 helper·화면 4,612줄을 `ExamAnalysisPipelineCenter.jsx`로 옮겨 여섯 번째 lazy chunk로 연결했다. 13개 API request 구현은 App runtime owner를 유지한다. main JS는 1,181.41 kB, gzip은 296.06 kB, App source는 721,795 bytes로 줄었고 시험분석 chunk 지연 진입을 유료 행동 없이 safe browser로 고정했다.
+- 진행: 오답관리·시험지관리·자료함·숙제현황 4개 화면을 39.49 kB shared lazy chunk로 옮겼다. 10개 App runtime binding과 기존 저장 callback identity를 유지하며 main JS는 1,142.78 kB, gzip은 285.71 kB, App source는 663,337 bytes로 줄었다.
 - 남음: `App.jsx`에 정의된 다른 저빈도 teacher 화면은 아직 initial chunk에 포함돼 Babel 500 KB·chunk 500 kB 경고가 남는다. 화면 정의를 저장 handler와 분리한 뒤 추가 lazy 연결해 700~900 kB 종료 목표를 달성한다.
 
 ### 3-8 종료 감사

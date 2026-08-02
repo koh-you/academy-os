@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 App 3차 리팩터링 3-7 학습지원 화면 lazy loading
+
+- `App.jsx`의 오답관리·시험지관리·자료함·숙제현황 화면과 전용 하위 view 1,335줄을 `src/domains/teacher/LearningSupportCenters.jsx`로 물리 분리했다. 기준 main의 화면 본문 53,378자와 문제 상태 pure model 977자를 줄바꿈 정규화 뒤 문자 단위로 대조했다.
+- 4개 화면은 함께 쓰이는 저빈도 학습지원 shared chunk로 lazy 연결했다. 학생 화면 component, 숙제 판정 helper, 날짜·과목 원천 등 10개 binding은 frozen `learningSupportRuntime`으로 App owner를 유지하며, 저장·삭제·교사 확인 callback identity도 `TeacherViewOutlet`에서 그대로 전달한다. 새 화면에는 fetch/API/Storage/Supabase/Solapi owner가 없다.
+- production main JS는 `1,181.41 kB / gzip 296.06 kB`에서 `1,142.78 kB / gzip 285.71 kB`로 줄었고 shared chunk는 `39.49 kB / gzip 11.66 kB`다. App은 15,176줄·663,337 bytes로 줄었으나 dev Babel 500 KB와 main 500 kB 경고는 남아 있다.
+- safe browser는 학습지원 module 응답을 400ms 지연해 오답관리 로딩→화면 진입→같은 chunk의 자료함 이동을 확인하며 등록·저장·삭제는 실행하지 않는다. 검증: runtime lint, teacher/learning-support 경계, 5도메인 fast 38/38, scenario·production 821/821, build 374 modules·lazy chunk 7/7, Worktree 격리 safe browser 14/14. 운영 데이터·실제 알림·AI 호출·SQL은 사용하지 않았다.
+
 ## 2026-08-02 App 3차 리팩터링 3-7 시험분석 화면 lazy loading
 
 - `App.jsx`에 남아 있던 시험분석 helper와 `ExamAnalysisPipelineCenter` 4,612줄을 `src/domains/exams/ExamAnalysisPipelineCenter.jsx`로 물리 분리해 여섯 번째 teacher lazy chunk로 연결했다. 추출 전후 helper 91,259자와 화면 104,145자를 줄바꿈 정규화 뒤 문자 단위로 대조했다.
