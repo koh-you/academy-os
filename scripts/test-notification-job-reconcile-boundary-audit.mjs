@@ -73,6 +73,10 @@ const teacherViewOutletSource = await readFile(
   new URL("../src/app/TeacherViewOutlet.js", import.meta.url),
   "utf8"
 );
+const lessonJournalEffectAdapterSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalEffectAdapter.js", import.meta.url),
+  "utf8"
+);
 const payloadSource = await readFile(
   new URL(
     "../src/domains/notifications/notificationJobReconcilePayload.js",
@@ -162,7 +166,7 @@ for (const boundary of orderedBoundaries) {
   previousIndex = boundaryIndex;
 }
 assert.equal(
-  teacherViewOutletSource.split(
+  `${teacherViewOutletSource}\n${lessonJournalEffectAdapterSource}`.split(
     "onReconcileSolapiNotificationResults: actions.handleReconcileSolapiNotificationResults"
   ).length - 1,
   3

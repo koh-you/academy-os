@@ -39,6 +39,7 @@ export function LessonJournalDetail({
   aiSettings,
   allRecords = [],
   attendanceSettings = defaultAttendanceSettings,
+  effects = {},
   integrationStatus,
   homeworks = [],
   lesson,
@@ -47,26 +48,10 @@ export function LessonJournalDetail({
   materials = [],
   makeupTasks = [],
   onBack,
-  onCancelNotificationJob,
-  onChangeRecord,
-  onDeleteLesson,
   onEditLesson,
   onOpenAttendance,
   onOpenExamPrep,
   onOpenReport,
-  onPassMakeupTask,
-  onPolishComment,
-  onReconcileSolapiNotificationResults,
-  onApplyLessonNotificationPlan,
-  onSaveRecord,
-  onSaveLessonJournalDrafts,
-  onScheduleMakeupTask,
-  onScheduleLessonNotificationsAt,
-  onSendComment,
-  onUpdateHomework,
-  onUpdateLessonNotificationPlan,
-  onUpdateMakeupTask,
-  onToggleStudentNotificationMute,
   notificationJobs = [],
   records,
   runtime,
@@ -117,9 +102,31 @@ export function LessonJournalDetail({
     isSameLessonGroup,
     isSpecialLectureLesson,
     isSupplementMakeupTaskLesson,
-    loadLessonJournalReservationAudit,
     today
   } = runtime;
+  const {
+    persistence: {
+      onChangeRecord,
+      onDeleteLesson,
+      onPassMakeupTask,
+      onSaveLessonJournalDrafts,
+      onSaveRecord,
+      onScheduleMakeupTask,
+      onToggleStudentNotificationMute,
+      onUpdateHomework,
+      onUpdateLessonNotificationPlan,
+      onUpdateMakeupTask
+    } = {},
+    provider: {
+      loadLessonJournalReservationAudit,
+      onApplyLessonNotificationPlan,
+      onCancelNotificationJob,
+      onPolishComment,
+      onReconcileSolapiNotificationResults,
+      onScheduleLessonNotificationsAt,
+      onSendComment
+    } = {}
+  } = effects;
   const resolvedAiSettings = aiSettings ?? defaultAiSettings;
   const {
     commentModal,

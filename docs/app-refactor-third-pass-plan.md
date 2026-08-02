@@ -50,6 +50,7 @@
 - 수업 달력, 수업 모달, 수업일지의 화면 조립과 draft/persisted state 경계를 분리한다.
 - 저장 성공은 API 성공과 서버 재조회 대조를 기준으로 유지한다.
 - 진행: 수업일지의 record·homework·makeup local draft 조작과 저장 결과 전이를 `useLessonJournalDraftController`로 이동했다. hook은 App 저장 callback을 주입받고 요청 lesson·draft revision이 그대로인 성공 응답에서만 draft를 비운다. 저장 중 생긴 후속 입력과 다른 수업의 draft는 보존하며, App의 ordered persistence·Supabase 재조회·오류 상태 갱신은 이동하지 않았다.
+- 진행: 수업일지 상세에 전달되던 저장·삭제·보충 mutation 10개와 알림·AI·예약 조회 provider 7개를 `lessonJournalEffectAdapter`의 `persistence`/`provider` 표면으로 고정했다. 실제 Solapi 예약·취소까지 조정하는 알림 계획 적용은 provider 표면에 분류했다. adapter는 함수 참조만 조립하고 API·Storage·React state를 소유하지 않으며, 실제 effect owner는 App에 유지한다.
 
 ### 3-3 Supplement 경계
 

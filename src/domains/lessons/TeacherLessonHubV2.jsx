@@ -18,6 +18,7 @@ export function TeacherLessonHubV2({
   generatedLessonSaveStatus = { lessons: [], message: "", state: "idle" },
   integrationStatus,
   isMonthlyRegularLessonOpened = false,
+  lessonJournalEffects,
   lessonNotificationPlans = {},
   monthlyRegularLessonOpenPlan = { errors: [], lessonsToCreate: [], rows: [] },
   clipboardCount,
@@ -38,8 +39,6 @@ export function TeacherLessonHubV2({
   homeworks,
   onAddLesson,
   onBackToCalendar,
-  onCancelNotificationJob,
-  onChangeRecord,
   onCopyLesson,
   onDateSelect,
   onDeleteLesson,
@@ -54,22 +53,12 @@ export function TeacherLessonHubV2({
   onOpenReport,
   onPasteLesson,
   onPassMakeupTask,
-  onPolishComment,
-  onReconcileSolapiNotificationResults,
   onRetryGeneratedLessonSave,
-  onApplyLessonNotificationPlan,
   onScheduleMakeupTask,
-  onSaveRecord,
-  onSaveLessonJournalDrafts,
   onSaveAcademyReminder,
-  onScheduleLessonNotificationsAt,
-  onSendComment,
   onSelectLesson,
   onUndoLessonAction,
-  onUpdateHomework,
-  onUpdateLessonNotificationPlan,
   onUpdateMakeupTask,
-  onToggleStudentNotificationMute,
   onShiftMonth,
   undoCount,
   isLessonJournalOpen
@@ -189,27 +178,12 @@ export function TeacherLessonHubV2({
             lessons={lessons}
             materials={materials}
             makeupTasks={makeupTasks}
+            effects={lessonJournalEffects}
             onBack={onBackToCalendar}
-            onCancelNotificationJob={onCancelNotificationJob}
-            onChangeRecord={onChangeRecord}
-            onDeleteLesson={onDeleteLesson}
             onEditLesson={onEditLesson}
             onOpenAttendance={onOpenAttendance}
             onOpenExamPrep={onOpenExamPrep}
             onOpenReport={onOpenReport}
-            onPassMakeupTask={onPassMakeupTask}
-            onPolishComment={onPolishComment}
-            onReconcileSolapiNotificationResults={onReconcileSolapiNotificationResults}
-            onApplyLessonNotificationPlan={onApplyLessonNotificationPlan}
-            onSaveRecord={onSaveRecord}
-            onSaveLessonJournalDrafts={onSaveLessonJournalDrafts}
-            onScheduleMakeupTask={onScheduleMakeupTask}
-            onScheduleLessonNotificationsAt={onScheduleLessonNotificationsAt}
-            onSendComment={onSendComment}
-            onUpdateHomework={onUpdateHomework}
-            onUpdateLessonNotificationPlan={onUpdateLessonNotificationPlan}
-            onUpdateMakeupTask={onUpdateMakeupTask}
-            onToggleStudentNotificationMute={onToggleStudentNotificationMute}
             records={records}
             runtime={lessonJournal}
             saveStates={saveStates}

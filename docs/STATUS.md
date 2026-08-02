@@ -48,6 +48,7 @@
 - 3-1 두 번째 단위에서 Teacher Lesson Hub 화면 조립을 `src/domains/lessons/TeacherLessonHubV2.jsx`로 물리 분리했다. 달력 local filter·focus·키보드 navigation은 새 화면이 소유하고, 수업일지 저장·알림 예약/취소/발송/reconcile handler와 상세 화면은 App runtime binding을 통해 기존 owner를 유지한다.
 - 3-1 세 번째 단위에서 Lesson Journal Detail 화면을 `src/domains/lessons/LessonJournalDetail.jsx`로 물리 분리했다. 화면 local draft·overlay·예약 표시 상태는 도메인 화면에 두고, 저장·삭제·알림 예약/취소/발송/reconcile callback과 OS 예약 조회 transport는 App owner를 유지한다.
 - 3-2 첫 단위에서 수업일지 record·homework·makeup local draft 조작과 저장 성공/실패 전이를 `useLessonJournalDraftController`로 묶었다. App의 Supabase 저장·재조회 callback은 유지한다. 성공 때도 요청 중 후속 입력이 있으면 최신 draft와 편집 모드를 보존해 재저장을 안내하고, 실패·부분저장 때도 수정본을 유지한다.
+- 3-2 두 번째 단위에서 수업일지의 persistence callback 10개와 provider/transport callback 7개를 `lessonJournalEffectAdapter` 계약으로 묶었다. 실제 Solapi 예약·취소까지 조정하는 알림 계획 적용은 provider 표면에 두고, App의 실제 저장·삭제·AI·Solapi·재대조 함수는 이동하지 않았다. Teacher Lesson Hub는 개별 고위험 callback 대신 adapter 하나를 상세 화면에 전달한다.
 
 ## 폴더 상태
 

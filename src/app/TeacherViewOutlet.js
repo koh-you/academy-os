@@ -1,4 +1,5 @@
 import { createElement } from "react";
+import { createLessonJournalEffectAdapter } from "../domains/lessons/lessonJournalEffectAdapter.js";
 
 const teacherViewContractDefinitions = [
   { id: "lessons", componentName: "TeacherLessonHubV2", effectKinds: ["save", "delete", "reserve", "cancel", "send", "reconcile"] },
@@ -28,6 +29,10 @@ export const teacherViewContracts = Object.freeze(teacherViewContractDefinitions
 export const teacherViewIds = Object.freeze(teacherViewContracts.map(({ id }) => id));
 
 export function createTeacherViewAdapters({ actions, components, models, runtimeBindings = {} }) {
+  const lessonJournalEffects = createLessonJournalEffectAdapter({
+    actions,
+    transport: runtimeBindings.lessonJournalTransport
+  });
   return {
     lessons: {
       Component: components.TeacherLessonHubV2,
@@ -40,6 +45,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
         attendanceSyncStatus: models.attendanceSyncStatus,
         generatedLessonSaveStatus: models.generatedLessonSaveStatus,
         integrationStatus: models.integrationStatus,
+        lessonJournalEffects,
         lessonNotificationPlans: models.lessonNotificationPlans,
         notificationJobs: models.notificationJobs,
         runtime: runtimeBindings.teacherLessonHub,
@@ -63,7 +69,6 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
         undoCount: models.lessonUndoStack.length,
         onAddLesson: actions.handleOpenAddLesson,
         onOpenMonthlyRegularLessons: actions.handleOpenMonthlyRegularLessonModal,
-        onChangeRecord: actions.handleChangeRecord,
         onCopyLesson: actions.handleCopySelectedLesson,
         onDateSelect: actions.handleDateSelect,
         onDeleteLesson: actions.handleDeleteLesson,
@@ -71,7 +76,6 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
         onDeleteSelectedLesson: actions.handleDeleteSelectedLessonFromCalendar,
         onEditLesson: actions.handleEditLesson,
         onBackToCalendar: actions.handleBackToCalendar,
-        onCancelNotificationJob: actions.handleCancelNotificationJob,
         onMoveDate: actions.handleCalendarMove,
         onShiftMonth: actions.handleCalendarMonthShift,
         onOpenAttendance: actions.setAttendanceModal,
@@ -79,23 +83,13 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
         onOpenLessonJournal: actions.handleOpenLessonJournal,
         onPasteLesson: actions.handlePasteLessonToSelectedDate,
         onOpenReport: actions.handleOpenReport,
-        onPolishComment: actions.handlePolishLessonComment,
         onPassMakeupTask: actions.handlePassSupplementTask,
-        onReconcileSolapiNotificationResults: actions.handleReconcileSolapiNotificationResults,
         onRetryGeneratedLessonSave: actions.handleRetryGeneratedLessonSave,
         onScheduleMakeupTask: actions.handleScheduleSupplementTask,
-        onSaveRecord: actions.handleSaveRecord,
-        onSaveLessonJournalDrafts: actions.handleSaveLessonJournalDrafts,
         onSaveAcademyReminder: actions.handleSaveAcademyReminder,
-        onApplyLessonNotificationPlan: actions.handleApplyLessonNotificationPlan,
-        onSendComment: actions.handleSendLessonComment,
         onSelectLesson: actions.setSelectedLessonId,
-        onScheduleLessonNotificationsAt: actions.handleScheduleLessonNotificationsAt,
         onUndoLessonAction: actions.handleUndoLessonAction,
-        onUpdateHomework: actions.handleUpdateHomework,
-        onUpdateLessonNotificationPlan: actions.handleUpdateLessonNotificationPlan,
         onUpdateMakeupTask: actions.handleUpdateMakeupTask,
-        onToggleStudentNotificationMute: actions.handleToggleStudentNotificationMute,
         isLessonJournalOpen: models.isLessonJournalOpen
       }
     },
