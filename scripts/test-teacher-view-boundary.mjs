@@ -59,6 +59,10 @@ const components = Object.fromEntries([...componentNames].map((componentName) =>
   componentName,
   function FixtureComponent() { return componentName; }
 ]));
+const runtimeBindings = {
+  notificationCenter: Object.freeze({ source: "fixture" }),
+  SpecialLectureNoticePanel: function FixtureSpecialLectureNoticePanel() { return "specialLecture"; }
+};
 
 const actionStubs = new Map();
 const actions = new Proxy({}, {
@@ -77,7 +81,7 @@ const models = new Proxy({
   }
 });
 
-const adapters = createTeacherViewAdapters({ actions, components, models });
+const adapters = createTeacherViewAdapters({ actions, components, models, runtimeBindings });
 assert.deepEqual(Object.keys(adapters), teacherViewIds);
 for (const [id, componentName] of expectedContracts) {
   assert.equal(adapters[id].Component, components[componentName], `${id} must retain its component`);
@@ -105,6 +109,10 @@ const highRiskCallbackMappings = [
 ];
 for (const [viewId, propName, actionName] of highRiskCallbackMappings) {
   assert.equal(adapters[viewId].props[propName], actions[actionName], `${viewId}.${propName} must preserve ${actionName}`);
+}
+for (const viewId of ["specialLectureManagement", "notifications"]) {
+  assert.equal(adapters[viewId].props.runtime, runtimeBindings.notificationCenter);
+  assert.equal(adapters[viewId].props.SpecialLectureNoticePanel, runtimeBindings.SpecialLectureNoticePanel);
 }
 
 const lessonElement = TeacherViewOutlet({ activeView: "lessons", adapters });

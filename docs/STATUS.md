@@ -43,6 +43,7 @@
 - 수업일지 생성 action, 첫 화면 알림 접기, 보충 정렬·시간 입력·알림톡 3종 통합 수정은 최신 main 위에서 재검증했다. safe browser는 Worktree별 격리 포트를 지원해 다른 작업의 미리보기를 재사용하지 않는다.
 - Phase 5는 PR #9, merge commit `254cd0b1`로 main 통합됐다. 17개 교사 화면의 component/props/callback 조립은 `TeacherViewOutlet` adapter가 담당하고, `App`은 상태와 저장·삭제·예약·취소·발송·재대조 handler를 계속 소유한다. main Production checks와 Vercel production 배포가 성공했다.
 - App 3차 리팩터링 3-0은 `docs/app-refactor-third-pass-plan.md`의 크기·시간 기준선을 사용한다. 검증 선택은 `docs/testing-policy.md`가 기준이며 lesson·supplement·student·notification·settlement fast 묶음을 제공한다.
+- 3-1 첫 단위에서 Notification Center top-level 화면을 notification 도메인 파일로 물리 분리했다. App-level 알림 조회·취소·reconcile callback과 특강 panel binding은 유지하고, 화면의 기존 공지 발송·예약·삭제 request binding도 의미 변경 없이 함께 이동했다.
 
 ## 폴더 상태
 
