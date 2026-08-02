@@ -42,6 +42,7 @@
 - Phase 4 app_state persistence는 변경 key를 브라우저에서 직렬화하고 기존 `updated_at` CAS와 Supabase 재조회가 일치한 뒤에만 저장 완료로 판정한다. 충돌 시 입력을 유지하고 자동 반복하지 않으며 전체 자동검증을 통과했다.
 - 수업일지 생성 action, 첫 화면 알림 접기, 보충 정렬·시간 입력·알림톡 3종 통합 수정은 최신 main 위에서 재검증했다. safe browser는 Worktree별 격리 포트를 지원해 다른 작업의 미리보기를 재사용하지 않는다.
 - Phase 5는 PR #9, merge commit `254cd0b1`로 main 통합됐다. 17개 교사 화면의 component/props/callback 조립은 `TeacherViewOutlet` adapter가 담당하고, `App`은 상태와 저장·삭제·예약·취소·발송·재대조 handler를 계속 소유한다. main Production checks와 Vercel production 배포가 성공했다.
+- App 3차 리팩터링 3-0은 `docs/app-refactor-third-pass-plan.md`의 크기·시간 기준선을 사용한다. 검증 선택은 `docs/testing-policy.md`가 기준이며 lesson·supplement·student·notification·settlement fast 묶음을 제공한다.
 
 ## 폴더 상태
 
@@ -52,7 +53,7 @@
 
 ## 다음 우선순위
 
-1. App 2차 리팩터링 Phase 1~5는 완료됐다. 대형 `App.jsx` 내부 화면 정의의 물리적 분리와 teacher 화면 lazy loading 중 한 단위만 최신 main의 별도 Worktree에서 시작한다.
+1. App 2차 리팩터링 Phase 1~5는 완료됐다. 3차 리팩터링은 3-0 기준선 뒤 `App.jsx` 내부 화면 정의의 물리적 분리부터 순서대로 진행한다.
 2. 약 1.63 MB production chunk와 Babel 500 KB 경고를 줄이되 화면 동작·저장 경계 변경을 같은 단위에 섞지 않는다.
 3. `app_state`에서 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
    - 즉시 사람 판단이 필요하지 않은 발견은 queue/worklog에 남기고 AI 검수와 다음 단계를 연쇄 진행한다.
@@ -72,4 +73,4 @@ npm run check:fast
 npm run test:browser-smoke
 ```
 
-운영 동작 변경은 추가로 `npm run test:production`을 실행한다.
+세부 검증 선택은 `docs/testing-policy.md`를 따른다.

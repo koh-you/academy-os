@@ -42,6 +42,9 @@ jobs:
       - name: Check runtime references
         run: npm run lint:runtime
 
+      - name: Check domain fast runner contract
+        run: npm run test:domain:runner
+
       - name: Test client runtime error contract
         run: npm run test:client-runtime-error
 

@@ -11,6 +11,9 @@
 
 ## 오늘 자동 작업
 
+- 3차 리팩터링 3-0 기준선을 최신 main에서 측정하고 5개 핵심 도메인의 10초 이내 fast fixture 경로와 검증 정책을 추가했다.
+- 다음 단위는 `docs/app-refactor-third-pass-plan.md`의 3-1 App 물리적 화면 분리다. 저장·발송 handler 계약을 바꾸지 않고 화면 정의만 한 단위씩 이동한다.
+
 - `app_state` 자동저장 12개 key의 500ms debounce, request ID, API upsert, `updated_at` 경계를 inventory했다.
 - 역순 도착 시 오래된 요청이 최신값을 덮는 fixture를 추가하고 Production checks에 연결했다.
 - 전용 inventory, runtime lint, production `809/809`, build `345 modules`, safe browser smoke `2/2`를 통과했다.

@@ -31,9 +31,9 @@
 
 ## 검증과 완료
 
-- 모든 코드 변경: `npm run lint:runtime`, 관련 전용 테스트, `npm run build`.
-- 빠른 일반 검증: `npm run check:fast`.
-- 운영 저장·출결·알림·시험·보충 흐름 변경: `npm run test:production`과 필요한 브라우저 smoke test.
+- 검증 명령 선택의 source of truth는 `docs/testing-policy.md`다.
+- 일반 코드 변경: `npm run lint:runtime`, 관련 `test:domain:*`·전용 테스트, `npm run build`.
+- 빠른 일반 검증은 `npm run check:fast`를 사용한다. 고위험 경계는 로컬 `npm run test:production`, PR/release는 exact-head와 main CI의 전체 production을 기준으로 하며 단순 변경의 로컬 반복 기준은 정책 문서를 따른다.
 - 새 UI 핵심 경로는 운영 계정 대신 `npm run dev:safe` 가상 환경에서 자동 브라우저 검사를 먼저 만든다.
 - 테스트를 파일 위치나 정확한 내부 개수에 과도하게 결합하지 않는다. 사용자 동작과 저장 계약을 검증한다.
 - 작업 완료 시 `docs/STATUS.md`, `docs/current-worklog.md`, `docs/next-session/DAILY_HANDOFF.md`를 짧게 갱신한다.

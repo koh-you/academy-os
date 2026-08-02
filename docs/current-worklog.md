@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 App 3차 리팩터링 3-0 기준선·검증 경로
+
+- 최신 main `16f8c4ca`에서 `App.jsx` 22,912줄·1,011,179 bytes, main JS 1,642.41 kB, 전체 production 86.19초를 기준선으로 측정했다.
+- lesson·supplement·student·notification·settlement 대표 pure fixture를 npm 중첩 없이 병렬 실행하는 `test:domain:*` 명령을 추가했다. 기존 `check:fast`와 전체 `test:production`의 의미는 보존한다.
+- 검증 source of truth는 `docs/testing-policy.md`, 3차 단계와 종료 기준은 `docs/app-refactor-third-pass-plan.md`다.
+- 검증: runner contract, 5개 domain 각 0.62초 이하·통합 27/27 0.94초, runtime lint, `check:fast` scenario 811/811, build 352 modules, 전체 production 811/811 84.3초를 통과했다. UI 동작 변경이 없어 브라우저 재실행은 생략했고 같은 기준 commit의 격리 smoke 8/8을 기준선에 기록했다.
+- 운영 데이터 쓰기·실제 알림·운영 SQL·유료 호출은 없다.
+
 ## 2026-08-02 정산 기본월·상단 컨트롤 정리
 
 - 서울 기준 매월 1~2일에는 지난달, 3일부터는 이번 달을 월별 정산 기본월로 선택한다. 초기 진입에만 적용하며 사용자가 직접 선택한 월은 바꾸지 않는다.
