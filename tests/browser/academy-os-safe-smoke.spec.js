@@ -63,7 +63,16 @@ test("notification and special lecture screens render through the extracted boun
 
   await navigation.getByRole("button", { name: /알림관리/ }).click();
   await expect(page.getByRole("heading", { name: "알림관리" })).toBeVisible();
-  await expect(page.getByRole("tab", { name: "개별 발송" })).toBeVisible();
+  const composeTab = page.getByRole("tab", { name: "개별 발송" });
+  await expect(composeTab).toBeVisible();
+  await page.getByRole("tab", { name: /발송 완료/ }).click();
+  await expect(page.getByText("NOTIFICATION HISTORY")).toBeVisible();
+  await composeTab.click();
+  const noticeTitle = page.getByPlaceholder("예: 휴원 안내, 보강 안내");
+  const noticeBody = page.getByPlaceholder("보낼 공지 내용을 입력하세요.");
+  await noticeTitle.fill("안전 경계 확인");
+  await noticeBody.fill("실제 발송 없이 local draft만 확인합니다.");
+  await expect(page.getByText("[안전 경계 확인] 실제 발송 없이 local draft만 확인합니다.")).toBeVisible();
 
   await navigation.getByRole("button", { name: /특강관리/ }).click();
   await expect(page.getByRole("heading", { name: "특강관리" })).toBeVisible();

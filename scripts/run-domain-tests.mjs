@@ -45,7 +45,8 @@ export const domainTestGroups = Object.freeze({
     "scripts/test-notification-notice-api.mjs",
     "scripts/test-notification-notice-builders.mjs",
     "scripts/test-notification-refresh-reconcile-controller.mjs",
-    "scripts/test-notification-effect-adapter.mjs"
+    "scripts/test-notification-effect-adapter.mjs",
+    "scripts/test-notification-notice-controller-boundary.mjs"
   ]),
   settlement: Object.freeze([
     "scripts/test-monthly-settlement.mjs",
