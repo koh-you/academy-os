@@ -45,12 +45,12 @@
 - Phase 1 auth/session과 Phase 2 출결 polling·동기화는 main 통합 완료다.
 - Phase 2에서 kiosk 날짜 rollover lifecycle을 출결 hook으로 이동하고 전용 fixture를 추가했다. safe browser가 TDZ 배치 오류를 발견해 최소 수정했으며 재실행 4/4가 통과했다.
 - Phase 3는 PR #4로 main 통합 및 CI/배포 성공했다. Phase 4 app_state 동일 key 직렬화·`updated_at` CAS·Supabase 재조회 완료 판정을 구현하고 전체 자동검증을 통과했다.
-- Phase 4와 사용자 수업일지·보충관리 수정은 main 통합과 CI·Vercel 배포가 완료됐다. Phase 5는 17개 teacher 화면 callback 조립을 `TeacherViewOutlet` adapter로 분리하고 전체 자동검증을 통과했다.
+- Phase 4와 사용자 수업일지·보충관리 수정은 main 통합과 CI·Vercel 배포가 완료됐다. Phase 5도 17개 teacher 화면 callback 조립을 `TeacherViewOutlet` adapter로 분리해 PR #9, merge commit `254cd0b1`로 main 통합했고 main CI·Vercel production이 성공했다.
 - main 병합은 의미 변경·운영 side effect 없이 AI 리뷰와 전체 검사·PR CI·배포가 성공하면 AI가 판단해 진행한다.
 
 1. `git status --short`가 clean이고 최신 main인지 확인한다.
 2. 오늘 branch의 GitHub Actions 결과를 확인한다.
-3. Phase 5 PR/CI·배포가 끝났는지 확인하고 2차 리팩터링 Phase 1~5를 완료 처리한다.
+3. App 2차 리팩터링 Phase 1~5는 완료 상태로 유지하고 자동 재개하지 않는다.
 4. 다음 대형 단위는 최신 main의 별도 Worktree에서 `App.jsx` 내부 화면 정의 물리 분리와 teacher 화면 lazy loading/code splitting 중 하나만 시작한다.
 5. 운영 삭제·발송·예약·유료 AI·SQL 적용이 필요하면 구현을 넓히지 말고 정확한 사람 gate를 남긴다.
 
