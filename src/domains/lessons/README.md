@@ -14,11 +14,11 @@ MVP 기준:
 - `lessonModalDraftTransitions.js`는 반 템플릿·수업 유형·날짜 변경에 따른 local draft patch와 색상 선택지만 계산합니다.
 - `lessonModalInitialDraft.js`는 최초 입력값과 mount 시 한 번 생성할 수업·휴강 보충 ID 인자를 계산합니다. 실제 시간 기반 ID source는 App이 주입합니다.
 - `lessonModalSaveState.js`는 모달 local 저장 상태의 초기 안내, 실패 후 dirty 복귀, 저장 중·완료·실패 표시값만 계산합니다.
-- `LessonModalStudentPicker.jsx`는 App이 소유한 검색·선택값과 callback으로 학생 검색, 학년 그룹, 선택 chip만 렌더링합니다.
-- `LessonModalClosurePanel.jsx`는 App이 계산한 기존 명단·수업기록·알림 상태와 local callback으로 휴강 안내와 선택형 보충 입력만 렌더링합니다.
-- `LessonModalBasics.jsx`는 App이 소유한 수업 유형·반 템플릿·색상·이름·날짜·시간 값과 callback을 렌더링하며 휴강 panel의 DOM 순서를 children으로 보존합니다.
-- `LessonModalActions.jsx`는 App이 소유한 저장 상태와 submit·close callback으로 저장 안내와 하단 action만 렌더링합니다.
-- App의 `LessonModal` controller는 local React draft와 위 controlled component 조립, 주입된 `onSubmit` 호출만 소유하며 외부 저장 API를 직접 호출하지 않습니다.
+- `LessonModal.jsx`는 수업 등록·수정의 local React draft, validation, 저장 진행 표시와 controlled component 조립만 소유합니다. App의 순수 날짜·색상 resolver와 저장 `onSubmit`을 주입받으며 API·Supabase·localStorage를 직접 사용하지 않습니다.
+- `LessonModalStudentPicker.jsx`는 `LessonModal`이 소유한 검색·선택값과 callback으로 학생 검색, 학년 그룹, 선택 chip만 렌더링합니다.
+- `LessonModalClosurePanel.jsx`는 `LessonModal`이 계산한 기존 명단·수업기록·알림 상태와 local callback으로 휴강 안내와 선택형 보충 입력만 렌더링합니다.
+- `LessonModalBasics.jsx`는 `LessonModal`이 소유한 수업 유형·반 템플릿·색상·이름·날짜·시간 값과 callback을 렌더링하며 휴강 panel의 DOM 순서를 children으로 보존합니다.
+- `LessonModalActions.jsx`는 `LessonModal`이 소유한 저장 표시 상태와 submit·close callback으로 저장 안내와 하단 action만 렌더링합니다.
 - `lessonCalendarKeyboardModel.js`는 편집 대상·수업일지 열림 예외와 달력 keyboard action만 순수하게 판정합니다.
 - `useLessonCalendarKeyboardNavigation.js`는 window keydown 등록·해제, 기본 동작 차단과 기존 달력 callback dispatch만 소유합니다.
 - `lessonModalSaveSnapshot.js`는 수업 modal 저장 후 Supabase 재조회 값을 비교할 필드·시간·명단·학생별 특강 일정을 순수 정규화합니다.

@@ -2,10 +2,11 @@ import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [rawAppSource, teacherLessonHubSource, lessonJournalDetailSource] = await Promise.all([
+const [rawAppSource, teacherLessonHubSource, lessonJournalDetailSource, lessonModalSource] = await Promise.all([
   readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/lessons/TeacherLessonHubV2.jsx", import.meta.url), "utf8"),
-  readFile(new URL("../src/domains/lessons/LessonJournalDetail.jsx", import.meta.url), "utf8")
+  readFile(new URL("../src/domains/lessons/LessonJournalDetail.jsx", import.meta.url), "utf8"),
+  readFile(new URL("../src/domains/lessons/LessonModal.jsx", import.meta.url), "utf8")
 ]);
 const appSource = await readAppWithLessonJournalSource(import.meta.url);
 const saveControllerSource = await readFile(
@@ -28,19 +29,29 @@ function section(source, start, end) {
 for (const extractedBoundary of [
   'from "../domains/lessons/lessonCalendarModel.js"',
   'from "../domains/lessons/TeacherLessonHubV2.jsx"',
-  'from "../domains/lessons/lessonModalDraftModel.js"',
-  'from "../domains/lessons/lessonModalDraftTransitions.js"',
   'from "../domains/lessons/lessonModalPayloadBuilders.js"',
   'from "../domains/lessons/lessonModalSaveController.js"',
   'from "../domains/lessons/lessonModalSaveSnapshot.js"',
-  'from "../domains/lessons/LessonModalActions.jsx"',
-  'from "../domains/lessons/LessonModalBasics.jsx"',
-  'from "../domains/lessons/LessonModalClosurePanel.jsx"',
-  'from "../domains/lessons/LessonModalStudentPicker.jsx"',
+  'from "../domains/lessons/LessonModal.jsx"',
   'from "../domains/lessons/AttendanceKiosk.jsx"'
 ]) {
   assert.ok(appSource.includes(extractedBoundary), `missing extracted boundary: ${extractedBoundary}`);
 }
+
+for (const lessonModalBoundary of [
+  'from "./lessonModalDraftModel.js"',
+  'from "./lessonModalDraftTransitions.js"',
+  'from "./lessonModalInitialDraft.js"',
+  'from "./lessonModalSaveState.js"',
+  'from "./lessonModalStudentModel.js"',
+  'from "./LessonModalActions.jsx"',
+  'from "./LessonModalBasics.jsx"',
+  'from "./LessonModalClosurePanel.jsx"',
+  'from "./LessonModalStudentPicker.jsx"'
+]) {
+  assert.ok(lessonModalSource.includes(lessonModalBoundary), `missing lesson modal boundary: ${lessonModalBoundary}`);
+}
+assert.equal(rawAppSource.includes("function LessonModal("), false);
 
 for (const lessonHubBoundary of [
   'from "./LessonCalendarView.jsx"',

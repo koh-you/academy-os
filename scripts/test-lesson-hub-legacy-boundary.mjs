@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
 const teacherViewOutletSource = await readFile(new URL("../src/app/TeacherViewOutlet.js", import.meta.url), "utf8");
 const teacherLessonHubSource = await readFile(new URL("../src/domains/lessons/TeacherLessonHubV2.jsx", import.meta.url), "utf8");
+const lessonModalSource = await readFile(new URL("../src/domains/lessons/LessonModal.jsx", import.meta.url), "utf8");
 const lessonHubBoundarySource = `${appSource}\n${teacherLessonHubSource}`;
 
 function countMatches(pattern, source = appSource) {
@@ -43,10 +44,12 @@ assert.equal(
   "the helper used only by the removed legacy detail must stay removed"
 );
 assert.equal(
-  countMatches(/function LessonModal\b/g),
+  countMatches(/function LessonModal\b/g, lessonModalSource),
   1,
   "the active lesson create/edit modal must remain"
 );
+assert.equal(appSource.includes("function LessonModal("), false, "the active lesson modal must stay extracted from App");
+assert.equal(appSource.includes('import { LessonModal } from "../domains/lessons/LessonModal.jsx"'), true);
 assert.equal(
   countMatches(/function ReportModal\b/g),
   1,

@@ -9,6 +9,10 @@ const panelSource = await readFile(
   new URL("../src/domains/lessons/LessonModalClosurePanel.jsx", import.meta.url),
   "utf8"
 );
+const modalSource = await readFile(
+  new URL("../src/domains/lessons/LessonModal.jsx", import.meta.url),
+  "utf8"
+);
 
 for (const requiredSource of [
   "export function LessonModalClosurePanel({",
@@ -47,20 +51,20 @@ for (const forbiddenSource of [
 }
 
 assert.ok(
-  appSource.includes(
-    'import { LessonModalClosurePanel } from "../domains/lessons/LessonModalClosurePanel.jsx";'
+  modalSource.includes(
+    'import { LessonModalClosurePanel } from "./LessonModalClosurePanel.jsx";'
   ),
-  "App must import the extracted closure panel"
+  "LessonModal must import the controlled closure panel"
 );
 assert.ok(
-  appSource.includes("<LessonModalClosurePanel"),
-  "App must render the extracted closure panel"
+  modalSource.includes("<LessonModalClosurePanel"),
+  "LessonModal must render the controlled closure panel"
 );
 assert.ok(
-  appSource.includes("function handleClosureMakeupDateChange(nextDate)"),
-  "App must retain closure makeup touched-state ownership"
+  modalSource.includes("function handleClosureMakeupDateChange(nextDate)"),
+  "LessonModal must retain closure makeup touched-state ownership"
 );
-for (const appOwnedSource of [
+for (const modalOwnedSource of [
   "getLessonClosureBlockingNotificationJobs(notificationJobs, initialLesson.lessonId)",
   "records.filter((record) => record.lessonId === initialLesson.lessonId).length",
   "onClosureMakeupEnabledChange={setClosureMakeupEnabled}",
@@ -68,9 +72,11 @@ for (const appOwnedSource of [
   "onClosureMakeupEndTimeChange={setClosureMakeupEndTime}"
 ]) {
   assert.ok(
-    appSource.includes(appOwnedSource),
-    `App must retain closure source ownership through ${appOwnedSource}`
+    modalSource.includes(modalOwnedSource),
+    `LessonModal must retain closure source ownership through ${modalOwnedSource}`
   );
 }
+
+assert.ok(appSource.includes('import { LessonModal } from "../domains/lessons/LessonModal.jsx";'));
 
 console.log("lesson modal closure panel controlled boundary passed");
