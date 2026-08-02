@@ -65,7 +65,8 @@
 - 학생 원천 merge와 선택·표시 파생값을 구분한다.
 - 진행: App에서 `StudentManager`로 전달되던 16개 상태 변경 callback을 `studentEffectAdapter`로 묶었다. 화면 local edit 1개는 `draft`, 저장 7개는 `persistence`, 삭제 5개는 `deletion`, 퇴원·복구 2개는 `lifecycle`, 영구 삭제 전 읽기 점검 1개는 `audit`으로 명시한다. adapter는 함수 참조만 조립하고 App의 API·Supabase 재조회·오류 복구 owner는 유지한다.
 - 진행: 2,168줄 `StudentManager`에 함께 있던 학생 프로필 화면·오류 경계·profile 전용 draft/표시 helper를 `StudentProfileModal.jsx`로 물리 분리했다. 이전 프로필 본문과 문자 단위로 동일하며, 새 화면은 주입 callback만 소비하고 API·Supabase·localStorage를 소유하지 않는다.
-- 진행: 퇴원 확인·인계 PDF·단일/일괄 영구삭제 4개 overlay를 `StudentLifecycleOverlays.jsx`로 물리 분리했다. 11,029자 JSX 본문은 기준 commit과 동일하고, audit·복원·삭제·PDF controller와 App effect는 `StudentManager`에 유지한다. 다음 단위는 퇴원생 목록·선택 toolbar 조립을 분리해 3-4 종료 조건을 대조한다.
+- 진행: 퇴원 확인·인계 PDF·단일/일괄 영구삭제 4개 overlay를 `StudentLifecycleOverlays.jsx`로 물리 분리했다. overlay JSX 본문은 기준 commit과 동일하고, audit·복원·삭제·PDF controller와 App effect는 `StudentManager`에 유지한다.
+- 완료: 퇴원생 표·정렬·선택 toolbar 조립을 `StudentWithdrawnList.jsx`로 물리 분리했다. 5,273자 JSX와 20개 직접 prop 표면은 기준 commit과 동일하다. `StudentManager`는 active list shell·공유 local controller·선택 화면 조정만 소유하고, profile·withdrawn list·lifecycle overlay/인계 화면은 별도 파일이 소유한다. App의 학생 저장·Supabase 재조회·퇴원·복구·삭제 effect는 이동하지 않은 상태로 3-4를 닫는다.
 
 ### 3-5 Notification 경계
 

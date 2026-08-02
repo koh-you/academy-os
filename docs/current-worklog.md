@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 App 3차 리팩터링 3-4 퇴원생 목록 경계
+
+- 퇴원생 표·정렬·선택 toolbar JSX와 날짜 표시 helper를 `src/domains/students/StudentWithdrawnList.jsx`로 물리 이동했다. 기준 commit의 목록 본문 5,273자를 직접 대조해 문자 단위 동일함을 확인했다.
+- 호출부·시그니처의 20개 prop은 모두 `prop={prop}` 직접 전달이다. dirty row, 선택 집합, 선택 저장, 퇴원 취소, 인계 PDF, 단일/일괄 영구삭제 controller는 `StudentManager`가 계속 소유하며 새 목록은 API·Storage·React state/effect를 갖지 않는다.
+- scenario inventory는 Manager/profile/lifecycle overlay/withdrawn list source를 합성해 기존 사용자 계약을 유지하고, SelectionToolbar import 검사는 실제 새 raw source를 읽도록 위치 결합만 교정했다. 전용 exact-prop fixture를 student fast와 production 학생 묶음에 연결했다.
+- 구조 결과: `StudentManager.jsx`는 826줄·40,802 bytes에서 755줄·36,371 bytes, 새 `StudentWithdrawnList.jsx`는 121줄·6,485 bytes다. profile·퇴원 목록·lifecycle overlay/인계 화면이 분리되고 App effect owner가 유지되어 3-4를 닫는다.
+- 검증: runtime lint, student fast 9/9, scenario/production 820/820, build 363 modules, 퇴원생 표·선택 toolbar를 직접 여는 Worktree 격리 safe browser 10/10을 통과했다. 운영 데이터·실제 삭제·알림·AI 호출·SQL은 사용하지 않았다.
+
 ## 2026-08-02 App 3차 리팩터링 3-4 학생 lifecycle overlay 경계
 
 - 퇴원 확인, 읽기 전용 인수인계 PDF, 단일 영구삭제, 일괄 영구삭제 4개 overlay를 `src/domains/students/StudentLifecycleOverlays.jsx`로 물리 이동했다. 기준 commit의 조건부 JSX 11,029자를 직접 대조해 문자 단위 동일함을 확인했다.
