@@ -11,7 +11,7 @@
 | 도메인 fast | `npm run test:domain:<domain>` | 작업 중 가장 자주 실행하는 관련 동작 fixture. 목표 10초 이내 |
 | 빠른 일반 검증 | `npm run check:fast` | runtime lint, 정적 production scenario, production build를 한 번에 확인 |
 | 전체 production | `npm run test:production` | 전체 pure fixture와 정적 scenario를 직렬 안전망으로 확인 |
-| 안전 브라우저 | `npm run test:browser-smoke` 또는 관련 Playwright grep | 핵심 UI 동선과 브라우저 조립을 가상 데이터로 확인 |
+| 안전 브라우저 | `npm run test:browser-smoke` 또는 뒤에 관련 Playwright grep 인수 추가 | Worktree별 격리 포트와 가상 데이터로 핵심 UI 동선을 확인 |
 | branch/main CI | GitHub Production checks | exact-head와 main의 통합 상태를 다시 확인 |
 
 `check:fast`는 도메인 테스트의 별칭이 아니다. 기존 의미인 `lint:runtime + scenario summary + build`를 유지한다.
@@ -67,5 +67,6 @@ npm run test:domain:settlement
 - 새 파일 위치나 source string 존재보다 사용자 동작과 저장 계약을 검증한다.
 - local draft, API/DB 원천, 파생 화면값, 외부 side effect를 구분한다.
 - 포트·브라우저·공유 fixture 검사는 병렬화하지 않는다.
+- 기본 browser smoke runner는 Worktree 경로별 가용 포트를 고르고 기존 preview를 재사용하지 않는다. `test:browser-smoke:direct`는 runner 자체를 진단할 때만 사용한다.
 - 정적 scenario 811개는 당장 삭제하지 않는다. 관련 코드를 만질 때 동작 fixture로 점진 교체한다.
 - 운영 데이터 쓰기, 실제 알림, 운영 SQL, 유료 호출은 검증에 사용하지 않는다.

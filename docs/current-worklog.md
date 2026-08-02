@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 browser smoke Worktree 격리 기본화
+
+- `npm run test:browser-smoke`가 Worktree 경로에서 안정적으로 파생한 가용 frontend/API 포트를 선택하고 기존 preview를 재사용하지 않도록 격리 runner를 추가했다.
+- 명시 포트, 포트 범위, Worktree path hash 계약을 fixture로 확인한다. 직접 Playwright 실행은 runner 진단용 `test:browser-smoke:direct`로 남겼다.
+- 검증: runner contract, `check:fast` scenario 812/812·build 353 modules, 기본 명령의 자동 격리 포트 safe browser 9/9를 통과했다. 단순 test tooling 변경의 로컬 full production 반복은 정책대로 생략하고 exact-head/main CI에서 확인한다.
+- 운영 데이터·실제 알림·운영 SQL·유료 호출은 사용하지 않는다.
+
 ## 2026-08-02 App 3차 리팩터링 3-1 Notification Center 화면 분리
 
 - `App.jsx` 내부의 Notification Center top-level 405줄을 `src/domains/notifications/NotificationCenter.jsx`로 이동했다. App은 명시적 `runtimeBindings`로 기존 날짜·표시 helper와 특강 panel을 주입하며 저장·예약·취소·reconcile 계약은 바꾸지 않았다.
