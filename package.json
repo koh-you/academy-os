@@ -22,7 +22,7 @@
     "test:app-state-persistence-controller": "node scripts/test-app-state-persistence-controller.mjs",
     "test:app-session-boundary": "node scripts/test-app-session-boundary.mjs",
     "test:notification-refresh-reconcile-controller": "node scripts/test-notification-refresh-reconcile-controller.mjs",
-    "test:teacher-view-boundary": "node scripts/test-teacher-view-boundary.mjs && node scripts/test-teacher-view-lazy-loading.mjs && node scripts/test-exam-analysis-pipeline-boundary.mjs && node scripts/test-learning-support-view-boundary.mjs",
+    "test:teacher-view-boundary": "node scripts/test-teacher-view-boundary.mjs && node scripts/test-teacher-view-lazy-loading.mjs && node scripts/test-exam-analysis-pipeline-boundary.mjs && node scripts/test-learning-support-view-boundary.mjs && node scripts/test-planning-tool-view-boundary.mjs",
     "check:fast": "npm run lint:runtime && npm run test:scenario-summary && npm run build",
     "test:domain:runner": "node scripts/test-domain-test-runner.mjs",
     "test:domain:lesson": "node scripts/run-domain-tests.mjs lesson",

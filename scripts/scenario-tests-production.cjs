@@ -14,6 +14,7 @@ const teacherViewOutletPath = path.join(root, "src", "app", "TeacherViewOutlet.j
 const lazyTeacherViewComponentsPath = path.join(root, "src", "app", "lazyTeacherViewComponents.js");
 const examAnalysisPipelineComponentPath = path.join(root, "src", "domains", "exams", "ExamAnalysisPipelineCenter.jsx");
 const learningSupportCentersPath = path.join(root, "src", "domains", "teacher", "LearningSupportCenters.jsx");
+const planningToolCentersPath = path.join(root, "src", "domains", "teacher", "PlanningToolCenters.jsx");
 const sidebarMenuModelPath = path.join(root, "src", "app", "sidebarMenuModel.js");
 const sidebarPath = path.join(root, "src", "app", "Sidebar.jsx");
 const roleLoginScreenPath = path.join(root, "src", "app", "RoleLoginScreen.jsx");
@@ -388,6 +389,7 @@ const teacherViewOutletSource = fs.existsSync(teacherViewOutletPath) ? fs.readFi
 const lazyTeacherViewComponentsSource = fs.existsSync(lazyTeacherViewComponentsPath) ? fs.readFileSync(lazyTeacherViewComponentsPath, "utf8") : "";
 const examAnalysisPipelineComponentSource = fs.existsSync(examAnalysisPipelineComponentPath) ? fs.readFileSync(examAnalysisPipelineComponentPath, "utf8") : "";
 const learningSupportCentersSource = fs.existsSync(learningSupportCentersPath) ? fs.readFileSync(learningSupportCentersPath, "utf8") : "";
+const planningToolCentersSource = fs.existsSync(planningToolCentersPath) ? fs.readFileSync(planningToolCentersPath, "utf8") : "";
 const sidebarMenuModelSource = fs.existsSync(sidebarMenuModelPath) ? fs.readFileSync(sidebarMenuModelPath, "utf8") : "";
 const sidebarSource = fs.existsSync(sidebarPath) ? fs.readFileSync(sidebarPath, "utf8") : "";
 const roleLoginScreenSource = fs.existsSync(roleLoginScreenPath) ? fs.readFileSync(roleLoginScreenPath, "utf8") : "";
@@ -429,6 +431,9 @@ const appEntrySource = [
     : "",
   fs.existsSync(learningSupportCentersPath)
     ? `/* extracted learning support screens boundary\n${learningSupportCentersSource.replace(/\*\//g, "* /")}\n*/`
+    : "",
+  fs.existsSync(planningToolCentersPath)
+    ? `/* extracted planning tool screens boundary\n${planningToolCentersSource.replace(/\*\//g, "* /")}\n*/`
     : "",
   fs.existsSync(notificationCenterComponentPath)
     ? `/* extracted notification center screen boundary\n${notificationCenterComponentSource.replace(/\*\//g, "* /")}\n*/`

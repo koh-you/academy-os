@@ -110,6 +110,23 @@ test("learning support screens open from their shared deferred chunk without mut
   expect(pageErrors).toEqual([]);
 });
 
+test("planning tool screens open from their shared deferred chunk without mutations", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await page.route("**/src/domains/teacher/PlanningToolCenters.jsx*", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    await route.continue();
+  });
+
+  await loginAsTeacher(page);
+  const navigation = page.getByRole("navigation", { name: "주요 화면" });
+  await navigation.getByRole("button", { name: /학사일정/ }).click();
+  await expect(page.locator('.teacherViewLoadState[role="status"]')).toContainText("교사 화면을 불러오는 중입니다.");
+  await expect(page.getByRole("heading", { name: "학사일정" })).toBeVisible();
+  await navigation.getByRole("button", { name: /수업연구/ }).click();
+  await expect(page.getByRole("heading", { name: "수업연구" })).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
 test("withdrawn student list keeps its table and selection toolbar boundary", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);

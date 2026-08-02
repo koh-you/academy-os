@@ -62,6 +62,7 @@
 - 3-7 첫 단위에서 이미 분리된 Lesson·Supplement·Student·Notification·Settlement top-level 화면을 동적 import로 연결했다. 초기 main JS는 1,656.92 kB에서 1,379.15 kB, gzip은 427.24 kB에서 351.03 kB로 줄었고, 5개 화면은 별도 chunk다. 로딩 표시와 chunk 실패 오류 번호·안전 새로고침은 safe browser로 검증했다.
 - 3-7 두 번째 단위에서 `App.jsx` 안의 시험분석 helper·화면 4,612줄을 `ExamAnalysisPipelineCenter.jsx`로 물리 분리하고 여섯 번째 lazy 화면으로 연결했다. 13개 API request owner는 App runtime에 유지했다. 초기 main JS는 1,181.41 kB, gzip 296.06 kB로 줄었고 유료 AI·업로드·저장은 실행하지 않은 안전 브라우저로 chunk 진입을 검증했다.
 - 3-7 세 번째 단위에서 오답관리·시험지관리·자료함·숙제현황 4개 화면 1,335줄을 `LearningSupportCenters.jsx`로 분리해 하나의 저빈도 shared lazy chunk로 연결했다. 저장·삭제·교사 확인 callback과 학생 화면 owner는 App runtime에 유지했다. 초기 main JS는 1,142.78 kB, gzip 285.71 kB이며 App은 15,176줄·663,337 bytes다.
+- 3-7 네 번째 단위에서 학사일정·반관리·수업연구·AI 도구 화면 1,509줄을 `PlanningToolCenters.jsx`로 분리해 shared lazy chunk로 연결했다. 일정 저장·시험행 동기화·반 명단·수업연구 callback은 App owner를 유지했다. 초기 main JS는 1,092.41 kB, gzip 272.16 kB이며 App은 595,886 bytes다.
 
 ## 폴더 상태
 
@@ -73,7 +74,7 @@
 ## 다음 우선순위
 
 1. App 2차 리팩터링 Phase 1~5는 완료됐다. 3차 리팩터링은 3-0 기준선 뒤 `App.jsx` 내부 화면 정의의 물리적 분리부터 순서대로 진행한다.
-2. 3-7 세 번째 분할로 production main chunk를 약 1.14 MB까지 줄였다. App에 남은 저빈도 teacher 화면을 추가 분리해 700~900 kB 목표와 Babel 500 KB 경고 제거를 이어간다. 화면 동작·저장 경계 변경은 같은 단위에 섞지 않는다.
+2. 3-7 네 번째 분할로 production main chunk를 약 1.09 MB까지 줄였다. App에 남은 저빈도 teacher 화면을 추가 분리해 700~900 kB 목표와 Babel 500 KB 경고 제거를 이어간다. 화면 동작·저장 경계 변경은 같은 단위에 섞지 않는다.
 3. `app_state`에서 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
    - 즉시 사람 판단이 필요하지 않은 발견은 queue/worklog에 남기고 AI 검수와 다음 단계를 연쇄 진행한다.
 
