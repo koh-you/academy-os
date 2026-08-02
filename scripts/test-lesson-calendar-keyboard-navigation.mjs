@@ -6,6 +6,10 @@ import { dispatchLessonCalendarKeyboardAction } from "../src/domains/lessons/use
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const appSource = fs.readFileSync(path.join(root, "src", "app", "App.jsx"), "utf8");
+const teacherLessonHubSource = fs.readFileSync(
+  path.join(root, "src", "domains", "lessons", "TeacherLessonHubV2.jsx"),
+  "utf8"
+);
 const hookSource = fs.readFileSync(
   path.join(root, "src", "domains", "lessons", "useLessonCalendarKeyboardNavigation.js"),
   "utf8"
@@ -51,8 +55,9 @@ for (const expected of [
 ]) {
   assert.equal(hookSource.includes(expected), true, `missing hook boundary: ${expected}`);
 }
-assert.equal(appSource.includes("useLessonCalendarKeyboardNavigation({"), true);
+assert.equal(teacherLessonHubSource.includes("useLessonCalendarKeyboardNavigation({"), true);
 assert.equal(appSource.includes('window.addEventListener("keydown", handleKeyDown)'), false);
+assert.equal(teacherLessonHubSource.includes('window.addEventListener("keydown", handleKeyDown)'), false);
 for (const forbidden of [
   "fetch(",
   "postJson",

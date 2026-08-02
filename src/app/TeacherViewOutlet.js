@@ -42,6 +42,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
         integrationStatus: models.integrationStatus,
         lessonNotificationPlans: models.lessonNotificationPlans,
         notificationJobs: models.notificationJobs,
+        runtime: runtimeBindings.teacherLessonHub,
         lessons: models.calendarLessons,
         lessonsForDate: models.lessonsForDate,
         makeupTasks: models.makeupTasks,

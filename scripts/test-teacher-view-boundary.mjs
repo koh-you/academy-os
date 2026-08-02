@@ -61,7 +61,8 @@ const components = Object.fromEntries([...componentNames].map((componentName) =>
 ]));
 const runtimeBindings = {
   notificationCenter: Object.freeze({ source: "fixture" }),
-  SpecialLectureNoticePanel: function FixtureSpecialLectureNoticePanel() { return "specialLecture"; }
+  SpecialLectureNoticePanel: function FixtureSpecialLectureNoticePanel() { return "specialLecture"; },
+  teacherLessonHub: Object.freeze({ source: "lesson-fixture" })
 };
 
 const actionStubs = new Map();
@@ -114,19 +115,24 @@ for (const viewId of ["specialLectureManagement", "notifications"]) {
   assert.equal(adapters[viewId].props.runtime, runtimeBindings.notificationCenter);
   assert.equal(adapters[viewId].props.SpecialLectureNoticePanel, runtimeBindings.SpecialLectureNoticePanel);
 }
+assert.equal(adapters.lessons.props.runtime, runtimeBindings.teacherLessonHub);
 
 const lessonElement = TeacherViewOutlet({ activeView: "lessons", adapters });
 assert.equal(lessonElement.type, components.TeacherLessonHubV2);
 assert.equal(lessonElement.props.onDeleteLesson, actions.handleDeleteLesson);
+assert.equal(lessonElement.props.runtime, runtimeBindings.teacherLessonHub);
 assert.equal(TeacherViewOutlet({ activeView: "studentPortal", adapters }), null);
 assert.equal(TeacherViewOutlet({ activeView: "reports", adapters }), null);
 assert.equal(TeacherViewOutlet({ activeView: "unknown", adapters }), null);
 
-const [appSource, outletSource] = await Promise.all([
+const [appSource, outletSource, teacherLessonHubSource] = await Promise.all([
   readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8"),
-  readFile(new URL("../src/app/TeacherViewOutlet.js", import.meta.url), "utf8")
+  readFile(new URL("../src/app/TeacherViewOutlet.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/domains/lessons/TeacherLessonHubV2.jsx", import.meta.url), "utf8")
 ]);
 assert.equal(appSource.includes('from "./TeacherViewOutlet.js"'), true);
+assert.equal(appSource.includes('import { TeacherLessonHubV2 } from "../domains/lessons/TeacherLessonHubV2.jsx"'), true);
+assert.equal(appSource.includes("function TeacherLessonHubV2("), false);
 assert.equal(appSource.includes("const teacherViewAdapters = createTeacherViewAdapters({"), true);
 assert.equal(appSource.includes("<TeacherViewOutlet activeView={activeView} adapters={teacherViewAdapters} />"), true);
 for (const viewId of teacherViewIds) {
@@ -153,6 +159,10 @@ for (const [, modelName] of outletSource.matchAll(/models\.([A-Za-z0-9_]+)/g)) {
 }
 for (const forbiddenToken of ["fetch(", "postJson(", "getJsonWithTimeout(", "localStorage", '"/api/']) {
   assert.equal(outletSource.includes(forbiddenToken), false, `outlet must not own ${forbiddenToken}`);
+  assert.equal(teacherLessonHubSource.includes(forbiddenToken), false, `lesson hub screen must not own ${forbiddenToken}`);
 }
+assert.equal(teacherLessonHubSource.includes("export function TeacherLessonHubV2("), true);
+assert.equal(teacherLessonHubSource.includes("onSaveLessonJournalDrafts={onSaveLessonJournalDrafts}"), true);
+assert.equal(teacherLessonHubSource.includes("onScheduleLessonNotificationsAt={onScheduleLessonNotificationsAt}"), true);
 
 console.log("teacher view contracts, callback adapters, and App ownership boundary fixtures passed");

@@ -26,7 +26,7 @@
 | --- | --- | --- | --- |
 | session | `src/app/useAppSession.js` | 로그인·로그아웃·초기 저장소 판독도 같은 hook | 유지. 다른 도메인과 재결합하지 않음 |
 | 교사 화면 routing | `src/app/TeacherViewOutlet.js` | 실제 저장·삭제·발송 handler는 `App` | adapter 계약을 유지하고 각 화면을 lazy 경계에 연결 |
-| lesson | `App.jsx`의 `TeacherLessonHubV2`, `LessonJournalDetail`과 `src/domains/lessons`가 혼재 | 수업·수업일지 저장 handler는 주로 `App` | 화면 조립부터 `src/domains/lessons`로 이동하고 draft/persisted 경계는 별도 단계로 검수 |
+| lesson | `TeacherLessonHubV2`는 `src/domains/lessons`, `LessonJournalDetail`은 `App.jsx`에 남아 혼재 | 수업·수업일지 저장 handler는 주로 `App` | 상세 화면과 draft/persisted 경계를 별도 단계로 검수 |
 | supplement | `src/domains/supplements/SupplementCenter.jsx`와 하위 모델 | 저장·취소·알림 handler 일부는 `App` callback | 화면 owner는 유지하고 side effect callback 표면을 줄임 |
 | student | `src/domains/students/StudentManager.jsx` | 학생 저장·퇴원·삭제 handler는 `App` | 원천 merge, 선택 상태, 저장 행동을 분명한 adapter로 연결 |
 | notification | `App.jsx`의 `NotificationCenter`와 `src/domains/notifications`가 혼재 | 저장·reconcile·발송 handler는 `App` | top-level 화면을 도메인으로 이동하고 draft/persisted/provider 상태를 분리 |
@@ -42,6 +42,7 @@
 - 우선순위는 Notification Center, Teacher Lesson Hub, Lesson Journal Detail이다.
 - 상태 owner와 저장·발송 handler 계약은 바꾸지 않고 props/callback 조립만 이동한다.
 - 진행: Notification Center top-level 1차 단위는 `src/domains/notifications/NotificationCenter.jsx`로 이동했다. App 전용 날짜·표시 helper는 명시적 `runtimeBindings`로 주입하고, 특강 panel은 다음 notification 단위까지 App 정의를 유지한다.
+- 진행: Teacher Lesson Hub는 `src/domains/lessons/TeacherLessonHubV2.jsx`로 이동했다. 달력의 local filter·focus·keyboard 상태만 화면이 소유하며, 상세 화면과 저장·예약·취소·발송·reconcile callback은 `teacherLessonHubRuntime`과 teacher view adapter를 통해 App owner를 유지한다.
 
 ### 3-2 Lesson 경계
 

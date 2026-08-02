@@ -3,16 +3,20 @@ import { readFile } from "node:fs/promises";
 
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
 const teacherViewOutletSource = await readFile(new URL("../src/app/TeacherViewOutlet.js", import.meta.url), "utf8");
+const teacherLessonHubSource = await readFile(new URL("../src/domains/lessons/TeacherLessonHubV2.jsx", import.meta.url), "utf8");
+const lessonHubBoundarySource = `${appSource}\n${teacherLessonHubSource}`;
 
-function countMatches(pattern) {
-  return [...appSource.matchAll(pattern)].length;
+function countMatches(pattern, source = appSource) {
+  return [...source.matchAll(pattern)].length;
 }
 
 assert.equal(
-  countMatches(/function TeacherLessonHubV2\b/g),
+  countMatches(/function TeacherLessonHubV2\b/g, lessonHubBoundarySource),
   1,
   "the active teacher lesson hub definition must remain"
 );
+assert.equal(appSource.includes("function TeacherLessonHubV2("), false, "the active teacher lesson hub must stay extracted from App");
+assert.equal(appSource.includes('import { TeacherLessonHubV2 } from "../domains/lessons/TeacherLessonHubV2.jsx"'), true);
 assert.equal(
   [...teacherViewOutletSource.matchAll(/Component: components\.TeacherLessonHubV2\b/g)].length,
   1,
@@ -27,7 +31,7 @@ for (const legacyName of [
   "LessonDetail"
 ]) {
   assert.equal(
-    countMatches(new RegExp(`function ${legacyName}\\b`, "g")),
+    countMatches(new RegExp(`function ${legacyName}\\b`, "g"), lessonHubBoundarySource),
     0,
     `${legacyName} legacy definition must stay removed`
   );
