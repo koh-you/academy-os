@@ -534,12 +534,13 @@ const fixedRow = buildStudentSettlementRow({
   student
 });
 assert.equal(fixedRow.regularGrossAmount, 450000, "재원생 금액은 실제 횟수와 무관한 월 고정금액이어야 합니다.");
-assert.equal(fixedRow.regularCount, 4, "정규 회차는 월별 스케줄 예측이 아니라 7월 수업일지 4건이어야 합니다.");
+assert.equal(fixedRow.regularCount, 5, "정규 4회와 보강 예정 휴강 1회를 정산 회차로 인정해야 합니다.");
 assert.equal(
   fixedRow.regularEvents.some((event) => event.lessonType === "closure"),
-  false,
-  "휴강 수업일지는 명단·기록만 남기고 정규 횟수와 시수 계산에서 제외해야 합니다."
+  true,
+  "보강 전 휴강도 해당 월 정규 횟수에 포함해야 합니다."
 );
+assert.equal(fixedRow.closureCount, 1);
 assert.equal(fixedRow.actualStatusCounts.pending, 4, "대기 출결은 수업일지 원천 상태를 유지한 채 집계되어야 합니다.");
 assert.equal(fixedRow.makeupCount, 1, "보충은 별도 횟수로 표시해야 합니다.");
 assert.equal(fixedRow.makeupHours, 2, "보충 시수는 별도 참고값이어야 합니다.");
@@ -587,15 +588,22 @@ const closureReplacementRow = buildStudentSettlementRow({
   student: closureReplacementStudent
 });
 assert.equal(closureReplacementRow.setting.mode, "new");
-assert.equal(closureReplacementRow.regularCount, 5, "휴강 보충 1회는 실제 정규 이행 횟수에 포함해야 합니다.");
+assert.equal(closureReplacementRow.regularCount, 5, "휴강 1회는 포함하고 연결 보강은 추가 회차로 중복 계산하지 않아야 합니다.");
 assert.equal(closureReplacementRow.makeupCount, 0, "휴강 보충을 일반 결석·숙제 보충과 중복 집계하지 않아야 합니다.");
+assert.equal(closureReplacementRow.closureCount, 1);
+assert.equal(closureReplacementRow.closureReplacementCount, 1);
+assert.equal(
+  closureReplacementRow.regularEvents.some((event) => event.eventType === "regularReplacement"),
+  false,
+  "연결 휴강 보충은 정산 인정 정규 회차를 추가하지 않아야 합니다."
+);
 assert.equal(closureReplacementRow.prorationCount, 5);
 assert.equal(closureReplacementRow.regularGrossAmount, 187500);
 
 const julyNewStudent = {
   defaultClassTemplateId: "class_mwf",
   grade: "고1",
-  name: "7월 신입 정규10회",
+  name: "7월 신입 정규10회와 휴강1회",
   studentId: "student_july_new_ten"
 };
 const julyNewTenLessons = ["08", "10", "13", "15", "17", "20", "22", "27", "29", "31"].map((day) => ({
@@ -607,7 +615,17 @@ const julyNewTenLessons = ["08", "10", "13", "15", "17", "20", "22", "27", "29",
   startTime: "19:00",
   status: "scheduled",
   studentIds: [julyNewStudent.studentId]
-}));
+})).concat({
+  className: "월수금반",
+  date: "2026-07-24",
+  endTime: "22:00",
+  lessonId: "lesson_july_new_ten_closure_24",
+  lessonTopic: "휴강",
+  lessonType: "closure",
+  startTime: "19:00",
+  status: "scheduled",
+  studentIds: [julyNewStudent.studentId]
+});
 const julyNewTenRow = buildStudentSettlementRow({
   classTemplates,
   lessons: julyNewTenLessons,
@@ -617,9 +635,10 @@ const julyNewTenRow = buildStudentSettlementRow({
   student: julyNewStudent
 });
 assert.equal(julyNewTenRow.monthlyScheduleCount, 14);
-assert.equal(julyNewTenRow.regularCount, 10);
-assert.equal(julyNewTenRow.prorationCount, 10, "신입생은 휴강 예정일을 포함한 달력 11회가 아니라 실제 정규 이행 10회를 적용해야 합니다.");
-assert.equal(julyNewTenRow.regularGrossAmount, 375000);
+assert.equal(julyNewTenRow.regularCount, 11);
+assert.equal(julyNewTenRow.closureCount, 1);
+assert.equal(julyNewTenRow.prorationCount, 11, "보강 예정인 휴강 1회를 정규 정산 횟수에 포함해야 합니다.");
+assert.equal(julyNewTenRow.regularGrossAmount, 412500);
 
 const offScheduleStudent = {
   defaultClassTemplateId: "class_mwf",

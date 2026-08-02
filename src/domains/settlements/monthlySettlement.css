@@ -493,6 +493,16 @@
   background: #dbeafe;
 }
 
+.monthlySettlementTable small.monthlySettlementRuleNote {
+  color: #4f46e5;
+  font-weight: 700;
+}
+
+.monthlySettlementCalendarLegend i.regularClosure {
+  background: #e0e7ff;
+  border: 1px dashed #6366f1;
+}
+
 .monthlySettlementCalendarLegend i.makeup {
   background: #ede9fe;
 }
@@ -601,6 +611,13 @@
 
 .monthlySettlementCalendarEvent.regularReplacement {
   border: 1px dashed currentColor;
+  padding: 2px 3px;
+}
+
+.monthlySettlementCalendarEvent.regularClosure {
+  background: #e0e7ff;
+  border: 1px dashed #6366f1;
+  color: #3730a3;
   padding: 2px 3px;
 }
 

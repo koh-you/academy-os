@@ -92,18 +92,28 @@ test("monthly settlement counts closure replacement and distinguishes attendance
   await page.getByLabel("정산월").fill("2026-07");
 
   const settlementRow = page.getByRole("row").filter({ hasText: "정산 미리보기 학생" });
-  await expect(settlementRow.getByRole("button", { name: /정규 2회/ })).toBeVisible();
-  await settlementRow.getByRole("button", { name: /정규 2회/ }).click();
+  await expect(settlementRow.getByRole("button", { name: /정규 3회/ })).toBeVisible();
+  await expect(settlementRow).toContainText("휴강 1회 · 정규 회차 포함");
+  await expect(settlementRow).toContainText("연결 보강 1회 · 추가 계산 없음");
+  await expect(settlementRow).toContainText("대기 1회 · 출결 미확정");
+  await settlementRow.getByRole("button", { name: /정규 3회/ }).click();
 
   const calendar = page.getByRole("dialog", { name: /정산 미리보기 학생 월별 출결·수업/ });
   const presentEvent = calendar.locator(".monthlySettlementCalendarEvent.regular.attendance-present");
   const absentReplacement = calendar.locator(".monthlySettlementCalendarEvent.regularReplacement.attendance-absent");
+  const pendingEvent = calendar.locator(".monthlySettlementCalendarEvent.regular.attendance-pending");
   await expect(presentEvent).toContainText("출석");
   await expect(absentReplacement).toContainText("휴강 보충 · 결석");
-  const [presentColor, absentColor] = await Promise.all([
+  await expect(pendingEvent).toContainText("대기");
+  await expect(calendar).toContainText("휴강 1회 · 정규 회차 포함");
+  await expect(calendar).toContainText("연결 보강 1회 · 추가 계산 없음");
+  const [presentColor, absentColor, pendingColor] = await Promise.all([
     presentEvent.evaluate((element) => getComputedStyle(element).backgroundColor),
-    absentReplacement.evaluate((element) => getComputedStyle(element).backgroundColor)
+    absentReplacement.evaluate((element) => getComputedStyle(element).backgroundColor),
+    pendingEvent.evaluate((element) => getComputedStyle(element).backgroundColor)
   ]);
   expect(presentColor).not.toBe(absentColor);
+  expect(pendingColor).not.toBe(presentColor);
+  expect(pendingColor).not.toBe(absentColor);
   expect(pageErrors).toEqual([]);
 });

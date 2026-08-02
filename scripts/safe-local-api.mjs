@@ -64,6 +64,18 @@ const initialState = {
     {
       className: "정산 미리보기반",
       classTemplateId: "safe-settlement-class",
+      date: "2026-07-23",
+      endTime: "19:00",
+      lessonId: "safe-settlement-pending",
+      lessonType: "class",
+      startTime: "16:00",
+      status: "scheduled",
+      studentIds: ["safe-settlement-student"],
+      title: "정산 미리보기반"
+    },
+    {
+      className: "정산 미리보기반",
+      classTemplateId: "safe-settlement-class",
       date: "2026-07-24",
       endTime: "19:00",
       lessonId: "safe-settlement-closure",

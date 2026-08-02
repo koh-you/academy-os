@@ -108,6 +108,7 @@ function MonthlySettlementCalendar({ monthKey, onClose, row }) {
     const grouped = new Map();
     [
       ...row.regularEvents,
+      ...row.closureReplacementEvents,
       ...row.makeupEvents,
       ...row.specialEvents
     ].forEach((event) => {
@@ -132,6 +133,7 @@ function MonthlySettlementCalendar({ monthKey, onClose, row }) {
         <span><i className="attendance-absent" />결석</span>
         <span><i className="attendance-late" />지각</span>
         <span><i className="attendance-pending" />대기</span>
+        <span><i className="regularClosure" />휴강 · 회차 포함</span>
         <span><i className="makeup" />보충 · 계산 제외</span>
         <span><i className="special" />특강 · 별도 정산</span>
       </div>
@@ -165,7 +167,9 @@ function MonthlySettlementCalendar({ monthKey, onClose, row }) {
                       key={event.eventId}
                       title={`${event.startTime}-${event.endTime} · ${event.className || event.label}`}
                     >
-                      {event.eventType === "regularReplacement"
+                      {event.eventType === "regularClosure"
+                        ? "휴강 · 보강 예정"
+                        : event.eventType === "regularReplacement"
                         ? `휴강 보충 · ${getSettlementAttendanceLabel(event.attendanceStatus)}`
                         : event.eventType === "regular"
                           ? event.isForecast ? "정규 예정" : getSettlementAttendanceLabel(event.attendanceStatus)
@@ -187,6 +191,9 @@ function MonthlySettlementCalendar({ monthKey, onClose, row }) {
           {" · "}기간 내 수업일지 {row.recognizedRegularCount}회
         </span>
         <span>출석 {row.actualStatusCounts.present ?? 0} · 지각 {row.actualStatusCounts.late ?? 0} · 대기 {row.actualStatusCounts.pending ?? 0} · 결석 {(row.actualStatusCounts.absent ?? 0) + (row.actualStatusCounts.excused ?? 0)}</span>
+        {row.closureCount > 0 ? <span>휴강 {row.closureCount}회 · 정규 회차 포함</span> : null}
+        {row.closureReplacementCount > 0 ? <span>연결 보강 {row.closureReplacementCount}회 · 추가 계산 없음</span> : null}
+        {(row.actualStatusCounts.pending ?? 0) > 0 ? <span>대기 {row.actualStatusCounts.pending}회 · 수업일지는 있으나 출결 미확정</span> : null}
         <span>보충: {row.makeupCount}회 · {formatSettlementHours(row.makeupHours)} · 정규 금액에는 추가하지 않음</span>
       </div>
     </Modal>
@@ -401,8 +408,8 @@ export function MonthlySettlementPanel({
         descriptionNode={(
           <p className="muted">
             선택한 달의 수업일지 명단을 정산 원천으로 봅니다. 재원생은 수업 횟수·시수와 무관하게 월 고정금액,
-            신입생은 첫 수업부터 말일까지 실제 이행한 정규 횟수에 회당 단가를 곱하고, 퇴원생은 1일부터 마지막 수업까지의 월별 스케줄 횟수 비율로 계산합니다.
-            같은 달에 첫 수업과 퇴원이 모두 있으면 첫 수업일부터 퇴원일까지 실제 이행한 정규 횟수만 계산합니다.
+            신입생은 첫 수업부터 말일까지 정산 인정 정규 횟수에 회당 단가를 곱하고, 퇴원생은 1일부터 마지막 수업까지의 월별 스케줄 횟수 비율로 계산합니다.
+            같은 달에 첫 수업과 퇴원이 모두 있으면 첫 수업일부터 퇴원일까지 정산 인정 정규 횟수만 계산합니다.
           </p>
         )}
         eyebrow="운영"
@@ -413,11 +420,11 @@ export function MonthlySettlementPanel({
         <strong>계산 기준</strong>
         <span>학생 상태 필터 없이 해당 월 수업일지 명단을 그대로 표시합니다.</span>
         <span>12회 또는 4.2주 환산을 사용하지 않습니다.</span>
-        <span>신입생은 예정 달력이 아니라 첫 수업~말일의 실제 정규 이행 횟수 × 회당 단가로 계산합니다.</span>
-        <span>신입생이 같은 달에 퇴원하면 첫 수업일~퇴원일 사이의 실제 정규 이행 횟수 × 회당 단가로 계산합니다.</span>
+        <span>신입생은 예정 달력이 아니라 첫 수업~말일의 정산 인정 정규 횟수 × 회당 단가로 계산합니다.</span>
+        <span>신입생이 같은 달에 퇴원하면 첫 수업일~퇴원일 사이의 정산 인정 정규 횟수 × 회당 단가로 계산합니다.</span>
         <span>신입 시작일과 기존 퇴원생 마지막 수업일은 수업일지로 정하고, 같은 달 신입·퇴원생의 종료일은 학생 퇴원일을 사용합니다.</span>
         <span>출석·지각·대기는 정산 포함, 결석도 별도 차감 요청이 없으면 자동 차감하지 않습니다.</span>
-        <span>원 휴강 수업과 연결된 휴강 보충은 정규 이행 1회로 포함하고 일반 결석·숙제 보충은 별도로 표시합니다.</span>
+        <span>휴강은 보강 전에도 정규 1회로 포함하고, 연결된 휴강 보충은 추가 회차로 중복 계산하지 않습니다.</span>
         <span>보충은 달력에 별도로 남기되 정규 금액을 추가하지 않습니다.</span>
         <span>정산 제외한 행은 이 달 정산표에서 숨기며, 학생·수업일지 원천은 유지합니다.</span>
         <span>특강비는 이 월별 정산에서 제외하고 운영의 별도 특강 정산에서 전체 과정 기준으로 계산합니다.</span>
@@ -613,6 +620,9 @@ export function MonthlySettlementPanel({
                         : "정산 기준 횟수 계산 불가"}
                     </small>
                     <small>기간 내 수업일지 {row.recognizedRegularCount}회 · {formatSettlementHours(row.recognizedRegularHours)}</small>
+                    {row.closureCount > 0 ? <small className="monthlySettlementRuleNote">휴강 {row.closureCount}회 · 정규 회차 포함</small> : null}
+                    {row.closureReplacementCount > 0 ? <small className="monthlySettlementRuleNote">연결 보강 {row.closureReplacementCount}회 · 추가 계산 없음</small> : null}
+                    {(row.actualStatusCounts.pending ?? 0) > 0 ? <small className="monthlySettlementRuleNote">대기 {row.actualStatusCounts.pending}회 · 출결 미확정</small> : null}
                     <small>보충 {row.makeupCount}회 · {formatSettlementHours(row.makeupHours)}</small>
                   </td>
                   <td className="monthlySettlementAmountCell">

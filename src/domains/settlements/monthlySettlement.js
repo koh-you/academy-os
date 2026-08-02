@@ -214,7 +214,9 @@ function buildActualLessonEvent(lesson = {}, record = null, student = {}) {
   const startTime = studentSchedule?.startTime || lesson.startTime || "";
   const endTime = studentSchedule?.endTime || lesson.endTime || "";
   const attendanceStatus = record?.attendanceStatus || "pending";
-  const eventType = isSpecialLectureSettlementLesson(lesson)
+  const eventType = nonTeachingLessonTypes.has(lesson.lessonType)
+    ? "regularClosure"
+    : isSpecialLectureSettlementLesson(lesson)
     ? "special"
     : isClosureReplacementSettlementLesson(lesson)
       ? "regularReplacement"
@@ -231,7 +233,9 @@ function buildActualLessonEvent(lesson = {}, record = null, student = {}) {
     eventId: lesson.lessonId,
     eventType,
     isForecast: false,
-    label: eventType === "regularReplacement"
+    label: eventType === "regularClosure"
+      ? "휴강 · 보강 예정"
+      : eventType === "regularReplacement"
       ? "휴강 보충"
       : eventType === "makeup"
         ? "보충"
@@ -256,7 +260,6 @@ export function buildStudentMonthEvidence({
     .filter((lesson) =>
       normalizeText(lesson.date).startsWith(`${monthKey}-`) &&
       !isCanceledLesson(lesson) &&
-      !nonTeachingLessonTypes.has(lesson.lessonType) &&
       hasStudent(lesson, student.studentId)
     )
     .sort((a, b) => (
@@ -271,12 +274,17 @@ export function buildStudentMonthEvidence({
     )
   );
   const actualRegularEvents = actualEvents.filter((event) =>
-    event.eventType === "regular" || event.eventType === "regularReplacement"
+    event.eventType === "regular" || event.eventType === "regularClosure"
   );
   const regularEvents = actualRegularEvents;
+  const closureEvents = actualEvents.filter((event) => event.eventType === "regularClosure");
+  const closureReplacementEvents = actualEvents.filter((event) => event.eventType === "regularReplacement");
   const makeupEvents = actualEvents.filter((event) => event.eventType === "makeup");
   const specialEvents = actualEvents.filter((event) => event.eventType === "special");
-  const actualStatusCounts = actualRegularEvents.reduce((counts, event) => {
+  const attendanceEvents = actualEvents.filter((event) =>
+    event.eventType === "regular" || event.eventType === "regularReplacement"
+  );
+  const actualStatusCounts = attendanceEvents.reduce((counts, event) => {
     const status = event.attendanceStatus || "pending";
     counts[status] = (counts[status] ?? 0) + 1;
     return counts;
@@ -284,6 +292,10 @@ export function buildStudentMonthEvidence({
   return {
     actualRegularEvents,
     actualStatusCounts,
+    closureCount: closureEvents.length,
+    closureEvents,
+    closureReplacementCount: closureReplacementEvents.length,
+    closureReplacementEvents,
     firstActualRegularDate: actualRegularEvents[0]?.date || "",
     lastActualRegularDate: actualRegularEvents.at(-1)?.date || "",
     makeupCount: makeupEvents.length,
