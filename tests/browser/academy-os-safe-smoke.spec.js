@@ -101,7 +101,7 @@ test("lesson journal carries the latest non-empty record across a month boundary
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);
 
-  const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · 1개 수업/ });
+  const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
   await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
 
   const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
@@ -177,7 +177,7 @@ test("settlement exposes special attendance, combined student attendance, and co
   await expect(specialRow).toContainText("수업일지 없음 1회");
 
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
-  await page.getByRole("button", { name: "정산 미리보기 학생" }).click();
+  await page.getByRole("button", { name: /정산 미리보기 학생$/ }).click();
   const profile = page.getByRole("dialog", { name: /정산 미리보기 학생 학생 프로파일/ });
   const attendanceSection = profile.locator(".studentAttendanceSection");
   await expect(attendanceSection).toContainText("정규 출결");
