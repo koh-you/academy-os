@@ -80,6 +80,20 @@ test("lesson journal creation action stays visible and opens the registration mo
   expect(pageErrors).toEqual([]);
 });
 
+test("lesson hub top reminders can collapse and expand without runtime errors", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+
+  const collapseButton = page.getByRole("button", { name: "알림 접기" });
+  await expect(collapseButton).toBeVisible();
+  await collapseButton.click();
+  await expect(page.getByRole("button", { name: "알림 펼치기" })).toBeVisible();
+  await expect(page.locator("#academy-reminder-panel-body")).toBeHidden();
+  await page.getByRole("button", { name: "알림 펼치기" }).click();
+  await expect(page.locator("#academy-reminder-panel-body")).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
 test("lesson journal carries the latest non-empty record across a month boundary", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);

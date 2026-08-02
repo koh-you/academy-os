@@ -14175,6 +14175,7 @@ function AcademyReminderPanel({
 }) {
   const [draft, setDraft] = useState(() => createAcademyReminderDraft(selectedDate));
   const [editingReminderId, setEditingReminderId] = useState("");
+  const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
   const [isReminderFormOpen, setIsReminderFormOpen] = useState(false);
   const [saveState, setSaveState] = useState("idle");
   const [saveMessage, setSaveMessage] = useState("");
@@ -14338,11 +14339,23 @@ function AcademyReminderPanel({
           <button
             className="softButton compact"
             disabled={isEditingReminder}
-            onClick={() => setIsReminderFormOpen((current) => !current)}
+            onClick={() => {
+              setIsPanelCollapsed(false);
+              setIsReminderFormOpen((current) => !current);
+            }}
             title={isEditingReminder ? "수정 중에는 수정 취소 또는 저장을 먼저 선택하세요." : undefined}
             type="button"
           >
             {shouldShowReminderForm ? "입력 접기" : "알림 입력 열기"}
+          </button>
+          <button
+            aria-controls="academy-reminder-panel-body"
+            aria-expanded={!isPanelCollapsed}
+            className="ghostButton compact"
+            onClick={() => setIsPanelCollapsed((current) => !current)}
+            type="button"
+          >
+            {isPanelCollapsed ? "알림 펼치기" : "알림 접기"}
           </button>
           </>
         )}
@@ -14352,6 +14365,7 @@ function AcademyReminderPanel({
         eyebrow="OPERATIONS SOURCE"
         title="운영 알림 원본"
       />
+      <div className="academyReminderPanelBody" hidden={isPanelCollapsed} id="academy-reminder-panel-body">
       {overdueReminders.length > 0 ? (
         <section className="academyReminderOverdueSection">
           <div className="miniSectionHeader">
@@ -14478,6 +14492,7 @@ function AcademyReminderPanel({
             templates={templates}
           />
         </section>
+      </div>
       </div>
     </section>
   );

@@ -923,6 +923,15 @@ summary:focus-visible {
   gap: 16px;
 }
 
+.academyReminderPanelBody {
+  display: grid;
+  gap: 16px;
+}
+
+.academyReminderPanelBody[hidden] {
+  display: none;
+}
+
 .academyReminderHeaderActions {
   align-items: center;
   display: flex;
