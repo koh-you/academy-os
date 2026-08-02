@@ -103,6 +103,7 @@ export function LessonJournalDetail({
     isSameLessonGroup,
     isSpecialLectureLesson,
     isSupplementMakeupTaskLesson,
+    nestedPanels,
     today
   } = runtime;
   const {
@@ -381,6 +382,7 @@ export function LessonJournalDetail({
   if (isSupplementMakeupLesson) {
     return (
       <SupplementMakeupLessonDetail
+        runtime={nestedPanels}
         attendanceSettings={attendanceSettings}
         homeworks={homeworks}
         lesson={lesson}
@@ -748,6 +750,7 @@ export function LessonJournalDetail({
 
       {prepMemoModal ? (
         <PreparationMemoModal
+          runtime={nestedPanels}
           acknowledgedMemoCutoff={prepMemoModal.acknowledgedMemoCutoff}
           lesson={lesson}
           onChangeRecord={onChangeRecord}

@@ -305,6 +305,23 @@ test("lesson journal carries the latest non-empty record across a month boundary
   expect(pageErrors).toEqual([]);
 });
 
+test("lesson memo opens from the shared nested lesson chunk without saving", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await page.route("**/src/domains/lessons/LessonNestedPanels.jsx*", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    await route.continue();
+  });
+  await loginAsTeacher(page);
+
+  const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
+  await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
+  const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
+  await lessonJournal.getByRole("button", { name: /월경계 학생 수업메모/ }).click();
+  await expect(page.locator('.teacherViewLoadState[role="status"]')).toContainText("교사 화면을 불러오는 중입니다.");
+  await expect(page.getByRole("dialog", { name: "월경계 학생 수업메모" })).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
 test("monthly settlement counts closure replacement and distinguishes attendance colors", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);

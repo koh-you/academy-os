@@ -231,6 +231,7 @@ const notificationEffectAdapterPath = path.join(root, "src", "domains", "notific
 const notificationNoticeControllerPath = path.join(root, "src", "domains", "notifications", "useNotificationNoticeController.js");
 const teacherLessonHubComponentPath = path.join(root, "src", "domains", "lessons", "TeacherLessonHubV2.jsx");
 const lessonJournalDetailComponentPath = path.join(root, "src", "domains", "lessons", "LessonJournalDetail.jsx");
+const lessonNestedPanelsPath = path.join(root, "src", "domains", "lessons", "LessonNestedPanels.jsx");
 const notificationCenterModelPath = path.join(root, "src", "domains", "notifications", "notificationCenterModel.js");
 const notificationCenterConfigPath = path.join(root, "src", "domains", "notifications", "notificationCenterConfig.js");
 const notificationJobLoadQueryPath = path.join(root, "src", "domains", "notifications", "notificationJobLoadQuery.js");
@@ -406,6 +407,7 @@ const notificationEffectAdapterSource = fs.existsSync(notificationEffectAdapterP
 const notificationNoticeControllerSource = fs.existsSync(notificationNoticeControllerPath) ? fs.readFileSync(notificationNoticeControllerPath, "utf8") : "";
 const teacherLessonHubComponentSource = fs.existsSync(teacherLessonHubComponentPath) ? fs.readFileSync(teacherLessonHubComponentPath, "utf8") : "";
 const lessonJournalDetailComponentSource = fs.existsSync(lessonJournalDetailComponentPath) ? fs.readFileSync(lessonJournalDetailComponentPath, "utf8") : "";
+const lessonNestedPanelsSource = fs.existsSync(lessonNestedPanelsPath) ? fs.readFileSync(lessonNestedPanelsPath, "utf8") : "";
 const appEntrySource = [
   rawAppEntrySource,
   fs.existsSync(generatedLessonPlanBuilderPath)
@@ -466,6 +468,9 @@ const appEntrySource = [
     : "",
   fs.existsSync(lessonJournalDetailComponentPath)
     ? `/* extracted lesson journal detail screen boundary\n${lessonJournalDetailComponentSource.replace(/\*\//g, "* /")}\n*/`
+    : "",
+  fs.existsSync(lessonNestedPanelsPath)
+    ? `/* extracted nested lesson panels boundary\n${lessonNestedPanelsSource.replace(/\*\//g, "* /")}\n*/`
     : "",
   fs.existsSync(lessonJournalDraftControllerPath)
     ? `/* extracted lesson journal draft controller boundary\n${fs
@@ -1095,7 +1100,7 @@ function hasTeacherReminderAboveCalendarControls(source, calendarViewSource) {
 const passSupplementTaskSource = sourceBetween(app, "async function handlePassSupplementTask(task)", "function handleUndoPassSupplementTask(task)");
 const undoPassSupplementTaskSource = sourceBetween(app, "function handleUndoPassSupplementTask(task)", "function handleUpdateMakeupTask(taskId, field, value)");
 const initialCommentDraftSource = sourceBetween(app, "function buildInitialCommentDraft", "function normalizeExamReviewDraftValue");
-const preparationMemoModalSource = sourceBetween(app, "function PreparationMemoModal", "function CommentComposerModal");
+const preparationMemoModalSource = lessonNestedPanelsSource || sourceBetween(app, "function PreparationMemoModal", "function CommentComposerModal");
 const initialNotificationCommentSource = sourceBetween(serverSource, "function buildInitialNotificationComment", "function formatNotificationAttendance");
 const getNotificationReservationFingerprintSource = sourceBetween(serverSource, "function getNotificationReservationFingerprint", "function isSameSolapiReservation");
 const supplementScheduleLineSource = sourceBetween(app, "function formatSupplementScheduleLine", "function getStudentSupplementSchedules");

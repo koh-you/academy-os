@@ -48,6 +48,10 @@ export const lazyTeacherViewComponents = Object.freeze({
     () => import("../domains/notifications/NotificationCenter.jsx"),
     "NotificationCenter"
   ),
+  PreparationMemoModal: lazyNamedExport(
+    () => import("../domains/lessons/LessonNestedPanels.jsx"),
+    "PreparationMemoModal"
+  ),
   SettlementWorkspace: lazyNamedExport(
     () => import("../domains/settlements/SettlementWorkspace.jsx"),
     "SettlementWorkspace"
@@ -75,6 +79,10 @@ export const lazyTeacherViewComponents = Object.freeze({
   SpecialLectureNoticePanel: lazyNamedExport(
     () => import("../domains/teacher/DashboardAuxiliaryPanels.jsx"),
     "SpecialLectureNoticePanel"
+  ),
+  SupplementMakeupLessonDetail: lazyNamedExport(
+    () => import("../domains/lessons/LessonNestedPanels.jsx"),
+    "SupplementMakeupLessonDetail"
   ),
   SupplementCenter: lazyNamedExport(
     () => import("../domains/supplements/SupplementCenter.jsx"),

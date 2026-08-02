@@ -9,8 +9,8 @@ assert.ok(mainJavaScript, "production build must emit one hashed main JavaScript
 
 const mainBytes = (await stat(resolve(assetsDirectory, mainJavaScript))).size;
 assert.ok(
-  mainBytes <= 970_000,
-  `initial main JavaScript exceeded the 0.97 MB 3-7 budget: ${mainBytes.toLocaleString()} bytes`
+  mainBytes <= 945_000,
+  `initial main JavaScript exceeded the 0.945 MB 3-7 budget: ${mainBytes.toLocaleString()} bytes`
 );
 
 const expectedLazyChunks = [
@@ -18,6 +18,7 @@ const expectedLazyChunks = [
   "ExamAnalysisPipelineCenter",
   "ExamPrepCenter",
   "LearningSupportCenters",
+  "LessonNestedPanels",
   "PlanningToolCenters",
   "SettingsCenter",
   "NotificationCenter",
@@ -34,5 +35,5 @@ for (const chunkName of expectedLazyChunks) {
 }
 
 console.log(
-  `teacher view chunk budget passed · main ${(mainBytes / 1000).toFixed(2)} kB · lazy ${expectedLazyChunks.length}/11`
+  `teacher view chunk budget passed · main ${(mainBytes / 1000).toFixed(2)} kB · lazy ${expectedLazyChunks.length}/12`
 );

@@ -77,6 +77,7 @@ export function TeacherLessonHubV2({
     isLegacyExamPrepLesson,
     isSupplementMakeupTaskLesson,
     lessonJournal,
+    nestedPanels,
     sortByTime
   } = runtime;
   const [lessonTypeFilter, setLessonTypeFilter] = useState("all");
@@ -115,6 +116,7 @@ export function TeacherLessonHubV2({
         onClose={onBackToCalendar}
       >
         <SupplementMakeupLessonDetail
+          runtime={nestedPanels}
           attendanceSettings={attendanceSettings}
           homeworks={homeworks}
           lesson={selectedLesson}

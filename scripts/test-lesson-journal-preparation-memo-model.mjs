@@ -124,13 +124,16 @@ assert.equal(
 );
 
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const nestedPanelsSource = await readFile(
+  new URL("../src/domains/lessons/LessonNestedPanels.jsx", import.meta.url),
+  "utf8"
+);
 const modelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalPreparationMemoModel.js", import.meta.url),
   "utf8"
 );
-const modalStart = appSource.indexOf("function PreparationMemoModal({");
-const modalEnd = appSource.indexOf("function CommentComposerModal({", modalStart);
-const modalSource = appSource.slice(modalStart, modalEnd);
+const modalStart = nestedPanelsSource.indexOf("function PreparationMemoModal({");
+const modalSource = nestedPanelsSource.slice(modalStart);
 
 for (const appContract of [
   "createLessonJournalPreparationMemoModel({",

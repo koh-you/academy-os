@@ -30,14 +30,16 @@ assert.equal(visibleTarget.visiblePriorMemo, "직전 메모 TARGET");
 assert.equal(checkedControl.hasCheckedPriorMemo, true);
 assert.equal(checkedControl.visiblePriorMemo, "");
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const nestedPanelsSource = await readFile(
+  new URL("../src/domains/lessons/LessonNestedPanels.jsx", import.meta.url),
+  "utf8"
+);
 const viewSource = await readFile(
   new URL("../src/domains/lessons/LessonJournalPreparationMemoView.jsx", import.meta.url),
   "utf8"
 );
-const modalStart = appSource.indexOf("function PreparationMemoModal({");
-const modalEnd = appSource.indexOf("function CommentComposerModal({", modalStart);
-const modalSource = appSource.slice(modalStart, modalEnd);
+const modalStart = nestedPanelsSource.indexOf("function PreparationMemoModal({");
+const modalSource = nestedPanelsSource.slice(modalStart);
 
 for (const appContract of [
   "<LessonJournalPreparationMemoView",
@@ -58,7 +60,7 @@ for (const retainedControllerContract of [
 ]) {
   assert.ok(
     modalSource.includes(retainedControllerContract),
-    `preparation memo controller must remain in App: ${retainedControllerContract}`
+    `preparation memo controller must remain in the nested panel: ${retainedControllerContract}`
   );
 }
 assert.ok(

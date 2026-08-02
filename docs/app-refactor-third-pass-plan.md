@@ -92,7 +92,8 @@
 - 진행: 학사일정·반관리·수업연구·AI 도구 4개 화면을 51.98 kB shared lazy chunk로 옮겼다. 24개 App runtime binding과 기존 저장 callback identity를 유지하며 main JS는 1,092.41 kB, gzip은 272.16 kB, App source는 595,886 bytes로 줄었다.
 - 진행: 첫 화면·수업일지 운영 알림 목록/편집과 특강 안내문 화면을 94.24 kB shared lazy chunk로 옮겼다. 운영 알림 pure helper 15개는 frozen runtime으로 주입하고 저장·삭제·특강 persistence callback identity를 유지했다. main JS는 999.16 kB, gzip은 248.14 kB, App source는 11,836줄·551,722 bytes로 줄었다. `React.lazy`가 함수가 아닌 React element type인 점을 반영해 Notification Center의 binding guard를 존재 검사로 교정하고 지연 로딩 브라우저 fixture로 고정했다.
 - 진행: 시험 대비와 설정 화면을 각각 별도 lazy chunk로 옮겼다. 계산·표시 helper와 설정 API transport는 frozen runtime으로 App owner를 유지하고, 화면 본문은 runtime 주입을 제외하면 기준 main과 문자 단위로 동일하다. main JS는 956.13 kB, gzip은 237.03 kB, App source는 10,855줄·507,358 bytes로 줄어 Babel의 `App.jsx > 500 KB` 경고가 사라졌다.
-- 남음: 초기 main chunk는 여전히 500 kB 경고와 700~900 kB 목표 상단을 넘는다. 저장·알림 owner를 건드리지 않는 저빈도 중첩 화면 분리를 한 단위 더 검토하고, 위험 대비 절감이 작으면 3-0 대비 감소율과 실제 지연 경로 수치로 종료 근거를 남긴다.
+- 진행: 수업 화면 내부에서만 열리는 보충 전용 상세와 준비 메모 화면을 22.40 kB shared nested lazy chunk로 옮겼다. 13개 pure helper는 frozen runtime으로 주입하고 실제 일정 저장·알림 예약·보충 완료·수업메모 저장 callback owner는 App에 유지했다. main JS는 934.69 kB, gzip은 231.48 kB, App source는 11,000줄·476,602 bytes다.
+- 완료: 3-0 대비 초기 main은 1,642.41→934.69 kB로 43.1%, gzip은 422.81→231.48 kB로 45.3% 줄었다. 12개 물리 lazy chunk와 21개 lazy component 경로, App 전용 Babel 500 KB 경고 제거를 수치로 고정했다. 700~900 kB 절대 목표 상단은 34.69 kB 초과하지만, 학생 로그인·핵심 modal을 추가 지연화하는 위험보다 이미 확보한 체감 효과가 크므로 종료 기준의 `동일한 체감 효과 수치 입증`으로 3-7을 닫는다.
 
 ### 3-8 종료 감사
 
