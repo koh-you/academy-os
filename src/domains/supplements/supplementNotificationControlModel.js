@@ -82,9 +82,11 @@ export function createSupplementNotificationControlModalViewModel({
     draftState &&
     dependencies.getTaskDraftDiff(task, draftState.values).length
   );
-  const controlTypes = notificationControl?.controlType === "all"
-    ? Object.keys(supplementNotificationControlConfigs)
-    : [notificationControl?.controlType].filter(Boolean);
+  const controlTypes = !task || !notificationControl
+    ? []
+    : notificationControl.controlType === "all"
+      ? Object.keys(supplementNotificationControlConfigs)
+      : [notificationControl.controlType].filter(Boolean);
   const controls = controlTypes.map((controlType) => {
     const controlJob = dependencies.getControlJob(task, notificationJobs, controlType);
     return {

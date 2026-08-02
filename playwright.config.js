@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const frontendPort = Number(process.env.ACADEMY_SAFE_FRONTEND_PORT || 5173);
+
 export default defineConfig({
   expect: { timeout: 10_000 },
   fullyParallel: false,
@@ -8,15 +10,15 @@ export default defineConfig({
   testDir: "./tests/browser",
   timeout: 45_000,
   use: {
-    baseURL: "http://127.0.0.1:5173",
+    baseURL: `http://127.0.0.1:${frontendPort}`,
     screenshot: "only-on-failure",
     trace: "retain-on-failure"
   },
   webServer: {
     command: "npm run dev:safe",
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: !process.env.CI && !process.env.ACADEMY_SAFE_ISOLATED,
     timeout: 120_000,
-    url: "http://127.0.0.1:5173"
+    url: `http://127.0.0.1:${frontendPort}`
   },
   projects: [
     {

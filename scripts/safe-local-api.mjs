@@ -1,7 +1,7 @@
 import http from "node:http";
 
 const host = "127.0.0.1";
-const port = 8787;
+const port = Number(process.env.ACADEMY_SAFE_API_PORT || 8787);
 
 const initialState = {
   academyReminders: [],

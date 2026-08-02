@@ -1,5 +1,8 @@
 import { expect, test } from "@playwright/test";
 
+const safeApiPort = Number(process.env.ACADEMY_SAFE_API_PORT || 8787);
+const safeApiBaseUrl = `http://127.0.0.1:${safeApiPort}`;
+
 function collectPageErrors(page) {
   const errors = [];
   page.on("pageerror", (error) => errors.push(error));
@@ -18,7 +21,7 @@ async function loginAsTeacher(page) {
 test.beforeEach(async ({ request }) => {
   await expect.poll(async () => {
     try {
-      const response = await request.post("http://127.0.0.1:8787/api/safe-fixture/reset");
+      const response = await request.post(`${safeApiBaseUrl}/api/safe-fixture/reset`);
       return response.ok();
     } catch {
       return false;

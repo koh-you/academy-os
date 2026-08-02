@@ -33,6 +33,7 @@
 - Phase 2는 PR #3으로 main 통합됐고 main Production checks·Vercel이 성공했다.
 - Phase 3 notification refresh/reconcile은 PR #4, merge commit `7fb366f9`로 main 통합됐고 main Production checks·Vercel이 성공했다.
 - Phase 4 app_state persistence는 변경 key를 브라우저에서 직렬화하고 기존 `updated_at` CAS와 Supabase 재조회가 일치한 뒤에만 저장 완료로 판정한다. 충돌 시 입력을 유지하고 자동 반복하지 않으며 전체 자동검증을 통과했다.
+- 수업일지 생성 action, 첫 화면 알림 접기, 보충 정렬·시간 입력·알림톡 3종 통합 수정은 최신 main 위에서 재검증했다. safe browser는 Worktree별 격리 포트를 지원해 다른 작업의 미리보기를 재사용하지 않는다.
 
 ## 폴더 상태
 
@@ -43,7 +44,7 @@
 
 ## 다음 우선순위
 
-1. App 2차 리팩터링 Phase 4 PR/CI를 닫고 최신 main 기반 별도 Worktree에서 Phase 5 teacher view callback·화면 조립 경계를 시작한다.
+1. 사용자 수업일지·보충관리 수정의 PR/CI·배포를 닫은 뒤 최신 main 기반 별도 Worktree에서 Phase 5 teacher view callback·화면 조립 경계를 재개한다.
 2. Phase 5 뒤 대형 `App.jsx`와 1.6 MB production chunk의 후속 분할 순서를 정한다.
 3. `app_state`에서 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
    - 즉시 사람 판단이 필요하지 않은 발견은 queue/worklog에 남기고 AI 검수와 다음 단계를 연쇄 진행한다.

@@ -177,4 +177,22 @@ assert.equal(bulkModalModel.controls[0].canCancel, true);
 assert.equal(bulkModalModel.controls[1].canCancel, false);
 assert.equal(bulkModalModel.controls[2].canReserve, true);
 
+let missingTaskSelectorCalls = 0;
+const missingTaskModalModel = createSupplementNotificationControlModalViewModel({
+  notificationControl: { controlType: "all", taskId: "removed-task" },
+  notificationJobs: [],
+  student,
+  tasks: []
+}, {
+  ...dependencies,
+  getControlDisplay: (job) => ({ status: job?.status ?? "none" }),
+  getControlJob: () => { missingTaskSelectorCalls += 1; },
+  getCurrentPreview: () => { missingTaskSelectorCalls += 1; },
+  getTaskDraftDiff: () => [],
+  getTaskDraftState: () => null
+});
+assert.equal(missingTaskModalModel.task, null);
+assert.deepEqual(missingTaskModalModel.controls, []);
+assert.equal(missingTaskSelectorCalls, 0, "removed tasks must not reach notification job or preview selectors");
+
 console.log("supplement notification control model: deterministic contract passed");

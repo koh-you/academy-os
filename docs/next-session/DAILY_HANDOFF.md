@@ -29,6 +29,7 @@
 - 결석보강 알림톡 3종은 한 화면에서 편집·일괄 저장한다. 학생 문구 수정은 학부모·당일 학생 문구에도 연동되어 3종 최종본으로 저장된다.
 - Solapi 확인 모달은 학생·학부모·당일 학생 3종을 함께 보여 주고, 취소 가능한 예약을 한 번에 일괄 취소한다. 실제 취소·예약은 수행하지 않았다.
 - 저장 상태 3종과 주요 행동은 결석보강 모달 하단 고정바에서 스크롤 위치와 무관하게 확인한다.
+- 위 5개 사용자 수정은 정산 수정이 포함된 최신 main에 재배치해 관련 전용 테스트, notification/app_state 경계, production `810/810`, build `349 modules`, Worktree 격리 safe browser `7/7`을 통과했다.
 - 숨겨진 달력 toolbar 안에 남아 사라졌던 `+ 수업 등록`과 조건부 `정규수업 열기`를 별도 표시 action bar로 긴급 복구했다.
 - 숨겨진 달력 제어줄과 분리해 수업일지의 이전·다음 달 탐색을 복구했고 실제 월 단위 이동·말일 보정을 적용했다.
 - 8월 1일 수업일지의 빈 교재·강의 내용 원인을 운영 원천에서 확인하고, 같은 반의 최신 비어 있지 않은 과거 기록을 필드별로 월 경계 너머까지 승계하도록 수정했다. 특강 기록은 분리된다.
@@ -44,7 +45,7 @@
 - Phase 1 auth/session과 Phase 2 출결 polling·동기화는 main 통합 완료다.
 - Phase 2에서 kiosk 날짜 rollover lifecycle을 출결 hook으로 이동하고 전용 fixture를 추가했다. safe browser가 TDZ 배치 오류를 발견해 최소 수정했으며 재실행 4/4가 통과했다.
 - Phase 3는 PR #4로 main 통합 및 CI/배포 성공했다. Phase 4 app_state 동일 key 직렬화·`updated_at` CAS·Supabase 재조회 완료 판정을 구현하고 전체 자동검증을 통과했다.
-- Phase 4 검증은 app_state 전용 2종, runtime lint, scenario·production `809/809`, build `349 modules`, safe browser `4/4`이며 운영 데이터 쓰기·운영 SQL은 없었다. PR/CI 뒤 Phase 5를 최신 main 별도 Worktree에서 시작한다.
+- Phase 4는 main 통합과 CI·Vercel 배포가 완료됐다. 사용자 수업일지·보충관리 수정의 PR/CI·배포 뒤 Phase 5를 최신 main 별도 Worktree에서 재개한다.
 - main 병합은 의미 변경·운영 side effect 없이 AI 리뷰와 전체 검사·PR CI·배포가 성공하면 AI가 판단해 진행한다.
 
 1. `git status --short`가 clean이고 최신 main인지 확인한다.
