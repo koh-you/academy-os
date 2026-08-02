@@ -1,5 +1,9 @@
 import assert from "node:assert/strict";
-import { createSupplementCenterTabViewModel } from "../src/domains/supplements/supplementCenterTabModel.js";
+import {
+  createSupplementCenterTabViewModel,
+  sortSupplementCenterItems,
+  supplementCenterSortOptions
+} from "../src/domains/supplements/supplementCenterTabModel.js";
 
 function candidate(taskType, sourceId) {
   return {
@@ -66,5 +70,23 @@ const fallback = createSupplementCenterTabViewModel({
 assert.equal(fallback.activeTab.id, "homework_makeup");
 assert.equal(fallback.activeTab.count, 1);
 assert.equal(fallback.tabs[1].subtitle, "결석 기록을 보강 일정으로 전환합니다.");
+
+const sortItems = [
+  { id: "sunday", studentId: "student-na", task: { sourceDate: "2026-08-02" } },
+  { id: "monday-na", studentId: "student-na", task: { sourceDate: "2026-08-03" } },
+  { id: "monday-ga", studentId: "student-ga", task: { sourceDate: "2026-08-03" } }
+];
+const names = { "student-ga": "가학생", "student-na": "나학생" };
+assert.deepEqual(supplementCenterSortOptions.map((option) => option.label), ["요일별", "이름 가나다별"]);
+assert.deepEqual(
+  sortSupplementCenterItems(sortItems, { getStudentName: (studentId) => names[studentId], sortMode: "weekday" })
+    .map((item) => item.id),
+  ["monday-ga", "monday-na", "sunday"]
+);
+assert.deepEqual(
+  sortSupplementCenterItems(sortItems, { getStudentName: (studentId) => names[studentId], sortMode: "name" })
+    .map((item) => item.id),
+  ["monday-ga", "sunday", "monday-na"]
+);
 
 console.log("supplement center tab model fixture passed");
