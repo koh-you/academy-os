@@ -238,6 +238,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
     classes: {
       Component: components.ClassManager,
       props: {
+        runtime: runtimeBindings.planningTools,
         students: models.students,
         templates: models.classTemplates,
         onUpdateClassRoster: actions.handleUpdateClassRoster
@@ -276,6 +277,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
     schoolCalendar: {
       Component: components.SchoolCalendarCenter,
       props: {
+        runtime: runtimeBindings.planningTools,
         events: models.schoolEvents,
         rowSaveStates: models.examPrepRowSaveStates,
         rows: models.examPrepRows,
@@ -288,6 +290,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
     lessonResearch: {
       Component: components.LessonResearchCenter,
       props: {
+        runtime: runtimeBindings.planningTools,
         appStateSaveState: models.appStateSaveState,
         items: models.lessonResearchItems,
         onAddItem: actions.handleAddLessonResearchItem,
@@ -297,7 +300,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
     },
     aiVariants: {
       Component: components.AIVariantProblemCenter,
-      props: { aiSettings: models.aiSettings, students: models.students }
+      props: { aiSettings: models.aiSettings, runtime: runtimeBindings.planningTools, students: models.students }
     },
     settlements: {
       Component: components.SettlementWorkspace,

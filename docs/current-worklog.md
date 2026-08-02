@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 App 3차 리팩터링 3-7 계획 도구 화면 lazy loading
+
+- `App.jsx`의 학사일정과 반관리·수업연구·AI 도구 화면 1,509줄을 `src/domains/teacher/PlanningToolCenters.jsx`로 물리 분리했다. 서로 떨어진 두 원본 구간을 합친 62,963자는 export/runtime 주입을 제거하고 기준 main과 줄바꿈 정규화 후 문자 단위로 동일하다.
+- 화면이 사용하던 학사일정 selector·시험행 동기화 helper·수업연구 catalog·기준일 등 24개 binding은 frozen `planningToolRuntime`으로 App owner를 유지한다. 일정 저장/삭제·시험행 갱신·반 명단·수업연구 callback identity는 `TeacherViewOutlet`에서 그대로 전달한다. 새 화면에는 fetch/API/Storage/Supabase/Solapi owner가 없고 AI 도구의 기존 local 파일 읽기·blob 다운로드만 유지한다.
+- production main JS는 `1,142.78 kB / gzip 285.71 kB`에서 `1,092.41 kB / gzip 272.16 kB`로 줄었고 shared chunk는 `51.98 kB / gzip 15.10 kB`다. App은 595,886 bytes로 줄었으나 dev Babel 500 KB와 main 500 kB 경고는 남아 있다.
+- safe browser는 계획 도구 module을 400ms 지연해 학사일정 로딩→화면 진입→수업연구 전환을 확인하며 일정 등록·명단 저장·AI 파일 행동은 실행하지 않는다. 검증: runtime lint, teacher/planning 경계, 5도메인 fast 38/38, scenario·production 821/821, build 375 modules·lazy physical chunk 8/8, Worktree 격리 safe browser 15/15. 운영 데이터·실제 알림·AI 호출·SQL은 사용하지 않았다.
+
 ## 2026-08-02 App 3차 리팩터링 3-7 학습지원 화면 lazy loading
 
 - `App.jsx`의 오답관리·시험지관리·자료함·숙제현황 화면과 전용 하위 view 1,335줄을 `src/domains/teacher/LearningSupportCenters.jsx`로 물리 분리했다. 기준 main의 화면 본문 53,378자와 문제 상태 pure model 977자를 줄바꿈 정규화 뒤 문자 단위로 대조했다.

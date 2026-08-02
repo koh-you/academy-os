@@ -64,6 +64,7 @@ const components = Object.fromEntries([...componentNames].map((componentName) =>
 const runtimeBindings = {
   examAnalysisPipeline: Object.freeze({ source: "exam-analysis-fixture" }),
   learningSupport: Object.freeze({ source: "learning-support-fixture" }),
+  planningTools: Object.freeze({ source: "planning-tools-fixture" }),
   lessonJournalTransport: Object.freeze({
     loadLessonJournalReservationAudit: () => "lesson-audit"
   }),
@@ -137,6 +138,9 @@ assert.equal(adapters.lessons.props.runtime, runtimeBindings.teacherLessonHub);
 assert.equal(adapters.examAnalysisPipeline.props.runtime, runtimeBindings.examAnalysisPipeline);
 for (const viewId of ["followups", "materials", "overdue"]) {
   assert.equal(adapters[viewId].props.runtime, runtimeBindings.learningSupport);
+}
+for (const viewId of ["aiVariants", "classes", "lessonResearch", "schoolCalendar"]) {
+  assert.equal(adapters[viewId].props.runtime, runtimeBindings.planningTools);
 }
 assert.equal(
   adapters.lessons.props.lessonJournalEffects.persistence.onSaveLessonJournalDrafts,
