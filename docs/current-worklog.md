@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 App 3차 리팩터링 3-1 Teacher Lesson Hub 화면 분리
+
+- `App.jsx` 내부의 Teacher Lesson Hub 화면 조립 260줄을 `src/domains/lessons/TeacherLessonHubV2.jsx`로 이동했다. 달력 filter·focus·keyboard navigation은 화면 local state로 유지하고, 수업일지 상세·보충 상세·시험대비 상세와 날짜 helper는 명시적 `teacherLessonHubRuntime`으로 주입한다.
+- App과 `TeacherViewOutlet`은 수업일지 저장, 수업 삭제, 알림 예약·취소·발송·reconcile callback의 기존 owner를 유지한다. 새 화면에는 API·localStorage 직접 접근이 없으며 저장 완료·오류 복구 의미를 바꾸지 않았다.
+- `App.jsx`는 22,497줄·995,166 bytes에서 22,251줄·985,836 bytes로 줄었다. 새 화면은 285줄·10,189 bytes이며 lazy loading 전이라 main JS는 1,644.17 kB, gzip 423.00 kB로 실질적으로 유지된다.
+- 기존 전용 fixture 3건이 구현 위치를 App에 고정하고 있어, 활성 허브 1개·달력 view 계약·keyboard 연결이라는 사용자 동작 계약을 새 파일 경계에서 검사하도록 갱신했다.
+- 검증: lesson fast 7/7, teacher view adapter, lesson hub/calendar/keyboard 전용 fixture, runtime lint, scenario 813/813, `check:fast`, production 813/813 85.0초, build 354 modules, Worktree 격리 safe browser 9/9를 통과했다. 운영 데이터·실제 알림·운영 SQL·유료 호출은 사용하지 않았다.
+
 ## 2026-08-02 browser smoke Worktree 격리 기본화
 
 - `npm run test:browser-smoke`가 Worktree 경로에서 안정적으로 파생한 가용 frontend/API 포트를 선택하고 기존 preview를 재사용하지 않도록 격리 runner를 추가했다.

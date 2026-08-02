@@ -5,6 +5,10 @@ const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
+const teacherLessonHubSource = await readFile(
+  new URL("../src/domains/lessons/TeacherLessonHubV2.jsx", import.meta.url),
+  "utf8"
+);
 const saveControllerSource = await readFile(
   new URL("../src/domains/lessons/lessonModalSaveController.js", import.meta.url),
   "utf8"
@@ -23,9 +27,8 @@ function section(source, start, end) {
 }
 
 for (const extractedBoundary of [
-  'from "../domains/lessons/LessonCalendarView.jsx"',
   'from "../domains/lessons/lessonCalendarModel.js"',
-  'from "../domains/lessons/useLessonCalendarKeyboardNavigation.js"',
+  'from "../domains/lessons/TeacherLessonHubV2.jsx"',
   'from "../domains/lessons/lessonModalDraftModel.js"',
   'from "../domains/lessons/lessonModalDraftTransitions.js"',
   'from "../domains/lessons/lessonModalPayloadBuilders.js"',
@@ -40,11 +43,15 @@ for (const extractedBoundary of [
   assert.ok(appSource.includes(extractedBoundary), `missing extracted boundary: ${extractedBoundary}`);
 }
 
-const calendarHub = section(
-  appSource,
-  "function TeacherLessonHubV2({",
-  "function ExamPrepLessonDetail("
-);
+for (const lessonHubBoundary of [
+  'from "./LessonCalendarView.jsx"',
+  'from "./lessonCalendarModel.js"',
+  'from "./useLessonCalendarKeyboardNavigation.js"'
+]) {
+  assert.ok(teacherLessonHubSource.includes(lessonHubBoundary), `missing lesson hub boundary: ${lessonHubBoundary}`);
+}
+
+const calendarHub = teacherLessonHubSource;
 for (const required of [
   "useLessonCalendarKeyboardNavigation({",
   "createLessonCalendarViewModel({",
@@ -53,6 +60,9 @@ for (const required of [
   "<LessonJournalDetail"
 ]) {
   assert.ok(calendarHub.includes(required), `calendar hub must preserve ${required}`);
+}
+for (const forbidden of ["/api/", "fetch(", "postJson", "localStorage", "notification_jobs"]) {
+  assert.equal(calendarHub.includes(forbidden), false, `calendar hub must stay side-effect free: ${forbidden}`);
 }
 
 const riskyCalendarActions = section(
