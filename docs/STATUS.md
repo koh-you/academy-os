@@ -32,6 +32,7 @@
 - `npm run doctor`가 경로·Git·Node·중복 clone을 점검한다.
 - VS Code F5는 운영 데이터에 연결하지 않는 안전한 가상 환경을 연다.
 - ESLint runtime 검사, 간결한 scenario 요약, client runtime error reporter, Playwright browser smoke가 있다.
+- 로컬 browser smoke는 Worktree별 가용 frontend/API 포트를 자동 선택하고 기존 preview를 재사용하지 않는다.
 - GitHub Actions는 lint, production test, build, browser smoke를 실행하는 것이 목표다.
 - `app_state` 자동저장 12개 key의 요청 역전·CAS/재조회 부재를 재현하는 inventory 검사가 Production checks에 연결됐다.
 - App 2차 리팩터링 Phase 1 auth/session은 PR #2로 main 통합됐다. session state·초기 저장소 판독·login/logout·teacher 저장 cleanup은 `useAppSession`이 소유하며 전용 fixture가 Production checks에 연결됐다.
