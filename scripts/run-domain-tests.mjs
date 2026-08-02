@@ -34,7 +34,8 @@ export const domainTestGroups = Object.freeze({
     "scripts/test-student-withdrawal-boundary.mjs",
     "scripts/test-parent-response-context.mjs",
     "scripts/test-student-list-sort.mjs",
-    "scripts/test-student-effect-adapter.mjs"
+    "scripts/test-student-effect-adapter.mjs",
+    "scripts/test-student-profile-boundary.mjs"
   ]),
   notification: Object.freeze([
     "scripts/test-notification-center-model.mjs",

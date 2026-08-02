@@ -39,6 +39,7 @@ const studentExamPostSubmissionPanelPath = path.join(root, "src", "domains", "po
 const examPostApiPath = path.join(root, "src", "domains", "portals", "examPostApi.js");
 const studentPortalApiPath = path.join(root, "src", "domains", "portals", "studentPortalApi.js");
 const studentManagerPath = path.join(root, "src", "domains", "students", "StudentManager.jsx");
+const studentProfileModalPath = path.join(root, "src", "domains", "students", "StudentProfileModal.jsx");
 const studentEffectAdapterPath = path.join(root, "src", "domains", "students", "studentEffectAdapter.js");
 const tallyStudentMergePath = path.join(root, "src", "domains", "students", "tallyStudentMerge.js");
 const examQuestionClassificationPath = path.join(root, "src", "domains", "exams", "questionClassification.js");
@@ -521,7 +522,11 @@ const appWithConfig = `${app}\n${appConfigSource}\n${appSessionSource}\n${school
 const apiClientSource = fs.existsSync(apiClientPath) ? fs.readFileSync(apiClientPath, "utf8") : "";
 const appWithApiClient = `${app}\n${apiClientSource}`;
 const materialManagerSource = `${sourceBetween(app, "function MaterialManager({", "function CandidatePanel({")}\n${testManagerPanelsSource}`;
-const studentManagerSource = fs.existsSync(studentManagerPath) ? fs.readFileSync(studentManagerPath, "utf8") : "";
+const studentManagerShellSource = fs.existsSync(studentManagerPath) ? fs.readFileSync(studentManagerPath, "utf8") : "";
+const studentProfileModalSource = fs.existsSync(studentProfileModalPath) ? fs.readFileSync(studentProfileModalPath, "utf8") : "";
+const studentProfileBodySource = studentProfileModalSource.replace(/^import .*$/gm, "");
+const studentManagerBodySource = studentManagerShellSource.replace(/^import \{ StudentProfileErrorBoundary, StudentProfileModal \}.*$/m, "");
+const studentManagerSource = `${studentManagerBodySource}\n${studentProfileBodySource}`;
 const studentEffectAdapterSource = fs.existsSync(studentEffectAdapterPath) ? fs.readFileSync(studentEffectAdapterPath, "utf8") : "";
 const sharedInlineSaveStatusSource = fs.existsSync(sharedInlineSaveStatusPath) ? fs.readFileSync(sharedInlineSaveStatusPath, "utf8") : "";
 const sharedAutosaveRiskNoticeSource = fs.existsSync(sharedAutosaveRiskNoticePath) ? fs.readFileSync(sharedAutosaveRiskNoticePath, "utf8") : "";
@@ -2582,6 +2587,7 @@ check("94g academy reminders surface overdue items above collapsed composer", ha
 check("94h academy reminders can target class templates and appear in matching lesson journals", hasAll(appWithConfig, ["{ value: \"class_notice\", label: \"반 알림\" }", "function getAcademyReminderClassTemplateId", "sourcePayload.classTemplateId", "function getLessonClassTemplateId", "const reminderClassTemplateId = getAcademyReminderClassTemplateId(reminder);", "reminderClassTemplateId === lessonClassTemplateId", "const isClassReminderDraft = draft.reminderType === \"class_notice\"", "<option value=\"\">반 선택</option>", "templates={classTemplates}", "templates={templates}"]) && hasAll(coreDataRoute, ["\"class_notice\"", "source_payload: sourcePayload", "sourcePayload.reminderType = \"class_notice\"", "reminder_type: reminderType === \"class_notice\" ? \"custom\" : reminderType"]) && hasAll(notificationRoute, ["class_notice: \"반 알림\"", "item.className ? `반 ${item.className}` : \"\""]) && hasAll(serverSource, ["className: sourcePayload.className || reminder.className || \"\""]));
 
 check("94i student callbacks use one explicit draft persistence deletion lifecycle and audit adapter", hasAll(studentEffectAdapterSource, ["export function createStudentEffectAdapter", "draft: Object.freeze({", "onUpdateStudent: actions.handleUpdateStudent", "persistence: Object.freeze({", "onSaveStudentProfile: actions.handleSaveStudentProfile", "deletion: Object.freeze({", "onPermanentlyDeleteWithdrawnStudent: actions.handlePermanentlyDeleteWithdrawnStudent", "lifecycle: Object.freeze({", "onDeleteStudent: actions.handleDeleteStudent", "onRestoreStudent: actions.handleRestoreStudent", "audit: Object.freeze({", "onAuditWithdrawnStudentDeletion: actions.handleAuditWithdrawnStudentDeletion"]) && hasAll(teacherViewOutletSource, ["createStudentEffectAdapter({ actions })", "effects: studentEffects"]) && hasAll(studentManagerSource, ["effects = {},", "draft: { onUpdateStudent }", "persistence: {", "deletion: {", "lifecycle: {", "audit: { onAuditWithdrawnStudentDeletion }"]) && !["fetch(", "postJson", "getJsonWithTimeout", "/api/", "Supabase", "localStorage", "useState", "useEffect"].some((value) => studentEffectAdapterSource.includes(value)));
+check("94j student profile view is physically separated without taking persistence ownership", hasAll(studentManagerShellSource, ['import { StudentProfileErrorBoundary, StudentProfileModal } from "./StudentProfileModal.jsx";', "<StudentProfileErrorBoundary", "<StudentProfileModal"]) && !studentManagerShellSource.includes("function StudentProfileModal(") && hasAll(studentProfileModalSource, ["export class StudentProfileErrorBoundary extends Component", "export function StudentProfileModal({", "createStudentProfileDraft", "createStudentScheduleRows", "getTallySubmissionFieldRows", 'className="studentProfileStickySaveBar"']) && !["fetch(", "postJson", "getJsonWithTimeout", "/api/", "localStorage", "supabase"].some((value) => studentProfileModalSource.toLowerCase().includes(value.toLowerCase())));
 
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));
