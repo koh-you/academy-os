@@ -18,7 +18,8 @@
 - 3-2 첫 단위로 수업일지 record·homework·makeup local draft와 성공/실패 전이를 전용 controller hook으로 묶었다. App 저장·Supabase 재조회 owner는 유지한다. 저장 중 후속 입력은 revision guard로 보존하고 재저장을 안내하며, 실패·부분저장 수정본 보존과 다른 수업 응답 격리를 TARGET/CONTROL 및 지연 API 안전 브라우저 동선으로 확인했다.
 - 3-2 두 번째 단위로 수업일지 persistence 10개와 provider/transport 7개 callback을 순수 effect adapter 계약으로 묶었다. 독립 검토에서 실제 Solapi 예약·취소까지 조정하는 알림 계획 적용의 분류를 바로잡아 provider 표면으로 옮겼다. App의 실제 저장·삭제·AI·Solapi·재조회 owner는 유지하고 Hub는 adapter 하나만 상세 화면에 전달한다.
 - 3-2 세 번째 단위로 수업 등록·수정 모달의 local draft·validation·저장 표시 controller를 lesson 도메인 파일로 옮겼다. App의 bulk 저장·Supabase 재조회·휴강 preflight callback은 유지했고 이전 controller 본문과 문자 단위로 대조했다.
-- 로컬 browser smoke의 Worktree 격리 runner를 기본 명령으로 사용한다. 달력·수업일지·수업 모달 경계 대조를 마쳐 3-2를 닫고, 다음 별도 단위는 3-3 Supplement 경계다.
+- 3-3에서 기존 보충 draft·일정·취소·알림 제어 controller 분리를 재대조하고, 화면에 낱개로 전달되던 8개 effect callback을 persistence 3개·provider 2개·orchestration 3개 adapter 표면으로 묶었다. 실제 저장·Supabase 재조회·Solapi effect는 App owner를 유지한다.
+- 로컬 browser smoke의 Worktree 격리 runner를 기본 명령으로 사용한다. 3-2 Lesson과 3-3 Supplement 경계를 닫았고, 다음 별도 단위는 3-4 Student 경계다.
 
 - `app_state` 자동저장 12개 key의 500ms debounce, request ID, API upsert, `updated_at` 경계를 inventory했다.
 - 역순 도착 시 오래된 요청이 최신값을 덮는 fixture를 추가하고 Production checks에 연결했다.
@@ -69,7 +70,7 @@
 1. `git status --short`가 clean이고 최신 main인지 확인한다.
 2. 오늘 branch의 GitHub Actions 결과를 확인한다.
 3. App 2차 리팩터링 Phase 1~5는 완료 상태로 유지하고 자동 재개하지 않는다.
-4. 다음 대형 단위는 최신 main의 별도 branch에서 3-2 수업 모달·달력의 남은 draft/persisted 경계를 검토하고, Lesson 경계가 닫히면 3-3 Supplement로 이동한다. lazy loading/code splitting은 3-7까지 섞지 않는다.
+4. 다음 대형 단위는 최신 main의 별도 branch에서 3-4 Student 경계를 검토한다. lazy loading/code splitting은 3-7까지 섞지 않는다.
 5. 운영 삭제·발송·예약·유료 AI·SQL 적용이 필요하면 구현을 넓히지 말고 정확한 사람 gate를 남긴다.
 
 ## 종료할 때

@@ -95,9 +95,6 @@ for (const [id, componentName] of expectedContracts) {
 const highRiskCallbackMappings = [
   ["lessons", "onDeleteLesson", "handleDeleteLesson"],
   ["specialLectureManagement", "onDeleteSpecialLectureApplication", "handleDeleteSpecialLectureApplication"],
-  ["supplements", "onSaveTask", "handleSaveMakeupTask"],
-  ["supplements", "onReserveNotification", "handleReserveSupplementNotificationControl"],
-  ["supplements", "onCancelNotification", "handleCancelSupplementNotificationControl"],
   ["students", "onSaveStudent", "handleSaveStudent"],
   ["students", "onDeleteStudent", "handleDeleteStudent"],
   ["examPrep", "onDeleteRow", "handleDeleteExamPrepRow"],
@@ -127,6 +124,19 @@ assert.equal(
   adapters.lessons.props.lessonJournalEffects.provider.loadLessonJournalReservationAudit,
   runtimeBindings.lessonJournalTransport.loadLessonJournalReservationAudit
 );
+assert.equal(
+  adapters.supplements.props.effects.persistence.onSaveTask,
+  actions.handleSaveMakeupTask
+);
+assert.equal(
+  adapters.supplements.props.effects.provider.onReserveNotification,
+  actions.handleReserveSupplementNotificationControl
+);
+assert.equal(
+  adapters.supplements.props.effects.orchestration.onScheduleTask,
+  actions.handleScheduleSupplementTask
+);
+assert.equal(Object.hasOwn(adapters.supplements.props, "onSaveTask"), false);
 
 const lessonElement = TeacherViewOutlet({ activeView: "lessons", adapters });
 assert.equal(lessonElement.type, components.TeacherLessonHubV2);
@@ -136,13 +146,14 @@ assert.equal(TeacherViewOutlet({ activeView: "studentPortal", adapters }), null)
 assert.equal(TeacherViewOutlet({ activeView: "reports", adapters }), null);
 assert.equal(TeacherViewOutlet({ activeView: "unknown", adapters }), null);
 
-const [appSource, outletSource, teacherLessonHubSource, lessonJournalDetailSource, lessonJournalDraftControllerSource, lessonJournalEffectAdapterSource] = await Promise.all([
+const [appSource, outletSource, teacherLessonHubSource, lessonJournalDetailSource, lessonJournalDraftControllerSource, lessonJournalEffectAdapterSource, supplementEffectAdapterSource] = await Promise.all([
   readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8"),
   readFile(new URL("../src/app/TeacherViewOutlet.js", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/lessons/TeacherLessonHubV2.jsx", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/lessons/LessonJournalDetail.jsx", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/lessons/useLessonJournalDraftController.js", import.meta.url), "utf8"),
-  readFile(new URL("../src/domains/lessons/lessonJournalEffectAdapter.js", import.meta.url), "utf8")
+  readFile(new URL("../src/domains/lessons/lessonJournalEffectAdapter.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/domains/supplements/supplementEffectAdapter.js", import.meta.url), "utf8")
 ]);
 assert.equal(appSource.includes('from "./TeacherViewOutlet.js"'), true);
 assert.equal(appSource.includes('import { TeacherLessonHubV2 } from "../domains/lessons/TeacherLessonHubV2.jsx"'), true);
@@ -165,7 +176,7 @@ const injectedActions = injectedNames(actionsBlock);
 for (const componentName of new Set([...componentNames])) {
   assert.equal(injectedComponents.has(componentName), true, `App must inject ${componentName}`);
 }
-for (const [, actionName] of `${outletSource}\n${lessonJournalEffectAdapterSource}`.matchAll(/actions\.([A-Za-z0-9_]+)/g)) {
+for (const [, actionName] of `${outletSource}\n${lessonJournalEffectAdapterSource}\n${supplementEffectAdapterSource}`.matchAll(/actions\.([A-Za-z0-9_]+)/g)) {
   assert.equal(injectedActions.has(actionName), true, `App must inject ${actionName}`);
 }
 for (const [, modelName] of outletSource.matchAll(/models\.([A-Za-z0-9_]+)/g)) {
@@ -177,6 +188,7 @@ for (const forbiddenToken of ["fetch(", "postJson(", "getJsonWithTimeout(", "loc
   assert.equal(lessonJournalDetailSource.includes(forbiddenToken), false, `lesson journal screen must not own ${forbiddenToken}`);
   assert.equal(lessonJournalDraftControllerSource.includes(forbiddenToken), false, `lesson journal draft controller must not own ${forbiddenToken}`);
   assert.equal(lessonJournalEffectAdapterSource.includes(forbiddenToken), false, `lesson journal effect adapter must not own ${forbiddenToken}`);
+  assert.equal(supplementEffectAdapterSource.includes(forbiddenToken), false, `supplement effect adapter must not own ${forbiddenToken}`);
 }
 assert.equal(teacherLessonHubSource.includes("export function TeacherLessonHubV2("), true);
 assert.equal(teacherLessonHubSource.includes("effects={lessonJournalEffects}"), true);

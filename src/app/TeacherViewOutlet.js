@@ -1,5 +1,6 @@
 import { createElement } from "react";
 import { createLessonJournalEffectAdapter } from "../domains/lessons/lessonJournalEffectAdapter.js";
+import { createSupplementEffectAdapter } from "../domains/supplements/supplementEffectAdapter.js";
 
 const teacherViewContractDefinitions = [
   { id: "lessons", componentName: "TeacherLessonHubV2", effectKinds: ["save", "delete", "reserve", "cancel", "send", "reconcile"] },
@@ -33,6 +34,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
     actions,
     transport: runtimeBindings.lessonJournalTransport
   });
+  const supplementEffects = createSupplementEffectAdapter({ actions });
   return {
     lessons: {
       Component: components.TeacherLessonHubV2,
@@ -179,14 +181,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
         records: models.records,
         students: models.students,
         tasks: models.makeupTasks,
-        onCancelAbsenceMakeup: actions.handleCancelAbsenceMakeupKeepSource,
-        onCancelAbsenceSource: actions.handleCancelAbsenceMakeupSource,
-        onCancelNotification: actions.handleCancelSupplementNotificationControl,
-        onPassTask: actions.handlePassSupplementTask,
-        onReserveNotification: actions.handleReserveSupplementNotificationControl,
-        onSaveTask: actions.handleSaveMakeupTask,
-        onScheduleTask: actions.handleScheduleSupplementTask,
-        onUndoPassTask: actions.handleUndoPassSupplementTask
+        effects: supplementEffects
       }
     },
     materials: {
