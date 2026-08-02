@@ -8,6 +8,7 @@ const expectedLazyComponents = Object.freeze([
   "AIVariantProblemCenter",
   "ClassManager",
   "ExamAnalysisPipelineCenter",
+  "ExamPrepCenter",
   "FollowUpCenter",
   "LessonResearchCenter",
   "MaterialManager",
@@ -17,6 +18,7 @@ const expectedLazyComponents = Object.freeze([
   "OverdueHomework",
   "ResourceLibraryCenter",
   "SchoolCalendarCenter",
+  "SettingsCenter",
   "SpecialLectureNoticePanel",
   "SupplementCenter",
   "TeacherLessonHubV2"
@@ -45,6 +47,7 @@ const lazyModuleContracts = [
   ["AIVariantProblemCenter", "../domains/teacher/PlanningToolCenters.jsx"],
   ["ClassManager", "../domains/teacher/PlanningToolCenters.jsx"],
   ["ExamAnalysisPipelineCenter", "../domains/exams/ExamAnalysisPipelineCenter.jsx"],
+  ["ExamPrepCenter", "../domains/exams/ExamPrepCenter.jsx"],
   ["FollowUpCenter", "../domains/teacher/LearningSupportCenters.jsx"],
   ["LessonResearchCenter", "../domains/teacher/PlanningToolCenters.jsx"],
   ["MaterialManager", "../domains/teacher/LearningSupportCenters.jsx"],
@@ -54,6 +57,7 @@ const lazyModuleContracts = [
   ["OverdueHomework", "../domains/teacher/LearningSupportCenters.jsx"],
   ["ResourceLibraryCenter", "../domains/teacher/LearningSupportCenters.jsx"],
   ["SchoolCalendarCenter", "../domains/teacher/PlanningToolCenters.jsx"],
+  ["SettingsCenter", "../domains/settings/SettingsCenter.jsx"],
   ["SpecialLectureNoticePanel", "../domains/teacher/DashboardAuxiliaryPanels.jsx"],
   ["SupplementCenter", "../domains/supplements/SupplementCenter.jsx"],
   ["TeacherLessonHubV2", "../domains/lessons/TeacherLessonHubV2.jsx"]

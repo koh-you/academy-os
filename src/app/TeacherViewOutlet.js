@@ -247,6 +247,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
     examPrep: {
       Component: components.ExamPrepCenter,
       props: {
+        runtime: runtimeBindings.examPrepCenter,
         aiSettings: models.aiSettings,
         examPostConfirmSaveStates: models.examPostConfirmSaveStates,
         examPostSubmissions: models.examPostSubmissions,
@@ -343,6 +344,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
     settings: {
       Component: components.SettingsCenter,
       props: {
+        runtime: runtimeBindings.settingsCenter,
         aiSettings: models.aiSettings,
         appStateSaveState: models.appStateSaveState,
         attendanceSettings: models.attendanceSettings,

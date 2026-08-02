@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const appSource = await readAppWithLessonJournalSource(import.meta.url);
+const settingsSource = await readFile(new URL("../src/domains/settings/SettingsCenter.jsx", import.meta.url), "utf8");
+const appBoundarySource = `${appSource}\n${settingsSource}`;
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -155,7 +157,7 @@ for (const reservedOtherRoadmapBoundary of [
   "function LessonJournalDetail("
 ]) {
   assert.ok(
-    appSource.includes(reservedOtherRoadmapBoundary),
+    appBoundarySource.includes(reservedOtherRoadmapBoundary),
     `cross-roadmap boundary must remain explicit: ${reservedOtherRoadmapBoundary}`
   );
 }
