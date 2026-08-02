@@ -1,6 +1,6 @@
 # Academy OS Current Status
 
-업데이트: 2026-08-01
+업데이트: 2026-08-02
 
 ## 현재 기준
 
@@ -19,7 +19,7 @@
 - VS Code F5는 운영 데이터에 연결하지 않는 안전한 가상 환경을 연다.
 - ESLint runtime 검사, 간결한 scenario 요약, client runtime error reporter, Playwright browser smoke가 있다.
 - GitHub Actions는 lint, production test, build, browser smoke를 실행하는 것이 목표다.
-- `app_state` 자동저장 12개 key의 요청 역전·CAS/재조회 부재를 재현하는 inventory 검사가 Production checks에 연결됐다.
+- `app_state` 자동저장 12개 key는 같은 브라우저에서 요청을 직렬화하고, 진행 중 변경을 key별 최신값으로 합친다. 전용 concurrency 검사가 Production checks에 연결됐다.
 
 ## 폴더 상태
 
@@ -30,8 +30,8 @@
 
 ## 다음 우선순위
 
-1. `app_state` 동일 key 저장을 브라우저 안에서 직렬화하고 진행 중 변경을 다음 요청으로 합친다.
-2. key별 `updated_at` CAS와 저장 뒤 대상 key 재조회는 별도 단위로 이어간다.
+1. `app_state` key별 `updated_at` CAS를 추가해 여러 탭·브라우저의 충돌을 감지한다.
+2. 저장 뒤 대상 key 재조회·대조를 별도 단위로 이어간다.
 3. 고위험 App/API 분리는 새 inventory와 자동 회귀 범위를 먼저 만든 뒤 진행한다.
 
 ## 자동 작업

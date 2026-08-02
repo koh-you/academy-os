@@ -5,7 +5,7 @@
 ## P1. 운영 저장 신뢰성
 
 - 학생 신규/Tally·학생/반 명단 저장 gate.
-- `app_state` key별 dirty 저장과 500ms debounce는 완료. 2026-08-01 요청 역전 fixture·CI inventory를 추가했으며, 다음은 동일 key 직렬화 -> version/updatedAt CAS -> 저장 뒤 재조회 순서다.
+- `app_state` key별 dirty 저장·500ms debounce·같은 브라우저 요청 직렬화와 진행 중 최신값 합치기는 완료. 다음은 version/updatedAt CAS -> 저장 뒤 재조회 순서다.
 - exam prep/Tally 입력 경쟁 방지.
 - 숙제·포털·자료함·보고서 저장 계약.
 - 보충·알림 다중 원천 reconcile과 미연결/오작동 버튼 정리.

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createAppStateSaveQueue } from "./appStateSaveQueue.js";
 import { createAppViewChangePlan } from "./appViewChangePlan.js";
 import { selectAppSessionSurface } from "./appSessionSurfaceSelector.js";
 import { RoleLoginScreen } from "./RoleLoginScreen.jsx";
@@ -1090,7 +1091,7 @@ function buildInitialCommentDraft({ audience, existingComment, record, supplemen
 const appStateAutosaveRisk = {
   title: "app_state key별 자동저장",
   storage: "Supabase app_state: aiSettings, attendanceSettings, lessonResearchItems, wrongProblems 등 변경된 key만 500ms debounce로 저장",
-  risk: "전체 snapshot 저장은 제거됐습니다. 다만 같은 key를 여러 탭에서 빠르게 고치거나, 이전 요청이 더 늦게 도착하면 최신값을 덮을 수 있습니다. 저장 뒤 재조회·version 대조도 아직 없습니다.",
+  risk: "같은 브라우저의 저장 요청은 순서대로 처리되고 진행 중 변경은 key별 최신값으로 합칩니다. 다만 여러 탭의 같은 key 변경 충돌과 저장 뒤 재조회·version 대조는 아직 없습니다.",
   stopCondition: "저장 실패가 뜨거나, 새로고침 뒤 이전 값이 보이거나, 다른 탭의 같은 설정이 되돌아가면 다음 입력을 멈춥니다.",
   recommendation: "독립성이 큰 데이터는 계속 명시 저장·재조회 흐름으로 분리하고, 남은 자동저장 key에는 updatedAt/version 충돌 확인을 붙입니다."
 };
@@ -5378,7 +5379,6 @@ export function App() {
   const initialMakeupTasksRef = useRef(makeupTasks);
   const initialExamPrepRowsRef = useRef(examPrepRows);
   const initialSchoolEventsRef = useRef(schoolEvents);
-  const appStateSaveRequestRef = useRef(0);
   const appStateSaveTimerRef = useRef(null);
   const problemBookSaveRequestRef = useRef(0);
   const problemBookSaveTimerRef = useRef(null);
@@ -5423,6 +5423,20 @@ export function App() {
   ]);
   const initialSharedAppStateRef = useRef(sharedAppState);
   const persistedSharedAppStateRef = useRef({});
+  const appStateSaveQueueRef = useRef(null);
+  if (!appStateSaveQueueRef.current) {
+    appStateSaveQueueRef.current = createAppStateSaveQueue({
+      save: postAppState,
+      onBatchSaved: (savedStates) => {
+        persistedSharedAppStateRef.current = {
+          ...persistedSharedAppStateRef.current,
+          ...savedStates
+        };
+      },
+      onError: (error) => console.error(error),
+      onStatusChange: setAppStateSaveState
+    });
+  }
 
   useEffect(() => {
     let isMounted = true;
@@ -5749,23 +5763,10 @@ export function App() {
     if (appStateSaveTimerRef.current) {
       window.clearTimeout(appStateSaveTimerRef.current);
     }
-    const requestId = appStateSaveRequestRef.current + 1;
-    appStateSaveRequestRef.current = requestId;
     setAppStateSaveState("saving");
     appStateSaveTimerRef.current = window.setTimeout(() => {
       appStateSaveTimerRef.current = null;
-      postAppState(changedStates)
-        .then(() => {
-          persistedSharedAppStateRef.current = {
-            ...persistedSharedAppStateRef.current,
-            ...changedStates
-          };
-          if (appStateSaveRequestRef.current === requestId) setAppStateSaveState("saved");
-        })
-        .catch((error) => {
-          console.error(error);
-          if (appStateSaveRequestRef.current === requestId) setAppStateSaveState("failed");
-        });
+      appStateSaveQueueRef.current.enqueue(changedStates);
     }, 500);
     return () => {
       if (appStateSaveTimerRef.current) {

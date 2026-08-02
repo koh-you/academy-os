@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 app_state 자동저장 브라우저 직렬화
+
+- 공통 자동저장 요청을 브라우저 안에서 한 번에 하나만 보내고, 요청 진행 중 변경은 key별 최신값으로 합쳐 다음 요청에서 저장하도록 큐를 추가했다.
+- 진행 중 값으로 되돌아온 key는 불필요한 후속 요청에서 제거하며, 성공한 batch만 persisted 기준에 반영한다.
+- 자동저장 경고는 해결된 같은 브라우저 요청 역전을 제외하고 여러 탭 충돌·CAS·저장 뒤 재조회 위험만 안내하도록 갱신했다.
+- 검증: 전용 concurrency inventory, runtime lint, scenario `809/809`, production 전체 묶음, build `346 modules`, safe browser smoke `4/4` 통과. 첫 browser 실행의 재사용 Vite 상태 오류는 새 safe server 단독 확인 후 전체 재실행에서 해소됐다.
+- 운영 Supabase·Storage·notification_jobs·Solapi 쓰기, 실제 발송·예약·취소, SQL 적용은 0건이다.
+
 ## 2026-08-01 수업일지 과거 기록 월 경계 연동 복구
 
 - 운영 원천을 읽기 전용으로 대조해 8월 1일 수업과 7월 수업의 반 식별자·학생 명단·지난 숙제 연결은 정상임을 확인했다.

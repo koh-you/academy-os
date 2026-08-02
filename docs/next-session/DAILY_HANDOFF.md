@@ -1,6 +1,6 @@
 # Daily Development Handoff
 
-업데이트: 2026-08-01
+업데이트: 2026-08-02
 
 ## 어제까지 완료
 
@@ -11,10 +11,11 @@
 
 ## 오늘 자동 작업
 
-- `app_state` 자동저장 12개 key의 500ms debounce, request ID, API upsert, `updated_at` 경계를 inventory했다.
-- 역순 도착 시 오래된 요청이 최신값을 덮는 fixture를 추가하고 Production checks에 연결했다.
-- 전용 inventory, runtime lint, production `809/809`, build `345 modules`, safe browser smoke `2/2`를 통과했다.
+- `app_state` 자동저장 요청을 같은 브라우저에서 직렬화하고, 진행 중 변경은 key별 최신값으로 합쳐 후속 요청에 반영한다.
+- 진행 중 값으로 되돌아온 key의 불필요한 후속 저장을 제거하는 deterministic fixture를 전용 concurrency inventory에 추가했다.
+- 전용 inventory, runtime lint, production `809/809`, build `346 modules`, safe browser smoke `4/4`를 통과했다.
 - 운영 쓰기·발송·예약·취소·유료 호출·SQL 적용은 없었다.
+- 실행 중 `origin/main`이 리팩토링 merge `28519782`로 이동했으므로 이 branch는 main에 통합하지 않았다. 리팩토링 완료 뒤 최신 main에 재적용하고 충돌을 확인한다.
 
 ## 사용자 후속 수정
 
@@ -29,8 +30,8 @@
 
 1. `git status --short`가 clean이고 최신 main인지 확인한다.
 2. 오늘 branch의 GitHub Actions 결과를 확인한다.
-3. 통과했으면 같은 브라우저의 동일 `app_state` key 저장을 직렬화하고 진행 중 변경을 다음 요청으로 합치는 단위만 수행한다.
-4. key별 `updated_at` CAS와 저장 뒤 재조회는 직렬화와 섞지 않고 다음 단위로 남긴다.
+3. 통과했으면 `app_state` key별 `updated_at` CAS로 여러 탭·브라우저 충돌을 감지하는 단위만 수행한다.
+4. 저장 뒤 대상 key 재조회·대조는 CAS와 섞지 않고 다음 단위로 남긴다.
 5. 운영 삭제·발송·예약·유료 AI·SQL 적용이 필요하면 구현을 넓히지 말고 정확한 사람 gate를 남긴다.
 
 ## 종료할 때
