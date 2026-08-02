@@ -79,6 +79,7 @@
 
 - 월별 정산 화면 조립과 계산 selector, 교사 확정값 저장을 분리한다.
 - 금액·횟수 규칙은 fixture를 먼저 고정하고 물리 이동만 한 단위씩 수행한다.
+- 진행: 월별 정산의 선택 월·local recovery draft·계산 row/summary·교사 확정값 저장 조립을 `useMonthlySettlementController`로 분리했다. 실제 app_state 저장·Supabase 재조회 대조는 App owner를 유지한다. 저장 요청 중 후속 수정은 month/revision guard로 보존하고 새 서버 기준시각에 recovery draft를 다시 기록해 재저장을 안내하며, 다른 월 응답과 오래된 실패가 활성 draft/local recovery를 덮지 않도록 전용 fixture와 월 이동 지연 safe browser로 고정했다.
 
 ### 3-7 Lazy loading과 chunk 분리
 

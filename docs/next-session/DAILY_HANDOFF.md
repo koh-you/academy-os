@@ -25,7 +25,8 @@
 - 3-4 마지막 단위로 퇴원생 목록·정렬·선택 toolbar를 `StudentWithdrawnList.jsx`로 물리 분리했다. 20개 prop identity와 local dirty/선택/lifecycle controller owner를 유지하며 3-4 Student 경계를 닫았다.
 - 3-5 첫 단위로 Notification Center 두 진입 경로의 flat callback 13개를 history provider/transport와 특강 persistence/deletion/orchestration/navigation effect 표면으로 묶었다. 두 refresh identity와 App의 실제 저장·재조회·Solapi effect owner, 화면 내부 공지 draft/request controller는 유지한다.
 - 3-5 두 번째 단위로 공지 수신자·작성·이력·취소·reconcile 조립을 `useNotificationNoticeController`로 이동했다. `NotificationCenter`는 144줄 render owner가 됐고 이력 탭·local draft 미리보기·특강관리 이동 safe browser를 추가해 Notification 경계를 닫았다.
-- 로컬 browser smoke의 Worktree 격리 runner를 기본 명령으로 사용한다. 3-2 Lesson, 3-3 Supplement, 3-4 Student, 3-5 Notification 경계는 닫혔고 다음은 3-6 Settlement 경계 inventory다.
+- 3-6 첫 단위로 월별 정산 선택 월·local recovery draft·계산 selector·교사 확정값 저장 조립을 `useMonthlySettlementController`로 이동했다. App의 Supabase 저장·재조회 owner와 정산 계산 규칙은 유지하고, 저장 중 후속 입력을 month/revision guard와 지연 safe browser로 보존했다.
+- 로컬 browser smoke의 Worktree 격리 runner를 기본 명령으로 사용한다. 3-2 Lesson, 3-3 Supplement, 3-4 Student, 3-5 Notification 경계는 닫혔고 현재 3-6 Settlement 화면 조립 closeout을 진행한다.
 
 - `app_state` 자동저장 12개 key의 500ms debounce, request ID, API upsert, `updated_at` 경계를 inventory했다.
 - 역순 도착 시 오래된 요청이 최신값을 덮는 fixture를 추가하고 Production checks에 연결했다.
@@ -76,7 +77,7 @@
 1. `git status --short`가 clean이고 최신 main인지 확인한다.
 2. 오늘 branch의 GitHub Actions 결과를 확인한다.
 3. App 2차 리팩터링 Phase 1~5는 완료 상태로 유지하고 자동 재개하지 않는다.
-4. 3-5 controller 단위를 exact-head 검수·통합한 뒤, 최신 main의 별도 branch에서 3-6 Settlement의 월별 화면 조립·계산 selector·교사 확정값 저장 경계를 inventory한다. 정산 규칙과 저장 의미를 바꾸지 않고 가장 큰 화면 조립 한 단위만 고른다. lazy loading/code splitting은 3-7까지 섞지 않는다.
+4. 3-6 첫 controller 단위를 exact-head 검수·통합한 뒤, 최신 main의 별도 branch에서 월별 정산 달력·표 화면 조립을 물리 분리해 Settlement 경계를 닫는다. 정산 규칙과 저장 의미는 바꾸지 않고 lazy loading/code splitting은 3-7까지 섞지 않는다.
 5. 운영 삭제·발송·예약·유료 AI·SQL 적용이 필요하면 구현을 넓히지 말고 정확한 사람 gate를 남긴다.
 
 ## 종료할 때

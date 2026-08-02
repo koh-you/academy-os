@@ -380,8 +380,8 @@ const server = http.createServer(async (request, response) => {
       state = createInitialState();
       return sendJson(response, 200, { ok: true, safeFixture: true });
     }
-    if (requestUrl.pathname === "/api/lesson-records/bulk") {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+    if (["/api/app-state", "/api/lesson-records/bulk"].includes(requestUrl.pathname)) {
+      await new Promise((resolve) => setTimeout(resolve, 800));
     }
     return sendJson(response, 200, {
       ...handleMutation(requestUrl.pathname, payload),
