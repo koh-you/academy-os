@@ -149,6 +149,29 @@ test("dashboard auxiliary panels open from their shared deferred chunk without m
   expect(pageErrors).toEqual([]);
 });
 
+test("exam prep and settings open from deferred chunks without side effects", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await page.route("**/src/domains/exams/ExamPrepCenter.jsx*", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    await route.continue();
+  });
+  await page.route("**/src/domains/settings/SettingsCenter.jsx*", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    await route.continue();
+  });
+
+  await loginAsTeacher(page);
+  const navigation = page.getByRole("navigation", { name: "주요 화면" });
+  await navigation.getByRole("button", { name: /시험관리/ }).click();
+  await expect(page.locator('.teacherViewLoadState[role="status"]')).toContainText("교사 화면을 불러오는 중입니다.");
+  await expect(page.getByRole("heading", { name: "시험관리" })).toBeVisible();
+
+  await navigation.getByRole("button", { name: /설정/ }).click();
+  await expect(page.locator('.teacherViewLoadState[role="status"]')).toContainText("교사 화면을 불러오는 중입니다.");
+  await expect(page.getByRole("heading", { name: "설정", exact: true })).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
 test("withdrawn student list keeps its table and selection toolbar boundary", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);

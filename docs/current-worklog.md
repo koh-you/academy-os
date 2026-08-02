@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 App 3차 리팩터링 3-7 시험 대비·설정 화면 lazy loading
+
+- `App.jsx`의 `ExamPrepCenter`, `SettingsCenter`, `NotificationSettingsSection`, `StatusDot`을 도메인 파일로 옮기고, 함께 있던 `EvaluationCenter`·`StudentSelect`는 교사 화면 파일로 분리했다. runtime 주입을 제거한 6개 함수 본문은 기준 main과 문자 단위로 동일하다.
+- 시험 계산·표시 helper 22개와 설정 원천·정규화·API transport 12개는 frozen runtime으로 App owner를 유지한다. 설정의 알림 템플릿 테스트와 계정 저장은 기존 `postJson` 주입 경계를 유지하며 안전 브라우저에서는 버튼을 실행하지 않았다.
+- 두 top-level 화면은 별도 lazy chunk로 연결했다. production main JS는 `999.16 kB / gzip 248.14 kB`에서 `956.13 kB / gzip 237.03 kB`로 줄었고 시험 대비 26.47 kB, 설정 18.33 kB chunk가 생겼다. App은 10,855줄·507,358 bytes가 되어 Babel의 App 500 KB 경고가 사라졌다.
+- 검증: 원문 함수 6개 exact 대조, runtime lint, teacher/core/lazy 경계, 5도메인 fast 38/38, scenario·production 821/821, `check:fast`, build 379 modules·lazy physical chunk 11/11, Worktree 격리 safe browser 17/17. 운영 데이터·실제 알림·유료 AI·SQL은 사용하지 않았다.
+- 초기 main의 일반 500 kB 경고와 700~900 kB 종료 목표 상단 초과는 남아 있다. 다음 최신 main 단위에서 저빈도 중첩 화면의 안전한 lazy 분리를 검토한다.
+
 ## 2026-08-02 App 3차 리팩터링 3-7 보조 대시보드 화면 lazy loading
 
 - `App.jsx`의 특강 안내문과 첫 화면·수업일지 운영 알림 목록/편집 화면 1,029줄을 `src/domains/teacher/DashboardAuxiliaryPanels.jsx`로 물리 분리했다. export와 운영 알림 runtime 주입을 제거한 화면 본문 42,078자는 기준 main과 문자 단위로 동일하다.

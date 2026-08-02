@@ -32,7 +32,8 @@
 - 3-7 세 번째 단위로 오답관리·시험지관리·자료함·숙제현황 4개 화면 1,335줄을 39.49 kB shared lazy chunk로 분리했다. App runtime 10개와 저장 callback owner를 유지했고 main JS는 1,142.78 kB, gzip은 285.71 kB다. 안전한 지연 진입을 포함해 browser 14/14를 통과했다.
 - 3-7 네 번째 단위로 학사일정·반관리·수업연구·AI 도구 4개 화면 1,509줄을 51.98 kB shared lazy chunk로 분리했다. App runtime 24개와 저장 callback owner를 유지했고 main JS는 1,092.41 kB, gzip은 272.16 kB다. 안전한 지연 진입을 포함해 browser 15/15를 통과했다.
 - 3-7 다섯 번째 단위로 특강 안내문과 첫 화면·수업일지 운영 알림 화면 1,029줄을 94.24 kB shared lazy chunk로 분리했다. App runtime 15개와 저장·삭제 callback owner를 유지했고 main JS는 999.16 kB, gzip은 248.14 kB다. lazy element type guard 회귀를 safe browser에서 발견해 최소 교정했고 지연 진입을 포함해 browser 16/16을 통과했다.
-- 로컬 browser smoke의 Worktree 격리 runner를 기본 명령으로 사용한다. 3-2 Lesson, 3-3 Supplement, 3-4 Student, 3-5 Notification, 3-6 Settlement 경계는 닫혔고 3-7은 App 내부 다른 저빈도 화면 추가 분리가 남았다.
+- 3-7 여섯 번째 단위로 시험 대비·설정 화면을 각각 lazy chunk로 분리했다. helper/설정 transport App owner와 화면 본문을 보존했고 main JS는 956.13 kB, gzip은 237.03 kB, App은 507,358 bytes다. Babel의 App 500 KB 경고가 사라졌고 부작용 없는 지연 진입을 포함해 browser 17/17을 통과했다.
+- 로컬 browser smoke의 Worktree 격리 runner를 기본 명령으로 사용한다. 3-2 Lesson, 3-3 Supplement, 3-4 Student, 3-5 Notification, 3-6 Settlement 경계는 닫혔고 3-7은 저빈도 중첩 화면 추가 분리 또는 측정 기반 closeout이 남았다.
 
 - `app_state` 자동저장 12개 key의 500ms debounce, request ID, API upsert, `updated_at` 경계를 inventory했다.
 - 역순 도착 시 오래된 요청이 최신값을 덮는 fixture를 추가하고 Production checks에 연결했다.
@@ -83,7 +84,7 @@
 1. `git status --short`가 clean이고 최신 main인지 확인한다.
 2. 오늘 branch의 GitHub Actions 결과를 확인한다.
 3. App 2차 리팩터링 Phase 1~5는 완료 상태로 유지하고 자동 재개하지 않는다.
-4. 3-7 보조 대시보드 shared lazy 단위를 exact-head 검수·통합한다. 다음 최신 main branch에서는 App 내부 다른 저빈도 teacher 화면을 저장 handler와 분리해 lazy 연결하고, 초기 main 700~900 kB와 Babel 500 KB 경고 제거 목표를 계속 측정한다.
+4. 3-7 시험 대비·설정 lazy 단위를 exact-head 검수·통합한다. 다음 최신 main branch에서는 저장·알림 owner를 건드리지 않는 저빈도 중첩 화면을 한 단위 더 검토하고, 위험 대비 절감이 작으면 3-0 대비 감소율과 App Babel 경고 제거를 종료 근거로 3-8 감사를 시작한다.
 5. 운영 삭제·발송·예약·유료 AI·SQL 적용이 필요하면 구현을 넓히지 말고 정확한 사람 gate를 남긴다.
 
 ## 종료할 때
