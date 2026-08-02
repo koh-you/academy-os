@@ -39,6 +39,7 @@ const studentExamPostSubmissionPanelPath = path.join(root, "src", "domains", "po
 const examPostApiPath = path.join(root, "src", "domains", "portals", "examPostApi.js");
 const studentPortalApiPath = path.join(root, "src", "domains", "portals", "studentPortalApi.js");
 const studentManagerPath = path.join(root, "src", "domains", "students", "StudentManager.jsx");
+const studentEffectAdapterPath = path.join(root, "src", "domains", "students", "studentEffectAdapter.js");
 const tallyStudentMergePath = path.join(root, "src", "domains", "students", "tallyStudentMerge.js");
 const examQuestionClassificationPath = path.join(root, "src", "domains", "exams", "questionClassification.js");
 const examQuestionItemsPath = path.join(root, "src", "domains", "exams", "questionItems.js");
@@ -422,6 +423,11 @@ const appEntrySource = [
     ? `/* supplement effect adapter boundary\n${fs
         .readFileSync(supplementEffectAdapterPath, "utf8")
         .replace(/\*\//g, "* /")}\n*/`
+    : "",
+  fs.existsSync(studentEffectAdapterPath)
+    ? `/* student effect adapter boundary\n${fs
+        .readFileSync(studentEffectAdapterPath, "utf8")
+        .replace(/\*\//g, "* /")}\n*/`
     : ""
 ].join("\n");
 const supplementCancellationConfirmModalSource = fs.existsSync(supplementCancellationConfirmModalPath) ? fs.readFileSync(supplementCancellationConfirmModalPath, "utf8") : "";
@@ -516,6 +522,7 @@ const apiClientSource = fs.existsSync(apiClientPath) ? fs.readFileSync(apiClient
 const appWithApiClient = `${app}\n${apiClientSource}`;
 const materialManagerSource = `${sourceBetween(app, "function MaterialManager({", "function CandidatePanel({")}\n${testManagerPanelsSource}`;
 const studentManagerSource = fs.existsSync(studentManagerPath) ? fs.readFileSync(studentManagerPath, "utf8") : "";
+const studentEffectAdapterSource = fs.existsSync(studentEffectAdapterPath) ? fs.readFileSync(studentEffectAdapterPath, "utf8") : "";
 const sharedInlineSaveStatusSource = fs.existsSync(sharedInlineSaveStatusPath) ? fs.readFileSync(sharedInlineSaveStatusPath, "utf8") : "";
 const sharedAutosaveRiskNoticeSource = fs.existsSync(sharedAutosaveRiskNoticePath) ? fs.readFileSync(sharedAutosaveRiskNoticePath, "utf8") : "";
 const sharedAsyncOperationStatusSource = fs.existsSync(sharedAsyncOperationStatusPath) ? fs.readFileSync(sharedAsyncOperationStatusPath, "utf8") : "";
@@ -2573,6 +2580,8 @@ check("94e academy reminders can be edited without creating duplicate source row
 check("94f completed academy reminders disappear from the active date list immediately", hasAll(app, ["const selectedDateReminders = getAcademyRemindersForDate(reminders, selectedDate)", "return normalizeAcademyReminderStatus(reminder.status) === \"pending\";"]) && !app.includes("const selectedDateReminders = getAcademyRemindersForDate(reminders, selectedDate, { includeDone: true })"));
 check("94g academy reminders surface overdue items above collapsed composer", hasAll(app, ["function isAcademyReminderOverdue", "if (reminderDate < todayKey) return true;", "scheduledAt.getTime() <= now.getTime()", "const [isReminderFormOpen, setIsReminderFormOpen] = useState(false)", "const shouldShowReminderForm = isReminderFormOpen || isEditingReminder", "const overdueReminders = sortAcademyReminders(reminders).filter((reminder) => isAcademyReminderOverdue(reminder));", ".filter((reminder) => !isAcademyReminderOverdue(reminder))", "처리 지연 알림", "입력 접기", "알림 입력 열기"]) && hasAll(css, [".academyReminderHeaderActions", ".academyReminderOverdueSection", ".academyReminderOverdueSection .academyReminderItem"]));
 check("94h academy reminders can target class templates and appear in matching lesson journals", hasAll(appWithConfig, ["{ value: \"class_notice\", label: \"반 알림\" }", "function getAcademyReminderClassTemplateId", "sourcePayload.classTemplateId", "function getLessonClassTemplateId", "const reminderClassTemplateId = getAcademyReminderClassTemplateId(reminder);", "reminderClassTemplateId === lessonClassTemplateId", "const isClassReminderDraft = draft.reminderType === \"class_notice\"", "<option value=\"\">반 선택</option>", "templates={classTemplates}", "templates={templates}"]) && hasAll(coreDataRoute, ["\"class_notice\"", "source_payload: sourcePayload", "sourcePayload.reminderType = \"class_notice\"", "reminder_type: reminderType === \"class_notice\" ? \"custom\" : reminderType"]) && hasAll(notificationRoute, ["class_notice: \"반 알림\"", "item.className ? `반 ${item.className}` : \"\""]) && hasAll(serverSource, ["className: sourcePayload.className || reminder.className || \"\""]));
+
+check("94i student callbacks use one explicit draft persistence deletion lifecycle and audit adapter", hasAll(studentEffectAdapterSource, ["export function createStudentEffectAdapter", "draft: Object.freeze({", "onUpdateStudent: actions.handleUpdateStudent", "persistence: Object.freeze({", "onSaveStudentProfile: actions.handleSaveStudentProfile", "deletion: Object.freeze({", "onPermanentlyDeleteWithdrawnStudent: actions.handlePermanentlyDeleteWithdrawnStudent", "lifecycle: Object.freeze({", "onDeleteStudent: actions.handleDeleteStudent", "onRestoreStudent: actions.handleRestoreStudent", "audit: Object.freeze({", "onAuditWithdrawnStudentDeletion: actions.handleAuditWithdrawnStudentDeletion"]) && hasAll(teacherViewOutletSource, ["createStudentEffectAdapter({ actions })", "effects: studentEffects"]) && hasAll(studentManagerSource, ["effects = {},", "draft: { onUpdateStudent }", "persistence: {", "deletion: {", "lifecycle: {", "audit: { onAuditWithdrawnStudentDeletion }"]) && !["fetch(", "postJson", "getJsonWithTimeout", "/api/", "Supabase", "localStorage", "useState", "useEffect"].some((value) => studentEffectAdapterSource.includes(value)));
 
 const failed = checks.filter((item) => !item.ok);
 console.log(JSON.stringify({ ok: failed.length === 0, total: checks.length, failed, checks }, null, 2));
