@@ -11,7 +11,9 @@ import {
   getMonthlySettlementMonthSaveSnapshot,
   getMonthlySettlementRateLabel,
   getMonthlySettlementStudents,
+  getSettlementAttendanceTone,
   getWeeklyScheduleHours,
+  isClosureReplacementSettlementLesson,
   monthlySettlementFactor,
   normalizeMonthlySettlementStudentSetting
 } from "../src/domains/settlements/monthlySettlement.js";
@@ -132,6 +134,10 @@ assert.equal(
 );
 assert.equal(getWeeklyScheduleHours("월수 19:00-22:00"), 6);
 assert.equal(getWeeklyScheduleHours("월수금 19:00-22:00"), 9);
+assert.equal(getSettlementAttendanceTone("present"), "present");
+assert.equal(getSettlementAttendanceTone("absent"), "absent");
+assert.equal(getSettlementAttendanceTone("late"), "late");
+assert.equal(getSettlementAttendanceTone("pending"), "pending");
 assert.equal(
   getDefaultFixedAmountForStudent({ grade: "중3" }, "월수 19:00-22:00"),
   308000
@@ -538,6 +544,157 @@ assert.equal(fixedRow.actualStatusCounts.pending, 4, "대기 출결은 수업일
 assert.equal(fixedRow.makeupCount, 1, "보충은 별도 횟수로 표시해야 합니다.");
 assert.equal(fixedRow.makeupHours, 2, "보충 시수는 별도 참고값이어야 합니다.");
 
+const closureReplacementStudent = {
+  defaultClassTemplateId: "class_mwf",
+  grade: "고3",
+  name: "휴강보충학생",
+  studentId: "student_closure_replacement"
+};
+const closureReplacementLessons = [
+  ["2026-07-22", "class", ""],
+  ["2026-07-24", "closure", ""],
+  ["2026-07-27", "class", ""],
+  ["2026-07-28", "makeup", "원 휴강 수업 · lesson_closure_replacement_24"],
+  ["2026-07-29", "class", ""],
+  ["2026-07-31", "class", ""]
+].map(([date, lessonType, sourceLabel], index) => ({
+  className: lessonType === "makeup" ? "월수금반 · 휴강 보충" : "월수금반",
+  date,
+  endTime: "19:00",
+  lessonId: `lesson_closure_replacement_${index + 1}`,
+  lessonTopic: lessonType === "closure" ? "휴강" : lessonType === "makeup" ? "휴강 보충" : "",
+  lessonType,
+  sourceLabel,
+  startTime: "16:00",
+  status: "scheduled",
+  studentIds: [closureReplacementStudent.studentId]
+}));
+assert.equal(
+  isClosureReplacementSettlementLesson(closureReplacementLessons[3]),
+  true,
+  "원 휴강 수업과 연결된 휴강 보충만 정규 이행으로 식별해야 합니다."
+);
+const closureReplacementRow = buildStudentSettlementRow({
+  classTemplates,
+  lessons: closureReplacementLessons,
+  monthKey,
+  records: [{
+    attendanceStatus: "present",
+    lessonId: closureReplacementLessons[3].lessonId,
+    studentId: closureReplacementStudent.studentId
+  }],
+  setting: { fixedAmount: 450000, mode: "fixed", scheduleText: "월수금 16:00-19:00" },
+  student: closureReplacementStudent
+});
+assert.equal(closureReplacementRow.setting.mode, "new");
+assert.equal(closureReplacementRow.regularCount, 5, "휴강 보충 1회는 실제 정규 이행 횟수에 포함해야 합니다.");
+assert.equal(closureReplacementRow.makeupCount, 0, "휴강 보충을 일반 결석·숙제 보충과 중복 집계하지 않아야 합니다.");
+assert.equal(closureReplacementRow.prorationCount, 5);
+assert.equal(closureReplacementRow.regularGrossAmount, 187500);
+
+const julyNewStudent = {
+  defaultClassTemplateId: "class_mwf",
+  grade: "고1",
+  name: "7월 신입 정규10회",
+  studentId: "student_july_new_ten"
+};
+const julyNewTenLessons = ["08", "10", "13", "15", "17", "20", "22", "27", "29", "31"].map((day) => ({
+  className: "월수금반",
+  date: `2026-07-${day}`,
+  endTime: "22:00",
+  lessonId: `lesson_july_new_ten_${day}`,
+  lessonType: "class",
+  startTime: "19:00",
+  status: "scheduled",
+  studentIds: [julyNewStudent.studentId]
+}));
+const julyNewTenRow = buildStudentSettlementRow({
+  classTemplates,
+  lessons: julyNewTenLessons,
+  monthKey,
+  records: [],
+  setting: { fixedAmount: 450000, mode: "fixed", scheduleText },
+  student: julyNewStudent
+});
+assert.equal(julyNewTenRow.monthlyScheduleCount, 14);
+assert.equal(julyNewTenRow.regularCount, 10);
+assert.equal(julyNewTenRow.prorationCount, 10, "신입생은 휴강 예정일을 포함한 달력 11회가 아니라 실제 정규 이행 10회를 적용해야 합니다.");
+assert.equal(julyNewTenRow.regularGrossAmount, 375000);
+
+const offScheduleStudent = {
+  defaultClassTemplateId: "class_mwf",
+  grade: "중3",
+  name: "스케줄밖첫수업학생",
+  studentId: "student_off_schedule_first"
+};
+const offScheduleLessons = ["08", "09", "11", "14", "16", "18", "21", "23", "25", "28", "30"].map((day) => ({
+  className: "실제 정규반",
+  date: `2026-07-${day}`,
+  endTime: "19:00",
+  lessonId: `lesson_off_schedule_${day}`,
+  lessonType: "class",
+  startTime: "16:00",
+  status: "scheduled",
+  studentIds: [offScheduleStudent.studentId]
+}));
+const offScheduleRow = buildStudentSettlementRow({
+  classTemplates,
+  lessons: offScheduleLessons,
+  monthKey,
+  records: [],
+  setting: { fixedAmount: 420000, mode: "fixed", scheduleText: "화목 16:00-19:00 / 토 10:00-13:00" },
+  student: offScheduleStudent
+});
+assert.equal(offScheduleRow.regularCount, 11);
+assert.equal(offScheduleRow.prorationCount, 11, "저장 스케줄 밖에서 실제 진행한 첫 정규수업도 신입 정산 횟수에 포함해야 합니다.");
+assert.equal(offScheduleRow.regularGrossAmount, 385000);
+
+const autoWithdrawnStudent = {
+  defaultClassTemplateId: "class_mwf",
+  grade: "고1",
+  name: "7월 퇴원 자동학생",
+  status: "paused",
+  studentId: "student_auto_withdrawn",
+  withdrawnAt: "2026-07-29T12:00:00+09:00"
+};
+const autoWithdrawnLessons = [
+  { date: "2026-06-24", lessonId: "lesson_auto_withdrawn_june" },
+  ...["08", "10", "13", "15", "17", "20", "22", "27", "29"].map((day) => ({
+    date: `2026-07-${day}`,
+    lessonId: `lesson_auto_withdrawn_${day}`
+  }))
+].map((lesson) => ({
+  ...lesson,
+  className: "월수금반",
+  endTime: "22:00",
+  lessonType: "class",
+  startTime: "19:00",
+  status: "scheduled",
+  studentIds: [autoWithdrawnStudent.studentId]
+}));
+const autoWithdrawnRow = buildStudentSettlementRow({
+  classTemplates,
+  lessons: autoWithdrawnLessons,
+  monthKey,
+  records: [],
+  setting: { fixedAmount: 450000, mode: "fixed", scheduleText },
+  student: autoWithdrawnStudent
+});
+assert.equal(autoWithdrawnRow.setting.mode, "withdrawn", "퇴원일 원천이 있고 교사 고정급 확정이 없으면 퇴원 방식으로 자동 전환해야 합니다.");
+assert.equal(autoWithdrawnRow.setting.modeSource, "lesson_journal");
+assert.equal(autoWithdrawnRow.periodEnd, "2026-07-29");
+assert.equal(autoWithdrawnRow.prorationCount, 13);
+assert.equal(autoWithdrawnRow.regularGrossAmount, Math.round(450000 * 13 / 14));
+const teacherFixedWithdrawnRow = buildStudentSettlementRow({
+  classTemplates,
+  lessons: autoWithdrawnLessons,
+  monthKey,
+  records: [],
+  setting: { fixedAmount: 450000, mode: "fixed", modeSource: "teacher", scheduleText },
+  student: autoWithdrawnStudent
+});
+assert.equal(teacherFixedWithdrawnRow.setting.mode, "fixed", "교사가 확정한 월정액은 퇴원 자동 판정으로 덮어쓰지 않아야 합니다.");
+
 const newStudent = {
   ...student,
   name: "7월 신입생",
@@ -652,7 +809,7 @@ assert.equal(
   "fixed",
   "이전 달 정규 수업일지가 있는 학생은 이번 달 첫 등장 학생으로 계산하면 안 됩니다."
 );
-const expectedNewCount = unevenScheduledEvents.filter((event) => event.date >= "2026-07-15").length;
+const expectedNewCount = newStudentLessons.length;
 const fullUnevenHours = unevenScheduledEvents.reduce((sum, event) => sum + event.durationHours, 0);
 const recognizedUnevenHours = unevenScheduledEvents
   .filter((event) => event.date >= "2026-07-15")
@@ -672,7 +829,7 @@ assert.notEqual(
 assert.equal(
   newStudentRow.regularGrossAmount,
   37500 * expectedNewCount,
-  "고등 신입생은 월 전체 횟수로 나누지 않고 첫 수업일부터 말일까지 횟수에 37,500원을 곱해야 합니다."
+  "고등 신입생은 월 전체 예정 횟수가 아니라 실제 정규 이행 횟수에 37,500원을 곱해야 합니다."
 );
 const middleNewStudent = {
   ...newStudent,
@@ -700,7 +857,7 @@ assert.equal(middleNewStudentRow.setting.newStudentSessionAmount, 35000);
 assert.equal(
   middleNewStudentRow.regularGrossAmount,
   35000 * expectedNewCount,
-  "중등 신입생은 월 전체 횟수로 나누지 않고 첫 수업일부터 말일까지 횟수에 35,000원을 곱해야 합니다."
+  "중등 신입생은 월 전체 예정 횟수가 아니라 실제 정규 이행 횟수에 35,000원을 곱해야 합니다."
 );
 
 const newWithdrawnScheduleText = "화목 16:00-19:00 / 토 10:00-13:00";
@@ -845,7 +1002,8 @@ const missingScheduleRow = buildStudentSettlementRow({
   student: newStudent
 });
 assert.equal(missingScheduleRow.monthlyScheduleCount, 0);
-assert.equal(missingScheduleRow.regularGrossAmount, 0, "월별 스케줄 횟수를 읽을 수 없으면 부분월 금액을 100%로 추정하지 않아야 합니다.");
+assert.equal(missingScheduleRow.prorationCount, 2);
+assert.equal(missingScheduleRow.regularGrossAmount, 75000, "신입 회당 정산은 월별 스케줄 형식과 무관하게 실제 정규 이행 횟수를 사용해야 합니다.");
 
 const excludedRow = buildStudentSettlementRow({
   classTemplates,

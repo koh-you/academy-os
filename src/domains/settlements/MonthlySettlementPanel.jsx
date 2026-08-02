@@ -21,6 +21,7 @@ import {
   getMonthlySettlementStudents,
   getNewStudentSessionRateLabel,
   getSettlementAttendanceLabel,
+  getSettlementAttendanceTone,
   listMonthDates,
   monthlySettlementFactor,
   normalizeMonthlySettlementStudentSetting,
@@ -127,7 +128,10 @@ function MonthlySettlementCalendar({ monthKey, onClose, row }) {
       title={`${row.student.name} 월별 출결·수업`}
     >
       <div className="monthlySettlementCalendarLegend">
-        <span><i className="regular" />정규</span>
+        <span><i className="attendance-present" />출석</span>
+        <span><i className="attendance-absent" />결석</span>
+        <span><i className="attendance-late" />지각</span>
+        <span><i className="attendance-pending" />대기</span>
         <span><i className="makeup" />보충 · 계산 제외</span>
         <span><i className="special" />특강 · 별도 정산</span>
       </div>
@@ -157,12 +161,14 @@ function MonthlySettlementCalendar({ monthKey, onClose, row }) {
                 <div>
                   {events.map((event) => (
                     <span
-                      className={`monthlySettlementCalendarEvent ${event.eventType} ${event.isForecast ? "forecast" : ""}`}
+                      className={`monthlySettlementCalendarEvent ${event.eventType} attendance-${getSettlementAttendanceTone(event.attendanceStatus)} ${event.isForecast ? "forecast" : ""}`}
                       key={event.eventId}
                       title={`${event.startTime}-${event.endTime} · ${event.className || event.label}`}
                     >
-                      {event.eventType === "regular"
-                        ? event.isForecast ? "정규 예정" : getSettlementAttendanceLabel(event.attendanceStatus)
+                      {event.eventType === "regularReplacement"
+                        ? `휴강 보충 · ${getSettlementAttendanceLabel(event.attendanceStatus)}`
+                        : event.eventType === "regular"
+                          ? event.isForecast ? "정규 예정" : getSettlementAttendanceLabel(event.attendanceStatus)
                         : event.eventType === "makeup" ? "보충" : "특강"}
                       {event.startTime ? ` ${event.startTime}` : ""}
                     </span>
@@ -231,7 +237,7 @@ export function MonthlySettlementPanel({
       ([studentId, setting]) =>
         setting.modeSource === "lesson_journal" &&
         (
-          savedMonth?.studentSettings?.[studentId]?.mode !== "new" ||
+          savedMonth?.studentSettings?.[studentId]?.mode !== setting.mode ||
           savedMonth?.studentSettings?.[studentId]?.modeSource !== "lesson_journal"
         )
     );
@@ -240,10 +246,10 @@ export function MonthlySettlementPanel({
     setSaveMessage(
       recoveredDraft
         ? hasJournalAutoModeChanges
-          ? "저장하지 않은 월별 정산 작업을 복구하고, 수업일지 최초 수업 기준 신입생 계산을 자동 반영했습니다."
+          ? "저장하지 않은 월별 정산 작업을 복구하고, 수업일지·퇴원일 기준 정산 방식을 자동 반영했습니다."
           : "저장하지 않은 월별 정산 작업을 복구했습니다."
         : hasJournalAutoModeChanges
-          ? "수업일지에서 이번 달 최초 정규수업이 확인된 학생을 신입생 회당 계산으로 자동 반영했습니다. 확인 후 저장해 주세요."
+          ? "수업일지 최초 수업과 학생 퇴원일을 기준으로 신입·퇴원 정산 방식을 자동 반영했습니다. 확인 후 저장해 주세요."
         : !savedMonth
           ? "이 달의 기본 정산 스냅샷을 확인한 뒤 저장해 주세요."
           : hasNewStudents ? "이 달의 기존 스냅샷에 새 학생이 추가되었습니다. 확인 후 저장해 주세요." : ""
@@ -395,8 +401,8 @@ export function MonthlySettlementPanel({
         descriptionNode={(
           <p className="muted">
             선택한 달의 수업일지 명단을 정산 원천으로 봅니다. 재원생은 수업 횟수·시수와 무관하게 월 고정금액,
-            신입생은 첫 수업부터 말일까지의 수업 횟수에 회당 단가를 곱하고, 퇴원생은 1일부터 마지막 수업까지의 월별 스케줄 횟수 비율로 계산합니다.
-            같은 달에 첫 수업과 퇴원이 모두 있으면 첫 수업일부터 퇴원일까지의 수업 횟수만 계산합니다.
+            신입생은 첫 수업부터 말일까지 실제 이행한 정규 횟수에 회당 단가를 곱하고, 퇴원생은 1일부터 마지막 수업까지의 월별 스케줄 횟수 비율로 계산합니다.
+            같은 달에 첫 수업과 퇴원이 모두 있으면 첫 수업일부터 퇴원일까지 실제 이행한 정규 횟수만 계산합니다.
           </p>
         )}
         eyebrow="운영"
@@ -407,10 +413,11 @@ export function MonthlySettlementPanel({
         <strong>계산 기준</strong>
         <span>학생 상태 필터 없이 해당 월 수업일지 명단을 그대로 표시합니다.</span>
         <span>12회 또는 4.2주 환산을 사용하지 않습니다.</span>
-        <span>신입생은 월 전체 횟수로 나누지 않고 첫 수업~말일 횟수 × 회당 단가로 계산합니다.</span>
-        <span>신입생이 같은 달에 퇴원하면 첫 수업일~퇴원일 사이의 월별 스케줄 횟수 × 회당 단가로 계산합니다.</span>
+        <span>신입생은 예정 달력이 아니라 첫 수업~말일의 실제 정규 이행 횟수 × 회당 단가로 계산합니다.</span>
+        <span>신입생이 같은 달에 퇴원하면 첫 수업일~퇴원일 사이의 실제 정규 이행 횟수 × 회당 단가로 계산합니다.</span>
         <span>신입 시작일과 기존 퇴원생 마지막 수업일은 수업일지로 정하고, 같은 달 신입·퇴원생의 종료일은 학생 퇴원일을 사용합니다.</span>
         <span>출석·지각·대기는 정산 포함, 결석도 별도 차감 요청이 없으면 자동 차감하지 않습니다.</span>
+        <span>원 휴강 수업과 연결된 휴강 보충은 정규 이행 1회로 포함하고 일반 결석·숙제 보충은 별도로 표시합니다.</span>
         <span>보충은 달력에 별도로 남기되 정규 금액을 추가하지 않습니다.</span>
         <span>정산 제외한 행은 이 달 정산표에서 숨기며, 학생·수업일지 원천은 유지합니다.</span>
         <span>특강비는 이 월별 정산에서 제외하고 운영의 별도 특강 정산에서 전체 과정 기준으로 계산합니다.</span>
@@ -486,7 +493,7 @@ export function MonthlySettlementPanel({
               const isNewWithdrawnMode = isNewMode && row.isNewWithdrawnPeriod;
               const parsedScheduleText = scheduleTextFromRules(setting.scheduleText);
               const hasScheduleWarning =
-                setting.mode !== "fixed" &&
+                setting.mode === "withdrawn" &&
                 row.hasRegularJournal &&
                 row.monthlyScheduleCount === 0;
               const scheduleHelpId = `monthly-settlement-schedule-help-${row.student.studentId}`;
@@ -504,6 +511,11 @@ export function MonthlySettlementPanel({
                     {row.isJournalAutoNew ? (
                       <em className="monthlySettlementAutoMode">
                         수업일지 자동 · {row.firstEverRegularDate} 첫 수업
+                      </em>
+                    ) : null}
+                    {setting.mode === "withdrawn" && setting.modeSource === "lesson_journal" ? (
+                      <em className="monthlySettlementAutoMode">
+                        학생 원천 자동 · 퇴원일 {String(row.student.withdrawnAt).slice(0, 10)}
                       </em>
                     ) : null}
                     {row.isNewCandidate && setting.mode === "fixed" ? (
@@ -524,7 +536,7 @@ export function MonthlySettlementPanel({
                     <small>
                       {setting.mode === "fixed"
                         ? "횟수와 무관하게 전액"
-                        : isNewMode && row.monthlyScheduleCount > 0
+                        : isNewMode
                           ? `${row.prorationCount}회 × ${formatSettlementWon(setting.newStudentSessionAmount)}`
                           : row.monthlyScheduleCount > 0
                           ? `횟수 비율 ${formatSettlementPercent(row.partialRatio)} · ${row.prorationCount}/${row.monthlyScheduleCount}회`
@@ -594,7 +606,7 @@ export function MonthlySettlementPanel({
                       정규 {row.regularCount}회 · {formatSettlementHours(row.regularHours)}
                     </button>
                     <small>
-                      {isNewMode && row.monthlyScheduleCount > 0
+                      {isNewMode
                         ? `${isNewWithdrawnMode ? "신입·퇴원" : "신입"} 정산 ${row.prorationCount}회`
                         : row.monthlyScheduleCount > 0
                         ? `정산 기준 ${row.prorationCount}/${row.monthlyScheduleCount}회`
@@ -612,7 +624,7 @@ export function MonthlySettlementPanel({
                         ? "정규 수업일지 없음 · 0원"
                         : setting.mode === "fixed"
                           ? "월정액 전액"
-                          : isNewMode && row.monthlyScheduleCount > 0
+                          : isNewMode
                             ? `${row.prorationCount}회 × ${formatSettlementWon(setting.newStudentSessionAmount)} + 조정`
                           : row.monthlyScheduleCount > 0
                             ? `${formatSettlementWon(row.baseAmount)} + 조정`
