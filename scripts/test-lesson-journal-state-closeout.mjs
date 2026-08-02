@@ -1,7 +1,8 @@
+import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const appSource = await readAppWithLessonJournalSource(import.meta.url);
 const draftStateSource = await readFile(
   new URL("../src/domains/lessons/useLessonJournalDraftLifecycle.js", import.meta.url),
   "utf8"
@@ -44,7 +45,7 @@ for (const AppOwnedBoundary of [
   "if (!reservationModalOpen) return;",
   "refreshReservationAudit().catch((error) => {",
   "}, [lesson.date, lesson.lessonId, reservationModalOpen]);",
-  "getJsonWithTimeout(osPath,",
+  "loadLessonJournalReservationAudit({",
   "onSaveLessonJournalDrafts?.(",
   "onApplyLessonNotificationPlan(lesson.lessonId)",
   "onReconcileSolapiNotificationResults?.("

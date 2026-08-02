@@ -1,3 +1,4 @@
+import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createLessonJournalReservationAuditResult } from "../src/domains/lessons/lessonJournalReservationAuditResult.js";
@@ -23,7 +24,7 @@ assert.deepEqual(createLessonJournalReservationAuditResult({}), {
   state: "ready"
 });
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const appSource = await readAppWithLessonJournalSource(import.meta.url);
 const modelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalReservationAuditResult.js", import.meta.url),
   "utf8"
@@ -35,12 +36,14 @@ const detailSource = appSource.slice(detailStart, detailEnd);
 for (const binding of [
   'import { createLessonJournalReservationAuditResult } from "../domains/lessons/lessonJournalReservationAuditResult.js"',
   "async function refreshReservationAudit()",
-  "getJsonWithTimeout(osPath, 12000,",
+  "loadLessonJournalReservationAudit({",
   "setReservationAudit(createLessonJournalReservationAuditResult(result))",
   "OS 예약 기록 조회 실패:"
 ]) {
   assert.ok(detailSource.includes(binding) || appSource.includes(binding), `missing audit-result binding: ${binding}`);
 }
+assert.ok(appSource.includes("function loadLessonJournalReservationAudit({ date, lessonId })"));
+assert.ok(appSource.includes("return getJsonWithTimeout(path, 12000,"));
 for (const removedProviderBoundary of [
   "solapiGroupsPath",
   "solapiMessagesPath",

@@ -1,3 +1,4 @@
+import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createLessonJournalStudentPreviewModel } from "../src/domains/lessons/lessonJournalStudentPreviewModel.js";
@@ -38,7 +39,7 @@ assert.deepEqual(
   }
 );
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const appSource = await readAppWithLessonJournalSource(import.meta.url);
 const componentSource = await readFile(
   new URL("../src/domains/lessons/LessonJournalStudentPreviewModal.jsx", import.meta.url),
   "utf8"

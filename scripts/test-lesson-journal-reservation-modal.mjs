@@ -1,3 +1,4 @@
+import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createLessonJournalReservationModalModel } from "../src/domains/lessons/lessonJournalReservationModalModel.js";
@@ -40,7 +41,7 @@ assert.equal(controlModel.resultRefreshLabel, "확인 중");
 assert.equal(controlModel.showAllViewAction, false);
 assert.deepEqual(controlModel.summaryCards.map((card) => card.count), [0, 0, 0]);
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const appSource = await readAppWithLessonJournalSource(import.meta.url);
 const componentSource = await readFile(
   new URL("../src/domains/lessons/LessonJournalReservationModal.jsx", import.meta.url),
   "utf8"

@@ -1,3 +1,4 @@
+import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createLessonJournalDraftSaveRequest } from "../src/domains/lessons/lessonJournalDraftSaveRequest.js";
@@ -69,7 +70,7 @@ assert.equal(blockedControl.hasDraftChanges, false);
 assert.equal(blockedControl.changeCount, 1);
 assert.equal(blockedControl.recordDrafts[0].lessonStudentRecordId, "retained");
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const appSource = await readAppWithLessonJournalSource(import.meta.url);
 const requestSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalDraftSaveRequest.js", import.meta.url),
   "utf8"

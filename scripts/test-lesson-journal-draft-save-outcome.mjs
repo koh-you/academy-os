@@ -1,3 +1,4 @@
+import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createLessonJournalDraftSaveOutcome } from "../src/domains/lessons/lessonJournalDraftSaveOutcome.js";
@@ -58,7 +59,7 @@ assert.deepEqual(
   }
 );
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const appSource = await readAppWithLessonJournalSource(import.meta.url);
 const outcomeSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalDraftSaveOutcome.js", import.meta.url),
   "utf8"

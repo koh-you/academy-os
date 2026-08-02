@@ -1,14 +1,13 @@
+import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const appSource = await readFile(
-  new URL("../src/app/App.jsx", import.meta.url),
-  "utf8"
-);
-const teacherLessonHubSource = await readFile(
-  new URL("../src/domains/lessons/TeacherLessonHubV2.jsx", import.meta.url),
-  "utf8"
-);
+const [rawAppSource, teacherLessonHubSource, lessonJournalDetailSource] = await Promise.all([
+  readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8"),
+  readFile(new URL("../src/domains/lessons/TeacherLessonHubV2.jsx", import.meta.url), "utf8"),
+  readFile(new URL("../src/domains/lessons/LessonJournalDetail.jsx", import.meta.url), "utf8")
+]);
+const appSource = await readAppWithLessonJournalSource(import.meta.url);
 const saveControllerSource = await readFile(
   new URL("../src/domains/lessons/lessonModalSaveController.js", import.meta.url),
   "utf8"
@@ -117,11 +116,21 @@ for (const required of [
 for (const reservedAppBoundary of [
   "async function handleAttendancePinPreview(",
   "async function handleAttendancePinCheck(",
-  "function LessonJournalDetail("
+  "function loadLessonJournalReservationAudit({ date, lessonId })"
 ]) {
   assert.ok(
-    appSource.includes(reservedAppBoundary),
-    `next roadmap boundary must remain in App: ${reservedAppBoundary}`
+    rawAppSource.includes(reservedAppBoundary),
+    `high-risk transport boundary must remain in App: ${reservedAppBoundary}`
+  );
+}
+assert.equal(rawAppSource.includes("function LessonJournalDetail("), false);
+assert.ok(teacherLessonHubSource.includes('from "./LessonJournalDetail.jsx"'));
+assert.ok(lessonJournalDetailSource.includes("export function LessonJournalDetail("));
+for (const forbidden of ["/api/", "fetch(", "postJson", "getJsonWithTimeout", "localStorage"]) {
+  assert.equal(
+    lessonJournalDetailSource.includes(forbidden),
+    false,
+    `lesson journal screen must not own ${forbidden}`
   );
 }
 assert.ok(

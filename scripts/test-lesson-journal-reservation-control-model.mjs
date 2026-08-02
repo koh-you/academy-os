@@ -1,3 +1,4 @@
+import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createLessonJournalReservationControlModel } from "../src/domains/lessons/lessonJournalReservationControlModel.js";
@@ -138,7 +139,7 @@ assert.equal(
   "Solapi 발송 원천 2건을 OS 상태에 반영합니다."
 );
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const appSource = await readAppWithLessonJournalSource(import.meta.url);
 const modelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalReservationControlModel.js", import.meta.url),
   "utf8"

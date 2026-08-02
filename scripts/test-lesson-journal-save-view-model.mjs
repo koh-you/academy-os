@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createLessonJournalSaveViewModel } from "../src/domains/lessons/lessonJournalSaveViewModel.js";
+import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 
 assert.deepEqual(createLessonJournalSaveViewModel(), {
   draftChangeCount: 0,
@@ -88,7 +89,7 @@ assert.equal(
   "직접 안내"
 );
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const appSource = await readAppWithLessonJournalSource(import.meta.url);
 const source = await readFile(
   new URL("../src/domains/lessons/lessonJournalSaveViewModel.js", import.meta.url),
   "utf8"

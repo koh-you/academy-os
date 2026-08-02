@@ -1,3 +1,4 @@
+import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createLessonJournalOverlayInitialState } from "../src/domains/lessons/useLessonJournalOverlayState.js";
@@ -26,7 +27,7 @@ assert.deepEqual(initialState, {
 assert.deepEqual(activeOverlayState, activeOverlaySnapshot);
 assert.deepEqual(createLessonJournalOverlayInitialState(), initialState);
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const appSource = await readAppWithLessonJournalSource(import.meta.url);
 const overlayStateSource = await readFile(
   new URL("../src/domains/lessons/useLessonJournalOverlayState.js", import.meta.url),
   "utf8"
