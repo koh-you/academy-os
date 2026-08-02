@@ -17999,6 +17999,20 @@ textarea.profileEditInput {
   padding: 18px;
 }
 
+.supplementSortControl {
+  align-items: center;
+  color: #52627a;
+  display: flex;
+  font-size: 13px;
+  font-weight: 800;
+  gap: 8px;
+}
+
+.supplementSortControl select {
+  min-height: 38px;
+  min-width: 132px;
+}
+
 .supplementItemList {
   border: 1px solid #e6edf7;
   border-radius: 8px;

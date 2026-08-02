@@ -18,7 +18,11 @@ import {
   findSupplementTaskForCandidate,
   getSupplementActionKey
 } from "./supplementCenterSelectionModel.js";
-import { createSupplementCenterTabViewModel } from "./supplementCenterTabModel.js";
+import {
+  createSupplementCenterTabViewModel,
+  sortSupplementCenterItems,
+  supplementCenterSortOptions
+} from "./supplementCenterTabModel.js";
 import { SupplementCandidateRow } from "./SupplementCandidateRow.jsx";
 import { SupplementHistoryModal } from "./SupplementHistoryModal.jsx";
 import { selectRecentSupplementTasks } from "./supplementHistory.js";
@@ -67,6 +71,7 @@ export function SupplementCenter({
   } = dependencies;
   const [selectedSupplementStudentId, setSelectedSupplementStudentId] = useState("");
   const [activeSupplementTab, setActiveSupplementTab] = useState("homework_makeup");
+  const [supplementSortMode, setSupplementSortMode] = useState("weekday");
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [historyQuery, setHistoryQuery] = useState("");
   const [passConfirmTask, setPassConfirmTask] = useState(null);
@@ -236,11 +241,13 @@ export function SupplementCenter({
   const absenceSupplementItems = absentRecords.map(createAbsenceSupplementItem);
   const visibleAbsenceSupplementItems = absenceSupplementItems.filter((item) => !item.isFutureDeferred);
   const deferredAbsenceSupplementItems = absenceSupplementItems.filter((item) => item.isFutureDeferred);
-  const activeDeferredAbsenceItems = deferredAbsenceSupplementItems
+  const activeDeferredAbsenceItems = sortSupplementCenterItems(deferredAbsenceSupplementItems
     .filter((item) =>
       !["done", "canceled"].includes(findSupplementTaskForCandidate(tasks, item.task)?.status)
-    )
-    .sort((a, b) => String(a.lessonDate || "").localeCompare(String(b.lessonDate || "")));
+    ), {
+      getStudentName: studentName,
+      sortMode: supplementSortMode
+    });
   const homeworkSupplementItems = createHomeworkSupplementItems(makeupHomeworks, {
     getReason: (homework) => getHomeworkMakeupReason(homework, records)
   });
@@ -254,8 +261,10 @@ export function SupplementCenter({
     absenceItems: visibleAbsenceSupplementItems,
     activeDeferredAbsenceCount: activeDeferredAbsenceItems.length,
     activeTabId: activeSupplementTab,
+    getStudentName: studentName,
     homeworkItems: homeworkSupplementItems,
     retestItems: retestSupplementItems,
+    sortMode: supplementSortMode,
     tasks
   });
   const recentSupplementTasks = selectRecentSupplementTasks({
@@ -292,6 +301,20 @@ export function SupplementCenter({
 
       <section className="supplementTabPanel">
         <SectionHeader
+          actions={(
+            <label className="supplementSortControl">
+              <span>정렬</span>
+              <select
+                aria-label="보충관리 정렬"
+                onChange={(event) => setSupplementSortMode(event.target.value)}
+                value={supplementSortMode}
+              >
+                {supplementCenterSortOptions.map((option) => (
+                  <option key={option.id} value={option.id}>{option.label}</option>
+                ))}
+              </select>
+            </label>
+          )}
           density="slim"
           description={activeTabData.subtitle}
           meta={<span className="countBadge">{activeTabData.count}건</span>}
