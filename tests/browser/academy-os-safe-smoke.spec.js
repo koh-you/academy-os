@@ -37,6 +37,47 @@ test("safe preview opens the login screen without runtime errors", async ({ page
   expect(pageErrors).toEqual([]);
 });
 
+test("teacher view lazy boundary shows loading feedback before the first lesson chunk opens", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await page.route("**/src/domains/lessons/TeacherLessonHubV2.jsx*", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await route.continue();
+  });
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "선생님" }).click();
+  await page.getByLabel("선생님 아이디").fill("preview");
+  await page.getByLabel("선생님 비밀번호").fill("preview");
+  await page.getByRole("button", { name: "선생님 로그인" }).click();
+  await expect(page.locator('.teacherViewLoadState[role="status"]')).toContainText("교사 화면을 불러오는 중입니다.");
+  await expect(page.getByRole("navigation", { name: "수업일지 달력 월 이동" })).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
+test("teacher view lazy boundary records a failed chunk and recovers after safe reload", async ({ page }) => {
+  let failedOnce = false;
+  await page.route("**/src/domains/students/StudentManager.jsx*", async (route) => {
+    if (!failedOnce) {
+      failedOnce = true;
+      await route.abort("failed");
+      return;
+    }
+    await route.continue();
+  });
+
+  await loginAsTeacher(page);
+  const navigation = page.getByRole("navigation", { name: "주요 화면" });
+  await navigation.getByRole("button", { name: /학생관리/ }).click();
+  const loadError = page.getByRole("alert");
+  await expect(loadError).toContainText("교사 화면을 불러오지 못했습니다.");
+  await expect(loadError).toContainText("입력이나 운영 데이터는 변경되지 않았습니다.");
+  await loadError.getByRole("button", { name: "안전하게 새로고침" }).click();
+
+  await expect(page.getByRole("navigation", { name: "주요 화면" })).toBeVisible();
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
+  await expect(page.getByRole("heading", { name: "학생관리" })).toBeVisible();
+});
+
 test("withdrawn student list keeps its table and selection toolbar boundary", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);

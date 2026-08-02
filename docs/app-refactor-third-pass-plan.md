@@ -86,6 +86,8 @@
 
 - 교사 화면의 진입 빈도와 의존성을 기준으로 route/view 단위 lazy loading을 적용한다.
 - 저장 handler 이동과 같은 commit에 섞지 않고 로딩·오류 복구 UI를 안전 브라우저로 확인한다.
+- 진행: 이미 도메인 파일로 분리된 `TeacherLessonHubV2`, `SupplementCenter`, `StudentManager`, `NotificationCenter`, `SettlementWorkspace` 5개 화면을 `React.lazy` 동적 import로 연결했다. initial main JS는 1,656.92 kB에서 1,379.15 kB, gzip은 427.24 kB에서 351.03 kB로 줄었으며 각 화면은 38.62~66.30 kB 별도 chunk다. 1.50 MB main 예산·5/5 chunk fixture와 실제 chunk 지연/실패/새로고침 복구 safe browser를 고정했다.
+- 남음: `App.jsx`에 정의된 저빈도 teacher 화면은 아직 initial chunk에 포함돼 Babel 500 KB·chunk 500 kB 경고가 남는다. 화면 정의를 저장 handler와 분리한 뒤 추가 lazy 연결해 700~900 kB 종료 목표를 달성한다.
 
 ### 3-8 종료 감사
 

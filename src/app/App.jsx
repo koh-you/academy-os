@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createAppViewChangePlan } from "./appViewChangePlan.js";
 import { selectAppSessionSurface } from "./appSessionSurfaceSelector.js";
 import { createTeacherViewAdapters, TeacherViewOutlet } from "./TeacherViewOutlet.js";
+import { lazyTeacherViewComponents } from "./lazyTeacherViewComponents.js";
 import { useAppSession } from "./useAppSession.js";
 import { RoleLoginScreen } from "./RoleLoginScreen.jsx";
 import { Sidebar } from "./Sidebar.jsx";
@@ -32,7 +33,6 @@ import { persistExamPrepRowsWithState } from "../domains/exams/examPrepRowSaveCo
 import { ExamPostSubmissionManager } from "../domains/exams/ExamPostSubmissionManager.jsx";
 import { ExamReviewComposerModal } from "../domains/exams/ExamReviewComposerModal.jsx";
 import { normalizeExamPrepRowReviewDraft } from "../domains/exams/examReviewDraft.js";
-import { StudentManager } from "../domains/students/StudentManager.jsx";
 import {
   getWithdrawalDateKey,
   getWithdrawalFutureLessonStartDate,
@@ -71,7 +71,6 @@ import {
   selectValidNotificationJobs,
   upsertNotificationJobList
 } from "../domains/notifications/notificationJobState.js";
-import { NotificationCenter } from "../domains/notifications/NotificationCenter.jsx";
 import { createNotificationJobsRefreshController } from "../domains/notifications/notificationJobsRefreshController.js";
 import { createNotificationJobsReconcileController } from "../domains/notifications/notificationJobsReconcileController.js";
 import {
@@ -159,7 +158,6 @@ import {
   getCanceledAbsenceMakeupSaveSnapshot
 } from "../domains/supplements/supplementCancellation.js";
 import { createSupplementSchedulePersistencePlan } from "../domains/supplements/supplementSchedulePlan.js";
-import { SupplementCenter } from "../domains/supplements/SupplementCenter.jsx";
 import { findSupplementTaskForCandidate } from "../domains/supplements/supplementCenterSelectionModel.js";
 import {
   createPersistableSupplementTask,
@@ -341,7 +339,6 @@ import {
   shouldIgnoreLessonAttendance
 } from "../domains/lessons/lessonClosure.js";
 import { shiftLessonCalendarMonth } from "../domains/lessons/lessonCalendarModel.js";
-import { TeacherLessonHubV2 } from "../domains/lessons/TeacherLessonHubV2.jsx";
 import {
   buildNewLessonModalLessons,
   buildUpdatedLessonModalLessons
@@ -389,7 +386,6 @@ import {
   replaceSpecialLectureYearInDateKey,
   replaceSpecialLectureYearToken,
 } from "../domains/specialLectures/specialLectureGuideUtils.js";
-import { SettlementWorkspace } from "../domains/settlements/SettlementWorkspace.jsx";
 import { copyTextToClipboard } from "../domains/exams/outputPreview.js";
 import {
   createDefaultMonthlySettlementState,
@@ -9273,6 +9269,7 @@ export function App() {
 
   const teacherViewAdapters = createTeacherViewAdapters({
     components: {
+      ...lazyTeacherViewComponents,
       AIVariantProblemCenter,
       ClassManager,
       ExamAnalysisPipelineCenter,
@@ -9281,15 +9278,10 @@ export function App() {
       LessonResearchCenter,
       MaterialManager,
       Modal,
-      NotificationCenter,
       OverdueHomework,
       ResourceLibraryCenter,
       SchoolCalendarCenter,
       SettingsCenter,
-      SettlementWorkspace,
-      StudentManager,
-      SupplementCenter,
-      TeacherLessonHubV2
     },
     runtimeBindings: {
       lessonJournalTransport,

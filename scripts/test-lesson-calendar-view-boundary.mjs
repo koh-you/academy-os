@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
 const teacherViewOutletSource = await readFile(new URL("../src/app/TeacherViewOutlet.js", import.meta.url), "utf8");
+const lazyTeacherViewSource = await readFile(new URL("../src/app/lazyTeacherViewComponents.js", import.meta.url), "utf8");
 const teacherLessonHubSource = await readFile(
   new URL("../src/domains/lessons/TeacherLessonHubV2.jsx", import.meta.url),
   "utf8"
@@ -63,7 +64,8 @@ for (const forbiddenSource of [
 }
 
 assert.ok(
-  appSource.includes('import { TeacherLessonHubV2 } from "../domains/lessons/TeacherLessonHubV2.jsx";') &&
+  appSource.includes('import { lazyTeacherViewComponents } from "./lazyTeacherViewComponents.js";') &&
+    lazyTeacherViewSource.includes('import("../domains/lessons/TeacherLessonHubV2.jsx")') &&
     teacherLessonHubSource.includes('import { LessonCalendarView } from "./LessonCalendarView.jsx";'),
   "App lesson route must reach the extracted calendar view through the teacher lesson hub"
 );

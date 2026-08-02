@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
 const teacherViewOutletSource = await readFile(new URL("../src/app/TeacherViewOutlet.js", import.meta.url), "utf8");
+const lazyTeacherViewSource = await readFile(new URL("../src/app/lazyTeacherViewComponents.js", import.meta.url), "utf8");
 const teacherLessonHubSource = await readFile(new URL("../src/domains/lessons/TeacherLessonHubV2.jsx", import.meta.url), "utf8");
 const lessonModalSource = await readFile(new URL("../src/domains/lessons/LessonModal.jsx", import.meta.url), "utf8");
 const lessonHubBoundarySource = `${appSource}\n${teacherLessonHubSource}`;
@@ -17,7 +18,8 @@ assert.equal(
   "the active teacher lesson hub definition must remain"
 );
 assert.equal(appSource.includes("function TeacherLessonHubV2("), false, "the active teacher lesson hub must stay extracted from App");
-assert.equal(appSource.includes('import { TeacherLessonHubV2 } from "../domains/lessons/TeacherLessonHubV2.jsx"'), true);
+assert.equal(appSource.includes('import { lazyTeacherViewComponents } from "./lazyTeacherViewComponents.js"'), true);
+assert.equal(lazyTeacherViewSource.includes('import("../domains/lessons/TeacherLessonHubV2.jsx")'), true);
 assert.equal(
   [...teacherViewOutletSource.matchAll(/Component: components\.TeacherLessonHubV2\b/g)].length,
   1,
