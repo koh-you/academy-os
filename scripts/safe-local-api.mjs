@@ -13,6 +13,14 @@ const initialState = {
       endTime: "13:00",
       startTime: "10:00",
       studentIds: ["safe-active-student"]
+    },
+    {
+      className: "정산 미리보기반",
+      classTemplateId: "safe-settlement-class",
+      days: ["mon", "wed", "fri"],
+      endTime: "19:00",
+      startTime: "16:00",
+      studentIds: ["safe-settlement-student"]
     }
   ],
   examPrepRows: [],
@@ -40,6 +48,58 @@ const initialState = {
       studentIds: ["safe-active-student"],
       title: "월 경계 연동반",
       type: "regular"
+    },
+    {
+      className: "정산 미리보기반",
+      classTemplateId: "safe-settlement-class",
+      date: "2026-07-22",
+      endTime: "19:00",
+      lessonId: "safe-settlement-regular",
+      lessonType: "class",
+      startTime: "16:00",
+      status: "scheduled",
+      studentIds: ["safe-settlement-student"],
+      title: "정산 미리보기반"
+    },
+    {
+      className: "정산 미리보기반",
+      classTemplateId: "safe-settlement-class",
+      date: "2026-07-23",
+      endTime: "19:00",
+      lessonId: "safe-settlement-pending",
+      lessonType: "class",
+      startTime: "16:00",
+      status: "scheduled",
+      studentIds: ["safe-settlement-student"],
+      title: "정산 미리보기반"
+    },
+    {
+      className: "정산 미리보기반",
+      classTemplateId: "safe-settlement-class",
+      date: "2026-07-24",
+      endTime: "19:00",
+      lessonId: "safe-settlement-closure",
+      lessonTopic: "휴강",
+      lessonType: "closure",
+      sourceLabel: "연결 휴강 보충 · safe-settlement-replacement",
+      startTime: "16:00",
+      status: "scheduled",
+      studentIds: ["safe-settlement-student"],
+      title: "정산 미리보기반 휴강"
+    },
+    {
+      className: "정산 미리보기반 · 휴강 보충",
+      classTemplateId: "safe-settlement-class",
+      date: "2026-07-28",
+      endTime: "16:00",
+      lessonId: "safe-settlement-replacement",
+      lessonTopic: "휴강 보충",
+      lessonType: "makeup",
+      sourceLabel: "원 휴강 수업 · safe-settlement-closure",
+      startTime: "13:00",
+      status: "scheduled",
+      studentIds: ["safe-settlement-student"],
+      title: "정산 미리보기반 휴강 보충"
     },
     {
       className: "월 경계 연동반",
@@ -104,6 +164,20 @@ const initialState = {
       lessonStudentRecordId: "safe-cross-month-current-record",
       recordId: "safe-cross-month-current-record",
       studentId: "safe-active-student"
+    },
+    {
+      attendanceStatus: "present",
+      lessonId: "safe-settlement-regular",
+      lessonStudentRecordId: "safe-settlement-regular-record",
+      recordId: "safe-settlement-regular-record",
+      studentId: "safe-settlement-student"
+    },
+    {
+      attendanceStatus: "absent",
+      lessonId: "safe-settlement-replacement",
+      lessonStudentRecordId: "safe-settlement-replacement-record",
+      recordId: "safe-settlement-replacement-record",
+      studentId: "safe-settlement-student"
     }
   ],
   resourceMaterials: [],
@@ -126,6 +200,14 @@ const initialState = {
       schoolName: "안전중",
       status: "active",
       studentId: "safe-active-student"
+    },
+    {
+      defaultClassTemplateId: "safe-settlement-class",
+      grade: "고1",
+      name: "정산 미리보기 학생",
+      schoolName: "안전고",
+      status: "active",
+      studentId: "safe-settlement-student"
     }
   ],
   testAttempts: [],

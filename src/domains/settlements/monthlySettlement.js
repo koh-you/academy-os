@@ -114,6 +114,13 @@ export function isMakeupSettlementLesson(lesson = {}) {
   return makeupLessonTypes.has(lesson.lessonType) || Boolean(lesson.sourceMakeupTaskId);
 }
 
+export function isClosureReplacementSettlementLesson(lesson = {}) {
+  if (!isMakeupSettlementLesson(lesson)) return false;
+  const sourceLabel = normalizeText(lesson.sourceLabel);
+  return normalizeText(lesson.lessonTopic) === "휴강 보충" &&
+    sourceLabel.startsWith("원 휴강 수업 · ");
+}
+
 export function isRegularSettlementLesson(lesson = {}) {
   return !isCanceledLesson(lesson) &&
     !nonTeachingLessonTypes.has(lesson.lessonType) &&
@@ -207,8 +214,12 @@ function buildActualLessonEvent(lesson = {}, record = null, student = {}) {
   const startTime = studentSchedule?.startTime || lesson.startTime || "";
   const endTime = studentSchedule?.endTime || lesson.endTime || "";
   const attendanceStatus = record?.attendanceStatus || "pending";
-  const eventType = isSpecialLectureSettlementLesson(lesson)
+  const eventType = nonTeachingLessonTypes.has(lesson.lessonType)
+    ? "regularClosure"
+    : isSpecialLectureSettlementLesson(lesson)
     ? "special"
+    : isClosureReplacementSettlementLesson(lesson)
+      ? "regularReplacement"
     : isMakeupSettlementLesson(lesson)
       ? "makeup"
       : "regular";
@@ -222,7 +233,13 @@ function buildActualLessonEvent(lesson = {}, record = null, student = {}) {
     eventId: lesson.lessonId,
     eventType,
     isForecast: false,
-    label: eventType === "makeup" ? "보충" : eventType === "special" ? "특강" : "정규",
+    label: eventType === "regularClosure"
+      ? "휴강 · 보강 예정"
+      : eventType === "regularReplacement"
+      ? "휴강 보충"
+      : eventType === "makeup"
+        ? "보충"
+        : eventType === "special" ? "특강" : "정규",
     lessonId: lesson.lessonId,
     lessonType: lesson.lessonType || "",
     source: "lessonJournal",
@@ -243,7 +260,6 @@ export function buildStudentMonthEvidence({
     .filter((lesson) =>
       normalizeText(lesson.date).startsWith(`${monthKey}-`) &&
       !isCanceledLesson(lesson) &&
-      !nonTeachingLessonTypes.has(lesson.lessonType) &&
       hasStudent(lesson, student.studentId)
     )
     .sort((a, b) => (
@@ -257,11 +273,18 @@ export function buildStudentMonthEvidence({
       student
     )
   );
-  const actualRegularEvents = actualEvents.filter((event) => event.eventType === "regular");
+  const actualRegularEvents = actualEvents.filter((event) =>
+    event.eventType === "regular" || event.eventType === "regularClosure"
+  );
   const regularEvents = actualRegularEvents;
+  const closureEvents = actualEvents.filter((event) => event.eventType === "regularClosure");
+  const closureReplacementEvents = actualEvents.filter((event) => event.eventType === "regularReplacement");
   const makeupEvents = actualEvents.filter((event) => event.eventType === "makeup");
   const specialEvents = actualEvents.filter((event) => event.eventType === "special");
-  const actualStatusCounts = actualRegularEvents.reduce((counts, event) => {
+  const attendanceEvents = actualEvents.filter((event) =>
+    event.eventType === "regular" || event.eventType === "regularReplacement"
+  );
+  const actualStatusCounts = attendanceEvents.reduce((counts, event) => {
     const status = event.attendanceStatus || "pending";
     counts[status] = (counts[status] ?? 0) + 1;
     return counts;
@@ -269,6 +292,10 @@ export function buildStudentMonthEvidence({
   return {
     actualRegularEvents,
     actualStatusCounts,
+    closureCount: closureEvents.length,
+    closureEvents,
+    closureReplacementCount: closureReplacementEvents.length,
+    closureReplacementEvents,
     firstActualRegularDate: actualRegularEvents[0]?.date || "",
     lastActualRegularDate: actualRegularEvents.at(-1)?.date || "",
     makeupCount: makeupEvents.length,
@@ -552,19 +579,32 @@ export function applyMonthlySettlementJournalMode(
     monthKey,
     student
   });
+  const withdrawnDate = normalizeMonthDate(student.withdrawnAt, monthKey);
+  const isFirstRegularLessonMonth = isMonthlyFirstRegularLessonCandidate({
+    lessons,
+    monthKey,
+    studentId: student.studentId
+  });
   const shouldApplyJournalNewMode =
     (normalizedSetting.mode === "fixed" ||
       (normalizedSetting.mode === "withdrawn" && normalizedSetting.modeSource !== "teacher")) &&
     normalizedSetting.modeSource !== "teacher" &&
-    isMonthlyFirstRegularLessonCandidate({
-      lessons,
-      monthKey,
-      studentId: student.studentId
-    });
-  return shouldApplyJournalNewMode
+    isFirstRegularLessonMonth;
+  if (shouldApplyJournalNewMode) {
+    return {
+      ...normalizedSetting,
+      mode: "new",
+      modeSource: "lesson_journal"
+    };
+  }
+  const shouldApplyJournalWithdrawnMode =
+    normalizedSetting.mode === "fixed" &&
+    normalizedSetting.modeSource !== "teacher" &&
+    Boolean(withdrawnDate);
+  return shouldApplyJournalWithdrawnMode
     ? {
         ...normalizedSetting,
-        mode: "new",
+        mode: "withdrawn",
         modeSource: "lesson_journal"
       }
     : normalizedSetting;
@@ -625,7 +665,10 @@ export function buildStudentSettlementRow({
     )
     : [];
   const monthlyScheduleCount = monthlyScheduleEvents.length;
-  const prorationCount = proratedScheduleEvents.length;
+  const scheduledProrationCount = proratedScheduleEvents.length;
+  const prorationCount = normalizedSetting.mode === "new"
+    ? recognizedRegularEvents.length
+    : scheduledProrationCount;
   const partialRatio = normalizedSetting.mode === "fixed"
     ? 1
     : monthlyScheduleCount > 0
@@ -673,7 +716,9 @@ export function buildStudentSettlementRow({
     periodEnd,
     periodStart,
     prorationCount,
-    prorationSource: monthlyScheduleEvents.length ? "monthlySchedule" : "missingSchedule",
+    prorationSource: normalizedSetting.mode === "new"
+      ? "lessonJournal"
+      : monthlyScheduleEvents.length ? "monthlySchedule" : "missingSchedule",
     recognizedRegularCount: recognizedRegularEvents.length,
     recognizedRegularEvents,
     recognizedRegularHours,
@@ -691,7 +736,7 @@ export function buildMonthlySettlementSummary(rows = []) {
     excludedStudentCount: rows.filter((row) => row.setting.excluded).length,
     prorationScheduleMissingCount: rows.filter((row) =>
       !row.setting.excluded &&
-      row.setting.mode !== "fixed" &&
+      row.setting.mode === "withdrawn" &&
       row.hasRegularJournal &&
       row.monthlyScheduleCount === 0
     ).length,
@@ -766,6 +811,14 @@ export function formatSettlementPercent(value = 0) {
 
 export function getSettlementAttendanceLabel(status = "pending") {
   return attendanceLabels[status] ?? status ?? "대기";
+}
+
+export function getSettlementAttendanceTone(status = "pending") {
+  if (["present", "checkin", "checkout"].includes(status)) return "present";
+  if (["absent", "unexcused"].includes(status)) return "absent";
+  if (status === "excused") return "excused";
+  if (status === "late") return "late";
+  return "pending";
 }
 
 export function scheduleTextFromRules(scheduleText = "") {

@@ -477,6 +477,32 @@
   border: 1px dashed #7aa7e8;
 }
 
+.monthlySettlementCalendarLegend i.attendance-present {
+  background: #bbf7d0;
+}
+
+.monthlySettlementCalendarLegend i.attendance-absent {
+  background: #fecaca;
+}
+
+.monthlySettlementCalendarLegend i.attendance-late {
+  background: #fed7aa;
+}
+
+.monthlySettlementCalendarLegend i.attendance-pending {
+  background: #dbeafe;
+}
+
+.monthlySettlementTable small.monthlySettlementRuleNote {
+  color: #4f46e5;
+  font-weight: 700;
+}
+
+.monthlySettlementCalendarLegend i.regularClosure {
+  background: #e0e7ff;
+  border: 1px dashed #6366f1;
+}
+
 .monthlySettlementCalendarLegend i.makeup {
   background: #ede9fe;
 }
@@ -556,6 +582,42 @@
 .monthlySettlementCalendarEvent.forecast {
   background: #f8fbff;
   border: 1px dashed #8ab0e5;
+  padding: 2px 3px;
+}
+
+.monthlySettlementCalendarEvent.regular.attendance-present,
+.monthlySettlementCalendarEvent.regularReplacement.attendance-present {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.monthlySettlementCalendarEvent.regular.attendance-absent,
+.monthlySettlementCalendarEvent.regularReplacement.attendance-absent {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.monthlySettlementCalendarEvent.regular.attendance-late,
+.monthlySettlementCalendarEvent.regularReplacement.attendance-late {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.monthlySettlementCalendarEvent.regular.attendance-excused,
+.monthlySettlementCalendarEvent.regularReplacement.attendance-excused {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.monthlySettlementCalendarEvent.regularReplacement {
+  border: 1px dashed currentColor;
+  padding: 2px 3px;
+}
+
+.monthlySettlementCalendarEvent.regularClosure {
+  background: #e0e7ff;
+  border: 1px dashed #6366f1;
+  color: #3730a3;
   padding: 2px 3px;
 }
 
