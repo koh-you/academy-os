@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 App 3차 리팩터링 3-4 학생관리 effect 경계
+
+- App→`TeacherViewOutlet`→`StudentManager`에 평면 전달되던 16개 상태 변경 callback을 동결된 `studentEffectAdapter` 하나로 교체했다. 화면 local row edit 1개는 `draft`, 저장 7개는 `persistence`, 삭제 5개는 `deletion`, 퇴원·복구 2개는 `lifecycle`, 영구 삭제 전 Supabase 읽기 점검 1개는 `audit`으로 구분했다.
+- adapter는 직접 함수 identity만 보존하며 API·Storage·React state를 사용하지 않는다. App의 학생 기본정보 저장·Supabase 재조회, 성적·테스트·상담·운영알림 저장, 퇴원 roster 반영, 복구 재조회, 영구 삭제 감사·재조회 및 기존 오류 복구 순서는 이동하지 않았다.
+- exact key·identity·동결·금지 의존성을 확인하는 전용 fixture를 student fast와 production withdrawal 묶음에 연결했다. Teacher adapter와 scenario도 새 경계를 직접 읽으며, `StudentManager` 내부 callback 이름과 프로필·퇴원 controller 연결은 유지한다.
+- 검증: runtime lint, student fast 6/6, effect adapter·teacher boundary 전용 fixture, scenario 817/817, `check:fast`, production 817/817 79.7초, build 360 modules, Worktree 격리 safe browser 9/9를 통과했다. 운영 데이터·실제 알림·AI 호출·운영 SQL은 사용하지 않았다.
+
 ## 2026-08-02 App 3차 리팩터링 3-3 보충관리 effect 경계
 
 - 기존 보충관리에는 task draft, 내용 저장, 일정 적용, 결석보강 취소, 완료 처리, 알림 3종 제어 controller가 이미 도메인 파일로 분리되어 있었다. 남아 있던 App→`TeacherViewOutlet`→`SupplementCenter`의 flat side-effect callback 8개를 동결된 `supplementEffectAdapter` 한 개로 교체했다.

@@ -63,6 +63,7 @@
 
 - 학생 목록·프로필·퇴원·인계 보고서 조립을 분리한다.
 - 학생 원천 merge와 선택·표시 파생값을 구분한다.
+- 진행: App에서 `StudentManager`로 전달되던 16개 상태 변경 callback을 `studentEffectAdapter`로 묶었다. 화면 local edit 1개는 `draft`, 저장 7개는 `persistence`, 삭제 5개는 `deletion`, 퇴원·복구 2개는 `lifecycle`, 영구 삭제 전 읽기 점검 1개는 `audit`으로 명시한다. adapter는 함수 참조만 조립하고 App의 API·Supabase 재조회·오류 복구 owner는 유지한다. 다음 단위에서 이 계약을 사용해 큰 프로필 조립을 물리 분리한다.
 
 ### 3-5 Notification 경계
 

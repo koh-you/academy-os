@@ -33,7 +33,8 @@ export const domainTestGroups = Object.freeze({
     "scripts/test-student-handover-pdf.mjs",
     "scripts/test-student-withdrawal-boundary.mjs",
     "scripts/test-parent-response-context.mjs",
-    "scripts/test-student-list-sort.mjs"
+    "scripts/test-student-list-sort.mjs",
+    "scripts/test-student-effect-adapter.mjs"
   ]),
   notification: Object.freeze([
     "scripts/test-notification-center-model.mjs",

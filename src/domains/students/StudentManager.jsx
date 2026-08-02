@@ -267,6 +267,7 @@ export function StudentManager({
   academyReminders = [],
   academyTests,
   academyTestSaveState = "idle",
+  effects = {},
   scoreRecords,
   scoreRecordSaveState = "idle",
   studentConsultationSaveState = "idle",
@@ -282,24 +283,32 @@ export function StudentManager({
   students,
   templates,
   ModalComponent,
-  onAddStudent,
-  onDeleteAcademyTest,
-  onDeleteAcademyReminder,
-  onDeleteScore,
-  onDeleteStudentConsultation,
-  onSaveAcademyTest,
-  onSaveAcademyReminder,
-  onSaveScore,
-  onSaveStudentProfile,
-  onSaveTeacherOperatingMemo,
-  onSaveStudentConsultation,
-  onAuditWithdrawnStudentDeletion,
-  onDeleteStudent,
-  onPermanentlyDeleteWithdrawnStudent,
-  onRestoreStudent,
-  onSaveStudent,
-  onUpdateStudent
+  onAddStudent
 }) {
+  const {
+    draft: { onUpdateStudent } = {},
+    persistence: {
+      onSaveAcademyReminder,
+      onSaveAcademyTest,
+      onSaveScore,
+      onSaveStudent,
+      onSaveStudentConsultation,
+      onSaveStudentProfile,
+      onSaveTeacherOperatingMemo
+    } = {},
+    deletion: {
+      onDeleteAcademyReminder,
+      onDeleteAcademyTest,
+      onDeleteScore,
+      onDeleteStudentConsultation,
+      onPermanentlyDeleteWithdrawnStudent
+    } = {},
+    lifecycle: {
+      onDeleteStudent: onWithdrawStudent,
+      onRestoreStudent
+    } = {},
+    audit: { onAuditWithdrawnStudentDeletion } = {}
+  } = effects;
   const [activeTab, setActiveTab] = useState("all");
   const [selectedStudentId, setSelectedStudentId] = useState("");
   const [deleteStudentId, setDeleteStudentId] = useState("");
@@ -384,7 +393,7 @@ export function StudentManager({
 
   function confirmDeleteStudent() {
     if (!deleteStudent) return;
-    onDeleteStudent(deleteStudent.studentId, withdrawalDraft);
+    onWithdrawStudent(deleteStudent.studentId, withdrawalDraft);
     if (selectedStudentId === deleteStudent.studentId) {
       setSelectedStudentId("");
     }

@@ -1,5 +1,6 @@
 import { createElement } from "react";
 import { createLessonJournalEffectAdapter } from "../domains/lessons/lessonJournalEffectAdapter.js";
+import { createStudentEffectAdapter } from "../domains/students/studentEffectAdapter.js";
 import { createSupplementEffectAdapter } from "../domains/supplements/supplementEffectAdapter.js";
 
 const teacherViewContractDefinitions = [
@@ -34,6 +35,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
     actions,
     transport: runtimeBindings.lessonJournalTransport
   });
+  const studentEffects = createStudentEffectAdapter({ actions });
   const supplementEffects = createSupplementEffectAdapter({ actions });
   return {
     lessons: {
@@ -227,23 +229,8 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
         students: models.students,
         specialLectureApplications: models.specialLectureApplications,
         templates: models.classTemplates,
-        onAddStudent: actions.handleOpenAddStudent,
-        onDeleteAcademyTest: actions.handleDeleteAcademyTest,
-        onDeleteAcademyReminder: actions.handleDeleteAcademyReminder,
-        onDeleteScore: actions.handleDeleteScoreRecord,
-        onDeleteStudentConsultation: actions.handleDeleteStudentConsultation,
-        onSaveAcademyTest: actions.handleSaveAcademyTest,
-        onSaveAcademyReminder: actions.handleSaveAcademyReminder,
-        onSaveScore: actions.handleSaveScoreRecord,
-        onSaveStudentProfile: actions.handleSaveStudentProfile,
-        onSaveTeacherOperatingMemo: actions.handleSaveTeacherOperatingMemo,
-        onSaveStudentConsultation: actions.handleSaveStudentConsultation,
-        onDeleteStudent: actions.handleDeleteStudent,
-        onAuditWithdrawnStudentDeletion: actions.handleAuditWithdrawnStudentDeletion,
-        onPermanentlyDeleteWithdrawnStudent: actions.handlePermanentlyDeleteWithdrawnStudent,
-        onRestoreStudent: actions.handleRestoreStudent,
-        onSaveStudent: actions.handleSaveStudent,
-        onUpdateStudent: actions.handleUpdateStudent
+        effects: studentEffects,
+        onAddStudent: actions.handleOpenAddStudent
       }
     },
     classes: {
