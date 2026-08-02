@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 App 3차 리팩터링 3-2 수업일지 draft/persisted 경계
+
+- `LessonJournalDetail`에 남아 있던 record·homework·makeup local draft 조작, 편집 상태, 저장 결과 처리를 `useLessonJournalDraftController`로 이동했다. 상세 화면은 948줄에서 775줄로 줄었고 새 controller는 257줄이다.
+- controller는 API·Supabase·localStorage를 직접 사용하지 않고 App의 `handleSaveLessonJournalDrafts`를 주입받는다. App은 ordered persistence와 서버 재조회 대조를 계속 소유하며, controller는 `ok` 성공에서만 draft를 비우고 실패·부분저장에서는 모든 수정본을 유지한다.
+- 순수 save transition TARGET/CONTROL fixture를 추가하고 lesson fast에 연결했다. 위치 결합 closeout은 상세 화면, draft controller, App persistence owner를 각각 직접 읽도록 바꿨다.
+- 안전 브라우저에서 월 경계 수업일지를 열어 `수정 시작 -> 교재 변경 -> 변경 저장 -> 저장 완료 -> 저장값 표시`까지 가상 Supabase fixture로 검증했다.
+- 검증: lesson fast 8/8, 수업일지 전용 59/59, runtime lint, scenario 814/814, `check:fast`, production 814/814 84.6초, build 356 modules, Worktree 격리 safe browser 9/9를 통과했다. 운영 데이터·실제 알림·운영 SQL·유료 호출은 사용하지 않았다.
+
 ## 2026-08-02 App 3차 리팩터링 3-1 Lesson Journal Detail 화면 분리
 
 - `App.jsx` 내부의 수업일지 상세 화면 846줄을 `src/domains/lessons/LessonJournalDetail.jsx`로 이동했다. 상세 화면은 기존 draft·overlay·예약 표시 hook과 파생 view model만 조립하며 API·localStorage를 직접 사용하지 않는다.

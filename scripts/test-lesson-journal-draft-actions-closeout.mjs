@@ -1,8 +1,11 @@
-import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const appSource = await readAppWithLessonJournalSource(import.meta.url);
+const [appSource, detailSource, controllerSource] = await Promise.all([
+  readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8"),
+  readFile(new URL("../src/domains/lessons/LessonJournalDetail.jsx", import.meta.url), "utf8"),
+  readFile(new URL("../src/domains/lessons/useLessonJournalDraftController.js", import.meta.url), "utf8")
+]);
 const modelUrls = [
   "../src/domains/lessons/lessonJournalRecordDraft.js",
   "../src/domains/lessons/lessonJournalHomeworkDraft.js",
@@ -13,11 +16,6 @@ const modelUrls = [
 const modelSources = await Promise.all(
   modelUrls.map((url) => readFile(new URL(url, import.meta.url), "utf8"))
 );
-const detailStart = appSource.indexOf("function LessonJournalDetail(");
-const detailEnd = appSource.indexOf("\nfunction PreparationMemoModal(", detailStart);
-assert.ok(detailStart >= 0 && detailEnd > detailStart, "LessonJournalDetail boundary must exist");
-const detailSource = appSource.slice(detailStart, detailEnd);
-
 for (const actionBoundary of [
   "function getEditableRecord(recordId, baseRecord)",
   "function updateJournalRecordDraft(student, baseRecord, field, value)",
@@ -31,9 +29,9 @@ for (const actionBoundary of [
   "async function saveJournalDrafts()"
 ]) {
   assert.equal(
-    detailSource.split(actionBoundary).length - 1,
+    controllerSource.split(actionBoundary).length - 1,
     1,
-    `draft action boundary must remain once in App: ${actionBoundary}`
+    `draft action boundary must remain once in the controller: ${actionBoundary}`
   );
 }
 
@@ -48,10 +46,10 @@ for (const pureBinding of [
   "getLessonJournalHomeworkDraftTitle({",
   "createLessonJournalHomeworkDraft({"
 ]) {
-  assert.ok(detailSource.includes(pureBinding), `missing pure draft binding: ${pureBinding}`);
+  assert.ok(controllerSource.includes(pureBinding), `missing pure draft binding: ${pureBinding}`);
 }
 
-for (const appOwnedEffect of [
+for (const controllerOwnedEffect of [
   "const nowIso = new Date().toISOString()",
   "setJournalRecordDrafts((current) => ({ ...current, [recordId]: record }))",
   "setJournalHomeworkDrafts((current) => ({",
@@ -60,8 +58,11 @@ for (const appOwnedEffect of [
   "setJournalManualSaveMessage(",
   "onSaveLessonJournalDrafts?.("
 ]) {
-  assert.ok(detailSource.includes(appOwnedEffect), `missing App-owned draft effect: ${appOwnedEffect}`);
+  assert.ok(controllerSource.includes(controllerOwnedEffect), `missing controller-owned draft effect: ${controllerOwnedEffect}`);
 }
+assert.ok(detailSource.includes("useLessonJournalDraftController({"));
+assert.ok(detailSource.includes("const saved = await saveJournalDraftChanges()"));
+assert.ok(appSource.includes("async function handleSaveLessonJournalDrafts("));
 
 for (const modelSource of modelSources) {
   for (const forbiddenSideEffect of [
@@ -83,8 +84,8 @@ for (const modelSource of modelSources) {
   }
 }
 
-const asyncFunctions = detailSource.match(/\basync function\s+\w+\s*\(/g) ?? [];
-assert.equal(asyncFunctions.length, 5);
+const asyncFunctions = controllerSource.match(/\basync function\s+\w+\s*\(/g) ?? [];
+assert.equal(asyncFunctions.length, 1);
 assert.equal(
   asyncFunctions.filter((signature) => signature.includes("saveJournalDrafts")).length,
   1

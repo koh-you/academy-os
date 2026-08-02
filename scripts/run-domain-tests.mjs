@@ -15,7 +15,8 @@ export const domainTestGroups = Object.freeze({
     "scripts/test-lesson-modal-draft-transitions.mjs",
     "scripts/test-lesson-modal-initial-draft.mjs",
     "scripts/test-lesson-modal-save-state.mjs",
-    "scripts/test-lesson-modal-student-model.mjs"
+    "scripts/test-lesson-modal-student-model.mjs",
+    "scripts/test-lesson-journal-draft-controller.mjs"
   ]),
   supplement: Object.freeze([
     "scripts/test-supplement-job-builders.mjs",
