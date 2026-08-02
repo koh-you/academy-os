@@ -23,6 +23,8 @@
 - App 2차 리팩터링 Phase 1 auth/session은 PR #2로 main 통합됐다. session state·초기 저장소 판독·login/logout·teacher 저장 cleanup은 `useAppSession`이 소유하며 전용 fixture가 Production checks에 연결됐다.
 - Phase 2~5와 AI 연쇄 검수·지연 보고·사람 gate 원칙은 `docs/app-refactor-second-pass-plan.md`가 기준이다.
 - Phase 2 branch에서 출결 kiosk 날짜 rollover의 ref·reload key·interval/listener를 출결 hook 경계로 이동하고 cleanup·동일 날짜 hydration 실패 재시도 fixture를 추가했다.
+- Phase 2는 PR #3으로 main 통합됐고 main Production checks·Vercel이 성공했다.
+- Phase 3 notification refresh/reconcile은 별도 controller로 scope별 in-flight·stale 응답·동일 reconcile 중복 실행을 차단했고 전체 자동검증을 통과했다. 실제 알림·운영 데이터는 사용하지 않았다.
 
 ## 폴더 상태
 
@@ -35,7 +37,7 @@
 
 1. `app_state` 동일 key 저장을 브라우저 안에서 직렬화하고 진행 중 변경을 다음 요청으로 합친다.
 2. key별 `updated_at` CAS와 저장 뒤 대상 key 재조회는 별도 단위로 이어간다.
-3. App 2차 리팩터링 Phase 2 출결 polling·동기화를 전체 검증하고 PR/CI로 닫는다.
+3. App 2차 리팩터링 Phase 3 PR/CI를 닫고 최신 main 기반 별도 Worktree에서 Phase 4 hydration·저장·복구·서버 재조회 경계를 시작한다.
    - 즉시 사람 판단이 필요하지 않은 발견은 queue/worklog에 남기고 AI 검수와 다음 단계를 연쇄 진행한다.
 
 ## 자동 작업

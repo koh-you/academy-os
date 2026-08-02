@@ -58,28 +58,30 @@ const helperSource = await readFile(
   new URL("../src/domains/notifications/notificationJobReconcilePayload.js", import.meta.url),
   "utf8"
 );
-const functionStart = appSource.indexOf(
-  'async function handleReconcileSolapiNotificationResults({ lessonId = "", date = "", notificationJobIds = [], scheduledFrom = "", scheduledTo = "" } = {})'
+const controllerSource = await readFile(
+  new URL(
+    "../src/domains/notifications/notificationJobsReconcileController.js",
+    import.meta.url
+  ),
+  "utf8"
 );
-const functionEnd = appSource.indexOf(
-  "\n  async function handleCancelNotificationJob(",
+const functionStart = controllerSource.indexOf(
+  "function reconcile(options = {})"
+);
+const functionEnd = controllerSource.indexOf(
+  "\n  function dispose(",
   functionStart
 );
 assert.ok(functionStart >= 0 && functionEnd > functionStart);
-const functionSource = appSource.slice(functionStart, functionEnd);
+const functionSource = controllerSource.slice(functionStart, functionEnd);
 for (const requestBoundary of [
-  "const result = await postJsonWithTimeout(",
+  "const payload = createNotificationJobReconcilePayload(options)",
+  "const result = await request(",
   '"/api/notification-jobs/reconcile-solapi"',
-  "createNotificationJobReconcilePayload({",
-  "date,",
-  "lessonId,",
-  "notificationJobIds,",
-  "scheduledFrom,",
-  "scheduledTo",
+  "payload,",
   "90000",
   '"Solapi 발송결과 조회가 90초를 넘었습니다. 예약 확인에서 다시 시도해 주세요."',
-  "mergeNotificationJobsIntoState(result.notificationJobs ?? [])",
-  "if (Array.isArray(result.records) && result.records.length)",
+  "if (!disposed) onResult(result)",
   "return result"
 ]) {
   assert.ok(
@@ -90,20 +92,20 @@ for (const requestBoundary of [
 const requestIndex = functionSource.indexOf(
   '"/api/notification-jobs/reconcile-solapi"'
 );
-const mergeJobsIndex = functionSource.indexOf(
-  "mergeNotificationJobsIntoState(result.notificationJobs ?? [])",
+const resultIndex = functionSource.indexOf(
+  "if (!disposed) onResult(result)",
   requestIndex
 );
-const mergeRecordsIndex = functionSource.indexOf(
-  "if (Array.isArray(result.records) && result.records.length)",
-  mergeJobsIndex
-);
-const returnIndex = functionSource.indexOf("return result", mergeRecordsIndex);
+const returnIndex = functionSource.indexOf("return result", resultIndex);
 assert.ok(
   requestIndex >= 0 &&
-    mergeJobsIndex > requestIndex &&
-    mergeRecordsIndex > mergeJobsIndex &&
-    returnIndex > mergeRecordsIndex
+    resultIndex > requestIndex &&
+    returnIndex > resultIndex
+);
+assert.ok(
+  appSource.includes("onResult: applyNotificationJobsReconcileResult") &&
+    appSource.includes("mergeNotificationJobsIntoState(result.notificationJobs ?? [])") &&
+    appSource.includes("if (Array.isArray(result.records) && result.records.length)")
 );
 assert.equal(
   appSource.split(

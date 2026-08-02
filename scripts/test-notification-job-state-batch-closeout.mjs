@@ -105,7 +105,7 @@ const setterIndex = functionSource.indexOf(
 assert.ok(selectionIndex >= 0 && guardIndex > selectionIndex && setterIndex > guardIndex);
 assert.equal(appSource.split("mergeNotificationJobsIntoState(").length - 1, 5);
 for (const AppOwnedCallSite of [
-  "mergeNotificationJobsIntoState(result.notificationJobs);",
+  "mergeNotificationJobsIntoState(nextJobs);",
   "mergeNotificationJobsIntoState(result.notificationJobs ?? []);",
   "mergeNotificationJobsIntoState(reservedJobs);",
   "mergeNotificationJobsIntoState(failedJobs);"

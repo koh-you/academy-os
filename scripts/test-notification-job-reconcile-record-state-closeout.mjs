@@ -70,20 +70,16 @@ assert.equal(
 );
 
 const functionStart = appSource.indexOf(
-  'async function handleReconcileSolapiNotificationResults({ lessonId = "", date = "", notificationJobIds = [], scheduledFrom = "", scheduledTo = "" } = {})'
+  "function applyNotificationJobsReconcileResult(result)"
 );
 const functionEnd = appSource.indexOf(
-  "\n  async function handleCancelNotificationJob(",
+  "\n  function getNotificationJobsReconcileController(",
   functionStart
 );
 assert.ok(functionStart >= 0 && functionEnd > functionStart);
 const functionSource = appSource.slice(functionStart, functionEnd);
-const requestIndex = functionSource.indexOf(
-  "const result = await postJsonWithTimeout("
-);
 const jobMergeIndex = functionSource.indexOf(
-  "mergeNotificationJobsIntoState(result.notificationJobs ?? [])",
-  requestIndex
+  "mergeNotificationJobsIntoState(result.notificationJobs ?? [])"
 );
 const recordGuardIndex = functionSource.indexOf(
   "if (Array.isArray(result.records) && result.records.length)",
@@ -118,10 +114,8 @@ const savedStateSetterIndex = functionSource.indexOf(
   "setSaveStates((currentStates)",
   savedStateGuardIndex
 );
-const returnIndex = functionSource.indexOf("return result", savedStateSetterIndex);
 assert.ok(
-  requestIndex >= 0 &&
-    jobMergeIndex > requestIndex &&
+  jobMergeIndex >= 0 &&
     recordGuardIndex > jobMergeIndex &&
     recordMergeIndex > recordGuardIndex &&
     upsertDependencyIndex > recordMergeIndex &&
@@ -130,8 +124,7 @@ assert.ok(
     storageIndex > stateIndex &&
     savedStateIndex > storageIndex &&
     savedStateGuardIndex > savedStateIndex &&
-    savedStateSetterIndex > savedStateGuardIndex &&
-    returnIndex > savedStateSetterIndex
+    savedStateSetterIndex > savedStateGuardIndex
 );
 assert.equal(
   appSource.split(
