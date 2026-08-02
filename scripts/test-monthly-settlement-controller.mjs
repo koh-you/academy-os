@@ -16,6 +16,7 @@ assert.deepEqual(
     message: "Supabase 재조회 값이 현재 월별 정산과 일치합니다.",
     shouldApply: true,
     shouldClearLocalDraft: true,
+    shouldRebaseRecovery: false,
     shouldReplaceDraft: true,
     shouldWriteRecovery: false
   }
@@ -33,6 +34,7 @@ assert.deepEqual(
     message: "Supabase 저장 완료 · 이후 변경 저장 필요",
     shouldApply: true,
     shouldClearLocalDraft: false,
+    shouldRebaseRecovery: true,
     shouldReplaceDraft: false,
     shouldWriteRecovery: false
   },
@@ -51,6 +53,7 @@ assert.deepEqual(
     message: "",
     shouldApply: false,
     shouldClearLocalDraft: false,
+    shouldRebaseRecovery: false,
     shouldReplaceDraft: false,
     shouldWriteRecovery: false
   },
@@ -69,6 +72,7 @@ assert.deepEqual(
     message: "TARGET 저장 실패",
     shouldApply: true,
     shouldClearLocalDraft: false,
+    shouldRebaseRecovery: false,
     shouldReplaceDraft: false,
     shouldWriteRecovery: false
   },
@@ -87,6 +91,7 @@ assert.deepEqual(
     message: "TARGET 저장 실패",
     shouldApply: true,
     shouldClearLocalDraft: false,
+    shouldRebaseRecovery: false,
     shouldReplaceDraft: false,
     shouldWriteRecovery: true
   }
@@ -113,6 +118,9 @@ for (const contract of [
   "const saveRevision = draftRevisionRef.current",
   "resolveMonthlySettlementSave({",
   "if (!resolution.shouldApply) return persistedMonth",
+  "if (resolution.shouldRebaseRecovery)",
+  "const latestDraft = draftMonthRef.current",
+  "writeLocalDraft(latestDraft, persistedMonth.updatedAt || baseUpdatedAt)",
   "if (resolution.shouldReplaceDraft)",
   "preservedSourceRef.current = {",
   "if (resolution.shouldWriteRecovery) writeLocalDraft(nextMonth, baseUpdatedAt)"

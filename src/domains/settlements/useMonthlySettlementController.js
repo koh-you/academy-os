@@ -98,6 +98,7 @@ export function resolveMonthlySettlementSave({
       message: error?.message || "",
       shouldApply: false,
       shouldClearLocalDraft: false,
+      shouldRebaseRecovery: false,
       shouldReplaceDraft: false,
       shouldWriteRecovery: false
     };
@@ -107,6 +108,7 @@ export function resolveMonthlySettlementSave({
       message: "Supabase 저장 완료 · 이후 변경 저장 필요",
       shouldApply: true,
       shouldClearLocalDraft: false,
+      shouldRebaseRecovery: true,
       shouldReplaceDraft: false,
       shouldWriteRecovery: false
     };
@@ -116,6 +118,7 @@ export function resolveMonthlySettlementSave({
       message: "Supabase 재조회 값이 현재 월별 정산과 일치합니다.",
       shouldApply: true,
       shouldClearLocalDraft: true,
+      shouldRebaseRecovery: false,
       shouldReplaceDraft: true,
       shouldWriteRecovery: false
     };
@@ -124,6 +127,7 @@ export function resolveMonthlySettlementSave({
     message: error?.message || "저장에 실패했습니다. 작업 내용은 이 기기의 임시 초안에 남아 있습니다.",
     shouldApply: true,
     shouldClearLocalDraft: false,
+    shouldRebaseRecovery: false,
     shouldReplaceDraft: false,
     shouldWriteRecovery: currentRevision === saveRevision
   };
@@ -144,6 +148,7 @@ export function useMonthlySettlementController({
   const [selectedCalendarStudentId, setSelectedCalendarStudentId] = useState("");
   const [saveMessage, setSaveMessage] = useState("");
   const activeMonthRef = useRef(selectedMonth);
+  const draftMonthRef = useRef(null);
   const draftRevisionRef = useRef(0);
   const saveInFlightRef = useRef(null);
   const preservedSourceRef = useRef(null);
@@ -196,6 +201,7 @@ export function useMonthlySettlementController({
         )
     );
     activeMonthRef.current = selectedMonth;
+    draftMonthRef.current = resolvedDraft;
     draftRevisionRef.current += 1;
     setDraftMonth(resolvedDraft);
     setIsDirty(Boolean(recoveredDraft || !savedMonth || hasNewStudents || hasJournalAutoModeChanges));
@@ -294,6 +300,7 @@ export function useMonthlySettlementController({
           [studentId]: nextSetting
         }
       };
+      draftMonthRef.current = nextMonth;
       writeLocalDraft(nextMonth, savedUpdatedAt);
       return nextMonth;
     });
@@ -365,8 +372,15 @@ export function useMonthlySettlementController({
         });
         if (!resolution.shouldApply) return persistedMonth;
         if (resolution.shouldClearLocalDraft) clearLocalDraft(saveMonthKey);
+        if (resolution.shouldRebaseRecovery) {
+          const latestDraft = draftMonthRef.current;
+          if (latestDraft?.monthKey === saveMonthKey) {
+            writeLocalDraft(latestDraft, persistedMonth.updatedAt || baseUpdatedAt);
+          }
+        }
         if (resolution.shouldReplaceDraft) {
           preservedSourceRef.current = null;
+          draftMonthRef.current = persistedMonth;
           setDraftMonth(persistedMonth);
           setIsDirty(false);
         } else {
