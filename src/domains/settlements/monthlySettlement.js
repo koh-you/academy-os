@@ -158,6 +158,19 @@ export function getCurrentKoreaMonthKey(now = new Date()) {
   return `${values.year}-${values.month}`;
 }
 
+export function getDefaultMonthlySettlementMonthKey(now = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "Asia/Seoul",
+    year: "numeric"
+  }).formatToParts(now);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  if (Number(values.day) > 2) return `${values.year}-${values.month}`;
+  const previousMonth = new Date(Date.UTC(Number(values.year), Number(values.month) - 2, 1));
+  return `${previousMonth.getUTCFullYear()}-${String(previousMonth.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
 export function listMonthDates(monthKey = "") {
   const { endDate, startDate } = getMonthRange(monthKey);
   const endParts = getDateParts(endDate);

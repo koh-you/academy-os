@@ -23,20 +23,35 @@
 }
 
 .monthlySettlementMonthControl {
-  min-width: 280px;
+  min-width: 430px;
 }
 
 .monthlySettlementHeaderActions {
-  align-items: stretch;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 280px;
+  min-width: 430px;
+}
+
+.monthlySettlementMonthControl.sharedFilterBar {
+  align-items: end;
+  display: grid;
+  gap: 10px 12px;
+  grid-template-columns: minmax(210px, 1fr) auto;
+  padding: 10px;
+}
+
+.monthlySettlementMonthControl.sharedFilterBar > .filterBarField {
+  min-width: 0;
+}
+
+.monthlySettlementMonthControl .sharedFilterBarAside {
+  flex-wrap: nowrap;
+  margin-left: 0;
 }
 
 .monthlySettlementPdfButton {
   justify-content: center;
-  width: 100%;
+  min-height: 40px;
+  padding-inline: 14px;
+  white-space: nowrap;
 }
 
 .monthlySettlementRuleNotice {
@@ -669,6 +684,10 @@
     min-width: 0;
   }
 
+  .monthlySettlementHeaderActions {
+    min-width: 0;
+  }
+
   .metricGrid.monthlySettlementMetrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -690,6 +709,20 @@
 }
 
 @media (max-width: 640px) {
+  .monthlySettlementMonthControl.sharedFilterBar {
+    grid-template-columns: minmax(0, 1fr);
+    overflow: visible;
+  }
+
+  .monthlySettlementMonthControl.sharedFilterBar > .filterBarField {
+    flex-basis: auto;
+  }
+
+  .monthlySettlementMonthControl .sharedFilterBarAside {
+    justify-content: space-between;
+    width: 100%;
+  }
+
   .metricGrid.monthlySettlementMetrics {
     grid-template-columns: 1fr;
   }

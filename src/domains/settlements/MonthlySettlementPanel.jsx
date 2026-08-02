@@ -13,7 +13,7 @@ import {
   formatSettlementHours,
   formatSettlementPercent,
   formatSettlementWon,
-  getCurrentKoreaMonthKey,
+  getDefaultMonthlySettlementMonthKey,
   getDateDayKey,
   getFixedAmountAfterScheduleChange,
   getMonthlySettlementRateLabel,
@@ -264,7 +264,7 @@ export function MonthlySettlementPanel({
   settlementState,
   students = []
 }) {
-  const [selectedMonth, setSelectedMonth] = useState(getCurrentKoreaMonthKey);
+  const [selectedMonth, setSelectedMonth] = useState(getDefaultMonthlySettlementMonthKey);
   const [draftMonth, setDraftMonth] = useState(null);
   const [isDirty, setIsDirty] = useState(false);
   const [selectedCalendarStudentId, setSelectedCalendarStudentId] = useState("");
@@ -464,6 +464,11 @@ export function MonthlySettlementPanel({
         actions={(
           <div className="monthlySettlementHeaderActions">
             <FilterBar
+              actions={(
+                <button className="softButton monthlySettlementPdfButton" onClick={handleOpenReportPdf} type="button">
+                  횟수·금액 PDF
+                </button>
+              )}
               className="monthlySettlementMonthControl"
               label="월별 정산 대상 월"
               result={<InlineSaveStatus label="월별 정산" saveState={effectiveSaveState} />}
@@ -473,9 +478,6 @@ export function MonthlySettlementPanel({
                 <input type="month" value={selectedMonth} onChange={(event) => setSelectedMonth(event.target.value)} />
               </label>
             </FilterBar>
-            <button className="softButton monthlySettlementPdfButton" onClick={handleOpenReportPdf} type="button">
-              횟수·금액 PDF
-            </button>
           </div>
         )}
         className="monthlySettlementHeader"
