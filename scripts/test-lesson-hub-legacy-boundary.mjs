@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const teacherViewOutletSource = await readFile(new URL("../src/app/TeacherViewOutlet.js", import.meta.url), "utf8");
 
 function countMatches(pattern) {
   return [...appSource.matchAll(pattern)].length;
@@ -13,7 +14,7 @@ assert.equal(
   "the active teacher lesson hub definition must remain"
 );
 assert.equal(
-  countMatches(/<TeacherLessonHubV2\b/g),
+  [...teacherViewOutletSource.matchAll(/Component: components\.TeacherLessonHubV2\b/g)].length,
   1,
   "the active teacher lesson hub entry point must remain"
 );

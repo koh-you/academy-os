@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createAppViewChangePlan } from "./appViewChangePlan.js";
 import { selectAppSessionSurface } from "./appSessionSurfaceSelector.js";
+import { createTeacherViewAdapters, TeacherViewOutlet } from "./TeacherViewOutlet.js";
 import { useAppSession } from "./useAppSession.js";
 import { RoleLoginScreen } from "./RoleLoginScreen.jsx";
 import { Sidebar } from "./Sidebar.jsx";
@@ -9133,6 +9134,297 @@ export function App() {
     }
   }
 
+  function handleOpenAddLesson() {
+    setIsLessonModalOpen(true);
+  }
+
+  function handleOpenMonthlyRegularLessonModal() {
+    setMonthlyRegularLessonOpenStatus({ message: "", state: "idle" });
+    setIsMonthlyRegularLessonOpenModal(true);
+  }
+
+  function handleEditLesson(lesson) {
+    setEditingLesson(lesson);
+    setIsLessonModalOpen(true);
+  }
+
+  function handleBackToCalendar() {
+    setIsLessonJournalOpen(false);
+  }
+
+  function handleOpenExamPrepView() {
+    handleChangeView("examPrep");
+  }
+
+  function handleOpenAddStudent() {
+    setIsStudentModalOpen(true);
+  }
+
+  function handleOpenExamPostSubmissionFile(file) {
+    return handleOpenExamPostFile(session?.sessionToken, file);
+  }
+
+  function handleEnsureExamCycleRows(examCycle, classTemplateId) {
+    setExamPrepRows((current) => {
+      const nextRowsToAdd = buildExamPrepRowsFromStudents(students, examCycle, classTemplateId, current);
+      const nextRows = mergeById(current, nextRowsToAdd, "examPrepId");
+      const addedRows = nextRows.filter((row) => !current.some((item) => item.examPrepId === row.examPrepId));
+      if (addedRows.length > 0) persistExamPrepRows(addedRows);
+      return nextRows;
+    });
+  }
+
+  async function handleSaveSchoolEvent(event) {
+    const nextEvent = {
+      ...event,
+      eventId: event.eventId || `event_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+    };
+    setSchoolEvents((current) => upsertById(current, nextEvent, "eventId"));
+    const result = await postSchoolEvent(nextEvent);
+    const savedEvent = result.schoolEvent ?? nextEvent;
+    setSchoolEvents((current) => upsertById(current, savedEvent, "eventId"));
+    return savedEvent;
+  }
+
+  async function handleDeleteSchoolEvent(eventId) {
+    setSchoolEvents((current) => current.filter((event) => event.eventId !== eventId));
+    await deleteSchoolEventFromApi(eventId);
+    return eventId;
+  }
+
+  function handleAddLessonResearchItem(subject, typeInfo) {
+    setLessonResearchItems((current) => [createLessonResearchItem(subject, typeInfo), ...current]);
+  }
+
+  function handleDeleteLessonResearchItem(researchItemId) {
+    setLessonResearchItems((current) => current.filter((item) => item.researchItemId !== researchItemId));
+  }
+
+  function handleUpdateLessonResearchItem(researchItemId, field, value) {
+    setLessonResearchItems((current) => current.map((item) => (
+      item.researchItemId === researchItemId ? { ...item, [field]: value, updatedAt: today } : item
+    )));
+  }
+
+  function handleRefreshNotificationHistory({ date = "" } = {}) {
+    return refreshNotificationJobs({ date, scope: "history" });
+  }
+
+  function handleRefreshActiveNotificationJobs() {
+    return refreshNotificationJobs({ scope: "active" });
+  }
+
+  function handleAddWrongProblem(studentId) {
+    setWrongProblems((current) => [
+      {
+        wrongProblemId: `wrong_${Date.now()}_${studentId}`,
+        studentId,
+        source: "",
+        problemRange: "",
+        status: "open",
+        note: ""
+      },
+      ...current
+    ]);
+  }
+
+  function handleUpdateWrongProblem(wrongProblemId, field, value) {
+    setWrongProblems((current) => current.map((item) => (
+      item.wrongProblemId === wrongProblemId ? { ...item, [field]: value } : item
+    )));
+  }
+
+  const teacherViewAdapters = createTeacherViewAdapters({
+    components: {
+      AIVariantProblemCenter,
+      ClassManager,
+      ExamAnalysisPipelineCenter,
+      ExamPrepCenter,
+      FollowUpCenter,
+      LessonResearchCenter,
+      MaterialManager,
+      Modal,
+      NotificationCenter,
+      OverdueHomework,
+      ResourceLibraryCenter,
+      SchoolCalendarCenter,
+      SettingsCenter,
+      SettlementWorkspace,
+      StudentManager,
+      SupplementCenter,
+      TeacherLessonHubV2
+    },
+    models: {
+      academyReminders,
+      academyTests,
+      academyTestSaveState,
+      aiSettings,
+      appStateSaveState,
+      attendanceSettings,
+      attendanceSyncStatus,
+      calendarLessons,
+      classTemplates,
+      examPostConfirmSaveStates,
+      examPostSubmissions,
+      examPostTargetStudentIds,
+      examPrepRows,
+      examPrepRowSaveStates,
+      generatedLessonSaveStatus,
+      homeworks,
+      integrationStatus,
+      isLessonJournalOpen,
+      isMonthlyRegularLessonOpened,
+      lessonClipboard,
+      lessonNotificationPlans,
+      lessonResearchItems,
+      lessons,
+      lessonsForDate,
+      lessonUndoStack,
+      makeupTasks,
+      monthlyInstructorSettlements,
+      monthlyRegularLessonOpenPlan,
+      monthlySettlementSaveState,
+      notificationJobs,
+      notificationJobsStatus,
+      notificationLogs,
+      problemBooks,
+      records,
+      reportSnapshots,
+      resourceMaterials,
+      saveStates,
+      schoolEvents,
+      scoreRecords,
+      scoreRecordSaveState,
+      selectedDate,
+      selectedLesson,
+      selectedLessonId,
+      specialLectureApplications,
+      specialLectureEnrollments,
+      specialLectureGuides,
+      specialLectureGuideSaveState,
+      specialLectureInstructorSettlements,
+      specialLectureSettlementSaveState,
+      studentConsultations,
+      studentConsultationSaveState,
+      studentIntakeApplicants,
+      studentProfileSaveStates,
+      students,
+      supplementCenterDependencies,
+      tallySubmissions,
+      tallySummaries,
+      teacherAccountSettings,
+      teacherOperatingMemos,
+      teacherOperatingMemoSaveStates,
+      testAttempts,
+      testResultSaveState,
+      testSessions,
+      wrongProblems
+    },
+    actions: {
+      handleAddLessonResearchItem,
+      handleAddProblemBookFromFile,
+      handleAddResourceMaterial,
+      handleAddWrongProblem,
+      handleApplyLessonNotificationPlan,
+      handleAssignHomeworkFromTask,
+      handleAuditWithdrawnStudentDeletion,
+      handleBackToCalendar,
+      handleCalendarMonthShift,
+      handleCalendarMove,
+      handleCancelAbsenceMakeupKeepSource,
+      handleCancelAbsenceMakeupSource,
+      handleCancelNotificationJob,
+      handleCancelSupplementNotificationControl,
+      handleChangeRecord,
+      handleConfirmExamPostSubmission,
+      handleCopySelectedLesson,
+      handleCreateMakeupTask,
+      handleCreateSpecialLectureLessons,
+      handleCreateSpecialLectureStudent,
+      handleDateSelect,
+      handleDeleteAcademyReminder,
+      handleDeleteAcademyTest,
+      handleDeleteExamPrepRow,
+      handleDeleteLesson,
+      handleDeleteLessonResearchItem,
+      handleDeleteResourceMaterial,
+      handleDeleteSchoolEvent,
+      handleDeleteScoreRecord,
+      handleDeleteSelectedLessonFromCalendar,
+      handleDeleteSpecialLectureApplication,
+      handleDeleteStudent,
+      handleDeleteStudentConsultation,
+      handleDeleteTestSession,
+      handleEditLesson,
+      handleEnsureExamCycleRows,
+      handleLogNotification,
+      handleOpenAddLesson,
+      handleOpenAddStudent,
+      handleOpenExamPostSubmissionFile,
+      handleOpenExamPrepView,
+      handleOpenLessonJournal,
+      handleOpenMonthlyRegularLessonModal,
+      handleOpenReport,
+      handlePassSupplementTask,
+      handlePasteLessonToSelectedDate,
+      handlePermanentlyDeleteWithdrawnStudent,
+      handlePolishLessonComment,
+      handleReconcileSolapiNotificationResults,
+      handleRefreshActiveNotificationJobs,
+      handleRefreshNotificationHistory,
+      handleReplaceSpecialLectureStudent,
+      handleReserveSupplementNotificationControl,
+      handleRestoreStudent,
+      handleRetryGeneratedLessonSave,
+      handleSaveAcademyReminder,
+      handleSaveAcademyTest,
+      handleSaveLessonJournalDrafts,
+      handleSaveMakeupTask,
+      handleSaveMonthlySettlementMonth,
+      handleSaveRecord,
+      handleSaveSchoolEvent,
+      handleSaveScoreRecord,
+      handleSaveSpecialLectureEnrollment,
+      handleSaveSpecialLectureEnrollments,
+      handleSaveSpecialLectureGuides,
+      handleSaveSpecialLectureSettlementState,
+      handleSaveStudent,
+      handleSaveStudentConsultation,
+      handleSaveStudentProfile,
+      handleSaveTeacherOperatingMemo,
+      handleSaveTestSession,
+      handleScheduleLessonNotificationsAt,
+      handleScheduleSupplementTask,
+      handleSendLessonComment,
+      handleSyncPreExamLessonFromSchoolEvent,
+      handleSyncSpecialLectureStudentSchedules,
+      handleTeacherVerifyHomework,
+      handleToggleStudentNotificationMute,
+      handleUndoLessonAction,
+      handleUndoPassSupplementTask,
+      handleUpdateClassRoster,
+      handleUpdateExamPrepRow,
+      handleUpdateHomework,
+      handleUpdateLessonNotificationPlan,
+      handleUpdateLessonResearchItem,
+      handleUpdateMakeupTask,
+      handleUpdateProblemBook,
+      handleUpdateProblemMeta,
+      handleUpdateSpecialLectureApplication,
+      handleUpdateStudent,
+      handleUpdateWrongProblem,
+      openSpecialLectureLesson,
+      setAiSettings,
+      setAttendanceModal,
+      setAttendanceSettings,
+      setExamPostTargetStudentIds,
+      setSelectedLessonId,
+      setTallySubmissions,
+      setTallySummaries,
+      setTeacherAccountSettings
+    }
+  });
+
   return (
     <main className={isSidebarCollapsed ? "appFrame sidebarCollapsed" : "appFrame"}>
       <Sidebar
@@ -9149,80 +9441,8 @@ export function App() {
       />
 
       <section className="mainPanel">
-        {activeView === "lessons" ? (
-          <TeacherLessonHubV2
-            academyReminders={academyReminders}
-            academyTests={academyTests}
-            aiSettings={aiSettings}
-            allRecords={records}
-            attendanceSettings={attendanceSettings}
-            attendanceSyncStatus={attendanceSyncStatus}
-            generatedLessonSaveStatus={generatedLessonSaveStatus}
-            integrationStatus={integrationStatus}
-            lessonNotificationPlans={lessonNotificationPlans}
-            notificationJobs={notificationJobs}
-            lessons={calendarLessons}
-            lessonsForDate={lessonsForDate}
-            makeupTasks={makeupTasks}
-            materials={resourceMaterials}
-            records={records}
-            saveStates={saveStates}
-            selectedDate={selectedDate}
-            selectedLesson={selectedLesson}
-            selectedLessonId={selectedLessonId}
-            students={students}
-            templates={classTemplates}
-            monthlyRegularLessonOpenPlan={monthlyRegularLessonOpenPlan}
-            isMonthlyRegularLessonOpened={isMonthlyRegularLessonOpened}
-            testAttempts={testAttempts}
-            testSessions={testSessions}
-            homeworks={homeworks}
-            clipboardCount={lessonClipboard ? 1 : 0}
-            undoCount={lessonUndoStack.length}
-            onAddLesson={() => setIsLessonModalOpen(true)}
-            onOpenMonthlyRegularLessons={() => {
-              setMonthlyRegularLessonOpenStatus({ message: "", state: "idle" });
-              setIsMonthlyRegularLessonOpenModal(true);
-            }}
-            onChangeRecord={handleChangeRecord}
-            onCopyLesson={handleCopySelectedLesson}
-            onDateSelect={handleDateSelect}
-            onDeleteLesson={handleDeleteLesson}
-            onDeleteAcademyReminder={handleDeleteAcademyReminder}
-            onDeleteSelectedLesson={handleDeleteSelectedLessonFromCalendar}
-            onEditLesson={(lesson) => {
-              setEditingLesson(lesson);
-              setIsLessonModalOpen(true);
-            }}
-            onBackToCalendar={() => setIsLessonJournalOpen(false)}
-            onCancelNotificationJob={handleCancelNotificationJob}
-            onMoveDate={handleCalendarMove}
-            onShiftMonth={handleCalendarMonthShift}
-            onOpenAttendance={setAttendanceModal}
-            onOpenExamPrep={() => handleChangeView("examPrep")}
-            onOpenLessonJournal={handleOpenLessonJournal}
-            onPasteLesson={handlePasteLessonToSelectedDate}
-            onOpenReport={handleOpenReport}
-            onPolishComment={handlePolishLessonComment}
-            onPassMakeupTask={handlePassSupplementTask}
-            onReconcileSolapiNotificationResults={handleReconcileSolapiNotificationResults}
-            onRetryGeneratedLessonSave={handleRetryGeneratedLessonSave}
-            onScheduleMakeupTask={handleScheduleSupplementTask}
-            onSaveRecord={handleSaveRecord}
-            onSaveLessonJournalDrafts={handleSaveLessonJournalDrafts}
-            onSaveAcademyReminder={handleSaveAcademyReminder}
-            onApplyLessonNotificationPlan={handleApplyLessonNotificationPlan}
-            onSendComment={handleSendLessonComment}
-            onSelectLesson={setSelectedLessonId}
-            onScheduleLessonNotificationsAt={handleScheduleLessonNotificationsAt}
-            onUndoLessonAction={handleUndoLessonAction}
-            onUpdateHomework={handleUpdateHomework}
-            onUpdateLessonNotificationPlan={handleUpdateLessonNotificationPlan}
-            onUpdateMakeupTask={handleUpdateMakeupTask}
-            onToggleStudentNotificationMute={handleToggleStudentNotificationMute}
-            isLessonJournalOpen={isLessonJournalOpen}
-          />
-        ) : null}
+        <TeacherViewOutlet activeView={activeView} adapters={teacherViewAdapters} />
+
 
         {activeView === "studentPortal" ? (
           <StudentPortalV2
@@ -9251,328 +9471,21 @@ export function App() {
           />
         ) : null}
 
-        {activeView === "overdue" ? (
-          <OverdueHomework
-            homeworks={homeworks}
-            lessons={lessons}
-            materials={resourceMaterials}
-            makeupTasks={makeupTasks}
-            records={records}
-            reportSnapshots={reportSnapshots}
-            scoreRecords={scoreRecords}
-            students={students}
-            onTeacherVerifyHomework={handleTeacherVerifyHomework}
-          />
-        ) : null}
 
-        {activeView === "students" ? (
-          <StudentManager
-            academyReminders={academyReminders}
-            academyTests={academyTests}
-            academyTestSaveState={academyTestSaveState}
-            homeworks={homeworks}
-            intakeApplicants={studentIntakeApplicants}
-            lessons={lessons}
-            ModalComponent={Modal}
-            records={records}
-            scoreRecords={scoreRecords}
-            scoreRecordSaveState={scoreRecordSaveState}
-            studentConsultationSaveState={studentConsultationSaveState}
-            studentConsultations={studentConsultations}
-            studentProfileSaveStates={studentProfileSaveStates}
-            teacherOperatingMemos={teacherOperatingMemos}
-            teacherOperatingMemoSaveStates={teacherOperatingMemoSaveStates}
-            students={students}
-            specialLectureApplications={specialLectureApplications}
-            templates={classTemplates}
-            onAddStudent={() => setIsStudentModalOpen(true)}
-            onDeleteAcademyTest={handleDeleteAcademyTest}
-            onDeleteAcademyReminder={handleDeleteAcademyReminder}
-            onDeleteScore={handleDeleteScoreRecord}
-            onDeleteStudentConsultation={handleDeleteStudentConsultation}
-            onSaveAcademyTest={handleSaveAcademyTest}
-            onSaveAcademyReminder={handleSaveAcademyReminder}
-            onSaveScore={handleSaveScoreRecord}
-            onSaveStudentProfile={handleSaveStudentProfile}
-            onSaveTeacherOperatingMemo={handleSaveTeacherOperatingMemo}
-            onSaveStudentConsultation={handleSaveStudentConsultation}
-            onDeleteStudent={handleDeleteStudent}
-            onAuditWithdrawnStudentDeletion={handleAuditWithdrawnStudentDeletion}
-            onPermanentlyDeleteWithdrawnStudent={handlePermanentlyDeleteWithdrawnStudent}
-            onRestoreStudent={handleRestoreStudent}
-            onSaveStudent={handleSaveStudent}
-            onUpdateStudent={handleUpdateStudent}
-          />
-        ) : null}
 
-        {activeView === "classes" ? (
-          <ClassManager
-            students={students}
-            templates={classTemplates}
-            onUpdateClassRoster={handleUpdateClassRoster}
-          />
-        ) : null}
 
-        {activeView === "examPrep" ? (
-          <ExamPrepCenter
-            aiSettings={aiSettings}
-            examPostConfirmSaveStates={examPostConfirmSaveStates}
-            examPostSubmissions={examPostSubmissions}
-            examPostTargetStudentIds={examPostTargetStudentIds}
-            rowSaveStates={examPrepRowSaveStates}
-            tallySubmissions={tallySubmissions}
-            tallySummaries={tallySummaries}
-            templates={classTemplates}
-            rows={examPrepRows}
-            students={students}
-            onConfirmExamPostSubmission={handleConfirmExamPostSubmission}
-            onOpenExamPostFile={(file) => handleOpenExamPostFile(session?.sessionToken, file)}
-            onEnsureExamCycleRows={(examCycle, classTemplateId) =>
-              setExamPrepRows((current) => {
-                const nextRowsToAdd = buildExamPrepRowsFromStudents(students, examCycle, classTemplateId, current);
-                const nextRows = mergeById(current, nextRowsToAdd, "examPrepId");
-                const addedRows = nextRows.filter((row) => !current.some((item) => item.examPrepId === row.examPrepId));
-                if (addedRows.length > 0) {
-                  persistExamPrepRows(addedRows);
-                }
-                return nextRows;
-              })
-            }
-            onSetTallySubmissions={setTallySubmissions}
-            onSetTallySummaries={setTallySummaries}
-            onSetExamPostTargetStudentIds={setExamPostTargetStudentIds}
-            onUpdateRow={handleUpdateExamPrepRow}
-            onDeleteRow={handleDeleteExamPrepRow}
-          />
-        ) : null}
 
-        {activeView === "examAnalysisPipeline" ? (
-          <ExamAnalysisPipelineCenter examPrepRows={examPrepRows} />
-        ) : null}
 
-        {activeView === "schoolCalendar" ? (
-          <SchoolCalendarCenter
-            events={schoolEvents}
-            rowSaveStates={examPrepRowSaveStates}
-            rows={examPrepRows}
-            onSaveEvent={async (event) => {
-              const nextEvent = { ...event, eventId: event.eventId || `event_${Date.now()}_${Math.random().toString(36).slice(2, 8)}` };
-              setSchoolEvents((current) => upsertById(current, nextEvent, "eventId"));
-              const result = await postSchoolEvent(nextEvent);
-              const savedEvent = result.schoolEvent ?? nextEvent;
-              setSchoolEvents((current) => upsertById(current, savedEvent, "eventId"));
-              return savedEvent;
-            }}
-            onDeleteEvent={async (eventId) => {
-              setSchoolEvents((current) => current.filter((event) => event.eventId !== eventId));
-              await deleteSchoolEventFromApi(eventId);
-              return eventId;
-            }}
-            onSyncPreExamLesson={handleSyncPreExamLessonFromSchoolEvent}
-            onUpdateExamPrepRow={handleUpdateExamPrepRow}
-          />
-        ) : null}
 
-        {activeView === "lessonResearch" ? (
-          <LessonResearchCenter
-            appStateSaveState={appStateSaveState}
-            items={lessonResearchItems}
-            onAddItem={(subject, typeInfo) =>
-              setLessonResearchItems((current) => [
-                createLessonResearchItem(subject, typeInfo),
-                ...current
-              ])
-            }
-            onDeleteItem={(researchItemId) =>
-              setLessonResearchItems((current) => current.filter((item) => item.researchItemId !== researchItemId))
-            }
-            onUpdateItem={(researchItemId, field, value) =>
-              setLessonResearchItems((current) =>
-                current.map((item) =>
-                  item.researchItemId === researchItemId ? { ...item, [field]: value, updatedAt: today } : item
-                )
-              )
-            }
-          />
-        ) : null}
 
-        {activeView === "aiVariants" ? (
-          <AIVariantProblemCenter aiSettings={aiSettings} students={students} />
-        ) : null}
 
-        {activeView === "settlements" ? (
-          <SettlementWorkspace
-            classTemplates={classTemplates}
-            lessons={lessons}
-            monthlySaveState={monthlySettlementSaveState}
-            monthlySettlementState={monthlyInstructorSettlements}
-            onSaveMonthlySettlement={handleSaveMonthlySettlementMonth}
-            onSaveSpecialLectureSettlement={handleSaveSpecialLectureSettlementState}
-            records={records}
-            specialLectureEnrollments={specialLectureEnrollments}
-            specialLectureGuides={specialLectureGuides}
-            specialLectureSaveState={specialLectureSettlementSaveState}
-            specialLectureSettlementState={specialLectureInstructorSettlements}
-            students={students}
-          />
-        ) : null}
 
-        {activeView === "settings" ? (
-          <SettingsCenter
-            aiSettings={aiSettings}
-            appStateSaveState={appStateSaveState}
-            attendanceSettings={attendanceSettings}
-            integrationStatus={integrationStatus}
-            onUpdateAiSettings={setAiSettings}
-            onUpdateAttendanceSettings={setAttendanceSettings}
-            teacherAccountSettings={teacherAccountSettings}
-            onUpdateTeacherAccountSettings={setTeacherAccountSettings}
-          />
-        ) : null}
 
-        {activeView === "notifications" ? (
-          <NotificationCenter
-            aiSettings={aiSettings}
-            classTemplates={classTemplates}
-            integrationStatus={integrationStatus}
-            lessons={calendarLessons}
-            notificationJobs={notificationJobs}
-            notificationJobsStatus={notificationJobsStatus}
-            notificationLogs={notificationLogs}
-            onCancelNotificationJob={handleCancelNotificationJob}
-            specialLectureGuides={specialLectureGuides}
-            specialLectureGuideSaveState={specialLectureGuideSaveState}
-            showSpecialLectureTab={false}
-            onScheduleLessonNotificationsAt={handleScheduleLessonNotificationsAt}
-            onReconcileSolapiNotificationResults={handleReconcileSolapiNotificationResults}
-            onSaveSpecialLectureGuides={handleSaveSpecialLectureGuides}
-            onUpdateLessonNotificationPlan={handleUpdateLessonNotificationPlan}
-            students={students}
-            onRefresh={({ date = "" } = {}) => refreshNotificationJobs({ date, scope: "history" })}
-          />
-        ) : null}
 
-        {activeView === "specialLectureManagement" ? (
-          <NotificationCenter
-            aiSettings={aiSettings}
-            classTemplates={classTemplates}
-            compactPageHeader
-            hideNotificationSectionTabs
-            initialNotificationTab="specialLecture"
-            integrationStatus={integrationStatus}
-            lessons={calendarLessons}
-            notificationJobs={notificationJobs}
-            notificationJobsStatus={notificationJobsStatus}
-            notificationLogs={notificationLogs}
-            pageTitle="특강관리"
-            specialLectureApplications={specialLectureApplications}
-            specialLectureEnrollments={specialLectureEnrollments}
-            specialLectureGuides={specialLectureGuides}
-            specialLectureGuideSaveState={specialLectureGuideSaveState}
-            onCreateSpecialLectureStudent={handleCreateSpecialLectureStudent}
-            onDeleteSpecialLectureApplication={handleDeleteSpecialLectureApplication}
-            onCreateSpecialLectureLessons={handleCreateSpecialLectureLessons}
-            onReplaceSpecialLectureStudent={handleReplaceSpecialLectureStudent}
-            onOpenSpecialLectureLesson={openSpecialLectureLesson}
-            onScheduleLessonNotificationsAt={handleScheduleLessonNotificationsAt}
-            onReconcileSolapiNotificationResults={handleReconcileSolapiNotificationResults}
-            onSaveSpecialLectureEnrollment={handleSaveSpecialLectureEnrollment}
-            onSaveSpecialLectureEnrollments={handleSaveSpecialLectureEnrollments}
-            onSaveSpecialLectureGuides={handleSaveSpecialLectureGuides}
-            onSyncSpecialLectureStudentSchedules={handleSyncSpecialLectureStudentSchedules}
-            onUpdateLessonNotificationPlan={handleUpdateLessonNotificationPlan}
-            onUpdateSpecialLectureApplication={handleUpdateSpecialLectureApplication}
-            records={records}
-            students={students}
-            onRefresh={() => refreshNotificationJobs({ scope: "active" })}
-          />
-        ) : null}
 
-        {activeView === "followups" ? (
-          <FollowUpCenter
-            appStateSaveState={appStateSaveState}
-            homeworks={homeworks}
-            lessons={lessons}
-            notificationLogs={notificationLogs}
-            problemBooks={problemBooks}
-            records={records}
-            students={students}
-            tasks={makeupTasks}
-            wrongProblems={wrongProblems}
-            onAddProblemBook={handleAddProblemBookFromFile}
-            onAddWrongProblem={(studentId) =>
-              setWrongProblems((current) => [
-                {
-                  wrongProblemId: `wrong_${Date.now()}_${studentId}`,
-                  studentId,
-                  source: "",
-                  problemRange: "",
-                  status: "open",
-                  note: ""
-                },
-                ...current
-              ])
-            }
-            onAssignHomework={handleAssignHomeworkFromTask}
-            onCreateTask={handleCreateMakeupTask}
-            onLogNotification={handleLogNotification}
-            onUpdateProblemBook={(problemBookId, field, value) =>
-              handleUpdateProblemBook(problemBookId, field, value)
-            }
-            onUpdateProblemMeta={(problemBookId, problemId, field, value) =>
-              handleUpdateProblemMeta(problemBookId, problemId, field, value)
-            }
-            onUpdateTask={handleUpdateMakeupTask}
-            onUpdateWrongProblem={(wrongProblemId, field, value) =>
-              setWrongProblems((current) =>
-                current.map((item) => (item.wrongProblemId === wrongProblemId ? { ...item, [field]: value } : item))
-              )
-            }
-          />
-        ) : null}
 
-        {activeView === "supplements" ? (
-          <SupplementCenter
-            dependencies={supplementCenterDependencies}
-            homeworks={homeworks}
-            lessons={lessons}
-            notificationTemplates={aiSettings.notificationTemplates}
-            notificationJobs={notificationJobs}
-            records={records}
-            students={students}
-            tasks={makeupTasks}
-            onCancelAbsenceMakeup={handleCancelAbsenceMakeupKeepSource}
-            onCancelAbsenceSource={handleCancelAbsenceMakeupSource}
-            onCancelNotification={handleCancelSupplementNotificationControl}
-            onPassTask={handlePassSupplementTask}
-            onReserveNotification={handleReserveSupplementNotificationControl}
-            onSaveTask={handleSaveMakeupTask}
-            onScheduleTask={handleScheduleSupplementTask}
-            onUndoPassTask={handleUndoPassSupplementTask}
-          />
-        ) : null}
 
-        {activeView === "materials" ? (
-          <MaterialManager
-            students={students}
-            testAttempts={testAttempts}
-            testResultSaveState={testResultSaveState}
-            testSessions={testSessions}
-            templates={classTemplates}
-            onDeleteTestSession={handleDeleteTestSession}
-            onSaveTestSession={handleSaveTestSession}
-          />
-        ) : null}
 
-        {activeView === "resources" ? (
-          <ResourceLibraryCenter
-            materials={resourceMaterials}
-            students={students}
-            templates={classTemplates}
-            onAddMaterial={handleAddResourceMaterial}
-            onDeleteMaterial={handleDeleteResourceMaterial}
-          />
-        ) : null}
 
         {activeView === "reports" ? (
           <EvaluationCenter

@@ -57,6 +57,9 @@ jobs:
       - name: Test notification refresh and reconcile controllers
         run: npm run test:notification-refresh-reconcile-controller
 
+      - name: Test teacher view callback boundary
+        run: npm run test:teacher-view-boundary
+
       - name: Run production tests
         run: npm run test:production
 
