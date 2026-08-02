@@ -5110,6 +5110,10 @@ function loadLessonJournalReservationAudit({ date, lessonId }) {
   return getJsonWithTimeout(path, 12000, "OS 알림톡 예약 기록 조회가 12초를 넘었습니다.");
 }
 
+const lessonJournalTransport = Object.freeze({
+  loadLessonJournalReservationAudit
+});
+
 const lessonJournalRuntime = Object.freeze({
   AcademyReminderList,
   CommentComposerModal,
@@ -5151,7 +5155,6 @@ const lessonJournalRuntime = Object.freeze({
   isSameLessonGroup,
   isSpecialLectureLesson,
   isSupplementMakeupTaskLesson,
-  loadLessonJournalReservationAudit,
   today
 });
 
@@ -9305,6 +9308,7 @@ export function App() {
       TeacherLessonHubV2
     },
     runtimeBindings: {
+      lessonJournalTransport,
       notificationCenter: notificationCenterRuntime,
       SpecialLectureNoticePanel,
       teacherLessonHub: teacherLessonHubRuntime

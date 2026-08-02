@@ -55,6 +55,7 @@ assert.deepEqual(createExistingNotificationJobReconcilePayload(), {
 
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
 const teacherViewOutletSource = await readFile(new URL("../src/app/TeacherViewOutlet.js", import.meta.url), "utf8");
+const lessonJournalEffectAdapterSource = await readFile(new URL("../src/domains/lessons/lessonJournalEffectAdapter.js", import.meta.url), "utf8");
 const helperSource = await readFile(
   new URL("../src/domains/notifications/notificationJobReconcilePayload.js", import.meta.url),
   "utf8"
@@ -109,7 +110,7 @@ assert.ok(
     appSource.includes("if (Array.isArray(result.records) && result.records.length)")
 );
 assert.equal(
-  teacherViewOutletSource.split(
+  `${teacherViewOutletSource}\n${lessonJournalEffectAdapterSource}`.split(
     "onReconcileSolapiNotificationResults: actions.handleReconcileSolapiNotificationResults"
   ).length - 1,
   3
