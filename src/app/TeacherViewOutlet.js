@@ -1,4 +1,5 @@
-import { createElement } from "react";
+import { Suspense, createElement } from "react";
+import { TeacherViewLoadBoundary, TeacherViewLoadingState } from "./TeacherViewLoadBoundary.js";
 import { createLessonJournalEffectAdapter } from "../domains/lessons/lessonJournalEffectAdapter.js";
 import { createNotificationEffectAdapter } from "../domains/notifications/notificationEffectAdapter.js";
 import { createStudentEffectAdapter } from "../domains/students/studentEffectAdapter.js";
@@ -348,5 +349,14 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
 
 export function TeacherViewOutlet({ activeView, adapters }) {
   const adapter = adapters[activeView];
-  return adapter ? createElement(adapter.Component, adapter.props) : null;
+  if (!adapter) return null;
+  return createElement(
+    TeacherViewLoadBoundary,
+    { activeView, key: activeView },
+    createElement(
+      Suspense,
+      { fallback: createElement(TeacherViewLoadingState) },
+      createElement(adapter.Component, adapter.props)
+    )
+  );
 }

@@ -6,6 +6,8 @@ import {
   teacherViewContracts,
   teacherViewIds
 } from "../src/app/TeacherViewOutlet.js";
+import { TeacherViewLoadBoundary } from "../src/app/TeacherViewLoadBoundary.js";
+import { lazyTeacherViewComponents } from "../src/app/lazyTeacherViewComponents.js";
 
 const expectedContracts = [
   ["lessons", "TeacherLessonHubV2"],
@@ -162,7 +164,10 @@ assert.equal(adapters.students.props.effects.lifecycle.onDeleteStudent, actions.
 assert.equal(adapters.students.props.effects.audit.onAuditWithdrawnStudentDeletion, actions.handleAuditWithdrawnStudentDeletion);
 assert.equal(Object.hasOwn(adapters.students.props, "onSaveStudent"), false);
 
-const lessonElement = TeacherViewOutlet({ activeView: "lessons", adapters });
+const lessonBoundaryElement = TeacherViewOutlet({ activeView: "lessons", adapters });
+assert.equal(lessonBoundaryElement.type, TeacherViewLoadBoundary);
+assert.equal(lessonBoundaryElement.key, "lessons");
+const lessonElement = lessonBoundaryElement.props.children.props.children;
 assert.equal(lessonElement.type, components.TeacherLessonHubV2);
 assert.equal(lessonElement.props.onDeleteLesson, actions.handleDeleteLesson);
 assert.equal(lessonElement.props.runtime, runtimeBindings.teacherLessonHub);
@@ -170,8 +175,9 @@ assert.equal(TeacherViewOutlet({ activeView: "studentPortal", adapters }), null)
 assert.equal(TeacherViewOutlet({ activeView: "reports", adapters }), null);
 assert.equal(TeacherViewOutlet({ activeView: "unknown", adapters }), null);
 
-const [appSource, outletSource, teacherLessonHubSource, lessonJournalDetailSource, lessonJournalDraftControllerSource, lessonJournalEffectAdapterSource, studentEffectAdapterSource, supplementEffectAdapterSource] = await Promise.all([
+const [appSource, lazyViewSource, outletSource, teacherLessonHubSource, lessonJournalDetailSource, lessonJournalDraftControllerSource, lessonJournalEffectAdapterSource, studentEffectAdapterSource, supplementEffectAdapterSource] = await Promise.all([
   readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8"),
+  readFile(new URL("../src/app/lazyTeacherViewComponents.js", import.meta.url), "utf8"),
   readFile(new URL("../src/app/TeacherViewOutlet.js", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/lessons/TeacherLessonHubV2.jsx", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/lessons/LessonJournalDetail.jsx", import.meta.url), "utf8"),
@@ -181,7 +187,8 @@ const [appSource, outletSource, teacherLessonHubSource, lessonJournalDetailSourc
   readFile(new URL("../src/domains/supplements/supplementEffectAdapter.js", import.meta.url), "utf8")
 ]);
 assert.equal(appSource.includes('from "./TeacherViewOutlet.js"'), true);
-assert.equal(appSource.includes('import { TeacherLessonHubV2 } from "../domains/lessons/TeacherLessonHubV2.jsx"'), true);
+assert.equal(appSource.includes('import { lazyTeacherViewComponents } from "./lazyTeacherViewComponents.js"'), true);
+assert.equal(lazyViewSource.includes('import("../domains/lessons/TeacherLessonHubV2.jsx")'), true);
 assert.equal(appSource.includes("function TeacherLessonHubV2("), false);
 assert.equal(appSource.includes("const teacherViewAdapters = createTeacherViewAdapters({"), true);
 assert.equal(appSource.includes("<TeacherViewOutlet activeView={activeView} adapters={teacherViewAdapters} />"), true);
@@ -198,8 +205,13 @@ const injectedNames = (block) => new Set(block.split(/\r?\n/).map((line) => line
 const injectedComponents = injectedNames(componentsBlock);
 const injectedModels = injectedNames(modelsBlock);
 const injectedActions = injectedNames(actionsBlock);
+const lazyComponentNames = new Set(Object.keys(lazyTeacherViewComponents));
 for (const componentName of new Set([...componentNames])) {
-  assert.equal(injectedComponents.has(componentName), true, `App must inject ${componentName}`);
+  if (lazyComponentNames.has(componentName)) {
+    assert.equal(injectedComponents.has("...lazyTeacherViewComponents"), true, `App must inject lazy ${componentName}`);
+  } else {
+    assert.equal(injectedComponents.has(componentName), true, `App must inject ${componentName}`);
+  }
 }
 for (const [, actionName] of `${outletSource}\n${lessonJournalEffectAdapterSource}\n${studentEffectAdapterSource}\n${supplementEffectAdapterSource}`.matchAll(/actions\.([A-Za-z0-9_]+)/g)) {
   assert.equal(injectedActions.has(actionName), true, `App must inject ${actionName}`);

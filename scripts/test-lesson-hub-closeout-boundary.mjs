@@ -17,6 +17,11 @@ const attendanceSyncHookSource = await readFile(
   new URL("../src/domains/lessons/useAttendanceRecordSync.js", import.meta.url),
   "utf8"
 );
+const lazyTeacherViewSource = await readFile(
+  new URL("../src/app/lazyTeacherViewComponents.js", import.meta.url),
+  "utf8"
+);
+const appAndLazyViewSource = `${appSource}\n${lazyTeacherViewSource}`;
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -28,14 +33,14 @@ function section(source, start, end) {
 
 for (const extractedBoundary of [
   'from "../domains/lessons/lessonCalendarModel.js"',
-  'from "../domains/lessons/TeacherLessonHubV2.jsx"',
+  'import("../domains/lessons/TeacherLessonHubV2.jsx")',
   'from "../domains/lessons/lessonModalPayloadBuilders.js"',
   'from "../domains/lessons/lessonModalSaveController.js"',
   'from "../domains/lessons/lessonModalSaveSnapshot.js"',
   'from "../domains/lessons/LessonModal.jsx"',
   'from "../domains/lessons/AttendanceKiosk.jsx"'
 ]) {
-  assert.ok(appSource.includes(extractedBoundary), `missing extracted boundary: ${extractedBoundary}`);
+  assert.ok(appAndLazyViewSource.includes(extractedBoundary), `missing extracted boundary: ${extractedBoundary}`);
 }
 
 for (const lessonModalBoundary of [

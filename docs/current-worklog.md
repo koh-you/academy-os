@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 App 3차 리팩터링 3-7 교사 화면 lazy loading 1차
+
+- 이미 물리 분리된 수업일지·보충관리·학생관리·알림관리·정산 5개 top-level 화면을 `lazyTeacherViewComponents`의 동적 import로 연결했다. `App`의 상태와 저장·삭제·Supabase 재조회·Solapi callback 조립은 바꾸지 않고 component 참조만 lazy component로 교체했다.
+- `TeacherViewOutlet`에 Suspense 로딩 상태와 view별 오류 경계를 추가했다. chunk 실패는 기존 client runtime error reporter로 오류 번호를 남기며, 운영 입력을 변경하지 않았다는 안내와 안전 새로고침 복구를 제공한다. `apiClient`의 Vite env 판독은 Node 전용 boundary fixture에서도 안전하도록 optional access로 좁게 보강했다.
+- production main JS는 `1,656.92 kB / gzip 427.24 kB`에서 `1,379.15 kB / gzip 351.03 kB`로 각각 16.8%·17.8% 줄었다. 5개 view는 38.62~66.30 kB 별도 chunk로 분리됐고 1.50 MB 초기 main 예산과 5/5 chunk 존재 검사를 모든 build에 연결했다.
+- safe browser는 첫 lesson chunk를 500ms 지연해 로딩 안내를 확인하고, StudentManager chunk를 1회 실패시켜 오류 기록→안전 새로고침→학생관리 재진입을 검증한다. 검증: runtime lint, 5도메인 fast 38/38, teacher lazy/boundary, scenario·production 821/821, `check:fast`, build 371 modules, Worktree 격리 safe browser 12/12. 운영 데이터·실제 알림·AI 호출·SQL은 사용하지 않았다.
+- App source 자체의 Babel 500 KB 경고와 1.38 MB main chunk는 남아 있다. 3-7 다음 단위는 App에 남은 저빈도 teacher 화면을 물리 분리·lazy 연결해 700~900 kB 종료 목표에 접근한다.
+
 ## 2026-08-02 App 3차 리팩터링 3-6 정산 view closeout
 
 - `MonthlySettlementPanel.jsx`의 출결·수업 달력/최종 횟수 편집을 `MonthlySettlementCalendar.jsx`, 정규 정산 표/제외 행 복원을 `MonthlySettlementRegularTable.jsx`로 물리 분리했다. 원본 JSX를 줄바꿈 정규화 후 직접 대조해 달력 6,304자와 표 9,847자가 각각 문자 단위로 동일함을 확인했다.

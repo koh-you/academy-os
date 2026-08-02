@@ -496,6 +496,28 @@ summary:focus-visible {
   padding: var(--academy-space-2) max(var(--academy-space-4), env(safe-area-inset-right)) max(28px, env(safe-area-inset-bottom)) max(var(--academy-space-3), env(safe-area-inset-left));
 }
 
+.teacherViewLoadState {
+  align-items: flex-start;
+  background: var(--academy-surface);
+  border: 1px solid var(--academy-border);
+  border-radius: var(--academy-radius);
+  box-shadow: var(--academy-shadow);
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  min-height: 140px;
+  padding: 24px;
+}
+
+.teacherViewLoadState.error {
+  border-color: #fecaca;
+}
+
+.teacherViewLoadState span,
+.teacherViewLoadState small {
+  color: var(--academy-text-muted);
+}
+
 .pageTop,
 .panel,
 .calendarShell {
