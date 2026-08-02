@@ -3,6 +3,8 @@ import { readFile } from "node:fs/promises";
 import { lazyTeacherViewComponents } from "../src/app/lazyTeacherViewComponents.js";
 
 const expectedLazyComponents = Object.freeze([
+  "AcademyReminderList",
+  "AcademyReminderPanel",
   "AIVariantProblemCenter",
   "ClassManager",
   "ExamAnalysisPipelineCenter",
@@ -15,6 +17,7 @@ const expectedLazyComponents = Object.freeze([
   "OverdueHomework",
   "ResourceLibraryCenter",
   "SchoolCalendarCenter",
+  "SpecialLectureNoticePanel",
   "SupplementCenter",
   "TeacherLessonHubV2"
 ]);
@@ -37,6 +40,8 @@ const [appSource, registrySource, outletSource, boundarySource] = await Promise.
 ]);
 
 const lazyModuleContracts = [
+  ["AcademyReminderList", "../domains/teacher/DashboardAuxiliaryPanels.jsx"],
+  ["AcademyReminderPanel", "../domains/teacher/DashboardAuxiliaryPanels.jsx"],
   ["AIVariantProblemCenter", "../domains/teacher/PlanningToolCenters.jsx"],
   ["ClassManager", "../domains/teacher/PlanningToolCenters.jsx"],
   ["ExamAnalysisPipelineCenter", "../domains/exams/ExamAnalysisPipelineCenter.jsx"],
@@ -49,6 +54,7 @@ const lazyModuleContracts = [
   ["OverdueHomework", "../domains/teacher/LearningSupportCenters.jsx"],
   ["ResourceLibraryCenter", "../domains/teacher/LearningSupportCenters.jsx"],
   ["SchoolCalendarCenter", "../domains/teacher/PlanningToolCenters.jsx"],
+  ["SpecialLectureNoticePanel", "../domains/teacher/DashboardAuxiliaryPanels.jsx"],
   ["SupplementCenter", "../domains/supplements/SupplementCenter.jsx"],
   ["TeacherLessonHubV2", "../domains/lessons/TeacherLessonHubV2.jsx"]
 ];

@@ -127,6 +127,28 @@ test("planning tool screens open from their shared deferred chunk without mutati
   expect(pageErrors).toEqual([]);
 });
 
+test("dashboard auxiliary panels open from their shared deferred chunk without mutations", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await page.route("**/src/domains/teacher/DashboardAuxiliaryPanels.jsx*", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    await route.continue();
+  });
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "선생님" }).click();
+  await page.getByLabel("선생님 아이디").fill("preview");
+  await page.getByLabel("선생님 비밀번호").fill("preview");
+  await page.getByRole("button", { name: "선생님 로그인" }).click();
+  await expect(page.locator('.teacherViewLoadState[role="status"]')).toContainText("교사 화면을 불러오는 중입니다.");
+  await expect(page.locator(".academyReminderPanel")).toBeVisible();
+
+  const navigation = page.getByRole("navigation", { name: "주요 화면" });
+  await navigation.getByRole("button", { name: /특강관리/ }).click();
+  await expect(page.getByRole("heading", { name: "특강관리" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "특강 안내문" })).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
 test("withdrawn student list keeps its table and selection toolbar boundary", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);

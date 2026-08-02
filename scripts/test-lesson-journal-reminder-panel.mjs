@@ -24,7 +24,7 @@ const journalSource = appSource.slice(journalStart, journalEnd);
 assert.match(journalSource, /<LessonJournalReminderPanel reminderCount=\{lessonAcademyReminders\.length\}>/);
 assert.match(
   journalSource,
-  /<AcademyReminderList reminders=\{lessonAcademyReminders\} students=\{students\} templates=\{templates\} \/>/
+  /<AcademyReminderList runtime=\{academyReminder\} reminders=\{lessonAcademyReminders\} students=\{students\} templates=\{templates\} \/>/
 );
 assert.doesNotMatch(journalSource, /<section className="panel lessonReminderPanel">/);
 assert.match(componentSource, /if \(!model\.isVisible\) return null/);

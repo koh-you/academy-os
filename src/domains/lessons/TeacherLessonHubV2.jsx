@@ -65,6 +65,7 @@ export function TeacherLessonHubV2({
 }) {
   const {
     AcademyReminderPanel,
+    academyReminder,
     ExamPrepLessonDetail,
     LessonJournalFallback,
     SupplementMakeupLessonDetail,
@@ -212,6 +213,7 @@ export function TeacherLessonHubV2({
   return (
     <>
       <AcademyReminderPanel
+        runtime={academyReminder}
         onDeleteAcademyReminder={onDeleteAcademyReminder}
         onSaveAcademyReminder={onSaveAcademyReminder}
         reminders={academyReminders}

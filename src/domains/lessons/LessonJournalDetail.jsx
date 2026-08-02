@@ -63,6 +63,7 @@ export function LessonJournalDetail({
 }) {
   const {
     AcademyReminderList,
+    academyReminder,
     CommentComposerModal,
     ExamPrepLessonDetail,
     PreparationMemoModal,
@@ -500,7 +501,7 @@ export function LessonJournalDetail({
       />
 
       <LessonJournalReminderPanel reminderCount={lessonAcademyReminders.length}>
-        <AcademyReminderList reminders={lessonAcademyReminders} students={students} templates={templates} />
+        <AcademyReminderList runtime={academyReminder} reminders={lessonAcademyReminders} students={students} templates={templates} />
       </LessonJournalReminderPanel>
 
       <LessonJournalNotificationBar
