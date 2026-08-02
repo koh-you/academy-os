@@ -1,4 +1,4 @@
-import { Component, useEffect, useState } from "react";
+import { Component, useEffect, useMemo, useState } from "react";
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
@@ -11,6 +11,8 @@ import { SelectionToolbar } from "../../shared/components/SelectionToolbar.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 import { parseStudentScheduleOverride } from "../../shared/utils/studentSchedule.js";
+import { getCurrentKoreaMonthKey } from "../settlements/monthlySettlement.js";
+import { buildStudentMonthlyAttendanceSummary } from "../settlements/settlementAttendance.js";
 import { buildStudentHandoverPdfModel, getStudentHandoverTitle, openStudentHandoverPdf } from "./studentHandoverPdf.js";
 import { sortWithdrawnStudents } from "./studentListSort.js";
 
@@ -1030,6 +1032,8 @@ export function StudentManager({
             scoreRecordSaveState={scoreRecordSaveState}
             studentConsultationSaveState={studentConsultationSaveState}
             consultations={selectedConsultations}
+            lessons={lessons}
+            records={records}
             tallySubmissions={getStudentTallySubmissions(selectedStudent, intakeApplicants)}
             teacherOperatingMemo={teacherOperatingMemos[selectedStudent.studentId] ?? ""}
             teacherOperatingMemoSaveState={teacherOperatingMemoSaveStates[selectedStudent.studentId] ?? "idle"}
@@ -1261,6 +1265,7 @@ function StudentProfileModal({
   academyTests,
   className,
   consultations = [],
+  lessons = [],
   ModalComponent,
   onClose,
   onDeleteAcademyTest,
@@ -1273,6 +1278,7 @@ function StudentProfileModal({
   onSaveStudentProfile,
   onSaveTeacherOperatingMemo,
   onSaveStudentConsultation,
+  records = [],
   scores,
   scoreRecordSaveState = "idle",
   studentConsultationSaveState = "idle",
@@ -1296,6 +1302,13 @@ function StudentProfileModal({
   const [newAcademyTestDraft, setNewAcademyTestDraft] = useState(() => createAcademyTestDraft(student.studentId));
   const [newConsultationDraft, setNewConsultationDraft] = useState(() => createConsultationDraft(student.studentId));
   const [newReminderDraft, setNewReminderDraft] = useState(() => createStudentReminderDraft(student.studentId));
+  const [attendanceMonth, setAttendanceMonth] = useState(getCurrentKoreaMonthKey);
+  const attendanceSummary = useMemo(() => buildStudentMonthlyAttendanceSummary({
+    lessons,
+    monthKey: attendanceMonth,
+    records,
+    studentId: student.studentId
+  }), [attendanceMonth, lessons, records, student.studentId]);
 
   useEffect(() => {
     setIsEditingProfile(false);
@@ -1312,6 +1325,7 @@ function StudentProfileModal({
     setNewAcademyTestDraft(createAcademyTestDraft(student.studentId));
     setNewConsultationDraft(createConsultationDraft(student.studentId));
     setNewReminderDraft(createStudentReminderDraft(student.studentId));
+    setAttendanceMonth(getCurrentKoreaMonthKey());
   }, [student.studentId]);
 
   useEffect(() => {
@@ -1630,6 +1644,36 @@ function StudentProfileModal({
             {profileActionError}
           </div>
         ) : null}
+        <section className="studentProfileSection studentAttendanceSection">
+          <div className="studentAttendanceSectionHeader">
+            <div>
+              <strong>월별 출결</strong>
+              <p>정규 수업과 특강 수업일지 출결을 한곳에서 확인합니다.</p>
+            </div>
+            <input
+              aria-label={`${student.name} 출결 조회 월`}
+              className="studentAttendanceMonthInput"
+              onClick={(event) => event.stopPropagation()}
+              onChange={(event) => setAttendanceMonth(event.target.value)}
+              type="month"
+              value={attendanceMonth}
+            />
+          </div>
+          <div className="studentProfileSectionBody studentAttendanceSummaryGrid">
+            {[
+              ["정규 출결", attendanceSummary.regular],
+              ["특강 출결", attendanceSummary.special]
+            ].map(([label, counts]) => (
+              <article className="studentAttendanceSummaryCard" key={label}>
+                <div><strong>{label}</strong><b>{counts.total}회</b></div>
+                <p>
+                  출석 {counts.present} · 지각 {counts.late} ·
+                  결석 {counts.absent + counts.excused} · 대기 {counts.pending}
+                </p>
+              </article>
+            ))}
+          </div>
+        </section>
         <details className="studentProfileSection" open>
           <summary>
             <div>

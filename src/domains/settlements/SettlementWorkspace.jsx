@@ -62,6 +62,8 @@ export function SettlementWorkspace({
           />
         ) : (
           <SpecialLectureSettlementPanel
+            lessons={lessons}
+            records={records}
             saveState={specialLectureSaveState}
             settlementState={specialLectureSettlementState}
             specialLectureEnrollments={specialLectureEnrollments}

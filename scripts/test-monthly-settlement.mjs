@@ -3,6 +3,7 @@ import {
   applyMonthlySettlementJournalMode,
   buildMonthlyScheduleEvents,
   buildMonthlySettlementSummary,
+  buildStudentMonthEvidence,
   buildStudentSettlementRow,
   getDefaultFixedAmountForStudent,
   getDefaultNewStudentSessionAmount,
@@ -17,6 +18,14 @@ import {
   monthlySettlementFactor,
   normalizeMonthlySettlementStudentSetting
 } from "../src/domains/settlements/monthlySettlement.js";
+import {
+  buildMonthlySettlementReportModel,
+  createMonthlySettlementReportHtml
+} from "../src/domains/settlements/monthlySettlementReport.js";
+import {
+  buildSpecialLectureAttendanceSummary,
+  buildStudentMonthlyAttendanceSummary
+} from "../src/domains/settlements/settlementAttendance.js";
 import {
   buildSpecialLectureSettlementRows,
   buildSpecialLectureSettlementSummary,
@@ -544,6 +553,23 @@ assert.equal(fixedRow.closureCount, 1);
 assert.equal(fixedRow.actualStatusCounts.pending, 4, "대기 출결은 수업일지 원천 상태를 유지한 채 집계되어야 합니다.");
 assert.equal(fixedRow.makeupCount, 1, "보충은 별도 횟수로 표시해야 합니다.");
 assert.equal(fixedRow.makeupHours, 2, "보충 시수는 별도 참고값이어야 합니다.");
+assert.equal(fixedRow.systemProrationCount, 5, "월정액 학생의 시스템 정규 횟수는 예정 스케줄이 아니라 수업일지 인정 회차여야 합니다.");
+const fixedOverrideRow = buildStudentSettlementRow({
+  classTemplates,
+  lessons,
+  monthKey,
+  records,
+  setting: {
+    fixedAmount: 450000,
+    mode: "fixed",
+    regularCountOverride: 4,
+    scheduleText
+  },
+  student
+});
+assert.equal(fixedOverrideRow.prorationCount, 4);
+assert.equal(fixedOverrideRow.hasRegularCountOverride, true);
+assert.equal(fixedOverrideRow.regularGrossAmount, 450000, "월정액 학생은 최종 정규 횟수를 확정해도 월 고정금액을 유지해야 합니다.");
 
 const closureReplacementStudent = {
   defaultClassTemplateId: "class_mwf",
@@ -759,6 +785,23 @@ const newStudentRow = buildStudentSettlementRow({
   },
   student: newStudent
 });
+const newStudentOverrideRow = buildStudentSettlementRow({
+  classTemplates,
+  lessons: newStudentLessons,
+  monthKey,
+  records: [],
+  setting: {
+    fixedAmount: 450000,
+    mode: "new",
+    newStudentSessionAmount: 37500,
+    regularCountOverride: 3,
+    scheduleText: unevenScheduleText
+  },
+  student: newStudent
+});
+assert.equal(newStudentOverrideRow.systemProrationCount, 2);
+assert.equal(newStudentOverrideRow.prorationCount, 3);
+assert.equal(newStudentOverrideRow.regularGrossAmount, 112500, "신입생은 교사가 확정한 최종 정규 횟수로 금액을 계산해야 합니다.");
 const journalAutoNewSetting = applyMonthlySettlementJournalMode({
   fixedAmount: 450000,
   mode: "fixed",
@@ -997,6 +1040,25 @@ const withdrawnRow = buildStudentSettlementRow({
   },
   student: withdrawnStudent
 });
+const withdrawnOverrideRow = buildStudentSettlementRow({
+  classTemplates,
+  lessons: withdrawnStudentLessons,
+  monthKey,
+  records: [],
+  setting: {
+    fixedAmount: 450000,
+    mode: "withdrawn",
+    regularCountOverride: 10,
+    scheduleText
+  },
+  student: withdrawnStudent
+});
+assert.equal(withdrawnOverrideRow.prorationCount, 10);
+assert.equal(
+  withdrawnOverrideRow.regularGrossAmount,
+  Math.round(450000 * 10 / withdrawnOverrideRow.monthlyScheduleCount),
+  "퇴원생은 교사가 확정한 최종 정규 횟수 비율로 금액을 계산해야 합니다."
+);
 const expectedWithdrawnCount = scheduledEvents.filter((event) => event.date <= "2026-07-15").length;
 assert.equal(withdrawnRow.periodStart, "2026-07-01", "퇴원생 인정 기간은 해당 월 1일부터 시작해야 합니다.");
 assert.equal(withdrawnRow.periodEnd, "2026-07-15", "퇴원생 종료일은 퇴원일이나 수기 날짜가 아니라 마지막 정규 수업일지여야 합니다.");
@@ -1062,6 +1124,16 @@ assert.equal(
   "lesson_journal",
   "수업일지 자동 판정 원천은 저장 후 Supabase 재조회 대조에 포함되어야 합니다."
 );
+assert.equal(
+  JSON.parse(getMonthlySettlementMonthSaveSnapshot({
+    monthKey,
+    studentSettings: {
+      [student.studentId]: fixedOverrideRow.setting
+    }
+  })).studentSettings[student.studentId].regularCountOverride,
+  4,
+  "교사 확정 최종 정규 횟수는 월별 저장 재조회 대조에 포함되어야 합니다."
+);
 
 const summary = buildMonthlySettlementSummary([fixedRow]);
 assert.equal(summary.regularGrossAmount, 450000);
@@ -1070,5 +1142,79 @@ assert.equal(summary.specialGrossAmount, undefined, "월별 정규 정산 summar
 const excludedSummary = buildMonthlySettlementSummary([fixedRow, excludedRow]);
 assert.equal(excludedSummary.regularGrossAmount, fixedRow.regularGrossAmount);
 assert.equal(excludedSummary.excludedStudentCount, 1);
+
+const makeupTimeEvidence = buildStudentMonthEvidence({
+  lessons: [{
+    date: "2026-07-30",
+    endTime: "16:00",
+    lessonId: "lesson_makeup_actual_time",
+    lessonType: "makeup",
+    startTime: "14:00",
+    status: "completed",
+    studentIds: [student.studentId]
+  }],
+  monthKey,
+  records: [],
+  student: {
+    ...student,
+    scheduleOverride: "목 16:00-19:00"
+  }
+});
+assert.equal(makeupTimeEvidence.makeupEvents[0].startTime, "14:00", "보강은 학생 정규 스케줄이 아니라 실제 수업일지 시간을 표시해야 합니다.");
+assert.equal(makeupTimeEvidence.makeupEvents[0].endTime, "16:00");
+
+const attendanceLessons = [
+  {
+    date: "2026-07-01",
+    lessonId: "regular_attendance",
+    lessonType: "class",
+    status: "completed",
+    studentIds: [student.studentId]
+  },
+  {
+    date: "2026-07-20",
+    lessonId: "special_attendance",
+    lessonType: "specialLecture",
+    specialLectureGuideId: "guide_attendance",
+    specialLectureSessionId: "session_attendance_1",
+    status: "completed",
+    studentIds: [student.studentId]
+  }
+];
+const attendanceRecords = [
+  { attendanceStatus: "present", lessonId: "regular_attendance", studentId: student.studentId },
+  { attendanceStatus: "late", lessonId: "special_attendance", studentId: student.studentId }
+];
+const studentAttendance = buildStudentMonthlyAttendanceSummary({
+  lessons: attendanceLessons,
+  monthKey,
+  records: attendanceRecords,
+  studentId: student.studentId
+});
+assert.equal(studentAttendance.regular.present, 1);
+assert.equal(studentAttendance.special.late, 1);
+const specialAttendance = buildSpecialLectureAttendanceSummary({
+  guideId: "guide_attendance",
+  lessons: attendanceLessons,
+  records: attendanceRecords,
+  sessions: [{ sessionId: "session_attendance_1" }, { sessionId: "session_attendance_2" }],
+  studentId: student.studentId
+});
+assert.equal(specialAttendance.journalCount, 1);
+assert.equal(specialAttendance.journalMissingCount, 1);
+assert.equal(specialAttendance.late, 1);
+
+const reportModel = buildMonthlySettlementReportModel({
+  monthKey,
+  rows: [fixedRow, excludedRow]
+});
+assert.equal(reportModel.rows.length, 1, "PDF에는 정산 제외 행을 넣지 않아야 합니다.");
+assert.equal(reportModel.rows[0].count, fixedRow.prorationCount);
+assert.equal(reportModel.rows[0].amount, fixedRow.regularGrossAmount);
+const reportHtml = createMonthlySettlementReportHtml(reportModel);
+assert.match(reportHtml, /학생별 정산 반영 횟수와 최종 금액/);
+assert.doesNotMatch(reportHtml, /출석|결석|대기|필터/);
+assert.match(reportHtml, /최종 정규 횟수/);
+assert.doesNotMatch(reportHtml, /학교·학년/);
 
 console.log("monthly settlement tests passed");
