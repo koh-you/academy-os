@@ -16,6 +16,13 @@
 - 전용 inventory, runtime lint, production `809/809`, build `345 modules`, safe browser smoke `2/2`를 통과했다.
 - 운영 쓰기·발송·예약·취소·유료 호출·SQL 적용은 없었다.
 
+## Slack 예약·Realtime 전용 작업
+
+- `codex/slack-scheduling-realtime`에서 실행 경로·환경변수·운영 미설정 표와 Slack Bot provider fixture를 추가했다.
+- fixture는 실제 외부 요청 없이 dry-run 무호출, 예약·취소 payload, bearer header, Slack 오류와 예약 시각 검증을 통과했다.
+- runtime lint, `check:fast` scenario `810/810`, production `810/810`, build `352 modules`가 통과했다.
+- 다음 단위는 서버 예약 orchestration의 이미 발송/예약됨, 강제 재예약 취소, 새 예약 실패 시 상태 일관성을 fixture로 고정하는 것이다. 실제 Slack 예약·취소와 운영 설정은 사람 승인 전 금지한다.
+
 ## 사용자 후속 수정
 
 - 특강 정산 탭은 수강 계획과 실제 특강 수업일지를 대조해 출결과 일지 누락을 표시하고, 학생 프로파일은 월별 정규·특강 출결을 함께 보여준다.

@@ -2,6 +2,12 @@
 
 이 문서만 현재 미룬 작업의 source of truth다. 과거 완료 이력은 `docs/archive/`에 있다. 사용자에게 더 급한 요청이 있으면 그 요청을 먼저 처리하고 큐를 통째로 반복하지 않는다.
 
+## P0. Slack 예약 알림 및 Supabase Realtime 전용 작업
+
+- `docs/slack-realtime-workstream.md`를 현재 역할·운영 Gate 기준으로 사용한다.
+- Slack provider fixture 다음으로 서버 예약 orchestration의 중복·강제 재예약·실패 복구를 고정하고, Bot/OAuth·채널·Render 환경변수·실제 미래 예약은 사람 Gate로 남긴다.
+- Slack 안전 단위가 끝난 뒤 `lesson_student_records`의 교사 bearer·소유권 RLS·event/table/filter·재연결·탭 복귀·오프라인·7초 polling fallback 계약을 테스트로 고정한다. 운영 SQL은 파일로만 준비한다.
+
 ## P1. 운영 저장 신뢰성
 
 - 학생 신규/Tally·학생/반 명단 저장 gate.

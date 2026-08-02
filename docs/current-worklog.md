@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 Slack 예약 알림 전용 작업 — provider 안전 fixture
+
+- 최신 `origin/main`에서 `codex/slack-scheduling-realtime` 브랜치를 만들고 Slack 예약·Realtime 전용 장기 작업 기준을 시작했다.
+- 즉시 Webhook, Bot 예약, GitHub Actions, Render 내부 dispatcher, Render Slack cron, 전날 예약 스크립트의 책임과 운영 미설정을 `docs/slack-realtime-workstream.md` 표로 고정했다.
+- Bot provider fixture가 기본 dry-run에서 Slack HTTP 호출이 0건임을 확인하고, live 모의 응답의 `chat.scheduleMessage`·`chat.deleteScheduledMessage` payload와 bearer header, Slack 오류, 잘못된/과거 예약 시각 오류를 검증한다. fixture token과 channel만 사용했으며 실제 Slack·운영 API·DB는 호출하지 않았다.
+- 검증: Slack 전용 fixture, runtime lint, `check:fast` scenario `810/810`, production `810/810`, build `352 modules` 통과. 다음 안전 단위는 서버 예약 orchestration의 중복·강제 재예약·실패 복구 fixture다.
+- 사람 Gate: Slack App `chat:write` 승인·설치, 대상 채널 Bot 초대, Render의 `SLACK_BOT_TOKEN`·`SLACK_CHANNEL_ID`·`NOTIFICATION_DISPATCH_TOKEN` 입력과 실제 미래 예약 1건 대조는 아직 수행하지 않았다.
+
 ## 2026-08-02 정산 특강 출결·학생 통합 출결·간결 PDF·보강 시간 교정
 
 - 특강 정산의 확정 계획 회차와 실제 특강 수업일지를 대조해 학생별 일지 수, 출석·지각·결석·대기, 일지 누락 수를 표시한다. 금액 계산 원천은 기존 확정 수강 계획을 유지한다.

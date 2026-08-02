@@ -27,6 +27,7 @@
     "dispatch:notifications": "node scripts/dispatch-due-notifications.cjs",
     "slack:daily-schedule": "node scripts/send-slack-daily-schedule.cjs",
     "slack:reserve-daily-schedule": "node scripts/reserve-slack-daily-schedule.cjs",
+    "test:slack-scheduling-provider": "node scripts/test-slack-scheduling-provider.mjs",
     "check:encoding": "node scripts/check-encoding.cjs",
     "inventory:exam-blog": "node scripts/inventory-exam-analysis-blog-images.mjs",
     "verify:exam-blog-inventory": "node scripts/verify-exam-analysis-blog-manifest.mjs",

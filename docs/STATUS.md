@@ -24,6 +24,7 @@
 
 ## 개발환경 상태
 
+- Slack 예약 알림 전용 작업은 최신 `origin/main`에서 시작했다. 즉시 Webhook, Bot 예약, GitHub Actions, Render dispatcher/cron 역할을 분리했고 Bot provider의 dry-run 무호출·예약/취소 payload·오류 전파 fixture가 통과했다. 운영 Bot/OAuth·채널·Render 환경변수는 아직 사람 Gate다.
 - Node 24 기준, `npm ci` 사용.
 - `npm run doctor`가 경로·Git·Node·중복 clone을 점검한다.
 - VS Code F5는 운영 데이터에 연결하지 않는 안전한 가상 환경을 연다.
@@ -48,9 +49,9 @@
 
 ## 다음 우선순위
 
-1. App 2차 리팩터링 Phase 1~5는 완료됐다. 대형 `App.jsx` 내부 화면 정의의 물리적 분리와 teacher 화면 lazy loading 중 한 단위만 최신 main의 별도 Worktree에서 시작한다.
-2. 약 1.63 MB production chunk와 Babel 500 KB 경고를 줄이되 화면 동작·저장 경계 변경을 같은 단위에 섞지 않는다.
-3. `app_state`에서 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
+1. 전용 `codex/slack-scheduling-realtime` 작업에서 Slack 예약 API의 서버 orchestration·재예약 실패 안전성을 fixture로 고정한 뒤 운영 사람 Gate로 넘긴다.
+2. Slack 안전 단위가 끝나면 교사 bearer·소유권 RLS·구독 범위·polling fallback 계약을 고정하고 Supabase Realtime을 점진 전환한다.
+3. App 2차 리팩터링 Phase 1~5는 완료됐다. 대형 `App.jsx` 내부 화면 정의의 물리적 분리와 teacher 화면 lazy loading은 위 전용 작업과 섞지 않는다.
    - 즉시 사람 판단이 필요하지 않은 발견은 queue/worklog에 남기고 AI 검수와 다음 단계를 연쇄 진행한다.
 
 ## 자동 작업
