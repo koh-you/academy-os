@@ -1,7 +1,11 @@
 import { SupplementNotificationDraftWorkspace } from "./SupplementNotificationDraftWorkspace.jsx";
 import { SupplementTaskActionBar } from "./SupplementTaskActionBar.jsx";
 import { SupplementTaskCardHeader } from "./SupplementTaskCardHeader.jsx";
-import { SupplementTaskSaveSummary, SupplementTaskScheduleGateNote } from "./SupplementTaskSaveSummary.jsx";
+import {
+  SupplementTaskSaveStatusGrid,
+  SupplementTaskSaveSummary,
+  SupplementTaskScheduleGateNote
+} from "./SupplementTaskSaveSummary.jsx";
 import { SupplementTaskScheduleEditor } from "./SupplementTaskScheduleEditor.jsx";
 import { SupplementTaskSourceContext } from "./SupplementTaskSourceContext.jsx";
 
@@ -14,7 +18,10 @@ export function SupplementTaskCard({ actionProps, cancellationSlot = null, heade
       <SupplementTaskSaveSummary {...saveSummaryProps} />
       <SupplementNotificationDraftWorkspace {...notificationProps} />
       <SupplementTaskScheduleGateNote {...scheduleGateProps} />
-      <SupplementTaskActionBar {...actionProps} />
+      <div className="supplementTaskStickyStatusBar">
+        <SupplementTaskSaveStatusGrid {...saveSummaryProps} />
+        <SupplementTaskActionBar {...actionProps} />
+      </div>
       {cancellationSlot}
     </article>
   );

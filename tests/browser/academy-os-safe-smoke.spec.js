@@ -1,5 +1,8 @@
 import { expect, test } from "@playwright/test";
 
+const safeApiPort = Number(process.env.ACADEMY_SAFE_API_PORT || 8787);
+const safeApiBaseUrl = `http://127.0.0.1:${safeApiPort}`;
+
 function collectPageErrors(page) {
   const errors = [];
   page.on("pageerror", (error) => errors.push(error));
@@ -18,7 +21,7 @@ async function loginAsTeacher(page) {
 test.beforeEach(async ({ request }) => {
   await expect.poll(async () => {
     try {
-      const response = await request.post("http://127.0.0.1:8787/api/safe-fixture/reset");
+      const response = await request.post(`${safeApiBaseUrl}/api/safe-fixture/reset`);
       return response.ok();
     } catch {
       return false;
@@ -66,6 +69,31 @@ test("lesson journal calendar can move to the next month and back", async ({ pag
   await expect(monthHeading).not.toHaveText(originalMonthTitle);
   await monthNavigation.getByRole("button", { name: "이전 달" }).click();
   await expect(monthHeading).toHaveText(originalMonthTitle);
+  expect(pageErrors).toEqual([]);
+});
+
+test("lesson journal creation action stays visible and opens the registration modal", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+
+  const creationActions = page.getByRole("group", { name: "수업일지 생성" });
+  await expect(creationActions).toBeVisible();
+  await creationActions.getByRole("button", { name: "+ 수업 등록", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "수업 등록" })).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
+test("lesson hub top reminders can collapse and expand without runtime errors", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+
+  const collapseButton = page.getByRole("button", { name: "알림 접기" });
+  await expect(collapseButton).toBeVisible();
+  await collapseButton.click();
+  await expect(page.getByRole("button", { name: "알림 펼치기" })).toBeVisible();
+  await expect(page.locator("#academy-reminder-panel-body")).toBeHidden();
+  await page.getByRole("button", { name: "알림 펼치기" }).click();
+  await expect(page.locator("#academy-reminder-panel-body")).toBeVisible();
   expect(pageErrors).toEqual([]);
 });
 

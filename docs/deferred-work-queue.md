@@ -26,7 +26,7 @@
 ## P4. 고위험 App/API 경계 리팩터링
 
 - App 2차 리팩터링은 `docs/app-refactor-second-pass-plan.md`의 Phase 1~5를 기준으로 한다.
-- Phase 1 auth/session, Phase 2 출결 polling·동기화, Phase 3 notification/Solapi reconcile은 main 통합 완료다. Phase 4 hydration/persistence는 PR/CI 대기이며 다음은 Phase 5 17개 teacher 화면 callback 조립이다.
+- Phase 1 auth/session, Phase 2 출결 polling·동기화, Phase 3 notification/Solapi reconcile, Phase 4 hydration/persistence는 main 통합 완료다. 사용자 수업일지·보충관리 수정 통합 뒤 Phase 5 17개 teacher 화면 callback 조립을 재개한다.
 - AI가 안전하게 검증 가능한 문제와 후속 발견은 단계 worklog에 남기고 연쇄 진행한다. 운영 side effect나 제품 의미 결정이 필요한 항목만 사람 gate로 올린다.
 - API: `api/server.js` route registration, auth, core data, notification/provider 서비스를 의미 단위로 분리.
 - 순수 분리보다 회귀·관찰 가능성 inventory를 먼저 만든다.

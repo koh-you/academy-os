@@ -923,6 +923,15 @@ summary:focus-visible {
   gap: 16px;
 }
 
+.academyReminderPanelBody {
+  display: grid;
+  gap: 16px;
+}
+
+.academyReminderPanelBody[hidden] {
+  display: none;
+}
+
 .academyReminderHeaderActions {
   align-items: center;
   display: flex;
@@ -3464,6 +3473,17 @@ summary:focus-visible {
   display: none;
 }
 
+.lessonCalendarPrimaryActions {
+  display: flex;
+  gap: var(--academy-space-2);
+  justify-content: flex-end;
+  margin-bottom: var(--academy-space-2);
+}
+
+.lessonCalendarPrimaryActions button {
+  min-height: 40px;
+}
+
 .lessonCalendarMonthNavigation {
   align-items: center;
   background: var(--academy-surface);
@@ -3490,6 +3510,17 @@ summary:focus-visible {
   font-size: 20px;
   height: 40px;
   width: 40px;
+}
+
+@media (max-width: 640px) {
+  .lessonCalendarPrimaryActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .lessonCalendarPrimaryActions button {
+    width: 100%;
+  }
 }
 
 .teacherCalendarShell {
@@ -17968,6 +17999,57 @@ textarea.profileEditInput {
   padding: 18px;
 }
 
+.supplementNotificationDraftEditors {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.supplementNotificationDraftEditors .notificationDraftField {
+  align-content: start;
+  background: #ffffff;
+  border: 1px solid #dbe5f6;
+  border-radius: 10px;
+  display: grid;
+  gap: 7px;
+  padding: 12px;
+}
+
+.supplementNotificationDraftEditors textarea {
+  min-height: 180px;
+}
+
+.supplementNotificationDraftEditorTitle {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.supplementTimeSelects {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.supplementTimeSelects select {
+  width: 100%;
+}
+
+.supplementSortControl {
+  align-items: center;
+  color: #52627a;
+  display: flex;
+  font-size: 13px;
+  font-weight: 800;
+  gap: 8px;
+}
+
+.supplementSortControl select {
+  min-height: 38px;
+  min-width: 132px;
+}
+
 .supplementItemList {
   border: 1px solid #e6edf7;
   border-radius: 8px;
@@ -20814,7 +20896,7 @@ body.attendanceOnlyBody {
       max(8px, env(safe-area-inset-left));
   }
 
-  .supplementNotificationControlModal {
+.supplementNotificationControlModal {
     max-height: calc(
       100dvh
       - max(8px, env(safe-area-inset-top))
@@ -20830,7 +20912,71 @@ body.attendanceOnlyBody {
   }
 }
 
+.supplementNotificationControlModal.wide {
+  max-width: 1120px;
+}
+
+.supplementNotificationBulkGuide {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 9px;
+  color: #1e40af;
+  font-size: 13px;
+  font-weight: 800;
+  margin: 0;
+  padding: 10px 12px;
+}
+
+.supplementNotificationControlCards {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.supplementNotificationControlCard {
+  border: 1px solid #dbe5f6;
+  border-radius: 12px;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding: 13px;
+}
+
+.supplementNotificationControlCardHeader {
+  align-items: start;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.supplementNotificationControlCardHeader h4 {
+  color: #17213d;
+  margin: 5px 0 0;
+}
+
+.supplementTaskStickyStatusBar {
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid #cbd8ee;
+  border-radius: 12px;
+  bottom: 0;
+  box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.1);
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  position: sticky;
+  z-index: 12;
+}
+
+.supplementTaskStickyStatusBar .supplementTaskActions {
+  padding-top: 0;
+}
+
 @media (max-width: 980px) {
+  .supplementNotificationControlCards,
+  .supplementNotificationDraftEditors {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .notificationControlGrid,
   .notificationLessonItem,
   .noticeComposerGrid,

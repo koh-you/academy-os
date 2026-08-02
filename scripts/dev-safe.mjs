@@ -5,11 +5,16 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const children = [];
 let stopping = false;
+const safeApiPort = process.env.ACADEMY_SAFE_API_PORT || "8787";
+const safeEnvironment = {
+  ...process.env,
+  VITE_API_BASE_URL: `http://127.0.0.1:${safeApiPort}`
+};
 
 function start(label, args) {
   const child = spawn(process.execPath, args, {
     cwd: root,
-    env: process.env,
+    env: safeEnvironment,
     stdio: "inherit"
   });
   children.push(child);

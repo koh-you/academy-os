@@ -1,5 +1,4 @@
 import {
-  getSupplementNotificationDraftConfig,
   isSupplementTeacherEditedField,
   supplementNotificationDraftConfigs,
   supplementTeacherFinalFields
@@ -20,28 +19,21 @@ export function createSupplementNotificationDraftTabConfigs({
 }
 
 export function createSupplementNotificationDraftWorkspaceViewModel({
-  activeField = "",
   draftState = {},
   notificationJobs = [],
   task = {}
 } = {}, dependencies = {}) {
-  const activeConfig = getSupplementNotificationDraftConfig(activeField);
-  const activeJob = dependencies.getControlJob(
-    task,
-    notificationJobs,
-    activeConfig.controlType
-  );
   return {
-    activeConfig,
-    activeDisplay: dependencies.getControlDisplay(activeJob),
-    activeDraft: draftState.values?.[activeField] ?? "",
-    isTeacherFinal:
-      isSupplementTeacherEditedField(task, activeField) ||
-      draftState.editedFields?.includes(activeField),
     tabConfigs: createSupplementNotificationDraftTabConfigs({
       notificationJobs,
       task
-    }, dependencies)
+    }, dependencies).map((config) => ({
+      ...config,
+      draft: draftState.values?.[config.field] ?? "",
+      isTeacherFinal:
+        isSupplementTeacherEditedField(task, config.field) ||
+        draftState.editedFields?.includes(config.field)
+    }))
   };
 }
 

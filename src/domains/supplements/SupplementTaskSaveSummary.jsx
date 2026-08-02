@@ -10,7 +10,17 @@ function SupplementSaveStatusPill({ label, status }) {
   );
 }
 
-export function SupplementTaskSaveSummary({ draftDiff, lessonStatus, makeupStatus, notificationStatus }) {
+export function SupplementTaskSaveStatusGrid({ lessonStatus, makeupStatus, notificationStatus }) {
+  return (
+    <div className="supplementSaveStatusGrid">
+      <SupplementSaveStatusPill label="보충 내용" status={makeupStatus} />
+      <SupplementSaveStatusPill label="수업일지 일정" status={lessonStatus} />
+      <SupplementSaveStatusPill label="알림톡 문구 3종" status={notificationStatus} />
+    </div>
+  );
+}
+
+export function SupplementTaskSaveSummary({ draftDiff }) {
   return (
     <>
       {draftDiff.length ? (
@@ -28,11 +38,6 @@ export function SupplementTaskSaveSummary({ draftDiff, lessonStatus, makeupStatu
           </ul>
         </div>
       ) : null}
-      <div className="supplementSaveStatusGrid">
-        <SupplementSaveStatusPill label="보충 내용" status={makeupStatus} />
-        <SupplementSaveStatusPill label="수업일지 일정" status={lessonStatus} />
-        <SupplementSaveStatusPill label="알림톡 문구 3종" status={notificationStatus} />
-      </div>
     </>
   );
 }

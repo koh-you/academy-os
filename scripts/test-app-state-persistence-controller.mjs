@@ -144,11 +144,15 @@ for (const expected of [
 for (const expected of [
   "createAppStateVersionFilter",
   'insertRows("app_state", [row])',
-  'patchRows(\n      "app_state"',
   "createAppStateConflictError(key)"
 ]) {
   assert.ok(coreSource.includes(expected), `missing app_state CAS boundary: ${expected}`);
 }
+assert.match(
+  coreSource,
+  /patchRows\(\s*"app_state"/,
+  "app_state CAS patch boundary must not depend on checkout line endings"
+);
 assert.ok(restSource.includes("export async function insertRows("));
 assert.ok(serverSource.includes("upsertAppState(safeStates, { expectedUpdatedAt })"));
 assert.ok(serverSource.includes("Number(error.statusCode) || 500"));

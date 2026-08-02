@@ -16,6 +16,7 @@ export default defineConfig(({ mode }) => ({
     }
   },
   server: {
-    port: 5173
+    port: Number(process.env.ACADEMY_SAFE_FRONTEND_PORT || 5173),
+    strictPort: true
   }
 }));
