@@ -1235,6 +1235,7 @@ const reportHtml = createMonthlySettlementReportHtml(reportModel);
 assert.match(reportHtml, /학생별 정산 반영 횟수와 최종 금액/);
 assert.doesNotMatch(reportHtml, /출석|결석|대기|필터/);
 assert.match(reportHtml, /최종 정규 횟수/);
+assert.match(reportHtml, /onclick="window\.print\(\)"[^>]*>인쇄하기</);
 assert.doesNotMatch(reportHtml, /학교·학년/);
 
 console.log("monthly settlement tests passed");

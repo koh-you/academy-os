@@ -111,7 +111,6 @@ function MonthlySettlementCalendar({
   isDirty,
   monthKey,
   onClose,
-  onOpenReportPdf,
   onRegularCountChange,
   onSave,
   row,
@@ -244,14 +243,6 @@ function MonthlySettlementCalendar({
         message={saveMessage || "저장하면 Supabase 재조회 값과 일치하는지 확인합니다."}
         saveState={saveState}
       >
-        <button
-          className="softButton"
-          disabled={isDirty || saveState === "saving"}
-          onClick={onOpenReportPdf}
-          type="button"
-        >
-          저장 확인값으로 PDF 출력
-        </button>
         <button
           className="primaryButton"
           disabled={!isDirty || saveState === "saving"}
@@ -807,7 +798,6 @@ export function MonthlySettlementPanel({
           isDirty={isDirty}
           monthKey={selectedMonth}
           onClose={() => setSelectedCalendarStudentId("")}
-          onOpenReportPdf={handleOpenReportPdf}
           onRegularCountChange={(value) => updateStudentSetting(
             selectedCalendarRow.student.studentId,
             "regularCountOverride",

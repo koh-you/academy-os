@@ -59,9 +59,13 @@ export function createMonthlySettlementReportHtml(model = {}) {
     .number { font-variant-numeric: tabular-nums; text-align: right; }
     tfoot td { background: #f7f9fc; border-top: 2px solid #172033; font-weight: 700; }
     .empty { color: #6b778a; padding: 28px; text-align: center; }
+    .printActions { display: flex; justify-content: flex-end; margin-bottom: 14px; }
+    .printActions button { background: #172033; border: 0; border-radius: 8px; color: #fff; cursor: pointer; font: inherit; font-weight: 700; padding: 9px 16px; }
+    @media print { .printActions { display: none; } }
   </style>
 </head>
 <body>
+  <div class="printActions"><button onclick="window.print()" type="button">인쇄하기</button></div>
   <header>
     <div><h1>${escapeHtml(monthLabel)}월 정산 보고서</h1><p>학생별 정산 반영 횟수와 최종 금액</p></div>
     <div class="totals">

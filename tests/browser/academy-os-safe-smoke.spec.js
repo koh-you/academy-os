@@ -148,12 +148,6 @@ test("monthly settlement counts closure replacement and distinguishes attendance
   await calendar.getByRole("button", { name: "최종 정규 횟수 저장 및 확인" }).click();
   await expect(calendar.getByRole("complementary", { name: /최종 정규 횟수 하단 고정 저장 바/ })).toContainText("저장 완료");
   await expect(finalCountInput).toHaveValue("4");
-  const reportPopupPromise = page.waitForEvent("popup");
-  await calendar.getByRole("button", { name: "저장 확인값으로 PDF 출력" }).click();
-  const reportPage = await reportPopupPromise;
-  await reportPage.waitForLoadState();
-  await expect(reportPage.getByRole("row").filter({ hasText: "정산 미리보기 학생" })).toContainText("4회");
-  await reportPage.close();
   await calendar.getByRole("button", { name: "창 닫기" }).click();
   await expect(settlementRow).toContainText("최종 정규 4회 · 교사 확정");
   await settlementRow.getByRole("button", { name: /정규 3회/ }).click();
@@ -167,6 +161,14 @@ test("monthly settlement counts closure replacement and distinguishes attendance
   expect(presentColor).not.toBe(absentColor);
   expect(pendingColor).not.toBe(presentColor);
   expect(pendingColor).not.toBe(absentColor);
+  await reopenedCalendar.getByRole("button", { name: "창 닫기" }).click();
+  const reportPopupPromise = page.waitForEvent("popup");
+  await page.getByRole("button", { name: "횟수·금액 PDF" }).click();
+  const reportPage = await reportPopupPromise;
+  await reportPage.waitForLoadState();
+  await expect(reportPage.getByRole("row").filter({ hasText: "정산 미리보기 학생" })).toContainText("4회");
+  await expect(reportPage.getByRole("button", { name: "인쇄하기" })).toBeVisible();
+  await reportPage.close();
   expect(pageErrors).toEqual([]);
 });
 
