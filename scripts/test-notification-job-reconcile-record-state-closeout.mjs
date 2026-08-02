@@ -37,6 +37,10 @@ const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
+const teacherViewOutletSource = await readFile(
+  new URL("../src/app/TeacherViewOutlet.js", import.meta.url),
+  "utf8"
+);
 const helperSource = await readFile(
   new URL(
     "../src/domains/notifications/notificationJobReconcileRecordState.js",
@@ -127,8 +131,8 @@ assert.ok(
     savedStateSetterIndex > savedStateGuardIndex
 );
 assert.equal(
-  appSource.split(
-    "onReconcileSolapiNotificationResults={handleReconcileSolapiNotificationResults}"
+  teacherViewOutletSource.split(
+    "onReconcileSolapiNotificationResults: actions.handleReconcileSolapiNotificationResults"
   ).length - 1,
   3
 );

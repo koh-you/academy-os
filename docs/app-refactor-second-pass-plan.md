@@ -11,8 +11,8 @@
 1. **Phase 1 — auth/session 경계**: `useAppSession`이 session state, 초기 teacher session 판독, 역할별 로그인, teacher 저장, logout cleanup을 소유한다. 2026-08-02 main 통합 완료.
 2. **Phase 2 — 출결 polling·동기화 경계**: 로그인/로그아웃·화면 전환·날짜 rollover의 lifecycle owner를 분명히 하고, in-flight 중복, stale 응답, 저장 중 draft 보호, cleanup과 재시도를 통합 fixture로 고정한다. 2026-08-02 main 통합 완료.
 3. **Phase 3 — 알림톡 reconcile·외부 부작용 경계**: refresh와 reconcile owner를 분리하고 scope별 in-flight, stale 응답, 중복 클릭, 실패 재시도를 고정한다. 조회·저장·예약·취소·발송은 별도 행동으로 유지한다. 2026-08-02 main 통합 완료.
-4. **Phase 4 — hydration·저장·복구·서버 재조회 경계**: 역할별 hydration, local draft와 서버 원천, debounce/직렬화, CAS, 저장 뒤 재조회, 늦은 응답 차단과 cleanup을 분리한다. 2026-08-02 구현·전체 자동검증 완료.
-5. **Phase 5 — teacher view callback·화면 조립 경계**: 17개 교사 화면의 props/callback 조립을 화면·도메인별 adapter/controller로 분리하고 저장·삭제·예약·취소 callback 및 오류 상태 계약을 고정한다.
+4. **Phase 4 — hydration·저장·복구·서버 재조회 경계**: 역할별 hydration, local draft와 서버 원천, debounce/직렬화, CAS, 저장 뒤 재조회, 늦은 응답 차단과 cleanup을 분리한다. 2026-08-02 main 통합 완료.
+5. **Phase 5 — teacher view callback·화면 조립 경계**: 17개 교사 화면의 props/callback 조립을 `TeacherViewOutlet` adapter로 분리하고 저장·삭제·예약·취소·발송·재대조 callback 계약을 고정했다. outlet은 네트워크·Storage side effect를 갖지 않고 `App` handler를 주입받는다. 2026-08-02 구현·전체 자동검증 완료.
 
 각 단계는 최신 main 기반 별도 Worktree와 `codex/` branch, 독립 PR·CI로 완료한다. 이전 단계 Worktree에 다음 단계 변경을 섞지 않는다.
 
@@ -34,3 +34,12 @@
 - session·화면·날짜 전환 뒤 늦은 응답이 새 상태를 덮지 않는다.
 - timer, polling, listener가 cleanup 뒤 실행되지 않는다.
 - 기능 회귀가 사람의 운영 확인 전에 fixture 또는 safe browser 검사에서 발견된다.
+
+## 2차 완료 뒤 후속 대형 단위
+
+1. `App.jsx`에 남은 화면·모달·도메인 컴포넌트 정의를 실제 도메인 파일로 이동한다.
+2. teacher 화면을 lazy load하고 vendor/domain chunk를 분리해 현재 약 1.63 MB production chunk와 Babel 500 KB 경고를 줄인다.
+3. hydration 뒤의 도메인별 상태/action controller를 분리하고 `app_state` 중 독립성이 큰 값은 명시 저장 API로 옮긴다.
+4. `api/server.js`의 route registration, auth, core data, notification/provider 서비스를 계약 테스트와 함께 분리한다.
+5. CSS를 화면/도메인 entry로 나누고 시각 회귀·핵심 safe E2E를 확대한다.
+6. API payload와 Supabase row부터 JSDoc/checkJs 또는 schema 기반 타입 계약을 도입한다.

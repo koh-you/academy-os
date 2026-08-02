@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const teacherViewOutletSource = await readFile(new URL("../src/app/TeacherViewOutlet.js", import.meta.url), "utf8");
 const viewSource = await readFile(
   new URL("../src/domains/lessons/LessonCalendarView.jsx", import.meta.url),
   "utf8"
@@ -74,7 +75,7 @@ assert.ok(
   appSource.includes("attendanceSyncStatus={attendanceSyncStatus}") &&
     appSource.includes("selectedCalendarDayRef={selectedCalendarDayRef}") &&
     appSource.includes("showMonthlyRegularLessonOpen={!isMonthlyRegularLessonOpened") &&
-    appSource.includes("onShiftMonth={handleCalendarMonthShift}"),
+    teacherViewOutletSource.includes("onShiftMonth: actions.handleCalendarMonthShift"),
   "App must preserve attendance sync, focus ownership, and monthly regular opening controls"
 );
 assert.ok(cssSource.includes(".lessonCalendarMonthNavigation"));
