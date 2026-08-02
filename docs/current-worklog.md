@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 App 3차 리팩터링 3-2 수업 등록·수정 모달 경계
+
+- App 내부의 수업 등록·수정 `LessonModal` local controller 328줄을 `src/domains/lessons/LessonModal.jsx`로 물리 이동했다. 모달은 draft·validation·저장 진행 표시와 하위 controlled component 조립만 소유한다.
+- App은 순수 날짜·시간·색상 resolver를 동결 runtime으로 주입하고, 실제 `/api/lessons/bulk` 저장·Supabase 재조회 대조·휴강 preflight·상태 반영은 기존 `handleAddLesson`/`handleUpdateLesson`/`saveLessonModalLessons` owner를 유지한다.
+- 이전 App controller와 새 controller의 runtime destructuring 이후 본문을 문자 단위로 대조해 동일함을 확인했다. 위치에 결합된 7개 boundary fixture와 scenario는 App의 단일 import, 새 local owner, App persistence owner를 각각 직접 검사하도록 교정했다.
+- `App.jsx`는 21,116줄·938,765 bytes로 줄었고 새 `LessonModal.jsx`는 379줄·12,709 bytes다. lazy loading 전이라 main JS는 1,649.42 kB, gzip 424.93 kB로 유지되어 chunk 절감은 3-7 대상이다.
+- 검증: runtime lint, lesson fast 9/9, 수업 모달 전용 14개와 저장·명단·정규수업 전용 fixture, scenario 816/816, `check:fast`, production 816/816 82.0초, build 358 modules, Worktree 격리 safe browser 9/9를 통과했다. 운영 데이터·실제 알림·AI 호출·운영 SQL은 사용하지 않았다.
+
 ## 2026-08-02 App 3차 리팩터링 3-2 수업일지 effect adapter 경계
 
 - Teacher Lesson Hub에서 Lesson Journal Detail로 낱개 전달되던 persistence callback 10개와 provider/transport callback 7개를 `lessonJournalEffectAdapter`의 `persistence`·`provider` 두 표면으로 묶었다. 실제 Solapi 예약·취소까지 조정하는 알림 계획 적용은 provider 표면에 분류했다. Hub의 직접 callback 표면은 11개 줄었고 25줄 순수 adapter 한 개로 대체됐다.

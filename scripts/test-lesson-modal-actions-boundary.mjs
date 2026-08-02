@@ -9,6 +9,10 @@ const actionsSource = await readFile(
   new URL("../src/domains/lessons/LessonModalActions.jsx", import.meta.url),
   "utf8"
 );
+const modalSource = await readFile(
+  new URL("../src/domains/lessons/LessonModal.jsx", import.meta.url),
+  "utf8"
+);
 
 for (const requiredSource of [
   "export function LessonModalActions({",
@@ -50,16 +54,16 @@ for (const forbiddenSource of [
 }
 
 assert.ok(
-  appSource.includes(
-    'import { LessonModalActions } from "../domains/lessons/LessonModalActions.jsx";'
+  modalSource.includes(
+    'import { LessonModalActions } from "./LessonModalActions.jsx";'
   ),
-  "App must import the extracted modal actions"
+  "LessonModal must import the controlled modal actions"
 );
 assert.ok(
-  appSource.includes("<LessonModalActions"),
-  "App must render the extracted modal actions"
+  modalSource.includes("<LessonModalActions"),
+  "LessonModal must render the controlled modal actions"
 );
-for (const appOwnedSource of [
+for (const modalOwnedSource of [
   "onSave={submitLesson}",
   "onClose={onClose}",
   "saveMessage={saveMessage}",
@@ -68,9 +72,11 @@ for (const appOwnedSource of [
   "isSaved={isSaved}"
 ]) {
   assert.ok(
-    appSource.includes(appOwnedSource),
-    `App must retain save ownership through ${appOwnedSource}`
+    modalSource.includes(modalOwnedSource),
+    `LessonModal must retain local save-state ownership through ${modalOwnedSource}`
   );
 }
+
+assert.ok(appSource.includes('import { LessonModal } from "../domains/lessons/LessonModal.jsx";'));
 
 console.log("lesson modal actions controlled boundary passed");

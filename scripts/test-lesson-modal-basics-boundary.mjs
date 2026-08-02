@@ -9,6 +9,10 @@ const basicsSource = await readFile(
   new URL("../src/domains/lessons/LessonModalBasics.jsx", import.meta.url),
   "utf8"
 );
+const modalSource = await readFile(
+  new URL("../src/domains/lessons/LessonModal.jsx", import.meta.url),
+  "utf8"
+);
 
 for (const requiredSource of [
   "export function LessonModalBasics({",
@@ -63,16 +67,16 @@ for (const forbiddenSource of [
 }
 
 assert.ok(
-  appSource.includes(
-    'import { LessonModalBasics } from "../domains/lessons/LessonModalBasics.jsx";'
+  modalSource.includes(
+    'import { LessonModalBasics } from "./LessonModalBasics.jsx";'
   ),
-  "App must import the extracted basics component"
+  "LessonModal must import the controlled basics component"
 );
 assert.ok(
-  appSource.includes("<LessonModalBasics"),
-  "App must render the extracted basics component"
+  modalSource.includes("<LessonModalBasics"),
+  "LessonModal must render the controlled basics component"
 );
-for (const appOwnedSource of [
+for (const modalOwnedSource of [
   "lessonType={lessonType}",
   "onLessonTypeChange={handleLessonTypeChange}",
   "onClassTemplateChange={handleTemplateChange}",
@@ -83,9 +87,11 @@ for (const appOwnedSource of [
   "onEndTimeChange={setEndTime}"
 ]) {
   assert.ok(
-    appSource.includes(appOwnedSource),
-    `App must retain draft ownership through ${appOwnedSource}`
+    modalSource.includes(modalOwnedSource),
+    `LessonModal must retain local draft ownership through ${modalOwnedSource}`
   );
 }
+
+assert.ok(appSource.includes('import { LessonModal } from "../domains/lessons/LessonModal.jsx";'));
 
 console.log("lesson modal basics controlled boundary passed");

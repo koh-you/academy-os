@@ -9,6 +9,10 @@ const pickerSource = await readFile(
   new URL("../src/domains/lessons/LessonModalStudentPicker.jsx", import.meta.url),
   "utf8"
 );
+const modalSource = await readFile(
+  new URL("../src/domains/lessons/LessonModal.jsx", import.meta.url),
+  "utf8"
+);
 
 for (const requiredSource of [
   "export function LessonModalStudentPicker({",
@@ -56,25 +60,27 @@ for (const forbiddenSource of [
 }
 
 assert.ok(
-  appSource.includes(
-    'import { LessonModalStudentPicker } from "../domains/lessons/LessonModalStudentPicker.jsx";'
+  modalSource.includes(
+    'import { LessonModalStudentPicker } from "./LessonModalStudentPicker.jsx";'
   ),
-  "App must import the extracted student picker"
+  "LessonModal must import the controlled student picker"
 );
 assert.ok(
-  appSource.includes("<LessonModalStudentPicker"),
-  "App must render the extracted student picker"
+  modalSource.includes("<LessonModalStudentPicker"),
+  "LessonModal must render the controlled student picker"
 );
-for (const appOwnedHandler of [
+for (const modalOwnedHandler of [
   "function selectVisibleLessonModalStudents()",
   "function selectLessonModalStudentGroup(groupStudents)",
   "function deselectLessonModalStudentGroup(groupStudents)",
   "function toggleLessonModalStudent(studentId, isSelected)"
 ]) {
   assert.ok(
-    appSource.includes(appOwnedHandler),
-    `App must retain selection state ownership through ${appOwnedHandler}`
+    modalSource.includes(modalOwnedHandler),
+    `LessonModal must retain selection state ownership through ${modalOwnedHandler}`
   );
 }
+
+assert.ok(appSource.includes('import { LessonModal } from "../domains/lessons/LessonModal.jsx";'));
 
 console.log("lesson modal student picker controlled boundary passed");

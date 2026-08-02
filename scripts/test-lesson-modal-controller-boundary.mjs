@@ -5,19 +5,30 @@ const appSource = await readFile(
   new URL("../src/app/App.jsx", import.meta.url),
   "utf8"
 );
-const controllerStart = appSource.indexOf("function LessonModal({");
-const controllerEnd = appSource.indexOf(
-  "\nfunction parseCsvRows",
-  controllerStart
+const modalSource = await readFile(
+  new URL("../src/domains/lessons/LessonModal.jsx", import.meta.url),
+  "utf8"
 );
+const controllerStart = modalSource.indexOf("export function LessonModal({");
+const controllerEnd = modalSource.length;
 
-assert.ok(controllerStart >= 0, "App must retain the LessonModal local controller");
+assert.ok(controllerStart >= 0, "lesson domain must own the LessonModal local controller");
 assert.ok(
   controllerEnd > controllerStart,
-  "LessonModal controller boundary must end before parseCsvRows"
+  "LessonModal controller boundary must remain readable"
 );
 
-const controllerSource = appSource.slice(controllerStart, controllerEnd);
+const controllerSource = modalSource.slice(controllerStart, controllerEnd);
+
+assert.ok(
+  appSource.includes('import { LessonModal } from "../domains/lessons/LessonModal.jsx";'),
+  "App must import the extracted LessonModal controller"
+);
+assert.equal(
+  appSource.includes("function LessonModal("),
+  false,
+  "App must not retain a duplicate LessonModal controller"
+);
 
 for (const requiredSource of [
   "useState",
