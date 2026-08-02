@@ -37,6 +37,21 @@ test("safe preview opens the login screen without runtime errors", async ({ page
   expect(pageErrors).toEqual([]);
 });
 
+test("notification and special lecture screens render through the extracted boundary", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+  const navigation = page.getByRole("navigation", { name: "주요 화면" });
+
+  await navigation.getByRole("button", { name: /알림관리/ }).click();
+  await expect(page.getByRole("heading", { name: "알림관리" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "개별 발송" })).toBeVisible();
+
+  await navigation.getByRole("button", { name: /특강관리/ }).click();
+  await expect(page.getByRole("heading", { name: "특강관리" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "특강 안내문" })).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
 test("withdrawn absence candidate can reach and complete safe makeup cancellation", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);

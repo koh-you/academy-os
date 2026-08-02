@@ -27,7 +27,7 @@ export const teacherViewContracts = Object.freeze(teacherViewContractDefinitions
 
 export const teacherViewIds = Object.freeze(teacherViewContracts.map(({ id }) => id));
 
-export function createTeacherViewAdapters({ actions, components, models }) {
+export function createTeacherViewAdapters({ actions, components, models, runtimeBindings = {} }) {
   return {
     lessons: {
       Component: components.TeacherLessonHubV2,
@@ -111,6 +111,8 @@ export function createTeacherViewAdapters({ actions, components, models }) {
         notificationJobs: models.notificationJobs,
         notificationJobsStatus: models.notificationJobsStatus,
         notificationLogs: models.notificationLogs,
+        runtime: runtimeBindings.notificationCenter,
+        SpecialLectureNoticePanel: runtimeBindings.SpecialLectureNoticePanel,
         pageTitle: "특강관리",
         specialLectureApplications: models.specialLectureApplications,
         specialLectureEnrollments: models.specialLectureEnrollments,
@@ -342,6 +344,8 @@ export function createTeacherViewAdapters({ actions, components, models }) {
         notificationJobs: models.notificationJobs,
         notificationJobsStatus: models.notificationJobsStatus,
         notificationLogs: models.notificationLogs,
+        runtime: runtimeBindings.notificationCenter,
+        SpecialLectureNoticePanel: runtimeBindings.SpecialLectureNoticePanel,
         onCancelNotificationJob: actions.handleCancelNotificationJob,
         specialLectureGuides: models.specialLectureGuides,
         specialLectureGuideSaveState: models.specialLectureGuideSaveState,

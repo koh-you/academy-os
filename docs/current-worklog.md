@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 App 3차 리팩터링 3-1 Notification Center 화면 분리
+
+- `App.jsx` 내부의 Notification Center top-level 405줄을 `src/domains/notifications/NotificationCenter.jsx`로 이동했다. App은 명시적 `runtimeBindings`로 기존 날짜·표시 helper와 특강 panel을 주입하며 저장·예약·취소·reconcile 계약은 바꾸지 않았다.
+- `App.jsx`는 22,912줄·1,011,179 bytes에서 22,497줄·995,166 bytes로 줄었다. 새 도메인 component는 456줄·16,909 bytes다. 아직 lazy loading 전이므로 main JS 크기는 약 1.64 MB로 유지된다.
+- 검증: notification fast 5/5, teacher view adapter, runtime lint, scenario 812/812, `check:fast`, production 812/812 84.3초, build 353 modules, Notification Center·특강관리 동선을 추가한 Worktree 격리 safe browser 9/9를 통과했다. 기본 5173 포트의 기존 preview를 재사용한 최초 smoke는 오래된 bundle 때문에 4건 실패했고 새 격리 포트 재실행으로 코드 회귀가 아님을 확인했다.
+- 운영 데이터 쓰기·실제 알림 발송/예약/취소·운영 SQL·유료 호출은 없다.
+
 ## 2026-08-02 App 3차 리팩터링 3-0 기준선·검증 경로
 
 - 최신 main `16f8c4ca`에서 `App.jsx` 22,912줄·1,011,179 bytes, main JS 1,642.41 kB, 전체 production 86.19초를 기준선으로 측정했다.

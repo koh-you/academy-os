@@ -41,6 +41,7 @@
 - `App.jsx`에 남은 큰 화면 정의를 도메인 파일로 옮긴다.
 - 우선순위는 Notification Center, Teacher Lesson Hub, Lesson Journal Detail이다.
 - 상태 owner와 저장·발송 handler 계약은 바꾸지 않고 props/callback 조립만 이동한다.
+- 진행: Notification Center top-level 1차 단위는 `src/domains/notifications/NotificationCenter.jsx`로 이동했다. App 전용 날짜·표시 helper는 명시적 `runtimeBindings`로 주입하고, 특강 panel은 다음 notification 단위까지 App 정의를 유지한다.
 
 ### 3-2 Lesson 경계
 
