@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 App 3차 리팩터링 3-6 월별 정산 controller 경계
+
+- `MonthlySettlementPanel.jsx`의 선택 월, localStorage recovery draft, 학생 설정 변경, 계산 row/summary, PDF model 호출과 교사 확정값 저장 조립을 `useMonthlySettlementController.js`로 이동했다. 화면은 달력과 정산 표 render를 유지하며 787줄·35,527 bytes에서 541줄·26,442 bytes로 줄었다.
+- App의 `handleSaveMonthlySettlementMonth`가 기존대로 현재 app_state 조회, Supabase 저장, 재조회 snapshot 대조와 App 상태 반영을 소유한다. 금액·횟수·신입·퇴원·휴강·연결 보강 계산 함수는 변경하지 않았다.
+- 저장 중에도 입력 가능한 기존 화면에서 오래된 성공 응답이 후속 수정본을 지우는 회귀를 확인했다. 요청 월과 draft revision이 같은 성공만 persisted 값으로 교체하고, 이후 변경은 local draft와 dirty 상태를 보존해 `저장 완료 · 이후 변경 저장 필요`로 재저장을 안내한다. 다른 월 응답과 오래된 실패도 활성 draft/local recovery에 적용하지 않는다.
+- 전용 TARGET/CONTROL fixture를 settlement fast와 production에 연결하고, 안전 API의 app_state 응답을 지연시켜 `4회 저장 → 저장 중 5회 수정 → 5회 보존 안내 → 재저장 → PDF 5회`를 브라우저에서 확인했다. 검증: runtime lint, settlement fast 6/6, scenario/production 821/821, `check:fast`, build 366 modules, Worktree 격리 safe browser 10/10. 운영 데이터·실제 알림·AI 호출·SQL은 사용하지 않았다.
+
 ## 2026-08-02 App 3차 리팩터링 3-5 알림 controller 경계
 
 - `NotificationCenter.jsx`에 남아 있던 공지 수신자 선택, local 작성 draft, 이력 필터·삭제, Solapi 취소/reconcile, API request binding과 compose/history/tab prop 조립을 `useNotificationNoticeController.js`로 물리 이동했다. 화면은 특강 callback 조립과 render만 소유한다.

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
@@ -7,29 +7,19 @@ import { Modal } from "../../shared/components/Modal.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import {
-  applyMonthlySettlementJournalMode,
-  buildMonthlySettlementSummary,
-  buildStudentSettlementRow,
   formatSettlementHours,
   formatSettlementPercent,
   formatSettlementWon,
-  getDefaultMonthlySettlementMonthKey,
   getDateDayKey,
-  getFixedAmountAfterScheduleChange,
   getMonthlySettlementRateLabel,
   getMonthRange,
-  getMonthlySettlementStudents,
   getNewStudentSessionRateLabel,
   getSettlementAttendanceLabel,
   getSettlementAttendanceTone,
   listMonthDates,
-  monthlySettlementFactor,
-  normalizeMonthlySettlementStudentSetting
+  monthlySettlementFactor
 } from "./monthlySettlement.js";
-import {
-  buildMonthlySettlementReportModel,
-  openMonthlySettlementReportPdf
-} from "./monthlySettlementReport.js";
+import { useMonthlySettlementController } from "./useMonthlySettlementController.js";
 import "./monthlySettlement.css";
 
 const settlementModeOptions = [
@@ -38,74 +28,6 @@ const settlementModeOptions = [
   { label: "퇴원생 · 1일~마지막 수업", value: "withdrawn" }
 ];
 const calendarDayLabels = ["일", "월", "화", "수", "목", "금", "토"];
-const localDraftPrefix = "academy-os.monthlyInstructorSettlementDraft.v1";
-
-function getLocalDraftKey(monthKey) {
-  return `${localDraftPrefix}.${monthKey}`;
-}
-
-function readLocalDraft(monthKey, savedUpdatedAt = "") {
-  try {
-    const stored = JSON.parse(window.localStorage.getItem(getLocalDraftKey(monthKey)) || "null");
-    if (!stored || stored.baseUpdatedAt !== savedUpdatedAt || stored.month?.monthKey !== monthKey) return null;
-    return stored.month;
-  } catch {
-    return null;
-  }
-}
-
-function writeLocalDraft(month, baseUpdatedAt = "") {
-  try {
-    window.localStorage.setItem(getLocalDraftKey(month.monthKey), JSON.stringify({
-      baseUpdatedAt,
-      month
-    }));
-  } catch {
-    // localStorage is a recovery aid; explicit Supabase save remains authoritative.
-  }
-}
-
-function clearLocalDraft(monthKey) {
-  try {
-    window.localStorage.removeItem(getLocalDraftKey(monthKey));
-  } catch {
-    // Ignore unavailable localStorage.
-  }
-}
-
-function createMonthDraft({
-  classTemplates,
-  lessons,
-  monthKey,
-  savedMonth,
-  students
-}) {
-  const sourceSettings = savedMonth?.studentSettings && typeof savedMonth.studentSettings === "object"
-    ? savedMonth.studentSettings
-    : {};
-  const visibleStudents = getMonthlySettlementStudents({
-    lessons,
-    monthKey,
-    students
-  });
-  return {
-    monthKey,
-    studentSettings: {
-      ...sourceSettings,
-      ...Object.fromEntries(visibleStudents.map((student) => [
-        student.studentId,
-        applyMonthlySettlementJournalMode(sourceSettings[student.studentId], {
-          classTemplates,
-          lessons,
-          monthKey,
-          student
-        })
-      ]))
-    },
-    updatedAt: savedMonth?.updatedAt || ""
-  };
-}
-
 function MonthlySettlementCalendar({
   isDirty,
   monthKey,
@@ -264,199 +186,31 @@ export function MonthlySettlementPanel({
   settlementState,
   students = []
 }) {
-  const [selectedMonth, setSelectedMonth] = useState(getDefaultMonthlySettlementMonthKey);
-  const [draftMonth, setDraftMonth] = useState(null);
-  const [isDirty, setIsDirty] = useState(false);
-  const [selectedCalendarStudentId, setSelectedCalendarStudentId] = useState("");
-  const [saveMessage, setSaveMessage] = useState("");
-  const savedMonth = settlementState?.months?.[selectedMonth] ?? null;
-  const savedUpdatedAt = savedMonth?.updatedAt || "";
-
-  useEffect(() => {
-    const baseDraft = createMonthDraft({
-      classTemplates,
-      lessons,
-      monthKey: selectedMonth,
-      savedMonth,
-      students
-    });
-    const recoveredDraft = typeof window !== "undefined"
-      ? readLocalDraft(selectedMonth, savedUpdatedAt)
-      : null;
-    const resolvedDraft = recoveredDraft
-      ? createMonthDraft({
-          classTemplates,
-          lessons,
-          monthKey: selectedMonth,
-          savedMonth: recoveredDraft,
-          students
-        })
-      : baseDraft;
-    const hasNewStudents = Object.keys(baseDraft.studentSettings).some(
-      (studentId) => !savedMonth?.studentSettings?.[studentId]
-    );
-    const hasJournalAutoModeChanges = Object.entries(resolvedDraft.studentSettings).some(
-      ([studentId, setting]) =>
-        setting.modeSource === "lesson_journal" &&
-        (
-          savedMonth?.studentSettings?.[studentId]?.mode !== setting.mode ||
-          savedMonth?.studentSettings?.[studentId]?.modeSource !== "lesson_journal"
-        )
-    );
-    setDraftMonth(resolvedDraft);
-    setIsDirty(Boolean(recoveredDraft || !savedMonth || hasNewStudents || hasJournalAutoModeChanges));
-    setSaveMessage(
-      recoveredDraft
-        ? hasJournalAutoModeChanges
-          ? "저장하지 않은 월별 정산 작업을 복구하고, 수업일지·퇴원일 기준 정산 방식을 자동 반영했습니다."
-          : "저장하지 않은 월별 정산 작업을 복구했습니다."
-        : hasJournalAutoModeChanges
-          ? "수업일지 최초 수업과 학생 퇴원일을 기준으로 신입·퇴원 정산 방식을 자동 반영했습니다. 확인 후 저장해 주세요."
-        : !savedMonth
-          ? "이 달의 기본 정산 스냅샷을 확인한 뒤 저장해 주세요."
-          : hasNewStudents ? "이 달의 기존 스냅샷에 새 학생이 추가되었습니다. 확인 후 저장해 주세요." : ""
-    );
-  }, [classTemplates, lessons, savedMonth, savedUpdatedAt, selectedMonth, students]);
-
-  useEffect(() => {
-    setSelectedCalendarStudentId("");
-  }, [selectedMonth]);
-
-  const visibleStudents = useMemo(
-    () => getMonthlySettlementStudents({
-      lessons,
-      monthKey: selectedMonth,
-      students
-    }),
-    [lessons, selectedMonth, students]
-  );
-  const rows = useMemo(() => visibleStudents.map((student) => buildStudentSettlementRow({
+  const {
+    activeRows,
+    effectiveSaveState,
+    excludedRows,
+    handleModeChange,
+    handleOpenReportPdf,
+    handleSave,
+    isDirty,
+    rows,
+    saveMessage,
+    selectedCalendarRow,
+    selectedMonth,
+    setSelectedCalendarStudentId,
+    setSelectedMonth,
+    summary,
+    updateStudentSetting
+  } = useMonthlySettlementController({
     classTemplates,
     lessons,
-    monthKey: selectedMonth,
+    onSaveMonth,
     records,
-    setting: draftMonth?.studentSettings?.[student.studentId],
-    student
-  })), [classTemplates, draftMonth, lessons, records, selectedMonth, visibleStudents]);
-  const activeRows = useMemo(
-    () => rows.filter((row) => !row.setting.excluded),
-    [rows]
-  );
-  const excludedRows = useMemo(
-    () => rows.filter((row) => row.setting.excluded),
-    [rows]
-  );
-  const summary = useMemo(
-    () => buildMonthlySettlementSummary(rows),
-    [rows]
-  );
-  const selectedCalendarRow = rows.find((row) => row.student.studentId === selectedCalendarStudentId) ?? null;
-  const effectiveSaveState = saveState === "saving"
-    ? "saving"
-    : saveState === "failed"
-      ? "failed"
-      : isDirty
-        ? "dirty"
-        : saveState === "saved" ? "saved" : "idle";
-
-  function updateStudentSetting(studentId, field, value) {
-    setDraftMonth((current) => {
-      if (!current) return current;
-      const student = students.find((item) => item.studentId === studentId) ?? {};
-      const currentSetting = normalizeMonthlySettlementStudentSetting(
-        current.studentSettings?.[studentId],
-        { classTemplates, monthKey: selectedMonth, student }
-      );
-      const nextSetting = {
-        ...currentSetting,
-        [field]: value
-      };
-      if (field === "mode") {
-        nextSetting.modeSource = "teacher";
-      }
-      if (field === "scheduleText") {
-        nextSetting.fixedAmount = getFixedAmountAfterScheduleChange({
-          classTemplates,
-          currentFixedAmount: currentSetting.fixedAmount,
-          nextScheduleText: value,
-          previousScheduleText: currentSetting.scheduleText,
-          student
-        });
-      }
-      const nextMonth = {
-        ...current,
-        studentSettings: {
-          ...current.studentSettings,
-          [studentId]: nextSetting
-        }
-      };
-      writeLocalDraft(nextMonth, savedUpdatedAt);
-      return nextMonth;
-    });
-    setIsDirty(true);
-    setSaveMessage("변경사항이 있습니다. 월별 스냅샷으로 저장해 주세요.");
-  }
-
-  function handleModeChange(row, mode) {
-    updateStudentSetting(row.student.studentId, "mode", mode);
-  }
-
-  function handleOpenReportPdf() {
-    try {
-      openMonthlySettlementReportPdf(buildMonthlySettlementReportModel({
-        monthKey: selectedMonth,
-        rows: activeRows
-      }));
-    } catch (error) {
-      setSaveMessage(error?.message || "PDF 인쇄 창을 열지 못했습니다.");
-    }
-  }
-
-  async function handleSave() {
-    if (!draftMonth || !onSaveMonth || saveState === "saving") return;
-    const rowByStudentId = new Map(rows.map((row) => [row.student.studentId, row]));
-    const monthRange = getMonthRange(selectedMonth);
-    const normalizedStudentSettings = {
-      ...draftMonth.studentSettings,
-      ...Object.fromEntries(visibleStudents.map((student) => [
-        student.studentId,
-        (() => {
-          const normalizedSetting = normalizeMonthlySettlementStudentSetting(
-            draftMonth.studentSettings?.[student.studentId],
-            { classTemplates, monthKey: selectedMonth, student }
-          );
-          const row = rowByStudentId.get(student.studentId);
-          return {
-            ...normalizedSetting,
-            endDate: normalizedSetting.mode === "withdrawn" ||
-              (normalizedSetting.mode === "new" && row?.isNewWithdrawnPeriod)
-              ? row?.periodEnd || ""
-              : monthRange.endDate,
-            startDate: normalizedSetting.mode === "new"
-              ? row?.periodStart || ""
-              : monthRange.startDate
-          };
-        })()
-      ]))
-    };
-    const nextMonth = {
-      ...draftMonth,
-      studentSettings: normalizedStudentSettings,
-      updatedAt: new Date().toISOString()
-    };
-    setSaveMessage("Supabase 저장 후 같은 월을 다시 조회해 확인하고 있습니다.");
-    try {
-      const persistedMonth = await onSaveMonth(nextMonth);
-      clearLocalDraft(selectedMonth);
-      setDraftMonth(persistedMonth);
-      setIsDirty(false);
-      setSaveMessage("Supabase 재조회 값이 현재 월별 정산과 일치합니다.");
-    } catch (error) {
-      writeLocalDraft(nextMonth, savedUpdatedAt);
-      setIsDirty(true);
-      setSaveMessage(error?.message || "저장에 실패했습니다. 작업 내용은 이 기기의 임시 초안에 남아 있습니다.");
-    }
-  }
+    saveState,
+    settlementState,
+    students
+  });
 
   return (
     <section className="panel fullPanel monthlySettlementPanel">
