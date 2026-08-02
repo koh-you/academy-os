@@ -1,3 +1,4 @@
+import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createLessonJournalExpectedReservationItems } from "../src/domains/lessons/lessonJournalExpectedReservationItems.js";
@@ -189,7 +190,7 @@ assert.deepEqual(defaultCalls.scheduledDates, [
   ["lesson_TARGET", 0, { allowPastFallback: false }]
 ]);
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const appSource = await readAppWithLessonJournalSource(import.meta.url);
 const builderSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalExpectedReservationItems.js", import.meta.url),
   "utf8"

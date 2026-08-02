@@ -3,9 +3,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveLessonJournalEditableText } from "../src/domains/lessons/lessonJournalEditableFieldsModel.js";
+import { readAppWithLessonJournalSourceSync } from "./lessonJournalTestSource.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
-const source = fs.readFileSync(path.join(scriptDir, "..", "src", "app", "App.jsx"), "utf8");
+const source = readAppWithLessonJournalSourceSync(import.meta.url);
 const editableFieldsModelSource = fs.readFileSync(
   path.join(scriptDir, "..", "src", "domains", "lessons", "lessonJournalEditableFieldsModel.js"),
   "utf8",

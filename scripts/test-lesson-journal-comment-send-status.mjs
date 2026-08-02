@@ -1,3 +1,4 @@
+import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { getLessonJournalEffectiveCommentSendStatus } from "../src/domains/lessons/lessonJournalCommentSendStatus.js";
@@ -110,7 +111,7 @@ assert.deepEqual(
   targetSnapshot
 );
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const appSource = await readAppWithLessonJournalSource(import.meta.url);
 const selectorSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalCommentSendStatus.js", import.meta.url),
   "utf8"

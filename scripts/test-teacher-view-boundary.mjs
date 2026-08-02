@@ -125,10 +125,11 @@ assert.equal(TeacherViewOutlet({ activeView: "studentPortal", adapters }), null)
 assert.equal(TeacherViewOutlet({ activeView: "reports", adapters }), null);
 assert.equal(TeacherViewOutlet({ activeView: "unknown", adapters }), null);
 
-const [appSource, outletSource, teacherLessonHubSource] = await Promise.all([
+const [appSource, outletSource, teacherLessonHubSource, lessonJournalDetailSource] = await Promise.all([
   readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8"),
   readFile(new URL("../src/app/TeacherViewOutlet.js", import.meta.url), "utf8"),
-  readFile(new URL("../src/domains/lessons/TeacherLessonHubV2.jsx", import.meta.url), "utf8")
+  readFile(new URL("../src/domains/lessons/TeacherLessonHubV2.jsx", import.meta.url), "utf8"),
+  readFile(new URL("../src/domains/lessons/LessonJournalDetail.jsx", import.meta.url), "utf8")
 ]);
 assert.equal(appSource.includes('from "./TeacherViewOutlet.js"'), true);
 assert.equal(appSource.includes('import { TeacherLessonHubV2 } from "../domains/lessons/TeacherLessonHubV2.jsx"'), true);
@@ -160,9 +161,15 @@ for (const [, modelName] of outletSource.matchAll(/models\.([A-Za-z0-9_]+)/g)) {
 for (const forbiddenToken of ["fetch(", "postJson(", "getJsonWithTimeout(", "localStorage", '"/api/']) {
   assert.equal(outletSource.includes(forbiddenToken), false, `outlet must not own ${forbiddenToken}`);
   assert.equal(teacherLessonHubSource.includes(forbiddenToken), false, `lesson hub screen must not own ${forbiddenToken}`);
+  assert.equal(lessonJournalDetailSource.includes(forbiddenToken), false, `lesson journal screen must not own ${forbiddenToken}`);
 }
 assert.equal(teacherLessonHubSource.includes("export function TeacherLessonHubV2("), true);
 assert.equal(teacherLessonHubSource.includes("onSaveLessonJournalDrafts={onSaveLessonJournalDrafts}"), true);
 assert.equal(teacherLessonHubSource.includes("onScheduleLessonNotificationsAt={onScheduleLessonNotificationsAt}"), true);
+assert.equal(lessonJournalDetailSource.includes("export function LessonJournalDetail("), true);
+assert.equal(lessonJournalDetailSource.includes("loadLessonJournalReservationAudit({"), true);
+assert.equal(lessonJournalDetailSource.includes("onSaveLessonJournalDrafts?.("), true);
+assert.equal(appSource.includes("function loadLessonJournalReservationAudit({ date, lessonId })"), true);
+assert.equal(appSource.includes("return getJsonWithTimeout(path, 12000,"), true);
 
 console.log("teacher view contracts, callback adapters, and App ownership boundary fixtures passed");

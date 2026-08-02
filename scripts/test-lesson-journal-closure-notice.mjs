@@ -1,3 +1,4 @@
+import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createLessonJournalClosureNoticeModel } from "../src/domains/lessons/lessonJournalClosureNoticeModel.js";
@@ -62,7 +63,7 @@ assert.equal(
   "원 휴강 연결 확인 필요"
 );
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const appSource = await readAppWithLessonJournalSource(import.meta.url);
 const componentSource = await readFile(
   new URL("../src/domains/lessons/LessonJournalClosureNotice.jsx", import.meta.url),
   "utf8"

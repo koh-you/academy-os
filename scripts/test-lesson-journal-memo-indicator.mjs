@@ -1,3 +1,4 @@
+import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createLessonJournalMemoIndicatorModel } from "../src/domains/lessons/lessonJournalMemoIndicatorModel.js";
@@ -41,7 +42,7 @@ const emptyControl = createLessonJournalMemoIndicatorModel({});
 assert.equal(emptyControl.memoButtonDescription, "현재 메모 미작성 · 이전 메모 없음 · 작성창 가져오기 안 함");
 assert.equal(emptyControl.hasCurrentMemo, false);
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const appSource = await readAppWithLessonJournalSource(import.meta.url);
 const modelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalMemoIndicatorModel.js", import.meta.url),
   "utf8"

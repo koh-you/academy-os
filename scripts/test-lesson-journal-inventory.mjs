@@ -1,7 +1,8 @@
+import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const appSource = await readAppWithLessonJournalSource(import.meta.url);
 const saveViewModelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalSaveViewModel.js", import.meta.url),
   "utf8"
@@ -284,13 +285,15 @@ for (const draftContract of [
 }
 
 for (const directSideEffect of [
-  "/api/notification-jobs?date=",
+  "loadLessonJournalReservationAudit({",
   "onCancelNotificationJob?.(",
   "onApplyLessonNotificationPlan(lesson.lessonId)",
   "onReconcileSolapiNotificationResults?.("
 ]) {
   assert.ok(journalSource.includes(directSideEffect), `missing journal side-effect boundary: ${directSideEffect}`);
 }
+assert.ok(appSource.includes("function loadLessonJournalReservationAudit({ date, lessonId })"));
+assert.ok(appSource.includes("/api/notification-jobs?date="));
 
 for (const removedDirectProviderBoundary of [
   "/api/solapi/groups?date=",

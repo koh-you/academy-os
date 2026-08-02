@@ -1,7 +1,8 @@
+import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const appSource = await readAppWithLessonJournalSource(import.meta.url);
 const detailStart = appSource.indexOf("function LessonJournalDetail(");
 const detailEnd = appSource.indexOf("\nfunction PreparationMemoModal(", detailStart);
 const detailSource = appSource.slice(detailStart, detailEnd);
@@ -39,7 +40,7 @@ for (const binding of [
 }
 
 for (const appOwnedBoundary of [
-  "getJsonWithTimeout(osPath, 12000,",
+  "loadLessonJournalReservationAudit({",
   "OS 예약 기록 조회 실패:",
   "window.confirm(\"이 알림톡 예약 1건을 취소할까요?",
   "onCancelNotificationJob?.(job,",
@@ -50,6 +51,8 @@ for (const appOwnedBoundary of [
 ]) {
   assert.ok(detailSource.includes(appOwnedBoundary), `reservation boundary must remain in App: ${appOwnedBoundary}`);
 }
+assert.ok(appSource.includes("function loadLessonJournalReservationAudit({ date, lessonId })"));
+assert.ok(appSource.includes("return getJsonWithTimeout(path, 12000,"));
 
 for (const removedProviderBoundary of [
   "cancelSolapiGroup",

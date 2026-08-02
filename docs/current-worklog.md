@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 App 3차 리팩터링 3-1 Lesson Journal Detail 화면 분리
+
+- `App.jsx` 내부의 수업일지 상세 화면 846줄을 `src/domains/lessons/LessonJournalDetail.jsx`로 이동했다. 상세 화면은 기존 draft·overlay·예약 표시 hook과 파생 view model만 조립하며 API·localStorage를 직접 사용하지 않는다.
+- 수업일지 저장·수업 삭제·알림 예약/취소/발송/reconcile callback은 기존 App/teacher adapter owner를 유지했다. 화면 안에 있던 OS 예약 기록 GET만 `loadLessonJournalReservationAudit` App transport로 옮겨 주입했다.
+- `App.jsx`는 22,251줄·985,836 bytes에서 21,455줄·950,993 bytes로 줄었다. 새 상세 화면은 948줄·39,995 bytes다. lazy loading 전이라 main JS는 1,646.67 kB, gzip 424.14 kB로 유지되어 chunk 절감은 3-7 대상이다.
+- 구현 위치에 결합된 수업일지 source fixture는 공통 소스 helper로 연결하고, 새 화면의 물리 분리·App transport·저장/알림 callback 계약을 scenario에 추가했다. 과거 구조를 우연히 통과하던 closeout 문구도 새 경계를 직접 검사하도록 교정했다.
+- 검증: lesson fast 7/7, 수업일지 관련 전용 fixture, teacher view boundary, runtime lint, scenario 814/814, `check:fast`, production 814/814 84.3초, build 355 modules, Worktree 격리 safe browser 9/9를 통과했다. 운영 데이터·실제 알림·운영 SQL·유료 호출은 사용하지 않았다.
+
 ## 2026-08-02 App 3차 리팩터링 3-1 Teacher Lesson Hub 화면 분리
 
 - `App.jsx` 내부의 Teacher Lesson Hub 화면 조립 260줄을 `src/domains/lessons/TeacherLessonHubV2.jsx`로 이동했다. 달력 filter·focus·keyboard navigation은 화면 local state로 유지하고, 수업일지 상세·보충 상세·시험대비 상세와 날짜 helper는 명시적 `teacherLessonHubRuntime`으로 주입한다.

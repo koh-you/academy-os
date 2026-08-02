@@ -1,3 +1,4 @@
+import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createLessonJournalDraftLifecycleInitialState } from "../src/domains/lessons/useLessonJournalDraftLifecycle.js";
@@ -44,7 +45,7 @@ assert.notEqual(secondInitialState.journalHomeworkDrafts, lessonBState.journalHo
 assert.notEqual(secondInitialState.journalMakeupTaskDrafts, lessonBState.journalMakeupTaskDrafts);
 assert.notEqual(secondInitialState.journalRecordDrafts, lessonBState.journalRecordDrafts);
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const appSource = await readAppWithLessonJournalSource(import.meta.url);
 const lifecycleSource = await readFile(
   new URL("../src/domains/lessons/useLessonJournalDraftLifecycle.js", import.meta.url),
   "utf8"

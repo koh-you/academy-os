@@ -5,6 +5,7 @@ import { defaultAttendanceSettings } from "./attendanceSettings.js";
 import { LessonCalendarView } from "./LessonCalendarView.jsx";
 import { createLessonCalendarViewModel } from "./lessonCalendarModel.js";
 import { LessonJournalErrorBoundary } from "./LessonJournalErrorBoundary.jsx";
+import { LessonJournalDetail } from "./LessonJournalDetail.jsx";
 import { useLessonCalendarKeyboardNavigation } from "./useLessonCalendarKeyboardNavigation.js";
 
 export function TeacherLessonHubV2({
@@ -76,7 +77,6 @@ export function TeacherLessonHubV2({
   const {
     AcademyReminderPanel,
     ExamPrepLessonDetail,
-    LessonJournalDetail,
     LessonJournalFallback,
     SupplementMakeupLessonDetail,
     buildMonthDays,
@@ -86,6 +86,7 @@ export function TeacherLessonHubV2({
     isExamPrepLesson,
     isLegacyExamPrepLesson,
     isSupplementMakeupTaskLesson,
+    lessonJournal,
     sortByTime
   } = runtime;
   const [lessonTypeFilter, setLessonTypeFilter] = useState("all");
@@ -210,6 +211,7 @@ export function TeacherLessonHubV2({
             onUpdateMakeupTask={onUpdateMakeupTask}
             onToggleStudentNotificationMute={onToggleStudentNotificationMute}
             records={records}
+            runtime={lessonJournal}
             saveStates={saveStates}
             students={students}
             templates={templates}

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { selectPreviousLessonMemoContext } from "../src/domains/lessons/lessonJournalPreviousMemoSelector.js";
+import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 
 const student = { studentId: "student_target" };
 const controlStudent = { studentId: "student_control" };
@@ -257,7 +258,7 @@ assert.equal(monthBoundaryContext.previousEditableRecord?.lessonMaterial, "7월 
 assert.equal(monthBoundaryContext.previousEditableRecord?.lessonProgress, "7월 최신 진도");
 assert.notEqual(monthBoundaryContext.previousEditableRecord?.lessonMaterial, "특강 CONTROL 교재");
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const appSource = await readAppWithLessonJournalSource(import.meta.url);
 assert.match(appSource, /selectPreviousLessonMemoContext\(\{/);
 assert.match(appSource, /previousMemoContext\.previousEditableRecord \?\? previousRecord/);
 assert.doesNotMatch(appSource, /function getPreviousLessonMemoContext\(student\)/);

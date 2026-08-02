@@ -6,6 +6,7 @@ import {
   isLessonRecordNotificationMuted,
   selectLessonStudentRecord
 } from "../src/domains/lessons/lessonNotificationJobSelectors.js";
+import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 
 assert.equal(
   createLessonNotificationJobId(
@@ -200,7 +201,7 @@ for (const preservedControl of [false, 0, ""]) {
   assert.equal(fallbackCallCount, 0);
 }
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const appSource = await readAppWithLessonJournalSource(import.meta.url);
 const selectorSource = await readFile(
   new URL("../src/domains/lessons/lessonNotificationJobSelectors.js", import.meta.url),
   "utf8"

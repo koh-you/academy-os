@@ -1,3 +1,4 @@
+import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createLessonJournalEditableFieldsModel } from "../src/domains/lessons/lessonJournalEditableFieldsModel.js";
@@ -62,7 +63,7 @@ assert.equal(fallbackControl[1].placeholder, "오늘 강의 내용");
 assert.equal(fallbackControl[1].value, "legacy 진도");
 assert.deepEqual(fallbackControl.map((field) => field.source), ["record", "record", "homework", "homework"]);
 
-const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const appSource = await readAppWithLessonJournalSource(import.meta.url);
 const componentSource = await readFile(
   new URL("../src/domains/lessons/LessonJournalEditableFields.jsx", import.meta.url),
   "utf8"
