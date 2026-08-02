@@ -6043,15 +6043,19 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request);
       const requestedStates = payload.states ?? payload;
+      const expectedUpdatedAt = payload.states ? payload.expectedUpdatedAt ?? null : null;
       const {
         examPostSubmissions: _examPostSubmissions,
         studentQuestions: _studentQuestions,
         ...safeStates
       } = requestedStates;
-      const result = await upsertAppState(safeStates);
+      const result = await upsertAppState(safeStates, { expectedUpdatedAt });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message
+      });
     }
     return;
   }
