@@ -58,6 +58,7 @@
 - 3-5 첫 단위에서 알림 이력·특강관리 화면에 전달되던 13개 callback을 `notificationEffectAdapter`의 history provider/transport와 특강 persistence/deletion/orchestration/navigation 표면으로 묶었다. 두 화면의 refresh identity와 App의 저장·재조회·Solapi effect owner, Notification Center 내부 공지 draft/request controller는 유지한다.
 - 3-5 두 번째 단위에서 공지 수신자·작성·이력·취소·reconcile 조립을 `useNotificationNoticeController`로 옮겼다. `NotificationCenter`는 469줄에서 144줄 render owner가 됐으며 local draft, 저장된 알림 이력, provider 상태와 실제 발송/예약/취소 경계를 유지한 채 3-5를 닫는다.
 - 3-6 첫 단위에서 월별 정산의 선택 월, local recovery draft, row/summary selector와 교사 확정값 저장 조립을 `useMonthlySettlementController`로 옮겼다. `MonthlySettlementPanel`은 787줄에서 541줄로 줄었고 App의 app_state 저장·Supabase 재조회 대조 owner는 유지한다. 저장 중 후속 입력은 month/revision guard로 보존해 재저장을 안내한다.
+- 3-6 closeout에서 월별 출결·수업 달력과 정규 정산 표를 `MonthlySettlementCalendar`·`MonthlySettlementRegularTable`로 분리했다. 두 JSX 본문은 기준 main과 문자 단위로 같고 state/effect/API/Storage가 없다. `MonthlySettlementPanel`은 184줄 화면 조립 owner가 됐으며 계산 controller와 App 저장·재조회 owner를 분리한 상태로 Settlement 경계를 닫는다.
 
 ## 폴더 상태
 
