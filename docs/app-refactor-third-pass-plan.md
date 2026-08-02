@@ -100,6 +100,8 @@
 - 상태 owner, 저장 원천, 외부 side effect, 오류 복구를 도메인별로 재대조한다.
 - source-string 위주의 검사는 관련 동작 fixture로 점진 교체한다.
 - 문서·queue를 정리하고 전체 production, build, safe browser, exact-head/main CI를 통과한다.
+- 완료: `docs/app-refactor-third-pass-closeout.md`에 session·lesson·supplement·student·notification·settlement·exam/settings의 화면/draft owner, authoritative 저장 원천, provider side effect와 오류 복구를 재대조했다. adapter가 API·Storage·React state를 소유하지 않는 구조 계약, 정산 local recovery와 notification/exam의 의도적 transport 예외, 21개 lazy 화면을 `test:third-pass-closeout`으로 고정했다.
+- 종료: 3-0 대비 App source 52% 이상, main/gzip 43.1%/45.3% 감소와 5개 fast 경로 10초 이내를 확인했다. 3차 리팩터링은 종료한다. 별도 제품 근거 없이 4차 리팩터링을 자동 시작하지 않는다.
 
 ## 종료 기준
 

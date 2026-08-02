@@ -66,6 +66,7 @@
 - 3-7 다섯 번째 단위에서 첫 화면·수업일지 운영 알림과 특강 안내문 보조 화면 3개를 `DashboardAuxiliaryPanels.jsx`로 분리해 shared lazy chunk로 연결했다. 화면 본문 42,078자는 runtime 주입을 제외하면 기준 main과 동일하고, 알림 저장·삭제와 특강 저장·삭제 callback owner는 유지했다. 초기 main JS는 999.16 kB, gzip 248.14 kB이며 App은 11,836줄·551,722 bytes다.
 - 3-7 여섯 번째 단위에서 시험 대비와 설정 화면을 각각 `ExamPrepCenter.jsx`, `SettingsCenter.jsx`로 분리해 별도 lazy chunk로 연결했다. helper와 설정 transport는 frozen runtime으로 App owner를 유지하며 화면 본문 6개 함수는 기준 main과 문자 단위로 동일하다. 초기 main JS는 956.13 kB, gzip 237.03 kB이며 App은 10,855줄·507,358 bytes로 줄어 Babel의 App 500 KB 경고가 사라졌다.
 - 3-7 마지막 단위에서 보충 전용 수업 상세와 수업 준비 메모를 `LessonNestedPanels.jsx`의 22.40 kB shared nested lazy chunk로 분리했다. 두 함수 본문은 runtime 주입을 제외하면 기준 main과 문자 단위로 동일하고 실제 일정 저장·알림 예약·보충 완료·메모 저장 callback owner는 유지했다. 초기 main은 934.69 kB, gzip 231.48 kB다. 3-0 대비 각각 43.1%·45.3% 감소하고 12개 물리 chunk·21개 lazy component 경로와 App Babel 경고 제거를 고정해 3-7을 닫는다.
+- 3-8 종료 감사에서 session·lesson·supplement·student·notification·settlement·exam/settings의 화면/draft owner, authoritative 저장 원천, provider side effect와 오류 복구를 재대조했다. 정산 local recovery, notification/exam transport 예외, effect adapter 순수성을 전용 fixture로 고정하고 3차 리팩터링 3-0~3-8을 완료 상태로 닫는다.
 
 ## 폴더 상태
 
@@ -76,8 +77,8 @@
 
 ## 다음 우선순위
 
-1. App 2차 리팩터링 Phase 1~5는 완료됐다. 3차 리팩터링은 3-0 기준선 뒤 `App.jsx` 내부 화면 정의의 물리적 분리부터 순서대로 진행한다.
-2. 3-7은 production main 43.1%·gzip 45.3% 감소, 12개 물리 lazy chunk, App Babel 500 KB 경고 제거로 닫혔다. 다음은 3-8 종료 감사에서 도메인별 상태 owner·저장 원천·외부 side effect·오류 복구와 문서/queue를 재대조한다.
+1. App 2차 Phase 1~5와 3차 3-0~3-8은 완료됐다. 현재는 deferred queue의 운영 저장 신뢰성·모달 계약·알림 설정 같은 제품 우선순위를 먼저 판단한다.
+2. App 3차 리팩터링 3-0~3-8은 production main 43.1%·gzip 45.3% 감소, 12개 물리 lazy chunk, App Babel 500 KB 경고 제거와 종료 소유권 감사까지 완료했다. 자동으로 다음 리팩터링 차수를 시작하지 않고 P1~P3 제품·저장 신뢰성 우선순위로 돌아간다.
 3. `app_state`에서 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
    - 즉시 사람 판단이 필요하지 않은 발견은 queue/worklog에 남기고 AI 검수와 다음 단계를 연쇄 진행한다.
 
