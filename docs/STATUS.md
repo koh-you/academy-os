@@ -27,7 +27,8 @@
 - Phase 2~5와 AI 연쇄 검수·지연 보고·사람 gate 원칙은 `docs/app-refactor-second-pass-plan.md`가 기준이다.
 - Phase 2 branch에서 출결 kiosk 날짜 rollover의 ref·reload key·interval/listener를 출결 hook 경계로 이동하고 cleanup·동일 날짜 hydration 실패 재시도 fixture를 추가했다.
 - Phase 2는 PR #3으로 main 통합됐고 main Production checks·Vercel이 성공했다.
-- Phase 3 notification refresh/reconcile은 별도 controller로 scope별 in-flight·stale 응답·동일 reconcile 중복 실행을 차단했고 전체 자동검증을 통과했다. 실제 알림·운영 데이터는 사용하지 않았다.
+- Phase 3 notification refresh/reconcile은 PR #4, merge commit `7fb366f9`로 main 통합됐고 main Production checks·Vercel이 성공했다.
+- Phase 4 app_state persistence는 변경 key를 브라우저에서 직렬화하고 기존 `updated_at` CAS와 Supabase 재조회가 일치한 뒤에만 저장 완료로 판정한다. 충돌 시 입력을 유지하고 자동 반복하지 않으며 전체 자동검증을 통과했다.
 
 ## 폴더 상태
 
@@ -38,9 +39,9 @@
 
 ## 다음 우선순위
 
-1. `app_state` 동일 key 저장을 브라우저 안에서 직렬화하고 진행 중 변경을 다음 요청으로 합친다.
-2. key별 `updated_at` CAS와 저장 뒤 대상 key 재조회는 별도 단위로 이어간다.
-3. App 2차 리팩터링 Phase 3 PR/CI를 닫고 최신 main 기반 별도 Worktree에서 Phase 4 hydration·저장·복구·서버 재조회 경계를 시작한다.
+1. App 2차 리팩터링 Phase 4 PR/CI를 닫고 최신 main 기반 별도 Worktree에서 Phase 5 teacher view callback·화면 조립 경계를 시작한다.
+2. Phase 5 뒤 대형 `App.jsx`와 1.6 MB production chunk의 후속 분할 순서를 정한다.
+3. `app_state`에서 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
    - 즉시 사람 판단이 필요하지 않은 발견은 queue/worklog에 남기고 AI 검수와 다음 단계를 연쇄 진행한다.
 
 ## 자동 작업

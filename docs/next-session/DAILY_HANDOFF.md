@@ -36,14 +36,14 @@
 - App 2차 리팩터링의 단계·검수·지연 보고 기준은 `docs/app-refactor-second-pass-plan.md`를 따른다.
 - Phase 1 auth/session과 Phase 2 출결 polling·동기화는 main 통합 완료다.
 - Phase 2에서 kiosk 날짜 rollover lifecycle을 출결 hook으로 이동하고 전용 fixture를 추가했다. safe browser가 TDZ 배치 오류를 발견해 최소 수정했으며 재실행 4/4가 통과했다.
-- Phase 2는 PR #3으로 main 통합 및 CI/배포 성공했다. Phase 3 notification refresh/reconcile도 구현·전체 자동검증을 완료했으며 PR/CI 뒤 Phase 4를 별도 Worktree에서 시작한다.
-- Phase 3 검증은 알림 전용 묶음, runtime lint, scenario·production `809/809`, build `348 modules`, safe browser `4/4`이며 실제 알림·운영 데이터는 사용하지 않았다.
+- Phase 3는 PR #4로 main 통합 및 CI/배포 성공했다. Phase 4 app_state 동일 key 직렬화·`updated_at` CAS·Supabase 재조회 완료 판정을 구현하고 전체 자동검증을 통과했다.
+- Phase 4 검증은 app_state 전용 2종, runtime lint, scenario·production `809/809`, build `349 modules`, safe browser `4/4`이며 운영 데이터 쓰기·운영 SQL은 없었다. PR/CI 뒤 Phase 5를 최신 main 별도 Worktree에서 시작한다.
 - main 병합은 의미 변경·운영 side effect 없이 AI 리뷰와 전체 검사·PR CI·배포가 성공하면 AI가 판단해 진행한다.
 
 1. `git status --short`가 clean이고 최신 main인지 확인한다.
 2. 오늘 branch의 GitHub Actions 결과를 확인한다.
-3. 통과했으면 같은 브라우저의 동일 `app_state` key 저장을 직렬화하고 진행 중 변경을 다음 요청으로 합치는 단위만 수행한다.
-4. key별 `updated_at` CAS와 저장 뒤 재조회는 직렬화와 섞지 않고 다음 단위로 남긴다.
+3. 통과했으면 최신 main의 별도 Worktree에서 Phase 5 teacher view callback·화면 조립을 한 화면군씩 분리한다.
+4. Phase 5 뒤 `App.jsx`와 production chunk의 후속 분할 순서를 남긴다.
 5. 운영 삭제·발송·예약·유료 AI·SQL 적용이 필요하면 구현을 넓히지 말고 정확한 사람 gate를 남긴다.
 
 ## 종료할 때

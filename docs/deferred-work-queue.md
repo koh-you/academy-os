@@ -5,7 +5,7 @@
 ## P1. 운영 저장 신뢰성
 
 - 학생 신규/Tally·학생/반 명단 저장 gate.
-- `app_state` key별 dirty 저장과 500ms debounce는 완료. 2026-08-01 요청 역전 fixture·CI inventory를 추가했으며, 다음은 동일 key 직렬화 -> version/updatedAt CAS -> 저장 뒤 재조회 순서다.
+- `app_state` key별 dirty 저장·500ms debounce·동일 key 직렬화·`updated_at` CAS·저장 뒤 Supabase 재조회는 완료. 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
 - exam prep/Tally 입력 경쟁 방지.
 - 숙제·포털·자료함·보고서 저장 계약.
 - 보충·알림 다중 원천 reconcile과 미연결/오작동 버튼 정리.
@@ -26,7 +26,7 @@
 ## P4. 고위험 App/API 경계 리팩터링
 
 - App 2차 리팩터링은 `docs/app-refactor-second-pass-plan.md`의 Phase 1~5를 기준으로 한다.
-- Phase 1 auth/session은 main 통합 완료. 남은 순서는 Phase 2 출결 polling·동기화 -> Phase 3 notification/Solapi reconcile -> Phase 4 hydration/persistence·저장 복구/재조회 -> Phase 5 17개 teacher 화면 callback 조립이다.
+- Phase 1 auth/session, Phase 2 출결 polling·동기화, Phase 3 notification/Solapi reconcile은 main 통합 완료다. Phase 4 hydration/persistence는 PR/CI 대기이며 다음은 Phase 5 17개 teacher 화면 callback 조립이다.
 - AI가 안전하게 검증 가능한 문제와 후속 발견은 단계 worklog에 남기고 연쇄 진행한다. 운영 side effect나 제품 의미 결정이 필요한 항목만 사람 gate로 올린다.
 - API: `api/server.js` route registration, auth, core data, notification/provider 서비스를 의미 단위로 분리.
 - 순수 분리보다 회귀·관찰 가능성 inventory를 먼저 만든다.

@@ -90,6 +90,17 @@ export async function upsertRows(table, rows, options = {}) {
   });
 }
 
+export async function insertRows(table, rows, options = {}) {
+  if (!Array.isArray(rows) || rows.length === 0) return [];
+  return supabaseRestRequest(table, {
+    method: "POST",
+    body: rows,
+    prefer: "return=representation",
+    requireServiceRole: options.requireServiceRole ?? true,
+    timeoutMs: options.timeoutMs
+  });
+}
+
 export async function callRpc(functionName, args = {}, options = {}) {
   if (!functionName) throw new Error("Supabase RPC function name is required.");
   return supabaseRestRequest(`rpc/${functionName}`, {
