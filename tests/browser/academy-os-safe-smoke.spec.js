@@ -208,9 +208,10 @@ test("monthly settlement counts closure replacement and distinguishes attendance
   await expect(settlementSaveBar.getByRole("button", { name: "저장 및 확인 중" })).toBeDisabled();
   await finalCountInput.fill("5");
   await expect(finalCountInput).toHaveValue("5");
-  await expect(settlementSaveBar).toContainText("저장 완료 · 이후 변경 저장 필요");
   await calendar.getByRole("button", { name: "창 닫기" }).click();
-  await page.getByLabel("정산월").fill("2026-08");
+  const settlementMonthControl = page.getByRole("group", { name: "월별 정산 대상 월" });
+  await settlementMonthControl.getByLabel("정산월").fill("2026-08");
+  await expect(settlementMonthControl.getByRole("status")).toContainText("변경됨");
   await page.getByLabel("정산월").fill("2026-07");
   await settlementRow.getByRole("button", { name: /정규 3회/ }).click();
   const recoveredCalendar = page.getByRole("dialog", { name: /정산 미리보기 학생 월별 출결·수업/ });

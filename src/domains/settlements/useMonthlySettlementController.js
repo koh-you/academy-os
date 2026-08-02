@@ -93,20 +93,11 @@ export function resolveMonthlySettlementSave({
   saveMonthKey,
   saveRevision
 } = {}) {
-  if (currentMonthKey !== saveMonthKey) {
-    return {
-      message: error?.message || "",
-      shouldApply: false,
-      shouldClearLocalDraft: false,
-      shouldRebaseRecovery: false,
-      shouldReplaceDraft: false,
-      shouldWriteRecovery: false
-    };
-  }
+  const shouldApply = currentMonthKey === saveMonthKey;
   if (persistedMonth && currentRevision !== saveRevision) {
     return {
-      message: "Supabase 저장 완료 · 이후 변경 저장 필요",
-      shouldApply: true,
+      message: shouldApply ? "Supabase 저장 완료 · 이후 변경 저장 필요" : "",
+      shouldApply,
       shouldClearLocalDraft: false,
       shouldRebaseRecovery: true,
       shouldReplaceDraft: false,
@@ -115,17 +106,19 @@ export function resolveMonthlySettlementSave({
   }
   if (persistedMonth) {
     return {
-      message: "Supabase 재조회 값이 현재 월별 정산과 일치합니다.",
-      shouldApply: true,
+      message: shouldApply ? "Supabase 재조회 값이 현재 월별 정산과 일치합니다." : "",
+      shouldApply,
       shouldClearLocalDraft: true,
       shouldRebaseRecovery: false,
-      shouldReplaceDraft: true,
+      shouldReplaceDraft: shouldApply,
       shouldWriteRecovery: false
     };
   }
   return {
-    message: error?.message || "저장에 실패했습니다. 작업 내용은 이 기기의 임시 초안에 남아 있습니다.",
-    shouldApply: true,
+    message: shouldApply
+      ? error?.message || "저장에 실패했습니다. 작업 내용은 이 기기의 임시 초안에 남아 있습니다."
+      : "",
+    shouldApply,
     shouldClearLocalDraft: false,
     shouldRebaseRecovery: false,
     shouldReplaceDraft: false,
@@ -148,8 +141,8 @@ export function useMonthlySettlementController({
   const [selectedCalendarStudentId, setSelectedCalendarStudentId] = useState("");
   const [saveMessage, setSaveMessage] = useState("");
   const activeMonthRef = useRef(selectedMonth);
-  const draftMonthRef = useRef(null);
-  const draftRevisionRef = useRef(0);
+  const draftByMonthRef = useRef(new Map());
+  const draftRevisionByMonthRef = useRef(new Map());
   const saveInFlightRef = useRef(null);
   const preservedSourceRef = useRef(null);
   const savedMonth = settlementState?.months?.[selectedMonth] ?? null;
@@ -201,8 +194,11 @@ export function useMonthlySettlementController({
         )
     );
     activeMonthRef.current = selectedMonth;
-    draftMonthRef.current = resolvedDraft;
-    draftRevisionRef.current += 1;
+    draftByMonthRef.current.set(selectedMonth, resolvedDraft);
+    draftRevisionByMonthRef.current.set(
+      selectedMonth,
+      (draftRevisionByMonthRef.current.get(selectedMonth) ?? 0) + 1
+    );
     setDraftMonth(resolvedDraft);
     setIsDirty(Boolean(recoveredDraft || !savedMonth || hasNewStudents || hasJournalAutoModeChanges));
     setSaveMessage(
@@ -263,13 +259,15 @@ export function useMonthlySettlementController({
     const resolvedMonth = typeof nextMonth === "function" ? nextMonth(activeMonthRef.current) : nextMonth;
     if (!resolvedMonth || resolvedMonth === activeMonthRef.current) return;
     activeMonthRef.current = resolvedMonth;
-    draftRevisionRef.current += 1;
     preservedSourceRef.current = null;
     setSelectedMonthState(resolvedMonth);
   }
 
   function updateStudentSetting(studentId, field, value) {
-    draftRevisionRef.current += 1;
+    draftRevisionByMonthRef.current.set(
+      selectedMonth,
+      (draftRevisionByMonthRef.current.get(selectedMonth) ?? 0) + 1
+    );
     setDraftMonth((current) => {
       if (!current) return current;
       const student = students.find((item) => item.studentId === studentId) ?? {};
@@ -300,7 +298,7 @@ export function useMonthlySettlementController({
           [studentId]: nextSetting
         }
       };
-      draftMonthRef.current = nextMonth;
+      draftByMonthRef.current.set(selectedMonth, nextMonth);
       writeLocalDraft(nextMonth, savedUpdatedAt);
       return nextMonth;
     });
@@ -357,7 +355,7 @@ export function useMonthlySettlementController({
       updatedAt: new Date().toISOString()
     };
     const saveMonthKey = selectedMonth;
-    const saveRevision = draftRevisionRef.current;
+    const saveRevision = draftRevisionByMonthRef.current.get(saveMonthKey) ?? 0;
     const baseUpdatedAt = savedUpdatedAt;
     setSaveMessage("Supabase 저장 후 같은 월을 다시 조회해 확인하고 있습니다.");
     const savePromise = (async () => {
@@ -365,22 +363,24 @@ export function useMonthlySettlementController({
         const persistedMonth = await onSaveMonth(nextMonth);
         const resolution = resolveMonthlySettlementSave({
           currentMonthKey: activeMonthRef.current,
-          currentRevision: draftRevisionRef.current,
+          currentRevision: draftRevisionByMonthRef.current.get(saveMonthKey) ?? 0,
           persistedMonth,
           saveMonthKey,
           saveRevision
         });
-        if (!resolution.shouldApply) return persistedMonth;
         if (resolution.shouldClearLocalDraft) clearLocalDraft(saveMonthKey);
         if (resolution.shouldRebaseRecovery) {
-          const latestDraft = draftMonthRef.current;
+          const latestDraft = draftByMonthRef.current.get(saveMonthKey);
           if (latestDraft?.monthKey === saveMonthKey) {
             writeLocalDraft(latestDraft, persistedMonth.updatedAt || baseUpdatedAt);
           }
         }
+        if (resolution.shouldClearLocalDraft) {
+          draftByMonthRef.current.set(saveMonthKey, persistedMonth);
+        }
+        if (!resolution.shouldApply) return persistedMonth;
         if (resolution.shouldReplaceDraft) {
           preservedSourceRef.current = null;
-          draftMonthRef.current = persistedMonth;
           setDraftMonth(persistedMonth);
           setIsDirty(false);
         } else {
@@ -395,13 +395,13 @@ export function useMonthlySettlementController({
       } catch (error) {
         const resolution = resolveMonthlySettlementSave({
           currentMonthKey: activeMonthRef.current,
-          currentRevision: draftRevisionRef.current,
+          currentRevision: draftRevisionByMonthRef.current.get(saveMonthKey) ?? 0,
           error,
           saveMonthKey,
           saveRevision
         });
-        if (!resolution.shouldApply) return undefined;
         if (resolution.shouldWriteRecovery) writeLocalDraft(nextMonth, baseUpdatedAt);
+        if (!resolution.shouldApply) return undefined;
         setIsDirty(true);
         setSaveMessage(resolution.message);
         return undefined;

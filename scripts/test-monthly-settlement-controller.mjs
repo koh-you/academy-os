@@ -44,7 +44,26 @@ assert.deepEqual(
 assert.deepEqual(
   resolveMonthlySettlementSave({
     currentMonthKey: "2026-08",
-    currentRevision: 6,
+    currentRevision: 4,
+    persistedMonth: { monthKey: "2026-07", updatedAt: "saved-a" },
+    saveMonthKey: "2026-07",
+    saveRevision: 4
+  }),
+  {
+    message: "",
+    shouldApply: false,
+    shouldClearLocalDraft: true,
+    shouldRebaseRecovery: false,
+    shouldReplaceDraft: false,
+    shouldWriteRecovery: false
+  },
+  "a completed unchanged save must clear its recovery without mutating the active month"
+);
+
+assert.deepEqual(
+  resolveMonthlySettlementSave({
+    currentMonthKey: "2026-08",
+    currentRevision: 5,
     persistedMonth: { monthKey: "2026-07", updatedAt: "saved-a" },
     saveMonthKey: "2026-07",
     saveRevision: 4
@@ -53,11 +72,11 @@ assert.deepEqual(
     message: "",
     shouldApply: false,
     shouldClearLocalDraft: false,
-    shouldRebaseRecovery: false,
+    shouldRebaseRecovery: true,
     shouldReplaceDraft: false,
     shouldWriteRecovery: false
   },
-  "a response for another month must not mutate the active month draft"
+  "a completed stale save must rebase its month recovery without mutating the active month"
 );
 
 assert.deepEqual(
@@ -112,15 +131,15 @@ for (const contract of [
   assert.ok(panelSource.includes(contract), `missing panel/controller contract: ${contract}`);
 }
 for (const contract of [
-  "draftRevisionRef.current += 1",
+  "draftRevisionByMonthRef.current.set(",
   "if (saveInFlightRef.current) return saveInFlightRef.current.promise",
   "const saveMonthKey = selectedMonth",
-  "const saveRevision = draftRevisionRef.current",
+  "const saveRevision = draftRevisionByMonthRef.current.get(saveMonthKey) ?? 0",
   "resolveMonthlySettlementSave({",
-  "if (!resolution.shouldApply) return persistedMonth",
   "if (resolution.shouldRebaseRecovery)",
-  "const latestDraft = draftMonthRef.current",
+  "const latestDraft = draftByMonthRef.current.get(saveMonthKey)",
   "writeLocalDraft(latestDraft, persistedMonth.updatedAt || baseUpdatedAt)",
+  "if (!resolution.shouldApply) return persistedMonth",
   "if (resolution.shouldReplaceDraft)",
   "preservedSourceRef.current = {",
   "if (resolution.shouldWriteRecovery) writeLocalDraft(nextMonth, baseUpdatedAt)"
