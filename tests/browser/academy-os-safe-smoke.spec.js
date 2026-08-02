@@ -179,6 +179,8 @@ test("settlement exposes special attendance, combined student attendance, and co
 
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /정산/ }).click();
   await expect(page.getByRole("columnheader", { name: "조정" })).toHaveCount(0);
+  await expect(page.getByRole("columnheader", { name: "월별 스케줄" })).toHaveCount(0);
+  await expect(page.getByRole("columnheader", { name: "정산 처리" })).toHaveCount(0);
   const popupPromise = page.waitForEvent("popup");
   await page.getByRole("button", { name: "횟수·금액 PDF" }).click();
   const reportPage = await popupPromise;
@@ -188,6 +190,8 @@ test("settlement exposes special attendance, combined student attendance, and co
   await expect(reportPage.getByRole("table")).toContainText("1회");
   await expect(reportPage.getByRole("columnheader", { name: "최종 정규 횟수" })).toBeVisible();
   await expect(reportPage.getByRole("columnheader", { name: "금액" })).toBeVisible();
+  await expect(reportPage.getByText("총 횟수", { exact: true })).toHaveCount(0);
+  await expect(reportPage.locator("tfoot")).not.toContainText("회");
   await expect(reportPage.getByRole("table")).not.toContainText("출석");
   await reportPage.close();
 

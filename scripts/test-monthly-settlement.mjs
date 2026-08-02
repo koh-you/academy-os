@@ -1231,10 +1231,13 @@ const reportModel = buildMonthlySettlementReportModel({
 assert.equal(reportModel.rows.length, 1, "PDF에는 정산 제외 행을 넣지 않아야 합니다.");
 assert.equal(reportModel.rows[0].count, fixedRow.prorationCount);
 assert.equal(reportModel.rows[0].amount, fixedRow.regularGrossAmount);
+assert.equal("totalCount" in reportModel, false, "PDF model은 최종 정규 횟수 합계를 만들지 않아야 합니다.");
 const reportHtml = createMonthlySettlementReportHtml(reportModel);
 assert.match(reportHtml, /학생별 정산 반영 횟수와 최종 금액/);
 assert.doesNotMatch(reportHtml, /출석|결석|대기|필터/);
 assert.match(reportHtml, /최종 정규 횟수/);
+assert.doesNotMatch(reportHtml, /총 횟수/);
+assert.match(reportHtml, /<td colspan="2">합계<\/td>/);
 assert.match(reportHtml, /onclick="window\.print\(\)"[^>]*>인쇄하기</);
 assert.doesNotMatch(reportHtml, /학교·학년/);
 

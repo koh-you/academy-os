@@ -98,7 +98,7 @@
 .monthlySettlementTable {
   border-collapse: separate;
   border-spacing: 0;
-  min-width: 1580px;
+  min-width: 1180px;
   width: 100%;
 }
 
@@ -137,17 +137,6 @@
   padding-left: 7px;
 }
 
-.monthlySettlementTable tr.monthlySettlementWarningRow .monthlySettlementScheduleCell {
-  background: #fff3d9;
-}
-
-.monthlySettlementTable tr.monthlySettlementWarningRow .monthlySettlementScheduleCell input {
-  background: #fffdfa;
-  border-color: #d8860b;
-  box-shadow: 0 0 0 2px rgb(216 134 11 / 14%);
-}
-
-.monthlySettlementTable tr.monthlySettlementWarningRow .monthlySettlementScheduleCell small,
 .monthlySettlementTable tr.monthlySettlementWarningRow .monthlySettlementAmountCell span {
   color: #925b08;
   font-weight: 700;
@@ -167,23 +156,15 @@
 }
 
 .monthlySettlementTable td:nth-child(4) {
-  min-width: 230px;
-}
-
-.monthlySettlementTable td:nth-child(5) {
   min-width: 175px;
 }
 
-.monthlySettlementTable td:nth-child(6) {
+.monthlySettlementTable td:nth-child(5) {
   min-width: 205px;
 }
 
-.monthlySettlementTable td:nth-child(8) {
+.monthlySettlementTable td:nth-child(7) {
   min-width: 180px;
-}
-
-.monthlySettlementTable td:nth-child(9) {
-  min-width: 125px;
 }
 
 .monthlySettlementFinalCountEditor {
@@ -307,10 +288,6 @@
   font-size: 11px;
 }
 
-.monthlySettlementScheduleCell small {
-  max-width: 230px;
-}
-
 .monthlySettlementPeriodInputs {
   display: grid;
   gap: 6px;
@@ -357,26 +334,6 @@
   color: #718096;
   font-size: 11px;
   margin-top: 5px;
-}
-
-.monthlySettlementExclusionCell button {
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 800;
-  min-height: 36px;
-  padding: 7px 9px;
-  width: 100%;
-}
-
-.monthlySettlementExcludeButton {
-  background: #fff;
-  border: 1px solid #d9a2a2;
-  color: #a83e3e;
-}
-
-.monthlySettlementExcludeButton:hover {
-  background: #fff4f4;
 }
 
 .monthlySettlementRestoreButton {
