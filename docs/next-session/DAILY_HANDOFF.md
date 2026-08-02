@@ -23,7 +23,8 @@
 - 3-4 두 번째 단위로 학생 프로필 화면·오류 경계·전용 helper를 `StudentProfileModal.jsx`로 물리 분리했다. 프로필 본문은 기준 commit과 동일하고 callback 저장 의미도 유지한다. `StudentManager.jsx`는 994줄로 줄었다.
 - 3-4 세 번째 단위로 퇴원 확인·인계 PDF·단일/일괄 영구삭제 overlay를 `StudentLifecycleOverlays.jsx`로 물리 분리했다. 11,029자 JSX는 기존과 동일하고 audit·복원·삭제·PDF controller는 Manager owner를 유지한다.
 - 3-4 마지막 단위로 퇴원생 목록·정렬·선택 toolbar를 `StudentWithdrawnList.jsx`로 물리 분리했다. 20개 prop identity와 local dirty/선택/lifecycle controller owner를 유지하며 3-4 Student 경계를 닫았다.
-- 로컬 browser smoke의 Worktree 격리 runner를 기본 명령으로 사용한다. 3-2 Lesson, 3-3 Supplement, 3-4 Student 경계는 닫혔고 다음은 3-5 Notification 경계 inventory다.
+- 3-5 첫 단위로 Notification Center 두 진입 경로의 flat callback 13개를 history provider/transport와 특강 persistence/deletion/orchestration/navigation effect 표면으로 묶었다. 두 refresh identity와 App의 실제 저장·재조회·Solapi effect owner, 화면 내부 공지 draft/request controller는 유지한다.
+- 로컬 browser smoke의 Worktree 격리 runner를 기본 명령으로 사용한다. 3-2 Lesson, 3-3 Supplement, 3-4 Student 경계는 닫혔고 3-5 Notification은 effect 계약 고정 뒤 남은 목록·편집·reconcile 화면 조립을 inventory한다.
 
 - `app_state` 자동저장 12개 key의 500ms debounce, request ID, API upsert, `updated_at` 경계를 inventory했다.
 - 역순 도착 시 오래된 요청이 최신값을 덮는 fixture를 추가하고 Production checks에 연결했다.
@@ -74,7 +75,7 @@
 1. `git status --short`가 clean이고 최신 main인지 확인한다.
 2. 오늘 branch의 GitHub Actions 결과를 확인한다.
 3. App 2차 리팩터링 Phase 1~5는 완료 상태로 유지하고 자동 재개하지 않는다.
-4. 다음 단위는 최신 main의 별도 branch에서 3-5 Notification의 목록·편집·reconcile UI와 기존 도메인 hook/effect owner를 먼저 inventory한다. 이미 분리된 경계를 재구현하지 않고 남은 가장 큰 화면 조립 한 단위만 고른다. lazy loading/code splitting은 3-7까지 섞지 않는다.
+4. 3-5 첫 effect adapter 단위를 exact-head 검수·통합한 뒤, 최신 main의 별도 branch에서 Notification Center의 목록·편집·reconcile 화면 조립과 기존 도메인 hook owner를 다시 inventory한다. 이미 분리된 경계를 재구현하지 않고 남은 가장 큰 화면 조립 한 단위만 고른다. lazy loading/code splitting은 3-7까지 섞지 않는다.
 5. 운영 삭제·발송·예약·유료 AI·SQL 적용이 필요하면 구현을 넓히지 말고 정확한 사람 gate를 남긴다.
 
 ## 종료할 때

@@ -94,13 +94,10 @@ for (const [id, componentName] of expectedContracts) {
 
 const highRiskCallbackMappings = [
   ["lessons", "onDeleteLesson", "handleDeleteLesson"],
-  ["specialLectureManagement", "onDeleteSpecialLectureApplication", "handleDeleteSpecialLectureApplication"],
   ["examPrep", "onDeleteRow", "handleDeleteExamPrepRow"],
   ["schoolCalendar", "onSaveEvent", "handleSaveSchoolEvent"],
   ["schoolCalendar", "onDeleteEvent", "handleDeleteSchoolEvent"],
-  ["settlements", "onSaveMonthlySettlement", "handleSaveMonthlySettlementMonth"],
-  ["notifications", "onCancelNotificationJob", "handleCancelNotificationJob"],
-  ["notifications", "onReconcileSolapiNotificationResults", "handleReconcileSolapiNotificationResults"]
+  ["settlements", "onSaveMonthlySettlement", "handleSaveMonthlySettlementMonth"]
 ];
 for (const [viewId, propName, actionName] of highRiskCallbackMappings) {
   assert.equal(adapters[viewId].props[propName], actions[actionName], `${viewId}.${propName} must preserve ${actionName}`);
@@ -109,6 +106,29 @@ for (const viewId of ["specialLectureManagement", "notifications"]) {
   assert.equal(adapters[viewId].props.runtime, runtimeBindings.notificationCenter);
   assert.equal(adapters[viewId].props.SpecialLectureNoticePanel, runtimeBindings.SpecialLectureNoticePanel);
 }
+assert.equal(
+  adapters.specialLectureManagement.props.effects.specialLectureDeletion.onDeleteSpecialLectureApplication,
+  actions.handleDeleteSpecialLectureApplication
+);
+assert.equal(
+  adapters.notifications.props.effects.historyProvider.onCancelNotificationJob,
+  actions.handleCancelNotificationJob
+);
+assert.equal(
+  adapters.notifications.props.effects.historyProvider.onReconcileSolapiNotificationResults,
+  actions.handleReconcileSolapiNotificationResults
+);
+assert.equal(
+  adapters.specialLectureManagement.props.effects.historyTransport.onRefresh,
+  actions.handleRefreshActiveNotificationJobs
+);
+assert.equal(
+  adapters.notifications.props.effects.historyTransport.onRefresh,
+  actions.handleRefreshNotificationHistory
+);
+assert.equal(Object.hasOwn(adapters.specialLectureManagement.props, "onDeleteSpecialLectureApplication"), false);
+assert.equal(Object.hasOwn(adapters.notifications.props, "onCancelNotificationJob"), false);
+assert.equal(Object.hasOwn(adapters.notifications.props, "onReconcileSolapiNotificationResults"), false);
 assert.equal(adapters.lessons.props.runtime, runtimeBindings.teacherLessonHub);
 assert.equal(
   adapters.lessons.props.lessonJournalEffects.persistence.onSaveLessonJournalDrafts,

@@ -20,7 +20,7 @@ assert.equal(payload.notificationJobIds, notificationJobIds);
 assert.deepEqual(input, inputSnapshot);
 
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
-const teacherViewOutletSource = await readFile(new URL("../src/app/TeacherViewOutlet.js", import.meta.url), "utf8");
+const notificationEffectAdapterSource = await readFile(new URL("../src/domains/notifications/notificationEffectAdapter.js", import.meta.url), "utf8");
 const lessonJournalEffectAdapterSource = await readFile(new URL("../src/domains/lessons/lessonJournalEffectAdapter.js", import.meta.url), "utf8");
 const helperSource = await readFile(
   new URL("../src/domains/notifications/notificationJobReconcilePayload.js", import.meta.url),
@@ -127,10 +127,10 @@ assert.ok(
     saveStateSetterIndex > savedStatesIndex
 );
 assert.equal(
-  `${teacherViewOutletSource}\n${lessonJournalEffectAdapterSource}`.split(
+  `${notificationEffectAdapterSource}\n${lessonJournalEffectAdapterSource}`.split(
     "onReconcileSolapiNotificationResults: actions.handleReconcileSolapiNotificationResults"
   ).length - 1,
-  3
+  2
 );
 assert.ok(
   !controllerSource.includes(

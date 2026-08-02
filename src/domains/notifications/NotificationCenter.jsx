@@ -35,24 +35,12 @@ export function NotificationCenter({
   aiSettings,
   classTemplates = [],
   compactPageHeader = false,
+  effects = {},
   hideNotificationSectionTabs = false,
   initialNotificationTab = "notice",
   lessons = [],
   notificationJobs,
   notificationJobsStatus = { state: "idle", message: "" },
-  onCancelNotificationJob,
-  onCreateSpecialLectureStudent,
-  onCreateSpecialLectureLessons,
-  onDeleteSpecialLectureApplication,
-  onReplaceSpecialLectureStudent,
-  onOpenSpecialLectureLesson,
-  onRefresh,
-  onReconcileSolapiNotificationResults,
-  onSaveSpecialLectureEnrollment,
-  onSaveSpecialLectureEnrollments,
-  onSaveSpecialLectureGuides,
-  onSyncSpecialLectureStudentSchedules,
-  onUpdateSpecialLectureApplication,
   pageDescription = "",
   pageTitle = "알림관리",
   showSpecialLectureTab = true,
@@ -66,6 +54,31 @@ export function NotificationCenter({
   if (!runtime || typeof SpecialLectureNoticePanel !== "function") {
     throw new Error("NotificationCenter requires App runtime and special lecture panel bindings.");
   }
+  const {
+    historyProvider: {
+      onCancelNotificationJob,
+      onReconcileSolapiNotificationResults
+    } = {},
+    historyTransport: { onRefresh } = {},
+    specialLecturePersistence: {
+      onCreateSpecialLectureStudent,
+      onReplaceSpecialLectureStudent,
+      onSaveSpecialLectureEnrollment,
+      onSaveSpecialLectureEnrollments,
+      onSaveSpecialLectureGuides,
+      onSyncSpecialLectureStudentSchedules,
+      onUpdateSpecialLectureApplication
+    } = {},
+    specialLectureDeletion: {
+      onDeleteSpecialLectureApplication
+    } = {},
+    specialLectureOrchestration: {
+      onCreateSpecialLectureLessons
+    } = {},
+    specialLectureNavigation: {
+      onOpenSpecialLectureLesson
+    } = {}
+  } = effects;
   const {
     canDeleteNotificationJob,
     defaultAiSettings,
