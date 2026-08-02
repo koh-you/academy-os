@@ -1,67 +1,83 @@
+function SupplementNotificationControlCard({ control, isBusy, onReserve }) {
+  return (
+    <article className="supplementNotificationControlCard">
+      <div className="supplementNotificationControlCardHeader">
+        <div>
+          <span className={`supplementNotificationControlState ${control.display.tone}`}>
+            <i aria-hidden="true" />
+            {control.display.label}
+          </span>
+          <h4>{control.config.label}</h4>
+        </div>
+        {control.canReserve ? (
+          <button className="softButton" disabled={isBusy} onClick={() => onReserve(control.controlType)} type="button">
+            개별 예약
+          </button>
+        ) : null}
+      </div>
+      <div className="supplementNotificationControlFacts">
+        <span>수신 대상</span>
+        <strong>{control.config.targetLabel} · {control.recipientLabel}</strong>
+        <span>{control.hasHistoricalJob ? "이전 예약 시각" : "예약 시각"}</span>
+        <strong>{control.scheduledAtLabel}</strong>
+        <span>Academy OS</span>
+        <strong>{control.jobStatusLabel}</strong>
+        <span>Solapi 그룹</span>
+        <strong>{control.providerReferenceLabel}</strong>
+      </div>
+      <div className="supplementNotificationControlPreview">
+        <strong>{control.previewLabel}</strong>
+        <pre>{control.preview || "저장된 알림톡 문구가 없습니다."}</pre>
+        {control.savedDraftDiffers ? (
+          <small className="savedDraftDiffers">저장한 최종본이 현재 예약 문구와 다릅니다. 기존 예약을 취소한 뒤 다시 예약해야 반영됩니다.</small>
+        ) : null}
+      </div>
+      {control.blockReason && !control.canCancel ? (
+        <p className="supplementNotificationControlBlock">{control.blockReason}</p>
+      ) : null}
+    </article>
+  );
+}
+
 export function SupplementNotificationControlModal({
-  blockReason,
-  canCancel,
-  canReserve,
-  config,
-  display,
+  controls,
   feedback,
-  hasHistoricalJob,
   isBusy,
-  jobStatusLabel,
-  onCancel,
+  onCancelAll,
   onClose,
   onReserve,
-  preview,
-  previewLabel,
-  providerReferenceLabel,
-  recipientLabel,
-  savedDraftDiffers,
   scheduleLabel,
-  scheduledAtLabel,
   studentName
 }) {
+  const cancelableCount = controls.filter((control) => control.canCancel).length;
   return (
     <div className="supplementNotificationControlBackdrop" role="presentation">
       <section
         aria-labelledby="supplement-notification-control-title"
         aria-modal="true"
-        className="supplementNotificationControlModal"
+        className="supplementNotificationControlModal wide"
         role="dialog"
       >
         <div className="supplementNotificationControlHeader">
           <div>
-            <span className={`supplementNotificationControlState ${display.tone}`}>
-              <i aria-hidden="true" />
-              {display.label}
-            </span>
-            <h3 id="supplement-notification-control-title">{config.label}</h3>
+            <h3 id="supplement-notification-control-title">Solapi 예약·취소 3종 확인</h3>
             <p>{studentName} · {scheduleLabel}</p>
           </div>
           <button aria-label="알림 제어 닫기" className="iconButton" disabled={isBusy} onClick={onClose} type="button">×</button>
         </div>
-        <div className="supplementNotificationControlFacts">
-          <span>수신 대상</span>
-          <strong>{config.targetLabel} · {recipientLabel}</strong>
-          <span>{hasHistoricalJob ? "이전 예약 시각" : "예약 시각"}</span>
-          <strong>{scheduledAtLabel}</strong>
-          <span>Academy OS 상태</span>
-          <strong>{jobStatusLabel}</strong>
-          <span>Solapi 그룹</span>
-          <strong>{providerReferenceLabel}</strong>
+        <p className="supplementNotificationBulkGuide">
+          학생·학부모·당일 학생 예약을 한 화면에서 확인합니다. 일괄 취소는 현재 취소 가능한 예약만 처리합니다.
+        </p>
+        <div className="supplementNotificationControlCards">
+          {controls.map((control) => (
+            <SupplementNotificationControlCard
+              control={control}
+              isBusy={isBusy}
+              key={control.controlType}
+              onReserve={onReserve}
+            />
+          ))}
         </div>
-        <div className="supplementNotificationControlPreview">
-          <strong>{previewLabel}</strong>
-          {hasHistoricalJob ? (
-            <small>취소·실패한 과거 문구는 재사용하지 않고, 현재 저장된 보충 내용으로 다시 만들었습니다.</small>
-          ) : null}
-          <pre>{preview || "저장된 알림톡 문구가 없습니다."}</pre>
-          {savedDraftDiffers ? (
-            <small className="savedDraftDiffers">저장한 수정본이 현재 Solapi 예약 문구와 다릅니다. 기존 예약을 취소한 뒤 다시 예약해야 수정본이 반영됩니다.</small>
-          ) : null}
-        </div>
-        {blockReason && !canCancel ? (
-          <p className="supplementNotificationControlBlock">{blockReason}</p>
-        ) : null}
         {feedback ? (
           <p className={`supplementNotificationControlFeedback ${feedback.tone}`}>
             {feedback.message}
@@ -69,14 +85,9 @@ export function SupplementNotificationControlModal({
         ) : null}
         <div className="modalActions supplementNotificationControlActions">
           <button className="softButton" disabled={isBusy} onClick={onClose} type="button">닫기</button>
-          {canCancel ? (
-            <button className="dangerSoftButton" disabled={isBusy} onClick={onCancel} type="button">
-              {isBusy ? "취소 중" : "Solapi 예약 취소"}
-            </button>
-          ) : null}
-          {canReserve ? (
-            <button className="primaryButton" disabled={isBusy} onClick={onReserve} type="button">
-              {isBusy ? "예약 중" : "Solapi 예약"}
+          {cancelableCount ? (
+            <button className="dangerSoftButton" disabled={isBusy} onClick={onCancelAll} type="button">
+              {isBusy ? "일괄 취소 중" : `취소 가능한 예약 ${cancelableCount}건 일괄 취소`}
             </button>
           ) : null}
         </div>

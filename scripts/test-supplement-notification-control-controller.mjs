@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
-import { createSupplementNotificationControlActionHandler } from "../src/domains/supplements/supplementNotificationControlController.js";
+import {
+  createSupplementNotificationBulkCancelHandler,
+  createSupplementNotificationControlActionHandler
+} from "../src/domains/supplements/supplementNotificationControlController.js";
 
 function createHarness(overrides = {}) {
   const events = [];
@@ -81,5 +84,44 @@ assert.equal(await failed.handleNotificationControlAction("reserve"), null);
 assert.deepEqual(failed.events.map(([type]) => type), ["busy", "feedback", "feedback", "busy"]);
 assert.equal(failed.events[2][1].tone, "failed");
 assert.deepEqual(failed.events.at(-1), ["busy", false]);
+
+const bulkEvents = [];
+const bulkCancel = createSupplementNotificationBulkCancelHandler({
+  controls: [
+    {
+      canCancel: true,
+      config: { label: "학생 알림톡", statusField: "studentChangeNotice" },
+      job: { notificationJobId: "student-job" }
+    },
+    {
+      canCancel: false,
+      config: { label: "학부모 알림톡", statusField: "parentChangeNotice" },
+      job: { notificationJobId: "parent-job" }
+    },
+    {
+      canCancel: true,
+      config: { label: "당일 학생 11시 알림톡", statusField: "studentReminder" },
+      job: { notificationJobId: "reminder-job" }
+    }
+  ],
+  notificationControlBusy: false,
+  notificationControlTask: { makeupTaskId: "task-1" },
+  onCancelNotification: async (job) => bulkEvents.push(["cancel", job.notificationJobId]),
+  setNotificationControlBusy: (value) => bulkEvents.push(["busy", value]),
+  setNotificationControlFeedback: (value) => bulkEvents.push(["feedback", value]),
+  setTaskSaveStatusPatch: (taskId, patch) => bulkEvents.push(["status", taskId, patch])
+});
+assert.deepEqual(await bulkCancel(), { canceledCount: 2, failedCount: 0 });
+assert.deepEqual(bulkEvents.filter(([type]) => type === "cancel"), [
+  ["cancel", "student-job"],
+  ["cancel", "reminder-job"]
+]);
+assert.deepEqual(bulkEvents.find(([type]) => type === "status"), [
+  "status",
+  "task-1",
+  { studentChangeNotice: "canceled", studentReminder: "canceled" }
+]);
+assert.equal(bulkEvents.at(-2)[1].tone, "success");
+assert.deepEqual(bulkEvents.at(-1), ["busy", false]);
 
 console.log("supplement notification control controller fixture passed");

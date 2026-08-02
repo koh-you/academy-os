@@ -76,34 +76,49 @@ export function createSupplementNotificationControlModalViewModel({
   const task = notificationControl
     ? tasks.find((item) => item.makeupTaskId === notificationControl.taskId) ?? null
     : null;
-  const job = task && notificationControl
-    ? dependencies.getControlJob(
-        task,
-        notificationJobs,
-        notificationControl.controlType
-      )
-    : null;
   const draftState = task ? dependencies.getTaskDraftState(task) : null;
   const hasUnsavedChanges = Boolean(
     task &&
     draftState &&
     dependencies.getTaskDraftDiff(task, draftState.values).length
   );
-  const currentPreview = task && notificationControl
-    ? dependencies.getCurrentPreview(task, notificationControl.controlType)
-    : "";
+  const controlTypes = notificationControl?.controlType === "all"
+    ? Object.keys(supplementNotificationControlConfigs)
+    : [notificationControl?.controlType].filter(Boolean);
+  const controls = controlTypes.map((controlType) => {
+    const controlJob = dependencies.getControlJob(task, notificationJobs, controlType);
+    return {
+      ...createSupplementNotificationControlViewModel({
+        controlType,
+        currentPreview: dependencies.getCurrentPreview(task, controlType),
+        hasUnsavedChanges,
+        job: controlJob,
+        student,
+        task
+      }, dependencies),
+      controlType,
+      display: dependencies.getControlDisplay(controlJob),
+      job: controlJob
+    };
+  });
+  const selectedControl = controls[0] ?? {
+    blockReason: "",
+    canCancel: false,
+    canReserve: false,
+    config: null,
+    display: dependencies.getControlDisplay(null),
+    hasHistoricalJob: false,
+    job: null,
+    preview: "",
+    previewLabel: "예약할 현재 문구",
+    recipient: "",
+    savedDraftDiffers: false
+  };
 
   return {
-    ...createSupplementNotificationControlViewModel({
-      controlType: notificationControl?.controlType,
-      currentPreview,
-      hasUnsavedChanges,
-      job,
-      student,
-      task
-    }, dependencies),
-    display: dependencies.getControlDisplay(job),
-    job,
+    ...selectedControl,
+    controls,
+    hasUnsavedChanges,
     task
   };
 }
