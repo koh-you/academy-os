@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 App 3차 리팩터링 3-6 정산 view closeout
+
+- `MonthlySettlementPanel.jsx`의 출결·수업 달력/최종 횟수 편집을 `MonthlySettlementCalendar.jsx`, 정규 정산 표/제외 행 복원을 `MonthlySettlementRegularTable.jsx`로 물리 분리했다. 원본 JSX를 줄바꿈 정규화 후 직접 대조해 달력 6,304자와 표 9,847자가 각각 문자 단위로 동일함을 확인했다.
+- Panel은 controller 반환값과 header·규칙·summary·save bar를 조립하는 184줄·8,027 bytes owner가 됐다. 새 달력은 161줄·7,343 bytes, 표는 232줄·11,544 bytes이며 둘 다 React state/effect·API·Storage를 소유하지 않고 기존 callback identity를 직접 전달받는다.
+- view exact-prop·callback·금지 의존성과 App의 app_state/Supabase 저장·재조회 owner를 확인하는 전용 fixture를 settlement fast 및 production에 연결했다. 검증: runtime lint, settlement fast 7/7, scenario/production 821/821, `check:fast`, build 368 modules, 지연 저장·응답 전 월 이동·초안 복구·PDF를 포함한 Worktree 격리 safe browser 10/10. 운영 데이터·실제 알림·AI 호출·SQL은 사용하지 않았다.
+- 월별 화면 조립·계산 selector·교사 확정값 저장 경계를 대조해 3-6을 닫는다. 다음 단계는 별도 최신 main branch의 3-7 lazy loading/chunk 분리다.
+
 ## 2026-08-02 App 3차 리팩터링 3-6 월별 정산 controller 경계
 
 - `MonthlySettlementPanel.jsx`의 선택 월, localStorage recovery draft, 학생 설정 변경, 계산 row/summary, PDF model 호출과 교사 확정값 저장 조립을 `useMonthlySettlementController.js`로 이동했다. 화면은 달력과 정산 표 render를 유지하며 787줄·35,527 bytes에서 541줄·26,442 bytes로 줄었다.

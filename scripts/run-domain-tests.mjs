@@ -51,6 +51,7 @@ export const domainTestGroups = Object.freeze({
   settlement: Object.freeze([
     "scripts/test-monthly-settlement.mjs",
     "scripts/test-monthly-settlement-controller.mjs",
+    "scripts/test-monthly-settlement-view-boundary.mjs",
     "scripts/test-monthly-regular-lesson-open.mjs",
     "scripts/test-student-withdrawal-boundary.mjs",
     "scripts/test-special-lecture-enrollment-save.mjs",
