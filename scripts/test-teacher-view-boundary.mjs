@@ -62,6 +62,7 @@ const components = Object.fromEntries([...componentNames].map((componentName) =>
   function FixtureComponent() { return componentName; }
 ]));
 const runtimeBindings = {
+  examAnalysisPipeline: Object.freeze({ source: "exam-analysis-fixture" }),
   lessonJournalTransport: Object.freeze({
     loadLessonJournalReservationAudit: () => "lesson-audit"
   }),
@@ -132,6 +133,7 @@ assert.equal(Object.hasOwn(adapters.specialLectureManagement.props, "onDeleteSpe
 assert.equal(Object.hasOwn(adapters.notifications.props, "onCancelNotificationJob"), false);
 assert.equal(Object.hasOwn(adapters.notifications.props, "onReconcileSolapiNotificationResults"), false);
 assert.equal(adapters.lessons.props.runtime, runtimeBindings.teacherLessonHub);
+assert.equal(adapters.examAnalysisPipeline.props.runtime, runtimeBindings.examAnalysisPipeline);
 assert.equal(
   adapters.lessons.props.lessonJournalEffects.persistence.onSaveLessonJournalDrafts,
   actions.handleSaveLessonJournalDrafts

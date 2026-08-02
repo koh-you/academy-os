@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { lazyTeacherViewComponents } from "../src/app/lazyTeacherViewComponents.js";
 
 const expectedLazyComponents = Object.freeze([
+  "ExamAnalysisPipelineCenter",
   "NotificationCenter",
   "SettlementWorkspace",
   "StudentManager",
@@ -28,6 +29,7 @@ const [appSource, registrySource, outletSource, boundarySource] = await Promise.
 ]);
 
 const lazyModuleContracts = [
+  ["ExamAnalysisPipelineCenter", "../domains/exams/ExamAnalysisPipelineCenter.jsx"],
   ["NotificationCenter", "../domains/notifications/NotificationCenter.jsx"],
   ["SettlementWorkspace", "../domains/settlements/SettlementWorkspace.jsx"],
   ["StudentManager", "../domains/students/StudentManager.jsx"],

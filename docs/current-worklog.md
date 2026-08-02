@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 App 3차 리팩터링 3-7 시험분석 화면 lazy loading
+
+- `App.jsx`에 남아 있던 시험분석 helper와 `ExamAnalysisPipelineCenter` 4,612줄을 `src/domains/exams/ExamAnalysisPipelineCenter.jsx`로 물리 분리해 여섯 번째 teacher lazy chunk로 연결했다. 추출 전후 helper 91,259자와 화면 104,145자를 줄바꿈 정규화 뒤 문자 단위로 대조했다.
+- 시험분석 source 조회·추출·문항 탐지·검수 저장·최종 초안 저장 등 13개 request 함수는 `examAnalysisPipelineRuntime`으로 직접 주입하며 App owner를 유지한다. 새 화면은 request 구현을 소유하거나 App/Outlet을 역참조하지 않는다.
+- production main JS는 `1,379.15 kB / gzip 351.03 kB`에서 `1,181.41 kB / gzip 296.06 kB`로 줄었고 시험분석은 `198.00 kB / gzip 54.94 kB` 별도 chunk가 됐다. build 예산을 1.25 MB와 6/6 lazy chunk로 강화했다. `App.jsx`는 16,513줄·721,795 bytes로 줄었지만 Babel 500 KB 경고와 main 500 kB 경고는 남아 있다.
+- safe browser는 Vite 시험분석 module 응답을 지연해 로딩 표시와 화면 진입·선생님 검수 탭을 확인하며 유료 AI·파일 업로드·저장 행동은 실행하지 않는다. 검증: runtime lint, teacher/exam 경계, 5도메인 fast 38/38, scenario·production 821/821, `check:fast`, build 372 modules, Worktree 격리 safe browser 13/13. 운영 데이터·실제 알림·AI 호출·SQL은 사용하지 않았다.
+
 ## 2026-08-02 App 3차 리팩터링 3-7 교사 화면 lazy loading 1차
 
 - 이미 물리 분리된 수업일지·보충관리·학생관리·알림관리·정산 5개 top-level 화면을 `lazyTeacherViewComponents`의 동적 import로 연결했다. `App`의 상태와 저장·삭제·Supabase 재조회·Solapi callback 조립은 바꾸지 않고 component 참조만 lazy component로 교체했다.

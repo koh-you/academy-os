@@ -265,7 +265,10 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
     },
     examAnalysisPipeline: {
       Component: components.ExamAnalysisPipelineCenter,
-      props: { examPrepRows: models.examPrepRows }
+      props: {
+        examPrepRows: models.examPrepRows,
+        runtime: runtimeBindings.examAnalysisPipeline
+      }
     },
     schoolCalendar: {
       Component: components.SchoolCalendarCenter,

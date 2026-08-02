@@ -60,6 +60,7 @@
 - 3-6 첫 단위에서 월별 정산의 선택 월, local recovery draft, row/summary selector와 교사 확정값 저장 조립을 `useMonthlySettlementController`로 옮겼다. `MonthlySettlementPanel`은 787줄에서 541줄로 줄었고 App의 app_state 저장·Supabase 재조회 대조 owner는 유지한다. 저장 중 후속 입력은 month/revision guard로 보존해 재저장을 안내한다.
 - 3-6 closeout에서 월별 출결·수업 달력과 정규 정산 표를 `MonthlySettlementCalendar`·`MonthlySettlementRegularTable`로 분리했다. 두 JSX 본문은 기준 main과 문자 단위로 같고 state/effect/API/Storage가 없다. `MonthlySettlementPanel`은 184줄 화면 조립 owner가 됐으며 계산 controller와 App 저장·재조회 owner를 분리한 상태로 Settlement 경계를 닫는다.
 - 3-7 첫 단위에서 이미 분리된 Lesson·Supplement·Student·Notification·Settlement top-level 화면을 동적 import로 연결했다. 초기 main JS는 1,656.92 kB에서 1,379.15 kB, gzip은 427.24 kB에서 351.03 kB로 줄었고, 5개 화면은 별도 chunk다. 로딩 표시와 chunk 실패 오류 번호·안전 새로고침은 safe browser로 검증했다.
+- 3-7 두 번째 단위에서 `App.jsx` 안의 시험분석 helper·화면 4,612줄을 `ExamAnalysisPipelineCenter.jsx`로 물리 분리하고 여섯 번째 lazy 화면으로 연결했다. 13개 API request owner는 App runtime에 유지했다. 초기 main JS는 1,181.41 kB, gzip 296.06 kB로 줄었고 유료 AI·업로드·저장은 실행하지 않은 안전 브라우저로 chunk 진입을 검증했다.
 
 ## 폴더 상태
 
@@ -71,7 +72,7 @@
 ## 다음 우선순위
 
 1. App 2차 리팩터링 Phase 1~5는 완료됐다. 3차 리팩터링은 3-0 기준선 뒤 `App.jsx` 내부 화면 정의의 물리적 분리부터 순서대로 진행한다.
-2. 3-7 첫 분할로 production main chunk를 약 1.38 MB까지 줄였다. App에 남은 저빈도 teacher 화면을 추가 분리해 700~900 kB 목표와 Babel 500 KB 경고 제거를 이어간다. 화면 동작·저장 경계 변경은 같은 단위에 섞지 않는다.
+2. 3-7 두 번째 분할로 production main chunk를 약 1.18 MB까지 줄였다. App에 남은 저빈도 teacher 화면을 추가 분리해 700~900 kB 목표와 Babel 500 KB 경고 제거를 이어간다. 화면 동작·저장 경계 변경은 같은 단위에 섞지 않는다.
 3. `app_state`에서 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
    - 즉시 사람 판단이 필요하지 않은 발견은 queue/worklog에 남기고 AI 검수와 다음 단계를 연쇄 진행한다.
 

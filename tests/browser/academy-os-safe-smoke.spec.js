@@ -78,6 +78,21 @@ test("teacher view lazy boundary records a failed chunk and recovers after safe 
   await expect(page.getByRole("heading", { name: "학생관리" })).toBeVisible();
 });
 
+test("exam analysis pipeline opens from its deferred chunk without running paid actions", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await page.route("**/src/domains/exams/ExamAnalysisPipelineCenter.jsx*", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    await route.continue();
+  });
+
+  await loginAsTeacher(page);
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /시험분석/ }).click();
+  await expect(page.locator('.teacherViewLoadState[role="status"]')).toContainText("교사 화면을 불러오는 중입니다.");
+  await expect(page.getByRole("heading", { name: "시험분석" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "선생님 검수" })).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
 test("withdrawn student list keeps its table and selection toolbar boundary", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);

@@ -8,6 +8,10 @@ function lazyNamedExport(loadModule, exportName) {
 }
 
 export const lazyTeacherViewComponents = Object.freeze({
+  ExamAnalysisPipelineCenter: lazyNamedExport(
+    () => import("../domains/exams/ExamAnalysisPipelineCenter.jsx"),
+    "ExamAnalysisPipelineCenter"
+  ),
   NotificationCenter: lazyNamedExport(
     () => import("../domains/notifications/NotificationCenter.jsx"),
     "NotificationCenter"
