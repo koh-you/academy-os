@@ -17999,6 +17999,16 @@ textarea.profileEditInput {
   padding: 18px;
 }
 
+.supplementTimeSelects {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.supplementTimeSelects select {
+  width: 100%;
+}
+
 .supplementSortControl {
   align-items: center;
   color: #52627a;

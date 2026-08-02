@@ -78,6 +78,7 @@
     "test:supplement-status": "node scripts/test-supplement-status.mjs",
     "test:supplement-task-draft": "node scripts/test-supplement-task-draft.mjs",
     "test:supplement-task-card-model": "node scripts/test-supplement-task-card-model.mjs",
+    "test:supplement-time-input-model": "node scripts/test-supplement-time-input-model.mjs",
     "test:supplement-notification-control-model": "node scripts/test-supplement-notification-control-model.mjs",
     "test:supplement-task-actions": "node scripts/test-supplement-task-actions.mjs",
     "test:supplement-confirmation-state": "node scripts/test-supplement-confirmation-state.mjs",
