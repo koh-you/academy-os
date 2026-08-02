@@ -60,6 +60,12 @@ function normalizeSignedMoneyInput(value, fallback = 0) {
   return Number.isFinite(number) ? Math.round(number) : fallback;
 }
 
+function normalizeOptionalCount(value, fallback = "") {
+  if (value === "" || value === null || value === undefined) return fallback;
+  const number = Number(value);
+  return Number.isFinite(number) ? Math.max(0, Math.round(number)) : fallback;
+}
+
 function normalizeMonthDate(value = "", monthKey = "") {
   const date = normalizeText(value).slice(0, 10);
   return date.startsWith(`${monthKey}-`) ? date : "";
@@ -210,10 +216,6 @@ export function buildMonthlyScheduleEvents(monthKey = "", scheduleText = "") {
 }
 
 function buildActualLessonEvent(lesson = {}, record = null, student = {}) {
-  const studentSchedule = getStudentScheduleForLesson(lesson, student);
-  const startTime = studentSchedule?.startTime || lesson.startTime || "";
-  const endTime = studentSchedule?.endTime || lesson.endTime || "";
-  const attendanceStatus = record?.attendanceStatus || "pending";
   const eventType = nonTeachingLessonTypes.has(lesson.lessonType)
     ? "regularClosure"
     : isSpecialLectureSettlementLesson(lesson)
@@ -223,6 +225,12 @@ function buildActualLessonEvent(lesson = {}, record = null, student = {}) {
     : isMakeupSettlementLesson(lesson)
       ? "makeup"
       : "regular";
+  const studentSchedule = eventType === "regular" || eventType === "regularClosure" || eventType === "special"
+    ? getStudentScheduleForLesson(lesson, student)
+    : null;
+  const startTime = studentSchedule?.startTime || lesson.startTime || "";
+  const endTime = studentSchedule?.endTime || lesson.endTime || "";
+  const attendanceStatus = record?.attendanceStatus || "pending";
   return {
     attendanceStatus,
     attendanceLabel: attendanceLabels[attendanceStatus] ?? attendanceStatus ?? "대기",
@@ -436,6 +444,7 @@ export function normalizeMonthlySettlementStudentSetting(
         : getDefaultNewStudentSessionAmount(student)
     ),
     note: normalizeText(setting.note),
+    regularCountOverride: normalizeOptionalCount(setting.regularCountOverride, ""),
     scheduleText,
     specialGrossAmount: normalizeMoneyInput(setting.specialGrossAmount, 0),
     startDate: normalizeMonthDate(setting.startDate, monthKey) || (mode === "withdrawn" ? startDate : "")
@@ -666,9 +675,13 @@ export function buildStudentSettlementRow({
     : [];
   const monthlyScheduleCount = monthlyScheduleEvents.length;
   const scheduledProrationCount = proratedScheduleEvents.length;
-  const prorationCount = normalizedSetting.mode === "new"
-    ? recognizedRegularEvents.length
-    : scheduledProrationCount;
+  const systemProrationCount = normalizedSetting.mode === "withdrawn"
+    ? scheduledProrationCount
+    : recognizedRegularEvents.length;
+  const hasRegularCountOverride = normalizedSetting.regularCountOverride !== "";
+  const prorationCount = hasRegularCountOverride
+    ? normalizedSetting.regularCountOverride
+    : systemProrationCount;
   const partialRatio = normalizedSetting.mode === "fixed"
     ? 1
     : monthlyScheduleCount > 0
@@ -703,6 +716,7 @@ export function buildStudentSettlementRow({
     hasFixedAmount,
     hasNewStudentSessionAmount,
     hasRegularJournal,
+    hasRegularCountOverride,
     isJournalAutoNew: normalizedSetting.mode === "new" &&
       normalizedSetting.modeSource === "lesson_journal",
     isNewWithdrawnPeriod,
@@ -716,15 +730,18 @@ export function buildStudentSettlementRow({
     periodEnd,
     periodStart,
     prorationCount,
-    prorationSource: normalizedSetting.mode === "new"
-      ? "lessonJournal"
-      : monthlyScheduleEvents.length ? "monthlySchedule" : "missingSchedule",
+    prorationSource: hasRegularCountOverride
+      ? "teacher"
+      : normalizedSetting.mode === "withdrawn"
+      ? monthlyScheduleEvents.length ? "monthlySchedule" : "missingSchedule"
+      : "lessonJournal",
     recognizedRegularCount: recognizedRegularEvents.length,
     recognizedRegularEvents,
     recognizedRegularHours,
     regularGrossAmount,
     setting: normalizedSetting,
     student,
+    systemProrationCount,
     weeklyScheduleHours
   };
 }
@@ -786,6 +803,7 @@ export function getMonthlySettlementMonthSaveSnapshot(month = {}) {
             modeSource: settlementModeSources.has(setting?.modeSource) ? setting.modeSource : "",
             newStudentSessionAmount: normalizeMoneyInput(setting?.newStudentSessionAmount, ""),
             note: normalizeText(setting?.note),
+            regularCountOverride: normalizeOptionalCount(setting?.regularCountOverride, ""),
             scheduleText: normalizeText(setting?.scheduleText),
             specialGrossAmount: normalizeMoneyInput(setting?.specialGrossAmount, 0),
             startDate: normalizeText(setting?.startDate)

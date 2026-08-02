@@ -102,6 +102,31 @@ const initialState = {
       title: "정산 미리보기반 휴강 보충"
     },
     {
+      className: "여름 개별 진도 클리닉",
+      date: "2026-08-03",
+      endTime: "16:00",
+      lessonId: "safe-special-lecture-journal",
+      lessonType: "specialLecture",
+      specialLectureGuideId: "special_lecture_2026_summer_high1_clinic_mwf",
+      specialLectureSessionId: "special_lecture_session_special_lecture_2026_summer_high1_clinic_mwf_06",
+      startTime: "13:00",
+      status: "completed",
+      studentIds: ["safe-settlement-student"],
+      title: "여름 개별 진도 클리닉"
+    },
+    {
+      className: "정산 미리보기반",
+      classTemplateId: "safe-settlement-class",
+      date: "2026-08-01",
+      endTime: "19:00",
+      lessonId: "safe-settlement-august-regular",
+      lessonType: "class",
+      startTime: "16:00",
+      status: "completed",
+      studentIds: ["safe-settlement-student"],
+      title: "정산 미리보기반"
+    },
+    {
       className: "월 경계 연동반",
       classTemplateId: "safe-cross-month-class",
       date: "2026-07-30",
@@ -178,12 +203,36 @@ const initialState = {
       lessonStudentRecordId: "safe-settlement-replacement-record",
       recordId: "safe-settlement-replacement-record",
       studentId: "safe-settlement-student"
+    },
+    {
+      attendanceStatus: "late",
+      lessonId: "safe-special-lecture-journal",
+      lessonStudentRecordId: "safe-special-lecture-record",
+      recordId: "safe-special-lecture-record",
+      studentId: "safe-settlement-student"
+    },
+    {
+      attendanceStatus: "present",
+      lessonId: "safe-settlement-august-regular",
+      lessonStudentRecordId: "safe-settlement-august-regular-record",
+      recordId: "safe-settlement-august-regular-record",
+      studentId: "safe-settlement-student"
     }
   ],
   resourceMaterials: [],
   schoolEvents: [],
   specialLectureApplications: [],
-  specialLectureEnrollments: [],
+  specialLectureEnrollments: [{
+    enrollmentId: "safe-special-lecture-enrollment",
+    planReviewedAt: "2026-07-20T00:00:00.000Z",
+    specialLectureGuideId: "special_lecture_2026_summer_high1_clinic_mwf",
+    status: "active",
+    studentId: "safe-settlement-student",
+    sessionIds: [
+      "special_lecture_session_special_lecture_2026_summer_high1_clinic_mwf_06",
+      "special_lecture_session_special_lecture_2026_summer_high1_clinic_mwf_07"
+    ]
+  }],
   studentIntakeApplicants: [],
   students: [
     {
