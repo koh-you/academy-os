@@ -3476,8 +3476,9 @@ summary:focus-visible {
 .lessonCalendarPrimaryActions {
   display: flex;
   gap: var(--academy-space-2);
+  grid-column: 3;
   justify-content: flex-end;
-  margin-bottom: var(--academy-space-2);
+  justify-self: end;
 }
 
 .lessonCalendarPrimaryActions button {
@@ -3490,12 +3491,20 @@ summary:focus-visible {
   border: 1px solid var(--academy-border);
   border-radius: var(--academy-radius);
   box-shadow: var(--academy-shadow);
-  display: flex;
+  display: grid;
   gap: var(--academy-space-2);
-  justify-content: center;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   margin-bottom: var(--academy-space-2);
   min-height: 62px;
   padding: 10px 14px;
+}
+
+.lessonCalendarMonthControls {
+  align-items: center;
+  display: flex;
+  gap: var(--academy-space-2);
+  grid-column: 2;
+  justify-content: center;
 }
 
 .lessonCalendarMonthNavigation h2 {
@@ -3513,6 +3522,16 @@ summary:focus-visible {
 }
 
 @media (max-width: 640px) {
+  .lessonCalendarMonthNavigation {
+    grid-template-columns: 1fr;
+  }
+
+  .lessonCalendarMonthControls,
+  .lessonCalendarPrimaryActions {
+    grid-column: 1;
+    justify-self: stretch;
+  }
+
   .lessonCalendarPrimaryActions {
     align-items: stretch;
     flex-direction: column;

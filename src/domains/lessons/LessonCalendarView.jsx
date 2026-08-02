@@ -53,19 +53,20 @@ export function LessonCalendarView({
         title={monthTitle}
       />
 
-      <div aria-label="수업일지 생성" className="lessonCalendarPrimaryActions" role="group">
-        <button className="primaryButton" onClick={onAddLesson} type="button">+ 수업 등록</button>
-        {showMonthlyRegularLessonOpen ? (
-          <button className="softButton" onClick={onOpenMonthlyRegularLessons} type="button">
-            {monthlyRegularLessonOpenLabel}
-          </button>
-        ) : null}
-      </div>
-
       <nav aria-label="수업일지 달력 월 이동" className="lessonCalendarMonthNavigation">
-        <button aria-label="이전 달" className="iconButton" onClick={() => onShiftMonth(-1)} type="button">‹</button>
-        <h2 aria-live="polite">{monthTitle}</h2>
-        <button aria-label="다음 달" className="iconButton" onClick={() => onShiftMonth(1)} type="button">›</button>
+        <div className="lessonCalendarMonthControls">
+          <button aria-label="이전 달" className="iconButton" onClick={() => onShiftMonth(-1)} type="button">‹</button>
+          <h2 aria-live="polite">{monthTitle}</h2>
+          <button aria-label="다음 달" className="iconButton" onClick={() => onShiftMonth(1)} type="button">›</button>
+        </div>
+        <div aria-label="수업일지 생성" className="lessonCalendarPrimaryActions" role="group">
+          <button className="primaryButton" onClick={onAddLesson} type="button">+ 수업 등록</button>
+          {showMonthlyRegularLessonOpen ? (
+            <button className="softButton" onClick={onOpenMonthlyRegularLessons} type="button">
+              {monthlyRegularLessonOpenLabel}
+            </button>
+          ) : null}
+        </div>
       </nav>
 
       <section

@@ -490,9 +490,17 @@
   margin-top: 0;
 }
 
-.monthlySettlementCalendarModal {
-  max-width: 1120px;
-  width: min(1120px, calc(100vw - 36px));
+.modalCard.monthlySettlementCalendarModal {
+  max-width: 1320px;
+  width: min(1320px, calc(100vw - 36px));
+}
+
+.modalCard.modalScrollable.monthlySettlementCalendarModal {
+  max-height: calc(100dvh - 20px);
+}
+
+.monthlySettlementCalendarModal .modalScrollBody {
+  gap: 14px;
 }
 
 .monthlySettlementCalendarLegend {
@@ -729,7 +737,7 @@
     grid-template-columns: 1fr;
   }
 
-  .monthlySettlementCalendarModal {
+  .modalCard.monthlySettlementCalendarModal {
     width: calc(100vw - 20px);
   }
 

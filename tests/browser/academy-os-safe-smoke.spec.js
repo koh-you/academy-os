@@ -76,7 +76,8 @@ test("lesson journal creation action stays visible and opens the registration mo
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);
 
-  const creationActions = page.getByRole("group", { name: "수업일지 생성" });
+  const monthNavigation = page.getByRole("navigation", { name: "수업일지 달력 월 이동" });
+  const creationActions = monthNavigation.getByRole("group", { name: "수업일지 생성" });
   await expect(creationActions).toBeVisible();
   await creationActions.getByRole("button", { name: "+ 수업 등록", exact: true }).click();
   await expect(page.getByRole("dialog", { name: "수업 등록" })).toBeVisible();
@@ -127,6 +128,10 @@ test("monthly settlement counts closure replacement and distinguishes attendance
   await settlementRow.getByRole("button", { name: /정규 3회/ }).click();
 
   const calendar = page.getByRole("dialog", { name: /정산 미리보기 학생 월별 출결·수업/ });
+  expect(await calendar.evaluate((element) => element.getBoundingClientRect().width)).toBeGreaterThan(1100);
+  expect(await calendar.locator(".monthlySettlementCalendarShell").evaluate(
+    (element) => element.scrollWidth <= element.clientWidth
+  )).toBe(true);
   const presentEvent = calendar.locator(".monthlySettlementCalendarEvent.regular.attendance-present");
   const absentReplacement = calendar.locator(".monthlySettlementCalendarEvent.regularReplacement.attendance-absent");
   const pendingEvent = calendar.locator(".monthlySettlementCalendarEvent.regular.attendance-pending");
