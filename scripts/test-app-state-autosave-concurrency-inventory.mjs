@@ -2,8 +2,9 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [appSource, coreDataSource, serverSource, schemaSource, workflowSource, packageSource] = await Promise.all([
+const [appSource, controllerSource, coreDataSource, serverSource, schemaSource, workflowSource, packageSource] = await Promise.all([
   read("../src/app/App.jsx"),
+  read("../src/domains/appState/appStatePersistenceController.js"),
   read("../api/routes/coreData.js"),
   read("../api/server.js"),
   read("../supabase/20260620_app_state_store.sql"),
@@ -54,27 +55,39 @@ const autosaveSource = sourceBetween(
 for (const boundary of [
   "const changedStates = Object.fromEntries",
   "persistedSharedAppStateRef.current[key]",
-  "appStateSaveRequestRef.current = requestId",
-  "postAppState(changedStates)",
-  "persistedSharedAppStateRef.current = {",
+  "getAppStatePersistenceController().save(changedStates)",
   "}, 500)"
 ]) {
   assert.ok(autosaveSource.includes(boundary), `missing app_state autosave boundary: ${boundary}`);
 }
-assert.ok(!autosaveSource.includes('fetch(apiUrl("/api/app-state")'));
-assert.ok(!autosaveSource.includes("expectedUpdatedAt"));
-assert.ok(!autosaveSource.includes("expectedVersion"));
+assert.ok(!autosaveSource.includes("appStateSaveRequestRef"));
+assert.ok(appSource.includes('/api/app-state?includeRows=true'));
+for (const boundary of [
+  "pendingByKey",
+  "updatedAtByKey",
+  "await write({",
+  "const verification = await read()",
+  'verification.source !== "supabase"',
+  "onPersisted({ key, updatedAt: verifiedRow.updatedAt"
+]) {
+  assert.ok(controllerSource.includes(boundary), `missing persistence controller boundary: ${boundary}`);
+}
 
-const listSource = sourceBetween(coreDataSource, "export async function listAppState()", "export async function upsertAppState(states)");
+const listSource = sourceBetween(
+  coreDataSource,
+  "export async function listAppState()",
+  "export async function upsertAppState(states, { expectedUpdatedAt = null } = {})"
+);
 assert.ok(listSource.includes("stateRows: rows.map(fromAppStateRow)"));
 assert.ok(coreDataSource.includes("function fromAppStateRow(row)"));
 assert.ok(coreDataSource.includes("updatedAt: row.updated_at"));
 
-const upsertSource = sourceBetween(coreDataSource, "export async function upsertAppState(states)", "export async function listResourceMaterials()");
-assert.ok(upsertSource.includes('upsertRows("app_state", rows)'));
-assert.ok(!upsertSource.includes('patchRows("app_state"'));
-assert.ok(!upsertSource.includes("expectedUpdatedAt"));
-assert.ok(!upsertSource.includes("expectedVersion"));
+const upsertSource = sourceBetween(coreDataSource, "export async function upsertAppState(states, { expectedUpdatedAt = null } = {})", "export async function listResourceMaterials()");
+assert.ok(upsertSource.includes('upsertRows("app_state", [row])'));
+assert.ok(upsertSource.includes('insertRows("app_state", [row])'));
+assert.ok(upsertSource.includes('patchRows('));
+assert.ok(upsertSource.includes("createAppStateVersionFilter(key, expectedVersion)"));
+assert.ok(upsertSource.includes("createAppStateConflictError(key)"));
 
 const getRouteSource = sourceBetween(
   serverSource,
@@ -89,22 +102,19 @@ const postRouteSource = sourceBetween(
   'if (request.method === "POST" && requestUrl.pathname === "/api/app-state")',
   'if (request.method === "GET" && requestUrl.pathname === "/api/resource-materials")'
 );
-assert.ok(postRouteSource.includes("upsertAppState(safeStates)"));
-assert.ok(!postRouteSource.includes("expectedUpdatedAt"));
-assert.ok(!postRouteSource.includes("expectedVersion"));
+assert.ok(postRouteSource.includes("upsertAppState(safeStates, { expectedUpdatedAt })"));
+assert.ok(postRouteSource.includes("Number(error.statusCode) || 500"));
 
 assert.ok(schemaSource.includes("state_key text primary key"));
 assert.ok(schemaSource.includes("updated_at timestamptz not null default now()"));
 assert.ok(!schemaSource.includes(" version "));
 
-const writesByArrival = [
-  { request: "newer", value: "B", arrivesAt: 10 },
-  { request: "older", value: "A", arrivesAt: 20 }
+const writesByInvocation = [
+  { request: "older", value: "A", networkDelay: 20 },
+  { request: "newer", value: "B", networkDelay: 10 }
 ];
-const finalValue = writesByArrival
-  .sort((left, right) => left.arrivesAt - right.arrivesAt)
-  .reduce((_current, write) => write.value, "initial");
-assert.equal(finalValue, "A", "the current last-arrival-wins contract must reproduce stale overwrite risk");
+const finalValue = writesByInvocation.reduce((_current, write) => write.value, "initial");
+assert.equal(finalValue, "B", "serialized same-key writes must preserve invocation order");
 
 const packageJson = JSON.parse(packageSource);
 assert.equal(
@@ -113,4 +123,4 @@ assert.equal(
 );
 assert.ok(workflowSource.includes("npm run test:app-state-autosave-inventory"));
 
-console.log("app_state autosave concurrency inventory passed (12 keys; stale-overwrite risk reproduced)");
+console.log("app_state autosave concurrency inventory passed (12 keys; serialization/CAS/requery guarded)");

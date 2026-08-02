@@ -125,6 +125,7 @@ import { createPersistedPreExamRowRepair } from "../domains/lessons/persistedPre
 import { createPreExamMathLabelInference } from "../domains/lessons/preExamMathLabelInference.js";
 import { selectChangedGeneratedLessonPlanRows } from "../domains/lessons/generatedLessonRepairSelectors.js";
 import { selectGeneratedLessonsToSave } from "../domains/lessons/generatedLessonSaveSelector.js";
+import { createAppStatePersistenceController } from "../domains/appState/appStatePersistenceController.js";
 import { selectGeneratedLessonPlanItemsByKey } from "../domains/lessons/generatedLessonTargetSelector.js";
 import {
   createGeneratedLessonFailedStatus,
@@ -1092,10 +1093,10 @@ function buildInitialCommentDraft({ audience, existingComment, record, supplemen
 
 const appStateAutosaveRisk = {
   title: "app_state key별 자동저장",
-  storage: "Supabase app_state: aiSettings, attendanceSettings, lessonResearchItems, wrongProblems 등 변경된 key만 500ms debounce로 저장",
-  risk: "전체 snapshot 저장은 제거됐습니다. 다만 같은 key를 여러 탭에서 빠르게 고치거나, 이전 요청이 더 늦게 도착하면 최신값을 덮을 수 있습니다. 저장 뒤 재조회·version 대조도 아직 없습니다.",
-  stopCondition: "저장 실패가 뜨거나, 새로고침 뒤 이전 값이 보이거나, 다른 탭의 같은 설정이 되돌아가면 다음 입력을 멈춥니다.",
-  recommendation: "독립성이 큰 데이터는 계속 명시 저장·재조회 흐름으로 분리하고, 남은 자동저장 key에는 updatedAt/version 충돌 확인을 붙입니다."
+  storage: "Supabase app_state: 변경된 key만 500ms debounce 후 같은 브라우저에서 직렬 저장하고 updated_at 대조와 서버 재조회로 완료 확인",
+  risk: "다른 탭이나 기기가 같은 key를 먼저 저장하면 자동 병합하지 않고 현재 탭을 저장 실패로 남깁니다. 입력값은 화면에 유지됩니다.",
+  stopCondition: "저장 실패가 뜨면 반복 입력을 멈추고 새로고침으로 서버 저장본과 현재 입력을 비교합니다.",
+  recommendation: "충돌한 입력은 서버 저장본을 확인한 뒤 필요한 값만 다시 반영합니다. 독립성이 큰 데이터는 계속 명시 저장 흐름으로 분리합니다."
 };
 
 const examPrepAutosaveRisk = {
@@ -4052,8 +4053,11 @@ function deleteSchoolEventFromApi(eventId) {
     });
 }
 
-function postAppState(states) {
-  return postJson("/api/app-state", { states });
+function postAppState(states, { expectedUpdatedAt = null } = {}) {
+  return postJson("/api/app-state", {
+    states,
+    ...(expectedUpdatedAt ? { expectedUpdatedAt } : {})
+  });
 }
 
 function postTestSession(testSession, testAttempts = []) {
@@ -5313,7 +5317,6 @@ export function App() {
   const initialMakeupTasksRef = useRef(makeupTasks);
   const initialExamPrepRowsRef = useRef(examPrepRows);
   const initialSchoolEventsRef = useRef(schoolEvents);
-  const appStateSaveRequestRef = useRef(0);
   const appStateSaveTimerRef = useRef(null);
   const problemBookSaveRequestRef = useRef(0);
   const problemBookSaveTimerRef = useRef(null);
@@ -5326,6 +5329,7 @@ export function App() {
   const teacherOperatingMemoSaveRequestRef = useRef({});
   const studentIntakeSaveRequestRef = useRef({});
   const isApplyingRemoteAppStateRef = useRef(false);
+  const appStatePersistenceControllerRef = useRef(null);
   const notificationJobsRefreshControllerRef = useRef(null);
   const notificationJobsReconcileControllerRef = useRef(null);
   const attendanceOnlyMode = isAttendanceOnlyRoute();
@@ -5371,6 +5375,28 @@ export function App() {
   ]);
   const initialSharedAppStateRef = useRef(sharedAppState);
   const persistedSharedAppStateRef = useRef({});
+
+  function getAppStatePersistenceController() {
+    if (!appStatePersistenceControllerRef.current) {
+      appStatePersistenceControllerRef.current = createAppStatePersistenceController({
+        onError: (error) => console.error(error),
+        onPersisted: ({ key, value }) => {
+          persistedSharedAppStateRef.current = {
+            ...persistedSharedAppStateRef.current,
+            [key]: value
+          };
+        },
+        onState: setAppStateSaveState,
+        read: () => getJsonWithTimeout(
+          `/api/app-state?includeRows=true&verify=autosave-${Date.now()}`,
+          15000,
+          "공통 설정 저장 확인이 15초를 넘었습니다. 현재 입력을 유지한 채 잠시 뒤 다시 확인해 주세요."
+        ),
+        write: ({ expectedUpdatedAt, states }) => postAppState(states, { expectedUpdatedAt })
+      });
+    }
+    return appStatePersistenceControllerRef.current;
+  }
 
   useEffect(() => {
     let isMounted = true;
@@ -5474,7 +5500,7 @@ export function App() {
           fetch(apiUrl("/api/school-events")),
           fetch(apiUrl("/api/test-sessions")),
           fetch(apiUrl("/api/test-attempts")),
-          fetch(apiUrl("/api/app-state")),
+          fetch(apiUrl("/api/app-state?includeRows=true"), { cache: "no-store" }),
           fetch(apiUrl("/api/resource-materials"))
         ]);
         const [
@@ -5581,6 +5607,11 @@ export function App() {
                 : initialSharedAppStateRef.current[key]
             ])
           );
+          getAppStatePersistenceController().setSnapshot({
+            keys: Object.keys(initialSharedAppStateRef.current),
+            stateRows: appStateResult.stateRows ?? [],
+            states: persistedSharedAppStateRef.current
+          });
           isApplyingRemoteAppStateRef.current = true;
           if (Array.isArray(states.academyTests)) setAcademyTests(states.academyTests);
           if (states.aiSettings) setAiSettings(states.aiSettings);
@@ -5630,7 +5661,13 @@ export function App() {
           }, 0);
         } else if (appStateResult.ok) {
           persistedSharedAppStateRef.current = initialSharedAppStateRef.current;
-          postAppState(initialSharedAppStateRef.current).catch((error) => console.error(error));
+          const seededResult = await postAppState(initialSharedAppStateRef.current);
+          if (!isMounted) return;
+          getAppStatePersistenceController().setSnapshot({
+            keys: Object.keys(initialSharedAppStateRef.current),
+            stateRows: seededResult.stateRows ?? [],
+            states: initialSharedAppStateRef.current
+          });
           setIsAppStateReady(true);
         }
         if (resourceMaterialsResult.ok && Array.isArray(resourceMaterialsResult.materials)) {
@@ -5697,23 +5734,10 @@ export function App() {
     if (appStateSaveTimerRef.current) {
       window.clearTimeout(appStateSaveTimerRef.current);
     }
-    const requestId = appStateSaveRequestRef.current + 1;
-    appStateSaveRequestRef.current = requestId;
     setAppStateSaveState("saving");
     appStateSaveTimerRef.current = window.setTimeout(() => {
       appStateSaveTimerRef.current = null;
-      postAppState(changedStates)
-        .then(() => {
-          persistedSharedAppStateRef.current = {
-            ...persistedSharedAppStateRef.current,
-            ...changedStates
-          };
-          if (appStateSaveRequestRef.current === requestId) setAppStateSaveState("saved");
-        })
-        .catch((error) => {
-          console.error(error);
-          if (appStateSaveRequestRef.current === requestId) setAppStateSaveState("failed");
-        });
+      getAppStatePersistenceController().save(changedStates);
     }, 500);
     return () => {
       if (appStateSaveTimerRef.current) {
@@ -5722,6 +5746,11 @@ export function App() {
       }
     };
   }, [isAppStateReady, sharedAppState, session?.role]);
+
+  useEffect(() => () => {
+    appStatePersistenceControllerRef.current?.dispose();
+    appStatePersistenceControllerRef.current = null;
+  }, [session?.role]);
 
   useEffect(() => () => {
     if (problemBookSaveTimerRef.current) window.clearTimeout(problemBookSaveTimerRef.current);
@@ -8306,16 +8335,9 @@ export function App() {
 
   function persistLessonNotificationPlans(nextPlans) {
     if (session?.role !== "teacher") return;
-    postAppState({
+    getAppStatePersistenceController().save({
       lessonNotificationPlans: nextPlans
-    })
-      .then(() => {
-        persistedSharedAppStateRef.current = {
-          ...persistedSharedAppStateRef.current,
-          lessonNotificationPlans: nextPlans
-        };
-      })
-      .catch((error) => console.error(error));
+    });
   }
 
   function handleUpdateLessonNotificationPlan(lessonId, mode) {

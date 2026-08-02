@@ -10,7 +10,12 @@ import {
   isLessonClosureConversion
 } from "../../src/domains/lessons/lessonClosure.js";
 import { deleteExamPrepRowWithAudit } from "../domain/examPrepDeletion.js";
-import { deleteRows, getSupabaseStatus, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
+import {
+  createAppStateConflictError,
+  createAppStateVersionFilter,
+  isAppStateInsertConflict
+} from "../domain/appStatePersistence.js";
+import { deleteRows, getSupabaseStatus, insertRows, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
 
 const fallbackSource = "local_sample";
 const databaseSource = "supabase";
@@ -2827,7 +2832,7 @@ export async function listAppState() {
   };
 }
 
-export async function upsertAppState(states) {
+export async function upsertAppState(states, { expectedUpdatedAt = null } = {}) {
   if (!states || typeof states !== "object" || Array.isArray(states)) {
     return { source: isSupabaseConfigured() ? databaseSource : fallbackSource, states: {} };
   }
@@ -2838,11 +2843,42 @@ export async function upsertAppState(states) {
   for (const key of hiddenAppStateKeys) {
     await deleteRows("app_state", `state_key=eq.${encodeURIComponent(key)}`);
   }
-  const rows = Object.entries(states)
+  const entries = Object.entries(states)
     .filter(([key]) => !hiddenAppStateKeys.has(key))
-    .map(([key, value]) => toAppStateRow(key, value));
-  if (rows.length === 0) return { source: databaseSource, states: {} };
-  const savedRows = await upsertRows("app_state", rows);
+    .map(([key, value]) => [key, toAppStateRow(key, value)]);
+  if (entries.length === 0) return { source: databaseSource, states: {} };
+
+  const savedRows = [];
+  for (const [key, row] of entries) {
+    const hasExpectedVersion = Boolean(
+      expectedUpdatedAt && Object.prototype.hasOwnProperty.call(expectedUpdatedAt, key)
+    );
+    if (!hasExpectedVersion) {
+      const [savedRow] = await upsertRows("app_state", [row]);
+      if (savedRow) savedRows.push(savedRow);
+      continue;
+    }
+
+    const expectedVersion = expectedUpdatedAt[key];
+    if (expectedVersion === null) {
+      try {
+        const [savedRow] = await insertRows("app_state", [row]);
+        if (savedRow) savedRows.push(savedRow);
+      } catch (error) {
+        if (isAppStateInsertConflict(error)) throw createAppStateConflictError(key);
+        throw error;
+      }
+      continue;
+    }
+
+    const patchedRows = await patchRows(
+      "app_state",
+      createAppStateVersionFilter(key, expectedVersion),
+      row
+    );
+    if (!patchedRows.length) throw createAppStateConflictError(key);
+    savedRows.push(...patchedRows);
+  }
   return {
     source: databaseSource,
     states: Object.fromEntries(savedRows.map((row) => [row.state_key, row.state_value])),
