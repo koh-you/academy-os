@@ -178,6 +178,34 @@ const teacherEntry = updateSupplementTaskDraftEntry({
 assert.deepEqual(teacherEntry.editedFields, ["notificationDraft"]);
 assert.equal(teacherEntry.values.notificationDraft, "선생님 최종본");
 
+const linkedAbsenceEntry = updateSupplementTaskDraftEntry({
+  existing: generatedEntry,
+  field: "studentScheduleNotificationDraft",
+  notificationTemplates: { marker: "template" },
+  student,
+  task: sourceTask,
+  value: "학생에서 연동한 최종본"
+}, transitionDependencies);
+assert.deepEqual(linkedAbsenceEntry.editedFields, [
+  "studentScheduleNotificationDraft",
+  "parentScheduleNotificationDraft",
+  "notificationDraft"
+]);
+assert.equal(linkedAbsenceEntry.values.studentScheduleNotificationDraft, "학생에서 연동한 최종본");
+assert.equal(linkedAbsenceEntry.values.parentScheduleNotificationDraft, "학생에서 연동한 최종본");
+assert.equal(linkedAbsenceEntry.values.notificationDraft, "학생에서 연동한 최종본");
+
+const independentHomeworkEntry = updateSupplementTaskDraftEntry({
+  existing: generatedEntry,
+  field: "studentScheduleNotificationDraft",
+  notificationTemplates: { marker: "template" },
+  student,
+  task: { ...sourceTask, taskType: "homework_makeup" },
+  value: "학생만 수정"
+}, transitionDependencies);
+assert.deepEqual(independentHomeworkEntry.editedFields, ["studentScheduleNotificationDraft"]);
+assert.equal(independentHomeworkEntry.values.parentScheduleNotificationDraft, "일정:absence_makeup:기본");
+
 const builtTask = buildSupplementTaskWithDraft({
   notificationTemplates: { marker: "template" },
   student,

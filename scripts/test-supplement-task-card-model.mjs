@@ -172,13 +172,15 @@ const workspaceModel = createSupplementNotificationDraftWorkspaceViewModel({
   getControlDisplay: (job) => ({ jobId: job?.id ?? "", status: job?.status ?? "none" }),
   getControlJob: (_task, jobs, controlType) => jobs.find((job) => job.controlType === controlType)
 });
-assert.equal(workspaceModel.activeConfig.controlType, "studentSchedule");
-assert.equal(workspaceModel.activeDraft, "학생 수정본");
-assert.deepEqual(workspaceModel.activeDisplay, {
+assert.equal(workspaceModel.tabConfigs[0].controlType, "studentSchedule");
+assert.equal(workspaceModel.tabConfigs[0].draft, "학생 수정본");
+assert.deepEqual(workspaceModel.tabConfigs[0].display, {
   jobId: "student-job",
   status: "scheduled"
 });
-assert.equal(workspaceModel.isTeacherFinal, true);
+assert.equal(workspaceModel.tabConfigs[0].isTeacherFinal, true);
+assert.equal(workspaceModel.tabConfigs[1].draft, "학부모 초안");
+assert.equal(workspaceModel.tabConfigs[1].isTeacherFinal, false);
 assert.equal(workspaceModel.tabConfigs.length, 3);
 
 console.log("supplement task card model: deterministic contract passed");

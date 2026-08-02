@@ -152,4 +152,29 @@ assert.equal(dirtyModalModel.blockReason, "수정 중인 보충 내용·일정�
 assert.equal(dirtyModalModel.canReserve, false);
 assert.deepEqual(dirtyModalModel.display, { status: "none" });
 
+const bulkModalModel = createSupplementNotificationControlModalViewModel({
+  notificationControl: { controlType: "all", taskId: "task-1" },
+  notificationJobs: [
+    { controlType: "studentSchedule", status: "scheduled" },
+    { controlType: "parentSchedule", status: "sent" }
+  ],
+  student,
+  tasks: [{ ...task, makeupTaskId: "task-1" }]
+}, {
+  ...dependencies,
+  getControlDisplay: (job) => ({ status: job?.status ?? "none" }),
+  getControlJob: (_task, jobs, controlType) => jobs.find((item) => item.controlType === controlType) ?? null,
+  getCurrentPreview: (_task, controlType) => `${controlType} 문구`,
+  getTaskDraftDiff: () => [],
+  getTaskDraftState: () => ({ values: {} })
+});
+assert.deepEqual(bulkModalModel.controls.map((control) => control.controlType), [
+  "studentSchedule",
+  "parentSchedule",
+  "studentReminder"
+]);
+assert.equal(bulkModalModel.controls[0].canCancel, true);
+assert.equal(bulkModalModel.controls[1].canCancel, false);
+assert.equal(bulkModalModel.controls[2].canReserve, true);
+
 console.log("supplement notification control model: deterministic contract passed");

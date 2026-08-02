@@ -8,7 +8,10 @@ import { createSupplementCancellationHandler } from "./supplementAbsenceCancelCo
 import { createSupplementConfirmationSubmitHandlers } from "./supplementConfirmationSubmitController.js";
 import { SupplementCancellationConfirmModal } from "./SupplementCancellationConfirmModal.jsx";
 import { SupplementNotificationControlModal } from "./SupplementNotificationControlModal.jsx";
-import { createSupplementNotificationControlActionHandler } from "./supplementNotificationControlController.js";
+import {
+  createSupplementNotificationBulkCancelHandler,
+  createSupplementNotificationControlActionHandler
+} from "./supplementNotificationControlController.js";
 import { createSupplementNotificationControlModalViewModel } from "./supplementNotificationControlModel.js";
 import { SupplementPassConfirmModal } from "./SupplementPassConfirmModal.jsx";
 import { SupplementScheduleChangeConfirmModal } from "./SupplementScheduleChangeConfirmModal.jsx";
@@ -27,7 +30,6 @@ import { getSupplementImmediateNoticeSaveStatus } from "./supplementStatus.js";
 import { useSupplementConfirmationState } from "./useSupplementConfirmationState.js";
 import { useSupplementFeedbackState } from "./useSupplementFeedbackState.js";
 import { useSupplementNotificationControlState } from "./useSupplementNotificationControlState.js";
-import { useSupplementNotificationDraftSelectionState } from "./useSupplementNotificationDraftSelectionState.js";
 import { useSupplementTaskBusyState } from "./useSupplementTaskBusyState.js";
 import { useSupplementTaskDraftController } from "./useSupplementTaskDraftController.js";
 import { useSupplementTaskSaveStatusState } from "./useSupplementTaskSaveStatusState.js";
@@ -76,10 +78,6 @@ export function SupplementStudentModal({
     feedback,
     showFeedback
   } = useSupplementFeedbackState();
-  const {
-    getActiveNotificationDraftField,
-    selectNotificationDraftField
-  } = useSupplementNotificationDraftSelectionState();
   const {
     getTaskSaveStatus,
     setTaskSaveStatusPatch
@@ -218,27 +216,40 @@ export function SupplementStudentModal({
     normalizeMessage: normalizeMessageText
   });
   const notificationControlTask = notificationControlViewModel.task;
-  const notificationControlJob = notificationControlViewModel.job;
-  const notificationControlProviderReference = getSolapiNotificationJobProviderReference(notificationControlJob);
-  const notificationControlDisplay = notificationControlViewModel.display;
-  const notificationControlConfig = notificationControlViewModel.config;
-  const notificationControlBlockReason = notificationControlViewModel.blockReason;
-  const notificationControlHasHistoricalJob = notificationControlViewModel.hasHistoricalJob;
-  const notificationControlPreview = notificationControlViewModel.preview;
-  const notificationControlPreviewLabel = notificationControlViewModel.previewLabel;
-  const notificationControlSavedDraftDiffers = notificationControlViewModel.savedDraftDiffers;
-  const notificationControlRecipient = notificationControlViewModel.recipient;
-  const canCancelNotificationControl = notificationControlViewModel.canCancel;
-  const canReserveNotificationControl = notificationControlViewModel.canReserve;
+  const notificationControls = notificationControlViewModel.controls.map((control) => ({
+    ...control,
+    jobStatusLabel: control.job ? formatNotificationJobStatus(control.job) : "예약 기록 없음",
+    providerReferenceLabel: getSolapiNotificationJobProviderReference(control.job) || "연결된 Solapi 그룹 없음",
+    recipientLabel: maskPhoneForDisplay(control.recipient),
+    scheduledAtLabel: control.job?.scheduledAt
+      ? formatKoreaTimeLabel(control.job.scheduledAt)
+      : control.controlType === "studentReminder"
+        ? formatKoreaTimeLabel(getSupplementStudentReminderScheduledAt(notificationControlTask))
+        : "예약 버튼을 누른 뒤 다음 정각"
+  }));
 
-  const handleNotificationControlAction = createSupplementNotificationControlActionHandler({
-    notificationControl,
+  function handleNotificationControlAction(controlType, action) {
+    const control = notificationControls.find((item) => item.controlType === controlType);
+    if (!control) return undefined;
+    return createSupplementNotificationControlActionHandler({
+      notificationControl: { ...notificationControl, controlType },
+      notificationControlBusy,
+      notificationControlConfig: control.config,
+      notificationControlJob: control.job,
+      notificationControlTask,
+      onCancelNotification,
+      onReserveNotification,
+      setNotificationControlBusy,
+      setNotificationControlFeedback,
+      setTaskSaveStatusPatch
+    })(action);
+  }
+
+  const handleNotificationBulkCancel = createSupplementNotificationBulkCancelHandler({
+    controls: notificationControls,
     notificationControlBusy,
-    notificationControlConfig,
-    notificationControlJob,
     notificationControlTask,
     onCancelNotification,
-    onReserveNotification,
     setNotificationControlBusy,
     setNotificationControlFeedback,
     setTaskSaveStatusPatch
@@ -287,31 +298,15 @@ export function SupplementStudentModal({
               task={scheduleConfirmTask}
             />
           ) : null}
-          {notificationControlTask && notificationControlConfig ? (
+          {notificationControlTask && notificationControls.length ? (
             <SupplementNotificationControlModal
-              blockReason={notificationControlBlockReason}
-              canCancel={canCancelNotificationControl}
-              canReserve={canReserveNotificationControl}
-              config={notificationControlConfig}
-              display={notificationControlDisplay}
+              controls={notificationControls}
               feedback={notificationControlFeedback}
-              hasHistoricalJob={notificationControlHasHistoricalJob}
               isBusy={notificationControlBusy}
-              jobStatusLabel={notificationControlJob ? formatNotificationJobStatus(notificationControlJob) : "예약 기록 없음"}
-              onCancel={() => handleNotificationControlAction("cancel")}
+              onCancelAll={handleNotificationBulkCancel}
               onClose={closeNotificationControl}
-              onReserve={() => handleNotificationControlAction("reserve")}
-              preview={notificationControlPreview}
-              previewLabel={notificationControlPreviewLabel}
-              providerReferenceLabel={notificationControlProviderReference || "연결된 Solapi 그룹 없음"}
-              recipientLabel={maskPhoneForDisplay(notificationControlRecipient)}
-              savedDraftDiffers={notificationControlSavedDraftDiffers}
+              onReserve={(controlType) => handleNotificationControlAction(controlType, "reserve")}
               scheduleLabel={formatSupplementScheduleDateTime(notificationControlTask)}
-              scheduledAtLabel={notificationControlJob?.scheduledAt
-                ? formatKoreaTimeLabel(notificationControlJob.scheduledAt)
-                : notificationControl.controlType === "studentReminder"
-                  ? formatKoreaTimeLabel(getSupplementStudentReminderScheduledAt(notificationControlTask))
-                  : "예약 버튼을 누른 뒤 다음 정각"}
               studentName={student.name}
             />
           ) : null}
@@ -346,12 +341,7 @@ export function SupplementStudentModal({
           !["done", "canceled"].includes(task.status);
         const isCancelAbsenceBusy = isTaskActionBusy(task.makeupTaskId, "cancelAbsence");
         const isCancelMakeupBusy = isTaskActionBusy(task.makeupTaskId, "cancelMakeup");
-        const activeNotificationDraftField = getActiveNotificationDraftField(
-          task.makeupTaskId,
-          supplementNotificationDraftConfigs[0].field
-        );
         const notificationDraftViewModel = createSupplementNotificationDraftWorkspaceViewModel({
-          activeField: activeNotificationDraftField,
           draftState: taskDraftState,
           notificationJobs,
           task
@@ -427,17 +417,13 @@ export function SupplementStudentModal({
             }}
             key={task.makeupTaskId}
             notificationProps={{
-              activeConfig: notificationDraftViewModel.activeConfig,
-              activeDisplay: notificationDraftViewModel.activeDisplay,
-              activeDraft: notificationDraftViewModel.activeDraft,
-              activeField: activeNotificationDraftField,
               configs: notificationDraftViewModel.tabConfigs,
               hasUnsavedChanges: draftDiff.length > 0,
               isBusy: taskBusy,
-              isTeacherFinal: notificationDraftViewModel.isTeacherFinal,
-              onChangeDraft: (value) => updateTaskDraft(task, activeNotificationDraftField, value),
-              onOpenControl: (controlType) => openNotificationControl(task, controlType),
-              onSelectField: (field) => selectNotificationDraftField(task.makeupTaskId, field)
+              onChangeDraft: (field, value) => updateTaskDraft(task, field, value),
+              onOpenControl: () => openNotificationControl(task, "all"),
+              onSave: () => handleSaveTask(task),
+              shouldLinkStudentDraft: task.taskType === "absence_makeup"
             }}
             saveSummaryProps={taskCardViewModel.saveSummaryProps}
             scheduleEditorProps={{

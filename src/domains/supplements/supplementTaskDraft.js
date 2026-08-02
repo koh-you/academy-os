@@ -182,9 +182,19 @@ export function updateSupplementTaskDraftEntry({
 } = {}, dependencies = {}) {
   const previousValues = existing?.values ?? createSupplementTaskDraft(task, student, notificationTemplates, dependencies);
   const values = { ...previousValues, [field]: value };
-  const editedFields = supplementTeacherFinalFields.has(field)
+  let editedFields = supplementTeacherFinalFields.has(field)
     ? [...new Set([...(existing?.editedFields ?? []), field])]
     : existing?.editedFields ?? [];
+
+  if (task.taskType === "absence_makeup" && field === "studentScheduleNotificationDraft") {
+    supplementNotificationDraftConfigs.forEach((config) => {
+      values[config.field] = value;
+    });
+    editedFields = mergeSupplementTeacherEditedFields(task, [
+      ...editedFields,
+      ...supplementNotificationDraftConfigs.map((config) => config.field)
+    ]);
+  }
 
   if (!supplementTeacherFinalFields.has(field)) {
     const normalizeTime = dependencies.normalizeTime;
