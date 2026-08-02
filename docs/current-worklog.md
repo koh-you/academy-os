@@ -4,10 +4,11 @@
 
 ## 2026-08-02 App 3차 리팩터링 3-2 수업일지 effect adapter 경계
 
-- Teacher Lesson Hub에서 Lesson Journal Detail로 낱개 전달되던 persistence callback 11개와 provider/transport callback 6개를 `lessonJournalEffectAdapter`의 `persistence`·`provider` 두 표면으로 묶었다. Hub의 직접 callback 표면은 11개 줄었고 25줄 순수 adapter 한 개로 대체됐다.
+- Teacher Lesson Hub에서 Lesson Journal Detail로 낱개 전달되던 persistence callback 10개와 provider/transport callback 7개를 `lessonJournalEffectAdapter`의 `persistence`·`provider` 두 표면으로 묶었다. 실제 Solapi 예약·취소까지 조정하는 알림 계획 적용은 provider 표면에 분류했다. Hub의 직접 callback 표면은 11개 줄었고 25줄 순수 adapter 한 개로 대체됐다.
 - App의 `handleSaveLessonJournalDrafts`, record/homework/makeup 저장, 수업 삭제, AI 코멘트, Solapi 예약·취소·reconcile 구현은 이동하거나 다시 작성하지 않았다. 12초 OS 예약 조회 transport도 App이 소유한 `lessonJournalTransport`에서 기존 함수 참조만 adapter에 주입한다.
+- 독립 검토에서 알림 계획 적용이 저장만 하는 동작이 아니라 실제 Solapi 예약·취소까지 조정한다는 분류 오류를 찾았다. 함수 identity와 실행 흐름은 그대로 두고 해당 callback만 provider 표면으로 옮겨 persistence 10개/provider·transport 7개 계약으로 교정했다.
 - exact key·App handler identity·transport identity·동결 여부를 확인하는 전용 fixture를 lesson fast와 production lifecycle에 연결했다. Teacher adapter와 scenario도 새 경계를 직접 읽도록 갱신했다.
-- 검증: lesson fast 9/9, 수업일지 전용 60/60, runtime lint, scenario 815/815, `check:fast`, production 815/815 80.3초, build 357 modules, Worktree 격리 safe browser 9/9를 통과했다. 운영 데이터·실제 알림·AI 호출·운영 SQL은 사용하지 않았다.
+- 검증: lesson fast 9/9, notification fast 5/5, 수업일지 전용 60/60, teacher boundary, runtime lint, scenario 815/815, `check:fast`, production 815/815 84.2초, build 357 modules, Worktree 격리 safe browser 9/9를 통과했다. 운영 데이터·실제 알림·AI 호출·운영 SQL은 사용하지 않았다.
 
 ## 2026-08-02 App 3차 리팩터링 3-2 수업일지 draft/persisted 경계
 

@@ -106,7 +106,6 @@ export function LessonJournalDetail({
   } = runtime;
   const {
     persistence: {
-      onApplyLessonNotificationPlan,
       onChangeRecord,
       onDeleteLesson,
       onPassMakeupTask,
@@ -120,6 +119,7 @@ export function LessonJournalDetail({
     } = {},
     provider: {
       loadLessonJournalReservationAudit,
+      onApplyLessonNotificationPlan,
       onCancelNotificationJob,
       onPolishComment,
       onReconcileSolapiNotificationResults,

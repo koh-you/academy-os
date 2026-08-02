@@ -15,7 +15,6 @@ const adapter = createLessonJournalEffectAdapter({
 });
 
 const persistenceMappings = {
-  onApplyLessonNotificationPlan: "handleApplyLessonNotificationPlan",
   onChangeRecord: "handleChangeRecord",
   onDeleteLesson: "handleDeleteLesson",
   onPassMakeupTask: "handlePassSupplementTask",
@@ -28,6 +27,7 @@ const persistenceMappings = {
   onUpdateMakeupTask: "handleUpdateMakeupTask"
 };
 const providerMappings = {
+  onApplyLessonNotificationPlan: "handleApplyLessonNotificationPlan",
   onCancelNotificationJob: "handleCancelNotificationJob",
   onPolishComment: "handlePolishLessonComment",
   onReconcileSolapiNotificationResults: "handleReconcileSolapiNotificationResults",

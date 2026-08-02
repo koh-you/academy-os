@@ -1,7 +1,6 @@
 export function createLessonJournalEffectAdapter({ actions = {}, transport = {} } = {}) {
   return Object.freeze({
     persistence: Object.freeze({
-      onApplyLessonNotificationPlan: actions.handleApplyLessonNotificationPlan,
       onChangeRecord: actions.handleChangeRecord,
       onDeleteLesson: actions.handleDeleteLesson,
       onPassMakeupTask: actions.handlePassSupplementTask,
@@ -15,6 +14,7 @@ export function createLessonJournalEffectAdapter({ actions = {}, transport = {} 
     }),
     provider: Object.freeze({
       loadLessonJournalReservationAudit: transport.loadLessonJournalReservationAudit,
+      onApplyLessonNotificationPlan: actions.handleApplyLessonNotificationPlan,
       onCancelNotificationJob: actions.handleCancelNotificationJob,
       onPolishComment: actions.handlePolishLessonComment,
       onReconcileSolapiNotificationResults: actions.handleReconcileSolapiNotificationResults,
