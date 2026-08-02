@@ -69,6 +69,17 @@ test("lesson journal calendar can move to the next month and back", async ({ pag
   expect(pageErrors).toEqual([]);
 });
 
+test("lesson journal creation action stays visible and opens the registration modal", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+
+  const creationActions = page.getByRole("group", { name: "수업일지 생성" });
+  await expect(creationActions).toBeVisible();
+  await creationActions.getByRole("button", { name: "+ 수업 등록", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "수업 등록" })).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
 test("lesson journal carries the latest non-empty record across a month boundary", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);

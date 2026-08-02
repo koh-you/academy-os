@@ -22,6 +22,8 @@ for (const requiredSource of [
   "onShiftMonth(-1)",
   "onShiftMonth(1)",
   "onAddLesson",
+  'aria-label="수업일지 생성"',
+  'className="lessonCalendarPrimaryActions"',
   "attendanceSyncPill",
   "attendanceSyncLabel",
   "showMonthlyRegularLessonOpen",
@@ -77,5 +79,7 @@ assert.ok(
 );
 assert.ok(cssSource.includes(".lessonCalendarMonthNavigation"));
 assert.ok(!cssSource.includes(".lessonCalendarMonthNavigation {\n  display: none"));
+assert.ok(cssSource.includes(".lessonCalendarPrimaryActions"));
+assert.ok(!cssSource.includes(".lessonCalendarPrimaryActions {\n  display: none"));
 
 console.log("lesson calendar presentational component boundary passed");

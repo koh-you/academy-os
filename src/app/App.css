@@ -3464,6 +3464,17 @@ summary:focus-visible {
   display: none;
 }
 
+.lessonCalendarPrimaryActions {
+  display: flex;
+  gap: var(--academy-space-2);
+  justify-content: flex-end;
+  margin-bottom: var(--academy-space-2);
+}
+
+.lessonCalendarPrimaryActions button {
+  min-height: 40px;
+}
+
 .lessonCalendarMonthNavigation {
   align-items: center;
   background: var(--academy-surface);
@@ -3490,6 +3501,17 @@ summary:focus-visible {
   font-size: 20px;
   height: 40px;
   width: 40px;
+}
+
+@media (max-width: 640px) {
+  .lessonCalendarPrimaryActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .lessonCalendarPrimaryActions button {
+    width: 100%;
+  }
 }
 
 .teacherCalendarShell {
