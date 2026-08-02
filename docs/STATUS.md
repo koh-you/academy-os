@@ -1,6 +1,6 @@
 # Academy OS Current Status
 
-업데이트: 2026-08-01
+업데이트: 2026-08-02
 
 ## 현재 기준
 
@@ -20,7 +20,9 @@
 - ESLint runtime 검사, 간결한 scenario 요약, client runtime error reporter, Playwright browser smoke가 있다.
 - GitHub Actions는 lint, production test, build, browser smoke를 실행하는 것이 목표다.
 - `app_state` 자동저장 12개 key의 요청 역전·CAS/재조회 부재를 재현하는 inventory 검사가 Production checks에 연결됐다.
-- App 고위험 경계 5개 inventory와 auth/session phase 1 분리가 전용 branch에 준비됐다. session state·초기 저장소 판독·login/logout·teacher 저장 cleanup은 `useAppSession`이 소유하며 전용 fixture가 Production checks에 연결됐다.
+- App 2차 리팩터링 Phase 1 auth/session은 PR #2로 main 통합됐다. session state·초기 저장소 판독·login/logout·teacher 저장 cleanup은 `useAppSession`이 소유하며 전용 fixture가 Production checks에 연결됐다.
+- Phase 2~5와 AI 연쇄 검수·지연 보고·사람 gate 원칙은 `docs/app-refactor-second-pass-plan.md`가 기준이다.
+- Phase 2 branch에서 출결 kiosk 날짜 rollover의 ref·reload key·interval/listener를 출결 hook 경계로 이동하고 cleanup·동일 날짜 hydration 실패 재시도 fixture를 추가했다.
 
 ## 폴더 상태
 
@@ -33,8 +35,8 @@
 
 1. `app_state` 동일 key 저장을 브라우저 안에서 직렬화하고 진행 중 변경을 다음 요청으로 합친다.
 2. key별 `updated_at` CAS와 저장 뒤 대상 key 재조회는 별도 단위로 이어간다.
-3. 고위험 App/API 분리는 새 inventory와 자동 회귀 범위를 먼저 만든 뒤 진행한다.
-   - App phase 1 다음 위험은 notification refresh의 in-flight/stale 응답 보호와 hydration 역할 전환 통합 fixture다. main 통합 전에는 이 branch를 직접 merge하지 않는다.
+3. App 2차 리팩터링 Phase 2 출결 polling·동기화를 전체 검증하고 PR/CI로 닫는다.
+   - 즉시 사람 판단이 필요하지 않은 발견은 queue/worklog에 남기고 AI 검수와 다음 단계를 연쇄 진행한다.
 
 ## 자동 작업
 

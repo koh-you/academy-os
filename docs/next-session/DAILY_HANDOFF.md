@@ -1,6 +1,6 @@
 # Daily Development Handoff
 
-업데이트: 2026-08-01
+업데이트: 2026-08-02
 
 ## 어제까지 완료
 
@@ -27,6 +27,10 @@
 - 별도 `codex/app-high-risk-boundaries-phase1` worktree에서 App 고위험 5개 경계 inventory와 auth/session hook 분리를 완료했다. main에는 merge하지 않았으며, notification polling 중복/stale 응답과 hydration 전환 fixture가 남은 통합 위험이다.
 
 ## 다음 자동 실행 단위
+
+- App 2차 리팩터링의 단계·검수·지연 보고 기준은 `docs/app-refactor-second-pass-plan.md`를 따른다.
+- Phase 1 auth/session은 main 통합 완료이며 현재 수동 리팩터링 작업은 별도 Worktree의 Phase 2 출결 polling·동기화다.
+- Phase 2에서 kiosk 날짜 rollover lifecycle을 출결 hook으로 이동하고 전용 fixture를 추가했다. safe browser가 TDZ 배치 오류를 발견해 최소 수정했으며 재실행 4/4가 통과했다.
 
 1. `git status --short`가 clean이고 최신 main인지 확인한다.
 2. 오늘 branch의 GitHub Actions 결과를 확인한다.

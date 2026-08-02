@@ -46,7 +46,10 @@ for (const request of ['"/api/attendance/check"', '"/api/attendance/preview"']) 
 }
 
 assertOrdered(appSource, [
-  'import { useAttendanceRecordSync } from "../domains/lessons/useAttendanceRecordSync.js"',
+  "useAttendanceDateRollover,",
+  "useAttendanceRecordSync",
+  'from "../domains/lessons/useAttendanceRecordSync.js"',
+  "useAttendanceDateRollover({",
   "useAttendanceRecordSync({"
 ]);
 assert.equal(
@@ -66,6 +69,8 @@ assert.equal(
 );
 for (const lifecycleContract of [
   "attendanceSyncIntervalMs = 7_000",
+  "attendanceDateRolloverIntervalMs = 30_000",
+  "startAttendanceDateRolloverLifecycle({",
   "async function syncAttendanceRecords()",
   "syncAttendanceRecordsAction({",
   "windowTarget.setInterval(",

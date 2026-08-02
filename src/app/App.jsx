@@ -291,7 +291,10 @@ import {
   defaultAttendanceSettings,
   normalizeAttendanceSettings
 } from "../domains/lessons/attendanceSettings.js";
-import { useAttendanceRecordSync } from "../domains/lessons/useAttendanceRecordSync.js";
+import {
+  useAttendanceDateRollover,
+  useAttendanceRecordSync
+} from "../domains/lessons/useAttendanceRecordSync.js";
 import { executeLessonJournalDraftPersistence } from "../domains/lessons/lessonJournalDraftPersistenceController.js";
 import { createLessonJournalDraftPersistencePlan } from "../domains/lessons/lessonJournalDraftPersistencePlan.js";
 import {
@@ -5190,7 +5193,6 @@ export function App() {
   const [lessonClipboard, setLessonClipboard] = useState(null);
   const [lessonUndoStack, setLessonUndoStack] = useState([]);
   const lessonCancelRequestsRef = useRef(new Map());
-  const attendanceLoadedDateRef = useRef(getKoreaDateString());
   const [deletedLessonBundles, setDeletedLessonBundles] = useStoredState(storageKeys.deletedLessonBundles, []);
   const [classTemplates, setClassTemplates] = useStoredState(storageKeys.classTemplates, sampleData.classTemplates);
   const [students, setStudents] = useStoredState(storageKeys.students, sampleData.students);
@@ -5259,7 +5261,6 @@ export function App() {
   const [integrationStatus, setIntegrationStatus] = useState(null);
   const [isAppStateReady, setIsAppStateReady] = useState(false);
   const [isPortalDataReady, setIsPortalDataReady] = useState(false);
-  const [attendanceReloadKey, setAttendanceReloadKey] = useState(0);
   const [attendanceSyncStatus, setAttendanceSyncStatus] = useState({
     lastSyncedAt: "",
     message: "출결 서버 확인 대기",
@@ -5328,6 +5329,17 @@ export function App() {
   const isApplyingRemoteAppStateRef = useRef(false);
   const attendanceOnlyMode = isAttendanceOnlyRoute();
   const specialLectureOnlyMode = isSpecialLectureRoute();
+  const {
+    loadedDateRef: attendanceLoadedDateRef,
+    markLoadedDate: markAttendanceLoadedDate,
+    reloadKey: attendanceReloadKey,
+    requestReload: requestAttendanceReload
+  } = useAttendanceDateRollover({
+    enabled: attendanceOnlyMode,
+    getCurrentDate: getKoreaDateString,
+    isReady: isAppStateReady,
+    onReloadRequested: () => setIsAppStateReady(false)
+  });
 
   const sharedAppState = useMemo(() => ({
     aiSettings,
@@ -5401,7 +5413,7 @@ export function App() {
             setRecords(nextLessons.length > 0 ? filterRecordsForLessons(recordsResult.records, nextLessons) : recordsResult.records);
           }
           setAttendanceSettings((current) => normalizeAttendanceSettings(current));
-          attendanceLoadedDateRef.current = attendanceDate;
+          markAttendanceLoadedDate(attendanceDate);
           setIsPortalDataReady(false);
           setIsAppStateReady(true);
           return;
@@ -6750,27 +6762,6 @@ export function App() {
     return () => document.body.classList.remove("attendanceOnlyBody");
   }, [attendanceOnlyMode]);
 
-  useEffect(() => {
-    if (!attendanceOnlyMode) return undefined;
-
-    function refreshAttendanceDataIfDateChanged() {
-      const currentDate = getKoreaDateString();
-      if (attendanceLoadedDateRef.current === currentDate && isAppStateReady) return;
-      attendanceLoadedDateRef.current = currentDate;
-      setIsAppStateReady(false);
-      setAttendanceReloadKey((current) => current + 1);
-    }
-
-    const intervalId = window.setInterval(refreshAttendanceDataIfDateChanged, 30_000);
-    window.addEventListener("focus", refreshAttendanceDataIfDateChanged);
-    document.addEventListener("visibilitychange", refreshAttendanceDataIfDateChanged);
-    return () => {
-      window.clearInterval(intervalId);
-      window.removeEventListener("focus", refreshAttendanceDataIfDateChanged);
-      document.removeEventListener("visibilitychange", refreshAttendanceDataIfDateChanged);
-    };
-  }, [attendanceOnlyMode, isAppStateReady]);
-
   useAttendanceRecordSync({
     enabled:
       isAppStateReady &&
@@ -6789,10 +6780,7 @@ export function App() {
       currentDate: getKoreaDateString(),
       lateGraceMinutes: attendanceSettings.lateGraceMinutes,
       loadedDate: attendanceLoadedDateRef.current,
-      onDateChanged: () => {
-        setIsAppStateReady(false);
-        setAttendanceReloadKey((current) => current + 1);
-      },
+      onDateChanged: requestAttendanceReload,
       options,
       phoneLast4,
       request: previewAttendanceRequest
@@ -6808,10 +6796,7 @@ export function App() {
       onAttendanceEvent: (notificationLog) => {
         setNotificationLogs((current) => [notificationLog, ...current]);
       },
-      onDateChanged: () => {
-        setIsAppStateReady(false);
-        setAttendanceReloadKey((current) => current + 1);
-      },
+      onDateChanged: requestAttendanceReload,
       onLesson: (lesson) => {
         setLessons((current) => upsertById(current, lesson, "lessonId"));
       },
