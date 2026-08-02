@@ -27,6 +27,10 @@ import {
   normalizeMonthlySettlementStudentSetting,
   scheduleTextFromRules
 } from "./monthlySettlement.js";
+import {
+  buildMonthlySettlementReportModel,
+  openMonthlySettlementReportPdf
+} from "./monthlySettlementReport.js";
 import "./monthlySettlement.css";
 
 const settlementModeOptions = [
@@ -103,7 +107,7 @@ function createMonthDraft({
   };
 }
 
-function MonthlySettlementCalendar({ monthKey, onClose, row }) {
+function MonthlySettlementCalendar({ monthKey, onClose, onRegularCountChange, row }) {
   const eventsByDate = useMemo(() => {
     const grouped = new Map();
     [
@@ -185,7 +189,11 @@ function MonthlySettlementCalendar({ monthKey, onClose, row }) {
       </section>
       <div className="monthlySettlementCalendarSummary">
         <span>
-          {row.setting.mode === "new"
+          {row.hasRegularCountOverride
+            ? `교사 확정 최종 정규 횟수: ${row.prorationCount}회`
+            : row.setting.mode === "fixed"
+            ? `시스템 정규 횟수: ${row.systemProrationCount}회`
+            : row.setting.mode === "new"
             ? `${row.isNewWithdrawnPeriod ? "신입·퇴원" : "신입"} 정산 횟수: ${row.prorationCount}회`
             : `정산 기준 횟수: ${row.prorationCount}/${row.monthlyScheduleCount}회`}
           {" · "}기간 내 수업일지 {row.recognizedRegularCount}회
@@ -196,6 +204,30 @@ function MonthlySettlementCalendar({ monthKey, onClose, row }) {
         {(row.actualStatusCounts.pending ?? 0) > 0 ? <span>대기 {row.actualStatusCounts.pending}회 · 수업일지는 있으나 출결 미확정</span> : null}
         <span>보충: {row.makeupCount}회 · {formatSettlementHours(row.makeupHours)} · 정규 금액에는 추가하지 않음</span>
       </div>
+      <section className="monthlySettlementFinalCountEditor">
+        <div>
+          <strong>시스템 계산 횟수</strong>
+          <span>{row.systemProrationCount}회</span>
+          <small>수업일지·휴강·정산 기간·월별 스케줄 규칙으로 계산</small>
+        </div>
+        <label>
+          <span>최종 정규 횟수</span>
+          <input
+            aria-label={`${row.student.name} 최종 정규 횟수`}
+            min="0"
+            onChange={(event) => onRegularCountChange(event.target.value)}
+            placeholder={`${row.systemProrationCount}`}
+            type="number"
+            value={row.setting.regularCountOverride}
+          />
+          <small>입력하면 이 횟수가 최종 정산과 PDF에 반영됩니다.</small>
+        </label>
+        {row.hasRegularCountOverride ? (
+          <button className="softButton compact" onClick={() => onRegularCountChange("")} type="button">
+            시스템 계산 사용
+          </button>
+        ) : null}
+      </section>
     </Modal>
   );
 }
@@ -343,6 +375,17 @@ export function MonthlySettlementPanel({
     updateStudentSetting(row.student.studentId, "mode", mode);
   }
 
+  function handleOpenReportPdf() {
+    try {
+      openMonthlySettlementReportPdf(buildMonthlySettlementReportModel({
+        monthKey: selectedMonth,
+        rows: activeRows
+      }));
+    } catch (error) {
+      setSaveMessage(error?.message || "PDF 인쇄 창을 열지 못했습니다.");
+    }
+  }
+
   async function handleSave() {
     if (!draftMonth || !onSaveMonth || saveState === "saving") return;
     const rowByStudentId = new Map(rows.map((row) => [row.student.studentId, row]));
@@ -393,16 +436,21 @@ export function MonthlySettlementPanel({
     <section className="panel fullPanel monthlySettlementPanel">
       <SectionHeader
         actions={(
-          <FilterBar
-            className="monthlySettlementMonthControl"
-            label="월별 정산 대상 월"
-            result={<InlineSaveStatus label="월별 정산" saveState={effectiveSaveState} />}
-          >
-            <label className="filterBarField">
-              <span>정산월</span>
-              <input type="month" value={selectedMonth} onChange={(event) => setSelectedMonth(event.target.value)} />
-            </label>
-          </FilterBar>
+          <div className="monthlySettlementHeaderActions">
+            <FilterBar
+              className="monthlySettlementMonthControl"
+              label="월별 정산 대상 월"
+              result={<InlineSaveStatus label="월별 정산" saveState={effectiveSaveState} />}
+            >
+              <label className="filterBarField">
+                <span>정산월</span>
+                <input type="month" value={selectedMonth} onChange={(event) => setSelectedMonth(event.target.value)} />
+              </label>
+            </FilterBar>
+            <button className="softButton monthlySettlementPdfButton" onClick={handleOpenReportPdf} type="button">
+              횟수·금액 PDF
+            </button>
+          </div>
         )}
         className="monthlySettlementHeader"
         descriptionNode={(
@@ -488,7 +536,6 @@ export function MonthlySettlementPanel({
               <th>자동 정산 기간</th>
               <th>횟수·시수 참고</th>
               <th>정규 적용금액</th>
-              <th>조정</th>
               <th>메모</th>
               <th>정산 처리</th>
             </tr>
@@ -613,7 +660,11 @@ export function MonthlySettlementPanel({
                       정규 {row.regularCount}회 · {formatSettlementHours(row.regularHours)}
                     </button>
                     <small>
-                      {isNewMode
+                      {row.hasRegularCountOverride
+                        ? `최종 정규 ${row.prorationCount}회 · 교사 확정`
+                        : setting.mode === "fixed"
+                        ? `시스템 정규 ${row.systemProrationCount}회`
+                        : isNewMode
                         ? `${isNewWithdrawnMode ? "신입·퇴원" : "신입"} 정산 ${row.prorationCount}회`
                         : row.monthlyScheduleCount > 0
                         ? `정산 기준 ${row.prorationCount}/${row.monthlyScheduleCount}회`
@@ -630,29 +681,17 @@ export function MonthlySettlementPanel({
                       {row.hasApplicableRate ? formatSettlementWon(row.regularGrossAmount) : "단가 미설정"}
                     </strong>
                     <span>
-                      {!row.hasRegularJournal
+                      {!row.hasRegularJournal && !row.hasRegularCountOverride
                         ? "정규 수업일지 없음 · 0원"
                         : setting.mode === "fixed"
                           ? "월정액 전액"
                           : isNewMode
-                            ? `${row.prorationCount}회 × ${formatSettlementWon(setting.newStudentSessionAmount)} + 조정`
+                            ? `${row.prorationCount}회 × ${formatSettlementWon(setting.newStudentSessionAmount)}`
                           : row.monthlyScheduleCount > 0
-                            ? `${formatSettlementWon(row.baseAmount)} + 조정`
+                            ? formatSettlementWon(row.baseAmount)
                             : "월별 스케줄 형식 확인 필요 · 0원"}
+                      {setting.adjustmentAmount ? ` · 기존 조정 ${formatSettlementWon(setting.adjustmentAmount)}` : ""}
                     </span>
-                  </td>
-                  <td>
-                    <div className="monthlySettlementMoneyInput signed">
-                      <input
-                        aria-label={`${row.student.name} 정산 조정금액`}
-                        placeholder="+/-"
-                        type="number"
-                        value={setting.adjustmentAmount}
-                        onChange={(event) => updateStudentSetting(row.student.studentId, "adjustmentAmount", event.target.value)}
-                      />
-                      <span>원</span>
-                    </div>
-                    <small>요청 차감·추가만 입력</small>
                   </td>
                   <td>
                     <textarea
@@ -731,6 +770,11 @@ export function MonthlySettlementPanel({
         <MonthlySettlementCalendar
           monthKey={selectedMonth}
           onClose={() => setSelectedCalendarStudentId("")}
+          onRegularCountChange={(value) => updateStudentSetting(
+            selectedCalendarRow.student.studentId,
+            "regularCountOverride",
+            value
+          )}
           row={selectedCalendarRow}
         />
       ) : null}

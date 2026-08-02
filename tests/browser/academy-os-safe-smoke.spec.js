@@ -101,7 +101,7 @@ test("lesson journal carries the latest non-empty record across a month boundary
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);
 
-  const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · 1개 수업/ });
+  const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
   await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
 
   const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
@@ -132,9 +132,14 @@ test("monthly settlement counts closure replacement and distinguishes attendance
   const pendingEvent = calendar.locator(".monthlySettlementCalendarEvent.regular.attendance-pending");
   await expect(presentEvent).toContainText("출석");
   await expect(absentReplacement).toContainText("휴강 보충 · 결석");
+  await expect(absentReplacement).toHaveAttribute("title", /13:00-16:00/);
   await expect(pendingEvent).toContainText("대기");
   await expect(calendar).toContainText("휴강 1회 · 정규 회차 포함");
   await expect(calendar).toContainText("연결 보강 1회 · 추가 계산 없음");
+  await expect(calendar).toContainText("시스템 계산 횟수");
+  const finalCountInput = calendar.getByLabel("정산 미리보기 학생 최종 정규 횟수");
+  await finalCountInput.fill("4");
+  await expect(calendar).toContainText("교사 확정 최종 정규 횟수: 4회");
   const [presentColor, absentColor, pendingColor] = await Promise.all([
     presentEvent.evaluate((element) => getComputedStyle(element).backgroundColor),
     absentReplacement.evaluate((element) => getComputedStyle(element).backgroundColor),
@@ -143,5 +148,40 @@ test("monthly settlement counts closure replacement and distinguishes attendance
   expect(presentColor).not.toBe(absentColor);
   expect(pendingColor).not.toBe(presentColor);
   expect(pendingColor).not.toBe(absentColor);
+  expect(pageErrors).toEqual([]);
+});
+
+test("settlement exposes special attendance, combined student attendance, and concise PDF report", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await page.addInitScript(() => { window.print = () => {}; });
+  await loginAsTeacher(page);
+
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /정산/ }).click();
+  await expect(page.getByRole("columnheader", { name: "조정" })).toHaveCount(0);
+  const popupPromise = page.waitForEvent("popup");
+  await page.getByRole("button", { name: "횟수·금액 PDF" }).click();
+  const reportPage = await popupPromise;
+  await reportPage.waitForLoadState();
+  await expect(reportPage.getByRole("heading", { name: "2026년 08월 정산 보고서" })).toBeVisible();
+  await expect(reportPage.getByRole("table")).toContainText("정산 미리보기 학생");
+  await expect(reportPage.getByRole("table")).toContainText("1회");
+  await expect(reportPage.getByRole("columnheader", { name: "최종 정규 횟수" })).toBeVisible();
+  await expect(reportPage.getByRole("columnheader", { name: "금액" })).toBeVisible();
+  await expect(reportPage.getByRole("table")).not.toContainText("출석");
+  await reportPage.close();
+
+  await page.getByRole("tab", { name: "특강 정산" }).click();
+  const specialRow = page.getByRole("row").filter({ hasText: "정산 미리보기 학생" });
+  await expect(specialRow).toContainText("일지 1/2회");
+  await expect(specialRow).toContainText("지각 1");
+  await expect(specialRow).toContainText("수업일지 없음 1회");
+
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
+  await page.getByRole("button", { name: /정산 미리보기 학생$/ }).click();
+  const profile = page.getByRole("dialog", { name: /정산 미리보기 학생 학생 프로파일/ });
+  const attendanceSection = profile.locator(".studentAttendanceSection");
+  await expect(attendanceSection).toContainText("정규 출결");
+  await expect(attendanceSection).toContainText("특강 출결");
+  await expect(attendanceSection).toContainText("지각 1");
   expect(pageErrors).toEqual([]);
 });

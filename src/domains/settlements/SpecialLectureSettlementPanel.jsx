@@ -17,6 +17,7 @@ import {
   normalizeSpecialLectureSettlementSetting,
   normalizeSpecialLectureSettlementState
 } from "./specialLectureSettlement.js";
+import { buildSpecialLectureAttendanceSummary } from "./settlementAttendance.js";
 import "./specialLectureSettlement.css";
 
 const localDraftKey = "academy-os.specialLectureInstructorSettlementDraft.v1";
@@ -60,7 +61,9 @@ function getGuideLabel(guide = {}) {
 }
 
 export function SpecialLectureSettlementPanel({
+  lessons = [],
   onSaveState,
+  records = [],
   saveState = "idle",
   settlementState,
   specialLectureEnrollments = [],
@@ -93,9 +96,20 @@ export function SpecialLectureSettlementPanel({
       specialLectureEnrollments,
       specialLectureGuides,
       students
-    }),
+    }).map((row) => ({
+      ...row,
+      attendance: buildSpecialLectureAttendanceSummary({
+        guideId: row.guide.specialLectureGuideId,
+        lessons,
+        records,
+        sessions: row.sessions,
+        studentId: row.student.studentId
+      })
+    })),
     [
       draftState,
+      lessons,
+      records,
       specialLectureEnrollments,
       specialLectureGuides,
       students
@@ -262,6 +276,7 @@ export function SpecialLectureSettlementPanel({
                 <tr>
                   <th>학생</th>
                   <th>실제 수강 계획</th>
+                  <th>특강 출결</th>
                   <th>정산 방식</th>
                   <th>유료 적용</th>
                   <th>특강 적용금액</th>
@@ -288,6 +303,18 @@ export function SpecialLectureSettlementPanel({
                           `${Number(session.dateKey.slice(5, 7))}/${Number(session.dateKey.slice(8, 10))}`
                         ).join(" · ")}
                       </small>
+                    </td>
+                    <td className="specialLectureAttendanceCell">
+                      <strong>일지 {row.attendance.journalCount}/{row.attendance.plannedCount}회</strong>
+                      <small>
+                        출석 {row.attendance.present} · 지각 {row.attendance.late} ·
+                        결석 {row.attendance.absent + row.attendance.excused} · 대기 {row.attendance.pending}
+                      </small>
+                      {row.attendance.journalMissingCount > 0 ? (
+                        <small className="specialLectureAttendanceWarning">
+                          수업일지 없음 {row.attendance.journalMissingCount}회
+                        </small>
+                      ) : null}
                     </td>
                     <td>
                       <select
