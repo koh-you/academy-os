@@ -20,6 +20,7 @@
 - ESLint runtime 검사, 간결한 scenario 요약, client runtime error reporter, Playwright browser smoke가 있다.
 - GitHub Actions는 lint, production test, build, browser smoke를 실행하는 것이 목표다.
 - `app_state` 자동저장 12개 key의 요청 역전·CAS/재조회 부재를 재현하는 inventory 검사가 Production checks에 연결됐다.
+- App 고위험 경계 5개 inventory와 auth/session phase 1 분리가 전용 branch에 준비됐다. session state·초기 저장소 판독·login/logout·teacher 저장 cleanup은 `useAppSession`이 소유하며 전용 fixture가 Production checks에 연결됐다.
 
 ## 폴더 상태
 
@@ -33,6 +34,7 @@
 1. `app_state` 동일 key 저장을 브라우저 안에서 직렬화하고 진행 중 변경을 다음 요청으로 합친다.
 2. key별 `updated_at` CAS와 저장 뒤 대상 key 재조회는 별도 단위로 이어간다.
 3. 고위험 App/API 분리는 새 inventory와 자동 회귀 범위를 먼저 만든 뒤 진행한다.
+   - App phase 1 다음 위험은 notification refresh의 in-flight/stale 응답 보호와 hydration 역할 전환 통합 fixture다. main 통합 전에는 이 branch를 직접 merge하지 않는다.
 
 ## 자동 작업
 

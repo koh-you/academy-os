@@ -8,6 +8,7 @@ const appPath = path.join(root, "src", "app", "App.jsx");
 const appConfigPath = path.join(root, "src", "app", "appConfig.js");
 const appViewChangePlanPath = path.join(root, "src", "app", "appViewChangePlan.js");
 const appSessionSurfaceSelectorPath = path.join(root, "src", "app", "appSessionSurfaceSelector.js");
+const appSessionPath = path.join(root, "src", "app", "useAppSession.js");
 const sidebarMenuModelPath = path.join(root, "src", "app", "sidebarMenuModel.js");
 const sidebarPath = path.join(root, "src", "app", "Sidebar.jsx");
 const roleLoginScreenPath = path.join(root, "src", "app", "RoleLoginScreen.jsx");
@@ -358,6 +359,7 @@ const slackDailyScheduleReserveScriptPath = path.join(root, "scripts", "reserve-
 const rawAppEntrySource = fs.readFileSync(appPath, "utf8");
 const appViewChangePlanSource = fs.existsSync(appViewChangePlanPath) ? fs.readFileSync(appViewChangePlanPath, "utf8") : "";
 const appSessionSurfaceSelectorSource = fs.existsSync(appSessionSurfaceSelectorPath) ? fs.readFileSync(appSessionSurfaceSelectorPath, "utf8") : "";
+const appSessionSource = fs.existsSync(appSessionPath) ? fs.readFileSync(appSessionPath, "utf8") : "";
 const sidebarMenuModelSource = fs.existsSync(sidebarMenuModelPath) ? fs.readFileSync(sidebarMenuModelPath, "utf8") : "";
 const sidebarSource = fs.existsSync(sidebarPath) ? fs.readFileSync(sidebarPath, "utf8") : "";
 const roleLoginScreenSource = fs.existsSync(roleLoginScreenPath) ? fs.readFileSync(roleLoginScreenPath, "utf8") : "";
@@ -465,7 +467,7 @@ const studentQuestionPanelSource = fs.existsSync(studentQuestionPanelPath) ? fs.
 const studentExamPostSubmissionPanelSource = fs.existsSync(studentExamPostSubmissionPanelPath) ? fs.readFileSync(studentExamPostSubmissionPanelPath, "utf8") : "";
 const examPostApiSource = fs.existsSync(examPostApiPath) ? fs.readFileSync(examPostApiPath, "utf8") : "";
 const studentPortalApiSource = fs.existsSync(studentPortalApiPath) ? fs.readFileSync(studentPortalApiPath, "utf8") : "";
-const appWithConfig = `${app}\n${appConfigSource}\n${schoolCalendarComponentsSource}\n${schoolCalendarUtilsSource}\n${testManagerPanelsSource}\n${testManagerUtilsSource}`;
+const appWithConfig = `${app}\n${appConfigSource}\n${appSessionSource}\n${schoolCalendarComponentsSource}\n${schoolCalendarUtilsSource}\n${testManagerPanelsSource}\n${testManagerUtilsSource}`;
 const apiClientSource = fs.existsSync(apiClientPath) ? fs.readFileSync(apiClientPath, "utf8") : "";
 const appWithApiClient = `${app}\n${apiClientSource}`;
 const materialManagerSource = `${sourceBetween(app, "function MaterialManager({", "function CandidatePanel({")}\n${testManagerPanelsSource}`;
@@ -1000,7 +1002,7 @@ check("03e app_state filters teacher account settings", hasAll(coreDataRoute, ["
 check("03f student portal data is scoped by session token", hasAll(serverSource, ["createPortalSessionToken", "verifyPortalSessionToken", 'requestUrl.pathname === "/api/portal-data"', "getPortalData(portalSession)", "record.studentId === session.studentId", "homework.studentId === session.studentId"]));
 check("03g legacy portal snapshot writes are disabled in favor of explicit student endpoints", hasAll(serverSource, ['requestUrl.pathname === "/api/portal-state"', "upsertPortalState(portalSession", "return { source: appState.source, states: {} }"]) && app.includes("fetchPortalData(session.sessionToken)") && !app.includes("postPortalState("));
 check("03h login submit clears loading state on failure", hasAll(app, ["setIsSubmitting(true)", "try {", "finally {", "setIsSubmitting(false)"]));
-check("03i teacher session persists across refresh without storing password", hasAll(appWithConfig, ["teacherSession: \"academy-os.teacherSession.v1\"", "function readStoredTeacherSession", "function persistTeacherSession", "function writeStorageValue", "function removeStorageValue", "function writeCookieValue", "function removeCookieValue", "function normalizeTeacherSessionForStorage", "const [session, setSession] = useState(() => readStoredTeacherSession())", "writeStorageValue(window.localStorage, storageKeys.teacherSession, storedValue)", "writeStorageValue(window.sessionStorage, storageKeys.teacherSession, storedValue)", "writeCookieValue(storageKeys.teacherSession", "persistTeacherSession(teacherSession)", "persistTeacherSession(null)"]) && !app.includes("JSON.stringify({ actorId, name, password") && !app.includes("teacherSession, JSON.stringify(session)"));
+check("03i teacher session persists across refresh without storing password", hasAll(appWithConfig, ["teacherSession: \"academy-os.teacherSession.v1\"", "function readStoredTeacherSession", "function persistTeacherSession", "function writeStorageValue", "function removeStorageValue", "function normalizeTeacherSessionForStorage", "const [session, setSession] = useState(() =>", "readStoredTeacherSession({ documentTarget, storageKey, windowTarget })", "writeStorageValue(windowTarget.localStorage, storageKey, storedValue)", "writeStorageValue(windowTarget.sessionStorage, storageKey, storedValue)", "persistTeacherSession({ documentTarget, session: null, storageKey, windowTarget })"]) && !appSessionSource.includes("JSON.stringify({ actorId, name, password") && !app.includes("teacherSession, JSON.stringify(session)"));
 check("04 attendance-only route exists", hasAll(app, ["isAttendanceOnlyRoute", 'window.location.pathname === "/attendance"', "AttendanceKiosk"]));
 check("04a attendance-only mode is declared before hook usage", app.indexOf("const attendanceOnlyMode = isAttendanceOnlyRoute();") > -1 && app.indexOf("const attendanceOnlyMode = isAttendanceOnlyRoute();") < app.indexOf("if (!session && !attendanceOnlyMode && !specialLectureOnlyMode)"));
 check("04b attendance-only route loads server data before accepting pins", hasAll(app, ["if (!session && !attendanceOnlyMode && !specialLectureOnlyMode)", "if (attendanceOnlyMode) setIsAppStateReady(false)", "isLoading={!isAppStateReady}"]) && hasAll(lessonAttendanceKioskSource, ["disabled={isLoading || isSubmitting || Boolean(pendingPreview)}", "출결 데이터를 불러오는 중입니다.", "attendanceNumberPad disabled"]));
@@ -2305,6 +2307,7 @@ check(
   ]) &&
     hasAll(rawAppEntrySource, [
       'from "./appSessionSurfaceSelector.js"',
+      'from "./useAppSession.js"',
       "const sessionSurface = selectAppSessionSurface({",
       'if (sessionSurface === "attendance")',
       "<AttendanceKiosk",
@@ -2330,10 +2333,9 @@ check(
     'from "./Sidebar.jsx"',
     "const sessionSurface = selectAppSessionSurface({",
     "function handleChangeView(nextView)",
-    "async function handleLogin(role, loginId, password)",
-    "function handleLogout()",
+      "const { login: handleLogin, logout: handleLogout, session } = useAppSession({",
     "async function refreshNotificationJobs(",
-    'postJson("/api/auth/login"',
+      "request: postJson",
     'activeView === "lessons"',
     'activeView === "notifications"',
     'activeView === "supplements"'
@@ -2343,6 +2345,7 @@ check(
     !rawAppEntrySource.includes("function LoginScreen({") &&
     hasAll(appViewChangePlanSource, ["export function createAppViewChangePlan"]) &&
     hasAll(appSessionSurfaceSelectorSource, ["export function selectAppSessionSurface"]) &&
+    hasAll(appSessionSource, ["export function useAppSession", "export async function authenticateAppSession", 'request("/api/auth/login"']) &&
     hasAll(sidebarSource, ["export function Sidebar"]) &&
     hasAll(roleLoginScreenSource, ["export function RoleLoginScreen"])
 );

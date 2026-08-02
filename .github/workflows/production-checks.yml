@@ -48,6 +48,9 @@ jobs:
       - name: Test app state autosave concurrency inventory
         run: npm run test:app-state-autosave-inventory
 
+      - name: Test app auth and session boundary
+        run: npm run test:app-session-boundary
+
       - name: Run production tests
         run: npm run test:production
 

@@ -24,6 +24,7 @@
 - safe browser에 직전 빈 기록을 건너뛰는 7월→8월 수업기록 승계 회귀를 추가했다.
 - 매일 자동 task는 시작 시 서울 기준 날짜를 제목 앞에 붙이도록 자동화 프롬프트를 갱신했다.
 - 검증: 달력·수업기록 연속성 전용 테스트, scenario `809/809`, runtime lint, build `345 modules`, safe browser `4/4`, production 전체 묶음 통과.
+- 별도 `codex/app-high-risk-boundaries-phase1` worktree에서 App 고위험 5개 경계 inventory와 auth/session hook 분리를 완료했다. main에는 merge하지 않았으며, notification polling 중복/stale 응답과 hydration 전환 fixture가 남은 통합 위험이다.
 
 ## 다음 자동 실행 단위
 

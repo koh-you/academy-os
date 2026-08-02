@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createAppViewChangePlan } from "./appViewChangePlan.js";
 import { selectAppSessionSurface } from "./appSessionSurfaceSelector.js";
+import { useAppSession } from "./useAppSession.js";
 import { RoleLoginScreen } from "./RoleLoginScreen.jsx";
 import { Sidebar } from "./Sidebar.jsx";
 import {
@@ -1539,64 +1540,6 @@ function isAttendanceOnlyRoute() {
   return window.location.pathname === "/attendance" || window.location.hash === "#attendance";
 }
 
-function readStoredTeacherSession() {
-  if (typeof window === "undefined") return null;
-  return (
-    parseTeacherSession(readStorageValue(window.localStorage, storageKeys.teacherSession)) ||
-    parseTeacherSession(readStorageValue(window.sessionStorage, storageKeys.teacherSession)) ||
-    parseTeacherSession(readCookieValue(storageKeys.teacherSession))
-  );
-}
-
-function readCookieValue(name) {
-  if (typeof document === "undefined") return "";
-  const encodedName = `${encodeURIComponent(name)}=`;
-  return document.cookie
-    .split(";")
-    .map((item) => item.trim())
-    .find((item) => item.startsWith(encodedName))
-    ?.slice(encodedName.length) ?? "";
-}
-
-function writeCookieValue(name, value) {
-  if (typeof document === "undefined") return;
-  document.cookie = `${encodeURIComponent(name)}=${value}; max-age=${60 * 60 * 24 * 30}; path=/; samesite=lax`;
-}
-
-function removeCookieValue(name) {
-  if (typeof document === "undefined") return;
-  document.cookie = `${encodeURIComponent(name)}=; max-age=0; path=/; samesite=lax`;
-}
-
-function normalizeTeacherSessionForStorage(session) {
-  if (session?.role !== "teacher") return null;
-  const { actorId, name, role, sessionToken, teacherId } = session;
-  return { actorId, name, role, sessionToken, teacherId };
-}
-
-function encodeTeacherSession(session) {
-  try {
-    const safeSession = normalizeTeacherSessionForStorage(session);
-    return safeSession ? JSON.stringify(safeSession) : "";
-  } catch {
-    return "";
-  }
-}
-
-function parseTeacherSession(rawValue) {
-  if (!rawValue) return null;
-  for (const candidate of [rawValue, safeDecodeURIComponent(rawValue)]) {
-    if (!candidate) continue;
-    try {
-      const parsed = JSON.parse(candidate);
-      if (parsed?.role === "teacher") return parsed;
-    } catch {
-      // Try the next representation.
-    }
-  }
-  return null;
-}
-
 function readStorageValue(storage, key) {
   try {
     return storage?.getItem(key) ?? "";
@@ -1619,28 +1562,6 @@ function removeStorageValue(storage, key) {
   } catch {
     // Ignore storage failures and keep logout usable.
   }
-}
-
-function safeDecodeURIComponent(value) {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return "";
-  }
-}
-
-function persistTeacherSession(session) {
-  if (typeof window === "undefined") return;
-  const storedValue = encodeTeacherSession(session);
-  if (storedValue) {
-    writeStorageValue(window.localStorage, storageKeys.teacherSession, storedValue);
-    writeStorageValue(window.sessionStorage, storageKeys.teacherSession, storedValue);
-    writeCookieValue(storageKeys.teacherSession, encodeURIComponent(storedValue));
-    return;
-  }
-  removeStorageValue(window.localStorage, storageKeys.teacherSession);
-  removeStorageValue(window.sessionStorage, storageKeys.teacherSession);
-  removeCookieValue(storageKeys.teacherSession);
 }
 
 function getExamAnalysisSourceOpenUrl(file) {
@@ -5248,7 +5169,22 @@ export function App() {
   const [activeView, setActiveView] = useState("lessons");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileNavigationOpen, setIsMobileNavigationOpen] = useState(false);
-  const [session, setSession] = useState(() => readStoredTeacherSession());
+  const [teacherAccountSettings, setTeacherAccountSettings] = useState(defaultTeacherAccountSettings);
+  const { login: handleLogin, logout: handleLogout, session } = useAppSession({
+    documentTarget: typeof document === "undefined" ? null : document,
+    onLogout: () => {
+      setIsPortalDataReady(false);
+      setActiveView("lessons");
+    },
+    onSessionAccepted: (nextSession) => {
+      setIsPortalDataReady(false);
+      if (nextSession.role === "teacher") setActiveView("lessons");
+    },
+    request: postJson,
+    storageKey: storageKeys.teacherSession,
+    teacherAccount: { ...defaultTeacherAccountSettings, ...teacherAccountSettings },
+    windowTarget: typeof window === "undefined" ? null : window
+  });
   const [selectedDate, setSelectedDate] = useState(today);
   const [selectedLessonId, setSelectedLessonId] = useState("");
   const [lessonClipboard, setLessonClipboard] = useState(null);
@@ -5310,7 +5246,6 @@ export function App() {
     storageKeys.specialLectureInstructorSettlements,
     createDefaultSpecialLectureSettlementState()
   );
-  const [teacherAccountSettings, setTeacherAccountSettings] = useState(defaultTeacherAccountSettings);
   const [lessonNotificationPlans, setLessonNotificationPlans] = useStoredState(storageKeys.lessonNotificationPlans, {});
   const [generatedLessonControls, setGeneratedLessonControls] = useStoredState(
     "academy-os.generatedLessonControls.v1",
@@ -6847,62 +6782,6 @@ export function App() {
     setStatus: setAttendanceSyncStatus,
     syncDate: attendanceOnlyMode ? getKoreaDateString() : selectedDate
   });
-
-  async function handleLogin(role, loginId, password) {
-    if (role === "teacher") {
-      const account = { ...defaultTeacherAccountSettings, ...teacherAccountSettings };
-      try {
-        const result = await postJson("/api/auth/login", { role, loginId, password });
-        if (result.authenticated) {
-          setIsPortalDataReady(false);
-          const teacherSession = {
-            role: "teacher",
-            actorId: "instructor_owner_001",
-            name: result.account?.name || account.name || teacherAccount.name,
-            teacherId: result.account?.teacherId || "",
-            sessionToken: result.account?.sessionToken || ""
-          };
-          setSession(teacherSession);
-          persistTeacherSession(teacherSession);
-          setActiveView("lessons");
-          return { ok: true };
-        }
-      } catch (error) {
-        console.warn("Server teacher auth failed.", error);
-      }
-      return { ok: false, message: "선생님 아이디 또는 비밀번호가 맞지 않습니다." };
-    }
-
-    try {
-      const result = await postJson("/api/auth/login", { role, loginId, password });
-      if (result.authenticated && result.account?.studentId) {
-        setIsPortalDataReady(false);
-        setSession({
-          role,
-          actorId: result.account.actorId,
-          studentId: result.account.studentId,
-          name: result.account.name,
-          sessionToken: result.account.sessionToken
-        });
-        return { ok: true };
-      }
-    } catch (error) {
-      console.warn("Server student auth failed.", error);
-    }
-
-    if (role === "student" || role === "parent") {
-      return { ok: false, message: role === "student" ? "학생 아이디 또는 비밀번호가 맞지 않습니다." : "학부모 아이디 또는 비밀번호가 맞지 않습니다." };
-    }
-
-    return { ok: false, message: "지원하지 않는 로그인 역할입니다." };
-  }
-
-  function handleLogout() {
-    setIsPortalDataReady(false);
-    persistTeacherSession(null);
-    setSession(null);
-    setActiveView("lessons");
-  }
 
   async function handleAttendancePinPreview(phoneLast4, options = {}) {
     return previewKioskAttendanceAction({
