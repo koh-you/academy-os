@@ -34,7 +34,9 @@
 - 3-7 다섯 번째 단위로 특강 안내문과 첫 화면·수업일지 운영 알림 화면 1,029줄을 94.24 kB shared lazy chunk로 분리했다. App runtime 15개와 저장·삭제 callback owner를 유지했고 main JS는 999.16 kB, gzip은 248.14 kB다. lazy element type guard 회귀를 safe browser에서 발견해 최소 교정했고 지연 진입을 포함해 browser 16/16을 통과했다.
 - 3-7 여섯 번째 단위로 시험 대비·설정 화면을 각각 lazy chunk로 분리했다. helper/설정 transport App owner와 화면 본문을 보존했고 main JS는 956.13 kB, gzip은 237.03 kB, App은 507,358 bytes다. Babel의 App 500 KB 경고가 사라졌고 부작용 없는 지연 진입을 포함해 browser 17/17을 통과했다.
 - 3-7 마지막 단위로 보충 전용 수업 상세와 수업 준비 메모를 22.40 kB shared nested lazy chunk로 분리했다. pure helper 13개와 실제 저장·알림 callback owner를 유지했고 main JS는 934.69 kB, gzip은 231.48 kB다. 3-0 대비 main 43.1%·gzip 45.3% 감소와 App Babel 경고 제거를 수치로 고정했으며 production 821/821·safe browser 18/18로 3-7을 닫는다.
-- 로컬 browser smoke의 Worktree 격리 runner를 기본 명령으로 사용한다. 3-2 Lesson, 3-3 Supplement, 3-4 Student, 3-5 Notification, 3-6 Settlement, 3-7 Lazy loading 경계가 닫혔고 다음은 3-8 종료 감사다.
+- 3-8에서 도메인별 상태 owner·저장 원천·외부 side effect·오류 복구와 의도적 transport 예외를 `docs/app-refactor-third-pass-closeout.md` 및 전용 fixture로 고정했다. 3차 리팩터링 3-0~3-8은 완료 상태로 닫고 자동 재개하지 않는다.
+- 종료 검증은 runtime lint, 도메인 fast 39/39, teacher/closeout 경계, scenario·production 821/821, build 380 modules·lazy chunk 12/12, 격리 safe browser 18/18을 통과했다. 운영 side effect는 실행하지 않았다.
+- 로컬 browser smoke의 Worktree 격리 runner를 기본 명령으로 사용한다. 다음 작업은 deferred queue의 제품·저장 신뢰성 우선순위에서 별도로 선택한다.
 
 - `app_state` 자동저장 12개 key의 500ms debounce, request ID, API upsert, `updated_at` 경계를 inventory했다.
 - 역순 도착 시 오래된 요청이 최신값을 덮는 fixture를 추가하고 Production checks에 연결했다.
@@ -85,7 +87,7 @@
 1. `git status --short`가 clean이고 최신 main인지 확인한다.
 2. 오늘 branch의 GitHub Actions 결과를 확인한다.
 3. App 2차 리팩터링 Phase 1~5는 완료 상태로 유지하고 자동 재개하지 않는다.
-4. 3-7 중첩 수업 화면 lazy closeout 단위를 exact-head 검수·통합한다. 다음 최신 main branch에서는 3-8 종료 감사로 상태 owner·저장 원천·외부 side effect·오류 복구와 문서/queue를 재대조하고 전체 검증을 고정한다.
+4. App 3차 리팩터링 3-0~3-8은 완료 상태를 유지한다. 별도 제품 근거 없이 4차 리팩터링이나 남은 App 화면 분리를 자동 시작하지 않는다.
 5. 운영 삭제·발송·예약·유료 AI·SQL 적용이 필요하면 구현을 넓히지 말고 정확한 사람 gate를 남긴다.
 
 ## 종료할 때

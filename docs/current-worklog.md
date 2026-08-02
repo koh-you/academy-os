@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 App 3차 리팩터링 3-8 종료 감사
+
+- `docs/app-refactor-third-pass-closeout.md`에 session과 6개 핵심 도메인, exam/settings의 화면·local draft·authoritative 저장 원천·provider side effect·오류 복구 owner를 재대조했다.
+- 정산 `localStorage` recovery, notification controller의 공지 API 조립, 시험분석 도메인 request, 설정 transport 주입을 의도적 예외로 명시했다. 네 effect adapter가 function identity 외 API·Storage·React state를 소유하지 않고 21개 lazy 화면과 App의 고위험 handler owner가 유지되는지 `test:third-pass-closeout`으로 고정했다.
+- 3-0 대비 App source bytes 52.9%, production main 43.1%, gzip 45.3% 감소와 App Babel 500 KB 경고 제거를 종료 근거로 확정했다. CSS/API server/type/safe E2E는 별도 투자 후보이며 4차 리팩터링을 자동 시작하지 않는다.
+- 검증: `git diff --check`, runtime lint, 5도메인 fast 39/39, teacher/closeout 경계, scenario·production 821/821, `check:fast`, build 380 modules·lazy physical chunk 12/12, Worktree 격리 safe browser 18/18을 통과했다. 운영 데이터·실제 알림·유료 AI·SQL은 사용하지 않았다.
+
 ## 2026-08-02 App 3차 리팩터링 3-7 중첩 수업 화면 lazy loading closeout
 
 - `App.jsx`의 `SupplementMakeupLessonDetail`과 `PreparationMemoModal`을 `src/domains/lessons/LessonNestedPanels.jsx`로 옮겨, 이미 lazy인 수업 화면 내부에서 필요할 때만 내려받는 22.40 kB shared chunk로 연결했다. runtime 주입을 제거한 두 함수 본문 22,026자·6,236자는 기준 main과 문자 단위로 동일하다.
