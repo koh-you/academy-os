@@ -15,7 +15,8 @@
 - 3-1 첫 단위로 Notification Center top-level 화면을 도메인 파일로 옮겼다. 저장·발송 handler와 특강 panel owner는 유지하고 App runtime binding을 teacher view adapter로 명시했다.
 - 3-1 두 번째 단위로 Teacher Lesson Hub 화면 조립을 lesson 도메인 파일로 옮겼다. 달력 local state만 화면이 소유하고 수업일지 저장·알림 side-effect callback 및 상세 화면 owner는 App에 유지했다.
 - 3-1 세 번째 단위로 Lesson Journal Detail 화면을 lesson 도메인 파일로 옮겼다. 화면 local draft·overlay·예약 표시 상태만 새 파일에서 조립하고, 저장·삭제·알림 side effect callback과 OS 예약 조회 transport는 App에 유지했다.
-- 로컬 browser smoke의 Worktree 격리 runner를 기본 명령으로 추가했다. 3-1 우선 화면 세 단위가 끝났으므로 다음 단위는 3-2 Lesson draft/persisted·callback 경계다.
+- 3-2 첫 단위로 수업일지 record·homework·makeup local draft와 성공/실패 전이를 전용 controller hook으로 묶었다. App 저장·Supabase 재조회 owner는 유지한다. 저장 중 후속 입력은 revision guard로 보존하고 재저장을 안내하며, 실패·부분저장 수정본 보존과 다른 수업 응답 격리를 TARGET/CONTROL 및 지연 API 안전 브라우저 동선으로 확인했다.
+- 로컬 browser smoke의 Worktree 격리 runner를 기본 명령으로 추가했다. 다음 단위는 3-2에 남은 수업일지 persisted/provider callback 표면을 명시적 adapter 계약으로 고정한다.
 
 - `app_state` 자동저장 12개 key의 500ms debounce, request ID, API upsert, `updated_at` 경계를 inventory했다.
 - 역순 도착 시 오래된 요청이 최신값을 덮는 fixture를 추가하고 Production checks에 연결했다.
@@ -66,7 +67,7 @@
 1. `git status --short`가 clean이고 최신 main인지 확인한다.
 2. 오늘 branch의 GitHub Actions 결과를 확인한다.
 3. App 2차 리팩터링 Phase 1~5는 완료 상태로 유지하고 자동 재개하지 않는다.
-4. 다음 대형 단위는 최신 main의 별도 Worktree에서 3-2 Lesson draft/persisted·callback 경계를 한 단위만 검수한다. lazy loading/code splitting은 3-7까지 섞지 않는다.
+4. 다음 대형 단위는 최신 main의 별도 branch에서 3-2 수업일지 persisted/provider callback 표면을 명시적 adapter 계약으로 고정한다. lazy loading/code splitting은 3-7까지 섞지 않는다.
 5. 운영 삭제·발송·예약·유료 AI·SQL 적용이 필요하면 구현을 넓히지 말고 정확한 사람 gate를 남긴다.
 
 ## 종료할 때

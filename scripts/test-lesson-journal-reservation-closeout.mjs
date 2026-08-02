@@ -1,11 +1,10 @@
-import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const appSource = await readAppWithLessonJournalSource(import.meta.url);
-const detailStart = appSource.indexOf("function LessonJournalDetail(");
-const detailEnd = appSource.indexOf("\nfunction PreparationMemoModal(", detailStart);
-const detailSource = appSource.slice(detailStart, detailEnd);
+const [appSource, detailSource] = await Promise.all([
+  readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8"),
+  readFile(new URL("../src/domains/lessons/LessonJournalDetail.jsx", import.meta.url), "utf8")
+]);
 
 const pureModelPaths = [
   "../src/domains/lessons/lessonJournalExpectedReservationItems.js",

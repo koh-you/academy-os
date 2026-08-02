@@ -61,6 +61,42 @@ assert.deepEqual(
   }
 );
 
+assert.deepEqual(
+  createLessonJournalSaveViewModel({
+    isSaving: true,
+    manualSaveMessage: "수업일지 · 저장 필요",
+    recordDrafts: { target: {} }
+  }),
+  {
+    draftChangeCount: 1,
+    hasDraftChanges: true,
+    homeworkDraftCount: 0,
+    lessonJournalSaveStatus: { label: "", tone: "idle" },
+    makeupTaskDraftCount: 0,
+    recordDraftCount: 1,
+    stickySaveMessage: "수업일지 · 저장 중",
+    stickySaveState: "saving"
+  },
+  "an in-flight request must remain visibly saving even if a later edit marks the draft dirty"
+);
+
+assert.deepEqual(
+  createLessonJournalSaveViewModel({
+    manualSaveMessage: "수업일지 · 저장 완료 · 이후 변경 저장 필요",
+    recordDrafts: { target: {} }
+  }),
+  {
+    draftChangeCount: 1,
+    hasDraftChanges: true,
+    homeworkDraftCount: 0,
+    lessonJournalSaveStatus: { label: "", tone: "idle" },
+    makeupTaskDraftCount: 0,
+    recordDraftCount: 1,
+    stickySaveMessage: "수업일지 · 저장 완료 · 이후 변경 저장 필요 · 저장 전 변경 1건",
+    stickySaveState: "dirty"
+  }
+);
+
 assert.equal(
   createLessonJournalSaveViewModel({
     manualSaveMessage: "수업일지 · 부분 저장 · 숙제 1건 · 저장 실패 · 수정본 유지",
