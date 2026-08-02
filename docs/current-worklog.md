@@ -10,7 +10,8 @@
 - 표의 요청 차감·추가 입력 열을 제거했다. 기존 저장 조정값은 유실하지 않고 금액에만 계속 반영한다.
 - 월별 정산 PDF는 필터나 출결 세부내역 없이 정산 제외 행의 `이름·최종 정규 횟수·금액`과 합계만 출력한다.
 - 보강·휴강 보충은 학생의 정규 프로필 시간표로 시간을 덮지 않고 실제 수업일지 시작·종료 시간을 사용한다. 이윤채 7월 30일 보강과 같은 14:00 수업이 16:00으로 보이던 원인을 이 경계에서 차단했다.
-- 검증: 정산 전용 fixture, runtime lint, build `351 modules`, production `810/810` 통과. 브라우저 안전 미리보기에서 새 PDF 버튼 노출까지 확인했으나 로컬 재접속은 브라우저 정책 차단으로 중단했으며, GitHub browser smoke에서 최종 확인한다. 운영 쓰기·알림 side effect는 없다.
+- 최신 main의 Phase 5 adapter와 통합하면서 정적 시나리오 충돌은 새 outlet 계약을 유지하고 정산 항목만 합쳤다. AI 리뷰에서 수업일지 0건일 때 교사 확정 횟수가 금액 계산을 통과하지 못하는 경계를 발견해, 자동 계산 0원 규칙은 유지하고 명시적 확정값만 계산하도록 최소 보정했다.
+- 검증: 정산 전용 fixture, Phase 5 전용 fixture, runtime lint, `check:fast` scenario `810/810`, production `810/810`, build `352 modules`, Worktree 격리 safe browser `8/8` 통과. 운영 쓰기·알림 side effect는 없다.
 
 ## 2026-08-02 App 2차 리팩터링 Phase 5 — teacher view callback·화면 조립
 

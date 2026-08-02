@@ -681,7 +681,7 @@ export function MonthlySettlementPanel({
                       {row.hasApplicableRate ? formatSettlementWon(row.regularGrossAmount) : "단가 미설정"}
                     </strong>
                     <span>
-                      {!row.hasRegularJournal
+                      {!row.hasRegularJournal && !row.hasRegularCountOverride
                         ? "정규 수업일지 없음 · 0원"
                         : setting.mode === "fixed"
                           ? "월정액 전액"

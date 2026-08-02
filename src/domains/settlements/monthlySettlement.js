@@ -693,7 +693,7 @@ export function buildStudentSettlementRow({
     ? hasNewStudentSessionAmount
     : hasFixedAmount;
   const hasRegularJournal = evidence.regularCount > 0;
-  const calculatedBaseAmount = hasApplicableRate && hasRegularJournal
+  const calculatedBaseAmount = hasApplicableRate && (hasRegularJournal || hasRegularCountOverride)
     ? normalizedSetting.mode === "fixed"
       ? Number(normalizedSetting.fixedAmount)
       : normalizedSetting.mode === "new"

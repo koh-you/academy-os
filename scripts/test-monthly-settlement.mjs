@@ -802,6 +802,26 @@ const newStudentOverrideRow = buildStudentSettlementRow({
 assert.equal(newStudentOverrideRow.systemProrationCount, 2);
 assert.equal(newStudentOverrideRow.prorationCount, 3);
 assert.equal(newStudentOverrideRow.regularGrossAmount, 112500, "신입생은 교사가 확정한 최종 정규 횟수로 금액을 계산해야 합니다.");
+const newStudentNoJournalOverrideRow = buildStudentSettlementRow({
+  classTemplates,
+  lessons: [],
+  monthKey,
+  records: [],
+  setting: {
+    mode: "new",
+    modeSource: "teacher",
+    newStudentSessionAmount: 37500,
+    regularCountOverride: 3,
+    scheduleText: unevenScheduleText
+  },
+  student: newStudent
+});
+assert.equal(newStudentNoJournalOverrideRow.hasRegularJournal, false);
+assert.equal(
+  newStudentNoJournalOverrideRow.regularGrossAmount,
+  112500,
+  "수업일지가 없어도 교사가 확정한 최종 정규 횟수는 금액에 반영되어야 합니다."
+);
 const journalAutoNewSetting = applyMonthlySettlementJournalMode({
   fixedAmount: 450000,
   mode: "fixed",
