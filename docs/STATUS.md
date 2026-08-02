@@ -56,6 +56,7 @@
 - 3-4 세 번째 단위에서 퇴원 확인·인계 PDF·단일/일괄 영구삭제 4개 overlay를 `StudentLifecycleOverlays.jsx`로 옮겼다. 화면 JSX 11,029자는 기준 commit과 동일하며, audit·복원·삭제 controller 및 App의 Supabase 재조회 owner는 이동하지 않았다. `StudentManager.jsx`는 826줄로 줄었다.
 - 3-4 마지막 단위에서 퇴원생 목록·정렬·선택 toolbar를 `StudentWithdrawnList.jsx`로 옮겼다. 20개 prop은 직접 identity를 유지하고 local dirty/선택 및 lifecycle controller는 Manager에 남겼다. `StudentManager.jsx`는 755줄로 줄었으며 profile·퇴원 목록·lifecycle overlay 경계를 대조해 3-4를 닫는다.
 - 3-5 첫 단위에서 알림 이력·특강관리 화면에 전달되던 13개 callback을 `notificationEffectAdapter`의 history provider/transport와 특강 persistence/deletion/orchestration/navigation 표면으로 묶었다. 두 화면의 refresh identity와 App의 저장·재조회·Solapi effect owner, Notification Center 내부 공지 draft/request controller는 유지한다.
+- 3-5 두 번째 단위에서 공지 수신자·작성·이력·취소·reconcile 조립을 `useNotificationNoticeController`로 옮겼다. `NotificationCenter`는 469줄에서 144줄 render owner가 됐으며 local draft, 저장된 알림 이력, provider 상태와 실제 발송/예약/취소 경계를 유지한 채 3-5를 닫는다.
 
 ## 폴더 상태
 

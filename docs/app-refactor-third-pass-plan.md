@@ -73,6 +73,7 @@
 - 알림 목록·편집·reconcile UI를 도메인 component/hook으로 옮긴다.
 - local draft, persisted final text, provider 상태, 발송 side effect를 별도 경계로 유지한다.
 - 진행: `TeacherViewOutlet`에서 `NotificationCenter` 두 진입 경로로 낱개 전달되던 13개 callback을 `notificationEffectAdapter`의 history provider 2개·transport 1개, 특강 persistence 7개·deletion 1개·orchestration 1개·navigation 1개 표면으로 고정했다. 알림 이력과 특강관리의 서로 다른 refresh 함수 identity를 보존하고, 실제 저장·Supabase 재조회·Solapi 예약/취소/reconcile owner와 공지 draft/request controller는 이동하지 않았다.
+- 완료: 공지 수신자·작성 draft, 이력·삭제, Solapi 취소/reconcile, request binding과 세 화면 prop 조립을 `useNotificationNoticeController`로 이동했다. `NotificationCenter`는 469줄에서 144줄 render owner가 됐고, App effect callback·API timeout·확인/오류 문구·저장/예약/발송 상태 전이는 유지했다. 이력 탭 전환과 local draft 미리보기를 safe browser로 확인해 3-5를 닫는다.
 
 ### 3-6 Settlement 경계
 

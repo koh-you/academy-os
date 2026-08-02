@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 App 3차 리팩터링 3-5 알림 controller 경계
+
+- `NotificationCenter.jsx`에 남아 있던 공지 수신자 선택, local 작성 draft, 이력 필터·삭제, Solapi 취소/reconcile, API request binding과 compose/history/tab prop 조립을 `useNotificationNoticeController.js`로 물리 이동했다. 화면은 특강 callback 조립과 render만 소유한다.
+- 기존 `useNotificationRecipientState`·`useNotificationComposerState`·`useNotificationHistoryState`, 순수 action/API adapter, 15/45초 timeout, 확인창·오류 문구·refresh 순서와 두 App effect identity는 바꾸지 않았다. 새 controller는 App·Storage·JSX를 역참조하지 않으며 `NotificationCenter.jsx`는 469줄·17,234 bytes에서 144줄·5,324 bytes로 줄었다.
+- source-string fixture는 새 controller source를 화면 경계에 합성하고 inline object 표기 대신 반환 prop 계약을 확인하도록 교정했다. 전용 fixture는 화면의 API/controller owner 제거, controller의 세 hook·request·취소/reconcile owner, render prop 연결을 고정한다.
+- 검증: runtime lint, notification fast 7/7, notice action/effect/controller·refresh/reconcile·teacher 전용 fixture, scenario/production 821/821, `check:fast`, build 365 modules, 이력 탭 전환·local draft 미리보기·특강관리 이동을 포함한 Worktree 격리 safe browser 10/10을 통과했다. 운영 데이터·실제 알림 발송/예약/취소·AI 호출·SQL은 사용하지 않았다.
+
 ## 2026-08-02 App 3차 리팩터링 3-5 알림 effect 경계
 
 - App→`TeacherViewOutlet`→`NotificationCenter` 두 진입 경로에 낱개로 전달되던 callback 13개를 동결된 `notificationEffectAdapter`로 교체했다. 이력 취소·reconcile 2개는 `historyProvider`, route별 재조회 1개는 `historyTransport`, 특강 저장 7개·삭제 1개·수업 저장 뒤 선택적 화면 이동까지 조정하는 orchestration 1개·화면 이동 1개는 각각 명시적 표면으로 분류했다.

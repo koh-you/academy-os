@@ -55,9 +55,10 @@ assert.equal(activeAdapter.historyTransport.onRefresh, activeRefresh);
 assert.equal(Object.isFrozen(historyAdapter), true);
 assert.equal(Object.isFrozen(activeAdapter), true);
 
-const [outletSource, centerSource, adapterSource] = await Promise.all([
+const [outletSource, centerSource, controllerSource, adapterSource] = await Promise.all([
   readFile(new URL("../src/app/TeacherViewOutlet.js", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/notifications/NotificationCenter.jsx", import.meta.url), "utf8"),
+  readFile(new URL("../src/domains/notifications/useNotificationNoticeController.js", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/notifications/notificationEffectAdapter.js", import.meta.url), "utf8")
 ]);
 assert.ok(outletSource.includes("effects: notificationEffects"));
@@ -82,7 +83,7 @@ for (const callbackName of Object.values(mappings).flatMap((surface) => Object.k
   assert.equal(signature.includes(callbackName), false, `NotificationCenter signature must not retain flat ${callbackName}`);
 }
 for (const surfaceName of Object.keys(mappings)) {
-  assert.ok(centerSource.includes(`${surfaceName}:`), `NotificationCenter must consume ${surfaceName}`);
+  assert.ok(`${centerSource}\n${controllerSource}`.includes(`${surfaceName}:`), `notification screen boundary must consume ${surfaceName}`);
 }
 for (const forbidden of ["fetch(", "postJson", "getJsonWithTimeout", "/api/", "localStorage", "useState", "useEffect"]) {
   assert.equal(adapterSource.includes(forbidden), false, `notification effect adapter must not own ${forbidden}`);
