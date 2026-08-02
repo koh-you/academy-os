@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 App 3차 리팩터링 3-4 학생 lifecycle overlay 경계
+
+- 퇴원 확인, 읽기 전용 인수인계 PDF, 단일 영구삭제, 일괄 영구삭제 4개 overlay를 `src/domains/students/StudentLifecycleOverlays.jsx`로 물리 이동했다. 기준 commit의 조건부 JSX 11,029자를 직접 대조해 문자 단위 동일함을 확인했다.
+- 새 overlay는 draft setter와 Manager controller만 주입받는다. 퇴원·복원, 영구삭제 전 audit, fingerprint 재확인, 단일/일괄 삭제 순서, PDF model 생성·인쇄는 기존 `StudentManager` 함수에 그대로 있고 App의 실제 저장·Supabase 재조회 callback도 이동하지 않았다.
+- 기존 footer·삭제 확인 source 검사는 새 raw overlay source를 직접 보도록 위치 결합만 교정했다. 전용 fixture는 4개 overlay 문구·busy close gate·controller 주입과 API/Storage/React state 부재를 student fast 및 production 학생 묶음에서 확인한다.
+- 구조 결과: `StudentManager.jsx`는 994줄·51,334 bytes에서 826줄·40,802 bytes, 새 `StudentLifecycleOverlays.jsx`는 244줄·13,689 bytes다. 다음 단위는 퇴원생 목록과 선택 toolbar 조립을 분리한다.
+
 ## 2026-08-02 App 3차 리팩터링 3-4 학생 프로필 화면 경계
 
 - `StudentManager.jsx` 후반에 있던 `StudentProfileModal`, 프로필 오류 경계, 기본정보·시간표·상담·성적·테스트·운영알림 local draft/표시 helper를 `src/domains/students/StudentProfileModal.jsx`로 물리 이동했다. 기존 프로필 component 본문은 기준 commit과 문자 단위로 동일하다.
