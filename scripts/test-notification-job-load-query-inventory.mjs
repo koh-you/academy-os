@@ -84,22 +84,41 @@ const helperSource = await readFile(
   new URL("../src/domains/notifications/notificationJobLoadQuery.js", import.meta.url),
   "utf8"
 );
-const functionStart = appSource.indexOf(
-  'async function refreshNotificationJobs({ date = "", lessonId = "", scope = "active", silent = false } = {})'
+const controllerSource = await readFile(
+  new URL(
+    "../src/domains/notifications/notificationJobsRefreshController.js",
+    import.meta.url
+  ),
+  "utf8"
 );
-const functionEnd = appSource.indexOf(
-  "\n  function mergeNotificationJobsIntoState(",
+const dateRangeStart = controllerSource.indexOf(
+  'export function createNotificationJobsDateRange(date = "")'
+);
+const dateRangeEnd = controllerSource.indexOf(
+  "\nexport function getNotificationJobsRefreshChannel(",
+  dateRangeStart
+);
+assert.ok(dateRangeStart >= 0 && dateRangeEnd > dateRangeStart);
+const dateRangeSource = controllerSource.slice(dateRangeStart, dateRangeEnd);
+for (const dateBoundary of [
+  'const dayStart = new Date(`${date}T00:00:00+09:00`)',
+  "scheduledFrom: dayStart.toISOString()",
+  "scheduledTo: nextDayStart.toISOString()"
+]) {
+  assert.ok(dateRangeSource.includes(dateBoundary));
+}
+const functionStart = controllerSource.indexOf(
+  'function refresh({ date = "", lessonId = "", scope = "active", silent = false } = {})'
+);
+const functionEnd = controllerSource.indexOf(
+  "\n  function dispose(",
   functionStart
 );
 assert.ok(functionStart >= 0 && functionEnd > functionStart);
-const functionSource = appSource.slice(functionStart, functionEnd);
+const functionSource = controllerSource.slice(functionStart, functionEnd);
 for (const queryBoundary of [
-  'let scheduledFrom = ""',
-  'let scheduledTo = ""',
-  'if (!lessonId && scope === "history" && date)',
-  'const dayStart = new Date(`${date}T00:00:00+09:00`)',
-  "scheduledFrom = dayStart.toISOString()",
-  "scheduledTo = nextDayStart.toISOString()",
+  '!lessonId && scope === "history"',
+  "? createNotificationJobsDateRange(date)",
   "const queryString = createNotificationJobsQueryString({",
   "lessonId,",
   "scheduledFrom,",
@@ -115,7 +134,7 @@ for (const queryBoundary of [
 assert.ok(!functionSource.includes("new URLSearchParams()"));
 assert.ok(!functionSource.includes("query.set("));
 const loadingIndex = functionSource.indexOf(
-  'setNotificationJobsStatus({ state: "loading", message: "알림 기록을 불러오는 중입니다." })'
+  'onStatus({ state: "loading", message: "알림 기록을 불러오는 중입니다." })'
 );
 const queryIndex = functionSource.indexOf(
   "const queryString = createNotificationJobsQueryString({"
@@ -125,14 +144,14 @@ const requestIndex = functionSource.indexOf(
   queryIndex
 );
 const resultIndex = functionSource.indexOf(
-  "if (result.ok && Array.isArray(result.notificationJobs))",
+  "if (!result.ok || !Array.isArray(result.notificationJobs))",
   requestIndex
 );
 assert.ok(
   functionSource.includes("if (!silent)") &&
-    loadingIndex >= 0 &&
-    queryIndex > loadingIndex &&
-    requestIndex > queryIndex &&
+    queryIndex >= 0 &&
+    loadingIndex > queryIndex &&
+    requestIndex > loadingIndex &&
     resultIndex > requestIndex
 );
 for (const helperRule of [

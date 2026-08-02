@@ -90,26 +90,33 @@ const helperSource = await readFile(
   new URL("../src/domains/notifications/notificationJobLoadStatus.js", import.meta.url),
   "utf8"
 );
-const functionStart = appSource.indexOf(
-  'async function refreshNotificationJobs({ date = "", lessonId = "", scope = "active", silent = false } = {})'
+const controllerSource = await readFile(
+  new URL(
+    "../src/domains/notifications/notificationJobsRefreshController.js",
+    import.meta.url
+  ),
+  "utf8"
 );
-const functionEnd = appSource.indexOf(
-  "\n  function mergeNotificationJobsIntoState(",
+const functionStart = controllerSource.indexOf(
+  'function refresh({ date = "", lessonId = "", scope = "active", silent = false } = {})'
+);
+const functionEnd = controllerSource.indexOf(
+  "\n  function dispose(",
   functionStart
 );
 assert.ok(functionStart >= 0 && functionEnd > functionStart);
-const functionSource = appSource.slice(functionStart, functionEnd);
+const functionSource = controllerSource.slice(functionStart, functionEnd);
 
 for (const statusBoundary of [
   "if (!silent)",
-  'setNotificationJobsStatus({ state: "loading", message: "알림 기록을 불러오는 중입니다." })',
-  "if (result.ok && Array.isArray(result.notificationJobs))",
-  "setNotificationJobsStatus(",
+  'onStatus({ state: "loading", message: "알림 기록을 불러오는 중입니다." })',
+  "if (!result.ok || !Array.isArray(result.notificationJobs))",
+  "onStatus(",
   "createNotificationJobsReadyStatus({",
   "count: result.notificationJobs.length,",
   "lessonId,",
   "scope",
-  'setNotificationJobsStatus({ state: "failed", message: error.message })'
+  'onStatus({ state: "failed", message: error.message })'
 ]) {
   assert.ok(
     functionSource.includes(statusBoundary),
@@ -117,18 +124,18 @@ for (const statusBoundary of [
   );
 }
 const resultIndex = functionSource.indexOf(
-  "if (result.ok && Array.isArray(result.notificationJobs))"
+  "if (!result.ok || !Array.isArray(result.notificationJobs))"
 );
 const assignmentIndex = functionSource.indexOf(
-  "setNotificationJobs(result.notificationJobs)",
+  "onJobs({",
   resultIndex
 );
 const mergeIndex = functionSource.indexOf(
-  "mergeNotificationJobsIntoState(result.notificationJobs)",
+  "notificationJobs: result.notificationJobs,",
   assignmentIndex
 );
 const readyStatusIndex = functionSource.indexOf(
-  "setNotificationJobsStatus(",
+  "onStatus(",
   mergeIndex
 );
 assert.ok(

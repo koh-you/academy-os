@@ -79,6 +79,13 @@ const helperSource = await readFile(
   new URL("../src/domains/notifications/notificationJobState.js", import.meta.url),
   "utf8"
 );
+const refreshControllerSource = await readFile(
+  new URL(
+    "../src/domains/notifications/notificationJobsRefreshController.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const modulePath = 'from "../domains/notifications/notificationJobState.js"';
 assert.equal(appSource.split(modulePath).length - 1, 1);
 for (const helperName of [
@@ -97,7 +104,7 @@ for (const helperName of [
 assert.equal((helperSource.match(/export function /g) ?? []).length, 5);
 assert.equal(appSource.split("setNotificationJobs(").length - 1, 11);
 assert.equal(
-  appSource.split("setNotificationJobs(result.notificationJobs)").length - 1,
+  appSource.split("setNotificationJobs(nextJobs)").length - 1,
   1
 );
 assert.equal(
@@ -133,29 +140,27 @@ assert.equal(
   1
 );
 
-const loadStart = appSource.indexOf(
-  'async function refreshNotificationJobs({ date = "", lessonId = "", scope = "active", silent = false } = {})'
+const adapterStart = appSource.indexOf("function getNotificationJobsRefreshController()");
+const adapterEnd = appSource.indexOf(
+  "\n  function applyNotificationJobsReconcileResult(",
+  adapterStart
 );
-const loadEnd = appSource.indexOf(
-  "\n  function mergeNotificationJobsIntoState(",
-  loadStart
+assert.ok(adapterStart >= 0 && adapterEnd > adapterStart);
+const adapterSource = appSource.slice(adapterStart, adapterEnd);
+const replaceIndex = adapterSource.indexOf("if (replace)");
+const directAssignmentIndex = adapterSource.indexOf(
+  "setNotificationJobs(nextJobs)",
+  replaceIndex
 );
-assert.ok(loadStart >= 0 && loadEnd > loadStart);
-const loadSource = appSource.slice(loadStart, loadEnd);
-const activeScopeIndex = loadSource.indexOf(
-  'if (scope === "active" && !lessonId)'
-);
-const directAssignmentIndex = loadSource.indexOf(
-  "setNotificationJobs(result.notificationJobs)",
-  activeScopeIndex
-);
-const mergeIndex = loadSource.indexOf(
-  "mergeNotificationJobsIntoState(result.notificationJobs)",
+const mergeIndex = adapterSource.indexOf(
+  "mergeNotificationJobsIntoState(nextJobs)",
   directAssignmentIndex
 );
 assert.ok(
-  activeScopeIndex >= 0 &&
-    directAssignmentIndex > activeScopeIndex &&
+    refreshControllerSource.includes("onJobs({") &&
+    refreshControllerSource.includes('replace: scope === "active" && !lessonId') &&
+    replaceIndex >= 0 &&
+    directAssignmentIndex > replaceIndex &&
     mergeIndex > directAssignmentIndex
 );
 

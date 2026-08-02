@@ -92,6 +92,13 @@ const helperSource = await readFile(
   new URL("../src/domains/notifications/notificationJobState.js", import.meta.url),
   "utf8"
 );
+const refreshControllerSource = await readFile(
+  new URL(
+    "../src/domains/notifications/notificationJobsRefreshController.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const functionStart = appSource.indexOf(
   "function mergeNotificationJobsIntoState(nextJobs = [])"
 );
@@ -113,7 +120,7 @@ for (const existingBoundary of [
   );
 }
 for (const AppOwnedCallSite of [
-  "mergeNotificationJobsIntoState(result.notificationJobs)",
+  "mergeNotificationJobsIntoState(nextJobs)",
   "mergeNotificationJobsIntoState(result.notificationJobs ?? [])",
   "mergeNotificationJobsIntoState(reservedJobs)",
   "mergeNotificationJobsIntoState(failedJobs)"
@@ -123,6 +130,11 @@ for (const AppOwnedCallSite of [
     `missing App-owned batch merge call site: ${AppOwnedCallSite}`
   );
 }
+assert.ok(
+  refreshControllerSource.includes("onJobs({") &&
+    refreshControllerSource.includes("notificationJobs: result.notificationJobs,") &&
+    refreshControllerSource.includes('replace: scope === "active" && !lessonId')
+);
 for (const helperRule of [
   "export function selectValidNotificationJobs(notificationJobs = [])",
   "return notificationJobs.filter((job) => job?.notificationJobId)",

@@ -29,10 +29,18 @@ const helperSource = await readFile(
   new URL("../src/domains/notifications/notificationJobLoadStatus.js", import.meta.url),
   "utf8"
 );
+const controllerSource = await readFile(
+  new URL(
+    "../src/domains/notifications/notificationJobsRefreshController.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const modulePath = 'from "../domains/notifications/notificationJobLoadStatus.js"';
-assert.equal(appSource.split(modulePath).length - 1, 1);
+assert.equal(appSource.split(modulePath).length - 1, 0);
+assert.equal(controllerSource.split('from "./notificationJobLoadStatus.js"').length - 1, 1);
 assert.equal(
-  appSource.split("createNotificationJobsReadyStatus({").length - 1,
+  controllerSource.split("createNotificationJobsReadyStatus({").length - 1,
   1
 );
 assert.equal(
@@ -41,36 +49,36 @@ assert.equal(
   1
 );
 
-const functionStart = appSource.indexOf(
-  'async function refreshNotificationJobs({ date = "", lessonId = "", scope = "active", silent = false } = {})'
+const functionStart = controllerSource.indexOf(
+  'function refresh({ date = "", lessonId = "", scope = "active", silent = false } = {})'
 );
-const functionEnd = appSource.indexOf(
-  "\n  function mergeNotificationJobsIntoState(",
+const functionEnd = controllerSource.indexOf(
+  "\n  function dispose(",
   functionStart
 );
 assert.ok(functionStart >= 0 && functionEnd > functionStart);
-const functionSource = appSource.slice(functionStart, functionEnd);
+const functionSource = controllerSource.slice(functionStart, functionEnd);
 const loadingIndex = functionSource.indexOf(
-  'setNotificationJobsStatus({ state: "loading", message: "알림 기록을 불러오는 중입니다." })'
+  'onStatus({ state: "loading", message: "알림 기록을 불러오는 중입니다." })'
 );
 const queryIndex = functionSource.indexOf(
   "const queryString = createNotificationJobsQueryString({"
 );
-const requestIndex = functionSource.indexOf("getJsonWithTimeout(", queryIndex);
+const requestIndex = functionSource.indexOf("await request(", queryIndex);
 const resultIndex = functionSource.indexOf(
-  "if (result.ok && Array.isArray(result.notificationJobs))",
+  "if (!result.ok || !Array.isArray(result.notificationJobs))",
   requestIndex
 );
 const directAssignmentIndex = functionSource.indexOf(
-  "setNotificationJobs(result.notificationJobs)",
+  "onJobs({",
   resultIndex
 );
 const mergeIndex = functionSource.indexOf(
-  "mergeNotificationJobsIntoState(result.notificationJobs)",
+  "notificationJobs: result.notificationJobs,",
   directAssignmentIndex
 );
 const readySetterIndex = functionSource.indexOf(
-  "setNotificationJobsStatus(",
+  "onStatus(",
   mergeIndex
 );
 const helperIndex = functionSource.indexOf(
@@ -78,14 +86,14 @@ const helperIndex = functionSource.indexOf(
   readySetterIndex
 );
 const failedIndex = functionSource.indexOf(
-  'setNotificationJobsStatus({ state: "failed", message: error.message })',
+  'onStatus({ state: "failed", message: error.message })',
   helperIndex
 );
 assert.ok(
   functionSource.includes("if (!silent)") &&
-  loadingIndex >= 0 &&
-    queryIndex > loadingIndex &&
-    requestIndex > queryIndex &&
+    queryIndex >= 0 &&
+    loadingIndex > queryIndex &&
+    requestIndex > loadingIndex &&
     resultIndex > requestIndex &&
     directAssignmentIndex > resultIndex &&
     mergeIndex > directAssignmentIndex &&

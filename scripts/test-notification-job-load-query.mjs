@@ -55,6 +55,10 @@ const helperSource = await readFile(
   new URL("../src/domains/notifications/notificationJobLoadQuery.js", import.meta.url),
   "utf8"
 );
+const controllerSource = await readFile(
+  new URL("../src/domains/notifications/notificationJobsRefreshController.js", import.meta.url),
+  "utf8"
+);
 const functionStart = appSource.indexOf(
   'async function refreshNotificationJobs({ date = "", lessonId = "", scope = "active", silent = false } = {})'
 );
@@ -64,26 +68,27 @@ const functionEnd = appSource.indexOf(
 );
 assert.ok(functionStart >= 0 && functionEnd > functionStart);
 const functionSource = appSource.slice(functionStart, functionEnd);
-for (const AppOwnedBoundary of [
-  "if (!silent)",
-  'setNotificationJobsStatus({ state: "loading", message: "알림 기록을 불러오는 중입니다." })',
-  'if (!lessonId && scope === "history" && date)',
+for (const AppAdapterBoundary of [
+  "getNotificationJobsRefreshController().refresh({",
+  "date,",
+  "lessonId,",
+  "scope,",
+  "silent"
+]) {
+  assert.ok(
+    functionSource.includes(AppAdapterBoundary),
+    `notification query adapter missing from App: ${AppAdapterBoundary}`
+  );
+}
+for (const controllerBoundary of [
   'const dayStart = new Date(`${date}T00:00:00+09:00`)',
   "const queryString = createNotificationJobsQueryString({",
   "scheduledFrom,",
   "scheduledTo,",
-  "getJsonWithTimeout(",
   "`/api/notification-jobs?${queryString}`",
-  "setNotificationJobs(result.notificationJobs)",
-  "mergeNotificationJobsIntoState(result.notificationJobs)",
-  "createNotificationJobsReadyStatus({",
-  'setNotificationJobsStatus({ state: "failed", message: error.message })'
-]) {
-  assert.ok(
-    functionSource.includes(AppOwnedBoundary),
-    `notification query effect moved from App: ${AppOwnedBoundary}`
-  );
-}
+  "onJobs({",
+  "createNotificationJobsReadyStatus({"
+]) assert.ok(controllerSource.includes(controllerBoundary), `notification query controller missing: ${controllerBoundary}`);
 assert.ok(!functionSource.includes("new URLSearchParams()"));
 assert.ok(!functionSource.includes("query.set("));
 for (const forbiddenHelperEffect of [

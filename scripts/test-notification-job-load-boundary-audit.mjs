@@ -64,18 +64,18 @@ const statusSource = await readFile(
   new URL("../src/domains/notifications/notificationJobLoadStatus.js", import.meta.url),
   "utf8"
 );
+const controllerSource = await readFile(
+  new URL("../src/domains/notifications/notificationJobsRefreshController.js", import.meta.url),
+  "utf8"
+);
 assert.equal(
-  appSource.split(
+  controllerSource.split(
     'from "../domains/notifications/notificationJobLoadQuery.js"'
   ).length - 1,
-  1
+  0
 );
-assert.equal(
-  appSource.split(
-    'from "../domains/notifications/notificationJobLoadStatus.js"'
-  ).length - 1,
-  1
-);
+assert.equal(controllerSource.includes('from "./notificationJobLoadQuery.js"'), true);
+assert.equal(controllerSource.includes('from "./notificationJobLoadStatus.js"'), true);
 assert.equal(
   querySource.split("export function createNotificationJobsQueryString(")
     .length - 1,
@@ -87,12 +87,12 @@ assert.equal(
   1
 );
 assert.equal(
-  appSource.split("createNotificationJobsQueryString({")
+  controllerSource.split("createNotificationJobsQueryString({")
     .length - 1,
   1
 );
 assert.equal(
-  appSource.split("createNotificationJobsReadyStatus({").length - 1,
+  controllerSource.split("createNotificationJobsReadyStatus({").length - 1,
   1
 );
 
@@ -105,28 +105,27 @@ const functionEnd = appSource.indexOf(
 );
 assert.ok(functionStart >= 0 && functionEnd > functionStart);
 const functionSource = appSource.slice(functionStart, functionEnd);
-for (const AppOwnedBoundary of [
-  "if (!silent)",
-  'setNotificationJobsStatus({ state: "loading", message: "알림 기록을 불러오는 중입니다." })',
-  'if (!lessonId && scope === "history" && date)',
-  "const queryString = createNotificationJobsQueryString({",
-  "scheduledFrom,",
-  "scheduledTo,",
-  "getJsonWithTimeout(",
-  "`/api/notification-jobs?${queryString}`",
-  "if (result.ok && Array.isArray(result.notificationJobs))",
-  'if (scope === "active" && !lessonId)',
-  "setNotificationJobs(result.notificationJobs)",
-  "mergeNotificationJobsIntoState(result.notificationJobs)",
-  "createNotificationJobsReadyStatus({",
-  "count: result.notificationJobs.length,",
-  'setNotificationJobsStatus({ state: "failed", message: error.message })'
+for (const AppAdapterBoundary of [
+  "getNotificationJobsRefreshController().refresh({",
+  "date,",
+  "lessonId,",
+  "scope,",
+  "silent"
 ]) {
   assert.ok(
-    functionSource.includes(AppOwnedBoundary),
-    `notification load audit lost App boundary: ${AppOwnedBoundary}`
+    functionSource.includes(AppAdapterBoundary),
+    `notification load audit lost App adapter: ${AppAdapterBoundary}`
   );
 }
+for (const controllerBoundary of [
+  "if (!silent)",
+  "const queryString = createNotificationJobsQueryString({",
+  "`/api/notification-jobs?${queryString}`",
+  "if (!result.ok || !Array.isArray(result.notificationJobs))",
+  "onJobs({",
+  "createNotificationJobsReadyStatus({",
+  "latestRequestByChannel.get(channel) !== requestId"
+]) assert.ok(controllerSource.includes(controllerBoundary), `notification load controller missing: ${controllerBoundary}`);
 assert.ok(!functionSource.includes("new URLSearchParams()"));
 assert.ok(!functionSource.includes("query.set("));
 assert.ok(

@@ -24,11 +24,22 @@ const helperSource = await readFile(
   new URL("../src/domains/notifications/notificationJobReconcilePayload.js", import.meta.url),
   "utf8"
 );
+const controllerSource = await readFile(
+  new URL(
+    "../src/domains/notifications/notificationJobsReconcileController.js",
+    import.meta.url
+  ),
+  "utf8"
+);
 const modulePath =
   'from "../domains/notifications/notificationJobReconcilePayload.js"';
-assert.equal(appSource.split(modulePath).length - 1, 1);
+assert.equal(appSource.split(modulePath).length - 1, 0);
 assert.equal(
-  appSource.split("createNotificationJobReconcilePayload({").length - 1,
+  controllerSource.split('from "./notificationJobReconcilePayload.js"').length - 1,
+  1
+);
+assert.equal(
+  controllerSource.split("createNotificationJobReconcilePayload(options)").length - 1,
   1
 );
 assert.equal(
@@ -37,71 +48,81 @@ assert.equal(
   1
 );
 
-const functionStart = appSource.indexOf(
-  'async function handleReconcileSolapiNotificationResults({ lessonId = "", date = "", notificationJobIds = [], scheduledFrom = "", scheduledTo = "" } = {})'
+const functionStart = controllerSource.indexOf(
+  "function reconcile(options = {})"
 );
-const functionEnd = appSource.indexOf(
-  "\n  async function handleCancelNotificationJob(",
+const functionEnd = controllerSource.indexOf(
+  "\n  function dispose(",
   functionStart
 );
 assert.ok(functionStart >= 0 && functionEnd > functionStart);
-const functionSource = appSource.slice(functionStart, functionEnd);
+const functionSource = controllerSource.slice(functionStart, functionEnd);
+const helperIndex = functionSource.indexOf(
+  "createNotificationJobReconcilePayload(options)"
+);
 const requestIndex = functionSource.indexOf(
-  "const result = await postJsonWithTimeout("
+  "const result = await request("
 );
 const endpointIndex = functionSource.indexOf(
   '"/api/notification-jobs/reconcile-solapi"',
   requestIndex
 );
-const helperIndex = functionSource.indexOf(
-  "createNotificationJobReconcilePayload({",
-  endpointIndex
+const timeoutIndex = functionSource.indexOf("90000", endpointIndex);
+const resultIndex = functionSource.indexOf("onResult(result)", timeoutIndex);
+const returnIndex = functionSource.indexOf("return result", resultIndex);
+assert.ok(
+  helperIndex >= 0 &&
+    requestIndex > helperIndex &&
+    endpointIndex > requestIndex &&
+    timeoutIndex > endpointIndex &&
+    resultIndex > timeoutIndex &&
+    returnIndex > resultIndex
 );
-const timeoutIndex = functionSource.indexOf("90000", helperIndex);
-const jobMergeIndex = functionSource.indexOf(
-  "mergeNotificationJobsIntoState(result.notificationJobs ?? [])",
-  timeoutIndex
+
+const applyStart = appSource.indexOf("function applyNotificationJobsReconcileResult(result)");
+const applyEnd = appSource.indexOf(
+  "\n  function getNotificationJobsReconcileController(",
+  applyStart
 );
-const recordGuardIndex = functionSource.indexOf(
+assert.ok(applyStart >= 0 && applyEnd > applyStart);
+const applySource = appSource.slice(applyStart, applyEnd);
+const jobMergeIndex = applySource.indexOf(
+  "mergeNotificationJobsIntoState(result.notificationJobs ?? [])"
+);
+const recordGuardIndex = applySource.indexOf(
   "if (Array.isArray(result.records) && result.records.length)",
   jobMergeIndex
 );
-const recordReduceIndex = functionSource.indexOf(
+const recordReduceIndex = applySource.indexOf(
   "mergeNotificationJobReconcileRecords({",
   recordGuardIndex
 );
-const refIndex = functionSource.indexOf(
+const refIndex = applySource.indexOf(
   "recordsRef.current = nextRecords",
   recordReduceIndex
 );
-const stateIndex = functionSource.indexOf("setRecords(nextRecords)", refIndex);
-const storageIndex = functionSource.indexOf(
+const stateIndex = applySource.indexOf("setRecords(nextRecords)", refIndex);
+const storageIndex = applySource.indexOf(
   "writeStorageValue(window.localStorage",
   stateIndex
 );
-const savedStatesIndex = functionSource.indexOf(
+const savedStatesIndex = applySource.indexOf(
   "const savedStates = createNotificationJobReconcileSavedStates(result.records)",
   storageIndex
 );
-const saveStateSetterIndex = functionSource.indexOf(
+const saveStateSetterIndex = applySource.indexOf(
   "setSaveStates((currentStates)",
   savedStatesIndex
 );
-const returnIndex = functionSource.indexOf("return result", saveStateSetterIndex);
 assert.ok(
-  requestIndex >= 0 &&
-    endpointIndex > requestIndex &&
-    helperIndex > endpointIndex &&
-    timeoutIndex > helperIndex &&
-    jobMergeIndex > timeoutIndex &&
+  jobMergeIndex >= 0 &&
     recordGuardIndex > jobMergeIndex &&
     recordReduceIndex > recordGuardIndex &&
     refIndex > recordReduceIndex &&
     stateIndex > refIndex &&
     storageIndex > stateIndex &&
     savedStatesIndex > storageIndex &&
-    saveStateSetterIndex > savedStatesIndex &&
-    returnIndex > saveStateSetterIndex
+    saveStateSetterIndex > savedStatesIndex
 );
 assert.equal(
   appSource.split(
@@ -110,7 +131,7 @@ assert.equal(
   3
 );
 assert.ok(
-  !functionSource.includes(
+  !controllerSource.includes(
     "{ date, lessonId, notificationJobIds, scheduledFrom, scheduledTo, limit: 500 }"
   )
 );

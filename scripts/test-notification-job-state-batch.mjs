@@ -87,7 +87,7 @@ assert.ok(!functionSource.includes("nextJobs.filter("));
 assert.ok(!functionSource.includes("new Set("));
 assert.ok(!functionSource.includes("current.filter("));
 for (const AppOwnedCallSite of [
-  "mergeNotificationJobsIntoState(result.notificationJobs)",
+  "mergeNotificationJobsIntoState(nextJobs)",
   "mergeNotificationJobsIntoState(result.notificationJobs ?? [])",
   "mergeNotificationJobsIntoState(reservedJobs)",
   "mergeNotificationJobsIntoState(failedJobs)"

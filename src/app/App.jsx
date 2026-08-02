@@ -75,9 +75,8 @@ import {
 } from "../domains/notifications/notificationJobState.js";
 import { ParentResponseContextPanel } from "../domains/notifications/ParentResponseContextPanel.jsx";
 import { getParentResponseContexts } from "../domains/notifications/parentResponseContext.js";
-import { createNotificationJobsQueryString } from "../domains/notifications/notificationJobLoadQuery.js";
-import { createNotificationJobsReadyStatus } from "../domains/notifications/notificationJobLoadStatus.js";
-import { createNotificationJobReconcilePayload } from "../domains/notifications/notificationJobReconcilePayload.js";
+import { createNotificationJobsRefreshController } from "../domains/notifications/notificationJobsRefreshController.js";
+import { createNotificationJobsReconcileController } from "../domains/notifications/notificationJobsReconcileController.js";
 import {
   createNotificationJobReconcileSavedStates,
   mergeNotificationJobReconcileRecords
@@ -5327,6 +5326,8 @@ export function App() {
   const teacherOperatingMemoSaveRequestRef = useRef({});
   const studentIntakeSaveRequestRef = useRef({});
   const isApplyingRemoteAppStateRef = useRef(false);
+  const notificationJobsRefreshControllerRef = useRef(null);
+  const notificationJobsReconcileControllerRef = useRef(null);
   const attendanceOnlyMode = isAttendanceOnlyRoute();
   const specialLectureOnlyMode = isSpecialLectureRoute();
   const {
@@ -6422,54 +6423,12 @@ export function App() {
   }, [attendanceOnlyMode, generatedLessonPlan, isAppStateReady, session?.role]);
 
   async function refreshNotificationJobs({ date = "", lessonId = "", scope = "active", silent = false } = {}) {
-    if (!silent) {
-      setNotificationJobsStatus({ state: "loading", message: "알림 기록을 불러오는 중입니다." });
-    }
-    try {
-      let scheduledFrom = "";
-      let scheduledTo = "";
-      if (!lessonId && scope === "history" && date) {
-        const dayStart = new Date(`${date}T00:00:00+09:00`);
-        const nextDayStart = new Date(`${date}T00:00:00+09:00`);
-        nextDayStart.setUTCDate(nextDayStart.getUTCDate() + 1);
-        if (!Number.isNaN(dayStart.getTime()) && !Number.isNaN(nextDayStart.getTime())) {
-          scheduledFrom = dayStart.toISOString();
-          scheduledTo = nextDayStart.toISOString();
-        }
-      }
-      const queryString = createNotificationJobsQueryString({
-        lessonId,
-        scheduledFrom,
-        scheduledTo,
-        scope
-      });
-      const result = await getJsonWithTimeout(
-        `/api/notification-jobs?${queryString}`,
-        12000,
-        "알림 기록 조회가 12초를 넘었습니다. 발송 기능은 사용할 수 있고, 기록만 새로고침으로 다시 확인해 주세요."
-      );
-      if (result.ok && Array.isArray(result.notificationJobs)) {
-        if (scope === "active" && !lessonId) {
-          setNotificationJobs(result.notificationJobs);
-        } else {
-          mergeNotificationJobsIntoState(result.notificationJobs);
-        }
-        if (!silent) {
-          setNotificationJobsStatus(
-            createNotificationJobsReadyStatus({
-              count: result.notificationJobs.length,
-              lessonId,
-              scope
-            })
-          );
-        }
-      }
-    } catch (error) {
-      if (!silent) {
-        setNotificationJobsStatus({ state: "failed", message: error.message });
-      }
-      console.info("academy-os notification jobs skipped:", error.message);
-    }
+    return getNotificationJobsRefreshController().refresh({
+      date,
+      lessonId,
+      scope,
+      silent
+    });
   }
 
   function mergeNotificationJobsIntoState(nextJobs = []) {
@@ -6478,19 +6437,27 @@ export function App() {
     setNotificationJobs((current) => mergeNotificationJobLists(current, validJobs));
   }
 
-  async function handleReconcileSolapiNotificationResults({ lessonId = "", date = "", notificationJobIds = [], scheduledFrom = "", scheduledTo = "" } = {}) {
-    const result = await postJsonWithTimeout(
-      "/api/notification-jobs/reconcile-solapi",
-      createNotificationJobReconcilePayload({
-        date,
-        lessonId,
-        notificationJobIds,
-        scheduledFrom,
-        scheduledTo
-      }),
-      90000,
-      "Solapi 발송결과 조회가 90초를 넘었습니다. 예약 확인에서 다시 시도해 주세요."
-    );
+  function getNotificationJobsRefreshController() {
+    if (!notificationJobsRefreshControllerRef.current) {
+      notificationJobsRefreshControllerRef.current = createNotificationJobsRefreshController({
+        onError: (error) => {
+          console.info("academy-os notification jobs skipped:", error.message);
+        },
+        onJobs: ({ notificationJobs: nextJobs, replace }) => {
+          if (replace) {
+            setNotificationJobs(nextJobs);
+          } else {
+            mergeNotificationJobsIntoState(nextJobs);
+          }
+        },
+        onStatus: setNotificationJobsStatus,
+        request: getJsonWithTimeout
+      });
+    }
+    return notificationJobsRefreshControllerRef.current;
+  }
+
+  function applyNotificationJobsReconcileResult(result) {
     mergeNotificationJobsIntoState(result.notificationJobs ?? []);
     if (Array.isArray(result.records) && result.records.length) {
       const nextRecords = mergeNotificationJobReconcileRecords({
@@ -6506,7 +6473,26 @@ export function App() {
         setSaveStates((currentStates) => ({ ...currentStates, ...savedStates }));
       }
     }
-    return result;
+  }
+
+  function getNotificationJobsReconcileController() {
+    if (!notificationJobsReconcileControllerRef.current) {
+      notificationJobsReconcileControllerRef.current = createNotificationJobsReconcileController({
+        onResult: applyNotificationJobsReconcileResult,
+        request: postJsonWithTimeout
+      });
+    }
+    return notificationJobsReconcileControllerRef.current;
+  }
+
+  async function handleReconcileSolapiNotificationResults({ lessonId = "", date = "", notificationJobIds = [], scheduledFrom = "", scheduledTo = "" } = {}) {
+    return getNotificationJobsReconcileController().reconcile({
+      date,
+      lessonId,
+      notificationJobIds,
+      scheduledFrom,
+      scheduledTo
+    });
   }
 
   async function handleCancelNotificationJob(notificationJob, reason = "선생님 예약 취소") {
@@ -6543,11 +6529,13 @@ export function App() {
   useEffect(() => {
     if (session?.role !== "teacher" || !isAppStateReady || attendanceOnlyMode) return;
     refreshNotificationJobs({ scope: "active" });
+    return () => getNotificationJobsRefreshController().invalidate("active");
   }, [attendanceOnlyMode, isAppStateReady, session?.role]);
 
   useEffect(() => {
     if (session?.role !== "teacher" || !isAppStateReady || activeView !== "notifications") return;
     refreshNotificationJobs({ scope: "history" });
+    return () => getNotificationJobsRefreshController().invalidate("history");
   }, [activeView, isAppStateReady, session?.role]);
 
   useEffect(() => {
@@ -6558,6 +6546,7 @@ export function App() {
       !selectedLessonId
     ) return;
     refreshNotificationJobs({ lessonId: selectedLessonId, scope: "lesson" });
+    return () => getNotificationJobsRefreshController().invalidate("lesson");
   }, [isAppStateReady, isLessonJournalOpen, selectedLessonId, session?.role]);
 
   useEffect(() => {
@@ -6583,8 +6572,16 @@ export function App() {
     return () => {
       window.clearInterval(intervalId);
       window.removeEventListener("focus", refreshVisibleNotificationJobs);
+      getNotificationJobsRefreshController().invalidate(
+        isLessonJournalOpen && selectedLessonId ? "lesson" : "history"
+      );
     };
   }, [activeView, isAppStateReady, isLessonJournalOpen, selectedLessonId, session?.role]);
+
+  useEffect(() => () => {
+    notificationJobsRefreshControllerRef.current?.dispose();
+    notificationJobsReconcileControllerRef.current?.dispose();
+  }, []);
 
   useEffect(() => {
     recordsRef.current = records;

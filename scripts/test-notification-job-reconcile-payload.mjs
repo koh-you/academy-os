@@ -38,6 +38,10 @@ const helperSource = await readFile(
   new URL("../src/domains/notifications/notificationJobReconcilePayload.js", import.meta.url),
   "utf8"
 );
+const controllerSource = await readFile(
+  new URL("../src/domains/notifications/notificationJobsReconcileController.js", import.meta.url),
+  "utf8"
+);
 const functionStart = appSource.indexOf(
   'async function handleReconcileSolapiNotificationResults({ lessonId = "", date = "", notificationJobIds = [], scheduledFrom = "", scheduledTo = "" } = {})'
 );
@@ -47,25 +51,27 @@ const functionEnd = appSource.indexOf(
 );
 assert.ok(functionStart >= 0 && functionEnd > functionStart);
 const functionSource = appSource.slice(functionStart, functionEnd);
-for (const AppOwnedBoundary of [
-  "const result = await postJsonWithTimeout(",
+for (const controllerBoundary of [
   '"/api/notification-jobs/reconcile-solapi"',
-  "createNotificationJobReconcilePayload({",
+  "createNotificationJobReconcilePayload(options)",
+  "inFlightByPayload.get(signature)",
+  "90000",
+  "if (!disposed) onResult(result)",
+  "return result"
+]) {
+  assert.ok(
+    controllerSource.includes(controllerBoundary),
+    `reconcile controller missing: ${controllerBoundary}`
+  );
+}
+for (const appAdapterBoundary of [
+  "getNotificationJobsReconcileController().reconcile({",
   "date,",
   "lessonId,",
   "notificationJobIds,",
   "scheduledFrom,",
-  "scheduledTo",
-  "90000",
-  "mergeNotificationJobsIntoState(result.notificationJobs ?? [])",
-  "if (Array.isArray(result.records) && result.records.length)",
-  "return result"
-]) {
-  assert.ok(
-    functionSource.includes(AppOwnedBoundary),
-    `reconcile payload effect moved from App: ${AppOwnedBoundary}`
-  );
-}
+  "scheduledTo"
+]) assert.ok(functionSource.includes(appAdapterBoundary), `reconcile App adapter missing: ${appAdapterBoundary}`);
 assert.ok(
   !functionSource.includes(
     "{ date, lessonId, notificationJobIds, scheduledFrom, scheduledTo, limit: 500 }"

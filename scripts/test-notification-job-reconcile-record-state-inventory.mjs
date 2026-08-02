@@ -139,10 +139,10 @@ const helperSource = await readFile(
   "utf8"
 );
 const functionStart = appSource.indexOf(
-  'async function handleReconcileSolapiNotificationResults({ lessonId = "", date = "", notificationJobIds = [], scheduledFrom = "", scheduledTo = "" } = {})'
+  "function applyNotificationJobsReconcileResult(result)"
 );
 const functionEnd = appSource.indexOf(
-  "\n  async function handleCancelNotificationJob(",
+  "\n  function getNotificationJobsReconcileController(",
   functionStart
 );
 assert.ok(functionStart >= 0 && functionEnd > functionStart);

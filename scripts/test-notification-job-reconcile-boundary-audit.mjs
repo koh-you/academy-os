@@ -83,17 +83,17 @@ const recordStateSource = await readFile(
   ),
   "utf8"
 );
+const controllerSource = await readFile(
+  new URL("../src/domains/notifications/notificationJobsReconcileController.js", import.meta.url),
+  "utf8"
+);
 
-for (const modulePath of [
-  'from "../domains/notifications/notificationJobReconcilePayload.js"',
-  'from "../domains/notifications/notificationJobReconcileRecordState.js"'
-]) {
-  assert.equal(appSource.split(modulePath).length - 1, 1);
-}
+assert.equal(controllerSource.includes('from "./notificationJobReconcilePayload.js"'), true);
+assert.equal(appSource.includes('from "../domains/notifications/notificationJobReconcileRecordState.js"'), true);
 assert.equal(payloadSource.split("export function ").length - 1, 1);
 assert.equal(recordStateSource.split("export function ").length - 1, 2);
 assert.equal(
-  appSource.split("createNotificationJobReconcilePayload({").length - 1,
+  controllerSource.split("createNotificationJobReconcilePayload(").length - 1,
   1
 );
 assert.equal(
@@ -116,11 +116,27 @@ const functionEnd = appSource.indexOf(
 );
 assert.ok(functionStart >= 0 && functionEnd > functionStart);
 const functionSource = appSource.slice(functionStart, functionEnd);
-const orderedBoundaries = [
-  "const result = await postJsonWithTimeout(",
+const controllerBoundaries = [
   '"/api/notification-jobs/reconcile-solapi"',
-  "createNotificationJobReconcilePayload({",
+  "createNotificationJobReconcilePayload(options)",
+  "inFlightByPayload.get(signature)",
   "90000",
+  "if (!disposed) onResult(result)"
+];
+for (const boundary of controllerBoundaries) {
+  assert.ok(controllerSource.includes(boundary), `reconcile controller missing: ${boundary}`);
+}
+for (const adapterBoundary of [
+  "getNotificationJobsReconcileController().reconcile({",
+  "notificationJobIds,",
+  "scheduledFrom,",
+  "scheduledTo"
+]) assert.ok(functionSource.includes(adapterBoundary), `reconcile App adapter missing: ${adapterBoundary}`);
+const applyStart = appSource.indexOf("function applyNotificationJobsReconcileResult(result)");
+const applyEnd = appSource.indexOf("\n  function getNotificationJobsReconcileController()", applyStart);
+assert.ok(applyStart >= 0 && applyEnd > applyStart);
+const applySource = appSource.slice(applyStart, applyEnd);
+const orderedBoundaries = [
   "mergeNotificationJobsIntoState(result.notificationJobs ?? [])",
   "if (Array.isArray(result.records) && result.records.length)",
   "const nextRecords = mergeNotificationJobReconcileRecords({",
@@ -130,12 +146,11 @@ const orderedBoundaries = [
   "writeStorageValue(window.localStorage",
   "const savedStates = createNotificationJobReconcileSavedStates(result.records)",
   "if (Object.keys(savedStates).length)",
-  "setSaveStates((currentStates)",
-  "return result"
+  "setSaveStates((currentStates)"
 ];
 let previousIndex = -1;
 for (const boundary of orderedBoundaries) {
-  const boundaryIndex = functionSource.indexOf(boundary, previousIndex + 1);
+  const boundaryIndex = applySource.indexOf(boundary, previousIndex + 1);
   assert.ok(
     boundaryIndex > previousIndex,
     `reconcile aggregate boundary order changed: ${boundary}`
@@ -148,9 +163,8 @@ assert.equal(
   ).length - 1,
   3
 );
-assert.ok(!functionSource.includes("new URLSearchParams()"));
-assert.ok(!functionSource.includes("result.records.reduce("));
-assert.ok(!functionSource.includes("Object.fromEntries("));
+assert.ok(!applySource.includes("result.records.reduce("));
+assert.ok(!applySource.includes("Object.fromEntries("));
 
 for (const helperSource of [payloadSource, recordStateSource]) {
   for (const forbiddenHelperEffect of [

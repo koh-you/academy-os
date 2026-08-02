@@ -73,6 +73,10 @@ const helperSource = await readFile(
   new URL("../src/domains/notifications/notificationJobLoadStatus.js", import.meta.url),
   "utf8"
 );
+const controllerSource = await readFile(
+  new URL("../src/domains/notifications/notificationJobsRefreshController.js", import.meta.url),
+  "utf8"
+);
 const functionStart = appSource.indexOf(
   'async function refreshNotificationJobs({ date = "", lessonId = "", scope = "active", silent = false } = {})'
 );
@@ -82,30 +86,30 @@ const functionEnd = appSource.indexOf(
 );
 assert.ok(functionStart >= 0 && functionEnd > functionStart);
 const functionSource = appSource.slice(functionStart, functionEnd);
-for (const AppOwnedBoundary of [
-  "if (!silent)",
-  'setNotificationJobsStatus({ state: "loading", message: "알림 기록을 불러오는 중입니다." })',
-  "getJsonWithTimeout(",
-  "setNotificationJobs(result.notificationJobs)",
-  "mergeNotificationJobsIntoState(result.notificationJobs)",
-  "setNotificationJobsStatus(",
-  "createNotificationJobsReadyStatus({",
-  "count: result.notificationJobs.length,",
+for (const AppAdapterBoundary of [
+  "getNotificationJobsRefreshController().refresh({",
   "lessonId,",
-  "scope",
-  'setNotificationJobsStatus({ state: "failed", message: error.message })'
+  "scope,",
+  "silent"
 ]) {
   assert.ok(
-    functionSource.includes(AppOwnedBoundary),
-    `notification load effect moved from App: ${AppOwnedBoundary}`
+    functionSource.includes(AppAdapterBoundary),
+    `notification load adapter missing from App: ${AppAdapterBoundary}`
   );
 }
+for (const controllerBoundary of [
+  "if (!silent)",
+  'onStatus({ state: "loading", message: "알림 기록을 불러오는 중입니다." })',
+  "createNotificationJobsReadyStatus({",
+  "count: result.notificationJobs.length,",
+  'onStatus({ state: "failed", message: error.message })'
+]) assert.ok(controllerSource.includes(controllerBoundary), `notification status controller missing: ${controllerBoundary}`);
 for (const removedInlineRule of [
   "`현재 수업 알림 ${result.notificationJobs.length}건을 확인했습니다.`",
   "`최근 알림 기록 ${result.notificationJobs.length}건을 불러왔습니다.`",
   "`처리 중·확인 필요 알림 ${result.notificationJobs.length}건을 불러왔습니다.`"
 ]) {
-  assert.ok(!functionSource.includes(removedInlineRule));
+  assert.ok(!controllerSource.includes(removedInlineRule));
 }
 for (const forbiddenHelperEffect of [
   "useState",
