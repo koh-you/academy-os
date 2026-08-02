@@ -57,6 +57,7 @@
 
 - 보충 task draft, 일정, 취소, 알림 제어를 화면에서 분리한다.
 - 저장과 실제 알림 발송·예약·취소 행동을 결합하지 않는다.
+- 완료: 기존 보충 draft·일정·취소·알림 제어 controller 분리를 재대조하고, `TeacherViewOutlet`에서 `SupplementCenter`로 전달되던 8개 callback을 `supplementEffectAdapter` 하나로 묶었다. 순수 저장 3개는 `persistence`, 실제 알림 예약·취소 2개는 `provider`, 저장과 provider 행동을 함께 조정하는 3개는 `orchestration`으로 명시했다. adapter는 함수 참조만 조립하며 실제 API·Supabase 재조회·Solapi effect owner는 App에 유지한다. 전용 exact-key/identity fixture와 기존 보충 controller·browser cancellation 동선으로 3-3을 닫는다.
 
 ### 3-4 Student 경계
 

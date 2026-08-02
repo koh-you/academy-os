@@ -31,22 +31,31 @@ import { SupplementStudentModal } from "./SupplementStudentModal.jsx";
 
 export function SupplementCenter({
   dependencies,
+  effects = {},
   homeworks,
   lessons,
   notificationTemplates = {},
   notificationJobs = [],
   records,
   students,
-  tasks,
-  onCancelAbsenceMakeup,
-  onCancelAbsenceSource,
-  onCancelNotification,
-  onPassTask,
-  onReserveNotification,
-  onSaveTask,
-  onScheduleTask,
-  onUndoPassTask
+  tasks
 }) {
+  const {
+    persistence: {
+      onCancelAbsenceSource,
+      onSaveTask,
+      onUndoPassTask
+    } = {},
+    provider: {
+      onCancelNotification,
+      onReserveNotification
+    } = {},
+    orchestration: {
+      onCancelAbsenceMakeup,
+      onPassTask,
+      onScheduleTask
+    } = {}
+  } = effects;
   const {
     addDaysInKorea,
     followUpTypeLabel,

@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 App 3차 리팩터링 3-3 보충관리 effect 경계
+
+- 기존 보충관리에는 task draft, 내용 저장, 일정 적용, 결석보강 취소, 완료 처리, 알림 3종 제어 controller가 이미 도메인 파일로 분리되어 있었다. 남아 있던 App→`TeacherViewOutlet`→`SupplementCenter`의 flat side-effect callback 8개를 동결된 `supplementEffectAdapter` 한 개로 교체했다.
+- `handleSaveMakeupTask` 등 순수 저장 3개는 `persistence`, 실제 알림 예약·취소 2개는 `provider`, 수업·task 저장과 provider 취소·예약을 함께 조정하는 취소·완료·일정 행동 3개는 `orchestration`으로 분류했다. 실제 함수 identity와 실행 순서는 바꾸지 않았고 API·Supabase 재조회·Solapi owner는 App에 유지한다.
+- exact key·App action identity·동결 여부·금지된 API/Storage/React state 부재를 확인하는 전용 fixture를 supplement fast와 production 묶음에 연결했다. 교사 화면 adapter와 scenario도 새 경계를 직접 읽으며, 화면 내부의 기존 callback 이름과 controller 연결은 유지한다.
+- 검증: runtime lint, supplement fast 7/7, effect adapter·teacher boundary·notification orchestration·task actions·modal action 전용 fixture, scenario 816/816, `check:fast`, production 816/816 83.4초, build 359 modules, Worktree 격리 safe browser 9/9를 통과했다. 운영 데이터·실제 알림·AI 호출·운영 SQL은 사용하지 않았다.
+
 ## 2026-08-02 App 3차 리팩터링 3-2 수업 등록·수정 모달 경계
 
 - App 내부의 수업 등록·수정 `LessonModal` local controller 328줄을 `src/domains/lessons/LessonModal.jsx`로 물리 이동했다. 모달은 draft·validation·저장 진행 표시와 하위 controlled component 조립만 소유한다.
