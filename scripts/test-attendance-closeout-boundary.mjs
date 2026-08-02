@@ -49,7 +49,7 @@ const previewAdapter = section(
 for (const required of [
   "previewKioskAttendanceAction({",
   "attendanceLoadedDateRef.current",
-  "setAttendanceReloadKey((current) => current + 1)",
+  "onDateChanged: requestAttendanceReload",
   "request: previewAttendanceRequest"
 ]) {
   assert.ok(previewAdapter.includes(required), `preview adapter must preserve ${required}`);
@@ -101,7 +101,8 @@ for (const adapter of [previewAdapter, checkAdapter, manualSaveAdapter]) {
 }
 
 assert.ok(
-  appSource.includes("useAttendanceRecordSync({") &&
+  appSource.includes("useAttendanceDateRollover({") &&
+    appSource.includes("useAttendanceRecordSync({") &&
     appSource.includes("setStatus: setAttendanceSyncStatus") &&
     appSource.includes("syncDate: attendanceOnlyMode ? getKoreaDateString() : selectedDate"),
   "App must keep only the attendance sync hook adapter"
@@ -110,7 +111,9 @@ for (const movedLifecycle of [
   "async function syncAttendanceRecords()",
   "window.setInterval(syncAttendanceRecords",
   'window.addEventListener("focus", syncAttendanceRecords)',
-  'document.addEventListener("visibilitychange", syncAttendanceRecords)'
+  'document.addEventListener("visibilitychange", syncAttendanceRecords)',
+  "function refreshAttendanceDataIfDateChanged()",
+  "setAttendanceReloadKey((current) => current + 1)"
 ]) {
   assert.equal(appSource.includes(movedLifecycle), false, `App must not re-own ${movedLifecycle}`);
 }

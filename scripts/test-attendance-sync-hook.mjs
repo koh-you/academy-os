@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import {
+  attendanceDateRolloverIntervalMs,
   attendanceSyncIntervalMs,
+  startAttendanceDateRolloverLifecycle,
   startAttendanceSyncLifecycle
 } from "../src/domains/lessons/useAttendanceRecordSync.js";
 
@@ -120,6 +122,45 @@ windowTarget.dispatch("focus");
 documentTarget.dispatch("visibilitychange");
 assert.equal(runCount, 3, "cleanup must stop all triggers");
 
+const rolloverDocument = new FakeEventTarget();
+const rolloverWindow = new FakeWindowTarget();
+const loadedDateRef = { current: "2026-08-01" };
+let currentDate = "2026-08-01";
+let isReady = true;
+let reloadCount = 0;
+let cleanupRollover = startAttendanceDateRolloverLifecycle({
+  documentTarget: rolloverDocument,
+  getCurrentDate: () => currentDate,
+  isReady,
+  loadedDateRef,
+  onReloadRequested: () => { reloadCount += 1; },
+  windowTarget: rolloverWindow
+});
+const [[rolloverIntervalId, rolloverInterval]] = rolloverWindow.intervals.entries();
+assert.equal(rolloverInterval.delay, attendanceDateRolloverIntervalMs);
+rolloverWindow.dispatch("focus");
+assert.equal(reloadCount, 0, "ready data for the current date must not reload");
+currentDate = "2026-08-02";
+rolloverDocument.dispatch("visibilitychange");
+assert.equal(reloadCount, 1, "date rollover must request hydration reload");
+assert.equal(loadedDateRef.current, "2026-08-02");
+cleanupRollover();
+rolloverWindow.runInterval(rolloverIntervalId);
+assert.equal(reloadCount, 1, "cleanup must stop rollover triggers");
+
+isReady = false;
+cleanupRollover = startAttendanceDateRolloverLifecycle({
+  documentTarget: rolloverDocument,
+  getCurrentDate: () => currentDate,
+  isReady,
+  loadedDateRef,
+  onReloadRequested: () => { reloadCount += 1; },
+  windowTarget: rolloverWindow
+});
+rolloverWindow.dispatch("focus");
+assert.equal(reloadCount, 2, "failed same-date hydration must remain retryable");
+cleanupRollover();
+
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
 const hookSource = await readFile(
   new URL("../src/domains/lessons/useAttendanceRecordSync.js", import.meta.url),
@@ -127,7 +168,9 @@ const hookSource = await readFile(
 );
 for (const expected of [
   "useAttendanceRecordSync({",
+  "useAttendanceDateRollover({",
   "startAttendanceSyncLifecycle({",
+  "startAttendanceDateRolloverLifecycle({",
   "syncAttendanceRecordsAction({",
   "windowTarget.setInterval(",
   'windowTarget.addEventListener("focus"',
@@ -139,11 +182,14 @@ for (const expected of [
   assert.equal(hookSource.includes(expected), true, `missing sync hook boundary: ${expected}`);
 }
 assert.equal(appSource.includes("useAttendanceRecordSync({"), true);
+assert.equal(appSource.includes("useAttendanceDateRollover({"), true);
 for (const movedBoundary of [
   "async function syncAttendanceRecords()",
   "window.setInterval(syncAttendanceRecords, 7_000)",
   'window.addEventListener("focus", syncAttendanceRecords)',
-  'document.addEventListener("visibilitychange", syncAttendanceRecords)'
+  'document.addEventListener("visibilitychange", syncAttendanceRecords)',
+  "function refreshAttendanceDataIfDateChanged()",
+  "setAttendanceReloadKey((current) => current + 1)"
 ]) {
   assert.equal(appSource.includes(movedBoundary), false, `App must not keep ${movedBoundary}`);
 }
