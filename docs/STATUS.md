@@ -52,6 +52,7 @@
 - 3-2 세 번째 단위에서 수업 등록·수정 `LessonModal` local controller를 lesson 도메인 파일로 옮겼다. local draft·validation·저장 표시는 새 화면이 소유하고, 실제 bulk 저장·Supabase 재조회·휴강 preflight·상태 반영은 App callback owner를 유지한다. 달력·수업일지·수업 모달 경계를 모두 대조해 3-2를 닫는다.
 - 3-3에서 보충관리의 기존 draft·일정·취소·알림 제어 controller 분리를 재대조하고, App에서 화면으로 전달하던 8개 callback을 `supplementEffectAdapter`의 persistence 3개·provider 2개·orchestration 3개 표면으로 묶었다. 실제 저장·Supabase 재조회·Solapi 예약·취소 owner는 App에 유지하며 3-3을 닫는다.
 - 3-4 첫 단위에서 학생관리의 16개 변경 callback을 `studentEffectAdapter`의 draft 1개·persistence 7개·deletion 5개·lifecycle 2개·audit 1개 표면으로 묶었다. App의 학생 저장·재조회·퇴원·복구·영구 삭제 구현은 그대로 유지하며 다음 학생 프로필 물리 분리의 고정 계약으로 사용한다.
+- 3-4 두 번째 단위에서 `StudentManager` 후반의 학생 프로필 화면·오류 경계·전용 helper를 `StudentProfileModal.jsx`로 옮겼다. 기존 프로필 본문과 callback 10개의 의미는 그대로이며, 실제 저장·Supabase 재조회·오류 복구는 App owner를 유지한다. `StudentManager.jsx`는 2,168줄에서 994줄로 줄었다.
 
 ## 폴더 상태
 

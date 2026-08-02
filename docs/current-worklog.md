@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 App 3차 리팩터링 3-4 학생 프로필 화면 경계
+
+- `StudentManager.jsx` 후반에 있던 `StudentProfileModal`, 프로필 오류 경계, 기본정보·시간표·상담·성적·테스트·운영알림 local draft/표시 helper를 `src/domains/students/StudentProfileModal.jsx`로 물리 이동했다. 기존 프로필 component 본문은 기준 commit과 문자 단위로 동일하다.
+- `StudentManager`는 선택 학생과 조회 모델을 조립해 기존 callback 10개를 새 화면에 직접 주입한다. 새 화면에는 fetch·API client·Supabase·localStorage가 없으며, 학생 기본정보 저장·교사 메모·상담·성적·테스트·운영알림 저장/삭제 및 재조회·오류 복구 owner는 App에 그대로 남는다.
+- scenario source inventory는 목록 shell과 프로필 화면을 명시적으로 합성하되 import 선언은 중복 파싱하지 않도록 조정했다. 전용 physical-boundary fixture를 student fast와 production 학생 묶음에 연결했다.
+- 구조 결과: `StudentManager.jsx` 2,168줄·112,396 bytes에서 994줄·51,334 bytes, 새 `StudentProfileModal.jsx` 1,180줄·59,491 bytes로 분리됐다. lazy loading은 3-7까지 적용하지 않는다.
+
 ## 2026-08-02 App 3차 리팩터링 3-4 학생관리 effect 경계
 
 - App→`TeacherViewOutlet`→`StudentManager`에 평면 전달되던 16개 상태 변경 callback을 동결된 `studentEffectAdapter` 하나로 교체했다. 화면 local row edit 1개는 `draft`, 저장 7개는 `persistence`, 삭제 5개는 `deletion`, 퇴원·복구 2개는 `lifecycle`, 영구 삭제 전 Supabase 읽기 점검 1개는 `audit`으로 구분했다.
