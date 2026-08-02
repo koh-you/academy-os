@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-02 App 3차 리팩터링 3-7 중첩 수업 화면 lazy loading closeout
+
+- `App.jsx`의 `SupplementMakeupLessonDetail`과 `PreparationMemoModal`을 `src/domains/lessons/LessonNestedPanels.jsx`로 옮겨, 이미 lazy인 수업 화면 내부에서 필요할 때만 내려받는 22.40 kB shared chunk로 연결했다. runtime 주입을 제거한 두 함수 본문 22,026자·6,236자는 기준 main과 문자 단위로 동일하다.
+- 화면이 쓰는 pure helper 13개는 frozen `lessonNestedPanelRuntime`으로 App owner를 유지한다. 일정 저장·다음 정각/11시 알림 예약·보충 완료와 수업메모 저장은 기존 callback을 직접 호출하며 새 화면은 API·Storage·Supabase·Solapi transport를 소유하지 않는다.
+- production main JS는 `956.13 kB / gzip 237.03 kB`에서 `934.69 kB / gzip 231.48 kB`로 줄었다. 3-0 대비 main 43.1%, gzip 45.3% 감소, 12개 물리 lazy chunk·21개 lazy component 경로, App 전용 Babel 500 KB 경고 제거를 종료 근거로 고정한다. App은 11,000줄·476,602 bytes다.
+- 검증: 두 함수 exact 대조, runtime lint, teacher/nested 경계, 5도메인 fast 39/39, scenario·production 821/821, `check:fast`, build 380 modules·lazy physical chunk 12/12, Worktree 격리 safe browser 18/18. 이동으로 드러난 lesson inventory·준비 메모 모델/뷰의 App 위치 결합 3곳은 새 화면 source를 읽도록만 교정했다. 운영 데이터·실제 알림·유료 AI·SQL은 사용하지 않았다.
+- 학생 로그인 화면과 핵심 학생 modal의 추가 지연화는 초기 main 34.69 kB 절감을 위해 사용자 핵심 경로를 복잡하게 만드는 위험이 더 커 이번 범위에 포함하지 않는다.
+
 ## 2026-08-02 App 3차 리팩터링 3-7 시험 대비·설정 화면 lazy loading
 
 - `App.jsx`의 `ExamPrepCenter`, `SettingsCenter`, `NotificationSettingsSection`, `StatusDot`을 도메인 파일로 옮기고, 함께 있던 `EvaluationCenter`·`StudentSelect`는 교사 화면 파일로 분리했다. runtime 주입을 제거한 6개 함수 본문은 기준 main과 문자 단위로 동일하다.
