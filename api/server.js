@@ -122,6 +122,7 @@ import {
 } from "../src/domains/resources/resourceMaterialStorageOperation.js";
 import { saveReportSnapshotWithVerification } from "../src/domains/reports/reportSnapshotPersistence.js";
 import { getNextHourlyAlimtalkReservationAt } from "../src/domains/notifications/supplementJobBuilders.js";
+import { defaultNotificationTemplates } from "../src/domains/notifications/notificationTemplateCatalog.js";
 import { isSupplementScheduleForLessonComment } from "../src/domains/notifications/supplementSchedule.js";
 import { normalizeSpecialLectureTallySessionRequests } from "../src/domains/specialLectures/tallySessionRequests.js";
 import {
@@ -2350,8 +2351,8 @@ function getPreparationNoticeForNotification(record = {}, target = "parent") {
 }
 
 const defaultLessonHomeworkFollowupTemplates = {
-  lessonNextHomeworkFollowup: "- 다음 수업 때 #{숙제}를 함께 확인하겠습니다.",
-  lessonStayAfterHomeworkFollowup: "- 오늘 수업 후 #{숙제} 보충을 마무리합니다."
+  lessonNextHomeworkFollowup: defaultNotificationTemplates.lessonNextHomeworkFollowup,
+  lessonStayAfterHomeworkFollowup: defaultNotificationTemplates.lessonStayAfterHomeworkFollowup
 };
 
 function getLessonHomeworkFollowupTemplates(states = {}) {

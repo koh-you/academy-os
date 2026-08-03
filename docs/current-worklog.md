@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 P3-1 알림톡 template catalog 경계
+
+- App 내부의 알림 default 6개, Settings metadata, legacy 일정 문구 변환, normalize를 import 없는 `notificationTemplateCatalog.js`로 옮겼다. 문자열과 key 순서는 그대로다.
+- Settings runtime surface는 같은 함수 identity를 계속 주입한다. API server의 수업일지 숙제 follow-up 두 기본값도 중복 문자열 대신 catalog 값을 읽으며, configured `app_state.aiSettings.notificationTemplates` 우선순위는 유지한다.
+- 전용 fixture는 default 6개, legacy 변환 2개, 빈 교사 입력 보존, 알 수 없는 key 제외를 고정한다. persisted `makeup_tasks` 최종본·notification job·provider callback은 변경하지 않았고 실제 발송·예약·취소는 실행하지 않았다.
+- 검증: runtime lint, notification `8/8`, teacher runtime 경계, catalog·inventory, `check:fast` scenario `827/827`, build `408 modules`·main `944.35 kB`·lazy `12/12`, production `827/827`을 통과했다.
+
 ## 2026-08-03 P3-0 알림톡 문구 원천 inventory
 
 - 출결·수업일지·숙제보충·결석보강·재시험·공지·특강·일정 변경·당일 11시 reminder를 provider contract, OS composition, human final, transport로 나눠 대조했다.

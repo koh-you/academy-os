@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-03
 
+## 2026-08-03 P3-1 알림톡 template catalog 경계
+
+- 기존 default 6개·Settings metadata·legacy 변환·normalize를 pure notification catalog로 이동했다. App과 server의 숙제 follow-up 기본값이 같은 원천을 읽으며 저장 key·문구·빈 사용자 값 의미는 그대로다.
+- 전용 catalog fixture, notification `8/8`, teacher runtime 경계, scenario·production `827/827`, build `408 modules`·main `944.35 kB`·lazy `12/12`가 통과했다. persisted 교사 최종본과 provider callback에는 변경이 없다.
+- 다음 P3-2는 출결·수업일지 client preview와 server 실제 문구의 renderer 동일성 fixture다. 설정 확장과 실제 발송·예약은 아직 실행하지 않는다.
+
 ## 2026-08-03 P3-0 알림톡 문구 원천 inventory
 
 - 9개 제품 경로를 대조한 결과 Settings 관리 key는 6개, Solapi provider template은 4개다. 출결·수업 리포트 구조·공지 preset·특강 guide·재시험 fallback은 아직 code-owned다.

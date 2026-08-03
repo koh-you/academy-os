@@ -60,3 +60,8 @@
 4. P3-4 closeout: 9개 제품 경로의 seed→draft→persisted final→provider variables를 가상 fixture와 safe browser로 대조한다. 실제 발송·예약·취소는 사람 gate다.
 
 자동 기준선은 `npm run test:notification-template-inventory`다.
+
+## 진행 상태
+
+- P3-1 완료: 기존 6개 default, Settings metadata, legacy schedule template 변환, normalize를 `src/domains/notifications/notificationTemplateCatalog.js`로 옮겼다. App과 server의 숙제 follow-up 기본값이 같은 pure catalog를 읽으며 저장 key·문구·빈 사용자 값·legacy migration 결과는 그대로다.
+- 다음 P3-2는 출결과 수업일지의 client preview/server live renderer 동일성 fixture를 먼저 만든다. 설정 key 추가나 provider 행동은 이 기준선과 섞지 않는다.
