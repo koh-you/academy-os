@@ -37,6 +37,55 @@ test("safe preview opens the login screen without runtime errors", async ({ page
   expect(pageErrors).toEqual([]);
 });
 
+test("consecutive absence makeup and regular lessons use one physical attendance visit", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  const previewProbe = await request.post(`${safeApiBaseUrl}/api/attendance/preview`, {
+    data: { lateGraceMinutes: 5, phoneLast4: "0833", source: "kiosk" }
+  });
+  expect(previewProbe.status(), await previewProbe.text()).toBe(200);
+  await page.goto("/attendance");
+  const pinInput = page.getByLabel("학생 휴대폰 번호 뒤 4자리");
+  await pinInput.fill("0833");
+  const firstPreviewResponse = page.waitForResponse((response) => response.url().includes("/api/attendance/preview"));
+  await page.locator(".attendancePinForm").getByRole("button", { name: "확인" }).click();
+  const firstPreview = await firstPreviewResponse;
+  expect(firstPreview.status(), await firstPreview.text()).toBe(200);
+
+  const selectionDialog = page.getByRole("dialog", { name: "출결 확인" });
+  await expect(selectionDialog).toContainText("오늘 수업이 2개 이상입니다.");
+  await selectionDialog.getByRole("button", { name: /결석보강 가상수업/ }).click();
+  await expect(selectionDialog).toContainText("연속 수업으로 처리: 결석보강 가상수업 → 고1 정규 가상수업");
+  await expect(selectionDialog).toContainText("등원 알림은 지금 한 번, 하원 알림은 마지막 수업 뒤 한 번만 전송합니다.");
+  await selectionDialog.getByRole("button", { name: "확인" }).click();
+  await expect(pinInput).toBeEnabled();
+
+  let recordsResult = await (await request.get(`${safeApiBaseUrl}/api/lesson-records`)).json();
+  let visitRecords = recordsResult.records.filter((record) => record.studentId === "safe-consecutive-attendance-student");
+  expect(visitRecords).toHaveLength(2);
+  expect(visitRecords.find((record) => record.lessonId === "safe-consecutive-attendance-makeup")?.attendanceStatus).toBe("late");
+  expect(visitRecords.find((record) => record.lessonId === "safe-consecutive-attendance-regular")?.attendanceStatus).toBe("present");
+  expect(new Set(visitRecords.map((record) => record.checkInTime))).toEqual(new Set(["15:55"]));
+  expect(visitRecords.every((record) => !record.checkOutTime)).toBe(true);
+
+  let eventsResult = await (await request.get(`${safeApiBaseUrl}/api/safe-fixture/attendance-events`)).json();
+  expect(eventsResult.attendanceEvents.map((event) => event.eventType)).toEqual(["checkin"]);
+
+  await pinInput.fill("0833");
+  await page.locator(".attendancePinForm").getByRole("button", { name: "확인" }).click();
+  const checkoutDialog = page.getByRole("dialog", { name: "출결 확인" });
+  await expect(checkoutDialog).toContainText("하원");
+  await expect(checkoutDialog).toContainText("연속 수업으로 처리: 결석보강 가상수업 → 고1 정규 가상수업");
+  await checkoutDialog.getByRole("button", { name: "확인" }).click();
+
+  recordsResult = await (await request.get(`${safeApiBaseUrl}/api/lesson-records`)).json();
+  visitRecords = recordsResult.records.filter((record) => record.studentId === "safe-consecutive-attendance-student");
+  expect(visitRecords).toHaveLength(2);
+  expect(new Set(visitRecords.map((record) => record.checkOutTime))).toEqual(new Set(["19:05"]));
+  eventsResult = await (await request.get(`${safeApiBaseUrl}/api/safe-fixture/attendance-events`)).json();
+  expect(eventsResult.attendanceEvents.map((event) => event.eventType)).toEqual(["checkin", "checkout"]);
+  expect(pageErrors).toEqual([]);
+});
+
 test("teacher view lazy boundary shows loading feedback before the first lesson chunk opens", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await page.route("**/src/domains/lessons/TeacherLessonHubV2.jsx*", async (route) => {
