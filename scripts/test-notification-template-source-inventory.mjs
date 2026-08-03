@@ -10,7 +10,8 @@ const [
   noticeConfigSource,
   noticeBuilderSource,
   supplementJobBuilderSource,
-  specialLectureSource
+  specialLectureSource,
+  templateCatalogSource
 ] = await Promise.all([
   read("src/app/App.jsx"),
   read("api/routes/notifications.js"),
@@ -19,7 +20,8 @@ const [
   read("src/domains/notifications/notificationCenterConfig.js"),
   read("src/domains/notifications/notificationNoticeBuilders.js"),
   read("src/domains/notifications/supplementJobBuilders.js"),
-  read("src/domains/specialLectures/specialLectureGuideUtils.js")
+  read("src/domains/specialLectures/specialLectureGuideUtils.js"),
+  read("src/domains/notifications/notificationTemplateCatalog.js")
 ]);
 
 const managedTemplateKeys = [
@@ -31,11 +33,14 @@ const managedTemplateKeys = [
   "supplementScheduleChangeNotice"
 ];
 for (const key of managedTemplateKeys) {
-  assert.ok(appSource.includes(`${key}:`), `missing managed notification template key: ${key}`);
-  assert.ok(appSource.includes(`key: "${key}"`), `missing settings metadata for notification template key: ${key}`);
+  assert.ok(templateCatalogSource.includes(`${key}:`), `missing managed notification template key: ${key}`);
+  assert.ok(templateCatalogSource.includes(`key: "${key}"`), `missing settings metadata for notification template key: ${key}`);
 }
-assert.ok(appSource.includes("function normalizeNotificationTemplates(templates = {})"));
-assert.ok(appSource.includes("source: \"Supabase app_state.aiSettings.notificationTemplates\""));
+assert.ok(templateCatalogSource.includes("export function normalizeNotificationTemplates(templates = {})"));
+assert.ok(templateCatalogSource.includes("source: \"Supabase app_state.aiSettings.notificationTemplates\""));
+assert.ok(appSource.includes('from "../domains/notifications/notificationTemplateCatalog.js"'));
+assert.equal(appSource.includes("const defaultNotificationTemplates ="), false);
+assert.equal(appSource.includes("function normalizeNotificationTemplates(templates = {})"), false);
 assert.ok(settingsSource.includes("notificationTemplateRows.map((row)"));
 assert.ok(settingsSource.includes("settings.notificationTemplates[row.key]"));
 assert.ok(settingsSource.includes("updateNotificationTemplate(row.key, event.target.value)"));
@@ -62,6 +67,7 @@ for (const key of managedTemplateKeys.slice(0, 2)) {
 }
 assert.ok(serverSource.includes("states?.aiSettings?.notificationTemplates"));
 assert.ok(serverSource.includes("formatSupplementScheduleLineForNotification"));
+assert.ok(serverSource.includes('from "../src/domains/notifications/notificationTemplateCatalog.js"'));
 
 for (const presetId of ["material", "makeup", "notice", "specialLecture"]) {
   assert.ok(noticeConfigSource.includes(`id: "${presetId}"`), `missing code-owned notice preset: ${presetId}`);
@@ -92,4 +98,4 @@ const productPaths = [
 ];
 assert.equal(productPaths.length, 9);
 
-console.log("notification template source inventory passed · product paths 9 · settings keys 6 · provider templates 4 · next bounded units 4");
+console.log("notification template source inventory passed · product paths 9 · settings keys 6 · provider templates 4");
