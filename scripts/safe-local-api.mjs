@@ -1,4 +1,8 @@
 import http from "node:http";
+import {
+  areLessonJournalHistoryHomeworksEqual,
+  areLessonJournalHistoryLessonsEqual
+} from "../src/domains/lessons/lessonJournalHistoryPersistence.js";
 
 const host = "127.0.0.1";
 const port = Number(process.env.ACADEMY_SAFE_API_PORT || 8787);
@@ -706,6 +710,82 @@ function handleMutation(pathname, payload) {
     };
     state.schoolEvents = upsertById(state.schoolEvents, savedSchoolEvent, ["eventId"]);
     return { ok: true, schoolEvent: savedSchoolEvent, verified: true };
+  }
+  if (pathname === "/api/lesson-journal/history-action") {
+    const { action, auditId, homeworkChanges = [], lessonChange = {} } = payload;
+    const lessonId = lessonChange.after?.lessonId || lessonChange.before?.lessonId || "";
+    const currentLesson = state.lessons.find((lesson) => lesson.lessonId === lessonId) ?? null;
+    const conflict = (error) => ({ code: "LESSON_JOURNAL_HISTORY_CONFLICT", error, ok: false, statusCode: 409 });
+    if (action === "undo_copy") {
+      const plannedHomeworkIds = new Set(homeworkChanges.map((change) => change.before?.homeworkId));
+      const unexpectedHomeworks = state.homeworks.filter((homework) => (
+        homework.lessonId === lessonId && !plannedHomeworkIds.has(homework.homeworkId)
+      ));
+      const records = state.records.filter((record) => record.lessonId === lessonId);
+      const jobs = state.notificationJobs.filter((job) => job.lessonId === lessonId);
+      if (unexpectedHomeworks.length || records.length || jobs.length) {
+        return conflict("복사된 수업에 새 수업기록·숙제·알림 작업이 연결되어 되돌리기를 중단했습니다.");
+      }
+      for (const { before } of homeworkChanges) {
+        const current = state.homeworks.find((homework) => homework.homeworkId === before.homeworkId) ?? null;
+        if (current && (current.updatedAt !== before.updatedAt || !areLessonJournalHistoryHomeworksEqual(before, current))) {
+          return conflict("숙제 원본이 다른 화면에서 먼저 변경되었습니다.");
+        }
+      }
+      if (currentLesson && (
+        currentLesson.updatedAt !== lessonChange.before?.updatedAt ||
+        !areLessonJournalHistoryLessonsEqual(lessonChange.before, currentLesson)
+      )) return conflict("수업 원본이 다른 화면에서 먼저 변경되었습니다.");
+      state.homeworks = state.homeworks.filter((homework) => !plannedHomeworkIds.has(homework.homeworkId));
+      state.lessons = state.lessons.filter((lesson) => lesson.lessonId !== lessonId);
+      return { action, auditId, homeworks: [], lesson: null, ok: true, verified: true };
+    }
+    let savedLesson = currentLesson;
+    if (lessonChange.after && currentLesson && areLessonJournalHistoryLessonsEqual(lessonChange.after, currentLesson)) {
+      savedLesson = currentLesson;
+    } else if (action === "copy" && !currentLesson) {
+      savedLesson = { ...lessonChange.after, updatedAt: new Date().toISOString() };
+      state.lessons = upsertById(state.lessons, savedLesson, ["lessonId"]);
+    } else if (
+      lessonChange.before &&
+      currentLesson?.updatedAt === lessonChange.before.updatedAt &&
+      areLessonJournalHistoryLessonsEqual(lessonChange.before, currentLesson)
+    ) {
+      savedLesson = {
+        ...lessonChange.after,
+        updatedAt: new Date(Math.max(Date.now(), new Date(currentLesson.updatedAt).getTime() + 1)).toISOString()
+      };
+      state.lessons = upsertById(state.lessons, savedLesson, ["lessonId"]);
+    } else {
+      return conflict("수업 원본이 다른 화면에서 먼저 변경되었습니다.");
+    }
+    const savedHomeworks = [];
+    for (const { after } of homeworkChanges) {
+      const current = state.homeworks.find((homework) => homework.homeworkId === after.homeworkId) ?? null;
+      if (current && areLessonJournalHistoryHomeworksEqual(after, current)) {
+        savedHomeworks.push(current);
+        continue;
+      }
+      if (current || action !== "copy") return conflict("숙제 원본이 다른 화면에서 먼저 변경되었습니다.");
+      const saved = { ...after, updatedAt: new Date().toISOString() };
+      state.homeworks = upsertById(state.homeworks, saved, ["homeworkId"]);
+      savedHomeworks.push(saved);
+    }
+    const relatedHomeworks = action === "undo_cancel"
+      ? state.homeworks.filter((homework) => homework.lessonId === lessonId)
+      : undefined;
+    const relatedRecords = action === "undo_cancel"
+      ? state.records.filter((record) => record.lessonId === lessonId)
+      : undefined;
+    return {
+      action,
+      auditId,
+      homeworks: savedHomeworks,
+      lesson: savedLesson,
+      ok: true,
+      ...(relatedHomeworks ? { relatedHomeworks, relatedRecords } : {}),
+      verified: true
+    };
   }
   if (pathname === "/api/lessons") {
     const lesson = payload.lesson || {};

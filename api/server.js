@@ -46,6 +46,7 @@ import {
   seedCoreData,
   saveClassRosterPlan,
   saveDerivedSchoolCalendarPlan,
+  saveLessonJournalHistoryPlan,
   syncSpecialLectureLessonStudentSchedule,
   upsertAppState,
   upsertAcademyReminder,
@@ -7024,6 +7025,27 @@ const server = http.createServer(async (request, response) => {
         auditId: payload.auditId,
         examPrepChanges: payload.examPrepChanges ?? [],
         lessonChanges: payload.lessonChanges ?? []
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.audit ? { audit: error.audit } : {})
+      });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/lesson-journal/history-action") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await saveLessonJournalHistoryPlan({
+        action: payload.action,
+        auditId: payload.auditId,
+        homeworkChanges: payload.homeworkChanges ?? [],
+        lessonChange: payload.lessonChange ?? {}
       });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {

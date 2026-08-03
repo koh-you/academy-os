@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-03
 
+## 2026-08-03 수업 복사·취소·되돌리기 저장 신뢰성
+
+- 수업 복사·취소·복구·복사 되돌리기는 `lessons`와 복사 숙제를 하나의 versioned action으로 저장한다. CAS/insert-only·Supabase 재조회·중간 실패 역순 보상 뒤에만 UI/undo를 갱신한다.
+- 결과 불명 복사는 최초 lesson ID·숙제 계획으로 재시도한다. 복사 후 record·예상 밖 homework·notification job이 연결되면 자동 undo를 막고, 취소 복구는 현재 서버 record·homework를 다시 읽는다. provider side effect는 없다.
+- 검증: lesson `13/13`, runtime lint, `check:fast`, production `823/823`, build `392 modules`·main `944.90 kB`·lazy `12/12`, safe browser `30/30`.
+- 다음 단위는 수업일지 record·homework 다중 행 저장의 행별 CAS·부분성공 복구다.
+
 ## 2026-08-03 학사일정 파생 시험행·직전수업 저장 신뢰성
 
 - 시험관리 파생 일정은 `exam_prep_rows`와 연결 `preExam lessons`를 한 versioned plan으로 저장한다. CAS·insert-only·Supabase 재조회·동일 요청 재시도·중간 실패 역순 보상 뒤에만 UI를 갱신한다.

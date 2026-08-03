@@ -20,6 +20,7 @@ export function dispatchLessonCalendarKeyboardAction(action, {
 }
 
 export function useLessonCalendarKeyboardNavigation({
+  isHistoryActionBusy = false,
   isLessonJournalOpen,
   onCopyLesson,
   onDeleteSelectedLesson,
@@ -37,6 +38,7 @@ export function useLessonCalendarKeyboardNavigation({
         selectedLessonId
       });
       if (!action) return;
+      if (isHistoryActionBusy && ["copy", "delete", "paste", "undo"].includes(action.type)) return;
       event.preventDefault();
       dispatchLessonCalendarKeyboardAction(action, {
         onCopyLesson,
@@ -51,6 +53,7 @@ export function useLessonCalendarKeyboardNavigation({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [
+    isHistoryActionBusy,
     isLessonJournalOpen,
     onCopyLesson,
     onDeleteSelectedLesson,

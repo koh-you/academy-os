@@ -2,11 +2,12 @@ import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [rawAppSource, teacherLessonHubSource, lessonJournalDetailSource, lessonModalSource] = await Promise.all([
+const [rawAppSource, teacherLessonHubSource, lessonJournalDetailSource, lessonModalSource, historyActionSource] = await Promise.all([
   readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/lessons/TeacherLessonHubV2.jsx", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/lessons/LessonJournalDetail.jsx", import.meta.url), "utf8"),
-  readFile(new URL("../src/domains/lessons/LessonModal.jsx", import.meta.url), "utf8")
+  readFile(new URL("../src/domains/lessons/LessonModal.jsx", import.meta.url), "utf8"),
+  readFile(new URL("../src/domains/lessons/lessonJournalHistoryAction.js", import.meta.url), "utf8")
 ]);
 const appSource = await readAppWithLessonJournalSource(import.meta.url);
 const saveControllerSource = await readFile(
@@ -87,12 +88,14 @@ const riskyCalendarActions = section(
 );
 for (const required of [
   "function handlePasteLessonToSelectedDate()",
-  'postJson("/api/homeworks/bulk"',
-  'postJson("/api/lessons"',
+  "runLessonJournalHistoryAction({",
+  'action: "copy"',
+  'action: "undo_copy"',
   "function handleUndoLessonAction()",
-  'postJson("/api/lesson-records"',
   "function confirmDeleteLesson(lessonId)",
-  "lessonCancelRequestsRef.current.set"
+  'action: "cancel"',
+  'action: "undo_cancel"',
+  "lessonHistoryActionRequestRef.current"
 ]) {
   assert.ok(
     riskyCalendarActions.includes(required),
@@ -138,6 +141,17 @@ for (const reservedAppBoundary of [
     rawAppSource.includes(reservedAppBoundary),
     `high-risk transport boundary must remain in App: ${reservedAppBoundary}`
   );
+}
+for (const forbidden of ['postJson("/api/homeworks/bulk"', 'postJson("/api/lesson-records"', 'postJson("/api/lessons"']) {
+  assert.equal(riskyCalendarActions.includes(forbidden), false, `calendar history action must not split persistence: ${forbidden}`);
+}
+for (const required of [
+  '"/api/lesson-journal/history-action"',
+  "createLessonJournalHistoryPlan({",
+  'result?.source !== "supabase"',
+  "result?.verified !== true"
+]) {
+  assert.ok(historyActionSource.includes(required), `history action must preserve ${required}`);
 }
 assert.equal(rawAppSource.includes("function LessonJournalDetail("), false);
 assert.ok(teacherLessonHubSource.includes('from "./LessonJournalDetail.jsx"'));

@@ -80,6 +80,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
         testSessions: models.testSessions,
         homeworks: models.homeworks,
         clipboardCount: models.lessonClipboard ? 1 : 0,
+        lessonHistoryActionState: models.lessonHistoryActionState,
         undoCount: models.lessonUndoStack.length,
         onAddLesson: actions.handleOpenAddLesson,
         onOpenMonthlyRegularLessons: actions.handleOpenMonthlyRegularLessonModal,
