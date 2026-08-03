@@ -1,7 +1,7 @@
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { ListCard, ListCardActions, ListCardBody } from "../../shared/components/ListCard.jsx";
 
-export function PortalMaterialsTab({ emptyMessage, materials = [], onOpenMaterial }) {
+export function PortalMaterialsTab({ emptyMessage, materials = [], openMaterial }) {
   return (
     <div className="portalMaterialsList">
       {materials.length === 0 ? <EmptyState className="emptyPortalPanel" title={emptyMessage} /> : null}
@@ -14,7 +14,7 @@ export function PortalMaterialsTab({ emptyMessage, materials = [], onOpenMateria
           </ListCardBody>
           {material.fileUrl ? (
             <ListCardActions>
-              <button className="softButton" onClick={() => onOpenMaterial?.(material)} type="button">열기</button>
+              <button className="softButton" onClick={() => openMaterial?.(material)} type="button">열기</button>
             </ListCardActions>
           ) : null}
         </ListCard>

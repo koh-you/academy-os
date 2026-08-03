@@ -541,7 +541,7 @@ export function ResourceLibraryCenter({
   resourceMaterialSaveState = { message: "", state: "idle" },
   onAddMaterial,
   onDeleteMaterial,
-  onOpenMaterial,
+  openMaterial,
   students = [],
   templates = []
 }) {
@@ -800,7 +800,7 @@ export function ResourceLibraryCenter({
                   <button
                     className="softButton mini"
                     disabled={resourceMaterialBusy}
-                    onClick={() => onOpenMaterial(material)}
+                    onClick={() => openMaterial(material)}
                     type="button"
                   >
                     열기

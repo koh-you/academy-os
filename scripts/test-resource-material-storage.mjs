@@ -206,13 +206,13 @@ for (const binding of [
   "saveResourceMaterialAction",
   "deleteResourceMaterialAction",
   "file,",
-  "handleOpenResourceMaterial",
+  "openResourceMaterial",
   "openResourceMaterialWindow",
   "session?.sessionToken"
 ]) assert.ok(appSource.includes(binding), `missing App Storage binding: ${binding}`);
 assert.ok(screenSource.includes("selectedFile"));
 assert.ok(screenSource.includes("private Storage"));
-assert.ok(portalSource.includes("onOpenMaterial?.(material)"));
+assert.ok(portalSource.includes("openMaterial?.(material)"));
 assert.equal(portalSource.includes("href={material.fileUrl}"), false);
 
 console.log("resource material private Storage upload, access, delete rollback, and UI fixtures passed");

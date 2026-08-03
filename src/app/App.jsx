@@ -4677,7 +4677,7 @@ export function App() {
         onStudentCheckHomework={handleStudentCheckHomework}
         onStudentDeleteQuestion={handleStudentDeleteQuestion}
         onOpenExamPostFile={(file) => handleOpenExamPostFile(session.sessionToken, file)}
-        onOpenResourceMaterial={handleOpenResourceMaterial}
+        openMaterial={openResourceMaterial}
         onSubmitExamPostSubmission={handleSubmitExamPostSubmission}
         onStudentUpdateQuestion={handleStudentUpdateQuestion}
       />
@@ -4701,7 +4701,7 @@ export function App() {
         sessionStudentId={session.studentId}
         students={students}
         onLogout={handleLogout}
-        onOpenResourceMaterial={handleOpenResourceMaterial}
+        openMaterial={openResourceMaterial}
       />
     );
   }
@@ -7200,7 +7200,7 @@ export function App() {
       handleOpenExamPrepView,
       handleOpenLessonJournal,
       handleOpenMonthlyRegularLessonModal,
-      handleOpenResourceMaterial,
+      openResourceMaterial,
       handleOpenReport,
       handlePassSupplementTask,
       handlePasteLessonToSelectedDate,
@@ -7303,7 +7303,7 @@ export function App() {
             onStudentAddQuestion={handleStudentAddQuestion}
             onStudentCheckHomework={handleStudentCheckHomework}
             onStudentDeleteQuestion={handleStudentDeleteQuestion}
-            onOpenResourceMaterial={handleOpenResourceMaterial}
+            openMaterial={openResourceMaterial}
             onSubmitExamPostSubmission={handleSubmitExamPostSubmission}
             onStudentUpdateQuestion={handleStudentUpdateQuestion}
           />
@@ -8119,7 +8119,7 @@ export function App() {
         sessionToken: session?.sessionToken
       });
     } catch (error) {
-      setResourceMaterialSaveState({ message: error.message || "자료 등록에 실패했습니다.", state: "failed" });
+      setResourceMaterialSaveState({ message: error.message || "자료 등록 실패", state: "failed" });
       return { error, ok: false };
     } finally {
       resourceMaterialMutationRef.current = false;
@@ -8147,7 +8147,7 @@ export function App() {
     } catch (error) {
       setResourceMaterialDeleteStates((current) => ({
         ...current,
-        [materialId]: { message: error.message || "자료 삭제에 실패했습니다.", state: "failed" }
+        [materialId]: { message: error.message || "자료 삭제 실패", state: "failed" }
       }));
       return { error, ok: false };
     } finally {
@@ -8156,7 +8156,7 @@ export function App() {
     }
   }
 
-  function handleOpenResourceMaterial(material) {
+  function openResourceMaterial(material) {
     const popup = window.open();
     import("../domains/resources/resourceMaterialFileApi.js").then((api) =>
       api.openResourceMaterialWindow({ materialId: material.materialId, popup, sessionToken: session.sessionToken })
@@ -8961,7 +8961,7 @@ function StudentPortalV2({
   onStudentCheckHomework,
   onStudentDeleteQuestion,
   onOpenExamPostFile,
-  onOpenResourceMaterial,
+  openMaterial,
   onSubmitExamPostSubmission,
   onStudentUpdateQuestion,
 }) {
@@ -9043,7 +9043,7 @@ function StudentPortalV2({
       onChangeActiveTab={setActiveTab}
       onChangeSelectedStudentId={setSelectedStudentId}
       onLogout={onLogout}
-      onOpenMaterial={onOpenResourceMaterial}
+      openMaterial={openMaterial}
       previewMode={previewMode}
       reports={studentReports}
       selectedStudent={selectedStudent}
