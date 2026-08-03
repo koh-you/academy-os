@@ -280,7 +280,6 @@ import {
   createLessonJournalRecordFieldPatch
 } from "../domains/lessons/lessonJournalRecordDraft.js";
 import { createLessonJournalDraftSaveRequest } from "../domains/lessons/lessonJournalDraftSaveRequest.js";
-import { saveLessonJournalHomeworksWithVerification } from "../domains/lessons/lessonJournalHomeworkBulkApi.js";
 import {
   createLessonJournalHomeworkDraft,
   createLessonJournalHomeworkDraftKey,
@@ -302,7 +301,6 @@ import {
 } from "../domains/lessons/lessonJournalCommentStatusModel.js";
 import { saveLessonJournalMakeupTasksWithVerification } from "../domains/lessons/lessonJournalMakeupTaskBulkApi.js";
 import { createLessonJournalMakeupTaskRequests } from "../domains/lessons/lessonJournalMakeupTaskRequest.js";
-import { saveLessonJournalRecordsWithVerification } from "../domains/lessons/lessonJournalRecordBulkApi.js";
 import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJournalSaveViewModel.js";
 import { createLessonJournalReservationAuditModel } from "../domains/lessons/lessonJournalReservationAuditModel.js";
 import { createLessonJournalReservationAuditResult } from "../domains/lessons/lessonJournalReservationAuditResult.js";
@@ -6795,12 +6793,18 @@ export function App() {
     }
 
     return executeLessonJournalDraftPersistence({
-      hasRecords: recordsToSave.length > 0,
-      persistHomeworks: async () => {
-        const verifiedHomeworks = await saveLessonJournalHomeworksWithVerification({
-          homeworks: persistencePlan.changedHomeworks,
-          request: postJson
+      persistJournalRows: async () => {
+        const { saveLessonJournalRowsAction } = await import(
+          "../domains/lessons/lessonJournalRowsSaveAction.js"
+        );
+        const result = await saveLessonJournalRowsAction({
+          changedHomeworks: persistencePlan.changedHomeworks,
+          currentHomeworks: homeworksRef.current,
+          currentRecords: recordsRef.current,
+          recordsToSave,
+          request: postJsonWithTimeout
         });
+        const verifiedHomeworks = result.homeworks ?? [];
         if (verifiedHomeworks.length) {
           nextHomeworks = mergeVerifiedLessonJournalHomeworks({
             plannedHomeworks: nextHomeworks,
@@ -6809,7 +6813,23 @@ export function App() {
           homeworksRef.current = nextHomeworks;
           setHomeworks(nextHomeworks);
         }
-        return verifiedHomeworks.length;
+        const verifiedRecords = result.records ?? [];
+        if (verifiedRecords.length) {
+          const nextRecords = mergeVerifiedLessonJournalRecords({
+            currentRecords: recordsRef.current,
+            verifiedRecords,
+            upsertRecord: upsertLessonStudentRecord
+          });
+          recordsRef.current = nextRecords;
+          setRecords(nextRecords);
+          writeStorageValue(window.localStorage, storageKeys.records, JSON.stringify(nextRecords));
+          const savedStates = createLessonJournalRecordSaveStates(recordsToSave, "saved");
+          setSaveStates((currentStates) => ({ ...currentStates, ...savedStates }));
+        }
+        return {
+          homeworkCount: verifiedHomeworks.length,
+          recordCount: verifiedRecords.length
+        };
       },
       persistMakeupTasks: async () => {
         const requestedTasks = createLessonJournalMakeupTaskRequests({
@@ -6832,28 +6852,10 @@ export function App() {
         }
         return verifiedTasks.length;
       },
-      persistRecords: async () => {
-        const verifiedRecords = await saveLessonJournalRecordsWithVerification({
-          records: recordsToSave,
-          request: postJson,
-          matchesRecord: hasMatchingVerifiedLessonRecordFields
-        });
-        const nextRecords = mergeVerifiedLessonJournalRecords({
-          currentRecords: recordsRef.current,
-          verifiedRecords,
-          upsertRecord: upsertLessonStudentRecord
-        });
-        recordsRef.current = nextRecords;
-        setRecords(nextRecords);
-        writeStorageValue(window.localStorage, storageKeys.records, JSON.stringify(nextRecords));
-        const savedStates = createLessonJournalRecordSaveStates(recordsToSave, "saved");
-        setSaveStates((currentStates) => ({ ...currentStates, ...savedStates }));
-        return verifiedRecords.length;
-      },
-      onFailure: (error) => {
+      onFailure: (error, { journalRowsCompleted } = {}) => {
         console.error(error);
         const failedStates = createLessonJournalRecordSaveStates(recordsToSave, "failed");
-        if (recordsToSave.length) {
+        if (recordsToSave.length && !journalRowsCompleted) {
           setSaveStates((currentStates) => ({ ...currentStates, ...failedStates }));
         }
       }

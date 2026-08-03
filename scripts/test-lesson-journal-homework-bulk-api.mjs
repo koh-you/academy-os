@@ -146,14 +146,19 @@ const handlerEnd = appSource.indexOf("async function handleSaveRecord(", handler
 const handlerSource = appSource.slice(handlerStart, handlerEnd);
 
 for (const appOwnedBinding of [
-  "saveLessonJournalHomeworksWithVerification({",
-  "homeworks: persistencePlan.changedHomeworks",
-  "request: postJson",
+  "saveLessonJournalRowsAction({",
+  "changedHomeworks: persistencePlan.changedHomeworks",
+  "currentHomeworks: homeworksRef.current",
+  "request: postJsonWithTimeout",
   "homeworksRef.current = nextHomeworks",
   "setHomeworks(nextHomeworks)"
 ]) {
   assert.ok(handlerSource.includes(appOwnedBinding), `missing App homework binding: ${appOwnedBinding}`);
 }
+assert.ok(
+  !handlerSource.includes("saveLessonJournalHomeworksWithVerification({"),
+  "draft saving must not use the legacy blind homework bulk endpoint"
+);
 assert.ok(
   !appSource.includes("function getLessonJournalHomeworkSaveFingerprint("),
   "App must not retain the extracted homework fingerprint"

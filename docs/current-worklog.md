@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 수업일지 기록·숙제 다중 행 저장 gate
+
+- 수업일지 변경 저장에서 따로 실행되던 숙제 bulk와 수업기록 bulk를 `/api/lesson-journal/rows/save`의 한 versioned plan으로 묶었다. 화면의 현재 Supabase 행을 `before` 버전으로 캡처하고 기존 행은 `updated_at` CAS, 신규 행은 insert-only로 저장하며, 모든 행을 재조회해 내용과 새 버전을 확인한 뒤에만 App ref·화면·로컬 기록 cache를 갱신한다.
+- 같은 저장의 응답만 유실된 재시도는 원하는 값이 이미 같으면 mutation 없이 성공한다. 중간 충돌·검증 실패는 이미 반영한 기록과 숙제를 역순으로 원래 값·timestamp까지 보상한다. 보상 전에 다른 화면이 더 최신 행을 썼으면 그 행을 덮지 않고 `LESSON_JOURNAL_ROWS_PARTIAL_FAILURE`로 남긴다.
+- 저장 중 후속 입력과 409 충돌에서는 현재 draft를 유지한다. 기록·숙제 저장이 끝난 뒤 별도 등원보충 저장만 실패한 경우 이미 검증된 수업기록 save state를 실패로 되돌리지 않는다. 등원보충 요청 ID의 결과 불명 재시도는 다음 독립 단위에서 다룬다.
+- 검증: 전용 pure/action/Supabase REST·rollback fixture, lesson `14/14`, runtime lint, `check:fast`, production `823/823`, build `392 modules`·main `944.10 kB`·lazy `12/12`, 격리 safe browser `31/31`. 운영 데이터·실제 알림·SQL·유료 호출은 사용하지 않았다.
+
 ## 2026-08-03 수업 복사·취소·되돌리기 저장 gate
 
 - 달력의 복사·취소·복구·복사 되돌리기를 각각 독립 fire-and-forget 요청과 낙관적 UI 변경으로 처리하던 흐름을 하나의 `/api/lesson-journal/history-action` plan으로 바꿨다. 서버의 CAS/insert-only·행별 Supabase 재조회가 모두 확인된 뒤에만 달력·숙제·undo stack을 갱신한다.

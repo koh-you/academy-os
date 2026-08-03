@@ -47,6 +47,7 @@ import {
   saveClassRosterPlan,
   saveDerivedSchoolCalendarPlan,
   saveLessonJournalHistoryPlan,
+  saveLessonJournalRowsPlan,
   syncSpecialLectureLessonStudentSchedule,
   upsertAppState,
   upsertAcademyReminder,
@@ -7046,6 +7047,26 @@ const server = http.createServer(async (request, response) => {
         auditId: payload.auditId,
         homeworkChanges: payload.homeworkChanges ?? [],
         lessonChange: payload.lessonChange ?? {}
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.audit ? { audit: error.audit } : {})
+      });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/lesson-journal/rows/save") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await saveLessonJournalRowsPlan({
+        auditId: payload.auditId,
+        homeworkChanges: payload.homeworkChanges ?? [],
+        recordChanges: payload.recordChanges ?? []
       });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {

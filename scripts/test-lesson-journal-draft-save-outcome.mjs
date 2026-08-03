@@ -84,14 +84,9 @@ for (const outcomeBinding of [
   assert.ok(controllerSource.includes(outcomeBinding), `missing save outcome binding: ${outcomeBinding}`);
 }
 assert.ok(
-  controllerSource.indexOf("await persistHomeworks()") <
+  controllerSource.indexOf("await persistJournalRows()") <
     controllerSource.indexOf("await persistMakeupTasks()"),
-  "homework save must remain before makeup save"
-);
-assert.ok(
-  controllerSource.indexOf("await persistMakeupTasks()") <
-    controllerSource.indexOf("await persistRecords()"),
-  "makeup save must remain before record save"
+  "atomic record/homework save must remain before makeup save"
 );
 assert.ok(
   handlerSource.includes("executeLessonJournalDraftPersistence({"),

@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-03
 
+## 2026-08-03 수업일지 기록·숙제 다중 행 저장 신뢰성
+
+- `lesson_student_records`와 숙제 변경을 `/api/lesson-journal/rows/save`의 한 versioned plan으로 저장한다. 행별 CAS/insert-only·Supabase 재조회·동일 결과 재시도·중간 실패 역순 보상 뒤에만 App 원천을 갱신한다.
+- stale 화면은 덮어쓰지 않고 draft를 유지한다. rollback 중 더 최신 행도 보호하며, 기록·숙제 완료 뒤 별도 등원보충 단계가 실패해도 이미 검증된 기록 save state는 유지한다.
+- 검증: lesson `14/14`, runtime lint, `check:fast`, production `823/823`, build `392 modules`·main `944.10 kB`·lazy `12/12`, safe browser `31/31`. 운영 side effect는 실행하지 않았다.
+- 다음 단위는 등원보충 초안 stable request identity와 보충·알림 다중 원천 reconcile이다.
+
 ## 2026-08-03 수업 복사·취소·되돌리기 저장 신뢰성
 
 - 수업 복사·취소·복구·복사 되돌리기는 `lessons`와 복사 숙제를 하나의 versioned action으로 저장한다. CAS/insert-only·Supabase 재조회·중간 실패 역순 보상 뒤에만 UI/undo를 갱신한다.

@@ -126,16 +126,20 @@ const handlerEnd = appSource.indexOf("async function handleSaveRecord(", handler
 const handlerSource = appSource.slice(handlerStart, handlerEnd);
 
 for (const AppOwnedBinding of [
-  "saveLessonJournalRecordsWithVerification({",
-  "records: recordsToSave",
-  "request: postJson",
-  "matchesRecord: hasMatchingVerifiedLessonRecordFields",
+  "saveLessonJournalRowsAction({",
+  "recordsToSave,",
+  "currentRecords: recordsRef.current",
+  "request: postJsonWithTimeout",
   "recordsRef.current = nextRecords",
   "setRecords(nextRecords)",
   "writeStorageValue(window.localStorage"
 ]) {
   assert.ok(handlerSource.includes(AppOwnedBinding), `missing App record binding: ${AppOwnedBinding}`);
 }
+assert.ok(
+  !handlerSource.includes("saveLessonJournalRecordsWithVerification({"),
+  "draft saving must not use the legacy blind record bulk endpoint"
+);
 for (const forbiddenUiEffect of [
   "recordsRef",
   "setRecords",

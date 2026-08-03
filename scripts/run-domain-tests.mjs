@@ -19,6 +19,7 @@ export const domainTestGroups = Object.freeze({
     "scripts/test-school-event-persistence.mjs",
     "scripts/test-derived-school-calendar-persistence.mjs",
     "scripts/test-lesson-journal-history-persistence.mjs",
+    "scripts/test-lesson-journal-rows-persistence.mjs",
     "scripts/test-lesson-journal-draft-controller.mjs",
     "scripts/test-lesson-journal-effect-adapter.mjs",
     "scripts/test-lesson-nested-panels-boundary.mjs"
