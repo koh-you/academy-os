@@ -124,6 +124,39 @@ assert.equal(emptyModel.scheduleGateProps.body, "시간까지 입력하면 수�
 assert.equal(emptyModel.sourceContextProps.sourceHomeworkTitle, "기록 없음");
 assert.equal(emptyModel.sourceContextProps.absenceSourceLabel, "원 결석 수업");
 
+const blockedSourceModel = createSupplementTaskCardViewModel({
+  draftValues: baseDraft,
+  getMethodLabel: () => "",
+  sourceReconcile: {
+    canApplySchedule: false,
+    detail: "연결 ID에 해당하는 수업일지가 없습니다.",
+    isScheduleChangeMode: false,
+    lessonStatus: "failed",
+    scheduleActionLabel: "연결 상태 확인 필요",
+    scheduleBlockReason: "연결 수업일지를 먼저 대조해야 합니다.",
+    statusLabel: "연결 수업일지 없음",
+    statusTone: "warning"
+  },
+  task: { ...baseTask, linkedLessonId: "missing-lesson" }
+});
+assert.deepEqual(blockedSourceModel.scheduleActionProps, {
+  isScheduleBlocked: true,
+  scheduleActionLabel: "연결 상태 확인 필요",
+  scheduleBlockReason: "연결 수업일지를 먼저 대조해야 합니다."
+});
+assert.equal(blockedSourceModel.saveSummaryProps.lessonStatus, "failed");
+assert.deepEqual(blockedSourceModel.sourceStatusProps, {
+  detail: "연결 ID에 해당하는 수업일지가 없습니다.",
+  label: "연결 수업일지 없음",
+  tone: "warning"
+});
+assert.deepEqual(blockedSourceModel.scheduleGateProps, {
+  body: "연결 수업일지를 먼저 대조해야 합니다.",
+  isScheduleChangeMode: false,
+  isSourceBlocked: true,
+  title: "최초 일정 확정"
+});
+
 const notificationConfigs = [
   { controlType: "studentSchedule", field: "studentScheduleNotificationDraft", label: "학생 알림톡" },
   { controlType: "parentSchedule", field: "parentScheduleNotificationDraft", label: "학부모 알림톡" }

@@ -683,6 +683,66 @@ test("notification and special lecture screens render through the extracted boun
   expect(pageErrors).toEqual([]);
 });
 
+test("broken supplement lesson links are visible and block schedule or notification writes", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await page.route("**/api/makeup-tasks*", async (route) => {
+    if (route.request().method() !== "GET") {
+      await route.continue();
+      return;
+    }
+    await route.fulfill({
+      contentType: "application/json",
+      json: {
+        makeupTasks: [{
+          linkedLessonDate: "2026-08-05",
+          linkedLessonId: "safe-missing-makeup-lesson",
+          linkedLessonTime: "15:30",
+          makeupTaskId: "safe-broken-makeup-task",
+          notificationDraft: "안전 당일 안내",
+          parentScheduleNotificationDraft: "안전 학부모 일정 안내",
+          reason: "결석 보강",
+          scheduledDate: "2026-08-05",
+          scheduledTime: "15:30",
+          sourceId: "safe-absence-record",
+          sourceLabel: "안전 미리보기 수업",
+          status: "scheduled",
+          studentId: "safe-withdrawn-student",
+          studentScheduleNotificationDraft: "안전 학생 일정 안내",
+          supplementHomeworkNote: "안전 보충 메모",
+          supplementMethod: "onsite_makeup",
+          supplementTeacherEditedFields: [
+            "studentScheduleNotificationDraft",
+            "parentScheduleNotificationDraft",
+            "notificationDraft"
+          ],
+          taskType: "absence_makeup",
+          updatedAt: "2026-08-03T00:00:00.000Z"
+        }],
+        ok: true
+      },
+      status: 200
+    });
+  });
+
+  await loginAsTeacher(page);
+  await page.getByRole("button", { name: /보충관리/ }).click();
+  await page.getByRole("button", { name: /결석보강/ }).first().click();
+  const candidate = page.getByRole("article").filter({ hasText: "미리보기 퇴원생" });
+  await expect(candidate).toContainText("연결 수업일지 없음");
+  await candidate.getByRole("button", { name: "상세 검토" }).click();
+
+  await expect(page.getByText("연결 수업일지 없음", { exact: true }).last()).toBeVisible();
+  const blockedScheduleButton = page.getByRole("button", { name: "연결 상태 확인 필요" });
+  await expect(blockedScheduleButton).toBeDisabled();
+  await expect(page.getByText(/저장된 연결 ID.*해당하는 수업일지가 없습니다/).last()).toBeVisible();
+
+  await page.getByRole("button", { name: "Solapi 예약·취소 3종 확인" }).click();
+  const notificationDialog = page.getByRole("dialog", { name: "Solapi 예약·취소 3종 확인" });
+  await expect(notificationDialog).toContainText("연결된 수업일지 원천이 확인되지 않아 새 알림톡 예약을 만들 수 없습니다.");
+  await expect(notificationDialog.getByRole("button", { name: "개별 예약" })).toHaveCount(0);
+  expect(pageErrors).toEqual([]);
+});
+
 test("withdrawn absence candidate can reach and complete safe makeup cancellation", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);

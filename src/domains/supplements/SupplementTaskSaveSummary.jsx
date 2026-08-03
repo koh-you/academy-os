@@ -42,9 +42,9 @@ export function SupplementTaskSaveSummary({ draftDiff }) {
   );
 }
 
-export function SupplementTaskScheduleGateNote({ body, isScheduleChangeMode, title }) {
+export function SupplementTaskScheduleGateNote({ body, isScheduleChangeMode, isSourceBlocked = false, title }) {
   return (
-    <div className={`supplementSendGateNote ${isScheduleChangeMode ? "changeNotice" : "confirmNotice"}`}>
+    <div className={`supplementSendGateNote ${isSourceBlocked ? "sourceBlocked" : isScheduleChangeMode ? "changeNotice" : "confirmNotice"}`}>
       <strong>{title}</strong>
       <span>보충 내용 저장: 원 숙제 카드와 알림톡 문구 3종을 저장하고, 발송/예약은 만들지 않습니다.</span>
       <span>{isScheduleChangeMode ? "수업일지 일정 변경" : "수업일지 일정 만들기"}: {body}</span>

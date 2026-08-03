@@ -67,6 +67,17 @@ const missingScheduleModel = createSupplementNotificationControlViewModel({
 }, dependencies);
 assert.equal(missingScheduleModel.blockReason, "저장된 보충 날짜와 시간이 없습니다.");
 
+const sourceBlockedModel = createSupplementNotificationControlViewModel({
+  controlType: "studentSchedule",
+  student,
+  task
+}, {
+  ...dependencies,
+  getSourceBlockReason: () => "연결 수업일지 원천을 먼저 복구해야 합니다."
+});
+assert.equal(sourceBlockedModel.blockReason, "연결 수업일지 원천을 먼저 복구해야 합니다.");
+assert.equal(sourceBlockedModel.canReserve, false);
+
 const scheduledModel = createSupplementNotificationControlViewModel({
   controlType: "studentSchedule",
   currentPreview: "현재  문구",

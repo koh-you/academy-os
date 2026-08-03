@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-03
 
+## 2026-08-03 보충·알림 원천 reconcile inventory
+
+- 보충 상세는 `makeup_tasks` 정방향 링크, `lessons` 역방향 원천과 실제 일정, 미발송 `notification_jobs`를 함께 대조한다. 누락·오래된 링크·중복·다른 원천·일정 불일치·이전 일정 예약은 경고로 표시하고 일정 저장/새 예약을 막는다.
+- 정상 연결과 의도적인 `needsLessonResync`는 기존 일정 생성·변경 흐름을 유지한다. 기존 예약 확인·취소 화면은 열 수 있지만 자동 복구·Solapi 행동은 실행하지 않았다.
+- 검증: supplement `8/8`, notification `7/7`, runtime lint, `check:fast`, production `823/823`, build `394 modules`·main `944.45 kB`·lazy `12/12`, safe browser `33/33`.
+- 다음 단위는 `lessons + makeup_tasks` 일정 저장의 versioned CAS·Supabase 재조회·부분실패 복구와 provider 후속 단계 분리다.
+
 ## 2026-08-03 수업일지 등원보충 재시도 신뢰성
 
 - 등원보충 초안은 학생·원 숙제·task 유형 기반 stable ID를 사용한다. 전용 API가 신규 insert-only·기존 `updated_at` CAS·Supabase 재조회를 수행하며, 응답 유실 재시도는 같은 항목 한 건을 회수한다.

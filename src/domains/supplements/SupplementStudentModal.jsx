@@ -17,6 +17,7 @@ import { SupplementPassConfirmModal } from "./SupplementPassConfirmModal.jsx";
 import { SupplementScheduleChangeConfirmModal } from "./SupplementScheduleChangeConfirmModal.jsx";
 import { SupplementStudentModalShell } from "./SupplementStudentModalShell.jsx";
 import { SupplementTaskCard } from "./SupplementTaskCard.jsx";
+import { createSupplementSourceReconcileModel } from "./supplementSourceReconcileModel.js";
 import {
   createSupplementNotificationDraftWorkspaceViewModel,
   createSupplementTaskCardViewModel
@@ -36,6 +37,7 @@ import { useSupplementTaskSaveStatusState } from "./useSupplementTaskSaveStatusS
 
 export function SupplementStudentModal({
   dependencies,
+  lessons = [],
   notificationTemplates = {},
   notificationJobs = [],
   onCancelAbsenceMakeup,
@@ -213,6 +215,11 @@ export function SupplementStudentModal({
       normalizedNotificationTemplates
     ),
     getTaskDraftState,
+    getSourceBlockReason: (task) => createSupplementSourceReconcileModel({
+      lessons,
+      notificationJobs,
+      task
+    }).notificationBlockReason,
     normalizeMessage: normalizeMessageText
   });
   const notificationControlTask = notificationControlViewModel.task;
@@ -323,12 +330,18 @@ export function SupplementStudentModal({
         const draftDiff = getSupplementTaskDraftDiff(task, draftValues, student, normalizedNotificationTemplates);
         const methodOptions = supplementMethodOptions(task.taskType);
         const saveStatus = getTaskSaveStatus(task.makeupTaskId);
+        const sourceReconcile = createSupplementSourceReconcileModel({
+          lessons,
+          notificationJobs,
+          task
+        });
         const taskCardViewModel = createSupplementTaskCardViewModel({
           draftDiff,
           draftValues,
           getMethodLabel: supplementMethodLabel,
           methodOptions,
           saveStatus,
+          sourceReconcile,
           task
         });
         const taskBusy = isTaskBusy(task.makeupTaskId);
@@ -352,13 +365,13 @@ export function SupplementStudentModal({
         return (
           <SupplementTaskCard
             actionProps={{
+              ...taskCardViewModel.scheduleActionProps,
               hasScheduleDraft: taskCardViewModel.hasScheduleDraft,
               isContentBusy,
               isLocalDraftTask,
               isPassBusy: isTaskActionBusy(task.makeupTaskId, "pass"),
               isScheduleBusy,
               isTaskBusy: taskBusy,
-              linkedLessonId: task.linkedLessonId,
               onPass: () => openPassConfirmation(buildTaskWithDraft(task)),
               onSave: () => handleSaveTask(task),
               onSchedule: () => requestApplyScheduleTask(task)
@@ -411,6 +424,7 @@ export function SupplementStudentModal({
             ) : null}
             headerProps={{
               hasSavedNotificationDrafts: taskCardViewModel.hasSavedNotificationDrafts,
+              sourceStatus: taskCardViewModel.sourceStatusProps,
               task,
               taskMeta: taskCardViewModel.taskMeta,
               typeLabel: followUpTypeLabel(task.taskType)

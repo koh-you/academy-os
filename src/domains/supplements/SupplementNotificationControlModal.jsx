@@ -32,7 +32,7 @@ function SupplementNotificationControlCard({ control, isBusy, onReserve }) {
           <small className="savedDraftDiffers">저장한 최종본이 현재 예약 문구와 다릅니다. 기존 예약을 취소한 뒤 다시 예약해야 반영됩니다.</small>
         ) : null}
       </div>
-      {control.blockReason && !control.canCancel ? (
+      {control.blockReason ? (
         <p className="supplementNotificationControlBlock">{control.blockReason}</p>
       ) : null}
     </article>

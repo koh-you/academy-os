@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 보충·알림 다중 원천 읽기/판정 reconcile
+
+- `makeup_tasks`의 정방향 `linkedLessonId`, `lessons`의 역방향 `sourceMakeupTaskId`, 연결 일정, 해당 task의 미발송 `notification_jobs`를 한 pure model에서 판정한다. 정상·기존 ID 연결·일정 변경 대기와 수업 누락·task 링크 누락/오래됨·중복 수업·다른 원천·예상 밖 일정 불일치·이전 일정 예약 잔존을 구분한다.
+- 기존에는 연결 ID 문자열만 있으면 실제 수업 행이 없어도 `수업일지 반영 완료`와 일정 변경/알림 예약 행동을 노출했다. 이제 목록·상세에서 원인을 표시하고 불일치 상태의 일정 저장과 새 예약을 차단한다. 기존 예약 조회·취소는 사람이 상태를 확인할 수 있도록 유지하며 자동 수업/보충 수정과 Solapi 행동은 추가하지 않았다.
+- 검증: reconcile/card/control fixture, supplement `8/8`, notification `7/7`, runtime lint, `check:fast`, scenario·production `823/823`, build `394 modules`·main `944.45 kB`·lazy `12/12`, Worktree 격리 safe browser 재실행 `33/33`. 첫 전체 브라우저의 기존 Tally 앱 기동 전 흰 화면 timeout은 단독·전체 재실행에서 재현되지 않았다.
+- 다음 독립 단위는 검증된 원천 판정을 입력으로 `lessons`와 `makeup_tasks` 일정 저장을 versioned CAS·재조회·중간 실패 복구로 묶고, 저장 성공 뒤 provider 단계와 명확히 분리하는 것이다. 실제 알림 예약·취소·발송은 테스트하지 않는다.
+
 ## 2026-08-03 수업일지 등원보충 stable request identity gate
 
 - 수업일지에서 새 등원보충 초안을 저장할 때 클릭 시각으로 매번 새 ID를 만들던 경계를 학생·원 숙제·task 유형 기반의 stable ID로 바꿨다. 전용 `/api/lesson-journal/makeup-tasks/save`는 신규 task를 insert-only, 기존 task를 `updated_at` CAS로 저장하고 Supabase 재조회 내용이 일치해야 `verified` 완료를 반환한다.
