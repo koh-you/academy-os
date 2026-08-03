@@ -54,5 +54,6 @@ AI fixture와 안전 가상 데이터로 확인 가능한 shell 변경에는 사
 ## 진행 상태
 
 - P2-1 완료: `ReportModal`의 버튼 두 개를 DOM 순서·문구·disabled·callback 그대로 공통 `ModalFooter`로 옮겼다.
-- 현재 수치: 공통 `ModalFooter` 10개, 기존 `modalActions` wrapper 7개.
-- 다음 단위: P2-2 `SupplementNotificationControlModal` bespoke shell. provider callback과 저장 상태는 변경하지 않는다.
+- P2-2 완료: `SupplementNotificationControlModal`을 공통 `Modal`/`ModalFooter`로 옮기고 busy 닫기 차단·접근성 이름·wide/safe-area layout을 보존했다. 3개 카드와 개별 예약·일괄 취소 callback은 그대로다.
+- 현재 수치: 공통 shell 41/41, bespoke dialog 0개, 공통 `ModalFooter` 11개, 기존 `modalActions` wrapper 6개.
+- 다음 단위: 다중 원천 확인 footer를 한 화면씩 검토한다. provider 또는 저장 의미를 shell 작업과 함께 바꾸지 않는다.

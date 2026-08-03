@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-03
 
+## 2026-08-03 P2-2 Solapi 제어창 공통 shell
+
+- `SupplementNotificationControlModal`을 공통 `Modal`/`ModalFooter`로 옮겨 모든 dialog 41개가 공통 shell을 사용한다. 기존 접근성 이름, busy X/Escape 차단, 3개 카드, wide/safe-area class를 보존했다.
+- 개별 예약·일괄 취소 callback과 provider feedback은 바꾸지 않았다. safe browser는 알림 행동이 차단된 가상 fixture에서 모바일 viewport와 하단 닫기만 확인한다. 실제 Solapi 행동은 없다.
+- 공통 footer는 11개, 기존 action wrapper는 6개다. 다음은 다중 원천 확인 footer를 한 화면씩 검토한다.
+
 ## 2026-08-03 P2-1 ReportModal footer
 
 - 보고서의 `스냅샷 저장`·`모의 발송` 버튼을 공통 `ModalFooter`로 옮겼다. 문구·순서·saving 잠금·callback과 인증/CAS/재조회 저장 계약은 그대로다.

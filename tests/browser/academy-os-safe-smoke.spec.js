@@ -996,6 +996,14 @@ test("broken supplement lesson links are visible and block schedule or notificat
   const notificationDialog = page.getByRole("dialog", { name: "Solapi 예약·취소 3종 확인" });
   await expect(notificationDialog).toContainText("연결된 수업일지 원천이 확인되지 않아 새 알림톡 예약을 만들 수 없습니다.");
   await expect(notificationDialog.getByRole("button", { name: "개별 예약" })).toHaveCount(0);
+  await page.setViewportSize({ height: 844, width: 390 });
+  const notificationDialogBox = await notificationDialog.boundingBox();
+  expect(notificationDialogBox.x).toBeGreaterThanOrEqual(0);
+  expect(notificationDialogBox.y).toBeGreaterThanOrEqual(0);
+  expect(notificationDialogBox.x + notificationDialogBox.width).toBeLessThanOrEqual(390);
+  expect(notificationDialogBox.y + notificationDialogBox.height).toBeLessThanOrEqual(844);
+  await notificationDialog.getByRole("button", { exact: true, name: "닫기" }).click();
+  await expect(notificationDialog).toBeHidden();
   expect(pageErrors).toEqual([]);
 });
 

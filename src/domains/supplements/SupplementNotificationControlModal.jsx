@@ -1,3 +1,5 @@
+import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
+
 function SupplementNotificationControlCard({ control, isBusy, onReserve }) {
   return (
     <article className="supplementNotificationControlCard">
@@ -51,47 +53,41 @@ export function SupplementNotificationControlModal({
 }) {
   const cancelableCount = controls.filter((control) => control.canCancel).length;
   return (
-    <div className="supplementNotificationControlBackdrop" role="presentation">
-      <section
-        aria-labelledby="supplement-notification-control-title"
-        aria-modal="true"
-        className="supplementNotificationControlModal wide"
-        role="dialog"
-      >
-        <div className="supplementNotificationControlHeader">
-          <div>
-            <h3 id="supplement-notification-control-title">Solapi 예약·취소 3종 확인</h3>
-            <p>{studentName} · {scheduleLabel}</p>
-          </div>
-          <button aria-label="알림 제어 닫기" className="iconButton" disabled={isBusy} onClick={onClose} type="button">×</button>
-        </div>
-        <p className="supplementNotificationBulkGuide">
-          학생·학부모·당일 학생 예약을 한 화면에서 확인합니다. 일괄 취소는 현재 취소 가능한 예약만 처리합니다.
+    <Modal
+      backdropClassName="supplementNotificationControlBackdrop"
+      className="supplementNotificationControlModal wide"
+      closeAriaLabel="알림 제어 닫기"
+      closeDisabled={isBusy}
+      onClose={onClose}
+      subtitle={`${studentName} · ${scheduleLabel}`}
+      title="Solapi 예약·취소 3종 확인"
+    >
+      <p className="supplementNotificationBulkGuide">
+        학생·학부모·당일 학생 예약을 한 화면에서 확인합니다. 일괄 취소는 현재 취소 가능한 예약만 처리합니다.
+      </p>
+      <div className="supplementNotificationControlCards">
+        {controls.map((control) => (
+          <SupplementNotificationControlCard
+            control={control}
+            isBusy={isBusy}
+            key={control.controlType}
+            onReserve={onReserve}
+          />
+        ))}
+      </div>
+      {feedback ? (
+        <p className={`supplementNotificationControlFeedback ${feedback.tone}`}>
+          {feedback.message}
         </p>
-        <div className="supplementNotificationControlCards">
-          {controls.map((control) => (
-            <SupplementNotificationControlCard
-              control={control}
-              isBusy={isBusy}
-              key={control.controlType}
-              onReserve={onReserve}
-            />
-          ))}
-        </div>
-        {feedback ? (
-          <p className={`supplementNotificationControlFeedback ${feedback.tone}`}>
-            {feedback.message}
-          </p>
+      ) : null}
+      <ModalFooter className="supplementNotificationControlActions" tone="danger">
+        <button className="softButton" disabled={isBusy} onClick={onClose} type="button">닫기</button>
+        {cancelableCount ? (
+          <button className="dangerSoftButton" disabled={isBusy} onClick={onCancelAll} type="button">
+            {isBusy ? "일괄 취소 중" : `취소 가능한 예약 ${cancelableCount}건 일괄 취소`}
+          </button>
         ) : null}
-        <div className="modalActions supplementNotificationControlActions">
-          <button className="softButton" disabled={isBusy} onClick={onClose} type="button">닫기</button>
-          {cancelableCount ? (
-            <button className="dangerSoftButton" disabled={isBusy} onClick={onCancelAll} type="button">
-              {isBusy ? "일괄 취소 중" : `취소 가능한 예약 ${cancelableCount}건 일괄 취소`}
-            </button>
-          ) : null}
-        </div>
-      </section>
-    </div>
+      </ModalFooter>
+    </Modal>
   );
 }
