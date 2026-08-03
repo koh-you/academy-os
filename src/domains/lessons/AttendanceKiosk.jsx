@@ -117,6 +117,7 @@ export function AttendanceKiosk({
     previewDetail,
     previewLessonCandidates,
     previewRequiresLessonSelection,
+    previewVisitLabel,
     resultDetail,
     resultTitle
   } = createAttendanceKioskDisplayModel({
@@ -208,6 +209,9 @@ export function AttendanceKiosk({
                   <span><small>수업</small><b>{formatLessonDisplayName(pendingPreview.lesson) || "-"}</b></span>
                   <span><small>시간</small><b>{pendingPreview.checkedTime || "-"}</b></span>
                 </div>
+                {previewVisitLabel ? (
+                  <p className="muted">연속 수업으로 처리: {previewVisitLabel}<br />등원 알림은 지금 한 번, 하원 알림은 마지막 수업 뒤 한 번만 전송합니다.</p>
+                ) : null}
                 <div className="attendanceConfirmActions single">
                   <button className="primaryButton" disabled={isSubmitting} onClick={confirmAttendanceCheck} type="button">
                     {isSubmitting ? "저장 중..." : "확인"}

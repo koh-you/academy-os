@@ -34,6 +34,7 @@ assert.deepEqual(
     previewDetail: "",
     previewLessonCandidates: [],
     previewRequiresLessonSelection: false,
+    previewVisitLabel: "",
     resultDetail: "가상 학생 · 가상 반 · 19:00-22:00 · 19:10",
     resultTitle: "지각 등원"
   }
@@ -57,6 +58,18 @@ assert.equal(selection.previewRequiresLessonSelection, true);
 assert.equal(selection.previewActionLabel, "수업 선택");
 assert.equal(selection.previewDetail, "가상 학생 · 수업 선택 · 19:00");
 assert.equal(selection.previewLessonCandidates, candidates);
+assert.equal(selection.previewVisitLabel, "");
+
+const continuity = createAttendanceKioskDisplayModel({
+  pendingPreview: {
+    attendanceVisit: { label: "결석보강 → 고1 정규수업" },
+    checkedTime: "15:00",
+    lesson: { lessonId: "lesson-makeup" },
+    ok: true,
+    student: { name: "가상 학생" }
+  }
+});
+assert.equal(continuity.previewVisitLabel, "결석보강 → 고1 정규수업");
 
 assert.deepEqual(
   createAttendanceKioskDisplayModel({
@@ -67,6 +80,7 @@ assert.deepEqual(
     previewDetail: "",
     previewLessonCandidates: [],
     previewRequiresLessonSelection: false,
+    previewVisitLabel: "",
     resultDetail: "가상 실패",
     resultTitle: "출결 체크 실패"
   }

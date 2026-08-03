@@ -29,6 +29,7 @@ export function createAttendanceKioskDisplayModel({
       ? "수업 선택"
       : getAttendanceActionLabel(pendingPreview)
     : "";
+  const previewVisitLabel = String(pendingPreview?.attendanceVisit?.label ?? "").trim();
   const previewDetail = pendingPreview?.ok
     ? previewRequiresLessonSelection
       ? `${pendingPreview.student?.name ?? ""} · 수업 선택 · ${pendingPreview.checkedTime || ""}`
@@ -40,6 +41,7 @@ export function createAttendanceKioskDisplayModel({
     previewDetail,
     previewLessonCandidates,
     previewRequiresLessonSelection,
+    previewVisitLabel,
     resultDetail,
     resultTitle
   };
