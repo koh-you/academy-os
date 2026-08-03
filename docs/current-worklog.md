@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 학사일정 파생 시험행·직전수업 저장 gate
+
+- 시험관리에서 파생되는 시험기간·수학시험 생성/수정/삭제를 기존 다중 fire-and-forget 요청 대신 `exam_prep_rows`와 연결 `preExam lessons`의 단일 versioned plan으로 바꿨다. 브라우저는 하나의 callback만 기다리고 Supabase verified 응답 전에는 모달·draft를 유지한다.
+- 서버는 시험행과 직전수업에 `updated_at` CAS·insert-only·변경 직후 재조회를 적용한다. 중간 실패는 이미 반영된 직접 원천을 역순 보상해 원래 내용과 timestamp를 다시 대조하며, 응답 유실 뒤 같은 audit 요청은 중복 mutation 없이 verified 성공으로 복구한다.
+- 수동 보호·자동생성 제외 수업의 자동 변경을 차단하고, 연결 record·homework·notification job이 있는 수업 삭제와 연결 원천이 있는 학생 명단 제거를 막았다. 실제 provider 취소나 알림 예약은 이 행동에서 실행하지 않는다.
+- 검증: 전용 pure/action/Supabase REST·rollback fixture, lesson `12/12`, runtime lint, `check:fast`, scenario·production `823/823`, build `390 modules`·main `944.84 kB`·lazy `12/12`, Worktree 격리 safe browser `28/28`. 운영 데이터·실제 알림·SQL·유료 호출은 사용하지 않았다.
+- 다음 독립 단위는 수업일지 다중 행·복사·되돌리기의 `lessons`·학생 기록·숙제 원천 저장 계약이다.
+
 ## 2026-08-03 수동 학사일정 저장·삭제 gate
 
 - 수동 `school_events` 신규 저장은 고정 ID insert-only, 수정·삭제는 일정별 `updated_at` CAS로 바꿨다. 서버는 저장/삭제 직후 Supabase 단일 행을 재조회하고, App도 전체 일정 원천을 no-store GET으로 다시 대조한 뒤에만 화면 목록을 교체한다.

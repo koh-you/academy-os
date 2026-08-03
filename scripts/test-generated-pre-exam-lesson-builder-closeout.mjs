@@ -151,6 +151,10 @@ const appSource = [
   await readFile(
     new URL("../src/domains/lessons/generatedLessonPlanBuilder.js", import.meta.url),
     "utf8"
+  ),
+  await readFile(
+    new URL("../src/domains/schoolCalendar/derivedSchoolCalendarPersistence.js", import.meta.url),
+    "utf8"
   )
 ].join("\n");
 const builderSource = await readFile(
@@ -176,7 +180,7 @@ assert.equal(
   appSource.split(
     "createPreExamLessonFromSchoolEvent("
   ).length - 1,
-  2
+  3
 );
 assert.equal(
   builderSource.split(
@@ -208,10 +212,11 @@ for (const boundary of injectionBoundaries) {
   previousInjectionIndex = boundaryIndex;
 }
 for (const consumerBoundary of [
-  "function handleSyncPreExamLessonFromSchoolEvent(event)",
-  "const lesson = createPreExamLessonFromSchoolEvent(event, students)",
-  'setLessons((current) => upsertById(current, nextLesson, "lessonId"))',
-  'postJson("/api/lessons", { lesson: nextLesson })',
+  "async function handleSaveDerivedSchoolCalendar(",
+  "createPreExamLessonFromSchoolEvent,",
+  "export function createDerivedLessonChanges({",
+  "const beforeCandidate = beforeEvent ? createPreExamLessonFromSchoolEvent(beforeEvent, students) : null",
+  "const afterCandidate = afterEvent ? createPreExamLessonFromSchoolEvent(afterEvent, students) : null",
   "function buildGeneratedLessonPlan(",
   "lesson: { ...lesson, generatedKey }"
 ]) {

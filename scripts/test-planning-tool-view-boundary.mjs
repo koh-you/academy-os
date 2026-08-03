@@ -54,9 +54,14 @@ assert.deepEqual(runtimeKeys, [
   "schoolCalendarAutosaveRisk",
   "ssenTypeCatalog",
   "syncPrimaryMathExamDate",
-  "syncSchoolCalendarEventToExamPrepRows",
-  "today"
+  "today",
+  "upsertMathExamEntryFromSchoolEvent"
 ].sort());
+
+assert.equal(outletSource.includes("onSaveDerivedEvent: actions.handleSaveDerivedSchoolCalendar"), true);
+assert.equal(screenSource.includes("시험관리 행과 직전수업을 함께 저장하는 중입니다."), true);
+assert.equal(screenSource.includes("onUpdateExamPrepRow"), false);
+assert.equal(screenSource.includes("onSyncPreExamLesson"), false);
 
 for (const viewId of ["aiVariants", "classes", "lessonResearch", "schoolCalendar"]) {
   const viewStart = outletSource.indexOf(`${viewId}: {`);

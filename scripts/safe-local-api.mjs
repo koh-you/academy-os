@@ -402,6 +402,27 @@ function haveSameSafeSchoolEvent(requested = {}, persisted = {}) {
   ));
 }
 
+function haveSameSafeDerivedExamPrepRow(requested = {}, persisted = {}) {
+  const fields = ["examPrepId", "schoolName", "grade", "subject", "examCycle", "examPeriod", "mathExamDate", "mathExamDates"];
+  return fields.every((field) => (
+    typeof requested[field] === "object" || typeof persisted[field] === "object"
+      ? JSON.stringify(requested[field] ?? []) === JSON.stringify(persisted[field] ?? [])
+      : String(requested[field] ?? "") === String(persisted[field] ?? "")
+  ));
+}
+
+function haveSameSafeDerivedLesson(requested = {}, persisted = {}) {
+  const fields = [
+    "lessonId", "classTemplateId", "className", "lessonType", "lessonTopic", "sourceSchoolEventId",
+    "sourceLabel", "date", "startTime", "endTime", "color", "status", "studentIds"
+  ];
+  return fields.every((field) => (
+    typeof requested[field] === "object" || typeof persisted[field] === "object"
+      ? JSON.stringify([...(requested[field] ?? [])].sort()) === JSON.stringify([...(persisted[field] ?? [])].sort())
+      : String(requested[field] ?? "") === String(persisted[field] ?? "")
+  ));
+}
+
 function handleMutation(pathname, payload) {
   if (pathname === "/api/app-state") {
     state.appStates = { ...state.appStates, ...(payload.states || {}) };
@@ -542,6 +563,76 @@ function handleMutation(pathname, payload) {
       verified: true
     };
   }
+  if (pathname === "/api/school-calendar/derived-save") {
+    const examPrepChanges = payload.examPrepChanges || [];
+    const lessonChanges = payload.lessonChanges || [];
+    for (const { after, before } of examPrepChanges) {
+      const current = state.examPrepRows.find((row) => row.examPrepId === after?.examPrepId) ?? null;
+      if (current && haveSameSafeDerivedExamPrepRow(after, current)) continue;
+      if (!current || !before?.updatedAt || current.updatedAt !== before.updatedAt || !haveSameSafeDerivedExamPrepRow(before, current)) {
+        return {
+          audit: { auditId: payload.auditId, failedStage: "exam-prep-rows", rollback: { verified: true } },
+          code: "SCHOOL_CALENDAR_DERIVED_SAVE_FAILED",
+          error: "시험관리 원본이 다른 화면에서 먼저 변경되었습니다.",
+          ok: false,
+          statusCode: 409
+        };
+      }
+    }
+    for (const { after, before } of lessonChanges) {
+      const lessonId = after?.lessonId || before?.lessonId;
+      const current = state.lessons.find((lesson) => lesson.lessonId === lessonId) ?? null;
+      if (after && current && haveSameSafeDerivedLesson(after, current)) continue;
+      if (!after && !current) continue;
+      if (
+        (before && (!current || !before.updatedAt || current.updatedAt !== before.updatedAt || !haveSameSafeDerivedLesson(before, current))) ||
+        (!before && current)
+      ) {
+        return {
+          audit: { auditId: payload.auditId, failedStage: "pre-exam-lessons", rollback: { verified: true } },
+          code: "SCHOOL_CALENDAR_DERIVED_SAVE_FAILED",
+          error: "직전수업 원본이 다른 화면에서 먼저 변경되었습니다.",
+          ok: false,
+          statusCode: 409
+        };
+      }
+    }
+    const examPrepRows = examPrepChanges.map(({ after }) => {
+      const current = state.examPrepRows.find((row) => row.examPrepId === after.examPrepId);
+      const saved = current && haveSameSafeDerivedExamPrepRow(after, current)
+        ? current
+        : { ...after, updatedAt: new Date(Math.max(Date.now(), new Date(current.updatedAt).getTime() + 1)).toISOString() };
+      state.examPrepRows = upsertById(state.examPrepRows, saved, ["examPrepId"]);
+      return saved;
+    });
+    const lessonIdsToDelete = [];
+    const lessons = [];
+    lessonChanges.forEach(({ after, before }) => {
+      const lessonId = after?.lessonId || before?.lessonId;
+      const current = state.lessons.find((lesson) => lesson.lessonId === lessonId) ?? null;
+      if (!after) {
+        state.lessons = state.lessons.filter((lesson) => lesson.lessonId !== lessonId);
+        lessonIdsToDelete.push(lessonId);
+        return;
+      }
+      const saved = current && haveSameSafeDerivedLesson(after, current)
+        ? current
+        : {
+            ...after,
+            updatedAt: new Date(Math.max(Date.now(), new Date(current?.updatedAt || 0).getTime() + 1)).toISOString()
+          };
+      state.lessons = upsertById(state.lessons, saved, ["lessonId"]);
+      lessons.push(saved);
+    });
+    return {
+      auditId: payload.auditId,
+      examPrepRows,
+      lessonIdsToDelete,
+      lessons,
+      ok: true,
+      verified: true
+    };
+  }
   if (pathname === "/api/students") {
     const student = payload.student || {};
     const existingStudent = state.students.find((item) => item.studentId === student.studentId) ?? null;
@@ -668,7 +759,7 @@ const server = http.createServer(async (request, response) => {
       state = createInitialState();
       return sendJson(response, 200, { ok: true, safeFixture: true });
     }
-    if (["/api/app-state", "/api/lesson-records/bulk", "/api/school-events"].includes(requestUrl.pathname)) {
+    if (["/api/app-state", "/api/lesson-records/bulk", "/api/school-events", "/api/school-calendar/derived-save"].includes(requestUrl.pathname)) {
       await new Promise((resolve) => setTimeout(resolve, 800));
     }
     const { statusCode = 200, ...result } = handleMutation(requestUrl.pathname, payload);

@@ -51,6 +51,12 @@ import {
   createSchoolEventVersionFilter,
   isSchoolEventInsertConflict
 } from "../../src/domains/schoolCalendar/schoolEventPersistence.js";
+import {
+  areDerivedExamPrepNonScheduleFieldsEqual,
+  areDerivedExamPrepRowsEqual,
+  areDerivedLessonsEqual,
+  areDerivedLessonTimestampsEqual
+} from "../../src/domains/schoolCalendar/derivedSchoolCalendarPersistence.js";
 import { deleteRows, getSupabaseStatus, insertRows, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
 
 const fallbackSource = "local_sample";
@@ -2442,6 +2448,346 @@ export async function saveClassRosterPlan({ auditId = "", lessonChanges = [], st
     lessons: appliedLessons.map((entry) => entry.lesson),
     source: databaseSource,
     students: appliedStudents.map((entry) => entry.student),
+    verified: true
+  };
+}
+
+function createDerivedSchoolCalendarConflict(message, details = {}) {
+  const error = new Error(message);
+  Object.assign(error, details, { code: "SCHOOL_CALENDAR_DERIVED_CONFLICT", statusCode: 409 });
+  return error;
+}
+
+async function persistDerivedExamPrepChange(change = {}) {
+  const after = change.after ?? null;
+  const before = change.before ?? null;
+  const examPrepId = String(after?.examPrepId || before?.examPrepId || "").trim();
+  if (!examPrepId || !after || !before) {
+    throw createDerivedSchoolCalendarConflict("학사일정에 연결할 시험관리 행 계획이 올바르지 않습니다.");
+  }
+  if (!areDerivedExamPrepNonScheduleFieldsEqual(before, after)) {
+    throw createDerivedSchoolCalendarConflict("파생 학사일정 저장은 시험기간과 수학시험 날짜 필드만 변경할 수 있습니다.", { examPrepId });
+  }
+  const current = (await getExistingExamPrepRowMap([examPrepId])).get(examPrepId) ?? null;
+  if (current && areDerivedExamPrepRowsEqual(after, current)) {
+    return { examPrepRow: current, mutated: false };
+  }
+  if (
+    !current ||
+    !before.updatedAt ||
+    !areExamPrepRowTimestampsEqual(current.updatedAt, before.updatedAt) ||
+    !areDerivedExamPrepRowsEqual(before, current)
+  ) {
+    throw createDerivedSchoolCalendarConflict(
+      `시험관리 ${examPrepId} 원본이 다른 화면에서 먼저 변경되었습니다.`,
+      { currentExamPrepRow: current, examPrepId }
+    );
+  }
+  const nextUpdatedAt = createNextExamPrepRowUpdatedAt(current.updatedAt);
+  const savedRows = await patchRows(
+    "exam_prep_rows",
+    createExamPrepRowVersionFilter(examPrepId, current.updatedAt),
+    { ...toExamPrepRow(after), updated_at: nextUpdatedAt }
+  );
+  if (savedRows.length !== 1) {
+    throw createDerivedSchoolCalendarConflict(
+      `시험관리 ${examPrepId} 저장 직전에 서버 버전이 변경되었습니다.`,
+      { currentExamPrepRow: (await getExistingExamPrepRowMap([examPrepId])).get(examPrepId) ?? null, examPrepId }
+    );
+  }
+  const verified = (await getExistingExamPrepRowMap([examPrepId])).get(examPrepId) ?? null;
+  if (
+    !verified ||
+    !areDerivedExamPrepRowsEqual(after, verified) ||
+    !areExamPrepRowTimestampsEqual(nextUpdatedAt, verified.updatedAt)
+  ) {
+    const error = new Error(`시험관리 ${examPrepId} 저장 후 Supabase 재조회가 일치하지 않습니다.`);
+    Object.assign(error, { code: "SCHOOL_CALENDAR_DERIVED_VERIFICATION_FAILED", examPrepId, statusCode: 409 });
+    error.appliedResult = {
+      beforeExamPrepRow: current,
+      examPrepRow: verified ?? fromExamPrepRow(savedRows[0]),
+      mutated: true
+    };
+    throw error;
+  }
+  return { beforeExamPrepRow: current, examPrepRow: verified, mutated: true };
+}
+
+async function assertDerivedLessonDeleteAllowed(lesson = {}) {
+  if (lesson.lessonType !== "preExam") {
+    throw createDerivedSchoolCalendarConflict("파생 학사일정에서는 자동 생성 직전수업만 삭제할 수 있습니다.", {
+      lessonId: lesson.lessonId
+    });
+  }
+  const encodedLessonId = encodeURIComponent(lesson.lessonId);
+  const [recordRows, homeworkRows, notificationRows] = await Promise.all([
+    listRows("lesson_student_records", `select=lesson_student_record_id&lesson_id=eq.${encodedLessonId}`, { requireServiceRole: true }),
+    listRows("homeworks", `select=homework_id&lesson_id=eq.${encodedLessonId}`, { requireServiceRole: true }),
+    listRows("notification_jobs", `select=notification_job_id&lesson_id=eq.${encodedLessonId}`, { requireServiceRole: true })
+  ]);
+  const protectionCounts = {
+    homeworks: homeworkRows.length,
+    notificationJobs: notificationRows.length,
+    records: recordRows.length
+  };
+  if (Object.values(protectionCounts).some((count) => count > 0)) {
+    throw createDerivedSchoolCalendarConflict(
+      "직전수업에 수업기록·숙제·알림 작업이 연결되어 수학시험 일정 삭제를 중단했습니다.",
+      { lessonId: lesson.lessonId, protectionCounts }
+    );
+  }
+}
+
+async function assertDerivedLessonRosterChangeAllowed(before = {}, after = {}) {
+  const afterStudentIds = new Set(after.studentIds ?? []);
+  const removedStudentIds = (before.studentIds ?? []).filter((studentId) => !afterStudentIds.has(studentId));
+  if (!removedStudentIds.length) return;
+  const encodedLessonId = encodeURIComponent(before.lessonId);
+  const [recordRows, notificationRows] = await Promise.all([
+    listRows("lesson_student_records", `select=student_id&lesson_id=eq.${encodedLessonId}`, { requireServiceRole: true }),
+    listRows("notification_jobs", `select=student_id&lesson_id=eq.${encodedLessonId}`, { requireServiceRole: true })
+  ]);
+  const removedIds = new Set(removedStudentIds);
+  const connectedStudentIds = [...new Set([
+    ...recordRows.map((row) => row.student_id),
+    ...notificationRows.map((row) => row.student_id)
+  ].filter((studentId) => removedIds.has(studentId)))];
+  if (connectedStudentIds.length) {
+    throw createDerivedSchoolCalendarConflict(
+      "직전수업 명단에 수업기록 또는 알림 작업이 연결되어 학사일정 저장 중 자동 제외를 중단했습니다.",
+      { connectedStudentIds, lessonId: before.lessonId }
+    );
+  }
+}
+
+async function persistDerivedLessonChange(change = {}) {
+  const after = change.after ?? null;
+  const before = change.before ?? null;
+  const lessonId = String(after?.lessonId || before?.lessonId || "").trim();
+  if (!lessonId || (!after && !before)) {
+    throw createDerivedSchoolCalendarConflict("학사일정에 연결할 직전수업 계획이 올바르지 않습니다.");
+  }
+  if ((before && before.lessonType !== "preExam") || (after && after.lessonType !== "preExam")) {
+    throw createDerivedSchoolCalendarConflict("파생 학사일정 저장은 자동 생성 직전수업만 변경할 수 있습니다.", { lessonId });
+  }
+  const current = await getLessonForRosterSave(lessonId);
+  if (after && current && areDerivedLessonsEqual(after, current)) {
+    return { lesson: current, mutated: false, operation: "unchanged" };
+  }
+  if (!after && !current) {
+    return { lesson: null, mutated: false, operation: "unchanged" };
+  }
+  if (!before) {
+    if (current) {
+      throw createDerivedSchoolCalendarConflict(
+        `직전수업 ${lessonId}가 다른 화면에서 먼저 생성되었습니다.`,
+        { currentLesson: current, lessonId }
+      );
+    }
+    const nextUpdatedAt = createNextRosterUpdatedAt();
+    let savedRows;
+    try {
+      savedRows = await insertRows("lessons", [{ ...toLessonRow(after), updated_at: nextUpdatedAt }]);
+    } catch (error) {
+      throw createDerivedSchoolCalendarConflict(
+        `직전수업 ${lessonId} 신규 저장이 다른 화면의 변경과 충돌했습니다.`,
+        { cause: error, currentLesson: await getLessonForRosterSave(lessonId), lessonId }
+      );
+    }
+    const verified = await getLessonForRosterSave(lessonId);
+    if (
+      savedRows.length !== 1 ||
+      !verified ||
+      !areDerivedLessonsEqual(after, verified) ||
+      !areDerivedLessonTimestampsEqual(nextUpdatedAt, verified.updatedAt)
+    ) {
+      const error = new Error(`직전수업 ${lessonId} 신규 저장 후 Supabase 재조회가 일치하지 않습니다.`);
+      Object.assign(error, { code: "SCHOOL_CALENDAR_DERIVED_VERIFICATION_FAILED", lessonId, statusCode: 409 });
+      error.appliedResult = {
+        lesson: verified ?? (savedRows[0] ? fromLessonRow(savedRows[0]) : { ...after, updatedAt: nextUpdatedAt }),
+        mutated: true,
+        operation: "create"
+      };
+      throw error;
+    }
+    return { lesson: verified, mutated: true, operation: "create" };
+  }
+  if (
+    !current ||
+    !before.updatedAt ||
+    !areDerivedLessonTimestampsEqual(current.updatedAt, before.updatedAt) ||
+    !areDerivedLessonsEqual(before, current)
+  ) {
+    throw createDerivedSchoolCalendarConflict(
+      `직전수업 ${lessonId} 원본이 다른 화면에서 먼저 변경되었습니다.`,
+      { currentLesson: current, lessonId }
+    );
+  }
+  if (!after) {
+    await assertDerivedLessonDeleteAllowed(current);
+    const deletedRows = await deleteRows("lessons", createLessonRosterVersionFilter(lessonId, current.updatedAt));
+    const verified = await getLessonForRosterSave(lessonId);
+    if (deletedRows.length !== 1 || verified) {
+      const error = new Error(`직전수업 ${lessonId} 삭제 후 Supabase 재조회가 일치하지 않습니다.`);
+      Object.assign(error, { code: "SCHOOL_CALENDAR_DERIVED_VERIFICATION_FAILED", lessonId, statusCode: 409 });
+      error.appliedResult = { beforeLesson: current, lesson: null, mutated: true, operation: "delete" };
+      throw error;
+    }
+    return { beforeLesson: current, lesson: null, mutated: true, operation: "delete" };
+  }
+  await assertDerivedLessonRosterChangeAllowed(current, after);
+  const nextUpdatedAt = createNextRosterUpdatedAt(current.updatedAt);
+  const savedRows = await patchRows(
+    "lessons",
+    createLessonRosterVersionFilter(lessonId, current.updatedAt),
+    { ...toLessonRow(after), updated_at: nextUpdatedAt }
+  );
+  if (savedRows.length !== 1) {
+    throw createDerivedSchoolCalendarConflict(
+      `직전수업 ${lessonId} 저장 직전에 서버 버전이 변경되었습니다.`,
+      { currentLesson: await getLessonForRosterSave(lessonId), lessonId }
+    );
+  }
+  const verified = await getLessonForRosterSave(lessonId);
+  if (
+    !verified ||
+    !areDerivedLessonsEqual(after, verified) ||
+    !areDerivedLessonTimestampsEqual(nextUpdatedAt, verified.updatedAt)
+  ) {
+    const error = new Error(`직전수업 ${lessonId} 저장 후 Supabase 재조회가 일치하지 않습니다.`);
+    Object.assign(error, { code: "SCHOOL_CALENDAR_DERIVED_VERIFICATION_FAILED", lessonId, statusCode: 409 });
+    error.appliedResult = {
+      beforeLesson: current,
+      lesson: verified ?? fromLessonRow(savedRows[0]),
+      mutated: true,
+      operation: "update"
+    };
+    throw error;
+  }
+  return { beforeLesson: current, lesson: verified, mutated: true, operation: "update" };
+}
+
+async function rollbackDerivedExamPrepChange(entry) {
+  if (!entry.mutated) return { examPrepId: entry.change.after.examPrepId, verified: true };
+  const before = entry.beforeExamPrepRow;
+  const saved = entry.examPrepRow;
+  const rollbackRows = await patchRows(
+    "exam_prep_rows",
+    createExamPrepRowVersionFilter(before.examPrepId, saved.updatedAt),
+    { ...toExamPrepRow(before), updated_at: before.updatedAt }
+  );
+  const current = (await getExistingExamPrepRowMap([before.examPrepId])).get(before.examPrepId) ?? null;
+  return {
+    examPrepId: before.examPrepId,
+    verified: rollbackRows.length === 1 &&
+      areDerivedExamPrepRowsEqual(before, current ?? {}) &&
+      areExamPrepRowTimestampsEqual(before.updatedAt, current?.updatedAt)
+  };
+}
+
+async function rollbackDerivedLessonChange(entry) {
+  const lessonId = entry.change.after?.lessonId || entry.change.before?.lessonId || "";
+  if (!entry.mutated) return { lessonId, verified: true };
+  if (entry.operation === "create") {
+    const deletedRows = await deleteRows("lessons", createLessonRosterVersionFilter(lessonId, entry.lesson.updatedAt));
+    return { lessonId, verified: deletedRows.length === 1 && !(await getLessonForRosterSave(lessonId)) };
+  }
+  if (entry.operation === "delete") {
+    const restoredRows = await insertRows("lessons", [{ ...toLessonRow(entry.beforeLesson), updated_at: entry.beforeLesson.updatedAt }]);
+    const restored = await getLessonForRosterSave(lessonId);
+    return {
+      lessonId,
+      verified: restoredRows.length === 1 &&
+        areDerivedLessonsEqual(entry.beforeLesson, restored ?? {}) &&
+        areDerivedLessonTimestampsEqual(entry.beforeLesson.updatedAt, restored?.updatedAt)
+    };
+  }
+  const rollbackRows = await patchRows(
+    "lessons",
+    createLessonRosterVersionFilter(lessonId, entry.lesson.updatedAt),
+    { ...toLessonRow(entry.beforeLesson), updated_at: entry.beforeLesson.updatedAt }
+  );
+  const restored = await getLessonForRosterSave(lessonId);
+  return {
+    lessonId,
+    verified: rollbackRows.length === 1 &&
+      areDerivedLessonsEqual(entry.beforeLesson, restored ?? {}) &&
+      areDerivedLessonTimestampsEqual(entry.beforeLesson.updatedAt, restored?.updatedAt)
+  };
+}
+
+export async function saveDerivedSchoolCalendarPlan({ auditId = "", examPrepChanges = [], lessonChanges = [] } = {}) {
+  const normalizedAuditId = String(auditId || "").trim();
+  if (!normalizedAuditId) throw new Error("학사일정 연동 저장 audit ID가 필요합니다.");
+  if (!Array.isArray(examPrepChanges) || !Array.isArray(lessonChanges)) {
+    throw new Error("학사일정 연동 저장 계획 형식이 올바르지 않습니다.");
+  }
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return {
+      auditId: normalizedAuditId,
+      examPrepRows: [],
+      lessonIdsToDelete: [],
+      lessons: [],
+      source: fallbackSource,
+      verified: false
+    };
+  }
+
+  const appliedRows = [];
+  const appliedLessons = [];
+  let failedStage = "exam-prep-rows";
+  try {
+    for (const change of examPrepChanges) {
+      try {
+        appliedRows.push({ change, ...(await persistDerivedExamPrepChange(change)) });
+      } catch (error) {
+        if (error.appliedResult) appliedRows.push({ change, ...error.appliedResult });
+        throw error;
+      }
+    }
+    failedStage = "pre-exam-lessons";
+    for (const change of lessonChanges) {
+      try {
+        appliedLessons.push({ change, ...(await persistDerivedLessonChange(change)) });
+      } catch (error) {
+        if (error.appliedResult) appliedLessons.push({ change, ...error.appliedResult });
+        throw error;
+      }
+    }
+  } catch (error) {
+    const rollbackResults = [];
+    const rollbackErrors = [];
+    for (const entry of [...appliedLessons].reverse()) {
+      try {
+        rollbackResults.push({ kind: "lesson", ...(await rollbackDerivedLessonChange(entry)) });
+      } catch (rollbackError) {
+        rollbackErrors.push({ id: entry.change.after?.lessonId || entry.change.before?.lessonId, kind: "lesson", message: rollbackError.message });
+      }
+    }
+    for (const entry of [...appliedRows].reverse()) {
+      try {
+        rollbackResults.push({ kind: "examPrepRow", ...(await rollbackDerivedExamPrepChange(entry)) });
+      } catch (rollbackError) {
+        rollbackErrors.push({ id: entry.change.after?.examPrepId, kind: "examPrepRow", message: rollbackError.message });
+      }
+    }
+    const rollbackVerified = rollbackErrors.length === 0 && rollbackResults.every((result) => result.verified);
+    error.statusCode = Number(error.statusCode) || 409;
+    error.code = rollbackVerified ? "SCHOOL_CALENDAR_DERIVED_SAVE_FAILED" : "SCHOOL_CALENDAR_DERIVED_PARTIAL_FAILURE";
+    error.audit = {
+      auditId: normalizedAuditId,
+      failedStage,
+      rollback: { errors: rollbackErrors, results: rollbackResults, verified: rollbackVerified }
+    };
+    throw error;
+  }
+
+  return {
+    auditId: normalizedAuditId,
+    examPrepRows: appliedRows.map((entry) => entry.examPrepRow),
+    lessonIdsToDelete: appliedLessons.filter((entry) => !entry.lesson).map((entry) => entry.change.before?.lessonId).filter(Boolean),
+    lessons: appliedLessons.map((entry) => entry.lesson).filter(Boolean),
+    source: databaseSource,
     verified: true
   };
 }
