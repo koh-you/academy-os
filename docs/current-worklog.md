@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 보충 일정 이중 원천 versioned 저장
+
+- 보충 일정 생성·변경의 `lessons`와 `makeup_tasks` 저장을 `/api/supplement-schedules/save` 단일 계획으로 묶었다. 신규는 insert-only, 기존은 각 `updated_at` CAS를 사용하고 두 원천을 Supabase에서 다시 읽어 모두 일치한 뒤에만 App state를 갱신한다.
+- 첫 원천 저장 뒤 두 번째 원천이 실패하면 정확한 저장 version으로 역순 보상한다. 보상 중 더 최신 변경을 만나면 덮어쓰지 않고 `SUPPLEMENT_SCHEDULE_PARTIAL_FAILURE`와 audit를 반환한다. 브라우저 또는 Supabase 응답 유실은 같은 audit·계획으로 재시도해 중복 수업/보충 항목을 만들지 않는다.
+- 원천 대조·계획 생성·재시도 action은 실제 보충 일정 저장 때만 동적 로드한다. 초기 main은 `943.67 kB`로 945 kB 예산을 유지한다. 기존 알림 예약 orchestration은 두 저장 원천 검증과 화면 반영 뒤에만 호출하며 이번 검증에서 실제 Solapi 행동은 실행하지 않았다.
+- 검증: supplement `10/10`, runtime lint, `check:fast`, scenario·production `823/823`, build `395 modules`·main `943.67 kB`·lazy `12/12`, Worktree 격리 safe browser `34/34`. 새 browser는 서버 반영 뒤 응답 유실→동일 audit 재시도→lesson/task 각 1건을 확인한다.
+- 병행 UI branch `codex/daily-20260803-makeup-journal-modal`은 App/API/persistence를 건드리지 않고 결석보강 상세를 일반 수업일지 shell로 통일했다. 이 저장 단위 main 통합 뒤 최신 main에 재배치해 전체 검증한다.
+
 ## 2026-08-03 보충·알림 다중 원천 읽기/판정 reconcile
 
 - `makeup_tasks`의 정방향 `linkedLessonId`, `lessons`의 역방향 `sourceMakeupTaskId`, 연결 일정, 해당 task의 미발송 `notification_jobs`를 한 pure model에서 판정한다. 정상·기존 ID 연결·일정 변경 대기와 수업 누락·task 링크 누락/오래됨·중복 수업·다른 원천·예상 밖 일정 불일치·이전 일정 예약 잔존을 구분한다.

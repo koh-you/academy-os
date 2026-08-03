@@ -4,7 +4,7 @@
 
 ## P1. 운영 저장 신뢰성
 
-- 다음 단위: 검증된 source reconcile을 입력으로 `lessons + makeup_tasks` 보충 일정 저장을 versioned CAS·Supabase 재조회·중간 실패 복구로 묶고, 원천 저장 완료와 `notification_jobs`/provider 후속 단계를 분리한다. 실제 Solapi 발송·예약·취소는 사람 gate다.
+- 보충 일정 이중 원천 저장 gate는 완료. 검증된 source reconcile을 입력으로 `lessons + makeup_tasks`를 한 versioned plan에 묶고, insert-only/CAS·Supabase 재조회·응답 유실 동일 계획 재시도·중간 실패 역순 보상·최신 변경 보호를 고정했다. App은 두 원천 검증 뒤에만 기존 `notification_jobs`/provider orchestration을 실행한다.
 - 보충/알림 다중 원천 읽기·판정 inventory는 완료. `makeup_tasks.linkedLessonId`, `lessons.sourceMakeupTaskId`, 실제 일정과 미발송 `notification_jobs`를 함께 대조하고 누락·역연결 오류·중복·다른 원천·일정 불일치·이전 일정 예약 상태에서는 오작동 가능한 일정 저장/새 예약을 차단한다.
 - 수업일지 등원보충 초안의 stable request identity gate는 완료. 학생·원 숙제·task 유형에서 같은 ID를 만들고 신규 insert-only·기존 `updated_at` CAS·Supabase 재조회로 저장한다. 결과 불명 재시도는 같은 항목을 회수하고 타 화면 최신 수정은 409로 보호한다.
 - 수업일지 `lesson_student_records`·숙제 다중 행 저장 gate는 완료. 두 원천을 하나의 versioned plan으로 묶어 행별 CAS/insert-only·Supabase 재조회·idempotent retry·역순 보상·더 최신 행 보호·draft 보존을 fixture와 safe browser로 고정했다.
@@ -17,7 +17,7 @@
 - 반 명단 저장 gate는 완료. 학생 추가·반 이동·반관리·퇴원의 `students` 반 필드와 미래 `lessons.studentIds`를 한 versioned plan으로 저장하고, 직접 원천 중간 실패는 역순 보상·원래 버전 재조회, 성공은 두 원천 재조회 대조 뒤에만 UI 반영한다. 과거 수업·변경 대상 밖 수동 명단과 실패 입력을 보존한다.
 - 수동 `school_events` 저장 gate는 완료. 신규는 insert-only, 수정·삭제는 일정별 `updated_at` CAS를 적용하고 API 내부와 App의 후속 GET에서 Supabase 원천을 재조회한다. 결과 불명 신규 저장은 고정 ID로 idempotent 재시도하며 실패 입력·모달을 보존한다. 시험관리 연동 일정과 파생 직전수업 gate도 후속 단위에서 완료했다.
 - 숙제·포털·자료함·보고서 저장 계약.
-- 보충·알림 다중 원천 reconcile의 읽기·판정과 미연결/오작동 버튼 차단은 완료했다. 다음은 두 저장 원천의 versioned write/recovery와 검증된 저장 뒤 notification 후속 단계 분리다.
+- 보충·알림 다중 원천 reconcile의 읽기·판정, 미연결/오작동 버튼 차단, 두 저장 원천의 versioned write/recovery와 검증 뒤 notification 후속 단계 분리는 완료했다.
 - 기준: `docs/save-persistence-audit-2026-07-20.md`, `docs/save-persistence-audit-2026-07-28.md`.
 
 ## P2. 모달 통일 후속

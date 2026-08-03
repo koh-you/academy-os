@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-03
 
+## 2026-08-03 보충 일정 versioned source save
+
+- `lessons + makeup_tasks` 보충 일정 저장을 단일 API 계획으로 묶었다. 각 원천의 insert-only/CAS와 Supabase 재조회가 모두 성공해야 화면을 갱신하고, 그 뒤에만 기존 notification orchestration을 실행한다.
+- 응답 유실은 같은 audit·계획으로 재시도하고, 중간 실패는 역순 CAS 보상한다. 보상 중 최신 변경은 보호하고 부분 실패 audit를 노출한다. 운영 데이터·실제 알림·SQL·유료 호출은 사용하지 않았다.
+- 검증: supplement `10/10`, lint, `check:fast`, production `823/823`, build `395 modules`·main `943.67 kB`·lazy `12/12`, safe browser `34/34`.
+- 다음 순서: 이 branch를 exact-head CI·main CI·Vercel까지 통합한 뒤 `codex/daily-20260803-makeup-journal-modal`을 최신 main에 재배치해 저장 callback 의미와 전체 검증을 확인한다. 이후 P1의 숙제·포털·자료함·보고서 저장 계약에서 한 단위를 선택한다.
+
 ## 2026-08-03 보충·알림 원천 reconcile inventory
 
 - 보충 상세는 `makeup_tasks` 정방향 링크, `lessons` 역방향 원천과 실제 일정, 미발송 `notification_jobs`를 함께 대조한다. 누락·오래된 링크·중복·다른 원천·일정 불일치·이전 일정 예약은 경고로 표시하고 일정 저장/새 예약을 막는다.

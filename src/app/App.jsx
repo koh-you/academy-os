@@ -156,7 +156,6 @@ import {
   getAbsenceSourcePreservationSnapshot,
   getCanceledAbsenceMakeupSaveSnapshot
 } from "../domains/supplements/supplementCancellation.js";
-import { createSupplementSchedulePersistencePlan } from "../domains/supplements/supplementSchedulePlan.js";
 import { findSupplementTaskForCandidate } from "../domains/supplements/supplementCenterSelectionModel.js";
 import {
   createPersistableSupplementTask,
@@ -8400,6 +8399,7 @@ export function App() {
   }
 
   async function handleScheduleSupplementTask(task) {
+    const { saveSupplementScheduleSource } = await import("../domains/supplements/supplementSchedulePersistence.js");
     const {
       keepLessonJournalOpen,
       previousScheduleText,
@@ -8412,24 +8412,27 @@ export function App() {
       notificationJobs,
       task
     });
-    const { lesson, nextTask, student } = createSupplementSchedulePersistencePlan({
-      addMinutes: addMinutesToTime,
-      createLessonId: createSupplementLessonId,
-      createLessonName: createSupplementLessonName,
-      followUpTypeLabel,
-      getDayKey,
-      getLessonColor: getSupplementLessonColor,
-      getLessonStudentIds,
+    const saveResult = await saveSupplementScheduleSource({
+      dependencies: {
+        addMinutes: addMinutesToTime,
+        createLessonId: createSupplementLessonId,
+        createLessonName: createSupplementLessonName,
+        followUpTypeLabel,
+        getDayKey,
+        getLessonColor: getSupplementLessonColor,
+        getLessonStudentIds,
+        normalizeTime: normalizeTimeInput
+      },
       lessons,
-      normalizeTime: normalizeTimeInput,
+      makeupTasks,
+      notificationJobs,
+      request: postJsonWithTimeout,
       students,
       task: taskForSchedule
     });
-
-    const lessonResult = await postJson("/api/lessons", { lesson });
-    const savedLesson = lessonResult.lesson ?? lesson;
-    const taskResult = await postMakeupTask(nextTask);
-    const savedTask = taskResult.makeupTask ?? nextTask;
+    const savedLesson = saveResult.lesson;
+    const savedTask = saveResult.makeupTask;
+    const { student } = saveResult;
 
     setLessons((current) => upsertById(current, savedLesson, "lessonId"));
     setMakeupTasks((current) => upsertById(current, savedTask, "makeupTaskId"));

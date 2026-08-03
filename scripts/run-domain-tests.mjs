@@ -32,6 +32,8 @@ export const domainTestGroups = Object.freeze({
     "scripts/test-supplement-notification-control-controller.mjs",
     "scripts/test-supplement-center-selection-model.mjs",
     "scripts/test-supplement-schedule-plan.mjs",
+    "scripts/test-supplement-schedule-persistence.mjs",
+    "scripts/test-supplement-schedule-api-persistence.mjs",
     "scripts/test-supplement-source-reconcile-model.mjs",
     "scripts/test-supplement-effect-adapter.mjs"
   ]),

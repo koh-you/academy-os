@@ -743,6 +743,60 @@ test("broken supplement lesson links are visible and block schedule or notificat
   expect(pageErrors).toEqual([]);
 });
 
+test("supplement schedule retries one verified source plan after an unknown response", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  const scheduleRequests = [];
+  let abortAfterCommit = true;
+  await page.route("**/api/supplement-schedules/save", async (route) => {
+    if (route.request().method() !== "POST") {
+      await route.continue();
+      return;
+    }
+    scheduleRequests.push(route.request().postDataJSON());
+    if (abortAfterCommit) {
+      abortAfterCommit = false;
+      await route.fetch();
+      await route.abort("failed");
+      return;
+    }
+    await route.continue();
+  });
+
+  await loginAsTeacher(page);
+  await page.getByRole("button", { name: /보충관리/ }).click();
+  await page.getByRole("button", { name: /결석보강/ }).first().click();
+  const withdrawnCandidate = page.getByRole("article").filter({ hasText: "미리보기 퇴원생" });
+  await withdrawnCandidate.getByRole("button", { name: "보충 생성" }).click();
+
+  const supplementModal = page.locator(".supplementStudentModal");
+  await supplementModal.locator('input[type="date"]').fill("2026-08-05");
+  await supplementModal.getByLabel("보충 시간 시").selectOption("15");
+  await supplementModal.getByLabel("보충 시간 분").selectOption("30");
+  const saveSchedule = supplementModal.getByRole("button", { name: "수업일지 일정 만들기" });
+  await saveSchedule.click();
+  await expect(supplementModal.getByRole("status")).toContainText("수업일지 일정 저장 실패");
+
+  await saveSchedule.click();
+  await expect(supplementModal.getByRole("status")).toContainText("수업일지 일정 만들기 완료");
+  expect(scheduleRequests).toHaveLength(2);
+  expect(scheduleRequests[1].auditId).toBe(scheduleRequests[0].auditId);
+  expect(scheduleRequests[1].lessonChange).toEqual(scheduleRequests[0].lessonChange);
+  expect(scheduleRequests[1].taskChange).toEqual(scheduleRequests[0].taskChange);
+
+  const lessons = (await (await request.get(`${safeApiBaseUrl}/api/lessons`)).json()).lessons;
+  const makeupTasks = (await (await request.get(`${safeApiBaseUrl}/api/makeup-tasks`)).json()).makeupTasks;
+  const savedTasks = makeupTasks.filter((task) => task.sourceId === "safe-absence-record");
+  expect(savedTasks).toHaveLength(1);
+  const linkedLessons = lessons.filter(
+    (lesson) => lesson.sourceMakeupTaskId === savedTasks[0].makeupTaskId
+  );
+  expect(linkedLessons).toHaveLength(1);
+  expect(savedTasks[0].linkedLessonId).toBe(linkedLessons[0].lessonId);
+  expect(linkedLessons[0].date).toBe("2026-08-05");
+  expect(linkedLessons[0].startTime).toBe("15:30");
+  expect(pageErrors).toEqual([]);
+});
+
 test("withdrawn absence candidate can reach and complete safe makeup cancellation", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);
