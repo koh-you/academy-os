@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
+import { applySupplementScheduleNotificationsRequest } from "../src/domains/notifications/supplementScheduleNotificationApply.js";
 import {
-  applySupplementScheduleNotificationsRequest,
   cancelActiveSupplementScheduleNoticesRequest,
   cancelSupplementNotificationControlRequest,
   cancelSupplementStudentReminderRequest,

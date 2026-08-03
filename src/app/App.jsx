@@ -129,7 +129,6 @@ import {
 } from "../domains/lessons/generatedLessonSaveStatus.js";
 import { mergeGeneratedLessonLists } from "../domains/lessons/generatedLessonState.js";
 import {
-  applySupplementScheduleNotificationsRequest,
   cancelActiveSupplementScheduleNoticesRequest,
   cancelSupplementNotificationControlRequest,
   cancelSupplementStudentReminderRequest,
@@ -8400,6 +8399,7 @@ export function App() {
 
   async function handleScheduleSupplementTask(task) {
     const { saveSupplementScheduleSource } = await import("../domains/supplements/supplementSchedulePersistence.js");
+    const { applySupplementScheduleNotificationsRequest } = await import("../domains/notifications/supplementScheduleNotificationApply.js");
     const {
       keepLessonJournalOpen,
       previousScheduleText,
