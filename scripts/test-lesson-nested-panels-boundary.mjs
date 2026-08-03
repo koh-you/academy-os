@@ -46,6 +46,9 @@ assert.equal(appSource.includes("SupplementMakeupLessonDetail: lazyTeacherViewCo
 assert.equal(appSource.includes("nestedPanels: lessonNestedPanelRuntime"), true);
 assert.equal(panelsSource.includes("onScheduleTask({"), true);
 assert.equal(panelsSource.includes("onPassTask({"), true);
+assert.equal(panelsSource.includes('<ModalFooter className="confirmActions">'), true);
+assert.equal(panelsSource.includes('onClick={() => setPassConfirmMode("")}'), true);
+assert.equal(panelsSource.includes("onClick={confirmPassTask}"), true);
 assert.equal(panelsSource.includes("onSaveRecord(recordId, lesson, student"), true);
 assert.equal(panelsSource.includes("skipNotificationRefresh: true"), true);
 

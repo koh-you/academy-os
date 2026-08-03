@@ -57,5 +57,6 @@ AI fixture와 안전 가상 데이터로 확인 가능한 shell 변경에는 사
 - P2-2 완료: `SupplementNotificationControlModal`을 공통 `Modal`/`ModalFooter`로 옮기고 busy 닫기 차단·접근성 이름·wide/safe-area layout을 보존했다. 3개 카드와 개별 예약·일괄 취소 callback은 그대로다.
 - P2-3a 완료: `SupplementPassConfirmModal`의 취소·완료 처리 wrapper만 공통 `ModalFooter`로 옮겼다. 완료 callback의 보충 원천 저장 후 학생 11시 예약 취소 orchestration과 busy/button 계약은 변경하지 않았다.
 - P2-3b 완료: `SupplementScheduleChangeConfirmModal`의 세 버튼 wrapper만 공통 `ModalFooter`로 옮겼다. local 변경 사유/내용 draft와 일정만 저장·다음 정각 및 11시 예약 갱신 callback payload는 그대로다.
-- 현재 수치: 공통 shell 41/41, bespoke dialog 0개, 공통 `ModalFooter` 13개, 기존 `modalActions` wrapper 4개.
-- 다음 단위: 수업일지 내부 보충 완료 확인 footer를 검토한다. 완료/추가 보충 저장과 예약 취소 의미는 shell 작업과 함께 바꾸지 않는다.
+- P2-3c 완료: `LessonNestedPanels`의 수업일지 내부 보충 완료/추가 보충 확인 wrapper만 공통 `ModalFooter`로 옮겼다. local 진행 메모와 `onPassTask` payload, busy/close guard는 그대로다.
+- 현재 수치: 공통 shell 41/41, bespoke dialog 0개, 공통 `ModalFooter` 14개, 기존 `modalActions` wrapper 3개.
+- 다음 단위: 월 정규수업 열기 footer를 검토한다. bulk 생성·Supabase 재조회 의미는 shell 작업과 함께 바꾸지 않는다.
