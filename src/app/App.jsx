@@ -3019,6 +3019,11 @@ export function App() {
     defaultSpecialLectureGuides
   );
   const [resourceMaterials, setResourceMaterials] = useStoredState(storageKeys.resourceMaterials, []);
+  const resourceMaterialsRef = useRef(resourceMaterials);
+  const resourceMaterialMutationRef = useRef(false);
+  const [resourceMaterialBusy, setResourceMaterialBusy] = useState(false);
+  const [resourceMaterialSaveState, setResourceMaterialSaveState] = useState({ message: "", state: "idle" });
+  const [resourceMaterialDeleteStates, setResourceMaterialDeleteStates] = useState({});
   const [aiSettings, setAiSettings] = useStoredState(storageKeys.aiSettings, defaultAiSettings);
   const [attendanceSettings, setAttendanceSettings] = useStoredState(
     storageKeys.attendanceSettings,
@@ -3132,6 +3137,10 @@ export function App() {
   useEffect(() => {
     studentIntakeApplicantsRef.current = studentIntakeApplicants;
   }, [studentIntakeApplicants]);
+
+  useEffect(() => {
+    resourceMaterialsRef.current = resourceMaterials;
+  }, [resourceMaterials]);
 
   const sharedAppState = useMemo(() => ({
     aiSettings,
@@ -7111,6 +7120,9 @@ export function App() {
       problemBooks,
       records,
       reportSnapshots,
+      resourceMaterialBusy,
+      resourceMaterialDeleteStates,
+      resourceMaterialSaveState,
       resourceMaterials,
       saveStates,
       schoolEvents,
@@ -8085,38 +8097,59 @@ export function App() {
     }
   }
 
-  function handleAddResourceMaterial(material) {
-    const nextMaterial = {
-      materialId: `resource_${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      title: material.title.trim(),
-      description: material.description.trim(),
-      fileName: material.fileName.trim(),
-      fileUrl: material.fileUrl.trim(),
-      visibility: material.visibility,
-      classTemplateId: material.classTemplateId,
-      studentIds: material.studentIds,
-      notifyByAlimtalk: material.notifyByAlimtalk
-    };
-    setResourceMaterials((current) => [nextMaterial, ...current]);
-    postJson("/api/resource-materials", { material: nextMaterial })
-      .then((result) => {
-        if (!result.ok || !result.material) return;
-        setResourceMaterials((current) =>
-          current.map((item) => (item.materialId === nextMaterial.materialId ? result.material : item))
-        );
-      })
-      .catch((error) => console.error(error));
+  async function handleAddResourceMaterial(material) {
+    if (resourceMaterialMutationRef.current) return { ok: false };
+    resourceMaterialMutationRef.current = true;
+    setResourceMaterialBusy(true);
+    try {
+      const { saveResourceMaterialAction } = await import("../domains/resources/resourceMaterialAction.js");
+      return await saveResourceMaterialAction({
+        material,
+        onApply: (materials) => {
+          resourceMaterialsRef.current = materials;
+          setResourceMaterials(materials);
+        },
+        onState: setResourceMaterialSaveState,
+        read: getJsonWithTimeout,
+        request: postJsonWithTimeout
+      });
+    } catch (error) {
+      setResourceMaterialSaveState({ message: error.message || "자료 등록 저장에 실패했습니다.", state: "failed" });
+      return { error, ok: false };
+    } finally {
+      resourceMaterialMutationRef.current = false;
+      setResourceMaterialBusy(false);
+    }
   }
 
-  function handleDeleteResourceMaterial(materialId) {
-    setResourceMaterials((current) => current.filter((material) => material.materialId !== materialId));
-    fetch(apiUrl(`/api/resource-materials?id=${encodeURIComponent(materialId)}`), { method: "DELETE" })
-      .then((response) => response.json())
-      .then((result) => {
-        if (!result.ok) throw new Error(result.error || "자료 삭제 저장 실패");
-      })
-      .catch((error) => console.error(error));
+  async function handleDeleteResourceMaterial(materialId) {
+    if (resourceMaterialMutationRef.current) return { ok: false };
+    const material = resourceMaterialsRef.current.find((item) => item.materialId === materialId);
+    if (!material) return { ok: false };
+    resourceMaterialMutationRef.current = true;
+    setResourceMaterialBusy(true);
+    try {
+      const { deleteResourceMaterialAction } = await import("../domains/resources/resourceMaterialAction.js");
+      return await deleteResourceMaterialAction({
+        material,
+        onApply: (materials) => {
+          resourceMaterialsRef.current = materials;
+          setResourceMaterials(materials);
+        },
+        onState: (state) => setResourceMaterialDeleteStates((current) => ({ ...current, [materialId]: state })),
+        read: getJsonWithTimeout,
+        request: deleteJsonWithTimeout
+      });
+    } catch (error) {
+      setResourceMaterialDeleteStates((current) => ({
+        ...current,
+        [materialId]: { message: error.message || "자료 삭제에 실패했습니다.", state: "failed" }
+      }));
+      return { error, ok: false };
+    } finally {
+      resourceMaterialMutationRef.current = false;
+      setResourceMaterialBusy(false);
+    }
   }
 
   function handleCreateMakeupTask(task) {

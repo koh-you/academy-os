@@ -7289,7 +7289,12 @@ const server = http.createServer(async (request, response) => {
       const result = await upsertResourceMaterial(payload.material ?? payload);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.currentMaterial !== undefined ? { currentMaterial: error.currentMaterial } : {})
+      });
     }
     return;
   }
@@ -7298,10 +7303,17 @@ const server = http.createServer(async (request, response) => {
     try {
       const materialId = requestUrl.searchParams.get("id");
       if (!materialId) throw new Error("삭제할 자료 ID가 필요합니다.");
-      const result = await deleteResourceMaterial(materialId);
+      const result = await deleteResourceMaterial(materialId, {
+        expectedUpdatedAt: requestUrl.searchParams.get("expectedUpdatedAt") || ""
+      });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.currentMaterial !== undefined ? { currentMaterial: error.currentMaterial } : {})
+      });
     }
     return;
   }

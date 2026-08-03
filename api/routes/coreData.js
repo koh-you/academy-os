@@ -52,6 +52,15 @@ import {
   isSchoolEventInsertConflict
 } from "../../src/domains/schoolCalendar/schoolEventPersistence.js";
 import {
+  areResourceMaterialsPersistedEqual,
+  areResourceMaterialTimestampsEqual,
+  createNextResourceMaterialUpdatedAt,
+  createResourceMaterialConflict,
+  createResourceMaterialVersionFilter,
+  isResourceMaterialInsertConflict,
+  isSameResourceMaterialDraft
+} from "../../src/domains/resources/resourceMaterialPersistence.js";
+import {
   areDerivedExamPrepNonScheduleFieldsEqual,
   areDerivedExamPrepRowsEqual,
   areDerivedLessonsEqual,
@@ -1221,6 +1230,7 @@ function toResourceMaterialRow(material) {
     visibility: normalizeMaterialVisibility(material.visibility),
     notify_by_alimtalk: Boolean(material.notifyByAlimtalk),
     created_by: compact(material.createdBy),
+    created_at: material.createdAt,
     updated_at: new Date().toISOString()
   };
 }
@@ -5106,22 +5116,113 @@ export async function listResourceMaterials() {
   return { source: databaseSource, materials: rows.map(fromResourceMaterialRow) };
 }
 
-export async function upsertResourceMaterial(material) {
-  if (!isSupabaseConfigured({ requireServiceRole: true })) {
-    return { source: fallbackSource, material };
-  }
-
-  const [row] = await upsertRows("resource_materials", [toResourceMaterialRow(material)]);
-  return { source: databaseSource, material: fromResourceMaterialRow(row) };
+async function getResourceMaterial(materialId) {
+  const rows = await listRows(
+    "resource_materials",
+    `select=*&resource_material_id=eq.${encodeURIComponent(materialId)}&limit=1`,
+    { requireServiceRole: true }
+  );
+  return rows[0] ? fromResourceMaterialRow(rows[0]) : null;
 }
 
-export async function deleteResourceMaterial(materialId) {
+function throwResourceMaterialConflict(materialId, currentMaterial, reason = "updated") {
+  const conflict = createResourceMaterialConflict(materialId, currentMaterial, reason);
+  const error = new Error(conflict.message);
+  Object.assign(error, conflict, { statusCode: 409 });
+  throw error;
+}
+
+async function verifyResourceMaterialSave(material, expectedUpdatedAt) {
+  const verifiedMaterial = await getResourceMaterial(material.materialId);
+  if (
+    !verifiedMaterial ||
+    !areResourceMaterialsPersistedEqual(material, verifiedMaterial) ||
+    !areResourceMaterialTimestampsEqual(expectedUpdatedAt, verifiedMaterial.updatedAt)
+  ) {
+    const error = new Error(`자료 ${material.materialId}의 Supabase 저장값을 재조회로 확인하지 못했습니다.`);
+    error.code = "RESOURCE_MATERIAL_VERIFICATION_FAILED";
+    throw error;
+  }
+  return verifiedMaterial;
+}
+
+async function convergeResourceMaterialDraft(requestedMaterial, currentMaterial) {
+  const materialId = requestedMaterial.materialId;
+  if (currentMaterial && areResourceMaterialsPersistedEqual(requestedMaterial, currentMaterial)) {
+    return { source: databaseSource, material: currentMaterial, verified: true };
+  }
+  if (!currentMaterial || !isSameResourceMaterialDraft(requestedMaterial, currentMaterial)) {
+    throwResourceMaterialConflict(materialId, currentMaterial, "duplicate");
+  }
+  const updatedRow = toResourceMaterialRow(requestedMaterial);
+  updatedRow.updated_at = createNextResourceMaterialUpdatedAt(currentMaterial.updatedAt);
+  const patchedRows = await patchRows(
+    "resource_materials",
+    createResourceMaterialVersionFilter(materialId, currentMaterial.updatedAt),
+    updatedRow
+  );
+  if (patchedRows.length !== 1) {
+    throwResourceMaterialConflict(materialId, await getResourceMaterial(materialId));
+  }
+  const verifiedMaterial = await verifyResourceMaterialSave(requestedMaterial, updatedRow.updated_at);
+  return { recoveredDraft: true, source: databaseSource, material: verifiedMaterial, verified: true };
+}
+
+export async function upsertResourceMaterial(material) {
   if (!isSupabaseConfigured({ requireServiceRole: true })) {
-    return { source: fallbackSource, materialId };
+    return { source: fallbackSource, material, verified: false };
   }
 
-  await deleteRows("resource_materials", `resource_material_id=eq.${encodeURIComponent(materialId)}`);
-  return { source: databaseSource, materialId };
+  const materialId = material?.materialId ?? material?.resourceMaterialId;
+  if (!materialId) throw new Error("저장할 자료 ID가 필요합니다.");
+  const requestedMaterial = { ...material, materialId, resourceMaterialId: materialId };
+  if (!requestedMaterial.createdAt) throw new Error("자료 초안의 생성 토큰이 필요합니다.");
+  const currentMaterial = await getResourceMaterial(materialId);
+  if (currentMaterial) {
+    return convergeResourceMaterialDraft(requestedMaterial, currentMaterial);
+  }
+
+  const row = toResourceMaterialRow(requestedMaterial);
+  row.updated_at = createNextResourceMaterialUpdatedAt();
+  try {
+    await insertRows("resource_materials", [row]);
+  } catch (error) {
+    if (isResourceMaterialInsertConflict(error)) {
+      return convergeResourceMaterialDraft(requestedMaterial, await getResourceMaterial(materialId));
+    }
+    throw error;
+  }
+  const verifiedMaterial = await verifyResourceMaterialSave(requestedMaterial, row.updated_at);
+  return { source: databaseSource, material: verifiedMaterial, verified: true };
+}
+
+export async function deleteResourceMaterial(materialId, { expectedUpdatedAt } = {}) {
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { source: fallbackSource, materialId, verified: false };
+  }
+
+  if (!materialId) throw new Error("삭제할 자료 ID가 필요합니다.");
+  if (!expectedUpdatedAt) throw new Error("삭제할 자료의 서버 버전이 필요합니다.");
+  const currentMaterial = await getResourceMaterial(materialId);
+  if (!currentMaterial) {
+    return { source: databaseSource, materialId, verified: true };
+  }
+  if (!areResourceMaterialTimestampsEqual(currentMaterial.updatedAt, expectedUpdatedAt)) {
+    throwResourceMaterialConflict(materialId, currentMaterial);
+  }
+  const deletedRows = await deleteRows(
+    "resource_materials",
+    createResourceMaterialVersionFilter(materialId, currentMaterial.updatedAt)
+  );
+  if (deletedRows.length !== 1) {
+    throwResourceMaterialConflict(materialId, await getResourceMaterial(materialId));
+  }
+  if (await getResourceMaterial(materialId)) {
+    const error = new Error(`자료 ${materialId} 삭제를 Supabase 재조회로 확인하지 못했습니다.`);
+    error.code = "RESOURCE_MATERIAL_VERIFICATION_FAILED";
+    throw error;
+  }
+  return { source: databaseSource, materialId, verified: true };
 }
 
 export async function listNotificationJobs({ lessonId = "", limit = 1000, scheduledFrom = "", scheduledTo = "", status = "" } = {}) {
