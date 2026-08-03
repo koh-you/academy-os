@@ -25,7 +25,8 @@ export function createSupplementNotificationControlViewModel({
     isSupplementTeacherEditedField(task, draftField) &&
     !String(task[draftField] ?? "").trim()
   );
-  const blockReason = !task?.linkedLessonId
+  const sourceBlockReason = task ? dependencies.getSourceBlockReason?.(task) || "" : "";
+  const blockReason = sourceBlockReason || (!task?.linkedLessonId
     ? "수업일지 일정을 먼저 만들어야 알림톡을 예약할 수 있습니다."
     : hasUnsavedChanges
       ? "수정 중인 보충 내용·일정을 먼저 저장해야 현재 원본으로 알림톡을 예약할 수 있습니다."
@@ -33,7 +34,7 @@ export function createSupplementNotificationControlViewModel({
         ? "선생님 최종 알림톡 문구가 비어 있습니다. 문구를 입력하고 저장한 뒤 예약해 주세요."
         : !task.scheduledDate || !task.scheduledTime
           ? "저장된 보충 날짜와 시간이 없습니다."
-          : "";
+          : "");
   const hasHistoricalJob = Boolean(job && ["canceled", "failed"].includes(job.status));
   const preview = task && controlType
     ? hasHistoricalJob

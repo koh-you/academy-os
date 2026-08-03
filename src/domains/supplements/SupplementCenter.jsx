@@ -28,6 +28,7 @@ import { SupplementHistoryModal } from "./SupplementHistoryModal.jsx";
 import { selectRecentSupplementTasks } from "./supplementHistory.js";
 import { SupplementPassConfirmModal } from "./SupplementPassConfirmModal.jsx";
 import { SupplementStudentModal } from "./SupplementStudentModal.jsx";
+import { createSupplementSourceReconcileModel } from "./supplementSourceReconcileModel.js";
 
 export function SupplementCenter({
   dependencies,
@@ -219,7 +220,17 @@ export function SupplementCenter({
 
   function renderSupplementRow(item) {
     const existingTask = findSupplementTaskForCandidate(tasks, item.task);
-    const taskProgress = getSupplementTaskProgress(existingTask, lessons);
+    const sourceReconcile = existingTask
+      ? createSupplementSourceReconcileModel({ lessons, notificationJobs, task: existingTask })
+      : null;
+    const taskProgress = sourceReconcile?.statusTone === "warning" &&
+      !["done", "canceled"].includes(existingTask?.status)
+      ? {
+          detail: sourceReconcile.detail,
+          label: sourceReconcile.statusLabel,
+          tone: "warning"
+        }
+      : getSupplementTaskProgress(existingTask, lessons);
     const rowAction = supplementRowActions[getSupplementActionKey(existingTask ?? item.task)];
     return (
       <SupplementCandidateRow
@@ -363,6 +374,7 @@ export function SupplementCenter({
       {selectedSupplementStudent ? (
         <SupplementStudentModal
           dependencies={supplementStudentModalDependencies}
+          lessons={lessons}
           notificationTemplates={notificationTemplates}
           onCancelAbsenceMakeup={handleCancelAbsenceMakeupFromModal}
           onCancelAbsenceSource={handleCancelAbsenceSourceFromModal}
