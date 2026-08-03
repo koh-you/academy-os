@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 P2-3a 보충 완료 확인 footer
+
+- `SupplementPassConfirmModal`의 `취소`·`보충 완료 처리` wrapper만 공통 `ModalFooter`로 옮겼다. 버튼 순서·문구·`isBusy` 잠금과 두 callback identity는 그대로다.
+- 확인 callback은 App에서 보충 항목을 저장한 뒤 학생 11시 Solapi 예약 취소까지 조립하므로 shell에 상태나 side effect를 새로 넣지 않았다.
+- 안전 브라우저는 연결 원천이 깨진 가상 fixture에서 확인창을 열고 공통 footer의 `취소`만 실행한다. 실제 보충 저장·알림 예약 취소는 실행하지 않았다.
+- 현재 공통 footer 12개, 기존 action wrapper 5개다. 다음은 보충 일정 변경 확인 footer를 별도 단위로 검토한다.
+
 ## 2026-08-03 P2-2 Solapi 제어창 공통 shell
 
 - 유일한 bespoke dialog였던 `SupplementNotificationControlModal`을 공통 `Modal`/`ModalFooter`로 옮겼다. 공통 shell에 기본 `창 닫기`를 유지하는 opt-in `closeAriaLabel`을 추가해 기존 `알림 제어 닫기` 이름을 보존했다.
