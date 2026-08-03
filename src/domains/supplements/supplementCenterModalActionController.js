@@ -29,7 +29,11 @@ export function createSupplementCenterModalActionHandlers({
       const result = await onScheduleTask(task);
       const nextTask = result?.makeupTask ?? task;
       clearPendingCandidateTask(nextTask);
-      setSupplementRowAction(nextTask, "saved", "수업일지 일정 저장 완료");
+      setSupplementRowAction(
+        nextTask,
+        "saved",
+        result?.notificationFailed ? "일정 저장 완료 · 알림 예약 실패" : "수업일지 일정 저장 완료"
+      );
       return result;
     } catch (error) {
       setSupplementRowAction(task, "failed", error?.message || "수업일지 일정 저장 실패");

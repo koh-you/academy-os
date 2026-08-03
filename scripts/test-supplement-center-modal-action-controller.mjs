@@ -72,6 +72,24 @@ assert.equal(scheduleResult.makeupTask, scheduled.savedTask);
 assert.deepEqual(scheduled.events.map(([type]) => type), ["row", "schedule", "clear", "row"]);
 assert.deepEqual(scheduled.events.at(-1), ["row", scheduled.savedTask, "saved", "수업일지 일정 저장 완료"]);
 
+const scheduledWithProviderFailure = createHarness({
+  onScheduleTask: async () => ({
+    makeupTask: { makeupTaskId: "task-1", status: "scheduled" },
+    notificationFailed: true,
+    notificationRetryScope: "provider",
+    sourceSaved: true
+  })
+});
+await scheduledWithProviderFailure.handlers.handleScheduleSupplementTaskFromModal(
+  scheduledWithProviderFailure.task
+);
+assert.deepEqual(scheduledWithProviderFailure.events.at(-1), [
+  "row",
+  { makeupTaskId: "task-1", status: "scheduled" },
+  "saved",
+  "일정 저장 완료 · 알림 예약 실패"
+]);
+
 const canceled = createHarness();
 assert.equal(await canceled.handlers.handleCancelAbsenceSourceFromModal(canceled.task), canceled.savedRecord);
 assert.equal(canceled.getPendingCandidateTask(), null);

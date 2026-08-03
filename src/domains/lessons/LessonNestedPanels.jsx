@@ -243,6 +243,13 @@ export function SupplementMakeupLessonDetail({
         scheduledDate: nextTask.scheduledDate || scheduleDraft.scheduledDate,
         scheduledTime: nextTask.scheduledTime || normalizedScheduleDraftTime
       });
+      if (result?.notificationFailed) {
+        setScheduleSaveState({
+          message: `일정은 서버 원천 저장·재확인을 완료했습니다. ${result.notificationFailureMessage || "알림톡 예약에 실패했습니다."} 예약 확인에서 실패한 알림만 다시 시도해 주세요.`,
+          state: "saved"
+        });
+        return;
+      }
       setScheduleSaveState({
         message: updateStudentReminder
           ? [

@@ -2,11 +2,14 @@
 
 업데이트: 2026-08-03
 
-## 2026-08-03 결석보강 수업일지 모달 통일
+## 2026-08-03 결석보강 수업일지 통일 + 보충 일정 source save
 
 - 결석보강은 일반 수업일지와 같은 modal shell·학생 기록 표·수정/저장·알림 구조로 연다. 헤더 아래에는 원 결석 수업 날짜·반·시간·사유만 추가하며 숙제보충 전용 상세는 그대로다.
-- App handler, 보충 일정 persistence, API, 알림 side effect는 변경하지 않았다. 검증은 lesson `15/15`, production `823/823`, build `396 modules`·lazy `12/12`, 전체 safe browser `34/34` 통과다.
-- 병행 리팩터링 task의 보충 일정 원자 저장 PR이 main에 들어온 뒤 현재 branch를 최신 main으로 맞추고 저장 callback·일정 생성 browser 경로까지 함께 재검증한 후 통합·배포한다.
+
+- `lessons + makeup_tasks` 보충 일정 저장을 단일 API 계획으로 묶었다. 각 원천의 insert-only/CAS와 Supabase 재조회가 모두 성공해야 화면을 갱신하고, 그 뒤에만 기존 notification orchestration을 실행한다.
+- 응답 유실 뒤 날짜·시간·메모가 바뀌어도 logical task key로 최초 audit를 회수한 뒤 최신 draft를 새 version에 후속 CAS 저장한다. 중간 실패는 역순 CAS 보상하고 최신 변경을 보호한다. provider 실패는 source saved·notification failed·provider-only 재시도로 분리한다.
+- Vercel Node에서 초기 main 예산을 52 bytes 넘긴 알림 적용 함수를 저장 뒤 동적 chunk로 옮겨 예산을 올리지 않고 main을 `942.19 kB`로 낮췄다. 검증: supplement `10/10`, nested lesson boundary, lint, `check:fast`, production `823/823`, build `396 modules`·lazy `12/12`, safe browser `34/34`. 운영 데이터·실제 알림·SQL·유료 호출은 사용하지 않았다.
+- 저장 단위 main 통합 뒤 UI branch에 exact main을 merge했다. 결합 검증은 lesson `15/15`, supplement `10/10`, lint, production `823/823`, build `398 modules`·main `942.19 kB`·lazy `12/12`, 집중 browser `1/1`, 전체 safe browser `35/35`다. PR exact-head CI·Vercel을 확인한 뒤 main 통합·배포한다.
 
 ## 2026-08-03 보충·알림 원천 reconcile inventory
 

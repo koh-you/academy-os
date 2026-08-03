@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
+import { applySupplementScheduleNotificationsRequest } from "../src/domains/notifications/supplementScheduleNotificationApply.js";
 import {
-  applySupplementScheduleNotificationsRequest,
   cancelActiveSupplementScheduleNoticesRequest,
   cancelSupplementNotificationControlRequest,
   cancelSupplementStudentReminderRequest,
@@ -209,6 +209,39 @@ assert.deepEqual({
   reminderJob: "student-11",
   reminderStatus: "scheduled"
 });
+assert.equal(scheduleNotificationResult.notificationFailed, false);
+assert.equal(scheduleNotificationResult.notificationRetryScope, "none");
+
+const providerFailureResult = await applySupplementScheduleNotificationsRequest({
+  reserveScheduleNotices: async () => {
+    throw new Error("Solapi 일정 안내 예약 응답 유실");
+  },
+  reserveStudentReminder: async () => ({
+    notificationJob: { notificationJobId: "student-11-saved" },
+    message: "11시 예약 완료",
+    status: "scheduled"
+  }),
+  shouldReserveScheduleNotice: true,
+  shouldUpdateStudentReminder: true,
+  student: { studentId: "student-1" },
+  task: reminderTask
+});
+assert.deepEqual({
+  failed: providerFailureResult.notificationFailed,
+  failureStage: providerFailureResult.notificationFailureStage,
+  parent: providerFailureResult.parentScheduleChangeNoticeStatus,
+  reminder: providerFailureResult.supplementReminderStatus,
+  retryScope: providerFailureResult.notificationRetryScope,
+  student: providerFailureResult.scheduleChangeNoticeStatus
+}, {
+  failed: true,
+  failureStage: "scheduleNotices",
+  parent: "failed",
+  reminder: "scheduled",
+  retryScope: "provider",
+  student: "failed"
+});
+assert.match(providerFailureResult.notificationFailureMessage, /응답 유실/);
 
 const skippedScheduleNotifications = await applySupplementScheduleNotificationsRequest({
   shouldReserveScheduleNotice: false,

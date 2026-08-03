@@ -8,6 +8,10 @@ import {
   areLessonJournalMakeupTasksEqual,
   createNextLessonJournalMakeupTaskUpdatedAt
 } from "../src/domains/lessons/lessonJournalMakeupTaskPersistence.js";
+import {
+  areSupplementScheduleTasksEqual,
+  createSupplementScheduleSavePlan
+} from "../src/domains/supplements/supplementSchedulePersistence.js";
 
 const host = "127.0.0.1";
 const port = Number(process.env.ACADEMY_SAFE_API_PORT || 8787);
@@ -490,6 +494,71 @@ function handleMutation(pathname, payload) {
     }
     return { makeupTasks: savedTasks, ok: true, verified: true };
   }
+  if (pathname === "/api/supplement-schedules/save") {
+    let plan;
+    try {
+      plan = createSupplementScheduleSavePlan({
+        afterLesson: payload.lessonChange?.after,
+        afterTask: payload.taskChange?.after,
+        beforeLesson: payload.lessonChange?.before,
+        beforeTask: payload.taskChange?.before
+      });
+    } catch (error) {
+      return { code: "SUPPLEMENT_SCHEDULE_INVALID", error: error.message, ok: false, statusCode: 400 };
+    }
+    const { lessonChange, taskChange } = plan;
+    const currentLesson = state.lessons.find(
+      (lesson) => lesson.lessonId === lessonChange.after.lessonId
+    ) ?? null;
+    const currentTask = state.makeupTasks.find(
+      (task) => task.makeupTaskId === taskChange.after.makeupTaskId
+    ) ?? null;
+    const lessonAlreadySaved = currentLesson && areLessonJournalHistoryLessonsEqual(currentLesson, lessonChange.after);
+    const taskAlreadySaved = currentTask && areSupplementScheduleTasksEqual(currentTask, taskChange.after);
+    const lessonBeforeMatches = lessonChange.before
+      ? Boolean(
+          currentLesson &&
+          currentLesson.updatedAt === lessonChange.before.updatedAt &&
+          areLessonJournalHistoryLessonsEqual(currentLesson, lessonChange.before)
+        )
+      : !currentLesson;
+    const taskBeforeMatches = taskChange.before
+      ? Boolean(
+          currentTask &&
+          currentTask.updatedAt === taskChange.before.updatedAt &&
+          areSupplementScheduleTasksEqual(currentTask, taskChange.before)
+        )
+      : !currentTask;
+    if ((!lessonAlreadySaved && !lessonBeforeMatches) || (!taskAlreadySaved && !taskBeforeMatches)) {
+      return {
+        code: "SUPPLEMENT_SCHEDULE_CONFLICT",
+        error: "보충 일정 원천이 다른 화면에서 먼저 변경되었습니다.",
+        ok: false,
+        statusCode: 409
+      };
+    }
+    const lesson = lessonAlreadySaved
+      ? currentLesson
+      : {
+          ...lessonChange.after,
+          updatedAt: new Date(Math.max(Date.now(), new Date(currentLesson?.updatedAt || 0).getTime() + 1)).toISOString()
+        };
+    const makeupTask = taskAlreadySaved
+      ? currentTask
+      : {
+          ...taskChange.after,
+          updatedAt: createNextLessonJournalMakeupTaskUpdatedAt(currentTask?.updatedAt)
+        };
+    state.lessons = upsertById(state.lessons, lesson, ["lessonId"]);
+    state.makeupTasks = upsertById(state.makeupTasks, makeupTask, ["makeupTaskId"]);
+    return {
+      auditId: payload.auditId,
+      lesson,
+      makeupTask,
+      ok: true,
+      verified: true
+    };
+  }
   if (pathname === "/api/exam-prep-rows/bulk") {
     const conflicts = [];
     const examPrepRows = [];
@@ -935,7 +1004,7 @@ const server = http.createServer(async (request, response) => {
       state = createInitialState();
       return sendJson(response, 200, { ok: true, safeFixture: true });
     }
-    if (["/api/app-state", "/api/lesson-records/bulk", "/api/lesson-journal/makeup-tasks/save", "/api/lesson-journal/rows/save", "/api/school-events", "/api/school-calendar/derived-save"].includes(requestUrl.pathname)) {
+    if (["/api/app-state", "/api/lesson-records/bulk", "/api/lesson-journal/makeup-tasks/save", "/api/lesson-journal/rows/save", "/api/supplement-schedules/save", "/api/school-events", "/api/school-calendar/derived-save"].includes(requestUrl.pathname)) {
       await new Promise((resolve) => setTimeout(resolve, 800));
     }
     const { statusCode = 200, ...result } = handleMutation(requestUrl.pathname, payload);

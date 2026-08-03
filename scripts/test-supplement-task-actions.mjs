@@ -170,6 +170,54 @@ assert.deepEqual(scheduleEvents[4][1], {
 });
 assert.equal(scheduleEvents[6][1].title, "수업일지 일정 만들기 완료");
 
+const providerFailureEvents = [];
+const providerFailureResult = {
+  makeupTask: { ...scheduledTask, linkedLessonId: "lesson-supplement" },
+  notificationFailed: true,
+  notificationFailureMessage: "Solapi 예약 응답을 확인하지 못했습니다.",
+  notificationRetryScope: "provider",
+  parentScheduleChangeNoticeStatus: "failed",
+  scheduleChangeNoticeStatus: "failed",
+  sourceSaved: true,
+  supplementReminderStatus: "failed"
+};
+const returnedProviderFailure = await applySupplementScheduleAction({
+  getImmediateNoticeStatus: (status) => status || "idle",
+  onFeedback: (value) => providerFailureEvents.push(["feedback", value]),
+  onMarkSaved: (value) => providerFailureEvents.push(["mark", value]),
+  onResetConfirmation: () => providerFailureEvents.push(["reset"]),
+  onSaveStatus: (value) => providerFailureEvents.push(["status", value]),
+  scheduleTask: async () => {
+    providerFailureEvents.push(["schedule"]);
+    return providerFailureResult;
+  },
+  task,
+  taskWithDraft: scheduledTask
+});
+assert.equal(returnedProviderFailure, providerFailureResult);
+assert.deepEqual(providerFailureEvents.map(([type]) => type), [
+  "status",
+  "feedback",
+  "schedule",
+  "mark",
+  "status",
+  "reset",
+  "feedback"
+]);
+assert.deepEqual(providerFailureEvents[4][1], {
+  lesson: "synced",
+  makeupTask: "saved",
+  notificationDraft: "saved",
+  parentChangeNotice: "failed",
+  parentScheduleNoticeLabel: "학부모 확정 안내",
+  studentChangeNotice: "failed",
+  studentScheduleNoticeLabel: "학생 확정 안내",
+  studentReminder: "failed"
+});
+assert.equal(providerFailureEvents[6][1].title, "일정 저장 완료 · 알림 예약 실패");
+assert.match(providerFailureEvents[6][1].message, /Supabase 저장·재확인/);
+assert.match(providerFailureEvents[6][1].message, /실패한 알림만 다시 시도/);
+
 const scheduleFailureEvents = [];
 await assert.rejects(() => applySupplementScheduleAction({
   getImmediateNoticeStatus: (status) => status || "idle",
