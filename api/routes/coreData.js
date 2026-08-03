@@ -15,6 +15,13 @@ import {
   createAppStateVersionFilter,
   isAppStateInsertConflict
 } from "../domain/appStatePersistence.js";
+import {
+  areExamPrepRowTimestampsEqual,
+  createExamPrepRowConflict,
+  createExamPrepRowVersionFilter,
+  createNextExamPrepRowUpdatedAt,
+  isExamPrepRowInsertConflict
+} from "../../src/domains/exams/examPrepRowPersistence.js";
 import { deleteRows, getSupabaseStatus, insertRows, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
 
 const fallbackSource = "local_sample";
@@ -886,6 +893,14 @@ async function getExistingExamPrepRowMap(examPrepIds = []) {
       .filter((row) => idSet.has(row.examPrepId))
       .map((row) => [row.examPrepId, row])
   );
+}
+
+function areExamPrepRowsPersistedEqual(requestedRow = {}, verifiedRow = {}) {
+  const requestedDbRow = toExamPrepRow(requestedRow);
+  const verifiedDbRow = toExamPrepRow(verifiedRow);
+  delete requestedDbRow.updated_at;
+  delete verifiedDbRow.updated_at;
+  return JSON.stringify(requestedDbRow) === JSON.stringify(verifiedDbRow);
 }
 
 function getExamPrepLogicalKey(row = {}) {
@@ -2615,29 +2630,133 @@ export async function deleteDuplicateExamPrepRows() {
   return { source: databaseSource, deletedExamPrepRowIds: duplicateRows.map((row) => row.examPrepId) };
 }
 
-export async function upsertExamPrepRow(row) {
-  if (!isSupabaseConfigured({ requireServiceRole: true })) {
-    return { source: fallbackSource, examPrepRow: row };
+export async function upsertExamPrepRow(row, options = {}) {
+  const result = await upsertExamPrepRows([row], options);
+  const conflict = result.conflicts?.[0];
+  if (conflict) {
+    const error = new Error(conflict.message);
+    error.code = conflict.code;
+    error.statusCode = 409;
+    throw error;
   }
-
-  const existingRows = await getExistingExamPrepRowMap([row.examPrepId]);
-  const safeRow = mergeExamPrepScheduleFields(row, existingRows.get(row.examPrepId));
-  const [savedRow] = await upsertRows("exam_prep_rows", [toExamPrepRow(safeRow)]);
-  return { source: databaseSource, examPrepRow: fromExamPrepRow(savedRow) };
+  const failure = result.failures?.[0];
+  if (failure) throw new Error(failure.message);
+  return {
+    source: result.source,
+    verified: result.verified,
+    examPrepRow: result.examPrepRows?.[0] ?? row
+  };
 }
 
-export async function upsertExamPrepRows(rows) {
+export async function upsertExamPrepRows(rows, { allowRestore = false } = {}) {
   if (!Array.isArray(rows) || rows.length === 0) {
-    return { source: isSupabaseConfigured() ? databaseSource : fallbackSource, examPrepRows: [] };
+    return {
+      conflicts: [],
+      examPrepRows: [],
+      failures: [],
+      source: isSupabaseConfigured() ? databaseSource : fallbackSource,
+      verified: true
+    };
   }
   if (!isSupabaseConfigured({ requireServiceRole: true })) {
-    return { source: fallbackSource, examPrepRows: rows };
+    return {
+      conflicts: [],
+      examPrepRows: [],
+      failures: rows.map((row) => ({
+        code: "EXAM_PREP_ROW_NOT_PERSISTED",
+        examPrepId: row?.examPrepId ?? "",
+        message: "Supabase가 연결되지 않아 시험정보 저장을 확인하지 못했습니다."
+      })),
+      source: fallbackSource,
+      verified: false
+    };
   }
 
-  const existingRows = await getExistingExamPrepRowMap(rows.map((row) => row.examPrepId));
-  const safeRows = rows.map((row) => mergeExamPrepScheduleFields(row, existingRows.get(row.examPrepId)));
-  const savedRows = await upsertRows("exam_prep_rows", safeRows.map(toExamPrepRow));
-  return { source: databaseSource, examPrepRows: savedRows.map(fromExamPrepRow) };
+  const requestedRows = [...new Map(
+    rows.filter((row) => row?.examPrepId).map((row) => [row.examPrepId, row])
+  ).values()];
+  const existingRows = await getExistingExamPrepRowMap(requestedRows.map((row) => row.examPrepId));
+  const conflicts = [];
+  const failures = [];
+  const persistedIntents = [];
+
+  for (const row of requestedRows) {
+    const existingRow = existingRows.get(row.examPrepId) ?? null;
+    if (existingRow && (!row.updatedAt || row.updatedAt !== existingRow.updatedAt)) {
+      conflicts.push(createExamPrepRowConflict(row.examPrepId, existingRow));
+      continue;
+    }
+    if (!existingRow && row.updatedAt && !allowRestore) {
+      conflicts.push(createExamPrepRowConflict(row.examPrepId, null, "deleted"));
+      continue;
+    }
+
+    const safeRow = mergeExamPrepScheduleFields(row, existingRow);
+    const dbRow = toExamPrepRow(safeRow);
+    dbRow.updated_at = createNextExamPrepRowUpdatedAt(existingRow?.updatedAt);
+    try {
+      let savedRows;
+      if (existingRow) {
+        savedRows = await patchRows(
+          "exam_prep_rows",
+          createExamPrepRowVersionFilter(row.examPrepId, existingRow.updatedAt),
+          dbRow
+        );
+        if (!savedRows.length) {
+          conflicts.push(createExamPrepRowConflict(row.examPrepId, existingRow));
+          continue;
+        }
+      } else {
+        try {
+          savedRows = await insertRows("exam_prep_rows", [dbRow]);
+        } catch (error) {
+          if (isExamPrepRowInsertConflict(error)) {
+            const latestRows = await getExistingExamPrepRowMap([row.examPrepId]);
+            conflicts.push(createExamPrepRowConflict(row.examPrepId, latestRows.get(row.examPrepId) ?? null));
+            continue;
+          }
+          throw error;
+        }
+      }
+      persistedIntents.push({ requestedRow: safeRow, updatedAt: dbRow.updated_at });
+    } catch (error) {
+      failures.push({
+        code: "EXAM_PREP_ROW_SAVE_FAILED",
+        examPrepId: row.examPrepId,
+        message: error.message || "시험정보 저장에 실패했습니다."
+      });
+    }
+  }
+
+  const verifiedRows = await getExistingExamPrepRowMap(
+    persistedIntents.map(({ requestedRow }) => requestedRow.examPrepId)
+  );
+  const examPrepRows = [];
+  for (const intent of persistedIntents) {
+    const examPrepId = intent.requestedRow.examPrepId;
+    const verifiedRow = verifiedRows.get(examPrepId);
+    if (
+      !verifiedRow ||
+      !areExamPrepRowsPersistedEqual(intent.requestedRow, verifiedRow) ||
+      !areExamPrepRowTimestampsEqual(intent.updatedAt, verifiedRow.updatedAt)
+    ) {
+      failures.push({
+        code: "EXAM_PREP_ROW_VERIFICATION_FAILED",
+        examPrepId,
+        message: `시험정보 ${examPrepId}의 Supabase 저장값을 재조회로 확인하지 못했습니다.`
+      });
+      continue;
+    }
+    examPrepRows.push(verifiedRow);
+  }
+
+  return {
+    conflicts,
+    examPrepRows,
+    failures,
+    source: databaseSource,
+    verified: examPrepRows.length === requestedRows.length && conflicts.length === 0 && failures.length === 0
+  };
 }
 
 export async function listTestSessions(filters = {}) {

@@ -1023,10 +1023,10 @@ const appStateAutosaveRisk = {
 
 const examPrepAutosaveRisk = {
   title: "시험정보/시험 후 기록지 입력 저장",
-  storage: "Supabase exam_prep_rows: 입력 즉시 같은 브라우저에서 직렬 저장하고, 진행 중 같은 행의 후속 입력은 최신값으로 합칩니다.",
-  risk: "저장 뒤 Supabase 재조회와 updated_at 충돌 대조는 아직 없습니다. 다른 탭·기기나 학사일정 수정이 같은 row를 갱신하면 마지막 도착 값이 남을 수 있습니다.",
-  stopCondition: "중복 시험정보, 잘못된 고사 값, 저장 실패, 새로고침 후 값 되돌림이 보이면 필터를 덧대지 말고 원천 row를 확인합니다.",
-  recommendation: "행 단위 저장 상태를 확인하고, 다음 단계에서 updated_at CAS와 저장 뒤 재조회 대조를 추가합니다."
+  storage: "Supabase exam_prep_rows: 입력 즉시 같은 브라우저에서 직렬 저장하고, updated_at CAS와 서버 재조회로 완료를 확인합니다.",
+  risk: "다른 탭·기기나 학사일정 수정이 같은 행을 먼저 저장하면 자동 병합하지 않고 현재 입력을 저장 실패로 유지합니다.",
+  stopCondition: "저장 실패가 뜨면 반복 입력을 멈추고 새로고침으로 서버 저장본과 현재 입력을 비교합니다.",
+  recommendation: "충돌한 입력은 서버 저장본을 확인한 뒤 필요한 값만 다시 반영합니다."
 };
 
 const schoolCalendarAutosaveRisk = {
@@ -5751,6 +5751,14 @@ export function App() {
     if (!examPrepRowSaveControllerRef.current) {
       examPrepRowSaveControllerRef.current = createExamPrepRowSaveController({
         onError: console.error,
+        onPersisted: ({ hasPendingChanges, row }) => {
+          setExamPrepRows((current) => current.map((currentRow) => {
+            if (currentRow.examPrepId !== row.examPrepId) return currentRow;
+            return hasPendingChanges
+              ? { ...currentRow, updatedAt: row.updatedAt }
+              : row;
+          }));
+        },
         request: (changedRows) => saveExamPrepRowsRequest({
           examPrepRows: changedRows,
           request: postJson
@@ -5861,6 +5869,7 @@ export function App() {
         readState: () => readExamPrepDeleteState(auditId),
         restoreRows: (rows) =>
           saveExamPrepRowsRequest({
+            allowRestore: true,
             examPrepRows: rows,
             request: postJson
           }),

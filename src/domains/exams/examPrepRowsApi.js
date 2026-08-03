@@ -1,8 +1,18 @@
-export function saveExamPrepRowsRequest({ examPrepRows = [], request }) {
+export async function saveExamPrepRowsRequest({ allowRestore = false, examPrepRows = [], request }) {
   if (typeof request !== "function") {
     throw new Error("시험정보 저장 request가 필요합니다.");
   }
-  return request("/api/exam-prep-rows/bulk", { examPrepRows });
+  const result = await request("/api/exam-prep-rows/bulk", {
+    examPrepRows,
+    ...(allowRestore ? { allowRestore: true } : {})
+  });
+  if (result?.source !== "supabase" || !Array.isArray(result?.examPrepRows)) {
+    throw new Error("시험정보의 Supabase 저장 결과를 확인하지 못했습니다. 현재 입력은 유지됩니다.");
+  }
+  if (allowRestore && result.verified !== true) {
+    throw new Error("시험정보 삭제 복구를 Supabase 재조회로 확인하지 못했습니다.");
+  }
+  return result;
 }
 
 export async function deleteExamPrepRowRequest({
