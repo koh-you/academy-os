@@ -1118,6 +1118,13 @@ test("lesson journal calendar can move to the next month and back", async ({ pag
   const originalMonthTitle = await monthHeading.textContent();
   await monthNavigation.getByRole("button", { name: "다음 달" }).click();
   await expect(monthHeading).not.toHaveText(originalMonthTitle);
+  const openMonthlyLessonsButton = monthNavigation.getByRole("button", { name: /정규수업 열기/ });
+  await expect(openMonthlyLessonsButton).toBeVisible();
+  await openMonthlyLessonsButton.click();
+  const openMonthlyLessonsDialog = page.getByRole("dialog", { name: /정규수업 열기/ });
+  await expect(openMonthlyLessonsDialog.locator(".modalFooter")).toBeVisible();
+  await openMonthlyLessonsDialog.getByRole("button", { exact: true, name: "닫기" }).click();
+  await expect(openMonthlyLessonsDialog).toBeHidden();
   await monthNavigation.getByRole("button", { name: "이전 달" }).click();
   await expect(monthHeading).toHaveText(originalMonthTitle);
   expect(pageErrors).toEqual([]);

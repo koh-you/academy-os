@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 P2-3d 월 정규수업 열기 footer
+
+- `MonthlyRegularLessonOpenModal`의 `닫기`·월 정규수업 열기 wrapper만 공통 `ModalFooter`로 옮겼다. `isSaving` 잠금, `canOpen`, callback과 문구는 그대로다.
+- App의 additive bulk 생성, 45초 timeout, 응답 불명 뒤 Supabase 재조회, 기존 회차·출결·숙제·알림 미복사 계약은 변경하지 않았다.
+- 안전 브라우저는 빈 다음 달 확인창을 열고 닫기만 하며 수업 생성은 실행하지 않는다.
+- 공통 footer 15개다. 남은 action wrapper 2개는 보충 상세 내부 작업 바로 유지하며 P2-3을 닫고 P2-4 저장 상태 대조로 이동한다.
+
 ## 2026-08-03 P2-3c 수업일지 내부 보충 완료 확인 footer
 
 - `LessonNestedPanels`의 보충 완료/추가 보충 확인창 버튼 wrapper만 공통 `ModalFooter`로 옮겼다.

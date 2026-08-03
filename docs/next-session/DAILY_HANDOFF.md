@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-03
 
+## 2026-08-03 P2-3d 월 정규수업 열기 footer
+
+- `MonthlyRegularLessonOpenModal`의 최종 버튼 wrapper만 공통 `ModalFooter`로 옮겼다. App-owned bulk save/requery와 버튼 조건은 그대로다.
+- safe browser는 빈 다음 달 확인창의 footer와 닫기만 실행하며 수업 생성은 없다.
+- 공통 footer는 15개다. 남은 `modalActions` 2개는 보충 상세 내부 작업 바로 유지한다. P2-3은 종료하고 다음 P2-4는 저장 상태 vocabulary 대조다.
+
 ## 2026-08-03 P2-3c 수업일지 내부 보충 완료 확인 footer
 
 - `LessonNestedPanels`의 보충 완료/추가 보충 확인 wrapper만 공통 `ModalFooter`로 옮겼다. local state, 취소/완료 callback, busy guard는 그대로다.

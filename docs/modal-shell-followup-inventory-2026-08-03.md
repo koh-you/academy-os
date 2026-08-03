@@ -58,5 +58,7 @@ AI fixture와 안전 가상 데이터로 확인 가능한 shell 변경에는 사
 - P2-3a 완료: `SupplementPassConfirmModal`의 취소·완료 처리 wrapper만 공통 `ModalFooter`로 옮겼다. 완료 callback의 보충 원천 저장 후 학생 11시 예약 취소 orchestration과 busy/button 계약은 변경하지 않았다.
 - P2-3b 완료: `SupplementScheduleChangeConfirmModal`의 세 버튼 wrapper만 공통 `ModalFooter`로 옮겼다. local 변경 사유/내용 draft와 일정만 저장·다음 정각 및 11시 예약 갱신 callback payload는 그대로다.
 - P2-3c 완료: `LessonNestedPanels`의 수업일지 내부 보충 완료/추가 보충 확인 wrapper만 공통 `ModalFooter`로 옮겼다. local 진행 메모와 `onPassTask` payload, busy/close guard는 그대로다.
-- 현재 수치: 공통 shell 41/41, bespoke dialog 0개, 공통 `ModalFooter` 14개, 기존 `modalActions` wrapper 3개.
-- 다음 단위: 월 정규수업 열기 footer를 검토한다. bulk 생성·Supabase 재조회 의미는 shell 작업과 함께 바꾸지 않는다.
+- P2-3d 완료: `MonthlyRegularLessonOpenModal`의 닫기·월 정규수업 열기 wrapper만 공통 `ModalFooter`로 옮겼다. bulk 생성, 45초 timeout, Supabase 재조회, 기존 회차 보존 계약은 App에 그대로다.
+- 현재 수치: 공통 shell 41/41, bespoke dialog 0개, 공통 `ModalFooter` 15개, 기존 `modalActions` wrapper 2개.
+- 남은 2개는 `SupplementTaskActionBar`와 `LessonNestedPanels` 일정 편집의 모달 내부 작업 바로 최종 footer가 아니므로 유지한다.
+- 다음 단위: P2-4 modal save state를 여섯 공통 상태와 대조한다. source/provider 복합 결과는 단일 상태로 축약하지 않는다.
