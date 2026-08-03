@@ -86,9 +86,10 @@
 ## 자동 작업
 
 - 매일 오전 9시에 독립 task가 열린다.
-- 자동 task 제목은 실행 시작 시 서울 기준 `YYYY-MM-DD Academy OS 매일 개발 이어가기`로 바꾼다.
+- 자동 task 제목은 실행 시작 시 다른 작업보다 먼저 서울 기준 `YYYY-MM-DD Academy OS 매일 개발 이어가기`로 바꾸고, 실패하거나 완료 응답이 없으면 한 번 재시도해 결과에 확인 여부를 남긴다.
 - 자동 작업 전용 clone에서 최신 `origin/main`을 기준으로 날짜별 `codex/` branch를 만들고, 안전한 한 단위만 commit/push한다.
-- main 자동 merge, 운영 삭제·발송·유료 호출·SQL 적용은 금지한다.
+- 1~3번 작업은 사람 Gate가 없고 시작 기준 main 불변·동시 통합 owner 없음·exact-head 원격 검사 통과·fast-forward 가능 조건을 모두 만족할 때 AI가 main 통합, main CI, 배포 commit 대조와 안전한 smoke까지 수행한다.
+- main이 바뀌었거나 충돌·동시 통합 징후가 있으면 자동 rebase나 force push 없이 중단한다. 4번 사람 Gate와 운영 삭제·발송·유료 호출·SQL 적용은 자동 수행하지 않는다.
 
 ## 빠른 확인
 

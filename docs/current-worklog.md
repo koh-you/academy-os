@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 매일 자동 task 제목·main 통합 정책
+
+- 매일 9시 자동 task는 서울 날짜를 계산해 다른 작업보다 먼저 `YYYY-MM-DD Academy OS 매일 개발 이어가기`로 제목을 바꾸며, 도구 실패나 완료 응답 부재 시 한 번 재시도하고 결과에 확인 여부를 남긴다.
+- 1~3번 작업은 사람 Gate가 없고 시작 기준 main 불변, 동시 통합 owner 없음, exact-head 원격 검사 통과, fast-forward 가능 조건을 모두 만족하면 AI가 main push·main CI·배포 commit 대조·안전한 smoke까지 완료한다.
+- 조건이 깨지면 자동 rebase·충돌 해결·force push를 하지 않고 branch 상태에서 보고한다. 4번 사람 Gate와 운영 데이터·알림·유료 AI·SQL side effect는 계속 자동 실행하지 않는다.
+- 전날 자동 task는 결과와 main/branch 상태가 남아 있으면 보관해도 된다. 진행 중이거나 사람 Gate·통합 대기 결정을 놓치지 않도록 현재 task는 완료 전에 보관하지 않는다.
+
 ## 2026-08-03 시험정보 행 자동저장 직렬화
 
 - 분류는 3번 기능·개선이다. 운영 회귀 발생을 확인한 것은 아니지만, 입력마다 실행되는 `exam_prep_rows` bulk 요청이 역순 도착하면 최신값을 덮을 수 있는 P1 저장 위험을 한 단위로 줄였다.

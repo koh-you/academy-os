@@ -47,6 +47,7 @@
 - 동시 작업은 같은 worktree/index를 공유하지 않는다. 별도 `codex/` branch와 worktree를 사용하고 main 통합 owner는 한 세션만 둔다.
 - 사용자 소유 변경을 임의로 stage/revert하지 않는다. 예상 밖 변경이나 충돌이 있으면 중단하고 보고한다.
 - 검증이 끝난 AI 변경은 별도 지시가 없어도 의도적으로 commit하고 GitHub에 push한다.
+- 매일 9시 자동 task의 1~3번 작업은 사람 Gate가 없고 시작 기준 `origin/main` 불변·동시 통합 owner 없음·정확한 branch HEAD 원격 검사 통과·fast-forward 가능 조건을 모두 만족하면 AI가 force 없이 main까지 통합하고 main CI·배포 commit·안전한 smoke를 확인한다. 조건이 하나라도 깨지면 통합하지 않고 보고한다.
 - 비밀값, `.env`, PDF/HWP/HWPX/ZIP, 대용량 운영 자료는 commit하지 않는다. API key 값은 출력하지 않는다.
 
 ## 배포·운영 경계
