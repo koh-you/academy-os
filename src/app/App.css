@@ -20886,6 +20886,11 @@ body.attendanceOnlyBody {
     width: 100%;
   }
 
+  .portalMaterialCard .listCardActions button {
+    justify-content: center;
+    width: 100%;
+  }
+
   .specialLecturePublicPage {
     padding: 12px;
   }

@@ -4677,6 +4677,7 @@ export function App() {
         onStudentCheckHomework={handleStudentCheckHomework}
         onStudentDeleteQuestion={handleStudentDeleteQuestion}
         onOpenExamPostFile={(file) => handleOpenExamPostFile(session.sessionToken, file)}
+        onOpenResourceMaterial={handleOpenResourceMaterial}
         onSubmitExamPostSubmission={handleSubmitExamPostSubmission}
         onStudentUpdateQuestion={handleStudentUpdateQuestion}
       />
@@ -4700,6 +4701,7 @@ export function App() {
         sessionStudentId={session.studentId}
         students={students}
         onLogout={handleLogout}
+        onOpenResourceMaterial={handleOpenResourceMaterial}
       />
     );
   }
@@ -7198,6 +7200,7 @@ export function App() {
       handleOpenExamPrepView,
       handleOpenLessonJournal,
       handleOpenMonthlyRegularLessonModal,
+      handleOpenResourceMaterial,
       handleOpenReport,
       handlePassSupplementTask,
       handlePasteLessonToSelectedDate,
@@ -7300,6 +7303,7 @@ export function App() {
             onStudentAddQuestion={handleStudentAddQuestion}
             onStudentCheckHomework={handleStudentCheckHomework}
             onStudentDeleteQuestion={handleStudentDeleteQuestion}
+            onOpenResourceMaterial={handleOpenResourceMaterial}
             onSubmitExamPostSubmission={handleSubmitExamPostSubmission}
             onStudentUpdateQuestion={handleStudentUpdateQuestion}
           />
@@ -8097,13 +8101,13 @@ export function App() {
     }
   }
 
-  async function handleAddResourceMaterial(material) {
+  async function handleAddResourceMaterial(material, file = null) {
     if (resourceMaterialMutationRef.current) return { ok: false };
     resourceMaterialMutationRef.current = true;
     setResourceMaterialBusy(true);
     try {
-      const { saveResourceMaterialAction } = await import("../domains/resources/resourceMaterialAction.js");
-      return await saveResourceMaterialAction({
+      return (await import("../domains/resources/resourceMaterialAction.js")).saveResourceMaterialAction({
+        file,
         material,
         onApply: (materials) => {
           resourceMaterialsRef.current = materials;
@@ -8111,10 +8115,11 @@ export function App() {
         },
         onState: setResourceMaterialSaveState,
         read: getJsonWithTimeout,
-        request: postJsonWithTimeout
+        request: postJsonWithTimeout,
+        sessionToken: session?.sessionToken
       });
     } catch (error) {
-      setResourceMaterialSaveState({ message: error.message || "자료 등록 저장에 실패했습니다.", state: "failed" });
+      setResourceMaterialSaveState({ message: error.message || "자료 등록에 실패했습니다.", state: "failed" });
       return { error, ok: false };
     } finally {
       resourceMaterialMutationRef.current = false;
@@ -8129,8 +8134,7 @@ export function App() {
     resourceMaterialMutationRef.current = true;
     setResourceMaterialBusy(true);
     try {
-      const { deleteResourceMaterialAction } = await import("../domains/resources/resourceMaterialAction.js");
-      return await deleteResourceMaterialAction({
+      return (await import("../domains/resources/resourceMaterialAction.js")).deleteResourceMaterialAction({
         material,
         onApply: (materials) => {
           resourceMaterialsRef.current = materials;
@@ -8138,7 +8142,7 @@ export function App() {
         },
         onState: (state) => setResourceMaterialDeleteStates((current) => ({ ...current, [materialId]: state })),
         read: getJsonWithTimeout,
-        request: deleteJsonWithTimeout
+        sessionToken: session?.sessionToken
       });
     } catch (error) {
       setResourceMaterialDeleteStates((current) => ({
@@ -8150,6 +8154,13 @@ export function App() {
       resourceMaterialMutationRef.current = false;
       setResourceMaterialBusy(false);
     }
+  }
+
+  function handleOpenResourceMaterial(material) {
+    const popup = window.open();
+    import("../domains/resources/resourceMaterialFileApi.js").then((api) =>
+      api.openResourceMaterialWindow({ materialId: material.materialId, popup, sessionToken: session.sessionToken })
+    );
   }
 
   function handleCreateMakeupTask(task) {
@@ -8950,6 +8961,7 @@ function StudentPortalV2({
   onStudentCheckHomework,
   onStudentDeleteQuestion,
   onOpenExamPostFile,
+  onOpenResourceMaterial,
   onSubmitExamPostSubmission,
   onStudentUpdateQuestion,
 }) {
@@ -9031,6 +9043,7 @@ function StudentPortalV2({
       onChangeActiveTab={setActiveTab}
       onChangeSelectedStudentId={setSelectedStudentId}
       onLogout={onLogout}
+      onOpenMaterial={onOpenResourceMaterial}
       previewMode={previewMode}
       reports={studentReports}
       selectedStudent={selectedStudent}

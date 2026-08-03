@@ -19,6 +19,7 @@ import {
   getCoreDataStatus,
   getLessonClosurePreflight,
   getLessonStudentRecordForAttendance,
+  getResourceMaterial,
   getNotificationJob,
   listAttendanceCandidateStudents,
   listAcademyReminders,
@@ -107,6 +108,18 @@ import {
   saveConsecutiveAttendanceVisitRecords,
   shouldApplyConsecutiveAttendanceVisit
 } from "../src/domains/lessons/attendanceVisitContinuity.js";
+import {
+  canPortalSessionAccessResourceMaterial,
+  isExternalResourceMaterialUrl,
+  parseResourceMaterialStorageReference,
+  resourceMaterialStorageAllowedMimeTypes,
+  resourceMaterialStorageBucket,
+  resourceMaterialStorageMaxBytes
+} from "../src/domains/resources/resourceMaterialStorageModel.js";
+import {
+  deleteResourceMaterialWithFile,
+  saveResourceMaterialFile
+} from "./domain/resourceMaterialStorage.js";
 import { getNextHourlyAlimtalkReservationAt } from "../src/domains/notifications/supplementJobBuilders.js";
 import { isSupplementScheduleForLessonComment } from "../src/domains/notifications/supplementSchedule.js";
 import { normalizeSpecialLectureTallySessionRequests } from "../src/domains/specialLectures/tallySessionRequests.js";
@@ -1463,7 +1476,9 @@ async function getPortalData(session) {
     schoolEvents: (schoolEventsResult.schoolEvents ?? []).filter((event) =>
       schoolNamesMatch(event.schoolName, student.schoolName)
     ),
-    materials: materialsResult.materials ?? [],
+    materials: (materialsResult.materials ?? []).filter((material) =>
+      canPortalSessionAccessResourceMaterial(material, student, session.role)
+    ),
     reportSnapshots: (states.reportSnapshots ?? []).filter((item) => item.studentId === session.studentId),
     scoreRecords: (states.scoreRecords ?? []).filter((item) => item.studentId === session.studentId),
     examPostSubmissions: (states.examPostSubmissions ?? []).filter((item) => item.studentId === session.studentId),
@@ -3379,7 +3394,7 @@ async function ensureStorageBucket(bucketId, options = {}) {
   }
 }
 
-async function uploadStorageObjectWithBucketRetry(bucketId, storagePath, { contentType, body }) {
+async function uploadStorageObjectWithBucketRetry(bucketId, storagePath, { bucketOptions = {}, contentType, body }) {
   try {
     return await supabaseStorageRequest(`object/${bucketId}/${storagePath}`, {
       method: "PUT",
@@ -3389,7 +3404,7 @@ async function uploadStorageObjectWithBucketRetry(bucketId, storagePath, { conte
     });
   } catch (error) {
     if (!isStorageBucketNotFound(error)) throw error;
-    await ensureStorageBucket(bucketId);
+    await ensureStorageBucket(bucketId, bucketOptions);
     return supabaseStorageRequest(`object/${bucketId}/${storagePath}`, {
       method: "PUT",
       contentType,
@@ -3445,7 +3460,7 @@ async function createSignedStorageUrl(bucketId, storagePath, expiresIn = 60 * 60
   return `${getSupabaseStorageBaseUrl()}${result.signedURL}`;
 }
 
-async function downloadStorageObject(bucketId, storagePath) {
+async function downloadStorageObjectWithMetadata(bucketId, storagePath) {
   if (!bucketId || !storagePath) throw new Error("다운로드할 파일 경로가 없습니다.");
   const serviceRoleKey = getSupabaseServiceRoleKey();
   const response = await fetch(`${getSupabaseStorageBaseUrl()}/object/${bucketId}/${storagePath}`, {
@@ -3462,9 +3477,18 @@ async function downloadStorageObject(bucketId, storagePath) {
     } catch {
       data = null;
     }
-    throw new Error(data?.message || data?.error || response.statusText);
+    const error = new Error(data?.message || data?.error || response.statusText);
+    error.statusCode = response.status;
+    throw error;
   }
-  return Buffer.from(await response.arrayBuffer());
+  return {
+    buffer: Buffer.from(await response.arrayBuffer()),
+    contentType: response.headers.get("content-type") || "application/octet-stream"
+  };
+}
+
+async function downloadStorageObject(bucketId, storagePath) {
+  return (await downloadStorageObjectWithMetadata(bucketId, storagePath)).buffer;
 }
 
 async function deleteStorageObject(bucketId, storagePath) {
@@ -3476,6 +3500,55 @@ async function deleteStorageObject(bucketId, storagePath) {
     if (error?.statusCode === 404) return false;
     throw error;
   }
+}
+
+function createResourceMaterialStorageOperations() {
+  return {
+    deleteMaterial: deleteResourceMaterial,
+    deleteObject: deleteStorageObject,
+    download: downloadStorageObjectWithMetadata,
+    getMaterial: getResourceMaterial,
+    saveMaterial: upsertResourceMaterial,
+    upload: (bucketId, storagePath, options) => uploadStorageObjectWithBucketRetry(bucketId, storagePath, {
+      ...options,
+      bucketOptions: {
+        allowedMimeTypes: resourceMaterialStorageAllowedMimeTypes,
+        fileSizeLimit: resourceMaterialStorageMaxBytes
+      }
+    })
+  };
+}
+
+async function resolveResourceMaterialOpenUrl(materialId, { portalSession = null, teacherSession = null } = {}) {
+  const material = await getResourceMaterial(materialId);
+  if (!material) {
+    const error = new Error("등록된 자료를 찾지 못했습니다.");
+    error.statusCode = 404;
+    throw error;
+  }
+  if (!teacherSession) {
+    const studentsResult = await listStudents();
+    const student = (studentsResult.students ?? []).find((item) => item.studentId === portalSession?.studentId);
+    if (!student || !canPortalSessionAccessResourceMaterial(material, student, portalSession.role)) {
+      const error = new Error("이 계정에 공개된 자료만 열람할 수 있습니다.");
+      error.statusCode = 403;
+      throw error;
+    }
+  }
+
+  const storageReference = parseResourceMaterialStorageReference(material.fileUrl);
+  if (storageReference) {
+    if (storageReference.bucketId !== resourceMaterialStorageBucket) {
+      const error = new Error("허용되지 않은 자료 Storage 경로입니다.");
+      error.statusCode = 400;
+      throw error;
+    }
+    return createSignedStorageUrl(storageReference.bucketId, storageReference.storagePath);
+  }
+  if (isExternalResourceMaterialUrl(material.fileUrl)) return material.fileUrl;
+  const error = new Error("열 수 있는 자료 파일 또는 링크가 없습니다.");
+  error.statusCode = 404;
+  throw error;
 }
 
 function inferExamAnalysisSubjectFromText(value = "") {
@@ -7279,6 +7352,90 @@ const server = http.createServer(async (request, response) => {
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/resource-material-files") {
+    try {
+      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
+      const teacherSession = verifyTeacherSessionToken(token);
+      if (!teacherSession) {
+        sendJson(request, response, 401, { ok: false, error: "교사 세션 인증이 필요합니다." });
+        return;
+      }
+      const payload = await readJsonBody(request, { limitBytes: 28 * 1024 * 1024 });
+      const parsedFile = parseDataUrl(payload.file?.dataUrl);
+      const digest = crypto.createHash("sha256").update(parsedFile.buffer).digest("hex");
+      const result = await saveResourceMaterialFile({
+        digest,
+        file: {
+          buffer: parsedFile.buffer,
+          fileName: payload.file?.fileName,
+          mimeType: parsedFile.mimeType,
+          size: parsedFile.buffer.length
+        },
+        material: {
+          ...(payload.material ?? {}),
+          createdBy: teacherSession.teacherId
+        },
+        operations: createResourceMaterialStorageOperations()
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.currentMaterial !== undefined ? { currentMaterial: error.currentMaterial } : {})
+      });
+    }
+    return;
+  }
+
+  if (request.method === "DELETE" && requestUrl.pathname === "/api/resource-material-files") {
+    try {
+      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
+      const teacherSession = verifyTeacherSessionToken(token);
+      if (!teacherSession) {
+        sendJson(request, response, 401, { ok: false, error: "교사 세션 인증이 필요합니다." });
+        return;
+      }
+      const payload = await readJsonBody(request);
+      const result = await deleteResourceMaterialWithFile({
+        material: payload.material,
+        operations: createResourceMaterialStorageOperations()
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.currentMaterial !== undefined ? { currentMaterial: error.currentMaterial } : {})
+      });
+    }
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/resource-material-files/open") {
+    try {
+      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
+      const teacherSession = verifyTeacherSessionToken(token);
+      const portalSession = teacherSession ? null : verifyPortalSessionToken(token);
+      if (!teacherSession && !portalSession) {
+        sendJson(request, response, 401, { ok: false, error: "자료 열람 세션 인증이 필요합니다. 다시 로그인해 주세요." });
+        return;
+      }
+      const materialId = requestUrl.searchParams.get("id") || "";
+      if (!materialId) {
+        sendJson(request, response, 400, { ok: false, error: "열람할 자료 ID가 필요합니다." });
+        return;
+      }
+      const signedUrl = await resolveResourceMaterialOpenUrl(materialId, { portalSession, teacherSession });
+      sendJson(request, response, 200, { ok: true, signedUrl });
+    } catch (error) {
+      sendJson(request, response, Number(error.statusCode) || 500, { ok: false, error: error.message });
     }
     return;
   }

@@ -19,6 +19,7 @@ export function StudentPortalShell({
   onChangeActiveTab,
   onChangeSelectedStudentId,
   onLogout,
+  onOpenMaterial,
   previewMode,
   reports,
   selectedStudent,
@@ -58,7 +59,7 @@ export function StudentPortalShell({
 
         {activeTab === "today" ? <StudentTodayTab {...today} /> : null}
         {activeTab === "all" ? <StudentAllHomeworkTab {...allHomework} /> : null}
-        {activeTab === "materials" ? <PortalMaterialsTab materials={materials} emptyMessage="아직 공개된 자료가 없습니다." /> : null}
+        {activeTab === "materials" ? <PortalMaterialsTab materials={materials} emptyMessage="아직 공개된 자료가 없습니다." onOpenMaterial={onOpenMaterial} /> : null}
         {activeTab === "curriculum" ? <StudentEmptyTab message="아직 커리큘럼이 설정되지 않았습니다. 선생님께 문의하세요." /> : null}
         {activeTab === "evaluation" ? <StudentEvaluationTab /> : null}
         {activeTab === "mypage" ? <StudentMyPageTab {...myPage} /> : null}

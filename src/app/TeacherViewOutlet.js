@@ -212,7 +212,8 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
         students: models.students,
         templates: models.classTemplates,
         onAddMaterial: actions.handleAddResourceMaterial,
-        onDeleteMaterial: actions.handleDeleteResourceMaterial
+        onDeleteMaterial: actions.handleDeleteResourceMaterial,
+        onOpenMaterial: actions.handleOpenResourceMaterial
       }
     },
     students: {

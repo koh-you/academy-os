@@ -270,11 +270,13 @@ for (const binding of [
   "resourceMaterialBusy: models.resourceMaterialBusy",
   "resourceMaterialDeleteStates: models.resourceMaterialDeleteStates",
   "resourceMaterialSaveState: models.resourceMaterialSaveState",
-  "if (result?.ok) setForm(createEmptyResourceMaterialForm())",
+  "if (result?.ok) {",
+  "setForm(createEmptyResourceMaterialForm())",
+  "setSelectedFile(null)",
   "disabled={resourceMaterialBusy}",
   "resourceMaterialSaveFeedback",
   "visibleResourceMaterialSaveState",
-  "파일 내용이 업로드되지 않고 파일명만 저장됩니다"
+  "private Storage에 업로드됩니다"
 ]) assert.ok(`${outletSource}\n${screenSource}`.includes(binding), `missing resource save UI binding: ${binding}`);
 assert.ok(serverSource.includes('expectedUpdatedAt: requestUrl.searchParams.get("expectedUpdatedAt") || ""'));
 

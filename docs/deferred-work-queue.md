@@ -17,7 +17,7 @@
 - 반 명단 저장 gate는 완료. 학생 추가·반 이동·반관리·퇴원의 `students` 반 필드와 미래 `lessons.studentIds`를 한 versioned plan으로 저장하고, 직접 원천 중간 실패는 역순 보상·원래 버전 재조회, 성공은 두 원천 재조회 대조 뒤에만 UI 반영한다. 과거 수업·변경 대상 밖 수동 명단과 실패 입력을 보존한다.
 - 수동 `school_events` 저장 gate는 완료. 신규는 insert-only, 수정·삭제는 일정별 `updated_at` CAS를 적용하고 API 내부와 App의 후속 GET에서 Supabase 원천을 재조회한다. 결과 불명 신규 저장은 고정 ID로 idempotent 재시도하며 실패 입력·모달을 보존한다. 시험관리 연동 일정과 파생 직전수업 gate도 후속 단위에서 완료했다.
 - 학생 포털의 숙제 완료·질문·시험 제출은 인증된 학생 범위와 서버 재조회 계약을 재확인했다. 교사 `숙제현황` 확인 상태도 versioned CAS·Supabase 재조회·행별 saving/saved/failed 표시로 고정했다. 사용자가 직접 해결한 `확인할 숙제` 별도 요청과 닫힌 PR #54는 중복 제외한다.
-- 자료함 메타데이터 등록·삭제 gate는 완료. 신규는 UI stable ID·생성 토큰의 insert-only를 사용하고, 응답 유실 뒤 수정한 최신 초안은 회수한 서버 버전에 CAS 반영한다. 삭제도 `updated_at` CAS를 사용하며 양쪽 모두 Supabase 목록 재조회 뒤에만 UI를 바꾸고 실패 입력·행을 유지한다. 남은 독립 단위는 실제 파일 Storage 업로드·열기·삭제의 부분실패 복구와 보고서 snapshot의 명시 저장·실패 복구다.
+- 자료함 메타데이터와 실제 파일 Storage gate는 완료. 신규 row는 stable ID·생성 토큰 insert-only/CAS와 Supabase 재조회를 사용하고, private Storage 파일은 생성 토큰·내용 해시 경로로 분리한다. 업로드 뒤 row 실패는 새 객체를 정리하고, 삭제는 파일 백업→Storage 삭제→row CAS 뒤 충돌 시 원경로 복구를 수행한다. 열기는 교사 또는 공개 대상 학생·학부모 bearer를 서버에서 재검증해 서명 URL을 발급한다. 남은 독립 단위는 보고서 snapshot의 명시 저장·실패 복구다.
 - 보충·알림 다중 원천 reconcile의 읽기·판정, 미연결/오작동 버튼 차단, 두 저장 원천의 versioned write/recovery와 검증 뒤 notification 후속 단계 분리는 완료했다.
 - 기준: `docs/save-persistence-audit-2026-07-20.md`, `docs/save-persistence-audit-2026-07-28.md`.
 

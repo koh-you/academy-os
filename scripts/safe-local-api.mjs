@@ -1,4 +1,5 @@
 import http from "node:http";
+import crypto from "node:crypto";
 import {
   areLessonJournalHistoryHomeworksEqual,
   areLessonJournalHistoryLessonsEqual
@@ -23,6 +24,12 @@ import {
   createNextResourceMaterialUpdatedAt,
   isSameResourceMaterialDraft
 } from "../src/domains/resources/resourceMaterialPersistence.js";
+import {
+  createResourceMaterialStoragePath,
+  createResourceMaterialStorageReference,
+  parseResourceMaterialStorageReference,
+  validateResourceMaterialFile
+} from "../src/domains/resources/resourceMaterialStorageModel.js";
 
 const host = "127.0.0.1";
 const port = Number(process.env.ACADEMY_SAFE_API_PORT || 8787);
@@ -433,6 +440,7 @@ function createInitialState() {
 }
 
 let state = createInitialState();
+let resourceMaterialFiles = new Map();
 
 const listRoutes = new Map([
   ["/api/academy-reminders", ["academyReminders", "academyReminders"]],
@@ -1245,6 +1253,95 @@ const server = http.createServer(async (request, response) => {
   if (request.method === "GET" && requestUrl.pathname === "/api/integrations/status") {
     return sendJson(response, 200, { ok: true, safeFixture: true });
   }
+  if (request.method === "POST" && requestUrl.pathname === "/api/resource-material-files") {
+    const payload = await readJson(request);
+    const match = String(payload.file?.dataUrl ?? "").match(/^data:([^;,]+)?(;base64)?,(.*)$/);
+    if (!match) return sendJson(response, 400, { ok: false, error: "안전 fixture 파일 형식이 올바르지 않습니다." });
+    const buffer = Buffer.from(match[3], match[2] ? "base64" : "utf8");
+    const mimeType = match[1] || "application/octet-stream";
+    try {
+      validateResourceMaterialFile({ fileName: payload.file?.fileName, mimeType, size: buffer.length });
+    } catch (error) {
+      return sendJson(response, 400, { ok: false, error: error.message });
+    }
+    const material = payload.material || {};
+    const storagePath = createResourceMaterialStoragePath({
+      createdAt: material.createdAt,
+      digest: crypto.createHash("sha256").update(buffer).digest("hex"),
+      fileName: payload.file?.fileName,
+      materialId: material.materialId
+    });
+    const fileReference = createResourceMaterialStorageReference({ storagePath });
+    resourceMaterialFiles.set(storagePath, { buffer, mimeType });
+    const { statusCode = 200, ...result } = handleMutation("/api/resource-materials", {
+      material: {
+        ...material,
+        fileName: payload.file?.fileName,
+        fileUrl: fileReference,
+        materialType: "file"
+      }
+    });
+    if (statusCode !== 200) resourceMaterialFiles.delete(storagePath);
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    return sendJson(response, statusCode, {
+      ...result,
+      fileReference,
+      ok: statusCode === 200 && result.ok !== false,
+      safeFixture: true,
+      source: "supabase",
+      storagePath
+    });
+  }
+  if (request.method === "DELETE" && requestUrl.pathname === "/api/resource-material-files") {
+    const payload = await readJson(request);
+    const material = payload.material || {};
+    const currentMaterial = state.resourceMaterials.find((item) => item.materialId === material.materialId) ?? null;
+    if (currentMaterial && currentMaterial.updatedAt !== material.updatedAt) {
+      return sendJson(response, 409, {
+        code: "RESOURCE_MATERIAL_CONFLICT",
+        currentMaterial,
+        error: `자료 ${material.materialId}가 다른 화면에서 먼저 변경되었습니다.`,
+        ok: false,
+        safeFixture: true,
+        source: "supabase"
+      });
+    }
+    const reference = parseResourceMaterialStorageReference(currentMaterial?.fileUrl || material.fileUrl);
+    if (reference) resourceMaterialFiles.delete(reference.storagePath);
+    state.resourceMaterials = state.resourceMaterials.filter((item) => item.materialId !== material.materialId);
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    return sendJson(response, 200, {
+      materialId: material.materialId,
+      ok: true,
+      safeFixture: true,
+      source: "supabase",
+      verified: true
+    });
+  }
+  if (request.method === "GET" && requestUrl.pathname === "/api/resource-material-files/open") {
+    const materialId = requestUrl.searchParams.get("id") || "";
+    const material = state.resourceMaterials.find((item) => item.materialId === materialId) ?? null;
+    if (!material) return sendJson(response, 404, { ok: false, error: "안전 fixture 자료를 찾지 못했습니다." });
+    const reference = parseResourceMaterialStorageReference(material.fileUrl);
+    if (!reference) return sendJson(response, 200, { ok: true, safeFixture: true, signedUrl: material.fileUrl });
+    const storedFile = resourceMaterialFiles.get(reference.storagePath);
+    if (!storedFile) return sendJson(response, 404, { ok: false, error: "안전 fixture 파일을 찾지 못했습니다." });
+    return sendJson(response, 200, {
+      ok: true,
+      safeFixture: true,
+      signedUrl: `http://${host}:${port}/api/safe-fixture/resource-material-file?path=${encodeURIComponent(reference.storagePath)}`
+    });
+  }
+  if (request.method === "GET" && requestUrl.pathname === "/api/safe-fixture/resource-material-file") {
+    const storedFile = resourceMaterialFiles.get(requestUrl.searchParams.get("path") || "");
+    if (!storedFile) return sendJson(response, 404, { ok: false, error: "안전 fixture 파일을 찾지 못했습니다." });
+    response.writeHead(200, {
+      "Access-Control-Allow-Origin": "*",
+      "Content-Type": storedFile.mimeType
+    });
+    response.end(storedFile.buffer);
+    return;
+  }
   if (request.method === "GET" && listRoutes.has(requestUrl.pathname)) {
     const [stateKey, responseKey] = listRoutes.get(requestUrl.pathname);
     return sendJson(response, 200, { ok: true, safeFixture: true, source: "supabase", [responseKey]: state[stateKey] });
@@ -1253,6 +1350,7 @@ const server = http.createServer(async (request, response) => {
     const payload = await readJson(request);
     if (requestUrl.pathname === "/api/safe-fixture/reset") {
       state = createInitialState();
+      resourceMaterialFiles = new Map();
       return sendJson(response, 200, { ok: true, safeFixture: true });
     }
     if (["/api/app-state", "/api/lesson-records/bulk", "/api/lesson-journal/makeup-tasks/save", "/api/lesson-journal/rows/save", "/api/resource-materials", "/api/supplement-schedules/save", "/api/school-events", "/api/school-calendar/derived-save"].includes(requestUrl.pathname)) {
