@@ -11,6 +11,7 @@ const initialState = {
       className: "월 경계 연동반",
       classTemplateId: "safe-cross-month-class",
       endTime: "13:00",
+      name: "월 경계 연동반",
       startTime: "10:00",
       studentIds: ["safe-active-student"]
     },
@@ -19,11 +20,23 @@ const initialState = {
       classTemplateId: "safe-settlement-class",
       days: ["mon", "wed", "fri"],
       endTime: "19:00",
+      name: "정산 미리보기반",
       startTime: "16:00",
       studentIds: ["safe-settlement-student"]
     }
   ],
-  examPrepRows: [],
+  examPrepRows: [
+    {
+      examCycle: "2026-2-mid",
+      examPrepId: "safe-exam-prep-row",
+      grade: "고1",
+      publisher: "안전 출판사",
+      schoolName: "안전고",
+      scope: "안전 fixture 시험 범위",
+      subject: "공통수학1",
+      subTextbook: "안전 fixture 부교재"
+    }
+  ],
   homeworks: [],
   lessons: [
     {
@@ -327,6 +340,12 @@ function handleMutation(pathname, payload) {
   if (pathname === "/api/makeup-tasks/bulk") {
     state.makeupTasks = payload.makeupTasks || [];
     return { makeupTasks: state.makeupTasks, ok: true };
+  }
+  if (pathname === "/api/exam-prep-rows/bulk") {
+    for (const examPrepRow of payload.examPrepRows || []) {
+      state.examPrepRows = upsertById(state.examPrepRows, examPrepRow, ["examPrepId"]);
+    }
+    return { examPrepRows: state.examPrepRows, ok: true };
   }
   if (pathname === "/api/lessons") {
     const lesson = payload.lesson || {};

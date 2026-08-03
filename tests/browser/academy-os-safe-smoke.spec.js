@@ -172,6 +172,51 @@ test("exam prep and settings open from deferred chunks without side effects", as
   expect(pageErrors).toEqual([]);
 });
 
+test("exam prep rapid edits serialize requests and persist the latest row value", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  const requests = [];
+  let captureRequests = false;
+  let releaseFirstRequest;
+  const firstRequestGate = new Promise((resolve) => {
+    releaseFirstRequest = resolve;
+  });
+  await page.route("**/api/exam-prep-rows/bulk", async (route) => {
+    if (!captureRequests) {
+      const response = await route.fetch();
+      await route.fulfill({ response });
+      return;
+    }
+    requests.push(route.request().postDataJSON());
+    if (requests.length === 1) await firstRequestGate;
+    const response = await route.fetch();
+    await route.fulfill({ response });
+  });
+
+  await loginAsTeacher(page);
+  const navigation = page.getByRole("navigation", { name: "주요 화면" });
+  await navigation.getByRole("button", { name: /시험관리/ }).click();
+  await page.getByRole("button", { name: "정산 미리보기반" }).click();
+
+  const scopeInput = page.getByLabel("안전고 시험 범위");
+  await expect(scopeInput).toBeVisible();
+  await page.waitForLoadState("networkidle");
+  captureRequests = true;
+  await scopeInput.fill("직렬화 첫 입력");
+  await expect.poll(() => requests.length).toBe(1);
+
+  await scopeInput.fill("직렬화 중간 입력");
+  await scopeInput.fill("직렬화 최신 입력");
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  expect(requests).toHaveLength(1);
+
+  releaseFirstRequest();
+  await expect.poll(() => requests.length).toBe(2);
+  expect(requests[0].examPrepRows[0].scope).toBe("직렬화 첫 입력");
+  expect(requests[1].examPrepRows[0].scope).toBe("직렬화 최신 입력");
+  await expect(scopeInput.locator("xpath=..").getByText("저장 완료")).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
 test("withdrawn student list keeps its table and selection toolbar boundary", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);

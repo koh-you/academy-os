@@ -22,7 +22,7 @@ import {
   deleteExamPrepRowRequest,
   saveExamPrepRowsRequest
 } from "../domains/exams/examPrepRowsApi.js";
-import { persistExamPrepRowsWithState } from "../domains/exams/examPrepRowSaveController.js";
+import { createExamPrepRowSaveController } from "../domains/exams/examPrepRowSaveController.js";
 import { normalizeExamPrepRowReviewDraft } from "../domains/exams/examReviewDraft.js";
 import {
   getWithdrawalDateKey,
@@ -1023,10 +1023,10 @@ const appStateAutosaveRisk = {
 
 const examPrepAutosaveRisk = {
   title: "시험정보/시험 후 기록지 입력 저장",
-  storage: "Supabase exam_prep_rows: 시험기간, 수학시험 일정, 시험범위, 부교재, review/revisedReview",
-  risk: "입력마다 행 저장이 실행되고, 학사일정의 시험기간/수학시험 수정도 같은 row를 갱신합니다. 중복 행이나 오래된 고사 값이 있으면 화면 보정만으로 숨기기 쉽습니다.",
+  storage: "Supabase exam_prep_rows: 입력 즉시 같은 브라우저에서 직렬 저장하고, 진행 중 같은 행의 후속 입력은 최신값으로 합칩니다.",
+  risk: "저장 뒤 Supabase 재조회와 updated_at 충돌 대조는 아직 없습니다. 다른 탭·기기나 학사일정 수정이 같은 row를 갱신하면 마지막 도착 값이 남을 수 있습니다.",
   stopCondition: "중복 시험정보, 잘못된 고사 값, 저장 실패, 새로고침 후 값 되돌림이 보이면 필터를 덧대지 말고 원천 row를 확인합니다.",
-  recommendation: "행 단위 저장 상태를 확인하고, 필요하면 삭제/마이그레이션/원천 데이터 수정 중 하나로 처리합니다."
+  recommendation: "행 단위 저장 상태를 확인하고, 다음 단계에서 updated_at CAS와 저장 뒤 재조회 대조를 추가합니다."
 };
 
 const schoolCalendarAutosaveRisk = {
@@ -3125,7 +3125,7 @@ export function App() {
   const scoreRecordSaveRequestRef = useRef(0);
   const academyTestSaveRequestRef = useRef(0);
   const studentConsultationSaveRequestRef = useRef(0);
-  const examPrepRowSaveRequestRef = useRef({});
+  const examPrepRowSaveControllerRef = useRef(null);
   const examPrepDeleteRequestIdsRef = useRef(new Set());
   const studentProfileSaveRequestRef = useRef({});
   const teacherOperatingMemoSaveRequestRef = useRef({});
@@ -5748,16 +5748,17 @@ export function App() {
   }
 
   function persistExamPrepRows(rowsToPersist) {
-    return persistExamPrepRowsWithState({
-      onError: console.error,
-      request: (changedRows) => saveExamPrepRowsRequest({
-        examPrepRows: changedRows,
-        request: postJson
-      }),
-      requestIdsByRow: examPrepRowSaveRequestRef.current,
-      rowsToPersist,
-      setSaveStates: setExamPrepRowSaveStates
-    });
+    if (!examPrepRowSaveControllerRef.current) {
+      examPrepRowSaveControllerRef.current = createExamPrepRowSaveController({
+        onError: console.error,
+        request: (changedRows) => saveExamPrepRowsRequest({
+          examPrepRows: changedRows,
+          request: postJson
+        }),
+        setSaveStates: setExamPrepRowSaveStates
+      });
+    }
+    return examPrepRowSaveControllerRef.current.save(rowsToPersist);
   }
 
   function handleUpdateExamPrepRow(examPrepId, field, value) {

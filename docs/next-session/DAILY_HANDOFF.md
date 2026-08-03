@@ -1,6 +1,15 @@
 # Daily Development Handoff
 
-업데이트: 2026-08-02
+업데이트: 2026-08-03
+
+## 2026-08-03 자동 작업
+
+- 3번 기능·개선으로 시험정보 행 자동저장 요청을 브라우저 전체에서 직렬화했다. 진행 중 같은 행의 후속 입력은 최신 row만 남겨 다음 bulk 요청으로 보내며, 최신 입력이 끝날 때까지 행 상태를 `저장 중`으로 유지한다.
+- 전용 controller fixture는 중복값 생략, bulk 내부 최신 row 선택, 요청 비중첩, 진행 중 coalesce, 실패 중 최신 입력 보존과 최종 실패 상태를 검증한다.
+- 안전 API에 시험정보 row·bulk 저장 fixture를 추가하고, 첫 요청 지연 중 3회 입력 후 마지막 값만 두 번째 요청으로 저장되는 브라우저 경로를 확인했다.
+- 다음 저장 신뢰성 단위는 시험정보 row의 `updated_at` CAS와 저장 뒤 Supabase 재조회다. Tally 후보 입력 경쟁 방지는 그와 분리한다.
+- 운영 Supabase 쓰기, 알림 발송·예약·취소, Storage, 유료 AI, 운영 SQL은 실행하지 않았다.
+- 검증: controller·API 전용 fixture, runtime lint, scenario·production `821/821`, build `380 modules`·lazy chunk `12/12`, 격리 safe browser `19/19` 통과.
 
 ## 어제까지 완료
 

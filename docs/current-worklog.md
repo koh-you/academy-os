@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 시험정보 행 자동저장 직렬화
+
+- 분류는 3번 기능·개선이다. 운영 회귀 발생을 확인한 것은 아니지만, 입력마다 실행되는 `exam_prep_rows` bulk 요청이 역순 도착하면 최신값을 덮을 수 있는 P1 저장 위험을 한 단위로 줄였다.
+- 시험정보 저장 controller는 브라우저 전체에서 요청을 하나씩 처리한다. 진행 중 같은 행에 들어온 여러 변경은 row ID별 최신값만 보존해 다음 bulk 요청으로 보내고, 이전 요청 성공·실패가 최신 입력의 `저장 중` 상태를 덮지 않는다.
+- 안전 API fixture에 시험정보 row와 bulk 저장 원천을 추가했다. Playwright에서 첫 요청을 지연한 채 같은 행을 세 번 편집해 동시 요청이 없고 마지막 값만 후속 저장되며 `저장 완료`가 표시되는지 확인한다.
+- 범위 밖인 다중 탭·기기 `updated_at` CAS와 저장 뒤 Supabase 재조회는 다음 독립 단위로 남긴다. 운영 Supabase·알림·Storage·유료 AI·SQL side effect는 실행하지 않았다.
+- 검증: controller·API 전용 fixture, runtime lint, scenario·production `821/821`, build `380 modules`·lazy chunk `12/12`, Worktree 격리 safe browser `19/19` 통과.
+
 ## 2026-08-02 App 3차 리팩터링 3-8 종료 감사
 
 - `docs/app-refactor-third-pass-closeout.md`에 session과 6개 핵심 도메인, exam/settings의 화면·local draft·authoritative 저장 원천·provider side effect·오류 복구 owner를 재대조했다.

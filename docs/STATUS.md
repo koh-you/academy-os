@@ -1,6 +1,6 @@
 # Academy OS Current Status
 
-업데이트: 2026-08-02
+업데이트: 2026-08-03
 
 ## 현재 기준
 
@@ -35,6 +35,7 @@
 - 로컬 browser smoke는 Worktree별 가용 frontend/API 포트를 자동 선택하고 기존 preview를 재사용하지 않는다.
 - GitHub Actions는 lint, production test, build, browser smoke를 실행하는 것이 목표다.
 - `app_state` 자동저장 12개 key의 요청 역전·CAS/재조회 부재를 재현하는 inventory 검사가 Production checks에 연결됐다.
+- 시험정보 행 자동저장은 같은 브라우저에서 요청을 하나씩 직렬 처리한다. 저장 중 같은 행을 다시 편집하면 중간값을 버리고 최신 row만 후속 bulk 저장하며, 저장 상태는 최신 입력이 처리될 때까지 `저장 중`을 유지한다. 다중 탭·기기 충돌을 막는 `updated_at` CAS와 저장 뒤 Supabase 재조회는 다음 독립 단위다.
 - App 2차 리팩터링 Phase 1 auth/session은 PR #2로 main 통합됐다. session state·초기 저장소 판독·login/logout·teacher 저장 cleanup은 `useAppSession`이 소유하며 전용 fixture가 Production checks에 연결됐다.
 - Phase 2~5와 AI 연쇄 검수·지연 보고·사람 gate 원칙은 `docs/app-refactor-second-pass-plan.md`가 기준이다.
 - Phase 2 branch에서 출결 kiosk 날짜 rollover의 ref·reload key·interval/listener를 출결 hook 경계로 이동하고 cleanup·동일 날짜 hydration 실패 재시도 fixture를 추가했다.
