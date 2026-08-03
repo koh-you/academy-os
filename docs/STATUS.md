@@ -94,7 +94,7 @@
 
 ## 다음 우선순위
 
-1. App 2차 Phase 1~5와 3차 3-0~3-8, P1 운영 저장 신뢰성은 완료됐다. P2-3c까지 dialog 41/41이 공통 shell을 사용하고 공통 footer 14개·기존 action wrapper 3개다. 수업일지 내부 보충 완료 확인 footer는 완료/추가 보충 callback과 busy guard를 그대로 유지했다. 다음은 월 정규수업 열기 footer를 별도 단위로 검토한다.
+1. App 2차 Phase 1~5와 3차 3-0~3-8, P1 운영 저장 신뢰성은 완료됐다. P2-3d까지 dialog 41/41이 공통 shell을 사용하고 최종 행동 footer 15개가 공통화됐다. 남은 `modalActions` 2개는 보충 상세 내부 작업 바로 의도적으로 유지한다. 다음 P2-4는 modal 저장 상태를 여섯 공통 상태와 대조한다.
 2. App 3차 리팩터링 3-0~3-8은 production main 43.1%·gzip 45.3% 감소, 12개 물리 lazy chunk, App Babel 500 KB 경고 제거와 종료 소유권 감사까지 완료했다. 자동으로 다음 리팩터링 차수를 시작하지 않고 P1~P3 제품·저장 신뢰성 우선순위로 돌아간다.
 3. `app_state`에서 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
    - 즉시 사람 판단이 필요하지 않은 발견은 queue/worklog에 남기고 AI 검수와 다음 단계를 연쇄 진행한다.

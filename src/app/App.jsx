@@ -8669,12 +8669,12 @@ function MonthlyRegularLessonOpenModal({ plan, saveStatus, onClose, onOpen }) {
         </div>
         {saveStatus?.state ? <InlineSaveStatus label="월 정규수업" saveState={saveStatus.state} /> : null}
         {saveStatus?.message ? <p className={`inlineNotice ${saveStatus.state === "failed" ? "danger" : ""}`}>{saveStatus.message}</p> : null}
-        <div className="modalActions">
+        <ModalFooter>
           <button className="softButton" disabled={isSaving} onClick={onClose} type="button">닫기</button>
           <button className="primaryButton" disabled={!canOpen} onClick={onOpen} type="button">
             {isSaving ? "Supabase 반영 확인 중" : `${plan.monthKey} 정규수업 열기`}
           </button>
-        </div>
+        </ModalFooter>
       </div>
     </Modal>
   );

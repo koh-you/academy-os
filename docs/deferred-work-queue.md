@@ -25,7 +25,7 @@
 ## P2. 모달 통일 후속
 
 - 최신 modal inventory는 `docs/modal-shell-followup-inventory-2026-08-03.md`에 고정했다. 41개 dialog 중 40개는 공통 shell이고, bespoke 예외는 실제 Solapi callback을 받는 보충 알림 제어창 1개다. 공통 footer는 9개, 기존 action wrapper는 8개다.
-- `ReportModal` footer, Solapi 제어창 shell, 보충 완료·일정 변경·수업일지 내부 완료 확인 footer 공통화는 완료했다. dialog 41/41이 공통 shell을 사용하며 공통 footer 14개·기존 action wrapper 3개다. 다음은 월 정규수업 열기 footer를 별도 단위로 검토하되 저장·재조회 callback identity와 오류 복구를 먼저 고정한다.
+- `ReportModal`, Solapi 제어창, 보충 완료·일정 변경·수업일지 내부 완료, 월 정규수업 열기까지 최종 행동 footer 공통화를 완료했다. dialog 41/41, 공통 footer 15개다. 남은 `modalActions` 2개는 보충 상세 내부의 여러 독립 저장·예약 작업 바로 유지한다. 다음은 P2-4 저장 상태 vocabulary 대조다.
 - 수업일지 저장과 Solapi side effect 버튼은 계속 분리한다.
 - 출결·알림·저장 원천이 함께 바뀌면 별도 작업으로 쪼갠다.
 
