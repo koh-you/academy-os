@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 보고서 snapshot 명시 저장 신뢰성
+
+- 보고서 snapshot을 11개 공용 `app_state` 자동저장 묶음에서 분리했다. 전용 API는 교사 bearer를 확인하고 최신 `reportSnapshots`와 row version을 읽어 CAS append한 뒤 Supabase 재조회에서 신규 snapshot과 기존 ID 보존을 모두 확인한다. 서버 확인 전에는 App 목록과 완료 표시를 바꾸지 않는다.
+- 저장 요청은 student·lesson·status별 single-flight와 stable report ID를 사용한다. 응답 유실 뒤 같은 내용 재시도는 이미 저장된 한 건을 회수하고, 같은 ID의 다른 내용·CAS 충돌·재조회 불일치에서는 modal draft를 유지한 채 실패를 표시한다. 저장 중 닫기·중복 행동은 잠그며 `모의 발송`은 실제 알림 없이 `mock_sent` snapshot만 저장한다.
+- 모달과 저장 action을 필요할 때만 동적 로드해 main chunk 예산을 유지했다. 안전 fixture는 무인증 401, 최초 저장, 동일 ID 복구, app-state 재조회를 검증한다. 검증: lesson `20/20`, runtime lint, `check:fast`, production `827/827`, build `407 modules`·main `944.35 kB`·lazy `12/12`, 전체 safe browser `40/40`. 운영 Supabase·실제 알림·SQL·유료 호출은 사용하지 않았다.
+- P1 저장 신뢰성 목록을 닫고 다음 독립 단계는 P2 modal inventory다. inventory에서는 화면 조립만 분류하고 저장·출결·알림 원천 변경을 섞지 않는다.
+
 ## 2026-08-03 자료함 private Storage 저장 신뢰성
 
 - 선택한 PDF·이미지·문서 파일은 20MB 제한을 확인한 뒤 private `resource-materials` bucket의 `stable material ID / createdAt token / content hash` 경로에 저장한다. DB에는 직접 공개 URL이 아니라 Storage 참조만 기록하며, 같은 응답 유실 재시도는 같은 객체·row로 수렴하고 파일 내용 변경은 새 해시 경로로 분리된다.

@@ -120,6 +120,7 @@ import {
   deleteResourceMaterialWithFile,
   saveResourceMaterialFile
 } from "../src/domains/resources/resourceMaterialStorageOperation.js";
+import { saveReportSnapshotWithVerification } from "../src/domains/reports/reportSnapshotPersistence.js";
 import { getNextHourlyAlimtalkReservationAt } from "../src/domains/notifications/supplementJobBuilders.js";
 import { isSupplementScheduleForLessonComment } from "../src/domains/notifications/supplementSchedule.js";
 import { normalizeSpecialLectureTallySessionRequests } from "../src/domains/specialLectures/tallySessionRequests.js";
@@ -6193,6 +6194,32 @@ const server = http.createServer(async (request, response) => {
       sendJson(request, response, Number(error.statusCode) || 500, {
         ok: false,
         error: error.message
+      });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/report-snapshots") {
+    try {
+      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
+      if (!verifyTeacherSessionToken(token)) {
+        sendJson(request, response, 401, { ok: false, error: "보고서 저장 세션 인증이 필요합니다. 다시 로그인해 주세요." });
+        return;
+      }
+      const payload = await readJsonBody(request);
+      const result = await saveReportSnapshotWithVerification({
+        operations: {
+          read: listAppState,
+          write: (states, options) => upsertAppState(states, options)
+        },
+        snapshot: payload.snapshot
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        code: error.code,
+        error: error.message,
+        ok: false
       });
     }
     return;

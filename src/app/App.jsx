@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { createAppViewChangePlan } from "./appViewChangePlan.js";
 import { selectAppSessionSurface } from "./appSessionSurfaceSelector.js";
 import { createTeacherViewAdapters, TeacherViewOutlet } from "./TeacherViewOutlet.js";
@@ -447,6 +447,10 @@ import {
   testPaperPreparationOptions,
   testPaperProgressOptions
 } from "./appConfig.js";
+
+const ReportModal = lazy(async () => ({
+  default: (await import("../domains/reports/ReportModal.jsx")).ReportModal
+}));
 
 const {
   checkAttendanceRequest,
@@ -3088,6 +3092,7 @@ export function App() {
   const [studentIntakeRegistrationStates, setStudentIntakeRegistrationStates] = useState({});
   const [studentIntakeRegistrationMessages, setStudentIntakeRegistrationMessages] = useState({});
   const [reportModal, setReportModal] = useState(null);
+  const reportSnapshotMutationRef = useRef(new Map());
   const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
   const [isMonthlyRegularLessonOpenModal, setIsMonthlyRegularLessonOpenModal] = useState(false);
   const [monthlyRegularLessonOpenStatus, setMonthlyRegularLessonOpenStatus] = useState({ message: "", state: "idle" });
@@ -3150,7 +3155,6 @@ export function App() {
     lessonNotificationPlans,
     lessonResearchItems,
     notificationLogs,
-    reportSnapshots,
     examPostTargetStudentIds,
     tallySubmissions,
     tallySummaries,
@@ -3163,7 +3167,6 @@ export function App() {
     lessonNotificationPlans,
     lessonResearchItems,
     notificationLogs,
-    reportSnapshots,
     examPostTargetStudentIds,
     tallySubmissions,
     tallySummaries,
@@ -3420,7 +3423,7 @@ export function App() {
           if (Array.isArray(states.lessonResearchItems)) setLessonResearchItems(normalizeLessonResearchItems(states.lessonResearchItems));
           if (Array.isArray(states.notificationLogs)) setNotificationLogs(states.notificationLogs);
           if (Array.isArray(states.problemBooks)) setProblemBooks(normalizeProblemBooks(states.problemBooks));
-          if (Array.isArray(states.reportSnapshots)) setReportSnapshots(states.reportSnapshots);
+          setReportSnapshots(Array.isArray(states.reportSnapshots) ? states.reportSnapshots : []);
           if (Array.isArray(states.scoreRecords)) setScoreRecords(states.scoreRecords);
           if (Array.isArray(states.examPostSubmissions)) setExamPostSubmissions(states.examPostSubmissions);
           if (states.examPostTargetStudentIds && typeof states.examPostTargetStudentIds === "object" && !Array.isArray(states.examPostTargetStudentIds)) {
@@ -3456,6 +3459,7 @@ export function App() {
             setIsAppStateReady(true);
           }, 0);
         } else if (appStateResult.ok) {
+          setReportSnapshots([]);
           persistedSharedAppStateRef.current = initialSharedAppStateRef.current;
           const seededResult = await postAppState(initialSharedAppStateRef.current);
           if (!isMounted) return;
@@ -6948,8 +6952,30 @@ export function App() {
     }
   }
 
-  function handleSaveReportSnapshot(snapshot) {
-    setReportSnapshots((current) => [snapshot, ...current]);
+  function handleSaveReportSnapshot(report, status = "snapshot_saved") {
+    return import("../domains/reports/reportSnapshotAction.js").then(({ saveReportSnapshotAction }) => (
+      saveReportSnapshotAction({
+        mutationMap: reportSnapshotMutationRef.current,
+        onApply: setReportSnapshots,
+        onState: (snapshotSaveState, savedStatus) => setReportModal((current) => current ? {
+          ...current,
+          ...(savedStatus ? { sendStatus: savedStatus } : {}),
+          snapshotSaveState
+        } : current),
+        report,
+        sessionToken: session?.sessionToken,
+        status
+      })
+    )).catch((error) => {
+      setReportModal((current) => current ? {
+        ...current,
+        snapshotSaveState: {
+          message: error.message || "보고서 저장 기능을 불러오지 못했습니다. 다시 시도해 주세요.",
+          state: "failed"
+        }
+      } : current);
+      return { error, ok: false };
+    });
   }
 
   function handleChangeView(nextView) {
@@ -7410,24 +7436,14 @@ export function App() {
       ) : null}
 
       {reportModal ? (
-        <ReportModal
-          report={reportModal}
-          onClose={() => setReportModal(null)}
-          onMockSend={(report) => {
-            setReportSnapshots((current) => [
-              { ...report, reportId: `report_${Date.now()}_${report.student.studentId}`, status: "mock_sent", createdAt: new Date().toISOString() },
-              ...current
-            ]);
-            setReportModal({ ...report, sendStatus: "mock_sent" });
-          }}
-          onSaveSnapshot={(report) => {
-            setReportSnapshots((current) => [
-              { ...report, reportId: `report_${Date.now()}_${report.student.studentId}`, status: "snapshot_saved", createdAt: new Date().toISOString() },
-              ...current
-            ]);
-            setReportModal({ ...report, sendStatus: "snapshot_saved" });
-          }}
-        />
+        <Suspense fallback={<div className="modalLoadingState" role="status">보고서 화면을 불러오는 중입니다.</div>}>
+          <ReportModal
+            report={reportModal}
+            onClose={() => setReportModal(null)}
+            onMockSend={(report) => handleSaveReportSnapshot(report, "mock_sent")}
+            onSaveSnapshot={handleSaveReportSnapshot}
+          />
+        </Suspense>
       ) : null}
 
       {pendingDeleteLesson ? (
@@ -7469,7 +7485,8 @@ export function App() {
       homeworkBundle,
       title: `${lesson.date} ${student.name} 데일리 리포트`,
       body: createAiReportDraft(student, lesson, record, homeworkBundle),
-      sendStatus: "draft"
+      sendStatus: "draft",
+      snapshotSaveState: { message: "", state: "idle" }
     });
   }
 
@@ -8780,50 +8797,6 @@ function CommentComposerModal({ ...props }) {
         normalizeText: normalizeMessageText
       }}
     />
-  );
-}
-
-function ReportModal({ report, onClose, onMockSend, onSaveSnapshot }) {
-  return (
-    <Modal title="AI 데일리 리포트" subtitle="현재는 실제 AI API/발송 대신 모의 초안과 모의 발송 상태로 검수합니다." onClose={onClose}>
-      <div className="reportMeta">
-        <span>{report.lesson.date}</span>
-        <span>{report.lesson.className}</span>
-        <span>{report.student.name}</span>
-        <span>{report.sendStatus}</span>
-      </div>
-      <label>
-        AI API 입력 데이터
-        <textarea
-          readOnly
-          rows="6"
-          value={JSON.stringify(
-            {
-              student: {
-                name: report.student.name,
-                schoolName: report.student.schoolName,
-                grade: report.student.grade,
-                textbook: report.student.textbook,
-                specialNote: report.student.specialNote
-              },
-              lesson: report.lesson,
-              record: report.record,
-              homework: report.homeworkBundle
-            },
-            null,
-            2
-          )}
-        />
-      </label>
-      <label>
-        보고서 초안
-        <textarea readOnly rows="8" value={report.body} />
-      </label>
-      <div className="modalActions">
-        <button className="softButton" onClick={() => onSaveSnapshot(report)} type="button">스냅샷 저장</button>
-        <button className="sendButton" onClick={() => onMockSend(report)} type="button">모의 발송</button>
-      </div>
-    </Modal>
   );
 }
 
