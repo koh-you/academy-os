@@ -94,7 +94,7 @@
 
 ## 다음 우선순위
 
-1. App 2차 Phase 1~5와 3차 3-0~3-8, P1 운영 저장 신뢰성은 완료됐다. P2 최신 modal inventory는 공통 shell 40/41, bespoke Solapi 제어 dialog 1개, 공통 footer 9개, 기존 action wrapper 8개를 확인했다. 다음 단위는 실제 알림이 없는 `ReportModal` footer 공통화이며 저장·출결·알림 원천 변경은 섞지 않는다.
+1. App 2차 Phase 1~5와 3차 3-0~3-8, P1 운영 저장 신뢰성은 완료됐다. P2-1에서 실제 알림이 없는 `ReportModal` 버튼을 공통 footer로 옮겨 공통 footer 10개·기존 action wrapper 7개가 됐다. 다음 P2-2는 bespoke Solapi 제어 dialog의 shell만 공통화하며 provider callback과 저장 원천은 바꾸지 않는다.
 2. App 3차 리팩터링 3-0~3-8은 production main 43.1%·gzip 45.3% 감소, 12개 물리 lazy chunk, App Babel 500 KB 경고 제거와 종료 소유권 감사까지 완료했다. 자동으로 다음 리팩터링 차수를 시작하지 않고 P1~P3 제품·저장 신뢰성 우선순위로 돌아간다.
 3. `app_state`에서 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
    - 즉시 사람 판단이 필요하지 않은 발견은 queue/worklog에 남기고 AI 검수와 다음 단계를 연쇄 진행한다.

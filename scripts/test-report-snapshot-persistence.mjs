@@ -236,6 +236,7 @@ for (const boundary of [
 }
 assert.ok(safeServerSource.includes('requestUrl.pathname === "/api/report-snapshots"'));
 assert.ok(modalSource.includes("closeDisabled={isSaving}"));
+assert.ok(modalSource.includes("<ModalFooter>"));
 assert.ok(modalSource.includes("reportSnapshotSaveFeedback"));
 assert.ok(modalSource.includes("disabled={isSaving}"));
 
