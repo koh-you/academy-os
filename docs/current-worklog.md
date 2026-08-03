@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 P2 modal follow-up inventory
+
+- 최신 main의 dialog 41개를 다시 대조했다. 공통 `Modal` 직접 사용 34개와 App→TeacherViewOutlet 주입 6개는 같은 shell이며, bespoke `role=dialog` 예외는 보충 Solapi 예약·취소 제어창 1개다.
+- 공통 `ModalFooter`는 9개, 기존 `modalActions` wrapper는 8개다. 8개 중 `SupplementTaskActionBar`와 보충 상세 split action은 본문 문맥의 다중 행동이므로 footer로 일괄 치환하지 않는다. 저장·재조회·provider 결과가 결합된 확인창도 한 화면씩 분리한다.
+- 공통 상태는 `idle/dirty/saving/verifying/saved/failed` 여섯 개다. source 저장 성공+provider 실패처럼 복합 결과는 단일 실패 상태로 축약하지 않는 원칙을 유지한다. 전용 inventory fixture가 shell 예외·주입 identity·상태 vocabulary·Solapi 화면 callback-only 경계를 고정한다.
+- P2-1은 실제 알림이 없는 `ReportModal` action wrapper의 footer 공통화다. P2-2에서만 Solapi 제어창의 bespoke shell을 바꾸며 실제 예약·취소는 실행하지 않는다.
+
 ## 2026-08-03 보고서 snapshot 명시 저장 신뢰성
 
 - 보고서 snapshot을 11개 공용 `app_state` 자동저장 묶음에서 분리했다. 전용 API는 교사 bearer를 확인하고 최신 `reportSnapshots`와 row version을 읽어 CAS append한 뒤 Supabase 재조회에서 신규 snapshot과 기존 ID 보존을 모두 확인한다. 서버 확인 전에는 App 목록과 완료 표시를 바꾸지 않는다.
