@@ -946,6 +946,8 @@ test("notification settings seed new notice and special lecture drafts without p
 
   await navigation.getByRole("button", { name: /설정/ }).click();
   await page.getByRole("tab", { name: "알림톡 문구" }).click();
+  await expect(page.locator(".notificationTemplateEditor")).toHaveCount(10);
+  await expect(page.getByText("재시험 학생 11시 알림톡")).toHaveCount(0);
   await page.getByLabel("교재 공지 초안 템플릿 문구").fill("안전 설정 교재 공지 초안");
   await page.getByLabel("특강 안내문 공지 초안 템플릿 문구").fill("안전 설정 특강 #{특강명}\n#{안내문링크}");
   await expect(page.getByRole("status").filter({ hasText: "설정 자동저장 · 저장 완료" })).toBeVisible();

@@ -1,6 +1,12 @@
 # Daily Development Handoff
 
-업데이트: 2026-08-03
+업데이트: 2026-08-04
+
+## 2026-08-04 P3-4 알림톡 template 종료 감사
+
+- 자동 closeout이 9개 제품 경로의 seed→draft→persisted human final→provider 변수, 설정 key 10개, provider template 4개를 고정한다. 재시험은 독립 11시 job 대상이 아니며 연결 수업 schedule line만 유지한다.
+- runtime 동작은 변경하지 않았다. Settings safe browser는 10개 관리 항목·재시험 11시 항목 부재·CAS/readback·새로고침 뒤 지속성을 확인하며 실제 발송·예약·취소는 실행하지 않는다.
+- runtime lint, notification `11/11`, scenario·production `827/827`, build `410 modules`·main `943.65 kB`·lazy `12/12`, safe browser `41/41`이 통과했다. P3는 닫고 4차 리팩터링은 자동 시작하지 않는다.
 
 ## 2026-08-03 P3-3b 알림톡 Settings seed 확장
 

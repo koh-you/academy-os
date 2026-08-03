@@ -82,4 +82,4 @@
 - P3-2 완료: `notificationMessageRenderer.js`가 출결 body와 수업일지 body의 공통 normalize/line/block/attendance 조립을 소유한다. App preview와 server live 결과를 학부모·학생 fixture로 직접 대조하며 공지 human final override도 보존한다.
 - P3-3a 완료: 일반 공지·특강은 seed→composer local draft→교사 최종 job→provider 경로이며, 재시험은 저장 가능한 task draft와 수업일지 schedule line만 있고 독립 11시 transport는 없음을 fixture로 고정했다.
 - P3-3b 완료: 일반 공지 preset 3개와 특강 guide seed를 `app_state.aiSettings.notificationTemplates`에 연결했다. 설정값은 새 초안에만 적용하며 현재 local draft·기존 notification job·`makeup_tasks` 교사 최종본과 provider contract는 보존한다.
-- 다음 P3-4는 9개 제품 경로의 seed→draft→persisted final→provider variables를 종료 감사한다. 실제 provider 행동은 실행하지 않는다.
+- P3-4 완료: 자동 closeout fixture가 9개 제품 경로의 seed→draft→persisted final→provider variables, 설정 key 10개, provider template 4개와 재시험 독립 11시 transport 부재를 함께 고정한다. safe browser는 설정 저장·새로고침과 관리 항목 10개를 확인하며 실제 provider 행동은 실행하지 않는다. P3는 닫는다.

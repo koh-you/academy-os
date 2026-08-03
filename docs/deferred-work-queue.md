@@ -39,6 +39,7 @@
 - P3-2 완료: 출결 body와 수업일지 학생·학부모 body를 import 없는 pure renderer로 합치고 App 미리보기·발송 직전 server 미리보기·Solapi route가 같은 결과를 사용한다. 다음 P3-3은 공지 preset·특강 guide·재시험의 실제 transport 범위를 먼저 확정한 뒤 설정 확장을 진행한다.
 - P3-3a 완료: 일반 공지·특강은 code-owned seed를 composer local draft에 복사한 뒤 교사 최종 `noticeText`를 job/provider에 전달한다. 재시험은 task draft 저장과 연결 수업 schedule line만 있고 독립 11시 job 대상이 아니다. 다음 P3-3b는 일반 공지 preset 3개와 특강 guide seed만 Settings 원천에 연결하며 재시험 11시 항목은 만들지 않는다.
 - P3-3b 완료: 공지 preset 3개와 특강 guide seed를 기존 `app_state.aiSettings.notificationTemplates`에 추가했다. 설정값은 새 local draft의 seed로만 쓰고 현재 draft·기존 job·`makeup_tasks` 교사 최종본·provider template ID/변수는 바꾸지 않는다. 다음 P3-4는 9개 제품 경로의 종료 감사다.
+- P3-4 완료: closeout fixture가 9개 경로·설정 key 10개·provider template 4개의 seed→draft→persisted final→provider 변수 연결을 고정하고 재시험 독립 11시 항목 부재를 확인한다. safe browser는 설정 CAS/readback·새로고침 지속성과 관리 항목 10개를 검증한다. 실제 provider 행동 없이 P3를 닫는다.
 
 ## P4. 고위험 App/API 경계 리팩터링
 
