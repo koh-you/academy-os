@@ -43,6 +43,14 @@ import {
   createLessonRosterVersionFilter,
   createNextRosterUpdatedAt
 } from "../../src/domains/students/classRosterPersistence.js";
+import {
+  areSchoolEventsPersistedEqual,
+  areSchoolEventTimestampsEqual,
+  createNextSchoolEventUpdatedAt,
+  createSchoolEventConflict,
+  createSchoolEventVersionFilter,
+  isSchoolEventInsertConflict
+} from "../../src/domains/schoolCalendar/schoolEventPersistence.js";
 import { deleteRows, getSupabaseStatus, insertRows, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
 
 const fallbackSource = "local_sample";
@@ -3234,13 +3242,84 @@ export async function listSchoolEvents() {
   return { source: databaseSource, schoolEvents: rows.map(fromSchoolEventRow) };
 }
 
+async function getSchoolEvent(eventId) {
+  const rows = await listRows(
+    "school_events",
+    `select=*&school_event_id=eq.${encodeURIComponent(eventId)}&limit=1`,
+    { requireServiceRole: true }
+  );
+  return rows[0] ? fromSchoolEventRow(rows[0]) : null;
+}
+
+function throwSchoolEventConflict(eventId, currentSchoolEvent, reason = "updated") {
+  const conflict = createSchoolEventConflict(eventId, currentSchoolEvent, reason);
+  const error = new Error(conflict.message);
+  Object.assign(error, conflict, { statusCode: 409 });
+  throw error;
+}
+
+async function verifySchoolEventSave(event, expectedUpdatedAt) {
+  const verifiedSchoolEvent = await getSchoolEvent(event.eventId);
+  if (
+    !verifiedSchoolEvent ||
+    !areSchoolEventsPersistedEqual(event, verifiedSchoolEvent) ||
+    !areSchoolEventTimestampsEqual(expectedUpdatedAt, verifiedSchoolEvent.updatedAt)
+  ) {
+    const error = new Error(`학사일정 ${event.eventId}의 Supabase 저장값을 재조회로 확인하지 못했습니다.`);
+    error.code = "SCHOOL_EVENT_VERIFICATION_FAILED";
+    throw error;
+  }
+  return verifiedSchoolEvent;
+}
+
 export async function upsertSchoolEvent(event) {
   if (!isSupabaseConfigured({ requireServiceRole: true })) {
-    return { source: fallbackSource, schoolEvent: event };
+    return { source: fallbackSource, schoolEvent: event, verified: false };
   }
 
-  const [row] = await upsertRows("school_events", [toSchoolEventRow(event)]);
-  return { source: databaseSource, schoolEvent: fromSchoolEventRow(row) };
+  const eventId = event?.eventId ?? event?.schoolEventId;
+  if (!eventId) throw new Error("저장할 학사일정 ID가 필요합니다.");
+  const requestedEvent = { ...event, eventId };
+  const currentSchoolEvent = await getSchoolEvent(eventId);
+
+  if (!currentSchoolEvent) {
+    if (requestedEvent.updatedAt) throwSchoolEventConflict(eventId, null, "deleted");
+    const dbRow = toSchoolEventRow(requestedEvent);
+    dbRow.updated_at = createNextSchoolEventUpdatedAt();
+    try {
+      await insertRows("school_events", [dbRow]);
+    } catch (error) {
+      if (isSchoolEventInsertConflict(error)) {
+        const concurrentSchoolEvent = await getSchoolEvent(eventId);
+        if (concurrentSchoolEvent && areSchoolEventsPersistedEqual(requestedEvent, concurrentSchoolEvent)) {
+          return { source: databaseSource, schoolEvent: concurrentSchoolEvent, verified: true };
+        }
+        throwSchoolEventConflict(eventId, concurrentSchoolEvent, "duplicate");
+      }
+      throw error;
+    }
+    const verifiedSchoolEvent = await verifySchoolEventSave(requestedEvent, dbRow.updated_at);
+    return { source: databaseSource, schoolEvent: verifiedSchoolEvent, verified: true };
+  }
+
+  if (areSchoolEventsPersistedEqual(requestedEvent, currentSchoolEvent)) {
+    return { source: databaseSource, schoolEvent: currentSchoolEvent, verified: true };
+  }
+  if (!requestedEvent.updatedAt) throwSchoolEventConflict(eventId, currentSchoolEvent, "duplicate");
+  if (!areSchoolEventTimestampsEqual(currentSchoolEvent.updatedAt, requestedEvent.updatedAt)) {
+    throwSchoolEventConflict(eventId, currentSchoolEvent);
+  }
+
+  const dbRow = toSchoolEventRow(requestedEvent);
+  dbRow.updated_at = createNextSchoolEventUpdatedAt(currentSchoolEvent.updatedAt);
+  const savedRows = await patchRows(
+    "school_events",
+    createSchoolEventVersionFilter(eventId, currentSchoolEvent.updatedAt),
+    dbRow
+  );
+  if (!savedRows.length) throwSchoolEventConflict(eventId, await getSchoolEvent(eventId));
+  const verifiedSchoolEvent = await verifySchoolEventSave(requestedEvent, dbRow.updated_at);
+  return { source: databaseSource, schoolEvent: verifiedSchoolEvent, verified: true };
 }
 
 export async function upsertSchoolEvents(events) {
@@ -3255,13 +3334,30 @@ export async function upsertSchoolEvents(events) {
   return { source: databaseSource, schoolEvents: rows.map(fromSchoolEventRow) };
 }
 
-export async function deleteSchoolEvent(eventId) {
+export async function deleteSchoolEvent(eventId, { expectedUpdatedAt } = {}) {
   if (!isSupabaseConfigured({ requireServiceRole: true })) {
-    return { source: fallbackSource, schoolEventId: eventId };
+    return { source: fallbackSource, schoolEventId: eventId, verified: false };
   }
 
-  await deleteRows("school_events", `school_event_id=eq.${encodeURIComponent(eventId)}`);
-  return { source: databaseSource, schoolEventId: eventId };
+  if (!eventId) throw new Error("삭제할 학사일정 ID가 필요합니다.");
+  if (!expectedUpdatedAt) throw new Error("삭제할 학사일정의 서버 버전이 필요합니다.");
+  const currentSchoolEvent = await getSchoolEvent(eventId);
+  if (!currentSchoolEvent) throwSchoolEventConflict(eventId, null, "deleted");
+  if (!areSchoolEventTimestampsEqual(currentSchoolEvent.updatedAt, expectedUpdatedAt)) {
+    throwSchoolEventConflict(eventId, currentSchoolEvent);
+  }
+
+  const deletedRows = await deleteRows(
+    "school_events",
+    createSchoolEventVersionFilter(eventId, currentSchoolEvent.updatedAt)
+  );
+  if (deletedRows.length !== 1) throwSchoolEventConflict(eventId, await getSchoolEvent(eventId));
+  if (await getSchoolEvent(eventId)) {
+    const error = new Error(`학사일정 ${eventId} 삭제를 Supabase 재조회로 확인하지 못했습니다.`);
+    error.code = "SCHOOL_EVENT_VERIFICATION_FAILED";
+    throw error;
+  }
+  return { source: databaseSource, schoolEventId: eventId, verified: true };
 }
 
 export async function listAcademyReminders({ date = "", from = "", to = "", includeDone = false, status = "" } = {}) {

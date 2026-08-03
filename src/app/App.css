@@ -6395,8 +6395,18 @@ summary:focus-visible {
   gap: 14px;
 }
 
+.schoolDateModalContent {
+  border: 0;
+  margin: 0;
+  min-inline-size: 0;
+  padding: 0;
+}
+
 .schoolEventFormPanel {
+  border: 0;
   gap: 12px;
+  margin: 0;
+  min-inline-size: 0;
   padding: 18px;
   width: 100%;
 }

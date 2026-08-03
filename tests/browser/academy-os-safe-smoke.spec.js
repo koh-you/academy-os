@@ -392,6 +392,68 @@ test("planning tool screens open from their shared deferred chunk without mutati
   expect(pageErrors).toEqual([]);
 });
 
+test("manual school event keeps its draft and stable id across an unknown save result, then verifies delete", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  let postCount = 0;
+  let releaseDeleteRequest;
+  const deleteRequestGate = new Promise((resolve) => {
+    releaseDeleteRequest = resolve;
+  });
+  await page.route("**/api/school-events*", async (route) => {
+    if (route.request().method() === "DELETE") {
+      await deleteRequestGate;
+      await route.continue();
+      return;
+    }
+    if (route.request().method() !== "POST") {
+      await route.continue();
+      return;
+    }
+    postCount += 1;
+    if (postCount === 1) {
+      await route.fetch();
+      await route.abort("failed");
+      return;
+    }
+    await route.continue();
+  });
+
+  await loginAsTeacher(page);
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학사일정/ }).click();
+  await page.getByRole("button", { name: "+ 일정 등록" }).first().click();
+  const form = page.getByRole("dialog", { name: "일정 등록" });
+  await form.locator(".inputTypeField select").selectOption("schoolEvent");
+  await form.locator(".schoolEventFormPanel > label").filter({ hasText: /^학교/ }).locator("select").selectOption("안전고");
+  const titleInput = form.locator('input[placeholder="예: 1학기 기말고사"]');
+  await titleInput.fill("안전 저장 학사일정");
+  const eventDate = await form.locator('.calendarDateGrid input[type="date"]').first().inputValue();
+
+  await form.getByRole("button", { name: "일정 등록" }).click();
+  await expect(form).toHaveAttribute("aria-busy", "true");
+  await expect(form.getByRole("button", { name: "창 닫기" })).toBeDisabled();
+  await expect(page.locator(".schoolCalendarSaveNotice")).toHaveClass(/failed/);
+  await expect(titleInput).toHaveValue("안전 저장 학사일정");
+
+  await form.getByRole("button", { name: "일정 등록" }).click();
+  await expect(form).toBeHidden();
+  expect(postCount).toBe(2);
+  await expect(page.locator(".schoolCalendarSaveNotice")).toContainText("저장 완료");
+
+  await page.getByRole("gridcell", { name: new RegExp(eventDate) }).click();
+  const dateModal = page.getByRole("dialog", { name: `${eventDate} 일정` });
+  await expect(dateModal.locator('.fieldGrid input:not([type="date"])')).toHaveValue("안전 저장 학사일정");
+  await dateModal.getByRole("button", { name: "삭제" }).click();
+  await expect(dateModal).toHaveAttribute("aria-busy", "true");
+  await expect(dateModal.getByRole("button", { name: "창 닫기" })).toBeDisabled();
+  releaseDeleteRequest();
+  await expect(dateModal).toContainText("선택한 날짜에 등록된 일정이 없습니다.");
+
+  const source = await request.get(`${safeApiBaseUrl}/api/school-events`);
+  const sourceBody = await source.json();
+  expect(sourceBody.schoolEvents).toEqual([]);
+  expect(pageErrors).toEqual([]);
+});
+
 test("dashboard auxiliary panels open from their shared deferred chunk without mutations", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await page.route("**/src/domains/teacher/DashboardAuxiliaryPanels.jsx*", async (route) => {
