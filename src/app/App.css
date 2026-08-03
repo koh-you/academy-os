@@ -16478,6 +16478,25 @@ textarea.profileEditInput {
   padding: 0 12px;
 }
 
+.teacherHomeworkSaveFeedback {
+  display: grid;
+  gap: 4px;
+  justify-items: end;
+  max-width: 240px;
+  text-align: right;
+}
+
+.teacherHomeworkSaveFeedback > span {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.teacherHomeworkSaveFeedback.failed > span {
+  color: #b91c1c;
+}
+
 .studentFormPanel,
 .studentAllPanel,
 .myPagePanel,

@@ -16,7 +16,7 @@
 - 개별 학생 신규 등록은 insert-only, 목록 행·프로필·Tally/특강 기존 학생 반영·퇴원 취소는 `updated_at` CAS를 사용한다. 학생 저장 뒤 Supabase 재조회가 일치해야 완료하며 저장 중 후속 입력과 충돌 입력은 보존한다. 이 개별 학생 gate는 완료됐다.
 - 반 명단 저장 gate는 완료. 학생 추가·반 이동·반관리·퇴원의 `students` 반 필드와 미래 `lessons.studentIds`를 한 versioned plan으로 저장하고, 직접 원천 중간 실패는 역순 보상·원래 버전 재조회, 성공은 두 원천 재조회 대조 뒤에만 UI 반영한다. 과거 수업·변경 대상 밖 수동 명단과 실패 입력을 보존한다.
 - 수동 `school_events` 저장 gate는 완료. 신규는 insert-only, 수정·삭제는 일정별 `updated_at` CAS를 적용하고 API 내부와 App의 후속 GET에서 Supabase 원천을 재조회한다. 결과 불명 신규 저장은 고정 ID로 idempotent 재시도하며 실패 입력·모달을 보존한다. 시험관리 연동 일정과 파생 직전수업 gate도 후속 단위에서 완료했다.
-- 숙제·포털·자료함·보고서 저장 계약.
+- 학생 포털의 숙제 완료·질문·시험 제출은 인증된 학생 범위와 서버 재조회 계약을 재확인했다. 교사 `숙제현황` 확인 상태도 versioned CAS·Supabase 재조회·행별 saving/saved/failed 표시로 고정했다. 사용자가 직접 해결한 `확인할 숙제` 별도 요청과 닫힌 PR #54는 중복 제외한다. 남은 독립 단위는 자료함 등록·삭제·실제 파일 원천과 보고서 snapshot의 명시 저장·실패 복구다.
 - 보충·알림 다중 원천 reconcile의 읽기·판정, 미연결/오작동 버튼 차단, 두 저장 원천의 versioned write/recovery와 검증 뒤 notification 후속 단계 분리는 완료했다.
 - 기준: `docs/save-persistence-audit-2026-07-20.md`, `docs/save-persistence-audit-2026-07-28.md`.
 

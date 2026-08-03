@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 교사 숙제 확인 상태 versioned 저장
+
+- `숙제현황`의 교사 확인 select가 App state를 먼저 바꾸고 `/api/homeworks` 실패를 console에만 남기던 경계를 제거했다. 기존 `/api/lesson-journal/rows/save` 계획을 재사용해 현재 숙제 행을 before로 캡처하고 `updated_at` CAS·Supabase 재조회가 일치한 뒤에만 `homeworks` 원천을 교체한다.
+- 행별 single-flight와 saving/saved/failed 상태를 표시한다. 응답 전에는 select가 이전 원천값을 유지하며, 409·검증 실패에서도 그 값을 보존해 교사가 다시 저장할 수 있다. 성공 결과는 새로고침 뒤에도 같은 서버 원천에서 복구된다.
+- 학생 포털의 숙제 완료·질문·시험 제출은 기존 학생 인증 범위와 서버 readback 계약을 재확인해 변경하지 않았다. 사용자가 직접 해결한 `확인할 숙제` 요청의 닫힌 PR #54는 중복 통합하지 않는다. 다음 독립 단위는 자료함과 보고서 저장 계약이다.
+- 검증: lesson `16/16`, 전용 TARGET/CONTROL fixture, runtime lint, `check:fast`, scenario·production `824/824`, build `399 modules`·main `943.16 kB`·lazy `12/12`, 전체 safe browser `36/36`. 운영 데이터·실제 알림·SQL·유료 호출은 사용하지 않았다.
+
 ## 2026-08-03 결석보강 수업일지 통일 + 보충 일정 versioned 저장
 
 - 결석보강 연결 수업을 별도 2열 `결석 보강 일정` 상세 대신 일반 `수업일지` shell과 `LessonJournalDetail`로 연다. 출결·교재·수업내용·지난/새 숙제·코멘트·수정/저장·알림 표시 방식은 일반 수업과 동일하고, 헤더 아래에 원 결석 수업의 날짜·반·시간·결석 사유만 읽기 전용 notice로 추가한다. 숙제보충 전용 상세는 유지한다.

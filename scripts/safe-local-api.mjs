@@ -64,6 +64,19 @@ const initialState = {
       teacherStatus: "unverified",
       title: "안전 이전 숙제",
       updatedAt: "2026-08-03T00:00:00.000Z"
+    },
+    {
+      assignedDate: "2026-07-22",
+      dueDate: "2026-07-23",
+      homeworkId: "safe-teacher-status-homework",
+      homeworkType: "previous",
+      lessonId: "safe-settlement-regular",
+      status: "missing",
+      studentId: "safe-settlement-student",
+      studentStatus: "not_started",
+      teacherStatus: "missing",
+      title: "안전 교사 확인 숙제",
+      updatedAt: "2026-08-03T00:00:00.000Z"
     }
   ],
   lessons: [

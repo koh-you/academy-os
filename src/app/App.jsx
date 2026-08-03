@@ -3062,6 +3062,8 @@ export function App() {
   const [specialLectureSettlementSaveState, setSpecialLectureSettlementSaveState] = useState("idle");
   const [studentHomeworkSaveStates, setStudentHomeworkSaveStates] = useState({});
   const studentHomeworkSavingIdsRef = useRef(new Set());
+  const [teacherHomeworkSaveStates, setTeacherHomeworkSaveStates] = useState({});
+  const teacherHomeworkSavingIdsRef = useRef(new Set());
   const [studentQuestionSaveState, setStudentQuestionSaveState] = useState({
     action: "",
     label: "",
@@ -7132,6 +7134,7 @@ export function App() {
       tallySubmissions,
       tallySummaries,
       teacherAccountSettings,
+      teacherHomeworkSaveStates,
       teacherOperatingMemos,
       teacherOperatingMemoSaveStates,
       testAttempts,
@@ -8036,20 +8039,50 @@ export function App() {
     }
   }
 
-  function handleTeacherVerifyHomework(homeworkId, teacherStatus) {
-    setHomeworks((current) =>
-      current.map((homework) => {
-        if (homework.homeworkId !== homeworkId) return homework;
-        const nextHomework = {
-          ...homework,
-          status: teacherStatus === "verified" ? "verified" : teacherStatus,
-          teacherStatus,
-          verifiedAt: new Date().toISOString()
-        };
-        postJson("/api/homeworks", { homework: nextHomework }).catch((error) => console.error(error));
-        return nextHomework;
-      })
-    );
+  async function handleTeacherVerifyHomework(homeworkId, teacherStatus) {
+    if (teacherHomeworkSavingIdsRef.current.has(homeworkId)) return { ok: false };
+    const targetHomework = homeworksRef.current.find((homework) => homework.homeworkId === homeworkId);
+    if (!targetHomework) {
+      setTeacherHomeworkSaveStates((current) => ({
+        ...current,
+        [homeworkId]: { message: "저장할 숙제 원천을 찾지 못했습니다.", state: "failed" }
+      }));
+      return { ok: false };
+    }
+
+    teacherHomeworkSavingIdsRef.current.add(homeworkId);
+    setTeacherHomeworkSaveStates((current) => ({
+      ...current,
+      [homeworkId]: { message: "Supabase에 저장하고 다시 확인하는 중입니다.", state: "saving" }
+    }));
+    try {
+      const { saveTeacherHomeworkStatusAction } = await import(
+        "../domains/homeworks/teacherHomeworkStatusSave.js"
+      );
+      const savedHomework = await saveTeacherHomeworkStatusAction({
+        homework: targetHomework,
+        request: postJsonWithTimeout,
+        teacherStatus
+      });
+      const nextHomeworks = homeworksRef.current.map((homework) =>
+        homework.homeworkId === savedHomework.homeworkId ? savedHomework : homework
+      );
+      homeworksRef.current = nextHomeworks;
+      setHomeworks(nextHomeworks);
+      setTeacherHomeworkSaveStates((current) => ({
+        ...current,
+        [homeworkId]: { message: "Supabase 저장 및 재조회 확인 완료", state: "saved" }
+      }));
+      return { homework: savedHomework, ok: true };
+    } catch (error) {
+      setTeacherHomeworkSaveStates((current) => ({
+        ...current,
+        [homeworkId]: { message: error.message || "교사 숙제 확인 저장에 실패했습니다.", state: "failed" }
+      }));
+      return { error, ok: false };
+    } finally {
+      teacherHomeworkSavingIdsRef.current.delete(homeworkId);
+    }
   }
 
   function handleAddResourceMaterial(material) {
