@@ -94,7 +94,7 @@
 
 ## 다음 우선순위
 
-1. App 2차 Phase 1~5와 3차 3-0~3-8, P1 운영 저장 신뢰성, P2 modal 통일 후속은 완료됐다. dialog 41/41이 공통 shell을 사용하고 최종 행동 footer 15개가 공통화됐다. DB/API 저장 표면은 여섯 공통 상태를 사용하며 provider/process 복합 결과 세 종류는 의미를 보존해 분리한다. 남은 `modalActions` 2개는 보충 상세 내부 작업 바로 의도적으로 유지한다. 다음은 P3 알림톡 문구 원천 inventory다.
+1. App 2차 Phase 1~5와 3차 3-0~3-8, P1 운영 저장 신뢰성, P2 modal 통일 후속은 완료됐다. P3-0 알림톡 문구 원천 inventory는 설정 key 6개, 제품 경로 9개, Solapi provider template 4개와 preview/live 분리 위험을 고정했다. 다음 P3-1은 기존 6개 default·변수 metadata·normalize를 pure notification catalog로 이동한다.
 2. App 3차 리팩터링 3-0~3-8은 production main 43.1%·gzip 45.3% 감소, 12개 물리 lazy chunk, App Babel 500 KB 경고 제거와 종료 소유권 감사까지 완료했다. 자동으로 다음 리팩터링 차수를 시작하지 않고 P1~P3 제품·저장 신뢰성 우선순위로 돌아간다.
 3. `app_state`에서 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
    - 즉시 사람 판단이 필요하지 않은 발견은 queue/worklog에 남기고 AI 검수와 다음 단계를 연쇄 진행한다.
