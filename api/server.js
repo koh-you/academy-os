@@ -6533,10 +6533,18 @@ const server = http.createServer(async (request, response) => {
   if (request.method === "POST" && requestUrl.pathname === "/api/student-intake-applicants") {
     try {
       const payload = await readJsonBody(request);
-      const result = await upsertStudentIntakeApplicant(payload.applicant ?? payload);
+      const result = await upsertStudentIntakeApplicant(
+        payload.applicant ?? payload,
+        { expectedUpdatedAt: payload.expectedUpdatedAt }
+      );
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        code: error.code,
+        currentApplicant: error.currentApplicant,
+        error: error.message
+      });
     }
     return;
   }

@@ -22,6 +22,13 @@ import {
   createNextExamPrepRowUpdatedAt,
   isExamPrepRowInsertConflict
 } from "../../src/domains/exams/examPrepRowPersistence.js";
+import {
+  areStudentIntakeApplicantsPersistedEqual,
+  areStudentIntakeApplicantTimestampsEqual,
+  createNextStudentIntakeApplicantUpdatedAt,
+  createStudentIntakeApplicantConflict,
+  createStudentIntakeApplicantVersionFilter
+} from "../../src/domains/students/studentIntakeApplicantPersistence.js";
 import { deleteRows, getSupabaseStatus, insertRows, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
 
 const fallbackSource = "local_sample";
@@ -1734,6 +1741,15 @@ export async function listStudentIntakeApplicants() {
   }
 }
 
+async function getStudentIntakeApplicant(applicantId) {
+  const rows = await listRows(
+    "student_intake_applicants",
+    `select=*&applicant_id=eq.${encodeURIComponent(applicantId)}&limit=1`,
+    { requireServiceRole: true }
+  );
+  return rows[0] ? fromStudentIntakeApplicantRow(rows[0]) : null;
+}
+
 export async function listSpecialLectureApplications() {
   if (!isSupabaseConfigured()) {
     return { source: fallbackSource, applications: [] };
@@ -1917,7 +1933,7 @@ export async function upsertStudents(students) {
   return { source: databaseSource, students: rows.map(fromStudentRow) };
 }
 
-export async function upsertStudentIntakeApplicant(applicant) {
+export async function upsertStudentIntakeApplicant(applicant, { expectedUpdatedAt } = {}) {
   const now = new Date().toISOString();
   const normalizedApplicant = {
     ...applicant,
@@ -1928,6 +1944,60 @@ export async function upsertStudentIntakeApplicant(applicant) {
   };
   if (!isSupabaseConfigured({ requireServiceRole: true })) {
     return { source: fallbackSource, applicant: normalizedApplicant };
+  }
+
+  if (expectedUpdatedAt !== undefined) {
+    const existingApplicant = await getStudentIntakeApplicant(normalizedApplicant.applicantId);
+    if (!existingApplicant) {
+      const conflict = createStudentIntakeApplicantConflict(
+        normalizedApplicant.applicantId,
+        null,
+        "deleted"
+      );
+      const error = new Error(conflict.message);
+      Object.assign(error, conflict, { statusCode: 409 });
+      throw error;
+    }
+    if (!areStudentIntakeApplicantTimestampsEqual(existingApplicant.updatedAt, expectedUpdatedAt)) {
+      const conflict = createStudentIntakeApplicantConflict(
+        normalizedApplicant.applicantId,
+        existingApplicant
+      );
+      const error = new Error(conflict.message);
+      Object.assign(error, conflict, { statusCode: 409 });
+      throw error;
+    }
+
+    const dbRow = toStudentIntakeApplicantRow(normalizedApplicant);
+    dbRow.updated_at = createNextStudentIntakeApplicantUpdatedAt(existingApplicant.updatedAt);
+    const savedRows = await patchRows(
+      "student_intake_applicants",
+      createStudentIntakeApplicantVersionFilter(normalizedApplicant.applicantId, existingApplicant.updatedAt),
+      dbRow
+    );
+    if (!savedRows.length) {
+      const currentApplicant = await getStudentIntakeApplicant(normalizedApplicant.applicantId);
+      const conflict = createStudentIntakeApplicantConflict(
+        normalizedApplicant.applicantId,
+        currentApplicant,
+        currentApplicant ? "updated" : "deleted"
+      );
+      const error = new Error(conflict.message);
+      Object.assign(error, conflict, { statusCode: 409 });
+      throw error;
+    }
+
+    const verifiedApplicant = await getStudentIntakeApplicant(normalizedApplicant.applicantId);
+    if (
+      !verifiedApplicant ||
+      !areStudentIntakeApplicantsPersistedEqual(normalizedApplicant, verifiedApplicant) ||
+      !areStudentIntakeApplicantTimestampsEqual(dbRow.updated_at, verifiedApplicant.updatedAt)
+    ) {
+      const error = new Error(`Tally 후보 ${normalizedApplicant.applicantId}의 Supabase 저장값을 재조회로 확인하지 못했습니다.`);
+      error.code = "STUDENT_INTAKE_APPLICANT_VERIFICATION_FAILED";
+      throw error;
+    }
+    return { source: databaseSource, applicant: verifiedApplicant, verified: true };
   }
 
   const [row] = await upsertRows("student_intake_applicants", [toStudentIntakeApplicantRow(normalizedApplicant)]);

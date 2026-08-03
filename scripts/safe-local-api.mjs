@@ -247,7 +247,30 @@ const initialState = {
       "special_lecture_session_special_lecture_2026_summer_high1_clinic_mwf_07"
     ]
   }],
-  studentIntakeApplicants: [],
+  studentIntakeApplicants: [{
+    applicantId: "safe-intake-applicant",
+    birthYear: "2010",
+    createdAt: "2026-08-03T00:00:00.000Z",
+    currentLearningProcess: "안전 fixture 기존 과정",
+    defaultClassTemplateId: "",
+    desiredClass: "",
+    enrollmentStatus: "상담중",
+    formId: "safe-intake-form",
+    formName: "안전 신규생 Tally",
+    grade: "고1",
+    memo: "",
+    name: "Tally 안전후보",
+    parentPhone: "01022223333",
+    previousSemesterScore: "3등급",
+    rawPayload: { safeFixture: true },
+    schoolName: "안전고",
+    source: "tally",
+    sourceSubmissionId: "safe-intake-submission",
+    specialNote: "",
+    status: "received",
+    studentPhone: "01011112222",
+    updatedAt: "2026-08-03T00:00:00.000Z"
+  }],
   students: [
     {
       grade: "중3",
@@ -374,6 +397,32 @@ function handleMutation(pathname, payload) {
       verified: examPrepRows.length === (payload.examPrepRows || []).length && conflicts.length === 0
     };
   }
+  if (pathname === "/api/student-intake-applicants") {
+    const applicant = payload.applicant || {};
+    const existingApplicant = state.studentIntakeApplicants
+      .find((item) => item.applicantId === applicant.applicantId);
+    if (!existingApplicant || payload.expectedUpdatedAt !== existingApplicant.updatedAt) {
+      return {
+        code: "STUDENT_INTAKE_APPLICANT_CONFLICT",
+        currentApplicant: existingApplicant ?? null,
+        error: `Tally 후보 ${applicant.applicantId}가 다른 화면에서 먼저 변경되었습니다.`,
+        ok: false,
+        statusCode: 409
+      };
+    }
+    const savedApplicant = {
+      ...applicant,
+      updatedAt: new Date(
+        Math.max(Date.now(), new Date(existingApplicant.updatedAt).getTime() + 1)
+      ).toISOString()
+    };
+    state.studentIntakeApplicants = upsertById(
+      state.studentIntakeApplicants,
+      savedApplicant,
+      ["applicantId"]
+    );
+    return { applicant: savedApplicant, ok: true, verified: true };
+  }
   if (pathname === "/api/lessons") {
     const lesson = payload.lesson || {};
     state.lessons = upsertById(state.lessons, lesson, ["lessonId", "id"]);
@@ -429,8 +478,9 @@ const server = http.createServer(async (request, response) => {
     if (["/api/app-state", "/api/lesson-records/bulk"].includes(requestUrl.pathname)) {
       await new Promise((resolve) => setTimeout(resolve, 800));
     }
-    return sendJson(response, 200, {
-      ...handleMutation(requestUrl.pathname, payload),
+    const { statusCode = 200, ...result } = handleMutation(requestUrl.pathname, payload);
+    return sendJson(response, statusCode, {
+      ...result,
       safeFixture: true,
       source: "supabase"
     });

@@ -38,6 +38,8 @@ import {
   replaceTallyStudentValues,
   specialLectureTallyStudentFields
 } from "../domains/students/tallyStudentMerge.js";
+import { saveStudentIntakeApplicantRequest } from "../domains/students/studentIntakeApplicantApi.js";
+import { createStudentIntakeApplicantSaveController } from "../domains/students/studentIntakeApplicantSaveController.js";
 import { ParentPortal } from "../domains/portals/ParentPortal.jsx";
 import { calculateAttendanceStats } from "../domains/portals/StudentMyPageTab.jsx";
 import { StudentPortalShell } from "../domains/portals/StudentPortalShell.jsx";
@@ -3002,6 +3004,7 @@ export function App() {
   const [classTemplates, setClassTemplates] = useStoredState(storageKeys.classTemplates, sampleData.classTemplates);
   const [students, setStudents] = useStoredState(storageKeys.students, sampleData.students);
   const [studentIntakeApplicants, setStudentIntakeApplicants] = useStoredState(storageKeys.studentIntakeApplicants, []);
+  const studentIntakeApplicantsRef = useRef(studentIntakeApplicants);
   const [specialLectureApplications, setSpecialLectureApplications] = useStoredState(storageKeys.specialLectureApplications, []);
   const [specialLectureEnrollments, setSpecialLectureEnrollments] = useStoredState(storageKeys.specialLectureEnrollments, []);
   const [lessons, setLessons] = useStoredState(storageKeys.lessons, sampleData.lessons);
@@ -3129,7 +3132,7 @@ export function App() {
   const examPrepDeleteRequestIdsRef = useRef(new Set());
   const studentProfileSaveRequestRef = useRef({});
   const teacherOperatingMemoSaveRequestRef = useRef({});
-  const studentIntakeSaveRequestRef = useRef({});
+  const studentIntakeSaveControllerRef = useRef(null);
   const isApplyingRemoteAppStateRef = useRef(false);
   const appStatePersistenceControllerRef = useRef(null);
   const notificationJobsRefreshControllerRef = useRef(null);
@@ -3147,6 +3150,10 @@ export function App() {
     isReady: isAppStateReady,
     onReloadRequested: () => setIsAppStateReady(false)
   });
+
+  useEffect(() => {
+    studentIntakeApplicantsRef.current = studentIntakeApplicants;
+  }, [studentIntakeApplicants]);
 
   const sharedAppState = useMemo(() => ({
     aiSettings,
@@ -5195,43 +5202,58 @@ export function App() {
     postJson("/api/students", { student }).catch((error) => console.error(error));
   }
 
-  function handleUpdateStudentIntakeApplicant(applicantId, updates) {
-    const nextApplicant = {
-      ...studentIntakeApplicants.find((applicant) => applicant.applicantId === applicantId),
-      ...updates,
-      updatedAt: new Date().toISOString()
-    };
-    if (!nextApplicant.applicantId) return;
-    setStudentIntakeApplicants((current) =>
-      current.map((applicant) => (applicant.applicantId === applicantId ? nextApplicant : applicant))
-    );
-    const requestId = (studentIntakeSaveRequestRef.current[applicantId] ?? 0) + 1;
-    studentIntakeSaveRequestRef.current[applicantId] = requestId;
-    setStudentIntakeSaveStates((current) => ({ ...current, [applicantId]: "saving" }));
-    postJson("/api/student-intake-applicants", { applicant: nextApplicant })
-      .then(() => {
-        if (studentIntakeSaveRequestRef.current[applicantId] === requestId) {
-          setStudentIntakeSaveStates((current) => ({ ...current, [applicantId]: "saved" }));
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-        if (studentIntakeSaveRequestRef.current[applicantId] === requestId) {
-          setStudentIntakeSaveStates((current) => ({ ...current, [applicantId]: "failed" }));
-        }
+  function getStudentIntakeApplicantSaveController() {
+    if (!studentIntakeSaveControllerRef.current) {
+      studentIntakeSaveControllerRef.current = createStudentIntakeApplicantSaveController({
+        onError: console.error,
+        onPersisted: ({ applicant, hasPendingChanges, pendingApplicant }) => {
+          const nextApplicant = hasPendingChanges ? pendingApplicant : applicant;
+          const nextApplicants = studentIntakeApplicantsRef.current.map((currentApplicant) => (
+            currentApplicant.applicantId === applicant.applicantId ? nextApplicant : currentApplicant
+          ));
+          studentIntakeApplicantsRef.current = nextApplicants;
+          setStudentIntakeApplicants(nextApplicants);
+        },
+        request: (applicant) => saveStudentIntakeApplicantRequest({
+          applicant,
+          request: postJsonWithTimeout
+        }),
+        setSaveStates: setStudentIntakeSaveStates
       });
+    }
+    return studentIntakeSaveControllerRef.current;
+  }
+
+  function handleUpdateStudentIntakeApplicant(applicantId, updates) {
+    if (studentIntakeRegistrationStates[applicantId] === "saving") return;
+    const currentApplicant = studentIntakeApplicantsRef.current
+      .find((applicant) => applicant.applicantId === applicantId);
+    if (!currentApplicant?.applicantId) return;
+    const nextApplicant = { ...currentApplicant, ...updates };
+    const nextApplicants = studentIntakeApplicantsRef.current.map((applicant) => (
+      applicant.applicantId === applicantId ? nextApplicant : applicant
+    ));
+    studentIntakeApplicantsRef.current = nextApplicants;
+    setStudentIntakeApplicants(nextApplicants);
+    getStudentIntakeApplicantSaveController().save(nextApplicant);
   }
 
   async function handleRegisterStudentIntakeApplicant(applicantId, values, options = {}) {
-    const applicant = studentIntakeApplicants.find((item) => item.applicantId === applicantId);
-    if (!applicant) throw new Error("등록할 Tally 후보를 찾지 못했습니다.");
     if (studentIntakeRegistrationStates[applicantId] === "saving") return;
     const targetStudentId = String(options.targetStudentId ?? "").trim();
 
     setStudentIntakeRegistrationStates((current) => ({ ...current, [applicantId]: "saving" }));
-    setStudentIntakeRegistrationMessages((current) => ({ ...current, [applicantId]: "학생 원천 저장 중" }));
+    setStudentIntakeRegistrationMessages((current) => ({ ...current, [applicantId]: "Tally 후보 입력 저장 확인 중" }));
 
     try {
+      const pendingSaveResult = await getStudentIntakeApplicantSaveController().waitForIdle(applicantId);
+      if (!pendingSaveResult.ok) {
+        throw pendingSaveResult.error || new Error("Tally 후보 입력 저장을 확인하지 못했습니다.");
+      }
+      const applicant = studentIntakeApplicantsRef.current
+        .find((item) => item.applicantId === applicantId);
+      if (!applicant) throw new Error("등록할 Tally 후보를 찾지 못했습니다.");
+      setStudentIntakeRegistrationMessages((current) => ({ ...current, [applicantId]: "학생 원천 저장 중" }));
       const generatedStudentId = `student_intake_${safeIdPart(applicantId)}`;
       const studentsBeforeResult = await getJsonWithTimeout(
         "/api/students",
@@ -5383,15 +5405,13 @@ export function App() {
         ...values,
         defaultClassTemplateId: savedStudent.defaultClassTemplateId ?? "",
         status: "registered",
-        memo: registeredApplicantMemo,
-        updatedAt: new Date().toISOString()
+        memo: registeredApplicantMemo
       };
-      await postJsonWithTimeout(
-        "/api/student-intake-applicants",
-        { applicant: registeredApplicant },
-        15000,
-        "Tally 후보 완료 상태 저장이 15초를 넘었습니다. 학생 원천은 이미 저장됐을 수 있습니다."
-      );
+      await saveStudentIntakeApplicantRequest({
+        applicant: registeredApplicant,
+        request: postJsonWithTimeout,
+        timeoutMessage: "Tally 후보 완료 상태 저장이 15초를 넘었습니다. 학생 원천은 이미 저장됐을 수 있습니다."
+      });
       const applicantsAfterResult = await getJsonWithTimeout(
         "/api/student-intake-applicants",
         15000,
@@ -5401,7 +5421,9 @@ export function App() {
       if (verifiedApplicant?.status !== "registered" || !String(verifiedApplicant.memo ?? "").includes(savedStudent.studentId)) {
         throw new Error("학생은 저장됐지만 Tally 후보의 등록완료 상태가 재조회와 일치하지 않습니다.");
       }
-      setStudentIntakeApplicants(applicantsAfterResult.applicants ?? []);
+      const verifiedApplicants = applicantsAfterResult.applicants ?? [];
+      studentIntakeApplicantsRef.current = verifiedApplicants;
+      setStudentIntakeApplicants(verifiedApplicants);
       setStudentIntakeRegistrationStates((current) => ({ ...current, [applicantId]: "saved" }));
       setStudentIntakeRegistrationMessages((current) => ({
         ...current,
@@ -9200,6 +9222,7 @@ function StudentModal({
         <label>
           Tally 반영 대상
           <select
+            disabled={applicantRegistrationStates[applicant.applicantId] === "saving"}
             value={targetStudentId}
             onChange={(event) => setApplicantTargetStudentIds((current) => ({
               ...current,
@@ -9241,13 +9264,14 @@ function StudentModal({
   }
 
   function renderTallyQuestionFields(applicant) {
+    const disabled = applicantRegistrationStates[applicant.applicantId] === "saving";
     return (
       <>
-        <label>재원생 여부<input value={applicant.enrollmentStatus ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "enrollmentStatus", event.target.value)} /></label>
-        <label>현재 학습 과정<input value={applicant.currentLearningProcess ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "currentLearningProcess", event.target.value)} /></label>
-        <label>직전학기 내신 성적<input value={applicant.previousSemesterScore ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "previousSemesterScore", event.target.value)} /></label>
-        <label>특이사항<input value={applicant.specialNote ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "specialNote", event.target.value)} /></label>
-        <label>추가 메모<input value={applicant.memo || applicant.desiredClass || ""} onChange={(event) => updateApplicant(applicant.applicantId, "memo", event.target.value)} /></label>
+        <label>재원생 여부<input disabled={disabled} value={applicant.enrollmentStatus ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "enrollmentStatus", event.target.value)} /></label>
+        <label>현재 학습 과정<input disabled={disabled} value={applicant.currentLearningProcess ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "currentLearningProcess", event.target.value)} /></label>
+        <label>직전학기 내신 성적<input disabled={disabled} value={applicant.previousSemesterScore ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "previousSemesterScore", event.target.value)} /></label>
+        <label>특이사항<input disabled={disabled} value={applicant.specialNote ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "specialNote", event.target.value)} /></label>
+        <label>추가 메모<input disabled={disabled} value={applicant.memo || applicant.desiredClass || ""} onChange={(event) => updateApplicant(applicant.applicantId, "memo", event.target.value)} /></label>
       </>
     );
   }
@@ -9330,6 +9354,7 @@ function StudentModal({
                   </div>
                   <select
                     aria-label={`${applicant.name || "이름 미입력"} Tally 접수 상태`}
+                    disabled={applicantRegistrationStates[applicant.applicantId] === "saving"}
                     value={applicant.status ?? "received"}
                     onChange={(event) => updateApplicant(applicant.applicantId, "status", event.target.value)}
                   >
@@ -9339,15 +9364,15 @@ function StudentModal({
                   </select>
                 </div>
                 <div className="studentIntakeGrid">
-                  <label>이름<input value={applicant.name ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "name", event.target.value)} /></label>
-                  <label>출생연도<input value={applicant.birthYear ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "birthYear", event.target.value)} /></label>
-                  <label>학교<input value={applicant.schoolName ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "schoolName", event.target.value)} /></label>
-                  <label>학년<input value={applicant.grade ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "grade", event.target.value)} /></label>
-                  <label>학생전화<input value={applicant.studentPhone ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "studentPhone", event.target.value)} /></label>
-                  <label>학부모전화<input value={applicant.parentPhone ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "parentPhone", event.target.value)} /></label>
+                  <label>이름<input disabled={applicantRegistrationStates[applicant.applicantId] === "saving"} value={applicant.name ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "name", event.target.value)} /></label>
+                  <label>출생연도<input disabled={applicantRegistrationStates[applicant.applicantId] === "saving"} value={applicant.birthYear ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "birthYear", event.target.value)} /></label>
+                  <label>학교<input disabled={applicantRegistrationStates[applicant.applicantId] === "saving"} value={applicant.schoolName ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "schoolName", event.target.value)} /></label>
+                  <label>학년<input disabled={applicantRegistrationStates[applicant.applicantId] === "saving"} value={applicant.grade ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "grade", event.target.value)} /></label>
+                  <label>학생전화<input disabled={applicantRegistrationStates[applicant.applicantId] === "saving"} value={applicant.studentPhone ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "studentPhone", event.target.value)} /></label>
+                  <label>학부모전화<input disabled={applicantRegistrationStates[applicant.applicantId] === "saving"} value={applicant.parentPhone ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "parentPhone", event.target.value)} /></label>
                   <label>
                     배정 반
-                    <select value={applicant.defaultClassTemplateId ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "defaultClassTemplateId", event.target.value)}>
+                    <select disabled={applicantRegistrationStates[applicant.applicantId] === "saving"} value={applicant.defaultClassTemplateId ?? ""} onChange={(event) => updateApplicant(applicant.applicantId, "defaultClassTemplateId", event.target.value)}>
                       <option value="">미배정</option>
                       {templates.map((template) => (
                         <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>

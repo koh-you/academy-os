@@ -31,6 +31,8 @@ export const domainTestGroups = Object.freeze({
   ]),
   student: Object.freeze([
     "scripts/test-tally-student-merge.mjs",
+    "scripts/test-student-intake-applicant-api.mjs",
+    "scripts/test-student-intake-applicant-save-controller.mjs",
     "scripts/test-student-handover-pdf.mjs",
     "scripts/test-student-withdrawal-boundary.mjs",
     "scripts/test-parent-response-context.mjs",
