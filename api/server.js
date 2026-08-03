@@ -44,6 +44,7 @@ import {
   recordAttendanceEvent,
   claimNotificationJob,
   seedCoreData,
+  saveClassRosterPlan,
   syncSpecialLectureLessonStudentSchedule,
   upsertAppState,
   upsertAcademyReminder,
@@ -6977,6 +6978,26 @@ const server = http.createServer(async (request, response) => {
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, Number(error.statusCode) || 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/class-rosters/save") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await saveClassRosterPlan({
+        auditId: payload.auditId,
+        lessonChanges: payload.lessonChanges ?? [],
+        studentChanges: payload.studentChanges ?? []
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.audit ? { audit: error.audit } : {})
+      });
     }
     return;
   }

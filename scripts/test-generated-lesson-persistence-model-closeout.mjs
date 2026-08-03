@@ -124,7 +124,7 @@ const syncHandlerStart = appSource.indexOf(
   "  function handleSyncPreExamLessonFromSchoolEvent(event) {"
 );
 const syncHandlerEnd = appSource.indexOf(
-  "  function handleUpdateClassRoster(",
+  "  async function handleUpdateClassRoster(",
   syncHandlerStart
 );
 assert.ok(

@@ -698,12 +698,16 @@ export function ClassManager({ runtime, students, templates, onUpdateClassRoster
   const [selectedTemplateId, setSelectedTemplateId] = useState(templates[1]?.classTemplateId ?? templates[0]?.classTemplateId ?? "");
   const [isRosterModalOpen, setIsRosterModalOpen] = useState(false);
   const [draftStudentIds, setDraftStudentIds] = useState([]);
+  const [rosterSaveError, setRosterSaveError] = useState("");
+  const [rosterSaveState, setRosterSaveState] = useState("idle");
   const selectedTemplate = templates.find((template) => template.classTemplateId === selectedTemplateId) ?? templates[0];
   const activeStudents = students.filter(isActiveStudent);
   const classStudents = activeStudents.filter((student) => student.defaultClassTemplateId === selectedTemplate?.classTemplateId);
 
   function openRosterModal() {
     setDraftStudentIds(classStudents.map((student) => student.studentId));
+    setRosterSaveError("");
+    setRosterSaveState("idle");
     setIsRosterModalOpen(true);
   }
 
@@ -713,10 +717,19 @@ export function ClassManager({ runtime, students, templates, onUpdateClassRoster
     );
   }
 
-  function saveRoster() {
+  async function saveRoster() {
     if (!selectedTemplate) return;
-    onUpdateClassRoster(selectedTemplate.classTemplateId, draftStudentIds);
-    setIsRosterModalOpen(false);
+    setRosterSaveError("");
+    setRosterSaveState("saving");
+    try {
+      await onUpdateClassRoster(selectedTemplate.classTemplateId, draftStudentIds);
+      setRosterSaveState("saved");
+      setIsRosterModalOpen(false);
+    } catch (error) {
+      console.error(error);
+      setRosterSaveError(error.message);
+      setRosterSaveState("failed");
+    }
   }
 
   return (
@@ -771,7 +784,10 @@ export function ClassManager({ runtime, students, templates, onUpdateClassRoster
       {isRosterModalOpen ? (
         <Modal
           className="classRosterModal"
-          onClose={() => setIsRosterModalOpen(false)}
+          closeDisabled={rosterSaveState === "saving"}
+          onClose={() => {
+            if (rosterSaveState !== "saving") setIsRosterModalOpen(false);
+          }}
           scrollable
           subtitle="학생을 체크하면 이 반으로 배정되고, 체크를 해제하면 이 반 명단에서 제외됩니다."
           title={`${selectedTemplate?.name ?? "반"} 명단 수정`}
@@ -793,6 +809,7 @@ export function ClassManager({ runtime, students, templates, onUpdateClassRoster
                 <label className={checked ? "rosterStudentItem selected" : "rosterStudentItem"} key={student.studentId}>
                   <input
                     checked={checked}
+                    disabled={rosterSaveState === "saving"}
                     onChange={() => toggleDraftStudent(student.studentId)}
                     type="checkbox"
                   />
@@ -806,9 +823,13 @@ export function ClassManager({ runtime, students, templates, onUpdateClassRoster
               );
             })}
           </div>
+          {rosterSaveState === "saving" ? <p className="statusText">학생 반 배정 저장 후 미래 수업 명단을 확인하고 있습니다.</p> : null}
+          {rosterSaveState === "failed" ? <p className="errorText" role="alert">{rosterSaveError || "반 명단 저장에 실패했습니다. 입력을 유지했으니 다시 시도해 주세요."}</p> : null}
           <div className="deleteConfirmActions">
-            <button className="softButton" onClick={() => setIsRosterModalOpen(false)} type="button">취소</button>
-            <button className="primaryButton" onClick={saveRoster} type="button">명단 저장</button>
+            <button className="softButton" disabled={rosterSaveState === "saving"} onClick={() => setIsRosterModalOpen(false)} type="button">취소</button>
+            <button className="primaryButton" disabled={rosterSaveState === "saving"} onClick={saveRoster} type="button">
+              {rosterSaveState === "saving" ? "저장·확인 중" : rosterSaveState === "failed" ? "다시 저장" : "명단 저장"}
+            </button>
           </div>
         </Modal>
       ) : null}

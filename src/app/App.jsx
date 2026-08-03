@@ -25,7 +25,6 @@ import {
 import { createExamPrepRowSaveController } from "../domains/exams/examPrepRowSaveController.js";
 import { normalizeExamPrepRowReviewDraft } from "../domains/exams/examReviewDraft.js";
 import {
-  getWithdrawalDateKey,
   getWithdrawalFutureLessonStartDate,
   isStudentVisibleInLessonJournal
 } from "../domains/students/withdrawalLessonBoundary.js";
@@ -42,6 +41,11 @@ import { saveStudentIntakeApplicantRequest } from "../domains/students/studentIn
 import { createStudentIntakeApplicantSaveController } from "../domains/students/studentIntakeApplicantSaveController.js";
 import { saveStudentRequest } from "../domains/students/studentApi.js";
 import { resolveStudentRowSaveSuccess } from "../domains/students/studentPersistence.js";
+import { saveClassRosterRequest } from "../domains/students/classRosterApi.js";
+import {
+  createClassRosterSavePlan,
+  verifyClassRosterSavePlan
+} from "../domains/students/classRosterPersistence.js";
 import { ParentPortal } from "../domains/portals/ParentPortal.jsx";
 import { calculateAttendanceStats } from "../domains/portals/StudentMyPageTab.jsx";
 import { StudentPortalShell } from "../domains/portals/StudentPortalShell.jsx";
@@ -4555,19 +4559,6 @@ export function App() {
     : [];
 
   useEffect(() => {
-    if (!isAppStateReady || session?.role !== "teacher") return;
-    const withdrawalBoundaries = students
-      .filter(isWithdrawnStudent)
-      .map((student) => ({
-        studentId: student.studentId,
-        fromDate: getWithdrawalFutureLessonStartDate(getWithdrawalDateKey(student.withdrawnAt))
-      }))
-      .filter(({ studentId, fromDate }) => studentId && fromDate);
-    if (withdrawalBoundaries.length === 0) return;
-    removeWithdrawnStudentsFromFutureLessons(withdrawalBoundaries);
-  }, [isAppStateReady, lessons, session?.role, students]);
-
-  useEffect(() => {
     if (!isLessonJournalOpen || !selectedLesson?.lessonId || !isAppStateReady || session?.role !== "teacher") return;
     const currentPlan = lessonNotificationPlans[selectedLesson.lessonId];
     if (!currentPlan?.autoRebuildEnabled) return;
@@ -5104,108 +5095,121 @@ export function App() {
     };
   }
 
-  function isActiveLessonForRosterSync(lesson) {
-    return (lesson.status ?? "scheduled") !== "canceled";
-  }
-
-  function applyLessonRosterChanges(changedLessons) {
-    if (!changedLessons.length) return;
-    const changedById = new Map(changedLessons.map((lesson) => [lesson.lessonId, lesson]));
-    setLessons((current) => current.map((lesson) => changedById.get(lesson.lessonId) ?? lesson));
-    postJson("/api/lessons/bulk", { lessons: changedLessons }).catch((error) => {
-      console.error(error);
-      window.alert(`수업 명단 저장 실패: ${error.message}`);
-    });
-  }
-
-  function addStudentToFutureClassLessons(student, fromDate = today) {
-    if (!isActiveStudent(student) || !student.defaultClassTemplateId) return [];
-    const changedLessons = lessons
-      .filter((lesson) =>
-        isActiveLessonForRosterSync(lesson) &&
-        lesson.classTemplateId === student.defaultClassTemplateId &&
-        String(lesson.date) >= fromDate &&
-        !(lesson.studentIds ?? []).includes(student.studentId)
-      )
-      .map((lesson) => ({
-        ...lesson,
-        studentIds: getActiveStudentIdsFromSelection([...(lesson.studentIds ?? []), student.studentId], students)
-      }));
-    applyLessonRosterChanges(changedLessons);
-    return changedLessons;
-  }
-
-  function reconcileChangedStudentsFutureClassLessons(changedStudents = [], previousStudents = [], fromDate = today) {
-    const changePairs = changedStudents
-      .map((student) => ({
-        student,
-        previousStudent: previousStudents.find((item) => item.studentId === student.studentId)
-      }))
-      .filter(({ student, previousStudent }) => student && previousStudent);
-    if (changePairs.length === 0) return [];
-
-    const changedLessons = lessons.flatMap((lesson) => {
-      if (!isActiveLessonForRosterSync(lesson) || String(lesson.date) < fromDate) return [];
-      let nextStudentIds = lesson.studentIds ?? [];
-      changePairs.forEach(({ student, previousStudent }) => {
-        const previousClassTemplateId = previousStudent.defaultClassTemplateId ?? "";
-        const nextClassTemplateId = isActiveStudent(student) ? (student.defaultClassTemplateId ?? "") : "";
-        if (previousClassTemplateId && previousClassTemplateId !== nextClassTemplateId && lesson.classTemplateId === previousClassTemplateId) {
-          nextStudentIds = nextStudentIds.filter((id) => id !== student.studentId);
-        }
-        if (nextClassTemplateId && lesson.classTemplateId === nextClassTemplateId && !nextStudentIds.includes(student.studentId)) {
-          nextStudentIds = [...nextStudentIds, student.studentId];
+  function applyVerifiedClassRosterSources(plan, sourceStudents = [], sourceLessons = [], options = {}) {
+    const affectedStudentIds = new Set(plan.studentChanges.map(({ after }) => after.studentId));
+    const affectedLessonIds = new Set(plan.lessonChanges.map((change) => change.lessonId));
+    const sourceStudentsById = new Map(sourceStudents.map((student) => [student.studentId, student]));
+    const sourceLessonsById = new Map(sourceLessons.map((lesson) => [lesson.lessonId, lesson]));
+    setStudents((current) => {
+      const merged = current
+        .filter((student) => !affectedStudentIds.has(student.studentId) || sourceStudentsById.has(student.studentId))
+        .map((student) => affectedStudentIds.has(student.studentId)
+          ? options.mergeStudent?.(
+              student,
+              sourceStudentsById.get(student.studentId),
+              plan.studentChanges.find(({ after }) => after.studentId === student.studentId)
+            ) ?? sourceStudentsById.get(student.studentId)
+          : student);
+      sourceStudents.forEach((student) => {
+        if (affectedStudentIds.has(student.studentId) && !merged.some((item) => item.studentId === student.studentId)) {
+          merged.push(student);
         }
       });
-      const sortedStudentIds = getActiveStudentIdsFromSelection(nextStudentIds, students);
-      if (JSON.stringify(sortedStudentIds) === JSON.stringify(lesson.studentIds ?? [])) return [];
-      return [{ ...lesson, studentIds: sortedStudentIds }];
+      return merged;
     });
-    applyLessonRosterChanges(changedLessons);
-    return changedLessons;
+    setLessons((current) => current.map((lesson) => (
+      affectedLessonIds.has(lesson.lessonId) && sourceLessonsById.has(lesson.lessonId)
+        ? sourceLessonsById.get(lesson.lessonId)
+        : lesson
+    )));
   }
 
-  function reconcileStudentFutureClassLessons(student, previousClassTemplateId = "", fromDate = today) {
-    const previousStudent = {
-      ...student,
-      defaultClassTemplateId: previousClassTemplateId
-    };
-    return reconcileChangedStudentsFutureClassLessons([student], [previousStudent], fromDate);
-  }
-
-  function removeStudentsFromLessonsFromDate(studentIds = [], fromDate = today) {
-    const removalStudentIds = new Set(studentIds);
-    if (removalStudentIds.size === 0) return [];
-    const changedLessons = lessons
-      .filter((lesson) =>
-        isActiveLessonForRosterSync(lesson) &&
-        String(lesson.date) >= fromDate &&
-        (lesson.studentIds ?? []).some((studentId) => removalStudentIds.has(studentId))
+  async function readClassRosterSources() {
+    const [studentResult, lessonResult] = await Promise.all([
+      getJsonWithTimeout(
+        "/api/students",
+        20000,
+        "학생 반 배정 재조회가 20초를 넘었습니다. 현재 입력을 유지한 채 다시 확인해 주세요."
+      ),
+      getJsonWithTimeout(
+        "/api/lessons?includeCanceled=true",
+        20000,
+        "미래 수업 명단 재조회가 20초를 넘었습니다. 현재 입력을 유지한 채 다시 확인해 주세요."
       )
-      .map((lesson) => ({
-        ...lesson,
-        studentIds: (lesson.studentIds ?? []).filter((id) => !removalStudentIds.has(id))
-      }));
-    applyLessonRosterChanges(changedLessons);
-    return changedLessons;
+    ]);
+    if (studentResult.source !== "supabase" || lessonResult.source !== "supabase") {
+      throw new Error("학생 반 배정과 미래 수업 명단을 Supabase에서 재조회하지 못했습니다.");
+    }
+    return {
+      lessons: lessonResult.lessons ?? [],
+      students: studentResult.students ?? []
+    };
   }
 
-  function removeStudentFromLessonsFromDate(studentId, fromDate = today) {
-    return removeStudentsFromLessonsFromDate([studentId], fromDate);
+  async function persistClassRosterMutation({
+    fromDate = today,
+    mergeStudent,
+    nextStudents,
+    previousStudents,
+    timeoutMessage
+  }) {
+    const lessonSource = await getJsonWithTimeout(
+      "/api/lessons?includeCanceled=true",
+      20000,
+      "미래 수업 명단 원천 확인이 20초를 넘었습니다. 저장하지 않고 현재 입력을 유지합니다."
+    );
+    if (lessonSource.source !== "supabase") {
+      throw new Error("미래 수업 명단 원천을 Supabase에서 확인하지 못해 저장을 중단했습니다.");
+    }
+    const plan = createClassRosterSavePlan({
+      fromDate,
+      lessons: lessonSource.lessons ?? [],
+      nextStudents,
+      previousStudents
+    });
+    if (plan.studentChanges.length === 0 && plan.lessonChanges.length === 0) {
+      return { lessons: lessonSource.lessons ?? [], plan, students: previousStudents };
+    }
+    try {
+      await saveClassRosterRequest({
+        lessonChanges: plan.lessonChanges,
+        request: postJsonWithTimeout,
+        studentChanges: plan.studentChanges,
+        timeoutMessage
+      });
+      const sources = await readClassRosterSources();
+      const verification = verifyClassRosterSavePlan(plan, sources);
+      if (!verification.verified) {
+        const mismatches = [
+          ...verification.studentMismatches.map((id) => `학생:${id}`),
+          ...verification.lessonMismatches.map((id) => `수업:${id}`)
+        ];
+        throw new Error(`반 명단 저장 뒤 Supabase 재조회 값이 다릅니다: ${mismatches.join(", ")}`);
+      }
+      applyVerifiedClassRosterSources(plan, sources.students, sources.lessons, { mergeStudent });
+      return { ...sources, plan };
+    } catch (error) {
+      try {
+        const recoverySources = await readClassRosterSources();
+        error.classRosterRecovery = verifyClassRosterSavePlan(plan, recoverySources);
+      } catch (recoveryError) {
+        error.recoveryError = recoveryError;
+      }
+      throw error;
+    }
   }
 
   async function handleAddStudent(formValues) {
     const student = createStudentFromFormValues(formValues);
-    const savedStudent = await saveStudentRequest({
-      createOnly: true,
-      request: postJsonWithTimeout,
-      student,
-      timeoutMessage: "신규 학생 저장이 15초를 넘었습니다. 중복 등록하지 말고 현재 입력을 유지한 채 서버 상태를 확인해 주세요."
+    const nextStudents = [...students, student];
+    const result = await persistClassRosterMutation({
+      fromDate: today,
+      nextStudents,
+      previousStudents: students,
+      timeoutMessage: "신규 학생과 미래 수업 명단 저장이 30초를 넘었습니다. 중복 등록하지 말고 현재 입력을 유지한 채 서버 상태를 확인해 주세요."
     });
-    setStudents((current) => current.some((item) => item.studentId === savedStudent.studentId)
-      ? current.map((item) => item.studentId === savedStudent.studentId ? savedStudent : item)
-      : [...current, savedStudent]);
-    addStudentToFutureClassLessons(savedStudent, today);
+    const savedStudent = result.students.find((item) => item.studentId === student.studentId);
+    if (!savedStudent) throw new Error("신규 학생 저장 뒤 Supabase 재조회에서 학생을 찾지 못했습니다.");
     setIsStudentModalOpen(false);
     return savedStudent;
   }
@@ -5301,25 +5305,19 @@ export function App() {
             ...tallyValues,
             studentId: generatedStudentId
           });
-      const previousClassTemplateId = existingStudent?.defaultClassTemplateId ?? "";
-      const savedStudentFromRequest = await saveStudentRequest({
-        createOnly: !existingStudent,
-        request: postJsonWithTimeout,
-        student: studentDraft,
-        timeoutMessage: "학생 저장이 15초를 넘었습니다. 중복 등록하지 말고 저장 상태를 다시 확인해 주세요."
+      const nextStudents = existingStudent
+        ? persistedStudentsBefore.map((student) => student.studentId === studentDraft.studentId ? studentDraft : student)
+        : [...persistedStudentsBefore, studentDraft];
+      const rosterResult = await persistClassRosterMutation({
+        fromDate: today,
+        nextStudents,
+        previousStudents: persistedStudentsBefore,
+        timeoutMessage: "학생과 미래 수업 명단 저장이 30초를 넘었습니다. 중복 등록하지 말고 저장 상태를 다시 확인해 주세요."
       });
-      const savedStudentId = savedStudentFromRequest.studentId;
+      const savedStudentId = studentDraft.studentId;
 
       setStudentIntakeRegistrationMessages((current) => ({ ...current, [applicantId]: "학생 원천 반영 확인 중" }));
-      const studentsAfterResult = await getJsonWithTimeout(
-        "/api/students",
-        15000,
-        "학생 저장 확인이 15초를 넘었습니다. 중복 등록하지 말고 잠시 뒤 다시 확인해 주세요."
-      );
-      if (studentsAfterResult.source !== "supabase") {
-        throw new Error("학생 저장 결과를 Supabase에서 다시 확인하지 못했습니다.");
-      }
-      const savedStudent = (studentsAfterResult.students ?? []).find((item) => item.studentId === savedStudentId);
+      const savedStudent = rosterResult.students.find((item) => item.studentId === savedStudentId);
       if (!savedStudent) throw new Error("학생 저장 응답은 받았지만 Supabase 재조회에서 학생을 찾지 못했습니다.");
       const studentVerificationFields = [
         "studentId",
@@ -5342,62 +5340,6 @@ export function App() {
       );
       if (mismatchedStudentFields.length > 0) {
         throw new Error(`학생 저장 재조회 값이 다릅니다: ${mismatchedStudentFields.join(", ")}`);
-      }
-      setStudents(studentsAfterResult.students ?? []);
-
-      const affectedClassTemplateIds = new Set([
-        previousClassTemplateId,
-        savedStudent.defaultClassTemplateId
-      ].filter(Boolean));
-      const changedLessons = lessons
-        .filter((lesson) =>
-          isActiveLessonForRosterSync(lesson) &&
-          affectedClassTemplateIds.has(lesson.classTemplateId) &&
-          String(lesson.date) >= today
-        )
-        .map((lesson) => {
-          const currentStudentIds = (lesson.studentIds ?? []).filter((studentId) => studentId !== savedStudent.studentId);
-          const nextStudentIds = lesson.classTemplateId === savedStudent.defaultClassTemplateId
-            ? [...currentStudentIds, savedStudent.studentId]
-            : currentStudentIds;
-          return {
-            ...lesson,
-            studentIds: getActiveStudentIdsFromSelection(nextStudentIds, studentsAfterResult.students ?? [])
-          };
-        })
-        .filter((lesson) => {
-          const originalLesson = lessons.find((item) => item.lessonId === lesson.lessonId);
-          return [...new Set(originalLesson?.studentIds ?? [])].sort().join("|") !==
-            [...new Set(lesson.studentIds ?? [])].sort().join("|");
-        });
-
-      if (changedLessons.length > 0) {
-        setStudentIntakeRegistrationMessages((current) => ({ ...current, [applicantId]: "미래 수업 명단 저장 중" }));
-        await postJsonWithTimeout(
-          "/api/lessons/bulk",
-          { lessons: changedLessons },
-          20000,
-          "미래 수업 명단 저장이 20초를 넘었습니다. 학생 원천은 저장됐을 수 있으니 상태를 확인해 주세요."
-        );
-        const lessonsAfterResult = await getJsonWithTimeout(
-          "/api/lessons",
-          20000,
-          "미래 수업 명단 확인이 20초를 넘었습니다."
-        );
-        const changedLessonIds = new Set(changedLessons.map((lesson) => lesson.lessonId));
-        const persistedLessonsById = new Map((lessonsAfterResult.lessons ?? [])
-          .filter((lesson) => changedLessonIds.has(lesson.lessonId))
-          .map((lesson) => [lesson.lessonId, lesson]));
-        const unmatchedLessons = changedLessons.filter((lesson) => {
-          const persistedLesson = persistedLessonsById.get(lesson.lessonId);
-          return !persistedLesson ||
-            [...new Set(persistedLesson.studentIds ?? [])].sort().join("|") !==
-              [...new Set(lesson.studentIds ?? [])].sort().join("|");
-        });
-        if (unmatchedLessons.length > 0) {
-          throw new Error(`학생은 저장됐지만 미래 수업 명단 ${unmatchedLessons.length}건이 재조회와 일치하지 않습니다.`);
-        }
-        setLessons(lessonsAfterResult.lessons ?? []);
       }
 
       setStudentIntakeRegistrationMessages((current) => ({ ...current, [applicantId]: "Tally 후보 완료 상태 저장 중" }));
@@ -5452,30 +5394,6 @@ export function App() {
     }
   }
 
-  function removeWithdrawnStudentsFromFutureLessons(withdrawalBoundaries = []) {
-    const removalStartByStudentId = new Map(
-      withdrawalBoundaries.map(({ studentId, fromDate }) => [studentId, fromDate])
-    );
-    if (removalStartByStudentId.size === 0) return [];
-    const changedLessons = lessons
-      .filter((lesson) =>
-        isActiveLessonForRosterSync(lesson) &&
-        (lesson.studentIds ?? []).some((studentId) => {
-          const fromDate = removalStartByStudentId.get(studentId);
-          return fromDate && String(lesson.date) >= fromDate;
-        })
-      )
-      .map((lesson) => ({
-        ...lesson,
-        studentIds: (lesson.studentIds ?? []).filter((studentId) => {
-          const fromDate = removalStartByStudentId.get(studentId);
-          return !fromDate || String(lesson.date) < fromDate;
-        })
-      }));
-    applyLessonRosterChanges(changedLessons);
-    return changedLessons;
-  }
-
   function handleUpdateStudent(studentId, field, value) {
     setStudents((current) =>
       current.map((student) => (student.studentId === studentId ? { ...student, [field]: value } : student))
@@ -5485,6 +5403,28 @@ export function App() {
   async function handleSaveStudent(studentId, options = {}) {
     const student = students.find((item) => item.studentId === studentId);
     if (!student) throw new Error("저장할 학생을 찾지 못했습니다.");
+    if (
+      Object.prototype.hasOwnProperty.call(options, "previousClassTemplateId") &&
+      options.previousClassTemplateId !== student.defaultClassTemplateId
+    ) {
+      const previousStudents = students.map((currentStudent) => currentStudent.studentId === studentId
+        ? { ...currentStudent, defaultClassTemplateId: options.previousClassTemplateId }
+        : currentStudent);
+      const result = await persistClassRosterMutation({
+        fromDate: today,
+        mergeStudent: (currentStudent, persistedStudent, change) => resolveStudentRowSaveSuccess({
+          currentStudent,
+          persistedStudent,
+          requestedStudent: change.after
+        }).student,
+        nextStudents: students,
+        previousStudents,
+        timeoutMessage: "학생 정보와 미래 수업 명단 저장이 30초를 넘었습니다. 현재 입력을 유지한 채 서버 상태를 확인해 주세요."
+      });
+      const savedStudent = result.students.find((item) => item.studentId === studentId);
+      if (!savedStudent) throw new Error("학생 반 변경 저장 뒤 Supabase 재조회에서 학생을 찾지 못했습니다.");
+      return savedStudent;
+    }
     const savedStudent = await saveStudentRequest({
       request: postJsonWithTimeout,
       student,
@@ -5499,12 +5439,6 @@ export function App() {
           }).student
         : currentStudent
     )));
-    if (
-      Object.prototype.hasOwnProperty.call(options, "previousClassTemplateId") &&
-      options.previousClassTemplateId !== savedStudent.defaultClassTemplateId
-    ) {
-      reconcileStudentFutureClassLessons(savedStudent, options.previousClassTemplateId, today);
-    }
     return savedStudent;
   }
 
@@ -5516,14 +5450,27 @@ export function App() {
     studentProfileSaveRequestRef.current[nextStudent.studentId] = requestId;
     setStudentProfileSaveStates((current) => ({ ...current, [nextStudent.studentId]: "saving" }));
     try {
-      const savedStudent = await saveStudentRequest({
-        request: postJsonWithTimeout,
-        student: nextStudent,
-        timeoutMessage: "학생 기본정보 저장 요청이 15초를 넘었습니다. 현재 입력을 유지한 채 서버 상태를 확인해 주세요."
-      });
-      setStudents((current) => current.map((student) => (
-        student.studentId === savedStudent.studentId ? savedStudent : student
-      )));
+      let savedStudent;
+      if ((currentStudent?.defaultClassTemplateId ?? "") !== (nextStudent.defaultClassTemplateId ?? "")) {
+        const nextStudents = students.map((student) => student.studentId === nextStudent.studentId ? nextStudent : student);
+        const result = await persistClassRosterMutation({
+          fromDate: today,
+          nextStudents,
+          previousStudents: students,
+          timeoutMessage: "학생 기본정보와 미래 수업 명단 저장이 30초를 넘었습니다. 현재 입력을 유지한 채 서버 상태를 확인해 주세요."
+        });
+        savedStudent = result.students.find((student) => student.studentId === nextStudent.studentId);
+        if (!savedStudent) throw new Error("학생 프로필 반 변경 뒤 Supabase 재조회에서 학생을 찾지 못했습니다.");
+      } else {
+        savedStudent = await saveStudentRequest({
+          request: postJsonWithTimeout,
+          student: nextStudent,
+          timeoutMessage: "학생 기본정보 저장 요청이 15초를 넘었습니다. 현재 입력을 유지한 채 서버 상태를 확인해 주세요."
+        });
+        setStudents((current) => current.map((student) => (
+          student.studentId === savedStudent.studentId ? savedStudent : student
+        )));
+      }
       if (studentProfileSaveRequestRef.current[nextStudent.studentId] === requestId) {
         setStudentProfileSaveStates((current) => ({ ...current, [nextStudent.studentId]: "saved" }));
       }
@@ -5939,7 +5886,7 @@ export function App() {
     postJson("/api/lessons", { lesson: nextLesson }).catch((error) => console.error(error));
   }
 
-  function handleUpdateClassRoster(classTemplateId, nextStudentIds) {
+  async function handleUpdateClassRoster(classTemplateId, nextStudentIds) {
     const nextStudentIdSet = new Set(nextStudentIds);
     const previousStudents = students;
     const nextStudents = previousStudents.map((student) => {
@@ -5954,18 +5901,21 @@ export function App() {
       }
       return student;
     });
-    setStudents(nextStudents);
     const changedStudents = nextStudents.filter((student) => {
       const previousStudent = previousStudents.find((item) => item.studentId === student.studentId);
       return previousStudent && previousStudent.defaultClassTemplateId !== student.defaultClassTemplateId;
     });
-    reconcileChangedStudentsFutureClassLessons(changedStudents, previousStudents, today);
-    if (changedStudents.length > 0) {
-      postJson("/api/students/bulk", { students: changedStudents }).catch((error) => console.error(error));
-    }
+    if (changedStudents.length === 0) return { changedStudentCount: 0 };
+    await persistClassRosterMutation({
+      fromDate: today,
+      nextStudents,
+      previousStudents,
+      timeoutMessage: "반 배정과 미래 수업 명단 저장이 30초를 넘었습니다. 모달 입력을 유지한 채 서버 상태를 확인해 주세요."
+    });
+    return { changedStudentCount: changedStudents.length };
   }
 
-  function handleDeleteStudent(studentId, withdrawalInfo = {}) {
+  async function handleDeleteStudent(studentId, withdrawalInfo = {}) {
     const removedStudent = students.find((student) => student.studentId === studentId);
     if (!removedStudent) return;
     const pausedStudent = {
@@ -5977,11 +5927,14 @@ export function App() {
     };
     const withdrawalDate = getKoreaDateString(new Date(pausedStudent.withdrawnAt));
     const futureLessonStartDate = getWithdrawalFutureLessonStartDate(withdrawalDate);
-    setStudents((current) => current.map((student) => (student.studentId === studentId ? pausedStudent : student)));
-    removeStudentFromLessonsFromDate(studentId, futureLessonStartDate);
-    if (removedStudent) {
-      postJson("/api/students", { student: pausedStudent }).catch((error) => console.error(error));
-    }
+    const nextStudents = students.map((student) => student.studentId === studentId ? pausedStudent : student);
+    await persistClassRosterMutation({
+      fromDate: futureLessonStartDate,
+      nextStudents,
+      previousStudents: students,
+      timeoutMessage: "퇴원 처리와 미래 수업 명단 저장이 30초를 넘었습니다. 입력을 유지한 채 서버 상태를 확인해 주세요."
+    });
+    return pausedStudent;
   }
 
   async function handleRestoreStudent(studentId) {
@@ -9138,7 +9091,11 @@ function StudentModal({
     setSingleSaveState("saving");
     setSingleSaveError("");
     try {
-      await onSubmit(form);
+      const submissionForm = form.studentId
+        ? form
+        : { ...form, studentId: `student_${Date.now()}` };
+      if (!form.studentId) setForm(submissionForm);
+      await onSubmit(submissionForm);
       setSingleSaveState("saved");
     } catch (error) {
       setSingleSaveState("failed");

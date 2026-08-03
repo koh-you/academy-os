@@ -32,7 +32,12 @@ export async function postJson(path, body) {
   });
   const result = await response.json();
   if (!response.ok || !result.ok) {
-    throw new Error(result.error || "API 저장 실패");
+    const error = new Error(result.error || "API 저장 실패");
+    error.audit = result.audit;
+    error.code = result.code;
+    error.result = result;
+    error.statusCode = response.status;
+    throw error;
   }
   return result;
 }
@@ -103,7 +108,12 @@ export async function postJsonWithTimeout(path, body, timeoutMs = 30000, timeout
     });
     const result = await response.json();
     if (!response.ok || !result.ok) {
-      throw new Error(result.error || "API 저장 실패");
+      const error = new Error(result.error || "API 저장 실패");
+      error.audit = result.audit;
+      error.code = result.code;
+      error.result = result;
+      error.statusCode = response.status;
+      throw error;
     }
     return result;
   } catch (error) {

@@ -34,14 +34,19 @@ export function StudentLifecycleOverlays({
   setPermanentDeleteConfirmation,
   setWithdrawalDraft,
   withdrawalDraft,
-  withdrawalReasonOptions
+  withdrawalError,
+  withdrawalReasonOptions,
+  withdrawalSaveState
 }) {
   return (
     <>
       {deleteStudent ? (
         <ModalComponent
           className="studentDeleteModal"
-          onClose={() => setDeleteStudentId("")}
+          closeDisabled={withdrawalSaveState === "saving"}
+          onClose={() => {
+            if (withdrawalSaveState !== "saving") setDeleteStudentId("");
+          }}
           subtitle="퇴원 처리하면 학생 목록과 다음 날 이후 수업 명단에서는 제외되고, 등원일부터 퇴원일까지의 수업기록은 보존됩니다."
           title="학생 퇴원 처리 확인"
         >
@@ -66,6 +71,7 @@ export function StudentLifecycleOverlays({
               <label>
                 퇴원 사유
                 <select
+                  disabled={withdrawalSaveState === "saving"}
                   value={withdrawalDraft.reason}
                   onChange={(event) => setWithdrawalDraft((current) => ({ ...current, reason: event.target.value }))}
                 >
@@ -77,16 +83,21 @@ export function StudentLifecycleOverlays({
               <label>
                 코멘트
                 <input
+                  disabled={withdrawalSaveState === "saving"}
                   value={withdrawalDraft.comment}
                   onChange={(event) => setWithdrawalDraft((current) => ({ ...current, comment: event.target.value }))}
                   placeholder="예: 보호자 요청, 시간표 조정 등"
                 />
               </label>
             </div>
+            {withdrawalSaveState === "saving" ? <InlineSaveStatus label="학생 상태·미래 수업 명단" saveState="saving" /> : null}
+            {withdrawalSaveState === "failed" ? <p className="errorText" role="alert">{withdrawalError || "퇴원 처리에 실패했습니다. 입력을 유지했으니 다시 시도해 주세요."}</p> : null}
           </div>
           <ModalFooter tone="danger">
-            <button className="softButton" onClick={() => setDeleteStudentId("")} type="button">취소</button>
-            <button className="dangerButton" onClick={confirmDeleteStudent} type="button">퇴원 처리</button>
+            <button className="softButton" disabled={withdrawalSaveState === "saving"} onClick={() => setDeleteStudentId("")} type="button">취소</button>
+            <button className="dangerButton" disabled={withdrawalSaveState === "saving"} onClick={confirmDeleteStudent} type="button">
+              {withdrawalSaveState === "saving" ? "저장·확인 중" : withdrawalSaveState === "failed" ? "다시 퇴원 처리" : "퇴원 처리"}
+            </button>
           </ModalFooter>
         </ModalComponent>
       ) : null}

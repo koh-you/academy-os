@@ -141,6 +141,18 @@ const initialState = {
       title: "정산 미리보기반"
     },
     {
+      className: "정산 미리보기반",
+      classTemplateId: "safe-settlement-class",
+      date: "2026-08-04",
+      endTime: "19:00",
+      lessonId: "safe-settlement-future-roster",
+      lessonType: "class",
+      startTime: "16:00",
+      status: "scheduled",
+      studentIds: ["safe-settlement-student"],
+      title: "정산 미리보기반 미래 수업"
+    },
+    {
       className: "월 경계 연동반",
       classTemplateId: "safe-cross-month-class",
       date: "2026-07-30",
@@ -310,7 +322,12 @@ const initialState = {
 };
 
 function createInitialState() {
-  return JSON.parse(JSON.stringify(initialState));
+  const snapshot = JSON.parse(JSON.stringify(initialState));
+  snapshot.lessons = snapshot.lessons.map((lesson) => ({
+    ...lesson,
+    updatedAt: lesson.updatedAt || "2026-08-03T00:00:00.000Z"
+  }));
+  return snapshot;
 }
 
 let state = createInitialState();
@@ -358,6 +375,19 @@ function upsertById(rows, row, idFields) {
   const index = rows.findIndex((candidate) => candidate?.[idField] === row[idField]);
   if (index < 0) return [...rows, row];
   return rows.map((candidate, candidateIndex) => candidateIndex === index ? row : candidate);
+}
+
+function haveSameSafeRosterStudentIds(left = [], right = []) {
+  return JSON.stringify([...new Set(left)].sort()) === JSON.stringify([...new Set(right)].sort());
+}
+
+function haveSameSafeStudentTarget(requested = {}, persisted = {}) {
+  const fields = [
+    "birthYear", "defaultClassTemplateId", "grade", "loginId", "name", "parentPhone", "pin",
+    "scheduleOverride", "schoolName", "specialNote", "status", "studentId", "studentPhone", "textbook",
+    "withdrawalComment", "withdrawalReason", "withdrawnAt"
+  ];
+  return fields.every((field) => String(requested[field] ?? "") === String(persisted[field] ?? ""));
 }
 
 function handleMutation(pathname, payload) {
@@ -431,6 +461,74 @@ function handleMutation(pathname, payload) {
       ["applicantId"]
     );
     return { applicant: savedApplicant, ok: true, verified: true };
+  }
+  if (pathname === "/api/class-rosters/save") {
+    const studentChanges = payload.studentChanges || [];
+    const lessonChanges = payload.lessonChanges || [];
+    for (const change of studentChanges) {
+      const currentStudent = state.students.find((item) => item.studentId === change.after?.studentId) ?? null;
+      if (currentStudent && haveSameSafeStudentTarget(change.after, currentStudent)) continue;
+      if (
+        (!change.before && currentStudent) ||
+        (change.before && (!currentStudent || currentStudent.updatedAt !== change.before.updatedAt))
+      ) {
+        return {
+          audit: { auditId: payload.auditId, failedStage: "students", rollback: { verified: true } },
+          code: "CLASS_ROSTER_SAVE_FAILED",
+          error: "학생 반 배정 원천이 다른 화면에서 먼저 변경되었습니다.",
+          ok: false,
+          statusCode: 409
+        };
+      }
+    }
+    for (const change of lessonChanges) {
+      const currentLesson = state.lessons.find((item) => item.lessonId === change.lessonId) ?? null;
+      if (currentLesson && haveSameSafeRosterStudentIds(currentLesson.studentIds, change.afterStudentIds)) continue;
+      if (
+        !currentLesson ||
+        currentLesson.updatedAt !== change.expectedUpdatedAt ||
+        !haveSameSafeRosterStudentIds(currentLesson.studentIds, change.beforeStudentIds)
+      ) {
+        return {
+          audit: { auditId: payload.auditId, failedStage: "lessons", rollback: { verified: true } },
+          code: "CLASS_ROSTER_SAVE_FAILED",
+          error: "미래 수업 명단이 다른 화면에서 먼저 변경되었습니다.",
+          ok: false,
+          statusCode: 409
+        };
+      }
+    }
+    const savedStudents = studentChanges.map((change) => {
+      const existingStudent = state.students.find((item) => item.studentId === change.after.studentId) ?? null;
+      const savedStudent = existingStudent && haveSameSafeStudentTarget(change.after, existingStudent)
+        ? existingStudent
+        : {
+            ...change.after,
+            updatedAt: new Date(Math.max(Date.now(), new Date(existingStudent?.updatedAt || 0).getTime() + 1)).toISOString()
+          };
+      state.students = upsertById(state.students, savedStudent, ["studentId"]);
+      return savedStudent;
+    });
+    const savedLessons = lessonChanges.map((change) => {
+      const existingLesson = state.lessons.find((item) => item.lessonId === change.lessonId);
+      const savedLesson = haveSameSafeRosterStudentIds(existingLesson.studentIds, change.afterStudentIds)
+        ? existingLesson
+        : {
+            ...existingLesson,
+            studentIds: change.afterStudentIds,
+            updatedAt: new Date(Math.max(Date.now(), new Date(existingLesson.updatedAt).getTime() + 1)).toISOString()
+          };
+      state.lessons = upsertById(state.lessons, savedLesson, ["lessonId"]);
+      return savedLesson;
+    });
+    return {
+      auditId: payload.auditId,
+      cleanup: { errors: [], verified: true },
+      lessons: savedLessons,
+      ok: true,
+      students: savedStudents,
+      verified: true
+    };
   }
   if (pathname === "/api/students") {
     const student = payload.student || {};

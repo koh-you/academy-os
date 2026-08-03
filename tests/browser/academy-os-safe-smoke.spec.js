@@ -168,12 +168,7 @@ test("Tally candidate CAS conflict keeps the current input and shows failure", a
 test("manual student creation keeps the modal draft on conflict and closes only after verified retry", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   let studentSaveRequests = 0;
-  await page.route("**/api/students", async (route) => {
-    if (route.request().method() !== "POST") {
-      const response = await route.fetch();
-      await route.fulfill({ response });
-      return;
-    }
+  await page.route("**/api/class-rosters/save", async (route) => {
     studentSaveRequests += 1;
     if (studentSaveRequests === 1) {
       await route.fulfill({
@@ -211,6 +206,54 @@ test("manual student creation keeps the modal draft on conflict and closes only 
   const persistedStudent = persistedResult.students.find((student) => student.name === "저장경계 학생");
   expect(persistedStudent?.schoolName).toBe("저장경계고");
   expect(persistedStudent?.updatedAt).toBeTruthy();
+  expect(pageErrors).toEqual([]);
+});
+
+test("class roster save keeps the modal draft on conflict and verifies student plus future lessons on retry", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  let rosterSaveRequests = 0;
+  await page.route("**/api/class-rosters/save", async (route) => {
+    rosterSaveRequests += 1;
+    if (rosterSaveRequests === 1) {
+      await route.fulfill({
+        body: JSON.stringify({
+          audit: { auditId: route.request().postDataJSON().auditId, failedStage: "lessons", rollback: { verified: true } },
+          code: "CLASS_ROSTER_SAVE_FAILED",
+          error: "미래 수업 명단이 다른 화면에서 먼저 변경되었습니다.",
+          ok: false
+        }),
+        contentType: "application/json",
+        status: 409
+      });
+      return;
+    }
+    const response = await route.fetch();
+    await route.fulfill({ response });
+  });
+
+  await loginAsTeacher(page);
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /반관리/ }).click();
+  await page.getByRole("button", { name: "명단 수정" }).click();
+  const rosterModal = page.getByRole("dialog", { name: "정산 미리보기반 명단 수정" });
+  const studentCheckbox = rosterModal.getByRole("checkbox", { name: /정산 미리보기 학생/ });
+  await studentCheckbox.uncheck();
+  await rosterModal.getByRole("button", { name: "명단 저장" }).click();
+
+  await expect(rosterModal.getByRole("alert")).toContainText("미래 수업 명단이 다른 화면에서 먼저 변경되었습니다.");
+  await expect(studentCheckbox).not.toBeChecked();
+  await expect(rosterModal).toBeVisible();
+
+  await rosterModal.getByRole("button", { name: "다시 저장" }).click();
+  await expect(rosterModal).toBeHidden();
+  const [studentsResponse, lessonsResponse] = await Promise.all([
+    request.get(`${safeApiBaseUrl}/api/students`),
+    request.get(`${safeApiBaseUrl}/api/lessons`)
+  ]);
+  const persistedStudents = (await studentsResponse.json()).students;
+  const persistedLessons = (await lessonsResponse.json()).lessons;
+  expect(persistedStudents.find((student) => student.studentId === "safe-settlement-student")?.defaultClassTemplateId).toBe("");
+  expect(persistedLessons.find((lesson) => lesson.lessonId === "safe-settlement-future-roster")?.studentIds).not.toContain("safe-settlement-student");
+  expect(persistedLessons.find((lesson) => lesson.lessonId === "safe-settlement-august-regular")?.studentIds).toContain("safe-settlement-student");
   expect(pageErrors).toEqual([]);
 });
 

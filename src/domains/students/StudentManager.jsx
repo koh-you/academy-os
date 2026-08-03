@@ -83,6 +83,8 @@ export function StudentManager({
   const [selectedStudentId, setSelectedStudentId] = useState("");
   const [deleteStudentId, setDeleteStudentId] = useState("");
   const [withdrawalDraft, setWithdrawalDraft] = useState({ comment: "", reason: "other" });
+  const [withdrawalError, setWithdrawalError] = useState("");
+  const [withdrawalSaveState, setWithdrawalSaveState] = useState("idle");
   const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("template_mwf_7_10");
   const [dirtyStudentIds, setDirtyStudentIds] = useState(() => new Set());
   const [originalClassTemplateIds, setOriginalClassTemplateIds] = useState({});
@@ -162,14 +164,23 @@ export function StudentManager({
     setSelectedWithdrawnStudentIds((current) => new Set([...current].filter((studentId) => validIds.has(studentId))));
   }, [withdrawnStudents]);
 
-  function confirmDeleteStudent() {
+  async function confirmDeleteStudent() {
     if (!deleteStudent) return;
-    onWithdrawStudent(deleteStudent.studentId, withdrawalDraft);
-    if (selectedStudentId === deleteStudent.studentId) {
-      setSelectedStudentId("");
+    setWithdrawalError("");
+    setWithdrawalSaveState("saving");
+    try {
+      await onWithdrawStudent(deleteStudent.studentId, withdrawalDraft);
+      if (selectedStudentId === deleteStudent.studentId) {
+        setSelectedStudentId("");
+      }
+      setDeleteStudentId("");
+      setWithdrawalDraft({ comment: "", reason: "other" });
+      setWithdrawalSaveState("saved");
+    } catch (error) {
+      console.error(error);
+      setWithdrawalError(error.message);
+      setWithdrawalSaveState("failed");
     }
-    setDeleteStudentId("");
-    setWithdrawalDraft({ comment: "", reason: "other" });
   }
 
   function updateStudentField(studentId, field, value) {
@@ -228,6 +239,8 @@ export function StudentManager({
       comment: student.withdrawalComment ?? "",
       reason: student.withdrawalReason || "other"
     });
+    setWithdrawalError("");
+    setWithdrawalSaveState("idle");
     setDeleteStudentId(student.studentId);
   }
 
@@ -793,7 +806,9 @@ export function StudentManager({
         setPermanentDeleteConfirmation={setPermanentDeleteConfirmation}
         setWithdrawalDraft={setWithdrawalDraft}
         withdrawalDraft={withdrawalDraft}
+        withdrawalError={withdrawalError}
         withdrawalReasonOptions={withdrawalReasonOptions}
+        withdrawalSaveState={withdrawalSaveState}
       />
     </section>
   );

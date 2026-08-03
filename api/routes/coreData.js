@@ -37,6 +37,12 @@ import {
   createStudentVersionFilter,
   isStudentInsertConflict
 } from "../../src/domains/students/studentPersistence.js";
+import {
+  areRosterStudentIdsEqual,
+  areRosterTimestampsEqual,
+  createLessonRosterVersionFilter,
+  createNextRosterUpdatedAt
+} from "../../src/domains/students/classRosterPersistence.js";
 import { deleteRows, getSupabaseStatus, insertRows, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
 
 const fallbackSource = "local_sample";
@@ -443,7 +449,8 @@ function fromLessonRow(row) {
     ...(row.special_lecture_student_schedules !== undefined
       ? { specialLectureStudentSchedules: normalizeSpecialLectureStudentSchedules(row.special_lecture_student_schedules) }
       : {}),
-    status: row.status
+    status: row.status,
+    updatedAt: row.updated_at ?? ""
   };
 }
 
@@ -2202,6 +2209,233 @@ export async function upsertSpecialLectureEnrollments(enrollments) {
     throw error;
   }
   return { source: databaseSource, enrollments: rows.map(fromSpecialLectureEnrollmentRow) };
+}
+
+async function getLessonForRosterSave(lessonId) {
+  const rows = await listRows(
+    "lessons",
+    `select=*&lesson_id=eq.${encodeURIComponent(lessonId)}&limit=1`,
+    { requireServiceRole: true }
+  );
+  return rows[0] ? fromLessonRow(rows[0]) : null;
+}
+
+function createClassRosterConflict(message, details = {}) {
+  const error = new Error(message);
+  Object.assign(error, details, { code: "CLASS_ROSTER_CONFLICT", statusCode: 409 });
+  return error;
+}
+
+async function persistClassRosterStudentChange(change = {}) {
+  const after = change.after ?? null;
+  const before = change.before ?? null;
+  if (!after?.studentId) throw createClassRosterConflict("반 명단에 반영할 학생 ID가 없습니다.");
+  const currentStudent = await getStudent(after.studentId);
+  if (currentStudent && areStudentsPersistedEqual(after, currentStudent)) {
+    return { mutated: false, student: currentStudent };
+  }
+  if (!before) {
+    if (currentStudent) {
+      throw createClassRosterConflict(
+        `학생 ${after.studentId}가 다른 화면에서 먼저 생성되었습니다.`,
+        { currentStudent, studentId: after.studentId }
+      );
+    }
+    const result = await upsertStudent(after, { createOnly: true });
+    return { mutated: true, student: result.student };
+  }
+  if (
+    !currentStudent ||
+    !before.updatedAt ||
+    !areRosterTimestampsEqual(currentStudent.updatedAt, before.updatedAt)
+  ) {
+    throw createClassRosterConflict(
+      `학생 ${after.studentId}의 반 배정 원천이 다른 화면에서 먼저 변경되었습니다.`,
+      { currentStudent, studentId: after.studentId }
+    );
+  }
+  const result = await upsertStudent(after, { expectedUpdatedAt: before.updatedAt });
+  return { beforeStudent: currentStudent, mutated: true, student: result.student };
+}
+
+async function persistLessonRosterChange(change = {}) {
+  const lessonId = String(change.lessonId ?? "").trim();
+  if (!lessonId) throw createClassRosterConflict("반 명단에 반영할 수업 ID가 없습니다.");
+  const currentLesson = await getLessonForRosterSave(lessonId);
+  if (!currentLesson) {
+    throw createClassRosterConflict(
+      `미래 수업 ${lessonId}가 다른 화면에서 먼저 삭제되었습니다.`,
+      { currentLesson: null, lessonId }
+    );
+  }
+  if (areRosterStudentIdsEqual(currentLesson.studentIds, change.afterStudentIds)) {
+    return { lesson: currentLesson, mutated: false };
+  }
+  if (
+    !change.expectedUpdatedAt ||
+    !areRosterTimestampsEqual(currentLesson.updatedAt, change.expectedUpdatedAt) ||
+    !areRosterStudentIdsEqual(currentLesson.studentIds, change.beforeStudentIds)
+  ) {
+    throw createClassRosterConflict(
+      `미래 수업 ${lessonId}의 명단이 다른 화면에서 먼저 변경되었습니다.`,
+      { currentLesson, lessonId }
+    );
+  }
+  const nextUpdatedAt = createNextRosterUpdatedAt(currentLesson.updatedAt);
+  const rows = await patchRows(
+    "lessons",
+    createLessonRosterVersionFilter(lessonId, currentLesson.updatedAt),
+    {
+      student_ids: change.afterStudentIds ?? [],
+      updated_at: nextUpdatedAt
+    }
+  );
+  if (!rows.length) {
+    throw createClassRosterConflict(
+      `미래 수업 ${lessonId}의 명단 저장 직전에 서버 버전이 변경되었습니다.`,
+      { currentLesson: await getLessonForRosterSave(lessonId), lessonId }
+    );
+  }
+  const verifiedLesson = await getLessonForRosterSave(lessonId);
+  if (
+    !verifiedLesson ||
+    !areRosterStudentIdsEqual(verifiedLesson.studentIds, change.afterStudentIds) ||
+    !areRosterTimestampsEqual(verifiedLesson.updatedAt, nextUpdatedAt)
+  ) {
+    const error = new Error(`미래 수업 ${lessonId}의 명단 저장 후 Supabase 재조회가 일치하지 않습니다.`);
+    Object.assign(error, { code: "CLASS_ROSTER_VERIFICATION_FAILED", lessonId, statusCode: 409 });
+    throw error;
+  }
+  return { lesson: verifiedLesson, mutated: true };
+}
+
+async function rollbackClassRosterStudentChange(entry) {
+  if (!entry.mutated) return { studentId: entry.change.after.studentId, verified: true };
+  const studentId = entry.change.after.studentId;
+  if (!entry.change.before) {
+    const deletedRows = await deleteRows(
+      "students",
+      createStudentVersionFilter(studentId, entry.student.updatedAt)
+    );
+    const currentStudent = await getStudent(studentId);
+    return { deleted: deletedRows.length > 0, studentId, verified: !currentStudent };
+  }
+  const rollbackRows = await patchRows(
+    "students",
+    createStudentVersionFilter(studentId, entry.student.updatedAt),
+    {
+      ...toStudentRow(entry.beforeStudent),
+      updated_at: entry.beforeStudent.updatedAt
+    }
+  );
+  const rollbackStudent = await getStudent(studentId);
+  return {
+    studentId,
+    verified: rollbackRows.length > 0 &&
+      areStudentsPersistedEqual(entry.beforeStudent, rollbackStudent) &&
+      areRosterTimestampsEqual(entry.beforeStudent.updatedAt, rollbackStudent?.updatedAt)
+  };
+}
+
+async function rollbackClassRosterLessonChange(entry) {
+  if (!entry.mutated) return { lessonId: entry.change.lessonId, verified: true };
+  const rollbackRows = await patchRows(
+    "lessons",
+    createLessonRosterVersionFilter(entry.change.lessonId, entry.lesson.updatedAt),
+    {
+      student_ids: entry.change.beforeStudentIds ?? [],
+      updated_at: entry.change.expectedUpdatedAt
+    }
+  );
+  const rollbackLesson = await getLessonForRosterSave(entry.change.lessonId);
+  return {
+    lessonId: entry.change.lessonId,
+    verified: rollbackRows.length > 0 &&
+      areRosterStudentIdsEqual(rollbackLesson?.studentIds, entry.change.beforeStudentIds) &&
+      areRosterTimestampsEqual(rollbackLesson?.updatedAt, entry.change.expectedUpdatedAt)
+  };
+}
+
+export async function saveClassRosterPlan({ auditId = "", lessonChanges = [], studentChanges = [] } = {}) {
+  const normalizedAuditId = String(auditId || "").trim();
+  if (!normalizedAuditId) throw new Error("반 명단 저장 audit ID가 필요합니다.");
+  if (!Array.isArray(studentChanges) || !Array.isArray(lessonChanges)) {
+    throw new Error("반 명단 저장 계획 형식이 올바르지 않습니다.");
+  }
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return {
+      auditId: normalizedAuditId,
+      cleanup: { errors: [], verified: true },
+      lessons: lessonChanges.map((change) => ({ lessonId: change.lessonId, studentIds: change.afterStudentIds })),
+      source: fallbackSource,
+      students: studentChanges.map((change) => change.after),
+      verified: false
+    };
+  }
+
+  const appliedStudents = [];
+  const appliedLessons = [];
+  let failedStage = "students";
+  try {
+    for (const change of studentChanges) {
+      const result = await persistClassRosterStudentChange(change);
+      appliedStudents.push({ change, ...result });
+    }
+    failedStage = "lessons";
+    for (const change of lessonChanges) {
+      const result = await persistLessonRosterChange(change);
+      appliedLessons.push({ change, ...result });
+    }
+  } catch (error) {
+    const rollbackResults = [];
+    const rollbackErrors = [];
+    for (const entry of [...appliedLessons].reverse()) {
+      try {
+        rollbackResults.push({ kind: "lesson", ...(await rollbackClassRosterLessonChange(entry)) });
+      } catch (rollbackError) {
+        rollbackErrors.push({ id: entry.change.lessonId, kind: "lesson", message: rollbackError.message });
+      }
+    }
+    for (const entry of [...appliedStudents].reverse()) {
+      try {
+        rollbackResults.push({ kind: "student", ...(await rollbackClassRosterStudentChange(entry)) });
+      } catch (rollbackError) {
+        rollbackErrors.push({ id: entry.change.after?.studentId, kind: "student", message: rollbackError.message });
+      }
+    }
+    const rollbackVerified = rollbackErrors.length === 0 && rollbackResults.every((result) => result.verified);
+    error.statusCode = Number(error.statusCode) || 409;
+    error.code = rollbackVerified ? "CLASS_ROSTER_SAVE_FAILED" : "CLASS_ROSTER_PARTIAL_FAILURE";
+    error.audit = {
+      auditId: normalizedAuditId,
+      failedStage,
+      rollback: {
+        errors: rollbackErrors,
+        results: rollbackResults,
+        verified: rollbackVerified
+      }
+    };
+    throw error;
+  }
+
+  const cleanupErrors = [];
+  for (const entry of appliedLessons) {
+    try {
+      await cancelPendingNotificationJobsForRemovedLessonStudents(entry.lesson, "반 명단에서 제외됨");
+      await deleteLessonStudentRecordsForRemovedLessonStudents(entry.lesson);
+    } catch (error) {
+      cleanupErrors.push({ lessonId: entry.lesson.lessonId, message: error.message });
+    }
+  }
+
+  return {
+    auditId: normalizedAuditId,
+    cleanup: { errors: cleanupErrors, verified: cleanupErrors.length === 0 },
+    lessons: appliedLessons.map((entry) => entry.lesson),
+    source: databaseSource,
+    students: appliedStudents.map((entry) => entry.student),
+    verified: true
+  };
 }
 
 export async function upsertLesson(lesson) {

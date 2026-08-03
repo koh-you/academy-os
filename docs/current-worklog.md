@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 학생 반 배정·미래 수업 명단 저장 gate
+
+- 학생 추가·목록/프로필 반 이동·Tally 등록·반관리·퇴원이 함께 바꾸는 `students.default_class_template_id/status`와 미래 `lessons.student_ids`를 하나의 명시적 save plan으로 묶었다. 각 기존 행은 `updated_at` CAS, 신규 학생은 insert-only를 사용하고 두 원천을 Supabase에서 다시 읽어 계획과 일치할 때만 화면 상태를 교체한다.
+- 직접 원천 저장 중 충돌·검증 실패가 나면 이미 반영된 수업과 학생을 역순 보상하고 원래 timestamp까지 재조회한다. 결과 불명·cleanup 실패는 입력과 모달을 유지하며 동일 audit 흐름으로 안전하게 재시도할 수 있다. 새 학생 모달은 첫 시도 ID를 고정해 timeout 재시도가 중복 학생을 만들지 않는다.
+- 미래 수업 명단 계산은 변경 학생의 이전/다음 반에만 적용하고 과거 수업, 취소 수업, 변경 대상 밖 수동 명단을 보존한다. 학생명 가나다 정렬은 실제로 변경한 수업에만 적용한다.
+- 검증: class-roster Supabase REST/rollback fixture, student domain `13/13`, runtime lint, `check:fast`, scenario·production `823/823`, build `386 modules`·main `944.91 kB`·lazy `12/12`, Worktree 격리 safe browser `26/26`. 운영 데이터·실제 알림·SQL·유료 호출은 사용하지 않았다.
+- 다음 독립 단위는 학사일정 파생 저장과 수업일지 다중 행·복사·되돌리기 저장 gate다.
+
 ## 2026-08-03 개별 학생 저장 CAS·Supabase 재조회
 
 - `students.updated_at`을 화면 모델에 노출하고 신규 학생은 insert-only, 기존 학생은 ID+기대 버전 PATCH로 저장한다. 신규 수동 등록·특강 전용 등록·Tally 신규 등록은 중복 ID/로그인을 409로 막고, 목록 행·프로필·Tally/특강 기존 학생 반영·퇴원 취소는 오래된 화면 버전의 덮어쓰기를 차단한다.
