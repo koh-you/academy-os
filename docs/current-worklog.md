@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 P3-0 알림톡 문구 원천 inventory
+
+- 출결·수업일지·숙제보충·결석보강·재시험·공지·특강·일정 변경·당일 11시 reminder를 provider contract, OS composition, human final, transport로 나눠 대조했다.
+- 현재 Settings가 관리하는 key는 6개이며 숙제/결석보강 11시와 일정 확정·변경은 교사 최종본 저장 뒤 job에 전달된다. 출결·수업 리포트 구조·공지 preset·특강 guide·재시험 fallback은 코드에 남아 있다.
+- 수업일지 client preview/server live 조립 분리와 재시험 독립 reminder 미연결을 먼저 고정했다. 다음 P3-1은 기존 6개 catalog만 pure domain으로 이동하며 실제 발송·예약·취소는 실행하지 않는다.
+- 검증: runtime lint, notification `7/7`, inventory, `check:fast` scenario `827/827`, build `407 modules`·main `944.34 kB`·lazy `12/12`, production `827/827`을 통과했다. 런타임 UI와 provider 행동은 변경하지 않았다.
+
 ## 2026-08-03 P2-4 modal 저장 상태 감사
 
 - dialog 41개의 DB/API 저장 표시를 `idle/dirty/saving/verifying/saved/failed`와 대조했다. 공통 상태를 잘못 전달하는 표면은 없어 런타임 동작은 변경하지 않았다.

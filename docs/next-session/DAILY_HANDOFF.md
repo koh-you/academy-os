@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-03
 
+## 2026-08-03 P3-0 알림톡 문구 원천 inventory
+
+- 9개 제품 경로를 대조한 결과 Settings 관리 key는 6개, Solapi provider template은 4개다. 출결·수업 리포트 구조·공지 preset·특강 guide·재시험 fallback은 아직 code-owned다.
+- 보충 알림은 template seed 뒤 교사 최종본을 `makeup_tasks`에 저장하므로 catalog 변경이 persisted human value를 덮으면 안 된다. 수업일지는 client preview와 server live 조립 동일성을 먼저 고정한다.
+- 검증은 lint, notification `7/7`, scenario·production `827/827`, build `407 modules`·main `944.34 kB`·lazy `12/12`를 통과했다. 런타임 UI와 provider 행동 변경은 없다.
+- 다음 P3-1은 기존 6개 default·변수 metadata·normalize를 pure notification catalog로 옮긴다. 실제 발송·예약·취소는 실행하지 않는다.
+
 ## 2026-08-03 P2-4 modal 저장 상태 감사
 
 - DB/API 저장 표면을 여섯 공통 상태와 대조했고 잘못된 매핑은 없어 런타임 동작을 바꾸지 않았다. provider/process 복합 결과 세 종류는 의미 보존을 위해 별도 표시한다.

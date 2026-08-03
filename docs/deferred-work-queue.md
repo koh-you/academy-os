@@ -34,6 +34,7 @@
 - 출결·수업일지·숙제보충·결석보강·재시험·공지·특강·일정 변경·11시 reminder의 문구 원천과 변수를 inventory한다.
 - 숨은 하드코딩을 `설정 > 알림톡`의 같은 원천으로 옮긴다.
 - 실제 발송·예약은 별도 사람 gate다. 먼저 읽기 전용 source inventory와 가상 fixture만 진행한다.
+- P3-0 완료: `docs/notification-template-source-inventory-2026-08-03.md`에 제품 경로 9개, 설정 key 6개, provider template 4개를 고정했다. 다음 P3-1은 기존 설정 catalog를 App 밖 pure notification domain으로 이동하고 문구·변수·normalize 결과를 문자 단위로 보존한다.
 
 ## P4. 고위험 App/API 경계 리팩터링
 
