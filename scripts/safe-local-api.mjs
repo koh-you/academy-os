@@ -390,6 +390,18 @@ function haveSameSafeStudentTarget(requested = {}, persisted = {}) {
   return fields.every((field) => String(requested[field] ?? "") === String(persisted[field] ?? ""));
 }
 
+function haveSameSafeSchoolEvent(requested = {}, persisted = {}) {
+  const fields = [
+    "color", "date", "endDate", "eventId", "examCycle", "examSubject", "grade",
+    "mathSubjectByDate", "memo", "schoolName", "title", "type"
+  ];
+  return fields.every((field) => (
+    typeof requested[field] === "object" || typeof persisted[field] === "object"
+      ? JSON.stringify(requested[field] ?? "") === JSON.stringify(persisted[field] ?? "")
+      : String(requested[field] ?? "") === String(persisted[field] ?? "")
+  ));
+}
+
 function handleMutation(pathname, payload) {
   if (pathname === "/api/app-state") {
     state.appStates = { ...state.appStates, ...(payload.states || {}) };
@@ -567,6 +579,43 @@ function handleMutation(pathname, payload) {
     state.students = upsertById(state.students, savedStudent, ["studentId"]);
     return { ok: true, student: savedStudent, verified: true };
   }
+  if (pathname === "/api/school-events") {
+    const schoolEvent = payload.schoolEvent || payload.event || payload || {};
+    const existingSchoolEvent = state.schoolEvents
+      .find((item) => item.eventId === schoolEvent.eventId) ?? null;
+    if (!existingSchoolEvent && schoolEvent.updatedAt) {
+      return {
+        code: "SCHOOL_EVENT_CONFLICT",
+        currentSchoolEvent: null,
+        error: `학사일정 ${schoolEvent.eventId}가 다른 화면에서 먼저 삭제되었습니다.`,
+        ok: false,
+        statusCode: 409
+      };
+    }
+    if (existingSchoolEvent && haveSameSafeSchoolEvent(schoolEvent, existingSchoolEvent)) {
+      return { ok: true, schoolEvent: existingSchoolEvent, verified: true };
+    }
+    if (
+      existingSchoolEvent &&
+      (!schoolEvent.updatedAt || schoolEvent.updatedAt !== existingSchoolEvent.updatedAt)
+    ) {
+      return {
+        code: "SCHOOL_EVENT_CONFLICT",
+        currentSchoolEvent: existingSchoolEvent,
+        error: `학사일정 ${schoolEvent.eventId}가 다른 화면에서 먼저 변경되었습니다.`,
+        ok: false,
+        statusCode: 409
+      };
+    }
+    const savedSchoolEvent = {
+      ...schoolEvent,
+      updatedAt: new Date(
+        Math.max(Date.now(), new Date(existingSchoolEvent?.updatedAt || 0).getTime() + 1)
+      ).toISOString()
+    };
+    state.schoolEvents = upsertById(state.schoolEvents, savedSchoolEvent, ["eventId"]);
+    return { ok: true, schoolEvent: savedSchoolEvent, verified: true };
+  }
   if (pathname === "/api/lessons") {
     const lesson = payload.lesson || {};
     state.lessons = upsertById(state.lessons, lesson, ["lessonId", "id"]);
@@ -619,7 +668,7 @@ const server = http.createServer(async (request, response) => {
       state = createInitialState();
       return sendJson(response, 200, { ok: true, safeFixture: true });
     }
-    if (["/api/app-state", "/api/lesson-records/bulk"].includes(requestUrl.pathname)) {
+    if (["/api/app-state", "/api/lesson-records/bulk", "/api/school-events"].includes(requestUrl.pathname)) {
       await new Promise((resolve) => setTimeout(resolve, 800));
     }
     const { statusCode = 200, ...result } = handleMutation(requestUrl.pathname, payload);
@@ -627,6 +676,29 @@ const server = http.createServer(async (request, response) => {
       ...result,
       safeFixture: true,
       source: "supabase"
+    });
+  }
+  if (request.method === "DELETE" && requestUrl.pathname === "/api/school-events") {
+    const eventId = requestUrl.searchParams.get("id") || "";
+    const expectedUpdatedAt = requestUrl.searchParams.get("expectedUpdatedAt") || "";
+    const currentSchoolEvent = state.schoolEvents.find((event) => event.eventId === eventId) ?? null;
+    if (!currentSchoolEvent || currentSchoolEvent.updatedAt !== expectedUpdatedAt) {
+      return sendJson(response, 409, {
+        code: "SCHOOL_EVENT_CONFLICT",
+        currentSchoolEvent,
+        error: `학사일정 ${eventId}가 다른 화면에서 먼저 변경되었거나 삭제되었습니다.`,
+        ok: false,
+        safeFixture: true,
+        source: "supabase"
+      });
+    }
+    state.schoolEvents = state.schoolEvents.filter((event) => event.eventId !== eventId);
+    return sendJson(response, 200, {
+      ok: true,
+      safeFixture: true,
+      schoolEventId: eventId,
+      source: "supabase",
+      verified: true
     });
   }
   if (request.method === "DELETE") return sendJson(response, 200, { ok: true, safeFixture: true });

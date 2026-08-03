@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-03
 
+## 2026-08-03 수동 학사일정 저장 신뢰성
+
+- 수동 학사일정 등록은 고정 ID insert-only, 수정·삭제는 일정별 `updated_at` CAS를 사용한다. 서버와 App의 후속 GET이 Supabase 원천과 일치해야 화면 목록을 갱신한다.
+- 결과 불명 신규 저장은 같은 ID로 idempotent 재시도한다. 충돌·실패에서는 draft와 모달을 유지하고 저장 중 편집·닫기를 막는다.
+- 검증: lesson `11/11`, runtime lint, `check:fast`, production `823/823`, build `388 modules`·main `944.93 kB`·lazy `12/12`, safe browser `27/27`. 운영 side effect는 실행하지 않았다.
+- 다음 단위는 시험관리 행과 파생 직전수업의 학사일정 연동 저장 gate다. 수업일지 다중 행·복사·되돌리기는 그 뒤 별도 단위로 진행한다.
+
 ## 2026-08-03 반 명단 저장 신뢰성
 
 - 학생 추가·반 이동·반관리·퇴원은 학생 원천과 미래 수업 명단을 한 versioned save plan으로 저장한다. 기존 행 CAS·신규 insert-only, 중간 실패의 역순 보상, 성공/복구의 Supabase 재조회 대조 뒤에만 UI를 갱신한다.

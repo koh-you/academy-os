@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 수동 학사일정 저장·삭제 gate
+
+- 수동 `school_events` 신규 저장은 고정 ID insert-only, 수정·삭제는 일정별 `updated_at` CAS로 바꿨다. 서버는 저장/삭제 직후 Supabase 단일 행을 재조회하고, App도 전체 일정 원천을 no-store GET으로 다시 대조한 뒤에만 화면 목록을 교체한다.
+- 저장 응답이 유실돼도 같은 form ID와 입력으로 재시도하면 이미 저장된 동일 행을 verified 성공으로 복구한다. 다른 내용의 같은 ID, 다른 화면의 선변경·삭제는 409로 막고 자동 병합하지 않는다. 저장 중 form·날짜 모달 입력과 닫기를 잠그며 실패·충돌에서는 draft와 모달을 유지한다.
+- 학사일정 저장 모듈은 행동 시점에 lazy load해 3-7 초기 main 예산을 유지했다. 검증: lesson `11/11`, runtime lint, `check:fast`, scenario·production `823/823`, build `388 modules`·main `944.93 kB`·lazy `12/12`, Worktree 격리 safe browser `27/27`. 운영 데이터·실제 알림·SQL·유료 호출은 사용하지 않았다.
+- 시험관리 연동 일정의 `exam_prep_rows`+파생 `lessons` orchestration은 변경하지 않았다. 다음 독립 단위에서 version·재조회·부분실패 복구를 함께 다룬다.
+
 ## 2026-08-03 학생 반 배정·미래 수업 명단 저장 gate
 
 - 학생 추가·목록/프로필 반 이동·Tally 등록·반관리·퇴원이 함께 바꾸는 `students.default_class_template_id/status`와 미래 `lessons.student_ids`를 하나의 명시적 save plan으로 묶었다. 각 기존 행은 `updated_at` CAS, 신규 학생은 insert-only를 사용하고 두 원천을 Supabase에서 다시 읽어 계획과 일치할 때만 화면 상태를 교체한다.

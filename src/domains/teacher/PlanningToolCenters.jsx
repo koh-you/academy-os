@@ -40,6 +40,10 @@ import {
   schoolCalendarSchoolColorPalette
 } from "../../app/appConfig.js";
 
+function createSchoolCalendarDraftId() {
+  return `event_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
 export function SchoolCalendarCenter({
   runtime,
   events,
@@ -84,7 +88,9 @@ export function SchoolCalendarCenter({
     state: "idle",
     message: "등록/수정 후 저장 결과가 여기에 표시됩니다."
   });
-  const [newEvent, setNewEvent] = useState({
+  const schoolCalendarRequestRef = useRef(null);
+  const [newEvent, setNewEvent] = useState(() => ({
+    eventId: createSchoolCalendarDraftId(),
     schoolName: rows[0]?.schoolName ?? "",
     grade: schoolCalendarGradeOptions.includes(rows[0]?.grade) ? rows[0]?.grade : "고1",
     examCycle: currentExamCycle,
@@ -104,7 +110,7 @@ export function SchoolCalendarCenter({
         memo: ""
       }
     ]
-  });
+  }));
   const schools = [...new Set(rows.map((row) => row.schoolName).filter(Boolean))];
   const examCycleOptions = [...new Set(rows.map((row) => row.examCycle).filter(Boolean))];
   const safeExamCycleOptions = examCycleOptions.length
@@ -150,6 +156,7 @@ export function SchoolCalendarCenter({
   );
   const isEditingEvent = Boolean(editingEvent);
   const isEditingDerivedEvent = Boolean(editingEvent?.derived);
+  const isSchoolCalendarSaving = schoolCalendarSaveState.state === "saving";
 
   useEffect(() => {
     if (!pendingExamPrepSaveIds.length) return;
@@ -227,6 +234,9 @@ export function SchoolCalendarCenter({
 
   function createDraftFromCalendarEvent(event = {}) {
     return {
+      eventId: event.eventId || event.schoolEventId || createSchoolCalendarDraftId(),
+      createdAt: event.createdAt || "",
+      updatedAt: event.updatedAt || "",
       schoolName: event.schoolName || event.schoolNames?.[0] || rows[0]?.schoolName || "",
       grade: event.grade || (schoolCalendarGradeOptions.includes(rows[0]?.grade) ? rows[0]?.grade : "고1"),
       examCycle: event.examCycle || currentExamCycle,
@@ -247,6 +257,28 @@ export function SchoolCalendarCenter({
         }
       ]
     };
+  }
+
+  async function runManualSchoolEventRequest({ request, savingMessage, successMessage }) {
+    if (schoolCalendarRequestRef.current) return schoolCalendarRequestRef.current;
+    setSchoolCalendarSaveState({ state: "saving", message: savingMessage });
+    const requestPromise = Promise.resolve().then(request);
+    schoolCalendarRequestRef.current = requestPromise;
+    try {
+      const result = await requestPromise;
+      setSchoolCalendarSaveState({ state: "saved", message: successMessage(result) });
+      return result;
+    } catch (error) {
+      setSchoolCalendarSaveState({
+        state: "failed",
+        message: error.message || "학사일정 저장에 실패했습니다."
+      });
+      throw error;
+    } finally {
+      if (schoolCalendarRequestRef.current === requestPromise) {
+        schoolCalendarRequestRef.current = null;
+      }
+    }
   }
 
   function openEventEditForm(event) {
@@ -316,11 +348,10 @@ export function SchoolCalendarCenter({
       return;
     }
     try {
-      setSchoolCalendarSaveState({ state: "saving", message: "수동 학사일정을 저장하는 중입니다." });
-      const savedEvent = await onSaveEvent?.(nextEvent);
-      setSchoolCalendarSaveState({
-        state: "saved",
-        message: `${savedEvent?.title || nextEvent.title || "학사일정"} · 저장 완료`
+      await runManualSchoolEventRequest({
+        request: () => onSaveEvent?.(nextEvent),
+        savingMessage: "수동 학사일정을 저장하는 중입니다.",
+        successMessage: (savedEvent) => `${savedEvent?.title || nextEvent.title || "학사일정"} · 저장 완료`
       });
       closeEventForm();
     } catch (error) {
@@ -334,15 +365,19 @@ export function SchoolCalendarCenter({
 
   async function deleteAcademicEvent(eventId) {
     try {
-      setSchoolCalendarSaveState({ state: "saving", message: "수동 학사일정을 삭제하는 중입니다." });
-      await onDeleteEvent?.(eventId);
-      setSchoolCalendarSaveState({ state: "saved", message: "학사일정 · 삭제 완료" });
+      await runManualSchoolEventRequest({
+        request: () => onDeleteEvent?.(eventId),
+        savingMessage: "수동 학사일정을 삭제하는 중입니다.",
+        successMessage: () => "학사일정 · 삭제 완료"
+      });
+      return true;
     } catch (error) {
       console.error(error);
       setSchoolCalendarSaveState({
         state: "failed",
         message: error.message || "학사일정 삭제에 실패했습니다."
       });
+      return false;
     }
   }
 
@@ -375,7 +410,7 @@ export function SchoolCalendarCenter({
       }
       return;
     }
-    await deleteAcademicEvent(editingEvent.eventId);
+    if (!await deleteAcademicEvent(editingEvent.eventId)) return;
     closeEventForm();
   }
 
@@ -393,7 +428,7 @@ export function SchoolCalendarCenter({
     const nextEvent = {
       ...newEvent,
       mathExamItems: undefined,
-      eventId: `event_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      eventId: newEvent.eventId || createSchoolCalendarDraftId(),
       schoolName,
       title,
       examSubject: subjectTitle,
@@ -410,11 +445,10 @@ export function SchoolCalendarCenter({
     if (nextEvent.type === "mathExam") onSyncPreExamLesson?.(nextEvent);
     if (!isLinkedEvent) {
       try {
-        setSchoolCalendarSaveState({ state: "saving", message: "수동 학사일정을 저장하는 중입니다." });
-        const savedEvent = await onSaveEvent?.(nextEvent);
-        setSchoolCalendarSaveState({
-          state: "saved",
-          message: `${savedEvent?.title || nextEvent.title || "학사일정"} · 저장 완료`
+        await runManualSchoolEventRequest({
+          request: () => onSaveEvent?.(nextEvent),
+          savingMessage: "수동 학사일정을 저장하는 중입니다.",
+          successMessage: (savedEvent) => `${savedEvent?.title || nextEvent.title || "학사일정"} · 저장 완료`
         });
       } catch (error) {
         console.error(error);
@@ -453,6 +487,9 @@ export function SchoolCalendarCenter({
     setSelectedMonth(newEvent.date);
     setNewEvent((current) => ({
       ...current,
+      eventId: createSchoolCalendarDraftId(),
+      createdAt: "",
+      updatedAt: "",
       title: "",
       examSubject: "",
       memo: "",
@@ -539,6 +576,9 @@ export function SchoolCalendarCenter({
     setSelectedMonth(date);
     setNewEvent((current) => ({
       ...current,
+      eventId: createSchoolCalendarDraftId(),
+      createdAt: "",
+      updatedAt: "",
       date: current.type === "examPeriod" ? getDefaultExamPeriodRange(current.examCycle || currentExamCycle).date : date,
       endDate: current.type === "examPeriod"
         ? getDefaultExamPeriodRange(current.examCycle || currentExamCycle).endDate
@@ -618,6 +658,7 @@ export function SchoolCalendarCenter({
       <div className="schoolCalendarLayout">
         {isFormModalOpen ? (
           <SchoolEventFormModal
+            busy={isSchoolCalendarSaving}
             eventColorOptions={eventColorOptions}
             eventTypeLabels={eventTypeLabels}
             examCycleLabel={examCycleLabel}
@@ -675,6 +716,7 @@ export function SchoolCalendarCenter({
       </div>
       {isDateModalOpen ? (
         <SchoolDateScheduleModal
+          busy={isSchoolCalendarSaving}
           eventColorOptions={eventColorOptions}
           eventTypeLabels={eventTypeLabels}
           events={selectedDateEvents}

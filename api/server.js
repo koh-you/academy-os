@@ -7073,7 +7073,12 @@ const server = http.createServer(async (request, response) => {
       const result = await upsertSchoolEvent(payload.schoolEvent ?? payload.event ?? payload);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.currentSchoolEvent !== undefined ? { currentSchoolEvent: error.currentSchoolEvent } : {})
+      });
     }
     return;
   }
@@ -7093,10 +7098,17 @@ const server = http.createServer(async (request, response) => {
     try {
       const eventId = requestUrl.searchParams.get("id");
       if (!eventId) throw new Error("삭제할 학사일정 ID가 필요합니다.");
-      const result = await deleteSchoolEvent(eventId);
+      const result = await deleteSchoolEvent(eventId, {
+        expectedUpdatedAt: requestUrl.searchParams.get("expectedUpdatedAt") || ""
+      });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.currentSchoolEvent !== undefined ? { currentSchoolEvent: error.currentSchoolEvent } : {})
+      });
     }
     return;
   }

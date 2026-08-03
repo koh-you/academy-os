@@ -1649,21 +1649,8 @@ function patchLessonRecordNotificationStatusRequest(record) {
   return postJson("/api/lesson-records/notification-status", { record });
 }
 
-function postSchoolEvent(schoolEvent) {
-  return postJson("/api/school-events", { schoolEvent });
-}
-
 function postSchoolEvents(schoolEvents) {
   return postJson("/api/school-events/bulk", { schoolEvents });
-}
-
-function deleteSchoolEventFromApi(eventId) {
-  return fetch(apiUrl(`/api/school-events?id=${encodeURIComponent(eventId)}`), { method: "DELETE" })
-    .then((response) => response.json())
-    .then((result) => {
-      if (!result.ok) throw new Error(result.error || "학사일정 삭제 저장 실패");
-      return result;
-    });
 }
 
 function postAppState(states, { expectedUpdatedAt = null } = {}) {
@@ -6954,20 +6941,25 @@ export function App() {
   }
 
   async function handleSaveSchoolEvent(event) {
-    const nextEvent = {
-      ...event,
-      eventId: event.eventId || `event_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
-    };
-    setSchoolEvents((current) => upsertById(current, nextEvent, "eventId"));
-    const result = await postSchoolEvent(nextEvent);
-    const savedEvent = result.schoolEvent ?? nextEvent;
-    setSchoolEvents((current) => upsertById(current, savedEvent, "eventId"));
-    return savedEvent;
+    const { saveAndVerifySchoolEvent } = await import("../domains/schoolCalendar/schoolEventApi.js");
+    const result = await saveAndVerifySchoolEvent({
+      event,
+      read: getJsonWithTimeout,
+      request: postJsonWithTimeout
+    });
+    setSchoolEvents(result.schoolEvents);
+    return result.schoolEvent;
   }
 
   async function handleDeleteSchoolEvent(eventId) {
-    setSchoolEvents((current) => current.filter((event) => event.eventId !== eventId));
-    await deleteSchoolEventFromApi(eventId);
+    const { deleteAndVerifySchoolEvent } = await import("../domains/schoolCalendar/schoolEventApi.js");
+    const currentEvent = schoolEvents.find((event) => event.eventId === eventId);
+    const result = await deleteAndVerifySchoolEvent({
+      event: currentEvent,
+      read: getJsonWithTimeout,
+      resolveApiUrl: apiUrl
+    });
+    setSchoolEvents(result.schoolEvents);
     return eventId;
   }
 

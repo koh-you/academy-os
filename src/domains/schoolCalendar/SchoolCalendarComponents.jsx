@@ -251,6 +251,7 @@ export function SchoolMonthGrid({
 }
 
 export function SchoolDateScheduleModal({
+  busy = false,
   eventColorOptions = [],
   eventTypeLabels = {},
   events = [],
@@ -292,7 +293,8 @@ export function SchoolDateScheduleModal({
   }
 
   return (
-    <Modal className="schoolDateScheduleModal" title={`${selectedDate} 일정`} subtitle="일정 내용과 색상을 확인하고 수정합니다." onClose={onClose} scrollable>
+    <Modal className="schoolDateScheduleModal" closeDisabled={busy} title={`${selectedDate} 일정`} subtitle="일정 내용과 색상을 확인하고 수정합니다." onClose={onClose} scrollable>
+      <fieldset aria-busy={busy} className="schoolDateModalContent" disabled={busy}>
       <div className="schoolDateModalToolbar">
         <button className="primaryButton compact" onClick={() => onCreateEvent?.(selectedDate)} type="button">
           이 날짜에 일정 등록
@@ -426,11 +428,13 @@ export function SchoolDateScheduleModal({
           ))}
         </div>
       )}
+      </fieldset>
     </Modal>
   );
 }
 
 export function SchoolEventFormModal({
+  busy = false,
   eventColorOptions = [],
   eventTypeLabels = {},
   examCycleLabel,
@@ -456,12 +460,13 @@ export function SchoolEventFormModal({
   return (
     <Modal
       className="schoolEventFormModal"
+      closeDisabled={busy}
       title={isEditingEvent ? "일정 수정" : "일정 등록"}
       subtitle={isEditingEvent ? "변경할 항목을 확인한 뒤 저장합니다." : "입력 유형을 먼저 고른 뒤 필요한 정보만 입력합니다."}
       onClose={onClose}
       scrollable
     >
-      <div className="schoolEventFormPanel modalForm">
+      <fieldset aria-busy={busy} className="schoolEventFormPanel modalForm" disabled={busy}>
         <label className="inputTypeField">
           입력 유형
           <select disabled={isEditingDerivedEvent} value={newEvent.type} onChange={(event) => onChangeEventType?.(event.target.value)}>
@@ -631,7 +636,7 @@ export function SchoolEventFormModal({
             {isEditingEvent ? "변경 저장" : newEvent.type === "examPeriod" ? "시험일정 묶음 등록" : "일정 등록"}
           </button>
         </div>
-      </div>
+      </fieldset>
     </Modal>
   );
 }
