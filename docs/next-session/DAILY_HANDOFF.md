@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-03
 
+## 2026-08-03 P2-4 modal 저장 상태 감사
+
+- DB/API 저장 표면을 여섯 공통 상태와 대조했고 잘못된 매핑은 없어 런타임 동작을 바꾸지 않았다. provider/process 복합 결과 세 종류는 의미 보존을 위해 별도 표시한다.
+- `test:modal-save-state-audit`가 공통 상태·복합 예외·본문 작업 바를 고정한다. P2는 공통 shell 41/41, bespoke 0, 공통 footer 15개로 종료한다.
+- 검증은 lint, domain `56/56`, scenario·production `827/827`, build `407 modules`·main `944.34 kB`·lazy `12/12`를 통과했다. 런타임 UI 변경은 없다.
+- 다음 P3는 출결·수업일지·보충·재시험·공지·특강·일정 변경·11시 reminder의 문구 원천을 읽기 전용으로 inventory한다. 실제 발송·예약은 사람 gate 전까지 실행하지 않는다.
+
 ## 2026-08-03 P2-3d 월 정규수업 열기 footer
 
 - `MonthlyRegularLessonOpenModal`의 최종 버튼 wrapper만 공통 `ModalFooter`로 옮겼다. App-owned bulk save/requery와 버튼 조건은 그대로다.
