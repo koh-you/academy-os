@@ -206,6 +206,9 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
       Component: components.ResourceLibraryCenter,
       props: {
         materials: models.resourceMaterials,
+        resourceMaterialBusy: models.resourceMaterialBusy,
+        resourceMaterialDeleteStates: models.resourceMaterialDeleteStates,
+        resourceMaterialSaveState: models.resourceMaterialSaveState,
         students: models.students,
         templates: models.classTemplates,
         onAddMaterial: actions.handleAddResourceMaterial,

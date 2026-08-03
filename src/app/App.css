@@ -16478,6 +16478,36 @@ textarea.profileEditInput {
   padding: 0 12px;
 }
 
+.resourceFormFields {
+  border: 0;
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  min-width: 0;
+  padding: 0;
+}
+
+.resourceMaterialSaveFeedback,
+.resourceMaterialDeleteActions {
+  display: grid;
+  gap: 6px;
+  justify-items: end;
+  min-width: 0;
+}
+
+.resourceMaterialSaveFeedback > span {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.45;
+  max-width: 300px;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.resourceMaterialSaveFeedback.failed > span {
+  color: #b91c1c;
+}
+
 .teacherHomeworkSaveFeedback {
   display: grid;
   gap: 4px;
@@ -16491,6 +16521,17 @@ textarea.profileEditInput {
   font-size: 12px;
   line-height: 1.45;
   overflow-wrap: anywhere;
+}
+
+.resourceFileBoundaryNotice {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  color: #9a3412;
+  font-size: 12px;
+  line-height: 1.5;
+  margin: -4px 0 0;
+  padding: 8px 10px;
 }
 
 .teacherHomeworkSaveFeedback.failed > span {

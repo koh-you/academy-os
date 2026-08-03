@@ -18,6 +18,11 @@ import {
   getConsecutiveAttendanceVisitLabel,
   shouldApplyConsecutiveAttendanceVisit
 } from "../src/domains/lessons/attendanceVisitContinuity.js";
+import {
+  areResourceMaterialsPersistedEqual,
+  createNextResourceMaterialUpdatedAt,
+  isSameResourceMaterialDraft
+} from "../src/domains/resources/resourceMaterialPersistence.js";
 
 const host = "127.0.0.1";
 const port = Number(process.env.ACADEMY_SAFE_API_PORT || 8787);
@@ -668,6 +673,39 @@ function handleMutation(pathname, payload) {
     state.appStates = { ...state.appStates, ...(payload.states || {}) };
     return { ok: true, states: state.appStates };
   }
+  if (pathname === "/api/resource-materials") {
+    const material = payload.material || {};
+    const currentMaterial = state.resourceMaterials.find((item) => item.materialId === material.materialId) ?? null;
+    if (currentMaterial && areResourceMaterialsPersistedEqual(material, currentMaterial)) {
+      return { material: currentMaterial, ok: true, verified: true };
+    }
+    if (currentMaterial) {
+      if (isSameResourceMaterialDraft(material, currentMaterial)) {
+        const savedMaterial = {
+          ...material,
+          createdAt: currentMaterial.createdAt,
+          updatedAt: createNextResourceMaterialUpdatedAt(currentMaterial.updatedAt)
+        };
+        state.resourceMaterials = state.resourceMaterials.map((item) => (
+          item.materialId === material.materialId ? savedMaterial : item
+        ));
+        return { material: savedMaterial, ok: true, recoveredDraft: true, verified: true };
+      }
+      return {
+        code: "RESOURCE_MATERIAL_CONFLICT",
+        currentMaterial,
+        error: `자료 ${material.materialId}가 같은 ID의 다른 내용으로 먼저 저장되었습니다.`,
+        ok: false,
+        statusCode: 409
+      };
+    }
+    const savedMaterial = {
+      ...material,
+      updatedAt: createNextResourceMaterialUpdatedAt()
+    };
+    state.resourceMaterials = [savedMaterial, ...state.resourceMaterials];
+    return { material: savedMaterial, ok: true, verified: true };
+  }
   if (pathname === "/api/makeup-tasks") {
     const makeupTask = payload.makeupTask || {};
     state.makeupTasks = upsertById(state.makeupTasks, makeupTask, ["makeupTaskId", "id"]);
@@ -1217,7 +1255,7 @@ const server = http.createServer(async (request, response) => {
       state = createInitialState();
       return sendJson(response, 200, { ok: true, safeFixture: true });
     }
-    if (["/api/app-state", "/api/lesson-records/bulk", "/api/lesson-journal/makeup-tasks/save", "/api/lesson-journal/rows/save", "/api/supplement-schedules/save", "/api/school-events", "/api/school-calendar/derived-save"].includes(requestUrl.pathname)) {
+    if (["/api/app-state", "/api/lesson-records/bulk", "/api/lesson-journal/makeup-tasks/save", "/api/lesson-journal/rows/save", "/api/resource-materials", "/api/supplement-schedules/save", "/api/school-events", "/api/school-calendar/derived-save"].includes(requestUrl.pathname)) {
       await new Promise((resolve) => setTimeout(resolve, 800));
     }
     const { statusCode = 200, ...result } = handleMutation(requestUrl.pathname, payload);
@@ -1246,6 +1284,38 @@ const server = http.createServer(async (request, response) => {
       ok: true,
       safeFixture: true,
       schoolEventId: eventId,
+      source: "supabase",
+      verified: true
+    });
+  }
+  if (request.method === "DELETE" && requestUrl.pathname === "/api/resource-materials") {
+    const materialId = requestUrl.searchParams.get("id") || "";
+    const expectedUpdatedAt = requestUrl.searchParams.get("expectedUpdatedAt") || "";
+    const currentMaterial = state.resourceMaterials.find((material) => material.materialId === materialId) ?? null;
+    if (!currentMaterial) {
+      return sendJson(response, 200, {
+        materialId,
+        ok: true,
+        safeFixture: true,
+        source: "supabase",
+        verified: true
+      });
+    }
+    if (currentMaterial.updatedAt !== expectedUpdatedAt) {
+      return sendJson(response, 409, {
+        code: "RESOURCE_MATERIAL_CONFLICT",
+        currentMaterial,
+        error: `자료 ${materialId}가 다른 화면에서 먼저 변경되었습니다.`,
+        ok: false,
+        safeFixture: true,
+        source: "supabase"
+      });
+    }
+    state.resourceMaterials = state.resourceMaterials.filter((material) => material.materialId !== materialId);
+    return sendJson(response, 200, {
+      materialId,
+      ok: true,
+      safeFixture: true,
       source: "supabase",
       verified: true
     });

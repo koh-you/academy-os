@@ -483,6 +483,78 @@ test("teacher homework verification waits for versioned readback and survives re
   expect(pageErrors).toEqual([]);
 });
 
+test("resource material converges an edited draft after an unknown insert, survives reload, and preserves rows on delete conflict", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  const postRequests = [];
+  let releaseSave;
+  const saveGate = new Promise((resolve) => {
+    releaseSave = resolve;
+  });
+  await page.route("**/api/resource-materials", async (route) => {
+    if (route.request().method() !== "POST") return route.continue();
+    postRequests.push(route.request().postDataJSON());
+    const response = await route.fetch();
+    if (postRequests.length === 1) {
+      await saveGate;
+      return route.fulfill({
+        contentType: "application/json",
+        json: { error: "첫 저장 응답을 확인하지 못했습니다.", ok: false },
+        status: 504
+      });
+    }
+    await route.fulfill({ response });
+  });
+
+  await loginAsTeacher(page);
+  const navigation = page.getByRole("navigation", { name: "주요 화면" });
+  await navigation.getByRole("button", { name: /자료함/ }).click();
+  const form = page.locator("form.resourceForm");
+  await expect(form.getByText("현재는 파일 내용이 업로드되지 않고 파일명만 저장됩니다.")).toBeVisible();
+  await form.getByLabel("자료명").fill("안전 자료함 저장 계약");
+  await expect(form.getByText("자료 등록 · 변경됨")).toBeVisible();
+  await form.getByLabel("파일명").fill("safe-resource.pdf");
+  await form.getByRole("button", { name: "자료 등록" }).click();
+
+  await expect(form.locator("fieldset")).toHaveAttribute("disabled", "");
+  await expect(form.getByLabel("자료명")).toBeDisabled();
+  await expect(form.getByLabel("자료명")).toHaveValue("안전 자료함 저장 계약");
+  await expect(page.locator(".resourceListItem")).toHaveCount(0);
+  await expect(page.locator(".resourceMaterialSaveFeedback.saving")).toContainText("저장 중");
+  releaseSave();
+
+  await expect(page.locator(".resourceMaterialSaveFeedback.failed")).toContainText("첫 저장 응답을 확인하지 못했습니다.");
+  await expect(page.locator(".resourceListItem")).toHaveCount(0);
+  await expect(form.getByLabel("자료명")).toHaveValue("안전 자료함 저장 계약");
+  await form.getByLabel("자료명").fill("안전 자료함 최신 초안");
+  await form.getByLabel("파일명").fill("safe-resource-latest.pdf");
+  await form.getByRole("button", { name: "자료 등록" }).click();
+
+  await expect(page.locator(".resourceListItem")).toContainText("안전 자료함 최신 초안");
+  await expect(form.getByLabel("자료명")).toHaveValue("");
+  await expect(page.locator(".resourceMaterialSaveFeedback.saved")).toContainText("Supabase 저장 및 목록 재조회 확인 완료");
+  expect(postRequests).toHaveLength(2);
+  expect(postRequests[1].material.materialId).toBe(postRequests[0].material.materialId);
+  expect(postRequests[1].material.createdAt).toBe(postRequests[0].material.createdAt);
+
+  await page.reload();
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /자료함/ }).click();
+  const savedRow = page.locator(".resourceListItem").filter({ hasText: "안전 자료함 최신 초안" });
+  await expect(savedRow).toHaveCount(1);
+
+  await page.route("**/api/resource-materials?*", (route) => {
+    if (route.request().method() !== "DELETE") return route.continue();
+    return route.fulfill({
+      contentType: "application/json",
+      json: { code: "RESOURCE_MATERIAL_CONFLICT", error: "다른 화면에서 먼저 변경되었습니다.", ok: false },
+      status: 409
+    });
+  });
+  await savedRow.getByRole("button", { name: "삭제" }).click();
+  await expect(savedRow).toHaveCount(1);
+  await expect(savedRow.locator(".resourceMaterialSaveFeedback.failed")).toContainText("다른 화면에서 먼저 변경되었습니다.");
+  expect(pageErrors).toEqual([]);
+});
+
 test("planning tool screens open from their shared deferred chunk without mutations", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await page.route("**/src/domains/teacher/PlanningToolCenters.jsx*", async (route) => {

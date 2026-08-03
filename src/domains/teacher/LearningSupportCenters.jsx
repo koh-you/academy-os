@@ -34,6 +34,7 @@ import {
   problemClickCycle,
   problemStatusMeta
 } from "./learningSupportModel.js";
+import { createResourceMaterialDraftId } from "../resources/resourceMaterialPersistence.js";
 
 export function FollowUpCenter({
   runtime,
@@ -516,9 +517,12 @@ function ProblemPreview({ book, problem }) {
   );
 }
 
-export function ResourceLibraryCenter({ materials = [], onAddMaterial, onDeleteMaterial, students = [], templates = [] }) {
-  const fileInputRef = useRef(null);
-  const [form, setForm] = useState({
+function createEmptyResourceMaterialForm() {
+  return {
+    materialId: createResourceMaterialDraftId({
+      randomUUID: () => globalThis.crypto?.randomUUID?.() ?? ""
+    }),
+    createdAt: new Date().toISOString(),
     title: "",
     description: "",
     fileName: "",
@@ -527,7 +531,21 @@ export function ResourceLibraryCenter({ materials = [], onAddMaterial, onDeleteM
     classTemplateId: "",
     studentIds: [],
     notifyByAlimtalk: false
-  });
+  };
+}
+
+export function ResourceLibraryCenter({
+  materials = [],
+  resourceMaterialBusy = false,
+  resourceMaterialDeleteStates = {},
+  resourceMaterialSaveState = { message: "", state: "idle" },
+  onAddMaterial,
+  onDeleteMaterial,
+  students = [],
+  templates = []
+}) {
+  const fileInputRef = useRef(null);
+  const [form, setForm] = useState(createEmptyResourceMaterialForm);
   const [openResourceClassIds, setOpenResourceClassIds] = useState(() =>
     templates.slice(0, 1).map((template) => template.classTemplateId)
   );
@@ -544,6 +562,23 @@ export function ResourceLibraryCenter({ materials = [], onAddMaterial, onDeleteM
     }
     return groups.filter((group) => group.students.length > 0);
   }, [students, templates]);
+  const resourceMaterialHasDraft = Boolean(
+    form.title.trim() ||
+    form.description.trim() ||
+    form.fileName.trim() ||
+    form.fileUrl.trim() ||
+    form.visibility !== "student" ||
+    form.classTemplateId ||
+    form.studentIds.length > 0 ||
+    form.notifyByAlimtalk
+  );
+  const visibleResourceMaterialSaveState = (
+    resourceMaterialSaveState.state === "saving" || resourceMaterialSaveState.state === "failed"
+      ? resourceMaterialSaveState
+      : resourceMaterialHasDraft
+        ? { message: "현재 초안은 아직 서버에 저장되지 않았습니다.", state: "dirty" }
+        : resourceMaterialSaveState
+  );
 
   function updateForm(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -587,19 +622,11 @@ export function ResourceLibraryCenter({ materials = [], onAddMaterial, onDeleteM
     setForm((current) => ({ ...current, studentIds: [] }));
   }
 
-  function submitMaterial(event) {
+  async function submitMaterial(event) {
     event.preventDefault();
-    if (!form.title.trim()) return;
-    onAddMaterial(form);
-    setForm((current) => ({
-      ...current,
-      title: "",
-      description: "",
-      fileName: "",
-      fileUrl: "",
-      studentIds: [],
-      notifyByAlimtalk: false
-    }));
+    if (!form.title.trim() || resourceMaterialBusy) return;
+    const result = await onAddMaterial(form);
+    if (result?.ok) setForm(createEmptyResourceMaterialForm());
   }
 
   return (
@@ -612,7 +639,8 @@ export function ResourceLibraryCenter({ materials = [], onAddMaterial, onDeleteM
       />
 
       <div className="resourceLibraryLayout">
-        <form className="panel resourceForm" onSubmit={submitMaterial}>
+        <form aria-busy={resourceMaterialBusy} className="panel resourceForm" onSubmit={submitMaterial}>
+          <fieldset className="resourceFormFields" disabled={resourceMaterialBusy}>
           <h2>자료 등록</h2>
           <label>
             자료명
@@ -623,6 +651,7 @@ export function ResourceLibraryCenter({ materials = [], onAddMaterial, onDeleteM
             <textarea value={form.description} onChange={(event) => updateForm("description", event.target.value)} placeholder="학생이 자료를 받을 때 함께 볼 안내문" />
           </label>
           <button
+            aria-describedby="resource-file-boundary-notice"
             className="resourceDropZone"
             onClick={() => fileInputRef.current?.click()}
             onDragOver={(event) => event.preventDefault()}
@@ -643,6 +672,9 @@ export function ResourceLibraryCenter({ materials = [], onAddMaterial, onDeleteM
             ref={fileInputRef}
             type="file"
           />
+          <p className="resourceFileBoundaryNotice" id="resource-file-boundary-notice">
+            현재는 파일 내용이 업로드되지 않고 파일명만 저장됩니다. 공유하려면 접근 가능한 링크를 함께 입력하세요.
+          </p>
           <div className="fieldGrid two">
             <label>
               파일명
@@ -729,13 +761,24 @@ export function ResourceLibraryCenter({ materials = [], onAddMaterial, onDeleteM
             <input checked={form.notifyByAlimtalk} onChange={(event) => updateForm("notifyByAlimtalk", event.target.checked)} type="checkbox" />
             등록 후 알림톡 안내 대상으로 표시
           </label>
-          <button className="primaryButton full" type="submit">자료 등록</button>
+          <button className="primaryButton full" type="submit">
+            {resourceMaterialSaveState.state === "saving" ? "자료 등록 중..." : "자료 등록"}
+          </button>
+          </fieldset>
+          {visibleResourceMaterialSaveState.state !== "idle" ? (
+            <div className={`resourceMaterialSaveFeedback ${visibleResourceMaterialSaveState.state}`} aria-live="polite" role="status">
+              <InlineSaveStatus label="자료 등록" saveState={visibleResourceMaterialSaveState.state} />
+              {visibleResourceMaterialSaveState.message ? <span>{visibleResourceMaterialSaveState.message}</span> : null}
+            </div>
+          ) : null}
         </form>
 
         <section className="panel resourceList">
           <h2>등록 자료</h2>
           {materials.length === 0 ? <div className="emptyPortalPanel">등록된 자료가 없습니다.</div> : null}
-          {materials.map((material) => (
+          {materials.map((material) => {
+            const deleteState = resourceMaterialDeleteStates[material.materialId] ?? { message: "", state: "idle" };
+            return (
             <article className="resourceListItem" key={material.materialId}>
               <div>
                 <strong>{material.title}</strong>
@@ -746,9 +789,25 @@ export function ResourceLibraryCenter({ materials = [], onAddMaterial, onDeleteM
                   {material.fileName || material.fileUrl || "파일/링크 미입력"}
                 </small>
               </div>
-              <button className="dangerButton mini" onClick={() => onDeleteMaterial(material.materialId)} type="button">삭제</button>
+              <div className="resourceMaterialDeleteActions">
+                <button
+                  className="dangerButton mini"
+                  disabled={resourceMaterialBusy}
+                  onClick={() => onDeleteMaterial(material.materialId)}
+                  type="button"
+                >
+                  {deleteState.state === "saving" ? "삭제 중..." : "삭제"}
+                </button>
+                {deleteState.state !== "idle" ? (
+                  <div className={`resourceMaterialSaveFeedback ${deleteState.state}`} aria-live="polite" role="status">
+                    <InlineSaveStatus label="자료 삭제" saveState={deleteState.state} />
+                    {deleteState.message ? <span>{deleteState.message}</span> : null}
+                  </div>
+                ) : null}
+              </div>
             </article>
-          ))}
+            );
+          })}
         </section>
       </div>
     </section>
