@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { noticeMessageTemplates } from "../src/domains/notifications/notificationCenterConfig.js";
+import {
+  getNoticeMessageTemplates,
+  noticeMessageTemplates
+} from "../src/domains/notifications/notificationCenterConfig.js";
 import { resolveLessonCommentBody } from "../src/domains/notifications/notificationMessageRenderer.js";
 import { applyNoticeTemplateAction } from "../src/domains/notifications/notificationNoticeActions.js";
 import { buildNoticeJob } from "../src/domains/notifications/notificationNoticeBuilders.js";
@@ -40,6 +43,15 @@ for (const templateId of ["material", "makeup", "notice"]) {
 const specialPreset = applyPreset("specialLecture");
 assert.equal(specialPreset.kind, "special_lecture");
 assert.equal(specialPreset.specialLectureMeta, null, "preset alone must not invent saved guide metadata");
+assert.deepEqual(
+  getNoticeMessageTemplates({
+    noticeAnnouncementPreset: "설정 일반 공지",
+    noticeMakeupPreset: "설정 보강 공지",
+    noticeMaterialPreset: "설정 교재 공지"
+  }).slice(0, 3).map((template) => template.body),
+  ["설정 교재 공지", "설정 보강 공지", "설정 일반 공지"],
+  "configured seeds must affect only a newly selected local draft"
+);
 
 const specialGuide = {
   specialLectureGuideId: "guide-transport-contract",
@@ -56,6 +68,44 @@ const guideSeed = buildSpecialLectureNoticeText(
 );
 assert.ok(guideSeed.includes("가상 여름 특강 안내드립니다."));
 assert.ok(guideSeed.includes("https://example.test/special-lecture/guide-transport-contract"));
+assert.equal(
+  guideSeed,
+  [
+    "안녕하세요. 가상 학원입니다.",
+    "가상 여름 특강 안내드립니다.",
+    "",
+    "대상: 중3",
+    "요일: 월·수",
+    "시간: 18:00",
+    "",
+    "가상 안내문에서 신청해 주세요.",
+    "",
+    "https://example.test/special-lecture/guide-transport-contract"
+  ].join("\n"),
+  "default special lecture guide seed must remain character-for-character compatible"
+);
+assert.equal(
+  buildSpecialLectureNoticeText(
+    { ...specialGuide, specialNotes: "첫째 줄\n둘째 줄" },
+    "https://example.test/special-lecture/guide-transport-contract",
+    "가상 학원"
+  ).includes("시간: 18:00\n\n특이사항:\n첫째 줄\n둘째 줄\n\n가상 안내문"),
+  true,
+  "special notes paragraph spacing must stay compatible"
+);
+assert.equal(
+  buildSpecialLectureNoticeText(
+    specialGuide,
+    "https://example.test/special-lecture/guide-transport-contract",
+    {
+      brandName: "가상 학원",
+      notificationTemplates: {
+        specialLectureGuideNotice: "설정 특강 #{특강명}\n#{안내문링크}"
+      }
+    }
+  ),
+  "설정 특강 가상 여름 특강\nhttps://example.test/special-lecture/guide-transport-contract"
+);
 
 const humanFinal = `${guideSeed}\n\n교사가 마지막으로 확정한 문장`;
 const specialLectureJob = buildNoticeJob({

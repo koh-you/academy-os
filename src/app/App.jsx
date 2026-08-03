@@ -150,8 +150,7 @@ import {
 } from "../domains/notifications/notificationCenterConfig.js";
 import {
   defaultNotificationTemplates,
-  normalizeNotificationTemplates,
-  notificationTemplateRows
+  normalizeNotificationTemplates
 } from "../domains/notifications/notificationTemplateCatalog.js";
 import {
   buildAttendanceBody,
@@ -2544,7 +2543,6 @@ const settingsCenterRuntime = Object.freeze({
   normalizeAiPrompts,
   normalizeAiSettings,
   normalizeNotificationTemplates,
-  notificationTemplateRows,
   postJson
 });
 

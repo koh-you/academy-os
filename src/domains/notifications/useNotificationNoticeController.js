@@ -2,9 +2,9 @@ import { academyBrandName, noticeWithdrawnClassFilterId } from "../../app/appCon
 import { apiUrl, isRequestTimeoutError, postJsonWithTimeout } from "../../shared/utils/apiClient.js";
 import { normalizeSpecialLectureGuide } from "../specialLectures/specialLectureGuideUtils.js";
 import {
+  getNoticeMessageTemplates,
   getNotificationJobLabel,
-  getNotificationStatusLabel,
-  noticeMessageTemplates
+  getNotificationStatusLabel
 } from "./notificationCenterConfig.js";
 import { canCancelNotificationJob } from "./notificationJobSelectors.js";
 import {
@@ -55,6 +55,7 @@ export function useNotificationNoticeController({
     today
   } = runtime;
   const resolvedAiSettings = aiSettings ?? defaultAiSettings;
+  const noticeMessageTemplates = getNoticeMessageTemplates(resolvedAiSettings.notificationTemplates);
   const commentAiProvider = resolvedAiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = resolvedAiSettings.commentModel ?? defaultAiSettings.commentModel;
   const isNotificationJobsLoading = notificationJobsStatus?.state === "loading";

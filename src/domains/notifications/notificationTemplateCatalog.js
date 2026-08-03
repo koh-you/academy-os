@@ -54,59 +54,59 @@ export const defaultNotificationTemplates = {
     "#{변경사유}",
     "#{변경전}",
     "변경 후 일정: #{변경후일정}"
+  ].join("\n"),
+  noticeMaterialPreset: [
+    "안녕하세요. 으뜸수학 고태영T입니다.",
+    "",
+    "다음 수업부터 사용할 교재를 안내드립니다.",
+    "학생이 수업에 필요한 교재와 필기구를 준비할 수 있도록 확인 부탁드립니다.",
+    "",
+    "감사합니다."
+  ].join("\n"),
+  noticeMakeupPreset: [
+    "안녕하세요. 으뜸수학 고태영T입니다.",
+    "",
+    "보강 수업 일정을 안내드립니다.",
+    "가능한 시간 확인 후 회신 부탁드립니다.",
+    "",
+    "감사합니다."
+  ].join("\n"),
+  noticeAnnouncementPreset: [
+    "안녕하세요. 으뜸수학 고태영T입니다.",
+    "",
+    "학원 공지사항을 안내드립니다.",
+    "내용 확인 부탁드립니다.",
+    "",
+    "감사합니다."
+  ].join("\n"),
+  specialLectureGuideNotice: [
+    "안녕하세요. #{학원명}입니다.",
+    "#{특강명} 안내드립니다.",
+    "",
+    "대상: #{대상}",
+    "요일: #{요일}",
+    "시간: #{시간}",
+    "",
+    "#{특이사항블록}",
+    "",
+    "#{안내메모}",
+    "",
+    "#{안내문링크}"
   ].join("\n")
 };
 
-export const notificationTemplateRows = [
-  {
-    audience: "학생/학부모",
-    callSite: "수업일지 과제 상태 · 다음시간까지 · 수업 알림톡 별표 블록",
-    key: "lessonNextHomeworkFollowup",
-    source: "Supabase app_state.aiSettings.notificationTemplates",
-    title: "다음 수업 숙제 확인 안내",
-    variables: "#{숙제}"
-  },
-  {
-    audience: "학생/학부모",
-    callSite: "수업일지 과제 상태 · 남아서 하고 가기 · 수업 알림톡 별표 블록",
-    key: "lessonStayAfterHomeworkFollowup",
-    source: "Supabase app_state.aiSettings.notificationTemplates",
-    title: "수업 후 숙제 보충 안내",
-    variables: "#{숙제}"
-  },
-  {
-    audience: "학생",
-    callSite: "보충관리 결석보강 · 학생 당일 11시 리마인더",
-    key: "absenceMakeupStudentReminder",
-    source: "Supabase app_state.aiSettings.notificationTemplates",
-    title: "결석보강 학생 11시 알림톡",
-    variables: "#{학생명}, #{보강일정}, #{보강대상}, #{결석사유줄}, #{확인숙제줄}, #{보충메모}"
-  },
-  {
-    audience: "학생",
-    callSite: "보충관리 숙제보충 · 학생 당일 11시 리마인더",
-    key: "homeworkMakeupStudentReminder",
-    source: "Supabase app_state.aiSettings.notificationTemplates",
-    title: "숙제보충 학생 11시 알림톡",
-    variables: "#{학생명}, #{보강일정}, #{밀린숙제}, #{보충메모}"
-  },
-  {
-    audience: "학생/학부모",
-    callSite: "보충관리 수업일지 일정 만들기 · 다음 정각 확정 안내",
-    key: "supplementScheduleConfirmNotice",
-    source: "Supabase app_state.aiSettings.notificationTemplates",
-    title: "보충 일정 확정 안내",
-    variables: "#{안내제목}, #{보강일정}, #{보강대상}, #{결석사유줄}, #{확인숙제줄}, #{보충메모}"
-  },
-  {
-    audience: "학생/학부모",
-    callSite: "보충관리 수업일지 일정 변경 · 다음 정각 변경 안내",
-    key: "supplementScheduleChangeNotice",
-    source: "Supabase app_state.aiSettings.notificationTemplates",
-    title: "보충 일정 변경 안내",
-    variables: "#{안내제목}, #{보강일정}, #{보강대상}, #{결석사유줄}, #{확인숙제줄}, #{보충메모}, #{변경사유}, #{변경전}, #{변경후일정}"
-  }
-];
+export function renderNotificationTemplate(template = "", variables = {}) {
+  const rendered = Object.entries(variables).reduce(
+    (text, [key, value]) => text.replaceAll(`#{${key}}`, String(value ?? "").replace(/\r\n?/g, "\n")),
+    String(template ?? "")
+  );
+  return rendered
+    .split("\n")
+    .map((line) => line.trimEnd())
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
 
 export function normalizeNotificationTemplates(templates = {}) {
   const sourceTemplates = templates && typeof templates === "object" ? templates : {};

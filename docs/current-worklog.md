@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 P3-3b 알림톡 Settings seed 확장
+
+- 일반 공지 preset 3개와 특강 guide seed를 기존 `app_state.aiSettings.notificationTemplates`에 연결했다. 설정값은 preset 선택·guide preview/발송 준비 시 새 local draft에만 복사되며 현재 composer draft·기존 notification job·`makeup_tasks` 교사 최종본을 재생성하지 않는다.
+- 재시험 11시 항목은 만들지 않았고 provider template ID·승인 변수·실제 발송/예약 callback은 변경하지 않았다. Settings 전용 10개 행 metadata를 lazy Settings chunk로 분리해 main budget을 상향하지 않았다. safe API의 `app_state` 모형도 key별 `updated_at` CAS·재조회 응답을 갖춰 설정 저장과 새로고침 지속성을 실제 계약대로 검증한다.
+- 검증: runtime lint, notification `10/10`, teacher runtime 경계, `check:fast` scenario `827/827`, production `827/827`, build `410 modules`·main `943.65 kB`·lazy `12/12`, Worktree 격리 safe browser `41/41` 통과. 운영 데이터·실제 알림 발송/예약/취소는 사용하지 않았다.
+- 다음 독립 단위는 9개 제품 경로의 seed→draft→persisted final→provider variables를 P3-4 fixture·safe browser로 종료 감사한다.
+
 ## 2026-08-03 P3-3a 알림톡 template transport 계약
 
 - 일반 공지 preset 4개와 특강 guide는 composer local draft의 seed이며, 즉시/예약 행동 시점의 교사 최종 `noticeText`가 notification job의 `commentBodyOverride/message/previewBody`와 live renderer 원천이 됨을 동작 fixture로 고정했다.

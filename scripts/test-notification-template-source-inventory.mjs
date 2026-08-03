@@ -12,6 +12,7 @@ const [
   supplementJobBuilderSource,
   specialLectureSource,
   templateCatalogSource,
+  templateSettingsCatalogSource,
   messageRendererSource
 ] = await Promise.all([
   read("src/app/App.jsx"),
@@ -23,6 +24,7 @@ const [
   read("src/domains/notifications/supplementJobBuilders.js"),
   read("src/domains/specialLectures/specialLectureGuideUtils.js"),
   read("src/domains/notifications/notificationTemplateCatalog.js"),
+  read("src/domains/settings/notificationTemplateSettingsCatalog.js"),
   read("src/domains/notifications/notificationMessageRenderer.js")
 ]);
 
@@ -32,17 +34,23 @@ const managedTemplateKeys = [
   "absenceMakeupStudentReminder",
   "homeworkMakeupStudentReminder",
   "supplementScheduleConfirmNotice",
-  "supplementScheduleChangeNotice"
+  "supplementScheduleChangeNotice",
+  "noticeMaterialPreset",
+  "noticeMakeupPreset",
+  "noticeAnnouncementPreset",
+  "specialLectureGuideNotice"
 ];
 for (const key of managedTemplateKeys) {
   assert.ok(templateCatalogSource.includes(`${key}:`), `missing managed notification template key: ${key}`);
-  assert.ok(templateCatalogSource.includes(`key: "${key}"`), `missing settings metadata for notification template key: ${key}`);
+  assert.ok(templateSettingsCatalogSource.includes(`key: "${key}"`), `missing settings metadata for notification template key: ${key}`);
 }
 assert.ok(templateCatalogSource.includes("export function normalizeNotificationTemplates(templates = {})"));
-assert.ok(templateCatalogSource.includes("source: \"Supabase app_state.aiSettings.notificationTemplates\""));
+assert.ok(templateSettingsCatalogSource.includes("Supabase app_state.aiSettings.notificationTemplates"));
 assert.ok(appSource.includes('from "../domains/notifications/notificationTemplateCatalog.js"'));
+assert.equal(appSource.includes("notificationTemplateRows"), false);
 assert.equal(appSource.includes("const defaultNotificationTemplates ="), false);
 assert.equal(appSource.includes("function normalizeNotificationTemplates(templates = {})"), false);
+assert.ok(settingsSource.includes('from "./notificationTemplateSettingsCatalog.js"'));
 assert.ok(settingsSource.includes("notificationTemplateRows.map((row)"));
 assert.ok(settingsSource.includes("settings.notificationTemplates[row.key]"));
 assert.ok(settingsSource.includes("updateNotificationTemplate(row.key, event.target.value)"));
@@ -79,6 +87,8 @@ for (const presetId of ["material", "makeup", "notice", "specialLecture"]) {
 assert.ok(noticeBuilderSource.includes("commentBodyOverride: noticeText"));
 assert.ok(noticeBuilderSource.includes("previewBody: noticeText"));
 assert.ok(specialLectureSource.includes("export function buildSpecialLectureNoticeText"));
+assert.ok(specialLectureSource.includes("templates.specialLectureGuideNotice"));
+assert.ok(noticeConfigSource.includes("getNoticeMessageTemplates"));
 assert.ok(appSource.includes('if (task.taskType === "retest")'));
 assert.ok(appSource.includes("학생 재시험 안내입니다."));
 assert.equal(appSource.includes("createAttendanceNotificationText"), false, "orphan attendance formatter must stay removed");
@@ -102,4 +112,4 @@ const productPaths = [
 ];
 assert.equal(productPaths.length, 9);
 
-console.log("notification template source inventory passed · product paths 9 · settings keys 6 · provider templates 4");
+console.log("notification template source inventory passed · product paths 9 · settings keys 10 · provider templates 4");

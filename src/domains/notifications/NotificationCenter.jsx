@@ -108,6 +108,7 @@ export function NotificationCenter({
           guides={specialLectureGuides}
           lessons={lessons}
           notificationJobs={notificationJobs}
+          notificationTemplates={aiSettings?.notificationTemplates}
           records={records}
           saveState={specialLectureGuideSaveState}
           onApplyToNotice={applySpecialLectureGuideToNotice}

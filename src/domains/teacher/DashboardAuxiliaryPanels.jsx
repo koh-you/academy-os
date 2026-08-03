@@ -67,6 +67,7 @@ export function SpecialLectureNoticePanel({
   guides = defaultSpecialLectureGuides,
   lessons = [],
   notificationJobs = [],
+  notificationTemplates = {},
   onApplyToNotice,
   onCreateStudent,
   onCreateSpecialLectureLessons,
@@ -99,7 +100,9 @@ export function SpecialLectureNoticePanel({
     selectedGuide && savedSelectedGuide && JSON.stringify(selectedGuide) === JSON.stringify(savedSelectedGuide)
   );
   const selectedGuideUrl = selectedGuide ? getSpecialLecturePublicUrl(selectedGuide) : "";
-  const noticeText = selectedGuide ? buildSpecialLectureNoticeText(selectedGuide, selectedGuideUrl) : "";
+  const noticeText = selectedGuide
+    ? buildSpecialLectureNoticeText(selectedGuide, selectedGuideUrl, { notificationTemplates })
+    : "";
   const selectedGuideSessions = selectedGuide ? (selectedGuide.sessions ?? []).map(normalizeSpecialLectureSession) : [];
   const generatedSessionsPreview = selectedGuide ? generateSpecialLectureSessions(selectedGuide) : [];
   const calculatedSessionCount = generatedSessionsPreview.length;
@@ -428,7 +431,11 @@ export function SpecialLectureNoticePanel({
       const savedGuides = await persistDraftGuides("특강 안내문 저장 완료 후 알림톡 준비 화면으로 이동했습니다.");
       const savedGuide = savedGuides.find((guide) => guide.specialLectureGuideId === selectedGuide.specialLectureGuideId) ?? selectedGuide;
       const savedGuideUrl = getSpecialLecturePublicUrl(savedGuide);
-      onApplyToNotice(savedGuide, buildSpecialLectureNoticeText(savedGuide, savedGuideUrl), savedGuideUrl);
+      onApplyToNotice(
+        savedGuide,
+        buildSpecialLectureNoticeText(savedGuide, savedGuideUrl, { notificationTemplates }),
+        savedGuideUrl
+      );
     } catch (error) {
       setPanelMessage(`알림톡 발송 준비 실패: ${error.message}`);
     }

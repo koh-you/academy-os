@@ -939,6 +939,38 @@ test("notification and special lecture screens render through the extracted boun
   expect(pageErrors).toEqual([]);
 });
 
+test("notification settings seed new notice and special lecture drafts without provider actions", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+  const navigation = page.getByRole("navigation", { name: "주요 화면" });
+
+  await navigation.getByRole("button", { name: /설정/ }).click();
+  await page.getByRole("tab", { name: "알림톡 문구" }).click();
+  await page.getByLabel("교재 공지 초안 템플릿 문구").fill("안전 설정 교재 공지 초안");
+  await page.getByLabel("특강 안내문 공지 초안 템플릿 문구").fill("안전 설정 특강 #{특강명}\n#{안내문링크}");
+  await expect(page.getByRole("status").filter({ hasText: "설정 자동저장 · 저장 완료" })).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByRole("navigation", { name: "주요 화면" })).toBeVisible();
+  await navigation.getByRole("button", { name: /설정/ }).click();
+  await page.getByRole("tab", { name: "알림톡 문구" }).click();
+  await expect(page.getByLabel("교재 공지 초안 템플릿 문구")).toHaveValue("안전 설정 교재 공지 초안");
+  await expect(page.getByLabel("특강 안내문 공지 초안 템플릿 문구")).toHaveValue("안전 설정 특강 #{특강명}\n#{안내문링크}");
+
+  await navigation.getByRole("button", { name: /알림관리/ }).click();
+  await page.getByLabel("템플릿").selectOption("material");
+  const noticeBody = page.getByPlaceholder("보낼 공지 내용을 입력하세요.");
+  await expect(noticeBody).toHaveValue("안전 설정 교재 공지 초안");
+  await noticeBody.fill("교사가 편집한 local 최종 문구");
+  await expect(noticeBody).toHaveValue("교사가 편집한 local 최종 문구");
+
+  await navigation.getByRole("button", { name: /특강관리/ }).click();
+  await page.getByRole("tab", { name: "특강 안내문" }).click();
+  await page.getByRole("tab", { name: "알림톡 미리보기" }).click();
+  await expect(page.locator(".specialLectureNoticePreview")).toContainText("안전 설정 특강");
+  expect(pageErrors).toEqual([]);
+});
+
 test("broken supplement lesson links are visible and block schedule or notification writes", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await page.route("**/api/makeup-tasks*", async (route) => {

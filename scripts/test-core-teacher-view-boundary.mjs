@@ -39,7 +39,7 @@ assert.deepEqual(readRuntimeKeys("settingsCenterRuntime"), [
   "appStateAutosaveRisk", "buildNotificationTemplatePreview", "defaultAiPrompts", "defaultAiSettings",
   "defaultNotificationTemplates", "defaultTeacherAccountSettings", "getKoreaDateString",
   "normalizeAiPrompts", "normalizeAiSettings", "normalizeNotificationTemplates",
-  "notificationTemplateRows", "postJson"
+  "postJson"
 ].sort());
 
 assert.equal(outletSource.includes("runtime: runtimeBindings.examPrepCenter"), true);
