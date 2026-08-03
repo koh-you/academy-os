@@ -123,6 +123,7 @@ import {
 import { saveReportSnapshotWithVerification } from "../src/domains/reports/reportSnapshotPersistence.js";
 import { getNextHourlyAlimtalkReservationAt } from "../src/domains/notifications/supplementJobBuilders.js";
 import { defaultNotificationTemplates } from "../src/domains/notifications/notificationTemplateCatalog.js";
+import { buildLessonNotificationBody } from "../src/domains/notifications/notificationMessageRenderer.js";
 import { isSupplementScheduleForLessonComment } from "../src/domains/notifications/supplementSchedule.js";
 import { normalizeSpecialLectureTallySessionRequests } from "../src/domains/specialLectures/tallySessionRequests.js";
 import {
@@ -2047,16 +2048,6 @@ const lessonBodyFields = [
   "commentBodyOverride",
   "reportBody"
 ];
-const attendanceLabelMap = {
-  absent: "결석",
-  checkin: "등원",
-  checkout: "하원",
-  excused: "인정결석",
-  late: "지각",
-  pending: "대기",
-  present: "등원"
-};
-
 function isLessonCommentNotificationJob(job = {}) {
   return lessonCommentNotificationTypes.has(job.notificationType);
 }
@@ -2094,20 +2085,6 @@ function compactDuplicateNotificationBlocks(value = "") {
     .join("\n\n");
 }
 
-function notificationTextIncludesBlock(text = "", block = "") {
-  const textKey = getNotificationTextKey(text);
-  const blockKey = getNotificationTextKey(block);
-  return Boolean(blockKey && textKey.includes(blockKey));
-}
-
-function notificationTextIncludesEveryLine(text = "", lines = []) {
-  const textKey = getNotificationTextKey(text);
-  return lines.every((line) => {
-    const lineKey = getNotificationTextKey(line);
-    return !lineKey || textKey.includes(lineKey);
-  });
-}
-
 function joinNotificationBlocks(blocks = []) {
   return blocks.map(normalizeNotificationText).filter(Boolean).join("\n\n");
 }
@@ -2115,11 +2092,6 @@ function joinNotificationBlocks(blocks = []) {
 function notificationLine(label, value) {
   const text = normalizeNotificationText(value);
   return text ? `${label} : ${text}` : "";
-}
-
-function notificationBlock(label, value) {
-  const text = normalizeNotificationText(value);
-  return text ? `${label}\n${text}` : "";
 }
 
 function getLessonStudentIdsForNotification(lesson = {}) {
@@ -2416,50 +2388,30 @@ function buildInitialNotificationComment({ existingComment }) {
   return compactDuplicateNotificationBlocks(existingComment);
 }
 
-function formatNotificationAttendance(record = {}) {
-  const label = attendanceLabelMap[record.attendanceStatus ?? "pending"] ?? record.attendanceStatus ?? "";
-  if (!["지각", "결석", "인정결석"].includes(label)) return label;
-
-  const details = [];
-  const reason = normalizeNotificationText(record.attendanceReason ?? record.reason ?? "");
-  const time = compactText(record.checkInTime || record.checkedAt || record.checkInAt);
-  if (reason) details.push(`사유: ${reason}`);
-  if (label === "지각" && time) details.push(`등원 ${time}`);
-  if (label === "지각" && !time && record.lateMinutes) details.push(`${record.lateMinutes}분 지각`);
-  if ((label === "결석" || label === "인정결석") && time) details.push(`처리 ${time}`);
-  return details.length ? `${label} (${details.join(" · ")})` : label;
-}
-
 function buildLatestLessonCommentPreview({ audience, commentBody, homeworkFollowupNotice = "", lesson, nextHomework, previousHomework, record, student, supplementSchedules, testResultLines = [] }) {
   const assignmentStatus = getAssignmentStatusForNotification(record, previousHomework);
   const omitPreviousHomework = isAssignmentStatusUnrecorded(assignmentStatus);
-  const commentText = normalizeNotificationText(commentBody);
-  const homeworkFollowupText = omitPreviousHomework ? "" : normalizeNotificationText(homeworkFollowupNotice);
-  const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
-  const supplementAndFollowupText = [homeworkFollowupText, supplementText].filter(Boolean).join("\n");
-  const testResultText = testResultLines.length ? testResultLines.map((item) => `- ${item}`).join("\n") : "";
-  const commentHasSupplement =
-    commentText.includes("보충/확인 안내") ||
-    commentText.includes("보충일정") ||
-    commentText.includes("보충 일정") ||
-    supplementSchedules.some((item) => commentText.includes(item));
-  const commentHasFollowup = homeworkFollowupText && notificationTextIncludesBlock(commentText, homeworkFollowupText);
-  const supplementNotice =
-    supplementAndFollowupText && (!commentHasSupplement || !commentHasFollowup)
-      ? [commentHasFollowup ? "" : homeworkFollowupText, commentHasSupplement ? "" : supplementText].filter(Boolean).join("\n")
-      : "";
+  const previewBody = buildLessonNotificationBody({
+    attendanceReason: record.attendanceReason ?? record.reason ?? "",
+    attendanceStatus: record.attendanceStatus ?? "pending",
+    checkInTime: record.checkInTime ?? "",
+    checkedAt: record.checkInAt || record.checkOutAt || "",
+    assignmentStatus: getAssignmentStatusMessage(audience, assignmentStatus),
+    audience,
+    homeworkFollowupNotice: omitPreviousHomework ? "" : homeworkFollowupNotice,
+    lessonContent: getNotificationLessonContent(record),
+    lessonMaterial: getNotificationLessonMaterial(record, student),
+    nextHomework: nextHomework?.title ?? "",
+    omitPreviousHomework,
+    previousHomework: omitPreviousHomework ? "" : previousHomework?.title ?? "",
+    supplementSchedule: supplementSchedules.join("\n"),
+    teacherComment: commentBody,
+    testResult: testResultLines.join("\n")
+  });
 
   return joinNotificationBlocks([
     `${student.name} 학생 ${audience === "student" ? "안내" : "수업 안내"}`,
-    notificationLine("🏫 출결", formatNotificationAttendance(record)),
-    omitPreviousHomework ? "" : notificationLine("✅ 과제 상태", getAssignmentStatusMessage(audience, assignmentStatus)),
-    notificationLine("📚 강의 교재", getNotificationLessonMaterial(record, student)),
-    notificationLine("🧭 강의 내용", getNotificationLessonContent(record)),
-    omitPreviousHomework ? "" : notificationLine("📘 지난 과제", previousHomework?.title ?? ""),
-    notificationLine("➡️ 다음 과제", nextHomework?.title ?? ""),
-    notificationBlock("📝 테스트", testResultText),
-    notificationBlock("⭐ 보충/확인 안내", supplementNotice),
-    notificationBlock("💬 코멘트", commentText),
+    previewBody,
     notificationLine("📘 수업", lesson.className)
   ]);
 }

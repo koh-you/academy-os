@@ -94,7 +94,7 @@
 
 ## 다음 우선순위
 
-1. App 2차 Phase 1~5와 3차 3-0~3-8, P1 운영 저장 신뢰성, P2 modal 통일 후속은 완료됐다. P3-0 inventory와 P3-1 pure catalog 경계에서 알림 제품 경로 9개, 설정 key 6개, Solapi provider template 4개를 고정하고 App/server의 기존 숙제 follow-up 기본값을 같은 catalog에 연결했다. 다음 P3-2는 출결·수업일지 client preview/server live renderer 동일성 계약이다.
+1. App 2차 Phase 1~5와 3차 3-0~3-8, P1 운영 저장 신뢰성, P2 modal 통일 후속은 완료됐다. P3-0~P3-2에서 알림 제품 경로 9개, 설정 key 6개, Solapi provider template 4개를 고정하고 출결·수업일지 client preview/server live body를 같은 pure renderer에 연결했다. 다음 P3-3은 공지 preset·특강 guide·재시험의 실제 transport 범위를 확정한 뒤 설정 원천을 확장한다.
 2. App 3차 리팩터링 3-0~3-8은 production main 43.1%·gzip 45.3% 감소, 12개 물리 lazy chunk, App Babel 500 KB 경고 제거와 종료 소유권 감사까지 완료했다. 자동으로 다음 리팩터링 차수를 시작하지 않고 P1~P3 제품·저장 신뢰성 우선순위로 돌아간다.
 3. `app_state`에서 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
    - 즉시 사람 판단이 필요하지 않은 발견은 queue/worklog에 남기고 AI 검수와 다음 단계를 연쇄 진행한다.

@@ -153,6 +153,15 @@ import {
   normalizeNotificationTemplates,
   notificationTemplateRows
 } from "../domains/notifications/notificationTemplateCatalog.js";
+import {
+  buildAttendanceBody,
+  buildLessonNotificationBody,
+  createNotificationMessageBlock as createMessageBlock,
+  createNotificationMessageLine as createMessageLine,
+  formatLessonNotificationAttendance as formatAttendanceForMessage,
+  joinNotificationMessageBlocks as joinMessageBlocks,
+  normalizeNotificationText as normalizeMessageText
+} from "../domains/notifications/notificationMessageRenderer.js";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import {
   createCanceledAbsenceMakeupTask,
@@ -566,44 +575,6 @@ function mergeHomeworkStatusFromLinkedPrevious(homework, homeworks = [], records
   };
 }
 
-function normalizeMessageText(value) {
-  return (value ?? "")
-    .toString()
-    .replace(/\r\n/g, "\n")
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .join("\n");
-}
-
-function createMessageBlock(label, value) {
-  const text = normalizeMessageText(value);
-  return text ? `${label}\n${text}` : "";
-}
-
-function createMessageLine(label, value) {
-  const text = normalizeMessageText(value);
-  return text ? `${label} : ${text}` : "";
-}
-
-function formatAttendanceMessageTime(value) {
-  const text = String(value ?? "").trim();
-  if (!text) return "";
-  const isoTime = text.match(/T(\d{2}:\d{2})/);
-  if (isoTime?.[1]) return isoTime[1];
-  const koreanTime = text.match(/(오전|오후)\s*(\d{1,2}):(\d{2})/);
-  if (koreanTime) {
-    const period = koreanTime[1];
-    let hour = Number(koreanTime[2]);
-    if (period === "오후" && hour < 12) hour += 12;
-    if (period === "오전" && hour === 12) hour = 0;
-    return `${String(hour).padStart(2, "0")}:${koreanTime[3]}`;
-  }
-  const time = text.match(/(\d{1,2}:\d{2})/);
-  if (time?.[1]) return time[1].padStart(5, "0");
-  return text;
-}
-
 function formatLessonClockTime(value = "") {
   const match = String(value ?? "").match(/^(\d{1,2}):(\d{2})/);
   if (!match) return String(value ?? "");
@@ -663,39 +634,6 @@ function getActiveStudentIdsFromSelection(studentIds = [], students = []) {
     .map((student) => student.studentId);
 }
 
-function formatAttendanceForMessage(recordOrPayload = {}) {
-  const attendanceStatus = recordOrPayload.attendanceStatus ?? "pending";
-  const label = attendanceLabels[attendanceStatus] ?? attendanceStatus ?? "";
-  if (!["지각", "결석", "인정결석"].includes(label)) return label;
-
-  const details = [];
-  const reason = normalizeMessageText(recordOrPayload.attendanceReason ?? recordOrPayload.reason ?? "");
-  const time = formatAttendanceMessageTime(
-    recordOrPayload.checkInTime ||
-    recordOrPayload.checkedAt ||
-    recordOrPayload.checkInAt
-  );
-  if (reason) details.push(`사유: ${reason}`);
-  if (label === "지각" && time) details.push(`등원 ${time}`);
-  if (label === "지각" && !time && recordOrPayload.lateMinutes) details.push(`${recordOrPayload.lateMinutes}분 지각`);
-  if ((label === "결석" || label === "인정결석") && time) details.push(`처리 ${time}`);
-  return details.length ? `${label} (${details.join(" · ")})` : label;
-}
-
-function formatAttendanceStatusForMessage(recordOrPayload = {}) {
-  const attendanceStatus = recordOrPayload.attendanceStatus ?? "pending";
-  const label = attendanceLabels[attendanceStatus] ?? attendanceStatus ?? "";
-  const reason = normalizeMessageText(recordOrPayload.attendanceReason ?? recordOrPayload.reason ?? "");
-  if (reason && ["지각", "결석", "인정결석"].includes(label)) {
-    return `${label} (사유: ${reason})`;
-  }
-  return label;
-}
-
-function joinMessageBlocks(blocks) {
-  return blocks.map(normalizeMessageText).filter(Boolean).join("\n\n");
-}
-
 function getMessageDedupeKey(value = "") {
   return normalizeMessageText(value).replace(/\s+/g, " ");
 }
@@ -720,14 +658,6 @@ function textIncludesMessageBlock(text = "", block = "") {
   const textKey = getMessageDedupeKey(text);
   const blockKey = getMessageDedupeKey(block);
   return Boolean(blockKey && textKey.includes(blockKey));
-}
-
-function textIncludesEveryLine(text = "", lines = []) {
-  const textKey = getMessageDedupeKey(text);
-  return lines.every((line) => {
-    const lineKey = getMessageDedupeKey(line);
-    return !lineKey || textKey.includes(lineKey);
-  });
 }
 
 function getPreparationNoticeForTarget(record = {}, target = "parent") {
@@ -852,53 +782,26 @@ function hasMatchingVerifiedLessonRecordFields(expectedRecord = {}, savedRecord 
     ));
 }
 
-function buildCommentPreviewLines({ audience, comment, nextHomework, notificationTemplates = {}, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
-  const lessonMaterial = getLessonMaterial(record, student);
-  const lessonContent = getLessonContent(record);
-  const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
-  const omitPreviousHomework = isAssignmentStatusUnrecorded(assignmentStatus);
-  const attendance = formatAttendanceForMessage(record);
-  const commentText = normalizeMessageText(comment);
-  const homeworkFollowupNotice = omitPreviousHomework ? "" : getHomeworkFollowupNoticeForTarget(record, audience, notificationTemplates);
-  const supplementText = supplementSchedules.length ? supplementSchedules.map((item) => `- ${item}`).join("\n") : "";
-  const supplementAndFollowupText = [homeworkFollowupNotice, supplementText].filter(Boolean).join("\n");
-  const testResultText = testResultLines.length ? testResultLines.map((item) => `- ${item}`).join("\n") : "";
-  const commentHasSupplement =
-    commentText.includes("보충/확인 안내") ||
-    commentText.includes("보충일정") ||
-    commentText.includes("보충 일정") ||
-    supplementSchedules.some((item) => commentText.includes(item));
-  const commentHasFollowup = homeworkFollowupNotice && textIncludesEveryLine(commentText, homeworkFollowupNotice.split("\n"));
-  const supplementNotice = supplementAndFollowupText && (!commentHasSupplement || !commentHasFollowup)
-    ? [commentHasFollowup ? "" : homeworkFollowupNotice, commentHasSupplement ? "" : supplementText].filter(Boolean).join("\n")
-    : "";
-  const lines = [
-    createMessageLine("🏫 출결", attendance),
-    assignmentStatus && !omitPreviousHomework ? createMessageLine("✅ 과제 상태", getAssignmentStatusMessage(audience, assignmentStatus)) : "",
-    createMessageLine("📚 강의 교재", lessonMaterial),
-    createMessageLine("🧭 강의 내용", lessonContent),
-    omitPreviousHomework ? "" : createMessageLine("📘 지난 과제", previousHomework?.title),
-    createMessageLine("➡️ 다음 과제", nextHomework?.title),
-    testResultText ? createMessageBlock("📝 테스트", testResultText) : "",
-    supplementNotice ? createMessageBlock("⭐ 보충/확인 안내", supplementNotice) : "",
-    commentText ? createMessageBlock("💬 코멘트", commentText) : ""
-  ];
-
-  return lines.filter(Boolean);
-}
-
 function buildCommentPreviewText({ audience, comment, lesson, nextHomework, notificationTemplates = {}, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
   const isParent = audience === "parent";
-  const previewLines = buildCommentPreviewLines({
-    audience,
-    comment,
-    nextHomework,
-    notificationTemplates,
-    previousHomework,
-    record,
-    student,
-    supplementSchedules,
-    testResultLines
+  const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
+  const omitPreviousHomework = isAssignmentStatusUnrecorded(assignmentStatus);
+  const homeworkFollowupNotice = omitPreviousHomework ? "" : getHomeworkFollowupNoticeForTarget(record, audience, notificationTemplates);
+  const previewBody = buildLessonNotificationBody({
+    attendanceReason: record?.attendanceReason ?? "",
+    attendanceStatus: record?.attendanceStatus ?? "pending",
+    checkInTime: record?.checkInTime ?? "",
+    checkedAt: record?.checkInAt || record?.checkOutAt || "",
+    assignmentStatus: getAssignmentStatusMessage(audience, assignmentStatus),
+    homeworkFollowupNotice,
+    lessonContent: getLessonContent(record),
+    lessonMaterial: getLessonMaterial(record, student),
+    nextHomework: nextHomework?.title ?? "",
+    omitPreviousHomework,
+    previousHomework: omitPreviousHomework ? "" : previousHomework?.title ?? "",
+    supplementSchedule: supplementSchedules.join("\n"),
+    teacherComment: comment,
+    testResult: testResultLines.join("\n")
   });
 
   return joinMessageBlocks([
@@ -906,7 +809,7 @@ function buildCommentPreviewText({ audience, comment, lesson, nextHomework, noti
     `#{학생명}: ${student.name}`,
     isParent ? `#{수업일}: ${lesson.date}` : `#{수업명}: ${lesson.className}`,
     isParent ? "#{리포트본문}:" : "#{코멘트}:",
-    ...(previewLines.length ? previewLines : ["왼쪽에 작성한 내용이 받는 사람 화면에 이렇게 표시됩니다."])
+    previewBody || "왼쪽에 작성한 내용이 받는 사람 화면에 이렇게 표시됩니다."
   ]);
 }
 
@@ -1461,21 +1364,23 @@ function buildNotificationTemplatePreview(type) {
       `#{학원명}: ${base.academyName}`,
       `#{학생명}: ${base.studentName}`,
       "#{출결본문}:",
-      createMessageLine("🏫 출결", formatAttendanceStatusForMessage(attendanceSample)),
-      createMessageLine("📘 수업", base.lessonName),
-      createMessageLine("🕒 시간", attendanceSample.checkInTime)
+      buildAttendanceBody({
+        ...attendanceSample,
+        lessonName: base.lessonName
+      })
     ]);
   }
 
-  const commonBody = joinMessageBlocks([
-    createMessageLine("🏫 출결", formatAttendanceForMessage(base)),
-    createMessageLine("✅ 과제 상태", getAssignmentStatusMessage(type, base.assignmentStatus)),
-    createMessageLine("📚 강의 교재", base.lessonMaterial),
-    createMessageLine("🧭 강의 내용", base.lessonContent),
-    createMessageLine("📘 지난 과제", base.previousHomework),
-    createMessageLine("➡️ 다음 과제", base.nextHomework),
-    createMessageBlock("💬 코멘트", base.message)
-  ]);
+  const commonBody = buildLessonNotificationBody({
+    attendanceStatus: base.attendanceStatus,
+    assignmentStatus: getAssignmentStatusMessage(type, base.assignmentStatus),
+    checkedAt: base.checkedAt,
+    lessonContent: base.lessonContent,
+    lessonMaterial: base.lessonMaterial,
+    nextHomework: base.nextHomework,
+    previousHomework: base.previousHomework,
+    teacherComment: base.message
+  });
 
   return joinMessageBlocks([
     `#{학원명}: ${base.academyName}`,
@@ -10940,16 +10845,6 @@ function getSupplementTaskProgress(task, lessons = []) {
     return { label: "일정 입력됨", tone: "scheduled", detail: `${task.scheduledDate} ${task.scheduledTime}` };
   }
   return { label: "일정 미확정", tone: "draft", detail: "" };
-}
-
-function createAttendanceNotificationText(payload) {
-  const attendanceNotificationLabels = { ...attendanceLabels, present: "등원" };
-  const status = attendanceNotificationLabels[payload.attendanceStatus] ?? payload.attendanceStatus ?? "등원";
-  return joinMessageBlocks([
-    `[${academyBrandName} 출결 안내]`,
-    `${payload.studentName} 학생이 ${formatAttendanceForMessage(payload) || status} 처리되었습니다.`,
-    `수업: ${payload.lessonName}`
-  ]);
 }
 
 function getHomeworkAction(homework) {

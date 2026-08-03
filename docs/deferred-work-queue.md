@@ -36,6 +36,7 @@
 - 실제 발송·예약은 별도 사람 gate다. 먼저 읽기 전용 source inventory와 가상 fixture만 진행한다.
 - P3-0 완료: `docs/notification-template-source-inventory-2026-08-03.md`에 제품 경로 9개, 설정 key 6개, provider template 4개를 고정했다. 다음 P3-1은 기존 설정 catalog를 App 밖 pure notification domain으로 이동하고 문구·변수·normalize 결과를 문자 단위로 보존한다.
 - P3-1 완료: 6개 default·Settings metadata·legacy 변환·normalize를 `notificationTemplateCatalog.js`로 이동했다. App과 server 숙제 follow-up이 같은 catalog를 읽고 저장 key와 persisted human final은 유지한다. 다음 P3-2는 출결·수업일지 preview/live renderer 동일성부터 고정한다.
+- P3-2 완료: 출결 body와 수업일지 학생·학부모 body를 import 없는 pure renderer로 합치고 App 미리보기·발송 직전 server 미리보기·Solapi route가 같은 결과를 사용한다. 다음 P3-3은 공지 preset·특강 guide·재시험의 실제 transport 범위를 먼저 확정한 뒤 설정 확장을 진행한다.
 
 ## P4. 고위험 App/API 경계 리팩터링
 

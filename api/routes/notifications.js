@@ -1,4 +1,16 @@
 import { createRequire } from "node:module";
+import {
+  assignmentStatusParentMessages,
+  assignmentStatusStudentMessages
+} from "../../src/domains/lessons/assignmentStatus.js";
+import {
+  buildAttendanceBody,
+  buildLessonNotificationBody,
+  createNotificationMessageBlock,
+  resolveLessonCommentBody
+} from "../../src/domains/notifications/notificationMessageRenderer.js";
+
+export { buildAttendanceBody };
 
 const require = createRequire(import.meta.url);
 const { SolapiMessageService } = require("solapi");
@@ -17,30 +29,6 @@ const TEMPLATE_ENV = {
   dailyReport: "SOLAPI_DAILY_REPORT_TEMPLATE_ID",
   specialLectureNotice: "SOLAPI_SPECIAL_LECTURE_TEMPLATE_ID",
   studentComment: "SOLAPI_STUDENT_COMMENT_TEMPLATE_ID"
-};
-
-const assignmentStatusParentMessageMap = {
-  complete_thorough: "과제를 성실하게 완료했습니다.",
-  complete_easy: "과제를 성실하게 완료했습니다.",
-  partial_80: "과제의 약 80%를 수행했습니다. 남은 부분은 다음 시간에 같이 확인하도록 하겠습니다.",
-  partial_50: "숙제를 많이 해오지 못했습니다. 남은 부분은 다음 시간에 같이 확인하고, 필요하면 추가 보충을 하도록 하겠습니다.",
-  known_only: "풀기 어려운 문제도 더 고민하는 습관이 필요합니다",
-  too_hard: "과제 난이도가 높아 해결하지 못한 부분이 있었습니다. 과제 난이도를 조정해보도록 하겠습니다.",
-  answer_suspected: "풀이 과정 확인이 필요한 문항이 있어 다음 수업에서 점검하겠습니다.",
-  not_done: "과제를 해오지 못했습니다. 필요하면 추가 보충을 하도록 하겠습니다.",
-  not_checked: "과제를 가져오지 못해 검사하지 못했습니다. 다음 시간에 같이 확인하도록 하겠습니다."
-};
-
-const assignmentStatusStudentMessageMap = {
-  complete_thorough: "과제를 꼼꼼하게 잘 해왔어. 열심히 하느라 수고했어~!",
-  complete_easy: "과제를 꼼꼼하게 잘 해왔어. 열심히 하느라 수고했어~!",
-  partial_80: "과제의 약 80%를 해왔어. 다음 시간부터는 깔끔하게 다 풀어오도록 하자.",
-  partial_50: "숙제를 많이 해오지 못했어. 남은 부분은 다음 시간에 같이 확인하고, 필요하면 추가 보충으로 마무리하자.",
-  known_only: "모르는 문제를 더 고민해와 !",
-  too_hard: "난이도가 높아서 풀기 어려웠을 것 같아. 난이도를 좀 조정해보자.",
-  answer_suspected: "풀이 과정이 충분히 남아 있지 않아 이해 여부를 다시 확인할게. 숙제는 꼭 풀이 과정을 남겨오도록 해.",
-  not_done: "과제를 못 해왔어. 오늘 나간 과제까지 다음 시간에 같이 검사받고, 다 못 끝내면 추가 등원보충을 해야 할 수도 있어.",
-  not_checked: "과제를 가져오지 못해서 검사하지 못했어. 다음 시간에 같이 확인하자."
 };
 
 function compactPhoneNumber(value = "") {
@@ -68,64 +56,6 @@ function isSlackDryRun() {
   return process.env.SLACK_DRY_RUN !== "false";
 }
 
-function attendanceLabel(status) {
-  return {
-    absent: "결석",
-    checkin: "등원",
-    checkout: "하원",
-    excused: "인정결석",
-    late: "지각",
-    pending: "대기",
-    present: "등원"
-  }[status] ?? status ?? "등원";
-}
-
-function formatAttendanceTime(value) {
-  const text = String(value ?? "").trim();
-  if (!text) return "";
-  const isoTime = text.match(/T(\d{2}:\d{2})/);
-  if (isoTime?.[1]) return isoTime[1];
-  const koreanTime = text.match(/(오전|오후)\s*(\d{1,2}):(\d{2})/);
-  if (koreanTime) {
-    const period = koreanTime[1];
-    let hour = Number(koreanTime[2]);
-    if (period === "오후" && hour < 12) hour += 12;
-    if (period === "오전" && hour === 12) hour = 0;
-    return `${String(hour).padStart(2, "0")}:${koreanTime[3]}`;
-  }
-  const time = text.match(/(\d{1,2}:\d{2})/);
-  if (time?.[1]) return time[1].padStart(5, "0");
-  return text;
-}
-
-function attendanceLabelWithDetail({ attendanceStatus, checkedAt, checkInTime, lateMinutes, reason } = {}) {
-  const label = attendanceLabel(attendanceStatus);
-  if (!["지각", "결석", "인정결석"].includes(label)) return label;
-
-  const details = [];
-  const cleanReason = normalizeText(reason);
-  const time = formatAttendanceTime(checkInTime || checkedAt);
-  if (cleanReason) details.push(`사유: ${cleanReason}`);
-  if (label === "지각" && time) details.push(`등원 ${time}`);
-  if (label === "지각" && !time && lateMinutes) details.push(`${lateMinutes}분 지각`);
-  if ((label === "결석" || label === "인정결석") && time) details.push(`처리 ${time}`);
-  return details.length ? `${label} (${details.join(" · ")})` : label;
-}
-
-function attendanceLabelForAttendanceBody({ attendanceStatus, reason } = {}) {
-  const label = attendanceLabel(attendanceStatus);
-  const cleanReason = normalizeText(reason);
-  if (cleanReason && ["지각", "결석", "인정결석"].includes(label)) {
-    return `${label} (사유: ${cleanReason})`;
-  }
-  return label;
-}
-
-function assignmentStatusText(value, fallback = "", audience = "parent") {
-  const messageMap = audience === "student" ? assignmentStatusStudentMessageMap : assignmentStatusParentMessageMap;
-  return messageMap[value] ?? fallback ?? value ?? "";
-}
-
 function normalizeText(value) {
   return String(value ?? "")
     .replace(/\r\n/g, "\n")
@@ -133,16 +63,6 @@ function normalizeText(value) {
     .map((line) => line.trim())
     .filter(Boolean)
     .join("\n");
-}
-
-function normalizeMessageBodyText(value) {
-  return String(value ?? "")
-    .replace(/\r\n?/g, "\n")
-    .split("\n")
-    .map((line) => line.trim())
-    .join("\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
 }
 
 function normalizeList(value) {
@@ -165,22 +85,59 @@ function messageBlock(label, value) {
   return text ? `${label}\n${text}` : "";
 }
 
-function messageLine(label, value) {
-  const text = normalizeText(value);
-  return text ? `${label} : ${text}` : "";
-}
-
 function joinMessageBlocks(blocks) {
   return blocks.map(normalizeText).filter(Boolean).join("\n\n");
 }
 
-function normalizeBulletLines(value = "") {
-  return normalizeText(value)
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => line.startsWith("-") ? line : `- ${line}`)
+function assignmentStatusText(value, fallback = "", audience = "parent") {
+  const messageMap = audience === "student" ? assignmentStatusStudentMessages : assignmentStatusParentMessages;
+  return messageMap[value] ?? fallback ?? value ?? "";
+}
+
+function buildDailyReportBody({
+  attendanceStatus,
+  attendanceReason,
+  checkInTime,
+  checkedAt,
+  assignmentStatus,
+  incompleteHomeworks,
+  homeworkFollowupNotice,
+  lessonContent,
+  lessonMaterial,
+  nextHomework,
+  omitPreviousHomework = false,
+  previousHomework,
+  preparationNotice,
+  retestSchedule,
+  audience = "parent",
+  supplementSchedule,
+  testResult,
+  teacherComment
+}) {
+  const incompleteHomeworkNotice = normalizeList(incompleteHomeworks)
+    .map((item) => `- ${item}`)
     .join("\n");
+  return buildLessonNotificationBody({
+    attendanceStatus,
+    attendanceReason,
+    checkInTime,
+    checkedAt,
+    assignmentStatus: assignmentStatusText(assignmentStatus, assignmentStatus, audience),
+    extraBlocks: [
+      !omitPreviousHomework ? createNotificationMessageBlock("⚠️ 미완료 과제", incompleteHomeworkNotice) : "",
+      createNotificationMessageBlock("⭐ 중요 · 재시험 일정", retestSchedule)
+    ],
+    homeworkFollowupNotice,
+    lessonContent,
+    lessonMaterial,
+    nextHomework,
+    omitPreviousHomework,
+    previousHomework,
+    preparationNotice,
+    supplementSchedule,
+    testResult,
+    teacherComment
+  });
 }
 
 function canUseRealRecipient(recipientType = "parent") {
@@ -285,135 +242,6 @@ function formatAcademyReminderItem(item) {
   ];
 
   return parts.filter(Boolean).join(" · ");
-}
-
-export function buildAttendanceBody({ attendanceStatus, checkedAt, checkInTime, checkOutTime, lessonName, lateMinutes, reason }) {
-  const timeSource = attendanceStatus === "checkout" ? checkOutTime || checkedAt : checkInTime || checkedAt;
-  const time = formatAttendanceTime(timeSource);
-  const lines = [
-    messageLine("🏫 출결", attendanceLabelForAttendanceBody({ attendanceStatus, lateMinutes, reason })),
-    lessonName ? messageLine("📘 수업", lessonName) : "",
-    time ? messageLine("🕒 시간", time) : ""
-  ];
-
-  return joinMessageBlocks(lines);
-}
-
-function buildDailyReportBody({
-  attendanceStatus,
-  attendanceReason,
-  checkInTime,
-  checkedAt,
-  assignmentStatus,
-  incompleteHomeworks,
-  homeworkFollowupNotice,
-  lessonContent,
-  lessonMaterial,
-  nextHomework,
-  omitPreviousHomework = false,
-  previousHomework,
-  preparationNotice,
-  retestSchedule,
-  audience = "parent",
-  supplementSchedule,
-  testResult,
-  teacherComment
-}) {
-  const incompleteList = normalizeList(incompleteHomeworks);
-  const assignmentStatusMessage = assignmentStatusText(assignmentStatus, assignmentStatus, audience);
-  const preparationText = normalizeText(preparationNotice);
-  const homeworkFollowupText = normalizeBulletLines(homeworkFollowupNotice);
-  const supplementText = normalizeBulletLines(supplementSchedule);
-  const teacherCommentText = normalizeText(teacherComment);
-  const commentText = joinMessageBlocks([
-    preparationText && !teacherCommentText.includes(preparationText) ? preparationText : "",
-    teacherCommentText
-  ]);
-  const supplementNotice = joinMessageBlocks([
-    homeworkFollowupText,
-    supplementText
-  ]);
-
-  return joinMessageBlocks([
-    messageLine("🏫 출결", attendanceLabelWithDetail({ attendanceStatus, checkedAt, checkInTime, reason: attendanceReason })),
-    omitPreviousHomework ? "" : messageLine("✅ 과제 상태", assignmentStatusMessage),
-    messageLine("📚 강의 교재", lessonMaterial),
-    messageLine("🧭 강의 내용", lessonContent),
-    omitPreviousHomework ? "" : messageLine("📘 지난 과제", previousHomework),
-    messageLine("➡️ 다음 과제", nextHomework),
-    messageBlock("📝 테스트", testResult),
-    !omitPreviousHomework && incompleteList.length ? messageBlock("⚠️ 미완료 과제", incompleteList.map((item) => `- ${item}`).join("\n")) : "",
-    messageBlock("⭐ 중요 · 재시험 일정", retestSchedule),
-    messageBlock("⭐ 보충/확인 안내", omitPreviousHomework ? supplementText : supplementNotice),
-    messageBlock("💬 코멘트", commentText)
-  ]);
-}
-
-function buildLessonCommentBody(payload, audience) {
-  return buildDailyReportBody({
-    attendanceStatus: payload.attendanceStatus,
-    attendanceReason: payload.attendanceReason || payload.reason,
-    checkInTime: payload.checkInTime,
-    checkedAt: payload.checkedAt,
-    assignmentStatus:
-      audience === "student"
-        ? payload.assignmentStatusStudentMessage || payload.assignmentStatusMessage || payload.assignmentStatus
-        : payload.assignmentStatusParentMessage || payload.assignmentStatusMessage || payload.assignmentStatus,
-    audience,
-    omitPreviousHomework: payload.assignmentStatus === "not_entered",
-    homeworkFollowupNotice: payload.homeworkFollowupNotice,
-    lessonContent: payload.lessonContent,
-    lessonMaterial: payload.lessonMaterial,
-    nextHomework: payload.nextHomework,
-    previousHomework: payload.previousHomework,
-    preparationNotice: payload.preparationNotice,
-    supplementSchedule: payload.supplementSchedule,
-    testResult: payload.testResult,
-    teacherComment: payload.message
-  });
-}
-
-function hasLessonCommentContext(payload = {}) {
-  return Boolean(
-    payload.lessonId ||
-    payload.osScheduled ||
-    payload.attendanceStatus ||
-    payload.assignmentStatus ||
-    payload.assignmentStatusMessage ||
-    payload.lessonMaterial ||
-    payload.lessonContent ||
-    payload.previousHomework ||
-    payload.nextHomework ||
-    payload.supplementSchedule ||
-    payload.preparationNotice ||
-    payload.homeworkFollowupNotice
-  );
-}
-
-function isNoticePayload(payload = {}) {
-  const notificationType = String(payload.notificationType ?? "");
-  return Boolean(
-    payload.noticeKind ||
-    payload.noticeTitle ||
-    payload.noticeBody ||
-    notificationType === "notice_parent" ||
-    notificationType === "notice_student"
-  );
-}
-
-function resolveLessonCommentBody(payload, audience) {
-  const overrideText = normalizeMessageBodyText(payload.commentBodyOverride);
-  if (isNoticePayload(payload)) {
-    return overrideText || normalizeMessageBodyText(payload.message) || buildLessonCommentBody(payload, audience);
-  }
-  if (!hasLessonCommentContext(payload)) {
-    return overrideText || buildLessonCommentBody(payload, audience);
-  }
-
-  return buildLessonCommentBody({
-    ...payload,
-    message: normalizeMessageBodyText(payload.message) || overrideText
-  }, audience);
 }
 
 function buildStudentScheduleReminderBody({ scheduleType, scheduleTitle, scheduleDate, scheduleTime, lessonName, memo }) {
@@ -683,7 +511,18 @@ export async function sendLessonCommentAlimtalk(payload) {
   const templateEnvName = canUseSpecialLectureTemplate
     ? TEMPLATE_ENV.specialLectureNotice
     : audience === "student" ? TEMPLATE_ENV.studentComment : TEMPLATE_ENV.dailyReport;
-  const commentBody = resolveLessonCommentBody(payload, audience);
+  const rendererPayload = {
+    ...payload,
+    assignmentStatusParentMessage:
+      payload.assignmentStatusParentMessage ||
+      payload.assignmentStatusMessage ||
+      assignmentStatusText(payload.assignmentStatus, payload.assignmentStatus, "parent"),
+    assignmentStatusStudentMessage:
+      payload.assignmentStatusStudentMessage ||
+      payload.assignmentStatusMessage ||
+      assignmentStatusText(payload.assignmentStatus, payload.assignmentStatus, "student")
+  };
+  const commentBody = resolveLessonCommentBody(rendererPayload, audience);
 
   return sendKakaoAlimtalk({
     payload,

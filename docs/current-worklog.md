@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 P3-2 알림톡 preview/live renderer 경계
+
+- 출결 `buildAttendanceBody`와 수업일지 `buildLessonNotificationBody`를 import 없는 pure notification domain에 두고 App 설정·수업일지 미리보기, 발송 직전 server 미리보기, Solapi route 실제 body가 같은 renderer를 사용하게 했다. 사용되지 않던 App 출결 formatter는 제거했다.
+- provider template ID·수신자·예약/즉시발송 callback은 이동하지 않았다. API route는 raw 과제 상태와 server 전용 미완료·재시험 블록만 기존 의미로 조립하고, persisted 교사 코멘트·공지 human final override는 계속 우선한다.
+- build 예산 초과를 상향으로 덮지 않고 App의 중복 normalize/line/block/attendance helper를 renderer로 합쳤다. 전용 fixture는 출결 2종, 학부모·학생 preview/live 동일성, 미기재 숙제 생략, 공지 human final 보존을 고정한다.
+- 검증: runtime lint, lesson `20/20`, notification `9/9`, scenario·production `827/827`, build `409 modules`·main `944.94 kB`·lazy `12/12`, Worktree 격리 safe browser `40/40`을 통과했다. 운영 데이터·실제 알림 발송/예약/취소는 사용하지 않았다.
+
 ## 2026-08-03 P3-1 알림톡 template catalog 경계
 
 - App 내부의 알림 default 6개, Settings metadata, legacy 일정 문구 변환, normalize를 import 없는 `notificationTemplateCatalog.js`로 옮겼다. 문자열과 key 순서는 그대로다.

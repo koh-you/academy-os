@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-03
 
+## 2026-08-03 P3-2 알림톡 preview/live renderer 경계
+
+- 출결·수업일지 client preview와 server live body를 `notificationMessageRenderer.js`에 연결했다. provider template/수신자/예약·발송 경계와 persisted human final은 그대로다.
+- 전용 동일성 fixture, lesson `20/20`, notification `9/9`, scenario·production `827/827`, build `409 modules`·main `944.94 kB`·lazy `12/12`, safe browser `40/40`이 통과했다. 실제 알림과 운영 데이터는 사용하지 않았다.
+- 다음 P3-3은 공지 preset·특강 guide·재시험의 transport 범위를 먼저 고정하고 Settings 확장을 진행한다.
+
 ## 2026-08-03 P3-1 알림톡 template catalog 경계
 
 - 기존 default 6개·Settings metadata·legacy 변환·normalize를 pure notification catalog로 이동했다. App과 server의 숙제 follow-up 기본값이 같은 원천을 읽으며 저장 key·문구·빈 사용자 값 의미는 그대로다.
