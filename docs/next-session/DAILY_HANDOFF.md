@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-03
 
+## 2026-08-03 P2-3b 보충 일정 변경 확인 footer
+
+- `SupplementScheduleChangeConfirmModal`의 세 버튼 wrapper만 공통 `ModalFooter`로 옮겼다. local draft, 일정만 저장/알림 예약 갱신 callback payload, busy 잠금은 그대로다.
+- safe browser는 기존 가상 일정 원천의 저장·재확인 후 확인창을 열고 취소만 한다. 이 footer 검증으로 추가 저장이나 provider 행동은 없다.
+- 공통 footer는 13개, 기존 action wrapper는 4개다. 다음은 `LessonNestedPanels`의 수업일지 내부 보충 완료 확인 footer를 별도 단위로 검토한다.
+
 ## 2026-08-03 P2-3a 보충 완료 확인 footer
 
 - `SupplementPassConfirmModal`의 버튼 wrapper만 공통 `ModalFooter`로 옮겼다. 취소/완료 callback, `isBusy`, 문구·순서는 그대로다.

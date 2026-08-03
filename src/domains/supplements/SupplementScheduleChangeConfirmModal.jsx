@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Modal } from "../../shared/components/Modal.jsx";
+import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
 import {
   createSupplementScheduleChangeDraft,
   createSupplementScheduleChangePatch,
@@ -67,7 +67,7 @@ export function SupplementScheduleChangeConfirmModal({
           알림톡 예약을 선택하면 학생과 학부모에게 등원보충 일정 안내가 다음 정각에 예약되고, 보강 당일 오전 11시 학생 리마인더 예약도 같은 보충 항목 기준으로 갱신됩니다.
         </p>
       </div>
-      <div className="modalActions confirmActions supplementScheduleConfirmActions">
+      <ModalFooter className="confirmActions supplementScheduleConfirmActions">
         <button className="softButton subtle" disabled={isBusy} onClick={onCancel} type="button">
           취소
         </button>
@@ -77,7 +77,7 @@ export function SupplementScheduleChangeConfirmModal({
         <button className="softButton scheduleApplyButton" disabled={isBusy} onClick={() => onConfirmWithReminder(buildNoticePatch())} type="button">
           {isBusy ? "예약/갱신 중" : "다음 정각 예약 및 11시 갱신"}
         </button>
-      </div>
+      </ModalFooter>
     </Modal>
   );
 }

@@ -1077,6 +1077,14 @@ test("supplement schedule retries one verified source plan after an unknown resp
   expect(savedTasks[0].linkedLessonId).toBe(linkedLessons[0].lessonId);
   expect(linkedLessons[0].date).toBe("2026-08-06");
   expect(linkedLessons[0].startTime).toBe("16:00");
+  await supplementModal.getByRole("button", { name: "수업일지 일정 변경" }).click();
+  const scheduleChangeDialog = page.getByRole("dialog", { name: "보충 일정 변경 저장" });
+  await expect(scheduleChangeDialog.locator(".modalFooter")).toBeVisible();
+  await expect(scheduleChangeDialog.getByRole("button", { name: "일정만 저장" })).toBeVisible();
+  await expect(scheduleChangeDialog.getByRole("button", { name: "다음 정각 예약 및 11시 갱신" })).toBeVisible();
+  await scheduleChangeDialog.getByRole("button", { name: "취소" }).click();
+  await expect(scheduleChangeDialog).toBeHidden();
+  expect(scheduleRequests).toHaveLength(3);
   expect(pageErrors).toEqual([]);
 });
 

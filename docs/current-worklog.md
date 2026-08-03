@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 P2-3b 보충 일정 변경 확인 footer
+
+- `SupplementScheduleChangeConfirmModal`의 `취소`·`일정만 저장`·`다음 정각 예약 및 11시 갱신` wrapper만 공통 `ModalFooter`로 옮겼다.
+- local 변경 내용/사유 draft 생성과 두 확인 callback의 patch payload, `isBusy` 잠금, 문구·순서는 변경하지 않았다. 일정 원천 저장과 provider 결과 분리도 기존 controller/App owner에 남아 있다.
+- 안전 브라우저는 가상 일정의 최신 원천 저장을 먼저 검증한 뒤 변경 확인창을 열고 `취소`만 실행하며, 추가 저장·알림 예약은 호출하지 않는다.
+- 현재 공통 footer 13개, 기존 action wrapper 4개다. 다음은 수업일지 내부 보충 완료 확인 footer다.
+
 ## 2026-08-03 P2-3a 보충 완료 확인 footer
 
 - `SupplementPassConfirmModal`의 `취소`·`보충 완료 처리` wrapper만 공통 `ModalFooter`로 옮겼다. 버튼 순서·문구·`isBusy` 잠금과 두 callback identity는 그대로다.
