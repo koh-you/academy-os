@@ -9,7 +9,7 @@ import {
   createExamPrepRowVersionFilter,
   createNextExamPrepRowUpdatedAt,
   isExamPrepRowInsertConflict
-} from "../api/domain/examPrepRowPersistence.js";
+} from "../src/domains/exams/examPrepRowPersistence.js";
 
 const rows = [
   { examPrepId: "exam-row-1", schoolName: "테스트중" },

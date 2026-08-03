@@ -7,6 +7,7 @@
 - 시험정보 행 저장은 브라우저 직렬화·최신값 coalesce에 더해 행별 `updated_at` CAS와 Supabase 저장 후 재조회를 완료했다. 성공 응답 중 들어온 최신 입력은 새 버전만 합쳐 보존하며, 충돌 시 자동 병합·재전송하지 않고 화면 입력과 실패 상태를 유지한다.
 - 일반 자동저장은 삭제된 기존 행을 재생성하지 않는다. 시험정보 삭제 orchestration의 감사 rollback만 `allowRestore`를 명시해 복구할 수 있다.
 - Supabase REST 모형과 안전 브라우저에서 정상 CAS, 구버전 차단, 삭제 행 차단/감사 복구, 빠른 후속 입력 재기준화, 충돌 입력 보존을 확인했다.
+- 첫 Vercel preview가 새 `api/domain` helper까지 서버리스 함수로 집계해 Hobby 12개 제한으로 실패한 것을 확인하고, 순수 helper를 `src/domains/exams`로 이동해 API runtime 파일을 12개로 복원했다.
 - 검증: 전용 fixture, runtime lint, `check:fast`, production `822/822`, build `380 modules`·lazy `12/12`, 격리 safe browser `20/20`. 운영 side effect는 실행하지 않았다.
 - 다음 단위는 학생 신규/Tally 후보 입력 경쟁 방지다. 그 뒤 학생 저장과 반 명단 저장 gate를 별도 단위로 진행한다.
 

@@ -21,7 +21,7 @@ import {
   createExamPrepRowVersionFilter,
   createNextExamPrepRowUpdatedAt,
   isExamPrepRowInsertConflict
-} from "../domain/examPrepRowPersistence.js";
+} from "../../src/domains/exams/examPrepRowPersistence.js";
 import { deleteRows, getSupabaseStatus, insertRows, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
 
 const fallbackSource = "local_sample";
