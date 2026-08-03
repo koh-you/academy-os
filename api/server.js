@@ -45,6 +45,7 @@ import {
   claimNotificationJob,
   seedCoreData,
   saveClassRosterPlan,
+  saveDerivedSchoolCalendarPlan,
   syncSpecialLectureLessonStudentSchedule,
   upsertAppState,
   upsertAcademyReminder,
@@ -7012,6 +7013,26 @@ const server = http.createServer(async (request, response) => {
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/school-calendar/derived-save") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await saveDerivedSchoolCalendarPlan({
+        auditId: payload.auditId,
+        examPrepChanges: payload.examPrepChanges ?? [],
+        lessonChanges: payload.lessonChanges ?? []
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.audit ? { audit: error.audit } : {})
+      });
     }
     return;
   }

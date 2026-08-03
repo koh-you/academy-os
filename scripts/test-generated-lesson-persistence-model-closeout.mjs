@@ -89,6 +89,10 @@ const appSource = [
   await readFile(
     new URL("../src/domains/lessons/generatedLessonPlanBuilder.js", import.meta.url),
     "utf8"
+  ),
+  await readFile(
+    new URL("../src/domains/schoolCalendar/derivedSchoolCalendarPersistence.js", import.meta.url),
+    "utf8"
   )
 ].join("\n");
 const helperSource = await readFile(
@@ -121,10 +125,10 @@ assert.equal(
 );
 
 const syncHandlerStart = appSource.indexOf(
-  "  function handleSyncPreExamLessonFromSchoolEvent(event) {"
+  "export function createDerivedLessonChanges({"
 );
 const syncHandlerEnd = appSource.indexOf(
-  "  async function handleUpdateClassRoster(",
+  "export function verifyDerivedSchoolCalendarPlan(",
   syncHandlerStart
 );
 assert.ok(
@@ -136,14 +140,15 @@ const syncHandlerSource = appSource.slice(
   syncHandlerEnd
 );
 const syncBoundaries = [
-  "createPreExamLessonFromSchoolEvent(event, students)",
-  "const generatedKey = getGeneratedLessonKey(lesson)",
-  "normalizeGeneratedLessonControls(generatedLessonControls)",
-  "const existingLesson = lessons.find(",
-  "const nextLesson = existingLesson ?",
-  "if (existingLesson && areGeneratedLessonPersistedFieldsEqual(nextLesson, existingLesson)) return",
-  'setLessons((current) => upsertById(current, nextLesson, "lessonId"))',
-  'postJson("/api/lessons", { lesson: nextLesson })'
+  "const safeControls = normalizeGeneratedLessonControls(controls)",
+  "const beforeCandidate = beforeEvent ? createPreExamLessonFromSchoolEvent(beforeEvent, students) : null",
+  "const afterCandidate = afterEvent ? createPreExamLessonFromSchoolEvent(afterEvent, students) : null",
+  "const existing = findGeneratedLessonForEvents({",
+  "const controlKeys = new Set([",
+  "const isProtected =",
+  "const after = existing",
+  "if (existing && areDerivedLessonsEqual(after, existing)) return",
+  "changesByLessonId.set(after.lessonId, { after, before: existing })"
 ];
 let previousSyncIndex = -1;
 for (const boundary of syncBoundaries) {

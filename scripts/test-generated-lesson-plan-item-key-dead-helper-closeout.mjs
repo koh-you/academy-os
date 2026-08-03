@@ -9,6 +9,10 @@ const appSource = [
   await readFile(
     new URL("../src/domains/lessons/generatedLessonPlanBuilder.js", import.meta.url),
     "utf8"
+  ),
+  await readFile(
+    new URL("../src/domains/schoolCalendar/derivedSchoolCalendarPersistence.js", import.meta.url),
+    "utf8"
   )
 ].join("\n").replace(/\r\n/g, "\n");
 const identitySource = (await readFile(
@@ -109,8 +113,10 @@ for (const schoolEventBoundary of [
 for (const identityConsumer of [
   "getIdentityKeys: getGeneratedLessonIdentityKeys",
   "const generatedKey = getGeneratedLessonKey(lesson)",
-  "const lessonKeys = new Set(getGeneratedLessonIdentityKeys(lesson))",
-  "const candidateKeys = new Set([candidate.generatedKey, ...getGeneratedLessonIdentityKeys(candidate.lesson)].filter(Boolean))"
+  "const candidateKeys = new Set([candidate.generatedKey, ...getGeneratedLessonIdentityKeys(candidate.lesson)].filter(Boolean))",
+  "const identityKeys = new Set(candidates.flatMap((candidate) => getGeneratedLessonIdentityKeys(candidate)))",
+  "getGeneratedLessonIdentityKeys(lesson).some((key) => identityKeys.has(key))",
+  "const afterIdentityKeys = getGeneratedLessonIdentityKeys(afterCandidate)"
 ]) {
   assert.ok(
     appSource.includes(identityConsumer),

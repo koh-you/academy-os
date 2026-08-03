@@ -94,6 +94,10 @@ const appSource = [
   await readFile(
     new URL("../src/domains/lessons/generatedLessonPlanBuilder.js", import.meta.url),
     "utf8"
+  ),
+  await readFile(
+    new URL("../src/domains/schoolCalendar/derivedSchoolCalendarPersistence.js", import.meta.url),
+    "utf8"
   )
 ].join("\n").replace(/\r\n/g, "\n");
 const helperSource = (await readFile(
@@ -158,10 +162,11 @@ for (const boundary of injectionBoundaries) {
 for (const consumerBoundary of [
   "getIdentityKeys: getGeneratedLessonIdentityKeys",
   "const generatedKey = getGeneratedLessonKey(lesson)",
-  "const lessonKeys = new Set(getGeneratedLessonIdentityKeys(lesson))",
-  "getGeneratedLessonIdentityKeys(item).some((key) => lessonKeys.has(key))",
+  "const identityKeys = new Set(candidates.flatMap((candidate) => getGeneratedLessonIdentityKeys(candidate)))",
+  "getGeneratedLessonIdentityKeys(lesson).some((key) => identityKeys.has(key))",
   "const candidateKeys = new Set([candidate.generatedKey, ...getGeneratedLessonIdentityKeys(candidate.lesson)].filter(Boolean))",
-  "getGeneratedLessonIdentityKeys(lesson).some((key) => candidateKeys.has(key))"
+  "getGeneratedLessonIdentityKeys(lesson).some((key) => candidateKeys.has(key))",
+  "const afterIdentityKeys = getGeneratedLessonIdentityKeys(afterCandidate)"
 ]) {
   assert.ok(
     appSource.includes(consumerBoundary),

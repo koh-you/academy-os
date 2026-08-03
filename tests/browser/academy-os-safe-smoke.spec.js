@@ -454,6 +454,58 @@ test("manual school event keeps its draft and stable id across an unknown save r
   expect(pageErrors).toEqual([]);
 });
 
+test("derived math exam saves its exam row and pre-exam lesson as one retry-safe action", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  let postCount = 0;
+  await page.route("**/api/school-calendar/derived-save", async (route) => {
+    postCount += 1;
+    if (postCount === 1) {
+      await route.fetch();
+      await route.abort("failed");
+      return;
+    }
+    await route.continue();
+  });
+
+  await loginAsTeacher(page);
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학사일정/ }).click();
+  await page.getByRole("button", { name: "+ 일정 등록" }).first().click();
+  const form = page.getByRole("dialog", { name: "일정 등록" });
+  await form.locator(".inputTypeField select").selectOption("mathExam");
+  await form.locator(".schoolEventFormPanel > label").filter({ hasText: /^학교/ }).locator("select").selectOption("안전고");
+  await form.locator(".schoolEventFormPanel > label").filter({ hasText: /^학년/ }).locator("select").selectOption("고1");
+  await form.locator('input[placeholder="예: 수학"]').fill("공통수학1");
+  const examDateInput = form.locator('.examSubjectRow input[type="date"]');
+  const examDate = await examDateInput.inputValue();
+
+  await form.getByRole("button", { name: "일정 등록" }).click();
+  await expect(form).toHaveAttribute("aria-busy", "true");
+  await expect(examDateInput).toBeDisabled();
+  await expect(form.getByRole("button", { name: "창 닫기" })).toBeDisabled();
+  await expect(page.locator(".schoolCalendarSaveNotice")).toHaveClass(/failed/);
+  await expect(form).toBeVisible();
+  await expect(examDateInput).toHaveValue(examDate);
+
+  await form.getByRole("button", { name: "일정 등록" }).click();
+  await expect(form).toBeHidden();
+  expect(postCount).toBe(2);
+  await expect(page.locator(".schoolCalendarSaveNotice")).toContainText("시험관리 · 직전수업 저장 완료");
+
+  const [rowResponse, lessonResponse] = await Promise.all([
+    request.get(`${safeApiBaseUrl}/api/exam-prep-rows`),
+    request.get(`${safeApiBaseUrl}/api/lessons`)
+  ]);
+  const rowBody = await rowResponse.json();
+  const lessonBody = await lessonResponse.json();
+  const savedRow = rowBody.examPrepRows.find((row) => row.examPrepId === "safe-exam-prep-row");
+  expect(savedRow.mathExamDate).toBe(examDate);
+  expect(savedRow.mathExamDates).toHaveLength(1);
+  const preExamLesson = lessonBody.lessons.find((lesson) => lesson.lessonType === "preExam" && lesson.sourceSchoolEventId);
+  expect(preExamLesson).toBeTruthy();
+  expect(preExamLesson.studentIds).toContain("safe-settlement-student");
+  expect(pageErrors).toEqual([]);
+});
+
 test("dashboard auxiliary panels open from their shared deferred chunk without mutations", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await page.route("**/src/domains/teacher/DashboardAuxiliaryPanels.jsx*", async (route) => {

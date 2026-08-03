@@ -91,6 +91,10 @@ const appSource = [
   await readFile(
     new URL("../src/domains/lessons/generatedLessonPlanBuilder.js", import.meta.url),
     "utf8"
+  ),
+  await readFile(
+    new URL("../src/domains/schoolCalendar/derivedSchoolCalendarPersistence.js", import.meta.url),
+    "utf8"
   )
 ].join("\n");
 const helperSource = await readFile(
@@ -113,7 +117,7 @@ assert.equal(
   2
 );
 for (const appBoundary of [
-  "if (existingLesson && areGeneratedLessonPersistedFieldsEqual(nextLesson, existingLesson)) return",
+  "areGeneratedLessonPersistedFieldsEqual(left, right)",
   "const needsUpdate = existing && !areGeneratedLessonPersistedFieldsEqual(candidate.lesson, existing)",
   'status = suppressed ? "skipped"'
 ]) {

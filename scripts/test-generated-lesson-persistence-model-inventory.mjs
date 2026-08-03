@@ -176,6 +176,10 @@ const appSource = [
   await readFile(
     new URL("../src/domains/lessons/generatedLessonPlanBuilder.js", import.meta.url),
     "utf8"
+  ),
+  await readFile(
+    new URL("../src/domains/schoolCalendar/derivedSchoolCalendarPersistence.js", import.meta.url),
+    "utf8"
   )
 ].join("\n");
 const helperSource = await readFile(

@@ -309,6 +309,10 @@ const appSource = [
   await readFile(
     new URL("../src/domains/lessons/generatedLessonPlanBuilder.js", import.meta.url),
     "utf8"
+  ),
+  await readFile(
+    new URL("../src/domains/schoolCalendar/derivedSchoolCalendarPersistence.js", import.meta.url),
+    "utf8"
   )
 ].join("\n");
 const builderSource = await readFile(
@@ -378,7 +382,7 @@ assert.equal(
   appSource.split(
     "createPreExamLessonFromSchoolEvent("
   ).length - 1,
-  2
+  3
 );
 for (const appBoundary of [
   'from "../domains/lessons/generatedPreExamLessonBuilder.js"',
@@ -389,7 +393,10 @@ for (const appBoundary of [
   "createPreExamLessonId,",
   "getDayKey,",
   "getStandardLessonColor,",
-  "getStudentsForSchoolCalendarEvent"
+  "getStudentsForSchoolCalendarEvent",
+  "export function createDerivedLessonChanges({",
+  "const beforeCandidate = beforeEvent ? createPreExamLessonFromSchoolEvent(beforeEvent, students) : null",
+  "const afterCandidate = afterEvent ? createPreExamLessonFromSchoolEvent(afterEvent, students) : null"
 ]) {
   assert.ok(
     appSource.includes(appBoundary),

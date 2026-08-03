@@ -280,12 +280,10 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
       props: {
         runtime: runtimeBindings.planningTools,
         events: models.schoolEvents,
-        rowSaveStates: models.examPrepRowSaveStates,
         rows: models.examPrepRows,
         onSaveEvent: actions.handleSaveSchoolEvent,
         onDeleteEvent: actions.handleDeleteSchoolEvent,
-        onSyncPreExamLesson: actions.handleSyncPreExamLessonFromSchoolEvent,
-        onUpdateExamPrepRow: actions.handleUpdateExamPrepRow
+        onSaveDerivedEvent: actions.handleSaveDerivedSchoolCalendar
       }
     },
     lessonResearch: {

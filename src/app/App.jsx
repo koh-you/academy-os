@@ -2041,20 +2041,6 @@ function upsertMathExamEntryFromSchoolEvent(row = {}, event = {}) {
     : [...entries, nextEntry];
 }
 
-function syncSchoolCalendarEventToExamPrepRows(rows = [], event = {}, onUpdateExamPrepRow) {
-  if (!onUpdateExamPrepRow || !["examPeriod", "mathExam"].includes(event.type)) return;
-  const targetRows = getSchoolCalendarTargetRows(rows, event);
-  targetRows.forEach((row) => {
-    if (event.type === "examPeriod") {
-      onUpdateExamPrepRow(row.examPrepId, "examPeriod", formatDateRangeText(event.date, event.endDate || event.date));
-      return;
-    }
-    const nextEntries = upsertMathExamEntryFromSchoolEvent(row, event);
-    onUpdateExamPrepRow(row.examPrepId, "mathExamDates", nextEntries);
-    onUpdateExamPrepRow(row.examPrepId, "mathExamDate", syncPrimaryMathExamDate(nextEntries));
-  });
-}
-
 function isExamLinkedCalendarEvent(event = {}) {
   return event.type === "examPeriod" || event.type === "mathExam";
 }
@@ -2798,8 +2784,8 @@ const planningToolRuntime = Object.freeze({
   schoolCalendarAutosaveRisk,
   ssenTypeCatalog,
   syncPrimaryMathExamDate,
-  syncSchoolCalendarEventToExamPrepRows,
-  today
+  today,
+  upsertMathExamEntryFromSchoolEvent
 });
 
 const notificationCenterRuntime = Object.freeze({
@@ -5855,22 +5841,30 @@ export function App() {
     }
   }
 
-  function handleSyncPreExamLessonFromSchoolEvent(event) {
-    const lesson = createPreExamLessonFromSchoolEvent(event, students);
-    if (!lesson) return;
-    const generatedKey = getGeneratedLessonKey(lesson);
-    const controls = normalizeGeneratedLessonControls(generatedLessonControls);
-    if (controls.suppressedKeys.includes(generatedKey) || controls.manualOverrideKeys.includes(generatedKey)) return;
-    const lessonKeys = new Set(getGeneratedLessonIdentityKeys(lesson));
-    const existingLesson = lessons.find((item) =>
-      item.sourceSchoolEventId === lesson.sourceSchoolEventId ||
-      item.lessonId === lesson.lessonId ||
-      getGeneratedLessonIdentityKeys(item).some((key) => lessonKeys.has(key))
-    );
-    const nextLesson = existingLesson ? { ...lesson, lessonId: existingLesson.lessonId } : lesson;
-    if (existingLesson && areGeneratedLessonPersistedFieldsEqual(nextLesson, existingLesson)) return;
-    setLessons((current) => upsertById(current, nextLesson, "lessonId"));
-    postJson("/api/lessons", { lesson: nextLesson }).catch((error) => console.error(error));
+  async function handleSaveDerivedSchoolCalendar({ eventChanges = [], nextRows = [] } = {}) {
+    const { saveDerivedSchoolCalendarAction } = await import("../domains/schoolCalendar/derivedSchoolCalendarAction.js");
+    const result = await saveDerivedSchoolCalendarAction({
+      controls: generatedLessonControls,
+      eventChanges,
+      lessons,
+      nextRows,
+      previousRows: examPrepRows,
+      request: postJsonWithTimeout,
+      students
+    }, {
+      createPreExamLessonFromSchoolEvent,
+      getGeneratedLessonIdentityKeys,
+      getGeneratedLessonKey,
+      normalizeGeneratedLessonControls
+    });
+    const savedRowsById = new Map((result.examPrepRows ?? []).map((row) => [row.examPrepId, row]));
+    const deletedLessonIds = new Set(result.lessonIdsToDelete ?? []);
+    setExamPrepRows((current) => current.map((row) => savedRowsById.get(row.examPrepId) ?? row));
+    setLessons((current) => mergeGeneratedLessonLists(
+      current.filter((lesson) => !deletedLessonIds.has(lesson.lessonId)),
+      result.lessons ?? []
+    ));
+    return result;
   }
 
   async function handleUpdateClassRoster(classTemplateId, nextStudentIds) {
@@ -7163,7 +7157,7 @@ export function App() {
       handleScheduleLessonNotificationsAt,
       handleScheduleSupplementTask,
       handleSendLessonComment,
-      handleSyncPreExamLessonFromSchoolEvent,
+      handleSaveDerivedSchoolCalendar,
       handleSyncSpecialLectureStudentSchedules,
       handleTeacherVerifyHomework,
       handleToggleStudentNotificationMute,

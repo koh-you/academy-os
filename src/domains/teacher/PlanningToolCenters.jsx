@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   SchoolAcademicOverviewPanel,
   SchoolCalendarFilterBar,
@@ -17,8 +17,7 @@ import {
   getSchoolCalendarFilterGroup,
   getSchoolCalendarSchoolColor,
   isDateWithinEvent,
-  joinCalendarLabel,
-  updateDateRangeField
+  joinCalendarLabel
 } from "../schoolCalendar/schoolCalendarUtils.js";
 import { AutosaveRiskNotice } from "../../shared/components/AutosaveRiskNotice.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
@@ -47,12 +46,10 @@ function createSchoolCalendarDraftId() {
 export function SchoolCalendarCenter({
   runtime,
   events,
-  rowSaveStates = {},
   rows,
   onDeleteEvent,
   onSaveEvent,
-  onSyncPreExamLesson,
-  onUpdateExamPrepRow
+  onSaveDerivedEvent
 }) {
   const {
     buildExamCalendarEvents,
@@ -72,8 +69,8 @@ export function SchoolCalendarCenter({
     normalizeMathSubject,
     schoolCalendarAutosaveRisk,
     syncPrimaryMathExamDate,
-    syncSchoolCalendarEventToExamPrepRows,
-    today
+    today,
+    upsertMathExamEntryFromSchoolEvent
   } = runtime;
   const [selectedMonth, setSelectedMonth] = useState(today);
   const [selectedDate, setSelectedDate] = useState(today);
@@ -82,8 +79,6 @@ export function SchoolCalendarCenter({
   const [calendarFilter, setCalendarFilter] = useState("all");
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
-  const [pendingExamPrepSaveIds, setPendingExamPrepSaveIds] = useState([]);
-  const [observedExamPrepSaving, setObservedExamPrepSaving] = useState(false);
   const [schoolCalendarSaveState, setSchoolCalendarSaveState] = useState({
     state: "idle",
     message: "등록/수정 후 저장 결과가 여기에 표시됩니다."
@@ -158,36 +153,6 @@ export function SchoolCalendarCenter({
   const isEditingDerivedEvent = Boolean(editingEvent?.derived);
   const isSchoolCalendarSaving = schoolCalendarSaveState.state === "saving";
 
-  useEffect(() => {
-    if (!pendingExamPrepSaveIds.length) return;
-    const saveStates = pendingExamPrepSaveIds.map((rowId) => rowSaveStates[rowId]).filter(Boolean);
-    if (saveStates.includes("failed")) {
-      setSchoolCalendarSaveState({
-        state: "failed",
-        message: "시험관리 연동 일정 저장에 실패했습니다. 시험관리 원본을 확인한 뒤 다시 저장하세요."
-      });
-      setPendingExamPrepSaveIds([]);
-      setObservedExamPrepSaving(false);
-      return;
-    }
-    if (saveStates.includes("saving")) {
-      setObservedExamPrepSaving(true);
-      setSchoolCalendarSaveState({
-        state: "saving",
-        message: "시험관리 원본에 학사일정을 저장하는 중입니다."
-      });
-      return;
-    }
-    if (observedExamPrepSaving && saveStates.length && saveStates.every((state) => state === "saved")) {
-      setSchoolCalendarSaveState({
-        state: "saved",
-        message: "학사일정 · 시험관리 원본 저장 완료"
-      });
-      setPendingExamPrepSaveIds([]);
-      setObservedExamPrepSaving(false);
-    }
-  }, [observedExamPrepSaving, pendingExamPrepSaveIds, rowSaveStates]);
-
   function shiftMonth(amount) {
     const [year, month] = selectedMonth.split("-").map(Number);
     const next = new Date(Date.UTC(year, month - 1 + amount, 1));
@@ -195,36 +160,28 @@ export function SchoolCalendarCenter({
     setSelectedMonth(nextDate);
   }
 
-  function getExamPrepSaveIdsForEvent(event = {}) {
-    if (event.derived && event.type === "examPeriod") {
-      const targetRows = event.examPeriodGroupKey
-        ? rows.filter((row) => getExamPeriodGroupKey(row) === event.examPeriodGroupKey)
-        : rows.filter((row) => row.examPrepId === event.examPrepId);
-      return [...new Set(targetRows.map((row) => row.examPrepId).filter(Boolean))];
-    }
-    if (event.derived && event.examPrepId) return [event.examPrepId];
-    if (isExamLinkedCalendarEvent(event)) {
-      return [...new Set(getSchoolCalendarTargetRows(rows, event).map((row) => row.examPrepId).filter(Boolean))];
-    }
-    return [];
+  function requireTargetRows(targetRows = []) {
+    if (targetRows.length) return targetRows;
+    throw new Error("저장할 시험관리 원본 행을 찾지 못했습니다. 학교/학년/시험구분을 먼저 확인하세요.");
   }
 
-  function beginLinkedSaveTracking(event) {
-    const rowIds = getExamPrepSaveIdsForEvent(event);
-    if (!rowIds.length) {
-      setSchoolCalendarSaveState({
-        state: "failed",
-        message: "저장할 시험관리 원본 행을 찾지 못했습니다. 학교/학년/시험구분을 먼저 확인하세요."
-      });
-      return false;
-    }
-    setPendingExamPrepSaveIds(rowIds);
-    setObservedExamPrepSaving(false);
-    setSchoolCalendarSaveState({
-      state: "saving",
-      message: "시험관리 원본에 학사일정을 저장하는 중입니다."
+  function patchExamPrepRows(currentRows, targetRows, patchRow) {
+    const targetIds = new Set(requireTargetRows(targetRows).map((row) => row.examPrepId));
+    return currentRows.map((row) => targetIds.has(row.examPrepId) ? patchRow(row) : row);
+  }
+
+  function applyLinkedEventToRows(currentRows, event) {
+    return patchExamPrepRows(currentRows, getSchoolCalendarTargetRows(currentRows, event), (row) => {
+      if (event.type === "examPeriod") {
+        return { ...row, examPeriod: formatDateRangeText(event.date, event.endDate || event.date) };
+      }
+      const nextEntries = upsertMathExamEntryFromSchoolEvent(row, event);
+      return {
+        ...row,
+        mathExamDate: syncPrimaryMathExamDate(nextEntries),
+        mathExamDates: nextEntries
+      };
     });
-    return true;
   }
 
   function closeEventForm() {
@@ -281,6 +238,17 @@ export function SchoolCalendarCenter({
     }
   }
 
+  function runDerivedSchoolEventRequest({ eventChanges, nextRows, successMessage }) {
+    if (typeof onSaveDerivedEvent !== "function") {
+      throw new Error("학사일정 연동 저장 callback이 필요합니다.");
+    }
+    return runManualSchoolEventRequest({
+      request: () => onSaveDerivedEvent({ eventChanges, nextRows }),
+      savingMessage: "시험관리 행과 직전수업을 함께 저장하는 중입니다.",
+      successMessage: () => successMessage
+    });
+  }
+
   function openEventEditForm(event) {
     setEditingEvent(event);
     setSelectedDate(event.date || selectedDate);
@@ -308,43 +276,50 @@ export function SchoolCalendarCenter({
       return;
     }
     if (originalEvent.derived) {
-      if (!beginLinkedSaveTracking(nextEvent)) return;
-      if (originalEvent.type === "examPeriod") {
-        const targetRows = originalEvent.examPeriodGroupKey
-          ? rows.filter((row) => getExamPeriodGroupKey(row) === originalEvent.examPeriodGroupKey)
-          : rows.filter((row) => row.examPrepId === originalEvent.examPrepId);
-        targetRows.forEach((row) => {
-          onUpdateExamPrepRow?.(
-            row.examPrepId,
-            "examPeriod",
-            formatDateRangeText(nextEvent.date, nextEvent.endDate || nextEvent.date)
-          );
+      try {
+        let nextRows;
+        if (originalEvent.type === "examPeriod") {
+          const targetRows = originalEvent.examPeriodGroupKey
+            ? rows.filter((row) => getExamPeriodGroupKey(row) === originalEvent.examPeriodGroupKey)
+            : rows.filter((row) => row.examPrepId === originalEvent.examPrepId);
+          nextRows = patchExamPrepRows(rows, targetRows, (row) => ({
+            ...row,
+            examPeriod: formatDateRangeText(nextEvent.date, nextEvent.endDate || nextEvent.date)
+          }));
+        } else {
+          const sourceRow = requireTargetRows(rows.filter((row) => row.examPrepId === originalEvent.examPrepId))[0];
+          const entries = normalizeMathExamEntries(sourceRow);
+          const fallbackEntries = entries.length ? entries : [createMathExamEntry(sourceRow, 0)];
+          const targetIndex = typeof originalEvent.mathExamEntryIndex === "number"
+            ? originalEvent.mathExamEntryIndex
+            : fallbackEntries.findIndex((entry) => entry.id === originalEvent.mathExamEntryId);
+          const safeIndex = targetIndex >= 0 ? targetIndex : 0;
+          const nextEntries = fallbackEntries.map((entry, index) => (
+            index === safeIndex
+              ? {
+                  ...entry,
+                  date: nextEvent.date || "",
+                  subject: normalizeMathSubject(nextEvent.examSubject || entry.subject),
+                  label: nextEvent.examSubject || entry.label
+                }
+              : entry
+          ));
+          nextRows = patchExamPrepRows(rows, [sourceRow], (row) => ({
+            ...row,
+            mathExamDate: syncPrimaryMathExamDate(nextEntries),
+            mathExamDates: nextEntries
+          }));
+        }
+        await runDerivedSchoolEventRequest({
+          eventChanges: [{ after: nextEvent, before: originalEvent }],
+          nextRows,
+          successMessage: "학사일정 · 시험관리 · 직전수업 저장 완료"
         });
-      } else if (originalEvent.type === "mathExam") {
-        const sourceRow = rows.find((row) => row.examPrepId === originalEvent.examPrepId);
-        const entries = normalizeMathExamEntries(sourceRow ?? {});
-        const fallbackEntries = entries.length ? entries : [createMathExamEntry(sourceRow ?? {}, 0)];
-        const targetIndex = typeof originalEvent.mathExamEntryIndex === "number"
-          ? originalEvent.mathExamEntryIndex
-          : fallbackEntries.findIndex((entry) => entry.id === originalEvent.mathExamEntryId);
-        const safeIndex = targetIndex >= 0 ? targetIndex : 0;
-        const nextEntries = fallbackEntries.map((entry, index) => (
-          index === safeIndex
-            ? {
-                ...entry,
-                date: nextEvent.date || "",
-                subject: normalizeMathSubject(nextEvent.examSubject || entry.subject),
-                label: nextEvent.examSubject || entry.label
-              }
-            : entry
-        ));
-        onUpdateExamPrepRow?.(originalEvent.examPrepId, "mathExamDates", nextEntries);
-        onUpdateExamPrepRow?.(originalEvent.examPrepId, "mathExamDate", syncPrimaryMathExamDate(nextEntries));
-        onSyncPreExamLesson?.({ ...originalEvent, ...nextEvent });
-      } else {
-        changedFields.forEach((field) => updateAcademicEvent(originalEvent, field, nextEvent[field]));
+        closeEventForm();
+      } catch (error) {
+        console.error(error);
+        setSchoolCalendarSaveState({ state: "failed", message: error.message || "학사일정 연동 저장에 실패했습니다." });
       }
-      closeEventForm();
       return;
     }
     try {
@@ -388,25 +363,35 @@ export function SchoolCalendarCenter({
       : formatCalendarEventLabel(editingEvent);
     if (typeof window !== "undefined" && !window.confirm(`${eventLabel}을 삭제할까요?`)) return;
     if (editingEvent.derived) {
-      if (!beginLinkedSaveTracking(editingEvent)) return;
-      if (editingEvent.type === "examPeriod") {
-        const targetRows = editingEvent.examPeriodGroupKey
-          ? rows.filter((row) => getExamPeriodGroupKey(row) === editingEvent.examPeriodGroupKey)
-          : rows.filter((row) => row.examPrepId === editingEvent.examPrepId);
-        targetRows.forEach((row) => onUpdateExamPrepRow?.(row.examPrepId, "examPeriod", ""));
+      try {
+        let nextRows;
+        if (editingEvent.type === "examPeriod") {
+          const targetRows = editingEvent.examPeriodGroupKey
+            ? rows.filter((row) => getExamPeriodGroupKey(row) === editingEvent.examPeriodGroupKey)
+            : rows.filter((row) => row.examPrepId === editingEvent.examPrepId);
+          nextRows = patchExamPrepRows(rows, targetRows, (row) => ({ ...row, examPeriod: "" }));
+        } else {
+          const sourceRow = requireTargetRows(rows.filter((row) => row.examPrepId === editingEvent.examPrepId))[0];
+          const entries = normalizeMathExamEntries(sourceRow);
+          const targetIndex = typeof editingEvent.mathExamEntryIndex === "number"
+            ? editingEvent.mathExamEntryIndex
+            : entries.findIndex((entry) => entry.id === editingEvent.mathExamEntryId);
+          const nextEntries = entries.filter((_, index) => index !== targetIndex);
+          nextRows = patchExamPrepRows(rows, [sourceRow], (row) => ({
+            ...row,
+            mathExamDate: syncPrimaryMathExamDate(nextEntries),
+            mathExamDates: nextEntries
+          }));
+        }
+        await runDerivedSchoolEventRequest({
+          eventChanges: [{ after: null, before: editingEvent }],
+          nextRows,
+          successMessage: "학사일정 · 시험관리 · 직전수업 삭제 완료"
+        });
         closeEventForm();
-        return;
-      }
-      if (editingEvent.type === "mathExam") {
-        const sourceRow = rows.find((row) => row.examPrepId === editingEvent.examPrepId);
-        const entries = normalizeMathExamEntries(sourceRow ?? {});
-        const targetIndex = typeof editingEvent.mathExamEntryIndex === "number"
-          ? editingEvent.mathExamEntryIndex
-          : entries.findIndex((entry) => entry.id === editingEvent.mathExamEntryId);
-        const nextEntries = entries.filter((_, index) => index !== targetIndex);
-        onUpdateExamPrepRow?.(editingEvent.examPrepId, "mathExamDates", nextEntries);
-        onUpdateExamPrepRow?.(editingEvent.examPrepId, "mathExamDate", syncPrimaryMathExamDate(nextEntries));
-        closeEventForm();
+      } catch (error) {
+        console.error(error);
+        setSchoolCalendarSaveState({ state: "failed", message: error.message || "학사일정 연동 삭제에 실패했습니다." });
       }
       return;
     }
@@ -440,10 +425,48 @@ export function SchoolCalendarCenter({
       return;
     }
     const isLinkedEvent = isExamLinkedCalendarEvent(nextEvent);
-    if (isLinkedEvent && !beginLinkedSaveTracking(nextEvent)) return;
-    syncSchoolCalendarEventToExamPrepRows(rows, nextEvent, onUpdateExamPrepRow);
-    if (nextEvent.type === "mathExam") onSyncPreExamLesson?.(nextEvent);
-    if (!isLinkedEvent) {
+    if (isLinkedEvent) {
+      try {
+        let nextRows = applyLinkedEventToRows(rows, nextEvent);
+        const eventChanges = [{ after: nextEvent, before: null }];
+        if (newEvent.type === "examPeriod") {
+          newEvent.mathExamItems
+            .filter((item) => item.date && (item.grade || item.subject))
+            .forEach((item) => {
+              const itemSubject = item.subject || "수학시험";
+              const itemDetail = [item.grade, itemSubject].filter(Boolean).join(" ");
+              const mathEvent = {
+                ...newEvent,
+                mathExamItems: undefined,
+                eventId: `${nextEvent.eventId}_${item.id}`,
+                type: "mathExam",
+                date: item.date,
+                endDate: "",
+                grade: item.grade,
+                schoolName,
+                title: joinCalendarLabel(schoolName, itemDetail, "수학시험"),
+                examSubject: itemSubject,
+                memo: item.memo || newEvent.memo,
+                color: getSchoolCalendarSchoolColor(schoolName)
+              };
+              nextRows = applyLinkedEventToRows(nextRows, mathEvent);
+              eventChanges.push({ after: mathEvent, before: null });
+            });
+        }
+        await runDerivedSchoolEventRequest({
+          eventChanges,
+          nextRows,
+          successMessage: "학사일정 · 시험관리 · 직전수업 저장 완료"
+        });
+      } catch (error) {
+        console.error(error);
+        setSchoolCalendarSaveState({
+          state: "failed",
+          message: error.message || "학사일정 연동 저장에 실패했습니다."
+        });
+        return;
+      }
+    } else {
       try {
         await runManualSchoolEventRequest({
           request: () => onSaveEvent?.(nextEvent),
@@ -458,30 +481,6 @@ export function SchoolCalendarCenter({
         });
         return;
       }
-    }
-    if (newEvent.type === "examPeriod") {
-      newEvent.mathExamItems
-        .filter((item) => item.date && (item.grade || item.subject))
-        .forEach((item) => {
-          const itemSubject = item.subject || "수학시험";
-          const itemDetail = [item.grade, itemSubject].filter(Boolean).join(" ");
-          const mathEvent = {
-            ...newEvent,
-            mathExamItems: undefined,
-            eventId: `event_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-            type: "mathExam",
-            date: item.date,
-            endDate: "",
-            grade: item.grade,
-            schoolName,
-            title: joinCalendarLabel(schoolName, itemDetail, "수학시험"),
-            examSubject: itemSubject,
-            memo: item.memo || newEvent.memo,
-            color: getSchoolCalendarSchoolColor(schoolName)
-          };
-          syncSchoolCalendarEventToExamPrepRows(rows, mathEvent, onUpdateExamPrepRow);
-          onSyncPreExamLesson?.(mathEvent);
-        });
     }
     setSelectedDate(newEvent.date);
     setSelectedMonth(newEvent.date);
@@ -595,51 +594,6 @@ export function SchoolCalendarCenter({
     }));
     setIsDateModalOpen(false);
     setIsFormModalOpen(true);
-  }
-
-  function updateAcademicEvent(event, field, value) {
-    if (event.readonly) return;
-    if (event.derived && event.examPrepId) {
-      const sourceRow = rows.find((row) => row.examPrepId === event.examPrepId);
-      if (event.type === "examPeriod" && ["date", "endDate"].includes(field)) {
-        const targetRows = event.examPeriodGroupKey
-          ? rows.filter((row) => getExamPeriodGroupKey(row) === event.examPeriodGroupKey)
-          : sourceRow ? [sourceRow] : [];
-        targetRows.forEach((row) => {
-          onUpdateExamPrepRow?.(
-            row.examPrepId,
-            "examPeriod",
-            updateDateRangeField(row.examPeriod ?? "", field, value)
-          );
-        });
-        return;
-      }
-      if (event.type === "mathExam" && ["date", "examSubject"].includes(field)) {
-        const entries = normalizeMathExamEntries(sourceRow ?? {});
-        const fallbackEntries = entries.length ? entries : [createMathExamEntry(sourceRow ?? {}, 0)];
-        const targetIndex = typeof event.mathExamEntryIndex === "number"
-          ? event.mathExamEntryIndex
-          : fallbackEntries.findIndex((entry) => entry.id === event.mathExamEntryId);
-        const safeIndex = targetIndex >= 0 ? targetIndex : 0;
-        const nextEntries = fallbackEntries.map((entry, index) => (
-          index === safeIndex
-            ? {
-                ...entry,
-                [field === "examSubject" ? "subject" : "date"]: value,
-                label: field === "examSubject" ? value : entry.label
-              }
-            : entry
-        ));
-        onUpdateExamPrepRow?.(event.examPrepId, "mathExamDates", nextEntries);
-        onUpdateExamPrepRow?.(event.examPrepId, "mathExamDate", syncPrimaryMathExamDate(nextEntries));
-        onSyncPreExamLesson?.({ ...event, [field]: value });
-        return;
-      }
-    }
-    const nextEvent = { ...event, [field]: value };
-    Promise.resolve(onSaveEvent?.(nextEvent)).catch((error) => console.error(error));
-    syncSchoolCalendarEventToExamPrepRows(rows, nextEvent, onUpdateExamPrepRow);
-    if (nextEvent.type === "mathExam") onSyncPreExamLesson?.(nextEvent);
   }
 
   return (

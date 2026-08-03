@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-03
 
+## 2026-08-03 학사일정 파생 시험행·직전수업 저장 신뢰성
+
+- 시험관리 파생 일정은 `exam_prep_rows`와 연결 `preExam lessons`를 한 versioned plan으로 저장한다. CAS·insert-only·Supabase 재조회·동일 요청 재시도·중간 실패 역순 보상 뒤에만 UI를 갱신한다.
+- 충돌·결과 불명·복구 불일치에서는 모달과 입력을 유지한다. 수동 보호/자동생성 제외 수업, 연결 record·homework·notification job은 자동 변경·삭제하지 않으며 provider side effect도 실행하지 않는다.
+- 검증: lesson `12/12`, runtime lint, `check:fast`, production `823/823`, build `390 modules`·main `944.84 kB`·lazy `12/12`, safe browser `28/28`.
+- 다음 단위는 수업일지 다중 행·복사·되돌리기 저장 gate다.
+
 ## 2026-08-03 수동 학사일정 저장 신뢰성
 
 - 수동 학사일정 등록은 고정 ID insert-only, 수정·삭제는 일정별 `updated_at` CAS를 사용한다. 서버와 App의 후속 GET이 Supabase 원천과 일치해야 화면 목록을 갱신한다.
