@@ -561,11 +561,11 @@ test("resource material file uploads privately, opens through an authenticated U
   const form = page.locator("form.resourceForm");
   await form.getByLabel("자료명").fill("안전 Storage 자료");
   await form.getByLabel("자료 파일 선택").setInputFiles({
-    buffer: Buffer.from("%PDF-1.4 safe resource material fixture"),
-    mimeType: "application/pdf",
-    name: "safe-storage-resource.pdf"
+    buffer: Buffer.from("safe resource material fixture"),
+    mimeType: "text/plain",
+    name: "safe-storage-resource.txt"
   });
-  await expect(form.getByLabel("파일명")).toHaveValue("safe-storage-resource.pdf");
+  await expect(form.getByLabel("파일명")).toHaveValue("safe-storage-resource.txt");
   await expect(form.getByLabel("파일명")).toBeDisabled();
   await form.getByRole("button", { name: "자료 등록" }).click();
 
