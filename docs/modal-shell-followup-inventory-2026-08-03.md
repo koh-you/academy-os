@@ -61,4 +61,5 @@ AI fixture와 안전 가상 데이터로 확인 가능한 shell 변경에는 사
 - P2-3d 완료: `MonthlyRegularLessonOpenModal`의 닫기·월 정규수업 열기 wrapper만 공통 `ModalFooter`로 옮겼다. bulk 생성, 45초 timeout, Supabase 재조회, 기존 회차 보존 계약은 App에 그대로다.
 - 현재 수치: 공통 shell 41/41, bespoke dialog 0개, 공통 `ModalFooter` 15개, 기존 `modalActions` wrapper 2개.
 - 남은 2개는 `SupplementTaskActionBar`와 `LessonNestedPanels` 일정 편집의 모달 내부 작업 바로 최종 footer가 아니므로 유지한다.
-- 다음 단위: P2-4 modal save state를 여섯 공통 상태와 대조한다. source/provider 복합 결과는 단일 상태로 축약하지 않는다.
+- P2-4 완료: modal DB/API 저장 표면을 여섯 공통 상태와 대조했다. 잘못 매핑된 상태는 없었고 provider/process 복합 결과 세 종류는 단일 상태로 축약하지 않는다. 상세 기준과 자동 감사는 `docs/modal-save-state-audit-2026-08-03.md`, `npm run test:modal-save-state-audit`가 고정한다.
+- P2는 종료한다. 다음 제품 단위는 P3 알림톡 문구 원천 inventory이며 실제 발송·예약은 실행하지 않는다.

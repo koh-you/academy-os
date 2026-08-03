@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 P2-4 modal 저장 상태 감사
+
+- dialog 41개의 DB/API 저장 표시를 `idle/dirty/saving/verifying/saved/failed`와 대조했다. 공통 상태를 잘못 전달하는 표면은 없어 런타임 동작은 변경하지 않았다.
+- Solapi provider orchestration, 보충 일정의 source/provider 복합 결과, 시험분석 process 결과는 DB 저장 완료와 의미가 달라 기존 분리 표시를 유지한다.
+- 자동 감사는 공통 상태·복합 예외 3종·본문 작업 바 2개를 고정한다. P2는 공통 shell 41/41, bespoke 0, 공통 footer 15개로 닫고 다음 P3 알림톡 문구 원천 inventory로 이동한다. 실제 발송·예약은 실행하지 않는다.
+- 검증: runtime lint, domain `56/56`, modal inventory, modal 상태 감사, `check:fast` scenario `827/827`, build `407 modules`·main `944.34 kB`·lazy `12/12`, production `827/827`을 통과했다. 런타임 UI 변경이 없어 전체 safe browser는 exact-head CI gate에서 실행한다.
+
 ## 2026-08-03 P2-3d 월 정규수업 열기 footer
 
 - `MonthlyRegularLessonOpenModal`의 `닫기`·월 정규수업 열기 wrapper만 공통 `ModalFooter`로 옮겼다. `isSaving` 잠금, `canOpen`, callback과 문구는 그대로다.

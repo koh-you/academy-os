@@ -24,8 +24,8 @@
 
 ## P2. 모달 통일 후속
 
-- 최신 modal inventory는 `docs/modal-shell-followup-inventory-2026-08-03.md`에 고정했다. 41개 dialog 중 40개는 공통 shell이고, bespoke 예외는 실제 Solapi callback을 받는 보충 알림 제어창 1개다. 공통 footer는 9개, 기존 action wrapper는 8개다.
-- `ReportModal`, Solapi 제어창, 보충 완료·일정 변경·수업일지 내부 완료, 월 정규수업 열기까지 최종 행동 footer 공통화를 완료했다. dialog 41/41, 공통 footer 15개다. 남은 `modalActions` 2개는 보충 상세 내부의 여러 독립 저장·예약 작업 바로 유지한다. 다음은 P2-4 저장 상태 vocabulary 대조다.
+- 최신 modal inventory는 `docs/modal-shell-followup-inventory-2026-08-03.md`, 상태 감사는 `docs/modal-save-state-audit-2026-08-03.md`에 고정했다.
+- `ReportModal`, Solapi 제어창, 보충 완료·일정 변경·수업일지 내부 완료, 월 정규수업 열기까지 통일해 dialog 41/41, 공통 footer 15개다. DB/API 저장 상태는 `idle/dirty/saving/verifying/saved/failed`로 대조했고 provider/process 복합 결과 세 종류는 별도 표시를 유지한다. 남은 `modalActions` 2개는 보충 상세 내부 작업 바로 유지하며 P2를 닫는다.
 - 수업일지 저장과 Solapi side effect 버튼은 계속 분리한다.
 - 출결·알림·저장 원천이 함께 바뀌면 별도 작업으로 쪼갠다.
 
@@ -33,7 +33,7 @@
 
 - 출결·수업일지·숙제보충·결석보강·재시험·공지·특강·일정 변경·11시 reminder의 문구 원천과 변수를 inventory한다.
 - 숨은 하드코딩을 `설정 > 알림톡`의 같은 원천으로 옮긴다.
-- 실제 발송·예약은 별도 사람 gate다.
+- 실제 발송·예약은 별도 사람 gate다. 먼저 읽기 전용 source inventory와 가상 fixture만 진행한다.
 
 ## P4. 고위험 App/API 경계 리팩터링
 
