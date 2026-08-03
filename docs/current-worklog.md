@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-04 P3-4 알림톡 template 종료 감사
+
+- `test-notification-template-closeout.mjs`가 출결·수업일지·숙제보충·결석보강·일정 확정/변경·당일 11시·재시험·일반 공지·특강 9개 경로의 seed→draft→persisted human final→provider 변수 계약을 실제 pure builder와 source boundary로 대조한다.
+- 설정 key 10개와 provider template 4개를 exact set으로 고정했다. 숙제/결석보강만 독립 11시 job 대상이고 재시험은 연결 수업의 schedule line만 사용하는 현재 범위를 유지한다. 런타임 코드·실제 알림 행동은 변경하지 않았다.
+- 검증: runtime lint, notification `11/11`, closeout, `check:fast` scenario `827/827`, production `827/827`, build `410 modules`·main `943.65 kB`·lazy `12/12`, Worktree 격리 safe browser `41/41` 통과. P3를 닫고 4차 리팩터링은 자동 시작하지 않는다.
+
 ## 2026-08-03 P3-3b 알림톡 Settings seed 확장
 
 - 일반 공지 preset 3개와 특강 guide seed를 기존 `app_state.aiSettings.notificationTemplates`에 연결했다. 설정값은 preset 선택·guide preview/발송 준비 시 새 local draft에만 복사되며 현재 composer draft·기존 notification job·`makeup_tasks` 교사 최종본을 재생성하지 않는다.
