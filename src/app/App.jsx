@@ -2978,7 +2978,8 @@ export function App() {
   const [selectedLessonId, setSelectedLessonId] = useState("");
   const [lessonClipboard, setLessonClipboard] = useState(null);
   const [lessonUndoStack, setLessonUndoStack] = useState([]);
-  const lessonCancelRequestsRef = useRef(new Map());
+  const lessonHistoryActionRequestRef = useRef(null);
+  const [lessonHistoryActionState, setLessonHistoryActionState] = useState({ message: "", state: "idle" });
   const [deletedLessonBundles, setDeletedLessonBundles] = useStoredState(storageKeys.deletedLessonBundles, []);
   const [classTemplates, setClassTemplates] = useStoredState(storageKeys.classTemplates, sampleData.classTemplates);
   const [students, setStudents] = useStoredState(storageKeys.students, sampleData.students);
@@ -4713,64 +4714,110 @@ export function App() {
   }
 
   function handleCopySelectedLesson() {
+    if (lessonHistoryActionRequestRef.current) return;
     const lesson = lessons.find((item) => item.lessonId === selectedLessonId);
     if (!lesson) return;
     setLessonClipboard({ ...lesson });
+    setLessonHistoryActionState({ message: `${lesson.className} · 복사 준비 완료`, state: "saved" });
   }
 
-  function handlePasteLessonToSelectedDate() {
-    if (!lessonClipboard) return;
-    const pastedLesson = {
-      ...lessonClipboard,
-      lessonId: createLessonId(selectedDate, lessonClipboard.className),
-      date: selectedDate,
-      dayOfWeek: getDayKey(selectedDate),
-      status: "scheduled"
-    };
-    setLessonUndoStack((current) => [{ type: "create", lesson: pastedLesson }, ...current].slice(0, 20));
-    setLessons((current) => [...current, pastedLesson]);
-    const linkedPreviousHomeworks = createPreviousHomeworksFromPriorLesson(homeworks, lessons, pastedLesson);
-    if (linkedPreviousHomeworks.length > 0) {
-      setHomeworks((current) => [...linkedPreviousHomeworks, ...current]);
-      postJson("/api/homeworks/bulk", { homeworks: linkedPreviousHomeworks }).catch((error) => console.error(error));
+  async function runLessonJournalHistoryAction({
+    action,
+    afterLesson = null,
+    beforeLesson = null,
+    copyTarget = null,
+    homeworks: actionHomeworks = []
+  }) {
+    if (lessonHistoryActionRequestRef.current) return lessonHistoryActionRequestRef.current;
+    const requestPromise = import("../domains/lessons/lessonJournalHistoryAction.js")
+      .then(({ saveLessonJournalHistoryAction }) => saveLessonJournalHistoryAction({
+        action,
+        afterLesson,
+        beforeLesson,
+        copyTarget,
+        homeworks: actionHomeworks,
+        onStateChange: setLessonHistoryActionState,
+        request: postJsonWithTimeout
+      }));
+    lessonHistoryActionRequestRef.current = requestPromise;
+    return requestPromise.finally(() => {
+      if (lessonHistoryActionRequestRef.current === requestPromise) {
+        lessonHistoryActionRequestRef.current = null;
+      }
+    });
+  }
+
+  async function handlePasteLessonToSelectedDate() {
+    if (!lessonClipboard || lessonHistoryActionRequestRef.current) return;
+    try {
+      const result = await runLessonJournalHistoryAction({
+        action: "copy",
+        copyTarget: {
+          date: selectedDate,
+          dayOfWeek: getDayKey(selectedDate),
+          findPreviousLesson: findPreviousLessonForStudent,
+          homeworks: homeworksRef.current,
+          lessons,
+          sourceLesson: lessonClipboard
+        }
+      });
+      const persistedLesson = result.lesson;
+      const persistedHomeworks = result.homeworks ?? [];
+      setLessonUndoStack((current) => [{
+        bundle: { homeworks: persistedHomeworks, lesson: persistedLesson },
+        type: "copy"
+      }, ...current].slice(0, 20));
+      setLessons((current) => upsertById(current, persistedLesson, "lessonId"));
+      setHomeworks((current) => persistedHomeworks.reduce(
+        (next, homework) => upsertById(next, homework, "homeworkId"),
+        current
+      ));
+      setSelectedLessonId(persistedLesson.lessonId);
+    } catch {
+      // The clipboard and selected date stay intact for an explicit retry.
     }
-    setSelectedLessonId(pastedLesson.lessonId);
-    postJson("/api/lessons", { lesson: pastedLesson }).catch((error) => console.error(error));
   }
 
-  function handleUndoLessonAction() {
+  async function handleUndoLessonAction() {
+    if (lessonHistoryActionRequestRef.current) return;
     const [latestAction, ...restActions] = lessonUndoStack;
     if (!latestAction) return;
-    if (latestAction.type === "create") {
-      setLessons((current) => current.filter((lesson) => lesson.lessonId !== latestAction.lesson.lessonId));
-      setSelectedLessonId("");
-    }
-    if (latestAction.type === "delete") {
-      const bundle = latestAction.bundle ?? { lesson: latestAction.lesson, records: [], homeworks: [] };
-      if (!bundle.lesson) return;
-      const restoredLesson = {
-        ...bundle.lesson,
-        status: ["canceled", "deleted"].includes(bundle.lesson.status) ? "scheduled" : (bundle.lesson.status ?? "scheduled")
-      };
-      setLessons((current) => upsertById(current, restoredLesson, "lessonId"));
-      setRecords((current) => [...(bundle.records ?? []), ...current.filter((record) => record.lessonId !== bundle.lesson.lessonId)]);
-      setHomeworks((current) => [...(bundle.homeworks ?? []), ...current.filter((homework) => homework.lessonId !== bundle.lesson.lessonId)]);
-      setDeletedLessonBundles((current) => current.filter((item) => item.bundleId !== bundle.bundleId));
-      setSelectedDate(restoredLesson.date);
-      setSelectedLessonId(restoredLesson.lessonId);
-      const pendingCancelRequest = lessonCancelRequestsRef.current.get(restoredLesson.lessonId) ?? Promise.resolve();
-      pendingCancelRequest
-        .catch(() => null)
-        .then(() => postJson("/api/lessons", { lesson: restoredLesson }))
-        .catch((error) => console.error(error));
-      if (bundle.records?.length) {
-        bundle.records.forEach((record) => postJson("/api/lesson-records", { record }).catch((error) => console.error(error)));
+    const bundle = latestAction.bundle ?? {};
+    try {
+      if (latestAction.type === "copy") {
+        await runLessonJournalHistoryAction({
+          action: "undo_copy",
+          beforeLesson: bundle.lesson,
+          homeworks: bundle.homeworks ?? []
+        });
+        setLessons((current) => current.filter((lesson) => lesson.lessonId !== bundle.lesson.lessonId));
+        setHomeworks((current) => current.filter((homework) => (
+          !(bundle.homeworks ?? []).some((item) => item.homeworkId === homework.homeworkId)
+        )));
+        setSelectedLessonId("");
       }
-      if (bundle.homeworks?.length) {
-        postJson("/api/homeworks/bulk", { homeworks: bundle.homeworks }).catch((error) => console.error(error));
+      if (latestAction.type === "cancel") {
+        const restoredLessonDraft = {
+          ...bundle.lesson,
+          status: ["canceled", "deleted"].includes(bundle.lesson.status) ? "scheduled" : (bundle.lesson.status ?? "scheduled")
+        };
+        const result = await runLessonJournalHistoryAction({
+          action: "undo_cancel",
+          afterLesson: restoredLessonDraft,
+          beforeLesson: latestAction.canceledLesson
+        });
+        const restoredLesson = result.lesson;
+        setLessons((current) => upsertById(current, restoredLesson, "lessonId"));
+        setRecords((current) => [...result.relatedRecords, ...current.filter((record) => record.lessonId !== bundle.lesson.lessonId)]);
+        setHomeworks((current) => [...result.relatedHomeworks, ...current.filter((homework) => homework.lessonId !== bundle.lesson.lessonId)]);
+        setDeletedLessonBundles((current) => current.filter((item) => item.bundleId !== bundle.bundleId));
+        setSelectedDate(restoredLesson.date);
+        setSelectedLessonId(restoredLesson.lessonId);
       }
+      setLessonUndoStack(restActions);
+    } catch {
+      // Keep the undo entry and local source bundle for an explicit retry.
     }
-    setLessonUndoStack(restActions);
   }
 
   function handleDeleteSelectedLessonFromCalendar() {
@@ -4786,7 +4833,8 @@ export function App() {
     setLessonDeleteModalId(lesson.lessonId);
   }
 
-  function confirmDeleteLesson(lessonId) {
+  async function confirmDeleteLesson(lessonId) {
+    if (lessonHistoryActionRequestRef.current) return;
     const lesson = calendarLessons.find((item) => item.lessonId === lessonId);
     if (!lesson) return;
     if (lesson.isVirtualGeneratedLesson || lesson.isExamPrepAutoLesson) {
@@ -4807,22 +4855,32 @@ export function App() {
       expiresAt: new Date(Date.now() + lessonDeleteRetentionMs).toISOString()
     };
     const canceledLesson = { ...lesson, status: "canceled" };
-    setDeletedLessonBundles((current) => pruneExpiredLessonDeletes([bundle, ...current]));
-    setLessonUndoStack((current) => [{ type: "delete", bundle }, ...current].slice(0, 20));
-    const generatedKey = getGeneratedLessonKey(lesson);
-    if (generatedKey) suppressGeneratedLessonKey(generatedKey);
-    setLessons((current) => current.filter((item) => item.lessonId !== lessonId));
-    setRecords((current) => current.filter((record) => record.lessonId !== lessonId));
-    setHomeworks((current) => current.filter((homework) => homework.lessonId !== lessonId));
-    setLessonDeleteModalId("");
-    const nextLessonForDate = lessons
-      .filter((item) => item.lessonId !== lessonId && item.date === lesson.date)
-      .sort(sortByTime)[0];
-    setSelectedLessonId(nextLessonForDate?.lessonId ?? "");
-    setIsLessonJournalOpen(false);
-    const cancelRequest = postJson("/api/lessons", { lesson: canceledLesson }).catch((error) => console.error(error));
-    lessonCancelRequestsRef.current.set(lessonId, cancelRequest);
-    cancelRequest.finally(() => lessonCancelRequestsRef.current.delete(lessonId));
+    try {
+      const result = await runLessonJournalHistoryAction({
+        action: "cancel",
+        afterLesson: canceledLesson,
+        beforeLesson: lesson
+      });
+      setDeletedLessonBundles((current) => pruneExpiredLessonDeletes([bundle, ...current]));
+      setLessonUndoStack((current) => [{
+        bundle,
+        canceledLesson: result.lesson,
+        type: "cancel"
+      }, ...current].slice(0, 20));
+      const generatedKey = getGeneratedLessonKey(lesson);
+      if (generatedKey) suppressGeneratedLessonKey(generatedKey);
+      setLessons((current) => current.filter((item) => item.lessonId !== lessonId));
+      setRecords((current) => current.filter((record) => record.lessonId !== lessonId));
+      setHomeworks((current) => current.filter((homework) => homework.lessonId !== lessonId));
+      setLessonDeleteModalId("");
+      const nextLessonForDate = lessons
+        .filter((item) => item.lessonId !== lessonId && item.date === lesson.date)
+        .sort(sortByTime)[0];
+      setSelectedLessonId(nextLessonForDate?.lessonId ?? "");
+      setIsLessonJournalOpen(false);
+    } catch {
+      // Keep the confirmation modal and source bundle intact for retry.
+    }
   }
 
   function handleOpenLessonJournal(lessonId) {
@@ -7036,6 +7094,7 @@ export function App() {
       isLessonJournalOpen,
       isMonthlyRegularLessonOpened,
       lessonClipboard,
+      lessonHistoryActionState,
       lessonNotificationPlans,
       lessonResearchItems,
       lessons,
@@ -7356,6 +7415,7 @@ export function App() {
       {pendingDeleteLesson ? (
         <Modal
           className="studentDeleteModal"
+          closeDisabled={lessonHistoryActionState.state === "saving"}
           onClose={() => setLessonDeleteModalId("")}
           subtitle="수업을 취소 처리하면 달력과 수업일지 목록에서는 숨겨지고, DB에는 7일 동안 취소 상태로 보관됩니다."
           title="수업 취소 확인"
@@ -7373,8 +7433,10 @@ export function App() {
             <p className="dangerCopy">정말 이 수업을 취소 처리할까요? 7일 안에는 되돌릴 수 있고, 이후에는 자동 삭제됩니다.</p>
           </div>
           <ModalFooter tone="danger">
-            <button className="softButton" onClick={() => setLessonDeleteModalId("")} type="button">취소</button>
-            <button className="dangerButton" onClick={() => confirmDeleteLesson(pendingDeleteLesson.lessonId)} type="button">수업 취소 처리</button>
+            <button className="softButton" disabled={lessonHistoryActionState.state === "saving"} onClick={() => setLessonDeleteModalId("")} type="button">취소</button>
+            <button className="dangerButton" disabled={lessonHistoryActionState.state === "saving"} onClick={() => confirmDeleteLesson(pendingDeleteLesson.lessonId)} type="button">
+              {lessonHistoryActionState.state === "saving" ? "취소 저장 중" : "수업 취소 처리"}
+            </button>
           </ModalFooter>
         </Modal>
       ) : null}
@@ -9724,48 +9786,6 @@ function createLinkedPreviousHomework(homeworks, lessons, lesson, student, sourc
     linkedFromLessonId: lesson.lessonId,
     linkedFromDate: lesson.date
   };
-}
-
-function createPreviousHomeworksFromPriorLesson(homeworks, lessons, lesson) {
-  return (lesson.studentIds ?? [])
-    .map((studentId) => {
-      const previousLesson = findPreviousLessonForStudent(lessons, lesson, studentId);
-      if (!previousLesson) return null;
-
-      const sourceHomework = homeworks.find(
-        (homework) =>
-          homework.lessonId === previousLesson.lessonId &&
-          homework.studentId === studentId &&
-          homework.homeworkType === "next"
-      );
-      if (!sourceHomework?.title?.trim()) return null;
-
-      const existing = homeworks.find(
-        (homework) =>
-          homework.lessonId === lesson.lessonId &&
-          homework.studentId === studentId &&
-          homework.homeworkType === "previous"
-      );
-
-      return {
-        ...(existing ?? {}),
-        homeworkId: existing?.homeworkId ?? `homework_previous_${lesson.date}_${studentId}`,
-        lessonId: lesson.lessonId,
-        studentId,
-        title: sourceHomework.title,
-        subject: existing?.subject ?? sourceHomework.subject ?? "노션 수업 DB",
-        homeworkType: "previous",
-        totalProblems: existing?.totalProblems ?? sourceHomework.totalProblems ?? null,
-        status: existing?.status ?? "verified",
-        studentStatus: existing?.studentStatus ?? "not_started",
-        teacherStatus: existing?.teacherStatus ?? "unverified",
-        assignedDate: previousLesson.date,
-        dueDate: existing?.dueDate ?? lesson.date,
-        linkedFromLessonId: previousLesson.lessonId,
-        linkedFromDate: previousLesson.date
-      };
-    })
-    .filter(Boolean);
 }
 
 function createLessonId(date, name) {

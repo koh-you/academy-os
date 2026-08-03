@@ -4,7 +4,8 @@
 
 ## P1. 운영 저장 신뢰성
 
-- 다음 단위: 수업일지 다중 행·복사·되돌리기 gate. `lessons`·`lesson_student_records`·숙제 원천을 행동별로 분리하고 version 조건·재조회·부분실패 복구·재시도 의미를 검증한다.
+- 다음 단위: 수업일지 `lesson_student_records`·숙제 다중 행 저장 gate. 행별 version 조건·Supabase 재조회·부분성공 뒤 최신 draft 보존과 재시도 의미를 검증한다.
+- 수업 달력 복사·취소·되돌리기 gate는 완료. `lessons`와 복사 숙제를 단일 versioned action으로 저장하고, CAS/insert-only·Supabase 재조회·idempotent unknown-result retry·역순 보상·연결 record/homework/notification 보호·취소 복구 원천 재조회를 fixture와 safe browser로 고정했다.
 - 시험관리 행과 직전수업을 함께 바꾸는 학사일정 파생 저장 gate는 완료. `exam_prep_rows`·파생 `preExam lessons`를 한 versioned plan으로 저장하고, CAS·Supabase 재조회·idempotent retry·역순 보상·연결 원천 보호를 fixture와 safe browser로 고정했다.
 - `app_state` key별 dirty 저장·500ms debounce·동일 key 직렬화·`updated_at` CAS·저장 뒤 Supabase 재조회는 완료. 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
 - 시험정보 행의 같은 브라우저 직렬화·최신값 coalesce·행별 `updated_at` CAS·저장 뒤 Supabase 재조회는 완료. 충돌 입력 보존과 삭제 감사 rollback 전용 복구 경계도 fixture로 고정했다.

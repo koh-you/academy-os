@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 수업 복사·취소·되돌리기 저장 gate
+
+- 달력의 복사·취소·복구·복사 되돌리기를 각각 독립 fire-and-forget 요청과 낙관적 UI 변경으로 처리하던 흐름을 하나의 `/api/lesson-journal/history-action` plan으로 바꿨다. 서버의 CAS/insert-only·행별 Supabase 재조회가 모두 확인된 뒤에만 달력·숙제·undo stack을 갱신한다.
+- 복사 중 응답만 유실돼도 동적 action 모듈이 최초 lesson ID와 숙제 계획을 보존해 같은 계획으로 재시도한다. 중간 실패는 생성/삭제 순서의 반대로 직접 원천을 보상하고 원래 timestamp까지 대조한다. 복사 후 새 record·예상 밖 homework·notification job이 생겼으면 undo를 차단한다.
+- 취소 실패에서는 확인 모달과 원본을 유지한다. 취소 복구는 기존 bundle을 서버에 다시 쓰지 않고 현재 Supabase의 연결 record·homework를 재조회해 화면만 복원하므로, 취소 기간 중 다른 원천 변경을 덮어쓰지 않는다. 실제 알림 예약·취소는 이 행동에 추가하지 않았다.
+- 검증: 전용 pure/action/Supabase REST·rollback fixture, lesson `13/13`, runtime lint, `check:fast`, scenario·production `823/823`, build `392 modules`·main `944.90 kB`·lazy `12/12`, Worktree 격리 safe browser `30/30`. 운영 데이터·실제 알림·SQL·유료 호출은 사용하지 않았다.
+- 다음 독립 단위는 수업일지 record·homework 다중 행 저장의 행별 CAS·부분성공 복구다.
+
 ## 2026-08-03 학사일정 파생 시험행·직전수업 저장 gate
 
 - 시험관리에서 파생되는 시험기간·수학시험 생성/수정/삭제를 기존 다중 fire-and-forget 요청 대신 `exam_prep_rows`와 연결 `preExam lessons`의 단일 versioned plan으로 바꿨다. 브라우저는 하나의 callback만 기다리고 Supabase verified 응답 전에는 모달·draft를 유지한다.

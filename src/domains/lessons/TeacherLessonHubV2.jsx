@@ -18,6 +18,7 @@ export function TeacherLessonHubV2({
   generatedLessonSaveStatus = { lessons: [], message: "", state: "idle" },
   integrationStatus,
   isMonthlyRegularLessonOpened = false,
+  lessonHistoryActionState = { message: "", state: "idle" },
   lessonJournalEffects,
   lessonNotificationPlans = {},
   monthlyRegularLessonOpenPlan = { errors: [], lessonsToCreate: [], rows: [] },
@@ -83,6 +84,7 @@ export function TeacherLessonHubV2({
   const [lessonTypeFilter, setLessonTypeFilter] = useState("all");
   const selectedCalendarDayRef = useRef(null);
   useLessonCalendarKeyboardNavigation({
+    isHistoryActionBusy: lessonHistoryActionState.state === "saving",
     isLessonJournalOpen,
     onCopyLesson,
     onDeleteSelectedLesson,
@@ -232,6 +234,12 @@ export function TeacherLessonHubV2({
               다시 저장
             </button>
           ) : null}
+        </div>
+      ) : null}
+
+      {lessonHistoryActionState.state !== "idle" ? (
+        <div aria-live="polite" className={`generatedLessonSaveNotice ${lessonHistoryActionState.state}`}>
+          {lessonHistoryActionState.message}
         </div>
       ) : null}
 

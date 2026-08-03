@@ -730,6 +730,84 @@ test("lesson journal creation action stays visible and opens the registration mo
   expect(pageErrors).toEqual([]);
 });
 
+test("lesson copy retries the same server plan after an unknown result and verified undo removes it", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  let abortAfterCommit = true;
+  await page.route("**/api/lesson-journal/history-action", async (route) => {
+    if (route.request().method() === "POST" && abortAfterCommit) {
+      abortAfterCommit = false;
+      await route.fetch();
+      await route.abort("failed");
+      return;
+    }
+    await route.continue();
+  });
+  await loginAsTeacher(page);
+
+  const sourceDay = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
+  await sourceDay.locator(".dayNumber").click();
+  await sourceDay.focus();
+  await page.keyboard.press("Control+c");
+  await expect(page.locator(".generatedLessonSaveNotice")).toContainText("복사 준비 완료");
+  const targetDay = page.getByRole("gridcell", { name: "2026-08-02 · 수업 없음" });
+  await targetDay.locator(".dayNumber").click();
+  await targetDay.focus();
+  await page.keyboard.press("Control+v");
+  await expect(page.locator(".generatedLessonSaveNotice.failed")).toBeVisible();
+
+  await page.keyboard.press("Control+v");
+  await expect(page.locator(".generatedLessonSaveNotice.saved")).toContainText("복사 완료");
+  const savedLessons = (await (await request.get(`${safeApiBaseUrl}/api/lessons`)).json()).lessons;
+  const copies = savedLessons.filter((lesson) => (
+    lesson.date === "2026-08-02" && lesson.className === "월 경계 연동반"
+  ));
+  expect(copies).toHaveLength(1);
+
+  await page.keyboard.press("Control+z");
+  await expect(page.locator(".generatedLessonSaveNotice.saved")).toContainText("되돌리기 완료");
+  const lessonsAfterUndo = (await (await request.get(`${safeApiBaseUrl}/api/lessons`)).json()).lessons;
+  expect(lessonsAfterUndo.some((lesson) => lesson.lessonId === copies[0].lessonId)).toBe(false);
+  expect(pageErrors).toEqual([]);
+});
+
+test("lesson cancellation keeps its confirmation on conflict and verified undo restores the source", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  let conflictOnce = true;
+  await page.route("**/api/lesson-journal/history-action", async (route) => {
+    if (route.request().method() === "POST" && conflictOnce) {
+      conflictOnce = false;
+      await route.fulfill({
+        contentType: "application/json",
+        json: { code: "LESSON_JOURNAL_HISTORY_CONFLICT", error: "안전 fixture 충돌", ok: false },
+        status: 409
+      });
+      return;
+    }
+    await route.continue();
+  });
+  await loginAsTeacher(page);
+
+  const sourceDay = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
+  await sourceDay.locator(".dayNumber").click();
+  await sourceDay.focus();
+  await page.keyboard.press("Delete");
+  const confirmDialog = page.getByRole("dialog", { name: "수업 취소 확인" });
+  await confirmDialog.getByRole("button", { name: "수업 취소 처리" }).click();
+  await expect(confirmDialog).toBeVisible();
+  await expect(page.locator(".generatedLessonSaveNotice.failed")).toContainText("안전 fixture 충돌");
+
+  await confirmDialog.getByRole("button", { name: "수업 취소 처리" }).click();
+  await expect(confirmDialog).toHaveCount(0);
+  const canceledLessons = (await (await request.get(`${safeApiBaseUrl}/api/lessons`)).json()).lessons;
+  expect(canceledLessons.find((lesson) => lesson.lessonId === "safe-cross-month-current-lesson")?.status).toBe("canceled");
+
+  await page.keyboard.press("Control+z");
+  await expect(page.locator(".generatedLessonSaveNotice.saved")).toContainText("복구 완료");
+  const restoredLessons = (await (await request.get(`${safeApiBaseUrl}/api/lessons`)).json()).lessons;
+  expect(restoredLessons.find((lesson) => lesson.lessonId === "safe-cross-month-current-lesson")?.status).toBe("scheduled");
+  expect(pageErrors).toEqual([]);
+});
+
 test("lesson hub top reminders can collapse and expand without runtime errors", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);
