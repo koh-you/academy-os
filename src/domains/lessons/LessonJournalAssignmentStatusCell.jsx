@@ -4,15 +4,18 @@ export function LessonJournalAssignmentStatusCell({
   assignmentStatusAriaLabel,
   assignmentStatusOptions,
   assignmentStatusValue,
+  homeworkFollowupConfirmationState,
   homeworkFollowupOptions,
   journalEditMode,
   onApplyHomeworkFollowupMethod,
   onAssignmentStatusChange,
+  onConfirmHomeworkFollowup,
   previousHomeworkFollowup,
   previousHomeworkTitle,
   selectedHomeworkFollowupMethod
 }) {
   const model = createLessonJournalAssignmentStatusCellModel({
+    homeworkFollowupConfirmationState,
     homeworkFollowupOptions,
     journalEditMode,
     previousHomeworkFollowup,
@@ -49,7 +52,16 @@ export function LessonJournalAssignmentStatusCell({
       ) : null}
       {model.pendingHomeworkFollowupText ? (
         <span className="homeworkFollowupCheck">
-          확인할 숙제 · {model.pendingHomeworkFollowupText}
+          <span>확인할 숙제 · {model.pendingHomeworkFollowupText}</span>
+          <button
+            aria-label={`${model.pendingHomeworkFollowupText} 숙제 확인 완료`}
+            className="homeworkFollowupConfirmButton"
+            disabled={model.homeworkFollowupConfirmationDisabled || !onConfirmHomeworkFollowup}
+            onClick={onConfirmHomeworkFollowup}
+            type="button"
+          >
+            {model.homeworkFollowupConfirmationLabel}
+          </button>
         </span>
       ) : null}
     </div>

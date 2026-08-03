@@ -16,6 +16,7 @@ const adapter = createLessonJournalEffectAdapter({
 
 const persistenceMappings = {
   onChangeRecord: "handleChangeRecord",
+  onConfirmHomeworkFollowup: "handleConfirmHomeworkFollowup",
   onDeleteLesson: "handleDeleteLesson",
   onPassMakeupTask: "handlePassSupplementTask",
   onSaveLessonJournalDrafts: "handleSaveLessonJournalDrafts",

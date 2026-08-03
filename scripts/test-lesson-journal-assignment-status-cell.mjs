@@ -15,6 +15,8 @@ assert.deepEqual(
     selectedHomeworkFollowupMethod: "next_lesson"
   }),
   {
+    homeworkFollowupConfirmationDisabled: false,
+    homeworkFollowupConfirmationLabel: "확인 완료",
     pendingHomeworkFollowupText: "TARGET 오답 5문제",
     selectedHomeworkFollowupMethod: "next_lesson",
     showHomeworkFollowupActions: true
@@ -30,6 +32,8 @@ assert.deepEqual(
     selectedHomeworkFollowupMethod: "stay_after"
   }),
   {
+    homeworkFollowupConfirmationDisabled: false,
+    homeworkFollowupConfirmationLabel: "확인 완료",
     pendingHomeworkFollowupText: "",
     selectedHomeworkFollowupMethod: "stay_after",
     showHomeworkFollowupActions: false
@@ -42,6 +46,24 @@ const missingHomeworkControl = createLessonJournalAssignmentStatusCellModel({
   previousHomeworkTitle: ""
 });
 assert.equal(missingHomeworkControl.showHomeworkFollowupActions, false);
+assert.deepEqual(
+  createLessonJournalAssignmentStatusCellModel({
+    homeworkFollowupConfirmationState: "saving",
+    previousHomeworkFollowup: { method: "next_lesson", text: "저장 중 숙제" }
+  }),
+  {
+    homeworkFollowupConfirmationDisabled: true,
+    homeworkFollowupConfirmationLabel: "확인 저장 중",
+    pendingHomeworkFollowupText: "저장 중 숙제",
+    selectedHomeworkFollowupMethod: "",
+    showHomeworkFollowupActions: false
+  }
+);
+assert.equal(
+  createLessonJournalAssignmentStatusCellModel({ homeworkFollowupConfirmationState: "failed" })
+    .homeworkFollowupConfirmationLabel,
+  "다시 확인"
+);
 
 const appSource = await readAppWithLessonJournalSource(import.meta.url);
 const componentSource = await readFile(
@@ -67,6 +89,8 @@ for (const contract of [
   "assignmentStatusOptions.map",
   "onAssignmentStatusChange(event.target.value)",
   "onApplyHomeworkFollowupMethod(method.id)",
+  "onConfirmHomeworkFollowup",
+  "숙제 확인 완료",
   "숙제보충 처리 방식",
   "확인할 숙제"
 ]) {

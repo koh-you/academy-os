@@ -110,6 +110,7 @@ export function LessonJournalDetail({
   const {
     persistence: {
       onChangeRecord,
+      onConfirmHomeworkFollowup,
       onDeleteLesson,
       onPassMakeupTask,
       onSaveLessonJournalDrafts,
@@ -625,8 +626,17 @@ export function LessonJournalDetail({
             const previousLessonContent = getLessonContent(previousEditableRecord);
             const previousPreparationMemo = previousMemoRecord?.preparationMemo?.trim() ?? "";
             const referencePreparationMemo = referenceRecord?.preparationMemo?.trim() ?? "";
-            const previousHomeworkFollowup = getHomeworkFollowupFromRecord(previousRecord ?? {})
-              ?? getHomeworkFollowupFromRecord(referenceRecord ?? {});
+            const previousRecordHomeworkFollowup = getHomeworkFollowupFromRecord(previousRecord ?? {});
+            const referenceRecordHomeworkFollowup = getHomeworkFollowupFromRecord(referenceRecord ?? {});
+            const previousHomeworkFollowup = previousRecordHomeworkFollowup ?? referenceRecordHomeworkFollowup;
+            const homeworkFollowupSourceRecord = previousRecordHomeworkFollowup
+              ? previousRecord
+              : referenceRecordHomeworkFollowup
+                ? referenceRecord
+                : null;
+            const homeworkFollowupConfirmationState = homeworkFollowupSourceRecord?.lessonStudentRecordId
+              ? saveStates[homeworkFollowupSourceRecord.lessonStudentRecordId] ?? "idle"
+              : "idle";
             const parentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "parent");
             const studentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "student");
             const parentCommentState = getCommentButtonState(record.teacherComment, parentCommentSendStatus);
@@ -641,12 +651,23 @@ export function LessonJournalDetail({
                   assignmentStatusAriaLabel: `${student.name} 숙제 상태`,
                   assignmentStatusOptions,
                   assignmentStatusValue,
+                  homeworkFollowupConfirmationState,
                   homeworkFollowupOptions,
                   journalEditMode,
                   onApplyHomeworkFollowupMethod: (method) =>
                     applyHomeworkFollowupMethod(student, record, effectivePreviousHomework, method),
                   onAssignmentStatusChange: (value) =>
                     handleAssignmentStatusChange(student, record, effectivePreviousHomework, value),
+                  onConfirmHomeworkFollowup: homeworkFollowupSourceRecord
+                    ? async () => {
+                        const result = await onConfirmHomeworkFollowup?.(homeworkFollowupSourceRecord);
+                        setJournalManualSaveMessage(
+                          result?.ok
+                            ? "확인할 숙제 · 확인 완료"
+                            : result?.message || "확인할 숙제 · 저장 실패 · 다시 시도해 주세요."
+                        );
+                      }
+                    : undefined,
                   previousHomeworkFollowup,
                   previousHomeworkTitle: effectivePreviousHomework?.title,
                   selectedHomeworkFollowupMethod

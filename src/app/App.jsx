@@ -6859,6 +6859,41 @@ export function App() {
     });
   }
 
+  async function handleConfirmHomeworkFollowup(sourceRecord) {
+    const recordId = sourceRecord?.lessonStudentRecordId;
+    if (!recordId) {
+      return { ok: false, message: "확인할 숙제 · 저장 실패 · 원 수업기록 없음" };
+    }
+    setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "saving" }));
+    try {
+      const { confirmLessonJournalHomeworkFollowup } = await import(
+        "../domains/lessons/lessonJournalHomeworkFollowupConfirmation.js"
+      );
+      const result = await confirmLessonJournalHomeworkFollowup({
+        currentRecords: recordsRef.current,
+        request: postJsonWithTimeout,
+        sourceRecord
+      });
+      const nextRecords = mergeVerifiedLessonJournalRecords({
+        currentRecords: recordsRef.current,
+        verifiedRecords: [result.record],
+        upsertRecord: upsertLessonStudentRecord
+      });
+      recordsRef.current = nextRecords;
+      setRecords(nextRecords);
+      writeStorageValue(window.localStorage, storageKeys.records, JSON.stringify(nextRecords));
+      setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "saved" }));
+      return { ok: true, message: "확인할 숙제 · 확인 완료", record: result.record };
+    } catch (error) {
+      console.error(error);
+      setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "failed" }));
+      return {
+        ok: false,
+        message: error?.message || "확인할 숙제 · 저장 실패 · 다시 시도해 주세요."
+      };
+    }
+  }
+
   async function handleSaveRecord(recordId, lessonForRecord = null, studentForRecord = null, recordOverride = null, options = {}) {
     const { skipNotificationRefresh = true, skipRelatedHomeworks = false, verifyFields = [] } = options;
     const existingTimerId = autoSaveTimersRef.current.get(recordId);
@@ -7155,6 +7190,7 @@ export function App() {
       handleCancelNotificationJob,
       handleCancelSupplementNotificationControl,
       handleChangeRecord,
+      handleConfirmHomeworkFollowup,
       handleConfirmExamPostSubmission,
       handleCopySelectedLesson,
       handleCreateMakeupTask,

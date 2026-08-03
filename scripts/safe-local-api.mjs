@@ -227,9 +227,14 @@ const initialState = {
     },
     {
       attendanceStatus: "present",
+      assignmentStatus: "not_checked",
+      homeworkFollowupMethod: "next_lesson",
+      homeworkFollowupSourceHomeworkId: "safe-cross-month-previous-homework",
+      homeworkFollowupText: "안전 확인 숙제",
       lessonId: "safe-cross-month-blank-lesson",
       lessonMaterial: "",
       lessonProgress: "",
+      preparationMemo: "준비물 챙기기\n다음 수업 확인: 안전 확인 숙제",
       lessonStudentRecordId: "safe-cross-month-blank-record",
       recordId: "safe-cross-month-blank-record",
       studentId: "safe-active-student"

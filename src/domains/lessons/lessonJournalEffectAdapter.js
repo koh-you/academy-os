@@ -2,6 +2,7 @@ export function createLessonJournalEffectAdapter({ actions = {}, transport = {} 
   return Object.freeze({
     persistence: Object.freeze({
       onChangeRecord: actions.handleChangeRecord,
+      onConfirmHomeworkFollowup: actions.handleConfirmHomeworkFollowup,
       onDeleteLesson: actions.handleDeleteLesson,
       onPassMakeupTask: actions.handlePassSupplementTask,
       onSaveLessonJournalDrafts: actions.handleSaveLessonJournalDrafts,

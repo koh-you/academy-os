@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 확인할 숙제 완료 처리
+
+- 다음 수업 수업일지에 남은 `확인할 숙제` 카드에 `확인 완료`를 추가했다. 클릭하면 원 수업기록의 `homeworkFollowupMethod/Text/SourceHomeworkId`와 레거시 메모 줄만 비우며 숙제 판정·코멘트·다른 메모는 보존한다.
+- 기존 `/api/lesson-journal/rows/save`의 `updated_at` CAS·Supabase 재조회 계약을 그대로 사용한다. 충돌·검증 실패에서는 표시를 유지하고 다시 확인할 수 있으며, 성공 때만 App 원천을 교체해 즉시 숨긴다.
+- 검증: lesson `16/16`, runtime lint, scenario·production `823/823`, build `399 modules`·main `943.28 kB`·lazy `12/12`, 집중 browser `1/1`, 전체 safe browser `36/36`. 브라우저에서 저장 뒤 API 원천과 페이지 새로고침까지 대조했다.
+
 ## 2026-08-03 결석보강 수업일지 통일 + 보충 일정 versioned 저장
 
 - 결석보강 연결 수업을 별도 2열 `결석 보강 일정` 상세 대신 일반 `수업일지` shell과 `LessonJournalDetail`로 연다. 출결·교재·수업내용·지난/새 숙제·코멘트·수정/저장·알림 표시 방식은 일반 수업과 동일하고, 헤더 아래에 원 결석 수업의 날짜·반·시간·결석 사유만 읽기 전용 notice로 추가한다. 숙제보충 전용 상세는 유지한다.

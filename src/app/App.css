@@ -7601,11 +7601,29 @@ textarea {
   border: 1px solid #fed7aa;
   border-radius: 6px;
   color: #9a3412;
-  display: block;
+  display: grid;
   font-size: 11px;
   font-weight: 900;
+  gap: 5px;
   line-height: 1.35;
   padding: 5px 6px;
+}
+
+.homeworkFollowupConfirmButton {
+  background: #ffffff;
+  border: 1px solid #fdba74;
+  border-radius: 5px;
+  color: #9a3412;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 900;
+  min-height: 26px;
+  padding: 2px 6px;
+}
+
+.homeworkFollowupConfirmButton:disabled {
+  cursor: wait;
+  opacity: 0.65;
 }
 
 .managementTable input,

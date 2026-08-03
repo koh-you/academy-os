@@ -1018,6 +1018,36 @@ test("lesson journal keeps drafts after a version conflict and saves them on a v
   expect(pageErrors).toEqual([]);
 });
 
+test("teacher confirms a pending homework followup and it stays cleared after reload", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+
+  const openCrossMonthLessonJournal = async () => {
+    const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
+    await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
+    return page.getByRole("dialog", { name: "수업일지" });
+  };
+
+  let lessonJournal = await openCrossMonthLessonJournal();
+  await expect(lessonJournal.getByText("확인할 숙제 · 안전 확인 숙제")).toBeVisible();
+  await lessonJournal.getByRole("button", { name: "안전 확인 숙제 숙제 확인 완료" }).click();
+  await expect(lessonJournal.getByText("확인할 숙제 · 안전 확인 숙제")).toHaveCount(0);
+
+  const savedRecords = (await (await request.get(`${safeApiBaseUrl}/api/lesson-records`)).json()).records;
+  const sourceRecord = savedRecords.find((record) => record.lessonStudentRecordId === "safe-cross-month-blank-record");
+  expect(sourceRecord.homeworkFollowupMethod).toBe("");
+  expect(sourceRecord.homeworkFollowupSourceHomeworkId).toBe("");
+  expect(sourceRecord.homeworkFollowupText).toBe("");
+  expect(sourceRecord.preparationMemo).toBe("준비물 챙기기");
+  expect(sourceRecord.assignmentStatus).toBe("not_checked");
+
+  await page.reload();
+  await expect(page.getByRole("navigation", { name: "주요 화면" })).toBeVisible();
+  lessonJournal = await openCrossMonthLessonJournal();
+  await expect(lessonJournal.getByText("확인할 숙제 · 안전 확인 숙제")).toHaveCount(0);
+  expect(pageErrors).toEqual([]);
+});
+
 test("lesson journal reuses one stable makeup task after an unknown save response", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   let interceptedTaskId = "";
