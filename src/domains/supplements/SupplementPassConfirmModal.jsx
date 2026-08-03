@@ -1,4 +1,4 @@
-import { Modal } from "../../shared/components/Modal.jsx";
+import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
 
 export function SupplementPassConfirmModal({ errorMessage = "", getTypeLabel, isBusy = false, onCancel, onConfirm, studentName, task }) {
   const targetLabel = task.taskType === "homework_makeup"
@@ -31,14 +31,14 @@ export function SupplementPassConfirmModal({ errorMessage = "", getTypeLabel, is
         </dl>
         {errorMessage ? <div className="supplementPassError">{errorMessage}</div> : null}
       </div>
-      <div className="modalActions confirmActions">
+      <ModalFooter className="confirmActions">
         <button className="softButton" disabled={isBusy} onClick={onCancel} type="button">
           취소
         </button>
         <button className="passButton" disabled={isBusy} onClick={onConfirm} type="button">
           {isBusy ? "처리 중" : "보충 완료 처리"}
         </button>
-      </div>
+      </ModalFooter>
     </Modal>
   );
 }

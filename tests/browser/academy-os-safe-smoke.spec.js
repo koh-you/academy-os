@@ -1004,6 +1004,13 @@ test("broken supplement lesson links are visible and block schedule or notificat
   expect(notificationDialogBox.y + notificationDialogBox.height).toBeLessThanOrEqual(844);
   await notificationDialog.getByRole("button", { exact: true, name: "닫기" }).click();
   await expect(notificationDialog).toBeHidden();
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".supplementStudentModal")).toBeHidden();
+  await candidate.getByRole("button", { name: "보충 완료 처리" }).click();
+  const passDialog = page.getByRole("dialog", { name: "보충 완료 처리 확인" });
+  await expect(passDialog.locator(".modalFooter")).toBeVisible();
+  await passDialog.getByRole("button", { name: "취소" }).click();
+  await expect(passDialog).toBeHidden();
   expect(pageErrors).toEqual([]);
 });
 

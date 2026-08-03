@@ -36,8 +36,8 @@ const rawDialogEntries = sourceEntries.filter((entry) => (
 
 assert.equal(directModalCount, 35, "unexpected direct common Modal surface count");
 assert.equal(injectedModalCount, 6, "unexpected injected common Modal surface count");
-assert.equal(modalFooterCount, 11, "unexpected common ModalFooter count");
-assert.equal(modalActionCount, 6, "unexpected legacy modalActions wrapper count");
+assert.equal(modalFooterCount, 12, "unexpected common ModalFooter count");
+assert.equal(modalActionCount, 5, "unexpected legacy modalActions wrapper count");
 assert.deepEqual(
   rawDialogEntries.map((entry) => entry.path),
   [],

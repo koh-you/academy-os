@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-03
 
+## 2026-08-03 P2-3a 보충 완료 확인 footer
+
+- `SupplementPassConfirmModal`의 버튼 wrapper만 공통 `ModalFooter`로 옮겼다. 취소/완료 callback, `isBusy`, 문구·순서는 그대로다.
+- 완료 callback은 보충 원천 저장과 학생 11시 예약 취소를 조립하지만 이번 변경은 화면 wrapper뿐이다. safe browser는 확인창을 열고 취소만 하며 실제 저장/provider 행동은 없다.
+- 공통 footer는 12개, 기존 action wrapper는 5개다. 다음은 일정 저장과 알림 예약 결과가 함께 보이는 `SupplementScheduleChangeConfirmModal`을 별도 단위로 검토한다.
+
 ## 2026-08-03 P2-2 Solapi 제어창 공통 shell
 
 - `SupplementNotificationControlModal`을 공통 `Modal`/`ModalFooter`로 옮겨 모든 dialog 41개가 공통 shell을 사용한다. 기존 접근성 이름, busy X/Escape 차단, 3개 카드, wide/safe-area class를 보존했다.
