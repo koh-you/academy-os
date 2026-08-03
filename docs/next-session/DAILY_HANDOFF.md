@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-03
 
+## 2026-08-03 P2 modal follow-up inventory
+
+- dialog 41개 중 공통 `Modal` 경로는 40개(직접 34, 주입 6)다. bespoke 예외는 실제 Solapi 예약·취소 callback을 받는 `SupplementNotificationControlModal` 1개다.
+- 공통 footer는 9개이고 기존 `modalActions` wrapper 8개가 남았다. 본문 다중 작업 바와 다중 원천 확인창을 footer 이름만 보고 일괄 이동하지 않는다. 공통 상태 vocabulary는 `idle/dirty/saving/verifying/saved/failed`로 고정했다.
+- 다음 P2-1은 실제 알림이 없는 `ReportModal` footer다. P2-2에서 Solapi 제어창의 shell만 공통화하고 callback identity·busy 닫기 차단·3개 카드·safe-area layout을 보존한다. 실제 provider 행동은 실행하지 않는다.
+
 ## 2026-08-03 보고서 snapshot 명시 저장 신뢰성
 
 - 보고서 snapshot은 공용 자동저장에서 빠졌고, 교사 인증 전용 API가 `app_state.reportSnapshots`의 `updated_at` CAS와 Supabase 재조회를 완료한 뒤에만 App 원천을 교체한다. 기존 snapshot ID도 함께 보존되는지 확인한다.
