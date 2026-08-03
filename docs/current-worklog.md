@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 보충 일정 이중 원천 versioned 저장
+
+- 보충 일정 생성·변경의 `lessons`와 `makeup_tasks` 저장을 `/api/supplement-schedules/save` 단일 계획으로 묶었다. 신규는 insert-only, 기존은 각 `updated_at` CAS를 사용하고 두 원천을 Supabase에서 다시 읽어 모두 일치한 뒤에만 App state를 갱신한다.
+- 첫 원천 저장 뒤 두 번째 원천이 실패하면 정확한 저장 version으로 역순 보상한다. 보상 중 더 최신 변경을 만나면 덮어쓰지 않고 `SUPPLEMENT_SCHEDULE_PARTIAL_FAILURE`와 audit를 반환한다. 브라우저 또는 Supabase 응답 유실 뒤 같은 logical task의 날짜·시간·메모가 바뀌면 최초 audit를 먼저 회수하고, 확인된 새 version을 before로 최신 draft를 후속 CAS 저장한다.
+- 원천 대조·계획 생성·재시도 action과 저장 성공 뒤 알림 적용은 실제 보충 일정 저장 때만 동적 로드한다. provider가 throw하거나 실패 상태를 반환하면 lesson/task는 `saved`, 알림만 `failed`, 재시도 범위는 `provider`로 표시해 전체 일정 저장 실패로 오인하지 않는다. 첫 exact preview에서 Vercel Node의 초기 main이 예산을 52 bytes 초과한 것을 확인해 알림 적용만 별도 lazy chunk로 옮겼고 예산은 올리지 않았다.
+- 검증: supplement `10/10`, nested lesson boundary, runtime lint, `check:fast`, scenario·production `823/823`, build `396 modules`·main `942.19 kB`·lazy `12/12`, Worktree 격리 safe browser `34/34`. 새 browser는 서버 반영 뒤 응답 유실→날짜·시간·알림 초안 변경→동일 audit 회수→새 audit CAS 저장→lesson/task 각 1건과 provider 실패 분리를 확인한다. 실제 Solapi 행동은 실행하지 않았다.
+- 병행 UI branch `codex/daily-20260803-makeup-journal-modal`은 App/API/persistence를 건드리지 않고 결석보강 상세를 일반 수업일지 shell로 통일했다. 이 저장 단위 main 통합 뒤 최신 main에 재배치해 전체 검증한다.
+
 ## 2026-08-03 보충·알림 다중 원천 읽기/판정 reconcile
 
 - `makeup_tasks`의 정방향 `linkedLessonId`, `lessons`의 역방향 `sourceMakeupTaskId`, 연결 일정, 해당 task의 미발송 `notification_jobs`를 한 pure model에서 판정한다. 정상·기존 ID 연결·일정 변경 대기와 수업 누락·task 링크 누락/오래됨·중복 수업·다른 원천·예상 밖 일정 불일치·이전 일정 예약 잔존을 구분한다.

@@ -71,6 +71,10 @@ import {
   createLessonJournalMakeupTaskPersistenceSnapshot,
   createNextLessonJournalMakeupTaskUpdatedAt
 } from "../../src/domains/lessons/lessonJournalMakeupTaskPersistence.js";
+import {
+  areSupplementScheduleTasksEqual,
+  createSupplementScheduleSavePlan
+} from "../../src/domains/supplements/supplementSchedulePersistence.js";
 import { deleteRows, getSupabaseStatus, insertRows, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
 
 const fallbackSource = "local_sample";
@@ -4188,6 +4192,7 @@ async function persistLessonJournalMakeupTask(requestedTask = {}) {
     const error = new Error(`등원보충 ${makeupTaskId} 저장 후 Supabase 재조회 값이 일치하지 않습니다.`);
     error.code = "LESSON_JOURNAL_MAKEUP_TASK_VERIFY_FAILED";
     error.statusCode = 500;
+    error.appliedTask = fromMakeupTaskRow(desiredRow);
     throw error;
   }
   return fromMakeupTaskRow(verifiedRow);
@@ -4229,6 +4234,310 @@ export async function saveLessonJournalMakeupTasks(makeupTasks = [], { auditId =
     source: databaseSource,
     verified: persistedTasks.length === makeupTasks.length
   };
+}
+
+function createSupplementScheduleConflict(message, details = {}) {
+  const error = new Error(message);
+  Object.assign(error, details, { code: "SUPPLEMENT_SCHEDULE_CONFLICT", statusCode: 409 });
+  return error;
+}
+
+async function persistSupplementScheduleLessonChange(change = {}) {
+  const after = change.after ?? null;
+  const before = change.before ?? null;
+  const lessonId = String(after?.lessonId ?? "").trim();
+  if (!lessonId) throw createSupplementScheduleConflict("저장할 보충 수업일지 ID가 없습니다.");
+  let current = await getLessonForRosterSave(lessonId);
+  if (current && areLessonJournalHistoryLessonsEqual(after, current)) {
+    return { beforeLesson: before, lesson: current, mutated: false, operation: "unchanged" };
+  }
+
+  if (!before) {
+    if (current) {
+      throw createSupplementScheduleConflict("같은 ID의 수업일지가 이미 다른 내용으로 존재합니다.", {
+        currentLesson: current,
+        lessonId
+      });
+    }
+    const nextUpdatedAt = createNextRosterUpdatedAt();
+    let savedRows;
+    try {
+      savedRows = await insertRows("lessons", [{ ...toLessonRow(after), updated_at: nextUpdatedAt }]);
+    } catch (error) {
+      current = await getLessonForRosterSave(lessonId);
+      if (current && areLessonJournalHistoryLessonsEqual(after, current)) {
+        return { beforeLesson: null, lesson: current, mutated: true, operation: "create" };
+      }
+      if (current) {
+        throw createSupplementScheduleConflict("보충 수업일지 신규 저장이 다른 화면과 충돌했습니다.", {
+          cause: error,
+          currentLesson: current,
+          lessonId
+        });
+      }
+      throw error;
+    }
+    const verified = await getLessonForRosterSave(lessonId);
+    if (
+      savedRows.length !== 1 ||
+      !verified ||
+      !areLessonJournalHistoryLessonsEqual(after, verified) ||
+      !areLessonJournalHistoryTimestampsEqual(nextUpdatedAt, verified.updatedAt)
+    ) {
+      const error = new Error("보충 수업일지 저장 후 Supabase 재조회가 일치하지 않습니다.");
+      error.code = "SUPPLEMENT_SCHEDULE_VERIFY_FAILED";
+      error.appliedResult = {
+        beforeLesson: null,
+        lesson: { ...after, updatedAt: nextUpdatedAt },
+        mutated: true,
+        operation: "create"
+      };
+      throw error;
+    }
+    return { beforeLesson: null, lesson: verified, mutated: true, operation: "create" };
+  }
+
+  if (
+    !current ||
+    !before.updatedAt ||
+    !areLessonJournalHistoryTimestampsEqual(current.updatedAt, before.updatedAt) ||
+    !areLessonJournalHistoryLessonsEqual(before, current)
+  ) {
+    throw createSupplementScheduleConflict("보충 수업일지가 다른 화면에서 먼저 변경되었습니다.", {
+      currentLesson: current,
+      lessonId
+    });
+  }
+  const nextUpdatedAt = createNextRosterUpdatedAt(current.updatedAt);
+  let savedRows;
+  try {
+    savedRows = await patchRows(
+      "lessons",
+      createLessonRosterVersionFilter(lessonId, current.updatedAt),
+      { ...toLessonRow(after), updated_at: nextUpdatedAt }
+    );
+  } catch (error) {
+    const recovered = await getLessonForRosterSave(lessonId);
+    if (recovered && areLessonJournalHistoryLessonsEqual(after, recovered)) {
+      return { beforeLesson: current, lesson: recovered, mutated: true, operation: "update" };
+    }
+    if (recovered && !areLessonJournalHistoryTimestampsEqual(current.updatedAt, recovered.updatedAt)) {
+      throw createSupplementScheduleConflict("보충 수업일지 저장 응답 확인 중 더 최신 변경을 발견했습니다.", {
+        cause: error,
+        currentLesson: recovered,
+        lessonId
+      });
+    }
+    throw error;
+  }
+  if (savedRows.length !== 1) {
+    const recovered = await getLessonForRosterSave(lessonId);
+    if (recovered && areLessonJournalHistoryLessonsEqual(after, recovered)) {
+      return { beforeLesson: current, lesson: recovered, mutated: false, operation: "unchanged" };
+    }
+    throw createSupplementScheduleConflict("보충 수업일지 저장 직전에 서버 버전이 변경되었습니다.", {
+      currentLesson: recovered,
+      lessonId
+    });
+  }
+  const verified = await getLessonForRosterSave(lessonId);
+  if (
+    !verified ||
+    !areLessonJournalHistoryLessonsEqual(after, verified) ||
+    !areLessonJournalHistoryTimestampsEqual(nextUpdatedAt, verified.updatedAt)
+  ) {
+    const error = new Error("보충 수업일지 변경 후 Supabase 재조회가 일치하지 않습니다.");
+    error.code = "SUPPLEMENT_SCHEDULE_VERIFY_FAILED";
+    error.appliedResult = {
+      beforeLesson: current,
+      lesson: { ...after, updatedAt: nextUpdatedAt },
+      mutated: true,
+      operation: "update"
+    };
+    throw error;
+  }
+  return { beforeLesson: current, lesson: verified, mutated: true, operation: "update" };
+}
+
+async function persistSupplementScheduleTaskChange(change = {}) {
+  const after = change.after ?? null;
+  const before = change.before ?? null;
+  const taskId = String(after?.makeupTaskId ?? "").trim();
+  if (!taskId) throw createSupplementScheduleConflict("저장할 보충관리 ID가 없습니다.");
+  const currentRow = await readMakeupTaskRow(taskId);
+  const current = currentRow ? fromMakeupTaskRow(currentRow) : null;
+  if (current && areSupplementScheduleTasksEqual(after, current)) {
+    return { beforeTask: before, makeupTask: current, mutated: false, operation: "unchanged" };
+  }
+  if (!before && current) {
+    throw createSupplementScheduleConflict("같은 ID의 보충 항목이 이미 다른 내용으로 존재합니다.", {
+      currentTask: current,
+      taskId
+    });
+  }
+  if (before && (
+    !current ||
+    !before.updatedAt ||
+    !areLessonJournalHistoryTimestampsEqual(current.updatedAt, before.updatedAt) ||
+    !areSupplementScheduleTasksEqual(before, current)
+  )) {
+    throw createSupplementScheduleConflict("보충 항목이 다른 화면에서 먼저 변경되었습니다.", {
+      currentTask: current,
+      taskId
+    });
+  }
+  try {
+    const makeupTask = await persistLessonJournalMakeupTask(after);
+    return {
+      beforeTask: before,
+      makeupTask,
+      mutated: true,
+      operation: before ? "update" : "create"
+    };
+  } catch (error) {
+    if (error.appliedTask) {
+      error.appliedResult = {
+        beforeTask: before,
+        makeupTask: error.appliedTask,
+        mutated: true,
+        operation: before ? "update" : "create"
+      };
+    }
+    throw error;
+  }
+}
+
+async function rollbackSupplementScheduleLesson(entry) {
+  if (!entry?.mutated) return { lessonId: entry?.lesson?.lessonId || "", verified: true };
+  const lessonId = entry.lesson.lessonId;
+  if (entry.operation === "create") {
+    const rows = await deleteRows("lessons", createLessonRosterVersionFilter(lessonId, entry.lesson.updatedAt));
+    return { lessonId, verified: rows.length === 1 && !(await getLessonForRosterSave(lessonId)) };
+  }
+  const rows = await patchRows(
+    "lessons",
+    createLessonRosterVersionFilter(lessonId, entry.lesson.updatedAt),
+    { ...toLessonRow(entry.beforeLesson), updated_at: entry.beforeLesson.updatedAt }
+  );
+  const restored = await getLessonForRosterSave(lessonId);
+  return {
+    lessonId,
+    verified: rows.length === 1 &&
+      areLessonJournalHistoryLessonsEqual(entry.beforeLesson, restored ?? {}) &&
+      areLessonJournalHistoryTimestampsEqual(entry.beforeLesson.updatedAt, restored?.updatedAt)
+  };
+}
+
+async function rollbackSupplementScheduleTask(entry) {
+  if (!entry?.mutated) return { makeupTaskId: entry?.makeupTask?.makeupTaskId || "", verified: true };
+  const makeupTaskId = entry.makeupTask.makeupTaskId;
+  if (entry.operation === "create") {
+    const rows = await deleteRows(
+      "makeup_tasks",
+      `makeup_task_id=eq.${encodeURIComponent(makeupTaskId)}&updated_at=eq.${encodeURIComponent(entry.makeupTask.updatedAt)}`
+    );
+    return { makeupTaskId, verified: rows.length === 1 && !(await readMakeupTaskRow(makeupTaskId)) };
+  }
+  const rows = await patchRows(
+    "makeup_tasks",
+    `makeup_task_id=eq.${encodeURIComponent(makeupTaskId)}&updated_at=eq.${encodeURIComponent(entry.makeupTask.updatedAt)}`,
+    { ...toMakeupTaskRow(entry.beforeTask), updated_at: entry.beforeTask.updatedAt }
+  );
+  const restoredRow = await readMakeupTaskRow(makeupTaskId);
+  const restored = restoredRow ? fromMakeupTaskRow(restoredRow) : null;
+  return {
+    makeupTaskId,
+    verified: rows.length === 1 &&
+      areSupplementScheduleTasksEqual(entry.beforeTask, restored ?? {}) &&
+      areLessonJournalHistoryTimestampsEqual(entry.beforeTask.updatedAt, restored?.updatedAt)
+  };
+}
+
+export async function saveSupplementSchedulePlan({
+  auditId = "",
+  lessonChange = {},
+  taskChange = {}
+} = {}) {
+  const normalizedAuditId = String(auditId || "").trim();
+  if (!normalizedAuditId) {
+    const error = new Error("보충 일정 저장 audit ID가 필요합니다.");
+    error.code = "SUPPLEMENT_SCHEDULE_INVALID";
+    error.statusCode = 400;
+    throw error;
+  }
+  try {
+    createSupplementScheduleSavePlan({
+      afterLesson: lessonChange.after,
+      afterTask: taskChange.after,
+      beforeLesson: lessonChange.before,
+      beforeTask: taskChange.before
+    });
+  } catch (error) {
+    error.code = "SUPPLEMENT_SCHEDULE_INVALID";
+    error.statusCode = 400;
+    throw error;
+  }
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return {
+      auditId: normalizedAuditId,
+      lesson: lessonChange.after ?? null,
+      makeupTask: taskChange.after ?? null,
+      source: fallbackSource,
+      verified: false
+    };
+  }
+
+  let appliedLesson = null;
+  let appliedTask = null;
+  let failedStage = "lesson";
+  try {
+    try {
+      appliedLesson = await persistSupplementScheduleLessonChange(lessonChange);
+    } catch (error) {
+      appliedLesson = error.appliedResult ?? null;
+      throw error;
+    }
+    failedStage = "makeupTask";
+    try {
+      appliedTask = await persistSupplementScheduleTaskChange(taskChange);
+    } catch (error) {
+      appliedTask = error.appliedResult ?? null;
+      throw error;
+    }
+    return {
+      auditId: normalizedAuditId,
+      lesson: appliedLesson.lesson,
+      makeupTask: appliedTask.makeupTask,
+      source: databaseSource,
+      verified: true
+    };
+  } catch (error) {
+    const rollbackResults = [];
+    const rollbackErrors = [];
+    for (const [kind, rollback] of [
+      ["makeupTask", () => rollbackSupplementScheduleTask(appliedTask)],
+      ["lesson", () => rollbackSupplementScheduleLesson(appliedLesson)]
+    ]) {
+      try {
+        const result = await rollback();
+        if (result) rollbackResults.push({ kind, ...result });
+      } catch (rollbackError) {
+        rollbackErrors.push({ kind, message: rollbackError.message });
+      }
+    }
+    const rollbackVerified = rollbackErrors.length === 0 && rollbackResults.every((result) => result.verified);
+    const originalCode = error.code;
+    error.code = rollbackVerified
+      ? originalCode || "SUPPLEMENT_SCHEDULE_SAVE_FAILED"
+      : "SUPPLEMENT_SCHEDULE_PARTIAL_FAILURE";
+    error.statusCode = rollbackVerified && error.statusCode === 409 ? 409 : 500;
+    error.audit = {
+      auditId: normalizedAuditId,
+      failedStage,
+      rollback: { errors: rollbackErrors, results: rollbackResults, verified: rollbackVerified }
+    };
+    throw error;
+  }
 }
 
 export async function deleteMakeupTask(makeupTaskId) {

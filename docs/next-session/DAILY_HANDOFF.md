@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-03
 
+## 2026-08-03 보충 일정 versioned source save
+
+- `lessons + makeup_tasks` 보충 일정 저장을 단일 API 계획으로 묶었다. 각 원천의 insert-only/CAS와 Supabase 재조회가 모두 성공해야 화면을 갱신하고, 그 뒤에만 기존 notification orchestration을 실행한다.
+- 응답 유실 뒤 날짜·시간·메모가 바뀌어도 logical task key로 최초 audit를 회수한 뒤 최신 draft를 새 version에 후속 CAS 저장한다. 중간 실패는 역순 CAS 보상하고 최신 변경을 보호한다. provider 실패는 source saved·notification failed·provider-only 재시도로 분리한다.
+- Vercel Node에서 초기 main 예산을 52 bytes 넘긴 알림 적용 함수를 저장 뒤 동적 chunk로 옮겨 예산을 올리지 않고 main을 `942.19 kB`로 낮췄다. 검증: supplement `10/10`, nested lesson boundary, lint, `check:fast`, production `823/823`, build `396 modules`·lazy `12/12`, safe browser `34/34`. 운영 데이터·실제 알림·SQL·유료 호출은 사용하지 않았다.
+- 다음 순서: 이 branch를 exact-head CI·main CI·Vercel까지 통합한 뒤 `codex/daily-20260803-makeup-journal-modal`을 최신 main에 재배치해 저장 callback 의미와 전체 검증을 확인한다. 이후 P1의 숙제·포털·자료함·보고서 저장 계약에서 한 단위를 선택한다.
+
 ## 2026-08-03 보충·알림 원천 reconcile inventory
 
 - 보충 상세는 `makeup_tasks` 정방향 링크, `lessons` 역방향 원천과 실제 일정, 미발송 `notification_jobs`를 함께 대조한다. 누락·오래된 링크·중복·다른 원천·일정 불일치·이전 일정 예약은 경고로 표시하고 일정 저장/새 예약을 막는다.
