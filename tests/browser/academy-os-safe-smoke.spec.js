@@ -892,6 +892,48 @@ test("lesson journal keeps drafts after a version conflict and saves them on a v
   expect(pageErrors).toEqual([]);
 });
 
+test("lesson journal reuses one stable makeup task after an unknown save response", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  let interceptedTaskId = "";
+  let loseFirstResponse = true;
+  await page.route("**/api/lesson-journal/makeup-tasks/save", async (route) => {
+    if (!loseFirstResponse) {
+      await route.continue();
+      return;
+    }
+    loseFirstResponse = false;
+    const payload = route.request().postDataJSON();
+    interceptedTaskId = payload.makeupTasks?.[0]?.makeupTaskId || "";
+    const response = await route.fetch();
+    expect(response.ok()).toBe(true);
+    await route.abort("failed");
+  });
+
+  await loginAsTeacher(page);
+  const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
+  await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
+  const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
+  await lessonJournal.getByRole("button", { name: "수정 시작" }).click();
+  await lessonJournal.getByRole("combobox", { name: "월경계 학생 숙제 상태" }).selectOption("not_done");
+  await lessonJournal.getByRole("button", { name: "등원보충" }).click();
+
+  const saveBar = lessonJournal.getByRole("complementary", { name: "수업일지 하단 고정 저장 바" });
+  const saveButton = saveBar.getByRole("button", { name: "변경 저장" });
+  await saveButton.click();
+  await expect(saveBar).toContainText(/부분 저장|저장 실패/);
+  expect(interceptedTaskId).toMatch(/^makeup_lesson_journal_/);
+  let savedTasks = (await (await request.get(`${safeApiBaseUrl}/api/makeup-tasks`)).json()).makeupTasks;
+  expect(savedTasks).toHaveLength(1);
+  expect(savedTasks[0].makeupTaskId).toBe(interceptedTaskId);
+
+  await saveButton.click();
+  await expect(saveBar).toContainText("저장 완료");
+  savedTasks = (await (await request.get(`${safeApiBaseUrl}/api/makeup-tasks`)).json()).makeupTasks;
+  expect(savedTasks).toHaveLength(1);
+  expect(savedTasks[0].makeupTaskId).toBe(interceptedTaskId);
+  expect(pageErrors).toEqual([]);
+});
+
 test("lesson memo opens from the shared nested lesson chunk without saving", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await page.route("**/src/domains/lessons/LessonNestedPanels.jsx*", async (route) => {

@@ -67,6 +67,10 @@ import {
   areLessonJournalRecordsEqual,
   verifyLessonJournalRowsSavePlan
 } from "../../src/domains/lessons/lessonJournalRowsPersistence.js";
+import {
+  createLessonJournalMakeupTaskPersistenceSnapshot,
+  createNextLessonJournalMakeupTaskUpdatedAt
+} from "../../src/domains/lessons/lessonJournalMakeupTaskPersistence.js";
 import { deleteRows, getSupabaseStatus, insertRows, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
 
 const fallbackSource = "local_sample";
@@ -4079,6 +4083,152 @@ export async function upsertMakeupTasks(makeupTasks) {
       )
     : rows;
   return { source: databaseSource, makeupTasks: verifiedRows.map(fromMakeupTaskRow) };
+}
+
+function createLessonJournalMakeupTaskConflict(taskId, currentTask = null) {
+  const error = new Error(`등원보충 ${taskId}가 다른 화면에서 먼저 변경되었습니다.`);
+  error.code = "LESSON_JOURNAL_MAKEUP_TASK_CONFLICT";
+  error.currentTask = currentTask;
+  error.statusCode = 409;
+  return error;
+}
+
+function createMakeupTaskRowPersistenceSnapshot(row = {}) {
+  return {
+    due_date: row.due_date ?? null,
+    makeup_task_id: row.makeup_task_id ?? "",
+    note: createLessonJournalMakeupTaskPersistenceSnapshot(parseJsonNote(row.note)),
+    source_homework_id: row.source_homework_id ?? null,
+    source_lesson_id: row.source_lesson_id ?? null,
+    status: row.status ?? "open",
+    student_id: row.student_id ?? "",
+    title: row.title ?? "",
+    type: row.type ?? "homework_makeup"
+  };
+}
+
+function areMakeupTaskRowsPersistedEqual(left = {}, right = {}) {
+  return JSON.stringify(createMakeupTaskRowPersistenceSnapshot(left)) ===
+    JSON.stringify(createMakeupTaskRowPersistenceSnapshot(right));
+}
+
+async function readMakeupTaskRow(makeupTaskId) {
+  const rows = await listRows(
+    "makeup_tasks",
+    `select=*&makeup_task_id=eq.${encodeURIComponent(makeupTaskId)}&limit=1`,
+    { requireServiceRole: true }
+  );
+  return rows[0] ?? null;
+}
+
+async function persistLessonJournalMakeupTask(requestedTask = {}) {
+  const makeupTaskId = String(requestedTask.makeupTaskId ?? "").trim();
+  if (!makeupTaskId || !requestedTask.studentId || !requestedTask.taskType) {
+    const error = new Error("등원보충 저장에 task ID·학생·유형이 필요합니다.");
+    error.code = "LESSON_JOURNAL_MAKEUP_TASK_INVALID";
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const desiredRow = toMakeupTaskRow({ ...requestedTask, makeupTaskId });
+  let currentRow = await readMakeupTaskRow(makeupTaskId);
+  if (currentRow && areMakeupTaskRowsPersistedEqual(currentRow, desiredRow)) {
+    return fromMakeupTaskRow(currentRow);
+  }
+
+  if (!currentRow) {
+    desiredRow.updated_at = createNextLessonJournalMakeupTaskUpdatedAt();
+    try {
+      await insertRows("makeup_tasks", [desiredRow]);
+    } catch (error) {
+      currentRow = await readMakeupTaskRow(makeupTaskId);
+      if (currentRow && areMakeupTaskRowsPersistedEqual(currentRow, desiredRow)) {
+        return fromMakeupTaskRow(currentRow);
+      }
+      if (currentRow) throw createLessonJournalMakeupTaskConflict(makeupTaskId, fromMakeupTaskRow(currentRow));
+      throw error;
+    }
+  } else {
+    const expectedUpdatedAt = String(requestedTask.updatedAt ?? "").trim();
+    if (!expectedUpdatedAt || currentRow.updated_at !== expectedUpdatedAt) {
+      throw createLessonJournalMakeupTaskConflict(makeupTaskId, fromMakeupTaskRow(currentRow));
+    }
+    desiredRow.updated_at = createNextLessonJournalMakeupTaskUpdatedAt(expectedUpdatedAt);
+    try {
+      const updatedRows = await patchRows(
+        "makeup_tasks",
+        `makeup_task_id=eq.${encodeURIComponent(makeupTaskId)}&updated_at=eq.${encodeURIComponent(expectedUpdatedAt)}`,
+        desiredRow
+      );
+      if (!updatedRows.length) {
+        currentRow = await readMakeupTaskRow(makeupTaskId);
+        if (currentRow && areMakeupTaskRowsPersistedEqual(currentRow, desiredRow)) {
+          return fromMakeupTaskRow(currentRow);
+        }
+        throw createLessonJournalMakeupTaskConflict(
+          makeupTaskId,
+          currentRow ? fromMakeupTaskRow(currentRow) : null
+        );
+      }
+    } catch (error) {
+      if (error?.code === "LESSON_JOURNAL_MAKEUP_TASK_CONFLICT") throw error;
+      currentRow = await readMakeupTaskRow(makeupTaskId);
+      if (currentRow && areMakeupTaskRowsPersistedEqual(currentRow, desiredRow)) {
+        return fromMakeupTaskRow(currentRow);
+      }
+      if (currentRow && currentRow.updated_at !== expectedUpdatedAt) {
+        throw createLessonJournalMakeupTaskConflict(makeupTaskId, fromMakeupTaskRow(currentRow));
+      }
+      throw error;
+    }
+  }
+
+  const verifiedRow = await readMakeupTaskRow(makeupTaskId);
+  if (!verifiedRow || !areMakeupTaskRowsPersistedEqual(verifiedRow, desiredRow)) {
+    const error = new Error(`등원보충 ${makeupTaskId} 저장 후 Supabase 재조회 값이 일치하지 않습니다.`);
+    error.code = "LESSON_JOURNAL_MAKEUP_TASK_VERIFY_FAILED";
+    error.statusCode = 500;
+    throw error;
+  }
+  return fromMakeupTaskRow(verifiedRow);
+}
+
+export async function saveLessonJournalMakeupTasks(makeupTasks = [], { auditId = "" } = {}) {
+  if (!Array.isArray(makeupTasks)) {
+    const error = new Error("등원보충 저장 목록 형식이 올바르지 않습니다.");
+    error.code = "LESSON_JOURNAL_MAKEUP_TASK_INVALID";
+    error.statusCode = 400;
+    throw error;
+  }
+  const taskIds = makeupTasks.map((task) => String(task?.makeupTaskId ?? "").trim());
+  if (new Set(taskIds).size !== taskIds.length) {
+    const error = new Error("같은 등원보충 요청 ID가 저장 목록에 중복되었습니다.");
+    error.code = "LESSON_JOURNAL_MAKEUP_TASK_INVALID";
+    error.statusCode = 400;
+    throw error;
+  }
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { auditId, source: fallbackSource, makeupTasks, verified: false };
+  }
+
+  const persistedTasks = [];
+  try {
+    for (const task of makeupTasks) {
+      persistedTasks.push(await persistLessonJournalMakeupTask(task));
+    }
+  } catch (error) {
+    error.audit = {
+      auditId,
+      persistedMakeupTaskIds: persistedTasks.map((task) => task.makeupTaskId)
+    };
+    throw error;
+  }
+  return {
+    auditId,
+    makeupTasks: persistedTasks,
+    source: databaseSource,
+    verified: persistedTasks.length === makeupTasks.length
+  };
 }
 
 export async function deleteMakeupTask(makeupTaskId) {

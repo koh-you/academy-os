@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-03
 
+## 2026-08-03 수업일지 등원보충 재시도 신뢰성
+
+- 등원보충 초안은 학생·원 숙제·task 유형 기반 stable ID를 사용한다. 전용 API가 신규 insert-only·기존 `updated_at` CAS·Supabase 재조회를 수행하며, 응답 유실 재시도는 같은 항목 한 건을 회수한다.
+- 타 화면 최신 변경은 409로 보호하고 수업일지 draft를 유지한다. 기록·숙제 저장과 보충 저장은 계속 별도 stage이며 실제 수업일지 일정·`notification_jobs`·Solapi 예약/취소/발송은 이 단위에서 실행하지 않았다.
+- 검증: lesson `15/15`, runtime lint, `check:fast`, production `823/823`, build `393 modules`·main `944.45 kB`·lazy `12/12`, safe browser `32/32`.
+- 다음 단위는 `makeup_tasks`·연결 `lessons`·`notification_jobs` 읽기/판정 reconcile과 미연결·오작동 버튼 inventory다. 실제 provider 행동은 사람 gate다.
+
 ## 2026-08-03 수업일지 기록·숙제 다중 행 저장 신뢰성
 
 - `lesson_student_records`와 숙제 변경을 `/api/lesson-journal/rows/save`의 한 versioned plan으로 저장한다. 행별 CAS/insert-only·Supabase 재조회·동일 결과 재시도·중간 실패 역순 보상 뒤에만 App 원천을 갱신한다.

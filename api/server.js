@@ -47,6 +47,7 @@ import {
   saveClassRosterPlan,
   saveDerivedSchoolCalendarPlan,
   saveLessonJournalHistoryPlan,
+  saveLessonJournalMakeupTasks,
   saveLessonJournalRowsPlan,
   syncSpecialLectureLessonStudentSchedule,
   upsertAppState,
@@ -6945,6 +6946,25 @@ const server = http.createServer(async (request, response) => {
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/lesson-journal/makeup-tasks/save") {
+    try {
+      const payload = await readJsonBody(request);
+      const result = await saveLessonJournalMakeupTasks(
+        payload.makeupTasks ?? payload.tasks ?? [],
+        { auditId: payload.auditId ?? "" }
+      );
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.audit ? { audit: error.audit } : {})
+      });
     }
     return;
   }

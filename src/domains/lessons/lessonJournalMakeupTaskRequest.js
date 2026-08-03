@@ -1,6 +1,7 @@
+import { createLessonJournalMakeupTaskId } from "./lessonJournalMakeupTaskPersistence.js";
+
 export function createLessonJournalMakeupTaskRequests({
   currentTasks = [],
-  idSeed,
   taskDrafts = [],
   timestamps = [],
   today = ""
@@ -20,7 +21,7 @@ export function createLessonJournalMakeupTaskRequests({
           touchedAt: timestamps[index]
         }
       : {
-          makeupTaskId: `makeup_${idSeed}_${task.studentId}_${index}`,
+          makeupTaskId: createLessonJournalMakeupTaskId(task),
           status: "draft",
           scheduledDate: today,
           scheduledTime: "",

@@ -4,6 +4,10 @@ import {
   areLessonJournalHistoryLessonsEqual
 } from "../src/domains/lessons/lessonJournalHistoryPersistence.js";
 import { areLessonJournalRecordsEqual } from "../src/domains/lessons/lessonJournalRowsPersistence.js";
+import {
+  areLessonJournalMakeupTasksEqual,
+  createNextLessonJournalMakeupTaskUpdatedAt
+} from "../src/domains/lessons/lessonJournalMakeupTaskPersistence.js";
 
 const host = "127.0.0.1";
 const port = Number(process.env.ACADEMY_SAFE_API_PORT || 8787);
@@ -43,7 +47,21 @@ const initialState = {
       updatedAt: "2026-08-03T00:00:00.000Z"
     }
   ],
-  homeworks: [],
+  homeworks: [
+    {
+      assignedDate: "2026-07-30",
+      dueDate: "2026-08-01",
+      homeworkId: "safe-cross-month-previous-homework",
+      homeworkType: "next",
+      lessonId: "safe-cross-month-blank-lesson",
+      status: "assigned",
+      studentId: "safe-active-student",
+      studentStatus: "not_started",
+      teacherStatus: "unverified",
+      title: "안전 이전 숙제",
+      updatedAt: "2026-08-03T00:00:00.000Z"
+    }
+  ],
   lessons: [
     {
       className: "안전 미리보기반",
@@ -441,6 +459,36 @@ function handleMutation(pathname, payload) {
   if (pathname === "/api/makeup-tasks/bulk") {
     state.makeupTasks = payload.makeupTasks || [];
     return { makeupTasks: state.makeupTasks, ok: true };
+  }
+  if (pathname === "/api/lesson-journal/makeup-tasks/save") {
+    const savedTasks = [];
+    for (const requestedTask of payload.makeupTasks || []) {
+      const currentTask = state.makeupTasks.find(
+        (task) => task.makeupTaskId === requestedTask.makeupTaskId
+      ) ?? null;
+      if (currentTask && areLessonJournalMakeupTasksEqual(currentTask, requestedTask)) {
+        savedTasks.push(currentTask);
+        continue;
+      }
+      if (
+        currentTask &&
+        (!requestedTask.updatedAt || requestedTask.updatedAt !== currentTask.updatedAt)
+      ) {
+        return {
+          code: "LESSON_JOURNAL_MAKEUP_TASK_CONFLICT",
+          error: `등원보충 ${requestedTask.makeupTaskId}가 다른 화면에서 먼저 변경되었습니다.`,
+          ok: false,
+          statusCode: 409
+        };
+      }
+      const savedTask = {
+        ...requestedTask,
+        updatedAt: createNextLessonJournalMakeupTaskUpdatedAt(currentTask?.updatedAt)
+      };
+      state.makeupTasks = upsertById(state.makeupTasks, savedTask, ["makeupTaskId"]);
+      savedTasks.push(savedTask);
+    }
+    return { makeupTasks: savedTasks, ok: true, verified: true };
   }
   if (pathname === "/api/exam-prep-rows/bulk") {
     const conflicts = [];
@@ -887,7 +935,7 @@ const server = http.createServer(async (request, response) => {
       state = createInitialState();
       return sendJson(response, 200, { ok: true, safeFixture: true });
     }
-    if (["/api/app-state", "/api/lesson-records/bulk", "/api/lesson-journal/rows/save", "/api/school-events", "/api/school-calendar/derived-save"].includes(requestUrl.pathname)) {
+    if (["/api/app-state", "/api/lesson-records/bulk", "/api/lesson-journal/makeup-tasks/save", "/api/lesson-journal/rows/save", "/api/school-events", "/api/school-calendar/derived-save"].includes(requestUrl.pathname)) {
       await new Promise((resolve) => setTimeout(resolve, 800));
     }
     const { statusCode = 200, ...result } = handleMutation(requestUrl.pathname, payload);

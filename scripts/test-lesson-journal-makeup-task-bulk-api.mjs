@@ -55,7 +55,8 @@ assert.deepEqual(
       requestCalls.push(args);
       return {
         source: "supabase",
-        makeupTasks: [verifiedSecond, extraControl, verifiedFirst]
+        makeupTasks: [verifiedSecond, extraControl, verifiedFirst],
+        verified: true
       };
     }
   }),
@@ -82,7 +83,8 @@ await assert.rejects(
     requestedTasks,
     request: async () => ({
       source: "fallback",
-      makeupTasks: requestedTasks
+      makeupTasks: requestedTasks,
+      verified: false
     })
   }),
   /등원보충을 Supabase에서 다시 확인하지 못했습니다/
@@ -93,7 +95,8 @@ await assert.rejects(
     requestedTasks,
     request: async () => ({
       source: "supabase",
-      makeupTasks: [requestedTasks[0]]
+      makeupTasks: [requestedTasks[0]],
+      verified: true
     })
   }),
   /studentId/
@@ -108,7 +111,8 @@ for (const field of lessonJournalMakeupTaskIdentityFields) {
         makeupTasks: [{
           ...requestedTasks[0],
           [field]: `${requestedTasks[0][field]}_불일치`
-        }]
+        }],
+        verified: true
       })
     }),
     new RegExp(field),

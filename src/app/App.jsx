@@ -1529,7 +1529,7 @@ function deleteAcademyReminderFromApi(reminderId) {
 }
 
 function postMakeupTasks(makeupTasks) {
-  return postJson("/api/makeup-tasks/bulk", { makeupTasks });
+  return postJsonWithTimeout("/api/lesson-journal/makeup-tasks/save", { makeupTasks }, 30000);
 }
 
 function deleteExamAnalysisRunRequest(analysisRunId) {
@@ -6834,7 +6834,6 @@ export function App() {
       persistMakeupTasks: async () => {
         const requestedTasks = createLessonJournalMakeupTaskRequests({
           currentTasks: makeupTasks,
-          idSeed: Date.now(),
           taskDrafts: makeupTaskDrafts,
           timestamps: makeupTaskDrafts.map(() => new Date().toISOString()),
           today
