@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-03
 
+## 2026-08-03 P3-3a 알림톡 template transport 계약
+
+- 일반 공지·특강은 code seed→composer local draft→교사 최종 notification job→provider 경로다. 특강 provider template이 없으면 대상별 comment template fallback을 유지한다.
+- 재시험은 저장 가능한 보충 task draft와 연결 수업의 수업일지 schedule line만 있고 독립 학생 11시 job 대상은 아니다. 이를 전용 가상 fixture로 고정했으며 실제 API·알림은 실행하지 않았다.
+- runtime lint, notification `10/10`, scenario·production `827/827`, build `409 modules`·main `944.94 kB`·lazy `12/12`가 통과했다. 런타임 동작은 변경하지 않았다.
+- 다음 P3-3b는 일반 공지 preset 3개와 특강 guide seed만 catalog/Settings에 연결한다. 재시험 11시 항목은 만들지 않고 현재 local draft·기존 job·`makeup_tasks` 교사 최종본을 보존한다.
+
 ## 2026-08-03 P3-2 알림톡 preview/live renderer 경계
 
 - 출결·수업일지 client preview와 server live body를 `notificationMessageRenderer.js`에 연결했다. provider template/수신자/예약·발송 경계와 persisted human final은 그대로다.
