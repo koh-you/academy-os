@@ -6,6 +6,7 @@ const teacherViewOutletSource = await readFile(new URL("../src/app/TeacherViewOu
 const lazyTeacherViewSource = await readFile(new URL("../src/app/lazyTeacherViewComponents.js", import.meta.url), "utf8");
 const teacherLessonHubSource = await readFile(new URL("../src/domains/lessons/TeacherLessonHubV2.jsx", import.meta.url), "utf8");
 const lessonModalSource = await readFile(new URL("../src/domains/lessons/LessonModal.jsx", import.meta.url), "utf8");
+const reportModalSource = await readFile(new URL("../src/domains/reports/ReportModal.jsx", import.meta.url), "utf8");
 const lessonHubBoundarySource = `${appSource}\n${teacherLessonHubSource}`;
 
 function countMatches(pattern, source = appSource) {
@@ -53,9 +54,11 @@ assert.equal(
 assert.equal(appSource.includes("function LessonModal("), false, "the active lesson modal must stay extracted from App");
 assert.equal(appSource.includes('import { LessonModal } from "../domains/lessons/LessonModal.jsx"'), true);
 assert.equal(
-  countMatches(/function ReportModal\b/g),
+  countMatches(/export function ReportModal\b/g, reportModalSource),
   1,
   "the active report modal must remain"
 );
+assert.equal(countMatches(/<ReportModal\b/g), 1, "App must retain one report modal render entry");
+assert.equal(appSource.includes('import("../domains/reports/ReportModal.jsx")'), true);
 
 console.log("lesson hub active entry and legacy removal boundary passed");

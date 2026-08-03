@@ -40,7 +40,6 @@ assert.deepEqual(sharedStateKeys, [
   "lessonNotificationPlans",
   "lessonResearchItems",
   "notificationLogs",
-  "reportSnapshots",
   "examPostTargetStudentIds",
   "tallySubmissions",
   "tallySummaries",
@@ -123,4 +122,4 @@ assert.equal(
 );
 assert.ok(workflowSource.includes("npm run test:app-state-autosave-inventory"));
 
-console.log("app_state autosave concurrency inventory passed (12 keys; serialization/CAS/requery guarded)");
+console.log("app_state autosave concurrency inventory passed (11 keys; serialization/CAS/requery guarded)");

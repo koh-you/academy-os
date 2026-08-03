@@ -37,6 +37,45 @@ test("safe preview opens the login screen without runtime errors", async ({ page
   expect(pageErrors).toEqual([]);
 });
 
+test("report snapshot requires teacher auth, verifies Supabase source, and survives reread", async ({ request }) => {
+  const snapshot = {
+    body: "안전 fixture 보고서 본문",
+    createdAt: "2026-08-03T09:00:00.000Z",
+    lessonId: "safe-lesson-report-snapshot",
+    reportId: "safe-report-snapshot-1",
+    status: "snapshot_saved",
+    studentId: "safe-student-report-snapshot",
+    title: "안전 fixture 보고서"
+  };
+  const unauthenticatedResponse = await request.post(`${safeApiBaseUrl}/api/report-snapshots`, {
+    data: { snapshot }
+  });
+  expect(unauthenticatedResponse.status()).toBe(401);
+
+  const saveResponse = await request.post(`${safeApiBaseUrl}/api/report-snapshots`, {
+    data: { snapshot },
+    headers: { Authorization: "Bearer safe-fixture-session" }
+  });
+  expect(saveResponse.status(), await saveResponse.text()).toBe(200);
+  const saved = await saveResponse.json();
+  expect(saved).toMatchObject({ recovered: false, source: "supabase", verified: true });
+  expect(saved.reportSnapshots.filter((item) => item.reportId === snapshot.reportId)).toHaveLength(1);
+
+  const retryResponse = await request.post(`${safeApiBaseUrl}/api/report-snapshots`, {
+    data: { snapshot },
+    headers: { Authorization: "Bearer safe-fixture-session" }
+  });
+  expect(retryResponse.status(), await retryResponse.text()).toBe(200);
+  const retried = await retryResponse.json();
+  expect(retried).toMatchObject({ recovered: true, source: "supabase", verified: true });
+  expect(retried.reportSnapshots.filter((item) => item.reportId === snapshot.reportId)).toHaveLength(1);
+
+  const rereadResponse = await request.get(`${safeApiBaseUrl}/api/app-state?includeRows=true`);
+  expect(rereadResponse.status(), await rereadResponse.text()).toBe(200);
+  const reread = await rereadResponse.json();
+  expect(reread.states.reportSnapshots.filter((item) => item.reportId === snapshot.reportId)).toEqual([snapshot]);
+});
+
 test("consecutive absence makeup and regular lessons use one physical attendance visit", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   const previewProbe = await request.post(`${safeApiBaseUrl}/api/attendance/preview`, {

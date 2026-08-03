@@ -8,7 +8,7 @@ function composeAppWithLessonJournalSource(
   lessonNestedPanelsSource
 ) {
   const commentComposerStart = appSource.indexOf("function CommentComposerModal({");
-  const commentComposerEnd = appSource.indexOf("function ReportModal({", commentComposerStart);
+  const commentComposerEnd = appSource.indexOf("function parseCsvRows", commentComposerStart);
   const preparationMemoStart = lessonNestedPanelsSource.indexOf("export function PreparationMemoModal({");
   const preparationMemoSource = lessonNestedPanelsSource.slice(preparationMemoStart);
   const lessonJournalModalSource = [

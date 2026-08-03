@@ -7,7 +7,7 @@ const shellSource = await readFile(
   "utf8"
 );
 const wrapperStart = appSource.indexOf("function CommentComposerModal({ ...props })");
-const wrapperEnd = appSource.indexOf("function ReportModal({", wrapperStart);
+const wrapperEnd = appSource.indexOf("function parseCsvRows", wrapperStart);
 assert.ok(wrapperStart >= 0, "missing App comment composer wrapper");
 assert.ok(wrapperEnd > wrapperStart, "missing App comment composer wrapper end");
 const wrapperSource = appSource.slice(wrapperStart, wrapperEnd);

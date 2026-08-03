@@ -29,6 +29,7 @@
 - 수업일지의 `lesson_student_records`와 숙제 다중 행은 하나의 versioned save plan으로 저장한다. 기존 행은 `updated_at` CAS, 신규 행은 insert-only를 사용하고 모든 행의 Supabase 재조회가 일치해야 화면 원천을 갱신한다. 동일 저장 재시도는 추가 쓰기 없이 성공하며 중간 실패는 역순 보상한다. 보상 중 더 최신 행이 발견되면 덮지 않고 부분 실패로 표시하며, 충돌·실패와 저장 중 후속 입력의 draft를 유지한다.
 - 교사 `숙제현황`의 확인 상태는 더 이상 화면에 먼저 반영한 뒤 실패를 console로만 남기지 않는다. 기존 versioned 숙제 행 저장을 사용해 `updated_at` CAS와 Supabase 재조회가 확인된 뒤에만 App 원천을 교체하며, 저장 중 행을 잠그고 충돌·실패에서는 이전 상태와 행별 실패 표시를 유지한다.
 - 자료함은 stable ID·생성 토큰의 insert-only/CAS 메타데이터 row와 private Storage 파일을 함께 관리한다. 파일은 생성 토큰·내용 해시 경로에 업로드하고 row 저장 실패 시 새 객체를 정리한다. 삭제는 파일 백업·Storage 삭제 뒤 row CAS를 실행하며 충돌 시 정확한 경로로 파일을 복구한다. 교사 또는 해당 학생·학부모 bearer를 서버에서 다시 확인한 뒤에만 외부 링크나 서명 URL을 발급하고, 포털 초기 payload도 공개 범위로 제한한다. 성공은 Supabase 목록 재조회 뒤에만 화면에 반영한다.
+- 보고서 snapshot은 공용 `app_state` 자동저장에서 분리했다. 교사 bearer가 필요한 전용 API가 최신 `reportSnapshots`와 `updated_at`을 읽고 CAS append한 뒤 Supabase 재조회가 일치해야 화면에 완료를 표시한다. 결과 불명 재시도는 같은 stable report ID를 회수해 중복을 만들지 않으며, `모의 발송`은 실제 알림 없이 저장 상태만 기록한다.
 - 수업일지에서 만드는 등원보충 초안은 학생·원 숙제·task 유형으로 고정한 요청 ID를 사용한다. 신규 `makeup_tasks`는 insert-only, 기존 항목은 `updated_at` CAS로 저장하고 Supabase 재조회가 일치해야 완료한다. 저장 응답만 유실된 재시도는 같은 항목 한 건으로 회수하며 다른 화면의 최신 수정은 덮지 않고 수업일지 draft를 유지한다.
 - 보충관리 상세는 `makeup_tasks.linkedLessonId`, `lessons.sourceMakeupTaskId`, 실제 일정, 미발송 `notification_jobs`를 함께 대조한다. 연결 수업 누락·역연결 ID 불일치·중복·다른 원천·예상 밖 일정 차이에서는 더 이상 반영 완료로 표시하지 않고 일정 저장과 새 알림 예약을 막는다. 기존 예약 확인·취소 화면은 원인 확인을 위해 유지하며 자동 복구나 provider 행동은 실행하지 않는다.
 - 보충 일정 생성·변경은 연결 `lessons`와 `makeup_tasks`를 하나의 versioned save plan으로 저장한다. 신규 insert-only·기존 `updated_at` CAS·Supabase 재조회가 모두 일치해야 화면 원천을 갱신하고 그 뒤에만 기존 알림 orchestration을 호출한다. 결과 불명 뒤 날짜·시간·메모가 바뀌어도 logical task의 최초 audit를 먼저 회수하고 확인된 새 버전에 최신 draft를 CAS 저장한다. provider 실패는 원천 저장 실패로 되돌리지 않고 `일정 저장 완료 · 알림 예약 실패`와 provider-only 재시도 범위로 분리한다. 두 번째 원천 실패의 역순 보상과 최신 변경 보호도 유지한다.
@@ -48,7 +49,7 @@
 - ESLint runtime 검사, 간결한 scenario 요약, client runtime error reporter, Playwright browser smoke가 있다.
 - 로컬 browser smoke는 Worktree별 가용 frontend/API 포트를 자동 선택하고 기존 preview를 재사용하지 않는다.
 - GitHub Actions는 lint, production test, build, browser smoke를 실행하는 것이 목표다.
-- `app_state` 자동저장 12개 key의 요청 역전·CAS/재조회 부재를 재현하는 inventory 검사가 Production checks에 연결됐다.
+- `app_state` 자동저장 11개 key의 요청 역전·CAS/재조회 경계를 검사하는 inventory가 Production checks에 연결됐다. 보고서 snapshot은 전용 명시 저장 계약을 사용한다.
 - 시험정보 행 자동저장은 같은 브라우저에서 요청을 하나씩 직렬 처리하고 행별 `updated_at` CAS 뒤 Supabase 재조회가 일치해야 저장 완료로 처리한다. 저장 중 들어온 최신 입력은 첫 성공 행의 새 버전으로 재기준화해 보존하고, 다중 탭·기기 충돌은 자동 병합하지 않은 채 현재 입력과 `저장 실패` 상태를 유지한다. 삭제 감사 rollback만 명시적 `allowRestore`로 행 재생성을 허용한다.
 - Tally 신규생 후보 입력은 후보별로 요청을 직렬 처리하고 `updated_at` CAS와 Supabase 재조회가 일치해야 저장 완료로 처리한다. 저장 중 후속 입력은 첫 성공 버전으로 재기준화해 최신값만 이어서 저장하며, 충돌·결과 불명 실패는 자동 재전송하지 않고 현재 입력과 실패 상태를 유지한다. 정식 등록은 해당 후보 입력 저장이 끝난 뒤 시작한다.
 - App 2차 리팩터링 Phase 1 auth/session은 PR #2로 main 통합됐다. session state·초기 저장소 판독·login/logout·teacher 저장 cleanup은 `useAppSession`이 소유하며 전용 fixture가 Production checks에 연결됐다.
@@ -93,7 +94,7 @@
 
 ## 다음 우선순위
 
-1. App 2차 Phase 1~5와 3차 3-0~3-8은 완료됐다. P1 운영 저장 신뢰성은 시험정보·Tally 후보·학생·반 명단·학사일정·수업 history/rows·숙제·보충 일정·자료함 메타데이터와 private Storage까지 완료했다. 다음 독립 단위는 보고서 snapshot의 명시 저장·충돌·실패 복구다.
+1. App 2차 Phase 1~5와 3차 3-0~3-8은 완료됐다. P1 운영 저장 신뢰성은 시험정보·Tally 후보·학생·반 명단·학사일정·수업 history/rows·숙제·보충 일정·자료함·보고서 snapshot까지 완료했다. 다음 순서는 P2 공통 modal shell·footer·상태 모델 inventory이며, 저장·출결·알림 원천 변경은 섞지 않는다.
 2. App 3차 리팩터링 3-0~3-8은 production main 43.1%·gzip 45.3% 감소, 12개 물리 lazy chunk, App Babel 500 KB 경고 제거와 종료 소유권 감사까지 완료했다. 자동으로 다음 리팩터링 차수를 시작하지 않고 P1~P3 제품·저장 신뢰성 우선순위로 돌아간다.
 3. `app_state`에서 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
    - 즉시 사람 판단이 필요하지 않은 발견은 queue/worklog에 남기고 AI 검수와 다음 단계를 연쇄 진행한다.

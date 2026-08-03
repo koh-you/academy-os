@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-03
 
+## 2026-08-03 보고서 snapshot 명시 저장 신뢰성
+
+- 보고서 snapshot은 공용 자동저장에서 빠졌고, 교사 인증 전용 API가 `app_state.reportSnapshots`의 `updated_at` CAS와 Supabase 재조회를 완료한 뒤에만 App 원천을 교체한다. 기존 snapshot ID도 함께 보존되는지 확인한다.
+- 결과 불명 재시도는 stable report ID로 기존 한 건을 회수한다. 충돌·검증 실패는 modal draft와 실패 표시를 유지하고 저장 중 닫기·중복 행동을 잠근다. `모의 발송`은 실제 알림을 실행하지 않고 저장 상태만 기록한다.
+- 검증: lesson `20/20`, runtime lint, `check:fast`, production `827/827`, build `407 modules`·main `944.35 kB`·lazy `12/12`, safe browser `40/40`. 운영 데이터·실제 알림·SQL·유료 호출은 사용하지 않았다.
+- P1 저장 신뢰성 목록은 이 단위로 닫는다. 다음 순서는 P2 modal inventory이며 저장·출결·알림 callback 의미는 inventory와 섞지 않는다.
+
 ## 2026-08-03 자료함 private Storage 저장 신뢰성
 
 - 자료 파일은 private bucket의 stable ID·생성 토큰·내용 해시 경로로 업로드하고 검증된 메타데이터 row에 Storage 참조를 저장한다. 같은 파일 재시도는 중복 생성하지 않고, 새 파일은 별도 해시 경로로 수렴한다.

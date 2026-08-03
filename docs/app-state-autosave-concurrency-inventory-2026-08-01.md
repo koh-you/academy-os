@@ -22,9 +22,11 @@
 | 응답/UI | 최신 request ID만 `저장 완료/실패` 표시 | 저장 뒤 GET 재조회·값 대조 없음 |
 | GET | 값 map은 기본 반환, row metadata는 `includeRows=true`일 때만 반환 | 일반 hydration에서 key별 version을 보관하지 않음 |
 
-## 자동저장 key 12개
+## 자동저장 key 11개
 
-`aiSettings`, `attendanceSettings`, `deletedLessonBundles`, `generatedLessonControls`, `lessonNotificationPlans`, `lessonResearchItems`, `notificationLogs`, `reportSnapshots`, `examPostTargetStudentIds`, `tallySubmissions`, `tallySummaries`, `wrongProblems`.
+`aiSettings`, `attendanceSettings`, `deletedLessonBundles`, `generatedLessonControls`, `lessonNotificationPlans`, `lessonResearchItems`, `notificationLogs`, `examPostTargetStudentIds`, `tallySubmissions`, `tallySummaries`, `wrongProblems`.
+
+`reportSnapshots`는 2026-08-03부터 이 자동저장 묶음에서 제외했다. 보고서 버튼은 전용 인증 API가 최신 `app_state.reportSnapshots`를 읽고 `updated_at` CAS로 한 건을 append한 뒤 Supabase 재조회가 일치할 때만 화면 목록을 교체한다.
 
 자동저장 POST 자체는 Solapi 발송·예약·취소, Storage 업로드, 운영 삭제를 실행하지 않는다. 다만 저장된 설정과 계획은 이후 별도 사용자 동작의 입력이 될 수 있으므로 값 유실을 허용하면 안 된다.
 
@@ -36,7 +38,7 @@
 4. CAS 충돌은 409와 최신 row를 반환해 자동 병합하지 않고 사용자에게 새로고침/재검토를 요구한다.
 5. 저장 성공 뒤 대상 key만 재조회해 값과 version을 대조한 후 `저장 완료`를 표시한다.
 
-새 SQL은 필요 없다. 기존 `app_state.updated_at`을 사용한다. 첫 구현은 자동저장 12개 key에만 적용하고, 명시 저장·재조회 계약을 이미 가진 정산·강사 운영 메모에는 섞지 않는다.
+새 SQL은 필요 없다. 기존 `app_state.updated_at`을 사용한다. 자동저장 11개 key와 보고서 전용 명시 저장은 서로의 저장 상태를 섞지 않으며, 명시 저장·재조회 계약을 이미 가진 정산·강사 운영 메모에도 섞지 않는다.
 
 ## 자동 검증
 

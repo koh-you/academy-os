@@ -30,6 +30,7 @@ import {
   parseResourceMaterialStorageReference,
   validateResourceMaterialFile
 } from "../src/domains/resources/resourceMaterialStorageModel.js";
+import { saveReportSnapshotWithVerification } from "../src/domains/reports/reportSnapshotPersistence.js";
 
 const host = "127.0.0.1";
 const port = Number(process.env.ACADEMY_SAFE_API_PORT || 8787);
@@ -55,6 +56,7 @@ const initialState = {
   academyReminders: [],
   attendanceEvents: [],
   attendanceQueuedNotifications: [],
+  appStateUpdatedAt: {},
   appStates: {},
   classTemplates: [
     {
@@ -1248,7 +1250,53 @@ const server = http.createServer(async (request, response) => {
     });
   }
   if (request.method === "GET" && requestUrl.pathname === "/api/app-state") {
-    return sendJson(response, 200, { ok: true, safeFixture: true, source: "supabase", states: state.appStates });
+    return sendJson(response, 200, {
+      ok: true,
+      safeFixture: true,
+      source: "supabase",
+      stateRows: Object.entries(state.appStateUpdatedAt).map(([key, updatedAt]) => ({ key, updatedAt })),
+      states: state.appStates
+    });
+  }
+  if (request.method === "POST" && requestUrl.pathname === "/api/report-snapshots") {
+    if (request.headers.authorization !== "Bearer safe-fixture-session") {
+      return sendJson(response, 401, { ok: false, error: "안전 fixture 보고서 저장 인증이 필요합니다." });
+    }
+    const payload = await readJson(request);
+    try {
+      const result = await saveReportSnapshotWithVerification({
+        operations: {
+          read: async () => ({
+            source: "supabase",
+            stateRows: Object.entries(state.appStateUpdatedAt).map(([key, updatedAt]) => ({ key, updatedAt })),
+            states: state.appStates
+          }),
+          write: async (states, { expectedUpdatedAt } = {}) => {
+            const currentUpdatedAt = state.appStateUpdatedAt.reportSnapshots ?? null;
+            if (expectedUpdatedAt?.reportSnapshots !== currentUpdatedAt) {
+              const conflict = new Error("다른 안전 화면에서 보고서가 먼저 저장되었습니다.");
+              conflict.code = "APP_STATE_CONFLICT";
+              conflict.statusCode = 409;
+              throw conflict;
+            }
+            state.appStates = { ...state.appStates, ...states };
+            state.appStateUpdatedAt = {
+              ...state.appStateUpdatedAt,
+              reportSnapshots: new Date().toISOString()
+            };
+          }
+        },
+        snapshot: payload.snapshot
+      });
+      return sendJson(response, 200, { ...result, ok: true, safeFixture: true });
+    } catch (error) {
+      return sendJson(response, Number(error.statusCode) || 500, {
+        code: error.code,
+        error: error.message,
+        ok: false,
+        safeFixture: true
+      });
+    }
   }
   if (request.method === "GET" && requestUrl.pathname === "/api/integrations/status") {
     return sendJson(response, 200, { ok: true, safeFixture: true });
