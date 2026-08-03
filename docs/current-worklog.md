@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 수업일지 등원보충 stable request identity gate
+
+- 수업일지에서 새 등원보충 초안을 저장할 때 클릭 시각으로 매번 새 ID를 만들던 경계를 학생·원 숙제·task 유형 기반의 stable ID로 바꿨다. 전용 `/api/lesson-journal/makeup-tasks/save`는 신규 task를 insert-only, 기존 task를 `updated_at` CAS로 저장하고 Supabase 재조회 내용이 일치해야 `verified` 완료를 반환한다.
+- 서버 반영 뒤 응답만 유실되면 같은 논리 요청과 ID를 재조회해 추가 쓰기 없이 성공으로 회수한다. 기존 task 변경 응답 유실도 재조회로 복구하고, 다른 화면의 더 최신 내용이나 같은 ID의 다른 원천은 409로 차단해 수업일지 전체 draft를 유지한다. 수업기록·숙제 row gate와 보충 stage의 분리는 유지했다.
+- 검증: stable ID/insert/CAS/응답 유실/충돌 Supabase REST fixture, lesson `15/15`, runtime lint, `check:fast`, scenario·production `823/823`, build `393 modules`·main `944.45 kB`·lazy `12/12`, Worktree 격리 safe browser `32/32`. 운영 데이터·실제 알림·SQL·유료 호출은 사용하지 않았다.
+- 다음 독립 단위는 `makeup_tasks`·연결 `lessons`·`notification_jobs`의 읽기/판정 reconcile과 미연결·오작동 버튼 inventory다. 실제 Solapi 행동은 계속 사람 gate다.
+
 ## 2026-08-03 수업일지 기록·숙제 다중 행 저장 gate
 
 - 수업일지 변경 저장에서 따로 실행되던 숙제 bulk와 수업기록 bulk를 `/api/lesson-journal/rows/save`의 한 versioned plan으로 묶었다. 화면의 현재 Supabase 행을 `before` 버전으로 캡처하고 기존 행은 `updated_at` CAS, 신규 행은 insert-only로 저장하며, 모든 행을 재조회해 내용과 새 버전을 확인한 뒤에만 App ref·화면·로컬 기록 cache를 갱신한다.

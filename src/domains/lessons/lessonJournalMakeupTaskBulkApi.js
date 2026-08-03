@@ -14,7 +14,7 @@ export async function saveLessonJournalMakeupTasksWithVerification({
   if (!requestedTasks.length) return [];
 
   const verification = await request(requestedTasks);
-  if (verification.source !== "supabase") {
+  if (verification.source !== "supabase" || verification.verified !== true) {
     throw new Error("등원보충을 Supabase에서 다시 확인하지 못했습니다.");
   }
 

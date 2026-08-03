@@ -211,6 +211,10 @@ const makeupTaskRequestSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalMakeupTaskRequest.js", import.meta.url),
   "utf8"
 );
+const makeupTaskPersistenceSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalMakeupTaskPersistence.js", import.meta.url),
+  "utf8"
+);
 const makeupTaskBulkApiSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalMakeupTaskBulkApi.js", import.meta.url),
   "utf8"
@@ -1093,6 +1097,7 @@ assert.ok(
 );
 for (const extractedMakeupTaskRequestContract of [
   "createLessonJournalMakeupTaskRequests",
+  "createLessonJournalMakeupTaskId(task)",
   "currentTasks.find",
   'existingTask.status === "done" ? "scheduled" : existingTask.status',
   "touchedAt: timestamps[index]",
@@ -1106,7 +1111,6 @@ for (const extractedMakeupTaskRequestContract of [
 for (const injectedMakeupTaskRequestContract of [
   "createLessonJournalMakeupTaskRequests({",
   "currentTasks: makeupTasks",
-  "idSeed: Date.now()",
   "taskDrafts: makeupTaskDrafts",
   "timestamps: makeupTaskDrafts.map(() => new Date().toISOString())",
   "request: postMakeupTasks"
@@ -1117,6 +1121,9 @@ for (const injectedMakeupTaskRequestContract of [
   );
 }
 assert.ok(
+  !saveHandlerSource.includes("idSeed: Date.now()") &&
+    makeupTaskPersistenceSource.includes("createLessonJournalMakeupTaskId") &&
+    makeupTaskPersistenceSource.includes("shortStableHash(identity)") &&
   !makeupTaskRequestSource.includes("Date.now") &&
     !makeupTaskRequestSource.includes("new Date") &&
     !makeupTaskRequestSource.includes("postMakeupTasks") &&
@@ -1127,7 +1134,7 @@ for (const extractedMakeupTaskBulkApiContract of [
   "lessonJournalMakeupTaskIdentityFields",
   "saveLessonJournalMakeupTasksWithVerification",
   "await request(requestedTasks)",
-  'verification.source !== "supabase"',
+  'verification.source !== "supabase" || verification.verified !== true',
   "return requestedTasks.map"
 ]) {
   assert.ok(

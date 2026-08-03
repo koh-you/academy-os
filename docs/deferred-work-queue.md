@@ -4,7 +4,8 @@
 
 ## P1. 운영 저장 신뢰성
 
-- 다음 단위: 수업일지 등원보충 초안의 요청 identity를 결과 불명 재시도에서도 고정하고, 보충·알림 다중 원천 reconcile과 미연결/오작동 버튼을 분리해 점검한다. 실제 Solapi 발송·예약·취소는 사람 gate다.
+- 다음 단위: `makeup_tasks`·연결 `lessons`·`notification_jobs`의 보충/알림 다중 원천 reconcile을 읽기·판정 단계부터 분리하고, 미연결/오작동 버튼을 inventory한다. 실제 Solapi 발송·예약·취소는 사람 gate다.
+- 수업일지 등원보충 초안의 stable request identity gate는 완료. 학생·원 숙제·task 유형에서 같은 ID를 만들고 신규 insert-only·기존 `updated_at` CAS·Supabase 재조회로 저장한다. 결과 불명 재시도는 같은 항목을 회수하고 타 화면 최신 수정은 409로 보호한다.
 - 수업일지 `lesson_student_records`·숙제 다중 행 저장 gate는 완료. 두 원천을 하나의 versioned plan으로 묶어 행별 CAS/insert-only·Supabase 재조회·idempotent retry·역순 보상·더 최신 행 보호·draft 보존을 fixture와 safe browser로 고정했다.
 - 수업 달력 복사·취소·되돌리기 gate는 완료. `lessons`와 복사 숙제를 단일 versioned action으로 저장하고, CAS/insert-only·Supabase 재조회·idempotent unknown-result retry·역순 보상·연결 record/homework/notification 보호·취소 복구 원천 재조회를 fixture와 safe browser로 고정했다.
 - 시험관리 행과 직전수업을 함께 바꾸는 학사일정 파생 저장 gate는 완료. `exam_prep_rows`·파생 `preExam lessons`를 한 versioned plan으로 저장하고, CAS·Supabase 재조회·idempotent retry·역순 보상·연결 원천 보호를 fixture와 safe browser로 고정했다.
@@ -15,7 +16,7 @@
 - 반 명단 저장 gate는 완료. 학생 추가·반 이동·반관리·퇴원의 `students` 반 필드와 미래 `lessons.studentIds`를 한 versioned plan으로 저장하고, 직접 원천 중간 실패는 역순 보상·원래 버전 재조회, 성공은 두 원천 재조회 대조 뒤에만 UI 반영한다. 과거 수업·변경 대상 밖 수동 명단과 실패 입력을 보존한다.
 - 수동 `school_events` 저장 gate는 완료. 신규는 insert-only, 수정·삭제는 일정별 `updated_at` CAS를 적용하고 API 내부와 App의 후속 GET에서 Supabase 원천을 재조회한다. 결과 불명 신규 저장은 고정 ID로 idempotent 재시도하며 실패 입력·모달을 보존한다. 시험관리 연동 일정과 파생 직전수업 gate도 후속 단위에서 완료했다.
 - 숙제·포털·자료함·보고서 저장 계약.
-- 보충·알림 다중 원천 reconcile과 미연결/오작동 버튼 정리. 등원보충 초안의 stable request identity를 첫 하위 단위로 둔다.
+- 보충·알림 다중 원천 reconcile과 미연결/오작동 버튼 정리. 등원보충 초안 stable request identity는 완료했으며 다음은 세 원천의 읽기·판정 inventory다.
 - 기준: `docs/save-persistence-audit-2026-07-20.md`, `docs/save-persistence-audit-2026-07-28.md`.
 
 ## P2. 모달 통일 후속

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createLessonJournalMakeupTaskRequests } from "../src/domains/lessons/lessonJournalMakeupTaskRequest.js";
+import { createLessonJournalMakeupTaskId } from "../src/domains/lessons/lessonJournalMakeupTaskPersistence.js";
 
 const currentTasks = [
   {
@@ -67,7 +68,6 @@ const timestamps = [
 assert.deepEqual(
   createLessonJournalMakeupTaskRequests({
     currentTasks,
-    idSeed: 1722123456789,
     taskDrafts,
     timestamps,
     today: "2026-07-28"
@@ -88,7 +88,7 @@ assert.deepEqual(
       touchedAt: timestamps[1]
     },
     {
-      makeupTaskId: "makeup_1722123456789_student_NEW_2",
+      makeupTaskId: createLessonJournalMakeupTaskId(taskDrafts[2]),
       status: "draft",
       scheduledDate: "2026-07-28",
       scheduledTime: "",
@@ -99,7 +99,7 @@ assert.deepEqual(
       ...taskDrafts[2]
     },
     {
-      makeupTaskId: "makeup_1722123456789_student_OVERRIDE_3",
+      makeupTaskId: createLessonJournalMakeupTaskId(taskDrafts[3]),
       status: "draft",
       scheduledDate: "2026-07-28",
       scheduledTime: "",
@@ -116,7 +116,6 @@ assert.deepEqual(taskDrafts, draftSnapshot);
 assert.deepEqual(
   createLessonJournalMakeupTaskRequests({
     currentTasks,
-    idSeed: 1,
     taskDrafts: [],
     timestamps: [],
     today: "2026-07-28"
@@ -126,7 +125,6 @@ assert.deepEqual(
 
 const differentSourceControl = createLessonJournalMakeupTaskRequests({
   currentTasks,
-  idSeed: 99,
   taskDrafts: [{
     studentId: "student_EXISTING_DONE",
     sourceId: "source_DIFFERENT_CONTROL",
@@ -135,7 +133,14 @@ const differentSourceControl = createLessonJournalMakeupTaskRequests({
   timestamps: ["2026-07-28T02:00:00.000Z"],
   today: "2026-07-28"
 });
-assert.equal(differentSourceControl[0].makeupTaskId, "makeup_99_student_EXISTING_DONE_0");
+assert.equal(
+  differentSourceControl[0].makeupTaskId,
+  createLessonJournalMakeupTaskId({
+    studentId: "student_EXISTING_DONE",
+    sourceId: "source_DIFFERENT_CONTROL",
+    taskType: "homework_makeup"
+  })
+);
 assert.equal(differentSourceControl[0].createdAt, "2026-07-28T02:00:00.000Z");
 assert.equal(differentSourceControl[0].touchedAt, undefined);
 
@@ -155,13 +160,17 @@ const helperSource = appSource.slice(handlerStart, handlerEnd);
 for (const injectedSource of [
   "createLessonJournalMakeupTaskRequests({",
   "currentTasks: makeupTasks",
-  "idSeed: Date.now()",
   "taskDrafts: makeupTaskDrafts",
   "timestamps: makeupTaskDrafts.map(() => new Date().toISOString())",
   "today"
 ]) {
   assert.ok(helperSource.includes(injectedSource), `missing makeup request source: ${injectedSource}`);
 }
+assert.ok(!helperSource.includes("idSeed: Date.now()"), "makeup request ID must not change on retry");
+assert.ok(
+  requestSource.includes("createLessonJournalMakeupTaskId(task)"),
+  "new makeup tasks must use the logical-source stable ID"
+);
 for (const AppOwnedSideEffect of [
   "saveLessonJournalMakeupTasksWithVerification({",
   "request: postMakeupTasks",
