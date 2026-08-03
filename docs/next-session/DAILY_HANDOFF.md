@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-03
 
+## 2026-08-03 P2-3c 수업일지 내부 보충 완료 확인 footer
+
+- `LessonNestedPanels`의 보충 완료/추가 보충 확인 wrapper만 공통 `ModalFooter`로 옮겼다. local state, 취소/완료 callback, busy guard는 그대로다.
+- 전용 nested panel fixture가 footer와 callback identity, App-owned persistence 주입을 고정한다. 실제 저장·예약 취소는 실행하지 않는다.
+- 공통 footer는 14개, 기존 action wrapper는 3개다. 다음은 App의 월 정규수업 열기 footer를 별도 단위로 검토한다.
+
 ## 2026-08-03 P2-3b 보충 일정 변경 확인 footer
 
 - `SupplementScheduleChangeConfirmModal`의 세 버튼 wrapper만 공통 `ModalFooter`로 옮겼다. local draft, 일정만 저장/알림 예약 갱신 callback payload, busy 잠금은 그대로다.

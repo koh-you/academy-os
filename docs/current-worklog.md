@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 P2-3c 수업일지 내부 보충 완료 확인 footer
+
+- `LessonNestedPanels`의 보충 완료/추가 보충 확인창 버튼 wrapper만 공통 `ModalFooter`로 옮겼다.
+- 취소와 `confirmPassTask` callback, local 진행 메모·추가 계획 payload, `isPassSaving` 버튼/닫기 잠금, 성공·실패 후 draft 상태는 변경하지 않았다.
+- 전용 nested panel 경계 검사가 footer·두 callback과 App-owned persistence 주입을 함께 고정한다. safe 전체 browser는 운영 동작 없이 실행한다.
+- 현재 공통 footer 14개, 기존 action wrapper 3개다. 다음은 월 정규수업 열기 footer다.
+
 ## 2026-08-03 P2-3b 보충 일정 변경 확인 footer
 
 - `SupplementScheduleChangeConfirmModal`의 `취소`·`일정만 저장`·`다음 정각 예약 및 11시 갱신` wrapper만 공통 `ModalFooter`로 옮겼다.

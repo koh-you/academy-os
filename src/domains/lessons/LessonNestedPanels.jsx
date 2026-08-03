@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Modal } from "../../shared/components/Modal.jsx";
+import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { getAttendanceDisplay, hasMissingCheckOut } from "./attendance.js";
 import { defaultAttendanceSettings } from "./attendanceSettings.js";
@@ -511,14 +511,14 @@ export function SupplementMakeupLessonDetail({
               ) : null}
             </dl>
           </div>
-          <div className="modalActions confirmActions">
+          <ModalFooter className="confirmActions">
             <button className="softButton" disabled={isPassSaving} onClick={() => setPassConfirmMode("")} type="button">
               취소
             </button>
             <button className="passButton" disabled={isPassSaving} onClick={confirmPassTask} type="button">
               {isPassSaving ? "처리 중" : passConfirmMode === "needs_more" ? "추가 보충 필요 기록" : "보충 완료 처리"}
             </button>
-          </div>
+          </ModalFooter>
           {passSaveState.message ? (
             <p className={`homeworkMakeupPassState modalState ${passSaveState.state}`}>{passSaveState.message}</p>
           ) : null}
