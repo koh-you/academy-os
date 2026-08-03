@@ -8,6 +8,7 @@ import {
 import { getAttendanceDisplay, hasMissingCheckOut } from "./attendance.js";
 import { defaultAttendanceSettings } from "./attendanceSettings.js";
 import { LessonJournalClosureNotice } from "./LessonJournalClosureNotice.jsx";
+import { LessonJournalAbsenceSourceNotice } from "./LessonJournalAbsenceSourceNotice.jsx";
 import { LessonJournalHeader } from "./LessonJournalHeader.jsx";
 import { LessonJournalNotificationBar } from "./LessonJournalNotificationBar.jsx";
 import { LessonJournalReminderPanel } from "./LessonJournalReminderPanel.jsx";
@@ -211,6 +212,8 @@ export function LessonJournalDetail({
     return hasMissingCheckOut(record, attendanceLesson);
   });
   const isSupplementMakeupLesson = isSupplementMakeupTaskLesson(lesson, linkedMakeupTask);
+  const isAbsenceMakeupLesson = isSupplementMakeupLesson && linkedMakeupTask?.taskType === "absence_makeup";
+  const isHomeworkMakeupLesson = isSupplementMakeupLesson && linkedMakeupTask?.taskType === "homework_makeup";
   const isExamPrepLessonCurrent = isExamPrepLesson(lesson);
 
   const {
@@ -379,7 +382,7 @@ export function LessonJournalDetail({
     }
   }
 
-  if (isSupplementMakeupLesson) {
+  if (isHomeworkMakeupLesson) {
     return (
       <SupplementMakeupLessonDetail
         runtime={nestedPanels}
@@ -493,6 +496,15 @@ export function LessonJournalDetail({
         onOpenExamPrep={onOpenExamPrep}
         studentCount={lessonStudents.length}
       />
+
+      {isAbsenceMakeupLesson ? (
+        <LessonJournalAbsenceSourceNotice
+          lesson={lesson}
+          lessons={lessons}
+          records={records}
+          task={linkedMakeupTask}
+        />
+      ) : null}
 
       <LessonJournalClosureNotice
         formatLessonTimeRange={formatLessonTimeRange}

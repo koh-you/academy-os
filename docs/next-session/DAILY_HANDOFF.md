@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-03
 
+## 2026-08-03 결석보강 수업일지 모달 통일
+
+- 결석보강은 일반 수업일지와 같은 modal shell·학생 기록 표·수정/저장·알림 구조로 연다. 헤더 아래에는 원 결석 수업 날짜·반·시간·사유만 추가하며 숙제보충 전용 상세는 그대로다.
+- App handler, 보충 일정 persistence, API, 알림 side effect는 변경하지 않았다. 검증은 lesson `15/15`, production `823/823`, build `396 modules`·lazy `12/12`, 전체 safe browser `34/34` 통과다.
+- 병행 리팩터링 task의 보충 일정 원자 저장 PR이 main에 들어온 뒤 현재 branch를 최신 main으로 맞추고 저장 callback·일정 생성 browser 경로까지 함께 재검증한 후 통합·배포한다.
+
 ## 2026-08-03 보충·알림 원천 reconcile inventory
 
 - 보충 상세는 `makeup_tasks` 정방향 링크, `lessons` 역방향 원천과 실제 일정, 미발송 `notification_jobs`를 함께 대조한다. 누락·오래된 링크·중복·다른 원천·일정 불일치·이전 일정 예약은 경고로 표시하고 일정 저장/새 예약을 막는다.

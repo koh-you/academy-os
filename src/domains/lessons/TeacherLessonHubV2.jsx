@@ -107,9 +107,10 @@ export function TeacherLessonHubV2({
     ? makeupTasks.find((task) => task.makeupTaskId === selectedLesson.sourceMakeupTaskId || task.linkedLessonId === selectedLesson.lessonId)
     : null;
   const isSupplementMakeupLesson = isSupplementMakeupTaskLesson(selectedLesson, selectedMakeupTask);
+  const isHomeworkMakeupLesson = isSupplementMakeupLesson && selectedMakeupTask?.taskType === "homework_makeup";
   const isExamPrepLessonSelected = isExamPrepLesson(selectedLesson);
   const lessonJournalDialog = isLessonJournalOpen && selectedLesson ? (
-    isSupplementMakeupLesson ? (
+    isHomeworkMakeupLesson ? (
       <Modal
         backdropClassName="homeworkMakeupModalBackdrop"
         className="homeworkMakeupScheduleModal"

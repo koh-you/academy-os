@@ -322,7 +322,8 @@ for (const removedDirectProviderBoundary of [
 for (const specializedBoundary of [
   "<SupplementMakeupLessonDetail",
   "<ExamPrepLessonDetail",
-  "if (isSupplementMakeupLesson)",
+  "if (isHomeworkMakeupLesson)",
+  "<LessonJournalAbsenceSourceNotice",
   "if (isExamPrepLessonCurrent)"
 ]) {
   assert.ok(journalSource.includes(specializedBoundary), `missing specialized detail boundary: ${specializedBoundary}`);

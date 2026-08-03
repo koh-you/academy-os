@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 결석보강 수업일지 모달 통일
+
+- 결석보강 연결 수업을 별도 2열 `결석 보강 일정` 상세 대신 일반 `수업일지` shell과 `LessonJournalDetail`로 연다. 출결·교재·수업내용·지난/새 숙제·코멘트·수정/저장·알림 표시 방식은 일반 수업과 동일하다.
+- 일반 수업일지 헤더 아래에 원 결석 수업의 날짜·반·시간·결석 사유만 읽기 전용 notice로 추가한다. 숙제보충은 기존 전용 상세를 유지하고 App의 저장·완료·일정·알림 callback, API, Supabase 원천은 변경하지 않았다.
+- 검증: lesson `15/15`, runtime lint, scenario·production `823/823`, build `396 modules`·main `944.45 kB`·lazy `12/12`, 집중 browser `1/1`, 전체 safe browser `34/34` 통과. 병행 중인 보충 일정 원자 저장 task가 완료된 최신 main을 받은 뒤 exact-head 검증·통합·배포한다.
+
 ## 2026-08-03 보충·알림 다중 원천 읽기/판정 reconcile
 
 - `makeup_tasks`의 정방향 `linkedLessonId`, `lessons`의 역방향 `sourceMakeupTaskId`, 연결 일정, 해당 task의 미발송 `notification_jobs`를 한 pure model에서 판정한다. 정상·기존 ID 연결·일정 변경 대기와 수업 누락·task 링크 누락/오래됨·중복 수업·다른 원천·예상 밖 일정 불일치·이전 일정 예약 잔존을 구분한다.
