@@ -1,3 +1,8 @@
+import {
+  normalizeNotificationTemplates,
+  renderNotificationTemplate
+} from "../notifications/notificationTemplateCatalog.js";
+
 const defaultSpecialLectureBrandName = "으뜸수학 고태영T";
 
 function getKoreaDateString(date = new Date()) {
@@ -873,25 +878,26 @@ export function getSpecialLectureApplicationUrl(guide = {}) {
   });
 }
 
-export function buildSpecialLectureNoticeText(guide = {}, guideUrl = getSpecialLecturePublicUrl(guide), brandName = defaultSpecialLectureBrandName) {
+export function buildSpecialLectureNoticeText(
+  guide = {},
+  guideUrl = getSpecialLecturePublicUrl(guide),
+  options = {}
+) {
   const normalizedGuide = normalizeSpecialLectureGuide(guide);
   const specialNotes = normalizedGuide.specialNotes.trim();
-  const introLines = [
-    `안녕하세요. ${brandName}입니다.`,
-    `${normalizedGuide.title} 안내드립니다.`
-  ];
-  const detailLines = [
-    `대상: ${normalizedGuide.audience || "-"}`,
-    `요일: ${normalizedGuide.days || "-"}`,
-    `시간: ${normalizedGuide.time || "-"}`
-  ];
-  return [
-    introLines.join("\n"),
-    detailLines.join("\n"),
-    specialNotes ? `특이사항:\n${specialNotes}` : "",
-    normalizedGuide.noticeMemo || "세부 시수와 수강료, 회차별 일정은 아래 링크에서 확인 부탁드립니다. 수강을 원하시거나 문의사항이 있으신 경우 안내문에서 신청해 주세요.",
-    guideUrl
-  ].filter(Boolean).join("\n\n");
+  const resolvedOptions = typeof options === "string" ? { brandName: options } : options ?? {};
+  const brandName = resolvedOptions.brandName || defaultSpecialLectureBrandName;
+  const templates = normalizeNotificationTemplates(resolvedOptions.notificationTemplates);
+  return renderNotificationTemplate(templates.specialLectureGuideNotice, {
+    "학원명": brandName,
+    "특강명": normalizedGuide.title,
+    "대상": normalizedGuide.audience || "-",
+    "요일": normalizedGuide.days || "-",
+    "시간": normalizedGuide.time || "-",
+    "특이사항블록": specialNotes ? `특이사항:\n${specialNotes}` : "",
+    "안내메모": normalizedGuide.noticeMemo || "세부 시수와 수강료, 회차별 일정은 아래 링크에서 확인 부탁드립니다. 수강을 원하시거나 문의사항이 있으신 경우 안내문에서 신청해 주세요.",
+    "안내문링크": guideUrl
+  });
 }
 
 export function isSpecialLectureRoute() {

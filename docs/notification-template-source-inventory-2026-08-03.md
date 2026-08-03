@@ -22,10 +22,10 @@
 | 보충 일정 확정·변경 | `supplementScheduleConfirmNotice`, `supplementScheduleChangeNotice` | 학생·학부모별 schedule draft를 `makeup_tasks`에 저장 | 학생 comment 또는 학부모 daily report template | 설정 원천 연결 완료 |
 | 당일 학생 11시 reminder | 숙제/결석보강 reminder template | `makeup_tasks.notificationDraft` 최종본 | 학생 comment template | 설정 원천 연결 완료. 실제 예약은 별도 행동 |
 | 재시험 | App의 `createNotificationDraft` fallback과 수업 리포트의 schedule line | 보충 task draft는 저장되지만 독립 11시 reminder 대상은 아님 | 현재 수업 comment 경로 | 코드 고정이며 실제 transport 범위를 먼저 확정해야 함 |
-| 일반 공지 | `notificationCenterConfig.js`의 교재/보강/공지 preset | 공지 composer local draft가 job의 `noticeText`로 저장 | 학생 comment 또는 학부모 daily report template | preset 3개가 Settings 밖 코드 고정 |
-| 특강 | `buildSpecialLectureNoticeText`와 특강 preset | guide에서 만든 문구를 공지 composer에서 편집 후 job 저장 | 설정 시 `SOLAPI_SPECIAL_LECTURE_TEMPLATE_ID`, 미설정이면 대상별 comment template fallback | guide builder와 preset이 Settings 밖 코드 고정 |
+| 일반 공지 | `noticeMaterialPreset`, `noticeMakeupPreset`, `noticeAnnouncementPreset` | 설정 seed를 복사한 composer local draft가 job의 `noticeText`로 저장 | 학생 comment 또는 학부모 daily report template | preset 3개를 Settings 원천에 연결. 기존 draft/job은 재생성하지 않음 |
+| 특강 | `specialLectureGuideNotice`와 정적 provider preset | guide seed를 공지 composer에서 편집 후 job 저장 | 설정 시 `SOLAPI_SPECIAL_LECTURE_TEMPLATE_ID`, 미설정이면 대상별 comment template fallback | guide preview·발송 준비 seed를 Settings 원천에 연결. provider preset/변수는 유지 |
 
-## 이미 설정에서 관리하는 6개 key
+## 설정에서 관리하는 10개 key
 
 - `lessonNextHomeworkFollowup`
 - `lessonStayAfterHomeworkFollowup`
@@ -33,6 +33,10 @@
 - `homeworkMakeupStudentReminder`
 - `supplementScheduleConfirmNotice`
 - `supplementScheduleChangeNotice`
+- `noticeMaterialPreset`
+- `noticeMakeupPreset`
+- `noticeAnnouncementPreset`
+- `specialLectureGuideNotice`
 
 모두 `Supabase app_state.aiSettings.notificationTemplates`를 읽는다. 보충 문구는 template로 초안을 만든 뒤 교사가 고친 최종본을 `makeup_tasks`에 저장하고, 예약 job은 그 최종본을 `reminderBody` 또는 `message`로 전달한다. 설정 변경이 이미 저장된 교사 최종본을 덮어쓰면 안 된다.
 
@@ -50,7 +54,8 @@
 1. P3-2에서 출결의 사용되지 않던 `createAttendanceNotificationText`를 제거하고 App·server가 같은 `buildAttendanceBody`를 사용하도록 정리했다.
 2. P3-2에서 수업일지 client preview, 발송 직전 server preview, Solapi route live body를 `buildLessonNotificationBody`에 연결했다. provider 변수명과 template ID 선택은 route 경계에 그대로 남는다.
 3. 재시험 task는 hard-coded draft가 있으나 숙제·결석보강과 같은 독립 11시 job 대상은 아니다. 설정 항목을 먼저 노출하면 실제로 발송되는 것처럼 오해할 수 있다.
-4. 공지 preset과 특강 guide 문구는 code-owned seed다. 교사가 작성한 현재 composer draft와 이미 저장된 notification job은 catalog 변경으로 재생성하지 않는다.
+4. P3-3b에서 공지 preset 3개와 특강 guide seed를 Settings 원천에 연결했다. 교사가 작성한 현재 composer draft와 이미 저장된 notification job은 catalog 변경으로 재생성하지 않는다.
+5. Settings 전용 10개 행 metadata는 lazy Settings chunk에 두고 App runtime에는 default·normalize만 주입해 main bundle 예산을 지킨다.
 
 ## P3-3a 실제 transport 계약
 
@@ -66,7 +71,7 @@
 
 1. P3-1 catalog 경계: 기존 6개 default·변수 metadata·normalize를 notification domain의 pure catalog로 이동하고 문자열을 문자 단위로 보존한다.
 2. P3-2 preview/live 경계: 출결과 수업일지의 shared renderer·fixture를 먼저 만들고 server 실제 변수와 client preview가 같은 결과를 쓰게 한다. provider 행동은 실행하지 않는다.
-3. P3-3 설정 확장: 공지 preset·특강 guide·재시험의 실제 transport 범위를 확정한 뒤 숨은 hard-code를 catalog/Settings에 연결한다. 기존 human final은 보존한다.
+3. P3-3 설정 확장: 실제 transport를 먼저 고정하고 공지 preset 3개·특강 guide seed만 catalog/Settings에 연결한다. 재시험 11시 항목은 만들지 않고 기존 human final을 보존한다.
 4. P3-4 closeout: 9개 제품 경로의 seed→draft→persisted final→provider variables를 가상 fixture와 safe browser로 대조한다. 실제 발송·예약·취소는 사람 gate다.
 
 자동 기준선은 `npm run test:notification-template-inventory`다.
@@ -76,4 +81,5 @@
 - P3-1 완료: 기존 6개 default, Settings metadata, legacy schedule template 변환, normalize를 `src/domains/notifications/notificationTemplateCatalog.js`로 옮겼다. App과 server의 숙제 follow-up 기본값이 같은 pure catalog를 읽으며 저장 key·문구·빈 사용자 값·legacy migration 결과는 그대로다.
 - P3-2 완료: `notificationMessageRenderer.js`가 출결 body와 수업일지 body의 공통 normalize/line/block/attendance 조립을 소유한다. App preview와 server live 결과를 학부모·학생 fixture로 직접 대조하며 공지 human final override도 보존한다.
 - P3-3a 완료: 일반 공지·특강은 seed→composer local draft→교사 최종 job→provider 경로이며, 재시험은 저장 가능한 task draft와 수업일지 schedule line만 있고 독립 11시 transport는 없음을 fixture로 고정했다.
-- 다음 P3-3b는 일반 공지 preset 3개와 특강 guide seed만 catalog/Settings에 연결한다. 재시험 11시 template은 노출하지 않고, 현재 local draft와 기존 persisted human final은 유지한다. 실제 provider 행동은 실행하지 않는다.
+- P3-3b 완료: 일반 공지 preset 3개와 특강 guide seed를 `app_state.aiSettings.notificationTemplates`에 연결했다. 설정값은 새 초안에만 적용하며 현재 local draft·기존 notification job·`makeup_tasks` 교사 최종본과 provider contract는 보존한다.
+- 다음 P3-4는 9개 제품 경로의 seed→draft→persisted final→provider variables를 종료 감사한다. 실제 provider 행동은 실행하지 않는다.

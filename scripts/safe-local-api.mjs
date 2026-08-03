@@ -680,8 +680,33 @@ function handleMutation(pathname, payload) {
     return { ok: true, ...handleSafeConsecutiveAttendance(pathname, payload) };
   }
   if (pathname === "/api/app-state") {
-    state.appStates = { ...state.appStates, ...(payload.states || {}) };
-    return { ok: true, states: state.appStates };
+    const requestedStates = payload.states || {};
+    const expectedUpdatedAt = payload.expectedUpdatedAt || null;
+    for (const key of Object.keys(requestedStates)) {
+      if (
+        expectedUpdatedAt &&
+        Object.prototype.hasOwnProperty.call(expectedUpdatedAt, key) &&
+        expectedUpdatedAt[key] !== (state.appStateUpdatedAt[key] ?? null)
+      ) {
+        return {
+          code: "APP_STATE_CONFLICT",
+          error: `${key} 설정이 다른 화면에서 먼저 변경되었습니다.`,
+          ok: false,
+          statusCode: 409
+        };
+      }
+    }
+    state.appStates = { ...state.appStates, ...requestedStates };
+    for (const key of Object.keys(requestedStates)) {
+      const previousTime = new Date(state.appStateUpdatedAt[key] || 0).getTime();
+      state.appStateUpdatedAt[key] = new Date(Math.max(Date.now(), previousTime + 1)).toISOString();
+    }
+    return {
+      ok: true,
+      stateRows: Object.entries(state.appStateUpdatedAt).map(([key, updatedAt]) => ({ key, updatedAt })),
+      states: state.appStates,
+      verified: true
+    };
   }
   if (pathname === "/api/resource-materials") {
     const material = payload.material || {};

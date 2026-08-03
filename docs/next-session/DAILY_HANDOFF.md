@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-03
 
+## 2026-08-03 P3-3b 알림톡 Settings seed 확장
+
+- 일반 공지 preset 3개와 특강 guide seed를 기존 `app_state.aiSettings.notificationTemplates`에 연결했다. 새 draft의 seed만 바뀌며 현재 composer draft·기존 job·보충 교사 최종본은 보존한다.
+- 재시험 11시 항목과 provider template ID/변수는 건드리지 않았다. Settings 행 metadata는 lazy chunk로 분리해 build budget을 상향하지 않았다. safe API의 `app_state` key별 `updated_at` CAS/readback을 보강해 설정값이 새로고침 뒤에도 유지되는지 확인한다.
+- runtime lint, notification `10/10`, teacher runtime 경계, scenario·production `827/827`, build `410 modules`·main `943.65 kB`·lazy `12/12`, safe browser `41/41`이 통과했다. 실제 알림과 운영 데이터는 사용하지 않았다.
+- 다음 P3-4는 9개 제품 경로의 seed→draft→persisted final→provider variables 종료 감사다.
+
 ## 2026-08-03 P3-3a 알림톡 template transport 계약
 
 - 일반 공지·특강은 code seed→composer local draft→교사 최종 notification job→provider 경로다. 특강 provider template이 없으면 대상별 comment template fallback을 유지한다.

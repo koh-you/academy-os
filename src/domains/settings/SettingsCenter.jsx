@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { academyBrandName } from "../../app/appConfig.js";
 import { defaultAttendanceSettings } from "../lessons/attendanceSettings.js";
 import { getNotificationJobLabel } from "../notifications/notificationCenterConfig.js";
+import { notificationTemplateRows } from "./notificationTemplateSettingsCatalog.js";
 import { AutosaveRiskNotice } from "../../shared/components/AutosaveRiskNotice.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
@@ -211,7 +212,6 @@ export function SettingsCenter({
     normalizeAiPrompts,
     normalizeAiSettings,
     normalizeNotificationTemplates,
-    notificationTemplateRows,
     postJson
   } = runtime;
   const [activeSettingsSection, setActiveSettingsSection] = useState("account");
@@ -480,7 +480,7 @@ export function SettingsCenter({
         <div className="sectionTitle">
           <div>
             <h2>알림톡 템플릿 문구</h2>
-            <p>실제 발송/예약 job이 읽는 문구 원천입니다. 보충 알림톡부터 설정값을 사용합니다.</p>
+            <p>보충 알림톡과 일반 공지·특강 안내 초안이 읽는 문구 원천입니다. 교사가 저장한 기존 최종본은 바꾸지 않습니다.</p>
           </div>
         </div>
         <div className="notificationTemplateSettingsGrid">
