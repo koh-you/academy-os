@@ -11,7 +11,8 @@ const [
   noticeBuilderSource,
   supplementJobBuilderSource,
   specialLectureSource,
-  templateCatalogSource
+  templateCatalogSource,
+  messageRendererSource
 ] = await Promise.all([
   read("src/app/App.jsx"),
   read("api/routes/notifications.js"),
@@ -21,7 +22,8 @@ const [
   read("src/domains/notifications/notificationNoticeBuilders.js"),
   read("src/domains/notifications/supplementJobBuilders.js"),
   read("src/domains/specialLectures/specialLectureGuideUtils.js"),
-  read("src/domains/notifications/notificationTemplateCatalog.js")
+  read("src/domains/notifications/notificationTemplateCatalog.js"),
+  read("src/domains/notifications/notificationMessageRenderer.js")
 ]);
 
 const managedTemplateKeys = [
@@ -54,10 +56,11 @@ const providerTemplateEnvNames = [
 for (const envName of providerTemplateEnvNames) {
   assert.ok(notificationRouteSource.includes(envName), `missing Solapi provider template contract: ${envName}`);
 }
-for (const builder of ["buildAttendanceBody", "buildDailyReportBody", "buildStudentScheduleReminderBody"]) {
-  assert.ok(notificationRouteSource.includes(`function ${builder}(`), `missing server message builder: ${builder}`);
+for (const builder of ["buildAttendanceBody", "buildLessonNotificationBody", "resolveLessonCommentBody"]) {
+  assert.ok(messageRendererSource.includes(`function ${builder}(`), `missing shared message renderer: ${builder}`);
 }
-assert.ok(notificationRouteSource.includes("export function buildAttendanceBody"));
+assert.ok(notificationRouteSource.includes('from "../../src/domains/notifications/notificationMessageRenderer.js"'));
+assert.ok(notificationRouteSource.includes("export { buildAttendanceBody };"));
 assert.ok(notificationRouteSource.includes('"#{출결본문}": attendanceBody'));
 assert.ok(notificationRouteSource.includes('"#{리포트본문}": reportBody'));
 assert.ok(notificationRouteSource.includes('"#{코멘트}": reminderBody'));
@@ -68,6 +71,7 @@ for (const key of managedTemplateKeys.slice(0, 2)) {
 assert.ok(serverSource.includes("states?.aiSettings?.notificationTemplates"));
 assert.ok(serverSource.includes("formatSupplementScheduleLineForNotification"));
 assert.ok(serverSource.includes('from "../src/domains/notifications/notificationTemplateCatalog.js"'));
+assert.ok(serverSource.includes('from "../src/domains/notifications/notificationMessageRenderer.js"'));
 
 for (const presetId of ["material", "makeup", "notice", "specialLecture"]) {
   assert.ok(noticeConfigSource.includes(`id: "${presetId}"`), `missing code-owned notice preset: ${presetId}`);
@@ -77,7 +81,7 @@ assert.ok(noticeBuilderSource.includes("previewBody: noticeText"));
 assert.ok(specialLectureSource.includes("export function buildSpecialLectureNoticeText"));
 assert.ok(appSource.includes('if (task.taskType === "retest")'));
 assert.ok(appSource.includes("학생 재시험 안내입니다."));
-assert.equal(appSource.split("createAttendanceNotificationText").length - 1, 1, "orphan attendance preview formatter changed");
+assert.equal(appSource.includes("createAttendanceNotificationText"), false, "orphan attendance formatter must stay removed");
 
 assert.ok(supplementJobBuilderSource.includes("reminderBody,"));
 assert.ok(supplementJobBuilderSource.includes("previewBody: reminderBody"));

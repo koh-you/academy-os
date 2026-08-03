@@ -15,8 +15,8 @@
 
 | 제품 경로 | OS composition 원천 | 사람 편집·저장 원천 | provider contract | 현재 판단 |
 | --- | --- | --- | --- | --- |
-| 출결 | `api/routes/notifications.js`의 `buildAttendanceBody` | 없음. 출결 record 값만 입력 | `SOLAPI_ATTENDANCE_TEMPLATE_ID`, `#{학원명}/#{학생명}/#{출결본문}` | 코드 고정. 설정 화면은 연결 테스트만 제공 |
-| 수업일지 학생·학부모 | server `buildDailyReportBody`와 client preview 조립 | 학생/학부모 코멘트·수업 기록, 숙제 확인 fragment 2개는 `app_state.aiSettings.notificationTemplates` | 학부모 daily report 또는 학생 comment template | preview/live 조립이 분리됨. 먼저 동일성 계약 필요 |
+| 출결 | `notificationMessageRenderer.js`의 `buildAttendanceBody` | 없음. 출결 record 값만 입력 | `SOLAPI_ATTENDANCE_TEMPLATE_ID`, `#{학원명}/#{학생명}/#{출결본문}` | App 미리보기와 server live body가 같은 pure renderer 사용 |
+| 수업일지 학생·학부모 | `notificationMessageRenderer.js`의 `buildLessonNotificationBody` | 학생/학부모 코멘트·수업 기록, 숙제 확인 fragment 2개는 `app_state.aiSettings.notificationTemplates` | 학부모 daily report 또는 학생 comment template | App preview·발송 직전 preview·route live body 동일성 고정 |
 | 숙제보충 | `homeworkMakeupStudentReminder` | 교사 최종 `makeup_tasks.notificationDraft` | 학생 comment template | 설정 원천 연결 완료 |
 | 결석보강 | `absenceMakeupStudentReminder` | 교사 최종 `makeup_tasks.notificationDraft` | 학생 comment template | 설정 원천 연결 완료 |
 | 보충 일정 확정·변경 | `supplementScheduleConfirmNotice`, `supplementScheduleChangeNotice` | 학생·학부모별 schedule draft를 `makeup_tasks`에 저장 | 학생 comment 또는 학부모 daily report template | 설정 원천 연결 완료 |
@@ -47,8 +47,8 @@
 
 ## 발견한 경계와 위험
 
-1. 출결은 server body가 유일한 live 원천이지만 App에 참조되지 않는 `createAttendanceNotificationText`가 남아 있다. live 원천으로 오인하지 않도록 shared renderer 단위에서 정리한다.
-2. 수업일지는 client preview와 server 발송 조립이 서로 다른 함수다. UI 문자열만 Settings로 옮기면 preview와 실제 문구가 달라질 수 있다.
+1. P3-2에서 출결의 사용되지 않던 `createAttendanceNotificationText`를 제거하고 App·server가 같은 `buildAttendanceBody`를 사용하도록 정리했다.
+2. P3-2에서 수업일지 client preview, 발송 직전 server preview, Solapi route live body를 `buildLessonNotificationBody`에 연결했다. provider 변수명과 template ID 선택은 route 경계에 그대로 남는다.
 3. 재시험 task는 hard-coded draft가 있으나 숙제·결석보강과 같은 독립 11시 job 대상은 아니다. 설정 항목을 먼저 노출하면 실제로 발송되는 것처럼 오해할 수 있다.
 4. 공지 preset과 특강 guide 문구는 code-owned seed다. 교사가 작성한 현재 composer draft와 이미 저장된 notification job은 catalog 변경으로 재생성하지 않는다.
 
@@ -64,4 +64,5 @@
 ## 진행 상태
 
 - P3-1 완료: 기존 6개 default, Settings metadata, legacy schedule template 변환, normalize를 `src/domains/notifications/notificationTemplateCatalog.js`로 옮겼다. App과 server의 숙제 follow-up 기본값이 같은 pure catalog를 읽으며 저장 key·문구·빈 사용자 값·legacy migration 결과는 그대로다.
-- 다음 P3-2는 출결과 수업일지의 client preview/server live renderer 동일성 fixture를 먼저 만든다. 설정 key 추가나 provider 행동은 이 기준선과 섞지 않는다.
+- P3-2 완료: `notificationMessageRenderer.js`가 출결 body와 수업일지 body의 공통 normalize/line/block/attendance 조립을 소유한다. App preview와 server live 결과를 학부모·학생 fixture로 직접 대조하며 공지 human final override도 보존한다.
+- 다음 P3-3은 공지 preset·특강 guide·재시험의 실제 transport 범위를 확정한 뒤 code-owned seed를 catalog/Settings에 연결한다. 실제 provider 행동은 실행하지 않는다.

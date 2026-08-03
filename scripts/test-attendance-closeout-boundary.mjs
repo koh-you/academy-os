@@ -24,7 +24,8 @@ for (const extractedBoundary of [
   'from "../domains/lessons/attendanceSettings.js"',
   'from "../domains/lessons/useAttendanceRecordSync.js"',
   'from "../domains/lessons/manualAttendancePayload.js"',
-  'from "../domains/lessons/manualAttendanceSaveController.js"'
+  'from "../domains/lessons/manualAttendanceSaveController.js"',
+  'from "../domains/notifications/notificationMessageRenderer.js"'
 ]) {
   assert.ok(appSource.includes(extractedBoundary), `missing extracted attendance boundary: ${extractedBoundary}`);
 }
@@ -150,9 +151,6 @@ assert.equal(
 
 for (const reservedOtherRoadmapBoundary of [
   "function isAttendanceOnlyRoute()",
-  "function formatAttendanceForMessage(",
-  "function formatAttendanceStatusForMessage(",
-  "function createAttendanceNotificationText(",
   "function SettingsCenter(",
   "function LessonJournalDetail("
 ]) {
@@ -161,5 +159,9 @@ for (const reservedOtherRoadmapBoundary of [
     `cross-roadmap boundary must remain explicit: ${reservedOtherRoadmapBoundary}`
   );
 }
+
+assert.equal(appSource.includes("function formatAttendanceStatusForMessage("), false);
+assert.equal(appSource.includes("function createAttendanceNotificationText("), false);
+assert.equal(appSource.includes("function formatAttendanceForMessage("), false);
 
 console.log("attendance roadmap 16 closeout boundary passed");
