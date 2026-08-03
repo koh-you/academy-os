@@ -50,3 +50,9 @@ UI-5에서 공통 dialog 의미와 일부 footer를 도입한 뒤 추가된 화�
 5. P2-4: modal save state를 여섯 공통 표시 상태와 대조하되 source/provider 복합 결과는 별도 표시를 유지한다.
 
 AI fixture와 안전 가상 데이터로 확인 가능한 shell 변경에는 사람 gate가 없다. 실제 Solapi 예약·취소, 운영 데이터 변경, 운영 SQL, 유료 호출은 실행하지 않는다.
+
+## 진행 상태
+
+- P2-1 완료: `ReportModal`의 버튼 두 개를 DOM 순서·문구·disabled·callback 그대로 공통 `ModalFooter`로 옮겼다.
+- 현재 수치: 공통 `ModalFooter` 10개, 기존 `modalActions` wrapper 7개.
+- 다음 단위: P2-2 `SupplementNotificationControlModal` bespoke shell. provider callback과 저장 상태는 변경하지 않는다.

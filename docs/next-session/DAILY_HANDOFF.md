@@ -2,6 +2,11 @@
 
 업데이트: 2026-08-03
 
+## 2026-08-03 P2-1 ReportModal footer
+
+- 보고서의 `스냅샷 저장`·`모의 발송` 버튼을 공통 `ModalFooter`로 옮겼다. 문구·순서·saving 잠금·callback과 인증/CAS/재조회 저장 계약은 그대로다.
+- 공통 footer는 10개, 기존 action wrapper는 7개다. 다음 P2-2는 Solapi 예약·취소 제어창의 shell만 공통화하고 provider 행동은 실행하거나 변경하지 않는다.
+
 ## 2026-08-03 P2 modal follow-up inventory
 
 - dialog 41개 중 공통 `Modal` 경로는 40개(직접 34, 주입 6)다. bespoke 예외는 실제 Solapi 예약·취소 callback을 받는 `SupplementNotificationControlModal` 1개다.

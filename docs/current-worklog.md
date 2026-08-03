@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 P2-1 ReportModal footer
+
+- `ReportModal`의 `스냅샷 저장`·`모의 발송` 버튼 wrapper만 공통 `ModalFooter`로 교체했다. 버튼 DOM 순서·문구·saving disabled·callback identity와 전용 인증/CAS/재조회 action은 변경하지 않았다.
+- 실제 알림은 없고 `모의 발송`도 `mock_sent` snapshot만 저장한다. 공통 footer는 10개, 기존 `modalActions` wrapper는 7개가 됐다.
+- 다음 P2-2는 Solapi 제어창의 bespoke dialog shell만 다룬다. 실제 예약·취소 callback과 provider 결과 상태는 그대로 둔다.
+
 ## 2026-08-03 P2 modal follow-up inventory
 
 - 최신 main의 dialog 41개를 다시 대조했다. 공통 `Modal` 직접 사용 34개와 App→TeacherViewOutlet 주입 6개는 같은 shell이며, bespoke `role=dialog` 예외는 보충 Solapi 예약·취소 제어창 1개다.

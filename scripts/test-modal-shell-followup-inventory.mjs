@@ -36,8 +36,8 @@ const rawDialogEntries = sourceEntries.filter((entry) => (
 
 assert.equal(directModalCount, 34, "unexpected direct common Modal surface count");
 assert.equal(injectedModalCount, 6, "unexpected injected common Modal surface count");
-assert.equal(modalFooterCount, 9, "unexpected common ModalFooter count");
-assert.equal(modalActionCount, 8, "unexpected legacy modalActions wrapper count");
+assert.equal(modalFooterCount, 10, "unexpected common ModalFooter count");
+assert.equal(modalActionCount, 7, "unexpected legacy modalActions wrapper count");
 assert.deepEqual(
   rawDialogEntries.map((entry) => entry.path),
   ["src/domains/supplements/SupplementNotificationControlModal.jsx"],
