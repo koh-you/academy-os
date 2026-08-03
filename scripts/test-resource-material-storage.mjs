@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import {
   deleteResourceMaterialWithFile,
   saveResourceMaterialFile
-} from "../api/domain/resourceMaterialStorage.js";
+} from "../src/domains/resources/resourceMaterialStorageOperation.js";
 import {
   canPortalSessionAccessResourceMaterial,
   createResourceMaterialStoragePath,

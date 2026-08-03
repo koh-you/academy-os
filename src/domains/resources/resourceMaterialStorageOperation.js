@@ -1,14 +1,14 @@
 import {
   areResourceMaterialTimestampsEqual,
   isSameResourceMaterialDraft
-} from "../../src/domains/resources/resourceMaterialPersistence.js";
+} from "./resourceMaterialPersistence.js";
 import {
   createResourceMaterialStoragePath,
   createResourceMaterialStorageReference,
   parseResourceMaterialStorageReference,
   resourceMaterialStorageBucket,
   validateResourceMaterialFile
-} from "../../src/domains/resources/resourceMaterialStorageModel.js";
+} from "./resourceMaterialStorageModel.js";
 
 function createStorageError(message, details = {}) {
   const error = new Error(message);

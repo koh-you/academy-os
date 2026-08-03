@@ -6,7 +6,8 @@
 
 - 자료 파일은 private bucket의 stable ID·생성 토큰·내용 해시 경로로 업로드하고 검증된 메타데이터 row에 Storage 참조를 저장한다. 같은 파일 재시도는 중복 생성하지 않고, 새 파일은 별도 해시 경로로 수렴한다.
 - 업로드 뒤 row 실패는 새 객체를 정리한다. 삭제는 파일 백업 뒤 Storage와 row CAS를 순서대로 처리하며 row 충돌 시 파일을 원경로에 복구한다. 파일 열기는 교사 또는 공개 대상 학생·학부모 bearer와 서버 공개범위 검사를 통과해야 서명 URL을 받는다.
-- 검증: lesson `19/19`, runtime lint, teacher owner audit, `check:fast`, production `826/826`, build `403 modules`·main 예산 통과·lazy `12/12`, 집중 browser `2/2`, 전체 safe browser `39/39`. 안전 fixture만 사용했고 운영 Supabase·Storage·실제 알림·SQL·유료 호출은 없었다.
+- 저장 조립 모듈은 Vercel이 별도 함수로 세지 않는 `src/domains/resources`에 두고, production inventory가 `api/**/*.js` 12개 한도를 고정한다.
+- 검증: lesson `19/19`, runtime lint, teacher owner audit, `check:fast`, scenario·production `827/827`, build `403 modules`·main 예산 통과·lazy `12/12`, 집중 browser `2/2`, 전체 safe browser `39/39`. 안전 fixture만 사용했고 운영 Supabase·Storage·실제 알림·SQL·유료 호출은 없었다.
 - 다음 P1은 보고서 snapshot의 명시 저장·CAS·실패 복구다.
 
 ## 2026-08-03 자료함 메타데이터 저장 신뢰성

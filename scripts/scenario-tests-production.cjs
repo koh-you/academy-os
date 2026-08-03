@@ -933,6 +933,12 @@ function check(name, condition, detail = "") {
 function hasAll(source, patterns) {
   return patterns.every((pattern) => source.includes(pattern));
 }
+function countMatchingFiles(directory, predicate) {
+  return fs.readdirSync(directory, { withFileTypes: true }).reduce((count, entry) => {
+    const entryPath = path.join(directory, entry.name);
+    return count + (entry.isDirectory() ? countMatchingFiles(entryPath, predicate) : Number(predicate(entryPath)));
+  }, 0);
+}
 function getButtonActionInventory(directory) {
   const filePaths = [];
   const inventory = {
@@ -1156,9 +1162,11 @@ const examPostManagerSource = examPostSubmissionManagerSource;
 const sharedAppStateSource = sourceBetween(app, "const sharedAppState = useMemo", "const initialSharedAppStateRef");
 const studentPortalTodaySource = `${app}\n${studentPortalShellSource}\n${studentTodayTabSource}`;
 const portalShellSource = `${app}\n${studentPortalShellSource}\n${parentPortalSource}`;
+const vercelApiFunctionCount = countMatchingFiles(path.join(root, "api"), (filePath) => /\.m?js$/i.test(filePath));
 
 check("01 login form does not expose default credentials", !app.includes("setLoginId(nextRole)") && app.includes('const [loginId, setLoginId] = useState("");'));
 check("01a public page metadata uses academy brand name", hasAll(indexHtml, ["<title>으뜸수학 고태영T Academy OS</title>", 'property="og:title" content="으뜸수학 고태영T Academy OS"', 'name="twitter:title" content="으뜸수학 고태영T Academy OS"']) && hasAll(attendanceHtml, ["<title>으뜸수학 고태영T 출결</title>", 'property="og:title" content="으뜸수학 고태영T 출결"', 'name="twitter:title" content="으뜸수학 고태영T 출결"']) && hasAll(specialLectureHtml, ["<title>으뜸수학 고태영T 특강 안내</title>", 'property="og:title" content="으뜸수학 고태영T 특강 안내"', 'name="twitter:title" content="으뜸수학 고태영T 특강 안내"']) && !indexHtml.includes("koh_you_math") && !attendanceHtml.includes("koh_you_math") && !specialLectureHtml.includes("koh_you_math"));
+check("01a-1 Vercel Hobby serverless function inventory stays within the 12-file deployment limit", vercelApiFunctionCount <= 12, `api JavaScript files: ${vercelApiFunctionCount}/12`);
 check("01b sidebar does not show legacy KYM brand mark", !app.includes("brandMark") && !app.includes(">KYM<") && !css.includes(".brandMark"));
 check("02 login form does not include temporary lockout", !hasAll(app, ["loginAttempts", "lockedUntil"]) && !css.includes("loginSecurityNotice"));
 check("03 role switching clears credentials", hasAll(app, ["function selectRole(nextRole)", 'setLoginId("");', 'setPassword("");', 'setError("");']));

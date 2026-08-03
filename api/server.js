@@ -119,7 +119,7 @@ import {
 import {
   deleteResourceMaterialWithFile,
   saveResourceMaterialFile
-} from "./domain/resourceMaterialStorage.js";
+} from "../src/domains/resources/resourceMaterialStorageOperation.js";
 import { getNextHourlyAlimtalkReservationAt } from "../src/domains/notifications/supplementJobBuilders.js";
 import { isSupplementScheduleForLessonComment } from "../src/domains/notifications/supplementSchedule.js";
 import { normalizeSpecialLectureTallySessionRequests } from "../src/domains/specialLectures/tallySessionRequests.js";

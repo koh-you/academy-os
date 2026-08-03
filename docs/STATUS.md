@@ -42,6 +42,7 @@
 ## 개발환경 상태
 
 - Node 24 기준, `npm ci` 사용.
+- Vercel Hobby 배포를 위해 `api/**/*.js` Serverless Function 후보는 12개 이하로 유지하며 production inventory가 초과를 차단한다.
 - `npm run doctor`가 경로·Git·Node·중복 clone을 점검한다.
 - VS Code F5는 운영 데이터에 연결하지 않는 안전한 가상 환경을 연다.
 - ESLint runtime 검사, 간결한 scenario 요약, client runtime error reporter, Playwright browser smoke가 있다.
