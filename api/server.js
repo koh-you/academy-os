@@ -102,8 +102,8 @@ import {
 import { applyStudentScheduleToLesson } from "../src/shared/utils/studentSchedule.js";
 import {
   createConsecutiveAttendanceVisitRecord,
-  findConsecutiveAbsenceMakeupVisit,
   getConsecutiveAttendanceVisitLabel,
+  loadConsecutiveAttendanceVisit,
   saveConsecutiveAttendanceVisitRecords,
   shouldApplyConsecutiveAttendanceVisit
 } from "../src/domains/lessons/attendanceVisitContinuity.js";
@@ -798,13 +798,11 @@ async function handleAttendanceCheck(payload = {}) {
     updatedAt: nowIso
   };
   const attendanceVisitCandidateLessons = attendanceCandidates.map((candidate) => candidate.attendanceLesson);
-  const makeupTasksResult = attendanceVisitCandidateLessons.some((candidate) => candidate.lessonType === "makeup")
-    ? await listMakeupTasks()
-    : { makeupTasks: [] };
-  const attendanceVisit = findConsecutiveAbsenceMakeupVisit({
+  const attendanceVisit = await loadConsecutiveAttendanceVisit({
     lessons: attendanceVisitCandidateLessons,
-    makeupTasks: makeupTasksResult.makeupTasks ?? [],
-    selectedLessonId: lesson.lessonId
+    listMakeupTasks,
+    selectedLessonId: lesson.lessonId,
+    source
   });
   const shouldApplyAttendanceVisit = source === "kiosk" && shouldApplyConsecutiveAttendanceVisit({
     eventType,

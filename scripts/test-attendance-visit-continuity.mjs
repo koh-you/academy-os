@@ -4,6 +4,7 @@ import {
   createConsecutiveAttendanceVisitRecord,
   findConsecutiveAbsenceMakeupVisit,
   getConsecutiveAttendanceVisitLabel,
+  loadConsecutiveAttendanceVisit,
   saveConsecutiveAttendanceVisitRecords,
   shouldApplyConsecutiveAttendanceVisit
 } from "../src/domains/lessons/attendanceVisitContinuity.js";
@@ -44,6 +45,37 @@ assert.equal(visitFromMakeup.visitType, "absence_makeup_then_regular");
 assert.equal(shouldApplyConsecutiveAttendanceVisit({ eventType: "checkin", selectedLessonId: "lesson-makeup", visit: visitFromMakeup }), true);
 assert.equal(shouldApplyConsecutiveAttendanceVisit({ eventType: "checkout", selectedLessonId: "lesson-makeup", visit: visitFromMakeup }), false);
 assert.equal(getConsecutiveAttendanceVisitLabel(visitFromMakeup), "김룡기 결석보강 → 고1 정규수업");
+
+const thirtyMinuteVisit = findConsecutiveAbsenceMakeupVisit({
+  lessons: [lessons[0], { ...lessons[1], startTime: "16:30" }],
+  makeupTasks: [absenceTask],
+  selectedLessonId: "lesson-makeup"
+});
+assert.equal(thirtyMinuteVisit.gapMinutes, 30, "정확히 30분 간격은 연속 방문에 포함한다");
+
+let manualMakeupQueryCount = 0;
+assert.equal(await loadConsecutiveAttendanceVisit({
+  lessons,
+  listMakeupTasks: async () => {
+    manualMakeupQueryCount += 1;
+    throw new Error("manual attendance must not query makeup tasks");
+  },
+  selectedLessonId: "lesson-makeup",
+  source: "manual"
+}), null);
+assert.equal(manualMakeupQueryCount, 0, "수동 출결은 보강 task 조회에 새로 의존하지 않는다");
+
+let kioskMakeupQueryCount = 0;
+assert.deepEqual((await loadConsecutiveAttendanceVisit({
+  lessons,
+  listMakeupTasks: async () => {
+    kioskMakeupQueryCount += 1;
+    return { makeupTasks: [absenceTask] };
+  },
+  selectedLessonId: "lesson-makeup",
+  source: "kiosk"
+})).lessonIds, ["lesson-makeup", "lesson-regular"]);
+assert.equal(kioskMakeupQueryCount, 1);
 
 const recordDependencies = {
   calculateLateMinutes: (lesson, checkedTime) => lesson.lessonId === "lesson-regular" && checkedTime === "16:07" ? 2 : 0,
@@ -160,8 +192,11 @@ assert.equal(findConsecutiveAbsenceMakeupVisit({
 }), null, "중간에 다른 수업이 있으면 뒤 정규수업을 건너뛰어 묶지 않는다");
 
 const source = await readFile(new URL("../src/domains/lessons/attendanceVisitContinuity.js", import.meta.url), "utf8");
+const serverSource = await readFile(new URL("../api/server.js", import.meta.url), "utf8");
 for (const forbidden of ["fetch(", "/api/", "useState", "useEffect", "localStorage", "Supabase", "Solapi", "new Date"] ) {
   assert.equal(source.includes(forbidden), false, `continuity model must not own ${forbidden}`);
 }
+assert.equal(serverSource.match(/tryRecordAttendanceEvent\(attendanceEventPayload\)/g)?.length, 1, "한 visit action은 출결 이벤트를 한 번만 기록한다");
+assert.equal(serverSource.match(/queueKioskAttendanceAlimtalk\(attendanceEventPayload, alimtalkPayload\)/g)?.length, 1, "한 visit action은 키오스크 알림을 한 번만 queue한다");
 
 console.log("consecutive absence-makeup attendance visit fixtures passed");

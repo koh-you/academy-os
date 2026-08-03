@@ -42,6 +42,7 @@ function getSafeKoreaDateString(date = new Date()) {
 const initialState = {
   academyReminders: [],
   attendanceEvents: [],
+  attendanceQueuedNotifications: [],
   appStates: {},
   classTemplates: [
     {
@@ -431,6 +432,7 @@ let state = createInitialState();
 const listRoutes = new Map([
   ["/api/academy-reminders", ["academyReminders", "academyReminders"]],
   ["/api/safe-fixture/attendance-events", ["attendanceEvents", "attendanceEvents"]],
+  ["/api/safe-fixture/attendance-queued-notifications", ["attendanceQueuedNotifications", "attendanceQueuedNotifications"]],
   ["/api/classes", ["classTemplates", "classTemplates"]],
   ["/api/exam-prep-rows", ["examPrepRows", "examPrepRows"]],
   ["/api/homeworks", ["homeworks", "homeworks"]],
@@ -638,6 +640,11 @@ function handleSafeConsecutiveAttendance(pathname, payload = {}) {
     studentId: student.studentId
   };
   state.attendanceEvents.push(attendanceEvent);
+  state.attendanceQueuedNotifications.push({
+    eventType,
+    notificationId: `safe_attendance_notification_${state.attendanceQueuedNotifications.length + 1}`,
+    studentId: student.studentId
+  });
   return {
     action: eventType,
     alimtalk: { status: "queued" },

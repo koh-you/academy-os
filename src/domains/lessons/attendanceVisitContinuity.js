@@ -64,6 +64,21 @@ export function findConsecutiveAbsenceMakeupVisit({
   return null;
 }
 
+export async function loadConsecutiveAttendanceVisit({
+  lessons = [],
+  listMakeupTasks,
+  selectedLessonId = "",
+  source = ""
+} = {}) {
+  if (source !== "kiosk" || !lessons.some((lesson) => lesson?.lessonType === "makeup")) return null;
+  const result = await listMakeupTasks();
+  return findConsecutiveAbsenceMakeupVisit({
+    lessons,
+    makeupTasks: result.makeupTasks ?? [],
+    selectedLessonId
+  });
+}
+
 export function shouldApplyConsecutiveAttendanceVisit({ eventType = "", selectedLessonId = "", visit = null } = {}) {
   if (!visit) return false;
   if (eventType === "checkin") return selectedLessonId === visit.entryLesson.lessonId;

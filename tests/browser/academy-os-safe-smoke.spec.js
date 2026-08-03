@@ -69,6 +69,8 @@ test("consecutive absence makeup and regular lessons use one physical attendance
 
   let eventsResult = await (await request.get(`${safeApiBaseUrl}/api/safe-fixture/attendance-events`)).json();
   expect(eventsResult.attendanceEvents.map((event) => event.eventType)).toEqual(["checkin"]);
+  let notificationsResult = await (await request.get(`${safeApiBaseUrl}/api/safe-fixture/attendance-queued-notifications`)).json();
+  expect(notificationsResult.attendanceQueuedNotifications.map((notification) => notification.eventType)).toEqual(["checkin"]);
 
   await pinInput.fill("0833");
   await page.locator(".attendancePinForm").getByRole("button", { name: "확인" }).click();
@@ -83,6 +85,8 @@ test("consecutive absence makeup and regular lessons use one physical attendance
   expect(new Set(visitRecords.map((record) => record.checkOutTime))).toEqual(new Set(["19:05"]));
   eventsResult = await (await request.get(`${safeApiBaseUrl}/api/safe-fixture/attendance-events`)).json();
   expect(eventsResult.attendanceEvents.map((event) => event.eventType)).toEqual(["checkin", "checkout"]);
+  notificationsResult = await (await request.get(`${safeApiBaseUrl}/api/safe-fixture/attendance-queued-notifications`)).json();
+  expect(notificationsResult.attendanceQueuedNotifications.map((notification) => notification.eventType)).toEqual(["checkin", "checkout"]);
   expect(pageErrors).toEqual([]);
 });
 
