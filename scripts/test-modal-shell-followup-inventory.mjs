@@ -34,13 +34,13 @@ const rawDialogEntries = sourceEntries.filter((entry) => (
   entry.path !== "src/shared/components/Modal.jsx" && entry.source.includes('role="dialog"')
 ));
 
-assert.equal(directModalCount, 34, "unexpected direct common Modal surface count");
+assert.equal(directModalCount, 35, "unexpected direct common Modal surface count");
 assert.equal(injectedModalCount, 6, "unexpected injected common Modal surface count");
-assert.equal(modalFooterCount, 10, "unexpected common ModalFooter count");
-assert.equal(modalActionCount, 7, "unexpected legacy modalActions wrapper count");
+assert.equal(modalFooterCount, 11, "unexpected common ModalFooter count");
+assert.equal(modalActionCount, 6, "unexpected legacy modalActions wrapper count");
 assert.deepEqual(
   rawDialogEntries.map((entry) => entry.path),
-  ["src/domains/supplements/SupplementNotificationControlModal.jsx"],
+  [],
   "new bespoke dialogs must not bypass the common Modal shell"
 );
 
@@ -50,7 +50,8 @@ for (const contract of [
   'role="dialog"',
   "closeDisabled = false",
   'aria-busy={closeDisabled || undefined}',
-  'aria-label="창 닫기"',
+  'closeAriaLabel = "창 닫기"',
+  "aria-label={closeAriaLabel}",
   "export function ModalFooter"
 ]) {
   assert.ok(sharedModalSource.includes(contract), `missing common modal contract: ${contract}`);
@@ -68,17 +69,21 @@ for (const state of ["idle", "dirty", "saving", "verifying", "saved", "failed"])
   assert.ok(statusSource.includes(`${state}:`), `missing common save-state vocabulary: ${state}`);
 }
 for (const callbackContract of [
+  "<Modal",
+  'closeAriaLabel="알림 제어 닫기"',
+  "closeDisabled={isBusy}",
+  '<ModalFooter className="supplementNotificationControlActions" tone="danger">',
   "onClick={onCancelAll}",
   "onClick={() => onReserve(control.controlType)}",
   "disabled={isBusy}",
   "onClick={onClose}"
 ]) {
-  assert.ok(supplementModalSource.includes(callbackContract), `missing bespoke provider modal contract: ${callbackContract}`);
+  assert.ok(supplementModalSource.includes(callbackContract), `missing supplement provider modal contract: ${callbackContract}`);
 }
 for (const forbiddenOwner of ["fetch(", "postJson", "/api/", "setNotificationJobs", "useEffect", "useState"]) {
   assert.ok(!supplementModalSource.includes(forbiddenOwner), `provider modal must remain callback-only: ${forbiddenOwner}`);
 }
 
 console.log(
-  `modal follow-up inventory passed · common ${directModalCount + injectedModalCount}/41 · raw 1 · footer ${modalFooterCount} · legacy actions ${modalActionCount}`
+  `modal follow-up inventory passed · common ${directModalCount + injectedModalCount}/41 · bespoke ${rawDialogEntries.length} · footer ${modalFooterCount} · legacy actions ${modalActionCount}`
 );

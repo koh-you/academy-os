@@ -17501,24 +17501,6 @@ textarea.profileEditInput {
   -webkit-overflow-scrolling: touch;
 }
 
-.supplementNotificationControlHeader {
-  align-items: start;
-  display: flex;
-  gap: 16px;
-  justify-content: space-between;
-}
-
-.supplementNotificationControlHeader h3 {
-  color: #17213d;
-  font-size: 20px;
-  margin: 7px 0 3px;
-}
-
-.supplementNotificationControlHeader p {
-  color: #64748b;
-  margin: 0;
-}
-
 .supplementNotificationControlState {
   align-items: center;
   color: #475569;

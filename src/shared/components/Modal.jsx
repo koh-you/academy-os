@@ -5,6 +5,7 @@ export function Modal({
   backdropClassName = "",
   children,
   className = "",
+  closeAriaLabel = "창 닫기",
   closeDisabled = false,
   hideCloseButton = false,
   hideHeader = false,
@@ -44,7 +45,7 @@ export function Modal({
               <h2 id={titleId}>{title}</h2>
               {subtitle ? <p className="muted">{subtitle}</p> : null}
             </div>
-            {hideCloseButton ? null : <button aria-label="창 닫기" className="iconButton" disabled={closeDisabled} onClick={onClose} type="button">×</button>}
+            {hideCloseButton ? null : <button aria-label={closeAriaLabel} className="iconButton" disabled={closeDisabled} onClick={onClose} type="button">×</button>}
           </div>
         )}
         {scrollable ? <div className="modalScrollBody">{children}</div> : children}

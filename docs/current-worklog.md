@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 P2-2 Solapi 제어창 공통 shell
+
+- 유일한 bespoke dialog였던 `SupplementNotificationControlModal`을 공통 `Modal`/`ModalFooter`로 옮겼다. 공통 shell에 기본 `창 닫기`를 유지하는 opt-in `closeAriaLabel`을 추가해 기존 `알림 제어 닫기` 이름을 보존했다.
+- `isBusy`는 공통 X/Escape와 footer/카드 버튼을 계속 잠근다. 3개 카드, Academy OS/Solapi 참조 대조, 개별 예약, 취소 가능 예약 일괄 취소 callback identity와 feedback 순서는 변경하지 않았다.
+- custom wide/max-height/safe-area CSS class는 같은 element에 유지했다. 안전 브라우저는 연결 원천이 깨져 provider 행동이 차단된 fixture에서 390×844 안에 dialog가 들어오고 하단 닫기로 종료되는 경로만 실행한다.
+- 현재 dialog는 공통 shell 41/41, 공통 footer 11개, 기존 action wrapper 6개다. 실제 Solapi 예약·취소는 실행하지 않았다.
+
 ## 2026-08-03 P2-1 ReportModal footer
 
 - `ReportModal`의 `스냅샷 저장`·`모의 발송` 버튼 wrapper만 공통 `ModalFooter`로 교체했다. 버튼 DOM 순서·문구·saving disabled·callback identity와 전용 인증/CAS/재조회 action은 변경하지 않았다.

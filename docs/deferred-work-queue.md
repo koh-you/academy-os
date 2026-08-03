@@ -25,7 +25,7 @@
 ## P2. 모달 통일 후속
 
 - 최신 modal inventory는 `docs/modal-shell-followup-inventory-2026-08-03.md`에 고정했다. 41개 dialog 중 40개는 공통 shell이고, bespoke 예외는 실제 Solapi callback을 받는 보충 알림 제어창 1개다. 공통 footer는 9개, 기존 action wrapper는 8개다.
-- `ReportModal` footer 공통화는 완료해 공통 footer 10개·기존 action wrapper 7개가 됐다. 다음 단위는 bespoke Solapi 제어창의 shell만 공통화하되 callback identity·busy guard·safe-area layout을 유지한다.
+- `ReportModal` footer와 Solapi 제어창 shell 공통화는 완료했다. dialog 41/41이 공통 shell을 사용하며 공통 footer 11개·기존 action wrapper 6개다. 다음은 다중 원천 확인 footer를 한 화면씩 검토하되 저장·provider callback identity와 오류 복구를 먼저 고정한다.
 - 수업일지 저장과 Solapi side effect 버튼은 계속 분리한다.
 - 출결·알림·저장 원천이 함께 바뀌면 별도 작업으로 쪼갠다.
 
