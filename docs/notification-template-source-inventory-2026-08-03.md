@@ -52,6 +52,16 @@
 3. 재시험 task는 hard-coded draft가 있으나 숙제·결석보강과 같은 독립 11시 job 대상은 아니다. 설정 항목을 먼저 노출하면 실제로 발송되는 것처럼 오해할 수 있다.
 4. 공지 preset과 특강 guide 문구는 code-owned seed다. 교사가 작성한 현재 composer draft와 이미 저장된 notification job은 catalog 변경으로 재생성하지 않는다.
 
+## P3-3a 실제 transport 계약
+
+| 경로 | seed → local draft | 저장되는 사람 최종본 | provider 진입 | 설정 확장 판단 |
+| --- | --- | --- | --- | --- |
+| 일반 공지 | 교재·보강·공지 preset을 선택할 때 제목·본문 local draft에 복사 | 즉시/예약 행동 시 만들어지는 `notification_jobs.payload.commentBodyOverride/message`와 `previewBody` | 학생은 student comment, 학부모는 daily report provider template | preset 3개는 seed로 설정 확장 가능. 현재 composer draft와 기존 job은 재생성 금지 |
+| 특강 | 저장된 guide의 `buildSpecialLectureNoticeText` 결과를 공지 local draft에 복사한 뒤 교사가 편집 | 일반 공지와 같은 job 최종 본문 + guide metadata | `SOLAPI_SPECIAL_LECTURE_TEMPLATE_ID`가 있으면 특강 template, 없으면 대상별 comment template fallback | guide 문구 seed만 설정 확장 가능. provider template ID/변수와 분리 |
+| 재시험 | App fallback이 보충 task draft를 만들고 교사가 `makeup_tasks.notificationDraft`로 저장 가능 | 저장된 task draft | 독립 11시 job에는 들어가지 않음. 연결 수업의 학생·학부모 수업일지 `supplementSchedule` line으로만 전달 | 독립 재시험 11시 템플릿을 노출하지 않음. transport가 생기기 전까지 fallback 설정화 보류 |
+
+`test-notification-template-transport-contract.mjs`는 preset 적용, 특강 guide seed→교사 최종 job→live renderer, provider 선택 분기, 재시험의 11시 제외를 가상 데이터로 고정한다. API를 호출하지 않으며 실제 발송·예약·취소를 실행하지 않는다.
+
 ## P3 실행 순서
 
 1. P3-1 catalog 경계: 기존 6개 default·변수 metadata·normalize를 notification domain의 pure catalog로 이동하고 문자열을 문자 단위로 보존한다.
@@ -65,4 +75,5 @@
 
 - P3-1 완료: 기존 6개 default, Settings metadata, legacy schedule template 변환, normalize를 `src/domains/notifications/notificationTemplateCatalog.js`로 옮겼다. App과 server의 숙제 follow-up 기본값이 같은 pure catalog를 읽으며 저장 key·문구·빈 사용자 값·legacy migration 결과는 그대로다.
 - P3-2 완료: `notificationMessageRenderer.js`가 출결 body와 수업일지 body의 공통 normalize/line/block/attendance 조립을 소유한다. App preview와 server live 결과를 학부모·학생 fixture로 직접 대조하며 공지 human final override도 보존한다.
-- 다음 P3-3은 공지 preset·특강 guide·재시험의 실제 transport 범위를 확정한 뒤 code-owned seed를 catalog/Settings에 연결한다. 실제 provider 행동은 실행하지 않는다.
+- P3-3a 완료: 일반 공지·특강은 seed→composer local draft→교사 최종 job→provider 경로이며, 재시험은 저장 가능한 task draft와 수업일지 schedule line만 있고 독립 11시 transport는 없음을 fixture로 고정했다.
+- 다음 P3-3b는 일반 공지 preset 3개와 특강 guide seed만 catalog/Settings에 연결한다. 재시험 11시 template은 노출하지 않고, 현재 local draft와 기존 persisted human final은 유지한다. 실제 provider 행동은 실행하지 않는다.

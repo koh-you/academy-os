@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 P3-3a 알림톡 template transport 계약
+
+- 일반 공지 preset 4개와 특강 guide는 composer local draft의 seed이며, 즉시/예약 행동 시점의 교사 최종 `noticeText`가 notification job의 `commentBodyOverride/message/previewBody`와 live renderer 원천이 됨을 동작 fixture로 고정했다.
+- 특강은 전용 provider template 설정 시 이를 사용하고 미설정이면 학생 comment·학부모 daily report template으로 fallback한다. provider ID·변수와 OS seed는 별도 원천으로 유지한다.
+- 재시험은 `makeup_tasks.notificationDraft`로 저장할 수 있지만 숙제·결석보강과 달리 독립 학생 11시 job 대상이 아니며, 연결 수업의 수업일지 schedule line으로만 전달된다. 실제 transport가 생기기 전에 재시험 11시 Settings 항목을 노출하지 않는다.
+- 검증: runtime lint, notification `10/10`, 전용 transport fixture, `check:fast` scenario `827/827`, build `409 modules`·main `944.94 kB`·lazy `12/12`, production `827/827`을 통과했다. 실제 API·알림 발송·예약·취소·운영 데이터는 사용하지 않았다.
+- 다음 독립 단위는 일반 공지 preset 3개와 특강 guide seed만 catalog/Settings에 연결하고 기존 local/persisted human final을 보존한다.
+
 ## 2026-08-03 P3-2 알림톡 preview/live renderer 경계
 
 - 출결 `buildAttendanceBody`와 수업일지 `buildLessonNotificationBody`를 import 없는 pure notification domain에 두고 App 설정·수업일지 미리보기, 발송 직전 server 미리보기, Solapi route 실제 body가 같은 renderer를 사용하게 했다. 사용되지 않던 App 출결 formatter는 제거했다.
