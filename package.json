@@ -179,6 +179,7 @@
     "test:attendance-api": "node scripts/test-attendance-api.mjs",
     "test:attendance-kiosk-preview-controller": "node scripts/test-attendance-kiosk-preview-controller.mjs",
     "test:attendance-kiosk-check-controller": "node scripts/test-attendance-kiosk-check-controller.mjs",
+    "test:attendance-visit-continuity": "node scripts/test-attendance-visit-continuity.mjs",
     "test:manual-attendance-payload": "node scripts/test-manual-attendance-payload.mjs",
     "test:attendance-closeout-boundary": "node scripts/test-attendance-closeout-boundary.mjs",
     "test:manual-attendance-save-controller": "node scripts/test-manual-attendance-save-controller.mjs",

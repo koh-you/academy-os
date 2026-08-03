@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 결석보강·정규수업 연속 출결
+
+- 같은 학생·같은 날짜에 결석보강 바로 다음 정규수업이 30분 이내로 이어질 때 하나의 실제 방문으로 묶는다. 중간에 다른 수업이 있거나 31분 이상 떨어진 일정, 숙제보충·특강은 자동으로 묶지 않는다.
+- 보강 등원 한 번으로 두 `lesson_student_records`를 기존 versioned rows plan에 함께 저장하고 Supabase 재조회가 두 행 모두 일치해야 완료한다. 같은 등원시각을 사용하되 보강/정규 시작시각별 지각 상태는 따로 계산한다. 마지막 정규수업 하원 한 번으로 두 행의 최종 하원시각을 함께 저장하며 출결 이벤트·알림 큐는 최초 등원과 최종 하원 각각 한 건만 만든다.
+- 키오스크 확인 모달은 묶이는 두 수업과 알림 처리 방식을 미리 표시한다. 가상 브라우저는 두 일지의 등원·하원시각, 보강 지각/정규 출석, 이벤트 `checkin` 1건 뒤 `checkout` 1건 누적을 검증한다. 운영 데이터와 실제 알림은 사용하지 않았다.
+- 검증: lesson `17/17`, 출결 전용 fixture 전체, runtime lint, `check:fast`, scenario·production `825/825`, build `399 modules`·main `943.52 kB`·lazy `12/12`, 집중 browser `2/2`, 전체 safe browser `37/37`.
+
 ## 2026-08-03 교사 숙제 확인 상태 versioned 저장
 
 - `숙제현황`의 교사 확인 select가 App state를 먼저 바꾸고 `/api/homeworks` 실패를 console에만 남기던 경계를 제거했다. 기존 `/api/lesson-journal/rows/save` 계획을 재사용해 현재 숙제 행을 before로 캡처하고 `updated_at` CAS·Supabase 재조회가 일치한 뒤에만 `homeworks` 원천을 교체한다.

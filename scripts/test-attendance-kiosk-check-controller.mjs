@@ -63,6 +63,10 @@ const successResult = await checkKioskAttendanceAction({
         lessonStudentRecordId: "record-target",
         attendanceStatus: "late"
       },
+      records: [
+        { lessonStudentRecordId: "record-target", attendanceStatus: "late" },
+        { lessonStudentRecordId: "record-linked", attendanceStatus: "present" }
+      ],
       student: { studentId: "student-target" }
     };
   }
@@ -81,7 +85,7 @@ assert.deepEqual(receivedPayload, {
   source: "kiosk",
   studentId: "student-target"
 });
-assert.deepEqual(applyOrder, ["request", "lesson", "record", "event"]);
+assert.deepEqual(applyOrder, ["request", "lesson", "record", "record", "event"]);
 assert.equal(successResult.ok, true);
 assert.deepEqual(lessons, [
   { lessonId: "lesson-target", className: "TARGET 갱신" },
@@ -89,7 +93,8 @@ assert.deepEqual(lessons, [
 ]);
 assert.deepEqual(records, [
   { lessonStudentRecordId: "record-target", attendanceStatus: "late" },
-  { lessonStudentRecordId: "record-control", attendanceStatus: "present" }
+  { lessonStudentRecordId: "record-control", attendanceStatus: "present" },
+  { lessonStudentRecordId: "record-linked", attendanceStatus: "present" }
 ]);
 assert.deepEqual(logs, [
   {

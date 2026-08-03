@@ -24,7 +24,8 @@ export const domainTestGroups = Object.freeze({
     "scripts/test-homework-teacher-status-save.mjs",
     "scripts/test-lesson-journal-draft-controller.mjs",
     "scripts/test-lesson-journal-effect-adapter.mjs",
-    "scripts/test-lesson-nested-panels-boundary.mjs"
+    "scripts/test-lesson-nested-panels-boundary.mjs",
+    "scripts/test-attendance-visit-continuity.mjs"
   ]),
   supplement: Object.freeze([
     "scripts/test-supplement-job-builders.mjs",

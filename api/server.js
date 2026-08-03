@@ -100,6 +100,13 @@ import {
   normalizeAssignmentStatusValue
 } from "../src/domains/lessons/assignmentStatus.js";
 import { applyStudentScheduleToLesson } from "../src/shared/utils/studentSchedule.js";
+import {
+  createConsecutiveAttendanceVisitRecord,
+  getConsecutiveAttendanceVisitLabel,
+  loadConsecutiveAttendanceVisit,
+  saveConsecutiveAttendanceVisitRecords,
+  shouldApplyConsecutiveAttendanceVisit
+} from "../src/domains/lessons/attendanceVisitContinuity.js";
 import { getNextHourlyAlimtalkReservationAt } from "../src/domains/notifications/supplementJobBuilders.js";
 import { isSupplementScheduleForLessonComment } from "../src/domains/notifications/supplementSchedule.js";
 import { normalizeSpecialLectureTallySessionRequests } from "../src/domains/specialLectures/tallySessionRequests.js";
@@ -657,6 +664,7 @@ async function handleAttendanceCheck(payload = {}) {
   const recordResult = await getLessonStudentRecordForAttendance(lesson.lessonId, student.studentId);
   const records = recordResult.record ? [recordResult.record] : [];
   const existingRecord = findAttendanceRecord(records, lesson.lessonId, student.studentId);
+  candidateRecordByLessonId.set(lesson.lessonId, existingRecord);
   const hasArrival = hasAttendanceArrival(existingRecord);
   const hasCheckout = hasAttendanceCheckout(existingRecord);
   const manualCheckOutTime = normalizeAttendanceTime(payload.checkOutTime);
@@ -789,6 +797,42 @@ async function handleAttendanceCheck(payload = {}) {
     updatedBy: source === "manual" ? "manual_attendance" : "attendance_kiosk",
     updatedAt: nowIso
   };
+  const attendanceVisitCandidateLessons = attendanceCandidates.map((candidate) => candidate.attendanceLesson);
+  const attendanceVisit = await loadConsecutiveAttendanceVisit({
+    lessons: attendanceVisitCandidateLessons,
+    listMakeupTasks,
+    selectedLessonId: lesson.lessonId,
+    source
+  });
+  const shouldApplyAttendanceVisit = source === "kiosk" && shouldApplyConsecutiveAttendanceVisit({
+    eventType,
+    selectedLessonId: lesson.lessonId,
+    visit: attendanceVisit
+  });
+  const companionLesson = shouldApplyAttendanceVisit
+    ? attendanceVisit.lessons.find((candidate) => candidate.lessonId !== lesson.lessonId)
+    : null;
+  const companionExistingRecord = companionLesson
+    ? candidateRecordByLessonId.get(companionLesson.lessonId) ?? null
+    : null;
+  const companionRecord = companionLesson
+    ? createConsecutiveAttendanceVisitRecord({
+        calculateLateMinutes: calculateAttendanceLateMinutesFromTime,
+        createAttendanceIso: createKoreaIsoForAttendance,
+        createRecordId: createLessonStudentRecordIdForAttendance,
+        currentTime: eventType === "checkout" ? nextRecord.checkOutTime : nextRecord.checkInTime,
+        eventType,
+        existingRecord: companionExistingRecord,
+        hasArrival: hasAttendanceArrival,
+        hasCheckout: hasAttendanceCheckout,
+        lateGraceMinutes: payload.lateGraceMinutes,
+        lesson: companionLesson,
+        nowIso,
+        studentId: student.studentId
+      })
+    : null;
+  const attendanceVisitRecords = companionRecord ? [nextRecord, companionRecord] : [nextRecord];
+  const appliedAttendanceVisit = companionRecord ? attendanceVisit : null;
   const previewCheckedTime = eventType === "checkout" ? nextRecord.checkOutTime : nextRecord.checkInTime;
   if (previewOnly) {
     return {
@@ -799,13 +843,24 @@ async function handleAttendanceCheck(payload = {}) {
       student,
       lesson,
       record: nextRecord,
+      records: attendanceVisitRecords,
+      attendanceVisit: appliedAttendanceVisit
+        ? { label: getConsecutiveAttendanceVisitLabel(appliedAttendanceVisit), lessonIds: appliedAttendanceVisit.lessonIds, visitType: appliedAttendanceVisit.visitType }
+        : null,
       attendanceEvent: null,
       alimtalk: { status: "preview" }
     };
   }
 
-  const savedResult = await upsertLessonStudentRecord(nextRecord);
-  const savedRecord = savedResult.record;
+  const savedRecords = appliedAttendanceVisit
+    ? await saveConsecutiveAttendanceVisitRecords({
+        auditId: `attendance_visit_${Date.now()}_${student.studentId}_${eventType}`,
+        records: attendanceVisitRecords,
+        recordBeforeByLessonId: candidateRecordByLessonId,
+        savePlan: saveLessonJournalRowsPlan
+      })
+    : [(await upsertLessonStudentRecord(nextRecord)).record];
+  const savedRecord = savedRecords.find((record) => record.lessonId === lesson.lessonId) ?? savedRecords[0];
 
   const alimtalkPayload = {
     attendanceStatus: eventType === "checkout" ? "checkout" : nextStatus === "present" ? "checkin" : nextStatus,
@@ -898,6 +953,10 @@ async function handleAttendanceCheck(payload = {}) {
     student,
     lesson,
     record: savedRecord,
+    records: savedRecords,
+    attendanceVisit: appliedAttendanceVisit
+      ? { label: getConsecutiveAttendanceVisitLabel(appliedAttendanceVisit), lessonIds: appliedAttendanceVisit.lessonIds, visitType: appliedAttendanceVisit.visitType }
+      : null,
     attendanceEvent: eventResult.attendanceEvent,
     alimtalk: {
       status: alimtalkStatus,

@@ -43,8 +43,13 @@ export async function checkKioskAttendanceAction({
     if (result.lesson) {
       onLesson(result.lesson);
     }
-    if (result.record) {
-      onRecord(result.record);
+    const savedRecords = Array.isArray(result.records) && result.records.length
+      ? result.records
+      : result.record
+        ? [result.record]
+        : [];
+    for (const record of savedRecords) {
+      onRecord(record);
     }
     if (result.attendanceEvent) {
       onAttendanceEvent({

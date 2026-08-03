@@ -12,12 +12,37 @@ import {
   areSupplementScheduleTasksEqual,
   createSupplementScheduleSavePlan
 } from "../src/domains/supplements/supplementSchedulePersistence.js";
+import {
+  createConsecutiveAttendanceVisitRecord,
+  findConsecutiveAbsenceMakeupVisit,
+  getConsecutiveAttendanceVisitLabel,
+  shouldApplyConsecutiveAttendanceVisit
+} from "../src/domains/lessons/attendanceVisitContinuity.js";
 
 const host = "127.0.0.1";
 const port = Number(process.env.ACADEMY_SAFE_API_PORT || 8787);
+const safeConsecutiveAttendanceTask = Object.freeze({
+  linkedLessonId: "safe-consecutive-attendance-makeup",
+  makeupTaskId: "safe-consecutive-attendance-task",
+  studentId: "safe-consecutive-attendance-student",
+  taskType: "absence_makeup"
+});
+
+function getSafeKoreaDateString(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "Asia/Seoul",
+    year: "numeric"
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
 
 const initialState = {
   academyReminders: [],
+  attendanceEvents: [],
+  attendanceQueuedNotifications: [],
   appStates: {},
   classTemplates: [
     {
@@ -363,6 +388,38 @@ const initialState = {
 
 function createInitialState() {
   const snapshot = JSON.parse(JSON.stringify(initialState));
+  const attendanceDate = getSafeKoreaDateString();
+  snapshot.students.push({
+    grade: "고1",
+    name: "연속출결 가상학생",
+    parentPhone: "01000000000",
+    status: "active",
+    studentId: "safe-consecutive-attendance-student",
+    studentPhone: "01000000833"
+  });
+  snapshot.lessons.push(
+    {
+      className: "결석보강 가상수업",
+      date: attendanceDate,
+      endTime: "16:00",
+      lessonId: "safe-consecutive-attendance-makeup",
+      lessonType: "makeup",
+      sourceMakeupTaskId: "safe-consecutive-attendance-task",
+      startTime: "15:00",
+      status: "scheduled",
+      studentIds: ["safe-consecutive-attendance-student"]
+    },
+    {
+      className: "고1 정규 가상수업",
+      date: attendanceDate,
+      endTime: "19:00",
+      lessonId: "safe-consecutive-attendance-regular",
+      lessonType: "class",
+      startTime: "16:00",
+      status: "scheduled",
+      studentIds: ["safe-consecutive-attendance-student"]
+    }
+  );
   snapshot.lessons = snapshot.lessons.map((lesson) => ({
     ...lesson,
     updatedAt: lesson.updatedAt || "2026-08-03T00:00:00.000Z"
@@ -374,6 +431,8 @@ let state = createInitialState();
 
 const listRoutes = new Map([
   ["/api/academy-reminders", ["academyReminders", "academyReminders"]],
+  ["/api/safe-fixture/attendance-events", ["attendanceEvents", "attendanceEvents"]],
+  ["/api/safe-fixture/attendance-queued-notifications", ["attendanceQueuedNotifications", "attendanceQueuedNotifications"]],
   ["/api/classes", ["classTemplates", "classTemplates"]],
   ["/api/exam-prep-rows", ["examPrepRows", "examPrepRows"]],
   ["/api/homeworks", ["homeworks", "homeworks"]],
@@ -463,7 +522,148 @@ function haveSameSafeDerivedLesson(requested = {}, persisted = {}) {
   ));
 }
 
+function parseSafeAttendanceMinutes(value = "") {
+  const [hours, minutes] = String(value).split(":").map(Number);
+  return Number.isInteger(hours) && Number.isInteger(minutes) ? hours * 60 + minutes : 0;
+}
+
+function hasSafeAttendanceArrival(record = {}) {
+  return Boolean(record?.checkInAt || record?.checkInTime);
+}
+
+function hasSafeAttendanceCheckout(record = {}) {
+  return Boolean(record?.checkOutAt || record?.checkOutTime);
+}
+
+function handleSafeConsecutiveAttendance(pathname, payload = {}) {
+  const student = state.students.find((item) => (
+    item.studentId === payload.studentId || String(item.studentPhone ?? "").replaceAll(/\D/g, "").endsWith(String(payload.phoneLast4 ?? ""))
+  ));
+  if (!student) return { error: "가상 출결 학생을 찾지 못했습니다.", ok: false, statusCode: 404 };
+  const attendanceLessons = state.lessons
+    .filter((lesson) => lesson.date === getSafeKoreaDateString())
+    .filter((lesson) => lesson.studentIds?.includes(student.studentId))
+    .sort((left, right) => String(left.startTime).localeCompare(String(right.startTime)));
+  const recordByLessonId = new Map(
+    state.records
+      .filter((record) => record.studentId === student.studentId)
+      .map((record) => [record.lessonId, record])
+  );
+  const openArrival = [...recordByLessonId.values()].some((record) => hasSafeAttendanceArrival(record) && !hasSafeAttendanceCheckout(record));
+  if (!payload.lessonId && !openArrival && attendanceLessons.length > 1) {
+    return {
+      action: "selectLesson",
+      alimtalk: { status: "preview" },
+      checkedTime: "15:55",
+      lesson: null,
+      lessonCandidates: attendanceLessons.map((lesson, index) => ({
+        attendanceLesson: lesson,
+        hasArrival: hasSafeAttendanceArrival(recordByLessonId.get(lesson.lessonId)),
+        hasCheckout: hasSafeAttendanceCheckout(recordByLessonId.get(lesson.lessonId)),
+        isLatest: index === attendanceLessons.length - 1,
+        lesson
+      })),
+      message: `${student.name} 학생의 오늘 수업을 선택해 주세요.`,
+      mode: "selectLesson",
+      record: null,
+      requiresLessonSelection: true,
+      student
+    };
+  }
+  const lesson = payload.lessonId
+    ? attendanceLessons.find((item) => item.lessonId === payload.lessonId)
+    : [...attendanceLessons].reverse()[0];
+  if (!lesson) return { error: "가상 출결 수업을 찾지 못했습니다.", ok: false, statusCode: 404 };
+  const existingRecord = recordByLessonId.get(lesson.lessonId) ?? null;
+  const eventType = payload.action || (openArrival ? "checkout" : "checkin");
+  const checkedTime = eventType === "checkout" ? payload.checkOutTime || "19:05" : payload.checkInTime || "15:55";
+  const nowIso = eventType === "checkout" ? `${lesson.date}T10:05:00.000Z` : `${lesson.date}T06:55:00.000Z`;
+  const dependencies = {
+    calculateLateMinutes: (candidate, time, graceMinutes = 5) => Math.max(0, parseSafeAttendanceMinutes(time) - parseSafeAttendanceMinutes(candidate.startTime) - Number(graceMinutes || 5)),
+    createAttendanceIso: (date, time) => `${date}T${time}:00+09:00`,
+    createRecordId: (lessonId, studentId) => `safe_record_${lessonId}_${studentId}`,
+    hasArrival: hasSafeAttendanceArrival,
+    hasCheckout: hasSafeAttendanceCheckout
+  };
+  const primaryRecord = createConsecutiveAttendanceVisitRecord({
+    ...dependencies,
+    currentTime: checkedTime,
+    eventType,
+    existingRecord,
+    lateGraceMinutes: payload.lateGraceMinutes,
+    lesson,
+    nowIso,
+    studentId: student.studentId
+  });
+  const visit = findConsecutiveAbsenceMakeupVisit({
+    lessons: attendanceLessons,
+    makeupTasks: [safeConsecutiveAttendanceTask],
+    selectedLessonId: lesson.lessonId
+  });
+  const applyVisit = shouldApplyConsecutiveAttendanceVisit({ eventType, selectedLessonId: lesson.lessonId, visit });
+  const companionLesson = applyVisit ? visit.lessons.find((item) => item.lessonId !== lesson.lessonId) : null;
+  const companionRecord = companionLesson ? createConsecutiveAttendanceVisitRecord({
+    ...dependencies,
+    currentTime: checkedTime,
+    eventType,
+    existingRecord: recordByLessonId.get(companionLesson.lessonId) ?? null,
+    lateGraceMinutes: payload.lateGraceMinutes,
+    lesson: companionLesson,
+    nowIso,
+    studentId: student.studentId
+  }) : null;
+  const records = [primaryRecord, companionRecord].filter(Boolean);
+  const attendanceVisit = companionRecord ? {
+    label: getConsecutiveAttendanceVisitLabel(visit),
+    lessonIds: visit.lessonIds,
+    visitType: visit.visitType
+  } : null;
+  if (pathname === "/api/attendance/preview") {
+    return {
+      action: eventType,
+      alimtalk: { status: "preview" },
+      attendanceVisit,
+      checkedTime,
+      lesson,
+      message: `${student.name} ${eventType === "checkout" ? "하원" : "등원"}`,
+      mode: eventType === "checkout" ? "checkOut" : "checkIn",
+      record: primaryRecord,
+      records,
+      student
+    };
+  }
+  for (const record of records) state.records = upsertById(state.records, record, ["lessonStudentRecordId"]);
+  const attendanceEvent = {
+    attendanceEventId: `safe_attendance_event_${state.attendanceEvents.length + 1}`,
+    eventType,
+    lessonId: lesson.lessonId,
+    studentId: student.studentId
+  };
+  state.attendanceEvents.push(attendanceEvent);
+  state.attendanceQueuedNotifications.push({
+    eventType,
+    notificationId: `safe_attendance_notification_${state.attendanceQueuedNotifications.length + 1}`,
+    studentId: student.studentId
+  });
+  return {
+    action: eventType,
+    alimtalk: { status: "queued" },
+    attendanceEvent,
+    attendanceVisit,
+    checkedTime,
+    lesson,
+    message: `${student.name} ${eventType === "checkout" ? "하원" : "등원"}`,
+    mode: eventType === "checkout" ? "checkOut" : "checkIn",
+    record: primaryRecord,
+    records,
+    student
+  };
+}
+
 function handleMutation(pathname, payload) {
+  if (["/api/attendance/check", "/api/attendance/preview"].includes(pathname)) {
+    return { ok: true, ...handleSafeConsecutiveAttendance(pathname, payload) };
+  }
   if (pathname === "/api/app-state") {
     state.appStates = { ...state.appStates, ...(payload.states || {}) };
     return { ok: true, states: state.appStates };
