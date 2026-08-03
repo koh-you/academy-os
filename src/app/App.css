@@ -3874,6 +3874,35 @@ summary:focus-visible {
   margin: 0;
 }
 
+.lessonJournalAbsenceSourceNotice {
+  align-items: center;
+  background: #fffaf0;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  display: grid;
+  gap: 4px 12px;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  padding: 10px 12px;
+}
+
+.lessonJournalAbsenceSourceNotice > span {
+  color: #c2410c;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.lessonJournalAbsenceSourceNotice > strong {
+  color: #17213d;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.lessonJournalAbsenceSourceNotice > small {
+  color: #7c2d12;
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .homeworkMakeupPage {
   gap: 16px;
 }
@@ -20225,6 +20254,11 @@ body.attendanceOnlyBody {
     );
     min-height: 0;
     width: 100%;
+  }
+
+  .lessonJournalAbsenceSourceNotice {
+    align-items: start;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .teacherCalendarShell {
