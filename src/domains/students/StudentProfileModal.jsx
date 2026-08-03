@@ -1,4 +1,4 @@
-import { Component, useEffect, useMemo, useState } from "react";
+import { Component, useEffect, useMemo, useRef, useState } from "react";
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
@@ -261,6 +261,7 @@ export function StudentProfileModal({
 }) {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileDraft, setProfileDraft] = useState(() => createStudentProfileDraft(student));
+  const profileDraftRevisionRef = useRef(0);
   const [profileSaveError, setProfileSaveError] = useState("");
   const [profileActionError, setProfileActionError] = useState("");
   const [isEditingTeacherOperatingMemo, setIsEditingTeacherOperatingMemo] = useState(false);
@@ -284,6 +285,7 @@ export function StudentProfileModal({
   useEffect(() => {
     setIsEditingProfile(false);
     setProfileDraft(createStudentProfileDraft(student));
+    profileDraftRevisionRef.current = 0;
     setProfileSaveError("");
     setProfileActionError("");
     setIsEditingTeacherOperatingMemo(false);
@@ -335,6 +337,7 @@ export function StudentProfileModal({
 
   function updateProfile(field, value) {
     clearProfileErrors();
+    profileDraftRevisionRef.current += 1;
     setProfileDraft((current) => ({ ...current, [field]: value }));
   }
 
@@ -375,6 +378,7 @@ export function StudentProfileModal({
   }
 
   async function saveProfileDraft() {
+    const saveRevision = profileDraftRevisionRef.current;
     clearProfileErrors();
     try {
       await onSaveStudentProfile?.({ ...student, ...profileDraft, studentId: student.studentId });
@@ -390,6 +394,7 @@ export function StudentProfileModal({
         JSON.stringify(newAcademyTestDraft) !== JSON.stringify(defaultAcademyTestDraft) ||
         JSON.stringify(newConsultationDraft) !== JSON.stringify(defaultConsultationDraft) ||
         JSON.stringify(newReminderDraft) !== JSON.stringify(defaultReminderDraft);
+      if (profileDraftRevisionRef.current !== saveRevision) return;
       if (!hasOtherDraftChanges) setIsEditingProfile(false);
     } catch (error) {
       setProfileSaveError(error?.message || "기본정보 저장에 실패했습니다.");
@@ -575,6 +580,7 @@ export function StudentProfileModal({
   return (
     <ModalComponent
       className="wideModal"
+      closeDisabled={isProfileSaving}
       title={`${student.name} 학생 프로파일`}
       subtitle="기본정보를 먼저 보고, 필요한 기록만 펼쳐서 확인합니다."
       onClose={onClose}
@@ -591,7 +597,7 @@ export function StudentProfileModal({
             <span className="countBadge">{className}</span>
             {isEditingProfile ? (
               <>
-                <button className="softButton" onClick={cancelProfileEdit} type="button">
+                <button className="softButton" disabled={isProfileSaving} onClick={cancelProfileEdit} type="button">
                   {hasAnyEditingDraftChanges ? "취소" : "수정 종료"}
                 </button>
               </>
@@ -1217,7 +1223,9 @@ export function StudentProfileModal({
             className="studentProfileStickySaveBar"
             label="기본정보"
             message={
-              isProfileDirty
+              effectiveProfileSaveState === "failed"
+                ? "저장 실패 · 현재 입력은 유지됩니다. 서버 저장본을 확인한 뒤 다시 시도해 주세요."
+                : isProfileDirty
                 ? `기본정보 변경 ${profileDirtyFieldCount}개 · 상담·성적·테스트·운영 알림은 각 영역에서 별도 저장`
                 : separateDirtyLabels.length
                   ? `기본정보 변경 없음 · ${separateDirtyLabels.join("·")}은 각 영역에서 별도 저장 필요`

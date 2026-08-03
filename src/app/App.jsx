@@ -40,6 +40,8 @@ import {
 } from "../domains/students/tallyStudentMerge.js";
 import { saveStudentIntakeApplicantRequest } from "../domains/students/studentIntakeApplicantApi.js";
 import { createStudentIntakeApplicantSaveController } from "../domains/students/studentIntakeApplicantSaveController.js";
+import { saveStudentRequest } from "../domains/students/studentApi.js";
+import { resolveStudentRowSaveSuccess } from "../domains/students/studentPersistence.js";
 import { ParentPortal } from "../domains/portals/ParentPortal.jsx";
 import { calculateAttendanceStats } from "../domains/portals/StudentMyPageTab.jsx";
 import { StudentPortalShell } from "../domains/portals/StudentPortalShell.jsx";
@@ -3779,9 +3781,12 @@ export function App() {
       defaultClassTemplateId: "",
       specialNote: sourceNote
     });
-    const result = await postJson("/api/students", { student });
-    if (!result.ok) throw new Error(result.error || "특강 전용 학생 등록 실패");
-    const savedStudent = result.student ?? student;
+    const savedStudent = await saveStudentRequest({
+      createOnly: true,
+      request: postJsonWithTimeout,
+      student,
+      timeoutMessage: "특강 전용 학생 저장이 15초를 넘었습니다. 중복 등록하지 말고 서버 상태를 확인해 주세요."
+    });
     setStudents((current) => current.some((item) => item.studentId === savedStudent.studentId)
       ? current.map((item) => item.studentId === savedStudent.studentId ? savedStudent : item)
       : [...current, savedStudent]);
@@ -3813,15 +3818,11 @@ export function App() {
     });
     if (replacementChanges.length === 0) return existingStudent;
 
-    const saveResult = await postJsonWithTimeout(
-      "/api/students",
-      { student: nextStudent },
-      15000,
-      "Tally 학생정보 저장이 15초를 넘었습니다. 중복 실행하지 말고 상태를 다시 확인해 주세요."
-    );
-    if (saveResult.source !== "supabase") {
-      throw new Error("Tally 학생정보가 Supabase가 아닌 임시 원천에 저장되어 완료할 수 없습니다.");
-    }
+    await saveStudentRequest({
+      request: postJsonWithTimeout,
+      student: nextStudent,
+      timeoutMessage: "Tally 학생정보 저장이 15초를 넘었습니다. 중복 실행하지 말고 상태를 다시 확인해 주세요."
+    });
     const studentsAfterResult = await getJsonWithTimeout(
       "/api/students",
       15000,
@@ -5193,13 +5194,20 @@ export function App() {
     return removeStudentsFromLessonsFromDate([studentId], fromDate);
   }
 
-  function handleAddStudent(formValues) {
+  async function handleAddStudent(formValues) {
     const student = createStudentFromFormValues(formValues);
-
-    setStudents((current) => [...current, student]);
-    addStudentToFutureClassLessons(student, today);
+    const savedStudent = await saveStudentRequest({
+      createOnly: true,
+      request: postJsonWithTimeout,
+      student,
+      timeoutMessage: "신규 학생 저장이 15초를 넘었습니다. 중복 등록하지 말고 현재 입력을 유지한 채 서버 상태를 확인해 주세요."
+    });
+    setStudents((current) => current.some((item) => item.studentId === savedStudent.studentId)
+      ? current.map((item) => item.studentId === savedStudent.studentId ? savedStudent : item)
+      : [...current, savedStudent]);
+    addStudentToFutureClassLessons(savedStudent, today);
     setIsStudentModalOpen(false);
-    postJson("/api/students", { student }).catch((error) => console.error(error));
+    return savedStudent;
   }
 
   function getStudentIntakeApplicantSaveController() {
@@ -5294,16 +5302,13 @@ export function App() {
             studentId: generatedStudentId
           });
       const previousClassTemplateId = existingStudent?.defaultClassTemplateId ?? "";
-      const studentSaveResult = await postJsonWithTimeout(
-        "/api/students",
-        { student: studentDraft },
-        15000,
-        "학생 저장이 15초를 넘었습니다. 중복 등록하지 말고 저장 상태를 다시 확인해 주세요."
-      );
-      if (studentSaveResult.source !== "supabase") {
-        throw new Error("학생 정보가 Supabase가 아닌 임시 원천에 저장되어 완료할 수 없습니다.");
-      }
-      const savedStudentId = studentSaveResult.student?.studentId || studentDraft.studentId;
+      const savedStudentFromRequest = await saveStudentRequest({
+        createOnly: !existingStudent,
+        request: postJsonWithTimeout,
+        student: studentDraft,
+        timeoutMessage: "학생 저장이 15초를 넘었습니다. 중복 등록하지 말고 저장 상태를 다시 확인해 주세요."
+      });
+      const savedStudentId = savedStudentFromRequest.studentId;
 
       setStudentIntakeRegistrationMessages((current) => ({ ...current, [applicantId]: "학생 원천 반영 확인 중" }));
       const studentsAfterResult = await getJsonWithTimeout(
@@ -5480,57 +5485,49 @@ export function App() {
   async function handleSaveStudent(studentId, options = {}) {
     const student = students.find((item) => item.studentId === studentId);
     if (!student) throw new Error("저장할 학생을 찾지 못했습니다.");
-    await postJson("/api/students", { student });
+    const savedStudent = await saveStudentRequest({
+      request: postJsonWithTimeout,
+      student,
+      timeoutMessage: "학생 목록 저장이 15초를 넘었습니다. 현재 입력을 유지한 채 서버 상태를 확인해 주세요."
+    });
+    setStudents((current) => current.map((currentStudent) => (
+      currentStudent.studentId === studentId
+        ? resolveStudentRowSaveSuccess({
+            currentStudent,
+            persistedStudent: savedStudent,
+            requestedStudent: student
+          }).student
+        : currentStudent
+    )));
     if (
       Object.prototype.hasOwnProperty.call(options, "previousClassTemplateId") &&
-      options.previousClassTemplateId !== student.defaultClassTemplateId
+      options.previousClassTemplateId !== savedStudent.defaultClassTemplateId
     ) {
-      reconcileStudentFutureClassLessons(student, options.previousClassTemplateId, today);
+      reconcileStudentFutureClassLessons(savedStudent, options.previousClassTemplateId, today);
     }
+    return savedStudent;
   }
 
   async function handleSaveStudentProfile(studentDraft) {
     if (!studentDraft?.studentId) throw new Error("저장할 학생을 찾지 못했습니다.");
     const currentStudent = students.find((item) => item.studentId === studentDraft.studentId);
     const nextStudent = { ...(currentStudent ?? {}), ...studentDraft };
-    const verificationFields = [
-      "schoolName",
-      "grade",
-      "textbook",
-      "studentPhone",
-      "parentPhone",
-      "loginId",
-      "pin",
-      "specialNote",
-      "scheduleOverride"
-    ];
     const requestId = (studentProfileSaveRequestRef.current[nextStudent.studentId] ?? 0) + 1;
     studentProfileSaveRequestRef.current[nextStudent.studentId] = requestId;
     setStudentProfileSaveStates((current) => ({ ...current, [nextStudent.studentId]: "saving" }));
     try {
-      await postJsonWithTimeout(
-        "/api/students",
-        { student: nextStudent },
-        15000,
-        "학생 기본정보 저장 요청이 15초를 넘었습니다. 저장 상태를 확인한 뒤 다시 시도해 주세요."
-      );
-      const studentsAfterResult = await getJsonWithTimeout(
-        "/api/students",
-        15000,
-        "학생 기본정보 저장 확인이 15초를 넘었습니다. 다시 저장하지 말고 잠시 뒤 새로고침해 주세요."
-      );
-      const savedStudent = (studentsAfterResult.students ?? []).find((student) => student.studentId === nextStudent.studentId);
-      if (!savedStudent) throw new Error("저장 응답은 받았지만 Supabase 재조회에서 학생을 찾지 못했습니다.");
-      const mismatchedFields = verificationFields.filter(
-        (field) => String(savedStudent[field] ?? "") !== String(nextStudent[field] ?? "")
-      );
-      if (mismatchedFields.length > 0) {
-        throw new Error(`Supabase 재조회 값이 저장 요청과 다릅니다: ${mismatchedFields.join(", ")}`);
-      }
-      setStudents(studentsAfterResult.students ?? []);
+      const savedStudent = await saveStudentRequest({
+        request: postJsonWithTimeout,
+        student: nextStudent,
+        timeoutMessage: "학생 기본정보 저장 요청이 15초를 넘었습니다. 현재 입력을 유지한 채 서버 상태를 확인해 주세요."
+      });
+      setStudents((current) => current.map((student) => (
+        student.studentId === savedStudent.studentId ? savedStudent : student
+      )));
       if (studentProfileSaveRequestRef.current[nextStudent.studentId] === requestId) {
         setStudentProfileSaveStates((current) => ({ ...current, [nextStudent.studentId]: "saved" }));
       }
+      return savedStudent;
     } catch (error) {
       console.error(error);
       if (studentProfileSaveRequestRef.current[nextStudent.studentId] === requestId) {
@@ -6001,15 +5998,11 @@ export function App() {
       withdrawalReason: "",
       withdrawalComment: ""
     };
-    const saveResult = await postJsonWithTimeout(
-      "/api/students",
-      { student: restoredStudent },
-      15000,
-      "퇴원 취소 저장이 15초를 넘었습니다. 중복 실행하지 말고 상태를 다시 확인해 주세요."
-    );
-    if (saveResult.source !== "supabase") {
-      throw new Error("퇴원 취소가 Supabase가 아닌 임시 원천에 저장되어 완료할 수 없습니다.");
-    }
+    await saveStudentRequest({
+      request: postJsonWithTimeout,
+      student: restoredStudent,
+      timeoutMessage: "퇴원 취소 저장이 15초를 넘었습니다. 중복 실행하지 말고 상태를 다시 확인해 주세요."
+    });
 
     const studentsAfterResult = await getJsonWithTimeout(
       "/api/students",
@@ -9105,6 +9098,8 @@ function StudentModal({
   onUpdateApplicant
 }) {
   const [mode, setMode] = useState("single");
+  const [singleSaveState, setSingleSaveState] = useState("idle");
+  const [singleSaveError, setSingleSaveError] = useState("");
   const [form, setForm] = useState({
     name: "",
     birthYear: "",
@@ -9123,6 +9118,7 @@ function StudentModal({
   const registeredApplicants = intakeApplicants.filter((applicant) => applicant.status === "registered");
 
   function update(field, value) {
+    setSingleSaveError("");
     setForm((current) => {
       const next = { ...current, [field]: value };
       if (field === "birthYear") {
@@ -9130,6 +9126,24 @@ function StudentModal({
       }
       return next;
     });
+  }
+
+  async function saveSingleStudent() {
+    if (singleSaveState === "saving") return;
+    if (!String(form.name ?? "").trim()) {
+      setSingleSaveState("failed");
+      setSingleSaveError("학생 이름을 입력해 주세요.");
+      return;
+    }
+    setSingleSaveState("saving");
+    setSingleSaveError("");
+    try {
+      await onSubmit(form);
+      setSingleSaveState("saved");
+    } catch (error) {
+      setSingleSaveState("failed");
+      setSingleSaveError(error?.message || "학생 저장에 실패했습니다.");
+    }
   }
 
   function updateApplicant(applicantId, field, value) {
@@ -9279,44 +9293,49 @@ function StudentModal({
   return (
     <Modal
       className="studentAddModal"
+      closeDisabled={singleSaveState === "saving"}
       title="학생 추가"
       subtitle="한 명씩 등록하거나 엑셀에서 복사한 목록을 일괄 등록합니다."
       onClose={onClose}
       scrollable
     >
       <div className="studentAddTabs" role="tablist" aria-label="학생 추가 방식">
-        <button className={mode === "single" ? "active" : ""} onClick={() => setMode("single")} type="button">한 명씩</button>
-        <button className={mode === "bulk" ? "active" : ""} onClick={() => setMode("bulk")} type="button">엑셀 일괄 등록</button>
-        <button className={mode === "intake" ? "active" : ""} onClick={() => setMode("intake")} type="button">Tally 접수</button>
+        <button className={mode === "single" ? "active" : ""} disabled={singleSaveState === "saving"} onClick={() => setMode("single")} type="button">한 명씩</button>
+        <button className={mode === "bulk" ? "active" : ""} disabled={singleSaveState === "saving"} onClick={() => setMode("bulk")} type="button">엑셀 일괄 등록</button>
+        <button className={mode === "intake" ? "active" : ""} disabled={singleSaveState === "saving"} onClick={() => setMode("intake")} type="button">Tally 접수</button>
       </div>
 
       {mode === "single" ? (
         <>
           <div className="studentAddGrid">
-            <label>이름<input value={form.name} onChange={(event) => update("name", event.target.value)} placeholder="박수빈" /></label>
+            <label>이름<input disabled={singleSaveState === "saving"} value={form.name} onChange={(event) => update("name", event.target.value)} placeholder="박수빈" /></label>
             <label>
               출생연도
               <div className="birthYearWithGrade">
-                <input value={form.birthYear} onChange={(event) => update("birthYear", event.target.value)} placeholder="2010" />
+                <input disabled={singleSaveState === "saving"} value={form.birthYear} onChange={(event) => update("birthYear", event.target.value)} placeholder="2010" />
                 <span>{form.grade || "학년"}</span>
               </div>
             </label>
-            <label>학교<input value={form.schoolName} onChange={(event) => update("schoolName", event.target.value)} placeholder="자운고등학교" /></label>
-            <label>PIN<input value={form.pin} onChange={(event) => update("pin", event.target.value)} placeholder="1234" /></label>
-            <label>학생전화번호<input inputMode="tel" value={form.studentPhone} onChange={(event) => update("studentPhone", event.target.value)} placeholder="01012345678" /></label>
-            <label>학부모전화번호<input inputMode="tel" value={form.parentPhone} onChange={(event) => update("parentPhone", event.target.value)} placeholder="01012345678" /></label>
+            <label>학교<input disabled={singleSaveState === "saving"} value={form.schoolName} onChange={(event) => update("schoolName", event.target.value)} placeholder="자운고등학교" /></label>
+            <label>PIN<input disabled={singleSaveState === "saving"} value={form.pin} onChange={(event) => update("pin", event.target.value)} placeholder="1234" /></label>
+            <label>학생전화번호<input disabled={singleSaveState === "saving"} inputMode="tel" value={form.studentPhone} onChange={(event) => update("studentPhone", event.target.value)} placeholder="01012345678" /></label>
+            <label>학부모전화번호<input disabled={singleSaveState === "saving"} inputMode="tel" value={form.parentPhone} onChange={(event) => update("parentPhone", event.target.value)} placeholder="01012345678" /></label>
             <label>
               반
-              <select value={form.defaultClassTemplateId} onChange={(event) => update("defaultClassTemplateId", event.target.value)}>
+              <select disabled={singleSaveState === "saving"} value={form.defaultClassTemplateId} onChange={(event) => update("defaultClassTemplateId", event.target.value)}>
                 <option value="">미배정</option>
                 {templates.map((template) => (
                   <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>
                 ))}
               </select>
             </label>
-            <label>특이사항<input value={form.specialNote} onChange={(event) => update("specialNote", event.target.value)} placeholder="상담 메모 또는 주의사항" /></label>
+            <label>특이사항<input disabled={singleSaveState === "saving"} value={form.specialNote} onChange={(event) => update("specialNote", event.target.value)} placeholder="상담 메모 또는 주의사항" /></label>
           </div>
-          <button className="primaryButton full studentAddSubmit" onClick={() => onSubmit(form)} type="button">학생 저장</button>
+          {singleSaveState !== "idle" ? <InlineSaveStatus label="신규 학생" saveState={singleSaveState} /> : null}
+          {singleSaveError ? <p className="profileSaveError" role="alert">학생 저장 실패 · {singleSaveError}</p> : null}
+          <button className="primaryButton full studentAddSubmit" disabled={singleSaveState === "saving"} onClick={saveSingleStudent} type="button">
+            {singleSaveState === "saving" ? "학생 저장 중" : "학생 저장"}
+          </button>
         </>
       ) : mode === "bulk" ? (
         <div className="studentBulkPlaceholder">

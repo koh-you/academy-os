@@ -274,26 +274,35 @@ const initialState = {
   students: [
     {
       grade: "중3",
+      loginId: "safe_withdrawn",
       name: "미리보기 퇴원생",
+      pin: "1234",
       schoolName: "안전중",
       status: "paused",
       studentId: "safe-withdrawn-student",
+      updatedAt: "2026-08-03T00:00:00.000Z",
       withdrawnAt: "2026-07-31T00:00:00.000Z"
     },
     {
       grade: "중3",
+      loginId: "safe_active",
       name: "월경계 학생",
+      pin: "1234",
       schoolName: "안전중",
       status: "active",
-      studentId: "safe-active-student"
+      studentId: "safe-active-student",
+      updatedAt: "2026-08-03T00:00:00.000Z"
     },
     {
       defaultClassTemplateId: "safe-settlement-class",
       grade: "고1",
+      loginId: "safe_settlement",
       name: "정산 미리보기 학생",
+      pin: "1234",
       schoolName: "안전고",
       status: "active",
-      studentId: "safe-settlement-student"
+      studentId: "safe-settlement-student",
+      updatedAt: "2026-08-03T00:00:00.000Z"
     }
   ],
   testAttempts: [],
@@ -422,6 +431,43 @@ function handleMutation(pathname, payload) {
       ["applicantId"]
     );
     return { applicant: savedApplicant, ok: true, verified: true };
+  }
+  if (pathname === "/api/students") {
+    const student = payload.student || {};
+    const existingStudent = state.students.find((item) => item.studentId === student.studentId) ?? null;
+    const duplicateLoginStudent = state.students.find((item) => (
+      item.loginId && item.loginId === student.loginId && item.studentId !== student.studentId
+    )) ?? null;
+    if (payload.createOnly === true && (existingStudent || duplicateLoginStudent)) {
+      return {
+        code: "STUDENT_CONFLICT",
+        currentStudent: existingStudent,
+        error: `학생 ${student.studentId}의 학생 ID 또는 로그인 ID가 이미 저장되어 있습니다.`,
+        ok: false,
+        statusCode: 409
+      };
+    }
+    if (
+      payload.createOnly !== true &&
+      Object.prototype.hasOwnProperty.call(payload, "expectedUpdatedAt") &&
+      (!existingStudent || payload.expectedUpdatedAt !== existingStudent.updatedAt)
+    ) {
+      return {
+        code: "STUDENT_CONFLICT",
+        currentStudent: existingStudent,
+        error: `학생 ${student.studentId}가 다른 화면에서 먼저 변경되었습니다.`,
+        ok: false,
+        statusCode: 409
+      };
+    }
+    const savedStudent = {
+      ...student,
+      updatedAt: new Date(
+        Math.max(Date.now(), new Date(existingStudent?.updatedAt || 0).getTime() + 1)
+      ).toISOString()
+    };
+    state.students = upsertById(state.students, savedStudent, ["studentId"]);
+    return { ok: true, student: savedStudent, verified: true };
   }
   if (pathname === "/api/lessons") {
     const lesson = payload.lesson || {};

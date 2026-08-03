@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 개별 학생 저장 CAS·Supabase 재조회
+
+- `students.updated_at`을 화면 모델에 노출하고 신규 학생은 insert-only, 기존 학생은 ID+기대 버전 PATCH로 저장한다. 신규 수동 등록·특강 전용 등록·Tally 신규 등록은 중복 ID/로그인을 409로 막고, 목록 행·프로필·Tally/특강 기존 학생 반영·퇴원 취소는 오래된 화면 버전의 덮어쓰기를 차단한다.
+- API는 저장 직후 해당 학생을 Supabase에서 다시 읽어 전체 persisted 필드와 새 timestamp가 일치할 때만 `verified: true`를 반환한다. local sample이나 결과 불명 응답은 완료로 처리하지 않는다.
+- 목록 행과 프로필은 저장 중 후속 입력 revision을 감지한다. `A 저장 -> 요청 중 B 입력 -> A 성공`이면 A의 새 `updated_at`만 B에 재기준화하고 B draft·편집 모드를 유지해 두 번째 저장을 요구한다. 신규 저장 실패·충돌은 모달과 form을 유지하고 저장 중 닫기·탭 전환을 막는다.
+- Supabase REST 모형과 안전 API/browser에서 정상 CAS, 구버전 차단, 삭제/중복 차단, 신규 충돌 후 재시도, 목록·프로필 후속 입력 보존과 두 번째 CAS를 확인했다. 검증은 student `12/12`, runtime lint, `check:fast`·scenario `823/823`, production `823/823`, build `384 modules`·lazy `12/12`, safe browser `25/25`다.
+- 학생 저장 후 미래 수업 명단 반영, 반관리 bulk, 퇴원의 학생+수업 ordered 저장은 변경하지 않았다. 다음 독립 단위인 반 명단 저장 gate에서 부분실패·재조회·복구를 함께 다룬다.
+
 ## 2026-08-03 Tally 신규생 후보 입력 경쟁 방지
 
 - 후보 입력마다 겹쳐 실행되던 `student_intake_applicants` 저장을 후보별 직렬 controller로 바꿨다. 첫 요청 중 같은 후보의 여러 변경은 최신 draft만 남기고, 성공 응답의 새 `updated_at`으로 재기준화한 뒤 다음 요청을 보낸다.
