@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
@@ -87,6 +87,7 @@ export function StudentManager({
   const [dirtyStudentIds, setDirtyStudentIds] = useState(() => new Set());
   const [originalClassTemplateIds, setOriginalClassTemplateIds] = useState({});
   const [studentSaveStates, setStudentSaveStates] = useState({});
+  const studentSaveRevisionsRef = useRef({});
   const [studentRestoreStates, setStudentRestoreStates] = useState({});
   const [studentRestoreNotice, setStudentRestoreNotice] = useState(null);
   const [permanentDeleteStudentId, setPermanentDeleteStudentId] = useState("");
@@ -180,17 +181,23 @@ export function StudentManager({
       }));
     }
     onUpdateStudent(studentId, field, value, { persist: false });
+    studentSaveRevisionsRef.current[studentId] = (studentSaveRevisionsRef.current[studentId] ?? 0) + 1;
     setDirtyStudentIds((current) => new Set(current).add(studentId));
     setStudentSaveStates((current) => ({ ...current, [studentId]: "dirty" }));
   }
 
   async function saveStudentRow(studentId) {
+    const saveRevision = studentSaveRevisionsRef.current[studentId] ?? 0;
     setStudentSaveStates((current) => ({ ...current, [studentId]: "saving" }));
     try {
       const saveOptions = Object.prototype.hasOwnProperty.call(originalClassTemplateIds, studentId)
         ? { previousClassTemplateId: originalClassTemplateIds[studentId] }
         : {};
       await onSaveStudent(studentId, saveOptions);
+      if ((studentSaveRevisionsRef.current[studentId] ?? 0) !== saveRevision) {
+        setStudentSaveStates((current) => ({ ...current, [studentId]: "dirty" }));
+        return;
+      }
       setDirtyStudentIds((current) => {
         const next = new Set(current);
         next.delete(studentId);

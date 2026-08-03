@@ -165,6 +165,141 @@ test("Tally candidate CAS conflict keeps the current input and shows failure", a
   expect(pageErrors).toEqual([]);
 });
 
+test("manual student creation keeps the modal draft on conflict and closes only after verified retry", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  let studentSaveRequests = 0;
+  await page.route("**/api/students", async (route) => {
+    if (route.request().method() !== "POST") {
+      const response = await route.fetch();
+      await route.fulfill({ response });
+      return;
+    }
+    studentSaveRequests += 1;
+    if (studentSaveRequests === 1) {
+      await route.fulfill({
+        body: JSON.stringify({
+          code: "STUDENT_CONFLICT",
+          error: "같은 학생 ID 또는 로그인 ID가 이미 저장되어 있습니다.",
+          ok: false
+        }),
+        contentType: "application/json",
+        status: 409
+      });
+      return;
+    }
+    const response = await route.fetch();
+    await route.fulfill({ response });
+  });
+
+  await loginAsTeacher(page);
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
+  await page.getByRole("button", { name: "+ 학생 추가" }).click();
+  const studentModal = page.getByRole("dialog", { name: "학생 추가" });
+  const nameInput = studentModal.getByLabel("이름", { exact: true });
+  await nameInput.fill("저장경계 학생");
+  await studentModal.getByLabel("학교", { exact: true }).fill("저장경계고");
+  await studentModal.getByRole("button", { name: "학생 저장", exact: true }).click();
+
+  await expect(studentModal.getByRole("alert")).toContainText("학생 저장 실패");
+  await expect(nameInput).toHaveValue("저장경계 학생");
+  await expect(studentModal).toBeVisible();
+
+  await studentModal.getByRole("button", { name: "학생 저장", exact: true }).click();
+  await expect(studentModal).toBeHidden();
+  const persistedResponse = await request.get(`${safeApiBaseUrl}/api/students`);
+  const persistedResult = await persistedResponse.json();
+  const persistedStudent = persistedResult.students.find((student) => student.name === "저장경계 학생");
+  expect(persistedStudent?.schoolName).toBe("저장경계고");
+  expect(persistedStudent?.updatedAt).toBeTruthy();
+  expect(pageErrors).toEqual([]);
+});
+
+test("student row save rebases its version and preserves an in-flight follow-up edit", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  const requests = [];
+  let releaseFirstRequest;
+  const firstRequestGate = new Promise((resolve) => {
+    releaseFirstRequest = resolve;
+  });
+  await page.route("**/api/students", async (route) => {
+    if (route.request().method() !== "POST") {
+      const response = await route.fetch();
+      await route.fulfill({ response });
+      return;
+    }
+    requests.push(route.request().postDataJSON());
+    if (requests.length === 1) await firstRequestGate;
+    const response = await route.fetch();
+    await route.fulfill({ response });
+  });
+
+  await loginAsTeacher(page);
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
+  const studentRow = page.locator(".studentListRow").filter({ hasText: "월경계 학생" });
+  const schoolInput = studentRow.getByLabel("월경계 학생 학교");
+  await schoolInput.fill("A 저장 학교");
+  await studentRow.getByRole("button", { name: "저장", exact: true }).click();
+  await expect.poll(() => requests.length).toBe(1);
+  await schoolInput.fill("B 후속 학교");
+  releaseFirstRequest();
+
+  await expect(schoolInput).toHaveValue("B 후속 학교");
+  await expect(studentRow.getByRole("button", { name: "저장", exact: true })).toBeEnabled();
+  await studentRow.getByRole("button", { name: "저장", exact: true }).click();
+  await expect(studentRow.getByRole("button", { name: "저장됨", exact: true })).toBeVisible();
+  expect(requests).toHaveLength(2);
+  expect(requests[1].expectedUpdatedAt).not.toBe(requests[0].expectedUpdatedAt);
+
+  const persistedResponse = await request.get(`${safeApiBaseUrl}/api/students`);
+  const persistedResult = await persistedResponse.json();
+  expect(persistedResult.students.find((student) => student.studentId === "safe-active-student")?.schoolName).toBe("B 후속 학교");
+  expect(pageErrors).toEqual([]);
+});
+
+test("student profile save keeps an in-flight follow-up draft for a second CAS save", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  const requests = [];
+  let releaseFirstRequest;
+  const firstRequestGate = new Promise((resolve) => {
+    releaseFirstRequest = resolve;
+  });
+  await page.route("**/api/students", async (route) => {
+    if (route.request().method() !== "POST") {
+      const response = await route.fetch();
+      await route.fulfill({ response });
+      return;
+    }
+    requests.push(route.request().postDataJSON());
+    if (requests.length === 1) await firstRequestGate;
+    const response = await route.fetch();
+    await route.fulfill({ response });
+  });
+
+  await loginAsTeacher(page);
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
+  await page.getByRole("button", { name: /월경계 학생$/ }).click();
+  const profile = page.getByRole("dialog", { name: /월경계 학생 학생 프로파일/ });
+  await profile.getByRole("button", { name: "수정", exact: true }).click();
+  const schoolInput = profile.getByLabel("월경계 학생 학교");
+  await schoolInput.fill("프로필 A 저장");
+  await profile.getByRole("button", { name: "기본정보만 저장", exact: true }).click();
+  await expect.poll(() => requests.length).toBe(1);
+  await schoolInput.fill("프로필 B 후속");
+  releaseFirstRequest();
+
+  await expect(schoolInput).toHaveValue("프로필 B 후속");
+  await expect(profile.getByRole("button", { name: "기본정보만 저장", exact: true })).toBeEnabled();
+  await profile.getByRole("button", { name: "기본정보만 저장", exact: true }).click();
+  await expect(profile.getByText("프로필 B 후속", { exact: true })).toBeVisible();
+  expect(requests).toHaveLength(2);
+  expect(requests[1].expectedUpdatedAt).not.toBe(requests[0].expectedUpdatedAt);
+
+  const persistedResponse = await request.get(`${safeApiBaseUrl}/api/students`);
+  const persistedResult = await persistedResponse.json();
+  expect(persistedResult.students.find((student) => student.studentId === "safe-active-student")?.schoolName).toBe("프로필 B 후속");
+  expect(pageErrors).toEqual([]);
+});
+
 test("exam analysis pipeline opens from its deferred chunk without running paid actions", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await page.route("**/src/domains/exams/ExamAnalysisPipelineCenter.jsx*", async (route) => {

@@ -29,6 +29,14 @@ import {
   createStudentIntakeApplicantConflict,
   createStudentIntakeApplicantVersionFilter
 } from "../../src/domains/students/studentIntakeApplicantPersistence.js";
+import {
+  areStudentsPersistedEqual,
+  areStudentTimestampsEqual,
+  createNextStudentUpdatedAt,
+  createStudentConflict,
+  createStudentVersionFilter,
+  isStudentInsertConflict
+} from "../../src/domains/students/studentPersistence.js";
 import { deleteRows, getSupabaseStatus, insertRows, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
 
 const fallbackSource = "local_sample";
@@ -137,7 +145,8 @@ function fromStudentRow(row) {
     scheduleOverride: row.schedule_override ?? "",
     withdrawalComment: row.withdrawal_comment ?? "",
     withdrawalReason: row.withdrawal_reason ?? "",
-    withdrawnAt: row.withdrawn_at ?? ""
+    withdrawnAt: row.withdrawn_at ?? "",
+    updatedAt: row.updated_at ?? ""
   };
 }
 
@@ -1878,9 +1887,75 @@ async function assertLessonClosureConversionAllowed(lesson = {}) {
   return preflight;
 }
 
-export async function upsertStudent(student) {
+async function getStudent(studentId) {
+  const rows = await listRows(
+    "students",
+    `select=*&student_id=eq.${encodeURIComponent(studentId)}&limit=1`,
+    { requireServiceRole: true }
+  );
+  return rows[0] ? fromStudentRow(rows[0]) : null;
+}
+
+function throwStudentConflict(studentId, currentStudent, reason = "updated") {
+  const conflict = createStudentConflict(studentId, currentStudent, reason);
+  const error = new Error(conflict.message);
+  Object.assign(error, conflict, { statusCode: 409 });
+  throw error;
+}
+
+async function verifyStudentSave(student, expectedUpdatedAt) {
+  const verifiedStudent = await getStudent(student.studentId);
+  if (
+    !verifiedStudent ||
+    !areStudentsPersistedEqual(student, verifiedStudent) ||
+    !areStudentTimestampsEqual(expectedUpdatedAt, verifiedStudent.updatedAt)
+  ) {
+    const error = new Error(`학생 ${student.studentId}의 Supabase 저장값을 재조회로 확인하지 못했습니다.`);
+    error.code = "STUDENT_VERIFICATION_FAILED";
+    throw error;
+  }
+  return verifiedStudent;
+}
+
+export async function upsertStudent(student, { createOnly = false, expectedUpdatedAt } = {}) {
   if (!isSupabaseConfigured({ requireServiceRole: true })) {
-    return { source: fallbackSource, student };
+    return { source: fallbackSource, student, verified: false };
+  }
+
+  if (createOnly) {
+    const dbRow = toStudentRow(student);
+    dbRow.updated_at = createNextStudentUpdatedAt();
+    try {
+      await insertRows("students", [dbRow]);
+    } catch (error) {
+      if (isStudentInsertConflict(error)) {
+        throwStudentConflict(student.studentId, await getStudent(student.studentId), "duplicate");
+      }
+      throw error;
+    }
+    const verifiedStudent = await verifyStudentSave(student, dbRow.updated_at);
+    return { source: databaseSource, student: verifiedStudent, verified: true };
+  }
+
+  if (expectedUpdatedAt !== undefined) {
+    const currentStudent = await getStudent(student.studentId);
+    if (!currentStudent) throwStudentConflict(student.studentId, null, "deleted");
+    if (!areStudentTimestampsEqual(currentStudent.updatedAt, expectedUpdatedAt)) {
+      throwStudentConflict(student.studentId, currentStudent);
+    }
+
+    const dbRow = toStudentRow(student);
+    dbRow.updated_at = createNextStudentUpdatedAt(currentStudent.updatedAt);
+    const savedRows = await patchRows(
+      "students",
+      createStudentVersionFilter(student.studentId, currentStudent.updatedAt),
+      dbRow
+    );
+    if (!savedRows.length) {
+      throwStudentConflict(student.studentId, await getStudent(student.studentId));
+    }
+    const verifiedStudent = await verifyStudentSave(student, dbRow.updated_at);
+    return { source: databaseSource, student: verifiedStudent, verified: true };
   }
 
   let row;

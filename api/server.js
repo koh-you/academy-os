@@ -6501,10 +6501,20 @@ const server = http.createServer(async (request, response) => {
   if (request.method === "POST" && requestUrl.pathname === "/api/students") {
     try {
       const payload = await readJsonBody(request);
-      const result = await upsertStudent(payload.student ?? payload);
+      const result = await upsertStudent(payload.student ?? payload, {
+        createOnly: payload.student ? payload.createOnly === true : false,
+        expectedUpdatedAt: payload.student && Object.prototype.hasOwnProperty.call(payload, "expectedUpdatedAt")
+          ? payload.expectedUpdatedAt
+          : undefined
+      });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.currentStudent !== undefined ? { currentStudent: error.currentStudent } : {})
+      });
     }
     return;
   }
