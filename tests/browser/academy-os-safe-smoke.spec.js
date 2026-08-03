@@ -78,6 +78,93 @@ test("teacher view lazy boundary records a failed chunk and recovers after safe 
   await expect(page.getByRole("heading", { name: "학생관리" })).toBeVisible();
 });
 
+test("Tally candidate rapid edits serialize, rebase CAS, and persist the verified latest input", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  const requests = [];
+  let releaseFirstRequest;
+  const firstRequestGate = new Promise((resolve) => {
+    releaseFirstRequest = resolve;
+  });
+  await page.route("**/api/student-intake-applicants", async (route) => {
+    if (route.request().method() !== "POST") {
+      const response = await route.fetch();
+      await route.fulfill({ response });
+      return;
+    }
+    requests.push(route.request().postDataJSON());
+    if (requests.length === 1) await firstRequestGate;
+    const response = await route.fetch();
+    await route.fulfill({ response });
+  });
+
+  await loginAsTeacher(page);
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
+  await page.getByRole("button", { name: "+ 학생 추가" }).click();
+  const studentModal = page.getByRole("dialog", { name: "학생 추가" });
+  await studentModal.getByRole("button", { name: "Tally 접수" }).click();
+  const candidateList = studentModal.getByRole("region", { name: "Tally 접수·등록 후보 목록" });
+  const learningProcessInput = candidateList.getByLabel("현재 학습 과정");
+
+  await learningProcessInput.fill("직렬화 첫 입력");
+  await expect.poll(() => requests.length).toBe(1);
+  await learningProcessInput.fill("직렬화 최신 입력");
+  await expect(learningProcessInput).toHaveValue("직렬화 최신 입력");
+  expect(requests).toHaveLength(1);
+
+  releaseFirstRequest();
+  await expect.poll(() => requests.length).toBe(2);
+  expect(requests[0].applicant.currentLearningProcess).toBe("직렬화 첫 입력");
+  expect(requests[1].applicant.currentLearningProcess).toBe("직렬화 최신 입력");
+  expect(requests[1].expectedUpdatedAt).not.toBe(requests[0].expectedUpdatedAt);
+  await expect(candidateList.getByRole("status")).toContainText("접수정보 · 저장 완료");
+
+  const persistedResponse = await request.get(`${safeApiBaseUrl}/api/student-intake-applicants`);
+  const persistedResult = await persistedResponse.json();
+  expect(
+    persistedResult.applicants.find((item) => item.applicantId === "safe-intake-applicant")
+      ?.currentLearningProcess
+  ).toBe("직렬화 최신 입력");
+  expect(pageErrors).toEqual([]);
+});
+
+test("Tally candidate CAS conflict keeps the current input and shows failure", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  let conflictEnabled = false;
+  let mutationRequests = 0;
+  await page.route("**/api/student-intake-applicants", async (route) => {
+    if (route.request().method() !== "POST" || !conflictEnabled) {
+      const response = await route.fetch();
+      await route.fulfill({ response });
+      return;
+    }
+    mutationRequests += 1;
+    await route.fulfill({
+      contentType: "application/json",
+      status: 409,
+      body: JSON.stringify({
+        code: "STUDENT_INTAKE_APPLICANT_CONFLICT",
+        error: "다른 화면에서 먼저 변경되었습니다.",
+        ok: false
+      })
+    });
+  });
+
+  await loginAsTeacher(page);
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
+  await page.getByRole("button", { name: "+ 학생 추가" }).click();
+  const studentModal = page.getByRole("dialog", { name: "학생 추가" });
+  await studentModal.getByRole("button", { name: "Tally 접수" }).click();
+  const candidateList = studentModal.getByRole("region", { name: "Tally 접수·등록 후보 목록" });
+  const specialNoteInput = candidateList.getByLabel("특이사항");
+
+  conflictEnabled = true;
+  await specialNoteInput.fill("충돌해도 보존할 Tally 입력");
+  await expect(candidateList.getByRole("status")).toContainText("접수정보 · 저장 실패");
+  await expect(specialNoteInput).toHaveValue("충돌해도 보존할 Tally 입력");
+  expect(mutationRequests).toBe(1);
+  expect(pageErrors).toEqual([]);
+});
+
 test("exam analysis pipeline opens from its deferred chunk without running paid actions", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await page.route("**/src/domains/exams/ExamAnalysisPipelineCenter.jsx*", async (route) => {

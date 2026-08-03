@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 Tally 신규생 후보 입력 경쟁 방지
+
+- 후보 입력마다 겹쳐 실행되던 `student_intake_applicants` 저장을 후보별 직렬 controller로 바꿨다. 첫 요청 중 같은 후보의 여러 변경은 최신 draft만 남기고, 성공 응답의 새 `updated_at`으로 재기준화한 뒤 다음 요청을 보낸다.
+- API는 UI 편집 요청에 기대 `updated_at` CAS를 적용하고, PATCH 결과를 Supabase에서 다시 읽어 후보 필드와 새 timestamp가 일치한 뒤에만 `verified: true`를 반환한다. 다른 화면의 변경·삭제와 결과 불명 실패는 자동 병합·재전송하지 않으며 화면의 최신 입력과 `저장 실패`를 유지한다.
+- 정식 학생 등록은 해당 후보 입력 controller가 idle이 될 때까지 기다린다. 등록 진행 중에는 후보 기본정보·Tally 질문·반영 대상 입력을 잠가 후보 저장과 등록 완료 CAS가 겹치지 않게 했으며, 학생 저장·미래 수업 명단 구현은 이번 단위에서 변경하지 않았다.
+- 검증: Tally merge+신규 API/controller fixture, student domain `11/11`, runtime lint, `check:fast`, scenario·production `823/823`, build `382 modules`·lazy chunk `12/12`, Worktree 격리 safe browser `22/22` 통과. 안전 fixture만 사용했고 운영 데이터·실제 알림·Storage·유료 AI·SQL은 실행하지 않았다.
+- 다음 독립 단위는 학생 저장 gate이며, 반 명단 저장 gate와 분리한다.
+
 ## 2026-08-03 시험정보 행 CAS·Supabase 재조회
 
 - P1 저장 신뢰성의 두 번째 시험정보 단위로 `exam_prep_rows` bulk 저장을 행별 `updated_at` CAS로 바꿨다. 기존 행은 ID+기대 버전 PATCH, 신규 행은 충돌 감지 INSERT를 사용하며 삭제된 기존 행을 일반 자동저장이 되살리지 못하게 했다. 삭제 감사 rollback만 `allowRestore`를 명시해 복구한다.

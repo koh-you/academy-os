@@ -36,6 +36,7 @@
 - GitHub Actions는 lint, production test, build, browser smoke를 실행하는 것이 목표다.
 - `app_state` 자동저장 12개 key의 요청 역전·CAS/재조회 부재를 재현하는 inventory 검사가 Production checks에 연결됐다.
 - 시험정보 행 자동저장은 같은 브라우저에서 요청을 하나씩 직렬 처리하고 행별 `updated_at` CAS 뒤 Supabase 재조회가 일치해야 저장 완료로 처리한다. 저장 중 들어온 최신 입력은 첫 성공 행의 새 버전으로 재기준화해 보존하고, 다중 탭·기기 충돌은 자동 병합하지 않은 채 현재 입력과 `저장 실패` 상태를 유지한다. 삭제 감사 rollback만 명시적 `allowRestore`로 행 재생성을 허용한다.
+- Tally 신규생 후보 입력은 후보별로 요청을 직렬 처리하고 `updated_at` CAS와 Supabase 재조회가 일치해야 저장 완료로 처리한다. 저장 중 후속 입력은 첫 성공 버전으로 재기준화해 최신값만 이어서 저장하며, 충돌·결과 불명 실패는 자동 재전송하지 않고 현재 입력과 실패 상태를 유지한다. 정식 등록은 해당 후보 입력 저장이 끝난 뒤 시작한다.
 - App 2차 리팩터링 Phase 1 auth/session은 PR #2로 main 통합됐다. session state·초기 저장소 판독·login/logout·teacher 저장 cleanup은 `useAppSession`이 소유하며 전용 fixture가 Production checks에 연결됐다.
 - Phase 2~5와 AI 연쇄 검수·지연 보고·사람 gate 원칙은 `docs/app-refactor-second-pass-plan.md`가 기준이다.
 - Phase 2 branch에서 출결 kiosk 날짜 rollover의 ref·reload key·interval/listener를 출결 hook 경계로 이동하고 cleanup·동일 날짜 hydration 실패 재시도 fixture를 추가했다.
@@ -78,7 +79,7 @@
 
 ## 다음 우선순위
 
-1. App 2차 Phase 1~5와 3차 3-0~3-8은 완료됐다. 운영 저장 신뢰성의 시험정보 CAS·재조회 단위도 완료했으며, 다음 순서는 학생 신규/Tally 후보 입력 경쟁과 학생·반 명단 저장 gate를 분리해 점검한다.
+1. App 2차 Phase 1~5와 3차 3-0~3-8은 완료됐다. 운영 저장 신뢰성의 시험정보와 Tally 후보 입력 CAS·재조회 단위도 완료했으며, 다음 순서는 학생 저장과 반 명단 저장 gate를 서로 분리해 점검한다.
 2. App 3차 리팩터링 3-0~3-8은 production main 43.1%·gzip 45.3% 감소, 12개 물리 lazy chunk, App Babel 500 KB 경고 제거와 종료 소유권 감사까지 완료했다. 자동으로 다음 리팩터링 차수를 시작하지 않고 P1~P3 제품·저장 신뢰성 우선순위로 돌아간다.
 3. `app_state`에서 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
    - 즉시 사람 판단이 필요하지 않은 발견은 queue/worklog에 남기고 AI 검수와 다음 단계를 연쇄 진행한다.
