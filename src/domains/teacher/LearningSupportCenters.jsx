@@ -541,11 +541,13 @@ export function ResourceLibraryCenter({
   resourceMaterialSaveState = { message: "", state: "idle" },
   onAddMaterial,
   onDeleteMaterial,
+  openMaterial,
   students = [],
   templates = []
 }) {
   const fileInputRef = useRef(null);
   const [form, setForm] = useState(createEmptyResourceMaterialForm);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [openResourceClassIds, setOpenResourceClassIds] = useState(() =>
     templates.slice(0, 1).map((template) => template.classTemplateId)
   );
@@ -585,9 +587,10 @@ export function ResourceLibraryCenter({
   }
 
   function attachFiles(files) {
-    const selectedFiles = Array.from(files ?? []);
-    if (selectedFiles.length === 0) return;
-    updateForm("fileName", selectedFiles.map((file) => file.name).join(", "));
+    const selected = Array.from(files ?? [])[0] ?? null;
+    if (!selected) return;
+    setSelectedFile(selected);
+    setForm((current) => ({ ...current, fileName: selected.name, fileUrl: "" }));
   }
 
   function toggleStudent(studentId) {
@@ -625,8 +628,12 @@ export function ResourceLibraryCenter({
   async function submitMaterial(event) {
     event.preventDefault();
     if (!form.title.trim() || resourceMaterialBusy) return;
-    const result = await onAddMaterial(form);
-    if (result?.ok) setForm(createEmptyResourceMaterialForm());
+    const result = await onAddMaterial(form, selectedFile);
+    if (result?.ok) {
+      setForm(createEmptyResourceMaterialForm());
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   }
 
   return (
@@ -667,22 +674,21 @@ export function ResourceLibraryCenter({
           <input
             aria-label="자료 파일 선택"
             hidden
-            multiple
             onChange={(event) => attachFiles(event.target.files)}
             ref={fileInputRef}
             type="file"
           />
           <p className="resourceFileBoundaryNotice" id="resource-file-boundary-notice">
-            현재는 파일 내용이 업로드되지 않고 파일명만 저장됩니다. 공유하려면 접근 가능한 링크를 함께 입력하세요.
+            선택 파일은 20MB 이하의 지원 문서·이미지만 private Storage에 업로드됩니다. 파일 없이 외부 링크만 등록할 수도 있습니다.
           </p>
           <div className="fieldGrid two">
             <label>
               파일명
-              <input value={form.fileName} onChange={(event) => updateForm("fileName", event.target.value)} placeholder="파일명 또는 카톡에서 보낸 자료명" />
+              <input disabled={Boolean(selectedFile)} value={form.fileName} onChange={(event) => updateForm("fileName", event.target.value)} placeholder="파일명 또는 카톡에서 보낸 자료명" />
             </label>
             <label>
               링크
-              <input value={form.fileUrl} onChange={(event) => updateForm("fileUrl", event.target.value)} placeholder="https://..." />
+              <input disabled={Boolean(selectedFile)} value={form.fileUrl} onChange={(event) => updateForm("fileUrl", event.target.value)} placeholder="https://..." />
             </label>
           </div>
           <div className="fieldGrid two">
@@ -790,6 +796,16 @@ export function ResourceLibraryCenter({
                 </small>
               </div>
               <div className="resourceMaterialDeleteActions">
+                {material.fileUrl ? (
+                  <button
+                    className="softButton mini"
+                    disabled={resourceMaterialBusy}
+                    onClick={() => openMaterial(material)}
+                    type="button"
+                  >
+                    열기
+                  </button>
+                ) : null}
                 <button
                   className="dangerButton mini"
                   disabled={resourceMaterialBusy}

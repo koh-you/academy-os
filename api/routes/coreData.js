@@ -5116,7 +5116,7 @@ export async function listResourceMaterials() {
   return { source: databaseSource, materials: rows.map(fromResourceMaterialRow) };
 }
 
-async function getResourceMaterial(materialId) {
+export async function getResourceMaterial(materialId) {
   const rows = await listRows(
     "resource_materials",
     `select=*&resource_material_id=eq.${encodeURIComponent(materialId)}&limit=1`,

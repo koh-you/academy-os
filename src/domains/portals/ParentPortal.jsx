@@ -15,6 +15,7 @@ export function ParentPortal({
   lessons = [],
   materials = [],
   onLogout,
+  openMaterial,
   records = [],
   referenceDate,
   reportSnapshots = [],
@@ -68,7 +69,7 @@ export function ParentPortal({
           />
         ) : null}
 
-        {activeTab === "materials" ? <PortalMaterialsTab materials={parentMaterials} emptyMessage="아직 공개된 자료가 없습니다." /> : null}
+        {activeTab === "materials" ? <PortalMaterialsTab materials={parentMaterials} emptyMessage="아직 공개된 자료가 없습니다." openMaterial={openMaterial} /> : null}
 
         {activeTab === "attendance" ? (
           <EmptyState

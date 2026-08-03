@@ -28,7 +28,7 @@
 - 수업 달력의 복사·취소·되돌리기는 하나의 versioned history action으로 `lessons`와 복사 숙제를 저장한다. 행별 CAS/insert-only·Supabase 재조회·중간 실패 역순 보상 뒤에만 UI와 undo stack을 바꾸며, 결과 불명 복사는 같은 수업 ID와 계획으로 재시도한다. 복사 뒤 새 기록·숙제·알림 작업이 연결되면 자동 되돌리기를 막고, 취소 복구는 현재 서버 기록·숙제를 다시 읽어 화면에 반영한다.
 - 수업일지의 `lesson_student_records`와 숙제 다중 행은 하나의 versioned save plan으로 저장한다. 기존 행은 `updated_at` CAS, 신규 행은 insert-only를 사용하고 모든 행의 Supabase 재조회가 일치해야 화면 원천을 갱신한다. 동일 저장 재시도는 추가 쓰기 없이 성공하며 중간 실패는 역순 보상한다. 보상 중 더 최신 행이 발견되면 덮지 않고 부분 실패로 표시하며, 충돌·실패와 저장 중 후속 입력의 draft를 유지한다.
 - 교사 `숙제현황`의 확인 상태는 더 이상 화면에 먼저 반영한 뒤 실패를 console로만 남기지 않는다. 기존 versioned 숙제 행 저장을 사용해 `updated_at` CAS와 Supabase 재조회가 확인된 뒤에만 App 원천을 교체하며, 저장 중 행을 잠그고 충돌·실패에서는 이전 상태와 행별 실패 표시를 유지한다.
-- 자료함 메타데이터 등록은 화면 초안에서 만든 stable ID·생성 토큰으로 insert-only 저장하고 Supabase 목록 재조회가 일치한 뒤에만 행을 표시한다. 응답 유실 뒤 초안을 더 수정해도 기존 저장을 회수해 새 `updated_at`에 최신 초안을 CAS 반영하며, 삭제도 CAS와 삭제 후 재조회를 통과해야 목록에서 제거한다. 실패·충돌에서는 입력과 행을 유지하고, 실제 파일 내용은 아직 업로드하지 않는다는 경계를 화면에 명시한다.
+- 자료함은 stable ID·생성 토큰의 insert-only/CAS 메타데이터 row와 private Storage 파일을 함께 관리한다. 파일은 생성 토큰·내용 해시 경로에 업로드하고 row 저장 실패 시 새 객체를 정리한다. 삭제는 파일 백업·Storage 삭제 뒤 row CAS를 실행하며 충돌 시 정확한 경로로 파일을 복구한다. 교사 또는 해당 학생·학부모 bearer를 서버에서 다시 확인한 뒤에만 외부 링크나 서명 URL을 발급하고, 포털 초기 payload도 공개 범위로 제한한다. 성공은 Supabase 목록 재조회 뒤에만 화면에 반영한다.
 - 수업일지에서 만드는 등원보충 초안은 학생·원 숙제·task 유형으로 고정한 요청 ID를 사용한다. 신규 `makeup_tasks`는 insert-only, 기존 항목은 `updated_at` CAS로 저장하고 Supabase 재조회가 일치해야 완료한다. 저장 응답만 유실된 재시도는 같은 항목 한 건으로 회수하며 다른 화면의 최신 수정은 덮지 않고 수업일지 draft를 유지한다.
 - 보충관리 상세는 `makeup_tasks.linkedLessonId`, `lessons.sourceMakeupTaskId`, 실제 일정, 미발송 `notification_jobs`를 함께 대조한다. 연결 수업 누락·역연결 ID 불일치·중복·다른 원천·예상 밖 일정 차이에서는 더 이상 반영 완료로 표시하지 않고 일정 저장과 새 알림 예약을 막는다. 기존 예약 확인·취소 화면은 원인 확인을 위해 유지하며 자동 복구나 provider 행동은 실행하지 않는다.
 - 보충 일정 생성·변경은 연결 `lessons`와 `makeup_tasks`를 하나의 versioned save plan으로 저장한다. 신규 insert-only·기존 `updated_at` CAS·Supabase 재조회가 모두 일치해야 화면 원천을 갱신하고 그 뒤에만 기존 알림 orchestration을 호출한다. 결과 불명 뒤 날짜·시간·메모가 바뀌어도 logical task의 최초 audit를 먼저 회수하고 확인된 새 버전에 최신 draft를 CAS 저장한다. provider 실패는 원천 저장 실패로 되돌리지 않고 `일정 저장 완료 · 알림 예약 실패`와 provider-only 재시도 범위로 분리한다. 두 번째 원천 실패의 역순 보상과 최신 변경 보호도 유지한다.
@@ -42,6 +42,7 @@
 ## 개발환경 상태
 
 - Node 24 기준, `npm ci` 사용.
+- Vercel Hobby 배포를 위해 `api/**/*.js` Serverless Function 후보는 12개 이하로 유지하며 production inventory가 초과를 차단한다.
 - `npm run doctor`가 경로·Git·Node·중복 clone을 점검한다.
 - VS Code F5는 운영 데이터에 연결하지 않는 안전한 가상 환경을 연다.
 - ESLint runtime 검사, 간결한 scenario 요약, client runtime error reporter, Playwright browser smoke가 있다.
@@ -92,7 +93,7 @@
 
 ## 다음 우선순위
 
-1. App 2차 Phase 1~5와 3차 3-0~3-8은 완료됐다. 운영 저장 신뢰성의 시험정보·Tally 후보·개별 학생·반 명단·수동/파생 학사일정, 수업 복사·취소·되돌리기, 수업기록·숙제 다중 행, 수업일지 등원보충 stable ID, 보충 원천 reconcile과 `lessons + makeup_tasks` versioned 일정 저장까지 완료했다. 병행 중인 결석보강 수업일지형 모달 UI를 최신 main에 재배치·통합한 뒤 P1의 숙제·포털·자료함·보고서 저장 계약을 다음 독립 단위로 고른다.
+1. App 2차 Phase 1~5와 3차 3-0~3-8은 완료됐다. P1 운영 저장 신뢰성은 시험정보·Tally 후보·학생·반 명단·학사일정·수업 history/rows·숙제·보충 일정·자료함 메타데이터와 private Storage까지 완료했다. 다음 독립 단위는 보고서 snapshot의 명시 저장·충돌·실패 복구다.
 2. App 3차 리팩터링 3-0~3-8은 production main 43.1%·gzip 45.3% 감소, 12개 물리 lazy chunk, App Babel 500 KB 경고 제거와 종료 소유권 감사까지 완료했다. 자동으로 다음 리팩터링 차수를 시작하지 않고 P1~P3 제품·저장 신뢰성 우선순위로 돌아간다.
 3. `app_state`에서 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
    - 즉시 사람 판단이 필요하지 않은 발견은 queue/worklog에 남기고 AI 검수와 다음 단계를 연쇄 진행한다.

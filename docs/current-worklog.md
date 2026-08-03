@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 자료함 private Storage 저장 신뢰성
+
+- 선택한 PDF·이미지·문서 파일은 20MB 제한을 확인한 뒤 private `resource-materials` bucket의 `stable material ID / createdAt token / content hash` 경로에 저장한다. DB에는 직접 공개 URL이 아니라 Storage 참조만 기록하며, 같은 응답 유실 재시도는 같은 객체·row로 수렴하고 파일 내용 변경은 새 해시 경로로 분리된다.
+- 파일 업로드 뒤 메타데이터 row 저장이 실패하면 새 객체를 삭제한다. 자료 삭제는 현재 파일을 메모리에 백업하고 Storage 객체를 지운 뒤 `updated_at` CAS로 row를 삭제하며, CAS 충돌·row 실패에서는 같은 경로·content type으로 파일을 복구한다. 복구마저 실패하는 경우에는 자동 성공으로 숨기지 않고 전용 부분실패 코드와 관리자 확인 문구를 반환한다.
+- 파일 열기는 교사 bearer 또는 해당 학생·학부모 bearer를 서버에서 검증하고 자료 공개 범위·개별 학생·반 범위를 다시 확인한 뒤에만 서명 URL을 발급한다. 학생/학부모 portal payload도 같은 범위로 서버에서 제한하며 외부 링크 역시 인증된 open endpoint를 거친다.
+- Vercel Preview에서 신규 `api/domain` 파일이 Hobby의 Serverless Function 12개 한도를 넘기는 문제를 확인했다. 순수 저장 조립을 `src/domains/resources/resourceMaterialStorageOperation.js`로 옮기고 `api/**/*.js` 개수를 12 이하로 고정하는 production inventory를 추가했다.
+- 검증: Storage 전용 upload/cleanup/delete rollback/access fixture, lesson `19/19`, runtime lint, teacher owner audit, `check:fast`, scenario·production `827/827`, build `403 modules`·main `945.00 kB 이하`·lazy `12/12`, 집중 browser `2/2`, 전체 safe browser `39/39`. 운영 Supabase·Storage·실제 알림·SQL·유료 호출은 사용하지 않았다.
+
 ## 2026-08-03 자료함 메타데이터 저장 신뢰성
 
 - 자료 등록 시 UI가 먼저 행을 추가하던 경계를 제거했다. 화면 초안에서 stable `materialId`와 `createdAt` 생성 토큰을 만들고 서버는 신규 행만 insert한다. 응답 유실 뒤 같은 초안을 수정해 재시도하면 저장된 첫 행을 생성 토큰으로 회수하고 그 `updated_at`에 최신 초안을 CAS 반영한다. 생성 토큰이 다른 중복 ID는 409로 막는다.
