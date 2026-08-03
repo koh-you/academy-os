@@ -22,7 +22,7 @@ async function listRuntimeSources(directoryUrl) {
 
 const sourceUrls = await listRuntimeSources(srcRoot);
 const sourceEntries = await Promise.all(sourceUrls.map(async (url) => ({
-  path: relative(repositoryRoot, fileURLToPath(url)),
+  path: relative(repositoryRoot, fileURLToPath(url)).replaceAll("\\", "/"),
   source: await readFile(url, "utf8")
 })));
 const count = (source, pattern) => [...source.matchAll(pattern)].length;
@@ -31,7 +31,7 @@ const injectedModalCount = sourceEntries.reduce((total, entry) => total + count(
 const modalFooterCount = sourceEntries.reduce((total, entry) => total + count(entry.source, /<ModalFooter\b/g), 0);
 const modalActionCount = sourceEntries.reduce((total, entry) => total + count(entry.source, /className="[^"]*modalActions[^"]*"/g), 0);
 const rawDialogEntries = sourceEntries.filter((entry) => (
-  entry.path !== "src\\shared\\components\\Modal.jsx" && entry.source.includes('role="dialog"')
+  entry.path !== "src/shared/components/Modal.jsx" && entry.source.includes('role="dialog"')
 ));
 
 assert.equal(directModalCount, 34, "unexpected direct common Modal surface count");
@@ -40,7 +40,7 @@ assert.equal(modalFooterCount, 9, "unexpected common ModalFooter count");
 assert.equal(modalActionCount, 8, "unexpected legacy modalActions wrapper count");
 assert.deepEqual(
   rawDialogEntries.map((entry) => entry.path),
-  ["src\\domains\\supplements\\SupplementNotificationControlModal.jsx"],
+  ["src/domains/supplements/SupplementNotificationControlModal.jsx"],
   "new bespoke dialogs must not bypass the common Modal shell"
 );
 
