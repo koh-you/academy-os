@@ -34,7 +34,8 @@ const initialState = {
       schoolName: "안전고",
       scope: "안전 fixture 시험 범위",
       subject: "공통수학1",
-      subTextbook: "안전 fixture 부교재"
+      subTextbook: "안전 fixture 부교재",
+      updatedAt: "2026-08-03T00:00:00.000Z"
     }
   ],
   homeworks: [],
@@ -342,10 +343,36 @@ function handleMutation(pathname, payload) {
     return { makeupTasks: state.makeupTasks, ok: true };
   }
   if (pathname === "/api/exam-prep-rows/bulk") {
+    const conflicts = [];
+    const examPrepRows = [];
     for (const examPrepRow of payload.examPrepRows || []) {
-      state.examPrepRows = upsertById(state.examPrepRows, examPrepRow, ["examPrepId"]);
+      const existingRow = state.examPrepRows.find((row) => row.examPrepId === examPrepRow.examPrepId);
+      if (
+        (existingRow && examPrepRow.updatedAt !== existingRow.updatedAt) ||
+        (!existingRow && examPrepRow.updatedAt && payload.allowRestore !== true)
+      ) {
+        conflicts.push({
+          code: "EXAM_PREP_ROW_CONFLICT",
+          currentRow: existingRow ?? null,
+          examPrepId: examPrepRow.examPrepId,
+          message: `시험정보 ${examPrepRow.examPrepId}가 다른 화면에서 먼저 변경되었습니다.`
+        });
+        continue;
+      }
+      const savedRow = {
+        ...examPrepRow,
+        updatedAt: new Date(Math.max(Date.now(), new Date(existingRow?.updatedAt || 0).getTime() + 1)).toISOString()
+      };
+      state.examPrepRows = upsertById(state.examPrepRows, savedRow, ["examPrepId"]);
+      examPrepRows.push(savedRow);
     }
-    return { examPrepRows: state.examPrepRows, ok: true };
+    return {
+      conflicts,
+      examPrepRows,
+      failures: [],
+      ok: true,
+      verified: examPrepRows.length === (payload.examPrepRows || []).length && conflicts.length === 0
+    };
   }
   if (pathname === "/api/lessons") {
     const lesson = payload.lesson || {};

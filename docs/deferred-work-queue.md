@@ -4,9 +4,9 @@
 
 ## P1. 운영 저장 신뢰성
 
-- 학생 신규/Tally·학생/반 명단 저장 gate.
+- 다음 단위: 학생 신규/Tally 후보 입력 경쟁 방지. 이후 학생 저장과 반 명단 저장 gate를 각각 분리해 점검한다.
 - `app_state` key별 dirty 저장·500ms debounce·동일 key 직렬화·`updated_at` CAS·저장 뒤 Supabase 재조회는 완료. 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
-- 시험정보 행의 같은 브라우저 요청 직렬화·진행 중 최신값 coalesce는 완료. 다음 단위는 `updated_at` CAS와 저장 뒤 Supabase 재조회이며, Tally 후보 입력 경쟁 방지는 별도로 남는다.
+- 시험정보 행의 같은 브라우저 직렬화·최신값 coalesce·행별 `updated_at` CAS·저장 뒤 Supabase 재조회는 완료. 충돌 입력 보존과 삭제 감사 rollback 전용 복구 경계도 fixture로 고정했다.
 - 숙제·포털·자료함·보고서 저장 계약.
 - 보충·알림 다중 원천 reconcile과 미연결/오작동 버튼 정리.
 - 기준: `docs/save-persistence-audit-2026-07-20.md`, `docs/save-persistence-audit-2026-07-28.md`.

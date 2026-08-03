@@ -6952,10 +6952,13 @@ const server = http.createServer(async (request, response) => {
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-prep-rows") {
     try {
       const payload = await readJsonBody(request);
-      const result = await upsertExamPrepRow(payload.examPrepRow ?? payload.row ?? payload);
+      const result = await upsertExamPrepRow(
+        payload.examPrepRow ?? payload.row ?? payload,
+        { allowRestore: payload.allowRestore === true }
+      );
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
+      sendJson(request, response, Number(error.statusCode) || 500, { ok: false, error: error.message });
     }
     return;
   }
@@ -6963,7 +6966,10 @@ const server = http.createServer(async (request, response) => {
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-prep-rows/bulk") {
     try {
       const payload = await readJsonBody(request);
-      const result = await upsertExamPrepRows(payload.examPrepRows ?? payload.rows ?? []);
+      const result = await upsertExamPrepRows(
+        payload.examPrepRows ?? payload.rows ?? [],
+        { allowRestore: payload.allowRestore === true }
+      );
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });

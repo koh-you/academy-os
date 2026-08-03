@@ -172,7 +172,7 @@ test("exam prep and settings open from deferred chunks without side effects", as
   expect(pageErrors).toEqual([]);
 });
 
-test("exam prep rapid edits serialize requests and persist the latest row value", async ({ page }) => {
+test("exam prep rapid edits serialize, rebase CAS, and persist the verified latest row value", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   const requests = [];
   let captureRequests = false;
@@ -213,7 +213,51 @@ test("exam prep rapid edits serialize requests and persist the latest row value"
   await expect.poll(() => requests.length).toBe(2);
   expect(requests[0].examPrepRows[0].scope).toBe("직렬화 첫 입력");
   expect(requests[1].examPrepRows[0].scope).toBe("직렬화 최신 입력");
+  expect(requests[1].examPrepRows[0].updatedAt).not.toBe(requests[0].examPrepRows[0].updatedAt);
   await expect(scopeInput.locator("xpath=..").getByText("저장 완료")).toBeVisible();
+  const persistedResponse = await request.get(`${safeApiBaseUrl}/api/exam-prep-rows`);
+  const persistedResult = await persistedResponse.json();
+  expect(persistedResult.examPrepRows.find((row) => row.examPrepId === "safe-exam-prep-row")?.scope).toBe("직렬화 최신 입력");
+  expect(pageErrors).toEqual([]);
+});
+
+test("exam prep CAS conflict keeps the current screen input and shows failure", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  let conflictEnabled = false;
+  await page.route("**/api/exam-prep-rows/bulk", async (route) => {
+    if (!conflictEnabled) {
+      const response = await route.fetch();
+      await route.fulfill({ response });
+      return;
+    }
+    await route.fulfill({
+      contentType: "application/json",
+      status: 200,
+      body: JSON.stringify({
+        conflicts: [{
+          code: "EXAM_PREP_ROW_CONFLICT",
+          examPrepId: "safe-exam-prep-row",
+          message: "다른 화면에서 먼저 변경되었습니다."
+        }],
+        examPrepRows: [],
+        failures: [],
+        ok: true,
+        source: "supabase",
+        verified: false
+      })
+    });
+  });
+
+  await loginAsTeacher(page);
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /시험관리/ }).click();
+  await page.getByRole("button", { name: "정산 미리보기반" }).click();
+  const scopeInput = page.getByLabel("안전고 시험 범위");
+  await page.waitForLoadState("networkidle");
+  conflictEnabled = true;
+  await scopeInput.fill("충돌해도 유지할 입력");
+  await expect(scopeInput).toHaveValue("충돌해도 유지할 입력");
+  await expect(scopeInput.locator("xpath=../..").getByText("저장 실패")).toBeVisible();
+  await expect(scopeInput).toHaveValue("충돌해도 유지할 입력");
   expect(pageErrors).toEqual([]);
 });
 

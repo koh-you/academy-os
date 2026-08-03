@@ -12,6 +12,7 @@ function patchExamPrepRowSaveStates(current, rowIds, nextState, shouldPatch = ()
 
 export function createExamPrepRowSaveController({
   onError = () => {},
+  onPersisted = () => {},
   request,
   setSaveStates
 }) {
@@ -37,22 +38,65 @@ export function createExamPrepRowSaveController({
       entries.forEach(([rowId, row]) => activeByRowId.set(rowId, row));
 
       try {
-        await request(rows);
-        entries.forEach(([rowId, row]) => persistedByRowId.set(rowId, row));
+        const result = await request(rows);
+        const verifiedByRowId = new Map(
+          (result?.examPrepRows ?? []).map((row) => [row?.examPrepId, row])
+        );
+        const failureByRowId = new Map(
+          [...(result?.conflicts ?? []), ...(result?.failures ?? [])]
+            .filter((failure) => failure?.examPrepId)
+            .map((failure) => [failure.examPrepId, failure])
+        );
+        const savedRowIds = [];
+        const failedRowIds = [];
+
+        entries.forEach(([rowId]) => {
+          const verifiedRow = verifiedByRowId.get(rowId);
+          if (verifiedRow?.updatedAt) {
+            persistedByRowId.set(rowId, verifiedRow);
+            const pendingRow = pendingByRowId.get(rowId);
+            const hasPendingChanges = Boolean(pendingRow);
+            if (pendingRow) {
+              pendingByRowId.set(rowId, { ...pendingRow, updatedAt: verifiedRow.updatedAt });
+            }
+            onPersisted({ hasPendingChanges, row: verifiedRow });
+            savedRowIds.push(rowId);
+            return;
+          }
+
+          const failure = failureByRowId.get(rowId) ?? {
+            code: "EXAM_PREP_ROW_VERIFICATION_FAILED",
+            examPrepId: rowId,
+            message: `시험정보 ${rowId}의 저장 결과를 확인하지 못했습니다.`
+          };
+          const error = new Error(failure.message);
+          error.code = failure.code;
+          lastError = error;
+          pendingByRowId.delete(rowId);
+          failedRowIds.push(rowId);
+          onError(error);
+        });
         setSaveStates((current) => patchExamPrepRowSaveStates(
           current,
-          rowIds,
+          savedRowIds,
           "saved",
           (rowId) => !pendingByRowId.has(rowId)
         ));
+        if (failedRowIds.length > 0) {
+          setSaveStates((current) => patchExamPrepRowSaveStates(
+            current,
+            failedRowIds,
+            "failed"
+          ));
+        }
       } catch (error) {
         lastError = error;
         onError(error);
+        rowIds.forEach((rowId) => pendingByRowId.delete(rowId));
         setSaveStates((current) => patchExamPrepRowSaveStates(
           current,
           rowIds,
-          "failed",
-          (rowId) => !pendingByRowId.has(rowId)
+          "failed"
         ));
       } finally {
         rowIds.forEach((rowId) => activeByRowId.delete(rowId));

@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-03 시험정보 행 CAS·Supabase 재조회
+
+- P1 저장 신뢰성의 두 번째 시험정보 단위로 `exam_prep_rows` bulk 저장을 행별 `updated_at` CAS로 바꿨다. 기존 행은 ID+기대 버전 PATCH, 신규 행은 충돌 감지 INSERT를 사용하며 삭제된 기존 행을 일반 자동저장이 되살리지 못하게 했다. 삭제 감사 rollback만 `allowRestore`를 명시해 복구한다.
+- 성공 행은 Supabase에서 다시 읽어 요청 필드와 새 timestamp를 대조한 뒤에만 `저장 완료`로 처리한다. 여러 행 중 일부 성공·충돌도 행별로 구분하고, 저장 중 후속 입력은 성공 응답의 새 버전만 합쳐 최신 화면 draft를 보존한다. 충돌·결과 불명 실패는 자동 재전송하지 않고 입력과 `저장 실패`를 유지한다.
+- 안전 API와 브라우저 fixture는 첫 요청 중 최신 입력 coalesce→새 버전 재기준화→두 번째 CAS 저장→API 최신값 확인, 외부 충돌 응답→현재 입력 보존을 검증한다. Supabase REST 모형은 정상 PATCH, 구버전 덮어쓰기 차단, 삭제 행 무단 재생성 차단, 감사 복구 허용을 직접 실행한다.
+- 검증: 전용 controller/API·Supabase REST fixture, runtime lint, `check:fast`, scenario·production `822/822`, build `380 modules`·lazy chunk `12/12`, Worktree 격리 safe browser `20/20` 통과. 운영 데이터·실제 알림·Storage·유료 AI·SQL은 사용하지 않았다.
+- 다음 독립 단위는 학생 신규/Tally 후보 입력 경쟁 방지다. 학생 저장·반 명단 저장 gate와 섞지 않는다.
+
 ## 2026-08-03 매일 자동 task 제목·main 통합 정책
 
 - 매일 9시 자동 task는 서울 날짜를 계산해 다른 작업보다 먼저 `YYYY-MM-DD Academy OS 매일 개발 이어가기`로 제목을 바꾸며, 도구 실패나 완료 응답 부재 시 한 번 재시도하고 결과에 확인 여부를 남긴다.
