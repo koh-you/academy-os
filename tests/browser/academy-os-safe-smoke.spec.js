@@ -776,24 +776,36 @@ test("supplement schedule retries one verified source plan after an unknown resp
   await saveSchedule.click();
   await expect(supplementModal.getByRole("status")).toContainText("수업일지 일정 저장 실패");
 
+  const latestReminderDraft = "응답 대기 중 수정한 최신 학생 11시 알림 초안";
+  await supplementModal.locator('input[type="date"]').fill("2026-08-06");
+  await supplementModal.getByLabel("보충 시간 시").selectOption("16");
+  await supplementModal.getByLabel("보충 시간 분").selectOption("00");
+  await supplementModal.locator(".supplementNotificationDraftEditors textarea").last().fill(latestReminderDraft);
   await saveSchedule.click();
-  await expect(supplementModal.getByRole("status")).toContainText("수업일지 일정 만들기 완료");
-  expect(scheduleRequests).toHaveLength(2);
+  await expect(supplementModal.getByRole("status")).toContainText("일정 저장 완료 · 알림 예약 실패");
+  await expect(supplementModal.getByRole("status")).toContainText("실패한 알림만 다시 시도");
+  expect(scheduleRequests).toHaveLength(3);
   expect(scheduleRequests[1].auditId).toBe(scheduleRequests[0].auditId);
+  expect(scheduleRequests[2].auditId).not.toBe(scheduleRequests[1].auditId);
   expect(scheduleRequests[1].lessonChange).toEqual(scheduleRequests[0].lessonChange);
   expect(scheduleRequests[1].taskChange).toEqual(scheduleRequests[0].taskChange);
+  expect(scheduleRequests[2].taskChange.after.notificationDraft).toBe(latestReminderDraft);
+  expect(scheduleRequests[2].taskChange.after.scheduledDate).toBe("2026-08-06");
+  expect(scheduleRequests[2].taskChange.after.scheduledTime).toBe("16:00");
+  expect(scheduleRequests[2].taskChange.before.updatedAt).toBeTruthy();
 
   const lessons = (await (await request.get(`${safeApiBaseUrl}/api/lessons`)).json()).lessons;
   const makeupTasks = (await (await request.get(`${safeApiBaseUrl}/api/makeup-tasks`)).json()).makeupTasks;
   const savedTasks = makeupTasks.filter((task) => task.sourceId === "safe-absence-record");
   expect(savedTasks).toHaveLength(1);
+  expect(savedTasks[0].notificationDraft).toBe(latestReminderDraft);
   const linkedLessons = lessons.filter(
     (lesson) => lesson.sourceMakeupTaskId === savedTasks[0].makeupTaskId
   );
   expect(linkedLessons).toHaveLength(1);
   expect(savedTasks[0].linkedLessonId).toBe(linkedLessons[0].lessonId);
-  expect(linkedLessons[0].date).toBe("2026-08-05");
-  expect(linkedLessons[0].startTime).toBe("15:30");
+  expect(linkedLessons[0].date).toBe("2026-08-06");
+  expect(linkedLessons[0].startTime).toBe("16:00");
   expect(pageErrors).toEqual([]);
 });
 

@@ -27,7 +27,7 @@
 - 수업일지의 `lesson_student_records`와 숙제 다중 행은 하나의 versioned save plan으로 저장한다. 기존 행은 `updated_at` CAS, 신규 행은 insert-only를 사용하고 모든 행의 Supabase 재조회가 일치해야 화면 원천을 갱신한다. 동일 저장 재시도는 추가 쓰기 없이 성공하며 중간 실패는 역순 보상한다. 보상 중 더 최신 행이 발견되면 덮지 않고 부분 실패로 표시하며, 충돌·실패와 저장 중 후속 입력의 draft를 유지한다.
 - 수업일지에서 만드는 등원보충 초안은 학생·원 숙제·task 유형으로 고정한 요청 ID를 사용한다. 신규 `makeup_tasks`는 insert-only, 기존 항목은 `updated_at` CAS로 저장하고 Supabase 재조회가 일치해야 완료한다. 저장 응답만 유실된 재시도는 같은 항목 한 건으로 회수하며 다른 화면의 최신 수정은 덮지 않고 수업일지 draft를 유지한다.
 - 보충관리 상세는 `makeup_tasks.linkedLessonId`, `lessons.sourceMakeupTaskId`, 실제 일정, 미발송 `notification_jobs`를 함께 대조한다. 연결 수업 누락·역연결 ID 불일치·중복·다른 원천·예상 밖 일정 차이에서는 더 이상 반영 완료로 표시하지 않고 일정 저장과 새 알림 예약을 막는다. 기존 예약 확인·취소 화면은 원인 확인을 위해 유지하며 자동 복구나 provider 행동은 실행하지 않는다.
-- 보충 일정 생성·변경은 연결 `lessons`와 `makeup_tasks`를 하나의 versioned save plan으로 저장한다. 신규 insert-only·기존 `updated_at` CAS·Supabase 재조회가 모두 일치해야 화면 원천을 갱신하고 그 뒤에만 기존 알림 orchestration을 호출한다. 결과 불명 응답은 같은 audit·계획으로 재시도하며 두 번째 원천 실패는 첫 번째 원천을 역순 보상하고, 보상 중 최신 변경은 덮지 않고 부분 실패로 드러낸다.
+- 보충 일정 생성·변경은 연결 `lessons`와 `makeup_tasks`를 하나의 versioned save plan으로 저장한다. 신규 insert-only·기존 `updated_at` CAS·Supabase 재조회가 모두 일치해야 화면 원천을 갱신하고 그 뒤에만 기존 알림 orchestration을 호출한다. 결과 불명 뒤 날짜·시간·메모가 바뀌어도 logical task의 최초 audit를 먼저 회수하고 확인된 새 버전에 최신 draft를 CAS 저장한다. provider 실패는 원천 저장 실패로 되돌리지 않고 `일정 저장 완료 · 알림 예약 실패`와 provider-only 재시도 범위로 분리한다. 두 번째 원천 실패의 역순 보상과 최신 변경 보호도 유지한다.
 - 월별 출결·수업 모달은 데스크톱에서 최대 1320px까지 넓어져 달력 7열을 가로 스크롤 없이 한눈에 확인한다.
 - 월별 정산 표에서는 `월별 스케줄`, `정산 처리` 열을 표시하지 않는다. 기존 스케줄·제외 저장 원천과 금액 계산은 보존한다.
 - 월별 정산 기본월은 서울 기준 매월 1~2일에는 지난달, 3일부터는 이번 달이다. 정산월·저장 상태·PDF 행동은 한 컨트롤 카드에서 표시한다.

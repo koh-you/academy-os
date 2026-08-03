@@ -32,9 +32,7 @@ export function createSupplementScheduleAuditId(now = Date.now()) {
 export function createSupplementScheduleRequestKey(task = {}) {
   return [
     task.makeupTaskId,
-    task.linkedLessonId,
-    task.scheduledDate,
-    task.scheduledTime
+    task.linkedLessonId
   ].map((value) => String(value ?? "").trim()).join(":");
 }
 
@@ -100,6 +98,41 @@ export function areSupplementScheduleVersionsEqual(left = "", right = "") {
   return areLessonJournalHistoryTimestampsEqual(left, right);
 }
 
+function createRebasedSupplementScheduleSavePlan(plan, result) {
+  return createSupplementScheduleSavePlan({
+    afterLesson: {
+      ...plan.lessonChange.after,
+      updatedAt: result.lesson.updatedAt
+    },
+    afterTask: {
+      ...plan.taskChange.after,
+      updatedAt: result.makeupTask.updatedAt
+    },
+    beforeLesson: result.lesson,
+    beforeTask: result.makeupTask
+  });
+}
+
+async function requestSupplementScheduleSave({ pending, request }) {
+  const result = await request(
+    "/api/supplement-schedules/save",
+    { auditId: pending.auditId, ...pending.plan },
+    30000,
+    "보충 일정 저장이 30초를 넘었습니다. 입력을 유지한 채 같은 일정으로 다시 시도해 주세요."
+  );
+  if (
+    result?.source !== "supabase" ||
+    result?.verified !== true ||
+    result?.auditId !== pending.auditId ||
+    !verifySupplementScheduleSavePlan(pending.plan, result).verified
+  ) {
+    const error = new Error("보충 일정 저장 결과를 Supabase 재조회로 확인하지 못했습니다.");
+    error.responseReceived = true;
+    throw error;
+  }
+  return result;
+}
+
 export async function saveSupplementScheduleAction({
   onStateChange = () => {},
   plan,
@@ -117,21 +150,18 @@ export async function saveSupplementScheduleAction({
   onStateChange({ message: "수업일지와 보충 원천을 함께 저장하고 다시 확인하는 중입니다.", state: "saving" });
 
   try {
-    const result = await request(
-      "/api/supplement-schedules/save",
-      { auditId: pending.auditId, ...pending.plan },
-      30000,
-      "보충 일정 저장이 30초를 넘었습니다. 입력을 유지한 채 같은 일정으로 다시 시도해 주세요."
-    );
-    if (
-      result?.source !== "supabase" ||
-      result?.verified !== true ||
-      result?.auditId !== pending.auditId ||
-      !verifySupplementScheduleSavePlan(pending.plan, result).verified
-    ) {
-      const error = new Error("보충 일정 저장 결과를 Supabase 재조회로 확인하지 못했습니다.");
-      error.responseReceived = true;
-      throw error;
+    let result = await requestSupplementScheduleSave({ pending, request });
+    if (!verifySupplementScheduleSavePlan(plan, result).verified) {
+      const rebasedPending = {
+        auditId: createSupplementScheduleAuditId(),
+        plan: createRebasedSupplementScheduleSavePlan(plan, result)
+      };
+      pendingScheduleRequests.set(normalizedKey, rebasedPending);
+      onStateChange({
+        message: "이전 저장 결과를 확인했습니다. 이후 변경을 최신 버전에 이어서 저장하고 있습니다.",
+        state: "saving"
+      });
+      result = await requestSupplementScheduleSave({ pending: rebasedPending, request });
     }
     pendingScheduleRequests.delete(normalizedKey);
     onStateChange({ message: "수업일지 · 보충 원천 저장 완료", state: "saved" });

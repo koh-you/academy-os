@@ -140,6 +140,25 @@ export async function applySupplementScheduleAction({
     const nextTask = result?.makeupTask ?? taskWithDraft;
     const scheduleNoticeLabel = isScheduleChange ? "변경 안내" : "확정 안내";
     onMarkSaved(nextTask);
+    if (result?.notificationFailed) {
+      onSaveStatus({
+        lesson: "synced",
+        makeupTask: "saved",
+        notificationDraft: "saved",
+        parentChangeNotice: result.parentScheduleChangeNoticeStatus || "failed",
+        parentScheduleNoticeLabel: `학부모 ${scheduleNoticeLabel}`,
+        studentChangeNotice: result.scheduleChangeNoticeStatus || "failed",
+        studentScheduleNoticeLabel: `학생 ${scheduleNoticeLabel}`,
+        studentReminder: result.supplementReminderStatus || "failed"
+      });
+      onResetConfirmation();
+      onFeedback({
+        message: `수업일지와 보충 원천은 Supabase 저장·재확인을 완료했습니다. ${result.notificationFailureMessage || "알림톡 예약에 실패했습니다."} 예약 확인에서 실패한 알림만 다시 시도해 주세요.`,
+        title: "일정 저장 완료 · 알림 예약 실패",
+        tone: "failed"
+      });
+      return result;
+    }
     onSaveStatus({
       lesson: "synced",
       makeupTask: "saved",

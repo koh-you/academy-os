@@ -8453,6 +8453,7 @@ export function App() {
     return {
       lesson: savedLesson,
       makeupTask: savedTask,
+      sourceSaved: true,
       ...notificationResult
     };
   }
