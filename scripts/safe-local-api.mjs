@@ -3,6 +3,7 @@ import {
   areLessonJournalHistoryHomeworksEqual,
   areLessonJournalHistoryLessonsEqual
 } from "../src/domains/lessons/lessonJournalHistoryPersistence.js";
+import { areLessonJournalRecordsEqual } from "../src/domains/lessons/lessonJournalRowsPersistence.js";
 
 const host = "127.0.0.1";
 const port = Number(process.env.ACADEMY_SAFE_API_PORT || 8787);
@@ -787,6 +788,53 @@ function handleMutation(pathname, payload) {
       verified: true
     };
   }
+  if (pathname === "/api/lesson-journal/rows/save") {
+    const { auditId, homeworkChanges = [], recordChanges = [] } = payload;
+    const conflict = (error) => ({ code: "LESSON_JOURNAL_ROWS_CONFLICT", error, ok: false, statusCode: 409 });
+    const homeworkPreflight = homeworkChanges.map(({ after, before }) => {
+      const current = state.homeworks.find((homework) => homework.homeworkId === after.homeworkId) ?? null;
+      if (current && areLessonJournalHistoryHomeworksEqual(after, current)) return { after, current, unchanged: true };
+      if (
+        (!before && current) ||
+        (before && (!current || current.updatedAt !== before.updatedAt || !areLessonJournalHistoryHomeworksEqual(before, current)))
+      ) return null;
+      return { after, current, unchanged: false };
+    });
+    if (homeworkPreflight.some((entry) => !entry)) return conflict("숙제 원본이 다른 화면에서 먼저 변경되었습니다.");
+    const recordPreflight = recordChanges.map(({ after, before }) => {
+      const current = state.records.find((record) => (
+        record.lessonId === after.lessonId && record.studentId === after.studentId
+      )) ?? null;
+      if (current && areLessonJournalRecordsEqual(after, current)) return { after, current, unchanged: true };
+      if (
+        (!before && current) ||
+        (before && (!current || current.updatedAt !== before.updatedAt || !areLessonJournalRecordsEqual(before, current)))
+      ) return null;
+      return { after, current, unchanged: false };
+    });
+    if (recordPreflight.some((entry) => !entry)) return conflict("수업기록 원본이 다른 화면에서 먼저 변경되었습니다.");
+    const homeworks = homeworkPreflight.map(({ after, current, unchanged }) => {
+      if (unchanged) return current;
+      const saved = {
+        ...after,
+        updatedAt: new Date(Math.max(Date.now(), new Date(current?.updatedAt || 0).getTime() + 1)).toISOString()
+      };
+      state.homeworks = upsertById(state.homeworks, saved, ["homeworkId"]);
+      return saved;
+    });
+    const records = recordPreflight.map(({ after, current, unchanged }) => {
+      if (unchanged) return current;
+      const saved = {
+        ...current,
+        ...after,
+        lessonStudentRecordId: current?.lessonStudentRecordId || after.lessonStudentRecordId,
+        updatedAt: new Date(Math.max(Date.now(), new Date(current?.updatedAt || 0).getTime() + 1)).toISOString()
+      };
+      state.records = upsertById(state.records, saved, ["lessonStudentRecordId"]);
+      return saved;
+    });
+    return { auditId, homeworks, ok: true, records, verified: true };
+  }
   if (pathname === "/api/lessons") {
     const lesson = payload.lesson || {};
     state.lessons = upsertById(state.lessons, lesson, ["lessonId", "id"]);
@@ -839,7 +887,7 @@ const server = http.createServer(async (request, response) => {
       state = createInitialState();
       return sendJson(response, 200, { ok: true, safeFixture: true });
     }
-    if (["/api/app-state", "/api/lesson-records/bulk", "/api/school-events", "/api/school-calendar/derived-save"].includes(requestUrl.pathname)) {
+    if (["/api/app-state", "/api/lesson-records/bulk", "/api/lesson-journal/rows/save", "/api/school-events", "/api/school-calendar/derived-save"].includes(requestUrl.pathname)) {
       await new Promise((resolve) => setTimeout(resolve, 800));
     }
     const { statusCode = 200, ...result } = handleMutation(requestUrl.pathname, payload);

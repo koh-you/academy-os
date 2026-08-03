@@ -210,10 +210,9 @@ for (const binding of [
   assert.ok(saveSource.includes(binding), `missing persistence plan binding: ${binding}`);
 }
 for (const retainedSideEffect of [
-  "saveLessonJournalHomeworksWithVerification(",
+  "saveLessonJournalRowsAction({",
   "saveLessonJournalMakeupTasksWithVerification(",
-  "saveLessonJournalRecordsWithVerification({",
-  "request: postJson",
+  "request: postJsonWithTimeout",
   "setHomeworks(nextHomeworks)",
   "setMakeupTasks(",
   "setRecords(nextRecords)"

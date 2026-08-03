@@ -822,7 +822,7 @@ test("lesson hub top reminders can collapse and expand without runtime errors", 
   expect(pageErrors).toEqual([]);
 });
 
-test("lesson journal carries the latest non-empty record across a month boundary", async ({ page }) => {
+test("lesson journal keeps an in-flight edit and verifies the retried record from the safe source", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);
 
@@ -848,6 +848,47 @@ test("lesson journal carries the latest non-empty record across a month boundary
   await saveButton.click();
   await expect(saveBar).toContainText("저장 완료");
   await expect(lessonJournal.getByRole("button", { name: "8월 후속 수정 B" })).toBeVisible();
+  const savedRecords = (await (await request.get(`${safeApiBaseUrl}/api/lesson-records`)).json()).records;
+  expect(savedRecords.find((record) => record.lessonId === "safe-cross-month-current-lesson")?.lessonMaterial)
+    .toBe("8월 후속 수정 B");
+  expect(pageErrors).toEqual([]);
+});
+
+test("lesson journal keeps drafts after a version conflict and saves them on a verified retry", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  let conflictOnce = true;
+  await page.route("**/api/lesson-journal/rows/save", async (route) => {
+    if (conflictOnce) {
+      conflictOnce = false;
+      await route.fulfill({
+        contentType: "application/json",
+        json: { code: "LESSON_JOURNAL_ROWS_CONFLICT", error: "다른 화면에서 먼저 변경되었습니다.", ok: false },
+        status: 409
+      });
+      return;
+    }
+    await route.continue();
+  });
+  await loginAsTeacher(page);
+  const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
+  await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
+
+  const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
+  await lessonJournal.getByRole("button", { name: "수정 시작" }).click();
+  const materialDraft = lessonJournal.getByRole("textbox", { name: "월경계 학생 강의 교재" });
+  await materialDraft.fill("충돌 뒤 보존할 수정본");
+  const saveBar = lessonJournal.getByRole("complementary", { name: "수업일지 하단 고정 저장 바" });
+  const saveButton = saveBar.getByRole("button", { name: "변경 저장" });
+  await saveButton.click();
+  await expect(saveBar).toContainText("저장 실패");
+  await expect(materialDraft).toHaveValue("충돌 뒤 보존할 수정본");
+  await expect(saveButton).toBeEnabled();
+
+  await saveButton.click();
+  await expect(saveBar).toContainText("저장 완료");
+  const savedRecords = (await (await request.get(`${safeApiBaseUrl}/api/lesson-records`)).json()).records;
+  expect(savedRecords.find((record) => record.lessonId === "safe-cross-month-current-lesson")?.lessonMaterial)
+    .toBe("충돌 뒤 보존할 수정본");
   expect(pageErrors).toEqual([]);
 });
 

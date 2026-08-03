@@ -199,6 +199,14 @@ const homeworkBulkApiSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalHomeworkBulkApi.js", import.meta.url),
   "utf8"
 );
+const rowsSaveActionSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalRowsSaveAction.js", import.meta.url),
+  "utf8"
+);
+const rowsPersistenceSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalRowsPersistence.js", import.meta.url),
+  "utf8"
+);
 const makeupTaskRequestSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalMakeupTaskRequest.js", import.meta.url),
   "utf8"
@@ -321,13 +329,13 @@ const saveHandlerSource = section(
   "async function handleSaveLessonJournalDrafts",
   "async function handleSaveRecord"
 );
-const savePersistenceSource = `${saveHandlerSource}\n${draftSaveOutcomeSource}\n${draftPersistenceControllerSource}\n${recordBulkApiSource}\n${homeworkBulkApiSource}\n${makeupTaskRequestSource}\n${makeupTaskBulkApiSource}\n${draftPersistenceStateSource}`;
+const savePersistenceSource = `${saveHandlerSource}\n${draftSaveOutcomeSource}\n${draftPersistenceControllerSource}\n${rowsSaveActionSource}\n${rowsPersistenceSource}\n${recordBulkApiSource}\n${homeworkBulkApiSource}\n${makeupTaskRequestSource}\n${makeupTaskBulkApiSource}\n${draftPersistenceStateSource}`;
 for (const persistenceContract of [
-  "saveLessonJournalHomeworksWithVerification",
+  "saveLessonJournalRowsAction",
   "saveLessonJournalMakeupTasksWithVerification",
-  'request("/api/lesson-records/bulk"',
-  'result.source !== "supabase"',
-  "hasMatchingVerifiedLessonRecordFields",
+  '"/api/lesson-journal/rows/save"',
+  "verifyLessonJournalRowsSavePlan",
+  "currentRecords",
   "completedSources.push",
   "부분 저장",
   "setSaveStates"
@@ -997,10 +1005,9 @@ assert.ok(
 );
 for (const extractedDraftPersistenceControllerContract of [
   "executeLessonJournalDraftPersistence",
-  "await persistHomeworks()",
+  "await persistJournalRows()",
   "await persistMakeupTasks()",
-  "await persistRecords()",
-  "onFailure?.(error)"
+  "onFailure?.(error, { journalRowsCompleted })"
 ]) {
   assert.ok(
     draftPersistenceControllerSource.includes(extractedDraftPersistenceControllerContract),
@@ -1009,10 +1016,9 @@ for (const extractedDraftPersistenceControllerContract of [
 }
 for (const injectedDraftPersistenceContract of [
   "executeLessonJournalDraftPersistence({",
-  "persistHomeworks: async () =>",
+  "persistJournalRows: async () =>",
   "persistMakeupTasks: async () =>",
-  "persistRecords: async () =>",
-  "onFailure: (error) =>"
+  "onFailure: (error, { journalRowsCompleted } = {}) =>"
 ]) {
   assert.ok(
     saveHandlerSource.includes(injectedDraftPersistenceContract),
@@ -1020,8 +1026,8 @@ for (const injectedDraftPersistenceContract of [
   );
 }
 assert.ok(
-  !draftPersistenceControllerSource.includes('postJson("/api/lesson-records/bulk"'),
-  "persistence controller must not own the lesson record API"
+  !draftPersistenceControllerSource.includes("/api/lesson-journal/rows/save"),
+  "persistence controller must not own the lesson rows API"
 );
 for (const extractedRecordBulkApiContract of [
   "saveLessonJournalRecordsWithVerification",
@@ -1036,10 +1042,10 @@ for (const extractedRecordBulkApiContract of [
   );
 }
 for (const injectedRecordBulkApiContract of [
-  "saveLessonJournalRecordsWithVerification({",
-  "records: recordsToSave",
-  "request: postJson",
-  "matchesRecord: hasMatchingVerifiedLessonRecordFields",
+  "saveLessonJournalRowsAction({",
+  "recordsToSave,",
+  "currentRecords: recordsRef.current",
+  "request: postJsonWithTimeout",
   "recordsRef.current = nextRecords",
   "writeStorageValue(window.localStorage"
 ]) {
@@ -1067,9 +1073,10 @@ for (const extractedHomeworkBulkApiContract of [
   );
 }
 for (const injectedHomeworkBulkApiContract of [
-  "saveLessonJournalHomeworksWithVerification({",
-  "homeworks: persistencePlan.changedHomeworks",
-  "request: postJson",
+  "saveLessonJournalRowsAction({",
+  "changedHomeworks: persistencePlan.changedHomeworks",
+  "currentHomeworks: homeworksRef.current",
+  "request: postJsonWithTimeout",
   "homeworksRef.current = nextHomeworks",
   "setHomeworks(nextHomeworks)"
 ]) {

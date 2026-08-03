@@ -10,29 +10,27 @@ function createStageHarness({
 } = {}) {
   const events = [];
   let capturedError = null;
+  let capturedFailureContext = null;
 
   return {
     events,
     getCapturedError: () => capturedError,
+    getCapturedFailureContext: () => capturedFailureContext,
     dependencies: {
-      persistHomeworks: async () => {
-        events.push("homeworks");
-        if (failAt === "homeworks") throw new Error("숙제 TARGET 실패");
-        return homeworkCount;
+      persistJournalRows: async () => {
+        events.push("journalRows");
+        if (failAt === "journalRows") throw new Error("기록·숙제 TARGET 실패");
+        return { homeworkCount, recordCount };
       },
       persistMakeupTasks: async () => {
         events.push("makeupTasks");
         if (failAt === "makeupTasks") throw new Error("등원보충 TARGET 실패");
         return makeupTaskCount;
       },
-      persistRecords: async () => {
-        events.push("records");
-        if (failAt === "records") throw new Error("수업기록 TARGET 실패");
-        return recordCount;
-      },
-      onFailure: (error) => {
+      onFailure: (error, context) => {
         events.push("failure");
         capturedError = error;
+        capturedFailureContext = context;
       }
     }
   };
@@ -41,25 +39,23 @@ function createStageHarness({
 const successHarness = createStageHarness();
 assert.deepEqual(
   await executeLessonJournalDraftPersistence({
-    hasRecords: true,
     ...successHarness.dependencies
   }),
   {
     ok: true,
-    message: "수업일지 · 저장 완료 · 숙제 2건 · 등원보충 1건 · 수업기록 3건"
+    message: "수업일지 · 저장 완료 · 숙제 2건 · 수업기록 3건 · 등원보충 1건"
   }
 );
-assert.deepEqual(successHarness.events, ["homeworks", "makeupTasks", "records"]);
+assert.deepEqual(successHarness.events, ["journalRows", "makeupTasks"]);
 assert.equal(successHarness.getCapturedError(), null);
 
 const emptyControlHarness = createStageHarness({
   homeworkCount: 0,
   makeupTaskCount: 0,
-  recordCount: 99
+  recordCount: 0
 });
 assert.deepEqual(
   await executeLessonJournalDraftPersistence({
-    hasRecords: false,
     ...emptyControlHarness.dependencies
   }),
   {
@@ -67,55 +63,42 @@ assert.deepEqual(
     message: "수업일지 · 저장 완료 · 변경 없음"
   }
 );
-assert.deepEqual(emptyControlHarness.events, ["homeworks", "makeupTasks"]);
+assert.deepEqual(emptyControlHarness.events, ["journalRows", "makeupTasks"]);
 
-const homeworkFailureHarness = createStageHarness({ failAt: "homeworks" });
+const homeworkFailureHarness = createStageHarness({ failAt: "journalRows" });
 assert.deepEqual(
   await executeLessonJournalDraftPersistence({
-    hasRecords: true,
     ...homeworkFailureHarness.dependencies
   }),
   {
     ok: false,
-    message: "수업일지 · 저장 실패 · 숙제 TARGET 실패"
+    message: "수업일지 · 저장 실패 · 기록·숙제 TARGET 실패"
   }
 );
-assert.deepEqual(homeworkFailureHarness.events, ["homeworks", "failure"]);
-assert.equal(homeworkFailureHarness.getCapturedError()?.message, "숙제 TARGET 실패");
+assert.deepEqual(homeworkFailureHarness.events, ["journalRows", "failure"]);
+assert.equal(homeworkFailureHarness.getCapturedError()?.message, "기록·숙제 TARGET 실패");
+assert.deepEqual(homeworkFailureHarness.getCapturedFailureContext(), { journalRowsCompleted: false });
 
 const makeupFailureHarness = createStageHarness({ failAt: "makeupTasks" });
 assert.deepEqual(
   await executeLessonJournalDraftPersistence({
-    hasRecords: true,
     ...makeupFailureHarness.dependencies
   }),
   {
     ok: false,
-    message: "수업일지 · 부분 저장 · 숙제 2건 · 저장 실패 · 등원보충 TARGET 실패"
+    message: "수업일지 · 부분 저장 · 숙제 2건 · 수업기록 3건 · 저장 실패 · 등원보충 TARGET 실패"
   }
 );
-assert.deepEqual(makeupFailureHarness.events, ["homeworks", "makeupTasks", "failure"]);
-
-const recordFailureHarness = createStageHarness({ failAt: "records" });
-assert.deepEqual(
-  await executeLessonJournalDraftPersistence({
-    hasRecords: true,
-    ...recordFailureHarness.dependencies
-  }),
-  {
-    ok: false,
-    message: "수업일지 · 부분 저장 · 숙제 2건 · 등원보충 1건 · 저장 실패 · 수업기록 TARGET 실패"
-  }
-);
-assert.deepEqual(recordFailureHarness.events, ["homeworks", "makeupTasks", "records", "failure"]);
+assert.deepEqual(makeupFailureHarness.events, ["journalRows", "makeupTasks", "failure"]);
+assert.deepEqual(makeupFailureHarness.getCapturedFailureContext(), { journalRowsCompleted: true });
 
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
 const controllerSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalDraftPersistenceController.js", import.meta.url),
   "utf8"
 );
-const recordApiSource = await readFile(
-  new URL("../src/domains/lessons/lessonJournalRecordBulkApi.js", import.meta.url),
+const rowsActionSource = await readFile(
+  new URL("../src/domains/lessons/lessonJournalRowsSaveAction.js", import.meta.url),
   "utf8"
 );
 const handlerStart = appSource.indexOf("async function handleSaveLessonJournalDrafts(");
@@ -124,28 +107,21 @@ const handlerSource = appSource.slice(handlerStart, handlerEnd);
 
 for (const injectedBoundary of [
   "executeLessonJournalDraftPersistence({",
-  "persistHomeworks: async () =>",
+  "persistJournalRows: async () =>",
   "persistMakeupTasks: async () =>",
-  "persistRecords: async () =>",
-  "onFailure: (error) =>"
+  "onFailure: (error, { journalRowsCompleted } = {}) =>"
 ]) {
   assert.ok(handlerSource.includes(injectedBoundary), `missing App persistence injection: ${injectedBoundary}`);
 }
 assert.ok(
-  controllerSource.indexOf("await persistHomeworks()") <
+  controllerSource.indexOf("await persistJournalRows()") <
     controllerSource.indexOf("await persistMakeupTasks()"),
-  "controller must persist homeworks before makeup tasks"
-);
-assert.ok(
-  controllerSource.indexOf("await persistMakeupTasks()") <
-    controllerSource.indexOf("await persistRecords()"),
-  "controller must persist makeup tasks before records"
+  "controller must persist the atomic record/homework plan before makeup tasks"
 );
 for (const appOwnedSideEffect of [
-  "saveLessonJournalHomeworksWithVerification(",
+  "saveLessonJournalRowsAction({",
   "saveLessonJournalMakeupTasksWithVerification(",
-  "saveLessonJournalRecordsWithVerification({",
-  "request: postJson",
+  "request: postJsonWithTimeout",
   "homeworksRef.current = nextHomeworks",
   "recordsRef.current = nextRecords",
   "setSaveStates("
@@ -154,8 +130,8 @@ for (const appOwnedSideEffect of [
   assert.ok(!controllerSource.includes(appOwnedSideEffect), `controller must not own App side effect: ${appOwnedSideEffect}`);
 }
 assert.ok(
-  recordApiSource.includes('request("/api/lesson-records/bulk", { records })'),
-  "injected record API adapter must retain the bulk route"
+  rowsActionSource.includes('"/api/lesson-journal/rows/save"'),
+  "dynamic row save action must retain the atomic endpoint"
 );
 
 console.log("lesson journal persistence controller TARGET/CONTROL fixtures passed");

@@ -1,18 +1,21 @@
 import { createLessonJournalDraftSaveOutcome } from "./lessonJournalDraftSaveOutcome.js";
 
 export async function executeLessonJournalDraftPersistence({
-  hasRecords = false,
-  persistHomeworks,
+  persistJournalRows,
   persistMakeupTasks,
-  persistRecords,
   onFailure
 } = {}) {
   const completedSources = [];
+  let journalRowsCompleted = false;
 
   try {
-    const homeworkCount = await persistHomeworks();
+    const { homeworkCount = 0, recordCount = 0 } = await persistJournalRows();
+    journalRowsCompleted = true;
     if (homeworkCount) {
       completedSources.push(`숙제 ${homeworkCount}건`);
+    }
+    if (recordCount) {
+      completedSources.push(`수업기록 ${recordCount}건`);
     }
 
     const makeupTaskCount = await persistMakeupTasks();
@@ -20,14 +23,9 @@ export async function executeLessonJournalDraftPersistence({
       completedSources.push(`등원보충 ${makeupTaskCount}건`);
     }
 
-    if (hasRecords) {
-      const recordCount = await persistRecords();
-      completedSources.push(`수업기록 ${recordCount}건`);
-    }
-
     return createLessonJournalDraftSaveOutcome({ completedSources });
   } catch (error) {
-    onFailure?.(error);
+    onFailure?.(error, { journalRowsCompleted });
     return createLessonJournalDraftSaveOutcome({
       completedSources,
       error

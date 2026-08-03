@@ -63,6 +63,10 @@ import {
   areLessonJournalHistoryTimestampsEqual,
   verifyLessonJournalHistoryPlan
 } from "../../src/domains/lessons/lessonJournalHistoryPersistence.js";
+import {
+  areLessonJournalRecordsEqual,
+  verifyLessonJournalRowsSavePlan
+} from "../../src/domains/lessons/lessonJournalRowsPersistence.js";
 import { deleteRows, getSupabaseStatus, insertRows, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
 
 const fallbackSource = "local_sample";
@@ -3211,6 +3215,390 @@ export async function saveLessonJournalHistoryPlan({
     homeworks: persistedHomeworks,
     lesson: persistedLesson,
     ...(relatedHomeworks ? { relatedHomeworks, relatedRecords } : {}),
+    source: databaseSource,
+    verified: true
+  };
+}
+
+function createLessonJournalRowsConflict(message, details = {}) {
+  const error = new Error(message);
+  Object.assign(error, details, { code: "LESSON_JOURNAL_ROWS_CONFLICT", statusCode: 409 });
+  return error;
+}
+
+async function getLessonJournalRecordForRowsSave(lessonId, studentId) {
+  const rows = await listRows(
+    "lesson_student_records",
+    `select=*&lesson_id=eq.${encodeURIComponent(lessonId)}&student_id=eq.${encodeURIComponent(studentId)}&limit=1`,
+    { requireServiceRole: true }
+  );
+  return rows[0] ? fromLessonRecordRow(rows[0]) : null;
+}
+
+function validateLessonJournalRowsPlan({ homeworkChanges = [], recordChanges = [] } = {}) {
+  if (!Array.isArray(homeworkChanges) || !Array.isArray(recordChanges)) {
+    throw createLessonJournalRowsConflict("수업기록·숙제 저장 계획 형식이 올바르지 않습니다.");
+  }
+  const homeworkIds = new Set();
+  for (const change of homeworkChanges) {
+    const after = change?.after;
+    if (!after?.homeworkId || !after?.studentId || !after?.lessonId) {
+      throw createLessonJournalRowsConflict("저장할 숙제의 ID·수업·학생 원천이 필요합니다.");
+    }
+    if (change.before && change.before.homeworkId !== after.homeworkId) {
+      throw createLessonJournalRowsConflict("숙제 저장 계획의 이전·이후 ID가 일치하지 않습니다.");
+    }
+    if (homeworkIds.has(after.homeworkId)) {
+      throw createLessonJournalRowsConflict(`중복된 숙제 저장 계획입니다: ${after.homeworkId}`);
+    }
+    homeworkIds.add(after.homeworkId);
+  }
+  const recordIds = new Set();
+  for (const change of recordChanges) {
+    const after = change?.after;
+    if (!after?.lessonStudentRecordId || !after?.lessonId || !after?.studentId) {
+      throw createLessonJournalRowsConflict("저장할 수업기록의 ID·수업·학생 원천이 필요합니다.");
+    }
+    const identity = `${after.lessonId}::${after.studentId}`;
+    if (
+      change.before &&
+      (change.before.lessonId !== after.lessonId || change.before.studentId !== after.studentId)
+    ) {
+      throw createLessonJournalRowsConflict("수업기록 저장 계획의 이전·이후 대상이 일치하지 않습니다.");
+    }
+    if (recordIds.has(identity)) {
+      throw createLessonJournalRowsConflict(`중복된 수업기록 저장 계획입니다: ${identity}`);
+    }
+    recordIds.add(identity);
+  }
+}
+
+async function persistLessonJournalRowsHomeworkChange(change = {}) {
+  const after = change.after;
+  const before = change.before ?? null;
+  const homeworkId = after.homeworkId;
+  const current = await getLessonJournalHistoryHomework(homeworkId);
+  if (current && areLessonJournalHistoryHomeworksEqual(after, current)) {
+    return { homework: current, mutated: false, operation: "unchanged" };
+  }
+  if (!before) {
+    if (current) {
+      throw createLessonJournalRowsConflict("숙제가 다른 화면에서 먼저 생성되었습니다.", { currentHomework: current, homeworkId });
+    }
+    const nextUpdatedAt = createNextRosterUpdatedAt();
+    let savedRows;
+    try {
+      savedRows = await insertRows("homeworks", [{ ...toHomeworkRow(after), updated_at: nextUpdatedAt }]);
+    } catch (error) {
+      const recovered = await getLessonJournalHistoryHomework(homeworkId);
+      if (recovered && areLessonJournalHistoryHomeworksEqual(after, recovered)) {
+        return {
+          homework: recovered,
+          mutated: areLessonJournalHistoryTimestampsEqual(nextUpdatedAt, recovered.updatedAt),
+          operation: "create"
+        };
+      }
+      throw createLessonJournalRowsConflict("숙제 신규 저장이 다른 화면과 충돌했습니다.", {
+        cause: error,
+        currentHomework: recovered,
+        homeworkId
+      });
+    }
+    const verified = await getLessonJournalHistoryHomework(homeworkId);
+    if (
+      savedRows.length !== 1 ||
+      !verified ||
+      !areLessonJournalHistoryHomeworksEqual(after, verified) ||
+      !areLessonJournalHistoryTimestampsEqual(nextUpdatedAt, verified.updatedAt)
+    ) {
+      const error = createLessonJournalRowsConflict("숙제 저장 후 Supabase 재조회가 일치하지 않습니다.", { homeworkId });
+      error.appliedResult = {
+        homework: verified ?? (savedRows[0] ? fromHomeworkRow(savedRows[0]) : { ...after, updatedAt: nextUpdatedAt }),
+        mutated: true,
+        operation: "create"
+      };
+      throw error;
+    }
+    return { homework: verified, mutated: true, operation: "create" };
+  }
+  if (
+    !current ||
+    !before.updatedAt ||
+    !areLessonJournalHistoryTimestampsEqual(current.updatedAt, before.updatedAt) ||
+    !areLessonJournalHistoryHomeworksEqual(before, current)
+  ) {
+    throw createLessonJournalRowsConflict("숙제 원본이 다른 화면에서 먼저 변경되었습니다.", { currentHomework: current, homeworkId });
+  }
+  const nextUpdatedAt = createNextRosterUpdatedAt(current.updatedAt);
+  let savedRows;
+  try {
+    savedRows = await patchRows(
+      "homeworks",
+      `homework_id=eq.${encodeURIComponent(homeworkId)}&updated_at=eq.${encodeURIComponent(current.updatedAt)}`,
+      { ...toHomeworkRow(after), updated_at: nextUpdatedAt }
+    );
+  } catch (error) {
+    const recovered = await getLessonJournalHistoryHomework(homeworkId);
+    if (recovered && areLessonJournalHistoryHomeworksEqual(after, recovered)) {
+      return {
+        beforeHomework: current,
+        homework: recovered,
+        mutated: areLessonJournalHistoryTimestampsEqual(nextUpdatedAt, recovered.updatedAt),
+        operation: "update"
+      };
+    }
+    throw error;
+  }
+  if (savedRows.length !== 1) {
+    throw createLessonJournalRowsConflict("숙제 저장 직전에 서버 버전이 변경되었습니다.", {
+      currentHomework: await getLessonJournalHistoryHomework(homeworkId),
+      homeworkId
+    });
+  }
+  const verified = await getLessonJournalHistoryHomework(homeworkId);
+  if (
+    !verified ||
+    !areLessonJournalHistoryHomeworksEqual(after, verified) ||
+    !areLessonJournalHistoryTimestampsEqual(nextUpdatedAt, verified.updatedAt)
+  ) {
+    const error = createLessonJournalRowsConflict("숙제 저장 후 Supabase 재조회가 일치하지 않습니다.", { homeworkId });
+    error.appliedResult = { beforeHomework: current, homework: verified ?? fromHomeworkRow(savedRows[0]), mutated: true, operation: "update" };
+    throw error;
+  }
+  return { beforeHomework: current, homework: verified, mutated: true, operation: "update" };
+}
+
+async function persistLessonJournalRowsRecordChange(change = {}) {
+  const after = change.after;
+  const before = change.before ?? null;
+  const { lessonId, studentId } = after;
+  await assertLessonStudentRecordBelongsToLesson(lessonId, studentId);
+  const current = await getLessonJournalRecordForRowsSave(lessonId, studentId);
+  const stableAfter = current
+    ? { ...after, lessonStudentRecordId: current.lessonStudentRecordId }
+    : after;
+  const attendanceStableRecord = mergeExistingAttendanceForNonAttendanceSave(stableAfter, current);
+  const effectiveAfter = mergeExistingHomeworkFollowupForSave(attendanceStableRecord, current);
+  if (current && areLessonJournalRecordsEqual(effectiveAfter, current)) {
+    return { record: current, mutated: false, operation: "unchanged" };
+  }
+  if (!before) {
+    if (current) {
+      throw createLessonJournalRowsConflict("수업기록이 다른 화면에서 먼저 생성되었습니다.", { currentRecord: current, lessonId, studentId });
+    }
+    const nextUpdatedAt = createNextRosterUpdatedAt();
+    let savedRows;
+    try {
+      savedRows = await insertRows("lesson_student_records", [{ ...toLessonRecordRow(effectiveAfter), updated_at: nextUpdatedAt }]);
+    } catch (error) {
+      const recovered = await getLessonJournalRecordForRowsSave(lessonId, studentId);
+      if (recovered && areLessonJournalRecordsEqual(effectiveAfter, recovered)) {
+        return {
+          record: recovered,
+          mutated: areLessonJournalHistoryTimestampsEqual(nextUpdatedAt, recovered.updatedAt),
+          operation: "create"
+        };
+      }
+      throw createLessonJournalRowsConflict("수업기록 신규 저장이 다른 화면과 충돌했습니다.", {
+        cause: error,
+        currentRecord: recovered,
+        lessonId,
+        studentId
+      });
+    }
+    const verified = await getLessonJournalRecordForRowsSave(lessonId, studentId);
+    if (
+      savedRows.length !== 1 ||
+      !verified ||
+      !areLessonJournalRecordsEqual(effectiveAfter, verified) ||
+      !areLessonJournalHistoryTimestampsEqual(nextUpdatedAt, verified.updatedAt)
+    ) {
+      const error = createLessonJournalRowsConflict("수업기록 저장 후 Supabase 재조회가 일치하지 않습니다.", { lessonId, studentId });
+      error.appliedResult = {
+        record: verified ?? (savedRows[0] ? fromLessonRecordRow(savedRows[0]) : { ...effectiveAfter, updatedAt: nextUpdatedAt }),
+        mutated: true,
+        operation: "create"
+      };
+      throw error;
+    }
+    return { record: verified, mutated: true, operation: "create" };
+  }
+  if (
+    !current ||
+    !before.updatedAt ||
+    !areLessonJournalHistoryTimestampsEqual(current.updatedAt, before.updatedAt) ||
+    !areLessonJournalRecordsEqual(before, current)
+  ) {
+    throw createLessonJournalRowsConflict("수업기록 원본이 다른 화면에서 먼저 변경되었습니다.", { currentRecord: current, lessonId, studentId });
+  }
+  const nextUpdatedAt = createNextRosterUpdatedAt(current.updatedAt);
+  const versionFilter = `lesson_id=eq.${encodeURIComponent(lessonId)}&student_id=eq.${encodeURIComponent(studentId)}&updated_at=eq.${encodeURIComponent(current.updatedAt)}`;
+  let savedRows;
+  try {
+    savedRows = await patchRows(
+      "lesson_student_records",
+      versionFilter,
+      { ...toLessonRecordRow(effectiveAfter), updated_at: nextUpdatedAt }
+    );
+  } catch (error) {
+    const recovered = await getLessonJournalRecordForRowsSave(lessonId, studentId);
+    if (recovered && areLessonJournalRecordsEqual(effectiveAfter, recovered)) {
+      return {
+        beforeRecord: current,
+        record: recovered,
+        mutated: areLessonJournalHistoryTimestampsEqual(nextUpdatedAt, recovered.updatedAt),
+        operation: "update"
+      };
+    }
+    throw error;
+  }
+  if (savedRows.length !== 1) {
+    throw createLessonJournalRowsConflict("수업기록 저장 직전에 서버 버전이 변경되었습니다.", {
+      currentRecord: await getLessonJournalRecordForRowsSave(lessonId, studentId),
+      lessonId,
+      studentId
+    });
+  }
+  const verified = await getLessonJournalRecordForRowsSave(lessonId, studentId);
+  if (
+    !verified ||
+    !areLessonJournalRecordsEqual(effectiveAfter, verified) ||
+    !areLessonJournalHistoryTimestampsEqual(nextUpdatedAt, verified.updatedAt)
+  ) {
+    const error = createLessonJournalRowsConflict("수업기록 저장 후 Supabase 재조회가 일치하지 않습니다.", { lessonId, studentId });
+    error.appliedResult = { beforeRecord: current, record: verified ?? fromLessonRecordRow(savedRows[0]), mutated: true, operation: "update" };
+    throw error;
+  }
+  return { beforeRecord: current, record: verified, mutated: true, operation: "update" };
+}
+
+async function rollbackLessonJournalRowsHomework(entry) {
+  const homeworkId = entry.change.after.homeworkId;
+  if (!entry.mutated) return { homeworkId, verified: true };
+  if (entry.operation === "create") {
+    const deletedRows = await deleteRows(
+      "homeworks",
+      `homework_id=eq.${encodeURIComponent(homeworkId)}&updated_at=eq.${encodeURIComponent(entry.homework.updatedAt)}`
+    );
+    return { homeworkId, verified: deletedRows.length === 1 && !(await getLessonJournalHistoryHomework(homeworkId)) };
+  }
+  const rollbackRows = await patchRows(
+    "homeworks",
+    `homework_id=eq.${encodeURIComponent(homeworkId)}&updated_at=eq.${encodeURIComponent(entry.homework.updatedAt)}`,
+    { ...toHomeworkRow(entry.beforeHomework), updated_at: entry.beforeHomework.updatedAt }
+  );
+  const restored = await getLessonJournalHistoryHomework(homeworkId);
+  return {
+    homeworkId,
+    verified: rollbackRows.length === 1 &&
+      areLessonJournalHistoryHomeworksEqual(entry.beforeHomework, restored ?? {}) &&
+      areLessonJournalHistoryTimestampsEqual(entry.beforeHomework.updatedAt, restored?.updatedAt)
+  };
+}
+
+async function rollbackLessonJournalRowsRecord(entry) {
+  const { lessonId, studentId } = entry.change.after;
+  if (!entry.mutated) return { lessonId, studentId, verified: true };
+  const versionFilter = `lesson_id=eq.${encodeURIComponent(lessonId)}&student_id=eq.${encodeURIComponent(studentId)}&updated_at=eq.${encodeURIComponent(entry.record.updatedAt)}`;
+  if (entry.operation === "create") {
+    const deletedRows = await deleteRows("lesson_student_records", versionFilter);
+    return {
+      lessonId,
+      studentId,
+      verified: deletedRows.length === 1 && !(await getLessonJournalRecordForRowsSave(lessonId, studentId))
+    };
+  }
+  const rollbackRows = await patchRows(
+    "lesson_student_records",
+    versionFilter,
+    { ...toLessonRecordRow(entry.beforeRecord), updated_at: entry.beforeRecord.updatedAt }
+  );
+  const restored = await getLessonJournalRecordForRowsSave(lessonId, studentId);
+  return {
+    lessonId,
+    studentId,
+    verified: rollbackRows.length === 1 &&
+      areLessonJournalRecordsEqual(entry.beforeRecord, restored ?? {}) &&
+      areLessonJournalHistoryTimestampsEqual(entry.beforeRecord.updatedAt, restored?.updatedAt)
+  };
+}
+
+export async function saveLessonJournalRowsPlan({
+  auditId = "",
+  homeworkChanges = [],
+  recordChanges = []
+} = {}) {
+  const normalizedAuditId = String(auditId || "").trim();
+  if (!normalizedAuditId) throw new Error("수업기록·숙제 저장 audit ID가 필요합니다.");
+  validateLessonJournalRowsPlan({ homeworkChanges, recordChanges });
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { auditId: normalizedAuditId, homeworks: [], records: [], source: fallbackSource, verified: false };
+  }
+
+  const appliedHomeworks = [];
+  const appliedRecords = [];
+  let failedStage = "homeworks";
+  try {
+    for (const change of homeworkChanges) {
+      try {
+        appliedHomeworks.push({ change, ...(await persistLessonJournalRowsHomeworkChange(change)) });
+      } catch (error) {
+        if (error.appliedResult) appliedHomeworks.push({ change, ...error.appliedResult });
+        throw error;
+      }
+    }
+    failedStage = "records";
+    for (const change of recordChanges) {
+      try {
+        appliedRecords.push({ change, ...(await persistLessonJournalRowsRecordChange(change)) });
+      } catch (error) {
+        if (error.appliedResult) appliedRecords.push({ change, ...error.appliedResult });
+        throw error;
+      }
+    }
+  } catch (error) {
+    const rollbackResults = [];
+    const rollbackErrors = [];
+    for (const entry of [...appliedRecords].reverse()) {
+      try {
+        rollbackResults.push({ kind: "record", ...(await rollbackLessonJournalRowsRecord(entry)) });
+      } catch (rollbackError) {
+        rollbackErrors.push({ id: entry.change.after?.lessonStudentRecordId, kind: "record", message: rollbackError.message });
+      }
+    }
+    for (const entry of [...appliedHomeworks].reverse()) {
+      try {
+        rollbackResults.push({ kind: "homework", ...(await rollbackLessonJournalRowsHomework(entry)) });
+      } catch (rollbackError) {
+        rollbackErrors.push({ id: entry.change.after?.homeworkId, kind: "homework", message: rollbackError.message });
+      }
+    }
+    const rollbackVerified = rollbackErrors.length === 0 && rollbackResults.every((result) => result.verified);
+    error.statusCode = Number(error.statusCode) || 409;
+    error.code = rollbackVerified ? "LESSON_JOURNAL_ROWS_SAVE_FAILED" : "LESSON_JOURNAL_ROWS_PARTIAL_FAILURE";
+    error.audit = {
+      auditId: normalizedAuditId,
+      failedStage,
+      rollback: { errors: rollbackErrors, results: rollbackResults, verified: rollbackVerified }
+    };
+    throw error;
+  }
+
+  const persistedHomeworks = appliedHomeworks.map((entry) => entry.homework);
+  const persistedRecords = appliedRecords.map((entry) => entry.record);
+  const verification = verifyLessonJournalRowsSavePlan(
+    { homeworkChanges, recordChanges },
+    { homeworks: persistedHomeworks, records: persistedRecords }
+  );
+  if (!verification.verified) {
+    throw createLessonJournalRowsConflict("수업기록·숙제 최종 원천 대조가 일치하지 않습니다.", {
+      audit: { auditId: normalizedAuditId, verification }
+    });
+  }
+  return {
+    auditId: normalizedAuditId,
+    homeworks: persistedHomeworks,
+    records: persistedRecords,
     source: databaseSource,
     verified: true
   };
