@@ -375,6 +375,61 @@ test("learning support screens open from their shared deferred chunk without mut
   expect(pageErrors).toEqual([]);
 });
 
+test("teacher homework verification waits for versioned readback and survives reload", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  const requests = [];
+  let releaseSave;
+  const saveGate = new Promise((resolve) => {
+    releaseSave = resolve;
+  });
+  await page.route("**/api/lesson-journal/rows/save", async (route) => {
+    requests.push(route.request().postDataJSON());
+    await saveGate;
+    const response = await route.fetch();
+    await route.fulfill({ response });
+  });
+
+  await loginAsTeacher(page);
+  const navigation = page.getByRole("navigation", { name: "주요 화면" });
+  await navigation.getByRole("button", { name: /숙제현황/ }).click();
+  const statusSelect = page.getByLabel(/안전 교사 확인 숙제 교사 확인 상태/);
+  await expect(statusSelect).toHaveValue("missing");
+
+  await statusSelect.selectOption("partial");
+  await expect.poll(() => requests.length).toBe(1);
+  await expect(statusSelect).toBeDisabled();
+  await expect(statusSelect).toHaveValue("missing");
+  await expect(page.locator(".teacherHomeworkSaveFeedback.saving")).toContainText("저장 중");
+  releaseSave();
+
+  await expect(statusSelect).toBeEnabled();
+  await expect(statusSelect).toHaveValue("partial");
+  await expect(page.locator(".teacherHomeworkSaveFeedback.saved")).toContainText("Supabase 저장 및 재조회 확인 완료");
+  expect(requests[0].homeworkChanges[0].before.teacherStatus).toBe("missing");
+  expect(requests[0].homeworkChanges[0].after.teacherStatus).toBe("partial");
+
+  const sourceResponse = await request.get(`${safeApiBaseUrl}/api/homeworks`);
+  const sourceBody = await sourceResponse.json();
+  expect(sourceBody.homeworks.find((homework) => homework.homeworkId === "safe-teacher-status-homework")?.teacherStatus).toBe("partial");
+
+  await page.reload();
+  await expect(page.getByRole("navigation", { name: "주요 화면" })).toBeVisible();
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /숙제현황/ }).click();
+  const reloadedStatusSelect = page.getByLabel(/안전 교사 확인 숙제 교사 확인 상태/);
+  await expect(reloadedStatusSelect).toHaveValue("partial");
+
+  await page.unroute("**/api/lesson-journal/rows/save");
+  await page.route("**/api/lesson-journal/rows/save", (route) => route.fulfill({
+    contentType: "application/json",
+    json: { code: "LESSON_JOURNAL_ROWS_CONFLICT", error: "다른 화면에서 먼저 변경되었습니다.", ok: false },
+    status: 409
+  }));
+  await reloadedStatusSelect.selectOption("missing");
+  await expect(reloadedStatusSelect).toHaveValue("partial");
+  await expect(page.locator(".teacherHomeworkSaveFeedback.failed")).toContainText("다른 화면에서 먼저 변경되었습니다.");
+  expect(pageErrors).toEqual([]);
+});
+
 test("planning tool screens open from their shared deferred chunk without mutations", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await page.route("**/src/domains/teacher/PlanningToolCenters.jsx*", async (route) => {

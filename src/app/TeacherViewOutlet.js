@@ -147,6 +147,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
         reportSnapshots: models.reportSnapshots,
         scoreRecords: models.scoreRecords,
         students: models.students,
+        teacherHomeworkSaveStates: models.teacherHomeworkSaveStates,
         onTeacherVerifyHomework: actions.handleTeacherVerifyHomework
       }
     },

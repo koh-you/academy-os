@@ -1045,6 +1045,7 @@ export function OverdueHomework({
   reportSnapshots = [],
   scoreRecords = [],
   students,
+  teacherHomeworkSaveStates = {},
   onTeacherVerifyHomework
 }) {
   const {
@@ -1317,31 +1318,41 @@ export function OverdueHomework({
             <div className="emptyHomeworkBox">{activeMetricMeta.emptyHomeworks}</div>
           ) : null}
           <div className="homeworkDetailList">
-            {selectedHomeworks.map((homework) => (
-              <article className="homeworkDetailCard" key={homework.homeworkId}>
-                <div>
-                  <strong>{detailScope === "all" ? `${getHomeworkStudentName(homework)} · ${homework.title}` : homework.title}</strong>
-                  <small>{homework.assignedDate} 배정 · {homework.dueDate || "-"} 마감</small>
-                  <span className="homeworkProgressTrack">
-                    <i style={{ width: homework.studentStatus === "checked_done" ? "100%" : "0%" }} />
-                  </span>
-                  <small>{homework.studentStatus === "checked_done" ? "학생 체크 완료" : "학생 체크 대기"}</small>
-                </div>
-                <div className="homeworkDetailControls">
-                  <select
-                    aria-label={`${getHomeworkStudentName(homework)} ${homework.title} 교사 확인 상태`}
-                    value={homework.teacherStatus ?? "unverified"}
-                    onChange={(event) => onTeacherVerifyHomework(homework.homeworkId, event.target.value)}
-                  >
-                    <option value="unverified">확인 대기</option>
-                    <option value="verified">확인 완료</option>
-                    <option value="partial">일부 완료</option>
-                    <option value="missing">미완료</option>
-                  </select>
-                  <span className="actionHint">{getHomeworkAction(homework)}</span>
-                </div>
-              </article>
-            ))}
+            {selectedHomeworks.map((homework) => {
+              const saveState = teacherHomeworkSaveStates[homework.homeworkId] ?? { message: "", state: "idle" };
+              return (
+                <article className="homeworkDetailCard" key={homework.homeworkId}>
+                  <div>
+                    <strong>{detailScope === "all" ? `${getHomeworkStudentName(homework)} · ${homework.title}` : homework.title}</strong>
+                    <small>{homework.assignedDate} 배정 · {homework.dueDate || "-"} 마감</small>
+                    <span className="homeworkProgressTrack">
+                      <i style={{ width: homework.studentStatus === "checked_done" ? "100%" : "0%" }} />
+                    </span>
+                    <small>{homework.studentStatus === "checked_done" ? "학생 체크 완료" : "학생 체크 대기"}</small>
+                  </div>
+                  <div className="homeworkDetailControls">
+                    <select
+                      aria-label={`${getHomeworkStudentName(homework)} ${homework.title} 교사 확인 상태`}
+                      disabled={saveState.state === "saving"}
+                      value={homework.teacherStatus ?? "unverified"}
+                      onChange={(event) => onTeacherVerifyHomework(homework.homeworkId, event.target.value)}
+                    >
+                      <option value="unverified">확인 대기</option>
+                      <option value="verified">확인 완료</option>
+                      <option value="partial">일부 완료</option>
+                      <option value="missing">미완료</option>
+                    </select>
+                    <span className="actionHint">{getHomeworkAction(homework)}</span>
+                    {saveState.state !== "idle" ? (
+                      <div className={`teacherHomeworkSaveFeedback ${saveState.state}`} aria-live="polite" role="status">
+                        <InlineSaveStatus label="교사 숙제 확인" saveState={saveState.state} />
+                        {saveState.message ? <span>{saveState.message}</span> : null}
+                      </div>
+                    ) : null}
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </section>
       </div>
