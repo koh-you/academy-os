@@ -8,9 +8,9 @@ import {
   versionedWriteRouteContracts
 } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 
-assert.equal(versionedWriteRouteContracts.length, 7);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 7);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 7);
+assert.equal(versionedWriteRouteContracts.length, 8);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 8);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 8);
 assert.equal(versionedWriteRouteContracts.every(Object.isFrozen), true);
 assert.equal(versionedWriteRouteContracts.every(({ request, response, sources }) => (
   Object.isFrozen(request) && Object.isFrozen(response) && Object.isFrozen(sources)
@@ -84,6 +84,33 @@ assert.deepEqual(
     record: { lessonStudentRecordId: "record-1" }
   }
 );
+assert.deepEqual(
+  parseVersionedWriteRequest("POST", "/api/app-state", {
+    expectedUpdatedAt: { aiSettings: null },
+    states: { aiSettings: { model: "safe-fixture" } }
+  }),
+  {
+    expectedUpdatedAt: { aiSettings: null },
+    states: { aiSettings: { model: "safe-fixture" } }
+  }
+);
+assert.deepEqual(
+  parseVersionedWriteResponse("POST", "/api/app-state", {
+    source: "supabase",
+    stateRows: [{ key: "aiSettings", updatedAt: "version-2" }],
+    states: { aiSettings: { model: "safe-fixture" } }
+  }),
+  {
+    source: "supabase",
+    states: { aiSettings: { model: "safe-fixture" } }
+  }
+);
+assert.throws(
+  () => parseVersionedWriteRequest("POST", "/api/app-state", {
+    aiSettings: { model: "legacy-direct" }
+  }),
+  (error) => error.field === "aiSettings" && error.statusCode === 400
+);
 assert.deepEqual(response, {
   auditId: "supplement-audit",
   source: "supabase",
@@ -149,4 +176,4 @@ assert.throws(
   /field\/alias가 중복/
 );
 
-console.log("versioned write route contracts passed · 7 routes · canonical keys and declared legacy alias only");
+console.log("versioned write route contracts passed · 8 routes · canonical keys and declared legacy alias only");

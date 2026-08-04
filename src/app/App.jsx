@@ -1574,11 +1574,28 @@ function postSchoolEvents(schoolEvents) {
   return postJson("/api/school-events/bulk", { schoolEvents });
 }
 
-function postAppState(states, { expectedUpdatedAt = null } = {}) {
-  return postJson("/api/app-state", {
+async function createAppStateWritePayload(states, { expectedUpdatedAt = null } = {}) {
+  const { parseVersionedWriteRequest } = await import("../shared/contracts/versionedWriteRouteContracts.js");
+  return parseVersionedWriteRequest("POST", "/api/app-state", {
     states,
     ...(expectedUpdatedAt ? { expectedUpdatedAt } : {})
   });
+}
+
+async function postAppState(states, options = {}) {
+  const { parseVersionedWriteResponse } = await import("../shared/contracts/versionedWriteRouteContracts.js");
+  const payload = await createAppStateWritePayload(states, options);
+  const result = await postJson("/api/app-state", payload);
+  parseVersionedWriteResponse("POST", "/api/app-state", result);
+  return result;
+}
+
+async function postAppStateWithTimeout(states, timeoutMs, timeoutMessage, options = {}) {
+  const { parseVersionedWriteResponse } = await import("../shared/contracts/versionedWriteRouteContracts.js");
+  const payload = await createAppStateWritePayload(states, options);
+  const result = await postJsonWithTimeout("/api/app-state", payload, timeoutMs, timeoutMessage);
+  parseVersionedWriteResponse("POST", "/api/app-state", result);
+  return result;
 }
 
 function postTestSession(testSession, testAttempts = []) {
@@ -5367,9 +5384,8 @@ export function App() {
         ...(currentMemos && typeof currentMemos === "object" && !Array.isArray(currentMemos) ? currentMemos : {}),
         [studentId]: memo
       };
-      await postJsonWithTimeout(
-        "/api/app-state",
-        { states: { teacherOperatingMemos: nextMemos } },
+      await postAppStateWithTimeout(
+        { teacherOperatingMemos: nextMemos },
         15000,
         "강사 운영 메모 저장 요청이 15초를 넘었습니다. 저장 상태를 확인한 뒤 다시 시도해 주세요."
       );

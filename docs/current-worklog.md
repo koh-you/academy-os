@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-1i app state
+
+- `/api/app-state`의 canonical `{ states, expectedUpdatedAt? }` request와 `{ source, states }` response를 8번째 공통 contract로 고정했다. client의 공용 저장과 강사 운영 메모 timeout 저장이 같은 payload builder/response parser를 사용하고 server는 legacy direct-object 및 invalid field/type을 DB 저장 전에 field 포함 400으로 차단한다.
+- key별 local draft, 브라우저 직렬 저장, `updated_at` CAS, 저장 후 GET Supabase 재조회 대조와 충돌·후속 입력 보존은 기존 `appStatePersistenceController` owner에 유지했다. 저장과 provider 행동을 새로 결합하지 않았다.
+- 검증: contract `8 routes`, app-state persistence/autosave, lint, scenario·production `827/827`, build `416 modules`·main `943.55 kB`·lazy `12/12`, 격리 browser `1/1` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1h derived school calendar
 
 - `/api/school-calendar/derived-save`의 `auditId/examPrepChanges/lessonChanges`와 verified response를 공통 contract에 연결했다. client는 canonical field만 전송하고 server는 invalid top-level field/type을 두 원천 저장 전에 field 포함 400으로 차단한다.
