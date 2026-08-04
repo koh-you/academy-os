@@ -415,10 +415,15 @@ test("student profile save keeps an in-flight follow-up draft for a second CAS s
   await page.getByRole("button", { name: /월경계 학생$/ }).click();
   const profile = page.getByRole("dialog", { name: /월경계 학생 학생 프로파일/ });
   await profile.getByRole("button", { name: "수정", exact: true }).click();
+  const profileSaveButton = profile.locator(".studentProfileStickySaveBar .saveButton");
+  await expect(profileSaveButton).toBeDisabled();
+  await expect(profileSaveButton).toHaveCSS("cursor", "not-allowed");
   const schoolInput = profile.getByLabel("월경계 학생 학교");
   await schoolInput.fill("프로필 A 저장");
   await profile.getByRole("button", { name: "기본정보만 저장", exact: true }).click();
   await expect.poll(() => requests.length).toBe(1);
+  await expect(profileSaveButton).toHaveText("저장 중");
+  await expect(profileSaveButton).toHaveCSS("cursor", "wait");
   await schoolInput.fill("프로필 B 후속");
   releaseFirstRequest();
 
@@ -1278,6 +1283,56 @@ test("lesson journal calendar can move to the next month and back", async ({ pag
   await expect(openMonthlyLessonsDialog).toBeHidden();
   await monthNavigation.getByRole("button", { name: "이전 달" }).click();
   await expect(monthHeading).toHaveText(originalMonthTitle);
+  expect(pageErrors).toEqual([]);
+});
+
+test("lesson journal calendar groups same-time special lessons above makeup lessons", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await page.route("**/api/lessons", async (route) => {
+    if (route.request().method() !== "GET") {
+      await route.continue();
+      return;
+    }
+    const response = await route.fetch();
+    const result = await response.json();
+    await route.fulfill({
+      response,
+      json: {
+        ...result,
+        lessons: [
+          ...(result.lessons ?? []),
+          {
+            className: "결석 보강 · 홍길동",
+            date: "2026-08-03",
+            endTime: "14:00",
+            lessonId: "safe-calendar-makeup-b",
+            lessonType: "makeup",
+            startTime: "13:00",
+            status: "scheduled",
+            studentIds: ["safe-active-student"]
+          },
+          {
+            className: "결석 보강 · 강민준",
+            date: "2026-08-03",
+            endTime: "14:00",
+            lessonId: "safe-calendar-makeup-a",
+            lessonType: "makeup",
+            startTime: "13:00",
+            status: "scheduled",
+            studentIds: ["safe-active-student"]
+          }
+        ]
+      }
+    });
+  });
+
+  await loginAsTeacher(page);
+  const calendarDay = page.getByRole("gridcell", { name: "2026-08-03 · 3개 수업" });
+  await expect(calendarDay.locator(".lessonPill")).toHaveText([
+    "13:00 여름 개별 진도 클리닉 (1명)",
+    "13:00 결석 보강 · 강민준 (1명)",
+    "13:00 결석 보강 · 홍길동 (1명)"
+  ]);
   expect(pageErrors).toEqual([]);
 });
 

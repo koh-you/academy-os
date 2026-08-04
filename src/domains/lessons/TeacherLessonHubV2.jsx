@@ -4,6 +4,7 @@ import { formatKoreaTimeFromIso } from "./attendance.js";
 import { defaultAttendanceSettings } from "./attendanceSettings.js";
 import { LessonCalendarView } from "./LessonCalendarView.jsx";
 import { createLessonCalendarViewModel } from "./lessonCalendarModel.js";
+import { compareLessonCalendarDisplayOrder } from "./lessonCalendarDisplayOrder.js";
 import { LessonJournalErrorBoundary } from "./LessonJournalErrorBoundary.jsx";
 import { LessonJournalDetail } from "./LessonJournalDetail.jsx";
 import { useLessonCalendarKeyboardNavigation } from "./useLessonCalendarKeyboardNavigation.js";
@@ -211,7 +212,7 @@ export function TeacherLessonHubV2({
     lessonTypeFilter,
     selectedDate,
     selectedLessonId,
-    sortLessons: sortByTime
+    sortLessons: (left, right) => compareLessonCalendarDisplayOrder(left, right, sortByTime)
   });
   const shouldShowGeneratedLessonSaveNotice = generatedLessonSaveStatus?.state && generatedLessonSaveStatus.state !== "idle";
 

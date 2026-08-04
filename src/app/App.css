@@ -7742,8 +7742,12 @@ textarea {
 }
 
 .saveButton:disabled {
-  cursor: wait;
+  cursor: not-allowed;
   opacity: 0.7;
+}
+
+.stickySaveBar-saving .saveButton:disabled {
+  cursor: wait;
 }
 
 button:disabled {

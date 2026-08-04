@@ -1,9 +1,13 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import { compareLessonCalendarDisplayOrder } from "../src/domains/lessons/lessonCalendarDisplayOrder.js";
 import {
   createLessonCalendarViewModel,
   lessonCalendarFilterOptions,
   shiftLessonCalendarMonth
 } from "../src/domains/lessons/lessonCalendarModel.js";
+
+const appCss = await readFile(new URL("../src/app/App.css", import.meta.url), "utf8");
 
 assert.equal(shiftLessonCalendarMonth("2026-08-01", 1), "2026-09-01");
 assert.equal(shiftLessonCalendarMonth("2026-08-01", -1), "2026-07-01");
@@ -118,6 +122,24 @@ assert.equal(allModel.calendarDays[1].lessons[1].className, "lessonPill examPrep
 assert.equal(allModel.calendarDays[1].lessons[1].label, "15:00 시험대비 · 고1 중간");
 assert.equal(allModel.calendarDays[2].lessons[0].className, "lessonPill specialLectureLessonPill");
 assert.equal(allModel.calendarDays[2].lessons[0].label, "16:00 특강반 (1명)");
+
+const sameTimeLessons = [
+  { lessonId: "makeup-b", lessonType: "makeup", className: "결석 보강 · 홍길동", startTime: "13:00" },
+  { lessonId: "regular", lessonType: "class", className: "정규반", startTime: "13:00" },
+  { lessonId: "special", lessonType: "specialLecture", className: "개별 진도 클리닉", startTime: "13:00" },
+  { lessonId: "makeup-a", lessonType: "makeup", className: "결석 보강 · 강민준", startTime: "13:00" },
+  { lessonId: "earlier", lessonType: "class", className: "이른 정규반", startTime: "12:00" }
+];
+assert.deepEqual(
+  [...sameTimeLessons]
+    .sort((left, right) => compareLessonCalendarDisplayOrder(left, right, dependencies.sortLessons))
+    .map((lesson) => lesson.lessonId),
+  ["earlier", "special", "makeup-a", "makeup-b", "regular"],
+  "calendar keeps chronological order and groups same-time special lessons before makeup and regular lessons"
+);
+
+assert.match(appCss, /\.saveButton:disabled\s*\{[^}]*cursor:\s*not-allowed;/s);
+assert.match(appCss, /\.stickySaveBar-saving \.saveButton:disabled\s*\{[^}]*cursor:\s*wait;/s);
 
 const expectedByFilter = {
   regular: ["regular"],
