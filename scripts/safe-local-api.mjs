@@ -31,6 +31,7 @@ import {
   validateResourceMaterialFile
 } from "../src/domains/resources/resourceMaterialStorageModel.js";
 import { saveReportSnapshotWithVerification } from "../src/domains/reports/reportSnapshotPersistence.js";
+import { parseExamAnalysisRunWriteRequest } from "../src/domains/exams/examAnalysisRunApi.js";
 import { parseVersionedWriteRequest } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 
 const host = "127.0.0.1";
@@ -78,6 +79,7 @@ const initialState = {
       studentIds: ["safe-settlement-student"]
     }
   ],
+  examAnalysisRuns: [],
   examPrepRows: [
     {
       examCycle: "2026-2-mid",
@@ -677,6 +679,29 @@ function handleSafeConsecutiveAttendance(pathname, payload = {}) {
 }
 
 function handleMutation(pathname, payload) {
+  if (pathname === "/api/exam-analysis-runs") {
+    let parsedPayload;
+    try {
+      parsedPayload = parseExamAnalysisRunWriteRequest(payload);
+    } catch (error) {
+      return {
+        code: error.code,
+        error: error.message,
+        field: error.field,
+        ok: false,
+        statusCode: Number(error.statusCode) || 400
+      };
+    }
+    const current = parsedPayload.analysisRun;
+    const analysisRun = {
+      ...current,
+      analysisRunId: current.analysisRunId || `safe-exam-analysis-${crypto.randomUUID()}`,
+      updatedAt: new Date().toISOString(),
+      workflowStatus: current.workflowStatus || "draft"
+    };
+    state.examAnalysisRuns = upsertById(state.examAnalysisRuns, analysisRun, ["analysisRunId"]);
+    return { analysisRun, ok: true, source: "supabase" };
+  }
   if (["/api/attendance/check", "/api/attendance/preview"].includes(pathname)) {
     return { ok: true, ...handleSafeConsecutiveAttendance(pathname, payload) };
   }
@@ -1605,6 +1630,28 @@ const server = http.createServer(async (request, response) => {
   }
   if (request.method === "GET" && requestUrl.pathname === "/api/integrations/status") {
     return sendJson(response, 200, { ok: true, safeFixture: true });
+  }
+  if (request.method === "GET" && requestUrl.pathname === "/api/exam-analysis-runs") {
+    const analysisRunId = requestUrl.searchParams.get("id") || requestUrl.searchParams.get("analysisRunId") || "";
+    if (!analysisRunId) {
+      return sendJson(response, 200, {
+        analysisRuns: state.examAnalysisRuns,
+        ok: true,
+        safeFixture: true,
+        source: "supabase"
+      });
+    }
+    const analysisRun = state.examAnalysisRuns.find((run) => run.analysisRunId === analysisRunId) ?? null;
+    return sendJson(response, 200, {
+      aiJobs: [],
+      analysisRun,
+      events: [],
+      ok: true,
+      questions: [],
+      safeFixture: true,
+      source: "supabase",
+      sources: []
+    });
   }
   if (request.method === "POST" && requestUrl.pathname === "/api/resource-material-files") {
     let payload;

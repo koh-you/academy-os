@@ -54,7 +54,9 @@ for (const requestName of runtimeNames.filter((name) => name.endsWith("Request")
   assert.equal(componentSource.includes(`function ${requestName}(`), false, `${requestName} implementation must stay in App`);
 }
 assert.equal(componentSource.includes('getJsonWithTimeout("/api/exam-analysis-runs"'), true);
-assert.equal(componentSource.includes('postJson("/api/exam-analysis-runs"'), true);
+assert.equal(componentSource.includes('import { saveExamAnalysisRunContractRequest } from "./examAnalysisRunApi.js"'), true);
+assert.equal(componentSource.includes("saveExamAnalysisRunContractRequest({"), true);
+assert.equal(componentSource.includes('postJson("/api/exam-analysis-runs"'), false);
 assert.equal(componentSource.includes("readFileAsDataUrl(file)"), true);
 assert.equal(componentSource.includes("getExamAnalysisReviewSaveMismatches"), true);
 assert.equal(componentSource.includes("getExamAnalysisOutputSaveMismatches"), true);

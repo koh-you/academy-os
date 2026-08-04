@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createExamAnalysisFinalPreviewModel, examAnalysisPreviewPalette } from "./finalPreview.js";
 import { ExamAnalysisFinalPreviewPanel } from "./ExamAnalysisFinalPreviewPanel.jsx";
 import { copyTextToClipboard } from "./outputPreview.js";
+import { saveExamAnalysisRunContractRequest } from "./examAnalysisRunApi.js";
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
@@ -2792,7 +2793,10 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
   async function saveRun() {
     setSaveStatus({ state: "saving", message: "시험분석 · 저장 중" });
     try {
-      const result = await postJson("/api/exam-analysis-runs", { analysisRun: buildRunPayload() });
+      const result = await saveExamAnalysisRunContractRequest({
+        analysisRun: buildRunPayload(),
+        request: postJson
+      });
       const savedRun = result.analysisRun;
       setSaveStatus({ state: "success", message: "시험분석 · 저장 완료" });
       if (savedRun?.analysisRunId) {

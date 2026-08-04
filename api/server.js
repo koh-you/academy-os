@@ -125,6 +125,7 @@ import {
   saveResourceMaterialFile
 } from "../src/domains/resources/resourceMaterialStorageOperation.js";
 import { saveReportSnapshotWithVerification } from "../src/domains/reports/reportSnapshotPersistence.js";
+import { parseExamAnalysisRunWriteRequest } from "../src/domains/exams/examAnalysisRunApi.js";
 import { getNextHourlyAlimtalkReservationAt } from "../src/domains/notifications/supplementJobBuilders.js";
 import { defaultNotificationTemplates } from "../src/domains/notifications/notificationTemplateCatalog.js";
 import { buildLessonNotificationBody } from "../src/domains/notifications/notificationMessageRenderer.js";
@@ -6293,11 +6294,16 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs") {
     try {
-      const payload = await readJsonBody(request);
-      const result = await upsertExamAnalysisRun(payload.analysisRun ?? payload.run ?? payload);
+      const payload = parseExamAnalysisRunWriteRequest(await readJsonBody(request));
+      const result = await upsertExamAnalysisRun(payload.analysisRun);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.field !== undefined ? { field: error.field } : {})
+      });
     }
     return;
   }

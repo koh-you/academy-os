@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-1t exam analysis run
+
+- 유료 실행이 없는 `POST /api/exam-analysis-runs` metadata 저장을 20번째 공통 contract로 고정했다. canonical `{ analysisRun }`과 source/run response를 client·server가 함께 검증하고 기존 `{ run }`·root 직접 payload는 endpoint helper에서 명시적으로 보존한다.
+- 실제 `exam_analysis_runs` upsert/event owner는 server pipeline에 유지했다. safe server는 가상 run row만 저장·재조회하고 UI의 `분석 저장 -> 목록 반영 -> reload 복구`를 검증하며 업로드·Storage·AI를 실행하지 않는다.
+- 첫 scenario는 이전 직접 `postJson` 문자열에 결합돼 실패해 contract helper 경계로 교정했다. 검증: contract `20 routes`, prompt studio·teacher/lazy 전용, lint, scenario·production `827/827`, build `418 modules`·main `944.70 kB`·lazy `12/12`, 격리 browser `1/1` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1s notification dispatch
 
 - `POST /api/notification-jobs/dispatch-due`를 19번째 공통 contract로 고정했다. canonical token/dry-run/limit/clock과 processed/source/automatic reconcile response를 server·cron client가 함께 검증한다.

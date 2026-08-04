@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-1t exam analysis run
+
+- `POST /api/exam-analysis-runs`의 canonical run metadata request와 source/run response를 공통 contract에 연결했다. 기존 `{ run }`·root 직접 payload는 명시적 legacy normalization으로 보존하고 실제 DB/event owner는 server pipeline에 둔다.
+- safe API와 화면은 가상 run 저장·목록 재조회·reload 지속성만 검증한다. contract `20 routes`, prompt studio·teacher/lazy 전용, lint, scenario·production `827/827`, build `418 modules`·main `944.70 kB`·lazy `12/12`, 격리 browser `1/1` 통과.
+- 다음 단위는 AI를 호출하지 않는 문항 수 사람 확정 payload/row response를 고정한다. 운영 데이터·업로드·Storage·유료 AI·실제 알림은 사용하지 않았다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1s notification dispatch
 
 - `POST /api/notification-jobs/dispatch-due`의 token/dry-run/limit/clock request와 processed/source/reconcile response를 공통 contract에 연결했다. 인증 선판정과 source claim·Solapi 실행·결과 저장 owner는 server에 유지한다.
