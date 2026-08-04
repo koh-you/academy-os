@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-1 closeout
+
+- 공통 payload contract 24개와 server 직접 mutation route 89개를 대조했다. contract domain은 lesson 4, notification 7, exam analysis 5 등 9개 domain이며 24개 모두 server inbound parser와 Production checks에 연결된다.
+- 미연결 65개는 숨은 누락으로 두지 않고 4-2/4-3 row mapper·route registry 42개와 4-5 Storage·Tally·AI·provider·admin seed 23개로 exact signature 분류했다. 새 직접 write route는 분류 없이 추가되면 closeout fixture가 실패한다.
+- 제품 runtime·DB·provider는 변경하지 않았다. 기준 문서는 `docs/app-refactor-fourth-pass-api-contract-closeout.md`이며 다음 단위는 4-2 row↔domain mapper round-trip/null/legacy/CAS token 기준선이다.
+- 검증: closeout·contract `24 routes`, domain all `69/69`, lint, scenario·production `827/827`, build `418 modules`·main `944.65 kB`·lazy `12/12` 통과. 전체 safe browser는 exact-head CI에서 실행한다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1x exam output drafts
 
 - `POST /api/exam-analysis-runs/save-output-drafts`를 24번째 공통 contract로 고정했다. analysis run ID, output input object, 블로그·인스타 교사 수정본과 edited flag를 source 쓰기 전에 검증하고 authoritative run/event/source response를 client가 다시 검증한다.

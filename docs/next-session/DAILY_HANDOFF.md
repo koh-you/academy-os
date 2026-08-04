@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-1 closeout
+
+- 4-1은 공통 contract 24개로 종료했다. server 직접 mutation 89개 중 나머지 65개는 4-2/4-3 row·route 42개와 4-5 external/provider/seed 23개로 exact allowlist 분류했다.
+- `test:fourth-pass-api-contract-closeout`이 route 수·domain count·provider source 6개·server parser 연결·남은 분류를 검사하며 전체 production gate에 포함된다.
+- 제품 runtime과 운영 원천은 바꾸지 않았다. 다음은 최신 main 기반 4-2 DB row/domain model 변환 기준선부터 시작하며 실제 Storage/Tally/AI/Solapi/Slack/admin seed는 실행하지 않는다.
+- closeout·contract `24 routes`, domain all `69/69`, lint, scenario·production `827/827`, build `418 modules`·main `944.65 kB`·lazy `12/12` 통과. 전체 safe browser는 exact-head CI gate로 남긴다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1x exam output drafts
 
 - `POST /api/exam-analysis-runs/save-output-drafts`의 run/output input/교사 수정본 request와 authoritative run/event/source response를 24번째 공통 contract에 연결했다. 잘못된 object·boolean·미지 field는 DB 쓰기 전에 400으로 차단한다.

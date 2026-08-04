@@ -121,6 +121,7 @@
 - 4-1v는 `POST /api/exam-analysis-runs/save-question-reviews`의 교사 문항별 검수 request와 run/question rows/event/teacher review response를 같은 contract에 연결했다. 빈 목록·잘못된 문항 번호·중복 번호는 DB 쓰기 전에 400으로 차단하며 safe API에서 교사 메모·확정·주요문항 저장, API 재조회와 reload 지속성을 확인해 유료 AI를 호출하지 않는다.
 - 4-1w는 `POST /api/exam-analysis-runs/save-prompt-studio`의 analysis run·expected revision·교사 작업본 request와 authoritative run/draft/verification response를 같은 contract에 연결했다. 음수·소수 revision과 미지 field는 쓰기 전에 400으로 차단하고 stale revision은 409로 현재 source를 보존하며, safe API에서 명시 저장·재조회·reload를 확인해 AI·Storage를 실행하지 않는다.
 - 4-1x는 `POST /api/exam-analysis-runs/save-output-drafts`의 analysis run·산출물 입력·블로그/인스타 교사 수정본 request와 authoritative run/event/source response를 같은 contract에 연결했다. 실제 audit summary 병합·정규화·Supabase 재조회 owner는 유지하고 safe API에서 명시 저장·재조회·reload만 확인해 AI 생성·Storage를 실행하지 않는다.
+- 4-1 종료 감사는 공통 contract 24개와 server 직접 mutation route 89개를 대조했다. 남은 65개는 4-2/4-3 row·route 경계 42개와 4-5 Storage·Tally·AI·provider·seed 경계 23개로 분류하며, 새 route는 분류 없이 추가할 수 없다.
 
 ## 폴더 상태
 
@@ -133,7 +134,7 @@
 
 1. App 2차 Phase 1~5와 3차 3-0~3-8, P1 운영 저장 신뢰성, P2 modal 통일 후속, P3 알림톡 설정 관리는 완료됐다. P3 closeout은 제품 경로 9개, 설정 key 10개, Solapi provider template 4개의 seed→draft→persisted final→provider 변수 연결과 재시험 독립 11시 transport 부재를 자동 검증한다. 공지 preset 3개·특강 guide seed는 새 초안에만 적용하며 현재 draft·기존 job·보충 교사 최종본과 provider contract를 보존한다.
 2. App 3차 리팩터링 3-0~3-8은 production main 43.1%·gzip 45.3% 감소, 12개 물리 lazy chunk, App Babel 500 KB 경고 제거와 종료 소유권 감사까지 완료했다.
-3. App/API 4차는 4-0 기준선과 4-1a~4-1x의 source·notification·시험분석 run/문항 수·교사 검수·Prompt Studio·output draft payload contract 연결을 확정했다. 다음은 4-1 종료 감사 뒤 4-2 DB row/domain model 변환 기준선을 시작하며 Storage·유료 AI route는 4-5 대상으로 남긴다.
+3. App/API 4차는 4-0 기준선과 4-1a~4-1x, 4-1 종료 감사까지 완료했다. 다음은 4-2 DB row/domain model 변환 기준선을 시작하며 Storage·Tally·유료 AI·실제 provider route는 4-5 대상으로 남긴다.
 4. `app_state`에서 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
    - 학생별 오답 `wrongProblems`는 명시 저장 전환을 완료했다. 다음 후보는 별도 저장 의미가 분명한 `lessonResearchItems`이며 새 작업에서 범위를 다시 확인한다.
    - 즉시 사람 판단이 필요하지 않은 발견은 queue/worklog에 남기고 AI 검수와 다음 단계를 연쇄 진행한다.
