@@ -189,3 +189,9 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 - 4-1w: `POST /api/exam-analysis-runs/save-prompt-studio`의 run/revision/교사 작업본 payload와 authoritative run/draft/source/verification response를 공통 contract에 연결했다. 실제 revision CAS·audit summary 병합·재조회/event owner는 server에 유지하고 safe API는 정상 저장·stale 409·reload만 검증했다.
 - 4-1x: `POST /api/exam-analysis-runs/save-output-drafts`의 run/output input/블로그·인스타 교사 수정본 payload와 authoritative run/event/source response를 공통 contract에 연결했다. 실제 audit summary 병합·입력 정규화·Supabase 재조회/event owner는 server에 유지하고 safe API는 명시 저장·reload만 검증해 AI 생성 route와 분리했다.
 - 4-1 종료 감사: 공통 contract 24개와 server 직접 mutation route 89개를 대조했다. 미연결 65개는 4-2/4-3 row·route 경계 42개와 4-5 Storage·Tally·AI·provider·seed 경계 23개로 명시 분류하고 새 route drift를 production fixture로 차단했다. 기준은 `docs/app-refactor-fourth-pass-api-contract-closeout.md`다.
+
+## 4-2 진행 상태
+
+- 4-2a 기준선: core row mapper 36개/18쌍과 exam pipeline mapper 9개, 합계 45개를 exact inventory로 고정했다. 4-0의 44개 집계는 구조 감사로 교정했다.
+- null/default, schema fallback option, legacy alias, `updated_at` token, exam source patch undefined와 unknown-field drop 정책을 production fixture가 검사한다. 제품 runtime과 DB/provider owner는 변경하지 않았다.
+- 후속은 한 단위씩 4-2b Student/ClassTemplate/Lesson 6개, 4-2c intake/special lecture 6개, 4-2d lesson activity 8개, 4-2e learning/calendar 10개, 4-2f platform source 6개, 4-2g exam pipeline 9개 순으로 진행한다.
