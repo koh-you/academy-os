@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { createExamPrepCenterDisplayModel } from "../src/domains/exams/examPrepCenterModel.js";
 
 const rows = [
@@ -143,5 +144,38 @@ assert.deepEqual(textSearchModel.filteredRows.map((row) => row.examPrepId), ["ro
 assert.equal(textSearchModel.editingExamPrepRow, null);
 assert.equal(textSearchModel.reviewModalRow, null);
 assert.equal(textSearchModel.selectedClass, undefined);
+
+const allClassesModel = createExamPrepCenterDisplayModel({
+  currentExamCycle: "2026-1-final",
+  dedupeRows: (sourceRows) => sourceRows.filter((row) => row.examPrepId !== "row-deduped"),
+  getAggregateSaveState: (saveStates) => saveStates.length ? "saved" : "idle",
+  getMathExamEntries: (row) => row.mathExamDates ?? [],
+  getRowSchoolGradeKey: (row) => row.schoolGradeKey,
+  getStudentSchoolGradeKey: (student) => student.schoolGradeKey,
+  rows,
+  selectedClassTemplateId: "",
+  selectedExamCycle: "2026-1-final",
+  students,
+  templates: [
+    { classTemplateId: "class-a", name: "A반" },
+    { classTemplateId: "class-b", name: "B반" }
+  ]
+});
+
+assert.deepEqual(allClassesModel.classStudents.map((student) => student.studentId), [
+  "student-active",
+  "student-default-active",
+  "student-other-class"
+]);
+assert.deepEqual(allClassesModel.visibleRows.map((row) => row.examPrepId), [
+  "row-visible",
+  "row-fallback-cycle",
+  "row-other-class"
+]);
+assert.equal(allClassesModel.selectedClass?.name, "전체 반");
+
+const centerSource = await readFile(new URL("../src/domains/exams/ExamPrepCenter.jsx", import.meta.url), "utf8");
+assert.match(centerSource, /<strong>전체 반<\/strong>/);
+assert.doesNotMatch(centerSource, /onEnsureExamCycleRows/);
 
 console.log("exam prep center model fixtures passed");

@@ -15,8 +15,11 @@ export function createExamPrepCenterDisplayModel({
   students = [],
   templates = []
 } = {}) {
+  const isAllClasses = !selectedClassTemplateId;
   const classStudents = students.filter(
-    (student) => (student.status ?? "active") === "active" && student.defaultClassTemplateId === selectedClassTemplateId
+    (student) =>
+      (student.status ?? "active") === "active" &&
+      (isAllClasses || student.defaultClassTemplateId === selectedClassTemplateId)
   );
   const classSchoolGradeKeys = new Set(classStudents.map(getStudentSchoolGradeKey).filter(Boolean));
   const displayRows = dedupeRows(rows);
@@ -51,7 +54,9 @@ export function createExamPrepCenterDisplayModel({
     examPrepSaveState: getAggregateSaveState(filteredRows.map((row) => rowSaveStates[row.examPrepId])),
     filteredRows,
     reviewModalRow: visibleRows.find((row) => row.examPrepId === reviewModalRowId) ?? null,
-    selectedClass: templates.find((template) => template.classTemplateId === selectedClassTemplateId),
+    selectedClass: isAllClasses
+      ? { classTemplateId: "", name: "전체 반" }
+      : templates.find((template) => template.classTemplateId === selectedClassTemplateId),
     visibleRows
   };
 }

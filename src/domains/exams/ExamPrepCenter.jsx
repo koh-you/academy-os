@@ -27,7 +27,6 @@ export function ExamPrepCenter({
   templates,
   onConfirmExamPostSubmission,
   onOpenExamPostFile,
-  onEnsureExamCycleRows,
   onSetExamPostTargetStudentIds,
   onSetTallySubmissions,
   onSetTallySummaries,
@@ -123,12 +122,17 @@ export function ExamPrepCenter({
 
   function changeExamCycle(examCycle) {
     setSelectedExamCycle(examCycle);
-    onEnsureExamCycleRows(examCycle, selectedClassTemplateId);
   }
 
   function changeClassTemplate(classTemplateId) {
     setSelectedClassTemplateId(classTemplateId);
-    onEnsureExamCycleRows(selectedExamCycle, classTemplateId);
+  }
+
+  function changeActiveTab(tabId) {
+    if (tabId !== "info" && !selectedClassTemplateId) {
+      setSelectedClassTemplateId(templates[0]?.classTemplateId ?? "template_mwf_7_10");
+    }
+    setActiveTab(tabId);
   }
 
   async function importTallyCsv(file) {
@@ -234,7 +238,7 @@ export function ExamPrepCenter({
             aria-selected={activeTab === tab.id}
             className={activeTab === tab.id ? "active" : ""}
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => changeActiveTab(tab.id)}
             role="tab"
             type="button"
           >
@@ -245,6 +249,16 @@ export function ExamPrepCenter({
 
       {activeTab !== "pastPapers" ? (
         <FilterBar className="classTabList" label="시험관리 반 필터">
+          {activeTab === "info" ? (
+            <button
+              aria-pressed={!selectedClassTemplateId}
+              className={`filterBarOption${!selectedClassTemplateId ? " active" : ""}`}
+              onClick={() => changeClassTemplate("")}
+              type="button"
+            >
+              <strong>전체 반</strong>
+            </button>
+          ) : null}
           {templates.map((template) => (
             <button
               aria-pressed={selectedClassTemplateId === template.classTemplateId}
@@ -356,7 +370,7 @@ export function ExamPrepCenter({
                 className="examPrepEmptyState"
                 description={query.trim()
                   ? "학교·과목·출판사를 다시 확인하세요."
-                  : "반 또는 고사를 바꾸면 해당 조건의 시험정보가 표시됩니다."}
+                  : "조회 범위 또는 고사를 바꾸면 해당 조건의 시험정보가 표시됩니다."}
                 title={query.trim() ? "검색 결과가 없습니다." : "표시할 시험정보가 없습니다."}
               />
             ) : null}
