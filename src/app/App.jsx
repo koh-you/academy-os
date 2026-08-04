@@ -310,7 +310,6 @@ import {
   getLessonJournalCommentStatusLabel,
   getLessonJournalDisplayCommentSendStatus
 } from "../domains/lessons/lessonJournalCommentStatusModel.js";
-import { saveLessonJournalMakeupTasksWithVerification } from "../domains/lessons/lessonJournalMakeupTaskBulkApi.js";
 import { createLessonJournalMakeupTaskRequests } from "../domains/lessons/lessonJournalMakeupTaskRequest.js";
 import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJournalSaveViewModel.js";
 import { createLessonJournalReservationAuditModel } from "../domains/lessons/lessonJournalReservationAuditModel.js";
@@ -1445,8 +1444,15 @@ function deleteAcademyReminderFromApi(reminderId) {
     });
 }
 
-function postMakeupTasks(makeupTasks) {
-  return postJsonWithTimeout("/api/lesson-journal/makeup-tasks/save", { makeupTasks }, 30000);
+async function postMakeupTasks(makeupTasks) {
+  const { createLessonJournalMakeupTasksRequestPayload } = await import(
+    "../domains/lessons/lessonJournalMakeupTaskBulkApi.js"
+  );
+  return postJsonWithTimeout(
+    "/api/lesson-journal/makeup-tasks/save",
+    createLessonJournalMakeupTasksRequestPayload(makeupTasks),
+    30000
+  );
 }
 
 function deleteExamAnalysisRunRequest(analysisRunId) {
@@ -6661,6 +6667,9 @@ export function App() {
         };
       },
       persistMakeupTasks: async () => {
+        const { saveLessonJournalMakeupTasksWithVerification } = await import(
+          "../domains/lessons/lessonJournalMakeupTaskBulkApi.js"
+        );
         const requestedTasks = createLessonJournalMakeupTaskRequests({
           currentTasks: makeupTasks,
           taskDrafts: makeupTaskDrafts,

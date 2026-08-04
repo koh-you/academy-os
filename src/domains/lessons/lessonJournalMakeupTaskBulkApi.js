@@ -1,3 +1,11 @@
+import {
+  parseVersionedWriteRequest,
+  parseVersionedWriteResponse
+} from "../../shared/contracts/versionedWriteRouteContracts.js";
+
+const lessonJournalMakeupTasksMethod = "POST";
+const lessonJournalMakeupTasksPath = "/api/lesson-journal/makeup-tasks/save";
+
 export const lessonJournalMakeupTaskIdentityFields = [
   "studentId",
   "sourceId",
@@ -7,6 +15,14 @@ export const lessonJournalMakeupTaskIdentityFields = [
   "supplementHomeworkNote"
 ];
 
+export function createLessonJournalMakeupTasksRequestPayload(makeupTasks = []) {
+  return parseVersionedWriteRequest(
+    lessonJournalMakeupTasksMethod,
+    lessonJournalMakeupTasksPath,
+    { makeupTasks }
+  );
+}
+
 export async function saveLessonJournalMakeupTasksWithVerification({
   requestedTasks = [],
   request
@@ -14,6 +30,11 @@ export async function saveLessonJournalMakeupTasksWithVerification({
   if (!requestedTasks.length) return [];
 
   const verification = await request(requestedTasks);
+  parseVersionedWriteResponse(
+    lessonJournalMakeupTasksMethod,
+    lessonJournalMakeupTasksPath,
+    verification
+  );
   if (verification.source !== "supabase" || verification.verified !== true) {
     throw new Error("등원보충을 Supabase에서 다시 확인하지 못했습니다.");
   }
