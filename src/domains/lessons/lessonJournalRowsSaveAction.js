@@ -2,6 +2,13 @@ import {
   createLessonJournalRowsSavePlan,
   verifyLessonJournalRowsSavePlan
 } from "./lessonJournalRowsPersistence.js";
+import {
+  parseVersionedWriteRequest,
+  parseVersionedWriteResponse
+} from "../../shared/contracts/versionedWriteRouteContracts.js";
+
+const lessonJournalRowsSaveMethod = "POST";
+const lessonJournalRowsSavePath = "/api/lesson-journal/rows/save";
 
 export function createLessonJournalRowsSaveAuditId(now = Date.now()) {
   const suffix = globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2, 10);
@@ -26,11 +33,21 @@ export async function saveLessonJournalRowsAction({
     return { auditId: "", homeworks: [], records: [], source: "none", verified: true };
   }
   const auditId = createLessonJournalRowsSaveAuditId();
+  const requestPayload = parseVersionedWriteRequest(
+    lessonJournalRowsSaveMethod,
+    lessonJournalRowsSavePath,
+    { auditId, ...plan }
+  );
   const result = await request(
-    "/api/lesson-journal/rows/save",
-    { auditId, ...plan },
+    lessonJournalRowsSavePath,
+    requestPayload,
     30000,
     "수업기록·숙제 저장이 30초를 넘었습니다. 수정본을 유지한 채 서버 상태를 다시 확인해 주세요."
+  );
+  parseVersionedWriteResponse(
+    lessonJournalRowsSaveMethod,
+    lessonJournalRowsSavePath,
+    result
   );
   const verification = verifyLessonJournalRowsSavePlan(plan, result);
   if (

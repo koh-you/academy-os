@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { saveLessonJournalRowsAction } from "../src/domains/lessons/lessonJournalRowsSaveAction.js";
 import {
   areLessonJournalRecordsEqual,
@@ -79,6 +80,32 @@ await saveLessonJournalRowsAction({
   }
 });
 assert.equal(actionPayload.recordChanges[0].before.updatedAt, version0);
+assert.deepEqual(Object.keys(actionPayload).sort(), ["auditId", "homeworkChanges", "recordChanges"]);
+
+await assert.rejects(
+  saveLessonJournalRowsAction({
+    changedHomeworks: [homeworkAfter],
+    currentHomeworks: [homeworkBefore],
+    currentRecords: [recordBefore],
+    recordsToSave: [recordAfter],
+    request: async () => ({
+      auditId: "invalid-response",
+      homeworks: [homeworkAfter],
+      records: [recordAfter],
+      source: "supabase",
+      verified: "true"
+    })
+  }),
+  (error) => error.code === "INVALID_API_PAYLOAD" && error.field === "verified"
+);
+
+const serverSource = await readFile(new URL("../api/server.js", import.meta.url), "utf8");
+const routeStart = serverSource.indexOf('requestUrl.pathname === "/api/lesson-journal/rows/save"');
+const routeEnd = serverSource.indexOf('requestUrl.pathname === "/api/exam-prep-rows"', routeStart);
+const lessonJournalRowsRouteSource = serverSource.slice(routeStart, routeEnd);
+assert.ok(routeStart >= 0 && routeEnd > routeStart);
+assert.match(lessonJournalRowsRouteSource, /parseVersionedWriteRequest\(/);
+assert.match(lessonJournalRowsRouteSource, /error\.field \? \{ field: error\.field \}/);
 
 const originalEnv = {
   SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
