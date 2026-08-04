@@ -356,3 +356,8 @@
 - 관련 검사와 build를 실행한다.
 - `STATUS.md`, `current-worklog.md`, 이 파일을 짧게 갱신한다.
 - 의도한 파일만 commit/push한다.
+
+## 2026-08-04 긴급 handoff
+
+- 4-7반 22:30 Solapi 예약 8건이 Render UTC 요일 오판으로 전부 명단 제외 취소됐다. 날짜-only 요일 계산과 UTC 회귀 fixture를 추가했다.
+- 코드 배포 뒤 실제 예약은 교사가 `Solapi 예약 업데이트` 1회로 실행하고, 상단 `Solapi 반영 완료` 및 예약 확인의 학부모 4건·학생 4건을 대조한다.

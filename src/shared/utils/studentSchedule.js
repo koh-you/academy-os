@@ -12,9 +12,18 @@ const koreaDayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
 function getLessonDayKey(lesson = {}) {
   if (!lesson?.date) return "";
-  const date = new Date(`${lesson.date}T00:00:00+09:00`);
-  if (Number.isNaN(date.getTime())) return "";
-  return koreaDayKeys[date.getDay()] ?? "";
+  const match = String(lesson.date).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return "";
+  const year = Number(match[1]);
+  const monthIndex = Number(match[2]) - 1;
+  const day = Number(match[3]);
+  const date = new Date(Date.UTC(year, monthIndex, day));
+  if (
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() !== monthIndex ||
+    date.getUTCDate() !== day
+  ) return "";
+  return koreaDayKeys[date.getUTCDay()] ?? "";
 }
 
 function isProfileScheduleManagedLesson(lesson = {}, student = {}) {
