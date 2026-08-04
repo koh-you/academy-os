@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-04 App/API 4차 리팩터링 4-0
+
+- 두 선행 작업의 final을 확인하고 학생 월간 제출 main `4d351314`의 Production checks·Vercel 성공과 열린 PR 0건을 대조한 뒤 최신 main에서 4차를 시작했다.
+- App 10,903줄·직접 request 73회, server 7,806줄·직접 route 120개, coreData row mapper 44개, App.css 21,727줄, safe browser 47개를 기준선으로 고정했다.
+- 검증 시간은 lint 4.45초, domain all 62/62 1.63초, scenario 827/827 3.25초, build 4.28초, production 80.88초, browser 47/47 114.80초다. 제품 runtime과 운영 side effect는 변경하지 않았다.
+- `docs/app-refactor-fourth-pass-plan.md`에 소유권·회귀 inventory, 정량 종료 목표와 4-1~4-8의 20~25개 예상 안전 단위를 기록했다. 다음은 4-1a API contract foundation이다.
+
 ## 2026-08-04 학생별 월간 제출 미리보기
 
 - 학생 프로필의 선택 월을 기준으로 예정 수업·실제 출결·변동사항을 분리해 보여 주는 읽기 전용 제출 미리보기를 추가했다. 개별 요일에서 제외된 정규수업은 빠지고, 보강·특강·휴강·취소·다른 반·개별 시간은 변동사항에 남는다.

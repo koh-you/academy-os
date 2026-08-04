@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-04
 
+## 2026-08-04 App/API 4차 리팩터링 4-0
+
+- 사용자가 4차 연쇄 진행을 승인했고 두 선행 작업이 모두 final/completed라 최신 main `4d351314`에서 시작했다. 재개 heartbeat `academy-os-4`는 4-0 시작 후 비활성화했다.
+- 기준선은 App 10,903줄·request 73회·handler 113개, server 7,806줄·route 120개, coreData 5,798줄·row mapper 44개, App.css 21,727줄, safe browser 47개다.
+- 시간 기준은 domain all 1.63초, lint 4.45초, scenario 3.25초, build 4.28초, full production 80.88초, full browser 114.80초다.
+- 계획·소유권·회귀 inventory는 `docs/app-refactor-fourth-pass-plan.md`가 source of truth다. 다음 단위는 4-1a 공통 API contract helper와 versioned write route inventory이며 실제 운영 쓰기·알림·AI 호출 없이 진행한다.
+
 ## 2026-08-04 학생별 월간 제출 기능
 
 - 학생 프로필의 월별 출결 영역에서 `월간 제출 미리보기`를 연다. 선택한 한 달의 예정 수업, 실제 출결, 보강·특강·휴강·취소·개별 시간 등의 변동사항을 별도 구역으로 표시한다.

@@ -1,0 +1,161 @@
+# App/API 4차 리팩터링 계획
+
+업데이트: 2026-08-04
+4-0 기준 commit: `4d351314293fc6b0a030f37c2a4b0c5fdd60be2e` (`origin/main`)
+
+## 목표
+
+3차 리팩터링은 큰 화면을 도메인 component로 옮기고 lazy loading을 적용해 초기 main JS를 크게 줄였다. 그러나 운영 기능을 수정할 때는 아직 `App.jsx -> api/server.js -> api/routes/coreData.js -> Supabase row -> provider`를 함께 추적해야 하는 경우가 많다. 4차 리팩터링은 기능을 다시 구현하지 않고 다음 변경 반경을 줄이는 단계다.
+
+1. API 요청·응답 shape를 endpoint 옆의 pure contract로 고정한다.
+2. DB row와 제품 domain model 사이의 변환 owner를 공개된 pure mapper로 분리한다.
+3. 120개 HTTP dispatch를 auth·portal·core data·exam·notification/provider route registry로 나눈다.
+4. App에 남은 authoritative persistence orchestration을 도메인 action으로 옮긴다.
+5. 저장과 Solapi·Slack·AI·Storage 같은 외부 side effect를 구조적으로 분리한다.
+6. 2만 줄 CSS와 단일 대형 browser spec의 변경 반경을 도메인 단위로 줄인다.
+
+줄 수 감소는 결과 지표일 뿐이다. 각 단위는 `local draft -> API contract -> authoritative source -> readback -> UI source replacement`와 provider 실패 복구 의미를 보존해야 완료다.
+
+## 4-0 기준선
+
+### 코드 규모와 집중도
+
+| 경계 | 현재 값 | 해석 |
+| --- | ---: | --- |
+| `src/app/App.jsx` | 10,903줄 · 474,401 bytes | `handle*` 함수 113개, 직접 `fetch` 36회, `postJson*` 37회 |
+| `api/server.js` | 7,806줄 · 323,037 bytes | named function 264개, 직접 method/path dispatch 120개 |
+| `api/routes/coreData.js` | 5,798줄 · 240,388 bytes | named function 224개, export function 78개 |
+| DB row mapper | 44개 | 대부분 `coreData.js`와 `examAnalysisPipeline.js` 내부 private 함수 |
+| `src/app/App.css` | 21,727줄 · 403,741 bytes | rule opening 약 3,173개, media query 17개 |
+| safe browser | 2개 spec · 47개 test | 주 spec 한 파일이 1,817줄 · 98,282 bytes |
+| API runtime inventory | JS 12개 | Vercel Hobby serverless 후보 상한 12개를 이미 사용 |
+| 테스트 파일 | `scripts/test-*.mjs` 346개 | 전체 production은 많은 child process를 직렬 실행 |
+
+HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험분석 core 17, 알림 job/provider 19, lesson·record·homework·attendance·makeup 26, 학생·특강 16이다. route 파일을 추가할 때는 Vercel 함수 후보 수를 늘리지 않도록 `api/routes` 아래의 내부 module로만 분리한다.
+
+### 검증 시간과 번들
+
+동일 commit, Node 24, 현재 Worktree에서 순차 측정했다.
+
+| 검사 | 결과 | 시간 |
+| --- | --- | ---: |
+| runtime lint | 통과 | 4.45초 |
+| domain all | 62/62 | 1.63초 |
+| scenario summary | 827/827 | 3.25초 |
+| production build | 414 modules · lazy 12/12 | 4.28초 |
+| full production | 827/827 | 80.88초 |
+| isolated safe browser | 47/47 | 114.80초 |
+
+빌드 기준은 main JS 942.25 kB, gzip 234.31 kB, main CSS 325.87 kB, gzip 51.96 kB다. 빠른 개발 피드백은 이미 1~5초지만 전체 신뢰 확인은 약 196초다. 4차에서는 전체 검사를 없애지 않고, 변경 중 endpoint/row/provider contract를 10초 이내 집중 검사로 먼저 실패하게 만드는 것이 속도 목표다.
+
+## 현재 소유권 지도
+
+| 영역 | local draft·파생값 | client action·payload | HTTP·인증 | DB row·원천 | provider·오류 복구 |
+| --- | --- | --- | --- | --- | --- |
+| auth/session | `useAppSession` | App 주입 request | `api/server.js` teacher/student bearer | `teacher_accounts`, session token | provider 없음; logout cleanup은 hook |
+| lesson/attendance | lesson domain controller | 일부 domain API/action, 일부 App handler | server 직접 dispatch | `coreData.js` lesson/record/homework mapper와 CAS plan | 출결 알림은 server notification orchestration |
+| supplement | Supplement controller | schedule persistence/action | server의 source save route | lesson + makeup task versioned plan | 원천 검증 뒤 App/server가 notification provider 호출 |
+| student/class | Student 화면/controller | student/class roster API와 App handler 혼재 | server 직접 dispatch | student/lesson roster mapper와 CAS plan | provider 없음; rollback/readback은 persistence module |
+| notification | notice controller와 persisted final | notification API/action + App effect | server job/provider route 혼재 | notification_jobs mapper·claim/reconcile | `api/routes/notifications.js`, server scheduler, App callback |
+| app state/report | hook local recovery | App autosave/report action | server 직접 dispatch·teacher auth | app_state CAS/readback | report mock은 provider 없음 |
+| resource | 화면 draft | resource action/API | server auth·Storage route | resource row + private Storage | Storage upload/delete rollback |
+| exam analysis | 화면 draft는 lazy screen | App runtime request 13개 | server dispatch·AI orchestration | exam pipeline row mapper | OpenAI/Anthropic/Storage는 명시 행동 Gate |
+| settlement | controller local recovery·selector | App `onSaveMonth` | app-state route | monthly settlement app_state | provider 없음 |
+
+의도적인 현재 예외는 Notification Center의 직접 timeout transport, Settings의 주입 `postJson`, 시험분석 App runtime request다. 4차에서 이 예외를 이동할 때도 화면이 provider나 DB owner가 되지 않는다.
+
+## 회귀 inventory
+
+| 경계 | 반드시 보존할 계약 | 작업 중 빠른 검사 | 종료 Gate |
+| --- | --- | --- | --- |
+| API payload | 누락/잘못된 shape는 쓰기 전 4xx, legacy alias는 명시적으로만 허용 | 새 `test:contract:*` 묶음, 관련 domain | full production, exact-head CI |
+| DB mapper | round-trip, null/legacy 필드, `updated_at` CAS token, 미지 필드 보존 정책 | mapper pure fixture | source API fixture + browser readback |
+| source save | insert-only/CAS, idempotent retry, 역순 보상, 최신 변경 보호 | 관련 persistence fixture | full production + 집중 browser/API |
+| App action | 저장 중 후속 draft 보존, stale response 격리, verified source만 UI 교체 | domain action/controller fixture | 관련 safe browser |
+| provider | source save와 send/reserve/cancel 결과 분리, provider-only retry | notification/provider fixture | dry-run safe API; 실제 발송 금지 |
+| auth | teacher/student/parent 범위, bearer 재확인, 무권한 401/403 | auth/portal contract fixture | safe login/portal smoke |
+| CSS | modal/table/sticky save 상태, tablet/mobile breakpoint | CSS inventory + build | 관련 screenshot/DOM smoke |
+| E2E | 핵심 저장·충돌·reload 동선, 테스트 간 state 격리 | domain별 grep | full safe browser |
+
+## 정량 종료 목표
+
+- endpoint별 payload/response contract가 요청 call site와 server route에서 같은 pure module을 사용한다.
+- 핵심 Supabase 표의 row mapper가 domain별 module로 이동하고 round-trip/legacy/CAS fixture를 가진다.
+- `api/server.js`의 120개 직접 method/path chain은 route registry가 소유하고 server는 공통 CORS/body/error/dispatch 조립만 담당한다.
+- App 직접 request call 73회와 `handle*` 113개는 4-4 종료 때 각각 45회 이하, 80개 이하를 목표로 한다. 의미 없는 wrapper 이동으로 수치를 맞추지 않는다.
+- provider module은 DB row mapper나 React state를 import하지 않고, source persistence module은 Solapi·Slack·AI SDK를 import하지 않는다.
+- `App.css`는 15,000줄 이하, initial main CSS는 250 kB 이하를 목표로 하되 시각 회귀가 있으면 수치보다 동작 보존을 우선한다.
+- safe browser는 domain spec으로 나누고, 전체 47개 이상의 사용자 동작을 유지한다. 고위험 domain의 집중 실행은 30초 이내를 목표로 한다.
+- endpoint/row/provider별 작업 중 contract 묶음은 10초 이내를 목표로 하며 full production·full browser는 PR/main Gate로 유지한다.
+
+## 단계와 안전 단위
+
+### 4-1 API payload 계약
+
+1. 공통 contract helper와 route inventory를 만든다.
+2. lesson journal·supplement·attendance versioned write payload를 고정한다.
+3. student·class roster·app-state·report·resource payload를 고정한다.
+4. notification/provider와 exam analysis payload를 고정한다. 유료 AI나 실제 알림은 호출하지 않는다.
+
+### 4-2 DB row와 domain model 경계
+
+1. student/class/lesson mapper를 pure module로 분리한다.
+2. lesson record/homework/makeup mapper를 분리한다.
+3. app_state/resource/notification mapper를 분리한다.
+4. exam pipeline mapper를 분리하고 legacy migration contract를 고정한다.
+
+### 4-3 API server route 분리
+
+1. 공통 request context·body·response·auth guard를 고정한다.
+2. auth/portal/core read route registry를 분리한다.
+3. student/lesson/supplement versioned write route registry를 분리한다.
+4. exam analysis route registry를 분리한다.
+5. notification job/provider registry와 scheduler 조립을 분리한다.
+
+### 4-4 App persistence action 추출
+
+1. App module-level request binding을 domain API로 옮긴다.
+2. student/lesson/supplement/app-state orchestration을 domain action으로 옮긴다.
+3. stale response, draft revision, readback, rollback contract를 각 action 옆에 둔다.
+
+### 4-5 provider 외부 side-effect 경계
+
+1. notification source persistence와 Solapi/Slack execution을 분리한다.
+2. Storage/AI execution을 명시적 effect surface로 고정한다.
+3. source saved/provider failed, retry scope, audit result를 공통 결과 shape로 고정한다.
+
+### 4-6 CSS domain entry 분리
+
+1. shared token/layout/modal/table/state CSS를 먼저 분리한다.
+2. lesson/student/supplement/notification domain entry를 lazy screen과 연결한다.
+3. responsive·print·portal/attendance entry를 분리하고 main CSS budget을 고정한다.
+
+### 4-7 safe E2E 확대
+
+1. 단일 spec을 auth/lesson/student/supplement/notification/settlement/resource로 나눈다.
+2. endpoint contract 실패, source conflict, provider failure의 사용자 복구 동선을 추가한다.
+3. grep 가능한 domain 명령과 전체 격리 runner를 함께 유지한다.
+
+### 4-8 종료 감사
+
+- 상태 owner, local draft, payload, DB row, authoritative source, provider, 오류 복구를 다시 대조한다.
+- 4-0 수치와 종료 수치를 비교하고 유지보수 피드백 시간·변경 반경 개선을 보고한다.
+- 미완료 후보는 별도 차수로 넘기고 4차 범위를 닫는다.
+
+예상 안전 단위는 20~25개다. 한 PR에 API contract, row mapper, route 이동, App action, CSS를 함께 섞지 않는다.
+
+## 연쇄 진행 규칙
+
+- 매 단위는 최신 `origin/main` 기반 별도 `codex/` branch에서 시작한다.
+- 관련 fast/전용 검사, runtime lint, build를 통과한 뒤 고위험이면 local full production과 집중 safe browser를 실행한다.
+- exact-head CI와 검토가 성공하고 동시 main owner·충돌이 없을 때만 force 없이 main에 통합한다.
+- 정확한 main CI와 영향받은 Vercel/Render 배포·안전 smoke가 닫힌 뒤 다음 단위를 시작한다.
+- AI로 검증 가능한 리뷰 지적은 최소 수정 후 재검증하고 다음 단위로 이어간다.
+- 운영 데이터 쓰기·삭제, 실제 알림 발송/예약/취소, 운영 SQL, 유료 AI, 새 로그인·관리자 승인이 필요한 순간만 사람 Gate로 남긴다.
+
+## 4-0 종료 상태
+
+- 두 선행 작업 종료와 `origin/main` `4d351314`의 Production checks·Vercel 성공을 대조했다.
+- 코드·검증 시간·소유권·회귀 inventory와 4-1~4-8 안전 단위를 확정했다.
+- 제품 runtime과 운영 데이터는 변경하지 않았다.
+- 다음 단위는 4-1a 공통 API contract helper와 versioned write route inventory다.
