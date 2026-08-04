@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-1q notification bulk reserve
+
+- `POST /api/notification-jobs/reserve-bulk`의 canonical batch request와 per-job/count response를 client·실서버·safe server 공통 contract에 연결했다. 기존 `jobs` alias와 concurrency default는 contract가 소유한다.
+- 실서버의 부분 실패·재사용·source 저장과 App batch merge는 유지했고 safe API는 dry-run만 수행한다. contract `17 routes`, notification `16/16`, lint, scenario·production `827/827`, build `417 modules`·main `944.71 kB`·lazy `12/12`, 격리 browser `1/1` 통과.
+- 다음 단위는 dispatch/readiness 또는 남은 notification provider write route를 inventory해 한 route씩 고정한다. 운영 데이터·실제 알림 예약·취소·SQL·유료 호출은 없었다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1p notification reconcile
 
 - `POST /api/notification-jobs/reconcile-solapi`의 6개 selector request와 provider checked/source job/record response를 client·실서버·safe server 공통 contract에 연결했다.

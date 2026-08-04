@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-1q notification bulk reserve
+
+- `POST /api/notification-jobs/reserve-bulk`를 17번째 공통 contract로 고정했다. canonical notification jobs/concurrency/dry-run/reason과 failed/reserved/reused count·per-job result를 client·server가 함께 검증하며 기존 `jobs` alias는 선언된 경로로만 허용한다.
+- server의 공통 lesson dispatch context, 개별 pending/reuse/old-group cancellation, 부분 실패 source 저장과 App batch merge/실패 표시 owner는 유지했다. safe server는 모든 job을 `dry_run`으로만 기록해 실제 Solapi를 호출하지 않는다.
+- 첫 build가 main 예산을 119 bytes 넘겨 중복 dynamic loader와 실패 job builder만 공통화했다. contract `17 routes`, notification `16/16`, notification job suite, lint, scenario·production `827/827`, build `417 modules`·main `944.71 kB`·lazy `12/12`, 격리 browser `1/1` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1p notification reconcile
 
 - `POST /api/notification-jobs/reconcile-solapi`를 16번째 공통 contract로 고정했다. date/lesson/job IDs/scheduled range/limit selector와 checked/job/record/count/source 응답을 client·server가 함께 검증한다.

@@ -141,6 +141,7 @@ import {
 import {
   cancelNotificationJobRequest,
   cancelNotificationJobsRequest,
+  createFailedNotificationJob,
   persistFailedNotificationJobRequest,
   persistNotificationJobRequest,
   reserveNotificationJobRequest
@@ -6140,21 +6141,19 @@ export function App() {
   async function reserveLessonNotificationJobs(notificationJobsToReserve = [], reason = "수업일지 일괄 예약") {
     if (!notificationJobsToReserve.length) return [];
     try {
-      const result = await postJson("/api/notification-jobs/reserve-bulk", {
+      const { reserveNotificationJobsContractRequest } = await import("../domains/notifications/notificationJobContractApi.js");
+      const { notificationJobs: reservedJobs } = await reserveNotificationJobsContractRequest({
         concurrency: 4,
         notificationJobs: notificationJobsToReserve,
-        reason
+        reason,
+        request: postJson
       });
-      const reservedJobs = Array.isArray(result.notificationJobs) ? result.notificationJobs : [];
       mergeNotificationJobsIntoState(reservedJobs);
       return reservedJobs;
     } catch (error) {
-      const failedJobs = notificationJobsToReserve.map((notificationJob) => ({
-        ...notificationJob,
-        error: `Solapi 일괄 예약 확인 실패: ${error.message}`,
-        provider: "academy-os",
-        status: "failed",
-        updatedAt: new Date().toISOString()
+      const failedJobs = notificationJobsToReserve.map((notificationJob) => createFailedNotificationJob({
+        errorMessage: `Solapi 일괄 예약 확인 실패: ${error.message}`,
+        notificationJob
       }));
       mergeNotificationJobsIntoState(failedJobs);
       return failedJobs;

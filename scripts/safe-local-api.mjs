@@ -844,6 +844,46 @@ function handleMutation(pathname, payload) {
       updatedCount: 0
     };
   }
+  if (pathname === "/api/notification-jobs/reserve-bulk") {
+    let parsedPayload;
+    try {
+      parsedPayload = parseVersionedWriteRequest("POST", pathname, payload);
+    } catch (error) {
+      return {
+        code: error.code,
+        error: error.message,
+        field: error.field,
+        ok: false,
+        statusCode: Number(error.statusCode) || 400
+      };
+    }
+    const requestedJobs = parsedPayload.notificationJobs.filter((job) => job?.notificationJobId);
+    const results = requestedJobs.map((requestedJob) => {
+      const notificationJob = {
+        ...requestedJob,
+        provider: "academy-os",
+        status: "dry_run"
+      };
+      state.notificationJobs = upsertById(
+        state.notificationJobs,
+        notificationJob,
+        ["notificationJobId"]
+      );
+      return {
+        notificationJob,
+        reserved: false,
+        source: "supabase"
+      };
+    });
+    return {
+      failedCount: 0,
+      notificationJobs: results.map((result) => result.notificationJob),
+      ok: true,
+      reservedCount: 0,
+      results,
+      reusedCount: 0
+    };
+  }
   if (pathname === "/api/resource-materials") {
     let parsedPayload;
     try {

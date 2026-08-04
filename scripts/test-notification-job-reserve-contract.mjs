@@ -53,7 +53,7 @@ for (const expected of [
 
 for (const expected of [
   "export async function reserveNotificationJobProviderRequest",
-  'await import("./notificationJobContractApi.js")',
+  "loadNotificationJobContractApi()",
   "reserveNotificationJobContractRequest({",
   "const result = await reserveNotificationJobProviderRequest({"
 ]) {
