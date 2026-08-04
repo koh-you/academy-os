@@ -8,6 +8,7 @@ const path = "/api/exam-analysis-runs";
 const questionCountPath = "/api/exam-analysis-runs/confirm-question-count";
 const questionReviewsPath = "/api/exam-analysis-runs/save-question-reviews";
 const promptStudioPath = "/api/exam-analysis-runs/save-prompt-studio";
+const outputDraftsPath = "/api/exam-analysis-runs/save-output-drafts";
 
 function createExamAnalysisPayloadError(field, message) {
   const error = new Error(message);
@@ -119,4 +120,20 @@ export async function saveExamPromptStudio(request, payload) {
     "프롬프트 작업본 저장이 지연되고 있습니다."
   );
   return parseVersionedWriteResponse(method, promptStudioPath, result);
+}
+
+export function parseExamAnalysisOutputDraftsSaveRequest(payload) {
+  return parseVersionedWriteRequest(method, outputDraftsPath, payload);
+}
+
+export async function saveExamOutputDrafts(request, payload) {
+  if (typeof request !== "function") throw new Error("시험분석 산출물 저장 request 함수가 필요합니다.");
+  const parsedPayload = parseExamAnalysisOutputDraftsSaveRequest(payload);
+  const result = await request(
+    outputDraftsPath,
+    parsedPayload,
+    30000,
+    "시험분석 산출물 저장이 지연되고 있습니다."
+  );
+  return parseVersionedWriteResponse(method, outputDraftsPath, result);
 }

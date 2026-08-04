@@ -1505,8 +1505,12 @@ function verifyExamAnalysisSourceWithAiRequest(sourceId) {
   );
 }
 
+function loadExamAnalysisRunApi() {
+  return import("../domains/exams/examAnalysisRunApi.js");
+}
+
 async function confirmExamAnalysisQuestionCountRequest(payload) {
-  return (await import("../domains/exams/examAnalysisRunApi.js")).confirmExamQuestionCount(
+  return (await loadExamAnalysisRunApi()).confirmExamQuestionCount(
     postJsonWithTimeout,
     payload
   );
@@ -1540,18 +1544,16 @@ function refineExamAnalysisQuestionRowsRequest(payload) {
 }
 
 async function saveExamAnalysisQuestionReviewsRequest(payload) {
-  return (await import("../domains/exams/examAnalysisRunApi.js")).saveExamQuestionReviews(
+  return (await loadExamAnalysisRunApi()).saveExamQuestionReviews(
     postJsonWithTimeout,
     payload
   );
 }
 
-function saveExamAnalysisOutputDraftsRequest(payload) {
-  return postJsonWithTimeout(
-    "/api/exam-analysis-runs/save-output-drafts",
-    payload,
-    30000,
-    "시험분석 산출물 저장이 지연되고 있습니다."
+async function saveExamAnalysisOutputDraftsRequest(payload) {
+  return (await loadExamAnalysisRunApi()).saveExamOutputDrafts(
+    postJsonWithTimeout,
+    payload
   );
 }
 

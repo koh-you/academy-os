@@ -572,6 +572,29 @@ test("exam analysis non-paid teacher saves use the safe source and survive reloa
   await page.getByRole("tab", { name: "최종 미리보기" }).click();
   await expect(page.getByRole("textbox", { name: /^배점\/문항 구조/ }))
     .toHaveValue("객관식 12문항 · 안전 계약 검수");
+
+  await page.getByRole("tab", { name: "산출물" }).click();
+  const outputSummaryInput = page.getByRole("textbox", { name: "첫 문단 핵심 요약", exact: true });
+  await expect(outputSummaryInput).toBeVisible();
+  await outputSummaryInput.fill("안전 산출물 저장 후 새로고침 유지");
+  await page.getByRole("button", { name: "산출물 작업본 저장", exact: true }).click();
+  const outputSaveBar = page.getByRole("complementary", { name: "산출물 작업본 하단 고정 저장 바" });
+  await expect(outputSaveBar.getByText("시험분석 산출물 · 저장 완료", { exact: true })).toBeVisible();
+
+  const outputDetail = await (
+    await request.get(`${safeApiBaseUrl}/api/exam-analysis-runs?id=${encodeURIComponent(savedRun.analysisRunId)}`)
+  ).json();
+  expect(outputDetail.analysisRun.auditSummary.outputDrafts.inputs.oneLineReview)
+    .toBe("안전 산출물 저장 후 새로고침 유지");
+  expect(outputDetail.events.filter((event) => event.eventType === "exam_analysis_output_draft_saved"))
+    .toHaveLength(1);
+
+  await page.reload();
+  await expect(page.getByRole("navigation", { name: "주요 화면" })).toBeVisible();
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /시험분석/ }).click();
+  await page.getByRole("tab", { name: "산출물" }).click();
+  await expect(page.getByRole("textbox", { name: "첫 문단 핵심 요약", exact: true }))
+    .toHaveValue("안전 산출물 저장 후 새로고침 유지");
   expect(pageErrors).toEqual([]);
 });
 

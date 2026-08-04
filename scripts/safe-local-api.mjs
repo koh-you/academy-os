@@ -34,6 +34,7 @@ import { saveReportSnapshotWithVerification } from "../src/domains/reports/repor
 import {
   parseExamAnalysisQuestionCountConfirmRequest,
   parseExamAnalysisQuestionReviewsSaveRequest,
+  parseExamAnalysisOutputDraftsSaveRequest,
   parseExamAnalysisPromptStudioSaveRequest,
   parseExamAnalysisRunWriteRequest
 } from "../src/domains/exams/examAnalysisRunApi.js";
@@ -975,6 +976,79 @@ function handleMutation(pathname, payload) {
       promptStudioDraft,
       questions: state.examAnalysisQuestions.filter((item) => item.analysisRunId === parsedPayload.analysisRunId),
       saveVerification: { revision: promptStudioDraft.revision, verified: true, verifiedAt: savedAt },
+      source: "supabase",
+      sources: []
+    };
+  }
+  if (pathname === "/api/exam-analysis-runs/save-output-drafts") {
+    let parsedPayload;
+    try {
+      parsedPayload = parseExamAnalysisOutputDraftsSaveRequest(payload);
+    } catch (error) {
+      return {
+        code: error.code,
+        error: error.message,
+        field: error.field,
+        ok: false,
+        statusCode: Number(error.statusCode) || 400
+      };
+    }
+    const currentRun = state.examAnalysisRuns
+      .find((run) => run.analysisRunId === parsedPayload.analysisRunId) ?? null;
+    if (!currentRun) {
+      return { error: "시험분석 작업을 찾지 못했습니다.", ok: false, statusCode: 404 };
+    }
+    const savedAt = new Date().toISOString();
+    const previousDrafts = currentRun.auditSummary?.outputDrafts ?? {};
+    const outputDrafts = {
+      ...previousDrafts,
+      inputs: {
+        ...(previousDrafts.inputs ?? {}),
+        ...parsedPayload.outputInputs,
+        updatedAt: savedAt
+      },
+      blog: {
+        ...(previousDrafts.blog ?? {}),
+        ...(parsedPayload.blogTeacherDraftEdited ? {
+          teacherDraft: parsedPayload.blogTeacherDraft.trim().slice(0, 20000),
+          teacherUpdatedAt: savedAt
+        } : {}),
+        updatedAt: savedAt
+      },
+      instagram: {
+        ...(previousDrafts.instagram ?? {}),
+        ...(parsedPayload.instagramTeacherDraftEdited ? {
+          teacherDraft: parsedPayload.instagramTeacherDraft.trim().slice(0, 20000),
+          teacherUpdatedAt: savedAt
+        } : {}),
+        updatedAt: savedAt
+      }
+    };
+    outputDrafts.blog.status = outputDrafts.blog.teacherUpdatedAt
+      ? "teacher_saved"
+      : outputDrafts.blog.aiDraft ? "ai_draft" : "inputs_saved";
+    outputDrafts.instagram.status = outputDrafts.instagram.teacherUpdatedAt
+      ? "teacher_saved"
+      : outputDrafts.instagram.aiDraft ? "ai_draft" : "inputs_saved";
+    const analysisRun = {
+      ...currentRun,
+      auditSummary: { ...(currentRun.auditSummary ?? {}), outputDrafts },
+      updatedAt: savedAt
+    };
+    state.examAnalysisRuns = upsertById(state.examAnalysisRuns, analysisRun, ["analysisRunId"]);
+    const event = {
+      analysisRunId: parsedPayload.analysisRunId,
+      eventId: `${parsedPayload.analysisRunId}-output-draft-saved-${savedAt}`,
+      eventType: "exam_analysis_output_draft_saved",
+      occurredAt: savedAt
+    };
+    state.examAnalysisEvents = upsertById(state.examAnalysisEvents, event, ["eventId"]);
+    return {
+      aiJobs: [],
+      analysisRun,
+      events: state.examAnalysisEvents.filter((item) => item.analysisRunId === parsedPayload.analysisRunId),
+      ok: true,
+      questions: state.examAnalysisQuestions.filter((item) => item.analysisRunId === parsedPayload.analysisRunId),
       source: "supabase",
       sources: []
     };

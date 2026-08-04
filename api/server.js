@@ -128,6 +128,7 @@ import { saveReportSnapshotWithVerification } from "../src/domains/reports/repor
 import {
   parseExamAnalysisQuestionCountConfirmRequest,
   parseExamAnalysisQuestionReviewsSaveRequest,
+  parseExamAnalysisOutputDraftsSaveRequest,
   parseExamAnalysisPromptStudioSaveRequest,
   parseExamAnalysisRunWriteRequest
 } from "../src/domains/exams/examAnalysisRunApi.js";
@@ -6406,18 +6407,16 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-output-drafts") {
     try {
-      const payload = await readJsonBody(request);
-      const result = await saveExamAnalysisOutputDrafts({
-        analysisRunId: payload.analysisRunId,
-        outputInputs: payload.outputInputs,
-        blogTeacherDraft: payload.blogTeacherDraft,
-        instagramTeacherDraft: payload.instagramTeacherDraft,
-        blogTeacherDraftEdited: payload.blogTeacherDraftEdited,
-        instagramTeacherDraftEdited: payload.instagramTeacherDraftEdited
-      });
+      const payload = parseExamAnalysisOutputDraftsSaveRequest(await readJsonBody(request));
+      const result = await saveExamAnalysisOutputDrafts(payload);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.field !== undefined ? { field: error.field } : {})
+      });
     }
     return;
   }
