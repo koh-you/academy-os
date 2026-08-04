@@ -105,7 +105,7 @@ for (const [
   );
   const helperIndex = functionSource.indexOf(helperText, setterIndex);
   const persistIndex = functionSource.indexOf(
-    'postJson("/api/notification-jobs", {',
+    "persistNotificationJobRequest({",
     helperIndex
   );
   const persistPayloadIndex = functionSource.indexOf(

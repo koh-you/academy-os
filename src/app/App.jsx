@@ -142,6 +142,7 @@ import {
   cancelNotificationJobRequest,
   cancelNotificationJobsRequest,
   persistFailedNotificationJobRequest,
+  persistNotificationJobRequest,
   reserveNotificationJobRequest
 } from "../domains/notifications/notificationJobApi.js";
 import {
@@ -6276,7 +6277,8 @@ export function App() {
         status: "canceled",
         updatedAt: new Date().toISOString()
       };
-      postJson("/api/notification-jobs", { notificationJob: fallbackJob }).catch((persistError) => console.error(persistError));
+      persistNotificationJobRequest({ notificationJob: fallbackJob, request: postJson })
+        .catch((persistError) => console.error(persistError));
       return fallbackJob;
     }
   }
@@ -7586,9 +7588,8 @@ export function App() {
       setNotificationJobs((current) =>
         upsertNotificationJobList(current, notificationJob)
       );
-      postJson("/api/notification-jobs", {
-        notificationJob
-      }).catch((error) => console.error(error));
+      persistNotificationJobRequest({ notificationJob, request: postJson })
+        .catch((error) => console.error(error));
       const completeStatus = scheduledDate
         ? `예약 중 · ${scheduledLabel}`
         : result.result?.dryRun
@@ -7610,9 +7611,8 @@ export function App() {
       setNotificationJobs((current) =>
         upsertNotificationJobList(current, failedJob)
       );
-      postJson("/api/notification-jobs", {
-        notificationJob: failedJob
-      }).catch((persistError) => console.error(persistError));
+      persistNotificationJobRequest({ notificationJob: failedJob, request: postJson })
+        .catch((persistError) => console.error(persistError));
       applySendStatus(`실패 · ${error.message}`, { persist: true });
     }
   }

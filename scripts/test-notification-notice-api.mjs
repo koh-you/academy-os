@@ -18,7 +18,7 @@ const persistResult = await persistNoticeJobRequest({
   notificationJob,
   request: async (...args) => {
     persistCalls.push(args);
-    return { notificationJob };
+    return { notificationJob, source: "supabase" };
   }
 });
 
@@ -67,7 +67,7 @@ const {
     bindingCalls.push(args);
     return args[0].endsWith("/reserve")
       ? { notificationJob: reservedJob }
-      : { notificationJob };
+      : { notificationJob, source: "supabase" };
   }
 });
 assert.equal(await persistNoticeJob(notificationJob), undefined);

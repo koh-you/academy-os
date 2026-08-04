@@ -108,7 +108,7 @@ for (const [
   );
   const helperIndex = functionSource.indexOf(helperText, setterIndex);
   const persistIndex = functionSource.indexOf(
-    'postJson("/api/notification-jobs", {',
+    "persistNotificationJobRequest({",
     helperIndex
   );
   const persistPayloadIndex = functionSource.indexOf(
@@ -128,7 +128,7 @@ for (const [
 }
 for (const AppOwnedEffect of [
   'fetch(apiUrl("/api/notifications/comment-alimtalk"), {',
-  'postJson("/api/notification-jobs", {',
+  "persistNotificationJobRequest({",
   "setNotificationLogs((current) =>",
   "setNotificationJobs((current) =>",
   "applySendStatus("

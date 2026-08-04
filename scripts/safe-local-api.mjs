@@ -709,6 +709,27 @@ function handleMutation(pathname, payload) {
       verified: true
     };
   }
+  if (pathname === "/api/notification-jobs") {
+    let parsedPayload;
+    try {
+      parsedPayload = parseVersionedWriteRequest("POST", pathname, payload);
+    } catch (error) {
+      return {
+        code: error.code,
+        error: error.message,
+        field: error.field,
+        ok: false,
+        statusCode: Number(error.statusCode) || 400
+      };
+    }
+    const notificationJob = parsedPayload.notificationJob;
+    state.notificationJobs = upsertById(
+      state.notificationJobs,
+      notificationJob,
+      ["notificationJobId"]
+    );
+    return { notificationJob, ok: true };
+  }
   if (pathname === "/api/resource-materials") {
     let parsedPayload;
     try {

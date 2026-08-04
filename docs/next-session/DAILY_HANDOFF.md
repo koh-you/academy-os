@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-1m notification source
+
+- `POST /api/notification-jobs`의 canonical source payload/response를 client·실서버·safe server 공통 contract에 연결했다. DB `notification_jobs` upsert만 이 경계가 소유하고 Solapi 예약·취소·reconcile은 별도 route에 그대로 남겼다.
+- App/공지/실패 기록의 직접 source POST는 공통 helper를 사용하고 dynamic contract chunk로 initial main 예산을 보존했다. contract `13 routes`, notification `12/12`, lint, scenario·production `827/827`, build `416 modules`·main `944.07 kB`·lazy `12/12`, provider 없는 browser `2/2` 통과.
+- 다음 단위는 `/api/notification-jobs/reserve` request/response와 source saved/provider result 분리를 실제 발송 없이 고정한다. 운영 데이터·실제 알림·SQL·유료 호출은 없었다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1l resource private file
 
 - 인증된 `/api/resource-material-files` POST/DELETE의 upload/delete request와 Storage+row verified response를 공통 contract에 연결했다. teacher auth는 parser보다 먼저, 28MB body limit와 기존 file validation은 parser 뒤에 유지한다.

@@ -1,3 +1,5 @@
+import { persistNotificationJobRequest } from "./notificationJobApi.js";
+
 const noticeJobPersistTimeoutMessage =
   "발송 기록 저장 요청이 15초를 넘었습니다. 새로고침 후 기록 반영 여부를 확인해 주세요.";
 const noticeJobReserveTimeoutMessage =
@@ -7,12 +9,11 @@ export async function persistNoticeJobRequest({
   notificationJob,
   request
 }) {
-  await request(
-    "/api/notification-jobs",
-    { notificationJob },
-    15000,
-    noticeJobPersistTimeoutMessage
-  );
+  await persistNotificationJobRequest({
+    notificationJob,
+    request,
+    requestArgs: [15000, noticeJobPersistTimeoutMessage]
+  });
 }
 
 export async function reserveNoticeJobRequest({
