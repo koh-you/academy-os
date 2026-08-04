@@ -39,9 +39,9 @@ const wrongProblemSaveMessages = {
   dirty: "아직 저장되지 않은 입력이 있습니다. 저장 중 수정했다면 한 번 더 저장해 주세요.",
   failed: "저장하지 못했습니다. 현재 입력을 유지하며, 서버 저장본을 확인한 뒤 다시 저장해 주세요.",
   idle: "학생별 오답을 수정한 뒤 명시적으로 저장해 주세요.",
-  saved: "Supabase 저장값을 재조회해 일치 여부를 확인했습니다.",
+  saved: "서버 저장값을 재조회해 일치 여부를 확인했습니다.",
   saving: "학생별 오답을 저장하고 있습니다.",
-  verifying: "Supabase 저장값을 다시 확인하고 있습니다."
+  verifying: "서버 저장값을 다시 확인하고 있습니다."
 };
 
 export function FollowUpCenter({
