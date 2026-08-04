@@ -124,6 +124,18 @@ const notificationJobBulkReserveResponseContract = defineApiPayloadContract({
   name: "notification job bulk reserve response"
 });
 
+const notificationReadinessResponseContract = defineApiPayloadContract({
+  allowUnknownFields: true,
+  fields: {
+    checkedCount: { required: true, type: "number" },
+    issueCount: { required: true, type: "number" },
+    issues: { required: true, type: "array" },
+    source: { allowEmpty: false, required: true, type: "string" },
+    windowMinutes: { required: true, type: "number" }
+  },
+  name: "notification readiness response"
+});
+
 function defineVersionedWriteRoute({
   domain,
   fields,
@@ -354,6 +366,18 @@ export const versionedWriteRouteContracts = Object.freeze([
     path: "/api/notification-jobs/reserve-bulk",
     response: notificationJobBulkReserveResponseContract,
     sources: ["notification_jobs", "provider.solapi"]
+  }),
+  defineVersionedWriteRoute({
+    domain: "notification",
+    fields: {
+      notifySlack: { defaultValue: false, type: "boolean" },
+      now: { trim: true, type: "string" },
+      windowMinutes: { defaultValue: 15, type: "number" }
+    },
+    key: "notificationReadinessCheck",
+    path: "/api/notification-jobs/readiness-check",
+    response: notificationReadinessResponseContract,
+    sources: ["notification_jobs", "provider.slack"]
   })
 ]);
 

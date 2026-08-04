@@ -1192,6 +1192,61 @@ test("notification bulk reserve contract keeps per-job dry-run results in the sa
   expect(pageErrors).toEqual([]);
 });
 
+test("notification readiness contract checks safe source jobs without Slack side effects", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+  const safeApiBaseUrl = `http://127.0.0.1:${process.env.ACADEMY_SAFE_API_PORT || 8787}`;
+  const notificationJobId = "safe-contract-readiness-missing-body";
+
+  const sourceResponse = await request.post(`${safeApiBaseUrl}/api/notification-jobs`, {
+    data: {
+      notificationJob: {
+        notificationJobId,
+        notificationType: "notice_parent",
+        payload: { studentName: "안전학생" },
+        scheduledAt: "2099-08-05T12:00:00.000Z",
+        status: "scheduled"
+      }
+    }
+  });
+  expect(sourceResponse.status()).toBe(200);
+
+  const readinessResponse = await request.post(`${safeApiBaseUrl}/api/notification-jobs/readiness-check`, {
+    data: {
+      notifySlack: false,
+      now: "2099-08-05T11:45:00.000Z",
+      windowMinutes: 60
+    }
+  });
+  expect(readinessResponse.status()).toBe(200);
+  expect(await readinessResponse.json()).toMatchObject({
+    checkedCount: 1,
+    issueCount: 1,
+    issues: [{
+      missing: ["공지 본문"],
+      notificationJobId,
+      notificationType: "notice_parent",
+      studentName: "안전학생"
+    }],
+    ok: true,
+    safeFixture: true,
+    slack: null,
+    source: "supabase",
+    windowMinutes: 60
+  });
+
+  const blockedSlackResponse = await request.post(`${safeApiBaseUrl}/api/notification-jobs/readiness-check`, {
+    data: { notifySlack: true }
+  });
+  expect(blockedSlackResponse.status()).toBe(400);
+  expect(await blockedSlackResponse.json()).toMatchObject({
+    error: "안전 fixture에서는 Slack 알림을 보낼 수 없습니다.",
+    ok: false,
+    safeFixture: true
+  });
+  expect(pageErrors).toEqual([]);
+});
+
 test("notification cancel contract persists the source state without provider actions in the safe API", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);

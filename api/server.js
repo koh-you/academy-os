@@ -7744,15 +7744,24 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs/readiness-check") {
     try {
-      const payload = await readJsonBody(request);
+      const payload = parseVersionedWriteRequest(
+        request.method,
+        requestUrl.pathname,
+        await readJsonBody(request)
+      );
       const result = await checkNotificationReadiness({
-        notifySlack: Boolean(payload.notifySlack),
+        notifySlack: payload.notifySlack,
         now: payload.now,
         windowMinutes: payload.windowMinutes
       });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.field !== undefined ? { field: error.field } : {})
+      });
     }
     return;
   }

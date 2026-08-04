@@ -8,9 +8,9 @@ import {
   versionedWriteRouteContracts
 } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 
-assert.equal(versionedWriteRouteContracts.length, 17);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 17);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 17);
+assert.equal(versionedWriteRouteContracts.length, 18);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 18);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 18);
 assert.equal(versionedWriteRouteContracts.every(Object.isFrozen), true);
 assert.equal(versionedWriteRouteContracts.every(({ request, response, sources }) => (
   Object.isFrozen(request) && Object.isFrozen(response) && Object.isFrozen(sources)
@@ -355,6 +355,34 @@ assert.throws(
   }),
   (error) => error.field === "notificationJobs" && error.statusCode === 400
 );
+assert.deepEqual(
+  parseVersionedWriteRequest("POST", "/api/notification-jobs/readiness-check", {
+    now: " 2099-08-05T11:45:00.000Z ",
+    windowMinutes: 60
+  }),
+  {
+    notifySlack: false,
+    now: "2099-08-05T11:45:00.000Z",
+    windowMinutes: 60
+  }
+);
+assert.deepEqual(
+  parseVersionedWriteResponse("POST", "/api/notification-jobs/readiness-check", {
+    checkedCount: 1,
+    issueCount: 1,
+    issues: [{ notificationJobId: "notification-safe-1", missing: ["공지 본문"] }],
+    slack: null,
+    source: "supabase",
+    windowMinutes: 60
+  }),
+  {
+    checkedCount: 1,
+    issueCount: 1,
+    issues: [{ notificationJobId: "notification-safe-1", missing: ["공지 본문"] }],
+    source: "supabase",
+    windowMinutes: 60
+  }
+);
 assert.deepEqual(response, {
   auditId: "supplement-audit",
   source: "supabase",
@@ -420,4 +448,4 @@ assert.throws(
   /field\/alias가 중복/
 );
 
-console.log("versioned write route contracts passed · 17 routes · canonical keys and declared legacy alias only");
+console.log("versioned write route contracts passed · 18 routes · canonical keys and declared legacy alias only");

@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-1r notification readiness
+
+- `POST /api/notification-jobs/readiness-check`를 18번째 공통 contract로 고정했다. canonical notifySlack/now/window와 checked/issue/source/window response를 server가 검증하며 잘못된 field/type은 source 조회 전에 400으로 차단한다.
+- notification_jobs source read, 시간 범위와 누락 판정, issue가 있을 때만 선택적 Slack 알림을 보내는 기존 owner는 유지했다. safe server는 공지 본문 누락 fixture만 판정하고 `notifySlack:true`는 거부해 실제 Slack을 호출하지 않는다.
+- 검증: contract `18 routes`, notification `17/17`, lint, scenario·production `827/827`, build `417 modules`·main `944.71 kB`·lazy `12/12`, 격리 browser `1/1` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1q notification bulk reserve
 
 - `POST /api/notification-jobs/reserve-bulk`를 17번째 공통 contract로 고정했다. canonical notification jobs/concurrency/dry-run/reason과 failed/reserved/reused count·per-job result를 client·server가 함께 검증하며 기존 `jobs` alias는 선언된 경로로만 허용한다.
