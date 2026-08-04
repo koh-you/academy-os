@@ -312,12 +312,11 @@ export function ExamPrepCenter({
               <span>수학 시험 일정</span>
               <span>시험 범위</span>
               <span>부교재</span>
-              <span>시험 후 총평</span>
-              <span>관리</span>
+              <span>상세</span>
             </div>
             {filteredRows.map((row) => {
               const specialNote = row.specialNote ?? row.memo ?? "";
-              const reviewSummary = row.revisedReview || row.review || "시험 후 총평 미작성";
+              const hasReview = Boolean(row.review || row.revisedReview);
 
               return (
                 <div className="examPrepRow" key={row.examPrepId}>
@@ -353,14 +352,12 @@ export function ExamPrepCenter({
                     onChange={(event) => onUpdateRow(row.examPrepId, "subTextbook", event.target.value)}
                     placeholder="부교재"
                   />
-                  <button className={row.review || row.revisedReview ? "examReviewOpenButton filled" : "examReviewOpenButton"} onClick={() => setReviewModalRowId(row.examPrepId)} type="button">
-                    <strong>{row.review || row.revisedReview ? "총평 보기/수정" : "총평 작성"}</strong>
-                    <span>{reviewSummary}</span>
-                  </button>
                   <div className="examPrepRowActions">
                     {rowSaveStates[row.examPrepId] ? <InlineSaveStatus saveState={rowSaveStates[row.examPrepId]} /> : null}
-                    <button className="softButton compact" onClick={() => setEditingExamPrepId(row.examPrepId)} type="button">수정</button>
-                    <button className="dangerSoftButton compact" onClick={() => onDeleteRow?.(row.examPrepId)} type="button">삭제</button>
+                    <button className={hasReview ? "examPrepDetailButton filled" : "examPrepDetailButton"} onClick={() => setEditingExamPrepId(row.examPrepId)} type="button">
+                      <strong>상세 관리</strong>
+                      {hasReview ? <span>총평 있음</span> : null}
+                    </button>
                   </div>
                 </div>
               );
@@ -438,6 +435,11 @@ export function ExamPrepCenter({
           getEditableMathExamEntries={getEditableMathExamEntries}
           onAddMathExamEntry={addMathExamEntry}
           onClose={() => setEditingExamPrepId("")}
+          onDeleteRow={onDeleteRow}
+          onOpenReview={() => {
+            setEditingExamPrepId("");
+            setReviewModalRowId(editingExamPrepRow.examPrepId);
+          }}
           onRemoveMathExamEntry={removeMathExamEntry}
           onUpdateMathExamEntry={updateMathExamEntry}
           onUpdateRow={onUpdateRow}

@@ -5545,8 +5545,8 @@ summary:focus-visible {
   border-top: 1px solid #e2e8f0;
   display: grid;
   gap: 4px;
-  grid-template-columns: 96px 132px 64px 92px 112px 168px 250px 280px 190px 180px 112px;
-  min-width: 1720px;
+  grid-template-columns: 96px 132px 64px 92px 112px 168px 250px 280px 190px 116px;
+  min-width: 1540px;
   padding: 8px 10px;
 }
 
@@ -5774,29 +5774,29 @@ summary:focus-visible {
   padding: 7px 10px;
 }
 
-.examReviewOpenButton {
+.examPrepDetailButton {
   background: #f8fafc;
   border: 1px solid #d8e3f8;
   border-radius: 8px;
   color: #475569;
   display: grid;
   gap: 4px;
-  min-height: 64px;
+  min-height: 58px;
   padding: 9px 10px;
   text-align: left;
 }
 
-.examReviewOpenButton.filled {
+.examPrepDetailButton.filled {
   background: #eef6ff;
   border-color: #93c5fd;
   color: #1d4ed8;
 }
 
-.examReviewOpenButton strong {
+.examPrepDetailButton strong {
   font-size: 14px;
 }
 
-.examReviewOpenButton span {
+.examPrepDetailButton span {
   color: inherit;
   display: -webkit-box;
   font-size: 12px;

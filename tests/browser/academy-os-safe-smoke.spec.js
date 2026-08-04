@@ -886,6 +886,29 @@ test("exam prep all-class view creates enrolled-school rows without inventing ex
   expect(pageErrors).toEqual([]);
 });
 
+test("exam prep rows consolidate review and management actions into the detail modal", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /시험관리/ }).click();
+  await page.getByRole("button", { name: "정산 미리보기반" }).click();
+
+  const tableHeader = page.locator(".examPrepHead");
+  await expect(tableHeader).toContainText("상세");
+  await expect(tableHeader).not.toContainText("시험 후 총평");
+  await expect(tableHeader).not.toContainText("관리");
+  const safeSchoolRow = page.locator(".examPrepRow").filter({ hasText: "안전고" });
+  await expect(safeSchoolRow.getByRole("button", { name: /상세 관리/ })).toHaveCount(1);
+  await safeSchoolRow.getByRole("button", { name: /상세 관리/ }).click();
+
+  const detailDialog = page.getByRole("dialog", { name: "안전고 시험정보 수정" });
+  await expect(detailDialog.getByRole("button", { name: "시험 후 총평 작성" })).toBeVisible();
+  await expect(detailDialog.getByRole("button", { name: "시험정보 삭제" })).toBeVisible();
+  await detailDialog.getByRole("button", { name: "시험 후 총평 작성" }).click();
+  await expect(page.getByRole("dialog", { name: "안전고 시험 후 총평" })).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
 test("exam prep rapid edits serialize, rebase CAS, and persist the verified latest row value", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   const requests = [];

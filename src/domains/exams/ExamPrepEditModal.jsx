@@ -11,6 +11,8 @@ export function ExamPrepEditModal({
   getEditableMathExamEntries,
   onAddMathExamEntry,
   onClose,
+  onDeleteRow,
+  onOpenReview,
   onRemoveMathExamEntry,
   onUpdateMathExamEntry,
   onUpdateRow,
@@ -18,6 +20,8 @@ export function ExamPrepEditModal({
   saveState = "idle"
 }) {
   const specialNote = row.specialNote ?? row.memo ?? "";
+  const hasReview = Boolean(row.review || row.revisedReview);
+  const isBusy = saveState === "saving" || saveState === "verifying";
 
   return (
     <Modal
@@ -145,6 +149,12 @@ export function ExamPrepEditModal({
 
         <div className="modalActionBar">
           {saveState !== "idle" ? <InlineSaveStatus label="시험정보" saveState={saveState} /> : null}
+          <button className="softButton" disabled={isBusy} onClick={onOpenReview} type="button">
+            {hasReview ? "시험 후 총평 보기/수정" : "시험 후 총평 작성"}
+          </button>
+          <button className="dangerSoftButton" disabled={isBusy} onClick={() => onDeleteRow?.(row.examPrepId)} type="button">
+            시험정보 삭제
+          </button>
           <button className="primaryButton" onClick={onClose} type="button">닫기</button>
         </div>
       </div>

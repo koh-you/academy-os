@@ -179,6 +179,14 @@ const centerSource = await readFile(new URL("../src/domains/exams/ExamPrepCenter
 assert.match(centerSource, /<strong>전체 반<\/strong>/);
 assert.match(centerSource, /onEnsureExamCycleRows\(examCycle, selectedClassTemplateId\)/);
 assert.match(centerSource, /onEnsureExamCycleRows\(selectedExamCycle, classTemplateId\)/);
+assert.match(centerSource, /<span>상세<\/span>/);
+assert.match(centerSource, /<strong>상세 관리<\/strong>/);
+assert.doesNotMatch(centerSource, /<span>시험 후 총평<\/span>/);
+assert.doesNotMatch(centerSource, /<span>관리<\/span>/);
+
+const editModalSource = await readFile(new URL("../src/domains/exams/ExamPrepEditModal.jsx", import.meta.url), "utf8");
+assert.match(editModalSource, /시험 후 총평 보기\/수정/);
+assert.match(editModalSource, /시험정보 삭제/);
 
 const generatedStudentRow = createStudentExamPrepRow({
   examCycle: "2026-2-mid",
@@ -193,7 +201,6 @@ assert.equal(generatedStudentRow.examPeriod, "");
 assert.equal(generatedStudentRow.mathExamDate, "");
 assert.deepEqual(generatedStudentRow.mathExamDates, []);
 assert.equal(generatedStudentRow.source, "학생DB 자동생성");
-
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
 assert.doesNotMatch(appSource, /return \{ \.\.\.row, examPeriod: getDefaultExamPeriodText\(row\.examCycle\) \}/);
 
