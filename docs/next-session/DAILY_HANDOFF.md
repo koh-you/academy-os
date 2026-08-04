@@ -6,7 +6,7 @@
 
 - 수동 출결과 키오스크 저장이 공유하는 `/api/attendance/check` request 및 `record/action/mode/alimtalk` response를 공통 contract에 연결했다. initial bundle을 지키기 위해 client contract는 저장 시점 dynamic import다.
 - 출결 원천 저장과 attendance event, 수동 결석 예약·키오스크 알림 queue는 server 기존 orchestration에 남아 있으며 provider 실패를 원천 저장 실패로 바꾸지 않는다.
-- contract/attendance controller, lesson `20/20`, lint, scenario·production `827/827`, build `416 modules`·main `942.62 kB`·lazy `12/12`, 격리 browser `1/1` 통과. 다음은 registry에 이미 있는 class roster payload를 client/server에 한 route로 연결한다. 운영 데이터·실제 알림·SQL·유료 호출은 없었다.
+- 첫 CI가 하원 저장 응답 전 readback하는 browser race를 찾아 POST 200·UI 재활성화 대기를 추가했다. contract/attendance controller, lesson `20/20`, lint, scenario·production `827/827`, build `416 modules`·main `942.62 kB`·lazy `12/12`, 전체 browser `47/47` 통과. 다음은 registry에 이미 있는 class roster payload를 client/server에 한 route로 연결한다. 운영 데이터·실제 알림·SQL·유료 호출은 없었다.
 
 ## 2026-08-05 App/API 4차 리팩터링 4-1e supplement schedule
 

@@ -6,7 +6,8 @@
 
 - `/api/attendance/check`의 수동·키오스크 공용 요청과 원천 저장 결과 응답을 7번째 contract로 고정했다. optional field는 `undefined`를 제외한 canonical key만 보내고 `lateMinutes`의 기존 number/string 입력은 모두 보존하며, server는 미지 field·잘못된 type을 출결 저장 전에 field 포함 400으로 차단한다.
 - 응답은 `record/action/mode/alimtalk`을 확인한 뒤 기존 controller가 App 원천을 교체한다. `lesson_student_records`·연속 방문 두 행 저장, attendance event, 수동 결석 Solapi 예약·키오스크 queue, provider 부분 실패 안내의 owner와 순서는 이동하지 않았다.
-- 검증: contract `7 routes`, attendance API·manual controller, lesson `20/20`, lint, scenario·production `827/827`, build `416 modules`·main `942.62 kB`·lazy `12/12`, 격리 집중 browser `1/1` 통과.
+- 첫 exact-head CI가 하원 확인 직후 저장 응답을 기다리지 않고 record를 읽던 browser 경쟁 조건을 발견했다. 하원 POST 200과 UI 재활성화를 기다리게 고쳐 격리 3회 반복 및 전체 browser `47/47`을 통과했다.
+- 검증: contract `7 routes`, attendance API·manual controller, lesson `20/20`, lint, scenario·production `827/827`, build `416 modules`·main `942.62 kB`·lazy `12/12`, browser `47/47` 통과.
 
 ## 2026-08-05 App/API 4차 리팩터링 4-1e supplement schedule
 

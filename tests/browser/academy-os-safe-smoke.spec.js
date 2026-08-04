@@ -116,7 +116,13 @@ test("consecutive absence makeup and regular lessons use one physical attendance
   const checkoutDialog = page.getByRole("dialog", { name: "출결 확인" });
   await expect(checkoutDialog).toContainText("하원");
   await expect(checkoutDialog).toContainText("연속 수업으로 처리: 결석보강 가상수업 → 고1 정규 가상수업");
+  const checkoutResponse = page.waitForResponse((response) => (
+    response.url().includes("/api/attendance/check") && response.request().method() === "POST"
+  ));
   await checkoutDialog.getByRole("button", { name: "확인" }).click();
+  const completedCheckoutResponse = await checkoutResponse;
+  expect(completedCheckoutResponse.status(), await completedCheckoutResponse.text()).toBe(200);
+  await expect(pinInput).toBeEnabled();
 
   recordsResult = await (await request.get(`${safeApiBaseUrl}/api/lesson-records`)).json();
   visitRecords = recordsResult.records.filter((record) => record.studentId === "safe-consecutive-attendance-student");
