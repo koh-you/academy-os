@@ -102,6 +102,7 @@
 - 4-1c는 `/api/lesson-journal/history-action`의 복사·취소·되돌리기 payload와 verified response를 같은 contract에 연결했다. stable pending copy와 undo stack, Supabase CAS/readback/rollback 및 실패 복구는 기존 owner에 유지한다.
 - 4-1d는 `/api/lesson-journal/makeup-tasks/save`의 canonical/legacy payload와 verified response를 같은 contract에 연결했다. initial bundle 예산 회귀는 저장 시점 dynamic import로 해소했고 stable task ID·CAS/readback·부분 저장 draft 복구는 유지한다.
 - 4-1e는 `/api/supplement-schedules/save`의 atomic lesson/task plan과 verified response를 같은 contract에 연결했다. 결과 불명 최신 draft 수렴, CAS/readback/rollback, source saved/provider failed 재시도 범위는 유지한다.
+- 4-1f는 `/api/attendance/check`의 수동·키오스크 공용 request와 `record/action/mode/alimtalk` response를 같은 contract에 연결했다. 연속 방문 원천 저장, attendance event, 수동 결석 Solapi 예약과 키오스크 queue는 기존 server owner에 남고 provider 실패와 원천 저장 결과의 구분을 유지한다.
 
 ## 폴더 상태
 
@@ -114,7 +115,7 @@
 
 1. App 2차 Phase 1~5와 3차 3-0~3-8, P1 운영 저장 신뢰성, P2 modal 통일 후속, P3 알림톡 설정 관리는 완료됐다. P3 closeout은 제품 경로 9개, 설정 key 10개, Solapi provider template 4개의 seed→draft→persisted final→provider 변수 연결과 재시험 독립 11시 transport 부재를 자동 검증한다. 공지 preset 3개·특강 guide seed는 새 초안에만 적용하며 현재 draft·기존 job·보충 교사 최종본과 provider contract를 보존한다.
 2. App 3차 리팩터링 3-0~3-8은 production main 43.1%·gzip 45.3% 감소, 12개 물리 lazy chunk, App Babel 500 KB 경고 제거와 종료 소유권 감사까지 완료했다.
-3. App/API 4차는 4-0 기준선과 4-1a~4-1e의 lesson rows/history/makeup·supplement schedule contract 연결을 확정했다. 다음은 attendance versioned write payload를 inventory에 한 route씩 추가·연결한다.
+3. App/API 4차는 4-0 기준선과 4-1a~4-1f의 lesson rows/history/makeup·supplement schedule·attendance check contract 연결을 확정했다. 다음은 registry의 class roster payload를 client/server에 한 route로 연결한다.
 4. `app_state`에서 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
    - 학생별 오답 `wrongProblems`는 명시 저장 전환을 완료했다. 다음 후보는 별도 저장 의미가 분명한 `lessonResearchItems`이며 새 작업에서 범위를 다시 확인한다.
    - 즉시 사람 판단이 필요하지 않은 발견은 queue/worklog에 남기고 AI 검수와 다음 단계를 연쇄 진행한다.

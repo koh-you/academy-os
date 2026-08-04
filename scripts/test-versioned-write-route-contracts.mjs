@@ -8,9 +8,9 @@ import {
   versionedWriteRouteContracts
 } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 
-assert.equal(versionedWriteRouteContracts.length, 6);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 6);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 6);
+assert.equal(versionedWriteRouteContracts.length, 7);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 7);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 7);
 assert.equal(versionedWriteRouteContracts.every(Object.isFrozen), true);
 assert.equal(versionedWriteRouteContracts.every(({ request, response, sources }) => (
   Object.isFrozen(request) && Object.isFrozen(response) && Object.isFrozen(sources)
@@ -47,6 +47,43 @@ const response = parseVersionedWriteResponse("POST", "/api/supplement-schedules/
   source: "supabase",
   verified: true
 });
+
+const attendancePayload = parseVersionedWriteRequest("POST", "/api/attendance/check", {
+  action: " checkin ",
+  lateMinutes: "",
+  phoneLast4: " 1234 ",
+  sendAlimtalk: true,
+  source: " kiosk "
+});
+assert.deepEqual(attendancePayload, {
+  action: "checkin",
+  lateMinutes: "",
+  phoneLast4: "1234",
+  sendAlimtalk: true,
+  source: "kiosk"
+});
+assert.equal(
+  parseVersionedWriteRequest("POST", "/api/attendance/check", {
+    lateMinutes: 7,
+    source: "manual"
+  }).lateMinutes,
+  7
+);
+assert.deepEqual(
+  parseVersionedWriteResponse("POST", "/api/attendance/check", {
+    action: "checkin",
+    alimtalk: { status: "queued" },
+    lesson: { lessonId: "lesson-1" },
+    mode: "checkIn",
+    record: { lessonStudentRecordId: "record-1" }
+  }),
+  {
+    action: "checkin",
+    alimtalk: { status: "queued" },
+    mode: "checkIn",
+    record: { lessonStudentRecordId: "record-1" }
+  }
+);
 assert.deepEqual(response, {
   auditId: "supplement-audit",
   source: "supabase",
@@ -112,4 +149,4 @@ assert.throws(
   /field\/alias가 중복/
 );
 
-console.log("versioned write route contracts passed · 6 routes · canonical keys and declared legacy alias only");
+console.log("versioned write route contracts passed · 7 routes · canonical keys and declared legacy alias only");

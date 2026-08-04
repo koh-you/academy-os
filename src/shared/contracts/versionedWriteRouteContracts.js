@@ -13,11 +13,23 @@ const verifiedWriteResponseContract = defineApiPayloadContract({
   name: "verified versioned write response"
 });
 
+const attendanceCheckResponseContract = defineApiPayloadContract({
+  allowUnknownFields: true,
+  fields: {
+    action: { allowEmpty: false, required: true, trim: true, type: "string" },
+    alimtalk: { required: true, type: "object" },
+    mode: { allowEmpty: false, required: true, trim: true, type: "string" },
+    record: { required: true, type: "object" }
+  },
+  name: "attendance check response"
+});
+
 function defineVersionedWriteRoute({
   domain,
   fields,
   key,
   path,
+  response = verifiedWriteResponseContract,
   sources
 }) {
   return defineApiRouteContract({
@@ -26,7 +38,7 @@ function defineVersionedWriteRoute({
     method: "POST",
     path,
     request: defineApiPayloadContract({ fields, name: `${key} request` }),
-    response: verifiedWriteResponseContract,
+    response,
     sources
   });
 }
@@ -97,6 +109,29 @@ export const versionedWriteRouteContracts = Object.freeze([
     key: "lessonJournalRowsSave",
     path: "/api/lesson-journal/rows/save",
     sources: ["lesson_student_records", "homeworks"]
+  }),
+  defineVersionedWriteRoute({
+    domain: "lesson",
+    fields: {
+      action: { trim: true, type: "string" },
+      actorId: { trim: true, type: "string" },
+      attendanceReason: { type: "string" },
+      attendanceStatus: { trim: true, type: "string" },
+      checkInTime: { trim: true, type: "string" },
+      checkOutTime: { trim: true, type: "string" },
+      date: { trim: true, type: "string" },
+      lateGraceMinutes: { type: "number" },
+      lateMinutes: { type: ["number", "string"] },
+      lessonId: { trim: true, type: "string" },
+      phoneLast4: { trim: true, type: "string" },
+      sendAlimtalk: { type: "boolean" },
+      source: { allowEmpty: false, required: true, trim: true, type: "string" },
+      studentId: { trim: true, type: "string" }
+    },
+    key: "attendanceCheck",
+    path: "/api/attendance/check",
+    response: attendanceCheckResponseContract,
+    sources: ["lessons", "lesson_student_records", "attendance_events", "notification_jobs"]
   })
 ]);
 

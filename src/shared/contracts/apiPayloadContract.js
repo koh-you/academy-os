@@ -16,17 +16,26 @@ function createContractError({ contractName, field = "", message }) {
   return error;
 }
 
-function matchesFieldType(value, type) {
-  if (type === "array") return Array.isArray(value);
-  if (type === "object") return isPlainObject(value);
-  if (type === "number") return typeof value === "number" && Number.isFinite(value);
-  return typeof value === type;
+function matchesFieldType(value, types) {
+  return types.some((type) => {
+    if (type === "array") return Array.isArray(value);
+    if (type === "object") return isPlainObject(value);
+    if (type === "number") return typeof value === "number" && Number.isFinite(value);
+    return typeof value === type;
+  });
 }
 
 function normalizeFieldSpec(fieldName, spec = {}) {
-  const type = String(spec.type ?? "").trim();
-  if (!supportedFieldTypes.has(type)) {
-    throw new Error(`지원하지 않는 API contract field type입니다: ${fieldName}=${type || "(empty)"}`);
+  const types = [...new Set(
+    (Array.isArray(spec.type) ? spec.type : [spec.type])
+      .map((type) => String(type ?? "").trim())
+      .filter(Boolean)
+  )];
+  const unsupportedType = types.find((type) => !supportedFieldTypes.has(type));
+  if (!types.length || unsupportedType) {
+    throw new Error(
+      `지원하지 않는 API contract field type입니다: ${fieldName}=${unsupportedType || "(empty)"}`
+    );
   }
   const aliases = [...new Set((spec.aliases ?? []).map((alias) => String(alias).trim()).filter(Boolean))];
   if (aliases.includes(fieldName)) {
@@ -39,7 +48,7 @@ function normalizeFieldSpec(fieldName, spec = {}) {
     hasDefault: Object.prototype.hasOwnProperty.call(spec, "defaultValue"),
     required: spec.required === true,
     trim: spec.trim === true,
-    type
+    types: Object.freeze(types)
   });
 }
 
@@ -111,15 +120,15 @@ export function defineApiPayloadContract({
       }
 
       let value = payload[sourceKey];
-      if (!matchesFieldType(value, spec.type)) {
+      if (!matchesFieldType(value, spec.types)) {
         throw createContractError({
           contractName,
           field: fieldName,
-          message: `${contractName} 요청의 ${fieldName} 필드는 ${spec.type}여야 합니다.`
+          message: `${contractName} 요청의 ${fieldName} 필드는 ${spec.types.join(" 또는 ")}여야 합니다.`
         });
       }
-      if (spec.type === "string" && spec.trim) value = value.trim();
-      if (spec.type === "string" && !spec.allowEmpty && !value) {
+      if (typeof value === "string" && spec.trim) value = value.trim();
+      if (typeof value === "string" && !spec.allowEmpty && !value) {
         throw createContractError({
           contractName,
           field: fieldName,
