@@ -30,15 +30,6 @@ assert.deepEqual(
 );
 assert.deepEqual(
   createLessonJournalDraftSaveOutcome({
-    error: new TypeError("Failed to fetch dynamically imported module: /assets/lessonJournalRowsSaveAction-old.js")
-  }),
-  {
-    ok: false,
-    message: "수업일지 · 저장 실패 · 페이지가 새 버전으로 바뀌어 저장 모듈을 불러오지 못했습니다. 현재 입력을 복사해 둔 뒤 새로고침하고 다시 저장해 주세요."
-  }
-);
-assert.deepEqual(
-  createLessonJournalDraftSaveOutcome({
     completedSources: ["숙제 2건"],
     error: new Error("등원보충 TARGET 실패")
   }),
@@ -120,8 +111,7 @@ for (const outcomeContract of [
   "completedSources.join(\" · \")",
   "부분 저장",
   "저장 실패",
-  'error?.message || "수정본 유지"',
-  "dynamically imported module"
+  'error?.message || "수정본 유지"'
 ]) {
   assert.ok(outcomeSource.includes(outcomeContract), `missing save outcome contract: ${outcomeContract}`);
 }

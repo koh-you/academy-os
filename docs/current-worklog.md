@@ -6,8 +6,8 @@
 
 - 운영 Chrome 로그에서 이전 main `main-wtA76djX.js`가 배포 뒤 사라진 `lessonJournalRowsSaveAction-DZ2rCAwK.js`를 저장 순간 동적 import해 실패한 것을 확인했다. API 요청 전 실패라 수업기록·숙제 원천은 바뀌지 않았고 화면의 수정본 1건은 유지됐다.
 - 수업일지 행 저장 모듈을 앱 시작 시 선행 요청하고 저장 handler는 같은 promise를 사용한다. 배포 교체 전 이미 열린 탭도 모듈을 브라우저에 확보하므로 이후 hash 교체에 영향을 받지 않는다.
-- 모듈 로드 실패 문구를 새 버전·입력 복사·새로고침 안내로 바꾸고, draft가 남은 실패 상태에서도 상세 오류와 변경 건수를 하단 바에 함께 표시한다.
-- 검증: lesson domain 20/20, 전용 outcome/view-model fixture, runtime lint, build main 944.98kB·lazy 12/12, safe browser의 저장 모듈 선행 요청→저장 중 후속 수정→재저장·재조회 동선이 통과했다.
+- draft가 남은 실패 상태에서도 기존 상세 오류와 변경 건수를 하단 바에 함께 표시한다.
+- 검증: lesson domain 20/20, 전용 outcome/view-model fixture, runtime lint, build main 944.72kB·lazy 12/12, safe browser의 저장 모듈 선행 요청→저장 중 후속 수정→재저장·재조회 동선이 통과했다. 첫 Vercel 빌드는 Node 24.15에서 번들 상한을 35바이트 넘어 실패했으며 진단 문구 중복을 걷어 여유를 확보했다.
 
 ## 2026-08-04 2학기 중간 누락 보완과 시험정보 행 정리
 

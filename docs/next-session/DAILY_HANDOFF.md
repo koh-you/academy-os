@@ -5,8 +5,8 @@
 ## 2026-08-04 열린 탭 수업일지 저장 모듈 선행 로드
 
 - 배포 전부터 열려 있던 운영 탭이 저장 순간 이전 hash의 `lessonJournalRowsSaveAction`을 요청해 Vercel HTML fallback/MIME 오류로 실패했다. 서버 요청 전 실패라 수정본은 화면에 남고 운영 원천은 변경되지 않았다.
-- 핵심 저장 모듈을 앱 시작 때 선행 요청하고 handler가 같은 module promise를 사용한다. 실패 시에는 상세 새 버전·새로고침 안내와 남은 변경 건수를 하단 바에서 같이 보여 준다.
-- lesson 20/20, 전용 fixture, runtime lint, build와 safe browser 선행 요청·검증 저장 동선이 통과했다. 배포 뒤 기존 탭의 이윤채 다음 숙제 수정본을 다시 저장·재조회해야 한다.
+- 핵심 저장 모듈을 앱 시작 때 선행 요청하고 handler가 같은 module promise를 사용한다. 실패 시에는 원인 상세와 남은 변경 건수를 하단 바에서 같이 보여 준다.
+- lesson 20/20, 전용 fixture, runtime lint, build main 944.72kB와 safe browser 선행 요청·검증 저장 동선이 통과했다. 배포 뒤 기존 탭의 이윤채 다음 숙제 수정본을 다시 저장·재조회해야 한다.
 
 ## 2026-08-04 2학기 중간 누락과 행별 관리 정리
 
