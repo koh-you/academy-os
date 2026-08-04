@@ -67,6 +67,10 @@ const controllerSource = await readFile(
   ),
   "utf8"
 );
+const contractApiSource = await readFile(
+  new URL("../src/domains/notifications/notificationJobContractApi.js", import.meta.url),
+  "utf8"
+);
 const functionStart = controllerSource.indexOf(
   "function reconcile(options = {})"
 );
@@ -78,9 +82,11 @@ assert.ok(functionStart >= 0 && functionEnd > functionStart);
 const functionSource = controllerSource.slice(functionStart, functionEnd);
 for (const requestBoundary of [
   "const payload = createNotificationJobReconcilePayload(options)",
-  "const result = await request(",
-  '"/api/notification-jobs/reconcile-solapi"',
+  'await import("./notificationJobContractApi.js")',
+  "const result = await reconcileNotificationJobsContractRequest({",
   "payload,",
+  "request,",
+  "requestArgs: [",
   "90000",
   '"Solapi 발송결과 조회가 90초를 넘었습니다. 예약 확인에서 다시 시도해 주세요."',
   "if (!disposed) onResult(result)",
@@ -92,7 +98,7 @@ for (const requestBoundary of [
   );
 }
 const requestIndex = functionSource.indexOf(
-  '"/api/notification-jobs/reconcile-solapi"'
+  "const result = await reconcileNotificationJobsContractRequest({"
 );
 const resultIndex = functionSource.indexOf(
   "if (!disposed) onResult(result)",
@@ -104,6 +110,13 @@ assert.ok(
     resultIndex > requestIndex &&
     returnIndex > resultIndex
 );
+for (const contractBoundary of [
+  '"/api/notification-jobs/reconcile-solapi"',
+  "parseVersionedWriteRequest(",
+  "parseVersionedWriteResponse("
+]) {
+  assert.ok(contractApiSource.includes(contractBoundary), `missing reconcile contract boundary: ${contractBoundary}`);
+}
 assert.ok(
   appSource.includes("onResult: applyNotificationJobsReconcileResult") &&
     appSource.includes("mergeNotificationJobsIntoState(result.notificationJobs ?? [])") &&

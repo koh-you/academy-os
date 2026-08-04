@@ -179,3 +179,4 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 - 4-1m: provider 실행이 없는 `POST /api/notification-jobs`의 canonical job payload와 source response를 공통 contract에 연결했다. notification source helper는 App·공지·실패 기록이 공유하고 Solapi reserve/cancel/reconcile owner는 별도 route에 유지했다.
 - 4-1n: `POST /api/notification-jobs/reserve`의 canonical job/reason/dry-run payload와 source/provider 결과를 공통 contract에 연결했다. pending/reuse/old-group cancel/teacher-cancel race와 실패 source 기록 owner는 유지하고 safe API dry-run만 실행했다.
 - 4-1o: `POST /api/notification-jobs/cancel`의 canonical job ID/reason/provider flag와 source response를 공통 contract에 연결했다. 기존 `id` alias는 명시적으로 보존하고 provider cancellation nullable 결과도 유지하며 safe API source 변경만 실행했다.
+- 4-1p: `POST /api/notification-jobs/reconcile-solapi`의 selector payload와 checked/job/record/count response를 공통 contract에 연결했다. single-flight와 App source merge owner는 유지하고 safe provider read만 실행했다.

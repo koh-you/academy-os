@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-1p notification reconcile
+
+- `POST /api/notification-jobs/reconcile-solapi`를 16번째 공통 contract로 고정했다. date/lesson/job IDs/scheduled range/limit selector와 checked/job/record/count/source 응답을 client·server가 함께 검증한다.
+- 90초 single-flight controller와 App의 notification job merge, lesson record/local cache/save-state 반영 순서는 유지했다. safe server는 `safe-provider` 조회 결과만 반환하고 source job을 변경하지 않아 실제 Solapi 조회·DB write가 없다.
+- 첫 build가 main 예산을 19 bytes 넘겨 initial wrapper를 제거하고 controller가 dynamic contract를 직접 로드하게 교정했다. 검증: contract `16 routes`, notification `15/15`, reconcile inventory/closeout, lint, scenario·production `827/827`, build `417 modules`·main `944.90 kB`·lazy `12/12`, 격리 browser `1/1` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1o notification cancel
 
 - `POST /api/notification-jobs/cancel`을 15번째 공통 contract로 고정했다. canonical `{ notificationJobId, reason?, cancelSolapi? }`와 기존 `id` alias를 명시하고 `{ source, notificationJob }`을 검증하며 nullable provider 취소 결과는 그대로 보존한다.

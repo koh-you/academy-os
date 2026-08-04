@@ -49,3 +49,25 @@ export async function cancelNotificationJobContractRequest({
     ...parseVersionedWriteResponse("POST", "/api/notification-jobs/cancel", result)
   };
 }
+
+export async function reconcileNotificationJobsContractRequest({
+  payload,
+  request,
+  requestArgs = []
+} = {}) {
+  const canonicalPayload = parseVersionedWriteRequest(
+    "POST",
+    "/api/notification-jobs/reconcile-solapi",
+    payload
+  );
+  const result = await request(
+    "/api/notification-jobs/reconcile-solapi",
+    canonicalPayload,
+    ...requestArgs
+  );
+  return parseVersionedWriteResponse(
+    "POST",
+    "/api/notification-jobs/reconcile-solapi",
+    result
+  );
+}

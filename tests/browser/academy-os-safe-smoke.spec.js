@@ -1182,6 +1182,50 @@ test("notification cancel contract persists the source state without provider ac
   expect(pageErrors).toEqual([]);
 });
 
+test("notification reconcile contract reads the safe provider without mutating source jobs", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+  const safeApiBaseUrl = `http://127.0.0.1:${process.env.ACADEMY_SAFE_API_PORT || 8787}`;
+  const notificationJobId = "safe-contract-reconcile-job";
+
+  const reservationResponse = await request.post(`${safeApiBaseUrl}/api/notification-jobs/reserve`, {
+    data: {
+      forceDryRun: true,
+      notificationJob: {
+        notificationJobId,
+        notificationType: "notice_parent",
+        scheduledAt: "2099-08-05T12:00:00.000Z",
+        status: "scheduled"
+      },
+      reason: "safe browser reconcile setup"
+    }
+  });
+  expect(reservationResponse.status()).toBe(200);
+
+  const reconcileResponse = await request.post(`${safeApiBaseUrl}/api/notification-jobs/reconcile-solapi`, {
+    data: { notificationJobIds: [notificationJobId] }
+  });
+  expect(reconcileResponse.status()).toBe(200);
+  expect(await reconcileResponse.json()).toMatchObject({
+    checked: [{ notificationJobId, status: "safe_fixture", updated: false }],
+    checkedCount: 1,
+    notificationJobs: [],
+    ok: true,
+    records: [],
+    safeFixture: true,
+    source: "safe-provider",
+    updatedCount: 0
+  });
+
+  const sourceResponse = await request.get(`${safeApiBaseUrl}/api/notification-jobs`);
+  expect((await sourceResponse.json()).notificationJobs).toContainEqual(expect.objectContaining({
+    notificationJobId,
+    provider: "academy-os",
+    status: "dry_run"
+  }));
+  expect(pageErrors).toEqual([]);
+});
+
 test("broken supplement lesson links are visible and block schedule or notification writes", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await page.route("**/api/makeup-tasks*", async (route) => {

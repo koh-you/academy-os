@@ -799,6 +799,51 @@ function handleMutation(pathname, payload) {
       solapiCancellation: null
     };
   }
+  if (pathname === "/api/notification-jobs/reconcile-solapi") {
+    let parsedPayload;
+    try {
+      parsedPayload = parseVersionedWriteRequest("POST", pathname, payload);
+    } catch (error) {
+      return {
+        code: error.code,
+        error: error.message,
+        field: error.field,
+        ok: false,
+        statusCode: Number(error.statusCode) || 400
+      };
+    }
+    const requestedIds = new Set(parsedPayload.notificationJobIds);
+    if (
+      !requestedIds.size &&
+      !parsedPayload.date &&
+      !parsedPayload.lessonId &&
+      !parsedPayload.scheduledFrom &&
+      !parsedPayload.scheduledTo
+    ) {
+      return {
+        error: "조회할 안전 fixture 알림톡 예약 범위가 필요합니다.",
+        ok: false,
+        statusCode: 400
+      };
+    }
+    const candidates = state.notificationJobs.filter((job) => (
+      (!requestedIds.size || requestedIds.has(job.notificationJobId)) &&
+      (!parsedPayload.lessonId || job.lessonId === parsedPayload.lessonId)
+    ));
+    return {
+      checked: candidates.map((job) => ({
+        notificationJobId: job.notificationJobId,
+        status: "safe_fixture",
+        updated: false
+      })),
+      checkedCount: candidates.length,
+      notificationJobs: [],
+      ok: true,
+      records: [],
+      source: "safe-provider",
+      updatedCount: 0
+    };
+  }
   if (pathname === "/api/resource-materials") {
     let parsedPayload;
     try {
@@ -1563,7 +1608,7 @@ const server = http.createServer(async (request, response) => {
     return sendJson(response, statusCode, {
       ...result,
       safeFixture: true,
-      source: "supabase"
+      source: result.source ?? "supabase"
     });
   }
   if (request.method === "DELETE" && requestUrl.pathname === "/api/school-events") {

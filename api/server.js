@@ -7607,18 +7607,27 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs/reconcile-solapi") {
     try {
-      const payload = await readJsonBody(request);
+      const payload = parseVersionedWriteRequest(
+        request.method,
+        requestUrl.pathname,
+        await readJsonBody(request)
+      );
       const result = await reconcileSolapiNotificationJobs({
-        date: payload.date || "",
-        lessonId: payload.lessonId || "",
+        date: payload.date,
+        lessonId: payload.lessonId,
         limit: payload.limit || 500,
-        notificationJobIds: payload.notificationJobIds ?? [],
-        scheduledFrom: payload.scheduledFrom || "",
-        scheduledTo: payload.scheduledTo || ""
+        notificationJobIds: payload.notificationJobIds,
+        scheduledFrom: payload.scheduledFrom,
+        scheduledTo: payload.scheduledTo
       });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.field !== undefined ? { field: error.field } : {})
+      });
     }
     return;
   }
