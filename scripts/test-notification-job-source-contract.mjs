@@ -41,7 +41,7 @@ for (const forbidden of [
 
 for (const expected of [
   "export async function persistNotificationJobRequest",
-  'await import("./notificationJobContractApi.js")',
+  "loadNotificationJobContractApi()",
   "persistNotificationJobContractRequest({ notificationJob, request, requestArgs })",
   "persistNotificationJobRequest({ notificationJob: failedJob, request })"
 ]) {

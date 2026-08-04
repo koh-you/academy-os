@@ -8,9 +8,9 @@ import {
   versionedWriteRouteContracts
 } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 
-assert.equal(versionedWriteRouteContracts.length, 16);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 16);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 16);
+assert.equal(versionedWriteRouteContracts.length, 17);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 17);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 17);
 assert.equal(versionedWriteRouteContracts.every(Object.isFrozen), true);
 assert.equal(versionedWriteRouteContracts.every(({ request, response, sources }) => (
   Object.isFrozen(request) && Object.isFrozen(response) && Object.isFrozen(sources)
@@ -319,6 +319,42 @@ assert.throws(
   }),
   (error) => error.field === "notificationJobIds" && error.statusCode === 400
 );
+assert.deepEqual(
+  parseVersionedWriteRequest("POST", "/api/notification-jobs/reserve-bulk", {
+    forceDryRun: true,
+    jobs: [notificationJob],
+    reason: " safe bulk reserve "
+  }),
+  {
+    concurrency: 4,
+    forceDryRun: true,
+    notificationJobs: [notificationJob],
+    reason: "safe bulk reserve"
+  }
+);
+assert.deepEqual(
+  parseVersionedWriteResponse("POST", "/api/notification-jobs/reserve-bulk", {
+    failedCount: 0,
+    notificationJobs: [notificationJob],
+    reservedCount: 0,
+    results: [{ notificationJob, reserved: false, source: "supabase" }],
+    reusedCount: 1
+  }),
+  {
+    failedCount: 0,
+    notificationJobs: [notificationJob],
+    reservedCount: 0,
+    results: [{ notificationJob, reserved: false, source: "supabase" }],
+    reusedCount: 1
+  }
+);
+assert.throws(
+  () => parseVersionedWriteRequest("POST", "/api/notification-jobs/reserve-bulk", {
+    jobs: [],
+    notificationJobs: []
+  }),
+  (error) => error.field === "notificationJobs" && error.statusCode === 400
+);
 assert.deepEqual(response, {
   auditId: "supplement-audit",
   source: "supabase",
@@ -384,4 +420,4 @@ assert.throws(
   /field\/alias가 중복/
 );
 
-console.log("versioned write route contracts passed · 16 routes · canonical keys and declared legacy alias only");
+console.log("versioned write route contracts passed · 17 routes · canonical keys and declared legacy alias only");

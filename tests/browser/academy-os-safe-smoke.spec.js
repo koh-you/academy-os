@@ -1134,6 +1134,64 @@ test("notification reserve contract stays canonical in the safe API without prov
   expect(pageErrors).toEqual([]);
 });
 
+test("notification bulk reserve contract keeps per-job dry-run results in the safe API", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+  const safeApiBaseUrl = `http://127.0.0.1:${process.env.ACADEMY_SAFE_API_PORT || 8787}`;
+  const notificationJobs = [
+    {
+      notificationJobId: "safe-contract-bulk-parent",
+      notificationType: "notice_parent",
+      scheduledAt: "2099-08-05T12:00:00.000Z",
+      status: "scheduled"
+    },
+    {
+      notificationJobId: "safe-contract-bulk-student",
+      notificationType: "notice_student",
+      scheduledAt: "2099-08-05T12:00:00.000Z",
+      status: "scheduled"
+    }
+  ];
+
+  const bulkResponse = await request.post(`${safeApiBaseUrl}/api/notification-jobs/reserve-bulk`, {
+    data: {
+      concurrency: 2,
+      forceDryRun: true,
+      notificationJobs,
+      reason: "safe browser bulk contract"
+    }
+  });
+  expect(bulkResponse.status()).toBe(200);
+  const bulkResult = await bulkResponse.json();
+  expect(bulkResult).toMatchObject({
+    failedCount: 0,
+    ok: true,
+    reservedCount: 0,
+    reusedCount: 0,
+    safeFixture: true,
+    source: "supabase"
+  });
+  expect(bulkResult.notificationJobs).toEqual(notificationJobs.map((job) => expect.objectContaining({
+    notificationJobId: job.notificationJobId,
+    provider: "academy-os",
+    status: "dry_run"
+  })));
+  expect(bulkResult.results).toHaveLength(2);
+  expect(bulkResult.results.every((result) => result.reserved === false && result.source === "supabase")).toBe(true);
+
+  const rejectedResponse = await request.post(`${safeApiBaseUrl}/api/notification-jobs/reserve-bulk`, {
+    data: { notificationJob: notificationJobs[0] }
+  });
+  expect(rejectedResponse.status()).toBe(400);
+  expect(await rejectedResponse.json()).toMatchObject({
+    code: "INVALID_API_PAYLOAD",
+    field: "notificationJob",
+    ok: false,
+    safeFixture: true
+  });
+  expect(pageErrors).toEqual([]);
+});
+
 test("notification cancel contract persists the source state without provider actions in the safe API", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);

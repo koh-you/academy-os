@@ -3,6 +3,10 @@ import { readFile } from "node:fs/promises";
 import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 
 const appSource = await readAppWithLessonJournalSource(import.meta.url);
+const notificationJobContractApiSource = await readFile(
+  new URL("../src/domains/notifications/notificationJobContractApi.js", import.meta.url),
+  "utf8"
+);
 const pureModelUrls = [
   "../src/domains/lessons/lessonJournalCommentSendStatus.js",
   "../src/domains/lessons/lessonJournalCommentStatusModel.js",
@@ -87,7 +91,8 @@ for (const appOwnedProviderAction of [
 }
 
 for (const appOwnedExternalBoundary of [
-  'postJson("/api/notification-jobs/reserve-bulk"',
+  "reserveNotificationJobsContractRequest({",
+  "request: postJson",
   "onCancelNotificationJob?.(",
   "onReconcileSolapiNotificationResults?.(",
   "onApplyLessonNotificationPlan(lesson.lessonId)",
@@ -100,6 +105,11 @@ for (const appOwnedExternalBoundary of [
     `external notification boundary moved out of App: ${appOwnedExternalBoundary}`
   );
 }
+
+assert.ok(
+  notificationJobContractApiSource.includes('request("/api/notification-jobs/reserve-bulk", payload, ...requestArgs)'),
+  "bulk provider endpoint must remain in the injected notification contract API"
+);
 
 for (const removedRawProviderBoundary of [
   "async function cancelSolapiGroup(",

@@ -112,6 +112,18 @@ const notificationJobReconcileResponseContract = defineApiPayloadContract({
   name: "notification job reconcile response"
 });
 
+const notificationJobBulkReserveResponseContract = defineApiPayloadContract({
+  allowUnknownFields: true,
+  fields: {
+    failedCount: { required: true, type: "number" },
+    notificationJobs: { required: true, type: "array" },
+    reservedCount: { required: true, type: "number" },
+    results: { required: true, type: "array" },
+    reusedCount: { required: true, type: "number" }
+  },
+  name: "notification job bulk reserve response"
+});
+
 function defineVersionedWriteRoute({
   domain,
   fields,
@@ -329,6 +341,19 @@ export const versionedWriteRouteContracts = Object.freeze([
     path: "/api/notification-jobs/reconcile-solapi",
     response: notificationJobReconcileResponseContract,
     sources: ["notification_jobs", "lesson_student_records", "provider.solapi"]
+  }),
+  defineVersionedWriteRoute({
+    domain: "notification",
+    fields: {
+      concurrency: { defaultValue: 4, type: "number" },
+      forceDryRun: { type: "boolean" },
+      notificationJobs: { aliases: ["jobs"], defaultValue: [], type: "array" },
+      reason: { trim: true, type: "string" }
+    },
+    key: "notificationJobBulkReserve",
+    path: "/api/notification-jobs/reserve-bulk",
+    response: notificationJobBulkReserveResponseContract,
+    sources: ["notification_jobs", "provider.solapi"]
   })
 ]);
 

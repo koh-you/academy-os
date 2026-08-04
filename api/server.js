@@ -7842,15 +7842,24 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs/reserve-bulk") {
     try {
-      const payload = await readJsonBody(request);
-      const result = await reserveNotificationJobsInSolapi(payload.notificationJobs ?? payload.jobs ?? [], {
+      const payload = parseVersionedWriteRequest(
+        request.method,
+        requestUrl.pathname,
+        await readJsonBody(request)
+      );
+      const result = await reserveNotificationJobsInSolapi(payload.notificationJobs, {
         concurrency: payload.concurrency || 4,
         forceDryRun: Boolean(payload.forceDryRun),
         reason: payload.reason || "수업일지 일괄 예약"
       });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.field !== undefined ? { field: error.field } : {})
+      });
     }
     return;
   }

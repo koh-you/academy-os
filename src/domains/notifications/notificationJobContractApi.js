@@ -71,3 +71,21 @@ export async function reconcileNotificationJobsContractRequest({
     result
   );
 }
+
+export async function reserveNotificationJobsContractRequest({
+  concurrency,
+  forceDryRun,
+  notificationJobs,
+  reason,
+  request,
+  requestArgs = []
+} = {}) {
+  const payload = parseVersionedWriteRequest("POST", "/api/notification-jobs/reserve-bulk", {
+    ...(concurrency === undefined ? {} : { concurrency }),
+    ...(forceDryRun === undefined ? {} : { forceDryRun }),
+    notificationJobs,
+    ...(reason === undefined ? {} : { reason })
+  });
+  const result = await request("/api/notification-jobs/reserve-bulk", payload, ...requestArgs);
+  return parseVersionedWriteResponse("POST", "/api/notification-jobs/reserve-bulk", result);
+}

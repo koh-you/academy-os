@@ -39,7 +39,7 @@ assert.equal(cancelRoute.includes("payload.notificationJobId || payload.id"), fa
 
 for (const expected of [
   "export async function cancelNotificationJobRequest",
-  'await import("./notificationJobContractApi.js")',
+  "loadNotificationJobContractApi()",
   "cancelNotificationJobContractRequest({",
   "onNotificationJob(result.notificationJob)"
 ]) {

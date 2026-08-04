@@ -1,10 +1,28 @@
+function loadNotificationJobContractApi() {
+  return import("./notificationJobContractApi.js");
+}
+
 export async function persistNotificationJobRequest({
   notificationJob,
   request,
   requestArgs = []
 } = {}) {
-  const { persistNotificationJobContractRequest } = await import("./notificationJobContractApi.js");
+  const { persistNotificationJobContractRequest } = await loadNotificationJobContractApi();
   return persistNotificationJobContractRequest({ notificationJob, request, requestArgs });
+}
+
+export function createFailedNotificationJob({
+  errorMessage,
+  notificationJob,
+  now = () => new Date().toISOString()
+} = {}) {
+  return {
+    ...notificationJob,
+    error: errorMessage,
+    provider: "academy-os",
+    status: "failed",
+    updatedAt: now()
+  };
 }
 
 export function persistFailedNotificationJobRequest({
@@ -14,13 +32,7 @@ export function persistFailedNotificationJobRequest({
   request,
   now = () => new Date().toISOString()
 } = {}) {
-  const failedJob = {
-    ...notificationJob,
-    error: errorMessage,
-    provider: "academy-os",
-    status: "failed",
-    updatedAt: now()
-  };
+  const failedJob = createFailedNotificationJob({ errorMessage, notificationJob, now });
   onNotificationJob(failedJob);
   persistNotificationJobRequest({ notificationJob: failedJob, request })
     .catch((persistError) => console.error(persistError));
@@ -34,7 +46,7 @@ export async function reserveNotificationJobProviderRequest({
   request,
   requestArgs = []
 } = {}) {
-  const { reserveNotificationJobContractRequest } = await import("./notificationJobContractApi.js");
+  const { reserveNotificationJobContractRequest } = await loadNotificationJobContractApi();
   return reserveNotificationJobContractRequest({
     forceDryRun,
     notificationJob,
@@ -79,7 +91,7 @@ export async function cancelNotificationJobRequest({
   requestArgs = []
 } = {}) {
   if (!notificationJob?.notificationJobId) throw new Error("취소할 알림톡 예약 ID가 없습니다.");
-  const { cancelNotificationJobContractRequest } = await import("./notificationJobContractApi.js");
+  const { cancelNotificationJobContractRequest } = await loadNotificationJobContractApi();
   const result = await cancelNotificationJobContractRequest({
     cancelSolapi,
     notificationJobId: notificationJob.notificationJobId,

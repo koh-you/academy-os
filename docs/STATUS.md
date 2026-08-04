@@ -113,6 +113,7 @@
 - 4-1n은 `POST /api/notification-jobs/reserve`의 canonical job/reason/dry-run request와 source/job/reserved response를 같은 contract에 연결했다. 예약 pending source 저장, 같은 예약 재사용, 기존 group 취소, 교사 취소 경합 보호와 실패 source 기록은 유지하고 실제 Solapi는 호출하지 않았다.
 - 4-1o는 `POST /api/notification-jobs/cancel`의 canonical job ID/reason/provider flag와 source/job response를 같은 contract에 연결했다. 기존 `id` alias와 nullable provider 취소 결과는 보존하고, safe API에서는 source 취소만 검증해 실제 Solapi를 호출하지 않았다.
 - 4-1p는 `POST /api/notification-jobs/reconcile-solapi`의 date/lesson/job ID/range selector와 provider checked/source job/record response를 같은 contract에 연결했다. 90초 single-flight와 App merge owner는 유지하고 safe API에서는 source를 바꾸지 않는 provider read만 검증했다.
+- 4-1q는 `POST /api/notification-jobs/reserve-bulk`의 canonical jobs/concurrency/dry-run/reason과 per-job/count response를 같은 contract에 연결했다. 기존 `jobs` alias, 부분 실패·재사용·App batch merge를 보존하고 safe API에서는 모든 job을 dry-run으로만 기록했다.
 
 ## 폴더 상태
 
@@ -125,7 +126,7 @@
 
 1. App 2차 Phase 1~5와 3차 3-0~3-8, P1 운영 저장 신뢰성, P2 modal 통일 후속, P3 알림톡 설정 관리는 완료됐다. P3 closeout은 제품 경로 9개, 설정 key 10개, Solapi provider template 4개의 seed→draft→persisted final→provider 변수 연결과 재시험 독립 11시 transport 부재를 자동 검증한다. 공지 preset 3개·특강 guide seed는 새 초안에만 적용하며 현재 draft·기존 job·보충 교사 최종본과 provider contract를 보존한다.
 2. App 3차 리팩터링 3-0~3-8은 production main 43.1%·gzip 45.3% 감소, 12개 물리 lazy chunk, App Babel 500 KB 경고 제거와 종료 소유권 감사까지 완료했다.
-3. App/API 4차는 4-0 기준선과 4-1a~4-1p의 source·notification reserve/cancel/reconcile payload contract 연결을 확정했다. 다음은 notification bulk/provider 및 남은 고위험 write payload를 한 route씩 고정한다.
+3. App/API 4차는 4-0 기준선과 4-1a~4-1q의 source·notification reserve/cancel/reconcile/bulk payload contract 연결을 확정했다. 다음은 dispatch/readiness와 남은 provider write payload를 한 route씩 고정한다.
 4. `app_state`에서 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
    - 학생별 오답 `wrongProblems`는 명시 저장 전환을 완료했다. 다음 후보는 별도 저장 의미가 분명한 `lessonResearchItems`이며 새 작업에서 범위를 다시 확인한다.
    - 즉시 사람 판단이 필요하지 않은 발견은 queue/worklog에 남기고 AI 검수와 다음 단계를 연쇄 진행한다.
