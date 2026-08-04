@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import {
   createSupplementScheduleRequestKey,
   createSupplementScheduleSavePlan,
@@ -126,5 +127,34 @@ assert.equal(requestBodies[2].taskChange.after.scheduleChangeDetail, "최신 일
 assert.equal(requestBodies[2].taskChange.after.scheduledDate, "2026-08-06");
 assert.equal(requestBodies[2].taskChange.after.scheduledTime, "16:00");
 assert.equal(requestBodies[2].taskChange.after.updatedAt, firstSavedAt);
+
+assert.deepEqual(Object.keys(requestBodies[2]).sort(), ["auditId", "lessonChange", "taskChange"]);
+
+resetSupplementSchedulePendingRequestsForTests();
+const responseStates = [];
+await assert.rejects(
+  saveSupplementScheduleAction({
+    onStateChange: (state) => responseStates.push(state),
+    plan,
+    request: async (_path, body) => ({
+      auditId: body.auditId,
+      lesson: body.lessonChange.after,
+      makeupTask: body.taskChange.after,
+      source: "supabase",
+      verified: "true"
+    }),
+    requestKey
+  }),
+  (error) => error.code === "INVALID_API_PAYLOAD" && error.field === "verified"
+);
+assert.equal(responseStates.at(-1)?.state, "failed");
+
+const serverSource = await readFile(new URL("../api/server.js", import.meta.url), "utf8");
+const routeStart = serverSource.indexOf('requestUrl.pathname === "/api/supplement-schedules/save"');
+const routeEnd = serverSource.indexOf('requestUrl.pathname === "/api/makeup-tasks"', routeStart);
+const supplementScheduleRouteSource = serverSource.slice(routeStart, routeEnd);
+assert.ok(routeStart >= 0 && routeEnd > routeStart);
+assert.match(supplementScheduleRouteSource, /parseVersionedWriteRequest\(/);
+assert.match(supplementScheduleRouteSource, /error\.field \? \{ field: error\.field \}/);
 
 console.log("supplement schedule plan validation and unknown-result latest-draft retry fixture passed");

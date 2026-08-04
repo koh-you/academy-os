@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-1e supplement schedule
+
+- `/api/supplement-schedules/save`의 `auditId/lessonChange/taskChange`와 verified response를 공통 contract에 연결했다. client action은 전송 직전 canonical plan을 만들고 server는 atomic persistence 전에 invalid top-level field/type을 차단한다.
+- stable logical task key, 결과 불명 원 plan 회수→최신 draft rebase 3요청, lessons·makeup_tasks CAS/readback/rollback은 그대로다. source 성공 뒤 provider 실패는 기존 `notificationFailed`·`notificationRetryScope: provider`로 분리돼 전체 저장 실패로 오표시하지 않는다.
+- 검증: contract/schedule atomic CAS·rollback·latest-draft fixture, supplement `10/10`, lint, scenario·production `827/827`, build `416 modules`·main `942.27 kB`·lazy `12/12`, 집중 browser `1/1` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1d lesson makeup
 
 - `/api/lesson-journal/makeup-tasks/save`의 canonical `makeupTasks` payload와 선언된 legacy `tasks` alias, verified response를 공통 contract에 연결했다. server는 persistence 전에 invalid top-level field/type을 차단한다.
