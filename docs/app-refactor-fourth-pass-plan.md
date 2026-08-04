@@ -186,3 +186,4 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 - 4-1t: `POST /api/exam-analysis-runs`의 run metadata payload와 source/run response를 공통 contract에 연결했다. `{ run }`·root 직접 legacy 입력은 명시적으로 보존하고 safe API는 가상 row 저장·재조회만 수행했다.
 - 4-1u: `POST /api/exam-analysis-runs/confirm-question-count`의 교사 확정 문항 수·판독 근거 payload와 run/question rows/event response를 공통 contract에 연결했다. 실제 1~N row RPC와 event owner는 server에 유지하고 safe API는 가상 row·reload만 검증했다.
 - 4-1v: `POST /api/exam-analysis-runs/save-question-reviews`의 교사 문항별 검수 payload와 run/question rows/event/teacher review response를 공통 contract에 연결했다. 실제 row patch·재조회와 run audit/event owner는 server에 유지하고 safe API는 가상 teacher/final fields와 reload 지속성만 검증했다.
+- 4-1w: `POST /api/exam-analysis-runs/save-prompt-studio`의 run/revision/교사 작업본 payload와 authoritative run/draft/source/verification response를 공통 contract에 연결했다. 실제 revision CAS·audit summary 병합·재조회/event owner는 server에 유지하고 safe API는 정상 저장·stale 409·reload만 검증했다.

@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-1w exam Prompt Studio
+
+- `POST /api/exam-analysis-runs/save-prompt-studio`를 23번째 공통 contract로 고정했다. analysis run ID, 0 이상 정수 expected revision, 교사 prompt draft를 source 쓰기 전에 검증하고 authoritative run/draft/source/save verification response를 client가 다시 검증한다.
+- 실제 revision CAS, `audit_summary.promptStudio` 병합, Supabase 재조회 대조와 저장 event owner는 server pipeline에 유지했다. safe API도 정상 저장과 stale revision 409를 분리하며 화면 local draft→명시 저장→API 재조회→reload 복구를 검증하고 AI·Storage·알림을 실행하지 않는다.
+- 첫 browser는 설명 문구까지 포함된 실제 accessible name을 exact label로 찾지 못해 label prefix 기준으로 교정했다. 검증: contract `23 routes`, Prompt Studio·teacher/lazy 전용, lint, scenario·production `827/827`, build `418 modules`·main `944.93 kB`·lazy `12/12`, 격리 browser `1/1` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1v exam question review
 
 - `POST /api/exam-analysis-runs/save-question-reviews`를 22번째 공통 contract로 고정했다. analysis run ID, 비어 있지 않은 reviews, 1~200 정수 문항 번호와 중복 번호를 source 쓰기 전에 검증하고 run/question rows/event/source/teacher review response를 client가 다시 검증한다.

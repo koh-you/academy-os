@@ -34,8 +34,13 @@ import { saveReportSnapshotWithVerification } from "../src/domains/reports/repor
 import {
   parseExamAnalysisQuestionCountConfirmRequest,
   parseExamAnalysisQuestionReviewsSaveRequest,
+  parseExamAnalysisPromptStudioSaveRequest,
   parseExamAnalysisRunWriteRequest
 } from "../src/domains/exams/examAnalysisRunApi.js";
+import {
+  getExamAnalysisPromptStudioDraftFromRun,
+  normalizeExamAnalysisPromptStudioDraft
+} from "../src/domains/exams/examAnalysisPromptStudioDraft.js";
 import { parseVersionedWriteRequest } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 
 const host = "127.0.0.1";
@@ -915,6 +920,63 @@ function handleMutation(pathname, payload) {
       source: "supabase",
       sources: [],
       teacherReview
+    };
+  }
+  if (pathname === "/api/exam-analysis-runs/save-prompt-studio") {
+    let parsedPayload;
+    try {
+      parsedPayload = parseExamAnalysisPromptStudioSaveRequest(payload);
+    } catch (error) {
+      return {
+        code: error.code,
+        error: error.message,
+        field: error.field,
+        ok: false,
+        statusCode: Number(error.statusCode) || 400
+      };
+    }
+    const currentRun = state.examAnalysisRuns
+      .find((run) => run.analysisRunId === parsedPayload.analysisRunId) ?? null;
+    if (!currentRun) {
+      return { error: "시험분석 작업을 찾지 못했습니다.", ok: false, statusCode: 404 };
+    }
+    const previousDraft = getExamAnalysisPromptStudioDraftFromRun(currentRun);
+    if (previousDraft.revision !== parsedPayload.expectedRevision) {
+      return {
+        error: `다른 화면에서 프롬프트 작업본이 변경되었습니다. 현재 revision ${previousDraft.revision}을 다시 불러와 주세요.`,
+        ok: false,
+        statusCode: 409
+      };
+    }
+    const savedAt = new Date().toISOString();
+    const promptStudioDraft = normalizeExamAnalysisPromptStudioDraft({
+      ...parsedPayload.promptStudioDraft,
+      revision: previousDraft.revision + 1,
+      savedAt
+    });
+    const analysisRun = {
+      ...currentRun,
+      auditSummary: { ...(currentRun.auditSummary ?? {}), promptStudio: promptStudioDraft },
+      updatedAt: savedAt
+    };
+    state.examAnalysisRuns = upsertById(state.examAnalysisRuns, analysisRun, ["analysisRunId"]);
+    const event = {
+      analysisRunId: parsedPayload.analysisRunId,
+      eventId: `${parsedPayload.analysisRunId}-prompt-studio-saved-${savedAt}`,
+      eventType: "exam_analysis_prompt_studio_saved",
+      occurredAt: savedAt
+    };
+    state.examAnalysisEvents = upsertById(state.examAnalysisEvents, event, ["eventId"]);
+    return {
+      aiJobs: [],
+      analysisRun,
+      events: state.examAnalysisEvents.filter((item) => item.analysisRunId === parsedPayload.analysisRunId),
+      ok: true,
+      promptStudioDraft,
+      questions: state.examAnalysisQuestions.filter((item) => item.analysisRunId === parsedPayload.analysisRunId),
+      saveVerification: { revision: promptStudioDraft.revision, verified: true, verifiedAt: savedAt },
+      source: "supabase",
+      sources: []
     };
   }
   if (["/api/attendance/check", "/api/attendance/preview"].includes(pathname)) {
