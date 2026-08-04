@@ -175,3 +175,4 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 - 4-1i: `/api/app-state`의 canonical `{ states, expectedUpdatedAt? }` payload와 `{ source, states }` response를 공통 contract에 연결했다. 공용 저장과 강사 운영 메모는 같은 client builder를 사용하며 key별 직렬화·CAS·Supabase 재조회·후속 입력 보존 owner는 기존 controller에 유지했다.
 - 4-1j: teacher auth가 필요한 `/api/report-snapshots`의 snapshot payload와 recovered/readback response를 공통 contract에 연결했다. stable ID 재시도, `app_state.reportSnapshots` CAS·Supabase 재조회와 UI draft 보존 owner는 기존 action/persistence에 유지했다.
 - 4-1k: 파일 없는 `/api/resource-materials` POST의 metadata payload와 verified row response를 공통 contract에 연결했다. stable ID, insert-only/CAS, 결과 불명 최신 draft 수렴·Supabase 목록 재조회와 UI 복구 owner는 기존 API/action에 유지했다.
+- 4-1l: teacher auth가 필요한 `/api/resource-material-files` POST/DELETE의 file/material payload와 Storage+row verified response를 공통 contract에 연결했다. stable path, upload rollback, delete backup/restore, CAS·재조회와 UI 보존 owner는 기존 operation/API/action에 유지했다.

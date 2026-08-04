@@ -8,9 +8,9 @@ import {
   versionedWriteRouteContracts
 } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 
-assert.equal(versionedWriteRouteContracts.length, 10);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 10);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 10);
+assert.equal(versionedWriteRouteContracts.length, 12);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 12);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 12);
 assert.equal(versionedWriteRouteContracts.every(Object.isFrozen), true);
 assert.equal(versionedWriteRouteContracts.every(({ request, response, sources }) => (
   Object.isFrozen(request) && Object.isFrozen(response) && Object.isFrozen(sources)
@@ -167,6 +167,50 @@ assert.deepEqual(
     verified: true
   }
 );
+const resourceFilePayload = {
+  file: { dataUrl: "data:application/pdf;base64,c2FmZQ==", fileName: "safe.pdf" },
+  material: resourceMaterial
+};
+assert.deepEqual(
+  parseVersionedWriteRequest("POST", "/api/resource-material-files", resourceFilePayload),
+  resourceFilePayload
+);
+assert.deepEqual(
+  parseVersionedWriteResponse("POST", "/api/resource-material-files", {
+    fileReference: "resource-storage://resource-materials/safe.pdf",
+    material: { ...resourceMaterial, updatedAt: "2026-08-05T00:00:01.000Z" },
+    previousFileCleanupFailed: false,
+    source: "supabase",
+    storagePath: "safe.pdf",
+    verified: true
+  }),
+  {
+    fileReference: "resource-storage://resource-materials/safe.pdf",
+    material: { ...resourceMaterial, updatedAt: "2026-08-05T00:00:01.000Z" },
+    previousFileCleanupFailed: false,
+    source: "supabase",
+    storagePath: "safe.pdf",
+    verified: true
+  }
+);
+assert.deepEqual(
+  parseVersionedWriteRequest("DELETE", "/api/resource-material-files", { material: resourceMaterial }),
+  { material: resourceMaterial }
+);
+assert.deepEqual(
+  parseVersionedWriteResponse("DELETE", "/api/resource-material-files", {
+    materialId: resourceMaterial.materialId,
+    source: "supabase",
+    storageDeleted: true,
+    verified: true
+  }),
+  {
+    materialId: resourceMaterial.materialId,
+    source: "supabase",
+    storageDeleted: true,
+    verified: true
+  }
+);
 assert.deepEqual(response, {
   auditId: "supplement-audit",
   source: "supabase",
@@ -232,4 +276,4 @@ assert.throws(
   /field\/alias가 중복/
 );
 
-console.log("versioned write route contracts passed · 10 routes · canonical keys and declared legacy alias only");
+console.log("versioned write route contracts passed · 12 routes · canonical keys and declared legacy alias only");

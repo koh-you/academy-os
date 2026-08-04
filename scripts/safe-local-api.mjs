@@ -1345,7 +1345,18 @@ const server = http.createServer(async (request, response) => {
     return sendJson(response, 200, { ok: true, safeFixture: true });
   }
   if (request.method === "POST" && requestUrl.pathname === "/api/resource-material-files") {
-    const payload = await readJson(request);
+    let payload;
+    try {
+      payload = parseVersionedWriteRequest(request.method, requestUrl.pathname, await readJson(request));
+    } catch (error) {
+      return sendJson(response, Number(error.statusCode) || 400, {
+        code: error.code,
+        error: error.message,
+        field: error.field,
+        ok: false,
+        safeFixture: true
+      });
+    }
     const match = String(payload.file?.dataUrl ?? "").match(/^data:([^;,]+)?(;base64)?,(.*)$/);
     if (!match) return sendJson(response, 400, { ok: false, error: "안전 fixture 파일 형식이 올바르지 않습니다." });
     const buffer = Buffer.from(match[3], match[2] ? "base64" : "utf8");
@@ -1384,7 +1395,18 @@ const server = http.createServer(async (request, response) => {
     });
   }
   if (request.method === "DELETE" && requestUrl.pathname === "/api/resource-material-files") {
-    const payload = await readJson(request);
+    let payload;
+    try {
+      payload = parseVersionedWriteRequest(request.method, requestUrl.pathname, await readJson(request));
+    } catch (error) {
+      return sendJson(response, Number(error.statusCode) || 400, {
+        code: error.code,
+        error: error.message,
+        field: error.field,
+        ok: false,
+        safeFixture: true
+      });
+    }
     const material = payload.material || {};
     const currentMaterial = state.resourceMaterials.find((item) => item.materialId === material.materialId) ?? null;
     if (currentMaterial && currentMaterial.updatedAt !== material.updatedAt) {

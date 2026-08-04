@@ -1,6 +1,10 @@
 import { apiUrl } from "../../shared/utils/apiClient.js";
 import { readFileAsDataUrl } from "../../shared/utils/file.js";
 import {
+  parseVersionedWriteRequest,
+  parseVersionedWriteResponse
+} from "../../shared/contracts/versionedWriteRouteContracts.js";
+import {
   areResourceMaterialsPersistedEqual,
   areResourceMaterialTimestampsEqual
 } from "./resourceMaterialPersistence.js";
@@ -50,14 +54,19 @@ export async function saveResourceMaterialFileAndVerify({ file, material, read, 
   if (!file) throw new Error("업로드할 자료 파일을 선택해 주세요.");
   if (typeof read !== "function") throw new Error("자료 목록 재조회 request가 필요합니다.");
   const dataUrl = await readFileAsDataUrl(file);
-  const result = await requestResourceMaterialFile("/api/resource-material-files", {
-    body: {
-      file: { dataUrl, fileName: file.name },
-      material
-    },
-    method: "POST",
-    sessionToken
+  const payload = parseVersionedWriteRequest("POST", "/api/resource-material-files", {
+    file: { dataUrl, fileName: file.name },
+    material
   });
+  const result = parseVersionedWriteResponse(
+    "POST",
+    "/api/resource-material-files",
+    await requestResourceMaterialFile("/api/resource-material-files", {
+      body: payload,
+      method: "POST",
+      sessionToken
+    })
+  );
   if (result?.source !== "supabase" || result?.verified !== true || !result?.material?.updatedAt) {
     throw new Error("파일 업로드 뒤 자료 row 저장을 재조회로 확인하지 못했습니다. 현재 입력을 유지합니다.");
   }
@@ -85,11 +94,16 @@ export async function saveResourceMaterialFileAndVerify({ file, material, read, 
 export async function deleteResourceMaterialFileAndVerify({ material, read, sessionToken } = {}) {
   if (!material?.materialId || !material?.updatedAt) throw new Error("삭제할 자료의 서버 버전이 필요합니다.");
   if (typeof read !== "function") throw new Error("자료 목록 재조회 request가 필요합니다.");
-  const result = await requestResourceMaterialFile("/api/resource-material-files", {
-    body: { material },
-    method: "DELETE",
-    sessionToken
-  });
+  const payload = parseVersionedWriteRequest("DELETE", "/api/resource-material-files", { material });
+  const result = parseVersionedWriteResponse(
+    "DELETE",
+    "/api/resource-material-files",
+    await requestResourceMaterialFile("/api/resource-material-files", {
+      body: payload,
+      method: "DELETE",
+      sessionToken
+    })
+  );
   if (result?.source !== "supabase" || result?.verified !== true || result?.materialId !== material.materialId) {
     throw new Error("자료 파일과 row 삭제 결과를 재조회로 확인하지 못했습니다. 목록을 유지합니다.");
   }

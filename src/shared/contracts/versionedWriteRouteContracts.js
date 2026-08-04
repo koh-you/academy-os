@@ -56,10 +56,35 @@ const resourceMaterialWriteResponseContract = defineApiPayloadContract({
   name: "resource material write response"
 });
 
+const resourceMaterialFileWriteResponseContract = defineApiPayloadContract({
+  allowUnknownFields: true,
+  fields: {
+    fileReference: { allowEmpty: false, required: true, type: "string" },
+    material: { required: true, type: "object" },
+    previousFileCleanupFailed: { type: "boolean" },
+    source: { allowEmpty: false, required: true, type: "string" },
+    storagePath: { allowEmpty: false, required: true, type: "string" },
+    verified: { required: true, type: "boolean" }
+  },
+  name: "resource material file write response"
+});
+
+const resourceMaterialFileDeleteResponseContract = defineApiPayloadContract({
+  allowUnknownFields: true,
+  fields: {
+    materialId: { allowEmpty: false, required: true, type: "string" },
+    source: { allowEmpty: false, required: true, type: "string" },
+    storageDeleted: { type: "boolean" },
+    verified: { required: true, type: "boolean" }
+  },
+  name: "resource material file delete response"
+});
+
 function defineVersionedWriteRoute({
   domain,
   fields,
   key,
+  method = "POST",
   path,
   response = verifiedWriteResponseContract,
   sources
@@ -67,7 +92,7 @@ function defineVersionedWriteRoute({
   return defineApiRouteContract({
     domain,
     key,
-    method: "POST",
+    method,
     path,
     request: defineApiPayloadContract({ fields, name: `${key} request` }),
     response,
@@ -195,6 +220,28 @@ export const versionedWriteRouteContracts = Object.freeze([
     path: "/api/resource-materials",
     response: resourceMaterialWriteResponseContract,
     sources: ["resource_materials"]
+  }),
+  defineVersionedWriteRoute({
+    domain: "resource",
+    fields: {
+      file: { required: true, type: "object" },
+      material: { required: true, type: "object" }
+    },
+    key: "resourceMaterialFileWrite",
+    path: "/api/resource-material-files",
+    response: resourceMaterialFileWriteResponseContract,
+    sources: ["resource_materials", "storage.resource-materials"]
+  }),
+  defineVersionedWriteRoute({
+    domain: "resource",
+    fields: {
+      material: { required: true, type: "object" }
+    },
+    key: "resourceMaterialFileDelete",
+    method: "DELETE",
+    path: "/api/resource-material-files",
+    response: resourceMaterialFileDeleteResponseContract,
+    sources: ["resource_materials", "storage.resource-materials"]
   })
 ]);
 

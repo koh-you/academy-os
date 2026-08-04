@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-1l resource private file
+
+- 인증된 `/api/resource-material-files` POST/DELETE의 upload/delete request와 Storage+row verified response를 공통 contract에 연결했다. teacher auth는 parser보다 먼저, 28MB body limit와 기존 file validation은 parser 뒤에 유지한다.
+- stable Storage path, row CAS/readback, upload rollback, delete backup/restore, 목록 재조회와 UI draft/list 보존 owner는 기존 operation/API/action에 유지했다. contract/Storage/metadata fixture, lint, scenario·production `827/827`, build `416 modules`·main `943.62 kB`·lazy `12/12`, 격리 browser `1/1` 통과.
+- 4-1의 student/app-state/report/resource 묶음은 닫혔다. 다음은 notification/provider payload를 한 route씩 inventory한다. 운영 데이터·실제 파일·알림·SQL·유료 호출은 없었다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1k resource metadata
 
 - `/api/resource-materials` POST의 `{ material }` request와 `material/source/verified/recoveredDraft?` response를 client·실서버·safe server 공통 contract에 연결했다. direct-object fallback은 내부 사용처가 없어 persistence 전 400으로 닫았다.

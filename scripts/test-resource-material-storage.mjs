@@ -184,24 +184,35 @@ const [appSource, fileApiSource, portalSource, screenSource, serverSource] = awa
   readFile(new URL("../src/domains/teacher/LearningSupportCenters.jsx", import.meta.url), "utf8"),
   readFile(new URL("../api/server.js", import.meta.url), "utf8")
 ]);
+const resourceFileServerSource = serverSource.slice(
+  serverSource.indexOf('if (request.method === "POST" && requestUrl.pathname === "/api/resource-material-files")'),
+  serverSource.indexOf('if (request.method === "GET" && requestUrl.pathname === "/api/resource-material-files/open")')
+);
 for (const binding of [
   'requestUrl.pathname === "/api/resource-material-files"',
-  'requestUrl.pathname === "/api/resource-material-files/open"',
   "verifyTeacherSessionToken(token)",
-  "verifyPortalSessionToken(token)",
-  "canPortalSessionAccessResourceMaterial(material, student, portalSession.role)",
-  "downloadStorageObjectWithMetadata",
+  "parseVersionedWriteRequest(",
   "deleteResourceMaterialWithFile({",
   "saveResourceMaterialFile({"
-]) assert.ok(serverSource.includes(binding), `missing server Storage boundary: ${binding}`);
+]) assert.ok(resourceFileServerSource.includes(binding), `missing server Storage boundary: ${binding}`);
+for (const binding of [
+  'requestUrl.pathname === "/api/resource-material-files/open"',
+  "verifyPortalSessionToken(token)",
+  "canPortalSessionAccessResourceMaterial(material, student, portalSession.role)",
+  "downloadStorageObjectWithMetadata"
+]) assert.ok(serverSource.includes(binding), `missing server Storage open boundary: ${binding}`);
 for (const binding of [
   "readFileAsDataUrl(file)",
   "Authorization: `Bearer ${sessionToken}`",
+  'parseVersionedWriteRequest("POST", "/api/resource-material-files"',
+  'parseVersionedWriteRequest("DELETE", "/api/resource-material-files"',
   "saveResourceMaterialFileAndVerify",
   "deleteResourceMaterialFileAndVerify",
   "getResourceMaterialOpenUrl",
   "openResourceMaterialWindow"
 ]) assert.ok(fileApiSource.includes(binding), `missing client Storage boundary: ${binding}`);
+assert.match(fileApiSource, /parseVersionedWriteResponse\(\s*"POST",\s*"\/api\/resource-material-files"/);
+assert.match(fileApiSource, /parseVersionedWriteResponse\(\s*"DELETE",\s*"\/api\/resource-material-files"/);
 for (const binding of [
   "saveResourceMaterialAction",
   "deleteResourceMaterialAction",
