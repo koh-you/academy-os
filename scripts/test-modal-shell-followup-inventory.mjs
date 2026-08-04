@@ -35,8 +35,8 @@ const rawDialogEntries = sourceEntries.filter((entry) => (
 ));
 
 assert.equal(directModalCount, 35, "unexpected direct common Modal surface count");
-assert.equal(injectedModalCount, 6, "unexpected injected common Modal surface count");
-assert.equal(modalFooterCount, 15, "unexpected common ModalFooter count");
+assert.equal(injectedModalCount, 7, "unexpected injected common Modal surface count");
+assert.equal(modalFooterCount, 16, "unexpected common ModalFooter count");
 assert.equal(modalActionCount, 2, "unexpected legacy modalActions wrapper count");
 assert.deepEqual(
   rawDialogEntries.map((entry) => entry.path),
@@ -57,14 +57,18 @@ for (const contract of [
   assert.ok(sharedModalSource.includes(contract), `missing common modal contract: ${contract}`);
 }
 
-const [appSource, outletSource, statusSource, supplementModalSource] = await Promise.all([
+const [appSource, monthlyReportModalSource, outletSource, statusSource, supplementModalSource] = await Promise.all([
   readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8"),
+  readFile(new URL("../src/domains/students/StudentMonthlyReportModal.jsx", import.meta.url), "utf8"),
   readFile(new URL("../src/app/TeacherViewOutlet.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/components/InlineSaveStatus.jsx", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/supplements/SupplementNotificationControlModal.jsx", import.meta.url), "utf8")
 ]);
 assert.ok(appSource.includes("Modal,"), "App must inject the shared Modal identity");
 assert.ok(outletSource.includes("ModalComponent: components.Modal"), "teacher outlet must preserve the shared Modal identity");
+for (const contract of ["<ModalComponent", "scrollable", "<ModalFooter>", "onClose={onClose}"]) {
+  assert.ok(monthlyReportModalSource.includes(contract), `missing student monthly report modal contract: ${contract}`);
+}
 for (const state of ["idle", "dirty", "saving", "verifying", "saved", "failed"]) {
   assert.ok(statusSource.includes(`${state}:`), `missing common save-state vocabulary: ${state}`);
 }
@@ -85,5 +89,5 @@ for (const forbiddenOwner of ["fetch(", "postJson", "/api/", "setNotificationJob
 }
 
 console.log(
-  `modal follow-up inventory passed · common ${directModalCount + injectedModalCount}/41 · bespoke ${rawDialogEntries.length} · footer ${modalFooterCount} · legacy actions ${modalActionCount}`
+  `modal follow-up inventory passed · common ${directModalCount + injectedModalCount}/42 · bespoke ${rawDialogEntries.length} · footer ${modalFooterCount} · legacy actions ${modalActionCount}`
 );
