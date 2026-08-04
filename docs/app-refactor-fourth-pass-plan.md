@@ -177,3 +177,4 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 - 4-1k: 파일 없는 `/api/resource-materials` POST의 metadata payload와 verified row response를 공통 contract에 연결했다. stable ID, insert-only/CAS, 결과 불명 최신 draft 수렴·Supabase 목록 재조회와 UI 복구 owner는 기존 API/action에 유지했다.
 - 4-1l: teacher auth가 필요한 `/api/resource-material-files` POST/DELETE의 file/material payload와 Storage+row verified response를 공통 contract에 연결했다. stable path, upload rollback, delete backup/restore, CAS·재조회와 UI 보존 owner는 기존 operation/API/action에 유지했다.
 - 4-1m: provider 실행이 없는 `POST /api/notification-jobs`의 canonical job payload와 source response를 공통 contract에 연결했다. notification source helper는 App·공지·실패 기록이 공유하고 Solapi reserve/cancel/reconcile owner는 별도 route에 유지했다.
+- 4-1n: `POST /api/notification-jobs/reserve`의 canonical job/reason/dry-run payload와 source/provider 결과를 공통 contract에 연결했다. pending/reuse/old-group cancel/teacher-cancel race와 실패 source 기록 owner는 유지하고 safe API dry-run만 실행했다.

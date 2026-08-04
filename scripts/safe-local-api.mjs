@@ -730,6 +730,35 @@ function handleMutation(pathname, payload) {
     );
     return { notificationJob, ok: true };
   }
+  if (pathname === "/api/notification-jobs/reserve") {
+    let parsedPayload;
+    try {
+      parsedPayload = parseVersionedWriteRequest("POST", pathname, payload);
+    } catch (error) {
+      return {
+        code: error.code,
+        error: error.message,
+        field: error.field,
+        ok: false,
+        statusCode: Number(error.statusCode) || 400
+      };
+    }
+    const notificationJob = {
+      ...parsedPayload.notificationJob,
+      provider: parsedPayload.forceDryRun ? "academy-os" : "solapi",
+      status: parsedPayload.forceDryRun ? "dry_run" : "scheduled"
+    };
+    state.notificationJobs = upsertById(
+      state.notificationJobs,
+      notificationJob,
+      ["notificationJobId"]
+    );
+    return {
+      notificationJob,
+      ok: true,
+      reserved: !parsedPayload.forceDryRun
+    };
+  }
   if (pathname === "/api/resource-materials") {
     let parsedPayload;
     try {

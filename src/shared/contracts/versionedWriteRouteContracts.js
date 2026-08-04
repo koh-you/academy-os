@@ -89,6 +89,16 @@ const notificationJobWriteResponseContract = defineApiPayloadContract({
   name: "notification job write response"
 });
 
+const notificationJobReserveResponseContract = defineApiPayloadContract({
+  allowUnknownFields: true,
+  fields: {
+    notificationJob: { required: true, type: "object" },
+    reserved: { required: true, type: "boolean" },
+    source: { allowEmpty: false, required: true, type: "string" }
+  },
+  name: "notification job reserve response"
+});
+
 function defineVersionedWriteRoute({
   domain,
   fields,
@@ -261,6 +271,18 @@ export const versionedWriteRouteContracts = Object.freeze([
     path: "/api/notification-jobs",
     response: notificationJobWriteResponseContract,
     sources: ["notification_jobs"]
+  }),
+  defineVersionedWriteRoute({
+    domain: "notification",
+    fields: {
+      forceDryRun: { type: "boolean" },
+      notificationJob: { required: true, type: "object" },
+      reason: { trim: true, type: "string" }
+    },
+    key: "notificationJobReserve",
+    path: "/api/notification-jobs/reserve",
+    response: notificationJobReserveResponseContract,
+    sources: ["notification_jobs", "provider.solapi"]
   })
 ]);
 

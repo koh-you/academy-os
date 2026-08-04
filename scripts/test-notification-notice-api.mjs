@@ -40,7 +40,7 @@ const reserveResult = await reserveNoticeJobRequest({
   notificationJob,
   request: async (...args) => {
     reserveCalls.push(args);
-    return { notificationJob: reservedJob };
+    return { notificationJob: reservedJob, reserved: true, source: "solapi" };
   }
 });
 
@@ -52,11 +52,13 @@ assert.deepEqual(reserveCalls, [[
   "Solapi 예약 요청이 45초를 넘었습니다. 실제 예약 여부는 발송 기록 또는 Solapi에서 확인해 주세요."
 ]]);
 
-const fallbackResult = await reserveNoticeJobRequest({
-  notificationJob,
-  request: async () => ({})
-});
-assert.equal(fallbackResult, notificationJob);
+await assert.rejects(
+  reserveNoticeJobRequest({
+    notificationJob,
+    request: async () => ({})
+  }),
+  (error) => error.field === "notificationJob" && error.statusCode === 400
+);
 
 const bindingCalls = [];
 const {
@@ -66,7 +68,7 @@ const {
   request: async (...args) => {
     bindingCalls.push(args);
     return args[0].endsWith("/reserve")
-      ? { notificationJob: reservedJob }
+      ? { notificationJob: reservedJob, reserved: true, source: "solapi" }
       : { notificationJob, source: "supabase" };
   }
 });
