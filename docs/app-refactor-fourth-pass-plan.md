@@ -173,3 +173,4 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 - 4-1g: `/api/class-rosters/save`의 학생·미래 수업 변경 payload와 verified response를 공통 contract에 연결했다. 학생/수업 CAS·재조회·rollback, cleanup과 App의 conflict draft 보존 owner는 유지했다.
 - 4-1h: `/api/school-calendar/derived-save`의 시험정보·연결 직전수업 변경 payload와 verified response를 공통 contract에 연결했다. 두 source의 CAS·재조회·rollback과 수동 보호 owner는 유지했다.
 - 4-1i: `/api/app-state`의 canonical `{ states, expectedUpdatedAt? }` payload와 `{ source, states }` response를 공통 contract에 연결했다. 공용 저장과 강사 운영 메모는 같은 client builder를 사용하며 key별 직렬화·CAS·Supabase 재조회·후속 입력 보존 owner는 기존 controller에 유지했다.
+- 4-1j: teacher auth가 필요한 `/api/report-snapshots`의 snapshot payload와 recovered/readback response를 공통 contract에 연결했다. stable ID 재시도, `app_state.reportSnapshots` CAS·Supabase 재조회와 UI draft 보존 owner는 기존 action/persistence에 유지했다.

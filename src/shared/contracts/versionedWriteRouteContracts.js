@@ -33,6 +33,18 @@ const appStateWriteResponseContract = defineApiPayloadContract({
   name: "app state write response"
 });
 
+const reportSnapshotWriteResponseContract = defineApiPayloadContract({
+  allowUnknownFields: true,
+  fields: {
+    recovered: { required: true, type: "boolean" },
+    reportSnapshots: { required: true, type: "array" },
+    snapshot: { required: true, type: "object" },
+    source: { allowEmpty: false, required: true, type: "string" },
+    verified: { required: true, type: "boolean" }
+  },
+  name: "report snapshot write response"
+});
+
 function defineVersionedWriteRoute({
   domain,
   fields,
@@ -151,6 +163,16 @@ export const versionedWriteRouteContracts = Object.freeze([
     key: "appStateWrite",
     path: "/api/app-state",
     response: appStateWriteResponseContract,
+    sources: ["app_state"]
+  }),
+  defineVersionedWriteRoute({
+    domain: "report",
+    fields: {
+      snapshot: { required: true, type: "object" }
+    },
+    key: "reportSnapshotWrite",
+    path: "/api/report-snapshots",
+    response: reportSnapshotWriteResponseContract,
     sources: ["app_state"]
   })
 ]);

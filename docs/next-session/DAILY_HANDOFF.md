@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-1j report snapshot
+
+- `/api/report-snapshots`의 `{ snapshot }` request와 `recovered/reportSnapshots/snapshot/source/verified` response를 client·실서버·safe server 공통 contract에 연결했다. teacher auth는 payload parsing보다 먼저 유지한다.
+- stable ID retry, app_state key CAS·Supabase 재조회·기존 snapshot 보존과 UI draft/상태 owner는 기존 action/persistence에 유지했다. contract/report fixture, lint, scenario·production `827/827`, build `416 modules`·main `943.61 kB`·lazy `12/12`, 격리 browser `1/1` 통과.
+- 다음 4-1 단위는 resource material payload contract다. 운영 데이터·실제 알림·SQL·유료 호출은 없었다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1i app state
 
 - 공용 app-state 저장과 강사 운영 메모가 같은 canonical `{ states, expectedUpdatedAt? }` request와 `{ source, states }` response contract를 사용한다. server는 legacy direct-object를 persistence 전에 400으로 거부한다.

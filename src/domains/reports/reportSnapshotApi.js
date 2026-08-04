@@ -1,5 +1,9 @@
 import { apiUrl } from "../../shared/utils/apiClient.js";
 import {
+  parseVersionedWriteRequest,
+  parseVersionedWriteResponse
+} from "../../shared/contracts/versionedWriteRouteContracts.js";
+import {
   areReportSnapshotsEqual,
   createReportSnapshot,
   isReportSnapshotRetryMatch
@@ -12,8 +16,9 @@ export async function saveReportSnapshotRequest({ sessionToken, snapshot, timeou
   const controller = new AbortController();
   const timeoutId = globalThis.setTimeout(() => controller.abort(), timeoutMs);
   try {
+    const payload = parseVersionedWriteRequest("POST", "/api/report-snapshots", { snapshot });
     const response = await fetch(apiUrl("/api/report-snapshots"), {
-      body: JSON.stringify({ snapshot }),
+      body: JSON.stringify(payload),
       cache: "no-store",
       headers: {
         Authorization: `Bearer ${sessionToken}`,
@@ -29,17 +34,17 @@ export async function saveReportSnapshotRequest({ sessionToken, snapshot, timeou
       error.statusCode = response.status;
       throw error;
     }
-    const verifiedSnapshot = result.reportSnapshots?.find((item) => item?.reportId === snapshot?.reportId);
+    const parsedResult = parseVersionedWriteResponse("POST", "/api/report-snapshots", result);
+    const verifiedSnapshot = parsedResult.reportSnapshots.find((item) => item?.reportId === snapshot?.reportId);
     if (
-      result.source !== "supabase" ||
-      result.verified !== true ||
-      !Array.isArray(result.reportSnapshots) ||
+      parsedResult.source !== "supabase" ||
+      parsedResult.verified !== true ||
       !verifiedSnapshot ||
       !areReportSnapshotsEqual(verifiedSnapshot, snapshot)
     ) {
       throw new Error("보고서 저장 결과를 Supabase 재조회로 확인하지 못했습니다.");
     }
-    return result;
+    return parsedResult;
   } catch (error) {
     if (error.name === "AbortError") {
       const timeoutError = new Error("보고서 저장 확인이 15초를 넘었습니다. 같은 보고서로 다시 확인해 주세요.");

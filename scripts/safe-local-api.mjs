@@ -31,6 +31,7 @@ import {
   validateResourceMaterialFile
 } from "../src/domains/resources/resourceMaterialStorageModel.js";
 import { saveReportSnapshotWithVerification } from "../src/domains/reports/reportSnapshotPersistence.js";
+import { parseVersionedWriteRequest } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 
 const host = "127.0.0.1";
 const port = Number(process.env.ACADEMY_SAFE_API_PORT || 8787);
@@ -1287,8 +1288,12 @@ const server = http.createServer(async (request, response) => {
     if (request.headers.authorization !== "Bearer safe-fixture-session") {
       return sendJson(response, 401, { ok: false, error: "안전 fixture 보고서 저장 인증이 필요합니다." });
     }
-    const payload = await readJson(request);
     try {
+      const payload = parseVersionedWriteRequest(
+        request.method,
+        requestUrl.pathname,
+        await readJson(request)
+      );
       const result = await saveReportSnapshotWithVerification({
         operations: {
           read: async () => ({
@@ -1318,6 +1323,7 @@ const server = http.createServer(async (request, response) => {
       return sendJson(response, Number(error.statusCode) || 500, {
         code: error.code,
         error: error.message,
+        ...(error.field ? { field: error.field } : {}),
         ok: false,
         safeFixture: true
       });
