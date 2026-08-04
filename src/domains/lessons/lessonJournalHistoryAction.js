@@ -1,4 +1,11 @@
 import { createLessonJournalHistoryPlan } from "./lessonJournalHistoryPersistence.js";
+import {
+  parseVersionedWriteRequest,
+  parseVersionedWriteResponse
+} from "../../shared/contracts/versionedWriteRouteContracts.js";
+
+const lessonJournalHistoryMethod = "POST";
+const lessonJournalHistoryPath = "/api/lesson-journal/history-action";
 
 const actionMessages = Object.freeze({
   cancel: {
@@ -107,11 +114,21 @@ export async function saveLessonJournalHistoryAction({
     homeworks: actionHomeworks
   });
   try {
+    const requestPayload = parseVersionedWriteRequest(
+      lessonJournalHistoryMethod,
+      lessonJournalHistoryPath,
+      { auditId, ...requestPlan }
+    );
     const result = await request(
-      "/api/lesson-journal/history-action",
-      { auditId, ...requestPlan },
+      lessonJournalHistoryPath,
+      requestPayload,
       30000,
       timeoutMessage
+    );
+    parseVersionedWriteResponse(
+      lessonJournalHistoryMethod,
+      lessonJournalHistoryPath,
+      result
     );
     if (result?.source !== "supabase" || result?.verified !== true || result?.auditId !== auditId) {
       throw new Error("수업 복사·되돌리기 결과를 Supabase 재조회로 확인하지 못했습니다.");

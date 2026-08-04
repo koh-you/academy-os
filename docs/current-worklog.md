@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-1c lesson history
+
+- `/api/lesson-journal/history-action`의 client outbound/server inbound와 client verified response를 공통 contract에 연결했다. `action/auditId/homeworkChanges/lessonChange` 외의 field와 잘못된 top-level type은 persistence 전에 차단한다.
+- 복사 결과 불명 뒤 같은 lesson/homework ID로 재시도하는 pending plan, 취소·복사 undo stack, Supabase CAS/readback/rollback, 성공 뒤 App 목록 반영 순서는 그대로다. contract 실패도 기존 failed 상태를 사용하고 pending copy를 지우지 않는다.
+- 검증: contract/history fixture, lesson domain `20/20`, runtime lint, scenario `827/827`, production `827/827`, build `416 modules`·main `942.31 kB`·lazy `12/12`, 집중 browser `2/2` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1b lesson journal rows
 
 - `/api/lesson-journal/rows/save` 한 경계에 4-1a 공통 contract를 연결했다. client action은 전송 직전 canonical `auditId/homeworkChanges/recordChanges`만 만들고 응답의 `source/verified/auditId` type을 확인하며, server는 persistence 호출 전에 미지 field·잘못된 top-level type을 400 `INVALID_API_PAYLOAD`로 차단한다.
