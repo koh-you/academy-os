@@ -1247,6 +1247,74 @@ test("notification readiness contract checks safe source jobs without Slack side
   expect(pageErrors).toEqual([]);
 });
 
+test("notification dispatch contract preserves safe jobs and rejects sensitive overrides", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+  const safeApiBaseUrl = `http://127.0.0.1:${process.env.ACADEMY_SAFE_API_PORT || 8787}`;
+  const notificationJobId = "safe-contract-dispatch-preserved";
+
+  const sourceResponse = await request.post(`${safeApiBaseUrl}/api/notification-jobs`, {
+    data: {
+      notificationJob: {
+        notificationJobId,
+        notificationType: "notice_parent",
+        payload: { message: "안전 자동 처리 보존" },
+        scheduledAt: "2026-08-05T00:00:00.000Z",
+        status: "scheduled"
+      }
+    }
+  });
+  expect(sourceResponse.status()).toBe(200);
+
+  const dispatchResponse = await request.post(`${safeApiBaseUrl}/api/notification-jobs/dispatch-due`, {
+    data: { forceDryRun: false, limit: 1 }
+  });
+  expect(dispatchResponse.status()).toBe(200);
+  expect(await dispatchResponse.json()).toMatchObject({
+    automaticSolapiReconcile: {
+      checkedCount: 0,
+      source: "safe-provider",
+      updatedCount: 0
+    },
+    dryRun: true,
+    ok: true,
+    processed: [],
+    processedCount: 0,
+    safeFixture: true,
+    source: "supabase"
+  });
+
+  const jobsResponse = await request.get(`${safeApiBaseUrl}/api/notification-jobs`);
+  expect(jobsResponse.status()).toBe(200);
+  const jobsResult = await jobsResponse.json();
+  expect(jobsResult.notificationJobs).toContainEqual(expect.objectContaining({
+    notificationJobId,
+    status: "scheduled"
+  }));
+
+  const blockedOverrideResponse = await request.post(`${safeApiBaseUrl}/api/notification-jobs/dispatch-due`, {
+    data: { forceDryRun: true, limit: 1, now: "2099-08-05T00:00:00.000Z" }
+  });
+  expect(blockedOverrideResponse.status()).toBe(401);
+  expect(await blockedOverrideResponse.json()).toMatchObject({
+    error: "안전 fixture에서는 알림 자동 처리 override를 사용할 수 없습니다.",
+    ok: false,
+    safeFixture: true
+  });
+
+  const invalidResponse = await request.post(`${safeApiBaseUrl}/api/notification-jobs/dispatch-due`, {
+    data: { limit: "1" }
+  });
+  expect(invalidResponse.status()).toBe(400);
+  expect(await invalidResponse.json()).toMatchObject({
+    code: "INVALID_API_PAYLOAD",
+    field: "limit",
+    ok: false,
+    safeFixture: true
+  });
+  expect(pageErrors).toEqual([]);
+});
+
 test("notification cancel contract persists the source state without provider actions in the safe API", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);

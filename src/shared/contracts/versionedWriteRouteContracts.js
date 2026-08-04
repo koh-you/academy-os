@@ -136,6 +136,18 @@ const notificationReadinessResponseContract = defineApiPayloadContract({
   name: "notification readiness response"
 });
 
+const notificationDispatchResponseContract = defineApiPayloadContract({
+  allowUnknownFields: true,
+  fields: {
+    automaticSolapiReconcile: { required: true, type: "object" },
+    dryRun: { required: true, type: "boolean" },
+    processed: { required: true, type: "array" },
+    processedCount: { required: true, type: "number" },
+    source: { allowEmpty: false, required: true, type: "string" }
+  },
+  name: "notification dispatch response"
+});
+
 function defineVersionedWriteRoute({
   domain,
   fields,
@@ -378,6 +390,19 @@ export const versionedWriteRouteContracts = Object.freeze([
     path: "/api/notification-jobs/readiness-check",
     response: notificationReadinessResponseContract,
     sources: ["notification_jobs", "provider.slack"]
+  }),
+  defineVersionedWriteRoute({
+    domain: "notification",
+    fields: {
+      dispatchToken: { trim: true, type: "string" },
+      forceDryRun: { defaultValue: false, type: "boolean" },
+      limit: { defaultValue: 20, type: "number" },
+      now: { trim: true, type: "string" }
+    },
+    key: "notificationDispatchDue",
+    path: "/api/notification-jobs/dispatch-due",
+    response: notificationDispatchResponseContract,
+    sources: ["notification_jobs", "provider.solapi"]
   })
 ]);
 

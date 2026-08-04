@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-1s notification dispatch
+
+- `POST /api/notification-jobs/dispatch-due`를 19번째 공통 contract로 고정했다. canonical token/dry-run/limit/clock과 processed/source/automatic reconcile response를 server·cron client가 함께 검증한다.
+- 민감 override 인증은 payload 정규화 전에 계속 판단하고, 기존 source claim·provider send·상태 저장·자동 Solapi reconcile owner는 server에 유지했다. safe server는 무인증 기본 요청도 0건 처리만 반환하며 token·dry-run·clock override를 401로 거부해 source job을 바꾸지 않는다.
+- 검증: contract `19 routes`, notification `18/18`, lint, scenario·production `827/827`, build `417 modules`·main `944.71 kB`·lazy `12/12`, 격리 browser `1/1` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1r notification readiness
 
 - `POST /api/notification-jobs/readiness-check`를 18번째 공통 contract로 고정했다. canonical notifySlack/now/window와 checked/issue/source/window response를 server가 검증하며 잘못된 field/type은 source 조회 전에 400으로 차단한다.

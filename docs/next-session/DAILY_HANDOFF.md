@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-1s notification dispatch
+
+- `POST /api/notification-jobs/dispatch-due`의 token/dry-run/limit/clock request와 processed/source/reconcile response를 공통 contract에 연결했다. 인증 선판정과 source claim·Solapi 실행·결과 저장 owner는 server에 유지한다.
+- cron client도 같은 request/response parser를 사용하고 safe API는 0건/no-write 응답만 허용하며 모든 민감 override를 401로 막는다. contract `19 routes`, notification `18/18`, lint, scenario·production `827/827`, build `417 modules`·main `944.71 kB`·lazy `12/12`, 격리 browser `1/1` 통과.
+- 다음 단위는 유료 실행 없이 exam analysis request/response inventory를 고정해 4-1 종료 범위를 확정한다. 운영 데이터·실제 Slack/Solapi·SQL·유료 호출은 없었다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1r notification readiness
 
 - `POST /api/notification-jobs/readiness-check`의 clock/window/Slack flag와 source issue response를 공통 contract에 연결했다. notification source read와 누락 판정, 선택적 Slack owner는 server에 유지한다.

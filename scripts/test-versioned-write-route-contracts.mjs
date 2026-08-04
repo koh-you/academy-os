@@ -8,9 +8,9 @@ import {
   versionedWriteRouteContracts
 } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 
-assert.equal(versionedWriteRouteContracts.length, 18);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 18);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 18);
+assert.equal(versionedWriteRouteContracts.length, 19);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 19);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 19);
 assert.equal(versionedWriteRouteContracts.every(Object.isFrozen), true);
 assert.equal(versionedWriteRouteContracts.every(({ request, response, sources }) => (
   Object.isFrozen(request) && Object.isFrozen(response) && Object.isFrozen(sources)
@@ -383,6 +383,32 @@ assert.deepEqual(
     windowMinutes: 60
   }
 );
+assert.deepEqual(
+  parseVersionedWriteRequest("POST", "/api/notification-jobs/dispatch-due", {
+    limit: 7
+  }),
+  {
+    forceDryRun: false,
+    limit: 7
+  }
+);
+assert.deepEqual(
+  parseVersionedWriteResponse("POST", "/api/notification-jobs/dispatch-due", {
+    automaticSolapiReconcile: { checkedCount: 0, updatedCount: 0 },
+    dryRun: true,
+    ok: true,
+    processed: [],
+    processedCount: 0,
+    source: "supabase"
+  }),
+  {
+    automaticSolapiReconcile: { checkedCount: 0, updatedCount: 0 },
+    dryRun: true,
+    processed: [],
+    processedCount: 0,
+    source: "supabase"
+  }
+);
 assert.deepEqual(response, {
   auditId: "supplement-audit",
   source: "supabase",
@@ -448,4 +474,4 @@ assert.throws(
   /field\/alias가 중복/
 );
 
-console.log("versioned write route contracts passed · 18 routes · canonical keys and declared legacy alias only");
+console.log("versioned write route contracts passed · 19 routes · canonical keys and declared legacy alias only");
