@@ -7548,9 +7548,12 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs/cancel") {
     try {
-      const payload = await readJsonBody(request);
-      const notificationJobId = payload.notificationJobId || payload.id;
-      if (!notificationJobId) throw new Error("취소할 알림톡 예약 ID가 필요합니다.");
+      const payload = parseVersionedWriteRequest(
+        request.method,
+        requestUrl.pathname,
+        await readJsonBody(request)
+      );
+      const notificationJobId = payload.notificationJobId;
       const reason = payload.reason || "선생님 예약 취소";
       const existing = await getNotificationJob(notificationJobId);
       const job = existing.notificationJob;
@@ -7569,7 +7572,12 @@ const server = http.createServer(async (request, response) => {
       const result = await cancelNotificationJob(notificationJobId, reason);
       sendJson(request, response, 200, { ok: true, ...result, solapiCancellation });
     } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.field !== undefined ? { field: error.field } : {})
+      });
     }
     return;
   }

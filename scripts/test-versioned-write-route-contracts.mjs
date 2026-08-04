@@ -8,9 +8,9 @@ import {
   versionedWriteRouteContracts
 } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 
-assert.equal(versionedWriteRouteContracts.length, 14);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 14);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 14);
+assert.equal(versionedWriteRouteContracts.length, 15);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 15);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 15);
 assert.equal(versionedWriteRouteContracts.every(Object.isFrozen), true);
 assert.equal(versionedWriteRouteContracts.every(({ request, response, sources }) => (
   Object.isFrozen(request) && Object.isFrozen(response) && Object.isFrozen(sources)
@@ -252,6 +252,35 @@ assert.deepEqual(
   }),
   { notificationJob, reserved: false, source: "supabase" }
 );
+assert.deepEqual(
+  parseVersionedWriteRequest("POST", "/api/notification-jobs/cancel", {
+    cancelSolapi: false,
+    notificationJobId: " cancel-safe-1 ",
+    reason: " safe cancel "
+  }),
+  { cancelSolapi: false, notificationJobId: "cancel-safe-1", reason: "safe cancel" }
+);
+assert.deepEqual(
+  parseVersionedWriteRequest("POST", "/api/notification-jobs/cancel", {
+    id: "legacy-cancel-safe-1"
+  }),
+  { notificationJobId: "legacy-cancel-safe-1" }
+);
+assert.throws(
+  () => parseVersionedWriteRequest("POST", "/api/notification-jobs/cancel", {
+    id: "legacy-cancel-safe-1",
+    notificationJobId: "cancel-safe-1"
+  }),
+  (error) => error.field === "notificationJobId" && error.statusCode === 400
+);
+assert.deepEqual(
+  parseVersionedWriteResponse("POST", "/api/notification-jobs/cancel", {
+    notificationJob: { ...notificationJob, status: "canceled" },
+    solapiCancellation: null,
+    source: "supabase"
+  }),
+  { notificationJob: { ...notificationJob, status: "canceled" }, source: "supabase" }
+);
 assert.deepEqual(response, {
   auditId: "supplement-audit",
   source: "supabase",
@@ -317,4 +346,4 @@ assert.throws(
   /field\/alias가 중복/
 );
 
-console.log("versioned write route contracts passed · 14 routes · canonical keys and declared legacy alias only");
+console.log("versioned write route contracts passed · 15 routes · canonical keys and declared legacy alias only");

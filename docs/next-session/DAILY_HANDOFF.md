@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-1o notification cancel
+
+- `POST /api/notification-jobs/cancel`의 canonical request와 source/provider 결과 response를 client·실서버·safe server 공통 contract에 연결했다. 기존 `id` 호환은 선언된 alias로만 허용한다.
+- 실서버의 Solapi group 취소와 source canceled 저장 순서는 유지하고, safe API는 `cancelSolapi:false`로 source만 변경해 실제 provider 행동이 없음을 고정했다. contract `15 routes`, notification `14/14`, lint, scenario·production `827/827`, build `417 modules`·main `944.66 kB`·lazy `12/12`, 격리 browser `1/1` 통과.
+- 다음 단위는 `/api/notification-jobs/reconcile-solapi`의 selector payload와 provider read/source merge response를 실제 provider 조회 없이 고정한다. 운영 데이터·실제 알림 예약·취소·SQL·유료 호출은 없었다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1n notification reserve
 
 - `POST /api/notification-jobs/reserve`의 canonical request와 source/provider 결과 response를 client·실서버·safe server 공통 contract에 연결했다. 공지와 보충/수업 예약은 저장 시점 dynamic contract helper를 공유한다.

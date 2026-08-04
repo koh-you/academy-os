@@ -759,6 +759,46 @@ function handleMutation(pathname, payload) {
       reserved: !parsedPayload.forceDryRun
     };
   }
+  if (pathname === "/api/notification-jobs/cancel") {
+    let parsedPayload;
+    try {
+      parsedPayload = parseVersionedWriteRequest("POST", pathname, payload);
+    } catch (error) {
+      return {
+        code: error.code,
+        error: error.message,
+        field: error.field,
+        ok: false,
+        statusCode: Number(error.statusCode) || 400
+      };
+    }
+    const currentJob = state.notificationJobs.find((job) => (
+      job.notificationJobId === parsedPayload.notificationJobId
+    )) ?? null;
+    if (!currentJob) {
+      return {
+        error: "안전 fixture에서 취소할 알림톡 예약을 찾지 못했습니다.",
+        ok: false,
+        statusCode: 404
+      };
+    }
+    const notificationJob = {
+      ...currentJob,
+      error: parsedPayload.reason || "선생님 예약 취소",
+      status: "canceled",
+      updatedAt: new Date().toISOString()
+    };
+    state.notificationJobs = upsertById(
+      state.notificationJobs,
+      notificationJob,
+      ["notificationJobId"]
+    );
+    return {
+      notificationJob,
+      ok: true,
+      solapiCancellation: null
+    };
+  }
   if (pathname === "/api/resource-materials") {
     let parsedPayload;
     try {

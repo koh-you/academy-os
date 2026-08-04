@@ -133,7 +133,11 @@ const cancelResult = await cancelNotificationJobRequest({
   onNotificationJob: (job) => cancelState.push(job),
   request: async (path, body) => {
     cancelCalls.push({ path, body });
-    return { notificationJob: canceledJob };
+    return {
+      notificationJob: canceledJob,
+      solapiCancellation: { groupId: "safe-provider-group" },
+      source: "supabase"
+    };
   }
 });
 
@@ -146,6 +150,8 @@ assert.deepEqual(cancelCalls, [{
 }]);
 assert.deepEqual(cancelState, [canceledJob]);
 assert.equal(cancelResult.notificationJob, canceledJob);
+assert.deepEqual(cancelResult.solapiCancellation, { groupId: "safe-provider-group" });
+assert.equal(cancelResult.source, "supabase");
 
 const batchCancelCalls = [];
 const batchCanceledJobs = await cancelNotificationJobsRequest({

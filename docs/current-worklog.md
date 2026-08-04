@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-1o notification cancel
+
+- `POST /api/notification-jobs/cancel`을 15번째 공통 contract로 고정했다. canonical `{ notificationJobId, reason?, cancelSolapi? }`와 기존 `id` alias를 명시하고 `{ source, notificationJob }`을 검증하며 nullable provider 취소 결과는 그대로 보존한다.
+- 실서버는 payload를 provider 조회·취소 전에 검증한다. safe server는 source job만 canceled로 저장하고 `solapiCancellation: null`을 반환해 provider를 호출하지 않으며, 기존 실제 Solapi group 취소→notification_jobs 상태 저장 순서는 변경하지 않았다.
+- 검증: contract `15 routes`, notification `14/14`, notification job suite, lint, scenario·production `827/827`, build `417 modules`·main `944.66 kB`·lazy `12/12`, 격리 cancel browser `1/1` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1n notification reserve
 
 - `POST /api/notification-jobs/reserve`를 14번째 공통 contract로 고정했다. client·실서버·safe server는 canonical `{ notificationJob, reason?, forceDryRun? }`만 받고 `{ source, notificationJob, reserved }`을 검증하며 legacy direct object와 invalid field/type은 provider 조립 전에 400으로 차단한다.

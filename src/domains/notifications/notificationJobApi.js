@@ -71,15 +71,21 @@ export async function reserveNotificationJobRequest({
 }
 
 export async function cancelNotificationJobRequest({
+  cancelSolapi,
   notificationJob,
   reason = "선생님 예약 취소",
   onNotificationJob = () => {},
-  request
+  request,
+  requestArgs = []
 } = {}) {
   if (!notificationJob?.notificationJobId) throw new Error("취소할 알림톡 예약 ID가 없습니다.");
-  const result = await request("/api/notification-jobs/cancel", {
+  const { cancelNotificationJobContractRequest } = await import("./notificationJobContractApi.js");
+  const result = await cancelNotificationJobContractRequest({
+    cancelSolapi,
     notificationJobId: notificationJob.notificationJobId,
-    reason
+    reason,
+    request,
+    requestArgs
   });
   if (result.notificationJob) onNotificationJob(result.notificationJob);
   return result;
