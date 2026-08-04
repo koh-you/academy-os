@@ -7163,7 +7163,11 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/class-rosters/save") {
     try {
-      const payload = await readJsonBody(request);
+      const payload = parseVersionedWriteRequest(
+        request.method,
+        requestUrl.pathname,
+        await readJsonBody(request)
+      );
       const result = await saveClassRosterPlan({
         auditId: payload.auditId,
         lessonChanges: payload.lessonChanges ?? [],
@@ -7175,6 +7179,7 @@ const server = http.createServer(async (request, response) => {
         ok: false,
         error: error.message,
         ...(error.code ? { code: error.code } : {}),
+        ...(error.field ? { field: error.field } : {}),
         ...(error.audit ? { audit: error.audit } : {})
       });
     }

@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-1g class roster
+
+- 학생 반 배정과 미래 정규수업 명단을 함께 저장하는 `/api/class-rosters/save`의 canonical request/verified response를 공통 contract에 연결했다. invalid payload는 persistence 전에 field 포함 400으로 차단한다.
+- 학생·수업 CAS/readback/rollback, cleanup, App의 최종 Supabase 재조회와 conflict draft 보존은 유지했다. contract/persistence, student `15/15`, lint, scenario·production `827/827`, build `416 modules`·main `942.68 kB`·lazy `12/12`, browser `1/1` 통과.
+- 다음은 registry의 derived school calendar payload를 한 route로 연결한다. 운영 데이터·실제 알림·SQL·유료 호출은 없었다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1f attendance check
 
 - 수동 출결과 키오스크 저장이 공유하는 `/api/attendance/check` request 및 `record/action/mode/alimtalk` response를 공통 contract에 연결했다. initial bundle을 지키기 위해 client contract는 저장 시점 dynamic import다.

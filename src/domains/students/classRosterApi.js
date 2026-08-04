@@ -1,3 +1,11 @@
+import {
+  parseVersionedWriteRequest,
+  parseVersionedWriteResponse
+} from "../../shared/contracts/versionedWriteRouteContracts.js";
+
+const classRosterSaveMethod = "POST";
+const classRosterSavePath = "/api/class-rosters/save";
+
 export function createClassRosterAuditId(now = Date.now()) {
   const randomPart = globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2, 10);
   return `class-roster-${now}-${randomPart}`;
@@ -19,11 +27,21 @@ export async function saveClassRosterRequest({
   if (lessonChanges.some((change) => !change.lessonId || !change.expectedUpdatedAt)) {
     throw new Error("미래 수업 명단의 서버 버전을 확인하지 못했습니다. 새로고침 후 다시 시도해 주세요.");
   }
+  const requestPayload = parseVersionedWriteRequest(
+    classRosterSaveMethod,
+    classRosterSavePath,
+    { auditId, lessonChanges, studentChanges }
+  );
   const result = await request(
-    "/api/class-rosters/save",
-    { auditId, lessonChanges, studentChanges },
+    classRosterSavePath,
+    requestPayload,
     30000,
     timeoutMessage
+  );
+  parseVersionedWriteResponse(
+    classRosterSaveMethod,
+    classRosterSavePath,
+    result
   );
   if (result?.source !== "supabase" || result?.verified !== true || result?.auditId !== auditId) {
     throw new Error("반 배정 저장 결과를 확인하지 못했습니다.");

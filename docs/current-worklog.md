@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-1g class roster
+
+- `/api/class-rosters/save`의 `auditId/studentChanges/lessonChanges`와 verified response를 공통 contract에 연결했다. client는 canonical field만 전송하고 server는 invalid top-level field/type을 학생·수업 저장 전에 field 포함 400으로 차단한다.
+- 학생별 `updated_at` CAS·신규 insert-only, 미래 정규수업 명단 CAS, 중간 실패 역순 rollback, 제외 학생 연결 기록 cleanup, 성공 뒤 학생·수업 Supabase 재조회 대조와 실패 draft 보존 owner는 그대로다.
+- 검증: contract·class roster persistence, student `15/15`, lint, scenario·production `827/827`, build `416 modules`·main `942.68 kB`·lazy `12/12`, 집중 browser `1/1` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1f attendance check
 
 - `/api/attendance/check`의 수동·키오스크 공용 요청과 원천 저장 결과 응답을 7번째 contract로 고정했다. optional field는 `undefined`를 제외한 canonical key만 보내고 `lateMinutes`의 기존 number/string 입력은 모두 보존하며, server는 미지 field·잘못된 type을 출결 저장 전에 field 포함 400으로 차단한다.
