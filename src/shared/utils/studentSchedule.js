@@ -17,6 +17,15 @@ function getLessonDayKey(lesson = {}) {
   return koreaDayKeys[date.getDay()] ?? "";
 }
 
+function isProfileScheduleManagedLesson(lesson = {}, student = {}) {
+  const lessonType = String(lesson?.lessonType || "class");
+  return (
+    Boolean(lesson?.classTemplateId) &&
+    lesson.classTemplateId === student?.defaultClassTemplateId &&
+    ["class", "closure"].includes(lessonType)
+  );
+}
+
 function normalizeScheduleSegmentText(value = "") {
   return String(value ?? "")
     .replaceAll("：", ":")
@@ -110,6 +119,23 @@ export function getStudentScheduleForLesson(lesson = {}, student = {}) {
   const lessonDayKey = getLessonDayKey(lesson);
   const rule = rules.find((item) => !item.days.length || item.days.includes(lessonDayKey)) ?? null;
   return rule ? { ...rule, scheduleType: "profile", source: "studentProfile" } : null;
+}
+
+export function isStudentScheduledForLesson(lesson = {}, student = {}) {
+  if (!isProfileScheduleManagedLesson(lesson, student)) return true;
+  const rules = parseStudentScheduleOverride(student?.scheduleOverride);
+  const dayRules = rules.filter((rule) => rule.days.length > 0);
+  if (!dayRules.length) return true;
+  const lessonDayKey = getLessonDayKey(lesson);
+  return Boolean(lessonDayKey && dayRules.some((rule) => rule.days.includes(lessonDayKey)));
+}
+
+export function getEffectiveLessonStudentIds(lesson = {}, students = []) {
+  const studentById = new Map(students.map((student) => [student.studentId, student]));
+  return (Array.isArray(lesson?.studentIds) ? lesson.studentIds : []).filter((studentId) => {
+    const student = studentById.get(studentId);
+    return !student || isStudentScheduledForLesson(lesson, student);
+  });
 }
 
 export function applyStudentScheduleToLesson(lesson = {}, student = {}) {

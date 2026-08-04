@@ -1,3 +1,5 @@
+import { isStudentScheduledForLesson } from "../../shared/utils/studentSchedule.js";
+
 export function selectPreviousLessonMemoContext({
   allRecords = [],
   currentLesson,
@@ -48,6 +50,7 @@ export function selectPreviousLessonMemoContext({
       item.status !== "canceled" &&
       !isClosureLesson(item) &&
       item.studentIds?.includes(student.studentId) &&
+      isStudentScheduledForLesson(item, student) &&
       isSameLessonGroup(currentLesson, item)
     )
     .sort((lessonA, lessonB) => (
@@ -61,7 +64,10 @@ export function selectPreviousLessonMemoContext({
     .filter(Boolean);
   const previousLessonRecordInCurrentGroup = previousLessonRecordsInCurrentGroup[0] ?? null;
   const bridgedPreviousLesson = previousLessons.length === 0
-    ? findPreviousLessonForStudent(lessons, currentLesson, student.studentId, { allowRegularClassFallback: true })
+    ? findPreviousLessonForStudent(lessons, currentLesson, student.studentId, {
+        allowRegularClassFallback: true,
+        student
+      })
     : null;
   const bridgedPreviousLessonRecord = bridgedPreviousLesson
     ? sourceRecords.find((item) => item.lessonId === bridgedPreviousLesson.lessonId && item.studentId === student.studentId) ?? null

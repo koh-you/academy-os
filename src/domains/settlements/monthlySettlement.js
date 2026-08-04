@@ -1,5 +1,6 @@
 import {
   getStudentScheduleForLesson,
+  isStudentScheduledForLesson,
   parseStudentScheduleOverride
 } from "../../shared/utils/studentSchedule.js";
 
@@ -101,9 +102,9 @@ function roundHours(value) {
   return Math.round((Number(value) || 0) * 100) / 100;
 }
 
-function hasStudent(lesson = {}, studentId = "") {
+function hasStudent(lesson = {}, student = {}) {
   const studentIds = Array.isArray(lesson.studentIds) ? lesson.studentIds : [];
-  return studentIds.includes(studentId);
+  return studentIds.includes(student.studentId) && isStudentScheduledForLesson(lesson, student);
 }
 
 function isCanceledLesson(lesson = {}) {
@@ -281,7 +282,7 @@ export function buildStudentMonthEvidence({
     .filter((lesson) =>
       normalizeText(lesson.date).startsWith(`${monthKey}-`) &&
       !isCanceledLesson(lesson) &&
-      hasStudent(lesson, student.studentId)
+      hasStudent(lesson, student)
     )
     .sort((a, b) => (
       String(a.date).localeCompare(String(b.date)) ||

@@ -46,11 +46,6 @@ import { saveStudentIntakeApplicantRequest } from "../domains/students/studentIn
 import { createStudentIntakeApplicantSaveController } from "../domains/students/studentIntakeApplicantSaveController.js";
 import { saveStudentRequest } from "../domains/students/studentApi.js";
 import { resolveStudentRowSaveSuccess } from "../domains/students/studentPersistence.js";
-import { saveClassRosterRequest } from "../domains/students/classRosterApi.js";
-import {
-  createClassRosterSavePlan,
-  verifyClassRosterSavePlan
-} from "../domains/students/classRosterPersistence.js";
 import { ParentPortal } from "../domains/portals/ParentPortal.jsx";
 import { calculateAttendanceStats } from "../domains/portals/StudentMyPageTab.jsx";
 import { StudentPortalShell } from "../domains/portals/StudentPortalShell.jsx";
@@ -439,7 +434,11 @@ import {
   postJsonWithTimeout
 } from "../shared/utils/apiClient.js";
 import { safeIdPart } from "../shared/utils/id.js";
-import { applyStudentScheduleToLesson } from "../shared/utils/studentSchedule.js";
+import {
+  applyStudentScheduleToLesson,
+  getEffectiveLessonStudentIds,
+  isStudentScheduledForLesson
+} from "../shared/utils/studentSchedule.js";
 import ssenTypeIndex from "../../api/data/ssenTypeIndex.json";
 import {
   academyBrandName,
@@ -595,8 +594,10 @@ function formatLessonDisplayName(lesson = {}) {
   return [lesson.className, formatLessonTimeRange(lesson)].filter(Boolean).join(" · ");
 }
 
-function getLessonStudentIds(lesson = {}) {
-  return Array.isArray(lesson?.studentIds) ? lesson.studentIds : [];
+function getLessonStudentIds(lesson = {}, students = []) {
+  return students.length
+    ? getEffectiveLessonStudentIds(lesson, students)
+    : Array.isArray(lesson?.studentIds) ? lesson.studentIds : [];
 }
 
 function isWithdrawnStudent(student = {}) {
@@ -620,13 +621,13 @@ function sortStudentsByName(students = []) {
 }
 
 function getActiveLessonStudents(lesson = {}, students = []) {
-  return sortStudentsByName(getLessonStudentIds(lesson)
+  return sortStudentsByName(getLessonStudentIds(lesson, students)
     .map((studentId) => students.find((student) => student.studentId === studentId))
     .filter(isActiveStudent));
 }
 
 function getLessonJournalStudents(lesson = {}, students = []) {
-  return sortStudentsByName(getLessonStudentIds(lesson)
+  return sortStudentsByName(getLessonStudentIds(lesson, students)
     .map((studentId) => students.find((student) => student.studentId === studentId))
     .filter((student) => student && isStudentVisibleInLessonJournal(student, lesson.date)));
 }
@@ -5005,6 +5006,10 @@ export function App() {
     previousStudents,
     timeoutMessage
   }) {
+    const [{ saveClassRosterRequest }, { createClassRosterSavePlan, verifyClassRosterSavePlan }] = await Promise.all([
+      import("../domains/students/classRosterApi.js"),
+      import("../domains/students/classRosterPersistence.js")
+    ]);
     const lessonSource = await getJsonWithTimeout(
       "/api/lessons?includeCanceled=true",
       20000,
@@ -5303,16 +5308,19 @@ export function App() {
     setStudentProfileSaveStates((current) => ({ ...current, [nextStudent.studentId]: "saving" }));
     try {
       let savedStudent;
-      if ((currentStudent?.defaultClassTemplateId ?? "") !== (nextStudent.defaultClassTemplateId ?? "")) {
+      if (
+        (currentStudent?.defaultClassTemplateId ?? "") !== (nextStudent.defaultClassTemplateId ?? "") ||
+        (currentStudent?.scheduleOverride ?? "") !== (nextStudent.scheduleOverride ?? "")
+      ) {
         const nextStudents = students.map((student) => student.studentId === nextStudent.studentId ? nextStudent : student);
         const result = await persistClassRosterMutation({
           fromDate: today,
           nextStudents,
           previousStudents: students,
-          timeoutMessage: "학생 기본정보와 미래 수업 명단 저장이 30초를 넘었습니다. 현재 입력을 유지한 채 서버 상태를 확인해 주세요."
+          timeoutMessage: "학생 기본정보와 개별 스케줄·미래 수업 명단 저장이 30초를 넘었습니다. 현재 입력을 유지한 채 서버 상태를 확인해 주세요."
         });
         savedStudent = result.students.find((student) => student.studentId === nextStudent.studentId);
-        if (!savedStudent) throw new Error("학생 프로필 반 변경 뒤 Supabase 재조회에서 학생을 찾지 못했습니다.");
+        if (!savedStudent) throw new Error("학생 프로필 스케줄 저장 뒤 Supabase 재조회에서 학생을 찾지 못했습니다.");
       } else {
         savedStudent = await saveStudentRequest({
           request: postJsonWithTimeout,
@@ -9614,23 +9622,26 @@ function isSameLessonGroup(lesson, candidate) {
   return getLessonContinuityKey(lesson) === getLessonContinuityKey(candidate);
 }
 
-function findNextLessonForStudent(lessons, lesson, studentId) {
+function findNextLessonForStudent(lessons, lesson, student) {
+  const studentId = student?.studentId ?? "";
   const currentSortValue = getLessonSortValue(lesson);
   return [...lessons]
     .filter((candidate) => candidate.lessonId !== lesson.lessonId)
     .filter((candidate) => !shouldIgnoreLessonAttendance(candidate))
     .filter((candidate) => isSameLessonGroup(lesson, candidate))
     .filter((candidate) => candidate.studentIds?.includes(studentId))
+    .filter((candidate) => isStudentScheduledForLesson(candidate, student))
     .filter((candidate) => getLessonSortValue(candidate) > currentSortValue)
     .sort((a, b) => getLessonSortValue(a).localeCompare(getLessonSortValue(b)))[0];
 }
 
-function findPreviousLessonForStudent(lessons, lesson, studentId, { allowRegularClassFallback = false } = {}) {
+function findPreviousLessonForStudent(lessons, lesson, studentId, { allowRegularClassFallback = false, student = null } = {}) {
   const currentSortValue = getLessonSortValue(lesson);
   const previousLessons = [...lessons]
     .filter((candidate) => candidate.lessonId !== lesson.lessonId)
     .filter((candidate) => !shouldIgnoreLessonAttendance(candidate))
     .filter((candidate) => candidate.studentIds?.includes(studentId))
+    .filter((candidate) => isStudentScheduledForLesson(candidate, student))
     .filter((candidate) => getLessonSortValue(candidate) < currentSortValue)
     .sort((a, b) => getLessonSortValue(b).localeCompare(getLessonSortValue(a)));
   const previousLessonInCurrentGroup = previousLessons.find((candidate) => isSameLessonGroup(lesson, candidate));
@@ -9641,7 +9652,7 @@ function findPreviousLessonForStudent(lessons, lesson, studentId, { allowRegular
 }
 
 function createLinkedPreviousHomework(homeworks, lessons, lesson, student, sourceHomework) {
-  const nextLesson = findNextLessonForStudent(lessons, lesson, student.studentId);
+  const nextLesson = findNextLessonForStudent(lessons, lesson, student);
   if (!nextLesson) return null;
 
   const existing = homeworks.find(
@@ -10306,7 +10317,7 @@ function getLessonHomework(homeworks, lesson, student, homeworkType, lessons = [
     lessons,
     lesson,
     student.studentId,
-    { allowRegularClassFallback: true }
+    { allowRegularClassFallback: true, student }
   );
 
   if (!previousLesson) return null;

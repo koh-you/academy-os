@@ -1,4 +1,5 @@
 import { areStudentsPersistedEqual } from "./studentPersistence.js";
+import { isStudentScheduledForLesson } from "../../shared/utils/studentSchedule.js";
 
 function normalizeStudentId(value) {
   return String(value ?? "").trim();
@@ -102,11 +103,17 @@ export function createClassRosterLessonChanges({
       }
       if (
         nextClassTemplateId &&
-        lesson.classTemplateId === nextClassTemplateId &&
-        !nextStudentIds.includes(studentId)
+        lesson.classTemplateId === nextClassTemplateId
       ) {
-        nextStudentIds.push(studentId);
-        didChangeMembership = true;
+        const shouldIncludeStudent = isStudentScheduledForLesson(lesson, nextStudent);
+        const includesStudent = nextStudentIds.includes(studentId);
+        if (shouldIncludeStudent && !includesStudent) {
+          nextStudentIds.push(studentId);
+          didChangeMembership = true;
+        } else if (!shouldIncludeStudent && includesStudent) {
+          nextStudentIds = nextStudentIds.filter((id) => id !== studentId);
+          didChangeMembership = true;
+        }
       }
     }
     if (!didChangeMembership) return [];

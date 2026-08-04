@@ -2,6 +2,7 @@ import {
   isRegularSettlementLesson,
   isSpecialLectureSettlementLesson
 } from "./monthlySettlement.js";
+import { isStudentScheduledForLesson } from "../../shared/utils/studentSchedule.js";
 
 const canceledStatuses = new Set(["canceled", "deleted"]);
 const presentStatuses = new Set(["present", "checkin", "checkout"]);
@@ -45,21 +46,23 @@ function countLessons(lessons = [], records = [], studentId = "") {
   }, createCounts());
 }
 
-function isActiveStudentLesson(lesson = {}, studentId = "") {
+function isActiveStudentLesson(lesson = {}, studentId = "", student = null) {
   return !canceledStatuses.has(lesson.status) &&
     Array.isArray(lesson.studentIds) &&
-    lesson.studentIds.includes(studentId);
+    lesson.studentIds.includes(studentId) &&
+    (!student || isStudentScheduledForLesson(lesson, student));
 }
 
 export function buildStudentMonthlyAttendanceSummary({
   lessons = [],
   monthKey = "",
   records = [],
+  student = null,
   studentId = ""
 } = {}) {
   const monthLessons = lessons.filter((lesson) =>
     String(lesson.date || "").startsWith(`${monthKey}-`) &&
-    isActiveStudentLesson(lesson, studentId)
+    isActiveStudentLesson(lesson, studentId, student)
   );
   const regularLessons = monthLessons.filter(isRegularSettlementLesson);
   const specialLessons = monthLessons.filter(isSpecialLectureSettlementLesson);

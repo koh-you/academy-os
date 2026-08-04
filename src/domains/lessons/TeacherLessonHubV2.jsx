@@ -8,6 +8,7 @@ import { compareLessonCalendarDisplayOrder } from "./lessonCalendarDisplayOrder.
 import { LessonJournalErrorBoundary } from "./LessonJournalErrorBoundary.jsx";
 import { LessonJournalDetail } from "./LessonJournalDetail.jsx";
 import { useLessonCalendarKeyboardNavigation } from "./useLessonCalendarKeyboardNavigation.js";
+import { getEffectiveLessonStudentIds } from "../../shared/utils/studentSchedule.js";
 
 export function TeacherLessonHubV2({
   academyReminders = [],
@@ -74,7 +75,6 @@ export function TeacherLessonHubV2({
     buildMonthDays,
     followUpTypeLabel,
     formatMonthTitle,
-    getLessonStudentIds,
     isExamPrepLesson,
     isLegacyExamPrepLesson,
     isSupplementMakeupTaskLesson,
@@ -82,6 +82,7 @@ export function TeacherLessonHubV2({
     nestedPanels,
     sortByTime
   } = runtime;
+  const getLessonStudentIds = (lesson) => getEffectiveLessonStudentIds(lesson, students);
   const [lessonTypeFilter, setLessonTypeFilter] = useState("all");
   const selectedCalendarDayRef = useRef(null);
   useLessonCalendarKeyboardNavigation({

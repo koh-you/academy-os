@@ -6,6 +6,10 @@ import {
   createLessonRosterVersionFilter,
   verifyClassRosterSavePlan
 } from "../src/domains/students/classRosterPersistence.js";
+import {
+  getEffectiveLessonStudentIds,
+  isStudentScheduledForLesson
+} from "../src/shared/utils/studentSchedule.js";
 
 const version0 = "2026-08-03T00:00:00.000Z";
 const studentA = {
@@ -58,6 +62,62 @@ assert.deepEqual(plan.lessonChanges.map((change) => [change.lessonId, change.aft
 assert.equal(plan.lessonChanges.some((change) => change.lessonId === "lesson-history"), false);
 assert.equal(plan.lessonChanges.some((change) => change.lessonId === "lesson-unrelated"), false);
 assert.equal(verifyClassRosterSavePlan(plan, { lessons, students: previousStudents }).verified, false);
+
+const mondayLesson = {
+  classTemplateId: "class-a",
+  date: "2026-08-03",
+  lessonId: "lesson-monday",
+  lessonType: "class",
+  status: "scheduled",
+  studentIds: [studentA.studentId],
+  updatedAt: version0
+};
+const wednesdayLesson = { ...mondayLesson, date: "2026-08-05", lessonId: "lesson-wednesday" };
+const fridayLesson = { ...mondayLesson, date: "2026-08-07", lessonId: "lesson-friday" };
+const wednesdayMakeupLesson = {
+  ...wednesdayLesson,
+  lessonId: "lesson-wednesday-makeup",
+  lessonType: "makeup"
+};
+const mondayFridayStudent = { ...studentA, scheduleOverride: "월금 17:00-19:00" };
+assert.equal(isStudentScheduledForLesson(mondayLesson, mondayFridayStudent), true);
+assert.equal(isStudentScheduledForLesson(wednesdayLesson, mondayFridayStudent), false);
+assert.equal(isStudentScheduledForLesson(wednesdayMakeupLesson, mondayFridayStudent), true);
+assert.deepEqual(
+  getEffectiveLessonStudentIds(wednesdayLesson, [mondayFridayStudent]),
+  [],
+  "개별 월금 스케줄은 월수금 기본 반의 수요일 명단보다 우선한다"
+);
+assert.deepEqual(
+  getEffectiveLessonStudentIds(wednesdayMakeupLesson, [mondayFridayStudent]),
+  [studentA.studentId],
+  "수동 보강 명단은 개별 정규 스케줄로 제거하지 않는다"
+);
+
+const overridePlan = createClassRosterSavePlan({
+  fromDate: "2026-08-03",
+  lessons: [mondayLesson, wednesdayLesson, fridayLesson, wednesdayMakeupLesson],
+  nextStudents: [mondayFridayStudent],
+  previousStudents: [studentA]
+});
+assert.deepEqual(
+  overridePlan.lessonChanges.map((change) => [change.lessonId, change.afterStudentIds]),
+  [["lesson-wednesday", []]],
+  "개별 스케줄 저장은 미래 정규수업 중 제외 요일 명단만 동기화한다"
+);
+
+const mondayWednesdayFridayStudent = { ...studentA, scheduleOverride: "월수금 17:00-19:00" };
+const restoreWednesdayPlan = createClassRosterSavePlan({
+  fromDate: "2026-08-03",
+  lessons: [{ ...wednesdayLesson, studentIds: [] }],
+  nextStudents: [mondayWednesdayFridayStudent],
+  previousStudents: [mondayFridayStudent]
+});
+assert.deepEqual(
+  restoreWednesdayPlan.lessonChanges.map((change) => [change.lessonId, change.afterStudentIds]),
+  [["lesson-wednesday", [studentA.studentId]]],
+  "나중에 월수금으로 수정하면 미래 수요일 정규 명단을 다시 포함한다"
+);
 
 let requestPayload = null;
 const apiResult = await saveClassRosterRequest({

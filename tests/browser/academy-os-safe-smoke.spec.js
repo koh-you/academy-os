@@ -1336,6 +1336,66 @@ test("lesson journal calendar groups same-time special lessons above makeup less
   expect(pageErrors).toEqual([]);
 });
 
+test("individual weekdays override the base-class roster but preserve a manual makeup roster", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await page.route("**/api/students*", async (route) => {
+    const response = await route.fetch();
+    const result = await response.json();
+    await route.fulfill({
+      response,
+      json: {
+        ...result,
+        students: [
+          ...(result.students ?? []),
+          {
+            defaultClassTemplateId: "safe-schedule-priority-class",
+            grade: "중3",
+            loginId: "safe_schedule_priority",
+            name: "개별일정 학생",
+            pin: "1234",
+            scheduleOverride: "월금 17:00-19:00",
+            schoolName: "안전중",
+            status: "active",
+            studentId: "safe-schedule-priority-student"
+          }
+        ]
+      }
+    });
+  });
+  await page.route("**/api/lessons*", async (route) => {
+    const response = await route.fetch();
+    const result = await response.json();
+    const sharedLesson = {
+      className: "월수금 앞반",
+      classTemplateId: "safe-schedule-priority-class",
+      date: "2026-08-05",
+      endTime: "19:00",
+      startTime: "17:00",
+      status: "scheduled",
+      studentIds: ["safe-schedule-priority-student"]
+    };
+    await route.fulfill({
+      response,
+      json: {
+        ...result,
+        lessons: [
+          ...(result.lessons ?? []),
+          { ...sharedLesson, lessonId: "safe-schedule-priority-regular", lessonType: "class" },
+          { ...sharedLesson, className: "결석 보강 · 개별일정 학생", lessonId: "safe-schedule-priority-makeup", lessonType: "makeup" }
+        ]
+      }
+    });
+  });
+
+  await loginAsTeacher(page);
+  const calendarDay = page.getByRole("gridcell", { name: "2026-08-05 · 2개 수업" });
+  await expect(calendarDay.locator(".lessonPill")).toHaveText([
+    "17:00 결석 보강 · 개별일정 학생 (1명)",
+    "17:00 월수금 앞반 (0명)"
+  ]);
+  expect(pageErrors).toEqual([]);
+});
+
 test("lesson journal creation action stays visible and opens the registration modal", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);

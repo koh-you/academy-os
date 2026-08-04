@@ -279,8 +279,9 @@ export function StudentProfileModal({
     lessons,
     monthKey: attendanceMonth,
     records,
+    student,
     studentId: student.studentId
-  }), [attendanceMonth, lessons, records, student.studentId]);
+  }), [attendanceMonth, lessons, records, student]);
 
   useEffect(() => {
     setIsEditingProfile(false);
@@ -785,7 +786,7 @@ export function StudentProfileModal({
                 ) : (
                   <strong>{student.scheduleOverride || "기본 반 스케줄"}</strong>
                 )}
-                <span className="muted">반 이름과 실제 등원 시간이 다를 때 설정합니다. 저장 후 출결 수업 매칭과 지각 판정에 반영됩니다.</span>
+                <span className="muted">선택한 요일과 시간이 기본 반보다 우선합니다. 저장 후 미래 정규수업 명단, 출결 매칭, 지각 판정에 반영됩니다.</span>
               </div>
             </div>
           </div>

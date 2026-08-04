@@ -100,7 +100,10 @@ import {
   isAssignmentStatusUnrecorded,
   normalizeAssignmentStatusValue
 } from "../src/domains/lessons/assignmentStatus.js";
-import { applyStudentScheduleToLesson } from "../src/shared/utils/studentSchedule.js";
+import {
+  applyStudentScheduleToLesson,
+  isStudentScheduledForLesson
+} from "../src/shared/utils/studentSchedule.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -366,6 +369,7 @@ function createAttendanceLessonCandidate(lesson = {}, student = {}, currentMinut
   const matchedByStudent = (lesson.studentIds ?? []).includes(student.studentId);
   const matchedByClass = Boolean(lesson.classTemplateId && lesson.classTemplateId === student.defaultClassTemplateId);
   if (!matchedByStudent && !matchedByClass) return null;
+  if (!isStudentScheduledForLesson(lesson, student)) return null;
   const studentLesson = applyStudentScheduleToLesson(lesson, student);
   return {
     attendanceLesson: studentLesson,
@@ -1463,7 +1467,9 @@ async function getPortalData(session) {
   ]);
   const student = (studentsResult.students ?? []).find((item) => item.studentId === session.studentId);
   if (!student) return null;
-  const lessons = (lessonsResult.lessons ?? []).filter((lesson) => lesson.studentIds?.includes(session.studentId));
+  const lessons = (lessonsResult.lessons ?? []).filter((lesson) => (
+    lesson.studentIds?.includes(session.studentId) && isStudentScheduledForLesson(lesson, student)
+  ));
   const lessonIds = new Set(lessons.map((lesson) => lesson.lessonId));
   const states = appStateResult.states ?? {};
   return {
@@ -2188,6 +2194,7 @@ function getLessonHomeworkForNotification(homeworks = [], lessons = [], lesson =
         item.lessonId !== lesson.lessonId &&
         item.date < lesson.date &&
         getLessonStudentIdsForNotification(item).includes(student.studentId) &&
+        isStudentScheduledForLesson(item, student) &&
         (!lesson.classTemplateId || !item.classTemplateId || item.classTemplateId === lesson.classTemplateId)
     )
     .sort((a, b) => b.date.localeCompare(a.date) || b.startTime.localeCompare(a.startTime))[0];
@@ -2494,15 +2501,15 @@ function refreshLessonCommentJobBeforeSend(job = {}, context = null) {
     };
   }
 
+  const student = context.studentById.get(job.studentId);
   const lessonStudentIds = getLessonStudentIdsForNotification(lesson);
-  if (!lessonStudentIds.includes(job.studentId)) {
+  if (!lessonStudentIds.includes(job.studentId) || (student && !isStudentScheduledForLesson(lesson, student))) {
     return {
       action: "cancel",
       job: cancelNotificationJobBeforeSend(job, "학생이 현재 수업 명단에서 제외되어 발송하지 않았습니다.", "student_removed_from_lesson")
     };
   }
 
-  const student = context.studentById.get(job.studentId);
   if (!student || (student.status ?? "active") !== "active") {
     return {
       action: "cancel",
