@@ -7402,7 +7402,11 @@ const server = http.createServer(async (request, response) => {
         sendJson(request, response, 401, { ok: false, error: "교사 세션 인증이 필요합니다." });
         return;
       }
-      const payload = await readJsonBody(request, { limitBytes: 28 * 1024 * 1024 });
+      const payload = parseVersionedWriteRequest(
+        request.method,
+        requestUrl.pathname,
+        await readJsonBody(request, { limitBytes: 28 * 1024 * 1024 })
+      );
       const parsedFile = parseDataUrl(payload.file?.dataUrl);
       const digest = crypto.createHash("sha256").update(parsedFile.buffer).digest("hex");
       const result = await saveResourceMaterialFile({
@@ -7425,6 +7429,7 @@ const server = http.createServer(async (request, response) => {
         ok: false,
         error: error.message,
         ...(error.code ? { code: error.code } : {}),
+        ...(error.field ? { field: error.field } : {}),
         ...(error.currentMaterial !== undefined ? { currentMaterial: error.currentMaterial } : {})
       });
     }
@@ -7439,7 +7444,11 @@ const server = http.createServer(async (request, response) => {
         sendJson(request, response, 401, { ok: false, error: "교사 세션 인증이 필요합니다." });
         return;
       }
-      const payload = await readJsonBody(request);
+      const payload = parseVersionedWriteRequest(
+        request.method,
+        requestUrl.pathname,
+        await readJsonBody(request)
+      );
       const result = await deleteResourceMaterialWithFile({
         material: payload.material,
         operations: createResourceMaterialStorageOperations()
@@ -7450,6 +7459,7 @@ const server = http.createServer(async (request, response) => {
         ok: false,
         error: error.message,
         ...(error.code ? { code: error.code } : {}),
+        ...(error.field ? { field: error.field } : {}),
         ...(error.currentMaterial !== undefined ? { currentMaterial: error.currentMaterial } : {})
       });
     }

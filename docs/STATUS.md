@@ -108,6 +108,7 @@
 - 4-1i는 `/api/app-state`의 canonical `{ states, expectedUpdatedAt? }` request와 `{ source, states }` response를 같은 contract에 연결했다. key별 local draft·직렬 저장·CAS·Supabase 재조회와 충돌·후속 입력 보존은 기존 controller owner에 유지한다.
 - 4-1j는 teacher auth가 필요한 `/api/report-snapshots`의 canonical snapshot request와 recovered/readback response를 같은 contract에 연결했다. stable ID 재시도, `app_state.reportSnapshots` CAS·Supabase 재조회와 실패 draft 보존은 기존 action/persistence owner에 유지한다.
 - 4-1k는 파일 없는 `/api/resource-materials` POST의 canonical metadata request와 verified row response를 같은 contract에 연결했다. stable ID·insert-only/CAS·결과 불명 최신 draft 수렴·Supabase 목록 재조회와 실패 form/list 보존은 기존 API/action owner에 유지한다.
+- 4-1l은 teacher auth가 필요한 `/api/resource-material-files` POST/DELETE의 canonical file/material request와 Storage+row verified response를 같은 contract에 연결했다. stable path·upload rollback·delete backup/restore·CAS/readback과 UI 보존은 기존 operation/API/action owner에 유지한다.
 
 ## 폴더 상태
 
@@ -120,7 +121,7 @@
 
 1. App 2차 Phase 1~5와 3차 3-0~3-8, P1 운영 저장 신뢰성, P2 modal 통일 후속, P3 알림톡 설정 관리는 완료됐다. P3 closeout은 제품 경로 9개, 설정 key 10개, Solapi provider template 4개의 seed→draft→persisted final→provider 변수 연결과 재시험 독립 11시 transport 부재를 자동 검증한다. 공지 preset 3개·특강 guide seed는 새 초안에만 적용하며 현재 draft·기존 job·보충 교사 최종본과 provider contract를 보존한다.
 2. App 3차 리팩터링 3-0~3-8은 production main 43.1%·gzip 45.3% 감소, 12개 물리 lazy chunk, App Babel 500 KB 경고 제거와 종료 소유권 감사까지 완료했다.
-3. App/API 4차는 4-0 기준선과 4-1a~4-1k의 lesson/supplement/attendance/class roster/derived calendar/app-state/report/resource metadata contract 연결을 확정했다. 다음은 인증된 private Storage 파일 payload 계약이다.
+3. App/API 4차는 4-0 기준선과 4-1a~4-1l의 lesson/supplement/attendance/class roster/derived calendar/app-state/report/resource contract 연결을 확정했다. 다음은 notification/provider payload를 한 route씩 고정한다.
 4. `app_state`에서 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
    - 학생별 오답 `wrongProblems`는 명시 저장 전환을 완료했다. 다음 후보는 별도 저장 의미가 분명한 `lessonResearchItems`이며 새 작업에서 범위를 다시 확인한다.
    - 즉시 사람 판단이 필요하지 않은 발견은 queue/worklog에 남기고 AI 검수와 다음 단계를 연쇄 진행한다.

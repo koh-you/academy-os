@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-1l resource private file
+
+- teacher auth가 필요한 `/api/resource-material-files` POST/DELETE의 canonical file+material/material request와 Storage+row verified response를 11·12번째 공통 contract로 고정했다. client·실서버·safe server가 같은 method/path parser를 사용하고 인증 확인 뒤 invalid top-level field/type을 Storage 행동 전에 400으로 차단한다.
+- 20MB/MIME 검증, content hash stable path, upload 뒤 row 실패 시 새 객체 정리, 이전 파일 cleanup 상태, 삭제 전 backup·Storage 삭제·row CAS와 실패 시 정확한 경로 복구, Supabase 목록 재조회와 UI 보존 owner는 유지했다. 서명 URL open/portal 권한 경계는 변경하지 않았다.
+- 검증: contract `12 routes`, resource Storage/metadata, lint, scenario·production `827/827`, build `416 modules`·main `943.62 kB`·lazy `12/12`, 격리 browser `1/1` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1k resource metadata
 
 - 파일 없는 자료 메타데이터 `/api/resource-materials` POST의 canonical `{ material }` request와 verified row response를 10번째 공통 contract로 고정했다. client·실서버·safe server가 같은 parser를 사용하고 legacy direct-object 및 invalid field/type을 row 저장 전에 field 포함 400으로 차단한다.
