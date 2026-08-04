@@ -82,8 +82,10 @@ for (const expected of [
   assert.ok(apiSource.includes(expected), `question count API contract missing ${expected}`);
 }
 for (const expected of [
+  "function loadExamAnalysisRunApi()",
+  'return import("../domains/exams/examAnalysisRunApi.js")',
   "async function confirmExamAnalysisQuestionCountRequest(payload)",
-  'return (await import("../domains/exams/examAnalysisRunApi.js")).confirmExamQuestionCount(',
+  "return (await loadExamAnalysisRunApi()).confirmExamQuestionCount(",
   "postJsonWithTimeout,"
 ]) {
   assert.ok(appSource.includes(expected), `App question count transport missing ${expected}`);

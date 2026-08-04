@@ -8,9 +8,9 @@ import {
   versionedWriteRouteContracts
 } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 
-assert.equal(versionedWriteRouteContracts.length, 23);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 23);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 23);
+assert.equal(versionedWriteRouteContracts.length, 24);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 24);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 24);
 assert.equal(versionedWriteRouteContracts.every(Object.isFrozen), true);
 assert.equal(versionedWriteRouteContracts.every(({ request, response, sources }) => (
   Object.isFrozen(request) && Object.isFrozen(response) && Object.isFrozen(sources)
@@ -512,6 +512,41 @@ assert.deepEqual(
     source: "supabase"
   }
 );
+assert.deepEqual(
+  parseVersionedWriteRequest("POST", "/api/exam-analysis-runs/save-output-drafts", {
+    analysisRunId: " exam-run-safe-1 ",
+    blogTeacherDraftEdited: true,
+    blogTeacherDraft: "선생님 블로그 수정본",
+    outputInputs: { oneLineReview: "한 줄 총평" }
+  }),
+  {
+    analysisRunId: "exam-run-safe-1",
+    blogTeacherDraft: "선생님 블로그 수정본",
+    blogTeacherDraftEdited: true,
+    instagramTeacherDraft: "",
+    instagramTeacherDraftEdited: false,
+    outputInputs: { oneLineReview: "한 줄 총평" }
+  }
+);
+assert.deepEqual(
+  parseVersionedWriteResponse("POST", "/api/exam-analysis-runs/save-output-drafts", {
+    aiJobs: [],
+    analysisRun: { analysisRunId: "exam-run-safe-1", auditSummary: { outputDrafts: {} } },
+    events: [{ eventType: "exam_analysis_output_draft_saved" }],
+    ok: true,
+    questions: [{ questionNumber: 1 }],
+    sources: [],
+    source: "supabase"
+  }),
+  {
+    aiJobs: [],
+    analysisRun: { analysisRunId: "exam-run-safe-1", auditSummary: { outputDrafts: {} } },
+    events: [{ eventType: "exam_analysis_output_draft_saved" }],
+    questions: [{ questionNumber: 1 }],
+    sources: [],
+    source: "supabase"
+  }
+);
 assert.deepEqual(response, {
   auditId: "supplement-audit",
   source: "supabase",
@@ -577,4 +612,4 @@ assert.throws(
   /field\/alias가 중복/
 );
 
-console.log("versioned write route contracts passed · 23 routes · canonical keys and declared legacy alias only");
+console.log("versioned write route contracts passed · 24 routes · canonical keys and declared legacy alias only");

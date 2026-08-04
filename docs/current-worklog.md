@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-1x exam output drafts
+
+- `POST /api/exam-analysis-runs/save-output-drafts`를 24번째 공통 contract로 고정했다. analysis run ID, output input object, 블로그·인스타 교사 수정본과 edited flag를 source 쓰기 전에 검증하고 authoritative run/event/source response를 client가 다시 검증한다.
+- 실제 `audit_summary.outputDrafts` 병합·정규화, Supabase run 재조회와 저장 event owner는 server에 유지했다. safe API는 가상 run만 갱신하며 화면 입력→명시 저장→API 재조회→reload 복구를 검증하고 AI 생성·Storage·알림을 실행하지 않는다.
+- 첫 browser는 고정 저장 바의 상태 이름과 상세 문구를 한 status로 찾은 선택자만 교정했다. 첫 build는 main 예산을 2 bytes 넘겨 동일 exam API dynamic import 3개를 공유 loader로 중복 제거했다. 검증: contract `24 routes`, output/Prompt Studio·teacher/lazy 전용, lint, scenario·production `827/827`, build `418 modules`·main `944.65 kB`·lazy `12/12`, 격리 browser `1/1` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1w exam Prompt Studio
 
 - `POST /api/exam-analysis-runs/save-prompt-studio`를 23번째 공통 contract로 고정했다. analysis run ID, 0 이상 정수 expected revision, 교사 prompt draft를 source 쓰기 전에 검증하고 authoritative run/draft/source/save verification response를 client가 다시 검증한다.

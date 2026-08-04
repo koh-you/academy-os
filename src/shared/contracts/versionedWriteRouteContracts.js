@@ -192,6 +192,19 @@ const examAnalysisPromptStudioSaveResponseContract = defineApiPayloadContract({
   name: "exam analysis prompt studio save response"
 });
 
+const examAnalysisOutputDraftsSaveResponseContract = defineApiPayloadContract({
+  allowUnknownFields: true,
+  fields: {
+    aiJobs: { required: true, type: "array" },
+    analysisRun: { required: true, type: "object" },
+    events: { required: true, type: "array" },
+    questions: { required: true, type: "array" },
+    sources: { required: true, type: "array" },
+    source: { allowEmpty: false, required: true, type: "string" }
+  },
+  name: "exam analysis output drafts save response"
+});
+
 function defineVersionedWriteRoute({
   domain,
   fields,
@@ -494,6 +507,21 @@ export const versionedWriteRouteContracts = Object.freeze([
     key: "examAnalysisPromptStudioSave",
     path: "/api/exam-analysis-runs/save-prompt-studio",
     response: examAnalysisPromptStudioSaveResponseContract,
+    sources: ["exam_analysis_runs", "exam_analysis_events"]
+  }),
+  defineVersionedWriteRoute({
+    domain: "examAnalysis",
+    fields: {
+      analysisRunId: { allowEmpty: false, required: true, trim: true, type: "string" },
+      blogTeacherDraft: { defaultValue: "", type: "string" },
+      blogTeacherDraftEdited: { defaultValue: false, type: "boolean" },
+      instagramTeacherDraft: { defaultValue: "", type: "string" },
+      instagramTeacherDraftEdited: { defaultValue: false, type: "boolean" },
+      outputInputs: { required: true, type: "object" }
+    },
+    key: "examAnalysisOutputDraftsSave",
+    path: "/api/exam-analysis-runs/save-output-drafts",
+    response: examAnalysisOutputDraftsSaveResponseContract,
     sources: ["exam_analysis_runs", "exam_analysis_events"]
   })
 ]);

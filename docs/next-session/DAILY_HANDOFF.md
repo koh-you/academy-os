@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-1x exam output drafts
+
+- `POST /api/exam-analysis-runs/save-output-drafts`의 run/output input/교사 수정본 request와 authoritative run/event/source response를 24번째 공통 contract에 연결했다. 잘못된 object·boolean·미지 field는 DB 쓰기 전에 400으로 차단한다.
+- Supabase audit summary 병합·입력 정규화·event·전체 run 재조회 owner는 server에 유지하고 safe API는 가상 run만 갱신한다. UI 명시 저장, API readback과 reload 복구를 확인했으며 AI 생성 route는 실행하지 않았다.
+- contract `24 routes`, output/Prompt Studio·teacher/lazy 전용, lint, scenario·production `827/827`, build `418 modules`·main `944.65 kB`·lazy `12/12`, 격리 browser `1/1` 통과. 다음은 4-1 종료 감사를 거쳐 4-2 DB row/domain model 변환 기준선을 시작한다. 운영 데이터·업로드·Storage·유료 AI·실제 알림은 사용하지 않았다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1w exam Prompt Studio
 
 - `POST /api/exam-analysis-runs/save-prompt-studio`의 run/revision/교사 작업본 request와 authoritative run/draft/source/verification response를 23번째 공통 contract에 연결했다. invalid revision은 source 쓰기 전에 400, stale revision은 409로 차단한다.

@@ -95,8 +95,10 @@ for (const expected of [
   assert.ok(apiSource.includes(expected), `question review API contract missing ${expected}`);
 }
 for (const expected of [
+  "function loadExamAnalysisRunApi()",
+  'return import("../domains/exams/examAnalysisRunApi.js")',
   "async function saveExamAnalysisQuestionReviewsRequest(payload)",
-  'return (await import("../domains/exams/examAnalysisRunApi.js")).saveExamQuestionReviews(',
+  "return (await loadExamAnalysisRunApi()).saveExamQuestionReviews(",
   "postJsonWithTimeout,"
 ]) {
   assert.ok(appSource.includes(expected), `App question review transport missing ${expected}`);
