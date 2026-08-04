@@ -8,9 +8,9 @@ import {
   versionedWriteRouteContracts
 } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 
-assert.equal(versionedWriteRouteContracts.length, 21);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 21);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 21);
+assert.equal(versionedWriteRouteContracts.length, 22);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 22);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 22);
 assert.equal(versionedWriteRouteContracts.every(Object.isFrozen), true);
 assert.equal(versionedWriteRouteContracts.every(({ request, response, sources }) => (
   Object.isFrozen(request) && Object.isFrozen(response) && Object.isFrozen(sources)
@@ -459,6 +459,33 @@ assert.deepEqual(
     source: "supabase"
   }
 );
+assert.deepEqual(
+  parseVersionedWriteRequest("POST", "/api/exam-analysis-runs/save-question-reviews", {
+    analysisRunId: " exam-run-safe-1 ",
+    reviews: [{ questionNumber: 1, reviewNote: "직접 검수" }]
+  }),
+  {
+    analysisRunId: "exam-run-safe-1",
+    reviews: [{ questionNumber: 1, reviewNote: "직접 검수" }]
+  }
+);
+assert.deepEqual(
+  parseVersionedWriteResponse("POST", "/api/exam-analysis-runs/save-question-reviews", {
+    analysisRun: { analysisRunId: "exam-run-safe-1" },
+    events: [{ eventType: "question_teacher_review_saved" }],
+    ok: true,
+    questions: [{ questionNumber: 1, rowStatus: "teacher_edited" }],
+    source: "supabase",
+    teacherReview: { confirmedCount: 0, reviewedCount: 1, totalQuestionCount: 1 }
+  }),
+  {
+    analysisRun: { analysisRunId: "exam-run-safe-1" },
+    events: [{ eventType: "question_teacher_review_saved" }],
+    questions: [{ questionNumber: 1, rowStatus: "teacher_edited" }],
+    source: "supabase",
+    teacherReview: { confirmedCount: 0, reviewedCount: 1, totalQuestionCount: 1 }
+  }
+);
 assert.deepEqual(response, {
   auditId: "supplement-audit",
   source: "supabase",
@@ -524,4 +551,4 @@ assert.throws(
   /field\/alias가 중복/
 );
 
-console.log("versioned write route contracts passed · 21 routes · canonical keys and declared legacy alias only");
+console.log("versioned write route contracts passed · 22 routes · canonical keys and declared legacy alias only");

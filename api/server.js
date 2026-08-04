@@ -127,6 +127,7 @@ import {
 import { saveReportSnapshotWithVerification } from "../src/domains/reports/reportSnapshotPersistence.js";
 import {
   parseExamAnalysisQuestionCountConfirmRequest,
+  parseExamAnalysisQuestionReviewsSaveRequest,
   parseExamAnalysisRunWriteRequest
 } from "../src/domains/exams/examAnalysisRunApi.js";
 import { getNextHourlyAlimtalkReservationAt } from "../src/domains/notifications/supplementJobBuilders.js";
@@ -6372,14 +6373,16 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-question-reviews") {
     try {
-      const payload = await readJsonBody(request);
-      const result = await saveExamAnalysisQuestionTeacherReviews({
-        analysisRunId: payload.analysisRunId,
-        reviews: payload.reviews
-      });
+      const payload = parseExamAnalysisQuestionReviewsSaveRequest(await readJsonBody(request));
+      const result = await saveExamAnalysisQuestionTeacherReviews(payload);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.field !== undefined ? { field: error.field } : {})
+      });
     }
     return;
   }

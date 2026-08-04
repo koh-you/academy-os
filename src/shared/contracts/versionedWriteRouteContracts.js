@@ -169,6 +169,18 @@ const examAnalysisQuestionCountConfirmResponseContract = defineApiPayloadContrac
   name: "exam analysis question count confirm response"
 });
 
+const examAnalysisQuestionReviewsSaveResponseContract = defineApiPayloadContract({
+  allowUnknownFields: true,
+  fields: {
+    analysisRun: { required: true, type: "object" },
+    events: { required: true, type: "array" },
+    questions: { required: true, type: "array" },
+    source: { allowEmpty: false, required: true, type: "string" },
+    teacherReview: { required: true, type: "object" }
+  },
+  name: "exam analysis question reviews save response"
+});
+
 function defineVersionedWriteRoute({
   domain,
   fields,
@@ -448,6 +460,17 @@ export const versionedWriteRouteContracts = Object.freeze([
     key: "examAnalysisQuestionCountConfirm",
     path: "/api/exam-analysis-runs/confirm-question-count",
     response: examAnalysisQuestionCountConfirmResponseContract,
+    sources: ["exam_analysis_runs", "exam_analysis_questions", "exam_analysis_events"]
+  }),
+  defineVersionedWriteRoute({
+    domain: "examAnalysis",
+    fields: {
+      analysisRunId: { allowEmpty: false, required: true, trim: true, type: "string" },
+      reviews: { required: true, type: "array" }
+    },
+    key: "examAnalysisQuestionReviewsSave",
+    path: "/api/exam-analysis-runs/save-question-reviews",
+    response: examAnalysisQuestionReviewsSaveResponseContract,
     sources: ["exam_analysis_runs", "exam_analysis_questions", "exam_analysis_events"]
   })
 ]);

@@ -124,7 +124,7 @@ const safeRouteStart = safeApiSource.indexOf(
   'if (pathname === "/api/exam-analysis-runs/confirm-question-count")'
 );
 const safeRouteEnd = safeApiSource.indexOf(
-  'if (["/api/attendance/check"',
+  'if (pathname === "/api/exam-analysis-runs/save-question-reviews")',
   safeRouteStart
 );
 assert.ok(safeRouteStart >= 0 && safeRouteEnd > safeRouteStart);

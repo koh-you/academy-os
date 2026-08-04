@@ -13,6 +13,7 @@ const appStatePersistenceControllerPath = path.join(root, "src", "domains", "app
 const teacherViewOutletPath = path.join(root, "src", "app", "TeacherViewOutlet.js");
 const lazyTeacherViewComponentsPath = path.join(root, "src", "app", "lazyTeacherViewComponents.js");
 const examAnalysisPipelineComponentPath = path.join(root, "src", "domains", "exams", "ExamAnalysisPipelineCenter.jsx");
+const examAnalysisRunApiPath = path.join(root, "src", "domains", "exams", "examAnalysisRunApi.js");
 const examPrepCenterComponentPath = path.join(root, "src", "domains", "exams", "ExamPrepCenter.jsx");
 const learningSupportCentersPath = path.join(root, "src", "domains", "teacher", "LearningSupportCenters.jsx");
 const resourceMaterialActionPath = path.join(root, "src", "domains", "resources", "resourceMaterialAction.js");
@@ -411,6 +412,7 @@ const appStatePersistenceControllerSource = fs.existsSync(appStatePersistenceCon
 const teacherViewOutletSource = fs.existsSync(teacherViewOutletPath) ? fs.readFileSync(teacherViewOutletPath, "utf8") : "";
 const lazyTeacherViewComponentsSource = fs.existsSync(lazyTeacherViewComponentsPath) ? fs.readFileSync(lazyTeacherViewComponentsPath, "utf8") : "";
 const examAnalysisPipelineComponentSource = fs.existsSync(examAnalysisPipelineComponentPath) ? fs.readFileSync(examAnalysisPipelineComponentPath, "utf8") : "";
+const examAnalysisRunApiSource = fs.existsSync(examAnalysisRunApiPath) ? fs.readFileSync(examAnalysisRunApiPath, "utf8") : "";
 const examPrepCenterComponentSource = fs.existsSync(examPrepCenterComponentPath) ? fs.readFileSync(examPrepCenterComponentPath, "utf8") : "";
 const learningSupportCentersSource = fs.existsSync(learningSupportCentersPath) ? fs.readFileSync(learningSupportCentersPath, "utf8") : "";
 const resourceMaterialActionSource = fs.existsSync(resourceMaterialActionPath) ? fs.readFileSync(resourceMaterialActionPath, "utf8") : "";
@@ -460,6 +462,9 @@ const appEntrySource = [
     : "",
   fs.existsSync(examAnalysisPipelineComponentPath)
     ? `/* extracted exam analysis pipeline screen boundary\n${examAnalysisPipelineComponentSource.replace(/\*\//g, "* /")}\n*/`
+    : "",
+  fs.existsSync(examAnalysisRunApiPath)
+    ? `/* exam analysis versioned write transport boundary\n${examAnalysisRunApiSource.replace(/\*\//g, "* /")}\n*/`
     : "",
   fs.existsSync(examPrepCenterComponentPath)
     ? `/* extracted exam prep center screen boundary\n${examPrepCenterComponentSource.replace(/\*\//g, "* /")}\n*/`

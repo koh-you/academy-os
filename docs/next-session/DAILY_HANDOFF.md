@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-1v exam question review
+
+- `POST /api/exam-analysis-runs/save-question-reviews`의 교사 문항별 검수 request와 run/question rows/event/teacher review response를 22번째 공통 contract에 연결했다. 빈 목록·잘못된 문항 번호·중복 번호는 DB 쓰기 전에 400으로 차단한다.
+- Supabase question row patch·재조회, run audit와 event owner는 server에 유지하고 safe API는 가상 teacher/final fields만 저장한다. UI에서 메모·확정·주요문항을 저장하고 API 재조회·reload 뒤 복구되는 동선을 검증했다.
+- contract `22 routes`, prompt studio·teacher/lazy 전용, lint, scenario·production `827/827`, build `418 modules`·main `944.93 kB`·lazy `12/12`, 격리 browser `1/1` 통과. 다음은 prompt studio/output draft 중 비-AI 저장 route를 한 단위씩 고정한다. 운영 데이터·업로드·Storage·유료 AI·실제 알림은 사용하지 않았다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1u exam question count
 
 - `POST /api/exam-analysis-runs/confirm-question-count`의 교사 확정 request와 run/question rows/event/source response를 21번째 공통 contract에 연결했다. 1~200 정수와 미지 field는 DB 쓰기 전에 400으로 차단한다.
