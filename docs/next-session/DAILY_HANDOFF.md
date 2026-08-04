@@ -1,6 +1,13 @@
 # Daily Development Handoff
 
-업데이트: 2026-08-04
+업데이트: 2026-08-05
+
+## 2026-08-05 App/API 4차 리팩터링 4-1a
+
+- 공통 pure payload parser와 6개 직접 versioned write route inventory를 추가했다. legacy alias는 선언된 `makeupTasks <- tasks`만 허용하고 canonical+alias 동시 입력, 미지 field, 잘못된 type은 400 contract error로 판정한다.
+- runtime route와 client call site는 아직 바꾸지 않았다. 다음 4-1b에서 수업일지 rows/history/makeup, 보충 일정, 출결 request를 같은 contract에 한 경계씩 연결한다.
+- 첫 exact-head CI에서 날짜가 지난 고정 fixture 2건을 발견해 해당 테스트 시계를 한국 시간 2026-08-03으로 고정하고 대상 수업만 개수 비종속으로 검증했다. 집중 browser `2/2`, 전체 browser `47/47`을 다시 통과했다.
+- contract fixture, domain all `62/62`, lint, scenario·production `827/827`, build `414 modules`·main `942.25 kB`·lazy `12/12` 통과. 운영 데이터·실제 알림·SQL·유료 호출은 없었다.
 
 ## 2026-08-04 App/API 4차 리팩터링 4-0
 

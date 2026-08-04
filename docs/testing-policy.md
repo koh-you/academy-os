@@ -1,6 +1,6 @@
 # Academy OS Testing Policy
 
-업데이트: 2026-08-02
+업데이트: 2026-08-05
 
 이 문서는 로컬 검증과 GitHub Production checks의 실행 기준을 정의한다. 테스트 수 자체보다 사용자 동작, 저장 계약, 외부 부작용 경계를 검증하는 것을 우선한다.
 
@@ -8,6 +8,7 @@
 
 | 층 | 명령 | 용도 |
 | --- | --- | --- |
+| API contract fast | `npm run test:contract:versioned-write` | versioned write의 canonical/legacy payload와 verified response를 1초 안에 확인 |
 | 도메인 fast | `npm run test:domain:<domain>` | 작업 중 가장 자주 실행하는 관련 동작 fixture. 목표 10초 이내 |
 | 빠른 일반 검증 | `npm run check:fast` | runtime lint, 정적 production scenario, production build를 한 번에 확인 |
 | 전체 production | `npm run test:production` | 전체 pure fixture와 정적 scenario를 직렬 안전망으로 확인 |
@@ -15,6 +16,8 @@
 | branch/main CI | GitHub Production checks | exact-head와 main의 통합 상태를 다시 확인 |
 
 `check:fast`는 도메인 테스트의 별칭이 아니다. 기존 의미인 `lint:runtime + scenario summary + build`를 유지한다.
+
+API payload contract를 바꾸는 동안에는 관련 domain fixture와 함께 `test:contract:versioned-write`를 먼저 실행한다. 이 명령은 server 저장·재조회 동작을 대신하지 않으며 전체 production과 안전 브라우저 gate는 아래 고위험 기준을 그대로 따른다.
 
 ## 도메인 fast 명령
 

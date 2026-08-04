@@ -303,6 +303,7 @@ test("manual student creation keeps the modal draft on conflict and closes only 
 
 test("class roster save keeps the modal draft on conflict and verifies student plus future lessons on retry", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
+  await page.clock.install({ time: new Date("2026-08-03T09:00:00+09:00") });
   let rosterSaveRequests = 0;
   await page.route("**/api/class-rosters/save", async (route) => {
     rosterSaveRequests += 1;
@@ -1338,6 +1339,7 @@ test("lesson journal calendar groups same-time special lessons above makeup less
 
 test("individual weekdays override the base-class roster but preserve a manual makeup roster", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
+  await page.clock.install({ time: new Date("2026-08-03T09:00:00+09:00") });
   await page.route("**/api/students*", async (route) => {
     const response = await route.fetch();
     const result = await response.json();
@@ -1388,8 +1390,8 @@ test("individual weekdays override the base-class roster but preserve a manual m
   });
 
   await loginAsTeacher(page);
-  const calendarDay = page.getByRole("gridcell", { name: "2026-08-05 · 2개 수업" });
-  await expect(calendarDay.locator(".lessonPill")).toHaveText([
+  const calendarDay = page.getByRole("gridcell", { name: /^2026-08-05 · \d+개 수업$/ });
+  await expect(calendarDay.locator(".lessonPill").filter({ hasText: /^17:00/ })).toHaveText([
     "17:00 결석 보강 · 개별일정 학생 (1명)",
     "17:00 월수금 앞반 (0명)"
   ]);
