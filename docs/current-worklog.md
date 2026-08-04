@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-04 학생별 오답 명시 저장
+
+- `wrongProblems`를 공용 `app_state` 500ms 자동저장 11개 key에서 분리했다. 오답관리에서 local draft를 수정한 뒤 `학생별 오답 저장`을 눌러야 `updated_at` CAS와 Supabase 재조회 대조를 수행하며, 충돌·실패 입력은 화면에 유지한다.
+- 저장 요청 중 들어온 후속 수정은 첫 저장 완료로 덮지 않고 `변경됨`으로 되돌려 두 번째 명시 저장을 요구한다. 가상 API/browser가 자동저장 부재, 첫 snapshot 분리, 후속 저장, 새로고침 지속성을 검증한다.
+- 검증: runtime lint, 명시 저장·app_state·teacher boundary, scenario·production `827/827`, build `410 modules`·main `944.86 kB`·lazy `12/12`, Worktree 격리 safe browser `42/42` 통과. 운영 데이터·알림·SQL·유료 AI는 사용하지 않았다.
+
 ## 2026-08-04 P3-4 알림톡 template 종료 감사
 
 - `test-notification-template-closeout.mjs`가 출결·수업일지·숙제보충·결석보강·일정 확정/변경·당일 11시·재시험·일반 공지·특강 9개 경로의 seed→draft→persisted human final→provider 변수 계약을 실제 pure builder와 source boundary로 대조한다.

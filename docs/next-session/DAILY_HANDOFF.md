@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-04
 
+## 2026-08-04 학생별 오답 명시 저장
+
+- `wrongProblems`를 공용 app_state 자동저장 11개 key에서 분리해 10개로 줄였다. 오답관리의 `학생별 오답 저장`이 해당 key만 CAS·Supabase 재조회하며, 저장 전 local draft와 충돌·실패 입력을 보존한다.
+- 저장 중 후속 편집은 첫 응답 뒤 다시 `변경됨`으로 표시한다. safe browser는 자동저장 부재→첫 snapshot 저장→후속 수정 보존→두 번째 저장→새로고침 지속성을 확인한다.
+- runtime lint, 전용/app_state/teacher 경계, scenario·production `827/827`, build `410 modules`·main `944.86 kB`·lazy `12/12`, safe browser `42/42` 통과. 다음 후보는 `lessonResearchItems` 명시 저장이며 새 실행에서 다시 범위를 좁힌다.
+
 ## 2026-08-04 P3-4 알림톡 template 종료 감사
 
 - 자동 closeout이 9개 제품 경로의 seed→draft→persisted human final→provider 변수, 설정 key 10개, provider template 4개를 고정한다. 재시험은 독립 11시 job 대상이 아니며 연결 수업 schedule line만 유지한다.

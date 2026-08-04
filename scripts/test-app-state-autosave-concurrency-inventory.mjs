@@ -42,9 +42,9 @@ assert.deepEqual(sharedStateKeys, [
   "notificationLogs",
   "examPostTargetStudentIds",
   "tallySubmissions",
-  "tallySummaries",
-  "wrongProblems"
+  "tallySummaries"
 ]);
+assert.equal(sharedStateKeys.includes("wrongProblems"), false);
 
 const autosaveSource = sourceBetween(
   appSource,
@@ -122,4 +122,4 @@ assert.equal(
 );
 assert.ok(workflowSource.includes("npm run test:app-state-autosave-inventory"));
 
-console.log("app_state autosave concurrency inventory passed (11 keys; serialization/CAS/requery guarded)");
+console.log("app_state autosave concurrency inventory passed (10 keys; serialization/CAS/requery guarded)");

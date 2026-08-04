@@ -140,9 +140,10 @@ assert.equal(adapters.lessons.props.runtime, runtimeBindings.teacherLessonHub);
 assert.equal(adapters.examAnalysisPipeline.props.runtime, runtimeBindings.examAnalysisPipeline);
 assert.equal(adapters.examPrep.props.runtime, runtimeBindings.examPrepCenter);
 assert.equal(adapters.settings.props.runtime, runtimeBindings.settingsCenter);
-for (const viewId of ["followups", "materials", "overdue"]) {
+for (const viewId of ["materials", "overdue"]) {
   assert.equal(adapters[viewId].props.runtime, runtimeBindings.learningSupport);
 }
+assert.equal(Object.hasOwn(adapters.followups.props, "runtime"), false);
 for (const viewId of ["aiVariants", "classes", "lessonResearch", "schoolCalendar"]) {
   assert.equal(adapters[viewId].props.runtime, runtimeBindings.planningTools);
 }

@@ -467,6 +467,62 @@ test("learning support screens open from their shared deferred chunk without mut
   expect(pageErrors).toEqual([]);
 });
 
+test("student wrong problems require explicit verified save and preserve in-flight edits", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  const explicitSaves = [];
+  await page.route("**/api/app-state", async (route) => {
+    if (route.request().method() === "POST") {
+      const payload = route.request().postDataJSON();
+      if (Object.keys(payload.states ?? {}).length === 1 && Array.isArray(payload.states?.wrongProblems)) {
+        explicitSaves.push(payload);
+      }
+    }
+    await route.continue();
+  });
+
+  await loginAsTeacher(page);
+  const navigation = page.getByRole("navigation", { name: "주요 화면" });
+  await navigation.getByRole("button", { name: /오답관리/ }).click();
+  await expect(page.getByRole("heading", { name: "오답관리" })).toBeVisible();
+  await page.getByRole("tab", { name: "학생별 오답" }).click();
+  const studentFilter = page.getByRole("group", { name: "오답관리 학년과 학생 필터" }).getByRole("combobox");
+  await studentFilter.selectOption("safe-active-student");
+
+  const saveStatus = page.getByRole("status").filter({ hasText: "학생별 오답" });
+  await expect(saveStatus).toContainText("저장 완료");
+  await page.getByRole("button", { name: "+ 오답 추가" }).click();
+  const sourceInput = page.getByLabel(/월경계 학생 새 오답 교재 또는 출처/);
+  await sourceInput.fill("안전 명시 저장 교재");
+  await expect(saveStatus).toContainText("변경됨");
+  await page.waitForTimeout(1_000);
+  expect(explicitSaves).toHaveLength(0);
+
+  await page.getByRole("button", { name: "학생별 오답 저장" }).click();
+  await expect.poll(() => explicitSaves.length).toBe(1);
+  const rangeInput = page.getByLabel(/월경계 학생 안전 명시 저장 교재 문항 또는 범위/);
+  await rangeInput.fill("10-12");
+  await expect(saveStatus).toContainText("변경됨", { timeout: 10_000 });
+  await expect(page.getByText("아직 저장되지 않은 입력이 있습니다. 저장 중 수정했다면 한 번 더 저장해 주세요.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "학생별 오답 저장" })).toBeEnabled();
+
+  let reread = await (await request.get(`${safeApiBaseUrl}/api/app-state?includeRows=true`)).json();
+  expect(reread.states.wrongProblems.find((item) => item.source === "안전 명시 저장 교재")?.problemRange).toBe("");
+
+  await page.getByRole("button", { name: "학생별 오답 저장" }).click();
+  await expect.poll(() => explicitSaves.length).toBe(2);
+  await expect(saveStatus).toContainText("저장 완료");
+  reread = await (await request.get(`${safeApiBaseUrl}/api/app-state?includeRows=true`)).json();
+  expect(reread.states.wrongProblems.find((item) => item.source === "안전 명시 저장 교재")?.problemRange).toBe("10-12");
+
+  await page.reload();
+  await expect(page.getByRole("navigation", { name: "주요 화면" })).toBeVisible();
+  await navigation.getByRole("button", { name: /오답관리/ }).click();
+  await page.getByRole("tab", { name: "학생별 오답" }).click();
+  await studentFilter.selectOption("safe-active-student");
+  await expect(page.locator('input[value="10-12"]')).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
 test("teacher homework verification waits for versioned readback and survives reload", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   const requests = [];

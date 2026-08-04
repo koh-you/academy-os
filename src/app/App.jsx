@@ -2548,7 +2548,6 @@ const settingsCenterRuntime = Object.freeze({
 
 const learningSupportRuntime = Object.freeze({
   StudentPortalV2,
-  appStateAutosaveRisk,
   dedupeActionableHomeworks,
   getHomeworkAction,
   isActiveStudent,
@@ -2849,6 +2848,8 @@ export function App() {
   });
   const [saveStates, setSaveStates] = useState({});
   const [appStateSaveState, setAppStateSaveState] = useState("idle");
+  const [wrongProblemSaveState, setWrongProblemSaveState] = useState("idle");
+  const [wrongProblemSaveBusy, setWrongProblemSaveBusy] = useState(false);
   const [problemBookSaveState, setProblemBookSaveState] = useState("idle");
   const [testResultSaveState, setTestResultSaveState] = useState("idle");
   const [scoreRecordSaveState, setScoreRecordSaveState] = useState("idle");
@@ -2911,6 +2912,8 @@ export function App() {
   const studentIntakeSaveControllerRef = useRef(null);
   const isApplyingRemoteAppStateRef = useRef(false);
   const appStatePersistenceControllerRef = useRef(null);
+  const wrongProblemPersistenceControllerRef = useRef(null);
+  const wrongProblemSaveRevisionRef = useRef(0);
   const notificationJobsRefreshControllerRef = useRef(null);
   const notificationJobsReconcileControllerRef = useRef(null);
   const attendanceOnlyMode = isAttendanceOnlyRoute();
@@ -2945,8 +2948,7 @@ export function App() {
     notificationLogs,
     examPostTargetStudentIds,
     tallySubmissions,
-    tallySummaries,
-    wrongProblems
+    tallySummaries
   }), [
     aiSettings,
     attendanceSettings,
@@ -2957,10 +2959,10 @@ export function App() {
     notificationLogs,
     examPostTargetStudentIds,
     tallySubmissions,
-    tallySummaries,
-    wrongProblems
+    tallySummaries
   ]);
   const initialSharedAppStateRef = useRef(sharedAppState);
+  const initialWrongProblemsRef = useRef(wrongProblems);
   const persistedSharedAppStateRef = useRef({});
 
   function getAppStatePersistenceController() {
@@ -2983,6 +2985,22 @@ export function App() {
       });
     }
     return appStatePersistenceControllerRef.current;
+  }
+
+  function getWrongProblemPersistenceController() {
+    if (!wrongProblemPersistenceControllerRef.current) {
+      wrongProblemPersistenceControllerRef.current = createAppStatePersistenceController({
+        onError: (error) => console.error(error),
+        onState: setWrongProblemSaveState,
+        read: () => getJsonWithTimeout(
+          `/api/app-state?includeRows=true&verify=wrong-problems-${Date.now()}`,
+          15000,
+          "학생별 오답 저장 확인이 15초를 넘었습니다. 현재 입력을 유지한 채 잠시 뒤 다시 확인해 주세요."
+        ),
+        write: ({ expectedUpdatedAt, states }) => postAppState(states, { expectedUpdatedAt })
+      });
+    }
+    return wrongProblemPersistenceControllerRef.current;
   }
 
   useEffect(() => {
@@ -3199,6 +3217,15 @@ export function App() {
             stateRows: appStateResult.stateRows ?? [],
             states: persistedSharedAppStateRef.current
           });
+          const persistedWrongProblems = Array.isArray(states.wrongProblems)
+            ? states.wrongProblems
+            : initialWrongProblemsRef.current;
+          getWrongProblemPersistenceController().setSnapshot({
+            keys: ["wrongProblems"],
+            stateRows: appStateResult.stateRows ?? [],
+            states: { wrongProblems: persistedWrongProblems }
+          });
+          setWrongProblemSaveState("saved");
           isApplyingRemoteAppStateRef.current = true;
           if (Array.isArray(states.academyTests)) setAcademyTests(states.academyTests);
           if (states.aiSettings) setAiSettings(states.aiSettings);
@@ -3249,13 +3276,23 @@ export function App() {
         } else if (appStateResult.ok) {
           setReportSnapshots([]);
           persistedSharedAppStateRef.current = initialSharedAppStateRef.current;
-          const seededResult = await postAppState(initialSharedAppStateRef.current);
+          const initialAppState = {
+            ...initialSharedAppStateRef.current,
+            wrongProblems: initialWrongProblemsRef.current
+          };
+          const seededResult = await postAppState(initialAppState);
           if (!isMounted) return;
           getAppStatePersistenceController().setSnapshot({
             keys: Object.keys(initialSharedAppStateRef.current),
             stateRows: seededResult.stateRows ?? [],
             states: initialSharedAppStateRef.current
           });
+          getWrongProblemPersistenceController().setSnapshot({
+            keys: ["wrongProblems"],
+            stateRows: seededResult.stateRows ?? [],
+            states: { wrongProblems: initialWrongProblemsRef.current }
+          });
+          setWrongProblemSaveState("saved");
           setIsAppStateReady(true);
         }
         if (resourceMaterialsResult.ok && Array.isArray(resourceMaterialsResult.materials)) {
@@ -3338,6 +3375,8 @@ export function App() {
   useEffect(() => () => {
     appStatePersistenceControllerRef.current?.dispose();
     appStatePersistenceControllerRef.current = null;
+    wrongProblemPersistenceControllerRef.current?.dispose();
+    wrongProblemPersistenceControllerRef.current = null;
   }, [session?.role]);
 
   useEffect(() => () => {
@@ -6864,6 +6903,8 @@ export function App() {
   }
 
   function handleAddWrongProblem(studentId) {
+    wrongProblemSaveRevisionRef.current += 1;
+    setWrongProblemSaveState("dirty");
     setWrongProblems((current) => [
       {
         wrongProblemId: `wrong_${Date.now()}_${studentId}`,
@@ -6878,9 +6919,26 @@ export function App() {
   }
 
   function handleUpdateWrongProblem(wrongProblemId, field, value) {
+    wrongProblemSaveRevisionRef.current += 1;
+    setWrongProblemSaveState("dirty");
     setWrongProblems((current) => current.map((item) => (
       item.wrongProblemId === wrongProblemId ? { ...item, [field]: value } : item
     )));
+  }
+
+  async function handleSaveWrongProblems() {
+    if (wrongProblemSaveBusy) return { ok: false };
+    const requestedRevision = wrongProblemSaveRevisionRef.current;
+    setWrongProblemSaveBusy(true);
+    try {
+      const result = await getWrongProblemPersistenceController().save({ wrongProblems });
+      if (result?.ok && requestedRevision !== wrongProblemSaveRevisionRef.current) {
+        setWrongProblemSaveState("dirty");
+      }
+      return result;
+    } finally {
+      setWrongProblemSaveBusy(false);
+    }
   }
 
   const teacherViewAdapters = createTeacherViewAdapters({
@@ -6968,7 +7026,9 @@ export function App() {
       testAttempts,
       testResultSaveState,
       testSessions,
-      wrongProblems
+      wrongProblems,
+      wrongProblemSaveBusy,
+      wrongProblemSaveState
     },
     actions: {
       handleAddLessonResearchItem,
@@ -7035,6 +7095,7 @@ export function App() {
       handleSaveRecord,
       handleSaveSchoolEvent,
       handleSaveScoreRecord,
+      handleSaveWrongProblems,
       handleSaveSpecialLectureEnrollment,
       handleSaveSpecialLectureEnrollments,
       handleSaveSpecialLectureGuides,

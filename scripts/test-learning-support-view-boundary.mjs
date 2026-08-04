@@ -34,7 +34,6 @@ const runtimeKeys = runtimeMatch[1]
   .sort();
 assert.deepEqual(runtimeKeys, [
   "StudentPortalV2",
-  "appStateAutosaveRisk",
   "dedupeActionableHomeworks",
   "getHomeworkAction",
   "isActiveStudent",
@@ -45,12 +44,18 @@ assert.deepEqual(runtimeKeys, [
   "today"
 ].sort());
 
-for (const viewId of ["followups", "materials", "overdue"]) {
+for (const viewId of ["materials", "overdue"]) {
   const viewStart = outletSource.indexOf(`${viewId}: {`);
   const nextView = outletSource.indexOf("\n    },", viewStart);
   const viewSource = outletSource.slice(viewStart, nextView);
   assert.equal(viewSource.includes("runtime: runtimeBindings.learningSupport"), true);
 }
+const followUpStart = outletSource.indexOf("followups: {");
+const followUpEnd = outletSource.indexOf("\n    },", followUpStart);
+assert.equal(
+  outletSource.slice(followUpStart, followUpEnd).includes("runtime: runtimeBindings.learningSupport"),
+  false
+);
 
 assert.equal(screenSource.includes('from "../../app/App.jsx"'), false);
 assert.equal(screenSource.includes('from "../../app/TeacherViewOutlet.js"'), false);

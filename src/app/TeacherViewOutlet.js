@@ -154,8 +154,6 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
     followups: {
       Component: components.FollowUpCenter,
       props: {
-        runtime: runtimeBindings.learningSupport,
-        appStateSaveState: models.appStateSaveState,
         homeworks: models.homeworks,
         lessons: models.lessons,
         notificationLogs: models.notificationLogs,
@@ -164,11 +162,14 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
         students: models.students,
         tasks: models.makeupTasks,
         wrongProblems: models.wrongProblems,
+        wrongProblemSaveBusy: models.wrongProblemSaveBusy,
+        wrongProblemSaveState: models.wrongProblemSaveState,
         onAddProblemBook: actions.handleAddProblemBookFromFile,
         onAddWrongProblem: actions.handleAddWrongProblem,
         onAssignHomework: actions.handleAssignHomeworkFromTask,
         onCreateTask: actions.handleCreateMakeupTask,
         onLogNotification: actions.handleLogNotification,
+        onSaveWrongProblems: actions.handleSaveWrongProblems,
         onUpdateProblemBook: actions.handleUpdateProblemBook,
         onUpdateProblemMeta: actions.handleUpdateProblemMeta,
         onUpdateTask: actions.handleUpdateMakeupTask,
