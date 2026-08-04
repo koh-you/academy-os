@@ -49,7 +49,8 @@
 - App 3차 리팩터링 3-0~3-8은 `docs/app-refactor-third-pass-plan.md`와 `docs/app-refactor-third-pass-closeout.md`를 기준으로 화면·draft/controller·adapter 분리, teacher 화면 lazy loading, 종료 소유권 감사를 완료했다. 3차 리팩터링은 닫고 자동 재개하지 않는다.
 - 후속 대형 후보는 CSS domain entry 분리, safe E2E 확대, API payload/DB row 타입 계약이다. 남은 학생 로그인·핵심 modal·보고서 화면은 실제 변경 속도나 번들 병목 근거가 생길 때만 별도 계획으로 검토한다.
 - API 후보는 `api/server.js`의 route registration, auth, core data, notification/provider service 분리다. App 3차 범위와 섞지 않고 별도 기준선·회귀 inventory를 먼저 만든다.
-- AI가 안전하게 검증 가능한 문제는 해당 제품 작업에서 처리하되, 위 후보를 이유로 4차 리팩터링을 자동 시작하지 않는다. 운영 side effect나 제품 의미 결정이 필요한 항목만 사람 gate로 올린다.
+- 사용자의 명시적 승인으로 4차 리팩터링을 시작했다. `docs/app-refactor-fourth-pass-plan.md`의 4-0 기준선 뒤 API payload, DB row mapper, server route, App persistence action, provider, CSS, safe E2E, 종료 감사 순서로 진행한다.
+- 한 번에 한 안전 단위만 최신 main에서 진행하며, 즉시 사람 판단이 필요하지 않은 발견은 기록 후 AI 검수·최소 수정·재검증으로 연쇄 진행한다. 운영 side effect나 제품 의미 결정이 필요한 항목만 사람 gate로 올린다.
 - 기준: `docs/development-roadmap-after-ui-refactor-2026-07-31.md`.
 
 ## P5. 시험분석 상세 프롬프트 시스템
