@@ -182,3 +182,4 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 - 4-1p: `POST /api/notification-jobs/reconcile-solapi`의 selector payload와 checked/job/record/count response를 공통 contract에 연결했다. single-flight와 App source merge owner는 유지하고 safe provider read만 실행했다.
 - 4-1q: `POST /api/notification-jobs/reserve-bulk`의 canonical batch payload와 per-job/count response를 공통 contract에 연결했다. 기존 `jobs` alias, 부분 실패·재사용·App batch merge를 유지하고 safe API dry-run만 실행했다.
 - 4-1r: `POST /api/notification-jobs/readiness-check`의 clock/window/Slack flag와 source issue response를 공통 contract에 연결했다. source 누락 판정과 선택적 Slack owner는 유지하고 safe API는 Slack 요청을 거부했다.
+- 4-1s: `POST /api/notification-jobs/dispatch-due`의 token/dry-run/limit/clock payload와 processed/source/reconcile response를 공통 contract에 연결했다. 인증 선판정과 server source/provider orchestration은 유지하고 safe API는 0건/no-write와 민감 override 차단만 검증했다.

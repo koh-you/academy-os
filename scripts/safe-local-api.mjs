@@ -937,6 +937,40 @@ function handleMutation(pathname, payload) {
       windowMinutes
     };
   }
+  if (pathname === "/api/notification-jobs/dispatch-due") {
+    let parsedPayload;
+    try {
+      parsedPayload = parseVersionedWriteRequest("POST", pathname, payload);
+    } catch (error) {
+      return {
+        code: error.code,
+        error: error.message,
+        field: error.field,
+        ok: false,
+        statusCode: Number(error.statusCode) || 400
+      };
+    }
+    if (parsedPayload.dispatchToken || parsedPayload.forceDryRun || parsedPayload.now) {
+      return {
+        error: "안전 fixture에서는 알림 자동 처리 override를 사용할 수 없습니다.",
+        ok: false,
+        statusCode: 401
+      };
+    }
+    return {
+      automaticSolapiReconcile: {
+        checkedCount: 0,
+        candidateCount: 0,
+        source: "safe-provider",
+        updatedCount: 0
+      },
+      dryRun: true,
+      ok: true,
+      processed: [],
+      processedCount: 0,
+      source: "supabase"
+    };
+  }
   if (pathname === "/api/resource-materials") {
     let parsedPayload;
     try {
