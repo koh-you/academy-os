@@ -24,6 +24,15 @@ const attendanceCheckResponseContract = defineApiPayloadContract({
   name: "attendance check response"
 });
 
+const appStateWriteResponseContract = defineApiPayloadContract({
+  allowUnknownFields: true,
+  fields: {
+    source: { allowEmpty: false, required: true, type: "string" },
+    states: { required: true, type: "object" }
+  },
+  name: "app state write response"
+});
+
 function defineVersionedWriteRoute({
   domain,
   fields,
@@ -132,6 +141,17 @@ export const versionedWriteRouteContracts = Object.freeze([
     path: "/api/attendance/check",
     response: attendanceCheckResponseContract,
     sources: ["lessons", "lesson_student_records", "attendance_events", "notification_jobs"]
+  }),
+  defineVersionedWriteRoute({
+    domain: "appState",
+    fields: {
+      expectedUpdatedAt: { type: "object" },
+      states: { required: true, type: "object" }
+    },
+    key: "appStateWrite",
+    path: "/api/app-state",
+    response: appStateWriteResponseContract,
+    sources: ["app_state"]
   })
 ]);
 

@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-1i app state
+
+- 공용 app-state 저장과 강사 운영 메모가 같은 canonical `{ states, expectedUpdatedAt? }` request와 `{ source, states }` response contract를 사용한다. server는 legacy direct-object를 persistence 전에 400으로 거부한다.
+- local draft·key별 직렬화·CAS·Supabase 재조회·충돌/후속 입력 보존 owner는 기존 controller에 유지했다. contract/app-state fixture, lint, scenario·production `827/827`, build `416 modules`·main `943.55 kB`·lazy `12/12`, 격리 browser `1/1` 통과.
+- 다음 4-1 단위는 report snapshot 전용 payload contract다. 운영 데이터·실제 알림·SQL·유료 호출은 없었다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1h derived school calendar
 
 - 시험정보와 연결 직전수업 atomic route의 canonical request/verified response를 공통 contract에 연결했다. invalid payload는 두 source persistence 전에 field 포함 400으로 차단한다.

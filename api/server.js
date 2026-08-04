@@ -6141,9 +6141,13 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/app-state") {
     try {
-      const payload = await readJsonBody(request);
-      const requestedStates = payload.states ?? payload;
-      const expectedUpdatedAt = payload.states ? payload.expectedUpdatedAt ?? null : null;
+      const payload = parseVersionedWriteRequest(
+        request.method,
+        requestUrl.pathname,
+        await readJsonBody(request)
+      );
+      const requestedStates = payload.states;
+      const expectedUpdatedAt = payload.expectedUpdatedAt ?? null;
       const {
         examPostSubmissions: _examPostSubmissions,
         studentQuestions: _studentQuestions,
@@ -6154,7 +6158,9 @@ const server = http.createServer(async (request, response) => {
     } catch (error) {
       sendJson(request, response, Number(error.statusCode) || 500, {
         ok: false,
-        error: error.message
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.field ? { field: error.field } : {})
       });
     }
     return;

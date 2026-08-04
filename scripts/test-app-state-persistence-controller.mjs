@@ -135,6 +135,9 @@ const [appSource, coreSource, serverSource, restSource, workflowSource, packageS
 for (const expected of [
   "createAppStatePersistenceController",
   "appStatePersistenceControllerRef",
+  "createAppStateWritePayload",
+  "parseVersionedWriteResponse",
+  "postAppStateWithTimeout",
   "/api/app-state?includeRows=true",
   "getAppStatePersistenceController().save(changedStates)",
   "expectedUpdatedAt"
@@ -154,6 +157,8 @@ assert.match(
   "app_state CAS patch boundary must not depend on checkout line endings"
 );
 assert.ok(restSource.includes("export async function insertRows("));
+assert.ok(serverSource.includes("parseVersionedWriteRequest("));
+assert.ok(serverSource.includes("const requestedStates = payload.states"));
 assert.ok(serverSource.includes("upsertAppState(safeStates, { expectedUpdatedAt })"));
 assert.ok(serverSource.includes("Number(error.statusCode) || 500"));
 const packageJson = JSON.parse(packageSource);
