@@ -884,6 +884,59 @@ function handleMutation(pathname, payload) {
       reusedCount: 0
     };
   }
+  if (pathname === "/api/notification-jobs/readiness-check") {
+    let parsedPayload;
+    try {
+      parsedPayload = parseVersionedWriteRequest("POST", pathname, payload);
+    } catch (error) {
+      return {
+        code: error.code,
+        error: error.message,
+        field: error.field,
+        ok: false,
+        statusCode: Number(error.statusCode) || 400
+      };
+    }
+    if (parsedPayload.notifySlack) {
+      return {
+        error: "안전 fixture에서는 Slack 알림을 보낼 수 없습니다.",
+        ok: false,
+        statusCode: 400
+      };
+    }
+    const nowTime = new Date(parsedPayload.now || new Date().toISOString()).getTime();
+    if (Number.isNaN(nowTime)) {
+      return { error: "now must be a valid date string.", ok: false, statusCode: 500 };
+    }
+    const windowMinutes = Math.max(1, parsedPayload.windowMinutes || 15);
+    const windowTime = nowTime + windowMinutes * 60_000;
+    const dueSoonJobs = state.notificationJobs.filter((job) => {
+      if (!["queued", "pending_send", "scheduled"].includes(job.status)) return false;
+      if (!job.scheduledAt) return true;
+      const scheduledTime = new Date(job.scheduledAt).getTime();
+      return !Number.isNaN(scheduledTime) && scheduledTime >= nowTime && scheduledTime <= windowTime;
+    });
+    const issues = dueSoonJobs
+      .map((job) => ({
+        missing: ["notice_parent", "notice_student"].includes(job.notificationType) &&
+          !String(job.payload?.message || job.payload?.commentBodyOverride || "").trim()
+          ? ["공지 본문"]
+          : [],
+        notificationJobId: job.notificationJobId,
+        notificationType: job.notificationType,
+        scheduledAt: job.scheduledAt,
+        studentName: job.payload?.studentName || job.studentId || "학생"
+      }))
+      .filter((issue) => issue.missing.length > 0);
+    return {
+      checkedCount: dueSoonJobs.length,
+      issueCount: issues.length,
+      issues,
+      ok: true,
+      slack: null,
+      windowMinutes
+    };
+  }
   if (pathname === "/api/resource-materials") {
     let parsedPayload;
     try {

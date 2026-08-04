@@ -72,6 +72,7 @@ export const domainTestGroups = Object.freeze({
     "scripts/test-notification-job-cancel-contract.mjs",
     "scripts/test-notification-job-reconcile-contract.mjs",
     "scripts/test-notification-job-bulk-reserve-contract.mjs",
+    "scripts/test-notification-readiness-contract.mjs",
     "scripts/test-notification-notice-builders.mjs",
     "scripts/test-notification-refresh-reconcile-controller.mjs",
     "scripts/test-notification-effect-adapter.mjs",
