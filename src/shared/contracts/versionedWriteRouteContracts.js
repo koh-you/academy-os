@@ -283,6 +283,24 @@ export const versionedWriteRouteContracts = Object.freeze([
     path: "/api/notification-jobs/reserve",
     response: notificationJobReserveResponseContract,
     sources: ["notification_jobs", "provider.solapi"]
+  }),
+  defineVersionedWriteRoute({
+    domain: "notification",
+    fields: {
+      cancelSolapi: { type: "boolean" },
+      notificationJobId: {
+        aliases: ["id"],
+        allowEmpty: false,
+        required: true,
+        trim: true,
+        type: "string"
+      },
+      reason: { trim: true, type: "string" }
+    },
+    key: "notificationJobCancel",
+    path: "/api/notification-jobs/cancel",
+    response: notificationJobWriteResponseContract,
+    sources: ["notification_jobs", "provider.solapi"]
   })
 ]);
 

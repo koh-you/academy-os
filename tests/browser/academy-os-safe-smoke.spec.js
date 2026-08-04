@@ -1134,6 +1134,54 @@ test("notification reserve contract stays canonical in the safe API without prov
   expect(pageErrors).toEqual([]);
 });
 
+test("notification cancel contract persists the source state without provider actions in the safe API", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+  const safeApiBaseUrl = `http://127.0.0.1:${process.env.ACADEMY_SAFE_API_PORT || 8787}`;
+
+  const reservationResponse = await request.post(`${safeApiBaseUrl}/api/notification-jobs/reserve`, {
+    data: {
+      forceDryRun: true,
+      notificationJob: {
+        notificationJobId: "safe-contract-cancel-job",
+        notificationType: "notice_parent",
+        scheduledAt: "2099-08-05T12:00:00.000Z",
+        status: "scheduled"
+      },
+      reason: "safe browser cancellation setup"
+    }
+  });
+  expect(reservationResponse.status()).toBe(200);
+
+  const cancellationResponse = await request.post(`${safeApiBaseUrl}/api/notification-jobs/cancel`, {
+    data: {
+      cancelSolapi: false,
+      notificationJobId: "safe-contract-cancel-job",
+      reason: "safe browser contract cancellation"
+    }
+  });
+  expect(cancellationResponse.status()).toBe(200);
+  expect(await cancellationResponse.json()).toMatchObject({
+    notificationJob: {
+      error: "safe browser contract cancellation",
+      notificationJobId: "safe-contract-cancel-job",
+      status: "canceled"
+    },
+    ok: true,
+    safeFixture: true,
+    solapiCancellation: null,
+    source: "supabase"
+  });
+
+  const sourceResponse = await request.get(`${safeApiBaseUrl}/api/notification-jobs`);
+  expect(sourceResponse.status()).toBe(200);
+  expect((await sourceResponse.json()).notificationJobs).toContainEqual(expect.objectContaining({
+    notificationJobId: "safe-contract-cancel-job",
+    status: "canceled"
+  }));
+  expect(pageErrors).toEqual([]);
+});
+
 test("broken supplement lesson links are visible and block schedule or notification writes", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await page.route("**/api/makeup-tasks*", async (route) => {
