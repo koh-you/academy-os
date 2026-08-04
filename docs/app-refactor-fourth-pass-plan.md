@@ -158,4 +158,10 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 - 두 선행 작업 종료와 `origin/main` `4d351314`의 Production checks·Vercel 성공을 대조했다.
 - 코드·검증 시간·소유권·회귀 inventory와 4-1~4-8 안전 단위를 확정했다.
 - 제품 runtime과 운영 데이터는 변경하지 않았다.
-- 다음 단위는 4-1a 공통 API contract helper와 versioned write route inventory다.
+- PR #74 merge `0a9a5ff4`의 main Production checks와 Vercel 배포를 확인해 4-0을 닫았다.
+
+## 4-1 진행 상태
+
+- 4-1a: `apiPayloadContract.js`에 object·array·string·boolean·number field, canonical/legacy alias 충돌, 미지 field, 공통 400 오류를 다루는 pure parser를 추가했다.
+- 수업일지 makeup/rows/history, 보충 일정, 반 명단, 학사일정 파생 저장의 6개 route를 `versionedWriteRouteContracts.js`에 등록했다. source table과 공통 verified response를 명시하되 runtime route에는 아직 연결하지 않아 기능 의미를 바꾸지 않았다.
+- `npm run test:contract:versioned-write`를 전체 production gate에 포함했다. 4-1b는 lesson journal·supplement·attendance부터 client/server가 같은 parser를 사용하도록 작은 단위로 연결한다.
