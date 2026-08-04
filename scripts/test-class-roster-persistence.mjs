@@ -136,6 +136,16 @@ const apiResult = await saveClassRosterRequest({
 });
 assert.equal(apiResult.verified, true);
 assert.equal(requestPayload.auditId, "class-roster-fixture");
+assert.deepEqual(Object.keys(requestPayload).sort(), ["auditId", "lessonChanges", "studentChanges"]);
+await assert.rejects(
+  saveClassRosterRequest({
+    auditId: "invalid-response",
+    lessonChanges: plan.lessonChanges,
+    request: async () => ({ source: "supabase", verified: "true" }),
+    studentChanges: plan.studentChanges
+  }),
+  (error) => error.code === "INVALID_API_PAYLOAD" && error.field === "verified"
+);
 await assert.rejects(
   saveClassRosterRequest({
     auditId: "missing-version",
