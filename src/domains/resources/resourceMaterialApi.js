@@ -2,17 +2,23 @@ import {
   areResourceMaterialsPersistedEqual,
   areResourceMaterialTimestampsEqual
 } from "./resourceMaterialPersistence.js";
+import {
+  parseVersionedWriteRequest,
+  parseVersionedWriteResponse
+} from "../../shared/contracts/versionedWriteRouteContracts.js";
 
 export async function saveResourceMaterialRequest({ material, request } = {}) {
   if (!material?.materialId) throw new Error("저장할 자료 ID가 필요합니다.");
   if (!material.createdAt) throw new Error("자료 초안의 생성 토큰이 필요합니다.");
   if (typeof request !== "function") throw new Error("자료 저장 request가 필요합니다.");
-  const result = await request(
+  const payload = parseVersionedWriteRequest("POST", "/api/resource-materials", { material });
+  const response = await request(
     "/api/resource-materials",
-    { material },
+    payload,
     15000,
     "자료 등록이 15초를 넘었습니다. 현재 입력을 유지한 채 서버 저장 상태를 확인해 주세요."
   );
+  const result = parseVersionedWriteResponse("POST", "/api/resource-materials", response);
   if (
     result?.source !== "supabase" ||
     result?.verified !== true ||

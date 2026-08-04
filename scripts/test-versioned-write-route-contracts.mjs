@@ -8,9 +8,9 @@ import {
   versionedWriteRouteContracts
 } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 
-assert.equal(versionedWriteRouteContracts.length, 9);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 9);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 9);
+assert.equal(versionedWriteRouteContracts.length, 10);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 10);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 10);
 assert.equal(versionedWriteRouteContracts.every(Object.isFrozen), true);
 assert.equal(versionedWriteRouteContracts.every(({ request, response, sources }) => (
   Object.isFrozen(request) && Object.isFrozen(response) && Object.isFrozen(sources)
@@ -140,6 +140,33 @@ assert.deepEqual(
     verified: true
   }
 );
+const resourceMaterial = {
+  createdAt: "2026-08-05T00:00:00.000Z",
+  materialId: "resource-1",
+  title: "safe resource"
+};
+assert.deepEqual(
+  parseVersionedWriteRequest("POST", "/api/resource-materials", { material: resourceMaterial }),
+  { material: resourceMaterial }
+);
+assert.throws(
+  () => parseVersionedWriteRequest("POST", "/api/resource-materials", resourceMaterial),
+  (error) => error.field === "createdAt" && error.statusCode === 400
+);
+assert.deepEqual(
+  parseVersionedWriteResponse("POST", "/api/resource-materials", {
+    material: { ...resourceMaterial, updatedAt: "2026-08-05T00:00:01.000Z" },
+    recoveredDraft: true,
+    source: "supabase",
+    verified: true
+  }),
+  {
+    material: { ...resourceMaterial, updatedAt: "2026-08-05T00:00:01.000Z" },
+    recoveredDraft: true,
+    source: "supabase",
+    verified: true
+  }
+);
 assert.deepEqual(response, {
   auditId: "supplement-audit",
   source: "supabase",
@@ -205,4 +232,4 @@ assert.throws(
   /field\/alias가 중복/
 );
 
-console.log("versioned write route contracts passed · 9 routes · canonical keys and declared legacy alias only");
+console.log("versioned write route contracts passed · 10 routes · canonical keys and declared legacy alias only");

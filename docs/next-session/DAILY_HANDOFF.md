@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-1k resource metadata
+
+- `/api/resource-materials` POST의 `{ material }` request와 `material/source/verified/recoveredDraft?` response를 client·실서버·safe server 공통 contract에 연결했다. direct-object fallback은 내부 사용처가 없어 persistence 전 400으로 닫았다.
+- insert-only/CAS·unknown-result 최신 draft 수렴·Supabase 목록 재조회·form/list 복구 owner는 기존 API/action에 유지했다. contract/resource fixture, lint, scenario·production `827/827`, build `416 modules`·main `943.62 kB`·lazy `12/12`, 격리 browser `1/1` 통과.
+- 다음 4-1 단위는 인증된 private Storage 파일 upload/delete payload contract다. 운영 데이터·실제 알림·SQL·유료 호출은 없었다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1j report snapshot
 
 - `/api/report-snapshots`의 `{ snapshot }` request와 `recovered/reportSnapshots/snapshot/source/verified` response를 client·실서버·safe server 공통 contract에 연결했다. teacher auth는 payload parsing보다 먼저 유지한다.

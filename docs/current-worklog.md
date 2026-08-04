@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-1k resource metadata
+
+- 파일 없는 자료 메타데이터 `/api/resource-materials` POST의 canonical `{ material }` request와 verified row response를 10번째 공통 contract로 고정했다. client·실서버·safe server가 같은 parser를 사용하고 legacy direct-object 및 invalid field/type을 row 저장 전에 field 포함 400으로 차단한다.
+- stable material ID/createdAt, 신규 insert-only, 기존 `updated_at` CAS, 결과 불명 회수 뒤 최신 draft 수렴, Supabase 목록 재조회와 실패 시 form/list 보존 owner는 유지했다. DELETE query와 private Storage 파일 경계는 변경하지 않았다.
+- 검증: contract `10 routes`, resource metadata persistence/action, lint, scenario·production `827/827`, build `416 modules`·main `943.62 kB`·lazy `12/12`, 격리 browser `1/1` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1j report snapshot
 
 - 인증된 `/api/report-snapshots`의 canonical `{ snapshot }` request와 recovered/readback response를 9번째 공통 contract로 고정했다. client·실서버·safe server가 같은 parser를 사용하며, 인증 확인 뒤 invalid field/type을 app_state CAS 전에 field 포함 400으로 차단한다.

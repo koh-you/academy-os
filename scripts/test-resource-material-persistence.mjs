@@ -246,13 +246,19 @@ try {
   }
 }
 
-const [actionSource, appSource, outletSource, screenSource, serverSource] = await Promise.all([
+const [actionSource, apiSource, appSource, outletSource, screenSource, serverSource, safeServerSource] = await Promise.all([
   readFile(new URL("../src/domains/resources/resourceMaterialAction.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/domains/resources/resourceMaterialApi.js", import.meta.url), "utf8"),
   readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8"),
   readFile(new URL("../src/app/TeacherViewOutlet.js", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/teacher/LearningSupportCenters.jsx", import.meta.url), "utf8"),
-  readFile(new URL("../api/server.js", import.meta.url), "utf8")
+  readFile(new URL("../api/server.js", import.meta.url), "utf8"),
+  readFile(new URL("./safe-local-api.mjs", import.meta.url), "utf8")
 ]);
+const resourceWriteServerSource = serverSource.slice(
+  serverSource.indexOf('if (request.method === "POST" && requestUrl.pathname === "/api/resource-materials")'),
+  serverSource.indexOf('if (request.method === "DELETE" && requestUrl.pathname === "/api/resource-materials")')
+);
 for (const binding of [
   "resourceMaterialMutationRef.current",
   "saveResourceMaterialAction({",
@@ -266,6 +272,16 @@ for (const binding of [
   "Supabase 저장 및 목록 재조회 확인 완료"
 ]) assert.ok(actionSource.includes(binding), `missing resource action binding: ${binding}`);
 assert.ok(!appSource.includes('postJson("/api/resource-materials", { material: nextMaterial })'));
+for (const boundary of [
+  'parseVersionedWriteRequest("POST", "/api/resource-materials"',
+  'parseVersionedWriteResponse("POST", "/api/resource-materials"'
+]) assert.ok(apiSource.includes(boundary), `missing resource API contract boundary: ${boundary}`);
+for (const boundary of [
+  "parseVersionedWriteRequest(",
+  "upsertResourceMaterial(payload.material)",
+  "error.field"
+]) assert.ok(resourceWriteServerSource.includes(boundary), `missing resource server contract boundary: ${boundary}`);
+assert.ok(safeServerSource.includes('parseVersionedWriteRequest("POST", pathname, payload)'));
 for (const binding of [
   "resourceMaterialBusy: models.resourceMaterialBusy",
   "resourceMaterialDeleteStates: models.resourceMaterialDeleteStates",

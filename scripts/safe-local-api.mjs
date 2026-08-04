@@ -710,7 +710,19 @@ function handleMutation(pathname, payload) {
     };
   }
   if (pathname === "/api/resource-materials") {
-    const material = payload.material || {};
+    let parsedPayload;
+    try {
+      parsedPayload = parseVersionedWriteRequest("POST", pathname, payload);
+    } catch (error) {
+      return {
+        code: error.code,
+        error: error.message,
+        field: error.field,
+        ok: false,
+        statusCode: Number(error.statusCode) || 400
+      };
+    }
+    const material = parsedPayload.material;
     const currentMaterial = state.resourceMaterials.find((item) => item.materialId === material.materialId) ?? null;
     if (currentMaterial && areResourceMaterialsPersistedEqual(material, currentMaterial)) {
       return { material: currentMaterial, ok: true, verified: true };
