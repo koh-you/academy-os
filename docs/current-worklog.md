@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-1b lesson journal rows
+
+- `/api/lesson-journal/rows/save` 한 경계에 4-1a 공통 contract를 연결했다. client action은 전송 직전 canonical `auditId/homeworkChanges/recordChanges`만 만들고 응답의 `source/verified/auditId` type을 확인하며, server는 persistence 호출 전에 미지 field·잘못된 top-level type을 400 `INVALID_API_PAYLOAD`로 차단한다.
+- record/homework local draft, `lesson_student_records`·`homeworks` CAS/readback/rollback, App의 성공 후 원천 교체와 실패 시 draft 보존은 이동하지 않았다. 알림·Storage·AI provider 동작도 없다.
+- 검증: contract fixture, rows CAS fixture, 교사 숙제 확인, lesson domain `20/20`, runtime lint, scenario `827/827`, production `827/827`, build `416 modules`·main `942.25 kB`·lazy `12/12`, 집중 browser `3/3` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1a
 
 - 6개 직접 versioned write route의 request field·명시 legacy alias·authoritative source·verified response를 frozen registry로 고정하고, 잘못된 object/field type·미지 field·canonical+alias 동시 입력을 공통 400 contract error로 판정하는 pure helper를 추가했다.

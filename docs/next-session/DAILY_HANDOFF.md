@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-1b lesson journal rows
+
+- 수업일지 record/homework 저장 route 하나에 공통 request/response contract를 연결했다. client는 canonical payload만 전송하고 verified Supabase response type을 검사하며, server는 persistence 전 invalid payload를 field가 포함된 400으로 반환한다.
+- 기존 local draft, Supabase CAS·재조회·rollback, App 성공 반영·실패 보존 owner는 그대로다. contract/rows/교사 숙제, lesson `20/20`, lint, scenario·production `827/827`, build `416 modules`·lazy `12/12`, 집중 browser `3/3` 통과.
+- 다음 단위는 최신 main에서 lesson history action route 하나를 같은 방식으로 연결한다. 운영 데이터·실제 알림·SQL·유료 호출은 없었다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1a
 
 - 공통 pure payload parser와 6개 직접 versioned write route inventory를 추가했다. legacy alias는 선언된 `makeupTasks <- tasks`만 허용하고 canonical+alias 동시 입력, 미지 field, 잘못된 type은 400 contract error로 판정한다.
