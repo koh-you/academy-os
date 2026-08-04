@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-1n notification reserve
+
+- `POST /api/notification-jobs/reserve`의 canonical request와 source/provider 결과 response를 client·실서버·safe server 공통 contract에 연결했다. 공지와 보충/수업 예약은 저장 시점 dynamic contract helper를 공유한다.
+- 예약 pending source, 동일 예약 재사용, 이전 group 취소, 교사 취소 경합, 최종 provider 결과/실패 source 저장 owner는 유지했다. contract `14 routes`, notification `13/13`, lint, scenario·production `827/827`, build `417 modules`·main `944.39 kB`·lazy `12/12`, safe dry-run browser `1/1` 통과.
+- 다음 단위는 `/api/notification-jobs/cancel` request/response와 provider 취소/source 상태 분리를 실제 취소 없이 고정한다. 운영 데이터·실제 알림 예약·취소·SQL·유료 호출은 없었다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1m notification source
 
 - `POST /api/notification-jobs`의 canonical source payload/response를 client·실서버·safe server 공통 contract에 연결했다. DB `notification_jobs` upsert만 이 경계가 소유하고 Solapi 예약·취소·reconcile은 별도 route에 그대로 남겼다.

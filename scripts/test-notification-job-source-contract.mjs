@@ -3,8 +3,9 @@ import { readFile } from "node:fs/promises";
 
 const readSource = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-const [appSource, jobApiSource, safeApiSource, serverSource] = await Promise.all([
+const [appSource, contractApiSource, jobApiSource, safeApiSource, serverSource] = await Promise.all([
   readSource("src/app/App.jsx"),
+  readSource("src/domains/notifications/notificationJobContractApi.js"),
   readSource("src/domains/notifications/notificationJobApi.js"),
   readSource("scripts/safe-local-api.mjs"),
   readSource("api/server.js")
@@ -40,13 +41,19 @@ for (const forbidden of [
 
 for (const expected of [
   "export async function persistNotificationJobRequest",
-  'await import("../../shared/contracts/versionedWriteRouteContracts.js")',
-  'parseVersionedWriteRequest("POST", "/api/notification-jobs"',
-  'request("/api/notification-jobs", payload, ...requestArgs)',
-  'parseVersionedWriteResponse("POST", "/api/notification-jobs", result)',
+  'await import("./notificationJobContractApi.js")',
+  "persistNotificationJobContractRequest({ notificationJob, request, requestArgs })",
   "persistNotificationJobRequest({ notificationJob: failedJob, request })"
 ]) {
-  assert.ok(jobApiSource.includes(expected), `client source contract missing ${expected}`);
+  assert.ok(jobApiSource.includes(expected), `client source boundary missing ${expected}`);
+}
+for (const expected of [
+  "export async function persistNotificationJobContractRequest",
+  'parseVersionedWriteRequest("POST", "/api/notification-jobs"',
+  'request("/api/notification-jobs", payload, ...requestArgs)',
+  'parseVersionedWriteResponse("POST", "/api/notification-jobs", result)'
+]) {
+  assert.ok(contractApiSource.includes(expected), `client source contract missing ${expected}`);
 }
 
 assert.equal(appSource.includes('postJson("/api/notification-jobs"'), false);

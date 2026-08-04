@@ -4,6 +4,7 @@ import {
   cancelNotificationJobsRequest,
   persistFailedNotificationJobRequest,
   persistNotificationJobRequest,
+  reserveNotificationJobProviderRequest,
   reserveNotificationJobRequest
 } from "../src/domains/notifications/notificationJobApi.js";
 
@@ -29,6 +30,33 @@ const persistedJob = await persistNotificationJobRequest({
 });
 assert.deepEqual(persistedJob, { notificationJob: draftJob, source: "supabase" });
 
+const providerContractCalls = [];
+const providerContractResult = await reserveNotificationJobProviderRequest({
+  forceDryRun: true,
+  notificationJob: draftJob,
+  reason: " safe reserve ",
+  request: async (...args) => {
+    providerContractCalls.push(args);
+    return {
+      notificationJob: { ...draftJob, provider: "academy-os", status: "dry_run" },
+      reserved: false,
+      source: "supabase"
+    };
+  },
+  requestArgs: [45000, "safe timeout"]
+});
+assert.deepEqual(providerContractCalls, [[
+  "/api/notification-jobs/reserve",
+  { forceDryRun: true, notificationJob: draftJob, reason: "safe reserve" },
+  45000,
+  "safe timeout"
+]]);
+assert.deepEqual(providerContractResult, {
+  notificationJob: { ...draftJob, provider: "academy-os", status: "dry_run" },
+  reserved: false,
+  source: "supabase"
+});
+
 const reserveCalls = [];
 const reserveState = [];
 const scheduledJob = { ...draftJob, provider: "solapi", result: { groupId: "group-1" } };
@@ -38,7 +66,7 @@ const reserveResult = await reserveNotificationJobRequest({
   onNotificationJob: (job) => reserveState.push(job),
   request: async (path, body) => {
     reserveCalls.push({ path, body });
-    return { notificationJob: scheduledJob };
+    return { notificationJob: scheduledJob, reserved: true, source: "solapi" };
   }
 });
 

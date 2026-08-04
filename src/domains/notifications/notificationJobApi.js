@@ -3,15 +3,8 @@ export async function persistNotificationJobRequest({
   request,
   requestArgs = []
 } = {}) {
-  const {
-    parseVersionedWriteRequest,
-    parseVersionedWriteResponse
-  } = await import("../../shared/contracts/versionedWriteRouteContracts.js");
-  const payload = parseVersionedWriteRequest("POST", "/api/notification-jobs", {
-    notificationJob
-  });
-  const result = await request("/api/notification-jobs", payload, ...requestArgs);
-  return parseVersionedWriteResponse("POST", "/api/notification-jobs", result);
+  const { persistNotificationJobContractRequest } = await import("./notificationJobContractApi.js");
+  return persistNotificationJobContractRequest({ notificationJob, request, requestArgs });
 }
 
 export function persistFailedNotificationJobRequest({
@@ -34,6 +27,23 @@ export function persistFailedNotificationJobRequest({
   return failedJob;
 }
 
+export async function reserveNotificationJobProviderRequest({
+  forceDryRun,
+  notificationJob,
+  reason,
+  request,
+  requestArgs = []
+} = {}) {
+  const { reserveNotificationJobContractRequest } = await import("./notificationJobContractApi.js");
+  return reserveNotificationJobContractRequest({
+    forceDryRun,
+    notificationJob,
+    reason,
+    request,
+    requestArgs
+  });
+}
+
 export async function reserveNotificationJobRequest({
   notificationJob,
   reason = "알림톡 예약",
@@ -42,7 +52,11 @@ export async function reserveNotificationJobRequest({
   now = () => new Date().toISOString()
 } = {}) {
   try {
-    const result = await request("/api/notification-jobs/reserve", { notificationJob, reason });
+    const result = await reserveNotificationJobProviderRequest({
+      notificationJob,
+      reason,
+      request
+    });
     if (result.notificationJob) onNotificationJob(result.notificationJob);
     return result.notificationJob ?? notificationJob;
   } catch (error) {
