@@ -58,7 +58,7 @@ export function ExamPrepCenter({
     today
   } = runtime;
   const [query, setQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("info");
+  const [activeTab, setActiveTabState] = useState("info");
   const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("template_mwf_7_10");
   const [selectedExamCycle, setSelectedExamCycle] = useState(currentExamCycle);
   const [editingExamPrepId, setEditingExamPrepId] = useState("");
@@ -120,19 +120,19 @@ export function ExamPrepCenter({
     }
   ];
 
+  function setActiveTab(tabId) {
+    if (tabId !== "info" && !selectedClassTemplateId) {
+      setSelectedClassTemplateId(templates[0]?.classTemplateId ?? "template_mwf_7_10");
+    }
+    setActiveTabState(tabId);
+  }
+
   function changeExamCycle(examCycle) {
     setSelectedExamCycle(examCycle);
   }
 
   function changeClassTemplate(classTemplateId) {
     setSelectedClassTemplateId(classTemplateId);
-  }
-
-  function changeActiveTab(tabId) {
-    if (tabId !== "info" && !selectedClassTemplateId) {
-      setSelectedClassTemplateId(templates[0]?.classTemplateId ?? "template_mwf_7_10");
-    }
-    setActiveTab(tabId);
   }
 
   async function importTallyCsv(file) {
@@ -238,7 +238,7 @@ export function ExamPrepCenter({
             aria-selected={activeTab === tab.id}
             className={activeTab === tab.id ? "active" : ""}
             key={tab.id}
-            onClick={() => changeActiveTab(tab.id)}
+            onClick={() => setActiveTab(tab.id)}
             role="tab"
             type="button"
           >
