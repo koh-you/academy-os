@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-1u exam question count
+
+- `POST /api/exam-analysis-runs/confirm-question-count`의 교사 확정 request와 run/question rows/event/source response를 21번째 공통 contract에 연결했다. 1~200 정수와 미지 field는 DB 쓰기 전에 400으로 차단한다.
+- Supabase RPC·run/event 저장·재조회 owner는 server에 유지하고 safe API는 가상 1~N rows와 reload 지속성만 검증한다. contract registry는 행동 시 dynamic chunk로 불러 initial main 예산을 보존했다.
+- 첫 Preview의 Node 24.15 build가 main 예산을 35 bytes 넘긴 뒤 endpoint timeout을 lazy helper로 이동해 local main을 `944.84 kB`로 낮췄다. contract `21 routes`, prompt studio·teacher/lazy 전용, lint, scenario·production `827/827`, build `418 modules`·lazy `12/12`, 격리 browser `1/1` 통과. 다음은 문항 검수/prompt/output draft 등 비-AI 저장 route를 한 단위씩 고정하고 Storage·AI route는 실행하지 않는다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1t exam analysis run
 
 - `POST /api/exam-analysis-runs`의 canonical run metadata request와 source/run response를 공통 contract에 연결했다. 기존 `{ run }`·root 직접 payload는 명시적 legacy normalization으로 보존하고 실제 DB/event owner는 server pipeline에 둔다.

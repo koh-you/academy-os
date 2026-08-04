@@ -157,6 +157,18 @@ const examAnalysisRunWriteResponseContract = defineApiPayloadContract({
   name: "exam analysis run write response"
 });
 
+const examAnalysisQuestionCountConfirmResponseContract = defineApiPayloadContract({
+  allowUnknownFields: true,
+  fields: {
+    analysisRun: { required: true, type: "object" },
+    events: { required: true, type: "array" },
+    insertedQuestionCount: { required: true, type: "number" },
+    questions: { required: true, type: "array" },
+    source: { allowEmpty: false, required: true, type: "string" }
+  },
+  name: "exam analysis question count confirm response"
+});
+
 function defineVersionedWriteRoute({
   domain,
   fields,
@@ -422,6 +434,21 @@ export const versionedWriteRouteContracts = Object.freeze([
     path: "/api/exam-analysis-runs",
     response: examAnalysisRunWriteResponseContract,
     sources: ["exam_analysis_runs"]
+  }),
+  defineVersionedWriteRoute({
+    domain: "examAnalysis",
+    fields: {
+      analysisRunId: { allowEmpty: false, required: true, trim: true, type: "string" },
+      confirmedBy: { allowEmpty: false, defaultValue: "teacher", trim: true, type: "string" },
+      detectedQuestionConfidence: { defaultValue: 1, type: "number" },
+      detectedQuestionEvidence: { defaultValue: [], type: "array" },
+      missingQuestionNumbers: { defaultValue: [], type: "array" },
+      questionCount: { required: true, type: "number" }
+    },
+    key: "examAnalysisQuestionCountConfirm",
+    path: "/api/exam-analysis-runs/confirm-question-count",
+    response: examAnalysisQuestionCountConfirmResponseContract,
+    sources: ["exam_analysis_runs", "exam_analysis_questions", "exam_analysis_events"]
   })
 ]);
 

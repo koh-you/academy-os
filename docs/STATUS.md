@@ -117,6 +117,7 @@
 - 4-1r은 `POST /api/notification-jobs/readiness-check`의 window/clock/Slack flag와 source issue response를 같은 contract에 연결했다. source read와 누락 판정은 유지하고 safe API는 `notifySlack:true`를 거부해 외부 side effect 없이 점검 결과만 검증한다.
 - 4-1s는 `POST /api/notification-jobs/dispatch-due`의 token/dry-run/limit/clock과 processed/source/reconcile response를 같은 contract에 연결했다. 인증 판단은 payload 정규화 전에 유지하고 safe API는 0건 처리·source job 보존과 민감 override 401만 검증해 실제 Solapi를 호출하지 않는다.
 - 4-1t는 유료 실행이 없는 `POST /api/exam-analysis-runs` metadata 저장의 canonical run과 source response를 같은 contract에 연결했다. 기존 `{ run }`·root 직접 legacy 입력은 명시적으로 보존하고 safe API에서 가상 row 저장·재조회·화면 reload 지속성만 검증한다.
+- 4-1u는 `POST /api/exam-analysis-runs/confirm-question-count`의 교사 확정 문항 수·판독 근거 request와 run/question rows/event response를 같은 contract에 연결했다. 1~200 정수는 DB 쓰기 전에 검증하고 safe API에서 1~N 가상 행·확정 event·reload 지속성만 확인해 유료 AI를 호출하지 않는다.
 
 ## 폴더 상태
 
@@ -129,7 +130,7 @@
 
 1. App 2차 Phase 1~5와 3차 3-0~3-8, P1 운영 저장 신뢰성, P2 modal 통일 후속, P3 알림톡 설정 관리는 완료됐다. P3 closeout은 제품 경로 9개, 설정 key 10개, Solapi provider template 4개의 seed→draft→persisted final→provider 변수 연결과 재시험 독립 11시 transport 부재를 자동 검증한다. 공지 preset 3개·특강 guide seed는 새 초안에만 적용하며 현재 draft·기존 job·보충 교사 최종본과 provider contract를 보존한다.
 2. App 3차 리팩터링 3-0~3-8은 production main 43.1%·gzip 45.3% 감소, 12개 물리 lazy chunk, App Babel 500 KB 경고 제거와 종료 소유권 감사까지 완료했다.
-3. App/API 4차는 4-0 기준선과 4-1a~4-1t의 source·notification·시험분석 run payload contract 연결을 확정했다. 다음은 유료 실행 없는 문항 수 사람 확정 request/response를 고정한다.
+3. App/API 4차는 4-0 기준선과 4-1a~4-1u의 source·notification·시험분석 run/문항 수 확정 payload contract 연결을 확정했다. 다음은 교사 문항 검수·prompt/output draft처럼 유료 실행 없는 시험분석 저장 route를 분리하고 Storage·유료 AI route는 4-5 대상으로 남긴다.
 4. `app_state`에서 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
    - 학생별 오답 `wrongProblems`는 명시 저장 전환을 완료했다. 다음 후보는 별도 저장 의미가 분명한 `lessonResearchItems`이며 새 작업에서 범위를 다시 확인한다.
    - 즉시 사람 판단이 필요하지 않은 발견은 queue/worklog에 남기고 AI 검수와 다음 단계를 연쇄 진행한다.
