@@ -33,6 +33,7 @@ import {
 import { saveReportSnapshotWithVerification } from "../src/domains/reports/reportSnapshotPersistence.js";
 import {
   parseExamAnalysisQuestionCountConfirmRequest,
+  parseExamAnalysisQuestionReviewsSaveRequest,
   parseExamAnalysisRunWriteRequest
 } from "../src/domains/exams/examAnalysisRunApi.js";
 import { parseVersionedWriteRequest } from "../src/shared/contracts/versionedWriteRouteContracts.js";
@@ -780,6 +781,140 @@ function handleMutation(pathname, payload) {
       questions,
       source: "supabase",
       sources: []
+    };
+  }
+  if (pathname === "/api/exam-analysis-runs/save-question-reviews") {
+    let parsedPayload;
+    try {
+      parsedPayload = parseExamAnalysisQuestionReviewsSaveRequest(payload);
+    } catch (error) {
+      return {
+        code: error.code,
+        error: error.message,
+        field: error.field,
+        ok: false,
+        statusCode: Number(error.statusCode) || 400
+      };
+    }
+    const currentRun = state.examAnalysisRuns
+      .find((run) => run.analysisRunId === parsedPayload.analysisRunId) ?? null;
+    const currentQuestions = state.examAnalysisQuestions
+      .filter((question) => question.analysisRunId === parsedPayload.analysisRunId);
+    if (!currentRun || !currentQuestions.length) {
+      return {
+        error: currentRun ? "고정 문항 행을 먼저 생성해 주세요." : "시험분석 작업을 찾지 못했습니다.",
+        ok: false,
+        statusCode: 404
+      };
+    }
+    const questionNumbers = new Set(currentQuestions.map((question) => Number(question.questionNumber)));
+    const reviews = parsedPayload.reviews
+      .map((review) => {
+        const questionNumber = Number(review.questionNumber ?? review.question_number);
+        const unitName = String(review.unitName ?? review.unit_name ?? "").trim().slice(0, 120);
+        const mainType = String(review.mainType ?? review.main_type ?? "").trim().slice(0, 160);
+        const subTypesValue = review.subTypes ?? review.sub_types ?? [];
+        return {
+          confirmed: Boolean(review.confirmed) && Boolean(unitName) && Boolean(mainType),
+          difficulty: String(review.difficulty ?? "").trim().slice(0, 40),
+          isImportantQuestion: Boolean(review.isImportantQuestion ?? review.is_important_question),
+          mainType,
+          mainTypeCode: String(review.mainTypeCode ?? review.main_type_code ?? "").trim().slice(0, 60),
+          questionNumber,
+          reviewNote: String(review.reviewNote ?? review.review_note ?? "").trim().slice(0, 500),
+          ssenMeta: review.ssenMeta && typeof review.ssenMeta === "object" ? review.ssenMeta : {},
+          subTypeCodes: Array.isArray(review.subTypeCodes ?? review.sub_type_codes)
+            ? (review.subTypeCodes ?? review.sub_type_codes).map(String).filter(Boolean).slice(0, 3)
+            : [],
+          subTypes: Array.isArray(subTypesValue)
+            ? subTypesValue.map(String).filter(Boolean).slice(0, 3)
+            : String(subTypesValue || "").split(/[,，]/).map((item) => item.trim()).filter(Boolean).slice(0, 3),
+          unitName
+        };
+      })
+      .filter((review) => questionNumbers.has(review.questionNumber));
+    if (!reviews.length) {
+      return { error: "저장할 검수 문항이 없습니다.", ok: false, statusCode: 400 };
+    }
+    const reviewedAt = new Date().toISOString();
+    const reviewByNumber = new Map(reviews.map((review) => [review.questionNumber, review]));
+    const questions = currentQuestions.map((question) => {
+      const review = reviewByNumber.get(Number(question.questionNumber));
+      if (!review) return question;
+      const teacherFields = {
+        difficulty: review.difficulty,
+        isImportantQuestion: review.isImportantQuestion,
+        mainType: review.mainType,
+        mainTypeCode: review.mainTypeCode,
+        reviewNote: review.reviewNote,
+        reviewedAt,
+        source: "teacher_review",
+        ssenMeta: review.ssenMeta,
+        subTypeCodes: review.subTypeCodes,
+        subTypes: review.subTypes,
+        unitName: review.unitName
+      };
+      return {
+        ...question,
+        confirmedAt: review.confirmed ? reviewedAt : null,
+        difficulty: review.difficulty,
+        finalFields: review.confirmed ? { ...teacherFields, confirmedAt: reviewedAt } : {},
+        mainType: review.mainType,
+        manualEditCount: Number(question.manualEditCount || 0) + 1,
+        rowStatus: review.confirmed ? "confirmed" : "teacher_edited",
+        subTypes: review.subTypes,
+        teacherEditedAt: reviewedAt,
+        teacherFields,
+        teacherOverride: true,
+        unitName: review.unitName,
+        updatedAt: reviewedAt
+      };
+    });
+    state.examAnalysisQuestions = [
+      ...state.examAnalysisQuestions.filter((question) => question.analysisRunId !== parsedPayload.analysisRunId),
+      ...questions
+    ];
+    const confirmedCount = questions.filter((question) => question.rowStatus === "confirmed").length;
+    const editedCount = questions.filter((question) => question.teacherOverride).length;
+    const importantQuestionNumbers = questions
+      .filter((question) => Boolean(question.finalFields?.isImportantQuestion ?? question.teacherFields?.isImportantQuestion))
+      .map((question) => Number(question.questionNumber));
+    const unconfirmedNumbers = questions
+      .filter((question) => question.rowStatus !== "confirmed")
+      .map((question) => Number(question.questionNumber));
+    const teacherReview = {
+      confirmedCount,
+      editedCount,
+      importantQuestionNumbers,
+      reviewedAt,
+      reviewedCount: reviews.length,
+      status: confirmedCount === questions.length ? "completed" : "in_progress",
+      totalQuestionCount: questions.length,
+      unconfirmedNumbers
+    };
+    const analysisRun = {
+      ...currentRun,
+      auditSummary: { ...(currentRun.auditSummary ?? {}), teacherReview },
+      updatedAt: reviewedAt,
+      workflowStatus: teacherReview.status === "completed" ? "completed" : "teacher_review"
+    };
+    state.examAnalysisRuns = upsertById(state.examAnalysisRuns, analysisRun, ["analysisRunId"]);
+    const event = {
+      analysisRunId: parsedPayload.analysisRunId,
+      eventId: `${parsedPayload.analysisRunId}-question-teacher-review-saved-${reviewedAt}`,
+      eventType: "question_teacher_review_saved",
+      occurredAt: reviewedAt
+    };
+    state.examAnalysisEvents = upsertById(state.examAnalysisEvents, event, ["eventId"]);
+    return {
+      aiJobs: [],
+      analysisRun,
+      events: state.examAnalysisEvents.filter((item) => item.analysisRunId === parsedPayload.analysisRunId),
+      ok: true,
+      questions,
+      source: "supabase",
+      sources: [],
+      teacherReview
     };
   }
   if (["/api/attendance/check", "/api/attendance/preview"].includes(pathname)) {

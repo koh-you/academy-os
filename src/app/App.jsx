@@ -1539,12 +1539,10 @@ function refineExamAnalysisQuestionRowsRequest(payload) {
   );
 }
 
-function saveExamAnalysisQuestionReviewsRequest(payload) {
-  return postJsonWithTimeout(
-    "/api/exam-analysis-runs/save-question-reviews",
-    payload,
-    30000,
-    "문항 검수 저장이 지연되고 있습니다."
+async function saveExamAnalysisQuestionReviewsRequest(payload) {
+  return (await import("../domains/exams/examAnalysisRunApi.js")).saveExamQuestionReviews(
+    postJsonWithTimeout,
+    payload
   );
 }
 

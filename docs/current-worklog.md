@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-1v exam question review
+
+- `POST /api/exam-analysis-runs/save-question-reviews`를 22번째 공통 contract로 고정했다. analysis run ID, 비어 있지 않은 reviews, 1~200 정수 문항 번호와 중복 번호를 source 쓰기 전에 검증하고 run/question rows/event/source/teacher review response를 client가 다시 검증한다.
+- 실제 Supabase question row patch·재조회, run audit 갱신과 검수 event owner는 server pipeline에 유지했다. safe API는 가상 rows의 teacher/final fields를 저장하고 화면의 메모·확정·주요문항 저장→API 재조회→reload 복구를 검증하며 AI·Storage·알림을 실행하지 않는다.
+- 첫 `check:fast`는 동적 contract 모듈로 이동한 endpoint 문자열을 이전 App 직접 문자열에서만 찾는 scenario를 발견해 합성 source에 transport 경계를 포함하도록 교정했다. 검증: contract `22 routes`, prompt studio·teacher/lazy 전용, lint, scenario·production `827/827`, build `418 modules`·main `944.93 kB`·lazy `12/12`, 격리 browser `1/1` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1u exam question count
 
 - `POST /api/exam-analysis-runs/confirm-question-count`를 21번째 공통 contract로 고정했다. analysis run ID, 1~200 정수, 판독 confidence/evidence/missing numbers와 confirmer를 source 쓰기 전에 검증하고 run/question rows/event/source response를 client가 다시 검증한다.
