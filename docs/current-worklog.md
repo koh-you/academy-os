@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-1h derived school calendar
+
+- `/api/school-calendar/derived-save`의 `auditId/examPrepChanges/lessonChanges`와 verified response를 공통 contract에 연결했다. client는 canonical field만 전송하고 server는 invalid top-level field/type을 두 원천 저장 전에 field 포함 400으로 차단한다.
+- 시험정보 행과 연결 직전수업의 CAS/insert-only, Supabase 재조회, 동일 요청 재시도, 중간 실패 역순 rollback, 수동 보호·자동생성 제외 수업 보존과 App 성공 반영 owner는 유지했다.
+- 검증: contract·derived persistence, domain all `62/62`, lint, scenario·production `827/827`, build `416 modules`·main `942.75 kB`·lazy `12/12`, 집중 browser `1/1` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1g class roster
 
 - `/api/class-rosters/save`의 `auditId/studentChanges/lessonChanges`와 verified response를 공통 contract에 연결했다. client는 canonical field만 전송하고 server는 invalid top-level field/type을 학생·수업 저장 전에 field 포함 400으로 차단한다.

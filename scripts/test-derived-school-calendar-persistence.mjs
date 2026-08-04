@@ -116,8 +116,21 @@ const actionResult = await saveDerivedSchoolCalendarAction({
   students: [{ studentId: "safe-student" }]
 }, lessonAdapters);
 assert.equal(actionResult.verified, true);
+assert.deepEqual(Object.keys(requestPayload).sort(), ["auditId", "examPrepChanges", "lessonChanges"]);
 assert.equal(requestPayload.examPrepChanges.length, 1);
 assert.equal(requestPayload.lessonChanges.length, 1);
+await assert.rejects(
+  saveDerivedSchoolCalendarAction({
+    controls: {},
+    eventChanges: [{ after: eventAfter, before: eventBefore }],
+    lessons: [lessonBefore],
+    nextRows: [rowAfter],
+    previousRows: [rowBefore],
+    request: async () => ({ source: "supabase", verified: "true" }),
+    students: [{ studentId: "safe-student" }]
+  }, lessonAdapters),
+  (error) => error.code === "INVALID_API_PAYLOAD" && error.field === "verified"
+);
 
 const originalEnv = {
   SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
