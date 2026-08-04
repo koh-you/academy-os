@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { saveLessonJournalHistoryAction } from "../src/domains/lessons/lessonJournalHistoryAction.js";
 import {
   areLessonJournalHistoryHomeworksEqual,
@@ -77,6 +78,41 @@ await saveLessonJournalHistoryAction({
   }
 });
 assert.equal(actionPayload.action, "copy");
+assert.deepEqual(Object.keys(actionPayload).sort(), ["action", "auditId", "homeworkChanges", "lessonChange"]);
+
+const responseErrors = [];
+const originalContractConsoleError = console.error;
+try {
+  console.error = () => {};
+  await assert.rejects(
+    saveLessonJournalHistoryAction({
+      action: "copy",
+      afterLesson: copiedLesson,
+      homeworks: [copiedHomework],
+      onStateChange: (state) => responseErrors.push(state),
+      request: async (_path, payload) => ({
+        action: payload.action,
+        auditId: payload.auditId,
+        homeworks: [copiedHomework],
+        lesson: copiedLesson,
+        source: "supabase",
+        verified: "true"
+      })
+    }),
+    (error) => error.code === "INVALID_API_PAYLOAD" && error.field === "verified"
+  );
+} finally {
+  console.error = originalContractConsoleError;
+}
+assert.equal(responseErrors.at(-1)?.state, "failed");
+
+const serverSource = await readFile(new URL("../api/server.js", import.meta.url), "utf8");
+const routeStart = serverSource.indexOf('requestUrl.pathname === "/api/lesson-journal/history-action"');
+const routeEnd = serverSource.indexOf('requestUrl.pathname === "/api/lesson-journal/rows/save"', routeStart);
+const lessonJournalHistoryRouteSource = serverSource.slice(routeStart, routeEnd);
+assert.ok(routeStart >= 0 && routeEnd > routeStart);
+assert.match(lessonJournalHistoryRouteSource, /parseVersionedWriteRequest\(/);
+assert.match(lessonJournalHistoryRouteSource, /error\.field \? \{ field: error\.field \}/);
 
 const copyTargetHomework = {
   ...copiedHomework,
