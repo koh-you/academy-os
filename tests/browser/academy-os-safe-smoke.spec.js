@@ -462,6 +462,29 @@ test("exam analysis pipeline opens from its deferred chunk without running paid 
   expect(pageErrors).toEqual([]);
 });
 
+test("exam analysis run metadata saves to the safe source and survives reload", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  const title = "안전 시험분석 계약 저장";
+  await loginAsTeacher(page);
+  const navigation = page.getByRole("navigation", { name: "주요 화면" });
+  await navigation.getByRole("button", { name: /시험분석/ }).click();
+  await expect(page.getByRole("heading", { name: "시험분석" })).toBeVisible();
+  await page.getByRole("textbox", { name: "분석명", exact: true }).fill(title);
+  await page.getByRole("textbox", { name: "학교", exact: true }).fill("안전고");
+  await page.getByRole("textbox", { name: "학년", exact: true }).fill("고1");
+  await page.getByRole("textbox", { name: "과목", exact: true }).fill("공통수학1");
+  await page.getByRole("textbox", { name: "고사", exact: true }).fill("2학기 중간");
+  await page.getByRole("button", { name: "분석 저장" }).click();
+  await expect(page.getByText("시험분석 · 저장 완료", { exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: "시험분석 분석본 목록" }).getByText(title, { exact: true })).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByRole("navigation", { name: "주요 화면" })).toBeVisible();
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /시험분석/ }).click();
+  await expect(page.getByRole("region", { name: "시험분석 분석본 목록" }).getByText(title, { exact: true })).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
 test("learning support screens open from their shared deferred chunk without mutations", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await page.route("**/src/domains/teacher/LearningSupportCenters.jsx*", async (route) => {

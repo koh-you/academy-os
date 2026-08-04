@@ -148,6 +148,15 @@ const notificationDispatchResponseContract = defineApiPayloadContract({
   name: "notification dispatch response"
 });
 
+const examAnalysisRunWriteResponseContract = defineApiPayloadContract({
+  allowUnknownFields: true,
+  fields: {
+    analysisRun: { required: true, type: "object" },
+    source: { allowEmpty: false, required: true, type: "string" }
+  },
+  name: "exam analysis run write response"
+});
+
 function defineVersionedWriteRoute({
   domain,
   fields,
@@ -403,6 +412,16 @@ export const versionedWriteRouteContracts = Object.freeze([
     path: "/api/notification-jobs/dispatch-due",
     response: notificationDispatchResponseContract,
     sources: ["notification_jobs", "provider.solapi"]
+  }),
+  defineVersionedWriteRoute({
+    domain: "examAnalysis",
+    fields: {
+      analysisRun: { aliases: ["run"], required: true, type: "object" }
+    },
+    key: "examAnalysisRunWrite",
+    path: "/api/exam-analysis-runs",
+    response: examAnalysisRunWriteResponseContract,
+    sources: ["exam_analysis_runs"]
   })
 ]);
 

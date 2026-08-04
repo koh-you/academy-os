@@ -8,9 +8,9 @@ import {
   versionedWriteRouteContracts
 } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 
-assert.equal(versionedWriteRouteContracts.length, 19);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 19);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 19);
+assert.equal(versionedWriteRouteContracts.length, 20);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 20);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 20);
 assert.equal(versionedWriteRouteContracts.every(Object.isFrozen), true);
 assert.equal(versionedWriteRouteContracts.every(({ request, response, sources }) => (
   Object.isFrozen(request) && Object.isFrozen(response) && Object.isFrozen(sources)
@@ -409,6 +409,25 @@ assert.deepEqual(
     source: "supabase"
   }
 );
+assert.deepEqual(
+  parseVersionedWriteRequest("POST", "/api/exam-analysis-runs", {
+    run: { analysisRunId: "exam-run-safe-1", title: "안전 시험분석" }
+  }),
+  {
+    analysisRun: { analysisRunId: "exam-run-safe-1", title: "안전 시험분석" }
+  }
+);
+assert.deepEqual(
+  parseVersionedWriteResponse("POST", "/api/exam-analysis-runs", {
+    analysisRun: { analysisRunId: "exam-run-safe-1", title: "안전 시험분석" },
+    ok: true,
+    source: "supabase"
+  }),
+  {
+    analysisRun: { analysisRunId: "exam-run-safe-1", title: "안전 시험분석" },
+    source: "supabase"
+  }
+);
 assert.deepEqual(response, {
   auditId: "supplement-audit",
   source: "supabase",
@@ -474,4 +493,4 @@ assert.throws(
   /field\/alias가 중복/
 );
 
-console.log("versioned write route contracts passed · 19 routes · canonical keys and declared legacy alias only");
+console.log("versioned write route contracts passed · 20 routes · canonical keys and declared legacy alias only");
