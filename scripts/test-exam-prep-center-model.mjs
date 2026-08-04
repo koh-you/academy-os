@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createExamPrepCenterDisplayModel } from "../src/domains/exams/examPrepCenterModel.js";
+import { createStudentExamPrepRow } from "../src/domains/exams/studentExamPrepRow.js";
 
 const rows = [
   {
@@ -176,6 +177,24 @@ assert.equal(allClassesModel.selectedClass?.name, "전체 반");
 
 const centerSource = await readFile(new URL("../src/domains/exams/ExamPrepCenter.jsx", import.meta.url), "utf8");
 assert.match(centerSource, /<strong>전체 반<\/strong>/);
-assert.doesNotMatch(centerSource, /onEnsureExamCycleRows/);
+assert.match(centerSource, /onEnsureExamCycleRows\(examCycle, selectedClassTemplateId\)/);
+assert.match(centerSource, /onEnsureExamCycleRows\(selectedExamCycle, classTemplateId\)/);
+
+const generatedStudentRow = createStudentExamPrepRow({
+  examCycle: "2026-2-mid",
+  examPrepId: "exam_prep_2026-2-mid_창동중_중3_공통수학1",
+  grade: "중3",
+  publisher: "출판사",
+  schoolName: "창동중"
+});
+assert.equal(generatedStudentRow.schoolName, "창동중");
+assert.equal(generatedStudentRow.grade, "중3");
+assert.equal(generatedStudentRow.examPeriod, "");
+assert.equal(generatedStudentRow.mathExamDate, "");
+assert.deepEqual(generatedStudentRow.mathExamDates, []);
+assert.equal(generatedStudentRow.source, "학생DB 자동생성");
+
+const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+assert.doesNotMatch(appSource, /return \{ \.\.\.row, examPeriod: getDefaultExamPeriodText\(row\.examCycle\) \}/);
 
 console.log("exam prep center model fixtures passed");

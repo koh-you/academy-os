@@ -27,6 +27,7 @@ export function ExamPrepCenter({
   templates,
   onConfirmExamPostSubmission,
   onOpenExamPostFile,
+  onEnsureExamCycleRows,
   onSetExamPostTargetStudentIds,
   onSetTallySubmissions,
   onSetTallySummaries,
@@ -129,10 +130,12 @@ export function ExamPrepCenter({
 
   function changeExamCycle(examCycle) {
     setSelectedExamCycle(examCycle);
+    onEnsureExamCycleRows(examCycle, selectedClassTemplateId);
   }
 
   function changeClassTemplate(classTemplateId) {
     setSelectedClassTemplateId(classTemplateId);
+    onEnsureExamCycleRows(selectedExamCycle, classTemplateId);
   }
 
   async function importTallyCsv(file) {

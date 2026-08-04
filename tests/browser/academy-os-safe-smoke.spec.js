@@ -863,6 +863,29 @@ test("exam prep and settings open from deferred chunks without side effects", as
   expect(pageErrors).toEqual([]);
 });
 
+test("exam prep all-class view creates enrolled-school rows without inventing exam dates", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /시험관리/ }).click();
+  await page.getByRole("button", { name: "전체 반" }).click();
+
+  const middleSchoolRow = page.locator(".examPrepRow").filter({ hasText: "안전중" });
+  await expect(middleSchoolRow).toBeVisible();
+  await expect(middleSchoolRow).toContainText("미입력");
+  await expect.poll(async () => {
+    const response = await request.get(`${safeApiBaseUrl}/api/exam-prep-rows`);
+    const result = await response.json();
+    return result.examPrepRows.find((row) => row.schoolName === "안전중" && row.grade === "중3");
+  }).toMatchObject({
+    examPeriod: "",
+    mathExamDate: "",
+    mathExamDates: [],
+    source: "학생DB 자동생성"
+  });
+  expect(pageErrors).toEqual([]);
+});
+
 test("exam prep rapid edits serialize, rebase CAS, and persist the verified latest row value", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   const requests = [];
