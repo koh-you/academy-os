@@ -145,6 +145,7 @@ globalThis.fetch = async (_url, options) => {
   return {
     json: async () => ({
       ok: true,
+      recovered: true,
       reportSnapshots: [snapshot],
       snapshot,
       source: "supabase",
@@ -198,6 +199,14 @@ const sharedStateSource = appSource.slice(
   appSource.indexOf("const sharedAppState = useMemo(() => ({"),
   appSource.indexOf("const initialSharedAppStateRef")
 );
+const reportServerSource = serverSource.slice(
+  serverSource.indexOf('if (request.method === "POST" && requestUrl.pathname === "/api/report-snapshots")'),
+  serverSource.indexOf('if (request.method === "GET" && requestUrl.pathname === "/api/test-sessions")')
+);
+const safeReportServerSource = safeServerSource.slice(
+  safeServerSource.indexOf('if (request.method === "POST" && requestUrl.pathname === "/api/report-snapshots")'),
+  safeServerSource.indexOf('if (request.method === "GET" && requestUrl.pathname === "/api/integrations/status")')
+);
 assert.ok(!sharedStateSource.includes("reportSnapshots"), "report snapshots must not use shared autosave");
 for (const boundary of [
   "reportSnapshotMutationRef",
@@ -211,7 +220,9 @@ for (const boundary of [
 for (const boundary of [
   'apiUrl("/api/report-snapshots")',
   "Authorization: `Bearer ${sessionToken}`",
-  'result.source !== "supabase"',
+  'parseVersionedWriteRequest("POST", "/api/report-snapshots"',
+  'parseVersionedWriteResponse("POST", "/api/report-snapshots"',
+  'parsedResult.source !== "supabase"',
   "areReportSnapshotsEqual"
 ]) {
   assert.ok(apiSource.includes(boundary), `missing report snapshot client boundary: ${boundary}`);
@@ -228,13 +239,15 @@ for (const boundary of [
 for (const boundary of [
   'requestUrl.pathname === "/api/report-snapshots"',
   "verifyTeacherSessionToken(token)",
+  "parseVersionedWriteRequest(",
   "saveReportSnapshotWithVerification",
   "read: listAppState",
   "upsertAppState(states, options)"
 ]) {
-  assert.ok(serverSource.includes(boundary), `missing report snapshot server boundary: ${boundary}`);
+  assert.ok(reportServerSource.includes(boundary), `missing report snapshot server boundary: ${boundary}`);
 }
-assert.ok(safeServerSource.includes('requestUrl.pathname === "/api/report-snapshots"'));
+assert.ok(safeReportServerSource.includes('requestUrl.pathname === "/api/report-snapshots"'));
+assert.ok(safeReportServerSource.includes("parseVersionedWriteRequest("));
 assert.ok(modalSource.includes("closeDisabled={isSaving}"));
 assert.ok(modalSource.includes("<ModalFooter>"));
 assert.ok(modalSource.includes("reportSnapshotSaveFeedback"));

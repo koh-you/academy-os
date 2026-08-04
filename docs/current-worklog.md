@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-1j report snapshot
+
+- 인증된 `/api/report-snapshots`의 canonical `{ snapshot }` request와 recovered/readback response를 9번째 공통 contract로 고정했다. client·실서버·safe server가 같은 parser를 사용하며, 인증 확인 뒤 invalid field/type을 app_state CAS 전에 field 포함 400으로 차단한다.
+- stable report ID, 결과 불명 동일 ID 회수, `app_state.reportSnapshots` CAS append, 기존 snapshot 보존, Supabase 재조회 대조와 App 성공 반영·실패 draft 보존 owner는 유지했다. `mock_sent`도 실제 알림 없이 snapshot 상태만 저장한다.
+- 검증: contract `9 routes`, report persistence/action/auth, lint, scenario·production `827/827`, build `416 modules`·main `943.61 kB`·lazy `12/12`, 격리 browser `1/1` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1i app state
 
 - `/api/app-state`의 canonical `{ states, expectedUpdatedAt? }` request와 `{ source, states }` response를 8번째 공통 contract로 고정했다. client의 공용 저장과 강사 운영 메모 timeout 저장이 같은 payload builder/response parser를 사용하고 server는 legacy direct-object 및 invalid field/type을 DB 저장 전에 field 포함 400으로 차단한다.

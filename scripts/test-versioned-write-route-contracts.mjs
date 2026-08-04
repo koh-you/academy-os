@@ -8,9 +8,9 @@ import {
   versionedWriteRouteContracts
 } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 
-assert.equal(versionedWriteRouteContracts.length, 8);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 8);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 8);
+assert.equal(versionedWriteRouteContracts.length, 9);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 9);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 9);
 assert.equal(versionedWriteRouteContracts.every(Object.isFrozen), true);
 assert.equal(versionedWriteRouteContracts.every(({ request, response, sources }) => (
   Object.isFrozen(request) && Object.isFrozen(response) && Object.isFrozen(sources)
@@ -111,6 +111,35 @@ assert.throws(
   }),
   (error) => error.field === "aiSettings" && error.statusCode === 400
 );
+const reportSnapshot = {
+  body: "safe body",
+  createdAt: "2026-08-05T00:00:00.000Z",
+  lessonId: "lesson-1",
+  reportId: "report-1",
+  status: "snapshot_saved",
+  studentId: "student-1",
+  title: "safe title"
+};
+assert.deepEqual(
+  parseVersionedWriteRequest("POST", "/api/report-snapshots", { snapshot: reportSnapshot }),
+  { snapshot: reportSnapshot }
+);
+assert.deepEqual(
+  parseVersionedWriteResponse("POST", "/api/report-snapshots", {
+    recovered: false,
+    reportSnapshots: [reportSnapshot],
+    snapshot: reportSnapshot,
+    source: "supabase",
+    verified: true
+  }),
+  {
+    recovered: false,
+    reportSnapshots: [reportSnapshot],
+    snapshot: reportSnapshot,
+    source: "supabase",
+    verified: true
+  }
+);
 assert.deepEqual(response, {
   auditId: "supplement-audit",
   source: "supabase",
@@ -176,4 +205,4 @@ assert.throws(
   /field\/alias가 중복/
 );
 
-console.log("versioned write route contracts passed · 8 routes · canonical keys and declared legacy alias only");
+console.log("versioned write route contracts passed · 9 routes · canonical keys and declared legacy alias only");

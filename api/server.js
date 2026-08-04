@@ -6173,7 +6173,11 @@ const server = http.createServer(async (request, response) => {
         sendJson(request, response, 401, { ok: false, error: "보고서 저장 세션 인증이 필요합니다. 다시 로그인해 주세요." });
         return;
       }
-      const payload = await readJsonBody(request);
+      const payload = parseVersionedWriteRequest(
+        request.method,
+        requestUrl.pathname,
+        await readJsonBody(request)
+      );
       const result = await saveReportSnapshotWithVerification({
         operations: {
           read: listAppState,
@@ -6186,6 +6190,7 @@ const server = http.createServer(async (request, response) => {
       sendJson(request, response, Number(error.statusCode) || 500, {
         code: error.code,
         error: error.message,
+        ...(error.field ? { field: error.field } : {}),
         ok: false
       });
     }
