@@ -12,12 +12,15 @@ export function createNotificationJobsReconcileController({ onResult, request })
 
     const promise = (async () => {
       try {
-        const result = await request(
-          "/api/notification-jobs/reconcile-solapi",
+        const { reconcileNotificationJobsContractRequest } = await import("./notificationJobContractApi.js");
+        const result = await reconcileNotificationJobsContractRequest({
           payload,
-          90000,
-          "Solapi 발송결과 조회가 90초를 넘었습니다. 예약 확인에서 다시 시도해 주세요."
-        );
+          request,
+          requestArgs: [
+            90000,
+            "Solapi 발송결과 조회가 90초를 넘었습니다. 예약 확인에서 다시 시도해 주세요."
+          ]
+        });
         if (!disposed) onResult(result);
         return result;
       } finally {

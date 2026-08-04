@@ -8,9 +8,9 @@ import {
   versionedWriteRouteContracts
 } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 
-assert.equal(versionedWriteRouteContracts.length, 15);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 15);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 15);
+assert.equal(versionedWriteRouteContracts.length, 16);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 16);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 16);
 assert.equal(versionedWriteRouteContracts.every(Object.isFrozen), true);
 assert.equal(versionedWriteRouteContracts.every(({ request, response, sources }) => (
   Object.isFrozen(request) && Object.isFrozen(response) && Object.isFrozen(sources)
@@ -281,6 +281,44 @@ assert.deepEqual(
   }),
   { notificationJob: { ...notificationJob, status: "canceled" }, source: "supabase" }
 );
+assert.deepEqual(
+  parseVersionedWriteRequest("POST", "/api/notification-jobs/reconcile-solapi", {
+    lessonId: " lesson-safe-1 ",
+    notificationJobIds: ["notification-safe-1"]
+  }),
+  {
+    date: "",
+    lessonId: "lesson-safe-1",
+    limit: 500,
+    notificationJobIds: ["notification-safe-1"],
+    scheduledFrom: "",
+    scheduledTo: ""
+  }
+);
+assert.deepEqual(
+  parseVersionedWriteResponse("POST", "/api/notification-jobs/reconcile-solapi", {
+    checked: [{ notificationJobId: "notification-safe-1", status: "sent" }],
+    checkedCount: 1,
+    notificationJobs: [{ ...notificationJob, status: "sent" }],
+    records: [],
+    source: "solapi",
+    updatedCount: 1
+  }),
+  {
+    checked: [{ notificationJobId: "notification-safe-1", status: "sent" }],
+    checkedCount: 1,
+    notificationJobs: [{ ...notificationJob, status: "sent" }],
+    records: [],
+    source: "solapi",
+    updatedCount: 1
+  }
+);
+assert.throws(
+  () => parseVersionedWriteRequest("POST", "/api/notification-jobs/reconcile-solapi", {
+    notificationJobIds: "notification-safe-1"
+  }),
+  (error) => error.field === "notificationJobIds" && error.statusCode === 400
+);
 assert.deepEqual(response, {
   auditId: "supplement-audit",
   source: "supabase",
@@ -346,4 +384,4 @@ assert.throws(
   /field\/alias가 중복/
 );
 
-console.log("versioned write route contracts passed · 15 routes · canonical keys and declared legacy alias only");
+console.log("versioned write route contracts passed · 16 routes · canonical keys and declared legacy alias only");

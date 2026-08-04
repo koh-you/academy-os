@@ -94,8 +94,16 @@ const reconcileController = createNotificationJobsReconcileController({
 const reconcilePromise = reconcileController.reconcile({ notificationJobIds: ["job_1"] });
 const duplicateReconcilePromise = reconcileController.reconcile({ notificationJobIds: ["job_1"] });
 assert.equal(reconcilePromise, duplicateReconcilePromise);
+await new Promise((resolve) => setImmediate(resolve));
 assert.equal(reconcileRequestCount, 1, "same reconcile payload must be single-flight");
-reconcileDeferred.resolve({ notificationJobs: [{ notificationJobId: "job_1" }], records: [] });
+reconcileDeferred.resolve({
+  checked: [{ notificationJobId: "job_1", status: "sent" }],
+  checkedCount: 1,
+  notificationJobs: [{ notificationJobId: "job_1" }],
+  records: [],
+  source: "solapi",
+  updatedCount: 1
+});
 await reconcilePromise;
 assert.equal(reconcileResults.length, 1);
 

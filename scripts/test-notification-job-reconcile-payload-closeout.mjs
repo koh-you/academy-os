@@ -33,6 +33,10 @@ const controllerSource = await readFile(
   ),
   "utf8"
 );
+const contractApiSource = await readFile(
+  new URL("../src/domains/notifications/notificationJobContractApi.js", import.meta.url),
+  "utf8"
+);
 const modulePath =
   'from "../domains/notifications/notificationJobReconcilePayload.js"';
 assert.equal(appSource.split(modulePath).length - 1, 0);
@@ -63,23 +67,23 @@ const helperIndex = functionSource.indexOf(
   "createNotificationJobReconcilePayload(options)"
 );
 const requestIndex = functionSource.indexOf(
-  "const result = await request("
+  "const result = await reconcileNotificationJobsContractRequest({"
 );
-const endpointIndex = functionSource.indexOf(
-  '"/api/notification-jobs/reconcile-solapi"',
-  requestIndex
-);
-const timeoutIndex = functionSource.indexOf("90000", endpointIndex);
+const timeoutIndex = functionSource.indexOf("90000", requestIndex);
 const resultIndex = functionSource.indexOf("onResult(result)", timeoutIndex);
 const returnIndex = functionSource.indexOf("return result", resultIndex);
 assert.ok(
   helperIndex >= 0 &&
     requestIndex > helperIndex &&
-    endpointIndex > requestIndex &&
-    timeoutIndex > endpointIndex &&
+    timeoutIndex > requestIndex &&
     resultIndex > timeoutIndex &&
     returnIndex > resultIndex
 );
+for (const contractBoundary of [
+  '"/api/notification-jobs/reconcile-solapi"',
+  "parseVersionedWriteRequest(",
+  "parseVersionedWriteResponse("
+]) assert.ok(contractApiSource.includes(contractBoundary));
 
 const applyStart = appSource.indexOf("function applyNotificationJobsReconcileResult(result)");
 const applyEnd = appSource.indexOf(

@@ -34,6 +34,10 @@ assert.deepEqual(createNotificationJobReconcilePayload(), {
 });
 
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
+const contractApiSource = await readFile(
+  new URL("../src/domains/notifications/notificationJobContractApi.js", import.meta.url),
+  "utf8"
+);
 const helperSource = await readFile(
   new URL("../src/domains/notifications/notificationJobReconcilePayload.js", import.meta.url),
   "utf8"
@@ -52,9 +56,9 @@ const functionEnd = appSource.indexOf(
 assert.ok(functionStart >= 0 && functionEnd > functionStart);
 const functionSource = appSource.slice(functionStart, functionEnd);
 for (const controllerBoundary of [
-  '"/api/notification-jobs/reconcile-solapi"',
   "createNotificationJobReconcilePayload(options)",
   "inFlightByPayload.get(signature)",
+  "reconcileNotificationJobsContractRequest({",
   "90000",
   "if (!disposed) onResult(result)",
   "return result"
@@ -62,6 +66,16 @@ for (const controllerBoundary of [
   assert.ok(
     controllerSource.includes(controllerBoundary),
     `reconcile controller missing: ${controllerBoundary}`
+  );
+}
+for (const contractBoundary of [
+  '"/api/notification-jobs/reconcile-solapi"',
+  "parseVersionedWriteRequest(",
+  "parseVersionedWriteResponse("
+]) {
+  assert.ok(
+    contractApiSource.includes(contractBoundary),
+    `reconcile contract missing: ${contractBoundary}`
   );
 }
 for (const appAdapterBoundary of [

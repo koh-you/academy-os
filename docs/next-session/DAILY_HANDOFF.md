@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-1p notification reconcile
+
+- `POST /api/notification-jobs/reconcile-solapi`의 6개 selector request와 provider checked/source job/record response를 client·실서버·safe server 공통 contract에 연결했다.
+- 기존 90초 single-flight, App source merge·record cache/save-state owner는 유지했다. safe API는 provider를 조회하거나 source job을 바꾸지 않는다. contract `16 routes`, notification `15/15`, reconcile 전용 감사, lint, scenario·production `827/827`, build `417 modules`·main `944.90 kB`·lazy `12/12`, 격리 browser `1/1` 통과.
+- 다음 단위는 notification bulk reserve 또는 남은 provider write route를 inventory해 한 route씩 고정한다. 운영 데이터·실제 알림 조회·예약·취소·SQL·유료 호출은 없었다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1o notification cancel
 
 - `POST /api/notification-jobs/cancel`의 canonical request와 source/provider 결과 response를 client·실서버·safe server 공통 contract에 연결했다. 기존 `id` 호환은 선언된 alias로만 허용한다.
