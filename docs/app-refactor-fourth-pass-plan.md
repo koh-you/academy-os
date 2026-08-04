@@ -171,3 +171,4 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 - 4-1e: `/api/supplement-schedules/save`의 atomic lesson/task payload와 verified response를 공통 contract에 연결했다. 결과 불명 최신 draft 수렴, Supabase CAS/readback/rollback과 provider 분리 owner는 유지했다.
 - 4-1f: `/api/attendance/check`의 수동·키오스크 공용 payload와 원천 저장 결과 response를 공통 contract에 연결했다. 연속 방문 기록·attendance event·수동 예약·키오스크 queue는 기존 server orchestration owner에 유지하고, source 결과와 provider 상태는 `record`와 `alimtalk`으로 계속 분리한다.
 - 4-1g: `/api/class-rosters/save`의 학생·미래 수업 변경 payload와 verified response를 공통 contract에 연결했다. 학생/수업 CAS·재조회·rollback, cleanup과 App의 conflict draft 보존 owner는 유지했다.
+- 4-1h: `/api/school-calendar/derived-save`의 시험정보·연결 직전수업 변경 payload와 verified response를 공통 contract에 연결했다. 두 source의 CAS·재조회·rollback과 수동 보호 owner는 유지했다.

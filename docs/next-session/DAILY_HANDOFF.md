@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-1h derived school calendar
+
+- 시험정보와 연결 직전수업 atomic route의 canonical request/verified response를 공통 contract에 연결했다. invalid payload는 두 source persistence 전에 field 포함 400으로 차단한다.
+- 행·수업 CAS/readback/rollback, retry, 수동 보호와 App 성공 반영은 유지했다. contract/persistence, domain all `62/62`, lint, scenario·production `827/827`, build `416 modules`·main `942.75 kB`·lazy `12/12`, browser `1/1` 통과.
+- 다음 4-1 단위는 app-state 전용 payload contract다. 운영 데이터·실제 알림·SQL·유료 호출은 없었다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1g class roster
 
 - 학생 반 배정과 미래 정규수업 명단을 함께 저장하는 `/api/class-rosters/save`의 canonical request/verified response를 공통 contract에 연결했다. invalid payload는 persistence 전에 field 포함 400으로 차단한다.

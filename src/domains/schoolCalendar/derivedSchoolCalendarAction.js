@@ -2,6 +2,13 @@ import {
   createDerivedExamPrepChanges,
   createDerivedLessonChanges
 } from "./derivedSchoolCalendarPersistence.js";
+import {
+  parseVersionedWriteRequest,
+  parseVersionedWriteResponse
+} from "../../shared/contracts/versionedWriteRouteContracts.js";
+
+const derivedSchoolCalendarMethod = "POST";
+const derivedSchoolCalendarPath = "/api/school-calendar/derived-save";
 
 export function createDerivedSchoolCalendarAuditId(now = Date.now()) {
   const suffix = globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2, 10);
@@ -36,11 +43,21 @@ export async function saveDerivedSchoolCalendarAction({
   if (lessonChanges.some(({ before }) => before && !before.updatedAt)) {
     throw new Error("직전수업 원본의 서버 버전을 확인하지 못했습니다. 새로고침 후 다시 시도해 주세요.");
   }
+  const requestPayload = parseVersionedWriteRequest(
+    derivedSchoolCalendarMethod,
+    derivedSchoolCalendarPath,
+    { auditId, examPrepChanges, lessonChanges }
+  );
   const result = await request(
-    "/api/school-calendar/derived-save",
-    { auditId, examPrepChanges, lessonChanges },
+    derivedSchoolCalendarPath,
+    requestPayload,
     30000,
     timeoutMessage
+  );
+  parseVersionedWriteResponse(
+    derivedSchoolCalendarMethod,
+    derivedSchoolCalendarPath,
+    result
   );
   if (result?.source !== "supabase" || result?.verified !== true || result?.auditId !== auditId) {
     throw new Error("학사일정 연동 저장 결과를 Supabase 재조회로 확인하지 못했습니다.");
