@@ -7097,7 +7097,11 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/supplement-schedules/save") {
     try {
-      const payload = await readJsonBody(request);
+      const payload = parseVersionedWriteRequest(
+        request.method,
+        requestUrl.pathname,
+        await readJsonBody(request)
+      );
       const result = await saveSupplementSchedulePlan(payload);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
@@ -7105,6 +7109,7 @@ const server = http.createServer(async (request, response) => {
         ok: false,
         error: error.message,
         ...(error.code ? { code: error.code } : {}),
+        ...(error.field ? { field: error.field } : {}),
         ...(error.audit ? { audit: error.audit } : {})
       });
     }

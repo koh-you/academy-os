@@ -168,3 +168,4 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 - 4-1b 첫 단위: `/api/lesson-journal/rows/save`의 client outbound/server inbound와 client verified response 검증을 공통 contract에 연결했다. record/homework draft, Supabase CAS/readback/rollback 및 App 오류 복구 owner는 유지했다.
 - 4-1c: `/api/lesson-journal/history-action`의 canonical payload와 verified response를 공통 contract에 연결했다. stable pending copy, undo stack, Supabase CAS/readback/rollback 및 App 오류 복구 owner는 유지했다.
 - 4-1d: `/api/lesson-journal/makeup-tasks/save`의 canonical/legacy payload와 verified response를 공통 contract에 연결했다. contract registry는 저장 시점 dynamic chunk로 유지해 initial main 예산을 보존하고 stable ID·CAS/readback·부분 저장 복구 owner는 유지했다.
+- 4-1e: `/api/supplement-schedules/save`의 atomic lesson/task payload와 verified response를 공통 contract에 연결했다. 결과 불명 최신 draft 수렴, Supabase CAS/readback/rollback과 provider 분리 owner는 유지했다.

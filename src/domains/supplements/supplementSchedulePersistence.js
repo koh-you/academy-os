@@ -3,11 +3,17 @@ import {
   areLessonJournalHistoryTimestampsEqual
 } from "../lessons/lessonJournalHistoryPersistence.js";
 import { createLessonJournalMakeupTaskPersistenceSnapshot } from "../lessons/lessonJournalMakeupTaskPersistence.js";
+import {
+  parseVersionedWriteRequest,
+  parseVersionedWriteResponse
+} from "../../shared/contracts/versionedWriteRouteContracts.js";
 import { createSupplementSchedulePersistencePlan } from "./supplementSchedulePlan.js";
 import { createSupplementSourceReconcileModel } from "./supplementSourceReconcileModel.js";
 import { createPersistableSupplementTask } from "./supplementTaskDraft.js";
 
 let pendingScheduleRequests = new Map();
+const supplementScheduleSaveMethod = "POST";
+const supplementScheduleSavePath = "/api/supplement-schedules/save";
 
 function createSupplementScheduleTaskSnapshot(task = {}) {
   const snapshot = createLessonJournalMakeupTaskPersistenceSnapshot(task);
@@ -114,11 +120,21 @@ function createRebasedSupplementScheduleSavePlan(plan, result) {
 }
 
 async function requestSupplementScheduleSave({ pending, request }) {
+  const requestPayload = parseVersionedWriteRequest(
+    supplementScheduleSaveMethod,
+    supplementScheduleSavePath,
+    { auditId: pending.auditId, ...pending.plan }
+  );
   const result = await request(
-    "/api/supplement-schedules/save",
-    { auditId: pending.auditId, ...pending.plan },
+    supplementScheduleSavePath,
+    requestPayload,
     30000,
     "보충 일정 저장이 30초를 넘었습니다. 입력을 유지한 채 같은 일정으로 다시 시도해 주세요."
+  );
+  parseVersionedWriteResponse(
+    supplementScheduleSaveMethod,
+    supplementScheduleSavePath,
+    result
   );
   if (
     result?.source !== "supabase" ||

@@ -2,11 +2,17 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-1e supplement schedule
+
+- 보충 일정 atomic save route의 canonical request/verified response를 공통 contract에 연결했다. invalid payload는 DB action 전에 field 포함 400으로 차단한다.
+- stable logical key, 결과 불명 3요청 수렴, lesson/task CAS·재조회·rollback과 source saved/provider failed 분리는 유지했다.
+- contract/schedule persistence, supplement `10/10`, lint, scenario·production `827/827`, build `416 modules`·main `942.27 kB`·lazy `12/12`, 집중 browser `1/1` 통과. 다음은 attendance versioned write payload inventory를 한 route 단위로 추가·연결한다. 운영 데이터·실제 알림·SQL·유료 호출은 없었다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1d lesson makeup
 
 - 등원보충 task 저장 route의 canonical/legacy request와 verified response를 공통 contract에 연결했다. stable ID·insert-only/CAS·재조회·부분 저장 draft 복구 owner는 유지했다.
 - contract 정적 연결로 initial main이 948.34 kB까지 늘어난 build budget 실패를 발견해 저장 시점 dynamic import로 바꿨고 main 942.27 kB로 복귀했다.
-- contract/bulk/CAS/controller, lesson `20/20`, lint, scenario·production `827/827`, build `416 modules`·lazy `12/12`, 집중 browser `1/1` 통과. 다음은 최신 main에서 supplement schedule route 하나를 연결한다. 운영 데이터·실제 알림·SQL·유료 호출은 없었다.
+- contract/bulk/CAS/controller, lesson `20/20`, lint, scenario·production `827/827`, build `416 modules`·lazy `12/12`, 집중 browser `1/1` 통과. 다음 supplement route는 이 handoff 상단의 4-1e에서 완료 상태를 이어 기록한다. 운영 데이터·실제 알림·SQL·유료 호출은 없었다.
 
 ## 2026-08-05 App/API 4차 리팩터링 4-1c lesson history
 
