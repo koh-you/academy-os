@@ -181,6 +181,17 @@ const examAnalysisQuestionReviewsSaveResponseContract = defineApiPayloadContract
   name: "exam analysis question reviews save response"
 });
 
+const examAnalysisPromptStudioSaveResponseContract = defineApiPayloadContract({
+  allowUnknownFields: true,
+  fields: {
+    analysisRun: { required: true, type: "object" },
+    promptStudioDraft: { required: true, type: "object" },
+    saveVerification: { required: true, type: "object" },
+    source: { allowEmpty: false, required: true, type: "string" }
+  },
+  name: "exam analysis prompt studio save response"
+});
+
 function defineVersionedWriteRoute({
   domain,
   fields,
@@ -472,6 +483,18 @@ export const versionedWriteRouteContracts = Object.freeze([
     path: "/api/exam-analysis-runs/save-question-reviews",
     response: examAnalysisQuestionReviewsSaveResponseContract,
     sources: ["exam_analysis_runs", "exam_analysis_questions", "exam_analysis_events"]
+  }),
+  defineVersionedWriteRoute({
+    domain: "examAnalysis",
+    fields: {
+      analysisRunId: { allowEmpty: false, required: true, trim: true, type: "string" },
+      expectedRevision: { defaultValue: 0, type: "number" },
+      promptStudioDraft: { required: true, type: "object" }
+    },
+    key: "examAnalysisPromptStudioSave",
+    path: "/api/exam-analysis-runs/save-prompt-studio",
+    response: examAnalysisPromptStudioSaveResponseContract,
+    sources: ["exam_analysis_runs", "exam_analysis_events"]
   })
 ]);
 

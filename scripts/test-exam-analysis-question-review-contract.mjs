@@ -142,7 +142,10 @@ for (const expected of [
 const safeRouteStart = safeApiSource.indexOf(
   'if (pathname === "/api/exam-analysis-runs/save-question-reviews")'
 );
-const safeRouteEnd = safeApiSource.indexOf('if (["/api/attendance/check"', safeRouteStart);
+const safeRouteEnd = safeApiSource.indexOf(
+  'if (pathname === "/api/exam-analysis-runs/save-prompt-studio")',
+  safeRouteStart
+);
 assert.ok(safeRouteStart >= 0 && safeRouteEnd > safeRouteStart);
 const safeRoute = safeApiSource.slice(safeRouteStart, safeRouteEnd);
 for (const expected of [

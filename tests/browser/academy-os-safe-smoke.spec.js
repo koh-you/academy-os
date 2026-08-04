@@ -462,7 +462,7 @@ test("exam analysis pipeline opens from its deferred chunk without running paid 
   expect(pageErrors).toEqual([]);
 });
 
-test("exam analysis run, teacher question count, and question review save to the safe source and survive reload", async ({ page, request }) => {
+test("exam analysis non-paid teacher saves use the safe source and survive reload", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   const title = "안전 시험분석 계약 저장";
   await loginAsTeacher(page);
@@ -539,6 +539,39 @@ test("exam analysis run, teacher question count, and question review save to the
   await expect(page.getByRole("textbox", { name: "1번 재확인 근거", exact: true })).toHaveValue("안전 검수 저장 완료");
   await expect(page.getByRole("checkbox", { name: "1번 확정", exact: true })).toBeChecked();
   await expect(page.getByRole("checkbox", { name: "1번 주요문항", exact: true })).toBeChecked();
+
+  await page.getByRole("tab", { name: "최종 미리보기" }).click();
+  const scoreStructureInput = page.getByRole("textbox", { name: /^배점\/문항 구조/ });
+  await expect(scoreStructureInput).toBeVisible();
+  await scoreStructureInput.fill("객관식 12문항 · 안전 계약 검수");
+  await page.getByRole("button", { name: "프롬프트 작업본 저장" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "프롬프트 작업본 · 저장 완료" })).toBeVisible();
+
+  let promptDetail = await (
+    await request.get(`${safeApiBaseUrl}/api/exam-analysis-runs?id=${encodeURIComponent(savedRun.analysisRunId)}`)
+  ).json();
+  expect(promptDetail.analysisRun.auditSummary.promptStudio.revision).toBe(1);
+  expect(promptDetail.analysisRun.auditSummary.promptStudio.roleInputs.examAnalysis.scoreStructure)
+    .toBe("객관식 12문항 · 안전 계약 검수");
+  const stalePromptResponse = await request.post(`${safeApiBaseUrl}/api/exam-analysis-runs/save-prompt-studio`, {
+    data: {
+      analysisRunId: savedRun.analysisRunId,
+      expectedRevision: 0,
+      promptStudioDraft: promptDetail.analysisRun.auditSummary.promptStudio
+    }
+  });
+  expect(stalePromptResponse.status()).toBe(409);
+  promptDetail = await (
+    await request.get(`${safeApiBaseUrl}/api/exam-analysis-runs?id=${encodeURIComponent(savedRun.analysisRunId)}`)
+  ).json();
+  expect(promptDetail.analysisRun.auditSummary.promptStudio.revision).toBe(1);
+
+  await page.reload();
+  await expect(page.getByRole("navigation", { name: "주요 화면" })).toBeVisible();
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /시험분석/ }).click();
+  await page.getByRole("tab", { name: "최종 미리보기" }).click();
+  await expect(page.getByRole("textbox", { name: /^배점\/문항 구조/ }))
+    .toHaveValue("객관식 12문항 · 안전 계약 검수");
   expect(pageErrors).toEqual([]);
 });
 

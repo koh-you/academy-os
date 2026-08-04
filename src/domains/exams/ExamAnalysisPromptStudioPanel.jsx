@@ -3,6 +3,7 @@ import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { getJsonWithTimeout, postJsonWithTimeout } from "../../shared/utils/apiClient.js";
 import { copyTextToClipboard } from "./outputPreview.js";
+import { saveExamPromptStudio } from "./examAnalysisRunApi.js";
 import { createExamAnalysisPromptInputSnapshot } from "./examAnalysisPromptInputMapping.js";
 import {
   applyExamAnalysisPromptStudioSaveVerification,
@@ -187,7 +188,7 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
     setLocalState((current) => ({ ...current, status: EXAM_ANALYSIS_PROMPT_SAVE_STATUS.SAVING, error: "" }));
     try {
       const payload = createExamAnalysisPromptStudioSavePayload(analysisRunId, localState, "teacher");
-      const result = await postJsonWithTimeout("/api/exam-analysis-runs/save-prompt-studio", payload, 20000, "프롬프트 작업본 저장이 지연되고 있습니다.");
+      const result = await saveExamPromptStudio(postJsonWithTimeout, payload);
       setLocalState((current) => ({ ...current, status: EXAM_ANALYSIS_PROMPT_SAVE_STATUS.VERIFYING }));
       setLocalState((current) => applyExamAnalysisPromptStudioSaveVerification(current, result));
       setDetail((current) => current ? { ...current, analysisRun: result.analysisRun } : current);

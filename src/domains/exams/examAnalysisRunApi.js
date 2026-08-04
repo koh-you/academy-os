@@ -7,6 +7,7 @@ const method = "POST";
 const path = "/api/exam-analysis-runs";
 const questionCountPath = "/api/exam-analysis-runs/confirm-question-count";
 const questionReviewsPath = "/api/exam-analysis-runs/save-question-reviews";
+const promptStudioPath = "/api/exam-analysis-runs/save-prompt-studio";
 
 function createExamAnalysisPayloadError(field, message) {
   const error = new Error(message);
@@ -95,4 +96,27 @@ export async function saveExamQuestionReviews(request, payload) {
     "문항 검수 저장이 지연되고 있습니다."
   );
   return parseVersionedWriteResponse(method, questionReviewsPath, result);
+}
+
+export function parseExamAnalysisPromptStudioSaveRequest(payload) {
+  const parsed = parseVersionedWriteRequest(method, promptStudioPath, payload);
+  if (!Number.isInteger(parsed.expectedRevision) || parsed.expectedRevision < 0) {
+    throw createExamAnalysisPayloadError(
+      "expectedRevision",
+      "프롬프트 작업본 expectedRevision은 0 이상의 정수여야 합니다."
+    );
+  }
+  return parsed;
+}
+
+export async function saveExamPromptStudio(request, payload) {
+  if (typeof request !== "function") throw new Error("프롬프트 작업본 저장 request 함수가 필요합니다.");
+  const parsedPayload = parseExamAnalysisPromptStudioSaveRequest(payload);
+  const result = await request(
+    promptStudioPath,
+    parsedPayload,
+    20000,
+    "프롬프트 작업본 저장이 지연되고 있습니다."
+  );
+  return parseVersionedWriteResponse(method, promptStudioPath, result);
 }

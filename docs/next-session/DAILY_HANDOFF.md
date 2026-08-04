@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-1w exam Prompt Studio
+
+- `POST /api/exam-analysis-runs/save-prompt-studio`의 run/revision/교사 작업본 request와 authoritative run/draft/source/verification response를 23번째 공통 contract에 연결했다. invalid revision은 source 쓰기 전에 400, stale revision은 409로 차단한다.
+- Supabase revision CAS·audit summary 병합·재조회·event owner는 server에 유지하고 safe API는 가상 run만 갱신한다. 화면 명시 저장, API readback, stale 충돌 보존과 reload 복구를 확인했다.
+- contract `23 routes`, Prompt Studio·teacher/lazy 전용, lint, scenario·production `827/827`, build `418 modules`·main `944.93 kB`·lazy `12/12`, 격리 browser `1/1` 통과. 다음은 비-AI output draft 저장을 고정한 뒤 4-1 종료 범위를 감사한다. 운영 데이터·업로드·Storage·유료 AI·실제 알림은 사용하지 않았다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1v exam question review
 
 - `POST /api/exam-analysis-runs/save-question-reviews`의 교사 문항별 검수 request와 run/question rows/event/teacher review response를 22번째 공통 contract에 연결했다. 빈 목록·잘못된 문항 번호·중복 번호는 DB 쓰기 전에 400으로 차단한다.

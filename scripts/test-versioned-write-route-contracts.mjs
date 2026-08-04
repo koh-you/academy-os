@@ -8,9 +8,9 @@ import {
   versionedWriteRouteContracts
 } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 
-assert.equal(versionedWriteRouteContracts.length, 22);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 22);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 22);
+assert.equal(versionedWriteRouteContracts.length, 23);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 23);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 23);
 assert.equal(versionedWriteRouteContracts.every(Object.isFrozen), true);
 assert.equal(versionedWriteRouteContracts.every(({ request, response, sources }) => (
   Object.isFrozen(request) && Object.isFrozen(response) && Object.isFrozen(sources)
@@ -486,6 +486,32 @@ assert.deepEqual(
     teacherReview: { confirmedCount: 0, reviewedCount: 1, totalQuestionCount: 1 }
   }
 );
+assert.deepEqual(
+  parseVersionedWriteRequest("POST", "/api/exam-analysis-runs/save-prompt-studio", {
+    analysisRunId: " exam-run-safe-1 ",
+    promptStudioDraft: { revision: 0, roleInputs: {} }
+  }),
+  {
+    analysisRunId: "exam-run-safe-1",
+    expectedRevision: 0,
+    promptStudioDraft: { revision: 0, roleInputs: {} }
+  }
+);
+assert.deepEqual(
+  parseVersionedWriteResponse("POST", "/api/exam-analysis-runs/save-prompt-studio", {
+    analysisRun: { analysisRunId: "exam-run-safe-1" },
+    ok: true,
+    promptStudioDraft: { revision: 1 },
+    saveVerification: { revision: 1, verified: true },
+    source: "supabase"
+  }),
+  {
+    analysisRun: { analysisRunId: "exam-run-safe-1" },
+    promptStudioDraft: { revision: 1 },
+    saveVerification: { revision: 1, verified: true },
+    source: "supabase"
+  }
+);
 assert.deepEqual(response, {
   auditId: "supplement-audit",
   source: "supabase",
@@ -551,4 +577,4 @@ assert.throws(
   /field\/alias가 중복/
 );
 
-console.log("versioned write route contracts passed · 22 routes · canonical keys and declared legacy alias only");
+console.log("versioned write route contracts passed · 23 routes · canonical keys and declared legacy alias only");

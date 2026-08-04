@@ -128,6 +128,7 @@ import { saveReportSnapshotWithVerification } from "../src/domains/reports/repor
 import {
   parseExamAnalysisQuestionCountConfirmRequest,
   parseExamAnalysisQuestionReviewsSaveRequest,
+  parseExamAnalysisPromptStudioSaveRequest,
   parseExamAnalysisRunWriteRequest
 } from "../src/domains/exams/examAnalysisRunApi.js";
 import { getNextHourlyAlimtalkReservationAt } from "../src/domains/notifications/supplementJobBuilders.js";
@@ -6389,15 +6390,16 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-prompt-studio") {
     try {
-      const payload = await readJsonBody(request);
-      const result = await saveExamAnalysisPromptStudioDraft({
-        analysisRunId: payload.analysisRunId,
-        promptStudioDraft: payload.promptStudioDraft,
-        expectedRevision: payload.expectedRevision
-      });
+      const payload = parseExamAnalysisPromptStudioSaveRequest(await readJsonBody(request));
+      const result = await saveExamAnalysisPromptStudioDraft(payload);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
-      sendJson(request, response, error.statusCode || 500, { ok: false, error: error.message });
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
+        ...(error.field !== undefined ? { field: error.field } : {})
+      });
     }
     return;
   }
