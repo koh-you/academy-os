@@ -9,7 +9,16 @@ import {
 const calls = [];
 const request = async (...args) => {
   calls.push(args);
-  return { ok: true, requestNumber: calls.length };
+  return args[0] === "/api/attendance/check"
+    ? {
+        action: "checkin",
+        alimtalk: { status: "queued" },
+        mode: "checkIn",
+        ok: true,
+        record: { lessonStudentRecordId: "record-1" },
+        requestNumber: calls.length
+      }
+    : { ok: true, requestNumber: calls.length };
 };
 const checkPayload = {
   action: "checkin",
@@ -24,7 +33,11 @@ const previewPayload = {
 };
 
 assert.deepEqual(await checkAttendanceRequest({ payload: checkPayload, request }), {
+  action: "checkin",
+  alimtalk: { status: "queued" },
+  mode: "checkIn",
   ok: true,
+  record: { lessonStudentRecordId: "record-1" },
   requestNumber: 1
 });
 assert.deepEqual(calls[0], [
@@ -58,13 +71,32 @@ await assert.rejects(
 
 const bindings = createAttendanceRequestBindings({ request });
 assert.deepEqual(await bindings.checkAttendanceRequest(checkPayload), {
+  action: "checkin",
+  alimtalk: { status: "queued" },
+  mode: "checkIn",
   ok: true,
+  record: { lessonStudentRecordId: "record-1" },
   requestNumber: 3
 });
 assert.deepEqual(await bindings.previewAttendanceRequest(previewPayload), {
   ok: true,
   requestNumber: 4
 });
+
+await assert.rejects(
+  checkAttendanceRequest({
+    payload: { ...checkPayload, unexpected: true },
+    request
+  }),
+  (error) => error.code === "INVALID_API_PAYLOAD" && error.field === "unexpected"
+);
+await assert.rejects(
+  checkAttendanceRequest({
+    payload: checkPayload,
+    request: async () => ({ ok: true })
+  }),
+  (error) => error.code === "INVALID_API_PAYLOAD" && error.field === "action"
+);
 
 const source = await readFile(
   new URL("../src/domains/lessons/attendanceApi.js", import.meta.url),

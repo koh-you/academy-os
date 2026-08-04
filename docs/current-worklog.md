@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-1f attendance check
+
+- `/api/attendance/check`의 수동·키오스크 공용 요청과 원천 저장 결과 응답을 7번째 contract로 고정했다. optional field는 `undefined`를 제외한 canonical key만 보내고 `lateMinutes`의 기존 number/string 입력은 모두 보존하며, server는 미지 field·잘못된 type을 출결 저장 전에 field 포함 400으로 차단한다.
+- 응답은 `record/action/mode/alimtalk`을 확인한 뒤 기존 controller가 App 원천을 교체한다. `lesson_student_records`·연속 방문 두 행 저장, attendance event, 수동 결석 Solapi 예약·키오스크 queue, provider 부분 실패 안내의 owner와 순서는 이동하지 않았다.
+- 검증: contract `7 routes`, attendance API·manual controller, lesson `20/20`, lint, scenario·production `827/827`, build `416 modules`·main `942.62 kB`·lazy `12/12`, 격리 집중 browser `1/1` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1e supplement schedule
 
 - `/api/supplement-schedules/save`의 `auditId/lessonChange/taskChange`와 verified response를 공통 contract에 연결했다. client action은 전송 직전 canonical plan을 만들고 server는 atomic persistence 전에 invalid top-level field/type을 차단한다.
