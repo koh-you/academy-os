@@ -7,6 +7,10 @@ import { useAppSession } from "./useAppSession.js";
 import { RoleLoginScreen } from "./RoleLoginScreen.jsx";
 import { Sidebar } from "./Sidebar.jsx";
 import { EvaluationCenter } from "../domains/teacher/EvaluationCenter.jsx";
+
+const lessonJournalRowsSaveActionModulePromise = import(
+  "../domains/lessons/lessonJournalRowsSaveAction.js"
+);
 import {
   createExamPrepDeleteAuditId,
   executeExamPrepDeleteOrchestration
@@ -6613,9 +6617,7 @@ export function App() {
 
     return executeLessonJournalDraftPersistence({
       persistJournalRows: async () => {
-        const { saveLessonJournalRowsAction } = await import(
-          "../domains/lessons/lessonJournalRowsSaveAction.js"
-        );
+        const { saveLessonJournalRowsAction } = await lessonJournalRowsSaveActionModulePromise;
         const result = await saveLessonJournalRowsAction({
           changedHomeworks: persistencePlan.changedHomeworks,
           currentHomeworks: homeworksRef.current,

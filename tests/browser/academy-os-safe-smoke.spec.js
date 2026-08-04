@@ -1387,7 +1387,14 @@ test("lesson hub top reminders can collapse and expand without runtime errors", 
 
 test("lesson journal keeps an in-flight edit and verifies the retried record from the safe source", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
+  const lessonJournalSaveModuleRequests = [];
+  page.on("request", (browserRequest) => {
+    if (browserRequest.url().includes("lessonJournalRowsSaveAction")) {
+      lessonJournalSaveModuleRequests.push(browserRequest.url());
+    }
+  });
   await loginAsTeacher(page);
+  expect(lessonJournalSaveModuleRequests).toHaveLength(1);
 
   const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
   await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();

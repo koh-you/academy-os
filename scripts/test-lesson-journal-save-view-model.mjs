@@ -106,6 +106,13 @@ assert.equal(
 );
 assert.equal(
   createLessonJournalSaveViewModel({
+    manualSaveMessage: "수업일지 · 저장 실패 · 페이지가 새 버전으로 바뀌었습니다.",
+    recordDrafts: { target: {} }
+  }).stickySaveMessage,
+  "수업일지 · 저장 실패 · 페이지가 새 버전으로 바뀌었습니다. · 저장 전 변경 1건"
+);
+assert.equal(
+  createLessonJournalSaveViewModel({
     manualSaveMessage: "수업일지 · 저장 완료"
   }).stickySaveState,
   "saved"

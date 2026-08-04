@@ -36,7 +36,9 @@ export function createLessonJournalSaveViewModel({
   const stickySaveMessage = isSaving
     ? "수업일지 · 저장 중"
     : hasDraftChanges
-      ? manualSaveMessage.includes("이후 변경 저장 필요")
+      ? manualSaveMessage.includes("저장 실패")
+        ? `${manualSaveMessage} · 저장 전 변경 ${draftChangeCount}건`
+        : manualSaveMessage.includes("이후 변경 저장 필요")
         ? `${manualSaveMessage} · 저장 전 변경 ${draftChangeCount}건`
         : `저장 전 변경 ${draftChangeCount}건`
       : manualSaveMessage ||
