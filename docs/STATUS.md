@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 4차 리팩터링 현재 단위
+
+- 4-1 API payload 계약은 공통 contract 24개와 종료 감사까지 main 반영 완료다.
+- 4-2a row mapper 기준선은 `coreData` 36개(18쌍), 시험분석 9개, 합계 45개를 exact inventory로 고정한다. 제품 runtime·DB·provider는 변경하지 않는다.
+- 첫 실제 추출 4-2b는 Student/ClassTemplate/Lesson 6개만 대상으로 하며 null/default, schema fallback, special lecture legacy alias, `updated_at` token과 unknown-field drop 정책을 먼저 동작 fixture로 고정한다.
+
 ## 현재 기준
 
 - canonical repo: `C:\Dev\academy-os`, `main`, `origin/main`

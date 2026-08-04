@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-2a row mapper 기준선
+
+- core 36개/18쌍과 exam pipeline 9개, 총 45개 row mapper의 현재 owner와 후속 4-2b~g 분류를 고정했다. 4-0의 44개 수치는 exact function inventory로 45개로 교정한다.
+- null/default, schema fallback option, legacy alias, 새 `updated_at`, exam patch undefined, unknown-field drop 정책을 `test:fourth-pass-row-mapper-baseline`에서 감사하고 전체 production gate에 연결했다.
+- 제품 runtime·DB·provider는 바꾸지 않았다. 다음은 최신 main 기반 Student/ClassTemplate/Lesson 6개 pure mapper 추출이며 운영 데이터·Storage·AI·Solapi·Slack은 실행하지 않는다.
+- mapper baseline, domain all `69/69`, lint, scenario·production `827/827`, build `418 modules`·main `944.65 kB`·lazy `12/12` 통과. exact-head CI의 전체 safe browser까지 확인한 뒤 통합한다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1 closeout
 
 - 4-1은 공통 contract 24개로 종료했다. server 직접 mutation 89개 중 나머지 65개는 4-2/4-3 row·route 42개와 4-5 external/provider/seed 23개로 exact allowlist 분류했다.

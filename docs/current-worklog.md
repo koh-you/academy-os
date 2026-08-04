@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-2a row mapper 기준선
+
+- `api/routes/coreData.js`의 36개/18쌍과 `api/routes/examAnalysisPipeline.js`의 9개를 합쳐 row↔domain mapper 45개를 exact inventory로 고정했다. 4-0의 단순 집계 44개는 구조 감사 결과 45개로 교정한다.
+- core write mapper 17개와 exam write/patch 3개의 새 `updated_at`, 5개 schema fallback option, 시험 source patch의 undefined 보존, unknown field drop과 첫 추출 6개의 I/O 부재를 production fixture로 검사한다.
+- 상태·DB save/CAS/readback·provider owner는 변경하지 않았다. 기준 문서는 `docs/app-refactor-fourth-pass-row-mapper-baseline.md`이며 다음 4-2b는 Student/ClassTemplate/Lesson 6개만 pure module로 옮긴다.
+- 검증: mapper baseline, domain all `69/69`, lint, scenario·production `827/827`, build `418 modules`·main `944.65 kB`·lazy `12/12` 통과. runtime 미변경이라 로컬 browser 반복은 생략하고 exact-head CI 전체 safe browser를 gate로 사용한다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1 closeout
 
 - 공통 payload contract 24개와 server 직접 mutation route 89개를 대조했다. contract domain은 lesson 4, notification 7, exam analysis 5 등 9개 domain이며 24개 모두 server inbound parser와 Production checks에 연결된다.
