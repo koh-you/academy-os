@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-1d lesson makeup
+
+- `/api/lesson-journal/makeup-tasks/save`의 canonical `makeupTasks` payload와 선언된 legacy `tasks` alias, verified response를 공통 contract에 연결했다. server는 persistence 전에 invalid top-level field/type을 차단한다.
+- 첫 구현은 정적 makeup helper가 contract registry를 initial main에 포함해 948.34 kB로 945 kB 예산을 넘었다. 저장 시점 dynamic import로 교정해 main 942.27 kB를 회복하고 contract/helper는 별도 0.96/5.95 kB chunk에 유지했다.
+- stable task ID, insert-only/CAS/readback, 결과 불명 재시도, rows 저장 후 makeup 실패의 부분 저장·draft 보존은 그대로다. 검증: contract/bulk/CAS/controller, lesson `20/20`, lint, scenario·production `827/827`, build `416 modules`·lazy `12/12`, 집중 browser `1/1` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1c lesson history
 
 - `/api/lesson-journal/history-action`의 client outbound/server inbound와 client verified response를 공통 contract에 연결했다. `action/auditId/homeworkChanges/lessonChange` 외의 field와 잘못된 top-level type은 persistence 전에 차단한다.

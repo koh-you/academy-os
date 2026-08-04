@@ -167,3 +167,4 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 - `npm run test:contract:versioned-write`를 전체 production gate에 포함했다. 4-1b는 lesson journal·supplement·attendance부터 client/server가 같은 parser를 사용하도록 작은 단위로 연결한다.
 - 4-1b 첫 단위: `/api/lesson-journal/rows/save`의 client outbound/server inbound와 client verified response 검증을 공통 contract에 연결했다. record/homework draft, Supabase CAS/readback/rollback 및 App 오류 복구 owner는 유지했다.
 - 4-1c: `/api/lesson-journal/history-action`의 canonical payload와 verified response를 공통 contract에 연결했다. stable pending copy, undo stack, Supabase CAS/readback/rollback 및 App 오류 복구 owner는 유지했다.
+- 4-1d: `/api/lesson-journal/makeup-tasks/save`의 canonical/legacy payload와 verified response를 공통 contract에 연결했다. contract registry는 저장 시점 dynamic chunk로 유지해 initial main 예산을 보존하고 stable ID·CAS/readback·부분 저장 복구 owner는 유지했다.
