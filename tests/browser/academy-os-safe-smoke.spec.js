@@ -1770,3 +1770,48 @@ test("settlement exposes special attendance, combined student attendance, and co
   await expect(attendanceSection).toContainText("지각 1");
   expect(pageErrors).toEqual([]);
 });
+
+test("student monthly submission previews parent and director views before copy or PDF", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await page.addInitScript(() => { window.print = () => {}; });
+  await loginAsTeacher(page);
+
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
+  await page.getByRole("button", { name: /정산 미리보기 학생$/ }).click();
+  const profile = page.getByRole("dialog", { name: /정산 미리보기 학생 학생 프로파일/ });
+  await profile.getByLabel("정산 미리보기 학생 출결 조회 월").fill("2026-08");
+  await profile.getByRole("button", { name: "월간 제출 미리보기" }).click();
+
+  const previewDialog = page.getByRole("dialog", { name: /정산 미리보기 학생 2026년 8월 월간 제출 미리보기/ });
+  await expect(previewDialog).toBeVisible();
+  await expect(previewDialog.getByRole("button", { name: "학부모용 간단본" })).toHaveAttribute("aria-pressed", "true");
+  await expect(previewDialog.getByRole("region", { name: /학부모용 미리보기/ })).toContainText("예정 수업");
+  await expect(previewDialog.getByRole("region", { name: /학부모용 미리보기/ })).toContainText("실제 출결");
+  await expect(previewDialog.getByRole("region", { name: /학부모용 미리보기/ })).toContainText("변동사항");
+
+  await previewDialog.getByRole("button", { name: "원장님용 상세본" }).click();
+  const directorPreview = previewDialog.getByRole("region", { name: /원장님용 미리보기/ });
+  await expect(directorPreview).toContainText("개별 스케줄");
+  await expect(directorPreview).toContainText(/출석 \d+ · 지각 \d+ · 결석 \d+ · 미입력 \d+/);
+  await directorPreview.getByRole("textbox").fill("8월 변동 일정 확인용");
+
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: async (value) => { window.__studentMonthlyReportCopiedText = value; } }
+    });
+  });
+  await previewDialog.getByRole("button", { name: "제출 내용 복사" }).click();
+  await expect(previewDialog.getByRole("status")).toContainText("내용을 복사했습니다");
+  expect(await page.evaluate(() => window.__studentMonthlyReportCopiedText)).toContain("원장님 공유 메모");
+
+  const popupPromise = page.waitForEvent("popup");
+  await previewDialog.getByRole("button", { name: "PDF 인쇄" }).click();
+  const reportPage = await popupPromise;
+  await reportPage.waitForLoadState();
+  await expect(reportPage.getByRole("heading", { name: /정산 미리보기 학생 2026년 8월 월간 수업 안내/ })).toBeVisible();
+  await expect(reportPage.getByText("원장님용 상세본", { exact: true })).toBeVisible();
+  await expect(reportPage.getByText("8월 변동 일정 확인용", { exact: true })).toBeVisible();
+  await reportPage.close();
+  expect(pageErrors).toEqual([]);
+});

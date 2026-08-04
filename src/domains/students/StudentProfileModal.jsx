@@ -8,6 +8,7 @@ import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { parseStudentScheduleOverride } from "../../shared/utils/studentSchedule.js";
 import { getCurrentKoreaMonthKey } from "../settlements/monthlySettlement.js";
 import { buildStudentMonthlyAttendanceSummary } from "../settlements/settlementAttendance.js";
+import { StudentMonthlyReportModal } from "./StudentMonthlyReportModal.jsx";
 const consultationTypeOptions = [
   { value: "student", label: "학생 상담" },
   { value: "parent", label: "학부모 상담" }
@@ -275,6 +276,7 @@ export function StudentProfileModal({
   const [newConsultationDraft, setNewConsultationDraft] = useState(() => createConsultationDraft(student.studentId));
   const [newReminderDraft, setNewReminderDraft] = useState(() => createStudentReminderDraft(student.studentId));
   const [attendanceMonth, setAttendanceMonth] = useState(getCurrentKoreaMonthKey);
+  const [isMonthlyReportOpen, setIsMonthlyReportOpen] = useState(false);
   const attendanceSummary = useMemo(() => buildStudentMonthlyAttendanceSummary({
     lessons,
     monthKey: attendanceMonth,
@@ -300,6 +302,7 @@ export function StudentProfileModal({
     setNewConsultationDraft(createConsultationDraft(student.studentId));
     setNewReminderDraft(createStudentReminderDraft(student.studentId));
     setAttendanceMonth(getCurrentKoreaMonthKey());
+    setIsMonthlyReportOpen(false);
   }, [student.studentId]);
 
   useEffect(() => {
@@ -628,14 +631,19 @@ export function StudentProfileModal({
               <strong>월별 출결</strong>
               <p>정규 수업과 특강 수업일지 출결을 한곳에서 확인합니다.</p>
             </div>
-            <input
-              aria-label={`${student.name} 출결 조회 월`}
-              className="studentAttendanceMonthInput"
-              onClick={(event) => event.stopPropagation()}
-              onChange={(event) => setAttendanceMonth(event.target.value)}
-              type="month"
-              value={attendanceMonth}
-            />
+            <div className="studentAttendanceSectionActions">
+              <input
+                aria-label={`${student.name} 출결 조회 월`}
+                className="studentAttendanceMonthInput"
+                onClick={(event) => event.stopPropagation()}
+                onChange={(event) => setAttendanceMonth(event.target.value)}
+                type="month"
+                value={attendanceMonth}
+              />
+              <button className="primaryButton compact" onClick={() => setIsMonthlyReportOpen(true)} type="button">
+                월간 제출 미리보기
+              </button>
+            </div>
           </div>
           <div className="studentProfileSectionBody studentAttendanceSummaryGrid">
             {[
@@ -1243,6 +1251,16 @@ export function StudentProfileModal({
               {saveActionLabel("기본정보만 저장", effectiveProfileSaveState)}
             </button>
           </StickySaveBar>
+        ) : null}
+        {isMonthlyReportOpen ? (
+          <StudentMonthlyReportModal
+            lessons={lessons}
+            ModalComponent={ModalComponent}
+            monthKey={attendanceMonth}
+            onClose={() => setIsMonthlyReportOpen(false)}
+            records={records}
+            student={student}
+          />
         ) : null}
       </div>
     </ModalComponent>

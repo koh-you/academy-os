@@ -12813,6 +12813,14 @@ textarea {
   margin: 4px 0 0;
 }
 
+.studentAttendanceSectionActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 .studentAttendanceSummaryGrid {
   display: grid;
   gap: 12px;
@@ -12841,6 +12849,266 @@ textarea {
   color: #5d6b80;
   font-size: 12px;
   margin: 8px 0 0;
+}
+
+.modalCard.studentMonthlyReportModal {
+  max-width: 1080px;
+}
+
+.studentMonthlyReportAudience {
+  background: #eef4ff;
+  border: 1px solid #d8e5fb;
+  border-radius: 10px;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 5px;
+}
+
+.studentMonthlyReportAudience button {
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+  color: #64748b;
+  cursor: pointer;
+  font-weight: 900;
+  min-height: 38px;
+}
+
+.studentMonthlyReportAudience button.active {
+  background: #ffffff;
+  box-shadow: 0 3px 12px rgba(37, 99, 235, 0.12);
+  color: #1d4ed8;
+}
+
+.studentMonthlyReportPreview {
+  background: #ffffff;
+  border: 1px solid #cbdcf6;
+  border-radius: 12px;
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+}
+
+.studentMonthlyReportPreview > header {
+  align-items: flex-start;
+  border-bottom: 1px solid #dbe7fb;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding-bottom: 14px;
+}
+
+.studentMonthlyReportPreview > header span,
+.studentMonthlyReportPreview > header small {
+  color: #2563eb;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.studentMonthlyReportPreview h3 {
+  color: #17213d;
+  font-size: 21px;
+  margin: 3px 0;
+}
+
+.studentMonthlyReportPreview header p {
+  color: #64748b;
+  font-size: 12px;
+  margin: 0;
+}
+
+.studentMonthlyReportSummary {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.studentMonthlyReportSummary > div {
+  align-items: center;
+  background: #f1f6ff;
+  border: 1px solid #d6e4fb;
+  border-radius: 9px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  min-height: 56px;
+}
+
+.studentMonthlyReportSummary strong {
+  color: #1d4ed8;
+  font-size: 18px;
+}
+
+.studentMonthlyReportSummary span,
+.studentMonthlyReportAttendanceCounts {
+  color: #52647c;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.studentMonthlyReportAttendanceCounts {
+  background: #f8fafc;
+  border-radius: 8px;
+  margin: -6px 0 0;
+  padding: 9px 12px;
+  text-align: center;
+}
+
+.studentMonthlyReportPreview > section {
+  display: grid;
+  gap: 8px;
+}
+
+.studentMonthlyReportPreview h4 {
+  color: #20334d;
+  font-size: 14px;
+  margin: 0;
+}
+
+.studentMonthlyReportRows {
+  border: 1px solid #dbe7fb;
+  border-radius: 9px;
+  display: grid;
+  overflow: hidden;
+}
+
+.studentMonthlyReportRow {
+  align-items: center;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 150px minmax(0, 1fr) auto;
+  min-height: 54px;
+  padding: 8px 11px;
+}
+
+.studentMonthlyReportRow + .studentMonthlyReportRow {
+  border-top: 1px solid #e4ecf8;
+}
+
+.studentMonthlyReportRow > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.studentMonthlyReportRow strong {
+  color: #263a55;
+  font-size: 13px;
+}
+
+.studentMonthlyReportRow span {
+  color: #64748b;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.studentMonthlyReportStatus,
+.studentMonthlyReportChangeReason {
+  border-radius: 999px;
+  font-size: 11px;
+  padding: 5px 8px;
+  white-space: nowrap;
+}
+
+.studentMonthlyReportStatus.status-present {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.studentMonthlyReportStatus.status-pending {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.studentMonthlyReportStatus.status-attention,
+.studentMonthlyReportChangeReason {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.studentMonthlyReportEmpty {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  color: #64748b;
+  font-size: 12px;
+  margin: 0;
+  padding: 12px;
+  text-align: center;
+}
+
+.studentMonthlyReportNote {
+  display: grid;
+  gap: 7px;
+}
+
+.studentMonthlyReportNote > span {
+  color: #20334d;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.studentMonthlyReportNote small {
+  color: #64748b;
+  font-weight: 700;
+}
+
+.studentMonthlyReportNote textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
+.studentMonthlyReportActionStatus {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 850;
+  margin: 0;
+  padding: 10px 12px;
+}
+
+@media (max-width: 720px) {
+  .studentAttendanceSectionHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .studentAttendanceSectionActions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .studentMonthlyReportPreview {
+    padding: 14px;
+  }
+
+  .studentMonthlyReportPreview > header {
+    display: grid;
+  }
+
+  .studentMonthlyReportSummary {
+    gap: 6px;
+  }
+
+  .studentMonthlyReportSummary > div {
+    display: grid;
+    gap: 0;
+    min-height: 62px;
+    text-align: center;
+  }
+
+  .studentMonthlyReportRow {
+    grid-template-columns: 110px minmax(0, 1fr);
+  }
+
+  .studentMonthlyReportStatus,
+  .studentMonthlyReportChangeReason {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
 }
 
 .studentTallySubmissionPanel {

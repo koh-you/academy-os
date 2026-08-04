@@ -140,6 +140,7 @@
     "test:student-lifecycle-overlays": "node scripts/test-student-lifecycle-overlays.mjs",
     "test:student-withdrawn-list-boundary": "node scripts/test-student-withdrawn-list-boundary.mjs",
     "test:student-handover-pdf": "node scripts/test-student-handover-pdf.mjs",
+    "test:student-monthly-report": "node scripts/test-student-monthly-report.mjs",
     "test:parent-response-context": "node scripts/test-parent-response-context.mjs",
     "test:solapi-auto-reconcile": "node scripts/test-solapi-auto-reconcile.mjs",
     "test:teacher-session-security": "node scripts/test-teacher-session-security.mjs",

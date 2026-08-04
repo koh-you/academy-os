@@ -50,6 +50,7 @@ export const domainTestGroups = Object.freeze({
     "scripts/test-class-roster-persistence.mjs",
     "scripts/test-student-schedule-timezone.mjs",
     "scripts/test-student-handover-pdf.mjs",
+    "scripts/test-student-monthly-report.mjs",
     "scripts/test-student-withdrawal-boundary.mjs",
     "scripts/test-parent-response-context.mjs",
     "scripts/test-student-list-sort.mjs",
