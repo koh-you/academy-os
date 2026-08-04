@@ -8,9 +8,9 @@ import {
   versionedWriteRouteContracts
 } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 
-assert.equal(versionedWriteRouteContracts.length, 12);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 12);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 12);
+assert.equal(versionedWriteRouteContracts.length, 13);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 13);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 13);
 assert.equal(versionedWriteRouteContracts.every(Object.isFrozen), true);
 assert.equal(versionedWriteRouteContracts.every(({ request, response, sources }) => (
   Object.isFrozen(request) && Object.isFrozen(response) && Object.isFrozen(sources)
@@ -211,6 +211,26 @@ assert.deepEqual(
     verified: true
   }
 );
+const notificationJob = {
+  notificationJobId: "notification-safe-1",
+  notificationType: "notice_parent",
+  status: "draft"
+};
+assert.deepEqual(
+  parseVersionedWriteRequest("POST", "/api/notification-jobs", { notificationJob }),
+  { notificationJob }
+);
+assert.throws(
+  () => parseVersionedWriteRequest("POST", "/api/notification-jobs", notificationJob),
+  (error) => error.field === "notificationJobId" && error.statusCode === 400
+);
+assert.deepEqual(
+  parseVersionedWriteResponse("POST", "/api/notification-jobs", {
+    notificationJob,
+    source: "supabase"
+  }),
+  { notificationJob, source: "supabase" }
+);
 assert.deepEqual(response, {
   auditId: "supplement-audit",
   source: "supabase",
@@ -276,4 +296,4 @@ assert.throws(
   /field\/alias가 중복/
 );
 
-console.log("versioned write route contracts passed · 12 routes · canonical keys and declared legacy alias only");
+console.log("versioned write route contracts passed · 13 routes · canonical keys and declared legacy alias only");

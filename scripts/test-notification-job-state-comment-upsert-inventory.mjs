@@ -100,7 +100,7 @@ const successHelperIndex = functionSource.indexOf(
   successSetterIndex
 );
 const successPersistIndex = functionSource.indexOf(
-  'postJson("/api/notification-jobs", {',
+  "persistNotificationJobRequest({ notificationJob, request: postJson })",
   successHelperIndex
 );
 const successStatusIndex = functionSource.indexOf(
@@ -131,7 +131,7 @@ const failureHelperIndex = functionSource.indexOf(
   failureSetterIndex
 );
 const failurePersistIndex = functionSource.indexOf(
-  'postJson("/api/notification-jobs", {',
+  "persistNotificationJobRequest({ notificationJob: failedJob, request: postJson })",
   failureHelperIndex
 );
 const failureStatusIndex = functionSource.indexOf(

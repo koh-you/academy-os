@@ -3,6 +3,7 @@ import {
   cancelNotificationJobRequest,
   cancelNotificationJobsRequest,
   persistFailedNotificationJobRequest,
+  persistNotificationJobRequest,
   reserveNotificationJobRequest
 } from "../src/domains/notifications/notificationJobApi.js";
 
@@ -11,6 +12,22 @@ const draftJob = {
   notificationType: "student_reminder",
   status: "scheduled"
 };
+
+async function waitForCallCount(calls, count) {
+  const deadline = Date.now() + 1000;
+  while (calls.length < count && Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
+}
+
+const persistedJob = await persistNotificationJobRequest({
+  notificationJob: draftJob,
+  request: async (path, body) => ({
+    notificationJob: body.notificationJob,
+    source: path === "/api/notification-jobs" ? "supabase" : "unexpected"
+  })
+});
+assert.deepEqual(persistedJob, { notificationJob: draftJob, source: "supabase" });
 
 const reserveCalls = [];
 const reserveState = [];
@@ -42,11 +59,11 @@ const failedJob = await reserveNotificationJobRequest({
   request: async (path, body) => {
     failureCalls.push({ path, body });
     if (path === "/api/notification-jobs/reserve") throw new Error("fixture failure");
-    return { notificationJob: body.notificationJob };
+    return { notificationJob: body.notificationJob, source: "supabase" };
   }
 });
 
-await Promise.resolve();
+await waitForCallCount(failureCalls, 2);
 assert.equal(failedJob.status, "failed");
 assert.equal(failedJob.provider, "academy-os");
 assert.equal(failedJob.error, "Solapi 예약 실패: fixture failure");
@@ -64,11 +81,11 @@ const missingRecipientJob = persistFailedNotificationJobRequest({
   onNotificationJob: (job) => missingRecipientState.push(job),
   request: async (path, body) => {
     missingRecipientCalls.push({ path, body });
-    return { notificationJob: body.notificationJob };
+    return { notificationJob: body.notificationJob, source: "supabase" };
   }
 });
 
-await Promise.resolve();
+await waitForCallCount(missingRecipientCalls, 1);
 assert.equal(missingRecipientJob.error, "수신 연락처가 없습니다.");
 assert.equal(missingRecipientJob.provider, "academy-os");
 assert.equal(missingRecipientJob.status, "failed");

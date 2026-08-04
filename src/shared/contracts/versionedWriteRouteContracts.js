@@ -80,6 +80,15 @@ const resourceMaterialFileDeleteResponseContract = defineApiPayloadContract({
   name: "resource material file delete response"
 });
 
+const notificationJobWriteResponseContract = defineApiPayloadContract({
+  allowUnknownFields: true,
+  fields: {
+    notificationJob: { required: true, type: "object" },
+    source: { allowEmpty: false, required: true, type: "string" }
+  },
+  name: "notification job write response"
+});
+
 function defineVersionedWriteRoute({
   domain,
   fields,
@@ -242,6 +251,16 @@ export const versionedWriteRouteContracts = Object.freeze([
     path: "/api/resource-material-files",
     response: resourceMaterialFileDeleteResponseContract,
     sources: ["resource_materials", "storage.resource-materials"]
+  }),
+  defineVersionedWriteRoute({
+    domain: "notification",
+    fields: {
+      notificationJob: { required: true, type: "object" }
+    },
+    key: "notificationJobWrite",
+    path: "/api/notification-jobs",
+    response: notificationJobWriteResponseContract,
+    sources: ["notification_jobs"]
   })
 ]);
 

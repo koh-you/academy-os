@@ -1,3 +1,19 @@
+export async function persistNotificationJobRequest({
+  notificationJob,
+  request,
+  requestArgs = []
+} = {}) {
+  const {
+    parseVersionedWriteRequest,
+    parseVersionedWriteResponse
+  } = await import("../../shared/contracts/versionedWriteRouteContracts.js");
+  const payload = parseVersionedWriteRequest("POST", "/api/notification-jobs", {
+    notificationJob
+  });
+  const result = await request("/api/notification-jobs", payload, ...requestArgs);
+  return parseVersionedWriteResponse("POST", "/api/notification-jobs", result);
+}
+
 export function persistFailedNotificationJobRequest({
   errorMessage,
   notificationJob,
@@ -13,7 +29,8 @@ export function persistFailedNotificationJobRequest({
     updatedAt: now()
   };
   onNotificationJob(failedJob);
-  request("/api/notification-jobs", { notificationJob: failedJob }).catch((persistError) => console.error(persistError));
+  persistNotificationJobRequest({ notificationJob: failedJob, request })
+    .catch((persistError) => console.error(persistError));
   return failedJob;
 }
 
