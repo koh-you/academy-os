@@ -6,7 +6,8 @@
 
 - 6개 직접 versioned write route의 request field·명시 legacy alias·authoritative source·verified response를 frozen registry로 고정하고, 잘못된 object/field type·미지 field·canonical+alias 동시 입력을 공통 400 contract error로 판정하는 pure helper를 추가했다.
 - 이번 단위는 registry와 fixture만 추가해 `api/server.js`, client request, Supabase 저장·재조회, provider 동작을 변경하지 않았다. 다음 4-1b부터 lesson journal·supplement·attendance 경계에 한 route씩 적용한다.
-- 검증: contract fixture, domain all `62/62`, runtime lint, scenario `827/827`, production `827/827`, build `414 modules`·main `942.25 kB`·lazy `12/12` 통과.
+- 첫 exact-head CI에서 2026-08-05를 미래 날짜로 가정한 safe fixture 2건이 실제 날짜 경계를 넘어 실패했다. 해당 테스트만 2026-08-03 한국 시간으로 고정하고 공용 fixture의 다른 수업 개수와 무관하게 대상 17시 수업 2건을 검증하도록 교정했다.
+- 검증: contract fixture, domain all `62/62`, runtime lint, scenario `827/827`, production `827/827`, build `414 modules`·main `942.25 kB`·lazy `12/12`, 집중 browser `2/2`, 전체 browser `47/47` 통과.
 
 ## 2026-08-04 App/API 4차 리팩터링 4-0
 
