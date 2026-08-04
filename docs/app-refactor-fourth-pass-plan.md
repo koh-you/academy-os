@@ -184,3 +184,4 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 - 4-1r: `POST /api/notification-jobs/readiness-check`의 clock/window/Slack flag와 source issue response를 공통 contract에 연결했다. source 누락 판정과 선택적 Slack owner는 유지하고 safe API는 Slack 요청을 거부했다.
 - 4-1s: `POST /api/notification-jobs/dispatch-due`의 token/dry-run/limit/clock payload와 processed/source/reconcile response를 공통 contract에 연결했다. 인증 선판정과 server source/provider orchestration은 유지하고 safe API는 0건/no-write와 민감 override 차단만 검증했다.
 - 4-1t: `POST /api/exam-analysis-runs`의 run metadata payload와 source/run response를 공통 contract에 연결했다. `{ run }`·root 직접 legacy 입력은 명시적으로 보존하고 safe API는 가상 row 저장·재조회만 수행했다.
+- 4-1u: `POST /api/exam-analysis-runs/confirm-question-count`의 교사 확정 문항 수·판독 근거 payload와 run/question rows/event response를 공통 contract에 연결했다. 실제 1~N row RPC와 event owner는 server에 유지하고 safe API는 가상 row·reload만 검증했다.

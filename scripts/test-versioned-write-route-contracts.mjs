@@ -8,9 +8,9 @@ import {
   versionedWriteRouteContracts
 } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 
-assert.equal(versionedWriteRouteContracts.length, 20);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 20);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 20);
+assert.equal(versionedWriteRouteContracts.length, 21);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 21);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 21);
 assert.equal(versionedWriteRouteContracts.every(Object.isFrozen), true);
 assert.equal(versionedWriteRouteContracts.every(({ request, response, sources }) => (
   Object.isFrozen(request) && Object.isFrozen(response) && Object.isFrozen(sources)
@@ -428,6 +428,37 @@ assert.deepEqual(
     source: "supabase"
   }
 );
+assert.deepEqual(
+  parseVersionedWriteRequest("POST", "/api/exam-analysis-runs/confirm-question-count", {
+    analysisRunId: " exam-run-safe-1 ",
+    questionCount: 24
+  }),
+  {
+    analysisRunId: "exam-run-safe-1",
+    confirmedBy: "teacher",
+    detectedQuestionConfidence: 1,
+    detectedQuestionEvidence: [],
+    missingQuestionNumbers: [],
+    questionCount: 24
+  }
+);
+assert.deepEqual(
+  parseVersionedWriteResponse("POST", "/api/exam-analysis-runs/confirm-question-count", {
+    analysisRun: { analysisRunId: "exam-run-safe-1", confirmedQuestionCount: 24 },
+    events: [{ eventType: "question_count_confirmed" }],
+    insertedQuestionCount: 24,
+    ok: true,
+    questions: Array.from({ length: 24 }),
+    source: "supabase"
+  }),
+  {
+    analysisRun: { analysisRunId: "exam-run-safe-1", confirmedQuestionCount: 24 },
+    events: [{ eventType: "question_count_confirmed" }],
+    insertedQuestionCount: 24,
+    questions: Array.from({ length: 24 }),
+    source: "supabase"
+  }
+);
 assert.deepEqual(response, {
   auditId: "supplement-audit",
   source: "supabase",
@@ -493,4 +524,4 @@ assert.throws(
   /field\/alias가 중복/
 );
 
-console.log("versioned write route contracts passed · 20 routes · canonical keys and declared legacy alias only");
+console.log("versioned write route contracts passed · 21 routes · canonical keys and declared legacy alias only");

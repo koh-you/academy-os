@@ -1505,12 +1505,10 @@ function verifyExamAnalysisSourceWithAiRequest(sourceId) {
   );
 }
 
-function confirmExamAnalysisQuestionCountRequest(payload) {
-  return postJsonWithTimeout(
-    "/api/exam-analysis-runs/confirm-question-count",
-    payload,
-    30000,
-    "문항 수 확정 저장이 지연되고 있습니다."
+async function confirmExamAnalysisQuestionCountRequest(payload) {
+  return (await import("../domains/exams/examAnalysisRunApi.js")).confirmExamQuestionCount(
+    postJsonWithTimeout,
+    payload
   );
 }
 

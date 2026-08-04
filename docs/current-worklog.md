@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-1u exam question count
+
+- `POST /api/exam-analysis-runs/confirm-question-count`를 21번째 공통 contract로 고정했다. analysis run ID, 1~200 정수, 판독 confidence/evidence/missing numbers와 confirmer를 source 쓰기 전에 검증하고 run/question rows/event/source response를 client가 다시 검증한다.
+- 실제 Supabase RPC 1~N 행 생성, run 갱신, 확정 event, 재조회 owner는 server pipeline에 유지했다. safe server는 가상 run에 question rows/event만 저장하며 화면의 교사 확정→API 재조회→reload 복구를 검증하고 AI·Storage·알림을 실행하지 않는다.
+- 첫 browser는 기본 `원본·PDF` tab에서 숨겨진 입력을 기다려 실패해 실제 사용자 동선대로 `문항 구조` tab을 여는 검사로 교정했다. 첫 build는 contract registry 정적 연결로 main 예산을 넘겨 App request가 행동 시 helper를 동적 로드하도록 바꿨다. 첫 Preview도 Node 24.15에서 로컬보다 55 bytes 큰 main으로 상한을 넘겨 endpoint timeout을 lazy helper가 소유하고 App에는 transport만 주입하도록 줄였다. 검증: contract `21 routes`, prompt studio·teacher/lazy 전용, lint, scenario·production `827/827`, build `418 modules`·main `944.84 kB`·lazy `12/12`, 격리 browser `1/1` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-1t exam analysis run
 
 - 유료 실행이 없는 `POST /api/exam-analysis-runs` metadata 저장을 20번째 공통 contract로 고정했다. canonical `{ analysisRun }`과 source/run response를 client·server가 함께 검증하고 기존 `{ run }`·root 직접 payload는 endpoint helper에서 명시적으로 보존한다.

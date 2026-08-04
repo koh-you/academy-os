@@ -126,7 +126,13 @@ const safeReadEnd = safeApiSource.indexOf(
 );
 assert.ok(safeReadStart >= 0 && safeReadEnd > safeReadStart);
 const safeReadSource = safeApiSource.slice(safeReadStart, safeReadEnd);
-for (const expected of ["analysisRuns: state.examAnalysisRuns", "analysisRunId", "questions: []", "sources: []"]) {
+for (const expected of [
+  "analysisRuns: state.examAnalysisRuns",
+  "analysisRunId",
+  "state.examAnalysisQuestions.filter",
+  "state.examAnalysisEvents.filter",
+  "sources: []"
+]) {
   assert.ok(safeReadSource.includes(expected), `safe exam run readback missing ${expected}`);
 }
 

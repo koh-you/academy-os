@@ -462,7 +462,7 @@ test("exam analysis pipeline opens from its deferred chunk without running paid 
   expect(pageErrors).toEqual([]);
 });
 
-test("exam analysis run metadata saves to the safe source and survives reload", async ({ page }) => {
+test("exam analysis run metadata and teacher question count save to the safe source and survive reload", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   const title = "안전 시험분석 계약 저장";
   await loginAsTeacher(page);
@@ -477,11 +477,28 @@ test("exam analysis run metadata saves to the safe source and survives reload", 
   await page.getByRole("button", { name: "분석 저장" }).click();
   await expect(page.getByText("시험분석 · 저장 완료", { exact: true })).toBeVisible();
   await expect(page.getByRole("region", { name: "시험분석 분석본 목록" }).getByText(title, { exact: true })).toBeVisible();
+  await page.getByRole("tab", { name: /문항 구조/ }).click();
+  await page.getByRole("spinbutton", { name: "선생님 확정 문항 수" }).fill("12");
+  await page.getByRole("button", { name: "12문항 확정" }).click();
+  await expect(page.getByText(/시험분석 · 문항 수 확정 완료 · 12문항 · 12행/).first()).toBeVisible();
+
+  const listResult = await (await request.get(`${safeApiBaseUrl}/api/exam-analysis-runs`)).json();
+  const savedRun = listResult.analysisRuns.find((run) => run.title === title);
+  const detailResult = await (
+    await request.get(`${safeApiBaseUrl}/api/exam-analysis-runs?id=${encodeURIComponent(savedRun.analysisRunId)}`)
+  ).json();
+  expect(detailResult.analysisRun.confirmedQuestionCount).toBe(12);
+  expect(detailResult.analysisRun.questionCountStatus).toBe("teacher_confirmed");
+  expect(detailResult.questions).toHaveLength(12);
+  expect(detailResult.events).toHaveLength(1);
+  expect(detailResult.events[0].eventType).toBe("question_count_confirmed");
 
   await page.reload();
   await expect(page.getByRole("navigation", { name: "주요 화면" })).toBeVisible();
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /시험분석/ }).click();
   await expect(page.getByRole("region", { name: "시험분석 분석본 목록" }).getByText(title, { exact: true })).toBeVisible();
+  await page.getByRole("tab", { name: /문항 구조/ }).click();
+  await expect(page.getByText("12문항 확정", { exact: true }).first()).toBeVisible();
   expect(pageErrors).toEqual([]);
 });
 

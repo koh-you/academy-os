@@ -31,7 +31,10 @@ import {
   validateResourceMaterialFile
 } from "../src/domains/resources/resourceMaterialStorageModel.js";
 import { saveReportSnapshotWithVerification } from "../src/domains/reports/reportSnapshotPersistence.js";
-import { parseExamAnalysisRunWriteRequest } from "../src/domains/exams/examAnalysisRunApi.js";
+import {
+  parseExamAnalysisQuestionCountConfirmRequest,
+  parseExamAnalysisRunWriteRequest
+} from "../src/domains/exams/examAnalysisRunApi.js";
 import { parseVersionedWriteRequest } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 
 const host = "127.0.0.1";
@@ -79,6 +82,8 @@ const initialState = {
       studentIds: ["safe-settlement-student"]
     }
   ],
+  examAnalysisEvents: [],
+  examAnalysisQuestions: [],
   examAnalysisRuns: [],
   examPrepRows: [
     {
@@ -701,6 +706,81 @@ function handleMutation(pathname, payload) {
     };
     state.examAnalysisRuns = upsertById(state.examAnalysisRuns, analysisRun, ["analysisRunId"]);
     return { analysisRun, ok: true, source: "supabase" };
+  }
+  if (pathname === "/api/exam-analysis-runs/confirm-question-count") {
+    let parsedPayload;
+    try {
+      parsedPayload = parseExamAnalysisQuestionCountConfirmRequest(payload);
+    } catch (error) {
+      return {
+        code: error.code,
+        error: error.message,
+        field: error.field,
+        ok: false,
+        statusCode: Number(error.statusCode) || 400
+      };
+    }
+    const currentRun = state.examAnalysisRuns
+      .find((run) => run.analysisRunId === parsedPayload.analysisRunId) ?? null;
+    if (!currentRun) {
+      return {
+        error: "시험분석 작업을 찾지 못했습니다.",
+        ok: false,
+        statusCode: 404
+      };
+    }
+    const previousQuestions = state.examAnalysisQuestions
+      .filter((question) => question.analysisRunId === parsedPayload.analysisRunId);
+    const previousNumbers = new Set(previousQuestions.map((question) => Number(question.questionNumber)));
+    const insertedQuestionCount = Array.from(
+      { length: parsedPayload.questionCount },
+      (_, index) => index + 1
+    ).filter((questionNumber) => !previousNumbers.has(questionNumber)).length;
+    const questions = Array.from({ length: parsedPayload.questionCount }, (_, index) => {
+      const questionNumber = index + 1;
+      return previousQuestions.find((question) => Number(question.questionNumber) === questionNumber) ?? {
+        analysisRunId: parsedPayload.analysisRunId,
+        questionId: `${parsedPayload.analysisRunId}-question-${questionNumber}`,
+        questionNumber
+      };
+    });
+    state.examAnalysisQuestions = [
+      ...state.examAnalysisQuestions.filter((question) => question.analysisRunId !== parsedPayload.analysisRunId),
+      ...questions
+    ];
+    const confirmedAt = new Date().toISOString();
+    const analysisRun = {
+      ...currentRun,
+      confirmedAt,
+      confirmedBy: parsedPayload.confirmedBy,
+      confirmedQuestionCount: parsedPayload.questionCount,
+      detectedQuestionConfidence: parsedPayload.detectedQuestionConfidence,
+      detectedQuestionCount: parsedPayload.questionCount,
+      detectedQuestionEvidence: parsedPayload.detectedQuestionEvidence,
+      missingQuestionNumbers: parsedPayload.missingQuestionNumbers,
+      questionCountStatus: "teacher_confirmed",
+      rowsLocked: true,
+      updatedAt: confirmedAt,
+      workflowStatus: "rows_created"
+    };
+    state.examAnalysisRuns = upsertById(state.examAnalysisRuns, analysisRun, ["analysisRunId"]);
+    const event = {
+      analysisRunId: parsedPayload.analysisRunId,
+      eventId: `${parsedPayload.analysisRunId}-question-count-confirmed`,
+      eventType: "question_count_confirmed",
+      occurredAt: confirmedAt
+    };
+    state.examAnalysisEvents = upsertById(state.examAnalysisEvents, event, ["eventId"]);
+    return {
+      aiJobs: [],
+      analysisRun,
+      events: state.examAnalysisEvents.filter((item) => item.analysisRunId === parsedPayload.analysisRunId),
+      insertedQuestionCount,
+      ok: true,
+      questions,
+      source: "supabase",
+      sources: []
+    };
   }
   if (["/api/attendance/check", "/api/attendance/preview"].includes(pathname)) {
     return { ok: true, ...handleSafeConsecutiveAttendance(pathname, payload) };
@@ -1645,9 +1725,9 @@ const server = http.createServer(async (request, response) => {
     return sendJson(response, 200, {
       aiJobs: [],
       analysisRun,
-      events: [],
+      events: state.examAnalysisEvents.filter((event) => event.analysisRunId === analysisRunId),
       ok: true,
-      questions: [],
+      questions: state.examAnalysisQuestions.filter((question) => question.analysisRunId === analysisRunId),
       safeFixture: true,
       source: "supabase",
       sources: []
