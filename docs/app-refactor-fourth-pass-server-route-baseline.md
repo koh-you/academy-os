@@ -125,3 +125,9 @@ route signature의 현재 등록 순서는 SHA-256 `118af79f…de5`로 fixture�
 - `POST /api/exam-post-submissions/confirm`을 `src/shared/server/examPostConfirmRouteRegistry.js`로 이동하고 portal write 다음·teacher-account 전에 dispatch해 기존 순서를 유지했다.
 - teacher guard를 body 파싱·source action보다 먼저 실행하고 payload identity, verified source 응답, 401과 `statusCode || 500` 의미를 동작 fixture로 고정했다.
 - AppState의 시험 제출 확인 저장·전체 목록 재조회, mutation lock과 오류 생성 owner는 server `confirmExamPostSubmission`에 유지했다. server는 7,676줄이며 다음은 app/core read route다.
+
+## 4-3j 완료 상태
+
+- `GET /api/app-state`와 `GET /api/special-lecture-guides`를 `src/shared/server/appCoreReadRouteRegistry.js`로 이동하고 teacher-account 다음·app-state write 전에 dispatch해 기존 순서를 유지했다.
+- app-state의 `includeRows=true` 선택 응답, guide 존재 flag·빈 배열 fallback, source 실패 500을 동작 fixture로 고정했다.
+- Supabase AppState read와 민감 key filtering owner는 server `listAppState`에 유지했다. server는 7,648줄이며 다음은 app-state versioned write route다.

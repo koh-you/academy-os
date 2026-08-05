@@ -2,6 +2,14 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-3j app/core read registry
+
+- `/api/app-state`와 `/api/special-lecture-guides` GET을 `appCoreReadRouteRegistry`로 이동했다. includeRows query와 guide fallback 응답을 보존한다.
+- Supabase read owner는 server에 유지했고 local read-only 200 smoke만 수행했다. 운영 쓰기·Storage·provider는 사용하지 않았다.
+- route/API closeout, domain `69/69`, lint, scenario·production `827/827`, build `418`·main `944.65 kB`·lazy `12/12` 통과. registry 13 + server 직접 107 = 전역 120 route다.
+- 첫 exact-head CI의 autosave inventory 위치 결합은 registry GET/server POST를 각각 확인하도록 최소 교정했고 관련 inventory·production을 재통과했다.
+- 다음은 최신 main에서 app-state POST의 versioned parser/safe key filter/source write 응답을 한 단위로 분리한다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3i exam post confirm registry
 
 - `/api/exam-post-submissions/confirm`의 teacher guard→body→source action과 verified/error 응답을 `examPostConfirmRouteRegistry`로 이동했다.

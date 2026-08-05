@@ -120,6 +120,7 @@ import { createTeacherAccountRouteRegistry } from "../src/shared/server/teacherA
 import { createPortalReadRouteRegistry } from "../src/shared/server/portalReadRouteRegistry.js";
 import { createPortalWriteRouteRegistry } from "../src/shared/server/portalWriteRouteRegistry.js";
 import { createExamPostConfirmRouteRegistry } from "../src/shared/server/examPostConfirmRouteRegistry.js";
+import { createAppCoreReadRouteRegistry } from "../src/shared/server/appCoreReadRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -262,6 +263,10 @@ const { dispatch: dispatchExamPostConfirmRoute } = createExamPostConfirmRouteReg
   confirmExamPostSubmission,
   getTeacherSession,
   readJsonBody,
+  sendJson
+});
+const { dispatch: dispatchAppCoreReadRoute } = createAppCoreReadRouteRegistry({
+  listAppState,
   sendJson
 });
 const teacherAccountTable = "teacher_accounts";
@@ -5855,40 +5860,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchPortalWriteRoute({ request, response, requestUrl })) return;
   if (await dispatchExamPostConfirmRoute({ request, response, requestUrl })) return;
   if (await dispatchTeacherAccountRoute({ request, response, requestUrl })) return;
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/app-state") {
-    try {
-      const result = await listAppState();
-      const { stateRows, ...summary } = result;
-      sendJson(request, response, 200, {
-        ok: true,
-        ...summary,
-        ...(requestUrl.searchParams.get("includeRows") === "true" ? { stateRows } : {})
-      });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/special-lecture-guides") {
-    try {
-      const result = await listAppState();
-      const hasSpecialLectureGuides = Array.isArray(result.states?.specialLectureGuides);
-      const specialLectureGuides = hasSpecialLectureGuides
-        ? result.states.specialLectureGuides
-        : [];
-      sendJson(request, response, 200, {
-        hasSpecialLectureGuides,
-        ok: true,
-        source: result.source,
-        specialLectureGuides
-      });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
+  if (await dispatchAppCoreReadRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/app-state") {
     try {

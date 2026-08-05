@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [appSource, controllerSource, coreDataSource, platformMapperSource, serverSource, schemaSource, workflowSource, packageSource] = await Promise.all([
+const [appCoreReadRouteRegistrySource, appSource, controllerSource, coreDataSource, platformMapperSource, serverSource, schemaSource, workflowSource, packageSource] = await Promise.all([
+  read("../src/shared/server/appCoreReadRouteRegistry.js"),
   read("../src/app/App.jsx"),
   read("../src/domains/appState/appStatePersistenceController.js"),
   read("../api/routes/coreData.js"),
@@ -91,10 +92,11 @@ assert.ok(upsertSource.includes("createAppStateVersionFilter(key, expectedVersio
 assert.ok(upsertSource.includes("createAppStateConflictError(key)"));
 
 const getRouteSource = sourceBetween(
-  serverSource,
-  'if (request.method === "GET" && requestUrl.pathname === "/api/app-state")',
-  'if (request.method === "GET" && requestUrl.pathname === "/api/special-lecture-guides")'
+  appCoreReadRouteRegistrySource,
+  'if (requestUrl.pathname === "/api/app-state")',
+  'if (requestUrl.pathname === "/api/special-lecture-guides")'
 );
+assert.ok(serverSource.includes("await dispatchAppCoreReadRoute({ request, response, requestUrl })"));
 assert.ok(getRouteSource.includes('requestUrl.searchParams.get("includeRows") === "true"'));
 assert.ok(getRouteSource.includes("{ stateRows, ...summary }"));
 
