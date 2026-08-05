@@ -118,6 +118,7 @@ import { createSystemRouteRegistry } from "../src/shared/server/systemRouteRegis
 import { createAuthLoginRouteRegistry } from "../src/shared/server/authLoginRouteRegistry.js";
 import { createTeacherAccountRouteRegistry } from "../src/shared/server/teacherAccountRouteRegistry.js";
 import { createPortalReadRouteRegistry } from "../src/shared/server/portalReadRouteRegistry.js";
+import { createPortalWriteRouteRegistry } from "../src/shared/server/portalWriteRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -246,6 +247,15 @@ const { dispatch: dispatchPortalReadRoute } = createPortalReadRouteRegistry({
   getPortalData,
   getPortalSession,
   sendJson
+});
+const { dispatch: dispatchPortalWriteRoute } = createPortalWriteRouteRegistry({
+  completePortalHomework,
+  getPortalSession,
+  mutatePortalQuestion,
+  readJsonBody,
+  savePortalExamPostSubmission,
+  sendJson,
+  upsertPortalState
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5835,70 +5845,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchSystemRoute({ request, response, requestUrl })) return;
   if (await dispatchAuthLoginRoute({ request, response, requestUrl })) return;
   if (await dispatchPortalReadRoute({ request, response, requestUrl })) return;
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/portal-state") {
-    try {
-      const portalSession = getPortalSession(request);
-      if (!portalSession) {
-        sendJson(request, response, 401, { ok: false, error: "학생 세션 인증이 필요합니다." });
-        return;
-      }
-      const payload = await readJsonBody(request);
-      const result = await upsertPortalState(portalSession, payload.states ?? payload);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/portal-homeworks/complete") {
-    try {
-      const portalSession = getPortalSession(request);
-      if (!portalSession) {
-        sendJson(request, response, 401, { ok: false, error: "학생 세션 인증이 필요합니다." });
-        return;
-      }
-      const payload = await readJsonBody(request);
-      const result = await completePortalHomework(portalSession, payload.homeworkId);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, Number(error.statusCode) || 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/portal-questions") {
-    try {
-      const portalSession = getPortalSession(request);
-      if (!portalSession) {
-        sendJson(request, response, 401, { ok: false, error: "학생 세션 인증이 필요합니다." });
-        return;
-      }
-      const payload = await readJsonBody(request);
-      const result = await mutatePortalQuestion(portalSession, payload);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, Number(error.statusCode) || 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/portal-exam-post-submissions") {
-    try {
-      const portalSession = getPortalSession(request);
-      if (!portalSession) {
-        sendJson(request, response, 401, { ok: false, error: "학생 세션 인증이 필요합니다." });
-        return;
-      }
-      const payload = await readJsonBody(request);
-      const result = await savePortalExamPostSubmission(portalSession, payload);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, Number(error.statusCode) || 500, { ok: false, error: error.message });
-    }
-    return;
-  }
+  if (await dispatchPortalWriteRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-post-submissions/confirm") {
     try {

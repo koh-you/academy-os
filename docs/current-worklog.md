@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-3h portal write registry
+
+- portal-state, 숙제 완료, 질문 CRUD, 시험 후 제출 POST 4개의 guard/body/action/response 조립을 frozen registry로 이동했다. 기존 route 순서와 120개 signature hash는 유지한다.
+- portal guard는 body/source보다 먼저 실행하고, payload mapping과 route별 500/statusCode 응답을 전용 fixture로 고정했다. 실제 Supabase 저장·재조회, mutation lock과 App local draft는 server/domain owner에 남았다.
+- 잘못된 bearer로 local backend 401 smoke만 수행해 source/provider가 실행되지 않음을 확인했다. 운영 로그인·데이터 쓰기·Storage·알림·AI 호출은 없었다.
+- 검증: route/API closeout, domain `69/69`, lint, scenario·production `827/827`, build `418 modules`·main `944.65 kB`·lazy `12/12` 통과. server 직접 route는 110개, registry 포함 합계는 120개다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3g portal read registry
 
 - portal-data route의 session guard→scoped source read→role 포함 응답을 단일-route registry로 이동했다.

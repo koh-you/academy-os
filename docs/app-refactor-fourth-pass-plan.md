@@ -211,4 +211,5 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 - 4-3e: login route의 teacher/student/parent role→credential action→HMAC session token/account 응답 조립을 단일-route registry로 이동했다. credential DB 함수와 token codec owner는 주입 상태로 유지했다.
 - 4-3f: teacher-account route의 Supabase configuration gate, current credential, input validation, password 선택과 저장 응답을 단일-route registry로 이동했다. hash/DB action은 server owner를 유지한다.
 - 4-3g: portal-data read route의 session guard→scoped source read→role 응답과 401/404/500을 단일-route registry로 이동했다. 실제 filtering은 server action owner를 유지한다.
-- 다음 4-3h는 portal session write route 4개를 같은 guard/error 의미로 이동한다.
+- 4-3h: portal-state/homework/question/exam submission POST 4개의 session guard→body→source action→응답 조립을 frozen registry로 이동했다. Supabase 저장·재조회, mutation lock, local draft owner는 이동하지 않았다.
+- 다음 4-3i는 teacher-account보다 앞선 교사 시험 후 제출 확인 route를 기존 순서 그대로 분리한다.
