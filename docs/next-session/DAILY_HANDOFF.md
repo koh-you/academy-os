@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 월간 제출 달력·표·PDF 선택
+
+- 월간 제출 화면은 달력 → 하단 수업·출결 표 → 변동사항으로 표시한다. 상단 대상별 간단본/상세본 문구를 없애고 `상세 정보 표시`만 남겼다.
+- PDF 포함 항목은 달력·표·변동사항 세 체크박스로 독립 선택한다. 비저장 메모·복사·인쇄만 사용하며 운영 데이터와 알림 side effect는 없다.
+- monthly report·student `15/15`·modal inventory·lint·scenario `827/827`·build와 focused safe browser `1/1` 통과. 다음 확인은 exact branch CI와 frontend 배포 smoke다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3i exam post confirm registry
 
 - `/api/exam-post-submissions/confirm`의 teacher guard→body→source action과 verified/error 응답을 `examPostConfirmRouteRegistry`로 이동했다.

@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 월간 제출 달력·표·PDF 선택
+
+- 학생 월간 제출 미리보기를 월간 달력과 하단 수업·출결 표, 변동사항 순서로 재구성했다. 기존 `학부모용 간단본`·`원장님용 상세본` 상단 문구는 제거하고 상세 정보 표시만 선택할 수 있다.
+- PDF의 달력·표·변동사항을 각각 독립 체크하며, 선택하지 않은 section은 출력 HTML에 포함하지 않는다. 전달 메모·복사·인쇄는 계속 비저장이고 운영 원천이나 알림을 바꾸지 않는다.
+- 검증: monthly report fixture, student `15/15`, modal inventory, runtime lint, scenario `827/827`, build `418 modules`·main `944.65 kB`·lazy `12/12`, focused safe browser `1/1` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3i exam post confirm registry
 
 - 교사 시험 후 제출 확인 POST의 teacher guard/body/action/response 조립을 frozen registry로 이동했다. 기존 전역 120개 route 순서와 오류 status를 유지한다.

@@ -43,6 +43,9 @@ assert.equal(model.summary.planned, 4);
 assert.equal(model.summary.actual, 2);
 assert.equal(model.attendance.present, 1);
 assert.equal(model.attendance.late, 1);
+assert.equal(model.calendarWeeks.length, 6, "2026년 8월은 일요일 시작 6주 달력으로 표시해야 합니다.");
+assert.equal(model.calendarWeeks.flat().find((cell) => cell?.date === "2026-08-26")?.rows[0]?.lessonId, "one_day");
+assert.deepEqual(model.rows.map((row) => row.lessonId), ["regular_mon", "regular_fri", "closure_mon", "canceled_fri", "special", "one_day"]);
 assert.ok(model.changeRows.some((row) => row.lessonId === "one_day" && row.changeReason === "보강·추가 수업"));
 assert.ok(model.changeRows.some((row) => row.lessonId === "canceled_fri" && row.changeReason === "취소된 수업"));
 assert.ok(model.changeRows.some((row) => row.lessonId === "closure_mon" && row.changeReason === "휴강"));
@@ -68,12 +71,20 @@ globalThis.window = {
   })
 };
 openStudentMonthlyReportPdf(model, { audience: "director", note: "원장님 확인용" });
-delete globalThis.window;
 assert.equal(printedHtml.length, 1);
-assert.match(printedHtml[0], /원장님용 상세본/);
-assert.match(printedHtml[0], /예정 수업/);
-assert.match(printedHtml[0], /실제 출결/);
+assert.doesNotMatch(printedHtml[0], /학부모용 간단본|원장님용 상세본/);
+assert.match(printedHtml[0], /월간 달력/);
+assert.match(printedHtml[0], /수업·출결 표/);
 assert.match(printedHtml[0], /변동사항/);
 assert.match(printedHtml[0], /원장님 확인용/);
+
+openStudentMonthlyReportPdf(model, {
+  sections: { calendar: false, changes: false, table: true }
+});
+assert.equal(printedHtml.length, 2);
+assert.doesNotMatch(printedHtml[1], /<h2>월간 달력<\/h2>/);
+assert.match(printedHtml[1], /<h2>수업·출결 표<\/h2>/);
+assert.doesNotMatch(printedHtml[1], /<h2>변동사항<\/h2>/);
+delete globalThis.window;
 
 console.log("student monthly report model tests passed");
