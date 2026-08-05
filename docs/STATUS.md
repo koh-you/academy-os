@@ -4,8 +4,10 @@
 
 ## 4차 리팩터링 현재 단위
 
+- 4-3n은 test session POST/DELETE의 canonical·legacy payload alias, delete selector와 source action 응답을 `src/shared/server/testSessionWriteRouteRegistry.js`로 옮겼다. DB 저장·재조회/삭제 owner는 core data에 유지한다.
+- 4-3m main `6bb35e06`의 GitHub Production checks는 성공했지만 Vercel은 24시간 build rate limit로 production 배포가 보류됐다. 4-3n은 exact-head 검증·push까지 진행하되 Vercel green 전 main 병합하지 않는다.
+- 다음 4-3o는 4-3n 배포 gate 해소 뒤 최신 main에서 integrations status read 경계를 분리한다.
 - 4-3m은 test session/attempt GET 두 개의 query alias/filter, source response와 실패 응답을 `src/shared/server/testSessionReadRouteRegistry.js`로 옮겼다. Supabase read owner는 기존 `listTestSessions/listTestAttempts`에 유지한다.
-- 다음 4-3n은 최신 main에서 test session write/delete route 경계를 별도 단위로 분리한다.
 - 4-3l은 teacher-authenticated report snapshot POST의 guard, versioned parser와 report persistence service 조립을 `src/shared/server/reportSnapshotRouteRegistry.js`로 옮겼다. AppState CAS/readback·재시도 검증은 기존 domain/server owner에 유지한다.
 - 4-3k는 app-state POST의 versioned parser, 보호 key 제외, `expectedUpdatedAt` CAS option과 오류 응답을 `src/shared/server/appStateWriteRouteRegistry.js`로 옮겼다. Supabase write/readback owner는 server의 `upsertAppState`에 유지한다.
 - 4-3j는 app-state와 특강 guide GET 두 개의 source summary, 선택적 `stateRows`, guide 존재/fallback 응답을 `src/shared/server/appCoreReadRouteRegistry.js`로 옮겼다. Supabase read owner는 server의 `listAppState`에 유지한다.

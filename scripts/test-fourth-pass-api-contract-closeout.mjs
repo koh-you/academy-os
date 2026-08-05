@@ -8,6 +8,7 @@ import { portalWriteRouteSignatures } from "../src/shared/server/portalWriteRout
 import { reportSnapshotRouteSignatures } from "../src/shared/server/reportSnapshotRouteRegistry.js";
 import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
 import { teacherAccountRouteSignatures } from "../src/shared/server/teacherAccountRouteRegistry.js";
+import { testSessionWriteRouteSignatures } from "../src/shared/server/testSessionWriteRouteRegistry.js";
 
 const [appStateWriteRouteSource, packageJson, reportSnapshotRouteSource, serverSource] = await Promise.all([
   readFile(new URL("../src/shared/server/appStateWriteRouteRegistry.js", import.meta.url), "utf8"),
@@ -161,7 +162,8 @@ const directWriteSignatures = [
   ...examPostConfirmRouteSignatures.map(signatureOf),
   ...portalWriteRouteSignatures.map(signatureOf),
   ...reportSnapshotRouteSignatures.map(signatureOf),
-  ...teacherAccountRouteSignatures.map(signatureOf)
+  ...teacherAccountRouteSignatures.map(signatureOf),
+  ...testSessionWriteRouteSignatures.map(signatureOf)
 ].sort();
 assert.equal(directWriteSignatures.length, 89);
 assert.equal(new Set(directWriteSignatures).size, 89);

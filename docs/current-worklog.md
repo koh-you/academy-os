@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-3n test session write registry
+
+- test session POST/DELETE의 payload alias와 delete selector, source action 응답 조립을 frozen registry로 이동했다. 실제 DB 저장·재조회/삭제는 core data owner에 유지한다.
+- pure fixture만 사용해 canonical/legacy/flat payload와 오류를 검증했고 운영 DB write/delete·Storage·provider를 실행하지 않았다.
+- 검증은 domain 69/69, scenario·production 827/827, build 418 modules·main 944.65 kB·lazy 12/12를 통과했다. registry 19 + 직접 route 101로 전역 120을 유지한다.
+- 4-3m main `6bb35e06`은 GitHub main CI가 성공했지만 Vercel 24시간 build rate limit로 production이 4-3l `cf558aa4` 배포에 머문다. 4-3n은 push/CI 후 Vercel green 전 main 병합을 보류한다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3m test session read registry
 
 - test session/attempt GET의 query alias/filter와 source 응답 조립을 frozen registry로 이동했다. Supabase read는 기존 core data owner에 유지한다.

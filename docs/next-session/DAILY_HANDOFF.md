@@ -2,6 +2,14 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-3n test session write registry
+
+- `/api/test-sessions` POST/DELETE의 payload alias/delete selector와 source response를 `testSessionWriteRouteRegistry`로 이동했다.
+- DB write/readback/delete는 core data owner다. pure fixture만 실행했고 운영 DB·Storage·provider는 사용하지 않았다.
+- 전체 검증은 domain 69/69, scenario·production 827/827, build 418 modules·main 944.65 kB·lazy 12/12를 통과했다. registry 19 + 직접 route 101 = 전역 120이다.
+- 4-3m main `6bb35e06` GitHub CI는 성공했지만 Vercel 24시간 build rate limit로 production은 4-3l에 머문다. 4-3n은 push/CI 후 Vercel green 전 main 병합을 보류한다.
+- 다음은 배포 gate 해소 뒤 integrations status GET route를 별도 registry로 분리한다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3m test session read registry
 
 - `/api/test-sessions`와 `/api/test-attempts` GET의 query filter/source response를 `testSessionReadRouteRegistry`로 이동했다.
