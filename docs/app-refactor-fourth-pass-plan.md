@@ -210,4 +210,5 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 - 4-3d: OPTIONS와 health/client-errors/core-status 3개 route를 첫 frozen registry로 이동했다. registry 3개 + server 직접 117개의 전역 method/path/order hash와 client-error 64 KiB·429/202/400 계약을 고정했다.
 - 4-3e: login route의 teacher/student/parent role→credential action→HMAC session token/account 응답 조립을 단일-route registry로 이동했다. credential DB 함수와 token codec owner는 주입 상태로 유지했다.
 - 4-3f: teacher-account route의 Supabase configuration gate, current credential, input validation, password 선택과 저장 응답을 단일-route registry로 이동했다. hash/DB action은 server owner를 유지한다.
-- 다음 4-3g는 portal read 1개부터 시작해 session write route를 별도 단위로 이동한다.
+- 4-3g: portal-data read route의 session guard→scoped source read→role 응답과 401/404/500을 단일-route registry로 이동했다. 실제 filtering은 server action owner를 유지한다.
+- 다음 4-3h는 portal session write route 4개를 같은 guard/error 의미로 이동한다.

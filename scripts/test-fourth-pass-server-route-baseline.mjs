@@ -2,13 +2,15 @@ import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { authLoginRouteSignatures } from "../src/shared/server/authLoginRouteRegistry.js";
+import { portalReadRouteSignatures } from "../src/shared/server/portalReadRouteRegistry.js";
 import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
 import { teacherAccountRouteSignatures } from "../src/shared/server/teacherAccountRouteRegistry.js";
 
-const [adapterSource, authLoginRouteRegistrySource, packageJson, serverSource, sessionGuardSource, systemRouteRegistrySource, teacherAccountRouteRegistrySource] = await Promise.all([
+const [adapterSource, authLoginRouteRegistrySource, packageJson, portalReadRouteRegistrySource, serverSource, sessionGuardSource, systemRouteRegistrySource, teacherAccountRouteRegistrySource] = await Promise.all([
   readFile(new URL("../src/shared/server/httpRouteAdapter.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/authLoginRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse),
+  readFile(new URL("../src/shared/server/portalReadRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../api/server.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/sessionRouteGuard.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/systemRouteRegistry.js", import.meta.url), "utf8"),
@@ -43,6 +45,12 @@ const orderedRoutes = [
     signature: `${method} ${path}`,
     source: authLoginRouteRegistrySource
   })),
+  ...portalReadRouteSignatures.map(({ method, path }) => ({
+    method,
+    path,
+    signature: `${method} ${path}`,
+    source: portalReadRouteRegistrySource
+  })),
   ...directRoutes.slice(0, teacherAccountInsertIndex),
   ...teacherAccountRouteSignatures.map(({ method, path }) => ({
     method,
@@ -55,7 +63,7 @@ const orderedRoutes = [
 const routes = orderedRoutes.map((route, index) => ({ ...route, index }));
 
 assert.equal(routes.length, 120);
-assert.equal(directRouteMatches.length, 115);
+assert.equal(directRouteMatches.length, 114);
 assert.equal(new Set(routes.map(({ signature }) => signature)).size, 120);
 assert.deepEqual(
   Object.fromEntries(["DELETE", "GET", "POST"].map((method) => [
@@ -215,6 +223,11 @@ assert.ok(serverSource.includes("await dispatchAuthLoginRoute({ request, respons
 assert.ok(authLoginRouteRegistrySource.includes('requestUrl.pathname !== "/api/auth/login"'));
 assert.ok(authLoginRouteRegistrySource.includes("authenticateStudentOrParent"));
 assert.ok(authLoginRouteRegistrySource.includes("authenticateTeacher"));
+assert.ok(serverSource.includes("createPortalReadRouteRegistry({"));
+assert.ok(serverSource.includes("await dispatchPortalReadRoute({ request, response, requestUrl })"));
+assert.ok(portalReadRouteRegistrySource.includes('requestUrl.pathname !== "/api/portal-data"'));
+assert.ok(portalReadRouteRegistrySource.includes("getPortalSession(request)"));
+assert.ok(portalReadRouteRegistrySource.includes("getPortalData(portalSession)"));
 assert.ok(serverSource.includes("createTeacherAccountRouteRegistry({"));
 assert.ok(serverSource.includes("await dispatchTeacherAccountRoute({ request, response, requestUrl })"));
 assert.ok(teacherAccountRouteRegistrySource.includes('requestUrl.pathname !== "/api/auth/teacher-account"'));
@@ -250,6 +263,7 @@ assert.ok(packageJson.scripts["test:production"].includes("npm run test:session-
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:system-route-registry"));
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:auth-login-route-registry"));
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:teacher-account-route-registry"));
+assert.ok(packageJson.scripts["test:production"].includes("npm run test:portal-read-route-registry"));
 
 console.log(
   "fourth-pass server route baseline passed · 120 routes · GET 31/POST 76/DELETE 13 · session/credential 15 + dispatch 2"

@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-3g portal read registry
+
+- portal-data route의 session guard→scoped source read→role 포함 응답을 단일-route registry로 이동했다.
+- source filtering과 Supabase read action은 server에 유지하고 direct identity로 주입했다. guard가 source action보다 선행한다.
+- 401/404/200/500을 fixture로 고정하고 local server에는 무효 token 401만 요청해 운영 portal 데이터는 조회하지 않았다.
+- 검증: runtime lint, portal/session 전용, domain 69/69, scenario·production 827/827, build 418 modules·main 944.65 kB·lazy 12/12 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3f teacher-account registry
 
 - 교사 계정 변경 route의 configuration gate→현재 credential→입력 검증→계정 저장 orchestration을 단일-route registry로 이동했다.

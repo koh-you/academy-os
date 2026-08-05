@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-3g portal read registry
+
+- `/api/portal-data`의 portal guard, scoped read와 role 응답을 `src/shared/server/portalReadRouteRegistry.js`로 이동했다. source filter/DB read는 server owner다.
+- 인증 없음·학생 없음·성공·source 실패를 fixture로 고정하고 무효 token 401 local smoke만 사용했다.
+- runtime lint, portal/session 전용, domain 69/69, production 827/827, build 418·main 944.65 kB·lazy 12/12를 통과했다.
+- 다음은 portal write 4개이며 운영 학생/학부모 로그인이나 데이터 쓰기는 실행하지 않는다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3f teacher-account registry
 
 - `/api/auth/teacher-account`의 service-role gate, current credential, 입력 검증과 save 응답을 `src/shared/server/teacherAccountRouteRegistry.js`로 이동했다.
