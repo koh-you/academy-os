@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { versionedWriteRouteContracts } from "../src/shared/contracts/versionedWriteRouteContracts.js";
+import { authLoginRouteSignatures } from "../src/shared/server/authLoginRouteRegistry.js";
 import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
 
 const [packageJson, serverSource] = await Promise.all([
@@ -147,7 +148,8 @@ const directWriteSignatures = [
   )].map((match) => `${match[1]} ${match[2]}`),
   ...systemRouteSignatures
     .filter(({ method }) => ["POST", "PUT", "PATCH", "DELETE"].includes(method))
-    .map(signatureOf)
+    .map(signatureOf),
+  ...authLoginRouteSignatures.map(signatureOf)
 ].sort();
 assert.equal(directWriteSignatures.length, 89);
 assert.equal(new Set(directWriteSignatures).size, 89);

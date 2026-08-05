@@ -387,6 +387,7 @@ const learningCalendarRowMappersPath = path.join(root, "src", "shared", "persist
 const platformSourceRowMappersPath = path.join(root, "src", "shared", "persistence", "platformSourceRowMappers.js");
 const examPrepDeletionApiPath = path.join(root, "api", "domain", "examPrepDeletion.js");
 const serverPath = path.join(root, "api", "server.js");
+const authLoginRouteRegistryPath = path.join(root, "src", "shared", "server", "authLoginRouteRegistry.js");
 const sessionRouteGuardPath = path.join(root, "src", "shared", "server", "sessionRouteGuard.js");
 const systemRouteRegistryPath = path.join(root, "src", "shared", "server", "systemRouteRegistry.js");
 const supabaseRestPath = path.join(root, "api", "lib", "supabaseRest.js");
@@ -933,6 +934,7 @@ const coreDataRoute = [
   fs.readFileSync(platformSourceRowMappersPath, "utf8")
 ].join("\n");
 const serverSource = fs.readFileSync(serverPath, "utf8");
+const authLoginRouteRegistrySource = fs.readFileSync(authLoginRouteRegistryPath, "utf8");
 const sessionRouteGuardSource = fs.readFileSync(sessionRouteGuardPath, "utf8");
 const systemRouteRegistrySource = fs.readFileSync(systemRouteRegistryPath, "utf8");
 const specialLectureStudentScheduleMutationSource =
@@ -1211,7 +1213,7 @@ check("03 role switching clears credentials", hasAll(app, ["function selectRole(
 check("03b teacher account can be changed from settings without app_state password storage", hasAll(app, ["teacherAccountSettings", "defaultTeacherAccountSettings", "onUpdateTeacherAccountSettings", "function saveTeacherAccount(event)", "postJson(\"/api/auth/teacher-account\"", "계정 설정", "계정 저장"]) && !app.includes("currentPassword !== account.password") && !app.includes("password: nextPassword || currentPassword") && hasAll(css, [".accountSettingsGrid", ".accountSettingsActions"]));
 check("03b-2 teacher login does not fall back to local password storage", !app.includes("loginWithLocalTeacherAccount") && !app.includes("Server teacher auth failed; falling back to local settings."));
 check("03c server teacher auth disables default fallback after bootstrap", hasAll(serverSource, ["function hasAnyTeacherAccount", "const needsBootstrap = !(await hasAnyTeacherAccount())", "needsBootstrap && loginId === defaultTeacherAccount.loginId"]));
-check("03d student and parent auth use server students table", hasAll(serverSource, ["function authenticateStudentOrParent", "createParentLoginId", '"students"', 'payload.role !== "teacher"', "student_id,name,login_id,pin,status"]));
+check("03d student and parent auth use server students table", hasAll(`${serverSource}\n${authLoginRouteRegistrySource}`, ["function authenticateStudentOrParent", "createParentLoginId", '"students"', 'payload.role !== "teacher"', "student_id,name,login_id,pin,status"]));
 check("03e app_state filters teacher account settings", hasAll(coreDataRoute, ["sensitiveAppStateKeys", "teacherAccountSettings", "hiddenAppStateKeys", "deleteRows(\"app_state\"", "!hiddenAppStateKeys.has"]));
 check("03f student portal data is scoped by session token", hasAll(sessionRouteGuardSource, ["createPortalSessionToken", "verifyPortalSessionToken"]) && hasAll(serverSource, ['requestUrl.pathname === "/api/portal-data"', "getPortalSession(request)", "getPortalData(portalSession)", "record.studentId === session.studentId", "homework.studentId === session.studentId"]));
 check("03g legacy portal snapshot writes are disabled in favor of explicit student endpoints", hasAll(serverSource, ['requestUrl.pathname === "/api/portal-state"', "upsertPortalState(portalSession", "return { source: appState.source, states: {} }"]) && app.includes("fetchPortalData(session.sessionToken)") && !app.includes("postPortalState("));

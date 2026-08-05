@@ -4,8 +4,9 @@
 
 ## 4차 리팩터링 현재 단위
 
+- 4-3e는 `POST /api/auth/login`의 role 검증, credential action 선택, session token/account 응답을 `src/shared/server/authLoginRouteRegistry.js`로 옮겼다. teacher/student/parent credential DB 함수와 HMAC token owner는 그대로 주입한다.
+- 다음 4-3f는 최신 main에서 교사 계정 변경 route만 별도 registry로 분리한 뒤 portal session route로 진행한다.
 - 4-3d는 OPTIONS와 side-effect 없는 health/core status, 제한된 client runtime error 수집을 `src/shared/server/systemRouteRegistry.js`의 첫 route registry로 옮겼다. 전역 120-route 순서 hash는 registry 3개 + server 직접 117개로 동일하다.
-- 다음 4-3e는 최신 main에서 credential auth와 portal session route를 별도 registry 단위로 분리한다.
 - 4-3c는 HMAC session token 생성·만료·검증, Authorization token 추출과 teacher/portal/mixed request guard를 `src/shared/server/sessionRouteGuard.js`로 옮겼다. 13개 session route의 guard 종류·선행 순서와 credential DB owner는 그대로다.
 - 4-3b는 header lookup, JSON body 2 MB/default·개별 limit, CORS origin, JSON response/preflight를 `src/shared/server/httpRouteAdapter.js`로 옮겼다. route 120개와 auth/session·DB/provider owner는 그대로다.
 - 4-3a는 `api/server.js` 7,941줄·직접 route 120개(GET 31/POST 76/DELETE 13)의 method/path/order와 9개 family, session/credential 15개·dispatch token 2개 guard 의미를 기준선 fixture로 고정했다. 제품 runtime은 바꾸지 않았다.
