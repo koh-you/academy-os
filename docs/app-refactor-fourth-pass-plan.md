@@ -194,4 +194,5 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 
 - 4-2a 기준선: core row mapper 36개/18쌍과 exam pipeline mapper 9개, 합계 45개를 exact inventory로 고정했다. 4-0의 44개 집계는 구조 감사로 교정했다.
 - null/default, schema fallback option, legacy alias, `updated_at` token, exam source patch undefined와 unknown-field drop 정책을 production fixture가 검사한다. 제품 runtime과 DB/provider owner는 변경하지 않았다.
-- 후속은 한 단위씩 4-2b Student/ClassTemplate/Lesson 6개, 4-2c intake/special lecture 6개, 4-2d lesson activity 8개, 4-2e learning/calendar 10개, 4-2f platform source 6개, 4-2g exam pipeline 9개 순으로 진행한다.
+- 4-2b: Student/ClassTemplate/Lesson 6개와 공유 pure normalize helper를 `src/shared/data`로 추출했다. route의 Supabase I/O와 fallback owner는 유지하고 동작 fixture·source inventory가 legacy/default/unknown-field drop 및 Vercel API file budget을 고정한다.
+- 후속은 한 단위씩 4-2c intake/special lecture 6개, 4-2d lesson activity 8개, 4-2e learning/calendar 10개, 4-2f platform source 6개, 4-2g exam pipeline 9개 순으로 진행한다.

@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [coreDataSource, examPipelineSource, packageJson] = await Promise.all([
+await import("./test-fourth-pass-student-class-lesson-row-mappers.mjs");
+
+const [coreDataSource, studentClassLessonMapperSource, examPipelineSource, packageJson] = await Promise.all([
   readFile(new URL("../api/routes/coreData.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/shared/data/studentClassLessonRowMappers.js", import.meta.url), "utf8"),
   readFile(new URL("../api/routes/examAnalysisPipeline.js", import.meta.url), "utf8"),
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse)
 ]);
@@ -139,9 +142,16 @@ function getFunctionSource(source, name) {
   return source.slice(start, cursor);
 }
 
-const coreMapperNames = listMapperNames(coreDataSource);
+const extractedCoreMapperNames = listMapperNames(studentClassLessonMapperSource);
+const remainingCoreMapperNames = listMapperNames(coreDataSource);
+const coreMapperNames = [...extractedCoreMapperNames, ...remainingCoreMapperNames];
 const examMapperNames = listMapperNames(examPipelineSource);
-assert.deepEqual(coreMapperNames, expectedCoreMapperNames);
+assert.deepEqual(extractedCoreMapperNames, mapperGroups["4-2b-student-class-lesson"]);
+assert.deepEqual(
+  remainingCoreMapperNames,
+  expectedCoreMapperNames.filter((name) => !mapperGroups["4-2b-student-class-lesson"].includes(name))
+);
+assert.deepEqual([...coreMapperNames].sort(), [...expectedCoreMapperNames].sort());
 assert.deepEqual(examMapperNames, expectedExamMapperNames);
 assert.equal(coreMapperNames.length, 36);
 assert.equal(examMapperNames.length, 9);
@@ -162,8 +172,13 @@ assert.deepEqual(
   [...expectedCoreMapperNames, ...expectedExamMapperNames].sort()
 );
 
+function getCoreFunctionSource(name) {
+  const source = extractedCoreMapperNames.includes(name) ? studentClassLessonMapperSource : coreDataSource;
+  return getFunctionSource(source, name);
+}
+
 const coreUpdatedAtWriters = expectedCoreMapperNames.filter((name) =>
-  getFunctionSource(coreDataSource, name).includes("updated_at: new Date().toISOString()")
+  getCoreFunctionSource(name).includes("updated_at: new Date().toISOString()")
 );
 assert.deepEqual(coreUpdatedAtWriters, [
   "toStudentRow",
@@ -199,12 +214,12 @@ const optionBearingMappers = [
   "toAcademyReminderRow"
 ];
 for (const name of optionBearingMappers) {
-  assert.match(getFunctionSource(coreDataSource, name), /include[A-Z]/, `${name} lost a schema fallback option`);
+  assert.match(getCoreFunctionSource(name), /include[A-Z]/, `${name} lost a schema fallback option`);
 }
 
-assert.match(getFunctionSource(coreDataSource, "toStudentRow"), /includeWithdrawalDetails/);
-assert.match(getFunctionSource(coreDataSource, "toStudentRow"), /includeWithdrawnAt/);
-assert.match(getFunctionSource(coreDataSource, "toLessonRow"), /includeScheduleMetadata/);
+assert.match(getCoreFunctionSource("toStudentRow"), /includeWithdrawalDetails/);
+assert.match(getCoreFunctionSource("toStudentRow"), /includeWithdrawnAt/);
+assert.match(getCoreFunctionSource("toLessonRow"), /includeScheduleMetadata/);
 assert.match(getFunctionSource(coreDataSource, "toLessonRecordRow"), /includeExtendedFields/);
 assert.match(getFunctionSource(coreDataSource, "toLessonRecordRow"), /includeAttendanceTimeFields/);
 assert.match(getFunctionSource(coreDataSource, "toHomeworkRow"), /includeExtendedFields/);
@@ -212,30 +227,27 @@ assert.match(getFunctionSource(coreDataSource, "toAcademyReminderRow"), /include
 assert.match(getFunctionSource(examPipelineSource, "toSourcePatchRow"), /=== undefined \? undefined/);
 
 for (const name of expectedCoreMapperNames.filter((mapperName) => mapperName.startsWith("from"))) {
-  assert.doesNotMatch(getFunctionSource(coreDataSource, name), /\.\.\.row\b/, `${name} started preserving unknown DB fields`);
+  assert.doesNotMatch(getCoreFunctionSource(name), /\.\.\.row\b/, `${name} started preserving unknown DB fields`);
 }
 for (const name of expectedExamMapperNames.filter((mapperName) => mapperName.startsWith("from"))) {
   assert.doesNotMatch(getFunctionSource(examPipelineSource, name), /\.\.\.row\b/, `${name} started preserving unknown DB fields`);
 }
 
 const firstExtractionSource = mapperGroups["4-2b-student-class-lesson"]
-  .map((name) => getFunctionSource(coreDataSource, name))
+  .map((name) => getCoreFunctionSource(name))
   .join("\n");
 assert.doesNotMatch(
   firstExtractionSource,
   /\b(?:listRows|insertRows|patchRows|upsertRows|deleteRows|fetch|postJson|Solapi|localStorage)\b/,
   "first extraction candidate owns I/O"
 );
-assert.deepEqual(
-  [...coreDataSource.matchAll(/^export function ((?:to|from)[A-Za-z0-9_]*Row)\s*\(/gm)].map((match) => match[1]),
-  ["toLessonRow"]
-);
+assert.match(coreDataSource, /export \{ toLessonRow \};/);
+assert.doesNotMatch(coreDataSource, /function (?:to|from)(?:Student|ClassTemplate|Lesson)Row\s*\(/);
 
 assert.ok(
   packageJson.scripts["test:production"].includes("npm run test:fourth-pass-row-mapper-baseline"),
   "production gate is missing the mapper baseline"
 );
-
 console.log(
-  "fourth-pass row mapper baseline passed · core 36/18 pairs · exam 9 · total 45 · first extraction 6"
+  "fourth-pass row mapper baseline passed · core 36/18 pairs · extracted 6 · exam 9 · total 45"
 );

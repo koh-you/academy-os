@@ -28,6 +28,7 @@
     "test:contract:versioned-write": "node scripts/test-versioned-write-route-contracts.mjs && node scripts/test-notification-job-source-contract.mjs && node scripts/test-notification-job-reserve-contract.mjs && node scripts/test-notification-job-cancel-contract.mjs && node scripts/test-notification-job-reconcile-contract.mjs && node scripts/test-notification-job-bulk-reserve-contract.mjs && node scripts/test-notification-readiness-contract.mjs && node scripts/test-notification-dispatch-contract.mjs && node scripts/test-exam-analysis-run-contract.mjs && node scripts/test-exam-analysis-question-count-contract.mjs && node scripts/test-exam-analysis-question-review-contract.mjs && node scripts/test-exam-analysis-prompt-studio-contract.mjs && node scripts/test-exam-analysis-output-draft-contract.mjs && npm run test:fourth-pass-api-contract-closeout",
     "test:fourth-pass-api-contract-closeout": "node scripts/test-fourth-pass-api-contract-closeout.mjs",
     "test:fourth-pass-row-mapper-baseline": "node scripts/test-fourth-pass-row-mapper-baseline.mjs",
+    "test:fourth-pass-student-class-lesson-row-mappers": "node scripts/test-fourth-pass-student-class-lesson-row-mappers.mjs",
     "check:fast": "npm run lint:runtime && npm run test:scenario-summary && npm run build",
     "test:domain:runner": "node scripts/test-domain-test-runner.mjs",
     "test:domain:lesson": "node scripts/run-domain-tests.mjs lesson",

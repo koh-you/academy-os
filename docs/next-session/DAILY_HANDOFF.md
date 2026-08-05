@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-2b Student/ClassTemplate/Lesson mapper 추출
+
+- Student/ClassTemplate/Lesson 6개 pure mapper와 공유 normalize helper를 `src/shared/data`로 추출했다. `coreData`의 Supabase I/O·fallback·저장/재조회 owner와 기존 `toLessonRow` export는 유지한다.
+- 전용 fixture와 production source inventory가 default/null, withdrawal·schedule metadata schema fallback, 특강 snake_case legacy alias, `updated_at`, unknown-field drop과 Vercel API 12-file budget을 고정한다.
+- local mapper·student `15/15`·lesson `20/20`·집중 API, lint, scenario·production `827/827`, build `418 modules`·main `944.65 kB`·lazy `12/12` 통과. 다음은 exact-head CI 뒤 4-2c intake/special lecture 6개다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-2a row mapper 기준선
 
 - core 36개/18쌍과 exam pipeline 9개, 총 45개 row mapper의 현재 owner와 후속 4-2b~g 분류를 고정했다. 4-0의 44개 수치는 exact function inventory로 45개로 교정한다.

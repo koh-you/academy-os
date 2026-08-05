@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-2b Student/ClassTemplate/Lesson mapper 추출
+
+- Student/ClassTemplate/Lesson row↔domain mapper 6개와 `compact`·시각·특강 학생별 일정 pure normalize helper를 `src/shared/data/studentClassLessonRowMappers.js`로 옮겼다. `coreData`의 DB I/O·schema fallback·export owner는 유지한다.
+- 전용 fixture가 null/default, withdrawal/schedule metadata fallback, snake_case 특강 일정 alias, `updated_at`, unknown field drop을 동작으로 검사한다. scenario source inventory도 route와 추출 모듈을 합쳐 감사하며 Vercel API 함수 파일 수 12개 제한을 유지한다.
+- 검증: mapper 6개, student `15/15`, lesson `20/20`, student persistence·lesson row shape·attendance API, lint, scenario·production `827/827`, build `418 modules`·main `944.65 kB`·lazy `12/12` 통과. 운영 데이터·Storage·알림·AI·SQL은 실행하지 않았다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-2a row mapper 기준선
 
 - `api/routes/coreData.js`의 36개/18쌍과 `api/routes/examAnalysisPipeline.js`의 9개를 합쳐 row↔domain mapper 45개를 exact inventory로 고정했다. 4-0의 단순 집계 44개는 구조 감사 결과 45개로 교정한다.
