@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-3d system route registry
+
+- OPTIONS + health/client-errors/core-status를 `src/shared/server/systemRouteRegistry.js`로 이동했다. registry 3 + server 117 = 기존 120 route와 order hash를 유지한다.
+- client error rate limit/body limit/normalize/log 응답과 health/core payload는 동작 fixture로 고정했고 local server 200 smoke도 통과했다.
+- runtime lint, domain 69/69, production 827/827, build 418·main 944.65 kB·lazy 12/12를 통과했다.
+- 다음은 credential auth와 portal session route registry이며 운영 로그인·계정 변경·운영 데이터는 사용하지 않는다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3c session route guard
 
 - session token codec과 request→teacher/portal/mixed session guard를 `src/shared/server/sessionRouteGuard.js`로 이동했다. 8시간/14일 expiry, HMAC, timing-safe 비교와 role 판정은 동일하다.

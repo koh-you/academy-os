@@ -1,28 +1,40 @@
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import { readFile } from "node:fs/promises";
+import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
 
-const [adapterSource, packageJson, serverSource, sessionGuardSource] = await Promise.all([
+const [adapterSource, packageJson, serverSource, sessionGuardSource, systemRouteRegistrySource] = await Promise.all([
   readFile(new URL("../src/shared/server/httpRouteAdapter.js", import.meta.url), "utf8"),
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse),
   readFile(new URL("../api/server.js", import.meta.url), "utf8"),
-  readFile(new URL("../src/shared/server/sessionRouteGuard.js", import.meta.url), "utf8")
+  readFile(new URL("../src/shared/server/sessionRouteGuard.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/shared/server/systemRouteRegistry.js", import.meta.url), "utf8")
 ]);
 
 const routePattern = /if \(request\.method === "(GET|POST|PUT|PATCH|DELETE)" && requestUrl\.pathname === "([^"]+)"\)/g;
-const routeMatches = [...serverSource.matchAll(routePattern)];
-const routes = routeMatches.map((match, index) => ({
-  index,
-  method: match[1],
-  path: match[2],
-  signature: `${match[1]} ${match[2]}`,
-  source: serverSource.slice(match.index, routeMatches[index + 1]?.index ?? serverSource.indexOf(
-    "sendJson(request, response, 404",
-    match.index
-  ))
-}));
+const directRouteMatches = [...serverSource.matchAll(routePattern)];
+const routes = [
+  ...systemRouteSignatures.map(({ method, path }, index) => ({
+    index,
+    method,
+    path,
+    signature: `${method} ${path}`,
+    source: systemRouteRegistrySource
+  })),
+  ...directRouteMatches.map((match, index) => ({
+    index: systemRouteSignatures.length + index,
+    method: match[1],
+    path: match[2],
+    signature: `${match[1]} ${match[2]}`,
+    source: serverSource.slice(match.index, directRouteMatches[index + 1]?.index ?? serverSource.indexOf(
+      "sendJson(request, response, 404",
+      match.index
+    ))
+  }))
+];
 
 assert.equal(routes.length, 120);
+assert.equal(directRouteMatches.length, 117);
 assert.equal(new Set(routes.map(({ signature }) => signature)).size, 120);
 assert.deepEqual(
   Object.fromEntries(["DELETE", "GET", "POST"].map((method) => [
@@ -175,8 +187,14 @@ assert.equal((adapterSource.match(/function readJsonBody\(/g) ?? []).length, 1);
 assert.equal((adapterSource.match(/function sendJson\(/g) ?? []).length, 1);
 assert.ok(serverSource.includes("createHttpRouteAdapter({ allowedOrigins })"));
 assert.ok(serverSource.includes("createSessionRouteGuard({"));
+assert.ok(serverSource.includes("createSystemRouteRegistry({"));
+assert.ok(serverSource.includes("await dispatchSystemRoute({ request, response, requestUrl })"));
 assert.ok(sessionGuardSource.includes("function verifySignedSessionToken"));
 assert.ok(sessionGuardSource.includes("function getTeacherOrPortalSession"));
+assert.ok(systemRouteRegistrySource.includes('"GET /health"'));
+assert.ok(systemRouteRegistrySource.includes('"POST /api/client-errors"'));
+assert.ok(systemRouteRegistrySource.includes('"GET /api/core/status"'));
+assert.ok(systemRouteRegistrySource.includes("limitBytes: 64 * 1024"));
 assert.equal((serverSource.match(/request\.headers\.authorization/g) ?? []).length, 0);
 assert.equal((serverSource.match(/const server = http\.createServer/g) ?? []).length, 1);
 assert.equal((serverSource.match(/server\.listen\(/g) ?? []).length, 1);
@@ -199,6 +217,7 @@ for (const providerOwner of [
 assert.equal(packageJson.scripts["test:fourth-pass-server-route-baseline"], "node scripts/test-fourth-pass-server-route-baseline.mjs");
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:fourth-pass-server-route-baseline"));
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:session-route-guard"));
+assert.ok(packageJson.scripts["test:production"].includes("npm run test:system-route-registry"));
 
 console.log(
   "fourth-pass server route baseline passed · 120 routes · GET 31/POST 76/DELETE 13 · session/credential 15 + dispatch 2"

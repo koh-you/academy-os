@@ -114,6 +114,7 @@ import {
   createSessionRouteGuard,
   timingSafeEqualText
 } from "../src/shared/server/sessionRouteGuard.js";
+import { createSystemRouteRegistry } from "../src/shared/server/systemRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -207,7 +208,6 @@ const {
   getRequestHeader,
   getSecret: () => process.env.APP_SESSION_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || "academy-os-dev-session-secret"
 });
-
 const dispatchableNotificationStatuses = new Set(["queued", "pending_send"]);
 const readinessCheckStatuses = new Set(["queued", "pending_send", "scheduled"]);
 const attendanceAlimtalkDedupeWindowMs = 2 * 60 * 1000;
@@ -215,6 +215,14 @@ const openAiResponsesUrl = "https://api.openai.com/v1/responses";
 const anthropicMessagesUrl = "https://api.anthropic.com/v1/messages";
 const recentAttendanceAlimtalkSends = new Map();
 const allowClientRuntimeError = createClientRuntimeErrorRateLimiter();
+const { dispatch: dispatchSystemRoute } = createSystemRouteRegistry({
+  allowClientRuntimeError,
+  getCoreDataStatus,
+  normalizeClientRuntimeErrorReport,
+  readJsonBody,
+  reportClientRuntimeError: (report) => console.error("[client_runtime_error]", JSON.stringify(report)),
+  sendJson
+});
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
   teacherId: "instructor_owner_001",
@@ -5800,46 +5808,7 @@ async function reserveTodayTeacherScheduleSlack({
 
 const server = http.createServer(async (request, response) => {
   const requestUrl = new URL(request.url, "http://127.0.0.1");
-
-  if (request.method === "OPTIONS") {
-    sendJson(request, response, 204, {});
-    return;
-  }
-
-  if (request.method === "GET" && requestUrl.pathname === "/health") {
-    sendJson(request, response, 200, {
-      features: {
-        lessonJournalNotificationFollowup: "result_reconciled_unrecorded_preserve_next",
-        lessonMemoSaveVerification: "memo_flags_ack_requery",
-        manualAbsenceAttendanceDelivery: "next_available_hour"
-      },
-      ok: true,
-      service: "academy-os-api"
-    });
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/client-errors") {
-    try {
-      const remoteAddress = request.socket?.remoteAddress || "unknown";
-      if (!allowClientRuntimeError(remoteAddress)) {
-        sendJson(request, response, 429, { ok: false, error: "client error report rate limit" });
-        return;
-      }
-      const payload = await readJsonBody(request, { limitBytes: 64 * 1024 });
-      const report = normalizeClientRuntimeErrorReport(payload.report);
-      console.error("[client_runtime_error]", JSON.stringify(report));
-      sendJson(request, response, 202, { errorId: report.errorId, ok: true });
-    } catch (error) {
-      sendJson(request, response, 400, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/core/status") {
-    sendJson(request, response, 200, { ok: true, result: getCoreDataStatus() });
-    return;
-  }
+  if (await dispatchSystemRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/auth/login") {
     try {

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { versionedWriteRouteContracts } from "../src/shared/contracts/versionedWriteRouteContracts.js";
+import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
 
 const [packageJson, serverSource] = await Promise.all([
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse),
@@ -140,9 +141,14 @@ assert.deepEqual(providerContracts, [
   "POST /api/notification-jobs/reserve-bulk"
 ]);
 
-const directWriteSignatures = [...serverSource.matchAll(
-  /if \(request\.method === "(POST|PUT|PATCH|DELETE)" && requestUrl\.pathname === "([^"]+)"\)/g
-)].map((match) => `${match[1]} ${match[2]}`).sort();
+const directWriteSignatures = [
+  ...[...serverSource.matchAll(
+    /if \(request\.method === "(POST|PUT|PATCH|DELETE)" && requestUrl\.pathname === "([^"]+)"\)/g
+  )].map((match) => `${match[1]} ${match[2]}`),
+  ...systemRouteSignatures
+    .filter(({ method }) => ["POST", "PUT", "PATCH", "DELETE"].includes(method))
+    .map(signatureOf)
+].sort();
 assert.equal(directWriteSignatures.length, 89);
 assert.equal(new Set(directWriteSignatures).size, 89);
 
