@@ -389,6 +389,7 @@ const examPrepDeletionApiPath = path.join(root, "api", "domain", "examPrepDeleti
 const serverPath = path.join(root, "api", "server.js");
 const appCoreReadRouteRegistryPath = path.join(root, "src", "shared", "server", "appCoreReadRouteRegistry.js");
 const appStateWriteRouteRegistryPath = path.join(root, "src", "shared", "server", "appStateWriteRouteRegistry.js");
+const testSessionReadRouteRegistryPath = path.join(root, "src", "shared", "server", "testSessionReadRouteRegistry.js");
 const authLoginRouteRegistryPath = path.join(root, "src", "shared", "server", "authLoginRouteRegistry.js");
 const examPostConfirmRouteRegistryPath = path.join(root, "src", "shared", "server", "examPostConfirmRouteRegistry.js");
 const portalReadRouteRegistryPath = path.join(root, "src", "shared", "server", "portalReadRouteRegistry.js");
@@ -941,6 +942,7 @@ const coreDataRoute = [
 const serverSource = fs.readFileSync(serverPath, "utf8");
 const appCoreReadRouteRegistrySource = fs.readFileSync(appCoreReadRouteRegistryPath, "utf8");
 const appStateWriteRouteRegistrySource = fs.readFileSync(appStateWriteRouteRegistryPath, "utf8");
+const testSessionReadRouteRegistrySource = fs.readFileSync(testSessionReadRouteRegistryPath, "utf8");
 const authLoginRouteRegistrySource = fs.readFileSync(authLoginRouteRegistryPath, "utf8");
 const examPostConfirmRouteRegistrySource = fs.readFileSync(examPostConfirmRouteRegistryPath, "utf8");
 const portalReadRouteRegistrySource = fs.readFileSync(portalReadRouteRegistryPath, "utf8");
@@ -950,6 +952,7 @@ const systemRouteRegistrySource = fs.readFileSync(systemRouteRegistryPath, "utf8
 const portalServerSource = `${serverSource}\n${portalReadRouteRegistrySource}\n${portalWriteRouteRegistrySource}\n${appStateWriteRouteRegistrySource}`;
 const examPostServerSource = `${portalServerSource}\n${examPostConfirmRouteRegistrySource}`;
 const appCoreServerSource = `${serverSource}\n${appCoreReadRouteRegistrySource}\n${appStateWriteRouteRegistrySource}`;
+const testSessionServerSource = `${serverSource}\n${testSessionReadRouteRegistrySource}`;
 const specialLectureStudentScheduleMutationSource =
   coreDataRoute.match(
     /export async function syncSpecialLectureLessonStudentSchedule[\s\S]*?\r?\n}\r?\n\r?\nexport async function deleteLesson/
@@ -1488,7 +1491,7 @@ check("41b comment Alimtalk shows assignment status after attendance for parent 
 check("41c assignment status copy follows latest parent and student tone", hasAll(lessonFrontendSource, ["남은 부분은 다음 시간에 같이 확인하도록 하겠습니다.", "필요하면 추가 보충을 하도록 하겠습니다.", "풀기 어려운 문제도 더 고민하는 습관이 필요합니다", "과제를 꼼꼼하게 잘 해왔어. 열심히 하느라 수고했어~!", "다음 시간부터는 깔끔하게 다 풀어오도록 하자.", "모르는 문제를 더 고민해와 !", "다 못 끝내면 추가 등원보충을 해야 할 수도 있어."]) && hasAll(notificationRoute, ['from "../../src/domains/lessons/assignmentStatus.js"', "assignmentStatusParentMessages", "assignmentStatusStudentMessages", "function assignmentStatusText"]));
 check("41d structured homework followup stays in the supplement check block while saved comments stay final", hasAll(`${app}\n${lessonReservationPayloadSnapshotSource}`, ["function getHomeworkFollowupNoticeForTarget", "buildLessonNotificationBody({", "homeworkFollowupNotice", "const commentBody = compactMessage(record?.[sourceField] ?? \"\")", "preparationNotice: \"\"", "const finalMessage = manualCommentBody || message"]) && hasAll(serverSource, ["function buildInitialNotificationComment({ existingComment })", "return compactDuplicateNotificationBlocks(existingComment)", "const preparationNotice = \"\"", "getHomeworkFollowupNoticeForNotification(record, audience, context.notificationTemplates)"]) && hasAll(notificationMessageRendererSource, ["homeworkFollowupNotice", "createNotificationMessageBlock(\"⭐ 보충/확인 안내\"", "createNotificationMessageBlock(\"💬 코멘트\", commentText)"]) && !app.includes("const prepMessage = preparationNotice") && !app.includes("const composedMessage = joinMessageBlocks([prepMessage, message])"));
 
-check("41e test attempts are stored as source and reflected in Alimtalk", hasAll(testSessionsSchema, ["create table if not exists test_sessions", "create table if not exists test_attempts", "unique (test_session_id, student_id)", "not_taken_reason"]) && hasAll(coreDataRoute, ["listTestSessions", "listTestAttempts", "upsertTestSessionWithAttempts", "supabase/20260713_test_sessions.sql"]) && hasAll(serverSource, ["/api/test-sessions", "/api/test-attempts", "getStudentTestResultLinesForNotification", "testResult: testResultLines.join(\"\\n\")"]) && hasAll(appWithConfig, ["응시 기록", "학생별 테스트 이력", "테스트명", "총 문항 수", "source: \"manual_test_result\"", "postTestSession", "getLessonTestResultLines", "hasIncompleteLessonTestAttempt", "testResult: testResultLines.join(\"\\n\")"]) && hasAll(notificationMessageRendererSource, ["createNotificationMessageBlock(\"📝 테스트\", testResult)", "testResult: payload.testResult"]) && hasAll(css, [".testAttemptPanel", ".testAttemptTable", ".testHistoryItem"]));
+check("41e test attempts are stored as source and reflected in Alimtalk", hasAll(testSessionsSchema, ["create table if not exists test_sessions", "create table if not exists test_attempts", "unique (test_session_id, student_id)", "not_taken_reason"]) && hasAll(coreDataRoute, ["listTestSessions", "listTestAttempts", "upsertTestSessionWithAttempts", "supabase/20260713_test_sessions.sql"]) && hasAll(testSessionServerSource, ["/api/test-sessions", "/api/test-attempts", "getStudentTestResultLinesForNotification", "testResult: testResultLines.join(\"\\n\")"]) && hasAll(appWithConfig, ["응시 기록", "학생별 테스트 이력", "테스트명", "총 문항 수", "source: \"manual_test_result\"", "postTestSession", "getLessonTestResultLines", "hasIncompleteLessonTestAttempt", "testResult: testResultLines.join(\"\\n\")"]) && hasAll(notificationMessageRendererSource, ["createNotificationMessageBlock(\"📝 테스트\", testResult)", "testResult: payload.testResult"]) && hasAll(css, [".testAttemptPanel", ".testAttemptTable", ".testHistoryItem"]));
 
 check("42 exam date range uses date inputs", hasAll(appWithConfig, ["examDateRangeInputs", "updateDateRangeField", "getDateRangeField"]));
 check("43 school calendar can edit derived exam dates", hasAll(app, ["onSaveDerivedEvent", "saveAcademicEventDraft", "mathExamDates", "await runDerivedSchoolEventRequest"]));

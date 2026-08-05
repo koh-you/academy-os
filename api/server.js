@@ -123,6 +123,7 @@ import { createExamPostConfirmRouteRegistry } from "../src/shared/server/examPos
 import { createAppCoreReadRouteRegistry } from "../src/shared/server/appCoreReadRouteRegistry.js";
 import { createAppStateWriteRouteRegistry } from "../src/shared/server/appStateWriteRouteRegistry.js";
 import { createReportSnapshotRouteRegistry } from "../src/shared/server/reportSnapshotRouteRegistry.js";
+import { createTestSessionReadRouteRegistry } from "../src/shared/server/testSessionReadRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -285,6 +286,11 @@ const { dispatch: dispatchReportSnapshotRoute } = createReportSnapshotRouteRegis
   saveReportSnapshotWithVerification,
   sendJson,
   upsertAppState
+});
+const { dispatch: dispatchTestSessionReadRoute } = createTestSessionReadRouteRegistry({
+  listTestAttempts,
+  listTestSessions,
+  sendJson
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5880,32 +5886,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchAppCoreReadRoute({ request, response, requestUrl })) return;
   if (await dispatchAppStateWriteRoute({ request, response, requestUrl })) return;
   if (await dispatchReportSnapshotRoute({ request, response, requestUrl })) return;
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/test-sessions") {
-    try {
-      const result = await listTestSessions({
-        testDate: requestUrl.searchParams.get("date") || requestUrl.searchParams.get("testDate") || "",
-        classTemplateId: requestUrl.searchParams.get("classTemplateId") || ""
-      });
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/test-attempts") {
-    try {
-      const result = await listTestAttempts({
-        testSessionId: requestUrl.searchParams.get("testSessionId") || "",
-        studentId: requestUrl.searchParams.get("studentId") || ""
-      });
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
+  if (await dispatchTestSessionReadRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/test-sessions") {
     try {
