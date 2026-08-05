@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-3m test session read registry
+
+- `/api/test-sessions`와 `/api/test-attempts` GET의 query filter/source response를 `testSessionReadRouteRegistry`로 이동했다.
+- Supabase read owner는 core data에 유지했다. pure fixture만 실행했고 운영 원천·Storage·provider는 사용하지 않았다.
+- 전체 검증은 domain 69/69, scenario·production 827/827, build 418 modules·main 944.65 kB·lazy 12/12를 통과했다. registry 17 + 직접 route 103 = 전역 120이다.
+- 다음은 최신 main에서 test session POST/DELETE route를 별도 registry로 분리한다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3l report snapshot registry
 
 - `/api/report-snapshots` POST의 teacher guard, versioned parser, verified persistence service와 error shape를 `reportSnapshotRouteRegistry`로 이동했다.

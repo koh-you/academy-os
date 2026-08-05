@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-3m test session read registry
+
+- test session/attempt GET의 query alias/filter와 source 응답 조립을 frozen registry로 이동했다. Supabase read는 기존 core data owner에 유지한다.
+- scenario의 이전 server 단일 파일 endpoint 문자열 결합을 registry+server 합성 감사로 교정했다. pure fixture만 사용해 운영 원천·Storage·provider를 조회하거나 실행하지 않았다.
+- 검증은 domain 69/69, scenario·production 827/827, build 418 modules·main 944.65 kB·lazy 12/12를 통과했다. registry 17 + 직접 route 103으로 전역 120을 유지한다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3l report snapshot registry
 
 - report snapshot POST의 teacher guard, versioned parse, verified persistence service와 응답 조립을 frozen registry로 이동했다. 실제 AppState read/CAS/readback·재시도 검증은 기존 domain/server owner에 유지한다.
