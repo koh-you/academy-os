@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { versionedWriteRouteContracts } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 import { authLoginRouteSignatures } from "../src/shared/server/authLoginRouteRegistry.js";
 import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
+import { teacherAccountRouteSignatures } from "../src/shared/server/teacherAccountRouteRegistry.js";
 
 const [packageJson, serverSource] = await Promise.all([
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse),
@@ -149,7 +150,8 @@ const directWriteSignatures = [
   ...systemRouteSignatures
     .filter(({ method }) => ["POST", "PUT", "PATCH", "DELETE"].includes(method))
     .map(signatureOf),
-  ...authLoginRouteSignatures.map(signatureOf)
+  ...authLoginRouteSignatures.map(signatureOf),
+  ...teacherAccountRouteSignatures.map(signatureOf)
 ].sort();
 assert.equal(directWriteSignatures.length, 89);
 assert.equal(new Set(directWriteSignatures).size, 89);

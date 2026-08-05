@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-3f teacher-account registry
+
+- 교사 계정 변경 route의 configuration gate→현재 credential→입력 검증→계정 저장 orchestration을 단일-route registry로 이동했다.
+- password hash, teacher_accounts 조회/bootstrap/upsert, account mapper는 server에 유지하고 direct action identity로 주입했다.
+- 설정 없음 503, credential 실패 401, login/password 검증, 새/기존 password 저장 선택과 save 실패를 fixture로 고정했다. local smoke도 Supabase 미설정 503만 확인해 실제 계정은 변경하지 않았다.
+- 검증: runtime lint, auth/settings 전용, domain 69/69, scenario·production 827/827, build 418 modules·main 944.65 kB·lazy 12/12 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3e auth login registry
 
 - 로그인 route의 role 검증과 credential action 선택, HMAC token/account 응답 조립을 단일-route frozen registry로 이동했다.
