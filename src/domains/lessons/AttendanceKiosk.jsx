@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { academyBrandName } from "../../app/appConfig.js";
 import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
-import {
-  attendanceKioskAutoConfirmSeconds,
-  createAttendanceKioskDisplayModel
-} from "./attendanceKioskModel.js";
+import { createAttendanceKioskDisplayModel } from "./attendanceKioskModel.js";
+
+const attendanceKioskAutoConfirmDelayMs = 5_000;
 
 export function AttendanceKiosk({
   isLoading = false,
@@ -21,7 +20,6 @@ export function AttendanceKiosk({
   const [pendingPreview, setPendingPreview] = useState(null);
   const [result, setResult] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [autoConfirmSeconds, setAutoConfirmSeconds] = useState(null);
   const confirmInFlightRef = useRef(false);
 
   async function runAttendancePreview(nextPin) {
@@ -136,22 +134,12 @@ export function AttendanceKiosk({
 
   useEffect(() => {
     if (isSubmitting || !pendingPreview?.ok || previewRequiresLessonSelection) {
-      setAutoConfirmSeconds(null);
       return undefined;
     }
 
-    let remainingSeconds = attendanceKioskAutoConfirmSeconds;
-    setAutoConfirmSeconds(remainingSeconds);
-    const countdownId = window.setInterval(() => {
-      remainingSeconds -= 1;
-      setAutoConfirmSeconds(remainingSeconds);
-      if (remainingSeconds <= 0) {
-        window.clearInterval(countdownId);
-        confirmAttendanceCheck();
-      }
-    }, 1_000);
+    const confirmId = window.setTimeout(confirmAttendanceCheck, attendanceKioskAutoConfirmDelayMs);
 
-    return () => window.clearInterval(countdownId);
+    return () => window.clearTimeout(confirmId);
   }, [confirmAttendanceCheck, isSubmitting, pendingPreview, previewRequiresLessonSelection]);
 
   return (
@@ -240,12 +228,9 @@ export function AttendanceKiosk({
                 {previewVisitLabel ? (
                   <p className="muted">연속 수업으로 처리: {previewVisitLabel}<br />등원 알림은 지금 한 번, 하원 알림은 마지막 수업 뒤 한 번만 전송합니다.</p>
                 ) : null}
-                <p>
-                  {autoConfirmSeconds ?? attendanceKioskAutoConfirmSeconds}초 뒤 자동 확인
-                </p>
                 <div className="attendanceConfirmActions single">
                   <button className="primaryButton" disabled={isSubmitting} onClick={confirmAttendanceCheck} type="button">
-                    {isSubmitting ? "저장 중..." : "확인"}
+                    {isSubmitting ? "저장 중..." : "5초 뒤 자동 확인"}
                   </button>
                 </div>
               </>

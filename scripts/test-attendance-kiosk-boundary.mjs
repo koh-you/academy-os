@@ -15,7 +15,7 @@ for (const required of [
   "const [isSubmitting, setIsSubmitting] = useState(false)",
   "const confirmInFlightRef = useRef(false)",
   "!pendingPreview?.ok || previewRequiresLessonSelection",
-  "attendanceKioskAutoConfirmSeconds",
+  "attendanceKioskAutoConfirmDelayMs",
   "초 뒤 자동 확인",
   "await onAttendancePreview(nextPin)",
   "await onAttendancePreview(pendingPreview.pin",

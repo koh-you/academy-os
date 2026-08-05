@@ -1,10 +1,9 @@
 import assert from "node:assert/strict";
-import {
-  attendanceKioskAutoConfirmSeconds,
-  createAttendanceKioskDisplayModel
-} from "../src/domains/lessons/attendanceKioskModel.js";
+import { readFile } from "node:fs/promises";
+import { createAttendanceKioskDisplayModel } from "../src/domains/lessons/attendanceKioskModel.js";
 
-assert.equal(attendanceKioskAutoConfirmSeconds, 5);
+const kioskSource = await readFile(new URL("../src/domains/lessons/AttendanceKiosk.jsx", import.meta.url), "utf8");
+assert.ok(kioskSource.includes("const attendanceKioskAutoConfirmDelayMs = 5_000;"));
 assert.equal(createAttendanceKioskDisplayModel({
   pendingPreview: { ok: true, mode: "selectLesson", requiresLessonSelection: true }
 }).previewRequiresLessonSelection, true);
