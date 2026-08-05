@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-2c intake/special lecture mapper
+
+- StudentIntakeApplicant/SpecialLectureApplication/SpecialLectureEnrollment 6개 mapper와 ID/status/requested-session/enrollment-session helper 7개를 import 없는 `src/shared/persistence/intakeSpecialLectureRowMappers.js`로 옮겼다.
+- 기존 main의 `compact`·clock helper를 포함한 helper/mapper 본문은 export 문구를 제외하고 문자 단위 `15/15` 동일하다. `coreData`의 Tally 조립, Supabase 저장·재조회와 schema fallback 오류 owner는 유지했다.
+- 전용 fixture가 intake desired-class, null/default, ID/status fallback, session dedupe, camel/snake legacy plan, conditional review field, `created_at`/`updated_at`, unknown-field drop을 검사한다. 실제 Tally·운영 DB·알림은 사용하지 않았다.
+- 검증: intake/special mapper, 45개 baseline(추출 12), intake CAS, 특강 저장·동기화, lint, scenario·production `827/827`, build `418 modules`·main `944.65 kB`·lazy `12/12`, 집중 safe browser `4/4` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-2b core identity mapper
 
 - Student/ClassTemplate/Lesson 6개 mapper와 특강 학생별 시간 normalize helper를 import 없는 `src/shared/persistence/coreIdentityRowMappers.js`로 옮겼다. 기존 main의 helper+mapper 9개 본문은 export 문구를 제외하고 문자 단위 `9/9` 동일하며 `coreData`의 `toLessonRow` 공개 API도 재수출한다.

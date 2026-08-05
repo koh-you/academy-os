@@ -1,9 +1,16 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [coreDataSource, coreIdentityMapperSource, examPipelineSource, packageJson] = await Promise.all([
+const [
+  coreDataSource,
+  coreIdentityMapperSource,
+  intakeSpecialLectureMapperSource,
+  examPipelineSource,
+  packageJson
+] = await Promise.all([
   readFile(new URL("../api/routes/coreData.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/persistence/coreIdentityRowMappers.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/shared/persistence/intakeSpecialLectureRowMappers.js", import.meta.url), "utf8"),
   readFile(new URL("../api/routes/examAnalysisPipeline.js", import.meta.url), "utf8"),
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse)
 ]);
@@ -66,6 +73,20 @@ const expectedExtractedCoreMapperNames = [
   "fromClassTemplateRow",
   "toLessonRow",
   "fromLessonRow"
+];
+
+const expectedExtractedIntakeSpecialMapperNames = [
+  "toStudentIntakeApplicantRow",
+  "fromStudentIntakeApplicantRow",
+  "toSpecialLectureApplicationRow",
+  "fromSpecialLectureApplicationRow",
+  "toSpecialLectureEnrollmentRow",
+  "fromSpecialLectureEnrollmentRow"
+];
+
+const expectedExtractedMapperNames = [
+  ...expectedExtractedCoreMapperNames,
+  ...expectedExtractedIntakeSpecialMapperNames
 ];
 
 const mapperGroups = {
@@ -151,12 +172,18 @@ function getFunctionSource(source, name) {
 
 const coreRouteMapperNames = listMapperNames(coreDataSource);
 const extractedCoreMapperNames = listMapperNames(coreIdentityMapperSource);
-const coreMapperNames = [...coreRouteMapperNames, ...extractedCoreMapperNames];
+const extractedIntakeSpecialMapperNames = listMapperNames(intakeSpecialLectureMapperSource);
+const coreMapperNames = [
+  ...coreRouteMapperNames,
+  ...extractedCoreMapperNames,
+  ...extractedIntakeSpecialMapperNames
+];
 const examMapperNames = listMapperNames(examPipelineSource);
 assert.deepEqual(extractedCoreMapperNames, expectedExtractedCoreMapperNames);
+assert.deepEqual(extractedIntakeSpecialMapperNames, expectedExtractedIntakeSpecialMapperNames);
 assert.deepEqual(
   coreRouteMapperNames,
-  expectedCoreMapperNames.filter((name) => !expectedExtractedCoreMapperNames.includes(name))
+  expectedCoreMapperNames.filter((name) => !expectedExtractedMapperNames.includes(name))
 );
 assert.deepEqual([...coreMapperNames].sort(), [...expectedCoreMapperNames].sort());
 assert.deepEqual(examMapperNames, expectedExamMapperNames);
@@ -165,10 +192,13 @@ assert.equal(examMapperNames.length, 9);
 assert.equal(coreMapperNames.length + examMapperNames.length, 45);
 
 function getCoreMapperSource(name) {
-  return getFunctionSource(
-    expectedExtractedCoreMapperNames.includes(name) ? coreIdentityMapperSource : coreDataSource,
-    name
-  );
+  if (expectedExtractedCoreMapperNames.includes(name)) {
+    return getFunctionSource(coreIdentityMapperSource, name);
+  }
+  if (expectedExtractedIntakeSpecialMapperNames.includes(name)) {
+    return getFunctionSource(intakeSpecialLectureMapperSource, name);
+  }
+  return getFunctionSource(coreDataSource, name);
 }
 
 const pairedCoreFamilies = expectedCoreMapperNames
@@ -251,17 +281,40 @@ assert.doesNotMatch(
   "first extraction candidate owns I/O"
 );
 assert.equal(/^import\s/m.test(coreIdentityMapperSource), false, "pure mapper module must not import I/O or route state");
+assert.equal(
+  /^import\s/m.test(intakeSpecialLectureMapperSource),
+  false,
+  "intake/special mapper module must not import I/O, Tally, or route state"
+);
 assert.deepEqual(
   [...coreIdentityMapperSource.matchAll(/^export function ((?:to|from)[A-Za-z0-9_]*Row)\s*\(/gm)]
     .map((match) => match[1]),
   expectedExtractedCoreMapperNames
 );
+assert.deepEqual(
+  [...intakeSpecialLectureMapperSource.matchAll(/^export function ((?:to|from)[A-Za-z0-9_]*Row)\s*\(/gm)]
+    .map((match) => match[1]),
+  expectedExtractedIntakeSpecialMapperNames
+);
 assert.match(coreDataSource, /from "\.\.\/\.\.\/src\/shared\/persistence\/coreIdentityRowMappers\.js";/);
+assert.match(coreDataSource, /from "\.\.\/\.\.\/src\/shared\/persistence\/intakeSpecialLectureRowMappers\.js";/);
 assert.match(coreDataSource, /export \{ toLessonRow \};/);
 assert.match(coreIdentityMapperSource, /export function normalizeSpecialLectureStudentSchedules/);
 assert.doesNotMatch(coreDataSource, /function normalizeSpecialLectureStudentSchedules/);
-for (const name of expectedExtractedCoreMapperNames) {
+for (const name of expectedExtractedMapperNames) {
   assert.doesNotMatch(coreDataSource, new RegExp(`function\\s+${name}\\s*\\(`));
+}
+for (const helperName of [
+  "createSpecialLectureApplicationId",
+  "normalizeSpecialLectureApplicationStatus",
+  "createSpecialLectureEnrollmentId",
+  "normalizeSpecialLectureEnrollmentStatus",
+  "normalizeSpecialLectureRequestedSessionPlans",
+  "normalizeSpecialLectureEnrollmentSessionIds",
+  "normalizeSpecialLectureEnrollmentSessionPlans"
+]) {
+  assert.match(intakeSpecialLectureMapperSource, new RegExp(`export function\\s+${helperName}\\s*\\(`));
+  assert.doesNotMatch(coreDataSource, new RegExp(`function\\s+${helperName}\\s*\\(`));
 }
 
 assert.ok(
@@ -272,7 +325,11 @@ assert.ok(
   packageJson.scripts["test:production"].includes("npm run test:core-identity-row-mappers"),
   "production gate is missing the extracted mapper behavior contract"
 );
+assert.ok(
+  packageJson.scripts["test:production"].includes("npm run test:intake-special-row-mappers"),
+  "production gate is missing the intake/special mapper behavior contract"
+);
 
 console.log(
-  "fourth-pass row mapper boundary passed · core 36/18 pairs · extracted 6 · exam 9 · total 45"
+  "fourth-pass row mapper boundary passed · core 36/18 pairs · extracted 12 · exam 9 · total 45"
 );
