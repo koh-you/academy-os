@@ -382,6 +382,7 @@ const coreDataRoutePath = path.join(root, "api", "routes", "coreData.js");
 const coreIdentityRowMappersPath = path.join(root, "src", "shared", "persistence", "coreIdentityRowMappers.js");
 const intakeSpecialLectureRowMappersPath = path.join(root, "src", "shared", "persistence", "intakeSpecialLectureRowMappers.js");
 const lessonActivityRowMappersPath = path.join(root, "src", "shared", "persistence", "lessonActivityRowMappers.js");
+const learningCalendarRowMappersPath = path.join(root, "src", "shared", "persistence", "learningCalendarRowMappers.js");
 const examPrepDeletionApiPath = path.join(root, "api", "domain", "examPrepDeletion.js");
 const serverPath = path.join(root, "api", "server.js");
 const supabaseRestPath = path.join(root, "api", "lib", "supabaseRest.js");
@@ -920,7 +921,8 @@ const coreDataRoute = [
   fs.readFileSync(coreDataRoutePath, "utf8"),
   fs.readFileSync(coreIdentityRowMappersPath, "utf8"),
   fs.readFileSync(intakeSpecialLectureRowMappersPath, "utf8"),
-  fs.readFileSync(lessonActivityRowMappersPath, "utf8")
+  fs.readFileSync(lessonActivityRowMappersPath, "utf8"),
+  fs.readFileSync(learningCalendarRowMappersPath, "utf8")
 ].join("\n");
 const serverSource = fs.readFileSync(serverPath, "utf8");
 const specialLectureStudentScheduleMutationSource =

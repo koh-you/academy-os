@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-2e learning/calendar mapper
+
+- 시험 session/attempt, 시험정보, 학사일정, 운영 알림 10개 mapper와 순수 helper를 `src/shared/persistence/learningCalendarRowMappers.js`로 이동했다. 이전 main 대비 함수 본문 22/22 exact, 추출 inventory 30/45다.
+- Supabase source write/CAS/readback, 시험·학사일정 reconcile, App draft와 Slack side effect는 기존 owner에 유지했다. SchoolEvent payload 확장 metadata 보존과 미지 DB column drop을 별도 계약으로 고정했다.
+- domain `69/69`, 관련 시험·일정 전용, lint, scenario·production `827/827`, build `418`·main `944.65 kB`·lazy `12/12`, safe browser `5/5` 통과. 다음은 최신 main 기반 AppState/ResourceMaterial/NotificationJob 6개다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-2d lesson activity mapper
 
 - 수업일지 record·숙제·보충 task·출결 event 8개 mapper와 JSON/status helper를 `src/shared/persistence/lessonActivityRowMappers.js`로 이동했다. 이전 main 대비 helper/mapper 본문 12/12 exact다.

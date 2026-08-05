@@ -85,3 +85,11 @@
 - 전용 fixture는 schema fallback option, 숙제 teacher status alias, null/기본값, 새 version token, 출결 append-only row와 unknown DB field drop을 검사한다.
 - MakeupTask만 `note` JSON의 미지 domain metadata를 의도적으로 보존한다. 이는 일정·알림 초안 등 기존 확장 필드를 잃지 않기 위한 기존 계약이며 DB row의 미지 column 보존과는 구분한다.
 - Supabase source write/CAS/readback/rollback, 연속 출결 방문 orchestration, App draft와 알림 provider side effect는 이동하거나 실행하지 않았다.
+
+## 4-2e 완료 상태
+
+- TestSession/TestAttempt/ExamPrep/SchoolEvent/AcademyReminder 10개 mapper와 숫자·시험 주기·학사일정 type·운영 알림 normalize helper를 `src/shared/persistence/learningCalendarRowMappers.js`로 옮겼다.
+- 기존 main의 `compact`, clock/date helper를 포함한 함수 본문은 export 선언을 제외하고 문자 단위 `22/22` 동일하며, 추출 inventory는 30/45다.
+- 전용 fixture는 정수 보정, 시험 주기 legacy/default, schema fallback option, 학사일정 type alias, 운영 알림 class notice 호환·시간/status/priority·version token과 unknown DB field drop을 검사한다.
+- SchoolEvent만 `event_payload` JSON의 미지 domain metadata를 의도적으로 보존한다. 이는 기존 화면 확장 필드를 유지하는 계약이며 미지 DB column은 계속 버린다.
+- Supabase source write/CAS/readback/rollback, 시험·학사일정 reconcile, App draft, AI와 Slack provider side effect는 이동하거나 실행하지 않았다.
