@@ -101,3 +101,9 @@ route signature의 현재 등록 순서는 SHA-256 `118af79f…de5`로 fixture�
 - `POST /api/auth/login`을 `src/shared/server/authLoginRouteRegistry.js`로 이동했다. system registry 다음·portal route 전에 dispatch해 기존 전역 순서를 유지한다.
 - teacher/student/parent role 검증, loginId trim, credential action 선택, portal/teacher token과 account response, 미지원 403·예외 500을 동작 fixture로 고정했다.
 - credential Supabase 조회/bootstrap과 password hash, HMAC token codec은 server/session guard owner로 유지했다. server는 7,775줄이며 다음은 teacher-account route다.
+
+## 4-3f 완료 상태
+
+- `POST /api/auth/teacher-account`를 `src/shared/server/teacherAccountRouteRegistry.js`로 이동하고 exam-post teacher 확인 뒤·app-core 전에 dispatch해 기존 order를 유지했다.
+- Supabase service-role gate, current credential, login/password validation, 새 비밀번호/기존 비밀번호 선택, 저장 성공·401·503·500을 동작 fixture로 고정했다.
+- PBKDF2 hash, teacher_accounts 조회/bootstrap/upsert와 반환 mapper는 server owner로 유지했다. server는 7,750줄이며 다음은 portal read route다.
