@@ -131,3 +131,9 @@ route signature의 현재 등록 순서는 SHA-256 `118af79f…de5`로 fixture�
 - `GET /api/app-state`와 `GET /api/special-lecture-guides`를 `src/shared/server/appCoreReadRouteRegistry.js`로 이동하고 teacher-account 다음·app-state write 전에 dispatch해 기존 순서를 유지했다.
 - app-state의 `includeRows=true` 선택 응답, guide 존재 flag·빈 배열 fallback, source 실패 500을 동작 fixture로 고정했다.
 - Supabase AppState read와 민감 key filtering owner는 server `listAppState`에 유지했다. server는 7,648줄이며 다음은 app-state versioned write route다.
+
+## 4-3k 완료 상태
+
+- `POST /api/app-state`를 `src/shared/server/appStateWriteRouteRegistry.js`로 이동하고 app/core read 다음·report snapshot 전에 dispatch해 기존 순서를 유지했다.
+- 공통 versioned parser, portal 전용 `examPostSubmissions`·`studentQuestions` 제외, `expectedUpdatedAt` CAS option, 성공과 code/field/status 오류를 동작 fixture로 고정했다.
+- Supabase CAS/insert/readback·conflict owner는 server에 유지한 `upsertAppState`에 있다. server는 7,629줄이며 다음은 teacher-authenticated report snapshot write route다.

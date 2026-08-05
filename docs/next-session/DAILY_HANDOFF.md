@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-3k app-state write registry
+
+- `/api/app-state` POST의 공통 parser, portal key filter, CAS option과 error shape를 `appStateWriteRouteRegistry`로 이동했다.
+- DB CAS/readback은 server action owner다. invalid payload 400 local smoke만 실행했고 운영 원천·Storage·provider는 사용하지 않았다.
+- 전체 검증은 domain 69/69, scenario·production 827/827, build 418 modules·main 944.65 kB·lazy 12/12를 통과했다. route 총수 120과 등록 순서는 유지됐다.
+- 다음은 최신 main에서 teacher-authenticated report snapshot POST를 별도 registry로 분리한다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3j app/core read registry
 
 - `/api/app-state`와 `/api/special-lecture-guides` GET을 `appCoreReadRouteRegistry`로 이동했다. includeRows query와 guide fallback 응답을 보존한다.

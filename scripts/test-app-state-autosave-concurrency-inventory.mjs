@@ -2,8 +2,9 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [appCoreReadRouteRegistrySource, appSource, controllerSource, coreDataSource, platformMapperSource, serverSource, schemaSource, workflowSource, packageSource] = await Promise.all([
+const [appCoreReadRouteRegistrySource, appStateWriteRouteRegistrySource, appSource, controllerSource, coreDataSource, platformMapperSource, serverSource, schemaSource, workflowSource, packageSource] = await Promise.all([
   read("../src/shared/server/appCoreReadRouteRegistry.js"),
+  read("../src/shared/server/appStateWriteRouteRegistry.js"),
   read("../src/app/App.jsx"),
   read("../src/domains/appState/appStatePersistenceController.js"),
   read("../api/routes/coreData.js"),
@@ -100,11 +101,8 @@ assert.ok(serverSource.includes("await dispatchAppCoreReadRoute({ request, respo
 assert.ok(getRouteSource.includes('requestUrl.searchParams.get("includeRows") === "true"'));
 assert.ok(getRouteSource.includes("{ stateRows, ...summary }"));
 
-const postRouteSource = sourceBetween(
-  serverSource,
-  'if (request.method === "POST" && requestUrl.pathname === "/api/app-state")',
-  'if (request.method === "GET" && requestUrl.pathname === "/api/resource-materials")'
-);
+const postRouteSource = appStateWriteRouteRegistrySource;
+assert.ok(serverSource.includes("await dispatchAppStateWriteRoute({ request, response, requestUrl })"));
 assert.ok(postRouteSource.includes("upsertAppState(safeStates, { expectedUpdatedAt })"));
 assert.ok(postRouteSource.includes("Number(error.statusCode) || 500"));
 

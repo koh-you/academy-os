@@ -51,7 +51,7 @@
 - API 후보는 `api/server.js`의 route registration, auth, core data, notification/provider service 분리다. App 3차 범위와 섞지 않고 별도 기준선·회귀 inventory를 먼저 만든다.
 - 사용자의 명시적 승인으로 4차 리팩터링을 시작했다. `docs/app-refactor-fourth-pass-plan.md`의 4-0 기준선 뒤 API payload, DB row mapper, server route, App persistence action, provider, CSS, safe E2E, 종료 감사 순서로 진행한다.
 - 4-3a server route 기준선은 120개 route와 기존 auth/provider owner를 고정했다. 후속은 request/auth adapter → auth/portal/core → versioned write → exam → notification/provider registry 순으로 작은 단위만 진행한다.
-- 4-1 API payload 24개 contract와 4-2 DB/domain row mapper 45/45 분리·종료 감사는 완료했다. 4-3j까지 system/auth/portal/교사 제출/app-core read route registry를 분리했고 다음 활성 단위는 app-state write 뒤 domain·provider route 경계다.
+- 4-1 API payload 24개 contract와 4-2 DB/domain row mapper 45/45 분리·종료 감사는 완료했다. 4-3k까지 system/auth/portal/교사 제출/app-core read·app-state write registry를 분리했고 다음 활성 단위는 report snapshot 뒤 domain·provider route 경계다.
 - 한 번에 한 안전 단위만 최신 main에서 진행하며, 즉시 사람 판단이 필요하지 않은 발견은 기록 후 AI 검수·최소 수정·재검증으로 연쇄 진행한다. 운영 side effect나 제품 의미 결정이 필요한 항목만 사람 gate로 올린다.
 - 기준: `docs/development-roadmap-after-ui-refactor-2026-07-31.md`.
 

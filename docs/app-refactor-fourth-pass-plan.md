@@ -214,4 +214,5 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 - 4-3h: portal-state/homework/question/exam submission POST 4개의 session guard→body→source action→응답 조립을 frozen registry로 이동했다. Supabase 저장·재조회, mutation lock, local draft owner는 이동하지 않았다.
 - 4-3i: teacher-account보다 앞선 교사 시험 후 제출 확인 POST의 teacher guard→body→source action→응답 조립을 frozen registry로 이동했다. AppState source 저장·재조회 action은 server owner를 유지한다.
 - 4-3j: app-state와 special-lecture-guides GET 두 개의 source read→summary/fallback 응답을 frozen registry로 이동했다. `listAppState`와 Supabase owner는 server에 유지한다.
-- 다음 4-3k는 app-state POST의 versioned parser→safe key filter→source write 응답을 분리한다.
+- 4-3k: app-state POST의 versioned parser→protected portal key filter→CAS source write 응답을 frozen registry로 이동했다. `upsertAppState`의 Supabase CAS/readback owner는 server에 유지한다.
+- 다음 4-3l은 teacher-authenticated report snapshot POST를 한 단위로 분리한다.
