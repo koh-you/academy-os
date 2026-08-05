@@ -2242,7 +2242,7 @@ test("settlement exposes special attendance, combined student attendance, and co
   expect(pageErrors).toEqual([]);
 });
 
-test("student monthly submission previews parent and director views before copy or PDF", async ({ page }) => {
+test("student monthly submission previews calendar table and selectable PDF sections", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await page.addInitScript(() => { window.print = () => {}; });
   await loginAsTeacher(page);
@@ -2255,16 +2255,17 @@ test("student monthly submission previews parent and director views before copy 
 
   const previewDialog = page.getByRole("dialog", { name: /정산 미리보기 학생 2026년 8월 월간 제출 미리보기/ });
   await expect(previewDialog).toBeVisible();
-  await expect(previewDialog.getByRole("button", { name: "학부모용 간단본" })).toHaveAttribute("aria-pressed", "true");
-  await expect(previewDialog.getByRole("region", { name: /학부모용 미리보기/ })).toContainText("예정 수업");
-  await expect(previewDialog.getByRole("region", { name: /학부모용 미리보기/ })).toContainText("실제 출결");
-  await expect(previewDialog.getByRole("region", { name: /학부모용 미리보기/ })).toContainText("변동사항");
+  await expect(previewDialog).not.toContainText("학부모용 간단본");
+  await expect(previewDialog).not.toContainText("원장님용 상세본");
+  const reportPreview = previewDialog.getByRole("region", { name: /월간 제출 미리보기/ });
+  await expect(reportPreview.getByRole("grid", { name: "월간 수업 달력" })).toBeVisible();
+  await expect(reportPreview.getByRole("table")).toContainText("수업");
+  await expect(reportPreview).toContainText("변동사항");
 
-  await previewDialog.getByRole("button", { name: "원장님용 상세본" }).click();
-  const directorPreview = previewDialog.getByRole("region", { name: /원장님용 미리보기/ });
-  await expect(directorPreview).toContainText("개별 스케줄");
-  await expect(directorPreview).toContainText(/출석 \d+ · 지각 \d+ · 결석 \d+ · 미입력 \d+/);
-  await directorPreview.getByRole("textbox").fill("8월 변동 일정 확인용");
+  await previewDialog.getByRole("checkbox", { name: "상세 정보 표시" }).check();
+  await expect(reportPreview).toContainText("개별 스케줄");
+  await expect(reportPreview).toContainText(/출석 \d+ · 지각 \d+ · 결석 \d+ · 미입력 \d+/);
+  await reportPreview.getByRole("textbox").fill("8월 변동 일정 확인용");
 
   await page.evaluate(() => {
     Object.defineProperty(navigator, "clipboard", {
@@ -2276,12 +2277,16 @@ test("student monthly submission previews parent and director views before copy 
   await expect(previewDialog.getByRole("status")).toContainText("내용을 복사했습니다");
   expect(await page.evaluate(() => window.__studentMonthlyReportCopiedText)).toContain("원장님 공유 메모");
 
+  await previewDialog.getByRole("checkbox", { name: "달력" }).uncheck();
+  await previewDialog.getByRole("checkbox", { name: "변동사항" }).uncheck();
   const popupPromise = page.waitForEvent("popup");
   await previewDialog.getByRole("button", { name: "PDF 인쇄" }).click();
   const reportPage = await popupPromise;
   await reportPage.waitForLoadState();
   await expect(reportPage.getByRole("heading", { name: /정산 미리보기 학생 2026년 8월 월간 수업 안내/ })).toBeVisible();
-  await expect(reportPage.getByText("원장님용 상세본", { exact: true })).toBeVisible();
+  await expect(reportPage.getByRole("heading", { name: "수업·출결 표" })).toBeVisible();
+  await expect(reportPage.getByRole("heading", { name: "월간 달력" })).toHaveCount(0);
+  await expect(reportPage.getByRole("heading", { name: "변동사항" })).toHaveCount(0);
   await expect(reportPage.getByText("8월 변동 일정 확인용", { exact: true })).toBeVisible();
   await reportPage.close();
   expect(pageErrors).toEqual([]);

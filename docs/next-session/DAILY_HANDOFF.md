@@ -44,6 +44,12 @@
 - 수동 확인과 타이머의 동시 실행은 잠금으로 한 번만 처리한다. API·Supabase·알림 생성 계약은 변경하지 않았고 운영 출결이나 실제 알림은 실행하지 않았다.
 - 전용/lesson `21/21`, runtime lint, build `418`·main `945.00 kB`, production `827/827`, 집중 safe browser `1/1` 통과.
 - 첫 main Vercel 실패는 rate limit이 아니라 배포 Node에서 번들 예산을 48 bytes 넘은 것이었다. 안내를 확인 버튼과 단일 timeout으로 합쳐 번들 크기를 낮춘 뒤 재배포한다.
+## 2026-08-05 월간 제출 달력·표·PDF 선택
+
+- 월간 제출 화면은 달력 → 하단 수업·출결 표 → 변동사항으로 표시한다. 상단 대상별 간단본/상세본 문구를 없애고 `상세 정보 표시`만 남겼다.
+- PDF 포함 항목은 달력·표·변동사항 세 체크박스로 독립 선택한다. 비저장 메모·복사·인쇄만 사용하며 운영 데이터와 알림 side effect는 없다.
+- monthly report·student `15/15`·modal inventory·lint·scenario `827/827`·build와 focused safe browser `1/1` 통과. 다음 확인은 exact branch CI와 frontend 배포 smoke다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3i exam post confirm registry
 
 - `/api/exam-post-submissions/confirm`의 teacher guard→body→source action과 verified/error 응답을 `examPostConfirmRouteRegistry`로 이동했다.
