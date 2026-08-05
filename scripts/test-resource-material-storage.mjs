@@ -177,12 +177,13 @@ await assert.rejects(
   (error) => error.code === "RESOURCE_MATERIAL_STORAGE_REFERENCE_INVALID" && error.statusCode === 400
 );
 
-const [appSource, fileApiSource, portalSource, screenSource, serverSource] = await Promise.all([
+const [appSource, fileApiSource, portalSource, screenSource, serverSource, sessionGuardSource] = await Promise.all([
   readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/resources/resourceMaterialFileApi.js", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/portals/PortalMaterialsTab.jsx", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/teacher/LearningSupportCenters.jsx", import.meta.url), "utf8"),
-  readFile(new URL("../api/server.js", import.meta.url), "utf8")
+  readFile(new URL("../api/server.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/shared/server/sessionRouteGuard.js", import.meta.url), "utf8")
 ]);
 const resourceFileServerSource = serverSource.slice(
   serverSource.indexOf('if (request.method === "POST" && requestUrl.pathname === "/api/resource-material-files")'),
@@ -190,17 +191,22 @@ const resourceFileServerSource = serverSource.slice(
 );
 for (const binding of [
   'requestUrl.pathname === "/api/resource-material-files"',
-  "verifyTeacherSessionToken(token)",
+  "getTeacherSession(request)",
   "parseVersionedWriteRequest(",
   "deleteResourceMaterialWithFile({",
   "saveResourceMaterialFile({"
 ]) assert.ok(resourceFileServerSource.includes(binding), `missing server Storage boundary: ${binding}`);
 for (const binding of [
   'requestUrl.pathname === "/api/resource-material-files/open"',
-  "verifyPortalSessionToken(token)",
+  "getTeacherOrPortalSession(request)",
   "canPortalSessionAccessResourceMaterial(material, student, portalSession.role)",
   "downloadStorageObjectWithMetadata"
 ]) assert.ok(serverSource.includes(binding), `missing server Storage open boundary: ${binding}`);
+for (const binding of [
+  "function verifyTeacherSessionToken",
+  "function verifyPortalSessionToken",
+  "function getTeacherOrPortalSession"
+]) assert.ok(sessionGuardSource.includes(binding), `missing session guard boundary: ${binding}`);
 for (const binding of [
   "readFileAsDataUrl(file)",
   "Authorization: `Bearer ${sessionToken}`",

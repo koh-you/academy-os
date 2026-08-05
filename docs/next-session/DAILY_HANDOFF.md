@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-3c session route guard
+
+- session token codec과 request→teacher/portal/mixed session guard를 `src/shared/server/sessionRouteGuard.js`로 이동했다. 8시간/14일 expiry, HMAC, timing-safe 비교와 role 판정은 동일하다.
+- portal 7·teacher 4·mixed 2 route는 공통 guard를 body/source action 전에 호출한다. credential DB 조회, route 응답, source/provider owner는 바꾸지 않았다.
+- runtime lint, domain 69/69, production 827/827, build 418·main 944.65 kB·lazy 12/12, safe browser session 경로 3/3을 통과했다.
+- 다음은 health/auth/portal/core read 첫 route registry이며 운영 로그인이나 계정 변경은 실행하지 않는다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3b HTTP route adapter
 
 - 공통 header/body/CORS/JSON response 구현을 `src/shared/server/httpRouteAdapter.js`로 이동하고 server가 allowed origins를 주입한 frozen adapter를 사용한다.

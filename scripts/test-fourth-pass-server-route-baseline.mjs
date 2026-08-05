@@ -2,10 +2,11 @@ import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import { readFile } from "node:fs/promises";
 
-const [adapterSource, packageJson, serverSource] = await Promise.all([
+const [adapterSource, packageJson, serverSource, sessionGuardSource] = await Promise.all([
   readFile(new URL("../src/shared/server/httpRouteAdapter.js", import.meta.url), "utf8"),
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse),
-  readFile(new URL("../api/server.js", import.meta.url), "utf8")
+  readFile(new URL("../api/server.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/shared/server/sessionRouteGuard.js", import.meta.url), "utf8")
 ]);
 
 const routePattern = /if \(request\.method === "(GET|POST|PUT|PATCH|DELETE)" && requestUrl\.pathname === "([^"]+)"\)/g;
@@ -142,18 +143,17 @@ function routeSource(signature) {
 
 for (const signature of expectedAuthRoutes.portal) {
   const source = routeSource(signature);
-  assert.ok(source.includes("verifyPortalSessionToken"), `${signature} lost its portal guard`);
-  assert.ok(source.indexOf("verifyPortalSessionToken") < source.indexOf("await readJsonBody") || !source.includes("await readJsonBody"));
+  assert.ok(source.includes("getPortalSession(request)"), `${signature} lost its portal guard`);
+  assert.ok(source.indexOf("getPortalSession(request)") < source.indexOf("await readJsonBody") || !source.includes("await readJsonBody"));
 }
 for (const signature of expectedAuthRoutes.teacher) {
   const source = routeSource(signature);
-  assert.ok(source.includes("verifyTeacherSessionToken"), `${signature} lost its teacher guard`);
-  assert.ok(source.indexOf("verifyTeacherSessionToken") < source.indexOf("await readJsonBody") || !source.includes("await readJsonBody"));
+  assert.ok(source.includes("getTeacherSession(request)"), `${signature} lost its teacher guard`);
+  assert.ok(source.indexOf("getTeacherSession(request)") < source.indexOf("await readJsonBody") || !source.includes("await readJsonBody"));
 }
 for (const signature of expectedAuthRoutes.teacherOrPortal) {
   const source = routeSource(signature);
-  assert.ok(source.includes("verifyTeacherSessionToken"));
-  assert.ok(source.includes("verifyPortalSessionToken"));
+  assert.ok(source.includes("getTeacherOrPortalSession(request)"));
 }
 for (const signature of expectedAuthRoutes.dispatchConditional) {
   const source = routeSource(signature);
@@ -174,6 +174,10 @@ assert.equal((serverSource.match(/function sendJson\(/g) ?? []).length, 0);
 assert.equal((adapterSource.match(/function readJsonBody\(/g) ?? []).length, 1);
 assert.equal((adapterSource.match(/function sendJson\(/g) ?? []).length, 1);
 assert.ok(serverSource.includes("createHttpRouteAdapter({ allowedOrigins })"));
+assert.ok(serverSource.includes("createSessionRouteGuard({"));
+assert.ok(sessionGuardSource.includes("function verifySignedSessionToken"));
+assert.ok(sessionGuardSource.includes("function getTeacherOrPortalSession"));
+assert.equal((serverSource.match(/request\.headers\.authorization/g) ?? []).length, 0);
 assert.equal((serverSource.match(/const server = http\.createServer/g) ?? []).length, 1);
 assert.equal((serverSource.match(/server\.listen\(/g) ?? []).length, 1);
 assert.ok(serverSource.includes('from "./routes/coreData.js"'));
@@ -194,6 +198,7 @@ for (const providerOwner of [
 
 assert.equal(packageJson.scripts["test:fourth-pass-server-route-baseline"], "node scripts/test-fourth-pass-server-route-baseline.mjs");
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:fourth-pass-server-route-baseline"));
+assert.ok(packageJson.scripts["test:production"].includes("npm run test:session-route-guard"));
 
 console.log(
   "fourth-pass server route baseline passed · 120 routes · GET 31/POST 76/DELETE 13 · session/credential 15 + dispatch 2"
