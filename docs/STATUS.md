@@ -4,6 +4,8 @@
 
 ## 4차 리팩터링 현재 단위
 
+- 4-3a는 `api/server.js` 7,941줄·직접 route 120개(GET 31/POST 76/DELETE 13)의 method/path/order와 9개 family, session/credential 15개·dispatch token 2개 guard 의미를 기준선 fixture로 고정했다. 제품 runtime은 바꾸지 않았다.
+- 다음 4-3b는 최신 main에서 공통 request context·JSON body·response·CORS와 기존 auth guard를 순수 adapter 경계로 고정한다.
 - 4-1 API payload 계약은 공통 contract 24개와 종료 감사까지 main 반영 완료다.
 - 4-2a row mapper 기준선은 `coreData` 36개(18쌍), 시험분석 9개, 합계 45개를 exact inventory로 고정했다.
 - 4-2b는 Student/ClassTemplate/Lesson 6개와 특강 학생별 시간 helper를 `src/shared/persistence/coreIdentityRowMappers.js`로 옮겼다. null/default, schema fallback, special lecture legacy alias, `updated_at` token과 unknown-field drop을 동작 fixture로 고정했고 DB·provider owner는 바꾸지 않았다.
@@ -12,7 +14,7 @@
 - 4-2e는 TestSession/TestAttempt/ExamPrep/SchoolEvent/AcademyReminder 10개와 순수 normalize helper를 `src/shared/persistence/learningCalendarRowMappers.js`로 옮겼다. 시험·학사일정 source write/CAS/readback·파생 일정·Slack owner는 그대로다.
 - 4-2f는 AppState/ResourceMaterial/NotificationJob 6개와 자료 visibility helper를 `src/shared/persistence/platformSourceRowMappers.js`로 옮겼다. `coreData`의 36개 mapper는 모두 import 없는 module로 분리됐고 DB·Storage·provider owner는 그대로다.
 - 4-2g는 시험분석 pipeline 9개 mapper와 로컬 ID helper를 `src/shared/persistence/examAnalysisPipelineRowMappers.js`로 옮겼다. DB RPC·Storage·유료 AI owner는 route/server에 유지했고 row mapper 45/45 추출 감사로 4-2를 닫았다.
-- 다음 4-3은 최신 main에서 `api/server.js` route registration·auth·core data·notification/provider 분리를 새 기준선부터 시작한다.
+- 4-2는 row mapper 45/45 추출 감사로 종료했다.
 
 ## 현재 기준
 

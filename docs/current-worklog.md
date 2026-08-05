@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-3a server route 기준선
+
+- `api/server.js`의 120개 exact-path route를 GET 31/POST 76/DELETE 13과 9개 후속 registry family로 분류하고 method/path/등록 순서 hash를 production fixture로 고정했다.
+- credential/session route 15개와 dispatch token route 2개의 기존 guard 종류·선행 순서를 대조했다. guard 없는 내부 운영 API에 새 권한 정책을 섞지 않고 현재 의미를 보존한 채 후속 registry 이동을 진행한다.
+- server 7,941줄의 request/body/response/auth, core/exam source, Solapi·Slack·Storage·AI owner를 지도화했다. 제품 runtime·DB·provider는 변경하거나 실행하지 않았고 기준 문서는 `docs/app-refactor-fourth-pass-server-route-baseline.md`다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-2g exam pipeline mapper·4-2 closeout
 
 - 시험분석 Run/Source/Question/AI job/Event 9개 mapper와 compact/stable JSON/local ID helper를 `src/shared/persistence/examAnalysisPipelineRowMappers.js`로 옮겼다. 이전 main 함수 본문은 export 문구를 제외하고 `13/13` 동일하고 Storage bucket 상수도 그대로 재수출한다.
