@@ -11,8 +11,9 @@ import { reportSnapshotRouteSignatures } from "../src/shared/server/reportSnapsh
 import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
 import { teacherAccountRouteSignatures } from "../src/shared/server/teacherAccountRouteRegistry.js";
 import { testSessionReadRouteSignatures } from "../src/shared/server/testSessionReadRouteRegistry.js";
+import { testSessionWriteRouteSignatures } from "../src/shared/server/testSessionWriteRouteRegistry.js";
 
-const [adapterSource, appCoreReadRouteRegistrySource, appStateWriteRouteRegistrySource, authLoginRouteRegistrySource, examPostConfirmRouteRegistrySource, packageJson, portalReadRouteRegistrySource, portalWriteRouteRegistrySource, reportSnapshotRouteRegistrySource, serverSource, sessionGuardSource, systemRouteRegistrySource, teacherAccountRouteRegistrySource, testSessionReadRouteRegistrySource] = await Promise.all([
+const [adapterSource, appCoreReadRouteRegistrySource, appStateWriteRouteRegistrySource, authLoginRouteRegistrySource, examPostConfirmRouteRegistrySource, packageJson, portalReadRouteRegistrySource, portalWriteRouteRegistrySource, reportSnapshotRouteRegistrySource, serverSource, sessionGuardSource, systemRouteRegistrySource, teacherAccountRouteRegistrySource, testSessionReadRouteRegistrySource, testSessionWriteRouteRegistrySource] = await Promise.all([
   readFile(new URL("../src/shared/server/httpRouteAdapter.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/appCoreReadRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/appStateWriteRouteRegistry.js", import.meta.url), "utf8"),
@@ -26,7 +27,8 @@ const [adapterSource, appCoreReadRouteRegistrySource, appStateWriteRouteRegistry
   readFile(new URL("../src/shared/server/sessionRouteGuard.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/systemRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/teacherAccountRouteRegistry.js", import.meta.url), "utf8"),
-  readFile(new URL("../src/shared/server/testSessionReadRouteRegistry.js", import.meta.url), "utf8")
+  readFile(new URL("../src/shared/server/testSessionReadRouteRegistry.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/shared/server/testSessionWriteRouteRegistry.js", import.meta.url), "utf8")
 ]);
 
 const routePattern = /if \(request\.method === "(GET|POST|PUT|PATCH|DELETE)" && requestUrl\.pathname === "([^"]+)"\)/g;
@@ -101,12 +103,18 @@ const orderedRoutes = [
     signature: `${method} ${path}`,
     source: testSessionReadRouteRegistrySource
   })),
+  ...testSessionWriteRouteSignatures.map(({ method, path }) => ({
+    method,
+    path,
+    signature: `${method} ${path}`,
+    source: testSessionWriteRouteRegistrySource
+  })),
   ...directRoutes
 ];
 const routes = orderedRoutes.map((route, index) => ({ ...route, index }));
 
 assert.equal(routes.length, 120);
-assert.equal(directRouteMatches.length, 103);
+assert.equal(directRouteMatches.length, 101);
 assert.equal(new Set(routes.map(({ signature }) => signature)).size, 120);
 assert.deepEqual(
   Object.fromEntries(["DELETE", "GET", "POST"].map((method) => [
@@ -301,6 +309,10 @@ assert.ok(serverSource.includes("createTestSessionReadRouteRegistry({"));
 assert.ok(serverSource.includes("await dispatchTestSessionReadRoute({ request, response, requestUrl })"));
 assert.ok(testSessionReadRouteRegistrySource.includes('requestUrl.pathname === "/api/test-sessions"'));
 assert.ok(testSessionReadRouteRegistrySource.includes('requestUrl.pathname === "/api/test-attempts"'));
+assert.ok(serverSource.includes("createTestSessionWriteRouteRegistry({"));
+assert.ok(serverSource.includes("await dispatchTestSessionWriteRoute({ request, response, requestUrl })"));
+assert.ok(testSessionWriteRouteRegistrySource.includes("upsertTestSessionWithAttempts("));
+assert.ok(testSessionWriteRouteRegistrySource.includes("deleteTestSession(testSessionId)"));
 assert.ok(teacherAccountRouteRegistrySource.includes("saveTeacherAccount"));
 assert.ok(sessionGuardSource.includes("function verifySignedSessionToken"));
 assert.ok(sessionGuardSource.includes("function getTeacherOrPortalSession"));
@@ -340,6 +352,7 @@ assert.ok(packageJson.scripts["test:production"].includes("npm run test:app-core
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:app-state-write-route-registry"));
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:report-snapshot-route-registry"));
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:test-session-read-route-registry"));
+assert.ok(packageJson.scripts["test:production"].includes("npm run test:test-session-write-route-registry"));
 
 console.log(
   "fourth-pass server route baseline passed · 120 routes · GET 31/POST 76/DELETE 13 · session/credential 15 + dispatch 2"

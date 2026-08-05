@@ -124,6 +124,7 @@ import { createAppCoreReadRouteRegistry } from "../src/shared/server/appCoreRead
 import { createAppStateWriteRouteRegistry } from "../src/shared/server/appStateWriteRouteRegistry.js";
 import { createReportSnapshotRouteRegistry } from "../src/shared/server/reportSnapshotRouteRegistry.js";
 import { createTestSessionReadRouteRegistry } from "../src/shared/server/testSessionReadRouteRegistry.js";
+import { createTestSessionWriteRouteRegistry } from "../src/shared/server/testSessionWriteRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -291,6 +292,12 @@ const { dispatch: dispatchTestSessionReadRoute } = createTestSessionReadRouteReg
   listTestAttempts,
   listTestSessions,
   sendJson
+});
+const { dispatch: dispatchTestSessionWriteRoute } = createTestSessionWriteRouteRegistry({
+  deleteTestSession,
+  readJsonBody,
+  sendJson,
+  upsertTestSessionWithAttempts
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5887,28 +5894,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchAppStateWriteRoute({ request, response, requestUrl })) return;
   if (await dispatchReportSnapshotRoute({ request, response, requestUrl })) return;
   if (await dispatchTestSessionReadRoute({ request, response, requestUrl })) return;
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/test-sessions") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await upsertTestSessionWithAttempts(payload.testSession ?? payload.session ?? payload, payload.testAttempts ?? payload.attempts ?? []);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "DELETE" && requestUrl.pathname === "/api/test-sessions") {
-    try {
-      const testSessionId = requestUrl.searchParams.get("testSessionId") || requestUrl.searchParams.get("id") || "";
-      const result = await deleteTestSession(testSessionId);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
+  if (await dispatchTestSessionWriteRoute({ request, response, requestUrl })) return;
 
   if (request.method === "GET" && requestUrl.pathname === "/api/integrations/status") {
     sendJson(request, response, 200, {

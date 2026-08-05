@@ -149,3 +149,9 @@ route signature의 현재 등록 순서는 SHA-256 `118af79f…de5`로 fixture�
 - `GET /api/test-sessions`와 `GET /api/test-attempts`를 `src/shared/server/testSessionReadRouteRegistry.js`로 이동하고 report snapshot 다음·test session write 전에 dispatch해 기존 순서를 유지했다.
 - session의 `date` 우선·`testDate` alias와 class filter, attempt의 session/student filter, source success와 500을 동작 fixture로 고정했다.
 - Supabase read owner는 core data의 `listTestSessions/listTestAttempts`에 유지했다. server는 7,591줄이며 다음은 test session write/delete route다.
+
+## 4-3n 완료 상태
+
+- `POST/DELETE /api/test-sessions`를 `src/shared/server/testSessionWriteRouteRegistry.js`로 이동하고 test session read 다음·integrations status 전에 dispatch해 기존 순서를 유지했다.
+- canonical `testSession/testAttempts`, legacy `session/attempts`, flat payload와 delete `testSessionId/id` 우선순위, source success와 500을 pure fixture로 고정했다.
+- DB 저장·재조회와 삭제 owner는 core data에 유지했다. server는 7,577줄이며 다음은 integrations status read route다.
