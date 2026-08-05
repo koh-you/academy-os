@@ -16,9 +16,11 @@
 
 ## 4차 리팩터링 현재 단위
 
+- 4-3o는 `GET /api/integrations/status`의 method/path와 AI·알림 상태 응답 조립을 `src/shared/server/integrationStatusRouteRegistry.js`로 옮겼다. 상태 계산과 provider 설정 owner는 기존 integration module에 유지한다.
+- 검증은 domain `70/70`, scenario·production `827/827`, build `421 modules`·main `928.62 kB`·lazy `12/12`를 통과했다. registry 20 + 직접 route 100으로 전역 120을 유지한다. Vercel 무료 일일 배포 한도 해소 전에는 main 병합·운영 배포를 보류한다.
 - 4-3n은 test session POST/DELETE의 canonical·legacy payload alias, delete selector와 source action 응답을 `src/shared/server/testSessionWriteRouteRegistry.js`로 옮겼다. DB 저장·재조회/삭제 owner는 core data에 유지한다.
-- 4-3m main `6bb35e06`의 GitHub Production checks는 성공했지만 Vercel은 24시간 build rate limit로 production 배포가 보류됐다. 4-3n은 exact-head 검증·push까지 진행하되 Vercel green 전 main 병합하지 않는다.
-- 다음 4-3o는 4-3n 배포 gate 해소 뒤 최신 main에서 integrations status read 경계를 분리한다.
+- 4-3n은 main `f270f2cc`에 반영됐고 최신 main `e4b1eab1`의 GitHub Production checks도 성공했다. Vercel은 `api-deployments-free-per-day` 한도로 최신 production 배포가 보류됐다.
+- 다음 4-3p는 4-3o main·배포가 닫힌 뒤 최신 main에서 시험분석 read route 경계를 분리한다.
 - 4-3m은 test session/attempt GET 두 개의 query alias/filter, source response와 실패 응답을 `src/shared/server/testSessionReadRouteRegistry.js`로 옮겼다. Supabase read owner는 기존 `listTestSessions/listTestAttempts`에 유지한다.
 - 4-3l은 teacher-authenticated report snapshot POST의 guard, versioned parser와 report persistence service 조립을 `src/shared/server/reportSnapshotRouteRegistry.js`로 옮겼다. AppState CAS/readback·재시도 검증은 기존 domain/server owner에 유지한다.
 - 4-3k는 app-state POST의 versioned parser, 보호 key 제외, `expectedUpdatedAt` CAS option과 오류 응답을 `src/shared/server/appStateWriteRouteRegistry.js`로 옮겼다. Supabase write/readback owner는 server의 `upsertAppState`에 유지한다.

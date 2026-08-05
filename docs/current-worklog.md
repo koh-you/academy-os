@@ -2,12 +2,19 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-3o integrations status registry
+
+- `GET /api/integrations/status`의 route match와 AI·알림 status response 조립을 frozen registry로 이동했다. 실제 status 계산과 provider 설정 owner는 기존 integration module에 유지한다.
+- pure fixture로 exact response, 비대상 route 무부작용, 기존 동기 오류 전파를 고정했다. 운영 DB·Storage·AI·알림 provider는 사용하지 않았다.
+- 검증은 domain `70/70`, scenario·production `827/827`, build `421 modules`·main `928.62 kB`·lazy `12/12`를 통과했다. registry 20 + 직접 route 100으로 전역 120을 유지한다.
+- 최신 main `e4b1eab1`의 GitHub CI는 성공했지만 Vercel 무료 일일 배포 한도로 production이 보류됐다. 4-3o는 branch/PR/exact-head CI까지 진행하고 main 병합·운영 배포는 한도 해소 뒤 닫는다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3n test session write registry
 
 - test session POST/DELETE의 payload alias와 delete selector, source action 응답 조립을 frozen registry로 이동했다. 실제 DB 저장·재조회/삭제는 core data owner에 유지한다.
 - pure fixture만 사용해 canonical/legacy/flat payload와 오류를 검증했고 운영 DB write/delete·Storage·provider를 실행하지 않았다.
 - 검증은 domain 69/69, scenario·production 827/827, build 418 modules·main 944.65 kB·lazy 12/12를 통과했다. registry 19 + 직접 route 101로 전역 120을 유지한다.
-- 4-3m main `6bb35e06`은 GitHub main CI가 성공했지만 Vercel 24시간 build rate limit로 production이 4-3l `cf558aa4` 배포에 머문다. 4-3n은 push/CI 후 Vercel green 전 main 병합을 보류한다.
+- 4-3n은 main `f270f2cc`에 반영됐고 최신 main `e4b1eab1`의 GitHub CI도 성공했다. 최신 production 배포는 Vercel 무료 일일 배포 한도로 보류됐다.
 
 ## 2026-08-05 App/API 4차 리팩터링 4-3m test session read registry
 
