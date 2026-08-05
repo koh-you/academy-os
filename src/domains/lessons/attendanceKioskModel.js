@@ -1,3 +1,5 @@
+export const attendanceKioskAutoConfirmSeconds = 5;
+
 export function getAttendanceActionLabel(result = {}) {
   if (result.mode === "completed") return "이미 하원";
   if (result.mode === "checkOut") return "하원";

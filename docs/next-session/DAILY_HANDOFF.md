@@ -38,7 +38,11 @@
 - route/API closeout, domain `69/69`, lint, scenario·production `827/827`, build `418`·main `944.65 kB`·lazy `12/12` 통과. registry 13 + server 직접 107 = 전역 120 route다.
 - 첫 exact-head CI의 autosave inventory 위치 결합은 registry GET/server POST를 각각 확인하도록 최소 교정했고 관련 inventory·production을 재통과했다.
 - 다음은 최신 main에서 app-state POST의 versioned parser/safe key filter/source write 응답을 한 단위로 분리한다.
+## 2026-08-05 출결 키오스크 5초 자동 확인
 
+- 수업이 확정된 미리보기는 5초 뒤 기존 확인 경로로 자동 저장하고, 복수 수업 선택 화면은 학생이 수업을 고를 때까지 유지한다.
+- 수동 확인과 타이머의 동시 실행은 잠금으로 한 번만 처리한다. API·Supabase·알림 생성 계약은 변경하지 않았고 운영 출결이나 실제 알림은 실행하지 않았다.
+- 전용/lesson `21/21`, runtime lint, build `418`·main `945.00 kB`, production `827/827`, 집중 safe browser `1/1` 통과.
 ## 2026-08-05 App/API 4차 리팩터링 4-3i exam post confirm registry
 
 - `/api/exam-post-submissions/confirm`의 teacher guard→body→source action과 verified/error 응답을 `examPostConfirmRouteRegistry`로 이동했다.
