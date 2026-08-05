@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-2b core identity mapper
+
+- Student/ClassTemplate/Lesson 6개 mapper와 특강 학생별 시간 normalize helper를 import 없는 `src/shared/persistence/coreIdentityRowMappers.js`로 옮겼다. 기존 main의 helper+mapper 9개 본문은 export 문구를 제외하고 문자 단위 `9/9` 동일하며 `coreData`의 `toLessonRow` 공개 API도 재수출한다.
+- 첫 위치인 `api/domain`은 Vercel Hobby 함수 inventory를 `13/12`로 늘려 즉시 중단했다. `src/shared/persistence`로 교정해 serverless JavaScript file budget을 `12/12`로 유지했다.
+- round-trip, null/default, clock time, special lecture legacy alias, schema fallback, `updated_at`, unknown-field drop과 I/O 부재를 전용 fixture로 고정했다. Supabase 저장/CAS/readback/rollback, App draft, provider owner는 변경하지 않았다.
+- 검증: core mapper, 45개 baseline, student `15/15`, lesson `20/20`, 학생/반/수업/특강/파생 일정 전용, lint, scenario·production `827/827`, build `418 modules`·main `944.65 kB`·lazy `12/12`, 집중 safe browser `4/4` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-2a row mapper 기준선
 
 - `api/routes/coreData.js`의 36개/18쌍과 `api/routes/examAnalysisPipeline.js`의 9개를 합쳐 row↔domain mapper 45개를 exact inventory로 고정했다. 4-0의 단순 집계 44개는 구조 감사 결과 45개로 교정한다.

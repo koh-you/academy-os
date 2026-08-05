@@ -49,7 +49,7 @@
 
 ## 첫 추출: 4-2b
 
-`Student`, `ClassTemplate`, `Lesson`의 6개 변환기와 필요한 pure helper만 `api/domain`의 단방향 모듈로 옮긴다. 이 여섯 변환기 본문에는 Supabase/API/Storage/provider 호출이 없다.
+`Student`, `ClassTemplate`, `Lesson`의 6개 변환기와 필요한 pure helper만 `src/shared/persistence`의 단방향 모듈로 옮긴다. `api/` 아래 JavaScript 파일은 Vercel serverless 함수 수에 포함되므로 새 mapper 파일을 그 경로에 추가하지 않는다. 이 여섯 변환기 본문에는 Supabase/API/Storage/provider 호출이 없다.
 
 4-2b fixture는 다음을 동작으로 고정한다.
 
@@ -61,3 +61,12 @@
 6. unknown field drop 정책과 mapper에 I/O가 없다는 import 경계.
 
 4-2a에서는 파일 이동, route import, DB 쓰기, provider 행동을 하지 않는다.
+
+## 4-2b 완료 상태
+
+- Student/ClassTemplate/Lesson 6개 mapper와 `normalizeSpecialLectureStudentSchedules`를 `src/shared/persistence/coreIdentityRowMappers.js`로 옮겼다.
+- 기존 main의 `compact`, `normalizeClockTime`, 특강 schedule helper와 6개 mapper 본문은 export 선언을 제외하고 문자 단위 `9/9` 동일하다.
+- `coreData`는 기존 외부 사용자를 위해 `toLessonRow`를 재수출하며 모든 저장·재조회 호출은 같은 함수 identity를 사용한다.
+- 최초 `api/domain` 배치는 Vercel serverless JavaScript file inventory를 12개에서 13개로 늘려 실패했다. 함수 entry가 아닌 pure mapper는 `src/shared/persistence`에 두어 `12/12` 배포 한도를 유지한다.
+- 전용 fixture가 round-trip, null/default, time normalization, 특강 snake_case alias, schema fallback, 새 version token, unknown field drop과 I/O 부재를 검사한다.
+- Supabase source, CAS/readback/rollback, App draft, provider side effect는 이동하거나 실행하지 않았다.

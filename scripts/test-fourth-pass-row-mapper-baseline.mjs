@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [coreDataSource, examPipelineSource, packageJson] = await Promise.all([
+const [coreDataSource, coreIdentityMapperSource, examPipelineSource, packageJson] = await Promise.all([
   readFile(new URL("../api/routes/coreData.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/shared/persistence/coreIdentityRowMappers.js", import.meta.url), "utf8"),
   readFile(new URL("../api/routes/examAnalysisPipeline.js", import.meta.url), "utf8"),
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse)
 ]);
@@ -56,6 +57,15 @@ const expectedExamMapperNames = [
   "fromAiJobRow",
   "toEventRow",
   "fromEventRow"
+];
+
+const expectedExtractedCoreMapperNames = [
+  "toStudentRow",
+  "fromStudentRow",
+  "toClassTemplateRow",
+  "fromClassTemplateRow",
+  "toLessonRow",
+  "fromLessonRow"
 ];
 
 const mapperGroups = {
@@ -139,13 +149,27 @@ function getFunctionSource(source, name) {
   return source.slice(start, cursor);
 }
 
-const coreMapperNames = listMapperNames(coreDataSource);
+const coreRouteMapperNames = listMapperNames(coreDataSource);
+const extractedCoreMapperNames = listMapperNames(coreIdentityMapperSource);
+const coreMapperNames = [...coreRouteMapperNames, ...extractedCoreMapperNames];
 const examMapperNames = listMapperNames(examPipelineSource);
-assert.deepEqual(coreMapperNames, expectedCoreMapperNames);
+assert.deepEqual(extractedCoreMapperNames, expectedExtractedCoreMapperNames);
+assert.deepEqual(
+  coreRouteMapperNames,
+  expectedCoreMapperNames.filter((name) => !expectedExtractedCoreMapperNames.includes(name))
+);
+assert.deepEqual([...coreMapperNames].sort(), [...expectedCoreMapperNames].sort());
 assert.deepEqual(examMapperNames, expectedExamMapperNames);
 assert.equal(coreMapperNames.length, 36);
 assert.equal(examMapperNames.length, 9);
 assert.equal(coreMapperNames.length + examMapperNames.length, 45);
+
+function getCoreMapperSource(name) {
+  return getFunctionSource(
+    expectedExtractedCoreMapperNames.includes(name) ? coreIdentityMapperSource : coreDataSource,
+    name
+  );
+}
 
 const pairedCoreFamilies = expectedCoreMapperNames
   .filter((name) => name.startsWith("to"))
@@ -163,7 +187,7 @@ assert.deepEqual(
 );
 
 const coreUpdatedAtWriters = expectedCoreMapperNames.filter((name) =>
-  getFunctionSource(coreDataSource, name).includes("updated_at: new Date().toISOString()")
+  getCoreMapperSource(name).includes("updated_at: new Date().toISOString()")
 );
 assert.deepEqual(coreUpdatedAtWriters, [
   "toStudentRow",
@@ -199,43 +223,56 @@ const optionBearingMappers = [
   "toAcademyReminderRow"
 ];
 for (const name of optionBearingMappers) {
-  assert.match(getFunctionSource(coreDataSource, name), /include[A-Z]/, `${name} lost a schema fallback option`);
+  assert.match(getCoreMapperSource(name), /include[A-Z]/, `${name} lost a schema fallback option`);
 }
 
-assert.match(getFunctionSource(coreDataSource, "toStudentRow"), /includeWithdrawalDetails/);
-assert.match(getFunctionSource(coreDataSource, "toStudentRow"), /includeWithdrawnAt/);
-assert.match(getFunctionSource(coreDataSource, "toLessonRow"), /includeScheduleMetadata/);
-assert.match(getFunctionSource(coreDataSource, "toLessonRecordRow"), /includeExtendedFields/);
-assert.match(getFunctionSource(coreDataSource, "toLessonRecordRow"), /includeAttendanceTimeFields/);
-assert.match(getFunctionSource(coreDataSource, "toHomeworkRow"), /includeExtendedFields/);
-assert.match(getFunctionSource(coreDataSource, "toAcademyReminderRow"), /includeCompletedAt/);
+assert.match(getCoreMapperSource("toStudentRow"), /includeWithdrawalDetails/);
+assert.match(getCoreMapperSource("toStudentRow"), /includeWithdrawnAt/);
+assert.match(getCoreMapperSource("toLessonRow"), /includeScheduleMetadata/);
+assert.match(getCoreMapperSource("toLessonRecordRow"), /includeExtendedFields/);
+assert.match(getCoreMapperSource("toLessonRecordRow"), /includeAttendanceTimeFields/);
+assert.match(getCoreMapperSource("toHomeworkRow"), /includeExtendedFields/);
+assert.match(getCoreMapperSource("toAcademyReminderRow"), /includeCompletedAt/);
 assert.match(getFunctionSource(examPipelineSource, "toSourcePatchRow"), /=== undefined \? undefined/);
 
 for (const name of expectedCoreMapperNames.filter((mapperName) => mapperName.startsWith("from"))) {
-  assert.doesNotMatch(getFunctionSource(coreDataSource, name), /\.\.\.row\b/, `${name} started preserving unknown DB fields`);
+  assert.doesNotMatch(getCoreMapperSource(name), /\.\.\.row\b/, `${name} started preserving unknown DB fields`);
 }
 for (const name of expectedExamMapperNames.filter((mapperName) => mapperName.startsWith("from"))) {
   assert.doesNotMatch(getFunctionSource(examPipelineSource, name), /\.\.\.row\b/, `${name} started preserving unknown DB fields`);
 }
 
 const firstExtractionSource = mapperGroups["4-2b-student-class-lesson"]
-  .map((name) => getFunctionSource(coreDataSource, name))
+  .map((name) => getCoreMapperSource(name))
   .join("\n");
 assert.doesNotMatch(
   firstExtractionSource,
   /\b(?:listRows|insertRows|patchRows|upsertRows|deleteRows|fetch|postJson|Solapi|localStorage)\b/,
   "first extraction candidate owns I/O"
 );
+assert.equal(/^import\s/m.test(coreIdentityMapperSource), false, "pure mapper module must not import I/O or route state");
 assert.deepEqual(
-  [...coreDataSource.matchAll(/^export function ((?:to|from)[A-Za-z0-9_]*Row)\s*\(/gm)].map((match) => match[1]),
-  ["toLessonRow"]
+  [...coreIdentityMapperSource.matchAll(/^export function ((?:to|from)[A-Za-z0-9_]*Row)\s*\(/gm)]
+    .map((match) => match[1]),
+  expectedExtractedCoreMapperNames
 );
+assert.match(coreDataSource, /from "\.\.\/\.\.\/src\/shared\/persistence\/coreIdentityRowMappers\.js";/);
+assert.match(coreDataSource, /export \{ toLessonRow \};/);
+assert.match(coreIdentityMapperSource, /export function normalizeSpecialLectureStudentSchedules/);
+assert.doesNotMatch(coreDataSource, /function normalizeSpecialLectureStudentSchedules/);
+for (const name of expectedExtractedCoreMapperNames) {
+  assert.doesNotMatch(coreDataSource, new RegExp(`function\\s+${name}\\s*\\(`));
+}
 
 assert.ok(
   packageJson.scripts["test:production"].includes("npm run test:fourth-pass-row-mapper-baseline"),
   "production gate is missing the mapper baseline"
 );
+assert.ok(
+  packageJson.scripts["test:production"].includes("npm run test:core-identity-row-mappers"),
+  "production gate is missing the extracted mapper behavior contract"
+);
 
 console.log(
-  "fourth-pass row mapper baseline passed · core 36/18 pairs · exam 9 · total 45 · first extraction 6"
+  "fourth-pass row mapper boundary passed · core 36/18 pairs · extracted 6 · exam 9 · total 45"
 );
