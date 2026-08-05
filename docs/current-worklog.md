@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-2f platform source mapper
+
+- AppState/ResourceMaterial/NotificationJob 6개 mapper와 자료 visibility helper를 import 없는 `src/shared/persistence/platformSourceRowMappers.js`로 옮겼다. 이전 main 함수 본문은 export 문구를 제외하고 문자 단위 `9/9` 동일하다.
+- AppState CAS/requery, 자료 private Storage upload/delete rollback, 알림 source 저장과 provider reserve/cancel/reconcile owner는 기존 controller/route/server에 유지했다. `coreData`의 36개/18쌍 mapper는 이제 전부 pure module에서 주입된다.
+- AppState inventory의 파일 위치 결합은 새 mapper source를 명시적으로 감사하도록 교정했다. 검증: notification `18/18`, AppState·자료·알림 전용, lint, scenario·production `827/827`, build `418`·main `944.65 kB`·lazy `12/12`, provider 없는 safe browser `5/5` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-2e learning/calendar mapper
 
 - TestSession/TestAttempt/ExamPrep/SchoolEvent/AcademyReminder 10개 mapper와 숫자·시험 주기·학사일정 type·운영 알림 normalize helper를 import 없는 `src/shared/persistence/learningCalendarRowMappers.js`로 옮겼다. 이전 main 함수 본문은 export 문구를 제외하고 문자 단위 `22/22` 동일하다.

@@ -93,3 +93,10 @@
 - 전용 fixture는 정수 보정, 시험 주기 legacy/default, schema fallback option, 학사일정 type alias, 운영 알림 class notice 호환·시간/status/priority·version token과 unknown DB field drop을 검사한다.
 - SchoolEvent만 `event_payload` JSON의 미지 domain metadata를 의도적으로 보존한다. 이는 기존 화면 확장 필드를 유지하는 계약이며 미지 DB column은 계속 버린다.
 - Supabase source write/CAS/readback/rollback, 시험·학사일정 reconcile, App draft, AI와 Slack provider side effect는 이동하거나 실행하지 않았다.
+
+## 4-2f 완료 상태
+
+- AppState/ResourceMaterial/NotificationJob 6개 mapper와 자료 visibility helper를 `src/shared/persistence/platformSourceRowMappers.js`로 옮겼다.
+- 기존 main의 `compact`를 포함한 함수 본문은 export 선언을 제외하고 문자 단위 `9/9` 동일하며, `coreData` mapper 추출 inventory는 36/36이다.
+- 전용 fixture는 AppState object/null/version token, 자료 legacy ID·URL·class alias·visibility, 알림 target/type/schedule/message alias·provider 결과와 unknown DB field drop을 검사한다.
+- AppState Supabase CAS/readback, 자료 private Storage upload/delete rollback, 알림 source 저장과 Solapi·Slack provider reserve/cancel/reconcile는 이동하거나 실행하지 않았다.

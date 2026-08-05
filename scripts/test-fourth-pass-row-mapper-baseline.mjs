@@ -7,6 +7,7 @@ const [
   intakeSpecialLectureMapperSource,
   lessonActivityMapperSource,
   learningCalendarMapperSource,
+  platformSourceMapperSource,
   examPipelineSource,
   packageJson
 ] = await Promise.all([
@@ -15,6 +16,7 @@ const [
   readFile(new URL("../src/shared/persistence/intakeSpecialLectureRowMappers.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/persistence/lessonActivityRowMappers.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/persistence/learningCalendarRowMappers.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/shared/persistence/platformSourceRowMappers.js", import.meta.url), "utf8"),
   readFile(new URL("../api/routes/examAnalysisPipeline.js", import.meta.url), "utf8"),
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse)
 ]);
@@ -112,11 +114,21 @@ const expectedExtractedLearningCalendarMapperNames = [
   "fromAcademyReminderRow"
 ];
 
+const expectedExtractedPlatformSourceMapperNames = [
+  "toAppStateRow",
+  "fromAppStateRow",
+  "toResourceMaterialRow",
+  "fromResourceMaterialRow",
+  "toNotificationJobRow",
+  "fromNotificationJobRow"
+];
+
 const expectedExtractedMapperNames = [
   ...expectedExtractedCoreMapperNames,
   ...expectedExtractedIntakeSpecialMapperNames,
   ...expectedExtractedLessonActivityMapperNames,
-  ...expectedExtractedLearningCalendarMapperNames
+  ...expectedExtractedLearningCalendarMapperNames,
+  ...expectedExtractedPlatformSourceMapperNames
 ];
 
 const mapperGroups = {
@@ -205,18 +217,21 @@ const extractedCoreMapperNames = listMapperNames(coreIdentityMapperSource);
 const extractedIntakeSpecialMapperNames = listMapperNames(intakeSpecialLectureMapperSource);
 const extractedLessonActivityMapperNames = listMapperNames(lessonActivityMapperSource);
 const extractedLearningCalendarMapperNames = listMapperNames(learningCalendarMapperSource);
+const extractedPlatformSourceMapperNames = listMapperNames(platformSourceMapperSource);
 const coreMapperNames = [
   ...coreRouteMapperNames,
   ...extractedCoreMapperNames,
   ...extractedIntakeSpecialMapperNames,
   ...extractedLessonActivityMapperNames,
-  ...extractedLearningCalendarMapperNames
+  ...extractedLearningCalendarMapperNames,
+  ...extractedPlatformSourceMapperNames
 ];
 const examMapperNames = listMapperNames(examPipelineSource);
 assert.deepEqual(extractedCoreMapperNames, expectedExtractedCoreMapperNames);
 assert.deepEqual(extractedIntakeSpecialMapperNames, expectedExtractedIntakeSpecialMapperNames);
 assert.deepEqual(extractedLessonActivityMapperNames, expectedExtractedLessonActivityMapperNames);
 assert.deepEqual(extractedLearningCalendarMapperNames, expectedExtractedLearningCalendarMapperNames);
+assert.deepEqual(extractedPlatformSourceMapperNames, expectedExtractedPlatformSourceMapperNames);
 assert.deepEqual(
   coreRouteMapperNames,
   expectedCoreMapperNames.filter((name) => !expectedExtractedMapperNames.includes(name))
@@ -239,6 +254,9 @@ function getCoreMapperSource(name) {
   }
   if (expectedExtractedLearningCalendarMapperNames.includes(name)) {
     return getFunctionSource(learningCalendarMapperSource, name);
+  }
+  if (expectedExtractedPlatformSourceMapperNames.includes(name)) {
+    return getFunctionSource(platformSourceMapperSource, name);
   }
   return getFunctionSource(coreDataSource, name);
 }
@@ -338,6 +356,11 @@ assert.equal(
   false,
   "learning/calendar mapper module must not import I/O, reconciliation, AI, or provider state"
 );
+assert.equal(
+  /^import\s/m.test(platformSourceMapperSource),
+  false,
+  "platform source mapper module must not import DB, Storage, or provider state"
+);
 assert.deepEqual(
   [...coreIdentityMapperSource.matchAll(/^export function ((?:to|from)[A-Za-z0-9_]*Row)\s*\(/gm)]
     .map((match) => match[1]),
@@ -358,10 +381,16 @@ assert.deepEqual(
     .map((match) => match[1]),
   expectedExtractedLearningCalendarMapperNames
 );
+assert.deepEqual(
+  [...platformSourceMapperSource.matchAll(/^export function ((?:to|from)[A-Za-z0-9_]*Row)\s*\(/gm)]
+    .map((match) => match[1]),
+  expectedExtractedPlatformSourceMapperNames
+);
 assert.match(coreDataSource, /from "\.\.\/\.\.\/src\/shared\/persistence\/coreIdentityRowMappers\.js";/);
 assert.match(coreDataSource, /from "\.\.\/\.\.\/src\/shared\/persistence\/intakeSpecialLectureRowMappers\.js";/);
 assert.match(coreDataSource, /from "\.\.\/\.\.\/src\/shared\/persistence\/lessonActivityRowMappers\.js";/);
 assert.match(coreDataSource, /from "\.\.\/\.\.\/src\/shared\/persistence\/learningCalendarRowMappers\.js";/);
+assert.match(coreDataSource, /from "\.\.\/\.\.\/src\/shared\/persistence\/platformSourceRowMappers\.js";/);
 assert.match(coreDataSource, /export \{ toLessonRow \};/);
 assert.match(coreIdentityMapperSource, /export function normalizeSpecialLectureStudentSchedules/);
 assert.doesNotMatch(coreDataSource, /function normalizeSpecialLectureStudentSchedules/);
@@ -409,7 +438,11 @@ assert.ok(
   packageJson.scripts["test:production"].includes("npm run test:learning-calendar-row-mappers"),
   "production gate is missing the learning/calendar mapper behavior contract"
 );
+assert.ok(
+  packageJson.scripts["test:production"].includes("npm run test:platform-source-row-mappers"),
+  "production gate is missing the platform source mapper behavior contract"
+);
 
 console.log(
-  "fourth-pass row mapper boundary passed · core 36/18 pairs · extracted 30 · exam 9 · total 45"
+  "fourth-pass row mapper boundary passed · core 36/18 pairs · extracted 36 · exam 9 · total 45"
 );
