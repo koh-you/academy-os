@@ -207,4 +207,5 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 - 4-3a 기준선: `api/server.js` 7,941줄의 direct exact-path route 120개를 GET 31/POST 76/DELETE 13과 9개 registry family로 분류했다. method/path/order hash, credential/session 15개, dispatch token 2개 guard 의미와 common body/response·core/exam/provider owner를 production fixture에 고정했다.
 - 4-3b: header lookup, allowed origins, JSON body parser, CORS selector와 JSON response를 frozen HTTP adapter로 옮겼다. route 120개/order hash와 auth/session·DB/provider owner는 유지하며 body/limit/error/preflight를 동작 fixture로 고정했다.
 - 4-3c: HMAC token 생성·expiry·timing-safe 검증과 request bearer→portal/teacher/mixed session guard를 frozen adapter로 옮겼다. 13개 session route guard와 credential DB owner는 유지했다.
-- 다음 4-3d부터 health/auth/portal/core route family를 한 묶음씩 이동한다.
+- 4-3d: OPTIONS와 health/client-errors/core-status 3개 route를 첫 frozen registry로 이동했다. registry 3개 + server 직접 117개의 전역 method/path/order hash와 client-error 64 KiB·429/202/400 계약을 고정했다.
+- 다음 4-3e부터 credential auth와 portal session route를 한 묶음씩 이동한다.

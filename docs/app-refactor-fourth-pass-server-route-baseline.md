@@ -88,3 +88,10 @@ route signature의 현재 등록 순서는 SHA-256 `118af79f…de5`로 fixture�
 - portal 7개, teacher 4개, teacher-or-portal 2개 route는 각각 `getPortalSession`, `getTeacherSession`, `getTeacherOrPortalSession`을 body parsing·source action 전에 호출한다.
 - token 변조, secret 교체, 만료 직전/직후, raw/Bearer token과 mixed guard의 teacher 우선순위를 동작 fixture로 고정했다.
 - teacher credential bootstrap과 Supabase 계정 조회, route 120개 order, DB/Storage/provider owner는 server에 유지했다. server는 7,842줄이며 다음은 첫 route registry다.
+
+## 4-3d 완료 상태
+
+- OPTIONS preflight와 `GET /health`, `POST /api/client-errors`, `GET /api/core/status`를 `src/shared/server/systemRouteRegistry.js`로 이동했다.
+- registry가 route를 처리했는지 boolean으로 반환하고, 미일치 route만 기존 server 순서로 내려간다. 전역 inventory는 registry 3개 + server 직접 117개, 총 120개와 기존 order hash를 유지한다.
+- client runtime error의 remote-address rate limit, 64 KiB body limit, normalize→report→202와 429/400 응답을 동작 fixture로 고정했다.
+- 인증·DB write·Storage/provider owner는 이동하지 않았다. server는 7,811줄이며 다음은 auth/portal registry다.

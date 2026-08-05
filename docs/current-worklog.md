@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-3d system route registry
+
+- OPTIONS, health, 제한된 client runtime error 수집, core status를 첫 frozen route registry로 이동했다. registry 미일치 시에만 기존 117개 직접 route가 원래 순서로 실행된다.
+- health payload, client-error 64 KiB·rate limit·normalize/report·202/400, core status 주입과 unknown route pass-through를 전용 fixture로 고정했다.
+- 인증·DB 저장·Storage/provider 경계는 변경하지 않았고 실제 local server의 health/core status 200을 가상 설정으로 확인했다.
+- 검증: runtime lint, domain 69/69, scenario·production 827/827, build 418 modules·main 944.65 kB·lazy 12/12 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3c session route guard
 
 - 교사 8시간·학생/학부모 14일 HMAC token 생성, timing-safe signature·expiry·role 검증과 request Authorization 해석을 `src/shared/server/sessionRouteGuard.js`로 이동했다.
