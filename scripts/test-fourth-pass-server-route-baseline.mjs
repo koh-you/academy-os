@@ -2,14 +2,16 @@ import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { authLoginRouteSignatures } from "../src/shared/server/authLoginRouteRegistry.js";
+import { examPostConfirmRouteSignatures } from "../src/shared/server/examPostConfirmRouteRegistry.js";
 import { portalReadRouteSignatures } from "../src/shared/server/portalReadRouteRegistry.js";
 import { portalWriteRouteSignatures } from "../src/shared/server/portalWriteRouteRegistry.js";
 import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
 import { teacherAccountRouteSignatures } from "../src/shared/server/teacherAccountRouteRegistry.js";
 
-const [adapterSource, authLoginRouteRegistrySource, packageJson, portalReadRouteRegistrySource, portalWriteRouteRegistrySource, serverSource, sessionGuardSource, systemRouteRegistrySource, teacherAccountRouteRegistrySource] = await Promise.all([
+const [adapterSource, authLoginRouteRegistrySource, examPostConfirmRouteRegistrySource, packageJson, portalReadRouteRegistrySource, portalWriteRouteRegistrySource, serverSource, sessionGuardSource, systemRouteRegistrySource, teacherAccountRouteRegistrySource] = await Promise.all([
   readFile(new URL("../src/shared/server/httpRouteAdapter.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/authLoginRouteRegistry.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/shared/server/examPostConfirmRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse),
   readFile(new URL("../src/shared/server/portalReadRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/portalWriteRouteRegistry.js", import.meta.url), "utf8"),
@@ -30,10 +32,6 @@ const directRoutes = directRouteMatches.map((match, index) => ({
     match.index
   ))
 }));
-const teacherAccountInsertIndex = directRoutes.findIndex(({ signature }) => (
-  signature === "POST /api/exam-post-submissions/confirm"
-)) + 1;
-assert.ok(teacherAccountInsertIndex > 0);
 const orderedRoutes = [
   ...systemRouteSignatures.map(({ method, path }) => ({
     method,
@@ -59,19 +57,24 @@ const orderedRoutes = [
     signature: `${method} ${path}`,
     source: portalWriteRouteRegistrySource
   })),
-  ...directRoutes.slice(0, teacherAccountInsertIndex),
+  ...examPostConfirmRouteSignatures.map(({ method, path }) => ({
+    method,
+    path,
+    signature: `${method} ${path}`,
+    source: examPostConfirmRouteRegistrySource
+  })),
   ...teacherAccountRouteSignatures.map(({ method, path }) => ({
     method,
     path,
     signature: `${method} ${path}`,
     source: teacherAccountRouteRegistrySource
   })),
-  ...directRoutes.slice(teacherAccountInsertIndex)
+  ...directRoutes
 ];
 const routes = orderedRoutes.map((route, index) => ({ ...route, index }));
 
 assert.equal(routes.length, 120);
-assert.equal(directRouteMatches.length, 110);
+assert.equal(directRouteMatches.length, 109);
 assert.equal(new Set(routes.map(({ signature }) => signature)).size, 120);
 assert.deepEqual(
   Object.fromEntries(["DELETE", "GET", "POST"].map((method) => [
@@ -242,6 +245,10 @@ assert.ok(portalWriteRouteRegistrySource.includes("getPortalSession(request)"));
 assert.ok(portalWriteRouteRegistrySource.includes("completePortalHomework"));
 assert.ok(portalWriteRouteRegistrySource.includes("mutatePortalQuestion"));
 assert.ok(portalWriteRouteRegistrySource.includes("savePortalExamPostSubmission"));
+assert.ok(serverSource.includes("createExamPostConfirmRouteRegistry({"));
+assert.ok(serverSource.includes("await dispatchExamPostConfirmRoute({ request, response, requestUrl })"));
+assert.ok(examPostConfirmRouteRegistrySource.includes("getTeacherSession(request)"));
+assert.ok(examPostConfirmRouteRegistrySource.includes("confirmExamPostSubmission(teacherSession, payload)"));
 assert.ok(serverSource.includes("createTeacherAccountRouteRegistry({"));
 assert.ok(serverSource.includes("await dispatchTeacherAccountRoute({ request, response, requestUrl })"));
 assert.ok(teacherAccountRouteRegistrySource.includes('requestUrl.pathname !== "/api/auth/teacher-account"'));
@@ -279,6 +286,7 @@ assert.ok(packageJson.scripts["test:production"].includes("npm run test:auth-log
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:teacher-account-route-registry"));
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:portal-read-route-registry"));
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:portal-write-route-registry"));
+assert.ok(packageJson.scripts["test:production"].includes("npm run test:exam-post-confirm-route-registry"));
 
 console.log(
   "fourth-pass server route baseline passed · 120 routes · GET 31/POST 76/DELETE 13 · session/credential 15 + dispatch 2"

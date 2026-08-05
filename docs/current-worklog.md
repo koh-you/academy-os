@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-3i exam post confirm registry
+
+- 교사 시험 후 제출 확인 POST의 teacher guard/body/action/response 조립을 frozen registry로 이동했다. 기존 전역 120개 route 순서와 오류 status를 유지한다.
+- AppState 저장·재조회와 mutation lock은 server action에 남겼다. 무효 bearer local 401 smoke만 수행했고 운영 로그인·데이터·Storage는 사용하지 않았다.
+- 첫 production은 server 내부 700자 위치에 결합된 teacher-session fixture가 실패해, server dispatch와 registry guard 선행을 함께 감사하도록 최소 교정했다. domain `69/69`, lint, scenario·production `827/827`, build `418`·main `944.65 kB`·lazy `12/12` 통과했다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3h portal write registry
 
 - portal-state, 숙제 완료, 질문 CRUD, 시험 후 제출 POST 4개의 guard/body/action/response 조립을 frozen registry로 이동했다. 기존 route 순서와 120개 signature hash는 유지한다.

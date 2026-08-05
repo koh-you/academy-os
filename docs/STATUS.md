@@ -4,8 +4,9 @@
 
 ## 4차 리팩터링 현재 단위
 
+- 4-3i는 교사 시험 후 제출 확인 POST의 teacher guard, body→action mapping과 statusCode 오류를 `src/shared/server/examPostConfirmRouteRegistry.js`로 옮겼다. AppState 저장·재조회와 mutation lock owner는 server action에 유지한다.
+- 다음 4-3j는 최신 main에서 app-state와 특강 guide의 read-only route를 별도 registry로 분리한다.
 - 4-3h는 portal-state, 숙제 완료, 질문 CRUD, 시험 후 제출 4개 POST의 portal guard, body→action mapping과 기존 500/statusCode 오류를 `src/shared/server/portalWriteRouteRegistry.js`로 옮겼다. Supabase 저장·재조회와 mutation lock owner는 server action에 유지한다.
-- 다음 4-3i는 최신 main에서 교사 시험 후 제출 확인 route를 별도 registry로 분리한다.
 - 4-3g는 `GET /api/portal-data`의 portal session guard, scoped source read, role 응답과 401/404/500을 `src/shared/server/portalReadRouteRegistry.js`로 옮겼다. source filtering owner는 server의 `getPortalData`에 유지한다.
 - 4-3f는 `POST /api/auth/teacher-account`의 Supabase 설정 gate, 현재 credential 확인, 입력 검증과 계정 저장 응답을 `src/shared/server/teacherAccountRouteRegistry.js`로 옮겼다. password hash와 teacher_accounts DB action은 server owner로 유지한다.
 - 4-3e는 `POST /api/auth/login`의 role 검증, credential action 선택, session token/account 응답을 `src/shared/server/authLoginRouteRegistry.js`로 옮겼다. teacher/student/parent credential DB 함수와 HMAC token owner는 그대로 주입한다.
