@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-3b HTTP route adapter
+
+- 공통 header/body/CORS/JSON response 구현을 `src/shared/server/httpRouteAdapter.js`로 이동하고 server가 allowed origins를 주입한 frozen adapter를 사용한다.
+- 전용 fixture는 body/default·limit·오류, CORS wildcard/allowlist/fallback, 응답 header/body와 preflight를 고정한다. direct route 120개와 session/provider/persistence 의미는 그대로다.
+- 다음은 bearer/session 검증과 teacher/portal guard 결과 adapter이며, 권한 정책 자체는 바꾸지 않는다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3a server route 기준선
 
 - server 직접 route 120개(GET 31/POST 76/DELETE 13)의 signature/order와 9개 family를 fixture로 고정했다. credential/session 15개, dispatch token 2개의 기존 guard 의미와 route action 전 선행 여부도 감사한다.

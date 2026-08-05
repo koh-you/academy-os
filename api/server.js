@@ -106,6 +106,11 @@ import {
 } from "../src/shared/utils/studentSchedule.js";
 import { parseVersionedWriteRequest } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 import {
+  createHttpRouteAdapter,
+  getCorsOrigin,
+  parseAllowedOrigins
+} from "../src/shared/server/httpRouteAdapter.js";
+import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
   loadConsecutiveAttendanceVisit,
@@ -186,10 +191,8 @@ const ssenSubjectByTypeCode = new Map(ssenTypeIndex
 
 const port = Number(process.env.PORT ?? process.env.ACADEMY_API_PORT ?? 8787);
 const host = process.env.ACADEMY_API_HOST ?? (process.env.RENDER ? "0.0.0.0" : "127.0.0.1");
-const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS ?? "*")
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+const allowedOrigins = parseAllowedOrigins(process.env.CORS_ALLOWED_ORIGINS ?? "*");
+const { getRequestHeader, readJsonBody, sendJson } = createHttpRouteAdapter({ allowedOrigins });
 
 const dispatchableNotificationStatuses = new Set(["queued", "pending_send"]);
 const readinessCheckStatuses = new Set(["queued", "pending_send", "scheduled"]);
@@ -249,10 +252,6 @@ function normalizeSchoolName(value = "") {
     .replace(/남자고/g, "남고")
     .replace(/고등학교/g, "고")
     .replace(/중학교/g, "중");
-}
-
-function getRequestHeader(request, name) {
-  return request.headers[name.toLowerCase()] ?? request.headers[name] ?? "";
 }
 
 function timingSafeEqualText(left = "", right = "") {
@@ -1964,44 +1963,6 @@ async function confirmExamPostSubmission(teacherSession, payload = {}) {
       verified: true
     };
   });
-}
-
-function readJsonBody(request, options = {}) {
-  const limitBytes = options.limitBytes ?? 2_000_000;
-  return new Promise((resolve, reject) => {
-    let body = "";
-    request.on("data", (chunk) => {
-      body += chunk;
-      if (Buffer.byteLength(body) > limitBytes) {
-        reject(new Error("요청 본문이 너무 큽니다."));
-        request.destroy();
-      }
-    });
-    request.on("end", () => {
-      try {
-        resolve(body ? JSON.parse(body) : {});
-      } catch (error) {
-        reject(new Error("JSON 형식이 올바르지 않습니다."));
-      }
-    });
-    request.on("error", reject);
-  });
-}
-
-function getCorsOrigin(request) {
-  if (allowedOrigins.includes("*")) return "*";
-  const origin = request.headers.origin;
-  return origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0] ?? "*";
-}
-
-function sendJson(request, response, statusCode, data) {
-  response.writeHead(statusCode, {
-    "Access-Control-Allow-Headers": "Content-Type,Tally-Signature,Authorization",
-    "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS",
-    "Access-Control-Allow-Origin": getCorsOrigin(request),
-    "Content-Type": "application/json; charset=utf-8"
-  });
-  response.end(JSON.stringify(data));
 }
 
 function getProviderMessageId(result) {
@@ -6518,7 +6479,7 @@ const server = http.createServer(async (request, response) => {
       if (!storagePath) throw new Error("파일 경로가 없습니다.");
       const signedUrl = await createSignedStorageUrl(bucketId, storagePath);
       response.writeHead(302, {
-        "Access-Control-Allow-Origin": getCorsOrigin(request),
+        "Access-Control-Allow-Origin": getCorsOrigin(request, allowedOrigins),
         Location: signedUrl
       });
       response.end();
