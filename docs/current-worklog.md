@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-3c session route guard
+
+- 교사 8시간·학생/학부모 14일 HMAC token 생성, timing-safe signature·expiry·role 검증과 request Authorization 해석을 `src/shared/server/sessionRouteGuard.js`로 이동했다.
+- portal 7개, teacher 4개, teacher-or-portal 2개 route는 같은 guard 종류와 body/action 전 선행 순서를 유지한다. teacher credential bootstrap·Supabase 계정 조회는 server owner에 남겼다.
+- 전용 fixture가 signature 변조·secret 교체·만료 경계·raw/Bearer token·teacher/portal/mixed guard를 고정한다. 기존 위치에 결합된 teacher security fixture는 새 owner source와 route 사용을 함께 감사하도록 교정했다.
+- 검증: runtime lint, domain 69/69, scenario·production 827/827, build 418 modules·main 944.65 kB·lazy 12/12, safe browser session 경로 3/3 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3b HTTP route adapter
 
 - `getRequestHeader`, JSON body parser, allowed-origin parser, CORS selector, JSON response를 `src/shared/server/httpRouteAdapter.js`로 옮기고 server에는 frozen adapter를 한 번 조립했다. exam source redirect도 같은 CORS selector를 사용한다.

@@ -187,13 +187,14 @@ try {
 }
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [actionSource, appSource, apiSource, modalSource, serverSource, safeServerSource] = await Promise.all([
+const [actionSource, appSource, apiSource, modalSource, serverSource, safeServerSource, sessionGuardSource] = await Promise.all([
   read("../src/domains/reports/reportSnapshotAction.js"),
   read("../src/app/App.jsx"),
   read("../src/domains/reports/reportSnapshotApi.js"),
   read("../src/domains/reports/ReportModal.jsx"),
   read("../api/server.js"),
-  read("./safe-local-api.mjs")
+  read("./safe-local-api.mjs"),
+  read("../src/shared/server/sessionRouteGuard.js")
 ]);
 const sharedStateSource = appSource.slice(
   appSource.indexOf("const sharedAppState = useMemo(() => ({"),
@@ -238,7 +239,7 @@ for (const boundary of [
 }
 for (const boundary of [
   'requestUrl.pathname === "/api/report-snapshots"',
-  "verifyTeacherSessionToken(token)",
+  "getTeacherSession(request)",
   "parseVersionedWriteRequest(",
   "saveReportSnapshotWithVerification",
   "read: listAppState",
@@ -246,6 +247,7 @@ for (const boundary of [
 ]) {
   assert.ok(reportServerSource.includes(boundary), `missing report snapshot server boundary: ${boundary}`);
 }
+assert.ok(sessionGuardSource.includes("function verifyTeacherSessionToken"));
 assert.ok(safeReportServerSource.includes('requestUrl.pathname === "/api/report-snapshots"'));
 assert.ok(safeReportServerSource.includes("parseVersionedWriteRequest("));
 assert.ok(modalSource.includes("closeDisabled={isSaving}"));

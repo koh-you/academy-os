@@ -81,3 +81,10 @@ route signature의 현재 등록 순서는 SHA-256 `118af79f…de5`로 fixture�
 - server는 allowed origins를 한 번 주입한 frozen adapter의 `getRequestHeader`·`readJsonBody`·`sendJson`을 사용한다. signed URL redirect도 같은 `getCorsOrigin`을 사용해 기존 fallback을 유지한다.
 - 빈 body, chunked JSON, malformed JSON, 기본/개별 body limit와 connection destroy, wildcard/allowlist/첫 origin fallback, OPTIONS 204의 header/body를 전용 fixture로 고정했다.
 - server는 7,902줄이 됐고 route 120개 signature/order, auth 17개 의미, source persistence와 provider owner는 이동하지 않았다. 다음은 session guard adapter다.
+
+## 4-3c 완료 상태
+
+- HMAC session token 생성, 8시간 교사/14일 portal expiry, timing-safe signature·role 검증과 request Authorization 해석을 `src/shared/server/sessionRouteGuard.js`로 이동했다.
+- portal 7개, teacher 4개, teacher-or-portal 2개 route는 각각 `getPortalSession`, `getTeacherSession`, `getTeacherOrPortalSession`을 body parsing·source action 전에 호출한다.
+- token 변조, secret 교체, 만료 직전/직후, raw/Bearer token과 mixed guard의 teacher 우선순위를 동작 fixture로 고정했다.
+- teacher credential bootstrap과 Supabase 계정 조회, route 120개 order, DB/Storage/provider owner는 server에 유지했다. server는 7,842줄이며 다음은 첫 route registry다.

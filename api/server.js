@@ -111,6 +111,10 @@ import {
   parseAllowedOrigins
 } from "../src/shared/server/httpRouteAdapter.js";
 import {
+  createSessionRouteGuard,
+  timingSafeEqualText
+} from "../src/shared/server/sessionRouteGuard.js";
+import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
   loadConsecutiveAttendanceVisit,
@@ -193,6 +197,16 @@ const port = Number(process.env.PORT ?? process.env.ACADEMY_API_PORT ?? 8787);
 const host = process.env.ACADEMY_API_HOST ?? (process.env.RENDER ? "0.0.0.0" : "127.0.0.1");
 const allowedOrigins = parseAllowedOrigins(process.env.CORS_ALLOWED_ORIGINS ?? "*");
 const { getRequestHeader, readJsonBody, sendJson } = createHttpRouteAdapter({ allowedOrigins });
+const {
+  createPortalSessionToken,
+  createTeacherSessionToken,
+  getPortalSession,
+  getTeacherOrPortalSession,
+  getTeacherSession
+} = createSessionRouteGuard({
+  getRequestHeader,
+  getSecret: () => process.env.APP_SESSION_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || "academy-os-dev-session-secret"
+});
 
 const dispatchableNotificationStatuses = new Set(["queued", "pending_send"]);
 const readinessCheckStatuses = new Set(["queued", "pending_send", "scheduled"]);
@@ -252,12 +266,6 @@ function normalizeSchoolName(value = "") {
     .replace(/남자고/g, "남고")
     .replace(/고등학교/g, "고")
     .replace(/중학교/g, "중");
-}
-
-function timingSafeEqualText(left = "", right = "") {
-  const leftBuffer = Buffer.from(String(left));
-  const rightBuffer = Buffer.from(String(right));
-  return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
 }
 
 function compactPhoneNumber(value = "") {
@@ -1374,59 +1382,6 @@ async function authenticateTeacher(loginId, password) {
 
 function createParentLoginId(student) {
   return `parent-${student.loginId}`;
-}
-
-function getSessionSecret() {
-  return process.env.APP_SESSION_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || "academy-os-dev-session-secret";
-}
-
-function encodeBase64Url(value) {
-  return Buffer.from(JSON.stringify(value)).toString("base64url");
-}
-
-function signSessionPayload(payload) {
-  return crypto.createHmac("sha256", getSessionSecret()).update(payload).digest("base64url");
-}
-
-function createPortalSessionToken(account) {
-  const payload = encodeBase64Url({
-    role: account.role,
-    studentId: account.studentId,
-    name: account.name,
-    exp: Date.now() + 1000 * 60 * 60 * 24 * 14
-  });
-  return `${payload}.${signSessionPayload(payload)}`;
-}
-
-function createTeacherSessionToken(account) {
-  const payload = encodeBase64Url({
-    role: "teacher",
-    teacherId: account.teacherId,
-    name: account.name,
-    exp: Date.now() + 1000 * 60 * 60 * 8
-  });
-  return `${payload}.${signSessionPayload(payload)}`;
-}
-
-function verifySignedSessionToken(token = "") {
-  const [payload, signature] = String(token).split(".");
-  if (!payload || !signature || !timingSafeEqualText(signSessionPayload(payload), signature)) return null;
-  try {
-    const session = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
-    return Number(session.exp) >= Date.now() ? session : null;
-  } catch {
-    return null;
-  }
-}
-
-function verifyPortalSessionToken(token = "") {
-  const session = verifySignedSessionToken(token);
-  return session?.studentId && ["student", "parent"].includes(session.role) ? session : null;
-}
-
-function verifyTeacherSessionToken(token = "") {
-  const session = verifySignedSessionToken(token);
-  return session?.teacherId && session.role === "teacher" ? session : null;
 }
 
 async function authenticateStudentOrParent(role, loginId, password) {
@@ -5934,8 +5889,7 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "GET" && requestUrl.pathname === "/api/portal-data") {
     try {
-      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
-      const portalSession = verifyPortalSessionToken(token);
+      const portalSession = getPortalSession(request);
       if (!portalSession) {
         sendJson(request, response, 401, { ok: false, error: "학생 세션 인증이 필요합니다." });
         return;
@@ -5954,8 +5908,7 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/portal-state") {
     try {
-      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
-      const portalSession = verifyPortalSessionToken(token);
+      const portalSession = getPortalSession(request);
       if (!portalSession) {
         sendJson(request, response, 401, { ok: false, error: "학생 세션 인증이 필요합니다." });
         return;
@@ -5971,8 +5924,7 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/portal-homeworks/complete") {
     try {
-      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
-      const portalSession = verifyPortalSessionToken(token);
+      const portalSession = getPortalSession(request);
       if (!portalSession) {
         sendJson(request, response, 401, { ok: false, error: "학생 세션 인증이 필요합니다." });
         return;
@@ -5988,8 +5940,7 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/portal-questions") {
     try {
-      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
-      const portalSession = verifyPortalSessionToken(token);
+      const portalSession = getPortalSession(request);
       if (!portalSession) {
         sendJson(request, response, 401, { ok: false, error: "학생 세션 인증이 필요합니다." });
         return;
@@ -6005,8 +5956,7 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/portal-exam-post-submissions") {
     try {
-      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
-      const portalSession = verifyPortalSessionToken(token);
+      const portalSession = getPortalSession(request);
       if (!portalSession) {
         sendJson(request, response, 401, { ok: false, error: "학생 세션 인증이 필요합니다." });
         return;
@@ -6022,8 +5972,7 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-post-submissions/confirm") {
     try {
-      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
-      const teacherSession = verifyTeacherSessionToken(token);
+      const teacherSession = getTeacherSession(request);
       if (!teacherSession) {
         sendJson(request, response, 401, { ok: false, error: "교사 세션 인증이 필요합니다. 다시 로그인해 주세요." });
         return;
@@ -6136,8 +6085,7 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/report-snapshots") {
     try {
-      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
-      if (!verifyTeacherSessionToken(token)) {
+      if (!getTeacherSession(request)) {
         sendJson(request, response, 401, { ok: false, error: "보고서 저장 세션 인증이 필요합니다. 다시 로그인해 주세요." });
         return;
       }
@@ -6491,8 +6439,7 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-post-files") {
     try {
-      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
-      const portalSession = verifyPortalSessionToken(token);
+      const portalSession = getPortalSession(request);
       if (!portalSession) {
         sendJson(request, response, 401, { ok: false, error: "학생 세션 인증이 필요합니다." });
         return;
@@ -6508,8 +6455,7 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-post-files/cleanup") {
     try {
-      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
-      const portalSession = verifyPortalSessionToken(token);
+      const portalSession = getPortalSession(request);
       if (!portalSession) {
         sendJson(request, response, 401, { ok: false, error: "학생 세션 인증이 필요합니다." });
         return;
@@ -6527,9 +6473,7 @@ const server = http.createServer(async (request, response) => {
     try {
       const bucketId = requestUrl.searchParams.get("bucket") || "exam-submissions";
       const storagePath = requestUrl.searchParams.get("path") || "";
-      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
-      const teacherSession = verifyTeacherSessionToken(token);
-      const portalSession = teacherSession ? null : verifyPortalSessionToken(token);
+      const { portalSession, teacherSession } = getTeacherOrPortalSession(request);
       if (!teacherSession && !portalSession) {
         sendJson(request, response, 401, { ok: false, error: "파일 열람 세션 인증이 필요합니다. 다시 로그인해 주세요." });
         return;
@@ -7368,8 +7312,7 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/resource-material-files") {
     try {
-      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
-      const teacherSession = verifyTeacherSessionToken(token);
+      const teacherSession = getTeacherSession(request);
       if (!teacherSession) {
         sendJson(request, response, 401, { ok: false, error: "교사 세션 인증이 필요합니다." });
         return;
@@ -7410,8 +7353,7 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "DELETE" && requestUrl.pathname === "/api/resource-material-files") {
     try {
-      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
-      const teacherSession = verifyTeacherSessionToken(token);
+      const teacherSession = getTeacherSession(request);
       if (!teacherSession) {
         sendJson(request, response, 401, { ok: false, error: "교사 세션 인증이 필요합니다." });
         return;
@@ -7440,9 +7382,7 @@ const server = http.createServer(async (request, response) => {
 
   if (request.method === "GET" && requestUrl.pathname === "/api/resource-material-files/open") {
     try {
-      const token = String(request.headers.authorization ?? "").replace(/^Bearer\s+/i, "");
-      const teacherSession = verifyTeacherSessionToken(token);
-      const portalSession = teacherSession ? null : verifyPortalSessionToken(token);
+      const { portalSession, teacherSession } = getTeacherOrPortalSession(request);
       if (!teacherSession && !portalSession) {
         sendJson(request, response, 401, { ok: false, error: "자료 열람 세션 인증이 필요합니다. 다시 로그인해 주세요." });
         return;

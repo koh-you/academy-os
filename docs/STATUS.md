@@ -4,8 +4,9 @@
 
 ## 4차 리팩터링 현재 단위
 
+- 4-3c는 HMAC session token 생성·만료·검증, Authorization token 추출과 teacher/portal/mixed request guard를 `src/shared/server/sessionRouteGuard.js`로 옮겼다. 13개 session route의 guard 종류·선행 순서와 credential DB owner는 그대로다.
+- 다음 4-3d는 최신 main에서 health/auth/portal/core read route를 첫 registry 단위로 분리한다.
 - 4-3b는 header lookup, JSON body 2 MB/default·개별 limit, CORS origin, JSON response/preflight를 `src/shared/server/httpRouteAdapter.js`로 옮겼다. route 120개와 auth/session·DB/provider owner는 그대로다.
-- 다음 4-3c는 최신 main에서 bearer/session token 확인과 teacher/portal guard 결과를 공통 adapter로 고정한다.
 - 4-3a는 `api/server.js` 7,941줄·직접 route 120개(GET 31/POST 76/DELETE 13)의 method/path/order와 9개 family, session/credential 15개·dispatch token 2개 guard 의미를 기준선 fixture로 고정했다. 제품 runtime은 바꾸지 않았다.
 - 4-1 API payload 계약은 공통 contract 24개와 종료 감사까지 main 반영 완료다.
 - 4-2a row mapper 기준선은 `coreData` 36개(18쌍), 시험분석 9개, 합계 45개를 exact inventory로 고정했다.
