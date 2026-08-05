@@ -5,12 +5,14 @@ const [
   coreDataSource,
   coreIdentityMapperSource,
   intakeSpecialLectureMapperSource,
+  lessonActivityMapperSource,
   examPipelineSource,
   packageJson
 ] = await Promise.all([
   readFile(new URL("../api/routes/coreData.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/persistence/coreIdentityRowMappers.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/persistence/intakeSpecialLectureRowMappers.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/shared/persistence/lessonActivityRowMappers.js", import.meta.url), "utf8"),
   readFile(new URL("../api/routes/examAnalysisPipeline.js", import.meta.url), "utf8"),
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse)
 ]);
@@ -84,9 +86,21 @@ const expectedExtractedIntakeSpecialMapperNames = [
   "fromSpecialLectureEnrollmentRow"
 ];
 
+const expectedExtractedLessonActivityMapperNames = [
+  "toLessonRecordRow",
+  "fromLessonRecordRow",
+  "toHomeworkRow",
+  "fromHomeworkRow",
+  "toMakeupTaskRow",
+  "fromMakeupTaskRow",
+  "toAttendanceEventRow",
+  "fromAttendanceEventRow"
+];
+
 const expectedExtractedMapperNames = [
   ...expectedExtractedCoreMapperNames,
-  ...expectedExtractedIntakeSpecialMapperNames
+  ...expectedExtractedIntakeSpecialMapperNames,
+  ...expectedExtractedLessonActivityMapperNames
 ];
 
 const mapperGroups = {
@@ -173,14 +187,17 @@ function getFunctionSource(source, name) {
 const coreRouteMapperNames = listMapperNames(coreDataSource);
 const extractedCoreMapperNames = listMapperNames(coreIdentityMapperSource);
 const extractedIntakeSpecialMapperNames = listMapperNames(intakeSpecialLectureMapperSource);
+const extractedLessonActivityMapperNames = listMapperNames(lessonActivityMapperSource);
 const coreMapperNames = [
   ...coreRouteMapperNames,
   ...extractedCoreMapperNames,
-  ...extractedIntakeSpecialMapperNames
+  ...extractedIntakeSpecialMapperNames,
+  ...extractedLessonActivityMapperNames
 ];
 const examMapperNames = listMapperNames(examPipelineSource);
 assert.deepEqual(extractedCoreMapperNames, expectedExtractedCoreMapperNames);
 assert.deepEqual(extractedIntakeSpecialMapperNames, expectedExtractedIntakeSpecialMapperNames);
+assert.deepEqual(extractedLessonActivityMapperNames, expectedExtractedLessonActivityMapperNames);
 assert.deepEqual(
   coreRouteMapperNames,
   expectedCoreMapperNames.filter((name) => !expectedExtractedMapperNames.includes(name))
@@ -197,6 +214,9 @@ function getCoreMapperSource(name) {
   }
   if (expectedExtractedIntakeSpecialMapperNames.includes(name)) {
     return getFunctionSource(intakeSpecialLectureMapperSource, name);
+  }
+  if (expectedExtractedLessonActivityMapperNames.includes(name)) {
+    return getFunctionSource(lessonActivityMapperSource, name);
   }
   return getFunctionSource(coreDataSource, name);
 }
@@ -286,6 +306,11 @@ assert.equal(
   false,
   "intake/special mapper module must not import I/O, Tally, or route state"
 );
+assert.equal(
+  /^import\s/m.test(lessonActivityMapperSource),
+  false,
+  "lesson activity mapper module must not import I/O, attendance orchestration, or provider state"
+);
 assert.deepEqual(
   [...coreIdentityMapperSource.matchAll(/^export function ((?:to|from)[A-Za-z0-9_]*Row)\s*\(/gm)]
     .map((match) => match[1]),
@@ -296,14 +321,23 @@ assert.deepEqual(
     .map((match) => match[1]),
   expectedExtractedIntakeSpecialMapperNames
 );
+assert.deepEqual(
+  [...lessonActivityMapperSource.matchAll(/^export function ((?:to|from)[A-Za-z0-9_]*Row)\s*\(/gm)]
+    .map((match) => match[1]),
+  expectedExtractedLessonActivityMapperNames
+);
 assert.match(coreDataSource, /from "\.\.\/\.\.\/src\/shared\/persistence\/coreIdentityRowMappers\.js";/);
 assert.match(coreDataSource, /from "\.\.\/\.\.\/src\/shared\/persistence\/intakeSpecialLectureRowMappers\.js";/);
+assert.match(coreDataSource, /from "\.\.\/\.\.\/src\/shared\/persistence\/lessonActivityRowMappers\.js";/);
 assert.match(coreDataSource, /export \{ toLessonRow \};/);
 assert.match(coreIdentityMapperSource, /export function normalizeSpecialLectureStudentSchedules/);
 assert.doesNotMatch(coreDataSource, /function normalizeSpecialLectureStudentSchedules/);
 for (const name of expectedExtractedMapperNames) {
   assert.doesNotMatch(coreDataSource, new RegExp(`function\\s+${name}\\s*\\(`));
 }
+assert.match(lessonActivityMapperSource, /export function parseJsonNote/);
+assert.doesNotMatch(coreDataSource, /function parseJsonNote\s*\(/);
+assert.match(getCoreMapperSource("fromMakeupTaskRow"), /\.\.\.metadata/);
 for (const helperName of [
   "createSpecialLectureApplicationId",
   "normalizeSpecialLectureApplicationStatus",
@@ -329,7 +363,11 @@ assert.ok(
   packageJson.scripts["test:production"].includes("npm run test:intake-special-row-mappers"),
   "production gate is missing the intake/special mapper behavior contract"
 );
+assert.ok(
+  packageJson.scripts["test:production"].includes("npm run test:lesson-activity-row-mappers"),
+  "production gate is missing the lesson activity mapper behavior contract"
+);
 
 console.log(
-  "fourth-pass row mapper boundary passed · core 36/18 pairs · extracted 12 · exam 9 · total 45"
+  "fourth-pass row mapper boundary passed · core 36/18 pairs · extracted 20 · exam 9 · total 45"
 );

@@ -77,3 +77,11 @@
 - 기존 main의 `compact`, `normalizeClockTime`을 포함한 helper/mapper 본문은 export 선언을 제외하고 문자 단위 `15/15` 동일하다.
 - 전용 fixture는 intake desired-class, null/default, 생성 ID, status fallback, session dedupe, camel/snake legacy plan, conditional plan review, 생성/갱신 token과 unknown field drop을 검사한다.
 - `coreData`는 Tally payload 조립, Supabase CAS/readback, schema fallback 재시도와 source 오류를 계속 소유한다. 실제 Tally·운영 DB·provider는 실행하지 않았다.
+
+## 4-2d 완료 상태
+
+- LessonRecord/Homework/MakeupTask/AttendanceEvent 8개 mapper와 `parseJsonNote`, MakeupTask status helper를 `src/shared/persistence/lessonActivityRowMappers.js`로 옮겼다.
+- 기존 main의 `compact`를 포함한 helper/mapper 본문은 export 선언을 제외하고 문자 단위 `12/12` 동일하고, 추출 inventory는 20/45다.
+- 전용 fixture는 schema fallback option, 숙제 teacher status alias, null/기본값, 새 version token, 출결 append-only row와 unknown DB field drop을 검사한다.
+- MakeupTask만 `note` JSON의 미지 domain metadata를 의도적으로 보존한다. 이는 일정·알림 초안 등 기존 확장 필드를 잃지 않기 위한 기존 계약이며 DB row의 미지 column 보존과는 구분한다.
+- Supabase source write/CAS/readback/rollback, 연속 출결 방문 orchestration, App draft와 알림 provider side effect는 이동하거나 실행하지 않았다.

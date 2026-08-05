@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-2d lesson activity mapper
+
+- LessonRecord/Homework/MakeupTask/AttendanceEvent 8개 mapper와 JSON note·status helper를 import 없는 `src/shared/persistence/lessonActivityRowMappers.js`로 옮겼다. 기존 main의 helper/mapper 본문은 export 문구를 제외하고 문자 단위 `12/12` 동일하다.
+- Supabase source write/CAS/readback/rollback, 출결 방문 orchestration과 알림 provider owner는 `coreData`/server/App에 유지했다. MakeupTask의 `note`는 기존대로 전체 domain metadata를 보존하되 미지 DB column은 버린다는 예외를 fixture와 경계 감사에 고정했다.
+- 검증: lesson activity mapper, 45개 baseline(추출 20), lesson `20/20`, supplement `10/10`, 수업일지·숙제·보충 일정·출결 전용, lint, scenario·production `827/827`, build `418 modules`·main `944.65 kB`·lazy `12/12`, 집중 safe browser `4/4` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-2c intake/special lecture mapper
 
 - StudentIntakeApplicant/SpecialLectureApplication/SpecialLectureEnrollment 6개 mapper와 ID/status/requested-session/enrollment-session helper 7개를 import 없는 `src/shared/persistence/intakeSpecialLectureRowMappers.js`로 옮겼다.
