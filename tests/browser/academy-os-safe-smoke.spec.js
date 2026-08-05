@@ -2263,6 +2263,8 @@ test("student lesson schedule previews calendar table and selectable PDF section
   await expect(reportPreview).toContainText("변동사항");
 
   await previewDialog.getByRole("checkbox", { name: "상세 정보 표시" }).check();
+  await expect(previewDialog.getByRole("checkbox", { name: "상세 정보 표시" })).toHaveCSS("width", "16px");
+  await expect(previewDialog.getByRole("checkbox", { name: "달력" })).toHaveCSS("height", "16px");
   await expect(reportPreview).toContainText("개별 스케줄");
   await expect(reportPreview).toContainText(/출석 \d+ · 지각 \d+ · 결석 \d+ · 미입력 \d+/);
   await reportPreview.getByRole("textbox").fill("8월 변동 일정 확인용");

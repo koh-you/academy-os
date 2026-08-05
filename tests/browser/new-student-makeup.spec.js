@@ -29,11 +29,14 @@ test("new student makeup selects a student and explicitly reserves schedule noti
   await expect(modal.getByLabel("수업명")).toHaveValue("신입생 보강");
   await expect(modal.getByLabel("큰 수업 틀")).toHaveValue("");
   await expect(modal.getByText("선택 0명")).toBeVisible();
+  const notificationCheckbox = modal.getByLabel("수업 저장 후 알림톡을 다음 정각에 예약");
+  await expect(notificationCheckbox).toHaveCSS("width", "16px");
+  await expect(notificationCheckbox).toHaveCSS("height", "16px");
 
   await modal.getByRole("button", { name: "✅ 수업 등록", exact: true }).click();
   await expect(modal).toContainText("신입생 보강 학생을 1명 이상 선택해 주세요.");
   await modal.locator(".lessonStudentChip").first().click();
-  await modal.getByLabel("수업 저장 후 알림톡을 다음 정각에 예약").check();
+  await notificationCheckbox.check();
   await modal.getByLabel("학생", { exact: true }).check();
   await expect(modal.getByRole("button", { name: "✅ 신입생 보강 등록 후 알림톡 예약" })).toBeVisible();
 
