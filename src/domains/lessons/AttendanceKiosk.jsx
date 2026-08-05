@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { academyBrandName } from "../../app/appConfig.js";
 import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
-import { createAttendanceKioskDisplayModel } from "./attendanceKioskModel.js";
+import {
+  attendanceKioskAutoConfirmSeconds,
+  createAttendanceKioskDisplayModel
+} from "./attendanceKioskModel.js";
 
 export function AttendanceKiosk({
   isLoading = false,
@@ -18,6 +21,8 @@ export function AttendanceKiosk({
   const [pendingPreview, setPendingPreview] = useState(null);
   const [result, setResult] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [autoConfirmSeconds, setAutoConfirmSeconds] = useState(null);
+  const confirmInFlightRef = useRef(false);
 
   async function runAttendancePreview(nextPin) {
     if (isSubmitting) return;
@@ -62,10 +67,12 @@ export function AttendanceKiosk({
     }
   }
 
-  async function confirmAttendanceCheck() {
-    if (!pendingPreview || isSubmitting) return;
+  const confirmAttendanceCheck = useCallback(async () => {
+    if (!pendingPreview || isSubmitting || confirmInFlightRef.current) return;
+    confirmInFlightRef.current = true;
     if (pendingPreview.mode === "completed") {
       setPendingPreview(null);
+      confirmInFlightRef.current = false;
       return;
     }
     setIsSubmitting(true);
@@ -89,9 +96,10 @@ export function AttendanceKiosk({
       setResult({ ok: false, message: error.message || "출결 저장에 실패했습니다." });
       setPendingPreview(null);
     } finally {
+      confirmInFlightRef.current = false;
       setIsSubmitting(false);
     }
-  }
+  }, [isSubmitting, onAttendanceCheck, pendingPreview]);
 
   function submitPin(event) {
     event?.preventDefault();
@@ -125,6 +133,26 @@ export function AttendanceKiosk({
     pendingPreview,
     result
   });
+
+  useEffect(() => {
+    if (isSubmitting || !pendingPreview?.ok || previewRequiresLessonSelection) {
+      setAutoConfirmSeconds(null);
+      return undefined;
+    }
+
+    let remainingSeconds = attendanceKioskAutoConfirmSeconds;
+    setAutoConfirmSeconds(remainingSeconds);
+    const countdownId = window.setInterval(() => {
+      remainingSeconds -= 1;
+      setAutoConfirmSeconds(remainingSeconds);
+      if (remainingSeconds <= 0) {
+        window.clearInterval(countdownId);
+        confirmAttendanceCheck();
+      }
+    }, 1_000);
+
+    return () => window.clearInterval(countdownId);
+  }, [confirmAttendanceCheck, isSubmitting, pendingPreview, previewRequiresLessonSelection]);
 
   return (
     <section className={isStandalone ? "attendanceKioskPage standalone" : "attendanceKioskPage"}>
@@ -212,6 +240,9 @@ export function AttendanceKiosk({
                 {previewVisitLabel ? (
                   <p className="muted">연속 수업으로 처리: {previewVisitLabel}<br />등원 알림은 지금 한 번, 하원 알림은 마지막 수업 뒤 한 번만 전송합니다.</p>
                 ) : null}
+                <p>
+                  {autoConfirmSeconds ?? attendanceKioskAutoConfirmSeconds}초 뒤 자동 확인
+                </p>
                 <div className="attendanceConfirmActions single">
                   <button className="primaryButton" disabled={isSubmitting} onClick={confirmAttendanceCheck} type="button">
                     {isSubmitting ? "저장 중..." : "확인"}

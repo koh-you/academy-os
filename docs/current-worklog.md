@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 출결 키오스크 5초 자동 확인
+
+- 확정된 출결 미리보기는 5초 카운트다운 뒤 기존 확인 callback을 자동 실행한다. 같은 날 수업이 여러 개면 수업 선택 전에는 타이머를 시작하지 않는다.
+- 수동 확인과 타이머 경합을 동기식 잠금으로 막아 출결 저장·알림 큐 요청이 중복되지 않게 했다. 서버 API와 저장·알림 원천 계약은 바꾸지 않았다.
+- 가상 출결 브라우저에서 선택 전 대기와 선택 후 자동 저장·출결 이벤트·알림 큐를 확인했다. 전용/lesson `21/21`, lint, build `418`·main `945.00 kB`, production `827/827`을 통과했다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3i exam post confirm registry
 
 - 교사 시험 후 제출 확인 POST의 teacher guard/body/action/response 조립을 frozen registry로 이동했다. 기존 전역 120개 route 순서와 오류 status를 유지한다.
