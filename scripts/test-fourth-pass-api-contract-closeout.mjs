@@ -5,12 +5,14 @@ import { appStateWriteRouteSignatures } from "../src/shared/server/appStateWrite
 import { authLoginRouteSignatures } from "../src/shared/server/authLoginRouteRegistry.js";
 import { examPostConfirmRouteSignatures } from "../src/shared/server/examPostConfirmRouteRegistry.js";
 import { portalWriteRouteSignatures } from "../src/shared/server/portalWriteRouteRegistry.js";
+import { reportSnapshotRouteSignatures } from "../src/shared/server/reportSnapshotRouteRegistry.js";
 import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
 import { teacherAccountRouteSignatures } from "../src/shared/server/teacherAccountRouteRegistry.js";
 
-const [appStateWriteRouteSource, packageJson, serverSource] = await Promise.all([
+const [appStateWriteRouteSource, packageJson, reportSnapshotRouteSource, serverSource] = await Promise.all([
   readFile(new URL("../src/shared/server/appStateWriteRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse),
+  readFile(new URL("../src/shared/server/reportSnapshotRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../api/server.js", import.meta.url), "utf8")
 ]);
 
@@ -158,6 +160,7 @@ const directWriteSignatures = [
   ...appStateWriteRouteSignatures.map(signatureOf),
   ...examPostConfirmRouteSignatures.map(signatureOf),
   ...portalWriteRouteSignatures.map(signatureOf),
+  ...reportSnapshotRouteSignatures.map(signatureOf),
   ...teacherAccountRouteSignatures.map(signatureOf)
 ].sort();
 assert.equal(directWriteSignatures.length, 89);
@@ -180,7 +183,8 @@ const specializedParserBySignature = new Map([
   ["POST /api/exam-analysis-runs/save-question-reviews", "parseExamAnalysisQuestionReviewsSaveRequest"]
 ]);
 const extractedRouteSourceBySignature = new Map([
-  ["POST /api/app-state", appStateWriteRouteSource]
+  ["POST /api/app-state", appStateWriteRouteSource],
+  ["POST /api/report-snapshots", reportSnapshotRouteSource]
 ]);
 for (const signature of expectedContractSignatures) {
   const separator = signature.indexOf(" ");

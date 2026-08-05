@@ -187,11 +187,12 @@ try {
 }
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [actionSource, appSource, apiSource, modalSource, serverSource, safeServerSource, sessionGuardSource] = await Promise.all([
+const [actionSource, appSource, apiSource, modalSource, reportRouteSource, serverSource, safeServerSource, sessionGuardSource] = await Promise.all([
   read("../src/domains/reports/reportSnapshotAction.js"),
   read("../src/app/App.jsx"),
   read("../src/domains/reports/reportSnapshotApi.js"),
   read("../src/domains/reports/ReportModal.jsx"),
+  read("../src/shared/server/reportSnapshotRouteRegistry.js"),
   read("../api/server.js"),
   read("./safe-local-api.mjs"),
   read("../src/shared/server/sessionRouteGuard.js")
@@ -199,10 +200,6 @@ const [actionSource, appSource, apiSource, modalSource, serverSource, safeServer
 const sharedStateSource = appSource.slice(
   appSource.indexOf("const sharedAppState = useMemo(() => ({"),
   appSource.indexOf("const initialSharedAppStateRef")
-);
-const reportServerSource = serverSource.slice(
-  serverSource.indexOf('if (request.method === "POST" && requestUrl.pathname === "/api/report-snapshots")'),
-  serverSource.indexOf('if (request.method === "GET" && requestUrl.pathname === "/api/test-sessions")')
 );
 const safeReportServerSource = safeServerSource.slice(
   safeServerSource.indexOf('if (request.method === "POST" && requestUrl.pathname === "/api/report-snapshots")'),
@@ -238,15 +235,17 @@ for (const boundary of [
   assert.ok(actionSource.includes(boundary), `missing report snapshot action boundary: ${boundary}`);
 }
 for (const boundary of [
-  'requestUrl.pathname === "/api/report-snapshots"',
+  'requestUrl.pathname !== "/api/report-snapshots"',
   "getTeacherSession(request)",
   "parseVersionedWriteRequest(",
   "saveReportSnapshotWithVerification",
   "read: listAppState",
   "upsertAppState(states, options)"
 ]) {
-  assert.ok(reportServerSource.includes(boundary), `missing report snapshot server boundary: ${boundary}`);
+  assert.ok(reportRouteSource.includes(boundary), `missing report snapshot server boundary: ${boundary}`);
 }
+assert.ok(serverSource.includes("createReportSnapshotRouteRegistry({"));
+assert.ok(serverSource.includes("await dispatchReportSnapshotRoute({ request, response, requestUrl })"));
 assert.ok(sessionGuardSource.includes("function verifyTeacherSessionToken"));
 assert.ok(safeReportServerSource.includes('requestUrl.pathname === "/api/report-snapshots"'));
 assert.ok(safeReportServerSource.includes("parseVersionedWriteRequest("));
