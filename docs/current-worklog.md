@@ -7,6 +7,7 @@
 - app-state와 special-lecture-guides GET 두 개의 read/response 조립을 frozen registry로 이동했다. 선택적 stateRows, guide 존재 flag·빈 배열 fallback과 실패 500을 고정했다.
 - Supabase read는 server `listAppState` owner에 유지했다. 첫 scenario의 이전 owner 결합 1건은 registry+server 합성 검사로 교정했고, local GET 200 read-only smoke에서 source write/provider가 없음을 확인했다.
 - 검증: route/API closeout, domain `69/69`, lint, scenario·production `827/827`, build `418 modules`·main `944.65 kB`·lazy `12/12` 통과. registry 13개 + server 직접 107개로 전역 120개를 유지한다.
+- 첫 exact-head CI는 GET app-state inline block을 source 경계로 쓰던 autosave inventory가 실패했다. fixture가 registry GET owner와 server POST owner를 각각 감사하도록 교정했고 autosave inventory·scenario·production을 재통과했다.
 
 ## 2026-08-05 App/API 4차 리팩터링 4-3i exam post confirm registry
 
