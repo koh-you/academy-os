@@ -7,6 +7,7 @@ export function LessonModalActions({
   isSaved,
   isSaving,
   lessonType,
+  notificationEnabled,
   onClose,
   onSave,
   saveMessage,
@@ -21,7 +22,9 @@ export function LessonModalActions({
             ? "수업 수정 저장"
             : lessonType === "closure" && closureMakeupEnabled
               ? "휴강 · 보충 수업일지 등록"
-              : "수업 등록"
+              : lessonType === "newStudentMakeup" && notificationEnabled
+                ? "신입생 보강 등록 후 알림톡 예약"
+                : "수업 등록"
         }`;
 
   return (

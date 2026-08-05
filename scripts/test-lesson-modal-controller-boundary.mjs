@@ -21,8 +21,8 @@ assert.ok(
 const controllerSource = modalSource.slice(controllerStart, controllerEnd);
 
 assert.ok(
-  appSource.includes('import { LessonModal } from "../domains/lessons/LessonModal.jsx";'),
-  "App must import the extracted LessonModal controller"
+  appSource.includes('import("../domains/lessons/LessonModal.jsx")'),
+  "App must lazy-load the extracted LessonModal controller"
 );
 assert.equal(
   appSource.includes("function LessonModal("),

@@ -60,6 +60,19 @@ export function createLessonModalTypeChangePatch({
   name,
   nextLessonType
 }) {
+  if (nextLessonType === "newStudentMakeup") {
+    return {
+      classTemplateId: "",
+      color: getStandardLessonColor({
+        lessonType: "makeup",
+        classTemplateId: "",
+        className: "신입생 보강"
+      }),
+      lessonType: nextLessonType,
+      name: "신입생 보강",
+      studentIds: []
+    };
+  }
   return {
     color: getStandardLessonColor({
       lessonType: nextLessonType,

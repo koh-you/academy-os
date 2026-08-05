@@ -1889,6 +1889,13 @@ function handleMutation(pathname, payload) {
     });
     return { auditId, homeworks, ok: true, records, verified: true };
   }
+  if (pathname === "/api/lessons/bulk") {
+    const lessons = Array.isArray(payload.lessons) ? payload.lessons : [];
+    lessons.forEach((lesson) => {
+      state.lessons = upsertById(state.lessons, lesson, ["lessonId", "id"]);
+    });
+    return { lessons: state.lessons, ok: true, source: "supabase", verified: true };
+  }
   if (pathname === "/api/lessons") {
     const lesson = payload.lesson || {};
     state.lessons = upsertById(state.lessons, lesson, ["lessonId", "id"]);

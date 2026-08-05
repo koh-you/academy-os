@@ -63,6 +63,25 @@ assert.equal(
   "",
   "non-closure lessons must ignore dormant closure makeup fields"
 );
+assert.equal(
+  getLessonModalValidationError({
+    ...validDraft,
+    lessonType: "newStudentMakeup",
+    name: "신입생 보강",
+    studentIds: []
+  }),
+  "신입생 보강 학생을 1명 이상 선택해 주세요."
+);
+assert.equal(
+  getLessonModalValidationError({
+    ...validDraft,
+    lessonType: "newStudentMakeup",
+    name: "신입생 보강",
+    notificationEnabled: true,
+    studentIds: ["student-1"]
+  }),
+  "알림톡을 받을 학부모 또는 학생을 선택해 주세요."
+);
 
 const payloadBase = {
   classTemplateId: "template-1",
@@ -106,6 +125,25 @@ assert.equal(
     .closureMakeupEnabled,
   false,
   "editing a persisted closure must not create another linked makeup lesson"
+);
+
+assert.deepEqual(
+  createLessonModalSubmitPayload({
+    ...payloadBase,
+    isPersistedClosure: false,
+    lessonType: "newStudentMakeup",
+    name: " 신입생 보강 ",
+    notificationAudiences: ["parent", "student"],
+    notificationEnabled: true
+  }),
+  {
+    ...newClosurePayload,
+    closureMakeupEnabled: false,
+    lessonType: "newStudentMakeup",
+    name: "신입생 보강",
+    notificationAudiences: ["parent", "student"],
+    notificationEnabled: true
+  }
 );
 assert.equal(
   createLessonModalSubmitPayload({

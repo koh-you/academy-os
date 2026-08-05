@@ -33,6 +33,7 @@ import { createLessonModalStudentSelectionModel } from "./lessonModalStudentMode
 import { LessonModalActions } from "./LessonModalActions.jsx";
 import { LessonModalBasics } from "./LessonModalBasics.jsx";
 import { LessonModalClosurePanel } from "./LessonModalClosurePanel.jsx";
+import { LessonModalNewStudentMakeupPanel } from "./LessonModalNewStudentMakeupPanel.jsx";
 import { LessonModalStudentPicker } from "./LessonModalStudentPicker.jsx";
 
 export function LessonModal({
@@ -112,6 +113,8 @@ export function LessonModal({
   const [closureMakeupEndTime, setClosureMakeupEndTime] = useState(initialDraft.closureMakeupEndTime);
   const [color, setColor] = useState(initialDraft.color);
   const [studentIds, setStudentIds] = useState(initialDraft.studentIds);
+  const [notificationEnabled, setNotificationEnabled] = useState(false);
+  const [notificationAudiences, setNotificationAudiences] = useState(["parent"]);
   const [saveState, setSaveState] = useState("idle");
   const [saveMessage, setSaveMessage] = useState(lessonModalInitialSaveMessage);
   const isSaving = saveState === "saving";
@@ -151,7 +154,9 @@ export function LessonModal({
     lessonType,
     name,
     startTime,
-    studentIds
+    studentIds,
+    notificationEnabled,
+    notificationAudiences
   ]);
 
   function handleTemplateChange(nextTemplateId, nextLessonType = lessonType) {
@@ -182,6 +187,9 @@ export function LessonModal({
     });
     setLessonType(patch.lessonType);
     setColor(patch.color);
+    if (patch.classTemplateId !== undefined) setClassTemplateId(patch.classTemplateId);
+    if (patch.name !== undefined) setName(patch.name);
+    if (patch.studentIds !== undefined) setStudentIds(patch.studentIds);
   }
 
   function isLessonTypeChoiceDisabled(nextLessonType) {
@@ -262,8 +270,11 @@ export function LessonModal({
       endTime,
       lessonType,
       name,
+      notificationAudiences,
+      notificationEnabled,
       normalizeTimeInput,
-      startTime
+      startTime,
+      studentIds
     });
     if (validationError) {
       applyLessonModalSaveState(
@@ -292,6 +303,8 @@ export function LessonModal({
         lessonType,
         lessonId: draftLessonId,
         name,
+        notificationAudiences,
+        notificationEnabled,
         startTime,
         studentIds
       }), (nextState, nextMessage) => {
@@ -345,6 +358,16 @@ export function LessonModal({
             onClosureMakeupStartTimeChange={setClosureMakeupStartTime}
           />
         ) : null}
+        {lessonType === "newStudentMakeup" ? (
+          <LessonModalNewStudentMakeupPanel
+            isFormLocked={isFormLocked}
+            notificationAudiences={notificationAudiences}
+            notificationEnabled={notificationEnabled}
+            onNotificationAudienceChange={setNotificationAudiences}
+            onNotificationEnabledChange={setNotificationEnabled}
+            selectedStudentCount={studentIds.length}
+          />
+        ) : null}
       </LessonModalBasics>
 
       <LessonModalStudentPicker
@@ -369,6 +392,7 @@ export function LessonModal({
         isSaved={isSaved}
         isSaving={isSaving}
         lessonType={lessonType}
+        notificationEnabled={notificationEnabled}
         onClose={onClose}
         onSave={submitLesson}
         saveMessage={saveMessage}

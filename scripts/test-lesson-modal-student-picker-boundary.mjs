@@ -81,6 +81,6 @@ for (const modalOwnedHandler of [
   );
 }
 
-assert.ok(appSource.includes('import { LessonModal } from "../domains/lessons/LessonModal.jsx";'));
+assert.ok(appSource.includes('import("../domains/lessons/LessonModal.jsx")'));
 
 console.log("lesson modal student picker controlled boundary passed");

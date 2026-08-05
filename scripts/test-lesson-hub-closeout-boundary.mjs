@@ -38,7 +38,7 @@ for (const extractedBoundary of [
   'from "../domains/lessons/lessonModalPayloadBuilders.js"',
   'from "../domains/lessons/lessonModalSaveController.js"',
   'from "../domains/lessons/lessonModalSaveSnapshot.js"',
-  'from "../domains/lessons/LessonModal.jsx"',
+  'import("../domains/lessons/LessonModal.jsx")',
   'from "../domains/lessons/AttendanceKiosk.jsx"'
 ]) {
   assert.ok(appAndLazyViewSource.includes(extractedBoundary), `missing extracted boundary: ${extractedBoundary}`);
@@ -53,6 +53,7 @@ for (const lessonModalBoundary of [
   'from "./LessonModalActions.jsx"',
   'from "./LessonModalBasics.jsx"',
   'from "./LessonModalClosurePanel.jsx"',
+  'from "./LessonModalNewStudentMakeupPanel.jsx"',
   'from "./LessonModalStudentPicker.jsx"'
 ]) {
   assert.ok(lessonModalSource.includes(lessonModalBoundary), `missing lesson modal boundary: ${lessonModalBoundary}`);

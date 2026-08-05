@@ -1,3 +1,8 @@
+import {
+  getNewStudentMakeupLessonTopic,
+  getPersistedLessonType
+} from "./newStudentMakeup.js";
+
 function buildClosureMakeupLesson({
   classTemplateId,
   closureMakeupLessonId,
@@ -42,12 +47,13 @@ export function buildNewLessonModalLessons({
   studentIds,
   teacherId = "instructor_owner_001"
 }) {
+  const persistedLessonType = getPersistedLessonType(formValues.lessonType);
   const lesson = {
     lessonId,
     classTemplateId,
     className: formValues.name,
-    lessonType: formValues.lessonType,
-    lessonTopic: formValues.lessonType === "closure" ? "휴강" : "",
+    lessonType: persistedLessonType,
+    lessonTopic: getNewStudentMakeupLessonTopic(formValues.lessonType),
     date: formValues.date,
     dayOfWeek: resolveDayKey(formValues.date),
     startTime: formValues.startTime,
@@ -55,7 +61,7 @@ export function buildNewLessonModalLessons({
     color: resolveLessonColor({
       className: formValues.name,
       classTemplateId,
-      lessonType: formValues.lessonType
+      lessonType: persistedLessonType
     }),
     teacherId,
     studentIds,
@@ -90,14 +96,15 @@ export function buildUpdatedLessonModalLessons({
   studentIds,
   teacherId = "instructor_owner_001"
 }) {
+  const persistedLessonType = getPersistedLessonType(formValues.lessonType);
   const lesson = {
     ...latestSourceLesson,
     isExamPrepAutoLesson: undefined,
     isVirtualGeneratedLesson: undefined,
     classTemplateId,
     className: formValues.name,
-    lessonType: formValues.lessonType,
-    lessonTopic: formValues.lessonType === "closure" ? "휴강" : editingLesson?.lessonTopic || "",
+    lessonType: persistedLessonType,
+    lessonTopic: getNewStudentMakeupLessonTopic(formValues.lessonType, editingLesson?.lessonTopic || ""),
     date: formValues.date,
     dayOfWeek: resolveDayKey(formValues.date),
     startTime: formValues.startTime,
@@ -106,7 +113,7 @@ export function buildUpdatedLessonModalLessons({
       ...editingLesson,
       className: formValues.name,
       classTemplateId,
-      lessonType: formValues.lessonType
+      lessonType: persistedLessonType
     }),
     studentIds,
     sourceLabel: formValues.lessonType === "closure"

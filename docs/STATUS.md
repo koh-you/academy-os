@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 신입생 보강 등록·알림
+
+- 8월 운영 수업일지 78건을 읽기 전용으로 대조해 `makeup / 신입생 보강 / 학생 1명 / 결석보강 원천 없음`인 기존 수업 3건을 확인했다.
+- 수업 등록에 `신입생 보강` 탭을 추가했다. 학생은 빈 명단에서 직접 선택하며 저장 원천은 기존 패턴과 호환되는 `lessonType=makeup`, `lessonTopic=신입생 보강`이다.
+- 선택적으로 학부모·학생 알림톡을 수업 저장·Supabase 재확인 뒤 다음 정각에 예약한다. 수업·학생·대상별 고정 job ID로 재시도 중복을 막으며 실제 운영 예약·발송은 실행하지 않았다.
+- lesson `21/21`, notification domain, runtime lint, build `421 modules`·main `928.62 kB`, production `827/827`, 집중 safe browser `1/1` 통과.
+
 ## 4차 리팩터링 현재 단위
 
 - 4-3n은 test session POST/DELETE의 canonical·legacy payload alias, delete selector와 source action 응답을 `src/shared/server/testSessionWriteRouteRegistry.js`로 옮겼다. DB 저장·재조회/삭제 owner는 core data에 유지한다.

@@ -77,6 +77,6 @@ for (const modalOwnedSource of [
   );
 }
 
-assert.ok(appSource.includes('import { LessonModal } from "../domains/lessons/LessonModal.jsx";'));
+assert.ok(appSource.includes('import("../domains/lessons/LessonModal.jsx")'));
 
 console.log("lesson modal closure panel controlled boundary passed");

@@ -1,3 +1,5 @@
+import { getLessonModalUiType } from "./newStudentMakeup.js";
+
 export function createLessonModalInitialDraft({
   activeStudents,
   activeTemplate,
@@ -31,7 +33,7 @@ export function createLessonModalInitialDraft({
     date: initialDate,
     endTime:
       normalizeTimeInput(initialLesson?.endTime) || initialTemplateTimes.endTime,
-    lessonType: initialLesson?.lessonType ?? "class",
+    lessonType: initialLesson ? getLessonModalUiType(initialLesson) : "class",
     name: initialLesson?.className ?? activeTemplate.name,
     startTime:
       normalizeTimeInput(initialLesson?.startTime) || initialTemplateTimes.startTime,

@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 신입생 보강 등록·알림
+
+- 운영 8월 수업일지의 기존 신입생 보강 3건은 `makeup`, 수업명 `신입생 보강`, 학생 1명, `sourceMakeupTaskId` 없음이었다.
+- 전용 탭은 학생을 빈 명단에서 직접 선택하고 기존 데이터와 같은 저장 모양을 만든다. 알림 선택 시 저장·재조회 성공 뒤 학부모/학생 일정을 다음 정각에 예약한다.
+- 운영 쓰기·알림 예약/발송은 0건이다. 전체 production `827/827`, build main `928.62 kB`, safe browser 저장·가상 알림 `1/1`을 통과했다.
+- branch exact-head CI 통과와 main/Vercel exact commit·읽기 전용 smoke 확인 후 완료한다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3n test session write registry
 
 - `/api/test-sessions` POST/DELETE의 payload alias/delete selector와 source response를 `testSessionWriteRouteRegistry`로 이동했다.

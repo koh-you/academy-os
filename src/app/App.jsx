@@ -350,7 +350,7 @@ import {
 } from "../domains/lessons/lessonModalPayloadBuilders.js";
 import { saveLessonModalLessonsWithVerification } from "../domains/lessons/lessonModalSaveController.js";
 import { getLessonModalSaveSnapshot } from "../domains/lessons/lessonModalSaveSnapshot.js";
-import { LessonModal } from "../domains/lessons/LessonModal.jsx";
+const LessonModal = lazy(() => import("../domains/lessons/LessonModal.jsx").then((module) => ({ default: module.LessonModal })));
 import { attendanceLabels, dayLabels, homeworkLabels } from "../domains/lessons/labels.js";
 import {
   buildSpecialLectureNoticeText,
@@ -4830,6 +4830,32 @@ export function App() {
     }
   }
 
+  async function reserveNewStudentMakeupNotices({ formValues, lesson }) {
+    if (!formValues.notificationEnabled) return " · 알림톡 없음";
+    const { buildNewStudentMakeupNotificationJobs } = await import(
+      "../domains/lessons/newStudentMakeupNotification.js"
+    );
+    const notificationJobsToReserve = buildNewStudentMakeupNotificationJobs({
+      academyName: academyBrandName,
+      audiences: formValues.notificationAudiences,
+      lesson,
+      students
+    });
+    if (!notificationJobsToReserve.length) return " · 알림톡 대상 없음";
+    const reservedJobs = await reserveLessonNotificationJobs(
+      notificationJobsToReserve,
+      "신입생 보강 일정 알림톡 예약"
+    );
+    const scheduledCount = reservedJobs.filter((job) => ["scheduled", "sent"].includes(job.status)).length;
+    const dryRunCount = reservedJobs.filter((job) => job.status === "dry_run").length;
+    const failedCount = reservedJobs.length - scheduledCount - dryRunCount;
+    return failedCount > 0
+      ? ` · 알림톡 ${scheduledCount}건 예약, ${failedCount}건 확인 필요`
+      : dryRunCount > 0
+        ? ` · 알림톡 ${dryRunCount}건 안전 모드 기록 완료`
+        : ` · 알림톡 ${scheduledCount}건 다음 정각 예약 완료`;
+  }
+
   async function handleAddLesson(formValues, onProgress = null) {
     const template = classTemplates.find(
       (item) => item.classTemplateId === formValues.classTemplateId
@@ -4851,6 +4877,10 @@ export function App() {
     });
     const [lesson] = lessonsToSave;
     const verifiedLessons = await saveLessonModalLessons(lessonsToSave, onProgress);
+    const notificationResult = await reserveNewStudentMakeupNotices({
+      formValues,
+      lesson: verifiedLessons[0]
+    });
     setSelectedDate(lesson.date);
     setSelectedLessonId(lesson.lessonId);
     return {
@@ -4859,7 +4889,9 @@ export function App() {
         ? "휴강과 연결 보충 수업일지 저장 완료"
         : formValues.lessonType === "closure"
           ? "휴강 수업일지 저장 완료"
-          : "수업일지 저장 완료"
+          : formValues.lessonType === "newStudentMakeup"
+            ? `신입생 보강 수업일지 저장 완료${notificationResult}`
+            : "수업일지 저장 완료"
     };
   }
 
@@ -4917,6 +4949,10 @@ export function App() {
     const [lesson] = lessonsToSave;
 
     const [persistedLesson] = await saveLessonModalLessons(lessonsToSave, onProgress);
+    const notificationResult = await reserveNewStudentMakeupNotices({
+      formValues,
+      lesson: persistedLesson
+    });
     markGeneratedLessonManualOverride(editingLesson);
     setSelectedDate(lesson.date);
     setSelectedLessonId(lesson.lessonId);
@@ -4926,7 +4962,9 @@ export function App() {
         ? "수업을 휴강으로 전환하고 연결 보충 수업일지까지 저장 완료"
         : formValues.lessonType === "closure" && editingLesson?.lessonType !== "closure"
           ? "수업을 휴강으로 전환 저장 완료 · 기존 명단·수업기록 보존"
-          : "수업일지 수정 저장 완료"
+          : formValues.lessonType === "newStudentMakeup"
+            ? `신입생 보강 수정 저장 완료${notificationResult}`
+            : "수업일지 수정 저장 완료"
     };
   }
 
@@ -7240,19 +7278,21 @@ export function App() {
       </section>
 
       {isLessonModalOpen ? (
-        <LessonModal
-          initialLesson={editingLesson}
-          notificationJobs={notificationJobs}
-          records={records}
-          runtime={lessonModalRuntime}
-          students={students}
-          templates={classTemplates}
-          onClose={() => {
-            setEditingLesson(null);
-            setIsLessonModalOpen(false);
-          }}
-          onSubmit={editingLesson ? handleUpdateLesson : handleAddLesson}
-        />
+        <Suspense fallback={<div className="modalLoadingState" role="status">수업 등록 화면을 불러오는 중입니다.</div>}>
+          <LessonModal
+            initialLesson={editingLesson}
+            notificationJobs={notificationJobs}
+            records={records}
+            runtime={lessonModalRuntime}
+            students={students}
+            templates={classTemplates}
+            onClose={() => {
+              setEditingLesson(null);
+              setIsLessonModalOpen(false);
+            }}
+            onSubmit={editingLesson ? handleUpdateLesson : handleAddLesson}
+          />
+        </Suspense>
       ) : null}
 
       {isMonthlyRegularLessonOpenModal ? (

@@ -52,7 +52,7 @@ assert.equal(
   "the active lesson create/edit modal must remain"
 );
 assert.equal(appSource.includes("function LessonModal("), false, "the active lesson modal must stay extracted from App");
-assert.equal(appSource.includes('import { LessonModal } from "../domains/lessons/LessonModal.jsx"'), true);
+assert.equal(appSource.includes('import("../domains/lessons/LessonModal.jsx")'), true);
 assert.equal(
   countMatches(/export function ReportModal\b/g, reportModalSource),
   1,

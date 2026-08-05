@@ -52,6 +52,24 @@ assert.deepEqual(regularLessons, [{
   status: "scheduled"
 }]);
 
+const newStudentMakeupLessons = buildNewLessonModalLessons({
+  classTemplateId: "",
+  closureMakeupLessonId: "",
+  formValues: {
+    ...baseFormValues,
+    lessonType: "newStudentMakeup",
+    name: "신입생 보강"
+  },
+  lessonId: "lesson-new-student-makeup",
+  resolveDayKey,
+  resolveLessonColor,
+  studentIds: ["student-a"]
+});
+assert.equal(newStudentMakeupLessons[0].lessonType, "makeup");
+assert.equal(newStudentMakeupLessons[0].lessonTopic, "신입생 보강");
+assert.equal(newStudentMakeupLessons[0].className, "신입생 보강");
+assert.deepEqual(newStudentMakeupLessons[0].studentIds, ["student-a"]);
+
 const closureLessons = buildNewLessonModalLessons({
   classTemplateId: "template-1",
   closureMakeupLessonId: "lesson-makeup-1",
