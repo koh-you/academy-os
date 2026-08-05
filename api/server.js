@@ -119,6 +119,7 @@ import { createAuthLoginRouteRegistry } from "../src/shared/server/authLoginRout
 import { createTeacherAccountRouteRegistry } from "../src/shared/server/teacherAccountRouteRegistry.js";
 import { createPortalReadRouteRegistry } from "../src/shared/server/portalReadRouteRegistry.js";
 import { createPortalWriteRouteRegistry } from "../src/shared/server/portalWriteRouteRegistry.js";
+import { createExamPostConfirmRouteRegistry } from "../src/shared/server/examPostConfirmRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -256,6 +257,12 @@ const { dispatch: dispatchPortalWriteRoute } = createPortalWriteRouteRegistry({
   savePortalExamPostSubmission,
   sendJson,
   upsertPortalState
+});
+const { dispatch: dispatchExamPostConfirmRoute } = createExamPostConfirmRouteRegistry({
+  confirmExamPostSubmission,
+  getTeacherSession,
+  readJsonBody,
+  sendJson
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5846,23 +5853,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchAuthLoginRoute({ request, response, requestUrl })) return;
   if (await dispatchPortalReadRoute({ request, response, requestUrl })) return;
   if (await dispatchPortalWriteRoute({ request, response, requestUrl })) return;
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/exam-post-submissions/confirm") {
-    try {
-      const teacherSession = getTeacherSession(request);
-      if (!teacherSession) {
-        sendJson(request, response, 401, { ok: false, error: "교사 세션 인증이 필요합니다. 다시 로그인해 주세요." });
-        return;
-      }
-      const payload = await readJsonBody(request);
-      const result = await confirmExamPostSubmission(teacherSession, payload);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, Number(error.statusCode) || 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
+  if (await dispatchExamPostConfirmRoute({ request, response, requestUrl })) return;
   if (await dispatchTeacherAccountRoute({ request, response, requestUrl })) return;
 
   if (request.method === "GET" && requestUrl.pathname === "/api/app-state") {

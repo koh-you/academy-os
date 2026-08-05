@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-3i exam post confirm registry
+
+- `/api/exam-post-submissions/confirm`의 teacher guard→body→source action과 verified/error 응답을 `examPostConfirmRouteRegistry`로 이동했다.
+- AppState 저장·재조회와 mutation lock은 server owner다. local invalid-bearer 401만 실행했고 운영 원천·Storage·provider는 사용하지 않았다.
+- 위치 결합 teacher-session fixture를 새 owner 기준으로 교정한 뒤 domain `69/69`, lint, scenario·production `827/827`, build `418`·main `944.65 kB`·lazy `12/12`를 통과했다. registry 11개 + server 직접 109개로 전역 120개를 유지한다.
+- 다음은 최신 main에서 app-state와 special-lecture-guides GET 두 개를 read-only registry로 분리한다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3h portal write registry
 
 - portal-state/homework/question/exam submission POST 4개를 `portalWriteRouteRegistry`로 이동했다. portal guard→body→source action과 기존 오류 status 의미를 보존한다.
