@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-2c intake/special lecture mapper
+
+- intake·특강 신청·특강 수강 6개 mapper와 관련 ID/status/session helper를 `src/shared/persistence/intakeSpecialLectureRowMappers.js`로 이동했다. 이전 main 대비 helper/mapper 본문 15/15 exact다.
+- Tally 입력 조립, source write/CAS/readback, schema fallback과 provider 경계는 `coreData`/server에 유지했다. 전용 null/legacy/version/unknown-field fixture와 45개 inventory는 현재 추출 12개를 감사한다.
+- intake CAS·특강 저장/동기화, lint, scenario·production `827/827`, build `418`·main `944.65 kB`·lazy `12/12`, safe browser `4/4` 통과. 다음은 최신 main 기반 LessonRecord/Homework/MakeupTask/AttendanceEvent 8개다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-2b core identity mapper
 
 - Student/ClassTemplate/Lesson 6개와 특강 학생별 시간 helper를 `src/shared/persistence/coreIdentityRowMappers.js`로 이동했다. 기존 helper/mapper 본문 9/9 exact, `coreData`의 공개 `toLessonRow` 재수출과 모든 호출 identity를 유지한다.

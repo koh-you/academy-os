@@ -70,3 +70,10 @@
 - 최초 `api/domain` 배치는 Vercel serverless JavaScript file inventory를 12개에서 13개로 늘려 실패했다. 함수 entry가 아닌 pure mapper는 `src/shared/persistence`에 두어 `12/12` 배포 한도를 유지한다.
 - 전용 fixture가 round-trip, null/default, time normalization, 특강 snake_case alias, schema fallback, 새 version token, unknown field drop과 I/O 부재를 검사한다.
 - Supabase source, CAS/readback/rollback, App draft, provider side effect는 이동하거나 실행하지 않았다.
+
+## 4-2c 완료 상태
+
+- StudentIntakeApplicant/SpecialLectureApplication/SpecialLectureEnrollment 6개 mapper와 ID/status/session helper 7개를 `src/shared/persistence/intakeSpecialLectureRowMappers.js`로 옮겼다.
+- 기존 main의 `compact`, `normalizeClockTime`을 포함한 helper/mapper 본문은 export 선언을 제외하고 문자 단위 `15/15` 동일하다.
+- 전용 fixture는 intake desired-class, null/default, 생성 ID, status fallback, session dedupe, camel/snake legacy plan, conditional plan review, 생성/갱신 token과 unknown field drop을 검사한다.
+- `coreData`는 Tally payload 조립, Supabase CAS/readback, schema fallback 재시도와 source 오류를 계속 소유한다. 실제 Tally·운영 DB·provider는 실행하지 않았다.
