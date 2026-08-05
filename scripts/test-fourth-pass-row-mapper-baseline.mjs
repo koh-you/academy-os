@@ -9,6 +9,7 @@ const [
   learningCalendarMapperSource,
   platformSourceMapperSource,
   examPipelineSource,
+  examPipelineMapperSource,
   packageJson
 ] = await Promise.all([
   readFile(new URL("../api/routes/coreData.js", import.meta.url), "utf8"),
@@ -18,6 +19,7 @@ const [
   readFile(new URL("../src/shared/persistence/learningCalendarRowMappers.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/persistence/platformSourceRowMappers.js", import.meta.url), "utf8"),
   readFile(new URL("../api/routes/examAnalysisPipeline.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/shared/persistence/examAnalysisPipelineRowMappers.js", import.meta.url), "utf8"),
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse)
 ]);
 
@@ -226,7 +228,8 @@ const coreMapperNames = [
   ...extractedLearningCalendarMapperNames,
   ...extractedPlatformSourceMapperNames
 ];
-const examMapperNames = listMapperNames(examPipelineSource);
+const examRouteMapperNames = listMapperNames(examPipelineSource);
+const examMapperNames = listMapperNames(examPipelineMapperSource);
 assert.deepEqual(extractedCoreMapperNames, expectedExtractedCoreMapperNames);
 assert.deepEqual(extractedIntakeSpecialMapperNames, expectedExtractedIntakeSpecialMapperNames);
 assert.deepEqual(extractedLessonActivityMapperNames, expectedExtractedLessonActivityMapperNames);
@@ -238,6 +241,7 @@ assert.deepEqual(
 );
 assert.deepEqual([...coreMapperNames].sort(), [...expectedCoreMapperNames].sort());
 assert.deepEqual(examMapperNames, expectedExamMapperNames);
+assert.deepEqual(examRouteMapperNames, []);
 assert.equal(coreMapperNames.length, 36);
 assert.equal(examMapperNames.length, 9);
 assert.equal(coreMapperNames.length + examMapperNames.length, 45);
@@ -300,7 +304,7 @@ assert.deepEqual(coreUpdatedAtWriters, [
 ]);
 assert.deepEqual(
   expectedExamMapperNames.filter((name) =>
-    getFunctionSource(examPipelineSource, name).includes("updated_at: new Date().toISOString()")
+    getFunctionSource(examPipelineMapperSource, name).includes("updated_at: new Date().toISOString()")
   ),
   ["toRunRow", "toSourceRow", "toSourcePatchRow"]
 );
@@ -323,13 +327,13 @@ assert.match(getCoreMapperSource("toLessonRecordRow"), /includeExtendedFields/);
 assert.match(getCoreMapperSource("toLessonRecordRow"), /includeAttendanceTimeFields/);
 assert.match(getCoreMapperSource("toHomeworkRow"), /includeExtendedFields/);
 assert.match(getCoreMapperSource("toAcademyReminderRow"), /includeCompletedAt/);
-assert.match(getFunctionSource(examPipelineSource, "toSourcePatchRow"), /=== undefined \? undefined/);
+assert.match(getFunctionSource(examPipelineMapperSource, "toSourcePatchRow"), /=== undefined \? undefined/);
 
 for (const name of expectedCoreMapperNames.filter((mapperName) => mapperName.startsWith("from"))) {
   assert.doesNotMatch(getCoreMapperSource(name), /\.\.\.row\b/, `${name} started preserving unknown DB fields`);
 }
 for (const name of expectedExamMapperNames.filter((mapperName) => mapperName.startsWith("from"))) {
-  assert.doesNotMatch(getFunctionSource(examPipelineSource, name), /\.\.\.row\b/, `${name} started preserving unknown DB fields`);
+  assert.doesNotMatch(getFunctionSource(examPipelineMapperSource, name), /\.\.\.row\b/, `${name} started preserving unknown DB fields`);
 }
 
 const firstExtractionSource = mapperGroups["4-2b-student-class-lesson"]
@@ -391,6 +395,21 @@ assert.match(coreDataSource, /from "\.\.\/\.\.\/src\/shared\/persistence\/intake
 assert.match(coreDataSource, /from "\.\.\/\.\.\/src\/shared\/persistence\/lessonActivityRowMappers\.js";/);
 assert.match(coreDataSource, /from "\.\.\/\.\.\/src\/shared\/persistence\/learningCalendarRowMappers\.js";/);
 assert.match(coreDataSource, /from "\.\.\/\.\.\/src\/shared\/persistence\/platformSourceRowMappers\.js";/);
+assert.match(examPipelineSource, /from "\.\.\/\.\.\/src\/shared\/persistence\/examAnalysisPipelineRowMappers\.js";/);
+assert.match(examPipelineSource, /export \{ examAnalysisSourceBucket \};/);
+assert.deepEqual(
+  [...examPipelineMapperSource.matchAll(/^export function ((?:to|from)[A-Za-z0-9_]*Row)\s*\(/gm)]
+    .map((match) => match[1]),
+  expectedExamMapperNames
+);
+assert.deepEqual(
+  [...examPipelineMapperSource.matchAll(/^import .+ from "([^"]+)";/gm)].map((match) => match[1]),
+  ["node:crypto"]
+);
+assert.doesNotMatch(examPipelineMapperSource, /\b(?:listRows|patchRows|upsertRows|deleteRows|callRpc|fetch|uploadStorageObject|downloadStorageObject|deleteStorageObject|callOpenAi|callAnthropic)\b/);
+for (const name of expectedExamMapperNames) {
+  assert.doesNotMatch(examPipelineSource, new RegExp(`function\\s+${name}\\s*\\(`));
+}
 assert.match(coreDataSource, /export \{ toLessonRow \};/);
 assert.match(coreIdentityMapperSource, /export function normalizeSpecialLectureStudentSchedules/);
 assert.doesNotMatch(coreDataSource, /function normalizeSpecialLectureStudentSchedules/);
@@ -442,7 +461,11 @@ assert.ok(
   packageJson.scripts["test:production"].includes("npm run test:platform-source-row-mappers"),
   "production gate is missing the platform source mapper behavior contract"
 );
+assert.ok(
+  packageJson.scripts["test:production"].includes("npm run test:exam-analysis-pipeline-row-mappers"),
+  "production gate is missing the exam pipeline mapper behavior contract"
+);
 
 console.log(
-  "fourth-pass row mapper boundary passed · core 36/18 pairs · extracted 36 · exam 9 · total 45"
+  "fourth-pass row mapper boundary passed · core 36/18 pairs · exam 9 · extracted 45/45"
 );

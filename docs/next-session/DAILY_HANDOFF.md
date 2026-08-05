@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-2g exam pipeline mapper·4-2 closeout
+
+- 시험분석 run/source/question/AI job/event 9개 mapper와 local ID helper를 `src/shared/persistence/examAnalysisPipelineRowMappers.js`로 이동했다. 이전 main 대비 함수 본문 13/13 exact이며 Storage bucket export identity를 유지한다.
+- 유일 import는 `node:crypto`이고 Supabase·Storage·유료 AI·event orchestration은 route/server owner에 남았다. 4-2 종료 inventory는 core 36 + exam 9 = 45/45 추출을 production에서 감사한다.
+- 시험분석 계약·prompt studio, lint, scenario·production `827/827`, build `418`·main `944.65 kB`·lazy `12/12`, non-paid safe browser `2/2` 통과. 다음은 최신 main 기반 4-3 server route/auth/core/provider 기준선이다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-2f platform source mapper
 
 - AppState·자료함·알림 작업 6개 mapper와 visibility helper를 `src/shared/persistence/platformSourceRowMappers.js`로 이동했다. 이전 main 대비 함수 본문 9/9 exact, core 추출 inventory 36/36이다.

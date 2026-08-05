@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-2g exam pipeline mapper·4-2 closeout
+
+- 시험분석 Run/Source/Question/AI job/Event 9개 mapper와 compact/stable JSON/local ID helper를 `src/shared/persistence/examAnalysisPipelineRowMappers.js`로 옮겼다. 이전 main 함수 본문은 export 문구를 제외하고 `13/13` 동일하고 Storage bucket 상수도 그대로 재수출한다.
+- mapper module의 유일 import는 로컬 ID용 `node:crypto`다. Supabase RPC/write/readback, Storage upload/download/delete, 유료 OpenAI/Anthropic 실행과 event orchestration owner는 route/server에 유지했다.
+- 4-2 종료 감사는 core 36개/18쌍과 exam 9개, 합계 45개 mapper가 route 내부 정의 없이 전용 module에 있음을 고정한다. 시험분석 계약·prompt studio, lint, scenario·production `827/827`, build `418`·main `944.65 kB`·lazy `12/12`, non-paid safe browser `2/2` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-2f platform source mapper
 
 - AppState/ResourceMaterial/NotificationJob 6개 mapper와 자료 visibility helper를 import 없는 `src/shared/persistence/platformSourceRowMappers.js`로 옮겼다. 이전 main 함수 본문은 export 문구를 제외하고 문자 단위 `9/9` 동일하다.

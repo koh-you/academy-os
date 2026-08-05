@@ -50,6 +50,7 @@
 - 후속 대형 후보는 CSS domain entry 분리, safe E2E 확대, API payload/DB row 타입 계약이다. 남은 학생 로그인·핵심 modal·보고서 화면은 실제 변경 속도나 번들 병목 근거가 생길 때만 별도 계획으로 검토한다.
 - API 후보는 `api/server.js`의 route registration, auth, core data, notification/provider service 분리다. App 3차 범위와 섞지 않고 별도 기준선·회귀 inventory를 먼저 만든다.
 - 사용자의 명시적 승인으로 4차 리팩터링을 시작했다. `docs/app-refactor-fourth-pass-plan.md`의 4-0 기준선 뒤 API payload, DB row mapper, server route, App persistence action, provider, CSS, safe E2E, 종료 감사 순서로 진행한다.
+- 4-1 API payload 24개 contract와 4-2 DB/domain row mapper 45/45 분리·종료 감사는 완료했다. 다음 활성 단위는 4-3 server route registration·auth·core data·notification/provider 경계다.
 - 한 번에 한 안전 단위만 최신 main에서 진행하며, 즉시 사람 판단이 필요하지 않은 발견은 기록 후 AI 검수·최소 수정·재검증으로 연쇄 진행한다. 운영 side effect나 제품 의미 결정이 필요한 항목만 사람 gate로 올린다.
 - 기준: `docs/development-roadmap-after-ui-refactor-2026-07-31.md`.
 

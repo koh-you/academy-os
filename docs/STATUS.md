@@ -11,7 +11,8 @@
 - 4-2d는 LessonRecord/Homework/MakeupTask/AttendanceEvent 8개와 JSON/status helper를 `src/shared/persistence/lessonActivityRowMappers.js`로 옮겼다. 수업일지·숙제·보충·출결 source write/CAS/readback와 알림 owner는 그대로다.
 - 4-2e는 TestSession/TestAttempt/ExamPrep/SchoolEvent/AcademyReminder 10개와 순수 normalize helper를 `src/shared/persistence/learningCalendarRowMappers.js`로 옮겼다. 시험·학사일정 source write/CAS/readback·파생 일정·Slack owner는 그대로다.
 - 4-2f는 AppState/ResourceMaterial/NotificationJob 6개와 자료 visibility helper를 `src/shared/persistence/platformSourceRowMappers.js`로 옮겼다. `coreData`의 36개 mapper는 모두 import 없는 module로 분리됐고 DB·Storage·provider owner는 그대로다.
-- 다음 4-2g는 시험분석 pipeline의 9개 mapper 경계와 4-2 전체 종료 감사를 수행한다.
+- 4-2g는 시험분석 pipeline 9개 mapper와 로컬 ID helper를 `src/shared/persistence/examAnalysisPipelineRowMappers.js`로 옮겼다. DB RPC·Storage·유료 AI owner는 route/server에 유지했고 row mapper 45/45 추출 감사로 4-2를 닫았다.
+- 다음 4-3은 최신 main에서 `api/server.js` route registration·auth·core data·notification/provider 분리를 새 기준선부터 시작한다.
 
 ## 현재 기준
 
