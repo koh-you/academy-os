@@ -4,8 +4,9 @@
 
 ## 4차 리팩터링 현재 단위
 
+- 4-3g는 `GET /api/portal-data`의 portal session guard, scoped source read, role 응답과 401/404/500을 `src/shared/server/portalReadRouteRegistry.js`로 옮겼다. source filtering owner는 server의 `getPortalData`에 유지한다.
+- 다음 4-3h는 최신 main에서 portal-state/homework/question/exam submission write route를 별도 registry로 분리한다.
 - 4-3f는 `POST /api/auth/teacher-account`의 Supabase 설정 gate, 현재 credential 확인, 입력 검증과 계정 저장 응답을 `src/shared/server/teacherAccountRouteRegistry.js`로 옮겼다. password hash와 teacher_accounts DB action은 server owner로 유지한다.
-- 다음 4-3g는 최신 main에서 portal read/write session route를 먼저 read 1개, write 묶음 순으로 분리한다.
 - 4-3e는 `POST /api/auth/login`의 role 검증, credential action 선택, session token/account 응답을 `src/shared/server/authLoginRouteRegistry.js`로 옮겼다. teacher/student/parent credential DB 함수와 HMAC token owner는 그대로 주입한다.
 - 4-3d는 OPTIONS와 side-effect 없는 health/core status, 제한된 client runtime error 수집을 `src/shared/server/systemRouteRegistry.js`의 첫 route registry로 옮겼다. 전역 120-route 순서 hash는 registry 3개 + server 직접 117개로 동일하다.
 - 4-3c는 HMAC session token 생성·만료·검증, Authorization token 추출과 teacher/portal/mixed request guard를 `src/shared/server/sessionRouteGuard.js`로 옮겼다. 13개 session route의 guard 종류·선행 순서와 credential DB owner는 그대로다.

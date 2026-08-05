@@ -388,6 +388,7 @@ const platformSourceRowMappersPath = path.join(root, "src", "shared", "persisten
 const examPrepDeletionApiPath = path.join(root, "api", "domain", "examPrepDeletion.js");
 const serverPath = path.join(root, "api", "server.js");
 const authLoginRouteRegistryPath = path.join(root, "src", "shared", "server", "authLoginRouteRegistry.js");
+const portalReadRouteRegistryPath = path.join(root, "src", "shared", "server", "portalReadRouteRegistry.js");
 const sessionRouteGuardPath = path.join(root, "src", "shared", "server", "sessionRouteGuard.js");
 const systemRouteRegistryPath = path.join(root, "src", "shared", "server", "systemRouteRegistry.js");
 const supabaseRestPath = path.join(root, "api", "lib", "supabaseRest.js");
@@ -935,6 +936,7 @@ const coreDataRoute = [
 ].join("\n");
 const serverSource = fs.readFileSync(serverPath, "utf8");
 const authLoginRouteRegistrySource = fs.readFileSync(authLoginRouteRegistryPath, "utf8");
+const portalReadRouteRegistrySource = fs.readFileSync(portalReadRouteRegistryPath, "utf8");
 const sessionRouteGuardSource = fs.readFileSync(sessionRouteGuardPath, "utf8");
 const systemRouteRegistrySource = fs.readFileSync(systemRouteRegistryPath, "utf8");
 const specialLectureStudentScheduleMutationSource =
@@ -1215,7 +1217,7 @@ check("03b-2 teacher login does not fall back to local password storage", !app.i
 check("03c server teacher auth disables default fallback after bootstrap", hasAll(serverSource, ["function hasAnyTeacherAccount", "const needsBootstrap = !(await hasAnyTeacherAccount())", "needsBootstrap && loginId === defaultTeacherAccount.loginId"]));
 check("03d student and parent auth use server students table", hasAll(`${serverSource}\n${authLoginRouteRegistrySource}`, ["function authenticateStudentOrParent", "createParentLoginId", '"students"', 'payload.role !== "teacher"', "student_id,name,login_id,pin,status"]));
 check("03e app_state filters teacher account settings", hasAll(coreDataRoute, ["sensitiveAppStateKeys", "teacherAccountSettings", "hiddenAppStateKeys", "deleteRows(\"app_state\"", "!hiddenAppStateKeys.has"]));
-check("03f student portal data is scoped by session token", hasAll(sessionRouteGuardSource, ["createPortalSessionToken", "verifyPortalSessionToken"]) && hasAll(serverSource, ['requestUrl.pathname === "/api/portal-data"', "getPortalSession(request)", "getPortalData(portalSession)", "record.studentId === session.studentId", "homework.studentId === session.studentId"]));
+check("03f student portal data is scoped by session token", hasAll(sessionRouteGuardSource, ["createPortalSessionToken", "verifyPortalSessionToken"]) && hasAll(`${serverSource}\n${portalReadRouteRegistrySource}`, ['requestUrl.pathname !== "/api/portal-data"', "getPortalSession(request)", "getPortalData(portalSession)", "record.studentId === session.studentId", "homework.studentId === session.studentId"]));
 check("03g legacy portal snapshot writes are disabled in favor of explicit student endpoints", hasAll(serverSource, ['requestUrl.pathname === "/api/portal-state"', "upsertPortalState(portalSession", "return { source: appState.source, states: {} }"]) && app.includes("fetchPortalData(session.sessionToken)") && !app.includes("postPortalState("));
 check("03h login submit clears loading state on failure", hasAll(app, ["setIsSubmitting(true)", "try {", "finally {", "setIsSubmitting(false)"]));
 check("03i teacher session persists across refresh without storing password", hasAll(appWithConfig, ["teacherSession: \"academy-os.teacherSession.v1\"", "function readStoredTeacherSession", "function persistTeacherSession", "function writeStorageValue", "function removeStorageValue", "function normalizeTeacherSessionForStorage", "const [session, setSession] = useState(() =>", "readStoredTeacherSession({ documentTarget, storageKey, windowTarget })", "writeStorageValue(windowTarget.localStorage, storageKey, storedValue)", "writeStorageValue(windowTarget.sessionStorage, storageKey, storedValue)", "persistTeacherSession({ documentTarget, session: null, storageKey, windowTarget })"]) && !appSessionSource.includes("JSON.stringify({ actorId, name, password") && !app.includes("teacherSession, JSON.stringify(session)"));

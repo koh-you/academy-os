@@ -117,6 +117,7 @@ import {
 import { createSystemRouteRegistry } from "../src/shared/server/systemRouteRegistry.js";
 import { createAuthLoginRouteRegistry } from "../src/shared/server/authLoginRouteRegistry.js";
 import { createTeacherAccountRouteRegistry } from "../src/shared/server/teacherAccountRouteRegistry.js";
+import { createPortalReadRouteRegistry } from "../src/shared/server/portalReadRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -240,6 +241,11 @@ const { dispatch: dispatchTeacherAccountRoute } = createTeacherAccountRouteRegis
   saveTeacherAccount,
   sendJson,
   toTeacherAccount
+});
+const { dispatch: dispatchPortalReadRoute } = createPortalReadRouteRegistry({
+  getPortalData,
+  getPortalSession,
+  sendJson
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5828,25 +5834,7 @@ const server = http.createServer(async (request, response) => {
   const requestUrl = new URL(request.url, "http://127.0.0.1");
   if (await dispatchSystemRoute({ request, response, requestUrl })) return;
   if (await dispatchAuthLoginRoute({ request, response, requestUrl })) return;
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/portal-data") {
-    try {
-      const portalSession = getPortalSession(request);
-      if (!portalSession) {
-        sendJson(request, response, 401, { ok: false, error: "학생 세션 인증이 필요합니다." });
-        return;
-      }
-      const data = await getPortalData(portalSession);
-      if (!data) {
-        sendJson(request, response, 404, { ok: false, error: "학생 정보를 찾지 못했습니다." });
-        return;
-      }
-      sendJson(request, response, 200, { ok: true, role: portalSession.role, ...data });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
+  if (await dispatchPortalReadRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/portal-state") {
     try {
