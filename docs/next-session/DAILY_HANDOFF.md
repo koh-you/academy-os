@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-2d lesson activity mapper
+
+- 수업일지 record·숙제·보충 task·출결 event 8개 mapper와 JSON/status helper를 `src/shared/persistence/lessonActivityRowMappers.js`로 이동했다. 이전 main 대비 helper/mapper 본문 12/12 exact다.
+- source write/CAS/readback/rollback, 연속 출결 방문 orchestration과 provider 알림 경계는 기존 owner에 유지했다. MakeupTask note의 확장 domain metadata 보존 예외와 unknown DB column drop을 별도 fixture로 고정했다.
+- lesson `20/20`, supplement `10/10`, 관련 persistence, lint, scenario·production `827/827`, build `418`·main `944.65 kB`·lazy `12/12`, safe browser `4/4` 통과. 다음은 최신 main 기반 learning/calendar mapper 10개다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-2c intake/special lecture mapper
 
 - intake·특강 신청·특강 수강 6개 mapper와 관련 ID/status/session helper를 `src/shared/persistence/intakeSpecialLectureRowMappers.js`로 이동했다. 이전 main 대비 helper/mapper 본문 15/15 exact다.
