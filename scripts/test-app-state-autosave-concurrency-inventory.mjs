@@ -2,10 +2,11 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [appSource, controllerSource, coreDataSource, serverSource, schemaSource, workflowSource, packageSource] = await Promise.all([
+const [appSource, controllerSource, coreDataSource, platformMapperSource, serverSource, schemaSource, workflowSource, packageSource] = await Promise.all([
   read("../src/app/App.jsx"),
   read("../src/domains/appState/appStatePersistenceController.js"),
   read("../api/routes/coreData.js"),
+  read("../src/shared/persistence/platformSourceRowMappers.js"),
   read("../api/server.js"),
   read("../supabase/20260620_app_state_store.sql"),
   read("../.github/workflows/production-checks.yml"),
@@ -78,8 +79,9 @@ const listSource = sourceBetween(
   "export async function upsertAppState(states, { expectedUpdatedAt = null } = {})"
 );
 assert.ok(listSource.includes("stateRows: rows.map(fromAppStateRow)"));
-assert.ok(coreDataSource.includes("function fromAppStateRow(row)"));
-assert.ok(coreDataSource.includes("updatedAt: row.updated_at"));
+assert.ok(coreDataSource.includes('from "../../src/shared/persistence/platformSourceRowMappers.js"'));
+assert.ok(platformMapperSource.includes("export function fromAppStateRow(row)"));
+assert.ok(platformMapperSource.includes("updatedAt: row.updated_at"));
 
 const upsertSource = sourceBetween(coreDataSource, "export async function upsertAppState(states, { expectedUpdatedAt = null } = {})", "export async function listResourceMaterials()");
 assert.ok(upsertSource.includes('upsertRows("app_state", [row])'));

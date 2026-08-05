@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-2f platform source mapper
+
+- AppState·자료함·알림 작업 6개 mapper와 visibility helper를 `src/shared/persistence/platformSourceRowMappers.js`로 이동했다. 이전 main 대비 함수 본문 9/9 exact, core 추출 inventory 36/36이다.
+- AppState CAS/requery, private Storage, 알림 source/provider orchestration은 기존 owner에 유지했다. 새 module은 DB·Storage·Solapi·Slack import가 없고 실제 provider 행동을 실행하지 않았다.
+- notification `18/18`, 관련 persistence, lint, scenario·production `827/827`, build `418`·main `944.65 kB`·lazy `12/12`, safe browser `5/5` 통과. 다음은 시험분석 9개 mapper 경계와 4-2 종료 감사다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-2e learning/calendar mapper
 
 - 시험 session/attempt, 시험정보, 학사일정, 운영 알림 10개 mapper와 순수 helper를 `src/shared/persistence/learningCalendarRowMappers.js`로 이동했다. 이전 main 대비 함수 본문 22/22 exact, 추출 inventory 30/45다.
