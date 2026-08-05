@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-3e auth login registry
+
+- `/api/auth/login`의 role→credential action→session token/account response 조립을 `src/shared/server/authLoginRouteRegistry.js`로 이동했다.
+- credential DB와 bootstrap, password hash, HMAC codec owner는 바꾸지 않았고 login/portal 전역 route 순서도 유지했다.
+- runtime lint, auth/session 전용, domain 69/69, production 827/827, build 418·main 944.65 kB·lazy 12/12를 통과했다.
+- 다음은 teacher-account credential 변경 route이며 운영 로그인·계정 변경 없이 fixture와 무자격 403 smoke만 사용한다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3d system route registry
 
 - OPTIONS + health/client-errors/core-status를 `src/shared/server/systemRouteRegistry.js`로 이동했다. registry 3 + server 117 = 기존 120 route와 order hash를 유지한다.

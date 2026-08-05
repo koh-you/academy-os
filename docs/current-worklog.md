@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-3e auth login registry
+
+- 로그인 route의 role 검증과 credential action 선택, HMAC token/account 응답 조립을 단일-route frozen registry로 이동했다.
+- credential DB/bootstrap/password hash는 server, token 서명·검증은 session guard에 유지하고 직접 함수 identity로 주입했다.
+- teacher/student/parent 성공·실패, 미지원 role 403, parser 예외 500을 전용 fixture로 고정하고 local server의 무자격 role 403을 확인했다. 운영 로그인은 실행하지 않았다.
+- 검증: runtime lint, auth/session 전용, domain 69/69, scenario·production 827/827, build 418 modules·main 944.65 kB·lazy 12/12 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3d system route registry
 
 - OPTIONS, health, 제한된 client runtime error 수집, core status를 첫 frozen route registry로 이동했다. registry 미일치 시에만 기존 117개 직접 route가 원래 순서로 실행된다.

@@ -95,3 +95,9 @@ route signature의 현재 등록 순서는 SHA-256 `118af79f…de5`로 fixture�
 - registry가 route를 처리했는지 boolean으로 반환하고, 미일치 route만 기존 server 순서로 내려간다. 전역 inventory는 registry 3개 + server 직접 117개, 총 120개와 기존 order hash를 유지한다.
 - client runtime error의 remote-address rate limit, 64 KiB body limit, normalize→report→202와 429/400 응답을 동작 fixture로 고정했다.
 - 인증·DB write·Storage/provider owner는 이동하지 않았다. server는 7,811줄이며 다음은 auth/portal registry다.
+
+## 4-3e 완료 상태
+
+- `POST /api/auth/login`을 `src/shared/server/authLoginRouteRegistry.js`로 이동했다. system registry 다음·portal route 전에 dispatch해 기존 전역 순서를 유지한다.
+- teacher/student/parent role 검증, loginId trim, credential action 선택, portal/teacher token과 account response, 미지원 403·예외 500을 동작 fixture로 고정했다.
+- credential Supabase 조회/bootstrap과 password hash, HMAC token codec은 server/session guard owner로 유지했다. server는 7,775줄이며 다음은 teacher-account route다.

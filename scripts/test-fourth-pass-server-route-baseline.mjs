@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import { readFile } from "node:fs/promises";
+import { authLoginRouteSignatures } from "../src/shared/server/authLoginRouteRegistry.js";
 import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
 
-const [adapterSource, packageJson, serverSource, sessionGuardSource, systemRouteRegistrySource] = await Promise.all([
+const [adapterSource, authLoginRouteRegistrySource, packageJson, serverSource, sessionGuardSource, systemRouteRegistrySource] = await Promise.all([
   readFile(new URL("../src/shared/server/httpRouteAdapter.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/shared/server/authLoginRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse),
   readFile(new URL("../api/server.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/sessionRouteGuard.js", import.meta.url), "utf8"),
@@ -21,8 +23,15 @@ const routes = [
     signature: `${method} ${path}`,
     source: systemRouteRegistrySource
   })),
-  ...directRouteMatches.map((match, index) => ({
+  ...authLoginRouteSignatures.map(({ method, path }, index) => ({
     index: systemRouteSignatures.length + index,
+    method,
+    path,
+    signature: `${method} ${path}`,
+    source: authLoginRouteRegistrySource
+  })),
+  ...directRouteMatches.map((match, index) => ({
+    index: systemRouteSignatures.length + authLoginRouteSignatures.length + index,
     method: match[1],
     path: match[2],
     signature: `${match[1]} ${match[2]}`,
@@ -34,7 +43,7 @@ const routes = [
 ];
 
 assert.equal(routes.length, 120);
-assert.equal(directRouteMatches.length, 117);
+assert.equal(directRouteMatches.length, 116);
 assert.equal(new Set(routes.map(({ signature }) => signature)).size, 120);
 assert.deepEqual(
   Object.fromEntries(["DELETE", "GET", "POST"].map((method) => [
@@ -189,6 +198,11 @@ assert.ok(serverSource.includes("createHttpRouteAdapter({ allowedOrigins })"));
 assert.ok(serverSource.includes("createSessionRouteGuard({"));
 assert.ok(serverSource.includes("createSystemRouteRegistry({"));
 assert.ok(serverSource.includes("await dispatchSystemRoute({ request, response, requestUrl })"));
+assert.ok(serverSource.includes("createAuthLoginRouteRegistry({"));
+assert.ok(serverSource.includes("await dispatchAuthLoginRoute({ request, response, requestUrl })"));
+assert.ok(authLoginRouteRegistrySource.includes('requestUrl.pathname !== "/api/auth/login"'));
+assert.ok(authLoginRouteRegistrySource.includes("authenticateStudentOrParent"));
+assert.ok(authLoginRouteRegistrySource.includes("authenticateTeacher"));
 assert.ok(sessionGuardSource.includes("function verifySignedSessionToken"));
 assert.ok(sessionGuardSource.includes("function getTeacherOrPortalSession"));
 assert.ok(systemRouteRegistrySource.includes('"GET /health"'));
@@ -218,6 +232,7 @@ assert.equal(packageJson.scripts["test:fourth-pass-server-route-baseline"], "nod
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:fourth-pass-server-route-baseline"));
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:session-route-guard"));
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:system-route-registry"));
+assert.ok(packageJson.scripts["test:production"].includes("npm run test:auth-login-route-registry"));
 
 console.log(
   "fourth-pass server route baseline passed · 120 routes · GET 31/POST 76/DELETE 13 · session/credential 15 + dispatch 2"
