@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-2e learning/calendar mapper
+
+- TestSession/TestAttempt/ExamPrep/SchoolEvent/AcademyReminder 10개 mapper와 숫자·시험 주기·학사일정 type·운영 알림 normalize helper를 import 없는 `src/shared/persistence/learningCalendarRowMappers.js`로 옮겼다. 이전 main 함수 본문은 export 문구를 제외하고 문자 단위 `22/22` 동일하다.
+- 시험·학사일정 Supabase write/CAS/readback/rollback, 파생 시험일정 병합과 Slack provider owner는 기존 route/server에 유지했다. SchoolEvent `event_payload`의 확장 domain metadata 보존과 unknown DB column drop을 구분해 fixture에 고정했다.
+- 파일 위치에 결합된 academy reminder 호환 fixture 한 건은 `coreData`와 새 mapper source를 합성하도록 교정했다. 검증: domain `69/69`, scenario·production `827/827`, build `418`·main `944.65 kB`·lazy `12/12`, 시험·학사일정 전용과 safe browser `5/5` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-2d lesson activity mapper
 
 - LessonRecord/Homework/MakeupTask/AttendanceEvent 8개 mapper와 JSON note·status helper를 import 없는 `src/shared/persistence/lessonActivityRowMappers.js`로 옮겼다. 기존 main의 helper/mapper 본문은 export 문구를 제외하고 문자 단위 `12/12` 동일하다.

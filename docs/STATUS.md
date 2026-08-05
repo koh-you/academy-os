@@ -9,7 +9,8 @@
 - 4-2b는 Student/ClassTemplate/Lesson 6개와 특강 학생별 시간 helper를 `src/shared/persistence/coreIdentityRowMappers.js`로 옮겼다. null/default, schema fallback, special lecture legacy alias, `updated_at` token과 unknown-field drop을 동작 fixture로 고정했고 DB·provider owner는 바꾸지 않았다.
 - 4-2c는 StudentIntakeApplicant/SpecialLectureApplication/SpecialLectureEnrollment 6개와 ID/status/session 정규화 helper를 `src/shared/persistence/intakeSpecialLectureRowMappers.js`로 옮겼다. Tally 조립·Supabase 저장·재조회 owner는 그대로다.
 - 4-2d는 LessonRecord/Homework/MakeupTask/AttendanceEvent 8개와 JSON/status helper를 `src/shared/persistence/lessonActivityRowMappers.js`로 옮겼다. 수업일지·숙제·보충·출결 source write/CAS/readback와 알림 owner는 그대로다.
-- 다음 4-2e는 TestSession/TestAttempt/ExamPrep/SchoolEvent/AcademyReminder 10개 mapper만 분리한다.
+- 4-2e는 TestSession/TestAttempt/ExamPrep/SchoolEvent/AcademyReminder 10개와 순수 normalize helper를 `src/shared/persistence/learningCalendarRowMappers.js`로 옮겼다. 시험·학사일정 source write/CAS/readback·파생 일정·Slack owner는 그대로다.
+- 다음 4-2f는 AppState/ResourceMaterial/NotificationJob 6개 mapper만 분리한다.
 
 ## 현재 기준
 

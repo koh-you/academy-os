@@ -4,7 +4,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
-const source = fs.readFileSync(path.join(scriptDir, "..", "api", "routes", "coreData.js"), "utf8");
+const source = [
+  fs.readFileSync(path.join(scriptDir, "..", "api", "routes", "coreData.js"), "utf8"),
+  fs.readFileSync(path.join(scriptDir, "..", "src", "shared", "persistence", "learningCalendarRowMappers.js"), "utf8")
+].join("\n");
 
 assert.match(
   source,
