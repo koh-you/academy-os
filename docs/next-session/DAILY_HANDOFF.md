@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-3a server route 기준선
+
+- server 직접 route 120개(GET 31/POST 76/DELETE 13)의 signature/order와 9개 family를 fixture로 고정했다. credential/session 15개, dispatch token 2개의 기존 guard 의미와 route action 전 선행 여부도 감사한다.
+- source persistence·local draft·DB readback·provider·오류 복구 owner는 변경하지 않았다. 다음 4-3b는 공통 request/body/response/CORS/auth adapter를 작은 단위로 고정하고, 이후 auth/portal/core registry를 옮긴다.
+- 기준 문서는 `docs/app-refactor-fourth-pass-server-route-baseline.md`이며 운영 DB·Storage·실제 알림·유료 AI는 사용하지 않았다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-2g exam pipeline mapper·4-2 closeout
 
 - 시험분석 run/source/question/AI job/event 9개 mapper와 local ID helper를 `src/shared/persistence/examAnalysisPipelineRowMappers.js`로 이동했다. 이전 main 대비 함수 본문 13/13 exact이며 Storage bucket export identity를 유지한다.

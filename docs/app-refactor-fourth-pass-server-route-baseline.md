@@ -1,0 +1,75 @@
+# App/API 4차 리팩터링 4-3 server route 기준선
+
+업데이트: 2026-08-05
+
+## 목적
+
+4-3은 `api/server.js`의 route registration, 인증, core data 조립, notification/provider 조립을 작은 registry로 나눈다. 이 문서는 이동 전에 route 순서와 현재 guard 의미, 원천 저장과 provider 부작용의 owner를 고정한다. 4-3a에서는 제품 runtime, API 응답, 운영 DB·Storage·알림·AI를 변경하거나 실행하지 않는다.
+
+## 정량 기준선
+
+| 항목 | 현재 값 |
+| --- | ---: |
+| `api/server.js` 물리 줄 수 | 7,941 |
+| 직접 exact-path route | 120 |
+| GET / POST / DELETE | 31 / 76 / 13 |
+| `readJsonBody` 호출 표면 | 77 route/helper call + 정의 1 |
+| `sendJson` 호출 표면 | 269 call + 정의 1 |
+| session 또는 credential 의미가 있는 route | 15 |
+| dispatch token 의미가 있는 route | 2 |
+
+route signature의 현재 등록 순서는 SHA-256 `118af79f…de5`로 fixture에 고정한다. route를 registry로 옮길 때도 method/path, 첫 일치 우선순위, OPTIONS 선처리, 마지막 404 의미를 유지한다.
+
+## route family inventory
+
+| 후속 registry 후보 | route 수 | 현재 owner |
+| --- | ---: | --- |
+| system/auth/portal | 11 | server callback + session helper |
+| app/core | 9 | server callback + `coreData` |
+| exam analysis | 20 | server callback + exam pipeline + Storage/AI helper |
+| student/intake/special lecture | 15 | server callback + `coreData` + Tally 조립 |
+| lesson/attendance/supplement | 29 | server callback + `coreData` + attendance/provider 조립 |
+| calendar/planning | 9 | server callback + `coreData` |
+| resource | 6 | server callback + `coreData` + private Storage operation |
+| notification/provider/admin seed | 20 | server callback + notification source/provider helper |
+| comment AI | 1 | server callback + `commentPolish` |
+
+합계는 120이다. `notification/provider/admin seed`는 향후 하나의 module로 합치라는 뜻이 아니라 현재 인접 route 구간을 나타낸다. source persistence, provider 실행, admin seed는 4-3/4-5에서 다시 분리한다.
+
+## 인증 의미
+
+| guard 종류 | route 수 | 계약 |
+| --- | ---: | --- |
+| login/current credential | 2 | 로그인 또는 교사 계정 변경 시 현재 credential 확인 |
+| portal session | 7 | 학생·학부모 bearer 확인 뒤 portal source 접근 |
+| teacher session | 4 | 교사 bearer 확인 뒤 보고서/자료 파일 변경 |
+| teacher 또는 portal session | 2 | 등록된 시험 제출 파일·자료 파일만 signed URL 발급 |
+| dispatch token 조건부 | 1 | dispatch override만 token 없이는 거부 |
+| dispatch token 필수 | 1 | Slack 예약은 configured+valid token 필수 |
+
+현재 여러 내부 운영 API는 route 자체의 session guard가 없다. 4-3은 이를 무조건 일괄 강화하지 않는다. 먼저 기존 App·safe API 호출 계약을 보존해 registry로 옮기고, 권한 정책 확대가 필요하면 별도 보안 기능 변경과 E2E로 다룬다.
+
+## 상태·저장·부작용 경계
+
+| 구분 | 4-3 owner |
+| --- | --- |
+| 원본 데이터 | Supabase row/Storage object; route registry가 소유하지 않음 |
+| local draft | App/domain controller; server route 이동 대상 아님 |
+| request context/body/response | 현재 server의 header/body/CORS/send helper; 4-3b에서 순수 adapter로 고정 |
+| 인증/session | credential/session/dispatch helper; route action보다 먼저 실행 |
+| API/DB 저장 | `coreData`, exam pipeline, versioned persistence operation의 CAS/readback/rollback |
+| 파생 화면값 | client selector/view owner 유지 |
+| provider side effect | Solapi·Slack·Tally·Storage·AI 호출; source 저장 성공과 별도 결과로 유지 |
+| 오류 복구 | route의 status/code/current source 응답 + domain action의 draft/rollback 보존 |
+
+## 연쇄 안전 단위
+
+1. 4-3a: 이 기준선과 production fixture만 추가한다.
+2. 4-3b: request context, JSON body, response, CORS와 기존 auth guard adapter를 pure module로 고정한다.
+3. 4-3c: health/auth/portal/core read route registry를 이동한다.
+4. 4-3d: student/lesson/supplement versioned write registry를 domain별로 이동한다.
+5. 4-3e: exam analysis route registry를 이동한다.
+6. 4-3f: notification source/job route와 provider/scheduler 조립을 분리한다.
+7. 4-3g: route 120/120, auth 17/17, source/provider/error recovery 종료 감사를 수행한다.
+
+각 runtime 이동은 route signature·order hash, 관련 contract/도메인 fixture, local full production, 필요한 safe browser를 통과한 뒤 exact-head CI와 main 배포까지 닫고 다음 단위로 넘어간다.

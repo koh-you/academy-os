@@ -201,3 +201,8 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 - 4-2e: TestSession/TestAttempt/ExamPrep/SchoolEvent/AcademyReminder 10개와 순수 normalize helper를 import 없는 `src/shared/persistence/learningCalendarRowMappers.js`로 옮겼다. 본문 22/22 exact, source write/CAS/readback·파생 일정·Slack owner를 유지하고 event payload metadata 보존 예외를 고정했다.
 - 4-2f: AppState/ResourceMaterial/NotificationJob 6개와 자료 visibility helper를 import 없는 `src/shared/persistence/platformSourceRowMappers.js`로 옮겼다. 본문 9/9 exact이며 `coreData` mapper 36/36을 pure module로 분리하고 DB·Storage·provider owner를 유지했다.
 - 4-2g/종료: 시험분석 Run/Source/Question/AI job/Event 9개와 local ID helper를 `src/shared/persistence/examAnalysisPipelineRowMappers.js`로 옮겼다. 본문 13/13 exact, 유일 import는 `node:crypto`이며 DB·Storage·유료 AI owner를 유지했다. core 36 + exam 9, 총 45/45 mapper 추출 감사로 4-2를 닫는다.
+
+## 4-3 진행 상태
+
+- 4-3a 기준선: `api/server.js` 7,941줄의 direct exact-path route 120개를 GET 31/POST 76/DELETE 13과 9개 registry family로 분류했다. method/path/order hash, credential/session 15개, dispatch token 2개 guard 의미와 common body/response·core/exam/provider owner를 production fixture에 고정했다.
+- 제품 runtime과 인증 정책은 변경하지 않았다. 다음은 4-3b request context·JSON body·response·CORS와 기존 guard를 재사용 가능한 adapter로 고정한 뒤, 4-3c부터 route family를 한 묶음씩 이동한다.
