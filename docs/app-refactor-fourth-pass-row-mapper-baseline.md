@@ -100,3 +100,11 @@
 - 기존 main의 `compact`를 포함한 함수 본문은 export 선언을 제외하고 문자 단위 `9/9` 동일하며, `coreData` mapper 추출 inventory는 36/36이다.
 - 전용 fixture는 AppState object/null/version token, 자료 legacy ID·URL·class alias·visibility, 알림 target/type/schedule/message alias·provider 결과와 unknown DB field drop을 검사한다.
 - AppState Supabase CAS/readback, 자료 private Storage upload/delete rollback, 알림 source 저장과 Solapi·Slack provider reserve/cancel/reconcile는 이동하거나 실행하지 않았다.
+
+## 4-2g 완료 및 4-2 종료 상태
+
+- 시험분석 Run/Source/Question/AI job/Event 9개 mapper와 compact/subject/stable JSON/local ID helper를 `src/shared/persistence/examAnalysisPipelineRowMappers.js`로 옮겼다.
+- 기존 main의 함수 본문은 export 선언을 제외하고 문자 단위 `13/13` 동일하고, `examAnalysisSourceBucket`도 같은 값과 공개 identity로 route가 재수출한다.
+- 유일한 import는 ID 생성용 `node:crypto`다. Supabase row/RPC, Storage upload/download/delete, OpenAI/Anthropic과 event orchestration 접근은 closeout fixture가 금지한다.
+- 전용 fixture는 run/source/source patch/question/AI job/event의 null/default/legacy alias/undefined patch/version token/unknown field drop과 ID 형식을 검사한다. 유료 AI와 운영 Storage는 실행하지 않았다.
+- 종료 inventory는 `coreData` 36개/18쌍과 시험분석 9개, 합계 45/45 mapper가 route 내부 정의 없이 전용 경계에 있음을 고정한다. 다음 단계는 4-3 server route registration/auth/core/provider 분리다.

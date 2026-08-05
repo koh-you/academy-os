@@ -378,6 +378,7 @@ const uiUnificationFinalAuditPath = path.join(root, "docs", "ui-unification-fina
 const notificationRoutePath = path.join(root, "api", "routes", "notifications.js");
 const commentPolishRoutePath = path.join(root, "api", "routes", "commentPolish.js");
 const examAnalysisPipelineRoutePath = path.join(root, "api", "routes", "examAnalysisPipeline.js");
+const examAnalysisPipelineRowMappersPath = path.join(root, "src", "shared", "persistence", "examAnalysisPipelineRowMappers.js");
 const coreDataRoutePath = path.join(root, "api", "routes", "coreData.js");
 const coreIdentityRowMappersPath = path.join(root, "src", "shared", "persistence", "coreIdentityRowMappers.js");
 const intakeSpecialLectureRowMappersPath = path.join(root, "src", "shared", "persistence", "intakeSpecialLectureRowMappers.js");
@@ -917,7 +918,10 @@ const attendanceHtml = fs.readFileSync(attendanceHtmlPath, "utf8");
 const specialLectureHtml = fs.readFileSync(specialLectureHtmlPath, "utf8");
 const notificationRoute = fs.readFileSync(notificationRoutePath, "utf8");
 const commentPolishRoute = fs.readFileSync(commentPolishRoutePath, "utf8");
-const examAnalysisPipelineRoute = fs.readFileSync(examAnalysisPipelineRoutePath, "utf8");
+const examAnalysisPipelineRoute = [
+  fs.readFileSync(examAnalysisPipelineRoutePath, "utf8"),
+  fs.readFileSync(examAnalysisPipelineRowMappersPath, "utf8")
+].join("\n");
 const coreDataRoute = [
   fs.readFileSync(coreDataRoutePath, "utf8"),
   fs.readFileSync(coreIdentityRowMappersPath, "utf8"),
