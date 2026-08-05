@@ -122,6 +122,7 @@ import { createPortalWriteRouteRegistry } from "../src/shared/server/portalWrite
 import { createExamPostConfirmRouteRegistry } from "../src/shared/server/examPostConfirmRouteRegistry.js";
 import { createAppCoreReadRouteRegistry } from "../src/shared/server/appCoreReadRouteRegistry.js";
 import { createAppStateWriteRouteRegistry } from "../src/shared/server/appStateWriteRouteRegistry.js";
+import { createReportSnapshotRouteRegistry } from "../src/shared/server/reportSnapshotRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -273,6 +274,15 @@ const { dispatch: dispatchAppCoreReadRoute } = createAppCoreReadRouteRegistry({
 const { dispatch: dispatchAppStateWriteRoute } = createAppStateWriteRouteRegistry({
   parseVersionedWriteRequest,
   readJsonBody,
+  sendJson,
+  upsertAppState
+});
+const { dispatch: dispatchReportSnapshotRoute } = createReportSnapshotRouteRegistry({
+  getTeacherSession,
+  listAppState,
+  parseVersionedWriteRequest,
+  readJsonBody,
+  saveReportSnapshotWithVerification,
   sendJson,
   upsertAppState
 });
@@ -5869,36 +5879,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchTeacherAccountRoute({ request, response, requestUrl })) return;
   if (await dispatchAppCoreReadRoute({ request, response, requestUrl })) return;
   if (await dispatchAppStateWriteRoute({ request, response, requestUrl })) return;
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/report-snapshots") {
-    try {
-      if (!getTeacherSession(request)) {
-        sendJson(request, response, 401, { ok: false, error: "보고서 저장 세션 인증이 필요합니다. 다시 로그인해 주세요." });
-        return;
-      }
-      const payload = parseVersionedWriteRequest(
-        request.method,
-        requestUrl.pathname,
-        await readJsonBody(request)
-      );
-      const result = await saveReportSnapshotWithVerification({
-        operations: {
-          read: listAppState,
-          write: (states, options) => upsertAppState(states, options)
-        },
-        snapshot: payload.snapshot
-      });
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, Number(error.statusCode) || 500, {
-        code: error.code,
-        error: error.message,
-        ...(error.field ? { field: error.field } : {}),
-        ok: false
-      });
-    }
-    return;
-  }
+  if (await dispatchReportSnapshotRoute({ request, response, requestUrl })) return;
 
   if (request.method === "GET" && requestUrl.pathname === "/api/test-sessions") {
     try {

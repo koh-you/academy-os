@@ -4,8 +4,9 @@
 
 ## 4차 리팩터링 현재 단위
 
+- 4-3l은 teacher-authenticated report snapshot POST의 guard, versioned parser와 report persistence service 조립을 `src/shared/server/reportSnapshotRouteRegistry.js`로 옮겼다. AppState CAS/readback·재시도 검증은 기존 domain/server owner에 유지한다.
+- 다음 4-3m은 최신 main에서 test session/attempt read route 경계를 작은 단위로 분리한다.
 - 4-3k는 app-state POST의 versioned parser, 보호 key 제외, `expectedUpdatedAt` CAS option과 오류 응답을 `src/shared/server/appStateWriteRouteRegistry.js`로 옮겼다. Supabase write/readback owner는 server의 `upsertAppState`에 유지한다.
-- 다음 4-3l은 최신 main에서 teacher-authenticated report snapshot write route를 별도 registry로 분리한다.
 - 4-3j는 app-state와 특강 guide GET 두 개의 source summary, 선택적 `stateRows`, guide 존재/fallback 응답을 `src/shared/server/appCoreReadRouteRegistry.js`로 옮겼다. Supabase read owner는 server의 `listAppState`에 유지한다.
 - 4-3i는 교사 시험 후 제출 확인 POST의 teacher guard, body→action mapping과 statusCode 오류를 `src/shared/server/examPostConfirmRouteRegistry.js`로 옮겼다. AppState 저장·재조회와 mutation lock owner는 server action에 유지한다.
 - 4-3h는 portal-state, 숙제 완료, 질문 CRUD, 시험 후 제출 4개 POST의 portal guard, body→action mapping과 기존 500/statusCode 오류를 `src/shared/server/portalWriteRouteRegistry.js`로 옮겼다. Supabase 저장·재조회와 mutation lock owner는 server action에 유지한다.
