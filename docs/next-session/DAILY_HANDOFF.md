@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-2b core identity mapper
+
+- Student/ClassTemplate/Lesson 6개와 특강 학생별 시간 helper를 `src/shared/persistence/coreIdentityRowMappers.js`로 이동했다. 기존 helper/mapper 본문 9/9 exact, `coreData`의 공개 `toLessonRow` 재수출과 모든 호출 identity를 유지한다.
+- `api/domain` 신규 파일이 Vercel serverless file `13/12`를 만든 문제는 구현 초기에 발견해 `src/shared/persistence`로 옮겼고 scenario 827/827과 build에서 `12/12`를 재확인했다.
+- 전용 round-trip/null/legacy/version/unknown-field, student `15/15`, lesson `20/20`, 관련 persistence, production `827/827`, build `418`·main `944.65 kB`·lazy `12/12`, safe browser `4/4` 통과. 다음은 최신 main 기반 intake/special-lecture mapper 6개다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-2a row mapper 기준선
 
 - core 36개/18쌍과 exam pipeline 9개, 총 45개 row mapper의 현재 owner와 후속 4-2b~g 분류를 고정했다. 4-0의 44개 수치는 exact function inventory로 45개로 교정한다.

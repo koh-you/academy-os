@@ -5,8 +5,9 @@
 ## 4차 리팩터링 현재 단위
 
 - 4-1 API payload 계약은 공통 contract 24개와 종료 감사까지 main 반영 완료다.
-- 4-2a row mapper 기준선은 `coreData` 36개(18쌍), 시험분석 9개, 합계 45개를 exact inventory로 고정한다. 제품 runtime·DB·provider는 변경하지 않는다.
-- 첫 실제 추출 4-2b는 Student/ClassTemplate/Lesson 6개만 대상으로 하며 null/default, schema fallback, special lecture legacy alias, `updated_at` token과 unknown-field drop 정책을 먼저 동작 fixture로 고정한다.
+- 4-2a row mapper 기준선은 `coreData` 36개(18쌍), 시험분석 9개, 합계 45개를 exact inventory로 고정했다.
+- 4-2b는 Student/ClassTemplate/Lesson 6개와 특강 학생별 시간 helper를 `src/shared/persistence/coreIdentityRowMappers.js`로 옮겼다. null/default, schema fallback, special lecture legacy alias, `updated_at` token과 unknown-field drop을 동작 fixture로 고정했고 DB·provider owner는 바꾸지 않았다.
+- 다음 4-2c는 StudentIntakeApplicant/SpecialLectureApplication/SpecialLectureEnrollment 6개만 같은 원칙으로 분리한다.
 
 ## 현재 기준
 
