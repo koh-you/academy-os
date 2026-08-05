@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-3k app-state write registry
+
+- app-state POST의 versioned parse, 보호 key 제외, expectedUpdatedAt CAS option과 응답 조립을 frozen registry로 이동했다. Supabase save/readback은 `upsertAppState` owner에 유지한다.
+- autosave inventory와 persistence controller/contract closeout의 이전 server 위치 결합을 새 registry owner로 교정했다. invalid payload local 400 smoke만 수행해 source write/provider가 실행되지 않음을 확인했다.
+- 검증은 domain 69/69, scenario·production 827/827, build 418 modules·main 944.65 kB·lazy 12/12를 통과했다. server route는 registry 14개를 포함해 총 120개이며 직접 route는 106개다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3j app/core read registry
 
 - app-state와 special-lecture-guides GET 두 개의 read/response 조립을 frozen registry로 이동했다. 선택적 stateRows, guide 존재 flag·빈 배열 fallback과 실패 500을 고정했다.

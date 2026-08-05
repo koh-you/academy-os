@@ -1,13 +1,15 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { versionedWriteRouteContracts } from "../src/shared/contracts/versionedWriteRouteContracts.js";
+import { appStateWriteRouteSignatures } from "../src/shared/server/appStateWriteRouteRegistry.js";
 import { authLoginRouteSignatures } from "../src/shared/server/authLoginRouteRegistry.js";
 import { examPostConfirmRouteSignatures } from "../src/shared/server/examPostConfirmRouteRegistry.js";
 import { portalWriteRouteSignatures } from "../src/shared/server/portalWriteRouteRegistry.js";
 import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
 import { teacherAccountRouteSignatures } from "../src/shared/server/teacherAccountRouteRegistry.js";
 
-const [packageJson, serverSource] = await Promise.all([
+const [appStateWriteRouteSource, packageJson, serverSource] = await Promise.all([
+  readFile(new URL("../src/shared/server/appStateWriteRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse),
   readFile(new URL("../api/server.js", import.meta.url), "utf8")
 ]);
@@ -153,6 +155,7 @@ const directWriteSignatures = [
     .filter(({ method }) => ["POST", "PUT", "PATCH", "DELETE"].includes(method))
     .map(signatureOf),
   ...authLoginRouteSignatures.map(signatureOf),
+  ...appStateWriteRouteSignatures.map(signatureOf),
   ...examPostConfirmRouteSignatures.map(signatureOf),
   ...portalWriteRouteSignatures.map(signatureOf),
   ...teacherAccountRouteSignatures.map(signatureOf)
@@ -176,16 +179,20 @@ const specializedParserBySignature = new Map([
   ["POST /api/exam-analysis-runs/save-prompt-studio", "parseExamAnalysisPromptStudioSaveRequest"],
   ["POST /api/exam-analysis-runs/save-question-reviews", "parseExamAnalysisQuestionReviewsSaveRequest"]
 ]);
+const extractedRouteSourceBySignature = new Map([
+  ["POST /api/app-state", appStateWriteRouteSource]
+]);
 for (const signature of expectedContractSignatures) {
   const separator = signature.indexOf(" ");
   const method = signature.slice(0, separator);
   const path = signature.slice(separator + 1);
-  const start = serverSource.indexOf(
+  const extractedRouteSource = extractedRouteSourceBySignature.get(signature);
+  const start = extractedRouteSource ? -1 : serverSource.indexOf(
     `if (request.method === "${method}" && requestUrl.pathname === "${path}")`
   );
-  const end = serverSource.indexOf("\n  if (request.method ===", start + 1);
-  assert.ok(start >= 0, `server route is missing ${signature}`);
-  const routeSource = serverSource.slice(start, end > start ? end : undefined);
+  const end = extractedRouteSource ? -1 : serverSource.indexOf("\n  if (request.method ===", start + 1);
+  assert.ok(extractedRouteSource || start >= 0, `server route is missing ${signature}`);
+  const routeSource = extractedRouteSource ?? serverSource.slice(start, end > start ? end : undefined);
   const parserToken = specializedParserBySignature.get(signature) ?? "parseVersionedWriteRequest";
   assert.ok(routeSource.includes(parserToken), `${signature} is not bound to ${parserToken}`);
 }

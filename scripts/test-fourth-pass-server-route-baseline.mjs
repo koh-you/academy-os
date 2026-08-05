@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { appCoreReadRouteSignatures } from "../src/shared/server/appCoreReadRouteRegistry.js";
+import { appStateWriteRouteSignatures } from "../src/shared/server/appStateWriteRouteRegistry.js";
 import { authLoginRouteSignatures } from "../src/shared/server/authLoginRouteRegistry.js";
 import { examPostConfirmRouteSignatures } from "../src/shared/server/examPostConfirmRouteRegistry.js";
 import { portalReadRouteSignatures } from "../src/shared/server/portalReadRouteRegistry.js";
@@ -9,9 +10,10 @@ import { portalWriteRouteSignatures } from "../src/shared/server/portalWriteRout
 import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
 import { teacherAccountRouteSignatures } from "../src/shared/server/teacherAccountRouteRegistry.js";
 
-const [adapterSource, appCoreReadRouteRegistrySource, authLoginRouteRegistrySource, examPostConfirmRouteRegistrySource, packageJson, portalReadRouteRegistrySource, portalWriteRouteRegistrySource, serverSource, sessionGuardSource, systemRouteRegistrySource, teacherAccountRouteRegistrySource] = await Promise.all([
+const [adapterSource, appCoreReadRouteRegistrySource, appStateWriteRouteRegistrySource, authLoginRouteRegistrySource, examPostConfirmRouteRegistrySource, packageJson, portalReadRouteRegistrySource, portalWriteRouteRegistrySource, serverSource, sessionGuardSource, systemRouteRegistrySource, teacherAccountRouteRegistrySource] = await Promise.all([
   readFile(new URL("../src/shared/server/httpRouteAdapter.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/appCoreReadRouteRegistry.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/shared/server/appStateWriteRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/authLoginRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/examPostConfirmRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse),
@@ -77,12 +79,18 @@ const orderedRoutes = [
     signature: `${method} ${path}`,
     source: appCoreReadRouteRegistrySource
   })),
+  ...appStateWriteRouteSignatures.map(({ method, path }) => ({
+    method,
+    path,
+    signature: `${method} ${path}`,
+    source: appStateWriteRouteRegistrySource
+  })),
   ...directRoutes
 ];
 const routes = orderedRoutes.map((route, index) => ({ ...route, index }));
 
 assert.equal(routes.length, 120);
-assert.equal(directRouteMatches.length, 107);
+assert.equal(directRouteMatches.length, 106);
 assert.equal(new Set(routes.map(({ signature }) => signature)).size, 120);
 assert.deepEqual(
   Object.fromEntries(["DELETE", "GET", "POST"].map((method) => [
@@ -265,6 +273,10 @@ assert.ok(serverSource.includes("await dispatchAppCoreReadRoute({ request, respo
 assert.ok(appCoreReadRouteRegistrySource.includes('requestUrl.pathname === "/api/app-state"'));
 assert.ok(appCoreReadRouteRegistrySource.includes('requestUrl.pathname === "/api/special-lecture-guides"'));
 assert.ok(appCoreReadRouteRegistrySource.includes('requestUrl.searchParams.get("includeRows") === "true"'));
+assert.ok(serverSource.includes("createAppStateWriteRouteRegistry({"));
+assert.ok(serverSource.includes("await dispatchAppStateWriteRoute({ request, response, requestUrl })"));
+assert.ok(appStateWriteRouteRegistrySource.includes("parseVersionedWriteRequest("));
+assert.ok(appStateWriteRouteRegistrySource.includes("upsertAppState(safeStates, { expectedUpdatedAt })"));
 assert.ok(teacherAccountRouteRegistrySource.includes("saveTeacherAccount"));
 assert.ok(sessionGuardSource.includes("function verifySignedSessionToken"));
 assert.ok(sessionGuardSource.includes("function getTeacherOrPortalSession"));
@@ -301,6 +313,7 @@ assert.ok(packageJson.scripts["test:production"].includes("npm run test:portal-r
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:portal-write-route-registry"));
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:exam-post-confirm-route-registry"));
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:app-core-read-route-registry"));
+assert.ok(packageJson.scripts["test:production"].includes("npm run test:app-state-write-route-registry"));
 
 console.log(
   "fourth-pass server route baseline passed · 120 routes · GET 31/POST 76/DELETE 13 · session/credential 15 + dispatch 2"

@@ -123,9 +123,10 @@ assert.equal(conflictWrites, 2);
 assert.equal(conflictStates.at(-1), "saved");
 assert.equal(conflictPersisted.length, 1);
 
-const [appSource, coreSource, serverSource, restSource, workflowSource, packageSource] =
+const [appSource, appStateWriteRouteSource, coreSource, serverSource, restSource, workflowSource, packageSource] =
   await Promise.all([
     readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8"),
+    readFile(new URL("../src/shared/server/appStateWriteRouteRegistry.js", import.meta.url), "utf8"),
     readFile(new URL("../api/routes/coreData.js", import.meta.url), "utf8"),
     readFile(new URL("../api/server.js", import.meta.url), "utf8"),
     readFile(new URL("../api/lib/supabaseRest.js", import.meta.url), "utf8"),
@@ -157,10 +158,12 @@ assert.match(
   "app_state CAS patch boundary must not depend on checkout line endings"
 );
 assert.ok(restSource.includes("export async function insertRows("));
-assert.ok(serverSource.includes("parseVersionedWriteRequest("));
-assert.ok(serverSource.includes("const requestedStates = payload.states"));
-assert.ok(serverSource.includes("upsertAppState(safeStates, { expectedUpdatedAt })"));
-assert.ok(serverSource.includes("Number(error.statusCode) || 500"));
+assert.ok(serverSource.includes("createAppStateWriteRouteRegistry({"));
+assert.ok(serverSource.includes("await dispatchAppStateWriteRoute({ request, response, requestUrl })"));
+assert.ok(appStateWriteRouteSource.includes("parseVersionedWriteRequest("));
+assert.ok(appStateWriteRouteSource.includes("const requestedStates = payload.states"));
+assert.ok(appStateWriteRouteSource.includes("upsertAppState(safeStates, { expectedUpdatedAt })"));
+assert.ok(appStateWriteRouteSource.includes("Number(error.statusCode) || 500"));
 const packageJson = JSON.parse(packageSource);
 assert.equal(
   packageJson.scripts["test:app-state-persistence-controller"],

@@ -121,6 +121,7 @@ import { createPortalReadRouteRegistry } from "../src/shared/server/portalReadRo
 import { createPortalWriteRouteRegistry } from "../src/shared/server/portalWriteRouteRegistry.js";
 import { createExamPostConfirmRouteRegistry } from "../src/shared/server/examPostConfirmRouteRegistry.js";
 import { createAppCoreReadRouteRegistry } from "../src/shared/server/appCoreReadRouteRegistry.js";
+import { createAppStateWriteRouteRegistry } from "../src/shared/server/appStateWriteRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -268,6 +269,12 @@ const { dispatch: dispatchExamPostConfirmRoute } = createExamPostConfirmRouteReg
 const { dispatch: dispatchAppCoreReadRoute } = createAppCoreReadRouteRegistry({
   listAppState,
   sendJson
+});
+const { dispatch: dispatchAppStateWriteRoute } = createAppStateWriteRouteRegistry({
+  parseVersionedWriteRequest,
+  readJsonBody,
+  sendJson,
+  upsertAppState
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5861,33 +5868,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchExamPostConfirmRoute({ request, response, requestUrl })) return;
   if (await dispatchTeacherAccountRoute({ request, response, requestUrl })) return;
   if (await dispatchAppCoreReadRoute({ request, response, requestUrl })) return;
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/app-state") {
-    try {
-      const payload = parseVersionedWriteRequest(
-        request.method,
-        requestUrl.pathname,
-        await readJsonBody(request)
-      );
-      const requestedStates = payload.states;
-      const expectedUpdatedAt = payload.expectedUpdatedAt ?? null;
-      const {
-        examPostSubmissions: _examPostSubmissions,
-        studentQuestions: _studentQuestions,
-        ...safeStates
-      } = requestedStates;
-      const result = await upsertAppState(safeStates, { expectedUpdatedAt });
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, Number(error.statusCode) || 500, {
-        ok: false,
-        error: error.message,
-        ...(error.code ? { code: error.code } : {}),
-        ...(error.field ? { field: error.field } : {})
-      });
-    }
-    return;
-  }
+  if (await dispatchAppStateWriteRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/report-snapshots") {
     try {
