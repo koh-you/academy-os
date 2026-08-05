@@ -4,8 +4,9 @@
 
 ## 4차 리팩터링 현재 단위
 
+- 4-3b는 header lookup, JSON body 2 MB/default·개별 limit, CORS origin, JSON response/preflight를 `src/shared/server/httpRouteAdapter.js`로 옮겼다. route 120개와 auth/session·DB/provider owner는 그대로다.
+- 다음 4-3c는 최신 main에서 bearer/session token 확인과 teacher/portal guard 결과를 공통 adapter로 고정한다.
 - 4-3a는 `api/server.js` 7,941줄·직접 route 120개(GET 31/POST 76/DELETE 13)의 method/path/order와 9개 family, session/credential 15개·dispatch token 2개 guard 의미를 기준선 fixture로 고정했다. 제품 runtime은 바꾸지 않았다.
-- 다음 4-3b는 최신 main에서 공통 request context·JSON body·response·CORS와 기존 auth guard를 순수 adapter 경계로 고정한다.
 - 4-1 API payload 계약은 공통 contract 24개와 종료 감사까지 main 반영 완료다.
 - 4-2a row mapper 기준선은 `coreData` 36개(18쌍), 시험분석 9개, 합계 45개를 exact inventory로 고정했다.
 - 4-2b는 Student/ClassTemplate/Lesson 6개와 특강 학생별 시간 helper를 `src/shared/persistence/coreIdentityRowMappers.js`로 옮겼다. null/default, schema fallback, special lecture legacy alias, `updated_at` token과 unknown-field drop을 동작 fixture로 고정했고 DB·provider owner는 바꾸지 않았다.

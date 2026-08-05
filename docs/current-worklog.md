@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-05 App/API 4차 리팩터링 4-3b HTTP route adapter
+
+- `getRequestHeader`, JSON body parser, allowed-origin parser, CORS selector, JSON response를 `src/shared/server/httpRouteAdapter.js`로 옮기고 server에는 frozen adapter를 한 번 조립했다. exam source redirect도 같은 CORS selector를 사용한다.
+- 빈 body, 분할 JSON, malformed JSON, 개별 byte limit+destroy, wildcard/allowlist/fallback origin, response headers/body와 OPTIONS 204의 기존 동작을 전용 fixture로 고정했다.
+- route signature/order 120/120, credential/session/dispatch guard, Supabase·Storage·Solapi·Slack·AI owner는 변경하지 않았다. server는 7,941줄에서 7,902줄로 줄었다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3a server route 기준선
 
 - `api/server.js`의 120개 exact-path route를 GET 31/POST 76/DELETE 13과 9개 후속 registry family로 분류하고 method/path/등록 순서 hash를 production fixture로 고정했다.

@@ -55,7 +55,7 @@ route signature의 현재 등록 순서는 SHA-256 `118af79f…de5`로 fixture�
 | --- | --- |
 | 원본 데이터 | Supabase row/Storage object; route registry가 소유하지 않음 |
 | local draft | App/domain controller; server route 이동 대상 아님 |
-| request context/body/response | 현재 server의 header/body/CORS/send helper; 4-3b에서 순수 adapter로 고정 |
+| request context/body/response | `src/shared/server/httpRouteAdapter.js`; server가 allowed origins를 주입 |
 | 인증/session | credential/session/dispatch helper; route action보다 먼저 실행 |
 | API/DB 저장 | `coreData`, exam pipeline, versioned persistence operation의 CAS/readback/rollback |
 | 파생 화면값 | client selector/view owner 유지 |
@@ -65,11 +65,19 @@ route signature의 현재 등록 순서는 SHA-256 `118af79f…de5`로 fixture�
 ## 연쇄 안전 단위
 
 1. 4-3a: 이 기준선과 production fixture만 추가한다.
-2. 4-3b: request context, JSON body, response, CORS와 기존 auth guard adapter를 pure module로 고정한다.
-3. 4-3c: health/auth/portal/core read route registry를 이동한다.
-4. 4-3d: student/lesson/supplement versioned write registry를 domain별로 이동한다.
-5. 4-3e: exam analysis route registry를 이동한다.
-6. 4-3f: notification source/job route와 provider/scheduler 조립을 분리한다.
-7. 4-3g: route 120/120, auth 17/17, source/provider/error recovery 종료 감사를 수행한다.
+2. 4-3b: request context, JSON body, response와 CORS adapter를 pure module로 고정한다.
+3. 4-3c: bearer/session token과 기존 teacher/portal guard adapter를 고정한다.
+4. 4-3d: health/auth/portal/core read route registry를 이동한다.
+5. 4-3e: student/lesson/supplement versioned write registry를 domain별로 이동한다.
+6. 4-3f: exam analysis route registry를 이동한다.
+7. 4-3g: notification source/job route와 provider/scheduler 조립을 분리한다.
+8. 4-3h: route 120/120, auth 17/17, source/provider/error recovery 종료 감사를 수행한다.
 
 각 runtime 이동은 route signature·order hash, 관련 contract/도메인 fixture, local full production, 필요한 safe browser를 통과한 뒤 exact-head CI와 main 배포까지 닫고 다음 단위로 넘어간다.
+
+## 4-3b 완료 상태
+
+- header lookup, allowed-origin parsing, JSON body parsing, CORS 선택과 JSON response를 `src/shared/server/httpRouteAdapter.js`로 이동했다.
+- server는 allowed origins를 한 번 주입한 frozen adapter의 `getRequestHeader`·`readJsonBody`·`sendJson`을 사용한다. signed URL redirect도 같은 `getCorsOrigin`을 사용해 기존 fallback을 유지한다.
+- 빈 body, chunked JSON, malformed JSON, 기본/개별 body limit와 connection destroy, wildcard/allowlist/첫 origin fallback, OPTIONS 204의 header/body를 전용 fixture로 고정했다.
+- server는 7,902줄이 됐고 route 120개 signature/order, auth 17개 의미, source persistence와 provider owner는 이동하지 않았다. 다음은 session guard adapter다.

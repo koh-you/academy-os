@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import { readFile } from "node:fs/promises";
 
-const [packageJson, serverSource] = await Promise.all([
+const [adapterSource, packageJson, serverSource] = await Promise.all([
+  readFile(new URL("../src/shared/server/httpRouteAdapter.js", import.meta.url), "utf8"),
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse),
   readFile(new URL("../api/server.js", import.meta.url), "utf8")
 ]);
@@ -168,8 +169,11 @@ for (const signature of expectedAuthRoutes.credential) {
   assert.ok(routeSource(signature).includes("authenticate"));
 }
 
-assert.equal((serverSource.match(/function readJsonBody\(/g) ?? []).length, 1);
-assert.equal((serverSource.match(/function sendJson\(/g) ?? []).length, 1);
+assert.equal((serverSource.match(/function readJsonBody\(/g) ?? []).length, 0);
+assert.equal((serverSource.match(/function sendJson\(/g) ?? []).length, 0);
+assert.equal((adapterSource.match(/function readJsonBody\(/g) ?? []).length, 1);
+assert.equal((adapterSource.match(/function sendJson\(/g) ?? []).length, 1);
+assert.ok(serverSource.includes("createHttpRouteAdapter({ allowedOrigins })"));
 assert.equal((serverSource.match(/const server = http\.createServer/g) ?? []).length, 1);
 assert.equal((serverSource.match(/server\.listen\(/g) ?? []).length, 1);
 assert.ok(serverSource.includes('from "./routes/coreData.js"'));
