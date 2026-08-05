@@ -3,14 +3,16 @@ import crypto from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { authLoginRouteSignatures } from "../src/shared/server/authLoginRouteRegistry.js";
 import { portalReadRouteSignatures } from "../src/shared/server/portalReadRouteRegistry.js";
+import { portalWriteRouteSignatures } from "../src/shared/server/portalWriteRouteRegistry.js";
 import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
 import { teacherAccountRouteSignatures } from "../src/shared/server/teacherAccountRouteRegistry.js";
 
-const [adapterSource, authLoginRouteRegistrySource, packageJson, portalReadRouteRegistrySource, serverSource, sessionGuardSource, systemRouteRegistrySource, teacherAccountRouteRegistrySource] = await Promise.all([
+const [adapterSource, authLoginRouteRegistrySource, packageJson, portalReadRouteRegistrySource, portalWriteRouteRegistrySource, serverSource, sessionGuardSource, systemRouteRegistrySource, teacherAccountRouteRegistrySource] = await Promise.all([
   readFile(new URL("../src/shared/server/httpRouteAdapter.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/authLoginRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse),
   readFile(new URL("../src/shared/server/portalReadRouteRegistry.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/shared/server/portalWriteRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../api/server.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/sessionRouteGuard.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/systemRouteRegistry.js", import.meta.url), "utf8"),
@@ -51,6 +53,12 @@ const orderedRoutes = [
     signature: `${method} ${path}`,
     source: portalReadRouteRegistrySource
   })),
+  ...portalWriteRouteSignatures.map(({ method, path }) => ({
+    method,
+    path,
+    signature: `${method} ${path}`,
+    source: portalWriteRouteRegistrySource
+  })),
   ...directRoutes.slice(0, teacherAccountInsertIndex),
   ...teacherAccountRouteSignatures.map(({ method, path }) => ({
     method,
@@ -63,7 +71,7 @@ const orderedRoutes = [
 const routes = orderedRoutes.map((route, index) => ({ ...route, index }));
 
 assert.equal(routes.length, 120);
-assert.equal(directRouteMatches.length, 114);
+assert.equal(directRouteMatches.length, 110);
 assert.equal(new Set(routes.map(({ signature }) => signature)).size, 120);
 assert.deepEqual(
   Object.fromEntries(["DELETE", "GET", "POST"].map((method) => [
@@ -228,6 +236,12 @@ assert.ok(serverSource.includes("await dispatchPortalReadRoute({ request, respon
 assert.ok(portalReadRouteRegistrySource.includes('requestUrl.pathname !== "/api/portal-data"'));
 assert.ok(portalReadRouteRegistrySource.includes("getPortalSession(request)"));
 assert.ok(portalReadRouteRegistrySource.includes("getPortalData(portalSession)"));
+assert.ok(serverSource.includes("createPortalWriteRouteRegistry({"));
+assert.ok(serverSource.includes("await dispatchPortalWriteRoute({ request, response, requestUrl })"));
+assert.ok(portalWriteRouteRegistrySource.includes("getPortalSession(request)"));
+assert.ok(portalWriteRouteRegistrySource.includes("completePortalHomework"));
+assert.ok(portalWriteRouteRegistrySource.includes("mutatePortalQuestion"));
+assert.ok(portalWriteRouteRegistrySource.includes("savePortalExamPostSubmission"));
 assert.ok(serverSource.includes("createTeacherAccountRouteRegistry({"));
 assert.ok(serverSource.includes("await dispatchTeacherAccountRoute({ request, response, requestUrl })"));
 assert.ok(teacherAccountRouteRegistrySource.includes('requestUrl.pathname !== "/api/auth/teacher-account"'));
@@ -264,6 +278,7 @@ assert.ok(packageJson.scripts["test:production"].includes("npm run test:system-r
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:auth-login-route-registry"));
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:teacher-account-route-registry"));
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:portal-read-route-registry"));
+assert.ok(packageJson.scripts["test:production"].includes("npm run test:portal-write-route-registry"));
 
 console.log(
   "fourth-pass server route baseline passed · 120 routes · GET 31/POST 76/DELETE 13 · session/credential 15 + dispatch 2"

@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-3h portal write registry
+
+- portal-state/homework/question/exam submission POST 4개를 `portalWriteRouteRegistry`로 이동했다. portal guard→body→source action과 기존 오류 status 의미를 보존한다.
+- Supabase 저장·재조회, question/exam mutation lock과 UI draft owner는 server/App에 유지했다. local invalid-bearer 401만 실행했고 운영 원천·Storage·provider는 사용하지 않았다.
+- route/API closeout, domain `69/69`, lint, scenario·production `827/827`, build `418`·main `944.65 kB`·lazy `12/12` 통과. registry 10개 + server 직접 110개로 전역 120개를 유지한다.
+- 다음은 최신 main에서 teacher exam post confirm route를 기존 teacher-account 앞 순서 그대로 한 단위로 분리한다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3g portal read registry
 
 - `/api/portal-data`의 portal guard, scoped read와 role 응답을 `src/shared/server/portalReadRouteRegistry.js`로 이동했다. source filter/DB read는 server owner다.

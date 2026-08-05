@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { versionedWriteRouteContracts } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 import { authLoginRouteSignatures } from "../src/shared/server/authLoginRouteRegistry.js";
+import { portalWriteRouteSignatures } from "../src/shared/server/portalWriteRouteRegistry.js";
 import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
 import { teacherAccountRouteSignatures } from "../src/shared/server/teacherAccountRouteRegistry.js";
 
@@ -151,6 +152,7 @@ const directWriteSignatures = [
     .filter(({ method }) => ["POST", "PUT", "PATCH", "DELETE"].includes(method))
     .map(signatureOf),
   ...authLoginRouteSignatures.map(signatureOf),
+  ...portalWriteRouteSignatures.map(signatureOf),
   ...teacherAccountRouteSignatures.map(signatureOf)
 ].sort();
 assert.equal(directWriteSignatures.length, 89);

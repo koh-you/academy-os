@@ -113,3 +113,9 @@ route signature의 현재 등록 순서는 SHA-256 `118af79f…de5`로 fixture�
 - `GET /api/portal-data`를 `src/shared/server/portalReadRouteRegistry.js`로 이동하고 login 다음·portal write 전에 dispatch해 기존 order를 유지했다.
 - portal guard 선행, scoped source action, student/parent role 응답, 인증 없음 401·학생 없음 404·source 실패 500을 동작 fixture로 고정했다.
 - 학생/수업/기록/숙제 filtering과 Supabase read owner는 server `getPortalData`에 유지했다. server는 7,738줄이며 다음은 portal write route다.
+
+## 4-3h 완료 상태
+
+- `POST /api/portal-state`, `/api/portal-homeworks/complete`, `/api/portal-questions`, `/api/portal-exam-post-submissions`를 `src/shared/server/portalWriteRouteRegistry.js`로 이동하고 portal read 다음·교사 제출 확인 전에 dispatch해 기존 순서를 유지했다.
+- portal guard를 body 파싱·source action보다 먼저 실행하고 route별 payload mapping, 성공 응답, portal-state의 고정 500과 나머지 route의 `statusCode || 500` 의미를 동작 fixture로 고정했다.
+- AppState·Homework·Question·ExamPost의 Supabase 저장·재조회, mutation lock과 오류 생성 owner는 server action에 유지했다. server는 7,685줄이며 다음은 교사 시험 후 제출 확인 route다.
