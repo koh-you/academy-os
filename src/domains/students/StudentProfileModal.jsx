@@ -641,7 +641,7 @@ export function StudentProfileModal({
                 value={attendanceMonth}
               />
               <button className="primaryButton compact" onClick={() => setIsMonthlyReportOpen(true)} type="button">
-                월간 제출 미리보기
+                수업일정표
               </button>
             </div>
           </div>

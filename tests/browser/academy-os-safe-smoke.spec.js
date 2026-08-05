@@ -2242,7 +2242,7 @@ test("settlement exposes special attendance, combined student attendance, and co
   expect(pageErrors).toEqual([]);
 });
 
-test("student monthly submission previews calendar table and selectable PDF sections", async ({ page }) => {
+test("student lesson schedule previews calendar table and selectable PDF sections", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await page.addInitScript(() => { window.print = () => {}; });
   await loginAsTeacher(page);
@@ -2251,13 +2251,13 @@ test("student monthly submission previews calendar table and selectable PDF sect
   await page.getByRole("button", { name: /정산 미리보기 학생$/ }).click();
   const profile = page.getByRole("dialog", { name: /정산 미리보기 학생 학생 프로파일/ });
   await profile.getByLabel("정산 미리보기 학생 출결 조회 월").fill("2026-08");
-  await profile.getByRole("button", { name: "월간 제출 미리보기" }).click();
+  await profile.getByRole("button", { name: "수업일정표" }).click();
 
-  const previewDialog = page.getByRole("dialog", { name: /정산 미리보기 학생 2026년 8월 월간 제출 미리보기/ });
+  const previewDialog = page.getByRole("dialog", { name: /정산 미리보기 학생 2026년 8월 수업일정표/ });
   await expect(previewDialog).toBeVisible();
   await expect(previewDialog).not.toContainText("학부모용 간단본");
   await expect(previewDialog).not.toContainText("원장님용 상세본");
-  const reportPreview = previewDialog.getByRole("region", { name: /월간 제출 미리보기/ });
+  const reportPreview = previewDialog.getByRole("region", { name: /수업일정표/ });
   await expect(reportPreview.getByRole("grid", { name: "월간 수업 달력" })).toBeVisible();
   await expect(reportPreview.getByRole("table")).toContainText("수업");
   await expect(reportPreview).toContainText("변동사항");
@@ -2273,7 +2273,7 @@ test("student monthly submission previews calendar table and selectable PDF sect
       value: { writeText: async (value) => { window.__studentMonthlyReportCopiedText = value; } }
     });
   });
-  await previewDialog.getByRole("button", { name: "제출 내용 복사" }).click();
+  await previewDialog.getByRole("button", { name: "일정표 내용 복사" }).click();
   await expect(previewDialog.getByRole("status")).toContainText("내용을 복사했습니다");
   expect(await page.evaluate(() => window.__studentMonthlyReportCopiedText)).toContain("원장님 공유 메모");
 

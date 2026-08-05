@@ -115,7 +115,7 @@ export function StudentMonthlyReportModal({
       onClose={onClose}
       scrollable
       subtitle="화면에서 내용을 확인한 뒤 복사하거나 PDF로 인쇄합니다. 운영 데이터와 알림은 변경하지 않습니다."
-      title={`${student.name} ${model.monthLabel} 월간 제출 미리보기`}
+      title={`${student.name} ${model.monthLabel} 수업일정표`}
     >
       <div className="studentMonthlyReportControls">
         <label><input checked={detailed} onChange={(event) => { setDetailed(event.target.checked); setActionStatus(""); }} type="checkbox" /> 상세 정보 표시</label>
@@ -127,7 +127,7 @@ export function StudentMonthlyReportModal({
         </fieldset>
       </div>
 
-      <section className="studentMonthlyReportPreview" aria-label={`${student.name} ${model.monthLabel} 월간 제출 미리보기`}>
+      <section className="studentMonthlyReportPreview" aria-label={`${student.name} ${model.monthLabel} 수업일정표`}>
         <header>
           <div>
             <h3>{student.name} {model.monthLabel} 수업 안내</h3>
@@ -166,7 +166,7 @@ export function StudentMonthlyReportModal({
       {actionStatus ? <p className="studentMonthlyReportActionStatus" role="status">{actionStatus}</p> : null}
       <ModalFooter>
         <button className="softButton" onClick={onClose} type="button">닫기</button>
-        <button className="softButton" onClick={copyReportText} type="button">제출 내용 복사</button>
+        <button className="softButton" onClick={copyReportText} type="button">일정표 내용 복사</button>
         <button className="primaryButton" onClick={printReport} type="button">PDF 인쇄</button>
       </ModalFooter>
     </ModalComponent>
