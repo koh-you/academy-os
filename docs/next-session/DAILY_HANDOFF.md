@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-05
 
+## 2026-08-05 App/API 4차 리팩터링 4-3o integrations status registry
+
+- `GET /api/integrations/status`의 route match와 AI·알림 status response 조립을 frozen registry로 이동했다. status 계산과 provider 설정 owner는 기존 integration module에 유지한다.
+- 운영 원천·Storage·AI·알림 provider를 실행하지 않고 pure fixture와 전체 검증을 통과했다: domain `70/70`, production `827/827`, build `421 modules`·main `928.62 kB`·lazy `12/12`.
+- 4-3o는 branch/PR/exact-head CI까지 닫고, Vercel 무료 일일 배포 한도 해소 전 main 병합·운영 배포는 보류한다. 이후 4-3p 시험분석 read route로 이어간다.
+
 ## 2026-08-05 체크박스 표시 보정
 
 - 오늘 추가된 수업일정표 PDF 옵션과 신입생 보강 알림 체크박스를 화면 범위 CSS로 `16×16px`에 고정했다.
@@ -19,8 +25,8 @@
 - `/api/test-sessions` POST/DELETE의 payload alias/delete selector와 source response를 `testSessionWriteRouteRegistry`로 이동했다.
 - DB write/readback/delete는 core data owner다. pure fixture만 실행했고 운영 DB·Storage·provider는 사용하지 않았다.
 - 전체 검증은 domain 69/69, scenario·production 827/827, build 418 modules·main 944.65 kB·lazy 12/12를 통과했다. registry 19 + 직접 route 101 = 전역 120이다.
-- 4-3m main `6bb35e06` GitHub CI는 성공했지만 Vercel 24시간 build rate limit로 production은 4-3l에 머문다. 4-3n은 push/CI 후 Vercel green 전 main 병합을 보류한다.
-- 다음은 배포 gate 해소 뒤 integrations status GET route를 별도 registry로 분리한다.
+- 4-3n은 main `f270f2cc`에 반영됐고 최신 main `e4b1eab1`의 GitHub CI도 성공했다. 최신 production 배포는 Vercel 무료 일일 배포 한도로 보류됐다.
+- 다음은 4-3o main·배포가 닫힌 뒤 시험분석 read route를 별도 registry로 분리한다.
 
 ## 2026-08-05 App/API 4차 리팩터링 4-3m test session read registry
 

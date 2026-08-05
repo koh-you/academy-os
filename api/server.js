@@ -125,6 +125,7 @@ import { createAppStateWriteRouteRegistry } from "../src/shared/server/appStateW
 import { createReportSnapshotRouteRegistry } from "../src/shared/server/reportSnapshotRouteRegistry.js";
 import { createTestSessionReadRouteRegistry } from "../src/shared/server/testSessionReadRouteRegistry.js";
 import { createTestSessionWriteRouteRegistry } from "../src/shared/server/testSessionWriteRouteRegistry.js";
+import { createIntegrationStatusRouteRegistry } from "../src/shared/server/integrationStatusRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -298,6 +299,11 @@ const { dispatch: dispatchTestSessionWriteRoute } = createTestSessionWriteRouteR
   readJsonBody,
   sendJson,
   upsertTestSessionWithAttempts
+});
+const { dispatch: dispatchIntegrationStatusRoute } = createIntegrationStatusRouteRegistry({
+  getAiStatus,
+  getNotificationStatus,
+  sendJson
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5895,17 +5901,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchReportSnapshotRoute({ request, response, requestUrl })) return;
   if (await dispatchTestSessionReadRoute({ request, response, requestUrl })) return;
   if (await dispatchTestSessionWriteRoute({ request, response, requestUrl })) return;
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/integrations/status") {
-    sendJson(request, response, 200, {
-      ok: true,
-      result: {
-        ai: getAiStatus(),
-        notifications: getNotificationStatus()
-      }
-    });
-    return;
-  }
+  if (await dispatchIntegrationStatusRoute({ request, response, requestUrl })) return;
 
   if (request.method === "GET" && requestUrl.pathname === "/api/exam-analysis-runs") {
     try {

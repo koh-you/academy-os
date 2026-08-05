@@ -218,4 +218,5 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 - 4-3l: report snapshot POST의 teacher guard→versioned parser→verified persistence service→응답 조립을 frozen registry로 이동했다. AppState read/CAS/readback과 retry owner는 기존 domain/server에 유지한다.
 - 4-3m: test session/attempt GET 두 개의 query alias/filter→source read→응답 조립을 frozen registry로 이동했다. Supabase read owner는 core data에 유지한다.
 - 4-3n: test session POST/DELETE의 canonical·legacy payload/selector→core data action→응답 조립을 frozen registry로 이동했다. DB write/readback/delete owner는 core data에 유지한다.
-- 다음 4-3o는 Vercel rate-limit gate 해소 뒤 integrations status GET 경계를 분리한다.
+- 4-3o: integrations status GET의 method/path와 AI·알림 status response 조립을 frozen registry로 분리했다. 실제 status 계산과 provider 설정 owner는 기존 integration module에 유지한다.
+- 다음 4-3p는 4-3o main·배포가 닫힌 뒤 시험분석 read route 경계를 분리한다.
