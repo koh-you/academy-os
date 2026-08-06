@@ -6885,6 +6885,7 @@ const server = http.createServer(async (request, response) => {
         error: error.message,
         ...(error.code ? { code: error.code } : {}),
         ...(error.field ? { field: error.field } : {}),
+        ...(error.currentHomework ? { currentHomework: error.currentHomework } : {}),
         ...(error.audit ? { audit: error.audit } : {})
       });
     }

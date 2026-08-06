@@ -106,6 +106,10 @@ const lessonJournalRowsRouteSource = serverSource.slice(routeStart, routeEnd);
 assert.ok(routeStart >= 0 && routeEnd > routeStart);
 assert.match(lessonJournalRowsRouteSource, /parseVersionedWriteRequest\(/);
 assert.match(lessonJournalRowsRouteSource, /error\.field \? \{ field: error\.field \}/);
+assert.match(
+  lessonJournalRowsRouteSource,
+  /error\.currentHomework \? \{ currentHomework: error\.currentHomework \}/
+);
 
 const originalEnv = {
   SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,

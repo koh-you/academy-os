@@ -10,6 +10,22 @@ export function mergeVerifiedLessonJournalHomeworks({
   );
 }
 
+export function mergeCreatedLessonJournalHomeworkConflict({
+  conflictHomework = null,
+  currentHomeworks = []
+} = {}) {
+  if (!conflictHomework?.homeworkId) {
+    return { homeworks: currentHomeworks, recovered: false };
+  }
+  if (currentHomeworks.some((homework) => homework.homeworkId === conflictHomework.homeworkId)) {
+    return { homeworks: currentHomeworks, recovered: false };
+  }
+  return {
+    homeworks: [conflictHomework, ...currentHomeworks],
+    recovered: true
+  };
+}
+
 export function mergeVerifiedLessonJournalMakeupTasks({
   currentTasks = [],
   verifiedTasks = [],
