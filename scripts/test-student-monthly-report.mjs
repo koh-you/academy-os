@@ -53,6 +53,8 @@ assert.ok(!model.changeRows.some((row) => row.lessonId === "regular_wed"), "개�
 
 const parentText = buildStudentMonthlyReportText(model, { audience: "parent", note: "8월 마지막 주부터 일정이 달라집니다." });
 assert.match(parentText, /강민준 2026년 8월 수업 안내/);
+assert.doesNotMatch(parentText, /예정 4회 · 출결 확인 2회 · 변동/);
+assert.doesNotMatch(parentText, /출결 미입력/);
 assert.match(parentText, /■ 예정 수업/);
 assert.match(parentText, /■ 실제 출결/);
 assert.match(parentText, /■ 변동사항/);
@@ -62,6 +64,7 @@ assert.doesNotMatch(parentText, /개별 스케줄/);
 const directorText = buildStudentMonthlyReportText(model, { audience: "director" });
 assert.match(directorText, /창동중 · 중3 · 월금 17:00-19:00/);
 assert.match(directorText, /월수금 앞반/);
+assert.doesNotMatch(directorText, /출결 미입력/);
 
 const printedHtml = [];
 globalThis.window = {
@@ -73,6 +76,7 @@ globalThis.window = {
 openStudentMonthlyReportPdf(model, { audience: "director", note: "원장님 확인용" });
 assert.equal(printedHtml.length, 1);
 assert.doesNotMatch(printedHtml[0], /학부모용 간단본|원장님용 상세본/);
+assert.doesNotMatch(printedHtml[0], /class="summary"|출결 미입력|미입력 0/);
 assert.match(printedHtml[0], /월간 달력/);
 assert.match(printedHtml[0], /수업·출결 표/);
 assert.match(printedHtml[0], /변동사항/);

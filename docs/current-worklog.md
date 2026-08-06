@@ -2,6 +2,11 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-06 수업일정표 출력 간소화
+
+- 수업일정표 달력·표·복사 문구·PDF의 미입력 출결 문구를 빈 표시로 바꾸고, 미리보기와 PDF 상단 3칸 요약을 제거했다.
+- 입력된 출결·수업·변동 데이터는 유지한다. 전용 fixture, student `15/15`, lint, build `421 modules`·main `928.62 kB`, 집중 safe browser `1/1` 통과.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3o integrations status registry
 
 - `GET /api/integrations/status`의 route match와 AI·알림 status response 조립을 frozen registry로 이동했다. 실제 status 계산과 provider 설정 owner는 기존 integration module에 유지한다.
