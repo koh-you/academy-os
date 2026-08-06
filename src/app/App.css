@@ -12942,29 +12942,6 @@ textarea {
   margin: 0;
 }
 
-.studentMonthlyReportSummary {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.studentMonthlyReportSummary > div {
-  align-items: center;
-  background: #f1f6ff;
-  border: 1px solid #d6e4fb;
-  border-radius: 9px;
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  min-height: 56px;
-}
-
-.studentMonthlyReportSummary strong {
-  color: #1d4ed8;
-  font-size: 18px;
-}
-
-.studentMonthlyReportSummary span,
 .studentMonthlyReportAttendanceCounts {
   color: #52647c;
   font-size: 12px;
@@ -13209,17 +13186,6 @@ textarea {
 
   .studentMonthlyReportPreview > header {
     display: grid;
-  }
-
-  .studentMonthlyReportSummary {
-    gap: 6px;
-  }
-
-  .studentMonthlyReportSummary > div {
-    display: grid;
-    gap: 0;
-    min-height: 62px;
-    text-align: center;
   }
 
   .studentMonthlyReportRow {

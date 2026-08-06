@@ -2261,12 +2261,15 @@ test("student lesson schedule previews calendar table and selectable PDF section
   await expect(reportPreview.getByRole("grid", { name: "월간 수업 달력" })).toBeVisible();
   await expect(reportPreview.getByRole("table")).toContainText("수업");
   await expect(reportPreview).toContainText("변동사항");
+  await expect(reportPreview.locator(".studentMonthlyReportSummary")).toHaveCount(0);
+  await expect(reportPreview).not.toContainText("출결 미입력");
 
   await previewDialog.getByRole("checkbox", { name: "상세 정보 표시" }).check();
   await expect(previewDialog.getByRole("checkbox", { name: "상세 정보 표시" })).toHaveCSS("width", "16px");
   await expect(previewDialog.getByRole("checkbox", { name: "달력" })).toHaveCSS("height", "16px");
   await expect(reportPreview).toContainText("개별 스케줄");
-  await expect(reportPreview).toContainText(/출석 \d+ · 지각 \d+ · 결석 \d+ · 미입력 \d+/);
+  await expect(reportPreview).toContainText(/출석 \d+ · 지각 \d+ · 결석 \d+/);
+  await expect(reportPreview).not.toContainText(/미입력 \d+/);
   await reportPreview.getByRole("textbox").fill("8월 변동 일정 확인용");
 
   await page.evaluate(() => {
@@ -2277,7 +2280,10 @@ test("student lesson schedule previews calendar table and selectable PDF section
   });
   await previewDialog.getByRole("button", { name: "일정표 내용 복사" }).click();
   await expect(previewDialog.getByRole("status")).toContainText("내용을 복사했습니다");
-  expect(await page.evaluate(() => window.__studentMonthlyReportCopiedText)).toContain("원장님 공유 메모");
+  const copiedText = await page.evaluate(() => window.__studentMonthlyReportCopiedText);
+  expect(copiedText).toContain("원장님 공유 메모");
+  expect(copiedText).not.toContain("출결 미입력");
+  expect(copiedText).not.toContain("예정 4회 · 출결 확인");
 
   await previewDialog.getByRole("checkbox", { name: "달력" }).uncheck();
   await previewDialog.getByRole("checkbox", { name: "변동사항" }).uncheck();
@@ -2289,6 +2295,9 @@ test("student lesson schedule previews calendar table and selectable PDF section
   await expect(reportPage.getByRole("heading", { name: "수업·출결 표" })).toBeVisible();
   await expect(reportPage.getByRole("heading", { name: "월간 달력" })).toHaveCount(0);
   await expect(reportPage.getByRole("heading", { name: "변동사항" })).toHaveCount(0);
+  await expect(reportPage.locator(".summary")).toHaveCount(0);
+  await expect(reportPage.locator("body")).not.toContainText("출결 미입력");
+  await expect(reportPage.locator("body")).not.toContainText(/미입력 \d+/);
   await expect(reportPage.getByText("8월 변동 일정 확인용", { exact: true })).toBeVisible();
   await reportPage.close();
   expect(pageErrors).toEqual([]);

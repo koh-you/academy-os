@@ -4,6 +4,7 @@ import { ModalFooter } from "../../shared/components/Modal.jsx";
 import {
   buildStudentMonthlyReportModel,
   buildStudentMonthlyReportText,
+  formatStudentMonthlyReportAttendance,
   openStudentMonthlyReportPdf
 } from "./studentMonthlyReport.js";
 
@@ -11,20 +12,23 @@ function ReportRows({ detailed = false, emptyText, rows = [], showAttendance = f
   if (!rows.length) return <p className="studentMonthlyReportEmpty">{emptyText}</p>;
   return (
     <div className="studentMonthlyReportRows">
-      {rows.map((row) => (
-        <article className="studentMonthlyReportRow" key={`${row.lessonId}_${showReason ? "change" : "lesson"}`}>
-          <div>
-            <strong>{row.dateLabel}</strong>
-            <span>{row.timeLabel}</span>
-          </div>
-          <div>
-            <strong>{row.typeLabel}</strong>
-            {detailed && row.className !== row.typeLabel ? <span>{row.className}</span> : null}
-          </div>
-          {showAttendance ? <b className={`studentMonthlyReportStatus status-${row.attendance === "출석" ? "present" : row.attendance === "출결 미입력" ? "pending" : "attention"}`}>{row.attendance}</b> : null}
-          {showReason ? <b className="studentMonthlyReportChangeReason">{row.changeReason}</b> : null}
-        </article>
-      ))}
+      {rows.map((row) => {
+        const attendance = formatStudentMonthlyReportAttendance(row.attendance);
+        return (
+          <article className="studentMonthlyReportRow" key={`${row.lessonId}_${showReason ? "change" : "lesson"}`}>
+            <div>
+              <strong>{row.dateLabel}</strong>
+              <span>{row.timeLabel}</span>
+            </div>
+            <div>
+              <strong>{row.typeLabel}</strong>
+              {detailed && row.className !== row.typeLabel ? <span>{row.className}</span> : null}
+            </div>
+            {showAttendance && attendance ? <b className={`studentMonthlyReportStatus status-${row.attendance === "출석" ? "present" : "attention"}`}>{attendance}</b> : null}
+            {showReason ? <b className="studentMonthlyReportChangeReason">{row.changeReason}</b> : null}
+          </article>
+        );
+      })}
     </div>
   );
 }
@@ -36,13 +40,16 @@ function ReportCalendar({ detailed = false, weeks = [] }) {
       {weeks.flat().map((cell, index) => cell ? (
         <div className="studentMonthlyReportCalendarDay" key={cell.date} role="gridcell">
           <strong>{cell.day}</strong>
-          {cell.rows.map((row) => (
-            <div className={`studentMonthlyReportCalendarLesson${row.isCanceled ? " canceled" : ""}`} key={row.lessonId}>
-              <span>{row.startTime || "--:--"} · {row.typeLabel}</span>
-              {detailed && row.className !== row.typeLabel ? <small>{row.className}</small> : null}
-              <small>{row.attendance}{row.changeReason ? ` · ${row.changeReason}` : ""}</small>
-            </div>
-          ))}
+          {cell.rows.map((row) => {
+            const detail = [formatStudentMonthlyReportAttendance(row.attendance), row.changeReason].filter(Boolean).join(" · ");
+            return (
+              <div className={`studentMonthlyReportCalendarLesson${row.isCanceled ? " canceled" : ""}`} key={row.lessonId}>
+                <span>{row.startTime || "--:--"} · {row.typeLabel}</span>
+                {detailed && row.className !== row.typeLabel ? <small>{row.className}</small> : null}
+                {detail ? <small>{detail}</small> : null}
+              </div>
+            );
+          })}
         </div>
       ) : <div aria-hidden="true" className="studentMonthlyReportCalendarDay outside" key={`outside-${index}`} />)}
     </div>
@@ -55,15 +62,18 @@ function ReportTable({ detailed = false, rows = [] }) {
       <table className="studentMonthlyReportTable">
         <thead><tr><th>날짜</th><th>시간</th><th>수업</th><th>출결</th><th>변동</th></tr></thead>
         <tbody>
-          {rows.length ? rows.map((row) => (
-            <tr key={row.lessonId}>
-              <td>{row.dateLabel}</td>
-              <td>{row.timeLabel}</td>
-              <td>{row.typeLabel}{detailed && row.className !== row.typeLabel ? <small>{row.className}</small> : null}</td>
-              <td><b className={`studentMonthlyReportStatus status-${row.attendance === "출석" ? "present" : row.attendance === "출결 미입력" ? "pending" : "attention"}`}>{row.attendance}</b></td>
-              <td>{row.changeReason || "-"}</td>
-            </tr>
-          )) : <tr><td colSpan="5">표시할 수업이 없습니다.</td></tr>}
+          {rows.length ? rows.map((row) => {
+            const attendance = formatStudentMonthlyReportAttendance(row.attendance);
+            return (
+              <tr key={row.lessonId}>
+                <td>{row.dateLabel}</td>
+                <td>{row.timeLabel}</td>
+                <td>{row.typeLabel}{detailed && row.className !== row.typeLabel ? <small>{row.className}</small> : null}</td>
+                <td>{attendance ? <b className={`studentMonthlyReportStatus status-${row.attendance === "출석" ? "present" : "attention"}`}>{attendance}</b> : null}</td>
+                <td>{row.changeReason || "-"}</td>
+              </tr>
+            );
+          }) : <tr><td colSpan="5">표시할 수업이 없습니다.</td></tr>}
         </tbody>
       </table>
     </DataTableShell>
@@ -135,14 +145,9 @@ export function StudentMonthlyReportModal({
           </div>
           {detailed ? <small>개별 스케줄 · {model.student.schedule}</small> : null}
         </header>
-        <div className="studentMonthlyReportSummary">
-          <div><strong>{model.summary.planned}회</strong><span>예정 수업</span></div>
-          <div><strong>{model.summary.actual}회</strong><span>출결 확인</span></div>
-          <div><strong>{model.summary.changes}건</strong><span>변동사항</span></div>
-        </div>
         {detailed ? (
           <p className="studentMonthlyReportAttendanceCounts">
-            출석 {model.attendance.present} · 지각 {model.attendance.late} · 결석 {model.attendance.absent} · 미입력 {model.attendance.pending}
+            출석 {model.attendance.present} · 지각 {model.attendance.late} · 결석 {model.attendance.absent}
           </p>
         ) : null}
         <section>
