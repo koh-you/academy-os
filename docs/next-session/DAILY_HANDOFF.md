@@ -2,6 +2,11 @@
 
 업데이트: 2026-08-06
 
+## 2026-08-06 Tally 기존 학생 반영 문구 단순화
+
+- 기존 학생 Tally 반영 선택지를 `기존 정보에 Tally 내용 추가`와 `Tally 내용으로 기본정보 교체`로 단순화했다.
+- 학생 저장·기본정보 교체·명단 재조회 동작은 그대로 유지한다.
+
 ## 2026-08-06 App/API 4차 리팩터링 4-3r exam analysis question count registry
 
 - 시험분석 문항 수 사람 확정 POST의 body→contract parser→DB action→response 조립을 `examAnalysisQuestionCountRouteRegistry`로 이동했다. 문항 row/run/event 저장과 Supabase 재조회 owner는 유지한다.

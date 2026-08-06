@@ -209,6 +209,10 @@ test("Tally candidate rapid edits serialize, rebase CAS, and persist the verifie
   await studentModal.getByRole("button", { name: "Tally 접수" }).click();
   const candidateList = studentModal.getByRole("region", { name: "Tally 접수·등록 후보 목록" });
   const learningProcessInput = candidateList.getByLabel("현재 학습 과정");
+  await candidateList.getByLabel("Tally 반영 대상").selectOption({ index: 1 });
+  await expect(candidateList.getByText(/학생이 이미 등록되어 있습니다\. Tally 답변을 어떻게 반영할까요\?/)).toBeVisible();
+  await expect(candidateList.getByRole("button", { name: "기존 정보에 Tally 내용 추가" })).toBeVisible();
+  await expect(candidateList.getByRole("button", { name: "Tally 내용으로 기본정보 교체" })).toBeVisible();
 
   await learningProcessInput.fill("직렬화 첫 입력");
   await expect.poll(() => requests.length).toBe(1);

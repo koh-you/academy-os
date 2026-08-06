@@ -2,6 +2,11 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-06 Tally 기존 학생 반영 문구 단순화
+
+- `빈칸 유지·보강`, `기존 기본정보 삭제 후 덮어쓰기` 표현을 각각 `기존 정보에 Tally 내용 추가`, `Tally 내용으로 기본정보 교체`로 바꿨다.
+- 선택 안내·진행·완료 메시지를 같은 용어로 통일했고 저장 로직은 변경하지 않았다.
+
 ## 2026-08-06 App/API 4차 리팩터링 4-3r exam analysis question count registry
 
 - 시험분석 문항 수 사람 확정 POST의 method/path, body read→contract parse→DB action과 성공/구조화 오류 응답을 frozen registry로 이동했다. 문항 row 생성, run 상태·event 저장과 Supabase 재조회는 기존 owner에 유지한다.

@@ -5295,11 +5295,11 @@ export function App() {
         [applicantId]: targetStudentId
           ? replaceExisting
             ? savedStudent.defaultClassTemplateId
-              ? "기존 기본정보 삭제 후 Tally 덮어쓰기와 미래 수업 명단 반영 확인 완료"
-              : "기존 기본정보 삭제 후 Tally 덮어쓰기 완료 · 정규반 미배정"
+              ? "Tally 내용으로 기본정보 교체 및 미래 수업 명단 반영 완료"
+              : "Tally 내용으로 기본정보 교체 완료 · 정규반 미배정"
             : savedStudent.defaultClassTemplateId
-              ? "기존 학생 Tally 정보와 미래 수업 명단 반영 확인 완료"
-              : "기존 학생 Tally 정보 반영 완료 · 정규반 미배정"
+              ? "기존 정보에 Tally 내용 추가 및 미래 수업 명단 반영 완료"
+              : "기존 정보에 Tally 내용 추가 완료 · 정규반 미배정"
           : savedStudent.defaultClassTemplateId
             ? "학생명단과 미래 수업 명단 반영 확인 완료"
             : "학생명단 반영 완료 · 정규반 미배정"
@@ -9217,14 +9217,14 @@ function StudentModal({
         </label>
         {targetStudent ? (
           <div>
-            <strong>기존 학생 반영 방식을 선택합니다</strong>
+            <strong>{targetStudent.name} 학생이 이미 등록되어 있습니다. Tally 답변을 어떻게 반영할까요?</strong>
             <span>
               {changes.length
-                ? `빈칸 보존·보강 시 변경: ${changes.map((change) => change.label).join(", ")}`
+                ? `기존 정보에 추가되는 내용: ${changes.map((change) => change.label).join(", ")}`
                 : "학생 기본정보가 이미 Tally와 같습니다."}
             </span>
             <small>
-              완전 덮어쓰기 시 Tally 빈칸으로 삭제: {clearedLabels.length ? clearedLabels.join(", ") : "없음"} · 학생 ID/로그인/PIN과 과거 수업·출결은 유지
+              기본정보 교체 시 비워지는 항목: {clearedLabels.length ? clearedLabels.join(", ") : "없음"} · 학생 ID/로그인/PIN과 과거 수업·출결은 유지
             </small>
           </div>
         ) : (
@@ -9374,7 +9374,7 @@ function StudentModal({
                         onClick={() => registerApplicant(applicant)}
                         type="button"
                       >
-                        {applicantRegistrationStates[applicant.applicantId] === "saving" ? "반영 중" : "빈칸 유지하고 보강"}
+                        {applicantRegistrationStates[applicant.applicantId] === "saving" ? "추가 중" : "기존 정보에 Tally 내용 추가"}
                       </button>
                       <button
                         className="dangerButton"
@@ -9382,7 +9382,7 @@ function StudentModal({
                         onClick={() => registerApplicant(applicant, { replaceExisting: true })}
                         type="button"
                       >
-                        {applicantRegistrationStates[applicant.applicantId] === "saving" ? "덮어쓰기 중" : "기존 기본정보 삭제 후 Tally 덮어쓰기"}
+                        {applicantRegistrationStates[applicant.applicantId] === "saving" ? "교체 중" : "Tally 내용으로 기본정보 교체"}
                       </button>
                     </div>
                   ) : (
