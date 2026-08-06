@@ -12943,14 +12943,11 @@ textarea {
 }
 
 .studentMonthlyReportAttendanceCounts {
+  background: #f8fafc;
+  border-radius: 8px;
   color: #52647c;
   font-size: 12px;
   font-weight: 800;
-}
-
-.studentMonthlyReportAttendanceCounts {
-  background: #f8fafc;
-  border-radius: 8px;
   margin: -6px 0 0;
   padding: 9px 12px;
   text-align: center;
