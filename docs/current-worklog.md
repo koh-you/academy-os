@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-06 App/API 4차 리팩터링 4-3 종료 감사
+
+- 공통 HTTP/session adapter와 15개 frozen registry의 24 route를 exact inventory로 고정했다. 전역 120 route와 GET 31/POST 76/DELETE 13, route order hash는 유지한다.
+- 남은 direct route는 DB/source read 16, Storage/Solapi 외부 read 5, DB/source action 52, Storage·Tally·AI·Solapi/Slack·seed 외부 write 23으로 분류했다. 4-4/4-5 owner 분리 전 억지 이동이나 실제 side effect는 실행하지 않았다.
+- domain `70/70`, scenario·production `827/827`, build `421 modules`·main `928.62 kB`·lazy `12/12`를 통과했다. runtime 변경이 없는 감사 단위라 exact-head CI의 전체 safe browser를 최종 gate로 둔다.
+- 사용자의 범위 변경에 따라 4-3을 닫고 4-4 이후는 2026-08-12 이후 명시적 재개 요청까지 보류한다. 기준은 `docs/app-refactor-fourth-pass-server-route-closeout.md`다.
+
 ## 2026-08-06 Tally 기존 학생 반영 문구 단순화
 
 - `빈칸 유지·보강`, `기존 기본정보 삭제 후 덮어쓰기` 표현을 각각 `기존 정보에 Tally 내용 추가`, `Tally 내용으로 기본정보 교체`로 바꿨다.

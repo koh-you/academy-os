@@ -26,6 +26,9 @@
 
 ## 4차 리팩터링 현재 단위
 
+- 4-3 종료 감사는 frozen registry 24개 route와 남은 DB/source read 16·외부 read 5·DB/source action 52·외부 write 23개를 exact 분류했다. 공통 HTTP/session 경계, route 순서와 owner 분리는 완료했고 남은 source/provider action 이동은 각각 4-4/4-5 입력으로 고정한다.
+- 종료 감사 검증은 domain `70/70`, scenario·production `827/827`, build `421 modules`·main `928.62 kB`·lazy `12/12`를 통과했다. 제품 runtime 변경이 없어 로컬 browser 중복은 생략하고 exact-head CI 전체 safe browser를 release gate로 사용한다.
+- 사용자의 2026-08-06 요청에 따라 4-3을 여기서 닫고 4-4 이후는 시작하지 않는다. 2026-08-12 이후 명시적 재개 요청 때 최신 main에서 새 branch로 이어가며 자동 재개 일정은 만들지 않았다.
 - 4-3r은 `POST /api/exam-analysis-runs/confirm-question-count`의 body read, 사람 확정 payload parser, DB action 호출과 200/structured error 응답 조립을 `examAnalysisQuestionCountRouteRegistry`로 옮겼다. 문항 row 생성·run 상태/이벤트 저장·Supabase 재조회 owner는 기존 pipeline module에 유지한다.
 - 전용 pure fixture와 기존 question-count contract로 비대상 route, read→parse→confirm 순서, source readback, 400 code/field와 500 오류를 고정했다. registry 24 + 직접 route 96으로 전역 120을 유지하며 운영 DB write·Storage·유료 AI·provider 호출은 실행하지 않았다.
 - 검증은 domain `70/70`, scenario·production `827/827`, build `421 modules`·main `928.62 kB`·lazy `12/12`, 집중 safe browser `1/1`을 통과했다.
@@ -36,7 +39,7 @@
 - 검증은 domain `70/70`, scenario·production `827/827`, build `421 modules`·main `928.62 kB`·lazy `12/12`, 실제 local API 쎈 catalog GET을 통과했다. registry 22 + 직접 route 98로 전역 120을 유지하며 DB write·Storage·유료 AI·provider 호출은 실행하지 않았다.
 - 4-3o는 `GET /api/integrations/status`의 method/path와 AI·알림 상태 응답 조립을 `src/shared/server/integrationStatusRouteRegistry.js`로 옮겼다. 상태 계산과 provider 설정 owner는 기존 integration module에 유지한다. 통합 commit `3079e685`는 최신 main `95d0b1f1`에 포함됐고 main CI·Vercel·health/core/integrations 읽기 전용 smoke가 성공했다.
 - 4-3n은 test session POST/DELETE의 canonical·legacy payload alias, delete selector와 source action 응답을 `src/shared/server/testSessionWriteRouteRegistry.js`로 옮겼다. DB 저장·재조회/삭제 owner는 core data에 유지한다.
-- 다음 4-3s는 유료 AI 경계를 건너뛰고 시험분석 교사 문항 검토 저장 POST 경계를 작은 단위로 분리한다. AI detect/fill/refine route는 4-5 provider 외부 side-effect 단계까지 이동을 보류한다.
+- 4-3 종료 기준과 잔여 분류는 `docs/app-refactor-fourth-pass-server-route-closeout.md`와 `test:fourth-pass-server-route-closeout`이 고정한다.
 - 4-3m은 test session/attempt GET 두 개의 query alias/filter, source response와 실패 응답을 `src/shared/server/testSessionReadRouteRegistry.js`로 옮겼다. Supabase read owner는 기존 `listTestSessions/listTestAttempts`에 유지한다.
 - 4-3l은 teacher-authenticated report snapshot POST의 guard, versioned parser와 report persistence service 조립을 `src/shared/server/reportSnapshotRouteRegistry.js`로 옮겼다. AppState CAS/readback·재시도 검증은 기존 domain/server owner에 유지한다.
 - 4-3k는 app-state POST의 versioned parser, 보호 key 제외, `expectedUpdatedAt` CAS option과 오류 응답을 `src/shared/server/appStateWriteRouteRegistry.js`로 옮겼다. Supabase write/readback owner는 server의 `upsertAppState`에 유지한다.
