@@ -69,16 +69,35 @@ assert.match(directorText, /월수금 앞반/);
 assert.doesNotMatch(directorText, /출결 미입력/);
 
 const printedHtml = [];
+const manualPrintHandlers = [];
+let printCalls = 0;
 globalThis.window = {
-  open: () => ({
-    document: { close() {}, write: (html) => printedHtml.push(html) },
-    opener: "origin"
-  })
+  open: () => {
+    const popup = {
+      document: {
+        close() {},
+        getElementById: () => ({
+          addEventListener: (_eventName, handler) => manualPrintHandlers.push(handler)
+        }),
+        open() {},
+        write: (html) => printedHtml.push(html)
+      },
+      focus() {},
+      opener: "origin",
+      print: () => { printCalls += 1; }
+    };
+    return popup;
+  }
 };
 openStudentMonthlyReportPdf(model, { audience: "director", note: "원장님 확인용" });
 assert.equal(printedHtml.length, 1);
+assert.equal(printCalls, 1);
+assert.equal(manualPrintHandlers.length, 1);
+manualPrintHandlers[0]();
+assert.equal(printCalls, 2);
 assert.doesNotMatch(printedHtml[0], /학부모용 간단본|원장님용 상세본/);
 assert.doesNotMatch(printedHtml[0], /class="summary"|출결 미입력|미입력 0/);
+assert.match(printedHtml[0], />인쇄하기<\/button>/);
 assert.match(printedHtml[0], /월간 달력/);
 assert.match(printedHtml[0], /수업·출결 표/);
 assert.match(printedHtml[0], /변동사항/);
@@ -88,6 +107,7 @@ openStudentMonthlyReportPdf(model, {
   sections: { calendar: false, changes: false, table: true }
 });
 assert.equal(printedHtml.length, 2);
+assert.equal(printCalls, 3);
 assert.doesNotMatch(printedHtml[1], /<h2>월간 달력<\/h2>/);
 assert.match(printedHtml[1], /<h2>수업·출결 표<\/h2>/);
 assert.doesNotMatch(printedHtml[1], /<h2>변동사항<\/h2>/);

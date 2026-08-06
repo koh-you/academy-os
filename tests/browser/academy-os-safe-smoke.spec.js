@@ -2395,6 +2395,15 @@ test("student lesson schedule previews calendar table and selectable PDF section
   const reportPage = await popupPromise;
   await reportPage.waitForLoadState();
   await expect(reportPage.getByRole("heading", { name: /정산 미리보기 학생 2026년 8월 월간 수업 안내/ })).toBeVisible();
+  const printButton = reportPage.getByRole("button", { name: "인쇄하기" });
+  await expect(printButton).toBeVisible();
+  await reportPage.evaluate(() => {
+    window.print = () => {
+      window.__studentMonthlyReportManualPrintCalls = (window.__studentMonthlyReportManualPrintCalls ?? 0) + 1;
+    };
+  });
+  await printButton.click();
+  await expect.poll(() => reportPage.evaluate(() => window.__studentMonthlyReportManualPrintCalls ?? 0)).toBe(1);
   await expect(reportPage.getByRole("heading", { name: "수업·출결 표" })).toBeVisible();
   await expect(reportPage.getByRole("heading", { name: "월간 달력" })).toHaveCount(0);
   await expect(reportPage.getByRole("heading", { name: "변동사항" })).toHaveCount(0);
