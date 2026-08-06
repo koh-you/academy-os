@@ -128,6 +128,7 @@ import { createTestSessionWriteRouteRegistry } from "../src/shared/server/testSe
 import { createIntegrationStatusRouteRegistry } from "../src/shared/server/integrationStatusRouteRegistry.js";
 import { createExamAnalysisReadRouteRegistry } from "../src/shared/server/examAnalysisReadRouteRegistry.js";
 import { createExamAnalysisRunWriteRouteRegistry } from "../src/shared/server/examAnalysisRunWriteRouteRegistry.js";
+import { createExamAnalysisQuestionCountRouteRegistry } from "../src/shared/server/examAnalysisQuestionCountRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -318,6 +319,12 @@ const { dispatch: dispatchExamAnalysisRunWriteRoute } = createExamAnalysisRunWri
   readJsonBody,
   sendJson,
   upsertExamAnalysisRun
+});
+const { dispatch: dispatchExamAnalysisQuestionCountRoute } = createExamAnalysisQuestionCountRouteRegistry({
+  confirmExamAnalysisQuestionCount,
+  parseExamAnalysisQuestionCountConfirmRequest,
+  readJsonBody,
+  sendJson
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5918,22 +5925,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchIntegrationStatusRoute({ request, response, requestUrl })) return;
   if (await dispatchExamAnalysisReadRoute({ request, response, requestUrl })) return;
   if (await dispatchExamAnalysisRunWriteRoute({ request, response, requestUrl })) return;
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/confirm-question-count") {
-    try {
-      const payload = parseExamAnalysisQuestionCountConfirmRequest(await readJsonBody(request));
-      const result = await confirmExamAnalysisQuestionCount(payload);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, Number(error.statusCode) || 500, {
-        ok: false,
-        error: error.message,
-        ...(error.code ? { code: error.code } : {}),
-        ...(error.field !== undefined ? { field: error.field } : {})
-      });
-    }
-    return;
-  }
+  if (await dispatchExamAnalysisQuestionCountRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/detect-question-boundaries") {
     try {

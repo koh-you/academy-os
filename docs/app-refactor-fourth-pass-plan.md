@@ -221,4 +221,5 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 - 4-3o: integrations status GET의 method/path와 AI·알림 status response 조립을 frozen registry로 분리했다. 실제 status 계산과 provider 설정 owner는 기존 integration module에 유지한다.
 - 4-3p: exam-analysis run 목록/상세와 쎈 catalog GET의 query alias→source 선택→응답 조립을 frozen registry로 이동했다. Supabase read와 쎈 selector owner는 기존 module/server에 유지한다.
 - 4-3q: exam-analysis run metadata POST의 body→contract parser→Supabase action→success/structured error 조립을 frozen registry로 이동했다. parser와 DB upsert/readback owner는 기존 domain/pipeline module에 유지한다.
-- 다음 4-3r은 유료 AI·Storage와 분리된 exam-analysis 문항 수 사람 확정 POST 경계를 작은 단위로 분리한다.
+- 4-3r: exam-analysis 문항 수 사람 확정 POST의 body→contract parser→DB action→success/structured error 조립을 frozen registry로 이동했다. 문항 row/run/event 저장과 Supabase 재조회 owner는 기존 pipeline module에 유지한다.
+- 다음 4-3s는 유료 AI detect/fill/refine route를 4-5까지 보류하고, 교사 문항 검토 저장 POST 경계를 작은 단위로 분리한다.

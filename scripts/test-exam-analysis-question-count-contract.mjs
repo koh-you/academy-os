@@ -7,9 +7,10 @@ import {
 } from "../src/domains/exams/examAnalysisRunApi.js";
 
 const readSource = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
-const [apiSource, appSource, routeSource, safeApiSource, serverSource] = await Promise.all([
+const [apiSource, appSource, routeRegistrySource, routeSource, safeApiSource, serverSource] = await Promise.all([
   readSource("src/domains/exams/examAnalysisRunApi.js"),
   readSource("src/app/App.jsx"),
+  readSource("src/shared/server/examAnalysisQuestionCountRouteRegistry.js"),
   readSource("api/routes/examAnalysisPipeline.js"),
   readSource("scripts/safe-local-api.mjs"),
   readSource("api/server.js")
@@ -91,15 +92,6 @@ for (const expected of [
   assert.ok(appSource.includes(expected), `App question count transport missing ${expected}`);
 }
 
-const serverRouteStart = serverSource.indexOf(
-  'if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/confirm-question-count")'
-);
-const serverRouteEnd = serverSource.indexOf(
-  'if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/detect-question-boundaries")',
-  serverRouteStart
-);
-assert.ok(serverRouteStart >= 0 && serverRouteEnd > serverRouteStart);
-const serverRoute = serverSource.slice(serverRouteStart, serverRouteEnd);
 for (const expected of [
   "parseExamAnalysisQuestionCountConfirmRequest(await readJsonBody(request))",
   "confirmExamAnalysisQuestionCount(payload)",
@@ -107,9 +99,17 @@ for (const expected of [
   "error.code",
   "error.field"
 ]) {
-  assert.ok(serverRoute.includes(expected), `server question count route missing ${expected}`);
+  assert.ok(routeRegistrySource.includes(expected), `server question count route missing ${expected}`);
 }
-assert.equal(serverRoute.includes("payload.confirmedBy || \"teacher\""), false);
+assert.equal(routeRegistrySource.includes("payload.confirmedBy || \"teacher\""), false);
+for (const expected of [
+  "createExamAnalysisQuestionCountRouteRegistry({",
+  "confirmExamAnalysisQuestionCount,",
+  "parseExamAnalysisQuestionCountConfirmRequest,",
+  "await dispatchExamAnalysisQuestionCountRoute({ request, response, requestUrl })"
+]) {
+  assert.ok(serverSource.includes(expected), `question count server injection missing ${expected}`);
+}
 
 for (const expected of [
   "ensure_exam_analysis_question_rows",
