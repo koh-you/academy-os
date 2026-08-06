@@ -16,6 +16,7 @@ const student = {
 const lessons = [
   { lessonId: "regular_mon", classTemplateId: "template_mwf", className: "월수금 앞반", date: "2026-08-03", endTime: "19:00", lessonType: "class", startTime: "16:00", studentIds: [student.studentId] },
   { lessonId: "regular_wed", classTemplateId: "template_mwf", className: "월수금 앞반", date: "2026-08-05", endTime: "19:00", lessonType: "class", startTime: "16:00", studentIds: [student.studentId] },
+  { lessonId: "friday_makeup", className: "결석 보강 · 강민준", date: "2026-08-07", endTime: "14:00", lessonType: "makeup", startTime: "13:00", studentIds: [student.studentId] },
   { lessonId: "regular_fri", classTemplateId: "template_mwf", className: "월수금 앞반", date: "2026-08-07", endTime: "19:00", lessonType: "class", startTime: "16:00", studentIds: [student.studentId] },
   { lessonId: "closure_mon", classTemplateId: "template_mwf", className: "월수금 앞반", date: "2026-08-10", endTime: "19:00", lessonType: "closure", startTime: "16:00", studentIds: [student.studentId] },
   { lessonId: "canceled_fri", classTemplateId: "template_mwf", className: "월수금 앞반", date: "2026-08-14", endTime: "19:00", lessonType: "class", startTime: "16:00", status: "canceled", studentIds: [student.studentId] },
@@ -37,15 +38,16 @@ const model = buildStudentMonthlyReportModel({
 });
 
 assert.equal(model.monthLabel, "2026년 8월");
-assert.deepEqual(model.plannedRows.map((row) => row.lessonId), ["regular_mon", "regular_fri", "special", "one_day"], "개별 월금 스케줄은 수요일 정규 명단을 제외하고 별도 수업은 보존해야 합니다.");
+assert.deepEqual(model.plannedRows.map((row) => row.lessonId), ["regular_mon", "friday_makeup", "regular_fri", "special", "one_day"], "개별 월금 스케줄은 수요일 정규 명단을 제외하고 별도 수업은 보존해야 합니다.");
 assert.deepEqual(model.actualRows.map((row) => row.lessonId), ["regular_mon", "special"], "지난 수업과 기록이 있는 수업만 실제 출결에 표시해야 합니다.");
-assert.equal(model.summary.planned, 4);
+assert.equal(model.summary.planned, 5);
 assert.equal(model.summary.actual, 2);
 assert.equal(model.attendance.present, 1);
 assert.equal(model.attendance.late, 1);
 assert.equal(model.calendarWeeks.length, 6, "2026년 8월은 일요일 시작 6주 달력으로 표시해야 합니다.");
 assert.equal(model.calendarWeeks.flat().find((cell) => cell?.date === "2026-08-26")?.rows[0]?.lessonId, "one_day");
-assert.deepEqual(model.rows.map((row) => row.lessonId), ["regular_mon", "regular_fri", "closure_mon", "canceled_fri", "special", "one_day"]);
+assert.deepEqual(model.rows.map((row) => row.lessonId), ["regular_mon", "friday_makeup", "regular_fri", "closure_mon", "canceled_fri", "special", "one_day"]);
+assert.equal(model.rows.find((row) => row.lessonId === "friday_makeup")?.timeLabel, "13:00-14:00", "보강 자체 시간은 학생의 금요일 정규 시간으로 덮어쓰지 않아야 합니다.");
 assert.ok(model.changeRows.some((row) => row.lessonId === "one_day" && row.changeReason === "보강·추가 수업"));
 assert.ok(model.changeRows.some((row) => row.lessonId === "canceled_fri" && row.changeReason === "취소된 수업"));
 assert.ok(model.changeRows.some((row) => row.lessonId === "closure_mon" && row.changeReason === "휴강"));

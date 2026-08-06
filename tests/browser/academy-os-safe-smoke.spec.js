@@ -2335,3 +2335,54 @@ test("student lesson schedule previews calendar table and selectable PDF section
   await reportPage.close();
   expect(pageErrors).toEqual([]);
 });
+
+test("student lesson schedule keeps a Friday makeup lesson's own time", async ({ page }) => {
+  await page.route("**/api/students", async (route) => {
+    const response = await route.fetch();
+    const body = await response.json();
+    await route.fulfill({
+      response,
+      json: {
+        ...body,
+        students: body.students.map((student) => student.studentId === "safe-settlement-student"
+          ? { ...student, scheduleOverride: "금 17:00-19:00" }
+          : student)
+      }
+    });
+  });
+  await page.route("**/api/lessons**", async (route) => {
+    const response = await route.fetch();
+    const body = await response.json();
+    await route.fulfill({
+      response,
+      json: {
+        ...body,
+        lessons: [
+          ...body.lessons,
+          {
+            className: "결석 보강 · 정산 미리보기 학생",
+            date: "2026-08-07",
+            endTime: "14:00",
+            lessonId: "safe-settlement-friday-makeup",
+            lessonType: "makeup",
+            startTime: "13:00",
+            status: "scheduled",
+            studentIds: ["safe-settlement-student"]
+          }
+        ]
+      }
+    });
+  });
+  await loginAsTeacher(page);
+
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
+  await page.getByRole("button", { name: /정산 미리보기 학생$/ }).click();
+  const profile = page.getByRole("dialog", { name: /정산 미리보기 학생 학생 프로파일/ });
+  await profile.getByLabel("정산 미리보기 학생 출결 조회 월").fill("2026-08");
+  await profile.getByRole("button", { name: "수업일정표" }).click();
+
+  const previewDialog = page.getByRole("dialog", { name: /정산 미리보기 학생 2026년 8월 수업일정표/ });
+  const makeupRow = previewDialog.getByRole("row").filter({ hasText: "8.7(금)" }).filter({ hasText: "보강" });
+  await expect(makeupRow).toContainText("13:00-14:00");
+  await expect(makeupRow).not.toContainText("17:00-19:00");
+});

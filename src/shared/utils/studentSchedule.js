@@ -123,6 +123,7 @@ export function getStudentScheduleForLesson(lesson = {}, student = {}) {
       startTime: specialLectureSchedule.startTime
     };
   }
+  if (!isProfileScheduleManagedLesson(lesson, student)) return null;
   const rules = parseStudentScheduleOverride(student?.scheduleOverride);
   if (!rules.length) return null;
   const lessonDayKey = getLessonDayKey(lesson);

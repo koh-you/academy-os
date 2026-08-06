@@ -3,7 +3,9 @@ import assert from "node:assert/strict";
 process.env.TZ = "UTC";
 
 const {
+  applyStudentScheduleToLesson,
   getEffectiveLessonStudentIds,
+  getStudentScheduleForLesson,
   isStudentScheduledForLesson
 } = await import("../src/shared/utils/studentSchedule.js");
 
@@ -24,6 +26,15 @@ const mondayLesson = {
   date: "2026-08-03",
   lessonId: "lesson-monday"
 };
+const fridayMakeupLesson = {
+  className: "결석 보강 · 강민준",
+  date: "2026-08-07",
+  endTime: "14:00",
+  lessonId: "lesson-friday-makeup",
+  lessonType: "makeup",
+  startTime: "13:00",
+  studentIds: [student.studentId]
+};
 
 assert.equal(
   isStudentScheduledForLesson(tuesdayLesson, student),
@@ -32,5 +43,7 @@ assert.equal(
 );
 assert.deepEqual(getEffectiveLessonStudentIds(tuesdayLesson, [student]), [student.studentId]);
 assert.equal(isStudentScheduledForLesson(mondayLesson, student), false);
+assert.equal(getStudentScheduleForLesson(fridayMakeupLesson, student), null, "보강은 같은 요일의 프로필 정규 시간으로 덮어쓰지 않는다");
+assert.deepEqual(applyStudentScheduleToLesson(fridayMakeupLesson, student), fridayMakeupLesson);
 
 console.log("student schedule timezone fixture passed");
