@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-06 App/API 4차 리팩터링 4-3o integrations status registry
+
+- integrations status GET의 AI·알림 상태 selector와 응답 조립을 frozen registry로 이동했다. provider 상태 계산과 환경 설정 owner는 기존 모듈에 유지한다.
+- 전용 fixture가 method/path 선택, selector 1회 호출, 기존 응답 모양을 고정한다. route baseline은 registry 20 + 직접 route 100으로 전역 120개와 순서를 유지한다.
+- runtime lint, build `421 modules`·main `928.62 kB`·lazy `12/12`, production `827/827`, 격리 로컬 API smoke를 통과했다. 외부 provider 호출·운영 쓰기는 없었다.
+
 ## 2026-08-05 App/API 4차 리팩터링 4-3n test session write registry
 
 - test session POST/DELETE의 payload alias와 delete selector, source action 응답 조립을 frozen registry로 이동했다. 실제 DB 저장·재조회/삭제는 core data owner에 유지한다.

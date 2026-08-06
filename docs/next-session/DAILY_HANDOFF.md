@@ -1,6 +1,12 @@
 # Daily Development Handoff
 
-업데이트: 2026-08-05
+업데이트: 2026-08-06
+
+## 2026-08-06 App/API 4차 리팩터링 4-3o integrations status registry
+
+- `/api/integrations/status`의 AI·알림 상태 selector와 응답 조립을 `integrationStatusRouteRegistry`로 이동했다.
+- provider 설정·상태 계산 owner는 유지했고 외부 호출·운영 쓰기는 없다. production `827/827`, build, 집중 로컬 API smoke를 통과했다.
+- 다음 안전 단위는 최신 main에서 exam-analysis read route 경계를 작게 분리하는 4-3p다.
 
 ## 2026-08-05 체크박스 표시 보정
 
