@@ -126,6 +126,7 @@ import { createReportSnapshotRouteRegistry } from "../src/shared/server/reportSn
 import { createTestSessionReadRouteRegistry } from "../src/shared/server/testSessionReadRouteRegistry.js";
 import { createTestSessionWriteRouteRegistry } from "../src/shared/server/testSessionWriteRouteRegistry.js";
 import { createIntegrationStatusRouteRegistry } from "../src/shared/server/integrationStatusRouteRegistry.js";
+import { createExamAnalysisReadRouteRegistry } from "../src/shared/server/examAnalysisReadRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -303,6 +304,12 @@ const { dispatch: dispatchTestSessionWriteRoute } = createTestSessionWriteRouteR
 const { dispatch: dispatchIntegrationStatusRoute } = createIntegrationStatusRouteRegistry({
   getAiStatus,
   getNotificationStatus,
+  sendJson
+});
+const { dispatch: dispatchExamAnalysisReadRoute } = createExamAnalysisReadRouteRegistry({
+  getExamAnalysisRun,
+  getSsenTypeCatalogForExamAnalysis,
+  listExamAnalysisRuns,
   sendJson
 });
 const teacherAccountTable = "teacher_accounts";
@@ -5902,41 +5909,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchTestSessionReadRoute({ request, response, requestUrl })) return;
   if (await dispatchTestSessionWriteRoute({ request, response, requestUrl })) return;
   if (await dispatchIntegrationStatusRoute({ request, response, requestUrl })) return;
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/exam-analysis-runs") {
-    try {
-      const analysisRunId = requestUrl.searchParams.get("id") || requestUrl.searchParams.get("analysisRunId");
-      const result = analysisRunId
-        ? await getExamAnalysisRun(analysisRunId)
-        : await listExamAnalysisRuns({
-            examPrepId: requestUrl.searchParams.get("examPrepId"),
-            workflowStatus: requestUrl.searchParams.get("workflowStatus"),
-            limit: requestUrl.searchParams.get("limit")
-          });
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/exam-analysis-ssen-types") {
-    try {
-      const analysisRunId = requestUrl.searchParams.get("analysisRunId") || "";
-      const detail = analysisRunId ? await getExamAnalysisRun(analysisRunId) : null;
-      const result = getSsenTypeCatalogForExamAnalysis({
-        subject: requestUrl.searchParams.get("subject") || "",
-        scope: requestUrl.searchParams.get("scope") || "",
-        analysisRun: detail?.analysisRun ?? null,
-        sourceFiles: detail?.sources ?? [],
-        questions: detail?.questions ?? []
-      });
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
+  if (await dispatchExamAnalysisReadRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs") {
     try {

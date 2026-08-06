@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-06
 
+## 2026-08-06 App/API 4차 리팩터링 4-3p exam analysis read registry
+
+- 시험분석 run 목록/상세와 쎈 catalog GET의 query·source 선택·응답 조립을 `examAnalysisReadRouteRegistry`로 이동했다. Supabase read와 쎈 분류 owner는 유지한다.
+- 운영 쓰기·Storage·AI/provider 없이 domain `70/70`, production `827/827`, build, 실제 local API catalog GET을 통과했다. registry 22 + 직접 route 98 = 전역 120이다.
+- 다음 4-3q는 유료 AI·Storage와 분리된 시험분석 run metadata POST route다.
+
 ## 2026-08-06 수업일정표 출력 간소화
 
 - 미리보기·복사·PDF에서 `출결 미입력`을 제외하고 상단 예정 수업·출결 확인·변동사항 요약표를 제거했다.
@@ -11,7 +17,7 @@
 
 - `GET /api/integrations/status`의 route match와 AI·알림 status response 조립을 frozen registry로 이동했다. status 계산과 provider 설정 owner는 기존 integration module에 유지한다.
 - 운영 원천·Storage·AI·알림 provider를 실행하지 않고 pure fixture와 전체 검증을 통과했다: domain `70/70`, production `827/827`, build `421 modules`·main `928.62 kB`·lazy `12/12`.
-- 4-3o는 branch/PR/exact-head CI까지 닫고, Vercel 무료 일일 배포 한도 해소 전 main 병합·운영 배포는 보류한다. 이후 4-3p 시험분석 read route로 이어간다.
+- 4-3o는 통합 commit `3079e685`로 main에 반영됐고 최신 main `95d0b1f1`의 CI·Vercel·읽기 전용 smoke가 성공했다.
 
 ## 2026-08-05 체크박스 표시 보정
 
@@ -30,8 +36,8 @@
 - `/api/test-sessions` POST/DELETE의 payload alias/delete selector와 source response를 `testSessionWriteRouteRegistry`로 이동했다.
 - DB write/readback/delete는 core data owner다. pure fixture만 실행했고 운영 DB·Storage·provider는 사용하지 않았다.
 - 전체 검증은 domain 69/69, scenario·production 827/827, build 418 modules·main 944.65 kB·lazy 12/12를 통과했다. registry 19 + 직접 route 101 = 전역 120이다.
-- 4-3n은 main `f270f2cc`에 반영됐고 최신 main `e4b1eab1`의 GitHub CI도 성공했다. 최신 production 배포는 Vercel 무료 일일 배포 한도로 보류됐다.
-- 다음은 4-3o main·배포가 닫힌 뒤 시험분석 read route를 별도 registry로 분리한다.
+- 4-3n은 main `f270f2cc`에 반영됐다.
+- 다음은 4-3p 이후 시험분석 run metadata POST route를 별도 registry로 분리한다.
 
 ## 2026-08-05 App/API 4차 리팩터링 4-3m test session read registry
 

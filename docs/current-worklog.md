@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-06 App/API 4차 리팩터링 4-3p exam analysis read registry
+
+- 시험분석 run 목록/상세와 쎈 catalog GET의 method/path·query alias·source 선택·응답 조립을 frozen registry로 이동했다. Supabase read와 쎈 분류 selector는 기존 owner에 유지한다.
+- 전용 fixture로 목록 filter, `id > analysisRunId` 우선순위, catalog run context, 500 응답을 고정했다. 운영 DB write·Storage·유료 AI·provider는 사용하지 않았다.
+- domain `70/70`, scenario·production `827/827`, build `421 modules`·main `928.62 kB`·lazy `12/12`, 실제 local API 쎈 catalog GET을 통과했다. registry 22 + 직접 route 98로 전역 120을 유지한다.
+
 ## 2026-08-06 수업일정표 출력 간소화
 
 - 수업일정표 달력·표·복사 문구·PDF의 미입력 출결 문구를 빈 표시로 바꾸고, 미리보기와 PDF 상단 3칸 요약을 제거했다.
@@ -12,7 +18,7 @@
 - `GET /api/integrations/status`의 route match와 AI·알림 status response 조립을 frozen registry로 이동했다. 실제 status 계산과 provider 설정 owner는 기존 integration module에 유지한다.
 - pure fixture로 exact response, 비대상 route 무부작용, 기존 동기 오류 전파를 고정했다. 운영 DB·Storage·AI·알림 provider는 사용하지 않았다.
 - 검증은 domain `70/70`, scenario·production `827/827`, build `421 modules`·main `928.62 kB`·lazy `12/12`를 통과했다. registry 20 + 직접 route 100으로 전역 120을 유지한다.
-- 최신 main `e4b1eab1`의 GitHub CI는 성공했지만 Vercel 무료 일일 배포 한도로 production이 보류됐다. 4-3o는 branch/PR/exact-head CI까지 진행하고 main 병합·운영 배포는 한도 해소 뒤 닫는다.
+- 4-3o는 통합 commit `3079e685`로 main에 반영됐고 최신 main `95d0b1f1`의 CI·Vercel·health/core/integrations 읽기 전용 smoke가 성공했다.
 
 ## 2026-08-05 App/API 4차 리팩터링 4-3n test session write registry
 
