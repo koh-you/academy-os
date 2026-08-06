@@ -2,6 +2,11 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-06 출결 알림 예약 취소 범위 회귀 수정
+
+- 운영 Supabase에서 최지민 결석보충의 18시 출결 알림이 17:54:48 예약된 뒤 17:54:58 `알림 제외`로 취소된 것을 확인했다. 같은 수업의 코멘트 예약 업데이트가 출결 job까지 이전 예약으로 간주한 것이 원인이다.
+- 코멘트 예약 갱신·알림 없음 처리의 취소 후보를 코멘트 job 두 종류로 제한했다. 운영 재발송·예약·데이터 수정은 실행하지 않았다.
+
 ## 2026-08-06 App/API 4차 리팩터링 4-3 종료 감사
 
 - 공통 HTTP/session adapter와 15개 frozen registry의 24 route를 exact inventory로 고정했다. 전역 120 route와 GET 31/POST 76/DELETE 13, route order hash는 유지한다.

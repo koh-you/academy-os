@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import {
   createLessonNotificationJobId,
   isActiveNotificationJobStatus,
+  isLessonCommentNotificationJob,
   isLessonRecordNotificationMuted,
   selectLessonStudentRecord
 } from "../src/domains/lessons/lessonNotificationJobSelectors.js";
@@ -53,6 +54,13 @@ for (const status of [
 }
 assert.equal(isActiveNotificationJobStatus({}), true);
 assert.equal(isActiveNotificationJobStatus(), true);
+
+assert.equal(isLessonCommentNotificationJob({ notificationType: "parent_comment" }), true);
+assert.equal(isLessonCommentNotificationJob({ notificationType: "student_comment" }), true);
+assert.equal(isLessonCommentNotificationJob({ notificationType: "attendance" }), false);
+assert.equal(isLessonCommentNotificationJob({ notificationType: "student_reminder" }), false);
+assert.equal(isLessonCommentNotificationJob({}), false);
+assert.equal(isLessonCommentNotificationJob(), false);
 
 const mutedRecord = {
   notificationMutedParent: {
@@ -209,6 +217,7 @@ const selectorSource = await readFile(
 for (const binding of [
   "createLessonNotificationJobId,",
   "isActiveNotificationJobStatus",
+  "isLessonCommentNotificationJob",
   "isLessonRecordNotificationMuted",
   "selectLessonStudentRecord",
   "return createLessonNotificationJobId(lessonId, studentId, target)",
@@ -223,6 +232,11 @@ for (const binding of [
 ]) {
   assert.ok(appSource.includes(binding), `missing lesson job selector binding: ${binding}`);
 }
+assert.equal(
+  appSource.split(".filter(isLessonCommentNotificationJob)").length - 1,
+  4,
+  "lesson comment reservation updates must preserve attendance and other notification jobs"
+);
 assert.ok(!appSource.includes("function createLessonNotificationJobId("));
 assert.ok(!appSource.includes("function isActiveNotificationJobStatus("));
 assert.ok(!appSource.includes("function isRecordNotificationMuted("));
@@ -238,6 +252,8 @@ for (const sourceToken of [
   "`lesson_comment_${lessonId}_${studentId}_${target}`",
   "export function isActiveNotificationJobStatus(job = {})",
   "!inactiveLessonNotificationJobStatuses.has(job.status)",
+  "export function isLessonCommentNotificationJob(job = {})",
+  "lessonCommentNotificationTypes.has(job.notificationType)",
   "export function isLessonRecordNotificationMuted(record, target)",
   'target === "student"',
   "Boolean(record?.notificationMutedStudent)",

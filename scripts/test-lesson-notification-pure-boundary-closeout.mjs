@@ -35,6 +35,7 @@ for (const pureBinding of [
   "createLessonReservationPayloadSnapshot",
   "createLessonNotificationJobId",
   "isActiveNotificationJobStatus",
+  "isLessonCommentNotificationJob",
   "isLessonRecordNotificationMuted",
   "selectLessonStudentRecord"
 ]) {
@@ -46,7 +47,7 @@ const exportedFunctionCount = pureModelSources.reduce(
     count + (source.match(/\bexport function\s+\w+\s*\(/g) ?? []).length,
   0
 );
-assert.equal(exportedFunctionCount, 15);
+assert.equal(exportedFunctionCount, 16);
 
 for (const modelSource of pureModelSources) {
   for (const forbiddenSideEffect of [

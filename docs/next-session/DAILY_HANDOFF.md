@@ -2,6 +2,11 @@
 
 업데이트: 2026-08-06
 
+## 2026-08-06 출결 알림 예약 취소 범위 수정
+
+- 수업일지 코멘트 Solapi 예약 업데이트가 같은 수업의 별도 출결 알림까지 취소하던 범위를 `parent_comment`·`student_comment`로 제한했다.
+- 운영 최지민 18시 출결 job은 이미 취소된 상태이며 실제 재발송·운영 데이터 수정은 하지 않았다.
+
 ## 2026-08-06 App/API 4차 리팩터링 4-3 종료 감사
 
 - frozen registry 24 + DB/source read 16 + 외부 read 5 + DB/source action 52 + 외부 write 23 = 전역 120 route를 closeout fixture로 고정했다.

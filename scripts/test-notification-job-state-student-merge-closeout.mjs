@@ -96,6 +96,7 @@ assert.ok(functionStart >= 0 && functionEnd > functionStart);
 const functionSource = appSource.slice(functionStart, functionEnd);
 for (const AppOwnedBoundary of [
   "job.lessonId === lesson.lessonId && job.studentId === student.studentId && !nextJobIds.has(job.notificationJobId)",
+  ".filter(isLessonCommentNotificationJob)",
   ".filter(isActiveNotificationJob)",
   "updatedAt: new Date().toISOString()",
   "setNotificationJobs((current) =>",

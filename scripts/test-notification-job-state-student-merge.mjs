@@ -87,6 +87,7 @@ for (const AppOwnedBoundary of [
   "const nextJobs = buildLessonNotificationJobs(lesson, [student], scheduledDate, planMode)",
   "const nextJobIds = new Set(nextJobs.map((job) => job.notificationJobId))",
   "job.lessonId === lesson.lessonId && job.studentId === student.studentId && !nextJobIds.has(job.notificationJobId)",
+  ".filter(isLessonCommentNotificationJob)",
   ".filter(isActiveNotificationJob)",
   "updatedAt: new Date().toISOString()",
   "setNotificationJobs((current) =>",

@@ -4,6 +4,10 @@ const inactiveLessonNotificationJobStatuses = new Set([
   "failed",
   "canceled"
 ]);
+const lessonCommentNotificationTypes = new Set([
+  "parent_comment",
+  "student_comment"
+]);
 
 export function createLessonNotificationJobId(
   lessonId,
@@ -15,6 +19,10 @@ export function createLessonNotificationJobId(
 
 export function isActiveNotificationJobStatus(job = {}) {
   return !inactiveLessonNotificationJobStatuses.has(job.status);
+}
+
+export function isLessonCommentNotificationJob(job = {}) {
+  return lessonCommentNotificationTypes.has(job.notificationType);
 }
 
 export function isLessonRecordNotificationMuted(record, target) {

@@ -87,6 +87,7 @@ import { createLessonReservationPayloadSnapshot } from "../domains/lessons/lesso
 import {
   createLessonNotificationJobId,
   isActiveNotificationJobStatus,
+  isLessonCommentNotificationJob,
   isLessonRecordNotificationMuted,
   selectLessonStudentRecord
 } from "../domains/lessons/lessonNotificationJobSelectors.js";
@@ -6356,6 +6357,7 @@ export function App() {
     const nextJobIds = new Set(nextJobs.map((job) => job.notificationJobId));
     const canceledJobs = notificationJobs
       .filter((job) => job.lessonId === lesson.lessonId && job.studentId === student.studentId && !nextJobIds.has(job.notificationJobId))
+      .filter(isLessonCommentNotificationJob)
       .filter(isActiveNotificationJob)
       .map((job) => ({ ...job, status: "canceled", error: "알림 제외", updatedAt: new Date().toISOString() }));
     setNotificationJobs((current) =>
@@ -6411,6 +6413,7 @@ export function App() {
     if (effectiveMode === "none") {
       const canceledJobs = notificationJobs
         .filter((job) => job.lessonId === lesson.lessonId)
+        .filter(isLessonCommentNotificationJob)
         .filter(isActiveNotificationJob)
         .map((job) => ({ ...job, status: "canceled", error: "", updatedAt: new Date().toISOString() }));
       if (canceledJobs.length) {
@@ -6434,6 +6437,7 @@ export function App() {
     const nextJobIds = new Set(nextJobs.map((job) => job.notificationJobId));
     const canceledJobs = notificationJobs
       .filter((job) => job.lessonId === lesson.lessonId && !nextJobIds.has(job.notificationJobId))
+      .filter(isLessonCommentNotificationJob)
       .filter(isActiveNotificationJob)
       .map((job) => ({ ...job, status: "canceled", error: "알림 제외", updatedAt: new Date().toISOString() }));
     setNotificationJobs((current) =>
@@ -6467,6 +6471,7 @@ export function App() {
     const nextJobIds = new Set(nextJobs.map((job) => job.notificationJobId));
     const canceledJobs = notificationJobs
       .filter((job) => job.lessonId === lesson.lessonId && !nextJobIds.has(job.notificationJobId))
+      .filter(isLessonCommentNotificationJob)
       .filter(isActiveNotificationJob)
       .map((job) => ({ ...job, status: "canceled", error: "알림 제외", updatedAt: new Date().toISOString() }));
     const scheduledLabel = formatKoreaTimeLabel(scheduledDate);
