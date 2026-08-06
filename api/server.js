@@ -127,6 +127,7 @@ import { createTestSessionReadRouteRegistry } from "../src/shared/server/testSes
 import { createTestSessionWriteRouteRegistry } from "../src/shared/server/testSessionWriteRouteRegistry.js";
 import { createIntegrationStatusRouteRegistry } from "../src/shared/server/integrationStatusRouteRegistry.js";
 import { createExamAnalysisReadRouteRegistry } from "../src/shared/server/examAnalysisReadRouteRegistry.js";
+import { createExamAnalysisRunWriteRouteRegistry } from "../src/shared/server/examAnalysisRunWriteRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -311,6 +312,12 @@ const { dispatch: dispatchExamAnalysisReadRoute } = createExamAnalysisReadRouteR
   getSsenTypeCatalogForExamAnalysis,
   listExamAnalysisRuns,
   sendJson
+});
+const { dispatch: dispatchExamAnalysisRunWriteRoute } = createExamAnalysisRunWriteRouteRegistry({
+  parseExamAnalysisRunWriteRequest,
+  readJsonBody,
+  sendJson,
+  upsertExamAnalysisRun
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5910,22 +5917,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchTestSessionWriteRoute({ request, response, requestUrl })) return;
   if (await dispatchIntegrationStatusRoute({ request, response, requestUrl })) return;
   if (await dispatchExamAnalysisReadRoute({ request, response, requestUrl })) return;
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs") {
-    try {
-      const payload = parseExamAnalysisRunWriteRequest(await readJsonBody(request));
-      const result = await upsertExamAnalysisRun(payload.analysisRun);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, Number(error.statusCode) || 500, {
-        ok: false,
-        error: error.message,
-        ...(error.code ? { code: error.code } : {}),
-        ...(error.field !== undefined ? { field: error.field } : {})
-      });
-    }
-    return;
-  }
+  if (await dispatchExamAnalysisRunWriteRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/confirm-question-count") {
     try {

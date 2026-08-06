@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-06
 
+## 2026-08-06 App/API 4차 리팩터링 4-3q exam analysis run write registry
+
+- 시험분석 run metadata POST의 body→contract parser→Supabase action→response 조립을 `examAnalysisRunWriteRouteRegistry`로 이동했다. payload parser와 DB upsert/readback owner는 유지한다.
+- 운영 쓰기·Storage·AI/provider 없이 domain `70/70`, production `827/827`, build, 격리 safe browser `55/55`를 통과했고 registry 23 + 직접 route 97 = 전역 120을 유지한다.
+- 다음 4-3r은 유료 AI·Storage와 분리된 시험분석 문항 수 사람 확정 POST route다.
+
 ## 2026-08-06 App/API 4차 리팩터링 4-3p exam analysis read registry
 
 - 시험분석 run 목록/상세와 쎈 catalog GET의 query·source 선택·응답 조립을 `examAnalysisReadRouteRegistry`로 이동했다. Supabase read와 쎈 분류 owner는 유지한다.

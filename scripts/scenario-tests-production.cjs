@@ -393,6 +393,7 @@ const testSessionReadRouteRegistryPath = path.join(root, "src", "shared", "serve
 const testSessionWriteRouteRegistryPath = path.join(root, "src", "shared", "server", "testSessionWriteRouteRegistry.js");
 const integrationStatusRouteRegistryPath = path.join(root, "src", "shared", "server", "integrationStatusRouteRegistry.js");
 const examAnalysisReadRouteRegistryPath = path.join(root, "src", "shared", "server", "examAnalysisReadRouteRegistry.js");
+const examAnalysisRunWriteRouteRegistryPath = path.join(root, "src", "shared", "server", "examAnalysisRunWriteRouteRegistry.js");
 const authLoginRouteRegistryPath = path.join(root, "src", "shared", "server", "authLoginRouteRegistry.js");
 const examPostConfirmRouteRegistryPath = path.join(root, "src", "shared", "server", "examPostConfirmRouteRegistry.js");
 const portalReadRouteRegistryPath = path.join(root, "src", "shared", "server", "portalReadRouteRegistry.js");
@@ -949,6 +950,7 @@ const testSessionReadRouteRegistrySource = fs.readFileSync(testSessionReadRouteR
 const testSessionWriteRouteRegistrySource = fs.readFileSync(testSessionWriteRouteRegistryPath, "utf8");
 const integrationStatusRouteRegistrySource = fs.readFileSync(integrationStatusRouteRegistryPath, "utf8");
 const examAnalysisReadRouteRegistrySource = fs.readFileSync(examAnalysisReadRouteRegistryPath, "utf8");
+const examAnalysisRunWriteRouteRegistrySource = fs.readFileSync(examAnalysisRunWriteRouteRegistryPath, "utf8");
 const authLoginRouteRegistrySource = fs.readFileSync(authLoginRouteRegistryPath, "utf8");
 const examPostConfirmRouteRegistrySource = fs.readFileSync(examPostConfirmRouteRegistryPath, "utf8");
 const portalReadRouteRegistrySource = fs.readFileSync(portalReadRouteRegistryPath, "utf8");
@@ -959,7 +961,7 @@ const portalServerSource = `${serverSource}\n${portalReadRouteRegistrySource}\n$
 const examPostServerSource = `${portalServerSource}\n${examPostConfirmRouteRegistrySource}`;
 const appCoreServerSource = `${serverSource}\n${appCoreReadRouteRegistrySource}\n${appStateWriteRouteRegistrySource}\n${integrationStatusRouteRegistrySource}`;
 const testSessionServerSource = `${serverSource}\n${testSessionReadRouteRegistrySource}\n${testSessionWriteRouteRegistrySource}`;
-const examAnalysisServerSource = `${serverSource}\n${examAnalysisReadRouteRegistrySource}`;
+const examAnalysisServerSource = `${serverSource}\n${examAnalysisReadRouteRegistrySource}\n${examAnalysisRunWriteRouteRegistrySource}`;
 const specialLectureStudentScheduleMutationSource =
   coreDataRoute.match(
     /export async function syncSpecialLectureLessonStudentSchedule[\s\S]*?\r?\n}\r?\n\r?\nexport async function deleteLesson/

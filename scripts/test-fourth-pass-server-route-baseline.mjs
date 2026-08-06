@@ -5,6 +5,7 @@ import { appCoreReadRouteSignatures } from "../src/shared/server/appCoreReadRout
 import { appStateWriteRouteSignatures } from "../src/shared/server/appStateWriteRouteRegistry.js";
 import { authLoginRouteSignatures } from "../src/shared/server/authLoginRouteRegistry.js";
 import { examAnalysisReadRouteSignatures } from "../src/shared/server/examAnalysisReadRouteRegistry.js";
+import { examAnalysisRunWriteRouteSignatures } from "../src/shared/server/examAnalysisRunWriteRouteRegistry.js";
 import { examPostConfirmRouteSignatures } from "../src/shared/server/examPostConfirmRouteRegistry.js";
 import { integrationStatusRouteSignatures } from "../src/shared/server/integrationStatusRouteRegistry.js";
 import { portalReadRouteSignatures } from "../src/shared/server/portalReadRouteRegistry.js";
@@ -15,12 +16,13 @@ import { teacherAccountRouteSignatures } from "../src/shared/server/teacherAccou
 import { testSessionReadRouteSignatures } from "../src/shared/server/testSessionReadRouteRegistry.js";
 import { testSessionWriteRouteSignatures } from "../src/shared/server/testSessionWriteRouteRegistry.js";
 
-const [adapterSource, appCoreReadRouteRegistrySource, appStateWriteRouteRegistrySource, authLoginRouteRegistrySource, examAnalysisReadRouteRegistrySource, examPostConfirmRouteRegistrySource, integrationStatusRouteRegistrySource, packageJson, portalReadRouteRegistrySource, portalWriteRouteRegistrySource, reportSnapshotRouteRegistrySource, serverSource, sessionGuardSource, systemRouteRegistrySource, teacherAccountRouteRegistrySource, testSessionReadRouteRegistrySource, testSessionWriteRouteRegistrySource] = await Promise.all([
+const [adapterSource, appCoreReadRouteRegistrySource, appStateWriteRouteRegistrySource, authLoginRouteRegistrySource, examAnalysisReadRouteRegistrySource, examAnalysisRunWriteRouteRegistrySource, examPostConfirmRouteRegistrySource, integrationStatusRouteRegistrySource, packageJson, portalReadRouteRegistrySource, portalWriteRouteRegistrySource, reportSnapshotRouteRegistrySource, serverSource, sessionGuardSource, systemRouteRegistrySource, teacherAccountRouteRegistrySource, testSessionReadRouteRegistrySource, testSessionWriteRouteRegistrySource] = await Promise.all([
   readFile(new URL("../src/shared/server/httpRouteAdapter.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/appCoreReadRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/appStateWriteRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/authLoginRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/examAnalysisReadRouteRegistry.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/shared/server/examAnalysisRunWriteRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/examPostConfirmRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/integrationStatusRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse),
@@ -125,12 +127,18 @@ const orderedRoutes = [
     signature: `${method} ${path}`,
     source: examAnalysisReadRouteRegistrySource
   })),
+  ...examAnalysisRunWriteRouteSignatures.map(({ method, path }) => ({
+    method,
+    path,
+    signature: `${method} ${path}`,
+    source: examAnalysisRunWriteRouteRegistrySource
+  })),
   ...directRoutes
 ];
 const routes = orderedRoutes.map((route, index) => ({ ...route, index }));
 
 assert.equal(routes.length, 120);
-assert.equal(directRouteMatches.length, 98);
+assert.equal(directRouteMatches.length, 97);
 assert.equal(new Set(routes.map(({ signature }) => signature)).size, 120);
 assert.deepEqual(
   Object.fromEntries(["DELETE", "GET", "POST"].map((method) => [
@@ -339,6 +347,11 @@ assert.ok(examAnalysisReadRouteRegistrySource.includes('requestUrl.pathname === 
 assert.ok(examAnalysisReadRouteRegistrySource.includes('requestUrl.pathname === "/api/exam-analysis-ssen-types"'));
 assert.ok(examAnalysisReadRouteRegistrySource.includes("listExamAnalysisRuns({"));
 assert.ok(examAnalysisReadRouteRegistrySource.includes("getSsenTypeCatalogForExamAnalysis({"));
+assert.ok(serverSource.includes("createExamAnalysisRunWriteRouteRegistry({"));
+assert.ok(serverSource.includes("await dispatchExamAnalysisRunWriteRoute({ request, response, requestUrl })"));
+assert.ok(examAnalysisRunWriteRouteRegistrySource.includes('requestUrl.pathname !== "/api/exam-analysis-runs"'));
+assert.ok(examAnalysisRunWriteRouteRegistrySource.includes("parseExamAnalysisRunWriteRequest(await readJsonBody(request))"));
+assert.ok(examAnalysisRunWriteRouteRegistrySource.includes("upsertExamAnalysisRun(payload.analysisRun)"));
 assert.ok(teacherAccountRouteRegistrySource.includes("saveTeacherAccount"));
 assert.ok(sessionGuardSource.includes("function verifySignedSessionToken"));
 assert.ok(sessionGuardSource.includes("function getTeacherOrPortalSession"));
@@ -380,6 +393,7 @@ assert.ok(packageJson.scripts["test:production"].includes("npm run test:report-s
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:test-session-read-route-registry"));
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:test-session-write-route-registry"));
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:exam-analysis-read-route-registry"));
+assert.ok(packageJson.scripts["test:production"].includes("npm run test:exam-analysis-run-write-route-registry"));
 
 console.log(
   "fourth-pass server route baseline passed · 120 routes · GET 31/POST 76/DELETE 13 · session/credential 15 + dispatch 2"

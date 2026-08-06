@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { versionedWriteRouteContracts } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 import { appStateWriteRouteSignatures } from "../src/shared/server/appStateWriteRouteRegistry.js";
 import { authLoginRouteSignatures } from "../src/shared/server/authLoginRouteRegistry.js";
+import { examAnalysisRunWriteRouteSignatures } from "../src/shared/server/examAnalysisRunWriteRouteRegistry.js";
 import { examPostConfirmRouteSignatures } from "../src/shared/server/examPostConfirmRouteRegistry.js";
 import { portalWriteRouteSignatures } from "../src/shared/server/portalWriteRouteRegistry.js";
 import { reportSnapshotRouteSignatures } from "../src/shared/server/reportSnapshotRouteRegistry.js";
@@ -10,8 +11,9 @@ import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.
 import { teacherAccountRouteSignatures } from "../src/shared/server/teacherAccountRouteRegistry.js";
 import { testSessionWriteRouteSignatures } from "../src/shared/server/testSessionWriteRouteRegistry.js";
 
-const [appStateWriteRouteSource, packageJson, reportSnapshotRouteSource, serverSource] = await Promise.all([
+const [appStateWriteRouteSource, examAnalysisRunWriteRouteSource, packageJson, reportSnapshotRouteSource, serverSource] = await Promise.all([
   readFile(new URL("../src/shared/server/appStateWriteRouteRegistry.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/shared/server/examAnalysisRunWriteRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse),
   readFile(new URL("../src/shared/server/reportSnapshotRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../api/server.js", import.meta.url), "utf8")
@@ -159,6 +161,7 @@ const directWriteSignatures = [
     .map(signatureOf),
   ...authLoginRouteSignatures.map(signatureOf),
   ...appStateWriteRouteSignatures.map(signatureOf),
+  ...examAnalysisRunWriteRouteSignatures.map(signatureOf),
   ...examPostConfirmRouteSignatures.map(signatureOf),
   ...portalWriteRouteSignatures.map(signatureOf),
   ...reportSnapshotRouteSignatures.map(signatureOf),
@@ -186,6 +189,7 @@ const specializedParserBySignature = new Map([
 ]);
 const extractedRouteSourceBySignature = new Map([
   ["POST /api/app-state", appStateWriteRouteSource],
+  ["POST /api/exam-analysis-runs", examAnalysisRunWriteRouteSource],
   ["POST /api/report-snapshots", reportSnapshotRouteSource]
 ]);
 for (const signature of expectedContractSignatures) {

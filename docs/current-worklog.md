@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-06 App/API 4차 리팩터링 4-3q exam analysis run write registry
+
+- 시험분석 run metadata POST의 method/path, body read→contract parse→source action과 성공/구조화 오류 응답을 frozen registry로 이동했다. canonical/legacy parser와 Supabase upsert/readback은 기존 owner에 유지한다.
+- 전용 pure fixture와 기존 run contract로 비대상 route, 호출 순서, exact action payload, source 응답, 400 code/field·500 오류를 고정했다. 운영 DB write·Storage·유료 AI·provider는 사용하지 않았다.
+- 첫 production 감사에서 새 registry source가 closeout 집계에서 빠진 것을 확인해 제품 코드가 아닌 감사 source map만 보강했다. 이후 domain `70/70`, scenario·production `827/827`, build `421 modules`·main `928.62 kB`·lazy `12/12`, 격리 safe browser `55/55`를 통과했다.
+- registry 23 + 직접 route 97로 전역 120의 method/path/order hash와 GET 31/POST 76/DELETE 13을 유지한다.
+
 ## 2026-08-06 App/API 4차 리팩터링 4-3p exam analysis read registry
 
 - 시험분석 run 목록/상세와 쎈 catalog GET의 method/path·query alias·source 선택·응답 조립을 frozen registry로 이동했다. Supabase read와 쎈 분류 selector는 기존 owner에 유지한다.

@@ -21,11 +21,14 @@
 
 ## 4차 리팩터링 현재 단위
 
+- 4-3q는 `POST /api/exam-analysis-runs`의 body read, canonical/legacy contract parser, Supabase action 호출과 200/structured error 응답 조립을 `examAnalysisRunWriteRouteRegistry`로 옮겼다. payload parser와 실제 DB upsert/readback owner는 기존 domain/pipeline module에 유지한다.
+- 전용 pure fixture와 기존 run contract로 비대상 route 무부작용, read→parse→upsert 순서, source readback, 400 code/field와 500 오류를 고정했다. registry 23 + 직접 route 97로 전역 120을 유지하며 운영 DB write·Storage·유료 AI·provider 호출은 실행하지 않았다.
+- 검증은 domain `70/70`, scenario·production `827/827`, build `421 modules`·main `928.62 kB`·lazy `12/12`, 격리 safe browser `55/55`를 통과했다.
 - 4-3p는 `GET /api/exam-analysis-runs`와 `GET /api/exam-analysis-ssen-types`의 query alias, 목록/상세 선택, catalog 입력과 200/500 응답 조립을 `examAnalysisReadRouteRegistry`로 옮겼다. Supabase read와 쎈 분류 selector owner는 기존 module/server에 유지한다.
 - 검증은 domain `70/70`, scenario·production `827/827`, build `421 modules`·main `928.62 kB`·lazy `12/12`, 실제 local API 쎈 catalog GET을 통과했다. registry 22 + 직접 route 98로 전역 120을 유지하며 DB write·Storage·유료 AI·provider 호출은 실행하지 않았다.
 - 4-3o는 `GET /api/integrations/status`의 method/path와 AI·알림 상태 응답 조립을 `src/shared/server/integrationStatusRouteRegistry.js`로 옮겼다. 상태 계산과 provider 설정 owner는 기존 integration module에 유지한다. 통합 commit `3079e685`는 최신 main `95d0b1f1`에 포함됐고 main CI·Vercel·health/core/integrations 읽기 전용 smoke가 성공했다.
 - 4-3n은 test session POST/DELETE의 canonical·legacy payload alias, delete selector와 source action 응답을 `src/shared/server/testSessionWriteRouteRegistry.js`로 옮겼다. DB 저장·재조회/삭제 owner는 core data에 유지한다.
-- 다음 4-3q는 최신 main에서 유료 AI·Storage와 분리된 시험분석 run metadata POST 경계를 작은 단위로 분리한다.
+- 다음 4-3r은 최신 main에서 유료 AI·Storage와 분리된 시험분석 문항 수 사람 확정 POST 경계를 작은 단위로 분리한다.
 - 4-3m은 test session/attempt GET 두 개의 query alias/filter, source response와 실패 응답을 `src/shared/server/testSessionReadRouteRegistry.js`로 옮겼다. Supabase read owner는 기존 `listTestSessions/listTestAttempts`에 유지한다.
 - 4-3l은 teacher-authenticated report snapshot POST의 guard, versioned parser와 report persistence service 조립을 `src/shared/server/reportSnapshotRouteRegistry.js`로 옮겼다. AppState CAS/readback·재시도 검증은 기존 domain/server owner에 유지한다.
 - 4-3k는 app-state POST의 versioned parser, 보호 key 제외, `expectedUpdatedAt` CAS option과 오류 응답을 `src/shared/server/appStateWriteRouteRegistry.js`로 옮겼다. Supabase write/readback owner는 server의 `upsertAppState`에 유지한다.

@@ -7,22 +7,14 @@ import {
 } from "../src/domains/exams/examAnalysisRunApi.js";
 
 const readSource = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
-const [apiSource, componentSource, safeApiSource, serverSource] = await Promise.all([
+const [apiSource, componentSource, routeRegistrySource, safeApiSource, serverSource] = await Promise.all([
   readSource("src/domains/exams/examAnalysisRunApi.js"),
   readSource("src/domains/exams/ExamAnalysisPipelineCenter.jsx"),
+  readSource("src/shared/server/examAnalysisRunWriteRouteRegistry.js"),
   readSource("scripts/safe-local-api.mjs"),
   readSource("api/server.js")
 ]);
 
-const routeStart = serverSource.indexOf(
-  'if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs")'
-);
-const routeEnd = serverSource.indexOf(
-  'if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/confirm-question-count")',
-  routeStart
-);
-assert.ok(routeStart >= 0 && routeEnd > routeStart);
-const routeSource = serverSource.slice(routeStart, routeEnd);
 for (const expected of [
   "parseExamAnalysisRunWriteRequest(await readJsonBody(request))",
   "upsertExamAnalysisRun(payload.analysisRun)",
@@ -30,9 +22,17 @@ for (const expected of [
   "error.code",
   "error.field"
 ]) {
-  assert.ok(routeSource.includes(expected), `exam run route missing ${expected}`);
+  assert.ok(routeRegistrySource.includes(expected), `exam run route missing ${expected}`);
 }
-assert.equal(routeSource.includes("payload.analysisRun ?? payload.run ?? payload"), false);
+assert.equal(routeRegistrySource.includes("payload.analysisRun ?? payload.run ?? payload"), false);
+for (const expected of [
+  "createExamAnalysisRunWriteRouteRegistry({",
+  "parseExamAnalysisRunWriteRequest,",
+  "upsertExamAnalysisRun",
+  "await dispatchExamAnalysisRunWriteRoute({ request, response, requestUrl })"
+]) {
+  assert.ok(serverSource.includes(expected), `exam run server injection missing ${expected}`);
+}
 
 for (const expected of [
   "export function parseExamAnalysisRunWriteRequest",
