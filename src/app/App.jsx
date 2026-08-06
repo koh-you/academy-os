@@ -8643,6 +8643,8 @@ function ExamPrepLessonDetail({ lesson, onDeleteLesson, onEditLesson }) {
 
 function LessonJournalFallback({ error, lesson, onBack, onDeleteLesson, onEditLesson, students = [] }) {
   const lessonStudents = getLessonJournalStudents(lesson, students);
+  const errorMessage = String(error?.message ?? error ?? "알 수 없는 오류");
+  const isStaleDeploymentChunk = /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module/i.test(errorMessage);
   return (
     <section className="lessonJournalPage">
       <NavigationHeader
@@ -8660,7 +8662,16 @@ function LessonJournalFallback({ error, lesson, onBack, onDeleteLesson, onEditLe
       />
       <section className="panel lessonJournalFallback">
         <strong>수업일지를 여는 중 오류가 발생했습니다.</strong>
-        <p>수업 정보는 저장되어 있습니다. 수업 수정에서 학생과 시간을 확인한 뒤 다시 열어 주세요.</p>
+        <p>
+          {isStaleDeploymentChunk
+            ? "새 버전 배포 뒤 이전 화면 코드가 남아 수업메모를 불러오지 못했습니다. 저장된 수업 정보는 유지되며, 최신 화면으로 새로고침하면 다시 열 수 있습니다."
+            : "수업 정보는 저장되어 있습니다. 수업 수정에서 학생과 시간을 확인한 뒤 다시 열어 주세요."}
+        </p>
+        {isStaleDeploymentChunk ? (
+          <button className="primaryButton" onClick={() => window.location.reload()} type="button">
+            최신 화면으로 새로고침
+          </button>
+        ) : null}
         {lessonStudents.length > 0 ? (
           <div className="studentChips">
             {lessonStudents.map((student) => (
@@ -8670,7 +8681,7 @@ function LessonJournalFallback({ error, lesson, onBack, onDeleteLesson, onEditLe
         ) : (
           <p className="muted">이 수업에 표시할 학생을 찾지 못했습니다.</p>
         )}
-        <small>{String(error?.message ?? error ?? "알 수 없는 오류")}</small>
+        <small>{errorMessage}</small>
       </section>
     </section>
   );

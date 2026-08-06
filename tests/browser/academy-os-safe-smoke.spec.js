@@ -2111,6 +2111,35 @@ test("lesson memo opens from the shared nested lesson chunk without saving", asy
   expect(pageErrors).toEqual([]);
 });
 
+test("lesson memo chunk failure offers a latest-screen recovery", async ({ page }) => {
+  let failedOnce = false;
+  await page.route("**/src/domains/lessons/LessonNestedPanels.jsx*", async (route) => {
+    if (!failedOnce) {
+      failedOnce = true;
+      await route.abort("failed");
+      return;
+    }
+    await route.continue();
+  });
+  await loginAsTeacher(page);
+
+  const openLessonJournal = async () => {
+    const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
+    await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
+    return page.getByRole("dialog", { name: "수업일지" });
+  };
+
+  let lessonJournal = await openLessonJournal();
+  await lessonJournal.getByRole("button", { name: /월경계 학생 수업메모/ }).click();
+  await expect(lessonJournal).toContainText("이전 화면 코드가 남아 수업메모를 불러오지 못했습니다.");
+  await lessonJournal.getByRole("button", { name: "최신 화면으로 새로고침" }).click();
+
+  await expect(page.getByRole("navigation", { name: "주요 화면" })).toBeVisible();
+  lessonJournal = await openLessonJournal();
+  await lessonJournal.getByRole("button", { name: /월경계 학생 수업메모/ }).click();
+  await expect(page.getByRole("dialog", { name: "월경계 학생 수업메모" })).toBeVisible();
+});
+
 test("monthly settlement counts closure replacement and distinguishes attendance colors", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);
