@@ -60,6 +60,7 @@ export function createSupplementCenterTabViewModel({
   activeDeferredAbsenceCount = 0,
   activeTabId = "homework_makeup",
   homeworkItems = [],
+  manualItems = [],
   getStudentName = () => "",
   retestItems = [],
   sortMode = "weekday",
@@ -88,6 +89,13 @@ export function createSupplementCenterTabViewModel({
       subtitle: "오답/평가 기준으로 재시험 일정을 잡습니다.",
       emptyText: "재시험이 없습니다.",
       items: retestItems
+    },
+    {
+      id: "manual_makeup",
+      title: "수동 보충",
+      subtitle: "자동 후보가 아닌 보충을 직접 작성해 수업일지와 알림톡에 연결합니다.",
+      emptyText: "직접 작성한 수동 보충이 없습니다.",
+      items: manualItems
     }
   ];
   const tabs = tabDefinitions.map((tab) => {

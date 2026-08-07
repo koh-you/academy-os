@@ -2,8 +2,50 @@ import assert from "node:assert/strict";
 import {
   createAbsenceSupplementCandidateModel,
   createHomeworkSupplementItems,
+  createManualSupplementItems,
+  createManualSupplementTask,
   createRetestSupplementItems
 } from "../src/domains/supplements/supplementCenterCandidateModel.js";
+
+const manualTask = createManualSupplementTask({
+  reason: "함수 단원 오개념 개별 보충",
+  scheduledDate: "2026-08-10",
+  scheduledTime: "16:30:00",
+  studentId: "student-manual",
+  title: "함수 단원 개별 보충"
+}, {
+  createdAt: "2026-08-07T13:00:00.000Z",
+  taskId: "makeup-manual-1"
+});
+assert.deepEqual(manualTask, {
+  attemptCount: 0,
+  childHomeworkIds: [],
+  createdAt: "2026-08-07T13:00:00.000Z",
+  isLocalDraftTask: true,
+  makeupTaskId: "makeup-manual-1",
+  notificationDraft: "",
+  reason: "함수 단원 오개념 개별 보충",
+  scheduledDate: "2026-08-10",
+  scheduledTime: "16:30",
+  sourceId: "manual_makeup-manual-1",
+  sourceLabel: "함수 단원 개별 보충",
+  status: "draft",
+  studentId: "student-manual",
+  supplementHomeworkNote: "함수 단원 개별 보충",
+  supplementMethod: "onsite_makeup",
+  taskType: "manual_makeup"
+});
+assert.deepEqual(createManualSupplementItems([manualTask]), [{
+  id: "makeup-manual-1",
+  meta: "2026-08-10 · 16:30 · 함수 단원 오개념 개별 보충",
+  studentId: "student-manual",
+  task: manualTask,
+  title: "함수 단원 개별 보충"
+}]);
+assert.throws(() => createManualSupplementTask({}), /학생을 선택/);
+assert.throws(() => createManualSupplementTask({ studentId: "student-manual" }), /제목을 입력/);
+assert.throws(() => createManualSupplementTask({ studentId: "student-manual", title: "제목" }), /사유·내용을 입력/);
+assert.throws(() => createManualSupplementTask({ studentId: "student-manual", title: "제목", reason: "사유" }), /날짜와 시작 시간을 입력/);
 
 const homeworkItems = createHomeworkSupplementItems(
   [
@@ -94,6 +136,7 @@ assert.deepEqual(retestItems, [
 ]);
 
 assert.deepEqual(createHomeworkSupplementItems(), []);
+assert.deepEqual(createManualSupplementItems(), []);
 assert.deepEqual(createRetestSupplementItems(), []);
 
 const absenceRecord = {

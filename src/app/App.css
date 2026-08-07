@@ -21821,3 +21821,17 @@ body.attendanceOnlyBody {
     font-size: 24px;
   }
 }
+.manualSupplementCreateForm {
+  display: grid;
+  gap: 14px;
+}
+
+.manualSupplementCreateForm > label {
+  display: grid;
+  gap: 7px;
+}
+
+.manualSupplementCreateForm textarea {
+  min-height: 96px;
+  resize: vertical;
+}

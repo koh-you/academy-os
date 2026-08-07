@@ -37,6 +37,7 @@ const student = {
 };
 
 assert.equal(isSupplementStudentReminderTask(task), true);
+assert.equal(isSupplementStudentReminderTask({ taskType: "manual_makeup" }), true);
 assert.equal(isSupplementStudentReminderTask({ taskType: "retest" }), false);
 assert.equal(getSupplementStudentReminderJobId(task), "supplement_student_reminder_makeup-1결석_student-1");
 assert.equal(getSupplementStudentReminderJobId({ ...task, studentId: "" }), "");

@@ -64,7 +64,7 @@ export function SupplementScheduleChangeConfirmModal({
           </label>
         </div>
         <p className="supplementScheduleConfirmNote">
-          알림톡 예약을 선택하면 학생과 학부모에게 등원보충 일정 안내가 다음 정각에 예약되고, 보강 당일 오전 11시 학생 리마인더 예약도 같은 보충 항목 기준으로 갱신됩니다.
+          알림톡 예약을 선택하면 학생과 학부모에게 보충 일정 안내가 다음 정각에 예약되고, 보충 당일 오전 11시 학생 리마인더 예약도 같은 보충 항목 기준으로 갱신됩니다.
         </p>
       </div>
       <ModalFooter className="confirmActions supplementScheduleConfirmActions">

@@ -102,7 +102,7 @@ const closeoutPaths = [
       ["app", 'if (task.taskType === "retest")'],
       ["app", "학생 재시험 안내입니다."],
       ["app", "재시험을 진행하겠습니다."],
-      ["supplementBuilders", '["homework_makeup", "absence_makeup"]']
+      ["supplementBuilders", '["homework_makeup", "absence_makeup", "manual_makeup"]']
     ]
   },
   {
@@ -222,6 +222,7 @@ assert.equal(reminderJob.previewBody, reminderHumanFinal);
 assert.equal(reminderJob.payload.reminderBody, reminderHumanFinal);
 assert.equal(isSupplementStudentReminderTask(homeworkTask), true);
 assert.equal(isSupplementStudentReminderTask(absenceTask), true);
+assert.equal(isSupplementStudentReminderTask({ taskType: "manual_makeup" }), true);
 assert.equal(isSupplementStudentReminderTask({ taskType: "retest" }), false);
 
 const scheduleSeed = renderNotificationTemplate(configuredTemplates.supplementScheduleConfirmNotice, {

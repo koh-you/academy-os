@@ -322,6 +322,7 @@ const supplementCenterTabModelPath = path.join(root, "src", "domains", "suppleme
 const supplementCenterCandidateModelPath = path.join(root, "src", "domains", "supplements", "supplementCenterCandidateModel.js");
 const supplementCandidateRowPath = path.join(root, "src", "domains", "supplements", "SupplementCandidateRow.jsx");
 const supplementCenterComponentPath = path.join(root, "src", "domains", "supplements", "SupplementCenter.jsx");
+const manualSupplementCreateModalPath = path.join(root, "src", "domains", "supplements", "ManualSupplementCreateModal.jsx");
 const specialLectureApplicationPanelPath = path.join(root, "src", "domains", "specialLectures", "SpecialLectureApplicationPanel.jsx");
 const specialLectureManagementPanelPath = path.join(root, "src", "domains", "specialLectures", "SpecialLectureManagementPanel.jsx");
 const specialLecturePublicPagePath = path.join(root, "src", "domains", "specialLectures", "SpecialLecturePublicPage.jsx");
@@ -554,6 +555,7 @@ const lessonJournalDetailSource = lessonJournalDetailComponentSource || appEntry
 const hasLessonJournalDetailBoundary = Boolean(lessonJournalDetailComponentSource) || (lessonJournalDetailStart >= 0 && lessonJournalDetailEnd > lessonJournalDetailStart);
 const supplementStudentModalSource = fs.existsSync(supplementStudentModalPath) ? fs.readFileSync(supplementStudentModalPath, "utf8") : "";
 const supplementCenterComponentSource = fs.existsSync(supplementCenterComponentPath) ? fs.readFileSync(supplementCenterComponentPath, "utf8") : "";
+const manualSupplementCreateModalSource = fs.existsSync(manualSupplementCreateModalPath) ? fs.readFileSync(manualSupplementCreateModalPath, "utf8") : "";
 const supplementEffectAdapterSource = fs.existsSync(supplementEffectAdapterPath) ? fs.readFileSync(supplementEffectAdapterPath, "utf8") : "";
 const notificationCenterModelSource = fs.existsSync(notificationCenterModelPath) ? fs.readFileSync(notificationCenterModelPath, "utf8") : "";
 const notificationCenterConfigSource = fs.existsSync(notificationCenterConfigPath) ? fs.readFileSync(notificationCenterConfigPath, "utf8") : "";

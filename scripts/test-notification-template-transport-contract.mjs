@@ -151,6 +151,7 @@ assert.equal(specialLectureJob.payload.noticeKind, "special_lecture");
 
 assert.equal(isSupplementStudentReminderTask({ taskType: "homework_makeup" }), true);
 assert.equal(isSupplementStudentReminderTask({ taskType: "absence_makeup" }), true);
+assert.equal(isSupplementStudentReminderTask({ taskType: "manual_makeup" }), true);
 assert.equal(
   isSupplementStudentReminderTask({ taskType: "retest" }),
   false,

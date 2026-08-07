@@ -2032,6 +2032,70 @@ test("lesson hub top reminders can collapse and expand without runtime errors", 
   expect(pageErrors).toEqual([]);
 });
 
+test("manual supplement creates a linked lesson journal and safe Alimtalk reservations", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+  await page.getByRole("button", { name: /보충관리/ }).click();
+  await page.getByRole("button", { name: "수동 보충 등록" }).click();
+
+  const createDialog = page.getByRole("dialog", { name: "수동 보충 작성" });
+  await createDialog.getByLabel("수동 보충 학생").selectOption("safe-consecutive-attendance-student");
+  await createDialog.getByLabel("수동 보충 제목").fill("함수 단원 개별 보충");
+  await createDialog.getByLabel("수동 보충 사유와 내용").fill("함수 그래프 오개념과 지난 문제를 개별 확인합니다.");
+  await createDialog.getByLabel("수동 보충 날짜").fill("2026-08-10");
+  await createDialog.getByLabel("수동 보충 시작 시간").fill("16:30");
+  await createDialog.getByRole("button", { name: "수업일지 등록 계속" }).click();
+
+  const supplementModal = page.locator(".supplementStudentModal");
+  await expect(supplementModal).toContainText("연속출결 가상학생 수동 보충");
+  await expect(supplementModal.getByRole("button", { name: "수업일지 일정 만들기" })).toBeEnabled();
+  await supplementModal.getByRole("button", { name: "수업일지 일정 만들기" }).click();
+  await expect(supplementModal.getByRole("status")).toContainText("수업일지 일정 만들기 완료");
+
+  const taskPayload = await (await request.get(`${safeApiBaseUrl}/api/makeup-tasks`)).json();
+  const savedTask = taskPayload.makeupTasks.find((task) => (
+    task.taskType === "manual_makeup" && task.sourceLabel === "함수 단원 개별 보충"
+  ));
+  expect(savedTask).toMatchObject({
+    linkedLessonDate: "2026-08-10",
+    linkedLessonTime: "16:30",
+    scheduledDate: "2026-08-10",
+    scheduledTime: "16:30",
+    status: "scheduled",
+    studentId: "safe-consecutive-attendance-student"
+  });
+
+  const lessonPayload = await (await request.get(`${safeApiBaseUrl}/api/lessons`)).json();
+  const linkedLesson = lessonPayload.lessons.find((lesson) => lesson.lessonId === savedTask.linkedLessonId);
+  expect(linkedLesson).toMatchObject({
+    className: "수동 보충 · 연속출결 가상학생",
+    date: "2026-08-10",
+    lessonType: "makeup",
+    sourceMakeupTaskId: savedTask.makeupTaskId,
+    startTime: "16:30",
+    studentIds: ["safe-consecutive-attendance-student"]
+  });
+
+  const notificationPayload = await (await request.get(`${safeApiBaseUrl}/api/notification-jobs`)).json();
+  const linkedNotifications = notificationPayload.notificationJobs.filter((job) => (
+    job.payload?.makeupTaskId === savedTask.makeupTaskId
+  ));
+  expect(linkedNotifications.map((job) => job.notificationType).sort()).toEqual([
+    "notice_parent",
+    "schedule_reminder",
+    "student_reminder"
+  ]);
+  expect(linkedNotifications.every((job) => ["dry_run", "scheduled"].includes(job.status))).toBe(true);
+  expect(linkedNotifications.every((job) => job.previewBody.includes("함수"))).toBe(true);
+
+  await supplementModal.getByRole("button", { name: "창 닫기" }).click();
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /수업일지/ }).click();
+  const scheduledDay = page.getByRole("gridcell", { name: /2026-08-10 · \d+개 수업/ });
+  await scheduledDay.getByRole("button", { name: "수동 보충 · 연속출결 가상학생" }).click();
+  await expect(page.getByRole("dialog", { name: "수업일지" })).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
 test("lesson journal desktop table keeps long homework followup inside its column", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   const longHomeworkFollowup = "개념원리 연습문제 93,95,96,114,119,120,121,140~148,182,183,214~216,243,245,249,283,284,291,295";

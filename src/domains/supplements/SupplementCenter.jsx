@@ -6,6 +6,8 @@ import { safeIdPart } from "../../shared/utils/id.js";
 import {
   createAbsenceSupplementCandidateModel,
   createHomeworkSupplementItems,
+  createManualSupplementItems,
+  createManualSupplementTask,
   createRetestSupplementItems
 } from "./supplementCenterCandidateModel.js";
 import {
@@ -25,6 +27,7 @@ import {
 } from "./supplementCenterTabModel.js";
 import { SupplementCandidateRow } from "./SupplementCandidateRow.jsx";
 import { SupplementHistoryModal } from "./SupplementHistoryModal.jsx";
+import { ManualSupplementCreateModal } from "./ManualSupplementCreateModal.jsx";
 import { selectRecentSupplementTasks } from "./supplementHistory.js";
 import { SupplementPassConfirmModal } from "./SupplementPassConfirmModal.jsx";
 import { SupplementStudentModal } from "./SupplementStudentModal.jsx";
@@ -83,6 +86,7 @@ export function SupplementCenter({
   const [activeSupplementTab, setActiveSupplementTab] = useState("homework_makeup");
   const [supplementSortMode, setSupplementSortMode] = useState("weekday");
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [isManualCreateModalOpen, setIsManualCreateModalOpen] = useState(false);
   const [historyQuery, setHistoryQuery] = useState("");
   const [passConfirmTask, setPassConfirmTask] = useState(null);
   const [passBusyTaskId, setPassBusyTaskId] = useState("");
@@ -161,6 +165,19 @@ export function SupplementCenter({
     const pendingTask = createPendingMakeupTask(item.task);
     setPendingCandidateTask(pendingTask);
     setSupplementRowAction(item.task, "draft", "보충 생성 화면에서 보충 내용 저장을 눌러야 보충 항목이 생성됩니다.");
+  }
+
+  function openManualSupplementReview(values) {
+    const createdAt = new Date().toISOString();
+    const taskId = `makeup_manual_${Date.now()}_${safeIdPart(values.studentId)}`;
+    const pendingTask = createManualSupplementTask(values, { createdAt, taskId });
+    setActiveSupplementTab("manual_makeup");
+    setSelectedSupplementStudentId(pendingTask.studentId);
+    setSelectedSupplementTaskKey(getSupplementActionKey(pendingTask));
+    setPendingCandidateTask(pendingTask);
+    setPassActionError("");
+    setIsManualCreateModalOpen(false);
+    setSupplementRowAction(pendingTask, "draft", "수업일지와 알림톡 연결 전 내용을 검토해 주세요.");
   }
 
   function clearPendingCandidateTask(savedTask) {
@@ -274,6 +291,7 @@ export function SupplementCenter({
   const retestSupplementItems = createRetestSupplementItems(retestRecords, {
     getLessonLabel: lessonLabel
   });
+  const manualSupplementItems = createManualSupplementItems(tasks);
   const {
     activeTab: activeTabData,
     tabs: supplementTabs
@@ -283,6 +301,7 @@ export function SupplementCenter({
     activeTabId: activeSupplementTab,
     getStudentName: studentName,
     homeworkItems: homeworkSupplementItems,
+    manualItems: manualSupplementItems,
     retestItems: retestSupplementItems,
     sortMode: supplementSortMode,
     tasks
@@ -296,11 +315,16 @@ export function SupplementCenter({
     <section className="followUpPage">
       <PageHeader
         actions={(
-          <button className="primaryButton compact" onClick={() => setIsHistoryModalOpen(true)} type="button">
-            최근 한 달 보충 내역
-          </button>
+          <div className="pageHeaderActions">
+            <button className="primaryButton compact" onClick={() => setIsManualCreateModalOpen(true)} type="button">
+              수동 보충 등록
+            </button>
+            <button className="softButton compact" onClick={() => setIsHistoryModalOpen(true)} type="button">
+              최근 한 달 보충 내역
+            </button>
+          </div>
         )}
-        description="숙제보충, 결석보강, 재시험을 별도로 관리합니다."
+        description="숙제보충, 결석보강, 재시험과 직접 작성한 수동 보충을 관리합니다."
         title="보충관리"
       />
 
@@ -388,6 +412,14 @@ export function SupplementCenter({
           student={selectedSupplementStudent}
           tabTitle={activeTabData.title}
           tasks={selectedSupplementTasks}
+        />
+      ) : null}
+      {isManualCreateModalOpen ? (
+        <ManualSupplementCreateModal
+          onClose={() => setIsManualCreateModalOpen(false)}
+          onCreate={openManualSupplementReview}
+          students={students}
+          today={today}
         />
       ) : null}
       {isHistoryModalOpen ? (

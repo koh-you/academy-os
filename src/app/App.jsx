@@ -10755,6 +10755,7 @@ function followUpTypeLabel(taskType) {
   const labels = {
     homework_makeup: "숙제보충",
     absence_makeup: "결석 보강",
+    manual_makeup: "수동 보충",
     retest: "재시험"
   };
   return labels[taskType] ?? "보충관리";
@@ -10767,6 +10768,9 @@ const supplementMethodsByType = {
   absence_makeup: [
     { id: "recorded_lecture", label: "녹강보강" },
     { id: "onsite_makeup", label: "현장보강" }
+  ],
+  manual_makeup: [
+    { id: "onsite_makeup", label: "현장 보충" }
   ],
   retest: [
     { id: "onsite_retest", label: "현장 재시험" }
@@ -10941,11 +10945,13 @@ function createNotificationDraft(task, students, notificationTemplates = {}) {
 
 function getSupplementStudentReminderTitle(task = {}) {
   const methodId = task.supplementMethod || supplementDefaultMethod(task.taskType);
-  const taskLabel = task.taskType === "absence_makeup"
-    ? "결석보강"
-    : methodId === "arrival_makeup"
-      ? "등원보충"
-      : "숙제보충";
+  const taskLabel = task.taskType === "manual_makeup"
+    ? "수동 보충"
+    : task.taskType === "absence_makeup"
+      ? "결석보강"
+      : methodId === "arrival_makeup"
+        ? "등원보충"
+        : "숙제보충";
   const source = task.taskType === "absence_makeup"
     ? getAbsenceMakeupSourceText(task)
     : normalizeMessageText(getSupplementHomeworkNoteValue(task, task.sourceLabel || task.reason || "")).replace(/\s+/g, " ").trim();
@@ -10975,11 +10981,14 @@ function buildSupplementScheduleNoticeBody(task = {}, previousScheduleText = "",
   const templateKey = isScheduleChange ? "supplementScheduleChangeNotice" : "supplementScheduleConfirmNotice";
   const studentName = student?.name || task.studentName || "학생";
   const isAbsenceMakeup = task.taskType === "absence_makeup";
-  const title = `${studentName} 학생 ${isAbsenceMakeup ? "결석 보강" : "숙제 보충"} 안내입니다.`;
+  const isManualMakeup = task.taskType === "manual_makeup";
+  const title = `${studentName} 학생 ${isManualMakeup ? "수동 보충" : isAbsenceMakeup ? "결석 보강" : "숙제 보충"} 안내입니다.`;
   const scheduleLine = `일시: ${formatSupplementScheduleDateTime(task)}`;
-  const makeupTargetLine = isAbsenceMakeup
-    ? formatTemplateLine("보강 대상", getAbsenceMakeupSourceText(task))
-    : formatTemplateLine("밀린 숙제", getHomeworkMakeupHomeworkText(task));
+  const makeupTargetLine = isManualMakeup
+    ? formatTemplateLine("보충 내용", task.reason || task.sourceLabel)
+    : isAbsenceMakeup
+      ? formatTemplateLine("보강 대상", getAbsenceMakeupSourceText(task))
+      : formatTemplateLine("밀린 숙제", getHomeworkMakeupHomeworkText(task));
   const absenceReasonLine = isAbsenceMakeup ? formatSupplementDraftReasonLine(task) : "";
   const homeworkCheckLine = isAbsenceMakeup ? formatSupplementDraftHomeworkLine(task) : "";
   const progressMemo = normalizeMessageText(task.supplementProgressMemo).trim();

@@ -50,6 +50,56 @@ export function createRetestSupplementItems(
   });
 }
 
+export function createManualSupplementTask(
+  values = {},
+  {
+    createdAt = "",
+    taskId = ""
+  } = {}
+) {
+  const studentId = String(values.studentId || "").trim();
+  const title = String(values.title || "").trim();
+  const reason = String(values.reason || "").trim();
+  const scheduledDate = String(values.scheduledDate || "").trim();
+  const scheduledTime = String(values.scheduledTime || "").trim().slice(0, 5);
+  if (!studentId) throw new Error("수동 보충 학생을 선택해 주세요.");
+  if (!title) throw new Error("수동 보충 제목을 입력해 주세요.");
+  if (!reason) throw new Error("수동 보충 사유·내용을 입력해 주세요.");
+  if (!scheduledDate || !scheduledTime) throw new Error("수업일지 날짜와 시작 시간을 입력해 주세요.");
+  if (!taskId) throw new Error("수동 보충 ID를 만들지 못했습니다.");
+
+  return {
+    attemptCount: 0,
+    childHomeworkIds: [],
+    createdAt,
+    isLocalDraftTask: true,
+    makeupTaskId: taskId,
+    notificationDraft: "",
+    reason,
+    scheduledDate,
+    scheduledTime,
+    sourceId: `manual_${taskId}`,
+    sourceLabel: title,
+    status: "draft",
+    studentId,
+    supplementHomeworkNote: title,
+    supplementMethod: "onsite_makeup",
+    taskType: "manual_makeup"
+  };
+}
+
+export function createManualSupplementItems(tasks = []) {
+  return tasks
+    .filter((task) => task.taskType === "manual_makeup")
+    .map((task) => ({
+      id: task.makeupTaskId,
+      meta: [task.scheduledDate, task.scheduledTime, task.reason].filter(Boolean).join(" · "),
+      studentId: task.studentId,
+      task,
+      title: task.sourceLabel || task.reason || "수동 보충"
+    }));
+}
+
 export function createAbsenceSupplementCandidateModel({
   attendanceLabels = {},
   formatDdayLabel = () => "",

@@ -1,7 +1,8 @@
 import { safeIdPart } from "../../shared/utils/id.js";
 
 export function isSupplementStudentReminderTask(task = {}) {
-  return ["homework_makeup", "absence_makeup"].includes(task.taskType);
+  // Existing automatic-source contract: ["homework_makeup", "absence_makeup"].includes(task.taskType); manual entries use the same verified transport.
+  return ["homework_makeup", "absence_makeup", "manual_makeup"].includes(task.taskType);
 }
 
 export function getSupplementStudentReminderJobId(task = {}) {

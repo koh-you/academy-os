@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-07 수동 보충 수업일지·알림 연결
+
+- `manual_makeup`을 자동 숙제·결석·재시험 후보와 분리된 직접 작성 원천으로 추가했다. 재원생과 제목·사유·일정을 입력하면 기존 `makeup_tasks + lessons` versioned save가 insert-only 보충 및 양방향 연결 수업일지를 저장·재조회한다.
+- 최초 `수업일지 일정 만들기`는 학생 일정, 학부모 일정, 당일 11시 학생 알림 3종을 같은 makeupTaskId로 연결한다. 가상 브라우저에서 원천 2종, 알림 3종, 달력 수업일지 진입까지 검증했다.
+- supplement `10/10`, notification `18/18`, scenario·production `827/827`, build `422 modules`, 집중 safe browser `1/1`을 통과했다.
+
 ## 2026-08-07 중첩 모달 ESC 닫기 복구
 
 - 공용 `Modal`의 각 인스턴스가 같은 window ESC 이벤트를 함께 처리하던 원인을 확인했다. DOM의 마지막 modal backdrop만 캡처 단계에서 이벤트를 소비하도록 바꿔 하위 팝업 닫기가 상위 수업일지·달력 키 처리로 전파되지 않는다.
