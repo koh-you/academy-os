@@ -2,6 +2,11 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-07 중첩 모달 ESC 닫기 복구
+
+- 공용 `Modal`의 각 인스턴스가 같은 window ESC 이벤트를 함께 처리하던 원인을 확인했다. DOM의 마지막 modal backdrop만 캡처 단계에서 이벤트를 소비하도록 바꿔 하위 팝업 닫기가 상위 수업일지·달력 키 처리로 전파되지 않는다.
+- 저장·알림 발송 callback은 변경하지 않았다. lesson `21/21`, runtime lint, scenario `827/827`, build, modal inventory, 집중 safe browser `1/1`을 통과했다.
+
 ## 2026-08-07 수업일지 표 레이아웃 복구
 
 - 수업일지 grid의 고정 track 합계가 선언된 최소 폭을 초과해 오른쪽 알림 열이 잘리는 원인을 확인했다. 10개 열을 1290px 기준으로 재배치하고 모든 grid item에 `min-width: 0`을 적용했다.

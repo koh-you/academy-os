@@ -1,4 +1,4 @@
-import { useEffect, useId } from "react";
+import { useEffect, useId, useRef } from "react";
 
 export function Modal({
   ariaLabel = "",
@@ -14,23 +14,28 @@ export function Modal({
   subtitle,
   title
 }) {
+  const backdropRef = useRef(null);
   const titleId = useId();
 
   useEffect(() => {
     function handleEscapeKey(event) {
       if (event.key === "Escape") {
-        if (closeDisabled) return;
+        const modalBackdrops = document.querySelectorAll(".modalBackdrop");
+        const topmostModalBackdrop = modalBackdrops[modalBackdrops.length - 1];
+        if (topmostModalBackdrop !== backdropRef.current) return;
         event.preventDefault();
+        event.stopImmediatePropagation();
+        if (closeDisabled) return;
         onClose?.();
       }
     }
 
-    window.addEventListener("keydown", handleEscapeKey);
-    return () => window.removeEventListener("keydown", handleEscapeKey);
+    window.addEventListener("keydown", handleEscapeKey, true);
+    return () => window.removeEventListener("keydown", handleEscapeKey, true);
   }, [closeDisabled, onClose]);
 
   return (
-    <div className={`modalBackdrop ${backdropClassName}`}>
+    <div className={`modalBackdrop ${backdropClassName}`} ref={backdropRef}>
       <section
         aria-label={hideHeader ? ariaLabel || undefined : undefined}
         aria-labelledby={!hideHeader && title ? titleId : undefined}

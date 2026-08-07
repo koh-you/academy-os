@@ -2085,6 +2085,28 @@ test("lesson journal desktop table keeps long homework followup inside its colum
   expect(pageErrors).toEqual([]);
 });
 
+test("Escape closes only the topmost Alimtalk modal before the lesson journal", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+
+  const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
+  await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
+  const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
+  await expect(lessonJournal).toBeVisible();
+
+  await lessonJournal.getByRole("button", { name: "학부모 알림톡" }).first().click();
+  const alimtalkModal = page.getByRole("dialog", { name: /학부모 알림톡/ });
+  await expect(alimtalkModal).toBeVisible();
+
+  await page.keyboard.press("Escape");
+  await expect(alimtalkModal).toBeHidden();
+  await expect(lessonJournal).toBeVisible();
+
+  await page.keyboard.press("Escape");
+  await expect(lessonJournal).toBeHidden();
+  expect(pageErrors).toEqual([]);
+});
+
 test("lesson journal keeps an in-flight edit and verifies the retried record from the safe source", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   const lessonJournalSaveModuleRequests = [];
