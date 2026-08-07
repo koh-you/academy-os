@@ -297,10 +297,12 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
       Component: components.LessonResearchCenter,
       props: {
         runtime: runtimeBindings.planningTools,
-        appStateSaveState: models.appStateSaveState,
         items: models.lessonResearchItems,
+        lessonResearchSaveBusy: models.lessonResearchSaveBusy,
+        lessonResearchSaveState: models.lessonResearchSaveState,
         onAddItem: actions.handleAddLessonResearchItem,
         onDeleteItem: actions.handleDeleteLessonResearchItem,
+        onSaveItems: actions.handleSaveLessonResearchItems,
         onUpdateItem: actions.handleUpdateLessonResearchItem
       }
     },

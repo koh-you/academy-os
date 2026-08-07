@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-07 수업연구 명시 저장
+
+- 수업연구 교안 배열을 공용 자동저장 10개 key에서 분리해 9개로 줄이고, 전용 controller가 `lessonResearchItems` 한 key만 CAS 저장·Supabase 재조회 검증한다.
+- 교안 추가·수정·삭제는 local draft와 `변경됨` 상태만 갱신한다. 저장 중 후속 수정, 충돌·실패 입력을 보존하며 운영 데이터 쓰기는 실행하지 않았다.
+- runtime lint, 전용 persistence·teacher-view fixture, production `827/827`, build `421 modules`·main `931.16 kB`·lazy `12/12`, 집중 safe browser `1/1`을 통과했다.
+
 ## 2026-08-06 수업일정표 PDF 인쇄 복구
 
 - 새 창 HTML의 `window.onload` 인쇄에만 의존하던 경로를 사용자 클릭 안의 직접 `print()` 호출로 바꾸고, 새 창에 인쇄 재시도 버튼을 제공했다.

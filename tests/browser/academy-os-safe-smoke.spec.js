@@ -682,6 +682,63 @@ test("student wrong problems require explicit verified save and preserve in-flig
   expect(pageErrors).toEqual([]);
 });
 
+test("lesson research requires explicit verified save and preserves in-flight edits", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  const explicitSaves = [];
+  await page.route("**/api/app-state", async (route) => {
+    if (route.request().method() === "POST") {
+      const payload = route.request().postDataJSON();
+      if (Object.keys(payload.states ?? {}).length === 1 && Array.isArray(payload.states?.lessonResearchItems)) {
+        explicitSaves.push(payload);
+        if (explicitSaves.length === 1) {
+          await new Promise((resolve) => setTimeout(resolve, 400));
+        }
+      }
+    }
+    await route.continue();
+  });
+
+  await loginAsTeacher(page);
+  const navigation = page.getByRole("navigation", { name: "주요 화면" });
+  await navigation.getByRole("button", { name: /수업연구/ }).click();
+  await expect(page.getByRole("heading", { name: "수업연구" })).toBeVisible();
+
+  const saveStatus = page.getByRole("status").filter({ hasText: "수업연구 교안" });
+  const titleInput = page.getByLabel("제목");
+  const sourceInput = page.getByLabel("출처 / 수업 맥락");
+  const savedTitle = `안전 명시 저장 교안 ${Date.now()}`;
+  const inFlightSource = "저장 중 후속 수업 맥락";
+
+  await expect(saveStatus).toContainText("저장 완료");
+  await titleInput.fill(savedTitle);
+  await expect(saveStatus).toContainText("변경됨");
+  await page.waitForTimeout(1_000);
+  expect(explicitSaves).toHaveLength(0);
+
+  await page.getByRole("button", { name: "수업연구 저장" }).click();
+  await expect.poll(() => explicitSaves.length).toBe(1);
+  await sourceInput.fill(inFlightSource);
+  await expect(saveStatus).toContainText("변경됨", { timeout: 10_000 });
+  await expect(page.getByText("아직 저장되지 않은 교안 변경이 있습니다. 저장 중 수정했다면 한 번 더 저장해 주세요.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "수업연구 저장" })).toBeEnabled();
+
+  let reread = await (await request.get(`${safeApiBaseUrl}/api/app-state?includeRows=true`)).json();
+  expect(reread.states.lessonResearchItems.find((item) => item.title === savedTitle)?.source).not.toBe(inFlightSource);
+
+  await page.getByRole("button", { name: "수업연구 저장" }).click();
+  await expect.poll(() => explicitSaves.length).toBe(2);
+  await expect(saveStatus).toContainText("저장 완료");
+  reread = await (await request.get(`${safeApiBaseUrl}/api/app-state?includeRows=true`)).json();
+  expect(reread.states.lessonResearchItems.find((item) => item.title === savedTitle)?.source).toBe(inFlightSource);
+
+  await page.reload();
+  await expect(page.getByRole("navigation", { name: "주요 화면" })).toBeVisible();
+  await navigation.getByRole("button", { name: /수업연구/ }).click();
+  await expect(page.getByLabel("제목")).toHaveValue(savedTitle);
+  await expect(page.getByLabel("출처 / 수업 맥락")).toHaveValue(inFlightSource);
+  expect(pageErrors).toEqual([]);
+});
+
 test("teacher homework verification waits for versioned readback and survives reload", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   const requests = [];

@@ -833,12 +833,32 @@ export function ClassManager({ runtime, students, templates, onUpdateClassRoster
   );
 }
 
-export function LessonResearchCenter({ runtime, appStateSaveState = "idle", items, onAddItem, onDeleteItem, onUpdateItem }) {
-  const { appStateAutosaveRisk, normalizeLessonResearchSubject, ssenTypeCatalog } = runtime;
+const lessonResearchSaveMessages = {
+  dirty: "아직 저장되지 않은 교안 변경이 있습니다. 저장 중 수정했다면 한 번 더 저장해 주세요.",
+  failed: "저장하지 못했습니다. 현재 입력을 유지하며, 서버 저장본을 확인한 뒤 다시 저장해 주세요.",
+  idle: "교안을 수정한 뒤 명시적으로 저장해 주세요.",
+  saved: "서버 저장값을 재조회해 일치 여부를 확인했습니다.",
+  saving: "수업연구 교안을 저장하고 있습니다.",
+  verifying: "서버 저장값을 다시 확인하고 있습니다."
+};
+
+export function LessonResearchCenter({
+  runtime,
+  items,
+  lessonResearchSaveBusy = false,
+  lessonResearchSaveState = "idle",
+  onAddItem,
+  onDeleteItem,
+  onSaveItems,
+  onUpdateItem
+}) {
+  const { normalizeLessonResearchSubject, ssenTypeCatalog } = runtime;
   const [selectedSubject, setSelectedSubject] = useState(lessonResearchSubjects[0]);
   const [selectedItemId, setSelectedItemId] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("전체");
   const [statusFilter, setStatusFilter] = useState("전체");
+  const canSaveItems = ["dirty", "failed"].includes(lessonResearchSaveState) && !lessonResearchSaveBusy;
+  const lessonResearchSaveMessage = lessonResearchSaveMessages[lessonResearchSaveState] ?? lessonResearchSaveMessages.idle;
   const catalogUnits = ssenTypeCatalog[selectedSubject] ?? [];
 
   const filteredItems = useMemo(
@@ -890,11 +910,12 @@ export function LessonResearchCenter({ runtime, appStateSaveState = "idle", item
   }
 
   return (
-    <section className="lessonResearchPage">
+    <section aria-busy={lessonResearchSaveBusy ? "true" : undefined} className="lessonResearchPage">
       <PageHeader
         actions={(
           <>
-          <InlineSaveStatus label="수업연구 자동저장" saveState={appStateSaveState} />
+          <InlineSaveStatus label="수업연구 교안" saveState={lessonResearchSaveState} />
+          <button className="primaryButton" disabled={!canSaveItems} onClick={onSaveItems} type="button">수업연구 저장</button>
           <button className="primaryButton" onClick={handleAddItem} type="button">+ 교안 항목 추가</button>
           </>
         )}
@@ -905,7 +926,9 @@ export function LessonResearchCenter({ runtime, appStateSaveState = "idle", item
         title="수업연구"
       />
 
-      <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...appStateAutosaveRisk} />
+      <p aria-live={lessonResearchSaveState === "failed" ? "assertive" : "polite"} className="wrongProblemSaveMessage">
+        {lessonResearchSaveMessage}
+      </p>
 
       <FilterBar className="researchSubjectTabs" label="수업연구 과목 필터">
         {lessonResearchSubjects.map((subject) => (

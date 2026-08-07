@@ -1,6 +1,11 @@
 # Daily Development Handoff
 
-업데이트: 2026-08-06
+업데이트: 2026-08-07
+
+## 2026-08-07 수업연구 명시 저장
+
+- `lessonResearchItems`는 더 이상 500ms 공용 자동저장에 포함되지 않는다. 교안 입력은 local draft로 남고 `수업연구 저장`이 해당 key의 CAS·Supabase 재조회 일치 뒤에만 완료를 표시한다.
+- 저장 중 후속 입력은 `변경됨`으로 보존해 두 번째 명시 저장이 필요하다. 전용 fixture, persistence·teacher-view 경계, runtime lint, production `827/827`, build, 집중 safe browser `1/1`을 통과했다.
 
 ## 2026-08-06 수업일정표 PDF 인쇄 복구
 

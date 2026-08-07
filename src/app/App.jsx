@@ -2870,6 +2870,8 @@ export function App() {
   });
   const [saveStates, setSaveStates] = useState({});
   const [appStateSaveState, setAppStateSaveState] = useState("idle");
+  const [lessonResearchSaveState, setLessonResearchSaveState] = useState("idle");
+  const [lessonResearchSaveBusy, setLessonResearchSaveBusy] = useState(false);
   const [wrongProblemSaveState, setWrongProblemSaveState] = useState("idle");
   const [wrongProblemSaveBusy, setWrongProblemSaveBusy] = useState(false);
   const [problemBookSaveState, setProblemBookSaveState] = useState("idle");
@@ -2934,6 +2936,8 @@ export function App() {
   const studentIntakeSaveControllerRef = useRef(null);
   const isApplyingRemoteAppStateRef = useRef(false);
   const appStatePersistenceControllerRef = useRef(null);
+  const lessonResearchPersistenceControllerRef = useRef(null);
+  const lessonResearchSaveRevisionRef = useRef(0);
   const wrongProblemPersistenceControllerRef = useRef(null);
   const wrongProblemSaveRevisionRef = useRef(0);
   const notificationJobsRefreshControllerRef = useRef(null);
@@ -2966,7 +2970,6 @@ export function App() {
     deletedLessonBundles,
     generatedLessonControls,
     lessonNotificationPlans,
-    lessonResearchItems,
     notificationLogs,
     examPostTargetStudentIds,
     tallySubmissions,
@@ -2977,13 +2980,13 @@ export function App() {
     deletedLessonBundles,
     generatedLessonControls,
     lessonNotificationPlans,
-    lessonResearchItems,
     notificationLogs,
     examPostTargetStudentIds,
     tallySubmissions,
     tallySummaries
   ]);
   const initialSharedAppStateRef = useRef(sharedAppState);
+  const initialLessonResearchItemsRef = useRef(lessonResearchItems);
   const initialWrongProblemsRef = useRef(wrongProblems);
   const persistedSharedAppStateRef = useRef({});
 
@@ -3023,6 +3026,22 @@ export function App() {
       });
     }
     return wrongProblemPersistenceControllerRef.current;
+  }
+
+  function getLessonResearchPersistenceController() {
+    if (!lessonResearchPersistenceControllerRef.current) {
+      lessonResearchPersistenceControllerRef.current = createAppStatePersistenceController({
+        onError: (error) => console.error(error),
+        onState: setLessonResearchSaveState,
+        read: () => getJsonWithTimeout(
+          `/api/app-state?includeRows=true&verify=lesson-research-${Date.now()}`,
+          15000,
+          "수업연구 저장 확인이 15초를 넘었습니다. 현재 입력을 유지한 채 잠시 뒤 다시 확인해 주세요."
+        ),
+        write: ({ expectedUpdatedAt, states }) => postAppState(states, { expectedUpdatedAt })
+      });
+    }
+    return lessonResearchPersistenceControllerRef.current;
   }
 
   useEffect(() => {
@@ -3239,6 +3258,15 @@ export function App() {
             stateRows: appStateResult.stateRows ?? [],
             states: persistedSharedAppStateRef.current
           });
+          const persistedLessonResearchItems = Array.isArray(states.lessonResearchItems)
+            ? normalizeLessonResearchItems(states.lessonResearchItems)
+            : initialLessonResearchItemsRef.current;
+          getLessonResearchPersistenceController().setSnapshot({
+            keys: ["lessonResearchItems"],
+            stateRows: appStateResult.stateRows ?? [],
+            states: { lessonResearchItems: persistedLessonResearchItems }
+          });
+          setLessonResearchSaveState("saved");
           const persistedWrongProblems = Array.isArray(states.wrongProblems)
             ? states.wrongProblems
             : initialWrongProblemsRef.current;
@@ -3300,6 +3328,7 @@ export function App() {
           persistedSharedAppStateRef.current = initialSharedAppStateRef.current;
           const initialAppState = {
             ...initialSharedAppStateRef.current,
+            lessonResearchItems: initialLessonResearchItemsRef.current,
             wrongProblems: initialWrongProblemsRef.current
           };
           const seededResult = await postAppState(initialAppState);
@@ -3314,6 +3343,12 @@ export function App() {
             stateRows: seededResult.stateRows ?? [],
             states: { wrongProblems: initialWrongProblemsRef.current }
           });
+          getLessonResearchPersistenceController().setSnapshot({
+            keys: ["lessonResearchItems"],
+            stateRows: seededResult.stateRows ?? [],
+            states: { lessonResearchItems: initialLessonResearchItemsRef.current }
+          });
+          setLessonResearchSaveState("saved");
           setWrongProblemSaveState("saved");
           setIsAppStateReady(true);
         }
@@ -3397,6 +3432,8 @@ export function App() {
   useEffect(() => () => {
     appStatePersistenceControllerRef.current?.dispose();
     appStatePersistenceControllerRef.current = null;
+    lessonResearchPersistenceControllerRef.current?.dispose();
+    lessonResearchPersistenceControllerRef.current = null;
     wrongProblemPersistenceControllerRef.current?.dispose();
     wrongProblemPersistenceControllerRef.current = null;
   }, [session?.role]);
@@ -6945,17 +6982,38 @@ export function App() {
   }
 
   function handleAddLessonResearchItem(subject, typeInfo) {
+    lessonResearchSaveRevisionRef.current += 1;
+    setLessonResearchSaveState("dirty");
     setLessonResearchItems((current) => [createLessonResearchItem(subject, typeInfo), ...current]);
   }
 
   function handleDeleteLessonResearchItem(researchItemId) {
+    lessonResearchSaveRevisionRef.current += 1;
+    setLessonResearchSaveState("dirty");
     setLessonResearchItems((current) => current.filter((item) => item.researchItemId !== researchItemId));
   }
 
   function handleUpdateLessonResearchItem(researchItemId, field, value) {
+    lessonResearchSaveRevisionRef.current += 1;
+    setLessonResearchSaveState("dirty");
     setLessonResearchItems((current) => current.map((item) => (
       item.researchItemId === researchItemId ? { ...item, [field]: value, updatedAt: today } : item
     )));
+  }
+
+  async function handleSaveLessonResearchItems() {
+    if (lessonResearchSaveBusy) return { ok: false };
+    const requestedRevision = lessonResearchSaveRevisionRef.current;
+    setLessonResearchSaveBusy(true);
+    try {
+      const result = await getLessonResearchPersistenceController().save({ lessonResearchItems });
+      if (result?.ok && requestedRevision !== lessonResearchSaveRevisionRef.current) {
+        setLessonResearchSaveState("dirty");
+      }
+      return result;
+    } finally {
+      setLessonResearchSaveBusy(false);
+    }
   }
 
   function handleRefreshNotificationHistory({ date = "" } = {}) {
@@ -7045,6 +7103,8 @@ export function App() {
       lessonHistoryActionState,
       lessonNotificationPlans,
       lessonResearchItems,
+      lessonResearchSaveBusy,
+      lessonResearchSaveState,
       lessons,
       lessonsForDate,
       lessonUndoStack,
@@ -7154,6 +7214,7 @@ export function App() {
       handleSaveAcademyReminder,
       handleSaveAcademyTest,
       handleSaveLessonJournalDrafts,
+      handleSaveLessonResearchItems,
       handleSaveMakeupTask,
       handleSaveMonthlySettlementMonth,
       handleSaveRecord,

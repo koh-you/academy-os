@@ -1,6 +1,11 @@
 # Academy OS Current Status
 
-업데이트: 2026-08-06
+업데이트: 2026-08-07
+
+## 2026-08-07 수업연구 명시 저장
+
+- `lessonResearchItems`를 공용 `app_state` 자동저장에서 분리했다. 교안 추가·수정·삭제는 local draft를 `변경됨`으로 유지하고 `수업연구 저장`에서 해당 key만 `updated_at` CAS·Supabase 재조회 대조한다.
+- 저장 중 후속 수정은 자동 덮어쓰기·재전송하지 않고 다시 저장할 입력으로 보존한다. production `827/827`, build `421 modules`, 집중 safe browser `1/1`을 통과했다.
 
 ## 2026-08-06 수업일정표 PDF 인쇄 복구
 
@@ -224,7 +229,7 @@
 2. App 3차 리팩터링 3-0~3-8은 production main 43.1%·gzip 45.3% 감소, 12개 물리 lazy chunk, App Babel 500 KB 경고 제거와 종료 소유권 감사까지 완료했다.
 3. App/API 4차는 4-0 기준선과 4-1a~4-1x, 4-1 종료 감사까지 완료했다. 다음은 4-2 DB row/domain model 변환 기준선을 시작하며 Storage·Tally·유료 AI·실제 provider route는 4-5 대상으로 남긴다.
 4. `app_state`에서 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
-   - 학생별 오답 `wrongProblems`는 명시 저장 전환을 완료했다. 다음 후보는 별도 저장 의미가 분명한 `lessonResearchItems`이며 새 작업에서 범위를 다시 확인한다.
+   - 학생별 오답 `wrongProblems`와 수업연구 `lessonResearchItems`는 명시 저장 전환을 완료했다. 다음 후보는 새 작업에서 저장 의미와 사용자 행동을 다시 확인한 뒤 고른다.
    - 즉시 사람 판단이 필요하지 않은 발견은 queue/worklog에 남기고 AI 검수와 다음 단계를 연쇄 진행한다.
 
 ## 자동 작업
