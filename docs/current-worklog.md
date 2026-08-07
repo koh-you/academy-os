@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-07 수업일지 표 레이아웃 복구
+
+- 수업일지 grid의 고정 track 합계가 선언된 최소 폭을 초과해 오른쪽 알림 열이 잘리는 원인을 확인했다. 10개 열을 1290px 기준으로 재배치하고 모든 grid item에 `min-width: 0`을 적용했다.
+- `확인할 숙제`의 공백 없는 긴 문항 목록은 `overflow-wrap: anywhere`로 과제 상태 셀 안에서 줄바꿈한다. 저장·알림 callback은 변경하지 않았다.
+- lesson `21/21`, runtime lint, scenario `827/827`, build `421 modules`, 1417×945 집중 safe browser `1/1`을 통과했다.
+
 ## 2026-08-07 수업연구 명시 저장
 
 - 수업연구 교안 배열을 공용 자동저장 10개 key에서 분리해 9개로 줄이고, 전용 controller가 `lessonResearchItems` 한 key만 CAS 저장·Supabase 재조회 검증한다.

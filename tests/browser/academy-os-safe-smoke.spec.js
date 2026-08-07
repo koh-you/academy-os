@@ -2032,6 +2032,59 @@ test("lesson hub top reminders can collapse and expand without runtime errors", 
   expect(pageErrors).toEqual([]);
 });
 
+test("lesson journal desktop table keeps long homework followup inside its column", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  const longHomeworkFollowup = "개념원리 연습문제 93,95,96,114,119,120,121,140~148,182,183,214~216,243,245,249,283,284,291,295";
+  await page.route("**/api/lesson-records*", async (route) => {
+    if (route.request().method() !== "GET") {
+      await route.continue();
+      return;
+    }
+    const response = await route.fetch();
+    const payload = await response.json();
+    await route.fulfill({
+      response,
+      json: {
+        ...payload,
+        records: (payload.records ?? []).map((record) => (
+          record.lessonStudentRecordId === "safe-cross-month-blank-record"
+            ? { ...record, homeworkFollowupMethod: "next_lesson", homeworkFollowupText: longHomeworkFollowup }
+            : record
+        ))
+      }
+    });
+  });
+  await page.setViewportSize({ width: 1417, height: 945 });
+  await loginAsTeacher(page);
+
+  const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
+  await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
+  const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
+
+  const table = lessonJournal.getByRole("region", { name: "수업일지 학생 기록" });
+  const row = table.locator(".journalRow:not(.journalHead)").first();
+  const followup = row.locator(".homeworkFollowupCheck");
+  const assignmentCell = row.locator(".assignmentStatusCell");
+  await expect(followup).toContainText(longHomeworkFollowup);
+  const layout = await row.evaluate((element) => {
+    const assignment = element.querySelector(".assignmentStatusCell").getBoundingClientRect();
+    const warning = element.querySelector(".homeworkFollowupCheck").getBoundingClientRect();
+    const comments = [...element.querySelectorAll(".journalCommentCell")].map((cell) => cell.getBoundingClientRect());
+    const shell = element.closest(".dataTableShell");
+    return {
+      commentsInsideRow: comments.every((cell) => cell.right <= element.getBoundingClientRect().right + 1),
+      desktopFitsWithoutScroll: shell.scrollWidth <= shell.clientWidth + 1,
+      warningInsideAssignment: warning.left >= assignment.left - 1 && warning.right <= assignment.right + 1
+    };
+  });
+  expect(layout).toEqual({
+    commentsInsideRow: true,
+    desktopFitsWithoutScroll: true,
+    warningInsideAssignment: true
+  });
+  expect(pageErrors).toEqual([]);
+});
+
 test("lesson journal keeps an in-flight edit and verifies the retried record from the safe source", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   const lessonJournalSaveModuleRequests = [];
