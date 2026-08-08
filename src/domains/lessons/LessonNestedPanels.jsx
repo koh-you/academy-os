@@ -531,6 +531,9 @@ export function SupplementMakeupLessonDetail({
 export function PreparationMemoModal({
   runtime,
   acknowledgedMemoCutoff = null,
+  homeworkFollowup = null,
+  homeworkFollowupLesson = null,
+  homeworkFollowupRecord = null,
   lesson,
   onChangeRecord,
   onClose,
@@ -547,6 +550,7 @@ export function PreparationMemoModal({
     createEmptyRecord,
     createLessonStudentRecordId,
     formatKoreaTimeLabel,
+    getHomeworkFollowupPatch,
     getSaveButtonLabel
   } = runtime;
   const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
@@ -563,6 +567,9 @@ export function PreparationMemoModal({
     sourceRecordId: currentRecord.prepMemoCheckedSourceRecordId ?? ""
   });
   const [localSaveError, setLocalSaveError] = useState("");
+  const [pendingHomeworkFollowup, setPendingHomeworkFollowup] = useState(homeworkFollowup);
+  const [homeworkFollowupCheckState, setHomeworkFollowupCheckState] = useState("idle");
+  const [homeworkFollowupCheckError, setHomeworkFollowupCheckError] = useState("");
   const [isClosingAfterSave, setIsClosingAfterSave] = useState(false);
   const preparationMemoModel = createLessonJournalPreparationMemoModel({
     acknowledgedMemoCutoff,
@@ -664,6 +671,44 @@ export function PreparationMemoModal({
     });
   }
 
+  async function checkHomeworkFollowup() {
+    if (
+      !pendingHomeworkFollowup?.text ||
+      !homeworkFollowupLesson?.lessonId ||
+      !homeworkFollowupRecord ||
+      homeworkFollowupCheckState === "saving"
+    ) {
+      return false;
+    }
+    setHomeworkFollowupCheckError("");
+    setHomeworkFollowupCheckState("saving");
+    const sourceRecordId = homeworkFollowupRecord.lessonStudentRecordId ||
+      createLessonStudentRecordId(homeworkFollowupLesson.lessonId, student.studentId);
+    const saved = await onSaveRecord(sourceRecordId, homeworkFollowupLesson, student, {
+      ...homeworkFollowupRecord,
+      ...getHomeworkFollowupPatch(homeworkFollowupRecord),
+      updatedBy: "instructor_owner_001",
+      updatedAt: new Date().toISOString()
+    }, {
+      skipNotificationRefresh: true,
+      skipRelatedHomeworks: true,
+      verifyFields: [
+        "homeworkFollowupMethod",
+        "homeworkFollowupText",
+        "homeworkFollowupSourceHomeworkId",
+        "preparationMemo"
+      ]
+    });
+    if (saved === false) {
+      setHomeworkFollowupCheckError("확인할 숙제 저장 실패 · 항목을 유지했습니다. 다시 시도해 주세요.");
+      setHomeworkFollowupCheckState("failed");
+      return false;
+    }
+    setPendingHomeworkFollowup(null);
+    setHomeworkFollowupCheckState("saved");
+    return true;
+  }
+
   function closeMemo() {
     if (isClosingAfterSave || saveState === "saving") return;
     setIsClosingAfterSave(true);
@@ -687,11 +732,15 @@ export function PreparationMemoModal({
       draftMemo={draftMemo}
       draftParentVisible={draftParentVisible}
       draftStudentVisible={draftStudentVisible}
+      homeworkFollowup={pendingHomeworkFollowup}
+      homeworkFollowupCheckError={homeworkFollowupCheckError}
+      homeworkFollowupCheckState={homeworkFollowupCheckState}
       isClosingAfterSave={isClosingAfterSave}
       lesson={lesson}
       localSaveError={localSaveError}
       model={preparationMemoModel}
       onCheckPriorMemo={checkPriorMemo}
+      onCheckHomeworkFollowup={checkHomeworkFollowup}
       onClose={closeMemo}
       onSave={saveMemo}
       onUpdateDraft={updateDraft}

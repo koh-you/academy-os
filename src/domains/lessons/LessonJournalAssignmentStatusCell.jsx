@@ -8,14 +8,12 @@ export function LessonJournalAssignmentStatusCell({
   journalEditMode,
   onApplyHomeworkFollowupMethod,
   onAssignmentStatusChange,
-  previousHomeworkFollowup,
   previousHomeworkTitle,
   selectedHomeworkFollowupMethod
 }) {
   const model = createLessonJournalAssignmentStatusCellModel({
     homeworkFollowupOptions,
     journalEditMode,
-    previousHomeworkFollowup,
     previousHomeworkTitle,
     selectedHomeworkFollowupMethod
   });
@@ -46,11 +44,6 @@ export function LessonJournalAssignmentStatusCell({
             </button>
           ))}
         </div>
-      ) : null}
-      {model.pendingHomeworkFollowupText ? (
-        <span className="homeworkFollowupCheck">
-          확인할 숙제 · {model.pendingHomeworkFollowupText}
-        </span>
       ) : null}
     </div>
   );

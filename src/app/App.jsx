@@ -2659,6 +2659,7 @@ const lessonNestedPanelRuntime = Object.freeze({
   getActiveLessonStudents,
   getLessonContent,
   getLessonHomework,
+  getHomeworkFollowupPatch,
   getSaveButtonLabel,
   getSupplementScheduleChangeDetailSeed,
   getSupplementTaskSourceLabel,

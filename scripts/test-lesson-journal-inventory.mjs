@@ -611,8 +611,7 @@ for (const extractedAssignmentStatusContract of [
   "createLessonJournalAssignmentStatusCellModel",
   "onAssignmentStatusChange(event.target.value)",
   "onApplyHomeworkFollowupMethod(method.id)",
-  "showHomeworkFollowupActions",
-  "pendingHomeworkFollowupText"
+  "showHomeworkFollowupActions"
 ]) {
   assert.ok(
     `${assignmentStatusCellSource}\n${assignmentStatusCellModelSource}`.includes(extractedAssignmentStatusContract),

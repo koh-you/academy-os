@@ -10,12 +10,10 @@ assert.deepEqual(
       { id: "next_lesson", label: "다음시간까지" }
     ],
     journalEditMode: true,
-    previousHomeworkFollowup: { method: "next_lesson", text: "TARGET 오답 5문제" },
     previousHomeworkTitle: "지난 숙제",
     selectedHomeworkFollowupMethod: "next_lesson"
   }),
   {
-    pendingHomeworkFollowupText: "TARGET 오답 5문제",
     selectedHomeworkFollowupMethod: "next_lesson",
     showHomeworkFollowupActions: true
   }
@@ -25,12 +23,10 @@ assert.deepEqual(
   createLessonJournalAssignmentStatusCellModel({
     homeworkFollowupOptions: [{ id: "stay_after", label: "남아서 하고 가기" }],
     journalEditMode: false,
-    previousHomeworkFollowup: { method: "stay_after", text: "CONTROL 숙제" },
     previousHomeworkTitle: "지난 숙제",
     selectedHomeworkFollowupMethod: "stay_after"
   }),
   {
-    pendingHomeworkFollowupText: "",
     selectedHomeworkFollowupMethod: "stay_after",
     showHomeworkFollowupActions: false
   }
@@ -67,11 +63,11 @@ for (const contract of [
   "assignmentStatusOptions.map",
   "onAssignmentStatusChange(event.target.value)",
   "onApplyHomeworkFollowupMethod(method.id)",
-  "숙제보충 처리 방식",
-  "확인할 숙제"
+  "숙제보충 처리 방식"
 ]) {
   assert.ok(componentSource.includes(contract), `missing assignment status cell contract: ${contract}`);
 }
+assert.ok(!componentSource.includes("확인할 숙제"), "pending homework followup must move to the lesson memo");
 for (const forbiddenSideEffect of ["fetch(", "postJson", "/api/", "useState", "useEffect"]) {
   assert.ok(!componentSource.includes(forbiddenSideEffect), `assignment status cell must stay callback-only: ${forbiddenSideEffect}`);
 }

@@ -3,8 +3,37 @@ import { readFile } from "node:fs/promises";
 import {
   createLessonJournalPreparationMemoModel,
   getLessonStudentRecordDate,
-  getLessonStudentRecordIdentity
+  getLessonStudentRecordIdentity,
+  selectLessonJournalHomeworkFollowupContext
 } from "../src/domains/lessons/lessonJournalPreparationMemoModel.js";
+
+const previousFollowupRecord = {
+  lessonStudentRecordId: "lsr_regular_2026-07-20_student_target",
+  homeworkFollowupMethod: "next_lesson",
+  homeworkFollowupText: "TARGET 오답 5문제"
+};
+const followupContext = selectLessonJournalHomeworkFollowupContext({
+  getHomeworkFollowup: (record) => record.homeworkFollowupMethod
+    ? { method: record.homeworkFollowupMethod, text: record.homeworkFollowupText }
+    : null,
+  previousRecord: previousFollowupRecord,
+  referenceRecord: {
+    homeworkFollowupMethod: "next_lesson",
+    homeworkFollowupText: "CONTROL 숙제"
+  }
+});
+assert.deepEqual(followupContext, {
+  followup: { method: "next_lesson", text: "TARGET 오답 5문제" },
+  sourceRecord: previousFollowupRecord
+});
+assert.deepEqual(
+  selectLessonJournalHomeworkFollowupContext({
+    getHomeworkFollowup: (record) => record.followup ?? null,
+    previousRecord: { followup: { method: "stay_after", text: "당일 보충" } },
+    referenceRecord: { followup: { method: "next_lesson", text: "REFERENCE 확인" } }
+  }).followup,
+  { method: "next_lesson", text: "REFERENCE 확인" }
+);
 
 const previousTarget = createLessonJournalPreparationMemoModel({
   currentRecord: {},
@@ -139,6 +168,7 @@ for (const appContract of [
   "createLessonJournalPreparationMemoModel({",
   "function saveMemo()",
   "function checkPriorMemo()",
+  "function checkHomeworkFollowup()",
   "return onSaveRecord(recordId, lesson, student",
   "onClose={closeMemo}"
 ]) {

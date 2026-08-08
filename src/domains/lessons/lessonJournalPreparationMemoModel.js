@@ -16,6 +16,22 @@ export function getLessonStudentRecordDate(record = null) {
   return String(record.lessonStudentRecordId ?? "").match(/\d{4}-\d{2}-\d{2}/)?.[0] ?? "";
 }
 
+export function selectLessonJournalHomeworkFollowupContext({
+  getHomeworkFollowup = () => null,
+  previousRecord = null,
+  referenceRecord = null
+} = {}) {
+  const previousFollowup = getHomeworkFollowup(previousRecord ?? {});
+  if (previousFollowup?.method === "next_lesson" && previousFollowup.text) {
+    return { followup: previousFollowup, sourceRecord: previousRecord };
+  }
+  const referenceFollowup = getHomeworkFollowup(referenceRecord ?? {});
+  if (referenceFollowup?.method === "next_lesson" && referenceFollowup.text) {
+    return { followup: referenceFollowup, sourceRecord: referenceRecord };
+  }
+  return { followup: null, sourceRecord: null };
+}
+
 export function createLessonJournalPreparationMemoModel({
   acknowledgedMemoCutoff = null,
   currentRecord = {},

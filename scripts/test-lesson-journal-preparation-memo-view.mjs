@@ -45,6 +45,7 @@ for (const appContract of [
   "<LessonJournalPreparationMemoView",
   "model={preparationMemoModel}",
   "onCheckPriorMemo={checkPriorMemo}",
+  "onCheckHomeworkFollowup={checkHomeworkFollowup}",
   "onClose={closeMemo}",
   "onSave={saveMemo}",
   "onUpdateDraft={updateDraft}",
@@ -55,6 +56,7 @@ for (const appContract of [
 for (const retainedControllerContract of [
   "function saveMemo()",
   "function checkPriorMemo()",
+  "function checkHomeworkFollowup()",
   "function closeMemo()",
   "return onSaveRecord(recordId, lesson, student"
 ]) {
@@ -81,6 +83,10 @@ for (const viewContract of [
   'onUpdateDraft("prepStudentVisible", event.target.checked)',
   'onUpdateDraft("prepParentVisible", event.target.checked)',
   "onCheckPriorMemo()",
+  "onCheckHomeworkFollowup()",
+  'className={`prepMemoHomeworkFollowup ${homeworkFollowupCheckState}`}',
+  "확인할 숙제",
+  "확인 완료",
   "onClick={onSave}",
   "{saveButtonLabel}"
 ]) {

@@ -7,11 +7,15 @@ export function LessonJournalPreparationMemoView({
   draftMemo,
   draftParentVisible,
   draftStudentVisible,
+  homeworkFollowup,
+  homeworkFollowupCheckError,
+  homeworkFollowupCheckState,
   isClosingAfterSave,
   lesson,
   localSaveError,
   model,
   onCheckPriorMemo,
+  onCheckHomeworkFollowup,
   onClose,
   onSave,
   onUpdateDraft,
@@ -75,6 +79,28 @@ export function LessonJournalPreparationMemoView({
           )}
         </section>
         <section className="prepMemoDraft">
+          {homeworkFollowup?.text || homeworkFollowupCheckState === "saved" ? (
+            <div className={`prepMemoHomeworkFollowup ${homeworkFollowupCheckState}`}>
+              <strong>확인할 숙제</strong>
+              {homeworkFollowup?.text ? <p>{homeworkFollowup.text}</p> : null}
+              {homeworkFollowup?.text ? (
+                <label className="prepMemoHomeworkFollowupCheck">
+                  <input
+                    checked={false}
+                    disabled={homeworkFollowupCheckState === "saving"}
+                    onChange={(event) => {
+                      if (event.target.checked) onCheckHomeworkFollowup();
+                    }}
+                    type="checkbox"
+                  />
+                  {homeworkFollowupCheckState === "saving" ? "확인 저장 중" : "확인 완료"}
+                </label>
+              ) : (
+                <span className="prepMemoHomeworkFollowupSaved">✓ 확인 완료 · 이후 수업일지에 다시 표시하지 않습니다.</span>
+              )}
+              {homeworkFollowupCheckError ? <span className="saveState save-failed">{homeworkFollowupCheckError}</span> : null}
+            </div>
+          ) : null}
           <label>
             강사용 메모
             <textarea

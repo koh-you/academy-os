@@ -29,6 +29,7 @@ assert.deepEqual(runtimeKeys, [
   "formatKoreaTimeLabel",
   "formatKoreanDateTime",
   "getActiveLessonStudents",
+  "getHomeworkFollowupPatch",
   "getLessonContent",
   "getLessonHomework",
   "getSaveButtonLabel",

@@ -25,6 +25,7 @@ import { createLessonJournalReservationAuditResult } from "./lessonJournalReserv
 import { applyCanceledLessonJournalReservationJob } from "./lessonJournalReservationAuditTransitions.js";
 import { createLessonJournalReservationControlModel } from "./lessonJournalReservationControlModel.js";
 import { createLessonJournalReservationSyncStatus } from "./lessonJournalReservationSyncModel.js";
+import { selectLessonJournalHomeworkFollowupContext } from "./lessonJournalPreparationMemoModel.js";
 import { isClosureLesson as getIsClosureLesson } from "./lessonClosure.js";
 import {
   createLessonNotificationJobId,
@@ -625,8 +626,11 @@ export function LessonJournalDetail({
             const previousLessonContent = getLessonContent(previousEditableRecord);
             const previousPreparationMemo = previousMemoRecord?.preparationMemo?.trim() ?? "";
             const referencePreparationMemo = referenceRecord?.preparationMemo?.trim() ?? "";
-            const previousHomeworkFollowup = getHomeworkFollowupFromRecord(previousRecord ?? {})
-              ?? getHomeworkFollowupFromRecord(referenceRecord ?? {});
+            const homeworkFollowupContext = selectLessonJournalHomeworkFollowupContext({
+              getHomeworkFollowup: getHomeworkFollowupFromRecord,
+              previousRecord,
+              referenceRecord
+            });
             const parentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "parent");
             const studentCommentSendStatus = getEffectiveCommentSendStatus(record, student, "student");
             const parentCommentState = getCommentButtonState(record.teacherComment, parentCommentSendStatus);
@@ -647,7 +651,6 @@ export function LessonJournalDetail({
                     applyHomeworkFollowupMethod(student, record, effectivePreviousHomework, method),
                   onAssignmentStatusChange: (value) =>
                     handleAssignmentStatusChange(student, record, effectivePreviousHomework, value),
-                  previousHomeworkFollowup,
                   previousHomeworkTitle: effectivePreviousHomework?.title,
                   selectedHomeworkFollowupMethod
                 }}
@@ -691,6 +694,8 @@ export function LessonJournalDetail({
                   acknowledgedMemoCutoffDate: previousMemoContext.acknowledgedMemoCutoffDate,
                   onOpen: () => setPrepMemoModal({
                     acknowledgedMemoCutoff: previousMemoContext.acknowledgedMemoCutoff,
+                    homeworkFollowup: homeworkFollowupContext.followup,
+                    homeworkFollowupRecord: homeworkFollowupContext.sourceRecord,
                     nextHomework,
                     previousHomework,
                     previousMemoRecord,
@@ -764,6 +769,9 @@ export function LessonJournalDetail({
         <PreparationMemoModal
           runtime={nestedPanels}
           acknowledgedMemoCutoff={prepMemoModal.acknowledgedMemoCutoff}
+          homeworkFollowup={prepMemoModal.homeworkFollowup}
+          homeworkFollowupRecord={prepMemoModal.homeworkFollowupRecord}
+          homeworkFollowupLesson={prepMemoModal.homeworkFollowupRecord ? lessons.find((item) => item.lessonId === prepMemoModal.homeworkFollowupRecord.lessonId) : null}
           lesson={lesson}
           onChangeRecord={onChangeRecord}
           onClose={() => setPrepMemoModal(null)}
