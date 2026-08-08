@@ -30,6 +30,7 @@ import { createExamPrepRowSaveController } from "../domains/exams/examPrepRowSav
 import { normalizeExamPrepRowReviewDraft } from "../domains/exams/examReviewDraft.js";
 import { createStudentExamPrepRow } from "../domains/exams/studentExamPrepRow.js";
 import {
+  createWithdrawalStudentMutation,
   getWithdrawalFutureLessonStartDate,
   isStudentVisibleInLessonJournal
 } from "../domains/students/withdrawalLessonBoundary.js";
@@ -5884,22 +5885,26 @@ export function App() {
   }
 
   async function handleDeleteStudent(studentId, withdrawalInfo = {}) {
-    const removedStudent = students.find((student) => student.studentId === studentId);
-    if (!removedStudent) return;
-    const pausedStudent = {
-      ...removedStudent,
-      status: "paused",
-      withdrawalReason: withdrawalInfo.reason || removedStudent.withdrawalReason || "other",
-      withdrawalComment: withdrawalInfo.comment ?? removedStudent.withdrawalComment ?? "",
+    const sourceBefore = await readClassRosterSources();
+    const { alreadyWithdrawn, nextStudents, pausedStudent } = createWithdrawalStudentMutation({
+      studentId,
+      students: sourceBefore.students,
+      withdrawalInfo,
       withdrawnAt: new Date().toISOString()
-    };
+    });
+    if (alreadyWithdrawn) {
+      applyVerifiedClassRosterSources({
+        lessonChanges: [],
+        studentChanges: [{ after: pausedStudent, before: students.find((student) => student.studentId === studentId) ?? null }]
+      }, sourceBefore.students, sourceBefore.lessons);
+      return pausedStudent;
+    }
     const withdrawalDate = getKoreaDateString(new Date(pausedStudent.withdrawnAt));
     const futureLessonStartDate = getWithdrawalFutureLessonStartDate(withdrawalDate);
-    const nextStudents = students.map((student) => student.studentId === studentId ? pausedStudent : student);
     await persistClassRosterMutation({
       fromDate: futureLessonStartDate,
       nextStudents,
-      previousStudents: students,
+      previousStudents: sourceBefore.students,
       timeoutMessage: "퇴원 처리와 미래 수업 명단 저장이 30초를 넘었습니다. 입력을 유지한 채 서버 상태를 확인해 주세요."
     });
     return pausedStudent;

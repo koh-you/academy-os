@@ -367,6 +367,55 @@ test("class roster save keeps the modal draft on conflict and verifies student p
   expect(pageErrors).toEqual([]);
 });
 
+test("student withdrawal rebases a stale student row before saving future rosters", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  await page.clock.install({ time: new Date("2026-08-03T09:00:00+09:00") });
+  const rosterRequests = [];
+  await page.route("**/api/class-rosters/save", async (route) => {
+    rosterRequests.push(route.request().postDataJSON());
+    const response = await route.fetch();
+    await route.fulfill({ response });
+  });
+
+  await loginAsTeacher(page);
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
+
+  const studentsBefore = await (await request.get(`${safeApiBaseUrl}/api/students`)).json();
+  const staleTarget = studentsBefore.students.find((student) => student.studentId === "safe-settlement-student");
+  const externallyUpdatedStudent = { ...staleTarget, schoolName: "다른 화면 최신 학교" };
+  const externalSaveResponse = await request.post(`${safeApiBaseUrl}/api/students`, {
+    data: { expectedUpdatedAt: staleTarget.updatedAt, student: externallyUpdatedStudent }
+  });
+  expect(externalSaveResponse.ok()).toBeTruthy();
+  const externallySavedStudent = (await externalSaveResponse.json()).student;
+  expect(externallySavedStudent.updatedAt).not.toBe(staleTarget.updatedAt);
+
+  await page.getByRole("button", { name: "정산 미리보기 학생 퇴원 처리" }).click();
+  const withdrawalModal = page.getByRole("dialog", { name: "학생 퇴원 처리 확인" });
+  await withdrawalModal.getByLabel("코멘트").fill("특강수강생");
+  await withdrawalModal.getByRole("button", { name: "퇴원 처리", exact: true }).click();
+  await expect(withdrawalModal).toBeHidden();
+
+  expect(rosterRequests).toHaveLength(1);
+  const studentChange = rosterRequests[0].studentChanges.find((change) => change.after.studentId === "safe-settlement-student");
+  expect(studentChange.before.updatedAt).toBe(externallySavedStudent.updatedAt);
+  expect(studentChange.after.schoolName).toBe("다른 화면 최신 학교");
+  expect(studentChange.after.withdrawalComment).toBe("특강수강생");
+
+  const [studentsAfterResponse, lessonsAfterResponse] = await Promise.all([
+    request.get(`${safeApiBaseUrl}/api/students`),
+    request.get(`${safeApiBaseUrl}/api/lessons`)
+  ]);
+  const studentsAfter = (await studentsAfterResponse.json()).students;
+  const lessonsAfter = (await lessonsAfterResponse.json()).lessons;
+  const withdrawnStudent = studentsAfter.find((student) => student.studentId === "safe-settlement-student");
+  expect(withdrawnStudent.status).toBe("paused");
+  expect(withdrawnStudent.schoolName).toBe("다른 화면 최신 학교");
+  expect(lessonsAfter.find((lesson) => lesson.lessonId === "safe-settlement-future-roster")?.studentIds).not.toContain("safe-settlement-student");
+  expect(lessonsAfter.find((lesson) => lesson.lessonId === "safe-settlement-august-regular")?.studentIds).toContain("safe-settlement-student");
+  expect(pageErrors).toEqual([]);
+});
+
 test("student row save rebases its version and preserves an in-flight follow-up edit", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   const requests = [];

@@ -34,3 +34,28 @@ export function getWithdrawalFutureLessonStartDate(withdrawalDate = "") {
     day: "2-digit"
   }).format(base);
 }
+
+export function createWithdrawalStudentMutation({
+  studentId = "",
+  students = [],
+  withdrawalInfo = {},
+  withdrawnAt = ""
+} = {}) {
+  const currentStudent = students.find((student) => student.studentId === studentId);
+  if (!currentStudent) throw new Error("퇴원 처리할 학생을 최신 학생 원천에서 찾지 못했습니다.");
+  if (currentStudent.status === "paused" && currentStudent.withdrawnAt) {
+    return { alreadyWithdrawn: true, nextStudents: students, pausedStudent: currentStudent };
+  }
+  const pausedStudent = {
+    ...currentStudent,
+    status: "paused",
+    withdrawalReason: withdrawalInfo.reason || currentStudent.withdrawalReason || "other",
+    withdrawalComment: withdrawalInfo.comment ?? currentStudent.withdrawalComment ?? "",
+    withdrawnAt
+  };
+  return {
+    alreadyWithdrawn: false,
+    nextStudents: students.map((student) => student.studentId === studentId ? pausedStudent : student),
+    pausedStudent
+  };
+}
