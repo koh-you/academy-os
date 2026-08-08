@@ -4,7 +4,7 @@
 
 ## 2026-08-08 수동 보충 저장 Gate·알림 문구 연동
 
-- 운영 `makeup_tasks_type_check`가 `manual_makeup`을 거부하던 원인을 확인하고 기준 스키마와 `supabase/20260808_manual_makeup_task_type.sql`을 준비했다. 운영 SQL 적용 전에는 수동 보충 저장이 계속 실패하므로 branch를 main에 통합하지 않는다.
+- 운영 `makeup_tasks_type_check`가 `manual_makeup`을 거부하던 원인을 확인하고 기준 스키마와 `supabase/20260808_manual_makeup_task_type.sql`을 준비했다. 사용자가 2026-08-08 운영 Supabase SQL 적용을 완료했다.
 - 수동 보충 알림 제목은 `수동 보충 안내입니다` 대신 `보충 안내입니다`를 사용한다. 학생 알림톡 문구 수정은 학부모·당일 학생 11시 문구까지 같은 최종본으로 연동한다.
 
 ## 2026-08-08 확인할 숙제 수업메모 관리

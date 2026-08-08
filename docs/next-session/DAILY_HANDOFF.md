@@ -2,10 +2,10 @@
 
 업데이트: 2026-08-08
 
-## 2026-08-08 수동 보충 저장 SQL Gate
+## 2026-08-08 수동 보충 저장 SQL Gate 완료
 
-- `manual_makeup` 저장을 허용하는 `supabase/20260808_manual_makeup_task_type.sql`을 운영 Supabase SQL Editor에서 사람이 실행해야 한다. 적용 전에는 이 branch를 main에 통합하지 않는다.
-- 적용 후 수동 보충 1건을 저장해 `makeup_tasks.type=manual_makeup` 재조회 성공을 확인한 뒤 branch exact-head 검사를 다시 확인하고 main 통합을 판단한다. 실제 알림 예약은 별도 확인 전 실행하지 않는다.
+- 사용자가 `manual_makeup` 저장을 허용하는 `supabase/20260808_manual_makeup_task_type.sql`의 운영 Supabase SQL Editor 적용 완료를 확인했다.
+- 운영 테스트 row나 실제 알림 예약은 만들지 않았다. exact branch HEAD 검사와 main 통합·배포 확인을 이어간다.
 - 준비된 UI는 `수동 보충 안내입니다`에서 `수동`을 빼고, 학생 알림톡 문구 수정 시 학부모·당일 학생 11시 문구까지 같은 최종본으로 연동한다.
 
 ## 2026-08-08 확인할 숙제 수업메모 관리

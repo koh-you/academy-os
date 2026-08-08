@@ -4,9 +4,9 @@
 
 ## 2026-08-08 수동 보충 저장 Gate·알림 문구 연동
 
-- 운영 저장 실패는 프론트가 보내는 `manual_makeup`을 Supabase의 `makeup_tasks_type_check`가 허용하지 않은 배포 순서 오류다. 기준 스키마와 재실행 가능한 constraint migration을 추가했으며 운영 SQL은 실행하지 않았다.
+- 운영 저장 실패는 프론트가 보내는 `manual_makeup`을 Supabase의 `makeup_tasks_type_check`가 허용하지 않은 배포 순서 오류다. 기준 스키마와 재실행 가능한 constraint migration을 추가했고, 사용자가 2026-08-08 운영 Supabase SQL Editor 적용 완료를 확인했다.
 - 수동 보충의 일정·당일 안내에서 제목의 `수동`을 제거했다. 학생 일정 문구 수정은 학부모 일정·당일 학생 문구에도 복제되어 세 필드 모두 사람 최종본으로 저장된다.
-- migration 계약, supplement `12/12`, notification `18/18`, runtime lint, production `827/827`, build `422 modules`, 집중 safe browser `1/1`에서 가상 저장·재조회와 3종 예약 preview를 확인했다. SQL 적용 확인 전 branch에서 멈춘다.
+- migration 계약, supplement `12/12`, notification `18/18`, runtime lint, production `827/827`, build `422 modules`, 집중 safe browser `1/1`에서 가상 저장·재조회와 3종 예약 preview를 확인했다. 실제 운영 테스트 row·알림 예약은 만들지 않았다.
 
 ## 2026-08-08 확인할 숙제 수업메모 관리
 
