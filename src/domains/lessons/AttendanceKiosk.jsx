@@ -3,7 +3,7 @@ import { academyBrandName } from "../../app/appConfig.js";
 import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
 import { createAttendanceKioskDisplayModel } from "./attendanceKioskModel.js";
 
-const attendanceKioskAutoConfirmDelayMs = 5_000;
+const attendanceKioskAutoConfirmDelayMs = 3_000;
 
 export function AttendanceKiosk({
   isLoading = false,
@@ -230,7 +230,7 @@ export function AttendanceKiosk({
                 ) : null}
                 <div className="attendanceConfirmActions single">
                   <button className="primaryButton" disabled={isSubmitting} onClick={confirmAttendanceCheck} type="button">
-                    {isSubmitting ? "저장 중..." : "5초 뒤 자동 확인"}
+                    {isSubmitting ? "저장 중..." : "3초 뒤 자동 확인"}
                   </button>
                 </div>
               </>

@@ -2,6 +2,10 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-08 출결 태블릿 자동 확인 3초
+
+- 유효한 출결 preview의 자동 저장 지연을 5초에서 3초로 줄이고 버튼 문구도 `3초 뒤 자동 확인`으로 맞췄다. 다중 수업 선택 전 정지, 성공 응답 뒤 키패드 복귀, 실패 시 오류 유지 계약은 바꾸지 않았다. lesson `21/21`, runtime lint, production `827/827`, build `422 modules`, 집중 safe browser `1/1`을 통과했다.
+
 ## 2026-08-08 수동 보충 저장 Gate·알림 문구 연동
 
 - 운영 저장 실패는 프론트가 보내는 `manual_makeup`을 Supabase의 `makeup_tasks_type_check`가 허용하지 않은 배포 순서 오류다. 기준 스키마와 재실행 가능한 constraint migration을 추가했고, 사용자가 2026-08-08 운영 Supabase SQL Editor 적용 완료를 확인했다.

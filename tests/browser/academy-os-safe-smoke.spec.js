@@ -100,7 +100,7 @@ test("consecutive absence makeup and regular lessons use one physical attendance
   await selectionDialog.getByRole("button", { name: /결석보강 가상수업/ }).click();
   await expect(selectionDialog).toContainText("연속 수업으로 처리: 결석보강 가상수업 → 고1 정규 가상수업");
   await expect(selectionDialog).toContainText("등원 알림은 지금 한 번, 하원 알림은 마지막 수업 뒤 한 번만 전송합니다.");
-  await expect(selectionDialog.getByRole("button", { name: "5초 뒤 자동 확인" })).toBeVisible();
+  await expect(selectionDialog.getByRole("button", { name: "3초 뒤 자동 확인" })).toBeVisible();
   const completedAutomaticCheckInResponse = await automaticCheckInResponse;
   expect(completedAutomaticCheckInResponse.status(), await completedAutomaticCheckInResponse.text()).toBe(200);
   await expect(pinInput).toBeEnabled({ timeout: 7_000 });
