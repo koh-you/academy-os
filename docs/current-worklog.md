@@ -2,6 +2,11 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-08 수동 보충 입력 검증 회귀
+
+- 전날 추가된 수동 보충 성공 동선에 이어 필수 시간 누락 실패 동선을 safe browser에 고정했다. 검증 오류 뒤 학생·제목·사유·날짜 입력과 모달이 유지되고 상세 검토 화면으로 넘어가지 않는다.
+- 보충 원천·수업·알림 API 쓰기가 발생하지 않음을 함께 대조했다. supplement `10/10`, runtime lint, build `422 modules`·main `931.54 kB`·lazy `12/12`, 집중 safe browser `1/1`을 통과했다.
+
 ## 2026-08-07 수동 보충 수업일지·알림 연결
 
 - `manual_makeup`을 자동 숙제·결석·재시험 후보와 분리된 직접 작성 원천으로 추가했다. 재원생과 제목·사유·일정을 입력하면 기존 `makeup_tasks + lessons` versioned save가 insert-only 보충 및 양방향 연결 수업일지를 저장·재조회한다.

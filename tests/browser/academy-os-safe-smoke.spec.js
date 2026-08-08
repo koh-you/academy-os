@@ -2032,6 +2032,41 @@ test("lesson hub top reminders can collapse and expand without runtime errors", 
   expect(pageErrors).toEqual([]);
 });
 
+test("manual supplement validation preserves the draft without source or notification writes", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+  await page.getByRole("button", { name: /보충관리/ }).click();
+
+  const writeRequests = [];
+  page.on("request", (request) => {
+    if (
+      request.method() !== "GET" &&
+      /\/api\/(makeup-tasks|lessons|notification-jobs)(?:[/?]|$)/.test(request.url())
+    ) {
+      writeRequests.push(`${request.method()} ${new URL(request.url()).pathname}`);
+    }
+  });
+
+  await page.getByRole("button", { name: "수동 보충 등록" }).click();
+  const createDialog = page.getByRole("dialog", { name: "수동 보충 작성" });
+  await createDialog.getByLabel("수동 보충 학생").selectOption("safe-consecutive-attendance-student");
+  await createDialog.getByLabel("수동 보충 제목").fill("입력 보존 확인 보충");
+  await createDialog.getByLabel("수동 보충 사유와 내용").fill("시간을 빠뜨린 검증 실패에서도 이 내용을 유지합니다.");
+  const scheduledDate = await createDialog.getByLabel("수동 보충 날짜").inputValue();
+
+  await createDialog.getByRole("button", { name: "수업일지 등록 계속" }).click();
+
+  await expect(createDialog.getByRole("alert")).toHaveText("수업일지 날짜와 시작 시간을 입력해 주세요.");
+  await expect(createDialog.getByLabel("수동 보충 학생")).toHaveValue("safe-consecutive-attendance-student");
+  await expect(createDialog.getByLabel("수동 보충 제목")).toHaveValue("입력 보존 확인 보충");
+  await expect(createDialog.getByLabel("수동 보충 사유와 내용")).toHaveValue("시간을 빠뜨린 검증 실패에서도 이 내용을 유지합니다.");
+  await expect(createDialog.getByLabel("수동 보충 날짜")).toHaveValue(scheduledDate);
+  await expect(createDialog.getByLabel("수동 보충 시작 시간")).toHaveValue("");
+  await expect(page.locator(".supplementStudentModal")).toHaveCount(0);
+  expect(writeRequests).toEqual([]);
+  expect(pageErrors).toEqual([]);
+});
+
 test("manual supplement creates a linked lesson journal and safe Alimtalk reservations", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);
