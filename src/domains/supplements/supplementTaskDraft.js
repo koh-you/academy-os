@@ -186,7 +186,7 @@ export function updateSupplementTaskDraftEntry({
     ? [...new Set([...(existing?.editedFields ?? []), field])]
     : existing?.editedFields ?? [];
 
-  if (task.taskType === "absence_makeup" && field === "studentScheduleNotificationDraft") {
+  if (["absence_makeup", "manual_makeup"].includes(task.taskType) && field === "studentScheduleNotificationDraft") {
     supplementNotificationDraftConfigs.forEach((config) => {
       values[config.field] = value;
     });

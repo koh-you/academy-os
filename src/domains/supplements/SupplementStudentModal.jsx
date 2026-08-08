@@ -437,7 +437,7 @@ export function SupplementStudentModal({
               onChangeDraft: (field, value) => updateTaskDraft(task, field, value),
               onOpenControl: () => openNotificationControl(task, "all"),
               onSave: () => handleSaveTask(task),
-              shouldLinkStudentDraft: task.taskType === "absence_makeup"
+              shouldLinkStudentDraft: ["absence_makeup", "manual_makeup"].includes(task.taskType)
             }}
             saveSummaryProps={taskCardViewModel.saveSummaryProps}
             scheduleEditorProps={{

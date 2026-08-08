@@ -10941,7 +10941,8 @@ function createNotificationDraft(task, students, notificationTemplates = {}) {
     return `${studentName} 학생 재시험 안내입니다.\n\n${scheduleText}\n${sourceText} 재시험을 진행합니다.${progressMemoBlock}`;
   }
 
-  return `${studentName} 학생 ${followUpTypeLabel(task.taskType)} 안내입니다.\n\n${scheduleText}\n${sourceText} 일정을 진행합니다.${progressMemoBlock}`;
+  const noticeLabel = task.taskType === "manual_makeup" ? "보충" : followUpTypeLabel(task.taskType);
+  return `${studentName} 학생 ${noticeLabel} 안내입니다.\n\n${scheduleText}\n${sourceText} 일정을 진행합니다.${progressMemoBlock}`;
 }
 
 function getSupplementStudentReminderTitle(task = {}) {
@@ -10983,7 +10984,7 @@ function buildSupplementScheduleNoticeBody(task = {}, previousScheduleText = "",
   const studentName = student?.name || task.studentName || "학생";
   const isAbsenceMakeup = task.taskType === "absence_makeup";
   const isManualMakeup = task.taskType === "manual_makeup";
-  const title = `${studentName} 학생 ${isManualMakeup ? "수동 보충" : isAbsenceMakeup ? "결석 보강" : "숙제 보충"} 안내입니다.`;
+  const title = `${studentName} 학생 ${isManualMakeup ? "보충" : isAbsenceMakeup ? "결석 보강" : "숙제 보충"} 안내입니다.`;
   const scheduleLine = `일시: ${formatSupplementScheduleDateTime(task)}`;
   const makeupTargetLine = isManualMakeup
     ? formatTemplateLine("보충 내용", task.reason || task.sourceLabel)

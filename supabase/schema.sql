@@ -161,7 +161,7 @@ create table if not exists homeworks (
 
 create table if not exists makeup_tasks (
   makeup_task_id text primary key,
-  type text not null check (type in ('homework_makeup', 'absence_makeup', 'retest')),
+  type text not null check (type in ('homework_makeup', 'absence_makeup', 'manual_makeup', 'retest')),
   student_id text not null references students(student_id) on delete cascade,
   source_lesson_id text references lessons(lesson_id) on delete set null,
   source_homework_id text references homeworks(homework_id) on delete set null,

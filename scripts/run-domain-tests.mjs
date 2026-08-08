@@ -32,6 +32,8 @@ export const domainTestGroups = Object.freeze({
     "scripts/test-attendance-visit-continuity.mjs"
   ]),
   supplement: Object.freeze([
+    "scripts/test-manual-supplement-persistence-contract.mjs",
+    "scripts/test-supplement-task-draft.mjs",
     "scripts/test-supplement-job-builders.mjs",
     "scripts/test-supplement-cancellation.mjs",
     "scripts/test-supplement-task-content-save-controller.mjs",

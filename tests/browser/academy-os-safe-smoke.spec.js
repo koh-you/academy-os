@@ -2083,6 +2083,18 @@ test("manual supplement creates a linked lesson journal and safe Alimtalk reserv
 
   const supplementModal = page.locator(".supplementStudentModal");
   await expect(supplementModal).toContainText("연속출결 가상학생 수동 보충");
+  const studentDraft = supplementModal.locator("label", { hasText: "학생 알림톡 문구" }).locator("textarea");
+  const parentDraft = supplementModal.locator("label", { hasText: "학부모 알림톡 문구" }).locator("textarea");
+  const sameDayDraft = supplementModal.locator("label", { hasText: "당일 학생 11시 알림톡 문구" }).locator("textarea");
+  await expect(studentDraft).toContainText("연속출결 가상학생 학생 보충 안내입니다.");
+  await expect(studentDraft).not.toContainText("수동 보충 안내입니다.");
+  const linkedFinalBody = "연속출결 가상학생 학생 보충 안내입니다.\n\n일시: 8/10(월) 오후 04:30\n보충 내용: 함수 그래프를 다시 확인합니다.";
+  await studentDraft.fill(linkedFinalBody);
+  await expect(parentDraft).toHaveValue(linkedFinalBody);
+  await expect(sameDayDraft).toHaveValue(linkedFinalBody);
+  await expect(supplementModal).toContainText("학생 문구 수정 시 3종에 연동되고 최종본으로 고정됩니다.");
+  await supplementModal.getByRole("button", { name: "알림톡 3종 일괄 저장" }).click();
+  await expect(supplementModal.getByRole("button", { name: "알림톡 3종 일괄 저장" })).toBeDisabled();
   await expect(supplementModal.getByRole("button", { name: "수업일지 일정 만들기" })).toBeEnabled();
   await supplementModal.getByRole("button", { name: "수업일지 일정 만들기" }).click();
   await expect(supplementModal.getByRole("status")).toContainText("수업일지 일정 만들기 완료");
@@ -2097,7 +2109,10 @@ test("manual supplement creates a linked lesson journal and safe Alimtalk reserv
     scheduledDate: "2026-08-10",
     scheduledTime: "16:30",
     status: "scheduled",
-    studentId: "safe-consecutive-attendance-student"
+    studentId: "safe-consecutive-attendance-student",
+    studentScheduleNotificationDraft: linkedFinalBody,
+    parentScheduleNotificationDraft: linkedFinalBody,
+    notificationDraft: linkedFinalBody
   });
 
   const lessonPayload = await (await request.get(`${safeApiBaseUrl}/api/lessons`)).json();
@@ -2121,7 +2136,10 @@ test("manual supplement creates a linked lesson journal and safe Alimtalk reserv
     "student_reminder"
   ]);
   expect(linkedNotifications.every((job) => ["dry_run", "scheduled"].includes(job.status))).toBe(true);
-  expect(linkedNotifications.every((job) => job.previewBody.includes("함수"))).toBe(true);
+  const normalizePreviewBody = (value) => String(value ?? "").replace(/\n{2,}/g, "\n").trim();
+  expect(linkedNotifications.every((job) => (
+    normalizePreviewBody(job.previewBody) === normalizePreviewBody(linkedFinalBody)
+  ))).toBe(true);
 
   await supplementModal.getByRole("button", { name: "창 닫기" }).click();
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /수업일지/ }).click();

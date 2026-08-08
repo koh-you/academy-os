@@ -195,6 +195,23 @@ assert.equal(linkedAbsenceEntry.values.studentScheduleNotificationDraft, "학생
 assert.equal(linkedAbsenceEntry.values.parentScheduleNotificationDraft, "학생에서 연동한 최종본");
 assert.equal(linkedAbsenceEntry.values.notificationDraft, "학생에서 연동한 최종본");
 
+const linkedManualEntry = updateSupplementTaskDraftEntry({
+  existing: generatedEntry,
+  field: "studentScheduleNotificationDraft",
+  notificationTemplates: { marker: "template" },
+  student,
+  task: { ...sourceTask, taskType: "manual_makeup" },
+  value: "수동 보충에서 학생 문구로 연동한 최종본"
+}, transitionDependencies);
+assert.deepEqual(linkedManualEntry.editedFields, [
+  "studentScheduleNotificationDraft",
+  "parentScheduleNotificationDraft",
+  "notificationDraft"
+]);
+assert.equal(linkedManualEntry.values.studentScheduleNotificationDraft, "수동 보충에서 학생 문구로 연동한 최종본");
+assert.equal(linkedManualEntry.values.parentScheduleNotificationDraft, "수동 보충에서 학생 문구로 연동한 최종본");
+assert.equal(linkedManualEntry.values.notificationDraft, "수동 보충에서 학생 문구로 연동한 최종본");
+
 const independentHomeworkEntry = updateSupplementTaskDraftEntry({
   existing: generatedEntry,
   field: "studentScheduleNotificationDraft",
