@@ -5,6 +5,7 @@ export function createLessonJournalDraftPersistencePlan({
   lessons = [],
   now = () => new Date().toISOString(),
   recordDrafts = [],
+  records = [],
   students = [],
   dependencies = {}
 } = {}) {
@@ -54,7 +55,8 @@ export function createLessonJournalDraftPersistencePlan({
       lesson,
       student,
       "previous",
-      lessons
+      lessons,
+      records
     );
     if (!previousHomework?.homeworkId || !previousHomework.title?.trim()) return;
     const existing = nextHomeworks.find(

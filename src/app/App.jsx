@@ -302,6 +302,7 @@ import {
   getLessonJournalHomeworkDraftTitle
 } from "../domains/lessons/lessonJournalHomeworkDraft.js";
 import { createLessonJournalHomeworkFollowupPlan } from "../domains/lessons/lessonJournalHomeworkFollowupPlan.js";
+import { selectLinkedPreviousHomework } from "../domains/lessons/lessonHomeworkContinuity.js";
 import { createLessonJournalAssignmentStatusPlan } from "../domains/lessons/lessonJournalAssignmentStatusPlan.js";
 import { resolveLessonJournalEditableText } from "../domains/lessons/lessonJournalEditableFieldsModel.js";
 import {
@@ -6134,7 +6135,7 @@ export function App() {
     const recordId = createLessonStudentRecordId(lesson.lessonId, student.studentId);
     const record = getLessonStudentRecord(lesson, student);
     if (isLessonRecordNotificationMuted(record, target)) return null;
-    const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
+    const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons, recordsRef.current);
     const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
     const audience = target === "student" ? "student" : "parent";
     const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId, { lesson, mode: "lesson_comment" });
@@ -6584,7 +6585,7 @@ export function App() {
     const homeworkStatus = getHomeworkStatusFromAssignmentStatus(assignmentStatus);
     const normalizedAssignmentStatus = normalizeAssignmentStatusValue(assignmentStatus);
     setHomeworks((current) => {
-      const previousHomework = getLessonHomework(current, lesson, student, "previous", lessons);
+      const previousHomework = getLessonHomework(current, lesson, student, "previous", lessons, recordsRef.current);
       if (!previousHomework?.homeworkId || !previousHomework.title?.trim()) return current;
 
       const existing = current.find((homework) => homework.homeworkId === previousHomework.homeworkId);
@@ -6713,6 +6714,7 @@ export function App() {
       homeworkDrafts,
       lesson,
       lessons,
+      records: recordsRef.current,
       recordDrafts,
       students,
       dependencies: {
@@ -7637,7 +7639,7 @@ export function App() {
     try {
       const lessonMaterial = getLessonMaterial(record, student);
       const lessonContent = getLessonContent(record);
-      const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
+      const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons, recordsRef.current);
       const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
       const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
       const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId, { lesson, mode: "lesson_comment" });
@@ -9790,7 +9792,7 @@ function findNextLessonForStudent(lessons, lesson, student) {
     .sort((a, b) => getLessonSortValue(a).localeCompare(getLessonSortValue(b)))[0];
 }
 
-function findPreviousLessonForStudent(lessons, lesson, studentId, { allowRegularClassFallback = false, student = null } = {}) {
+function findPreviousLessonsForStudent(lessons, lesson, studentId, { allowRegularClassFallback = false, student = null } = {}) {
   const currentSortValue = getLessonSortValue(lesson);
   const previousLessons = [...lessons]
     .filter((candidate) => candidate.lessonId !== lesson.lessonId)
@@ -9799,11 +9801,15 @@ function findPreviousLessonForStudent(lessons, lesson, studentId, { allowRegular
     .filter((candidate) => isStudentScheduledForLesson(candidate, student))
     .filter((candidate) => getLessonSortValue(candidate) < currentSortValue)
     .sort((a, b) => getLessonSortValue(b).localeCompare(getLessonSortValue(a)));
-  const previousLessonInCurrentGroup = previousLessons.find((candidate) => isSameLessonGroup(lesson, candidate));
-  if (previousLessonInCurrentGroup || !allowRegularClassFallback || isSpecialLectureLesson(lesson)) {
-    return previousLessonInCurrentGroup;
+  const previousLessonsInCurrentGroup = previousLessons.filter((candidate) => isSameLessonGroup(lesson, candidate));
+  if (previousLessonsInCurrentGroup.length || !allowRegularClassFallback || isSpecialLectureLesson(lesson)) {
+    return previousLessonsInCurrentGroup;
   }
-  return previousLessons.find((candidate) => !isSpecialLectureLesson(candidate));
+  return previousLessons.filter((candidate) => !isSpecialLectureLesson(candidate));
+}
+
+function findPreviousLessonForStudent(lessons, lesson, studentId, options = {}) {
+  return findPreviousLessonsForStudent(lessons, lesson, studentId, options)[0];
 }
 
 function createLinkedPreviousHomework(homeworks, lessons, lesson, student, sourceHomework) {
@@ -10455,7 +10461,7 @@ function getHomeworkBundle(homeworks, lesson, student, lessons = []) {
   return { previous, today };
 }
 
-function getLessonHomework(homeworks, lesson, student, homeworkType, lessons = []) {
+function getLessonHomework(homeworks, lesson, student, homeworkType, lessons = [], records = null) {
   const directHomework =
     homeworks.find(
       (homework) =>
@@ -10468,31 +10474,19 @@ function getLessonHomework(homeworks, lesson, student, homeworkType, lessons = [
     return directHomework;
   }
 
-  const previousLesson = findPreviousLessonForStudent(
+  const previousLessons = findPreviousLessonsForStudent(
     lessons,
     lesson,
     student.studentId,
     { allowRegularClassFallback: true, student }
   );
 
-  if (!previousLesson) return null;
-
-  const linkedHomework =
-    homeworks.find(
-      (homework) =>
-        homework.lessonId === previousLesson.lessonId &&
-        homework.studentId === student.studentId &&
-        homework.homeworkType === "next"
-    ) ?? null;
-
-  return linkedHomework
-    ? {
-        ...linkedHomework,
-        linkedFromLessonId: previousLesson.lessonId,
-        linkedFromDate: previousLesson.date,
-        homeworkType: "previous"
-      }
-    : null;
+  return selectLinkedPreviousHomework({
+    homeworks,
+    previousLessons,
+    records,
+    studentId: student.studentId
+  });
 }
 
 function createAiReportDraft(student, lesson, record, homeworkBundle) {

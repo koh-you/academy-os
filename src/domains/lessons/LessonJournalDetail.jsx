@@ -592,7 +592,7 @@ export function LessonJournalDetail({
             const persistedRecord = findLessonStudentRecord(records, lesson, student) ?? createEmptyRecord(lesson, student);
             const editableRecord = getEditableRecord(recordId, persistedRecord);
             const attendanceLesson = applyStudentScheduleToLesson(lesson, student);
-            const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons);
+            const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons, allRecords);
             const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
             const previousHomeworkTitle = getHomeworkDraftTitle(student, "previous", previousHomework);
             const nextHomeworkTitle = getHomeworkDraftTitle(student, "next", nextHomework);

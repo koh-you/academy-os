@@ -24,7 +24,7 @@ for (const appOwnedSourceBoundary of [
   "createLessonStudentRecordId(lesson.lessonId, student.studentId)",
   "getLessonStudentRecord(lesson, student)",
   "isLessonRecordNotificationMuted(record, target)",
-  'getLessonHomework(homeworks, lesson, student, "previous", lessons)',
+  'getLessonHomework(homeworks, lesson, student, "previous", lessons, recordsRef.current)',
   'getLessonHomework(homeworks, lesson, student, "next")',
   'target === "student" ? "student" : "parent"',
   "getStudentSupplementSchedules(makeupTasks, student.studentId",

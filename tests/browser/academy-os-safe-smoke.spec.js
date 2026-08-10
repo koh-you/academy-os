@@ -1998,6 +1998,77 @@ test("lesson journal creation action stays visible and opens the registration mo
   expect(pageErrors).toEqual([]);
 });
 
+test("lesson journal skips an unused intermediate lesson but stops at an attended lesson", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  let intermediateLessonAttended = false;
+  const intermediateLessonId = "safe-cross-month-unused-intermediate";
+
+  await page.route("**/api/lessons*", async (route) => {
+    const response = await route.fetch();
+    const payload = await response.json();
+    await route.fulfill({
+      response,
+      json: {
+        ...payload,
+        lessons: [
+          ...(payload.lessons ?? []),
+          {
+            className: "월 경계 연동반 · 미진행 보충",
+            classTemplateId: "safe-cross-month-class",
+            date: "2026-07-31",
+            endTime: "13:00",
+            lessonId: intermediateLessonId,
+            lessonType: "makeup",
+            startTime: "10:00",
+            status: "scheduled",
+            studentIds: ["safe-active-student"],
+            title: "월 경계 연동반 · 미진행 보충"
+          }
+        ]
+      }
+    });
+  });
+  await page.route("**/api/lesson-records*", async (route) => {
+    const response = await route.fetch();
+    const payload = await response.json();
+    await route.fulfill({
+      response,
+      json: {
+        ...payload,
+        records: intermediateLessonAttended
+          ? [
+              ...(payload.records ?? []),
+              {
+                attendanceStatus: "present",
+                lessonId: intermediateLessonId,
+                lessonStudentRecordId: "safe-cross-month-intermediate-record",
+                studentId: "safe-active-student"
+              }
+            ]
+          : payload.records
+      }
+    });
+  });
+
+  await loginAsTeacher(page);
+  const openCurrentJournal = async () => {
+    const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
+    await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
+    return page.getByRole("dialog", { name: "수업일지" });
+  };
+
+  let journal = await openCurrentJournal();
+  let studentRow = journal.getByRole("region", { name: "수업일지 학생 기록" }).locator(".journalRow:not(.journalHead)").first();
+  await expect(studentRow.getByRole("button", { name: "안전 이전 숙제", exact: true })).toBeVisible();
+
+  intermediateLessonAttended = true;
+  await page.reload();
+  journal = await openCurrentJournal();
+  studentRow = journal.getByRole("region", { name: "수업일지 학생 기록" }).locator(".journalRow:not(.journalHead)").first();
+  await expect(studentRow.getByRole("button", { name: "지난 숙제", exact: true })).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
 test("lesson copy retries the same server plan after an unknown result and verified undo removes it", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   let abortAfterCommit = true;
