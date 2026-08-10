@@ -1,6 +1,11 @@
 # Daily Development Handoff
 
-업데이트: 2026-08-10
+업데이트: 2026-08-11
+
+## 2026-08-11 시험정보 제외 Gate
+
+- branch에 고사별 `is_excluded` 저장, 상세관리 제외·복원, 기본 목록·파생 일정·자동 시험대비·시험분석 제외가 준비돼 있다.
+- main 통합 전 Supabase SQL Editor에서 `supabase/20260811_exam_prep_exclusion.sql`을 한 번 실행해야 한다. SQL 적용 전에는 branch를 배포하지 않는다.
 
 ## 2026-08-10 시험정보 저장 UI
 

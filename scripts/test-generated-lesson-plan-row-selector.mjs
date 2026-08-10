@@ -22,12 +22,18 @@ const emptyCycleTarget = {
   examPrepId: "exam_TARGET_EMPTY",
   examCycle: ""
 };
+const excludedControl = {
+  examPrepId: "exam_CONTROL_EXCLUDED",
+  examCycle: currentCycle,
+  isExcluded: true
+};
 const rows = [
   explicitTarget,
   previousControl,
   missingCycleTarget,
   futureControl,
-  emptyCycleTarget
+  emptyCycleTarget,
+  excludedControl
 ];
 const inputSnapshot = structuredClone(rows);
 const selectedRows = selectGeneratedLessonPlanRows(rows, currentCycle);

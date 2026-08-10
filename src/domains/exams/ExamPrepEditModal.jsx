@@ -14,6 +14,7 @@ export function ExamPrepEditModal({
   onOpenReview,
   onRemoveMathExamEntry,
   onSave,
+  onToggleExcluded,
   onUpdateMathExamEntry,
   onUpdateRow,
   row,
@@ -154,8 +155,13 @@ export function ExamPrepEditModal({
           <button className="softButton" disabled={isBusy || hasChanges} onClick={onOpenReview} type="button">
             {hasReview ? "시험 후 총평 보기/수정" : "시험 후 총평 작성"}
           </button>
-          <button className="dangerSoftButton" disabled={isBusy} onClick={() => onDeleteRow?.(row.examPrepId)} type="button">
-            시험정보 삭제
+          {row.source !== "학생DB 자동생성" ? (
+            <button className="dangerSoftButton" disabled={isBusy} onClick={() => onDeleteRow?.(row.examPrepId)} type="button">
+              시험정보 삭제
+            </button>
+          ) : null}
+          <button className={row.isExcluded ? "softButton" : "dangerSoftButton"} disabled={isBusy} onClick={onToggleExcluded} type="button">
+            {row.isExcluded ? "시험관리 다시 포함" : "이번 고사 내신 준비 제외"}
           </button>
           <button className="softButton" disabled={isBusy} onClick={onClose} type="button">닫기</button>
           <button className="primaryButton" disabled={isBusy || !hasChanges} onClick={onSave} type="button">

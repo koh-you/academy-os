@@ -1680,7 +1680,10 @@ function normalizeExamPrepRowCycle(row = {}) {
 }
 
 function normalizeExamPrepRows(rows = []) {
-  return rows.map((row) => normalizeExamPrepRowReviewDraft(normalizeExamPrepRowCycle(row)));
+  return rows.map((row) => ({
+    ...normalizeExamPrepRowReviewDraft(normalizeExamPrepRowCycle(row)),
+    isExcluded: Boolean(row.isExcluded)
+  }));
 }
 
 function createParentLoginId(student) {
@@ -1838,6 +1841,9 @@ function isPlaceholderExamPrepRow(row = {}) {
 }
 
 function chooseRepresentativeExamPrepRow(currentRow, candidateRow) {
+  if (Boolean(currentRow.isExcluded) !== Boolean(candidateRow.isExcluded)) {
+    return currentRow.isExcluded ? currentRow : candidateRow;
+  }
   const currentScore = getExamPrepRowCompleteness(currentRow);
   const candidateScore = getExamPrepRowCompleteness(candidateRow);
   if (candidateScore !== currentScore) return candidateScore > currentScore ? candidateRow : currentRow;
@@ -1847,9 +1853,9 @@ function chooseRepresentativeExamPrepRow(currentRow, candidateRow) {
   return String(candidateRow.updatedAt || "") > String(currentRow.updatedAt || "") ? candidateRow : currentRow;
 }
 
-function dedupeExamPrepRowsForDisplay(rows = []) {
+function dedupeExamPrepRowsForDisplay(rows = [], { includeExcluded = false } = {}) {
   const grouped = new Map();
-  rows.forEach((row) => {
+  rows.filter((row) => includeExcluded || !row.isExcluded).forEach((row) => {
     const key = getExamPrepLogicalKey(row);
     const previous = grouped.get(key);
     grouped.set(key, previous ? chooseRepresentativeExamPrepRow(previous, row) : row);
@@ -1931,7 +1937,7 @@ function createSchoolEventFromExamPrepRow(row, index = 0) {
 }
 
 function createDefaultSchoolEvents(rows) {
-  return rows.map((row, index) => createSchoolEventFromExamPrepRow(row, index));
+  return rows.filter((row) => !row.isExcluded).map((row, index) => createSchoolEventFromExamPrepRow(row, index));
 }
 
 function getSchoolCalendarTargetRows(rows = [], event = {}) {

@@ -12265,6 +12265,11 @@ textarea {
   padding: 0 12px;
 }
 
+.examPrepRow.excluded {
+  background: #f8fafc;
+  opacity: 0.78;
+}
+
 .examPeriodReadCell {
   overflow: visible;
   text-overflow: clip;

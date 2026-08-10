@@ -141,6 +141,7 @@ export function toExamPrepRow(row) {
     math_exam_dates: row.mathExamDates ?? [],
     special_note: compact(row.specialNote),
     source: compact(row.source),
+    is_excluded: Boolean(row.isExcluded),
     review_ai_status: compact(row.reviewAiStatus),
     updated_at: new Date().toISOString()
   };
@@ -169,6 +170,7 @@ export function fromExamPrepRow(row) {
     memo: row.memo ?? "",
     specialNote: row.special_note ?? "",
     source: row.source ?? "",
+    isExcluded: Boolean(row.is_excluded),
     reviewAiStatus: row.review_ai_status ?? "",
     createdAt: row.created_at,
     updatedAt: row.updated_at

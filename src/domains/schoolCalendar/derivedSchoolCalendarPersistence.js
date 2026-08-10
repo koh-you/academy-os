@@ -18,11 +18,15 @@ const examPrepScheduleFields = [
   "memo",
   "specialNote",
   "source",
+  "isExcluded",
   "reviewAiStatus"
 ];
 
 function normalizeExamPrepScheduleRow(row = {}) {
-  return Object.fromEntries(examPrepScheduleFields.map((field) => [field, row[field] ?? (field === "mathExamDates" ? [] : "")]));
+  return Object.fromEntries(examPrepScheduleFields.map((field) => [
+    field,
+    row[field] ?? (field === "mathExamDates" ? [] : field === "isExcluded" ? false : "")
+  ]));
 }
 
 export function areDerivedExamPrepRowsEqual(left = {}, right = {}) {

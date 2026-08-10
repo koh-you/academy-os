@@ -280,7 +280,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
     examAnalysisPipeline: {
       Component: components.ExamAnalysisPipelineCenter,
       props: {
-        examPrepRows: models.examPrepRows,
+        examPrepRows: models.examPrepRows.filter((row) => !row.isExcluded),
         runtime: runtimeBindings.examAnalysisPipeline
       }
     },

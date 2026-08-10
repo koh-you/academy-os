@@ -96,11 +96,13 @@ const examPrepRow = toExamPrepRow({
   mathExamDates: [{ date: "2026-11-04", subject: "수학" }],
   specialNote: "특이사항",
   source: "teacher",
+  isExcluded: true,
   reviewAiStatus: "confirmed"
 });
 assert.equal(examPrepRow.exam_cycle, "2026-2-final");
 assert.equal(examPrepRow.exam_term, "2026-2-final");
 assert.equal(examPrepRow.sub_materials, "부교재");
+assert.equal(examPrepRow.is_excluded, true);
 assert.match(examPrepRow.updated_at, isoPattern);
 
 const mappedExamPrep = fromExamPrepRow({
@@ -112,6 +114,7 @@ const mappedExamPrep = fromExamPrepRow({
 assert.equal(mappedExamPrep.examCycle, "2026-2-final");
 assert.equal(mappedExamPrep.examTerm, "2026-2-final");
 assert.equal(mappedExamPrep.subTextbook, "legacy 부교재");
+assert.equal(mappedExamPrep.isExcluded, true);
 assert.equal(mappedExamPrep.unknown_db_column, undefined);
 assert.equal(toExamPrepRow({ examPrepId: "legacy_2025_mid_school", examCycle: "2026-2-final" }).exam_cycle, "2025-1-mid");
 

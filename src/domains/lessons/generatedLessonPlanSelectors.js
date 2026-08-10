@@ -4,6 +4,7 @@ export function selectGeneratedLessonPlanRows(
 ) {
   return rows.filter(
     (row) =>
+      !row.isExcluded &&
       (row.examCycle || currentExamCycle) === currentExamCycle
   );
 }

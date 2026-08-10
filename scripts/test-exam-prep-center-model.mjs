@@ -64,6 +64,15 @@ const rows = [
     schoolName: "학교A",
     grade: "고1",
     subject: "삭제될 중복"
+  },
+  {
+    examPrepId: "row-excluded",
+    examCycle: "2026-1-final",
+    schoolGradeKey: "school-a_high-1",
+    schoolName: "학교A",
+    grade: "고1",
+    subject: "공통수학",
+    isExcluded: true
   }
 ];
 const students = [
@@ -128,12 +137,14 @@ assert.deepEqual(model.displayRows.map((row) => row.examPrepId), [
   "row-visible",
   "row-fallback-cycle",
   "row-other-class",
-  "row-other-cycle"
+  "row-other-cycle",
+  "row-excluded"
 ]);
 assert.deepEqual(model.visibleRows.map((row) => row.examPrepId), [
   "row-visible",
   "row-fallback-cycle"
 ]);
+assert.deepEqual(model.excludedRows.map((row) => row.examPrepId), ["row-excluded"]);
 assert.deepEqual(model.filteredRows.map((row) => row.examPrepId), ["row-visible"]);
 assert.equal(model.editingExamPrepRow?.examPrepId, "row-visible");
 assert.equal(model.reviewModalRow?.examPrepId, "row-fallback-cycle");
@@ -193,6 +204,21 @@ assert.deepEqual(allClassesModel.visibleRows.map((row) => row.examPrepId), [
 ]);
 assert.equal(allClassesModel.selectedClass?.name, "전체 반");
 
+const excludedModel = createExamPrepCenterDisplayModel({
+  currentExamCycle: "2026-1-final",
+  dedupeRows: (sourceRows) => sourceRows,
+  getAggregateSaveState: () => "idle",
+  getMathExamEntries: () => [],
+  getRowSchoolGradeKey: (row) => row.schoolGradeKey,
+  getStudentSchoolGradeKey: (student) => student.schoolGradeKey,
+  rows,
+  selectedClassTemplateId: "class-a",
+  selectedExamCycle: "2026-1-final",
+  showExcluded: true,
+  students
+});
+assert.deepEqual(excludedModel.visibleRows.map((row) => row.examPrepId), ["row-excluded"]);
+
 const centerSource = await readFile(new URL("../src/domains/exams/ExamPrepCenter.jsx", import.meta.url), "utf8");
 assert.match(centerSource, /<strong>전체 반<\/strong>/);
 assert.match(centerSource, /onEnsureExamCycleRows\(examCycle, selectedClassTemplateId\)/);
@@ -200,6 +226,7 @@ assert.match(centerSource, /onEnsureExamCycleRows\(selectedExamCycle, classTempl
 assert.match(centerSource, /<span>상세<\/span>/);
 assert.match(centerSource, /<strong>상세 관리<\/strong>/);
 assert.match(centerSource, /onSaveRow\(editingExamPrepDraft\)/);
+assert.match(centerSource, /내신 제외 보기/);
 assert.doesNotMatch(centerSource, /className="examPrepInlineTextarea"/);
 assert.doesNotMatch(centerSource, /<span>시험 후 총평<\/span>/);
 assert.doesNotMatch(centerSource, /<span>관리<\/span>/);
@@ -208,6 +235,7 @@ const editModalSource = await readFile(new URL("../src/domains/exams/ExamPrepEdi
 assert.match(editModalSource, /시험 후 총평 보기\/수정/);
 assert.match(editModalSource, /시험정보 삭제/);
 assert.match(editModalSource, /변경 저장/);
+assert.match(editModalSource, /이번 고사 내신 준비 제외/);
 
 const generatedStudentRow = createStudentExamPrepRow({
   examCycle: "2026-2-mid",

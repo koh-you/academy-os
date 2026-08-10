@@ -1315,6 +1315,39 @@ test("exam prep CAS conflict keeps the current screen input and shows failure", 
   expect(pageErrors).toEqual([]);
 });
 
+test("exam prep exclusion survives reread and can be restored without deleting the enrolled school row", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /시험관리/ }).click();
+  await page.getByRole("button", { name: "정산 미리보기반" }).click();
+
+  let safeSchoolRow = page.locator(".examPrepRow").filter({ hasText: "안전고" });
+  await safeSchoolRow.getByRole("button", { name: /상세 관리/ }).click();
+  let detailDialog = page.getByRole("dialog", { name: "안전고 시험정보 수정" });
+  await detailDialog.getByRole("button", { name: "이번 고사 내신 준비 제외" }).click();
+  await expect(detailDialog.getByText("시험정보 · 변경됨")).toBeVisible();
+  await detailDialog.getByRole("button", { name: "변경 저장" }).click();
+  await expect(detailDialog).toBeHidden();
+  await expect(safeSchoolRow).toHaveCount(0);
+  await expect.poll(async () => {
+    const response = await request.get(`${safeApiBaseUrl}/api/exam-prep-rows`);
+    const result = await response.json();
+    return result.examPrepRows.find((row) => row.examPrepId === "safe-exam-prep-row")?.isExcluded;
+  }).toBe(true);
+
+  await page.getByRole("button", { name: "내신 제외 보기 (1)" }).click();
+  safeSchoolRow = page.locator(".examPrepRow.excluded").filter({ hasText: "안전고" });
+  await expect(safeSchoolRow).toBeVisible();
+  await safeSchoolRow.getByRole("button", { name: /상세 관리/ }).click();
+  detailDialog = page.getByRole("dialog", { name: "안전고 시험정보 수정" });
+  await detailDialog.getByRole("button", { name: "시험관리 다시 포함" }).click();
+  await detailDialog.getByRole("button", { name: "변경 저장" }).click();
+  await expect(detailDialog).toBeHidden();
+  await page.getByRole("button", { name: "시험정보 보기" }).click();
+  await expect(page.locator(".examPrepRow").filter({ hasText: "안전고" })).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
 test("withdrawn student list keeps its table and selection toolbar boundary", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);

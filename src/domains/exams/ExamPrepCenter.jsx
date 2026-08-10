@@ -66,6 +66,7 @@ export function ExamPrepCenter({
   const [editingExamPrepId, setEditingExamPrepId] = useState("");
   const [editingExamPrepDraft, setEditingExamPrepDraft] = useState(null);
   const [editingExamPrepSavedDraft, setEditingExamPrepSavedDraft] = useState(null);
+  const [showExcluded, setShowExcluded] = useState(false);
   const [reviewModalRowId, setReviewModalRowId] = useState("");
   const [tallyImportStatus, setTallyImportStatus] = useState("");
   const [pastPaperFrameKey, setPastPaperFrameKey] = useState(0);
@@ -78,6 +79,7 @@ export function ExamPrepCenter({
     classStudents,
     editingExamPrepRow,
     examPrepSaveState,
+    excludedRows,
     filteredRows,
     reviewModalRow,
     selectedClass
@@ -93,6 +95,7 @@ export function ExamPrepCenter({
     reviewModalRowId,
     rowSaveStates,
     rows,
+    showExcluded,
     selectedClassTemplateId,
     selectedExamCycle,
     students,
@@ -233,8 +236,13 @@ export function ExamPrepCenter({
 
   async function saveEditingExamPrepDraft() {
     if (!editingExamPrepDraft || !hasEditingExamPrepChanges) return { ok: true };
+    const exclusionChanged = Boolean(editingExamPrepDraft.isExcluded) !== Boolean(editingExamPrepSavedDraft?.isExcluded);
     const result = await onSaveRow(editingExamPrepDraft);
     if (result?.ok) {
+      if (exclusionChanged) {
+        closeExamPrepEditor();
+        return result;
+      }
       const savedDraft = cloneExamPrepDraft(editingExamPrepDraft);
       setEditingExamPrepSavedDraft(savedDraft);
     }
@@ -339,6 +347,14 @@ export function ExamPrepCenter({
                 <option value="2026-2-final">2026 2학기 기말</option>
               </select>
             </label>
+            <button
+              aria-pressed={showExcluded}
+              className={`softButton compact${showExcluded ? " active" : ""}`}
+              onClick={() => setShowExcluded((current) => !current)}
+              type="button"
+            >
+              {showExcluded ? "시험정보 보기" : `내신 제외 보기 (${excludedRows.length})`}
+            </button>
           </FilterBar>
           <DataTableShell className="examPrepTable" label="시험정보 목록">
             <div className="examPrepRow examPrepHead">
@@ -358,7 +374,7 @@ export function ExamPrepCenter({
               const hasReview = Boolean(row.review || row.revisedReview);
 
               return (
-                <div className="examPrepRow" key={row.examPrepId}>
+                <div className={`examPrepRow${row.isExcluded ? " excluded" : ""}`} key={row.examPrepId}>
                   <div className="examReadCell strong">{row.schoolName || "-"}</div>
                   <div className="examReadCell multiline">{specialNote || "특이사항 없음"}</div>
                   <div className="examReadCell">{row.grade || "-"}</div>
@@ -471,6 +487,7 @@ export function ExamPrepCenter({
           }}
           onRemoveMathExamEntry={removeMathExamEntry}
           onSave={saveEditingExamPrepDraft}
+          onToggleExcluded={() => updateEditingExamPrepRow(editingExamPrepDraft.examPrepId, "isExcluded", !editingExamPrepDraft.isExcluded)}
           onUpdateMathExamEntry={updateMathExamEntry}
           onUpdateRow={updateEditingExamPrepRow}
         />

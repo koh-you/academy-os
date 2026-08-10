@@ -21,6 +21,7 @@ export function createStudentExamPrepRow({
     review: "",
     revisedReview: "",
     memo: "",
+    isExcluded: false,
     source: "학생DB 자동생성"
   };
 }

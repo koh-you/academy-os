@@ -10,6 +10,7 @@ export function createExamPrepCenterDisplayModel({
   reviewModalRowId,
   rowSaveStates = {},
   rows = [],
+  showExcluded = false,
   selectedClassTemplateId,
   selectedExamCycle,
   students = [],
@@ -22,13 +23,15 @@ export function createExamPrepCenterDisplayModel({
       (isAllClasses || student.defaultClassTemplateId === selectedClassTemplateId)
   );
   const classSchoolGradeKeys = new Set(classStudents.map(getStudentSchoolGradeKey).filter(Boolean));
-  const displayRows = dedupeRows(rows);
-  const visibleRows = displayRows.filter((row) => {
+  const displayRows = dedupeRows(rows, { includeExcluded: true });
+  const matchingRows = displayRows.filter((row) => {
     const rowCycle = row.examCycle ?? currentExamCycle;
     const matchesCycle = rowCycle === selectedExamCycle;
     const matchesClass = classSchoolGradeKeys.has(getRowSchoolGradeKey(row));
     return matchesCycle && matchesClass;
   });
+  const excludedRows = matchingRows.filter((row) => row.isExcluded);
+  const visibleRows = matchingRows.filter((row) => showExcluded ? row.isExcluded : !row.isExcluded);
   const normalizedQuery = String(query ?? "").toLowerCase();
   const filteredRows = visibleRows.filter((row) => {
     const haystack = [
@@ -53,6 +56,7 @@ export function createExamPrepCenterDisplayModel({
     editingExamPrepRow: visibleRows.find((row) => row.examPrepId === editingExamPrepId) ?? null,
     examPrepSaveState: getAggregateSaveState(filteredRows.map((row) => rowSaveStates[row.examPrepId])),
     filteredRows,
+    excludedRows,
     reviewModalRow: visibleRows.find((row) => row.examPrepId === reviewModalRowId) ?? null,
     selectedClass: isAllClasses
       ? { classTemplateId: "", name: "전체 반" }

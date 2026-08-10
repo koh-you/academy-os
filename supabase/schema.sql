@@ -217,6 +217,7 @@ create table if not exists exam_prep_rows (
   memo text,
   special_note text,
   source text,
+  is_excluded boolean not null default false,
   review_ai_status text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
