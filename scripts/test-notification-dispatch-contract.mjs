@@ -8,6 +8,7 @@ import {
   parseVersionedWriteRequest,
   parseVersionedWriteResponse
 } from "../src/shared/contracts/versionedWriteRouteContracts.js";
+import { createNotificationDispatchCandidateQuery } from "../api/lib/supabaseRest.js";
 
 const execFileAsync = promisify(execFile);
 const readSource = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
@@ -52,7 +53,10 @@ const ownerEnd = serverSource.indexOf("const internalDispatchEnabled", ownerStar
 assert.ok(ownerStart >= 0 && ownerEnd > ownerStart);
 const ownerSource = serverSource.slice(ownerStart, ownerEnd);
 for (const expected of [
-  "await listNotificationJobs()",
+  "await listNotificationDispatchCandidates({",
+  "allowManualStatuses,",
+  "limit: 1000,",
+  "now",
   "allowManualStatuses && dispatchableNotificationStatuses.has(job.status)",
   'job.status !== "scheduled" || !isOsScheduledNotificationJob(job)',
   "await claimNotificationJob(job, claimId)",
@@ -64,6 +68,30 @@ for (const expected of [
 ]) {
   assert.ok(ownerSource.includes(expected), `dispatch owner missing ${expected}`);
 }
+
+const scheduledQuery = new URLSearchParams(createNotificationDispatchCandidateQuery({
+  now: "2026-08-10T06:00:00.000Z"
+}));
+assert.equal(scheduledQuery.get("select"), "*");
+assert.equal(scheduledQuery.get("status"), "in.(scheduled)");
+assert.equal(
+  scheduledQuery.get("or"),
+  "(scheduled_at.is.null,scheduled_at.lte.2026-08-10T06:00:00.000Z)"
+);
+assert.equal(scheduledQuery.get("order"), "created_at.desc");
+assert.equal(scheduledQuery.get("limit"), "1000");
+
+const authenticatedQuery = new URLSearchParams(createNotificationDispatchCandidateQuery({
+  allowManualStatuses: true,
+  limit: 50,
+  now: new Date("2026-08-10T06:00:00.000Z")
+}));
+assert.equal(authenticatedQuery.get("status"), "in.(scheduled,queued,pending_send)");
+assert.equal(authenticatedQuery.get("limit"), "50");
+assert.throws(
+  () => createNotificationDispatchCandidateQuery({ now: "not-a-date" }),
+  /now must be a valid date value/
+);
 
 assert.deepEqual(
   parseVersionedWriteRequest("POST", "/api/notification-jobs/dispatch-due", {}),

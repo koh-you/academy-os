@@ -142,7 +142,7 @@ import {
   toNotificationJobRow,
   toResourceMaterialRow
 } from "../../src/shared/persistence/platformSourceRowMappers.js";
-import { deleteRows, getSupabaseStatus, insertRows, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
+import { createNotificationDispatchCandidateQuery, deleteRows, getSupabaseStatus, insertRows, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
 
 export { toLessonRow };
 
@@ -4224,6 +4224,24 @@ export async function listNotificationJobs({ lessonId = "", limit = 1000, schedu
   }
   filters.push("order=created_at.desc", `limit=${safeLimit}`);
   const query = filters.join("&");
+  const rows = await listRows("notification_jobs", query, { requireServiceRole: true });
+  return { source: databaseSource, notificationJobs: rows.map(fromNotificationJobRow) };
+}
+
+export async function listNotificationDispatchCandidates({
+  allowManualStatuses = false,
+  limit = 1000,
+  now = new Date()
+} = {}) {
+  if (!isSupabaseConfigured()) {
+    return { source: fallbackSource, notificationJobs: [] };
+  }
+
+  const query = createNotificationDispatchCandidateQuery({
+    allowManualStatuses,
+    limit,
+    now
+  });
   const rows = await listRows("notification_jobs", query, { requireServiceRole: true });
   return { source: databaseSource, notificationJobs: rows.map(fromNotificationJobRow) };
 }

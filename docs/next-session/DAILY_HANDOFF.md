@@ -2,6 +2,11 @@
 
 업데이트: 2026-08-10
 
+## 2026-08-10 Supabase egress 긴급 대응
+
+- 매분 알림 dispatch 원천 조회를 전체 최근 1,000건에서 도래한 `scheduled` 후보로 좁혔다. 중복 방지 claim, 예약 발송, stale retry, GitHub fallback, Solapi 결과 대조는 유지한다.
+- exact-head CI 후 main 배포하고 Render가 새 commit인지, Supabase 로그에서 매분 unfiltered 1,000건 조회가 사라졌는지 확인한다. 이후 3~4일 Usage의 uncached egress 추세를 관찰한 뒤 Free 전환을 판단한다.
+
 ## 2026-08-10 자동 작업 우선순위 정합성
 
 - `STATUS.md`의 다음 우선순위를 현재 queue와 일치시켰다. 4-3은 완료했고 4-4 이후는 2026-08-12 이후 사용자의 명시적 재개 요청 전 자동 시작하지 않는다.

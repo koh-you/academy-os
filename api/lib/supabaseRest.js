@@ -24,6 +24,36 @@ export function getSupabaseStatus() {
   };
 }
 
+const scheduledNotificationStatus = "scheduled";
+const authenticatedManualNotificationStatuses = ["queued", "pending_send"];
+
+function normalizeNotificationDispatchNow(now) {
+  const value = now instanceof Date ? now : new Date(now);
+  if (Number.isNaN(value.getTime())) throw new Error("now must be a valid date value.");
+  return value.toISOString();
+}
+
+export function createNotificationDispatchCandidateQuery({
+  allowManualStatuses = false,
+  limit = 1000,
+  now = new Date()
+} = {}) {
+  const safeLimit = Math.max(1, Math.min(1000, Number(limit) || 1000));
+  const statuses = [
+    scheduledNotificationStatus,
+    ...(allowManualStatuses ? authenticatedManualNotificationStatuses : [])
+  ];
+  const dueFilter = `(scheduled_at.is.null,scheduled_at.lte.${normalizeNotificationDispatchNow(now)})`;
+
+  return [
+    "select=*",
+    `status=in.(${statuses.join(",")})`,
+    `or=${encodeURIComponent(dueFilter)}`,
+    "order=created_at.desc",
+    `limit=${safeLimit}`
+  ].join("&");
+}
+
 export async function supabaseRestRequest(path, options = {}) {
   const requireServiceRole = options.requireServiceRole ?? false;
   if (!isSupabaseConfigured({ requireServiceRole })) {

@@ -2,6 +2,11 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-10 Supabase 알림 dispatch 후보 조회 축소
+
+- `notification_jobs`의 최근 1,000건 전체를 매분 읽던 내부 dispatch를 서버측 `status=scheduled` 및 `scheduled_at is null 또는 현재 이하` 후보 조회로 교체했다. 인증된 수동 dispatch에서만 기존 `queued`·`pending_send` 포함 계약을 유지한다.
+- 기존 in-memory OS 예약 판정과 원자적 claim/send/upsert, 10분 stale retry, 48시간 Solapi 자동 대조는 바꾸지 않았다. notification `18/18`, dispatch·reconcile 전용 계약, runtime lint, scenario·production `827/827`, build `422 modules`를 통과했다.
+
 ## 2026-08-10 자동 작업 우선순위 문서 정합성
 
 - `STATUS.md`의 오래된 4-2 시작 안내를 현재 deferred queue와 handoff에 맞춰 교정했다. 4-3은 완료 상태이며 4-4 이후는 2026-08-12 이후 명시적 요청 전 자동 재개하지 않는다.

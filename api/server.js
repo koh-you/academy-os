@@ -31,6 +31,7 @@ import {
   listLessonStudentRecords,
   listLessonStudentRecordsForLessons,
   listMakeupTasks,
+  listNotificationDispatchCandidates,
   listNotificationJobs,
   listResourceMaterials,
   listSchoolEvents,
@@ -5631,7 +5632,11 @@ async function dispatchDueNotificationJobs({
   limit = 20,
   now = new Date().toISOString()
 } = {}) {
-  const listed = await listNotificationJobs();
+  const listed = await listNotificationDispatchCandidates({
+    allowManualStatuses,
+    limit: 1000,
+    now
+  });
   const nowTime = new Date(now).getTime();
   if (Number.isNaN(nowTime)) throw new Error("now must be a valid date string.");
 
