@@ -272,6 +272,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
         onSetTallySubmissions: actions.setTallySubmissions,
         onSetTallySummaries: actions.setTallySummaries,
         onSetExamPostTargetStudentIds: actions.setExamPostTargetStudentIds,
+        onSaveRow: actions.handleSaveExamPrepRowDraft,
         onUpdateRow: actions.handleUpdateExamPrepRow,
         onDeleteRow: actions.handleDeleteExamPrepRow
       }

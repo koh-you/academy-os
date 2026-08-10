@@ -199,12 +199,15 @@ assert.match(centerSource, /onEnsureExamCycleRows\(examCycle, selectedClassTempl
 assert.match(centerSource, /onEnsureExamCycleRows\(selectedExamCycle, classTemplateId\)/);
 assert.match(centerSource, /<span>상세<\/span>/);
 assert.match(centerSource, /<strong>상세 관리<\/strong>/);
+assert.match(centerSource, /onSaveRow\(editingExamPrepDraft\)/);
+assert.doesNotMatch(centerSource, /className="examPrepInlineTextarea"/);
 assert.doesNotMatch(centerSource, /<span>시험 후 총평<\/span>/);
 assert.doesNotMatch(centerSource, /<span>관리<\/span>/);
 
 const editModalSource = await readFile(new URL("../src/domains/exams/ExamPrepEditModal.jsx", import.meta.url), "utf8");
 assert.match(editModalSource, /시험 후 총평 보기\/수정/);
 assert.match(editModalSource, /시험정보 삭제/);
+assert.match(editModalSource, /변경 저장/);
 
 const generatedStudentRow = createStudentExamPrepRow({
   examCycle: "2026-2-mid",

@@ -1184,8 +1184,15 @@ test("exam prep rows consolidate review and management actions into the detail m
   expect(pageErrors).toEqual([]);
 });
 
-test("exam prep date inputs keep the first date and persist the completed range after reload", async ({ page, request }) => {
+test("exam prep date inputs save once on explicit action and show the full completed range after reload", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
+  const requests = [];
+  let captureRequests = false;
+  await page.route("**/api/exam-prep-rows/bulk", async (route) => {
+    if (captureRequests) requests.push(route.request().postDataJSON());
+    const response = await route.fetch();
+    await route.fulfill({ response });
+  });
   await loginAsTeacher(page);
 
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /시험관리/ }).click();
@@ -1196,13 +1203,19 @@ test("exam prep date inputs keep the first date and persist the completed range 
   const detailDialog = page.getByRole("dialog", { name: "안전고 시험정보 수정" });
   const startDateInput = detailDialog.getByLabel("시험기간 시작일");
   const endDateInput = detailDialog.getByLabel("시험기간 종료일");
+  await page.waitForLoadState("networkidle");
+  captureRequests = true;
   await startDateInput.fill("2026-10-13");
   await expect(startDateInput).toHaveValue("2026-10-13");
-  await expect(detailDialog.getByText("시험정보 · 저장 완료")).toBeVisible();
-
   await endDateInput.fill("2026-10-19");
   await expect(endDateInput).toHaveValue("2026-10-19");
+  await expect(detailDialog.getByText("시험정보 · 변경됨")).toBeVisible();
+  await page.waitForTimeout(300);
+  expect(requests).toHaveLength(0);
+  await detailDialog.getByRole("button", { name: "변경 저장" }).click();
   await expect(detailDialog.getByText("시험정보 · 저장 완료")).toBeVisible();
+  expect(requests).toHaveLength(1);
+  expect(requests[0].examPrepRows[0].examPeriod).toBe("2026-10-13 ~ 2026-10-19");
   await expect.poll(async () => {
     const response = await request.get(`${safeApiBaseUrl}/api/exam-prep-rows`);
     const result = await response.json();
@@ -1217,14 +1230,10 @@ test("exam prep date inputs keep the first date and persist the completed range 
   expect(pageErrors).toEqual([]);
 });
 
-test("exam prep rapid edits serialize, rebase CAS, and persist the verified latest row value", async ({ page, request }) => {
+test("exam prep rapid edits stay local until one explicit verified save", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   const requests = [];
   let captureRequests = false;
-  let releaseFirstRequest;
-  const firstRequestGate = new Promise((resolve) => {
-    releaseFirstRequest = resolve;
-  });
   await page.route("**/api/exam-prep-rows/bulk", async (route) => {
     if (!captureRequests) {
       const response = await route.fetch();
@@ -1232,7 +1241,6 @@ test("exam prep rapid edits serialize, rebase CAS, and persist the verified late
       return;
     }
     requests.push(route.request().postDataJSON());
-    if (requests.length === 1) await firstRequestGate;
     const response = await route.fetch();
     await route.fulfill({ response });
   });
@@ -1241,25 +1249,22 @@ test("exam prep rapid edits serialize, rebase CAS, and persist the verified late
   const navigation = page.getByRole("navigation", { name: "주요 화면" });
   await navigation.getByRole("button", { name: /시험관리/ }).click();
   await page.getByRole("button", { name: "정산 미리보기반" }).click();
-
-  const scopeInput = page.getByLabel("안전고 시험 범위");
+  const safeSchoolRow = page.locator(".examPrepRow").filter({ hasText: "안전고" });
+  await safeSchoolRow.getByRole("button", { name: /상세 관리/ }).click();
+  const detailDialog = page.getByRole("dialog", { name: "안전고 시험정보 수정" });
+  const scopeInput = detailDialog.getByLabel("시험 범위");
   await expect(scopeInput).toBeVisible();
   await page.waitForLoadState("networkidle");
   captureRequests = true;
   await scopeInput.fill("직렬화 첫 입력");
-  await expect.poll(() => requests.length).toBe(1);
-
   await scopeInput.fill("직렬화 중간 입력");
   await scopeInput.fill("직렬화 최신 입력");
-  await new Promise((resolve) => setTimeout(resolve, 100));
+  await page.waitForTimeout(300);
+  expect(requests).toHaveLength(0);
+  await detailDialog.getByRole("button", { name: "변경 저장" }).click();
+  await expect(detailDialog.getByText("시험정보 · 저장 완료")).toBeVisible();
   expect(requests).toHaveLength(1);
-
-  releaseFirstRequest();
-  await expect.poll(() => requests.length).toBe(2);
-  expect(requests[0].examPrepRows[0].scope).toBe("직렬화 첫 입력");
-  expect(requests[1].examPrepRows[0].scope).toBe("직렬화 최신 입력");
-  expect(requests[1].examPrepRows[0].updatedAt).not.toBe(requests[0].examPrepRows[0].updatedAt);
-  await expect(scopeInput.locator("xpath=..").getByText("저장 완료")).toBeVisible();
+  expect(requests[0].examPrepRows[0].scope).toBe("직렬화 최신 입력");
   const persistedResponse = await request.get(`${safeApiBaseUrl}/api/exam-prep-rows`);
   const persistedResult = await persistedResponse.json();
   expect(persistedResult.examPrepRows.find((row) => row.examPrepId === "safe-exam-prep-row")?.scope).toBe("직렬화 최신 입력");
@@ -1296,12 +1301,16 @@ test("exam prep CAS conflict keeps the current screen input and shows failure", 
   await loginAsTeacher(page);
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /시험관리/ }).click();
   await page.getByRole("button", { name: "정산 미리보기반" }).click();
-  const scopeInput = page.getByLabel("안전고 시험 범위");
+  const safeSchoolRow = page.locator(".examPrepRow").filter({ hasText: "안전고" });
+  await safeSchoolRow.getByRole("button", { name: /상세 관리/ }).click();
+  const detailDialog = page.getByRole("dialog", { name: "안전고 시험정보 수정" });
+  const scopeInput = detailDialog.getByLabel("시험 범위");
   await page.waitForLoadState("networkidle");
   conflictEnabled = true;
   await scopeInput.fill("충돌해도 유지할 입력");
   await expect(scopeInput).toHaveValue("충돌해도 유지할 입력");
-  await expect(scopeInput.locator("xpath=../..").getByText("저장 실패")).toBeVisible();
+  await detailDialog.getByRole("button", { name: "변경 저장" }).click();
+  await expect(detailDialog.getByText("시험정보 · 저장 실패")).toBeVisible();
   await expect(scopeInput).toHaveValue("충돌해도 유지할 입력");
   expect(pageErrors).toEqual([]);
 });

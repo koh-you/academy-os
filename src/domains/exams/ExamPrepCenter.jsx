@@ -4,7 +4,7 @@ import { ExamPrepPastPaperPanel } from "./ExamPrepPastPaperPanel.jsx";
 import { createExamPrepCenterDisplayModel } from "./examPrepCenterModel.js";
 import { ExamPostSubmissionManager } from "./ExamPostSubmissionManager.jsx";
 import { ExamReviewComposerModal } from "./ExamReviewComposerModal.jsx";
-import { AutosaveRiskNotice } from "../../shared/components/AutosaveRiskNotice.jsx";
+import { areExamPrepDraftsEqual, cloneExamPrepDraft, updateExamPrepDraft } from "./examPrepDraft.js";
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
@@ -31,6 +31,7 @@ export function ExamPrepCenter({
   onSetExamPostTargetStudentIds,
   onSetTallySubmissions,
   onSetTallySummaries,
+  onSaveRow,
   onUpdateRow,
   onDeleteRow
 }) {
@@ -63,6 +64,8 @@ export function ExamPrepCenter({
   const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("template_mwf_7_10");
   const [selectedExamCycle, setSelectedExamCycle] = useState(currentExamCycle);
   const [editingExamPrepId, setEditingExamPrepId] = useState("");
+  const [editingExamPrepDraft, setEditingExamPrepDraft] = useState(null);
+  const [editingExamPrepSavedDraft, setEditingExamPrepSavedDraft] = useState(null);
   const [reviewModalRowId, setReviewModalRowId] = useState("");
   const [tallyImportStatus, setTallyImportStatus] = useState("");
   const [pastPaperFrameKey, setPastPaperFrameKey] = useState(0);
@@ -120,6 +123,11 @@ export function ExamPrepCenter({
       label: "기출문제"
     }
   ];
+  const hasEditingExamPrepChanges = !areExamPrepDraftsEqual(editingExamPrepDraft, editingExamPrepSavedDraft);
+  const persistedEditingExamPrepSaveState = rowSaveStates[editingExamPrepId] ?? "idle";
+  const editingExamPrepSaveState = ["saving", "verifying", "failed"].includes(persistedEditingExamPrepSaveState)
+    ? persistedEditingExamPrepSaveState
+    : (hasEditingExamPrepChanges ? "dirty" : persistedEditingExamPrepSaveState);
 
   function setActiveTab(tabId) {
     if (tabId !== "info" && !selectedClassTemplateId) {
@@ -181,8 +189,10 @@ export function ExamPrepCenter({
   }
 
   function commitMathExamEntries(row, entries) {
-    onUpdateRow(row.examPrepId, "mathExamDates", entries);
-    onUpdateRow(row.examPrepId, "mathExamDate", syncPrimaryMathExamDate(entries));
+    setEditingExamPrepDraft((current) => {
+      const withEntries = updateExamPrepDraft(current, row.examPrepId, "mathExamDates", entries);
+      return updateExamPrepDraft(withEntries, row.examPrepId, "mathExamDate", syncPrimaryMathExamDate(entries));
+    });
   }
 
   function updateMathExamEntry(row, entryIndex, field, value) {
@@ -208,6 +218,33 @@ export function ExamPrepCenter({
   function removeMathExamEntry(row, entryIndex) {
     const entries = getEditableMathExamEntries(row).filter((_, index) => index !== entryIndex);
     commitMathExamEntries(row, entries);
+  }
+
+  function openExamPrepEditor(row) {
+    const draft = cloneExamPrepDraft(row);
+    setEditingExamPrepId(row.examPrepId);
+    setEditingExamPrepDraft(draft);
+    setEditingExamPrepSavedDraft(cloneExamPrepDraft(draft));
+  }
+
+  function updateEditingExamPrepRow(examPrepId, field, value) {
+    setEditingExamPrepDraft((current) => updateExamPrepDraft(current, examPrepId, field, value));
+  }
+
+  async function saveEditingExamPrepDraft() {
+    if (!editingExamPrepDraft || !hasEditingExamPrepChanges) return { ok: true };
+    const result = await onSaveRow(editingExamPrepDraft);
+    if (result?.ok) {
+      const savedDraft = cloneExamPrepDraft(editingExamPrepDraft);
+      setEditingExamPrepSavedDraft(savedDraft);
+    }
+    return result;
+  }
+
+  function closeExamPrepEditor() {
+    setEditingExamPrepId("");
+    setEditingExamPrepDraft(null);
+    setEditingExamPrepSavedDraft(null);
   }
 
   return (
@@ -278,7 +315,9 @@ export function ExamPrepCenter({
 
       {activeTab === "info" ? (
         <>
-          <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...examPrepAutosaveRisk} />
+          <p className="examPrepExplicitSaveNotice" role="note">
+            시험정보는 <strong>상세 관리</strong>에서 수정한 뒤 <strong>변경 저장</strong>을 눌러야 Supabase에 반영됩니다.
+          </p>
           <FilterBar
             className="examCycleBar"
             label="시험관리 고사 필터"
@@ -325,7 +364,7 @@ export function ExamPrepCenter({
                   <div className="examReadCell">{row.grade || "-"}</div>
                   <div className="examReadCell">{row.subject || "-"}</div>
                   <div className="examReadCell">{row.publisher || "-"}</div>
-                  <div className="examReadCell">{row.examPeriod || "미입력"}</div>
+                  <div className="examReadCell examPeriodReadCell">{row.examPeriod || "미입력"}</div>
                   <div className="examReadCell mathExamEntryList">
                     {normalizeMathExamEntries(row).length ? (
                       normalizeMathExamEntries(row).map((entry, index) => (
@@ -338,23 +377,11 @@ export function ExamPrepCenter({
                       "미입력"
                     )}
                   </div>
-                  <textarea
-                    aria-label={`${row.schoolName || "학교"} 시험 범위`}
-                    className="examPrepInlineTextarea"
-                    value={row.scope ?? ""}
-                    onChange={(event) => onUpdateRow(row.examPrepId, "scope", event.target.value)}
-                    placeholder="시험 범위"
-                  />
-                  <textarea
-                    aria-label={`${row.schoolName || "학교"} 부교재`}
-                    className="examPrepInlineTextarea"
-                    value={row.subTextbook ?? ""}
-                    onChange={(event) => onUpdateRow(row.examPrepId, "subTextbook", event.target.value)}
-                    placeholder="부교재"
-                  />
+                  <div className="examReadCell multiline">{row.scope || "미입력"}</div>
+                  <div className="examReadCell multiline">{row.subTextbook || "미입력"}</div>
                   <div className="examPrepRowActions">
                     {rowSaveStates[row.examPrepId] ? <InlineSaveStatus saveState={rowSaveStates[row.examPrepId]} /> : null}
-                    <button className={hasReview ? "examPrepDetailButton filled" : "examPrepDetailButton"} onClick={() => setEditingExamPrepId(row.examPrepId)} type="button">
+                    <button className={hasReview ? "examPrepDetailButton filled" : "examPrepDetailButton"} onClick={() => openExamPrepEditor(row)} type="button">
                       <strong>상세 관리</strong>
                       {hasReview ? <span>총평 있음</span> : null}
                     </button>
@@ -427,22 +454,25 @@ export function ExamPrepCenter({
           onUpdateRow={onUpdateRow}
         />
       ) : null}
-      {editingExamPrepRow ? (
+      {editingExamPrepRow && editingExamPrepDraft ? (
         <ExamPrepEditModal
-          autosaveRisk={examPrepAutosaveRisk}
-          row={editingExamPrepRow}
-          saveState={rowSaveStates[editingExamPrepRow.examPrepId] ?? "idle"}
+          hasChanges={hasEditingExamPrepChanges}
+          row={editingExamPrepDraft}
+          saveState={editingExamPrepSaveState}
           getEditableMathExamEntries={getEditableMathExamEntries}
           onAddMathExamEntry={addMathExamEntry}
-          onClose={() => setEditingExamPrepId("")}
+          onClose={closeExamPrepEditor}
           onDeleteRow={onDeleteRow}
           onOpenReview={() => {
             setEditingExamPrepId("");
+            setEditingExamPrepDraft(null);
+            setEditingExamPrepSavedDraft(null);
             setReviewModalRowId(editingExamPrepRow.examPrepId);
           }}
           onRemoveMathExamEntry={removeMathExamEntry}
+          onSave={saveEditingExamPrepDraft}
           onUpdateMathExamEntry={updateMathExamEntry}
-          onUpdateRow={onUpdateRow}
+          onUpdateRow={updateEditingExamPrepRow}
         />
       ) : null}
     </section>

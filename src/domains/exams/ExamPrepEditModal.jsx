@@ -2,18 +2,18 @@ import {
   getDateRangeField,
   updateDateRangeField
 } from "../schoolCalendar/schoolCalendarUtils.js";
-import { AutosaveRiskNotice } from "../../shared/components/AutosaveRiskNotice.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
 
 export function ExamPrepEditModal({
-  autosaveRisk = {},
   getEditableMathExamEntries,
+  hasChanges = false,
   onAddMathExamEntry,
   onClose,
   onDeleteRow,
   onOpenReview,
   onRemoveMathExamEntry,
+  onSave,
   onUpdateMathExamEntry,
   onUpdateRow,
   row,
@@ -32,7 +32,9 @@ export function ExamPrepEditModal({
       scrollable
     >
       <div className="examPrepEditForm">
-        <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...autosaveRisk} />
+        <p className="examPrepExplicitSaveNotice" role="note">
+          입력 중에는 화면 초안만 바뀝니다. <strong>변경 저장</strong>을 눌러야 Supabase에 저장됩니다.
+        </p>
         <section className="examPrepEditSection">
           <h2>기본 정보</h2>
           <div className="examPrepEditGrid">
@@ -149,13 +151,16 @@ export function ExamPrepEditModal({
 
         <div className="modalActionBar">
           {saveState !== "idle" ? <InlineSaveStatus label="시험정보" saveState={saveState} /> : null}
-          <button className="softButton" disabled={isBusy} onClick={onOpenReview} type="button">
+          <button className="softButton" disabled={isBusy || hasChanges} onClick={onOpenReview} type="button">
             {hasReview ? "시험 후 총평 보기/수정" : "시험 후 총평 작성"}
           </button>
           <button className="dangerSoftButton" disabled={isBusy} onClick={() => onDeleteRow?.(row.examPrepId)} type="button">
             시험정보 삭제
           </button>
-          <button className="primaryButton" onClick={onClose} type="button">닫기</button>
+          <button className="softButton" disabled={isBusy} onClick={onClose} type="button">닫기</button>
+          <button className="primaryButton" disabled={isBusy || !hasChanges} onClick={onSave} type="button">
+            {isBusy ? "저장 중" : "변경 저장"}
+          </button>
         </div>
       </div>
     </Modal>

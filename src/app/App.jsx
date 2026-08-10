@@ -948,8 +948,8 @@ const appStateAutosaveRisk = {
 };
 
 const examPrepAutosaveRisk = {
-  title: "시험정보/시험 후 기록지 입력 저장",
-  storage: "Supabase exam_prep_rows: 입력 즉시 같은 브라우저에서 직렬 저장하고, updated_at CAS와 서버 재조회로 완료를 확인합니다.",
+  title: "시험 후 기록지 입력 저장",
+  storage: "Supabase exam_prep_rows: 시험 후 기록지는 같은 브라우저에서 직렬 저장하고, updated_at CAS와 서버 재조회로 완료를 확인합니다.",
   risk: "다른 탭·기기나 학사일정 수정이 같은 행을 먼저 저장하면 자동 병합하지 않고 현재 입력을 저장 실패로 유지합니다.",
   stopCondition: "저장 실패가 뜨면 반복 입력을 멈추고 새로고침으로 서버 저장본과 현재 입력을 비교합니다.",
   recommendation: "충돌한 입력은 서버 저장본을 확인한 뒤 필요한 값만 다시 반영합니다."
@@ -5716,6 +5716,29 @@ export function App() {
     });
   }
 
+  function handleSaveExamPrepRowDraft(draftRow) {
+    const existingExamRow = examPrepRows.find((row) => row.examPrepId === draftRow?.examPrepId);
+    if (!existingExamRow) {
+      return Promise.resolve({ ok: false, error: new Error("저장할 시험정보를 찾지 못했습니다.") });
+    }
+    const updatedExamRow = {
+      ...existingExamRow,
+      ...draftRow,
+      examPrepId: existingExamRow.examPrepId,
+      updatedAt: existingExamRow.updatedAt
+    };
+    const updatedRows = examPrepRows.map((row) => (
+      row.examPrepId === updatedExamRow.examPrepId ? updatedExamRow : row
+    ));
+    const nextRows = syncPublisherAcrossExamTerm(updatedRows, updatedExamRow);
+    const changedRows = nextRows.filter((row) => {
+      const previousRow = examPrepRows.find((item) => item.examPrepId === row.examPrepId);
+      return previousRow && JSON.stringify(previousRow) !== JSON.stringify(row);
+    });
+    if (changedRows.length === 0) return Promise.resolve({ ok: true });
+    return persistExamPrepRows(changedRows);
+  }
+
   function createPersistedExamPrepLessonReconcilePlan(nextExamPrepRows) {
     return createExamPrepLessonReconcilePlan({
       buildCandidates: buildExamPrepLessonCandidates,
@@ -7252,6 +7275,7 @@ export function App() {
       handleUndoLessonAction,
       handleUndoPassSupplementTask,
       handleUpdateClassRoster,
+      handleSaveExamPrepRowDraft,
       handleUpdateExamPrepRow,
       handleUpdateHomework,
       handleUpdateLessonNotificationPlan,
