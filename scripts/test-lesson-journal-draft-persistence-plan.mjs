@@ -141,7 +141,7 @@ assert.deepEqual(
       dueDate: "2026-07-28",
       status: "completed",
       teacherStatus: "verified",
-      updatedAt: "2026-07-28T00:00:03.000Z"
+      updatedAt: "2026-07-28T00:00:02.000Z"
     },
     {
       assignmentStatus: "complete",
@@ -149,7 +149,7 @@ assert.deepEqual(
       dueDate: "2026-07-28",
       status: "completed",
       teacherStatus: "verified",
-      updatedAt: "2026-07-28T00:00:03.000Z"
+      updatedAt: "2026-07-28T00:00:02.000Z"
     }
   ]
 );
@@ -162,6 +162,36 @@ assert.equal(
   "기존 명시 숙제 CONTROL"
 );
 assert.equal(currentHomeworks[1].assignmentStatus, undefined);
+
+let alreadyCheckedNowCount = 0;
+const alreadyCheckedPlan = createLessonJournalDraftPersistencePlan({
+  currentHomeworks: plan.nextHomeworks,
+  lesson: { date: "2026-07-28", lessonId: "lesson_target" },
+  lessons: [{ lessonId: "lesson_source" }],
+  now: () => {
+    alreadyCheckedNowCount += 1;
+    return "2026-07-28T00:00:04.000Z";
+  },
+  recordDrafts: [{
+    assignmentStatus: "complete",
+    lessonStudentRecordId: "lsr_target",
+    studentId: "student_target"
+  }],
+  students,
+  dependencies: {
+    buildHomeworkDraftUpdate: () => {
+      throw new Error("no homework draft expected");
+    },
+    getHomeworkStatusFromAssignmentStatus: () => ({ status: "completed", teacherStatus: "verified" }),
+    getLessonHomework: (homeworks, _lesson, student, homeworkType) => homeworks.find(
+      (homework) => homework.studentId === student.studentId && homework.homeworkType === homeworkType
+    ),
+    isAssignmentStatusUnrecorded: () => false,
+    normalizeAssignmentStatusValue: (status) => status
+  }
+});
+assert.deepEqual(alreadyCheckedPlan.changedHomeworks, []);
+assert.equal(alreadyCheckedNowCount, 1, "unchanged homework status must not refresh checkedAt");
 
 const emptyControl = createLessonJournalDraftPersistencePlan({
   currentHomeworks,

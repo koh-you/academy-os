@@ -82,6 +82,13 @@ function normalizeHomeworkValue(_field, value) {
   return value ?? "";
 }
 
+const lessonJournalHomeworkCheckStateFields = [
+  "assignmentStatus",
+  "incompleteHomework",
+  "status",
+  "teacherStatus"
+];
+
 function createLessonJournalChangeRebase({
   after = {},
   before = {},
@@ -106,13 +113,22 @@ function createLessonJournalChangeRebase({
 }
 
 export function rebaseLessonJournalHomeworkChange(change = {}, current = {}) {
-  return createLessonJournalChangeRebase({
+  const rebased = createLessonJournalChangeRebase({
     after: change.after,
     before: change.before,
     current,
     fields: lessonJournalHistoryHomeworkFields,
     normalizeValue: normalizeHomeworkValue
   });
+  const sameAppliedCheckState = lessonJournalHomeworkCheckStateFields.every((field) => (
+    normalizeHomeworkValue(field, change.after?.[field]) ===
+    normalizeHomeworkValue(field, current?.[field])
+  ));
+  if (sameAppliedCheckState && rebased.conflictingFields.includes("checkedAt")) {
+    rebased.conflictingFields = rebased.conflictingFields.filter((field) => field !== "checkedAt");
+    rebased.value.checkedAt = current.checkedAt;
+  }
+  return rebased;
 }
 
 export function rebaseLessonJournalRecordChange(change = {}, current = {}) {

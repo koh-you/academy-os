@@ -68,15 +68,20 @@ export function createLessonJournalDraftPersistencePlan({
       status: homeworkStatus.status,
       teacherStatus: homeworkStatus.teacherStatus,
       assignmentStatus: normalizedAssignmentStatus,
-      incompleteHomework: normalizedAssignmentStatus,
-      checkedAt: now(),
-      updatedAt: now()
+      incompleteHomework: normalizedAssignmentStatus
     };
-    const nextHomework = {
-      ...existing,
-      ...checkedFields,
-      dueDate: existing.dueDate || lesson.date
+    let checkTimestamp = "";
+    const createCheckedHomework = (homework) => {
+      if (!homework) return null;
+      const dueDate = homework.dueDate || lesson.date;
+      const changed = Object.entries({ ...checkedFields, dueDate }).some(
+        ([field, value]) => (homework[field] ?? "") !== (value ?? "")
+      );
+      if (!changed) return null;
+      const checkedAt = checkTimestamp || (checkTimestamp = now());
+      return { ...homework, ...checkedFields, dueDate, checkedAt, updatedAt: checkedAt };
     };
+    const nextHomework = createCheckedHomework(existing);
     const sourceHomework = nextHomeworks.find(
       (homework) =>
         homework.homeworkType === "next" &&
@@ -86,14 +91,8 @@ export function createLessonJournalDraftPersistencePlan({
         String(homework.title ?? "").trim() ===
           String(existing.title ?? "").trim()
     );
-    const updatedSourceHomework = sourceHomework
-      ? {
-          ...sourceHomework,
-          ...checkedFields,
-          dueDate: sourceHomework.dueDate || lesson.date
-        }
-      : null;
-    changedHomeworkMap.set(nextHomework.homeworkId, nextHomework);
+    const updatedSourceHomework = createCheckedHomework(sourceHomework);
+    if (nextHomework) changedHomeworkMap.set(nextHomework.homeworkId, nextHomework);
     if (updatedSourceHomework) {
       changedHomeworkMap.set(
         updatedSourceHomework.homeworkId,
@@ -101,7 +100,7 @@ export function createLessonJournalDraftPersistencePlan({
       );
     }
     nextHomeworks = nextHomeworks.map((homework) => {
-      if (homework.homeworkId === nextHomework.homeworkId) return nextHomework;
+      if (nextHomework && homework.homeworkId === nextHomework.homeworkId) return nextHomework;
       if (
         updatedSourceHomework &&
         homework.homeworkId === updatedSourceHomework.homeworkId

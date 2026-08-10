@@ -87,6 +87,26 @@ assert.deepEqual(
   }).conflictingFields,
   ["title"]
 );
+const alreadyAppliedHomeworkCheck = rebaseLessonJournalHomeworkChange({
+  before: { ...homeworkBefore, checkedAt: "" },
+  after: {
+    ...homeworkBefore,
+    assignmentStatus: "completed",
+    checkedAt: "2026-08-03T00:00:06.000Z",
+    incompleteHomework: "completed",
+    status: "completed",
+    teacherStatus: "verified"
+  }
+}, {
+  ...homeworkBefore,
+  assignmentStatus: "completed",
+  checkedAt: "2026-08-03T00:00:05.000Z",
+  incompleteHomework: "completed",
+  status: "completed",
+  teacherStatus: "verified"
+});
+assert.deepEqual(alreadyAppliedHomeworkCheck.conflictingFields, []);
+assert.equal(alreadyAppliedHomeworkCheck.value.checkedAt, "2026-08-03T00:00:05.000Z");
 
 let actionPayload;
 await saveLessonJournalRowsAction({
