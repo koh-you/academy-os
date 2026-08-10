@@ -1,6 +1,10 @@
 # Academy OS Current Status
 
-업데이트: 2026-08-08
+업데이트: 2026-08-10
+
+## 2026-08-10 자동 작업 우선순위 정합성
+
+- App/API 4차 리팩터링은 4-3 종료 감사까지 완료했고 4-4 이후는 2026-08-12 이후 사용자의 명시적 재개 요청 전까지 자동 시작하지 않는다. 시험분석은 전용 작업 폴더·branch에서만 계속하며, 정산 단가는 사용자 입력이 있을 때 새 월·빈 단가에만 적용한다.
 
 ## 2026-08-08 퇴원 최신 학생 원천 재기준화
 
@@ -265,10 +269,8 @@
 
 1. App 2차 Phase 1~5와 3차 3-0~3-8, P1 운영 저장 신뢰성, P2 modal 통일 후속, P3 알림톡 설정 관리는 완료됐다. P3 closeout은 제품 경로 9개, 설정 key 10개, Solapi provider template 4개의 seed→draft→persisted final→provider 변수 연결과 재시험 독립 11시 transport 부재를 자동 검증한다. 공지 preset 3개·특강 guide seed는 새 초안에만 적용하며 현재 draft·기존 job·보충 교사 최종본과 provider contract를 보존한다.
 2. App 3차 리팩터링 3-0~3-8은 production main 43.1%·gzip 45.3% 감소, 12개 물리 lazy chunk, App Babel 500 KB 경고 제거와 종료 소유권 감사까지 완료했다.
-3. App/API 4차는 4-0 기준선과 4-1a~4-1x, 4-1 종료 감사까지 완료했다. 다음은 4-2 DB row/domain model 변환 기준선을 시작하며 Storage·Tally·유료 AI·실제 provider route는 4-5 대상으로 남긴다.
-4. `app_state`에서 독립성이 큰 데이터는 명시 저장 도메인으로 계속 분리한다.
-   - 학생별 오답 `wrongProblems`와 수업연구 `lessonResearchItems`는 명시 저장 전환을 완료했다. 다음 후보는 새 작업에서 저장 의미와 사용자 행동을 다시 확인한 뒤 고른다.
-   - 즉시 사람 판단이 필요하지 않은 발견은 queue/worklog에 남기고 AI 검수와 다음 단계를 연쇄 진행한다.
+3. App/API 4차는 4-3 종료 감사까지 완료했다. 4-4 이후는 2026-08-12 이후 사용자의 명시적 재개 요청이 있을 때 최신 main에서 다시 시작하며 자동 재개하지 않는다.
+4. 시험분석 상세 프롬프트는 `C:\Dev\academy-os-exam-analysis`의 전용 branch에서만 계속하고, 정산 단가는 사용자가 새 값을 제공할 때 새 월·빈 단가에만 적용한다. 두 조건이 없으면 임의의 제품 기능이나 리팩터링을 자동 시작하지 않는다.
 
 ## 자동 작업
 
