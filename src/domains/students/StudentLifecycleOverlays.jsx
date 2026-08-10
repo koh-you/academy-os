@@ -47,7 +47,7 @@ export function StudentLifecycleOverlays({
           onClose={() => {
             if (withdrawalSaveState !== "saving") setDeleteStudentId("");
           }}
-          subtitle="퇴원 처리하면 학생 목록과 다음 날 이후 수업 명단에서는 제외되고, 등원일부터 퇴원일까지의 수업기록은 보존됩니다."
+          subtitle="퇴원 처리하면 학생 목록에서 제외됩니다. 오늘 수업 행이 있으면 명단 제외를 오늘부터 또는 내일부터 선택하고, 이미 저장된 수업기록은 보존합니다."
           title="학생 퇴원 처리 확인"
         >
           <div className="deleteConfirmBody">
@@ -66,7 +66,7 @@ export function StudentLifecycleOverlays({
               <span>PIN</span>
               <strong>{deleteStudent.pin || "-"}</strong>
             </div>
-            <p className="dangerCopy">정말 이 학생을 퇴원 처리할까요? 등원일부터 퇴원일까지의 학생·수업·수업기록·출결·숙제는 보존하고, 다음 날 이후 수업 명단에서만 제외합니다.</p>
+            <p className="dangerCopy">정말 이 학생을 퇴원 처리할까요? 이미 저장된 수업기록·출결·숙제는 보존하고, 선택한 적용일부터 수업 명단에서 제외합니다.</p>
             <div className="withdrawalReasonGrid">
               <label>
                 퇴원 사유
@@ -90,6 +90,23 @@ export function StudentLifecycleOverlays({
                 />
               </label>
             </div>
+            {withdrawalDraft.hasTodayLessonRow ? (
+              <label className="studentRosterEffectiveField">
+                오늘 수업일지 반영
+                <select
+                  aria-label={`${deleteStudent.name} 퇴원 적용 시점`}
+                  disabled={withdrawalSaveState === "saving"}
+                  onChange={(event) => setWithdrawalDraft((current) => ({
+                    ...current,
+                    rosterEffectiveMode: event.target.value
+                  }))}
+                  value={withdrawalDraft.rosterEffectiveMode ?? "tomorrow"}
+                >
+                  <option value="tomorrow">오늘 행 유지 · 내일부터 제외</option>
+                  <option value="today">오늘부터 행 제외</option>
+                </select>
+              </label>
+            ) : null}
             {withdrawalSaveState === "saving" ? <InlineSaveStatus label="학생 상태·미래 수업 명단" saveState="saving" /> : null}
             {withdrawalSaveState === "failed" ? <p className="errorText" role="alert">{withdrawalError || "퇴원 처리에 실패했습니다. 입력을 유지했으니 다시 시도해 주세요."}</p> : null}
           </div>

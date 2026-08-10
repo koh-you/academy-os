@@ -236,6 +236,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
         teacherOperatingMemos: models.teacherOperatingMemos,
         teacherOperatingMemoSaveStates: models.teacherOperatingMemoSaveStates,
         students: models.students,
+        today: models.today,
         specialLectureApplications: models.specialLectureApplications,
         templates: models.classTemplates,
         effects: studentEffects,

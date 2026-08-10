@@ -378,7 +378,7 @@ test("class roster save keeps the modal draft on conflict and verifies student p
 
 test("student withdrawal rebases a stale student row before saving future rosters", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
-  await page.clock.install({ time: new Date("2026-08-03T09:00:00+09:00") });
+  await page.clock.install({ time: new Date("2026-08-01T09:00:00+09:00") });
   const rosterRequests = [];
   await page.route("**/api/class-rosters/save", async (route) => {
     rosterRequests.push(route.request().postDataJSON());
@@ -401,6 +401,7 @@ test("student withdrawal rebases a stale student row before saving future roster
 
   await page.getByRole("button", { name: "정산 미리보기 학생 퇴원 처리" }).click();
   const withdrawalModal = page.getByRole("dialog", { name: "학생 퇴원 처리 확인" });
+  await expect(withdrawalModal.getByLabel("정산 미리보기 학생 퇴원 적용 시점")).toHaveValue("tomorrow");
   await withdrawalModal.getByLabel("코멘트").fill("특강수강생");
   await withdrawalModal.getByRole("button", { name: "퇴원 처리", exact: true }).click();
   await expect(withdrawalModal).toBeHidden();
@@ -1995,6 +1996,32 @@ test("lesson journal creation action stays visible and opens the registration mo
   await expect(creationActions).toBeVisible();
   await creationActions.getByRole("button", { name: "+ 수업 등록", exact: true }).click();
   await expect(page.getByRole("dialog", { name: "수업 등록" })).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
+test("student class move preserves today's journal row when applying from tomorrow", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await page.clock.install({ time: new Date("2026-08-01T09:00:00+09:00") });
+  const rosterRequests = [];
+  await page.route("**/api/class-rosters/save", async (route) => {
+    rosterRequests.push(route.request().postDataJSON());
+    const response = await route.fetch();
+    await route.fulfill({ response });
+  });
+
+  await loginAsTeacher(page);
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
+  const classSelect = page.getByLabel("정산 미리보기 학생 반");
+  const studentRow = classSelect.locator("xpath=ancestor::div[contains(@class, 'studentListRow')]");
+  await classSelect.selectOption("safe-cross-month-class");
+  await expect(page.getByLabel("정산 미리보기 학생 반 변경 적용 시점")).toHaveValue("tomorrow");
+  await studentRow.getByRole("button", { name: "저장", exact: true }).click();
+  await expect(studentRow.getByRole("button", { name: "저장됨", exact: true })).toBeVisible();
+
+  expect(rosterRequests).toHaveLength(1);
+  const changedLessonIds = rosterRequests[0].lessonChanges.map((change) => change.lessonId);
+  expect(changedLessonIds).not.toContain("safe-settlement-august-regular");
+  expect(changedLessonIds).toContain("safe-settlement-future-roster");
   expect(pageErrors).toEqual([]);
 });
 

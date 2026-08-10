@@ -47,7 +47,7 @@ for (const propName of [
 
 for (const contract of [
   'title="학생 퇴원 처리 확인"',
-  "등원일부터 퇴원일까지의 학생·수업·수업기록·출결·숙제는 보존",
+  "이미 저장된 수업기록·출결·숙제는 보존하고, 선택한 적용일부터 수업 명단에서 제외",
   "이 코멘트는 이번 PDF에만 포함되며 저장하지 않습니다.",
   'closeDisabled={permanentDeleteAuditState === "saving"}',
   'closeDisabled={batchPermanentDeleteAuditState === "saving"}',

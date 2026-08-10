@@ -12265,6 +12265,26 @@ textarea {
   padding: 0 12px;
 }
 
+.studentClassAssignmentCell {
+  display: grid;
+  gap: 6px;
+}
+
+.studentClassAssignmentCell select {
+  min-width: 0;
+  width: 100%;
+}
+
+.studentRosterEffectiveSelect {
+  font-size: 12px !important;
+}
+
+.studentRosterEffectiveField {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+}
+
 .studentClassSelect {
   width: 100%;
 }

@@ -11,6 +11,7 @@ import { StudentLifecycleOverlays } from "./StudentLifecycleOverlays.jsx";
 import { StudentProfileErrorBoundary, StudentProfileModal } from "./StudentProfileModal.jsx";
 import { StudentWithdrawnList } from "./StudentWithdrawnList.jsx";
 import { sortWithdrawnStudents } from "./studentListSort.js";
+import { hasStudentLessonRowOnDate } from "./rosterEffectiveDate.js";
 
 const withdrawalReasonOptions = [
   { value: "graduation", label: "졸업" },
@@ -51,6 +52,7 @@ export function StudentManager({
   records = [],
   specialLectureApplications = [],
   students,
+  today = "",
   templates,
   ModalComponent,
   onAddStudent
@@ -82,12 +84,13 @@ export function StudentManager({
   const [activeTab, setActiveTab] = useState("all");
   const [selectedStudentId, setSelectedStudentId] = useState("");
   const [deleteStudentId, setDeleteStudentId] = useState("");
-  const [withdrawalDraft, setWithdrawalDraft] = useState({ comment: "", reason: "other" });
+  const [withdrawalDraft, setWithdrawalDraft] = useState({ comment: "", reason: "other", rosterEffectiveMode: "tomorrow" });
   const [withdrawalError, setWithdrawalError] = useState("");
   const [withdrawalSaveState, setWithdrawalSaveState] = useState("idle");
   const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("template_mwf_7_10");
   const [dirtyStudentIds, setDirtyStudentIds] = useState(() => new Set());
   const [originalClassTemplateIds, setOriginalClassTemplateIds] = useState({});
+  const [rosterEffectiveModes, setRosterEffectiveModes] = useState({});
   const [studentSaveStates, setStudentSaveStates] = useState({});
   const studentSaveRevisionsRef = useRef({});
   const [studentRestoreStates, setStudentRestoreStates] = useState({});
@@ -174,7 +177,7 @@ export function StudentManager({
         setSelectedStudentId("");
       }
       setDeleteStudentId("");
-      setWithdrawalDraft({ comment: "", reason: "other" });
+      setWithdrawalDraft({ comment: "", reason: "other", rosterEffectiveMode: "tomorrow" });
       setWithdrawalSaveState("saved");
     } catch (error) {
       console.error(error);
@@ -202,7 +205,10 @@ export function StudentManager({
     setStudentSaveStates((current) => ({ ...current, [studentId]: "saving" }));
     try {
       const saveOptions = Object.prototype.hasOwnProperty.call(originalClassTemplateIds, studentId)
-        ? { previousClassTemplateId: originalClassTemplateIds[studentId] }
+        ? {
+            previousClassTemplateId: originalClassTemplateIds[studentId],
+            rosterEffectiveMode: rosterEffectiveModes[studentId] ?? "today"
+          }
         : {};
       await onSaveStudent(studentId, saveOptions);
       if ((studentSaveRevisionsRef.current[studentId] ?? 0) !== saveRevision) {
@@ -215,6 +221,11 @@ export function StudentManager({
         return next;
       });
       setOriginalClassTemplateIds((current) => {
+        const next = { ...current };
+        delete next[studentId];
+        return next;
+      });
+      setRosterEffectiveModes((current) => {
         const next = { ...current };
         delete next[studentId];
         return next;
@@ -235,9 +246,17 @@ export function StudentManager({
   }
 
   function openWithdrawStudentModal(student) {
+    const hasTodayLessonRow = hasStudentLessonRowOnDate({
+      date: today,
+      lessons,
+      records,
+      studentId: student.studentId
+    });
     setWithdrawalDraft({
       comment: student.withdrawalComment ?? "",
-      reason: student.withdrawalReason || "other"
+      hasTodayLessonRow,
+      reason: student.withdrawalReason || "other",
+      rosterEffectiveMode: hasTodayLessonRow ? "tomorrow" : "today"
     });
     setWithdrawalError("");
     setWithdrawalSaveState("idle");
@@ -647,17 +666,53 @@ export function StudentManager({
                   <span className="studentInitial">{student.name?.[0] ?? "학"}</span>
                   <strong>{student.name}</strong>
                 </button>
-                <select
-                  aria-label={`${student.name} 반`}
-                  className="studentClassSelect"
-                  value={student.defaultClassTemplateId ?? ""}
-                  onChange={(event) => updateStudentField(student.studentId, "defaultClassTemplateId", event.target.value)}
-                >
-                  <option value="">미배정</option>
-                  {templates.map((template) => (
-                    <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>
-                  ))}
-                </select>
+                <div className="studentClassAssignmentCell">
+                  <select
+                    aria-label={`${student.name} 반`}
+                    className="studentClassSelect"
+                    value={student.defaultClassTemplateId ?? ""}
+                    onChange={(event) => {
+                      updateStudentField(student.studentId, "defaultClassTemplateId", event.target.value);
+                      if (!Object.prototype.hasOwnProperty.call(rosterEffectiveModes, student.studentId)) {
+                        const hasTodayLessonRow = hasStudentLessonRowOnDate({
+                          date: today,
+                          lessons,
+                          records,
+                          studentId: student.studentId
+                        });
+                        setRosterEffectiveModes((current) => ({
+                          ...current,
+                          [student.studentId]: hasTodayLessonRow ? "tomorrow" : "today"
+                        }));
+                      }
+                    }}
+                  >
+                    <option value="">미배정</option>
+                    {templates.map((template) => (
+                      <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>
+                    ))}
+                  </select>
+                  {Object.prototype.hasOwnProperty.call(originalClassTemplateIds, student.studentId) && hasStudentLessonRowOnDate({
+                    date: today,
+                    lessons,
+                    records,
+                    studentId: student.studentId
+                  }) ? (
+                    <select
+                      aria-label={`${student.name} 반 변경 적용 시점`}
+                      className="studentRosterEffectiveSelect"
+                      disabled={isSaving}
+                      onChange={(event) => setRosterEffectiveModes((current) => ({
+                        ...current,
+                        [student.studentId]: event.target.value
+                      }))}
+                      value={rosterEffectiveModes[student.studentId] ?? "tomorrow"}
+                    >
+                      <option value="tomorrow">내일부터 반 이동</option>
+                      <option value="today">오늘부터 반 이동</option>
+                    </select>
+                  ) : null}
+                </div>
                 <input
                   aria-label={`${student.name} 아이디`}
                   className="editableTextCell monoCell"

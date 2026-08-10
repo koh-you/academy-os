@@ -31,9 +31,9 @@ import { normalizeExamPrepRowReviewDraft } from "../domains/exams/examReviewDraf
 import { createStudentExamPrepRow } from "../domains/exams/studentExamPrepRow.js";
 import {
   createWithdrawalStudentMutation,
-  getWithdrawalFutureLessonStartDate,
   isStudentVisibleInLessonJournal
 } from "../domains/students/withdrawalLessonBoundary.js";
+import { getRosterEffectiveFromDate } from "../domains/students/rosterEffectiveDate.js";
 import {
   getDefaultTallyStudentId,
   getTallyStudentMergeCandidates,
@@ -5371,7 +5371,7 @@ export function App() {
         ? { ...currentStudent, defaultClassTemplateId: options.previousClassTemplateId }
         : currentStudent);
       const result = await persistClassRosterMutation({
-        fromDate: today,
+        fromDate: getRosterEffectiveFromDate({ mode: options.rosterEffectiveMode, today }),
         mergeStudent: (currentStudent, persistedStudent, change) => resolveStudentRowSaveSuccess({
           currentStudent,
           persistedStudent,
@@ -5901,9 +5901,12 @@ export function App() {
       return pausedStudent;
     }
     const withdrawalDate = getKoreaDateString(new Date(pausedStudent.withdrawnAt));
-    const futureLessonStartDate = getWithdrawalFutureLessonStartDate(withdrawalDate);
+    const rosterEffectiveFromDate = getRosterEffectiveFromDate({
+      mode: withdrawalInfo.rosterEffectiveMode ?? "tomorrow",
+      today: withdrawalDate
+    });
     await persistClassRosterMutation({
-      fromDate: futureLessonStartDate,
+      fromDate: rosterEffectiveFromDate,
       nextStudents,
       previousStudents: sourceBefore.students,
       timeoutMessage: "퇴원 처리와 미래 수업 명단 저장이 30초를 넘었습니다. 입력을 유지한 채 서버 상태를 확인해 주세요."
@@ -7148,6 +7151,7 @@ export function App() {
       studentIntakeApplicants,
       studentProfileSaveStates,
       students,
+      today,
       supplementCenterDependencies,
       tallySubmissions,
       tallySummaries,
