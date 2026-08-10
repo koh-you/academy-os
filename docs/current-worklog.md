@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-10 검증 병목 완화 정책
+
+- 같은 commit을 로컬 production·branch full CI·main full CI에서 반복하던 규칙을 폐기했다. 위험도는 변경한 코드 경계로 판정하고 저·중위험은 관련 fixture와 focused smoke를 우선한다.
+- 진짜 API/DB/auth/명단/정산/알림·다중 원천 변경만 branch 전체검사를 한 번 수행한다. main에서는 exact 배포와 변경 smoke를 확인하고 전체 CI는 비차단 monitor로 둔다.
+- 리팩터링 수치나 테스트 총량보다 운영 오류 재현 fixture와 서버 원천 대조를 우선한다.
+
 ## 2026-08-10 시험기간 날짜 입력 복구
 
 - 시험관리 상세에서 첫 날짜 선택 직후 `examPeriod`가 단일 날짜가 되는 정상 중간 상태를 기존 범위 파서가 빈값으로 되돌리던 원인을 수정했다.

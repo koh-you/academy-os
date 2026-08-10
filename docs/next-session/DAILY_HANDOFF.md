@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-10
 
+## 2026-08-10 검증 병목 완화 · 최우선
+
+- 작은 수정은 실제 diff 기준으로 저·중위험을 판정하고 관련 테스트·focused smoke·필요한 build만 실행한다. 저장 화면이어도 API·DB·CAS를 바꾸지 않으면 고위험이 아니다.
+- 전체 production/safe browser는 진짜 고위험 branch exact-head에서 한 번만 실행한다. 동일 SHA main 전체 CI는 백그라운드 monitor이며 완료를 막지 않는다.
+- Worktree 격리, 시작 main 불변, fast-forward only, force push 금지, 운영 side effect 사람 Gate, 저장 후 서버 재조회는 계속 적용한다.
+
 ## 2026-08-10 시험기간 날짜 입력 복구
 
 - 시험관리 상세의 시작일 첫 선택이 사라지던 부분 범위 파싱 오류를 고쳤다. 두 날짜 입력 후 기존 범위 형식으로 저장되고 API 재조회·새로고침에서도 유지된다.

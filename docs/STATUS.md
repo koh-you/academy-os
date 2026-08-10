@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-10
 
+## 2026-08-10 검증 병목 완화 정책
+
+- 위험도는 기능 중요도가 아니라 실제 diff의 blast radius로 판정한다. 기존 API·DB·CAS를 그대로 쓰는 frontend 저장 UI 수정은 중위험이며 `저장`이라는 이유만으로 고위험이 아니다.
+- 저·중위험은 관련 테스트·focused smoke·필요한 build로 완료한다. 전체검사는 진짜 고위험 branch exact-head에서 한 번만 수행하고 동일 SHA의 로컬·main 반복을 금지한다.
+- main은 exact 배포 commit과 변경 smoke를 완료 기준으로 삼고 전체 CI는 백그라운드 monitor로 전환한다. Worktree·fast-forward·force 금지·사람 Gate·서버 재조회는 유지한다.
+
 ## 2026-08-10 시험기간 날짜 입력 복구
 
 - 빈 시험기간에서 시작일을 먼저 선택하면 단일 날짜 중간값을 범위 파서가 읽지 못해 입력칸이 즉시 비던 오류를 수정했다.

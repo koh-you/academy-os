@@ -2,6 +2,15 @@
 
 이 파일은 새 Codex 작업의 짧은 공통 규칙이다. 완료 이력과 상세 설계는 여기 넣지 않는다.
 
+## 최우선 검증 원칙 · 2026-08-10
+
+- 위험도는 기능의 중요성이나 `저장`이라는 단어가 아니라 **이번 diff가 실제로 바꾼 경계와 blast radius**로 정한다. 기존 API·DB·CAS 계약을 그대로 사용하는 frontend 입력·표시 수정은 중위험이며 자동으로 고위험이 되지 않는다.
+- 검증은 `재현 fixture -> 관련 전용 테스트 -> 집중 browser/API -> 필요한 build` 순서로 가장 가까운 신호를 먼저 사용한다. 테스트 총량보다 실제 사용자 동작과 서버 원천 대조를 우선한다.
+- 같은 commit의 전체 production·전체 safe browser를 로컬, branch, main에서 반복하지 않는다. 전체 검사는 진짜 고위험 branch에서 원격으로 한 번만 수행하고, 로컬 전체검사는 원격 실패 원인 규명이나 환경 차이 확인 때만 추가한다.
+- 저·중위험은 관련 검사와 focused smoke가 통과하면 exact-head 전체 branch CI를 필수 Gate로 삼지 않는다. main의 전체 CI는 백그라운드 회귀 monitor이며 완료를 막지 않고, 배포 commit과 변경 기능 smoke를 완료 기준으로 삼는다.
+- 문서·테스트 전용 변경은 링크·명령·diff만 확인하고 production build·배포·운영 smoke를 생략한다. 전체 회귀는 매 commit이 아니라 scheduled 일일 검사 또는 진짜 고위험 변경에서 수행한다.
+- Worktree 격리, 시작 main 불변, fast-forward only, force push 금지, 운영 side effect 사람 Gate, 저장 후 서버 재조회 원칙은 그대로 유지한다.
+
 ## 시작할 때 읽기
 
 1. `docs/STATUS.md`
@@ -32,8 +41,8 @@
 ## 검증과 완료
 
 - 검증 명령 선택의 source of truth는 `docs/testing-policy.md`다.
-- 일반 코드 변경: `npm run lint:runtime`, 관련 `test:domain:*`·전용 테스트, `npm run build`.
-- 빠른 일반 검증은 `npm run check:fast`를 사용한다. 고위험 경계는 로컬 `npm run test:production`, PR/release는 exact-head와 main CI의 전체 production을 기준으로 하며 단순 변경의 로컬 반복 기준은 정책 문서를 따른다.
+- 일반 코드 변경: 관련 `test:domain:*`·전용 테스트와 영향받은 runtime lint/build만 실행한다.
+- 빠른 일반 검증은 `npm run check:fast`를 사용한다. 전체 production은 진짜 고위험 branch의 원격 exact-head에서 한 번 실행하고, 저·중위험과 동일 SHA main에서는 반복하지 않는다.
 - 새 UI 핵심 경로는 운영 계정 대신 `npm run dev:safe` 가상 환경에서 자동 브라우저 검사를 먼저 만든다.
 - 테스트를 파일 위치나 정확한 내부 개수에 과도하게 결합하지 않는다. 사용자 동작과 저장 계약을 검증한다.
 - 작업 완료 시 `docs/STATUS.md`, `docs/current-worklog.md`, `docs/next-session/DAILY_HANDOFF.md`를 짧게 갱신한다.
@@ -47,7 +56,7 @@
 - 동시 작업은 같은 worktree/index를 공유하지 않는다. 별도 `codex/` branch와 worktree를 사용하고 main 통합 owner는 한 세션만 둔다.
 - 사용자 소유 변경을 임의로 stage/revert하지 않는다. 예상 밖 변경이나 충돌이 있으면 중단하고 보고한다.
 - 검증이 끝난 AI 변경은 별도 지시가 없어도 의도적으로 commit하고 GitHub에 push한다.
-- 매일 9시 자동 task의 1~3번 작업은 사람 Gate가 없고 시작 기준 `origin/main` 불변·동시 통합 owner 없음·정확한 branch HEAD 원격 검사 통과·fast-forward 가능 조건을 모두 만족하면 AI가 force 없이 main까지 통합하고 main CI·배포 commit·안전한 smoke를 확인한다. 조건이 하나라도 깨지면 통합하지 않고 보고한다.
+- 매일 9시 자동 task의 1~3번 작업은 사람 Gate가 없고 시작 기준 `origin/main` 불변·동시 통합 owner 없음·fast-forward 가능 조건을 만족하면 AI가 force 없이 main까지 통합한다. 정확한 branch HEAD 전체 검사는 진짜 고위험에서만 필수이며, 저·중위험은 관련 검사·focused smoke를 Gate로 사용한다. main CI는 백그라운드 monitor로 두고 배포 commit·변경 smoke를 확인한다.
 - 비밀값, `.env`, PDF/HWP/HWPX/ZIP, 대용량 운영 자료는 commit하지 않는다. API key 값은 출력하지 않는다.
 
 ## 배포·운영 경계
@@ -55,7 +64,7 @@
 - GitHub: `https://github.com/koh-you/academy-os`
 - Frontend: `https://academy-os-blue.vercel.app`
 - Backend: `https://koh-you-math-academy-os-api.onrender.com`
-- main push 뒤 GitHub Actions가 통과해야 배포 완료로 본다.
+- main push 뒤 exact 배포 commit과 변경 기능 smoke가 통과해야 반영 완료로 본다. 동일 SHA의 main 전체 CI는 백그라운드 회귀 monitor이며 저·중위험 완료를 막지 않는다.
 - Supabase SQL은 파일로 준비하고 사용자가 SQL Editor에서 적용한다.
 - 화면만 맞아 보이는 수정이 아니라 API 응답과 필요한 서버 재조회를 성공 기준으로 삼는다.
 
