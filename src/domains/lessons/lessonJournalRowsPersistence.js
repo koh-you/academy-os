@@ -126,7 +126,6 @@ export function rebaseLessonJournalHomeworkChange(change = {}, current = {}) {
   ));
   if (sameAppliedCheckState && rebased.conflictingFields.includes("checkedAt")) {
     rebased.conflictingFields = rebased.conflictingFields.filter((field) => field !== "checkedAt");
-    rebased.value.checkedAt = current.checkedAt;
   }
   return rebased;
 }

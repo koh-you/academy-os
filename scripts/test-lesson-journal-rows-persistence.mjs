@@ -106,7 +106,7 @@ const alreadyAppliedHomeworkCheck = rebaseLessonJournalHomeworkChange({
   teacherStatus: "verified"
 });
 assert.deepEqual(alreadyAppliedHomeworkCheck.conflictingFields, []);
-assert.equal(alreadyAppliedHomeworkCheck.value.checkedAt, "2026-08-03T00:00:05.000Z");
+assert.equal(alreadyAppliedHomeworkCheck.value.checkedAt, "2026-08-03T00:00:06.000Z");
 
 let actionPayload;
 await saveLessonJournalRowsAction({
@@ -339,6 +339,29 @@ try {
   assert.equal(storedHomeworks[0].teacher_status, "verified", "latest non-overlapping homework field must survive");
   await saveLessonJournalRowsPlan({ auditId: "rows-homework-nonoverlap-retry", ...plan });
   assert.equal(homeworkPatchCount, 1, "rebased homework retry must be idempotent");
+
+  resetFixture();
+  const checkedHomeworkAfter = {
+    ...homeworkBefore,
+    assignmentStatus: "completed",
+    checkedAt: "2026-08-03T00:00:06.000Z",
+    incompleteHomework: "completed",
+    status: "completed",
+    teacherStatus: "verified"
+  };
+  storedHomeworks[0] = toHomeworkRow({
+    ...checkedHomeworkAfter,
+    checkedAt: "2026-08-03T00:00:05.000Z",
+    updatedAt: "2026-08-03T00:00:05.000Z"
+  });
+  const checkedAtRebasedSave = await saveLessonJournalRowsPlan({
+    auditId: "rows-homework-checked-at-rebase",
+    homeworkChanges: [{ before: homeworkBefore, after: checkedHomeworkAfter }],
+    recordChanges: []
+  });
+  assert.equal(checkedAtRebasedSave.verified, true);
+  assert.equal(checkedAtRebasedSave.homeworks[0].checkedAt, checkedHomeworkAfter.checkedAt);
+  assert.equal(storedHomeworks[0].checked_at, checkedHomeworkAfter.checkedAt);
 
   resetFixture();
   storedRecords[0] = {
