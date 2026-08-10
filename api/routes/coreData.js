@@ -74,6 +74,8 @@ import {
 } from "../../src/domains/lessons/lessonJournalHistoryPersistence.js";
 import {
   areLessonJournalRecordsEqual,
+  rebaseLessonJournalHomeworkChange,
+  rebaseLessonJournalRecordChange,
   verifyLessonJournalRowsSavePlan
 } from "../../src/domains/lessons/lessonJournalRowsPersistence.js";
 import {
@@ -2271,7 +2273,7 @@ function validateLessonJournalRowsPlan({ homeworkChanges = [], recordChanges = [
 }
 
 async function persistLessonJournalRowsHomeworkChange(change = {}) {
-  const after = change.after;
+  let after = change.after;
   const before = change.before ?? null;
   const homeworkId = after.homeworkId;
   const current = await getLessonJournalHistoryHomework(homeworkId);
@@ -2318,13 +2320,25 @@ async function persistLessonJournalRowsHomeworkChange(change = {}) {
     }
     return { homework: verified, mutated: true, operation: "create" };
   }
+  if (!current || !before.updatedAt) {
+    throw createLessonJournalRowsConflict("숙제 원본이 다른 화면에서 먼저 변경되었습니다.", { currentHomework: current, homeworkId });
+  }
   if (
-    !current ||
-    !before.updatedAt ||
     !areLessonJournalHistoryTimestampsEqual(current.updatedAt, before.updatedAt) ||
     !areLessonJournalHistoryHomeworksEqual(before, current)
   ) {
-    throw createLessonJournalRowsConflict("숙제 원본이 다른 화면에서 먼저 변경되었습니다.", { currentHomework: current, homeworkId });
+    const rebased = rebaseLessonJournalHomeworkChange(change, current);
+    if (rebased.conflictingFields.length) {
+      throw createLessonJournalRowsConflict("숙제의 같은 항목이 다른 화면에서 먼저 변경되었습니다.", {
+        conflictFields: rebased.conflictingFields,
+        currentHomework: current,
+        homeworkId
+      });
+    }
+    after = rebased.value;
+    if (areLessonJournalHistoryHomeworksEqual(after, current)) {
+      return { homework: current, mutated: false, operation: "unchanged" };
+    }
   }
   const nextUpdatedAt = createNextRosterUpdatedAt(current.updatedAt);
   let savedRows;
@@ -2366,11 +2380,31 @@ async function persistLessonJournalRowsHomeworkChange(change = {}) {
 }
 
 async function persistLessonJournalRowsRecordChange(change = {}) {
-  const after = change.after;
+  let after = change.after;
   const before = change.before ?? null;
   const { lessonId, studentId } = after;
   await assertLessonStudentRecordBelongsToLesson(lessonId, studentId);
   const current = await getLessonJournalRecordForRowsSave(lessonId, studentId);
+  if (
+    before &&
+    current &&
+    (
+      !before.updatedAt ||
+      !areLessonJournalHistoryTimestampsEqual(current.updatedAt, before.updatedAt) ||
+      !areLessonJournalRecordsEqual(before, current)
+    )
+  ) {
+    const rebased = rebaseLessonJournalRecordChange(change, current);
+    if (rebased.conflictingFields.length) {
+      throw createLessonJournalRowsConflict("수업기록의 같은 항목이 다른 화면에서 먼저 변경되었습니다.", {
+        conflictFields: rebased.conflictingFields,
+        currentRecord: current,
+        lessonId,
+        studentId
+      });
+    }
+    after = rebased.value;
+  }
   const stableAfter = current
     ? { ...after, lessonStudentRecordId: current.lessonStudentRecordId }
     : after;
@@ -2420,12 +2454,7 @@ async function persistLessonJournalRowsRecordChange(change = {}) {
     }
     return { record: verified, mutated: true, operation: "create" };
   }
-  if (
-    !current ||
-    !before.updatedAt ||
-    !areLessonJournalHistoryTimestampsEqual(current.updatedAt, before.updatedAt) ||
-    !areLessonJournalRecordsEqual(before, current)
-  ) {
+  if (!current || !before.updatedAt) {
     throw createLessonJournalRowsConflict("수업기록 원본이 다른 화면에서 먼저 변경되었습니다.", { currentRecord: current, lessonId, studentId });
   }
   const nextUpdatedAt = createNextRosterUpdatedAt(current.updatedAt);

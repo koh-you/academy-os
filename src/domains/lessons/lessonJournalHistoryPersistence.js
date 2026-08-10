@@ -19,7 +19,7 @@ const lessonFields = [
   "specialLectureSessionIndex"
 ];
 
-const homeworkFields = [
+export const lessonJournalHistoryHomeworkFields = [
   "homeworkId",
   "lessonId",
   "studentId",
@@ -75,7 +75,7 @@ export function areLessonJournalHistoryLessonsEqual(left = {}, right = {}) {
 }
 
 export function areLessonJournalHistoryHomeworksEqual(left = {}, right = {}) {
-  return JSON.stringify(normalizeFields(left, homeworkFields)) === JSON.stringify(normalizeFields(right, homeworkFields));
+  return JSON.stringify(normalizeFields(left, lessonJournalHistoryHomeworkFields)) === JSON.stringify(normalizeFields(right, lessonJournalHistoryHomeworkFields));
 }
 
 export function createLessonJournalHistoryPlan({

@@ -4,6 +4,8 @@ import { saveLessonJournalRowsAction } from "../src/domains/lessons/lessonJourna
 import {
   areLessonJournalRecordsEqual,
   createLessonJournalRowsSavePlan,
+  rebaseLessonJournalHomeworkChange,
+  rebaseLessonJournalRecordChange,
   verifyLessonJournalRowsSavePlan
 } from "../src/domains/lessons/lessonJournalRowsPersistence.js";
 
@@ -59,6 +61,32 @@ assert.equal(verifyLessonJournalRowsSavePlan(plan, {
   homeworks: [homeworkAfter],
   records: [recordAfter]
 }).verified, true);
+
+const homeworkRebase = rebaseLessonJournalHomeworkChange(plan.homeworkChanges[0], {
+  ...homeworkBefore,
+  teacherStatus: "verified",
+  updatedAt: "2026-08-03T00:00:05.000Z"
+});
+assert.deepEqual(homeworkRebase.conflictingFields, []);
+assert.equal(homeworkRebase.value.title, homeworkAfter.title);
+assert.equal(homeworkRebase.value.teacherStatus, "verified");
+const recordRebase = rebaseLessonJournalRecordChange(plan.recordChanges[0], {
+  ...recordBefore,
+  checkOutAt: "2026-08-03T09:00:00.000Z",
+  checkOutTime: "18:00",
+  updatedAt: "2026-08-03T00:00:05.000Z"
+});
+assert.deepEqual(recordRebase.conflictingFields, []);
+assert.equal(recordRebase.value.teacherComment, recordAfter.teacherComment);
+assert.equal(recordRebase.value.checkOutTime, "18:00");
+assert.deepEqual(
+  rebaseLessonJournalHomeworkChange(plan.homeworkChanges[0], {
+    ...homeworkBefore,
+    title: "다른 화면 제목",
+    updatedAt: "2026-08-03T00:00:05.000Z"
+  }).conflictingFields,
+  ["title"]
+);
 
 let actionPayload;
 await saveLessonJournalRowsAction({
@@ -278,6 +306,33 @@ try {
   await saveLessonJournalRowsPlan({ auditId: "rows-retry-after-unknown-response", ...plan });
   assert.equal(homeworkPatchCount, 1, "same desired homework retry must be idempotent");
   assert.equal(recordPatchCount, 1, "same desired record retry must be idempotent");
+
+  resetFixture();
+  storedHomeworks[0] = {
+    ...storedHomeworks[0],
+    teacher_status: "verified",
+    updated_at: "2026-08-03T00:00:05.000Z"
+  };
+  const homeworkRebasedSave = await saveLessonJournalRowsPlan({ auditId: "rows-homework-nonoverlap-rebase", ...plan });
+  assert.equal(homeworkRebasedSave.verified, true);
+  assert.equal(storedHomeworks[0].title, homeworkAfter.title);
+  assert.equal(storedHomeworks[0].teacher_status, "verified", "latest non-overlapping homework field must survive");
+  await saveLessonJournalRowsPlan({ auditId: "rows-homework-nonoverlap-retry", ...plan });
+  assert.equal(homeworkPatchCount, 1, "rebased homework retry must be idempotent");
+
+  resetFixture();
+  storedRecords[0] = {
+    ...storedRecords[0],
+    check_out_at: "2026-08-03T09:00:00.000Z",
+    check_out_time: "18:00",
+    updated_at: "2026-08-03T00:00:05.000Z"
+  };
+  const recordRebasedSave = await saveLessonJournalRowsPlan({ auditId: "rows-record-nonoverlap-rebase", ...plan });
+  assert.equal(recordRebasedSave.verified, true);
+  assert.equal(storedRecords[0].teacher_comment, recordAfter.teacherComment);
+  assert.equal(storedRecords[0].check_out_time, "18:00", "latest non-overlapping attendance field must survive");
+  await saveLessonJournalRowsPlan({ auditId: "rows-record-nonoverlap-retry", ...plan });
+  assert.equal(recordPatchCount, 1, "rebased record retry must be idempotent");
 
   resetFixture();
   failNextRecordPatch = true;

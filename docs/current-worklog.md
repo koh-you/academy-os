@@ -2,6 +2,11 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-10 수업일지 최신 원천 필드 병합
+
+- 열린 수업일지의 숙제·기록 version이 출결이나 숙제 상태 갱신으로 바뀌어도, 사람이 수정한 필드와 겹치지 않으면 최신 Supabase 행 위에 수정 필드만 병합한 뒤 최신 version으로 CAS 저장한다.
+- 같은 필드가 양쪽에서 다르게 바뀌면 충돌을 유지한다. 숙제 상태·출결 시간 보존, 충돌 차단, atomic rollback fixture와 lesson `21/21`, runtime lint, production `827/827`, build `422 modules`를 통과했다.
+
 ## 2026-08-10 Supabase 알림 dispatch 후보 조회 축소
 
 - `notification_jobs`의 최근 1,000건 전체를 매분 읽던 내부 dispatch를 서버측 `status=scheduled` 및 `scheduled_at is null 또는 현재 이하` 후보 조회로 교체했다. 인증된 수동 dispatch에서만 기존 `queued`·`pending_send` 포함 계약을 유지한다.

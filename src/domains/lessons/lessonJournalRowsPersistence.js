@@ -1,9 +1,10 @@
 import {
   areLessonJournalHistoryHomeworksEqual,
-  areLessonJournalHistoryTimestampsEqual
+  areLessonJournalHistoryTimestampsEqual,
+  lessonJournalHistoryHomeworkFields
 } from "./lessonJournalHistoryPersistence.js";
 
-const recordFields = [
+export const lessonJournalRecordFields = [
   "lessonStudentRecordId",
   "lessonId",
   "studentId",
@@ -72,8 +73,71 @@ export function areLessonJournalRowsTimestampsEqual(left, right) {
 }
 
 export function areLessonJournalRecordsEqual(left = {}, right = {}) {
-  return recordFields.every((field) => (
+  return lessonJournalRecordFields.every((field) => (
     normalizeRecordValue(field, left[field]) === normalizeRecordValue(field, right[field])
+  ));
+}
+
+function normalizeHomeworkValue(_field, value) {
+  return value ?? "";
+}
+
+function createLessonJournalChangeRebase({
+  after = {},
+  before = {},
+  current = {},
+  fields = [],
+  normalizeValue = (_field, value) => value ?? ""
+} = {}) {
+  const changedFields = fields.filter((field) => (
+    normalizeValue(field, before[field]) !== normalizeValue(field, after[field])
+  ));
+  const conflictingFields = changedFields.filter((field) => {
+    const beforeValue = normalizeValue(field, before[field]);
+    const afterValue = normalizeValue(field, after[field]);
+    const currentValue = normalizeValue(field, current[field]);
+    return currentValue !== beforeValue && currentValue !== afterValue;
+  });
+  const value = { ...current };
+  changedFields.forEach((field) => {
+    value[field] = after[field];
+  });
+  return { changedFields, conflictingFields, value };
+}
+
+export function rebaseLessonJournalHomeworkChange(change = {}, current = {}) {
+  return createLessonJournalChangeRebase({
+    after: change.after,
+    before: change.before,
+    current,
+    fields: lessonJournalHistoryHomeworkFields,
+    normalizeValue: normalizeHomeworkValue
+  });
+}
+
+export function rebaseLessonJournalRecordChange(change = {}, current = {}) {
+  return createLessonJournalChangeRebase({
+    after: change.after,
+    before: change.before,
+    current,
+    fields: lessonJournalRecordFields,
+    normalizeValue: normalizeRecordValue
+  });
+}
+
+function doesPersistedChangeMatch({
+  after = {},
+  before = null,
+  persisted = {},
+  fields = [],
+  normalizeValue = (_field, value) => value ?? ""
+} = {}) {
+  if (!before) return fields.every((field) => (
+    normalizeValue(field, after[field]) === normalizeValue(field, persisted[field])
+  ));
+  return fields.every((field) => (
+    normalizeValue(field, before[field]) === normalizeValue(field, after[field]) ||
+    normalizeValue(field, after[field]) === normalizeValue(field, persisted[field])
   ));
 }
 
@@ -117,16 +181,28 @@ export function verifyLessonJournalRowsSavePlan({
     `${record.lessonId}::${record.studentId}`,
     record
   ]));
-  const homeworkMismatches = homeworkChanges.flatMap(({ after }) => {
+  const homeworkMismatches = homeworkChanges.flatMap(({ after, before }) => {
     const persisted = homeworkById.get(after?.homeworkId);
-    return persisted && areLessonJournalHistoryHomeworksEqual(after, persisted)
+    return persisted && doesPersistedChangeMatch({
+      after,
+      before,
+      persisted,
+      fields: lessonJournalHistoryHomeworkFields,
+      normalizeValue: normalizeHomeworkValue
+    })
       ? []
       : [after?.homeworkId ?? ""];
   });
-  const recordMismatches = recordChanges.flatMap(({ after }) => {
+  const recordMismatches = recordChanges.flatMap(({ after, before }) => {
     const identity = `${after?.lessonId}::${after?.studentId}`;
     const persisted = recordByIdentity.get(identity);
-    return persisted && areLessonJournalRecordsEqual(after, persisted)
+    return persisted && doesPersistedChangeMatch({
+      after,
+      before,
+      persisted,
+      fields: lessonJournalRecordFields,
+      normalizeValue: normalizeRecordValue
+    })
       ? []
       : [after?.lessonStudentRecordId || identity];
   });
