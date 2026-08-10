@@ -3,6 +3,15 @@ import { expect, test } from "@playwright/test";
 const safeApiPort = Number(process.env.ACADEMY_SAFE_API_PORT || 8787);
 const safeApiBaseUrl = `http://127.0.0.1:${safeApiPort}`;
 
+function getKoreaDateAfterDays(days) {
+  return new Intl.DateTimeFormat("en-CA", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "Asia/Seoul",
+    year: "numeric"
+  }).format(new Date(Date.now() + days * 24 * 60 * 60 * 1000));
+}
+
 function collectPageErrors(page) {
   const errors = [];
   page.on("pageerror", (error) => errors.push(error));
@@ -2118,6 +2127,13 @@ test("manual supplement validation preserves the draft without source or notific
 
 test("manual supplement creates a linked lesson journal and safe Alimtalk reservations", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
+  const currentMonth = getKoreaDateAfterDays(0).slice(0, 7);
+  const scheduledDate = getKoreaDateAfterDays(14);
+  const [, scheduledMonth, scheduledDayOfMonth] = scheduledDate.split("-");
+  const scheduledWeekday = new Date(`${scheduledDate}T00:00:00+09:00`).toLocaleDateString("ko-KR", {
+    timeZone: "Asia/Seoul",
+    weekday: "short"
+  });
   await loginAsTeacher(page);
   await page.getByRole("button", { name: /보충관리/ }).click();
   await page.getByRole("button", { name: "수동 보충 등록" }).click();
@@ -2126,7 +2142,7 @@ test("manual supplement creates a linked lesson journal and safe Alimtalk reserv
   await createDialog.getByLabel("수동 보충 학생").selectOption("safe-consecutive-attendance-student");
   await createDialog.getByLabel("수동 보충 제목").fill("함수 단원 개별 보충");
   await createDialog.getByLabel("수동 보충 사유와 내용").fill("함수 그래프 오개념과 지난 문제를 개별 확인합니다.");
-  await createDialog.getByLabel("수동 보충 날짜").fill("2026-08-10");
+  await createDialog.getByLabel("수동 보충 날짜").fill(scheduledDate);
   await createDialog.getByLabel("수동 보충 시작 시간").fill("16:30");
   await createDialog.getByRole("button", { name: "수업일지 등록 계속" }).click();
 
@@ -2137,7 +2153,7 @@ test("manual supplement creates a linked lesson journal and safe Alimtalk reserv
   const sameDayDraft = supplementModal.locator("label", { hasText: "당일 학생 11시 알림톡 문구" }).locator("textarea");
   await expect(studentDraft).toContainText("연속출결 가상학생 학생 보충 안내입니다.");
   await expect(studentDraft).not.toContainText("수동 보충 안내입니다.");
-  const linkedFinalBody = "연속출결 가상학생 학생 보충 안내입니다.\n\n일시: 8/10(월) 오후 04:30\n보충 내용: 함수 그래프를 다시 확인합니다.";
+  const linkedFinalBody = `연속출결 가상학생 학생 보충 안내입니다.\n\n일시: ${Number(scheduledMonth)}/${Number(scheduledDayOfMonth)}(${scheduledWeekday}) 오후 04:30\n보충 내용: 함수 그래프를 다시 확인합니다.`;
   await studentDraft.fill(linkedFinalBody);
   await expect(parentDraft).toHaveValue(linkedFinalBody);
   await expect(sameDayDraft).toHaveValue(linkedFinalBody);
@@ -2153,9 +2169,9 @@ test("manual supplement creates a linked lesson journal and safe Alimtalk reserv
     task.taskType === "manual_makeup" && task.sourceLabel === "함수 단원 개별 보충"
   ));
   expect(savedTask).toMatchObject({
-    linkedLessonDate: "2026-08-10",
+    linkedLessonDate: scheduledDate,
     linkedLessonTime: "16:30",
-    scheduledDate: "2026-08-10",
+    scheduledDate,
     scheduledTime: "16:30",
     status: "scheduled",
     studentId: "safe-consecutive-attendance-student",
@@ -2168,7 +2184,7 @@ test("manual supplement creates a linked lesson journal and safe Alimtalk reserv
   const linkedLesson = lessonPayload.lessons.find((lesson) => lesson.lessonId === savedTask.linkedLessonId);
   expect(linkedLesson).toMatchObject({
     className: "수동 보충 · 연속출결 가상학생",
-    date: "2026-08-10",
+    date: scheduledDate,
     lessonType: "makeup",
     sourceMakeupTaskId: savedTask.makeupTaskId,
     startTime: "16:30",
@@ -2192,7 +2208,12 @@ test("manual supplement creates a linked lesson journal and safe Alimtalk reserv
 
   await supplementModal.getByRole("button", { name: "창 닫기" }).click();
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /수업일지/ }).click();
-  const scheduledDay = page.getByRole("gridcell", { name: /2026-08-10 · \d+개 수업/ });
+  if (scheduledDate.slice(0, 7) !== currentMonth) {
+    await page.getByRole("navigation", { name: "수업일지 달력 월 이동" })
+      .getByRole("button", { name: "다음 달" })
+      .click();
+  }
+  const scheduledDay = page.getByRole("gridcell", { name: new RegExp(`${scheduledDate} · \\d+개 수업`) });
   await scheduledDay.getByRole("button", { name: "수동 보충 · 연속출결 가상학생" }).click();
   await expect(page.getByRole("dialog", { name: "수업일지" })).toBeVisible();
   expect(pageErrors).toEqual([]);
