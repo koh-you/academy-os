@@ -2,6 +2,24 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createExamPrepCenterDisplayModel } from "../src/domains/exams/examPrepCenterModel.js";
 import { createStudentExamPrepRow } from "../src/domains/exams/studentExamPrepRow.js";
+import {
+  getDateRangeField,
+  updateDateRangeField
+} from "../src/domains/schoolCalendar/schoolCalendarUtils.js";
+
+const startOnlyPeriod = updateDateRangeField("", "date", "2026-10-13");
+assert.equal(startOnlyPeriod, "2026-10-13");
+assert.equal(getDateRangeField(startOnlyPeriod, "date"), "2026-10-13");
+assert.equal(getDateRangeField(startOnlyPeriod, "endDate"), "");
+assert.equal(
+  updateDateRangeField(startOnlyPeriod, "endDate", "2026-10-19"),
+  "2026-10-13 ~ 2026-10-19"
+);
+
+const endOnlyPeriod = updateDateRangeField("", "endDate", "2026-10-19");
+assert.equal(endOnlyPeriod, "~ 2026-10-19");
+assert.equal(getDateRangeField(endOnlyPeriod, "date"), "");
+assert.equal(getDateRangeField(endOnlyPeriod, "endDate"), "2026-10-19");
 
 const rows = [
   {

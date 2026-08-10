@@ -1184,6 +1184,39 @@ test("exam prep rows consolidate review and management actions into the detail m
   expect(pageErrors).toEqual([]);
 });
 
+test("exam prep date inputs keep the first date and persist the completed range after reload", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /시험관리/ }).click();
+  await page.getByRole("button", { name: "정산 미리보기반" }).click();
+  const safeSchoolRow = page.locator(".examPrepRow").filter({ hasText: "안전고" });
+  await safeSchoolRow.getByRole("button", { name: /상세 관리/ }).click();
+
+  const detailDialog = page.getByRole("dialog", { name: "안전고 시험정보 수정" });
+  const startDateInput = detailDialog.getByLabel("시험기간 시작일");
+  const endDateInput = detailDialog.getByLabel("시험기간 종료일");
+  await startDateInput.fill("2026-10-13");
+  await expect(startDateInput).toHaveValue("2026-10-13");
+  await expect(detailDialog.getByText("시험정보 · 저장 완료")).toBeVisible();
+
+  await endDateInput.fill("2026-10-19");
+  await expect(endDateInput).toHaveValue("2026-10-19");
+  await expect(detailDialog.getByText("시험정보 · 저장 완료")).toBeVisible();
+  await expect.poll(async () => {
+    const response = await request.get(`${safeApiBaseUrl}/api/exam-prep-rows`);
+    const result = await response.json();
+    return result.examPrepRows.find((row) => row.examPrepId === "safe-exam-prep-row")?.examPeriod;
+  }).toBe("2026-10-13 ~ 2026-10-19");
+
+  await detailDialog.getByRole("button", { name: "닫기", exact: true }).click();
+  await page.reload();
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /시험관리/ }).click();
+  await page.getByRole("button", { name: "정산 미리보기반" }).click();
+  await expect(page.locator(".examPrepRow").filter({ hasText: "안전고" })).toContainText("2026-10-13 ~ 2026-10-19");
+  expect(pageErrors).toEqual([]);
+});
+
 test("exam prep rapid edits serialize, rebase CAS, and persist the verified latest row value", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   const requests = [];

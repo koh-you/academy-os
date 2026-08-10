@@ -50,15 +50,27 @@ export function formatDateRangeText(date = "", endDate = "") {
   return date || endDate || "";
 }
 
-export function getDateRangeField(value = "", field) {
+function parseEditableDateRangeText(value = "") {
   const parsed = parseDateRangeText(value);
+  if (parsed) return parsed;
+  const text = String(value).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+    return { date: text, endDate: "" };
+  }
+  const endOnlyMatch = text.match(/^~\s*(\d{4}-\d{2}-\d{2})$/);
+  return endOnlyMatch ? { date: "", endDate: endOnlyMatch[1] } : null;
+}
+
+export function getDateRangeField(value = "", field) {
+  const parsed = parseEditableDateRangeText(value);
   if (!parsed) return "";
   return field === "endDate" ? parsed.endDate : parsed.date;
 }
 
 export function updateDateRangeField(value = "", field, nextValue = "") {
-  const parsed = parseDateRangeText(value) ?? { date: "", endDate: "" };
+  const parsed = parseEditableDateRangeText(value) ?? { date: "", endDate: "" };
   const nextRange = { ...parsed, [field]: nextValue };
+  if (!nextRange.date && nextRange.endDate) return `~ ${nextRange.endDate}`;
   return formatDateRangeText(nextRange.date, nextRange.endDate);
 }
 
