@@ -23,7 +23,27 @@ export function createExamPrepCenterDisplayModel({
       (isAllClasses || student.defaultClassTemplateId === selectedClassTemplateId)
   );
   const classSchoolGradeKeys = new Set(classStudents.map(getStudentSchoolGradeKey).filter(Boolean));
+  const studentsBySchoolGradeKey = new Map();
+  classStudents.forEach((student) => {
+    const key = getStudentSchoolGradeKey(student);
+    if (!key) return;
+    const matches = studentsBySchoolGradeKey.get(key) ?? [];
+    matches.push(student);
+    studentsBySchoolGradeKey.set(key, matches);
+  });
+  studentsBySchoolGradeKey.forEach((matchingStudents) => {
+    matchingStudents.sort((first, second) =>
+      String(first.name || "").localeCompare(String(second.name || ""), "ko") ||
+      String(first.studentId || "").localeCompare(String(second.studentId || ""))
+    );
+  });
   const displayRows = dedupeRows(rows, { includeExcluded: true });
+  const studentRosterByExamPrepId = Object.fromEntries(
+    displayRows.map((row) => [
+      row.examPrepId,
+      studentsBySchoolGradeKey.get(getRowSchoolGradeKey(row)) ?? []
+    ])
+  );
   const matchingRows = displayRows.filter((row) => {
     const rowCycle = row.examCycle ?? currentExamCycle;
     const matchesCycle = rowCycle === selectedExamCycle;
@@ -45,7 +65,8 @@ export function createExamPrepCenterDisplayModel({
       getMathExamEntries(row).map((entry) => `${entry.date} ${entry.grade} ${entry.subject} ${entry.label}`).join(" "),
       row.mathExamDate,
       row.specialNote,
-      row.memo
+      row.memo,
+      (studentRosterByExamPrepId[row.examPrepId] ?? []).map((student) => student.name).join(" ")
     ].join(" ");
     return haystack.toLowerCase().includes(normalizedQuery);
   });
@@ -58,6 +79,7 @@ export function createExamPrepCenterDisplayModel({
     filteredRows,
     excludedRows,
     reviewModalRow: visibleRows.find((row) => row.examPrepId === reviewModalRowId) ?? null,
+    studentRosterByExamPrepId,
     selectedClass: isAllClasses
       ? { classTemplateId: "", name: "전체 반" }
       : templates.find((template) => template.classTemplateId === selectedClassTemplateId),

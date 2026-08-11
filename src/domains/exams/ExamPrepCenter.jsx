@@ -82,6 +82,7 @@ export function ExamPrepCenter({
     excludedRows,
     filteredRows,
     reviewModalRow,
+    studentRosterByExamPrepId,
     selectedClass
   } = createExamPrepCenterDisplayModel({
     currentExamCycle,
@@ -359,8 +360,9 @@ export function ExamPrepCenter({
           <DataTableShell className="examPrepTable" label="시험정보 목록">
             <div className="examPrepRow examPrepHead">
               <span>학교명</span>
-              <span>특이사항</span>
               <span>학년</span>
+              <span>해당 학생</span>
+              <span>특이사항</span>
               <span>과목</span>
               <span>출판사</span>
               <span>시험기간</span>
@@ -372,12 +374,30 @@ export function ExamPrepCenter({
             {filteredRows.map((row) => {
               const specialNote = row.specialNote ?? row.memo ?? "";
               const hasReview = Boolean(row.review || row.revisedReview);
+              const matchingStudents = studentRosterByExamPrepId[row.examPrepId] ?? [];
 
               return (
                 <div className={`examPrepRow${row.isExcluded ? " excluded" : ""}`} key={row.examPrepId}>
                   <div className="examReadCell strong">{row.schoolName || "-"}</div>
-                  <div className="examReadCell multiline">{specialNote || "특이사항 없음"}</div>
                   <div className="examReadCell">{row.grade || "-"}</div>
+                  <div
+                    aria-label={`${row.schoolName || "학교 미입력"} ${row.grade || "학년 미입력"} 해당 학생`}
+                    className="examReadCell examPrepStudentRosterCell"
+                  >
+                    {matchingStudents.length ? (
+                      <>
+                        <small>{matchingStudents.length}명</small>
+                        <div className="examPrepStudentNameList">
+                          {matchingStudents.map((student) => (
+                            <span key={student.studentId || student.name}>{student.name || "이름 미입력"}</span>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <span className="examPrepStudentRosterEmpty">연결 학생 없음</span>
+                    )}
+                  </div>
+                  <div className="examReadCell multiline">{specialNote || "특이사항 없음"}</div>
                   <div className="examReadCell">{row.subject || "-"}</div>
                   <div className="examReadCell">{row.publisher || "-"}</div>
                   <div className="examReadCell examPeriodReadCell">{row.examPeriod || "미입력"}</div>

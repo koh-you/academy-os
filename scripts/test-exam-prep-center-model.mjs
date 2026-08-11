@@ -78,23 +78,27 @@ const rows = [
 const students = [
   {
     studentId: "student-active",
+    name: "가 학생",
     defaultClassTemplateId: "class-a",
     schoolGradeKey: "school-a_high-1",
     status: "active"
   },
   {
     studentId: "student-default-active",
+    name: "나 학생",
     defaultClassTemplateId: "class-a",
     schoolGradeKey: "school-a_high-1"
   },
   {
     studentId: "student-withdrawn",
+    name: "퇴원 학생",
     defaultClassTemplateId: "class-a",
     schoolGradeKey: "school-b_high-2",
     status: "withdrawn"
   },
   {
     studentId: "student-other-class",
+    name: "다 학생",
     defaultClassTemplateId: "class-b",
     schoolGradeKey: "school-b_high-2",
     status: "active"
@@ -146,6 +150,10 @@ assert.deepEqual(model.visibleRows.map((row) => row.examPrepId), [
 ]);
 assert.deepEqual(model.excludedRows.map((row) => row.examPrepId), ["row-excluded"]);
 assert.deepEqual(model.filteredRows.map((row) => row.examPrepId), ["row-visible"]);
+assert.deepEqual(
+  model.studentRosterByExamPrepId["row-visible"].map((student) => student.name),
+  ["가 학생", "나 학생"]
+);
 assert.equal(model.editingExamPrepRow?.examPrepId, "row-visible");
 assert.equal(model.reviewModalRow?.examPrepId, "row-fallback-cycle");
 assert.equal(model.selectedClass?.name, "A반");
@@ -202,6 +210,10 @@ assert.deepEqual(allClassesModel.visibleRows.map((row) => row.examPrepId), [
   "row-fallback-cycle",
   "row-other-class"
 ]);
+assert.deepEqual(
+  allClassesModel.studentRosterByExamPrepId["row-other-class"].map((student) => student.name),
+  ["다 학생"]
+);
 assert.equal(allClassesModel.selectedClass?.name, "전체 반");
 
 const excludedModel = createExamPrepCenterDisplayModel({
