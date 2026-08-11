@@ -150,23 +150,34 @@ export function ExamPrepEditModal({
           </div>
         </section>
 
-        <div className="modalActionBar">
-          {saveState !== "idle" ? <InlineSaveStatus label="시험정보" saveState={saveState} /> : null}
-          <button className="softButton" disabled={isBusy || hasChanges} onClick={onOpenReview} type="button">
-            {hasReview ? "시험 후 총평 보기/수정" : "시험 후 총평 작성"}
-          </button>
-          {row.source !== "학생DB 자동생성" ? (
-            <button className="dangerSoftButton" disabled={isBusy} onClick={() => onDeleteRow?.(row.examPrepId)} type="button">
-              시험정보 삭제
-            </button>
+        <div className="examPrepEditActionFooter">
+          {saveState !== "idle" ? (
+            <div aria-label="시험정보 저장 상태" className="examPrepEditStatusBar" role="group">
+              <InlineSaveStatus label="시험정보" saveState={saveState} />
+            </div>
           ) : null}
-          <button className={row.isExcluded ? "softButton" : "dangerSoftButton"} disabled={isBusy} onClick={onToggleExcluded} type="button">
-            {row.isExcluded ? "시험관리 다시 포함" : "이번 고사 내신 준비 제외"}
-          </button>
-          <button className="softButton" disabled={isBusy} onClick={onClose} type="button">닫기</button>
-          <button className="primaryButton" disabled={isBusy || !hasChanges} onClick={onSave} type="button">
-            {isBusy ? "저장 중" : "변경 저장"}
-          </button>
+          <div className="examPrepEditActionRow">
+            <div aria-label="시험정보 관리 범위 변경" className="examPrepEditScopeActions" role="group">
+              <span className="examPrepActionGroupLabel">관리 범위 변경</span>
+              {row.source !== "학생DB 자동생성" ? (
+                <button className="dangerSoftButton" disabled={isBusy} onClick={() => onDeleteRow?.(row.examPrepId)} type="button">
+                  시험정보 삭제
+                </button>
+              ) : null}
+              <button className={row.isExcluded ? "softButton" : "dangerSoftButton"} disabled={isBusy} onClick={onToggleExcluded} type="button">
+                {row.isExcluded ? "시험관리 다시 포함" : "이번 고사 내신 준비 제외"}
+              </button>
+            </div>
+            <div aria-label="시험정보 주요 작업" className="examPrepEditMainActions" role="group">
+              <button className="softButton" disabled={isBusy || hasChanges} onClick={onOpenReview} type="button">
+                {hasReview ? "시험 후 총평 보기/수정" : "시험 후 총평 작성"}
+              </button>
+              <button className="softButton" disabled={isBusy} onClick={onClose} type="button">닫기</button>
+              <button className="primaryButton" disabled={isBusy || !hasChanges} onClick={onSave} type="button">
+                {isBusy ? "저장 중" : "변경 저장"}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </Modal>

@@ -12288,6 +12288,72 @@ textarea {
   padding: 10px 12px;
 }
 
+.examPrepEditActionFooter {
+  border-top: 1px solid #e2e8f0;
+  display: grid;
+  gap: 10px;
+  padding-top: 14px;
+}
+
+.examPrepEditStatusBar {
+  align-items: center;
+  display: flex;
+  min-height: 24px;
+}
+
+.examPrepEditActionRow {
+  align-items: flex-end;
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+}
+
+.examPrepEditScopeActions {
+  align-items: center;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 7px 9px;
+}
+
+.examPrepActionGroupLabel {
+  color: #9a3412;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.examPrepEditMainActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
+@media (max-width: 720px) {
+  .examPrepEditActionRow {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .examPrepEditScopeActions,
+  .examPrepEditMainActions {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .examPrepEditMainActions > button {
+    flex: 1 1 auto;
+  }
+}
+
 .studentClassAssignmentCell {
   display: grid;
   gap: 6px;
