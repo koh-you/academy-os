@@ -6359,15 +6359,83 @@ summary:focus-visible {
   z-index: 2;
 }
 
+.schoolMonthLegend {
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #d8e3f8;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  min-width: 840px;
+  padding: 9px 12px;
+}
+
+.schoolMonthLegend span {
+  align-items: center;
+  color: #475569;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  gap: 7px;
+}
+
+.schoolMonthLegend i {
+  border-radius: 4px;
+  display: inline-block;
+  height: 10px;
+  width: 24px;
+}
+
+.schoolMonthLegend i.examPeriod {
+  background: #eff6ff;
+  border: 1px solid #60a5fa;
+  box-shadow: inset 4px 0 #2563eb;
+}
+
+.schoolMonthLegend i.mathExam {
+  background: #60a5fa;
+  border: 1px solid #2563eb;
+}
+
+.schoolMonthLegend i.academicEvent {
+  background: #fde68a;
+  border: 1px solid #f59e0b;
+}
+
+.schoolExamPeriodLayer {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.schoolEventPill.examPeriodBand {
+  background: color-mix(in srgb, var(--event-color, #2563eb) 16%, #ffffff);
+  border-color: color-mix(in srgb, var(--event-color, #2563eb) 58%, #ffffff);
+  border-left: 4px solid var(--event-color, #2563eb);
+  border-radius: 5px;
+  box-shadow: none;
+  color: #26344f;
+  font-size: 10px;
+  line-height: 1.15;
+  min-height: 20px;
+  padding: 4px 6px;
+}
+
+.schoolEventPill.examPeriodBand.periodMiddle {
+  border-left-style: dashed;
+}
+
+.schoolEventPill.examPeriodBand.periodEnd {
+  border-right: 4px solid var(--event-color, #2563eb);
+}
+
 .schoolMathExamLayer {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
-  left: 8px;
   min-width: 0;
-  position: absolute;
-  right: 8px;
-  top: 32px;
+  position: static;
   z-index: 4;
 }
 
@@ -6401,10 +6469,7 @@ summary:focus-visible {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  left: 8px;
-  position: absolute;
-  right: 8px;
-  top: 72px;
+  position: static;
   z-index: 3;
 }
 
@@ -6978,7 +7043,7 @@ summary:focus-visible {
 }
 
 .schoolMonthGrid {
-  border-radius: 8px;
+  border-radius: 0 0 8px 8px;
   min-width: 840px;
   overflow: hidden;
 }
@@ -6986,8 +7051,8 @@ summary:focus-visible {
 .schoolMonthCell {
   background: #ffffff;
   isolation: isolate;
-  min-height: 128px;
-  overflow: visible;
+  min-height: 154px;
+  overflow: hidden;
   position: relative;
   text-align: left;
 }
@@ -7003,13 +7068,11 @@ summary:focus-visible {
 }
 
 .schoolMonthCell .lessonPills {
-  bottom: 0;
-  display: block;
-  left: 0;
+  display: grid;
+  gap: 5px;
+  min-width: 0;
   pointer-events: none;
-  position: absolute;
-  right: 0;
-  top: 0;
+  position: static;
   z-index: 2;
 }
 

@@ -120,6 +120,7 @@ export function SchoolCalendarCenter({
   };
   const calendarFilters = [
     { id: "all", label: "전체" },
+    { id: "examPeriod", label: "시험기간" },
     { id: "mathExam", label: "수학시험" },
     { id: "vacation", label: "방학/개학" },
     { id: "schoolEvent", label: "학교행사" },
@@ -135,20 +136,23 @@ export function SchoolCalendarCenter({
   const filteredEvents = academicEvents.filter(
     (event) => schoolFilter === "전체 학교" || event.schoolName === schoolFilter
   );
-  const calendarEvents = filteredEvents.filter((event) => event.type !== "examPeriod");
-  const calendarDisplayEvents = calendarEvents.filter((event) => (
-    calendarFilter === "all" ? true : getSchoolCalendarFilterGroup(event) === calendarFilter
-  ));
-  const selectedDateEvents = calendarDisplayEvents.filter((event) => isDateWithinEvent(selectedDate, event));
-  const monthDays = buildMonthDays(selectedMonth);
-  const monthCalendarEvents = calendarEvents.filter((event) => eventIntersectsMonth(event, selectedMonth));
-  const monthMathExamEvents = filteredEvents.filter((event) => event.type === "mathExam" && eventIntersectsMonth(event, selectedMonth));
-  const monthAcademicEvents = monthCalendarEvents.filter((event) => event.type !== "mathExam");
   const examPeriodCards = createSchoolCalendarPeriodCards(
     filteredEvents.filter((event) => event.type === "examPeriod"),
     filteredEvents.filter((event) => event.type === "mathExam"),
     selectedMonth
   );
+  const calendarEvents = filteredEvents.filter((event) => event.type !== "examPeriod");
+  const calendarDisplayEvents = [
+    ...(calendarFilter === "all" || calendarFilter === "examPeriod" ? examPeriodCards : []),
+    ...calendarEvents.filter((event) => (
+      calendarFilter === "all" ? true : getSchoolCalendarFilterGroup(event) === calendarFilter
+    ))
+  ].sort((eventA, eventB) => eventA.date.localeCompare(eventB.date));
+  const selectedDateEvents = calendarDisplayEvents.filter((event) => isDateWithinEvent(selectedDate, event));
+  const monthDays = buildMonthDays(selectedMonth);
+  const monthCalendarEvents = calendarEvents.filter((event) => eventIntersectsMonth(event, selectedMonth));
+  const monthMathExamEvents = filteredEvents.filter((event) => event.type === "mathExam" && eventIntersectsMonth(event, selectedMonth));
+  const monthAcademicEvents = monthCalendarEvents.filter((event) => event.type !== "mathExam");
   const isEditingEvent = Boolean(editingEvent);
   const isEditingDerivedEvent = Boolean(editingEvent?.derived);
   const isSchoolCalendarSaving = schoolCalendarSaveState.state === "saving";

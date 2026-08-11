@@ -9,6 +9,7 @@ import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import {
   formatCalendarEventLabel,
   formatCalendarSummaryLabel,
+  formatPeriodSummaryLabel as formatCalendarPeriodSummaryLabel,
   getMonthCellDisplayEvents,
   getSchoolCalendarEventColor,
   getSchoolCalendarSchoolColor,
@@ -73,7 +74,7 @@ export function SchoolAcademicOverviewPanel({
     <section className="panel schoolAcademicOverviewPanel">
       <SectionHeader
         density="slim"
-        description="시험기간은 카드로 모아 보고, 달력에는 실제 날짜 확인이 필요한 수학시험과 학사일정만 표시합니다."
+        description="학교별 전체 시험기간은 카드와 달력 띠로 보고, 기간 안의 수학시험 날짜는 달력에서 더 진하게 확인합니다."
         title="월간 학사 개요"
       />
       <div className="schoolAcademicStatsGrid">
@@ -171,19 +172,24 @@ export function SchoolMonthGrid({
 }) {
   return (
     <section aria-label="학사일정 월간 달력" className="schoolMonthGridShell" role="region" tabIndex={0}>
+      <div aria-label="학사일정 달력 범례" className="schoolMonthLegend" role="group">
+        <span><i className="examPeriod" />학교색 띠 · 전체 시험기간</span>
+        <span><i className="mathExam" />진한 탭 · 수학시험 날짜</span>
+        <span><i className="academicEvent" />방학·학교행사</span>
+      </div>
       <div aria-label="학사일정 월간 일정" className="calendarGrid teacherCalendarGrid schoolMonthGrid" role="grid">
         {["일", "월", "화", "수", "목", "금", "토"].map((label) => (
           <div className="weekday" key={label} role="columnheader">{label}</div>
         ))}
         {monthDays.map((day) => {
-          const eventPriority = { mathExam: 0, vacation: 1, schoolEvent: 2, custom: 3 };
+          const eventPriority = { examPeriod: 0, mathExam: 1, vacation: 2, schoolEvent: 3, custom: 4 };
           const dayEvents = calendarDisplayEvents
             .filter((event) => isDateWithinEvent(day.date, event))
             .sort((eventA, eventB) => (
               (eventPriority[eventA.type] ?? 4) - (eventPriority[eventB.type] ?? 4)
               || formatCalendarEventLabel(eventA).localeCompare(formatCalendarEventLabel(eventB))
             ));
-          const { academicEvents, hiddenCount, mathExamEvents } = getMonthCellDisplayEvents(dayEvents);
+          const { academicEvents, examPeriodEvents, hiddenCount, mathExamEvents } = getMonthCellDisplayEvents(dayEvents);
           return (
             <button
               aria-label={`${day.date} · ${dayEvents.length ? `${dayEvents.length}개 일정` : "일정 없음"}`}
@@ -202,6 +208,29 @@ export function SchoolMonthGrid({
             >
               <span className="dayNumber">{day.dayNumber}</span>
               <span className="lessonPills">
+                <span className="schoolExamPeriodLayer">
+                  {examPeriodEvents.map((event) => {
+                    const periodLabel = `${formatCalendarPeriodSummaryLabel(event)} 시험기간`;
+                    const periodEndDate = event.endDate || event.date;
+                    const periodPosition = event.date === periodEndDate
+                      ? "singleDay"
+                      : day.date === event.date
+                        ? "periodStart"
+                        : day.date === periodEndDate
+                          ? "periodEnd"
+                          : "periodMiddle";
+                    return (
+                      <span
+                        className={`schoolEventPill event-examPeriod examPeriodBand ${periodPosition}`}
+                        key={event.eventId}
+                        style={{ "--event-color": getSchoolCalendarEventColor(event) }}
+                        title={`${periodLabel} · ${event.date} ~ ${periodEndDate}`}
+                      >
+                        {periodLabel}
+                      </span>
+                    );
+                  })}
+                </span>
                 <span className="schoolMathExamLayer">
                   {mathExamEvents.map((event, mathTabIndex) => {
                     const eventLabel = formatCalendarSummaryLabel(event);
