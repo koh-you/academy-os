@@ -149,6 +149,7 @@ export function TeacherLessonHubV2({
           lesson={selectedLesson}
           onDeleteLesson={onDeleteLesson}
           onEditLesson={onEditLesson}
+          students={students}
         />
       </Modal>
     ) : (

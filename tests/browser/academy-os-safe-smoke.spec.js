@@ -2098,6 +2098,82 @@ test("lesson journal calendar groups same-time special lessons above makeup less
   expect(pageErrors).toEqual([]);
 });
 
+test("exam prep calendar exposes every school and switches the daily roster between time and school order", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await page.clock.install({ time: new Date("2026-08-11T09:00:00+09:00") });
+  await page.route("**/api/students*", async (route) => {
+    const response = await route.fetch();
+    const result = await response.json();
+    await route.fulfill({
+      response,
+      json: {
+        ...result,
+        students: [
+          ...(result.students ?? []),
+          { name: "김가람", schoolName: "상계중", status: "active", studentId: "safe-exam-prep-1" },
+          { name: "박나래", schoolName: "정의여고", status: "active", studentId: "safe-exam-prep-2" },
+          { name: "이도윤", schoolName: "자운고", status: "active", studentId: "safe-exam-prep-3" }
+        ]
+      }
+    });
+  });
+  await page.route("**/api/lessons*", async (route) => {
+    const response = await route.fetch();
+    const result = await response.json();
+    await route.fulfill({
+      response,
+      json: {
+        ...result,
+        lessons: [
+          ...(result.lessons ?? []),
+          {
+            className: "시험대비",
+            color: "#bae6fd",
+            date: "2026-08-16",
+            endTime: "18:00",
+            lessonId: "safe-exam-prep-roster",
+            lessonTopic: "2학기 중간고사 시험대비",
+            lessonType: "examPrep",
+            sourceLabel: "상계중 2학기 중간고사 · 정의여고 2학기 중간고사 · 자운고 2학기 중간고사",
+            specialLectureStudentSchedules: [
+              { endTime: "15:00", scheduleType: "adjusted", startTime: "13:30", studentId: "safe-exam-prep-2" }
+            ],
+            startTime: "15:00",
+            status: "scheduled",
+            studentIds: ["safe-exam-prep-1", "safe-exam-prep-2", "safe-exam-prep-3"]
+          }
+        ]
+      }
+    });
+  });
+
+  await loginAsTeacher(page);
+  const calendarDay = page.getByRole("gridcell", { name: /^2026-08-16 · \d+개 수업$/ });
+  const examPrepPill = calendarDay.locator(".examPrepLessonPill");
+  await expect(examPrepPill).toContainText("시험대비 · 3개교 · 3명");
+  await expect(examPrepPill.locator(".examPrepCalendarSchool")).toHaveText([
+    "상계중 2학기 중간고사",
+    "정의여고 2학기 중간고사",
+    "자운고 2학기 중간고사"
+  ]);
+  await expect(examPrepPill.evaluate((element) => element.scrollWidth <= element.clientWidth)).resolves.toBe(true);
+  await examPrepPill.click();
+
+  const dialog = page.getByRole("dialog", { name: "시험대비" });
+  await expect(dialog.getByRole("button", { name: "시간순" })).toHaveAttribute("aria-pressed", "true");
+  await expect(dialog.locator(".examPrepRosterGroup > header strong")).toHaveText(["13:30-15:00", "15:00-18:00"]);
+  await expect(dialog.locator(".examPrepRosterRow > div > strong")).toHaveText(["박나래", "김가람", "이도윤"]);
+  await dialog.getByRole("button", { name: "학교별" }).click();
+  await expect(dialog.locator(".examPrepRosterGroup > header strong")).toHaveText(["상계중", "자운고", "정의여고"]);
+
+  await page.setViewportSize({ height: 844, width: 390 });
+  const dialogBox = await dialog.boundingBox();
+  expect(dialogBox.x).toBeGreaterThanOrEqual(0);
+  expect(dialogBox.x + dialogBox.width).toBeLessThanOrEqual(390);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  expect(pageErrors).toEqual([]);
+});
+
 test("individual weekdays override the base-class roster but preserve a manual makeup roster", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await page.clock.install({ time: new Date("2026-08-03T09:00:00+09:00") });

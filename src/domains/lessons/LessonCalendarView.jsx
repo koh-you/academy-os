@@ -115,7 +115,18 @@ export function LessonCalendarView({
                     style={{ background: pill.lesson.color }}
                     type="button"
                   >
-                    {pill.label}
+                    {pill.examPrepSummary ? (
+                      <span className="examPrepCalendarSummary">
+                        <strong>
+                          {pill.lesson.startTime || "시간 미정"} 시험대비 · {pill.examPrepSummary.schoolLabels.length}개교 · {pill.examPrepSummary.studentCount}명
+                        </strong>
+                        <span className="examPrepCalendarSchools">
+                          {pill.examPrepSummary.schoolLabels.map((label) => (
+                            <span className="examPrepCalendarSchool" key={label}>{label}</span>
+                          ))}
+                        </span>
+                      </span>
+                    ) : pill.label}
                   </button>
                 ))}
               </span>

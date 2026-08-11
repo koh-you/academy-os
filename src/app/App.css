@@ -3729,6 +3729,38 @@ summary:focus-visible {
 
 .lessonPill.examPrepLessonPill {
   border-left: 4px solid #38bdf8;
+  overflow: visible;
+  padding: 6px 7px;
+  white-space: normal;
+}
+
+.examPrepCalendarSummary {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.examPrepCalendarSummary > strong {
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.examPrepCalendarSchools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.examPrepCalendarSchool {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(14, 116, 144, 0.18);
+  border-radius: 999px;
+  color: #0c4a6e;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  padding: 2px 5px;
 }
 
 .lessonPill.specialLectureLessonPill {
@@ -12388,6 +12420,134 @@ textarea {
   font-weight: 900;
   letter-spacing: 0.02em;
   white-space: nowrap;
+}
+
+.examPrepRosterPanel {
+  display: grid;
+  gap: 14px;
+}
+
+.examPrepRosterHeader {
+  align-items: end;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.examPrepRosterHeader h3 {
+  margin: 3px 0 4px;
+}
+
+.examPrepRosterHeader p {
+  margin: 0;
+}
+
+.examPrepRosterViewToggle {
+  background: #e9f2ff;
+  border: 1px solid #cbdcf3;
+  border-radius: 10px;
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 3px;
+  padding: 3px;
+}
+
+.examPrepRosterViewToggle button {
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+  color: #52627a;
+  cursor: pointer;
+  font-weight: 900;
+  min-height: 34px;
+  padding: 0 13px;
+}
+
+.examPrepRosterViewToggle button.active {
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+  color: #0f4c9a;
+}
+
+.examPrepRosterGroups {
+  display: grid;
+  gap: 12px;
+}
+
+.examPrepRosterGroup {
+  background: #fff;
+  border: 1px solid #dbe5f5;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.examPrepRosterGroup > header {
+  align-items: center;
+  background: #eef7ff;
+  color: #0f3f72;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 14px;
+}
+
+.examPrepRosterGroup > header span {
+  color: #59708d;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.examPrepRosterRows {
+  display: grid;
+}
+
+.examPrepRosterRow {
+  align-items: center;
+  border-top: 1px solid #edf2f7;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 11px 14px;
+}
+
+.examPrepRosterRow:first-child {
+  border-top: 0;
+}
+
+.examPrepRosterRow > div {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.examPrepStudentSchool {
+  background: #f1f5f9;
+  border-radius: 999px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 3px 8px;
+}
+
+.examPrepStudentTime {
+  color: #0f4c9a;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-weight: 900;
+  gap: 6px;
+}
+
+.examPrepStudentTime small {
+  background: #dff7ed;
+  border-radius: 999px;
+  color: #087a55;
+  padding: 2px 6px;
+}
+
+.examPrepStudentTime.missing {
+  color: #b45309;
 }
 
 .examPrepEditMainActions {
@@ -21914,6 +22074,21 @@ body.attendanceOnlyBody {
   .examPrepSourceItem {
     align-items: start;
     grid-template-columns: 1fr;
+  }
+
+  .examPrepRosterHeader,
+  .examPrepRosterRow {
+    align-items: stretch;
+    display: grid;
+  }
+
+  .examPrepRosterViewToggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .examPrepStudentTime {
+    justify-content: space-between;
   }
 }
 

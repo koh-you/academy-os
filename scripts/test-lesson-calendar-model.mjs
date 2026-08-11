@@ -2,6 +2,12 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { compareLessonCalendarDisplayOrder } from "../src/domains/lessons/lessonCalendarDisplayOrder.js";
 import {
+  createExamPrepStudentRows,
+  getExamPrepSourceItems,
+  groupExamPrepStudentsBySchool,
+  groupExamPrepStudentsByTime
+} from "../src/domains/lessons/examPrepLessonPresentation.js";
+import {
   createLessonCalendarViewModel,
   lessonCalendarFilterOptions,
   shiftLessonCalendarMonth
@@ -54,10 +60,14 @@ const lessons = [
     lessonId: "exam-prep",
     lessonType: "examPrep",
     className: "시험대비",
-    sourceLabel: "고1 중간",
+    sourceLabel: "상계중 2학기 중간고사 · 정의여고 2학기 중간고사",
     date: "2026-07-16",
     startTime: "15:00",
-    studentIds: ["student-1"]
+    endTime: "18:00",
+    studentIds: ["student-1", "student-2", "student-3"],
+    specialLectureStudentSchedules: [
+      { studentId: "student-2", startTime: "13:30", endTime: "15:00", scheduleType: "adjusted" }
+    ]
   },
   {
     lessonId: "special",
@@ -119,7 +129,11 @@ assert.equal(allModel.calendarDays[0].lessons[1].className, "lessonPill active")
 assert.equal(allModel.calendarDays[0].lessons[1].label, "09:00 정규반 (2명)");
 assert.equal(allModel.calendarDays[0].lessons[2].label, "11:00 휴강 · 휴강반");
 assert.equal(allModel.calendarDays[1].lessons[1].className, "lessonPill examPrepLessonPill");
-assert.equal(allModel.calendarDays[1].lessons[1].label, "15:00 시험대비 · 고1 중간");
+assert.equal(allModel.calendarDays[1].lessons[1].label, "15:00 시험대비 · 상계중 2학기 중간고사 · 정의여고 2학기 중간고사");
+assert.deepEqual(allModel.calendarDays[1].lessons[1].examPrepSummary, {
+  schoolLabels: ["상계중 2학기 중간고사", "정의여고 2학기 중간고사"],
+  studentCount: 3
+});
 assert.equal(allModel.calendarDays[2].lessons[0].className, "lessonPill specialLectureLessonPill");
 assert.equal(allModel.calendarDays[2].lessons[0].label, "16:00 특강반 (1명)");
 
@@ -156,6 +170,32 @@ for (const [filter, expectedLessonIds] of Object.entries(expectedByFilter)) {
     `${filter} filter must preserve its lesson category`
   );
 }
+
+const examPrepLesson = lessons.find((lesson) => lesson.lessonId === "exam-prep");
+const examPrepStudents = [
+  { studentId: "student-1", name: "김가람", schoolName: "상계중" },
+  { studentId: "student-2", name: "박나래", schoolName: "정의여고" },
+  { studentId: "student-3", name: "이도윤", schoolName: "상계중" }
+];
+const examPrepRows = createExamPrepStudentRows(examPrepLesson, examPrepStudents);
+assert.deepEqual(
+  examPrepRows.map((row) => [row.name, row.schoolName, row.timeLabel, row.hasIndividualTime]),
+  [
+    ["박나래", "정의여고", "13:30-15:00", true],
+    ["김가람", "상계중", "15:00-18:00", false],
+    ["이도윤", "상계중", "15:00-18:00", false]
+  ],
+  "exam prep students use individual times first and otherwise retain the lesson time"
+);
+assert.deepEqual(
+  groupExamPrepStudentsByTime(examPrepRows).map((group) => [group.label, group.students.map((student) => student.name)]),
+  [["13:30-15:00", ["박나래"]], ["15:00-18:00", ["김가람", "이도윤"]]]
+);
+assert.deepEqual(
+  groupExamPrepStudentsBySchool(examPrepRows).map((group) => [group.label, group.students.map((student) => student.name)]),
+  [["상계중", ["김가람", "이도윤"]], ["정의여고", ["박나래"]]]
+);
+assert.deepEqual(getExamPrepSourceItems(examPrepLesson), ["상계중 2학기 중간고사", "정의여고 2학기 중간고사"]);
 
 assert.deepEqual(
   lessons.map((lesson) => lesson.lessonId),

@@ -409,6 +409,7 @@ export function LessonJournalDetail({
         lesson={lesson}
         onDeleteLesson={onDeleteLesson}
         onEditLesson={onEditLesson}
+        students={students}
       />
     );
   }

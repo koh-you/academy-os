@@ -1,3 +1,5 @@
+import { getExamPrepSourceItems } from "./examPrepLessonPresentation.js";
+
 export const lessonCalendarFilterOptions = [
   { id: "all", label: "전체" },
   { id: "regular", label: "정규수업" },
@@ -67,6 +69,12 @@ function createLessonPillModel({
 
   return {
     className,
+    examPrepSummary: isExamPrepType
+      ? {
+          schoolLabels: getExamPrepSourceItems(lesson),
+          studentCount: getLessonStudentIds(lesson).length
+        }
+      : null,
     label: `${lesson.startTime} ${nameLabel}${suffixLabel}`,
     lesson
   };
