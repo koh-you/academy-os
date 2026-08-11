@@ -106,7 +106,7 @@ export function SchoolCalendarCenter({
       }
     ]
   }));
-  const schools = [...new Set(rows.map((row) => row.schoolName).filter(Boolean))];
+  const schools = [...new Set(rows.filter((row) => !row.isExcluded).map((row) => row.schoolName).filter(Boolean))];
   const examCycleOptions = [...new Set(rows.map((row) => row.examCycle).filter(Boolean))];
   const safeExamCycleOptions = examCycleOptions.length
     ? [currentExamCycle, ...examCycleOptions.filter((cycle) => cycle !== currentExamCycle)]

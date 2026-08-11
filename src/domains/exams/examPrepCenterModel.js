@@ -17,11 +17,12 @@ export function createExamPrepCenterDisplayModel({
   templates = []
 } = {}) {
   const isAllClasses = !selectedClassTemplateId;
-  const classStudents = students.filter(
+  const activeStudents = students.filter((student) => (student.status ?? "active") === "active");
+  const classStudents = activeStudents.filter(
     (student) =>
-      (student.status ?? "active") === "active" &&
       (isAllClasses || student.defaultClassTemplateId === selectedClassTemplateId)
   );
+  const activeSchoolGradeKeys = new Set(activeStudents.map(getStudentSchoolGradeKey).filter(Boolean));
   const classSchoolGradeKeys = new Set(classStudents.map(getStudentSchoolGradeKey).filter(Boolean));
   const studentsBySchoolGradeKey = new Map();
   classStudents.forEach((student) => {
@@ -44,10 +45,15 @@ export function createExamPrepCenterDisplayModel({
       studentsBySchoolGradeKey.get(getRowSchoolGradeKey(row)) ?? []
     ])
   );
+  const orphanedRows = displayRows.filter((row) => {
+    const rowCycle = row.examCycle ?? currentExamCycle;
+    return rowCycle === selectedExamCycle && !activeSchoolGradeKeys.has(getRowSchoolGradeKey(row));
+  });
+  const orphanedExamPrepIds = new Set(orphanedRows.map((row) => row.examPrepId));
   const matchingRows = displayRows.filter((row) => {
     const rowCycle = row.examCycle ?? currentExamCycle;
     const matchesCycle = rowCycle === selectedExamCycle;
-    const matchesClass = classSchoolGradeKeys.has(getRowSchoolGradeKey(row));
+    const matchesClass = classSchoolGradeKeys.has(getRowSchoolGradeKey(row)) || orphanedExamPrepIds.has(row.examPrepId);
     return matchesCycle && matchesClass;
   });
   const excludedRows = matchingRows.filter((row) => row.isExcluded);
@@ -77,6 +83,8 @@ export function createExamPrepCenterDisplayModel({
     editingExamPrepRow: visibleRows.find((row) => row.examPrepId === editingExamPrepId) ?? null,
     examPrepSaveState: getAggregateSaveState(filteredRows.map((row) => rowSaveStates[row.examPrepId])),
     filteredRows,
+    orphanedExamPrepIds,
+    orphanedRows,
     excludedRows,
     reviewModalRow: visibleRows.find((row) => row.examPrepId === reviewModalRowId) ?? null,
     studentRosterByExamPrepId,

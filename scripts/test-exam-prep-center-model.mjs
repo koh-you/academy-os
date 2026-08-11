@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createExamPrepCenterDisplayModel } from "../src/domains/exams/examPrepCenterModel.js";
+import { applyExamPrepDraftToLogicalGroup } from "../src/domains/exams/examPrepDraft.js";
 import { createStudentExamPrepRow } from "../src/domains/exams/studentExamPrepRow.js";
 import {
   getDateRangeField,
@@ -58,6 +59,14 @@ const rows = [
     subject: "수학"
   },
   {
+    examPrepId: "row-orphaned",
+    examCycle: "2026-1-final",
+    schoolGradeKey: "school-c_high-3",
+    schoolName: "학교C",
+    grade: "고3",
+    subject: "확률과통계"
+  },
+  {
     examPrepId: "row-deduped",
     examCycle: "2026-1-final",
     schoolGradeKey: "school-a_high-1",
@@ -102,6 +111,13 @@ const students = [
     defaultClassTemplateId: "class-b",
     schoolGradeKey: "school-b_high-2",
     status: "active"
+  },
+  {
+    studentId: "student-paused",
+    name: "중지 학생",
+    defaultClassTemplateId: "class-a",
+    schoolGradeKey: "school-c_high-3",
+    status: "paused"
   }
 ];
 const observedSaveStates = [];
@@ -142,11 +158,13 @@ assert.deepEqual(model.displayRows.map((row) => row.examPrepId), [
   "row-fallback-cycle",
   "row-other-class",
   "row-other-cycle",
+  "row-orphaned",
   "row-excluded"
 ]);
 assert.deepEqual(model.visibleRows.map((row) => row.examPrepId), [
   "row-visible",
-  "row-fallback-cycle"
+  "row-fallback-cycle",
+  "row-orphaned"
 ]);
 assert.deepEqual(model.excludedRows.map((row) => row.examPrepId), ["row-excluded"]);
 assert.deepEqual(model.filteredRows.map((row) => row.examPrepId), ["row-visible"]);
@@ -154,6 +172,9 @@ assert.deepEqual(
   model.studentRosterByExamPrepId["row-visible"].map((student) => student.name),
   ["가 학생", "나 학생"]
 );
+assert.deepEqual(model.studentRosterByExamPrepId["row-orphaned"], []);
+assert.deepEqual(model.orphanedRows.map((row) => row.examPrepId), ["row-orphaned"]);
+assert.equal(model.orphanedExamPrepIds.has("row-orphaned"), true);
 assert.equal(model.editingExamPrepRow?.examPrepId, "row-visible");
 assert.equal(model.reviewModalRow?.examPrepId, "row-fallback-cycle");
 assert.equal(model.selectedClass?.name, "A반");
@@ -208,7 +229,8 @@ assert.deepEqual(allClassesModel.classStudents.map((student) => student.studentI
 assert.deepEqual(allClassesModel.visibleRows.map((row) => row.examPrepId), [
   "row-visible",
   "row-fallback-cycle",
-  "row-other-class"
+  "row-other-class",
+  "row-orphaned"
 ]);
 assert.deepEqual(
   allClassesModel.studentRosterByExamPrepId["row-other-class"].map((student) => student.name),
@@ -231,6 +253,32 @@ const excludedModel = createExamPrepCenterDisplayModel({
 });
 assert.deepEqual(excludedModel.visibleRows.map((row) => row.examPrepId), ["row-excluded"]);
 
+const duplicateRows = [
+  { examPrepId: "duplicate-a", isExcluded: false, logicalKey: "same", scope: "기존 A", updatedAt: "a" },
+  { examPrepId: "duplicate-b", isExcluded: false, logicalKey: "same", scope: "기존 B", updatedAt: "b" },
+  { examPrepId: "other", isExcluded: false, logicalKey: "other", scope: "다른 행", updatedAt: "c" }
+];
+const excludedDuplicateRows = applyExamPrepDraftToLogicalGroup({
+  draftRow: { ...duplicateRows[0], isExcluded: true, scope: "수정 A" },
+  getLogicalKey: (row) => row.logicalKey,
+  rows: duplicateRows
+});
+assert.deepEqual(
+  excludedDuplicateRows.map((row) => [row.examPrepId, row.isExcluded, row.scope, row.updatedAt]),
+  [
+    ["duplicate-a", true, "수정 A", "a"],
+    ["duplicate-b", true, "기존 B", "b"],
+    ["other", false, "다른 행", "c"]
+  ]
+);
+const editedDuplicateRows = applyExamPrepDraftToLogicalGroup({
+  draftRow: { ...duplicateRows[0], scope: "범위만 수정" },
+  getLogicalKey: (row) => row.logicalKey,
+  rows: duplicateRows
+});
+assert.equal(editedDuplicateRows[0].scope, "범위만 수정");
+assert.equal(editedDuplicateRows[1], duplicateRows[1]);
+
 const centerSource = await readFile(new URL("../src/domains/exams/ExamPrepCenter.jsx", import.meta.url), "utf8");
 assert.match(centerSource, /<strong>전체 반<\/strong>/);
 assert.match(centerSource, /onEnsureExamCycleRows\(examCycle, selectedClassTemplateId\)/);
@@ -239,6 +287,7 @@ assert.match(centerSource, /<span>상세<\/span>/);
 assert.match(centerSource, /<strong>상세 관리<\/strong>/);
 assert.match(centerSource, /onSaveRow\(editingExamPrepDraft\)/);
 assert.match(centerSource, /내신 제외 보기/);
+assert.match(centerSource, /연결된 활성 학생 없음/);
 assert.doesNotMatch(centerSource, /className="examPrepInlineTextarea"/);
 assert.doesNotMatch(centerSource, /<span>시험 후 총평<\/span>/);
 assert.doesNotMatch(centerSource, /<span>관리<\/span>/);

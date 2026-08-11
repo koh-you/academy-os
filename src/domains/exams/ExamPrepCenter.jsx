@@ -81,6 +81,8 @@ export function ExamPrepCenter({
     examPrepSaveState,
     excludedRows,
     filteredRows,
+    orphanedExamPrepIds,
+    orphanedRows,
     reviewModalRow,
     studentRosterByExamPrepId,
     selectedClass
@@ -332,7 +334,7 @@ export function ExamPrepCenter({
             label="시험관리 고사 필터"
             result={(
               <>
-                <span>{filteredRows.length}개 시험정보 · {classStudents.length}명</span>
+                <span>{filteredRows.length}개 시험정보 · {classStudents.length}명 · 연결 없음 {orphanedRows.length}개</span>
                 {examPrepSaveState !== "idle" ? (
                   <InlineSaveStatus className="examCycleSaveStatus" label="시험정보" saveState={examPrepSaveState} />
                 ) : null}
@@ -375,9 +377,10 @@ export function ExamPrepCenter({
               const specialNote = row.specialNote ?? row.memo ?? "";
               const hasReview = Boolean(row.review || row.revisedReview);
               const matchingStudents = studentRosterByExamPrepId[row.examPrepId] ?? [];
+              const isOrphaned = orphanedExamPrepIds.has(row.examPrepId);
 
               return (
-                <div className={`examPrepRow${row.isExcluded ? " excluded" : ""}`} key={row.examPrepId}>
+                <div className={`examPrepRow${row.isExcluded ? " excluded" : ""}${isOrphaned ? " orphaned" : ""}`} key={row.examPrepId}>
                   <div className="examReadCell strong">{row.schoolName || "-"}</div>
                   <div className="examReadCell">{row.grade || "-"}</div>
                   <div
@@ -394,7 +397,9 @@ export function ExamPrepCenter({
                         </div>
                       </>
                     ) : (
-                      <span className="examPrepStudentRosterEmpty">연결 학생 없음</span>
+                      <span className={`examPrepStudentRosterEmpty${isOrphaned ? " warning" : ""}`}>
+                        {isOrphaned ? "연결된 활성 학생 없음" : "이 반의 연결 학생 없음"}
+                      </span>
                     )}
                   </div>
                   <div className="examReadCell multiline">{specialNote || "특이사항 없음"}</div>

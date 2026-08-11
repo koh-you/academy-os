@@ -27,6 +27,7 @@ import {
   saveExamPrepRowsRequest
 } from "../domains/exams/examPrepRowsApi.js";
 import { createExamPrepRowSaveController } from "../domains/exams/examPrepRowSaveController.js";
+import { applyExamPrepDraftToLogicalGroup } from "../domains/exams/examPrepDraft.js";
 import { normalizeExamPrepRowReviewDraft } from "../domains/exams/examReviewDraft.js";
 import { createStudentExamPrepRow } from "../domains/exams/studentExamPrepRow.js";
 import {
@@ -5757,15 +5758,12 @@ export function App() {
     if (!existingExamRow) {
       return Promise.resolve({ ok: false, error: new Error("저장할 시험정보를 찾지 못했습니다.") });
     }
-    const updatedExamRow = {
-      ...existingExamRow,
-      ...draftRow,
-      examPrepId: existingExamRow.examPrepId,
-      updatedAt: existingExamRow.updatedAt
-    };
-    const updatedRows = examPrepRows.map((row) => (
-      row.examPrepId === updatedExamRow.examPrepId ? updatedExamRow : row
-    ));
+    const updatedRows = applyExamPrepDraftToLogicalGroup({
+      draftRow,
+      getLogicalKey: getExamPrepLogicalKey,
+      rows: examPrepRows
+    });
+    const updatedExamRow = updatedRows.find((row) => row.examPrepId === existingExamRow.examPrepId);
     const nextRows = syncPublisherAcrossExamTerm(updatedRows, updatedExamRow);
     const changedRows = nextRows.filter((row) => {
       const previousRow = examPrepRows.find((item) => item.examPrepId === row.examPrepId);
