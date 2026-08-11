@@ -1230,6 +1230,43 @@ test("exam prep date inputs save once on explicit action and show the full compl
   expect(pageErrors).toEqual([]);
 });
 
+test("exam prep closes an unsaved draft without changing the server source", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  const requests = [];
+  let captureRequests = false;
+  await page.route("**/api/exam-prep-rows/bulk", async (route) => {
+    if (captureRequests) requests.push(route.request().postDataJSON());
+    const response = await route.fetch();
+    await route.fulfill({ response });
+  });
+
+  await loginAsTeacher(page);
+  const initialResponse = await request.get(`${safeApiBaseUrl}/api/exam-prep-rows`);
+  const initialResult = await initialResponse.json();
+  const initialScope = initialResult.examPrepRows.find((row) => row.examPrepId === "safe-exam-prep-row")?.scope ?? "";
+
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /시험관리/ }).click();
+  await page.getByRole("button", { name: "정산 미리보기반" }).click();
+  const safeSchoolRow = page.locator(".examPrepRow").filter({ hasText: "안전고" });
+  await safeSchoolRow.getByRole("button", { name: /상세 관리/ }).click();
+  const detailDialog = page.getByRole("dialog", { name: "안전고 시험정보 수정" });
+  const scopeInput = detailDialog.getByLabel("시험 범위");
+  await page.waitForLoadState("networkidle");
+  captureRequests = true;
+  await scopeInput.fill("저장하지 않고 닫을 초안");
+  await expect(detailDialog.getByText("시험정보 · 변경됨")).toBeVisible();
+  await detailDialog.getByRole("button", { name: "닫기", exact: true }).click();
+  expect(requests).toHaveLength(0);
+
+  const persistedResponse = await request.get(`${safeApiBaseUrl}/api/exam-prep-rows`);
+  const persistedResult = await persistedResponse.json();
+  expect(persistedResult.examPrepRows.find((row) => row.examPrepId === "safe-exam-prep-row")?.scope ?? "").toBe(initialScope);
+
+  await safeSchoolRow.getByRole("button", { name: /상세 관리/ }).click();
+  await expect(page.getByRole("dialog", { name: "안전고 시험정보 수정" }).getByLabel("시험 범위")).toHaveValue(initialScope);
+  expect(pageErrors).toEqual([]);
+});
+
 test("exam prep rapid edits stay local until one explicit verified save", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   const requests = [];
