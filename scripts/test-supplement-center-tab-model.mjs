@@ -87,7 +87,7 @@ const sortItems = [
   { id: "monday-ga", studentId: "student-ga", task: { sourceDate: "2026-08-03" } }
 ];
 const names = { "student-ga": "가학생", "student-na": "나학생" };
-assert.deepEqual(supplementCenterSortOptions.map((option) => option.label), ["요일별", "이름 가나다별"]);
+assert.deepEqual(supplementCenterSortOptions.map((option) => option.label), ["요일별", "수업일지 날짜순", "이름 가나다별"]);
 assert.deepEqual(
   sortSupplementCenterItems(sortItems, { getStudentName: (studentId) => names[studentId], sortMode: "weekday" })
     .map((item) => item.id),
@@ -97,6 +97,17 @@ assert.deepEqual(
   sortSupplementCenterItems(sortItems, { getStudentName: (studentId) => names[studentId], sortMode: "name" })
     .map((item) => item.id),
   ["monday-ga", "sunday", "monday-na"]
+);
+
+const lessonDateItems = [
+  { id: "later-journal", lessonDate: "2026-08-08", studentId: "student-ga", task: { sourceDate: "2026-07-01" } },
+  { id: "undated-journal", studentId: "student-na", task: {} },
+  { id: "earlier-journal", lessonDate: "2026-08-01", studentId: "student-na", task: { sourceDate: "2026-09-01" } }
+];
+assert.deepEqual(
+  sortSupplementCenterItems(lessonDateItems, { getStudentName: (studentId) => names[studentId], sortMode: "lesson_date" })
+    .map((item) => item.id),
+  ["earlier-journal", "later-journal", "undated-journal"]
 );
 
 console.log("supplement center tab model fixture passed");

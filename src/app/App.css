@@ -19180,12 +19180,20 @@ textarea.profileEditInput {
   display: flex;
   font-size: 13px;
   font-weight: 800;
+  flex: 0 0 auto;
   gap: 8px;
+  white-space: nowrap;
+}
+
+.supplementSortControl > span {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .supplementSortControl select {
+  flex: 0 0 auto;
   min-height: 38px;
-  min-width: 132px;
+  min-width: 168px;
 }
 
 .supplementItemList {

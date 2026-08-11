@@ -2,6 +2,7 @@ import { findSupplementTaskForCandidate } from "./supplementCenterSelectionModel
 
 export const supplementCenterSortOptions = [
   { id: "weekday", label: "요일별" },
+  { id: "lesson_date", label: "수업일지 날짜순" },
   { id: "name", label: "이름 가나다별" }
 ];
 
@@ -46,6 +47,10 @@ export function sortSupplementCenterItems(
 
     if (sortMode === "name") {
       return nameOrder || dateOrder || String(left.id || "").localeCompare(String(right.id || ""));
+    }
+
+    if (sortMode === "lesson_date") {
+      return dateOrder || nameOrder || String(left.id || "").localeCompare(String(right.id || ""));
     }
 
     return getMondayFirstWeekdayIndex(leftDate) - getMondayFirstWeekdayIndex(rightDate)
