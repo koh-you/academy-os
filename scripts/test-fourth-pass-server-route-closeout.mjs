@@ -72,13 +72,13 @@ assert.deepEqual(registrySignatures, [
 const directRoutes = [...serverSource.matchAll(
   /if \(request\.method === "(GET|POST|PUT|PATCH|DELETE)" && requestUrl\.pathname === "([^"]+)"\)/g
 )].map((match) => `${match[1]} ${match[2]}`);
-assert.equal(directRoutes.length, 96);
-assert.equal(new Set(directRoutes).size, 96);
+assert.equal(directRoutes.length, 97);
+assert.equal(new Set(directRoutes).size, 97);
 
 const directReadSignatures = directRoutes.filter((signature) => signature.startsWith("GET "));
 const directWriteSignatures = directRoutes.filter((signature) => !signature.startsWith("GET "));
 assert.equal(directReadSignatures.length, 21);
-assert.equal(directWriteSignatures.length, 75);
+assert.equal(directWriteSignatures.length, 76);
 
 const externalReadSignatures = [
   "GET /api/exam-analysis-source-files/open",
@@ -130,14 +130,14 @@ const externalEffectSet = new Set(externalWriteSignatures);
 const domainSourceActionSignatures = directWriteSignatures.filter(
   (signature) => !externalEffectSet.has(signature)
 );
-assert.equal(domainSourceActionSignatures.length, 52);
+assert.equal(domainSourceActionSignatures.length, 53);
 assert.equal(
   registrySignatures.length
     + domainSourceReadSignatures.length
     + externalReadSignatures.length
     + domainSourceActionSignatures.length
     + externalWriteSignatures.length,
-  120
+  121
 );
 
 for (const [createToken, dispatchToken] of [
@@ -170,5 +170,5 @@ assert.ok(
 );
 
 console.log(
-  "fourth-pass server route closeout passed · registry 24 · source read 16 · external read 5 · source action 52 · external write 23"
+  "fourth-pass server route closeout passed · registry 24 · source read 16 · external read 5 · source action 53 · external write 23"
 );

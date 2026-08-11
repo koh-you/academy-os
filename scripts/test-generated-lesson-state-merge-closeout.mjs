@@ -66,7 +66,7 @@ assert.equal(
 );
 assert.equal(
   appSource.split("mergeGeneratedLessonsIntoState(").length - 1,
-  3
+  4
 );
 
 const wrapperStart = appSource.indexOf(

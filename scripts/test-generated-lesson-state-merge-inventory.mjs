@@ -141,7 +141,7 @@ for (const helperRule of [
 }
 assert.equal(
   appSource.split("mergeGeneratedLessonsIntoState(").length - 1,
-  3
+  4
 );
 
 const saveStart = appSource.indexOf(

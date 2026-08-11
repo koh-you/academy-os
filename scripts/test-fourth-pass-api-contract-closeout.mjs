@@ -221,5 +221,5 @@ assert.equal(
 );
 
 console.log(
-  "fourth-pass API contract closeout passed · direct writes 89 · contracted 24 · route/mapper deferred 42 · external gated 23"
+  "fourth-pass API contract closeout passed · direct writes 90 · contracted 25 · route/mapper deferred 42 · external gated 23"
 );
