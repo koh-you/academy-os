@@ -194,7 +194,7 @@ assert.equal(
 );
 assert.equal(
   appSource.split(
-    "buildExamPrepLessonCandidates(rows)"
+    "buildExamPrepLessonCandidates(rows, students)"
   ).length - 1,
   1
 );
@@ -211,7 +211,7 @@ for (const appBoundary of [
   "getStandardLessonColor,",
   "getSundayDatesForExamPeriod,",
   "parseDateRangeText",
-  "candidates.push(...buildExamPrepLessonCandidates(rows))"
+  "candidates.push(...buildExamPrepLessonCandidates(rows, students))"
 ]) {
   assert.ok(
     appSource.includes(appBoundary),

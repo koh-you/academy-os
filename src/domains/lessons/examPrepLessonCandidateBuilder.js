@@ -1,12 +1,16 @@
 export function createExamPrepLessonCandidateBuilder({
   examCycleLabel,
   getExamPrepGeneratedKeyForDate,
+  getExamPrepSchoolGradeKey = () => "",
   getStandardLessonColor,
+  getStudentSchoolGradeKey = () => "",
   getSundayDatesForExamPeriod,
+  isActiveStudent = () => false,
   parseDateRangeText
 }) {
   return function buildExamPrepLessonCandidates(
-    rows = []
+    rows = [],
+    students = []
   ) {
     const dateMap = new Map();
     rows.forEach((row) => {
@@ -26,6 +30,8 @@ export function createExamPrepLessonCandidateBuilder({
             row.schoolName || "학교 미입력",
           examCycle: row.examCycle || "",
           examPrepId: row.examPrepId,
+          schoolGradeKey:
+            getExamPrepSchoolGradeKey(row),
           periodText: row.examPeriod
         };
         if (!dateMap.has(key)) {
@@ -56,6 +62,20 @@ export function createExamPrepLessonCandidateBuilder({
             (block) => block.schoolName
           )
           .join(", ");
+        const schoolGradeKeys = new Set(
+          entry.blocks
+            .map((block) => block.schoolGradeKey)
+            .filter(Boolean)
+        );
+        const studentIds = students
+          .filter((student) =>
+            isActiveStudent(student) &&
+            schoolGradeKeys.has(
+              getStudentSchoolGradeKey(student)
+            )
+          )
+          .map((student) => student.studentId)
+          .filter(Boolean);
         return {
           generatedKey: entry.key,
           label: `${entry.date} 시험대비`,
@@ -89,7 +109,7 @@ export function createExamPrepLessonCandidateBuilder({
               }),
             teacherId:
               "instructor_owner_001",
-            studentIds: [],
+            studentIds,
             status: "scheduled",
             generatedKey: entry.key
           }

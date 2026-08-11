@@ -118,7 +118,7 @@ assert.equal(
 );
 for (const appBoundary of [
   "areGeneratedLessonPersistedFieldsEqual(left, right)",
-  "const needsUpdate = existing && !areGeneratedLessonPersistedFieldsEqual(candidate.lesson, existing)",
+  "const needsUpdate = existing && !areGeneratedLessonPersistedFieldsEqual(authoritativeLesson, existing)",
   'status = suppressed ? "skipped"'
 ]) {
   assert.ok(

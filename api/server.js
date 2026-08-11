@@ -49,6 +49,7 @@ import {
   saveClassRosterPlan,
   saveDerivedSchoolCalendarPlan,
   saveLessonJournalHistoryPlan,
+  saveExamPrepSchedulePlan,
   saveLessonJournalMakeupTasks,
   saveLessonJournalRowsPlan,
   saveSupplementSchedulePlan,
@@ -6865,6 +6866,25 @@ const server = http.createServer(async (request, response) => {
         error: error.message,
         ...(error.code ? { code: error.code } : {}),
         ...(error.field ? { field: error.field } : {}),
+        ...(error.audit ? { audit: error.audit } : {})
+      });
+    }
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/exam-prep-schedule/save") {
+    try {
+      const payload = parseVersionedWriteRequest(request.method, requestUrl.pathname, await readJsonBody(request));
+      const result = await saveExamPrepSchedulePlan({
+        auditId: payload.auditId,
+        changes: payload.changes ?? []
+      });
+      sendJson(request, response, 200, { ok: true, ...result });
+    } catch (error) {
+      sendJson(request, response, Number(error.statusCode) || 500, {
+        ok: false,
+        error: error.message,
+        ...(error.code ? { code: error.code } : {}),
         ...(error.audit ? { audit: error.audit } : {})
       });
     }

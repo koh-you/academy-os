@@ -6391,6 +6391,129 @@ summary:focus-visible {
   z-index: 2;
 }
 
+.examPrepScheduleEditModal {
+  max-width: 760px;
+  width: min(760px, calc(100vw - 32px));
+}
+
+.examPrepScheduleEditor {
+  display: grid;
+  gap: 16px;
+}
+
+.examPrepScheduleMode {
+  background: #eef4fb;
+  border-radius: 10px;
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 4px;
+}
+
+.examPrepScheduleMode button {
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: #52647a;
+  font-weight: 900;
+  min-height: 42px;
+}
+
+.examPrepScheduleMode button.active {
+  background: #fff;
+  box-shadow: 0 1px 4px rgb(15 23 42 / 12%);
+  color: #172554;
+}
+
+.examPrepScheduleRule,
+.examPrepSchedulePreview {
+  background: #f8fbff;
+  border: 1px solid #dbe8f8;
+  border-radius: 10px;
+  color: #475569;
+  line-height: 1.55;
+  margin: 0;
+  padding: 12px 14px;
+}
+
+.examPrepScheduleGroupList {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-height: min(320px, 38vh);
+  overflow-y: auto;
+}
+
+.examPrepScheduleGroupList label {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #dbe5f5;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+}
+
+.examPrepScheduleGroupList label.selected {
+  background: #eff6ff;
+  border-color: #60a5fa;
+}
+
+.examPrepScheduleGroupList label span {
+  display: flex;
+  justify-content: space-between;
+  min-width: 0;
+  width: 100%;
+}
+
+.examPrepScheduleGroupList label strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.examPrepScheduleGroupList label small {
+  color: #64748b;
+  flex: 0 0 auto;
+  font-weight: 800;
+}
+
+.examPrepScheduleTimes {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.examPrepScheduleTimes label {
+  color: #475569;
+  display: grid;
+  font-size: 13px;
+  font-weight: 900;
+  gap: 6px;
+}
+
+.examPrepScheduleTimes input {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font: inherit;
+  min-height: 44px;
+  padding: 0 12px;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .examPrepScheduleEditModal {
+    width: calc(100vw - 20px);
+  }
+
+  .examPrepScheduleGroupList,
+  .examPrepScheduleTimes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .schoolMonthLegend {
   align-items: center;
   background: #f8fafc;

@@ -139,7 +139,7 @@ assert.equal(
 );
 assert.equal(
   appSource.split(
-    "buildExamPrepLessonCandidates(rows)"
+    "buildExamPrepLessonCandidates(rows, students)"
   ).length - 1,
   1
 );
@@ -169,7 +169,7 @@ const appBoundaries = [
   "getSundayDatesForExamPeriod,",
   "function toKoreaDateString(date)",
   "function buildGeneratedLessonPlan(",
-  "candidates.push(...buildExamPrepLessonCandidates(rows))",
+  "candidates.push(...buildExamPrepLessonCandidates(rows, students))",
   "return candidates.map((candidate) => {"
 ];
 let previousIndex = -1;

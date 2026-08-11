@@ -173,7 +173,7 @@ const planBoundaries = [
   "const existing = lessons.find(",
   "const suppressed =",
   "const manualOverride =",
-  "const needsUpdate = existing && !areGeneratedLessonPersistedFieldsEqual(candidate.lesson, existing)",
+  "const needsUpdate = existing && !areGeneratedLessonPersistedFieldsEqual(authoritativeLesson, existing)",
   'const status = suppressed ? "skipped" : manualOverride ? "protected" : !existing ? "create" : needsUpdate ? "update" : "synced"',
   "existingLesson: existing,",
   "status,"

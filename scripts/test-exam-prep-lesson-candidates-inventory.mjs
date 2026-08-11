@@ -268,7 +268,7 @@ const helperBoundaries = [
   'endTime: "18:00"',
   "getStandardLessonColor({",
   '"instructor_owner_001"',
-  "studentIds: []",
+  "studentIds,",
   'status: "scheduled"',
   "generatedKey: entry.key"
 ];
@@ -298,7 +298,7 @@ assert.equal(
 );
 assert.equal(
   appSource.split(
-    "buildExamPrepLessonCandidates(rows)"
+    "buildExamPrepLessonCandidates(rows, students)"
   ).length - 1,
   1
 );

@@ -2219,6 +2219,89 @@ export async function saveLessonJournalHistoryPlan({
   };
 }
 
+function validateExamPrepScheduleChange(change = {}) {
+  const after = change.after ?? null;
+  const before = change.before ?? null;
+  if (!after || after.lessonType !== "examPrep") {
+    throw new Error("시험대비 일정 저장에는 시험대비 수업의 생성·수정만 포함할 수 있습니다.");
+  }
+  if (before && before.lessonId !== after.lessonId) {
+    throw new Error("시험대비 일정의 원본과 수정본 ID가 일치하지 않습니다.");
+  }
+  const studentIds = new Set(after.studentIds ?? []);
+  for (const schedule of after.specialLectureStudentSchedules ?? []) {
+    if (!studentIds.has(schedule?.studentId)) {
+      throw new Error("시험대비 개별 시간의 학생이 현재 수업 명단에 없습니다.");
+    }
+    if (!schedule?.startTime || !schedule?.endTime || schedule.endTime <= schedule.startTime) {
+      throw new Error("시험대비 개별 시간 범위가 올바르지 않습니다.");
+    }
+  }
+}
+
+async function preflightExamPrepRosterRemovals(changes = []) {
+  for (const change of changes) {
+    const beforeIds = new Set(change.before?.studentIds ?? []);
+    const afterIds = new Set(change.after?.studentIds ?? []);
+    const removedIds = [...beforeIds].filter((studentId) => !afterIds.has(studentId));
+    if (!removedIds.length) continue;
+    const lessonId = encodeURIComponent(change.after.lessonId);
+    const encodedStudents = removedIds.map(encodeURIComponent).join(",");
+    const [records, jobs] = await Promise.all([
+      listRows("lesson_student_records", `select=lesson_student_record_id&lesson_id=eq.${lessonId}&student_id=in.(${encodedStudents})`, { requireServiceRole: true }),
+      listRows("notification_jobs", `select=notification_job_id&lesson_id=eq.${lessonId}&student_id=in.(${encodedStudents})`, { requireServiceRole: true })
+    ]);
+    if (records.length || jobs.length) {
+      throw createLessonJournalHistoryConflict("제외될 학생에게 수업기록 또는 알림 작업이 연결되어 명단 자동 정리를 중단했습니다.", {
+        lessonId: change.after.lessonId,
+        removedStudentIds: removedIds,
+        protectionCounts: { notificationJobs: jobs.length, records: records.length }
+      });
+    }
+  }
+}
+
+export async function saveExamPrepSchedulePlan({ auditId = "", changes = [] } = {}) {
+  const normalizedAuditId = String(auditId || "").trim();
+  if (!normalizedAuditId) throw new Error("시험대비 일정 저장 audit ID가 필요합니다.");
+  if (!Array.isArray(changes) || !changes.length || changes.length > 24) {
+    throw new Error("시험대비 일정 저장 계획은 1~24개 수업이어야 합니다.");
+  }
+  changes.forEach(validateExamPrepScheduleChange);
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return { auditId: normalizedAuditId, lessons: [], source: fallbackSource, verified: false };
+  }
+  await preflightExamPrepRosterRemovals(changes);
+  const applied = [];
+  try {
+    for (const change of changes) {
+      try {
+        applied.push({ change, ...(await persistLessonJournalHistoryLessonChange(change)) });
+      } catch (error) {
+        if (error.appliedResult) applied.push({ change, ...error.appliedResult });
+        throw error;
+      }
+    }
+  } catch (error) {
+    const rollback = [];
+    for (const entry of [...applied].reverse()) {
+      rollback.push(await rollbackLessonJournalHistoryLesson(entry));
+    }
+    const rollbackVerified = rollback.every((result) => result.verified);
+    error.statusCode = Number(error.statusCode) || 409;
+    error.code = rollbackVerified ? "EXAM_PREP_SCHEDULE_SAVE_FAILED" : "EXAM_PREP_SCHEDULE_PARTIAL_FAILURE";
+    error.audit = { auditId: normalizedAuditId, rollback: { results: rollback, verified: rollbackVerified } };
+    throw error;
+  }
+  const lessons = applied.map((entry) => entry.lesson).filter(Boolean);
+  const verified = lessons.length === changes.length && changes.every((change) => {
+    const persisted = lessons.find((lesson) => lesson.lessonId === change.after.lessonId);
+    return areLessonJournalHistoryLessonsEqual(change.after, persisted ?? {});
+  });
+  if (!verified) throw createLessonJournalHistoryConflict("시험대비 일정 최종 Supabase 재조회가 일치하지 않습니다.");
+  return { auditId: normalizedAuditId, lessons, source: "supabase", verified: true };
+}
+
 function createLessonJournalRowsConflict(message, details = {}) {
   const error = new Error(message);
   Object.assign(error, details, { code: "LESSON_JOURNAL_ROWS_CONFLICT", statusCode: 409 });

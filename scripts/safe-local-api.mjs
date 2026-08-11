@@ -1896,6 +1896,24 @@ function handleMutation(pathname, payload) {
     });
     return { lessons: state.lessons, ok: true, source: "supabase", verified: true };
   }
+  if (pathname === "/api/exam-prep-schedule/save") {
+    const changes = Array.isArray(payload.changes) ? payload.changes : [];
+    const conflicts = changes.filter(({ before, after }) => {
+      const current = state.lessons.find((lesson) => lesson.lessonId === after?.lessonId) ?? null;
+      return before ? current?.updatedAt !== before.updatedAt : Boolean(current);
+    });
+    if (conflicts.length) {
+      const error = new Error("시험대비 일정 원본이 다른 화면에서 먼저 변경되었습니다.");
+      error.statusCode = 409;
+      throw error;
+    }
+    const lessons = changes.map(({ after }) => {
+      const saved = { ...after, updatedAt: new Date().toISOString() };
+      state.lessons = upsertById(state.lessons, saved, ["lessonId", "id"]);
+      return saved;
+    });
+    return { auditId: payload.auditId, lessons, ok: true, source: "supabase", verified: lessons.length === changes.length };
+  }
   if (pathname === "/api/lessons") {
     const lesson = payload.lesson || {};
     state.lessons = upsertById(state.lessons, lesson, ["lessonId", "id"]);

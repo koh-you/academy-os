@@ -8,9 +8,9 @@ import {
   versionedWriteRouteContracts
 } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 
-assert.equal(versionedWriteRouteContracts.length, 24);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 24);
-assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 24);
+assert.equal(versionedWriteRouteContracts.length, 25);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ key }) => key)).size, 25);
+assert.equal(new Set(versionedWriteRouteContracts.map(({ method, path }) => `${method} ${path}`)).size, 25);
 assert.equal(versionedWriteRouteContracts.every(Object.isFrozen), true);
 assert.equal(versionedWriteRouteContracts.every(({ request, response, sources }) => (
   Object.isFrozen(request) && Object.isFrozen(response) && Object.isFrozen(sources)
@@ -612,4 +612,4 @@ assert.throws(
   /field\/alias가 중복/
 );
 
-console.log("versioned write route contracts passed · 24 routes · canonical keys and declared legacy alias only");
+console.log("versioned write route contracts passed · 25 routes · canonical keys and declared legacy alias only");

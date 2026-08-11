@@ -285,6 +285,16 @@ export const versionedWriteRouteContracts = Object.freeze([
     domain: "lesson",
     fields: {
       auditId: { allowEmpty: false, required: true, trim: true, type: "string" },
+      changes: { required: true, type: "array" }
+    },
+    key: "examPrepScheduleSave",
+    path: "/api/exam-prep-schedule/save",
+    sources: ["lessons", "lesson_student_records", "notification_jobs"]
+  }),
+  defineVersionedWriteRoute({
+    domain: "lesson",
+    fields: {
+      auditId: { allowEmpty: false, required: true, trim: true, type: "string" },
       homeworkChanges: { defaultValue: [], type: "array" },
       recordChanges: { defaultValue: [], type: "array" }
     },

@@ -22,7 +22,7 @@ export function buildGeneratedLessonPlan({ rows = [], lessons = [], students = [
         lesson: { ...lesson, generatedKey }
       });
     });
-  candidates.push(...buildExamPrepLessonCandidates(rows));
+  candidates.push(...buildExamPrepLessonCandidates(rows, students));
 
   return candidates.map((candidate) => {
     const candidateKeys = new Set([candidate.generatedKey, ...getGeneratedLessonIdentityKeys(candidate.lesson)].filter(Boolean));
@@ -33,8 +33,17 @@ export function buildGeneratedLessonPlan({ rows = [], lessons = [], students = [
     );
     const controlKeys = [candidate.generatedKey, ...candidateKeys].filter(Boolean);
     const suppressed = controlKeys.some((key) => safeControls.suppressedKeys.includes(key));
-    const manualOverride = existing && controlKeys.some((key) => safeControls.manualOverrideKeys.includes(key));
-    const needsUpdate = existing && !areGeneratedLessonPersistedFieldsEqual(candidate.lesson, existing);
+    const isExamPrep = candidate.lesson.lessonType === "examPrep";
+    const retainedSchedules = isExamPrep && existing
+      ? (existing.specialLectureStudentSchedules ?? []).filter((schedule) =>
+          candidate.lesson.studentIds.includes(schedule.studentId)
+        )
+      : candidate.lesson.specialLectureStudentSchedules;
+    const authoritativeLesson = isExamPrep
+      ? { ...candidate.lesson, specialLectureStudentSchedules: retainedSchedules ?? [] }
+      : candidate.lesson;
+    const manualOverride = existing && !isExamPrep && controlKeys.some((key) => safeControls.manualOverrideKeys.includes(key));
+    const needsUpdate = existing && !areGeneratedLessonPersistedFieldsEqual(authoritativeLesson, existing);
     const status = suppressed ? "skipped" : manualOverride ? "protected" : !existing ? "create" : needsUpdate ? "update" : "synced";
     return {
       ...candidate,
@@ -42,10 +51,10 @@ export function buildGeneratedLessonPlan({ rows = [], lessons = [], students = [
       status,
       lesson: existing && status === "update"
         ? {
-            ...candidate.lesson,
+            ...authoritativeLesson,
             lessonId: existing.lessonId
           }
-        : candidate.lesson
+        : authoritativeLesson
     };
   });
 }

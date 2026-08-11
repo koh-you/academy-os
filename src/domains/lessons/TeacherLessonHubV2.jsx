@@ -9,6 +9,7 @@ import { LessonJournalErrorBoundary } from "./LessonJournalErrorBoundary.jsx";
 import { LessonJournalDetail } from "./LessonJournalDetail.jsx";
 import { useLessonCalendarKeyboardNavigation } from "./useLessonCalendarKeyboardNavigation.js";
 import { getEffectiveLessonStudentIds } from "../../shared/utils/studentSchedule.js";
+import { ExamPrepScheduleModal } from "./ExamPrepScheduleModal.jsx";
 
 export function TeacherLessonHubV2({
   academyReminders = [],
@@ -18,6 +19,7 @@ export function TeacherLessonHubV2({
   attendanceSettings = defaultAttendanceSettings,
   attendanceSyncStatus = { lastSyncedAt: "", message: "출결 서버 확인 대기", state: "idle" },
   generatedLessonSaveStatus = { lessons: [], message: "", state: "idle" },
+  examPrepScheduleLessons = [],
   integrationStatus,
   isMonthlyRegularLessonOpened = false,
   lessonHistoryActionState = { message: "", state: "idle" },
@@ -26,6 +28,7 @@ export function TeacherLessonHubV2({
   monthlyRegularLessonOpenPlan = { errors: [], lessonsToCreate: [], rows: [] },
   clipboardCount,
   lessons,
+  persistedLessons = [],
   makeupTasks = [],
   materials = [],
   notificationJobs = [],
@@ -57,6 +60,7 @@ export function TeacherLessonHubV2({
   onPasteLesson,
   onPassMakeupTask,
   onRetryGeneratedLessonSave,
+  onSaveExamPrepSchedule,
   onScheduleMakeupTask,
   onSaveAcademyReminder,
   onSelectLesson,
@@ -146,10 +150,14 @@ export function TeacherLessonHubV2({
         onClose={onBackToCalendar}
       >
         <ExamPrepLessonDetail
+          examPrepScheduleLessons={examPrepScheduleLessons}
           lesson={selectedLesson}
           onDeleteLesson={onDeleteLesson}
-          onEditLesson={onEditLesson}
+          onSaveExamPrepSchedule={onSaveExamPrepSchedule}
+          persistedLessons={persistedLessons}
+          ScheduleModalComponent={ExamPrepScheduleModal}
           students={students}
+          templates={templates}
         />
       </Modal>
     ) : (

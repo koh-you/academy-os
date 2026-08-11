@@ -32,6 +32,7 @@ const expectedContractSignatures = [
   "POST /api/exam-analysis-runs/save-output-drafts",
   "POST /api/exam-analysis-runs/save-prompt-studio",
   "POST /api/exam-analysis-runs/save-question-reviews",
+  "POST /api/exam-prep-schedule/save",
   "POST /api/lesson-journal/history-action",
   "POST /api/lesson-journal/makeup-tasks/save",
   "POST /api/lesson-journal/rows/save",
@@ -122,7 +123,7 @@ const deferredRouteMapperSignatures = [
 
 const contractSignatures = versionedWriteRouteContracts.map(signatureOf).sort();
 assert.deepEqual(contractSignatures, expectedContractSignatures);
-assert.equal(versionedWriteRouteContracts.length, 24);
+assert.equal(versionedWriteRouteContracts.length, 25);
 
 const domainCounts = Object.fromEntries(
   [...new Set(versionedWriteRouteContracts.map(({ domain }) => domain))]
@@ -132,7 +133,7 @@ const domainCounts = Object.fromEntries(
 assert.deepEqual(domainCounts, {
   appState: 1,
   examAnalysis: 5,
-  lesson: 4,
+  lesson: 5,
   notification: 7,
   report: 1,
   resource: 3,
@@ -171,8 +172,8 @@ const directWriteSignatures = [
   ...teacherAccountRouteSignatures.map(signatureOf),
   ...testSessionWriteRouteSignatures.map(signatureOf)
 ].sort();
-assert.equal(directWriteSignatures.length, 89);
-assert.equal(new Set(directWriteSignatures).size, 89);
+assert.equal(directWriteSignatures.length, 90);
+assert.equal(new Set(directWriteSignatures).size, 90);
 
 const classifiedSignatures = [
   ...expectedContractSignatures,

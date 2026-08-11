@@ -32,7 +32,7 @@ export function areGeneratedLessonPersistedFieldsEqual(
       normalizeTimeInput(candidate[field] ?? "") === normalizeTimeInput(existing[field] ?? "")
   );
   if (!sameTimes) return false;
-  return (
+  const sameStudentIds = (
     JSON.stringify(
       normalizeGeneratedLessonStudentIds(
         candidate.studentIds ?? []
@@ -44,4 +44,15 @@ export function areGeneratedLessonPersistedFieldsEqual(
       )
     )
   );
+  if (!sameStudentIds) return false;
+  const normalizeSchedules = (values = []) => [...values]
+    .map((value) => ({
+      endTime: normalizeTimeInput(value?.endTime ?? ""),
+      scheduleType: String(value?.scheduleType ?? ""),
+      startTime: normalizeTimeInput(value?.startTime ?? ""),
+      studentId: String(value?.studentId ?? "")
+    }))
+    .sort((left, right) => JSON.stringify(left).localeCompare(JSON.stringify(right)));
+  return JSON.stringify(normalizeSchedules(candidate.specialLectureStudentSchedules ?? [])) ===
+    JSON.stringify(normalizeSchedules(existing.specialLectureStudentSchedules ?? []));
 }

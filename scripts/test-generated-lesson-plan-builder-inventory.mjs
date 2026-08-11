@@ -489,7 +489,7 @@ const helperBoundaries = [
   'event.schoolName || "학교 미입력"',
   'event.examSubject || "수학"',
   "lesson: { ...lesson, generatedKey }",
-  "candidates.push(...buildExamPrepLessonCandidates(rows))",
+  "candidates.push(...buildExamPrepLessonCandidates(rows, students))",
   "return candidates.map((candidate) => {",
   "const candidateKeys = new Set(",
   "getGeneratedLessonIdentityKeys(candidate.lesson)",
@@ -501,7 +501,7 @@ const helperBoundaries = [
   "const controlKeys = [candidate.generatedKey, ...candidateKeys].filter(Boolean)",
   "safeControls.suppressedKeys.includes(key)",
   "safeControls.manualOverrideKeys.includes(key)",
-  "!areGeneratedLessonPersistedFieldsEqual(candidate.lesson, existing)",
+  "!areGeneratedLessonPersistedFieldsEqual(authoritativeLesson, existing)",
   'suppressed ? "skipped"',
   'manualOverride ? "protected"',
   '!existing ? "create"',
@@ -509,7 +509,7 @@ const helperBoundaries = [
   "existingLesson: existing",
   'existing && status === "update"',
   "lessonId: existing.lessonId",
-  ": candidate.lesson"
+  ": authoritativeLesson"
 ];
 let previousIndex = -1;
 for (const boundary of helperBoundaries) {
