@@ -8712,13 +8712,14 @@ function ExamPrepLessonDetail({ lesson, onDeleteLesson, onEditLesson, students =
     ? groupExamPrepStudentsBySchool(studentRows)
     : groupExamPrepStudentsByTime(studentRows);
   const schoolCount = new Set(studentRows.map((row) => row.schoolName).filter((name) => name !== "학교 미입력")).size;
+  const displaySchoolCount = Math.max(schoolCount, sourceItems.length);
 
   return (
     <div className="examPrepLessonBody">
       <div className="examPrepSummaryGrid">
         <MetricCard density="compact" hint="시험대비" label="수업일" value={lesson.date} />
         <MetricCard density="compact" hint={lesson.status === "canceled" ? "취소됨" : "진행 예정"} label="시간" value={`${lesson.startTime || "미정"}-${lesson.endTime || "미정"}`} />
-        <MetricCard density="compact" hint={`${schoolCount || sourceItems.length}개교 준비`} label="참여 학생" value={`${lessonStudentCount}명`} />
+        <MetricCard density="compact" hint={`${displaySchoolCount}개교 준비`} label="참여 학생" value={`${lessonStudentCount}명`} />
       </div>
 
       <section className="panel examPrepPanel">
@@ -8763,7 +8764,7 @@ function ExamPrepLessonDetail({ lesson, onDeleteLesson, onEditLesson, students =
         <div className="examPrepRosterHeader">
           <div>
             <span className="eyebrow">당일 시험대비 명단</span>
-            <h3>{studentRows.length}명 · {schoolCount}개교</h3>
+            <h3>{studentRows.length}명 · {displaySchoolCount}개교</h3>
             <p className="muted">개별 시간이 있으면 그 시간을, 없으면 시험대비 수업의 공통 시간을 표시합니다.</p>
           </div>
           <div aria-label="시험대비 명단 정렬" className="examPrepRosterViewToggle" role="group">
