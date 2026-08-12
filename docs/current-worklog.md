@@ -2,6 +2,11 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-12 safe browser CI 직렬화
+
+- main Production checks `31471373774`는 공유 safe fixture를 2 workers가 동시에 reset하면서 시험대비 일정 충돌이 발생했고, 안전 API가 의도된 409를 throw해 프로세스까지 종료하면서 69개 검사가 연쇄 실패했다.
+- Playwright workers를 1로 고정하고 409를 응답으로 보존했다. API 계약 fixture와 집중 browser `2/2`, 반복 직렬 browser `6/6`이 통과했으며 제품 runtime·운영 원천은 변경하지 않았다.
+
 ## 2026-08-11 시험관리 연결 없는 행·중복 상태 정리
 
 - 활성 학생이 없는 잔존 시험정보를 반 필터 뒤에 숨기지 않고 주황 경고 상태로 표시한다. 대표 행에서 내신 제외·복원을 저장하면 같은 논리 키의 중복 원본도 기존 bulk CAS 저장과 재조회로 함께 맞춘다.

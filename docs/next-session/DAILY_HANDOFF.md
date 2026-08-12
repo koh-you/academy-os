@@ -1,6 +1,11 @@
 # Daily Development Handoff
 
-업데이트: 2026-08-11
+업데이트: 2026-08-12
+
+## 2026-08-12 safe browser CI 회귀 복구
+
+- main CI 실패 원인은 제품 기능이 아니라 공유 safe API fixture를 2 workers가 병렬 reset한 테스트 경합과, 시험대비 일정 409가 fixture 서버를 종료한 오류였다.
+- Playwright 전체 browser suite는 1 worker로 실행하며 의도된 시험대비 일정 충돌은 409 응답 뒤에도 `/health`가 유지된다. 제품 runtime·API·DB·운영 데이터는 바뀌지 않았다.
 
 ## 2026-08-11 연결 없는 시험정보 관리
 

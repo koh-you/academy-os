@@ -1,6 +1,11 @@
 # Academy OS Current Status
 
-업데이트: 2026-08-11
+업데이트: 2026-08-12
+
+## 2026-08-12 safe browser 공유 fixture 직렬화
+
+- Playwright 전체 검사가 공유 safe API fixture를 2 workers에서 동시에 reset해 시험대비 일정 409와 후속 `ECONNREFUSED`를 만들던 CI 회귀를 수정했다.
+- 전체 browser suite를 1 worker로 고정하고, 시험대비 일정의 의도된 409를 안전 API 응답으로 반환해 fixture 서버가 종료되지 않도록 했다. 제품 runtime·API·DB 계약은 변경하지 않았다.
 
 ## 2026-08-11 시험관리 연결 없는 행·중복 제외 정합성
 

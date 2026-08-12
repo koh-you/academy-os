@@ -1903,9 +1903,12 @@ function handleMutation(pathname, payload) {
       return before ? current?.updatedAt !== before.updatedAt : Boolean(current);
     });
     if (conflicts.length) {
-      const error = new Error("시험대비 일정 원본이 다른 화면에서 먼저 변경되었습니다.");
-      error.statusCode = 409;
-      throw error;
+      return {
+        code: "EXAM_PREP_SCHEDULE_SAVE_FAILED",
+        error: "시험대비 일정 원본이 다른 화면에서 먼저 변경되었습니다.",
+        ok: false,
+        statusCode: 409
+      };
     }
     const lessons = changes.map(({ after }) => {
       const saved = { ...after, updatedAt: new Date().toISOString() };

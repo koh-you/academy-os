@@ -9,6 +9,8 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   testDir: "./tests/browser",
   timeout: 45_000,
+  // Browser specs reset one shared safe API fixture, so files must not race each other.
+  workers: 1,
   use: {
     baseURL: `http://127.0.0.1:${frontendPort}`,
     screenshot: "only-on-failure",

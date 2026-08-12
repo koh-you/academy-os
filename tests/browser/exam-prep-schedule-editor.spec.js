@@ -86,3 +86,25 @@ test("current exam management roster removes stale school and saves forward sche
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
 });
+
+test("exam prep schedule conflict returns 409 without stopping the safe API", async ({ request }) => {
+  const source = await (await request.get(`${safeApiBaseUrl}/api/lessons`)).json();
+  const current = source.lessons.find((lesson) => lesson.lessonId === "lesson_exam_prep_2026-08-09");
+  const response = await request.post(`${safeApiBaseUrl}/api/exam-prep-schedule/save`, {
+    data: {
+      auditId: "safe-conflict-audit",
+      changes: [{
+        before: { ...current, updatedAt: "2026-08-02T00:00:00.000Z" },
+        after: { ...current, startTime: "14:00" }
+      }]
+    }
+  });
+
+  expect(response.status()).toBe(409);
+  await expect(response.json()).resolves.toMatchObject({
+    code: "EXAM_PREP_SCHEDULE_SAVE_FAILED",
+    ok: false,
+    safeFixture: true
+  });
+  await expect((await request.get(`${safeApiBaseUrl}/health`)).json()).resolves.toMatchObject({ ok: true });
+});
