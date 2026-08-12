@@ -6573,8 +6573,90 @@ summary:focus-visible {
 }
 
 .examPrepLessonContentEditor textarea {
-  min-height: 104px;
+  min-height: 84px;
   width: 100%;
+}
+
+.examPrepStudentContentHeading {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.examPrepStudentContentHeading strong {
+  color: #17233d;
+  font-size: 15px;
+}
+
+.examPrepStudentContentHeading p {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 4px 0 0;
+}
+
+.examPrepStudentContentHeading > span {
+  background: #e8f1ff;
+  border-radius: 999px;
+  color: #2563eb;
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 5px 9px;
+}
+
+.examPrepLegacyCommonContent {
+  background: #fff8e8;
+  border: 1px solid #f6d98b;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.examPrepLegacyCommonContent span {
+  color: #92400e;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.examPrepLegacyCommonContent p {
+  color: #78350f;
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.examPrepStudentContentList {
+  display: grid;
+  gap: 10px;
+}
+
+.examPrepStudentContentRow {
+  align-items: start;
+  background: #fff;
+  border: 1px solid #dbe5f2;
+  border-radius: 10px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(130px, 0.36fr) minmax(0, 1fr);
+  padding: 12px;
+}
+
+.examPrepStudentContentIdentity {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.examPrepStudentContentIdentity strong,
+.examPrepStudentContentIdentity small {
+  overflow-wrap: anywhere;
+}
+
+.examPrepStudentContentIdentity small {
+  color: #64748b;
+  font-weight: 700;
+  line-height: 1.45;
 }
 
 .examPrepLessonContentFooter {
@@ -6607,6 +6689,10 @@ summary:focus-visible {
   .examPrepLessonContentFooter {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .examPrepStudentContentRow {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

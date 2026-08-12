@@ -64,12 +64,12 @@ test("current exam management roster removes stale school and saves forward sche
   await expect(detail).toContainText("1명");
   await expect(detail).toContainText("안전고 2학기 중간고사");
   await expect(detail).not.toContainText("상계고");
-  const contentInput = detail.getByLabel("오늘 진행한 내용");
+  const contentInput = detail.getByLabel("정산 미리보기 학생 오늘 진행한 내용");
   await contentInput.fill("안전고 고1 함수 단원 오답 정리");
-  const contentSaveResponse = page.waitForResponse((response) => response.url().includes("/api/exam-prep-schedule/save"));
-  await detail.getByRole("button", { name: "진행 내용 저장" }).click();
+  const contentSaveResponse = page.waitForResponse((response) => response.url().includes("/api/lesson-records"));
+  await detail.getByRole("button", { name: /학생별 진행 내용 저장/ }).click();
   expect((await contentSaveResponse).status()).toBe(200);
-  await expect(detail.getByRole("status")).toContainText("이 날짜 시험대비에만 반영");
+  await expect(detail.getByRole("status")).toContainText("학생별 1명 재조회 확인");
   await detail.getByRole("button", { name: "일정 수정" }).click();
 
   const editor = page.getByRole("dialog", { name: "시험대비 일정 수정" });
@@ -92,15 +92,21 @@ test("current exam management roster removes stale school and saves forward sche
   const reread = await (await request.get(`${safeApiBaseUrl}/api/lessons`)).json();
   const saved = reread.lessons.find((lesson) => lesson.lessonId === "lesson_exam_prep_2026-08-09");
   expect(saved.studentIds).toEqual(["safe-settlement-student"]);
-  expect(saved.lessonTopic).toBe("안전고 고1 함수 단원 오답 정리");
+  expect(saved.lessonTopic).toBe("시험대비");
   expect(saved.specialLectureStudentSchedules).toContainEqual(expect.objectContaining({ studentId: "safe-settlement-student", startTime: "14:00", endTime: "16:00" }));
+  const rereadRecords = await (await request.get(`${safeApiBaseUrl}/api/lesson-records`)).json();
+  expect(rereadRecords.records).toContainEqual(expect.objectContaining({
+    lessonId: "lesson_exam_prep_2026-08-09",
+    lessonProgress: "안전고 고1 함수 단원 오답 정리",
+    studentId: "safe-settlement-student"
+  }));
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
 
   await page.reload();
   const persistedDay = page.getByRole("gridcell", { name: /2026-08-09/ });
   await persistedDay.locator(".lessonPill").click();
-  await expect(page.getByRole("dialog", { name: "시험대비" }).getByLabel("오늘 진행한 내용")).toHaveValue("안전고 고1 함수 단원 오답 정리");
+  await expect(page.getByRole("dialog", { name: "시험대비" }).getByLabel("정산 미리보기 학생 오늘 진행한 내용")).toHaveValue("안전고 고1 함수 단원 오답 정리");
 });
 
 test("exam prep schedule conflict returns 409 without stopping the safe API", async ({ request }) => {

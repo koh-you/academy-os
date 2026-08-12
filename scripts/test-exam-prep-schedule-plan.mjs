@@ -1,9 +1,7 @@
 import assert from "node:assert/strict";
 import {
-  createExamPrepContentSavePlan,
   createExamPrepScheduleGroups,
-  createExamPrepScheduleSavePlan,
-  getExamPrepLessonContent
+  createExamPrepScheduleSavePlan
 } from "../src/domains/lessons/examPrepSchedulePlan.js";
 
 const students = [
@@ -63,22 +61,5 @@ assert.equal(secondPlan.changes[0].after.specialLectureStudentSchedules.find((sc
 assert.equal(secondPlan.changes[1].after.specialLectureStudentSchedules.find((schedule) => schedule.studentId === "a").startTime, "16:00");
 
 assert.throws(() => createExamPrepScheduleSavePlan({ lessons, sourceLesson: lessons[0], students, selectedKeys: [], startTime: "14:00", endTime: "13:00" }), /종료 시간/);
-
-assert.equal(getExamPrepLessonContent({ lessonTopic: "시험대비" }), "");
-assert.equal(getExamPrepLessonContent({ lessonTopic: " 함수 단원 오답 정리 " }), "함수 단원 오답 정리");
-const contentPlan = createExamPrepContentSavePlan({
-  content: " 함수 단원 오답 정리 ",
-  persistedLessons: [{ ...lessons[0], lessonTopic: "시험대비", updatedAt: "version-1" }],
-  sourceLesson: lessons[0]
-});
-assert.equal(contentPlan.changes.length, 1);
-assert.equal(contentPlan.changes[0].before.updatedAt, "version-1");
-assert.equal(contentPlan.changes[0].after.lessonTopic, "함수 단원 오답 정리");
-assert.equal(contentPlan.content, "함수 단원 오답 정리");
-assert.equal(createExamPrepContentSavePlan({
-  content: "함수 단원 오답 정리",
-  persistedLessons: [contentPlan.changes[0].after],
-  sourceLesson: contentPlan.changes[0].after
-}).changes.length, 0);
 
 console.log("exam prep schedule plan tests passed");

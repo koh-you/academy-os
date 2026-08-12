@@ -5,8 +5,8 @@
 ## 2026-08-12 시험대비 당일 진행 내용·체크박스 크기
 
 - 일반 input의 `width: 100%`, `min-height: 52px`, padding이 checkbox에 적용되던 원인을 공용 baseline에서 차단하고 일정 대상 checkbox를 20×20px로 고정했다.
-- 평시 수업일지 전체 형식 대신 날짜별 한 개의 `오늘 진행한 내용`을 두고 학교·학생별 차이는 이름과 함께 짧게 적도록 안내했다. 빈 값은 기존 `시험대비` 기본값으로 저장된다.
-- 자동 생성 lesson이 사람 작성 `lessonTopic`을 기본값으로 덮던 경로도 보존 규칙으로 수정했다. 관련 fixture, API, 390px focused browser 2/2, `check:fast`가 통과했다.
+- 평시 수업일지 전체 형식 대신 학생 명단 각 행에 `오늘 진행한 내용`을 둔다. 각 값은 해당 lesson의 학생별 `lesson_student_records.progress_note`에 저장되며 공통 입력·일괄 복사 UI는 없다.
+- 이전 공통 기록이 있으면 읽을 수 있게 보존한다. 관련 fixture, API, 390px focused browser 2/2, `check:fast`가 통과했다.
 
 ## 2026-08-12 safe browser CI 직렬화
 

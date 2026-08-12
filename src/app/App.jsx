@@ -8727,7 +8727,7 @@ function MonthlyRegularLessonOpenModal({ plan, saveStatus, onClose, onOpen }) {
   );
 }
 
-function ExamPrepLessonDetail({ examPrepScheduleLessons = [], lesson, onDeleteLesson, onSaveExamPrepSchedule, persistedLessons = [], ScheduleModalComponent, students = [], templates = [] }) {
+function ExamPrepLessonDetail({ examPrepScheduleLessons = [], lesson, onDeleteLesson, onSaveExamPrepSchedule, onSaveRecord, persistedLessons = [], records = [], ScheduleModalComponent, students = [], templates = [] }) {
   const [rosterView, setRosterView] = useState("time");
   const [isScheduleEditorOpen, setIsScheduleEditorOpen] = useState(false);
   const sourceItems = getExamPrepSourceItems(lesson);
@@ -8786,9 +8786,11 @@ function ExamPrepLessonDetail({ examPrepScheduleLessons = [], lesson, onDeleteLe
 
         <Suspense fallback={<p className="inlineNotice">진행 내용 입력을 준비하는 중입니다.</p>}>
           <ExamPrepContentEditor
+            createRecord={(student) => createEmptyRecord(lesson, student)}
             lesson={lesson}
-            onSave={onSaveExamPrepSchedule}
-            persistedLessons={persistedLessons}
+            onSaveRecord={onSaveRecord}
+            records={records}
+            studentRows={studentRows}
           />
         </Suspense>
       </section>

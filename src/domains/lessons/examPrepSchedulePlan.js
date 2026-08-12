@@ -85,29 +85,3 @@ export function createExamPrepScheduleSavePlan({
     targetStudentIds
   };
 }
-
-export function getExamPrepLessonContent(lesson = {}) {
-  const content = String(lesson.lessonTopic || "").trim();
-  return content === "시험대비" ? "" : content;
-}
-
-export function createExamPrepContentSavePlan({
-  content = "",
-  persistedLessons = [],
-  sourceLesson = {}
-} = {}) {
-  if (!sourceLesson.lessonId || sourceLesson.lessonType !== "examPrep") {
-    throw new Error("진행 내용을 저장할 시험대비 수업을 찾지 못했습니다.");
-  }
-  const before = persistedLessons.find((lesson) => lesson.lessonId === sourceLesson.lessonId) ?? null;
-  const baseLesson = before ?? sourceLesson;
-  const lessonTopic = String(content || "").trim() || "시험대비";
-  if (String(baseLesson.lessonTopic || "시험대비").trim() === lessonTopic) {
-    return { changes: [], content: getExamPrepLessonContent(baseLesson), lessonId: sourceLesson.lessonId };
-  }
-  return {
-    changes: [{ before, after: { ...baseLesson, lessonTopic } }],
-    content: getExamPrepLessonContent({ lessonTopic }),
-    lessonId: sourceLesson.lessonId
-  };
-}

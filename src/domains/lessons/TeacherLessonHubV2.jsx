@@ -61,6 +61,7 @@ export function TeacherLessonHubV2({
   onPassMakeupTask,
   onRetryGeneratedLessonSave,
   onSaveExamPrepSchedule,
+  onSaveRecord,
   onScheduleMakeupTask,
   onSaveAcademyReminder,
   onSelectLesson,
@@ -154,7 +155,9 @@ export function TeacherLessonHubV2({
           lesson={selectedLesson}
           onDeleteLesson={onDeleteLesson}
           onSaveExamPrepSchedule={onSaveExamPrepSchedule}
+          onSaveRecord={onSaveRecord}
           persistedLessons={persistedLessons}
+          records={records}
           ScheduleModalComponent={ExamPrepScheduleModal}
           students={students}
           templates={templates}

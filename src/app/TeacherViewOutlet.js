@@ -103,6 +103,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
         onPassMakeupTask: actions.handlePassSupplementTask,
         onRetryGeneratedLessonSave: actions.handleRetryGeneratedLessonSave,
         onSaveExamPrepSchedule: actions.handleSaveExamPrepSchedule,
+        onSaveRecord: actions.handleSaveRecord,
         onScheduleMakeupTask: actions.handleScheduleSupplementTask,
         onSaveAcademyReminder: actions.handleSaveAcademyReminder,
         onSelectLesson: actions.setSelectedLessonId,

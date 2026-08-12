@@ -80,7 +80,7 @@
     "test:exam-prompt-studio-ui": "node scripts/test-exam-analysis-prompt-studio-ui.mjs",
     "test:exam-final-preview": "node scripts/test-exam-analysis-final-preview.mjs",
     "test:exam-prep-center-model": "node scripts/test-exam-prep-center-model.mjs",
-    "test:exam-prep-schedule": "node scripts/test-exam-prep-schedule-plan.mjs && node scripts/test-generated-lesson-plan-builder-exam-prep-content.mjs",
+    "test:exam-prep-schedule": "node scripts/test-exam-prep-schedule-plan.mjs && node scripts/test-exam-prep-student-content.mjs && node scripts/test-generated-lesson-plan-builder-exam-prep-content.mjs",
     "test:exam-prep-lesson-api": "node scripts/test-exam-prep-lesson-api.mjs",
     "test:exam-prep-lesson-reconcile-plan": "node scripts/test-exam-prep-lesson-reconcile-plan.mjs",
     "test:exam-prep-row-save-controller": "node scripts/test-exam-prep-row-save-controller.mjs",
