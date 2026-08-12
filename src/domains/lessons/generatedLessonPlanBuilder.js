@@ -40,7 +40,11 @@ export function buildGeneratedLessonPlan({ rows = [], lessons = [], students = [
         )
       : candidate.lesson.specialLectureStudentSchedules;
     const authoritativeLesson = isExamPrep
-      ? { ...candidate.lesson, specialLectureStudentSchedules: retainedSchedules ?? [] }
+      ? {
+          ...candidate.lesson,
+          lessonTopic: existing?.lessonTopic || candidate.lesson.lessonTopic,
+          specialLectureStudentSchedules: retainedSchedules ?? []
+        }
       : candidate.lesson;
     const manualOverride = existing && !isExamPrep && controlKeys.some((key) => safeControls.manualOverrideKeys.includes(key));
     const needsUpdate = existing && !areGeneratedLessonPersistedFieldsEqual(authoritativeLesson, existing);

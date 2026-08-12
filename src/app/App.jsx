@@ -364,6 +364,7 @@ import {
 import { saveLessonModalLessonsWithVerification } from "../domains/lessons/lessonModalSaveController.js";
 import { getLessonModalSaveSnapshot } from "../domains/lessons/lessonModalSaveSnapshot.js";
 const LessonModal = lazy(() => import("../domains/lessons/LessonModal.jsx").then((module) => ({ default: module.LessonModal })));
+const ExamPrepContentEditor = lazy(() => import("../domains/lessons/ExamPrepContentEditor.jsx").then((module) => ({ default: module.ExamPrepContentEditor })));
 import { attendanceLabels, dayLabels, homeworkLabels } from "../domains/lessons/labels.js";
 import {
   buildSpecialLectureNoticeText,
@@ -8738,7 +8739,6 @@ function ExamPrepLessonDetail({ examPrepScheduleLessons = [], lesson, onDeleteLe
     : groupExamPrepStudentsByTime(studentRows);
   const schoolCount = new Set(studentRows.map((row) => row.schoolName).filter((name) => name !== "학교 미입력")).size;
   const displaySchoolCount = Math.max(schoolCount, sourceItems.length);
-
   return (
     <div className="examPrepLessonBody">
       <div className="examPrepSummaryGrid">
@@ -8767,7 +8767,7 @@ function ExamPrepLessonDetail({ examPrepScheduleLessons = [], lesson, onDeleteLe
             </p>
           )}
           eyebrow="시험대비 수업"
-          title={lesson.lessonTopic || lesson.className || "시험대비"}
+          title="시험대비"
           titleAs="h3"
         />
 
@@ -8783,6 +8783,14 @@ function ExamPrepLessonDetail({ examPrepScheduleLessons = [], lesson, onDeleteLe
         ) : (
           <EmptyState as="p" className="examPrepEmptyState">연결된 시험정보가 없습니다. 필요한 경우 일정 수정에서 수업명과 학생 명단을 직접 정리하세요.</EmptyState>
         )}
+
+        <Suspense fallback={<p className="inlineNotice">진행 내용 입력을 준비하는 중입니다.</p>}>
+          <ExamPrepContentEditor
+            lesson={lesson}
+            onSave={onSaveExamPrepSchedule}
+            persistedLessons={persistedLessons}
+          />
+        </Suspense>
       </section>
 
       {isScheduleEditorOpen ? (

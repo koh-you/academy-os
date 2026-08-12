@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-12 시험대비 당일 진행 내용·체크박스 크기
+
+- 일반 input의 `width: 100%`, `min-height: 52px`, padding이 checkbox에 적용되던 원인을 공용 baseline에서 차단하고 일정 대상 checkbox를 20×20px로 고정했다.
+- 평시 수업일지 전체 형식 대신 날짜별 한 개의 `오늘 진행한 내용`을 두고 학교·학생별 차이는 이름과 함께 짧게 적도록 안내했다. 빈 값은 기존 `시험대비` 기본값으로 저장된다.
+- 자동 생성 lesson이 사람 작성 `lessonTopic`을 기본값으로 덮던 경로도 보존 규칙으로 수정했다. 관련 fixture, API, 390px focused browser 2/2, `check:fast`가 통과했다.
+
 ## 2026-08-12 safe browser CI 직렬화
 
 - main Production checks `31471373774`는 공유 safe fixture를 2 workers가 동시에 reset하면서 시험대비 일정 충돌이 발생했고, 안전 API가 의도된 409를 throw해 프로세스까지 종료하면서 69개 검사가 연쇄 실패했다.
