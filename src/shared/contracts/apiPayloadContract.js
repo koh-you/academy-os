@@ -1,3 +1,49 @@
+// @ts-check
+
+/**
+ * @typedef {"array"|"boolean"|"number"|"object"|"string"} ApiPayloadFieldType
+ */
+
+/**
+ * @typedef {Object} ApiPayloadFieldSpecInput
+ * @property {ApiPayloadFieldType|ApiPayloadFieldType[]} [type]
+ * @property {string[]} [aliases]
+ * @property {boolean} [allowEmpty]
+ * @property {*} [defaultValue]
+ * @property {boolean} [required]
+ * @property {boolean} [trim]
+ */
+
+/**
+ * @typedef {Object} ApiPayloadFieldSpec
+ * @property {readonly string[]} aliases
+ * @property {boolean} allowEmpty
+ * @property {*} [defaultValue]
+ * @property {boolean} hasDefault
+ * @property {boolean} required
+ * @property {boolean} trim
+ * @property {readonly ApiPayloadFieldType[]} types
+ */
+
+/**
+ * @typedef {Object} ApiPayloadContract
+ * @property {boolean} allowUnknownFields
+ * @property {Readonly<Record<string, ApiPayloadFieldSpec>>} fields
+ * @property {string} name
+ * @property {(payload: unknown) => Record<string, *>} parse
+ */
+
+/**
+ * @typedef {Object} ApiRouteContract
+ * @property {string} domain
+ * @property {string} key
+ * @property {string} method
+ * @property {string} path
+ * @property {ApiPayloadContract} request
+ * @property {ApiPayloadContract} response
+ * @property {readonly string[]} sources
+ */
+
 const supportedFieldTypes = new Set(["array", "boolean", "number", "object", "string"]);
 
 function isPlainObject(value) {
@@ -6,8 +52,17 @@ function isPlainObject(value) {
   return prototype === Object.prototype || prototype === null;
 }
 
+/**
+ * @param {Object} options
+ * @param {string} options.contractName
+ * @param {string} [options.field]
+ * @param {string} options.message
+ * @returns {Error & { code: string, contractName: string, field: string, statusCode: number }}
+ */
 function createContractError({ contractName, field = "", message }) {
-  const error = new Error(message);
+  const error = /** @type {Error & { code: string, contractName: string, field: string, statusCode: number }} */ (
+    new Error(message)
+  );
   error.name = "ApiPayloadContractError";
   error.code = "INVALID_API_PAYLOAD";
   error.statusCode = 400;
@@ -25,12 +80,17 @@ function matchesFieldType(value, types) {
   });
 }
 
+/**
+ * @param {string} fieldName
+ * @param {ApiPayloadFieldSpecInput} [spec]
+ * @returns {ApiPayloadFieldSpec}
+ */
 function normalizeFieldSpec(fieldName, spec = {}) {
-  const types = [...new Set(
+  const types = /** @type {ApiPayloadFieldType[]} */ ([...new Set(
     (Array.isArray(spec.type) ? spec.type : [spec.type])
       .map((type) => String(type ?? "").trim())
       .filter(Boolean)
-  )];
+  )]);
   const unsupportedType = types.find((type) => !supportedFieldTypes.has(type));
   if (!types.length || unsupportedType) {
     throw new Error(
@@ -58,6 +118,13 @@ function cloneDefaultValue(value) {
   return value;
 }
 
+/**
+ * @param {Object} [options]
+ * @param {boolean} [options.allowUnknownFields]
+ * @param {Record<string, ApiPayloadFieldSpecInput>} [options.fields]
+ * @param {string} [options.name]
+ * @returns {ApiPayloadContract}
+ */
 export function defineApiPayloadContract({
   allowUnknownFields = false,
   fields = {},
@@ -148,6 +215,17 @@ export function defineApiPayloadContract({
   });
 }
 
+/**
+ * @param {Object} [options]
+ * @param {string} [options.domain]
+ * @param {string} [options.key]
+ * @param {string} [options.method]
+ * @param {string} [options.path]
+ * @param {ApiPayloadContract} [options.request]
+ * @param {ApiPayloadContract} [options.response]
+ * @param {string[]} [options.sources]
+ * @returns {ApiRouteContract}
+ */
 export function defineApiRouteContract({
   domain,
   key,
