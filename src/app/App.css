@@ -19350,6 +19350,27 @@ textarea.profileEditInput {
   white-space: nowrap;
 }
 
+.studentRosterEffectiveChoice {
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  border-radius: 8px;
+  color: #9a3412;
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+}
+
+.studentRosterEffectiveChoice span {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.studentRosterEffectiveChoice select {
+  background: #ffffff;
+  border: 1px solid #fb923c;
+  min-height: 42px;
+}
+
 .supplementSortControl > span {
   flex: 0 0 auto;
   white-space: nowrap;

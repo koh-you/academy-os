@@ -2293,6 +2293,36 @@ test("student class move preserves today's journal row when applying from tomorr
   expect(pageErrors).toEqual([]);
 });
 
+test("student profile schedule asks whether today's journal should change before roster save", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await page.clock.install({ time: new Date("2026-08-01T09:00:00+09:00") });
+  const rosterRequests = [];
+  await page.route("**/api/class-rosters/save", async (route) => {
+    rosterRequests.push(route.request().postDataJSON());
+    const response = await route.fetch();
+    await route.fulfill({ response });
+  });
+
+  await loginAsTeacher(page);
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
+  await page.getByRole("button", { name: /정산 미리보기 학생$/ }).click();
+  const profile = page.getByRole("dialog", { name: /정산 미리보기 학생 학생 프로파일/ });
+  await profile.getByRole("button", { name: "수정", exact: true }).click();
+  await profile.getByRole("button", { name: "시간표 추가" }).click();
+
+  const effectiveDateSelect = profile.getByLabel("정산 미리보기 학생 개별 시간표 적용 시점");
+  await expect(profile.getByText("오늘 수업일지 명단도 변경할까요?")).toBeVisible();
+  await expect(effectiveDateSelect).toHaveValue("tomorrow");
+  await profile.getByRole("button", { name: "기본정보만 저장", exact: true }).click();
+  await expect(profile.getByText("화목 17:00-20:00", { exact: true })).toBeVisible();
+
+  expect(rosterRequests).toHaveLength(1);
+  const changedLessonIds = rosterRequests[0].lessonChanges.map((change) => change.lessonId);
+  expect(changedLessonIds).not.toContain("safe-settlement-august-regular");
+  expect(changedLessonIds).toContain("safe-settlement-future-roster");
+  expect(pageErrors).toEqual([]);
+});
+
 test("lesson journal skips an unused intermediate lesson but stops at an attended lesson", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   let intermediateLessonAttended = false;

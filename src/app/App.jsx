@@ -5145,6 +5145,7 @@ export function App() {
     mergeStudent,
     nextStudents,
     previousStudents,
+    reconcileStudentIds = [],
     timeoutMessage
   }) {
     const [{ saveClassRosterRequest }, { createClassRosterSavePlan, verifyClassRosterSavePlan }] = await Promise.all([
@@ -5163,7 +5164,8 @@ export function App() {
       fromDate,
       lessons: lessonSource.lessons ?? [],
       nextStudents,
-      previousStudents
+      previousStudents,
+      reconcileStudentIds
     });
     if (plan.studentChanges.length === 0 && plan.lessonChanges.length === 0) {
       return { lessons: lessonSource.lessons ?? [], plan, students: previousStudents };
@@ -5440,7 +5442,7 @@ export function App() {
     return savedStudent;
   }
 
-  async function handleSaveStudentProfile(studentDraft) {
+  async function handleSaveStudentProfile(studentDraft, options = {}) {
     if (!studentDraft?.studentId) throw new Error("저장할 학생을 찾지 못했습니다.");
     const currentStudent = students.find((item) => item.studentId === studentDraft.studentId);
     const nextStudent = { ...(currentStudent ?? {}), ...studentDraft };
@@ -5450,14 +5452,16 @@ export function App() {
     try {
       let savedStudent;
       if (
+        options.forceRosterReconcile === true ||
         (currentStudent?.defaultClassTemplateId ?? "") !== (nextStudent.defaultClassTemplateId ?? "") ||
         (currentStudent?.scheduleOverride ?? "") !== (nextStudent.scheduleOverride ?? "")
       ) {
         const nextStudents = students.map((student) => student.studentId === nextStudent.studentId ? nextStudent : student);
         const result = await persistClassRosterMutation({
-          fromDate: today,
+          fromDate: getRosterEffectiveFromDate({ mode: options.rosterEffectiveMode, today }),
           nextStudents,
           previousStudents: students,
+          reconcileStudentIds: options.forceRosterReconcile === true ? [nextStudent.studentId] : [],
           timeoutMessage: "학생 기본정보와 개별 스케줄·미래 수업 명단 저장이 30초를 넘었습니다. 현재 입력을 유지한 채 서버 상태를 확인해 주세요."
         });
         savedStudent = result.students.find((student) => student.studentId === nextStudent.studentId);

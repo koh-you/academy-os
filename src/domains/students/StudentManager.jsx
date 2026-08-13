@@ -825,6 +825,7 @@ export function StudentManager({
             teacherOperatingMemoSaveState={teacherOperatingMemoSaveStates[selectedStudent.studentId] ?? "idle"}
             studentProfileSaveState={studentProfileSaveStates[selectedStudent.studentId] ?? "idle"}
             student={selectedStudent}
+            today={today}
           />
         </StudentProfileErrorBoundary>
       ) : null}

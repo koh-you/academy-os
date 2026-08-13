@@ -9,6 +9,7 @@ import { parseStudentScheduleOverride } from "../../shared/utils/studentSchedule
 import { getCurrentKoreaMonthKey } from "../settlements/monthlySettlement.js";
 import { buildStudentMonthlyAttendanceSummary } from "../settlements/settlementAttendance.js";
 import { StudentMonthlyReportModal } from "./StudentMonthlyReportModal.jsx";
+import { hasStudentLessonRowOnDate } from "./rosterEffectiveDate.js";
 const consultationTypeOptions = [
   { value: "student", label: "학생 상담" },
   { value: "parent", label: "학부모 상담" }
@@ -256,6 +257,7 @@ export function StudentProfileModal({
   studentConsultationSaveState = "idle",
   studentProfileSaveState = "idle",
   student,
+  today = "",
   teacherOperatingMemo = "",
   teacherOperatingMemoSaveState = "idle",
   tallySubmissions = []
@@ -264,6 +266,8 @@ export function StudentProfileModal({
   const [profileDraft, setProfileDraft] = useState(() => createStudentProfileDraft(student));
   const profileDraftRevisionRef = useRef(0);
   const [profileSaveError, setProfileSaveError] = useState("");
+  const [forceRosterReconcile, setForceRosterReconcile] = useState(false);
+  const [rosterEffectiveMode, setRosterEffectiveMode] = useState("today");
   const [profileActionError, setProfileActionError] = useState("");
   const [isEditingTeacherOperatingMemo, setIsEditingTeacherOperatingMemo] = useState(false);
   const [teacherOperatingMemoDraft, setTeacherOperatingMemoDraft] = useState(teacherOperatingMemo);
@@ -290,6 +294,7 @@ export function StudentProfileModal({
     setProfileDraft(createStudentProfileDraft(student));
     profileDraftRevisionRef.current = 0;
     setProfileSaveError("");
+    setForceRosterReconcile(false);
     setProfileActionError("");
     setIsEditingTeacherOperatingMemo(false);
     setTeacherOperatingMemoDraft(teacherOperatingMemo);
@@ -341,6 +346,9 @@ export function StudentProfileModal({
 
   function updateProfile(field, value) {
     clearProfileErrors();
+    if (field === "scheduleOverride" && String(value ?? "") !== String(student.scheduleOverride ?? "")) {
+      setRosterEffectiveMode(hasTodayLessonRow ? "tomorrow" : "today");
+    }
     profileDraftRevisionRef.current += 1;
     setProfileDraft((current) => ({ ...current, [field]: value }));
   }
@@ -385,7 +393,10 @@ export function StudentProfileModal({
     const saveRevision = profileDraftRevisionRef.current;
     clearProfileErrors();
     try {
-      await onSaveStudentProfile?.({ ...student, ...profileDraft, studentId: student.studentId });
+      await onSaveStudentProfile?.(
+        { ...student, ...profileDraft, studentId: student.studentId },
+        { forceRosterReconcile, rosterEffectiveMode }
+      );
       const defaultScoreDraft = createScoreDraft(student.studentId);
       const defaultAcademyTestDraft = createAcademyTestDraft(student.studentId);
       const defaultConsultationDraft = createConsultationDraft(student.studentId);
@@ -400,6 +411,7 @@ export function StudentProfileModal({
         JSON.stringify(newReminderDraft) !== JSON.stringify(defaultReminderDraft);
       if (profileDraftRevisionRef.current !== saveRevision) return;
       if (!hasOtherDraftChanges) setIsEditingProfile(false);
+      setForceRosterReconcile(false);
     } catch (error) {
       setProfileSaveError(error?.message || "기본정보 저장에 실패했습니다.");
     }
@@ -415,6 +427,7 @@ export function StudentProfileModal({
     setNewAcademyTestDraft(createAcademyTestDraft(student.studentId));
     setNewConsultationDraft(createConsultationDraft(student.studentId));
     setNewReminderDraft(createStudentReminderDraft(student.studentId));
+    setForceRosterReconcile(false);
     setIsEditingProfile(false);
   }
 
@@ -552,7 +565,8 @@ export function StudentProfileModal({
   const hasNewConsultationContent = Boolean(String(newConsultationDraft.content ?? "").trim());
   const hasNewReminderDraftChanges = JSON.stringify(newReminderDraft) !== JSON.stringify(defaultNewReminderDraft);
   const hasNewReminderContent = Boolean(String(newReminderDraft.title || newReminderDraft.content || "").trim());
-  const isProfileDirty = hasStudentProfileDraftChanges(student, profileDraft);
+  const hasProfileValueChanges = hasStudentProfileDraftChanges(student, profileDraft);
+  const isProfileDirty = hasProfileValueChanges || forceRosterReconcile;
   const profileDirtyFieldCount = studentProfileFields.filter(
     (field) => String(student[field] ?? "") !== String(profileDraft[field] ?? "")
   ).length;
@@ -580,6 +594,15 @@ export function StudentProfileModal({
   const isProfileSaving = effectiveProfileSaveState === "saving";
   const profileScheduleRows = createStudentScheduleRows(profileDraft.scheduleOverride);
   const hasUnparsedScheduleText = Boolean(String(profileDraft.scheduleOverride ?? "").trim()) && profileScheduleRows.length === 0;
+  const hasRosterScheduleChanges = forceRosterReconcile ||
+    String(student.scheduleOverride ?? "") !== String(profileDraft.scheduleOverride ?? "") ||
+    String(student.defaultClassTemplateId ?? "") !== String(profileDraft.defaultClassTemplateId ?? "");
+  const hasTodayLessonRow = hasStudentLessonRowOnDate({
+    date: today,
+    lessons,
+    records,
+    studentId: student.studentId
+  });
 
   return (
     <ModalComponent
@@ -606,7 +629,14 @@ export function StudentProfileModal({
                 </button>
               </>
             ) : (
-              <button className="softButton" onClick={() => setIsEditingProfile(true)} type="button">수정</button>
+              <button
+                className="softButton"
+                onClick={() => {
+                  setRosterEffectiveMode(hasTodayLessonRow ? "tomorrow" : "today");
+                  setIsEditingProfile(true);
+                }}
+                type="button"
+              >수정</button>
             )}
             </>
           )}
@@ -789,7 +819,29 @@ export function StudentProfileModal({
                     <div className="studentScheduleActions">
                       <button className="softButton compact" onClick={addProfileScheduleRow} type="button">시간표 추가</button>
                       <button className="softButton compact" disabled={!profileScheduleRows.length && !profileDraft.scheduleOverride} onClick={clearProfileScheduleRows} type="button">기본 반 스케줄 사용</button>
+                      <button
+                        className="softButton compact"
+                        onClick={() => {
+                          setForceRosterReconcile(true);
+                          setRosterEffectiveMode(hasTodayLessonRow ? "tomorrow" : "today");
+                        }}
+                        type="button"
+                      >현재 시간표로 명단 재계산</button>
                     </div>
+                    {hasRosterScheduleChanges && hasTodayLessonRow ? (
+                      <label className="studentRosterEffectiveChoice">
+                        <strong>오늘 수업일지 명단도 변경할까요?</strong>
+                        <span>오늘 수업 행·기록이 있어 적용 시점을 선택해야 합니다.</span>
+                        <select
+                          aria-label={`${student.name} 개별 시간표 적용 시점`}
+                          onChange={(event) => setRosterEffectiveMode(event.target.value)}
+                          value={rosterEffectiveMode}
+                        >
+                          <option value="tomorrow">오늘 명단 유지 · 내일부터 적용</option>
+                          <option value="today">오늘 명단 포함 · 오늘부터 적용</option>
+                        </select>
+                      </label>
+                    ) : null}
                   </div>
                 ) : (
                   <strong>{student.scheduleOverride || "기본 반 스케줄"}</strong>
@@ -1235,7 +1287,9 @@ export function StudentProfileModal({
               effectiveProfileSaveState === "failed"
                 ? "저장 실패 · 현재 입력은 유지됩니다. 서버 저장본을 확인한 뒤 다시 시도해 주세요."
                 : isProfileDirty
-                ? `기본정보 변경 ${profileDirtyFieldCount}개 · 상담·성적·테스트·운영 알림은 각 영역에서 별도 저장`
+                ? forceRosterReconcile && profileDirtyFieldCount === 0
+                  ? "현재 시간표로 명단 재계산 · 저장 후 서버 재조회 확인"
+                  : `기본정보 변경 ${profileDirtyFieldCount}개 · 상담·성적·테스트·운영 알림은 각 영역에서 별도 저장`
                 : separateDirtyLabels.length
                   ? `기본정보 변경 없음 · ${separateDirtyLabels.join("·")}은 각 영역에서 별도 저장 필요`
                   : "기본정보 변경 없음 · 상담·성적·테스트·운영 알림은 각 영역에서 별도 저장"

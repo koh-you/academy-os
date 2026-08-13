@@ -58,6 +58,10 @@ function isRosterManagedLesson(lesson = {}, fromDate = "") {
   );
 }
 
+function isRegularRosterLesson(lesson = {}) {
+  return Boolean(lesson.classTemplateId) && ["class", "closure"].includes(String(lesson.lessonType || "class"));
+}
+
 function sortSelectedActiveStudentIds(studentIds = [], students = []) {
   const selectedIds = new Set(studentIds);
   const studentById = new Map(students.map((student) => [student.studentId, student]));
@@ -77,9 +81,14 @@ export function createClassRosterLessonChanges({
   fromDate = "",
   lessons = [],
   nextStudents = [],
-  previousStudents = []
+  previousStudents = [],
+  reconcileStudentIds = []
 } = {}) {
-  const changedIds = new Set(changedStudentIds.map(normalizeStudentId).filter(Boolean));
+  const reconcileIds = new Set(reconcileStudentIds.map(normalizeStudentId).filter(Boolean));
+  const changedIds = new Set([
+    ...changedStudentIds,
+    ...reconcileIds
+  ].map(normalizeStudentId).filter(Boolean));
   if (changedIds.size === 0) return [];
   const previousById = new Map(previousStudents.map((student) => [student.studentId, student]));
   const nextById = new Map(nextStudents.map((student) => [student.studentId, student]));
@@ -96,6 +105,17 @@ export function createClassRosterLessonChanges({
       const shouldBeScheduleMember = isActiveStudent(nextStudent) &&
         isStudentAssignedToRegularLesson(lesson, nextStudent);
       const includesStudent = nextStudentIds.includes(studentId);
+      if (reconcileIds.has(studentId)) {
+        if (!isRegularRosterLesson(lesson)) continue;
+        if (shouldBeScheduleMember && !includesStudent) {
+          nextStudentIds.push(studentId);
+          didChangeMembership = true;
+        } else if (!shouldBeScheduleMember && includesStudent) {
+          nextStudentIds = nextStudentIds.filter((id) => id !== studentId);
+          didChangeMembership = true;
+        }
+        continue;
+      }
       if (wasScheduleMember && !shouldBeScheduleMember && includesStudent) {
         nextStudentIds = nextStudentIds.filter((id) => id !== studentId);
         didChangeMembership = true;
@@ -121,7 +141,8 @@ export function createClassRosterSavePlan({
   fromDate = "",
   lessons = [],
   nextStudents = [],
-  previousStudents = []
+  previousStudents = [],
+  reconcileStudentIds = []
 } = {}) {
   const studentChanges = createClassRosterStudentChanges(previousStudents, nextStudents);
   const changedStudentIds = studentChanges.map(({ after }) => after.studentId);
@@ -132,7 +153,8 @@ export function createClassRosterSavePlan({
       fromDate,
       lessons,
       nextStudents,
-      previousStudents
+      previousStudents,
+      reconcileStudentIds
     }),
     studentChanges
   };
