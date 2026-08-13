@@ -9,7 +9,8 @@ import { parseStudentScheduleOverride } from "../../shared/utils/studentSchedule
 import { getCurrentKoreaMonthKey } from "../settlements/monthlySettlement.js";
 import { buildStudentMonthlyAttendanceSummary } from "../settlements/settlementAttendance.js";
 import { StudentMonthlyReportModal } from "./StudentMonthlyReportModal.jsx";
-import { hasStudentLessonRowOnDate } from "./rosterEffectiveDate.js";
+import { getRosterEffectiveFromDate, hasStudentLessonRowOnDate } from "./rosterEffectiveDate.js";
+import { findStudentPartialDefaultLessonOverlaps } from "../../shared/utils/studentSchedule.js";
 const consultationTypeOptions = [
   { value: "student", label: "학생 상담" },
   { value: "parent", label: "학부모 상담" }
@@ -268,6 +269,7 @@ export function StudentProfileModal({
   const [profileSaveError, setProfileSaveError] = useState("");
   const [forceRosterReconcile, setForceRosterReconcile] = useState(false);
   const [rosterEffectiveMode, setRosterEffectiveMode] = useState("today");
+  const [isPartialOverlapConfirmationOpen, setIsPartialOverlapConfirmationOpen] = useState(false);
   const [profileActionError, setProfileActionError] = useState("");
   const [isEditingTeacherOperatingMemo, setIsEditingTeacherOperatingMemo] = useState(false);
   const [teacherOperatingMemoDraft, setTeacherOperatingMemoDraft] = useState(teacherOperatingMemo);
@@ -295,6 +297,7 @@ export function StudentProfileModal({
     profileDraftRevisionRef.current = 0;
     setProfileSaveError("");
     setForceRosterReconcile(false);
+    setIsPartialOverlapConfirmationOpen(false);
     setProfileActionError("");
     setIsEditingTeacherOperatingMemo(false);
     setTeacherOperatingMemoDraft(teacherOperatingMemo);
@@ -389,7 +392,11 @@ export function StudentProfileModal({
     updateProfile("scheduleOverride", "");
   }
 
-  async function saveProfileDraft() {
+  async function saveProfileDraft({ partialOverlapConfirmed = false } = {}) {
+    if (hasRosterScheduleChanges && partialDefaultLessonOverlaps.length > 0 && !partialOverlapConfirmed) {
+      setIsPartialOverlapConfirmationOpen(true);
+      return;
+    }
     const saveRevision = profileDraftRevisionRef.current;
     clearProfileErrors();
     try {
@@ -412,6 +419,7 @@ export function StudentProfileModal({
       if (profileDraftRevisionRef.current !== saveRevision) return;
       if (!hasOtherDraftChanges) setIsEditingProfile(false);
       setForceRosterReconcile(false);
+      setIsPartialOverlapConfirmationOpen(false);
     } catch (error) {
       setProfileSaveError(error?.message || "기본정보 저장에 실패했습니다.");
     }
@@ -428,6 +436,7 @@ export function StudentProfileModal({
     setNewConsultationDraft(createConsultationDraft(student.studentId));
     setNewReminderDraft(createStudentReminderDraft(student.studentId));
     setForceRosterReconcile(false);
+    setIsPartialOverlapConfirmationOpen(false);
     setIsEditingProfile(false);
   }
 
@@ -603,6 +612,11 @@ export function StudentProfileModal({
     records,
     studentId: student.studentId
   });
+  const rosterEffectiveFromDate = getRosterEffectiveFromDate({ mode: rosterEffectiveMode, today });
+  const partialDefaultLessonOverlaps = findStudentPartialDefaultLessonOverlaps(
+    lessons.filter((lesson) => String(lesson.date ?? "") >= rosterEffectiveFromDate),
+    { ...student, ...profileDraft }
+  );
 
   return (
     <ModalComponent
@@ -1315,6 +1329,31 @@ export function StudentProfileModal({
             records={records}
             student={student}
           />
+        ) : null}
+        {isPartialOverlapConfirmationOpen ? (
+          <ModalComponent
+            className="studentPartialOverlapModal"
+            onClose={() => setIsPartialOverlapConfirmationOpen(false)}
+            subtitle="개별 시간이 기본 소속 반 시간 밖까지 이어집니다. 명단 표시 기준을 확인해 주세요."
+            title="기본 반 명단에 계속 표시할까요?"
+          >
+            <div className="studentPartialOverlapList">
+              {partialDefaultLessonOverlaps.map((overlap) => (
+                <div key={`${overlap.className}_${overlap.lessonStartTime}_${overlap.scheduleStartTime}`}>
+                  <strong>{overlap.className}</strong>
+                  <span>반 {overlap.lessonStartTime}-{overlap.lessonEndTime}</span>
+                  <span>학생 {overlap.scheduleStartTime}-{overlap.scheduleEndTime}</span>
+                </div>
+              ))}
+            </div>
+            <p className="studentPartialOverlapNotice">
+              계속 표시하면 시간이 일부 겹치는 기본 소속 반 명단에 학생을 유지합니다. 다른 반 배치는 개별 시간이 수업시간 안에 완전히 포함될 때만 적용됩니다.
+            </p>
+            <div className="modalFooter">
+              <button className="softButton" onClick={() => setIsPartialOverlapConfirmationOpen(false)} type="button">돌아가서 시간표 수정</button>
+              <button className="primaryButton" onClick={() => saveProfileDraft({ partialOverlapConfirmed: true })} type="button">기본 반 명단에 표시하고 저장</button>
+            </div>
+          </ModalComponent>
         ) : null}
       </div>
     </ModalComponent>

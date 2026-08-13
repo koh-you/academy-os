@@ -164,6 +164,31 @@ export function getStudentScheduleForLesson(lesson = {}, student = {}) {
   return rule ? { ...rule, scheduleType: "profile", source: "studentProfile" } : null;
 }
 
+export function findStudentPartialDefaultLessonOverlaps(lessons = [], student = {}) {
+  const rules = parseStudentScheduleOverride(student?.scheduleOverride);
+  if (!student?.defaultClassTemplateId || rules.length === 0) return [];
+  const overlaps = [];
+  const seen = new Set();
+  for (const lesson of lessons) {
+    if (!isProfileScheduleManagedLesson(lesson, student)) continue;
+    if (lesson.classTemplateId !== student.defaultClassTemplateId) continue;
+    for (const rule of rules) {
+      if (!isRuleOverlappingLesson(rule, lesson) || isRuleMatchedToLesson(rule, lesson)) continue;
+      const key = [lesson.classTemplateId, lesson.startTime, lesson.endTime, rule.startTime, rule.endTime].join("|");
+      if (seen.has(key)) continue;
+      seen.add(key);
+      overlaps.push({
+        className: lesson.className || lesson.title || "기본 소속 반",
+        lessonEndTime: lesson.endTime || "",
+        lessonStartTime: lesson.startTime || "",
+        scheduleEndTime: rule.endTime,
+        scheduleStartTime: rule.startTime
+      });
+    }
+  }
+  return overlaps;
+}
+
 export function isStudentAssignedToRegularLesson(lesson = {}, student = {}) {
   if (!isProfileScheduleManagedLesson(lesson, student)) return false;
   const rules = parseStudentScheduleOverride(student?.scheduleOverride);

@@ -2343,12 +2343,18 @@ test("student profile schedule asks whether today's journal should change before
   await expect(profile.getByText("오늘 수업일지 명단도 변경할까요?")).toBeVisible();
   await expect(effectiveDateSelect).toHaveValue("tomorrow");
   await profile.getByRole("button", { name: "기본정보만 저장", exact: true }).click();
+  const overlapDialog = page.getByRole("dialog", { name: "기본 반 명단에 계속 표시할까요?" });
+  await expect(overlapDialog).toContainText("반 16:00-19:00");
+  await expect(overlapDialog).toContainText("학생 17:00-20:00");
+  await overlapDialog.getByRole("button", { name: "기본 반 명단에 표시하고 저장" }).click();
+  await expect(overlapDialog).toBeHidden();
   await expect(profile.getByText("화목 17:00-20:00", { exact: true })).toBeVisible();
 
-  expect(rosterRequests).toHaveLength(1);
+  await expect.poll(() => rosterRequests.length).toBe(1);
   const changedLessonIds = rosterRequests[0].lessonChanges.map((change) => change.lessonId);
   expect(changedLessonIds).not.toContain("safe-settlement-august-regular");
-  expect(changedLessonIds).toContain("safe-settlement-future-roster");
+  expect(changedLessonIds).toEqual([]);
+  expect(rosterRequests[0].studentChanges[0].after.scheduleOverride).toBe("화목 17:00-20:00");
   expect(pageErrors).toEqual([]);
 });
 

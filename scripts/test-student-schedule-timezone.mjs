@@ -4,6 +4,7 @@ process.env.TZ = "UTC";
 
 const {
   applyStudentScheduleToLesson,
+  findStudentPartialDefaultLessonOverlaps,
   getEffectiveLessonStudentIds,
   getStudentScheduleForLesson,
   isStudentScheduledForLesson
@@ -56,6 +57,16 @@ assert.equal(
 );
 assert.deepEqual(getEffectiveLessonStudentIds(overlappingDefaultLesson, [student]), [student.studentId]);
 assert.equal(getStudentScheduleForLesson(overlappingDefaultLesson, student)?.startTime, "17:00");
+assert.deepEqual(
+  findStudentPartialDefaultLessonOverlaps([overlappingDefaultLesson], student),
+  [{
+    className: "기본 소속 반",
+    lessonEndTime: "19:00",
+    lessonStartTime: "16:00",
+    scheduleEndTime: "20:00",
+    scheduleStartTime: "17:00"
+  }]
+);
 assert.equal(isStudentScheduledForLesson(mondayLesson, student), false);
 assert.equal(getStudentScheduleForLesson(fridayMakeupLesson, student), null, "보강은 같은 요일의 프로필 정규 시간으로 덮어쓰지 않는다");
 assert.deepEqual(applyStudentScheduleToLesson(fridayMakeupLesson, student), fridayMakeupLesson);

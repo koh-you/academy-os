@@ -19371,6 +19371,34 @@ textarea.profileEditInput {
   min-height: 42px;
 }
 
+.studentPartialOverlapList {
+  display: grid;
+  gap: 8px;
+}
+
+.studentPartialOverlapList > div {
+  align-items: center;
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  grid-template-columns: minmax(140px, 1fr) auto auto;
+  padding: 12px;
+}
+
+.studentPartialOverlapList span,
+.studentPartialOverlapNotice {
+  color: #9a3412;
+  font-size: 13px;
+}
+
+@media (max-width: 640px) {
+  .studentPartialOverlapList > div {
+    grid-template-columns: 1fr;
+  }
+}
+
 .supplementSortControl > span {
   flex: 0 0 auto;
   white-space: nowrap;
