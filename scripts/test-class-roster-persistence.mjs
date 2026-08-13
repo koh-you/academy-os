@@ -130,11 +130,34 @@ const leeBefore = { ...studentA, defaultClassTemplateId: "template_mwf_7_10", na
 const leeAfter = { ...leeBefore, scheduleOverride: "월 16:00-19:00 / 수금 19:00-22:00" };
 const parkBefore = { ...studentA, defaultClassTemplateId: "template_mwf_7_10", name: "박지현", studentId: "park-jihyun" };
 const parkAfter = { ...parkBefore, scheduleOverride: "수 19:00-22:00 / 토 13:00-16:00" };
+const frontStudent = {
+  ...studentA,
+  defaultClassTemplateId: "template_tt_sat_front",
+  name: "서빈",
+  scheduleOverride: "화목 17:00-20:00 / 토 10:00-13:00",
+  studentId: "student-seobin"
+};
+const tuesdayFrontLesson = {
+  classTemplateId: "template_tt_sat_front",
+  date: "2026-08-04",
+  endTime: "19:00",
+  lessonId: "tuesday-front-4-7",
+  lessonType: "class",
+  startTime: "16:00",
+  status: "scheduled",
+  studentIds: [frontStudent.studentId],
+  updatedAt: version0
+};
 
 assert.equal(isStudentAssignedToRegularLesson(timedRegularLessons[0], leeAfter), true);
 assert.equal(isStudentAssignedToRegularLesson(timedRegularLessons[1], leeAfter), false);
 assert.equal(isStudentAssignedToRegularLesson(timedRegularLessons[2], leeAfter), true);
 assert.equal(isStudentAssignedToRegularLesson(timedRegularLessons[3], parkAfter), true);
+assert.equal(
+  isStudentAssignedToRegularLesson(tuesdayFrontLesson, frontStudent),
+  true,
+  "서빈·김보현처럼 기본 앞반과 개별 시간이 겹치면 기존 명단에서 사라지지 않는다"
+);
 
 const individualTimesPlan = createClassRosterSavePlan({
   fromDate: "2026-08-03",

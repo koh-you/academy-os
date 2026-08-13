@@ -46,6 +46,24 @@ function isRuleMatchedToLesson(rule = {}, lesson = {}) {
   return lessonStart <= ruleStart && ruleEnd <= lessonEnd;
 }
 
+function isRuleOverlappingLesson(rule = {}, lesson = {}) {
+  const lessonDayKey = getLessonDayKey(lesson);
+  if (rule.days.length && !rule.days.includes(lessonDayKey)) return false;
+  if (!lesson?.startTime || !lesson?.endTime) return true;
+  const ruleStart = getScheduleTimeMinutes(rule.startTime);
+  const ruleEnd = getScheduleTimeMinutes(rule.endTime);
+  const lessonStart = getScheduleTimeMinutes(lesson.startTime);
+  const lessonEnd = getScheduleTimeMinutes(lesson.endTime);
+  if ([ruleStart, ruleEnd, lessonStart, lessonEnd].some((value) => value === null)) return false;
+  return lessonStart < ruleEnd && ruleStart < lessonEnd;
+}
+
+function isRuleAssignedToLesson(rule = {}, lesson = {}, student = {}) {
+  return lesson.classTemplateId === student?.defaultClassTemplateId
+    ? isRuleOverlappingLesson(rule, lesson)
+    : isRuleMatchedToLesson(rule, lesson);
+}
+
 function normalizeScheduleSegmentText(value = "") {
   return String(value ?? "")
     .replaceAll("：", ":")
@@ -139,7 +157,7 @@ export function getStudentScheduleForLesson(lesson = {}, student = {}) {
   if (!rules.length) return null;
   const dayRules = rules.filter((item) => item.days.length > 0);
   const rule = dayRules.length
-    ? dayRules.find((item) => isRuleMatchedToLesson(item, lesson)) ?? null
+    ? dayRules.find((item) => isRuleAssignedToLesson(item, lesson, student)) ?? null
     : lesson.classTemplateId === student?.defaultClassTemplateId
       ? rules.find((item) => isRuleMatchedToLesson(item, lesson)) ?? null
       : null;
@@ -151,7 +169,7 @@ export function isStudentAssignedToRegularLesson(lesson = {}, student = {}) {
   const rules = parseStudentScheduleOverride(student?.scheduleOverride);
   const dayRules = rules.filter((rule) => rule.days.length > 0);
   if (dayRules.length) {
-    return dayRules.some((rule) => isRuleMatchedToLesson(rule, lesson));
+    return dayRules.some((rule) => isRuleAssignedToLesson(rule, lesson, student));
   }
   return lesson.classTemplateId === student?.defaultClassTemplateId;
 }
@@ -162,7 +180,7 @@ export function isStudentScheduledForLesson(lesson = {}, student = {}) {
   const dayRules = rules.filter((rule) => rule.days.length > 0);
   if (!dayRules.length) return true;
   if (lesson.classTemplateId !== student?.defaultClassTemplateId) return true;
-  return dayRules.some((rule) => isRuleMatchedToLesson(rule, lesson));
+  return dayRules.some((rule) => isRuleOverlappingLesson(rule, lesson));
 }
 
 export function getEffectiveLessonStudentIds(lesson = {}, students = []) {

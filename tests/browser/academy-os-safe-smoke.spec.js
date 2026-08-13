@@ -2200,6 +2200,17 @@ test("individual times place a student in the actual lesson roster and preserve 
             schoolName: "안전중",
             status: "active",
             studentId: "safe-schedule-priority-student"
+          },
+          {
+            defaultClassTemplateId: "template_tt_sat_front",
+            grade: "중3",
+            loginId: "safe_front_overlap",
+            name: "서빈",
+            pin: "1234",
+            scheduleOverride: "화목 17:00-20:00 / 토 10:00-13:00",
+            schoolName: "안전중",
+            status: "active",
+            studentId: "safe-front-overlap-student"
           }
         ]
       }
@@ -2227,6 +2238,17 @@ test("individual times place a student in the actual lesson roster and preserve 
           { ...sharedLesson, className: "결석 보강 · 박지현", lessonId: "safe-schedule-priority-makeup", lessonType: "makeup" },
           {
             ...sharedLesson,
+            className: "화목 4-7 / 토 10-1반",
+            classTemplateId: "template_tt_sat_front",
+            date: "2026-08-04",
+            endTime: "19:00",
+            lessonId: "lesson_regular_2026-08-04_template_tt_sat_front",
+            lessonType: "class",
+            startTime: "16:00",
+            studentIds: ["safe-front-overlap-student"]
+          },
+          {
+            ...sharedLesson,
             className: "토요일 1-4반",
             classTemplateId: "safe-saturday-1-4-class",
             date: "2026-08-08",
@@ -2241,6 +2263,13 @@ test("individual times place a student in the actual lesson roster and preserve 
   });
 
   await loginAsTeacher(page);
+  const frontDay = page.getByRole("gridcell", { name: /^2026-08-04 · \d+개 수업$/ });
+  await expect(frontDay.getByRole("button", { name: /화목 4-7 \/ 토 10-1반/ })).toContainText("(1명)");
+  await frontDay.getByRole("button", { name: /화목 4-7 \/ 토 10-1반/ }).click();
+  const frontJournal = page.getByRole("dialog", { name: "수업일지" });
+  await expect(frontJournal).toContainText("서빈");
+  await expect(frontJournal.getByLabel("개별 시간표 적용")).toHaveText("개별");
+  await frontJournal.getByRole("button", { name: "수업 목록으로 돌아가기" }).click();
   const calendarDay = page.getByRole("gridcell", { name: /^2026-08-05 · \d+개 수업$/ });
   await expect(calendarDay.locator(".lessonPill").filter({ hasText: /^17:00/ })).toHaveText([
     "17:00 결석 보강 · 박지현 (1명)",
