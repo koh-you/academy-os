@@ -6391,6 +6391,15 @@ summary:focus-visible {
   z-index: 2;
 }
 
+.examPrepSortField {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.examPrepSortField select {
+  min-width: 154px;
+}
+
 .examPrepStudentRosterCell {
   align-content: center;
   align-items: flex-start;

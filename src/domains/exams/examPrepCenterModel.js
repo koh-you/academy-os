@@ -1,3 +1,28 @@
+function getExamPeriodStart(row = {}) {
+  return String(row.examPeriod ?? "").match(/\d{4}-\d{2}-\d{2}/)?.[0] ?? "9999-12-31";
+}
+
+export function sortExamPrepRows(rows = [], sortMode = "school", studentRosterByExamPrepId = {}) {
+  const schoolGradeFallback = (first, second) =>
+    String(first.schoolName || "").localeCompare(String(second.schoolName || ""), "ko") ||
+    String(first.grade || "").localeCompare(String(second.grade || ""), "ko", { numeric: true }) ||
+    String(first.examPrepId || "").localeCompare(String(second.examPrepId || ""));
+  return [...rows].sort((first, second) => {
+    if (sortMode === "exam_period") {
+      return getExamPeriodStart(first).localeCompare(getExamPeriodStart(second)) || schoolGradeFallback(first, second);
+    }
+    if (sortMode === "grade") {
+      return String(first.grade || "").localeCompare(String(second.grade || ""), "ko", { numeric: true }) || schoolGradeFallback(first, second);
+    }
+    if (sortMode === "student_count") {
+      const countDifference = (studentRosterByExamPrepId[second.examPrepId]?.length ?? 0) -
+        (studentRosterByExamPrepId[first.examPrepId]?.length ?? 0);
+      return countDifference || schoolGradeFallback(first, second);
+    }
+    return schoolGradeFallback(first, second);
+  });
+}
+
 export function createExamPrepCenterDisplayModel({
   currentExamCycle,
   dedupeRows,

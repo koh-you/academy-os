@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ExamPrepEditModal } from "./ExamPrepEditModal.jsx";
 import { ExamPrepPastPaperPanel } from "./ExamPrepPastPaperPanel.jsx";
-import { createExamPrepCenterDisplayModel } from "./examPrepCenterModel.js";
+import { createExamPrepCenterDisplayModel, sortExamPrepRows } from "./examPrepCenterModel.js";
 import { ExamPostSubmissionManager } from "./ExamPostSubmissionManager.jsx";
 import { ExamReviewComposerModal } from "./ExamReviewComposerModal.jsx";
 import { areExamPrepDraftsEqual, cloneExamPrepDraft, updateExamPrepDraft } from "./examPrepDraft.js";
@@ -61,8 +61,9 @@ export function ExamPrepCenter({
   } = runtime;
   const [query, setQuery] = useState("");
   const [activeTab, setActiveTabState] = useState("info");
-  const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("template_mwf_7_10");
+  const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("");
   const [selectedExamCycle, setSelectedExamCycle] = useState(currentExamCycle);
+  const [rowSortMode, setRowSortMode] = useState("school");
   const [editingExamPrepId, setEditingExamPrepId] = useState("");
   const [editingExamPrepDraft, setEditingExamPrepDraft] = useState(null);
   const [editingExamPrepSavedDraft, setEditingExamPrepSavedDraft] = useState(null);
@@ -71,6 +72,7 @@ export function ExamPrepCenter({
   const [tallyImportStatus, setTallyImportStatus] = useState("");
   const [pastPaperFrameKey, setPastPaperFrameKey] = useState(0);
   const [pastPaperLoadState, setPastPaperLoadState] = useState("loading");
+  const ensuredExamCycleScopesRef = useRef(new Set());
   const setTallySubmissions = onSetTallySubmissions ?? (() => {});
   const setTallySummaries = onSetTallySummaries ?? (() => {});
   const pastPaperArchiveUrl =
@@ -107,6 +109,7 @@ export function ExamPrepCenter({
   const visibleTallySubmissions = tallySubmissions.filter(
     (submission) => submission.examCycle === selectedExamCycle && submission.classTemplateId === selectedClassTemplateId
   );
+  const sortedExamPrepRows = sortExamPrepRows(filteredRows, rowSortMode, studentRosterByExamPrepId);
   const tallyDifficultyValues = visibleTallySubmissions.map((item) => item.difficulty).filter(Number.isFinite);
   const tallyPreparationValues = visibleTallySubmissions.map((item) => item.preparation).filter(Number.isFinite);
   const tallyAverageLabel = (values) => {
@@ -135,6 +138,17 @@ export function ExamPrepCenter({
     ? persistedEditingExamPrepSaveState
     : (hasEditingExamPrepChanges ? "dirty" : persistedEditingExamPrepSaveState);
 
+  function ensureExamCycleRows(examCycle, classTemplateId) {
+    const scopeKey = `${examCycle}_${classTemplateId || "all"}`;
+    if (ensuredExamCycleScopesRef.current.has(scopeKey)) return;
+    ensuredExamCycleScopesRef.current.add(scopeKey);
+    onEnsureExamCycleRows(examCycle, classTemplateId);
+  }
+
+  useEffect(() => {
+    ensureExamCycleRows(selectedExamCycle, selectedClassTemplateId);
+  }, [selectedExamCycle, selectedClassTemplateId]);
+
   function setActiveTab(tabId) {
     if (tabId !== "info" && !selectedClassTemplateId) {
       setSelectedClassTemplateId(templates[0]?.classTemplateId ?? "template_mwf_7_10");
@@ -144,12 +158,12 @@ export function ExamPrepCenter({
 
   function changeExamCycle(examCycle) {
     setSelectedExamCycle(examCycle);
-    onEnsureExamCycleRows(examCycle, selectedClassTemplateId);
+    ensureExamCycleRows(examCycle, selectedClassTemplateId);
   }
 
   function changeClassTemplate(classTemplateId) {
     setSelectedClassTemplateId(classTemplateId);
-    onEnsureExamCycleRows(selectedExamCycle, classTemplateId);
+    ensureExamCycleRows(selectedExamCycle, classTemplateId);
   }
 
   async function importTallyCsv(file) {
@@ -350,6 +364,15 @@ export function ExamPrepCenter({
                 <option value="2026-2-final">2026 2학기 기말</option>
               </select>
             </label>
+            <label className="filterBarField examPrepSortField">
+              <span>정렬</span>
+              <select aria-label="시험정보 정렬" value={rowSortMode} onChange={(event) => setRowSortMode(event.target.value)}>
+                <option value="school">학교명 가나다순</option>
+                <option value="exam_period">시험기간 빠른순</option>
+                <option value="grade">학년순</option>
+                <option value="student_count">학생 많은 순</option>
+              </select>
+            </label>
             <button
               aria-pressed={showExcluded}
               className={`softButton compact${showExcluded ? " active" : ""}`}
@@ -373,7 +396,7 @@ export function ExamPrepCenter({
               <span>부교재</span>
               <span>상세</span>
             </div>
-            {filteredRows.map((row) => {
+            {sortedExamPrepRows.map((row) => {
               const specialNote = row.specialNote ?? row.memo ?? "";
               const hasReview = Boolean(row.review || row.revisedReview);
               const matchingStudents = studentRosterByExamPrepId[row.examPrepId] ?? [];

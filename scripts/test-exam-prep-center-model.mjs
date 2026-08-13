@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { createExamPrepCenterDisplayModel } from "../src/domains/exams/examPrepCenterModel.js";
+import { createExamPrepCenterDisplayModel, sortExamPrepRows } from "../src/domains/exams/examPrepCenterModel.js";
 import { applyExamPrepDraftToLogicalGroup } from "../src/domains/exams/examPrepDraft.js";
 import { createStudentExamPrepRow } from "../src/domains/exams/studentExamPrepRow.js";
 import {
@@ -237,6 +237,15 @@ assert.deepEqual(
   ["다 학생"]
 );
 assert.equal(allClassesModel.selectedClass?.name, "전체 반");
+const sortableRows = [
+  { examPeriod: "2026-10-20 ~ 2026-10-22", examPrepId: "b", grade: "중3", schoolName: "창동중" },
+  { examPeriod: "2026-09-28 ~ 2026-10-02", examPrepId: "a", grade: "고1", schoolName: "정의여고" },
+  { examPeriod: "", examPrepId: "c", grade: "중2", schoolName: "신도봉중" }
+];
+assert.deepEqual(sortExamPrepRows(sortableRows).map((row) => row.examPrepId), ["c", "a", "b"]);
+assert.deepEqual(sortExamPrepRows(sortableRows, "exam_period").map((row) => row.examPrepId), ["a", "b", "c"]);
+assert.deepEqual(sortExamPrepRows(sortableRows, "grade").map((row) => row.examPrepId), ["a", "c", "b"]);
+assert.deepEqual(sortExamPrepRows(sortableRows, "student_count", { a: [{}], b: [{}, {}], c: [] }).map((row) => row.examPrepId), ["b", "a", "c"]);
 
 const excludedModel = createExamPrepCenterDisplayModel({
   currentExamCycle: "2026-1-final",
@@ -281,8 +290,11 @@ assert.equal(editedDuplicateRows[1], duplicateRows[1]);
 
 const centerSource = await readFile(new URL("../src/domains/exams/ExamPrepCenter.jsx", import.meta.url), "utf8");
 assert.match(centerSource, /<strong>전체 반<\/strong>/);
-assert.match(centerSource, /onEnsureExamCycleRows\(examCycle, selectedClassTemplateId\)/);
-assert.match(centerSource, /onEnsureExamCycleRows\(selectedExamCycle, classTemplateId\)/);
+assert.match(centerSource, /useState\(""\)/);
+assert.match(centerSource, /학교명 가나다순/);
+assert.match(centerSource, /ensureExamCycleRows\(examCycle, selectedClassTemplateId\)/);
+assert.match(centerSource, /ensureExamCycleRows\(selectedExamCycle, classTemplateId\)/);
+assert.match(centerSource, /ensureExamCycleRows\(selectedExamCycle, selectedClassTemplateId\)/);
 assert.match(centerSource, /<span>상세<\/span>/);
 assert.match(centerSource, /<strong>상세 관리<\/strong>/);
 assert.match(centerSource, /onSaveRow\(editingExamPrepDraft\)/);

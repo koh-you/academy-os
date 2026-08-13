@@ -1188,11 +1188,19 @@ test("exam prep all-class view creates enrolled-school rows without inventing ex
   await loginAsTeacher(page);
 
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /시험관리/ }).click();
-  await page.getByRole("button", { name: "전체 반" }).click();
+  await expect(page.getByRole("button", { name: "전체 반" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByLabel("시험정보 정렬")).toHaveValue("school");
 
   const middleSchoolRow = page.locator(".examPrepRow").filter({ hasText: "안전중" });
   await expect(middleSchoolRow).toBeVisible();
   await expect(middleSchoolRow).toContainText("미입력");
+  const schoolNames = await page.locator(".examPrepRow:not(.examPrepHead) > :first-child").allTextContents();
+  expect(schoolNames).toEqual([...schoolNames].sort((first, second) => first.localeCompare(second, "ko")));
+  await page.getByLabel("시험정보 정렬").selectOption("exam_period");
+  await expect(page.getByLabel("시험정보 정렬")).toHaveValue("exam_period");
+  await page.setViewportSize({ height: 844, width: 390 });
+  await expect(page.getByLabel("시험정보 정렬")).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await expect.poll(async () => {
     const response = await request.get(`${safeApiBaseUrl}/api/exam-prep-rows`);
     const result = await response.json();
