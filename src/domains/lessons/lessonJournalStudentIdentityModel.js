@@ -13,7 +13,7 @@ export function createLessonJournalStudentIdentityModel({ attendanceLesson = {},
       scheduleType === "profile" ? "profile" : ""
     ].filter(Boolean).join(" "),
     scheduleTimeLabel: scheduleType === "profile"
-      ? "개별"
+      ? "개별시간표"
       : `${attendanceLesson.startTime}-${attendanceLesson.endTime}`,
     showScheduleTime
   };

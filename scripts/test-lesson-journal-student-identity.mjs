@@ -34,7 +34,7 @@ const profileTarget = createLessonJournalStudentIdentityModel({
 });
 assert.equal(profileTarget.gradeSchoolLabel, "고1 · 학교 미입력");
 assert.equal(profileTarget.scheduleTimeClassName, "specialLectureStudentTime profile");
-assert.equal(profileTarget.scheduleTimeLabel, "개별");
+assert.equal(profileTarget.scheduleTimeLabel, "개별시간표");
 assert.equal(profileTarget.scheduleTimeAriaLabel, "개별 시간표 적용");
 
 const regularControl = createLessonJournalStudentIdentityModel({

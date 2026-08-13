@@ -8841,7 +8841,7 @@ function ExamPrepLessonDetail({ examPrepScheduleLessons = [], lesson, onDeleteLe
                       </div>
                       <span className={student.timeLabel === "시간 미정" ? "examPrepStudentTime missing" : "examPrepStudentTime"}>
                         {student.timeLabel}
-                        {student.hasIndividualTime ? <small>개별</small> : null}
+                        {student.hasIndividualTime ? <small>개별시간표</small> : null}
                       </span>
                     </div>
                   ))}
