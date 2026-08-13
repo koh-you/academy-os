@@ -14,13 +14,15 @@
 
 | 문서 | 목적 |
 | --- | --- |
-| `backend-db-deployment-plan.md` | Supabase, Render, Vercel로 넘어가는 전체 구조 |
-| `first-time-production-checklist.md` | 처음 회원가입하는 사람 기준 실제 작업 순서 |
+| `STATUS.md` | 현재 상태와 최근 변경 이력 |
+| `deferred-work-queue.md` | 미룬 작업 큐 (source of truth) |
+| `engineering-contracts.md` | 개발 계약 |
+| `testing-policy.md` | 검증 명령 선택 기준 |
+| `current-worklog.md` | 진행 중 작업 로그 |
 | `attendance-alimtalk.md` | 출결/알림톡 연동 기준 |
 | `exam-analysis-pipeline-v2.md` | 새 시험분석 파이프라인 기준 |
-| `day-26-30-mvp-closeout.md` | Day 30까지 MVP 정리 |
-| `data-model.md` | 기존 데이터 모델 초안 |
-| `permissions.md` | 권한/공개 범위 기준 |
+
+`architecture.md`, `data-model.md`, `permissions.md`, `backend-db-deployment-plan.md`, `first-time-production-checklist.md`, `day-26-30-mvp-closeout.md`는 프로젝트 초기(Day 2~3) 초안이며 위 문서들로 대체됐다. 문제의 역사나 근거가 필요할 때만 `archive/`에서 확인한다.
 
 ## 운영 전환 파일
 

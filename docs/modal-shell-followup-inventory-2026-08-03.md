@@ -2,7 +2,7 @@
 
 ## 목적과 기준선
 
-UI-5에서 공통 dialog 의미와 일부 footer를 도입한 뒤 추가된 화면을 최신 main에서 다시 대조한다. 이 문서는 P2 후속 작업의 현재 기준선이며, 과거 완료 기록은 `docs/ui-modal-inventory-2026-07-29.md`를 참고한다.
+UI-5에서 공통 dialog 의미와 일부 footer를 도입한 뒤 추가된 화면을 최신 main에서 다시 대조한다. 이 문서는 P2 후속 작업의 현재 기준선이며, 과거 완료 기록은 `docs/archive/ui-modal-inventory-2026-07-29.md`를 참고한다.
 
 - dialog 표면: 41개
 - 공통 `Modal` 직접 사용: 34개

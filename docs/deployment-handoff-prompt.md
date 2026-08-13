@@ -9,9 +9,9 @@
 - AGENTS.md
 - docs/current-worklog.md
 - docs/home-codex-setup.md
-- docs/session-handoff-2026-06-20.md
+- docs/archive/session-handoff-2026-06-20.md
 - docs/deployment-handoff-prompt.md
-- docs/ai-deployment-responsibility-2026-06-21.md
+- docs/archive/ai-deployment-responsibility-2026-06-21.md
 
 중요 원칙:
 1. AI가 할 수 있는 일은 AI가 끝까지 합니다. 사용자가 명시적으로 막지 않았다면 로컬 수정/검증에서 멈추지 말고 commit과 push까지 진행하세요.
@@ -88,7 +88,7 @@ SQL 적용 원칙:
 ## 짧은 버전
 
 ```text
-academy-os 작업입니다. AGENTS.md, docs/current-worklog.md, docs/home-codex-setup.md, docs/session-handoff-2026-06-20.md, docs/ai-deployment-responsibility-2026-06-21.md를 먼저 읽으세요.
+academy-os 작업입니다. AGENTS.md, docs/current-worklog.md, docs/home-codex-setup.md, docs/archive/session-handoff-2026-06-20.md, docs/archive/ai-deployment-responsibility-2026-06-21.md를 먼저 읽으세요.
 
 AI가 할 수 있는 일은 AI가 끝까지 해주세요. 코드 수정 후에는 반드시 npm run build, 필요 시 npm run test:production을 실행하고, git commit 후 git push origin main까지 완료하세요. GitHub main push가 Vercel/Render 자동 배포 트리거입니다. push 후 가능한 범위에서 운영 URL도 확인하세요.
 
