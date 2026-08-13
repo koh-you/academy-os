@@ -1,4 +1,4 @@
-import { saveLessonJournalRowsAction } from "../lessons/lessonJournalRowsSaveAction.js";
+import { saveLessonJournalRowsAction } from "./lessonJournalRowsSaveAction.js";
 
 export const teacherHomeworkStatuses = Object.freeze([
   "unverified",

@@ -8141,7 +8141,7 @@ export function App() {
     }));
     try {
       const { saveTeacherHomeworkStatusAction } = await import(
-        "../domains/homeworks/teacherHomeworkStatusSave.js"
+        "../domains/lessons/teacherHomeworkStatusSave.js"
       );
       const savedHomework = await saveTeacherHomeworkStatusAction({
         homework: targetHomework,
