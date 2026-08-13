@@ -13529,7 +13529,15 @@ textarea {
   height: 16px;
   margin: 0;
   min-height: 0;
+  min-width: 16px;
   padding: 0;
+  width: 16px;
+}
+
+.prepMemoHomeworkFollowupCheck input[type="checkbox"] {
+  flex-basis: 16px;
+  height: 16px;
+  min-width: 16px;
   width: 16px;
 }
 

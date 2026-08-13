@@ -48,7 +48,7 @@ export function createClassRosterStudentChanges(previousStudents = [], nextStude
 }
 
 function isActiveStudent(student = {}) {
-  return (student.status ?? "active") === "active";
+  return Boolean(student) && (student.status ?? "active") === "active";
 }
 
 function isRosterManagedLesson(lesson = {}, fromDate = "") {

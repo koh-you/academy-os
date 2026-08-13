@@ -1517,6 +1517,10 @@ test("notification settings seed new notice and special lecture drafts without p
 
   await navigation.getByRole("button", { name: /특강관리/ }).click();
   await page.getByRole("tab", { name: "특강 안내문" }).click();
+  if (await page.getByText("편집할 특강을 선택하세요.").isVisible()) {
+    await page.locator(".specialLectureStoredToggle").click();
+    await page.locator(".specialLectureSelector.stored button").first().click();
+  }
   await page.getByRole("tab", { name: "알림톡 미리보기" }).click();
   await expect(page.locator(".specialLectureNoticePreview")).toContainText("안전 설정 특강");
   expect(pageErrors).toEqual([]);
