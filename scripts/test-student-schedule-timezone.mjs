@@ -17,8 +17,10 @@ const student = {
 const tuesdayLesson = {
   classTemplateId: "template_tt_sat_front",
   date: "2026-08-04",
+  endTime: "20:00",
   lessonId: "lesson-tuesday",
   lessonType: "class",
+  startTime: "17:00",
   studentIds: [student.studentId]
 };
 const mondayLesson = {
@@ -45,5 +47,22 @@ assert.deepEqual(getEffectiveLessonStudentIds(tuesdayLesson, [student]), [studen
 assert.equal(isStudentScheduledForLesson(mondayLesson, student), false);
 assert.equal(getStudentScheduleForLesson(fridayMakeupLesson, student), null, "보강은 같은 요일의 프로필 정규 시간으로 덮어쓰지 않는다");
 assert.deepEqual(applyStudentScheduleToLesson(fridayMakeupLesson, student), fridayMakeupLesson);
+
+const saturdayHostLesson = {
+  classTemplateId: "template_tt_sat_back",
+  date: "2026-08-08",
+  endTime: "16:00",
+  lessonId: "lesson-saturday-host",
+  lessonType: "class",
+  startTime: "13:00",
+  studentIds: ["park-jihyun"]
+};
+const park = {
+  defaultClassTemplateId: "template_mwf_7_10",
+  scheduleOverride: "수 19:00-22:00 / 토 13:00-16:00",
+  studentId: "park-jihyun"
+};
+assert.equal(getStudentScheduleForLesson(saturdayHostLesson, park)?.scheduleType, "profile");
+assert.equal(applyStudentScheduleToLesson(saturdayHostLesson, park).studentScheduleLabel, "13:00-16:00");
 
 console.log("student schedule timezone fixture passed");

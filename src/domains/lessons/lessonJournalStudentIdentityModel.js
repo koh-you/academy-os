@@ -6,12 +6,15 @@ export function createLessonJournalStudentIdentityModel({ attendanceLesson = {},
 
   return {
     gradeSchoolLabel: `${student.grade || "고1"} · ${student.schoolName || "학교 미입력"}`,
+    scheduleTimeAriaLabel: scheduleType === "profile" ? "개별 시간표 적용" : "",
     scheduleTimeClassName: [
       "specialLectureStudentTime",
       scheduleType === "adjusted" ? "adjusted" : "",
       scheduleType === "profile" ? "profile" : ""
     ].filter(Boolean).join(" "),
-    scheduleTimeLabel: `${attendanceLesson.startTime}-${attendanceLesson.endTime}`,
+    scheduleTimeLabel: scheduleType === "profile"
+      ? "개별"
+      : `${attendanceLesson.startTime}-${attendanceLesson.endTime}`,
     showScheduleTime
   };
 }

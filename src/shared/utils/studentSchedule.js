@@ -30,9 +30,20 @@ function isProfileScheduleManagedLesson(lesson = {}, student = {}) {
   const lessonType = String(lesson?.lessonType || "class");
   return (
     Boolean(lesson?.classTemplateId) &&
-    lesson.classTemplateId === student?.defaultClassTemplateId &&
     ["class", "closure"].includes(lessonType)
   );
+}
+
+function isRuleMatchedToLesson(rule = {}, lesson = {}) {
+  const lessonDayKey = getLessonDayKey(lesson);
+  if (rule.days.length && !rule.days.includes(lessonDayKey)) return false;
+  if (!lesson?.startTime || !lesson?.endTime) return true;
+  const ruleStart = getScheduleTimeMinutes(rule.startTime);
+  const ruleEnd = getScheduleTimeMinutes(rule.endTime);
+  const lessonStart = getScheduleTimeMinutes(lesson.startTime);
+  const lessonEnd = getScheduleTimeMinutes(lesson.endTime);
+  if ([ruleStart, ruleEnd, lessonStart, lessonEnd].some((value) => value === null)) return false;
+  return lessonStart <= ruleStart && ruleEnd <= lessonEnd;
 }
 
 function normalizeScheduleSegmentText(value = "") {
@@ -126,9 +137,23 @@ export function getStudentScheduleForLesson(lesson = {}, student = {}) {
   if (!isProfileScheduleManagedLesson(lesson, student)) return null;
   const rules = parseStudentScheduleOverride(student?.scheduleOverride);
   if (!rules.length) return null;
-  const lessonDayKey = getLessonDayKey(lesson);
-  const rule = rules.find((item) => !item.days.length || item.days.includes(lessonDayKey)) ?? null;
+  const dayRules = rules.filter((item) => item.days.length > 0);
+  const rule = dayRules.length
+    ? dayRules.find((item) => isRuleMatchedToLesson(item, lesson)) ?? null
+    : lesson.classTemplateId === student?.defaultClassTemplateId
+      ? rules.find((item) => isRuleMatchedToLesson(item, lesson)) ?? null
+      : null;
   return rule ? { ...rule, scheduleType: "profile", source: "studentProfile" } : null;
+}
+
+export function isStudentAssignedToRegularLesson(lesson = {}, student = {}) {
+  if (!isProfileScheduleManagedLesson(lesson, student)) return false;
+  const rules = parseStudentScheduleOverride(student?.scheduleOverride);
+  const dayRules = rules.filter((rule) => rule.days.length > 0);
+  if (dayRules.length) {
+    return dayRules.some((rule) => isRuleMatchedToLesson(rule, lesson));
+  }
+  return lesson.classTemplateId === student?.defaultClassTemplateId;
 }
 
 export function isStudentScheduledForLesson(lesson = {}, student = {}) {
@@ -136,8 +161,8 @@ export function isStudentScheduledForLesson(lesson = {}, student = {}) {
   const rules = parseStudentScheduleOverride(student?.scheduleOverride);
   const dayRules = rules.filter((rule) => rule.days.length > 0);
   if (!dayRules.length) return true;
-  const lessonDayKey = getLessonDayKey(lesson);
-  return Boolean(lessonDayKey && dayRules.some((rule) => rule.days.includes(lessonDayKey)));
+  if (lesson.classTemplateId !== student?.defaultClassTemplateId) return true;
+  return dayRules.some((rule) => isRuleMatchedToLesson(rule, lesson));
 }
 
 export function getEffectiveLessonStudentIds(lesson = {}, students = []) {

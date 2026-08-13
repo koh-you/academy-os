@@ -8,6 +8,7 @@ import {
 } from "../src/domains/students/classRosterPersistence.js";
 import {
   getEffectiveLessonStudentIds,
+  isStudentAssignedToRegularLesson,
   isStudentScheduledForLesson
 } from "../src/shared/utils/studentSchedule.js";
 
@@ -117,6 +118,38 @@ assert.deepEqual(
   restoreWednesdayPlan.lessonChanges.map((change) => [change.lessonId, change.afterStudentIds]),
   [["lesson-wednesday", [studentA.studentId]]],
   "나중에 월수금으로 수정하면 미래 수요일 정규 명단을 다시 포함한다"
+);
+
+const timedRegularLessons = [
+  { classTemplateId: "template_mwf_4_7", date: "2026-08-03", endTime: "19:00", lessonId: "monday-4-7", lessonType: "class", startTime: "16:00", status: "scheduled", studentIds: [], updatedAt: version0 },
+  { classTemplateId: "template_mwf_7_10", date: "2026-08-03", endTime: "22:00", lessonId: "monday-7-10", lessonType: "class", startTime: "19:00", status: "scheduled", studentIds: ["lee-jinhoo", "park-jihyun"], updatedAt: version0 },
+  { classTemplateId: "template_mwf_7_10", date: "2026-08-05", endTime: "22:00", lessonId: "wednesday-7-10", lessonType: "class", startTime: "19:00", status: "scheduled", studentIds: ["lee-jinhoo", "park-jihyun"], updatedAt: version0 },
+  { classTemplateId: "template_tt_sat_back", date: "2026-08-08", endTime: "16:00", lessonId: "saturday-1-4", lessonType: "class", startTime: "13:00", status: "scheduled", studentIds: ["manual-roster-member"], updatedAt: version0 }
+];
+const leeBefore = { ...studentA, defaultClassTemplateId: "template_mwf_7_10", name: "이진후", studentId: "lee-jinhoo" };
+const leeAfter = { ...leeBefore, scheduleOverride: "월 16:00-19:00 / 수금 19:00-22:00" };
+const parkBefore = { ...studentA, defaultClassTemplateId: "template_mwf_7_10", name: "박지현", studentId: "park-jihyun" };
+const parkAfter = { ...parkBefore, scheduleOverride: "수 19:00-22:00 / 토 13:00-16:00" };
+
+assert.equal(isStudentAssignedToRegularLesson(timedRegularLessons[0], leeAfter), true);
+assert.equal(isStudentAssignedToRegularLesson(timedRegularLessons[1], leeAfter), false);
+assert.equal(isStudentAssignedToRegularLesson(timedRegularLessons[2], leeAfter), true);
+assert.equal(isStudentAssignedToRegularLesson(timedRegularLessons[3], parkAfter), true);
+
+const individualTimesPlan = createClassRosterSavePlan({
+  fromDate: "2026-08-03",
+  lessons: timedRegularLessons,
+  nextStudents: [leeAfter, parkAfter],
+  previousStudents: [leeBefore, parkBefore]
+});
+assert.deepEqual(
+  individualTimesPlan.lessonChanges.map((change) => [change.lessonId, change.afterStudentIds]),
+  [
+    ["monday-4-7", ["lee-jinhoo"]],
+    ["monday-7-10", []],
+    ["saturday-1-4", ["park-jihyun", "manual-roster-member"]]
+  ],
+  "이진후는 월요일 4-7, 박지현은 토요일 1-4 명단으로 옮기고 수요일 7-10은 유지한다"
 );
 
 let requestPayload = null;

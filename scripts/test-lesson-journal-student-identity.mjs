@@ -14,6 +14,7 @@ assert.deepEqual(
   }),
   {
     gradeSchoolLabel: "고2 · TARGET고",
+    scheduleTimeAriaLabel: "",
     scheduleTimeClassName: "specialLectureStudentTime",
     scheduleTimeLabel: "16:00-18:00",
     showScheduleTime: true
@@ -33,6 +34,8 @@ const profileTarget = createLessonJournalStudentIdentityModel({
 });
 assert.equal(profileTarget.gradeSchoolLabel, "고1 · 학교 미입력");
 assert.equal(profileTarget.scheduleTimeClassName, "specialLectureStudentTime profile");
+assert.equal(profileTarget.scheduleTimeLabel, "개별");
+assert.equal(profileTarget.scheduleTimeAriaLabel, "개별 시간표 적용");
 
 const regularControl = createLessonJournalStudentIdentityModel({
   attendanceLesson: { endTime: "22:30", startTime: "19:00", studentScheduleType: "" },
@@ -61,7 +64,8 @@ for (const contract of [
   "studentPortalPreviewButton",
   "onOpenStudentPreview(student.studentId)",
   "model.gradeSchoolLabel",
-  "model.scheduleTimeClassName"
+  "model.scheduleTimeClassName",
+  "model.scheduleTimeAriaLabel"
 ]) {
   assert.ok(componentSource.includes(contract), `missing student identity contract: ${contract}`);
 }

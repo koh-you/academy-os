@@ -1,5 +1,5 @@
 import { areStudentsPersistedEqual } from "./studentPersistence.js";
-import { isStudentScheduledForLesson } from "../../shared/utils/studentSchedule.js";
+import { isStudentAssignedToRegularLesson } from "../../shared/utils/studentSchedule.js";
 
 function normalizeStudentId(value) {
   return String(value ?? "").trim();
@@ -91,29 +91,18 @@ export function createClassRosterLessonChanges({
     for (const studentId of changedIds) {
       const previousStudent = previousById.get(studentId) ?? null;
       const nextStudent = nextById.get(studentId) ?? null;
-      const previousClassTemplateId = previousStudent?.defaultClassTemplateId ?? "";
-      const nextClassTemplateId = isActiveStudent(nextStudent) ? (nextStudent?.defaultClassTemplateId ?? "") : "";
-      if (
-        previousClassTemplateId &&
-        previousClassTemplateId !== nextClassTemplateId &&
-        lesson.classTemplateId === previousClassTemplateId
-      ) {
+      const wasScheduleMember = isActiveStudent(previousStudent) &&
+        isStudentAssignedToRegularLesson(lesson, previousStudent);
+      const shouldBeScheduleMember = isActiveStudent(nextStudent) &&
+        isStudentAssignedToRegularLesson(lesson, nextStudent);
+      const includesStudent = nextStudentIds.includes(studentId);
+      if (wasScheduleMember && !shouldBeScheduleMember && includesStudent) {
         nextStudentIds = nextStudentIds.filter((id) => id !== studentId);
         didChangeMembership = true;
       }
-      if (
-        nextClassTemplateId &&
-        lesson.classTemplateId === nextClassTemplateId
-      ) {
-        const shouldIncludeStudent = isStudentScheduledForLesson(lesson, nextStudent);
-        const includesStudent = nextStudentIds.includes(studentId);
-        if (shouldIncludeStudent && !includesStudent) {
-          nextStudentIds.push(studentId);
-          didChangeMembership = true;
-        } else if (!shouldIncludeStudent && includesStudent) {
-          nextStudentIds = nextStudentIds.filter((id) => id !== studentId);
-          didChangeMembership = true;
-        }
+      if (shouldBeScheduleMember && !includesStudent) {
+        nextStudentIds.push(studentId);
+        didChangeMembership = true;
       }
     }
     if (!didChangeMembership) return [];

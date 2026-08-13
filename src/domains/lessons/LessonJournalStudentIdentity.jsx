@@ -18,7 +18,11 @@ export function LessonJournalStudentIdentity({ attendanceLesson, onOpenStudentPr
       </span>
       <small>{model.gradeSchoolLabel}</small>
       {model.showScheduleTime ? (
-        <small className={model.scheduleTimeClassName}>
+        <small
+          aria-label={model.scheduleTimeAriaLabel || undefined}
+          className={model.scheduleTimeClassName}
+          title={model.scheduleTimeAriaLabel || undefined}
+        >
           {model.scheduleTimeLabel}
         </small>
       ) : null}
