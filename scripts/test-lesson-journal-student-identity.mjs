@@ -34,8 +34,14 @@ const profileTarget = createLessonJournalStudentIdentityModel({
 });
 assert.equal(profileTarget.gradeSchoolLabel, "고1 · 학교 미입력");
 assert.equal(profileTarget.scheduleTimeClassName, "specialLectureStudentTime profile");
-assert.equal(profileTarget.scheduleTimeLabel, "개별시간표");
-assert.equal(profileTarget.scheduleTimeAriaLabel, "개별 시간표 적용");
+assert.equal(profileTarget.scheduleTimeLabel, "7-10");
+assert.equal(profileTarget.scheduleTimeAriaLabel, "개별 시간표 7-10 적용");
+
+const profileMinuteTarget = createLessonJournalStudentIdentityModel({
+  attendanceLesson: { endTime: "19:00", startTime: "16:30", studentScheduleType: "profile" },
+  student: {}
+});
+assert.equal(profileMinuteTarget.scheduleTimeLabel, "4:30-7");
 
 const regularControl = createLessonJournalStudentIdentityModel({
   attendanceLesson: { endTime: "22:30", startTime: "19:00", studentScheduleType: "" },

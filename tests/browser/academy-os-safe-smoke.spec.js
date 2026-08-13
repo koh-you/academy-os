@@ -2167,7 +2167,6 @@ test("exam prep calendar exposes every school and switches the daily roster betw
   await expect(dialog.getByRole("button", { name: "시간순" })).toHaveAttribute("aria-pressed", "true");
   await expect(dialog.locator(".examPrepRosterGroup > header strong")).toHaveText(["13:30-15:00", "15:00-18:00"]);
   await expect(dialog.locator(".examPrepRosterRow > div > strong")).toHaveText(["박나래", "김가람", "이도윤"]);
-  await expect(dialog.locator(".examPrepStudentTime small")).toHaveText("개별시간표");
   await dialog.getByRole("button", { name: "학교별" }).click();
   await expect(dialog.locator(".examPrepRosterGroup > header strong")).toHaveText(["상계중", "자운고", "정의여고"]);
 
@@ -2269,7 +2268,7 @@ test("individual times place a student in the actual lesson roster and preserve 
   await frontDay.getByRole("button", { name: /화목 4-7 \/ 토 10-1반/ }).click();
   const frontJournal = page.getByRole("dialog", { name: "수업일지" });
   await expect(frontJournal).toContainText("서빈");
-  await expect(frontJournal.getByLabel("개별 시간표 적용")).toHaveText("개별시간표");
+  await expect(frontJournal.getByLabel("개별 시간표 5-8 적용")).toHaveText("5-8");
   await frontJournal.getByRole("button", { name: "수업 목록으로 돌아가기" }).click();
   const calendarDay = page.getByRole("gridcell", { name: /^2026-08-05 · \d+개 수업$/ });
   await expect(calendarDay.locator(".lessonPill").filter({ hasText: /^17:00/ })).toHaveText([
@@ -2281,7 +2280,7 @@ test("individual times place a student in the actual lesson roster and preserve 
   await saturday.getByRole("button", { name: /토요일 1-4반/ }).click();
   const journal = page.getByRole("dialog", { name: "수업일지" });
   await expect(journal).toContainText("박지현");
-  await expect(journal.getByLabel("개별 시간표 적용")).toHaveText("개별시간표");
+  await expect(journal.getByLabel("개별 시간표 1-4 적용")).toHaveText("1-4");
   expect(pageErrors).toEqual([]);
 });
 
