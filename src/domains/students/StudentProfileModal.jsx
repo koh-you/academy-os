@@ -3,14 +3,14 @@ import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { ListCard, ListCardActions } from "../../shared/components/ListCard.jsx";
+import { ModalFooter } from "../../shared/components/Modal.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
-import { parseStudentScheduleOverride } from "../../shared/utils/studentSchedule.js";
+import { findStudentPartialDefaultLessonOverlaps, parseStudentScheduleOverride } from "../../shared/utils/studentSchedule.js";
 import { getCurrentKoreaMonthKey } from "../settlements/monthlySettlement.js";
 import { buildStudentMonthlyAttendanceSummary } from "../settlements/settlementAttendance.js";
 import { StudentMonthlyReportModal } from "./StudentMonthlyReportModal.jsx";
 import { getRosterEffectiveFromDate, hasStudentLessonRowOnDate } from "./rosterEffectiveDate.js";
-import { findStudentPartialDefaultLessonOverlaps } from "../../shared/utils/studentSchedule.js";
 const consultationTypeOptions = [
   { value: "student", label: "학생 상담" },
   { value: "parent", label: "학부모 상담" }
@@ -1349,10 +1349,10 @@ export function StudentProfileModal({
             <p className="studentPartialOverlapNotice">
               계속 표시하면 시간이 일부 겹치는 기본 소속 반 명단에 학생을 유지합니다. 다른 반 배치는 개별 시간이 수업시간 안에 완전히 포함될 때만 적용됩니다.
             </p>
-            <div className="modalFooter">
+            <ModalFooter>
               <button className="softButton" onClick={() => setIsPartialOverlapConfirmationOpen(false)} type="button">돌아가서 시간표 수정</button>
               <button className="primaryButton" onClick={() => saveProfileDraft({ partialOverlapConfirmed: true })} type="button">기본 반 명단에 표시하고 저장</button>
-            </div>
+            </ModalFooter>
           </ModalComponent>
         ) : null}
       </div>
