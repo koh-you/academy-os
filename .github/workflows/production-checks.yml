@@ -14,18 +14,19 @@ concurrency:
   group: production-checks-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  CI: true
+  TZ: Asia/Seoul
+  ALIMTALK_DRY_RUN: true
+  ALIMTALK_ALLOW_LIVE_TEST_SEND: false
+  ALIMTALK_ALLOW_REAL_STUDENT_NUMBERS: false
+  ALIMTALK_ALLOW_REAL_PARENT_NUMBERS: false
+  SLACK_DRY_RUN: true
+
 jobs:
-  test-and-build:
+  fast-checks:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    env:
-      CI: true
-      TZ: Asia/Seoul
-      ALIMTALK_DRY_RUN: true
-      ALIMTALK_ALLOW_LIVE_TEST_SEND: false
-      ALIMTALK_ALLOW_REAL_STUDENT_NUMBERS: false
-      ALIMTALK_ALLOW_REAL_PARENT_NUMBERS: false
-      SLACK_DRY_RUN: true
+    timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
@@ -63,14 +64,82 @@ jobs:
       - name: Test teacher view callback boundary
         run: npm run test:teacher-view-boundary
 
+  production-fixtures:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Run production tests
         run: npm run test:production
 
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Build production bundle
         run: npm run build
+
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Install Chromium for browser smoke tests
         run: npx playwright install --with-deps chromium
 
       - name: Run safe browser smoke tests
         run: npm run test:browser-smoke
+
+  test-and-build:
+    name: test-and-build
+    needs: [fast-checks, production-fixtures, build, browser-smoke]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Aggregate parallel job results
+        run: |
+          echo "fast-checks: ${{ needs.fast-checks.result }}"
+          echo "production-fixtures: ${{ needs.production-fixtures.result }}"
+          echo "build: ${{ needs.build.result }}"
+          echo "browser-smoke: ${{ needs.browser-smoke.result }}"
+          if [ "${{ needs.fast-checks.result }}" != "success" ] || \
+             [ "${{ needs.production-fixtures.result }}" != "success" ] || \
+             [ "${{ needs.build.result }}" != "success" ] || \
+             [ "${{ needs.browser-smoke.result }}" != "success" ]; then
+            echo "One or more parallel jobs failed."
+            exit 1
+          fi
