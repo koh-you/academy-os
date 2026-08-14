@@ -11,8 +11,8 @@ from docx.shared import Inches, Pt, RGBColor
 
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "docs" / "academy-os_day23_code_review_and_scenario_tests.docx"
-RESULTS = ROOT / "docs" / "scenario-test-results-day-23.json"
+OUT = ROOT / "docs" / "archive" / "academy-os_day23_code_review_and_scenario_tests.docx"
+RESULTS = ROOT / "docs" / "archive" / "scenario-test-results-day-23.json"
 
 
 def set_cell_shading(cell, fill):

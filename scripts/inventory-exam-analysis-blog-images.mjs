@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const blogId = "skills_in_math2";
-const defaultOutput = "docs/exam-analysis-blog-image-manifest-gate2-2026-07-21.json";
+const defaultOutput = "docs/archive/exam-analysis-blog-image-manifest-gate2-2026-07-21.json";
 
 const primaryPosts = [
   ["224342833914", "2026-07-10", "용화여고1 1학기 기말", "high", 8, "filename_confirmed", false],

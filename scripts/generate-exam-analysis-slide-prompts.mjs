@@ -8,7 +8,7 @@ const inputArg = process.argv[2];
 if (!inputArg) throw new Error("Usage: node scripts/generate-exam-analysis-slide-prompts.mjs <input.json> [output.md]");
 const inputPath = path.resolve(process.cwd(), inputArg);
 const outputPath = path.resolve(process.cwd(), process.argv[3] || `${path.basename(inputPath, path.extname(inputPath))}-prompts.md`);
-const library = JSON.parse(await fs.readFile(path.join(repoRoot, "docs/exam-analysis-slide-role-library-gate5-2026-07-21.json"), "utf8"));
+const library = JSON.parse(await fs.readFile(path.join(repoRoot, "docs/archive/exam-analysis-slide-role-library-gate5-2026-07-21.json"), "utf8"));
 const project = JSON.parse(await fs.readFile(inputPath, "utf8"));
 
 const assert = (condition, message) => { if (!condition) throw new Error(message); };

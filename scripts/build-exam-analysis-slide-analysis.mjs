@@ -4,8 +4,8 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const inputPath = path.resolve(repoRoot, "docs/exam-analysis-blog-image-manifest-gate2-2026-07-21.json");
-const outputPath = path.resolve(repoRoot, "docs/exam-analysis-blog-slide-analysis-gate3-2026-07-21.json");
+const inputPath = path.resolve(repoRoot, "docs/archive/exam-analysis-blog-image-manifest-gate2-2026-07-21.json");
+const outputPath = path.resolve(repoRoot, "docs/archive/exam-analysis-blog-slide-analysis-gate3-2026-07-21.json");
 const rawDir = path.resolve(process.argv[2] || "E:/academy-os/.codex-temp/benchmark-vision-results");
 
 const manualRoles = {

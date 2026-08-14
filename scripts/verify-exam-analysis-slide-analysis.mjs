@@ -3,8 +3,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const gate2 = JSON.parse(await fs.readFile(path.join(repoRoot, "docs/exam-analysis-blog-image-manifest-gate2-2026-07-21.json"), "utf8"));
-const gate3 = JSON.parse(await fs.readFile(path.join(repoRoot, "docs/exam-analysis-blog-slide-analysis-gate3-2026-07-21.json"), "utf8"));
+const gate2 = JSON.parse(await fs.readFile(path.join(repoRoot, "docs/archive/exam-analysis-blog-image-manifest-gate2-2026-07-21.json"), "utf8"));
+const gate3 = JSON.parse(await fs.readFile(path.join(repoRoot, "docs/archive/exam-analysis-blog-slide-analysis-gate3-2026-07-21.json"), "utf8"));
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
 
 assert(gate3.schemaVersion === 1, "schemaVersion must be 1");

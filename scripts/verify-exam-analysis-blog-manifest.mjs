@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const manifestPath = path.resolve(
   repoRoot,
-  process.argv[2] || "docs/exam-analysis-blog-image-manifest-gate2-2026-07-21.json"
+  process.argv[2] || "docs/archive/exam-analysis-blog-image-manifest-gate2-2026-07-21.json"
 );
 
 function assert(condition, message) {

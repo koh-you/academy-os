@@ -4,7 +4,7 @@ const path = require("path");
 const root = process.cwd();
 const appPath = path.join(root, "src", "app", "App.jsx");
 const samplePath = path.join(root, "src", "shared", "data", "sampleData.js");
-const outputPath = path.join(root, "docs", "scenario-test-results-day-23.json");
+const outputPath = path.join(root, "docs", "archive", "scenario-test-results-day-23.json");
 
 const app = fs.readFileSync(appPath, "utf8");
 const sample = fs.readFileSync(samplePath, "utf8");
