@@ -1,7 +1,22 @@
+// @ts-check
+
+/** @typedef {import("./routeRegistryTypes.js").RouteDispatchContext} RouteDispatchContext */
+/** @typedef {import("./routeRegistryTypes.js").RouteRegistry} RouteRegistry */
+
 export const teacherAccountRouteSignatures = Object.freeze([
   Object.freeze({ method: "POST", path: "/api/auth/teacher-account" })
 ]);
 
+/**
+ * @param {Object} deps
+ * @param {(loginId: string, password: string) => Promise<*>} deps.authenticateTeacher
+ * @param {(options?: { requireServiceRole?: boolean }) => boolean} deps.isSupabaseConfigured
+ * @param {(request: *) => Promise<Record<string, *>>} deps.readJsonBody
+ * @param {(account: *) => Promise<*>} deps.saveTeacherAccount
+ * @param {(request: *, response: *, statusCode: number, data: *) => void} deps.sendJson
+ * @param {(account: *) => *} deps.toTeacherAccount
+ * @returns {RouteRegistry}
+ */
 export function createTeacherAccountRouteRegistry({
   authenticateTeacher,
   isSupabaseConfigured,
@@ -10,6 +25,7 @@ export function createTeacherAccountRouteRegistry({
   sendJson,
   toTeacherAccount
 }) {
+  /** @param {RouteDispatchContext} context */
   async function dispatch({ request, response, requestUrl }) {
     if (request.method !== "POST" || requestUrl.pathname !== "/api/auth/teacher-account") return false;
     try {

@@ -1,3 +1,8 @@
+// @ts-check
+
+/** @typedef {import("./routeRegistryTypes.js").RouteDispatchContext} RouteDispatchContext */
+/** @typedef {import("./routeRegistryTypes.js").RouteRegistry} RouteRegistry */
+
 export const examAnalysisQuestionCountRouteSignatures = Object.freeze([
   Object.freeze({
     method: "POST",
@@ -5,12 +10,21 @@ export const examAnalysisQuestionCountRouteSignatures = Object.freeze([
   })
 ]);
 
+/**
+ * @param {Object} deps
+ * @param {(payload: *) => Promise<*>} deps.confirmExamAnalysisQuestionCount
+ * @param {(body: *) => *} deps.parseExamAnalysisQuestionCountConfirmRequest
+ * @param {(request: *) => Promise<Record<string, *>>} deps.readJsonBody
+ * @param {(request: *, response: *, statusCode: number, data: *) => void} deps.sendJson
+ * @returns {RouteRegistry}
+ */
 export function createExamAnalysisQuestionCountRouteRegistry({
   confirmExamAnalysisQuestionCount,
   parseExamAnalysisQuestionCountConfirmRequest,
   readJsonBody,
   sendJson
 }) {
+  /** @param {RouteDispatchContext} context */
   async function dispatch({ request, response, requestUrl }) {
     if (
       request.method !== "POST"

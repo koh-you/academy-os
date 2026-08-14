@@ -1,14 +1,28 @@
+// @ts-check
+
+/** @typedef {import("./routeRegistryTypes.js").RouteDispatchContext} RouteDispatchContext */
+/** @typedef {import("./routeRegistryTypes.js").RouteRegistry} RouteRegistry */
+
 export const testSessionWriteRouteSignatures = Object.freeze([
   Object.freeze({ method: "POST", path: "/api/test-sessions" }),
   Object.freeze({ method: "DELETE", path: "/api/test-sessions" })
 ]);
 
+/**
+ * @param {Object} deps
+ * @param {(testSessionId: string) => Promise<*>} deps.deleteTestSession
+ * @param {(request: *) => Promise<Record<string, *>>} deps.readJsonBody
+ * @param {(request: *, response: *, statusCode: number, data: *) => void} deps.sendJson
+ * @param {(testSession: *, testAttempts: *[]) => Promise<*>} deps.upsertTestSessionWithAttempts
+ * @returns {RouteRegistry}
+ */
 export function createTestSessionWriteRouteRegistry({
   deleteTestSession,
   readJsonBody,
   sendJson,
   upsertTestSessionWithAttempts
 }) {
+  /** @param {RouteDispatchContext} context */
   async function dispatch({ request, response, requestUrl }) {
     const isPost = request.method === "POST" && requestUrl.pathname === "/api/test-sessions";
     const isDelete = request.method === "DELETE" && requestUrl.pathname === "/api/test-sessions";

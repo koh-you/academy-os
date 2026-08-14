@@ -1,13 +1,26 @@
+// @ts-check
+
+/** @typedef {import("./routeRegistryTypes.js").RouteDispatchContext} RouteDispatchContext */
+/** @typedef {import("./routeRegistryTypes.js").RouteRegistry} RouteRegistry */
+
 export const testSessionReadRouteSignatures = Object.freeze([
   Object.freeze({ method: "GET", path: "/api/test-sessions" }),
   Object.freeze({ method: "GET", path: "/api/test-attempts" })
 ]);
 
+/**
+ * @param {Object} deps
+ * @param {(query: *) => Promise<*>} deps.listTestAttempts
+ * @param {(query: *) => Promise<*>} deps.listTestSessions
+ * @param {(request: *, response: *, statusCode: number, data: *) => void} deps.sendJson
+ * @returns {RouteRegistry}
+ */
 export function createTestSessionReadRouteRegistry({
   listTestAttempts,
   listTestSessions,
   sendJson
 }) {
+  /** @param {RouteDispatchContext} context */
   async function dispatch({ request, response, requestUrl }) {
     if (request.method !== "GET") return false;
     try {

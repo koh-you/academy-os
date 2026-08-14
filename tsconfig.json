@@ -10,5 +10,5 @@
     "skipLibCheck": true,
     "resolveJsonModule": true
   },
-  "include": ["src/shared/contracts/**/*.js"]
+  "include": ["src/shared/contracts/**/*.js", "src/shared/server/**/*.js"]
 }

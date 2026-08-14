@@ -1,3 +1,8 @@
+// @ts-check
+
+/** @typedef {import("./routeRegistryTypes.js").RouteDispatchContext} RouteDispatchContext */
+/** @typedef {import("./routeRegistryTypes.js").RouteRegistry} RouteRegistry */
+
 export const portalWriteRouteSignatures = Object.freeze([
   Object.freeze({ method: "POST", path: "/api/portal-state" }),
   Object.freeze({ method: "POST", path: "/api/portal-homeworks/complete" }),
@@ -5,6 +10,17 @@ export const portalWriteRouteSignatures = Object.freeze([
   Object.freeze({ method: "POST", path: "/api/portal-exam-post-submissions" })
 ]);
 
+/**
+ * @param {Object} deps
+ * @param {(session: *, homeworkId: string) => Promise<*>} deps.completePortalHomework
+ * @param {(request: *) => *} deps.getPortalSession
+ * @param {(session: *, payload: *) => Promise<*>} deps.mutatePortalQuestion
+ * @param {(request: *) => Promise<Record<string, *>>} deps.readJsonBody
+ * @param {(session: *, payload: *) => Promise<*>} deps.savePortalExamPostSubmission
+ * @param {(request: *, response: *, statusCode: number, data: *) => void} deps.sendJson
+ * @param {(session: *, states: *) => Promise<*>} deps.upsertPortalState
+ * @returns {RouteRegistry}
+ */
 export function createPortalWriteRouteRegistry({
   completePortalHomework,
   getPortalSession,
@@ -33,6 +49,7 @@ export function createPortalWriteRouteRegistry({
     }]
   ]);
 
+  /** @param {RouteDispatchContext} context */
   async function dispatch({ request, response, requestUrl }) {
     if (request.method !== "POST") return false;
     const action = actions.get(requestUrl.pathname);

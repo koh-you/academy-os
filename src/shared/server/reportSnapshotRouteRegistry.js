@@ -1,7 +1,23 @@
+// @ts-check
+
+/** @typedef {import("./routeRegistryTypes.js").RouteDispatchContext} RouteDispatchContext */
+/** @typedef {import("./routeRegistryTypes.js").RouteRegistry} RouteRegistry */
+
 export const reportSnapshotRouteSignatures = Object.freeze([
   Object.freeze({ method: "POST", path: "/api/report-snapshots" })
 ]);
 
+/**
+ * @param {Object} deps
+ * @param {(request: *) => *} deps.getTeacherSession
+ * @param {() => Promise<*>} deps.listAppState
+ * @param {(method: string, path: string, body: *) => *} deps.parseVersionedWriteRequest
+ * @param {(request: *) => Promise<Record<string, *>>} deps.readJsonBody
+ * @param {(args: *) => Promise<*>} deps.saveReportSnapshotWithVerification
+ * @param {(request: *, response: *, statusCode: number, data: *) => void} deps.sendJson
+ * @param {(states: *, options?: *) => Promise<*>} deps.upsertAppState
+ * @returns {RouteRegistry}
+ */
 export function createReportSnapshotRouteRegistry({
   getTeacherSession,
   listAppState,
@@ -11,6 +27,7 @@ export function createReportSnapshotRouteRegistry({
   sendJson,
   upsertAppState
 }) {
+  /** @param {RouteDispatchContext} context */
   async function dispatch({ request, response, requestUrl }) {
     if (request.method !== "POST" || requestUrl.pathname !== "/api/report-snapshots") return false;
     try {

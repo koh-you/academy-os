@@ -1,13 +1,27 @@
+// @ts-check
+
+/** @typedef {import("./routeRegistryTypes.js").RouteDispatchContext} RouteDispatchContext */
+/** @typedef {import("./routeRegistryTypes.js").RouteRegistry} RouteRegistry */
+
 export const appStateWriteRouteSignatures = Object.freeze([
   Object.freeze({ method: "POST", path: "/api/app-state" })
 ]);
 
+/**
+ * @param {Object} deps
+ * @param {(method: string, path: string, body: *) => *} deps.parseVersionedWriteRequest
+ * @param {(request: *) => Promise<Record<string, *>>} deps.readJsonBody
+ * @param {(request: *, response: *, statusCode: number, data: *) => void} deps.sendJson
+ * @param {(states: *, options?: { expectedUpdatedAt?: * }) => Promise<*>} deps.upsertAppState
+ * @returns {RouteRegistry}
+ */
 export function createAppStateWriteRouteRegistry({
   parseVersionedWriteRequest,
   readJsonBody,
   sendJson,
   upsertAppState
 }) {
+  /** @param {RouteDispatchContext} context */
   async function dispatch({ request, response, requestUrl }) {
     if (request.method !== "POST" || requestUrl.pathname !== "/api/app-state") return false;
     try {
