@@ -72,13 +72,16 @@ async function main() {
     throw new Error("Playwright CLI is missing. Run npm ci first.");
   }
 
-  console.log(`isolated safe browser ports · frontend ${frontendPort} · api ${apiPort}`);
+  console.log(`isolated safe browser ports · frontend base ${frontendPort} · api base ${apiPort}`);
   const child = spawn(process.execPath, [playwrightCli, "test", ...process.argv.slice(2)], {
     cwd: repositoryRoot,
     env: {
       ...process.env,
+      // These are starting points for this worktree; tests/browser/globalSetup.mjs
+      // finds ACADEMY_SAFE_WORKER_COUNT consecutive free ports from each base,
+      // one pair per Playwright worker.
       ACADEMY_SAFE_API_PORT: String(apiPort),
-      ACADEMY_SAFE_FRONTEND_PORT: String(frontendPort),
+      ACADEMY_SAFE_FRONTEND_BASE_PORT: String(frontendPort),
       ACADEMY_SAFE_ISOLATED: "1"
     },
     stdio: "inherit"
