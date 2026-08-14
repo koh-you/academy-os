@@ -4,7 +4,7 @@ import {
   createTeacherHomeworkStatusDraft,
   saveTeacherHomeworkStatusAction,
   teacherHomeworkStatuses
-} from "../src/domains/homeworks/teacherHomeworkStatusSave.js";
+} from "../src/domains/lessons/teacherHomeworkStatusSave.js";
 
 const version0 = "2026-08-03T00:00:00.000Z";
 const version1 = "2026-08-03T00:00:01.000Z";
