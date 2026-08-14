@@ -1,5 +1,11 @@
+// @ts-check
+
+// @ts-expect-error -- no @types/node in this project; node: imports are unresolved for type-checking only, runtime is unaffected
 import crypto from "node:crypto";
+// @ts-expect-error -- no @types/node in this project; node: imports are unresolved for type-checking only, runtime is unaffected
 import { Buffer } from "node:buffer";
+
+/** @typedef {import("./routeRegistryTypes.js").MinimalHttpRequest} MinimalHttpRequest */
 
 export function timingSafeEqualText(left = "", right = "") {
   const leftBuffer = Buffer.from(String(left));
@@ -7,6 +13,12 @@ export function timingSafeEqualText(left = "", right = "") {
   return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
 }
 
+/**
+ * @param {Object} deps
+ * @param {(request: MinimalHttpRequest, name: string) => string|string[]} deps.getRequestHeader
+ * @param {() => string} deps.getSecret
+ * @param {() => number} [deps.now]
+ */
 export function createSessionRouteGuard({ getRequestHeader, getSecret, now = () => Date.now() }) {
   function encodeBase64Url(value) {
     return Buffer.from(JSON.stringify(value)).toString("base64url");
@@ -57,18 +69,22 @@ export function createSessionRouteGuard({ getRequestHeader, getSecret, now = () 
     return session?.teacherId && session.role === "teacher" ? session : null;
   }
 
+  /** @param {MinimalHttpRequest} request */
   function getAuthorizationToken(request) {
     return String(getRequestHeader(request, "authorization") ?? "").replace(/^Bearer\s+/i, "");
   }
 
+  /** @param {MinimalHttpRequest} request */
   function getPortalSession(request) {
     return verifyPortalSessionToken(getAuthorizationToken(request));
   }
 
+  /** @param {MinimalHttpRequest} request */
   function getTeacherSession(request) {
     return verifyTeacherSessionToken(getAuthorizationToken(request));
   }
 
+  /** @param {MinimalHttpRequest} request */
   function getTeacherOrPortalSession(request) {
     const token = getAuthorizationToken(request);
     const teacherSession = verifyTeacherSessionToken(token);

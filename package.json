@@ -13,6 +13,7 @@
     "dev:safe": "node scripts/dev-safe.mjs",
     "doctor": "node scripts/doctor.mjs",
     "lint:runtime": "eslint src api --max-warnings=0",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "test:scenario-summary": "node scripts/run-scenario-summary.mjs",
     "test:browser-smoke": "node scripts/run-browser-smoke-isolated.mjs",
     "test:browser-smoke:direct": "playwright test",

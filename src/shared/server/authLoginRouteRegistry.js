@@ -1,7 +1,22 @@
+// @ts-check
+
+/** @typedef {import("./routeRegistryTypes.js").RouteDispatchContext} RouteDispatchContext */
+/** @typedef {import("./routeRegistryTypes.js").RouteRegistry} RouteRegistry */
+
 export const authLoginRouteSignatures = Object.freeze([
   Object.freeze({ method: "POST", path: "/api/auth/login" })
 ]);
 
+/**
+ * @param {Object} deps
+ * @param {(role: string, loginId: string, password: string) => Promise<*>} deps.authenticateStudentOrParent
+ * @param {(loginId: string, password: string) => Promise<*>} deps.authenticateTeacher
+ * @param {(account: *) => string} deps.createPortalSessionToken
+ * @param {(account: *) => string} deps.createTeacherSessionToken
+ * @param {(request: *) => Promise<Record<string, *>>} deps.readJsonBody
+ * @param {(request: *, response: *, statusCode: number, data: *) => void} deps.sendJson
+ * @returns {RouteRegistry}
+ */
 export function createAuthLoginRouteRegistry({
   authenticateStudentOrParent,
   authenticateTeacher,
@@ -10,6 +25,7 @@ export function createAuthLoginRouteRegistry({
   readJsonBody,
   sendJson
 }) {
+  /** @param {RouteDispatchContext} context */
   async function dispatch({ request, response, requestUrl }) {
     if (request.method !== "POST" || requestUrl.pathname !== "/api/auth/login") return false;
     try {

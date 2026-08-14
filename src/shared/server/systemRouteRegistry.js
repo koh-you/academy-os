@@ -1,9 +1,24 @@
+// @ts-check
+
+/** @typedef {import("./routeRegistryTypes.js").RouteDispatchContext} RouteDispatchContext */
+/** @typedef {import("./routeRegistryTypes.js").RouteRegistry} RouteRegistry */
+
 export const systemRouteSignatures = Object.freeze([
   Object.freeze({ method: "GET", path: "/health" }),
   Object.freeze({ method: "POST", path: "/api/client-errors" }),
   Object.freeze({ method: "GET", path: "/api/core/status" })
 ]);
 
+/**
+ * @param {Object} deps
+ * @param {(remoteAddress: string) => boolean} deps.allowClientRuntimeError
+ * @param {() => *} deps.getCoreDataStatus
+ * @param {(report: *) => *} deps.normalizeClientRuntimeErrorReport
+ * @param {(request: *, options?: { limitBytes?: number }) => Promise<Record<string, *>>} deps.readJsonBody
+ * @param {(report: *) => void} deps.reportClientRuntimeError
+ * @param {(request: *, response: *, statusCode: number, data: *) => void} deps.sendJson
+ * @returns {RouteRegistry}
+ */
 export function createSystemRouteRegistry({
   allowClientRuntimeError,
   getCoreDataStatus,
@@ -44,6 +59,7 @@ export function createSystemRouteRegistry({
     }]
   ]);
 
+  /** @param {RouteDispatchContext} context */
   async function dispatch({ request, response, requestUrl }) {
     if (request.method === "OPTIONS") {
       sendJson(request, response, 204, {});

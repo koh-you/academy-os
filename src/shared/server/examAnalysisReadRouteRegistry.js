@@ -1,14 +1,28 @@
+// @ts-check
+
+/** @typedef {import("./routeRegistryTypes.js").RouteDispatchContext} RouteDispatchContext */
+/** @typedef {import("./routeRegistryTypes.js").RouteRegistry} RouteRegistry */
+
 export const examAnalysisReadRouteSignatures = Object.freeze([
   Object.freeze({ method: "GET", path: "/api/exam-analysis-runs" }),
   Object.freeze({ method: "GET", path: "/api/exam-analysis-ssen-types" })
 ]);
 
+/**
+ * @param {Object} deps
+ * @param {(analysisRunId: string) => Promise<*>} deps.getExamAnalysisRun
+ * @param {(query: *) => *} deps.getSsenTypeCatalogForExamAnalysis
+ * @param {(query: *) => Promise<*>} deps.listExamAnalysisRuns
+ * @param {(request: *, response: *, statusCode: number, data: *) => void} deps.sendJson
+ * @returns {RouteRegistry}
+ */
 export function createExamAnalysisReadRouteRegistry({
   getExamAnalysisRun,
   getSsenTypeCatalogForExamAnalysis,
   listExamAnalysisRuns,
   sendJson
 }) {
+  /** @param {RouteDispatchContext} context */
   async function dispatch({ request, response, requestUrl }) {
     if (request.method !== "GET") return false;
 

@@ -1,8 +1,21 @@
+// @ts-check
+
+/** @typedef {import("./routeRegistryTypes.js").RouteDispatchContext} RouteDispatchContext */
+/** @typedef {import("./routeRegistryTypes.js").RouteRegistry} RouteRegistry */
+
 export const portalReadRouteSignatures = Object.freeze([
   Object.freeze({ method: "GET", path: "/api/portal-data" })
 ]);
 
+/**
+ * @param {Object} deps
+ * @param {(session: *) => Promise<*>} deps.getPortalData
+ * @param {(request: *) => *} deps.getPortalSession
+ * @param {(request: *, response: *, statusCode: number, data: *) => void} deps.sendJson
+ * @returns {RouteRegistry}
+ */
 export function createPortalReadRouteRegistry({ getPortalData, getPortalSession, sendJson }) {
+  /** @param {RouteDispatchContext} context */
   async function dispatch({ request, response, requestUrl }) {
     if (request.method !== "GET" || requestUrl.pathname !== "/api/portal-data") return false;
     try {

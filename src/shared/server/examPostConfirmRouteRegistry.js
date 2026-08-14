@@ -1,13 +1,27 @@
+// @ts-check
+
+/** @typedef {import("./routeRegistryTypes.js").RouteDispatchContext} RouteDispatchContext */
+/** @typedef {import("./routeRegistryTypes.js").RouteRegistry} RouteRegistry */
+
 export const examPostConfirmRouteSignatures = Object.freeze([
   Object.freeze({ method: "POST", path: "/api/exam-post-submissions/confirm" })
 ]);
 
+/**
+ * @param {Object} deps
+ * @param {(teacherSession: *, payload: *) => Promise<*>} deps.confirmExamPostSubmission
+ * @param {(request: *) => *} deps.getTeacherSession
+ * @param {(request: *) => Promise<Record<string, *>>} deps.readJsonBody
+ * @param {(request: *, response: *, statusCode: number, data: *) => void} deps.sendJson
+ * @returns {RouteRegistry}
+ */
 export function createExamPostConfirmRouteRegistry({
   confirmExamPostSubmission,
   getTeacherSession,
   readJsonBody,
   sendJson
 }) {
+  /** @param {RouteDispatchContext} context */
   async function dispatch({ request, response, requestUrl }) {
     if (request.method !== "POST" || requestUrl.pathname !== "/api/exam-post-submissions/confirm") {
       return false;
