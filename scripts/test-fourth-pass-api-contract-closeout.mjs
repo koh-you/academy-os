@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { versionedWriteRouteContracts } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 import { appStateWriteRouteSignatures } from "../src/shared/server/appStateWriteRouteRegistry.js";
 import { authLoginRouteSignatures } from "../src/shared/server/authLoginRouteRegistry.js";
+import { examAnalysisAiRouteSignatures } from "../src/shared/server/examAnalysisAiRouteRegistry.js";
 import { examAnalysisQuestionCountRouteSignatures } from "../src/shared/server/examAnalysisQuestionCountRouteRegistry.js";
 import { examAnalysisRunWriteRouteSignatures } from "../src/shared/server/examAnalysisRunWriteRouteRegistry.js";
 import { examPostConfirmRouteSignatures } from "../src/shared/server/examPostConfirmRouteRegistry.js";
@@ -164,6 +165,7 @@ const directWriteSignatures = [
     .map(signatureOf),
   ...authLoginRouteSignatures.map(signatureOf),
   ...appStateWriteRouteSignatures.map(signatureOf),
+  ...examAnalysisAiRouteSignatures.map(signatureOf),
   ...examAnalysisQuestionCountRouteSignatures.map(signatureOf),
   ...examAnalysisRunWriteRouteSignatures.map(signatureOf),
   ...examPostConfirmRouteSignatures.map(signatureOf),

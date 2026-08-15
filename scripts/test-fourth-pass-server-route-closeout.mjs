@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { appCoreReadRouteSignatures } from "../src/shared/server/appCoreReadRouteRegistry.js";
 import { appStateWriteRouteSignatures } from "../src/shared/server/appStateWriteRouteRegistry.js";
 import { authLoginRouteSignatures } from "../src/shared/server/authLoginRouteRegistry.js";
+import { examAnalysisAiRouteSignatures } from "../src/shared/server/examAnalysisAiRouteRegistry.js";
 import { examAnalysisQuestionCountRouteSignatures } from "../src/shared/server/examAnalysisQuestionCountRouteRegistry.js";
 import { examAnalysisReadRouteSignatures } from "../src/shared/server/examAnalysisReadRouteRegistry.js";
 import { examAnalysisRunWriteRouteSignatures } from "../src/shared/server/examAnalysisRunWriteRouteRegistry.js";
@@ -37,11 +38,12 @@ const registrySignatures = [
   ...integrationStatusRouteSignatures,
   ...examAnalysisReadRouteSignatures,
   ...examAnalysisRunWriteRouteSignatures,
-  ...examAnalysisQuestionCountRouteSignatures
+  ...examAnalysisQuestionCountRouteSignatures,
+  ...examAnalysisAiRouteSignatures
 ].map(signatureOf).sort();
 
-assert.equal(registrySignatures.length, 24);
-assert.equal(new Set(registrySignatures).size, 24);
+assert.equal(registrySignatures.length, 29);
+assert.equal(new Set(registrySignatures).size, 29);
 assert.deepEqual(registrySignatures, [
   "DELETE /api/test-sessions",
   "GET /api/app-state",
@@ -60,6 +62,11 @@ assert.deepEqual(registrySignatures, [
   "POST /api/client-errors",
   "POST /api/exam-analysis-runs",
   "POST /api/exam-analysis-runs/confirm-question-count",
+  "POST /api/exam-analysis-runs/detect-question-boundaries",
+  "POST /api/exam-analysis-runs/fill-question-rows",
+  "POST /api/exam-analysis-runs/generate-output-draft",
+  "POST /api/exam-analysis-runs/refine-question-rows",
+  "POST /api/exam-analysis-source-files/vision-check",
   "POST /api/exam-post-submissions/confirm",
   "POST /api/portal-exam-post-submissions",
   "POST /api/portal-homeworks/complete",
@@ -72,13 +79,13 @@ assert.deepEqual(registrySignatures, [
 const directRoutes = [...serverSource.matchAll(
   /if \(request\.method === "(GET|POST|PUT|PATCH|DELETE)" && requestUrl\.pathname === "([^"]+)"\)/g
 )].map((match) => `${match[1]} ${match[2]}`);
-assert.equal(directRoutes.length, 97);
-assert.equal(new Set(directRoutes).size, 97);
+assert.equal(directRoutes.length, 92);
+assert.equal(new Set(directRoutes).size, 92);
 
 const directReadSignatures = directRoutes.filter((signature) => signature.startsWith("GET "));
 const directWriteSignatures = directRoutes.filter((signature) => !signature.startsWith("GET "));
 assert.equal(directReadSignatures.length, 21);
-assert.equal(directWriteSignatures.length, 76);
+assert.equal(directWriteSignatures.length, 71);
 
 const externalReadSignatures = [
   "GET /api/exam-analysis-source-files/open",
@@ -101,13 +108,8 @@ const externalWriteSignatures = [
   "DELETE /api/exam-analysis-source-files",
   "POST /api/admin/seed-core-data",
   "POST /api/ai/comment-polish",
-  "POST /api/exam-analysis-runs/detect-question-boundaries",
-  "POST /api/exam-analysis-runs/fill-question-rows",
-  "POST /api/exam-analysis-runs/generate-output-draft",
-  "POST /api/exam-analysis-runs/refine-question-rows",
   "POST /api/exam-analysis-source-files",
   "POST /api/exam-analysis-source-files/extract",
-  "POST /api/exam-analysis-source-files/vision-check",
   "POST /api/exam-post-files",
   "POST /api/exam-post-files/cleanup",
   "POST /api/intake/tally",
@@ -121,7 +123,7 @@ const externalWriteSignatures = [
   "POST /api/solapi/groups/cancel",
   "POST /api/special-lecture-applications/tally"
 ].sort();
-assert.equal(externalWriteSignatures.length, 23);
+assert.equal(externalWriteSignatures.length, 18);
 for (const signature of externalWriteSignatures) {
   assert.ok(directWriteSignatures.includes(signature), `external route classification drifted: ${signature}`);
 }
@@ -155,7 +157,8 @@ for (const [createToken, dispatchToken] of [
   ["createIntegrationStatusRouteRegistry({", "dispatchIntegrationStatusRoute({ request, response, requestUrl })"],
   ["createExamAnalysisReadRouteRegistry({", "dispatchExamAnalysisReadRoute({ request, response, requestUrl })"],
   ["createExamAnalysisRunWriteRouteRegistry({", "dispatchExamAnalysisRunWriteRoute({ request, response, requestUrl })"],
-  ["createExamAnalysisQuestionCountRouteRegistry({", "dispatchExamAnalysisQuestionCountRoute({ request, response, requestUrl })"]
+  ["createExamAnalysisQuestionCountRouteRegistry({", "dispatchExamAnalysisQuestionCountRoute({ request, response, requestUrl })"],
+  ["createExamAnalysisAiRouteRegistry({", "dispatchExamAnalysisAiRoute({ request, response, requestUrl })"]
 ]) {
   assert.ok(serverSource.includes(createToken), `registry construction missing: ${createToken}`);
   assert.ok(serverSource.includes(dispatchToken), `registry dispatch missing: ${dispatchToken}`);
@@ -170,5 +173,5 @@ assert.ok(
 );
 
 console.log(
-  "fourth-pass server route closeout passed · registry 24 · source read 16 · external read 5 · source action 53 · external write 23"
+  "fourth-pass server route closeout passed · registry 29 · source read 16 · external read 5 · source action 53 · external write 18"
 );

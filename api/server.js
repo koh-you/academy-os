@@ -149,6 +149,7 @@ import { createIntegrationStatusRouteRegistry } from "../src/shared/server/integ
 import { createExamAnalysisReadRouteRegistry } from "../src/shared/server/examAnalysisReadRouteRegistry.js";
 import { createExamAnalysisRunWriteRouteRegistry } from "../src/shared/server/examAnalysisRunWriteRouteRegistry.js";
 import { createExamAnalysisQuestionCountRouteRegistry } from "../src/shared/server/examAnalysisQuestionCountRouteRegistry.js";
+import { createExamAnalysisAiRouteRegistry } from "../src/shared/server/examAnalysisAiRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -345,6 +346,16 @@ const { dispatch: dispatchExamAnalysisQuestionCountRoute } = createExamAnalysisQ
   parseExamAnalysisQuestionCountConfirmRequest,
   readJsonBody,
   sendJson
+});
+const { dispatch: dispatchExamAnalysisAiRoute } = createExamAnalysisAiRouteRegistry({
+  createExamAnalysisStorageOperations,
+  detectExamAnalysisQuestionBoundaries,
+  fillExamAnalysisQuestionRowsWithAi,
+  generateExamAnalysisOutputDraft,
+  readJsonBody,
+  refineExamAnalysisQuestionRowsWithAi,
+  sendJson,
+  verifyExamAnalysisSourceFileWithAi
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5683,52 +5694,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchExamAnalysisReadRoute({ request, response, requestUrl })) return;
   if (await dispatchExamAnalysisRunWriteRoute({ request, response, requestUrl })) return;
   if (await dispatchExamAnalysisQuestionCountRoute({ request, response, requestUrl })) return;
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/detect-question-boundaries") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await detectExamAnalysisQuestionBoundaries({
-        analysisRunId: payload.analysisRunId,
-        operations: createExamAnalysisStorageOperations(),
-        sourceId: payload.sourceId
-      });
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/fill-question-rows") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await fillExamAnalysisQuestionRowsWithAi({
-        analysisRunId: payload.analysisRunId,
-        operations: createExamAnalysisStorageOperations(),
-        sourceId: payload.sourceId
-      });
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/refine-question-rows") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await refineExamAnalysisQuestionRowsWithAi({
-        analysisRunId: payload.analysisRunId,
-        operations: createExamAnalysisStorageOperations(),
-        sourceId: payload.sourceId,
-        targetQuestionNumbers: payload.targetQuestionNumbers
-      });
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
+  if (await dispatchExamAnalysisAiRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-question-reviews") {
     try {
@@ -5774,21 +5740,6 @@ const server = http.createServer(async (request, response) => {
         ...(error.code ? { code: error.code } : {}),
         ...(error.field !== undefined ? { field: error.field } : {})
       });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/generate-output-draft") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await generateExamAnalysisOutputDraft({
-        analysisRunId: payload.analysisRunId,
-        outputType: payload.outputType,
-        outputInputs: payload.outputInputs
-      });
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
     }
     return;
   }
@@ -5851,19 +5802,6 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request);
       const result = await extractExamAnalysisSourceFile(payload.sourceId, {
-        operations: createExamAnalysisStorageOperations()
-      });
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-source-files/vision-check") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await verifyExamAnalysisSourceFileWithAi(payload.sourceId, {
         operations: createExamAnalysisStorageOperations()
       });
       sendJson(request, response, 200, { ok: true, ...result });

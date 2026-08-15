@@ -109,7 +109,7 @@ const serverRouteStart = serverSource.indexOf(
   'if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-output-drafts")'
 );
 const serverRouteEnd = serverSource.indexOf(
-  'if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/generate-output-draft")',
+  'if (request.method === "DELETE" && requestUrl.pathname === "/api/exam-analysis-runs")',
   serverRouteStart
 );
 assert.ok(serverRouteStart >= 0 && serverRouteEnd > serverRouteStart);
