@@ -116,10 +116,11 @@ assert.deepEqual(
   }
 );
 
-const [appSource, panelSource, controllerSource] = await Promise.all([
+const [appSource, panelSource, controllerSource, monthlySettlementMonthSaveApiSource] = await Promise.all([
   readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/settlements/MonthlySettlementPanel.jsx", import.meta.url), "utf8"),
-  readFile(new URL("../src/domains/settlements/useMonthlySettlementController.js", import.meta.url), "utf8")
+  readFile(new URL("../src/domains/settlements/useMonthlySettlementController.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/domains/settlements/monthlySettlementMonthSaveApi.js", import.meta.url), "utf8")
 ]);
 
 for (const contract of [
@@ -147,7 +148,7 @@ for (const contract of [
   assert.ok(controllerSource.includes(contract), `missing settlement controller contract: ${contract}`);
 }
 assert.ok(appSource.includes("async function handleSaveMonthlySettlementMonth(month)"));
-assert.ok(appSource.includes("getMonthlySettlementMonthSaveSnapshot(persistedMonth)"));
+assert.ok(monthlySettlementMonthSaveApiSource.includes("getMonthlySettlementMonthSaveSnapshot(persistedMonth)"));
 for (const forbidden of [
   "fetch(",
   "postAppState",

@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [appSource, calendarSource, panelSource, tableSource] = await Promise.all([
+const [appSource, calendarSource, panelSource, tableSource, monthlySettlementMonthSaveApiSource] = await Promise.all([
   readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/settlements/MonthlySettlementCalendar.jsx", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/settlements/MonthlySettlementPanel.jsx", import.meta.url), "utf8"),
-  readFile(new URL("../src/domains/settlements/MonthlySettlementRegularTable.jsx", import.meta.url), "utf8")
+  readFile(new URL("../src/domains/settlements/MonthlySettlementRegularTable.jsx", import.meta.url), "utf8"),
+  readFile(new URL("../src/domains/settlements/monthlySettlementMonthSaveApi.js", import.meta.url), "utf8")
 ]);
 
 function getOpeningTagProps(source, componentName) {
@@ -97,7 +98,7 @@ for (const [name, source] of [
 }
 
 assert.ok(appSource.includes("async function handleSaveMonthlySettlementMonth(month)"));
-assert.ok(appSource.includes("getMonthlySettlementMonthSaveSnapshot(persistedMonth)"));
+assert.ok(monthlySettlementMonthSaveApiSource.includes("getMonthlySettlementMonthSaveSnapshot(persistedMonth)"));
 assert.ok(appSource.includes("setMonthlyInstructorSettlements(persistedState)"));
 
 console.log("monthly settlement view boundary fixtures passed");
