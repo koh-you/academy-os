@@ -43,39 +43,28 @@ function classifyHandlers(sourceLines) {
 const handlers = classifyHandlers(lines);
 const directCallHandlers = handlers.filter((item) => item.hasDirectCall).map((item) => item.name).sort();
 
-// 4-4a baseline: locks in that a specific, small set of `handle*` functions
-// still hold inline fetch/postJson orchestration in App.jsx (real 4-4
-// extraction candidates), while the rest already delegate to already-extracted
-// domain functions (thin wrappers — moving them would not reduce change
-// radius, per the fourth-pass plan's own warning against wrapper-only moves).
-const expectedDirectCallHandlers = [
-  "handleCancelAbsenceMakeupKeepSource",
-  "handleCancelAbsenceMakeupSource",
-  "handleCreateSpecialLectureLessons",
-  "handleDeleteExamPrepRow",
-  "handleDeleteSpecialLectureApplication",
-  "handleOpenMonthlyRegularLessons",
-  "handlePolishLessonComment",
-  "handleSaveMonthlySettlementMonth",
-  "handleSaveRecord",
-  "handleSaveSpecialLectureEnrollment",
-  "handleSaveSpecialLectureEnrollments",
-  "handleSaveSpecialLectureSettlementState",
-  "handleSendLessonComment",
-  "handleSyncSpecialLectureStudentSchedules",
-  "handleUpdateSpecialLectureApplication"
-];
+// 4-4 closeout: 4-4a locked in 15 `handle*` functions that still held inline
+// fetch/postJson orchestration in App.jsx. 4-4b through 4-4h extracted every
+// one of them into domain actions (special lecture cluster, absence makeup
+// cancel, lesson comment, save record, monthly regular lesson open, exam
+// prep row delete, monthly settlement month save) — none reimplemented,
+// each verified independently before merge. This now locks the closeout
+// state: zero remaining direct-call candidates. `handlers.length` stays at
+// the 4-4a baseline (116) since no handler function was deleted, only
+// thinned to a wrapper; the direct fetch/postJson* call count dropped from
+// 66 to 44, meeting the fourth-pass plan's "45 or fewer" 4-4 exit target.
+const expectedDirectCallHandlers = [];
 
 assert.deepEqual(directCallHandlers, expectedDirectCallHandlers);
 assert.equal(handlers.length, 116, `handle* count drifted from the 4-4a baseline (116), now ${handlers.length}`);
 
 const directRequestCallCount = (appSource.match(/\bfetch\(|\bpostJson[A-Za-z]*\(/g) || []).length;
-assert.equal(directRequestCallCount, 66, `direct fetch/postJson call count drifted from the 4-4a baseline (66), now ${directRequestCallCount}`);
+assert.equal(directRequestCallCount, 44, `direct fetch/postJson call count drifted from the 4-4 closeout (44), now ${directRequestCallCount}`);
 
 assert.ok(
   packageJson.scripts["test:production"].includes("npm run test:fourth-pass-app-action-baseline")
 );
 
 console.log(
-  `fourth-pass app action baseline passed · handlers 116 · direct-call candidates ${expectedDirectCallHandlers.length} · thin wrappers ${handlers.length - expectedDirectCallHandlers.length} · direct request calls 66`
+  `fourth-pass app action baseline passed · handlers 116 · direct-call candidates 0 · thin wrappers ${handlers.length} · direct request calls 44`
 );
