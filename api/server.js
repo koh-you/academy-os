@@ -3517,6 +3517,13 @@ function createResourceMaterialStorageOperations() {
   };
 }
 
+function createExamAnalysisStorageOperations() {
+  return {
+    deleteObject: deleteStorageObject,
+    downloadSource: downloadStorageObject
+  };
+}
+
 async function resolveResourceMaterialOpenUrl(materialId, { portalSession = null, teacherSession = null } = {}) {
   const material = await getResourceMaterial(materialId);
   if (!material) {
@@ -5352,7 +5359,7 @@ async function uploadExamAnalysisSourceFile(payload) {
   };
 }
 
-async function extractExamAnalysisSourceFile(sourceId) {
+async function extractExamAnalysisSourceFile(sourceId, { operations } = {}) {
   if (!sourceId) throw new Error("sourceId가 필요합니다.");
   const { sourceFile } = await getExamAnalysisSource(sourceId);
   if (!sourceFile?.sourceId) throw new Error("PDF 원본 정보를 찾지 못했습니다.");
@@ -5369,7 +5376,7 @@ async function extractExamAnalysisSourceFile(sourceId) {
   });
 
   try {
-    const buffer = await downloadStorageObject(sourceFile.bucketId || examAnalysisSourceBucket, sourceFile.storagePath);
+    const buffer = await operations.downloadSource(sourceFile.bucketId || examAnalysisSourceBucket, sourceFile.storagePath);
     const extraction = await extractPdfTextPages(buffer);
     extraction.quality = buildExtractionQuality(extraction);
     const inferredSubject = inferExamAnalysisSubjectFromText(`${sourceFile.originalFileName}\n${extraction.extractedText.slice(0, 2000)}`);
@@ -5391,11 +5398,11 @@ async function extractExamAnalysisSourceFile(sourceId) {
   }
 }
 
-async function verifyExamAnalysisSourceFileWithAi(sourceId) {
+async function verifyExamAnalysisSourceFileWithAi(sourceId, { operations } = {}) {
   if (!sourceId) throw new Error("sourceId가 필요합니다.");
   const { sourceFile } = await getExamAnalysisSource(sourceId);
   if (!sourceFile?.sourceId) throw new Error("PDF 원본 정보를 찾지 못했습니다.");
-  const buffer = await downloadStorageObject(sourceFile.bucketId || examAnalysisSourceBucket, sourceFile.storagePath);
+  const buffer = await operations.downloadSource(sourceFile.bucketId || examAnalysisSourceBucket, sourceFile.storagePath);
   await recordExamAnalysisEvent({
     analysisRunId: sourceFile.analysisRunId,
     eventType: "source_vision_check_started",
@@ -5457,7 +5464,7 @@ async function verifyExamAnalysisSourceFileWithAi(sourceId) {
   }
 }
 
-async function detectExamAnalysisQuestionBoundaries({ analysisRunId, sourceId } = {}) {
+async function detectExamAnalysisQuestionBoundaries({ analysisRunId, operations, sourceId } = {}) {
   if (!analysisRunId) throw new Error("analysisRunId가 필요합니다.");
   const detail = await getExamAnalysisRun(analysisRunId);
   if (!detail.analysisRun?.analysisRunId) throw new Error("시험분석 작업을 찾지 못했습니다.");
@@ -5466,7 +5473,7 @@ async function detectExamAnalysisQuestionBoundaries({ analysisRunId, sourceId } 
     ? detail.sources?.find((source) => source.sourceId === sourceId)
     : detail.sources?.[0];
   if (!sourceFile?.sourceId) throw new Error("PDF 원본 정보를 찾지 못했습니다.");
-  const buffer = await downloadStorageObject(sourceFile.bucketId || examAnalysisSourceBucket, sourceFile.storagePath);
+  const buffer = await operations.downloadSource(sourceFile.bucketId || examAnalysisSourceBucket, sourceFile.storagePath);
 
   await recordExamAnalysisEvent({
     analysisRunId,
@@ -5505,7 +5512,7 @@ async function detectExamAnalysisQuestionBoundaries({ analysisRunId, sourceId } 
   }
 }
 
-async function fillExamAnalysisQuestionRowsWithAi({ analysisRunId, sourceId } = {}) {
+async function fillExamAnalysisQuestionRowsWithAi({ analysisRunId, operations, sourceId } = {}) {
   if (!analysisRunId) throw new Error("analysisRunId가 필요합니다.");
   const detail = await getExamAnalysisRun(analysisRunId);
   if (!detail.analysisRun?.analysisRunId) throw new Error("시험분석 작업을 찾지 못했습니다.");
@@ -5516,7 +5523,7 @@ async function fillExamAnalysisQuestionRowsWithAi({ analysisRunId, sourceId } = 
     ? detail.sources?.find((source) => source.sourceId === sourceId)
     : detail.sources?.[0];
   if (!sourceFile?.sourceId) throw new Error("PDF 원본 정보를 찾지 못했습니다.");
-  const buffer = await downloadStorageObject(sourceFile.bucketId || examAnalysisSourceBucket, sourceFile.storagePath);
+  const buffer = await operations.downloadSource(sourceFile.bucketId || examAnalysisSourceBucket, sourceFile.storagePath);
 
   await updateExamAnalysisRun(analysisRunId, { workflowStatus: "ai_fill_running" });
   await recordExamAnalysisEvent({
@@ -5556,7 +5563,7 @@ async function fillExamAnalysisQuestionRowsWithAi({ analysisRunId, sourceId } = 
   }
 }
 
-async function refineExamAnalysisQuestionRowsWithAi({ analysisRunId, sourceId, targetQuestionNumbers = [] } = {}) {
+async function refineExamAnalysisQuestionRowsWithAi({ analysisRunId, operations, sourceId, targetQuestionNumbers = [] } = {}) {
   if (!analysisRunId) throw new Error("analysisRunId가 필요합니다.");
   const detail = await getExamAnalysisRun(analysisRunId);
   if (!detail.analysisRun?.analysisRunId) throw new Error("시험분석 작업을 찾지 못했습니다.");
@@ -5580,7 +5587,7 @@ async function refineExamAnalysisQuestionRowsWithAi({ analysisRunId, sourceId, t
     ? detail.sources?.find((source) => source.sourceId === sourceId)
     : detail.sources?.[0];
   if (!sourceFile?.sourceId) throw new Error("PDF 원본 정보를 찾지 못했습니다.");
-  const buffer = await downloadStorageObject(sourceFile.bucketId || examAnalysisSourceBucket, sourceFile.storagePath);
+  const buffer = await operations.downloadSource(sourceFile.bucketId || examAnalysisSourceBucket, sourceFile.storagePath);
 
   await updateExamAnalysisRun(analysisRunId, { workflowStatus: "missing_retry_running" });
   await recordExamAnalysisEvent({
@@ -5938,6 +5945,7 @@ const server = http.createServer(async (request, response) => {
       const payload = await readJsonBody(request);
       const result = await detectExamAnalysisQuestionBoundaries({
         analysisRunId: payload.analysisRunId,
+        operations: createExamAnalysisStorageOperations(),
         sourceId: payload.sourceId
       });
       sendJson(request, response, 200, { ok: true, ...result });
@@ -5952,6 +5960,7 @@ const server = http.createServer(async (request, response) => {
       const payload = await readJsonBody(request);
       const result = await fillExamAnalysisQuestionRowsWithAi({
         analysisRunId: payload.analysisRunId,
+        operations: createExamAnalysisStorageOperations(),
         sourceId: payload.sourceId
       });
       sendJson(request, response, 200, { ok: true, ...result });
@@ -5966,6 +5975,7 @@ const server = http.createServer(async (request, response) => {
       const payload = await readJsonBody(request);
       const result = await refineExamAnalysisQuestionRowsWithAi({
         analysisRunId: payload.analysisRunId,
+        operations: createExamAnalysisStorageOperations(),
         sourceId: payload.sourceId,
         targetQuestionNumbers: payload.targetQuestionNumbers
       });
@@ -6044,8 +6054,9 @@ const server = http.createServer(async (request, response) => {
       const analysisRunId = requestUrl.searchParams.get("id") || requestUrl.searchParams.get("analysisRunId");
       if (!analysisRunId) throw new Error("analysisRunId가 필요합니다.");
       const detail = await getExamAnalysisRun(analysisRunId);
+      const operations = createExamAnalysisStorageOperations();
       const storageResults = await Promise.allSettled(
-        (detail.sources ?? []).map((source) => deleteStorageObject(source.bucketId || examAnalysisSourceBucket, source.storagePath))
+        (detail.sources ?? []).map((source) => operations.deleteObject(source.bucketId || examAnalysisSourceBucket, source.storagePath))
       );
       const result = await deleteExamAnalysisRun(analysisRunId);
       sendJson(request, response, 200, {
@@ -6079,7 +6090,7 @@ const server = http.createServer(async (request, response) => {
       if (!sourceId) throw new Error("sourceId가 필요합니다.");
       const { sourceFile } = await getExamAnalysisSource(sourceId);
       if (!sourceFile?.sourceId) throw new Error("PDF 원본 정보를 찾지 못했습니다.");
-      const storageDeleted = await deleteStorageObject(sourceFile.bucketId || examAnalysisSourceBucket, sourceFile.storagePath);
+      const storageDeleted = await createExamAnalysisStorageOperations().deleteObject(sourceFile.bucketId || examAnalysisSourceBucket, sourceFile.storagePath);
       const result = await deleteExamAnalysisSource(sourceId);
       sendJson(request, response, 200, {
         ok: true,
@@ -6095,7 +6106,9 @@ const server = http.createServer(async (request, response) => {
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-source-files/extract") {
     try {
       const payload = await readJsonBody(request);
-      const result = await extractExamAnalysisSourceFile(payload.sourceId);
+      const result = await extractExamAnalysisSourceFile(payload.sourceId, {
+        operations: createExamAnalysisStorageOperations()
+      });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
@@ -6106,7 +6119,9 @@ const server = http.createServer(async (request, response) => {
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-source-files/vision-check") {
     try {
       const payload = await readJsonBody(request);
-      const result = await verifyExamAnalysisSourceFileWithAi(payload.sourceId);
+      const result = await verifyExamAnalysisSourceFileWithAi(payload.sourceId, {
+        operations: createExamAnalysisStorageOperations()
+      });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
