@@ -213,6 +213,78 @@ async function runAnthropicText(prompt, model, maxTokens = 4000) {
   return outputTextFromAnthropic(data);
 }
 
+export async function runAnthropicPdfMessage({ buffer, errorMessage, maxTokens = 4000, model, promptText }) {
+  const response = await fetch(ANTHROPIC_MESSAGES_URL, {
+    method: "POST",
+    headers: {
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+      "x-api-key": requiredEnv("ANTHROPIC_API_KEY")
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: maxTokens,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "document",
+              source: {
+                type: "base64",
+                media_type: "application/pdf",
+                data: buffer.toString("base64")
+              }
+            },
+            { type: "text", text: promptText }
+          ]
+        }
+      ]
+    })
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error?.message || errorMessage || "Claude PDF 요청에 실패했습니다.");
+  }
+
+  return outputTextFromAnthropic(data);
+}
+
+export async function runOpenAiPdfMessage({ buffer, errorMessage, fileName, maxOutputTokens = 4000, model, promptText }) {
+  const response = await fetch(OPENAI_RESPONSES_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${requiredEnv("OPENAI_API_KEY")}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model,
+      input: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_file",
+              filename: fileName || "exam-source.pdf",
+              file_data: `data:application/pdf;base64,${buffer.toString("base64")}`
+            },
+            { type: "input_text", text: promptText }
+          ]
+        }
+      ],
+      max_output_tokens: maxOutputTokens
+    })
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error?.message || errorMessage || "OpenAI PDF 요청에 실패했습니다.");
+  }
+
+  return outputTextFromOpenAi(data);
+}
+
 export async function polishLessonComment(payload = {}) {
   const provider = selectedProvider(payload);
   const model = selectedModel(payload);
