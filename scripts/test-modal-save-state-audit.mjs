@@ -17,7 +17,8 @@ const [
   supplementControlSource,
   supplementActionSource,
   examAnalysisSource,
-  supplementTaskActionBarSource
+  supplementTaskActionBarSource,
+  monthlyRegularLessonOpenApiSource
 ] = await Promise.all([
   read("src/shared/components/InlineSaveStatus.jsx"),
   read("src/shared/components/StickySaveBar.jsx"),
@@ -33,7 +34,8 @@ const [
   read("src/domains/supplements/SupplementNotificationControlModal.jsx"),
   read("src/domains/supplements/supplementTaskActions.js"),
   read("src/domains/exams/ExamAnalysisPipelineCenter.jsx"),
-  read("src/domains/supplements/SupplementTaskActionBar.jsx")
+  read("src/domains/supplements/SupplementTaskActionBar.jsx"),
+  read("src/domains/lessons/monthlyRegularLessonOpenApi.js")
 ]);
 
 const commonStates = ["idle", "dirty", "saving", "verifying", "saved", "failed"];
@@ -43,6 +45,7 @@ for (const state of commonStates) {
 assert.ok(inlineStatusSource.includes('return Object.prototype.hasOwnProperty.call(saveStateLabels, saveState) ? saveState : "idle"'));
 assert.ok(stickySaveBarSource.includes("<InlineSaveStatus label={label} saveState={saveState} />"));
 
+const monthlyLessonModalSource = `${appSource}\n${monthlyRegularLessonOpenApiSource}`;
 for (const contract of [
   'state: "saving"',
   'state: "verifying"',
@@ -50,7 +53,7 @@ for (const contract of [
   'state: "failed"',
   '<InlineSaveStatus label="월 정규수업" saveState={saveStatus.state} />'
 ]) {
-  assert.ok(appSource.includes(contract), `monthly lesson modal state contract missing: ${contract}`);
+  assert.ok(monthlyLessonModalSource.includes(contract), `monthly lesson modal state contract missing: ${contract}`);
 }
 for (const contract of [
   '<InlineSaveStatus label="보고서" saveState={saveState.state} />',
