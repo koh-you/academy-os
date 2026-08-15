@@ -22,7 +22,11 @@ const lazyTeacherViewSource = await readFile(
   new URL("../src/app/lazyTeacherViewComponents.js", import.meta.url),
   "utf8"
 );
-const appAndLazyViewSource = `${appSource}\n${lazyTeacherViewSource}`;
+const absenceMakeupCancelApiSource = await readFile(
+  new URL("../src/domains/supplements/absenceMakeupCancelApi.js", import.meta.url),
+  "utf8"
+);
+const appAndLazyViewSource = `${appSource}\n${lazyTeacherViewSource}\n${absenceMakeupCancelApiSource}`;
 
 function section(source, start, end) {
   const startIndex = source.indexOf(start);
@@ -32,12 +36,23 @@ function section(source, start, end) {
   return source.slice(startIndex, endIndex);
 }
 
+// lessonModalSaveSnapshot.js's only App.jsx-era call site (inside
+// handleCancelAbsenceMakeupKeepSource) moved to
+// src/domains/supplements/absenceMakeupCancelApi.js (4-4c), so App.jsx no
+// longer imports it directly. The boundary itself didn't regress — the
+// import is one hop further from App.jsx now, not reabsorbed into it — so
+// this checks the domain module's own (path-relative) import instead of
+// App.jsx's.
+assert.ok(
+  absenceMakeupCancelApiSource.includes('from "../lessons/lessonModalSaveSnapshot.js"'),
+  'missing extracted boundary: from ".../lessons/lessonModalSaveSnapshot.js" (now via absenceMakeupCancelApi.js)'
+);
+
 for (const extractedBoundary of [
   'from "../domains/lessons/lessonCalendarModel.js"',
   'import("../domains/lessons/TeacherLessonHubV2.jsx")',
   'from "../domains/lessons/lessonModalPayloadBuilders.js"',
   'from "../domains/lessons/lessonModalSaveController.js"',
-  'from "../domains/lessons/lessonModalSaveSnapshot.js"',
   'import("../domains/lessons/LessonModal.jsx")',
   'from "../domains/lessons/AttendanceKiosk.jsx"'
 ]) {
