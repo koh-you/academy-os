@@ -50,3 +50,10 @@ Solapi는 `source: "solapi"|"supabase"`, Slack은 `dryRun: boolean`, AI는 `{ pr
 ## 상태·저장·부작용 경계 (변경 없음)
 
 4-5a는 조사만 수행한다. 4-5b부터 실제 파일 이동/DI 도입이 시작되며, 각 단위는 기존과 동일하게 own branch → 검증 → commit → push를 따르고 main 병합은 사용자 승인 후에만 진행한다.
+
+## 2026-08-16 통합 검수 상태
+
+- 4-5b는 Vercel function 수를 늘리지 않기 위해 새 파일 대신 기존 `api/lib/supabaseRest.js`로 Storage primitive 7개를 이동했다.
+- 4-5c는 시험분석 PDF download/delete 호출을 operations 경계로 주입했다. 업로드·서명 URL과 다른 도메인의 Storage 호출은 이번 단위 밖이다.
+- 4-5d는 vision-check·boundary-detect의 Anthropic/OpenAI PDF fetch만 DB-free provider 모듈로 이동했다. row-fill·output-draft transport는 아직 server에 남아 있다.
+- 4-5e는 provider result envelope를 정의했지만 기존 orchestrator에는 적용하지 않았다. 통합 검토에서 Anthropic `content` fallback/trim 호환성 누락을 수정하고 네트워크 없는 transport 동작 fixture를 추가했다.

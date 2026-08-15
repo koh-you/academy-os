@@ -224,3 +224,9 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 - 4-3r: exam-analysis 문항 수 사람 확정 POST의 body→contract parser→DB action→success/structured error 조립을 frozen registry로 이동했다. 문항 row/run/event 저장과 Supabase 재조회 owner는 기존 pipeline module에 유지한다.
 - 4-3 종료 감사: frozen registry 24개와 DB/source read 16·external read 5·DB/source action 52·external write 23개를 exact 분류했다. 공통 HTTP/session과 registry 패턴을 완료하고, 잔여 action 이동은 owner가 선행되는 4-4/4-5 범위로 넘긴다. 기준은 `docs/app-refactor-fourth-pass-server-route-closeout.md`다.
 - 사용자 요청에 따라 4-3을 닫고 4-4 이후는 2026-08-12 이후 명시적으로 재개할 때까지 보류한다.
+
+## 4-4/4-5 진행 상태
+
+- 4-4는 2026-08-15 통합 검토까지 완료했다. App 직접 request 포함 handler 15개를 action으로 이동해 직접 호출 포함 handler를 0개로 만들었고, 저장·재조회·rollback·provider 범위를 보존했다.
+- 4-5a~d는 provider 기준선, Storage primitive 7개 이동, 시험분석 download/delete operations 주입, vision-check·boundary-detect PDF transport 분리까지 통합 검수했다. Anthropic 응답 `content` fallback/trim 호환성은 동작 fixture로 복원·고정했다.
+- 4-5e는 공통 provider result envelope를 정의하고 pure fixture로 shape만 고정했다. 기존 orchestrator에 적용하면 throw/복구 의미가 바뀔 수 있으므로 아직 채택하지 않았다. notification source/provider orchestration 적용과 provider route registry는 후속 안전 단위다.

@@ -1,6 +1,12 @@
 # Academy OS Current Status
 
-업데이트: 2026-08-15
+업데이트: 2026-08-16
+
+## 2026-08-16 App/API 4차 리팩터링 4-5a~e 통합 검수
+
+- Claude Code의 `4-5a`~`4-5e`와 테스트 정책 보완을 통합해 Supabase Storage 원시 함수 7개를 `api/lib/supabaseRest.js`로 이동하고, 시험분석 PDF download/delete를 명시적 operations 경계로 주입했다. 시험분석 vision-check·문항 경계 탐지의 Anthropic/OpenAI PDF transport는 DB import가 없는 provider 모듈로 옮겼다.
+- 검토에서 Anthropic PDF 응답의 기존 `content` 호환 필드와 trim 처리가 이동 과정에서 빠진 회귀를 수정했다. 실제 provider 호출 없이 Anthropic/OpenAI request payload, 호환 응답 파싱과 오류 전파를 동작 fixture로 고정했다.
+- production `305/305`, scenario `828/828`, runtime lint, build `438 modules`·main `938.40 kB`, safe browser `77/77`을 통과했다. 4-5e는 공통 provider 결과 envelope를 정의한 단계이며 기존 orchestrator 적용과 provider route registry는 후속 범위로 남긴다. 운영 Storage·유료 AI·알림 provider는 실행하지 않았다.
 
 ## 2026-08-15 App/API 4차 리팩터링 4-4 검토·종료
 

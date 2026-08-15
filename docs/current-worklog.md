@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-16 App/API 4차 리팩터링 4-5a~e 통합 검토
+
+- main `ec19e9075`에서 갈라진 Claude Code 브랜치 5개와 테스트 정책 보완을 `codex/integration-4-5-and-testing-policy`에 모은 계보를 확인했다. Storage 원시 함수 7개는 기존 `api/lib/supabaseRest.js`로 이동했고, 시험분석 PDF download/delete 7개 호출은 `createExamAnalysisStorageOperations()`를 통해 주입되며 기존 DB/event/실패 기록 순서를 보존한다.
+- vision-check·문항 경계 탐지의 Anthropic/OpenAI PDF fetch를 `api/routes/commentPolish.js`의 DB-free transport로 옮긴 payload와 오류 문구를 대조했다. 검토 중 Anthropic 응답 parser가 이전의 `block.content` fallback과 최종 trim을 잃은 호환성 회귀를 발견해 복원하고, 네트워크 없는 transport 동작 fixture를 production Gate에 연결했다.
+- 4-5e 공통 `{ ok, source, dryRun, providerResult, error }` envelope는 정의·단위검사만 된 상태다. 기존 throw 기반 Solapi/Slack/AI/Storage orchestrator에는 아직 적용하지 않아 실행 의미를 바꾸지 않았고, 4-5 전체 종료나 route registry 완료로 표시하지 않는다.
+- 검증: provider baseline/result/transport, resource Storage, runtime lint, production `305/305`, scenario `828/828`, build `438 modules`·main `938.40 kB`, safe browser `77/77`. 운영 Storage·Supabase write·유료 AI·실제 알림은 실행하지 않았다.
+
 ## 2026-08-15 App/API 4차 리팩터링 4-4 통합 검토
 
 - `4-4a`~`4-4h`의 15개 직접 request handler를 통합해 특강·결석보강·수업일지·시험관리·정산 action 경계를 검토했다. 기존 저장 순서, Supabase 재조회, draft 보존과 알림/AI 실행 범위는 유지됐고 App 직접 request는 66→44로 줄었다.

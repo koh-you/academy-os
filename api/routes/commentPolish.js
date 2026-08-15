@@ -141,7 +141,16 @@ function outputTextFromOpenAi(data = {}) {
 }
 
 function outputTextFromAnthropic(data = {}) {
-  return data.content?.map((block) => block.text ?? "").join("\n") ?? "";
+  if (!Array.isArray(data.content)) return "";
+  return data.content
+    .map((block) => {
+      if (typeof block?.text === "string") return block.text;
+      if (typeof block?.content === "string") return block.content;
+      return "";
+    })
+    .filter(Boolean)
+    .join("\n")
+    .trim();
 }
 
 function createMockComment(payload = {}) {

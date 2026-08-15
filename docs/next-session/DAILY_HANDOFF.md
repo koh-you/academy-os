@@ -1,6 +1,13 @@
 # Daily Development Handoff
 
-업데이트: 2026-08-15
+업데이트: 2026-08-16
+
+## 2026-08-16 App/API 4차 리팩터링 4-5a~e
+
+- Claude Code의 통합 후보는 `codex/integration-4-5-and-testing-policy`다. Storage primitive 7개를 `api/lib/supabaseRest.js`로 이동하고 시험분석 PDF download/delete를 operations로 주입했으며, vision-check·boundary-detect PDF transport를 DB-free `commentPolish.js`로 옮겼다.
+- 통합 검토에서 Anthropic PDF response의 기존 `content` fallback/trim 누락을 복원했다. 새 transport fixture는 provider 네트워크 없이 Anthropic/OpenAI request body, base64 PDF, 응답 호환성과 오류 전파를 검증한다.
+- production `305/305`, scenario `828/828`, build main `938.40 kB`, safe browser `77/77` 통과. 실제 Storage·AI·알림 호출은 없었다.
+- 4-5e 결과 envelope는 아직 정의만 됐다. 후속은 기존 throw/복구 의미를 유지한 orchestrator별 채택과 provider route registry이며, 별도 안전 단위로 검토하기 전 자동 진행하지 않는다.
 
 ## 2026-08-15 App/API 4차 리팩터링 4-4
 
