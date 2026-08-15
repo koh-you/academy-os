@@ -126,8 +126,20 @@ for (const [
       statusIndex > persistPayloadIndex
   );
 }
+const lessonCommentApiSource = await readFile(
+  new URL("../src/domains/lessons/lessonCommentApi.js", import.meta.url),
+  "utf8"
+);
+assert.ok(
+  lessonCommentApiSource.includes('fetch(apiUrl("/api/notifications/comment-alimtalk"), {'),
+  "comment alimtalk fetch must live in lessonCommentApi.js"
+);
+assert.ok(
+  functionSource.includes("requestCommentAlimtalk(notificationPayload)"),
+  "lesson comment effect moved from App: requestCommentAlimtalk(notificationPayload)"
+);
+
 for (const AppOwnedEffect of [
-  'fetch(apiUrl("/api/notifications/comment-alimtalk"), {',
   "persistNotificationJobRequest({",
   "setNotificationLogs((current) =>",
   "setNotificationJobs((current) =>",
