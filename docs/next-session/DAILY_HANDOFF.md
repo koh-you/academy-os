@@ -1,6 +1,12 @@
 # Daily Development Handoff
 
-업데이트: 2026-08-13
+업데이트: 2026-08-15
+
+## 2026-08-15 App/API 4차 리팩터링 4-4
+
+- App의 직접 request 포함 handler 15개를 도메인 action으로 모두 옮겼고 직접 request 수는 66→44다. 특강, 결석보강 취소, 수업 코멘트·기록, 월 정규수업, 시험관리 복원, 월 정산의 저장·재조회 의미는 유지한다.
+- 통합 검토에서 특강 API 비정상 성공 판정과 initial main JS 예산 초과를 수정했다. 특강 action은 사용 시 로드되며 build main은 938.40 kB다.
+- 관련 fixture와 focused safe browser `3/3`이 통과했다. 다음 4-5 provider side-effect 경계는 자동 시작하지 않는다.
 
 ## 2026-08-13 화목토 앞반 명단 표시
 

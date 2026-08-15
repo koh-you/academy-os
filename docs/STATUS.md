@@ -1,6 +1,12 @@
 # Academy OS Current Status
 
-업데이트: 2026-08-13
+업데이트: 2026-08-15
+
+## 2026-08-15 App/API 4차 리팩터링 4-4 검토·종료
+
+- App에 남아 있던 직접 request 포함 handler 15개를 특강·결석보강 취소·수업 코멘트·수업기록·월 정규수업·시험관리 복원·월 정산 도메인 action으로 옮겼다. 직접 `fetch`/`postJson*` 호출은 66→44, 직접 호출 포함 handler는 15→0이며 기존 local draft·CAS·Supabase 재조회·부분 실패 복구와 provider 실행 범위를 유지한다.
+- 통합 검토에서 특강 API의 `ok` 누락 응답을 성공으로 허용하던 경계를 원래 계약대로 차단하고 동작 fixture를 추가했다. 특강 action은 사용 시 동적 로드해 initial main JS를 938.40 kB로 유지한다.
+- domain `74/74`, scenario `828/828`, runtime lint, 4-4 기준선, production build와 focused safe browser `3/3`을 통과했다. 4-5 provider 경계는 시작하지 않는다.
 
 ## 2026-08-13 시험관리 전체 학교 기본·정렬
 

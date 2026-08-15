@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-15 App/API 4차 리팩터링 4-4 통합 검토
+
+- `4-4a`~`4-4h`의 15개 직접 request handler를 통합해 특강·결석보강·수업일지·시험관리·정산 action 경계를 검토했다. 기존 저장 순서, Supabase 재조회, draft 보존과 알림/AI 실행 범위는 유지됐고 App 직접 request는 66→44로 줄었다.
+- 검토 중 `specialLectureApi`가 HTTP 200이면서 `ok`가 누락된 비정상 JSON을 성공으로 처리하는 회귀를 수정하고 실제 mock 응답 fixture로 고정했다. 새 특강 action 정적 import로 initial main JS가 945,395 bytes까지 오른 문제는 동적 import로 교정해 938.40 kB가 됐다.
+- domain `74/74`, 관련 전용 fixture, scenario `828/828`, runtime lint, build와 특강 화면·결석보강 취소·월 정산 저장 focused browser `3/3`을 통과했다. 운영 데이터·실제 알림·유료 AI는 실행하지 않았다.
+
 ## 2026-08-13 화목토 앞반 명단 표시 긴급 회귀
 
 - 서빈·김보현은 운영 수업 명단에 저장돼 있었지만 기본 앞반 `16-19`와 개별시간 `17-20`의 완전 포함 판정이 실패해 화면에서만 제외됐다.

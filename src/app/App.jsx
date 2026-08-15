@@ -395,15 +395,6 @@ import {
   replaceSpecialLectureYearToken,
 } from "../domains/specialLectures/specialLectureGuideUtils.js";
 import {
-  createSpecialLectureLessonsAction,
-  deleteSpecialLectureApplicationAction,
-  saveSpecialLectureEnrollmentAction,
-  saveSpecialLectureEnrollmentsAction,
-  saveSpecialLectureSettlementStateAction,
-  syncSpecialLectureStudentSchedulesAction,
-  updateSpecialLectureApplicationAction
-} from "../domains/specialLectures/specialLectureApi.js";
-import {
   cancelAbsenceMakeupKeepSourceAction,
   cancelAbsenceMakeupSourceAction
 } from "../domains/supplements/absenceMakeupCancelApi.js";
@@ -1416,6 +1407,10 @@ function removeStorageValue(storage, key) {
 
 function postMakeupTask(makeupTask) {
   return postJson("/api/makeup-tasks", { makeupTask });
+}
+
+function loadSpecialLectureApi() {
+  return import("../domains/specialLectures/specialLectureApi.js");
 }
 
 function postAcademyReminder(academyReminder) {
@@ -3498,6 +3493,7 @@ export function App() {
   async function handleSaveSpecialLectureSettlementState(draftState) {
     setSpecialLectureSettlementSaveState("saving");
     try {
+      const { saveSpecialLectureSettlementStateAction } = await loadSpecialLectureApi();
       const persistedState = await saveSpecialLectureSettlementStateAction(draftState, { postAppState });
       setSpecialLectureInstructorSettlements(persistedState);
       setSpecialLectureSettlementSaveState("saved");
@@ -3522,7 +3518,8 @@ export function App() {
         application.applicationId === applicationId ? nextApplication : application
       ))
     );
-    return updateSpecialLectureApplicationAction(nextApplication)
+    return loadSpecialLectureApi()
+      .then(({ updateSpecialLectureApplicationAction }) => updateSpecialLectureApplicationAction(nextApplication))
       .then((savedApplication) => {
         setSpecialLectureApplications((current) =>
           normalizeSpecialLectureApplications(current.map((application) =>
@@ -3542,6 +3539,7 @@ export function App() {
   }
 
   async function handleDeleteSpecialLectureApplication(applicationId) {
+    const { deleteSpecialLectureApplicationAction } = await loadSpecialLectureApi();
     const persistedApplications = await deleteSpecialLectureApplicationAction(applicationId);
     setSpecialLectureApplications(persistedApplications);
     return String(applicationId ?? "").trim();
@@ -3655,6 +3653,7 @@ export function App() {
       normalizeSpecialLectureEnrollments(upsertById(current, nextEnrollment, "enrollmentId"))
     );
     try {
+      const { saveSpecialLectureEnrollmentAction } = await loadSpecialLectureApi();
       const { persistedEnrollment, persistedEnrollments } = await saveSpecialLectureEnrollmentAction(nextEnrollment);
       setSpecialLectureEnrollments(persistedEnrollments);
       return persistedEnrollment;
@@ -3679,7 +3678,8 @@ export function App() {
       });
       return normalizeSpecialLectureEnrollments(merged);
     });
-    return saveSpecialLectureEnrollmentsAction(nextEnrollments)
+    return loadSpecialLectureApi()
+      .then(({ saveSpecialLectureEnrollmentsAction }) => saveSpecialLectureEnrollmentsAction(nextEnrollments))
       .then((savedEnrollments) => {
         setSpecialLectureEnrollments((current) => {
           let merged = current;
@@ -3705,6 +3705,7 @@ export function App() {
   }
 
   async function handleCreateSpecialLectureLessons(lessonDrafts = [], { openFirstLesson = true } = {}) {
+    const { createSpecialLectureLessonsAction } = await loadSpecialLectureApi();
     const { persistedLessons, verifiedLessons } = await createSpecialLectureLessonsAction(lessonDrafts, {
       normalizeLesson: (lesson) => ({
         ...lesson,
@@ -3719,6 +3720,7 @@ export function App() {
   }
 
   async function handleSyncSpecialLectureStudentSchedules(syncRequests = []) {
+    const { syncSpecialLectureStudentSchedulesAction } = await loadSpecialLectureApi();
     const { persistedLessons, verifiedLessons } = await syncSpecialLectureStudentSchedulesAction(syncRequests);
     if (persistedLessons.length) setLessons(filterActiveLessons(persistedLessons));
     return verifiedLessons;

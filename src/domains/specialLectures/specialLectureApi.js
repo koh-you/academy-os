@@ -15,7 +15,7 @@ import {
 
 async function readJsonResponse(response) {
   const result = await response.json();
-  return { ...result, ok: response.ok && result.ok !== false };
+  return { ...result, ok: response.ok && result.ok === true };
 }
 
 /**

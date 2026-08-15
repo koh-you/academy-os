@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { getSpecialLectureEnrollmentSaveSnapshot } from "../src/domains/specialLectures/specialLectureGuideUtils.js";
+import { deleteSpecialLectureApplicationAction } from "../src/domains/specialLectures/specialLectureApi.js";
 
 const browserEnrollment = {
   applicationId: "application_1",
@@ -63,3 +64,36 @@ assert.notEqual(
 );
 
 console.log("Special lecture enrollment save verification tests passed.");
+
+const originalFetch = globalThis.fetch;
+try {
+  globalThis.fetch = async () => ({
+    ok: true,
+    status: 200,
+    json: async () => ({ deleted: true, source: "supabase" })
+  });
+  await assert.rejects(
+    () => deleteSpecialLectureApplicationAction("special-application-1"),
+    /특강 신청 원본 삭제 실패/,
+    "HTTP 200이어도 API ok 계약이 빠진 응답은 저장 성공으로 처리하지 않아야 합니다."
+  );
+
+  const responses = [
+    { deleted: true, ok: true, source: "supabase" },
+    { applications: [], ok: true, source: "supabase" }
+  ];
+  globalThis.fetch = async () => ({
+    ok: true,
+    status: 200,
+    json: async () => responses.shift()
+  });
+  assert.deepEqual(
+    await deleteSpecialLectureApplicationAction("special-application-1"),
+    [],
+    "명시적 ok 응답과 삭제 후 재조회가 일치하면 저장 원천 목록을 반환해야 합니다."
+  );
+} finally {
+  globalThis.fetch = originalFetch;
+}
+
+console.log("Special lecture API response contract tests passed.");
