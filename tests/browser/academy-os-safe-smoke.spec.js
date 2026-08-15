@@ -1,6 +1,8 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures.js";
 
-const safeApiPort = Number(process.env.ACADEMY_SAFE_API_PORT || 8787);
+// One safe-api server runs per worker (tests/browser/globalSetup.mjs), each at
+// ACADEMY_SAFE_API_PORT + this worker's parallel index.
+const safeApiPort = Number(process.env.ACADEMY_SAFE_API_PORT || 8787) + Number(process.env.TEST_PARALLEL_INDEX || 0);
 const safeApiBaseUrl = `http://127.0.0.1:${safeApiPort}`;
 
 function getKoreaDateAfterDays(days) {
@@ -1537,7 +1539,7 @@ test("notification settings seed new notice and special lecture drafts without p
 test("notification reserve contract stays canonical in the safe API without provider actions", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);
-  const safeApiBaseUrl = `http://127.0.0.1:${process.env.ACADEMY_SAFE_API_PORT || 8787}`;
+  const safeApiBaseUrl = `http://127.0.0.1:${Number(process.env.ACADEMY_SAFE_API_PORT || 8787) + Number(process.env.TEST_PARALLEL_INDEX || 0)}`;
 
   const reservationResponse = await request.post(`${safeApiBaseUrl}/api/notification-jobs/reserve`, {
     data: {
@@ -1584,7 +1586,7 @@ test("notification reserve contract stays canonical in the safe API without prov
 test("notification bulk reserve contract keeps per-job dry-run results in the safe API", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);
-  const safeApiBaseUrl = `http://127.0.0.1:${process.env.ACADEMY_SAFE_API_PORT || 8787}`;
+  const safeApiBaseUrl = `http://127.0.0.1:${Number(process.env.ACADEMY_SAFE_API_PORT || 8787) + Number(process.env.TEST_PARALLEL_INDEX || 0)}`;
   const notificationJobs = [
     {
       notificationJobId: "safe-contract-bulk-parent",
@@ -1642,7 +1644,7 @@ test("notification bulk reserve contract keeps per-job dry-run results in the sa
 test("notification readiness contract checks safe source jobs without Slack side effects", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);
-  const safeApiBaseUrl = `http://127.0.0.1:${process.env.ACADEMY_SAFE_API_PORT || 8787}`;
+  const safeApiBaseUrl = `http://127.0.0.1:${Number(process.env.ACADEMY_SAFE_API_PORT || 8787) + Number(process.env.TEST_PARALLEL_INDEX || 0)}`;
   const notificationJobId = "safe-contract-readiness-missing-body";
 
   const sourceResponse = await request.post(`${safeApiBaseUrl}/api/notification-jobs`, {
@@ -1697,7 +1699,7 @@ test("notification readiness contract checks safe source jobs without Slack side
 test("notification dispatch contract preserves safe jobs and rejects sensitive overrides", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);
-  const safeApiBaseUrl = `http://127.0.0.1:${process.env.ACADEMY_SAFE_API_PORT || 8787}`;
+  const safeApiBaseUrl = `http://127.0.0.1:${Number(process.env.ACADEMY_SAFE_API_PORT || 8787) + Number(process.env.TEST_PARALLEL_INDEX || 0)}`;
   const notificationJobId = "safe-contract-dispatch-preserved";
 
   const sourceResponse = await request.post(`${safeApiBaseUrl}/api/notification-jobs`, {
@@ -1765,7 +1767,7 @@ test("notification dispatch contract preserves safe jobs and rejects sensitive o
 test("notification cancel contract persists the source state without provider actions in the safe API", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);
-  const safeApiBaseUrl = `http://127.0.0.1:${process.env.ACADEMY_SAFE_API_PORT || 8787}`;
+  const safeApiBaseUrl = `http://127.0.0.1:${Number(process.env.ACADEMY_SAFE_API_PORT || 8787) + Number(process.env.TEST_PARALLEL_INDEX || 0)}`;
 
   const reservationResponse = await request.post(`${safeApiBaseUrl}/api/notification-jobs/reserve`, {
     data: {
@@ -1813,7 +1815,7 @@ test("notification cancel contract persists the source state without provider ac
 test("notification reconcile contract reads the safe provider without mutating source jobs", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);
-  const safeApiBaseUrl = `http://127.0.0.1:${process.env.ACADEMY_SAFE_API_PORT || 8787}`;
+  const safeApiBaseUrl = `http://127.0.0.1:${Number(process.env.ACADEMY_SAFE_API_PORT || 8787) + Number(process.env.TEST_PARALLEL_INDEX || 0)}`;
   const notificationJobId = "safe-contract-reconcile-job";
 
   const reservationResponse = await request.post(`${safeApiBaseUrl}/api/notification-jobs/reserve`, {
