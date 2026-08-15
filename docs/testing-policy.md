@@ -88,3 +88,13 @@ npm run test:domain:settlement
 - 기본 browser smoke runner는 Worktree 경로별 가용 포트를 고르고 기존 preview를 재사용하지 않는다. `test:browser-smoke:direct`는 runner 자체를 진단할 때만 사용한다.
 - 정적 scenario 811개는 당장 삭제하지 않는다. 관련 코드를 만질 때 동작 fixture로 점진 교체한다.
 - 운영 데이터 쓰기, 실제 알림, 운영 SQL, 유료 호출은 검증에 사용하지 않는다.
+
+## App.jsx 코드 이동 시 자기참조 정적검사 처리 · 2026-08-15
+
+`App.jsx`의 handler 본문을 도메인 action 파일로 옮기면(4-4 유형 리팩터링), 옮긴 코드의 리터럴 문자열(함수명·에러 메시지·정확한 코드 조각)을 검사하는 정적검사가 **여러 개, 서로 독립적으로** 깨질 수 있다. 하나만 고치고 끝났다고 가정하지 않는다.
+
+- `scripts/scenario-tests-production.cjs`의 `hasAll(app, [...])` 체크뿐 아니라, `test-*-closeout*.mjs`, `test-modal-save-state-audit.mjs`, `test-monthly-settlement-controller.mjs` 같은 독립 standalone 스크립트들도 같은 리터럴을 App.jsx 소스에서 개별적으로 검사하고 있을 수 있다. 이동 전에 옮길 리터럴을 `scripts/` 전체에서 grep해 관련 체크를 먼저 파악한다.
+- 깨진 체크는 항상 새 파일의 source를 함께 읽어 검사하도록 고친다(예: `hasAll(\`${app}\n${newModuleSource}\`, [...])` 또는 해당 스크립트에 새 파일 `readFile`을 추가). 체크를 느슨하게 하거나 지우지 않는다 — 검사 대상이 옮겨간 것이지 계약이 사라진 게 아니다.
+- `test:production`의 npm script 문자열 자체를 참조하는 self-referential 체크(`packageJson.scripts["test:production"].includes(...)`)가 다수 존재한다. `test:production`의 값은 직접 편집하지 않고, 체인의 마지막 단계가 내부적으로 하는 일만 바꾼다.
+- 4-4a식 baseline-lock fixture(예: `test-fourth-pass-app-action-baseline.mjs`)는 리팩터링 시작 시점의 상태를 고정해 이후 단위가 대조할 기준으로 쓴다. 대상 단위를 모두 완료했으면 fixture의 기대값을 종료 상태로 갱신한다 — fixture를 지우거나 무시하지 않는다.
+- 하나의 안전 단위를 "완료"로 표시하기 전에 `npm run test:production` 전체를 한 번 통과시켜, 개별적으로 찾지 못한 다른 자기참조 체크가 없는지 확인한다.
