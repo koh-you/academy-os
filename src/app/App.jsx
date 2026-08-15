@@ -5864,7 +5864,7 @@ export function App() {
             request: postJson
           }),
         restoreLessons: (lessonsToRestore) =>
-          postJson("/api/lessons/bulk", { lessons: lessonsToRestore })
+          saveExamPrepLessonsRequest({ lessons: lessonsToRestore, request: postJson })
       });
       setExamPrepRows(result.state.examPrepRows);
       setLessons(result.state.lessons);
