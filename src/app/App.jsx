@@ -408,6 +408,10 @@ import {
   cancelAbsenceMakeupKeepSourceAction,
   cancelAbsenceMakeupSourceAction
 } from "../domains/supplements/absenceMakeupCancelApi.js";
+import {
+  requestCommentAlimtalk,
+  requestCommentPolish
+} from "../domains/lessons/lessonCommentApi.js";
 import { copyTextToClipboard } from "../domains/exams/outputPreview.js";
 import {
   createDefaultMonthlySettlementState,
@@ -7413,38 +7417,30 @@ export function App() {
     }
 
     try {
-      const response = await fetch(apiUrl("/api/ai/comment-polish"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          aiProvider,
-          aiModel,
-          aiPrompt: getAiPrompt(aiSettings, "commentPolish"),
-          audience: target === "student" ? "student" : "parent",
-          attendanceStatus: attendanceLabels[record?.attendanceStatus ?? "pending"],
-          assignmentStatus: getAssignmentStatusMessage(target === "student" ? "student" : "parent", record?.assignmentStatus ?? record?.incompleteHomework ?? ""),
-          grade: student.grade,
-          homeworkStatus: homeworkLabels[record?.homeworkStatus ?? "not_started"],
-          lessonDate: lesson.date,
-          lessonContent: getLessonContent(record),
-          lessonMaterial: getLessonMaterial(record, student),
-          lessonName: lesson.className,
-          rawText: rawTextSeed || sourceDraft || (record?.[sourceField] ?? ""),
-          schoolName: student.schoolName,
-          studentName: student.name,
-          supplementSchedule: supplementSchedules.join("\n"),
-          testResult: testResultLines.join("\n")
-        })
+      const polishResult = await requestCommentPolish({
+        aiProvider,
+        aiModel,
+        aiPrompt: getAiPrompt(aiSettings, "commentPolish"),
+        audience: target === "student" ? "student" : "parent",
+        attendanceStatus: attendanceLabels[record?.attendanceStatus ?? "pending"],
+        assignmentStatus: getAssignmentStatusMessage(target === "student" ? "student" : "parent", record?.assignmentStatus ?? record?.incompleteHomework ?? ""),
+        grade: student.grade,
+        homeworkStatus: homeworkLabels[record?.homeworkStatus ?? "not_started"],
+        lessonDate: lesson.date,
+        lessonContent: getLessonContent(record),
+        lessonMaterial: getLessonMaterial(record, student),
+        lessonName: lesson.className,
+        rawText: rawTextSeed || sourceDraft || (record?.[sourceField] ?? ""),
+        schoolName: student.schoolName,
+        studentName: student.name,
+        supplementSchedule: supplementSchedules.join("\n"),
+        testResult: testResultLines.join("\n")
       });
-      const result = await response.json();
-      if (!response.ok || !result.ok) {
-        throw new Error(result.error || "코멘트 AI 수정에 실패했습니다.");
-      }
       if (!shouldPersist) {
         return {
           ok: true,
-          polishedText: result.result.polishedText,
-          provider: result.result.provider
+          polishedText: polishResult.polishedText,
+          provider: polishResult.provider
         };
       }
 
@@ -7454,8 +7450,8 @@ export function App() {
         lessonStudentRecordId: recordId,
         lessonId: lesson.lessonId,
         studentId: student.studentId,
-        [sourceField]: result.result.polishedText,
-        [statusField]: `완료 · ${result.result.provider}`,
+        [sourceField]: polishResult.polishedText,
+        [statusField]: `완료 · ${polishResult.provider}`,
         updatedBy: "instructor_owner_001",
         updatedAt: new Date().toISOString()
       };
@@ -7463,7 +7459,7 @@ export function App() {
       recordsRef.current = nextRecords;
       setRecords(nextRecords);
       await handleSaveRecord(recordId, lesson, student, nextRecord);
-      return { ok: true, polishedText: result.result.polishedText, provider: result.result.provider };
+      return { ok: true, polishedText: polishResult.polishedText, provider: polishResult.provider };
     } catch (error) {
       if (shouldPersist) {
         setRecords((current) =>
@@ -7589,15 +7585,7 @@ export function App() {
         testResult: testResultLines.join("\n"),
         target
       };
-      const response = await fetch(apiUrl("/api/notifications/comment-alimtalk"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(notificationPayload)
-      });
-      const result = await response.json();
-      if (!response.ok || !result.ok) {
-        throw new Error(result.error || "코멘트 알림톡 발송 실패");
-      }
+      const result = await requestCommentAlimtalk(notificationPayload);
 
       const logStatus = scheduledDate ? "scheduled" : result.result?.dryRun ? "dry_run" : "sent";
       const notificationLog = { ...logBase, result, status: logStatus };
