@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [serverSource, notificationsRouteSource, commentPolishRouteSource, resourceStorageOperationSource, packageJson] = await Promise.all([
+const [serverSource, notificationsRouteSource, commentPolishRouteSource, resourceStorageOperationSource, supabaseRestSource, packageJson] = await Promise.all([
   readFile(new URL("../api/server.js", import.meta.url), "utf8"),
   readFile(new URL("../api/routes/notifications.js", import.meta.url), "utf8"),
   readFile(new URL("../api/routes/commentPolish.js", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/resources/resourceMaterialStorageOperation.js", import.meta.url), "utf8"),
+  readFile(new URL("../api/lib/supabaseRest.js", import.meta.url), "utf8"),
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse)
 ]);
 
@@ -48,26 +49,38 @@ for (const forbidden of ["createClient", "SUPABASE_SERVICE_ROLE"]) {
   );
 }
 
-// 4-5a baseline: Storage primitives are still inline in api/server.js, not
-// yet split into their own module (4-5b's target). Locks the starting point.
-for (const stillInline of [
+// 4-5b closeout: Storage primitives moved out of api/server.js into the
+// existing api/lib/supabaseRest.js (not a new file — a new api/ file would
+// have crossed the Vercel Hobby 12-function ceiling this baseline itself
+// flags below).
+for (const moved of [
   "async function supabaseStorageRequest(path, options = {})",
-  "async function ensureStorageBucket(bucketId, options = {})",
-  "async function uploadStorageObjectWithBucketRetry(bucketId, storagePath, { bucketOptions = {}, contentType, body })",
-  "async function createSignedStorageUrl(bucketId, storagePath, expiresIn = 60 * 60 * 24 * 7)",
-  "async function downloadStorageObjectWithMetadata(bucketId, storagePath)",
-  "async function downloadStorageObject(bucketId, storagePath)",
-  "async function deleteStorageObject(bucketId, storagePath)"
+  "export async function ensureStorageBucket(bucketId, options = {})",
+  "export async function uploadStorageObjectWithBucketRetry(bucketId, storagePath, { bucketOptions = {}, contentType, body })",
+  "export async function createSignedStorageUrl(bucketId, storagePath, expiresIn = 60 * 60 * 24 * 7)",
+  "export async function downloadStorageObjectWithMetadata(bucketId, storagePath)",
+  "export async function downloadStorageObject(bucketId, storagePath)",
+  "export async function deleteStorageObject(bucketId, storagePath)"
 ]) {
   assert.ok(
-    serverSource.includes(stillInline),
-    `Storage primitive drifted from the 4-5a baseline (still expected inline in server.js): ${stillInline}`
+    supabaseRestSource.includes(moved),
+    `Storage primitive missing from its 4-5b home (api/lib/supabaseRest.js): ${moved}`
+  );
+  const bareDeclaration = moved.replace("export ", "");
+  assert.equal(
+    serverSource.includes(bareDeclaration),
+    false,
+    `Storage primitive should no longer be declared in server.js after 4-5b: ${bareDeclaration}`
   );
 }
 
-// 4-5a baseline: the 8 raw exam-analysis AI fetch functions are still inline
-// in api/server.js, not yet split into their own module (4-5d's target).
-for (const stillInline of [
+// All 8 exam-analysis AI wrapper functions still live in api/server.js
+// (their signatures are unchanged); 4-5d moved only the literal fetch()
+// bodies of the vision-check/boundary-detect pair out to two generic
+// transport functions in commentPolish.js. Row-fill and output-draft
+// still own their fetch() calls inline — deferred past 4-5d because their
+// prompt-building depends on the Ssen-type catalog, a separate concern.
+for (const stillDeclaredInServer of [
   "async function runAnthropicExamAnalysisOutputDraft(prompt, outputType)",
   "async function runOpenAiExamAnalysisOutputDraft(prompt, outputType)",
   "async function runAnthropicPdfVisionCheck(sourceFile, buffer)",
@@ -78,15 +91,33 @@ for (const stillInline of [
   "async function runOpenAiPdfQuestionRowFill(sourceFile, buffer, detail, options = {})"
 ]) {
   assert.ok(
-    serverSource.includes(stillInline),
-    `Exam analysis AI function drifted from the 4-5a baseline (still expected inline in server.js): ${stillInline}`
+    serverSource.includes(stillDeclaredInServer),
+    `exam analysis AI wrapper drifted from its 4-5a/4-5d signature: ${stillDeclaredInServer}`
   );
 }
+
+// 4-5d closeout: the vision-check/boundary-detect pair's raw fetch calls
+// moved to these two generic transport functions in commentPolish.js.
+for (const moved of [
+  "export async function runAnthropicPdfMessage({ buffer, errorMessage, maxTokens = 4000, model, promptText })",
+  "export async function runOpenAiPdfMessage({ buffer, errorMessage, fileName, maxOutputTokens = 4000, model, promptText })"
+]) {
+  assert.ok(
+    commentPolishRouteSource.includes(moved),
+    `4-5d PDF transport function missing from commentPolish.js: ${moved}`
+  );
+}
+// Row-fill/output-draft still own their fetch() calls directly (deferred).
+assert.equal(
+  (serverSource.match(/anthropicMessagesUrl|openAiResponsesUrl/g) ?? []).length > 0,
+  true,
+  "row-fill/output-draft must still reference the server-local AI URL constants"
+);
 
 assert.ok(
   packageJson.scripts["test:production"].includes("npm run test:fourth-pass-provider-boundary-baseline")
 );
 
 console.log(
-  "fourth-pass provider boundary baseline passed · Solapi/Slack/comment-polish already isolated · Storage primitives 7 inline · exam-analysis AI functions 8 inline"
+  "fourth-pass provider boundary baseline passed · Solapi/Slack/comment-polish already isolated · Storage primitives 7 moved to supabaseRest.js · vision-check/boundary-detect transport moved to commentPolish.js · row-fill/output-draft 4 still inline"
 );
