@@ -107,7 +107,12 @@ import {
   createClientRuntimeErrorRateLimiter,
   normalizeClientRuntimeErrorReport
 } from "./domain/clientRuntimeError.js";
-import { getAiStatus, polishLessonComment } from "./routes/commentPolish.js";
+import {
+  getAiStatus,
+  polishLessonComment,
+  runAnthropicPdfMessage,
+  runOpenAiPdfMessage
+} from "./routes/commentPolish.js";
 import {
   getAssignmentStatusMessage,
   getAssignmentStatusParentMessage,
@@ -4708,42 +4713,14 @@ async function generateExamAnalysisOutputDraft({ analysisRunId, outputType, outp
 }
 
 async function runAnthropicPdfVisionCheck(sourceFile, buffer) {
-  const apiKey = apiEnvValue("ANTHROPIC_API_KEY");
-  if (!apiKey) throw new Error("ANTHROPIC_API_KEY 환경변수가 필요합니다.");
   const model = apiEnvValue("ANTHROPIC_EXAM_PDF_MODEL") || apiEnvValue("ANTHROPIC_MODEL") || "claude-sonnet-4-5";
-  const response = await fetch(anthropicMessagesUrl, {
-    method: "POST",
-    headers: {
-      "anthropic-version": "2023-06-01",
-      "content-type": "application/json",
-      "x-api-key": apiKey
-    },
-    body: JSON.stringify({
-      model,
-      max_tokens: 2000,
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "document",
-              source: {
-                type: "base64",
-                media_type: "application/pdf",
-                data: buffer.toString("base64")
-              }
-            },
-            { type: "text", text: buildPdfVisionCheckPrompt(sourceFile) }
-          ]
-        }
-      ]
-    })
+  const rawText = await runAnthropicPdfMessage({
+    buffer,
+    errorMessage: "Claude PDF 검증 요청에 실패했습니다.",
+    maxTokens: 2000,
+    model,
+    promptText: buildPdfVisionCheckPrompt(sourceFile)
   });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.error?.message || "Claude PDF 검증 요청에 실패했습니다.");
-  }
-  const rawText = outputTextFromAnthropicResponse(data);
   return normalizePdfVisionCheckResult({
     provider: "anthropic",
     model,
@@ -4753,39 +4730,15 @@ async function runAnthropicPdfVisionCheck(sourceFile, buffer) {
 }
 
 async function runOpenAiPdfVisionCheck(sourceFile, buffer) {
-  const apiKey = apiEnvValue("OPENAI_API_KEY");
-  if (!apiKey) throw new Error("OPENAI_API_KEY 환경변수가 필요합니다.");
   const model = apiEnvValue("OPENAI_EXAM_PDF_MODEL") || apiEnvValue("OPENAI_MODEL") || "gpt-4.1-mini";
-
-  const response = await fetch(openAiResponsesUrl, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model,
-      input: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "input_file",
-              filename: sourceFile.originalFileName || "exam-source.pdf",
-              file_data: `data:application/pdf;base64,${buffer.toString("base64")}`
-            },
-            { type: "input_text", text: buildPdfVisionCheckPrompt(sourceFile) }
-          ]
-        }
-      ],
-      max_output_tokens: 2000
-    })
+  const rawText = await runOpenAiPdfMessage({
+    buffer,
+    errorMessage: "OpenAI PDF 검증 요청에 실패했습니다.",
+    fileName: sourceFile.originalFileName,
+    maxOutputTokens: 2000,
+    model,
+    promptText: buildPdfVisionCheckPrompt(sourceFile)
   });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.error?.message || "OpenAI PDF 검증 요청에 실패했습니다.");
-  }
-  const rawText = outputTextFromOpenAiResponse(data);
   return normalizePdfVisionCheckResult({
     provider: "openai",
     model,
@@ -4805,42 +4758,14 @@ async function runPdfVisionCheck(sourceFile, buffer) {
 }
 
 async function runAnthropicPdfQuestionBoundaryDetection(sourceFile, buffer, detail) {
-  const apiKey = apiEnvValue("ANTHROPIC_API_KEY");
-  if (!apiKey) throw new Error("ANTHROPIC_API_KEY 환경변수가 필요합니다.");
   const model = apiEnvValue("ANTHROPIC_EXAM_PDF_MODEL") || apiEnvValue("ANTHROPIC_MODEL") || "claude-sonnet-4-5";
-  const response = await fetch(anthropicMessagesUrl, {
-    method: "POST",
-    headers: {
-      "anthropic-version": "2023-06-01",
-      "content-type": "application/json",
-      "x-api-key": apiKey
-    },
-    body: JSON.stringify({
-      model,
-      max_tokens: 6000,
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "document",
-              source: {
-                type: "base64",
-                media_type: "application/pdf",
-                data: buffer.toString("base64")
-              }
-            },
-            { type: "text", text: buildPdfQuestionBoundaryPrompt({ sourceFile, analysisRun: detail.analysisRun, questions: detail.questions }) }
-          ]
-        }
-      ]
-    })
+  const rawText = await runAnthropicPdfMessage({
+    buffer,
+    errorMessage: "Claude 문항 경계 탐지 요청에 실패했습니다.",
+    maxTokens: 6000,
+    model,
+    promptText: buildPdfQuestionBoundaryPrompt({ sourceFile, analysisRun: detail.analysisRun, questions: detail.questions })
   });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.error?.message || "Claude 문항 경계 탐지 요청에 실패했습니다.");
-  }
-  const rawText = outputTextFromAnthropicResponse(data);
   return normalizePdfQuestionBoundaryResult({
     provider: "anthropic",
     model,
@@ -4850,38 +4775,15 @@ async function runAnthropicPdfQuestionBoundaryDetection(sourceFile, buffer, deta
 }
 
 async function runOpenAiPdfQuestionBoundaryDetection(sourceFile, buffer, detail) {
-  const apiKey = apiEnvValue("OPENAI_API_KEY");
-  if (!apiKey) throw new Error("OPENAI_API_KEY 환경변수가 필요합니다.");
   const model = apiEnvValue("OPENAI_EXAM_PDF_MODEL") || apiEnvValue("OPENAI_MODEL") || "gpt-4.1-mini";
-  const response = await fetch(openAiResponsesUrl, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model,
-      input: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "input_file",
-              filename: sourceFile.originalFileName || "exam-source.pdf",
-              file_data: `data:application/pdf;base64,${buffer.toString("base64")}`
-            },
-            { type: "input_text", text: buildPdfQuestionBoundaryPrompt({ sourceFile, analysisRun: detail.analysisRun, questions: detail.questions }) }
-          ]
-        }
-      ],
-      max_output_tokens: 6000
-    })
+  const rawText = await runOpenAiPdfMessage({
+    buffer,
+    errorMessage: "OpenAI 문항 경계 탐지 요청에 실패했습니다.",
+    fileName: sourceFile.originalFileName,
+    maxOutputTokens: 6000,
+    model,
+    promptText: buildPdfQuestionBoundaryPrompt({ sourceFile, analysisRun: detail.analysisRun, questions: detail.questions })
   });
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.error?.message || "OpenAI 문항 경계 탐지 요청에 실패했습니다.");
-  }
-  const rawText = outputTextFromOpenAiResponse(data);
   return normalizePdfQuestionBoundaryResult({
     provider: "openai",
     model,
