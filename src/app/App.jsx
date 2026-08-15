@@ -414,11 +414,10 @@ import {
 import { copyTextToClipboard } from "../domains/exams/outputPreview.js";
 import {
   createDefaultMonthlySettlementState,
-  createMonthlySettlementStateWithMonth,
-  getMonthlySettlementMonthSaveSnapshot,
   monthlySettlementStateKey,
   normalizeMonthlySettlementState
 } from "../domains/settlements/monthlySettlement.js";
+import { saveMonthlySettlementMonthAction } from "../domains/settlements/monthlySettlementMonthSaveApi.js";
 import {
   createDefaultSpecialLectureSettlementState,
   normalizeSpecialLectureSettlementState,
@@ -3485,39 +3484,7 @@ export function App() {
     if (!/^\d{4}-\d{2}$/.test(monthKey)) throw new Error("저장할 정산월을 확인해 주세요.");
     setMonthlySettlementSaveState("saving");
     try {
-      const currentResponse = await fetch(apiUrl("/api/app-state"), { cache: "no-store" });
-      const currentResult = await currentResponse.json();
-      if (!currentResponse.ok || !currentResult.ok || currentResult.source !== "supabase") {
-        throw new Error(currentResult.error || "Supabase의 현재 월별 정산 원천을 불러오지 못했습니다.");
-      }
-      const currentState = normalizeMonthlySettlementState(
-        currentResult.states?.[monthlySettlementStateKey]
-      );
-      const nextState = createMonthlySettlementStateWithMonth(currentState, month);
-      const expectedMonth = nextState.months[monthKey];
-      const saveResult = await postAppState({ [monthlySettlementStateKey]: nextState });
-      if (!saveResult.ok || saveResult.source !== "supabase") {
-        throw new Error(saveResult.error || "월별 정산이 Supabase에 저장되지 않았습니다.");
-      }
-
-      const verifyResponse = await fetch(apiUrl("/api/app-state"), { cache: "no-store" });
-      const verifyResult = await verifyResponse.json();
-      if (!verifyResponse.ok || !verifyResult.ok || verifyResult.source !== "supabase") {
-        throw new Error(verifyResult.error || "월별 정산 저장 결과를 다시 확인하지 못했습니다.");
-      }
-      const persistedState = normalizeMonthlySettlementState(
-        verifyResult.states?.[monthlySettlementStateKey]
-      );
-      const persistedMonth = persistedState.months[monthKey];
-      if (!persistedMonth) {
-        throw new Error("Supabase 재조회에서 저장한 정산월을 찾지 못했습니다.");
-      }
-      if (
-        getMonthlySettlementMonthSaveSnapshot(persistedMonth) !==
-        getMonthlySettlementMonthSaveSnapshot(expectedMonth)
-      ) {
-        throw new Error("Supabase 재조회 값이 수정한 월별 정산과 다릅니다. 저장 완료로 처리하지 않았습니다.");
-      }
+      const { persistedMonth, persistedState } = await saveMonthlySettlementMonthAction(month, { postAppState });
       setMonthlyInstructorSettlements(persistedState);
       setMonthlySettlementSaveState("saved");
       return persistedMonth;
