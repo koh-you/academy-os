@@ -1,4 +1,5 @@
 import { AutosaveRiskNotice } from "../../shared/components/AutosaveRiskNotice.jsx";
+import { Disclosure } from "../../shared/components/Disclosure.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
@@ -81,8 +82,7 @@ export function ExamReviewComposerModal({
               </label>
             ))}
           </div>
-          <details className="examReviewRawDraft">
-            <summary>전체 원문 보기/직접 수정</summary>
+          <Disclosure className="examReviewRawDraft" trigger="전체 원문 보기/직접 수정">
             <textarea
               aria-label="시험 후 기록지 전체 원문"
               className="commentComposerTextarea"
@@ -91,7 +91,7 @@ export function ExamReviewComposerModal({
               onChange={(event) => updateReviewDraft(event.target.value)}
               placeholder="시험 후 기록지 전체 원문"
             />
-          </details>
+          </Disclosure>
           <small className="muted">{row.reviewAiStatus || "AI 대기"}</small>
         </section>
 
