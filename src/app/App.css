@@ -5,10 +5,12 @@
   --academy-border: #d8e3f8;
   --academy-border-strong: #cbd8ee;
   --academy-text: #0f172a;
+  --academy-text-muted: #52647c;
   --academy-muted: #64748b;
   --academy-primary: #17213d;
   --academy-primary-hover: #243252;
   --academy-focus: #2563eb;
+  --academy-focus-ring: #2563eb;
   --academy-radius: 8px;
   --academy-radius-pill: 999px;
   --academy-shadow: 0 12px 28px rgba(30, 64, 175, 0.06);
@@ -36,6 +38,9 @@
   --status-destructive-bg: #fff1f2;
   --status-destructive-border: #fecdd3;
   --status-destructive-text: #dc2626;
+  --status-closure-bg: #e0e7ff;
+  --status-closure-border: #6366f1;
+  --status-closure-text: #3730a3;
   background: var(--academy-page-bg);
   color: var(--academy-text);
   font-family:
