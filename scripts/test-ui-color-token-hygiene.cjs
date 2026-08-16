@@ -21,6 +21,11 @@ function listFiles(directory, predicate, output = []) {
 
 const cssFiles = listFiles(sourceRoot, (filePath) => filePath.endsWith(".css"));
 const colorLiteralPattern = /#[0-9a-fA-F]{3,8}\b|\brgba?\(/g;
+const varCallPattern = /var\([^)]*\)/g;
+
+function valueOutsideVarCalls(value) {
+  return value.replace(varCallPattern, "");
+}
 
 const violations = [];
 
@@ -31,7 +36,7 @@ for (const filePath of cssFiles) {
     if (decl.parent?.selector === ":root") {
       return;
     }
-    const matches = decl.value.match(colorLiteralPattern);
+    const matches = valueOutsideVarCalls(decl.value).match(colorLiteralPattern);
     if (!matches) {
       return;
     }
