@@ -197,7 +197,7 @@ export function TestAttemptActions({
           이 회차 삭제
         </button>
       ) : null}
-      <button className="saveDraftButton" disabled={!canSave || isSaving} onClick={onSaveAttemptSession} type="button">
+      <button className="primaryButton" disabled={!canSave || isSaving} onClick={onSaveAttemptSession} type="button">
         {isSaving ? "저장 중" : "응시 기록 저장"}
       </button>
     </div>

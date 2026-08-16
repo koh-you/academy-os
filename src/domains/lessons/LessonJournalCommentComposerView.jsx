@@ -81,7 +81,7 @@ export function LessonJournalCommentComposerView({
               {localAiStatus === "AI 수정 중" ? "AI 수정 중..." : "AI 수정"}
             </button>
             <button
-              className="saveDraftButton"
+              className="softButton"
               disabled={!hasUnsavedDraft || draftSaveState === "saving"}
               onClick={onSave}
               type="button"
@@ -89,7 +89,7 @@ export function LessonJournalCommentComposerView({
               {draftSaveState === "saving" ? "저장 중" : "최종 문구 저장"}
             </button>
             <button
-              className="sendButton"
+              className="primaryButton"
               disabled={hasUnsavedDraft || isNotificationMuted || (planMode === "none" && !isManualResendAvailable)}
               onClick={onSend}
               title={hasUnsavedDraft ? "최종 문구 저장 후 예약/발송할 수 있습니다." : ""}

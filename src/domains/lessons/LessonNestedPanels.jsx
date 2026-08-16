@@ -473,7 +473,7 @@ export function SupplementMakeupLessonDetail({
             <button className="softButton" disabled={isPassSaving || isTaskDone} onClick={() => setPassConfirmMode("needs_more")} type="button">
               {isPassSaving ? "처리 중" : "추가 보충 필요로 기록"}
             </button>
-            <button className="passButton" disabled={!task || isTaskDone || isPassSaving} onClick={() => setPassConfirmMode("completed")} type="button">
+            <button className="primaryButton" disabled={!task || isTaskDone || isPassSaving} onClick={() => setPassConfirmMode("completed")} type="button">
               {isTaskDone ? "보충 완료됨" : isPassSaving ? "처리 중" : "보충 완료 처리"}
             </button>
           </div>
@@ -515,7 +515,7 @@ export function SupplementMakeupLessonDetail({
             <button className="softButton" disabled={isPassSaving} onClick={() => setPassConfirmMode("")} type="button">
               취소
             </button>
-            <button className="passButton" disabled={isPassSaving} onClick={confirmPassTask} type="button">
+            <button className="primaryButton" disabled={isPassSaving} onClick={confirmPassTask} type="button">
               {isPassSaving ? "처리 중" : passConfirmMode === "needs_more" ? "추가 보충 필요 기록" : "보충 완료 처리"}
             </button>
           </ModalFooter>

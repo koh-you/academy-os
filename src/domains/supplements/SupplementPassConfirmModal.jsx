@@ -35,7 +35,7 @@ export function SupplementPassConfirmModal({ errorMessage = "", getTypeLabel, is
         <button className="softButton" disabled={isBusy} onClick={onCancel} type="button">
           취소
         </button>
-        <button className="passButton" disabled={isBusy} onClick={onConfirm} type="button">
+        <button className="primaryButton" disabled={isBusy} onClick={onConfirm} type="button">
           {isBusy ? "처리 중" : "보충 완료 처리"}
         </button>
       </ModalFooter>

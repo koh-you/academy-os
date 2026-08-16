@@ -66,7 +66,7 @@ export function NotificationComposerPanel({
           예약 발송
         </button>
         <button
-          className="sendButton"
+          className="primaryButton"
           disabled={!noticeText || !noticeRecipientCount || isSendingNotice}
           onClick={onSendNoticeNow}
           type="button"

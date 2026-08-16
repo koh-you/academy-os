@@ -4580,24 +4580,6 @@ summary:focus-visible {
   color: var(--status-danger-text);
 }
 
-.saveDraftButton {
-  background: #dcfce7;
-  border: 1px solid #86efac;
-  border-radius: 8px;
-  color: #166534;
-  font-size: 14px;
-  font-weight: 900;
-  min-height: 38px;
-  padding: 0 14px;
-}
-
-.saveDraftButton:disabled {
-  background: #f1f5f9;
-  border-color: #dbe4f0;
-  color: #94a3b8;
-  cursor: default;
-}
-
 .manualSaveDraftSummary {
   background: #fff7ed;
   border: 1px solid #fdba74;
@@ -8041,7 +8023,6 @@ textarea {
 }
 
 .softButton,
-.sendButton,
 .dangerButton {
   border-radius: 8px;
   font-weight: 900;
@@ -8100,12 +8081,6 @@ textarea {
   background: #eef2ff;
   border: 1px solid #c7d2fe;
   color: #4f46e5;
-}
-
-.sendButton {
-  background: #dcfce7;
-  border: 1px solid #86efac;
-  color: #16a34a;
 }
 
 .dangerButton {
@@ -12941,44 +12916,6 @@ textarea {
   width: 18px;
 }
 
-.studentRestoreButton {
-  background: #eef6ff;
-  border: 1px solid #93c5fd;
-  border-radius: 8px;
-  color: #1d4ed8;
-  font-size: 12px;
-  font-weight: 900;
-  min-height: 32px;
-  padding: 0 8px;
-}
-
-.studentRestoreButton.saving {
-  cursor: wait;
-  opacity: 0.72;
-}
-
-.studentRestoreButton.failed {
-  background: #fff1f2;
-  border-color: #fda4af;
-  color: #be123c;
-}
-
-.studentPermanentDeleteButton {
-  background: #fff1f2;
-  border: 1px solid #fda4af;
-  border-radius: 8px;
-  color: #be123c;
-  font-size: 12px;
-  font-weight: 900;
-  min-height: 32px;
-  padding: 0 8px;
-}
-
-.studentPermanentDeleteButton:disabled {
-  cursor: wait;
-  opacity: 0.65;
-}
-
 .studentRestoreNotice {
   align-items: center;
   background: #eff6ff;
@@ -13234,28 +13171,17 @@ textarea {
   padding: 5px 12px;
 }
 
-.withdrawButton,
-.trashButton {
+.withdrawButton {
   background: transparent;
   border: 0;
+  color: #ea580c;
   font-weight: 900;
   min-height: 32px;
   padding: 0;
 }
 
-.withdrawButton {
-  color: #ea580c;
-}
-
 .withdrawButton::before {
   content: "🔓 ";
-}
-
-.trashButton {
-  border: 1px solid #d8e3f8;
-  border-radius: 999px;
-  color: #64748b;
-  padding: 0 10px;
 }
 
 .studentSaveButton {
@@ -13283,14 +13209,6 @@ textarea {
 .studentSaveButton.dirty {
   background: #1d4ed8;
   border-color: #1d4ed8;
-}
-
-.trashButton:hover,
-.trashButton:focus-visible {
-  background: #fff1f2;
-  border-color: #fecdd3;
-  color: #dc2626;
-  outline: none;
 }
 
 .studentProfilePanel {
@@ -18831,22 +18749,6 @@ textarea.profileEditInput {
   padding: 0 14px;
 }
 
-.passButton {
-  background: var(--status-success-bg);
-  border: 1px solid var(--status-success-border);
-  border-radius: 8px;
-  color: var(--status-success-text);
-  font-weight: 900;
-  min-height: 38px;
-  padding: 0 14px;
-}
-
-.passButton:disabled {
-  background: #f8fafc;
-  border-color: #dbe5f3;
-  color: #64748b;
-  cursor: not-allowed;
-}
 
 .softButton.subtle {
   background: #ffffff;
@@ -19530,18 +19432,10 @@ textarea.profileEditInput {
   color: #047857;
 }
 
-.supplementRowItem .softButton,
-.supplementRowItem .passButton {
+.supplementRowItem .softButton {
   justify-self: end;
   min-width: 108px;
   white-space: nowrap;
-}
-
-.supplementRowItem .passButton:disabled {
-  background: #f8fafc;
-  border-color: #dbe5f3;
-  color: #64748b;
-  cursor: not-allowed;
 }
 
 .supplementRowItem:last-child {
@@ -22198,8 +22092,7 @@ body.attendanceOnlyBody {
     align-self: flex-start;
   }
 
-  .supplementRowItem .softButton,
-  .supplementRowItem .passButton {
+  .supplementRowItem .softButton {
     justify-self: stretch;
     width: 100%;
   }
