@@ -36,3 +36,12 @@
 - `동작 보존 inventory -> 한 의미 단위 분리 -> 전용 검사 -> 전체 회귀` 순서다.
 - 순수 helper/component를 먼저 분리하고 인증, persistence, 출결 polling, notification reconcile, Solapi는 별도 고위험 단위로 다룬다.
 - 문자열이 특정 파일에 존재하는지만 검사하는 테스트는 모듈 분리를 막지 않도록 사용자 동작·export 계약 중심으로 바꾼다.
+
+## UI 디자인 계약
+
+- 색상·간격·타이포·그림자·라운드는 `src/app/App.tokens.css`의 `--academy-*`/`--status-*` 토큰이 유일한 원천이다. 새 하드코딩 색상은 `scripts/test-ui-color-token-hygiene.cjs`(`test:production` 포함)가 차단한다.
+- 버튼은 `docs/ui-button-hierarchy.md`의 6종(primaryButton/softButton/ghostButton/dangerSoftButton/dangerButton/iconButton)만 쓴다. 화면당 primary 1개, 취소는 왼쪽·확정은 오른쪽, 위험 동작은 2단계 확인이다.
+- 접기/펼치기는 장식이 아니다. 모달·패널 내용이 길어서 스크롤만으로 훑기 부담스러울 때, 필요한 부분만 펼쳐보게 하려는 목적이다. 그 목적에 맞을 때만 `src/shared/components/Disclosure.jsx`를 쓰고, 짧은 내용에는 기본으로 붙이지 않는다.
+- 화면의 큰 구성(탭 배치, 목록/상세 레이아웃, 진입 동선)은 유지한다. 반면 모달 내부·상세 화면처럼 지엽적인 부분은 기존 모양을 그대로 재현할 필요 없다 - 위 토큰·버튼·접기 규칙과 업계 표준(headless) 패턴으로 다시 짜도 된다. 판단 기준은 "기능이 그대로 동작하고, 사용자가 화면을 보고 바로 알아볼 수 있는가"이지 픽셀 단위 재현이 아니다.
+- 새 상호작용 컴포넌트(토글/드롭다운/탭 등)가 필요하면 헤드리스 패턴을 따른다 - 컴포넌트가 상태·ARIA·트랜지션을 소유하고 스타일은 `className` prop으로 주입한다(Radix UI/Headless UI 방식).
+- 새 UI를 만들기 전 `src/shared/components/`에 이미 있는지 먼저 확인한다.
