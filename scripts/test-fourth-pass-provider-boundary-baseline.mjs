@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [serverSource, notificationsRouteSource, commentPolishRouteSource, resourceStorageOperationSource, supabaseRestSource, packageJson] = await Promise.all([
+const [serverSource, notificationsRouteSource, commentPolishRouteSource, ssenCatalogSource, resourceStorageOperationSource, supabaseRestSource, packageJson] = await Promise.all([
   readFile(new URL("../api/server.js", import.meta.url), "utf8"),
   readFile(new URL("../api/routes/notifications.js", import.meta.url), "utf8"),
   readFile(new URL("../api/routes/commentPolish.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/shared/server/examAnalysisSsenCatalog.js", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/resources/resourceMaterialStorageOperation.js", import.meta.url), "utf8"),
   readFile(new URL("../api/lib/supabaseRest.js", import.meta.url), "utf8"),
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse)
@@ -74,26 +75,41 @@ for (const moved of [
   );
 }
 
-// All 8 exam-analysis AI wrapper functions still live in api/server.js
-// (their signatures are unchanged); 4-5d moved only the literal fetch()
-// bodies of the vision-check/boundary-detect pair out to two generic
-// transport functions in commentPolish.js. Row-fill and output-draft
-// still own their fetch() calls inline — deferred past 4-5d because their
-// prompt-building depends on the Ssen-type catalog, a separate concern.
+// The vision-check/boundary-detect wrappers keep server-side normalization.
 for (const stillDeclaredInServer of [
-  "async function runAnthropicExamAnalysisOutputDraft(prompt, outputType)",
-  "async function runOpenAiExamAnalysisOutputDraft(prompt, outputType)",
   "async function runAnthropicPdfVisionCheck(sourceFile, buffer)",
   "async function runOpenAiPdfVisionCheck(sourceFile, buffer)",
   "async function runAnthropicPdfQuestionBoundaryDetection(sourceFile, buffer, detail)",
-  "async function runOpenAiPdfQuestionBoundaryDetection(sourceFile, buffer, detail)",
-  "async function runAnthropicPdfQuestionRowFill(sourceFile, buffer, detail, options = {})",
-  "async function runOpenAiPdfQuestionRowFill(sourceFile, buffer, detail, options = {})"
+  "async function runOpenAiPdfQuestionBoundaryDetection(sourceFile, buffer, detail)"
 ]) {
   assert.ok(
     serverSource.includes(stillDeclaredInServer),
     `exam analysis AI wrapper drifted from its 4-5a/4-5d signature: ${stillDeclaredInServer}`
   );
+}
+
+// 4-5g: row-fill/output-draft provider wrappers reuse the generic transports;
+// prompt construction, provider choice, parsing, and normalization stay in server.js.
+for (const moved of [
+  "export async function runAnthropicExamAnalysisOutputDraft({ model, outputType, prompt })",
+  "export async function runOpenAiExamAnalysisOutputDraft({ model, outputType, prompt })",
+  "export function runAnthropicPdfQuestionRowFill({ buffer, model, promptText })",
+  "export function runOpenAiPdfQuestionRowFill({ buffer, fileName, model, promptText })"
+]) {
+  assert.ok(commentPolishRouteSource.includes(moved), `4-5g provider wrapper missing: ${moved}`);
+  assert.equal(serverSource.includes(moved), false, `4-5g provider wrapper must not be declared in server.js: ${moved}`);
+}
+
+for (const moved of [
+  "export function inferExamAnalysisSubjectFromText",
+  "export function sanitizeExamAnalysisSubject",
+  "export function getExamAnalysisSsenSubject",
+  "export function getSsenTypesForExamAnalysis",
+  "export function getSsenTypeCatalogForExamAnalysis",
+  "export function formatSsenTypeCandidatesForPrompt"
+]) {
+  assert.ok(ssenCatalogSource.includes(moved), `4-5g Ssen catalog export missing: ${moved}`);
+  assert.equal(serverSource.includes(moved), false, `4-5g Ssen catalog helper must not be declared in server.js: ${moved}`);
 }
 
 // 4-5d closeout: the vision-check/boundary-detect pair's raw fetch calls
@@ -107,17 +123,14 @@ for (const moved of [
     `4-5d PDF transport function missing from commentPolish.js: ${moved}`
   );
 }
-// Row-fill/output-draft still own their fetch() calls directly (deferred).
 assert.equal(
-  (serverSource.match(/anthropicMessagesUrl|openAiResponsesUrl/g) ?? []).length > 0,
-  true,
-  "row-fill/output-draft must still reference the server-local AI URL constants"
+  (serverSource.match(/anthropicMessagesUrl|openAiResponsesUrl/g) ?? []).length,
+  0,
+  "server.js should no longer own provider URL constants after 4-5g"
 );
 
 assert.ok(
   packageJson.scripts["test:production"].includes("npm run test:fourth-pass-provider-boundary-baseline")
 );
 
-console.log(
-  "fourth-pass provider boundary baseline passed · Solapi/Slack/comment-polish already isolated · Storage primitives 7 moved to supabaseRest.js · vision-check/boundary-detect transport moved to commentPolish.js · row-fill/output-draft 4 still inline"
-);
+console.log("fourth-pass provider boundary baseline passed · 4-5g row-fill/output wrappers and Ssen catalog isolated");

@@ -231,7 +231,8 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 - 4-5a~d는 provider 기준선, Storage primitive 7개 이동, 시험분석 download/delete operations 주입, vision-check·boundary-detect PDF transport 분리까지 통합 검수했다. Anthropic 응답 `content` fallback/trim 호환성은 동작 fixture로 복원·고정했다.
 - 4-5e는 공통 provider result envelope를 정의하고 pure fixture로 shape만 고정했다. 기존 orchestrator에 적용하면 throw/복구 의미가 바뀔 수 있으므로 아직 채택하지 않았다. notification source/provider orchestration 적용과 provider route registry는 후속 안전 단위다.
 - 4-5f 첫 안전 단위는 시험분석 AI POST 5개를 frozen route registry로 이동했다. 최신 main의 Storage operations 주입을 registry dependency로 보존하고 pure route fixture로 고정했다. notification/Solapi/Slack dispatch registry는 아직 남아 있다.
-- 4-5g(row-fill/output-draft AI + 쎈 catalog)·4-5h(notification-jobs/Solapi/Slack route registry)·4-5i(provider envelope를 실제 orchestrator에 적용)는 얽힘·사람 검증 필요·복구 의미 변경 위험으로 4-8에서 별도 차수로 이연했다.
+- 4-5g는 쎈 catalog/과목 추론 311줄을 `src/shared/server`로 이동하고 row-fill/output-draft provider wrapper 4개를 기존 DB-free transport에 연결했다. prompt/model 선택/parse/normalize와 DB/event orchestration은 server에 유지했으며 Vercel API 함수 수 12/12를 보존했다.
+- 4-5h(notification-jobs/Solapi/Slack route registry)·4-5i(provider envelope를 실제 orchestrator에 적용)는 얽힘·사람 검증 필요·복구 의미 변경 위험으로 4-8에서 별도 차수로 이연했다.
 
 ## 4-6 진행 상태
 
@@ -249,4 +250,4 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 ## 4-8 종료 감사
 
 - 4-0 수치와 종료 수치 비교, 소유권 지도 재검증, 미완료 후보 분류는 `docs/app-refactor-fourth-pass-4-8-closeout.md`에 고정했다.
-- 4-6c, 4-5g/h/i, lesson/auth spec 이름 분리는 별도 차수로 이연하고 4차 리팩터링 범위를 닫는다.
+- 4-6c, 4-5h/i는 별도 차수로 이연하고 4차 리팩터링 범위를 닫는다.

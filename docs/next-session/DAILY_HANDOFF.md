@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-16
 
+## 2026-08-16 App/API 4차 리팩터링 4-5g
+
+- 독립 브랜치 `codex/app-refactor-fourth-pass-4-5g-ai-catalog`에서 쎈 catalog/과목 추론 311줄과 row-fill/output-draft provider wrapper 4개를 분리했다. prompt·provider 선택·parse/normalize·DB/event orchestration은 server에 남아 있다.
+- `api/` JS는 Vercel 함수 수에 포함되므로 새 module을 그 아래 추가하지 않는다. 쎈 module은 `src/shared/server`, provider wrapper는 기존 `api/routes/commentPolish.js`에 둬 12/12를 유지했다.
+- focused fixture, production `305/305`, scenario `828/828`, lint/typecheck, safe browser `77/77` 통과. 실제 AI/DB side effect 없음. main 병합 전 사용자 승인이 필요하며, 다음 독립 단위는 4-5h notification/Solapi/Slack route registry다.
+
 ## 2026-08-16 App/API 4차 리팩터링 4-5f
 
 - Claude Code는 시험분석 AI POST 5개를 `examAnalysisAiRouteRegistry`로 이동한 `dd1513307`까지 완료·push했다. 최신 main 기준 검토 브랜치는 `codex/integration-4-5f-reviewed`다.
