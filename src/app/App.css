@@ -8398,27 +8398,6 @@ button:disabled {
   line-height: 1.45;
 }
 
-.noticeHistoryCollapsedSummary {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px dashed var(--academy-border-strong, #cbd8ee);
-  border-radius: 8px;
-  display: grid;
-  gap: 5px;
-  padding: 14px;
-}
-
-.noticeHistoryCollapsedSummary strong {
-  color: var(--academy-primary, #17213d);
-  font-size: 15px;
-  font-weight: 900;
-}
-
-.noticeHistoryCollapsedSummary span {
-  color: var(--academy-muted, #64748b);
-  font-size: 13px;
-  font-weight: 900;
-}
-
 .integrationStatusGrid {
   display: grid;
   gap: 12px;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import "./Disclosure.css";
 
 function joinClassNames(...values) {
@@ -25,12 +25,15 @@ export function Disclosure({
   bodyClassName = "",
   hideTrigger = false,
   collapsedContent = null,
+  id,
   children,
   ...props
 }) {
   const isControlled = openProp !== undefined;
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
   const open = isControlled ? openProp : internalOpen;
+  const generatedBodyId = useId();
+  const bodyId = hideTrigger ? undefined : (id ?? generatedBodyId);
 
   function handleToggle() {
     const next = !open;
@@ -41,11 +44,17 @@ export function Disclosure({
   }
 
   return (
-    <div className={joinClassNames("disclosure", className)} data-open={open} {...props}>
+    <div
+      className={joinClassNames("disclosure", className)}
+      data-open={open}
+      id={hideTrigger ? id : undefined}
+      {...props}
+    >
       {!hideTrigger ? (
         <button
           type="button"
           className={joinClassNames("disclosureTrigger", triggerClassName)}
+          aria-controls={bodyId}
           aria-expanded={open}
           onClick={handleToggle}
         >
@@ -54,7 +63,7 @@ export function Disclosure({
         </button>
       ) : null}
       <div className="disclosureBody">
-        <div className={joinClassNames("disclosureBodyInner", bodyClassName)} aria-hidden={!open}>
+        <div className={joinClassNames("disclosureBodyInner", bodyClassName)} aria-hidden={!open} id={bodyId}>
           {children}
         </div>
       </div>

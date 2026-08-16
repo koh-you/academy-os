@@ -53,7 +53,7 @@ for (const viewContract of [
   'label="퇴원생 선택"',
   "onClick={saveSelectedWithdrawnStudents}",
   "getSingleSelectedWithdrawnStudent(\"퇴원 취소\")",
-  "studentPermanentDeleteButton"
+  "영구 삭제"
 ]) {
   assert.ok(listSource.includes(viewContract), `list must retain ${viewContract}`);
 }

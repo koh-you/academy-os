@@ -371,6 +371,7 @@ export function SupplementCenter({
         {activeSupplementTab === "absence_makeup" && activeDeferredAbsenceItems.length > 0 ? (
           <Disclosure
             className="supplementDeferredPanel"
+            id="future-absence-list"
             open={isFutureAbsenceOpen}
             onToggle={setIsFutureAbsenceOpen}
             trigger={(

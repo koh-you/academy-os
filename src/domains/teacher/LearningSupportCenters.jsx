@@ -241,6 +241,7 @@ function WrongProblemBoard({
       </FilterBar>
 
       <Disclosure
+        id="wrong-board-diagnosis-content"
         open={isDiagnosisOpen}
         onToggle={setIsDiagnosisOpen}
         trigger={`🔍 커리큘럼 진단 | 보드 ${filteredBooks.length}개 · 이 학생 연결: ${selectedStudent ? 1 : 0}개 · 표시 교재: ${filteredBooks.length}개`}
