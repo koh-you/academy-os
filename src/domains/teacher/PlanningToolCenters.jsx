@@ -20,6 +20,7 @@ import {
   joinCalendarLabel
 } from "../schoolCalendar/schoolCalendarUtils.js";
 import { AutosaveRiskNotice } from "../../shared/components/AutosaveRiskNotice.jsx";
+import { Disclosure } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
@@ -974,19 +975,19 @@ export function LessonResearchCenter({
               tabIndex={0}
             >
               {catalogUnits.map((chapter) => (
-                <details className="researchTypeChapter" key={chapter.id} open>
-                  <summary>
+                <Disclosure bodyClassName="researchTypeUnitList" className="researchTypeChapter" defaultOpen key={chapter.id} trigger={(
+                  <>
                     <strong>{chapter.title}</strong>
                     <span>{chapter.units.reduce((sum, unit) => sum + unit.types.length, 0)}개 유형</span>
-                  </summary>
-                  <div className="researchTypeUnitList">
+                  </>
+                )}>
                     {chapter.units.map((unit) => (
-                      <details className="researchTypeUnit" key={unit.id}>
-                        <summary>
+                      <Disclosure bodyClassName="researchTypeNodeList" className="researchTypeUnit" key={unit.id} trigger={(
+                        <>
                           <b>{unit.title}</b>
                           <span>{unit.types.length}개</span>
-                        </summary>
-                        <div className="researchTypeNodeList">
+                        </>
+                      )}>
                           {unit.types.map((type) => (
                             <button className="researchTypeNode" key={type.id} onClick={() => handleAddTypeLessonPlan(type, chapter, unit)} type="button">
                               <span>
@@ -996,11 +997,9 @@ export function LessonResearchCenter({
                               <b>교안</b>
                             </button>
                           ))}
-                        </div>
-                      </details>
+                      </Disclosure>
                     ))}
-                  </div>
-                </details>
+                </Disclosure>
               ))}
             </div>
           </div>
