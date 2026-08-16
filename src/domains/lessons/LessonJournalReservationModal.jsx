@@ -122,7 +122,7 @@ export function LessonJournalReservationModal({
           </button>
         ) : null}
         {canScheduleTodayTwoPm ? (
-          <button className="sendButton" onClick={onScheduleTodayTwoPm} type="button">
+          <button className="primaryButton" onClick={onScheduleTodayTwoPm} type="button">
             오늘 14:00 일괄예약
           </button>
         ) : null}

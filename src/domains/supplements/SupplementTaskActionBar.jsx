@@ -27,7 +27,7 @@ export function SupplementTaskActionBar({
         {isScheduleBusy ? "일정 저장 중" : scheduleActionLabel || "수업일지 일정 만들기"}
       </button>
       {!isLocalDraftTask ? (
-        <button className="passButton" disabled={isTaskBusy} onClick={onPass} title="보충 완료 처리" type="button">
+        <button className="primaryButton" disabled={isTaskBusy} onClick={onPass} title="보충 완료 처리" type="button">
           {isPassBusy ? "처리 중" : "보충 완료 처리"}
         </button>
       ) : null}

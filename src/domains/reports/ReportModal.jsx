@@ -48,7 +48,7 @@ export function ReportModal({ onClose, onMockSend, onSaveSnapshot, report }) {
         <button className="softButton" disabled={isSaving} onClick={() => onSaveSnapshot(report)} type="button">
           {isSaving ? "저장 확인 중" : "스냅샷 저장"}
         </button>
-        <button className="sendButton" disabled={isSaving} onClick={() => onMockSend(report)} type="button">
+        <button className="primaryButton" disabled={isSaving} onClick={() => onMockSend(report)} type="button">
           {isSaving ? "저장 확인 중" : "모의 발송"}
         </button>
       </ModalFooter>

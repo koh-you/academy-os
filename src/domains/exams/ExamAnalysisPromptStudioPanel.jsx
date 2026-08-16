@@ -375,7 +375,7 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
             </div>
             {draft.roleInputs.keyQuestions.length ? draft.roleInputs.keyQuestions.map((question, index) => (
               <div className="examPromptQuestionCard" key={question.blockId || index}>
-              <div className="examPromptQuestionTitle"><b>주요문항 {index + 1}</b><span>문제 crop·손풀이 ID가 없으면 누락으로 유지</span><button className="textButton danger" onClick={() => removeKeyQuestion(index)} type="button">삭제</button></div>
+              <div className="examPromptQuestionTitle"><b>주요문항 {index + 1}</b><span>문제 crop·손풀이 ID가 없으면 누락으로 유지</span><button className="ghostButton dangerText" onClick={() => removeKeyQuestion(index)} type="button">삭제</button></div>
               <div className="examPromptFieldGrid compact">
                 <PromptField label="문항 번호" value={question.questionNumber} onChange={(value) => updateKeyQuestion(index, "questionNumber", value)} />
                 <PromptField label="카드 제목" value={question.title} onChange={(value) => updateKeyQuestion(index, "title", value)} />
