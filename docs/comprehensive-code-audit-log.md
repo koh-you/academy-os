@@ -126,5 +126,20 @@ docs/comprehensive-code-audit-log.md 파일을 먼저 읽고, "진행 상태" �
 | 시험분석 AI 파이프라인 1,750줄 | 압축 대상 아님, 물리적 위치만 조정 후보 |
 | 출결/알림 핵심 로직(`handleAttendanceCheck` 등) | 복잡하지만 응집도 높음, 재설계보다 현행 유지가 안전 |
 
+## 자동 도구 발견 (통독과 병행, 2026-08-16)
+
+읽기만으로는 커버 범위가 느려서 결정론적 도구 2개를 프로젝트에 추가했다(`npm run check:duplication`, `npm run check:orphans`). 매 세션 전체 통독을 반복하지 않고도 최신 상태를 몇 초 만에 재확인할 수 있다.
+
+**`npm run check:duplication` (jscpd)**: `api/server.js` 5680~7245줄의 82개 직접 dispatch 블록 중복을 213ms 만에 정확한 줄 범위로 확인 — 위 "압축 방향"과 정확히 일치. 단, App.jsx-server.js 알림 문구 중복(변수명이 달라 리터럴 매칭 안 됨)은 못 잡았다 — 이런 "이름만 바꾼 재구현"은 도구가 아니라 읽기로만 찾을 수 있다는 걸 확인.
+
+**`npm run check:orphans` (dependency-cruiser)**: 어디서도 import 안 되는 고아 모듈 5개 발견 (457개 모듈, 918개 의존관계 분석에 몇 초):
+- `src/shared/server/routeRegistryTypes.js`
+- `src/shared/contracts/providerResultContract.js` — **주의**: 4-5e에서 의도적으로 아직 실제 orchestrator에 안 붙인 pure fixture 모듈. 죽은 코드 아님, 고아로 뜨는 게 정상.
+- `src/domains/supplements/useSupplementNotificationDraftSelectionState.js`
+- `src/domains/lessons/lessonJournalRecordBulkApi.js`
+- `src/domains/lessons/lessonJournalHomeworkBulkApi.js`
+
+나머지 4개는 아직 확인 안 함 — 다음 세션에서 각각 (a) 정말 죽은 코드인지 (b) `providerResultContract.js`처럼 의도적으로 대기 중인 모듈인지 판별 필요. `grep -rn "<파일명 없이 export 이름>"`으로 동적 import(`import("...")`)나 파일 경로 문자열로만 참조되는 경우가 아닌지도 확인할 것 — dependency-cruiser는 정적 import만 추적하므로 오탐 가능.
+
 **다음 시작 지점**: `api/routes/coreData.js` (4,907줄) 처음부터.
 
