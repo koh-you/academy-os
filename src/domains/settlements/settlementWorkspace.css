@@ -5,8 +5,8 @@
 
 .settlementWorkspaceTabs {
   align-items: center;
-  background: #eef3fa;
-  border: 1px solid #d9e3f1;
+  background: var(--status-info-bg, #eff6ff);
+  border: 1px solid var(--status-info-border, #bfdbfe);
   border-radius: 12px;
   display: flex;
   gap: 6px;
@@ -20,7 +20,7 @@
   background: transparent;
   border: 1px solid transparent;
   border-radius: 9px;
-  color: #52647c;
+  color: var(--academy-text-muted, #52647c);
   cursor: pointer;
   font-size: 13px;
   font-weight: 800;
@@ -29,15 +29,15 @@
 }
 
 .settlementWorkspaceTabs button:hover {
-  background: #f8fbff;
-  color: #253a59;
+  background: var(--status-info-bg, #eff6ff);
+  color: var(--academy-text-muted, #52647c);
 }
 
 .settlementWorkspaceTabs button.active {
-  background: #16233f;
-  border-color: #16233f;
-  box-shadow: 0 4px 10px rgba(22, 35, 63, 0.16);
-  color: #fff;
+  background: var(--academy-primary, #17213d);
+  border-color: var(--academy-primary, #17213d);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--academy-primary, #17213d) 16%, transparent);
+  color: var(--academy-surface, #fff);
 }
 
 .settlementWorkspacePanel {

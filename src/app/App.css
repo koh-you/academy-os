@@ -5,6 +5,7 @@
   --academy-border: #d8e3f8;
   --academy-border-strong: #cbd8ee;
   --academy-text: #0f172a;
+  --academy-text-muted: #52647c;
   --academy-muted: #64748b;
   --academy-primary: #17213d;
   --academy-primary-hover: #243252;
@@ -27,6 +28,7 @@
   --status-pending-bg: #fff7ed;
   --status-pending-border: #fed7aa;
   --status-pending-text: #c2410c;
+  --status-pending-strong: #d8860b;
   --status-success-bg: #ecfdf5;
   --status-success-border: #86efac;
   --status-success-text: #047857;
@@ -36,6 +38,11 @@
   --status-destructive-bg: #fff1f2;
   --status-destructive-border: #fecdd3;
   --status-destructive-text: #dc2626;
+  --status-closure-bg: #e0e7ff;
+  --status-closure-border: #6366f1;
+  --status-closure-text: #3730a3;
+  --status-makeup-bg: #ede9fe;
+  --status-makeup-text: #5b3b91;
   background: var(--academy-page-bg);
   color: var(--academy-text);
   font-family:

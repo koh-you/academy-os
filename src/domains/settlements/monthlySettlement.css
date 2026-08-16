@@ -56,10 +56,10 @@
 
 .monthlySettlementRuleNotice {
   align-items: center;
-  background: #f7faff;
-  border: 1px solid #cbdcf5;
+  background: var(--status-info-bg, #eff6ff);
+  border: 1px solid var(--status-info-border, #bfdbfe);
   border-radius: 14px;
-  color: #42536b;
+  color: var(--academy-text-muted, #52647c);
   display: flex;
   flex-wrap: wrap;
   gap: 8px 16px;
@@ -67,7 +67,7 @@
 }
 
 .monthlySettlementRuleNotice strong {
-  color: #214c8a;
+  color: var(--status-info-text, #1d4ed8);
 }
 
 .monthlySettlementRuleNotice span {
@@ -77,7 +77,7 @@
 }
 
 .monthlySettlementRuleNotice span + span {
-  border-left: 1px solid #cbdcf5;
+  border-left: 1px solid var(--status-info-border, #bfdbfe);
   padding-left: 16px;
 }
 
@@ -86,25 +86,25 @@
 }
 
 .monthlySettlementRateWarning {
-  background: #fff8e8;
-  border: 1px solid #f1d28b;
+  background: var(--status-pending-bg, #fff7ed);
+  border: 1px solid var(--status-pending-border, #fed7aa);
   border-radius: 12px;
-  color: #7a5515;
+  color: var(--status-pending-text, #c2410c);
   font-size: 13px;
   padding: 10px 12px;
 }
 
 .monthlySettlementExcludedNotice {
-  background: #f3f6fa;
-  border: 1px solid #cbd5e1;
+  background: var(--status-info-bg, #eff6ff);
+  border: 1px solid var(--academy-border-strong, #cbd8ee);
   border-radius: 12px;
-  color: #52657e;
+  color: var(--academy-text-muted, #52647c);
   font-size: 13px;
   padding: 10px 12px;
 }
 
 .monthlySettlementTableWrap {
-  border: 1px solid #d7e1ef;
+  border: 1px solid var(--status-info-border, #bfdbfe);
   border-radius: 14px;
   max-width: 100%;
   overflow: auto;
@@ -118,9 +118,9 @@
 }
 
 .monthlySettlementTable th {
-  background: #f4f7fc;
-  border-bottom: 1px solid #d7e1ef;
-  color: #53657d;
+  background: var(--status-info-bg, #eff6ff);
+  border-bottom: 1px solid var(--status-info-border, #bfdbfe);
+  color: var(--academy-text-muted, #52647c);
   font-size: 12px;
   padding: 11px 9px;
   position: sticky;
@@ -131,7 +131,7 @@
 }
 
 .monthlySettlementTable td {
-  border-bottom: 1px solid #e7edf6;
+  border-bottom: 1px solid var(--academy-border, #d8e3f8);
   min-width: 130px;
   padding: 10px 9px;
   vertical-align: top;
@@ -142,23 +142,23 @@
 }
 
 .monthlySettlementTable tr.monthlySettlementWarningRow > td {
-  background: #fff8e8;
-  border-bottom-color: #efcf88;
+  background: var(--status-pending-bg, #fff7ed);
+  border-bottom-color: var(--status-pending-border, #fed7aa);
 }
 
 .monthlySettlementTable tr.monthlySettlementWarningRow > td:first-child {
-  background: #fff1d2;
-  border-left: 4px solid #d8860b;
+  background: var(--status-pending-bg, #fff7ed);
+  border-left: 4px solid var(--status-pending-strong, #d8860b);
   padding-left: 7px;
 }
 
 .monthlySettlementTable tr.monthlySettlementWarningRow .monthlySettlementAmountCell span {
-  color: #925b08;
+  color: var(--status-pending-text, #c2410c);
   font-weight: 700;
 }
 
 .monthlySettlementTable td:nth-child(1) {
-  background: #fff;
+  background: var(--academy-surface, #fff);
   left: 0;
   min-width: 150px;
   position: sticky;
@@ -184,8 +184,8 @@
 
 .monthlySettlementFinalCountEditor {
   align-items: end;
-  background: #f4f8ff;
-  border: 1px solid #bdd2f1;
+  background: var(--status-info-bg, #eff6ff);
+  border: 1px solid var(--status-info-border, #bfdbfe);
   border-radius: 12px;
   display: grid;
   gap: 12px;
@@ -200,8 +200,8 @@
 }
 
 .monthlySettlementFinalCountEditor input {
-  background: #fff;
-  border: 1px solid #9ebbe2;
+  background: var(--academy-surface, #fff);
+  border: 1px solid var(--status-info-border, #bfdbfe);
   border-radius: 8px;
   font-size: 16px;
   font-weight: 800;
@@ -211,15 +211,15 @@
 }
 
 .monthlySettlementFinalCountEditor small {
-  color: #65758c;
+  color: var(--academy-text-muted, #52647c);
   font-size: 11px;
 }
 
 .monthlySettlementTable input,
 .monthlySettlementTable select,
 .monthlySettlementTable textarea {
-  background: #fff;
-  border: 1px solid #cbd7e7;
+  background: var(--academy-surface, #fff);
+  border: 1px solid var(--academy-border-strong, #cbd8ee);
   border-radius: 8px;
   box-sizing: border-box;
   font-size: 12px;
@@ -231,8 +231,8 @@
 .monthlySettlementTable input:disabled,
 .monthlySettlementTable select:disabled,
 .monthlySettlementTable textarea:disabled {
-  background: #eef2f6;
-  color: #8491a3;
+  background: var(--academy-surface-muted, #f8fafc);
+  color: var(--academy-muted, #64748b);
   cursor: not-allowed;
 }
 
@@ -242,7 +242,7 @@
 }
 
 .monthlySettlementTable small {
-  color: #718096;
+  color: var(--academy-muted, #64748b);
   display: block;
   font-size: 11px;
   line-height: 1.45;
@@ -256,18 +256,18 @@
 }
 
 .monthlySettlementStudentCell strong {
-  color: #24364d;
+  color: var(--academy-text-muted, #52647c);
   font-size: 14px;
 }
 
 .monthlySettlementStudentCell span {
-  color: #718096;
+  color: var(--academy-muted, #64748b);
   font-size: 11px;
   margin-top: 4px;
 }
 
 .monthlySettlementStudentCell em {
-  color: #a25c13;
+  color: var(--status-pending-text, #c2410c);
   font-size: 10px;
   font-style: normal;
   font-weight: 700;
@@ -275,18 +275,18 @@
 }
 
 .monthlySettlementStudentCell .monthlySettlementAutoMode {
-  background: #e9f8f1;
-  border: 1px solid #a7dfc4;
+  background: var(--status-success-bg, #ecfdf5);
+  border: 1px solid var(--status-success-border, #86efac);
   border-radius: 999px;
-  color: #19704b;
+  color: var(--status-success-text, #047857);
   padding: 3px 7px;
   width: fit-content;
 }
 
 .monthlySettlementStudentCell .monthlySettlementRowWarning {
-  background: #d8860b;
+  background: var(--status-pending-strong, #d8860b);
   border-radius: 999px;
-  color: #fff;
+  color: var(--academy-surface, #fff);
   padding: 3px 7px;
   width: fit-content;
 }
@@ -299,7 +299,7 @@
 }
 
 .monthlySettlementMoneyInput span {
-  color: #64748b;
+  color: var(--academy-muted, #64748b);
   font-size: 11px;
 }
 
@@ -309,7 +309,7 @@
 }
 
 .monthlySettlementFixedPeriod {
-  color: #52657e;
+  color: var(--academy-text-muted, #52647c);
   display: block;
   font-size: 12px;
   line-height: 1.5;
@@ -317,10 +317,10 @@
 }
 
 .monthlySettlementCountButton {
-  background: #eef5ff;
-  border: 1px solid #bad2f4;
+  background: var(--status-info-bg, #eff6ff);
+  border: 1px solid var(--status-info-border, #bfdbfe);
   border-radius: 8px;
-  color: #24528f;
+  color: var(--status-info-text, #1d4ed8);
   cursor: pointer;
   font-size: 12px;
   font-weight: 700;
@@ -331,7 +331,7 @@
 }
 
 .monthlySettlementCountButton:hover {
-  background: #e1edff;
+  background: var(--status-info-bg, #eff6ff);
 }
 
 .monthlySettlementAmountCell strong,
@@ -340,25 +340,25 @@
 }
 
 .monthlySettlementAmountCell strong {
-  color: #174f37;
+  color: var(--status-success-text, #047857);
   font-size: 14px;
   white-space: nowrap;
 }
 
 .monthlySettlementAmountCell span {
-  color: #718096;
+  color: var(--academy-muted, #64748b);
   font-size: 11px;
   margin-top: 5px;
 }
 
 .monthlySettlementRestoreButton {
-  background: #eef6ff;
-  border: 1px solid #9ec0e8;
-  color: #24588f;
+  background: var(--status-info-bg, #eff6ff);
+  border: 1px solid var(--status-info-border, #bfdbfe);
+  color: var(--status-info-text, #1d4ed8);
 }
 
 .monthlySettlementRestoreButton:hover {
-  background: #dfedff;
+  background: var(--status-info-bg, #eff6ff);
 }
 
 .monthlySettlementSubsectionHeader {
@@ -369,22 +369,22 @@
 }
 
 .monthlySettlementSubsectionHeader h2 {
-  color: #263b55;
+  color: var(--academy-text-muted, #52647c);
   font-size: 18px;
   margin: 0;
 }
 
 .monthlySettlementSubsectionHeader p {
-  color: #718096;
+  color: var(--academy-muted, #64748b);
   font-size: 12px;
   margin: 5px 0 0;
 }
 
 .monthlySettlementSubsectionHeader > span {
-  background: #eaf4ff;
-  border: 1px solid #bad2f4;
+  background: var(--status-info-bg, #eff6ff);
+  border: 1px solid var(--status-info-border, #bfdbfe);
   border-radius: 999px;
-  color: #24528f;
+  color: var(--status-info-text, #1d4ed8);
   flex: 0 0 auto;
   font-size: 11px;
   font-weight: 800;
@@ -392,14 +392,14 @@
 }
 
 .monthlySettlementExcludedPanel {
-  background: #f8fafc;
-  border: 1px solid #cbd5e1;
+  background: var(--academy-surface-muted, #f8fafc);
+  border: 1px solid var(--academy-border-strong, #cbd8ee);
   border-radius: 12px;
   overflow: hidden;
 }
 
 .monthlySettlementExcludedPanel summary {
-  color: #52657e;
+  color: var(--academy-text-muted, #52647c);
   cursor: pointer;
   font-size: 13px;
   font-weight: 800;
@@ -407,7 +407,7 @@
 }
 
 .monthlySettlementExcludedList {
-  border-top: 1px solid #dce4ee;
+  border-top: 1px solid var(--academy-border-strong, #cbd8ee);
   display: grid;
 }
 
@@ -420,7 +420,7 @@
 }
 
 .monthlySettlementExcludedList > div + div {
-  border-top: 1px solid #e7edf4;
+  border-top: 1px solid var(--academy-border, #d8e3f8);
 }
 
 .monthlySettlementExcludedList span,
@@ -430,12 +430,12 @@
 }
 
 .monthlySettlementExcludedList strong {
-  color: #34475f;
+  color: var(--academy-text-muted, #52647c);
   font-size: 13px;
 }
 
 .monthlySettlementExcludedList small {
-  color: #7a8797;
+  color: var(--academy-text-muted, #52647c);
   font-size: 11px;
   margin-top: 2px;
 }
@@ -451,9 +451,9 @@
 }
 
 .monthlySettlementEmpty {
-  border: 1px dashed #cbd7e7;
+  border: 1px dashed var(--academy-border-strong, #cbd8ee);
   border-radius: 12px;
-  color: #718096;
+  color: var(--academy-muted, #64748b);
   padding: 28px;
   text-align: center;
 }
@@ -484,14 +484,14 @@
 
 .monthlySettlementCalendarLegend span {
   align-items: center;
-  color: #596b82;
+  color: var(--academy-text-muted, #52647c);
   display: inline-flex;
   font-size: 12px;
   gap: 5px;
 }
 
 .monthlySettlementCalendarLegend i {
-  background: #dbeafe;
+  background: var(--status-info-bg, #eff6ff);
   border-radius: 4px;
   display: inline-block;
   height: 10px;
@@ -499,42 +499,42 @@
 }
 
 .monthlySettlementCalendarLegend i.forecast {
-  background: #fff;
-  border: 1px dashed #7aa7e8;
+  background: var(--academy-surface, #fff);
+  border: 1px dashed var(--status-info-border, #bfdbfe);
 }
 
 .monthlySettlementCalendarLegend i.attendance-present {
-  background: #bbf7d0;
+  background: var(--status-success-border, #86efac);
 }
 
 .monthlySettlementCalendarLegend i.attendance-absent {
-  background: #fecaca;
+  background: var(--status-danger-border, #fecaca);
 }
 
 .monthlySettlementCalendarLegend i.attendance-late {
-  background: #fed7aa;
+  background: var(--status-pending-border, #fed7aa);
 }
 
 .monthlySettlementCalendarLegend i.attendance-pending {
-  background: #dbeafe;
+  background: var(--status-info-bg, #eff6ff);
 }
 
 .monthlySettlementTable small.monthlySettlementRuleNote {
-  color: #4f46e5;
+  color: var(--status-info-text, #1d4ed8);
   font-weight: 700;
 }
 
 .monthlySettlementCalendarLegend i.regularClosure {
-  background: #e0e7ff;
-  border: 1px dashed #6366f1;
+  background: var(--status-closure-bg, #e0e7ff);
+  border: 1px dashed var(--status-closure-border, #6366f1);
 }
 
 .monthlySettlementCalendarLegend i.makeup {
-  background: #ede9fe;
+  background: var(--status-makeup-bg, #ede9fe);
 }
 
 .monthlySettlementCalendarLegend i.special {
-  background: #d1fae5;
+  background: var(--status-success-bg, #ecfdf5);
 }
 
 .monthlySettlementCalendarShell {
@@ -553,8 +553,8 @@
 }
 
 .monthlySettlementCalendar {
-  background: #dce5f1;
-  border: 1px solid #dce5f1;
+  background: var(--academy-border-strong, #cbd8ee);
+  border: 1px solid var(--academy-border-strong, #cbd8ee);
   display: grid;
   gap: 1px;
   grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -562,8 +562,8 @@
 }
 
 .monthlySettlementCalendarDayLabel {
-  background: #f4f7fb;
-  color: #607086;
+  background: var(--status-info-bg, #eff6ff);
+  color: var(--academy-text-muted, #52647c);
   font-size: 12px;
   padding: 7px;
   text-align: center;
@@ -571,7 +571,7 @@
 
 .monthlySettlementCalendarBlank,
 .monthlySettlementCalendarDate {
-  background: #fff;
+  background: var(--academy-surface, #fff);
   min-height: 106px;
 }
 
@@ -581,7 +581,7 @@
 }
 
 .monthlySettlementCalendarDate > b {
-  color: #40546e;
+  color: var(--academy-text-muted, #52647c);
   display: block;
   font-size: 12px;
   margin-bottom: 5px;
@@ -593,9 +593,9 @@
 }
 
 .monthlySettlementCalendarEvent {
-  background: #dbeafe;
+  background: var(--status-info-bg, #eff6ff);
   border-radius: 5px;
-  color: #234a7d;
+  color: var(--status-info-text, #1d4ed8);
   display: block;
   font-size: 10px;
   line-height: 1.3;
@@ -606,33 +606,33 @@
 }
 
 .monthlySettlementCalendarEvent.forecast {
-  background: #f8fbff;
-  border: 1px dashed #8ab0e5;
+  background: var(--status-info-bg, #eff6ff);
+  border: 1px dashed var(--status-info-border, #bfdbfe);
   padding: 2px 3px;
 }
 
 .monthlySettlementCalendarEvent.regular.attendance-present,
 .monthlySettlementCalendarEvent.regularReplacement.attendance-present {
-  background: #dcfce7;
-  color: #166534;
+  background: var(--status-success-bg, #ecfdf5);
+  color: var(--status-success-text, #047857);
 }
 
 .monthlySettlementCalendarEvent.regular.attendance-absent,
 .monthlySettlementCalendarEvent.regularReplacement.attendance-absent {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--status-danger-bg, #fef2f2);
+  color: var(--status-danger-text, #b91c1c);
 }
 
 .monthlySettlementCalendarEvent.regular.attendance-late,
 .monthlySettlementCalendarEvent.regularReplacement.attendance-late {
-  background: #ffedd5;
-  color: #9a3412;
+  background: var(--status-pending-bg, #fff7ed);
+  color: var(--status-pending-text, #c2410c);
 }
 
 .monthlySettlementCalendarEvent.regular.attendance-excused,
 .monthlySettlementCalendarEvent.regularReplacement.attendance-excused {
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--status-pending-bg, #fff7ed);
+  color: var(--status-pending-text, #c2410c);
 }
 
 .monthlySettlementCalendarEvent.regularReplacement {
@@ -641,24 +641,24 @@
 }
 
 .monthlySettlementCalendarEvent.regularClosure {
-  background: #e0e7ff;
-  border: 1px dashed #6366f1;
-  color: #3730a3;
+  background: var(--status-closure-bg, #e0e7ff);
+  border: 1px dashed var(--status-closure-border, #6366f1);
+  color: var(--status-closure-text, #3730a3);
   padding: 2px 3px;
 }
 
 .monthlySettlementCalendarEvent.makeup {
-  background: #ede9fe;
-  color: #5b3b91;
+  background: var(--status-makeup-bg, #ede9fe);
+  color: var(--status-makeup-text, #5b3b91);
 }
 
 .monthlySettlementCalendarEvent.special {
-  background: #d1fae5;
-  color: #17624a;
+  background: var(--status-success-bg, #ecfdf5);
+  color: var(--status-success-text, #047857);
 }
 
 .monthlySettlementCalendarSummary {
-  background: #f6f8fc;
+  background: var(--status-info-bg, #eff6ff);
   border-radius: 10px;
   display: flex;
   flex-wrap: wrap;
@@ -668,7 +668,7 @@
 }
 
 .monthlySettlementCalendarSummary span {
-  color: #52657e;
+  color: var(--academy-text-muted, #52647c);
   font-size: 12px;
 }
 
