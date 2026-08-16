@@ -41,7 +41,7 @@
 계획의 4-7 목표는 "단일 spec을 auth/lesson/student/supplement/notification/settlement/resource로 나눈다"였다. 종료 시점 상태:
 
 - 완료: settlement, resource, notification(jobs), supplement, student, exam-prep(계획엔 없었지만 고위험 CAS 도메인이라 추가), school-calendar(계획엔 없었지만 자연 경계로 분리).
-- lesson: 남은 34개 test 중 21개가 lesson-journal 핵심 도메인으로 사실상 이 파일이 lesson domain spec 역할을 한다. 별도 파일로 이름만 바꾸는 작업은 하지 않았다 — 파일명(`academy-os-safe-smoke.spec.js`)이 아직 lesson 전용임을 명시하지 않으므로 후속 candidate로 남긴다.
+- lesson: 남은 34개 test 중 21개가 lesson-journal 핵심 도메인이다. 4-9에서 `academy-os-safe-smoke.spec.js` → `lesson-journal.spec.js`로 이름만 바꿨다(내용 변경 없음, `git mv`). auth 2개와 서로 다른 도메인의 lazy-chunk 경계 test 11개도 이 파일에 함께 남아 있어 파일명이 100% 정확하지는 않지만, 21/34가 lesson-journal이므로 대표 이름으로 채택했다.
 - auth: 별도 auth 전용 spec은 만들지 않았다. `safe preview opens the login screen...`, `report snapshot requires teacher auth...` 2개 test가 메인 spec에 남아 있다. 전용 파일로 분리할 만큼 크지 않다고 판단해 보류.
 - 나머지 11개 test(teacher view lazy boundary 2, exam analysis boundary 2, learning support 3, homework verification 1, planning tool boundary 1, dashboard boundary 1, consecutive absence makeup 1)는 서로 다른 도메인의 "lazy chunk 로딩" 경계 테스트가 섞여 있어 하나의 파일로 묶으면 의미 있는 도메인 경계가 되지 않는다 — 강제로 분리하지 않고 메인 spec에 유지하기로 판단했다.
 - 4-7 목표 2("endpoint contract 실패·source conflict·provider failure 복구 동선 추가")는 새 테스트 시나리오 작성이 필요한 확장 작업이라 이번 세션 범위에 포함하지 않았다 — 별도 요청 시 진행.
@@ -55,7 +55,7 @@
 | 4-5g row-fill/output-draft AI + 쎈 catalog 분리 | Ssen catalog/output-content 블록과 강하게 얽혀 있어 단일 안전 단위로 쪼개기 어려움 | Codex에게 프롬프트 전달 완료 |
 | 4-5h notification-jobs/Solapi/Slack route registry | 실제 provider 호출 경로라 사람 검증 필요 | Codex에게 프롬프트 전달 완료 |
 | 4-5i provider envelope를 실제 orchestrator에 적용 | throw/복구 의미가 바뀔 수 있어 별도 안전 단위 필요 | Codex에게 프롬프트 전달 완료 |
-| lesson spec 전용 파일명 분리 | 남은 34개 중 21개가 이미 사실상 lesson 도메인이나 파일명이 이를 반영하지 않음 | 후속 세션에서 이름만 바꾸는 저위험 rename으로 처리 가능 |
+| ~~lesson spec 전용 파일명 분리~~ | ~~남은 34개 중 21개가 이미 사실상 lesson 도메인이나 파일명이 이를 반영하지 않음~~ | 4-9에서 `lesson-journal.spec.js`로 rename 완료 |
 | auth 전용 spec 분리 | test 2개뿐이라 분리 이득이 적음 | 필요시 school-calendar 규모 이하로 저위험 처리 가능 |
 | UI 시각 통일(버튼 색상/계층, 펼치기·접힘 패턴) | 이번 세션과 무관, 별도 Claude 세션에서 진행 중 | 해당 세션에서 계속 |
 
