@@ -177,7 +177,7 @@ function createMockComment(payload = {}) {
     : `${name} 학생은 오늘 수업에 참여했습니다. 과제와 수업 내용을 이어서 확인하며 다음 수업에서 보완하겠습니다.`;
 }
 
-async function runOpenAiText(prompt, model, maxOutputTokens = 0) {
+export async function runOpenAiText(prompt, model, maxOutputTokens = 0, errorMessage = "") {
   const response = await fetch(OPENAI_RESPONSES_URL, {
     method: "POST",
     headers: {
@@ -193,13 +193,13 @@ async function runOpenAiText(prompt, model, maxOutputTokens = 0) {
 
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(data.error?.message || "OpenAI 요청에 실패했습니다.");
+    throw new Error(data.error?.message || errorMessage || "OpenAI 요청에 실패했습니다.");
   }
 
   return outputTextFromOpenAi(data);
 }
 
-async function runAnthropicText(prompt, model, maxTokens = 4000) {
+export async function runAnthropicText(prompt, model, maxTokens = 4000, errorMessage = "") {
   const response = await fetch(ANTHROPIC_MESSAGES_URL, {
     method: "POST",
     headers: {
@@ -216,7 +216,7 @@ async function runAnthropicText(prompt, model, maxTokens = 4000) {
 
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(data.error?.message || "Claude 요청에 실패했습니다.");
+    throw new Error(data.error?.message || errorMessage || "Claude 요청에 실패했습니다.");
   }
 
   return outputTextFromAnthropic(data);
@@ -292,6 +292,57 @@ export async function runOpenAiPdfMessage({ buffer, errorMessage, fileName, maxO
   }
 
   return outputTextFromOpenAi(data);
+}
+
+function examAnalysisOutputTokenLimit(outputType) {
+  return outputType === "blog" ? 6500 : 4800;
+}
+
+export async function runAnthropicExamAnalysisOutputDraft({ model, outputType, prompt }) {
+  return {
+    provider: "anthropic",
+    model,
+    text: await runAnthropicText(
+      prompt,
+      model,
+      examAnalysisOutputTokenLimit(outputType),
+      "Claude 시험분석 산출물 초안 생성에 실패했습니다."
+    )
+  };
+}
+
+export async function runOpenAiExamAnalysisOutputDraft({ model, outputType, prompt }) {
+  return {
+    provider: "openai",
+    model,
+    text: await runOpenAiText(
+      prompt,
+      model,
+      examAnalysisOutputTokenLimit(outputType),
+      "OpenAI 시험분석 산출물 초안 생성에 실패했습니다."
+    )
+  };
+}
+
+export function runAnthropicPdfQuestionRowFill({ buffer, model, promptText }) {
+  return runAnthropicPdfMessage({
+    buffer,
+    errorMessage: "Claude AI 행 채움 요청에 실패했습니다.",
+    maxTokens: 6000,
+    model,
+    promptText
+  });
+}
+
+export function runOpenAiPdfQuestionRowFill({ buffer, fileName, model, promptText }) {
+  return runOpenAiPdfMessage({
+    buffer,
+    errorMessage: "OpenAI AI 행 채움 요청에 실패했습니다.",
+    fileName,
+    maxOutputTokens: 6000,
+    model,
+    promptText
+  });
 }
 
 export async function polishLessonComment(payload = {}) {

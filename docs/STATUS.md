@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-16
 
+## 2026-08-16 App/API 4차 리팩터링 4-5g 검수 후보
+
+- 시험분석 row-fill/output-draft의 Anthropic/OpenAI 함수 4개를 DB 없는 `commentPolish.js` provider 경계로 옮기고, 큰 프롬프트·결과 정규화·provider 선택은 `api/server.js`에 유지했다.
+- `ssenTypeIndex.json` 로드부터 과목 추론·범위 매칭·prompt 후보 포맷까지 311줄을 `src/shared/server/examAnalysisSsenCatalog.js`로 분리했다. `api/` 함수 수가 14가 되는 초기 배치를 중단하고 `src/shared/server`로 교정해 Vercel 한도 12/12를 보존했다.
+- 실제 유료 AI·운영 DB를 호출하지 않고 provider payload/token fixture, 쎈 과목·type-code·범위 fixture, production `305/305`, scenario `828/828`, runtime lint/typecheck, safe browser `77/77`을 통과했다. 이 브랜치는 사용자 승인 전 main에 병합하지 않는다.
+
 ## 2026-08-16 App/API 4차 리팩터링 4-5f 통합 검수
 
 - Claude Code는 `codex/app-refactor-fourth-pass-4-5f`에서 시험분석 AI POST 5개를 `examAnalysisAiRouteRegistry`로 이동해 commit·push까지 완료했다. 이 브랜치가 이전 main에서 갈라진 점을 확인하고 최신 main 기준 별도 통합 브랜치에서 충돌을 해소했다.

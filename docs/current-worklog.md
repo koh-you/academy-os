@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-16 App/API 4차 리팩터링 4-5g
+
+- 사전 의존성 감사에서 쎈 JSON→과목 추론→catalog/read route와 row-fill prompt가 한 클러스터이고, 430줄 output 콘텐츠 모델→prompt→provider가 별도 클러스터임을 확인했다. 그래프는 `docs/app-refactor-fourth-pass-4-5g-dependency-graph.md`에 고정했다.
+- 쎈 클러스터 311줄은 `src/shared/server/examAnalysisSsenCatalog.js`로 이동했다. row-fill/output-draft provider wrapper 4개는 `commentPolish.js`의 기존 범용 PDF/text transport를 재사용하며, server는 prompt 작성·model 선택·JSON parse·결과 normalize를 계속 소유한다.
+- 첫 배치에서 `api/routes` JS 두 파일 추가가 Vercel 함수 inventory 12→14를 만드는 것을 fixture가 잡아냈다. 새 API 파일을 없애 12/12로 복구했다. production `305/305`, scenario `828/828`, runtime lint/typecheck, safe browser `77/77`; 운영 provider·Supabase write는 실행하지 않았다.
+
 ## 2026-08-16 App/API 4차 리팩터링 4-5f 통합 검토
 
 - Claude Code branch `codex/app-refactor-fourth-pass-4-5f`의 단일 commit `dd1513307`은 시험분석 vision-check·boundary detect·row fill/refine·output draft 생성 POST 5개를 frozen route registry로 이동한 상태까지 완료·push돼 있었다. 다만 기준 commit이 최신 main 이전이어서 `codex/integration-4-5f-reviewed`에서 재통합했다.
