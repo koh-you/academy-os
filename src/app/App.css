@@ -9290,14 +9290,15 @@ button:disabled {
   padding: 10px 12px;
 }
 
-.specialLectureCanceledEnrollments > summary {
+.specialLectureCanceledEnrollments > .disclosureTrigger {
   color: var(--academy-text-strong, #475569);
-  cursor: pointer;
   font-size: 12px;
   font-weight: 900;
+  min-height: 0;
+  padding: 0;
 }
 
-.specialLectureCanceledEnrollments > p {
+.specialLectureCanceledEnrollments p {
   color: var(--academy-muted, #64748b);
   font-size: 11px;
   line-height: 1.5;
@@ -9688,36 +9689,18 @@ button:disabled {
   padding-top: 7px;
 }
 
-.specialLectureCancellationActions > summary {
-  align-items: center;
+.specialLectureCancellationActions > .disclosureTrigger {
   background: var(--academy-surface-muted, #f8fafc);
   border: 1px solid var(--academy-border-strong, #cbd8ee);
   border-radius: 7px;
   color: var(--academy-text-muted, #52647c);
-  cursor: pointer;
-  display: flex;
   font-size: 11px;
   font-weight: 900;
-  justify-content: space-between;
   min-height: 34px;
   padding: 6px 9px;
 }
 
-.specialLectureCancellationActions > summary::after {
-  content: "⌄";
-  font-size: 14px;
-  line-height: 1;
-}
-
-.specialLectureCancellationActions[open] > summary::after {
-  content: "⌃";
-}
-
-.specialLectureCancellationActions > summary::marker {
-  content: "";
-}
-
-.specialLectureCancellationActions > div {
+.specialLectureCancellationActions .disclosureBodyInner {
   background: var(--status-pending-bg, #fff7ed);
   border: 1px solid var(--status-danger-border, #fecaca);
   border-radius: 7px;
