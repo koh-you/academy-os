@@ -1,3 +1,4 @@
+import { Disclosure, DisclosureChevron } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { SpecialLectureCalendarPreview } from "./SpecialLecturePublicPage.jsx";
@@ -286,6 +287,7 @@ export function SpecialLectureScheduleCalculator({
                 type="button"
               >
                 {isOpen ? "접기" : "펼치기"}
+                <DisclosureChevron open={isOpen} />
               </button>
             ) : null}
           </>
@@ -303,8 +305,17 @@ export function SpecialLectureScheduleCalculator({
         titleAs="h3"
       />
 
-      {isOpen ? (
-        <>
+      <Disclosure
+        hideTrigger
+        open={isOpen}
+        collapsedContent={(
+          <>
+            <span>요일별 {calculatedWeekdaySummaryText}</span>
+            <span>규칙 {normalizedScheduleRules.length}개</span>
+            <span>달력과 요금 설정은 펼치면 보입니다.</span>
+          </>
+        )}
+      >
           <div className="specialLecturePeriodGrid">
             <label>
               기간 시작
@@ -387,14 +398,7 @@ export function SpecialLectureScheduleCalculator({
           </div>
           <button className="softButton compact" onClick={onAddScheduleRule} type="button">요일/시간 추가</button>
           <SpecialLectureCalendarPreview guide={{ ...guide, sessions: generatedSessionsPreview }} />
-        </>
-      ) : (
-        <div className="specialLectureCalculatorCollapsedSummary">
-          <span>요일별 {calculatedWeekdaySummaryText}</span>
-          <span>규칙 {normalizedScheduleRules.length}개</span>
-          <span>달력과 요금 설정은 펼치면 보입니다.</span>
-        </div>
-      )}
+      </Disclosure>
     </section>
   );
 }
@@ -427,6 +431,7 @@ export function SpecialLectureSessionPlanEditor({
               type="button"
             >
               {isOpen ? "접기" : "펼치기"}
+              <DisclosureChevron open={isOpen} />
             </button>
           ) : null}
           <button
@@ -445,12 +450,17 @@ export function SpecialLectureSessionPlanEditor({
         title="회차별 일정"
         titleAs="h3"
       />
-      {!isOpen ? (
-        <div className="specialLectureSessionCollapsedSummary">
-          <strong>{sessionPlanSummaryText}</strong>
-          <span>세부 날짜/시간/주제는 펼치면 수정할 수 있습니다.</span>
-        </div>
-      ) : sessions.length ? (
+      <Disclosure
+        hideTrigger
+        open={isOpen}
+        collapsedContent={(
+          <>
+            <strong>{sessionPlanSummaryText}</strong>
+            <span>세부 날짜/시간/주제는 펼치면 수정할 수 있습니다.</span>
+          </>
+        )}
+      >
+      {sessions.length ? (
         <div className="specialLectureSessionCardList">
           {sessions.map((session, index) => (
             <article className="specialLectureSessionCard" key={`${guide.specialLectureGuideId}_session_${index}`}>
@@ -500,6 +510,7 @@ export function SpecialLectureSessionPlanEditor({
           일정 계산을 펼쳐 요일/시간을 정한 뒤 `일정 계산 적용`을 누르거나, `회차 추가`로 직접 회차를 만드세요.
         </div>
       )}
+      </Disclosure>
     </section>
   );
 }

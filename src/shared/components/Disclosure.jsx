@@ -5,6 +5,16 @@ function joinClassNames(...values) {
   return values.filter(Boolean).join(" ");
 }
 
+export function DisclosureChevron({ open, className = "" }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={joinClassNames("disclosureChevron", className)}
+      data-open={open}
+    />
+  );
+}
+
 export function Disclosure({
   className = "",
   defaultOpen = false,
@@ -13,6 +23,8 @@ export function Disclosure({
   trigger,
   triggerClassName = "",
   bodyClassName = "",
+  hideTrigger = false,
+  collapsedContent = null,
   children,
   ...props
 }) {
@@ -30,20 +42,25 @@ export function Disclosure({
 
   return (
     <div className={joinClassNames("disclosure", className)} data-open={open} {...props}>
-      <button
-        type="button"
-        className={joinClassNames("disclosureTrigger", triggerClassName)}
-        aria-expanded={open}
-        onClick={handleToggle}
-      >
-        <span className="disclosureTriggerLabel">{trigger}</span>
-        <span className="disclosureChevron" aria-hidden="true" />
-      </button>
+      {!hideTrigger ? (
+        <button
+          type="button"
+          className={joinClassNames("disclosureTrigger", triggerClassName)}
+          aria-expanded={open}
+          onClick={handleToggle}
+        >
+          <span className="disclosureTriggerLabel">{trigger}</span>
+          <DisclosureChevron open={open} />
+        </button>
+      ) : null}
       <div className="disclosureBody">
         <div className={joinClassNames("disclosureBodyInner", bodyClassName)} aria-hidden={!open}>
           {children}
         </div>
       </div>
+      {!open && collapsedContent ? (
+        <div className="disclosureCollapsedSummary">{collapsedContent}</div>
+      ) : null}
     </div>
   );
 }

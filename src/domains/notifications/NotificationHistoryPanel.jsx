@@ -1,5 +1,6 @@
 import { AsyncOperationStatus } from "../../shared/components/AsyncOperationStatus.jsx";
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
+import { Disclosure, DisclosureChevron } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { NotificationHistoryRow } from "./NotificationHistoryRow.jsx";
@@ -77,6 +78,7 @@ export function NotificationHistoryPanel({
             type="button"
           >
             {isHistoryOpen ? "접기" : "펼치기"}
+            <DisclosureChevron open={isHistoryOpen} />
           </button>
           </>
         )}
@@ -103,8 +105,19 @@ export function NotificationHistoryPanel({
         label="Solapi 결과 대조"
         state={solapiResultOperationState}
       />
-      {isHistoryOpen ? (
-        <DataTableShell className="notificationTable noticeHistoryTable" id="notification-history-content" label="알림톡 발송 기록">
+      <Disclosure
+        hideTrigger
+        id="notification-history-content"
+        open={isHistoryOpen}
+        onToggle={onToggleHistory}
+        collapsedContent={(
+          <>
+            <strong>{filterLabel} {filteredJobs.length}건</strong>
+            <span>상세 발송 기록은 펼치면 확인할 수 있습니다.</span>
+          </>
+        )}
+      >
+        <DataTableShell className="notificationTable noticeHistoryTable" label="알림톡 발송 기록">
           <div className="notificationTableHead">
             <span>상태</span>
             <span>종류</span>
@@ -137,12 +150,7 @@ export function NotificationHistoryPanel({
             ))
           )}
         </DataTableShell>
-      ) : (
-        <div className="noticeHistoryCollapsedSummary">
-          <strong>{filterLabel} {filteredJobs.length}건</strong>
-          <span>상세 발송 기록은 펼치면 확인할 수 있습니다.</span>
-        </div>
-      )}
+      </Disclosure>
     </section>
   );
 }

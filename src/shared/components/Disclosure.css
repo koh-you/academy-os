@@ -36,7 +36,7 @@
   width: 8px;
 }
 
-.disclosure[data-open="true"] .disclosureChevron {
+.disclosureChevron[data-open="true"] {
   transform: rotate(45deg);
 }
 
@@ -58,3 +58,12 @@
 .disclosure[data-open="true"] .disclosureBodyInner {
   padding: 0 14px 14px;
 }
+
+.disclosure > .disclosureCollapsedSummary {
+  color: var(--academy-text-muted, #52647c);
+  display: grid;
+  font-size: 12px;
+  gap: 3px;
+  padding: 0 14px 14px;
+}
+
