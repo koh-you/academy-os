@@ -172,5 +172,23 @@ docs/comprehensive-code-audit-log.md 파일을 먼저 읽고, "진행 상태" �
 - `src/shared/server/routeRegistryTypes.js` — **오탐**. JSDoc `@typedef {import("./routeRegistryTypes.js").X}` 타입 전용 참조로 route registry 파일 15개 이상이 실제로 사용 중. dependency-cruiser는 주석 안의 타입 참조를 못 잡아서 orphan으로 오판함. 삭제하면 안 됨.
 - `src/domains/lessons/lessonJournalRecordBulkApi.js`, `src/domains/lessons/lessonJournalHomeworkBulkApi.js`, `src/domains/supplements/useSupplementNotificationDraftSelectionState.js` — 셋 다 **"만들었지만 실제 코드에 통합 안 됨"** 카테고리. App.jsx/server.js 어디서도 안 쓰이는 건 맞지만, `scripts/test-lesson-journal-record-bulk-api.mjs`, `scripts/test-lesson-journal-homework-bulk-api.mjs`, `scripts/test-supplement-notification-draft-selection-state.mjs`가 각각 전용으로 검증하고 `scenario-tests-production.cjs`에 물려 있어서 test:production을 통과시키는 상태. 지우면 이 3개 테스트가 import 에러로 깨짐 — ReportCenter처럼 즉시 삭제 가능한 게 아니라, (a) 왜 통합이 안 됐는지 git blame/history 확인 (b) 실제로 통합해서 살릴지, 테스트와 함께 정리해서 지울지 결정하는 별도 안전 단위가 필요함. 이번 세션에서는 처리 안 함, 다음 세션 후보로 남김.
 
-**다음 시작 지점**: `src/app/App.css` (22,609줄) 처음부터. (`api/routes/coreData.js` 2026-08-17 완독 — 12-도메인 낙관적 저장/롤백 중복 패턴 발견, 아래 참조)
+### 2026-08-17 알림 문구 중복 — 실행 결과 및 잔여 실제 버그 (핵심 발견)
+
+App.jsx↔server.js 알림 문구 "중복" 1순위 통합을 실행하기 전, 정밀 스코핑을 위해 함수 쌍 22개를 전부 대조했다. 결과: **"중복"이라고 봤던 것 중 상당수가 이미 갈라진 실제 프로덕션 버그**였다 — 서버가 실제로 보내는 알림톡 문구가 클라이언트 미리보기와 다르게 나가고 있음.
+
+**실행 완료 (zero-behavior-change, `codex/notification-text-shared-helpers` 브랜치, 커밋 c469c0f01, push됨, 아직 main 미병합)**:
+바이트 단위로 동일함이 확인된 함수만 공유 모듈로 통합: `getNotificationTextKey`/`compactDuplicateNotificationBlocks`/`notificationTextIncludesBlock`(→`notificationMessageRenderer.js`), `getHomeworkAssignmentStatus`(→`assignmentStatus.js`), `parseHomeworkFollowupMemoLine`/`removeHomeworkFollowupMemoLines`/`getLessonPreparationNotice`(→ 신규 `lessonPreparationNotice.js`). 서버 쪽 죽은 코드 2개(`getPreparationNoticeForNotification`, `removeHomeworkFollowupMemoLinesForNotification` — 호출부 0건 확인)도 함께 삭제. lint/typecheck/test:production(305/305, 828/828)/build/browser-smoke(77/77) 전부 통과.
+
+**실행 안 함 — 발견만 기록, 실제 발송 문구가 걸린 문제라 별도 제품 판단 필요**:
+1. **`getLessonHomework`(App.jsx) vs `getLessonHomeworkForNotification`(server.js) — 가장 심각.** "지난 숙제" 탐색 알고리즘 자체가 다름. 클라이언트는 그룹핑·특강 폴백·`hasPersistedLessonProgress` 되짚기 로직까지 포함한 전체 정렬 리스트를 훑고, 서버는 `classTemplateId` 기준 단순 최신-1건 선택. 같은 수업·학생에 대해 서버가 클라이언트와 다른 "지난 숙제"를 골라 다른 문구를 보낼 수 있음.
+2. **`getLessonStudentIds` vs `...ForNotification`** — 서버는 `getEffectiveLessonStudentIds`(반 편성 유효일자/스케줄 오버라이드 반영)를 아예 호출하지 않고 raw `lesson.studentIds`만 신뢰. ①의 원인 중 하나.
+3. **테스트 종류 라벨 문구 자체가 다름** — `daily` 테스트: 클라이언트 "데일리 테스트"(공백 있음) vs 서버 "데일리테스트"(공백 없음). 시험명 미입력 시 이 라벨이 그대로 알림톡에 나감 — 실사용 빈도 높은 케이스.
+4. **`followUpTypeLabel`** — 클라이언트만 `manual_makeup: "수동 보충"`을 가짐. 서버는 이 키가 없어 "보충관리"로 대체 발송.
+5. **`supplementMethodLabel`의 기본값 분기** — `manual_makeup` 타입에서 클라이언트는 `"onsite_makeup"`(현장보강), 서버는 `"onsite_retest"`(현장 재시험) 기본값으로 서로 다른 라벨을 씀.
+6. **`getSupplementTaskSourceLabel`/`formatSupplementHomeworkCheckSentence`** — "지난 숙제 확인" 문장이 클라이언트는 `sourcePreviousHomework` 폴백이 있어 뜨는데 서버는 폴백이 없어 같은 상황에서 문장이 통째로 빠짐.
+7. **`renderNotificationTemplate` 3중 구현 탱글** — 같은 이름 `renderNotificationTemplate`이 (a) `notificationTemplateCatalog.js`의 정식 export (b) App.jsx 로컬 shadow 함수 (c) server.js의 `renderLessonHomeworkFollowupTemplate`(포지셔널 인자, 다른 정규화) 세 가지로 따로 존재. 현재 기본 템플릿(한 줄짜리)에서는 우연히 결과가 같지만, 선생님이 템플릿을 여러 줄로 커스터마이즈하면 세 구현이 갈라짐. 다른 항목들을 손대기 전에 이 탱글부터 정리(정식 버전 하나로 통일)해야 함.
+
+**권장 순서** (다음 세션): (1) `renderNotificationTemplate` 3중 구현 통일 — 거의 모든 나머지 항목이 이걸 거쳐감. (2) `getLessonHomework`/`getLessonStudentIds` 커플 — "서버 알림이 클라이언트 화면과 같은 반 편성 로직을 따라야 하는가"는 사용자 확인이 필요한 제품 판단. (3) 나머지 항목(③⑤⑥)은 각각 독립적이고 작음 — 실제 레코드로 before/after 텍스트 diff를 만들어 사용자에게 "이게 맞는 동작인가" 확인 후 하나씩 고칠 것.
+
+**다음 시작 지점**: `src/app/App.css` (22,609줄) 처음부터. (`api/routes/coreData.js` 완독, 알림 문구 1차 통합 실행 완료 — 둘 다 위 참조. 위 실제 버그 7건은 별도 안전 단위 후보로 대기 중.)
 
