@@ -13091,36 +13091,36 @@ textarea {
   overflow: hidden;
 }
 
-.studentProfileSection > summary {
-  align-items: center;
+.studentProfileSection > .disclosureTrigger {
   background: var(--status-info-bg, #eff6ff);
-  cursor: pointer;
-  display: flex;
   flex-wrap: wrap;
   gap: 14px;
-  justify-content: space-between;
-  list-style: none;
   min-height: 64px;
   padding: 12px 14px;
 }
 
-.studentProfileSection > summary::-webkit-details-marker {
-  display: none;
+.studentProfileSection > .disclosureTrigger .disclosureTriggerLabel {
+  align-items: center;
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: space-between;
 }
 
-.studentProfileSection > summary > div:first-child {
+.studentProfileSection > .disclosureTrigger .disclosureTriggerLabel > div:first-child {
   display: grid;
   gap: 3px;
   min-width: 0;
 }
 
-.studentProfileSection > summary strong {
+.studentProfileSection .disclosureTriggerLabel strong {
   color: var(--academy-primary, #17213d);
   font-size: 16px;
   font-weight: 950;
 }
 
-.studentProfileSection > summary p {
+.studentProfileSection .disclosureTriggerLabel p {
   color: var(--academy-muted, #64748b);
   font-size: 12px;
   font-weight: 800;
@@ -13128,20 +13128,8 @@ textarea {
   margin: 0;
 }
 
-.studentProfileSection > summary::after {
-  color: var(--academy-focus-ring, #2563eb);
-  content: "펼치기";
-  flex: 0 0 auto;
-  font-size: 12px;
-  font-weight: 950;
-}
-
-.studentProfileSection[open] > summary {
+.studentProfileSection[data-open="true"] > .disclosureTrigger {
   border-bottom: 1px solid var(--status-info-border, #bfdbfe);
-}
-
-.studentProfileSection[open] > summary::after {
-  content: "접기";
 }
 
 .studentProfileSectionBody {
@@ -13579,15 +13567,18 @@ textarea {
   padding: 0 12px;
 }
 
-.studentTallySubmissionPanel > summary {
-  align-items: center;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
+.studentTallySubmissionPanel > .disclosureTrigger {
   min-height: 52px;
 }
 
-.studentTallySubmissionPanel > summary span,
+.studentTallySubmissionPanel .disclosureTriggerLabel {
+  align-items: center;
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: space-between;
+}
+
+.studentTallySubmissionPanel .disclosureTriggerLabel span,
 .studentTallySubmissionCard > p {
   color: var(--academy-muted, #64748b);
   font-size: 12px;
