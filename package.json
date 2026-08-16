@@ -13,6 +13,7 @@
     "dev:safe": "node scripts/dev-safe.mjs",
     "doctor": "node scripts/doctor.mjs",
     "lint:runtime": "eslint src api --max-warnings=0",
+    "check:duplication": "jscpd src api",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test:scenario-summary": "node scripts/run-scenario-summary.mjs",
     "test:browser-smoke": "node scripts/run-browser-smoke-isolated.mjs",
@@ -309,6 +310,7 @@
     "eslint": "^9.39.5",
     "eslint-plugin-react": "^7.37.5",
     "globals": "^17.8.0",
+    "jscpd": "^5.0.15",
     "typescript": "^5.8.0",
     "vite": "^7.0.0"
   },
