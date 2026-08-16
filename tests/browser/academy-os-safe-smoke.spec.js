@@ -1,43 +1,14 @@
 import { expect, test } from "./fixtures.js";
-
-// One safe-api server runs per worker (tests/browser/globalSetup.mjs), each at
-// ACADEMY_SAFE_API_PORT + this worker's parallel index.
-const safeApiPort = Number(process.env.ACADEMY_SAFE_API_PORT || 8787) + Number(process.env.TEST_PARALLEL_INDEX || 0);
-const safeApiBaseUrl = `http://127.0.0.1:${safeApiPort}`;
-
-function getKoreaDateAfterDays(days) {
-  return new Intl.DateTimeFormat("en-CA", {
-    day: "2-digit",
-    month: "2-digit",
-    timeZone: "Asia/Seoul",
-    year: "numeric"
-  }).format(new Date(Date.now() + days * 24 * 60 * 60 * 1000));
-}
-
-function collectPageErrors(page) {
-  const errors = [];
-  page.on("pageerror", (error) => errors.push(error));
-  return errors;
-}
-
-async function loginAsTeacher(page) {
-  await page.goto("/");
-  await page.getByRole("button", { name: "선생님" }).click();
-  await page.getByLabel("선생님 아이디").fill("preview");
-  await page.getByLabel("선생님 비밀번호").fill("preview");
-  await page.getByRole("button", { name: "선생님 로그인" }).click();
-  await expect(page.getByRole("navigation", { name: "주요 화면" })).toBeVisible();
-}
+import {
+  collectPageErrors,
+  getKoreaDateAfterDays,
+  loginAsTeacher,
+  resetSafeFixture,
+  safeApiBaseUrl
+} from "./safeSmokeSupport.js";
 
 test.beforeEach(async ({ request }) => {
-  await expect.poll(async () => {
-    try {
-      const response = await request.post(`${safeApiBaseUrl}/api/safe-fixture/reset`);
-      return response.ok();
-    } catch {
-      return false;
-    }
-  }, { timeout: 10_000 }).toBe(true);
+  await resetSafeFixture(request);
 });
 
 test("safe preview opens the login screen without runtime errors", async ({ page }) => {
