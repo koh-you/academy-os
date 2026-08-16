@@ -1,6 +1,17 @@
 # Daily Development Handoff
 
-업데이트: 2026-08-16
+업데이트: 2026-08-17
+
+## 2026-08-17 4-5g·4-6c 통합
+
+- 최신 main의 UI token 구조를 우선 보존하면서 4-5g 쎈 catalog/provider 경계와 4-6c ParentResponse lazy CSS를 재통합한다.
+- 실제 provider/운영 source 호출 없이 전용 fixture와 전체 검증을 통과한 exact head만 main에 fast-forward한다. 후속 4-5h·4-5i는 그 main에서 각각 새 브랜치로 진행한다.
+
+## 2026-08-16 App/API 4차 리팩터링 4-5g
+
+- 독립 브랜치 `codex/app-refactor-fourth-pass-4-5g-ai-catalog`에서 쎈 catalog/과목 추론 311줄과 row-fill/output-draft provider wrapper 4개를 분리했다. prompt·provider 선택·parse/normalize·DB/event orchestration은 server에 남아 있다.
+- `api/` JS는 Vercel 함수 수에 포함되므로 새 module을 그 아래 추가하지 않는다. 쎈 module은 `src/shared/server`, provider wrapper는 기존 `api/routes/commentPolish.js`에 둬 12/12를 유지했다.
+- focused fixture, production `305/305`, scenario `828/828`, lint/typecheck, safe browser `77/77` 통과. 실제 AI/DB side effect 없음. 다음 독립 단위는 4-5h notification/Solapi/Slack route registry다.
 
 ## 2026-08-16 App/API 4차 리팩터링 4-5f
 

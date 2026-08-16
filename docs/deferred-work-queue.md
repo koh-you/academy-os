@@ -53,7 +53,9 @@
 - 4-3a server route 기준선은 120개 route와 기존 auth/provider owner를 고정했다. 후속은 request/auth adapter → auth/portal/core → versioned write → exam → notification/provider registry 순으로 작은 단위만 진행한다.
 - 4-1 API payload 24개 contract, 4-2 DB/domain row mapper 45/45, 4-3 공통 HTTP/session과 frozen registry 24개 분리·종료 감사는 완료했다. 남은 DB/source read 16·external read 5·DB/source action 52·external write 23은 각각 후속 owner 분리 입력으로 exact 분류했다.
 - 사용자의 2026-08-15 재개 요청으로 4-4 App persistence action 추출과 통합 검토를 완료했다. App 직접 request는 44회, 직접 호출 포함 handler는 0개이며 저장·재조회·provider 범위를 보존했다.
-- 2026-08-16 병합·검수 요청으로 Claude Code의 4-5a~f 통합분을 검토했다. Storage primitive 이동, 시험분석 download/delete operations 주입, vision-check·boundary-detect PDF transport 분리와 provider result envelope 정의에 이어 시험분석 AI POST 5개를 route registry로 이동했다. 4-5f의 notification/Solapi/Slack route 범위와 envelope의 기존 orchestrator 적용은 남아 있으며 4-5 전체 종료로 표시하거나 자동 진행하지 않는다.
+- 2026-08-16 병합·검수 요청으로 Claude Code의 4-5a~f 통합분을 검토했다. Storage primitive 이동, 시험분석 download/delete operations 주입, vision-check·boundary-detect PDF transport 분리와 provider result envelope 정의에 이어 시험분석 AI POST 5개를 route registry로 이동했다.
+- 4-5g 검수 후보는 쎈 catalog/과목 추론을 독립 모듈로 옮기고 row-fill/output-draft provider wrapper 4개를 기존 DB-free transport에 연결했다. 남은 4-5h notification/Solapi/Slack registry와 4-5i envelope orchestrator 채택은 각각 최신 main 기반 독립 안전 단위이며, 4-5 전체 종료로 표시하지 않는다.
+- 4-6c는 최신 UI token 변수를 보존한 ParentResponse 전용 CSS를 NotificationCenter lazy entry로 이동했다. 다음 CSS 분리는 별도 selector/cascade/screenshot 안전 단위로 남긴다.
 - 한 번에 한 안전 단위만 최신 main에서 진행하며, 즉시 사람 판단이 필요하지 않은 발견은 기록 후 AI 검수·최소 수정·재검증으로 연쇄 진행한다. 운영 side effect나 제품 의미 결정이 필요한 항목만 사람 gate로 올린다.
 - 기준: `docs/development-roadmap-after-ui-refactor-2026-07-31.md`.
 

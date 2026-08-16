@@ -1,6 +1,13 @@
 # Academy OS Current Status
 
-업데이트: 2026-08-16
+업데이트: 2026-08-17
+
+## 2026-08-17 App/API 4차 리팩터링 4-5g·4-6c 최신 main 통합
+
+- 시험분석 row-fill/output-draft의 Anthropic/OpenAI 함수 4개를 DB 없는 `commentPolish.js` provider 경계로 옮기고, 큰 프롬프트·결과 정규화·provider 선택은 `api/server.js`에 유지했다.
+- `ssenTypeIndex.json` 로드부터 과목 추론·범위 매칭·prompt 후보 포맷까지 311줄을 `src/shared/server/examAnalysisSsenCatalog.js`로 분리했다. `api/` 함수 수가 14가 되는 초기 배치를 중단하고 `src/shared/server`로 교정해 Vercel 한도 12/12를 보존했다.
+- 최신 UI token main과의 충돌은 token 변수를 보존한 채 ParentResponse 전용 CSS만 lazy chunk로 이동해 해결했다. App.css의 해당 selector는 0개이며 640px gap/section/card cascade를 lazy CSS에 명시했다.
+- 실제 유료 AI·운영 DB를 호출하지 않고 provider·쎈 catalog·CSS 전용 fixture와 전체 lint/production/build/browser를 다시 검증한 뒤 main에 통합한다.
 
 ## 2026-08-16 App/API 4차 리팩터링 4-5f 통합 검수
 

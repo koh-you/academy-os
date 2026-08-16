@@ -1,0 +1,153 @@
+.parentResponseContextPanel {
+  display: grid;
+  gap: 16px;
+}
+
+.parentResponseContextTools {
+  align-items: end;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.parentResponseContextTools label {
+  display: grid;
+  gap: 6px;
+  min-width: min(100%, 320px);
+}
+
+.parentResponseContextTools > .sharedSearchField {
+  min-width: min(100%, 320px);
+}
+
+.parentResponseContextTools p {
+  color: var(--academy-muted, #64748b);
+  font-size: 13px;
+  margin: 0;
+  max-width: 560px;
+}
+
+.parentResponseContextList {
+  display: grid;
+  gap: 12px;
+}
+
+.parentResponseContextCard {
+  border: 1px solid var(--academy-border-strong, #cbd8ee);
+  border-radius: 12px;
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.parentResponseContextMeta,
+.parentResponseContextActions {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.parentResponseContextMeta > div {
+  display: grid;
+  gap: 2px;
+}
+
+.parentResponseContextMeta span,
+.parentResponseContextActions > span {
+  color: var(--academy-muted, #64748b);
+  font-size: 13px;
+}
+
+.parentResponseContextCard dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  margin: 0;
+}
+
+.parentResponseContextCard dl div {
+  display: grid;
+  gap: 2px;
+}
+
+.parentResponseContextCard dt {
+  color: var(--academy-muted, #64748b);
+  font-size: 12px;
+}
+
+.parentResponseContextCard dd {
+  margin: 0;
+}
+
+.parentResponseContextBody {
+  background: var(--academy-surface-muted, #f8fafc);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.parentResponseContextBody small {
+  color: var(--academy-muted, #64748b);
+  font-weight: 800;
+}
+
+.parentResponseContextBody p {
+  margin: 8px 0 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.parentResponseContextBody:focus-visible {
+  outline: 2px solid var(--academy-focus-ring, rgba(37, 99, 235, 0.36));
+  outline-offset: 2px;
+}
+
+.parentResponseContextActions > span {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .parentResponseContextTools,
+  .parentResponseContextMeta,
+  .parentResponseContextActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .parentResponseContextTools label {
+    min-width: 0;
+  }
+
+  .parentResponseContextTools > .sharedSearchField {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .parentResponseContextActions > button {
+    width: 100%;
+  }
+
+  .parentResponseContextBody {
+    max-height: min(42dvh, 320px);
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 640px) {
+  .parentResponseContextPanel {
+    gap: 12px;
+  }
+
+  .parentResponseContextPanel .sectionHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .parentResponseContextCard {
+    padding: 12px;
+  }
+}
