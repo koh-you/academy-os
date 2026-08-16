@@ -77,7 +77,7 @@ for (const contract of [
   "createLessonJournalSaveBarModel",
   'className="lessonJournalStickySaveBar"',
   'label="수업일지"',
-  'className="saveDraftButton"',
+  'className="primaryButton"',
   "disabled={model.buttonDisabled}",
   "onClick={onSave}",
   "model.buttonLabel"

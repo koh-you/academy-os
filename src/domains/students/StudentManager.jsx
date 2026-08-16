@@ -771,7 +771,7 @@ export function StudentManager({
                 </button>
                 <button
                   aria-label={`${student.name} 퇴원 처리`}
-                  className="trashButton"
+                  className="dangerButton"
                   onClick={() => openWithdrawStudentModal(student)}
                   type="button"
                 >

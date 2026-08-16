@@ -1,0 +1,70 @@
+.disclosure {
+  border: 1px solid var(--academy-border, #d8e3f8);
+  border-radius: var(--academy-radius, 8px);
+  background: var(--academy-surface, #ffffff);
+}
+
+.disclosureTrigger {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--academy-radius, 8px);
+  color: var(--academy-text, #0f172a);
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  font-weight: 700;
+  gap: 8px;
+  justify-content: space-between;
+  min-height: var(--academy-touch-target, 44px);
+  padding: 10px 14px;
+  text-align: left;
+  width: 100%;
+}
+
+.disclosureTriggerLabel {
+  min-width: 0;
+}
+
+.disclosureChevron {
+  border-bottom: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  flex-shrink: 0;
+  height: 8px;
+  transform: rotate(-45deg);
+  transition: transform var(--academy-transition-fast, 150ms ease);
+  width: 8px;
+}
+
+.disclosureChevron[data-open="true"] {
+  transform: rotate(45deg);
+}
+
+.disclosureBody {
+  display: grid;
+  grid-template-rows: 0fr;
+  overflow: hidden;
+  transition: grid-template-rows var(--academy-transition-fast, 150ms ease);
+}
+
+.disclosure[data-open="true"] .disclosureBody {
+  grid-template-rows: 1fr;
+}
+
+.disclosureBodyInner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.disclosure[data-open="true"] .disclosureBodyInner {
+  padding: 0 14px 14px;
+}
+
+.disclosure > .disclosureCollapsedSummary {
+  color: var(--academy-text-muted, #52647c);
+  display: grid;
+  font-size: 12px;
+  gap: 3px;
+  padding: 0 14px 14px;
+}
+

@@ -50,6 +50,7 @@ import {
   replaceSpecialLectureYearToken
 } from "../specialLectures/specialLectureGuideUtils.js";
 import { copyTextToClipboard } from "../exams/outputPreview.js";
+import { Disclosure, DisclosureChevron } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
@@ -978,6 +979,7 @@ export function AcademyReminderPanel({
             type="button"
           >
             {isPanelCollapsed ? "알림 펼치기" : "알림 접기"}
+            <DisclosureChevron open={!isPanelCollapsed} />
           </button>
           </>
         )}
@@ -987,7 +989,13 @@ export function AcademyReminderPanel({
         eyebrow="OPERATIONS SOURCE"
         title="운영 알림 원본"
       />
-      <div className="academyReminderPanelBody" hidden={isPanelCollapsed} id="academy-reminder-panel-body">
+      <Disclosure
+        hideTrigger
+        bodyClassName="academyReminderPanelBody"
+        id="academy-reminder-panel-body"
+        open={!isPanelCollapsed}
+        onToggle={(nextOpen) => setIsPanelCollapsed(!nextOpen)}
+      >
       {overdueReminders.length > 0 ? (
         <section className="academyReminderOverdueSection">
           <div className="miniSectionHeader">
@@ -1118,7 +1126,7 @@ export function AcademyReminderPanel({
           />
         </section>
       </div>
-      </div>
+      </Disclosure>
     </section>
   );
 }

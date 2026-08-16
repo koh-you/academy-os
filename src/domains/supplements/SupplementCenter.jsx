@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { attendanceLabels } from "../lessons/labels.js";
+import { Disclosure } from "../../shared/components/Disclosure.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { safeIdPart } from "../../shared/utils/id.js";
@@ -368,26 +369,22 @@ export function SupplementCenter({
         {activeTabData.items.length === 0 ? <div className="emptyHomeworkBox">{activeTabData.emptyText}</div> : null}
 
         {activeSupplementTab === "absence_makeup" && activeDeferredAbsenceItems.length > 0 ? (
-          <section className="supplementDeferredPanel">
-            <button
-              aria-controls="future-absence-list"
-              aria-expanded={isFutureAbsenceOpen}
-              className="supplementDeferredToggle"
-              onClick={() => setIsFutureAbsenceOpen((current) => !current)}
-              type="button"
-            >
-              <span>
+          <Disclosure
+            className="supplementDeferredPanel"
+            id="future-absence-list"
+            open={isFutureAbsenceOpen}
+            onToggle={setIsFutureAbsenceOpen}
+            trigger={(
+              <>
                 <b>미래 결석 예정 {activeDeferredAbsenceItems.length}건</b>
                 <small>{futureAbsenceMakeupVisibleDays}일 전부터 결석보강 기본 목록에 자동 표시됩니다.</small>
-              </span>
-              <strong>{isFutureAbsenceOpen ? "접기" : "펼치기"}</strong>
-            </button>
-            {isFutureAbsenceOpen ? (
-              <div className="supplementItemList supplementDeferredList" id="future-absence-list">
-                {activeDeferredAbsenceItems.map((item) => renderSupplementRow(item))}
-              </div>
-            ) : null}
-          </section>
+              </>
+            )}
+          >
+            <div className="supplementItemList supplementDeferredList">
+              {activeDeferredAbsenceItems.map((item) => renderSupplementRow(item))}
+            </div>
+          </Disclosure>
         ) : null}
 
         <div className="supplementItemList">

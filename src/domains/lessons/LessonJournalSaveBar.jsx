@@ -26,7 +26,7 @@ export function LessonJournalSaveBar({
       saveState={saveState}
     >
       <button
-        className="saveDraftButton"
+        className="primaryButton"
         disabled={model.buttonDisabled}
         onClick={onSave}
         type="button"

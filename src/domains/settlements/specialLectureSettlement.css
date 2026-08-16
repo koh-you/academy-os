@@ -20,10 +20,10 @@
 
 .specialLectureSettlementRuleNotice {
   align-items: center;
-  background: #f2f8ff;
-  border: 1px solid #c9dcf5;
+  background: var(--status-info-bg, #eff6ff);
+  border: 1px solid var(--status-info-border, #bfdbfe);
   border-radius: 14px;
-  color: #42536b;
+  color: var(--academy-text-muted, #52647c);
   display: flex;
   flex-wrap: wrap;
   gap: 8px 16px;
@@ -31,7 +31,7 @@
 }
 
 .specialLectureSettlementRuleNotice strong {
-  color: #214c8a;
+  color: var(--status-info-text, #1d4ed8);
 }
 
 .specialLectureSettlementRuleNotice span {
@@ -39,7 +39,7 @@
 }
 
 .specialLectureSettlementRuleNotice span + span {
-  border-left: 1px solid #c9dcf5;
+  border-left: 1px solid var(--status-info-border, #bfdbfe);
   padding-left: 16px;
 }
 
@@ -69,14 +69,14 @@
 }
 
 .specialLectureAttendanceWarning {
-  color: #a35b08 !important;
+  color: var(--status-pending-text, #c2410c) !important;
   font-weight: 700;
 }
 
 .specialLectureSettlementTable th {
-  background: #f0f8f5;
-  border-bottom: 1px solid #d7e1ef;
-  color: #42665a;
+  background: var(--status-info-bg, #eff6ff);
+  border-bottom: 1px solid var(--status-info-border, #bfdbfe);
+  color: var(--academy-text-muted, #52647c);
   font-size: 12px;
   padding: 11px 10px;
   position: sticky;
@@ -87,7 +87,7 @@
 }
 
 .specialLectureSettlementTable td {
-  border-bottom: 1px solid #e7edf6;
+  border-bottom: 1px solid var(--academy-border, #d8e3f8);
   min-width: 170px;
   padding: 11px 10px;
   vertical-align: top;
@@ -98,7 +98,7 @@
 }
 
 .specialLectureSettlementTable td:nth-child(1) {
-  background: #fff;
+  background: var(--academy-surface, #fff);
   left: 0;
   min-width: 155px;
   position: sticky;
@@ -124,12 +124,12 @@
 }
 
 .specialLectureSettlementTable strong {
-  color: #2a4058;
+  color: var(--academy-text-muted, #52647c);
   font-size: 13px;
 }
 
 .specialLectureSettlementTable small {
-  color: #718096;
+  color: var(--academy-muted, #64748b);
   font-size: 11px;
   line-height: 1.5;
   margin-top: 5px;
@@ -138,8 +138,8 @@
 .specialLectureSettlementTable input,
 .specialLectureSettlementTable select,
 .specialLectureSettlementTable textarea {
-  background: #fff;
-  border: 1px solid #cbd7e7;
+  background: var(--academy-surface, #fff);
+  border: 1px solid var(--academy-border-strong, #cbd8ee);
   border-radius: 8px;
   box-sizing: border-box;
   font-size: 12px;
@@ -154,8 +154,8 @@
 }
 
 .specialLectureSettlementTable textarea:disabled {
-  background: #eef2f6;
-  color: #8491a3;
+  background: var(--academy-surface-muted, #f8fafc);
+  color: var(--academy-muted, #64748b);
 }
 
 .specialLectureSettlementCountInput,
@@ -175,28 +175,28 @@
 
 .specialLectureSettlementCountInput span,
 .specialLectureSettlementMoneyInput span {
-  color: #64748b;
+  color: var(--academy-muted, #64748b);
   font-size: 11px;
   white-space: nowrap;
 }
 
 .specialLectureSettlementTable tr.specialLectureSettlementWarningRow > td {
-  background: #fff8e8;
+  background: var(--status-pending-bg, #fff7ed);
 }
 
 .specialLectureSettlementTable tr.specialLectureSettlementWarningRow > td:first-child {
-  background: #fff1d2;
-  border-left: 4px solid #d8860b;
+  background: var(--status-pending-bg, #fff7ed);
+  border-left: 4px solid var(--status-pending-strong, #d8860b);
   padding-left: 6px;
 }
 
 .specialLectureSettlementTable textarea.warning {
-  border-color: #d8860b;
-  box-shadow: 0 0 0 2px rgb(216 134 11 / 14%);
+  border-color: var(--status-pending-strong, #d8860b);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--status-pending-strong, #d8860b) 14%, transparent);
 }
 
 .specialLectureSettlementTable .specialLectureSettlementReasonWarning {
-  color: #9a5d11;
+  color: var(--status-pending-text, #c2410c);
   font-weight: 800;
 }
 

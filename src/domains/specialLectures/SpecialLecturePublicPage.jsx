@@ -188,7 +188,7 @@ export function SpecialLectureNoticeActionPanel({
           {saveState === "saving" ? "저장 중" : "안내문 저장"}
         </button>
         <button
-          className="sendButton"
+          className="primaryButton"
           disabled={saveState === "saving"}
           onClick={onPrepareNotice}
           type="button"

@@ -1,0 +1,12 @@
+[
+  "src/app/App.css||.classTabList span||background||rgba(148, 163, 184, 0.18)",
+  "src/app/App.css||.examPrepCalendarSchool||border||1px solid rgba(14, 116, 144, 0.18)",
+  "src/app/App.css||.notificationStatsGrid button,\n.notificationPanel||box-shadow||0 10px 26px rgba(31, 45, 78, 0.05)",
+  "src/app/App.css||.sideNav button.active .navBadge||background||#f97316",
+  "src/app/App.css||.specialLectureSessionPlan.journal-missing,\n.specialLectureSessionPlan.journal-outOfSync,\n.specialLectureSessionPlan.journal-pendingRemoval||box-shadow||0 0 0 1px rgba(251, 146, 60, 0.14)",
+  "src/app/App.css||.studentExamPostForm input:focus,\n.studentExamPostForm select:focus,\n.studentExamPostForm textarea:focus||box-shadow||0 0 0 3px rgba(23, 37, 84, 0.1)",
+  "src/app/App.css||.supplementMetric:hover,\n.supplementMetric.active||box-shadow||0 14px 34px rgba(31, 63, 143, 0.12)",
+  "src/app/App.css||.withdrawnStudentBulkActions||background||rgba(248, 251, 255, 0.98)",
+  "src/app/App.css||.wrongBoardFilterPanel,\n.wrongBoardDiagnosis,\n.wrongBoardNotice,\n.wrongBookCard,\n.floatingProblemInspector||box-shadow||0 10px 24px rgba(31, 64, 128, 0.04)",
+  "src/shared/components/WorkspaceTabs.css||.workspaceTabs.workspaceTabs.workspaceTabs-secondary > button.active,\r\n.workspaceTabs.workspaceTabs.workspaceTabs-secondary > button[aria-selected=\"true\"]||background||#e8eefb"
+]

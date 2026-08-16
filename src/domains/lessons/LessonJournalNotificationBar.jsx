@@ -94,7 +94,7 @@ export function LessonJournalNotificationBar({
         ) : null}
         {model.showApplyAction ? (
           <button
-            className="sendButton"
+            className="primaryButton"
             disabled={!canApplySolapiReservation}
             onClick={onApplySolapiReservationPlan}
             type="button"

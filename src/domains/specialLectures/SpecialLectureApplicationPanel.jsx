@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { copyTextToClipboard } from "../exams/outputPreview.js";
+import { Disclosure, DisclosureChevron } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
 import { SearchField } from "../../shared/components/SearchField.jsx";
@@ -1414,7 +1415,7 @@ export function SpecialLectureApplicationPanel({
           ) : null}
         </div>
       ) : null}
-      <div className="specialLectureEnrollmentPanel" id="special-lecture-enrollment-panel">
+      <div className="specialLectureEnrollmentPanel">
         <div className="specialLectureGateHeader">
           <div>
             <strong>특강 명단 · 학생별 회차 관리</strong>
@@ -1434,11 +1435,11 @@ export function SpecialLectureApplicationPanel({
               type="button"
             >
               {isEnrollmentPanelOpen ? "접기" : "펼치기"}
+              <DisclosureChevron open={isEnrollmentPanelOpen} />
             </button>
           </div>
         </div>
-        {isEnrollmentPanelOpen ? (
-          <>
+        <Disclosure hideTrigger id="special-lecture-enrollment-panel" open={isEnrollmentPanelOpen} onToggle={setIsEnrollmentPanelOpen}>
         {!isGuideSaved ? (
           <p className="inlineNotice danger">현재 특강 안내문에 저장하지 않은 변경이 있습니다. `안내문 저장` 후 학생별 수강계획을 수정하세요.</p>
         ) : null}
@@ -1570,11 +1571,10 @@ export function SpecialLectureApplicationPanel({
             </div>
           </details>
         ) : null}
-          </>
-        ) : null}
+        </Disclosure>
       </div>
 
-      <div className="specialLectureLessonPreviewGate" id="special-lecture-lesson-preview-panel">
+      <div className="specialLectureLessonPreviewGate">
         <div className="specialLectureGateHeader">
           <div>
             <strong>특강 수업일지 반영</strong>
@@ -1596,11 +1596,11 @@ export function SpecialLectureApplicationPanel({
               type="button"
             >
               {isLessonPreviewOpen ? "접기" : "펼치기"}
+              <DisclosureChevron open={isLessonPreviewOpen} />
             </button>
           </div>
         </div>
-        {isLessonPreviewOpen ? (
-          <>
+        <Disclosure hideTrigger id="special-lecture-lesson-preview-panel" open={isLessonPreviewOpen} onToggle={setIsLessonPreviewOpen}>
         {lessonPreviewRows.length ? (
           <div className="specialLectureLessonPreviewList">
             {lessonPreviewRows.map((row) => (
@@ -1649,8 +1649,7 @@ export function SpecialLectureApplicationPanel({
           ) : null}
           <span>저장 대상: Supabase `lessons` · 과거 수업/기록/출결/알림톡 예약은 자동 변경하지 않음</span>
         </div>
-          </>
-        ) : null}
+        </Disclosure>
       </div>
       {matchApplication ? (
         <Modal
