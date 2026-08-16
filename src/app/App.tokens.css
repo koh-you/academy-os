@@ -6,11 +6,15 @@
   --academy-border-strong: #cbd8ee;
   --academy-text: #0f172a;
   --academy-text-muted: #52647c;
+  --academy-text-strong: #475569;
   --academy-muted: #64748b;
   --academy-primary: #17213d;
   --academy-primary-hover: #243252;
   --academy-focus-ring: #2563eb;
   --academy-focus-shadow: rgba(37, 99, 235, 0.36);
+  --academy-accent-bg: #eef2ff;
+  --academy-accent-border: #c7d2fe;
+  --academy-accent-text: #4f46e5;
   --academy-radius: 8px;
   --academy-radius-pill: 999px;
   --academy-shadow: 0 12px 28px rgba(30, 64, 175, 0.06);
