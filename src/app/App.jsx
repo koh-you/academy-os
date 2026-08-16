@@ -9241,86 +9241,6 @@ function inferGradeFromBirthYear(birthYear) {
   return "고3";
 }
 
-function ReportCenter({ lessons, records, reportLesson, selectedReportLessonId, snapshots, students, onSaveSnapshot, onSelectLesson }) {
-  const [selectedStudentId, setSelectedStudentId] = useState("");
-  const lessonStudents = reportLesson
-    ? getActiveLessonStudents(reportLesson, students)
-    : [];
-  const activeStudent = lessonStudents.find((student) => student.studentId === selectedStudentId) ?? lessonStudents[0];
-  const activeRecord = activeStudent ? records.find((record) => record.studentId === activeStudent.studentId) : null;
-  const reportBody = activeStudent && reportLesson
-    ? createReportBody(activeStudent, reportLesson, activeRecord)
-    : "";
-
-  useEffect(() => {
-    if (lessonStudents[0] && !lessonStudents.some((student) => student.studentId === selectedStudentId)) {
-      setSelectedStudentId(lessonStudents[0].studentId);
-    }
-  }, [lessonStudents, selectedStudentId]);
-
-  function saveSnapshot() {
-    if (!activeStudent || !reportLesson) return;
-
-    onSaveSnapshot({
-      reportId: `report_${Date.now()}_${activeStudent.studentId}`,
-      studentId: activeStudent.studentId,
-      lessonId: reportLesson.lessonId,
-      title: `${reportLesson.date} ${activeStudent.name} 리포트`,
-      body: reportBody,
-      status: "snapshot_saved",
-      createdAt: new Date().toISOString()
-    });
-  }
-
-  return (
-    <section className="reportGrid">
-      <div className="panel">
-        <SectionHeader
-          description="Day 10-12: 템플릿, 초안, 스냅샷 저장"
-          title="보고서 생성"
-          titleAs="h1"
-        />
-        <label>수업 선택
-          <select value={selectedReportLessonId} onChange={(event) => onSelectLesson(event.target.value)}>
-            {lessons.map((lesson) => (
-              <option key={lesson.lessonId} value={lesson.lessonId}>{lesson.date} · {lesson.className}</option>
-            ))}
-          </select>
-        </label>
-        <label>학생 선택
-          <select value={activeStudent?.studentId ?? ""} onChange={(event) => setSelectedStudentId(event.target.value)}>
-            {lessonStudents.map((student) => <option key={student.studentId} value={student.studentId}>{student.name}</option>)}
-          </select>
-        </label>
-        <label>리포트 템플릿
-          <textarea readOnly rows="4" value={sampleData.reportTemplates[0].body} />
-        </label>
-      </div>
-
-      <div className="panel">
-        <SectionHeader
-          actions={<button className="primaryButton" onClick={saveSnapshot} type="button">스냅샷 저장</button>}
-          eyebrow="Draft"
-          title="리포트 초안"
-        />
-        <textarea aria-label="리포트 초안" className="reportDraft" readOnly rows="12" value={reportBody} />
-      </div>
-
-      <div className="panel snapshotsPanel">
-        <h2>저장된 스냅샷</h2>
-        {snapshots.length === 0 ? <p className="muted">아직 저장된 스냅샷이 없습니다.</p> : null}
-        {snapshots.map((snapshot) => (
-          <article className="snapshotCard" key={snapshot.reportId}>
-            <strong>{snapshot.title}</strong>
-            <small>{snapshot.status} · {snapshot.createdAt}</small>
-            <p>{snapshot.body}</p>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 function useStoredState(key, fallbackValue) {
   const [value, setValue] = useState(() => {
     if (typeof window === "undefined") return fallbackValue;
@@ -10094,32 +10014,6 @@ function createReportBody(student, lesson, record) {
     .replace("{attendance}", attendanceLabels[record?.attendanceStatus ?? "pending"])
     .replace("{homework}", homeworkLabels[record?.homeworkStatus ?? "not_started"])
     .replace("{teacherComment}", record?.teacherComment || "아직 강사 코멘트가 입력되지 않았습니다.");
-}
-
-function getHomeworkBundle(homeworks, lesson, student, lessons = []) {
-  const lessonById = new Map(lessons.map((item) => [item.lessonId, item]));
-  const homeworkMatchesCurrentLessonGroup = (homework = {}) => {
-    if (homework.lessonId === lesson.lessonId) return true;
-    const sourceLesson = lessonById.get(homework.lessonId);
-    if (!sourceLesson) return !isSpecialLectureLesson(lesson);
-    return isSameLessonGroup(lesson, sourceLesson);
-  };
-  const studentHomeworks = homeworks
-    .filter((homework) => homework.studentId === student.studentId)
-    .filter(homeworkMatchesCurrentLessonGroup)
-    .sort((a, b) => a.assignedDate.localeCompare(b.assignedDate));
-
-  const previous =
-    getLessonHomework(homeworks, lesson, student, "previous", lessons) ??
-    studentHomeworks
-      .filter((homework) => homework.assignedDate < lesson.date)
-      .at(-1) ?? null;
-  const today =
-    getLessonHomework(homeworks, lesson, student, "next", lessons) ??
-    studentHomeworks.find((homework) => homework.assignedDate === lesson.date || homework.lessonId === lesson.lessonId) ??
-    null;
-
-  return { previous, today };
 }
 
 function getLessonHomework(homeworks, lesson, student, homeworkType, lessons = [], records = null) {

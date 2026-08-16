@@ -1,0 +1,8 @@
+{
+  "threshold": 5,
+  "reporters": ["console"],
+  "ignore": ["**/node_modules/**", "**/data/ssenTypeIndex.json", "**/dist/**"],
+  "absolute": false,
+  "gitignore": true,
+  "format": ["javascript", "jsx", "css"]
+}
