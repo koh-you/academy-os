@@ -4,6 +4,7 @@ import { ListCard, ListCardActions, ListCardHeader } from "../../shared/componen
 import { SearchField } from "../../shared/components/SearchField.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { buildParentChannelLookupText, getParentResponseContexts } from "./parentResponseContext.js";
+import "./parentResponseContextPanel.css";
 
 export function ParentResponseContextPanel({ formatDateTime, notificationJobs = [], onCopy, students = [] }) {
   const [copyMessage, setCopyMessage] = useState("");

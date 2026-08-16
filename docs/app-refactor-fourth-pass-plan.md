@@ -238,7 +238,7 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 
 - 4-6a 기준선: `App.css` 22,609줄·약 3,321 rule block, 전역 단일 import, 13개 lazy JS 컴포넌트에 CSS scoping 없음, 시각 회귀 도구 없음을 `docs/app-refactor-fourth-pass-css-domain-split-baseline.md`로 고정했다.
 - 4-6b: 공유 token/reset CSS 82줄을 `App.tokens.css`로 물리 분리하고 `main.jsx`의 import 순서(`App.tokens.css` → `App.css`)는 바꾸지 않았다. 분리된 selector가 `App.css`에 중복 선언되지 않음을 확인해 cascade-order 안전을 검증했다.
-- 4-6c(도메인 entry를 lazy chunk와 연결)는 cascade-order 변경이 기능 테스트로 검증 불가능하고 이 환경에 시각 회귀 도구가 없어 보류했다. 사람이 브라우저로 확인 가능한 환경에서 재개한다.
+- 4-6c는 NotificationCenter의 `ParentResponseContextPanel` 전용 CSS를 lazy chunk로 이동했다. 최신 UI token 변수를 보존하고 640px gap/header/card override를 lazy CSS가 직접 소유하도록 재통합했다.
 
 ## 4-7 진행 상태
 
@@ -250,4 +250,4 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 ## 4-8 종료 감사
 
 - 4-0 수치와 종료 수치 비교, 소유권 지도 재검증, 미완료 후보 분류는 `docs/app-refactor-fourth-pass-4-8-closeout.md`에 고정했다.
-- 4-6c, 4-5h/i는 별도 차수로 이연하고 4차 리팩터링 범위를 닫는다.
+- 4-5h/i와 추가 CSS domain split은 별도 차수로 이연하고 4차 리팩터링 범위를 닫는다.

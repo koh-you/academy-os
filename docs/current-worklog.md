@@ -2,6 +2,11 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-17 4-5g·4-6c 최신 main 통합
+
+- 4-5g는 4-8 종료 문서와의 충돌만 합성해 쎈 catalog/provider 경계를 보존했다. 4-6c는 최신 UI token 통합과 겹친 `App.css`/`App.tokens.css`를 그대로 선택하지 않고, 현재 tokenized ParentResponse 규칙을 lazy CSS로 다시 이동했다.
+- `App.tokens.css`의 최신 색상·상태·focus token은 전부 보존했다. ParentResponse의 640px gap·header·card override는 lazy CSS가 직접 소유해 load-order 변경에도 기존 화면을 유지한다.
+
 ## 2026-08-16 App/API 4차 리팩터링 4-5g
 
 - 사전 의존성 감사에서 쎈 JSON→과목 추론→catalog/read route와 row-fill prompt가 한 클러스터이고, 430줄 output 콘텐츠 모델→prompt→provider가 별도 클러스터임을 확인했다. 그래프는 `docs/app-refactor-fourth-pass-4-5g-dependency-graph.md`에 고정했다.
