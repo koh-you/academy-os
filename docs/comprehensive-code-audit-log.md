@@ -139,7 +139,9 @@ docs/comprehensive-code-audit-log.md 파일을 먼저 읽고, "진행 상태" �
 - `src/domains/lessons/lessonJournalRecordBulkApi.js`
 - `src/domains/lessons/lessonJournalHomeworkBulkApi.js`
 
-나머지 4개는 아직 확인 안 함 — 다음 세션에서 각각 (a) 정말 죽은 코드인지 (b) `providerResultContract.js`처럼 의도적으로 대기 중인 모듈인지 판별 필요. `grep -rn "<파일명 없이 export 이름>"`으로 동적 import(`import("...")`)나 파일 경로 문자열로만 참조되는 경우가 아닌지도 확인할 것 — dependency-cruiser는 정적 import만 추적하므로 오탐 가능.
+**2026-08-17 후속 확인 결과**:
+- `src/shared/server/routeRegistryTypes.js` — **오탐**. JSDoc `@typedef {import("./routeRegistryTypes.js").X}` 타입 전용 참조로 route registry 파일 15개 이상이 실제로 사용 중. dependency-cruiser는 주석 안의 타입 참조를 못 잡아서 orphan으로 오판함. 삭제하면 안 됨.
+- `src/domains/lessons/lessonJournalRecordBulkApi.js`, `src/domains/lessons/lessonJournalHomeworkBulkApi.js`, `src/domains/supplements/useSupplementNotificationDraftSelectionState.js` — 셋 다 **"만들었지만 실제 코드에 통합 안 됨"** 카테고리. App.jsx/server.js 어디서도 안 쓰이는 건 맞지만, `scripts/test-lesson-journal-record-bulk-api.mjs`, `scripts/test-lesson-journal-homework-bulk-api.mjs`, `scripts/test-supplement-notification-draft-selection-state.mjs`가 각각 전용으로 검증하고 `scenario-tests-production.cjs`에 물려 있어서 test:production을 통과시키는 상태. 지우면 이 3개 테스트가 import 에러로 깨짐 — ReportCenter처럼 즉시 삭제 가능한 게 아니라, (a) 왜 통합이 안 됐는지 git blame/history 확인 (b) 실제로 통합해서 살릴지, 테스트와 함께 정리해서 지울지 결정하는 별도 안전 단위가 필요함. 이번 세션에서는 처리 안 함, 다음 세션 후보로 남김.
 
 **다음 시작 지점**: `api/routes/coreData.js` (4,907줄) 처음부터.
 
