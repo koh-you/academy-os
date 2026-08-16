@@ -38,6 +38,19 @@
 7. 오류를 감추는 filter/fallback/normalize가 겹치면 패치를 중단하고 원천 데이터·저장 경계·마이그레이션을 재검토한다.
 8. 요청과 무관한 대규모 리팩터링을 섞지 않는다. 기능 수정이 먼저 main에 들어간 뒤 별도 리팩터링이 따라간다.
 
+## 정답 위치 · 2026-08-16
+
+새 로직을 어디에 쓸지 애매할 때 먼저 확인한다. 전체 코드베이스 통독 감사(`docs/comprehensive-code-audit-log.md`)에서 발견한 실제 중복·오배치 사례를 기준으로 한다.
+
+| 기능 | 정답 위치 | 여기 새로 만들지 말 것 |
+| --- | --- | --- |
+| 알림톡/알림 문구 생성(보충 안내, 과제 상태 텍스트, 테스트 결과 요약 등) | `src/domains/notifications/` | `src/app/App.jsx`, `api/server.js` — **현재 두 곳에 함수 단위로 거의 동일하게 중복 구현되어 있음(수정 시 반드시 두 곳 다 확인)**, 신규 로직은 여기 추가하지 말고 공유 모듈로 통합할 것 |
+| 시험관리(exam prep) 행 로직 · 학사일정 이벤트 파생 | `src/domains/exams/`, `src/domains/schoolCalendar/` | `src/app/App.jsx` 최상위 함수로 추가 금지 — 같은 도메인 로직이 이미 절반은 domains/, 절반은 App.jsx에 흩어져 있음 |
+| 날짜/시간 포맷(Korea 기준) | `src/shared/utils/` | 각 파일에서 `getKoreaDateString` 류를 새로 정의하지 말 것 — App.jsx·api/server.js에 이미 여러 벌 존재 확인됨 |
+| HTTP route 처리 | `src/shared/server/*RouteRegistry.js` 패턴 | `api/server.js`의 `if (request.method === ... && pathname === ...)` 직접 나열 — 이미 80개 넘게 있고(4-3 리팩터링에서 이관 예고된 미완료 항목), 새 route도 여기 추가하면 같은 패턴이 계속 늘어남 |
+
+새 함수를 추가하기 전에 `npm run check:duplication`(jscpd)을 돌려 기존 코드와 겹치는지 먼저 확인한다. 단, jscpd는 리터럴 복붙만 잡고 이름만 바꾼 재구현(위 알림 문구 사례처럼)은 못 잡으므로, 알림/저장 관련 로직을 만들 땐 표에 나온 위치를 먼저 grep해서 이미 있는지 확인하는 습관이 더 확실하다.
+
 ## 검증과 완료
 
 - 검증 명령 선택의 source of truth는 `docs/testing-policy.md`다.
