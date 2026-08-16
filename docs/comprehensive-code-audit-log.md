@@ -25,7 +25,7 @@ docs/comprehensive-code-audit-log.md 파일을 먼저 읽고, "진행 상태" �
 | --- | ---: | --- | --- |
 | `src/app/App.jsx` | 10,723 | **완독** | 발견 기록 참조. 압축 후보 약 3,350줄 |
 | `api/server.js` | 7,255 | **완독** | 발견 기록 참조. 압축 후보 약 1,650줄+ |
-| `api/routes/coreData.js` | 4,907 | 미시작 | 1 |
+| `api/routes/coreData.js` | 4,907 | **완독** | 발견 기록 참조. 압축 후보 약 2,000줄+ (단일 구조적 패턴) |
 | `src/app/App.css` | 22,609 | 미시작 | 1 |
 | `src/domains/**` (약 259개 파일) | - | 미시작 | 목록화 필요 |
 | `src/shared/**` | - | 미시작 | 목록화 필요 |
@@ -126,6 +126,35 @@ docs/comprehensive-code-audit-log.md 파일을 먼저 읽고, "진행 상태" �
 | 시험분석 AI 파이프라인 1,750줄 | 압축 대상 아님, 물리적 위치만 조정 후보 |
 | 출결/알림 핵심 로직(`handleAttendanceCheck` 등) | 복잡하지만 응집도 높음, 재설계보다 현행 유지가 안전 |
 
+### `api/routes/coreData.js` — 완독 (4,907/4,907줄)
+
+**1~434줄 (import, 헬퍼, 학생 삭제 감사 로직)**
+- 도메인별 persistence 헬퍼(`studentPersistence.js`, `examPrepRowPersistence.js`, `schoolEventPersistence.js` 등 15개 이상)를 각각 import — App.jsx의 "함수 하나당 파일 하나" 파편화와 같은 패턴이 여기도 존재.
+- `deleteWithdrawnStudent`/`auditWithdrawnStudentDeletion`: 학생 삭제 시 13개 테이블에 걸친 참조를 찾아 정리하는 로직. 응집도 높고 위험한 영역이라 재설계보다 현행 유지 권장.
+
+**435~4907줄 — 파일 전체를 관통하는 단일 구조적 패턴 발견 (핵심 발견)**
+- `upsertStudent`, `persistClassRosterStudentChange`/`persistLessonRosterChange`(반 명단), `persistDerivedExamPrepChange`/`persistDerivedLessonChange`(파생 학사일정), `persistLessonJournalHistoryLessonChange`/`persistLessonJournalHistoryHomeworkChange`(수업 복사·되돌리기), `persistLessonJournalRowsHomeworkChange`/`persistLessonJournalRowsRecordChange`(수업기록·숙제), `persistLessonJournalMakeupTask`(등원보충), `persistSupplementScheduleLessonChange`/`persistSupplementScheduleTaskChange`(보충 일정), `upsertExamPrepRows`, `upsertSchoolEvent`, `upsertResourceMaterial` — **최소 12개 도메인**이 다음 6단계를 거의 동일한 코드로 각각 재구현:
+  1. 현재 행 재조회 (`getXxx`)
+  2. before/after 동등성 비교 (`areXxxEqual`) — 변경 없으면 조기 반환
+  3. 낙관적 동시성 버전 충돌 감지 (`updated_at` 불일치 시 conflict 에러 생성, 코드/메시지만 도메인별로 다름)
+  4. 버전 필터로 patch/insert (`createXxxVersionFilter`)
+  5. 저장 직후 재조회로 검증 (`verifyXxxSave` / `areXxxTimestampsEqual`)
+  6. 실패 시 롤백 (`rollbackXxx`) — 여러 변경을 묶어 저장하는 `saveXxxPlan` 함수들(`saveClassRosterPlan`, `saveDerivedSchoolCalendarPlan`, `saveLessonJournalHistoryPlan`, `saveLessonJournalRowsPlan`, `saveSupplementSchedulePlan`)은 추가로 역순 롤백 오케스트레이션(성공한 변경을 역순으로 되돌리고 검증)까지 도메인마다 새로 작성.
+- 도메인마다 함수 이름(`throwStudentConflict`/`createClassRosterConflict`/`createDerivedSchoolCalendarConflict`/`createLessonJournalHistoryConflict`/`createLessonJournalRowsConflict`/`createSupplementScheduleConflict`)과 에러 코드만 바뀌고 로직 골격은 완전히 동일 — App.jsx의 CRUD 트리오 중복(65행 참조)보다 훨씬 크고 훨씬 일관된 패턴. `saveXxxPlan` 계열 5개 함수의 롤백 오케스트레이션 부분만 대략 900~1,000줄이 구조적으로 동일.
+- **왜 이렇게 됐는지**: `docs/testing-policy.md`의 "저장 후 반드시 재조회로 검증" 원칙과 4차 리팩터링의 "안전 단위"식 접근(도메인 하나씩 독립 브랜치로 처리) 때문에, 매번 새 도메인을 다룰 때마다 이 패턴을 처음부터 다시 타이핑한 것으로 보임. 도구(`check:duplication`)가 이걸 못 잡는 이유: 변수명·에러 메시지·테이블명이 매번 달라 jscpd의 토큰 매칭 임계값을 넘지 못함.
+
+**압축 재설계 방향 (사용자 승인 범위: 저장 로직 자유 재설계 가능)**
+- 제네릭 헬퍼 하나로 통합 가능: `createOptimisticSavePlan({ table, idColumns, toRow, fromRow, areEqual, areTimestampsEqual, createNextUpdatedAt, conflictCode })` 형태로 만들면, 위 12개 도메인의 개별 `persistXxx`/`rollbackXxx` 쌍(각 40~120줄)을 도메인별 설정 객체(각 10~15줄)로 대체 가능. `saveXxxPlan` 5개의 롤백 오케스트레이션도 "여러 변경을 순서대로 적용하고 실패 시 역순 롤백"이라는 동일 골격을 제네릭 `runReversiblePlan(steps)` 러너 하나로 통합 가능.
+- 예상 절감: 약 2,000~2,400줄(파일의 45~50%) — App.jsx/server.js보다 압축 잠재력이 훨씬 큼. 단, 실제 저장 경로(Supabase 쓰기)를 직접 건드리므로 App.jsx 죽은 코드 삭제와 달리 **고위험** — 도메인 하나씩 별도 안전 단위로 전환하고 각 단위마다 해당 도메인의 저장/충돌/롤백 시나리오 테스트를 직접 실행해 확인해야 함.
+
+### `api/routes/coreData.js` 종합 소견 (4,907/4,907줄 완독)
+
+| 항목 | 상태 |
+| --- | --- |
+| 낙관적 동시성 저장+검증+롤백 패턴의 12-도메인 재구현 | 약 2,000~2,400줄, 제네릭 헬퍼 1~2개로 통합 가능 — **압축 최우선 후보** |
+| 학생 삭제 감사(`auditWithdrawnStudentDeletion` 등) | 응집도 높음, 현행 유지 권장 |
+| import 파편화 (persistence 헬퍼 15개+ 개별 파일) | App.jsx와 동일 패턴, 낮은 우선순위 |
+
 ## 자동 도구 발견 (통독과 병행, 2026-08-16)
 
 읽기만으로는 커버 범위가 느려서 결정론적 도구 2개를 프로젝트에 추가했다(`npm run check:duplication`, `npm run check:orphans`). 매 세션 전체 통독을 반복하지 않고도 최신 상태를 몇 초 만에 재확인할 수 있다.
@@ -143,5 +172,5 @@ docs/comprehensive-code-audit-log.md 파일을 먼저 읽고, "진행 상태" �
 - `src/shared/server/routeRegistryTypes.js` — **오탐**. JSDoc `@typedef {import("./routeRegistryTypes.js").X}` 타입 전용 참조로 route registry 파일 15개 이상이 실제로 사용 중. dependency-cruiser는 주석 안의 타입 참조를 못 잡아서 orphan으로 오판함. 삭제하면 안 됨.
 - `src/domains/lessons/lessonJournalRecordBulkApi.js`, `src/domains/lessons/lessonJournalHomeworkBulkApi.js`, `src/domains/supplements/useSupplementNotificationDraftSelectionState.js` — 셋 다 **"만들었지만 실제 코드에 통합 안 됨"** 카테고리. App.jsx/server.js 어디서도 안 쓰이는 건 맞지만, `scripts/test-lesson-journal-record-bulk-api.mjs`, `scripts/test-lesson-journal-homework-bulk-api.mjs`, `scripts/test-supplement-notification-draft-selection-state.mjs`가 각각 전용으로 검증하고 `scenario-tests-production.cjs`에 물려 있어서 test:production을 통과시키는 상태. 지우면 이 3개 테스트가 import 에러로 깨짐 — ReportCenter처럼 즉시 삭제 가능한 게 아니라, (a) 왜 통합이 안 됐는지 git blame/history 확인 (b) 실제로 통합해서 살릴지, 테스트와 함께 정리해서 지울지 결정하는 별도 안전 단위가 필요함. 이번 세션에서는 처리 안 함, 다음 세션 후보로 남김.
 
-**다음 시작 지점**: `api/routes/coreData.js` (4,907줄) 처음부터.
+**다음 시작 지점**: `src/app/App.css` (22,609줄) 처음부터. (`api/routes/coreData.js` 2026-08-17 완독 — 12-도메인 낙관적 저장/롤백 중복 패턴 발견, 아래 참조)
 
