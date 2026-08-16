@@ -4,6 +4,7 @@ import { ExamAnalysisFinalPreviewPanel } from "./ExamAnalysisFinalPreviewPanel.j
 import { copyTextToClipboard } from "./outputPreview.js";
 import { saveExamAnalysisRunContractRequest } from "./examAnalysisRunApi.js";
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
+import { Disclosure, DisclosureChevron } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
@@ -1788,18 +1789,18 @@ function ExamAnalysisOutputDraftPanel({
           </span>
         </div>
         <button
-          aria-controls="exam-output-top-summary-checkpoint exam-output-top-summary-benchmark exam-output-top-summary-visibility"
+          aria-controls="exam-output-top-summary-content"
           aria-expanded={!isOutputSectionCollapsed("topSummary")}
           className="examAnalysisOutputCollapseButton"
           onClick={() => toggleOutputSection("topSummary")}
           type="button"
         >
           {isOutputSectionCollapsed("topSummary") ? "펼치기" : "접기"}
+          <DisclosureChevron open={!isOutputSectionCollapsed("topSummary")} />
         </button>
       </div>
-      {!isOutputSectionCollapsed("topSummary") ? (
-        <>
-          <div className={`examAnalysisOutputSaveCheckpoint ${saveCheckpointState}`} id="exam-output-top-summary-checkpoint">
+      <Disclosure hideTrigger id="exam-output-top-summary-content" open={!isOutputSectionCollapsed("topSummary")}>
+          <div className={`examAnalysisOutputSaveCheckpoint ${saveCheckpointState}`}>
             <strong>{saveCheckpointTitle}</strong>
             <span>{saveCheckpointText}</span>
             <small>
@@ -1807,7 +1808,7 @@ function ExamAnalysisOutputDraftPanel({
             </small>
           </div>
 
-          <div className="examAnalysisBenchmarkMap" id="exam-output-top-summary-benchmark">
+          <div className="examAnalysisBenchmarkMap">
             <div>
               <strong>벤치마킹 글 위치표</strong>
               <span>아래 입력칸이 네이버 글의 어느 흐름에 들어가는지 먼저 확인합니다.</span>
@@ -1821,8 +1822,26 @@ function ExamAnalysisOutputDraftPanel({
               ))}
             </div>
           </div>
-        </>
-      ) : null}
+
+          <div className="examAnalysisOutputVisibility">
+            <span>공개 범위</span>
+            {[
+              ["blog_instagram", "블로그+인스타"],
+              ["blog", "블로그용"],
+              ["instagram", "인스타용"],
+              ["internal", "내부용"]
+            ].map(([value, label]) => (
+              <button
+                className={outputDrafts.inputs.visibility === value ? "active" : ""}
+                key={value}
+                onClick={() => onUpdateInput("visibility", value)}
+                type="button"
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+      </Disclosure>
 
       <div className="examAnalysisOutputCollapsibleHeader">
         <div>
@@ -1837,10 +1856,11 @@ function ExamAnalysisOutputDraftPanel({
           type="button"
         >
           {isOutputSectionCollapsed("guide") ? "펼치기" : "접기"}
+          <DisclosureChevron open={!isOutputSectionCollapsed("guide")} />
         </button>
       </div>
-      {!isOutputSectionCollapsed("guide") ? (
-        <div className="examAnalysisOutputGuide" id="exam-output-guide">
+      <Disclosure hideTrigger id="exam-output-guide" open={!isOutputSectionCollapsed("guide")}>
+        <div className="examAnalysisOutputGuide">
           <strong>작성 방향</strong>
           <span>산출물은 단원 분류를 보여주는 자료가 아니라, 학생과 학부모가 실제로 궁금해하는 내용을 해석해주는 자료입니다. 카드뉴스는 6개 슬라이드 유형을 바탕으로 만들고, 주요문항/손풀이 카드는 선생님 crop 이미지만 슬롯에 넣습니다.</span>
           <small>초안 점검 기준</small>
@@ -1863,28 +1883,7 @@ function ExamAnalysisOutputDraftPanel({
             ))}
           </ol>
         </div>
-      ) : null}
-
-      {!isOutputSectionCollapsed("topSummary") ? (
-        <div className="examAnalysisOutputVisibility" id="exam-output-top-summary-visibility">
-          <span>공개 범위</span>
-          {[
-            ["blog_instagram", "블로그+인스타"],
-            ["blog", "블로그용"],
-            ["instagram", "인스타용"],
-            ["internal", "내부용"]
-          ].map(([value, label]) => (
-            <button
-              className={outputDrafts.inputs.visibility === value ? "active" : ""}
-              key={value}
-              onClick={() => onUpdateInput("visibility", value)}
-              type="button"
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      ) : null}
+      </Disclosure>
 
       <div className="examAnalysisOutputCollapsibleHeader">
         <div>
@@ -1899,10 +1898,11 @@ function ExamAnalysisOutputDraftPanel({
           type="button"
         >
           {isOutputSectionCollapsed("gptChecklist") ? "펼치기" : "접기"}
+          <DisclosureChevron open={!isOutputSectionCollapsed("gptChecklist")} />
         </button>
       </div>
-      {!isOutputSectionCollapsed("gptChecklist") ? (
-        <div className="examAnalysisGptChecklistPanel" id="exam-output-gpt-checklist">
+      <Disclosure hideTrigger id="exam-output-gpt-checklist" open={!isOutputSectionCollapsed("gptChecklist")}>
+        <div className="examAnalysisGptChecklistPanel">
           <div className="examAnalysisGptChecklistNotice">
             <strong>반복 제작 기준</strong>
             <span>자동 입력값은 읽기 전용입니다. 등급컷, 출제 근거, 금지 항목, 주요문항 최종 선택은 선생님 저장본을 원본으로 사용합니다.</span>
@@ -1949,7 +1949,7 @@ function ExamAnalysisOutputDraftPanel({
             <textarea aria-label="GPT 프로젝트 기획 패킷" readOnly rows={12} value={gptPlanningPacket} />
           </div>
         </div>
-      ) : null}
+      </Disclosure>
 
       <div className="examAnalysisOutputCollapsibleHeader">
         <div>
@@ -1964,10 +1964,11 @@ function ExamAnalysisOutputDraftPanel({
           type="button"
         >
           {isOutputSectionCollapsed("baseInputs") ? "펼치기" : "접기"}
+          <DisclosureChevron open={!isOutputSectionCollapsed("baseInputs")} />
         </button>
       </div>
-      {!isOutputSectionCollapsed("baseInputs") ? (
-        <div className="examAnalysisOutputInputGrid" id="exam-output-base-inputs">
+      <Disclosure hideTrigger id="exam-output-base-inputs" open={!isOutputSectionCollapsed("baseInputs")}>
+        <div className="examAnalysisOutputInputGrid">
           {examAnalysisOutputInputFields.map((field) => (
             <label key={field.key}>
               <span>{field.label}</span>
@@ -1982,7 +1983,7 @@ function ExamAnalysisOutputDraftPanel({
             </label>
           ))}
         </div>
-      ) : null}
+      </Disclosure>
 
       <div className="examAnalysisInstructorSectionHeader withAction">
         <div>
@@ -1997,11 +1998,12 @@ function ExamAnalysisOutputDraftPanel({
           type="button"
         >
           {isOutputSectionCollapsed("blogBlocks") ? "펼치기" : "접기"}
+          <DisclosureChevron open={!isOutputSectionCollapsed("blogBlocks")} />
         </button>
       </div>
 
-      {!isOutputSectionCollapsed("blogBlocks") ? (
-        <div className="examAnalysisBlogBlockGrid" id="exam-output-blog-blocks">
+      <Disclosure hideTrigger id="exam-output-blog-blocks" open={!isOutputSectionCollapsed("blogBlocks")}>
+        <div className="examAnalysisBlogBlockGrid">
           {examAnalysisBlogBlockFields.map((field) => (
             <article className="examAnalysisBlogBlockCard" key={field.key}>
               <div className="examAnalysisBlogBlockCardHeader">
@@ -2023,7 +2025,7 @@ function ExamAnalysisOutputDraftPanel({
             </article>
           ))}
         </div>
-      ) : null}
+      </Disclosure>
 
       <div className="examAnalysisKeyQuestionHeader">
         <div>
@@ -2040,6 +2042,7 @@ function ExamAnalysisOutputDraftPanel({
             type="button"
           >
             {isOutputSectionCollapsed("keyQuestions") ? "펼치기" : "접기"}
+            <DisclosureChevron open={!isOutputSectionCollapsed("keyQuestions")} />
           </button>
           <button
             className="secondaryButton"
@@ -2052,8 +2055,8 @@ function ExamAnalysisOutputDraftPanel({
         </div>
       </div>
 
-      {!isOutputSectionCollapsed("keyQuestions") ? (
-        <div className="examAnalysisKeyQuestionList" id="exam-output-key-questions">
+      <Disclosure hideTrigger id="exam-output-key-questions" open={!isOutputSectionCollapsed("keyQuestions")}>
+        <div className="examAnalysisKeyQuestionList">
           {keyQuestionBlocks.map((block, index) => (
             <article className="examAnalysisKeyQuestionCard" key={block.blockId || index}>
               <div className="examAnalysisKeyQuestionCardHeader">
@@ -2096,7 +2099,7 @@ function ExamAnalysisOutputDraftPanel({
             </article>
           ))}
         </div>
-      ) : null}
+      </Disclosure>
 
       <div className="examAnalysisOutputCollapsibleHeader">
         <div>
@@ -2111,10 +2114,11 @@ function ExamAnalysisOutputDraftPanel({
           type="button"
         >
           {isOutputSectionCollapsed("finalDrafts") ? "펼치기" : "접기"}
+          <DisclosureChevron open={!isOutputSectionCollapsed("finalDrafts")} />
         </button>
       </div>
-      {!isOutputSectionCollapsed("finalDrafts") ? (
-        <div className="examAnalysisOutputEditorGrid" id="exam-output-final-drafts">
+      <Disclosure hideTrigger id="exam-output-final-drafts" open={!isOutputSectionCollapsed("finalDrafts")}>
+        <div className="examAnalysisOutputEditorGrid">
           <section>
             <div>
               <div>
@@ -2154,7 +2158,7 @@ function ExamAnalysisOutputDraftPanel({
             />
           </section>
         </div>
-      ) : null}
+      </Disclosure>
 
       <div className="examAnalysisOutputPolicy">
         <span>입력칸과 선생님 수정본은 저장 후 새로고침해도 유지됩니다.</span>
@@ -4057,6 +4061,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                     type="button"
                   >
                     {questionCountStageCollapsed ? "펼치기" : "접기"}
+                    <DisclosureChevron open={!questionCountStageCollapsed} />
                   </button>
                 </>
               )}
@@ -4074,8 +4079,11 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
               title="문항 수 확인"
               titleAs="strong"
             />
-            {questionCountStageCollapsed ? renderExamAnalysisStageCollapsedHint("문항 수 확인", questionCountStageComplete) : (
-              <>
+            <Disclosure
+              hideTrigger
+              open={!questionCountStageCollapsed}
+              collapsedContent={renderExamAnalysisStageCollapsedHint("문항 수 확인", questionCountStageComplete)}
+            >
                 <div className="examAnalysisQuestionCountGrid">
                   <div className="examAnalysisQuestionCountCard">
                     <strong>{questionCountCandidate.count ? `${questionCountCandidate.count}문항 후보` : "문항 후보 없음"}</strong>
@@ -4127,8 +4135,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                     </div>
                   ) : null}
                 </div>
-              </>
-            )}
+            </Disclosure>
           </div>
 
           <div className={boundaryStageCollapsed ? "panel examAnalysisBoundaryPanel examAnalysisStagePanel collapsed" : "panel examAnalysisBoundaryPanel examAnalysisStagePanel"} id="exam-analysis-boundary-stage">
@@ -4152,6 +4159,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                     type="button"
                   >
                     {boundaryStageCollapsed ? "펼치기" : "접기"}
+                    <DisclosureChevron open={!boundaryStageCollapsed} />
                   </button>
                 </>
               )}
@@ -4167,8 +4175,11 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
               title="문항 경계 탐지"
               titleAs="strong"
             />
-            {boundaryStageCollapsed ? renderExamAnalysisStageCollapsedHint("문항 경계 탐지", boundaryStageComplete) : (
-              <>
+            <Disclosure
+              hideTrigger
+              open={!boundaryStageCollapsed}
+              collapsedContent={renderExamAnalysisStageCollapsedHint("문항 경계 탐지", boundaryStageComplete)}
+            >
                 {boundaryDetection ? (
                   <div className={boundaryDetection.status === "needs_review" ? "examAnalysisBoundarySummary needsReview" : "examAnalysisBoundarySummary ok"}>
                     <strong>{boundaryDetection.status === "needs_review" ? "검토 필요" : "탐지 완료"}</strong>
@@ -4195,8 +4206,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                 ) : (
                   <EmptyState className="emptyState compact">고정 문항 행 없음</EmptyState>
                 )}
-              </>
-            )}
+            </Disclosure>
           </div>
 
           <div className={rowFillStageCollapsed ? "panel examAnalysisRowFillPanel examAnalysisStagePanel collapsed" : "panel examAnalysisRowFillPanel examAnalysisStagePanel"} id="exam-analysis-row-fill-stage">
@@ -4220,6 +4230,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                   type="button"
                 >
                   {rowFillStageCollapsed ? "펼치기" : "접기"}
+                  <DisclosureChevron open={!rowFillStageCollapsed} />
                 </button>
                 </>
               )}
@@ -4229,8 +4240,11 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
               title="AI 행 채움"
               titleAs="strong"
             />
-            {rowFillStageCollapsed ? renderExamAnalysisStageCollapsedHint("AI 행 채움", rowFillStageComplete) : (
-              <>
+            <Disclosure
+              hideTrigger
+              open={!rowFillStageCollapsed}
+              collapsedContent={renderExamAnalysisStageCollapsedHint("AI 행 채움", rowFillStageComplete)}
+            >
                 {rowFill ? (
                   <div className={rowFill.status === "needs_review" ? "examAnalysisRowFillSummary needsReview" : "examAnalysisRowFillSummary ok"}>
                     <strong>{rowFill.status === "needs_review" ? "검토 필요" : "채움 완료"}</strong>
@@ -4263,8 +4277,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                 {aiNeedsReviewRows.length ? (
                   <p className="examAnalysisReviewNotice">재확인 문항 {aiNeedsReviewRows.map((question) => question.questionNumber).join(", ")}번은 다음 검수 단계에서 확인해야 합니다.</p>
                 ) : null}
-              </>
-            )}
+            </Disclosure>
           </div>
 
           <div className={reviewStageCollapsed ? "panel examAnalysisReviewPanel examAnalysisStagePanel collapsed" : "panel examAnalysisReviewPanel examAnalysisStagePanel"} id="exam-analysis-review-stage">
@@ -4296,6 +4309,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                   type="button"
                 >
                   {reviewStageCollapsed ? "펼치기" : "접기"}
+                  <DisclosureChevron open={!reviewStageCollapsed} />
                 </button>
                 </>
               )}
@@ -4305,8 +4319,11 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
               title="AI 결과 검수"
               titleAs="strong"
             />
-            {reviewStageCollapsed ? renderExamAnalysisStageCollapsedHint("AI 결과 검수", reviewStageComplete) : (
-              <>
+            <Disclosure
+              hideTrigger
+              open={!reviewStageCollapsed}
+              collapsedContent={renderExamAnalysisStageCollapsedHint("AI 결과 검수", reviewStageComplete)}
+            >
                 {teacherReview ? (
                   <div className={teacherReview.status === "completed" ? "examAnalysisReviewSummary ok" : "examAnalysisReviewSummary needsReview"}>
                     <strong>{teacherReview.status === "completed" ? "검수 완료" : "검수 진행 중"}</strong>
@@ -4550,8 +4567,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                     {isSavingReviews ? "저장 중" : "문항 검수본 저장"}
                   </button>
                 </StickySaveBar>
-              </>
-            )}
+            </Disclosure>
           </div>
 
           <ExamAnalysisFinalPreviewPanel

@@ -15,6 +15,7 @@ import {
   TestManagerTabs
 } from "../tests/TestManagerPanels.jsx";
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
+import { Disclosure } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
@@ -239,27 +240,18 @@ function WrongProblemBoard({
         </label>
       </FilterBar>
 
-      <button
-        aria-controls="wrong-board-diagnosis-content"
-        aria-expanded={isDiagnosisOpen}
-        className="wrongBoardDiagnosis"
-        onClick={() => setIsDiagnosisOpen((current) => !current)}
-        type="button"
+      <Disclosure
+        open={isDiagnosisOpen}
+        onToggle={setIsDiagnosisOpen}
+        trigger={`🔍 커리큘럼 진단 | 보드 ${filteredBooks.length}개 · 이 학생 연결: ${selectedStudent ? 1 : 0}개 · 표시 교재: ${filteredBooks.length}개`}
       >
-        <span>🔍 커리큘럼 진단 | 보드 {filteredBooks.length}개 · 이 학생 연결: {selectedStudent ? 1 : 0}개 · 표시 교재: {filteredBooks.length}개</span>
-        <span>{isDiagnosisOpen ? "▲ 접기" : "▼ 펼치기"}</span>
-      </button>
-
-      {isDiagnosisOpen ? (
-        <div className="wrongBoardNotice" id="wrong-board-diagnosis-content">
-          <strong>{selectedStudent?.name ?? "학생"} 기준 오답 보드</strong>
-          <p>
-            {activeTab === "studentWrong"
-              ? "학생 프로파일에 있던 교재오답 기록은 이 탭에서 별도로 관리합니다."
-              : "PDF 자동 크롭 전 단계에서는 파일명, 단원, 문항 번호, 상태, 풀이 메모를 먼저 저장합니다. 서버 크롭이 붙으면 이 미리보기 영역에 실제 문항 이미지가 표시됩니다."}
-          </p>
-        </div>
-      ) : null}
+        <strong>{selectedStudent?.name ?? "학생"} 기준 오답 보드</strong>
+        <p>
+          {activeTab === "studentWrong"
+            ? "학생 프로파일에 있던 교재오답 기록은 이 탭에서 별도로 관리합니다."
+            : "PDF 자동 크롭 전 단계에서는 파일명, 단원, 문항 번호, 상태, 풀이 메모를 먼저 저장합니다. 서버 크롭이 붙으면 이 미리보기 영역에 실제 문항 이미지가 표시됩니다."}
+        </p>
+      </Disclosure>
 
       {activeTab === "studentWrong" ? (
         <StudentWrongProblemBoard
@@ -754,32 +746,34 @@ export function ResourceLibraryCenter({
                 const selectedCount = groupStudentIds.filter((studentId) => form.studentIds.includes(studentId)).length;
                 const isOpen = openResourceClassIds.includes(group.id);
                 return (
-                  <section className="resourceClassGroup" key={group.id}>
-                    <button className="resourceClassGroupHeader" onClick={() => toggleResourceGroup(group.id)} type="button">
-                      <span>{isOpen ? "⌄" : "›"} {group.name}</span>
-                      <b>{selectedCount}/{group.students.length}명</b>
-                    </button>
-                    {isOpen ? (
-                      <div className="resourceClassGroupBody">
-                        <div className="resourceGroupActions">
-                          <button onClick={() => selectResourceGroup(groupStudentIds)} type="button">반 전체 선택</button>
-                          <button onClick={() => clearResourceGroup(groupStudentIds)} type="button">반 선택 해제</button>
-                        </div>
-                        <div className="resourceStudentButtons">
-                          {group.students.map((student) => (
-                            <button
-                              className={form.studentIds.includes(student.studentId) ? "active" : ""}
-                              key={student.studentId}
-                              onClick={() => toggleStudent(student.studentId)}
-                              type="button"
-                            >
-                              {student.name}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    ) : null}
-                  </section>
+                  <Disclosure
+                    key={group.id}
+                    open={isOpen}
+                    onToggle={() => toggleResourceGroup(group.id)}
+                    trigger={(
+                      <>
+                        <span>{group.name}</span>
+                        <b>{selectedCount}/{group.students.length}명</b>
+                      </>
+                    )}
+                  >
+                    <div className="resourceGroupActions">
+                      <button onClick={() => selectResourceGroup(groupStudentIds)} type="button">반 전체 선택</button>
+                      <button onClick={() => clearResourceGroup(groupStudentIds)} type="button">반 선택 해제</button>
+                    </div>
+                    <div className="resourceStudentButtons">
+                      {group.students.map((student) => (
+                        <button
+                          className={form.studentIds.includes(student.studentId) ? "active" : ""}
+                          key={student.studentId}
+                          onClick={() => toggleStudent(student.studentId)}
+                          type="button"
+                        >
+                          {student.name}
+                        </button>
+                      ))}
+                    </div>
+                  </Disclosure>
                 );
               })}
             </div>
