@@ -1,5 +1,6 @@
 import { Component, useEffect, useMemo, useRef, useState } from "react";
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
+import { Disclosure } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { ListCard, ListCardActions } from "../../shared/components/ListCard.jsx";
@@ -704,19 +705,18 @@ export function StudentProfileModal({
             ))}
           </div>
         </section>
-        <details className="studentProfileSection" open>
-          <summary>
-            <div>
-              <strong>기본정보</strong>
-              <p>연락처, 로그인, 개별 스케줄을 관리합니다.</p>
-            </div>
-          </summary>
-          <div className="studentProfileSectionBody">
-            <details className="studentTallySubmissionPanel">
-              <summary>
+        <Disclosure bodyClassName="studentProfileSectionBody" className="studentProfileSection" defaultOpen trigger={(
+          <div>
+            <strong>기본정보</strong>
+            <p>연락처, 로그인, 개별 스케줄을 관리합니다.</p>
+          </div>
+        )}>
+            <Disclosure className="studentTallySubmissionPanel" trigger={(
+              <>
                 <strong>학생이 Tally로 제출한 데이터</strong>
                 <span>{tallySubmissions.length ? `${tallySubmissions.length}건` : "제출 데이터 없음"}</span>
-              </summary>
+              </>
+            )}>
               {tallySubmissions.length ? tallySubmissions.map((submission) => (
                 <article className="studentTallySubmissionCard" key={submission.applicantId}>
                   <p>{submission.formName || "Tally"} · {submission.createdAt ? new Date(submission.createdAt).toLocaleString("ko-KR") : "제출 시각 미확인"}</p>
@@ -725,7 +725,7 @@ export function StudentProfileModal({
                   </dl>
                 </article>
               )) : <p className="muted">이 학생과 이름·연락처 또는 학교·학년이 일치하는 Tally 제출 원천이 없습니다.</p>}
-            </details>
+            </Disclosure>
             <section className="teacherOperatingMemoPanel">
               <div className="teacherOperatingMemoHeader">
                 <div>
@@ -863,18 +863,17 @@ export function StudentProfileModal({
                 <span className="muted">선택한 요일과 시간이 기본 반보다 우선합니다. 저장 후 미래 정규수업 명단, 출결 매칭, 지각 판정에 반영됩니다.</span>
               </div>
             </div>
-          </div>
-        </details>
+        </Disclosure>
 
-        <details className="studentProfileSection">
-          <summary>
+        <Disclosure bodyClassName="studentProfileSectionBody" className="studentProfileSection" trigger={(
+          <>
             <div>
               <strong>학생별 운영 알림</strong>
               <p>상담 일정, 학부모 연락, 특이사항 알림을 대시보드 원본과 같이 봅니다.</p>
             </div>
             <span className="saveState save-idle inlineSaveStatus">09:00 슬랙 원본</span>
-          </summary>
-          <div className="studentProfileSectionBody">
+          </>
+        )}>
             {isEditingProfile ? (
               <section className="studentReminderComposer">
             <div className="studentReminderControls">
@@ -984,18 +983,17 @@ export function StudentProfileModal({
                 ))
               )}
             </div>
-          </div>
-        </details>
+        </Disclosure>
 
-        <details className="studentProfileSection">
-          <summary>
+        <Disclosure bodyClassName="studentProfileSectionBody" className="studentProfileSection" trigger={(
+          <>
             <div>
               <strong>상담 기록</strong>
               <p>학생 상담과 학부모 상담을 날짜별로 구분해 남깁니다.</p>
             </div>
             <InlineSaveStatus label="상담기록" saveState={studentConsultationSaveState} />
-          </summary>
-          <div className="studentProfileSectionBody">
+          </>
+        )}>
             {isEditingProfile ? (
               <section className="studentConsultationComposer">
             <div className="studentConsultationControls">
@@ -1101,18 +1099,17 @@ export function StudentProfileModal({
                 })
               )}
             </div>
-          </div>
-        </details>
+        </Disclosure>
 
-        <details className="studentProfileSection">
-          <summary>
+        <Disclosure bodyClassName="studentProfileSectionBody" className="studentProfileSection" trigger={(
+          <>
             <div>
               <strong>성적 기록</strong>
               <p>학교 내신 시험과 모의고사 성적을 초안으로 입력한 뒤 저장합니다.</p>
             </div>
             <InlineSaveStatus label="성적" saveState={scoreRecordSaveState} />
-          </summary>
-          <div className="studentProfileSectionBody">
+          </>
+        )}>
             <DataTableShell className="managementTable studentScoreModalTable" label="학생 성적 기록">
               <div className="managementRow scoreRow managementHead">
             <span>구분</span>
@@ -1199,18 +1196,17 @@ export function StudentProfileModal({
                 })
               )}
             </DataTableShell>
-          </div>
-        </details>
+        </Disclosure>
 
-        <details className="studentProfileSection">
-          <summary>
+        <Disclosure bodyClassName="studentProfileSectionBody" className="studentProfileSection" trigger={(
+          <>
             <div>
               <strong>테스트 성적</strong>
               <p>학원 데일리/단원/누적 테스트 성적을 초안으로 입력한 뒤 저장합니다.</p>
             </div>
             <InlineSaveStatus label="테스트" saveState={academyTestSaveState} />
-          </summary>
-          <div className="studentProfileSectionBody">
+          </>
+        )}>
             <DataTableShell className="managementTable studentProfileDataTable" label="학생 학원 테스트 기록">
               <div className="managementRow academyTestProfileRow managementHead">
             <span>날짜</span>
@@ -1291,8 +1287,7 @@ export function StudentProfileModal({
                 })
               )}
             </DataTableShell>
-          </div>
-        </details>
+        </Disclosure>
         {isEditingProfile ? (
           <StickySaveBar
             className="studentProfileStickySaveBar"
