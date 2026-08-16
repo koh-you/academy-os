@@ -57,3 +57,4 @@ Solapi는 `source: "solapi"|"supabase"`, Slack은 `dryRun: boolean`, AI는 `{ pr
 - 4-5c는 시험분석 PDF download/delete 호출을 operations 경계로 주입했다. 업로드·서명 URL과 다른 도메인의 Storage 호출은 이번 단위 밖이다.
 - 4-5d는 vision-check·boundary-detect의 Anthropic/OpenAI PDF fetch만 DB-free provider 모듈로 이동했다. row-fill·output-draft transport는 아직 server에 남아 있다.
 - 4-5e는 provider result envelope를 정의했지만 기존 orchestrator에는 적용하지 않았다. 통합 검토에서 Anthropic `content` fallback/trim 호환성 누락을 수정하고 네트워크 없는 transport 동작 fixture를 추가했다.
+- 4-5f 첫 단위는 시험분석 AI POST 5개 dispatch를 `examAnalysisAiRouteRegistry`로 이동했다. 4-5c의 Storage operations 주입은 registry dependency로 유지하고 pure fixture로 검증한다. notification/Solapi/Slack dispatch와 envelope 채택은 남아 있다.

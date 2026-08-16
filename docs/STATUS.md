@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-16
 
+## 2026-08-16 App/API 4차 리팩터링 4-5f 통합 검수
+
+- Claude Code는 `codex/app-refactor-fourth-pass-4-5f`에서 시험분석 AI POST 5개를 `examAnalysisAiRouteRegistry`로 이동해 commit·push까지 완료했다. 이 브랜치가 이전 main에서 갈라진 점을 확인하고 최신 main 기준 별도 통합 브랜치에서 충돌을 해소했다.
+- 검토 중 최신 main의 `createExamAnalysisStorageOperations()` 주입이 단순 cherry-pick에서 빠지는 통합 회귀를 발견해 registry dependency로 보존했다. 실제 Storage·AI 없이 5개 route payload, 4개 Storage operations 주입, 성공/오류 응답을 검증하는 pure fixture를 production Gate에 연결했다.
+- runtime lint, typecheck, route/API/provider focused fixture와 scenario `828/828`을 통과했다. 이번 4-5f는 시험분석 AI route cluster만 다루며 notification/Solapi/Slack provider registry와 4-5e envelope 채택은 후속 범위다.
+
 ## 2026-08-16 App/API 4차 리팩터링 4-5a~e 통합 검수
 
 - Claude Code의 `4-5a`~`4-5e`와 테스트 정책 보완을 통합해 Supabase Storage 원시 함수 7개를 `api/lib/supabaseRest.js`로 이동하고, 시험분석 PDF download/delete를 명시적 operations 경계로 주입했다. 시험분석 vision-check·문항 경계 탐지의 Anthropic/OpenAI PDF transport는 DB import가 없는 provider 모듈로 옮겼다.

@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-16
 
+## 2026-08-16 App/API 4차 리팩터링 4-5f
+
+- Claude Code는 시험분석 AI POST 5개를 `examAnalysisAiRouteRegistry`로 이동한 `dd1513307`까지 완료·push했다. 최신 main 기준 검토 브랜치는 `codex/integration-4-5f-reviewed`다.
+- 통합 충돌에서 4-5c Storage operations 주입을 보존했고, 5개 route payload·성공/오류·4개 operations 주입을 실제 provider 없이 검증하는 fixture를 production Gate에 추가했다.
+- lint, typecheck, 관련 route/API/provider fixture와 scenario `828/828` 통과. notification/Solapi/Slack route registry와 provider envelope 채택은 아직 완료하지 않았다.
+
 ## 2026-08-16 App/API 4차 리팩터링 4-5a~e
 
 - Claude Code의 통합 후보는 `codex/integration-4-5-and-testing-policy`다. Storage primitive 7개를 `api/lib/supabaseRest.js`로 이동하고 시험분석 PDF download/delete를 operations로 주입했으며, vision-check·boundary-detect PDF transport를 DB-free `commentPolish.js`로 옮겼다.

@@ -230,3 +230,4 @@ HTTP dispatch 120개는 GET 31, POST 76, DELETE 13이다. 큰 묶음은 시험�
 - 4-4는 2026-08-15 통합 검토까지 완료했다. App 직접 request 포함 handler 15개를 action으로 이동해 직접 호출 포함 handler를 0개로 만들었고, 저장·재조회·rollback·provider 범위를 보존했다.
 - 4-5a~d는 provider 기준선, Storage primitive 7개 이동, 시험분석 download/delete operations 주입, vision-check·boundary-detect PDF transport 분리까지 통합 검수했다. Anthropic 응답 `content` fallback/trim 호환성은 동작 fixture로 복원·고정했다.
 - 4-5e는 공통 provider result envelope를 정의하고 pure fixture로 shape만 고정했다. 기존 orchestrator에 적용하면 throw/복구 의미가 바뀔 수 있으므로 아직 채택하지 않았다. notification source/provider orchestration 적용과 provider route registry는 후속 안전 단위다.
+- 4-5f 첫 안전 단위는 시험분석 AI POST 5개를 frozen route registry로 이동했다. 최신 main의 Storage operations 주입을 registry dependency로 보존하고 pure route fixture로 고정했다. notification/Solapi/Slack dispatch registry는 아직 남아 있다.

@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-16 App/API 4차 리팩터링 4-5f 통합 검토
+
+- Claude Code branch `codex/app-refactor-fourth-pass-4-5f`의 단일 commit `dd1513307`은 시험분석 vision-check·boundary detect·row fill/refine·output draft 생성 POST 5개를 frozen route registry로 이동한 상태까지 완료·push돼 있었다. 다만 기준 commit이 최신 main 이전이어서 `codex/integration-4-5f-reviewed`에서 재통합했다.
+- 최신 main에는 4-5c의 시험분석 Storage operations 주입이 추가돼 있어 원 branch 그대로는 4개 경계의 주입이 사라질 수 있었다. registry가 operations factory를 명시적으로 받도록 해결하고, 네트워크·Storage 없는 동작 fixture에서 method/path, request mapping, operations 주입, 200/500 response를 고정했다.
+- 검증: runtime lint, typecheck, route baseline/closeout, API closeout, output draft 계약, provider baseline/transport/result, 새 registry fixture, scenario `828/828`. 운영 Storage·유료 AI·Supabase write는 실행하지 않았다. 4-5f의 알림 provider route 범위와 4-5e envelope orchestrator 적용은 남아 있다.
+
 ## 2026-08-16 App/API 4차 리팩터링 4-5a~e 통합 검토
 
 - main `ec19e9075`에서 갈라진 Claude Code 브랜치 5개와 테스트 정책 보완을 `codex/integration-4-5-and-testing-policy`에 모은 계보를 확인했다. Storage 원시 함수 7개는 기존 `api/lib/supabaseRest.js`로 이동했고, 시험분석 PDF download/delete 7개 호출은 `createExamAnalysisStorageOperations()`를 통해 주입되며 기존 DB/event/실패 기록 순서를 보존한다.
