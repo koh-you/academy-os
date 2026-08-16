@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Disclosure } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { getJsonWithTimeout, postJsonWithTimeout } from "../../shared/utils/apiClient.js";
@@ -314,13 +315,16 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
             </li>
           ))}
         </ol>
-        {sequenceModel.skipped.length ? <details className="examPromptSkipped"><summary>제외된 조건부 역할 {sequenceModel.skipped.length}개</summary>{sequenceModel.skipped.map((item) => <span key={item.roleId}>{item.roleId} · {item.reason}</span>)}</details> : null}
+        {sequenceModel.skipped.length ? <Disclosure className="examPromptSkipped" trigger={`제외된 조건부 역할 ${sequenceModel.skipped.length}개`}>{sequenceModel.skipped.map((item) => <span key={item.roleId}>{item.roleId} · {item.reason}</span>)}</Disclosure> : null}
       </div>
 
       <div className="examPromptRoleGrid">
-        <details className="examPromptRoleCard" open>
-          <summary><span><b>1. 공통 정보</b><small>자동 입력값을 확인하고 학교 분위기만 보완</small></span><em>기본 확인</em></summary>
-          <div className="examPromptRoleCardBody">
+        <Disclosure bodyClassName="examPromptRoleCardBody" className="examPromptRoleCard" defaultOpen trigger={(
+          <>
+            <span><b>1. 공통 정보</b><small>자동 입력값을 확인하고 학교 분위기만 보완</small></span>
+            <em>기본 확인</em>
+          </>
+        )}>
             <div className="examPromptFieldGrid compact">
               {[['schoolName','학교명'],['grade','학년'],['examName','시험명'],['subject','과목']].map(([field, label]) => (
                 <PromptField key={field} label={label} value={draft.roleInputs.common[field]} onChange={(value) => updateRoleField("common", field, value)} sourceLabel="원천값 기반" />
@@ -333,12 +337,14 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
               onChange={(value) => updateRoleField("common", "schoolStyle", value)}
               placeholder="예: 차분한 분석형 · 학교 대표색 남색 · 과장 표현 없이"
             />
-          </div>
-        </details>
+        </Disclosure>
 
-        <details className="examPromptRoleCard" open>
-          <summary><span><b>2. 시험 분석</b><small>숫자는 확인하고, 시험의 특징을 짧게 설명</small></span><em>필수 입력</em></summary>
-          <div className="examPromptRoleCardBody">
+        <Disclosure bodyClassName="examPromptRoleCardBody" className="examPromptRoleCard" defaultOpen trigger={(
+          <>
+            <span><b>2. 시험 분석</b><small>숫자는 확인하고, 시험의 특징을 짧게 설명</small></span>
+            <em>필수 입력</em>
+          </>
+        )}>
             <div className="examPromptFieldGrid compact">
               <PromptField label="문항 수" value={draft.roleInputs.examAnalysis.questionCount} onChange={(value) => updateRoleField("examAnalysis", "questionCount", value)} sourceLabel="확정값 기반" />
               <PromptField label="배점/문항 구조" value={draft.roleInputs.examAnalysis.scoreStructure} onChange={(value) => updateRoleField("examAnalysis", "scoreStructure", value)} placeholder="예: 객관식 17문항 75점 · 서술형 3문항 25점" />
@@ -363,12 +369,14 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
               placeholder="예: 익숙한 유형도 조건을 바꾸어 출제해 개념 연결과 계산 정확도를 함께 확인했습니다."
             />
             <PhrasePicker field="reviewPoints" schoolLevel={schoolLevel} targetPath="roleInputs.examAnalysis.overallReview" currentValue={draft.roleInputs.examAnalysis.overallReview} onApply={applyPhrase} />
-          </div>
-        </details>
+        </Disclosure>
 
-        <details className="examPromptRoleCard wide">
-          <summary><span><b>3. 주요문항</b><small>선택 이유·핵심 개념·풀이 전략·오답 지점</small></span><em>{draft.roleInputs.keyQuestions.length}문항</em></summary>
-          <div className="examPromptRoleCardBody">
+        <Disclosure bodyClassName="examPromptRoleCardBody" className="examPromptRoleCard wide" trigger={(
+          <>
+            <span><b>3. 주요문항</b><small>선택 이유·핵심 개념·풀이 전략·오답 지점</small></span>
+            <em>{draft.roleInputs.keyQuestions.length}문항</em>
+          </>
+        )}>
             <div className="examPromptRoleHeading">
               <small>주요문항으로 보여줄 문제만 펼쳐서 보완합니다.</small>
               <button className="ghostButton" disabled={draft.roleInputs.keyQuestions.length >= 12} onClick={addKeyQuestion} type="button">주요문항 추가</button>
@@ -394,25 +402,28 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
               </div>
               </div>
             )) : <div className="emptyState compact">산출물 입력에서 주요문항을 선택한 뒤 다시 확인해 주세요.</div>}
-          </div>
-        </details>
+        </Disclosure>
 
-        <details className="examPromptRoleCard">
-          <summary><span><b>4. 다음 대비</b><small>학생이 앞으로 해야 할 구체적인 훈련</small></span><em>{draft.roleInputs.nextPreparation.actionItems.length}/5개</em></summary>
-          <div className="examPromptRoleCardBody">
+        <Disclosure bodyClassName="examPromptRoleCardBody" className="examPromptRoleCard" trigger={(
+          <>
+            <span><b>4. 다음 대비</b><small>학생이 앞으로 해야 할 구체적인 훈련</small></span>
+            <em>{draft.roleInputs.nextPreparation.actionItems.length}/5개</em>
+          </>
+        )}>
             <PromptField hint="추상적인 다짐보다 실행할 행동을 한 줄에 하나씩 적습니다." label="학습 행동" value={draft.roleInputs.nextPreparation.actionItems.join("\n")} onChange={(value) => updateRoleField("nextPreparation", "actionItems", value.split(/\r?\n/).map((item) => item.trim()).filter(Boolean).slice(0, 5))} multiline placeholder={"예: 복합 조건을 표로 정리한 뒤 식 세우기\n서술형 풀이에서 근거 문장까지 작성하기"} />
             <PhrasePicker field="actionItems" schoolLevel={schoolLevel} targetPath="roleInputs.nextPreparation.actionItems" currentValue={draft.roleInputs.nextPreparation.actionItems.join("\n")} onApply={({ value, ...selection }) => applyPhrase({ ...selection, value: value.split(/\r?\n/).filter(Boolean).slice(0, 5) })} />
-          </div>
-        </details>
+        </Disclosure>
 
-        <details className="examPromptRoleCard">
-          <summary><span><b>5. 마무리 안내</b><small>학원의 역할과 상담 연결 문구</small></span><em>마지막 장</em></summary>
-          <div className="examPromptRoleCardBody">
+        <Disclosure bodyClassName="examPromptRoleCardBody" className="examPromptRoleCard" trigger={(
+          <>
+            <span><b>5. 마무리 안내</b><small>학원의 역할과 상담 연결 문구</small></span>
+            <em>마지막 장</em>
+          </>
+        )}>
             <PromptField hint="시험분석 뒤 학원이 어떤 도움을 줄지 한 문장으로 적습니다." label="학원 가치 문장" value={draft.roleInputs.cta.valueStatement} onChange={(value) => updateRoleField("cta", "valueStatement", value)} multiline placeholder="예: 결과보다 풀이 과정을 분석해 다음 시험의 학습 방향까지 연결합니다." />
             <PhrasePicker field="valueStatement" schoolLevel={schoolLevel} targetPath="roleInputs.cta.valueStatement" currentValue={draft.roleInputs.cta.valueStatement} onApply={applyPhrase} />
             <PromptField label="연락/다음 행동" value={draft.roleInputs.cta.contactOrNextAction} onChange={(value) => updateRoleField("cta", "contactOrNextAction", value)} multiline placeholder="예: 상담 문의 010-0000-0000 · 학원 채널 링크" />
-          </div>
-        </details>
+        </Disclosure>
       </div>
 
       <div className="examPromptOutputPanel">
@@ -435,17 +446,22 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
           <li><b>2</b><span><strong>결과 검사</strong><small>생성된 이미지를 첨부하고 오류를 검사합니다.</small></span></li>
           <li><b>3</b><span><strong>필요한 부분만 수정</strong><small>문제가 있을 때만 수정 요청을 입력합니다.</small></span></li>
         </ol>
-        <details className="examPromptOutputItem" open>
-          <summary><b>프로젝트 마스터 프롬프트</b><span>모든 슬라이드 공통</span></summary>
+        <Disclosure className="examPromptOutputItem" defaultOpen trigger={(
+          <>
+            <b>프로젝트 마스터 프롬프트</b>
+            <span>모든 슬라이드 공통</span>
+          </>
+        )}>
           <pre>{promptPack.masterPrompt}</pre>
           <button className="ghostButton" onClick={() => copyPrompt("마스터 프롬프트", promptPack.masterPrompt)} type="button">마스터 복사</button>
-        </details>
+        </Disclosure>
         {promptPack.slides.map((slide) => (
-          <details className={`examPromptOutputItem ${slide.generationAllowed ? "ready" : "blocked"}`} key={slide.roleId}>
-            <summary>
+          <Disclosure className={`examPromptOutputItem ${slide.generationAllowed ? "ready" : "blocked"}`} key={slide.roleId} trigger={(
+            <>
               <b>{slide.slideNumber}. {slide.title}</b>
               <span>{slide.generationAllowed ? "복사 가능" : `입력 필요 · ${slide.missingFields.join(", ")}`}</span>
-            </summary>
+            </>
+          )}>
             <div className="examPromptWorkflowSteps">
               <section className="examPromptWorkflowStep primary">
                 <div className="examPromptWorkflowStepHeader">
@@ -456,46 +472,48 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
                 <pre>{slide.prompt}</pre>
                 <button className="primaryButton" disabled={!slide.generationAllowed} onClick={() => copyPrompt(`${slide.slideNumber}번 생성`, `${promptPack.masterPrompt}\n\n${slide.prompt}`)} type="button">처음 만들기 프롬프트 복사</button>
               </section>
-              <details className="examPromptWorkflowStep">
-                <summary>
+              <Disclosure bodyClassName="examPromptWorkflowStepBody" className="examPromptWorkflowStep" trigger={(
+                <>
                   <b>2</b>
                   <span><strong>결과 검사</strong><small>생성된 이미지를 ChatGPT에 첨부한 뒤 사용</small></span>
                   <em>항상 권장</em>
-                </summary>
-                <div className="examPromptWorkflowStepBody">
-                  <p>이미지를 수정하지 않고 오탈자·숫자·잘림·원본 훼손 여부만 검사합니다.</p>
-                  <pre>{slide.qaPrompt}</pre>
-                  <button className="ghostButton" onClick={() => copyPrompt(`${slide.slideNumber}번 결과 검사`, slide.qaPrompt)} type="button">결과 검사 프롬프트 복사</button>
-                </div>
-              </details>
-              <details className="examPromptWorkflowStep">
-                <summary>
+                </>
+              )}>
+                <p>이미지를 수정하지 않고 오탈자·숫자·잘림·원본 훼손 여부만 검사합니다.</p>
+                <pre>{slide.qaPrompt}</pre>
+                <button className="ghostButton" onClick={() => copyPrompt(`${slide.slideNumber}번 결과 검사`, slide.qaPrompt)} type="button">결과 검사 프롬프트 복사</button>
+              </Disclosure>
+              <Disclosure bodyClassName="examPromptWorkflowStepBody" className="examPromptWorkflowStep" trigger={(
+                <>
                   <b>3</b>
                   <span><strong>필요한 부분만 수정</strong><small>검사에서 문제가 있거나 바꾸고 싶을 때만 사용</small></span>
                   <em>선택</em>
-                </summary>
-                <div className="examPromptWorkflowStepBody">
-                  <label className="examPromptRevisionRequest">
-                    <span><b>수정할 내용</b><small>이 입력은 저장되지 않는 임시 메모입니다.</small></span>
-                    <textarea
-                      onChange={(event) => setRevisionRequests((current) => ({ ...current, [slide.roleId]: event.target.value }))}
-                      placeholder="예: 제목의 학교명을 창동고로 고치고, 하단에서 잘린 문장을 모두 보이게 해주세요."
-                      rows={3}
-                      value={revisionRequests[slide.roleId] || ""}
-                    />
-                  </label>
-                  <pre>{getRevisionPrompt(slide)}</pre>
-                  <button className="ghostButton" disabled={!String(revisionRequests[slide.roleId] || "").trim()} onClick={() => copyPrompt(`${slide.slideNumber}번 수정`, getRevisionPrompt(slide))} type="button">수정 프롬프트 복사</button>
-                </div>
-              </details>
+                </>
+              )}>
+                <label className="examPromptRevisionRequest">
+                  <span><b>수정할 내용</b><small>이 입력은 저장되지 않는 임시 메모입니다.</small></span>
+                  <textarea
+                    onChange={(event) => setRevisionRequests((current) => ({ ...current, [slide.roleId]: event.target.value }))}
+                    placeholder="예: 제목의 학교명을 창동고로 고치고, 하단에서 잘린 문장을 모두 보이게 해주세요."
+                    rows={3}
+                    value={revisionRequests[slide.roleId] || ""}
+                  />
+                </label>
+                <pre>{getRevisionPrompt(slide)}</pre>
+                <button className="ghostButton" disabled={!String(revisionRequests[slide.roleId] || "").trim()} onClick={() => copyPrompt(`${slide.slideNumber}번 수정`, getRevisionPrompt(slide))} type="button">수정 프롬프트 복사</button>
+              </Disclosure>
             </div>
-          </details>
+          </Disclosure>
         ))}
-        <details className="examPromptOutputItem">
-          <summary><b>전체 시리즈 수정 프롬프트</b><span>스타일 일괄 보정</span></summary>
+        <Disclosure className="examPromptOutputItem" trigger={(
+          <>
+            <b>전체 시리즈 수정 프롬프트</b>
+            <span>스타일 일괄 보정</span>
+          </>
+        )}>
           <pre>{promptPack.globalRevisionPrompt}</pre>
           <button className="ghostButton" onClick={() => copyPrompt("전체 수정", promptPack.globalRevisionPrompt)} type="button">전체 수정 복사</button>
-        </details>
+        </Disclosure>
       </div>
 
       <div className="examPromptSaveBar">
