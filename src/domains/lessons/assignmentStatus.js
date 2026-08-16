@@ -105,3 +105,12 @@ export function isAssignmentStatusHomeworkMakeupCandidate(value) {
   const normalizedValue = normalizeAssignmentStatusValue(value);
   return ["not_done", "partial_80", "partial_50"].includes(normalizedValue);
 }
+
+export function getHomeworkAssignmentStatus(homework, records = []) {
+  const ownStatus = homework?.assignmentStatus ?? homework?.incompleteHomework ?? "";
+  if (ownStatus) return ownStatus;
+  const record = records.find(
+    (item) => item.lessonId === (homework?.checkedLessonId ?? homework?.lessonId) && item.studentId === homework?.studentId
+  );
+  return record?.assignmentStatus ?? record?.incompleteHomework ?? "";
+}

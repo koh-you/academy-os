@@ -168,12 +168,20 @@ import {
 import {
   buildAttendanceBody,
   buildLessonNotificationBody,
+  compactDuplicateNotificationBlocks,
   createNotificationMessageBlock as createMessageBlock,
   createNotificationMessageLine as createMessageLine,
   formatLessonNotificationAttendance as formatAttendanceForMessage,
+  getNotificationTextKey,
   joinNotificationMessageBlocks as joinMessageBlocks,
-  normalizeNotificationText as normalizeMessageText
+  normalizeNotificationText as normalizeMessageText,
+  notificationTextIncludesBlock
 } from "../domains/notifications/notificationMessageRenderer.js";
+import {
+  getLessonPreparationNotice,
+  parseHomeworkFollowupMemoLine,
+  removeHomeworkFollowupMemoLines
+} from "../domains/notifications/lessonPreparationNotice.js";
 import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
 import { saveLessonRecordAction } from "../domains/lessons/lessonRecordSaveApi.js";
 import { findSupplementTaskForCandidate } from "../domains/supplements/supplementCenterSelectionModel.js";
@@ -253,6 +261,7 @@ import {
   getAssignmentStatusMessage,
   getAssignmentStatusParentMessage,
   getAssignmentStatusStudentMessage,
+  getHomeworkAssignmentStatus,
   getHomeworkStatusFromAssignmentStatus,
   isAssignmentStatusHomeworkMakeupCandidate,
   isAssignmentStatusUnrecorded,
@@ -548,15 +557,6 @@ function getHomeworkStatusTone(homework, records = []) {
   return "pending";
 }
 
-function getHomeworkAssignmentStatus(homework, records = []) {
-  const ownStatus = homework?.assignmentStatus ?? homework?.incompleteHomework ?? "";
-  if (ownStatus) return ownStatus;
-  const record = records.find(
-    (item) => item.lessonId === (homework?.checkedLessonId ?? homework?.lessonId) && item.studentId === homework?.studentId
-  );
-  return record?.assignmentStatus ?? record?.incompleteHomework ?? "";
-}
-
 function getLinkedPreviousHomework(homework, homeworks = []) {
   if (homework?.homeworkType !== "next") return null;
   return homeworks.find(
@@ -648,46 +648,9 @@ function getActiveStudentIdsFromSelection(studentIds = [], students = []) {
     .map((student) => student.studentId);
 }
 
-function getMessageDedupeKey(value = "") {
-  return normalizeMessageText(value).replace(/\s+/g, " ");
-}
-
-function compactDuplicateMessageBlocks(value = "") {
-  const seen = new Set();
-  return String(value ?? "")
-    .replace(/\r\n/g, "\n")
-    .split(/\n\s*\n+/g)
-    .map(normalizeMessageText)
-    .filter(Boolean)
-    .filter((block) => {
-      const key = getMessageDedupeKey(block);
-      if (!key || seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    })
-    .join("\n\n");
-}
-
-function textIncludesMessageBlock(text = "", block = "") {
-  const textKey = getMessageDedupeKey(text);
-  const blockKey = getMessageDedupeKey(block);
-  return Boolean(blockKey && textKey.includes(blockKey));
-}
-
-function getPreparationNoticeForTarget(record = {}, target = "parent") {
-  const shouldIncludePrepMemo =
-    target === "student" ? Boolean(record?.prepStudentVisible) : Boolean(record?.prepParentVisible);
-  return shouldIncludePrepMemo ? removeHomeworkFollowupMemoLines(record?.preparationMemo) : "";
-}
-
 function getHomeworkFollowupNoticeForTarget(record = {}, target = "parent", notificationTemplates = {}) {
   return formatHomeworkFollowupForNotice(record, notificationTemplates);
 }
-
-const homeworkFollowupMemoPrefixes = {
-  next_lesson: "다음 수업 확인",
-  stay_after: "수업 후 보충"
-};
 
 const homeworkFollowupMethods = [
   { id: "stay_after", label: "남아서 하고 가기" },
@@ -701,14 +664,6 @@ function getHomeworkFollowupOptionsForAssignmentStatus(status = "") {
     return homeworkFollowupMethods.filter((method) => method.id === "next_lesson");
   }
   return isAssignmentStatusHomeworkMakeupCandidate(normalizedStatus) ? homeworkFollowupMethods : [];
-}
-
-function parseHomeworkFollowupMemoLine(line = "") {
-  const text = normalizeMessageText(line);
-  const match = text.match(/^(다음 수업 확인|수업 후 보충)\s*:\s*(.+)$/);
-  if (!match) return null;
-  const method = match[1] === homeworkFollowupMemoPrefixes.next_lesson ? "next_lesson" : "stay_after";
-  return { method, text: match[2].trim() };
 }
 
 function getHomeworkFollowupFromRecord(record = {}) {
@@ -738,14 +693,6 @@ function formatHomeworkFollowupForNotice(record = {}, notificationTemplates = {}
     return renderNotificationTemplate(templates.lessonStayAfterHomeworkFollowup, { "숙제": followup.text });
   }
   return "";
-}
-
-function removeHomeworkFollowupMemoLines(value = "") {
-  return normalizeMessageText(value)
-    .split("\n")
-    .filter((line) => !parseHomeworkFollowupMemoLine(line))
-    .join("\n")
-    .trim();
 }
 
 function getHomeworkFollowupMethodFromRecord(record = {}) {
@@ -894,9 +841,9 @@ function hasIncompleteLessonTestAttempt(testSessions = [], testAttempts = [], le
 }
 
 function buildInitialCommentDraft({ audience, existingComment, record, supplementSchedules }) {
-  const commentText = compactDuplicateMessageBlocks(existingComment);
-  const prepMemo = getPreparationNoticeForTarget(record, audience);
-  const shouldAddPrepMemo = prepMemo && !textIncludesMessageBlock(commentText, prepMemo);
+  const commentText = compactDuplicateNotificationBlocks(existingComment);
+  const prepMemo = getLessonPreparationNotice(record, audience);
+  const shouldAddPrepMemo = prepMemo && !notificationTextIncludesBlock(commentText, prepMemo);
 
   if (commentText) {
     return joinMessageBlocks([
@@ -1025,7 +972,7 @@ function buildLessonReservationPayloadSnapshot({
 }) {
   return createLessonReservationPayloadSnapshot({
     audience,
-    compactMessage: compactDuplicateMessageBlocks,
+    compactMessage: compactDuplicateNotificationBlocks,
     getAssignmentStatus: getAssignmentStatusForMessage,
     getHomeworkFollowupNotice: getHomeworkFollowupNoticeForTarget,
     getLessonContent,

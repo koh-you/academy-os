@@ -128,6 +128,7 @@ import {
   getAssignmentStatusMessage,
   getAssignmentStatusParentMessage,
   getAssignmentStatusStudentMessage,
+  getHomeworkAssignmentStatus,
   isAssignmentStatusUnrecorded,
   normalizeAssignmentStatusValue
 } from "../src/domains/lessons/assignmentStatus.js";
@@ -190,7 +191,14 @@ import {
 } from "../src/domains/exams/examAnalysisRunApi.js";
 import { getNextHourlyAlimtalkReservationAt } from "../src/domains/notifications/supplementJobBuilders.js";
 import { defaultNotificationTemplates } from "../src/domains/notifications/notificationTemplateCatalog.js";
-import { buildLessonNotificationBody } from "../src/domains/notifications/notificationMessageRenderer.js";
+import {
+  buildLessonNotificationBody,
+  compactDuplicateNotificationBlocks,
+  createNotificationMessageLine,
+  joinNotificationMessageBlocks,
+  normalizeNotificationText
+} from "../src/domains/notifications/notificationMessageRenderer.js";
+import { parseHomeworkFollowupMemoLine } from "../src/domains/notifications/lessonPreparationNotice.js";
 import { isSupplementScheduleForLessonComment } from "../src/domains/notifications/supplementSchedule.js";
 import { normalizeSpecialLectureTallySessionRequests } from "../src/domains/specialLectures/tallySessionRequests.js";
 import {
@@ -2126,44 +2134,6 @@ function shouldRefreshLessonCommentJobBeforeSend(job = {}) {
   return Boolean(job.lessonId && job.studentId && isLessonCommentNotificationJob(job));
 }
 
-function normalizeNotificationText(value = "") {
-  return String(value ?? "")
-    .replace(/\r\n/g, "\n")
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .join("\n");
-}
-
-function getNotificationTextKey(value = "") {
-  return normalizeNotificationText(value).replace(/\s+/g, " ");
-}
-
-function compactDuplicateNotificationBlocks(value = "") {
-  const seen = new Set();
-  return String(value ?? "")
-    .replace(/\r\n/g, "\n")
-    .split(/\n\s*\n+/g)
-    .map(normalizeNotificationText)
-    .filter(Boolean)
-    .filter((block) => {
-      const key = getNotificationTextKey(block);
-      if (!key || seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    })
-    .join("\n\n");
-}
-
-function joinNotificationBlocks(blocks = []) {
-  return blocks.map(normalizeNotificationText).filter(Boolean).join("\n\n");
-}
-
-function notificationLine(label, value) {
-  const text = normalizeNotificationText(value);
-  return text ? `${label} : ${text}` : "";
-}
-
 function getLessonStudentIdsForNotification(lesson = {}) {
   return Array.isArray(lesson.studentIds) ? lesson.studentIds : [];
 }
@@ -2216,21 +2186,12 @@ function getNotificationLessonContent(record = {}) {
   return compactText(record.lessonProgress) || compactText(record.progress) || compactText(record.lessonContent);
 }
 
-function getHomeworkAssignmentStatusForNotification(homework = {}, records = []) {
-  const ownStatus = homework.assignmentStatus ?? homework.incompleteHomework ?? "";
-  if (ownStatus) return ownStatus;
-  const record = records.find(
-    (item) => item.lessonId === (homework.checkedLessonId ?? homework.lessonId) && item.studentId === homework.studentId
-  );
-  return record?.assignmentStatus ?? record?.incompleteHomework ?? "";
-}
-
 function getAssignmentStatusForNotification(record = {}, previousHomework = null, records = []) {
   const recordStatus = normalizeAssignmentStatusValue(record.assignmentStatus ?? record.incompleteHomework ?? "");
   if (recordStatus) return recordStatus;
 
   const homeworkStatus = normalizeAssignmentStatusValue(
-    getHomeworkAssignmentStatusForNotification(previousHomework ?? {}, records)
+    getHomeworkAssignmentStatus(previousHomework ?? {}, records)
   );
   if (homeworkStatus) return homeworkStatus;
 
@@ -2388,11 +2349,6 @@ function getStudentTestResultLinesForNotification(testSessions = [], testAttempt
     .map(({ session, attempt }) => formatTestAttemptLineForNotification(session, attempt));
 }
 
-function getPreparationNoticeForNotification(record = {}, target = "parent") {
-  const shouldInclude = target === "student" ? Boolean(record.prepStudentVisible) : Boolean(record.prepParentVisible);
-  return shouldInclude ? removeHomeworkFollowupMemoLinesForNotification(record.preparationMemo) : "";
-}
-
 const defaultLessonHomeworkFollowupTemplates = {
   lessonNextHomeworkFollowup: defaultNotificationTemplates.lessonNextHomeworkFollowup,
   lessonStayAfterHomeworkFollowup: defaultNotificationTemplates.lessonStayAfterHomeworkFollowup
@@ -2414,14 +2370,6 @@ function getHomeworkFollowupNoticeForNotification(record = {}, target = "parent"
   return formatHomeworkFollowupForNotification(record, notificationTemplates);
 }
 
-function parseHomeworkFollowupMemoLineForNotification(line = "") {
-  const text = normalizeNotificationText(line);
-  const match = text.match(/^(다음 수업 확인|수업 후 보충)\s*:\s*(.+)$/);
-  if (!match) return null;
-  const method = match[1] === "다음 수업 확인" ? "next_lesson" : "stay_after";
-  return { method, text: match[2].trim() };
-}
-
 function getHomeworkFollowupForNotification(record = {}) {
   const method = normalizeNotificationText(record.homeworkFollowupMethod);
   const text = normalizeNotificationText(record.homeworkFollowupText);
@@ -2430,7 +2378,7 @@ function getHomeworkFollowupForNotification(record = {}) {
   }
   return normalizeNotificationText(record.preparationMemo)
     .split("\n")
-    .map(parseHomeworkFollowupMemoLineForNotification)
+    .map(parseHomeworkFollowupMemoLine)
     .find(Boolean) ?? null;
 }
 
@@ -2445,14 +2393,6 @@ function formatHomeworkFollowupForNotification(record = {}, notificationTemplate
     return renderLessonHomeworkFollowupTemplate(templates.lessonStayAfterHomeworkFollowup, followup.text);
   }
   return "";
-}
-
-function removeHomeworkFollowupMemoLinesForNotification(value = "") {
-  return normalizeNotificationText(value)
-    .split("\n")
-    .filter((line) => !parseHomeworkFollowupMemoLineForNotification(line))
-    .join("\n")
-    .trim();
 }
 
 function buildInitialNotificationComment({ existingComment }) {
@@ -2480,10 +2420,10 @@ function buildLatestLessonCommentPreview({ audience, commentBody, homeworkFollow
     testResult: testResultLines.join("\n")
   });
 
-  return joinNotificationBlocks([
+  return joinNotificationMessageBlocks([
     `${student.name} 학생 ${audience === "student" ? "안내" : "수업 안내"}`,
     previewBody,
-    notificationLine("📘 수업", lesson.className)
+    createNotificationMessageLine("📘 수업", lesson.className)
   ]);
 }
 

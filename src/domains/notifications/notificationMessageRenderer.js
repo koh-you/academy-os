@@ -17,6 +17,32 @@ function normalizeMessageBodyText(value) {
     .trim();
 }
 
+export function getNotificationTextKey(value = "") {
+  return normalizeNotificationText(value).replace(/\s+/g, " ");
+}
+
+export function compactDuplicateNotificationBlocks(value = "") {
+  const seen = new Set();
+  return String(value ?? "")
+    .replace(/\r\n/g, "\n")
+    .split(/\n\s*\n+/g)
+    .map(normalizeNotificationText)
+    .filter(Boolean)
+    .filter((block) => {
+      const key = getNotificationTextKey(block);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .join("\n\n");
+}
+
+export function notificationTextIncludesBlock(text = "", block = "") {
+  const textKey = getNotificationTextKey(text);
+  const blockKey = getNotificationTextKey(block);
+  return Boolean(blockKey && textKey.includes(blockKey));
+}
+
 export function createNotificationMessageBlock(label, value) {
   const text = normalizeNotificationText(value);
   return text ? `${label}\n${text}` : "";

@@ -187,7 +187,7 @@ for (const binding of [
   'import { createLessonReservationPayloadSnapshot } from "../domains/lessons/lessonReservationPayloadSnapshot.js"',
   "function buildLessonReservationPayloadSnapshot({",
   "return createLessonReservationPayloadSnapshot({",
-  "compactMessage: compactDuplicateMessageBlocks",
+  "compactMessage: compactDuplicateNotificationBlocks",
   "getAssignmentStatus: getAssignmentStatusForMessage",
   "getHomeworkFollowupNotice: getHomeworkFollowupNoticeForTarget",
   "getLessonContent,",
