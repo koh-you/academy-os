@@ -37,25 +37,24 @@
 .examPromptGenerationStatus.blocked { background: var(--status-pending-bg, #fff7ed); color: var(--status-pending-text, #c2410c); }
 .examPromptOutputItem { border: 1px solid var(--academy-border, #d8e3f8); border-radius: 12px; padding: 10px; background: var(--academy-surface, #fff); }
 .examPromptOutputItem.blocked { border-color: var(--status-pending-border, #fed7aa); }
-.examPromptOutputItem summary { cursor: pointer; display: flex; justify-content: space-between; gap: 10px; }
-.examPromptOutputItem summary span { color: var(--academy-muted, #64748b); font-size: 11px; }
-.examPromptOutputItem.blocked summary span { color: var(--status-pending-text, #c2410c); }
-.examPromptOutputItem > pre, .examPromptWorkflowStep pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 340px; overflow: auto; border: 1px solid var(--status-neutral-border, #e2e8f0); border-radius: 9px; background: var(--academy-surface-muted, #f8fafc); padding: 12px; font: 14px/1.6 ui-monospace, SFMono-Regular, Consolas, monospace; }
+.examPromptOutputItem .disclosureTrigger { padding: 0; min-height: 0; }
+.examPromptOutputItem .disclosureTriggerLabel { cursor: pointer; display: flex; justify-content: space-between; gap: 10px; width: 100%; }
+.examPromptOutputItem .disclosureTriggerLabel span { color: var(--academy-muted, #64748b); font-size: 11px; }
+.examPromptOutputItem.blocked .disclosureTriggerLabel span { color: var(--status-pending-text, #c2410c); }
+.examPromptOutputItem .disclosureBodyInner > pre, .examPromptWorkflowStep pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 340px; overflow: auto; border: 1px solid var(--status-neutral-border, #e2e8f0); border-radius: 9px; background: var(--academy-surface-muted, #f8fafc); padding: 12px; font: 14px/1.6 ui-monospace, SFMono-Regular, Consolas, monospace; }
+.examPromptOutputItem .disclosureBodyInner { display: grid; gap: 8px; padding-top: 8px; }
 .examPromptWorkflowGuide { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .examPromptWorkflowGuide li { align-items: center; background: var(--academy-surface, #fff); border: 1px solid var(--status-info-border, #bfdbfe); border-radius: 12px; display: flex; gap: 9px; min-width: 0; padding: 10px; }
-.examPromptWorkflowGuide li > b, .examPromptWorkflowStepHeader > b, .examPromptWorkflowStep > summary > b { align-items: center; background: var(--academy-focus-ring, #2563eb); border-radius: 50%; color: var(--academy-surface, #fff); display: flex; flex: 0 0 28px; height: 28px; justify-content: center; }
-.examPromptWorkflowGuide span, .examPromptWorkflowStepHeader span, .examPromptWorkflowStep > summary span { display: grid; gap: 2px; min-width: 0; }
-.examPromptWorkflowGuide strong, .examPromptWorkflowStepHeader strong, .examPromptWorkflowStep > summary strong { color: var(--academy-text, #0f172a); font-size: 14px; }
-.examPromptWorkflowGuide small, .examPromptWorkflowStepHeader small, .examPromptWorkflowStep > summary small { color: var(--academy-muted, #64748b); font-size: 11px; line-height: 1.4; }
+.examPromptWorkflowGuide li > b, .examPromptWorkflowStepHeader > b, .examPromptWorkflowStep .disclosureTriggerLabel > b { align-items: center; background: var(--academy-focus-ring, #2563eb); border-radius: 50%; color: var(--academy-surface, #fff); display: flex; flex: 0 0 28px; height: 28px; justify-content: center; }
+.examPromptWorkflowGuide span, .examPromptWorkflowStepHeader span, .examPromptWorkflowStep .disclosureTriggerLabel span { display: grid; gap: 2px; min-width: 0; }
+.examPromptWorkflowGuide strong, .examPromptWorkflowStepHeader strong, .examPromptWorkflowStep .disclosureTriggerLabel strong { color: var(--academy-text, #0f172a); font-size: 14px; }
+.examPromptWorkflowGuide small, .examPromptWorkflowStepHeader small, .examPromptWorkflowStep .disclosureTriggerLabel small { color: var(--academy-muted, #64748b); font-size: 11px; line-height: 1.4; }
 .examPromptWorkflowSteps { display: grid; gap: 9px; margin-top: 10px; }
 .examPromptWorkflowStep { background: var(--academy-surface-muted, #f8fafc); border: 1px solid var(--academy-border, #d8e3f8); border-radius: 12px; min-width: 0; overflow: clip; }
 .examPromptWorkflowStep.primary { background: var(--academy-surface, #fff); border-color: var(--status-info-border, #bfdbfe); display: grid; gap: 10px; padding: 12px; }
-.examPromptWorkflowStepHeader, .examPromptWorkflowStep > summary { align-items: center; display: flex; gap: 9px; }
-.examPromptWorkflowStep > summary { cursor: pointer; list-style: none; padding: 12px; }
-.examPromptWorkflowStep > summary::-webkit-details-marker { display: none; }
-.examPromptWorkflowStep > summary::after { color: var(--academy-muted, #64748b); content: "펼치기"; font-size: 11px; font-weight: 700; }
-.examPromptWorkflowStep[open] > summary { border-bottom: 1px solid var(--academy-border, #d8e3f8); }
-.examPromptWorkflowStep[open] > summary::after { content: "접기"; }
+.examPromptWorkflowStepHeader, .examPromptWorkflowStep .disclosureTriggerLabel { align-items: center; display: flex; gap: 9px; }
+.examPromptWorkflowStep > .disclosureTrigger { padding: 12px; }
+.examPromptWorkflowStep[data-open="true"] > .disclosureTrigger { border-bottom: 1px solid var(--academy-border, #d8e3f8); }
 .examPromptWorkflowStep em { background: var(--status-closure-bg, #e0e7ff); border-radius: 999px; color: var(--status-closure-text, #3730a3); font-size: 11px; font-style: normal; font-weight: 700; margin-left: auto; padding: 4px 8px; white-space: nowrap; }
 .examPromptWorkflowStepBody { display: grid; gap: 10px; padding: 12px; }
 .examPromptWorkflowStepBody > p { color: var(--academy-text-muted, #52647c); font-size: 12px; margin: 0; }
@@ -66,14 +65,12 @@
 .examPromptRoleGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .examPromptRoleCard { border: 1px solid var(--academy-border, #d8e3f8); border-radius: 16px; padding: 0; background: var(--academy-surface, #fff); overflow: clip; }
 .examPromptRoleCard.wide { grid-column: 1 / -1; }
-.examPromptRoleCard > summary { align-items: center; cursor: pointer; display: flex; gap: 12px; justify-content: space-between; list-style: none; min-height: 58px; padding: 12px 15px; }
-.examPromptRoleCard > summary::-webkit-details-marker { display: none; }
-.examPromptRoleCard > summary::after { color: var(--academy-muted, #64748b); content: "펼치기"; font-size: 11px; font-weight: 700; }
-.examPromptRoleCard[open] > summary { border-bottom: 1px solid var(--status-neutral-border, #e2e8f0); }
-.examPromptRoleCard[open] > summary::after { content: "접기"; }
-.examPromptRoleCard > summary > span { display: grid; gap: 3px; }
-.examPromptRoleCard > summary small { color: var(--academy-muted, #64748b); font-weight: 500; }
-.examPromptRoleCard > summary em { background: var(--status-info-bg, #eff6ff); border-radius: 999px; color: var(--status-info-text, #1d4ed8); font-size: 11px; font-style: normal; font-weight: 700; margin-left: auto; padding: 5px 8px; white-space: nowrap; }
+.examPromptRoleCard > .disclosureTrigger { min-height: 58px; padding: 12px 15px; }
+.examPromptRoleCard .disclosureTriggerLabel { align-items: center; display: flex; gap: 12px; justify-content: space-between; flex: 1 1 auto; }
+.examPromptRoleCard[data-open="true"] > .disclosureTrigger { border-bottom: 1px solid var(--status-neutral-border, #e2e8f0); }
+.examPromptRoleCard .disclosureTriggerLabel > span { display: grid; gap: 3px; }
+.examPromptRoleCard .disclosureTriggerLabel small { color: var(--academy-muted, #64748b); font-weight: 500; }
+.examPromptRoleCard .disclosureTriggerLabel em { background: var(--status-info-bg, #eff6ff); border-radius: 999px; color: var(--status-info-text, #1d4ed8); font-size: 11px; font-style: normal; font-weight: 700; margin-left: auto; padding: 5px 8px; white-space: nowrap; }
 .examPromptRoleCardBody { display: grid; gap: 12px; padding: 15px; }
 .examPromptRoleHeading { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
 .examPromptFieldGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
@@ -93,9 +90,9 @@
 @media (max-width: 900px) {
   .examPromptStudioHeader, .examPromptSaveBar { align-items: stretch; flex-direction: column; }
   .examPromptRoleGrid, .examPromptFieldGrid, .examPromptSlideSequence, .examPromptWorkflowGuide { grid-template-columns: 1fr; }
-  .examPromptRoleHeading, .examPromptRoleCard > summary { flex-wrap: wrap; }
-  .examPromptRoleHeading > *, .examPromptRoleCard > summary > span, .examPromptPhrasePicker select { min-width: 0; }
-  .examPromptWorkflowStepHeader, .examPromptWorkflowStep > summary { flex-wrap: wrap; }
+  .examPromptRoleHeading, .examPromptRoleCard .disclosureTriggerLabel { flex-wrap: wrap; }
+  .examPromptRoleHeading > *, .examPromptRoleCard .disclosureTriggerLabel > span, .examPromptPhrasePicker select { min-width: 0; }
+  .examPromptWorkflowStepHeader, .examPromptWorkflowStep .disclosureTriggerLabel { flex-wrap: wrap; }
   .examPromptRoleCard.wide { grid-column: auto; }
   .examPromptPhrasePicker { grid-template-columns: 1fr; }
   .examPromptPhrasePicker small { grid-column: auto; }
