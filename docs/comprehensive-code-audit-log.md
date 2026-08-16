@@ -26,7 +26,7 @@ docs/comprehensive-code-audit-log.md 파일을 먼저 읽고, "진행 상태" �
 | `src/app/App.jsx` | 10,723 | **완독** | 발견 기록 참조. 압축 후보 약 3,350줄 |
 | `api/server.js` | 7,255 | **완독** | 발견 기록 참조. 압축 후보 약 1,650줄+ |
 | `api/routes/coreData.js` | 4,907 | **완독** | 발견 기록 참조. 압축 후보 약 2,000줄+ (단일 구조적 패턴) |
-| `src/app/App.css` | 22,609 | 미시작 | 1 |
+| `src/app/App.css` | 22,609 | 부분 샘플(1~2000줄) — 아래 참조, 방법 전환 권장 | stylelint 도입 후 재개 |
 | `src/domains/**` (약 259개 파일) | - | 미시작 | 목록화 필요 |
 | `src/shared/**` | - | 미시작 | 목록화 필요 |
 
@@ -190,5 +190,16 @@ App.jsx↔server.js 알림 문구 "중복" 1순위 통합을 실행하기 전, �
 
 **권장 순서** (다음 세션): (1) `renderNotificationTemplate` 3중 구현 통일 — 거의 모든 나머지 항목이 이걸 거쳐감. (2) `getLessonHomework`/`getLessonStudentIds` 커플 — "서버 알림이 클라이언트 화면과 같은 반 편성 로직을 따라야 하는가"는 사용자 확인이 필요한 제품 판단. (3) 나머지 항목(③⑤⑥)은 각각 독립적이고 작음 — 실제 레코드로 before/after 텍스트 diff를 만들어 사용자에게 "이게 맞는 동작인가" 확인 후 하나씩 고칠 것.
 
-**다음 시작 지점**: `src/app/App.css` (22,609줄) 처음부터. (`api/routes/coreData.js` 완독, 알림 문구 1차 통합 실행 완료 — 둘 다 위 참조. 위 실제 버그 7건은 별도 안전 단위 후보로 대기 중.)
+### `src/app/App.css` — 부분 샘플만 진행 (1~2,000/22,609줄), 방법 전환 권장
+
+App.jsx/server.js/coreData.js와 달리 CSS는 손으로 순차 통독하는 방식의 정보 밀도가 낮다는 걸 처음 2,000줄(파일의 9%)에서 확인했다: `.examAnalysis*`, `.academyReminder*` 같은 기능별 flat class 네이밍이 일관되고, `var(--academy-*)`/`var(--status-*)` 디자인 토큰을 거의 모든 색상·테두리에 일관되게 사용하며, 셀렉터를 콤마로 묶어 같은 선언 블록을 공유하는 패턴(`.pageTop, .panel, .calendarShell { ... }`)이 이미 CSS 자체의 "중복 제거" 관용구로 쓰이고 있음. 이 샘플 구간에서는 죽은 셀렉터나 명백한 중복을 못 찾음 — JS와 달리 CSS 중복은 사람이 22,000줄을 눈으로 훑어서 찾기보다 도구가 훨씬 빠르고 정확하다.
+
+**방법 전환 권장**: 다음 세션은 손으로 읽는 대신 아래를 먼저 실행할 것.
+1. `stylelint`(+ `stylelint-declaration-block-no-ignored-properties`, `stylelint-no-unused-selectors` 계열) 도입 — 중복 셀렉터, 사용되지 않는 커스텀 프로퍼티, 우선순위 충돌을 초 단위로 탐지.
+2. App.jsx/도메인 JSX 전체의 `className`/`class` 리터럴을 추출해 App.css의 셀렉터와 대조하는 간단한 스크립트(PurgeCSS 방식) — 실제 미사용 셀렉터(죽은 CSS) 찾기. `check:duplication`/`check:orphans`처럼 `npm run check:css-unused`로 등록.
+3. 위 두 도구가 걸러낸 "진짜 애매한" 구간만 사람이 직접 읽는다 — 22,609줄 전체를 순서대로 읽는 대신, 도구가 좁혀준 위치만 확인하는 방식으로 전환.
+
+이 판단 자체가 이번 세션에서 나온 방법론적 발견: **파일 종류(로직 파일 vs 스타일시트)에 따라 "전체 통독"과 "도구 우선"을 다르게 선택해야 시간 낭비가 없다.**
+
+**다음 시작 지점**: App.css는 위 도구 셋업 후 재개. `src/domains/**`(약 259개 파일)/`src/shared/**`는 아직 인벤토리도 안 됨 — 다음 세션은 여기서 파일 목록화부터 시작하거나, 사용자가 우선순위를 지정하면 그에 따름. (`api/routes/coreData.js` 완독, 알림 문구 1차 통합 실행 완료 — 둘 다 위 참조. 실제 발송 버그 7건은 별도 안전 단위 후보로 대기 중.)
 
