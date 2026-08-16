@@ -37,14 +37,14 @@
 
 .workspaceTabs.workspaceTabs > button.active,
 .workspaceTabs.workspaceTabs > button[aria-selected="true"] {
-  background: var(--academy-navy, #17213d);
-  border-color: var(--academy-navy, #17213d);
-  box-shadow: 0 4px 10px rgba(23, 33, 61, 0.16);
-  color: #ffffff;
+  background: var(--academy-primary, #17213d);
+  border-color: var(--academy-primary, #17213d);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--academy-primary, #17213d) 16%, transparent);
+  color: var(--academy-surface, #ffffff);
 }
 
 .workspaceTabs.workspaceTabs > button:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--academy-primary, #2563eb) 28%, transparent);
+  outline: 3px solid color-mix(in srgb, var(--academy-focus-ring, #2563eb) 28%, transparent);
   outline-offset: 2px;
 }
 
@@ -64,7 +64,7 @@
 .workspaceTabs.workspaceTabs.workspaceTabs-secondary > button.active,
 .workspaceTabs.workspaceTabs.workspaceTabs-secondary > button[aria-selected="true"] {
   background: #e8eefb;
-  border-color: #cbd8ee;
+  border-color: var(--academy-border-strong, #cbd8ee);
   box-shadow: none;
   color: var(--academy-primary, #17213d);
 }
@@ -84,7 +84,7 @@
 .workspaceTabs.workspaceTabs.workspaceTabs-compact > button[aria-selected="true"] {
   background: var(--academy-surface, #ffffff);
   border-color: var(--academy-border-strong, #cbd8ee);
-  box-shadow: 0 1px 5px rgba(23, 33, 61, 0.1);
+  box-shadow: 0 1px 5px color-mix(in srgb, var(--academy-primary, #17213d) 10%, transparent);
   color: var(--academy-primary, #17213d);
 }
 
