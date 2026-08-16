@@ -1518,9 +1518,7 @@ export function SpecialLectureApplicationPanel({
                           : "학생 기본정보를 Tally로 다시 반영"}
                       </button>
                     ) : null}
-                    <details className="specialLectureCancellationActions">
-                      <summary>취소 관리</summary>
-                      <div>
+                    <Disclosure className="specialLectureCancellationActions" trigger="취소 관리">
                         <p>남은 회차만 취소하거나 특강 신청 전체를 취소할 수 있습니다.</p>
                         <button
                           className="softButton compact subtle"
@@ -1538,8 +1536,7 @@ export function SpecialLectureApplicationPanel({
                         >
                           {savingEnrollmentId === enrollment.enrollmentId ? "취소 저장 중" : "특강 신청 전체 취소"}
                         </button>
-                      </div>
-                    </details>
+                    </Disclosure>
                   </div>
                 </article>
               );
@@ -1549,8 +1546,7 @@ export function SpecialLectureApplicationPanel({
           <p className="specialLectureGateEmpty">현재 활성 수강명단이 없습니다. 확정 신청자를 기존 학생과 매칭한 뒤 명단에 추가하세요.</p>
         )}
         {canceledEnrollments.length ? (
-          <details className="specialLectureCanceledEnrollments">
-            <summary>취소·오입력 기록 {canceledEnrollments.length}건</summary>
+          <Disclosure className="specialLectureCanceledEnrollments" trigger={`취소·오입력 기록 ${canceledEnrollments.length}건`}>
             <p>활성 수강명단과 미래 특강 수업 반영에서는 제외되며, 신청 원본과 기존 수업 기록은 삭제하지 않습니다.</p>
             <div className="specialLectureCanceledEnrollmentList">
               {canceledEnrollments.map((enrollment) => {
@@ -1569,7 +1565,7 @@ export function SpecialLectureApplicationPanel({
                 );
               })}
             </div>
-          </details>
+          </Disclosure>
         ) : null}
         </Disclosure>
       </div>
