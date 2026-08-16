@@ -54,6 +54,7 @@
 - 4-1 API payload 24개 contract, 4-2 DB/domain row mapper 45/45, 4-3 공통 HTTP/session과 frozen registry 24개 분리·종료 감사는 완료했다. 남은 DB/source read 16·external read 5·DB/source action 52·external write 23은 각각 후속 owner 분리 입력으로 exact 분류했다.
 - 사용자의 2026-08-15 재개 요청으로 4-4 App persistence action 추출과 통합 검토를 완료했다. App 직접 request는 44회, 직접 호출 포함 handler는 0개이며 저장·재조회·provider 범위를 보존했다.
 - 2026-08-16 병합·검수 요청으로 Claude Code의 4-5a~f 통합분을 검토했다. Storage primitive 이동, 시험분석 download/delete operations 주입, vision-check·boundary-detect PDF transport 분리와 provider result envelope 정의에 이어 시험분석 AI POST 5개를 route registry로 이동했다. 4-5f의 notification/Solapi/Slack route 범위와 envelope의 기존 orchestrator 적용은 남아 있으며 4-5 전체 종료로 표시하거나 자동 진행하지 않는다.
+- 2026-08-16 4-6a/b를 최신 main 위에 재적용하고 4-6c 첫 lazy CSS 단위로 NotificationCenter 학부모 응대 전용 selector를 분리했다. screenshot cascade 회귀를 복구해 desktop/mobile hash를 동일하게 맞췄으며, 다음 CSS 도메인과 4-5g/h/i는 각각 별도 branch에서 진행한다. 4-6c main 병합은 사용자 승인 전 보류한다.
 - 한 번에 한 안전 단위만 최신 main에서 진행하며, 즉시 사람 판단이 필요하지 않은 발견은 기록 후 AI 검수·최소 수정·재검증으로 연쇄 진행한다. 운영 side effect나 제품 의미 결정이 필요한 항목만 사람 gate로 올린다.
 - 기준: `docs/development-roadmap-after-ui-refactor-2026-07-31.md`.
 

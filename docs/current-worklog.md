@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-16 App/API 4차 리팩터링 4-6a~c
+
+- Claude Code의 `f927ba7a8`(4-6a)·`9f2fef4c7`(4-6b)을 최신 main 위에 순서대로 재적용했다. 4-6b는 `:root` token과 global reset 82줄을 `App.tokens.css`로 옮기되 `main.jsx`의 기존 순서를 유지한다.
+- 가장 작은 후보를 재조사해 SettlementWorkspace는 이미 전용 CSS 3개가 lazy import된 상태임을 확인했다. 첫 실제 lazy 분리는 NotificationCenter 안의 소유권이 명확한 `ParentResponseContextPanel` 31개 selector로 제한하고, App.css와 exact selector overlap이 0인지 fixture로 고정했다.
+- 1440px은 첫 이동부터 동일했지만 390px screenshot에서 generic mobile `.notificationPanel`이 기존에 만들던 `gap: 12px` 최종값이 사라진 것을 발견했다. 640px 전용 override로 기존 최종값을 보존한 뒤 desktop/mobile before·after PNG hash가 모두 동일해졌다.
+- build: initial main CSS `338,443→336,364 bytes`(-2,079), lazy `NotificationCenter` CSS `2,142 bytes` 신설. 검증은 production `305/305`, scenario `828/828`, safe browser `77/77`, focused notification browser `1/1`, lint, typecheck, build 통과다. branch만 push하고 main 병합은 승인 전 보류한다.
+
 ## 2026-08-16 App/API 4차 리팩터링 4-5f 통합 검토
 
 - Claude Code branch `codex/app-refactor-fourth-pass-4-5f`의 단일 commit `dd1513307`은 시험분석 vision-check·boundary detect·row fill/refine·output draft 생성 POST 5개를 frozen route registry로 이동한 상태까지 완료·push돼 있었다. 다만 기준 commit이 최신 main 이전이어서 `codex/integration-4-5f-reviewed`에서 재통합했다.

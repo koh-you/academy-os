@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-16
 
+## 2026-08-16 App/API 4차 리팩터링 4-6a~c 검수 브랜치
+
+- Claude Code의 4-6a baseline과 4-6b shared token/reset 분리를 최신 main 위에 재적용하고, `codex/app-refactor-fourth-pass-4-6c-parent-response`에서 첫 lazy CSS 단위를 진행했다. SettlementWorkspace CSS는 이미 lazy import돼 있어 추가 이동 대상이 없었고, NotificationCenter의 전용 `ParentResponseContextPanel` 31개 selector를 별도 CSS로 옮겼다.
+- 최초 이동 스크린샷에서 390px 패널 gap이 `12→16px`로 바뀐 cascade 회귀를 발견했다. 기존 App.css 후반 mobile `.notificationPanel`의 최종값을 새 domain CSS에 명시해 복구했고, 1440px·390px 이동 전/후 PNG SHA-256이 각각 완전히 일치했다.
+- build는 main CSS `338,443→336,364 bytes`, 신규 NotificationCenter CSS `2,142 bytes`로 분리됐다. production `305/305`, scenario `828/828`, safe browser `77/77`, runtime lint, typecheck, build를 통과했으며 사용자 승인 전 main에는 병합하지 않는다.
+
 ## 2026-08-16 App/API 4차 리팩터링 4-5f 통합 검수
 
 - Claude Code는 `codex/app-refactor-fourth-pass-4-5f`에서 시험분석 AI POST 5개를 `examAnalysisAiRouteRegistry`로 이동해 commit·push까지 완료했다. 이 브랜치가 이전 main에서 갈라진 점을 확인하고 최신 main 기준 별도 통합 브랜치에서 충돌을 해소했다.

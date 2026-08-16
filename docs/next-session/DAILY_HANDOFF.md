@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-16
 
+## 2026-08-16 App/API 4차 리팩터링 4-6a~c
+
+- 최신 main 기반 검수 브랜치는 `codex/app-refactor-fourth-pass-4-6c-parent-response`다. Claude의 4-6a baseline·4-6b token/reset 분리를 포함하며, 4-6c는 NotificationCenter의 `ParentResponseContextPanel` CSS만 lazy chunk로 이동했다.
+- 이동 중 390px cascade gap 회귀를 screenshot으로 검출·복구했다. 1440px·390px before/after PNG hash가 완전히 같고, main CSS는 338,443→336,364 bytes, 새 NotificationCenter CSS는 2,142 bytes다.
+- production `305/305`, scenario `828/828`, safe browser `77/77`, lint, typecheck, build 통과. main 병합은 사용자 승인 전 금지하며 다음 CSS 도메인과 4-5g/h/i를 이 branch에 섞지 않는다.
+
 ## 2026-08-16 App/API 4차 리팩터링 4-5f
 
 - Claude Code는 시험분석 AI POST 5개를 `examAnalysisAiRouteRegistry`로 이동한 `dd1513307`까지 완료·push했다. 최신 main 기준 검토 브랜치는 `codex/integration-4-5f-reviewed`다.

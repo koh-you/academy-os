@@ -37,3 +37,11 @@
 ## 상태·저장·부작용 경계
 
 4-6a는 조사만 수행한다. 실제 CSS 이동은 4-6b부터 시작하며, cascade 위험이 있는 4-6c 이후 단위는 진행 전 사용자에게 시각 검증 방식(스크린샷 대조 등)을 확인받는다.
+
+## 2026-08-16 4-6b/4-6c 진행 상태
+
+- 4-6b는 shared token/reset 82줄을 `App.tokens.css`로 옮기고 `main.jsx`에서 기존 App.css 바로 앞에 import해 순서를 유지했다.
+- SettlementWorkspace는 이미 `settlementWorkspace.css`, `monthlySettlement.css`, `specialLectureSettlement.css`를 lazy component 쪽에서 import하므로 4-6c 추가 후보에서 제외했다.
+- 4-6c 첫 단위는 NotificationCenter의 `ParentResponseContextPanel` 전용 selector 31개다. exact selector는 App.css에서 모두 제거됐고 새 CSS의 selector는 전부 `.parentResponseContext*`로 anchor된다. 같은 cascade context의 반복은 서로 다른 속성을 선언하는 `.parentResponseContextActions > span` 2개뿐이며 함께 이동한다.
+- 최초 390px screenshot에서 App.css 후반의 generic `.notificationPanel { gap: 12px }`가 더 이상 전용 `gap: 16px`을 덮지 못하는 순서 회귀를 발견했다. 새 640px domain override로 기존 computed value를 명시해 1440px·390px before/after PNG SHA-256을 각각 동일하게 만들었다.
+- build 결과 main CSS는 `338,443→336,364 bytes`, 신규 lazy NotificationCenter CSS는 `2,142 bytes`다. production `305/305`, scenario `828/828`, safe browser `77/77`을 통과했다.
