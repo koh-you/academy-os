@@ -33,7 +33,7 @@ export function Disclosure({
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
   const open = isControlled ? openProp : internalOpen;
   const generatedBodyId = useId();
-  const bodyId = hideTrigger ? undefined : (id ?? generatedBodyId);
+  const bodyId = id ?? generatedBodyId;
 
   function handleToggle() {
     const next = !open;
@@ -47,7 +47,6 @@ export function Disclosure({
     <div
       className={joinClassNames("disclosure", className)}
       data-open={open}
-      id={hideTrigger ? id : undefined}
       {...props}
     >
       {!hideTrigger ? (
