@@ -27,11 +27,11 @@
 .sharedFilterBar.sharedFilterBar > .filterBarOption[aria-pressed="true"] {
   background: var(--academy-primary, #17213d);
   border-color: var(--academy-primary, #17213d);
-  color: #ffffff;
+  color: var(--academy-surface, #ffffff);
 }
 
 .sharedFilterBar.sharedFilterBar > .filterBarOption:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--academy-primary, #2563eb) 28%, transparent);
+  outline: 3px solid color-mix(in srgb, var(--academy-focus-ring, #2563eb) 28%, transparent);
   outline-offset: 2px;
 }
 
@@ -59,7 +59,7 @@
 
 .sharedFilterBar.sharedFilterBar > .filterBarField select:focus-visible,
 .sharedFilterBar.sharedFilterBar > .filterBarField input:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--academy-primary, #2563eb) 22%, transparent);
+  outline: 3px solid color-mix(in srgb, var(--academy-focus-ring, #2563eb) 22%, transparent);
   outline-offset: 1px;
 }
 

@@ -45,7 +45,7 @@
 }
 
 .sharedSearchFieldControl input:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--academy-primary, #2563eb) 22%, transparent);
+  outline: 3px solid color-mix(in srgb, var(--academy-focus-ring, #2563eb) 22%, transparent);
   outline-offset: 1px;
 }
 
@@ -74,7 +74,7 @@
 }
 
 .sharedSearchFieldClear:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--academy-primary, #2563eb) 22%, transparent);
+  outline: 3px solid color-mix(in srgb, var(--academy-focus-ring, #2563eb) 22%, transparent);
   outline-offset: 1px;
 }
 
