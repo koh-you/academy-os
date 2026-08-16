@@ -1,4 +1,5 @@
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
+import { Disclosure } from "../../shared/components/Disclosure.jsx";
 import {
   formatSettlementHours,
   formatSettlementPercent,
@@ -206,9 +207,7 @@ export function MonthlySettlementRegularTable({
       ) : null}
 
       {excludedRows.length ? (
-        <details className="monthlySettlementExcludedPanel">
-          <summary>삭제한 정산 행 {excludedRows.length}명 · 복원</summary>
-          <div className="monthlySettlementExcludedList">
+        <Disclosure bodyClassName="monthlySettlementExcludedList" className="monthlySettlementExcludedPanel" trigger={`삭제한 정산 행 ${excludedRows.length}명 · 복원`}>
             {excludedRows.map((row) => (
               <div key={row.student.studentId}>
                 <span>
@@ -224,8 +223,7 @@ export function MonthlySettlementRegularTable({
                 </button>
               </div>
             ))}
-          </div>
-        </details>
+        </Disclosure>
       ) : null}
     </>
   );

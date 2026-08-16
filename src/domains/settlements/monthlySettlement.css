@@ -398,11 +398,11 @@
   overflow: hidden;
 }
 
-.monthlySettlementExcludedPanel summary {
+.monthlySettlementExcludedPanel .disclosureTrigger {
   color: var(--academy-text-muted, #52647c);
-  cursor: pointer;
   font-size: 13px;
   font-weight: 800;
+  min-height: 0;
   padding: 11px 13px;
 }
 
