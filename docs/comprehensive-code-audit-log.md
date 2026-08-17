@@ -25,10 +25,10 @@ docs/comprehensive-code-audit-log.md 파일을 먼저 읽고, "진행 상태" �
 | --- | ---: | --- | --- |
 | `src/app/App.jsx` | 10,723 | **완독** | 발견 기록 참조. 압축 후보 약 3,350줄 |
 | `api/server.js` | 7,255 | **완독** | 발견 기록 참조. 압축 후보 약 1,650줄+ |
-| `api/routes/coreData.js` | 4,907 | 미시작 | 1 |
-| `src/app/App.css` | 22,609 | 미시작 | 1 |
-| `src/domains/**` (약 259개 파일) | - | 미시작 | 목록화 필요 |
-| `src/shared/**` | - | 미시작 | 목록화 필요 |
+| `api/routes/coreData.js` | 4,907 | **완독** | 발견 기록 참조. 압축 후보 약 2,000줄+ (단일 구조적 패턴) |
+| `src/app/App.css` | 22,609 | 부분 샘플(1~2000줄) — 아래 참조, 방법 전환 권장 | stylelint 도입 후 재개 |
+| `src/domains/**` (367개 파일, ~50,024줄) | - | **목록화 완료**, 파일별 완독은 미시작 | 아래 인벤토리 참조 |
+| `src/shared/**` (53개 파일, ~5,544줄) | - | **목록화 완료**, 파일별 완독은 미시작 | 아래 인벤토리 참조 |
 
 ## 읽기 원칙
 
@@ -126,6 +126,66 @@ docs/comprehensive-code-audit-log.md 파일을 먼저 읽고, "진행 상태" �
 | 시험분석 AI 파이프라인 1,750줄 | 압축 대상 아님, 물리적 위치만 조정 후보 |
 | 출결/알림 핵심 로직(`handleAttendanceCheck` 등) | 복잡하지만 응집도 높음, 재설계보다 현행 유지가 안전 |
 
+### `api/routes/coreData.js` — 완독 (4,907/4,907줄)
+
+**1~434줄 (import, 헬퍼, 학생 삭제 감사 로직)**
+- 도메인별 persistence 헬퍼(`studentPersistence.js`, `examPrepRowPersistence.js`, `schoolEventPersistence.js` 등 15개 이상)를 각각 import — App.jsx의 "함수 하나당 파일 하나" 파편화와 같은 패턴이 여기도 존재.
+- `deleteWithdrawnStudent`/`auditWithdrawnStudentDeletion`: 학생 삭제 시 13개 테이블에 걸친 참조를 찾아 정리하는 로직. 응집도 높고 위험한 영역이라 재설계보다 현행 유지 권장.
+
+**435~4907줄 — 파일 전체를 관통하는 단일 구조적 패턴 발견 (핵심 발견)**
+- `upsertStudent`, `persistClassRosterStudentChange`/`persistLessonRosterChange`(반 명단), `persistDerivedExamPrepChange`/`persistDerivedLessonChange`(파생 학사일정), `persistLessonJournalHistoryLessonChange`/`persistLessonJournalHistoryHomeworkChange`(수업 복사·되돌리기), `persistLessonJournalRowsHomeworkChange`/`persistLessonJournalRowsRecordChange`(수업기록·숙제), `persistLessonJournalMakeupTask`(등원보충), `persistSupplementScheduleLessonChange`/`persistSupplementScheduleTaskChange`(보충 일정), `upsertExamPrepRows`, `upsertSchoolEvent`, `upsertResourceMaterial` — **최소 12개 도메인**이 다음 6단계를 거의 동일한 코드로 각각 재구현:
+  1. 현재 행 재조회 (`getXxx`)
+  2. before/after 동등성 비교 (`areXxxEqual`) — 변경 없으면 조기 반환
+  3. 낙관적 동시성 버전 충돌 감지 (`updated_at` 불일치 시 conflict 에러 생성, 코드/메시지만 도메인별로 다름)
+  4. 버전 필터로 patch/insert (`createXxxVersionFilter`)
+  5. 저장 직후 재조회로 검증 (`verifyXxxSave` / `areXxxTimestampsEqual`)
+  6. 실패 시 롤백 (`rollbackXxx`) — 여러 변경을 묶어 저장하는 `saveXxxPlan` 함수들(`saveClassRosterPlan`, `saveDerivedSchoolCalendarPlan`, `saveLessonJournalHistoryPlan`, `saveLessonJournalRowsPlan`, `saveSupplementSchedulePlan`)은 추가로 역순 롤백 오케스트레이션(성공한 변경을 역순으로 되돌리고 검증)까지 도메인마다 새로 작성.
+- 도메인마다 함수 이름(`throwStudentConflict`/`createClassRosterConflict`/`createDerivedSchoolCalendarConflict`/`createLessonJournalHistoryConflict`/`createLessonJournalRowsConflict`/`createSupplementScheduleConflict`)과 에러 코드만 바뀌고 로직 골격은 완전히 동일 — App.jsx의 CRUD 트리오 중복(65행 참조)보다 훨씬 크고 훨씬 일관된 패턴. `saveXxxPlan` 계열 5개 함수의 롤백 오케스트레이션 부분만 대략 900~1,000줄이 구조적으로 동일.
+- **왜 이렇게 됐는지**: `docs/testing-policy.md`의 "저장 후 반드시 재조회로 검증" 원칙과 4차 리팩터링의 "안전 단위"식 접근(도메인 하나씩 독립 브랜치로 처리) 때문에, 매번 새 도메인을 다룰 때마다 이 패턴을 처음부터 다시 타이핑한 것으로 보임. 도구(`check:duplication`)가 이걸 못 잡는 이유: 변수명·에러 메시지·테이블명이 매번 달라 jscpd의 토큰 매칭 임계값을 넘지 못함.
+
+**압축 재설계 방향 (사용자 승인 범위: 저장 로직 자유 재설계 가능)**
+- 제네릭 헬퍼 하나로 통합 가능: `createOptimisticSavePlan({ table, idColumns, toRow, fromRow, areEqual, areTimestampsEqual, createNextUpdatedAt, conflictCode })` 형태로 만들면, 위 12개 도메인의 개별 `persistXxx`/`rollbackXxx` 쌍(각 40~120줄)을 도메인별 설정 객체(각 10~15줄)로 대체 가능. `saveXxxPlan` 5개의 롤백 오케스트레이션도 "여러 변경을 순서대로 적용하고 실패 시 역순 롤백"이라는 동일 골격을 제네릭 `runReversiblePlan(steps)` 러너 하나로 통합 가능.
+- 예상 절감: 약 2,000~2,400줄(파일의 45~50%) — App.jsx/server.js보다 압축 잠재력이 훨씬 큼. 단, 실제 저장 경로(Supabase 쓰기)를 직접 건드리므로 App.jsx 죽은 코드 삭제와 달리 **고위험** — 도메인 하나씩 별도 안전 단위로 전환하고 각 단위마다 해당 도메인의 저장/충돌/롤백 시나리오 테스트를 직접 실행해 확인해야 함.
+
+**2026-08-17 실행 1건 완료 + 중요한 재발견 (`codex/core-data-optimistic-save-plan` 브랜치, 커밋 fb309a274, push됨, main 미병합)**:
+- `src/shared/persistence/optimisticSavePlan.js`에 `upsertWithOptimisticConcurrency`/`deleteWithOptimisticConcurrency` 제네릭 헬퍼 구현, `upsertSchoolEvent`/`deleteSchoolEvent`를 이 헬퍼로 전환 — 가장 "교과서적인" CAS 패턴(읽기→동등비교→버전충돌검사→patch/insert→재조회검증)이라 첫 적용 대상으로 선택. 전용 픽스처 테스트(`scripts/test-school-event-persistence.mjs` — 가짜 Supabase REST를 세워 저장/충돌/재시도/삭제 시나리오를 실제 `upsertSchoolEvent`/`deleteSchoolEvent`에 대고 검증)로 동작 무변경 확인, 그 외 lint/typecheck/test:production(305/305, 828/828)/build/browser-smoke(77/77) 전부 통과.
+- **재발견 — "12개 도메인이 동일 패턴"이라는 처음 진단은 골격 수준에서만 맞고, 세부 의미론은 도메인마다 다르다.** 다음 후보 2개를 실제로 대조해보니 헬퍼에 억지로 끼워맞추면 위험:
+  - `upsertResourceMaterial`(`convergeResourceMaterialDraft`) — 버전(updatedAt) 비교가 아예 없음. 대신 `isSameResourceMaterialDraft`로 "같은 초안인지" 의미적 동일성만 확인하고, 맞으면 버전 무관하게 patch — CAS가 아니라 "초안 수렴" 로직이라 구조 자체가 다름.
+  - `persistLessonJournalMakeupTask`(makeup_tasks) — 도메인 엔티티가 아니라 DB row 자체(`currentRow`/`desiredRow`)를 비교하고, 버전 검사도 `currentRow.updated_at !== expectedUpdatedAt` 직접 문자열 비교라 `areTimestampsEqual` 훅으로 못 바꿈.
+- **결론**: `upsertWithOptimisticConcurrency`는 school_events처럼 "표준 CAS" 도메인에만 안전하게 재사용 가능. 나머지 도메인은 (a) 표준 CAS인지 (b) draft-convergence류인지 (c) row-level 비교류인지 먼저 분류해야 함 — 다음 세션은 이 분류 작업부터 시작할 것. `saveXxxPlan` 5개(멀티 엔티티 롤백 오케스트레이션)는 아직 손 안 댐, 이것도 별도 분석 필요.
+
+**2026-08-17 후속 — 나머지 독립 구현체 11개 실제 분류 완료 (실행은 안 함, 분류만)**
+
+먼저 중요한 재발견: coreData.js의 `persist*Change` 함수 12개 중 2개는 사실 **자체 CAS 로직이 없는 얇은 위임 wrapper**다 — `persistClassRosterStudentChange`는 실제 저장을 `upsertStudent(after, { createOnly | expectedUpdatedAt })`에 위임하고, `persistSupplementScheduleTaskChange`는 실제 저장을 `persistLessonJournalMakeupTask(after)`에 위임한다. 즉 "12개 도메인이 각자 CAS를 재구현"이 아니라 **실제 독립 구현체는 11개**이고 그중 2곳은 이미 재사용 중이었다.
+
+11개 독립 구현체를 제어흐름 모양으로 분류:
+
+| 구현체 | 대상 테이블 | 모양 | 이유 |
+| --- | --- | --- | --- |
+| `upsertSchoolEvent`/`deleteSchoolEvent` | school_events | **표준 CAS** | ✅ 이미 전환 완료 (school_events 파일럿) |
+| `upsertStudent` | students | **3-모드 혼합** (createOnly / CAS-update / 무조건 upsert+스키마 마이그레이션 폴백) | 호출자 의도에 따라 세 가지 다른 동작 — 하나의 CAS 흐름이 아니라 분기 자체가 다름. createOnly/CAS-update 두 모드만 떼어내면 표준 CAS와 유사해지지만 세 번째 모드(플레인 upsert)는 버전 검사 자체가 없어 별도 취급 필요 |
+| `upsertResourceMaterial`/`deleteResourceMaterial` | resource_materials | **초안 수렴(draft-convergence)** | 버전 비교 없이 `isSameResourceMaterialDraft`로 의미적 동일성만 확인 후 patch. delete는 이미 없어진 대상을 conflict가 아니라 성공으로 처리(school_events와 반대) |
+| `persistLessonJournalMakeupTask` | makeup_tasks | **row-level 비교** | 도메인 엔티티가 아니라 DB row(`currentRow`/`desiredRow`) 자체를 비교, 버전 검사도 `updated_at` 문자열 직접비교 |
+| `persistLessonRosterChange` | lessons (명단만) | **표준 CAS, update-only** | 수업은 항상 이미 존재 — insert 분기 없음. 그 외엔 school_events와 유사 |
+| `persistDerivedExamPrepChange` | exam_prep_rows | **update-only + 이중 검증 + appliedResult** | validation(`areDerivedExamPrepNonScheduleFieldsEqual`)과 동등성(`areDerivedExamPrepRowsEqual`) 검사가 분리된 2단계, 실패 시 롤백용 `error.appliedResult` 첨부 |
+| `persistDerivedLessonChange` | lessons (직전수업) | **3-way (insert/update/delete)** | `after`/`before` 유무 조합으로 생성·수정·삭제 세 갈래 분기 |
+| `persistLessonJournalHistoryLessonChange` | lessons (복사본) | **3-way (insert/update/delete)** | 위와 동일 패턴, 수업 복사·되돌리기 전용 |
+| `persistLessonJournalHistoryHomeworkChange` | homeworks | **3-way (insert/update/delete)** | 위와 동일 패턴 |
+| `persistLessonJournalRowsHomeworkChange` | homeworks | **rebase 기반 충돌 해소** | 버전 불일치 시 즉시 실패가 아니라 `rebaseLessonJournalHomeworkChange`로 충돌 안 나는 필드만 자동 병합 시도 — school_events보다 훨씬 관대한 동시성 모델 |
+| `persistLessonJournalRowsRecordChange` | lesson_student_records | **rebase 기반 충돌 해소 + 필드 병합** | 위와 동일한 rebase에 더해 기존 출결/숙제후속 필드를 자동으로 이어붙이는 `mergeExistingAttendanceForNonAttendanceSave`/`mergeExistingHomeworkFollowupForSave`까지 얹음 — 11개 중 가장 복잡 |
+| `persistSupplementScheduleLessonChange` | lessons (보충) | **3-way에 가까움** | insert/update 분기, `areLessonJournalHistoryLessonsEqual`(수업일지 이력과 동일 동등성 함수 재사용 — 이미 공유 중) |
+| `upsertExamPrepRow`/`upsertExamPrepRows` | exam_prep_rows | **배치(array) 처리** | 단일 엔티티가 아니라 행 배열을 받아 행별로 conflict/failure를 따로 수집 — 애초에 단일-엔티티 헬퍼와 모양이 다름 |
+
+**결론 및 다음 방향**: 표준 CAS로 안전하게 묶을 수 있는 건 `school_events`(완료) + `persistLessonRosterChange`(update-only 변형, 헬퍼에 `allowInsert: false` 옵션 하나만 추가하면 재사용 가능) 정도 — 나머지 9개는 각자 진짜 다른 동시성 모델(초안수렴/row-level/이중검증/3-way/rebase/배치)을 쓰고 있어 무리하게 하나로 묶으면 오히려 각 도메인의 실제 안전장치(rebase 관대함, 이중검증 엄격함 등)가 옅어질 위험이 있음. **"2,000~2,400줄 절감"이라는 최초 추정은 골격 수준 유사성에 기반한 과대추정이었고, 실제 안전하게 통합 가능한 범위는 훨씬 작다(school_events + lesson roster 정도, 수백 줄 규모)**. 나머지는 각 동시성 모델별로 별도 제네릭 헬퍼를 만들 가치가 있는지(예: rebase 모델 전용 헬퍼로 2개 도메인 묶기) 다음 세션에서 따로 판단할 것 — 무리해서 하나의 만능 헬퍼로 밀어붙이지 말 것.
+
+### `api/routes/coreData.js` 종합 소견 (4,907/4,907줄 완독)
+
+| 항목 | 상태 |
+| --- | --- |
+| 낙관적 동시성 저장+검증+롤백 패턴의 12-도메인 재구현 | 약 2,000~2,400줄, 제네릭 헬퍼 1~2개로 통합 가능 — **압축 최우선 후보** |
+| 학생 삭제 감사(`auditWithdrawnStudentDeletion` 등) | 응집도 높음, 현행 유지 권장 |
+| import 파편화 (persistence 헬퍼 15개+ 개별 파일) | App.jsx와 동일 패턴, 낮은 우선순위 |
+
 ## 자동 도구 발견 (통독과 병행, 2026-08-16)
 
 읽기만으로는 커버 범위가 느려서 결정론적 도구 2개를 프로젝트에 추가했다(`npm run check:duplication`, `npm run check:orphans`). 매 세션 전체 통독을 반복하지 않고도 최신 상태를 몇 초 만에 재확인할 수 있다.
@@ -139,7 +199,107 @@ docs/comprehensive-code-audit-log.md 파일을 먼저 읽고, "진행 상태" �
 - `src/domains/lessons/lessonJournalRecordBulkApi.js`
 - `src/domains/lessons/lessonJournalHomeworkBulkApi.js`
 
-나머지 4개는 아직 확인 안 함 — 다음 세션에서 각각 (a) 정말 죽은 코드인지 (b) `providerResultContract.js`처럼 의도적으로 대기 중인 모듈인지 판별 필요. `grep -rn "<파일명 없이 export 이름>"`으로 동적 import(`import("...")`)나 파일 경로 문자열로만 참조되는 경우가 아닌지도 확인할 것 — dependency-cruiser는 정적 import만 추적하므로 오탐 가능.
+**2026-08-17 후속 확인 결과**:
+- `src/shared/server/routeRegistryTypes.js` — **오탐**. JSDoc `@typedef {import("./routeRegistryTypes.js").X}` 타입 전용 참조로 route registry 파일 15개 이상이 실제로 사용 중. dependency-cruiser는 주석 안의 타입 참조를 못 잡아서 orphan으로 오판함. 삭제하면 안 됨.
+- `src/domains/lessons/lessonJournalRecordBulkApi.js`, `src/domains/lessons/lessonJournalHomeworkBulkApi.js`, `src/domains/supplements/useSupplementNotificationDraftSelectionState.js` — 셋 다 **"만들었지만 실제 코드에 통합 안 됨"** 카테고리. App.jsx/server.js 어디서도 안 쓰이는 건 맞지만, `scripts/test-lesson-journal-record-bulk-api.mjs`, `scripts/test-lesson-journal-homework-bulk-api.mjs`, `scripts/test-supplement-notification-draft-selection-state.mjs`가 각각 전용으로 검증하고 `scenario-tests-production.cjs`에 물려 있어서 test:production을 통과시키는 상태. 지우면 이 3개 테스트가 import 에러로 깨짐 — ReportCenter처럼 즉시 삭제 가능한 게 아니라, (a) 왜 통합이 안 됐는지 git blame/history 확인 (b) 실제로 통합해서 살릴지, 테스트와 함께 정리해서 지울지 결정하는 별도 안전 단위가 필요함. 이번 세션에서는 처리 안 함, 다음 세션 후보로 남김.
 
-**다음 시작 지점**: `api/routes/coreData.js` (4,907줄) 처음부터.
+### 2026-08-17 알림 문구 중복 — 실행 결과 및 잔여 실제 버그 (핵심 발견)
+
+App.jsx↔server.js 알림 문구 "중복" 1순위 통합을 실행하기 전, 정밀 스코핑을 위해 함수 쌍 22개를 전부 대조했다. 결과: **"중복"이라고 봤던 것 중 상당수가 이미 갈라진 실제 프로덕션 버그**였다 — 서버가 실제로 보내는 알림톡 문구가 클라이언트 미리보기와 다르게 나가고 있음.
+
+**실행 완료 (zero-behavior-change, `codex/notification-text-shared-helpers` 브랜치, 커밋 c469c0f01, push됨, 아직 main 미병합)**:
+바이트 단위로 동일함이 확인된 함수만 공유 모듈로 통합: `getNotificationTextKey`/`compactDuplicateNotificationBlocks`/`notificationTextIncludesBlock`(→`notificationMessageRenderer.js`), `getHomeworkAssignmentStatus`(→`assignmentStatus.js`), `parseHomeworkFollowupMemoLine`/`removeHomeworkFollowupMemoLines`/`getLessonPreparationNotice`(→ 신규 `lessonPreparationNotice.js`). 서버 쪽 죽은 코드 2개(`getPreparationNoticeForNotification`, `removeHomeworkFollowupMemoLinesForNotification` — 호출부 0건 확인)도 함께 삭제. lint/typecheck/test:production(305/305, 828/828)/build/browser-smoke(77/77) 전부 통과.
+
+**2026-08-17 후속 실행 — 7건 전부 수정 완료 (같은 브랜치, 커밋 4a90233da, push됨, 아직 main 미병합)**:
+
+사용자가 제품 맥락을 명확히 함: "알림문구는 기존 데이터를 활용해서 초안을 불러오고, 사용자가 수정하면 그게 곧 원본으로 알림톡 나가는 구조"라는 확인을 받고, 실제 코드를 추적해 정확한 메커니즘을 확인함 — `refreshLessonCommentJobBeforeSend`가 예약된 알림 발송 직전에 서버에서 최신 데이터로 컨텍스트 필드(출결/과제상태/지난-다음 숙제/테스트결과/보충일정)를 다시 계산하는 것은 의도된 설계(발송 시점까지 시간차가 있으므로 최신 수업 상태 반영). 문제는 그 재계산 알고리즘이 클라이언트가 작성 시점에 보여준 것과 달라서, 데이터가 안 변해도 재계산 결과가 달라질 수 있었다는 것. 아래 7건 전부 "서버가 클라이언트와 동일한 알고리즘을 쓰도록" 수정:
+
+1. **`getLessonHomework`/`getLessonHomeworkForNotification` — 수정 완료.** `findPreviousLessonsForStudent`/`isSameLessonGroup`/`getLessonContinuityKey`/`isSpecialLectureLesson`/`getLessonSortValue`를 App.jsx에서 `src/domains/lessons/lessonHomeworkContinuity.js`(기존에 `selectLinkedPreviousHomework`가 있던 파일)로 추출, 양쪽이 동일 함수를 import. server.js의 `getLessonHomeworkForNotification`을 이 공유 함수들을 호출하도록 재작성 — 더 이상 독자적인 `classTemplateId` 기반 단순 검색을 하지 않음.
+2. **`getLessonStudentIds` — 수정 완료.** server.js가 `getEffectiveLessonStudentIds`(`src/shared/utils/studentSchedule.js`, 이미 존재하던 공유 함수)를 import해서 사용하도록 변경.
+3. **테스트 종류 라벨 — 수정 완료.** server.js의 자체 `getNotificationTestKindLabel` 삭제, `src/domains/tests/testManagerUtils.js`의 `getTestPaperKindLabel`(appConfig.js 기반, "데일리 테스트" 공백 포함이 정본)을 양쪽이 동일하게 사용.
+4. **`followUpTypeLabel` — 수정 완료.** server.js 쪽 맵에 `manual_makeup: "수동 보충"` 추가.
+5. **`supplementMethodLabel` 기본값 — 수정 완료.** `supplementMethodsByType`/`supplementMethodOptions`/`supplementDefaultMethod`/`normalizeSupplementMethodForTask`/`supplementMethodLabel`을 App.jsx에서 신규 `src/domains/supplements/supplementMethodLabel.js`로 추출해 양쪽 공유 — 서버가 자체 하드코딩된 기본값 분기를 갖지 않게 됨.
+6. **`getSupplementTaskSourceLabel`/`formatSupplementHomeworkCheckSentence` — 수정 완료.** 같은 신규 파일로 함께 추출, `sourcePreviousHomework` 폴백이 서버에도 적용됨.
+7. **`renderNotificationTemplate` 3중 구현 — 수정 완료.** App.jsx 로컬 shadow 삭제, server.js의 `renderLessonHomeworkFollowupTemplate`(포지셔널 인자 버전)과 `getLessonHomeworkFollowupTemplates`(좁은 2-key 병합) 삭제 — 양쪽 모두 `notificationTemplateCatalog.js`의 정식 `renderNotificationTemplate`/`normalizeNotificationTemplates`를 사용.
+
+수정과 함께 자기참조형 소스-리터럴 테스트 락 6개(`scenario-tests-production.cjs`의 20j-9/55a/56/59e/77e-6/88a-2, `test-notification-template-source-inventory.mjs` 1개)가 옛 위치/이름을 검사하고 있어서 깨짐 — `docs/testing-policy.md` 정책대로 체크를 새 위치/이름에 맞게 업데이트(약화 아님). `lessonHomeworkContinuitySource`/`supplementMethodLabelSource` 파일 소스 트래커를 scenario-tests-production.cjs에 새로 추가.
+
+검증: lint/typecheck/test:production(305/305, 828/828)/build/browser-smoke(77/77) 전부 재실행해서 통과 확인(이전 커밋 결과 재사용 안 함 — 중간에 시스템 메모리 부족으로 브라우저 스모크가 한 번 실패했으나, 코드 문제가 아님을 확인 후 재시도해서 통과).
+
+**다음 세션에서 아직 할 일**: 이 브랜치(`codex/notification-text-shared-helpers`, main과 충돌 없음 확인됨)는 아직 main에 병합되지 않음 — 사용자 또는 Codex가 GitHub에서 병합해야 함.
+
+### `src/app/App.css` — 부분 샘플만 진행 (1~2,000/22,609줄), 방법 전환 권장
+
+App.jsx/server.js/coreData.js와 달리 CSS는 손으로 순차 통독하는 방식의 정보 밀도가 낮다는 걸 처음 2,000줄(파일의 9%)에서 확인했다: `.examAnalysis*`, `.academyReminder*` 같은 기능별 flat class 네이밍이 일관되고, `var(--academy-*)`/`var(--status-*)` 디자인 토큰을 거의 모든 색상·테두리에 일관되게 사용하며, 셀렉터를 콤마로 묶어 같은 선언 블록을 공유하는 패턴(`.pageTop, .panel, .calendarShell { ... }`)이 이미 CSS 자체의 "중복 제거" 관용구로 쓰이고 있음. 이 샘플 구간에서는 죽은 셀렉터나 명백한 중복을 못 찾음 — JS와 달리 CSS 중복은 사람이 22,000줄을 눈으로 훑어서 찾기보다 도구가 훨씬 빠르고 정확하다.
+
+**방법 전환 권장**: 다음 세션은 손으로 읽는 대신 아래를 먼저 실행할 것.
+1. `stylelint`(+ `stylelint-declaration-block-no-ignored-properties`, `stylelint-no-unused-selectors` 계열) 도입 — 중복 셀렉터, 사용되지 않는 커스텀 프로퍼티, 우선순위 충돌을 초 단위로 탐지.
+2. App.jsx/도메인 JSX 전체의 `className`/`class` 리터럴을 추출해 App.css의 셀렉터와 대조하는 간단한 스크립트(PurgeCSS 방식) — 실제 미사용 셀렉터(죽은 CSS) 찾기. `check:duplication`/`check:orphans`처럼 `npm run check:css-unused`로 등록.
+3. 위 두 도구가 걸러낸 "진짜 애매한" 구간만 사람이 직접 읽는다 — 22,609줄 전체를 순서대로 읽는 대신, 도구가 좁혀준 위치만 확인하는 방식으로 전환.
+
+이 판단 자체가 이번 세션에서 나온 방법론적 발견: **파일 종류(로직 파일 vs 스타일시트)에 따라 "전체 통독"과 "도구 우선"을 다르게 선택해야 시간 낭비가 없다.**
+
+### `src/domains/**` · `src/shared/**` — 인벤토리 완료 (2026-08-17), 파일별 완독은 아직
+
+367개 파일(`src/domains/`, ~50,024줄) + 53개 파일(`src/shared/`, ~5,544줄), 총 420개 파일 약 55,568줄. App.jsx/server.js/coreData.js 완독에 썼던 "offset 순차 읽기"는 이 규모에서는 비현실적 — 대신 하위 폴더별 파일 수·줄 수 집계와 극단값(가장 크거나 가장 작은 파일)만 먼저 확인해 우선순위를 잡았다.
+
+**`src/domains/` 하위 폴더별 규모 (파일 수 | 줄 수, 큰 순)**
+| 폴더 | 파일 수 | 줄 수 |
+| --- | ---: | ---: |
+| `lessons` | 163 | 11,811 |
+| `exams` | 31 | 9,817 |
+| `supplements` | 49 | 4,808 |
+| `specialLectures` | 8 | 4,379 |
+| `teacher` | 5 | 4,280 |
+| `notifications` | 40 | 4,201 |
+| `students` | 19 | 4,020 |
+| `settlements` | 11 | 2,903 |
+| `portals` | 20 | 1,574 |
+| `schoolCalendar` | 6 | 1,228 |
+| `settings` | 2 | 750 |
+| `resources` | 6 | 698 |
+| `tests` | 2 | 303 |
+| `reports` | 4 | 299 |
+| `appState` | 1 | 153 |
+| `problems`/`counseling`/`ai-drafts` | 0 (README만) | 0 |
+
+**`src/shared/` 하위 폴더별 규모**
+| 폴더 | 파일 수 | 줄 수 |
+| --- | ---: | ---: |
+| `persistence` | 6 | 1,352 |
+| `server` | 19 | 1,223 |
+| `contracts` | 3 | 894 |
+| `data` | 1 | 799 |
+| `components` | 17 | 707 |
+| `utils` | 4 | 426 |
+| `runtime` | 3 | 143 |
+
+**발견 1 — `lessons` 폴더의 극단적 파편화 (정량 확인)**: 163개 파일 중 33개가 20줄 미만, 70개(43%)가 40줄 미만. 예: `generatedExamPrepKeyBuilder.js`(3줄), `examPrepScheduleApi.js`(4줄), `generatedLessonSaveSelector.js`(5줄) — 함수 하나짜리 파일이 대량 존재. App.jsx 감사에서 이미 지적한 "함수 하나당 파일 하나" 패턴이 `src/domains/lessons`에도 그대로 반복됨. 압축 방향: 관련 있는 3~10줄짜리 셀렉터/빌더 파일들을 주제별로 묶은 파일 몇 개로 합치는 게 안전하고 효과적일 것 — 각각 순수 함수라 위험은 낮지만, 몇 개를 묶을지·어떤 기준으로 묶을지는 실제 import 그래프를 봐야 함(다음 세션 작업).
+
+**발견 2 — `ExamAnalysisPipelineCenter.jsx` 단일 파일이 4,656줄**: `exams` 폴더 전체(9,817줄)의 거의 절반을 이 파일 하나가 차지. App.jsx 다음으로 큰 단일 파일일 가능성이 높음 — 다음 세션에서 이 파일부터 완독 우선순위로 잡을 것을 권장.
+
+**발견 3 — 설계만 있고 구현 없는 도메인 3개**: `problems`/`counseling`/`ai-drafts` 폴더는 각각 MVP 설계 의도를 적은 README.md만 있고 실제 코드가 없음. 죽은 코드는 아니지만(애초에 코드가 없었음), 실제로 필요한 기능인지 폐기해도 되는 설계인지 사용자 확인이 필요.
+
+### `src/domains/exams/ExamAnalysisPipelineCenter.jsx` — 완독 (4,656/4,656줄, 2026-08-17)
+
+**전체 구조**: 시험분석(PDF 업로드 → 텍스트 추출 → AI 문항 채움 → 선생님 검수 → 블로그/인스타 산출물 생성) 파이프라인 전체를 다루는 단일 화면. 크게 세 영역으로 나뉨.
+
+1. **순수 함수·설정 데이터 (1~1670줄, 약 1,670줄)** — 상태 없는 헬퍼와 대형 상수 배열. 검수 초안 변환(`createExamAnalysisReviewDraft` 등), 산출물 입력 필드 정의(`examAnalysisOutputInputFields`, `examAnalysisGptChecklistManualFields`, `examAnalysisBlogBlockFields`, `examAnalysisKeyQuestionBlockFields` — 전부 한글 카피/가이드 문구가 박힌 설정 배열), SVG 차트 생성기 4개(`createExamAnalysisPartDistributionSvg` 등, 각 50~90줄, 좌표를 직접 계산해 SVG 문자열 조립), **브라우저에서 직접 구현한 ZIP 파일 writer**(`createExamAnalysisZipBlob` + CRC32 테이블 계산 + DOS 날짜/시간 인코딩 + local/central directory header 수작업 조립, 약 110줄) — 외부 라이브러리(jszip 등) 없이 ZIP 포맷을 직접 구현한 사례.
+2. **`ExamAnalysisOutputDraftPanel` 프레젠테이션 컴포넌트 (1675~2185줄, 약 510줄)** — 이미 분리된 하위 컴포넌트. 블로그/인스타 산출물 편집 UI 전체를 담당.
+3. **`ExamAnalysisPipelineCenter` 메인 컴포넌트 (2352~4655줄, 약 2,300줄)** — App.jsx의 `App()` 함수와 똑같은 패턴이 축소판으로 재현됨: `useState` 25개(loadStatus/saveStatus/uploadStatus/extractStatus/visionStatus/confirmStatus/boundaryStatus/rowFillStatus/rowRefineStatus/reviewStatus/outputStatus 등 단계별 상태가 각각 별도 useState), `handle*`/`load*`/`save*`/`confirm*`/`detect*`/`fill*`/`refine*`/`generate*` 약 30개 함수, 나머지는 인라인 JSX. 렌더 트리 자체는 단계별 패널(원본→문항수→경계탐지→AI채움→검수→미리보기→산출물→기록)을 순서대로 나열하는 비교적 명확한 구조.
+
+**압축 후보 (기계적, 위험 거의 없음)**
+| 항목 | 절감 예상 | 근거 |
+| --- | ---: | --- |
+| ZIP writer + README/manifest/체크리스트 텍스트 빌더를 `examAnalysisOutputPackageBuilder.js`로 분리 | ~600줄 | 전부 순수 함수, 컴포넌트 상태 없음 |
+| SVG 차트 생성기 4개를 `examAnalysisChartSvg.js`로 분리 | ~250줄 | 전부 순수 함수 |
+| 산출물 입력 필드 설정 배열들을 `examAnalysisOutputFieldConfig.js`(데이터 파일)로 분리 | ~250줄 | 로직 없는 설정 데이터 |
+| `ExamAnalysisOutputDraftPanel`을 기존 `ExamAnalysisFinalPreviewPanel.jsx`처럼 별도 `.jsx` 파일로 이동 | ~510줄 | 이미 독립 함수, 위험 낮음 |
+| **합계** | **약 1,600줄 (4,656 → 약 3,050줄, ~34% 감소)** | App.jsx 압축과 동일한 패턴 — 상태/핸들러는 안 건드림 |
+
+**재설계가 필요한 핵심 (위험 있음)**: 메인 컴포넌트의 25개 useState는 실질적으로 5개 그룹(원본 업로드/문항수 확정/경계탐지+AI채움/검수/산출물)으로 나뉘는데 각각 완전히 개별 useState로 선언돼 있음 — App.jsx처럼 도메인별 custom hook(`useExamAnalysisSourceFiles`, `useExamAnalysisReview`, `useExamAnalysisOutputDrafts` 등)으로 묶으면 상태 폭발이 줄어들 것으로 보이나, 이건 단순 이동이 아니라 실제 재설계라 별도 안전 단위로 다뤄야 함. 이번 세션에서는 읽기만 완료, 실행은 다음 세션 후보.
+
+**교차 검증**: 이 파일의 로직은 App.jsx/server.js/coreData.js에서 발견된 중복(알림 문구, CAS 저장 패턴)과 겹치지 않음 — 시험분석 전용 도메인 로직이라 독립적. 다른 파일과의 중복은 발견 안 됨.
+
+**다음 세션 권장 순서**: (1) App.css는 stylelint 도구 셋업 후 재개. (2) 위 압축 후보 4개(ZIP/SVG/설정데이터/패널분리) 실행 — 기계적이고 안전, 다음 세션 즉시 시작 가능. (3) `src/domains/lessons`의 3~40줄 파편 파일 70개를 실제 import 그래프 기준으로 통합 후보 묶음 설계. (4) coreData.js 나머지 11개 도메인을 표준 CAS/draft-convergence/row-level 셋으로 분류 후 표준 CAS 도메인만 우선 전환. (`api/routes/coreData.js` 완독, 알림 문구 1차 통합 실행 완료, coreData.js school_events 파일럿 완료 — 모두 위 참조. 실제 발송 버그는 전부 수정 완료.)
 
