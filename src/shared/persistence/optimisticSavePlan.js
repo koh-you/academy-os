@@ -10,13 +10,16 @@ export async function upsertWithOptimisticConcurrency(requested, {
   patchRow,
   verify,
   throwConflict,
-  missingIdMessage
+  missingIdMessage,
+  allowInsert = true,
+  areBeforeStateEqual
 }) {
   if (!entityId) throw new Error(missingIdMessage);
 
   const current = await getCurrent(entityId);
 
   if (!current) {
+    if (!allowInsert) throwConflict(entityId, null, "deleted");
     if (requested.updatedAt) throwConflict(entityId, null, "deleted");
     const dbRow = toRow(requested);
     dbRow.updated_at = createNextUpdatedAt();
@@ -41,6 +44,9 @@ export async function upsertWithOptimisticConcurrency(requested, {
   }
   if (!requested.updatedAt) throwConflict(entityId, current, "duplicate");
   if (!areTimestampsEqual(current.updatedAt, requested.updatedAt)) {
+    throwConflict(entityId, current);
+  }
+  if (areBeforeStateEqual && !areBeforeStateEqual(requested, current)) {
     throwConflict(entityId, current);
   }
 
