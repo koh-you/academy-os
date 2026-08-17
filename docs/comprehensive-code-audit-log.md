@@ -154,6 +154,30 @@ docs/comprehensive-code-audit-log.md 파일을 먼저 읽고, "진행 상태" �
   - `persistLessonJournalMakeupTask`(makeup_tasks) — 도메인 엔티티가 아니라 DB row 자체(`currentRow`/`desiredRow`)를 비교하고, 버전 검사도 `currentRow.updated_at !== expectedUpdatedAt` 직접 문자열 비교라 `areTimestampsEqual` 훅으로 못 바꿈.
 - **결론**: `upsertWithOptimisticConcurrency`는 school_events처럼 "표준 CAS" 도메인에만 안전하게 재사용 가능. 나머지 도메인은 (a) 표준 CAS인지 (b) draft-convergence류인지 (c) row-level 비교류인지 먼저 분류해야 함 — 다음 세션은 이 분류 작업부터 시작할 것. `saveXxxPlan` 5개(멀티 엔티티 롤백 오케스트레이션)는 아직 손 안 댐, 이것도 별도 분석 필요.
 
+**2026-08-17 후속 — 나머지 독립 구현체 11개 실제 분류 완료 (실행은 안 함, 분류만)**
+
+먼저 중요한 재발견: coreData.js의 `persist*Change` 함수 12개 중 2개는 사실 **자체 CAS 로직이 없는 얇은 위임 wrapper**다 — `persistClassRosterStudentChange`는 실제 저장을 `upsertStudent(after, { createOnly | expectedUpdatedAt })`에 위임하고, `persistSupplementScheduleTaskChange`는 실제 저장을 `persistLessonJournalMakeupTask(after)`에 위임한다. 즉 "12개 도메인이 각자 CAS를 재구현"이 아니라 **실제 독립 구현체는 11개**이고 그중 2곳은 이미 재사용 중이었다.
+
+11개 독립 구현체를 제어흐름 모양으로 분류:
+
+| 구현체 | 대상 테이블 | 모양 | 이유 |
+| --- | --- | --- | --- |
+| `upsertSchoolEvent`/`deleteSchoolEvent` | school_events | **표준 CAS** | ✅ 이미 전환 완료 (school_events 파일럿) |
+| `upsertStudent` | students | **3-모드 혼합** (createOnly / CAS-update / 무조건 upsert+스키마 마이그레이션 폴백) | 호출자 의도에 따라 세 가지 다른 동작 — 하나의 CAS 흐름이 아니라 분기 자체가 다름. createOnly/CAS-update 두 모드만 떼어내면 표준 CAS와 유사해지지만 세 번째 모드(플레인 upsert)는 버전 검사 자체가 없어 별도 취급 필요 |
+| `upsertResourceMaterial`/`deleteResourceMaterial` | resource_materials | **초안 수렴(draft-convergence)** | 버전 비교 없이 `isSameResourceMaterialDraft`로 의미적 동일성만 확인 후 patch. delete는 이미 없어진 대상을 conflict가 아니라 성공으로 처리(school_events와 반대) |
+| `persistLessonJournalMakeupTask` | makeup_tasks | **row-level 비교** | 도메인 엔티티가 아니라 DB row(`currentRow`/`desiredRow`) 자체를 비교, 버전 검사도 `updated_at` 문자열 직접비교 |
+| `persistLessonRosterChange` | lessons (명단만) | **표준 CAS, update-only** | 수업은 항상 이미 존재 — insert 분기 없음. 그 외엔 school_events와 유사 |
+| `persistDerivedExamPrepChange` | exam_prep_rows | **update-only + 이중 검증 + appliedResult** | validation(`areDerivedExamPrepNonScheduleFieldsEqual`)과 동등성(`areDerivedExamPrepRowsEqual`) 검사가 분리된 2단계, 실패 시 롤백용 `error.appliedResult` 첨부 |
+| `persistDerivedLessonChange` | lessons (직전수업) | **3-way (insert/update/delete)** | `after`/`before` 유무 조합으로 생성·수정·삭제 세 갈래 분기 |
+| `persistLessonJournalHistoryLessonChange` | lessons (복사본) | **3-way (insert/update/delete)** | 위와 동일 패턴, 수업 복사·되돌리기 전용 |
+| `persistLessonJournalHistoryHomeworkChange` | homeworks | **3-way (insert/update/delete)** | 위와 동일 패턴 |
+| `persistLessonJournalRowsHomeworkChange` | homeworks | **rebase 기반 충돌 해소** | 버전 불일치 시 즉시 실패가 아니라 `rebaseLessonJournalHomeworkChange`로 충돌 안 나는 필드만 자동 병합 시도 — school_events보다 훨씬 관대한 동시성 모델 |
+| `persistLessonJournalRowsRecordChange` | lesson_student_records | **rebase 기반 충돌 해소 + 필드 병합** | 위와 동일한 rebase에 더해 기존 출결/숙제후속 필드를 자동으로 이어붙이는 `mergeExistingAttendanceForNonAttendanceSave`/`mergeExistingHomeworkFollowupForSave`까지 얹음 — 11개 중 가장 복잡 |
+| `persistSupplementScheduleLessonChange` | lessons (보충) | **3-way에 가까움** | insert/update 분기, `areLessonJournalHistoryLessonsEqual`(수업일지 이력과 동일 동등성 함수 재사용 — 이미 공유 중) |
+| `upsertExamPrepRow`/`upsertExamPrepRows` | exam_prep_rows | **배치(array) 처리** | 단일 엔티티가 아니라 행 배열을 받아 행별로 conflict/failure를 따로 수집 — 애초에 단일-엔티티 헬퍼와 모양이 다름 |
+
+**결론 및 다음 방향**: 표준 CAS로 안전하게 묶을 수 있는 건 `school_events`(완료) + `persistLessonRosterChange`(update-only 변형, 헬퍼에 `allowInsert: false` 옵션 하나만 추가하면 재사용 가능) 정도 — 나머지 9개는 각자 진짜 다른 동시성 모델(초안수렴/row-level/이중검증/3-way/rebase/배치)을 쓰고 있어 무리하게 하나로 묶으면 오히려 각 도메인의 실제 안전장치(rebase 관대함, 이중검증 엄격함 등)가 옅어질 위험이 있음. **"2,000~2,400줄 절감"이라는 최초 추정은 골격 수준 유사성에 기반한 과대추정이었고, 실제 안전하게 통합 가능한 범위는 훨씬 작다(school_events + lesson roster 정도, 수백 줄 규모)**. 나머지는 각 동시성 모델별로 별도 제네릭 헬퍼를 만들 가치가 있는지(예: rebase 모델 전용 헬퍼로 2개 도메인 묶기) 다음 세션에서 따로 판단할 것 — 무리해서 하나의 만능 헬퍼로 밀어붙이지 말 것.
+
 ### `api/routes/coreData.js` 종합 소견 (4,907/4,907줄 완독)
 
 | 항목 | 상태 |
