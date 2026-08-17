@@ -144,6 +144,10 @@ import {
   toNotificationJobRow,
   toResourceMaterialRow
 } from "../../src/shared/persistence/platformSourceRowMappers.js";
+import {
+  deleteWithOptimisticConcurrency,
+  upsertWithOptimisticConcurrency
+} from "../../src/shared/persistence/optimisticSavePlan.js";
 import { createNotificationDispatchCandidateQuery, deleteRows, getSupabaseStatus, insertRows, isSupabaseConfigured, listRows, patchRows, upsertRows } from "../lib/supabaseRest.js";
 
 export { toLessonRow };
@@ -3996,48 +4000,26 @@ export async function upsertSchoolEvent(event) {
   }
 
   const eventId = event?.eventId ?? event?.schoolEventId;
-  if (!eventId) throw new Error("저장할 학사일정 ID가 필요합니다.");
   const requestedEvent = { ...event, eventId };
-  const currentSchoolEvent = await getSchoolEvent(eventId);
-
-  if (!currentSchoolEvent) {
-    if (requestedEvent.updatedAt) throwSchoolEventConflict(eventId, null, "deleted");
-    const dbRow = toSchoolEventRow(requestedEvent);
-    dbRow.updated_at = createNextSchoolEventUpdatedAt();
-    try {
-      await insertRows("school_events", [dbRow]);
-    } catch (error) {
-      if (isSchoolEventInsertConflict(error)) {
-        const concurrentSchoolEvent = await getSchoolEvent(eventId);
-        if (concurrentSchoolEvent && areSchoolEventsPersistedEqual(requestedEvent, concurrentSchoolEvent)) {
-          return { source: databaseSource, schoolEvent: concurrentSchoolEvent, verified: true };
-        }
-        throwSchoolEventConflict(eventId, concurrentSchoolEvent, "duplicate");
-      }
-      throw error;
-    }
-    const verifiedSchoolEvent = await verifySchoolEventSave(requestedEvent, dbRow.updated_at);
-    return { source: databaseSource, schoolEvent: verifiedSchoolEvent, verified: true };
-  }
-
-  if (areSchoolEventsPersistedEqual(requestedEvent, currentSchoolEvent)) {
-    return { source: databaseSource, schoolEvent: currentSchoolEvent, verified: true };
-  }
-  if (!requestedEvent.updatedAt) throwSchoolEventConflict(eventId, currentSchoolEvent, "duplicate");
-  if (!areSchoolEventTimestampsEqual(currentSchoolEvent.updatedAt, requestedEvent.updatedAt)) {
-    throwSchoolEventConflict(eventId, currentSchoolEvent);
-  }
-
-  const dbRow = toSchoolEventRow(requestedEvent);
-  dbRow.updated_at = createNextSchoolEventUpdatedAt(currentSchoolEvent.updatedAt);
-  const savedRows = await patchRows(
-    "school_events",
-    createSchoolEventVersionFilter(eventId, currentSchoolEvent.updatedAt),
-    dbRow
-  );
-  if (!savedRows.length) throwSchoolEventConflict(eventId, await getSchoolEvent(eventId));
-  const verifiedSchoolEvent = await verifySchoolEventSave(requestedEvent, dbRow.updated_at);
-  return { source: databaseSource, schoolEvent: verifiedSchoolEvent, verified: true };
+  const { entity } = await upsertWithOptimisticConcurrency(requestedEvent, {
+    entityId: eventId,
+    getCurrent: getSchoolEvent,
+    toRow: toSchoolEventRow,
+    createNextUpdatedAt: createNextSchoolEventUpdatedAt,
+    areEqual: areSchoolEventsPersistedEqual,
+    areTimestampsEqual: areSchoolEventTimestampsEqual,
+    isInsertConflictError: isSchoolEventInsertConflict,
+    insertRow: (dbRow) => insertRows("school_events", [dbRow]),
+    patchRow: (id, expectedUpdatedAt, dbRow) => patchRows(
+      "school_events",
+      createSchoolEventVersionFilter(id, expectedUpdatedAt),
+      dbRow
+    ),
+    verify: verifySchoolEventSave,
+    throwConflict: throwSchoolEventConflict,
+    missingIdMessage: "저장할 학사일정 ID가 필요합니다."
+  });
+  return { source: databaseSource, schoolEvent: entity, verified: true };
 }
 
 export async function upsertSchoolEvents(events) {
@@ -4057,24 +4039,16 @@ export async function deleteSchoolEvent(eventId, { expectedUpdatedAt } = {}) {
     return { source: fallbackSource, schoolEventId: eventId, verified: false };
   }
 
-  if (!eventId) throw new Error("삭제할 학사일정 ID가 필요합니다.");
-  if (!expectedUpdatedAt) throw new Error("삭제할 학사일정의 서버 버전이 필요합니다.");
-  const currentSchoolEvent = await getSchoolEvent(eventId);
-  if (!currentSchoolEvent) throwSchoolEventConflict(eventId, null, "deleted");
-  if (!areSchoolEventTimestampsEqual(currentSchoolEvent.updatedAt, expectedUpdatedAt)) {
-    throwSchoolEventConflict(eventId, currentSchoolEvent);
-  }
-
-  const deletedRows = await deleteRows(
-    "school_events",
-    createSchoolEventVersionFilter(eventId, currentSchoolEvent.updatedAt)
-  );
-  if (deletedRows.length !== 1) throwSchoolEventConflict(eventId, await getSchoolEvent(eventId));
-  if (await getSchoolEvent(eventId)) {
-    const error = new Error(`학사일정 ${eventId} 삭제를 Supabase 재조회로 확인하지 못했습니다.`);
-    error.code = "SCHOOL_EVENT_VERIFICATION_FAILED";
-    throw error;
-  }
+  await deleteWithOptimisticConcurrency(eventId, expectedUpdatedAt, {
+    getCurrent: getSchoolEvent,
+    areTimestampsEqual: areSchoolEventTimestampsEqual,
+    deleteRow: (id, updatedAt) => deleteRows("school_events", createSchoolEventVersionFilter(id, updatedAt)),
+    throwConflict: throwSchoolEventConflict,
+    missingIdMessage: "삭제할 학사일정 ID가 필요합니다.",
+    missingVersionMessage: "삭제할 학사일정의 서버 버전이 필요합니다.",
+    verifyGoneErrorMessage: `학사일정 ${eventId} 삭제를 Supabase 재조회로 확인하지 못했습니다.`,
+    verifyGoneErrorCode: "SCHOOL_EVENT_VERIFICATION_FAILED"
+  });
   return { source: databaseSource, schoolEventId: eventId, verified: true };
 }
 
