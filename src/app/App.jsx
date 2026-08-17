@@ -163,7 +163,8 @@ import {
 } from "../domains/notifications/notificationCenterConfig.js";
 import {
   defaultNotificationTemplates,
-  normalizeNotificationTemplates
+  normalizeNotificationTemplates,
+  renderNotificationTemplate
 } from "../domains/notifications/notificationTemplateCatalog.js";
 import {
   buildAttendanceBody,
@@ -193,6 +194,17 @@ import {
   getSupplementTaskDraftDiff as getSupplementTaskDraftDiffModel,
   isSupplementTeacherEditedField
 } from "../domains/supplements/supplementTaskDraft.js";
+import {
+  followUpTypeLabel,
+  formatSupplementHomeworkCheckSentence,
+  getAbsenceMakeupHomeworkText,
+  getSupplementTaskSourceLabel,
+  normalizeSupplementMethodForTask,
+  supplementDefaultMethod,
+  supplementMethodLabel,
+  supplementMethodOptions,
+  supplementMethodsByType
+} from "../domains/supplements/supplementMethodLabel.js";
 import { getSupplementNotificationControlDisplay } from "../domains/supplements/supplementStatus.js";
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
@@ -311,7 +323,13 @@ import {
   getLessonJournalHomeworkDraftTitle
 } from "../domains/lessons/lessonJournalHomeworkDraft.js";
 import { createLessonJournalHomeworkFollowupPlan } from "../domains/lessons/lessonJournalHomeworkFollowupPlan.js";
-import { selectLinkedPreviousHomework } from "../domains/lessons/lessonHomeworkContinuity.js";
+import {
+  findPreviousLessonsForStudent,
+  getLessonSortValue,
+  isSameLessonGroup,
+  isSpecialLectureLesson,
+  selectLinkedPreviousHomework
+} from "../domains/lessons/lessonHomeworkContinuity.js";
 import { createLessonJournalAssignmentStatusPlan } from "../domains/lessons/lessonJournalAssignmentStatusPlan.js";
 import { resolveLessonJournalEditableText } from "../domains/lessons/lessonJournalEditableFieldsModel.js";
 import {
@@ -382,7 +400,6 @@ import {
   getDefaultSpecialLectureGuideId,
   getSpecialLectureCalculatedFields,
   getSpecialLectureGuideSlug,
-  getSpecialLectureLessonTrackId,
   getSpecialLecturePublicUrl,
   getSpecialLectureSeasonShortLabel,
   getSpecialLectureTotalHours,
@@ -9273,37 +9290,6 @@ function pruneExpiredLessonDeletes(bundles = []) {
   return bundles.filter((bundle) => !bundle.expiresAt || Date.parse(bundle.expiresAt) > now);
 }
 
-function getLessonSortValue(lesson) {
-  return `${lesson.date ?? ""}T${lesson.startTime || "00:00"}`;
-}
-
-function isSpecialLectureLesson(lesson = {}) {
-  return Boolean(
-    lesson.lessonType === "specialLecture" ||
-    lesson.lessonTrackType === "specialLecture" ||
-    lesson.specialLectureGuideId
-  );
-}
-
-function getLessonContinuityKey(lesson = {}) {
-  if (isSpecialLectureLesson(lesson)) {
-    return lesson.lessonTrackId || (lesson.specialLectureGuideId ? getSpecialLectureLessonTrackId(lesson) : "");
-  }
-  if (lesson.classTemplateId) return `classTemplate:${lesson.classTemplateId}`;
-  return `className:${lesson.className ?? ""}`;
-}
-
-function isSameLessonGroup(lesson, candidate) {
-  const lessonIsSpecial = isSpecialLectureLesson(lesson);
-  const candidateIsSpecial = isSpecialLectureLesson(candidate);
-  if (lessonIsSpecial || candidateIsSpecial) {
-    const lessonKey = getLessonContinuityKey(lesson);
-    const candidateKey = getLessonContinuityKey(candidate);
-    return Boolean(lessonIsSpecial && candidateIsSpecial && lessonKey && lessonKey === candidateKey);
-  }
-  return getLessonContinuityKey(lesson) === getLessonContinuityKey(candidate);
-}
-
 function findNextLessonForStudent(lessons, lesson, student) {
   const studentId = student?.studentId ?? "";
   const currentSortValue = getLessonSortValue(lesson);
@@ -9315,22 +9301,6 @@ function findNextLessonForStudent(lessons, lesson, student) {
     .filter((candidate) => isStudentScheduledForLesson(candidate, student))
     .filter((candidate) => getLessonSortValue(candidate) > currentSortValue)
     .sort((a, b) => getLessonSortValue(a).localeCompare(getLessonSortValue(b)))[0];
-}
-
-function findPreviousLessonsForStudent(lessons, lesson, studentId, { allowRegularClassFallback = false, student = null } = {}) {
-  const currentSortValue = getLessonSortValue(lesson);
-  const previousLessons = [...lessons]
-    .filter((candidate) => candidate.lessonId !== lesson.lessonId)
-    .filter((candidate) => !shouldIgnoreLessonAttendance(candidate))
-    .filter((candidate) => candidate.studentIds?.includes(studentId))
-    .filter((candidate) => isStudentScheduledForLesson(candidate, student))
-    .filter((candidate) => getLessonSortValue(candidate) < currentSortValue)
-    .sort((a, b) => getLessonSortValue(b).localeCompare(getLessonSortValue(a)));
-  const previousLessonsInCurrentGroup = previousLessons.filter((candidate) => isSameLessonGroup(lesson, candidate));
-  if (previousLessonsInCurrentGroup.length || !allowRegularClassFallback || isSpecialLectureLesson(lesson)) {
-    return previousLessonsInCurrentGroup;
-  }
-  return previousLessons.filter((candidate) => !isSpecialLectureLesson(candidate));
 }
 
 function findPreviousLessonForStudent(lessons, lesson, studentId, options = {}) {
@@ -10253,66 +10223,6 @@ function calculateHomeworkStats(homeworks) {
   };
 }
 
-function followUpTypeLabel(taskType) {
-  const labels = {
-    homework_makeup: "숙제보충",
-    absence_makeup: "결석 보강",
-    manual_makeup: "수동 보충",
-    retest: "재시험"
-  };
-  return labels[taskType] ?? "보충관리";
-}
-
-const supplementMethodsByType = {
-  homework_makeup: [
-    { id: "arrival_makeup", label: "등원보충" }
-  ],
-  absence_makeup: [
-    { id: "recorded_lecture", label: "녹강보강" },
-    { id: "onsite_makeup", label: "현장보강" }
-  ],
-  manual_makeup: [
-    { id: "onsite_makeup", label: "현장 보충" }
-  ],
-  retest: [
-    { id: "onsite_retest", label: "현장 재시험" }
-  ]
-};
-
-function supplementMethodOptions(taskType) {
-  return supplementMethodsByType[taskType] ?? [];
-}
-
-function supplementDefaultMethod(taskType) {
-  if (taskType === "homework_makeup") return "arrival_makeup";
-  if (taskType === "absence_makeup") return "onsite_makeup";
-  return supplementMethodOptions(taskType)[0]?.id ?? "";
-}
-
-function normalizeSupplementMethodForTask(taskType, methodId) {
-  const options = supplementMethodOptions(taskType);
-  if (options.some((option) => option.id === methodId)) return methodId;
-  return supplementDefaultMethod(taskType);
-}
-
-function supplementMethodLabel(task) {
-  const methodId = normalizeSupplementMethodForTask(task?.taskType, task?.supplementMethod);
-  return supplementMethodOptions(task?.taskType).find((option) => option.id === methodId)?.label ?? "방식 미정";
-}
-
-function renderNotificationTemplate(template = "", variables = {}) {
-  const rendered = Object.entries(variables).reduce(
-    (text, [key, value]) => text.replaceAll(`#{${key}}`, normalizeMessageText(value)),
-    String(template ?? "")
-  );
-  return rendered
-    .split("\n")
-    .map((line) => line.trimEnd())
-    .join("\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-}
-
 function formatTemplateLine(label, value) {
   const text = normalizeMessageText(value).replace(/\s+/g, " ").trim();
   return text ? `${label}: ${text}` : "";
@@ -10327,12 +10237,6 @@ function getAbsenceMakeupSourceText(task = {}) {
   return "결석 수업";
 }
 
-function getAbsenceMakeupHomeworkText(task = {}) {
-  return normalizeMessageText(getSupplementHomeworkNoteValue(task, task.sourcePreviousHomework || ""))
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 function getHomeworkMakeupHomeworkText(task = {}) {
   const homeworkText = normalizeMessageText(getSupplementHomeworkNoteValue(task, task.sourceLabel || task.reason || ""))
     .replace(/\s+/g, " ")
@@ -10340,19 +10244,6 @@ function getHomeworkMakeupHomeworkText(task = {}) {
   const homeworkDate = formatSupplementShortDate(task.sourceDueDate || task.sourceDate || task.lessonDate || "");
   const homeworkDateText = homeworkDate ? `${homeworkDate} 숙제` : "";
   return [homeworkDateText, homeworkText || "숙제 보충"].filter(Boolean).join(" · ");
-}
-
-function getSupplementTaskSourceLabel(task) {
-  if (task?.taskType === "homework_makeup") {
-    return getSupplementHomeworkNoteValue(task, task.sourceLabel || "");
-  }
-  return task?.sourceLabel || "";
-}
-
-function formatSupplementHomeworkCheckSentence(task = {}) {
-  const homeworkText = getAbsenceMakeupHomeworkText(task);
-  if (!homeworkText) return "";
-  return `지난 숙제 ${homeworkText}도 함께 확인하겠습니다.`;
 }
 
 function formatSupplementDraftScheduleText(task = {}) {

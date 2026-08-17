@@ -74,7 +74,7 @@ assert.ok(notificationRouteSource.includes('"#{리포트본문}": reportBody'));
 assert.ok(notificationRouteSource.includes('"#{코멘트}": reminderBody'));
 
 for (const key of managedTemplateKeys.slice(0, 2)) {
-  assert.ok(serverSource.includes(`${key}:`), `server dispatch must load configured lesson follow-up: ${key}`);
+  assert.ok(serverSource.includes(`templates.${key}`), `server dispatch must load configured lesson follow-up: ${key}`);
 }
 assert.ok(serverSource.includes("states?.aiSettings?.notificationTemplates"));
 assert.ok(serverSource.includes("formatSupplementScheduleLineForNotification"));

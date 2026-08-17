@@ -1,3 +1,54 @@
+import { shouldIgnoreLessonAttendance } from "./lessonClosure.js";
+import { isStudentScheduledForLesson } from "../../shared/utils/studentSchedule.js";
+import { getSpecialLectureLessonTrackId } from "../specialLectures/specialLectureGuideUtils.js";
+
+export function getLessonSortValue(lesson) {
+  return `${lesson.date ?? ""}T${lesson.startTime || "00:00"}`;
+}
+
+export function isSpecialLectureLesson(lesson = {}) {
+  return Boolean(
+    lesson.lessonType === "specialLecture" ||
+    lesson.lessonTrackType === "specialLecture" ||
+    lesson.specialLectureGuideId
+  );
+}
+
+export function getLessonContinuityKey(lesson = {}) {
+  if (isSpecialLectureLesson(lesson)) {
+    return lesson.lessonTrackId || (lesson.specialLectureGuideId ? getSpecialLectureLessonTrackId(lesson) : "");
+  }
+  if (lesson.classTemplateId) return `classTemplate:${lesson.classTemplateId}`;
+  return `className:${lesson.className ?? ""}`;
+}
+
+export function isSameLessonGroup(lesson, candidate) {
+  const lessonIsSpecial = isSpecialLectureLesson(lesson);
+  const candidateIsSpecial = isSpecialLectureLesson(candidate);
+  if (lessonIsSpecial || candidateIsSpecial) {
+    const lessonKey = getLessonContinuityKey(lesson);
+    const candidateKey = getLessonContinuityKey(candidate);
+    return Boolean(lessonIsSpecial && candidateIsSpecial && lessonKey && lessonKey === candidateKey);
+  }
+  return getLessonContinuityKey(lesson) === getLessonContinuityKey(candidate);
+}
+
+export function findPreviousLessonsForStudent(lessons, lesson, studentId, { allowRegularClassFallback = false, student = null } = {}) {
+  const currentSortValue = getLessonSortValue(lesson);
+  const previousLessons = [...lessons]
+    .filter((candidate) => candidate.lessonId !== lesson.lessonId)
+    .filter((candidate) => !shouldIgnoreLessonAttendance(candidate))
+    .filter((candidate) => candidate.studentIds?.includes(studentId))
+    .filter((candidate) => isStudentScheduledForLesson(candidate, student))
+    .filter((candidate) => getLessonSortValue(candidate) < currentSortValue)
+    .sort((a, b) => getLessonSortValue(b).localeCompare(getLessonSortValue(a)));
+  const previousLessonsInCurrentGroup = previousLessons.filter((candidate) => isSameLessonGroup(lesson, candidate));
+  if (previousLessonsInCurrentGroup.length || !allowRegularClassFallback || isSpecialLectureLesson(lesson)) {
+    return previousLessonsInCurrentGroup;
+  }
+  return previousLessons.filter((candidate) => !isSpecialLectureLesson(candidate));
+}
+
 const meaningfulAttendanceStatuses = new Set([
   "absent",
   "excused",
