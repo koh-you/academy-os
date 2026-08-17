@@ -1,5 +1,6 @@
 import { normalizeNotificationText as normalizeMessageText } from "../notifications/notificationMessageRenderer.js";
 import { getJsonWithTimeout, postJson } from "../../shared/utils/apiClient.js";
+import { saveLessonJournalHomeworksWithVerification } from "./lessonJournalHomeworkBulkApi.js";
 
 const lessonRecordRequeryVerificationFields = [
   "homeworkFollowupMethod",
@@ -61,8 +62,8 @@ export async function saveLessonRecordAction({ record, relatedHomeworks = [], re
     }
     savedRecord = requeriedRecord;
   }
-  if (relatedHomeworks.length > 0) {
-    await postJson("/api/homeworks/bulk", { homeworks: relatedHomeworks });
-  }
-  return { savedRecord };
+  const verifiedHomeworks = relatedHomeworks.length > 0
+    ? await saveLessonJournalHomeworksWithVerification({ homeworks: relatedHomeworks, request: postJson })
+    : [];
+  return { savedRecord, verifiedHomeworks };
 }
