@@ -17,6 +17,7 @@ const [
   supplementControlSource,
   supplementActionSource,
   examAnalysisSource,
+  examAnalysisOutputDraftPanelSource,
   supplementTaskActionBarSource,
   monthlyRegularLessonOpenApiSource
 ] = await Promise.all([
@@ -34,6 +35,7 @@ const [
   read("src/domains/supplements/SupplementNotificationControlModal.jsx"),
   read("src/domains/supplements/supplementTaskActions.js"),
   read("src/domains/exams/ExamAnalysisPipelineCenter.jsx"),
+  read("src/domains/exams/ExamAnalysisOutputDraftPanel.jsx"),
   read("src/domains/supplements/SupplementTaskActionBar.jsx"),
   read("src/domains/lessons/monthlyRegularLessonOpenApi.js")
 ]);
@@ -91,7 +93,7 @@ for (const contract of [
 ]) {
   assert.ok(supplementActionSource.includes(contract), `supplement composite state contract missing: ${contract}`);
 }
-assert.ok(examAnalysisSource.includes('const outputStickySaveState = outputStatus.state === "success" ? "saved" : outputStatus.state'));
+assert.ok(examAnalysisOutputDraftPanelSource.includes('const outputStickySaveState = outputStatus.state === "success" ? "saved" : outputStatus.state'));
 assert.ok(examAnalysisSource.includes('saveState={reviewStatus.state === "success" ? "saved" : reviewStatus.state}'));
 
 // These are contextual action bars, not final modal footers.

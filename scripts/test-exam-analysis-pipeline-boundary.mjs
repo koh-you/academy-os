@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const [appSource, componentSource, lazyViewSource, outletSource] = await Promise.all([
+const [appSource, componentSource, outputDraftPanelSource, lazyViewSource, outletSource] = await Promise.all([
   readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/exams/ExamAnalysisPipelineCenter.jsx", import.meta.url), "utf8"),
+  readFile(new URL("../src/domains/exams/ExamAnalysisOutputDraftPanel.jsx", import.meta.url), "utf8"),
   readFile(new URL("../src/app/lazyTeacherViewComponents.js", import.meta.url), "utf8"),
   readFile(new URL("../src/app/TeacherViewOutlet.js", import.meta.url), "utf8")
 ]);
@@ -27,7 +28,9 @@ const runtimeNames = [
 assert.equal(appSource.includes("function ExamAnalysisPipelineCenter("), false);
 assert.equal(appSource.includes("function ExamAnalysisOutputDraftPanel("), false);
 assert.equal(componentSource.includes("export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime })"), true);
-assert.equal(componentSource.includes("function ExamAnalysisOutputDraftPanel("), true);
+assert.equal(componentSource.includes("function ExamAnalysisOutputDraftPanel("), false);
+assert.equal(componentSource.includes('import { ExamAnalysisOutputDraftPanel } from "./ExamAnalysisOutputDraftPanel.jsx"'), true);
+assert.equal(outputDraftPanelSource.includes("export function ExamAnalysisOutputDraftPanel("), true);
 assert.equal(lazyViewSource.includes('import("../domains/exams/ExamAnalysisPipelineCenter.jsx")'), true);
 assert.equal(outletSource.includes("runtime: runtimeBindings.examAnalysisPipeline"), true);
 
