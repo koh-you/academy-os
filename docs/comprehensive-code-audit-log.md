@@ -179,16 +179,23 @@ App.jsx↔server.js 알림 문구 "중복" 1순위 통합을 실행하기 전, �
 **실행 완료 (zero-behavior-change, `codex/notification-text-shared-helpers` 브랜치, 커밋 c469c0f01, push됨, 아직 main 미병합)**:
 바이트 단위로 동일함이 확인된 함수만 공유 모듈로 통합: `getNotificationTextKey`/`compactDuplicateNotificationBlocks`/`notificationTextIncludesBlock`(→`notificationMessageRenderer.js`), `getHomeworkAssignmentStatus`(→`assignmentStatus.js`), `parseHomeworkFollowupMemoLine`/`removeHomeworkFollowupMemoLines`/`getLessonPreparationNotice`(→ 신규 `lessonPreparationNotice.js`). 서버 쪽 죽은 코드 2개(`getPreparationNoticeForNotification`, `removeHomeworkFollowupMemoLinesForNotification` — 호출부 0건 확인)도 함께 삭제. lint/typecheck/test:production(305/305, 828/828)/build/browser-smoke(77/77) 전부 통과.
 
-**실행 안 함 — 발견만 기록, 실제 발송 문구가 걸린 문제라 별도 제품 판단 필요**:
-1. **`getLessonHomework`(App.jsx) vs `getLessonHomeworkForNotification`(server.js) — 가장 심각.** "지난 숙제" 탐색 알고리즘 자체가 다름. 클라이언트는 그룹핑·특강 폴백·`hasPersistedLessonProgress` 되짚기 로직까지 포함한 전체 정렬 리스트를 훑고, 서버는 `classTemplateId` 기준 단순 최신-1건 선택. 같은 수업·학생에 대해 서버가 클라이언트와 다른 "지난 숙제"를 골라 다른 문구를 보낼 수 있음.
-2. **`getLessonStudentIds` vs `...ForNotification`** — 서버는 `getEffectiveLessonStudentIds`(반 편성 유효일자/스케줄 오버라이드 반영)를 아예 호출하지 않고 raw `lesson.studentIds`만 신뢰. ①의 원인 중 하나.
-3. **테스트 종류 라벨 문구 자체가 다름** — `daily` 테스트: 클라이언트 "데일리 테스트"(공백 있음) vs 서버 "데일리테스트"(공백 없음). 시험명 미입력 시 이 라벨이 그대로 알림톡에 나감 — 실사용 빈도 높은 케이스.
-4. **`followUpTypeLabel`** — 클라이언트만 `manual_makeup: "수동 보충"`을 가짐. 서버는 이 키가 없어 "보충관리"로 대체 발송.
-5. **`supplementMethodLabel`의 기본값 분기** — `manual_makeup` 타입에서 클라이언트는 `"onsite_makeup"`(현장보강), 서버는 `"onsite_retest"`(현장 재시험) 기본값으로 서로 다른 라벨을 씀.
-6. **`getSupplementTaskSourceLabel`/`formatSupplementHomeworkCheckSentence`** — "지난 숙제 확인" 문장이 클라이언트는 `sourcePreviousHomework` 폴백이 있어 뜨는데 서버는 폴백이 없어 같은 상황에서 문장이 통째로 빠짐.
-7. **`renderNotificationTemplate` 3중 구현 탱글** — 같은 이름 `renderNotificationTemplate`이 (a) `notificationTemplateCatalog.js`의 정식 export (b) App.jsx 로컬 shadow 함수 (c) server.js의 `renderLessonHomeworkFollowupTemplate`(포지셔널 인자, 다른 정규화) 세 가지로 따로 존재. 현재 기본 템플릿(한 줄짜리)에서는 우연히 결과가 같지만, 선생님이 템플릿을 여러 줄로 커스터마이즈하면 세 구현이 갈라짐. 다른 항목들을 손대기 전에 이 탱글부터 정리(정식 버전 하나로 통일)해야 함.
+**2026-08-17 후속 실행 — 7건 전부 수정 완료 (같은 브랜치, 커밋 4a90233da, push됨, 아직 main 미병합)**:
 
-**권장 순서** (다음 세션): (1) `renderNotificationTemplate` 3중 구현 통일 — 거의 모든 나머지 항목이 이걸 거쳐감. (2) `getLessonHomework`/`getLessonStudentIds` 커플 — "서버 알림이 클라이언트 화면과 같은 반 편성 로직을 따라야 하는가"는 사용자 확인이 필요한 제품 판단. (3) 나머지 항목(③⑤⑥)은 각각 독립적이고 작음 — 실제 레코드로 before/after 텍스트 diff를 만들어 사용자에게 "이게 맞는 동작인가" 확인 후 하나씩 고칠 것.
+사용자가 제품 맥락을 명확히 함: "알림문구는 기존 데이터를 활용해서 초안을 불러오고, 사용자가 수정하면 그게 곧 원본으로 알림톡 나가는 구조"라는 확인을 받고, 실제 코드를 추적해 정확한 메커니즘을 확인함 — `refreshLessonCommentJobBeforeSend`가 예약된 알림 발송 직전에 서버에서 최신 데이터로 컨텍스트 필드(출결/과제상태/지난-다음 숙제/테스트결과/보충일정)를 다시 계산하는 것은 의도된 설계(발송 시점까지 시간차가 있으므로 최신 수업 상태 반영). 문제는 그 재계산 알고리즘이 클라이언트가 작성 시점에 보여준 것과 달라서, 데이터가 안 변해도 재계산 결과가 달라질 수 있었다는 것. 아래 7건 전부 "서버가 클라이언트와 동일한 알고리즘을 쓰도록" 수정:
+
+1. **`getLessonHomework`/`getLessonHomeworkForNotification` — 수정 완료.** `findPreviousLessonsForStudent`/`isSameLessonGroup`/`getLessonContinuityKey`/`isSpecialLectureLesson`/`getLessonSortValue`를 App.jsx에서 `src/domains/lessons/lessonHomeworkContinuity.js`(기존에 `selectLinkedPreviousHomework`가 있던 파일)로 추출, 양쪽이 동일 함수를 import. server.js의 `getLessonHomeworkForNotification`을 이 공유 함수들을 호출하도록 재작성 — 더 이상 독자적인 `classTemplateId` 기반 단순 검색을 하지 않음.
+2. **`getLessonStudentIds` — 수정 완료.** server.js가 `getEffectiveLessonStudentIds`(`src/shared/utils/studentSchedule.js`, 이미 존재하던 공유 함수)를 import해서 사용하도록 변경.
+3. **테스트 종류 라벨 — 수정 완료.** server.js의 자체 `getNotificationTestKindLabel` 삭제, `src/domains/tests/testManagerUtils.js`의 `getTestPaperKindLabel`(appConfig.js 기반, "데일리 테스트" 공백 포함이 정본)을 양쪽이 동일하게 사용.
+4. **`followUpTypeLabel` — 수정 완료.** server.js 쪽 맵에 `manual_makeup: "수동 보충"` 추가.
+5. **`supplementMethodLabel` 기본값 — 수정 완료.** `supplementMethodsByType`/`supplementMethodOptions`/`supplementDefaultMethod`/`normalizeSupplementMethodForTask`/`supplementMethodLabel`을 App.jsx에서 신규 `src/domains/supplements/supplementMethodLabel.js`로 추출해 양쪽 공유 — 서버가 자체 하드코딩된 기본값 분기를 갖지 않게 됨.
+6. **`getSupplementTaskSourceLabel`/`formatSupplementHomeworkCheckSentence` — 수정 완료.** 같은 신규 파일로 함께 추출, `sourcePreviousHomework` 폴백이 서버에도 적용됨.
+7. **`renderNotificationTemplate` 3중 구현 — 수정 완료.** App.jsx 로컬 shadow 삭제, server.js의 `renderLessonHomeworkFollowupTemplate`(포지셔널 인자 버전)과 `getLessonHomeworkFollowupTemplates`(좁은 2-key 병합) 삭제 — 양쪽 모두 `notificationTemplateCatalog.js`의 정식 `renderNotificationTemplate`/`normalizeNotificationTemplates`를 사용.
+
+수정과 함께 자기참조형 소스-리터럴 테스트 락 6개(`scenario-tests-production.cjs`의 20j-9/55a/56/59e/77e-6/88a-2, `test-notification-template-source-inventory.mjs` 1개)가 옛 위치/이름을 검사하고 있어서 깨짐 — `docs/testing-policy.md` 정책대로 체크를 새 위치/이름에 맞게 업데이트(약화 아님). `lessonHomeworkContinuitySource`/`supplementMethodLabelSource` 파일 소스 트래커를 scenario-tests-production.cjs에 새로 추가.
+
+검증: lint/typecheck/test:production(305/305, 828/828)/build/browser-smoke(77/77) 전부 재실행해서 통과 확인(이전 커밋 결과 재사용 안 함 — 중간에 시스템 메모리 부족으로 브라우저 스모크가 한 번 실패했으나, 코드 문제가 아님을 확인 후 재시도해서 통과).
+
+**다음 세션에서 아직 할 일**: 이 브랜치(`codex/notification-text-shared-helpers`, main과 충돌 없음 확인됨)는 아직 main에 병합되지 않음 — 사용자 또는 Codex가 GitHub에서 병합해야 함.
 
 ### `src/app/App.css` — 부분 샘플만 진행 (1~2,000/22,609줄), 방법 전환 권장
 
