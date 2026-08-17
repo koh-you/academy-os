@@ -256,5 +256,26 @@ App.jsx/server.js/coreData.js와 달리 CSS는 손으로 순차 통독하는 방
 
 **발견 3 — 설계만 있고 구현 없는 도메인 3개**: `problems`/`counseling`/`ai-drafts` 폴더는 각각 MVP 설계 의도를 적은 README.md만 있고 실제 코드가 없음. 죽은 코드는 아니지만(애초에 코드가 없었음), 실제로 필요한 기능인지 폐기해도 되는 설계인지 사용자 확인이 필요.
 
-**다음 세션 권장 순서**: (1) App.css는 stylelint 도구 셋업 후 재개. (2) `src/domains/exams/ExamAnalysisPipelineCenter.jsx`(4,656줄) 완독 — 단일 파일 기준 두 번째로 크고 아직 안 읽음. (3) `src/domains/lessons`의 3~40줄 파편 파일 70개를 실제 import 그래프 기준으로 통합 후보 묶음 설계. (4) coreData.js 나머지 11개 도메인을 표준 CAS/draft-convergence/row-level 셋으로 분류 후 표준 CAS 도메인만 우선 전환. (`api/routes/coreData.js` 완독, 알림 문구 1차 통합 실행 완료, coreData.js school_events 파일럿 완료 — 모두 위 참조. 실제 발송 버그는 전부 수정 완료.)
+### `src/domains/exams/ExamAnalysisPipelineCenter.jsx` — 완독 (4,656/4,656줄, 2026-08-17)
+
+**전체 구조**: 시험분석(PDF 업로드 → 텍스트 추출 → AI 문항 채움 → 선생님 검수 → 블로그/인스타 산출물 생성) 파이프라인 전체를 다루는 단일 화면. 크게 세 영역으로 나뉨.
+
+1. **순수 함수·설정 데이터 (1~1670줄, 약 1,670줄)** — 상태 없는 헬퍼와 대형 상수 배열. 검수 초안 변환(`createExamAnalysisReviewDraft` 등), 산출물 입력 필드 정의(`examAnalysisOutputInputFields`, `examAnalysisGptChecklistManualFields`, `examAnalysisBlogBlockFields`, `examAnalysisKeyQuestionBlockFields` — 전부 한글 카피/가이드 문구가 박힌 설정 배열), SVG 차트 생성기 4개(`createExamAnalysisPartDistributionSvg` 등, 각 50~90줄, 좌표를 직접 계산해 SVG 문자열 조립), **브라우저에서 직접 구현한 ZIP 파일 writer**(`createExamAnalysisZipBlob` + CRC32 테이블 계산 + DOS 날짜/시간 인코딩 + local/central directory header 수작업 조립, 약 110줄) — 외부 라이브러리(jszip 등) 없이 ZIP 포맷을 직접 구현한 사례.
+2. **`ExamAnalysisOutputDraftPanel` 프레젠테이션 컴포넌트 (1675~2185줄, 약 510줄)** — 이미 분리된 하위 컴포넌트. 블로그/인스타 산출물 편집 UI 전체를 담당.
+3. **`ExamAnalysisPipelineCenter` 메인 컴포넌트 (2352~4655줄, 약 2,300줄)** — App.jsx의 `App()` 함수와 똑같은 패턴이 축소판으로 재현됨: `useState` 25개(loadStatus/saveStatus/uploadStatus/extractStatus/visionStatus/confirmStatus/boundaryStatus/rowFillStatus/rowRefineStatus/reviewStatus/outputStatus 등 단계별 상태가 각각 별도 useState), `handle*`/`load*`/`save*`/`confirm*`/`detect*`/`fill*`/`refine*`/`generate*` 약 30개 함수, 나머지는 인라인 JSX. 렌더 트리 자체는 단계별 패널(원본→문항수→경계탐지→AI채움→검수→미리보기→산출물→기록)을 순서대로 나열하는 비교적 명확한 구조.
+
+**압축 후보 (기계적, 위험 거의 없음)**
+| 항목 | 절감 예상 | 근거 |
+| --- | ---: | --- |
+| ZIP writer + README/manifest/체크리스트 텍스트 빌더를 `examAnalysisOutputPackageBuilder.js`로 분리 | ~600줄 | 전부 순수 함수, 컴포넌트 상태 없음 |
+| SVG 차트 생성기 4개를 `examAnalysisChartSvg.js`로 분리 | ~250줄 | 전부 순수 함수 |
+| 산출물 입력 필드 설정 배열들을 `examAnalysisOutputFieldConfig.js`(데이터 파일)로 분리 | ~250줄 | 로직 없는 설정 데이터 |
+| `ExamAnalysisOutputDraftPanel`을 기존 `ExamAnalysisFinalPreviewPanel.jsx`처럼 별도 `.jsx` 파일로 이동 | ~510줄 | 이미 독립 함수, 위험 낮음 |
+| **합계** | **약 1,600줄 (4,656 → 약 3,050줄, ~34% 감소)** | App.jsx 압축과 동일한 패턴 — 상태/핸들러는 안 건드림 |
+
+**재설계가 필요한 핵심 (위험 있음)**: 메인 컴포넌트의 25개 useState는 실질적으로 5개 그룹(원본 업로드/문항수 확정/경계탐지+AI채움/검수/산출물)으로 나뉘는데 각각 완전히 개별 useState로 선언돼 있음 — App.jsx처럼 도메인별 custom hook(`useExamAnalysisSourceFiles`, `useExamAnalysisReview`, `useExamAnalysisOutputDrafts` 등)으로 묶으면 상태 폭발이 줄어들 것으로 보이나, 이건 단순 이동이 아니라 실제 재설계라 별도 안전 단위로 다뤄야 함. 이번 세션에서는 읽기만 완료, 실행은 다음 세션 후보.
+
+**교차 검증**: 이 파일의 로직은 App.jsx/server.js/coreData.js에서 발견된 중복(알림 문구, CAS 저장 패턴)과 겹치지 않음 — 시험분석 전용 도메인 로직이라 독립적. 다른 파일과의 중복은 발견 안 됨.
+
+**다음 세션 권장 순서**: (1) App.css는 stylelint 도구 셋업 후 재개. (2) 위 압축 후보 4개(ZIP/SVG/설정데이터/패널분리) 실행 — 기계적이고 안전, 다음 세션 즉시 시작 가능. (3) `src/domains/lessons`의 3~40줄 파편 파일 70개를 실제 import 그래프 기준으로 통합 후보 묶음 설계. (4) coreData.js 나머지 11개 도메인을 표준 CAS/draft-convergence/row-level 셋으로 분류 후 표준 CAS 도메인만 우선 전환. (`api/routes/coreData.js` 완독, 알림 문구 1차 통합 실행 완료, coreData.js school_events 파일럿 완료 — 모두 위 참조. 실제 발송 버그는 전부 수정 완료.)
 
