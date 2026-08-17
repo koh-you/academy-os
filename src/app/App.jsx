@@ -6588,7 +6588,7 @@ export function App() {
             (homework) => homework.lessonId === record.lessonId && homework.studentId === record.studentId
           );
 
-      const { savedRecord } = await saveLessonRecordAction({ record, relatedHomeworks, recordId, verifyFields });
+      const { savedRecord, verifiedHomeworks } = await saveLessonRecordAction({ record, relatedHomeworks, recordId, verifyFields });
       const latestRecord = findMatchingLessonStudentRecord(recordsRef.current, record);
       const latestTime = latestRecord?.updatedAt ? Date.parse(latestRecord.updatedAt) : 0;
       const savedTime = record.updatedAt ? Date.parse(record.updatedAt) : Date.now();
@@ -6597,6 +6597,14 @@ export function App() {
         const nextRecords = upsertLessonStudentRecord(recordsRef.current, savedRecord);
         recordsRef.current = nextRecords;
         setRecords(nextRecords);
+      }
+      if (verifiedHomeworks?.length) {
+        const nextHomeworks = mergeVerifiedLessonJournalHomeworks({
+          plannedHomeworks: homeworksRef.current,
+          verifiedHomeworks
+        });
+        homeworksRef.current = nextHomeworks;
+        setHomeworks(nextHomeworks);
       }
       writeStorageValue(window.localStorage, storageKeys.records, JSON.stringify(recordsRef.current));
       writeStorageValue(window.localStorage, storageKeys.homeworks, JSON.stringify(homeworksRef.current));
