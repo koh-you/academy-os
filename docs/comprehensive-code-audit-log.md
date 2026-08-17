@@ -147,6 +147,13 @@ docs/comprehensive-code-audit-log.md 파일을 먼저 읽고, "진행 상태" �
 - 제네릭 헬퍼 하나로 통합 가능: `createOptimisticSavePlan({ table, idColumns, toRow, fromRow, areEqual, areTimestampsEqual, createNextUpdatedAt, conflictCode })` 형태로 만들면, 위 12개 도메인의 개별 `persistXxx`/`rollbackXxx` 쌍(각 40~120줄)을 도메인별 설정 객체(각 10~15줄)로 대체 가능. `saveXxxPlan` 5개의 롤백 오케스트레이션도 "여러 변경을 순서대로 적용하고 실패 시 역순 롤백"이라는 동일 골격을 제네릭 `runReversiblePlan(steps)` 러너 하나로 통합 가능.
 - 예상 절감: 약 2,000~2,400줄(파일의 45~50%) — App.jsx/server.js보다 압축 잠재력이 훨씬 큼. 단, 실제 저장 경로(Supabase 쓰기)를 직접 건드리므로 App.jsx 죽은 코드 삭제와 달리 **고위험** — 도메인 하나씩 별도 안전 단위로 전환하고 각 단위마다 해당 도메인의 저장/충돌/롤백 시나리오 테스트를 직접 실행해 확인해야 함.
 
+**2026-08-17 실행 1건 완료 + 중요한 재발견 (`codex/core-data-optimistic-save-plan` 브랜치, 커밋 fb309a274, push됨, main 미병합)**:
+- `src/shared/persistence/optimisticSavePlan.js`에 `upsertWithOptimisticConcurrency`/`deleteWithOptimisticConcurrency` 제네릭 헬퍼 구현, `upsertSchoolEvent`/`deleteSchoolEvent`를 이 헬퍼로 전환 — 가장 "교과서적인" CAS 패턴(읽기→동등비교→버전충돌검사→patch/insert→재조회검증)이라 첫 적용 대상으로 선택. 전용 픽스처 테스트(`scripts/test-school-event-persistence.mjs` — 가짜 Supabase REST를 세워 저장/충돌/재시도/삭제 시나리오를 실제 `upsertSchoolEvent`/`deleteSchoolEvent`에 대고 검증)로 동작 무변경 확인, 그 외 lint/typecheck/test:production(305/305, 828/828)/build/browser-smoke(77/77) 전부 통과.
+- **재발견 — "12개 도메인이 동일 패턴"이라는 처음 진단은 골격 수준에서만 맞고, 세부 의미론은 도메인마다 다르다.** 다음 후보 2개를 실제로 대조해보니 헬퍼에 억지로 끼워맞추면 위험:
+  - `upsertResourceMaterial`(`convergeResourceMaterialDraft`) — 버전(updatedAt) 비교가 아예 없음. 대신 `isSameResourceMaterialDraft`로 "같은 초안인지" 의미적 동일성만 확인하고, 맞으면 버전 무관하게 patch — CAS가 아니라 "초안 수렴" 로직이라 구조 자체가 다름.
+  - `persistLessonJournalMakeupTask`(makeup_tasks) — 도메인 엔티티가 아니라 DB row 자체(`currentRow`/`desiredRow`)를 비교하고, 버전 검사도 `currentRow.updated_at !== expectedUpdatedAt` 직접 문자열 비교라 `areTimestampsEqual` 훅으로 못 바꿈.
+- **결론**: `upsertWithOptimisticConcurrency`는 school_events처럼 "표준 CAS" 도메인에만 안전하게 재사용 가능. 나머지 도메인은 (a) 표준 CAS인지 (b) draft-convergence류인지 (c) row-level 비교류인지 먼저 분류해야 함 — 다음 세션은 이 분류 작업부터 시작할 것. `saveXxxPlan` 5개(멀티 엔티티 롤백 오케스트레이션)는 아직 손 안 댐, 이것도 별도 분석 필요.
+
 ### `api/routes/coreData.js` 종합 소견 (4,907/4,907줄 완독)
 
 | 항목 | 상태 |
