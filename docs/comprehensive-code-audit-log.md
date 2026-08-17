@@ -27,8 +27,8 @@ docs/comprehensive-code-audit-log.md 파일을 먼저 읽고, "진행 상태" �
 | `api/server.js` | 7,255 | **완독** | 발견 기록 참조. 압축 후보 약 1,650줄+ |
 | `api/routes/coreData.js` | 4,907 | **완독** | 발견 기록 참조. 압축 후보 약 2,000줄+ (단일 구조적 패턴) |
 | `src/app/App.css` | 22,609 | 부분 샘플(1~2000줄) — 아래 참조, 방법 전환 권장 | stylelint 도입 후 재개 |
-| `src/domains/**` (약 259개 파일) | - | 미시작 | 목록화 필요 |
-| `src/shared/**` | - | 미시작 | 목록화 필요 |
+| `src/domains/**` (367개 파일, ~50,024줄) | - | **목록화 완료**, 파일별 완독은 미시작 | 아래 인벤토리 참조 |
+| `src/shared/**` (53개 파일, ~5,544줄) | - | **목록화 완료**, 파일별 완독은 미시작 | 아래 인벤토리 참조 |
 
 ## 읽기 원칙
 
@@ -215,5 +215,46 @@ App.jsx/server.js/coreData.js와 달리 CSS는 손으로 순차 통독하는 방
 
 이 판단 자체가 이번 세션에서 나온 방법론적 발견: **파일 종류(로직 파일 vs 스타일시트)에 따라 "전체 통독"과 "도구 우선"을 다르게 선택해야 시간 낭비가 없다.**
 
-**다음 시작 지점**: App.css는 위 도구 셋업 후 재개. `src/domains/**`(약 259개 파일)/`src/shared/**`는 아직 인벤토리도 안 됨 — 다음 세션은 여기서 파일 목록화부터 시작하거나, 사용자가 우선순위를 지정하면 그에 따름. (`api/routes/coreData.js` 완독, 알림 문구 1차 통합 실행 완료 — 둘 다 위 참조. 실제 발송 버그 7건은 별도 안전 단위 후보로 대기 중.)
+### `src/domains/**` · `src/shared/**` — 인벤토리 완료 (2026-08-17), 파일별 완독은 아직
+
+367개 파일(`src/domains/`, ~50,024줄) + 53개 파일(`src/shared/`, ~5,544줄), 총 420개 파일 약 55,568줄. App.jsx/server.js/coreData.js 완독에 썼던 "offset 순차 읽기"는 이 규모에서는 비현실적 — 대신 하위 폴더별 파일 수·줄 수 집계와 극단값(가장 크거나 가장 작은 파일)만 먼저 확인해 우선순위를 잡았다.
+
+**`src/domains/` 하위 폴더별 규모 (파일 수 | 줄 수, 큰 순)**
+| 폴더 | 파일 수 | 줄 수 |
+| --- | ---: | ---: |
+| `lessons` | 163 | 11,811 |
+| `exams` | 31 | 9,817 |
+| `supplements` | 49 | 4,808 |
+| `specialLectures` | 8 | 4,379 |
+| `teacher` | 5 | 4,280 |
+| `notifications` | 40 | 4,201 |
+| `students` | 19 | 4,020 |
+| `settlements` | 11 | 2,903 |
+| `portals` | 20 | 1,574 |
+| `schoolCalendar` | 6 | 1,228 |
+| `settings` | 2 | 750 |
+| `resources` | 6 | 698 |
+| `tests` | 2 | 303 |
+| `reports` | 4 | 299 |
+| `appState` | 1 | 153 |
+| `problems`/`counseling`/`ai-drafts` | 0 (README만) | 0 |
+
+**`src/shared/` 하위 폴더별 규모**
+| 폴더 | 파일 수 | 줄 수 |
+| --- | ---: | ---: |
+| `persistence` | 6 | 1,352 |
+| `server` | 19 | 1,223 |
+| `contracts` | 3 | 894 |
+| `data` | 1 | 799 |
+| `components` | 17 | 707 |
+| `utils` | 4 | 426 |
+| `runtime` | 3 | 143 |
+
+**발견 1 — `lessons` 폴더의 극단적 파편화 (정량 확인)**: 163개 파일 중 33개가 20줄 미만, 70개(43%)가 40줄 미만. 예: `generatedExamPrepKeyBuilder.js`(3줄), `examPrepScheduleApi.js`(4줄), `generatedLessonSaveSelector.js`(5줄) — 함수 하나짜리 파일이 대량 존재. App.jsx 감사에서 이미 지적한 "함수 하나당 파일 하나" 패턴이 `src/domains/lessons`에도 그대로 반복됨. 압축 방향: 관련 있는 3~10줄짜리 셀렉터/빌더 파일들을 주제별로 묶은 파일 몇 개로 합치는 게 안전하고 효과적일 것 — 각각 순수 함수라 위험은 낮지만, 몇 개를 묶을지·어떤 기준으로 묶을지는 실제 import 그래프를 봐야 함(다음 세션 작업).
+
+**발견 2 — `ExamAnalysisPipelineCenter.jsx` 단일 파일이 4,656줄**: `exams` 폴더 전체(9,817줄)의 거의 절반을 이 파일 하나가 차지. App.jsx 다음으로 큰 단일 파일일 가능성이 높음 — 다음 세션에서 이 파일부터 완독 우선순위로 잡을 것을 권장.
+
+**발견 3 — 설계만 있고 구현 없는 도메인 3개**: `problems`/`counseling`/`ai-drafts` 폴더는 각각 MVP 설계 의도를 적은 README.md만 있고 실제 코드가 없음. 죽은 코드는 아니지만(애초에 코드가 없었음), 실제로 필요한 기능인지 폐기해도 되는 설계인지 사용자 확인이 필요.
+
+**다음 세션 권장 순서**: (1) App.css는 stylelint 도구 셋업 후 재개. (2) `src/domains/exams/ExamAnalysisPipelineCenter.jsx`(4,656줄) 완독 — 단일 파일 기준 두 번째로 크고 아직 안 읽음. (3) `src/domains/lessons`의 3~40줄 파편 파일 70개를 실제 import 그래프 기준으로 통합 후보 묶음 설계. (4) coreData.js 나머지 11개 도메인을 표준 CAS/draft-convergence/row-level 셋으로 분류 후 표준 CAS 도메인만 우선 전환. (`api/routes/coreData.js` 완독, 알림 문구 1차 통합 실행 완료, coreData.js school_events 파일럿 완료 — 모두 위 참조. 실제 발송 버그는 전부 수정 완료.)
 
