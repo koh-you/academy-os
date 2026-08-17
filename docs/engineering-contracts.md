@@ -45,3 +45,7 @@
 - 화면의 큰 구성(탭 배치, 목록/상세 레이아웃, 진입 동선)은 유지한다. 반면 모달 내부·상세 화면처럼 지엽적인 부분은 기존 모양을 그대로 재현할 필요 없다 - 위 토큰·버튼·접기 규칙과 업계 표준(headless) 패턴으로 다시 짜도 된다. 판단 기준은 "기능이 그대로 동작하고, 사용자가 화면을 보고 바로 알아볼 수 있는가"이지 픽셀 단위 재현이 아니다.
 - 새 상호작용 컴포넌트(토글/드롭다운/탭 등)가 필요하면 헤드리스 패턴을 따른다 - 컴포넌트가 상태·ARIA·트랜지션을 소유하고 스타일은 `className` prop으로 주입한다(Radix UI/Headless UI 방식).
 - 새 UI를 만들기 전 `src/shared/components/`에 이미 있는지 먼저 확인한다.
+- 네이티브 `<details>/<summary>`를 발견하면(장식용이 아니라 위 접기/펼치기 기준에 해당하는 경우) `Disclosure`로 옮긴다. CSS는 `summary` → `.disclosureTrigger`(트리거 버튼 자체), 그 안의 제목·배지 영역 → `.disclosureTriggerLabel`, `[open]` → `[data-open="true"]`로 바꾼다. 네이티브 `::after`/`::-webkit-details-marker`나 커스텀 화살표 텍스트는 지우고 컴포넌트가 이미 그리는 공용 화살표로 대체한다. 트리거 안에 제목과 배지처럼 좌우로 나뉘는 요소가 있으면 `.disclosureTriggerLabel { display:flex; justify-content:space-between; }`로 배치한다.
+- `bodyClassName`으로 넘긴 클래스는 `.disclosureBodyInner`에 붙는다. 이 요소는 열린 상태에서 기본 `padding: 0 14px 14px`를 가지며 선택자 특이성이 웬만한 커스텀 규칙보다 높아 기존 `padding`을 덮어쓸 수 있다 — 의도된 결과면 그대로 두고, 정확한 값이 필요하면 선택자를 더 구체적으로 쓴다.
+- 앱 전체 네이티브 `<details>/<summary>` 개수는 `scripts/scenario-tests-production.cjs`의 `disclosureTableInventory.detailsCount`/`summaryCount`로 검사된다. 개수가 바뀌는 작업(Disclosure 전환 등)을 할 때는 이 숫자를 함께 고친다. 여러 브랜치가 동시에 이 숫자를 건드리면 병합 시 충돌하므로, 나중에 병합하는 브랜치는 새 main 기준으로 rebase한 뒤 실제 개수를 다시 세어 반영한다.
+- 브라우저 자동화로 접기/펼치기 애니메이션(높이 전환)을 검증할 때, 탭이 실제로 화면에 그려지지 않는 상태(`document.hidden === true`)면 CSS 트랜지션이 진행되지 않고 시작 값에 멈춘 것처럼 보일 수 있다 — 실제 버그가 아니라 도구 환경의 함정이다. 이때는 요소에 `transition: none`을 임시로 걸어 즉시 최종 값으로 점프시킨 뒤 측정해서 진짜 최종 상태를 확인한다.
