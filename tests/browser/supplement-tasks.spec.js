@@ -206,7 +206,6 @@ test("manual supplement validation preserves the draft without source or notific
 
 test("manual supplement creates a linked lesson journal and safe Alimtalk reservations", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
-  const currentMonth = getKoreaDateAfterDays(0).slice(0, 7);
   const scheduledDate = getKoreaDateAfterDays(14);
   const [, scheduledMonth, scheduledDayOfMonth] = scheduledDate.split("-");
   const scheduledWeekday = new Date(`${scheduledDate}T00:00:00+09:00`).toLocaleDateString("ko-KR", {
@@ -287,11 +286,9 @@ test("manual supplement creates a linked lesson journal and safe Alimtalk reserv
 
   await supplementModal.getByRole("button", { name: "창 닫기" }).click();
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /수업일지/ }).click();
-  if (scheduledDate.slice(0, 7) !== currentMonth) {
-    await page.getByRole("navigation", { name: "수업일지 달력 월 이동" })
-      .getByRole("button", { name: "다음 달" })
-      .click();
-  }
+  // Creating the supplement task already moves the calendar's selected date to the
+  // new lesson (scheduledDate), so the journal calendar opens on that month directly
+  // — no separate "다음 달" navigation is needed here.
   const scheduledDay = page.getByRole("gridcell", { name: new RegExp(`${scheduledDate} · \\d+개 수업`) });
   await scheduledDay.getByRole("button", { name: "수동 보충 · 연속출결 가상학생" }).click();
   await expect(page.getByRole("dialog", { name: "수업일지" })).toBeVisible();
