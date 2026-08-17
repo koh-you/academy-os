@@ -161,6 +161,7 @@ import { createExamAnalysisReadRouteRegistry } from "../src/shared/server/examAn
 import { createExamAnalysisRunWriteRouteRegistry } from "../src/shared/server/examAnalysisRunWriteRouteRegistry.js";
 import { createExamAnalysisQuestionCountRouteRegistry } from "../src/shared/server/examAnalysisQuestionCountRouteRegistry.js";
 import { createExamAnalysisAiRouteRegistry } from "../src/shared/server/examAnalysisAiRouteRegistry.js";
+import { createSchoolEventRouteRegistry } from "../src/shared/server/schoolEventRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -354,6 +355,14 @@ const { dispatch: dispatchExamAnalysisAiRoute } = createExamAnalysisAiRouteRegis
   refineExamAnalysisQuestionRowsWithAi,
   sendJson,
   verifyExamAnalysisSourceFileWithAi
+});
+const { dispatch: dispatchSchoolEventRoute } = createSchoolEventRouteRegistry({
+  deleteSchoolEvent,
+  listSchoolEvents,
+  readJsonBody,
+  sendJson,
+  upsertSchoolEvent,
+  upsertSchoolEvents
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5254,6 +5263,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchExamAnalysisRunWriteRoute({ request, response, requestUrl })) return;
   if (await dispatchExamAnalysisQuestionCountRoute({ request, response, requestUrl })) return;
   if (await dispatchExamAnalysisAiRoute({ request, response, requestUrl })) return;
+  if (await dispatchSchoolEventRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-question-reviews") {
     try {
@@ -6212,62 +6222,6 @@ const server = http.createServer(async (request, response) => {
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/school-events") {
-    try {
-      const result = await listSchoolEvents();
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/school-events") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await upsertSchoolEvent(payload.schoolEvent ?? payload.event ?? payload);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, Number(error.statusCode) || 500, {
-        ok: false,
-        error: error.message,
-        ...(error.code ? { code: error.code } : {}),
-        ...(error.currentSchoolEvent !== undefined ? { currentSchoolEvent: error.currentSchoolEvent } : {})
-      });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/school-events/bulk") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await upsertSchoolEvents(payload.schoolEvents ?? payload.events ?? []);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "DELETE" && requestUrl.pathname === "/api/school-events") {
-    try {
-      const eventId = requestUrl.searchParams.get("id");
-      if (!eventId) throw new Error("삭제할 학사일정 ID가 필요합니다.");
-      const result = await deleteSchoolEvent(eventId, {
-        expectedUpdatedAt: requestUrl.searchParams.get("expectedUpdatedAt") || ""
-      });
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, Number(error.statusCode) || 500, {
-        ok: false,
-        error: error.message,
-        ...(error.code ? { code: error.code } : {}),
-        ...(error.currentSchoolEvent !== undefined ? { currentSchoolEvent: error.currentSchoolEvent } : {})
-      });
     }
     return;
   }
