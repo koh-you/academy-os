@@ -246,18 +246,19 @@ try {
   }
 }
 
-const [actionSource, apiSource, appSource, outletSource, screenSource, serverSource, safeServerSource] = await Promise.all([
+const [actionSource, apiSource, appSource, outletSource, screenSource, serverSource, safeServerSource, resourceMaterialRouteRegistrySource] = await Promise.all([
   readFile(new URL("../src/domains/resources/resourceMaterialAction.js", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/resources/resourceMaterialApi.js", import.meta.url), "utf8"),
   readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8"),
   readFile(new URL("../src/app/TeacherViewOutlet.js", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/teacher/LearningSupportCenters.jsx", import.meta.url), "utf8"),
   readFile(new URL("../api/server.js", import.meta.url), "utf8"),
-  readFile(new URL("./safe-local-api.mjs", import.meta.url), "utf8")
+  readFile(new URL("./safe-local-api.mjs", import.meta.url), "utf8"),
+  readFile(new URL("../src/shared/server/resourceMaterialRouteRegistry.js", import.meta.url), "utf8")
 ]);
-const resourceWriteServerSource = serverSource.slice(
-  serverSource.indexOf('if (request.method === "POST" && requestUrl.pathname === "/api/resource-materials")'),
-  serverSource.indexOf('if (request.method === "DELETE" && requestUrl.pathname === "/api/resource-materials")')
+const resourceWriteServerSource = resourceMaterialRouteRegistrySource.slice(
+  resourceMaterialRouteRegistrySource.indexOf('if (request.method === "POST" && requestUrl.pathname === "/api/resource-materials")'),
+  resourceMaterialRouteRegistrySource.indexOf('if (request.method === "DELETE" && requestUrl.pathname === "/api/resource-materials")')
 );
 for (const binding of [
   "resourceMaterialMutationRef.current",
@@ -294,6 +295,6 @@ for (const binding of [
   "visibleResourceMaterialSaveState",
   "private Storage에 업로드됩니다"
 ]) assert.ok(`${outletSource}\n${screenSource}`.includes(binding), `missing resource save UI binding: ${binding}`);
-assert.ok(serverSource.includes('expectedUpdatedAt: requestUrl.searchParams.get("expectedUpdatedAt") || ""'));
+assert.ok(resourceMaterialRouteRegistrySource.includes('expectedUpdatedAt: requestUrl.searchParams.get("expectedUpdatedAt") || ""'));
 
 console.log("resource material insert-only, CAS delete, readback, retry, and UI fixtures passed");

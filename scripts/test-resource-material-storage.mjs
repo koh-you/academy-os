@@ -177,17 +177,18 @@ await assert.rejects(
   (error) => error.code === "RESOURCE_MATERIAL_STORAGE_REFERENCE_INVALID" && error.statusCode === 400
 );
 
-const [appSource, fileApiSource, portalSource, screenSource, serverSource, sessionGuardSource] = await Promise.all([
+const [appSource, fileApiSource, portalSource, screenSource, serverSource, sessionGuardSource, resourceMaterialRouteRegistrySource] = await Promise.all([
   readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/resources/resourceMaterialFileApi.js", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/portals/PortalMaterialsTab.jsx", import.meta.url), "utf8"),
   readFile(new URL("../src/domains/teacher/LearningSupportCenters.jsx", import.meta.url), "utf8"),
   readFile(new URL("../api/server.js", import.meta.url), "utf8"),
-  readFile(new URL("../src/shared/server/sessionRouteGuard.js", import.meta.url), "utf8")
+  readFile(new URL("../src/shared/server/sessionRouteGuard.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/shared/server/resourceMaterialRouteRegistry.js", import.meta.url), "utf8")
 ]);
-const resourceFileServerSource = serverSource.slice(
-  serverSource.indexOf('if (request.method === "POST" && requestUrl.pathname === "/api/resource-material-files")'),
-  serverSource.indexOf('if (request.method === "GET" && requestUrl.pathname === "/api/resource-material-files/open")')
+const resourceFileServerSource = resourceMaterialRouteRegistrySource.slice(
+  resourceMaterialRouteRegistrySource.indexOf('if (request.method === "POST" && requestUrl.pathname === "/api/resource-material-files")'),
+  resourceMaterialRouteRegistrySource.indexOf('if (request.method === "GET" && requestUrl.pathname === "/api/resource-material-files/open")')
 );
 for (const binding of [
   'requestUrl.pathname === "/api/resource-material-files"',
@@ -198,7 +199,9 @@ for (const binding of [
 ]) assert.ok(resourceFileServerSource.includes(binding), `missing server Storage boundary: ${binding}`);
 for (const binding of [
   'requestUrl.pathname === "/api/resource-material-files/open"',
-  "getTeacherOrPortalSession(request)",
+  "getTeacherOrPortalSession(request)"
+]) assert.ok(resourceMaterialRouteRegistrySource.includes(binding), `missing server Storage open boundary: ${binding}`);
+for (const binding of [
   "canPortalSessionAccessResourceMaterial(material, student, portalSession.role)",
   "downloadStorageObjectWithMetadata"
 ]) assert.ok(serverSource.includes(binding), `missing server Storage open boundary: ${binding}`);

@@ -23,6 +23,7 @@ import { lessonRecordRouteSignatures } from "../src/shared/server/lessonRecordRo
 import { lessonRouteSignatures } from "../src/shared/server/lessonRouteRegistry.js";
 import { notificationJobRouteSignatures } from "../src/shared/server/notificationJobRouteRegistry.js";
 import { notificationProviderRouteSignatures } from "../src/shared/server/notificationProviderRouteRegistry.js";
+import { resourceMaterialRouteSignatures } from "../src/shared/server/resourceMaterialRouteRegistry.js";
 import { schoolEventRouteSignatures } from "../src/shared/server/schoolEventRouteRegistry.js";
 import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
 import { teacherAccountRouteSignatures } from "../src/shared/server/teacherAccountRouteRegistry.js";
@@ -63,17 +64,20 @@ const registrySignatures = [
   ...lessonRouteSignatures,
   ...makeupTaskRouteSignatures,
   ...notificationJobRouteSignatures,
-  ...notificationProviderRouteSignatures
+  ...notificationProviderRouteSignatures,
+  ...resourceMaterialRouteSignatures
 ].map(signatureOf).sort();
 
-assert.equal(registrySignatures.length, 79);
-assert.equal(new Set(registrySignatures).size, 79);
+assert.equal(registrySignatures.length, 85);
+assert.equal(new Set(registrySignatures).size, 85);
 assert.deepEqual(registrySignatures, [
   "DELETE /api/academy-reminders",
   "DELETE /api/exam-prep-rows",
   "DELETE /api/lessons",
   "DELETE /api/makeup-tasks",
   "DELETE /api/notification-jobs",
+  "DELETE /api/resource-material-files",
+  "DELETE /api/resource-materials",
   "DELETE /api/school-events",
   "DELETE /api/test-sessions",
   "GET /api/academy-reminders",
@@ -91,6 +95,8 @@ assert.deepEqual(registrySignatures, [
   "GET /api/makeup-tasks",
   "GET /api/notification-jobs",
   "GET /api/portal-data",
+  "GET /api/resource-material-files/open",
+  "GET /api/resource-materials",
   "GET /api/school-events",
   "GET /api/special-lecture-guides",
   "GET /api/test-attempts",
@@ -145,6 +151,8 @@ assert.deepEqual(registrySignatures, [
   "POST /api/portal-questions",
   "POST /api/portal-state",
   "POST /api/report-snapshots",
+  "POST /api/resource-material-files",
+  "POST /api/resource-materials",
   "POST /api/school-events",
   "POST /api/school-events/bulk",
   "POST /api/test-sessions"
@@ -153,18 +161,17 @@ assert.deepEqual(registrySignatures, [
 const directRoutes = [...serverSource.matchAll(
   /if \(request\.method === "(GET|POST|PUT|PATCH|DELETE)" && requestUrl\.pathname === "([^"]+)"\)/g
 )].map((match) => `${match[1]} ${match[2]}`);
-assert.equal(directRoutes.length, 42);
-assert.equal(new Set(directRoutes).size, 42);
+assert.equal(directRoutes.length, 36);
+assert.equal(new Set(directRoutes).size, 36);
 
 const directReadSignatures = directRoutes.filter((signature) => signature.startsWith("GET "));
 const directWriteSignatures = directRoutes.filter((signature) => !signature.startsWith("GET "));
-assert.equal(directReadSignatures.length, 11);
-assert.equal(directWriteSignatures.length, 31);
+assert.equal(directReadSignatures.length, 9);
+assert.equal(directWriteSignatures.length, 27);
 
 const externalReadSignatures = [
   "GET /api/exam-analysis-source-files/open",
   "GET /api/exam-post-files/open",
-  "GET /api/resource-material-files/open",
   "GET /api/solapi/groups",
   "GET /api/solapi/messages"
 ].sort();
@@ -175,7 +182,7 @@ const externalReadSet = new Set(externalReadSignatures);
 const domainSourceReadSignatures = directReadSignatures.filter(
   (signature) => !externalReadSet.has(signature)
 );
-assert.equal(domainSourceReadSignatures.length, 6);
+assert.equal(domainSourceReadSignatures.length, 5);
 
 const externalWriteSignatures = [
   "DELETE /api/exam-analysis-runs",
@@ -197,7 +204,7 @@ const externalEffectSet = new Set(externalWriteSignatures);
 const domainSourceActionSignatures = directWriteSignatures.filter(
   (signature) => !externalEffectSet.has(signature)
 );
-assert.equal(domainSourceActionSignatures.length, 22);
+assert.equal(domainSourceActionSignatures.length, 18);
 assert.equal(
   registrySignatures.length
     + domainSourceReadSignatures.length
@@ -235,7 +242,8 @@ for (const [createToken, dispatchToken] of [
   ["createLessonRouteRegistry({", "dispatchLessonRoute({ request, response, requestUrl })"],
   ["createMakeupTaskRouteRegistry({", "dispatchMakeupTaskRoute({ request, response, requestUrl })"],
   ["createNotificationJobRouteRegistry({", "dispatchNotificationJobRoute({ request, response, requestUrl })"],
-  ["createNotificationProviderRouteRegistry({", "dispatchNotificationProviderRoute({ request, response, requestUrl })"]
+  ["createNotificationProviderRouteRegistry({", "dispatchNotificationProviderRoute({ request, response, requestUrl })"],
+  ["createResourceMaterialRouteRegistry({", "dispatchResourceMaterialRoute({ request, response, requestUrl })"]
 ]) {
   assert.ok(serverSource.includes(createToken), `registry construction missing: ${createToken}`);
   assert.ok(serverSource.includes(dispatchToken), `registry dispatch missing: ${dispatchToken}`);
@@ -250,5 +258,5 @@ assert.ok(
 );
 
 console.log(
-  "fourth-pass server route closeout passed · registry 79 · source read 6 · external read 5 · source action 22 · external write 9"
+  "fourth-pass server route closeout passed · registry 85 · source read 5 · external read 4 · source action 18 · external write 9"
 );
