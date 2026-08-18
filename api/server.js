@@ -171,6 +171,7 @@ import { createAdminAiRouteRegistry } from "../src/shared/server/adminAiRouteReg
 import { createAttendanceRouteRegistry } from "../src/shared/server/attendanceRouteRegistry.js";
 import { createClassTemplateRouteRegistry } from "../src/shared/server/classTemplateRouteRegistry.js";
 import { createHomeworkRouteRegistry } from "../src/shared/server/homeworkRouteRegistry.js";
+import { createLessonRecordRouteRegistry } from "../src/shared/server/lessonRecordRouteRegistry.js";
 import { createSchoolEventRouteRegistry } from "../src/shared/server/schoolEventRouteRegistry.js";
 import { createAcademyReminderRouteRegistry } from "../src/shared/server/academyReminderRouteRegistry.js";
 import { createExamPrepRowRouteRegistry } from "../src/shared/server/examPrepRowRouteRegistry.js";
@@ -436,6 +437,17 @@ const { dispatch: dispatchHomeworkRoute } = createHomeworkRouteRegistry({
   sendJson,
   upsertHomework,
   upsertHomeworks
+});
+const { dispatch: dispatchLessonRecordRoute } = createLessonRecordRouteRegistry({
+  listLessons,
+  listLessonStudentRecords,
+  listLessonStudentRecordsForLessons,
+  pruneStaleLessonStudentRecords,
+  patchLessonStudentRecordNotificationStatus,
+  readJsonBody,
+  sendJson,
+  upsertLessonStudentRecord,
+  upsertLessonStudentRecords
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5199,6 +5211,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchClassTemplateRoute({ request, response, requestUrl })) return;
   if (await dispatchExamPrepRowRoute({ request, response, requestUrl })) return;
   if (await dispatchHomeworkRoute({ request, response, requestUrl })) return;
+  if (await dispatchLessonRecordRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-question-reviews") {
     try {
@@ -5710,53 +5723,6 @@ const server = http.createServer(async (request, response) => {
     return;
   }
 
-  if (request.method === "GET" && requestUrl.pathname === "/api/lesson-records") {
-    try {
-      const date = requestUrl.searchParams.get("date");
-      const result = date
-        ? await listLessonStudentRecordsForLessons((await listLessons({ date })).lessons ?? [])
-        : await listLessonStudentRecords();
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/lesson-records") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await upsertLessonStudentRecord(payload.record ?? payload);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/lesson-records/notification-status") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await patchLessonStudentRecordNotificationStatus(payload.record ?? payload);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/lesson-records/prune-stale") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await pruneStaleLessonStudentRecords(payload.lessonId);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
   if (request.method === "GET" && requestUrl.pathname === "/api/makeup-tasks") {
     try {
       const result = await listMakeupTasks();
@@ -5965,17 +5931,6 @@ const server = http.createServer(async (request, response) => {
         ...(error.currentRecord ? { currentRecord: error.currentRecord } : {}),
         ...(error.audit ? { audit: error.audit } : {})
       });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/lesson-records/bulk") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await upsertLessonStudentRecords(payload.records ?? []);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
     }
     return;
   }
