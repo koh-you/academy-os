@@ -172,6 +172,7 @@ import { createAttendanceRouteRegistry } from "../src/shared/server/attendanceRo
 import { createClassTemplateRouteRegistry } from "../src/shared/server/classTemplateRouteRegistry.js";
 import { createHomeworkRouteRegistry } from "../src/shared/server/homeworkRouteRegistry.js";
 import { createLessonRecordRouteRegistry } from "../src/shared/server/lessonRecordRouteRegistry.js";
+import { createLessonRouteRegistry } from "../src/shared/server/lessonRouteRegistry.js";
 import { createSchoolEventRouteRegistry } from "../src/shared/server/schoolEventRouteRegistry.js";
 import { createAcademyReminderRouteRegistry } from "../src/shared/server/academyReminderRouteRegistry.js";
 import { createExamPrepRowRouteRegistry } from "../src/shared/server/examPrepRowRouteRegistry.js";
@@ -448,6 +449,23 @@ const { dispatch: dispatchLessonRecordRoute } = createLessonRecordRouteRegistry(
   sendJson,
   upsertLessonStudentRecord,
   upsertLessonStudentRecords
+});
+function logLessonAudit(tag, audit, { isError = false } = {}) {
+  (isError ? console.error : console.info)(tag, JSON.stringify(audit));
+}
+const { dispatch: dispatchLessonRoute } = createLessonRouteRegistry({
+  createAuditId: () => crypto.randomUUID(),
+  deleteLesson,
+  deleteExamPrepLessonForReconcile,
+  deleteLessonsBefore,
+  getLessonClosurePreflight,
+  logAudit: logLessonAudit,
+  listLessons,
+  readJsonBody,
+  sendJson,
+  syncSpecialLectureLessonStudentSchedule,
+  upsertLesson,
+  upsertLessons
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5212,6 +5230,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchExamPrepRowRoute({ request, response, requestUrl })) return;
   if (await dispatchHomeworkRoute({ request, response, requestUrl })) return;
   if (await dispatchLessonRecordRoute({ request, response, requestUrl })) return;
+  if (await dispatchLessonRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-question-reviews") {
     try {
@@ -5634,91 +5653,6 @@ const server = http.createServer(async (request, response) => {
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/lessons") {
-    try {
-      const result = await listLessons({
-        date: requestUrl.searchParams.get("date"),
-        includeCanceled: requestUrl.searchParams.get("includeCanceled") === "true"
-      });
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/lessons") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await upsertLesson(payload.lesson ?? payload);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/lessons/bulk") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await upsertLessons(payload.lessons ?? []);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/lessons/closure-preflight") {
-    try {
-      const lessonId = requestUrl.searchParams.get("lessonId") || "";
-      const result = await getLessonClosurePreflight(lessonId);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 400, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/lessons/special-lecture-student-schedule") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await syncSpecialLectureLessonStudentSchedule(payload);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 409, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "DELETE" && requestUrl.pathname === "/api/lessons") {
-    try {
-      const lessonId = requestUrl.searchParams.get("id");
-      const beforeDate = requestUrl.searchParams.get("before");
-      const mode = requestUrl.searchParams.get("mode");
-      const auditId = requestUrl.searchParams.get("auditId") || crypto.randomUUID();
-      const result = beforeDate
-        ? await deleteLessonsBefore(beforeDate)
-        : mode === "exam-prep-reconcile"
-          ? await deleteExamPrepLessonForReconcile(lessonId, { auditId })
-          : await deleteLesson(lessonId);
-      if (mode === "exam-prep-reconcile") {
-        console.info("[exam-prep-delete-audit]", JSON.stringify(result.audit));
-      }
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      if (error.audit?.operation === "delete_exam_prep_lesson") {
-        console.error("[exam-prep-delete-audit]", JSON.stringify(error.audit));
-      }
-      sendJson(request, response, error.audit ? 409 : 500, {
-        ok: false,
-        error: error.message,
-        ...(error.audit ? { audit: error.audit } : {})
-      });
     }
     return;
   }

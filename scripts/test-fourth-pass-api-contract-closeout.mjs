@@ -15,6 +15,7 @@ import { adminAiRouteSignatures } from "../src/shared/server/adminAiRouteRegistr
 import { attendanceRouteSignatures } from "../src/shared/server/attendanceRouteRegistry.js";
 import { homeworkRouteSignatures } from "../src/shared/server/homeworkRouteRegistry.js";
 import { lessonRecordRouteSignatures } from "../src/shared/server/lessonRecordRouteRegistry.js";
+import { lessonRouteSignatures } from "../src/shared/server/lessonRouteRegistry.js";
 import { schoolEventRouteSignatures } from "../src/shared/server/schoolEventRouteRegistry.js";
 import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
 import { teacherAccountRouteSignatures } from "../src/shared/server/teacherAccountRouteRegistry.js";
@@ -198,6 +199,9 @@ const directWriteSignatures = [
     .filter(({ method }) => ["POST", "PUT", "PATCH", "DELETE"].includes(method))
     .map(signatureOf),
   ...lessonRecordRouteSignatures
+    .filter(({ method }) => ["POST", "PUT", "PATCH", "DELETE"].includes(method))
+    .map(signatureOf),
+  ...lessonRouteSignatures
     .filter(({ method }) => ["POST", "PUT", "PATCH", "DELETE"].includes(method))
     .map(signatureOf),
   ...teacherAccountRouteSignatures.map(signatureOf),
