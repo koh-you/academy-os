@@ -176,6 +176,7 @@ import { createLessonRouteRegistry } from "../src/shared/server/lessonRouteRegis
 import { createSchoolEventRouteRegistry } from "../src/shared/server/schoolEventRouteRegistry.js";
 import { createAcademyReminderRouteRegistry } from "../src/shared/server/academyReminderRouteRegistry.js";
 import { createExamPrepRowRouteRegistry } from "../src/shared/server/examPrepRowRouteRegistry.js";
+import { createMakeupTaskRouteRegistry } from "../src/shared/server/makeupTaskRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -466,6 +467,15 @@ const { dispatch: dispatchLessonRoute } = createLessonRouteRegistry({
   syncSpecialLectureLessonStudentSchedule,
   upsertLesson,
   upsertLessons
+});
+const { dispatch: dispatchMakeupTaskRoute } = createMakeupTaskRouteRegistry({
+  deleteAllMakeupTasks,
+  deleteMakeupTask,
+  listMakeupTasks,
+  readJsonBody,
+  sendJson,
+  upsertMakeupTask,
+  upsertMakeupTasks
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5231,6 +5241,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchHomeworkRoute({ request, response, requestUrl })) return;
   if (await dispatchLessonRecordRoute({ request, response, requestUrl })) return;
   if (await dispatchLessonRoute({ request, response, requestUrl })) return;
+  if (await dispatchMakeupTaskRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-question-reviews") {
     try {
@@ -5657,38 +5668,6 @@ const server = http.createServer(async (request, response) => {
     return;
   }
 
-  if (request.method === "GET" && requestUrl.pathname === "/api/makeup-tasks") {
-    try {
-      const result = await listMakeupTasks();
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/makeup-tasks") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await upsertMakeupTask(payload.makeupTask ?? payload.task ?? payload);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/makeup-tasks/bulk") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await upsertMakeupTasks(payload.makeupTasks ?? payload.tasks ?? []);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
   if (request.method === "POST" && requestUrl.pathname === "/api/lesson-journal/makeup-tasks/save") {
     try {
       const payload = parseVersionedWriteRequest(
@@ -5730,18 +5709,6 @@ const server = http.createServer(async (request, response) => {
         ...(error.field ? { field: error.field } : {}),
         ...(error.audit ? { audit: error.audit } : {})
       });
-    }
-    return;
-  }
-
-  if (request.method === "DELETE" && requestUrl.pathname === "/api/makeup-tasks") {
-    try {
-      const taskId = requestUrl.searchParams.get("id");
-      const deleteAll = requestUrl.searchParams.get("all") === "true";
-      const result = deleteAll ? await deleteAllMakeupTasks() : await deleteMakeupTask(taskId);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
     }
     return;
   }
