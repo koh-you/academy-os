@@ -184,6 +184,7 @@ import { createSolapiRouteRegistry } from "../src/shared/server/solapiRouteRegis
 import { createSpecialLectureApplicationRouteRegistry } from "../src/shared/server/specialLectureApplicationRouteRegistry.js";
 import { createSpecialLectureEnrollmentRouteRegistry } from "../src/shared/server/specialLectureEnrollmentRouteRegistry.js";
 import { createStudentIntakeApplicantRouteRegistry } from "../src/shared/server/studentIntakeApplicantRouteRegistry.js";
+import { createStudentRouteRegistry } from "../src/shared/server/studentRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -560,6 +561,15 @@ const { dispatch: dispatchStudentIntakeApplicantRoute } = createStudentIntakeApp
   readJsonBody,
   sendJson,
   upsertStudentIntakeApplicant
+});
+const { dispatch: dispatchStudentRoute } = createStudentRouteRegistry({
+  auditWithdrawnStudentDeletion,
+  deleteWithdrawnStudent,
+  listStudents,
+  readJsonBody,
+  sendJson,
+  upsertStudent,
+  upsertStudents
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5333,6 +5343,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchSpecialLectureApplicationRoute({ request, response, requestUrl })) return;
   if (await dispatchSpecialLectureEnrollmentRoute({ request, response, requestUrl })) return;
   if (await dispatchStudentIntakeApplicantRoute({ request, response, requestUrl })) return;
+  if (await dispatchStudentRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-question-reviews") {
     try {
@@ -5530,82 +5541,6 @@ const server = http.createServer(async (request, response) => {
       }
       const signedUrl = await createSignedStorageUrl(bucketId, storagePath);
       sendJson(request, response, 200, { ok: true, signedUrl });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/students") {
-    try {
-      const result = await listStudents();
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/students/delete-audit") {
-    try {
-      const result = await auditWithdrawnStudentDeletion(requestUrl.searchParams.get("studentId") || "");
-      sendJson(request, response, 200, { ok: true, audit: result });
-    } catch (error) {
-      sendJson(request, response, Number(error.statusCode) || 500, {
-        ok: false,
-        error: error.message,
-        ...(error.audit ? { audit: error.audit } : {})
-      });
-    }
-    return;
-  }
-
-  if (request.method === "DELETE" && requestUrl.pathname === "/api/students") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await deleteWithdrawnStudent(
-        payload.studentId,
-        payload.confirmationName,
-        payload.forceDeleteWithReferences === true,
-        payload.expectedReferenceFingerprint
-      );
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, Number(error.statusCode) || 500, {
-        ok: false,
-        error: error.message,
-        ...(error.audit ? { audit: error.audit } : {})
-      });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/students") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await upsertStudent(payload.student ?? payload, {
-        createOnly: payload.student ? payload.createOnly === true : false,
-        expectedUpdatedAt: payload.student && Object.prototype.hasOwnProperty.call(payload, "expectedUpdatedAt")
-          ? payload.expectedUpdatedAt
-          : undefined
-      });
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, Number(error.statusCode) || 500, {
-        ok: false,
-        error: error.message,
-        ...(error.code ? { code: error.code } : {}),
-        ...(error.currentStudent !== undefined ? { currentStudent: error.currentStudent } : {})
-      });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/students/bulk") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await upsertStudents(payload.students ?? []);
-      sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
     }
