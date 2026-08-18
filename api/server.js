@@ -170,6 +170,7 @@ import { createExamAnalysisAiRouteRegistry } from "../src/shared/server/examAnal
 import { createAdminAiRouteRegistry } from "../src/shared/server/adminAiRouteRegistry.js";
 import { createAttendanceRouteRegistry } from "../src/shared/server/attendanceRouteRegistry.js";
 import { createClassTemplateRouteRegistry } from "../src/shared/server/classTemplateRouteRegistry.js";
+import { createHomeworkRouteRegistry } from "../src/shared/server/homeworkRouteRegistry.js";
 import { createSchoolEventRouteRegistry } from "../src/shared/server/schoolEventRouteRegistry.js";
 import { createAcademyReminderRouteRegistry } from "../src/shared/server/academyReminderRouteRegistry.js";
 import { createExamPrepRowRouteRegistry } from "../src/shared/server/examPrepRowRouteRegistry.js";
@@ -428,6 +429,13 @@ const { dispatch: dispatchExamPrepRowRoute } = createExamPrepRowRouteRegistry({
   sendJson,
   upsertExamPrepRow,
   upsertExamPrepRows
+});
+const { dispatch: dispatchHomeworkRoute } = createHomeworkRouteRegistry({
+  listHomeworks,
+  readJsonBody,
+  sendJson,
+  upsertHomework,
+  upsertHomeworks
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5190,6 +5198,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchAttendanceRoute({ request, response, requestUrl })) return;
   if (await dispatchClassTemplateRoute({ request, response, requestUrl })) return;
   if (await dispatchExamPrepRowRoute({ request, response, requestUrl })) return;
+  if (await dispatchHomeworkRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-question-reviews") {
     try {
@@ -5714,15 +5723,6 @@ const server = http.createServer(async (request, response) => {
     return;
   }
 
-  if (request.method === "GET" && requestUrl.pathname === "/api/homeworks") {
-    try {
-      const result = await listHomeworks();
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
 
   if (request.method === "POST" && requestUrl.pathname === "/api/lesson-records") {
     try {
@@ -5750,28 +5750,6 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request);
       const result = await pruneStaleLessonStudentRecords(payload.lessonId);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/homeworks") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await upsertHomework(payload.homework ?? payload);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/homeworks/bulk") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await upsertHomeworks(payload.homeworks ?? []);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
