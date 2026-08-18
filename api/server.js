@@ -169,6 +169,7 @@ import { createExamAnalysisQuestionCountRouteRegistry } from "../src/shared/serv
 import { createExamAnalysisAiRouteRegistry } from "../src/shared/server/examAnalysisAiRouteRegistry.js";
 import { createAdminAiRouteRegistry } from "../src/shared/server/adminAiRouteRegistry.js";
 import { createAttendanceRouteRegistry } from "../src/shared/server/attendanceRouteRegistry.js";
+import { createClassTemplateRouteRegistry } from "../src/shared/server/classTemplateRouteRegistry.js";
 import { createSchoolEventRouteRegistry } from "../src/shared/server/schoolEventRouteRegistry.js";
 import { createAcademyReminderRouteRegistry } from "../src/shared/server/academyReminderRouteRegistry.js";
 import {
@@ -407,6 +408,10 @@ const { dispatch: dispatchAttendanceRoute } = createAttendanceRouteRegistry({
   handleAttendanceCheck,
   parseVersionedWriteRequest,
   readJsonBody,
+  sendJson
+});
+const { dispatch: dispatchClassTemplateRoute } = createClassTemplateRouteRegistry({
+  listClassTemplates,
   sendJson
 });
 const teacherAccountTable = "teacher_accounts";
@@ -5168,6 +5173,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchAcademyReminderRoute({ request, response, requestUrl })) return;
   if (await dispatchAdminAiRoute({ request, response, requestUrl })) return;
   if (await dispatchAttendanceRoute({ request, response, requestUrl })) return;
+  if (await dispatchClassTemplateRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-question-reviews") {
     try {
@@ -5587,16 +5593,6 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request);
       const result = await upsertSpecialLectureEnrollments(payload.enrollments ?? []);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/classes") {
-    try {
-      const result = await listClassTemplates();
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
