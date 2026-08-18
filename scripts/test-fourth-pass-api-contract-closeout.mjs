@@ -11,18 +11,20 @@ import { examPostConfirmRouteSignatures } from "../src/shared/server/examPostCon
 import { portalWriteRouteSignatures } from "../src/shared/server/portalWriteRouteRegistry.js";
 import { reportSnapshotRouteSignatures } from "../src/shared/server/reportSnapshotRouteRegistry.js";
 import { adminAiRouteSignatures } from "../src/shared/server/adminAiRouteRegistry.js";
+import { attendanceRouteSignatures } from "../src/shared/server/attendanceRouteRegistry.js";
 import { schoolEventRouteSignatures } from "../src/shared/server/schoolEventRouteRegistry.js";
 import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
 import { teacherAccountRouteSignatures } from "../src/shared/server/teacherAccountRouteRegistry.js";
 import { testSessionWriteRouteSignatures } from "../src/shared/server/testSessionWriteRouteRegistry.js";
 
-const [appStateWriteRouteSource, examAnalysisQuestionCountRouteSource, examAnalysisRunWriteRouteSource, packageJson, reportSnapshotRouteSource, serverSource] = await Promise.all([
+const [appStateWriteRouteSource, examAnalysisQuestionCountRouteSource, examAnalysisRunWriteRouteSource, packageJson, reportSnapshotRouteSource, serverSource, attendanceRouteRegistrySource] = await Promise.all([
   readFile(new URL("../src/shared/server/appStateWriteRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/examAnalysisQuestionCountRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/examAnalysisRunWriteRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse),
   readFile(new URL("../src/shared/server/reportSnapshotRouteRegistry.js", import.meta.url), "utf8"),
-  readFile(new URL("../api/server.js", import.meta.url), "utf8")
+  readFile(new URL("../api/server.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/shared/server/attendanceRouteRegistry.js", import.meta.url), "utf8")
 ]);
 
 const signatureOf = ({ method, path }) => `${method} ${path}`;
@@ -183,6 +185,9 @@ const directWriteSignatures = [
   ...academyReminderRouteSignatures
     .filter(({ method }) => ["POST", "PUT", "PATCH", "DELETE"].includes(method))
     .map(signatureOf),
+  ...attendanceRouteSignatures
+    .filter(({ method }) => ["POST", "PUT", "PATCH", "DELETE"].includes(method))
+    .map(signatureOf),
   ...teacherAccountRouteSignatures.map(signatureOf),
   ...testSessionWriteRouteSignatures.map(signatureOf)
 ].sort();
@@ -209,7 +214,8 @@ const extractedRouteSourceBySignature = new Map([
   ["POST /api/app-state", appStateWriteRouteSource],
   ["POST /api/exam-analysis-runs/confirm-question-count", examAnalysisQuestionCountRouteSource],
   ["POST /api/exam-analysis-runs", examAnalysisRunWriteRouteSource],
-  ["POST /api/report-snapshots", reportSnapshotRouteSource]
+  ["POST /api/report-snapshots", reportSnapshotRouteSource],
+  ["POST /api/attendance/check", attendanceRouteRegistrySource]
 ]);
 for (const signature of expectedContractSignatures) {
   const separator = signature.indexOf(" ");
