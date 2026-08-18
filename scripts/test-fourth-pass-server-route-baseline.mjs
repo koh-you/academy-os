@@ -29,12 +29,13 @@ import { schoolEventRouteSignatures } from "../src/shared/server/schoolEventRout
 import { solapiRouteSignatures } from "../src/shared/server/solapiRouteRegistry.js";
 import { specialLectureApplicationRouteSignatures } from "../src/shared/server/specialLectureApplicationRouteRegistry.js";
 import { specialLectureEnrollmentRouteSignatures } from "../src/shared/server/specialLectureEnrollmentRouteRegistry.js";
+import { studentIntakeApplicantRouteSignatures } from "../src/shared/server/studentIntakeApplicantRouteRegistry.js";
 import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
 import { teacherAccountRouteSignatures } from "../src/shared/server/teacherAccountRouteRegistry.js";
 import { testSessionReadRouteSignatures } from "../src/shared/server/testSessionReadRouteRegistry.js";
 import { testSessionWriteRouteSignatures } from "../src/shared/server/testSessionWriteRouteRegistry.js";
 
-const [academyReminderRouteRegistrySource, adapterSource, appCoreReadRouteRegistrySource, appStateWriteRouteRegistrySource, authLoginRouteRegistrySource, examAnalysisAiRouteRegistrySource, examAnalysisReadRouteRegistrySource, examAnalysisRunWriteRouteRegistrySource, examAnalysisQuestionCountRouteRegistrySource, examPostConfirmRouteRegistrySource, examPrepRowRouteRegistrySource, integrationStatusRouteRegistrySource, makeupTaskRouteRegistrySource, packageJson, portalReadRouteRegistrySource, portalWriteRouteRegistrySource, reportSnapshotRouteRegistrySource, resourceMaterialRouteRegistrySource, schoolEventRouteRegistrySource, serverSource, sessionGuardSource, systemRouteRegistrySource, teacherAccountRouteRegistrySource, testSessionReadRouteRegistrySource, testSessionWriteRouteRegistrySource, adminAiRouteRegistrySource, attendanceRouteRegistrySource, classTemplateRouteRegistrySource, homeworkRouteRegistrySource, lessonRecordRouteRegistrySource, lessonRouteRegistrySource, notificationJobRouteRegistrySource, notificationProviderRouteRegistrySource, solapiRouteRegistrySource, specialLectureApplicationRouteRegistrySource, specialLectureEnrollmentRouteRegistrySource] = await Promise.all([
+const [academyReminderRouteRegistrySource, adapterSource, appCoreReadRouteRegistrySource, appStateWriteRouteRegistrySource, authLoginRouteRegistrySource, examAnalysisAiRouteRegistrySource, examAnalysisReadRouteRegistrySource, examAnalysisRunWriteRouteRegistrySource, examAnalysisQuestionCountRouteRegistrySource, examPostConfirmRouteRegistrySource, examPrepRowRouteRegistrySource, integrationStatusRouteRegistrySource, makeupTaskRouteRegistrySource, packageJson, portalReadRouteRegistrySource, portalWriteRouteRegistrySource, reportSnapshotRouteRegistrySource, resourceMaterialRouteRegistrySource, schoolEventRouteRegistrySource, serverSource, sessionGuardSource, systemRouteRegistrySource, teacherAccountRouteRegistrySource, testSessionReadRouteRegistrySource, testSessionWriteRouteRegistrySource, adminAiRouteRegistrySource, attendanceRouteRegistrySource, classTemplateRouteRegistrySource, homeworkRouteRegistrySource, lessonRecordRouteRegistrySource, lessonRouteRegistrySource, notificationJobRouteRegistrySource, notificationProviderRouteRegistrySource, solapiRouteRegistrySource, specialLectureApplicationRouteRegistrySource, specialLectureEnrollmentRouteRegistrySource, studentIntakeApplicantRouteRegistrySource] = await Promise.all([
   readFile(new URL("../src/shared/server/academyReminderRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/httpRouteAdapter.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/appCoreReadRouteRegistry.js", import.meta.url), "utf8"),
@@ -70,7 +71,8 @@ const [academyReminderRouteRegistrySource, adapterSource, appCoreReadRouteRegist
   readFile(new URL("../src/shared/server/notificationProviderRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/solapiRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/specialLectureApplicationRouteRegistry.js", import.meta.url), "utf8"),
-  readFile(new URL("../src/shared/server/specialLectureEnrollmentRouteRegistry.js", import.meta.url), "utf8")
+  readFile(new URL("../src/shared/server/specialLectureEnrollmentRouteRegistry.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/shared/server/studentIntakeApplicantRouteRegistry.js", import.meta.url), "utf8")
 ]);
 
 const routePattern = /if \(request\.method === "(GET|POST|PUT|PATCH|DELETE)" && requestUrl\.pathname === "([^"]+)"\)/g;
@@ -277,12 +279,18 @@ const orderedRoutes = [
     signature: `${method} ${path}`,
     source: specialLectureEnrollmentRouteRegistrySource
   })),
+  ...studentIntakeApplicantRouteSignatures.map(({ method, path }) => ({
+    method,
+    path,
+    signature: `${method} ${path}`,
+    source: studentIntakeApplicantRouteRegistrySource
+  })),
   ...directRoutes
 ];
 const routes = orderedRoutes.map((route, index) => ({ ...route, index }));
 
 assert.equal(routes.length, 121);
-assert.equal(directRouteMatches.length, 27);
+assert.equal(directRouteMatches.length, 25);
 assert.equal(new Set(routes.map(({ signature }) => signature)).size, 121);
 assert.deepEqual(
   Object.fromEntries(["DELETE", "GET", "POST"].map((method) => [
@@ -296,7 +304,7 @@ const routeOrderHash = crypto
   .createHash("sha256")
   .update(routes.map(({ signature }) => signature).join("\n"))
   .digest("hex");
-assert.equal(routeOrderHash, "be5c8b6d7ebe78163718f32910fe94c9d791fe66abf8f98ddea0c43290406070");
+assert.equal(routeOrderHash, "030086b6e1d263410ed6bcb5b7cc19ec346e4f53b99a521068c5e5bb0c39e96d");
 
 function getRouteFamily(path) {
   if (
