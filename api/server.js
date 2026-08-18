@@ -168,6 +168,7 @@ import { createExamAnalysisRunWriteRouteRegistry } from "../src/shared/server/ex
 import { createExamAnalysisQuestionCountRouteRegistry } from "../src/shared/server/examAnalysisQuestionCountRouteRegistry.js";
 import { createExamAnalysisAiRouteRegistry } from "../src/shared/server/examAnalysisAiRouteRegistry.js";
 import { createSchoolEventRouteRegistry } from "../src/shared/server/schoolEventRouteRegistry.js";
+import { createAcademyReminderRouteRegistry } from "../src/shared/server/academyReminderRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -386,6 +387,13 @@ const { dispatch: dispatchSchoolEventRoute } = createSchoolEventRouteRegistry({
   sendJson,
   upsertSchoolEvent,
   upsertSchoolEvents
+});
+const { dispatch: dispatchAcademyReminderRoute } = createAcademyReminderRouteRegistry({
+  deleteAcademyReminder,
+  listAcademyReminders,
+  readJsonBody,
+  sendJson,
+  upsertAcademyReminder
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5143,6 +5151,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchExamAnalysisQuestionCountRoute({ request, response, requestUrl })) return;
   if (await dispatchExamAnalysisAiRoute({ request, response, requestUrl })) return;
   if (await dispatchSchoolEventRoute({ request, response, requestUrl })) return;
+  if (await dispatchAcademyReminderRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-question-reviews") {
     try {
@@ -5770,43 +5779,6 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request);
       const result = await upsertHomeworks(payload.homeworks ?? []);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/academy-reminders") {
-    try {
-      const result = await listAcademyReminders({
-        date: requestUrl.searchParams.get("date") ?? "",
-        from: requestUrl.searchParams.get("from") ?? "",
-        to: requestUrl.searchParams.get("to") ?? "",
-        includeDone: requestUrl.searchParams.get("includeDone") === "true",
-        status: requestUrl.searchParams.get("status") ?? ""
-      });
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/academy-reminders") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await upsertAcademyReminder(payload.academyReminder ?? payload.reminder ?? payload);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "DELETE" && requestUrl.pathname === "/api/academy-reminders") {
-    try {
-      const result = await deleteAcademyReminder(requestUrl.searchParams.get("id"));
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
