@@ -182,6 +182,7 @@ import { createMakeupTaskRouteRegistry } from "../src/shared/server/makeupTaskRo
 import { createResourceMaterialRouteRegistry } from "../src/shared/server/resourceMaterialRouteRegistry.js";
 import { createSolapiRouteRegistry } from "../src/shared/server/solapiRouteRegistry.js";
 import { createSpecialLectureApplicationRouteRegistry } from "../src/shared/server/specialLectureApplicationRouteRegistry.js";
+import { createSpecialLectureEnrollmentRouteRegistry } from "../src/shared/server/specialLectureEnrollmentRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -545,6 +546,13 @@ const { dispatch: dispatchSpecialLectureApplicationRoute } = createSpecialLectur
   readJsonBody,
   sendJson,
   upsertSpecialLectureApplication
+});
+const { dispatch: dispatchSpecialLectureEnrollmentRoute } = createSpecialLectureEnrollmentRouteRegistry({
+  listSpecialLectureEnrollments,
+  readJsonBody,
+  sendJson,
+  upsertSpecialLectureEnrollment,
+  upsertSpecialLectureEnrollments
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5316,6 +5324,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchResourceMaterialRoute({ request, response, requestUrl })) return;
   if (await dispatchSolapiRoute({ request, response, requestUrl })) return;
   if (await dispatchSpecialLectureApplicationRoute({ request, response, requestUrl })) return;
+  if (await dispatchSpecialLectureEnrollmentRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-question-reviews") {
     try {
@@ -5651,38 +5660,6 @@ const server = http.createServer(async (request, response) => {
       }
       const application = normalizeSpecialLectureApplicationPayload(payload);
       const result = await upsertSpecialLectureApplication(application);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/special-lecture-enrollments") {
-    try {
-      const result = await listSpecialLectureEnrollments();
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/special-lecture-enrollments") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await upsertSpecialLectureEnrollment(payload.enrollment ?? payload);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/special-lecture-enrollments/bulk") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await upsertSpecialLectureEnrollments(payload.enrollments ?? []);
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
