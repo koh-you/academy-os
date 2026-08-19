@@ -149,7 +149,7 @@ await assert.rejects(
 
 const serverSource = await readFile(new URL("../api/server.js", import.meta.url), "utf8");
 const routeStart = serverSource.indexOf('requestUrl.pathname === "/api/lesson-journal/rows/save"');
-const routeEnd = serverSource.indexOf('requestUrl.pathname === "/api/lesson-records/bulk"', routeStart);
+const routeEnd = serverSource.indexOf('requestUrl.pathname === "/api/resource-materials"', routeStart);
 const lessonJournalRowsRouteSource = serverSource.slice(routeStart, routeEnd);
 assert.ok(routeStart >= 0 && routeEnd > routeStart);
 assert.match(lessonJournalRowsRouteSource, /parseVersionedWriteRequest\(/);
