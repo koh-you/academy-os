@@ -14,13 +14,14 @@ import { integrationStatusRouteSignatures } from "../src/shared/server/integrati
 import { portalReadRouteSignatures } from "../src/shared/server/portalReadRouteRegistry.js";
 import { portalWriteRouteSignatures } from "../src/shared/server/portalWriteRouteRegistry.js";
 import { reportSnapshotRouteSignatures } from "../src/shared/server/reportSnapshotRouteRegistry.js";
+import { adminAiRouteSignatures } from "../src/shared/server/adminAiRouteRegistry.js";
 import { schoolEventRouteSignatures } from "../src/shared/server/schoolEventRouteRegistry.js";
 import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
 import { teacherAccountRouteSignatures } from "../src/shared/server/teacherAccountRouteRegistry.js";
 import { testSessionReadRouteSignatures } from "../src/shared/server/testSessionReadRouteRegistry.js";
 import { testSessionWriteRouteSignatures } from "../src/shared/server/testSessionWriteRouteRegistry.js";
 
-const [academyReminderRouteRegistrySource, adapterSource, appCoreReadRouteRegistrySource, appStateWriteRouteRegistrySource, authLoginRouteRegistrySource, examAnalysisAiRouteRegistrySource, examAnalysisReadRouteRegistrySource, examAnalysisRunWriteRouteRegistrySource, examAnalysisQuestionCountRouteRegistrySource, examPostConfirmRouteRegistrySource, integrationStatusRouteRegistrySource, packageJson, portalReadRouteRegistrySource, portalWriteRouteRegistrySource, reportSnapshotRouteRegistrySource, schoolEventRouteRegistrySource, serverSource, sessionGuardSource, systemRouteRegistrySource, teacherAccountRouteRegistrySource, testSessionReadRouteRegistrySource, testSessionWriteRouteRegistrySource] = await Promise.all([
+const [academyReminderRouteRegistrySource, adapterSource, appCoreReadRouteRegistrySource, appStateWriteRouteRegistrySource, authLoginRouteRegistrySource, examAnalysisAiRouteRegistrySource, examAnalysisReadRouteRegistrySource, examAnalysisRunWriteRouteRegistrySource, examAnalysisQuestionCountRouteRegistrySource, examPostConfirmRouteRegistrySource, integrationStatusRouteRegistrySource, packageJson, portalReadRouteRegistrySource, portalWriteRouteRegistrySource, reportSnapshotRouteRegistrySource, schoolEventRouteRegistrySource, serverSource, sessionGuardSource, systemRouteRegistrySource, teacherAccountRouteRegistrySource, testSessionReadRouteRegistrySource, testSessionWriteRouteRegistrySource, adminAiRouteRegistrySource] = await Promise.all([
   readFile(new URL("../src/shared/server/academyReminderRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/httpRouteAdapter.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/appCoreReadRouteRegistry.js", import.meta.url), "utf8"),
@@ -42,7 +43,8 @@ const [academyReminderRouteRegistrySource, adapterSource, appCoreReadRouteRegist
   readFile(new URL("../src/shared/server/systemRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/teacherAccountRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/testSessionReadRouteRegistry.js", import.meta.url), "utf8"),
-  readFile(new URL("../src/shared/server/testSessionWriteRouteRegistry.js", import.meta.url), "utf8")
+  readFile(new URL("../src/shared/server/testSessionWriteRouteRegistry.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/shared/server/adminAiRouteRegistry.js", import.meta.url), "utf8")
 ]);
 
 const routePattern = /if \(request\.method === "(GET|POST|PUT|PATCH|DELETE)" && requestUrl\.pathname === "([^"]+)"\)/g;
@@ -165,12 +167,18 @@ const orderedRoutes = [
     signature: `${method} ${path}`,
     source: academyReminderRouteRegistrySource
   })),
+  ...adminAiRouteSignatures.map(({ method, path }) => ({
+    method,
+    path,
+    signature: `${method} ${path}`,
+    source: adminAiRouteRegistrySource
+  })),
   ...directRoutes
 ];
 const routes = orderedRoutes.map((route, index) => ({ ...route, index }));
 
 assert.equal(routes.length, 121);
-assert.equal(directRouteMatches.length, 85);
+assert.equal(directRouteMatches.length, 83);
 assert.equal(new Set(routes.map(({ signature }) => signature)).size, 121);
 assert.deepEqual(
   Object.fromEntries(["DELETE", "GET", "POST"].map((method) => [
@@ -184,7 +192,7 @@ const routeOrderHash = crypto
   .createHash("sha256")
   .update(routes.map(({ signature }) => signature).join("\n"))
   .digest("hex");
-assert.equal(routeOrderHash, "e712324543f8f6038c42e3125b909cf3c0f9da886fe6eba7c12f3394d359d89b");
+assert.equal(routeOrderHash, "6d88fab62a965a77717275b6562c21eb5ec9779b5e1ba779e96129b3208e57a4");
 
 function getRouteFamily(path) {
   if (

@@ -16,7 +16,7 @@ const routeStart = serverSource.indexOf(
   'if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs/readiness-check")'
 );
 const routeEnd = serverSource.indexOf(
-  'if (request.method === "POST" && requestUrl.pathname === "/api/admin/seed-core-data")',
+  'if (request.method === "POST" && requestUrl.pathname === "/api/notifications/attendance-alimtalk")',
   routeStart
 );
 assert.ok(routeStart >= 0 && routeEnd > routeStart);
