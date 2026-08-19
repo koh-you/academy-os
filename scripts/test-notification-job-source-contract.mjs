@@ -3,23 +3,24 @@ import { readFile } from "node:fs/promises";
 
 const readSource = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-const [appSource, contractApiSource, jobApiSource, safeApiSource, serverSource] = await Promise.all([
+const [appSource, contractApiSource, jobApiSource, safeApiSource, serverSource, notificationJobRouteRegistrySource] = await Promise.all([
   readSource("src/app/App.jsx"),
   readSource("src/domains/notifications/notificationJobContractApi.js"),
   readSource("src/domains/notifications/notificationJobApi.js"),
   readSource("scripts/safe-local-api.mjs"),
-  readSource("api/server.js")
+  readSource("api/server.js"),
+  readSource("src/shared/server/notificationJobRouteRegistry.js")
 ]);
 
-const routeStart = serverSource.indexOf(
+const routeStart = notificationJobRouteRegistrySource.indexOf(
   'if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs")'
 );
-const routeEnd = serverSource.indexOf(
-  'if (request.method === "GET" && requestUrl.pathname === "/api/solapi/messages")',
+const routeEnd = notificationJobRouteRegistrySource.indexOf(
+  'if (request.method === "DELETE" && requestUrl.pathname === "/api/notification-jobs")',
   routeStart
 );
 assert.ok(routeStart >= 0 && routeEnd > routeStart);
-const sourceWriteRoute = serverSource.slice(routeStart, routeEnd);
+const sourceWriteRoute = notificationJobRouteRegistrySource.slice(routeStart, routeEnd);
 
 for (const expected of [
   "parseVersionedWriteRequest(",

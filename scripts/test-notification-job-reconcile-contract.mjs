@@ -5,22 +5,23 @@ import { createNotificationJobsReconcileController } from "../src/domains/notifi
 
 const readSource = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-const [contractApiSource, controllerSource, safeApiSource, serverSource] = await Promise.all([
+const [contractApiSource, controllerSource, safeApiSource, serverSource, notificationJobRouteRegistrySource] = await Promise.all([
   readSource("src/domains/notifications/notificationJobContractApi.js"),
   readSource("src/domains/notifications/notificationJobsReconcileController.js"),
   readSource("scripts/safe-local-api.mjs"),
-  readSource("api/server.js")
+  readSource("api/server.js"),
+  readSource("src/shared/server/notificationJobRouteRegistry.js")
 ]);
 
-const routeStart = serverSource.indexOf(
+const routeStart = notificationJobRouteRegistrySource.indexOf(
   'if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs/reconcile-solapi")'
 );
-const routeEnd = serverSource.indexOf(
+const routeEnd = notificationJobRouteRegistrySource.indexOf(
   'if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs")',
   routeStart
 );
 assert.ok(routeStart >= 0 && routeEnd > routeStart);
-const reconcileRoute = serverSource.slice(routeStart, routeEnd);
+const reconcileRoute = notificationJobRouteRegistrySource.slice(routeStart, routeEnd);
 for (const expected of [
   "parseVersionedWriteRequest(",
   "await readJsonBody(request)",

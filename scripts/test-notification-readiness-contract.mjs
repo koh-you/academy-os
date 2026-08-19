@@ -7,20 +7,21 @@ import {
 } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 
 const readSource = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
-const [safeApiSource, serverSource] = await Promise.all([
+const [safeApiSource, serverSource, notificationJobRouteRegistrySource] = await Promise.all([
   readSource("scripts/safe-local-api.mjs"),
-  readSource("api/server.js")
+  readSource("api/server.js"),
+  readSource("src/shared/server/notificationJobRouteRegistry.js")
 ]);
 
-const routeStart = serverSource.indexOf(
+const routeStart = notificationJobRouteRegistrySource.indexOf(
   'if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs/readiness-check")'
 );
-const routeEnd = serverSource.indexOf(
-  'if (request.method === "POST" && requestUrl.pathname === "/api/notifications/attendance-alimtalk")',
+const routeEnd = notificationJobRouteRegistrySource.indexOf(
+  'if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs/reserve-bulk")',
   routeStart
 );
 assert.ok(routeStart >= 0 && routeEnd > routeStart);
-const routeSource = serverSource.slice(routeStart, routeEnd);
+const routeSource = notificationJobRouteRegistrySource.slice(routeStart, routeEnd);
 for (const expected of [
   "parseVersionedWriteRequest(",
   "await readJsonBody(request)",

@@ -12,21 +12,22 @@ import { createNotificationDispatchCandidateQuery } from "../api/lib/supabaseRes
 
 const execFileAsync = promisify(execFile);
 const readSource = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
-const [dispatchScriptSource, safeApiSource, serverSource] = await Promise.all([
+const [dispatchScriptSource, safeApiSource, serverSource, notificationJobRouteRegistrySource] = await Promise.all([
   readSource("scripts/dispatch-due-notifications.cjs"),
   readSource("scripts/safe-local-api.mjs"),
-  readSource("api/server.js")
+  readSource("api/server.js"),
+  readSource("src/shared/server/notificationJobRouteRegistry.js")
 ]);
 
-const routeStart = serverSource.indexOf(
+const routeStart = notificationJobRouteRegistrySource.indexOf(
   'if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs/dispatch-due")'
 );
-const routeEnd = serverSource.indexOf(
+const routeEnd = notificationJobRouteRegistrySource.indexOf(
   'if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs/readiness-check")',
   routeStart
 );
 assert.ok(routeStart >= 0 && routeEnd > routeStart);
-const routeSource = serverSource.slice(routeStart, routeEnd);
+const routeSource = notificationJobRouteRegistrySource.slice(routeStart, routeEnd);
 for (const expected of [
   "const rawPayload = await readJsonBody(request)",
   "getDispatchAuthState(request, rawPayload)",

@@ -5,22 +5,23 @@ import { reserveNotificationJobsContractRequest } from "../src/domains/notificat
 
 const readSource = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-const [appSource, contractApiSource, safeApiSource, serverSource] = await Promise.all([
+const [appSource, contractApiSource, safeApiSource, serverSource, notificationJobRouteRegistrySource] = await Promise.all([
   readSource("src/app/App.jsx"),
   readSource("src/domains/notifications/notificationJobContractApi.js"),
   readSource("scripts/safe-local-api.mjs"),
-  readSource("api/server.js")
+  readSource("api/server.js"),
+  readSource("src/shared/server/notificationJobRouteRegistry.js")
 ]);
 
-const routeStart = serverSource.indexOf(
+const routeStart = notificationJobRouteRegistrySource.indexOf(
   'if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs/reserve-bulk")'
 );
-const routeEnd = serverSource.indexOf(
-  'if (request.method === "POST" && requestUrl.pathname === "/api/notifications/slack-today-schedule/reserve")',
+const routeEnd = notificationJobRouteRegistrySource.indexOf(
+  "return false;\n  }\n\n  return Object.freeze",
   routeStart
 );
 assert.ok(routeStart >= 0 && routeEnd > routeStart);
-const routeSource = serverSource.slice(routeStart, routeEnd);
+const routeSource = notificationJobRouteRegistrySource.slice(routeStart, routeEnd);
 for (const expected of [
   "parseVersionedWriteRequest(",
   "await readJsonBody(request)",
