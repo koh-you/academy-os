@@ -167,6 +167,7 @@ import { createExamAnalysisReadRouteRegistry } from "../src/shared/server/examAn
 import { createExamAnalysisRunWriteRouteRegistry } from "../src/shared/server/examAnalysisRunWriteRouteRegistry.js";
 import { createExamAnalysisQuestionCountRouteRegistry } from "../src/shared/server/examAnalysisQuestionCountRouteRegistry.js";
 import { createExamAnalysisAiRouteRegistry } from "../src/shared/server/examAnalysisAiRouteRegistry.js";
+import { createAdminAiRouteRegistry } from "../src/shared/server/adminAiRouteRegistry.js";
 import { createSchoolEventRouteRegistry } from "../src/shared/server/schoolEventRouteRegistry.js";
 import { createAcademyReminderRouteRegistry } from "../src/shared/server/academyReminderRouteRegistry.js";
 import {
@@ -394,6 +395,12 @@ const { dispatch: dispatchAcademyReminderRoute } = createAcademyReminderRouteReg
   readJsonBody,
   sendJson,
   upsertAcademyReminder
+});
+const { dispatch: dispatchAdminAiRoute } = createAdminAiRouteRegistry({
+  polishLessonComment,
+  readJsonBody,
+  seedCoreData,
+  sendJson
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5152,6 +5159,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchExamAnalysisAiRoute({ request, response, requestUrl })) return;
   if (await dispatchSchoolEventRoute({ request, response, requestUrl })) return;
   if (await dispatchAcademyReminderRoute({ request, response, requestUrl })) return;
+  if (await dispatchAdminAiRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-question-reviews") {
     try {
@@ -6461,16 +6469,6 @@ const server = http.createServer(async (request, response) => {
     return;
   }
 
-  if (request.method === "POST" && requestUrl.pathname === "/api/admin/seed-core-data") {
-    try {
-      const result = await seedCoreData();
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
   if (request.method === "POST" && requestUrl.pathname === "/api/notifications/attendance-alimtalk") {
     try {
       const payload = await readJsonBody(request);
@@ -6589,17 +6587,6 @@ const server = http.createServer(async (request, response) => {
         scheduledAt: payload.scheduledAt || `${date}T00:00:00.000Z`
       });
       sendJson(request, response, 200, { ok: true, provider: "slack_bot", result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/ai/comment-polish") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await polishLessonComment(payload);
-      sendJson(request, response, 200, { ok: true, result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
     }
