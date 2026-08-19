@@ -172,6 +172,7 @@ import { createAttendanceRouteRegistry } from "../src/shared/server/attendanceRo
 import { createClassTemplateRouteRegistry } from "../src/shared/server/classTemplateRouteRegistry.js";
 import { createSchoolEventRouteRegistry } from "../src/shared/server/schoolEventRouteRegistry.js";
 import { createAcademyReminderRouteRegistry } from "../src/shared/server/academyReminderRouteRegistry.js";
+import { createExamPrepRowRouteRegistry } from "../src/shared/server/examPrepRowRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -413,6 +414,20 @@ const { dispatch: dispatchAttendanceRoute } = createAttendanceRouteRegistry({
 const { dispatch: dispatchClassTemplateRoute } = createClassTemplateRouteRegistry({
   listClassTemplates,
   sendJson
+});
+function logExamPrepRowAudit(tag, audit, { isError = false } = {}) {
+  (isError ? console.error : console.info)(tag, JSON.stringify(audit));
+}
+const { dispatch: dispatchExamPrepRowRoute } = createExamPrepRowRouteRegistry({
+  createAuditId: () => crypto.randomUUID(),
+  deleteDuplicateExamPrepRows,
+  deleteExamPrepRow,
+  listExamPrepRows,
+  logAudit: logExamPrepRowAudit,
+  readJsonBody,
+  sendJson,
+  upsertExamPrepRow,
+  upsertExamPrepRows
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5174,6 +5189,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchAdminAiRoute({ request, response, requestUrl })) return;
   if (await dispatchAttendanceRoute({ request, response, requestUrl })) return;
   if (await dispatchClassTemplateRoute({ request, response, requestUrl })) return;
+  if (await dispatchExamPrepRowRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-question-reviews") {
     try {
@@ -5852,30 +5868,6 @@ const server = http.createServer(async (request, response) => {
     return;
   }
 
-  if (request.method === "GET" && requestUrl.pathname === "/api/exam-prep-rows") {
-    try {
-      const result = await listExamPrepRows();
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/exam-prep-rows") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await upsertExamPrepRow(
-        payload.examPrepRow ?? payload.row ?? payload,
-        { allowRestore: payload.allowRestore === true }
-      );
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, Number(error.statusCode) || 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
   if (request.method === "POST" && requestUrl.pathname === "/api/class-rosters/save") {
     try {
       const payload = parseVersionedWriteRequest(
@@ -5897,20 +5889,6 @@ const server = http.createServer(async (request, response) => {
         ...(error.field ? { field: error.field } : {}),
         ...(error.audit ? { audit: error.audit } : {})
       });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/exam-prep-rows/bulk") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await upsertExamPrepRows(
-        payload.examPrepRows ?? payload.rows ?? [],
-        { allowRestore: payload.allowRestore === true }
-      );
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
     }
     return;
   }
@@ -6007,36 +5985,6 @@ const server = http.createServer(async (request, response) => {
         ...(error.conflictFields ? { conflictFields: error.conflictFields } : {}),
         ...(error.currentHomework ? { currentHomework: error.currentHomework } : {}),
         ...(error.currentRecord ? { currentRecord: error.currentRecord } : {}),
-        ...(error.audit ? { audit: error.audit } : {})
-      });
-    }
-    return;
-  }
-
-  if (request.method === "DELETE" && requestUrl.pathname === "/api/exam-prep-rows") {
-    try {
-      const deleteDuplicates = requestUrl.searchParams.get("duplicates") === "true";
-      const confirmed = requestUrl.searchParams.get("confirm") === "true";
-      const examPrepId = requestUrl.searchParams.get("id");
-      const auditId = requestUrl.searchParams.get("auditId") || crypto.randomUUID();
-      if (!confirmed) throw new Error("시험정보 삭제는 confirm=true가 필요합니다.");
-      if (deleteDuplicates && examPrepId) {
-        throw new Error("단일 시험정보 삭제와 중복 일괄 삭제를 같은 요청에서 실행할 수 없습니다.");
-      }
-      const result = deleteDuplicates
-        ? await deleteDuplicateExamPrepRows()
-        : await deleteExamPrepRow(examPrepId, { auditId });
-      if (!deleteDuplicates) {
-        console.info("[exam-prep-delete-audit]", JSON.stringify(result.audit));
-      }
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      if (error.audit?.operation === "delete_exam_prep_row") {
-        console.error("[exam-prep-delete-audit]", JSON.stringify(error.audit));
-      }
-      sendJson(request, response, error.audit ? 409 : 500, {
-        ok: false,
-        error: error.message,
         ...(error.audit ? { audit: error.audit } : {})
       });
     }

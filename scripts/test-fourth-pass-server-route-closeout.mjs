@@ -9,6 +9,7 @@ import { examAnalysisQuestionCountRouteSignatures } from "../src/shared/server/e
 import { examAnalysisReadRouteSignatures } from "../src/shared/server/examAnalysisReadRouteRegistry.js";
 import { examAnalysisRunWriteRouteSignatures } from "../src/shared/server/examAnalysisRunWriteRouteRegistry.js";
 import { examPostConfirmRouteSignatures } from "../src/shared/server/examPostConfirmRouteRegistry.js";
+import { examPrepRowRouteSignatures } from "../src/shared/server/examPrepRowRouteRegistry.js";
 import { integrationStatusRouteSignatures } from "../src/shared/server/integrationStatusRouteRegistry.js";
 import { portalReadRouteSignatures } from "../src/shared/server/portalReadRouteRegistry.js";
 import { portalWriteRouteSignatures } from "../src/shared/server/portalWriteRouteRegistry.js";
@@ -49,13 +50,15 @@ const registrySignatures = [
   ...academyReminderRouteSignatures,
   ...adminAiRouteSignatures,
   ...attendanceRouteSignatures,
-  ...classTemplateRouteSignatures
+  ...classTemplateRouteSignatures,
+  ...examPrepRowRouteSignatures
 ].map(signatureOf).sort();
 
-assert.equal(registrySignatures.length, 41);
-assert.equal(new Set(registrySignatures).size, 41);
+assert.equal(registrySignatures.length, 45);
+assert.equal(new Set(registrySignatures).size, 45);
 assert.deepEqual(registrySignatures, [
   "DELETE /api/academy-reminders",
+  "DELETE /api/exam-prep-rows",
   "DELETE /api/school-events",
   "DELETE /api/test-sessions",
   "GET /api/academy-reminders",
@@ -64,6 +67,7 @@ assert.deepEqual(registrySignatures, [
   "GET /api/core/status",
   "GET /api/exam-analysis-runs",
   "GET /api/exam-analysis-ssen-types",
+  "GET /api/exam-prep-rows",
   "GET /api/integrations/status",
   "GET /api/portal-data",
   "GET /api/school-events",
@@ -88,6 +92,8 @@ assert.deepEqual(registrySignatures, [
   "POST /api/exam-analysis-runs/refine-question-rows",
   "POST /api/exam-analysis-source-files/vision-check",
   "POST /api/exam-post-submissions/confirm",
+  "POST /api/exam-prep-rows",
+  "POST /api/exam-prep-rows/bulk",
   "POST /api/portal-exam-post-submissions",
   "POST /api/portal-homeworks/complete",
   "POST /api/portal-questions",
@@ -101,13 +107,13 @@ assert.deepEqual(registrySignatures, [
 const directRoutes = [...serverSource.matchAll(
   /if \(request\.method === "(GET|POST|PUT|PATCH|DELETE)" && requestUrl\.pathname === "([^"]+)"\)/g
 )].map((match) => `${match[1]} ${match[2]}`);
-assert.equal(directRoutes.length, 80);
-assert.equal(new Set(directRoutes).size, 80);
+assert.equal(directRoutes.length, 76);
+assert.equal(new Set(directRoutes).size, 76);
 
 const directReadSignatures = directRoutes.filter((signature) => signature.startsWith("GET "));
 const directWriteSignatures = directRoutes.filter((signature) => !signature.startsWith("GET "));
-assert.equal(directReadSignatures.length, 18);
-assert.equal(directWriteSignatures.length, 62);
+assert.equal(directReadSignatures.length, 17);
+assert.equal(directWriteSignatures.length, 59);
 
 const externalReadSignatures = [
   "GET /api/exam-analysis-source-files/open",
@@ -123,7 +129,7 @@ const externalReadSet = new Set(externalReadSignatures);
 const domainSourceReadSignatures = directReadSignatures.filter(
   (signature) => !externalReadSet.has(signature)
 );
-assert.equal(domainSourceReadSignatures.length, 13);
+assert.equal(domainSourceReadSignatures.length, 12);
 
 const externalWriteSignatures = [
   "DELETE /api/exam-analysis-runs",
@@ -152,7 +158,7 @@ const externalEffectSet = new Set(externalWriteSignatures);
 const domainSourceActionSignatures = directWriteSignatures.filter(
   (signature) => !externalEffectSet.has(signature)
 );
-assert.equal(domainSourceActionSignatures.length, 46);
+assert.equal(domainSourceActionSignatures.length, 43);
 assert.equal(
   registrySignatures.length
     + domainSourceReadSignatures.length
@@ -183,7 +189,8 @@ for (const [createToken, dispatchToken] of [
   ["createAcademyReminderRouteRegistry({", "dispatchAcademyReminderRoute({ request, response, requestUrl })"],
   ["createAdminAiRouteRegistry({", "dispatchAdminAiRoute({ request, response, requestUrl })"],
   ["createAttendanceRouteRegistry({", "dispatchAttendanceRoute({ request, response, requestUrl })"],
-  ["createClassTemplateRouteRegistry({", "dispatchClassTemplateRoute({ request, response, requestUrl })"]
+  ["createClassTemplateRouteRegistry({", "dispatchClassTemplateRoute({ request, response, requestUrl })"],
+  ["createExamPrepRowRouteRegistry({", "dispatchExamPrepRowRoute({ request, response, requestUrl })"]
 ]) {
   assert.ok(serverSource.includes(createToken), `registry construction missing: ${createToken}`);
   assert.ok(serverSource.includes(dispatchToken), `registry dispatch missing: ${dispatchToken}`);
@@ -198,5 +205,5 @@ assert.ok(
 );
 
 console.log(
-  "fourth-pass server route closeout passed · registry 41 · source read 13 · external read 5 · source action 46 · external write 16"
+  "fourth-pass server route closeout passed · registry 45 · source read 12 · external read 5 · source action 43 · external write 16"
 );
