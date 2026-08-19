@@ -3,22 +3,23 @@ import { readFile } from "node:fs/promises";
 
 const readSource = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-const [contractApiSource, jobApiSource, safeApiSource, serverSource] = await Promise.all([
+const [contractApiSource, jobApiSource, safeApiSource, serverSource, notificationJobRouteRegistrySource] = await Promise.all([
   readSource("src/domains/notifications/notificationJobContractApi.js"),
   readSource("src/domains/notifications/notificationJobApi.js"),
   readSource("scripts/safe-local-api.mjs"),
-  readSource("api/server.js")
+  readSource("api/server.js"),
+  readSource("src/shared/server/notificationJobRouteRegistry.js")
 ]);
 
-const routeStart = serverSource.indexOf(
+const routeStart = notificationJobRouteRegistrySource.indexOf(
   'if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs/reserve")'
 );
-const routeEnd = serverSource.indexOf(
+const routeEnd = notificationJobRouteRegistrySource.indexOf(
   'if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs/reconcile-solapi")',
   routeStart
 );
 assert.ok(routeStart >= 0 && routeEnd > routeStart);
-const reserveRoute = serverSource.slice(routeStart, routeEnd);
+const reserveRoute = notificationJobRouteRegistrySource.slice(routeStart, routeEnd);
 
 for (const expected of [
   "parseVersionedWriteRequest(",

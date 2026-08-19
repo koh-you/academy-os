@@ -5,22 +5,23 @@ import { cancelNotificationJobRequest } from "../src/domains/notifications/notif
 
 const readSource = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-const [contractApiSource, jobApiSource, safeApiSource, serverSource] = await Promise.all([
+const [contractApiSource, jobApiSource, safeApiSource, serverSource, notificationJobRouteRegistrySource] = await Promise.all([
   readSource("src/domains/notifications/notificationJobContractApi.js"),
   readSource("src/domains/notifications/notificationJobApi.js"),
   readSource("scripts/safe-local-api.mjs"),
-  readSource("api/server.js")
+  readSource("api/server.js"),
+  readSource("src/shared/server/notificationJobRouteRegistry.js")
 ]);
 
-const routeStart = serverSource.indexOf(
+const routeStart = notificationJobRouteRegistrySource.indexOf(
   'if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs/cancel")'
 );
-const routeEnd = serverSource.indexOf(
+const routeEnd = notificationJobRouteRegistrySource.indexOf(
   'if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs/reserve")',
   routeStart
 );
 assert.ok(routeStart >= 0 && routeEnd > routeStart);
-const cancelRoute = serverSource.slice(routeStart, routeEnd);
+const cancelRoute = notificationJobRouteRegistrySource.slice(routeStart, routeEnd);
 
 for (const expected of [
   "parseVersionedWriteRequest(",

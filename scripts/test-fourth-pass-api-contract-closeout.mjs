@@ -17,19 +17,21 @@ import { attendanceRouteSignatures } from "../src/shared/server/attendanceRouteR
 import { homeworkRouteSignatures } from "../src/shared/server/homeworkRouteRegistry.js";
 import { lessonRecordRouteSignatures } from "../src/shared/server/lessonRecordRouteRegistry.js";
 import { lessonRouteSignatures } from "../src/shared/server/lessonRouteRegistry.js";
+import { notificationJobRouteSignatures } from "../src/shared/server/notificationJobRouteRegistry.js";
 import { schoolEventRouteSignatures } from "../src/shared/server/schoolEventRouteRegistry.js";
 import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
 import { teacherAccountRouteSignatures } from "../src/shared/server/teacherAccountRouteRegistry.js";
 import { testSessionWriteRouteSignatures } from "../src/shared/server/testSessionWriteRouteRegistry.js";
 
-const [appStateWriteRouteSource, examAnalysisQuestionCountRouteSource, examAnalysisRunWriteRouteSource, packageJson, reportSnapshotRouteSource, serverSource, attendanceRouteRegistrySource] = await Promise.all([
+const [appStateWriteRouteSource, examAnalysisQuestionCountRouteSource, examAnalysisRunWriteRouteSource, packageJson, reportSnapshotRouteSource, serverSource, attendanceRouteRegistrySource, notificationJobRouteRegistrySource] = await Promise.all([
   readFile(new URL("../src/shared/server/appStateWriteRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/examAnalysisQuestionCountRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../src/shared/server/examAnalysisRunWriteRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../package.json", import.meta.url), "utf8").then(JSON.parse),
   readFile(new URL("../src/shared/server/reportSnapshotRouteRegistry.js", import.meta.url), "utf8"),
   readFile(new URL("../api/server.js", import.meta.url), "utf8"),
-  readFile(new URL("../src/shared/server/attendanceRouteRegistry.js", import.meta.url), "utf8")
+  readFile(new URL("../src/shared/server/attendanceRouteRegistry.js", import.meta.url), "utf8"),
+  readFile(new URL("../src/shared/server/notificationJobRouteRegistry.js", import.meta.url), "utf8")
 ]);
 
 const signatureOf = ({ method, path }) => `${method} ${path}`;
@@ -208,6 +210,9 @@ const directWriteSignatures = [
   ...makeupTaskRouteSignatures
     .filter(({ method }) => ["POST", "PUT", "PATCH", "DELETE"].includes(method))
     .map(signatureOf),
+  ...notificationJobRouteSignatures
+    .filter(({ method }) => ["POST", "PUT", "PATCH", "DELETE"].includes(method))
+    .map(signatureOf),
   ...teacherAccountRouteSignatures.map(signatureOf),
   ...testSessionWriteRouteSignatures.map(signatureOf)
 ].sort();
@@ -235,7 +240,14 @@ const extractedRouteSourceBySignature = new Map([
   ["POST /api/exam-analysis-runs/confirm-question-count", examAnalysisQuestionCountRouteSource],
   ["POST /api/exam-analysis-runs", examAnalysisRunWriteRouteSource],
   ["POST /api/report-snapshots", reportSnapshotRouteSource],
-  ["POST /api/attendance/check", attendanceRouteRegistrySource]
+  ["POST /api/attendance/check", attendanceRouteRegistrySource],
+  ["POST /api/notification-jobs", notificationJobRouteRegistrySource],
+  ["POST /api/notification-jobs/cancel", notificationJobRouteRegistrySource],
+  ["POST /api/notification-jobs/dispatch-due", notificationJobRouteRegistrySource],
+  ["POST /api/notification-jobs/readiness-check", notificationJobRouteRegistrySource],
+  ["POST /api/notification-jobs/reconcile-solapi", notificationJobRouteRegistrySource],
+  ["POST /api/notification-jobs/reserve", notificationJobRouteRegistrySource],
+  ["POST /api/notification-jobs/reserve-bulk", notificationJobRouteRegistrySource]
 ]);
 for (const signature of expectedContractSignatures) {
   const separator = signature.indexOf(" ");
