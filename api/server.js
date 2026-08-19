@@ -180,6 +180,7 @@ import { createAcademyReminderRouteRegistry } from "../src/shared/server/academy
 import { createExamPrepRowRouteRegistry } from "../src/shared/server/examPrepRowRouteRegistry.js";
 import { createMakeupTaskRouteRegistry } from "../src/shared/server/makeupTaskRouteRegistry.js";
 import { createResourceMaterialRouteRegistry } from "../src/shared/server/resourceMaterialRouteRegistry.js";
+import { createSolapiRouteRegistry } from "../src/shared/server/solapiRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -528,6 +529,14 @@ const { dispatch: dispatchResourceMaterialRoute } = createResourceMaterialRouteR
   saveResourceMaterialFile,
   sendJson,
   upsertResourceMaterial
+});
+const { dispatch: dispatchSolapiRoute } = createSolapiRouteRegistry({
+  cancelSolapiReservationGroup,
+  getKoreaDayUtcRange,
+  listSolapiGroups,
+  listSolapiMessages,
+  readJsonBody,
+  sendJson
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5297,6 +5306,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchNotificationJobRoute({ request, response, requestUrl })) return;
   if (await dispatchNotificationProviderRoute({ request, response, requestUrl })) return;
   if (await dispatchResourceMaterialRoute({ request, response, requestUrl })) return;
+  if (await dispatchSolapiRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-question-reviews") {
     try {
@@ -5887,55 +5897,6 @@ const server = http.createServer(async (request, response) => {
         ...(error.currentRecord ? { currentRecord: error.currentRecord } : {}),
         ...(error.audit ? { audit: error.audit } : {})
       });
-    }
-    return;
-  }
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/solapi/messages") {
-    try {
-      const { startIso, endIso } = getKoreaDayUtcRange(requestUrl.searchParams.get("date") || "");
-      const result = await listSolapiMessages({
-        endDate: requestUrl.searchParams.get("endDate") || endIso,
-        groupId: requestUrl.searchParams.get("groupId") || "",
-        limit: requestUrl.searchParams.get("limit") || 100,
-        messageId: requestUrl.searchParams.get("messageId") || "",
-        startDate: requestUrl.searchParams.get("startDate") || startIso,
-        statusCode: requestUrl.searchParams.get("statusCode") || "",
-        to: requestUrl.searchParams.get("to") || "",
-        type: requestUrl.searchParams.get("type") || "ATA"
-      });
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/solapi/groups") {
-    try {
-      const { startIso, endIso } = getKoreaDayUtcRange(requestUrl.searchParams.get("date") || "");
-      const result = await listSolapiGroups({
-        endDate: requestUrl.searchParams.get("endDate") || endIso,
-        groupId: requestUrl.searchParams.get("groupId") || "",
-        limit: requestUrl.searchParams.get("limit") || 100,
-        startDate: requestUrl.searchParams.get("startDate") || startIso
-      });
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/solapi/groups/cancel") {
-    try {
-      const payload = await readJsonBody(request);
-      const groupId = payload.groupId || payload.id;
-      if (!groupId) throw new Error("취소할 Solapi groupId가 필요합니다.");
-      const result = await cancelSolapiReservationGroup(groupId);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
     }
     return;
   }
