@@ -22,6 +22,7 @@ import { homeworkRouteSignatures } from "../src/shared/server/homeworkRouteRegis
 import { lessonRecordRouteSignatures } from "../src/shared/server/lessonRecordRouteRegistry.js";
 import { lessonRouteSignatures } from "../src/shared/server/lessonRouteRegistry.js";
 import { notificationJobRouteSignatures } from "../src/shared/server/notificationJobRouteRegistry.js";
+import { notificationProviderRouteSignatures } from "../src/shared/server/notificationProviderRouteRegistry.js";
 import { schoolEventRouteSignatures } from "../src/shared/server/schoolEventRouteRegistry.js";
 import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
 import { teacherAccountRouteSignatures } from "../src/shared/server/teacherAccountRouteRegistry.js";
@@ -61,11 +62,12 @@ const registrySignatures = [
   ...lessonRecordRouteSignatures,
   ...lessonRouteSignatures,
   ...makeupTaskRouteSignatures,
-  ...notificationJobRouteSignatures
+  ...notificationJobRouteSignatures,
+  ...notificationProviderRouteSignatures
 ].map(signatureOf).sort();
 
-assert.equal(registrySignatures.length, 72);
-assert.equal(new Set(registrySignatures).size, 72);
+assert.equal(registrySignatures.length, 79);
+assert.equal(new Set(registrySignatures).size, 79);
 assert.deepEqual(registrySignatures, [
   "DELETE /api/academy-reminders",
   "DELETE /api/exam-prep-rows",
@@ -131,6 +133,13 @@ assert.deepEqual(registrySignatures, [
   "POST /api/notification-jobs/reconcile-solapi",
   "POST /api/notification-jobs/reserve",
   "POST /api/notification-jobs/reserve-bulk",
+  "POST /api/notifications/attendance-alimtalk",
+  "POST /api/notifications/comment-alimtalk",
+  "POST /api/notifications/daily-report-alimtalk",
+  "POST /api/notifications/slack-daily-schedule",
+  "POST /api/notifications/slack-today-schedule",
+  "POST /api/notifications/slack-today-schedule/reserve",
+  "POST /api/notifications/student-schedule-reminder",
   "POST /api/portal-exam-post-submissions",
   "POST /api/portal-homeworks/complete",
   "POST /api/portal-questions",
@@ -144,13 +153,13 @@ assert.deepEqual(registrySignatures, [
 const directRoutes = [...serverSource.matchAll(
   /if \(request\.method === "(GET|POST|PUT|PATCH|DELETE)" && requestUrl\.pathname === "([^"]+)"\)/g
 )].map((match) => `${match[1]} ${match[2]}`);
-assert.equal(directRoutes.length, 49);
-assert.equal(new Set(directRoutes).size, 49);
+assert.equal(directRoutes.length, 42);
+assert.equal(new Set(directRoutes).size, 42);
 
 const directReadSignatures = directRoutes.filter((signature) => signature.startsWith("GET "));
 const directWriteSignatures = directRoutes.filter((signature) => !signature.startsWith("GET "));
 assert.equal(directReadSignatures.length, 11);
-assert.equal(directWriteSignatures.length, 38);
+assert.equal(directWriteSignatures.length, 31);
 
 const externalReadSignatures = [
   "GET /api/exam-analysis-source-files/open",
@@ -176,17 +185,10 @@ const externalWriteSignatures = [
   "POST /api/exam-post-files",
   "POST /api/exam-post-files/cleanup",
   "POST /api/intake/tally",
-  "POST /api/notifications/attendance-alimtalk",
-  "POST /api/notifications/comment-alimtalk",
-  "POST /api/notifications/daily-report-alimtalk",
-  "POST /api/notifications/slack-daily-schedule",
-  "POST /api/notifications/slack-today-schedule",
-  "POST /api/notifications/slack-today-schedule/reserve",
-  "POST /api/notifications/student-schedule-reminder",
   "POST /api/solapi/groups/cancel",
   "POST /api/special-lecture-applications/tally"
 ].sort();
-assert.equal(externalWriteSignatures.length, 16);
+assert.equal(externalWriteSignatures.length, 9);
 for (const signature of externalWriteSignatures) {
   assert.ok(directWriteSignatures.includes(signature), `external route classification drifted: ${signature}`);
 }
@@ -232,7 +234,8 @@ for (const [createToken, dispatchToken] of [
   ["createLessonRecordRouteRegistry({", "dispatchLessonRecordRoute({ request, response, requestUrl })"],
   ["createLessonRouteRegistry({", "dispatchLessonRoute({ request, response, requestUrl })"],
   ["createMakeupTaskRouteRegistry({", "dispatchMakeupTaskRoute({ request, response, requestUrl })"],
-  ["createNotificationJobRouteRegistry({", "dispatchNotificationJobRoute({ request, response, requestUrl })"]
+  ["createNotificationJobRouteRegistry({", "dispatchNotificationJobRoute({ request, response, requestUrl })"],
+  ["createNotificationProviderRouteRegistry({", "dispatchNotificationProviderRoute({ request, response, requestUrl })"]
 ]) {
   assert.ok(serverSource.includes(createToken), `registry construction missing: ${createToken}`);
   assert.ok(serverSource.includes(dispatchToken), `registry dispatch missing: ${dispatchToken}`);
@@ -247,5 +250,5 @@ assert.ok(
 );
 
 console.log(
-  "fourth-pass server route closeout passed · registry 72 · source read 6 · external read 5 · source action 22 · external write 16"
+  "fourth-pass server route closeout passed · registry 79 · source read 6 · external read 5 · source action 22 · external write 9"
 );

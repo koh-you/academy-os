@@ -17,7 +17,7 @@ const routeStart = notificationJobRouteRegistrySource.indexOf(
   'if (request.method === "POST" && requestUrl.pathname === "/api/notification-jobs/reserve-bulk")'
 );
 const routeEnd = notificationJobRouteRegistrySource.indexOf(
-  "return false;\n  }\n\n  return Object.freeze",
+  "return Object.freeze({ dispatch, routeSignatures: notificationJobRouteSignatures })",
   routeStart
 );
 assert.ok(routeStart >= 0 && routeEnd > routeStart);

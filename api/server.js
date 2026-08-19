@@ -174,6 +174,7 @@ import { createHomeworkRouteRegistry } from "../src/shared/server/homeworkRouteR
 import { createLessonRecordRouteRegistry } from "../src/shared/server/lessonRecordRouteRegistry.js";
 import { createLessonRouteRegistry } from "../src/shared/server/lessonRouteRegistry.js";
 import { createNotificationJobRouteRegistry } from "../src/shared/server/notificationJobRouteRegistry.js";
+import { createNotificationProviderRouteRegistry } from "../src/shared/server/notificationProviderRouteRegistry.js";
 import { createSchoolEventRouteRegistry } from "../src/shared/server/schoolEventRouteRegistry.js";
 import { createAcademyReminderRouteRegistry } from "../src/shared/server/academyReminderRouteRegistry.js";
 import { createExamPrepRowRouteRegistry } from "../src/shared/server/examPrepRowRouteRegistry.js";
@@ -497,6 +498,19 @@ const { dispatch: dispatchNotificationJobRoute } = createNotificationJobRouteReg
   sendJson,
   summarizeNotificationJobForList,
   upsertNotificationJob
+});
+const { dispatch: dispatchNotificationProviderRoute } = createNotificationProviderRouteRegistry({
+  getDispatchAuthState,
+  getKoreaDateString,
+  readJsonBody,
+  reserveTodayTeacherScheduleSlack,
+  sendAttendanceAlimtalkOnce,
+  sendDailyReportAlimtalk,
+  sendJson,
+  sendLessonCommentAlimtalk,
+  sendSlackDailyScheduleSummary,
+  sendStudentScheduleReminderAlimtalk,
+  sendTodayTeacherScheduleSlack
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5264,6 +5278,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchLessonRoute({ request, response, requestUrl })) return;
   if (await dispatchMakeupTaskRoute({ request, response, requestUrl })) return;
   if (await dispatchNotificationJobRoute({ request, response, requestUrl })) return;
+  if (await dispatchNotificationProviderRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-question-reviews") {
     try {
@@ -6041,106 +6056,6 @@ const server = http.createServer(async (request, response) => {
       if (!groupId) throw new Error("취소할 Solapi groupId가 필요합니다.");
       const result = await cancelSolapiReservationGroup(groupId);
       sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/notifications/attendance-alimtalk") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await sendAttendanceAlimtalkOnce(payload);
-      sendJson(request, response, 200, { ok: true, provider: "solapi", result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/notifications/comment-alimtalk") {
-    try {
-      const payload = await readJsonBody(request);
-      if (payload.sendMode === "scheduled" && !payload.scheduledDate) {
-        throw new Error("scheduledDate is required for scheduled comment Alimtalk sends.");
-      }
-      const result = await sendLessonCommentAlimtalk(payload);
-      sendJson(request, response, 200, { ok: true, provider: "solapi", result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/notifications/daily-report-alimtalk") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await sendDailyReportAlimtalk(payload);
-      sendJson(request, response, 200, { ok: true, provider: "solapi", result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/notifications/student-schedule-reminder") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await sendStudentScheduleReminderAlimtalk(payload);
-      sendJson(request, response, 200, { ok: true, provider: "solapi", result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/notifications/slack-daily-schedule") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await sendSlackDailyScheduleSummary(payload);
-      sendJson(request, response, 200, { ok: true, provider: "slack", result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/notifications/slack-today-schedule") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await sendTodayTeacherScheduleSlack({
-        date: payload.date || getKoreaDateString(payload.now || new Date()),
-        force: payload.force === true,
-        notifyEmpty: payload.notifyEmpty !== false
-      });
-      sendJson(request, response, 200, { ok: true, provider: "slack", result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/notifications/slack-today-schedule/reserve") {
-    try {
-      const payload = await readJsonBody(request);
-      const dispatchAuth = getDispatchAuthState(request, payload);
-      if (!dispatchAuth.configured || !dispatchAuth.ok) {
-        sendJson(request, response, dispatchAuth.configured ? 401 : 503, {
-          ok: false,
-          error: dispatchAuth.configured
-            ? "Invalid notification dispatch token."
-            : "NOTIFICATION_DISPATCH_TOKEN is required for Slack scheduling."
-        });
-        return;
-      }
-      const date = payload.date || getKoreaDateString(payload.now || new Date());
-      const result = await reserveTodayTeacherScheduleSlack({
-        date,
-        force: payload.force === true,
-        notifyEmpty: payload.notifyEmpty !== false,
-        scheduledAt: payload.scheduledAt || `${date}T00:00:00.000Z`
-      });
-      sendJson(request, response, 200, { ok: true, provider: "slack_bot", result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
     }

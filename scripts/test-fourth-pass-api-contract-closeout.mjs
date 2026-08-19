@@ -18,6 +18,7 @@ import { homeworkRouteSignatures } from "../src/shared/server/homeworkRouteRegis
 import { lessonRecordRouteSignatures } from "../src/shared/server/lessonRecordRouteRegistry.js";
 import { lessonRouteSignatures } from "../src/shared/server/lessonRouteRegistry.js";
 import { notificationJobRouteSignatures } from "../src/shared/server/notificationJobRouteRegistry.js";
+import { notificationProviderRouteSignatures } from "../src/shared/server/notificationProviderRouteRegistry.js";
 import { schoolEventRouteSignatures } from "../src/shared/server/schoolEventRouteRegistry.js";
 import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
 import { teacherAccountRouteSignatures } from "../src/shared/server/teacherAccountRouteRegistry.js";
@@ -211,6 +212,9 @@ const directWriteSignatures = [
     .filter(({ method }) => ["POST", "PUT", "PATCH", "DELETE"].includes(method))
     .map(signatureOf),
   ...notificationJobRouteSignatures
+    .filter(({ method }) => ["POST", "PUT", "PATCH", "DELETE"].includes(method))
+    .map(signatureOf),
+  ...notificationProviderRouteSignatures
     .filter(({ method }) => ["POST", "PUT", "PATCH", "DELETE"].includes(method))
     .map(signatureOf),
   ...teacherAccountRouteSignatures.map(signatureOf),
