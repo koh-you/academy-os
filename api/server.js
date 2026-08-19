@@ -168,6 +168,7 @@ import { createExamAnalysisRunWriteRouteRegistry } from "../src/shared/server/ex
 import { createExamAnalysisQuestionCountRouteRegistry } from "../src/shared/server/examAnalysisQuestionCountRouteRegistry.js";
 import { createExamAnalysisAiRouteRegistry } from "../src/shared/server/examAnalysisAiRouteRegistry.js";
 import { createAdminAiRouteRegistry } from "../src/shared/server/adminAiRouteRegistry.js";
+import { createAttendanceRouteRegistry } from "../src/shared/server/attendanceRouteRegistry.js";
 import { createSchoolEventRouteRegistry } from "../src/shared/server/schoolEventRouteRegistry.js";
 import { createAcademyReminderRouteRegistry } from "../src/shared/server/academyReminderRouteRegistry.js";
 import {
@@ -400,6 +401,12 @@ const { dispatch: dispatchAdminAiRoute } = createAdminAiRouteRegistry({
   polishLessonComment,
   readJsonBody,
   seedCoreData,
+  sendJson
+});
+const { dispatch: dispatchAttendanceRoute } = createAttendanceRouteRegistry({
+  handleAttendanceCheck,
+  parseVersionedWriteRequest,
+  readJsonBody,
   sendJson
 });
 const teacherAccountTable = "teacher_accounts";
@@ -5160,6 +5167,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchSchoolEventRoute({ request, response, requestUrl })) return;
   if (await dispatchAcademyReminderRoute({ request, response, requestUrl })) return;
   if (await dispatchAdminAiRoute({ request, response, requestUrl })) return;
+  if (await dispatchAttendanceRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-question-reviews") {
     try {
@@ -5730,41 +5738,6 @@ const server = http.createServer(async (request, response) => {
     try {
       const payload = await readJsonBody(request);
       const result = await pruneStaleLessonStudentRecords(payload.lessonId);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/attendance/check") {
-    try {
-      const payload = parseVersionedWriteRequest(
-        request.method,
-        requestUrl.pathname,
-        await readJsonBody(request)
-      );
-      const result = await handleAttendanceCheck(payload);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, Number(error.statusCode) || 500, {
-        ok: false,
-        error: error.message,
-        ...(error.code ? { code: error.code } : {}),
-        ...(error.field ? { field: error.field } : {})
-      });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/attendance/preview") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await handleAttendanceCheck({
-        ...payload,
-        previewOnly: true,
-        sendAlimtalk: false
-      });
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });

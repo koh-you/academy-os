@@ -14,6 +14,7 @@ import { portalReadRouteSignatures } from "../src/shared/server/portalReadRouteR
 import { portalWriteRouteSignatures } from "../src/shared/server/portalWriteRouteRegistry.js";
 import { reportSnapshotRouteSignatures } from "../src/shared/server/reportSnapshotRouteRegistry.js";
 import { adminAiRouteSignatures } from "../src/shared/server/adminAiRouteRegistry.js";
+import { attendanceRouteSignatures } from "../src/shared/server/attendanceRouteRegistry.js";
 import { schoolEventRouteSignatures } from "../src/shared/server/schoolEventRouteRegistry.js";
 import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
 import { teacherAccountRouteSignatures } from "../src/shared/server/teacherAccountRouteRegistry.js";
@@ -45,11 +46,12 @@ const registrySignatures = [
   ...examAnalysisAiRouteSignatures,
   ...schoolEventRouteSignatures,
   ...academyReminderRouteSignatures,
-  ...adminAiRouteSignatures
+  ...adminAiRouteSignatures,
+  ...attendanceRouteSignatures
 ].map(signatureOf).sort();
 
-assert.equal(registrySignatures.length, 38);
-assert.equal(new Set(registrySignatures).size, 38);
+assert.equal(registrySignatures.length, 40);
+assert.equal(new Set(registrySignatures).size, 40);
 assert.deepEqual(registrySignatures, [
   "DELETE /api/academy-reminders",
   "DELETE /api/school-events",
@@ -70,6 +72,8 @@ assert.deepEqual(registrySignatures, [
   "POST /api/admin/seed-core-data",
   "POST /api/ai/comment-polish",
   "POST /api/app-state",
+  "POST /api/attendance/check",
+  "POST /api/attendance/preview",
   "POST /api/auth/login",
   "POST /api/auth/teacher-account",
   "POST /api/client-errors",
@@ -94,13 +98,13 @@ assert.deepEqual(registrySignatures, [
 const directRoutes = [...serverSource.matchAll(
   /if \(request\.method === "(GET|POST|PUT|PATCH|DELETE)" && requestUrl\.pathname === "([^"]+)"\)/g
 )].map((match) => `${match[1]} ${match[2]}`);
-assert.equal(directRoutes.length, 83);
-assert.equal(new Set(directRoutes).size, 83);
+assert.equal(directRoutes.length, 81);
+assert.equal(new Set(directRoutes).size, 81);
 
 const directReadSignatures = directRoutes.filter((signature) => signature.startsWith("GET "));
 const directWriteSignatures = directRoutes.filter((signature) => !signature.startsWith("GET "));
 assert.equal(directReadSignatures.length, 19);
-assert.equal(directWriteSignatures.length, 64);
+assert.equal(directWriteSignatures.length, 62);
 
 const externalReadSignatures = [
   "GET /api/exam-analysis-source-files/open",
@@ -145,7 +149,7 @@ const externalEffectSet = new Set(externalWriteSignatures);
 const domainSourceActionSignatures = directWriteSignatures.filter(
   (signature) => !externalEffectSet.has(signature)
 );
-assert.equal(domainSourceActionSignatures.length, 48);
+assert.equal(domainSourceActionSignatures.length, 46);
 assert.equal(
   registrySignatures.length
     + domainSourceReadSignatures.length
@@ -174,7 +178,8 @@ for (const [createToken, dispatchToken] of [
   ["createExamAnalysisAiRouteRegistry({", "dispatchExamAnalysisAiRoute({ request, response, requestUrl })"],
   ["createSchoolEventRouteRegistry({", "dispatchSchoolEventRoute({ request, response, requestUrl })"],
   ["createAcademyReminderRouteRegistry({", "dispatchAcademyReminderRoute({ request, response, requestUrl })"],
-  ["createAdminAiRouteRegistry({", "dispatchAdminAiRoute({ request, response, requestUrl })"]
+  ["createAdminAiRouteRegistry({", "dispatchAdminAiRoute({ request, response, requestUrl })"],
+  ["createAttendanceRouteRegistry({", "dispatchAttendanceRoute({ request, response, requestUrl })"]
 ]) {
   assert.ok(serverSource.includes(createToken), `registry construction missing: ${createToken}`);
   assert.ok(serverSource.includes(dispatchToken), `registry dispatch missing: ${dispatchToken}`);
@@ -189,5 +194,5 @@ assert.ok(
 );
 
 console.log(
-  "fourth-pass server route closeout passed · registry 38 · source read 14 · external read 5 · source action 48 · external write 16"
+  "fourth-pass server route closeout passed · registry 40 · source read 14 · external read 5 · source action 46 · external write 16"
 );
