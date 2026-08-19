@@ -179,6 +179,7 @@ import { createSchoolEventRouteRegistry } from "../src/shared/server/schoolEvent
 import { createAcademyReminderRouteRegistry } from "../src/shared/server/academyReminderRouteRegistry.js";
 import { createExamPrepRowRouteRegistry } from "../src/shared/server/examPrepRowRouteRegistry.js";
 import { createMakeupTaskRouteRegistry } from "../src/shared/server/makeupTaskRouteRegistry.js";
+import { createResourceMaterialRouteRegistry } from "../src/shared/server/resourceMaterialRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -511,6 +512,22 @@ const { dispatch: dispatchNotificationProviderRoute } = createNotificationProvid
   sendSlackDailyScheduleSummary,
   sendStudentScheduleReminderAlimtalk,
   sendTodayTeacherScheduleSlack
+});
+const { dispatch: dispatchResourceMaterialRoute } = createResourceMaterialRouteRegistry({
+  createFileDigest: (buffer) => crypto.createHash("sha256").update(buffer).digest("hex"),
+  createResourceMaterialStorageOperations,
+  deleteResourceMaterial,
+  deleteResourceMaterialWithFile,
+  getTeacherOrPortalSession,
+  getTeacherSession,
+  listResourceMaterials,
+  parseVersionedWriteRequest,
+  parseDataUrl,
+  readJsonBody,
+  resolveResourceMaterialOpenUrl,
+  saveResourceMaterialFile,
+  sendJson,
+  upsertResourceMaterial
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5279,6 +5296,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchMakeupTaskRoute({ request, response, requestUrl })) return;
   if (await dispatchNotificationJobRoute({ request, response, requestUrl })) return;
   if (await dispatchNotificationProviderRoute({ request, response, requestUrl })) return;
+  if (await dispatchResourceMaterialRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-question-reviews") {
     try {
@@ -5868,146 +5886,6 @@ const server = http.createServer(async (request, response) => {
         ...(error.currentHomework ? { currentHomework: error.currentHomework } : {}),
         ...(error.currentRecord ? { currentRecord: error.currentRecord } : {}),
         ...(error.audit ? { audit: error.audit } : {})
-      });
-    }
-    return;
-  }
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/resource-materials") {
-    try {
-      const result = await listResourceMaterials();
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/resource-material-files") {
-    try {
-      const teacherSession = getTeacherSession(request);
-      if (!teacherSession) {
-        sendJson(request, response, 401, { ok: false, error: "교사 세션 인증이 필요합니다." });
-        return;
-      }
-      const payload = parseVersionedWriteRequest(
-        request.method,
-        requestUrl.pathname,
-        await readJsonBody(request, { limitBytes: 28 * 1024 * 1024 })
-      );
-      const parsedFile = parseDataUrl(payload.file?.dataUrl);
-      const digest = crypto.createHash("sha256").update(parsedFile.buffer).digest("hex");
-      const result = await saveResourceMaterialFile({
-        digest,
-        file: {
-          buffer: parsedFile.buffer,
-          fileName: payload.file?.fileName,
-          mimeType: parsedFile.mimeType,
-          size: parsedFile.buffer.length
-        },
-        material: {
-          ...(payload.material ?? {}),
-          createdBy: teacherSession.teacherId
-        },
-        operations: createResourceMaterialStorageOperations()
-      });
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, Number(error.statusCode) || 500, {
-        ok: false,
-        error: error.message,
-        ...(error.code ? { code: error.code } : {}),
-        ...(error.field ? { field: error.field } : {}),
-        ...(error.currentMaterial !== undefined ? { currentMaterial: error.currentMaterial } : {})
-      });
-    }
-    return;
-  }
-
-  if (request.method === "DELETE" && requestUrl.pathname === "/api/resource-material-files") {
-    try {
-      const teacherSession = getTeacherSession(request);
-      if (!teacherSession) {
-        sendJson(request, response, 401, { ok: false, error: "교사 세션 인증이 필요합니다." });
-        return;
-      }
-      const payload = parseVersionedWriteRequest(
-        request.method,
-        requestUrl.pathname,
-        await readJsonBody(request)
-      );
-      const result = await deleteResourceMaterialWithFile({
-        material: payload.material,
-        operations: createResourceMaterialStorageOperations()
-      });
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, Number(error.statusCode) || 500, {
-        ok: false,
-        error: error.message,
-        ...(error.code ? { code: error.code } : {}),
-        ...(error.field ? { field: error.field } : {}),
-        ...(error.currentMaterial !== undefined ? { currentMaterial: error.currentMaterial } : {})
-      });
-    }
-    return;
-  }
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/resource-material-files/open") {
-    try {
-      const { portalSession, teacherSession } = getTeacherOrPortalSession(request);
-      if (!teacherSession && !portalSession) {
-        sendJson(request, response, 401, { ok: false, error: "자료 열람 세션 인증이 필요합니다. 다시 로그인해 주세요." });
-        return;
-      }
-      const materialId = requestUrl.searchParams.get("id") || "";
-      if (!materialId) {
-        sendJson(request, response, 400, { ok: false, error: "열람할 자료 ID가 필요합니다." });
-        return;
-      }
-      const signedUrl = await resolveResourceMaterialOpenUrl(materialId, { portalSession, teacherSession });
-      sendJson(request, response, 200, { ok: true, signedUrl });
-    } catch (error) {
-      sendJson(request, response, Number(error.statusCode) || 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/resource-materials") {
-    try {
-      const payload = parseVersionedWriteRequest(
-        request.method,
-        requestUrl.pathname,
-        await readJsonBody(request)
-      );
-      const result = await upsertResourceMaterial(payload.material);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, Number(error.statusCode) || 500, {
-        ok: false,
-        error: error.message,
-        ...(error.code ? { code: error.code } : {}),
-        ...(error.field ? { field: error.field } : {}),
-        ...(error.currentMaterial !== undefined ? { currentMaterial: error.currentMaterial } : {})
-      });
-    }
-    return;
-  }
-
-  if (request.method === "DELETE" && requestUrl.pathname === "/api/resource-materials") {
-    try {
-      const materialId = requestUrl.searchParams.get("id");
-      if (!materialId) throw new Error("삭제할 자료 ID가 필요합니다.");
-      const result = await deleteResourceMaterial(materialId, {
-        expectedUpdatedAt: requestUrl.searchParams.get("expectedUpdatedAt") || ""
-      });
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, Number(error.statusCode) || 500, {
-        ok: false,
-        error: error.message,
-        ...(error.code ? { code: error.code } : {}),
-        ...(error.currentMaterial !== undefined ? { currentMaterial: error.currentMaterial } : {})
       });
     }
     return;
