@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { versionedWriteRouteContracts } from "../src/shared/contracts/versionedWriteRouteContracts.js";
+import { academyReminderRouteSignatures } from "../src/shared/server/academyReminderRouteRegistry.js";
 import { appStateWriteRouteSignatures } from "../src/shared/server/appStateWriteRouteRegistry.js";
 import { authLoginRouteSignatures } from "../src/shared/server/authLoginRouteRegistry.js";
 import { examAnalysisAiRouteSignatures } from "../src/shared/server/examAnalysisAiRouteRegistry.js";
@@ -173,6 +174,9 @@ const directWriteSignatures = [
   ...portalWriteRouteSignatures.map(signatureOf),
   ...reportSnapshotRouteSignatures.map(signatureOf),
   ...schoolEventRouteSignatures
+    .filter(({ method }) => ["POST", "PUT", "PATCH", "DELETE"].includes(method))
+    .map(signatureOf),
+  ...academyReminderRouteSignatures
     .filter(({ method }) => ["POST", "PUT", "PATCH", "DELETE"].includes(method))
     .map(signatureOf),
   ...teacherAccountRouteSignatures.map(signatureOf),

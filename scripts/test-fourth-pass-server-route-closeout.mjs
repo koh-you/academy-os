@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { academyReminderRouteSignatures } from "../src/shared/server/academyReminderRouteRegistry.js";
 import { appCoreReadRouteSignatures } from "../src/shared/server/appCoreReadRouteRegistry.js";
 import { appStateWriteRouteSignatures } from "../src/shared/server/appStateWriteRouteRegistry.js";
 import { authLoginRouteSignatures } from "../src/shared/server/authLoginRouteRegistry.js";
@@ -41,14 +42,17 @@ const registrySignatures = [
   ...examAnalysisRunWriteRouteSignatures,
   ...examAnalysisQuestionCountRouteSignatures,
   ...examAnalysisAiRouteSignatures,
-  ...schoolEventRouteSignatures
+  ...schoolEventRouteSignatures,
+  ...academyReminderRouteSignatures
 ].map(signatureOf).sort();
 
-assert.equal(registrySignatures.length, 33);
-assert.equal(new Set(registrySignatures).size, 33);
+assert.equal(registrySignatures.length, 36);
+assert.equal(new Set(registrySignatures).size, 36);
 assert.deepEqual(registrySignatures, [
+  "DELETE /api/academy-reminders",
   "DELETE /api/school-events",
   "DELETE /api/test-sessions",
+  "GET /api/academy-reminders",
   "GET /api/app-state",
   "GET /api/core/status",
   "GET /api/exam-analysis-runs",
@@ -60,6 +64,7 @@ assert.deepEqual(registrySignatures, [
   "GET /api/test-attempts",
   "GET /api/test-sessions",
   "GET /health",
+  "POST /api/academy-reminders",
   "POST /api/app-state",
   "POST /api/auth/login",
   "POST /api/auth/teacher-account",
@@ -85,13 +90,13 @@ assert.deepEqual(registrySignatures, [
 const directRoutes = [...serverSource.matchAll(
   /if \(request\.method === "(GET|POST|PUT|PATCH|DELETE)" && requestUrl\.pathname === "([^"]+)"\)/g
 )].map((match) => `${match[1]} ${match[2]}`);
-assert.equal(directRoutes.length, 88);
-assert.equal(new Set(directRoutes).size, 88);
+assert.equal(directRoutes.length, 85);
+assert.equal(new Set(directRoutes).size, 85);
 
 const directReadSignatures = directRoutes.filter((signature) => signature.startsWith("GET "));
 const directWriteSignatures = directRoutes.filter((signature) => !signature.startsWith("GET "));
-assert.equal(directReadSignatures.length, 20);
-assert.equal(directWriteSignatures.length, 68);
+assert.equal(directReadSignatures.length, 19);
+assert.equal(directWriteSignatures.length, 66);
 
 const externalReadSignatures = [
   "GET /api/exam-analysis-source-files/open",
@@ -107,7 +112,7 @@ const externalReadSet = new Set(externalReadSignatures);
 const domainSourceReadSignatures = directReadSignatures.filter(
   (signature) => !externalReadSet.has(signature)
 );
-assert.equal(domainSourceReadSignatures.length, 15);
+assert.equal(domainSourceReadSignatures.length, 14);
 
 const externalWriteSignatures = [
   "DELETE /api/exam-analysis-runs",
@@ -138,7 +143,7 @@ const externalEffectSet = new Set(externalWriteSignatures);
 const domainSourceActionSignatures = directWriteSignatures.filter(
   (signature) => !externalEffectSet.has(signature)
 );
-assert.equal(domainSourceActionSignatures.length, 50);
+assert.equal(domainSourceActionSignatures.length, 48);
 assert.equal(
   registrySignatures.length
     + domainSourceReadSignatures.length
@@ -165,7 +170,8 @@ for (const [createToken, dispatchToken] of [
   ["createExamAnalysisRunWriteRouteRegistry({", "dispatchExamAnalysisRunWriteRoute({ request, response, requestUrl })"],
   ["createExamAnalysisQuestionCountRouteRegistry({", "dispatchExamAnalysisQuestionCountRoute({ request, response, requestUrl })"],
   ["createExamAnalysisAiRouteRegistry({", "dispatchExamAnalysisAiRoute({ request, response, requestUrl })"],
-  ["createSchoolEventRouteRegistry({", "dispatchSchoolEventRoute({ request, response, requestUrl })"]
+  ["createSchoolEventRouteRegistry({", "dispatchSchoolEventRoute({ request, response, requestUrl })"],
+  ["createAcademyReminderRouteRegistry({", "dispatchAcademyReminderRoute({ request, response, requestUrl })"]
 ]) {
   assert.ok(serverSource.includes(createToken), `registry construction missing: ${createToken}`);
   assert.ok(serverSource.includes(dispatchToken), `registry dispatch missing: ${dispatchToken}`);
@@ -180,5 +186,5 @@ assert.ok(
 );
 
 console.log(
-  "fourth-pass server route closeout passed · registry 33 · source read 15 · external read 5 · source action 50 · external write 18"
+  "fourth-pass server route closeout passed · registry 36 · source read 14 · external read 5 · source action 48 · external write 18"
 );
