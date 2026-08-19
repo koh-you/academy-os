@@ -151,7 +151,7 @@ assert.equal(responseStates.at(-1)?.state, "failed");
 
 const serverSource = await readFile(new URL("../api/server.js", import.meta.url), "utf8");
 const routeStart = serverSource.indexOf('requestUrl.pathname === "/api/supplement-schedules/save"');
-const routeEnd = serverSource.indexOf('requestUrl.pathname === "/api/exam-prep-rows"', routeStart);
+const routeEnd = serverSource.indexOf('requestUrl.pathname === "/api/class-rosters/save"', routeStart);
 const supplementScheduleRouteSource = serverSource.slice(routeStart, routeEnd);
 assert.ok(routeStart >= 0 && routeEnd > routeStart);
 assert.match(supplementScheduleRouteSource, /parseVersionedWriteRequest\(/);
