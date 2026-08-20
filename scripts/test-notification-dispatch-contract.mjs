@@ -49,26 +49,16 @@ assert.ok(
   "dispatch auth must reject sensitive overrides before payload normalization"
 );
 
-const ownerStart = serverSource.indexOf("async function dispatchDueNotificationJobs(");
-const ownerEnd = serverSource.indexOf("const internalDispatchEnabled", ownerStart);
-assert.ok(ownerStart >= 0 && ownerEnd > ownerStart);
-const ownerSource = serverSource.slice(ownerStart, ownerEnd);
-for (const expected of [
-  "await listNotificationDispatchCandidates({",
-  "allowManualStatuses,",
-  "limit: 1000,",
-  "now",
-  "allowManualStatuses && dispatchableNotificationStatuses.has(job.status)",
-  'job.status !== "scheduled" || !isOsScheduledNotificationJob(job)',
-  "await claimNotificationJob(job, claimId)",
-  "await sendNotificationJob(prepared.job, { forceDryRun })",
-  "await upsertNotificationJob(updatedJob)",
-  "await reconcileDueSolapiNotificationJobs({ now })",
-  "processedCount: processed.length",
-  "source: listed.source"
-]) {
-  assert.ok(ownerSource.includes(expected), `dispatch owner missing ${expected}`);
-}
+// MV-2d moved the dispatch orchestration body out of api/server.js into
+// notificationSolapiDispatchService.js (behavior verified by
+// test-notification-solapi-dispatch-service.mjs, not by source-slicing here).
+// server.js keeps a thin hoisted-function wrapper so the route registry wiring
+// and runInternalNotificationDispatch's 60s loop (both evaluated before the
+// service is constructed) keep working.
+assert.ok(serverSource.includes("function dispatchDueNotificationJobs(options)"));
+assert.ok(serverSource.includes('from "../src/shared/server/notificationSolapiDispatchService.js"'));
+assert.ok(serverSource.includes("createNotificationSolapiDispatchService({"));
+assert.ok(serverSource.includes("setInterval(() => runInternalNotificationDispatch(\"interval\"), 60 * 1000)"));
 
 const scheduledQuery = new URLSearchParams(createNotificationDispatchCandidateQuery({
   now: "2026-08-10T06:00:00.000Z"
