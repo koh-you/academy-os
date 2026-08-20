@@ -34,23 +34,16 @@ for (const expected of [
 }
 assert.equal(reserveRoute.includes("payload.notificationJob ?? payload"), false);
 
-const reservationStart = serverSource.indexOf("async function reserveNotificationJobInSolapi(");
-const reservationEnd = serverSource.indexOf("async function reserveNotificationJobsInSolapi(", reservationStart);
-assert.ok(reservationStart >= 0 && reservationEnd > reservationStart);
-const reservationSource = serverSource.slice(reservationStart, reservationEnd);
-for (const expected of [
-  "getNotificationJob(nextJob.notificationJobId)",
-  "isSameSolapiReservation(existingJob, nextJob)",
-  "isSameSolapiReservationPending(existingJob, nextJob)",
-  "cancelSolapiReservationGroup(existingProviderGroupId)",
-  "await upsertNotificationJob(reservingJob)",
-  "sendScheduledNotificationJobToSolapi(reservingJob, { forceDryRun })",
-  "reservationCanceledAfterTeacherCancel: true",
-  "await upsertNotificationJob(updatedJob)",
-  'source: "solapi"'
-]) {
-  assert.ok(reservationSource.includes(expected), `reservation orchestration missing ${expected}`);
-}
+// MV-2b moved the reserve orchestration body out of api/server.js into
+// notificationSolapiReserveService.js (behavior verified by
+// test-notification-solapi-reserve-service.mjs, not by source-slicing here).
+// server.js keeps thin hoisted-function wrappers with the same names so the
+// route registry wiring above (evaluated before the service is constructed)
+// keeps working; this only checks that ownership move is deliberate and wired.
+assert.ok(serverSource.includes("function reserveNotificationJobInSolapi(job, options)"));
+assert.ok(serverSource.includes("function reserveNotificationJobsInSolapi(jobs, options)"));
+assert.ok(serverSource.includes('from "../src/shared/server/notificationSolapiReserveService.js"'));
+assert.ok(serverSource.includes("createNotificationSolapiReserveService({"));
 
 for (const expected of [
   "export async function reserveNotificationJobProviderRequest",
