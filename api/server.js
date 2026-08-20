@@ -183,6 +183,7 @@ import { createResourceMaterialRouteRegistry } from "../src/shared/server/resour
 import { createSolapiRouteRegistry } from "../src/shared/server/solapiRouteRegistry.js";
 import { createSpecialLectureApplicationRouteRegistry } from "../src/shared/server/specialLectureApplicationRouteRegistry.js";
 import { createSpecialLectureEnrollmentRouteRegistry } from "../src/shared/server/specialLectureEnrollmentRouteRegistry.js";
+import { createStudentIntakeApplicantRouteRegistry } from "../src/shared/server/studentIntakeApplicantRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -553,6 +554,12 @@ const { dispatch: dispatchSpecialLectureEnrollmentRoute } = createSpecialLecture
   sendJson,
   upsertSpecialLectureEnrollment,
   upsertSpecialLectureEnrollments
+});
+const { dispatch: dispatchStudentIntakeApplicantRoute } = createStudentIntakeApplicantRouteRegistry({
+  listStudentIntakeApplicants,
+  readJsonBody,
+  sendJson,
+  upsertStudentIntakeApplicant
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5325,6 +5332,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchSolapiRoute({ request, response, requestUrl })) return;
   if (await dispatchSpecialLectureApplicationRoute({ request, response, requestUrl })) return;
   if (await dispatchSpecialLectureEnrollmentRoute({ request, response, requestUrl })) return;
+  if (await dispatchStudentIntakeApplicantRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-question-reviews") {
     try {
@@ -5600,35 +5608,6 @@ const server = http.createServer(async (request, response) => {
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/student-intake-applicants") {
-    try {
-      const result = await listStudentIntakeApplicants();
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/student-intake-applicants") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await upsertStudentIntakeApplicant(
-        payload.applicant ?? payload,
-        { expectedUpdatedAt: payload.expectedUpdatedAt }
-      );
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, Number(error.statusCode) || 500, {
-        ok: false,
-        code: error.code,
-        currentApplicant: error.currentApplicant,
-        error: error.message
-      });
     }
     return;
   }
