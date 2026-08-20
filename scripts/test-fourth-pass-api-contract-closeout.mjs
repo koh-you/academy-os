@@ -23,6 +23,7 @@ import { notificationProviderRouteSignatures } from "../src/shared/server/notifi
 import { schoolEventRouteSignatures } from "../src/shared/server/schoolEventRouteRegistry.js";
 import { solapiRouteSignatures } from "../src/shared/server/solapiRouteRegistry.js";
 import { specialLectureApplicationRouteSignatures } from "../src/shared/server/specialLectureApplicationRouteRegistry.js";
+import { specialLectureEnrollmentRouteSignatures } from "../src/shared/server/specialLectureEnrollmentRouteRegistry.js";
 import { systemRouteSignatures } from "../src/shared/server/systemRouteRegistry.js";
 import { teacherAccountRouteSignatures } from "../src/shared/server/teacherAccountRouteRegistry.js";
 import { testSessionWriteRouteSignatures } from "../src/shared/server/testSessionWriteRouteRegistry.js";
@@ -228,6 +229,9 @@ const directWriteSignatures = [
     .filter(({ method }) => ["POST", "PUT", "PATCH", "DELETE"].includes(method))
     .map(signatureOf),
   ...specialLectureApplicationRouteSignatures
+    .filter(({ method }) => ["POST", "PUT", "PATCH", "DELETE"].includes(method))
+    .map(signatureOf),
+  ...specialLectureEnrollmentRouteSignatures
     .filter(({ method }) => ["POST", "PUT", "PATCH", "DELETE"].includes(method))
     .map(signatureOf),
   ...teacherAccountRouteSignatures.map(signatureOf),
