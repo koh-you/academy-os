@@ -61,6 +61,7 @@ const studentProfileModalPath = path.join(root, "src", "domains", "students", "S
 const studentLifecycleOverlaysPath = path.join(root, "src", "domains", "students", "StudentLifecycleOverlays.jsx");
 const studentWithdrawnListPath = path.join(root, "src", "domains", "students", "StudentWithdrawnList.jsx");
 const studentEffectAdapterPath = path.join(root, "src", "domains", "students", "studentEffectAdapter.js");
+const lessonRosterSelectorsPath = path.join(root, "src", "domains", "students", "lessonRosterSelectors.js");
 const classRosterApiPath = path.join(root, "src", "domains", "students", "classRosterApi.js");
 const classRosterPersistencePath = path.join(root, "src", "domains", "students", "classRosterPersistence.js");
 const studentWithdrawalLessonBoundaryPath = path.join(root, "src", "domains", "students", "withdrawalLessonBoundary.js");
@@ -596,6 +597,11 @@ const appEntrySource = [
   fs.existsSync(studentEffectAdapterPath)
     ? `/* student effect adapter boundary\n${fs
         .readFileSync(studentEffectAdapterPath, "utf8")
+        .replace(/\*\//g, "* /")}\n*/`
+    : "",
+  fs.existsSync(lessonRosterSelectorsPath)
+    ? `/* extracted lesson roster selectors boundary\n${fs
+        .readFileSync(lessonRosterSelectorsPath, "utf8")
         .replace(/\*\//g, "* /")}\n*/`
     : ""
 ].join("\n");

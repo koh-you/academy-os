@@ -30,11 +30,18 @@ import { createExamPrepRowSaveController } from "../domains/exams/examPrepRowSav
 import { applyExamPrepDraftToLogicalGroup } from "../domains/exams/examPrepDraft.js";
 import { normalizeExamPrepRowReviewDraft } from "../domains/exams/examReviewDraft.js";
 import { createStudentExamPrepRow } from "../domains/exams/studentExamPrepRow.js";
-import {
-  createWithdrawalStudentMutation,
-  isStudentVisibleInLessonJournal
-} from "../domains/students/withdrawalLessonBoundary.js";
+import { createWithdrawalStudentMutation } from "../domains/students/withdrawalLessonBoundary.js";
 import { getRosterEffectiveFromDate } from "../domains/students/rosterEffectiveDate.js";
+import {
+  compareStudentsByName,
+  getActiveLessonStudents,
+  getActiveStudentIdsFromSelection,
+  getLessonJournalStudents,
+  getLessonStudentIds,
+  isActiveStudent,
+  isWithdrawnStudent,
+  sortStudentsByName
+} from "../domains/students/lessonRosterSelectors.js";
 import {
   getDefaultTallyStudentId,
   getTallyStudentMergeCandidates,
@@ -473,7 +480,6 @@ import {
 import { safeIdPart } from "../shared/utils/id.js";
 import {
   applyStudentScheduleToLesson,
-  getEffectiveLessonStudentIds,
   isStudentScheduledForLesson
 } from "../shared/utils/studentSchedule.js";
 import ssenTypeIndex from "../../api/data/ssenTypeIndex.json";
@@ -620,51 +626,6 @@ function formatLessonTimeRange(lesson = {}) {
 
 function formatLessonDisplayName(lesson = {}) {
   return [lesson.className, formatLessonTimeRange(lesson)].filter(Boolean).join(" · ");
-}
-
-function getLessonStudentIds(lesson = {}, students = []) {
-  return students.length
-    ? getEffectiveLessonStudentIds(lesson, students)
-    : Array.isArray(lesson?.studentIds) ? lesson.studentIds : [];
-}
-
-function isWithdrawnStudent(student = {}) {
-  return (student.status ?? "active") !== "active" || Boolean(student.withdrawnAt);
-}
-
-function isActiveStudent(student = {}) {
-  return student && !isWithdrawnStudent(student);
-}
-
-function compareStudentsByName(left = {}, right = {}) {
-  const nameCompare = String(left.name ?? "").localeCompare(String(right.name ?? ""), "ko", {
-    numeric: true,
-    sensitivity: "base"
-  });
-  return nameCompare || String(left.studentId ?? "").localeCompare(String(right.studentId ?? ""));
-}
-
-function sortStudentsByName(students = []) {
-  return [...students].sort(compareStudentsByName);
-}
-
-function getActiveLessonStudents(lesson = {}, students = []) {
-  return sortStudentsByName(getLessonStudentIds(lesson, students)
-    .map((studentId) => students.find((student) => student.studentId === studentId))
-    .filter(isActiveStudent));
-}
-
-function getLessonJournalStudents(lesson = {}, students = []) {
-  return sortStudentsByName(getLessonStudentIds(lesson, students)
-    .map((studentId) => students.find((student) => student.studentId === studentId))
-    .filter((student) => student && isStudentVisibleInLessonJournal(student, lesson.date)));
-}
-
-function getActiveStudentIdsFromSelection(studentIds = [], students = []) {
-  const selectedStudentIds = new Set(studentIds);
-  return sortStudentsByName(students
-    .filter((student) => isActiveStudent(student) && selectedStudentIds.has(student.studentId)))
-    .map((student) => student.studentId);
 }
 
 function getHomeworkFollowupNoticeForTarget(record = {}, target = "parent", notificationTemplates = {}) {
