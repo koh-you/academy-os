@@ -62,7 +62,7 @@ const [appSource, outletSource, hubSource, detailSource, adapterSource] = await 
 
 assert.ok(outletSource.includes("createLessonJournalEffectAdapter({"));
 assert.ok(outletSource.includes("transport: runtimeBindings.lessonJournalTransport"));
-assert.ok(outletSource.includes("lessonJournalEffects,"));
+assert.ok(outletSource.includes("lessonJournalEffects"));
 assert.ok(hubSource.includes("effects={lessonJournalEffects}"));
 assert.ok(detailSource.includes("persistence: {"));
 assert.ok(detailSource.includes("provider: {"));

@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
 const teacherViewOutletSource = await readFile(new URL("../src/app/TeacherViewOutlet.js", import.meta.url), "utf8");
+const lessonHubViewPropsSource = await readFile(new URL("../src/domains/lessons/lessonHubViewProps.js", import.meta.url), "utf8");
 const lazyTeacherViewSource = await readFile(new URL("../src/app/lazyTeacherViewComponents.js", import.meta.url), "utf8");
 const teacherLessonHubSource = await readFile(
   new URL("../src/domains/lessons/TeacherLessonHubV2.jsx", import.meta.url),
@@ -82,7 +83,7 @@ assert.ok(
   teacherLessonHubSource.includes("attendanceSyncStatus={attendanceSyncStatus}") &&
     teacherLessonHubSource.includes("selectedCalendarDayRef={selectedCalendarDayRef}") &&
     teacherLessonHubSource.includes("showMonthlyRegularLessonOpen={!isMonthlyRegularLessonOpened") &&
-    teacherViewOutletSource.includes("onShiftMonth: actions.handleCalendarMonthShift"),
+    (teacherViewOutletSource + lessonHubViewPropsSource).includes("onShiftMonth: actions.handleCalendarMonthShift"),
   "lesson route must preserve attendance sync, local focus ownership, and monthly regular opening controls"
 );
 assert.ok(cssSource.includes(".lessonCalendarMonthNavigation"));
