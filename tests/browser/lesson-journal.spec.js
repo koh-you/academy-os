@@ -1234,6 +1234,75 @@ test("lesson journal rebases a newly created homework conflict before a verified
   expect(pageErrors).toEqual([]);
 });
 
+test("lesson journal rebases an updated homework conflict before a verified retry", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  let currentHomework = null;
+  let saveAttempt = 0;
+  await page.route("**/api/lesson-journal/rows/save", async (route) => {
+    saveAttempt += 1;
+    const payload = route.request().postDataJSON();
+    if (saveAttempt === 1) {
+      currentHomework = {
+        ...payload.homeworkChanges[0].before,
+        assignmentStatus: "partial_80",
+        incompleteHomework: "partial_80",
+        status: "partial",
+        teacherStatus: "partial",
+        updatedAt: "2026-08-20T09:00:00.000Z"
+      };
+      await route.fulfill({
+        contentType: "application/json",
+        json: {
+          code: "LESSON_JOURNAL_ROWS_CONFLICT",
+          conflictFields: ["assignmentStatus"],
+          currentHomework,
+          error: "숙제의 같은 항목이 다른 화면에서 먼저 변경되었습니다.",
+          ok: false
+        },
+        status: 409
+      });
+      return;
+    }
+    expect(payload.homeworkChanges.find(
+      (change) => change.after.homeworkId === currentHomework.homeworkId
+    )?.before).toEqual(currentHomework);
+    await route.fulfill({
+      contentType: "application/json",
+      json: {
+        auditId: payload.auditId,
+        homeworks: payload.homeworkChanges.map((change) => change.after),
+        ok: true,
+        records: payload.recordChanges.map((change) => change.after),
+        source: "supabase",
+        verified: true
+      },
+      status: 200
+    });
+  });
+  await loginAsTeacher(page);
+  const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
+  await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
+
+  const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
+  await lessonJournal.getByRole("button", { name: "수정 시작" }).click();
+  const studentRow = lessonJournal.getByRole("region", { name: "수업일지 학생 기록" })
+    .locator(".journalRow:not(.journalHead)")
+    .first();
+  const assignmentStatus = studentRow.getByRole("combobox");
+  await assignmentStatus.selectOption("partial_50");
+  const saveBar = lessonJournal.getByRole("complementary", { name: "수업일지 하단 고정 저장 바" });
+  const saveButton = saveBar.getByRole("button", { name: "변경 저장" });
+  await saveButton.click();
+  await expect(saveBar).toContainText("최신 원천을 불러왔습니다");
+  await expect(saveBar).toContainText("변경 저장을 다시 눌러 주세요");
+  await expect(assignmentStatus).toHaveValue("partial_50");
+
+  await saveButton.click();
+  await expect(saveBar).toContainText("저장 완료");
+  expect(saveAttempt).toBe(2);
+  expect(pageErrors).toEqual([]);
+});
+
 test("lesson journal reuses one stable makeup task after an unknown save response", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   let interceptedTaskId = "";

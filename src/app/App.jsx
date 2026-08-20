@@ -307,7 +307,7 @@ import { executeLessonJournalDraftPersistence } from "../domains/lessons/lessonJ
 import { createLessonJournalDraftPersistencePlan } from "../domains/lessons/lessonJournalDraftPersistencePlan.js";
 import {
   createLessonJournalRecordSaveStates,
-  mergeCreatedLessonJournalHomeworkConflict,
+  mergeLatestLessonJournalHomeworkConflict,
   mergeVerifiedLessonJournalHomeworks,
   mergeVerifiedLessonJournalMakeupTasks,
   mergeVerifiedLessonJournalRecords
@@ -6543,14 +6543,14 @@ export function App() {
       },
       onFailure: (error, { journalRowsCompleted } = {}) => {
         console.error(error);
-        const homeworkConflict = mergeCreatedLessonJournalHomeworkConflict({
+        const homeworkConflict = mergeLatestLessonJournalHomeworkConflict({
           conflictHomework: error?.result?.currentHomework,
           currentHomeworks: homeworksRef.current
         });
         if (!journalRowsCompleted && homeworkConflict.recovered) {
           homeworksRef.current = homeworkConflict.homeworks;
           setHomeworks(homeworkConflict.homeworks);
-          error.message = "숙제가 다른 화면에서 먼저 생성되어 최신 원천을 불러왔습니다. 입력은 유지되었습니다. 변경 저장을 다시 눌러 주세요.";
+          error.message = "숙제가 다른 화면에서 변경되어 최신 원천을 불러왔습니다. 입력은 유지되었습니다. 변경 저장을 다시 눌러 주세요.";
         }
         const failedStates = createLessonJournalRecordSaveStates(recordsToSave, "failed");
         if (recordsToSave.length && !journalRowsCompleted) {

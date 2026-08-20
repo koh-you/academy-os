@@ -2,6 +2,11 @@
 
 업데이트: 2026-08-20
 
+## 2026-08-20 수업일지 숙제 충돌 재저장 복구
+
+- 기존 숙제 동일 필드 409에서 최신 서버 row를 화면의 다음 저장 기준선으로 반영하고, 교사 입력 draft는 보존한다. 안내 후 `변경 저장`을 다시 누르면 최신 버전 위에서 저장한다.
+- API·DB·CAS 계약은 바꾸지 않은 frontend 충돌 복구다. 신규 숙제 생성 충돌과 기존 숙제 갱신 충돌 safe browser가 모두 통과했으며 운영 데이터·알림 side effect는 실행하지 않았다.
+
 ## 2026-08-20 App/API 4차 리팩터링 4-5h 종료 감사
 
 - notification job 9개, notification provider 7개(Slack 3개 포함), Solapi 4개 route가 이미 최신 main의 frozen registry와 전용 fixture로 이동된 상태를 확인했다.

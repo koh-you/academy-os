@@ -2,6 +2,11 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-20 수업일지 숙제 충돌 재저장 복구
+
+- 운영 화면의 `숙제의 같은 항목이 다른 화면에서 먼저 변경되었습니다` 실패는 서버가 최신 숙제 row를 응답해도 이미 로컬 목록에 같은 ID가 있으면 기준선을 갱신하지 않던 frontend 복구 공백이었다. 다음 클릭도 오래된 `updatedAt`을 보내 영구 충돌할 수 있었다.
+- 409의 최신 숙제 row로 기준선만 교체하고 입력 draft는 유지한다. 두 번째 저장은 최신 원천 위에서 재계획되며 서버 CAS·동일 필드 보호·Supabase 재조회는 그대로다. 관련 fixture와 safe browser 충돌→재시도 `2/2`를 통과했다.
+
 ## 2026-08-20 App/API 4차 리팩터링 4-5h 종료 감사
 
 - 최신 main에 이미 병합된 notification job/provider/Solapi route registry를 직접 dispatch와 대조했다. Slack 3개 route는 notification provider registry가 소유하며, 운영 provider를 호출하지 않는 전용 fixture가 인증·성공·오류 계약을 고정한다.

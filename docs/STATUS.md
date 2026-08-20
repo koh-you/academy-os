@@ -2,6 +2,11 @@
 
 업데이트: 2026-08-20
 
+## 2026-08-20 수업일지 숙제 충돌 재저장 복구
+
+- 기존 숙제의 같은 필드가 다른 화면에서 먼저 저장된 409 응답에서 최신 `currentHomework`를 화면 기준선으로 교체한다. 사람 입력 draft는 유지하고 두 번째 `변경 저장`이 최신 `updatedAt` 위에서 다시 계획되도록 해 영구 충돌 반복을 막는다.
+- 서버 CAS·Supabase 재조회·동일 필드 충돌 차단은 변경하지 않았다. lesson domain `22/22`, 관련 pure fixture, runtime lint/build, 신규·기존 숙제 충돌 focused safe browser `2/2`가 통과했다.
+
 ## 2026-08-20 App/API 4차 리팩터링 4-5h 종료 감사
 
 - 최신 main의 notification job 9개, notification provider 7개(Slack 3개 포함), Solapi 4개 route가 각각 frozen registry와 전용 fixture를 소유하는지 대조했다.

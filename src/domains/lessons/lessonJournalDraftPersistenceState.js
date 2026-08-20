@@ -10,18 +10,24 @@ export function mergeVerifiedLessonJournalHomeworks({
   );
 }
 
-export function mergeCreatedLessonJournalHomeworkConflict({
+export function mergeLatestLessonJournalHomeworkConflict({
   conflictHomework = null,
   currentHomeworks = []
 } = {}) {
   if (!conflictHomework?.homeworkId) {
     return { homeworks: currentHomeworks, recovered: false };
   }
-  if (currentHomeworks.some((homework) => homework.homeworkId === conflictHomework.homeworkId)) {
-    return { homeworks: currentHomeworks, recovered: false };
-  }
+  const hasCurrentHomework = currentHomeworks.some(
+    (homework) => homework.homeworkId === conflictHomework.homeworkId
+  );
   return {
-    homeworks: [conflictHomework, ...currentHomeworks],
+    homeworks: hasCurrentHomework
+      ? currentHomeworks.map((homework) => (
+          homework.homeworkId === conflictHomework.homeworkId
+            ? conflictHomework
+            : homework
+        ))
+      : [conflictHomework, ...currentHomeworks],
     recovered: true
   };
 }

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import {
   createLessonJournalRecordSaveStates,
-  mergeCreatedLessonJournalHomeworkConflict,
+  mergeLatestLessonJournalHomeworkConflict,
   mergeVerifiedLessonJournalHomeworks,
   mergeVerifiedLessonJournalMakeupTasks,
   mergeVerifiedLessonJournalRecords
@@ -45,7 +45,7 @@ const createdElsewhereHomework = {
   updatedAt: "2026-08-06T10:00:00.000Z"
 };
 assert.deepEqual(
-  mergeCreatedLessonJournalHomeworkConflict({
+  mergeLatestLessonJournalHomeworkConflict({
     conflictHomework: createdElsewhereHomework,
     currentHomeworks: plannedHomeworks
   }),
@@ -55,12 +55,30 @@ assert.deepEqual(
   }
 );
 assert.deepEqual(
-  mergeCreatedLessonJournalHomeworkConflict({
+  mergeLatestLessonJournalHomeworkConflict({
     conflictHomework: plannedHomeworks[0],
     currentHomeworks: plannedHomeworks
   }),
-  { homeworks: plannedHomeworks, recovered: false },
-  "이미 로컬에 있는 숙제는 다른 화면의 최신 행으로 자동 덮어쓰지 않아야 합니다."
+  {
+    homeworks: [plannedHomeworks[0], plannedHomeworks[1]],
+    recovered: true
+  },
+  "이미 로컬에 있는 숙제도 서버 최신 행으로 기준선을 교체해야 합니다."
+);
+const updatedElsewhereHomework = {
+  ...plannedHomeworks[0],
+  title: "다른 화면의 최신 숙제",
+  updatedAt: "2026-08-20T09:00:00.000Z"
+};
+assert.deepEqual(
+  mergeLatestLessonJournalHomeworkConflict({
+    conflictHomework: updatedElsewhereHomework,
+    currentHomeworks: plannedHomeworks
+  }),
+  {
+    homeworks: [updatedElsewhereHomework, plannedHomeworks[1]],
+    recovered: true
+  }
 );
 
 function upsertById(items, nextItem, idKey) {
