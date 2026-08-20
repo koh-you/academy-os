@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-20
 
+## 2026-08-20 Maintenance Velocity MV-2b 완료 · notification Solapi reserve 분리
+
+- `reserveNotificationJobInSolapi`/`reserveNotificationJobsInSolapi`를 `api/server.js`에서 `src/shared/server/notificationSolapiReserveService.js`(DI factory)로 분리했다. `api/server.js`는 두 이름을 hoisted `function` wrapper로 유지한다 — registry 배선(488행)과 출결 handler(1278행)가 서비스 생성 라인보다 먼저 실행되므로 `const` destructuring이면 TDZ로 서버 기동 시 crash했을 것.
+- `test-notification-solapi-reserve-service.mjs` 신설(실제 Solapi 호출 없는 8개 동작 시나리오: 정상 예약·dedup 재사용·cancel action 단락·기존 그룹 취소 후 재예약·teacher-cancel race·dry-run·bulk 부분 실패 격리·lesson-context 게이팅).
+- **교훈**: 개별 `scripts/test-*.mjs`만 확인하고 PR을 올렸다가 CI의 `production-fixtures`에서 `scripts/scenario-tests-production.cjs`(894KB 단일 파일) 안의 독립적인 자기참조 문자열 체크 3건(`20e-1`, `84d-3`, `84d-3c-2`)이 깨진 걸 뒤늦게 발견했다. `notificationJobServerSource`가 이제 새 서비스 파일 source도 결합하도록 고쳐서 해결했다 — testing-policy.md 92-100행이 경고한 정확히 그 패턴(코드 이동 시 여러 곳에서 독립적으로 깨지는 자기참조 체크)이 server.js 코드 이동에도 그대로 적용된다는 사례로 남긴다.
+- 다음 단위는 MV-2c(`reconcileSolapiNotificationJobs` 분리) — `docs/mv-2a-notification-provider-call-graph.md`에서 확인했듯 `dispatchDueNotificationJobs`(MV-2d)가 내부적으로 이를 감싸므로 c를 d보다 먼저 진행한다.
+
 ## 2026-08-20 Maintenance Velocity MV-1 실행 완료
 
 - MV-1a: `docs/testing-policy.md`의 "동작 우선"(85행) 원칙과 "리터럴 문자열 체크는 리팩터링 내내 보존"(92-100행) 지시 사이 모순에 예외 조항을 추가하고, 변경 종류별 최소 검증표를 명시했다(PR #169).
