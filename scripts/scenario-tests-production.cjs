@@ -2813,7 +2813,7 @@ check("90a lesson modal creates verified closure and optional linked makeup jour
   '{ id: "closure", label: "휴강" }',
   'lesson.lessonType === "closure" ? "closureLessonPill"'
 ]) && hasAll(serverSource, ['lesson.lessonType !== "closure"']) && hasAll(css, [".closureMakeupPanel", ".closureMakeupChoices", ".lessonModalSaveStatus", ".closureJournalNotice", ".closureLessonPill"]));
-check("90a-1 existing lessons convert to closure by live risk state without dropping records or special-lecture metadata", hasAll(lessonFrontendSource, [
+check("90a-1 existing lessons convert to closure by live risk state without dropping records or special-lecture metadata", hasAll(`${lessonFrontendSource}\n${lessonHomeworkContinuitySource}`, [
   "const isPersistedClosure = initialLesson?.lessonType === \"closure\"",
   "const isClosureConversion = isLessonClosureConversion(initialLesson, lessonType)",
   "const isStudentRosterLocked = isFormLocked || isClosureConversion",
