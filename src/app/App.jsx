@@ -333,6 +333,8 @@ import {
 } from "../domains/lessons/lessonJournalHomeworkDraft.js";
 import { createLessonJournalHomeworkFollowupPlan } from "../domains/lessons/lessonJournalHomeworkFollowupPlan.js";
 import {
+  createLinkedPreviousHomework,
+  findNextLessonForStudent,
   findPreviousLessonsForStudent,
   getLessonSortValue,
   isSameLessonGroup,
@@ -478,10 +480,7 @@ import {
   postJsonWithTimeout
 } from "../shared/utils/apiClient.js";
 import { safeIdPart } from "../shared/utils/id.js";
-import {
-  applyStudentScheduleToLesson,
-  isStudentScheduledForLesson
-} from "../shared/utils/studentSchedule.js";
+import { applyStudentScheduleToLesson } from "../shared/utils/studentSchedule.js";
 import ssenTypeIndex from "../../api/data/ssenTypeIndex.json";
 import {
   academyBrandName,
@@ -9245,54 +9244,8 @@ function pruneExpiredLessonDeletes(bundles = []) {
   return bundles.filter((bundle) => !bundle.expiresAt || Date.parse(bundle.expiresAt) > now);
 }
 
-function findNextLessonForStudent(lessons, lesson, student) {
-  const studentId = student?.studentId ?? "";
-  const currentSortValue = getLessonSortValue(lesson);
-  return [...lessons]
-    .filter((candidate) => candidate.lessonId !== lesson.lessonId)
-    .filter((candidate) => !shouldIgnoreLessonAttendance(candidate))
-    .filter((candidate) => isSameLessonGroup(lesson, candidate))
-    .filter((candidate) => candidate.studentIds?.includes(studentId))
-    .filter((candidate) => isStudentScheduledForLesson(candidate, student))
-    .filter((candidate) => getLessonSortValue(candidate) > currentSortValue)
-    .sort((a, b) => getLessonSortValue(a).localeCompare(getLessonSortValue(b)))[0];
-}
-
 function findPreviousLessonForStudent(lessons, lesson, studentId, options = {}) {
   return findPreviousLessonsForStudent(lessons, lesson, studentId, options)[0];
-}
-
-function createLinkedPreviousHomework(homeworks, lessons, lesson, student, sourceHomework) {
-  const nextLesson = findNextLessonForStudent(lessons, lesson, student);
-  if (!nextLesson) return null;
-
-  const existing = homeworks.find(
-    (homework) =>
-      homework.lessonId === nextLesson.lessonId &&
-      homework.studentId === student.studentId &&
-      homework.homeworkType === "previous"
-  );
-  const title = sourceHomework.title ?? "";
-
-  if (!title.trim() && !existing) return null;
-
-  return {
-    ...(existing ?? {}),
-    homeworkId: existing?.homeworkId ?? `homework_previous_${nextLesson.date}_${student.studentId}`,
-    lessonId: nextLesson.lessonId,
-    studentId: student.studentId,
-    title,
-    subject: existing?.subject ?? sourceHomework.subject ?? "노션 수업 DB",
-    homeworkType: "previous",
-    totalProblems: existing?.totalProblems ?? sourceHomework.totalProblems ?? null,
-    status: existing?.status ?? "verified",
-    studentStatus: existing?.studentStatus ?? "not_started",
-    teacherStatus: existing?.teacherStatus ?? "unverified",
-    assignedDate: lesson.date,
-    dueDate: existing?.dueDate ?? nextLesson.date,
-    linkedFromLessonId: lesson.lessonId,
-    linkedFromDate: lesson.date
-  };
 }
 
 function createLessonId(date, name) {

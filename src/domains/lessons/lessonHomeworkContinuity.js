@@ -49,6 +49,52 @@ export function findPreviousLessonsForStudent(lessons, lesson, studentId, { allo
   return previousLessons.filter((candidate) => !isSpecialLectureLesson(candidate));
 }
 
+export function findNextLessonForStudent(lessons, lesson, student) {
+  const studentId = student?.studentId ?? "";
+  const currentSortValue = getLessonSortValue(lesson);
+  return [...lessons]
+    .filter((candidate) => candidate.lessonId !== lesson.lessonId)
+    .filter((candidate) => !shouldIgnoreLessonAttendance(candidate))
+    .filter((candidate) => isSameLessonGroup(lesson, candidate))
+    .filter((candidate) => candidate.studentIds?.includes(studentId))
+    .filter((candidate) => isStudentScheduledForLesson(candidate, student))
+    .filter((candidate) => getLessonSortValue(candidate) > currentSortValue)
+    .sort((a, b) => getLessonSortValue(a).localeCompare(getLessonSortValue(b)))[0];
+}
+
+export function createLinkedPreviousHomework(homeworks, lessons, lesson, student, sourceHomework) {
+  const nextLesson = findNextLessonForStudent(lessons, lesson, student);
+  if (!nextLesson) return null;
+
+  const existing = homeworks.find(
+    (homework) =>
+      homework.lessonId === nextLesson.lessonId &&
+      homework.studentId === student.studentId &&
+      homework.homeworkType === "previous"
+  );
+  const title = sourceHomework.title ?? "";
+
+  if (!title.trim() && !existing) return null;
+
+  return {
+    ...(existing ?? {}),
+    homeworkId: existing?.homeworkId ?? `homework_previous_${nextLesson.date}_${student.studentId}`,
+    lessonId: nextLesson.lessonId,
+    studentId: student.studentId,
+    title,
+    subject: existing?.subject ?? sourceHomework.subject ?? "노션 수업 DB",
+    homeworkType: "previous",
+    totalProblems: existing?.totalProblems ?? sourceHomework.totalProblems ?? null,
+    status: existing?.status ?? "verified",
+    studentStatus: existing?.studentStatus ?? "not_started",
+    teacherStatus: existing?.teacherStatus ?? "unverified",
+    assignedDate: lesson.date,
+    dueDate: existing?.dueDate ?? nextLesson.date,
+    linkedFromLessonId: lesson.lessonId,
+    linkedFromDate: lesson.date
+  };
+}
+
 const meaningfulAttendanceStatuses = new Set([
   "absent",
   "excused",
