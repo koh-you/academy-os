@@ -37,7 +37,7 @@
 - MV-2c: `reconcileSolapiNotificationJobs`(`api/server.js:3219`) 분리, provider read와 source 상태 변경 구분.
 - MV-2d: `dispatchDueNotificationJobs`(`api/server.js:5023`) 분리, claim/send/reconcile 단계별 결과 표현. 부분 성공을 전체 성공으로 숨기지 않는다.
 - MV-2e: Slack scheduling 경계 검토. `codex/slack-scheduling-realtime`의 dry-run fixture(`test-slack-scheduling-provider.mjs`)를 최신 `api/routes/notifications.js` 기준으로 재작성 — main은 현재 이 계약을 문자열 매칭으로만 검사한다.
-- MV-2f: `providerResultContract` 실채택 또는 명시적 삭제 결정.
+- MV-2f: `providerResultContract` 삭제로 결정하고 완료했다. MV-2b~d에서 실제로 만든 3개 서비스의 반환 shape(reserve의 `reserved`/`reused`/`canceledAfterReserve`, reconcile의 `checked`/`checkedCount`/`updatedCount`, dispatch의 `processed`/`processedCount`/`automaticSolapiReconcile`)가 서로 전혀 다르고, 억지로 공통 envelope에 맞추면 registry·App의 필드 접근이 전부 깨진다는 게 실제 코드로 확인됐다.
 
 ## MV-3 · App의 고빈도 도메인 응집
 
