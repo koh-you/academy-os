@@ -181,6 +181,7 @@ import { createExamPrepRowRouteRegistry } from "../src/shared/server/examPrepRow
 import { createMakeupTaskRouteRegistry } from "../src/shared/server/makeupTaskRouteRegistry.js";
 import { createResourceMaterialRouteRegistry } from "../src/shared/server/resourceMaterialRouteRegistry.js";
 import { createSolapiRouteRegistry } from "../src/shared/server/solapiRouteRegistry.js";
+import { createSpecialLectureApplicationRouteRegistry } from "../src/shared/server/specialLectureApplicationRouteRegistry.js";
 import {
   createConsecutiveAttendanceVisitRecord,
   getConsecutiveAttendanceVisitLabel,
@@ -537,6 +538,13 @@ const { dispatch: dispatchSolapiRoute } = createSolapiRouteRegistry({
   listSolapiMessages,
   readJsonBody,
   sendJson
+});
+const { dispatch: dispatchSpecialLectureApplicationRoute } = createSpecialLectureApplicationRouteRegistry({
+  deleteSpecialLectureApplication,
+  listSpecialLectureApplications,
+  readJsonBody,
+  sendJson,
+  upsertSpecialLectureApplication
 });
 const teacherAccountTable = "teacher_accounts";
 const defaultTeacherAccount = {
@@ -5307,6 +5315,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchNotificationProviderRoute({ request, response, requestUrl })) return;
   if (await dispatchResourceMaterialRoute({ request, response, requestUrl })) return;
   if (await dispatchSolapiRoute({ request, response, requestUrl })) return;
+  if (await dispatchSpecialLectureApplicationRoute({ request, response, requestUrl })) return;
 
   if (request.method === "POST" && requestUrl.pathname === "/api/exam-analysis-runs/save-question-reviews") {
     try {
@@ -5625,58 +5634,6 @@ const server = http.createServer(async (request, response) => {
       }
       const applicant = normalizeTallyApplicantPayload(payload);
       const result = await upsertStudentIntakeApplicant(applicant);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "GET" && requestUrl.pathname === "/api/special-lecture-applications") {
-    try {
-      const result = await listSpecialLectureApplications();
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "POST" && requestUrl.pathname === "/api/special-lecture-applications") {
-    try {
-      const payload = await readJsonBody(request);
-      const result = await upsertSpecialLectureApplication(payload.application ?? payload);
-      sendJson(request, response, 200, { ok: true, ...result });
-    } catch (error) {
-      sendJson(request, response, 500, { ok: false, error: error.message });
-    }
-    return;
-  }
-
-  if (request.method === "DELETE" && requestUrl.pathname === "/api/special-lecture-applications") {
-    try {
-      const applicationId = requestUrl.searchParams.get("id");
-      if (requestUrl.searchParams.get("confirm") !== "true") {
-        sendJson(request, response, 400, { ok: false, error: "특강 신청 원본 삭제 확인값이 필요합니다." });
-        return;
-      }
-      const result = await deleteSpecialLectureApplication(applicationId);
-      if (result.linkedEnrollmentIds?.length) {
-        sendJson(request, response, 409, {
-          ok: false,
-          error: "이미 확정 명단에 연결된 신청 원본은 삭제할 수 없습니다. 학생 회차와 수업일지 영향을 먼저 확인해 주세요."
-        });
-        return;
-      }
-      if (!result.deleted) {
-        sendJson(request, response, result.source === "supabase" ? 404 : 503, {
-          ok: false,
-          error: result.source === "supabase"
-            ? "삭제할 특강 신청 원본을 찾지 못했습니다."
-            : "Supabase 연결을 확인하지 못해 신청 원본을 삭제하지 않았습니다."
-        });
-        return;
-      }
       sendJson(request, response, 200, { ok: true, ...result });
     } catch (error) {
       sendJson(request, response, 500, { ok: false, error: error.message });
