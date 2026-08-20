@@ -4,6 +4,7 @@ import { createLessonJournalEffectAdapter } from "../domains/lessons/lessonJourn
 import { createNotificationEffectAdapter } from "../domains/notifications/notificationEffectAdapter.js";
 import { createStudentEffectAdapter } from "../domains/students/studentEffectAdapter.js";
 import { createSupplementEffectAdapter } from "../domains/supplements/supplementEffectAdapter.js";
+import { createLessonHubViewProps } from "../domains/lessons/lessonHubViewProps.js";
 
 const teacherViewContractDefinitions = [
   { id: "lessons", componentName: "TeacherLessonHubV2", effectKinds: ["save", "delete", "reserve", "cancel", "send", "reconcile"] },
@@ -50,67 +51,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
   return {
     lessons: {
       Component: components.TeacherLessonHubV2,
-      props: {
-        academyReminders: models.academyReminders,
-        academyTests: models.academyTests,
-        aiSettings: models.aiSettings,
-        allRecords: models.records,
-        attendanceSettings: models.attendanceSettings,
-        attendanceSyncStatus: models.attendanceSyncStatus,
-        generatedLessonSaveStatus: models.generatedLessonSaveStatus,
-        examPrepScheduleLessons: models.examPrepScheduleLessons,
-        integrationStatus: models.integrationStatus,
-        lessonJournalEffects,
-        lessonNotificationPlans: models.lessonNotificationPlans,
-        notificationJobs: models.notificationJobs,
-        runtime: runtimeBindings.teacherLessonHub,
-        lessons: models.calendarLessons,
-        persistedLessons: models.lessons,
-        lessonsForDate: models.lessonsForDate,
-        makeupTasks: models.makeupTasks,
-        materials: models.resourceMaterials,
-        records: models.records,
-        saveStates: models.saveStates,
-        selectedDate: models.selectedDate,
-        selectedLesson: models.selectedLesson,
-        selectedLessonId: models.selectedLessonId,
-        students: models.students,
-        templates: models.classTemplates,
-        monthlyRegularLessonOpenPlan: models.monthlyRegularLessonOpenPlan,
-        isMonthlyRegularLessonOpened: models.isMonthlyRegularLessonOpened,
-        testAttempts: models.testAttempts,
-        testSessions: models.testSessions,
-        homeworks: models.homeworks,
-        clipboardCount: models.lessonClipboard ? 1 : 0,
-        lessonHistoryActionState: models.lessonHistoryActionState,
-        undoCount: models.lessonUndoStack.length,
-        onAddLesson: actions.handleOpenAddLesson,
-        onOpenMonthlyRegularLessons: actions.handleOpenMonthlyRegularLessonModal,
-        onCopyLesson: actions.handleCopySelectedLesson,
-        onDateSelect: actions.handleDateSelect,
-        onDeleteLesson: actions.handleDeleteLesson,
-        onDeleteAcademyReminder: actions.handleDeleteAcademyReminder,
-        onDeleteSelectedLesson: actions.handleDeleteSelectedLessonFromCalendar,
-        onEditLesson: actions.handleEditLesson,
-        onBackToCalendar: actions.handleBackToCalendar,
-        onMoveDate: actions.handleCalendarMove,
-        onShiftMonth: actions.handleCalendarMonthShift,
-        onOpenAttendance: actions.setAttendanceModal,
-        onOpenExamPrep: actions.handleOpenExamPrepView,
-        onOpenLessonJournal: actions.handleOpenLessonJournal,
-        onPasteLesson: actions.handlePasteLessonToSelectedDate,
-        onOpenReport: actions.handleOpenReport,
-        onPassMakeupTask: actions.handlePassSupplementTask,
-        onRetryGeneratedLessonSave: actions.handleRetryGeneratedLessonSave,
-        onSaveExamPrepSchedule: actions.handleSaveExamPrepSchedule,
-        onSaveRecord: actions.handleSaveRecord,
-        onScheduleMakeupTask: actions.handleScheduleSupplementTask,
-        onSaveAcademyReminder: actions.handleSaveAcademyReminder,
-        onSelectLesson: actions.setSelectedLessonId,
-        onUndoLessonAction: actions.handleUndoLessonAction,
-        onUpdateMakeupTask: actions.handleUpdateMakeupTask,
-        isLessonJournalOpen: models.isLessonJournalOpen
-      }
+      props: createLessonHubViewProps({ actions, models, runtimeBindings, lessonJournalEffects })
     },
     specialLectureManagement: {
       Component: components.NotificationCenter,
