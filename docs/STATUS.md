@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-20
 
+## 2026-08-20 Maintenance Velocity MV-3d~e 완료 · MV 전체(0~3) 종료
+
+- MV-3d: 도메인별 30일 commit 빈도(lessons 191 > notifications 99 > students 66 > exams 59)로 최고빈도 화면을 확정하고, `TeacherViewOutlet.js`의 `lessons` 화면 조립 블록(64줄·~60개 prop)을 `src/domains/lessons/lessonHubViewProps.js`의 `createLessonHubViewProps()`로 분리했다. `TeacherViewOutlet.js`를 직접 raw로 읽던 자기참조 테스트 4곳(2건은 실제 파손, 2건은 무관한 다른 화면 오탐)을 찾아 고쳤다.
+- MV-3e: `check:orphans`가 잡은 3개 중 `routeRegistryTypes.js`는 확인된 false positive로 유지, 나머지 2개(`lessonJournalRecordBulkApi.js`, `useSupplementNotificationDraftSelectionState.js`)는 각자의 전용 테스트가 "이제 안 쓴다"를 명시적으로 검증하던 의도적 은퇴 모듈이라 삭제했다. 검증 중 `scripts/production-test-file-list.json`이 `test:production` npm 체인과 별도인 3번째 독립 테스트 레지스트리라는 걸 발견해 같이 정리했다(305→303 파일).
+- 6개 PR(#186~#188, 상태 노트 포함) 모두 fast-checks/build/production-fixtures/browser-smoke 통과 후 main에 merge됐다.
+- **MV-0부터 MV-3e까지 전체 종료.** MV-3b(시험관리 클러스터)만 `getKoreaDateString` 선행 통합이 필요하다는 근거와 함께 보류 상태로 남아 있다. 결과 요약과 목표 대비 비교는 별도 보고서로 정리한다.
+
 ## 2026-08-20 Maintenance Velocity MV-3a~c 완료
 
 - MV-3a: `normalizeGradeLabel`/`schoolNamesMatch`/`normalizeSchoolName` 3중 중복(App.jsx·server.js·coreData.js)을 `src/domains/schoolCalendar/schoolCalendarUtils.js`로 통합했다.
