@@ -2,6 +2,11 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-20 App/API 4차 리팩터링 4-5h 종료 감사
+
+- 최신 main에 이미 병합된 notification job/provider/Solapi route registry를 직접 dispatch와 대조했다. Slack 3개 route는 notification provider registry가 소유하며, 운영 provider를 호출하지 않는 전용 fixture가 인증·성공·오류 계약을 고정한다.
+- `test:notification-job-route-registry`, `test:notification-provider-route-registry`, `test:solapi-route-registry`, server route baseline/closeout이 모두 통과했다. 문서만 갱신했으며 다음 안전 단위는 4-5i다.
+
 ## 2026-08-17 4-5g·4-6c 최신 main 통합
 
 - 4-5g는 4-8 종료 문서와의 충돌만 합성해 쎈 catalog/provider 경계를 보존했다. 4-6c는 최신 UI token 통합과 겹친 `App.css`/`App.tokens.css`를 그대로 선택하지 않고, 현재 tokenized ParentResponse 규칙을 lazy CSS로 다시 이동했다.
