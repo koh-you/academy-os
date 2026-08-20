@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-20
 
+## 2026-08-20 Maintenance Velocity MV-2 전체 완료 (2a~2f)
+
+- MV-2e: `codex/slack-scheduling-realtime`(2026-08-02, main보다 489 commit 뒤처짐) branch에서 유일하게 가치 있던 `test-slack-scheduling-provider.mjs`를 수정 없이 그대로 재적용했다 — 현재 `api/routes/notifications.js`에 대해 바로 통과했다. 나머지 branch 내용은 재적용하지 않았다(이미 대체됨).
+- MV-2f: `providerResultContract.js`는 실채택 대신 삭제로 결정했다. MV-2b~d에서 실제로 만든 reserve/reconcile/dispatch 3개 서비스의 반환 shape가 서로 전혀 달라 공통 envelope을 강제하면 호출부가 다 깨진다는 걸 실제 코드로 확인했다.
+- MV-2(고위험 알림 provider 소유권 완성) 전체를 닫는다. 다음은 MV-3(App의 고빈도 도메인 응집)이며 3a(중복 헬퍼 확인)부터 시작한다.
+
 ## 2026-08-20 Maintenance Velocity MV-2b~d 완료 · notification Solapi orchestration 전체 분리
 
 - `reserveNotificationJobInSolapi`(MV-2b), `reconcileSolapiNotificationJobs`/`reconcileDueSolapiNotificationJobs`(MV-2c), `dispatchDueNotificationJobs`(MV-2d)를 각각 `src/shared/server/notificationSolapiReserveService.js`/`notificationSolapiReconcileService.js`/`notificationSolapiDispatchService.js`(DI factory)로 분리했다. `api/server.js`는 세 이름 모두 hoisted `function` wrapper로 유지한다 — route registry 배선과 (dispatch는 추가로) 운영에서 실제로 60초마다 발송을 트리거하는 `runInternalNotificationDispatch`의 `setInterval` 루프가 서비스 생성 라인보다 먼저 실행되기 때문이다. `runInternalNotificationDispatch` 자체와 `process.env` 직접 참조 코드는 `src/**`가 browser eslint globals라 옮기지 못해 `api/server.js`에 남겼다.
