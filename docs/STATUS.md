@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-20
 
+## 2026-08-20 Maintenance Velocity MV-1 실행 완료
+
+- MV-1a: `docs/testing-policy.md`의 "동작 우선"(85행) 원칙과 "리터럴 문자열 체크는 리팩터링 내내 보존"(92-100행) 지시 사이 모순에 예외 조항을 추가하고, 변경 종류별 최소 검증표를 명시했다(PR #169).
+- MV-1b: 어디서도 참조되지 않던 `test:production:verbose`(150+ 스크립트 체인)를 삭제했다(PR #170).
+- MV-1c: `scripts/test-wrong-problem-explicit-save.mjs`(100% source-string 슬라이싱)를 삭제했다 — 같은 guarantee를 `tests/browser/lesson-journal.spec.js:336`가 이미 실제 동작으로 더 강하게 검증한다. 함께 검토한 `test-notification-job-reconcile-contract.mjs`는 재확인 결과 실제 controller 동작 테스트와 대체 불가능한 route wiring drift 감지를 겸하고 있어 유지했다(PR #171).
+- 세 PR 모두 fast-checks/build/production-fixtures/browser-smoke(해당 시) 통과 후 main에 fast-forward merge됐다. 제품 runtime은 변경하지 않았다. 다음 단위는 `docs/maintenance-velocity-refactor-plan.md`의 MV-2(알림 provider 소유권 완성, 고위험 별도 owner)다.
+
 ## 2026-08-20 Maintenance Velocity MV-0 실행 완료
 
 - 원격 브랜치 279개 중 `git merge-base --is-ancestor`로 main의 ancestor임이 확인된 265개를 일괄 삭제했다(PR #167 merge 직후 재계산). 나머지 16개(콘텐츠 기준 Class A 11개, 재적용 검토 대상 Class B 5개: `codex/attendance-auto-confirm`, `codex/daily-20260802-app-state-write-serialization`, `codex/daily-20260803-homework-followup-clear`, `codex/refactor-supplement-11b`, `codex/slack-scheduling-realtime`)는 개별 판단이 필요해 남겨뒀다.
