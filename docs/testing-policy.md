@@ -98,3 +98,18 @@ npm run test:domain:settlement
 - `test:production`의 npm script 문자열 자체를 참조하는 self-referential 체크(`packageJson.scripts["test:production"].includes(...)`)가 다수 존재한다. `test:production`의 값은 직접 편집하지 않고, 체인의 마지막 단계가 내부적으로 하는 일만 바꾼다.
 - 4-4a식 baseline-lock fixture(예: `test-fourth-pass-app-action-baseline.mjs`)는 리팩터링 시작 시점의 상태를 고정해 이후 단위가 대조할 기준으로 쓴다. 대상 단위를 모두 완료했으면 fixture의 기대값을 종료 상태로 갱신한다 — fixture를 지우거나 무시하지 않는다.
 - 하나의 안전 단위를 "완료"로 표시하기 전에 `npm run test:production` 전체를 한 번 통과시켜, 개별적으로 찾지 못한 다른 자기참조 체크가 없는지 확인한다.
+
+**예외 — 이미 동작 계층에서 같은 계약을 검증하는 경우.** 위 절차는 리터럴 문자열 체크가 유일한 안전망일 때(기계적 코드 이동 중 drift 감지)를 전제한다. 옮기는 코드의 계약을 이미 `test:domain:*` fixture나 `tests/browser/*.spec.js`가 실제 동작으로 검증하고 있다면, 리터럴 체크를 새 위치로 다시 이관하지 말고 **정리(삭제)**한다 — "새 파일 위치나 source string 존재보다 사용자 동작과 저장 계약을 검증한다"(85행)는 최상위 원칙이 이 경우엔 우선한다. 판단 기준: 리터럴 체크를 지웠을 때 아무 동작 fixture/browser spec도 실패하지 않으면 순수 중복이었다는 뜻이다.
+
+## 변경 종류별 최소 검증표
+
+| 변경 종류 | 최소 검증 |
+| --- | --- |
+| 문서 전용 | 관련 링크·명령 유효성, diff 검토만 |
+| pure helper/컴포넌트 이동 | 가장 가까운 fixture + `npm run lint:runtime` |
+| backend route shell 이동(registry 패턴) | 해당 route registry 전용 fixture + lint/typecheck. 전체 production 불필요 |
+| 기존 저장 API를 사용하는 UI 수정 | 관련 `test:domain:<domain>` + focused browser에서 저장/재조회/새로고침 확인 |
+| provider orchestration(알림·Solapi·Slack 실행 경계) | pure provider/source fixture + exact-head 원격 전체검사를 해당 cluster 종료 시 1회 |
+| E2E flake 수정 | 해당 spec만 격리 반복 실행, 전체 browser suite는 재실행하지 않음 |
+
+이 표는 §문서 최상위 정책의 위험도 판정을 대체하지 않는다 — 변경이 여러 종류에 걸치면 더 엄격한 쪽을 따른다.
