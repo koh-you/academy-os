@@ -2,6 +2,11 @@
 
 업데이트: 2026-08-20
 
+## 2026-08-20 Maintenance Velocity MV-0 실행 완료
+
+- 원격 브랜치 279개 중 `git merge-base --is-ancestor`로 main의 ancestor임이 확인된 265개를 일괄 삭제했다(PR #167 merge 직후 재계산). 나머지 16개(콘텐츠 기준 Class A 11개, 재적용 검토 대상 Class B 5개: `codex/attendance-auto-confirm`, `codex/daily-20260802-app-state-write-serialization`, `codex/daily-20260803-homework-followup-clear`, `codex/refactor-supplement-11b`, `codex/slack-scheduling-realtime`)는 개별 판단이 필요해 남겨뒀다.
+- 문서 교정(PR #167, `d5a6671d`)은 main에 fast-forward merge됐다. MV-0는 여기서 닫고 다음 단위는 `docs/maintenance-velocity-refactor-plan.md`의 MV-1이다.
+
 ## 2026-08-20 Maintenance Velocity 종합 감사 · 다음 단위 재정의
 
 - 4-0 기준선 이후 main 상태를 재측정하고 4-4~4-8 각 단계를 완료/부분 완료/형식상 완료로 재판정했다. 상세 근거와 MV-0~MV-3 계획은 `docs/maintenance-velocity-refactor-plan.md`를 source of truth로 삼는다. `docs/app-refactor-fourth-pass-plan.md`는 4차의 역사적 기록으로 남기고 번호를 연장하지 않는다.
