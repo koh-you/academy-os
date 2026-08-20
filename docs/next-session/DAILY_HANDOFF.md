@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-20
 
+## 2026-08-20 Maintenance Velocity 종합 감사 · 다음 세션 시작점
+
+- 다음 리팩터링 단위는 `docs/app-refactor-fourth-pass-plan.md`의 4-9가 아니라 `docs/maintenance-velocity-refactor-plan.md`의 MV-0~MV-3다. MV-0(상태·브랜치 정리) 문서 교정은 이번에 완료했고, 남은 건 원격 브랜치 263개(Class A) 삭제와 5개(Class B) 재적용 여부에 대한 사용자 승인이다.
+- MV-1(검증 비용 축소)이 다음 최우선 단위다. `test:production:verbose` 삭제, 순수 문자열 슬라이싱 계약 테스트 정리부터 시작한다.
+- MV-2(알림 provider 소유권 완성)는 고위험 별도 단위다. `reserveNotificationJobInSolapi`(`api/server.js:2951`) 등 orchestration 함수가 아직 `api/server.js`에 있다는 걸 4-5h "완료" 표시만 보고 놓치지 말 것.
+
 ## 2026-08-20 수업일지 숙제 충돌 재저장 복구
 
 - 기존 숙제 동일 필드 409에서 최신 서버 row를 화면의 다음 저장 기준선으로 반영하고, 교사 입력 draft는 보존한다. 안내 후 `변경 저장`을 다시 누르면 최신 버전 위에서 저장한다.

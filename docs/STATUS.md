@@ -2,6 +2,16 @@
 
 업데이트: 2026-08-20
 
+## 2026-08-20 Maintenance Velocity 종합 감사 · 다음 단위 재정의
+
+- 4-0 기준선 이후 main 상태를 재측정하고 4-4~4-8 각 단계를 완료/부분 완료/형식상 완료로 재판정했다. 상세 근거와 MV-0~MV-3 계획은 `docs/maintenance-velocity-refactor-plan.md`를 source of truth로 삼는다. `docs/app-refactor-fourth-pass-plan.md`는 4차의 역사적 기록으로 남기고 번호를 연장하지 않는다.
+- 바로 아래 4-5h 종료 감사는 notification job/provider/Solapi route의 **frozen registry·전용 fixture 소유권**을 확인한 것이다. `reserveNotificationJobInSolapi`(`api/server.js:2951`), `reconcileSolapiNotificationJobs`(`api/server.js:3219`), `dispatchDueNotificationJobs`(`api/server.js:5023`) 같은 실제 orchestration 함수 본체는 여전히 `api/server.js`가 소유한다. HTTP shell 이동과 orchestration 소유권 이전은 별개이며, 후자는 새 계획의 MV-2로 남는다.
+- 4-4 App persistence action은 부분 완료다. `saveDirtyHomeworks()`(`App.jsx:6443-6456`)처럼 CAS 없이 로컬 dirty-set과 `postJson` 직접 호출로 저장하는 경로가 남아 있고, `TeacherViewOutlet.js`의 화면 조립은 새 action 추가 시 여전히 3곳(App.jsx 조립·TeacherViewOutlet 화면 prop·import)을 함께 고쳐야 한다.
+- 4-6 CSS 경계는 부분 완료다. `App.css`(22,244줄)는 `src/main.jsx:8`에서 여전히 단일 blocking import이며 4-0 기준선(21,727줄)보다 늘었다.
+- 4-7 safe E2E는 실질적으로 완료다(13 파일/77 테스트, 샘플링한 spec에 실제 CAS 충돌·재시도 assertion 포함). 다만 "새 실패 시나리오 추가" 목표는 이번 범위에 없었다.
+- 이번 감사에서 발견한 사실: `codex/notification-text-shared-helpers`(PR #142, `3456757e`, 이미 main에 병합됨)가 실제 운영 버그(알림 미리보기와 실제 발송 문구가 서로 다른 로직으로 계산되어 7건 불일치)를 고쳤다. AGENTS.md의 "미리보기와 발송 문구는 같은 원천을 사용한다" 원칙이 그 전까지 실제로는 깨져 있었다는 뜻이며, 이 사실은 지금까지 어느 상태 문서에도 기록되지 않았다.
+- 제품 코드·운영 데이터는 변경하지 않았다. 원격 브랜치 279개를 분류했으나(263개 Class A 안전삭제, 5개 Class B 재적용 검토) 삭제·재적용은 사용자 승인 후 개별 진행한다.
+
 ## 2026-08-20 수업일지 숙제 충돌 재저장 복구
 
 - 기존 숙제의 같은 필드가 다른 화면에서 먼저 저장된 409 응답에서 최신 `currentHomework`를 화면 기준선으로 교체한다. 사람 입력 draft는 유지하고 두 번째 `변경 저장`이 최신 `updatedAt` 위에서 다시 계획되도록 해 영구 충돌 반복을 막는다.

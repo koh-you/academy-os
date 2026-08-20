@@ -2,6 +2,11 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-20 Maintenance Velocity 종합 감사
+
+- 3개 병렬 조사(문서/상태 대조, 원격 브랜치 279개 분류, 유지보수 비용 정량화)로 4-0 이후 main 실측치와 4-4~4-8 실제 완료 상태를 다시 판정했다. 상세 근거·baseline·다음 단위(MV-0~MV-3)는 `docs/maintenance-velocity-refactor-plan.md`에 정리했으며 이 파일이 향후 source of truth다.
+- 제품 코드는 변경하지 않았다. STATUS.md/deferred-work-queue.md의 4-4/4-5h/4-6 서술을 실제 상태로 교정했다. 브랜치 삭제·재적용은 사용자 승인 후 개별 실행한다.
+
 ## 2026-08-20 수업일지 숙제 충돌 재저장 복구
 
 - 운영 화면의 `숙제의 같은 항목이 다른 화면에서 먼저 변경되었습니다` 실패는 서버가 최신 숙제 row를 응답해도 이미 로컬 목록에 같은 ID가 있으면 기준선을 갱신하지 않던 frontend 복구 공백이었다. 다음 클릭도 오래된 `updatedAt`을 보내 영구 충돌할 수 있었다.
