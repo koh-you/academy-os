@@ -1,4 +1,5 @@
 import { sampleData } from "../../src/shared/data/sampleData.js";
+import { normalizeSchoolName } from "../../src/domains/schoolCalendar/schoolCalendarUtils.js";
 import {
   getSpecialLectureStudentSyncOperation,
   getSpecialLectureStudentSyncProtectionReasons,
@@ -220,19 +221,6 @@ function getKoreaDateString(date = new Date()) {
 
 function compactExamPrepKeyPart(value = "") {
   return String(value || "").replace(/\s+/g, "");
-}
-
-function normalizeSchoolName(value = "") {
-  return String(value || "")
-    .trim()
-    .replace(/\s+/g, "")
-    .replace(/[·ㆍ.,_/\\-]/g, "")
-    .replace(/여자고등학교/g, "여고")
-    .replace(/여자고/g, "여고")
-    .replace(/남자고등학교/g, "남고")
-    .replace(/남자고/g, "남고")
-    .replace(/고등학교/g, "고")
-    .replace(/중학교/g, "중");
 }
 
 function normalizeExamEntries(row = {}) {

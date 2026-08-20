@@ -17,6 +17,22 @@ export function normalizeSchoolName(value = "") {
     .replace(/중학교/g, "중");
 }
 
+export function normalizeGradeLabel(grade = "") {
+  const value = String(grade || "").trim();
+  if (value.includes("1")) return value.includes("중") ? "중1" : "고1";
+  if (value.includes("2")) return value.includes("중") ? "중2" : "고2";
+  if (value.includes("3")) return value.includes("중") ? "중3" : "고3";
+  return value;
+}
+
+export function schoolNamesMatch(firstSchool = "", secondSchool = "", { allowBlank = true } = {}) {
+  if (!firstSchool || !secondSchool) return allowBlank;
+  const firstText = normalizeSchoolName(firstSchool);
+  const secondText = normalizeSchoolName(secondSchool);
+  if (!firstText || !secondText) return allowBlank;
+  return firstText === secondText || firstText.includes(secondText) || secondText.includes(firstText);
+}
+
 export function getSchoolCalendarSchoolColor(schoolName = "") {
   const key = normalizeSchoolName(schoolName) || "학교미입력";
   if (schoolCalendarKnownColors[key]) return schoolCalendarKnownColors[key];

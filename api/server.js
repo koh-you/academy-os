@@ -237,6 +237,7 @@ import {
 import { getTestPaperKindLabel } from "../src/domains/tests/testManagerUtils.js";
 import { isSupplementScheduleForLessonComment } from "../src/domains/notifications/supplementSchedule.js";
 import { normalizeSpecialLectureTallySessionRequests } from "../src/domains/specialLectures/tallySessionRequests.js";
+import { normalizeGradeLabel, normalizeSchoolName, schoolNamesMatch } from "../src/domains/schoolCalendar/schoolCalendarUtils.js";
 import {
   confirmExamAnalysisQuestionCount,
   deleteExamAnalysisRun,
@@ -604,27 +605,6 @@ function summarizeNotificationJobForList(job = {}) {
     ...job,
     result: summarizeNotificationJobResult(job.result)
   };
-}
-
-function normalizeGradeLabel(grade = "") {
-  const value = String(grade || "").trim();
-  if (value.includes("1")) return value.includes("중") ? "중1" : "고1";
-  if (value.includes("2")) return value.includes("중") ? "중2" : "고2";
-  if (value.includes("3")) return value.includes("중") ? "중3" : "고3";
-  return value;
-}
-
-function normalizeSchoolName(value = "") {
-  return String(value || "")
-    .trim()
-    .replace(/\s+/g, "")
-    .replace(/[·ㆍ.,_/\\-]/g, "")
-    .replace(/여자고등학교/g, "여고")
-    .replace(/여자고/g, "여고")
-    .replace(/남자고등학교/g, "남고")
-    .replace(/남자고/g, "남고")
-    .replace(/고등학교/g, "고")
-    .replace(/중학교/g, "중");
 }
 
 function compactPhoneNumber(value = "") {
@@ -1386,14 +1366,9 @@ function getDispatchAuthState(request, payload = {}) {
 // MV-2d: isStaleDispatchClaim, isNoticeNotificationType, and
 // isOsScheduledNotificationJob moved into notificationSolapiDispatchService.js
 // as private helpers -- each was used exclusively by dispatchDueNotificationJobs.
-
-function schoolNamesMatch(firstSchool = "", secondSchool = "", { allowBlank = true } = {}) {
-  if (!firstSchool || !secondSchool) return allowBlank;
-  const firstText = normalizeSchoolName(firstSchool);
-  const secondText = normalizeSchoolName(secondSchool);
-  if (!firstText || !secondText) return allowBlank;
-  return firstText === secondText || firstText.includes(secondText) || secondText.includes(firstText);
-}
+// MV-3a: normalizeGradeLabel, normalizeSchoolName, and schoolNamesMatch moved
+// to src/domains/schoolCalendar/schoolCalendarUtils.js (imported above) --
+// they were byte-for-byte duplicated between App.jsx and this file.
 
 function compactText(value = "") {
   return String(value ?? "").trim();

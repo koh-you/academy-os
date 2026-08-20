@@ -261,8 +261,10 @@ import {
   getSchoolCalendarSchoolColor,
   isDateWithinEvent,
   joinCalendarLabel,
+  normalizeGradeLabel,
   normalizeSchoolName,
   parseDateRangeText,
+  schoolNamesMatch,
   updateDateRangeField
 } from "../domains/schoolCalendar/schoolCalendarUtils.js";
 import {
@@ -1655,22 +1657,6 @@ function getDefaultExamPeriodRange(examCycle = currentExamCycle) {
 function getDefaultExamPeriodText(examCycle = currentExamCycle) {
   const range = getDefaultExamPeriodRange(examCycle);
   return formatDateRangeText(range.date, range.endDate);
-}
-
-function normalizeGradeLabel(grade = "") {
-  const value = String(grade).trim();
-  if (value.includes("1")) return value.includes("중") ? "중1" : "고1";
-  if (value.includes("2")) return value.includes("중") ? "중2" : "고2";
-  if (value.includes("3")) return value.includes("중") ? "중3" : "고3";
-  return value;
-}
-
-function schoolNamesMatch(firstSchool = "", secondSchool = "", { allowBlank = true } = {}) {
-  if (!firstSchool || !secondSchool) return allowBlank;
-  const firstText = normalizeSchoolName(firstSchool);
-  const secondText = normalizeSchoolName(secondSchool);
-  if (!firstText || !secondText) return allowBlank;
-  return firstText === secondText || firstText.includes(secondText) || secondText.includes(firstText);
 }
 
 function getSchoolGradeKey(schoolName = "", grade = "") {
