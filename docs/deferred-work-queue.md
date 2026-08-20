@@ -54,10 +54,11 @@
 - 4-1 API payload 24개 contract, 4-2 DB/domain row mapper 45/45, 4-3 공통 HTTP/session과 frozen registry 24개 분리·종료 감사는 완료했다. 남은 DB/source read 16·external read 5·DB/source action 52·external write 23은 각각 후속 owner 분리 입력으로 exact 분류했다.
 - 사용자의 2026-08-15 재개 요청으로 4-4 App persistence action 추출과 통합 검토를 완료했다. App 직접 request는 44회, 직접 호출 포함 handler는 0개이며 저장·재조회·provider 범위를 보존했다.
 - 2026-08-16 병합·검수 요청으로 Claude Code의 4-5a~f 통합분을 검토했다. Storage primitive 이동, 시험분석 download/delete operations 주입, vision-check·boundary-detect PDF transport 분리와 provider result envelope 정의에 이어 시험분석 AI POST 5개를 route registry로 이동했다.
-- 4-5g는 쎈 catalog/과목 추론을 독립 모듈로 옮기고 row-fill/output-draft provider wrapper 4개를 기존 DB-free transport에 연결했다. 4-5h는 notification job 9개, notification provider 7개(Slack 3개 포함), Solapi 4개 route의 frozen registry·전용 fixture·server baseline/closeout 대조까지 완료했다. 남은 4-5i envelope orchestrator 채택은 최신 main 기반 독립 안전 단위이며, 4-5 전체 종료로 표시하지 않는다.
-- 4-6c는 최신 UI token 변수를 보존한 ParentResponse 전용 CSS를 NotificationCenter lazy entry로 이동했다. 다음 CSS 분리는 별도 selector/cascade/screenshot 안전 단위로 남긴다.
+- 4-5g는 쎈 catalog/과목 추론을 독립 모듈로 옮기고 row-fill/output-draft provider wrapper 4개를 기존 DB-free transport에 연결했다. 4-5h는 notification job 9개, notification provider 7개(Slack 3개 포함), Solapi 4개 route의 frozen registry·전용 fixture·server baseline/closeout 대조까지 완료했다. **단, 이는 HTTP shell·registry 소유권이며 `reserveNotificationJobInSolapi`(`api/server.js:2951`)·`reconcileSolapiNotificationJobs`(`api/server.js:3219`)·`dispatchDueNotificationJobs`(`api/server.js:5023`) orchestration 본체는 여전히 `api/server.js`가 소유한다.** 남은 4-5i envelope orchestrator 채택과 orchestration 소유권 이전은 `docs/maintenance-velocity-refactor-plan.md`의 MV-2로 이어간다.
+- 4-6c는 최신 UI token 변수를 보존한 ParentResponse 전용 CSS를 NotificationCenter lazy entry로 이동했다. `App.css`(22,244줄)는 `src/main.jsx:8`에서 여전히 단일 blocking import이며 4-0 기준선보다 늘었다. 다음 CSS 분리는 별도 selector/cascade/screenshot 안전 단위로 남긴다.
+- 2026-08-20 종합 감사로 App/API 4차 리팩터링의 다음 단위는 4-9 이후 번호를 연장하지 않고 `docs/maintenance-velocity-refactor-plan.md`의 MV-0~MV-3로 대체한다. 근거·baseline 수치·완료 지표는 그 문서를 source of truth로 삼는다.
 - 한 번에 한 안전 단위만 최신 main에서 진행하며, 즉시 사람 판단이 필요하지 않은 발견은 기록 후 AI 검수·최소 수정·재검증으로 연쇄 진행한다. 운영 side effect나 제품 의미 결정이 필요한 항목만 사람 gate로 올린다.
-- 기준: `docs/development-roadmap-after-ui-refactor-2026-07-31.md`.
+- 기준: `docs/development-roadmap-after-ui-refactor-2026-07-31.md`, `docs/maintenance-velocity-refactor-plan.md`.
 
 ## P5. 시험분석 상세 프롬프트 시스템
 
