@@ -191,10 +191,6 @@ const draftPersistenceControllerSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalDraftPersistenceController.js", import.meta.url),
   "utf8"
 );
-const recordBulkApiSource = await readFile(
-  new URL("../src/domains/lessons/lessonJournalRecordBulkApi.js", import.meta.url),
-  "utf8"
-);
 const homeworkBulkApiSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalHomeworkBulkApi.js", import.meta.url),
   "utf8"
@@ -334,7 +330,7 @@ const saveHandlerSource = section(
   "async function handleSaveLessonJournalDrafts",
   "async function handleSaveRecord"
 );
-const savePersistenceSource = `${saveHandlerSource}\n${draftSaveOutcomeSource}\n${draftPersistenceControllerSource}\n${rowsSaveActionSource}\n${rowsPersistenceSource}\n${recordBulkApiSource}\n${homeworkBulkApiSource}\n${makeupTaskRequestSource}\n${makeupTaskBulkApiSource}\n${draftPersistenceStateSource}`;
+const savePersistenceSource = `${saveHandlerSource}\n${draftSaveOutcomeSource}\n${draftPersistenceControllerSource}\n${rowsSaveActionSource}\n${rowsPersistenceSource}\n${homeworkBulkApiSource}\n${makeupTaskRequestSource}\n${makeupTaskBulkApiSource}\n${draftPersistenceStateSource}`;
 for (const persistenceContract of [
   "saveLessonJournalRowsAction",
   "saveLessonJournalMakeupTasksWithVerification",
@@ -1033,18 +1029,6 @@ assert.ok(
   !draftPersistenceControllerSource.includes("/api/lesson-journal/rows/save"),
   "persistence controller must not own the lesson rows API"
 );
-for (const extractedRecordBulkApiContract of [
-  "saveLessonJournalRecordsWithVerification",
-  'request("/api/lesson-records/bulk", { records })',
-  'result.source !== "supabase"',
-  "matchesRecord(record, verified)",
-  "return verifiedRecords"
-]) {
-  assert.ok(
-    recordBulkApiSource.includes(extractedRecordBulkApiContract),
-    `missing extracted 17F-5 contract: ${extractedRecordBulkApiContract}`
-  );
-}
 for (const injectedRecordBulkApiContract of [
   "saveLessonJournalRowsAction({",
   "recordsToSave,",
@@ -1058,12 +1042,6 @@ for (const injectedRecordBulkApiContract of [
     `missing App-owned 17F-5 binding: ${injectedRecordBulkApiContract}`
   );
 }
-assert.ok(
-  !recordBulkApiSource.includes("localStorage") &&
-    !recordBulkApiSource.includes("setRecords") &&
-    !recordBulkApiSource.includes("setSaveStates"),
-  "record bulk API adapter must not own React or local storage updates"
-);
 for (const extractedHomeworkBulkApiContract of [
   "createLessonJournalHomeworkSaveFingerprint",
   "saveLessonJournalHomeworksWithVerification",
