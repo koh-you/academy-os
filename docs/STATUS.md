@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-20
 
+## 2026-08-20 Maintenance Velocity MV-2b~d 완료 · notification Solapi orchestration 전체 분리
+
+- `reserveNotificationJobInSolapi`(MV-2b), `reconcileSolapiNotificationJobs`/`reconcileDueSolapiNotificationJobs`(MV-2c), `dispatchDueNotificationJobs`(MV-2d)를 각각 `src/shared/server/notificationSolapiReserveService.js`/`notificationSolapiReconcileService.js`/`notificationSolapiDispatchService.js`(DI factory)로 분리했다. `api/server.js`는 세 이름 모두 hoisted `function` wrapper로 유지한다 — route registry 배선과 (dispatch는 추가로) 운영에서 실제로 60초마다 발송을 트리거하는 `runInternalNotificationDispatch`의 `setInterval` 루프가 서비스 생성 라인보다 먼저 실행되기 때문이다. `runInternalNotificationDispatch` 자체와 `process.env` 직접 참조 코드는 `src/**`가 browser eslint globals라 옮기지 못해 `api/server.js`에 남겼다.
+- 각 단위마다 순수 helper(약 15개: wait/withSolapiRetry/getSolapiPrimaryMessage/getReconciledSolapiJobState/isOsScheduledNotificationJob 등)를 해당 서비스로 함께 옮겨 응집시켰고, 3개 서비스 모두 실제 Solapi 호출 없는 동작 fixture(8+10+11=29개 시나리오)로 고정했다.
+- MV-2c부터는 `scripts/scenario-tests-production.cjs`에서 이동될 리터럴 문자열을 실행 전에 먼저 grep해 자기참조 체크를 선제적으로 고치는 절차를 적용했다(MV-2b는 사후에 CI 실패로 발견). MV-2d에서는 그 grep도 못 잡는 사례(scenario 파일이 안 읽는 독립 `test-*-contract.mjs`의 자체 source-slice)를 로컬 전체 검사로 추가 발견해 고쳤다 — 두 grep도 완전하지 않으므로 로컬 `npm run test:production` 전체 통과를 최종 게이트로 유지한다.
+- 4개 PR(#174~#177) 모두 fast-checks/build/production-fixtures/browser-smoke 통과 후 main에 fast-forward merge됐다. 다음은 MV-2e(Slack scheduling 경계, `codex/slack-scheduling-realtime` 브랜치의 dry-run fixture 재작성)와 MV-2f(`providerResultContract` 채택/삭제 결정)다.
+
 ## 2026-08-20 Maintenance Velocity MV-2b 완료 · notification Solapi reserve 분리
 
 - `reserveNotificationJobInSolapi`/`reserveNotificationJobsInSolapi`를 `api/server.js`에서 `src/shared/server/notificationSolapiReserveService.js`(DI factory)로 분리했다. `api/server.js`는 두 이름을 hoisted `function` wrapper로 유지한다 — registry 배선(488행)과 출결 handler(1278행)가 서비스 생성 라인보다 먼저 실행되므로 `const` destructuring이면 TDZ로 서버 기동 시 crash했을 것.
