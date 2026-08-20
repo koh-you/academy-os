@@ -11,6 +11,7 @@ import { examPostConfirmRouteSignatures } from "../src/shared/server/examPostCon
 import { examPrepRowRouteSignatures } from "../src/shared/server/examPrepRowRouteRegistry.js";
 import { makeupTaskRouteSignatures } from "../src/shared/server/makeupTaskRouteRegistry.js";
 import { resourceMaterialRouteSignatures } from "../src/shared/server/resourceMaterialRouteRegistry.js";
+import { studentRouteSignatures } from "../src/shared/server/studentRouteRegistry.js";
 import { portalWriteRouteSignatures } from "../src/shared/server/portalWriteRouteRegistry.js";
 import { reportSnapshotRouteSignatures } from "../src/shared/server/reportSnapshotRouteRegistry.js";
 import { adminAiRouteSignatures } from "../src/shared/server/adminAiRouteRegistry.js";
@@ -236,6 +237,9 @@ const directWriteSignatures = [
     .filter(({ method }) => ["POST", "PUT", "PATCH", "DELETE"].includes(method))
     .map(signatureOf),
   ...studentIntakeApplicantRouteSignatures
+    .filter(({ method }) => ["POST", "PUT", "PATCH", "DELETE"].includes(method))
+    .map(signatureOf),
+  ...studentRouteSignatures
     .filter(({ method }) => ["POST", "PUT", "PATCH", "DELETE"].includes(method))
     .map(signatureOf),
   ...teacherAccountRouteSignatures.map(signatureOf),
