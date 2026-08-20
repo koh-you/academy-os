@@ -25,7 +25,7 @@
 
 - `docs/testing-policy.md` 본문과 AGENTS.md 최상단 위험도 원칙(2026-08-10, blast-radius 기준)을 나란히 diff해 모순 지점을 특정한다.
 - `test:production:verbose` 삭제 또는 사용처 명시.
-- 순수 문자열 슬라이싱 계약 테스트(예: `test-notification-job-reconcile-contract.mjs`, `test-wrong-problem-explicit-save.mjs`)를 behavior/export 계약 테스트로 교체하거나, 이미 동일 계약을 검증하는 browser spec과 중복되면 한쪽을 정리한다. 기존 assertion을 느슨하게 만들지 않는다.
+- 순수 문자열 슬라이싱 계약 테스트를 behavior/export 계약 테스트로 교체하거나, 이미 동일 계약을 검증하는 browser spec과 완전히 중복되면 정리한다. `test-wrong-problem-explicit-save.mjs`(100% source-slicing, `tests/browser/lesson-journal.spec.js:336`가 자동저장 없음·명시 저장·in-flight 보존·서버 재조회까지 더 강하게 커버)는 MV-1c에서 삭제했다. `test-notification-job-reconcile-contract.mjs`는 재검증 결과 순수 슬라이싱이 아니라(실제 controller 동작 테스트 포함) real Solapi를 호출할 수 없어 대체 불가능한 route wiring drift 감지도 겸하고 있어 유지한다 — 후보로만 보이는 파일도 삭제 전 반드시 직접 재확인한다. 기존 assertion을 느슨하게 만들지 않는다.
 - 변경 종류별 최소 검증표를 testing-policy.md에 명시한다: 문서 전용(diff만) / pure helper 이동(가장 가까운 fixture+lint) / route shell 이동(registry fixture+lint, 전체 production 불필요) / 저장 API 사용 UI(domain test+focused browser) / provider orchestration(pure fixture+exact-head 원격 전체검사 cluster당 1회) / E2E flake(해당 spec만 격리 반복).
 
 ## MV-2 · 알림 provider 소유권 완성
