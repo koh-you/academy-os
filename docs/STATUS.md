@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-20
 
+## 2026-08-20 Maintenance Velocity MV-3a~c 완료
+
+- MV-3a: `normalizeGradeLabel`/`schoolNamesMatch`/`normalizeSchoolName` 3중 중복(App.jsx·server.js·coreData.js)을 `src/domains/schoolCalendar/schoolCalendarUtils.js`로 통합했다.
+- MV-3b: `dedupeExamPrepRowsForDisplay`·`buildExamCalendarEvents`·`ExamPrepLessonDetail` 등 시험관리 클러스터(~25개 함수·280줄)를 조사했으나, 전부 모듈 스코프 `currentExamCycle`/`today`에 얽혀 있고 그 근원인 `getKoreaDateString`이 App.jsx 안에 export 없이 정의돼 있어(AGENTS.md가 이미 "여러 벌 존재"로 flag한 함수) 안전하게 못 옮긴다고 결론짓고 보류했다. 근거는 `docs/maintenance-velocity-refactor-plan.md`에 줄 번호와 함께 기록했다.
+- MV-3c: `codex/refactor-supplement-11b`(178 commit 뒤처짐, merge/cherry-pick 안 함) 후보 중 `currentExamCycle` 체인에 안 걸리는 2개 — lesson roster selector 8개(`src/domains/students/lessonRosterSelectors.js`)와 homework continuity 2개(`findNextLessonForStudent`/`createLinkedPreviousHomework`, `src/domains/lessons/lessonHomeworkContinuity.js`)를 최신 main 기준으로 재구현했다. 나머지 2개(exam prep dedupe, `ExamPrepLessonDetail`)는 MV-3b와 같은 이유로 보류.
+- 5개 PR(#182~#185, MV-3b 조사 노트 포함) 모두 fast-checks/build/production-fixtures/browser-smoke 통과 후 main에 merge됐다. 다음은 MV-3d(TeacherViewOutlet 고빈도 화면 응집)와 MV-3e(orphan 모듈 정리)다.
+
 ## 2026-08-20 Maintenance Velocity MV-2 전체 완료 (2a~2f)
 
 - MV-2e: `codex/slack-scheduling-realtime`(2026-08-02, main보다 489 commit 뒤처짐) branch에서 유일하게 가치 있던 `test-slack-scheduling-provider.mjs`를 수정 없이 그대로 재적용했다 — 현재 `api/routes/notifications.js`에 대해 바로 통과했다. 나머지 branch 내용은 재적용하지 않았다(이미 대체됨).
