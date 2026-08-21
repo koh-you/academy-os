@@ -406,6 +406,7 @@ export function LessonJournalDetail({
   if (isExamPrepLessonCurrent) {
     return (
       <ExamPrepLessonDetail
+        createEmptyRecord={createEmptyRecord}
         lesson={lesson}
         onDeleteLesson={onDeleteLesson}
         onEditLesson={onEditLesson}
