@@ -2,6 +2,14 @@
 
 업데이트: 2026-08-21
 
+## 2026-08-21 App.css 도메인 분리 3단위 완료 (MV-5b·MV-5c)
+
+- MV-5b: `ExamReviewComposerModal`(15 selector) 분리 — `.commentDraftPanel` 등 다른 lazy 청크(`LessonJournalCommentComposerView.jsx`)와 공유하는 클래스 자체는 App.css에 남기고, `.examReviewComposerModal` 조상 스코프 override만 안전하게 이동. 죽은 selector `.copyFeedbackStatus`와 결합 선언돼 있던 `.reviewCopyStatus`는 규칙을 쪼개 분리.
+- MV-5c: `ExamAnalysisPipelineCenter` 클러스터(App.css 386줄 · selector 430개, 이전 두 단위보다 훨씬 큼) 분리. 규모 때문에 postcss로 기계적 추출(재입력 없음)했고, 이 과정에서 자동으로 걸러진 "mixed rule" 중 2개(`.examAnalysisGrid`, `.examAnalysisFormGrid`)는 수십 개 무관한 도메인과 공유하는 거대 유틸리티 규칙이라 App.css에 남겼다. cascade 검증은 declared-property 기준 자동 대조로 AI 실행 없이 도달 가능한 53개 selector(400+ 속성값)를 확인, 나머지는 기계적 추출 자체가 안전장치.
+- PR #201·#202, fast-checks/build/production-fixtures/browser-smoke 전체 통과 후 main에 병합됐다.
+- **App.css 누적 효과**: main CSS blocking 번들 `414.41 kB → 365.82 kB`(-48.59 kB, 약 12%) since MV-5a 착수. `App.css` 자체는 22,230 → 19,706줄.
+- 다음 후보와 방법론은 `docs/app-refactor-fourth-pass-css-domain-split-baseline.md`에 기록. `ExamPostSubmissionManager`는 학생 포털과 클래스명이 겹쳐 분리 불가로 판정, 더 이상 후보 아님.
+
 ## 2026-08-21 리팩터링·원격 브랜치 정리 6단계 완료
 
 - PR #193·#195 종료(danger 버튼 클래스 통일, 학생 프로필 중복 버튼 클래스 제거) + PR #196(StudentManager의 `isWithdrawnStudent` 로컬 중복을 `lessonRosterSelectors.js` export로 통합, 동시 세션이 만든 PR을 검증 후 병합) — main에 병합, CI 전체 통과.
