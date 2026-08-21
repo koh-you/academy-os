@@ -12,6 +12,7 @@ import { StudentProfileErrorBoundary, StudentProfileModal } from "./StudentProfi
 import { StudentWithdrawnList } from "./StudentWithdrawnList.jsx";
 import { sortWithdrawnStudents } from "./studentListSort.js";
 import { hasStudentLessonRowOnDate } from "./rosterEffectiveDate.js";
+import { isWithdrawnStudent } from "./lessonRosterSelectors.js";
 
 const withdrawalReasonOptions = [
   { value: "graduation", label: "졸업" },
@@ -19,10 +20,6 @@ const withdrawalReasonOptions = [
   { value: "withdrawal", label: "퇴원" },
   { value: "other", label: "기타" }
 ];
-
-function isWithdrawnStudent(student = {}) {
-  return (student.status ?? "active") !== "active" || Boolean(student.withdrawnAt);
-}
 
 function getStudentTallySubmissions(student = {}, intakeApplicants = []) {
   return intakeApplicants.filter((applicant) => {
