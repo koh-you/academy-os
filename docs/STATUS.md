@@ -1,6 +1,13 @@
 # Academy OS Current Status
 
-업데이트: 2026-08-20
+업데이트: 2026-08-21
+
+## 2026-08-21 MV-3b 선행 작업 완료 (getKoreaDateString 통합)
+
+- `getKoreaDateString`이 App.jsx·server.js(2벌, `getKoreaDateStringForAttendance` 포함)·`api/routes/coreData.js`·`src/domains/lessons/attendance.js`·`src/domains/specialLectures/specialLectureGuideUtils.js`·`src/shared/persistence/learningCalendarRowMappers.js`에 총 7벌 중복돼 있었다. 3가지 코드 형태(en-CA formatToParts, en-CA `.format()`, en-US formatToParts+재래핑)가 실제 호출부 기준 완전히 동치임을 확인한 뒤 `src/shared/utils/koreaDate.js`(AGENTS.md 정답 위치)로 통합했다.
+- `learningCalendarRowMappers.js`는 `test-fourth-pass-row-mapper-baseline.mjs`가 강제하는 "import 0개" 순수성 계약 때문에 로컬 사본을 그대로 유지하는 예외로 남겼다.
+- PR #190, fast-checks/build/production-fixtures/browser-smoke 전체 통과 후 main에 merge됐다.
+- **MV-3b의 실제 시험관리 클러스터 추출(`dedupeExamPrepRowsForDisplay` 등 ~25개 함수)은 이번 범위 밖 — 선행 블로커만 해소했다.** `currentExamCycle` 자체의 중복·export 여부는 아직 미조사. 상세는 `docs/maintenance-velocity-refactor-plan.md`.
 
 ## 2026-08-20 Maintenance Velocity MV-3d~e 완료 · MV 전체(0~3) 종료
 
