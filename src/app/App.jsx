@@ -7137,7 +7137,7 @@ export function App() {
           </div>
           <ModalFooter tone="danger">
             <button className="softButton" disabled={lessonHistoryActionState.state === "saving"} onClick={() => setLessonDeleteModalId("")} type="button">취소</button>
-            <button className="dangerButton" disabled={lessonHistoryActionState.state === "saving"} onClick={() => confirmDeleteLesson(pendingDeleteLesson.lessonId)} type="button">
+            <button className="dangerSoftButton" disabled={lessonHistoryActionState.state === "saving"} onClick={() => confirmDeleteLesson(pendingDeleteLesson.lessonId)} type="button">
               {lessonHistoryActionState.state === "saving" ? "취소 저장 중" : "수업 취소 처리"}
             </button>
           </ModalFooter>
