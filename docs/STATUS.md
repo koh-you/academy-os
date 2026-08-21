@@ -2,6 +2,16 @@
 
 업데이트: 2026-08-21
 
+## 2026-08-21 리팩터링·원격 브랜치 정리 6단계 완료
+
+- PR #193·#195 종료(danger 버튼 클래스 통일, 학생 프로필 중복 버튼 클래스 제거) + PR #196(StudentManager의 `isWithdrawnStudent` 로컬 중복을 `lessonRosterSelectors.js` export로 통합, 동시 세션이 만든 PR을 검증 후 병합) — main에 병합, CI 전체 통과.
+- 원격 브랜치 20개 재감사: 4개(`mv-3b-*`)는 이미 삭제됨, 15개는 main에 내용이 흡수/대체됐음을 각각 직접 diff로 확인 후 삭제, 1개(`codex/daily-20260801-save-reliability`)는 main에 아직 없는 `docs/delivery-policy.md`(요청 분류·배포 정책 문서) 내용이라 재적용 후보로 보존.
+- MV-4b: `ExamPrepLessonDetail`을 App.jsx에서 `src/domains/lessons/ExamPrepLessonDetail.jsx`로 추출(App.jsx 9934→9800줄). `createEmptyRecord`만 App.jsx 클로저 의존이라 새 prop으로 노출하고 두 실제 호출부에 연결.
+- MV-5a: App.css 도메인 분리 재개(4-6 번호는 연장하지 않고 MV로 기록). `ExamPrepPastPaperPanel`의 `.pastPaper*` selector 11개를 전용 CSS로 분리(main CSS 414.41→413.23 kB). 스크린샷 도구가 없어 `getComputedStyle()` 전/후 대조로 cascade 안전성 확인.
+- MV-6: `getDefaultExamCycleForDate`가 client(`examPrepCalendarCluster.js`)·server(`learningCalendarRowMappers.js`)에 이중 존재함을 확인, 10개 날짜로 동치 검증 후 parity fixture만 추가(제품 코드 무변경, row mapper zero-import 계약 유지).
+- 6개 PR(#193, #195, #196, #197, #198, #199) 모두 fast-checks/build/production-fixtures/browser-smoke 통과 후 main에 병합됐다. 운영 데이터 쓰기·삭제, 실제 알림 발송, 유료 AI, 로그인/권한 변경은 실행하지 않았다.
+- 남은 후속 항목(사람 판단 필요): App.css의 나머지 도메인 분리(선택 기준·방법은 baseline 문서에 기록), `codex/daily-20260801-save-reliability`의 delivery-policy.md 재적용 여부.
+
 ## 2026-08-21 MV-3b 완료 (시험관리·학사달력 클러스터 추출)
 
 - PR #190(선행 작업)에 이어 PR #192에서 `dedupeExamPrepRowsForDisplay`·`buildExamCalendarEvents` 등 `currentExamCycle`/`today`에 얽힌 순수 함수 40개(~470줄, App.jsx:1541-2012)를 `src/domains/exams/examPrepCalendarCluster.js`의 `createExamPrepCalendarCluster(today)` 팩토리로 이동했다. 원래 모듈 스코프 클로저 의미(한 번만 계산되는 `currentExamCycle`)를 보존하도록 팩토리 패턴을 썼고, App.jsx의 기존 ~15개 호출부(런타임 prop 번들 포함)는 무변경으로 동작한다.
