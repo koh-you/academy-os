@@ -6138,69 +6138,6 @@ summary:focus-visible {
   min-height: 120px;
 }
 
-.pastPaperFramePanel {
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--academy-border, #d8e3f8);
-  border-radius: 8px;
-  box-shadow: 0 12px 28px color-mix(in srgb, var(--status-info-text, #1d4ed8) 6%, transparent);
-  display: grid;
-  gap: 12px;
-  min-height: calc(100vh - 230px);
-  padding: 14px;
-}
-
-.pastPaperToolbar {
-  align-items: center;
-  display: flex;
-  gap: 16px;
-  justify-content: space-between;
-}
-
-.pastPaperActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-.pastPaperToolbar h2,
-.pastPaperToolbar p {
-  margin: 0;
-}
-
-.pastPaperFrameWrap {
-  display: grid;
-  min-height: calc(100vh - 330px);
-  position: relative;
-}
-
-.pastPaperLoading {
-  align-self: start;
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  color: var(--status-info-text, #1d4ed8);
-  font-weight: 900;
-  justify-self: start;
-  margin: 12px;
-  padding: 10px 12px;
-  position: absolute;
-  z-index: 1;
-}
-
-.pastPaperFrame {
-  border: 1px solid var(--status-neutral-border, #e2e8f0);
-  border-radius: 8px;
-  min-height: calc(100vh - 330px);
-  width: 100%;
-}
-
-.pastPaperHelp {
-  color: var(--academy-muted, #64748b);
-  font-size: 13px;
-  margin: -2px 0 0;
-}
-
 .mutedBadge {
   background: var(--academy-surface-muted, #f8fafc);
   color: var(--academy-muted, #64748b);
@@ -21058,15 +20995,6 @@ body.attendanceOnlyBody {
   .tallyMetricLine,
   .tallyReviewGrid {
     grid-template-columns: 1fr;
-  }
-
-  .pastPaperToolbar {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .pastPaperActions {
-    justify-content: flex-start;
   }
 
   .supplementRowItem {
