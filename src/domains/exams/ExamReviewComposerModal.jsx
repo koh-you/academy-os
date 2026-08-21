@@ -1,4 +1,5 @@
 import { AutosaveRiskNotice } from "../../shared/components/AutosaveRiskNotice.jsx";
+import "./examReviewComposerModal.css";
 import { Disclosure } from "../../shared/components/Disclosure.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
