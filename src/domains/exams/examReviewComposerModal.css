@@ -1,0 +1,97 @@
+.modalSaveStatusBar {
+  display: flex;
+  justify-content: flex-end;
+  margin: -4px 0 12px;
+}
+
+.examReviewComposerModal .commentDraftPanel,
+.examReviewComposerModal .commentPreviewPanel {
+  align-content: start;
+  align-self: start;
+}
+
+.examReviewComposerModal .sectionHeader.slim {
+  min-height: 36px;
+}
+
+.examReviewChecklist {
+  display: grid;
+  gap: 10px;
+  max-height: 560px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.examReviewChecklistItem {
+  background: var(--status-info-bg, #eff6ff);
+  border: 1px solid var(--status-info-border, #bfdbfe);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 12px;
+}
+
+.examReviewChecklistItem span {
+  color: var(--academy-primary, #17213d);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.examReviewChecklistItem textarea {
+  background: var(--academy-surface, #ffffff);
+  border: 1px solid var(--status-info-bg, #eff6ff);
+  border-radius: 8px;
+  min-height: 74px;
+  padding: 10px;
+  resize: vertical;
+}
+
+.examReviewRawDraft {
+  background: var(--academy-surface-muted, #f8fafc);
+  border: 1px solid var(--status-neutral-border, #e2e8f0);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.examReviewRawDraft .disclosureTrigger {
+  font-size: 13px;
+  font-weight: 900;
+  min-height: 0;
+  padding: 0;
+}
+
+.examReviewRawDraft .commentComposerTextarea {
+  margin-top: 10px;
+  min-height: 220px;
+}
+
+.examReviewBlogSource {
+  background: var(--status-info-bg, #eff6ff);
+  border: 1px solid var(--status-info-border, #bfdbfe);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.examReviewBlogSource strong {
+  color: var(--academy-primary, #17213d);
+}
+
+.examReviewBlogSource pre {
+  color: var(--status-info-text, #1d4ed8);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  margin: 0;
+  max-height: 180px;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
+.reviewCopyStatus {
+  color: var(--status-success-text, #047857);
+  font-size: 13px;
+  font-weight: 900;
+}
