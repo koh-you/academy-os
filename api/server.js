@@ -137,6 +137,7 @@ import {
   getEffectiveLessonStudentIds,
   isStudentScheduledForLesson
 } from "../src/shared/utils/studentSchedule.js";
+import { getKoreaDateString } from "../src/shared/utils/koreaDate.js";
 import {
   findPreviousLessonsForStudent,
   selectLinkedPreviousHomework
@@ -651,16 +652,9 @@ async function sendAttendanceAlimtalkOnce(payload) {
   }
 }
 
-function getKoreaDateStringForAttendance(date = new Date()) {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Seoul",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit"
-  }).formatToParts(date);
-  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
-  return `${values.year}-${values.month}-${values.day}`;
-}
+// MV-3b prerequisite: getKoreaDateStringForAttendance was a byte-identical
+// duplicate of getKoreaDateString under a different name; merged into the
+// one call site instead of keeping both.
 
 function formatKoreaAttendanceTime(date = new Date()) {
   return new Intl.DateTimeFormat("ko-KR", {
@@ -933,7 +927,7 @@ async function handleAttendanceCheck(payload = {}) {
   const source = String(payload.source || "kiosk");
   const now = new Date();
   const nowIso = now.toISOString();
-  const todayString = getKoreaDateStringForAttendance(now);
+  const todayString = getKoreaDateString(now);
   const attendanceDate = String(payload.date || todayString);
   const currentTime = formatKoreaAttendanceTime(now);
   const previewOnly = payload.previewOnly === true;
@@ -4635,17 +4629,6 @@ async function runInternalNotificationDispatch(reason = "interval") {
   } finally {
     internalDispatchRunning = false;
   }
-}
-
-function getKoreaDateString(value = new Date()) {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    day: "2-digit",
-    month: "2-digit",
-    timeZone: "Asia/Seoul",
-    year: "numeric"
-  }).formatToParts(new Date(value));
-  const dateParts = Object.fromEntries(parts.map((part) => [part.type, part.value]));
-  return `${dateParts.year}-${dateParts.month}-${dateParts.day}`;
 }
 
 function isSupplementLesson(lesson = {}) {

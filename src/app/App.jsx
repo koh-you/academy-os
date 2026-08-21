@@ -480,6 +480,7 @@ import {
   postJsonWithTimeout
 } from "../shared/utils/apiClient.js";
 import { safeIdPart } from "../shared/utils/id.js";
+import { getKoreaDateString } from "../shared/utils/koreaDate.js";
 import { applyStudentScheduleToLesson } from "../shared/utils/studentSchedule.js";
 import ssenTypeIndex from "../../api/data/ssenTypeIndex.json";
 import {
@@ -9519,17 +9520,6 @@ function addMinutesToTime(time, minutes) {
 
 function getDayKey(date) {
   return ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][new Date(`${date}T00:00:00+09:00`).getDay()];
-}
-
-function getKoreaDateString(date = new Date()) {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Seoul",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit"
-  }).formatToParts(date);
-  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
-  return `${values.year}-${values.month}-${values.day}`;
 }
 
 function getKoreaDateTimeString(date = new Date()) {
