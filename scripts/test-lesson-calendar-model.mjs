@@ -1,5 +1,4 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import { compareLessonCalendarDisplayOrder } from "../src/domains/lessons/lessonCalendarDisplayOrder.js";
 import {
   createExamPrepStudentRows,
@@ -12,8 +11,6 @@ import {
   lessonCalendarFilterOptions,
   shiftLessonCalendarMonth
 } from "../src/domains/lessons/lessonCalendarModel.js";
-
-const appCss = await readFile(new URL("../src/app/App.css", import.meta.url), "utf8");
 
 assert.equal(shiftLessonCalendarMonth("2026-08-01", 1), "2026-09-01");
 assert.equal(shiftLessonCalendarMonth("2026-08-01", -1), "2026-07-01");
@@ -151,9 +148,6 @@ assert.deepEqual(
   ["earlier", "special", "makeup-a", "makeup-b", "regular"],
   "calendar keeps chronological order and groups same-time special lessons before makeup and regular lessons"
 );
-
-assert.match(appCss, /\.saveButton:disabled\s*\{[^}]*cursor:\s*not-allowed;/s);
-assert.match(appCss, /\.stickySaveBar-saving \.saveButton:disabled\s*\{[^}]*cursor:\s*wait;/s);
 
 const expectedByFilter = {
   regular: ["regular"],

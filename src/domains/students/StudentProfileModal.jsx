@@ -957,7 +957,7 @@ export function StudentProfileModal({
                 {isEditingProfile ? (
                   <ListCardActions className="studentProfileRowActions">
                     <button
-                      className="softButton primarySoft"
+                      className="softButton"
                       disabled={reminder.status === "done"}
                       onClick={() =>
                         runProfileAction("운영 알림 완료", () =>
@@ -1076,7 +1076,7 @@ export function StudentProfileModal({
                   {isEditingProfile ? (
                     <div className="studentProfileRowActions">
                       <button
-                        className="softButton primarySoft"
+                        className="softButton"
                         disabled={!isDirty || studentConsultationSaveState === "saving"}
                         onClick={() => runProfileAction("상담 변경 저장", () => saveConsultationDraft(item))}
                         type="button"
@@ -1164,7 +1164,7 @@ export function StudentProfileModal({
                       <input aria-label={`${student.name} ${item.examDate || "성적"} 메모`} value={draft.note ?? ""} onChange={(event) => updateScoreDraft(item.scoreRecordId, "note", event.target.value)} />
                       <div className="studentProfileRowActions">
                         <button
-                          className="softButton primarySoft"
+                          className="softButton"
                           disabled={!isDirty || scoreRecordSaveState === "saving"}
                           onClick={() => runProfileAction("성적 변경 저장", () => saveScoreDraft(item))}
                           type="button"
@@ -1255,7 +1255,7 @@ export function StudentProfileModal({
                       <input aria-label={`${student.name} ${item.title || "테스트"} 메모`} value={draft.note ?? ""} onChange={(event) => updateAcademyTestDraft(item.testId, "note", event.target.value)} />
                       <div className="studentProfileRowActions">
                         <button
-                          className="softButton primarySoft"
+                          className="softButton"
                           disabled={!isDirty || academyTestSaveState === "saving"}
                           onClick={() => runProfileAction("테스트 변경 저장", () => saveAcademyTestDraft(item))}
                           type="button"
@@ -1306,7 +1306,7 @@ export function StudentProfileModal({
             saveState={effectiveProfileSaveState}
           >
             <button
-              className="saveButton"
+              className="primaryButton"
               disabled={!isProfileDirty || isProfileSaving}
               onClick={saveProfileDraft}
               type="button"
