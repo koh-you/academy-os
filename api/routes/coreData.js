@@ -1,5 +1,6 @@
 import { sampleData } from "../../src/shared/data/sampleData.js";
 import { normalizeSchoolName } from "../../src/domains/schoolCalendar/schoolCalendarUtils.js";
+import { getKoreaDateString } from "../../src/shared/utils/koreaDate.js";
 import {
   getSpecialLectureStudentSyncOperation,
   getSpecialLectureStudentSyncProtectionReasons,
@@ -208,15 +209,6 @@ function throwSpecialLectureTallySessionRequestSchemaError() {
 function hasMeaningfulValue(value) {
   if (typeof value === "boolean") return value;
   return Boolean(String(value ?? "").trim());
-}
-
-function getKoreaDateString(date = new Date()) {
-  return new Intl.DateTimeFormat("en-CA", {
-    day: "2-digit",
-    month: "2-digit",
-    timeZone: "Asia/Seoul",
-    year: "numeric"
-  }).format(date);
 }
 
 function compactExamPrepKeyPart(value = "") {

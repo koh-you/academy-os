@@ -110,6 +110,10 @@ export function getDefaultExamCycleForDate(dateString = getKoreaDateString()) {
   return `${year}-2-final`;
 }
 
+// Kept as a local copy (not imported from src/shared/utils/koreaDate.js) --
+// test-fourth-pass-row-mapper-baseline.mjs enforces that this module has
+// zero import statements at all, so it stays self-contained even though
+// this duplicates the shared implementation used everywhere else.
 function getKoreaDateString(date = new Date()) {
   return new Intl.DateTimeFormat("en-CA", {
     day: "2-digit",
