@@ -2,6 +2,13 @@
 
 업데이트: 2026-08-21
 
+## 2026-08-21 MV-3b 완료 (시험관리·학사달력 클러스터 추출)
+
+- PR #190(선행 작업)에 이어 PR #192에서 `dedupeExamPrepRowsForDisplay`·`buildExamCalendarEvents` 등 `currentExamCycle`/`today`에 얽힌 순수 함수 40개(~470줄, App.jsx:1541-2012)를 `src/domains/exams/examPrepCalendarCluster.js`의 `createExamPrepCalendarCluster(today)` 팩토리로 이동했다. 원래 모듈 스코프 클로저 의미(한 번만 계산되는 `currentExamCycle`)를 보존하도록 팩토리 패턴을 썼고, App.jsx의 기존 ~15개 호출부(런타임 prop 번들 포함)는 무변경으로 동작한다.
+- 이동 전 호이스팅 순서·외부 import 의존 여부를 grep으로 미리 검증해 원자적 이동이 안전함을 확인했다. `scenario-tests-production.cjs`의 8개 리터럴 검사는 기존 `examPrepCenterModelSource` 확장 패턴을 그대로 따라 고쳤다.
+- PR #192, fast-checks/build/production-fixtures/browser-smoke 전체 통과 후 main에 merge됐다.
+- **MV-3b 종료.** 남은 것은 `currentExamCycle`의 client/server 경계 간 중복(`api/routes/coreData.js`의 별도 사본)과 `ExamPrepLessonDetail`(JSX 컴포넌트) 검토 — 둘 다 이번 범위 밖으로 명시적으로 남겼다.
+
 ## 2026-08-21 MV-3b 선행 작업 완료 (getKoreaDateString 통합)
 
 - `getKoreaDateString`이 App.jsx·server.js(2벌, `getKoreaDateStringForAttendance` 포함)·`api/routes/coreData.js`·`src/domains/lessons/attendance.js`·`src/domains/specialLectures/specialLectureGuideUtils.js`·`src/shared/persistence/learningCalendarRowMappers.js`에 총 7벌 중복돼 있었다. 3가지 코드 형태(en-CA formatToParts, en-CA `.format()`, en-US formatToParts+재래핑)가 실제 호출부 기준 완전히 동치임을 확인한 뒤 `src/shared/utils/koreaDate.js`(AGENTS.md 정답 위치)로 통합했다.
