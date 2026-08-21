@@ -45,3 +45,14 @@
 - 4-6c 첫 단위는 NotificationCenter의 `ParentResponseContextPanel` 전용 selector 31개다. exact selector는 App.css에서 모두 제거됐고 새 CSS의 selector는 전부 `.parentResponseContext*`로 anchor된다. 같은 cascade context의 반복은 서로 다른 속성을 선언하는 `.parentResponseContextActions > span` 2개뿐이며 함께 이동한다.
 - 최초 390px screenshot에서 App.css 후반의 generic `.notificationPanel { gap: 12px }`가 더 이상 전용 `gap: 16px`을 덮지 못하는 순서 회귀를 발견했다. 새 640px domain override로 기존 computed value를 명시해 1440px·390px before/after PNG SHA-256을 각각 동일하게 만들었다.
 - build 결과 main CSS는 `338,443→336,364 bytes`, 신규 lazy NotificationCenter CSS는 `2,142 bytes`다. production `305/305`, scenario `828/828`, safe browser `77/77`을 통과했다.
+
+## 2026-08-21 MV-5a 진행 상태 (Maintenance Velocity 재개, 4-6 번호 연장 안 함)
+
+이 문서는 4차의 역사적 기록으로 유지하고, 이후 CSS 분리 단위는 `docs/maintenance-velocity-refactor-plan.md`에 MV 번호로 기록한다. 아래는 이번 재실측 기준선이다.
+
+- 착수 시점(2026-08-21) 재실측: `App.css` 22,230줄, main CSS 빌드 산출물 `414.41 kB`(gzip 미표기, 이전 4-6c 이후 다른 도메인 CSS 추가로 증가). 여전히 도메인별 lazy 분리 없이 `main.jsx`에서 전역 1회 blocking import.
+- **선택 기준**: lazy 화면들 중 자체 selector 접두사(`.pastPaper*` 등)만 쓰고 다른 도메인 JSX와 공유하지 않는 후보를 `grep -rl`로 찾아 선정했다. `ExamPrepPastPaperPanel.jsx`(이미 `ExamPrepCenter.jsx` lazy 청크에 속함)의 `.pastPaper*` 9개 규칙(+모바일 미디어쿼리 2개 override, 총 11 selector)이 App.css 어디에도 다른 파일에서 재사용되지 않음을 확인했다.
+- **cascade 안전성 검증 방법**: 이 리포에 스크린샷 diff 도구가 없어(4-6c 때와 동일한 제약), computed style을 before/after로 직접 비교했다. `npm run dev:safe`로 로컬 서버를 띄우고 브라우저에서 `getComputedStyle()`로 7개 selector × 18개 속성(desktop 1280px)과 2개 selector × 3개 속성(mobile 900px, `max-width: 1100px` breakpoint)을 이동 전/후 각각 캡처해 완전히 동일함을 확인했다(색상 값까지 rgb 단위로 일치).
+- `src/domains/exams/examPrepPastPaperPanel.css`(신규)를 만들고 `ExamPrepPastPaperPanel.jsx`가 직접 import한다(기존 4-6c의 `parentResponseContextPanel.css` 패턴과 동일).
+- build 결과: main CSS `414.41 kB → 413.23 kB`, 신규 lazy `ExamPrepCenter.css` `1.21 kB`. `scripts/test-exam-prep-past-paper-css-domain-split.mjs`(신규, postcss로 selector 11개·미디어쿼리 앵커링 구조 검증)와 기존 `test:production`(303/303) 모두 통과.
+- **다음 후보 미착수**: 도메인당 selector 공유 여부를 전수 조사하지 않았다 — `ExamPrepPastPaperPanel` 하나만 검증 후 안전 단위로 확정했다. 다음 세션에서 유사하게 격리된 다른 lazy 화면(예: `ExamAnalysisPipelineCenter` 자체 selector, `PlanningToolCenters` 하위 화면들)을 같은 방법으로 하나씩 확인해 나간다. App.css 전역 import 제거(모든 selector가 도메인별로 옮겨진 뒤)는 아직 훨씬 먼 목표다.

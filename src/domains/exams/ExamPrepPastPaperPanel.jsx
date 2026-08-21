@@ -1,4 +1,5 @@
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import "./examPrepPastPaperPanel.css";
 
 export function ExamPrepPastPaperPanel({
   archiveUrl,
