@@ -151,6 +151,7 @@ export function TeacherLessonHubV2({
         onClose={onBackToCalendar}
       >
         <ExamPrepLessonDetail
+          createEmptyRecord={nestedPanels.createEmptyRecord}
           examPrepScheduleLessons={examPrepScheduleLessons}
           lesson={selectedLesson}
           onDeleteLesson={onDeleteLesson}
