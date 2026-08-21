@@ -112,7 +112,7 @@ export function StudentLifecycleOverlays({
           </div>
           <ModalFooter tone="danger">
             <button className="softButton" disabled={withdrawalSaveState === "saving"} onClick={() => setDeleteStudentId("")} type="button">취소</button>
-            <button className="dangerButton" disabled={withdrawalSaveState === "saving"} onClick={confirmDeleteStudent} type="button">
+            <button className="dangerSoftButton" disabled={withdrawalSaveState === "saving"} onClick={confirmDeleteStudent} type="button">
               {withdrawalSaveState === "saving" ? "저장·확인 중" : withdrawalSaveState === "failed" ? "다시 퇴원 처리" : "퇴원 처리"}
             </button>
           </ModalFooter>
@@ -216,7 +216,7 @@ export function StudentLifecycleOverlays({
             </button>
             {permanentDeleteAudit ? (
               <button
-                className="dangerButton"
+                className="dangerSoftButton"
                 disabled={
                   permanentDeleteAuditState === "saving" ||
                   (!permanentDeleteAudit.allowed && !forceDeleteWithReferences) ||
@@ -274,7 +274,7 @@ export function StudentLifecycleOverlays({
           ) : null}
           <ModalFooter tone="danger">
             <button className="softButton" disabled={batchPermanentDeleteAuditState === "saving"} onClick={closeBatchPermanentDeleteModal} type="button">닫기</button>
-            <button className="dangerButton" disabled={batchPermanentDeleteAuditState !== "saved" || batchPermanentDeleteConfirmation.trim() !== "영구 삭제" || (batchPermanentDeleteStudents.some((student) => !batchPermanentDeleteAudits[student.studentId]?.allowed) && !batchForceDeleteWithReferences)} onClick={permanentlyDeleteSelectedWithdrawnStudents} type="button">선택 학생 영구 삭제</button>
+            <button className="dangerSoftButton" disabled={batchPermanentDeleteAuditState !== "saved" || batchPermanentDeleteConfirmation.trim() !== "영구 삭제" || (batchPermanentDeleteStudents.some((student) => !batchPermanentDeleteAudits[student.studentId]?.allowed) && !batchForceDeleteWithReferences)} onClick={permanentlyDeleteSelectedWithdrawnStudents} type="button">선택 학생 영구 삭제</button>
           </ModalFooter>
         </ModalComponent>
       ) : null}
