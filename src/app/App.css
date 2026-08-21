@@ -8013,15 +8013,6 @@ textarea {
   color: var(--status-pending-text, #c2410c);
 }
 
-.saveButton {
-  background: var(--academy-primary, #17213d);
-  border: 0;
-  border-radius: 8px;
-  color: var(--academy-surface, #ffffff);
-  font-weight: 900;
-  min-height: 38px;
-}
-
 .softButton,
 .dangerButton {
   border-radius: 8px;
@@ -8089,18 +8080,13 @@ textarea {
   color: var(--status-danger-text, #b91c1c);
 }
 
-.saveButton:disabled {
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-.stickySaveBar-saving .saveButton:disabled {
-  cursor: wait;
-}
-
 button:disabled {
   cursor: not-allowed;
   opacity: 0.65;
+}
+
+.stickySaveBar-saving .primaryButton:disabled {
+  cursor: wait;
 }
 
 .saveState {
