@@ -8085,6 +8085,10 @@ button:disabled {
   opacity: 0.65;
 }
 
+.stickySaveBar-saving .primaryButton:disabled {
+  cursor: wait;
+}
+
 .saveState {
   color: var(--academy-muted, #64748b);
   font-weight: 800;

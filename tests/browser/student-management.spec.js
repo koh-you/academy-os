@@ -305,7 +305,7 @@ test("student profile save keeps an in-flight follow-up draft for a second CAS s
   await page.getByRole("button", { name: /월경계 학생$/ }).click();
   const profile = page.getByRole("dialog", { name: /월경계 학생 학생 프로파일/ });
   await profile.getByRole("button", { name: "수정", exact: true }).click();
-  const profileSaveButton = profile.locator(".studentProfileStickySaveBar .saveButton");
+  const profileSaveButton = profile.locator(".studentProfileStickySaveBar .primaryButton");
   await expect(profileSaveButton).toBeDisabled();
   await expect(profileSaveButton).toHaveCSS("cursor", "not-allowed");
   const schoolInput = profile.getByLabel("월경계 학생 학교");
