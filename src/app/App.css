@@ -5639,6 +5639,12 @@ textarea {
   padding: 0 12px;
 }
 
+.dangerButton.mini {
+  font-size: 12px;
+  min-height: 30px;
+  padding: 0 8px;
+}
+
 .ghostButton {
   align-items: center;
   background: var(--academy-surface, #ffffff);
