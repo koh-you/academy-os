@@ -583,7 +583,7 @@ export function SchoolEventFormModal({
             {!isEditingEvent ? (
               <div className="examSubjectBox schoolExamBundleBox">
                 <SectionHeader
-                  actions={<button className="softButton small" onClick={onAddMathExamItem} type="button">+ 수학시험 추가</button>}
+                  actions={<button className="softButton mini" onClick={onAddMathExamItem} type="button">+ 수학시험 추가</button>}
                   density="slim"
                   title="수학시험 날짜"
                   titleAs="strong"
