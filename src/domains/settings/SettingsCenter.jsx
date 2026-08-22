@@ -409,7 +409,7 @@ export function SettingsCenter({
 
       <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...appStateAutosaveRisk} />
 
-      <WorkspaceTabs className="notificationSectionTabs settingsSectionTabs" label="설정 항목 선택">
+      <WorkspaceTabs className="settingsSectionTabs" label="설정 항목 선택" variant="secondary">
         {settingsSections.map((section) => (
           <button
             aria-selected={activeSettingsSection === section.id}
