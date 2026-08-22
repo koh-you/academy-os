@@ -1,0 +1,319 @@
+.aiSettingBadge {
+  align-items: center;
+  background: var(--academy-accent-bg, #eef2ff);
+  border: 1px solid var(--status-info-border, #bfdbfe);
+  border-radius: 999px;
+  color: var(--status-closure-text, #3730a3);
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 900;
+  min-height: 38px;
+  padding: 8px 12px;
+  white-space: nowrap;
+}
+
+.aiSettingBadge.fieldBadge {
+  border-radius: 8px;
+  justify-content: center;
+  min-height: 46px;
+  width: 100%;
+}
+
+.integrationStatusGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.templateTestGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.integrationStatusGrid article {
+  background: var(--academy-surface-muted, #f8fafc);
+  border: 1px solid var(--status-neutral-border, #e2e8f0);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.templateTestGrid article {
+  background: var(--academy-surface-muted, #f8fafc);
+  border: 1px solid var(--status-neutral-border, #e2e8f0);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.integrationStatusGrid strong {
+  color: var(--academy-text, #0f172a);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.templateTestGrid strong {
+  color: var(--academy-text, #0f172a);
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.templateTestGrid p {
+  color: var(--academy-muted, #64748b);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.templateResultCard {
+  background: var(--academy-surface-muted, #f8fafc);
+  border: 1px solid var(--academy-border-strong, #cbd8ee);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.templateResultMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.templateResultMeta span {
+  background: var(--academy-surface, #ffffff);
+  border: 1px solid var(--academy-border-strong, #cbd8ee);
+  border-radius: 999px;
+  color: var(--academy-text-strong, #475569);
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 10px;
+}
+
+.integrationStatusGrid span {
+  align-items: center;
+  color: var(--academy-text-strong, #475569);
+  display: flex;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.settingsSectionTabs {
+  margin: 0;
+}
+
+.settingsSectionTabs button {
+  font-size: 12px;
+  padding: 7px 11px;
+}
+
+.settingsCard {
+  display: grid;
+  gap: 14px;
+}
+
+.settingsRows {
+  border: 1px solid var(--status-neutral-border, #e2e8f0);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.settingsRow {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(240px, 1fr) 180px 220px;
+  padding: 14px 16px;
+}
+
+.settingsRow.compact {
+  grid-template-columns: minmax(240px, 1fr) 180px 120px;
+}
+
+.settingsRow + .settingsRow {
+  border-top: 1px solid var(--status-neutral-border, #e2e8f0);
+}
+
+.settingsRow > div {
+  display: grid;
+  gap: 4px;
+}
+
+.settingsRow strong {
+  font-size: 16px;
+}
+
+.accountSettingsGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.accountSettingsGrid label {
+  display: grid;
+  gap: 6px;
+}
+
+.accountSettingsGrid label span {
+  color: var(--academy-text-strong, #475569);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.accountSettingsActions {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+}
+
+.promptSettingsLayout {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 300px minmax(0, 1fr);
+}
+
+.promptTabList {
+  border: 1px solid var(--status-neutral-border, #e2e8f0);
+  border-radius: 8px;
+  display: grid;
+  overflow: hidden;
+}
+
+.promptTabList button {
+  background: var(--academy-surface, #ffffff);
+  border: 0;
+  border-top: 1px solid var(--status-neutral-border, #e2e8f0);
+  color: var(--academy-text-strong, #475569);
+  cursor: pointer;
+  display: grid;
+  gap: 5px;
+  padding: 14px;
+  text-align: left;
+}
+
+.promptTabList button:first-child {
+  border-top: 0;
+}
+
+.promptTabList button.active {
+  background: var(--status-info-bg, #eff6ff);
+  box-shadow: inset 3px 0 0 var(--academy-focus-ring, #2563eb);
+  color: var(--academy-text, #0f172a);
+}
+
+.promptTabList strong {
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.promptTabList span {
+  color: var(--academy-muted, #64748b);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.promptEditor {
+  align-content: start;
+  background: var(--status-info-bg, #eff6ff);
+  border: 1px solid var(--academy-border, #d8e3f8);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.promptEditor > span {
+  color: var(--academy-text, #0f172a);
+  font-weight: 900;
+}
+
+.promptMappingCard {
+  background: var(--academy-surface, #ffffff);
+  border: 1px solid var(--academy-border, #d8e3f8);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.promptMappingCard div {
+  display: grid;
+  gap: 4px;
+}
+
+.promptMappingCard strong {
+  color: var(--academy-primary, #17213d);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.promptMappingCard span {
+  color: var(--academy-text-strong, #475569);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.promptEditor textarea {
+  background: var(--academy-surface, #ffffff);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.55;
+  min-height: 330px;
+  resize: vertical;
+}
+
+.notificationTemplateSettingsGrid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.notificationTemplateEditor {
+  align-content: start;
+  background: var(--status-info-bg, #eff6ff);
+  border: 1px solid var(--academy-border, #d8e3f8);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.notificationTemplateEditorTop {
+  align-items: start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.notificationTemplateEditorTop > div {
+  display: grid;
+  gap: 4px;
+}
+
+.notificationTemplateEditorTop strong {
+  color: var(--academy-text, #0f172a);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.notificationTemplateEditorTop span {
+  color: var(--academy-muted, #64748b);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.notificationTemplateEditor textarea {
+  background: var(--academy-surface, #ffffff);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.55;
+  min-height: 220px;
+  resize: vertical;
+}
