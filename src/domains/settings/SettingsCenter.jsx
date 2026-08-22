@@ -1,4 +1,5 @@
 
+import "./settingsCenter.css";
 import { useEffect, useState } from "react";
 import { academyBrandName } from "../../app/appConfig.js";
 import { defaultAttendanceSettings } from "../lessons/attendanceSettings.js";
