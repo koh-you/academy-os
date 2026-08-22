@@ -239,6 +239,7 @@ export function StudentManager({
     if (saveState === "saving") return "저장 중";
     if (saveState === "saved") return "저장됨";
     if (saveState === "failed") return "재시도";
+    if (saveState === "dirty") return "저장 필요";
     return "저장";
   }
 
@@ -759,7 +760,7 @@ export function StudentManager({
                   ))}
                 </select>
                 <button
-                  className={`studentSaveButton ${saveState ?? "clean"}`}
+                  className="primaryButton compact"
                   disabled={isSaveDisabled}
                   onClick={() => saveStudentRow(student.studentId)}
                   type="button"
