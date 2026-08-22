@@ -10064,33 +10064,6 @@ textarea {
   content: "🔓 ";
 }
 
-.studentSaveButton {
-  background: var(--academy-text, #0f172a);
-  border: 1px solid var(--academy-text, #0f172a);
-  border-radius: 999px;
-  color: var(--academy-surface, #ffffff);
-  font-weight: 900;
-  min-height: 32px;
-  padding: 0 12px;
-}
-
-.studentSaveButton:disabled {
-  background: var(--academy-surface-muted, #f8fafc);
-  border-color: var(--academy-border, #d8e3f8);
-  color: var(--academy-muted, #64748b);
-  cursor: default;
-}
-
-.studentSaveButton.failed {
-  background: var(--status-danger-text, #b91c1c);
-  border-color: var(--status-danger-text, #b91c1c);
-}
-
-.studentSaveButton.dirty {
-  background: var(--status-info-text, #1d4ed8);
-  border-color: var(--status-info-text, #1d4ed8);
-}
-
 .studentProfilePanel {
   display: grid;
   gap: 14px;
