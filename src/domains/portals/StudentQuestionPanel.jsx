@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { ListCard, ListCardActions, ListCardBody } from "../../shared/components/ListCard.jsx";
+import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 
 function QuestionSaveFeedback({ saveState, targetId }) {
@@ -23,7 +24,14 @@ export function StudentQuestionPanel({
   writeEnabled = false
 }) {
   const [questionText, setQuestionText] = useState("");
+  const [deleteQuestionId, setDeleteQuestionId] = useState("");
   const isSaving = saveState.state === "saving";
+  const deleteTargetQuestion = questions.find((question) => question.questionId === deleteQuestionId);
+
+  function confirmDeleteQuestion() {
+    onDeleteQuestion?.(deleteQuestionId);
+    setDeleteQuestionId("");
+  }
   const hasQuestionDraft = Boolean(questionText.trim());
   const createFeedbackState = hasQuestionDraft && !(saveState.targetId === "create" && ["saving", "failed"].includes(saveState.state))
     ? {
@@ -91,7 +99,7 @@ export function StudentQuestionPanel({
                 <button
                   className="dangerSoftButton"
                   disabled={!writeEnabled || isSaving}
-                  onClick={() => onDeleteQuestion?.(question.questionId)}
+                  onClick={() => setDeleteQuestionId(question.questionId)}
                   type="button"
                 >
                   {saveState.targetId === question.questionId && saveState.action === "delete" && isSaving ? "삭제 중..." : "삭제"}
@@ -104,6 +112,21 @@ export function StudentQuestionPanel({
       </div>
       {saveState.targetId && saveState.targetId !== "create" && !pendingTargetVisible ? (
         <QuestionSaveFeedback saveState={saveState} targetId={saveState.targetId} />
+      ) : null}
+      {deleteQuestionId ? (
+        <Modal
+          className="studentQuestionDeleteConfirmModal"
+          title="질문을 삭제할까요?"
+          onClose={() => setDeleteQuestionId("")}
+        >
+          <p>
+            {deleteTargetQuestion ? `"${deleteTargetQuestion.text}" 질문을 삭제합니다.` : "이 질문을 삭제합니다."} 삭제하면 복구할 수 없습니다.
+          </p>
+          <ModalFooter tone="danger">
+            <button className="softButton" onClick={() => setDeleteQuestionId("")} type="button">돌아가기</button>
+            <button className="dangerSoftButton" onClick={confirmDeleteQuestion} type="button">삭제</button>
+          </ModalFooter>
+        </Modal>
       ) : null}
     </section>
   );

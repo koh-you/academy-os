@@ -34,9 +34,9 @@ const rawDialogEntries = sourceEntries.filter((entry) => (
   entry.path !== "src/shared/components/Modal.jsx" && entry.source.includes('role="dialog"')
 ));
 
-assert.equal(directModalCount, 37, "unexpected direct common Modal surface count");
+assert.equal(directModalCount, 38, "unexpected direct common Modal surface count");
 assert.equal(injectedModalCount, 8, "unexpected injected common Modal surface count");
-assert.equal(modalFooterCount, 18, "unexpected common ModalFooter count");
+assert.equal(modalFooterCount, 19, "unexpected common ModalFooter count");
 assert.equal(modalActionCount, 2, "unexpected legacy modalActions wrapper count");
 assert.deepEqual(
   rawDialogEntries.map((entry) => entry.path),
