@@ -83,21 +83,6 @@ jobs:
       - name: Run production tests
         run: npm run test:production
 
-      - name: TEMP diagnose scenario failures
-        if: always()
-        run: |
-          node scripts/scenario-tests-production.cjs > /tmp/scenario-out.json 2>&1 || true
-          node -e '
-            const fs = require("fs");
-            const data = JSON.parse(fs.readFileSync("/tmp/scenario-out.json", "utf8"));
-            const failed = data.checks.filter((c) => !c.ok);
-            console.log("REAL_FAILED_COUNT=" + failed.length);
-            for (const f of failed) {
-              console.log("REAL_FAIL_NAME: " + f.name);
-              console.log("REAL_FAIL_DETAIL: " + f.detail);
-            }
-          '
-
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 10
