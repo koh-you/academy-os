@@ -474,6 +474,7 @@ import {
 } from "../shared/utils/apiClient.js";
 import { safeIdPart } from "../shared/utils/id.js";
 import { getKoreaDateString } from "../shared/utils/koreaDate.js";
+import { isStaleDeploymentChunkError } from "../shared/utils/dynamicImportError.js";
 import { applyStudentScheduleToLesson } from "../shared/utils/studentSchedule.js";
 import ssenTypeIndex from "../../api/data/ssenTypeIndex.json";
 import {
@@ -7747,7 +7748,7 @@ function MonthlyRegularLessonOpenModal({ plan, saveStatus, onClose, onOpen }) {
 function LessonJournalFallback({ error, lesson, onBack, onDeleteLesson, onEditLesson, students = [] }) {
   const lessonStudents = getLessonJournalStudents(lesson, students);
   const errorMessage = String(error?.message ?? error ?? "알 수 없는 오류");
-  const isStaleDeploymentChunk = /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module/i.test(errorMessage);
+  const isStaleDeploymentChunk = isStaleDeploymentChunkError(error);
   return (
     <section className="lessonJournalPage">
       <NavigationHeader

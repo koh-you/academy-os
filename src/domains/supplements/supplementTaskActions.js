@@ -1,3 +1,5 @@
+import { isStaleDeploymentChunkError } from "../../shared/utils/dynamicImportError.js";
+
 export async function saveSupplementTaskContentAction({
   currentLessonStatus = "",
   onFeedback,
@@ -182,17 +184,22 @@ export async function applySupplementScheduleAction({
     });
     return result;
   } catch (error) {
+    const reloadRequired = isStaleDeploymentChunkError(error);
+    const failedStatus = reloadRequired ? "changed" : "failed";
     onSaveStatus({
-      lesson: "failed",
-      makeupTask: "failed",
-      notificationDraft: "failed",
-      parentChangeNotice: "failed",
-      studentChangeNotice: "failed",
-      studentReminder: "failed"
+      lesson: failedStatus,
+      makeupTask: failedStatus,
+      notificationDraft: failedStatus,
+      parentChangeNotice: failedStatus,
+      studentChangeNotice: failedStatus,
+      studentReminder: failedStatus
     });
     onFeedback({
-      message: error?.message || "알 수 없는 오류가 발생했습니다.",
-      title: "수업일지 일정 저장 실패",
+      message: reloadRequired
+        ? "새 버전 배포 뒤 이전 화면 코드가 남아 저장 모듈을 불러오지 못했습니다. 서버 저장과 알림 예약은 시작되지 않았습니다. 입력한 문구를 복사한 뒤 최신 화면으로 새로고침해 다시 저장해 주세요."
+        : error?.message || "알 수 없는 오류가 발생했습니다.",
+      ...(reloadRequired ? { reloadRequired: true } : {}),
+      title: reloadRequired ? "최신 화면 새로고침 필요" : "수업일지 일정 저장 실패",
       tone: "failed"
     });
     throw error;

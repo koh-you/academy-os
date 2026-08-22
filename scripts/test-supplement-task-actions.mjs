@@ -240,6 +240,33 @@ assert.deepEqual(scheduleFailureEvents[4][1], {
   tone: "failed"
 });
 
+const staleChunkEvents = [];
+await assert.rejects(() => applySupplementScheduleAction({
+  getImmediateNoticeStatus: (status) => status || "idle",
+  onFeedback: (value) => staleChunkEvents.push(["feedback", value]),
+  onMarkSaved: () => staleChunkEvents.push(["mark"]),
+  onResetConfirmation: () => staleChunkEvents.push(["reset"]),
+  onSaveStatus: (value) => staleChunkEvents.push(["status", value]),
+  scheduleTask: async () => {
+    staleChunkEvents.push(["schedule"]);
+    throw new TypeError("Failed to fetch dynamically imported module: https://example.test/assets/supplement.js");
+  },
+  task,
+  taskWithDraft: scheduledTask
+}), /Failed to fetch dynamically imported module/);
+assert.deepEqual(staleChunkEvents.map(([type]) => type), ["status", "feedback", "schedule", "status", "feedback"]);
+assert.deepEqual(staleChunkEvents[3][1], {
+  lesson: "changed",
+  makeupTask: "changed",
+  notificationDraft: "changed",
+  parentChangeNotice: "changed",
+  studentChangeNotice: "changed",
+  studentReminder: "changed"
+});
+assert.equal(staleChunkEvents[4][1].title, "최신 화면 새로고침 필요");
+assert.equal(staleChunkEvents[4][1].reloadRequired, true);
+assert.match(staleChunkEvents[4][1].message, /서버 저장과 알림 예약은 시작되지 않았습니다/);
+
 const notificationReserveEvents = [];
 const notificationReserveResult = await applySupplementNotificationControlAction({
   action: "reserve",
