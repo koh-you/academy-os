@@ -734,17 +734,6 @@ summary:focus-visible {
   color: var(--status-pending-text, #c2410c);
 }
 
-.notificationJobsStatusNotice {
-  align-items: center;
-  display: flex;
-  gap: 10px;
-  justify-content: space-between;
-}
-
-.notificationJobsStatusNotice .softButton {
-  flex: 0 0 auto;
-}
-
 .statusDot {
   border-radius: 999px;
   display: inline-block;
@@ -5975,44 +5964,6 @@ button:disabled {
   justify-content: flex-end;
 }
 
-.solapiResultSyncControl {
-  align-items: center;
-  color: var(--academy-text-strong, #475569);
-  display: flex;
-  font-size: 12px;
-  font-weight: 900;
-  gap: 6px;
-}
-
-.solapiResultSyncControl strong {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--academy-border, #d8e3f8);
-  border-radius: 8px;
-  color: var(--academy-primary, #17213d);
-  font-size: 12px;
-  font-weight: 900;
-  min-height: 32px;
-  padding: 7px 9px;
-  white-space: nowrap;
-}
-
-.notificationHistoryDateFilter {
-  align-items: center;
-  color: var(--academy-text-strong, #475569);
-  display: flex;
-  font-size: 12px;
-  font-weight: 900;
-  gap: 6px;
-}
-
-.notificationHistoryDateFilter input {
-  min-height: var(--academy-touch-target, 44px);
-}
-
-.noticeSolapiResultNotice {
-  line-height: 1.45;
-}
-
 .templatePreviewText {
   background: var(--academy-surface, #ffffff);
   border: 1px solid var(--academy-border-strong, #cbd8ee);
@@ -6035,284 +5986,11 @@ button:disabled {
   overflow: auto;
 }
 
-.notificationTable {
-  border: 1px solid var(--status-neutral-border, #e2e8f0);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.notificationTableHead,
-.notificationTableRow {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: 150px 120px 100px 150px 120px minmax(240px, 1fr) 104px;
-  padding: 12px 14px;
-}
-
-.notificationTableHead {
-  background: var(--academy-surface-muted, #f8fafc);
-  color: var(--academy-muted, #64748b);
-  font-weight: 900;
-}
-
-.notificationTableRow {
-  align-items: start;
-  border-top: 1px solid var(--status-neutral-border, #e2e8f0);
-}
-
 .notificationTableRow p,
 .notificationLogList p {
   color: var(--academy-text-strong, #475569);
   line-height: 1.5;
   margin: 0;
-  white-space: pre-wrap;
-}
-
-.notificationJobStateCell,
-.notificationJobTypeCell {
-  display: grid;
-  gap: 4px;
-  min-width: 0;
-}
-
-.notificationJobStateCell small,
-.notificationJobTypeCell small {
-  color: var(--academy-muted, #64748b);
-  font-size: 11px;
-  font-weight: 900;
-  overflow-wrap: anywhere;
-}
-
-.notificationJobActions {
-  align-items: start;
-  display: grid;
-  justify-items: start;
-}
-
-.notificationJobActions .dangerSoftButton.compact {
-  min-width: 74px;
-  white-space: nowrap;
-}
-
-.notificationJobActions small {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.noticeModeTabs {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin-bottom: 14px;
-}
-
-.noticeModeTabs.compact {
-  margin-bottom: 0;
-}
-
-.noticeModeTabs button {
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--academy-border, #d8e3f8);
-  border-radius: 8px;
-  color: var(--academy-text-strong, #475569);
-  display: grid;
-  min-height: 42px;
-  padding: 9px 12px;
-  text-align: center;
-}
-
-.noticeModeTabs button.active {
-  background: var(--academy-accent-bg, #eef2ff);
-  border-color: var(--academy-accent-text, #4f46e5);
-  color: var(--status-closure-text, #3730a3);
-}
-
-.noticeModeTabs strong {
-  font-size: 15px;
-}
-
-.noticeComposerGrid {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: minmax(280px, 0.9fr) minmax(420px, 1.4fr);
-}
-
-.noticeTargetPanel,
-.noticeWritePanel {
-  display: grid;
-  gap: 12px;
-}
-
-.noticeFilterGrid,
-.noticeScheduleGrid {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.noticeFilterGrid label,
-.noticeScheduleGrid label,
-.noticeWritePanel label {
-  color: var(--academy-text-strong, #475569);
-  display: grid;
-  font-size: 13px;
-  font-weight: 900;
-  gap: 6px;
-}
-
-.noticeTargetSummary {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.noticeTargetSummary > div,
-.noticePreviewBox {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--status-neutral-border, #e2e8f0);
-  border-radius: 8px;
-  display: grid;
-  gap: 5px;
-  padding: 12px;
-}
-
-.noticeTargetSummary span,
-.noticePreviewBox strong {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.noticeTargetSummary strong {
-  color: var(--academy-text, #0f172a);
-  font-size: 22px;
-}
-
-.noticeStudentPicker {
-  border: 1px solid var(--status-neutral-border, #e2e8f0);
-  border-radius: 8px;
-  display: grid;
-  gap: 6px;
-  max-height: 360px;
-  overflow: auto;
-  overscroll-behavior: contain;
-  padding: 10px;
-  scrollbar-gutter: stable;
-  touch-action: pan-y;
-  -webkit-overflow-scrolling: touch;
-}
-
-.noticeStudentPicker:focus-visible {
-  outline: 2px solid var(--academy-focus-ring, rgba(37, 99, 235, 0.36));
-  outline-offset: 2px;
-}
-
-.noticePickerActions,
-.noticeSendActions {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.noticeListHeader {
-  justify-content: space-between;
-}
-
-.noticeListHeader > div {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.noticeListHeader > div:first-child {
-  align-items: start;
-  display: grid;
-  gap: 2px;
-}
-
-.noticeListHeader strong {
-  color: var(--academy-primary, #17213d);
-  font-size: 14px;
-  font-weight: 900;
-}
-
-.noticeListHeader span {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.noticeStudentOption {
-  align-items: center;
-  border: 1px solid var(--status-neutral-border, #e2e8f0);
-  border-radius: 8px;
-  display: grid;
-  gap: 8px;
-  grid-template-columns: auto 1fr;
-  padding: 9px 10px;
-}
-
-.noticeStudentOption.active {
-  background: var(--academy-accent-bg, #eef2ff);
-  border-color: var(--status-closure-border, #6366f1);
-}
-
-.noticeRecipientBadges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  grid-column: 2;
-}
-
-.noticeRecipientBadges small {
-  border: 1px solid var(--academy-border, #d8e3f8);
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 900;
-  padding: 4px 7px;
-}
-
-.noticeRecipientBadges .available {
-  background: var(--status-success-bg, #ecfdf5);
-  border-color: var(--status-success-border, #86efac);
-  color: var(--status-success-text, #047857);
-}
-
-.noticeRecipientBadges .missing {
-  background: var(--academy-surface-muted, #f8fafc);
-  border-color: var(--status-neutral-border, #e2e8f0);
-  color: var(--academy-muted, #64748b);
-}
-
-.noticeStudentOption strong,
-.noticeStudentOption small {
-  display: block;
-}
-
-.noticeStudentOption small {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  margin-top: 2px;
-}
-
-.noticeStudentEmpty {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px dashed var(--academy-border-strong, #cbd8ee);
-  border-radius: 8px;
-  color: var(--academy-muted, #64748b);
-  font-size: 13px;
-  font-weight: 900;
-  padding: 14px;
-}
-
-.noticePreviewBox p {
-  color: var(--academy-text-strong, #475569);
-  line-height: 1.6;
-  margin: 0;
-  min-height: 76px;
   white-space: pre-wrap;
 }
 
@@ -6344,19 +6022,6 @@ button:disabled {
   color: var(--academy-surface, #ffffff);
 }
 
-.noticeWorkspaceTabs {
-  margin: 0;
-  overscroll-behavior-inline: contain;
-  scroll-padding-inline: 8px;
-  touch-action: pan-x pan-y;
-  -webkit-overflow-scrolling: touch;
-}
-
-.noticeWorkspaceTabs button {
-  font-size: 12px;
-  padding: 7px 10px;
-}
-
 .specialLecturePanel {
   display: grid;
   gap: 16px;
@@ -6368,10 +6033,6 @@ button:disabled {
   flex-wrap: wrap;
   gap: 8px;
   justify-content: flex-end;
-}
-
-.specialLectureTopTabs {
-  margin-top: 0;
 }
 
 .specialLectureTopTabs,
@@ -8082,135 +7743,6 @@ button:disabled {
 }
 
 /* Keep the recipient picker dense without changing shared form controls. */
-.noticeComposerPanel {
-  gap: 10px;
-  padding: 14px;
-}
-
-.noticeComposerPanel > .sectionHeader .eyebrow {
-  font-size: 11px;
-  margin-bottom: 3px;
-}
-
-.noticeComposerPanel > .sectionHeader h2 {
-  font-size: 22px;
-}
-
-.noticeTargetPanel {
-  align-content: start;
-  gap: 9px;
-}
-
-.noticeTargetPanel .noticeModeTabs.compact {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.noticeTargetPanel .noticeModeTabs.compact button {
-  flex: 1 1 86px;
-  min-height: 34px;
-  padding: 6px 10px;
-}
-
-.noticeTargetPanel .noticeModeTabs.compact strong {
-  font-size: 13px;
-}
-
-.noticeTargetPanel .noticeFilterGrid label {
-  font-size: 12px;
-  gap: 4px;
-}
-
-.noticeTargetPanel .noticeFilterGrid input,
-.noticeTargetPanel .noticeFilterGrid select {
-  font-size: 14px;
-  min-height: 38px;
-  padding: 0 11px;
-}
-
-.noticeTargetPanel .noticeTargetSummary {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.noticeTargetPanel .noticeTargetSummary div {
-  align-items: center;
-  display: flex;
-  flex: 1 1 110px;
-  gap: 6px;
-  justify-content: space-between;
-  min-height: 36px;
-  padding: 7px 9px;
-}
-
-.noticeTargetPanel .noticeTargetSummary strong {
-  font-size: 15px;
-}
-
-.noticeTargetPanel .noticeStudentPicker {
-  gap: 5px;
-  max-height: 430px;
-  padding: 7px;
-}
-
-.noticeTargetPanel .noticeStudentOption {
-  gap: 7px;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  min-height: 54px;
-  padding: 7px 9px;
-}
-
-.noticeTargetPanel .noticeRecipientBadges {
-  grid-column: auto;
-  justify-content: flex-end;
-}
-
-.noticeTargetPanel .noticeRecipientBadges small {
-  padding: 3px 6px;
-}
-
-@media (min-width: 981px) {
-  .noticeComposerGrid {
-    align-items: stretch;
-    height: clamp(560px, calc(100dvh - 170px), 760px);
-    min-height: 0;
-  }
-
-  .noticeTargetPanel,
-  .noticeWritePanel {
-    min-height: 0;
-  }
-
-  .noticeTargetPanel {
-    grid-template-rows: auto auto auto minmax(0, 1fr);
-    height: 100%;
-  }
-
-  .noticeTargetPanel .noticeStudentPicker {
-    max-height: none;
-    min-height: 0;
-    overscroll-behavior: contain;
-    scrollbar-gutter: stable;
-  }
-
-  .noticeTargetPanel .noticeListHeader {
-    background: var(--academy-surface, #ffffff);
-    border-bottom: 1px solid var(--status-neutral-border, #e2e8f0);
-    padding-bottom: 7px;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-  }
-
-  .noticeWritePanel {
-    align-content: start;
-    overflow-y: auto;
-    padding-right: 4px;
-    scrollbar-gutter: stable;
-  }
-}
 
 .specialLectureCalculator.collapsed {
   gap: 8px;
@@ -18638,57 +18170,6 @@ body.attendanceOnlyBody {
     padding: 12px;
   }
 
-  .noticeWorkspaceTabs {
-    flex-wrap: nowrap;
-    margin-inline: -2px;
-    overflow-x: auto;
-    padding: 2px 2px 7px;
-    scrollbar-width: thin;
-  }
-
-  .noticeWorkspaceTabs button {
-    flex: 0 0 auto;
-    min-height: 40px;
-    padding: 8px 11px;
-    white-space: nowrap;
-  }
-
-  .noticeTargetPanel .noticeModeTabs.compact {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .noticeTargetPanel .noticeModeTabs.compact button {
-    min-height: 42px;
-  }
-
-  .noticeTargetPanel .noticeStudentPicker {
-    max-height: min(48dvh, 420px);
-  }
-
-  .noticeTargetPanel .noticeListHeader,
-  .noticeTargetPanel .noticeListHeader > div:last-child {
-    align-items: stretch;
-    width: 100%;
-  }
-
-  .noticeTargetPanel .noticeListHeader > div:last-child {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .noticeTargetPanel .noticeListHeader > div:last-child button,
-  .noticeSendActions button {
-    min-height: 42px;
-    width: 100%;
-  }
-
-  .noticeSendActions {
-    align-items: stretch;
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-
   .notificationQueueActions {
     align-items: stretch;
     display: grid;
@@ -18710,15 +18191,6 @@ body.attendanceOnlyBody {
   .notificationQueueActions .countBadge {
     min-width: 0;
     width: 100%;
-  }
-
-  .notificationTable {
-    overflow-x: auto;
-  }
-
-  .notificationTableHead,
-  .notificationTableRow {
-    min-width: 900px;
   }
 
 }
@@ -19148,15 +18620,6 @@ body.attendanceOnlyBody {
   .noticeFilterGrid,
   .noticeScheduleGrid {
     grid-template-columns: 1fr;
-  }
-
-  .noticeTargetPanel .noticeStudentOption {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .noticeTargetPanel .noticeRecipientBadges {
-    grid-column: 2;
-    justify-content: flex-start;
   }
 
   .specialLectureEnrollmentCard,

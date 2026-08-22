@@ -1,3 +1,4 @@
+import "./notificationCenterExtra.css";
 import { copyTextToClipboard } from "../exams/outputPreview.js";
 import { defaultSpecialLectureGuides } from "../specialLectures/specialLectureGuideUtils.js";
 import { NotificationCenterHeader, NotificationSectionTabs } from "./NotificationCenterNavigation.jsx";
