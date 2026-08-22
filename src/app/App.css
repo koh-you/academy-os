@@ -9579,32 +9579,6 @@ textarea {
   margin: 0;
 }
 
-.examPrepRosterViewToggle {
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 10px;
-  display: inline-flex;
-  flex: 0 0 auto;
-  gap: 3px;
-  padding: 3px;
-}
-
-.examPrepRosterViewToggle button {
-  background: transparent;
-  border: 0;
-  border-radius: 7px;
-  color: var(--academy-text-muted, #52647c);
-  cursor: pointer;
-  font-weight: 900;
-  min-height: 34px;
-  padding: 0 13px;
-}
-
-.examPrepRosterViewToggle button.active {
-  background: var(--academy-surface, #fff);
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--academy-text, #0f172a) 12%, transparent);
-  color: var(--status-info-text, #1d4ed8);
-}
 
 .examPrepRosterGroups {
   display: grid;
@@ -11506,28 +11480,6 @@ textarea {
   padding: 10px;
 }
 
-.studentScheduleDayButtons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.studentScheduleDayButtons button {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 8px;
-  color: var(--academy-text-strong, #475569);
-  font-size: 13px;
-  font-weight: 900;
-  min-height: 34px;
-  min-width: 34px;
-}
-
-.studentScheduleDayButtons button.active {
-  background: var(--status-info-text, #1d4ed8);
-  border-color: var(--status-info-text, #1d4ed8);
-  color: var(--academy-surface, #ffffff);
-}
 
 .studentScheduleRow label {
   color: var(--academy-muted, #64748b);
@@ -18718,11 +18670,6 @@ body.attendanceOnlyBody {
   .examPrepRosterRow {
     align-items: stretch;
     display: grid;
-  }
-
-  .examPrepRosterViewToggle {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
   }
 
   .examPrepStudentTime {
