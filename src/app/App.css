@@ -15680,41 +15680,6 @@ textarea.profileEditInput {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.supplementMetric {
-  background: var(--academy-surface, #fff);
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 8px;
-  box-shadow: 0 10px 28px color-mix(in srgb, var(--academy-text, #0f172a) 4%, transparent);
-  color: var(--academy-text, #0f172a);
-  cursor: pointer;
-  display: grid;
-  gap: 8px;
-  min-height: 120px;
-  padding: 18px;
-  text-align: left;
-}
-
-.supplementMetric:hover,
-.supplementMetric.active {
-  border-color: var(--status-closure-text, #3730a3);
-  box-shadow: 0 14px 34px rgba(31, 63, 143, 0.12);
-}
-
-.supplementMetric span {
-  color: var(--academy-text-muted, #52647c);
-  font-weight: 900;
-}
-
-.supplementMetric strong {
-  font-size: 34px;
-  line-height: 1;
-}
-
-.supplementMetric small {
-  color: var(--academy-muted, #64748b);
-  line-height: 1.4;
-}
-
 .supplementTabPanel {
   background: var(--academy-surface, #fff);
   border: 1px solid var(--academy-border-strong, #cbd8ee);

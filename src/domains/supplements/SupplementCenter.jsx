@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { attendanceLabels } from "../lessons/labels.js";
 import { Disclosure } from "../../shared/components/Disclosure.jsx";
+import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { safeIdPart } from "../../shared/utils/id.js";
@@ -331,16 +332,14 @@ export function SupplementCenter({
 
       <div className="supplementOverviewGrid">
         {supplementTabs.map((tab) => (
-          <button
-            className={activeSupplementTab === tab.id ? "supplementMetric active" : "supplementMetric"}
+          <MetricCard
+            active={activeSupplementTab === tab.id}
+            hint={tab.subtitle}
             key={tab.id}
+            label={tab.title}
             onClick={() => setActiveSupplementTab(tab.id)}
-            type="button"
-          >
-            <span>{tab.title}</span>
-            <strong>{tab.count}건</strong>
-            <small>{tab.subtitle}</small>
-          </button>
+            value={`${tab.count}건`}
+          />
         ))}
       </div>
 
