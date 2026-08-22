@@ -15310,12 +15310,6 @@ textarea.profileEditInput {
   color: var(--academy-text-strong, #475569);
 }
 
-.softButton.primarySoft {
-  background: var(--status-info-bg);
-  border-color: var(--status-info-border);
-  color: var(--status-info-text);
-}
-
 .supplementProgressBadge {
   align-items: center;
   border-radius: 8px;
