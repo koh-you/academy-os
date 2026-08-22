@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { WorkspaceTabs } from "../shared/components/WorkspaceTabs.jsx";
 
 export function RoleLoginScreen({
   academyBrandName,
@@ -45,7 +46,7 @@ export function RoleLoginScreen({
       <form className="loginCard" onSubmit={submit}>
         <p className="loginEyebrow">{academyBrandName}</p>
         <h1>로그인</h1>
-        <div className="loginTabs">
+        <WorkspaceTabs label="로그인 유형 선택" variant="primary">
           {["student", "parent", "teacher"].map((item) => (
             <button
               className={role === item ? "active" : ""}
@@ -56,7 +57,7 @@ export function RoleLoginScreen({
               {roleLabels[item]}
             </button>
           ))}
-        </div>
+        </WorkspaceTabs>
         <p className="muted" id={loginHelpId}>
           {role === "student" ? "학생 본인 계정으로 입장합니다." : null}
           {role === "parent" ? "학부모 열람 계정으로 입장합니다." : null}
