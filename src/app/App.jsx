@@ -381,7 +381,7 @@ import {
   isLessonClosureConversion,
   shouldIgnoreLessonAttendance
 } from "../domains/lessons/lessonClosure.js";
-import { shiftLessonCalendarMonth } from "../domains/lessons/lessonCalendarModel.js";
+import { getLessonsForDate, shiftLessonCalendarMonth } from "../domains/lessons/lessonCalendarModel.js";
 import {
   buildNewLessonModalLessons,
   buildUpdatedLessonModalLessons
@@ -3693,7 +3693,7 @@ export function App() {
     return expectedTemplateIds.length > 0 && expectedTemplateIds.every((templateId) => openedTemplateIds.has(templateId));
   }, [lessons, monthlyRegularLessonOpenPlan.rows, selectedDate]);
   const lessonsForDate = useMemo(
-    () => calendarLessons.filter((lesson) => lesson.date === selectedDate).sort(sortByTime),
+    () => getLessonsForDate(calendarLessons, selectedDate, sortByTime),
     [calendarLessons, selectedDate]
   );
   const supplementAttention = useMemo(
@@ -3886,7 +3886,7 @@ export function App() {
   }
 
   function handleDateSelect(date) {
-    const nextLessons = calendarLessons.filter((lesson) => lesson.date === date).sort(sortByTime);
+    const nextLessons = getLessonsForDate(calendarLessons, date, sortByTime);
     setSelectedDate(date);
     setSelectedLessonId(nextLessons[0]?.lessonId ?? "");
     setIsLessonJournalOpen(false);
