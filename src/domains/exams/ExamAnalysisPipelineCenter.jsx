@@ -25,6 +25,7 @@ import { Disclosure, DisclosureChevron } from "../../shared/components/Disclosur
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
+import { SelectableCard } from "../../shared/components/SelectableCard.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 import { apiUrl, getJsonWithTimeout, postJson, postJsonWithTimeout } from "../../shared/utils/apiClient.js";
@@ -1941,15 +1942,15 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                 {schoolCards.length === 0 ? (
                   <EmptyState className="emptyState compact">학교 없음</EmptyState>
                 ) : schoolCards.map((school) => (
-                  <button
-                    className={selectedSchoolName === school.name ? "examAnalysisColumnCard active" : "examAnalysisColumnCard"}
+                  <SelectableCard
+                    active={selectedSchoolName === school.name}
+                    density="compact"
                     key={school.name}
                     onClick={() => selectSchoolCard(school)}
-                    type="button"
                   >
                     <strong>{school.name}</strong>
                     <span>{school.gradeCount}학년 · {school.examCount}고사 · {school.runCount}건</span>
-                  </button>
+                  </SelectableCard>
                 ))}
               </div>
             </div>
@@ -1965,15 +1966,15 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                 {gradeCards.length === 0 ? (
                   <EmptyState className="emptyState compact">학년 없음</EmptyState>
                 ) : gradeCards.map((grade) => (
-                  <button
-                    className={selectedGrade === grade.name ? "examAnalysisColumnCard active" : "examAnalysisColumnCard"}
+                  <SelectableCard
+                    active={selectedGrade === grade.name}
+                    density="compact"
                     key={grade.name}
                     onClick={() => selectGradeCard(grade)}
-                    type="button"
                   >
                     <strong>{grade.name}</strong>
                     <span>{grade.examCount}고사 · {grade.runCount}건</span>
-                  </button>
+                  </SelectableCard>
                 ))}
               </div>
             </div>
@@ -1987,15 +1988,15 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
               </div>
               <div aria-label="시험분석 고사 목록" className="examAnalysisColumnList" role="region" tabIndex={0}>
                 {examCycleCards.map((examCycle) => (
-                  <button
-                    className={selectedExamCycle === examCycle.name ? "examAnalysisColumnCard active" : "examAnalysisColumnCard"}
+                  <SelectableCard
+                    active={selectedExamCycle === examCycle.name}
+                    density="compact"
                     key={examCycle.name}
                     onClick={() => selectExamCycleCard(examCycle)}
-                    type="button"
                   >
                     <strong>{examCycle.name}</strong>
                     <span>{examCycle.runCount}건</span>
-                  </button>
+                  </SelectableCard>
                 ))}
               </div>
             </div>
@@ -2021,15 +2022,15 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                 {scopedRuns.length === 0 ? (
                   <EmptyState className="emptyState compact">PDF를 업로드하면 분석이 생성됩니다.</EmptyState>
                 ) : scopedRuns.map((run) => (
-                  <button
-                    className={selectedRunId === run.analysisRunId ? "examAnalysisColumnCard active" : "examAnalysisColumnCard"}
+                  <SelectableCard
+                    active={selectedRunId === run.analysisRunId}
+                    density="compact"
                     key={run.analysisRunId}
                     onClick={() => setSelectedRunId(run.analysisRunId)}
-                    type="button"
                   >
                     <strong>{getExamAnalysisRunTitle(run)}</strong>
                     <span>{[run.createdAt?.slice(0, 4), workflowStatusLabel(run.workflowStatus), getDefaultExamAnalysisSubject(run)].filter(Boolean).join(" · ")}</span>
-                  </button>
+                  </SelectableCard>
                 ))}
               </div>
             </div>
