@@ -17320,7 +17320,6 @@ textarea.profileEditInput {
   gap: 10px;
 }
 
-.testSessionItem,
 .testHistoryItem {
   align-items: center;
   background: var(--academy-surface, #ffffff);
@@ -17334,14 +17333,12 @@ textarea.profileEditInput {
   text-align: left;
 }
 
-.testSessionItem strong,
 .testHistoryItem strong {
   color: var(--academy-primary, #17213d);
   display: block;
   font-size: 14px;
 }
 
-.testSessionItem span,
 .testHistoryItem span,
 .testHistoryItem small {
   color: var(--academy-muted, #64748b);
