@@ -1,0 +1,5 @@
+.selectableCard { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; background: var(--academy-surface, #fff); border: 1.5px solid var(--academy-border, #d8e3f8); border-radius: var(--academy-radius, 8px); padding: 12px 14px; cursor: pointer; min-width: 120px; transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease; }
+.selectableCard:hover { border-color: var(--academy-border-strong, #9fb3d6); }
+.selectableCard.active { background: var(--academy-primary, #17213d); border-color: var(--academy-primary, #17213d); color: var(--academy-surface, #fff); box-shadow: 0 4px 12px color-mix(in srgb, var(--academy-primary, #17213d) 18%, transparent); }
+.selectableCard-compact { padding: 8px 10px; min-width: 0; }
+.selectableCard:focus-visible { outline: 3px solid color-mix(in srgb, var(--academy-focus-ring, #2563eb) 28%, transparent); outline-offset: 2px; }
