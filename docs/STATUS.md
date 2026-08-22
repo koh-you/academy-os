@@ -1,6 +1,15 @@
 # Academy OS Current Status
 
-업데이트: 2026-08-21
+업데이트: 2026-08-22
+
+## 2026-08-22 App.css 도메인 분리 3단위 추가 완료 (MV-5c·5d·5e)
+
+- MV-5c: `ExamAnalysisPipelineCenter` 클러스터(386줄·430 selector). 규모 때문에 postcss 기계적 추출 도구를 새로 만들어 실행 — 이후 모든 CSS 분리 단위가 이 방식을 재사용.
+- MV-5d: `SettingsCenter`(47 selector). className 격리를 자동으로 조사하는 재사용 도구를 처음 만듦.
+- MV-5e: `NotificationCenter`(101 selector). 격리 조사 도구를 여러 파일 동시 지원으로 확장, `DashboardAuxiliaryPanels.jsx`와 공유하는 `.notificationPanel` 계열 cascade 위험을 자동으로 찾아 올바르게 처리.
+- PR #202·#204·#205, fast-checks/build/production-fixtures/browser-smoke 전체 통과 후 main에 병합.
+- **App.css 누적 효과** (MV-5a 시작 대비): main CSS blocking 번들 `414.41 kB → 351.69 kB`(-63 kB, 약 15%). App.css 22,230줄 → 크게 축소(정확한 현재 줄 수는 `wc -l src/app/App.css`로 재확인).
+- 남은 후보와 방법론은 `docs/app-refactor-fourth-pass-css-domain-split-baseline.md`에 기록: `LessonNestedPanels`, `TeacherLessonHubV2`, `StudentManager`, `SupplementCenter`, `SettlementWorkspace`(낮은 우선순위), `DashboardAuxiliaryPanels`/`LearningSupportCenters`/`PlanningToolCenters`(여러 화면 묶음이라 화면별 조사 필요).
 
 ## 2026-08-21 App.css 도메인 분리 3단위 완료 (MV-5b·MV-5c)
 
