@@ -2112,7 +2112,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                   ref={fileInputRef}
                   type="file"
                 />
-                <button className="primaryButton" onClick={() => fileInputRef.current?.click()} type="button">PDF 업로드</button>
+                <button className="softButton" onClick={() => fileInputRef.current?.click()} type="button">PDF 업로드</button>
                 </>
               )}
               actionsClassName="headerActions"
@@ -2286,7 +2286,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                       />
                     </label>
                     <button
-                      className="primaryButton"
+                      className="softButton"
                       disabled={!activeRun?.analysisRunId || isConfirmingQuestionCount}
                       onClick={confirmQuestionCount}
                       type="button"
@@ -2735,7 +2735,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                   saveState={reviewStatus.state === "success" ? "saved" : reviewStatus.state}
                 >
                   <button
-                    className="primaryButton"
+                    className="softButton"
                     disabled={!reviewRowsReady || isSavingReviews || isRefiningRows}
                     onClick={saveQuestionReviews}
                     type="button"
