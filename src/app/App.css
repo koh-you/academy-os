@@ -1116,6 +1116,11 @@ summary:focus-visible {
   gap: 6px;
 }
 
+.academyReminderActions .dangerSoftButton.compact {
+  min-width: 74px;
+  white-space: nowrap;
+}
+
 .lessonReminderPanel .academyReminderItem {
   grid-template-columns: minmax(0, 1fr);
 }
