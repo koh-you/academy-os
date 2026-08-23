@@ -44,7 +44,7 @@ domainRoot.walkRules((rule) => {
     assert.ok(isSafeSelector(selector), `domain CSS selector must be examAnalysis/examPrompt-scoped or on the confirmed-exclusive list: ${selector}`);
   }
 });
-assert.equal(domainSelectorCount, 429);
+assert.equal(domainSelectorCount, 427);
 
 // No selector that moved should still have a same-name rule left behind in
 // App.css (the two mega-rules above are the sole, confirmed exceptions).
