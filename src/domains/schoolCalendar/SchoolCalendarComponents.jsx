@@ -6,6 +6,7 @@ import { Modal } from "../../shared/components/Modal.jsx";
 import { NavigationHeader } from "../../shared/components/NavigationHeader.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
+import { SelectableCard } from "../../shared/components/SelectableCard.jsx";
 import {
   formatCalendarEventLabel,
   formatCalendarSummaryLabel,
@@ -87,13 +88,13 @@ export function SchoolAcademicOverviewPanel({
       ) : (
         <div className="examPeriodGallery">
           {examPeriodCards.map((event) => (
-            <button
+            <SelectableCard
               aria-label={`${formatPeriodSummaryLabel?.(event)} 시험기간 상세 열기`}
               className="examPeriodOverviewCard"
+              density="default"
               key={event.eventId}
               onClick={() => onOpenEventEditForm?.(event)}
               style={{ "--school-color": getSchoolCalendarEventColor?.(event) }}
-              type="button"
             >
               <div className="examPeriodOverviewCardHeader">
                 <div>
@@ -111,7 +112,7 @@ export function SchoolAcademicOverviewPanel({
                   <span className="mutedChip">수학시험 날짜 미입력</span>
                 )}
               </div>
-            </button>
+            </SelectableCard>
           ))}
         </div>
       )}

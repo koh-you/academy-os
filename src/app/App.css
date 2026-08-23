@@ -4426,28 +4426,8 @@ summary:focus-visible {
 }
 
 .examPeriodOverviewCard {
-  appearance: none;
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--academy-border, #d8e3f8);
   border-left: 4px solid var(--school-color, #2563eb);
-  border-radius: 8px;
-  box-shadow: 0 8px 18px color-mix(in srgb, var(--academy-text, #0f172a) 6%, transparent);
-  color: inherit;
-  cursor: pointer;
-  display: grid;
-  font: inherit;
-  gap: 11px;
-  min-height: 154px;
-  padding: 15px;
-  text-align: left;
-  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
   width: 100%;
-}
-
-.examPeriodOverviewCard:hover {
-  border-color: var(--status-info-border, #bfdbfe);
-  box-shadow: 0 12px 24px color-mix(in srgb, var(--academy-text, #0f172a) 9%, transparent);
-  transform: translateY(-1px);
 }
 
 .examPeriodOverviewCard:focus-visible {
