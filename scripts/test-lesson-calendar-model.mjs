@@ -8,9 +8,31 @@ import {
 } from "../src/domains/lessons/examPrepLessonPresentation.js";
 import {
   createLessonCalendarViewModel,
+  getLessonsForDate,
   lessonCalendarFilterOptions,
   shiftLessonCalendarMonth
 } from "../src/domains/lessons/lessonCalendarModel.js";
+
+const sortByTimeFixture = (a, b) => (a.startTime || "").localeCompare(b.startTime || "");
+
+assert.deepEqual(
+  getLessonsForDate(
+    [
+      { lessonId: "l1", date: "2026-08-10", startTime: "16:00" },
+      { lessonId: "l2", date: "2026-08-10", startTime: "10:00" },
+      { lessonId: "l3", date: "2026-08-11", startTime: "09:00" }
+    ],
+    "2026-08-10",
+    sortByTimeFixture
+  ).map((lesson) => lesson.lessonId),
+  ["l2", "l1"],
+  "getLessonsForDate filters to the given date and applies the sort function"
+);
+assert.deepEqual(getLessonsForDate([], "2026-08-10", sortByTimeFixture), []);
+assert.deepEqual(
+  getLessonsForDate([{ lessonId: "l1", date: "2026-08-10" }], "2026-08-11", sortByTimeFixture),
+  []
+);
 
 assert.equal(shiftLessonCalendarMonth("2026-08-01", 1), "2026-09-01");
 assert.equal(shiftLessonCalendarMonth("2026-08-01", -1), "2026-07-01");
