@@ -2968,22 +2968,6 @@ summary:focus-visible {
   gap: 5px;
 }
 
-.journalSaveButton {
-  background: var(--academy-primary, #17213d);
-  border: 1px solid var(--academy-primary, #17213d);
-  border-radius: 8px;
-  color: var(--academy-surface, #ffffff);
-  font-size: 13px;
-  font-weight: 900;
-  min-height: 36px;
-  padding: 0 10px;
-}
-
-.journalSaveButton:disabled {
-  cursor: wait;
-  opacity: 0.7;
-}
-
 .journalSave-dirty {
   background: var(--status-pending-bg);
   border-color: var(--status-pending-border);
