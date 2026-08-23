@@ -809,29 +809,6 @@ summary:focus-visible {
   padding: 0 20px;
 }
 
-.secondaryButton {
-  align-items: center;
-  background: var(--academy-surface-muted);
-  border: 1px solid var(--academy-border-strong);
-  border-radius: var(--academy-radius);
-  color: var(--academy-primary);
-  display: inline-flex;
-  font-size: 14px;
-  font-weight: 900;
-  justify-content: center;
-  min-height: 42px;
-  padding: 0 16px;
-  text-decoration: none;
-}
-
-.secondaryButton.compact {
-  border-color: var(--academy-accent-border, #c7d2fe);
-  color: var(--academy-accent-text, #4f46e5);
-  font-size: 15px;
-  min-height: 42px;
-  padding: 0 16px;
-}
-
 .primaryButton.full {
   width: 100%;
 }
@@ -841,7 +818,6 @@ summary:focus-visible {
 }
 
 .primaryButton:disabled,
-.secondaryButton:disabled,
 .iconButton:disabled {
   cursor: not-allowed;
   opacity: 0.55;
