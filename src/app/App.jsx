@@ -381,7 +381,7 @@ import {
   isLessonClosureConversion,
   shouldIgnoreLessonAttendance
 } from "../domains/lessons/lessonClosure.js";
-import { shiftLessonCalendarMonth } from "../domains/lessons/lessonCalendarModel.js";
+import { getLessonsForDate, shiftLessonCalendarMonth } from "../domains/lessons/lessonCalendarModel.js";
 import {
   buildNewLessonModalLessons,
   buildUpdatedLessonModalLessons
@@ -3694,7 +3694,7 @@ export function App() {
     return expectedTemplateIds.length > 0 && expectedTemplateIds.every((templateId) => openedTemplateIds.has(templateId));
   }, [lessons, monthlyRegularLessonOpenPlan.rows, selectedDate]);
   const lessonsForDate = useMemo(
-    () => calendarLessons.filter((lesson) => lesson.date === selectedDate).sort(sortByTime),
+    () => getLessonsForDate(calendarLessons, selectedDate, sortByTime),
     [calendarLessons, selectedDate]
   );
   const supplementAttention = useMemo(
@@ -3887,7 +3887,7 @@ export function App() {
   }
 
   function handleDateSelect(date) {
-    const nextLessons = calendarLessons.filter((lesson) => lesson.date === date).sort(sortByTime);
+    const nextLessons = getLessonsForDate(calendarLessons, date, sortByTime);
     setSelectedDate(date);
     setSelectedLessonId(nextLessons[0]?.lessonId ?? "");
     setIsLessonJournalOpen(false);
@@ -4116,7 +4116,7 @@ export function App() {
 
   async function reserveNewStudentMakeupNotices({ formValues, lesson }) {
     if (!formValues.notificationEnabled) return " · 알림톡 없음";
-    const { buildNewStudentMakeupNotificationJobs } = await import(
+    const { buildNewStudentMakeupNotificationJobs, formatNewStudentMakeupReservationSummary } = await import(
       "../domains/lessons/newStudentMakeupNotification.js"
     );
     const notificationJobsToReserve = buildNewStudentMakeupNotificationJobs({
@@ -4130,14 +4130,7 @@ export function App() {
       notificationJobsToReserve,
       "신입생 보강 일정 알림톡 예약"
     );
-    const scheduledCount = reservedJobs.filter((job) => ["scheduled", "sent"].includes(job.status)).length;
-    const dryRunCount = reservedJobs.filter((job) => job.status === "dry_run").length;
-    const failedCount = reservedJobs.length - scheduledCount - dryRunCount;
-    return failedCount > 0
-      ? ` · 알림톡 ${scheduledCount}건 예약, ${failedCount}건 확인 필요`
-      : dryRunCount > 0
-        ? ` · 알림톡 ${dryRunCount}건 안전 모드 기록 완료`
-        : ` · 알림톡 ${scheduledCount}건 다음 정각 예약 완료`;
+    return formatNewStudentMakeupReservationSummary(reservedJobs);
   }
 
   async function handleAddLesson(formValues, onProgress = null) {
