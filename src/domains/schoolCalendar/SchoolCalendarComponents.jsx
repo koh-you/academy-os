@@ -369,7 +369,7 @@ export function SchoolDateScheduleModal({
                           <button className="dangerSoftButton" onClick={() => onDeleteEvent?.(event.eventId)} type="button">삭제</button>
                         )}
                         {!isReadonlyEvent ? (
-                          <button className="primaryButton compact" onClick={() => onSaveEvent?.(event, draftEvent)} type="button">저장</button>
+                          <button className="softButton" onClick={() => onSaveEvent?.(event, draftEvent)} type="button">저장</button>
                         ) : null}
                       </div>
                     </div>
