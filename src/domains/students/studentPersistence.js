@@ -1,3 +1,5 @@
+import { isActiveStudent } from "./lessonRosterSelectors.js";
+
 const studentPersistenceFields = [
   "studentId",
   "name",
@@ -70,6 +72,27 @@ export function areStudentsPersistedEqual(requested = {}, persisted = {}) {
   return studentPersistenceFields.every(
     (field) => normalizeComparableValue(requested[field]) === normalizeComparableValue(persisted[field])
   );
+}
+
+export function verifyRestoredStudent({ studentId, studentsAfterResult }) {
+  if (studentsAfterResult.source !== "supabase") {
+    throw new Error("퇴원 취소 결과를 Supabase에서 다시 확인하지 못했습니다.");
+  }
+  const persistedStudent = (studentsAfterResult.students ?? []).find(
+    (student) => student.studentId === studentId
+  );
+  if (!persistedStudent) {
+    throw new Error("저장 응답은 받았지만 Supabase 재조회에서 학생을 찾지 못했습니다.");
+  }
+  if (
+    !isActiveStudent(persistedStudent) ||
+    persistedStudent.withdrawnAt ||
+    persistedStudent.withdrawalReason ||
+    persistedStudent.withdrawalComment
+  ) {
+    throw new Error("Supabase 재조회 값이 퇴원 취소 요청과 다릅니다. 완료로 처리하지 않았습니다.");
+  }
+  return persistedStudent;
 }
 
 export function resolveStudentRowSaveSuccess({
