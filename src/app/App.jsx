@@ -55,7 +55,11 @@ import {
 import { saveStudentIntakeApplicantRequest } from "../domains/students/studentIntakeApplicantApi.js";
 import { createStudentIntakeApplicantSaveController } from "../domains/students/studentIntakeApplicantSaveController.js";
 import { saveStudentRequest } from "../domains/students/studentApi.js";
-import { resolveStudentRowSaveSuccess, verifyRestoredStudent } from "../domains/students/studentPersistence.js";
+import {
+  resolveStudentRowSaveSuccess,
+  verifyReplacedTallyStudent,
+  verifyRestoredStudent
+} from "../domains/students/studentPersistence.js";
 import { ParentPortal } from "../domains/portals/ParentPortal.jsx";
 import { calculateAttendanceStats } from "../domains/portals/StudentMyPageTab.jsx";
 import { StudentPortalShell } from "../domains/portals/StudentPortalShell.jsx";
@@ -3093,34 +3097,27 @@ export function App() {
       15000,
       "Tally 학생정보 저장 확인이 15초를 넘었습니다. 다시 실행하지 말고 잠시 뒤 새로고침해 주세요."
     );
-    if (studentsAfterResult.source !== "supabase") {
-      throw new Error("Tally 학생정보 저장 결과를 Supabase에서 다시 확인하지 못했습니다.");
-    }
-    const savedStudent = (studentsAfterResult.students ?? [])
-      .find((student) => student.studentId === normalizedStudentId);
-    if (!savedStudent) throw new Error("저장 후 Supabase 재조회에서 기존 학생을 찾지 못했습니다.");
-    const verificationFields = [
-      "studentId",
-      "loginId",
-      "pin",
-      "name",
-      "birthYear",
-      "schoolName",
-      "grade",
-      "studentPhone",
-      "parentPhone",
-      "textbook",
-      "specialNote",
-      "defaultClassTemplateId",
-      "scheduleOverride",
-      "status"
-    ];
-    const mismatchedFields = verificationFields.filter((field) =>
-      String(savedStudent[field] ?? "") !== String(nextStudent[field] ?? "")
-    );
-    if (mismatchedFields.length > 0) {
-      throw new Error(`Tally 학생정보 재조회 값이 다릅니다: ${mismatchedFields.join(", ")}`);
-    }
+    const savedStudent = verifyReplacedTallyStudent({
+      expectedStudent: nextStudent,
+      studentId: normalizedStudentId,
+      studentsAfterResult,
+      verificationFields: [
+        "studentId",
+        "loginId",
+        "pin",
+        "name",
+        "birthYear",
+        "schoolName",
+        "grade",
+        "studentPhone",
+        "parentPhone",
+        "textbook",
+        "specialNote",
+        "defaultClassTemplateId",
+        "scheduleOverride",
+        "status"
+      ]
+    });
     setStudents(studentsAfterResult.students ?? []);
     return savedStudent;
   }

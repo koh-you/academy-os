@@ -95,6 +95,27 @@ export function verifyRestoredStudent({ studentId, studentsAfterResult }) {
   return persistedStudent;
 }
 
+export function verifyReplacedTallyStudent({
+  expectedStudent,
+  studentId,
+  studentsAfterResult,
+  verificationFields
+}) {
+  if (studentsAfterResult.source !== "supabase") {
+    throw new Error("Tally 학생정보 저장 결과를 Supabase에서 다시 확인하지 못했습니다.");
+  }
+  const savedStudent = (studentsAfterResult.students ?? [])
+    .find((student) => student.studentId === studentId);
+  if (!savedStudent) throw new Error("저장 후 Supabase 재조회에서 기존 학생을 찾지 못했습니다.");
+  const mismatchedFields = verificationFields.filter((field) =>
+    String(savedStudent[field] ?? "") !== String(expectedStudent[field] ?? "")
+  );
+  if (mismatchedFields.length > 0) {
+    throw new Error(`Tally 학생정보 재조회 값이 다릅니다: ${mismatchedFields.join(", ")}`);
+  }
+  return savedStudent;
+}
+
 export function resolveStudentRowSaveSuccess({
   currentStudent = {},
   persistedStudent = {},
