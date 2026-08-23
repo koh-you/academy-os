@@ -20,6 +20,17 @@ export function buildNewStudentMakeupNoticeBody({ academyName = "", lesson = {},
   return `안녕하세요. ${academyName || "으뜸수학 고태영T"}입니다.\n\n${student.name || "학생"} 학생의 신입생 보강 일정을 안내드립니다.\n일정: ${schedule}\n확인 부탁드립니다.`;
 }
 
+export function formatNewStudentMakeupReservationSummary(reservedJobs = []) {
+  const scheduledCount = reservedJobs.filter((job) => ["scheduled", "sent"].includes(job.status)).length;
+  const dryRunCount = reservedJobs.filter((job) => job.status === "dry_run").length;
+  const failedCount = reservedJobs.length - scheduledCount - dryRunCount;
+  return failedCount > 0
+    ? ` · 알림톡 ${scheduledCount}건 예약, ${failedCount}건 확인 필요`
+    : dryRunCount > 0
+      ? ` · 알림톡 ${dryRunCount}건 안전 모드 기록 완료`
+      : ` · 알림톡 ${scheduledCount}건 다음 정각 예약 완료`;
+}
+
 export function buildNewStudentMakeupNotificationJobs({
   academyName = "",
   audiences = [],
