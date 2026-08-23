@@ -2,6 +2,7 @@ import { lazy, Suspense, useState } from "react";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 import {
   createExamPrepStudentRows,
   getExamPrepSourceItems,
@@ -99,10 +100,10 @@ export function ExamPrepLessonDetail({ createEmptyRecord, examPrepScheduleLesson
             <h3>{studentRows.length}명 · {displaySchoolCount}개교</h3>
             <p className="muted">개별 시간이 있으면 그 시간을, 없으면 시험대비 수업의 공통 시간을 표시합니다.</p>
           </div>
-          <div aria-label="시험대비 명단 정렬" className="examPrepRosterViewToggle" role="group">
+          <WorkspaceTabs label="시험대비 명단 정렬" variant="compact">
             <button aria-pressed={rosterView === "time"} className={rosterView === "time" ? "active" : ""} onClick={() => setRosterView("time")} type="button">시간순</button>
             <button aria-pressed={rosterView === "school"} className={rosterView === "school" ? "active" : ""} onClick={() => setRosterView("school")} type="button">학교별</button>
-          </div>
+          </WorkspaceTabs>
         </div>
 
         {studentGroups.length ? (

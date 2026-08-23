@@ -14,7 +14,7 @@ export function SupplementTaskActionBar({
 }) {
   return (
     <div className="modalActions supplementSplitActions supplementTaskActions">
-      <button className="softButton primarySoft" disabled={isTaskBusy} onClick={onSave} type="button">
+      <button className="softButton" disabled={isTaskBusy} onClick={onSave} type="button">
         {isContentBusy ? "저장 중" : "보충 내용·알림톡 저장"}
       </button>
       <button

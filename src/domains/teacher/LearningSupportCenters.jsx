@@ -23,6 +23,7 @@ import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
+import { SelectableCard } from "../../shared/components/SelectableCard.jsx";
 import { SelectionToolbar } from "../../shared/components/SelectionToolbar.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 import {
@@ -1362,11 +1363,11 @@ export function OverdueHomework({
               const summary = getStudentHomeworkSummary(student);
               const isSelected = selectedStudent?.studentId === student.studentId;
               return (
-                <button
-                  className={isSelected ? "homeworkStudentTile active" : "homeworkStudentTile"}
+                <SelectableCard
+                  active={isSelected}
+                  density="compact"
                   key={student.studentId}
                   onClick={() => handleSelectStudent(student.studentId)}
-                  type="button"
                 >
                   <span className="homeworkStudentTop">
                     <strong>{student.name}</strong>
@@ -1380,7 +1381,7 @@ export function OverdueHomework({
                   <span className="homeworkStudentMeta">
                     {getStudentMetricLine(summary)}
                   </span>
-                </button>
+                </SelectableCard>
               );
             })}
           </div>

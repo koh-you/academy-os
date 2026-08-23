@@ -49,7 +49,7 @@ export function NotificationSectionTabs({
   return (
     <>
       {showSpecialLectureTab && !hideNotificationSectionTabs ? (
-        <WorkspaceTabs className="notificationSectionTabs" label="알림관리 영역 선택">
+        <WorkspaceTabs label="알림관리 영역 선택">
           <button
             aria-selected={activeNotificationTab === "notice"}
             className={activeNotificationTab === "notice" ? "active" : ""}
@@ -71,7 +71,7 @@ export function NotificationSectionTabs({
         </WorkspaceTabs>
       ) : null}
       {activeNotificationTab === "specialLecture" && hideNotificationSectionTabs ? (
-        <WorkspaceTabs className="notificationSectionTabs specialLectureTopTabs" label="특강관리 작업 구분">
+        <WorkspaceTabs className="specialLectureTopTabs" label="특강관리 작업 구분">
           <button
             aria-selected={activeSpecialLectureWorkspaceTab === "roster"}
             className={activeSpecialLectureWorkspaceTab === "roster" ? "active" : ""}
@@ -117,7 +117,7 @@ export function NoticeWorkspaceTabs({
   ];
 
   return (
-    <WorkspaceTabs className="notificationSectionTabs noticeWorkspaceTabs" label="알림관리 작업 구분">
+    <WorkspaceTabs className="noticeWorkspaceTabs" label="알림관리 작업 구분">
       <button
         aria-selected={activeNoticeWorkspace === "compose"}
         className={activeNoticeWorkspace === "compose" ? "active" : ""}

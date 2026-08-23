@@ -55,7 +55,7 @@ import {
 import { saveStudentIntakeApplicantRequest } from "../domains/students/studentIntakeApplicantApi.js";
 import { createStudentIntakeApplicantSaveController } from "../domains/students/studentIntakeApplicantSaveController.js";
 import { saveStudentRequest } from "../domains/students/studentApi.js";
-import { resolveStudentRowSaveSuccess } from "../domains/students/studentPersistence.js";
+import { resolveStudentRowSaveSuccess, verifyRestoredStudent } from "../domains/students/studentPersistence.js";
 import { ParentPortal } from "../domains/portals/ParentPortal.jsx";
 import { calculateAttendanceStats } from "../domains/portals/StudentMyPageTab.jsx";
 import { StudentPortalShell } from "../domains/portals/StudentPortalShell.jsx";
@@ -317,10 +317,7 @@ import {
   mergeVerifiedLessonJournalMakeupTasks,
   mergeVerifiedLessonJournalRecords
 } from "../domains/lessons/lessonJournalDraftPersistenceState.js";
-import {
-  createLessonJournalRecordDraft,
-  createLessonJournalRecordFieldPatch
-} from "../domains/lessons/lessonJournalRecordDraft.js";
+import { createLessonJournalRecordFieldPatch } from "../domains/lessons/lessonJournalRecordDraft.js";
 import { createLessonJournalDraftSaveRequest } from "../domains/lessons/lessonJournalDraftSaveRequest.js";
 import {
   createLessonJournalHomeworkDraft,
@@ -5198,21 +5195,7 @@ export function App() {
       15000,
       "퇴원 취소 저장 확인이 15초를 넘었습니다. 다시 실행하지 말고 잠시 뒤 새로고침해 주세요."
     );
-    if (studentsAfterResult.source !== "supabase") {
-      throw new Error("퇴원 취소 결과를 Supabase에서 다시 확인하지 못했습니다.");
-    }
-    const persistedStudent = (studentsAfterResult.students ?? []).find((student) => student.studentId === studentId);
-    if (!persistedStudent) {
-      throw new Error("저장 응답은 받았지만 Supabase 재조회에서 학생을 찾지 못했습니다.");
-    }
-    if (
-      !isActiveStudent(persistedStudent) ||
-      persistedStudent.withdrawnAt ||
-      persistedStudent.withdrawalReason ||
-      persistedStudent.withdrawalComment
-    ) {
-      throw new Error("Supabase 재조회 값이 퇴원 취소 요청과 다릅니다. 완료로 처리하지 않았습니다.");
-    }
+    const persistedStudent = verifyRestoredStudent({ studentId, studentsAfterResult });
 
     setStudents(studentsAfterResult.students ?? []);
     return persistedStudent;
@@ -5318,10 +5301,7 @@ export function App() {
       needsMakeup: false,
       needsRetest: false,
       ...(safeExistingRecord ?? {}),
-      [field]: value,
-      ...(field === "assignmentStatus" ? { incompleteHomework: value } : {}),
-      ...(field === "teacherComment" ? { teacherCommentSendStatus: "" } : {}),
-      ...(field === "studentComment" ? { studentCommentSendStatus: "" } : {}),
+      ...createLessonJournalRecordFieldPatch({ field, value }),
       updatedBy: "instructor_owner_001",
       updatedAt: new Date().toISOString()
     };
@@ -8372,11 +8352,11 @@ function StudentModal({
       onClose={onClose}
       scrollable
     >
-      <div className="studentAddTabs" role="tablist" aria-label="학생 추가 방식">
+      <WorkspaceTabs label="학생 추가 방식" variant="primary">
         <button className={mode === "single" ? "active" : ""} disabled={singleSaveState === "saving"} onClick={() => setMode("single")} type="button">한 명씩</button>
         <button className={mode === "bulk" ? "active" : ""} disabled={singleSaveState === "saving"} onClick={() => setMode("bulk")} type="button">엑셀 일괄 등록</button>
         <button className={mode === "intake" ? "active" : ""} disabled={singleSaveState === "saving"} onClick={() => setMode("intake")} type="button">Tally 접수</button>
-      </div>
+      </WorkspaceTabs>
 
       {mode === "single" ? (
         <>
