@@ -115,6 +115,8 @@ import { createExamPrepLessonCandidateBuilder } from "../domains/lessons/examPre
 import { filterStaleGeneratedExamPrepLessons } from "../domains/lessons/examPrepGeneratedLessonSourceFilter.js";
 import { saveExamPrepSchedulePlanRequest } from "../domains/lessons/examPrepScheduleApi.js";
 import { ExamPrepLessonDetail } from "../domains/lessons/ExamPrepLessonDetail.jsx";
+import { LessonJournalFallback } from "../domains/lessons/LessonJournalFallback.jsx";
+import { MonthlyRegularLessonOpenModal } from "../domains/lessons/MonthlyRegularLessonOpenModal.jsx";
 import { mergeGeneratedCalendarLessons } from "../domains/lessons/generatedLessonCalendarMerge.js";
 import {
   addGeneratedLessonManualOverrideKey,
@@ -458,7 +460,6 @@ import {
   normalizeSaveState
 } from "../shared/components/InlineSaveStatus.jsx";
 import { Modal, ModalFooter } from "../shared/components/Modal.jsx";
-import { NavigationHeader } from "../shared/components/NavigationHeader.jsx";
 import { PageHeader } from "../shared/components/PageHeader.jsx";
 import { SearchField } from "../shared/components/SearchField.jsx";
 import { SelectionToolbar } from "../shared/components/SelectionToolbar.jsx";
@@ -475,7 +476,6 @@ import {
 } from "../shared/utils/apiClient.js";
 import { safeIdPart } from "../shared/utils/id.js";
 import { getKoreaDateString } from "../shared/utils/koreaDate.js";
-import { isStaleDeploymentChunkError } from "../shared/utils/dynamicImportError.js";
 import { applyStudentScheduleToLesson } from "../shared/utils/studentSchedule.js";
 import ssenTypeIndex from "../../api/data/ssenTypeIndex.json";
 import {
@@ -7674,96 +7674,6 @@ export function App() {
 function getNotificationJobStatusClass(job) {
   return resolveNotificationJobStatusClass(job, isNotificationSchedulePast);
 }
-
-function MonthlyRegularLessonOpenModal({ plan, saveStatus, onClose, onOpen }) {
-  const isSaving = ["saving", "verifying"].includes(saveStatus?.state);
-  const canOpen = !plan.errors?.length && plan.lessonsToCreate?.length > 0 && !isSaving;
-  return (
-    <Modal
-      className="monthlyRegularLessonOpenModal"
-      title={`${plan.monthKey || "대상 월"} 정규수업 열기`}
-      subtitle={`${plan.sourceMonth || "이전 달"}의 마지막 실제 정규수업 명단과 반 시간을 기준으로, 비어 있는 회차만 추가합니다.`}
-      onClose={isSaving ? () => {} : onClose}
-    >
-      <div className="monthlyRegularLessonOpenBody">
-        {plan.errors?.length ? <p className="inlineNotice danger">{plan.errors.join(" ")}</p> : null}
-        <p className="muted">기존 {plan.monthKey} 수업은 수정하지 않습니다. 출결·수업기록·숙제·알림톡은 복사하거나 예약하지 않습니다. 첫 회차의 지난 숙제는 기존 직전수업 탐색으로 {plan.sourceMonth} 마지막 수업의 다음 숙제를 이어서 표시합니다.</p>
-        <div className="monthlyRegularLessonOpenSummary">
-          <strong>{plan.rows?.length ?? 0}개 반</strong>
-          <span>새 회차 {plan.lessonsToCreate?.length ?? 0}개</span>
-        </div>
-        <div className="monthlyRegularLessonOpenRows">
-          {(plan.rows || []).map((row) => (
-            <article key={row.classTemplateId}>
-              <strong>{row.className}</strong>
-              <span>{row.sourceDate} 명단 {row.studentCount}명 → 새 회차 {row.lessons.length}개</span>
-              {row.existingCount ? <small>이미 열린 회차 {row.existingCount}개는 유지</small> : null}
-              {row.excludedStudentCount ? <small className="dangerCopy">현재 퇴원/비활성 학생 {row.excludedStudentCount}명은 제외</small> : null}
-            </article>
-          ))}
-        </div>
-        {saveStatus?.state ? <InlineSaveStatus label="월 정규수업" saveState={saveStatus.state} /> : null}
-        {saveStatus?.message ? <p className={`inlineNotice ${saveStatus.state === "failed" ? "danger" : ""}`}>{saveStatus.message}</p> : null}
-        <ModalFooter>
-          <button className="softButton" disabled={isSaving} onClick={onClose} type="button">닫기</button>
-          <button className="primaryButton" disabled={!canOpen} onClick={onOpen} type="button">
-            {isSaving ? "Supabase 반영 확인 중" : `${plan.monthKey} 정규수업 열기`}
-          </button>
-        </ModalFooter>
-      </div>
-    </Modal>
-  );
-}
-
-function LessonJournalFallback({ error, lesson, onBack, onDeleteLesson, onEditLesson, students = [] }) {
-  const lessonStudents = getLessonJournalStudents(lesson, students);
-  const errorMessage = String(error?.message ?? error ?? "알 수 없는 오류");
-  const isStaleDeploymentChunk = isStaleDeploymentChunkError(error);
-  return (
-    <section className="lessonJournalPage">
-      <NavigationHeader
-        actions={(
-          <>
-            <button className="softButton" onClick={() => onEditLesson?.(lesson)} type="button">수업 수정</button>
-            <button className="dangerButton" onClick={() => onDeleteLesson?.(lesson.lessonId)} type="button">수업 취소 처리</button>
-          </>
-        )}
-        className="lessonJournalHeader"
-        description={`${lesson?.date || "-"} · ${lesson?.startTime || ""}-${lesson?.endTime || ""} · ${lessonStudents.length}명`}
-        leading={<button aria-label="수업 목록으로 돌아가기" className="iconButton" onClick={onBack} type="button">‹</button>}
-        title={lesson?.className || "수업일지"}
-        titleAs="h2"
-      />
-      <section className="panel lessonJournalFallback">
-        <strong>수업일지를 여는 중 오류가 발생했습니다.</strong>
-        <p>
-          {isStaleDeploymentChunk
-            ? "새 버전 배포 뒤 이전 화면 코드가 남아 수업메모를 불러오지 못했습니다. 저장된 수업 정보는 유지되며, 최신 화면으로 새로고침하면 다시 열 수 있습니다."
-            : "수업 정보는 저장되어 있습니다. 수업 수정에서 학생과 시간을 확인한 뒤 다시 열어 주세요."}
-        </p>
-        {isStaleDeploymentChunk ? (
-          <button className="primaryButton" onClick={() => window.location.reload()} type="button">
-            최신 화면으로 새로고침
-          </button>
-        ) : null}
-        {lessonStudents.length > 0 ? (
-          <div className="studentChips">
-            {lessonStudents.map((student) => (
-              <span className="lessonStudentChip selected" key={student.studentId}>{student.name}</span>
-            ))}
-          </div>
-        ) : (
-          <p className="muted">이 수업에 표시할 학생을 찾지 못했습니다.</p>
-        )}
-        <small>{errorMessage}</small>
-      </section>
-    </section>
-  );
-}
-
-
-
-
 
 function CommentComposerModal({ ...props }) {
   return (

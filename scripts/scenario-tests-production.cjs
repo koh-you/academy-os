@@ -88,6 +88,8 @@ const examQuestionCropViewPath = path.join(root, "src", "domains", "exams", "que
 const examPostSubmissionOptionsPath = path.join(root, "src", "domains", "exams", "postSubmissionOptions.js");
 const examPrepEditModalPath = path.join(root, "src", "domains", "exams", "ExamPrepEditModal.jsx");
 const examPrepLessonDetailPath = path.join(root, "src", "domains", "lessons", "ExamPrepLessonDetail.jsx");
+const lessonJournalFallbackPath = path.join(root, "src", "domains", "lessons", "LessonJournalFallback.jsx");
+const monthlyRegularLessonOpenModalComponentPath = path.join(root, "src", "domains", "lessons", "MonthlyRegularLessonOpenModal.jsx");
 const examPrepLessonReconcilePlanPath = path.join(root, "src", "domains", "exams", "examPrepLessonReconcilePlan.js");
 const examPrepPastPaperPanelPath = path.join(root, "src", "domains", "exams", "ExamPrepPastPaperPanel.jsx");
 const examPrepCenterModelPath = path.join(root, "src", "domains", "exams", "examPrepCenterModel.js");
@@ -611,6 +613,16 @@ const appEntrySource = [
     ? `/* extracted lesson roster selectors boundary\n${fs
         .readFileSync(lessonRosterSelectorsPath, "utf8")
         .replace(/\*\//g, "* /")}\n*/`
+    : "",
+  fs.existsSync(lessonJournalFallbackPath)
+    ? `/* extracted lesson journal fallback boundary\n${fs
+        .readFileSync(lessonJournalFallbackPath, "utf8")
+        .replace(/\*\//g, "* /")}\n*/`
+    : "",
+  fs.existsSync(monthlyRegularLessonOpenModalComponentPath)
+    ? `/* extracted monthly regular lesson open modal boundary\n${fs
+        .readFileSync(monthlyRegularLessonOpenModalComponentPath, "utf8")
+        .replace(/\*\//g, "* /")}\n*/`
     : ""
 ].join("\n");
 const supplementCancellationConfirmModalSource = fs.existsSync(supplementCancellationConfirmModalPath) ? fs.readFileSync(supplementCancellationConfirmModalPath, "utf8") : "";
@@ -659,6 +671,8 @@ const examPrepPastPaperPanelSource = fs.existsSync(examPrepPastPaperPanelPath) ?
 const examPrepCenterModelSource = fs.existsSync(examPrepCenterModelPath) ? fs.readFileSync(examPrepCenterModelPath, "utf8") : "";
 const examPrepCalendarClusterSource = fs.existsSync(examPrepCalendarClusterPath) ? fs.readFileSync(examPrepCalendarClusterPath, "utf8") : "";
 const examPrepLessonDetailSource = fs.existsSync(examPrepLessonDetailPath) ? fs.readFileSync(examPrepLessonDetailPath, "utf8") : "";
+const lessonJournalFallbackSource = fs.existsSync(lessonJournalFallbackPath) ? fs.readFileSync(lessonJournalFallbackPath, "utf8") : "";
+const monthlyRegularLessonOpenModalComponentSource = fs.existsSync(monthlyRegularLessonOpenModalComponentPath) ? fs.readFileSync(monthlyRegularLessonOpenModalComponentPath, "utf8") : "";
 const examPrepRowSaveControllerSource = fs.existsSync(examPrepRowSaveControllerPath) ? fs.readFileSync(examPrepRowSaveControllerPath, "utf8") : "";
 const examPrepRowsApiSource = fs.existsSync(examPrepRowsApiPath) ? fs.readFileSync(examPrepRowsApiPath, "utf8") : "";
 const examPostSubmissionManagerSource = fs.existsSync(examPostSubmissionManagerPath) ? fs.readFileSync(examPostSubmissionManagerPath, "utf8") : "";
