@@ -317,10 +317,7 @@ import {
   mergeVerifiedLessonJournalMakeupTasks,
   mergeVerifiedLessonJournalRecords
 } from "../domains/lessons/lessonJournalDraftPersistenceState.js";
-import {
-  createLessonJournalRecordDraft,
-  createLessonJournalRecordFieldPatch
-} from "../domains/lessons/lessonJournalRecordDraft.js";
+import { createLessonJournalRecordFieldPatch } from "../domains/lessons/lessonJournalRecordDraft.js";
 import { createLessonJournalDraftSaveRequest } from "../domains/lessons/lessonJournalDraftSaveRequest.js";
 import {
   createLessonJournalHomeworkDraft,
@@ -5318,10 +5315,7 @@ export function App() {
       needsMakeup: false,
       needsRetest: false,
       ...(safeExistingRecord ?? {}),
-      [field]: value,
-      ...(field === "assignmentStatus" ? { incompleteHomework: value } : {}),
-      ...(field === "teacherComment" ? { teacherCommentSendStatus: "" } : {}),
-      ...(field === "studentComment" ? { studentCommentSendStatus: "" } : {}),
+      ...createLessonJournalRecordFieldPatch({ field, value }),
       updatedBy: "instructor_owner_001",
       updatedAt: new Date().toISOString()
     };
