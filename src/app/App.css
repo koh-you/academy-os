@@ -13613,30 +13613,6 @@ textarea.profileEditInput {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.homeworkStudentTile {
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  color: var(--academy-text, #0f172a);
-  cursor: pointer;
-  display: grid;
-  gap: 8px;
-  padding: 12px 14px;
-  text-align: left;
-  transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
-}
-
-.homeworkStudentTile:hover {
-  background: var(--status-info-bg, #eff6ff);
-  border-color: var(--academy-border, #d8e3f8);
-}
-
-.homeworkStudentTile.active {
-  background: var(--academy-surface-muted, #f8fafc);
-  border-color: var(--academy-border-strong, #cbd8ee);
-  box-shadow: inset 3px 0 0 var(--academy-focus-ring, #2563eb);
-}
-
 .homeworkStudentTop {
   align-items: center;
   display: grid;
