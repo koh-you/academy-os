@@ -7,7 +7,8 @@ import {
   createStudentConflict,
   createStudentVersionFilter,
   isStudentInsertConflict,
-  resolveStudentRowSaveSuccess
+  resolveStudentRowSaveSuccess,
+  verifyRestoredStudent
 } from "../src/domains/students/studentPersistence.js";
 
 const baseStudent = {
@@ -208,5 +209,39 @@ try {
     else process.env[key] = value;
   }
 }
+
+const restoredStudent = { ...baseStudent, status: "active", withdrawalComment: "", withdrawalReason: "", withdrawnAt: "" };
+assert.deepEqual(
+  verifyRestoredStudent({
+    studentId: "student-1",
+    studentsAfterResult: { source: "supabase", students: [restoredStudent] }
+  }),
+  restoredStudent,
+  "재원 상태로 정상 복구된 학생을 그대로 반환해야 한다."
+);
+assert.throws(
+  () => verifyRestoredStudent({
+    studentId: "student-1",
+    studentsAfterResult: { source: "local_sample", students: [restoredStudent] }
+  }),
+  /Supabase에서 다시 확인하지 못했습니다/,
+  "재조회 출처가 Supabase가 아니면 완료 처리하지 않아야 한다."
+);
+assert.throws(
+  () => verifyRestoredStudent({
+    studentId: "student-1",
+    studentsAfterResult: { source: "supabase", students: [] }
+  }),
+  /재조회에서 학생을 찾지 못했습니다/,
+  "재조회 목록에 학생이 없으면 완료 처리하지 않아야 한다."
+);
+assert.throws(
+  () => verifyRestoredStudent({
+    studentId: "student-1",
+    studentsAfterResult: { source: "supabase", students: [{ ...restoredStudent, withdrawnAt: "2026-08-01T00:00:00.000Z" }] }
+  }),
+  /재조회 값이 퇴원 취소 요청과 다릅니다/,
+  "재조회 값이 여전히 퇴원 상태면 완료 처리하지 않아야 한다."
+);
 
 console.log("student persistence tests passed");
