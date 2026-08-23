@@ -142,7 +142,7 @@ export function MonthlySettlementRegularTable({
                   </td>
                   <td>
                     <button
-                      className="monthlySettlementCountButton"
+                      className="ghostButton monthlySettlementCountButton"
                       onClick={() => setSelectedCalendarStudentId(row.student.studentId)}
                       type="button"
                     >
@@ -215,7 +215,7 @@ export function MonthlySettlementRegularTable({
                   <small>{row.student.grade || "학년 미입력"} · {row.student.schoolName || "학교 미입력"}</small>
                 </span>
                 <button
-                  className="monthlySettlementRestoreButton"
+                  className="ghostButton"
                   onClick={() => updateStudentSetting(row.student.studentId, "excluded", false)}
                   type="button"
                 >

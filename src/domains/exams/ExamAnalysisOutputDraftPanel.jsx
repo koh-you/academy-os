@@ -100,7 +100,7 @@ export function ExamAnalysisOutputDraftPanel({
         actions={(
           <>
           <button
-            className="secondaryButton"
+            className="ghostButton"
             disabled={!hasRun || !hasReviewModel || isOutputBusy}
             onClick={() => onGenerateOutputDraft("blog")}
             type="button"
@@ -108,7 +108,7 @@ export function ExamAnalysisOutputDraftPanel({
             {generatingOutputType === "blog" ? "블로그 생성 중" : "블로그 초안 생성"}
           </button>
           <button
-            className="secondaryButton"
+            className="ghostButton"
             disabled={!hasRun || !hasReviewModel || isOutputBusy}
             onClick={() => onGenerateOutputDraft("instagram")}
             type="button"
@@ -116,7 +116,7 @@ export function ExamAnalysisOutputDraftPanel({
             {generatingOutputType === "instagram" ? "인스타 생성 중" : "인스타 카드 초안 생성"}
           </button>
           <button
-            className="secondaryButton"
+            className="ghostButton"
             disabled={!hasRun || !hasReviewModel || isOutputBusy}
             onClick={onDownloadOutputPackageZip}
             type="button"
@@ -289,7 +289,7 @@ export function ExamAnalysisOutputDraftPanel({
                 <span>이 내용을 GPT 프로젝트 대화세션 첫 메시지에 붙여넣고 카드 기획안부터 받습니다.</span>
               </div>
               <button
-                className="secondaryButton"
+                className="ghostButton"
                 disabled={!gptPlanningPacket.trim()}
                 onClick={() => onCopyText("GPT 기획 패킷", gptPlanningPacket)}
                 type="button"
@@ -396,7 +396,7 @@ export function ExamAnalysisOutputDraftPanel({
             <DisclosureChevron open={!isOutputSectionCollapsed("keyQuestions")} />
           </button>
           <button
-            className="secondaryButton"
+            className="ghostButton"
             disabled={isOutputBusy}
             onClick={onAddKeyQuestionBlock}
             type="button"

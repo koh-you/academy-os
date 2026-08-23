@@ -317,21 +317,10 @@
 }
 
 .monthlySettlementCountButton {
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  color: var(--status-info-text, #1d4ed8);
-  cursor: pointer;
   font-size: 12px;
-  font-weight: 700;
   line-height: 1.4;
-  padding: 7px 9px;
   text-align: left;
   width: 100%;
-}
-
-.monthlySettlementCountButton:hover {
-  background: var(--status-info-bg, #eff6ff);
 }
 
 .monthlySettlementAmountCell strong,
@@ -349,16 +338,6 @@
   color: var(--academy-muted, #64748b);
   font-size: 11px;
   margin-top: 5px;
-}
-
-.monthlySettlementRestoreButton {
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  color: var(--status-info-text, #1d4ed8);
-}
-
-.monthlySettlementRestoreButton:hover {
-  background: var(--status-info-bg, #eff6ff);
 }
 
 .monthlySettlementSubsectionHeader {
@@ -440,14 +419,8 @@
   margin-top: 2px;
 }
 
-.monthlySettlementExcludedList .monthlySettlementRestoreButton {
-  border-radius: 8px;
-  cursor: pointer;
+.monthlySettlementExcludedList .ghostButton {
   flex: 0 0 auto;
-  font-size: 12px;
-  font-weight: 800;
-  min-height: 34px;
-  padding: 6px 12px;
 }
 
 .monthlySettlementEmpty {

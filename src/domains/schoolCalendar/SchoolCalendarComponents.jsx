@@ -6,6 +6,7 @@ import { Modal } from "../../shared/components/Modal.jsx";
 import { NavigationHeader } from "../../shared/components/NavigationHeader.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
+import { SelectableCard } from "../../shared/components/SelectableCard.jsx";
 import {
   formatCalendarEventLabel,
   formatCalendarSummaryLabel,
@@ -87,13 +88,13 @@ export function SchoolAcademicOverviewPanel({
       ) : (
         <div className="examPeriodGallery">
           {examPeriodCards.map((event) => (
-            <button
+            <SelectableCard
               aria-label={`${formatPeriodSummaryLabel?.(event)} 시험기간 상세 열기`}
               className="examPeriodOverviewCard"
+              density="default"
               key={event.eventId}
               onClick={() => onOpenEventEditForm?.(event)}
               style={{ "--school-color": getSchoolCalendarEventColor?.(event) }}
-              type="button"
             >
               <div className="examPeriodOverviewCardHeader">
                 <div>
@@ -111,7 +112,7 @@ export function SchoolAcademicOverviewPanel({
                   <span className="mutedChip">수학시험 날짜 미입력</span>
                 )}
               </div>
-            </button>
+            </SelectableCard>
           ))}
         </div>
       )}
@@ -369,7 +370,7 @@ export function SchoolDateScheduleModal({
                           <button className="dangerSoftButton" onClick={() => onDeleteEvent?.(event.eventId)} type="button">삭제</button>
                         )}
                         {!isReadonlyEvent ? (
-                          <button className="primaryButton compact" onClick={() => onSaveEvent?.(event, draftEvent)} type="button">저장</button>
+                          <button className="softButton" onClick={() => onSaveEvent?.(event, draftEvent)} type="button">저장</button>
                         ) : null}
                       </div>
                     </div>
@@ -583,7 +584,7 @@ export function SchoolEventFormModal({
             {!isEditingEvent ? (
               <div className="examSubjectBox schoolExamBundleBox">
                 <SectionHeader
-                  actions={<button className="softButton small" onClick={onAddMathExamItem} type="button">+ 수학시험 추가</button>}
+                  actions={<button className="softButton mini" onClick={onAddMathExamItem} type="button">+ 수학시험 추가</button>}
                   density="slim"
                   title="수학시험 날짜"
                   titleAs="strong"

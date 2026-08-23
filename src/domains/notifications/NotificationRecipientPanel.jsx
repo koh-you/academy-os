@@ -3,6 +3,7 @@ import { ListCard } from "../../shared/components/ListCard.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { SearchField } from "../../shared/components/SearchField.jsx";
 import { SelectionToolbar } from "../../shared/components/SelectionToolbar.jsx";
+import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 
 const noticeRecipientModes = [
   { id: "selected", label: "선택" },
@@ -41,19 +42,20 @@ export function NotificationRecipientPanel({
 }) {
   return (
     <div className="noticeTargetPanel">
-      <div aria-label="알림 수신 대상 범위" className="noticeModeTabs compact" role="group">
+      <WorkspaceTabs label="알림 수신 대상 범위" variant="secondary">
         {noticeRecipientModes.map((mode) => (
           <button
-            aria-pressed={noticeRecipientMode === mode.id}
+            aria-selected={noticeRecipientMode === mode.id}
             className={noticeRecipientMode === mode.id ? "active" : ""}
             key={mode.id}
             onClick={() => onNoticeRecipientModeChange(mode.id)}
+            role="tab"
             type="button"
           >
             <strong>{mode.label}</strong>
           </button>
         ))}
-      </div>
+      </WorkspaceTabs>
       <FilterBar className="noticeFilterGrid" label="알림 대상 반과 학생 검색">
         <label className="filterBarField">
           <span>반</span>

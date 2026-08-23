@@ -133,7 +133,7 @@ export function LessonJournalPreparationMemoView({
           </div>
           <div className="prepMemoSaveBar">
             <button
-              className={`journalSaveButton journalSave-${saveState}`}
+              className={`primaryButton journalSave-${saveState}`}
               disabled={saveState === "saving" || isClosingAfterSave}
               onClick={onSave}
               type="button"

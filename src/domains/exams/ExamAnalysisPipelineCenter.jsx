@@ -1898,7 +1898,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
       <PageHeader
         actions={(
           <>
-          <button className="secondaryButton" onClick={() => loadRuns(selectedRunId)} type="button">새로고침</button>
+          <button className="ghostButton" onClick={() => loadRuns(selectedRunId)} type="button">새로고침</button>
           <button className="primaryButton" onClick={saveRun} type="button">분석 저장</button>
           </>
         )}
@@ -2113,7 +2113,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                   ref={fileInputRef}
                   type="file"
                 />
-                <button className="primaryButton" onClick={() => fileInputRef.current?.click()} type="button">PDF 업로드</button>
+                <button className="softButton" onClick={() => fileInputRef.current?.click()} type="button">PDF 업로드</button>
                 </>
               )}
               actionsClassName="headerActions"
@@ -2192,7 +2192,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                     </div>
                     <div className="examAnalysisSourceActions">
                       <button
-                        className="secondaryButton compact"
+                        className="ghostButton"
                         disabled={extractingSourceId === file.sourceId}
                         onClick={() => extractSourceText(file)}
                         type="button"
@@ -2200,7 +2200,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                         {extractingSourceId === file.sourceId ? "추출 중" : file.extractionStatus === "extracted" ? "재추출" : "텍스트 추출"}
                       </button>
                       <button
-                        className="secondaryButton compact"
+                        className="ghostButton"
                         disabled={checkingSourceId === file.sourceId}
                         onClick={() => verifySourceWithAi(file)}
                         type="button"
@@ -2208,7 +2208,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                         {checkingSourceId === file.sourceId ? "검증 중" : "원본 AI 검증"}
                       </button>
                       {getExamAnalysisSourceOpenUrl(file) ? (
-                        <a className="secondaryButton linkButton" href={getExamAnalysisSourceOpenUrl(file)} rel="noreferrer" target="_blank">열기</a>
+                        <a className="ghostButton linkButton" href={getExamAnalysisSourceOpenUrl(file)} rel="noreferrer" target="_blank">열기</a>
                       ) : null}
                       <button
                         className="dangerSoftButton compact"
@@ -2233,7 +2233,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                   <button
                     aria-controls="exam-analysis-question-count-stage"
                     aria-expanded={!questionCountStageCollapsed}
-                    className="secondaryButton compact examAnalysisStageToggleButton"
+                    className="ghostButton"
                     onClick={() => toggleExamAnalysisStage("question-count", questionCountStageComplete)}
                     type="button"
                   >
@@ -2287,7 +2287,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                       />
                     </label>
                     <button
-                      className="primaryButton"
+                      className="softButton"
                       disabled={!activeRun?.analysisRunId || isConfirmingQuestionCount}
                       onClick={confirmQuestionCount}
                       type="button"
@@ -2321,7 +2321,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                 <>
                   {boundaryStatus.message ? <span className={`saveStateBadge ${boundaryStatus.state}`}>{boundaryStatus.message}</span> : null}
                   <button
-                    className="secondaryButton"
+                    className="ghostButton"
                     disabled={!questionRows.length || !sourceFiles.length || isDetectingBoundaries}
                     onClick={detectQuestionBoundaries}
                     type="button"
@@ -2331,7 +2331,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                   <button
                     aria-controls="exam-analysis-boundary-stage"
                     aria-expanded={!boundaryStageCollapsed}
-                    className="secondaryButton compact examAnalysisStageToggleButton"
+                    className="ghostButton"
                     onClick={() => toggleExamAnalysisStage("boundary", boundaryStageComplete)}
                     type="button"
                   >
@@ -2392,7 +2392,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                 <>
                 {rowFillStatus.message ? <span className={`saveStateBadge ${rowFillStatus.state}`}>{rowFillStatus.message}</span> : null}
                 <button
-                  className="secondaryButton"
+                  className="ghostButton"
                   disabled={!questionRows.length || !boundaryDetectedCount || isFillingRows}
                   onClick={fillQuestionRowsWithAi}
                   type="button"
@@ -2402,7 +2402,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                 <button
                   aria-controls="exam-analysis-row-fill-stage"
                   aria-expanded={!rowFillStageCollapsed}
-                  className="secondaryButton compact examAnalysisStageToggleButton"
+                  className="ghostButton"
                   onClick={() => toggleExamAnalysisStage("row-fill", rowFillStageComplete)}
                   type="button"
                 >
@@ -2463,7 +2463,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                 <>
                 {rowRefineStatus.message ? <span className={`saveStateBadge ${rowRefineStatus.state}`}>{rowRefineStatus.message}</span> : null}
                 <button
-                  className="secondaryButton"
+                  className="ghostButton"
                   disabled={!reviewRowsReady || isSavingReviews || isRefiningRows || !refineTargetCount}
                   onClick={refineQuestionRowsWithAi}
                   type="button"
@@ -2471,7 +2471,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                   {isRefiningRows ? "2차 수정 중" : `AI 2차 수정${refineTargetCount ? ` · ${refineTargetCount}개` : ""}`}
                 </button>
                 <button
-                  className="secondaryButton"
+                  className="ghostButton"
                   disabled={!reviewRowsReady || isSavingReviews || isRefiningRows}
                   onClick={markAllQuestionReviewsConfirmed}
                   type="button"
@@ -2481,7 +2481,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                 <button
                   aria-controls="exam-analysis-review-stage"
                   aria-expanded={!reviewStageCollapsed}
-                  className="secondaryButton compact examAnalysisStageToggleButton"
+                  className="ghostButton"
                   onClick={() => toggleExamAnalysisStage("review", reviewStageComplete)}
                   type="button"
                 >
@@ -2736,7 +2736,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                   saveState={reviewStatus.state === "success" ? "saved" : reviewStatus.state}
                 >
                   <button
-                    className="primaryButton"
+                    className="softButton"
                     disabled={!reviewRowsReady || isSavingReviews || isRefiningRows}
                     onClick={saveQuestionReviews}
                     type="button"

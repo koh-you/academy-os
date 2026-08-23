@@ -2,6 +2,7 @@ import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
+import { SelectableCard } from "../../shared/components/SelectableCard.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 
 export function TestManagerTabs({ activeTab = "attempts", onChange }) {
@@ -219,15 +220,14 @@ export function RecentTestSessionList({
         title="최근 응시 회차"
       />
       {sessions.slice(0, 12).map((session) => (
-        <button
-          className="testSessionItem"
+        <SelectableCard
+          density="compact"
           key={session.testSessionId}
           onClick={() => onOpenSession?.(session)}
-          type="button"
         >
           <strong>{session.testDate} · {session.testTitle}</strong>
           <span>{session.className || "전체 학생"} · {getKindLabel?.(session.testKind)} · {session.totalQuestions || "-"}문항</span>
-        </button>
+        </SelectableCard>
       ))}
       {!totalCount ? <EmptyState className="emptyState compact" title="저장된 응시 회차가 없습니다." /> : null}
     </section>

@@ -759,7 +759,7 @@ export function StudentManager({
                   ))}
                 </select>
                 <button
-                  className={`studentSaveButton ${saveState ?? "clean"}`}
+                  className="primaryButton compact"
                   disabled={isSaveDisabled}
                   onClick={() => saveStudentRow(student.studentId)}
                   type="button"

@@ -792,9 +792,10 @@ export function StudentProfileModal({
                     ) : null}
                     {profileScheduleRows.map((row, rowIndex) => (
                       <div className="studentScheduleRow" key={row.rowId}>
-                        <div className="studentScheduleDayButtons" aria-label="개별 스케줄 요일">
+                        <div className="workspaceTabs workspaceTabs-compact" aria-label="개별 스케줄 요일" role="group">
                           {studentScheduleDayOptions.map((day) => (
                             <button
+                              aria-pressed={row.days.includes(day.value)}
                               className={row.days.includes(day.value) ? "active" : ""}
                               key={day.value}
                               onClick={() => toggleProfileScheduleDay(rowIndex, day.value)}
