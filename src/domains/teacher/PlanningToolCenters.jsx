@@ -28,6 +28,7 @@ import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
+import { SelectableCard } from "../../shared/components/SelectableCard.jsx";
 import { SelectionToolbar } from "../../shared/components/SelectionToolbar.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 import { safeIdPart } from "../../shared/utils/id.js";
@@ -745,17 +746,18 @@ export function ClassManager({ runtime, students, templates, onUpdateClassRoster
         {templates.map((template) => {
           const count = activeStudents.filter((student) => student.defaultClassTemplateId === template.classTemplateId).length;
           return (
-            <button
-              className={selectedTemplateId === template.classTemplateId ? "classBoardCard active" : "classBoardCard"}
+            <SelectableCard
+              active={selectedTemplateId === template.classTemplateId}
+              className="classBoardCard"
+              density="default"
               key={template.classTemplateId}
               onClick={() => setSelectedTemplateId(template.classTemplateId)}
-              type="button"
             >
               <span className="classColor" style={{ background: template.color }} />
               <strong>{template.name}</strong>
               <small>{template.track} · {template.timeLabel}</small>
               <b>{count}명</b>
-            </button>
+            </SelectableCard>
           );
         })}
       </div>
@@ -1033,11 +1035,12 @@ export function LessonResearchCenter({
               <EmptyState className="emptyState">아직 이 과목에 정리된 연구 항목이 없습니다.</EmptyState>
             ) : (
               filteredItems.map((item) => (
-                <button
-                  className={selectedItem?.researchItemId === item.researchItemId ? "researchCard active" : "researchCard"}
+                <SelectableCard
+                  active={selectedItem?.researchItemId === item.researchItemId}
+                  className="researchCard"
+                  density="default"
                   key={item.researchItemId}
                   onClick={() => setSelectedItemId(item.researchItemId)}
-                  type="button"
                 >
                   <div>
                     <strong>{item.title}</strong>
@@ -1049,7 +1052,7 @@ export function LessonResearchCenter({
                     <span>{item.status}</span>
                     <b>{item.priority}</b>
                   </div>
-                </button>
+                </SelectableCard>
               ))
             )}
           </div>
