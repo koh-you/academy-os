@@ -8,6 +8,7 @@ import {
   createStudentVersionFilter,
   isStudentInsertConflict,
   resolveStudentRowSaveSuccess,
+  verifyReplacedTallyStudent,
   verifyRestoredStudent
 } from "../src/domains/students/studentPersistence.js";
 
@@ -242,6 +243,49 @@ assert.throws(
   }),
   /재조회 값이 퇴원 취소 요청과 다릅니다/,
   "재조회 값이 여전히 퇴원 상태면 완료 처리하지 않아야 한다."
+);
+
+const tallyExpectedStudent = { ...baseStudent, name: "Tally 갱신 이름", schoolName: "Tally 갱신 학교" };
+const tallyVerificationFields = ["name", "schoolName"];
+assert.deepEqual(
+  verifyReplacedTallyStudent({
+    expectedStudent: tallyExpectedStudent,
+    studentId: "student-1",
+    studentsAfterResult: { source: "supabase", students: [tallyExpectedStudent] },
+    verificationFields: tallyVerificationFields
+  }),
+  tallyExpectedStudent,
+  "Tally 재조회 값이 기대값과 일치하면 저장된 학생을 그대로 반환해야 한다."
+);
+assert.throws(
+  () => verifyReplacedTallyStudent({
+    expectedStudent: tallyExpectedStudent,
+    studentId: "student-1",
+    studentsAfterResult: { source: "local_sample", students: [tallyExpectedStudent] },
+    verificationFields: tallyVerificationFields
+  }),
+  /Tally 학생정보 저장 결과를 Supabase에서 다시 확인하지 못했습니다/,
+  "재조회 출처가 Supabase가 아니면 완료 처리하지 않아야 한다."
+);
+assert.throws(
+  () => verifyReplacedTallyStudent({
+    expectedStudent: tallyExpectedStudent,
+    studentId: "student-1",
+    studentsAfterResult: { source: "supabase", students: [] },
+    verificationFields: tallyVerificationFields
+  }),
+  /저장 후 Supabase 재조회에서 기존 학생을 찾지 못했습니다/,
+  "재조회 목록에 학생이 없으면 완료 처리하지 않아야 한다."
+);
+assert.throws(
+  () => verifyReplacedTallyStudent({
+    expectedStudent: tallyExpectedStudent,
+    studentId: "student-1",
+    studentsAfterResult: { source: "supabase", students: [{ ...tallyExpectedStudent, schoolName: "다른 학교" }] },
+    verificationFields: tallyVerificationFields
+  }),
+  /Tally 학생정보 재조회 값이 다릅니다: schoolName/,
+  "지정한 필드 값이 재조회 결과와 다르면 완료 처리하지 않아야 한다."
 );
 
 console.log("student persistence tests passed");
