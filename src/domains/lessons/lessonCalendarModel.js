@@ -10,6 +10,10 @@ export const lessonCalendarFilterOptions = [
   { id: "specialLecture", label: "특강" }
 ];
 
+export function getLessonsForDate(lessons = [], date = "", sortFn) {
+  return lessons.filter((lesson) => lesson.date === date).sort(sortFn);
+}
+
 export function shiftLessonCalendarMonth(dateString = "", monthOffset = 0) {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(dateString));
   const offset = Number(monthOffset);
