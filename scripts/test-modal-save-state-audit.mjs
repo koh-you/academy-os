@@ -19,7 +19,8 @@ const [
   examAnalysisSource,
   examAnalysisOutputDraftPanelSource,
   supplementTaskActionBarSource,
-  monthlyRegularLessonOpenApiSource
+  monthlyRegularLessonOpenApiSource,
+  monthlyRegularLessonOpenModalSource
 ] = await Promise.all([
   read("src/shared/components/InlineSaveStatus.jsx"),
   read("src/shared/components/StickySaveBar.jsx"),
@@ -37,7 +38,8 @@ const [
   read("src/domains/exams/ExamAnalysisPipelineCenter.jsx"),
   read("src/domains/exams/ExamAnalysisOutputDraftPanel.jsx"),
   read("src/domains/supplements/SupplementTaskActionBar.jsx"),
-  read("src/domains/lessons/monthlyRegularLessonOpenApi.js")
+  read("src/domains/lessons/monthlyRegularLessonOpenApi.js"),
+  read("src/domains/lessons/MonthlyRegularLessonOpenModal.jsx")
 ]);
 
 const commonStates = ["idle", "dirty", "saving", "verifying", "saved", "failed"];
@@ -47,7 +49,7 @@ for (const state of commonStates) {
 assert.ok(inlineStatusSource.includes('return Object.prototype.hasOwnProperty.call(saveStateLabels, saveState) ? saveState : "idle"'));
 assert.ok(stickySaveBarSource.includes("<InlineSaveStatus label={label} saveState={saveState} />"));
 
-const monthlyLessonModalSource = `${appSource}\n${monthlyRegularLessonOpenApiSource}`;
+const monthlyLessonModalSource = `${appSource}\n${monthlyRegularLessonOpenApiSource}\n${monthlyRegularLessonOpenModalSource}`;
 for (const contract of [
   'state: "saving"',
   'state: "verifying"',
