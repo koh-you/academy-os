@@ -921,7 +921,7 @@ export function LessonResearchCenter({
           <>
           <InlineSaveStatus label="수업연구 교안" saveState={lessonResearchSaveState} />
           <button className="primaryButton" disabled={!canSaveItems} onClick={onSaveItems} type="button">수업연구 저장</button>
-          <button className="primaryButton" onClick={handleAddItem} type="button">+ 교안 항목 추가</button>
+          <button className="softButton" onClick={handleAddItem} type="button">+ 교안 항목 추가</button>
           </>
         )}
         actionsClassName="researchTopActions"
