@@ -83,32 +83,6 @@ summary:focus-visible {
   margin: 0 0 10px;
 }
 
-.loginTabs {
-  background: var(--academy-surface-muted, #f8fafc);
-  border-radius: 8px;
-  display: grid;
-  gap: 5px;
-  grid-template-columns: repeat(3, 1fr);
-  min-width: 0;
-  padding: 5px;
-}
-
-.loginTabs button {
-  background: transparent;
-  border: 0;
-  border-radius: 8px;
-  color: var(--academy-muted, #64748b);
-  font-weight: 900;
-  min-height: 50px;
-  min-width: 0;
-}
-
-.loginTabs button.active {
-  background: var(--academy-surface, #ffffff);
-  color: var(--academy-text, #0f172a);
-  box-shadow: 0 6px 14px color-mix(in srgb, var(--academy-text, #0f172a) 8%, transparent);
-}
-
 .loginCard input {
   background: var(--status-info-bg, #eff6ff);
   border: 1px solid var(--status-info-border, #bfdbfe);
@@ -132,11 +106,6 @@ summary:focus-visible {
   .loginCard h1 {
     font-size: 32px;
     margin-bottom: 4px;
-  }
-
-  .loginTabs button {
-    font-size: 14px;
-    min-height: 46px;
   }
 
   .loginCard input {
@@ -5970,29 +5939,6 @@ button:disabled {
   margin-top: 14px;
 }
 
-.notificationSectionTabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 10px 0 14px;
-}
-
-.notificationSectionTabs button {
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 8px;
-  color: var(--academy-text-strong, #475569);
-  font-size: 14px;
-  font-weight: 900;
-  padding: 10px 14px;
-}
-
-.notificationSectionTabs button.active {
-  background: var(--status-info-text, #1d4ed8);
-  border-color: var(--status-info-text, #1d4ed8);
-  color: var(--academy-surface, #ffffff);
-}
-
 .specialLecturePanel {
   display: grid;
   gap: 16px;
@@ -8509,31 +8455,6 @@ button:disabled {
   font-size: 26px;
 }
 
-.studentAddTabs {
-  background: var(--academy-surface-muted, #f8fafc);
-  border-radius: 18px;
-  display: grid;
-  gap: 6px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  padding: 5px;
-}
-
-.studentAddTabs button {
-  background: transparent;
-  border: 0;
-  border-radius: 14px;
-  color: var(--academy-muted, #64748b);
-  cursor: pointer;
-  font-size: 17px;
-  font-weight: 900;
-  min-height: 52px;
-}
-
-.studentAddTabs button.active {
-  background: var(--academy-surface, #ffffff);
-  box-shadow: 0 1px 3px color-mix(in srgb, var(--academy-text, #0f172a) 8%, transparent);
-  color: var(--academy-text, #0f172a);
-}
 
 .studentAddGrid {
   display: grid;
