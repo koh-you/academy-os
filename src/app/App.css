@@ -18368,7 +18368,7 @@ body.attendanceOnlyBody {
 
   .studentHomeworkActionControls > button,
   .studentQuestionForm > button,
-  .studentExamPostSubmitButton {
+  .studentExamPostFieldset > button {
     width: 100%;
   }
 
