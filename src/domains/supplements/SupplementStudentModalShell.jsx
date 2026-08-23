@@ -26,7 +26,14 @@ export function SupplementStudentModalShell({
             <strong>{feedback.title}</strong>
             <p>{feedback.message}</p>
           </div>
-          <button aria-label="완료 알림 닫기" className="iconButton" onClick={onDismissFeedback} type="button">×</button>
+          <div className="supplementFeedbackActions">
+            {feedback.reloadRequired ? (
+              <button className="softButton mini" onClick={() => window.location.reload()} type="button">
+                최신 화면으로 새로고침
+              </button>
+            ) : null}
+            <button aria-label="완료 알림 닫기" className="iconButton" onClick={onDismissFeedback} type="button">×</button>
+          </div>
         </div>
       ) : null}
       <div className="supplementModalLayout single">

@@ -1,6 +1,11 @@
 # Daily Development Handoff
 
-업데이트: 2026-08-20
+업데이트: 2026-08-22
+
+## 2026-08-22 보충 일정 옛 배포 청크 복구 안내
+
+- 삭제된 Vite lazy chunk를 옛 화면이 요청한 경우는 저장 실패와 분리한다. 보충 모달에서 서버 저장·알림 예약이 시작되지 않았음을 알리고 입력 복사 후 최신 화면 새로고침을 안내한다.
+- 재현 fixture는 persistence 모듈 요청을 차단하고 draft·3개 저장 필요 상태 유지 및 `/api/supplement-schedules/save` POST 0건을 확인한다. 운영 데이터나 실제 알림은 건드리지 않았다.
 
 ## 2026-08-20 Maintenance Velocity 종합 감사 · 다음 세션 시작점
 

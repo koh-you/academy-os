@@ -80,6 +80,47 @@ test("broken supplement lesson links are visible and block schedule or notificat
   expect(pageErrors).toEqual([]);
 });
 
+test("stale deployment chunk preserves supplement drafts without starting a server save", async ({ page }) => {
+  const scheduleWrites = [];
+  await page.route("**/src/domains/supplements/supplementSchedulePersistence.js*", (route) => (
+    route.abort("failed")
+  ));
+  page.on("request", (request) => {
+    if (request.method() === "POST" && /\/api\/supplement-schedules\/save(?:[/?]|$)/.test(request.url())) {
+      scheduleWrites.push(request.url());
+    }
+  });
+
+  await loginAsTeacher(page);
+  await page.getByRole("button", { name: /보충관리/ }).click();
+  await page.getByRole("button", { name: /결석보강/ }).first().click();
+  const withdrawnCandidate = page.getByRole("article").filter({ hasText: "미리보기 퇴원생" });
+  await withdrawnCandidate.getByRole("button", { name: "보충 생성" }).click();
+
+  const supplementModal = page.locator(".supplementStudentModal");
+  const latestReminderDraft = "새 배포 감지 후에도 보존되어야 하는 학생 11시 알림 초안";
+  await supplementModal.locator('input[type="date"]').fill("2026-08-05");
+  await supplementModal.getByLabel("보충 시간 시").selectOption("15");
+  await supplementModal.getByLabel("보충 시간 분").selectOption("30");
+  const reminderDraft = supplementModal.locator(".supplementNotificationDraftEditors textarea").last();
+  await reminderDraft.fill(latestReminderDraft);
+  await supplementModal.getByRole("button", { name: "수업일지 일정 만들기" }).click();
+
+  const feedback = supplementModal.getByRole("status");
+  await expect(feedback).toContainText("최신 화면 새로고침 필요");
+  await expect(feedback).toContainText("서버 저장과 알림 예약은 시작되지 않았습니다");
+  await expect(feedback.getByRole("button", { name: "최신 화면으로 새로고침" })).toBeVisible();
+  await expect(reminderDraft).toHaveValue(latestReminderDraft);
+  const preservedSaveStatuses = supplementModal.locator(".supplementSaveStatusPill.changed");
+  await expect(preservedSaveStatuses).toHaveCount(3);
+  await expect(preservedSaveStatuses).toHaveText([
+    "보충 내용저장 필요",
+    "수업일지 일정저장 필요",
+    "알림톡 문구 3종저장 필요"
+  ]);
+  expect(scheduleWrites).toEqual([]);
+});
+
 test("supplement schedule retries one verified source plan after an unknown response", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   const scheduleRequests = [];

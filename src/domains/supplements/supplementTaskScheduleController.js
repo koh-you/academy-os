@@ -31,7 +31,12 @@ export function createSupplementTaskScheduleHandlers({
     try {
       return await applySupplementScheduleAction({
         getImmediateNoticeStatus,
-        onFeedback: ({ message, title, tone }) => showFeedback(title, message, tone),
+        onFeedback: ({ message, reloadRequired, title, tone }) => showFeedback(
+          title,
+          message,
+          tone,
+          { reloadRequired }
+        ),
         onMarkSaved: (nextTask) => markTaskDraftSaved(task.makeupTaskId, nextTask),
         onResetConfirmation: closeScheduleConfirmation,
         onSaveStatus: (patch) => setTaskSaveStatusPatch(task.makeupTaskId, patch),

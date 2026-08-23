@@ -38,6 +38,8 @@ export const domainTestGroups = Object.freeze({
     "scripts/test-supplement-job-builders.mjs",
     "scripts/test-supplement-cancellation.mjs",
     "scripts/test-supplement-task-content-save-controller.mjs",
+    "scripts/test-supplement-task-actions.mjs",
+    "scripts/test-dynamic-import-error.mjs",
     "scripts/test-supplement-notification-control-controller.mjs",
     "scripts/test-supplement-center-selection-model.mjs",
     "scripts/test-supplement-schedule-plan.mjs",

@@ -2,6 +2,11 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-22 보충 일정 옛 배포 청크 복구 안내
+
+- 운영 오류의 `Failed to fetch dynamically imported module`은 저장 API가 아니라 열린 옛 화면과 새 Vercel 배포 사이의 청크 불일치였다. 공용 판별 helper를 기존 App fallback과 보충 일정 action이 함께 사용한다.
+- 보충 모달은 입력을 유지한 채 `저장 필요`로 되돌리고, 서버 저장·알림 예약 미시작과 새로고침 필요를 구분해 표시한다. 전용 domain fixture 14/14, focused safe browser 1/1, runtime lint, build를 통과했다.
+
 ## 2026-08-20 Maintenance Velocity 종합 감사
 
 - 3개 병렬 조사(문서/상태 대조, 원격 브랜치 279개 분류, 유지보수 비용 정량화)로 4-0 이후 main 실측치와 4-4~4-8 실제 완료 상태를 다시 판정했다. 상세 근거·baseline·다음 단위(MV-0~MV-3)는 `docs/maintenance-velocity-refactor-plan.md`에 정리했으며 이 파일이 향후 source of truth다.

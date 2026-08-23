@@ -16295,6 +16295,13 @@ textarea.profileEditInput {
   margin: 0;
 }
 
+.supplementFeedbackActions {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
 .supplementFeedbackPopup.saving {
   background: var(--status-info-bg, #eff6ff);
   border-color: var(--status-info-border, #bfdbfe);
