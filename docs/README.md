@@ -17,6 +17,7 @@
 | `STATUS.md` | 현재 상태와 최근 변경 이력 |
 | `deferred-work-queue.md` | 미룬 작업 큐 (source of truth) |
 | `engineering-contracts.md` | 개발 계약 |
+| `delivery-policy.md` | 요청 분류·배포 정책 (운영 긴급/일반 버그/기능·개선/사람 Gate/긴급 롤백) |
 | `testing-policy.md` | 검증 명령 선택 기준 |
 | `current-worklog.md` | 진행 중 작업 로그 |
 | `attendance-alimtalk.md` | 출결/알림톡 연동 기준 |
