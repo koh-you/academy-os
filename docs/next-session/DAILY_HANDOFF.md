@@ -8,6 +8,13 @@
 - `limit=`을 명시하지 않은 호출만 자동으로 다음 페이지를 이어받도록 고쳤다. 이미 `limit=`을 지정한 호출(알림 발송 후보, 단건 조회)은 그대로 단일 요청이다. `lessons`·`lesson_student_records`도 같은 helper를 쓰므로 앞으로 커지면 함께 보호된다.
 - PR·main 병합은 사용자 확인 후 진행 예정이다. 다음 세션에서 이어받을 것은 없음 — 이 단위는 여기서 닫힌다.
 
+## 2026-08-25 Maintenance Velocity 후속 종료
+
+- 원격 stale branch는 재감사 후 모두 삭제되어 `origin/main`만 남았다.
+- 학생 추가/Tally 화면은 `src/domains/students/StudentModal.jsx`와 `studentModal.css`가 소유한다. App의 학생 저장·후보 저장·등록/교체 callback 의미는 바꾸지 않는다.
+- `StudentPortalV2`, 23줄 `CommentComposerModal`, comment/AI App orchestration은 추가 추출 후보가 아니다. 실제 기능 변경 또는 탐색 병목 근거가 생길 때만 재검토한다.
+- runtime lint, student `18/18`, scenario `827/827`, production `305/305`, build `466 modules`·lazy `12/12`, 격리 safe browser `79/79` 통과. 운영 데이터·Storage·실제 알림은 사용하지 않았다.
+
 ## 2026-08-22 보충 일정 옛 배포 청크 복구 안내
 
 - 삭제된 Vite lazy chunk를 옛 화면이 요청한 경우는 저장 실패와 분리한다. 보충 모달에서 서버 저장·알림 예약이 시작되지 않았음을 알리고 입력 복사 후 최신 화면 새로고침을 안내한다.

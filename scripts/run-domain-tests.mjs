@@ -62,6 +62,8 @@ export const domainTestGroups = Object.freeze({
     "scripts/test-parent-response-context.mjs",
     "scripts/test-student-list-sort.mjs",
     "scripts/test-student-effect-adapter.mjs",
+    "scripts/test-student-modal-boundary.mjs",
+    "scripts/test-student-modal-css-domain-split.mjs",
     "scripts/test-student-profile-boundary.mjs",
     "scripts/test-student-lifecycle-overlays.mjs",
     "scripts/test-student-withdrawn-list-boundary.mjs"

@@ -8,6 +8,15 @@
 - 저장·삭제·알림 로직은 건드리지 않고 `listRows()`에 투명한 페이지네이션만 추가했다. 호출자가 이미 `limit=`을 명시한 쿼리(알림 발송 후보, 단건 조회 등)는 그대로 단일 요청을 유지하고, 나머지 전체 목록 호출만 자동으로 다음 페이지를 이어받는다. 같은 helper를 쓰는 `lessons`·`lesson_student_records` 등 다른 테이블도 앞으로 같은 한도에 걸리지 않도록 함께 보호된다.
 - 운영 API에 직접 read-only 조회로 `homeworks` 1000/1000행·최신 날짜 `2026-08-24`(오늘 행 없음)를 확인해 재현했다. 수정 전 코드에서 실패하고 수정 후 통과하는 페이지네이션 fixture, runtime lint, production build, `npm run test:production`(303/303, scenario 827/827), 충돌·재시도·rebase 시나리오를 포함한 lesson-journal 안전 browser 35/35를 통과했다.
 
+## 2026-08-25 Maintenance Velocity 후속 1~5
+
+- 열린 PR이 없는 상태에서 남은 원격 stale 브랜치 2개를 재감사했다. 보충 옛 청크 브랜치는 main 조상이었고, save-reliability 브랜치의 유일한 유효 산출물 `delivery-policy.md`는 main과 byte-identical이라 두 브랜치를 삭제했다. 원격은 `main`만 남았다.
+- App의 `StudentModal` 435줄을 학생 도메인 파일로 이동했다. local form/Tally 선택 state만 화면이 소유하고 학생 저장·후보 CAS·등록/교체·Supabase 재조회 callback은 App이 계속 소유한다.
+- 같은 화면 전용 CSS 61 selector를 `studentModal.css`로 기계적으로 이동했다. 공유 class-roster focus 규칙은 App.css에 남겼고, 단일 등록·Tally 화면의 핵심 computed style 전후 대조가 모두 동일하다.
+- 관련 source-string 시나리오는 새 화면 source를 합성하되, 별도 경계 fixture와 기존 safe browser의 저장 충돌→draft 보존→검증 재시도 동작을 주 계약으로 둔다.
+- `CommentComposerModal`은 이미 23줄 DI wrapper, `StudentPortalV2`는 의도적 local controller owner이므로 추가 이동하지 않는다. comment/AI handler도 기존 App-owned orchestration 경계를 유지한다.
+- 검증은 runtime lint, student domain `18/18`, scenario `827/827`, production `305/305`, build `466 modules`·lazy `12/12`, 격리 safe browser `79/79`를 통과했다. 운영 데이터·Storage·실제 알림은 사용하지 않았다.
+
 ## 2026-08-22 보충 일정 옛 배포 청크 복구 안내
 
 - 열린 옛 화면이 새 배포 뒤 삭제된 `supplementSchedulePersistence` 청크를 요청하면 일반 저장 실패로 오인하던 표시를 교정했다. 이 경우 서버 저장·알림 예약이 시작되지 않았음을 알리고, 입력 복사 안내와 `최신 화면으로 새로고침` 버튼을 제공한다.
@@ -33,12 +42,12 @@
 ## 2026-08-21 리팩터링·원격 브랜치 정리 6단계 완료
 
 - PR #193·#195 종료(danger 버튼 클래스 통일, 학생 프로필 중복 버튼 클래스 제거) + PR #196(StudentManager의 `isWithdrawnStudent` 로컬 중복을 `lessonRosterSelectors.js` export로 통합, 동시 세션이 만든 PR을 검증 후 병합) — main에 병합, CI 전체 통과.
-- 원격 브랜치 20개 재감사: 4개(`mv-3b-*`)는 이미 삭제됨, 15개는 main에 내용이 흡수/대체됐음을 각각 직접 diff로 확인 후 삭제, 1개(`codex/daily-20260801-save-reliability`)는 main에 아직 없는 `docs/delivery-policy.md`(요청 분류·배포 정책 문서) 내용이라 재적용 후보로 보존.
+- 원격 브랜치 20개 재감사: 4개(`mv-3b-*`)는 이미 삭제됨, 15개는 main에 내용이 흡수/대체됐음을 각각 직접 diff로 확인 후 삭제, 당시 1개(`codex/daily-20260801-save-reliability`)는 `docs/delivery-policy.md` 재적용 후보로 보존했다. 이후 PR #237로 같은 문서가 main에 반영됐고 2026-08-25 byte-identical 대조 후 브랜치를 삭제했다.
 - MV-4b: `ExamPrepLessonDetail`을 App.jsx에서 `src/domains/lessons/ExamPrepLessonDetail.jsx`로 추출(App.jsx 9934→9800줄). `createEmptyRecord`만 App.jsx 클로저 의존이라 새 prop으로 노출하고 두 실제 호출부에 연결.
 - MV-5a: App.css 도메인 분리 재개(4-6 번호는 연장하지 않고 MV로 기록). `ExamPrepPastPaperPanel`의 `.pastPaper*` selector 11개를 전용 CSS로 분리(main CSS 414.41→413.23 kB). 스크린샷 도구가 없어 `getComputedStyle()` 전/후 대조로 cascade 안전성 확인.
 - MV-6: `getDefaultExamCycleForDate`가 client(`examPrepCalendarCluster.js`)·server(`learningCalendarRowMappers.js`)에 이중 존재함을 확인, 10개 날짜로 동치 검증 후 parity fixture만 추가(제품 코드 무변경, row mapper zero-import 계약 유지).
 - 6개 PR(#193, #195, #196, #197, #198, #199) 모두 fast-checks/build/production-fixtures/browser-smoke 통과 후 main에 병합됐다. 운영 데이터 쓰기·삭제, 실제 알림 발송, 유료 AI, 로그인/권한 변경은 실행하지 않았다.
-- 남은 후속 항목(사람 판단 필요): App.css의 나머지 도메인 분리(선택 기준·방법은 baseline 문서에 기록), `codex/daily-20260801-save-reliability`의 delivery-policy.md 재적용 여부.
+- 당시 남은 후속 항목은 App.css의 나머지 도메인 분리와 delivery policy 재적용 판단이었다. delivery policy는 PR #237로 해소됐고, CSS는 관련 화면을 실제 수정할 때만 기회적으로 분리한다.
 
 ## 2026-08-21 MV-3b 완료 (시험관리·학사달력 클러스터 추출)
 

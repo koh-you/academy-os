@@ -48,6 +48,14 @@
 - MV-3d: `src/app/TeacherViewOutlet.js`의 17개 화면 조립 중 최근 변경 빈도가 높은 화면 1개를 골라 화면 전용 facade/hook으로 응집. 저장 owner·CAS/readback 의미는 변경하지 않는다.
 - MV-3e: 미통합 모듈(`lessonJournalRecordBulkApi.js`, `lessonJournalHomeworkBulkApi.js`, `useSupplementNotificationDraftSelectionState.js`) orphan 상태 재확인 후 통합 또는 명시적 삭제.
 
+## MV-11 · 권장 후속 1~5 종료 (2026-08-25)
+
+- remote branch cleanup: 열린 PR 0건을 확인하고 남은 두 branch를 각각 main ancestor/byte-identical superseded로 재검증한 뒤 삭제했다.
+- opportunistic CSS: 실제로 만진 학생 추가 화면에 한정해 전용 61 selector를 기계적으로 이동하고 computed-style 전후 동일성을 확인했다. StudentManager 전체 CSS의 선제 분리는 하지 않았다.
+- stale source checks: 새 파일 위치를 raw 문자열 하나로 고정하는 대신 App callback 배선·화면의 transport/provider 부재를 전용 boundary fixture로 추가하고, 저장 충돌·draft 보존·CAS 재시도는 기존 safe browser 동작 검사를 유지했다.
+- StudentModal: 435줄 본문은 문자 단위 동일하게 이동했으며 App이 source persistence owner를 유지한다.
+- retained owners: `StudentPortalV2`, `CommentComposerModal`, comment/AI handler는 현재 역할이 이미 명확해 추가 wrapper/파일 이동을 하지 않는다.
+
 ## 하지 말 것
 
 direct route 숫자를 0으로 만들기 위한 일괄 이동, handler 개수 축소용 wrapper 추출, App.css 전체 선제적 분리, 모든 provider에 억지 envelope 통합, 오래된 branch 전체 merge/cherry-pick, 동일 SHA 반복 전체검사, 매 commit마다 상태 문서 3종 갱신, 줄 수·테스트 수만으로 성공 판정, 실제 알림 발송·운영 SQL·유료 AI 자동 실행.
