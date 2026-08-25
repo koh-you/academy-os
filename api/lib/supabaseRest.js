@@ -103,10 +103,27 @@ export async function supabaseRestRequest(path, options = {}) {
   return data;
 }
 
+const listRowsDefaultPageSize = 1000;
+const listRowsExplicitLimitPattern = /(^|&)limit=/;
+
 export async function listRows(table, query = "select=*", options = {}) {
-  return supabaseRestRequest(`${table}?${query}`, {
-    requireServiceRole: options.requireServiceRole ?? false
-  });
+  const requireServiceRole = options.requireServiceRole ?? false;
+  if (listRowsExplicitLimitPattern.test(query)) {
+    return supabaseRestRequest(`${table}?${query}`, { requireServiceRole });
+  }
+
+  const pageSize = options.pageSize ?? listRowsDefaultPageSize;
+  const rows = [];
+  let offset = 0;
+  for (;;) {
+    const page = await supabaseRestRequest(
+      `${table}?${query}&limit=${pageSize}&offset=${offset}`,
+      { requireServiceRole }
+    );
+    rows.push(...page);
+    if (page.length < pageSize) return rows;
+    offset += pageSize;
+  }
 }
 
 export async function upsertRows(table, rows, options = {}) {
