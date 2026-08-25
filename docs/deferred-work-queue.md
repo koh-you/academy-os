@@ -44,6 +44,8 @@
 
 ## P4. 고위험 App/API 경계 리팩터링
 
+- 2026-08-25 후속 감사에서 `StudentModal`과 전용 CSS 61 selector 분리를 완료했다. `StudentPortalV2`는 portal local/controller state owner, `CommentComposerModal`은 23줄 DI wrapper, comment/AI handler는 App orchestration owner이므로 줄 수만을 위한 추가 추출은 폐기한다. 관련 기능 변경 빈도나 실제 탐색 병목이 새로 확인될 때만 재검토한다.
+
 - App 2차 리팩터링은 `docs/app-refactor-second-pass-plan.md`의 Phase 1~5를 기준으로 한다.
 - Phase 1 auth/session, Phase 2 출결 polling·동기화, Phase 3 notification/Solapi reconcile, Phase 4 hydration/persistence, Phase 5 teacher 화면 callback 조립은 main 통합·CI·배포 완료다. App 2차 리팩터링 Phase 1~5는 닫는다.
 - App 3차 리팩터링 3-0~3-8은 `docs/app-refactor-third-pass-plan.md`와 `docs/app-refactor-third-pass-closeout.md`를 기준으로 화면·draft/controller·adapter 분리, teacher 화면 lazy loading, 종료 소유권 감사를 완료했다. 3차 리팩터링은 닫고 자동 재개하지 않는다.

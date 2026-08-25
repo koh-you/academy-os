@@ -1,0 +1,338 @@
+
+
+.modalCard.studentAddModal {
+  border-radius: 24px;
+  gap: 26px;
+  max-width: 960px;
+  padding: 28px 30px 26px;
+}
+
+.studentAddModal .modalHeader {
+  align-items: start;
+}
+
+.studentAddModal .modalHeader h2 {
+  font-size: 26px;
+}
+
+
+.studentAddGrid {
+  display: grid;
+  gap: 18px 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.studentAddGrid label,
+.studentBulkPlaceholder {
+  color: var(--academy-text-strong, #475569);
+  display: grid;
+  font-weight: 900;
+  gap: 8px;
+}
+
+.studentAddGrid input,
+.studentAddGrid select,
+.studentBulkPlaceholder textarea {
+  background: var(--academy-surface, #ffffff);
+  border: 1px solid var(--academy-border-strong, #cbd8ee);
+  border-radius: 16px;
+  color: var(--academy-text, #0f172a);
+  font-size: 17px;
+  min-height: 48px;
+  padding: 0 16px;
+}
+
+.studentBulkPlaceholder textarea {
+  min-height: 150px;
+  padding: 14px 16px;
+}
+
+.birthYearWithGrade {
+  align-items: center;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.birthYearWithGrade span {
+  background: var(--academy-surface-muted, #f8fafc);
+  border-radius: 10px;
+  color: var(--academy-text-strong, #475569);
+  font-weight: 900;
+  padding: 8px 12px;
+}
+
+.primaryButton.studentAddSubmit {
+  border-radius: 16px;
+  font-size: 18px;
+  min-height: 48px;
+}
+
+.studentIntakePanel {
+  display: grid;
+  gap: 14px;
+}
+
+.intakeEndpointBox {
+  background: var(--academy-surface-muted, #f8fafc);
+  border: 1px solid var(--academy-border, #d8e3f8);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.intakeEndpointBox code {
+  background: var(--academy-surface, #ffffff);
+  border: 1px solid var(--status-neutral-border, #e2e8f0);
+  border-radius: 8px;
+  color: var(--academy-text, #0f172a);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+  padding: 10px 12px;
+}
+
+.studentIntakeSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.studentIntakeSummary span {
+  background: var(--academy-accent-bg, #eef2ff);
+  border: 1px solid var(--academy-accent-border, #c7d2fe);
+  border-radius: 999px;
+  color: var(--status-closure-text, #3730a3);
+  font-weight: 900;
+  padding: 8px 12px;
+}
+
+.studentIntakeList {
+  display: grid;
+  gap: 12px;
+  max-height: 520px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+  scrollbar-gutter: stable;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+.studentIntakeList:focus-visible {
+  outline: 2px solid var(--academy-focus-ring, #2563eb);
+  outline-offset: 2px;
+}
+
+.studentIntakeCard {
+  border: 1px solid var(--academy-border, #d8e3f8);
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+}
+
+.studentIntakeCard.registered {
+  background: var(--academy-surface-muted, #f8fafc);
+}
+
+.studentIntakeCard.registered.unlinked {
+  background: var(--status-pending-bg, #fff7ed);
+  border-color: var(--status-danger-border, #fecaca);
+}
+
+.studentIntakeRegistrationRecovery,
+.studentIntakeRegistrationStatus {
+  align-items: start;
+  border: 1px solid var(--status-danger-border, #fecaca);
+  border-radius: 8px;
+  display: grid;
+  gap: 7px;
+  padding: 12px;
+}
+
+.studentIntakeRegistrationRecovery {
+  background: var(--status-destructive-bg, #fff1f2);
+  color: var(--status-destructive-text, #dc2626);
+}
+
+.studentIntakeRegistrationRecovery span,
+.studentIntakeRegistrationStatus span {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.studentIntakeRegistrationRecovery label {
+  color: var(--academy-text-strong, #475569);
+  display: grid;
+  font-weight: 900;
+  gap: 6px;
+  max-width: 320px;
+}
+
+.studentIntakeRegistrationRecovery select {
+  background: var(--academy-surface, #ffffff);
+  border: 1px solid var(--status-destructive-border, #fecdd3);
+  border-radius: 8px;
+  color: var(--academy-text, #0f172a);
+  min-height: 40px;
+  padding: 0 12px;
+}
+
+.studentIntakeRegistrationRecovery button {
+  justify-self: start;
+}
+
+.studentIntakeRegistrationStatus {
+  background: var(--academy-surface-muted, #f8fafc);
+  border-color: var(--academy-border, #d8e3f8);
+}
+
+.studentIntakeRegistrationStatus.failed {
+  background: var(--status-destructive-bg, #fff1f2);
+  border-color: var(--status-danger-border, #fecaca);
+  color: var(--status-destructive-text, #dc2626);
+}
+
+.studentIntakeRegistrationStatus.saved {
+  background: var(--status-success-bg, #ecfdf5);
+  border-color: var(--status-success-border, #86efac);
+  color: var(--status-success-text, #047857);
+}
+
+.studentIntakeRegisteredList {
+  border-top: 1px solid var(--status-neutral-border, #e2e8f0);
+  display: grid;
+  gap: 12px;
+  padding-top: 14px;
+}
+
+.studentIntakeAnswerList {
+  display: grid;
+  gap: 6px;
+}
+
+.studentIntakeAnswerList span {
+  color: var(--academy-text-strong, #475569);
+  display: grid;
+  font-size: 14px;
+  gap: 2px;
+}
+
+.studentIntakeCardHeader,
+.studentIntakeActions {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.studentIntakeCardHeader strong {
+  color: var(--academy-text, #0f172a);
+  display: block;
+  font-size: 18px;
+}
+
+.studentIntakeCardHeader span,
+.studentIntakeActions small {
+  color: var(--academy-muted, #64748b);
+  font-weight: 800;
+}
+
+.studentIntakeCardHeader select {
+  max-width: 140px;
+}
+
+.studentIntakeGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.studentIntakeGrid label {
+  color: var(--academy-text-strong, #475569);
+  display: grid;
+  font-weight: 900;
+  gap: 6px;
+}
+
+.studentIntakeGrid input,
+.studentIntakeGrid select {
+  background: var(--academy-surface, #ffffff);
+  border: 1px solid var(--academy-border-strong, #cbd8ee);
+  border-radius: 8px;
+  color: var(--academy-text, #0f172a);
+  min-height: 40px;
+  padding: 0 12px;
+}
+
+.studentIntakeMergeTarget {
+  align-items: end;
+  background: var(--academy-surface-muted, #f8fafc);
+  border: 1px solid var(--academy-border, #d8e3f8);
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(260px, 0.9fr) minmax(280px, 1.1fr);
+  padding: 12px;
+}
+
+.studentIntakeMergeTarget.matched {
+  background: var(--status-info-bg, #eff6ff);
+  border-color: var(--status-info-border, #bfdbfe);
+}
+
+.studentIntakeMergeTarget label,
+.studentIntakeMergeTarget > div {
+  display: grid;
+  gap: 6px;
+}
+
+.studentIntakeMergeTarget label {
+  color: var(--academy-text-strong, #475569);
+  font-weight: 900;
+}
+
+.studentIntakeMergeTarget select {
+  background: var(--academy-surface, #ffffff);
+  border: 1px solid var(--status-info-border, #bfdbfe);
+  border-radius: 8px;
+  color: var(--academy-text, #0f172a);
+  min-height: 42px;
+  padding: 0 12px;
+  width: 100%;
+}
+
+.studentIntakeMergeTarget strong {
+  color: var(--status-info-text, #1d4ed8);
+}
+
+.studentIntakeMergeTarget span,
+.studentIntakeMergeTarget small {
+  color: var(--academy-text-strong, #475569);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.studentIntakeActions {
+  flex-wrap: wrap;
+}
+
+.studentIntakeActionButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+@media (max-width: 980px) {
+
+  .studentIntakeMergeTarget {
+    grid-template-columns: 1fr;
+  }
+
+  .studentIntakeActionButtons,
+.studentIntakeActionButtons button {
+    width: 100%;
+  }
+}

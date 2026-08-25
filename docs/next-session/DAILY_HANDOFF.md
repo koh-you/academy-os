@@ -1,6 +1,13 @@
 # Daily Development Handoff
 
-업데이트: 2026-08-22
+업데이트: 2026-08-25
+
+## 2026-08-25 Maintenance Velocity 후속 종료
+
+- 원격 stale branch는 재감사 후 모두 삭제되어 `origin/main`만 남았다.
+- 학생 추가/Tally 화면은 `src/domains/students/StudentModal.jsx`와 `studentModal.css`가 소유한다. App의 학생 저장·후보 저장·등록/교체 callback 의미는 바꾸지 않는다.
+- `StudentPortalV2`, 23줄 `CommentComposerModal`, comment/AI App orchestration은 추가 추출 후보가 아니다. 실제 기능 변경 또는 탐색 병목 근거가 생길 때만 재검토한다.
+- runtime lint, student `18/18`, scenario `827/827`, production `305/305`, build `466 modules`·lazy `12/12`, 격리 safe browser `79/79` 통과. 운영 데이터·Storage·실제 알림은 사용하지 않았다.
 
 ## 2026-08-22 보충 일정 옛 배포 청크 복구 안내
 
