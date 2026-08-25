@@ -2,6 +2,12 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-25 homeworks 전체 목록 GET 1000행 절단 수정
+
+- 사용자가 오늘 수업일지 "다음 숙제"가 저장 완료 후 새로고침 몇 초 뒤 사라진다고 보고했다. `api/lib/supabaseRest.js`의 `listRows()`가 Supabase/PostgREST 기본 1000행 상한 안에서 단일 요청만 보내고 있었고, `homeworks`가 1000행을 넘기면서 `assigned_date` 오름차순 전체 목록에서 오늘 날짜 행이 통째로 빠졌다. 운영 API read-only 조회로 1000/1000행·최대 날짜 `2026-08-24`를 확인해 재현했다.
+- 저장·삭제·알림 로직은 그대로 두고 `listRows()`에만 투명 페이지네이션을 추가했다. 호출자가 `limit=`을 이미 지정한 쿼리(알림 발송 후보, 단건 조회)는 그대로 단일 요청을 쓰고, 나머지 전체 목록 호출만 자동으로 다음 페이지를 이어받아 앞으로 `lessons`·`lesson_student_records` 등도 같은 한도에 걸리지 않게 된다.
+- 수정 전 실패·수정 후 통과하는 pagination fixture(`scripts/test-supabase-rest-list-rows-pagination.mjs`)를 추가해 `test:production` 체인에 연결했다. `npm run lint:runtime`, `npm run build`, `npm run test:production`(303/303, scenario 827/827), 충돌·재시도·rebase 시나리오를 포함한 `tests/browser/lesson-journal.spec.js` 35/35를 통과했다.
+
 ## 2026-08-25 StudentModal·CSS 응집과 stale branch 종료
 
 - 남은 원격 브랜치 2개를 최신 main/PR 기준으로 다시 대조해 삭제했고 원격은 main만 남겼다.

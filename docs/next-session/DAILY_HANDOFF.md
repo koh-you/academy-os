@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-25
 
+## 2026-08-25 homeworks 전체 목록 GET 1000행 절단 수정
+
+- `api/lib/supabaseRest.js`의 `listRows()`가 Supabase 기본 1000행 상한에서 페이지네이션 없이 한 번만 요청해, `homeworks`가 1000행을 넘긴 뒤로는 `assigned_date` 오름차순 목록에서 최신 날짜(오늘)가 빠졌다. 오늘 수업일지 "다음 숙제"가 저장 직후엔 보이다가 새로고침 후 사라지는 증상으로 나타났다.
+- `limit=`을 명시하지 않은 호출만 자동으로 다음 페이지를 이어받도록 고쳤다. 이미 `limit=`을 지정한 호출(알림 발송 후보, 단건 조회)은 그대로 단일 요청이다. `lessons`·`lesson_student_records`도 같은 helper를 쓰므로 앞으로 커지면 함께 보호된다.
+- PR·main 병합은 사용자 확인 후 진행 예정이다. 다음 세션에서 이어받을 것은 없음 — 이 단위는 여기서 닫힌다.
+
 ## 2026-08-25 Maintenance Velocity 후속 종료
 
 - 원격 stale branch는 재감사 후 모두 삭제되어 `origin/main`만 남았다.

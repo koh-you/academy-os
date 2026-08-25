@@ -2,6 +2,12 @@
 
 업데이트: 2026-08-25
 
+## 2026-08-25 homeworks 전체 목록 GET 1000행 절단 수정
+
+- 운영에서 오늘 날짜 수업일지의 "다음 숙제"가 저장 완료 표시 뒤 새로고침 몇 초 후 사라지는 버그를 확인했다. 원인은 `listRows()`(`api/lib/supabaseRest.js`)가 Supabase/PostgREST 기본 페이지 상한(1000행) 안에서 단일 요청만 보내던 것이었다. `homeworks` 테이블이 1000행을 넘어서면서 `assigned_date` 오름차순 목록에서 최신 날짜(오늘)가 통째로 잘려 나갔고, 새로고침마다 실행되는 전체 재조회가 세션 중 정상 저장된 값을 이 잘린 응답으로 덮어썼다.
+- 저장·삭제·알림 로직은 건드리지 않고 `listRows()`에 투명한 페이지네이션만 추가했다. 호출자가 이미 `limit=`을 명시한 쿼리(알림 발송 후보, 단건 조회 등)는 그대로 단일 요청을 유지하고, 나머지 전체 목록 호출만 자동으로 다음 페이지를 이어받는다. 같은 helper를 쓰는 `lessons`·`lesson_student_records` 등 다른 테이블도 앞으로 같은 한도에 걸리지 않도록 함께 보호된다.
+- 운영 API에 직접 read-only 조회로 `homeworks` 1000/1000행·최신 날짜 `2026-08-24`(오늘 행 없음)를 확인해 재현했다. 수정 전 코드에서 실패하고 수정 후 통과하는 페이지네이션 fixture, runtime lint, production build, `npm run test:production`(303/303, scenario 827/827), 충돌·재시도·rebase 시나리오를 포함한 lesson-journal 안전 browser 35/35를 통과했다.
+
 ## 2026-08-25 Maintenance Velocity 후속 1~5
 
 - 열린 PR이 없는 상태에서 남은 원격 stale 브랜치 2개를 재감사했다. 보충 옛 청크 브랜치는 main 조상이었고, save-reliability 브랜치의 유일한 유효 산출물 `delivery-policy.md`는 main과 byte-identical이라 두 브랜치를 삭제했다. 원격은 `main`만 남았다.
