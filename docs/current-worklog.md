@@ -2,6 +2,14 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-25 StudentModal·CSS 응집과 stale branch 종료
+
+- 남은 원격 브랜치 2개를 최신 main/PR 기준으로 다시 대조해 삭제했고 원격은 main만 남겼다.
+- `StudentModal` 본문을 문자 단위로 보존해 `src/domains/students`로 이동하고 App에는 저장·Tally 등록·CAS/readback callback 배선만 남겼다. 새 경계 fixture는 직접 API/Storage/provider owner가 생기지 않았음을 고정한다.
+- 화면 전용 CSS 61 selector를 기계적으로 옮겼다. computed-style 대조가 찾아낸 저장 버튼 cascade 1건은 `.primaryButton.studentAddSubmit`으로 기존 18px/16px 값을 복원했다. 공유 class-roster selector는 App.css에 유지했다.
+- `StudentPortalV2`, `CommentComposerModal`, comment/AI orchestration은 현 구조가 더 응집돼 있어 의도적으로 유지한다.
+- 검증: runtime lint, student `18/18`, scenario `827/827`, production `305/305`, build `466 modules`·lazy `12/12`, 격리 safe browser `79/79`. 운영 원천과 실제 알림은 사용하지 않았다.
+
 ## 2026-08-22 보충 일정 옛 배포 청크 복구 안내
 
 - 운영 오류의 `Failed to fetch dynamically imported module`은 저장 API가 아니라 열린 옛 화면과 새 Vercel 배포 사이의 청크 불일치였다. 공용 판별 helper를 기존 App fallback과 보충 일정 action이 함께 사용한다.
