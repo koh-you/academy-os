@@ -30,16 +30,25 @@ export function getRequestHeader(request, name) {
 export function readJsonBody(request, options = {}) {
   const limitBytes = options.limitBytes ?? 2_000_000;
   return new Promise((resolve, reject) => {
-    let body = "";
+    const chunks = [];
+    let bodyBytes = 0;
+    let limitExceeded = false;
     request.on("data", (chunk) => {
-      body += chunk;
-      if (Buffer.byteLength(body) > limitBytes) {
+      if (limitExceeded) return;
+      const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      bodyBytes += buffer.length;
+      if (bodyBytes > limitBytes) {
+        limitExceeded = true;
         reject(new Error("요청 본문이 너무 큽니다."));
         request.destroy();
+        return;
       }
+      chunks.push(buffer);
     });
     request.on("end", () => {
+      if (limitExceeded) return;
       try {
+        const body = Buffer.concat(chunks, bodyBytes).toString("utf8");
         resolve(body ? JSON.parse(body) : {});
       } catch (error) {
         reject(new Error("JSON 형식이 올바르지 않습니다."));
