@@ -1,4 +1,5 @@
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
+import { KakaoAlimtalkPreview } from "../../shared/components/KakaoAlimtalkPreview.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 
@@ -102,7 +103,9 @@ export function LessonJournalCommentComposerView({
 
         <section className="commentPreviewPanel">
           <SectionHeader density="slim" eyebrow="PREVIEW" title={previewTitle} />
-          <pre className="templatePreviewText commentTemplatePreview">{generatedPreviewText}</pre>
+          <div className="templatePreviewText commentTemplatePreview">
+            <KakaoAlimtalkPreview text={generatedPreviewText} />
+          </div>
         </section>
       </div>
     </Modal>

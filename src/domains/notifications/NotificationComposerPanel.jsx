@@ -1,3 +1,5 @@
+import { KakaoAlimtalkPreview } from "../../shared/components/KakaoAlimtalkPreview.jsx";
+
 export function NotificationComposerPanel({
   dispatchMessage,
   isPolishingNotice,
@@ -51,7 +53,7 @@ export function NotificationComposerPanel({
       </div>
       <div className="noticePreviewBox">
         <strong>미리보기</strong>
-        <p>{noticeText || "제목과 본문을 입력하면 이곳에 발송 문구가 표시됩니다."}</p>
+        <KakaoAlimtalkPreview text={noticeText || "제목과 본문을 입력하면 이곳에 발송 문구가 표시됩니다."} />
       </div>
       <div className="noticeSendActions">
         <button className="softButton" disabled={!noticeBody.trim() || isPolishingNotice} onClick={onPolishNotice} type="button">

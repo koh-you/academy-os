@@ -41,7 +41,7 @@ domainRoot.walkRules((rule) => {
     assert.ok(isSafeSelector(selector), `domain CSS selector must be on the confirmed-exclusive list: ${selector}`);
   }
 });
-assert.equal(domainSelectorCount, 91);
+assert.equal(domainSelectorCount, 90);
 
 // .notificationLogList, .notificationControlGrid, .notificationLessonItem,
 // .notificationControlActions, .notificationBulkActions, and .specialLectureGuideTabs
