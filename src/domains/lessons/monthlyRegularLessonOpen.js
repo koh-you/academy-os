@@ -73,14 +73,15 @@ export function buildMonthlyRegularLessonOpenPlan({ lessons = [], monthKey = "",
     const days = Array.isArray(template.days) && template.days.length
       ? template.days
       : [...(sourceDaysByTemplate.get(classTemplateId) || [])];
-    const studentIds = [...new Set((sourceLesson.studentIds || []).filter((studentId) => activeStudents.has(studentId)))];
-    const excludedStudentCount = (sourceLesson.studentIds || []).length - studentIds.length;
+    const templateStudentIds = [...new Set((sourceLesson.studentIds || []).filter((studentId) => activeStudents.has(studentId)))];
+    const excludedStudentCount = (sourceLesson.studentIds || []).length - templateStudentIds.length;
     const candidates = monthDates(targetMonth).filter((date) => days.includes(getDayKey(date)));
     const lessonRows = candidates
       .filter((date) => !existingByDateTemplate.has(`${date}|${classTemplateId}`))
       .map((date) => {
         const dateDayKey = getDayKey(date);
         const daySource = latestByTemplateDay.get(`${classTemplateId}|${dateDayKey}`) || sourceLesson;
+        const dayStudentIds = [...new Set((daySource.studentIds || []).filter((studentId) => activeStudents.has(studentId)))];
         const saturdayTimes = dateDayKey === "sat" && template.saturdayStartTime && template.saturdayEndTime
           ? { endTime: template.saturdayEndTime, startTime: template.saturdayStartTime }
           : null;
@@ -96,17 +97,18 @@ export function buildMonthlyRegularLessonOpenPlan({ lessons = [], monthKey = "",
         sourceLabel: `월 오픈 · ${sourceMonth} 실제 명단 연장`,
         startTime: saturdayTimes?.startTime || daySource.startTime,
         status: "scheduled",
-        studentIds,
+        studentIds: dayStudentIds,
         teacherId: sourceLesson.teacherId || "instructor_owner_001"
         });
       });
+    const studentCount = new Set(lessonRows.flatMap((row) => row.studentIds)).size;
     return {
       className: template.name || sourceLesson.className,
       classTemplateId,
       excludedStudentCount,
       existingCount: candidates.length - lessonRows.length,
       sourceDate: sourceLesson.date,
-      studentCount: studentIds.length,
+      studentCount: lessonRows.length ? studentCount : templateStudentIds.length,
       lessons: lessonRows
     };
   }).sort((left, right) => left.className.localeCompare(right.className, "ko"));

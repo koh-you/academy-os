@@ -2,6 +2,13 @@
 
 이 파일은 최근 작업만 유지한다. 2026-07-31 이전의 전체 이력은 `docs/archive/current-worklog-through-2026-07-31.md`에 있다.
 
+## 2026-08-25 월 정규수업 열기 요일별 명단 오류 수정
+
+- 사용자 보고(9월 수업일지 명단이 8월과 다름, 박지현 학생)를 운영 API read-only 조회로 재현했다. `monthlyRegularLessonOpen.js`가 반 전체의 "지난달 마지막 실제 수업" 1건(요일 무관)의 명단을 새 달 모든 요일에 그대로 복사해서, 개별시간표로 특정 요일에만 다니는 학생이 다른 요일 명단 기준으로 잘못 채워지거나 빠지는 버그였다. 요일별 시작/종료 시간은 이미 요일별로 정확히 계산되고 있었는데 명단만 그 로직을 안 타고 있었다.
+- 각 신규 회차의 `studentIds`를 그 요일의 마지막 수업 명단(`latestByTemplateDay`)에서 가져오도록 고쳤다. 박지현 케이스를 그대로 재현하는 회귀 fixture를 추가(수정 전 실패 확인)했고, 저장·삭제·알림 로직은 변경하지 않았다.
+- 잘못 생성된 9월 정규수업 52건(전부 자동생성, 연결 데이터 0건 확인)을 사용자가 Supabase SQL Editor에서 직접 삭제하도록 SQL을 준비해 전달했다 — 대량 삭제는 AI가 직접 실행하지 않는다.
+- runtime lint, build, `test:production` 305/305·scenario 827/827, `tests/browser/lesson-journal.spec.js` 35/35 통과.
+
 ## 2026-08-25 homeworks 전체 목록 GET 1000행 절단 수정
 
 - 사용자가 오늘 수업일지 "다음 숙제"가 저장 완료 후 새로고침 몇 초 뒤 사라진다고 보고했다. `api/lib/supabaseRest.js`의 `listRows()`가 Supabase/PostgREST 기본 1000행 상한 안에서 단일 요청만 보내고 있었고, `homeworks`가 1000행을 넘기면서 `assigned_date` 오름차순 전체 목록에서 오늘 날짜 행이 통째로 빠졌다. 운영 API read-only 조회로 1000/1000행·최대 날짜 `2026-08-24`를 확인해 재현했다.
