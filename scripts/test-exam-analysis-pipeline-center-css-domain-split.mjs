@@ -18,7 +18,7 @@ assert.ok(componentSource.includes('import "./examAnalysisPipelineCenter.css";')
 // docs/app-refactor-fourth-pass-css-domain-split-baseline.md).
 const extraSafeClasses = new Set([
   "confirmCell", "importantCell", "reviewStateCell", "ssenMetaCell", "span2",
-  "softTinyButton", "questionRowsPreview", "questionRowsPreviewChips"
+  "questionRowsPreview", "questionRowsPreviewChips"
 ]);
 function isSafeSelector(sel) {
   const leftmost = sel.trim().split(/\s|>|\+|~/)[0];
@@ -44,7 +44,7 @@ domainRoot.walkRules((rule) => {
     assert.ok(isSafeSelector(selector), `domain CSS selector must be examAnalysis/examPrompt-scoped or on the confirmed-exclusive list: ${selector}`);
   }
 });
-assert.equal(domainSelectorCount, 427);
+assert.equal(domainSelectorCount, 423);
 
 // No selector that moved should still have a same-name rule left behind in
 // App.css (the two mega-rules above are the sole, confirmed exceptions).

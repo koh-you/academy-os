@@ -2623,7 +2623,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                                       ))}
                                     </select>
                                     <button
-                                      className="softTinyButton square"
+                                      className="softButton square"
                                       onClick={() => setEditingSsenQuestionNumber("")}
                                       type="button"
                                     >
@@ -2636,7 +2636,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                                   <span>{mainTypeLabel}</span>
                                 </div>
                                 <button
-                                  className="softTinyButton"
+                                  className="softButton"
                                   onClick={() => setEditingSsenQuestionNumber(String(question.questionNumber))}
                                   type="button"
                                 >

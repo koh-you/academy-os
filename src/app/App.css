@@ -395,7 +395,7 @@ summary:focus-visible {
 
 .sidebar.collapsed .sideStatus span,
 .sidebar.collapsed .sideStatus strong,
-.sidebar.collapsed .logoutButton {
+.sidebar.collapsed .sideStatus .ghostButton {
   font-size: 0;
   padding: 12px 0;
 }
@@ -411,7 +411,7 @@ summary:focus-visible {
   font-size: 16px;
 }
 
-.sidebar.collapsed .logoutButton::before {
+.sidebar.collapsed .sideStatus .ghostButton::before {
   content: "⏻";
   font-size: 16px;
 }
@@ -2404,37 +2404,17 @@ summary:focus-visible {
   white-space: nowrap;
 }
 
-.schedulePlanButton {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--academy-border, #d8e3f8);
-  border-radius: 8px;
-  color: var(--academy-text-strong, #475569);
+.lessonNotificationActionRow .ghostButton {
   font-size: 13px;
-  font-weight: 900;
   min-height: 38px;
-  padding: 0 12px;
 }
 
-.schedulePlanButton.active {
-  background: var(--academy-accent-bg, #eef2ff);
-  border-color: var(--status-closure-border, #6366f1);
-  color: var(--status-closure-text, #3730a3);
-}
-
-.schedulePlanButton.noSend.active {
-  background: var(--status-danger-bg, #fef2f2);
-  border-color: var(--status-danger-border, #fecaca);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--status-danger-text, #b91c1c) 15%, transparent);
-  color: var(--status-danger-text, #b91c1c);
-}
-
-.schedulePlanButton.check {
-  background: var(--academy-surface, #ffffff);
+.lessonNotificationActionRow .ghostButton.check {
   border-color: var(--academy-primary, #17213d);
   color: var(--academy-primary, #17213d);
 }
 
-.schedulePlanButton:disabled {
+.lessonNotificationActionRow .ghostButton:disabled {
   cursor: default;
   opacity: 1;
 }
@@ -2971,21 +2951,20 @@ summary:focus-visible {
   justify-content: space-between;
 }
 
-.studentPortalPreviewButton {
-  align-items: center;
-  background: var(--academy-accent-bg, #eef2ff);
-  border: 1px solid var(--academy-accent-border, #c7d2fe);
+.iconButton.compact {
   border-radius: 8px;
-  color: var(--academy-accent-text, #4f46e5);
-  cursor: pointer;
-  display: inline-flex;
   font-size: 14px;
   height: 30px;
-  justify-content: center;
   width: 34px;
 }
 
-.studentPortalPreviewButton:hover {
+.journalStudentTopLine .iconButton.compact {
+  background: var(--academy-accent-bg, #eef2ff);
+  border-color: var(--academy-accent-border, #c7d2fe);
+  color: var(--academy-accent-text, #4f46e5);
+}
+
+.journalStudentTopLine .iconButton.compact:hover {
   background: var(--status-closure-bg, #e0e7ff);
   border-color: var(--status-closure-border, #6366f1);
 }
@@ -3294,23 +3273,12 @@ summary:focus-visible {
   color: var(--academy-text, #0f172a);
 }
 
-.tinySoftButton,
-.iconTinyButton {
-  background: var(--academy-accent-bg, #eef2ff);
-  border: 1px solid var(--academy-accent-border, #c7d2fe);
+.modalMathExamEntryEditor .softButton {
   border-radius: 10px;
-  color: var(--academy-accent-text, #4f46e5);
-  cursor: pointer;
   font-size: 12px;
   font-weight: 800;
   min-height: 32px;
   padding: 6px 10px;
-}
-
-.iconTinyButton {
-  background: var(--status-destructive-bg, #fff1f2);
-  border-color: var(--status-destructive-border, #fecdd3);
-  color: var(--status-danger-text, #b91c1c);
 }
 
 .examReadCell {
@@ -5585,6 +5553,12 @@ textarea {
 
 .ghostButton:active {
   transform: translateY(1px);
+}
+
+.ghostButton.compact {
+  font-size: 12px;
+  min-height: 32px;
+  padding: 6px 10px;
 }
 
 .ghostButton.scheduleEditButton {
@@ -10351,25 +10325,15 @@ textarea {
   font-weight: 700;
 }
 
-.prepMemoButton {
-  align-items: center;
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--academy-border, #d8e3f8);
-  border-radius: 6px;
-  color: var(--academy-text-strong, #475569);
-  cursor: pointer;
-  display: inline-flex;
-  font-weight: 900;
+.journalPrepCell .ghostButton {
   gap: 5px;
-  justify-content: center;
   min-height: 38px;
-  padding: 8px 10px;
   white-space: nowrap;
   width: 100%;
 }
 
-.prepMemoButton:hover,
-.prepMemoButton:focus-visible {
+.journalPrepCell .ghostButton:hover,
+.journalPrepCell .ghostButton:focus-visible {
   background: var(--academy-accent-bg, #eef2ff);
   border-color: var(--status-closure-border, #6366f1);
   color: var(--status-closure-text, #3730a3);
@@ -12141,22 +12105,25 @@ textarea.profileEditInput {
   justify-content: flex-end;
 }
 
-.logoutButton,
 .portalDate {
   align-items: center;
-  background: var(--academy-surface, #ffffff);
+  background: var(--academy-accent-bg, #eef2ff);
   border: 1px solid var(--academy-border, #d8e3f8);
   border-radius: 8px;
-  color: var(--academy-primary, #17213d);
+  color: var(--academy-focus-ring, #2563eb);
   display: inline-flex;
   font-weight: 800;
   min-height: 46px;
   padding: 0 18px;
 }
 
-.portalDate {
-  background: var(--academy-accent-bg, #eef2ff);
-  color: var(--academy-focus-ring, #2563eb);
+.sideStatus .ghostButton,
+.portalActions .ghostButton {
+  border-color: var(--academy-border, #d8e3f8);
+  color: var(--academy-primary, #17213d);
+  font-weight: 800;
+  min-height: 46px;
+  padding: 0 18px;
 }
 
 .compactSelect {
@@ -15370,6 +15337,11 @@ textarea.profileEditInput {
   white-space: nowrap;
 }
 
+.supplementRowItem .primaryButton {
+  justify-self: end;
+  white-space: nowrap;
+}
+
 .supplementRowItem:last-child {
   border-bottom: 0;
 }
@@ -17361,7 +17333,8 @@ body.attendanceOnlyBody {
     margin-top: 0;
   }
 
-  .logoutButton {
+  .sideStatus .ghostButton,
+  .portalActions .ghostButton {
     min-height: 42px;
   }
 
@@ -17432,12 +17405,12 @@ body.attendanceOnlyBody {
     position: static;
   }
 
-  .sidebar.collapsed .logoutButton {
+  .sidebar.collapsed .sideStatus .ghostButton {
     font-size: inherit;
     padding: 12px;
   }
 
-  .sidebar.collapsed .logoutButton::before {
+  .sidebar.collapsed .sideStatus .ghostButton::before {
     content: none;
   }
 

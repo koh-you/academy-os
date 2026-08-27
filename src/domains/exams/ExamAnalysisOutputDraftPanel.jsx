@@ -142,7 +142,7 @@ export function ExamAnalysisOutputDraftPanel({
         <button
           aria-controls="exam-output-top-summary-content"
           aria-expanded={!isOutputSectionCollapsed("topSummary")}
-          className="examAnalysisOutputCollapseButton"
+          className="ghostButton compact"
           onClick={() => toggleOutputSection("topSummary")}
           type="button"
         >
@@ -202,7 +202,7 @@ export function ExamAnalysisOutputDraftPanel({
         <button
           aria-controls="exam-output-guide"
           aria-expanded={!isOutputSectionCollapsed("guide")}
-          className="examAnalysisOutputCollapseButton"
+          className="ghostButton compact"
           onClick={() => toggleOutputSection("guide")}
           type="button"
         >
@@ -244,7 +244,7 @@ export function ExamAnalysisOutputDraftPanel({
         <button
           aria-controls="exam-output-gpt-checklist"
           aria-expanded={!isOutputSectionCollapsed("gptChecklist")}
-          className="examAnalysisOutputCollapseButton"
+          className="ghostButton compact"
           onClick={() => toggleOutputSection("gptChecklist")}
           type="button"
         >
@@ -310,7 +310,7 @@ export function ExamAnalysisOutputDraftPanel({
         <button
           aria-controls="exam-output-base-inputs"
           aria-expanded={!isOutputSectionCollapsed("baseInputs")}
-          className="examAnalysisOutputCollapseButton"
+          className="ghostButton compact"
           onClick={() => toggleOutputSection("baseInputs")}
           type="button"
         >
@@ -344,7 +344,7 @@ export function ExamAnalysisOutputDraftPanel({
         <button
           aria-controls="exam-output-blog-blocks"
           aria-expanded={!isOutputSectionCollapsed("blogBlocks")}
-          className="examAnalysisOutputCollapseButton"
+          className="ghostButton compact"
           onClick={() => toggleOutputSection("blogBlocks")}
           type="button"
         >
@@ -388,7 +388,7 @@ export function ExamAnalysisOutputDraftPanel({
           <button
             aria-controls="exam-output-key-questions"
             aria-expanded={!isOutputSectionCollapsed("keyQuestions")}
-            className="examAnalysisOutputCollapseButton"
+            className="ghostButton compact"
             onClick={() => toggleOutputSection("keyQuestions")}
             type="button"
           >
@@ -460,7 +460,7 @@ export function ExamAnalysisOutputDraftPanel({
         <button
           aria-controls="exam-output-final-drafts"
           aria-expanded={!isOutputSectionCollapsed("finalDrafts")}
-          className="examAnalysisOutputCollapseButton"
+          className="ghostButton compact"
           onClick={() => toggleOutputSection("finalDrafts")}
           type="button"
         >

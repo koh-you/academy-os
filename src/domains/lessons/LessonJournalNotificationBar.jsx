@@ -58,7 +58,7 @@ export function LessonJournalNotificationBar({
       </div>
       <div aria-label="알림톡 예약 작업" className="lessonNotificationActionRow" role="region" tabIndex={0}>
         {model.showEditAction ? (
-          <button className="schedulePlanButton" onClick={onStartJournalEditMode} type="button">
+          <button className="ghostButton" onClick={onStartJournalEditMode} type="button">
             수정 시작
           </button>
         ) : null}
@@ -78,12 +78,12 @@ export function LessonJournalNotificationBar({
             <option value="none">알림톡 없음</option>
           </select>
         </label>
-        <button className="schedulePlanButton check" onClick={onOpenReservationAudit} type="button">
+        <button className="ghostButton check" onClick={onOpenReservationAudit} type="button">
           예약 확인
         </button>
         {model.showRefreshAction ? (
           <button
-            className={solapiResultRefreshState === "failed" ? "dangerSoftButton" : "schedulePlanButton check"}
+            className={solapiResultRefreshState === "failed" ? "dangerSoftButton" : "ghostButton check"}
             disabled={!canRefreshSolapiResults}
             onClick={onRefreshSolapiSendResults}
             title={solapiResultRefreshTitle}

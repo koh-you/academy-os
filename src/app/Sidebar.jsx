@@ -73,7 +73,7 @@ export function Sidebar({
       <div className={isMobileNavigationOpen ? "sideStatus mobileNavigationOpen" : "sideStatus"}>
         <span>접속 중 1명</span>
         <strong>{today}</strong>
-        <button className="logoutButton" onClick={onLogout} type="button">로그아웃</button>
+        <button className="ghostButton" onClick={onLogout} type="button">로그아웃</button>
       </div>
     </aside>
   );

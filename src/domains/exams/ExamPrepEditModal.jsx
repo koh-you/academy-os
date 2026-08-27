@@ -117,12 +117,12 @@ export function ExamPrepEditModal({
                     onChange={(event) => onUpdateMathExamEntry(row, entryIndex, "label", event.target.value)}
                   />
                 </label>
-                <button className="iconTinyButton" type="button" onClick={() => onRemoveMathExamEntry(row, entryIndex)}>
+                <button className="dangerButton mini" type="button" onClick={() => onRemoveMathExamEntry(row, entryIndex)}>
                   삭제
                 </button>
               </div>
             ))}
-            <button className="tinySoftButton" type="button" onClick={() => onAddMathExamEntry(row)}>
+            <button className="softButton" type="button" onClick={() => onAddMathExamEntry(row)}>
               + 수학시험 추가
             </button>
           </div>
