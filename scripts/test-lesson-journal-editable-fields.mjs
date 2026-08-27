@@ -37,7 +37,7 @@ assert.deepEqual(
       ariaLabel: "TARGET 학생 지난 숙제",
       editKey: "record_target:previousHomework",
       field: "previous",
-      placeholder: "지난 숙제",
+      placeholder: "미입력",
       source: "homework",
       value: "TARGET 지난 숙제"
     },
@@ -45,7 +45,7 @@ assert.deepEqual(
       ariaLabel: "TARGET 학생 다음 숙제",
       editKey: "record_target:nextHomework",
       field: "next",
-      placeholder: "다음 숙제",
+      placeholder: "미입력",
       source: "homework",
       value: "TARGET 다음 숙제"
     }

@@ -5416,7 +5416,8 @@ textarea {
 
 .journalTable .journalMemoCardRead.empty {
   color: var(--academy-muted, #64748b);
-  font-weight: 700;
+  font-style: italic;
+  font-weight: 500;
 }
 
 .journalTable .journalMemoCardRead.locked {

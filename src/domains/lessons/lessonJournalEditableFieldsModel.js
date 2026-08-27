@@ -39,7 +39,7 @@ export function createLessonJournalEditableFieldsModel({
       ariaLabel: `${student.name} 지난 숙제`,
       editKey: `${recordId}:previousHomework`,
       field: "previous",
-      placeholder: "지난 숙제",
+      placeholder: "미입력",
       source: "homework",
       value: previousHomeworkTitle
     },
@@ -47,7 +47,7 @@ export function createLessonJournalEditableFieldsModel({
       ariaLabel: `${student.name} 다음 숙제`,
       editKey: `${recordId}:nextHomework`,
       field: "next",
-      placeholder: "다음 숙제",
+      placeholder: "미입력",
       source: "homework",
       value: nextHomeworkTitle
     }
