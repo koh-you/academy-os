@@ -871,15 +871,18 @@ test("lesson journal skips an unused intermediate lesson but stops at an attende
     return page.getByRole("dialog", { name: "수업일지" });
   };
 
+  // Field render order is fixed: lessonMaterial, lessonProgress, previousHomework, nextHomework.
+  const previousHomeworkButton = (row) => row.locator("button.journalMemoCardRead").nth(2);
+
   let journal = await openCurrentJournal();
   let studentRow = journal.getByRole("region", { name: "수업일지 학생 기록" }).locator(".journalRow:not(.journalHead)").first();
-  await expect(studentRow.getByRole("button", { name: "안전 이전 숙제", exact: true })).toBeVisible();
+  await expect(previousHomeworkButton(studentRow)).toHaveText("안전 이전 숙제");
 
   intermediateLessonAttended = true;
   await page.reload();
   journal = await openCurrentJournal();
   studentRow = journal.getByRole("region", { name: "수업일지 학생 기록" }).locator(".journalRow:not(.journalHead)").first();
-  await expect(studentRow.getByRole("button", { name: "지난 숙제", exact: true })).toBeVisible();
+  await expect(previousHomeworkButton(studentRow)).toHaveText("미입력");
   expect(pageErrors).toEqual([]);
 });
 
