@@ -38,7 +38,7 @@ export function ParentPortal({
         </div>
         <div aria-label="학부모 계정 행동" className="portalActions" role="group">
           <span className="portalDate">달력 {referenceDate}</span>
-          <button className="logoutButton" onClick={onLogout} type="button">로그아웃</button>
+          <button className="ghostButton" onClick={onLogout} type="button">로그아웃</button>
         </div>
       </header>
 

@@ -71,7 +71,7 @@ assert.doesNotMatch(journalSource, /const priorMemoAttentionLabel =/);
 for (const componentContract of [
   "createLessonJournalMemoIndicatorModel",
   "aria-label={`${studentName} 수업메모 · ${memoButtonDescription}`}",
-  'className="prepMemoButton"',
+  'className="ghostButton"',
   'className="prepMemoWrittenMark"',
   'className="prepMemoAttentionMark"',
   "onClick={onOpen}"

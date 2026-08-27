@@ -27,7 +27,7 @@ export function LessonJournalPrepMemoButton({
     <div className="journalPrepCell">
       <button
         aria-label={`${studentName} 수업메모 · ${memoButtonDescription}`}
-        className="prepMemoButton"
+        className="ghostButton"
         onClick={onOpen}
         type="button"
       >

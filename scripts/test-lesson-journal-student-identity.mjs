@@ -67,7 +67,7 @@ assert.match(rowSource, /<LessonJournalStudentIdentity/);
 assert.match(journalSource, /onOpenStudentPreview: setStudentPreviewId/);
 assert.doesNotMatch(journalSource, /className="studentCell compact"/);
 for (const contract of [
-  "studentPortalPreviewButton",
+  'className="iconButton compact"',
   "onOpenStudentPreview(student.studentId)",
   "model.gradeSchoolLabel",
   "model.scheduleTimeClassName",

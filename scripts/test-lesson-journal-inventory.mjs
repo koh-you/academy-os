@@ -526,7 +526,7 @@ assert.ok(
 );
 for (const extractedStudentIdentityContract of [
   "createLessonJournalStudentIdentityModel",
-  "studentPortalPreviewButton",
+  'className="iconButton compact"',
   "onOpenStudentPreview(student.studentId)",
   "specialLectureStudentTime",
   "studentScheduleType"

@@ -40,7 +40,7 @@ export function SupplementCandidateRow({
       </button>
       {existingTask ? (
         <button
-          className="primaryButton"
+          className="primaryButton compact"
           disabled={isPassBusy}
           onClick={onPass}
           title="보충 완료 처리"

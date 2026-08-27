@@ -9,7 +9,7 @@ export function LessonJournalStudentIdentity({ attendanceLesson, onOpenStudentPr
         <strong>{student.name}</strong>
         <button
           aria-label={`${student.name} 학생 화면 보기`}
-          className="studentPortalPreviewButton"
+          className="iconButton compact"
           onClick={() => onOpenStudentPreview(student.studentId)}
           type="button"
         >
