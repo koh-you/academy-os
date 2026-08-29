@@ -19,15 +19,11 @@ export function LessonModalActions({
       ? "✅ 저장 완료"
       : `✅ ${
           isEditing
-            ? lessonType === "closureMakeup" && notificationEnabled
-              ? "휴강 보충 수정 후 알림 예약"
-              : "수업 수정 저장"
+            ? "수업 수정 저장"
             : lessonType === "closure" && closureMakeupEnabled
               ? "휴강 · 보충 수업일지 등록"
               : lessonType === "newStudentMakeup" && notificationEnabled
                 ? "신입생 보강 등록 후 알림톡 예약"
-                : lessonType === "closureMakeup" && notificationEnabled
-                  ? "휴강 보충 등록 후 알림 예약"
                 : "수업 등록"
         }`;
 

@@ -33,7 +33,10 @@ import { createLessonModalStudentSelectionModel } from "./lessonModalStudentMode
 import { LessonModalActions } from "./LessonModalActions.jsx";
 import { LessonModalBasics } from "./LessonModalBasics.jsx";
 import { LessonModalClosurePanel } from "./LessonModalClosurePanel.jsx";
-import { LessonModalClosureMakeupPanel } from "./LessonModalClosureMakeupPanel.jsx";
+import {
+  LessonModalClosureMakeupNotificationModal,
+  LessonModalClosureMakeupPanel
+} from "./LessonModalClosureMakeupPanel.jsx";
 import { LessonModalNewStudentMakeupPanel } from "./LessonModalNewStudentMakeupPanel.jsx";
 import { LessonModalStudentPicker } from "./LessonModalStudentPicker.jsx";
 
@@ -117,6 +120,7 @@ export function LessonModal({
   const [notificationEnabled, setNotificationEnabled] = useState(false);
   const [notificationAudiences, setNotificationAudiences] = useState(["parent"]);
   const [includeStudentReminder, setIncludeStudentReminder] = useState(true);
+  const [isClosureMakeupNotificationModalOpen, setIsClosureMakeupNotificationModalOpen] = useState(false);
   const [saveState, setSaveState] = useState("idle");
   const [saveMessage, setSaveMessage] = useState(lessonModalInitialSaveMessage);
   const isSaving = saveState === "saving";
@@ -262,8 +266,10 @@ export function LessonModal({
     setSaveMessage(nextSaveState.message);
   }
 
-  async function submitLesson() {
+  async function submitLesson(options = null) {
     if (isSaving || isSaved) return;
+    const isClosureNotificationSubmit = options?.source === "closureMakeupNotificationModal";
+    const effectiveNotificationEnabled = isClosureNotificationSubmit ? true : notificationEnabled;
     const validationError = getLessonModalValidationError({
       closureMakeupDate,
       closureMakeupEnabled,
@@ -274,7 +280,7 @@ export function LessonModal({
       lessonType,
       name,
       notificationAudiences,
-      notificationEnabled,
+      notificationEnabled: effectiveNotificationEnabled,
       includeStudentReminder,
       normalizeTimeInput,
       startTime,
@@ -309,7 +315,7 @@ export function LessonModal({
         lessonId: draftLessonId,
         name,
         notificationAudiences,
-        notificationEnabled,
+        notificationEnabled: effectiveNotificationEnabled,
         startTime,
         studentIds
       }), (nextState, nextMessage) => {
@@ -317,10 +323,17 @@ export function LessonModal({
         setSaveMessage(nextMessage);
       });
       applyLessonModalSaveState(createLessonModalSavedSaveState(result));
+      return result;
     } catch (error) {
       console.error(error);
       applyLessonModalSaveState(createLessonModalFailedSaveState(error));
+      return null;
     }
+  }
+
+  async function confirmClosureMakeupNotification() {
+    const result = await submitLesson({ source: "closureMakeupNotificationModal" });
+    if (result) setIsClosureMakeupNotificationModalOpen(false);
   }
 
   return (
@@ -375,13 +388,8 @@ export function LessonModal({
         ) : null}
         {lessonType === "closureMakeup" ? (
           <LessonModalClosureMakeupPanel
-            includeStudentReminder={includeStudentReminder}
             isFormLocked={isFormLocked}
-            notificationAudiences={notificationAudiences}
-            notificationEnabled={notificationEnabled}
-            onIncludeStudentReminderChange={setIncludeStudentReminder}
-            onNotificationAudienceChange={setNotificationAudiences}
-            onNotificationEnabledChange={setNotificationEnabled}
+            onOpenNotificationModal={() => setIsClosureMakeupNotificationModalOpen(true)}
             selectedStudentCount={studentIds.length}
           />
         ) : null}
@@ -415,6 +423,18 @@ export function LessonModal({
         saveMessage={saveMessage}
         saveState={saveState}
       />
+      {isClosureMakeupNotificationModalOpen ? (
+        <LessonModalClosureMakeupNotificationModal
+          includeStudentReminder={includeStudentReminder}
+          isSaving={isSaving}
+          notificationAudiences={notificationAudiences}
+          onClose={() => setIsClosureMakeupNotificationModalOpen(false)}
+          onConfirm={confirmClosureMakeupNotification}
+          onIncludeStudentReminderChange={setIncludeStudentReminder}
+          onNotificationAudienceChange={setNotificationAudiences}
+          selectedStudentCount={studentIds.length}
+        />
+      ) : null}
     </Modal>
   );
 }

@@ -1,13 +1,31 @@
 import React from "react";
+import { Modal } from "../../shared/components/Modal.jsx";
 
 export function LessonModalClosureMakeupPanel({
-  includeStudentReminder,
   isFormLocked,
+  onOpenNotificationModal,
+  selectedStudentCount
+}) {
+  return (
+    <div className="modalSection lessonModalSection lessonModalNewStudentMakeupPanel">
+      <strong>별도 휴강 보충 등록</strong>
+      <p className="muted">반 명단에서 이번 시간에 참석할 학생만 선택합니다. 한 수업에 선택한 학생 전체의 안내를 일괄 예약할 수 있습니다.</p>
+      <button className="softButton" disabled={isFormLocked || selectedStudentCount === 0} onClick={onOpenNotificationModal} type="button">
+        휴강 보충 알림 관리
+      </button>
+      <small className="muted">대상 학생 {selectedStudentCount}명 · 버튼을 누르면 별도 알림관리 모달에서 수신 대상과 당일 알림을 확인합니다.</small>
+    </div>
+  );
+}
+
+export function LessonModalClosureMakeupNotificationModal({
+  includeStudentReminder,
+  isSaving,
   notificationAudiences,
-  notificationEnabled,
+  onClose,
+  onConfirm,
   onIncludeStudentReminderChange,
   onNotificationAudienceChange,
-  onNotificationEnabledChange,
   selectedStudentCount
 }) {
   function toggleAudience(audience) {
@@ -17,24 +35,22 @@ export function LessonModalClosureMakeupPanel({
         : [...notificationAudiences, audience]
     );
   }
-
   return (
-    <div className="modalSection lessonModalSection lessonModalNewStudentMakeupPanel">
-      <strong>별도 휴강 보충 등록</strong>
-      <p className="muted">반 명단에서 이번 시간에 참석할 학생만 선택합니다. 한 수업에 선택한 학생 전체의 안내를 일괄 예약할 수 있습니다.</p>
-      <label className="checkRow">
-        <input checked={notificationEnabled} disabled={isFormLocked} onChange={(event) => onNotificationEnabledChange(event.target.checked)} type="checkbox" />
-        휴강 보충 알림 예약
-      </label>
-      {notificationEnabled ? (
-        <div className="lessonModalNotificationAudience">
-          <span className="muted">대상 학생 {selectedStudentCount}명 · 다음 정각 일정 안내</span>
-          <label className="checkRow"><input checked={notificationAudiences.includes("parent")} disabled={isFormLocked} onChange={() => toggleAudience("parent")} type="checkbox" />학부모</label>
-          <label className="checkRow"><input checked={notificationAudiences.includes("student")} disabled={isFormLocked} onChange={() => toggleAudience("student")} type="checkbox" />학생</label>
-          <label className="checkRow"><input checked={includeStudentReminder} disabled={isFormLocked} onChange={(event) => onIncludeStudentReminderChange(event.target.checked)} type="checkbox" />보충 당일 오전 11시 학생 알림</label>
-          <small className="muted">수업 저장과 서버 재확인이 끝난 뒤 예약합니다. 같은 수업·학생·대상은 다시 저장해도 중복 생성하지 않습니다.</small>
-        </div>
-      ) : <small className="muted">수업만 저장하며 알림톡은 만들지 않습니다.</small>}
-    </div>
+    <Modal className="supplementNotificationControlModal" onClose={isSaving ? () => {} : onClose} title="휴강 보충 알림 관리">
+      <p className="muted">선택 학생 {selectedStudentCount}명의 수업을 먼저 저장·재확인한 뒤 알림을 예약합니다.</p>
+      <div className="lessonModalNotificationAudience">
+        <strong>다음 정각 일정 안내</strong>
+        <label className="checkRow"><input checked={notificationAudiences.includes("parent")} disabled={isSaving} onChange={() => toggleAudience("parent")} type="checkbox" />학부모</label>
+        <label className="checkRow"><input checked={notificationAudiences.includes("student")} disabled={isSaving} onChange={() => toggleAudience("student")} type="checkbox" />학생</label>
+        <label className="checkRow"><input checked={includeStudentReminder} disabled={isSaving} onChange={(event) => onIncludeStudentReminderChange(event.target.checked)} type="checkbox" />보충 당일 오전 11시 학생 알림</label>
+      </div>
+      <small className="muted">같은 수업·학생·대상은 다시 시도해도 중복 생성하지 않습니다.</small>
+      <div className="modalActions">
+        <button className="primaryButton" disabled={isSaving || notificationAudiences.length === 0} onClick={onConfirm} type="button">
+          {isSaving ? "저장·예약 중" : "일정 저장 후 알림 예약"}
+        </button>
+        <button className="softButton" disabled={isSaving} onClick={onClose} type="button">취소</button>
+      </div>
+    </Modal>
   );
 }
