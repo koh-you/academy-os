@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal } from "../../shared/components/Modal.jsx";
+import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
 
 export function LessonModalClosureMakeupPanel({
   isFormLocked,
@@ -45,12 +45,12 @@ export function LessonModalClosureMakeupNotificationModal({
         <label className="checkRow"><input checked={includeStudentReminder} disabled={isSaving} onChange={(event) => onIncludeStudentReminderChange(event.target.checked)} type="checkbox" />보충 당일 오전 11시 학생 알림</label>
       </div>
       <small className="muted">같은 수업·학생·대상은 다시 시도해도 중복 생성하지 않습니다.</small>
-      <div className="modalActions">
+      <ModalFooter>
         <button className="primaryButton" disabled={isSaving || notificationAudiences.length === 0} onClick={onConfirm} type="button">
           {isSaving ? "저장·예약 중" : "일정 저장 후 알림 예약"}
         </button>
         <button className="softButton" disabled={isSaving} onClick={onClose} type="button">취소</button>
-      </div>
+      </ModalFooter>
     </Modal>
   );
 }
