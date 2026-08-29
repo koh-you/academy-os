@@ -82,6 +82,15 @@ assert.equal(
   }),
   "알림톡을 받을 학부모 또는 학생을 선택해 주세요."
 );
+assert.equal(
+  getLessonModalValidationError({
+    ...validDraft,
+    lessonType: "closureMakeup",
+    name: "월수금 4-7반 · 휴강 보충",
+    studentIds: []
+  }),
+  "휴강 보충 학생을 1명 이상 선택해 주세요."
+);
 
 const payloadBase = {
   classTemplateId: "template-1",
@@ -126,6 +135,19 @@ assert.equal(
   false,
   "editing a persisted closure must not create another linked makeup lesson"
 );
+const closureMakeupPayload = createLessonModalSubmitPayload({
+  ...payloadBase,
+  includeStudentReminder: true,
+  isPersistedClosure: false,
+  lessonType: "closureMakeup",
+  name: " 월수금 4-7반 · 휴강 보충 ",
+  notificationAudiences: ["parent", "student"],
+  notificationEnabled: true
+});
+assert.equal(closureMakeupPayload.lessonType, "closureMakeup");
+assert.equal(closureMakeupPayload.closureMakeupEnabled, false);
+assert.equal(closureMakeupPayload.includeStudentReminder, true);
+assert.deepEqual(closureMakeupPayload.notificationAudiences, ["parent", "student"]);
 
 assert.deepEqual(
   createLessonModalSubmitPayload({

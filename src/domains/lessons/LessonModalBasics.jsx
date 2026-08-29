@@ -31,6 +31,7 @@ export function LessonModalBasics({
             ["preExam", "📌 직전수업"],
             ["exam", "📝 평가"],
             ["makeup", "🔧 보강"],
+            ["closureMakeup", "🔁 휴강 보충"],
             ["newStudentMakeup", "🌱 신입생 보강"],
             ["examPrep", "🗓 시험대비"],
             ["closure", "⏸ 휴강"]

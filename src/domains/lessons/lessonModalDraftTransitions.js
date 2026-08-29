@@ -60,6 +60,19 @@ export function createLessonModalTypeChangePatch({
   name,
   nextLessonType
 }) {
+  if (nextLessonType === "closureMakeup") {
+    const baseName = String(name || "").replace(/\s*·?\s*휴강 보충\s*$/, "").trim();
+    return {
+      color: getStandardLessonColor({
+        lessonType: "makeup",
+        classTemplateId,
+        className: `${baseName || "별도"} · 휴강 보충`
+      }),
+      lessonType: nextLessonType,
+      name: `${baseName || "별도"} · 휴강 보충`,
+      studentIds: []
+    };
+  }
   if (nextLessonType === "newStudentMakeup") {
     return {
       classTemplateId: "",

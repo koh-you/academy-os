@@ -69,7 +69,9 @@ export function buildNewLessonModalLessons({
       ? closureMakeupLessonId
         ? `연결 휴강 보충 · ${closureMakeupLessonId}`
         : "휴강 보충 없음"
-      : "",
+      : formValues.lessonType === "closureMakeup"
+        ? "별도 휴강 보충"
+        : "",
     status: "scheduled"
   };
   const makeupLesson = buildClosureMakeupLesson({

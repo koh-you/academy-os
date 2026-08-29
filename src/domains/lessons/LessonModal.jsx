@@ -33,6 +33,7 @@ import { createLessonModalStudentSelectionModel } from "./lessonModalStudentMode
 import { LessonModalActions } from "./LessonModalActions.jsx";
 import { LessonModalBasics } from "./LessonModalBasics.jsx";
 import { LessonModalClosurePanel } from "./LessonModalClosurePanel.jsx";
+import { LessonModalClosureMakeupPanel } from "./LessonModalClosureMakeupPanel.jsx";
 import { LessonModalNewStudentMakeupPanel } from "./LessonModalNewStudentMakeupPanel.jsx";
 import { LessonModalStudentPicker } from "./LessonModalStudentPicker.jsx";
 
@@ -115,6 +116,7 @@ export function LessonModal({
   const [studentIds, setStudentIds] = useState(initialDraft.studentIds);
   const [notificationEnabled, setNotificationEnabled] = useState(false);
   const [notificationAudiences, setNotificationAudiences] = useState(["parent"]);
+  const [includeStudentReminder, setIncludeStudentReminder] = useState(true);
   const [saveState, setSaveState] = useState("idle");
   const [saveMessage, setSaveMessage] = useState(lessonModalInitialSaveMessage);
   const isSaving = saveState === "saving";
@@ -156,7 +158,8 @@ export function LessonModal({
     startTime,
     studentIds,
     notificationEnabled,
-    notificationAudiences
+    notificationAudiences,
+    includeStudentReminder
   ]);
 
   function handleTemplateChange(nextTemplateId, nextLessonType = lessonType) {
@@ -272,6 +275,7 @@ export function LessonModal({
       name,
       notificationAudiences,
       notificationEnabled,
+      includeStudentReminder,
       normalizeTimeInput,
       startTime,
       studentIds
@@ -300,6 +304,7 @@ export function LessonModal({
         date,
         endTime,
         isPersistedClosure,
+        includeStudentReminder,
         lessonType,
         lessonId: draftLessonId,
         name,
@@ -363,6 +368,18 @@ export function LessonModal({
             isFormLocked={isFormLocked}
             notificationAudiences={notificationAudiences}
             notificationEnabled={notificationEnabled}
+            onNotificationAudienceChange={setNotificationAudiences}
+            onNotificationEnabledChange={setNotificationEnabled}
+            selectedStudentCount={studentIds.length}
+          />
+        ) : null}
+        {lessonType === "closureMakeup" ? (
+          <LessonModalClosureMakeupPanel
+            includeStudentReminder={includeStudentReminder}
+            isFormLocked={isFormLocked}
+            notificationAudiences={notificationAudiences}
+            notificationEnabled={notificationEnabled}
+            onIncludeStudentReminderChange={setIncludeStudentReminder}
             onNotificationAudienceChange={setNotificationAudiences}
             onNotificationEnabledChange={setNotificationEnabled}
             selectedStudentCount={studentIds.length}

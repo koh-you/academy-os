@@ -4122,6 +4122,20 @@ export function App() {
     return formatNewStudentMakeupReservationSummary(reservedJobs);
   }
 
+  async function reserveClosureMakeupNotices({ formValues, lesson }) {
+    if (formValues.lessonType !== "closureMakeup" || !formValues.notificationEnabled) return " · 알림톡 없음";
+    const { reserveClosureMakeupNoticesAction } = await import(
+      "../domains/notifications/closureMakeupNotification.js"
+    );
+    return reserveClosureMakeupNoticesAction({
+      academyName: academyBrandName,
+      formValues,
+      lesson,
+      reserveJobs: (jobs) => reserveLessonNotificationJobs(jobs, "휴강 보충 알림 예약"),
+      students
+    });
+  }
+
   async function handleAddLesson(formValues, onProgress = null) {
     const template = classTemplates.find(
       (item) => item.classTemplateId === formValues.classTemplateId
@@ -4147,6 +4161,10 @@ export function App() {
       formValues,
       lesson: verifiedLessons[0]
     });
+    const closureMakeupNotificationResult = await reserveClosureMakeupNotices({
+      formValues,
+      lesson: verifiedLessons[0]
+    });
     setSelectedDate(lesson.date);
     setSelectedLessonId(lesson.lessonId);
     return {
@@ -4157,6 +4175,8 @@ export function App() {
           ? "휴강 수업일지 저장 완료"
           : formValues.lessonType === "newStudentMakeup"
             ? `신입생 보강 수업일지 저장 완료${notificationResult}`
+            : formValues.lessonType === "closureMakeup"
+              ? `휴강 보충 수업일지 저장 완료${closureMakeupNotificationResult}`
             : "수업일지 저장 완료"
     };
   }
@@ -4219,6 +4239,10 @@ export function App() {
       formValues,
       lesson: persistedLesson
     });
+    const closureMakeupNotificationResult = await reserveClosureMakeupNotices({
+      formValues,
+      lesson: persistedLesson
+    });
     markGeneratedLessonManualOverride(editingLesson);
     setSelectedDate(lesson.date);
     setSelectedLessonId(lesson.lessonId);
@@ -4230,6 +4254,8 @@ export function App() {
           ? "수업을 휴강으로 전환 저장 완료 · 기존 명단·수업기록 보존"
           : formValues.lessonType === "newStudentMakeup"
             ? `신입생 보강 수정 저장 완료${notificationResult}`
+            : formValues.lessonType === "closureMakeup"
+              ? `휴강 보충 수정 저장 완료${closureMakeupNotificationResult}`
             : "수업일지 수정 저장 완료"
     };
   }
