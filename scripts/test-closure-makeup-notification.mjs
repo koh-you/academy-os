@@ -6,6 +6,7 @@ import {
 import {
   buildClosureMakeupNotificationJobs,
   buildClosureMakeupNoticeBody,
+  createClosureMakeupNotificationDrafts,
   formatClosureMakeupReservationSummary
 } from "../src/domains/notifications/closureMakeupNotification.js";
 
@@ -34,12 +35,15 @@ assert.equal(getLessonModalUiType({
   sourceLabel: "8.28 월수금 7-10반 휴강 보충"
 }), "closureMakeup", "기존 별도 휴강보충 일정도 새 UI 유형으로 연다");
 assert.match(buildClosureMakeupNoticeBody({ lesson, student, target: "student" }), /2026-08-30 14:00~17:00/);
+const editableDrafts = createClosureMakeupNotificationDrafts({ lesson });
+editableDrafts.studentScheduleNotificationDraft = "{{학생명}} 학생 맞춤 휴강보충 안내";
 
 const jobs = buildClosureMakeupNotificationJobs({
   academyName: "으뜸수학 고태영T",
   audiences: ["parent", "student"],
   includeStudentReminder: true,
   lesson,
+  messageDrafts: editableDrafts,
   now: new Date("2026-08-29T01:10:00.000Z"),
   students: [student, { studentId: "not-selected", name: "미선택" }]
 });
@@ -57,6 +61,7 @@ assert.deepEqual(jobs.map((job) => job.notificationJobId), [
 ]);
 assert.ok(jobs.every((job) => job.result.closureMakeup === true));
 assert.equal(new Set(jobs.map((job) => job.notificationJobId)).size, jobs.length);
+assert.equal(jobs[1].previewBody, "테스트학생 학생 맞춤 휴강보충 안내");
 assert.equal(
   buildClosureMakeupNotificationJobs({ lesson: { ...lesson, lessonType: "class" }, students: [student] }).length,
   0

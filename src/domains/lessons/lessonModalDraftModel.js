@@ -43,6 +43,7 @@ export function createLessonModalSubmitPayload({
   closureMakeupEnabled,
   closureMakeupEndTime,
   closureMakeupLessonId,
+  closureMakeupNotificationDrafts = {},
   closureMakeupStartTime,
   color,
   date,
@@ -74,7 +75,10 @@ export function createLessonModalSubmitPayload({
     ...(["newStudentMakeup", "closureMakeup"].includes(lessonType) ? {
       notificationAudiences: notificationEnabled ? notificationAudiences : [],
       notificationEnabled,
-      ...(lessonType === "closureMakeup" ? { includeStudentReminder } : {})
+      ...(lessonType === "closureMakeup" ? {
+        closureMakeupNotificationDrafts: notificationEnabled ? closureMakeupNotificationDrafts : {},
+        includeStudentReminder
+      } : {})
     } : {}),
     startTime,
     studentIds

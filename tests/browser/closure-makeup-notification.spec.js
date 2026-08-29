@@ -49,8 +49,11 @@ test("closure makeup edit opens notification management modal and reserves three
   const notificationModal = page.getByRole("dialog", { name: "휴강 보충 알림 관리" });
   await expect(notificationModal).toBeVisible();
   await expect(notificationModal).toContainText("선택 학생 2명");
-  await notificationModal.getByLabel("학생", { exact: true }).check();
-  await expect(notificationModal.getByLabel("보충 당일 오전 11시 학생 알림")).toBeChecked();
+  await expect(notificationModal.getByText("알림톡 문구 편집", { exact: true })).toBeVisible();
+  await expect(notificationModal.locator("textarea")).toHaveCount(3);
+  await notificationModal.getByLabel("학생 알림톡 예약").check();
+  await expect(notificationModal.getByLabel("당일 학생 11시 알림톡 예약")).toBeChecked();
+  await notificationModal.getByLabel("학생 알림톡 문구").fill("{{학생명}} 학생 맞춤 휴강보충 안내");
   await notificationModal.getByRole("button", { name: "일정 저장 후 알림 예약" }).click();
   await expect(notificationModal).toBeHidden();
   await expect(editModal).toContainText("휴강 보충 수정 저장 완료");
@@ -66,6 +69,11 @@ test("closure makeup edit opens notification management modal and reserves three
   expect(lessonJobs.filter((job) => job.notificationType === "notice_parent")).toHaveLength(2);
   expect(lessonJobs.filter((job) => job.notificationType === "schedule_reminder")).toHaveLength(2);
   expect(lessonJobs.filter((job) => job.notificationType === "student_reminder")).toHaveLength(1);
+  const studentNoticeBodies = lessonJobs
+    .filter((job) => job.notificationType === "schedule_reminder")
+    .map((job) => job.previewBody);
+  expect(studentNoticeBodies).toHaveLength(2);
+  expect(studentNoticeBodies.every((body) => body.endsWith("학생 맞춤 휴강보충 안내") && !body.includes("{{학생명}}"))).toBe(true);
   expect(new Set(lessonJobs.map((job) => job.notificationJobId)).size).toBe(5);
   expect(pageErrors).toEqual([]);
 });

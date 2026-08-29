@@ -21,10 +21,12 @@ export function LessonModalClosureMakeupPanel({
 export function LessonModalClosureMakeupNotificationModal({
   includeStudentReminder,
   isSaving,
+  notificationDrafts,
   notificationAudiences,
   onClose,
   onConfirm,
   onIncludeStudentReminderChange,
+  onNotificationDraftChange,
   onNotificationAudienceChange,
   selectedStudentCount
 }) {
@@ -35,18 +37,71 @@ export function LessonModalClosureMakeupNotificationModal({
         : [...notificationAudiences, audience]
     );
   }
+  const draftConfigs = [
+    {
+      checked: notificationAudiences.includes("student"),
+      description: "학생에게 다음 정각에 예약할 일정 안내 문구입니다.",
+      field: "studentScheduleNotificationDraft",
+      label: "학생 알림톡",
+      onToggle: () => toggleAudience("student")
+    },
+    {
+      checked: notificationAudiences.includes("parent"),
+      description: "학부모에게 다음 정각에 예약할 일정 안내 문구입니다.",
+      field: "parentScheduleNotificationDraft",
+      label: "학부모 알림톡",
+      onToggle: () => toggleAudience("parent")
+    },
+    {
+      checked: includeStudentReminder,
+      description: "보충 당일 오전 11시에 학생에게 예약할 문구입니다.",
+      field: "studentReminderNotificationDraft",
+      label: "당일 학생 11시 알림톡",
+      onToggle: () => onIncludeStudentReminderChange(!includeStudentReminder)
+    }
+  ];
+  const enabledDraftsHaveText = draftConfigs.every((config) => (
+    !config.checked || String(notificationDrafts?.[config.field] || "").trim()
+  ));
   return (
-    <Modal className="supplementNotificationControlModal" onClose={isSaving ? () => {} : onClose} title="휴강 보충 알림 관리">
+    <Modal className="supplementNotificationControlModal wide closureMakeupNotificationModal" onClose={isSaving ? () => {} : onClose} scrollable title="휴강 보충 알림 관리">
       <p className="muted">선택 학생 {selectedStudentCount}명의 수업을 먼저 저장·재확인한 뒤 알림을 예약합니다.</p>
-      <div className="lessonModalNotificationAudience">
-        <strong>다음 정각 일정 안내</strong>
-        <label className="checkRow"><input checked={notificationAudiences.includes("parent")} disabled={isSaving} onChange={() => toggleAudience("parent")} type="checkbox" />학부모</label>
-        <label className="checkRow"><input checked={notificationAudiences.includes("student")} disabled={isSaving} onChange={() => toggleAudience("student")} type="checkbox" />학생</label>
-        <label className="checkRow"><input checked={includeStudentReminder} disabled={isSaving} onChange={(event) => onIncludeStudentReminderChange(event.target.checked)} type="checkbox" />보충 당일 오전 11시 학생 알림</label>
+      <section className="supplementNotificationDraftWorkspace">
+        <div className="supplementNotificationDraftHeader">
+          <div>
+            <strong>알림톡 문구 편집</strong>
+            <span>학생·학부모·당일 학생 문구 3종을 한 화면에서 확인하고 수정합니다.</span>
+          </div>
+          <small><code>{"{{학생명}}"}</code>은 선택한 각 학생 이름으로 자동 치환됩니다.</small>
+        </div>
+        <div className="supplementNotificationDraftEditors">
+          {draftConfigs.map((config) => (
+            <label className="notificationDraftField supplementReadableField" key={config.field}>
+              <span className="supplementNotificationDraftEditorTitle">
+                <strong>{config.label} 문구</strong>
+                <span className={`supplementNotificationControlState ${config.checked ? "on" : "off"}`}>
+                  <input aria-label={`${config.label} 예약`} checked={config.checked} disabled={isSaving} onChange={config.onToggle} type="checkbox" />
+                  {config.checked ? "예약" : "예약 없음"}
+                </span>
+              </span>
+              <span>{config.description}</span>
+              <small className="supplementTeacherFinalNotice">수정한 문구 그대로 학생별 예약에 사용됩니다.</small>
+              <textarea
+                aria-label={`${config.label} 문구`}
+                disabled={isSaving || !config.checked}
+                onChange={(event) => onNotificationDraftChange(config.field, event.target.value)}
+                value={notificationDrafts?.[config.field] || ""}
+              />
+            </label>
+          ))}
+        </div>
+      </section>
+      <div className="supplementNotificationSaveGuide saved">
+        <strong>수업 저장·재확인 후 예약</strong>
+        <span>선택한 문구만 예약하며 같은 수업·학생·대상은 다시 시도해도 중복 생성하지 않습니다.</span>
       </div>
-      <small className="muted">같은 수업·학생·대상은 다시 시도해도 중복 생성하지 않습니다.</small>
       <ModalFooter>
-        <button className="primaryButton" disabled={isSaving || notificationAudiences.length === 0} onClick={onConfirm} type="button">
+        <button className="primaryButton" disabled={isSaving || (notificationAudiences.length === 0 && !includeStudentReminder) || !enabledDraftsHaveText} onClick={onConfirm} type="button">
           {isSaving ? "저장·예약 중" : "일정 저장 후 알림 예약"}
         </button>
         <button className="softButton" disabled={isSaving} onClick={onClose} type="button">취소</button>

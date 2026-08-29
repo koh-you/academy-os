@@ -21,11 +21,25 @@ export function buildClosureMakeupNoticeBody({ academyName = "", lesson = {}, st
   return `안녕하세요. ${academyName || "으뜸수학 고태영T"}입니다.\n\n${student.name || "학생"} 학생의 휴강 보충 일정을 안내드립니다.\n일정: ${schedule}\n확인 부탁드립니다.`;
 }
 
+export function createClosureMakeupNotificationDrafts({ academyName = "", lesson = {} } = {}) {
+  const schedule = formatClosureMakeupSchedule(lesson);
+  return {
+    studentScheduleNotificationDraft: `{{학생명}} 학생 휴강 보충 안내입니다.\n\n일정: ${schedule}\n시간에 맞춰 등원해 주세요.`,
+    parentScheduleNotificationDraft: `안녕하세요. ${academyName || "으뜸수학 고태영T"}입니다.\n\n{{학생명}} 학생의 휴강 보충 일정을 안내드립니다.\n일정: ${schedule}\n확인 부탁드립니다.`,
+    studentReminderNotificationDraft: `{{학생명}} 학생, 오늘 ${lesson.startTime || ""} 휴강 보충 수업이 있습니다. 시간에 맞춰 등원해 주세요.`
+  };
+}
+
+export function renderClosureMakeupNotificationDraft(draft = "", student = {}) {
+  return String(draft).replaceAll("{{학생명}}", student.name || "학생");
+}
+
 export function buildClosureMakeupNotificationJobs({
   academyName = "",
   audiences = [],
   includeStudentReminder = true,
   lesson = {},
+  messageDrafts = {},
   now = new Date(),
   students = []
 } = {}) {
@@ -33,6 +47,10 @@ export function buildClosureMakeupNotificationJobs({
   const scheduleNoticeAt = getNextHourlyAlimtalkReservationAt(now);
   const selectedAudienceSet = new Set(audiences);
   const selectedStudentIds = new Set(lesson.studentIds || []);
+  const resolvedDrafts = {
+    ...createClosureMakeupNotificationDrafts({ academyName, lesson }),
+    ...messageDrafts
+  };
   return students
     .filter((student) => selectedStudentIds.has(student.studentId))
     .flatMap((student) => {
@@ -50,7 +68,12 @@ export function buildClosureMakeupNotificationJobs({
           const job = buildSupplementScheduleNoticeJob({
             academyName,
             now,
-            reminderBody: buildClosureMakeupNoticeBody({ academyName, lesson, student, target }),
+            reminderBody: renderClosureMakeupNotificationDraft(
+              target === "parent"
+                ? resolvedDrafts.parentScheduleNotificationDraft
+                : resolvedDrafts.studentScheduleNotificationDraft,
+              student
+            ),
             scheduledAt: scheduleNoticeAt,
             scheduleTitle: closureMakeupClassName,
             student,
@@ -69,7 +92,7 @@ export function buildClosureMakeupNotificationJobs({
       const reminder = buildSupplementStudentReminderJob({
         academyName,
         now,
-        reminderBody: `${student.name || "학생"} 학생, 오늘 ${lesson.startTime || ""} 휴강 보충 수업이 있습니다. 시간에 맞춰 등원해 주세요.`,
+        reminderBody: renderClosureMakeupNotificationDraft(resolvedDrafts.studentReminderNotificationDraft, student),
         scheduledAt: reminderAt.toISOString(),
         scheduleTitle: closureMakeupClassName,
         student,
@@ -104,6 +127,7 @@ export async function reserveClosureMakeupNoticesAction({
     audiences: formValues.notificationAudiences,
     includeStudentReminder: formValues.includeStudentReminder,
     lesson,
+    messageDrafts: formValues.closureMakeupNotificationDrafts,
     students
   });
   if (!jobs.length) return " · 알림톡 대상 없음";
