@@ -87,7 +87,8 @@ export function LessonCalendarView({
                 "monthCell",
                 "teacherMonthCell",
                 day.inMonth ? "" : "outside",
-                day.isSelected ? "selected" : ""
+                day.isSelected ? "selected" : "",
+                day.isToday ? "today" : ""
               ].join(" ")}
               key={day.date}
               onClick={() => onDateSelect(day.date)}

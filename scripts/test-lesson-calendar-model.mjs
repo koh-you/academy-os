@@ -140,6 +140,25 @@ assert.deepEqual(
 );
 assert.equal(allModel.visibleLessonCount, 5);
 assert.equal(allModel.calendarDays[0].isSelected, true);
+assert.equal(allModel.calendarDays[0].isToday, false, "today marker must not follow the selected date by default");
+assert.ok(
+  allModel.calendarDays.every((day) => day.isToday === false),
+  "no day is today when the model receives no today value"
+);
+
+const todayModel = createLessonCalendarViewModel({
+  ...dependencies,
+  days,
+  lessons,
+  lessonTypeFilter: "all",
+  selectedDate: "2026-07-16",
+  selectedLessonId: "",
+  today: "2026-07-15"
+});
+assert.equal(todayModel.calendarDays[0].isToday, true, "the day matching today must be marked isToday regardless of selection");
+assert.equal(todayModel.calendarDays[0].isSelected, false, "today marker stays independent from the currently selected/viewed date");
+assert.equal(todayModel.calendarDays[1].isSelected, true);
+assert.equal(todayModel.calendarDays[1].isToday, false);
 assert.deepEqual(
   allModel.calendarDays[0].lessons.map((pill) => pill.lesson.lessonId),
   ["pre-exam", "regular", "closure"]

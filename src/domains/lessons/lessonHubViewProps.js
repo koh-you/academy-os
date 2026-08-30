@@ -24,6 +24,7 @@ export function createLessonHubViewProps({ actions, models, runtimeBindings, les
     selectedLesson: models.selectedLesson,
     selectedLessonId: models.selectedLessonId,
     students: models.students,
+    today: models.today,
     templates: models.classTemplates,
     monthlyRegularLessonOpenPlan: models.monthlyRegularLessonOpenPlan,
     isMonthlyRegularLessonOpened: models.isMonthlyRegularLessonOpened,

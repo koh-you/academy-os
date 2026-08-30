@@ -93,7 +93,8 @@ export function createLessonCalendarViewModel({
   lessonTypeFilter = "all",
   selectedDate = "",
   selectedLessonId = "",
-  sortLessons
+  sortLessons,
+  today = ""
 }) {
   const visibleLessons = lessons.filter(
     (lesson) =>
@@ -107,6 +108,7 @@ export function createLessonCalendarViewModel({
   const calendarDays = days.map((day) => ({
     ...day,
     isSelected: selectedDate === day.date,
+    isToday: Boolean(today) && today === day.date,
     lessons: visibleLessons
       .filter((lesson) => lesson.date === day.date)
       .sort(sortLessons)
