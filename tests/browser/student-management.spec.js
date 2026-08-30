@@ -305,12 +305,14 @@ test("student profile save keeps an in-flight follow-up draft for a second CAS s
   await page.getByRole("button", { name: /월경계 학생$/ }).click();
   const profile = page.getByRole("dialog", { name: /월경계 학생 학생 프로파일/ });
   await profile.getByRole("button", { name: "수정", exact: true }).click();
-  const profileSaveButton = profile.locator(".studentProfileStickySaveBar .primaryButton");
+  await profile.getByRole("button", { name: /^기본정보/ }).click();
+  const basicModal = page.getByRole("dialog", { name: /기본정보/ });
+  const profileSaveButton = basicModal.locator(".studentProfileStickySaveBar .primaryButton");
   await expect(profileSaveButton).toBeDisabled();
   await expect(profileSaveButton).toHaveCSS("cursor", "not-allowed");
-  const schoolInput = profile.getByLabel("월경계 학생 학교");
+  const schoolInput = basicModal.getByLabel("월경계 학생 학교");
   await schoolInput.fill("프로필 A 저장");
-  await profile.getByRole("button", { name: "기본정보만 저장", exact: true }).click();
+  await basicModal.getByRole("button", { name: "기본정보만 저장", exact: true }).click();
   await expect.poll(() => requests.length).toBe(1);
   await expect(profileSaveButton).toHaveText("저장 중");
   await expect(profileSaveButton).toHaveCSS("cursor", "wait");
@@ -318,9 +320,9 @@ test("student profile save keeps an in-flight follow-up draft for a second CAS s
   releaseFirstRequest();
 
   await expect(schoolInput).toHaveValue("프로필 B 후속");
-  await expect(profile.getByRole("button", { name: "기본정보만 저장", exact: true })).toBeEnabled();
-  await profile.getByRole("button", { name: "기본정보만 저장", exact: true }).click();
-  await expect(profile.getByText("프로필 B 후속", { exact: true })).toBeVisible();
+  await expect(basicModal.getByRole("button", { name: "기본정보만 저장", exact: true })).toBeEnabled();
+  await basicModal.getByRole("button", { name: "기본정보만 저장", exact: true }).click();
+  await expect(basicModal.getByText("프로필 B 후속", { exact: true })).toBeVisible();
   expect(requests).toHaveLength(2);
   expect(requests[1].expectedUpdatedAt).not.toBe(requests[0].expectedUpdatedAt);
 

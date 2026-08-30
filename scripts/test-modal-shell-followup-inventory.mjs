@@ -35,7 +35,7 @@ const rawDialogEntries = sourceEntries.filter((entry) => (
 ));
 
 assert.equal(directModalCount, 39, "unexpected direct common Modal surface count");
-assert.equal(injectedModalCount, 8, "unexpected injected common Modal surface count");
+assert.equal(injectedModalCount, 14, "unexpected injected common Modal surface count");
 assert.equal(modalFooterCount, 20, "unexpected common ModalFooter count");
 assert.equal(modalActionCount, 2, "unexpected legacy modalActions wrapper count");
 assert.deepEqual(
@@ -89,5 +89,5 @@ for (const forbiddenOwner of ["fetch(", "postJson", "/api/", "setNotificationJob
 }
 
 console.log(
-  `modal follow-up inventory passed · common ${directModalCount + injectedModalCount}/47 · bespoke ${rawDialogEntries.length} · footer ${modalFooterCount} · legacy actions ${modalActionCount}`
+  `modal follow-up inventory passed · common ${directModalCount + injectedModalCount}/53 · bespoke ${rawDialogEntries.length} · footer ${modalFooterCount} · legacy actions ${modalActionCount}`
 );
