@@ -284,6 +284,7 @@ export function StudentProfileModal({
   const [newReminderDraft, setNewReminderDraft] = useState(() => createStudentReminderDraft(student.studentId));
   const [attendanceMonth, setAttendanceMonth] = useState(getCurrentKoreaMonthKey);
   const [isMonthlyReportOpen, setIsMonthlyReportOpen] = useState(false);
+  const [openSectionKey, setOpenSectionKey] = useState(null);
   const attendanceSummary = useMemo(() => buildStudentMonthlyAttendanceSummary({
     lessons,
     monthKey: attendanceMonth,
@@ -312,6 +313,7 @@ export function StudentProfileModal({
     setNewReminderDraft(createStudentReminderDraft(student.studentId));
     setAttendanceMonth(getCurrentKoreaMonthKey());
     setIsMonthlyReportOpen(false);
+    setOpenSectionKey(null);
   }, [student.studentId]);
 
   useEffect(() => {
@@ -618,6 +620,45 @@ export function StudentProfileModal({
     lessons.filter((lesson) => String(lesson.date ?? "") >= rosterEffectiveFromDate),
     { ...student, ...profileDraft }
   );
+  const pendingReminderCount = academyReminders.filter((reminder) => reminder.status !== "done").length;
+  const profileTileConfig = [
+    {
+      key: "basic",
+      status: <InlineSaveStatus label="기본정보" saveState={effectiveProfileSaveState} />,
+      subtitle: "연락처 · 로그인 · 개별 스케줄",
+      title: "기본정보"
+    },
+    {
+      key: "attendance",
+      status: <span className="studentProfileTileMeta">정규 {attendanceSummary.regular.total}회 · 특강 {attendanceSummary.special.total}회</span>,
+      subtitle: "정규·특강 수업일지 출결",
+      title: "월별 출결"
+    },
+    {
+      key: "alerts",
+      status: <span className="studentProfileTileMeta">{academyReminders.length ? `대기 ${pendingReminderCount}건` : "등록된 알림 없음"}</span>,
+      subtitle: "상담·연락·특이사항 일정",
+      title: "운영 알림"
+    },
+    {
+      key: "consultation",
+      status: <InlineSaveStatus label="상담기록" saveState={studentConsultationSaveState} />,
+      subtitle: "학생·학부모 상담",
+      title: "상담기록"
+    },
+    {
+      key: "score",
+      status: <InlineSaveStatus label="성적" saveState={scoreRecordSaveState} />,
+      subtitle: "내신·모의고사",
+      title: "성적"
+    },
+    {
+      key: "test",
+      status: <InlineSaveStatus label="테스트" saveState={academyTestSaveState} />,
+      subtitle: "학원 자체 테스트",
+      title: "테스트"
+    }
+  ];
 
   return (
     <ModalComponent
@@ -632,10 +673,6 @@ export function StudentProfileModal({
         <SectionHeader
           actions={(
             <>
-            {effectiveProfileSaveState !== "idle" ? <InlineSaveStatus label="기본정보" saveState={effectiveProfileSaveState} /> : null}
-            <InlineSaveStatus label="상담기록" saveState={studentConsultationSaveState} />
-            <InlineSaveStatus label="성적" saveState={scoreRecordSaveState} />
-            <InlineSaveStatus label="테스트" saveState={academyTestSaveState} />
             <span className="countBadge">{className}</span>
             {isEditingProfile ? (
               <>
@@ -670,17 +707,27 @@ export function StudentProfileModal({
             {profileActionError}
           </div>
         ) : null}
-        <section className="studentProfileSection studentAttendanceSection">
-          <div className="studentAttendanceSectionHeader">
-            <div>
-              <strong>월별 출결</strong>
-              <p>정규 수업과 특강 수업일지 출결을 한곳에서 확인합니다.</p>
-            </div>
+        <div aria-label={`${student.name} 프로필 섹션`} className="studentProfileTileGrid" role="group">
+          {profileTileConfig.map((tile) => (
+            <button className="studentProfileTile" key={tile.key} onClick={() => setOpenSectionKey(tile.key)} type="button">
+              <strong>{tile.title}</strong>
+              <p>{tile.subtitle}</p>
+              {tile.status}
+            </button>
+          ))}
+        </div>
+
+        {openSectionKey === "attendance" ? (
+          <ModalComponent
+            className="studentProfileSectionModal"
+            onClose={() => setOpenSectionKey(null)}
+            subtitle="정규 수업과 특강 수업일지 출결을 한곳에서 확인합니다."
+            title={`${student.name} · 월별 출결`}
+          >
             <div className="studentAttendanceSectionActions">
               <input
                 aria-label={`${student.name} 출결 조회 월`}
                 className="studentAttendanceMonthInput"
-                onClick={(event) => event.stopPropagation()}
                 onChange={(event) => setAttendanceMonth(event.target.value)}
                 type="month"
                 value={attendanceMonth}
@@ -689,28 +736,33 @@ export function StudentProfileModal({
                 수업일정표
               </button>
             </div>
-          </div>
-          <div className="studentProfileSectionBody studentAttendanceSummaryGrid">
-            {[
-              ["정규 출결", attendanceSummary.regular],
-              ["특강 출결", attendanceSummary.special]
-            ].map(([label, counts]) => (
-              <article className="studentAttendanceSummaryCard" key={label}>
-                <div><strong>{label}</strong><b>{counts.total}회</b></div>
-                <p>
-                  출석 {counts.present} · 지각 {counts.late} ·
-                  결석 {counts.absent + counts.excused} · 대기 {counts.pending}
-                </p>
-              </article>
-            ))}
-          </div>
-        </section>
-        <Disclosure bodyClassName="studentProfileSectionBody" className="studentProfileSection" defaultOpen trigger={(
-          <div>
-            <strong>기본정보</strong>
-            <p>연락처, 로그인, 개별 스케줄을 관리합니다.</p>
-          </div>
-        )}>
+            <div className="studentProfileSectionBody studentAttendanceSummaryGrid">
+              {[
+                ["정규 출결", attendanceSummary.regular],
+                ["특강 출결", attendanceSummary.special]
+              ].map(([label, counts]) => (
+                <article className="studentAttendanceSummaryCard" key={label}>
+                  <div><strong>{label}</strong><b>{counts.total}회</b></div>
+                  <p>
+                    출석 {counts.present} · 지각 {counts.late} ·
+                    결석 {counts.absent + counts.excused} · 대기 {counts.pending}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </ModalComponent>
+        ) : null}
+
+        {openSectionKey === "basic" ? (
+          <ModalComponent
+            className="studentProfileSectionModal wideModal"
+            closeDisabled={isProfileSaving}
+            onClose={() => setOpenSectionKey(null)}
+            scrollable
+            subtitle="연락처, 로그인, 개별 스케줄을 관리합니다."
+            title={`${student.name} · 기본정보`}
+          >
+            <div className="studentProfileSectionBody">
             <Disclosure className="studentTallySubmissionPanel" trigger={(
               <>
                 <strong>학생이 Tally로 제출한 데이터</strong>
@@ -864,17 +916,46 @@ export function StudentProfileModal({
                 <span className="muted">선택한 요일과 시간이 기본 반보다 우선합니다. 저장 후 미래 정규수업 명단, 출결 매칭, 지각 판정에 반영됩니다.</span>
               </div>
             </div>
-        </Disclosure>
-
-        <Disclosure bodyClassName="studentProfileSectionBody" className="studentProfileSection" trigger={(
-          <>
-            <div>
-              <strong>학생별 운영 알림</strong>
-              <p>상담 일정, 학부모 연락, 특이사항 알림을 대시보드 원본과 같이 봅니다.</p>
             </div>
-            <span className="saveState save-idle inlineSaveStatus">09:00 슬랙 원본</span>
-          </>
-        )}>
+            {isEditingProfile ? (
+              <StickySaveBar
+                className="studentProfileStickySaveBar"
+                label="기본정보"
+                message={
+                  effectiveProfileSaveState === "failed"
+                    ? "저장 실패 · 현재 입력은 유지됩니다. 서버 저장본을 확인한 뒤 다시 시도해 주세요."
+                    : isProfileDirty
+                    ? forceRosterReconcile && profileDirtyFieldCount === 0
+                      ? "현재 시간표로 명단 재계산 · 저장 후 서버 재조회 확인"
+                      : `기본정보 변경 ${profileDirtyFieldCount}개 · 상담·성적·테스트·운영 알림은 각 영역에서 별도 저장`
+                    : separateDirtyLabels.length
+                      ? `기본정보 변경 없음 · ${separateDirtyLabels.join("·")}은 각 영역에서 별도 저장 필요`
+                      : "기본정보 변경 없음 · 상담·성적·테스트·운영 알림은 각 영역에서 별도 저장"
+                }
+                saveState={effectiveProfileSaveState}
+              >
+                <button
+                  className="primaryButton"
+                  disabled={!isProfileDirty || isProfileSaving}
+                  onClick={saveProfileDraft}
+                  type="button"
+                >
+                  {saveActionLabel("기본정보만 저장", effectiveProfileSaveState)}
+                </button>
+              </StickySaveBar>
+            ) : null}
+          </ModalComponent>
+        ) : null}
+
+        {openSectionKey === "alerts" ? (
+          <ModalComponent
+            className="studentProfileSectionModal"
+            onClose={() => setOpenSectionKey(null)}
+            scrollable
+            subtitle="상담 일정, 학부모 연락, 특이사항 알림을 대시보드 원본과 같이 봅니다."
+            title={`${student.name} · 학생별 운영 알림`}
+          >
+            <p className="studentProfileTileMeta studentReminderSourceNote">이 알림은 매일 09:00 슬랙 메시지 원본과 같은 내용입니다.</p>
             {isEditingProfile ? (
               <section className="studentReminderComposer">
             <div className="studentReminderControls">
@@ -984,17 +1065,17 @@ export function StudentProfileModal({
                 ))
               )}
             </div>
-        </Disclosure>
+          </ModalComponent>
+        ) : null}
 
-        <Disclosure bodyClassName="studentProfileSectionBody" className="studentProfileSection" trigger={(
-          <>
-            <div>
-              <strong>상담 기록</strong>
-              <p>학생 상담과 학부모 상담을 날짜별로 구분해 남깁니다.</p>
-            </div>
-            <InlineSaveStatus label="상담기록" saveState={studentConsultationSaveState} />
-          </>
-        )}>
+        {openSectionKey === "consultation" ? (
+          <ModalComponent
+            className="studentProfileSectionModal"
+            onClose={() => setOpenSectionKey(null)}
+            scrollable
+            subtitle="학생 상담과 학부모 상담을 날짜별로 구분해 남깁니다."
+            title={`${student.name} · 상담 기록`}
+          >
             {isEditingProfile ? (
               <section className="studentConsultationComposer">
             <div className="studentConsultationControls">
@@ -1100,17 +1181,17 @@ export function StudentProfileModal({
                 })
               )}
             </div>
-        </Disclosure>
+          </ModalComponent>
+        ) : null}
 
-        <Disclosure bodyClassName="studentProfileSectionBody" className="studentProfileSection" trigger={(
-          <>
-            <div>
-              <strong>성적 기록</strong>
-              <p>학교 내신 시험과 모의고사 성적을 초안으로 입력한 뒤 저장합니다.</p>
-            </div>
-            <InlineSaveStatus label="성적" saveState={scoreRecordSaveState} />
-          </>
-        )}>
+        {openSectionKey === "score" ? (
+          <ModalComponent
+            className="studentProfileSectionModal"
+            onClose={() => setOpenSectionKey(null)}
+            scrollable
+            subtitle="학교 내신 시험과 모의고사 성적을 초안으로 입력한 뒤 저장합니다."
+            title={`${student.name} · 성적 기록`}
+          >
             <DataTableShell className="managementTable studentScoreModalTable" label="학생 성적 기록">
               <div className="managementRow scoreRow managementHead">
             <span>구분</span>
@@ -1197,17 +1278,17 @@ export function StudentProfileModal({
                 })
               )}
             </DataTableShell>
-        </Disclosure>
+          </ModalComponent>
+        ) : null}
 
-        <Disclosure bodyClassName="studentProfileSectionBody" className="studentProfileSection" trigger={(
-          <>
-            <div>
-              <strong>테스트 성적</strong>
-              <p>학원 데일리/단원/누적 테스트 성적을 초안으로 입력한 뒤 저장합니다.</p>
-            </div>
-            <InlineSaveStatus label="테스트" saveState={academyTestSaveState} />
-          </>
-        )}>
+        {openSectionKey === "test" ? (
+          <ModalComponent
+            className="studentProfileSectionModal"
+            onClose={() => setOpenSectionKey(null)}
+            scrollable
+            subtitle="학원 데일리/단원/누적 테스트 성적을 초안으로 입력한 뒤 저장합니다."
+            title={`${student.name} · 테스트 성적`}
+          >
             <DataTableShell className="managementTable studentProfileDataTable" label="학생 학원 테스트 기록">
               <div className="managementRow academyTestProfileRow managementHead">
             <span>날짜</span>
@@ -1288,34 +1369,9 @@ export function StudentProfileModal({
                 })
               )}
             </DataTableShell>
-        </Disclosure>
-        {isEditingProfile ? (
-          <StickySaveBar
-            className="studentProfileStickySaveBar"
-            label="기본정보"
-            message={
-              effectiveProfileSaveState === "failed"
-                ? "저장 실패 · 현재 입력은 유지됩니다. 서버 저장본을 확인한 뒤 다시 시도해 주세요."
-                : isProfileDirty
-                ? forceRosterReconcile && profileDirtyFieldCount === 0
-                  ? "현재 시간표로 명단 재계산 · 저장 후 서버 재조회 확인"
-                  : `기본정보 변경 ${profileDirtyFieldCount}개 · 상담·성적·테스트·운영 알림은 각 영역에서 별도 저장`
-                : separateDirtyLabels.length
-                  ? `기본정보 변경 없음 · ${separateDirtyLabels.join("·")}은 각 영역에서 별도 저장 필요`
-                  : "기본정보 변경 없음 · 상담·성적·테스트·운영 알림은 각 영역에서 별도 저장"
-            }
-            saveState={effectiveProfileSaveState}
-          >
-            <button
-              className="primaryButton"
-              disabled={!isProfileDirty || isProfileSaving}
-              onClick={saveProfileDraft}
-              type="button"
-            >
-              {saveActionLabel("기본정보만 저장", effectiveProfileSaveState)}
-            </button>
-          </StickySaveBar>
+          </ModalComponent>
         ) : null}
+
         {isMonthlyReportOpen ? (
           <StudentMonthlyReportModal
             lessons={lessons}
