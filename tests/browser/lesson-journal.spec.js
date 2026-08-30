@@ -791,18 +791,20 @@ test("student profile schedule asks whether today's journal should change before
   await page.getByRole("button", { name: /정산 미리보기 학생$/ }).click();
   const profile = page.getByRole("dialog", { name: /정산 미리보기 학생 학생 프로파일/ });
   await profile.getByRole("button", { name: "수정", exact: true }).click();
-  await profile.getByRole("button", { name: "시간표 추가" }).click();
+  await profile.getByRole("button", { name: /^기본정보/ }).click();
+  const basicModal = page.getByRole("dialog", { name: /기본정보/ });
+  await basicModal.getByRole("button", { name: "시간표 추가" }).click();
 
-  const effectiveDateSelect = profile.getByLabel("정산 미리보기 학생 개별 시간표 적용 시점");
-  await expect(profile.getByText("오늘 수업일지 명단도 변경할까요?")).toBeVisible();
+  const effectiveDateSelect = basicModal.getByLabel("정산 미리보기 학생 개별 시간표 적용 시점");
+  await expect(basicModal.getByText("오늘 수업일지 명단도 변경할까요?")).toBeVisible();
   await expect(effectiveDateSelect).toHaveValue("tomorrow");
-  await profile.getByRole("button", { name: "기본정보만 저장", exact: true }).click();
+  await basicModal.getByRole("button", { name: "기본정보만 저장", exact: true }).click();
   const overlapDialog = page.getByRole("dialog", { name: "기본 반 명단에 계속 표시할까요?" });
   await expect(overlapDialog).toContainText("반 16:00-19:00");
   await expect(overlapDialog).toContainText("학생 17:00-20:00");
   await overlapDialog.getByRole("button", { name: "기본 반 명단에 표시하고 저장" }).click();
   await expect(overlapDialog).toBeHidden();
-  await expect(profile.getByText("화목 17:00-20:00", { exact: true })).toBeVisible();
+  await expect(basicModal.getByText("화목 17:00-20:00", { exact: true })).toBeVisible();
 
   await expect.poll(() => rosterRequests.length).toBe(1);
   const changedLessonIds = rosterRequests[0].lessonChanges.map((change) => change.lessonId);
@@ -1402,8 +1404,10 @@ test("student lesson schedule previews calendar table and selectable PDF section
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
   await page.getByRole("button", { name: /정산 미리보기 학생$/ }).click();
   const profile = page.getByRole("dialog", { name: /정산 미리보기 학생 학생 프로파일/ });
-  await profile.getByLabel("정산 미리보기 학생 출결 조회 월").fill("2026-08");
-  await profile.getByRole("button", { name: "수업일정표" }).click();
+  await profile.getByRole("button", { name: /^월별 출결/ }).click();
+  const attendanceModal = page.getByRole("dialog", { name: /월별 출결/ });
+  await attendanceModal.getByLabel("정산 미리보기 학생 출결 조회 월").fill("2026-08");
+  await attendanceModal.getByRole("button", { name: "수업일정표" }).click();
 
   const previewDialog = page.getByRole("dialog", { name: /정산 미리보기 학생 2026년 8월 수업일정표/ });
   await expect(previewDialog).toBeVisible();
@@ -1506,8 +1510,10 @@ test("student lesson schedule keeps a Friday makeup lesson's own time", async ({
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
   await page.getByRole("button", { name: /정산 미리보기 학생$/ }).click();
   const profile = page.getByRole("dialog", { name: /정산 미리보기 학생 학생 프로파일/ });
-  await profile.getByLabel("정산 미리보기 학생 출결 조회 월").fill("2026-08");
-  await profile.getByRole("button", { name: "수업일정표" }).click();
+  await profile.getByRole("button", { name: /^월별 출결/ }).click();
+  const attendanceModal = page.getByRole("dialog", { name: /월별 출결/ });
+  await attendanceModal.getByLabel("정산 미리보기 학생 출결 조회 월").fill("2026-08");
+  await attendanceModal.getByRole("button", { name: "수업일정표" }).click();
 
   const previewDialog = page.getByRole("dialog", { name: /정산 미리보기 학생 2026년 8월 수업일정표/ });
   const makeupRow = previewDialog.getByRole("row").filter({ hasText: "8.7(금)" }).filter({ hasText: "보강" });
