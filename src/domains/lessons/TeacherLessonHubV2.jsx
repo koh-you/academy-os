@@ -42,6 +42,7 @@ export function TeacherLessonHubV2({
   templates = [],
   testAttempts = [],
   testSessions = [],
+  today = "",
   homeworks,
   onAddLesson,
   onBackToCalendar,
@@ -226,7 +227,8 @@ export function TeacherLessonHubV2({
     lessonTypeFilter,
     selectedDate,
     selectedLessonId,
-    sortLessons: (left, right) => compareLessonCalendarDisplayOrder(left, right, sortByTime)
+    sortLessons: (left, right) => compareLessonCalendarDisplayOrder(left, right, sortByTime),
+    today
   });
   const shouldShowGeneratedLessonSaveNotice = generatedLessonSaveStatus?.state && generatedLessonSaveStatus.state !== "idle";
 
