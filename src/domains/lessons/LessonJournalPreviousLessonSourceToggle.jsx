@@ -1,4 +1,5 @@
 export function LessonJournalPreviousLessonSourceToggle({
+  disabled = false,
   nearestLessonDateLabel = "",
   onSelect,
   regularLessonDateLabel = "",
@@ -9,6 +10,7 @@ export function LessonJournalPreviousLessonSourceToggle({
       <button
         aria-pressed={selectedMode === "nearest"}
         className={selectedMode === "nearest" ? "ghostButton mini active" : "ghostButton mini"}
+        disabled={disabled}
         onClick={() => onSelect("nearest")}
         type="button"
       >
@@ -17,6 +19,7 @@ export function LessonJournalPreviousLessonSourceToggle({
       <button
         aria-pressed={selectedMode === "regular"}
         className={selectedMode === "regular" ? "ghostButton mini active" : "ghostButton mini"}
+        disabled={disabled}
         onClick={() => onSelect("regular")}
         type="button"
       >
