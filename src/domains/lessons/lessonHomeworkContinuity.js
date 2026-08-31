@@ -1,5 +1,8 @@
 import { shouldIgnoreLessonAttendance } from "./lessonClosure.js";
-import { isStudentScheduledForLesson } from "../../shared/utils/studentSchedule.js";
+import {
+  isStudentAssignedToRegularLesson,
+  isStudentScheduledForLesson
+} from "../../shared/utils/studentSchedule.js";
 import { getSpecialLectureLessonTrackId } from "../specialLectures/specialLectureGuideUtils.js";
 
 export function getLessonSortValue(lesson) {
@@ -33,6 +36,24 @@ export function isSameLessonGroup(lesson, candidate) {
   return getLessonContinuityKey(lesson) === getLessonContinuityKey(candidate);
 }
 
+function isRegularProfileContinuityCandidate(lesson = {}, student = {}) {
+  if (!lesson.lessonType || lesson.lessonType === "class" || lesson.lessonType === "closure") {
+    return isStudentAssignedToRegularLesson(lesson, student);
+  }
+  return !isSpecialLectureLesson(lesson);
+}
+
+function isSameLessonContinuityForStudent(lesson, candidate, student = {}) {
+  if (
+    !isSpecialLectureLesson(lesson) &&
+    student?.scheduleOverride &&
+    isStudentAssignedToRegularLesson(lesson, student)
+  ) {
+    return isRegularProfileContinuityCandidate(candidate, student);
+  }
+  return isSameLessonGroup(lesson, candidate);
+}
+
 export function findPreviousLessonsForStudent(lessons, lesson, studentId, { allowRegularClassFallback = false, student = null } = {}) {
   const currentSortValue = getLessonSortValue(lesson);
   const previousLessons = [...lessons]
@@ -42,7 +63,9 @@ export function findPreviousLessonsForStudent(lessons, lesson, studentId, { allo
     .filter((candidate) => isStudentScheduledForLesson(candidate, student))
     .filter((candidate) => getLessonSortValue(candidate) < currentSortValue)
     .sort((a, b) => getLessonSortValue(b).localeCompare(getLessonSortValue(a)));
-  const previousLessonsInCurrentGroup = previousLessons.filter((candidate) => isSameLessonGroup(lesson, candidate));
+  const previousLessonsInCurrentGroup = previousLessons.filter((candidate) => (
+    isSameLessonContinuityForStudent(lesson, candidate, student)
+  ));
   if (previousLessonsInCurrentGroup.length || !allowRegularClassFallback || isSpecialLectureLesson(lesson)) {
     return previousLessonsInCurrentGroup;
   }
@@ -55,7 +78,7 @@ export function findNextLessonForStudent(lessons, lesson, student) {
   return [...lessons]
     .filter((candidate) => candidate.lessonId !== lesson.lessonId)
     .filter((candidate) => !shouldIgnoreLessonAttendance(candidate))
-    .filter((candidate) => isSameLessonGroup(lesson, candidate))
+    .filter((candidate) => isSameLessonContinuityForStudent(lesson, candidate, student))
     .filter((candidate) => candidate.studentIds?.includes(studentId))
     .filter((candidate) => isStudentScheduledForLesson(candidate, student))
     .filter((candidate) => getLessonSortValue(candidate) > currentSortValue)

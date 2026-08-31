@@ -1,5 +1,9 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import {
+  findNextLessonForStudent,
+  findPreviousLessonsForStudent as findActualPreviousLessonsForStudent,
+  selectLinkedPreviousHomework
+} from "../src/domains/lessons/lessonHomeworkContinuity.js";
 import { selectPreviousLessonMemoContext } from "../src/domains/lessons/lessonJournalPreviousMemoSelector.js";
 import { readAppWithLessonJournalSource } from "./lessonJournalTestSource.mjs";
 
@@ -41,7 +45,7 @@ function lessonSortValue(lesson = {}) {
   return `${lesson.date ?? ""}T${lesson.startTime || "00:00"}`;
 }
 
-function findPreviousLessonForStudent(lessons, lesson, studentId, { allowRegularClassFallback = false } = {}) {
+function findPreviousLessonsForStudent(lessons, lesson, studentId, { allowRegularClassFallback = false } = {}) {
   const previousLessons = lessons
     .filter((candidate) => candidate.lessonId !== lesson.lessonId)
     .filter((candidate) => candidate.status !== "canceled" && !isClosureLesson(candidate))
@@ -49,12 +53,14 @@ function findPreviousLessonForStudent(lessons, lesson, studentId, { allowRegular
     .filter((candidate) => lessonSortValue(candidate) < lessonSortValue(lesson))
     .sort((left, right) => lessonSortValue(right).localeCompare(lessonSortValue(left)));
   const sameGroupLesson = previousLessons.find((candidate) => isSameLessonGroup(lesson, candidate));
-  if (sameGroupLesson || !allowRegularClassFallback || isSpecialLectureLesson(lesson)) return sameGroupLesson;
-  return previousLessons.find((candidate) => !isSpecialLectureLesson(candidate));
+  if (sameGroupLesson || !allowRegularClassFallback || isSpecialLectureLesson(lesson)) {
+    return previousLessons.filter((candidate) => isSameLessonGroup(lesson, candidate));
+  }
+  return previousLessons.filter((candidate) => !isSpecialLectureLesson(candidate));
 }
 
 const dependencies = {
-  findPreviousLessonForStudent,
+  findPreviousLessonsForStudent,
   isClosureLesson,
   isSameLessonGroup,
   isSpecialLectureLesson
@@ -257,6 +263,169 @@ assert.equal(monthBoundaryContext.previousRecord?.lessonId, blankImmediateLesson
 assert.equal(monthBoundaryContext.previousEditableRecord?.lessonMaterial, "7월 최신 교재");
 assert.equal(monthBoundaryContext.previousEditableRecord?.lessonProgress, "7월 최신 진도");
 assert.notEqual(monthBoundaryContext.previousEditableRecord?.lessonMaterial, "특강 CONTROL 교재");
+
+const splitScheduleStudent = {
+  defaultClassTemplateId: "class_7_10",
+  scheduleOverride: "월 16:00-19:00 / 수금 19:00-22:00",
+  studentId: "student_split_schedule"
+};
+const splitCurrentLesson = {
+  classTemplateId: "class_4_7",
+  date: "2026-08-31",
+  lessonId: "lesson_split_current",
+  lessonType: "class",
+  startTime: "16:00",
+  endTime: "19:00",
+  studentIds: [splitScheduleStudent.studentId]
+};
+const splitOlderMondayLesson = {
+  ...splitCurrentLesson,
+  date: "2026-08-24",
+  lessonId: "lesson_split_monday_old"
+};
+const splitRecentWednesdayLesson = {
+  ...splitCurrentLesson,
+  classTemplateId: "class_7_10",
+  date: "2026-08-26",
+  lessonId: "lesson_split_wednesday_recent",
+  startTime: "19:00",
+  endTime: "22:00"
+};
+const splitImmediateMakeupLesson = {
+  ...splitRecentWednesdayLesson,
+  date: "2026-08-30",
+  lessonId: "lesson_split_makeup_immediate",
+  lessonType: "makeup",
+  startTime: "18:00",
+  endTime: "21:00"
+};
+const splitLessons = [
+  splitCurrentLesson,
+  splitOlderMondayLesson,
+  splitRecentWednesdayLesson,
+  splitImmediateMakeupLesson
+];
+const splitPreviousLessons = findActualPreviousLessonsForStudent(
+  splitLessons,
+  splitCurrentLesson,
+  splitScheduleStudent.studentId,
+  { allowRegularClassFallback: true, student: splitScheduleStudent }
+);
+assert.deepEqual(
+  splitPreviousLessons.map((lesson) => lesson.lessonId),
+  [
+    splitImmediateMakeupLesson.lessonId,
+    splitRecentWednesdayLesson.lessonId,
+    splitOlderMondayLesson.lessonId
+  ]
+);
+assert.equal(
+  findNextLessonForStudent(splitLessons, splitOlderMondayLesson, splitScheduleStudent)?.lessonId,
+  splitRecentWednesdayLesson.lessonId
+);
+
+const splitContext = selectPreviousLessonMemoContext({
+  ...dependencies,
+  currentLesson: splitCurrentLesson,
+  findPreviousLessonsForStudent: findActualPreviousLessonsForStudent,
+  lessons: splitLessons,
+  records: [
+    {
+      attendanceStatus: "present",
+      lessonId: splitImmediateMakeupLesson.lessonId,
+      lessonMaterial: "",
+      lessonProgress: "",
+      studentId: splitScheduleStudent.studentId
+    },
+    {
+      attendanceStatus: "absent",
+      lessonId: splitRecentWednesdayLesson.lessonId,
+      lessonMaterial: "직전 수요일 교재",
+      lessonProgress: "직전 수요일 진도",
+      studentId: splitScheduleStudent.studentId
+    },
+    {
+      attendanceStatus: "present",
+      lessonId: splitOlderMondayLesson.lessonId,
+      lessonMaterial: "오래된 월요일 CONTROL 교재",
+      lessonProgress: "오래된 월요일 CONTROL 진도",
+      studentId: splitScheduleStudent.studentId
+    }
+  ],
+  student: splitScheduleStudent
+});
+assert.equal(splitContext.previousRecord?.lessonId, splitImmediateMakeupLesson.lessonId);
+assert.equal(splitContext.previousEditableRecord?.lessonMaterial, "직전 수요일 교재");
+assert.equal(splitContext.previousEditableRecord?.lessonProgress, "직전 수요일 진도");
+assert.notEqual(splitContext.previousEditableRecord?.lessonMaterial, "오래된 월요일 CONTROL 교재");
+assert.equal(selectLinkedPreviousHomework({
+  homeworks: [{
+    homeworkId: "homework_old_monday_next",
+    homeworkType: "next",
+    lessonId: splitOlderMondayLesson.lessonId,
+    studentId: splitScheduleStudent.studentId,
+    title: "오래된 월요일 CONTROL 숙제"
+  }],
+  previousLessons: splitPreviousLessons,
+  records: [{
+    attendanceStatus: "present",
+    lessonId: splitImmediateMakeupLesson.lessonId,
+    studentId: splitScheduleStudent.studentId
+  }],
+  studentId: splitScheduleStudent.studentId
+}), null);
+
+const alternateWeekdayStudent = {
+  defaultClassTemplateId: "class_saturday_morning",
+  scheduleOverride: "화 13:00-16:00 / 목 10:00-13:00 / 토 16:00-19:00",
+  studentId: "student_alternate_weekdays"
+};
+const alternateWeekdayLessons = [
+  {
+    classTemplateId: "class_saturday_morning",
+    date: "2026-09-05",
+    endTime: "19:00",
+    lessonId: "lesson_alternate_saturday_current",
+    lessonType: "class",
+    startTime: "16:00",
+    studentIds: [alternateWeekdayStudent.studentId]
+  },
+  {
+    classTemplateId: "class_thursday_morning",
+    date: "2026-09-03",
+    endTime: "13:00",
+    lessonId: "lesson_alternate_thursday_previous",
+    lessonType: "class",
+    startTime: "10:00",
+    studentIds: [alternateWeekdayStudent.studentId]
+  },
+  {
+    classTemplateId: "class_tuesday_afternoon",
+    date: "2026-09-01",
+    endTime: "16:00",
+    lessonId: "lesson_alternate_tuesday_older",
+    lessonType: "class",
+    startTime: "13:00",
+    studentIds: [alternateWeekdayStudent.studentId]
+  }
+];
+assert.deepEqual(
+  findActualPreviousLessonsForStudent(
+    alternateWeekdayLessons,
+    alternateWeekdayLessons[0],
+    alternateWeekdayStudent.studentId,
+    { allowRegularClassFallback: true, student: alternateWeekdayStudent }
+  ).map((lesson) => lesson.lessonId),
+  ["lesson_alternate_thursday_previous", "lesson_alternate_tuesday_older"]
+);
+assert.equal(
+  findNextLessonForStudent(
+    alternateWeekdayLessons,
+    alternateWeekdayLessons[2],
+    alternateWeekdayStudent
+  )?.lessonId,
+  "lesson_alternate_thursday_previous"
+);
 
 const appSource = await readAppWithLessonJournalSource(import.meta.url);
 assert.match(appSource, /selectPreviousLessonMemoContext\(\{/);

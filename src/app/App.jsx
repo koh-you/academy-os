@@ -334,7 +334,6 @@ import {
   findNextLessonForStudent,
   findPreviousLessonsForStudent,
   getLessonSortValue,
-  isSameLessonGroup,
   isSpecialLectureLesson,
   selectLinkedPreviousHomework
 } from "../domains/lessons/lessonHomeworkContinuity.js";
@@ -2145,7 +2144,7 @@ const lessonJournalRuntime = Object.freeze({
   createLessonStudentRecordId,
   defaultAiSettings,
   findLessonStudentRecord,
-  findPreviousLessonForStudent,
+  findPreviousLessonsForStudent,
   formatKoreaTimeLabel,
   formatLessonTimeRange,
   formatNotificationJobStatus,
@@ -2170,7 +2169,6 @@ const lessonJournalRuntime = Object.freeze({
   isExamPrepLesson,
   isLessonAlimtalkScheduleExpired,
   isNotificationSchedulePast,
-  isSameLessonGroup,
   isSpecialLectureLesson,
   isSupplementMakeupTaskLesson,
   nestedPanels: lessonNestedPanelRuntime,

@@ -888,6 +888,78 @@ test("lesson journal skips an unused intermediate lesson but stops at an attende
   expect(pageErrors).toEqual([]);
 });
 
+test("lesson journal follows a student's weekday-specific times across regular classes", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await page.route("**/api/students*", async (route) => {
+    const response = await route.fetch();
+    const payload = await response.json();
+    await route.fulfill({
+      response,
+      json: {
+        ...payload,
+        students: (payload.students ?? []).map((student) => (
+          student.studentId === "safe-active-student"
+            ? {
+                ...student,
+                defaultClassTemplateId: "safe-cross-month-class",
+                scheduleOverride: "화 10:00-13:00 / 목 19:00-22:00 / 토 10:00-13:00"
+              }
+            : student
+        ))
+      }
+    });
+  });
+  await page.route("**/api/lessons*", async (route) => {
+    const response = await route.fetch();
+    const payload = await response.json();
+    await route.fulfill({
+      response,
+      json: {
+        ...payload,
+        lessons: (payload.lessons ?? []).map((lesson) => (
+          lesson.lessonId === "safe-cross-month-blank-lesson"
+            ? {
+                ...lesson,
+                classTemplateId: "safe-thursday-evening-class",
+                endTime: "22:00",
+                startTime: "19:00"
+              }
+            : lesson
+        ))
+      }
+    });
+  });
+  await page.route("**/api/lesson-records*", async (route) => {
+    const response = await route.fetch();
+    const payload = await response.json();
+    await route.fulfill({
+      response,
+      json: {
+        ...payload,
+        records: (payload.records ?? []).map((record) => (
+          record.lessonId === "safe-cross-month-blank-lesson"
+            ? {
+                ...record,
+                lessonMaterial: "목요일 개인 시간표 교재",
+                lessonProgress: "목요일 개인 시간표 진도"
+              }
+            : record
+        ))
+      }
+    });
+  });
+
+  await loginAsTeacher(page);
+  const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
+  await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
+  const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
+  await expect(lessonJournal.getByRole("button", { name: "목요일 개인 시간표 교재" })).toBeVisible();
+  await expect(lessonJournal.getByRole("button", { name: "목요일 개인 시간표 진도" })).toBeVisible();
+  await expect(lessonJournal.getByRole("button", { name: "안전 이전 숙제" })).toBeVisible();
+  await expect(lessonJournal).not.toContainText("7월 최신 교재");
+  expect(pageErrors).toEqual([]);
+});
+
 test("lesson copy retries the same server plan after an unknown result and verified undo removes it", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   let abortAfterCommit = true;

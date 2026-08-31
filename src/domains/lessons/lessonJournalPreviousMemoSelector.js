@@ -1,11 +1,7 @@
-import { isStudentScheduledForLesson } from "../../shared/utils/studentSchedule.js";
-
 export function selectPreviousLessonMemoContext({
   allRecords = [],
   currentLesson,
-  findPreviousLessonForStudent,
-  isClosureLesson,
-  isSameLessonGroup,
+  findPreviousLessonsForStudent,
   isSpecialLectureLesson,
   lessons = [],
   records = [],
@@ -22,10 +18,17 @@ export function selectPreviousLessonMemoContext({
     const sourceLesson = lessonById.get(record.lessonId);
     return `${getRecordLessonDate(record)} ${sourceLesson?.startTime ?? ""}`;
   };
+  const previousLessons = findPreviousLessonsForStudent(
+    lessons,
+    currentLesson,
+    student.studentId,
+    { allowRegularClassFallback: true, student }
+  );
+  const previousLessonIds = new Set(previousLessons.map((item) => item.lessonId));
   const recordMatchesCurrentLessonGroup = (record) => {
     const sourceLesson = lessonById.get(record.lessonId);
     if (!sourceLesson) return !isSpecialLectureLesson(currentLesson);
-    return isSameLessonGroup(currentLesson, sourceLesson);
+    return previousLessonIds.has(sourceLesson.lessonId);
   };
   const acknowledgedMemoCutoff = sourceRecords
     .filter((item) =>
@@ -43,41 +46,14 @@ export function selectPreviousLessonMemoContext({
     const recordDate = getRecordLessonDate(record);
     return Boolean(acknowledgedMemoCutoffDate && recordDate && recordDate <= acknowledgedMemoCutoffDate);
   };
-  const previousLessons = lessons
-    .filter((item) =>
-      item.lessonId !== currentLesson.lessonId &&
-      item.date < currentLesson.date &&
-      item.status !== "canceled" &&
-      !isClosureLesson(item) &&
-      item.studentIds?.includes(student.studentId) &&
-      isStudentScheduledForLesson(item, student) &&
-      isSameLessonGroup(currentLesson, item)
-    )
-    .sort((lessonA, lessonB) => (
-      `${lessonB.date} ${lessonB.startTime ?? ""}`.localeCompare(`${lessonA.date} ${lessonA.startTime ?? ""}`)
-    ));
-
   const previousLessonRecordsInCurrentGroup = previousLessons
     .map((previousLesson) =>
       sourceRecords.find((item) => item.lessonId === previousLesson.lessonId && item.studentId === student.studentId)
     )
     .filter(Boolean);
   const previousLessonRecordInCurrentGroup = previousLessonRecordsInCurrentGroup[0] ?? null;
-  const bridgedPreviousLesson = previousLessons.length === 0
-    ? findPreviousLessonForStudent(lessons, currentLesson, student.studentId, {
-        allowRegularClassFallback: true,
-        student
-      })
-    : null;
-  const bridgedPreviousLessonRecord = bridgedPreviousLesson
-    ? sourceRecords.find((item) => item.lessonId === bridgedPreviousLesson.lessonId && item.studentId === student.studentId) ?? null
-    : null;
-  const previousLessonRecord = previousLessonRecordInCurrentGroup ?? bridgedPreviousLessonRecord;
-  const editableSourceRecords = previousLessonRecordsInCurrentGroup.length
-    ? previousLessonRecordsInCurrentGroup
-    : bridgedPreviousLessonRecord
-      ? [bridgedPreviousLessonRecord]
-      : [];
+  const previousLessonRecord = previousLessonRecordInCurrentGroup;
+  const editableSourceRecords = previousLessonRecordsInCurrentGroup;
   const latestNonEmptyValue = (fieldNames) => {
     for (const record of editableSourceRecords) {
       for (const fieldName of fieldNames) {
