@@ -141,6 +141,24 @@ assert.deepEqual(
   inputSnapshot
 );
 
+const nextDay11amCalls = createCalls();
+createLessonJournalExpectedReservationItems({
+  ...createDependencies(nextDay11amCalls),
+  homeworks,
+  lesson,
+  lessons,
+  makeupTasks,
+  notificationPlanMode: "nextDay11am",
+  notificationTemplates: { lesson: "template_TARGET" },
+  records,
+  students,
+  testAttempts,
+  testSessions
+});
+assert.deepEqual(nextDay11amCalls.scheduledDates, [
+  ["lesson_TARGET", "nextDay11am", { allowPastFallback: false }]
+]);
+
 const manualCalls = createCalls();
 const manualItems = createLessonJournalExpectedReservationItems({
   ...createDependencies(manualCalls),

@@ -6,6 +6,8 @@ export function createLessonJournalReservationControlModel({
   hasDraftChanges = false,
   hasRefreshHandler = false,
   isDelayedScheduleExpired = false,
+  isNextDay11amScheduleExpired = false,
+  nextDay11amScheduleLabel = "",
   notificationPlanMode = "default",
   notificationPlanScheduledAt = "",
   reservationApplyState = "idle",
@@ -17,9 +19,11 @@ export function createLessonJournalReservationControlModel({
     ? "알림톡 없음"
     : notificationPlanMode === "delay30"
       ? `${isDelayedScheduleExpired ? "30분 지연 시간 지남" : "30분 지연"} · ${delayedScheduleLabel}`
-      : notificationPlanMode === "manual"
-        ? `수동 예약 · ${notificationPlanScheduledAt ? formatManualScheduledAt(notificationPlanScheduledAt) : "시각 미정"}`
-        : defaultScheduleHintText;
+      : notificationPlanMode === "nextDay11am"
+        ? `${isNextDay11amScheduleExpired ? "다음날 11시 예약 시간 지남" : "다음날 11시 예약"} · ${nextDay11amScheduleLabel}`
+        : notificationPlanMode === "manual"
+          ? `수동 예약 · ${notificationPlanScheduledAt ? formatManualScheduledAt(notificationPlanScheduledAt) : "시각 미정"}`
+          : defaultScheduleHintText;
   const solapiApplyButtonLabel =
     reservationApplyState === "applying"
       ? "Solapi 반영 중"

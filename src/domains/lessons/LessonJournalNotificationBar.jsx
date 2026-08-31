@@ -11,9 +11,11 @@ export function LessonJournalNotificationBar({
   isClosureLesson,
   isDefaultScheduleExpired,
   isDelayedScheduleExpired,
+  isNextDay11amScheduleExpired,
   journalEditMode,
   lessonId,
   lessonNotificationPlan,
+  nextDay11amAlimtalkTimeLabel,
   notificationPlanMode,
   notificationPlanSummaryText,
   onApplySolapiReservationPlan,
@@ -75,6 +77,7 @@ export function LessonJournalNotificationBar({
             ) : null}
             <option disabled={isDefaultScheduleExpired} value="default">기본 예약 · {defaultAlimtalkTimeLabel}</option>
             <option disabled={isDelayedScheduleExpired} value="delay30">30분 지연 · {delayedAlimtalkTimeLabel}</option>
+            <option disabled={isNextDay11amScheduleExpired} value="nextDay11am">다음날 11시 · {nextDay11amAlimtalkTimeLabel}</option>
             <option value="none">알림톡 없음</option>
           </select>
         </label>

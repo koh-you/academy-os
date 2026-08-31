@@ -168,8 +168,10 @@ export function LessonJournalDetail({
   const notificationPlanMode = isClosureLesson ? "none" : (lessonNotificationPlan?.mode || "default");
   const defaultAlimtalkTimeLabel = formatKoreaTimeLabel(getLessonAlimtalkScheduledDate(lesson, 0, { allowPastFallback: false }));
   const delayedAlimtalkTimeLabel = formatKoreaTimeLabel(getLessonAlimtalkScheduledDate(lesson, 30, { allowPastFallback: false }));
+  const nextDay11amAlimtalkTimeLabel = formatKoreaTimeLabel(getLessonAlimtalkScheduledDate(lesson, "nextDay11am", { allowPastFallback: false }));
   const isDefaultScheduleExpired = isLessonAlimtalkScheduleExpired(lesson, 0);
   const isDelayedScheduleExpired = isLessonAlimtalkScheduleExpired(lesson, 30);
+  const isNextDay11amScheduleExpired = isLessonAlimtalkScheduleExpired(lesson, "nextDay11am");
   const lessonNotificationJobs = notificationJobs.filter((job) => job.lessonId === lesson.lessonId);
   const auditedLessonNotificationJobs = Array.isArray(reservationAudit.osJobs) ? reservationAudit.osJobs : lessonNotificationJobs;
   const todayTwoPmIso = new Date(`${today}T14:00:00+09:00`).toISOString();
@@ -300,7 +302,10 @@ export function LessonJournalDetail({
     isAssignmentStatusUnrecorded,
     isScheduleExpired:
       notificationPlanMode !== "manual" &&
-      isLessonAlimtalkScheduleExpired(lesson, notificationPlanMode === "delay30" ? 30 : 0),
+      isLessonAlimtalkScheduleExpired(
+        lesson,
+        notificationPlanMode === "delay30" ? 30 : notificationPlanMode === "nextDay11am" ? "nextDay11am" : 0
+      ),
     notificationPlanMode,
     notificationPlanScheduledAt: lessonNotificationPlan?.scheduledAt
   });
@@ -318,6 +323,8 @@ export function LessonJournalDetail({
     hasDraftChanges: hasJournalDraftChanges,
     hasRefreshHandler: Boolean(onReconcileSolapiNotificationResults),
     isDelayedScheduleExpired,
+    isNextDay11amScheduleExpired,
+    nextDay11amScheduleLabel: nextDay11amAlimtalkTimeLabel,
     notificationPlanMode,
     notificationPlanScheduledAt: lessonNotificationPlan?.scheduledAt,
     reservationApplyState,
@@ -533,9 +540,11 @@ export function LessonJournalDetail({
         isClosureLesson={isClosureLesson}
         isDefaultScheduleExpired={isDefaultScheduleExpired}
         isDelayedScheduleExpired={isDelayedScheduleExpired}
+        isNextDay11amScheduleExpired={isNextDay11amScheduleExpired}
         journalEditMode={journalEditMode}
         lessonId={lesson.lessonId}
         lessonNotificationPlan={lessonNotificationPlan}
+        nextDay11amAlimtalkTimeLabel={nextDay11amAlimtalkTimeLabel}
         notificationPlanMode={notificationPlanMode}
         notificationPlanSummaryText={notificationPlanSummaryText}
         onApplySolapiReservationPlan={applySolapiReservationPlan}

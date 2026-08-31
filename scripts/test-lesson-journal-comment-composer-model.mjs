@@ -127,6 +127,58 @@ assert.equal(studentExpiredTarget.actionLabel, "수동 재발송");
 assert.equal(studentExpiredTarget.forceTestRecipient, true);
 assert.equal(studentExpiredTarget.visibleDraftSaveState, "saving");
 
+const studentNextDay11amTarget = createLessonJournalCommentComposerModel({
+  audience: "student",
+  audienceModel: studentAudience,
+  draftSaveState: "saving",
+  initialSendTiming: "nextDay11am",
+  integrationStatus: {
+    notifications: {
+      allowRealStudentRecipients: false,
+      dryRun: false
+    }
+  },
+  lesson: { expiredDelays: [] },
+  record: {},
+  student: {
+    name: "TARGET 학생",
+    parentPhone: "010-parent",
+    studentPhone: "010-student"
+  },
+  dependencies
+});
+
+assert.equal(studentNextDay11amTarget.planMode, "nextDay11am");
+assert.equal(studentNextDay11amTarget.sendDelayMinutes, "nextDay11am");
+assert.equal(studentNextDay11amTarget.isManualResendAvailable, false);
+assert.equal(studentNextDay11amTarget.sendTiming, "scheduled");
+assert.equal(studentNextDay11amTarget.actionLabel, "다음날 11시 예약");
+
+const studentNextDay11amExpiredTarget = createLessonJournalCommentComposerModel({
+  audience: "student",
+  audienceModel: studentAudience,
+  draftSaveState: "saving",
+  initialSendTiming: "nextDay11am",
+  integrationStatus: {
+    notifications: {
+      allowRealStudentRecipients: false,
+      dryRun: false
+    }
+  },
+  lesson: { expiredDelays: ["nextDay11am"] },
+  record: {},
+  student: {
+    name: "TARGET 학생",
+    parentPhone: "010-parent",
+    studentPhone: "010-student"
+  },
+  dependencies
+});
+
+assert.equal(studentNextDay11amExpiredTarget.isManualResendAvailable, true);
+assert.equal(studentNextDay11amExpiredTarget.sendTiming, "now");
+assert.equal(studentNextDay11amExpiredTarget.actionLabel, "수동 재발송");
+
 const noSendControl = createLessonJournalCommentComposerModel({
   audienceModel: parentAudience,
   initialSendTiming: "none",

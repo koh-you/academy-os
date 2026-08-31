@@ -25,7 +25,7 @@ export function createLessonJournalExpectedReservationItems({
     ? notificationPlanScheduledAt
     : getScheduledDate(
         lesson,
-        notificationPlanMode === "delay30" ? 30 : 0,
+        notificationPlanMode === "delay30" ? 30 : notificationPlanMode === "nextDay11am" ? "nextDay11am" : 0,
         { allowPastFallback: false }
       );
   if (!scheduledDate) return [];
