@@ -2086,8 +2086,11 @@ const notificationCenterRuntime = Object.freeze({
   today
 });
 
-function loadLessonJournalReservationAudit({ date, lessonId }) {
-  const path = `/api/notification-jobs?date=${encodeURIComponent(date)}&lessonId=${encodeURIComponent(lessonId)}&limit=500`;
+function loadLessonJournalReservationAudit({ lessonId }) {
+  // lessonId alone is a precise, sufficient scope for this per-lesson audit — a date range would
+  // miss reservations scheduled outside the lesson's own calendar day (e.g. "다음날 11시" mode
+  // schedules into the next day, and "manual" mode can schedule to any future date/time).
+  const path = `/api/notification-jobs?lessonId=${encodeURIComponent(lessonId)}&limit=500`;
   return getJsonWithTimeout(path, 12000, "OS 알림톡 예약 기록 조회가 12초를 넘었습니다.");
 }
 

@@ -7,27 +7,23 @@ const parentRecord = {
   studentComment: "학생 CONTROL",
   teacherComment: "학부모 저장 CONTROL"
 };
-const parentScheduledTarget = createLessonJournalCommentSendPayload({
+const parentImmediateTarget = createLessonJournalCommentSendPayload({
   draftComment: "학부모 최종 TARGET",
   field: "teacherComment",
   forceDryRun: false,
   forceTestRecipient: false,
   generatedPreviewText: "학부모 미리보기 TARGET",
-  isManualResendAvailable: false,
   record: parentRecord,
-  sendDelayMinutes: 30,
-  sendTiming: "scheduled"
+  sendTiming: "now"
 });
 
-assert.deepEqual(parentScheduledTarget, {
+assert.deepEqual(parentImmediateTarget, {
   options: {
-    delayMinutes: 30,
     forceDryRun: false,
     forceTestRecipient: false,
     manualCommentBody: "학부모 최종 TARGET",
     manualPreviewBody: "학부모 미리보기 TARGET",
-    resendReason: "",
-    sendTiming: "scheduled"
+    sendTiming: "now"
   },
   record: {
     lessonStudentRecordId: "lsr_parent_target",
@@ -37,43 +33,49 @@ assert.deepEqual(parentScheduledTarget, {
 });
 assert.equal(parentRecord.teacherComment, "학부모 저장 CONTROL");
 
-const studentResendTarget = createLessonJournalCommentSendPayload({
+const studentDryRunTarget = createLessonJournalCommentSendPayload({
   draftComment: "학생 최종 TARGET",
   field: "studentComment",
   forceDryRun: true,
   forceTestRecipient: true,
   generatedPreviewText: "학생 미리보기 TARGET",
-  isManualResendAvailable: true,
   record: {
     studentComment: "학생 저장 CONTROL",
     teacherComment: "학부모 CONTROL"
   },
-  sendDelayMinutes: 0,
   sendTiming: "now"
 });
-assert.deepEqual(studentResendTarget.options, {
-  delayMinutes: 0,
+assert.deepEqual(studentDryRunTarget.options, {
   forceDryRun: true,
   forceTestRecipient: true,
   manualCommentBody: "학생 최종 TARGET",
   manualPreviewBody: "학생 미리보기 TARGET",
-  resendReason: "예약 시간 경과 후 수동 재발송",
   sendTiming: "now"
 });
-assert.equal(studentResendTarget.record.studentComment, "학생 최종 TARGET");
-assert.equal(studentResendTarget.record.teacherComment, "학부모 CONTROL");
+assert.equal(studentDryRunTarget.record.studentComment, "학생 최종 TARGET");
+assert.equal(studentDryRunTarget.record.teacherComment, "학부모 CONTROL");
+
+const noSendControl = createLessonJournalCommentSendPayload({
+  field: "studentComment",
+  sendTiming: "none"
+});
+assert.deepEqual(noSendControl.options, {
+  forceDryRun: false,
+  forceTestRecipient: false,
+  manualCommentBody: "",
+  manualPreviewBody: "",
+  sendTiming: "none"
+});
 
 const defaultControl = createLessonJournalCommentSendPayload({
   field: "studentComment"
 });
 assert.deepEqual(defaultControl.options, {
-  delayMinutes: 0,
   forceDryRun: false,
   forceTestRecipient: false,
   manualCommentBody: "",
   manualPreviewBody: "",
-  resendReason: "",
-  sendTiming: "scheduled"
+  sendTiming: "now"
 });
 assert.deepEqual(defaultControl.record, {
   studentComment: ""
@@ -105,6 +107,10 @@ for (const retainedAction of [
 assert.ok(
   !modalSource.includes("manualCommentBody: draftComment"),
   "CommentComposerModal must not retain the extracted send options"
+);
+assert.ok(
+  !payloadSource.includes("delayMinutes") && !payloadSource.includes("resendReason"),
+  "comment send payload no longer carries a schedule delay or resend framing — the send button is always immediate"
 );
 for (const forbiddenDependency of [
   "fetch(",

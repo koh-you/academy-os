@@ -344,7 +344,6 @@ export function LessonJournalDetail({
     setReservationAudit((current) => ({ ...current, message: "OS 예약 기록을 조회하는 중입니다.", state: "loading" }));
     try {
       const result = await loadLessonJournalReservationAudit({
-        date: lesson.date,
         lessonId: lesson.lessonId
       });
       setReservationAudit(createLessonJournalReservationAuditResult(result));

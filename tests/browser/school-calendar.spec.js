@@ -1,5 +1,5 @@
 import { expect, test } from "./fixtures.js";
-import { collectPageErrors, loginAsTeacher, resetSafeFixture, safeApiBaseUrl } from "./safeSmokeSupport.js";
+import { collectPageErrors, loginAsTeacher, navigateSchoolCalendarToMonth, resetSafeFixture, safeApiBaseUrl } from "./safeSmokeSupport.js";
 
 test.beforeEach(async ({ request }) => {
   await resetSafeFixture(request);
@@ -24,6 +24,7 @@ test("school calendar shows the full exam period with a stronger math exam date 
   await detailDialog.getByRole("button", { name: "닫기", exact: true }).click();
 
   await navigation.getByRole("button", { name: /학사일정/ }).click();
+  await navigateSchoolCalendarToMonth(page, 2026, 8);
   await expect(page.getByRole("group", { name: "학사일정 달력 범례" })).toContainText("학교색 띠 · 전체 시험기간");
   await expect(page.getByRole("group", { name: "학사일정 달력 범례" })).toContainText("진한 탭 · 수학시험 날짜");
   for (const date of ["2026-08-12", "2026-08-13", "2026-08-14", "2026-08-15"]) {

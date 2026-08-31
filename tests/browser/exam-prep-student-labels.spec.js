@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures.js";
+import { navigateSchoolCalendarToMonth } from "./safeSmokeSupport.js";
 
 const safeApiPort = Number(process.env.ACADEMY_SAFE_API_PORT || 8787) + Number(process.env.TEST_PARALLEL_INDEX || 0);
 const safeApiBaseUrl = `http://127.0.0.1:${safeApiPort}`;
@@ -67,6 +68,7 @@ test("unlinked exam rows stay manageable and excluding a representative removes 
   const navigation = page.getByRole("navigation", { name: "주요 화면" });
   await navigation.getByRole("button", { name: /학사일정/ }).click();
   await expect(page.getByRole("heading", { name: "학사일정" })).toBeVisible();
+  await navigateSchoolCalendarToMonth(page, 2026, 8);
   await expect(page.locator(".examPeriodOverviewCard").filter({ hasText: "연결없음고" })).toBeVisible();
 
   await navigation.getByRole("button", { name: /시험관리/ }).click();
