@@ -32,7 +32,7 @@ const preservedContractSnippets = [
   ["<Suspense fallback=", "Suspense boundary around ExamPrepContentEditor"],
   ["<ExamPrepContentEditor", "ExamPrepContentEditor usage"],
   ["rosterView === \"school\"", "time/school roster sort toggle"],
-  ["examPrepSourceItem", "connected exam-source info rendering"],
+  ["examPrepSourceChip", "connected exam-source info rendering"],
   ["className=\"ghostButton\"", "schedule-edit button class"],
   ["className=\"dangerButton\"", "delete-schedule button class"]
 ];

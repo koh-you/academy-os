@@ -1794,39 +1794,20 @@ summary:focus-visible {
   padding: 0 14px;
 }
 
-.examPrepSourceList {
+.examPrepSourceChipList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.examPrepSourceChip {
+  background: var(--status-info-bg, #eff6ff);
   border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  display: grid;
-  overflow: hidden;
-}
-
-.examPrepSourceItem {
-  align-items: center;
-  background: var(--academy-surface, #fff);
-  border-bottom: 1px solid var(--status-neutral-border, #e2e8f0);
-  display: grid;
-  gap: 10px;
-  grid-template-columns: minmax(0, 1fr) auto;
-  padding: 14px 16px;
-}
-
-.examPrepSourceItem:last-child {
-  border-bottom: 0;
-}
-
-.examPrepSourceItem strong {
+  border-radius: 999px;
   color: var(--academy-text, #0f172a);
-  display: block;
-  font-size: 17px;
-  overflow-wrap: anywhere;
-}
-
-.examPrepSourceItem small {
-  color: var(--academy-muted, #64748b);
-  display: block;
-  font-weight: 900;
-  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 6px 12px;
 }
 
 .makeupOriginalHomework {
@@ -18048,11 +18029,6 @@ body.attendanceOnlyBody {
   .examPrepSummaryGrid,
   .makeupProcessFormGrid,
   .makeupProcessStatusGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .examPrepSourceItem {
-    align-items: start;
     grid-template-columns: 1fr;
   }
 

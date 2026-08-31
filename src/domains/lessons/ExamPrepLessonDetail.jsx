@@ -17,7 +17,6 @@ export function ExamPrepLessonDetail({ createEmptyRecord, examPrepScheduleLesson
   const [rosterView, setRosterView] = useState("time");
   const [isScheduleEditorOpen, setIsScheduleEditorOpen] = useState(false);
   const sourceItems = getExamPrepSourceItems(lesson);
-  const scheduledTime = `${lesson.date} ${lesson.startTime || "미정"}-${lesson.endTime || "미정"}`;
   const lessonStudentCount = getLessonStudentIds(lesson).length;
   const studentRows = createExamPrepStudentRows(lesson, students);
   const studentGroups = rosterView === "school"
@@ -58,12 +57,9 @@ export function ExamPrepLessonDetail({ createEmptyRecord, examPrepScheduleLesson
         />
 
         {sourceItems.length ? (
-          <div className="examPrepSourceList" aria-label="연결된 시험정보">
+          <div className="examPrepSourceChipList" aria-label="연결된 시험정보">
             {sourceItems.map((label) => (
-              <div className="examPrepSourceItem" key={label}>
-                <strong>{label}</strong>
-                <small>{scheduledTime}</small>
-              </div>
+              <span className="examPrepSourceChip" key={label}>{label}</span>
             ))}
           </div>
         ) : (
