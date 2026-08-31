@@ -613,7 +613,11 @@ export function LessonJournalDetail({
               regularPreviousLesson &&
               nearestPreviousLesson.lessonId !== regularPreviousLesson.lessonId
             );
-            const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons, allRecords, { onlyRegularLessons });
+            const nearestPreviousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons, allRecords, { onlyRegularLessons: false });
+            const regularPreviousHomework = hasAlternatePreviousLessonSource
+              ? getLessonHomework(homeworks, lesson, student, "previous", lessons, allRecords, { onlyRegularLessons: true })
+              : nearestPreviousHomework;
+            const previousHomework = onlyRegularLessons ? regularPreviousHomework : nearestPreviousHomework;
             const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
             const previousHomeworkTitle = getHomeworkDraftTitle(student, "previous", previousHomework);
             const nextHomeworkTitle = getHomeworkDraftTitle(student, "next", nextHomework);
@@ -696,8 +700,13 @@ export function LessonJournalDetail({
                   previousLessonContent,
                   previousLessonMaterial,
                   previousLessonSourceToggleProps: hasAlternatePreviousLessonSource ? {
+                    disabled: !journalEditMode,
                     nearestLessonDateLabel: formatShortDateLabel(nearestPreviousLesson?.date),
-                    onSelect: (mode) => setPreviousLessonSourceForStudent(student.studentId, mode),
+                    onSelect: (mode) => {
+                      setPreviousLessonSourceForStudent(student.studentId, mode);
+                      const targetHomework = mode === "regular" ? regularPreviousHomework : nearestPreviousHomework;
+                      updateJournalHomeworkDraft(student, "previous", targetHomework?.title ?? "");
+                    },
                     regularLessonDateLabel: formatShortDateLabel(regularPreviousLesson?.date),
                     selectedMode: previousLessonSourceMode
                   } : null,

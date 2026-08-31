@@ -959,6 +959,78 @@ test("lesson journal follows a student's immediately previous attended lesson ac
   expect(pageErrors).toEqual([]);
 });
 
+test("previous-lesson-source toggle requires edit mode and persists the selected homework on save", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  await page.route("**/api/lesson-records*", async (route) => {
+    const response = await route.fetch();
+    const payload = await response.json();
+    await route.fulfill({
+      response,
+      json: {
+        ...payload,
+        records: (payload.records ?? []).map((record) => (
+          record.lessonId === "safe-settlement-replacement"
+            ? { ...record, attendanceStatus: "present", checkInAt: "2026-07-28T04:00:00.000Z" }
+            : record
+        ))
+      }
+    });
+  });
+  await page.route("**/api/homeworks*", async (route) => {
+    const response = await route.fetch();
+    const payload = await response.json();
+    const hasRegularNext = (payload.homeworks ?? []).some((homework) => (
+      homework.lessonId === "safe-settlement-regular" && homework.homeworkType === "next"
+    ));
+    await route.fulfill({
+      response,
+      json: {
+        ...payload,
+        homeworks: hasRegularNext
+          ? payload.homeworks
+          : [
+              ...(payload.homeworks ?? []),
+              {
+                homeworkId: "safe-settlement-regular-next-e2e",
+                homeworkType: "next",
+                lessonId: "safe-settlement-regular",
+                studentId: "safe-settlement-student",
+                title: "정규 07.22 다음 숙제 CONTROL"
+              }
+            ]
+      }
+    });
+  });
+
+  await loginAsTeacher(page);
+  const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
+  await currentDateCell.getByRole("button", { name: /정산 미리보기반/ }).click();
+  const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
+
+  const toggle = lessonJournal.getByRole("group", { name: "지난 숙제 참고 수업 선택" });
+  const regularButton = toggle.getByRole("button", { name: "정규 07.22" });
+  await expect(toggle.getByRole("button", { name: "직전 07.28" })).toBeVisible();
+  await expect(regularButton).toBeDisabled();
+
+  await lessonJournal.getByRole("button", { name: "수정 시작" }).click();
+  await expect(regularButton).toBeEnabled();
+  await regularButton.click();
+  await expect(lessonJournal).toContainText("저장 전 변경 1건");
+
+  await lessonJournal.getByRole("button", { name: "변경 저장" }).click();
+  await expect(lessonJournal).toContainText("수업일지 · 저장 완료");
+  await expect(regularButton).toBeDisabled();
+
+  const homeworksAfter = (await (await request.get(`${safeApiBaseUrl}/api/homeworks`)).json()).homeworks;
+  const savedPrevious = homeworksAfter.find((homework) => (
+    homework.lessonId === "safe-settlement-august-regular" &&
+    homework.studentId === "safe-settlement-student" &&
+    homework.homeworkType === "previous"
+  ));
+  expect(savedPrevious?.title).toBe("정규 07.22 다음 숙제 CONTROL");
+  expect(pageErrors).toEqual([]);
+});
+
 test("lesson copy retries the same server plan after an unknown result and verified undo removes it", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   let abortAfterCommit = true;
