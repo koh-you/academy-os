@@ -8149,6 +8149,10 @@ function pruneExpiredLessonDeletes(bundles = []) {
   return bundles.filter((bundle) => !bundle.expiresAt || Date.parse(bundle.expiresAt) > now);
 }
 
+function findPreviousLessonForStudent(lessons, lesson, studentId, options = {}) {
+  return findPreviousLessonsForStudent(lessons, lesson, studentId, options)[0];
+}
+
 function createLessonId(date, name) {
   return `lesson_${date}_${name.replaceAll(" ", "-").replaceAll("/", "-")}_${Date.now()}`;
 }
