@@ -151,7 +151,7 @@ for (const required of [
 for (const reservedAppBoundary of [
   "async function handleAttendancePinPreview(",
   "async function handleAttendancePinCheck(",
-  "function loadLessonJournalReservationAudit({ date, lessonId })"
+  "function loadLessonJournalReservationAudit({ lessonId })"
 ]) {
   assert.ok(
     rawAppSource.includes(reservedAppBoundary),

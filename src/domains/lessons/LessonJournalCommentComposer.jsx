@@ -40,8 +40,6 @@ export function LessonJournalCommentComposer({
     getDisplaySendStatus,
     getSafetyText,
     getSafetyTone,
-    getScheduledDate,
-    isLessonScheduleExpired,
     normalizeSaveState,
     normalizeText
   } = dependencies;
@@ -81,7 +79,6 @@ export function LessonJournalCommentComposer({
     hasUnsavedDraft,
     initialSendTiming,
     integrationStatus,
-    lesson,
     record,
     saveState,
     student,
@@ -91,16 +88,12 @@ export function LessonJournalCommentComposer({
       getDisplaySendStatus,
       getSafetyText,
       getSafetyTone,
-      getScheduledDate,
-      isLessonScheduleExpired,
       normalizeSaveState
     }
   });
   const {
     forceDryRun,
     forceTestRecipient,
-    isManualResendAvailable,
-    sendDelayMinutes,
     sendTiming
   } = commentComposerModel;
   const sourceText = buildSourceText({
@@ -190,9 +183,7 @@ export function LessonJournalCommentComposer({
       forceDryRun,
       forceTestRecipient,
       generatedPreviewText,
-      isManualResendAvailable,
       record,
-      sendDelayMinutes,
       sendTiming
     });
     onSendComment(lesson, student, payload.record, audience, payload.options);

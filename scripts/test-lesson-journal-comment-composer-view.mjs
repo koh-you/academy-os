@@ -12,8 +12,6 @@ const dependencies = {
       ? Boolean(status?.allowRealParentRecipients)
       : Boolean(status?.allowRealStudentRecipients)
   }),
-  isLessonScheduleExpired: (lesson, delayMinutes) =>
-    lesson.expiredDelays?.includes(delayMinutes) ?? false,
   normalizeSaveState: (state) => state
 };
 
@@ -30,7 +28,6 @@ const parentTarget = createLessonJournalCommentComposerModel({
       dryRun: false
     }
   },
-  lesson: { expiredDelays: [] },
   student: {
     name: "TARGET 학생",
     parentPhone: "010-parent"
@@ -50,7 +47,6 @@ const noSendControl = createLessonJournalCommentComposerModel({
       dryRun: false
     }
   },
-  lesson: { expiredDelays: [] },
   student: {
     name: "CONTROL 학생",
     studentPhone: "010-student"
@@ -61,7 +57,7 @@ const noSendControl = createLessonJournalCommentComposerModel({
 assert.equal(parentTarget.isParent, true);
 assert.equal(parentTarget.visibleDraftSaveState, "dirty");
 assert.equal(parentTarget.canSendNowToRealRecipient, true);
-assert.equal(noSendControl.planMode, "none");
+assert.equal(noSendControl.isLessonNotificationOff, true);
 assert.equal(noSendControl.actionLabel, "발송 안 함");
 assert.equal(noSendControl.forceTestRecipient, true);
 
@@ -119,7 +115,7 @@ for (const viewContract of [
   "onClick={onSave}",
   "onClick={onSend}",
   'disabled={!hasUnsavedDraft || draftSaveState === "saving"}',
-  'disabled={hasUnsavedDraft || isNotificationMuted || (planMode === "none" && !isManualResendAvailable)}',
+  "disabled={hasUnsavedDraft || isNotificationMuted || isLessonNotificationOff}",
   'className="commentPreviewPanel"',
   "{generatedPreviewText}"
 ]) {

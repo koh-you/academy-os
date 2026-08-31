@@ -15,8 +15,6 @@ const dependencies = {
         notificationStatus?.allowRealRecipients
       )
   }),
-  isLessonScheduleExpired: (lesson, delayMinutes) =>
-    lesson.expiredDelays?.includes(delayMinutes) ?? false,
   normalizeSaveState: (state) =>
     ["idle", "dirty", "saving", "saved", "failed"].includes(state)
       ? state
@@ -64,7 +62,6 @@ const parentDefaultTarget = createLessonJournalCommentComposerModel({
       missing: ["SOLAPI_KEY"]
     }
   },
-  lesson: { expiredDelays: [] },
   record: {
     teacherCommentSendStatus: "예약 중",
     notificationMutedParent: false
@@ -83,113 +80,60 @@ assert.deepEqual(
     actionLabel: parentDefaultTarget.actionLabel,
     canSendNowToRealRecipient: parentDefaultTarget.canSendNowToRealRecipient,
     forceTestRecipient: parentDefaultTarget.forceTestRecipient,
-    planMode: parentDefaultTarget.planMode,
+    isLessonNotificationOff: parentDefaultTarget.isLessonNotificationOff,
     sendTiming: parentDefaultTarget.sendTiming,
     title: parentDefaultTarget.title,
     visibleDraftSaveState: parentDefaultTarget.visibleDraftSaveState
   },
   {
-    actionLabel: "예약 발송",
+    actionLabel: "즉시 발송",
     canSendNowToRealRecipient: true,
     forceTestRecipient: false,
-    planMode: "default",
-    sendTiming: "scheduled",
+    isLessonNotificationOff: false,
+    sendTiming: "now",
     title: "TARGET 학생 학부모 알림톡",
     visibleDraftSaveState: "dirty"
   }
 );
 
-const studentExpiredTarget = createLessonJournalCommentComposerModel({
-  audience: "student",
-  audienceModel: studentAudience,
-  draftSaveState: "saving",
-  initialSendTiming: "delay30",
-  integrationStatus: {
-    notifications: {
-      allowRealStudentRecipients: false,
-      dryRun: false
-    }
-  },
-  lesson: { expiredDelays: [30] },
-  record: {},
-  student: {
-    name: "TARGET 학생",
-    parentPhone: "010-parent",
-    studentPhone: "010-student"
-  },
-  dependencies
-});
-
-assert.equal(studentExpiredTarget.isManualResendAvailable, true);
-assert.equal(studentExpiredTarget.sendDelayMinutes, 30);
-assert.equal(studentExpiredTarget.sendTiming, "now");
-assert.equal(studentExpiredTarget.actionLabel, "수동 재발송");
-assert.equal(studentExpiredTarget.forceTestRecipient, true);
-assert.equal(studentExpiredTarget.visibleDraftSaveState, "saving");
-
-const studentNextDay11amTarget = createLessonJournalCommentComposerModel({
-  audience: "student",
-  audienceModel: studentAudience,
-  draftSaveState: "saving",
-  initialSendTiming: "nextDay11am",
-  integrationStatus: {
-    notifications: {
-      allowRealStudentRecipients: false,
-      dryRun: false
-    }
-  },
-  lesson: { expiredDelays: [] },
-  record: {},
-  student: {
-    name: "TARGET 학생",
-    parentPhone: "010-parent",
-    studentPhone: "010-student"
-  },
-  dependencies
-});
-
-assert.equal(studentNextDay11amTarget.planMode, "nextDay11am");
-assert.equal(studentNextDay11amTarget.sendDelayMinutes, "nextDay11am");
-assert.equal(studentNextDay11amTarget.isManualResendAvailable, false);
-assert.equal(studentNextDay11amTarget.sendTiming, "scheduled");
-assert.equal(studentNextDay11amTarget.actionLabel, "다음날 11시 예약");
-
-const studentNextDay11amExpiredTarget = createLessonJournalCommentComposerModel({
-  audience: "student",
-  audienceModel: studentAudience,
-  draftSaveState: "saving",
-  initialSendTiming: "nextDay11am",
-  integrationStatus: {
-    notifications: {
-      allowRealStudentRecipients: false,
-      dryRun: false
-    }
-  },
-  lesson: { expiredDelays: ["nextDay11am"] },
-  record: {},
-  student: {
-    name: "TARGET 학생",
-    parentPhone: "010-parent",
-    studentPhone: "010-student"
-  },
-  dependencies
-});
-
-assert.equal(studentNextDay11amExpiredTarget.isManualResendAvailable, true);
-assert.equal(studentNextDay11amExpiredTarget.sendTiming, "now");
-assert.equal(studentNextDay11amExpiredTarget.actionLabel, "수동 재발송");
+for (const modeLabel of ["delay30", "nextDay11am", "manual", "anything-else"]) {
+  const target = createLessonJournalCommentComposerModel({
+    audience: "student",
+    audienceModel: studentAudience,
+    initialSendTiming: modeLabel,
+    integrationStatus: { notifications: {} },
+    record: {},
+    student: { name: "TARGET 학생" },
+    dependencies
+  });
+  assert.equal(target.sendTiming, "now", `${modeLabel} must always send immediately`);
+  assert.equal(target.actionLabel, "즉시 발송", `${modeLabel} must show the immediate-send label`);
+  assert.equal(target.isLessonNotificationOff, false, modeLabel);
+}
 
 const noSendControl = createLessonJournalCommentComposerModel({
   audienceModel: parentAudience,
   initialSendTiming: "none",
   integrationStatus: { notifications: {} },
-  lesson: { expiredDelays: [] },
   student: { name: "CONTROL 학생" },
   dependencies
 });
-assert.equal(noSendControl.planMode, "none");
+assert.equal(noSendControl.isLessonNotificationOff, true);
 assert.equal(noSendControl.sendTiming, "none");
 assert.equal(noSendControl.actionLabel, "발송 안 함");
+
+const mutedControl = createLessonJournalCommentComposerModel({
+  audience: "parent",
+  audienceModel: parentAudience,
+  initialSendTiming: "default",
+  integrationStatus: { notifications: {} },
+  record: { notificationMutedParent: true },
+  student: { name: "CONTROL 학생" },
+  dependencies
+});
+assert.equal(mutedControl.isNotificationMuted, true);
+assert.equal(mutedControl.actionLabel, "알림 제외");
+assert.equal(mutedControl.sendTiming, "now", "mute is a separate concern from send timing");
 
 const modalSource = await readFile(
   new URL("../src/domains/lessons/LessonJournalCommentComposer.jsx", import.meta.url),
@@ -204,8 +148,7 @@ for (const modelBinding of [
   "createLessonJournalCommentAudienceModel({",
   "createLessonJournalCommentComposerModel({",
   "getAudienceStatus,",
-  "getScheduledDate,",
-  "isLessonScheduleExpired,"
+  "normalizeSaveState,"
 ]) {
   assert.ok(modalSource.includes(modelBinding), `missing comment model binding: ${modelBinding}`);
 }
@@ -226,6 +169,10 @@ assert.ok(
 assert.ok(
   !modalSource.includes('const currentPlanLabel ='),
   "CommentComposerModal must not retain the extracted plan label calculation"
+);
+assert.ok(
+  !modalSource.includes("isLessonScheduleExpired"),
+  "CommentComposerModal no longer needs the lesson-plan schedule dependency — the send button is always immediate"
 );
 for (const forbiddenSideEffect of [
   "fetch(",

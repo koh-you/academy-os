@@ -22,7 +22,6 @@ export function createLessonJournalCommentComposerModel({
   hasUnsavedDraft = false,
   initialSendTiming = "default",
   integrationStatus = null,
-  lesson = {},
   record = {},
   saveState = "idle",
   student = {},
@@ -30,22 +29,10 @@ export function createLessonJournalCommentComposerModel({
 } = {}) {
   const {
     getAudienceStatus,
-    isLessonScheduleExpired,
     normalizeSaveState
   } = dependencies;
-  const planMode = ["default", "delay30", "nextDay11am", "none"].includes(initialSendTiming)
-    ? initialSendTiming
-    : "default";
-  const sendDelayMinutes = planMode === "delay30" ? 30 : planMode === "nextDay11am" ? "nextDay11am" : 0;
-  const isManualResendAvailable = isLessonScheduleExpired(
-    lesson,
-    sendDelayMinutes
-  );
-  const sendTiming = isManualResendAvailable
-    ? "now"
-    : planMode === "none"
-      ? "none"
-      : "scheduled";
+  const isLessonNotificationOff = initialSendTiming === "none";
+  const sendTiming = isLessonNotificationOff ? "none" : "now";
   const normalizedDraftSaveState = normalizeSaveState(saveState);
   const normalizedLocalDraftSaveState = normalizeSaveState(draftSaveState);
   const visibleDraftSaveState =
@@ -76,27 +63,19 @@ export function createLessonJournalCommentComposerModel({
   const forceTestRecipient = !canSendNowToRealRecipient;
   const actionLabel = isNotificationMuted
     ? "알림 제외"
-    : isManualResendAvailable
-      ? "수동 재발송"
-      : planMode === "none"
-        ? "발송 안 함"
-        : planMode === "delay30"
-          ? "30분 지연 예약"
-          : planMode === "nextDay11am"
-            ? "다음날 11시 예약"
-            : "예약 발송";
+    : isLessonNotificationOff
+      ? "발송 안 함"
+      : "즉시 발송";
   return {
     actionLabel,
     audienceNotificationStatus,
     canSendNowToRealRecipient,
     forceDryRun,
     forceTestRecipient,
-    isManualResendAvailable,
+    isLessonNotificationOff,
     isNotificationMuted,
     isParent,
-    planMode,
     previewTitle,
-    sendDelayMinutes,
     sendTiming,
     title,
     visibleDraftSaveState

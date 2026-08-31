@@ -42,7 +42,7 @@ for (const binding of [
 ]) {
   assert.ok(detailSource.includes(binding) || appSource.includes(binding), `missing audit-result binding: ${binding}`);
 }
-assert.ok(appSource.includes("function loadLessonJournalReservationAudit({ date, lessonId })"));
+assert.ok(appSource.includes("function loadLessonJournalReservationAudit({ lessonId })"));
 assert.ok(appSource.includes("return getJsonWithTimeout(path, 12000,"));
 for (const removedProviderBoundary of [
   "solapiGroupsPath",

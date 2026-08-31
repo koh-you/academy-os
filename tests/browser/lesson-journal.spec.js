@@ -3,6 +3,7 @@ import {
   collectPageErrors,
   getKoreaDateAfterDays,
   loginAsTeacher,
+  navigateCalendarToMonth,
   resetSafeFixture,
   safeApiBaseUrl
 } from "./safeSmokeSupport.js";
@@ -563,6 +564,7 @@ test("withdrawn absence candidate can reach and complete safe makeup cancellatio
 test("lesson journal calendar can move to the next month and back", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, 2026, 8);
 
   const monthNavigation = page.getByRole("navigation", { name: "수업일지 달력 월 이동" });
   await expect(monthNavigation).toBeVisible();
@@ -623,6 +625,7 @@ test("lesson journal calendar groups same-time special lessons above makeup less
   });
 
   await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, 2026, 8);
   const calendarDay = page.getByRole("gridcell", { name: "2026-08-03 · 3개 수업" });
   await expect(calendarDay.locator(".lessonPill")).toHaveText([
     "13:00 여름 개별 진도 클리닉 (1명)",
@@ -717,6 +720,7 @@ test("individual times place a student in the actual lesson roster and preserve 
   });
 
   await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, 2026, 8);
   const frontDay = page.getByRole("gridcell", { name: /^2026-08-04 · \d+개 수업$/ });
   await expect(frontDay.getByRole("button", { name: /화목 4-7 \/ 토 10-1반/ })).toContainText("(1명)");
   await frontDay.getByRole("button", { name: /화목 4-7 \/ 토 10-1반/ }).click();
@@ -867,6 +871,7 @@ test("lesson journal skips an unused intermediate lesson but stops at an attende
   });
 
   await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, 2026, 8);
   const openCurrentJournal = async () => {
     const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
     await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
@@ -882,6 +887,7 @@ test("lesson journal skips an unused intermediate lesson but stops at an attende
 
   intermediateLessonAttended = true;
   await page.reload();
+  await navigateCalendarToMonth(page, 2026, 8);
   journal = await openCurrentJournal();
   studentRow = journal.getByRole("region", { name: "수업일지 학생 기록" }).locator(".journalRow:not(.journalHead)").first();
   await expect(previousHomeworkButton(studentRow)).toHaveText("미입력");
@@ -949,6 +955,7 @@ test("lesson journal follows a student's immediately previous attended lesson ac
   });
 
   await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, 2026, 8);
   const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
   await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
   const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
@@ -1003,6 +1010,7 @@ test("previous-lesson-source toggle requires edit mode and persists the selected
   });
 
   await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, 2026, 8);
   const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
   await currentDateCell.getByRole("button", { name: /정산 미리보기반/ }).click();
   const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
@@ -1031,6 +1039,43 @@ test("previous-lesson-source toggle requires edit mode and persists the selected
   expect(pageErrors).toEqual([]);
 });
 
+test("individual comment send button always sends immediately regardless of the lesson reservation plan", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, 2026, 9);
+
+  const currentDateCell = page.getByRole("gridcell", { name: /2026-09-01 · \d+개 수업/ });
+  await currentDateCell.getByRole("button", { name: /고1 정규 가상수업/ }).click();
+  const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
+  await expect(lessonJournal).toBeVisible();
+
+  await lessonJournal.getByLabel("알림톡 예약 설정").selectOption("nextDay11am");
+
+  await lessonJournal.getByRole("button", { name: "학부모 알림톡" }).first().click();
+  const alimtalkModal = page.getByRole("dialog", { name: /학부모 알림톡/ });
+  await expect(alimtalkModal).toBeVisible();
+
+  const sendButton = alimtalkModal.getByRole("button", { name: "즉시 발송" });
+  await expect(sendButton).toBeVisible();
+
+  await alimtalkModal.getByLabel("학부모 최종 알림톡 문구").fill("즉시발송 회귀 테스트 문구");
+  await alimtalkModal.getByRole("button", { name: "최종 문구 저장" }).click();
+  await expect(alimtalkModal.getByText("최종 문구 · 저장 완료")).toBeVisible();
+  await expect(sendButton).toBeEnabled();
+  await sendButton.click();
+
+  await expect.poll(async () => {
+    const jobs = await (await request.get(`${safeApiBaseUrl}/api/notification-jobs?lessonId=safe-consecutive-attendance-regular&limit=200`)).json();
+    return jobs.notificationJobs?.find((job) => job.notificationType === "parent_comment")?.status;
+  }, { timeout: 10_000 }).toBe("sent");
+
+  const jobsAfter = await (await request.get(`${safeApiBaseUrl}/api/notification-jobs?lessonId=safe-consecutive-attendance-regular&limit=200`)).json();
+  const parentJob = jobsAfter.notificationJobs.find((job) => job.notificationType === "parent_comment");
+  expect(parentJob.scheduledAt).toBe("");
+  expect(parentJob.previewBody).toContain("즉시발송 회귀 테스트 문구");
+  expect(pageErrors).toEqual([]);
+});
+
 test("lesson copy retries the same server plan after an unknown result and verified undo removes it", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   let abortAfterCommit = true;
@@ -1044,6 +1089,7 @@ test("lesson copy retries the same server plan after an unknown result and verif
     await route.continue();
   });
   await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, 2026, 8);
 
   const sourceDay = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
   await sourceDay.locator(".dayNumber").click();
@@ -1087,6 +1133,7 @@ test("lesson cancellation keeps its confirmation on conflict and verified undo r
     await route.continue();
   });
   await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, 2026, 8);
 
   const sourceDay = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
   await sourceDay.locator(".dayNumber").click();
@@ -1170,6 +1217,7 @@ test("lesson memo checks a pending homework followup and removes it from later j
   });
   await page.setViewportSize({ width: 1417, height: 945 });
   await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, 2026, 8);
 
   const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
   await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
@@ -1216,6 +1264,7 @@ test("lesson memo checks a pending homework followup and removes it from later j
 test("Escape closes only the topmost Alimtalk modal before the lesson journal", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, 2026, 8);
 
   const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
   await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
@@ -1244,6 +1293,7 @@ test("lesson journal keeps an in-flight edit and verifies the retried record fro
     }
   });
   await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, 2026, 8);
   expect(lessonJournalSaveModuleRequests).toHaveLength(1);
 
   const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
@@ -1291,6 +1341,7 @@ test("lesson journal keeps drafts after a version conflict and saves them on a v
     await route.continue();
   });
   await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, 2026, 8);
   const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
   await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
 
@@ -1362,6 +1413,7 @@ test("lesson journal rebases a newly created homework conflict before a verified
     });
   });
   await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, 2026, 8);
   const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
   await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
 
@@ -1429,6 +1481,7 @@ test("lesson journal rebases an updated homework conflict before a verified retr
     });
   });
   await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, 2026, 8);
   const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
   await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
 
@@ -1470,6 +1523,7 @@ test("lesson journal reuses one stable makeup task after an unknown save respons
   });
 
   await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, 2026, 8);
   const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
   await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
   const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
@@ -1501,6 +1555,7 @@ test("lesson memo opens from the shared nested lesson chunk without saving", asy
     await route.continue();
   });
   await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, 2026, 8);
 
   const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
   await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
@@ -1522,6 +1577,7 @@ test("lesson memo chunk failure offers a latest-screen recovery", async ({ page 
     await route.continue();
   });
   await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, 2026, 8);
 
   const openLessonJournal = async () => {
     const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
@@ -1535,6 +1591,7 @@ test("lesson memo chunk failure offers a latest-screen recovery", async ({ page 
   await lessonJournal.getByRole("button", { name: "최신 화면으로 새로고침" }).click();
 
   await expect(page.getByRole("navigation", { name: "주요 화면" })).toBeVisible();
+  await navigateCalendarToMonth(page, 2026, 8);
   lessonJournal = await openLessonJournal();
   await lessonJournal.getByRole("button", { name: /월경계 학생 수업메모/ }).click();
   await expect(page.getByRole("dialog", { name: "월경계 학생 수업메모" })).toBeVisible();

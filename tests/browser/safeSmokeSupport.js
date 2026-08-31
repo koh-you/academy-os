@@ -27,6 +27,20 @@ export async function loginAsTeacher(page) {
   await expect(page.getByRole("navigation", { name: "주요 화면" })).toBeVisible();
 }
 
+export async function navigateCalendarToMonth(page, targetYear, targetMonth) {
+  const monthRegion = page.getByRole("region", { name: /\d{4}년 \d{1,2}월 수업 달력/ });
+  for (let guard = 0; guard < 36; guard += 1) {
+    const label = await monthRegion.getAttribute("aria-label");
+    const match = label?.match(/(\d{4})년 (\d{1,2})월/);
+    if (!match) break;
+    const currentYear = Number(match[1]);
+    const currentMonth = Number(match[2]);
+    if (currentYear === targetYear && currentMonth === targetMonth) return;
+    const forward = currentYear < targetYear || (currentYear === targetYear && currentMonth < targetMonth);
+    await page.getByRole("button", { name: forward ? "다음 달" : "이전 달" }).click();
+  }
+}
+
 export async function resetSafeFixture(request) {
   await expect.poll(async () => {
     try {

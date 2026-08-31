@@ -22,10 +22,9 @@ export function LessonJournalCommentComposerView({
 }) {
   const {
     actionLabel,
-    isManualResendAvailable,
+    isLessonNotificationOff,
     isNotificationMuted,
     isParent,
-    planMode,
     previewTitle,
     title,
     visibleDraftSaveState
@@ -91,9 +90,9 @@ export function LessonJournalCommentComposerView({
             </button>
             <button
               className="primaryButton"
-              disabled={hasUnsavedDraft || isNotificationMuted || (planMode === "none" && !isManualResendAvailable)}
+              disabled={hasUnsavedDraft || isNotificationMuted || isLessonNotificationOff}
               onClick={onSend}
-              title={hasUnsavedDraft ? "최종 문구 저장 후 예약/발송할 수 있습니다." : ""}
+              title={hasUnsavedDraft ? "최종 문구 저장 후 발송할 수 있습니다." : ""}
               type="button"
             >
               {hasUnsavedDraft ? "저장 후 가능" : actionLabel}

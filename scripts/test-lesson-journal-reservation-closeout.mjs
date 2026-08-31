@@ -50,7 +50,7 @@ for (const appOwnedBoundary of [
 ]) {
   assert.ok(detailSource.includes(appOwnedBoundary), `reservation boundary must remain in App: ${appOwnedBoundary}`);
 }
-assert.ok(appSource.includes("function loadLessonJournalReservationAudit({ date, lessonId })"));
+assert.ok(appSource.includes("function loadLessonJournalReservationAudit({ lessonId })"));
 assert.ok(appSource.includes("return getJsonWithTimeout(path, 12000,"));
 
 for (const removedProviderBoundary of [

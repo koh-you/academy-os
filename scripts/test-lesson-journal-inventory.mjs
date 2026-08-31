@@ -300,8 +300,8 @@ for (const directSideEffect of [
 ]) {
   assert.ok(journalSource.includes(directSideEffect), `missing journal side-effect boundary: ${directSideEffect}`);
 }
-assert.ok(appSource.includes("function loadLessonJournalReservationAudit({ date, lessonId })"));
-assert.ok(appSource.includes("/api/notification-jobs?date="));
+assert.ok(appSource.includes("function loadLessonJournalReservationAudit({ lessonId })"));
+assert.ok(appSource.includes("/api/notification-jobs?lessonId="));
 
 for (const removedDirectProviderBoundary of [
   "/api/solapi/groups?date=",
@@ -784,7 +784,7 @@ for (const extractedPreparationMemoViewContract of [
 for (const extractedCommentComposerContract of [
   "createLessonJournalCommentAudienceModel",
   "createLessonJournalCommentComposerModel",
-  "isManualResendAvailable",
+  "isLessonNotificationOff",
   "forceTestRecipient",
   "visibleDraftSaveState"
 ]) {
@@ -898,7 +898,6 @@ for (const extractedCommentSendPayloadContract of [
   "createLessonJournalCommentSendPayload",
   "manualCommentBody: draftComment",
   "manualPreviewBody: generatedPreviewText",
-  "resendReason:",
   "sendTiming",
   "[field]: draftComment"
 ]) {

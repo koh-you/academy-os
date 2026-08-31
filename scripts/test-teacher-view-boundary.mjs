@@ -254,7 +254,7 @@ assert.equal(lessonJournalDetailSource.includes("provider: {"), true);
 assert.equal(lessonJournalDetailSource.includes("onSaveLessonJournalDrafts,"), true);
 assert.equal(lessonJournalDetailSource.includes("useLessonJournalDraftController({"), true);
 assert.equal(lessonJournalDraftControllerSource.includes("onSaveLessonJournalDrafts?.("), true);
-assert.equal(appSource.includes("function loadLessonJournalReservationAudit({ date, lessonId })"), true);
+assert.equal(appSource.includes("function loadLessonJournalReservationAudit({ lessonId })"), true);
 assert.equal(appSource.includes("const lessonJournalTransport = Object.freeze({"), true);
 assert.equal(appSource.includes("lessonJournalTransport,"), true);
 assert.equal(appSource.includes("return getJsonWithTimeout(path, 12000,"), true);
