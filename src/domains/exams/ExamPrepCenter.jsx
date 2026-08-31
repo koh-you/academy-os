@@ -293,7 +293,10 @@ export function ExamPrepCenter({
           {activeTab === "info" && hasExamPeriodSundaySchedule({ lessons: sundayScheduleLessons }) ? (
             <button
               className="softButton compact"
-              onClick={() => openExamPeriodSundaySchedulePdf(buildExamPeriodSundayScheduleModel({ lessons: sundayScheduleLessons, students }))}
+              onClick={() => openExamPeriodSundaySchedulePdf(
+                buildExamPeriodSundayScheduleModel({ lessons: sundayScheduleLessons, students }),
+                { title: "고태영T 일요시험대비 일정표" }
+              )}
               type="button"
             >
               일요시험대비 일정표 PDF
