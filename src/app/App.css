@@ -5134,11 +5134,16 @@ summary:focus-visible {
 }
 
 .countBadge {
+  align-items: center;
   background: var(--academy-accent-bg, #eef2ff);
-  border-radius: 8px;
+  border: 1px solid var(--academy-accent-border, #c7d2fe);
+  border-radius: 999px;
   color: var(--status-closure-text, #3730a3);
+  display: inline-flex;
+  font-size: 13px;
   font-weight: 900;
-  padding: 8px 10px;
+  min-height: 28px;
+  padding: 0 12px;
 }
 
 .lessonCards {

@@ -940,7 +940,10 @@ export function StudentProfileModal({
                   onClick={saveProfileDraft}
                   type="button"
                 >
-                  {saveActionLabel("기본정보만 저장", effectiveProfileSaveState)}
+                  {saveActionLabel(
+                    forceRosterReconcile && profileDirtyFieldCount === 0 ? "명단 재계산 저장" : "기본정보만 저장",
+                    effectiveProfileSaveState
+                  )}
                 </button>
               </StickySaveBar>
             ) : null}
