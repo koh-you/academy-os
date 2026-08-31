@@ -38,6 +38,10 @@ function isSameLessonContinuityForStudent(lesson, candidate) {
     : !isSpecialLectureLesson(candidate);
 }
 
+export function isMakeupLesson(lesson = {}) {
+  return lesson.lessonType === "makeup";
+}
+
 const attendedStatuses = new Set(["late", "present"]);
 
 export function hasStudentAttendedLesson(records = [], lessonId = "", studentId = "") {
@@ -51,7 +55,7 @@ export function hasStudentAttendedLesson(records = [], lessonId = "", studentId 
   ));
 }
 
-export function findPreviousLessonsForStudent(lessons, lesson, studentId, { records = null } = {}) {
+export function findPreviousLessonsForStudent(lessons, lesson, studentId, { onlyRegularLessons = false, records = null } = {}) {
   const currentSortValue = getLessonSortValue(lesson);
   const canVerifyAttendance = Array.isArray(records);
   return [...lessons]
@@ -59,6 +63,7 @@ export function findPreviousLessonsForStudent(lessons, lesson, studentId, { reco
     .filter((candidate) => !shouldIgnoreLessonAttendance(candidate))
     .filter((candidate) => candidate.studentIds?.includes(studentId))
     .filter((candidate) => isSameLessonContinuityForStudent(lesson, candidate))
+    .filter((candidate) => !onlyRegularLessons || !isMakeupLesson(candidate))
     .filter((candidate) => !canVerifyAttendance || hasStudentAttendedLesson(records, candidate.lessonId, studentId))
     .filter((candidate) => getLessonSortValue(candidate) < currentSortValue)
     .sort((a, b) => getLessonSortValue(b).localeCompare(getLessonSortValue(a)));

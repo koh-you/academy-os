@@ -2763,6 +2763,19 @@ summary:focus-visible {
   gap: 6px;
 }
 
+.journalPreviousHomeworkCell {
+  display: grid;
+  gap: 4px;
+  grid-template-rows: 1fr auto;
+  min-height: 0;
+}
+
+.journalPreviousLessonSourceToggle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
 .commentOpenButton {
   background: var(--academy-accent-bg, #eef2ff);
   border: 1px solid var(--academy-accent-border, #c7d2fe);
@@ -5547,6 +5560,18 @@ textarea {
   font-size: 12px;
   min-height: 32px;
   padding: 6px 10px;
+}
+
+.ghostButton.mini {
+  font-size: 11px;
+  min-height: 26px;
+  padding: 0 8px;
+}
+
+.ghostButton.active {
+  background: var(--status-info-bg, #eff6ff);
+  border-color: var(--academy-focus-ring, #2563eb);
+  color: var(--academy-primary, #17213d);
 }
 
 .ghostButton.scheduleEditButton {

@@ -8735,7 +8735,7 @@ function createReportBody(student, lesson, record) {
     .replace("{teacherComment}", record?.teacherComment || "아직 강사 코멘트가 입력되지 않았습니다.");
 }
 
-function getLessonHomework(homeworks, lesson, student, homeworkType, lessons = [], records = null) {
+function getLessonHomework(homeworks, lesson, student, homeworkType, lessons = [], records = null, { onlyRegularLessons = false } = {}) {
   const directHomework =
     homeworks.find(
       (homework) =>
@@ -8752,7 +8752,7 @@ function getLessonHomework(homeworks, lesson, student, homeworkType, lessons = [
     lessons,
     lesson,
     student.studentId,
-    { records }
+    { onlyRegularLessons, records }
   );
 
   return selectLinkedPreviousHomework({
