@@ -4,15 +4,17 @@ import {
   hasExamPeriodSundaySchedule
 } from "../src/domains/lessons/examPeriodSundaySchedule.js";
 
-const isExamPrepLesson = (lesson) => lesson?.lessonType === "examPrep";
-
 const students = [
   { name: "김가람", schoolName: "상계중", studentId: "student-1" },
   { name: "박나래", schoolName: "정의여고", studentId: "student-2" },
   { name: "이도윤", schoolName: "상계중", studentId: "student-3" }
 ];
 
-const lessons = [
+// Mirrors App.jsx's `examPrepScheduleLessons`, which is already narrowed to
+// lessonType === "examPrep" before this module ever sees it — plus a couple
+// of non-examPrep lessons here to prove the caller's filtering is what keeps
+// them out, not this module re-checking lessonType itself.
+const allLessons = [
   {
     date: "2026-08-16",
     endTime: "18:00",
@@ -51,16 +53,16 @@ const lessons = [
     studentIds: ["student-2"]
   }
 ];
+const examPrepLessons = allLessons.filter((lesson) => lesson.lessonType === "examPrep");
 
-assert.equal(hasExamPeriodSundaySchedule({ isExamPrepLesson, lessons }), true);
-assert.equal(hasExamPeriodSundaySchedule({ isExamPrepLesson, lessons: [] }), false);
+assert.equal(hasExamPeriodSundaySchedule({ lessons: examPrepLessons }), true);
+assert.equal(hasExamPeriodSundaySchedule({ lessons: [] }), false);
 assert.equal(
-  hasExamPeriodSundaySchedule({ isExamPrepLesson, lessons: lessons.filter((lesson) => lesson.lessonId !== "sunday-1" && lesson.lessonId !== "sunday-2") }),
-  false,
-  "non-Sunday and non-examPrep lessons must not count"
+  hasExamPeriodSundaySchedule({ lessons: examPrepLessons.filter((lesson) => lesson.lessonId !== "sunday-1" && lesson.lessonId !== "sunday-2") }),
+  false
 );
 
-const model = buildExamPeriodSundayScheduleModel({ isExamPrepLesson, lessons, students });
+const model = buildExamPeriodSundayScheduleModel({ lessons: examPrepLessons, students });
 
 assert.equal(model.totalSessions, 2, "only the two Sunday examPrep lessons count as sessions");
 assert.equal(model.totalStudents, 3, "distinct students across both Sundays");
@@ -70,21 +72,24 @@ const firstDay = model.dates[0];
 assert.equal(firstDay.dateLabel, "8.16(일)");
 assert.equal(firstDay.studentCount, 3);
 assert.equal(firstDay.lessons.length, 1);
-assert.equal(firstDay.lessons[0].timeLabel, "13:00-18:00");
 assert.equal(firstDay.lessons[0].sourceLabel, "상계중 2학기 중간고사 · 정의여고 2학기 중간고사");
 assert.deepEqual(
-  firstDay.lessons[0].schoolGroups.map((group) => [group.label, group.students.map((student) => student.name)]),
-  [["상계중", ["김가람", "이도윤"]], ["정의여고", ["박나래"]]],
-  "students group by school, sorted in Korean order"
+  firstDay.lessons[0].students.map((student) => [student.name, student.schoolName, student.timeLabel]),
+  [
+    ["김가람", "상계중", "13:00-18:00"],
+    ["이도윤", "상계중", "13:00-18:00"],
+    ["박나래", "정의여고", "13:30-15:00"]
+  ],
+  "each student keeps their own time next to their name, sorted by that time"
 );
 
 const secondDay = model.dates[1];
 assert.equal(secondDay.dateLabel, "8.23(일)");
 assert.equal(secondDay.studentCount, 2);
 
-const emptyModel = buildExamPeriodSundayScheduleModel({ isExamPrepLesson, lessons: [], students });
+const emptyModel = buildExamPeriodSundayScheduleModel({ lessons: [], students });
 assert.deepEqual(emptyModel.dates, []);
 assert.equal(emptyModel.totalSessions, 0);
 assert.equal(emptyModel.totalStudents, 0);
 
-console.log("exam period Sunday schedule model passed · sessions 2 · dates 2 · school grouping verified");
+console.log("exam period Sunday schedule model passed · sessions 2 · dates 2 · per-student name/school/time rows verified");

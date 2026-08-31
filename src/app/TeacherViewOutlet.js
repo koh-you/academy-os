@@ -210,6 +210,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
         tallySummaries: models.tallySummaries,
         templates: models.classTemplates,
         rows: models.examPrepRows,
+        sundayScheduleLessons: models.examPrepScheduleLessons,
         students: models.students,
         onConfirmExamPostSubmission: actions.handleConfirmExamPostSubmission,
         onOpenExamPostFile: actions.handleOpenExamPostSubmissionFile,

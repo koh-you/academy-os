@@ -12,6 +12,7 @@ import { getAggregateSaveState, InlineSaveStatus } from "../../shared/components
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SearchField } from "../../shared/components/SearchField.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
+import { buildExamPeriodSundayScheduleModel, hasExamPeriodSundaySchedule, openExamPeriodSundaySchedulePdf } from "../lessons/examPeriodSundaySchedule.js";
 
 export function ExamPrepCenter({
   runtime,
@@ -24,6 +25,7 @@ export function ExamPrepCenter({
   tallySummaries = {},
   rows,
   students,
+  sundayScheduleLessons = [],
   templates,
   onConfirmExamPostSubmission,
   onOpenExamPostFile,
@@ -287,6 +289,15 @@ export function ExamPrepCenter({
               placeholder="학교, 과목, 출판사 검색"
               result={`${filteredRows.length}건`}
             />
+          ) : null}
+          {activeTab === "info" && hasExamPeriodSundaySchedule({ lessons: sundayScheduleLessons }) ? (
+            <button
+              className="softButton compact"
+              onClick={() => openExamPeriodSundaySchedulePdf(buildExamPeriodSundayScheduleModel({ lessons: sundayScheduleLessons, students }))}
+              type="button"
+            >
+              일요시험대비 일정표 PDF
+            </button>
           ) : null}
           </>
         )}
