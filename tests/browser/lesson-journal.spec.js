@@ -888,7 +888,7 @@ test("lesson journal skips an unused intermediate lesson but stops at an attende
   expect(pageErrors).toEqual([]);
 });
 
-test("lesson journal follows a student's weekday-specific times across regular classes", async ({ page }) => {
+test("lesson journal follows a student's immediately previous attended lesson across regular classes", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await page.route("**/api/students*", async (route) => {
     const response = await route.fetch();
@@ -901,8 +901,7 @@ test("lesson journal follows a student's weekday-specific times across regular c
           student.studentId === "safe-active-student"
             ? {
                 ...student,
-                defaultClassTemplateId: "safe-cross-month-class",
-                scheduleOverride: "화 10:00-13:00 / 목 19:00-22:00 / 토 10:00-13:00"
+                defaultClassTemplateId: "safe-cross-month-class"
               }
             : student
         ))

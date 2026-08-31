@@ -22,7 +22,7 @@ export function selectPreviousLessonMemoContext({
     lessons,
     currentLesson,
     student.studentId,
-    { allowRegularClassFallback: true, student }
+    { records: sourceRecords }
   );
   const previousLessonIds = new Set(previousLessons.map((item) => item.lessonId));
   const recordMatchesCurrentLessonGroup = (record) => {
@@ -53,21 +53,16 @@ export function selectPreviousLessonMemoContext({
     .filter(Boolean);
   const previousLessonRecordInCurrentGroup = previousLessonRecordsInCurrentGroup[0] ?? null;
   const previousLessonRecord = previousLessonRecordInCurrentGroup;
-  const editableSourceRecords = previousLessonRecordsInCurrentGroup;
-  const latestNonEmptyValue = (fieldNames) => {
-    for (const record of editableSourceRecords) {
-      for (const fieldName of fieldNames) {
-        const value = record?.[fieldName];
-        if (String(value ?? "").trim()) return String(value);
-      }
-    }
-    return "";
-  };
-  const previousEditableRecord = editableSourceRecords.length
+  const previousEditableRecord = previousLessonRecord
     ? {
-        ...(previousLessonRecord ?? {}),
-        lessonMaterial: latestNonEmptyValue(["lessonMaterial"]),
-        lessonProgress: latestNonEmptyValue(["lessonProgress", "progress", "lessonContent"])
+        ...previousLessonRecord,
+        lessonMaterial: String(previousLessonRecord.lessonMaterial ?? ""),
+        lessonProgress: String(
+          previousLessonRecord.lessonProgress ??
+          previousLessonRecord.progress ??
+          previousLessonRecord.lessonContent ??
+          ""
+        )
       }
     : null;
   const visiblePreviousMemoRecord = previousLessonRecord?.preparationMemo?.trim() && !isMemoRecordAcknowledged(previousLessonRecord)

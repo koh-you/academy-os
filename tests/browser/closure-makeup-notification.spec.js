@@ -16,6 +16,7 @@ test.beforeEach(async ({ request }) => {
 test("closure makeup edit opens notification management modal and reserves three notification types", async ({ page, request }) => {
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error));
+  await page.clock.install({ time: new Date("2026-08-29T09:00:00+09:00") });
   await page.goto("/");
   await page.getByRole("button", { name: "선생님" }).click();
   await page.getByLabel("선생님 아이디").fill("preview");

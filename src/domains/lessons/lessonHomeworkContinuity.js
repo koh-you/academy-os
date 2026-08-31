@@ -1,8 +1,4 @@
 import { shouldIgnoreLessonAttendance } from "./lessonClosure.js";
-import {
-  isStudentAssignedToRegularLesson,
-  isStudentScheduledForLesson
-} from "../../shared/utils/studentSchedule.js";
 import { getSpecialLectureLessonTrackId } from "../specialLectures/specialLectureGuideUtils.js";
 
 export function getLessonSortValue(lesson) {
@@ -36,40 +32,36 @@ export function isSameLessonGroup(lesson, candidate) {
   return getLessonContinuityKey(lesson) === getLessonContinuityKey(candidate);
 }
 
-function isRegularProfileContinuityCandidate(lesson = {}, student = {}) {
-  if (!lesson.lessonType || lesson.lessonType === "class" || lesson.lessonType === "closure") {
-    return isStudentAssignedToRegularLesson(lesson, student);
-  }
-  return !isSpecialLectureLesson(lesson);
+function isSameLessonContinuityForStudent(lesson, candidate) {
+  return isSpecialLectureLesson(lesson)
+    ? isSameLessonGroup(lesson, candidate)
+    : !isSpecialLectureLesson(candidate);
 }
 
-function isSameLessonContinuityForStudent(lesson, candidate, student = {}) {
-  if (
-    !isSpecialLectureLesson(lesson) &&
-    student?.scheduleOverride &&
-    isStudentAssignedToRegularLesson(lesson, student)
-  ) {
-    return isRegularProfileContinuityCandidate(candidate, student);
-  }
-  return isSameLessonGroup(lesson, candidate);
+const attendedStatuses = new Set(["late", "present"]);
+
+export function hasStudentAttendedLesson(records = [], lessonId = "", studentId = "") {
+  return records.some((record) => (
+    record?.lessonId === lessonId &&
+    record?.studentId === studentId &&
+    (
+      attendedStatuses.has(record.attendanceStatus) ||
+      [record.checkInAt, record.checkInTime].some(hasText)
+    )
+  ));
 }
 
-export function findPreviousLessonsForStudent(lessons, lesson, studentId, { allowRegularClassFallback = false, student = null } = {}) {
+export function findPreviousLessonsForStudent(lessons, lesson, studentId, { records = null } = {}) {
   const currentSortValue = getLessonSortValue(lesson);
-  const previousLessons = [...lessons]
+  const canVerifyAttendance = Array.isArray(records);
+  return [...lessons]
     .filter((candidate) => candidate.lessonId !== lesson.lessonId)
     .filter((candidate) => !shouldIgnoreLessonAttendance(candidate))
     .filter((candidate) => candidate.studentIds?.includes(studentId))
-    .filter((candidate) => isStudentScheduledForLesson(candidate, student))
+    .filter((candidate) => isSameLessonContinuityForStudent(lesson, candidate))
+    .filter((candidate) => !canVerifyAttendance || hasStudentAttendedLesson(records, candidate.lessonId, studentId))
     .filter((candidate) => getLessonSortValue(candidate) < currentSortValue)
     .sort((a, b) => getLessonSortValue(b).localeCompare(getLessonSortValue(a)));
-  const previousLessonsInCurrentGroup = previousLessons.filter((candidate) => (
-    isSameLessonContinuityForStudent(lesson, candidate, student)
-  ));
-  if (previousLessonsInCurrentGroup.length || !allowRegularClassFallback || isSpecialLectureLesson(lesson)) {
-    return previousLessonsInCurrentGroup;
-  }
-  return previousLessons.filter((candidate) => !isSpecialLectureLesson(candidate));
 }
 
 export function findNextLessonForStudent(lessons, lesson, student) {
@@ -78,9 +70,8 @@ export function findNextLessonForStudent(lessons, lesson, student) {
   return [...lessons]
     .filter((candidate) => candidate.lessonId !== lesson.lessonId)
     .filter((candidate) => !shouldIgnoreLessonAttendance(candidate))
-    .filter((candidate) => isSameLessonContinuityForStudent(lesson, candidate, student))
+    .filter((candidate) => isSameLessonContinuityForStudent(lesson, candidate))
     .filter((candidate) => candidate.studentIds?.includes(studentId))
-    .filter((candidate) => isStudentScheduledForLesson(candidate, student))
     .filter((candidate) => getLessonSortValue(candidate) > currentSortValue)
     .sort((a, b) => getLessonSortValue(a).localeCompare(getLessonSortValue(b)))[0];
 }

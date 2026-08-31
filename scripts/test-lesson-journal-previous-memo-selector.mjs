@@ -21,48 +21,8 @@ function isSpecialLectureLesson(lesson = {}) {
   return Boolean(lesson.lessonType === "specialLecture" || lesson.specialLectureGuideId);
 }
 
-function getLessonGroupKey(lesson = {}) {
-  if (isSpecialLectureLesson(lesson)) {
-    return lesson.lessonTrackId || lesson.specialLectureGuideId || "";
-  }
-  return lesson.classTemplateId || lesson.className || "";
-}
-
-function isSameLessonGroup(lesson, candidate) {
-  const lessonIsSpecial = isSpecialLectureLesson(lesson);
-  const candidateIsSpecial = isSpecialLectureLesson(candidate);
-  if (lessonIsSpecial || candidateIsSpecial) {
-    return lessonIsSpecial && candidateIsSpecial && getLessonGroupKey(lesson) === getLessonGroupKey(candidate);
-  }
-  return getLessonGroupKey(lesson) === getLessonGroupKey(candidate);
-}
-
-function isClosureLesson(lesson = {}) {
-  return lesson.lessonType === "closure";
-}
-
-function lessonSortValue(lesson = {}) {
-  return `${lesson.date ?? ""}T${lesson.startTime || "00:00"}`;
-}
-
-function findPreviousLessonsForStudent(lessons, lesson, studentId, { allowRegularClassFallback = false } = {}) {
-  const previousLessons = lessons
-    .filter((candidate) => candidate.lessonId !== lesson.lessonId)
-    .filter((candidate) => candidate.status !== "canceled" && !isClosureLesson(candidate))
-    .filter((candidate) => candidate.studentIds?.includes(studentId))
-    .filter((candidate) => lessonSortValue(candidate) < lessonSortValue(lesson))
-    .sort((left, right) => lessonSortValue(right).localeCompare(lessonSortValue(left)));
-  const sameGroupLesson = previousLessons.find((candidate) => isSameLessonGroup(lesson, candidate));
-  if (sameGroupLesson || !allowRegularClassFallback || isSpecialLectureLesson(lesson)) {
-    return previousLessons.filter((candidate) => isSameLessonGroup(lesson, candidate));
-  }
-  return previousLessons.filter((candidate) => !isSpecialLectureLesson(candidate));
-}
-
 const dependencies = {
-  findPreviousLessonsForStudent,
-  isClosureLesson,
-  isSameLessonGroup,
+  findPreviousLessonsForStudent: findActualPreviousLessonsForStudent,
   isSpecialLectureLesson
 };
 const priorLesson = {
@@ -81,12 +41,14 @@ const olderLesson = {
 };
 const baseLessons = [currentLesson, priorLesson, olderLesson];
 const priorMemoRecord = {
+  attendanceStatus: "present",
   lessonId: priorLesson.lessonId,
   lessonStudentRecordId: "record_prior",
   preparationMemo: "직전 TARGET 메모",
   studentId: student.studentId
 };
 const olderMemoRecord = {
+  attendanceStatus: "late",
   lessonId: olderLesson.lessonId,
   lessonStudentRecordId: "record_older",
   preparationMemo: "이전 참고 메모",
@@ -152,6 +114,7 @@ const fallbackContext = selectPreviousLessonMemoContext({
   currentLesson,
   lessons: [currentLesson, movedClassLesson],
   records: [{
+    attendanceStatus: "present",
     lessonId: movedClassLesson.lessonId,
     preparationMemo: "반 이동 직전 메모",
     studentId: student.studentId
@@ -174,6 +137,7 @@ const specialIsolationContext = selectPreviousLessonMemoContext({
   currentLesson: specialLesson,
   lessons: [specialLesson, movedClassLesson],
   records: [{
+    attendanceStatus: "present",
     lessonId: movedClassLesson.lessonId,
     preparationMemo: "정규 CONTROL 메모",
     studentId: student.studentId
@@ -201,8 +165,8 @@ const filteredContext = selectPreviousLessonMemoContext({
   currentLesson,
   lessons: [currentLesson, canceledLesson, closureLesson, olderLesson],
   records: [
-    { lessonId: canceledLesson.lessonId, preparationMemo: "취소 CONTROL", studentId: student.studentId },
-    { lessonId: closureLesson.lessonId, preparationMemo: "휴강 CONTROL", studentId: student.studentId },
+    { attendanceStatus: "present", lessonId: canceledLesson.lessonId, preparationMemo: "취소 CONTROL", studentId: student.studentId },
+    { attendanceStatus: "present", lessonId: closureLesson.lessonId, preparationMemo: "휴강 CONTROL", studentId: student.studentId },
     olderMemoRecord
   ],
   student
@@ -239,18 +203,21 @@ const monthBoundaryContext = selectPreviousLessonMemoContext({
   lessons: [monthBoundaryCurrentLesson, blankImmediateLesson, populatedOlderLesson, unrelatedSpecialLesson],
   records: [
     {
+      attendanceStatus: "present",
       lessonId: blankImmediateLesson.lessonId,
       lessonMaterial: "",
       lessonProgress: "",
       studentId: student.studentId
     },
     {
+      attendanceStatus: "present",
       lessonId: populatedOlderLesson.lessonId,
       lessonMaterial: "7월 최신 교재",
       lessonProgress: "7월 최신 진도",
       studentId: student.studentId
     },
     {
+      attendanceStatus: "present",
       lessonId: unrelatedSpecialLesson.lessonId,
       lessonMaterial: "특강 CONTROL 교재",
       lessonProgress: "특강 CONTROL 진도",
@@ -260,8 +227,8 @@ const monthBoundaryContext = selectPreviousLessonMemoContext({
   student
 });
 assert.equal(monthBoundaryContext.previousRecord?.lessonId, blankImmediateLesson.lessonId);
-assert.equal(monthBoundaryContext.previousEditableRecord?.lessonMaterial, "7월 최신 교재");
-assert.equal(monthBoundaryContext.previousEditableRecord?.lessonProgress, "7월 최신 진도");
+assert.equal(monthBoundaryContext.previousEditableRecord?.lessonMaterial, "");
+assert.equal(monthBoundaryContext.previousEditableRecord?.lessonProgress, "");
 assert.notEqual(monthBoundaryContext.previousEditableRecord?.lessonMaterial, "특강 CONTROL 교재");
 
 const splitScheduleStudent = {
@@ -305,17 +272,39 @@ const splitLessons = [
   splitRecentWednesdayLesson,
   splitImmediateMakeupLesson
 ];
+const splitRecords = [
+  {
+    attendanceStatus: "present",
+    lessonId: splitImmediateMakeupLesson.lessonId,
+    lessonMaterial: "",
+    lessonProgress: "",
+    studentId: splitScheduleStudent.studentId
+  },
+  {
+    attendanceStatus: "absent",
+    lessonId: splitRecentWednesdayLesson.lessonId,
+    lessonMaterial: "결석한 수요일 CONTROL 교재",
+    lessonProgress: "결석한 수요일 CONTROL 진도",
+    studentId: splitScheduleStudent.studentId
+  },
+  {
+    attendanceStatus: "present",
+    lessonId: splitOlderMondayLesson.lessonId,
+    lessonMaterial: "오래된 월요일 CONTROL 교재",
+    lessonProgress: "오래된 월요일 CONTROL 진도",
+    studentId: splitScheduleStudent.studentId
+  }
+];
 const splitPreviousLessons = findActualPreviousLessonsForStudent(
   splitLessons,
   splitCurrentLesson,
   splitScheduleStudent.studentId,
-  { allowRegularClassFallback: true, student: splitScheduleStudent }
+  { records: splitRecords }
 );
 assert.deepEqual(
   splitPreviousLessons.map((lesson) => lesson.lessonId),
   [
     splitImmediateMakeupLesson.lessonId,
-    splitRecentWednesdayLesson.lessonId,
     splitOlderMondayLesson.lessonId
   ]
 );
@@ -329,34 +318,12 @@ const splitContext = selectPreviousLessonMemoContext({
   currentLesson: splitCurrentLesson,
   findPreviousLessonsForStudent: findActualPreviousLessonsForStudent,
   lessons: splitLessons,
-  records: [
-    {
-      attendanceStatus: "present",
-      lessonId: splitImmediateMakeupLesson.lessonId,
-      lessonMaterial: "",
-      lessonProgress: "",
-      studentId: splitScheduleStudent.studentId
-    },
-    {
-      attendanceStatus: "absent",
-      lessonId: splitRecentWednesdayLesson.lessonId,
-      lessonMaterial: "직전 수요일 교재",
-      lessonProgress: "직전 수요일 진도",
-      studentId: splitScheduleStudent.studentId
-    },
-    {
-      attendanceStatus: "present",
-      lessonId: splitOlderMondayLesson.lessonId,
-      lessonMaterial: "오래된 월요일 CONTROL 교재",
-      lessonProgress: "오래된 월요일 CONTROL 진도",
-      studentId: splitScheduleStudent.studentId
-    }
-  ],
+  records: splitRecords,
   student: splitScheduleStudent
 });
 assert.equal(splitContext.previousRecord?.lessonId, splitImmediateMakeupLesson.lessonId);
-assert.equal(splitContext.previousEditableRecord?.lessonMaterial, "직전 수요일 교재");
-assert.equal(splitContext.previousEditableRecord?.lessonProgress, "직전 수요일 진도");
+assert.equal(splitContext.previousEditableRecord?.lessonMaterial, "");
+assert.equal(splitContext.previousEditableRecord?.lessonProgress, "");
 assert.notEqual(splitContext.previousEditableRecord?.lessonMaterial, "오래된 월요일 CONTROL 교재");
 assert.equal(selectLinkedPreviousHomework({
   homeworks: [{
@@ -377,7 +344,6 @@ assert.equal(selectLinkedPreviousHomework({
 
 const alternateWeekdayStudent = {
   defaultClassTemplateId: "class_saturday_morning",
-  scheduleOverride: "화 13:00-16:00 / 목 10:00-13:00 / 토 16:00-19:00",
   studentId: "student_alternate_weekdays"
 };
 const alternateWeekdayLessons = [
@@ -388,6 +354,15 @@ const alternateWeekdayLessons = [
     lessonId: "lesson_alternate_saturday_current",
     lessonType: "class",
     startTime: "16:00",
+    studentIds: [alternateWeekdayStudent.studentId]
+  },
+  {
+    classTemplateId: "class_friday_evening",
+    date: "2026-09-04",
+    endTime: "22:00",
+    lessonId: "lesson_alternate_friday_not_attended",
+    lessonType: "class",
+    startTime: "19:00",
     studentIds: [alternateWeekdayStudent.studentId]
   },
   {
@@ -414,14 +389,32 @@ assert.deepEqual(
     alternateWeekdayLessons,
     alternateWeekdayLessons[0],
     alternateWeekdayStudent.studentId,
-    { allowRegularClassFallback: true, student: alternateWeekdayStudent }
+    {
+      records: [
+        {
+          attendanceStatus: "pending",
+          lessonId: "lesson_alternate_friday_not_attended",
+          studentId: alternateWeekdayStudent.studentId
+        },
+        {
+          attendanceStatus: "present",
+          lessonId: "lesson_alternate_thursday_previous",
+          studentId: alternateWeekdayStudent.studentId
+        },
+        {
+          attendanceStatus: "late",
+          lessonId: "lesson_alternate_tuesday_older",
+          studentId: alternateWeekdayStudent.studentId
+        }
+      ]
+    }
   ).map((lesson) => lesson.lessonId),
   ["lesson_alternate_thursday_previous", "lesson_alternate_tuesday_older"]
 );
 assert.equal(
   findNextLessonForStudent(
     alternateWeekdayLessons,
-    alternateWeekdayLessons[2],
+    alternateWeekdayLessons[3],
     alternateWeekdayStudent
   )?.lessonId,
   "lesson_alternate_thursday_previous"
