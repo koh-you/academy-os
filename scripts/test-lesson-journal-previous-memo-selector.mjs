@@ -342,6 +342,50 @@ assert.equal(selectLinkedPreviousHomework({
   studentId: splitScheduleStudent.studentId
 }), null);
 
+// A teacher can opt out of the "closest attended lesson (even a makeup)"
+// default and ask for the closest *regular* class instead — this is the
+// same fixture as above, so it proves the toggle actually changes which
+// lesson gets treated as "직전 수업" rather than only filtering candidates
+// that were already excluded for other reasons.
+const splitRegularOnlyPreviousLessons = findActualPreviousLessonsForStudent(
+  splitLessons,
+  splitCurrentLesson,
+  splitScheduleStudent.studentId,
+  { onlyRegularLessons: true, records: splitRecords }
+);
+assert.deepEqual(
+  splitRegularOnlyPreviousLessons.map((lesson) => lesson.lessonId),
+  [splitOlderMondayLesson.lessonId],
+  "onlyRegularLessons must skip the makeup lesson entirely, not just prefer it less"
+);
+const splitRegularOnlyContext = selectPreviousLessonMemoContext({
+  ...dependencies,
+  currentLesson: splitCurrentLesson,
+  findPreviousLessonsForStudent: findActualPreviousLessonsForStudent,
+  lessons: splitLessons,
+  onlyRegularLessons: true,
+  records: splitRecords,
+  student: splitScheduleStudent
+});
+assert.equal(splitRegularOnlyContext.previousRecord?.lessonId, splitOlderMondayLesson.lessonId);
+assert.equal(splitRegularOnlyContext.previousEditableRecord?.lessonMaterial, "오래된 월요일 CONTROL 교재");
+assert.equal(
+  selectLinkedPreviousHomework({
+    homeworks: [{
+      homeworkId: "homework_old_monday_next",
+      homeworkType: "next",
+      lessonId: splitOlderMondayLesson.lessonId,
+      studentId: splitScheduleStudent.studentId,
+      title: "오래된 월요일 CONTROL 숙제"
+    }],
+    previousLessons: splitRegularOnlyPreviousLessons,
+    records: splitRecords,
+    studentId: splitScheduleStudent.studentId
+  })?.title,
+  "오래된 월요일 CONTROL 숙제",
+  "onlyRegularLessons must let the previous-homework lookup reach the older regular class"
+);
+
 const alternateWeekdayStudent = {
   defaultClassTemplateId: "class_saturday_morning",
   studentId: "student_alternate_weekdays"

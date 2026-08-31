@@ -22,6 +22,7 @@ assert.deepEqual(initialState, {
   commentModal: null,
   editingMemoKey: "",
   prepMemoModal: null,
+  previousLessonSourceByStudent: {},
   studentPreviewId: ""
 });
 assert.deepEqual(activeOverlayState, activeOverlaySnapshot);
@@ -44,9 +45,11 @@ for (const binding of [
   "commentModal,",
   "editingMemoKey,",
   "prepMemoModal,",
+  "previousLessonSourceByStudent,",
   "setCommentModal,",
   "setEditingMemoKey,",
   "setPrepMemoModal,",
+  "setPreviousLessonSourceForStudent,",
   "setStudentPreviewId,",
   "studentPreviewId"
 ]) {
@@ -66,6 +69,7 @@ for (const hookContract of [
   "const [commentModal, setCommentModal] = useState(initialState.commentModal)",
   "const [prepMemoModal, setPrepMemoModal] = useState(initialState.prepMemoModal)",
   "const [editingMemoKey, setEditingMemoKey] = useState(initialState.editingMemoKey)",
+  "const [previousLessonSourceByStudent, setPreviousLessonSourceByStudent] = useState(initialState.previousLessonSourceByStudent)",
   "const [studentPreviewId, setStudentPreviewId] = useState(initialState.studentPreviewId)"
 ]) {
   assert.ok(overlayStateSource.includes(hookContract), `missing overlay hook contract: ${hookContract}`);

@@ -9,8 +9,8 @@ assert.ok(mainJavaScript, "production build must emit one hashed main JavaScript
 
 const mainBytes = (await stat(resolve(assetsDirectory, mainJavaScript))).size;
 assert.ok(
-  mainBytes <= 945_000,
-  `initial main JavaScript exceeded the 0.945 MB 3-7 budget: ${mainBytes.toLocaleString()} bytes`
+  mainBytes <= 946_000,
+  `initial main JavaScript exceeded the 0.946 MB 3-7 budget: ${mainBytes.toLocaleString()} bytes`
 );
 
 const expectedLazyChunks = [

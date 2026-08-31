@@ -5,7 +5,7 @@ import {
   isAssignmentStatusUnrecorded,
   normalizeAssignmentStatusValue
 } from "./assignmentStatus.js";
-import { getAttendanceDisplay, hasMissingCheckOut } from "./attendance.js";
+import { formatShortDateLabel, getAttendanceDisplay, hasMissingCheckOut } from "./attendance.js";
 import { defaultAttendanceSettings } from "./attendanceSettings.js";
 import { LessonJournalClosureNotice } from "./LessonJournalClosureNotice.jsx";
 import { LessonJournalAbsenceSourceNotice } from "./LessonJournalAbsenceSourceNotice.jsx";
@@ -135,9 +135,11 @@ export function LessonJournalDetail({
     commentModal,
     editingMemoKey,
     prepMemoModal,
+    previousLessonSourceByStudent,
     setCommentModal,
     setEditingMemoKey,
     setPrepMemoModal,
+    setPreviousLessonSourceForStudent,
     setStudentPreviewId,
     studentPreviewId
   } = useLessonJournalOverlayState();
@@ -593,7 +595,16 @@ export function LessonJournalDetail({
             const persistedRecord = findLessonStudentRecord(records, lesson, student) ?? createEmptyRecord(lesson, student);
             const editableRecord = getEditableRecord(recordId, persistedRecord);
             const attendanceLesson = applyStudentScheduleToLesson(lesson, student);
-            const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons, allRecords);
+            const previousLessonSourceMode = previousLessonSourceByStudent[student.studentId] || "nearest";
+            const onlyRegularLessons = previousLessonSourceMode === "regular";
+            const nearestPreviousLesson = findPreviousLessonsForStudent(lessons, lesson, student.studentId, { records: allRecords })[0] ?? null;
+            const regularPreviousLesson = findPreviousLessonsForStudent(lessons, lesson, student.studentId, { onlyRegularLessons: true, records: allRecords })[0] ?? null;
+            const hasAlternatePreviousLessonSource = Boolean(
+              nearestPreviousLesson &&
+              regularPreviousLesson &&
+              nearestPreviousLesson.lessonId !== regularPreviousLesson.lessonId
+            );
+            const previousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons, allRecords, { onlyRegularLessons });
             const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
             const previousHomeworkTitle = getHomeworkDraftTitle(student, "previous", previousHomework);
             const nextHomeworkTitle = getHomeworkDraftTitle(student, "next", nextHomework);
@@ -609,6 +620,7 @@ export function LessonJournalDetail({
               findPreviousLessonsForStudent,
               isSpecialLectureLesson,
               lessons,
+              onlyRegularLessons,
               records,
               student
             });
@@ -674,6 +686,12 @@ export function LessonJournalDetail({
                   previousHomeworkTitle,
                   previousLessonContent,
                   previousLessonMaterial,
+                  previousLessonSourceToggleProps: hasAlternatePreviousLessonSource ? {
+                    nearestLessonDateLabel: formatShortDateLabel(nearestPreviousLesson?.date),
+                    onSelect: (mode) => setPreviousLessonSourceForStudent(student.studentId, mode),
+                    regularLessonDateLabel: formatShortDateLabel(regularPreviousLesson?.date),
+                    selectedMode: previousLessonSourceMode
+                  } : null,
                   record,
                   recordId,
                   student

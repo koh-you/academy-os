@@ -4,6 +4,7 @@ export function selectPreviousLessonMemoContext({
   findPreviousLessonsForStudent,
   isSpecialLectureLesson,
   lessons = [],
+  onlyRegularLessons = false,
   records = [],
   student
 }) {
@@ -22,7 +23,7 @@ export function selectPreviousLessonMemoContext({
     lessons,
     currentLesson,
     student.studentId,
-    { records: sourceRecords }
+    { onlyRegularLessons, records: sourceRecords }
   );
   const previousLessonIds = new Set(previousLessons.map((item) => item.lessonId));
   const recordMatchesCurrentLessonGroup = (record) => {
