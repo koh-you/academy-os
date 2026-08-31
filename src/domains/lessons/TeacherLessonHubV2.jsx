@@ -10,6 +10,7 @@ import { LessonJournalDetail } from "./LessonJournalDetail.jsx";
 import { useLessonCalendarKeyboardNavigation } from "./useLessonCalendarKeyboardNavigation.js";
 import { getEffectiveLessonStudentIds } from "../../shared/utils/studentSchedule.js";
 import { ExamPrepScheduleModal } from "./ExamPrepScheduleModal.jsx";
+import { buildExamPeriodSundayScheduleModel, hasExamPeriodSundaySchedule, openExamPeriodSundaySchedulePdf } from "./examPeriodSundaySchedule.js";
 
 export function TeacherLessonHubV2({
   academyReminders = [],
@@ -231,6 +232,12 @@ export function TeacherLessonHubV2({
     today
   });
   const shouldShowGeneratedLessonSaveNotice = generatedLessonSaveStatus?.state && generatedLessonSaveStatus.state !== "idle";
+  const showExamPeriodSundaySchedule = hasExamPeriodSundaySchedule({ isExamPrepLesson, lessons });
+
+  function handleOpenExamPeriodSundaySchedulePdf() {
+    const model = buildExamPeriodSundayScheduleModel({ isExamPrepLesson, lessons, students });
+    openExamPeriodSundaySchedulePdf(model);
+  }
 
   return (
     <>
@@ -277,10 +284,12 @@ export function TeacherLessonHubV2({
         onDateSelect={onDateSelect}
         onLessonTypeFilterChange={setLessonTypeFilter}
         onMoveDate={onMoveDate}
+        onOpenExamPeriodSundaySchedule={handleOpenExamPeriodSundaySchedulePdf}
         onOpenMonthlyRegularLessons={onOpenMonthlyRegularLessons}
         onOpenLessonJournal={onOpenLessonJournal}
         onShiftMonth={onShiftMonth}
         selectedCalendarDayRef={selectedCalendarDayRef}
+        showExamPeriodSundaySchedule={showExamPeriodSundaySchedule}
         showMonthlyRegularLessonOpen={!isMonthlyRegularLessonOpened && monthlyRegularLessonOpenPlan.lessonsToCreate.length > 0}
         viewModel={lessonCalendarViewModel}
       />

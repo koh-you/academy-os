@@ -136,6 +136,7 @@
   "scripts/test-exam-prep-delete-orchestration.mjs",
   "scripts/test-lesson-hub-legacy-boundary.mjs",
   "scripts/test-lesson-calendar-model.mjs",
+  "scripts/test-exam-period-sunday-schedule.mjs",
   "scripts/test-generated-lesson-save-selector-inventory.mjs",
   "scripts/test-generated-lesson-save-selector.mjs",
   "scripts/test-generated-lesson-save-selector-closeout.mjs",

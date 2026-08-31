@@ -12,10 +12,12 @@ export function LessonCalendarView({
   onDateSelect,
   onLessonTypeFilterChange,
   onMoveDate,
+  onOpenExamPeriodSundaySchedule,
   onOpenMonthlyRegularLessons,
   onOpenLessonJournal,
   onShiftMonth,
   selectedCalendarDayRef,
+  showExamPeriodSundaySchedule,
   showMonthlyRegularLessonOpen,
   viewModel
 }) {
@@ -64,6 +66,11 @@ export function LessonCalendarView({
           {showMonthlyRegularLessonOpen ? (
             <button className="softButton" onClick={onOpenMonthlyRegularLessons} type="button">
               {monthlyRegularLessonOpenLabel}
+            </button>
+          ) : null}
+          {showExamPeriodSundaySchedule ? (
+            <button className="softButton" onClick={onOpenExamPeriodSundaySchedule} type="button">
+              일요시험대비 일정표 PDF
             </button>
           ) : null}
         </div>
