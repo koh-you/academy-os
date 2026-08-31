@@ -1179,10 +1179,11 @@ test("lesson journal keeps an in-flight edit and verifies the retried record fro
 
   const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
   await expect(lessonJournal.getByRole("button", { name: "월 경계 연동반" })).toBeVisible();
-  await expect(lessonJournal.getByRole("button", { name: "7월 최신 교재" })).toBeVisible();
-  await expect(lessonJournal.getByRole("button", { name: "7월 최신 진도" })).toBeVisible();
+  await expect(lessonJournal).not.toContainText("7월 최신 교재");
+  await expect(lessonJournal).not.toContainText("7월 최신 진도");
   await lessonJournal.getByRole("button", { name: "수정 시작" }).click();
   const materialDraft = lessonJournal.getByRole("textbox", { name: "월경계 학생 강의 교재" });
+  await expect(materialDraft).toHaveValue("");
   await materialDraft.fill("8월 저장 요청 A");
   const saveBar = lessonJournal.getByRole("complementary", { name: "수업일지 하단 고정 저장 바" });
   await expect(saveBar).toContainText("저장 전 변경 1건");
