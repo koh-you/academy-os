@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures.js";
+import { navigateCalendarToMonth } from "./safeSmokeSupport.js";
 
 const safeApiPort = Number(process.env.ACADEMY_SAFE_API_PORT || 8787) + Number(process.env.TEST_PARALLEL_INDEX || 0);
 const safeApiBaseUrl = `http://127.0.0.1:${safeApiPort}`;
@@ -54,6 +55,7 @@ test.beforeEach(async ({ request }) => {
 test("current exam management roster removes stale school and saves forward schedule with responsive layout", async ({ page, request }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, 2026, 8);
   const day = page.getByRole("gridcell", { name: /2026-08-09/ });
   const pill = day.locator(".lessonPill");
   await expect(pill).toContainText("안전고");
@@ -104,6 +106,7 @@ test("current exam management roster removes stale school and saves forward sche
   expect(overflow).toBeLessThanOrEqual(1);
 
   await page.reload();
+  await navigateCalendarToMonth(page, 2026, 8);
   const persistedDay = page.getByRole("gridcell", { name: /2026-08-09/ });
   await persistedDay.locator(".lessonPill").click();
   await expect(page.getByRole("dialog", { name: "시험대비" }).getByLabel("정산 미리보기 학생 오늘 진행한 내용")).toHaveValue("안전고 고1 함수 단원 오답 정리");

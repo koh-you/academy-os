@@ -41,6 +41,20 @@ export async function navigateCalendarToMonth(page, targetYear, targetMonth) {
   }
 }
 
+export async function navigateSchoolCalendarToMonth(page, targetYear, targetMonth) {
+  const monthHeading = page.getByRole("heading", { name: /\d{4}년 \d{1,2}월/ });
+  for (let guard = 0; guard < 36; guard += 1) {
+    const text = await monthHeading.textContent();
+    const match = text?.match(/(\d{4})년 (\d{1,2})월/);
+    if (!match) break;
+    const currentYear = Number(match[1]);
+    const currentMonth = Number(match[2]);
+    if (currentYear === targetYear && currentMonth === targetMonth) return;
+    const forward = currentYear < targetYear || (currentYear === targetYear && currentMonth < targetMonth);
+    await page.getByRole("button", { name: forward ? "다음 달" : "이전 달" }).click();
+  }
+}
+
 export async function resetSafeFixture(request) {
   await expect.poll(async () => {
     try {

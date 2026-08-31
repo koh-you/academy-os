@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures.js";
+import { navigateCalendarToMonth } from "./safeSmokeSupport.js";
 
 const safeApiPort = Number(process.env.ACADEMY_SAFE_API_PORT || 8787) + Number(process.env.TEST_PARALLEL_INDEX || 0);
 const safeApiBaseUrl = `http://127.0.0.1:${safeApiPort}`;
@@ -80,6 +81,7 @@ test("absence makeup opens the regular lesson journal with only its source lesso
   });
 
   await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, 2026, 8);
   const makeupDay = page.getByRole("gridcell", { name: /2026-08-03 · \d+개 수업/ });
   await makeupDay.getByRole("button", { name: /결석 보강 미리보기/ }).click();
 
