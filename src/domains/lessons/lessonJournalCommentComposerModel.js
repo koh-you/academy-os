@@ -33,10 +33,10 @@ export function createLessonJournalCommentComposerModel({
     isLessonScheduleExpired,
     normalizeSaveState
   } = dependencies;
-  const planMode = ["default", "delay30", "none"].includes(initialSendTiming)
+  const planMode = ["default", "delay30", "nextDay11am", "none"].includes(initialSendTiming)
     ? initialSendTiming
     : "default";
-  const sendDelayMinutes = planMode === "delay30" ? 30 : 0;
+  const sendDelayMinutes = planMode === "delay30" ? 30 : planMode === "nextDay11am" ? "nextDay11am" : 0;
   const isManualResendAvailable = isLessonScheduleExpired(
     lesson,
     sendDelayMinutes
@@ -82,7 +82,9 @@ export function createLessonJournalCommentComposerModel({
         ? "발송 안 함"
         : planMode === "delay30"
           ? "30분 지연 예약"
-          : "예약 발송";
+          : planMode === "nextDay11am"
+            ? "다음날 11시 예약"
+            : "예약 발송";
   return {
     actionLabel,
     audienceNotificationStatus,

@@ -8,6 +8,7 @@ const createModel = (overrides = {}) =>
     defaultScheduleHintText: "기본 예약 · 오늘 22:30",
     delayedScheduleLabel: "오늘 23:00",
     formatManualScheduledAt: (value) => `KST(${value})`,
+    nextDay11amScheduleLabel: "08.01 11:00",
     notificationPlanMode: "default",
     reservationApplyState: "idle",
     resultRefreshState: "idle",
@@ -33,6 +34,18 @@ assert.equal(
     notificationPlanMode: "delay30"
   }).notificationPlanSummaryText,
   "30분 지연 시간 지남 · 오늘 23:00"
+);
+
+assert.equal(
+  createModel({ notificationPlanMode: "nextDay11am" }).notificationPlanSummaryText,
+  "다음날 11시 예약 · 08.01 11:00"
+);
+assert.equal(
+  createModel({
+    isNextDay11amScheduleExpired: true,
+    notificationPlanMode: "nextDay11am"
+  }).notificationPlanSummaryText,
+  "다음날 11시 예약 시간 지남 · 08.01 11:00"
 );
 
 let manualFormatterCallCount = 0;

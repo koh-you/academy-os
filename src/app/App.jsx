@@ -5645,7 +5645,7 @@ export function App() {
     const currentPlan = lessonNotificationPlans[lesson.lessonId];
     const student = students.find((item) => item.studentId === record?.studentId);
     if (!student || !(lesson.studentIds ?? []).includes(student.studentId)) return;
-    const delayMinutes = planMode === "delay30" ? 30 : 0;
+    const delayMinutes = planMode === "delay30" ? 30 : planMode === "nextDay11am" ? "nextDay11am" : 0;
     const scheduledDate = planMode === "manual"
       ? currentPlan?.scheduledAt
       : getLessonAlimtalkScheduledDate(lesson, delayMinutes);
@@ -5729,7 +5729,7 @@ export function App() {
       return { ok: true, canceledCount: canceledJobs.length, reservedCount: 0 };
     }
 
-    const delayMinutes = effectiveMode === "delay30" ? 30 : 0;
+    const delayMinutes = effectiveMode === "delay30" ? 30 : effectiveMode === "nextDay11am" ? "nextDay11am" : 0;
     if (isLessonAlimtalkScheduleExpired(lesson, delayMinutes)) {
       updateLessonNotificationRecordStatuses(lesson, "예약 시간 지남");
       return { ok: false, error: "예약 시간이 이미 지났습니다." };
@@ -8438,6 +8438,10 @@ function getKoreaDateTimeString(date = new Date()) {
 }
 
 function getLessonAlimtalkBaseScheduledDate(lesson, delayMinutes = 0) {
+  if (delayMinutes === "nextDay11am") {
+    const nextDate = addDaysInKorea(lesson?.date ?? getKoreaDateString(), 1);
+    return new Date(`${nextDate}T11:00:00+09:00`);
+  }
   const baseTime = getDayKey(lesson?.date) === "sat" ? "16:30" : "22:30";
   const baseDate = new Date(`${lesson?.date ?? getKoreaDateString()}T${baseTime}:00+09:00`);
   baseDate.setMinutes(baseDate.getMinutes() + delayMinutes);
@@ -8453,7 +8457,8 @@ function getLessonAlimtalkScheduledDate(lesson, delayMinutes = 0, options = {}) 
   const baseDate = getLessonAlimtalkBaseScheduledDate(lesson, delayMinutes);
   const now = new Date();
   if (allowPastFallback && baseDate.getTime() <= now.getTime()) {
-    baseDate.setTime(now.getTime() + Math.max(1, delayMinutes) * 60 * 1000);
+    const fallbackMinutes = delayMinutes === "nextDay11am" ? 24 * 60 : delayMinutes;
+    baseDate.setTime(now.getTime() + Math.max(1, fallbackMinutes) * 60 * 1000);
   }
   return baseDate.toISOString();
 }
