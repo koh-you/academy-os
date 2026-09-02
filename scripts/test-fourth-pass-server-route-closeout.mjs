@@ -78,8 +78,8 @@ const registrySignatures = [
   ...studentRouteSignatures
 ].map(signatureOf).sort();
 
-assert.equal(registrySignatures.length, 101);
-assert.equal(new Set(registrySignatures).size, 101);
+assert.equal(registrySignatures.length, 102);
+assert.equal(new Set(registrySignatures).size, 102);
 assert.deepEqual(registrySignatures, [
   "DELETE /api/academy-reminders",
   "DELETE /api/exam-prep-rows",
@@ -146,6 +146,7 @@ assert.deepEqual(registrySignatures, [
   "POST /api/lesson-records/bulk",
   "POST /api/lesson-records/notification-status",
   "POST /api/lesson-records/prune-stale",
+  "POST /api/lesson-records/retest-status",
   "POST /api/lessons",
   "POST /api/lessons/bulk",
   "POST /api/lessons/special-lecture-student-schedule",
@@ -234,7 +235,7 @@ assert.equal(
     + externalReadSignatures.length
     + domainSourceActionSignatures.length
     + externalWriteSignatures.length,
-  121
+  122
 );
 
 for (const [createToken, dispatchToken] of [
@@ -286,5 +287,5 @@ assert.ok(
 );
 
 console.log(
-  "fourth-pass server route closeout passed · registry 101 · source read 0 · external read 2 · source action 10 · external write 8"
+  "fourth-pass server route closeout passed · registry 102 · source read 0 · external read 2 · source action 10 · external write 8"
 );

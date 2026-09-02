@@ -1927,6 +1927,19 @@ function handleMutation(pathname, payload) {
     state.records = upsertById(state.records, record, ["lessonStudentRecordId", "recordId", "id"]);
     return { ok: true, record, records: state.records };
   }
+  if (pathname === "/api/lesson-records/retest-status") {
+    const patch = payload.record || payload;
+    const idField = ["lessonStudentRecordId", "recordId", "id"].find((field) => patch?.[field]);
+    const existing = (idField && state.records.find((row) => row?.[idField] === patch[idField]))
+      || state.records.find((row) => row.lessonId === patch.lessonId && row.studentId === patch.studentId)
+      || null;
+    const record = {
+      ...(existing || { lessonId: patch.lessonId, lessonStudentRecordId: patch.lessonStudentRecordId, studentId: patch.studentId }),
+      needsRetest: Boolean(patch.needsRetest)
+    };
+    state.records = upsertById(state.records, record, ["lessonStudentRecordId", "recordId", "id"]);
+    return { ok: true, record, records: state.records };
+  }
   return { ...payload, ok: true, safeFixture: true };
 }
 

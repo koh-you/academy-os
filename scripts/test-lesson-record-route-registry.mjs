@@ -12,6 +12,7 @@ let listForLessonsResult = { source: "supabase", records: ["for-lessons"] };
 let listLessonsResult = { source: "supabase", lessons: [{ lessonId: "lesson-1" }] };
 let upsertResult = { source: "supabase", record: { lessonId: "lesson-1", studentId: "student-1" } };
 let patchResult = { source: "supabase", record: { notificationStatus: "sent" } };
+let retestPatchResult = { source: "supabase", record: { needsRetest: true } };
 let pruneResult = { source: "supabase", removed: 0 };
 let upsertBulkResult = { source: "supabase", records: [] };
 let routeError = null;
@@ -40,6 +41,11 @@ const registry = createLessonRecordRouteRegistry({
     events.push("patch");
     if (routeError?.stage === "patch") throw routeError.error;
     return patchResult;
+  },
+  patchLessonStudentRecordRetestStatus: async (record) => {
+    events.push("retestPatch");
+    if (routeError?.stage === "retestPatch") throw routeError.error;
+    return retestPatchResult;
   },
   readJsonBody: async () => {
     events.push("read");
@@ -77,6 +83,7 @@ assert.deepEqual(lessonRecordRouteSignatures, [
   { method: "GET", path: "/api/lesson-records" },
   { method: "POST", path: "/api/lesson-records" },
   { method: "POST", path: "/api/lesson-records/notification-status" },
+  { method: "POST", path: "/api/lesson-records/retest-status" },
   { method: "POST", path: "/api/lesson-records/prune-stale" },
   { method: "POST", path: "/api/lesson-records/bulk" }
 ]);
@@ -107,6 +114,12 @@ assert.deepEqual(events, ["read", "patch"]);
 assert.deepEqual(sends.at(-1).body, { ok: true, ...patchResult });
 
 events.length = 0;
+rawBody = { record: { lessonId: "lesson-1", studentId: "student-1", needsRetest: true } };
+assert.equal(await registry.dispatch(route("POST", "/api/lesson-records/retest-status")), true);
+assert.deepEqual(events, ["read", "retestPatch"]);
+assert.deepEqual(sends.at(-1).body, { ok: true, ...retestPatchResult });
+
+events.length = 0;
 rawBody = { lessonId: "lesson-1" };
 assert.equal(await registry.dispatch(route("POST", "/api/lesson-records/prune-stale")), true);
 assert.deepEqual(events, ["read", "prune"]);
@@ -131,6 +144,10 @@ routeError = { stage: "patch", error: new Error("상태 실패") };
 assert.equal(await registry.dispatch(route("POST", "/api/lesson-records/notification-status")), true);
 assert.deepEqual(sends.at(-1).body, { ok: false, error: "상태 실패" });
 
+routeError = { stage: "retestPatch", error: new Error("재시험 상태 실패") };
+assert.equal(await registry.dispatch(route("POST", "/api/lesson-records/retest-status")), true);
+assert.deepEqual(sends.at(-1).body, { ok: false, error: "재시험 상태 실패" });
+
 routeError = { stage: "prune", error: new Error("정리 실패") };
 assert.equal(await registry.dispatch(route("POST", "/api/lesson-records/prune-stale")), true);
 assert.deepEqual(sends.at(-1).body, { ok: false, error: "정리 실패" });
@@ -139,4 +156,4 @@ routeError = { stage: "upsertBulk", error: new Error("일괄 저장 실패") };
 assert.equal(await registry.dispatch(route("POST", "/api/lesson-records/bulk")), true);
 assert.deepEqual(sends.at(-1).body, { ok: false, error: "일괄 저장 실패" });
 
-console.log("lesson record route registry list, upsert, notification status, prune, bulk, and error contracts passed");
+console.log("lesson record route registry list, upsert, notification status, retest status, prune, bulk, and error contracts passed");

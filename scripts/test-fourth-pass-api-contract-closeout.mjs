@@ -122,6 +122,7 @@ const deferredRouteMapperSignatures = [
   "POST /api/lesson-records/bulk",
   "POST /api/lesson-records/notification-status",
   "POST /api/lesson-records/prune-stale",
+  "POST /api/lesson-records/retest-status",
   "POST /api/lessons",
   "POST /api/lessons/bulk",
   "POST /api/lessons/special-lecture-student-schedule",
@@ -245,8 +246,8 @@ const directWriteSignatures = [
   ...teacherAccountRouteSignatures.map(signatureOf),
   ...testSessionWriteRouteSignatures.map(signatureOf)
 ].sort();
-assert.equal(directWriteSignatures.length, 90);
-assert.equal(new Set(directWriteSignatures).size, 90);
+assert.equal(directWriteSignatures.length, 91);
+assert.equal(new Set(directWriteSignatures).size, 91);
 
 const classifiedSignatures = [
   ...expectedContractSignatures,
@@ -254,7 +255,7 @@ const classifiedSignatures = [
   ...deferredRouteMapperSignatures
 ].sort();
 assert.equal(deferredExternalSignatures.length, 23);
-assert.equal(deferredRouteMapperSignatures.length, 42);
+assert.equal(deferredRouteMapperSignatures.length, 43);
 assert.deepEqual(classifiedSignatures, directWriteSignatures);
 
 const specializedParserBySignature = new Map([
@@ -305,5 +306,5 @@ assert.equal(
 );
 
 console.log(
-  "fourth-pass API contract closeout passed · direct writes 90 · contracted 25 · route/mapper deferred 42 · external gated 23"
+  "fourth-pass API contract closeout passed · direct writes 91 · contracted 25 · route/mapper deferred 43 · external gated 23"
 );
