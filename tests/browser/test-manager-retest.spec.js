@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures.js";
+import { navigateCalendarToMonth } from "./safeSmokeSupport.js";
 
 const safeApiPort = Number(process.env.ACADEMY_SAFE_API_PORT || 8787) + Number(process.env.TEST_PARALLEL_INDEX || 0);
 const safeApiBaseUrl = `http://127.0.0.1:${safeApiPort}`;
@@ -55,4 +56,16 @@ test("marking a test attempt below the pass threshold flags the matching lesson 
   await page.getByLabel("테스트 이력 학생 선택").selectOption({ label: "월경계 학생" });
   const historyItem = page.locator(".testHistoryItem", { hasText: "평면좌표 재시험 테스트" });
   await expect(historyItem.getByText("재시험 필요")).toBeVisible();
+
+  // The same-day lesson Alimtalk draft should also spell out "재시험 필요"
+  // next to the score line, not just the raw correct-answer count.
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: "수업일지" }).click();
+  await navigateCalendarToMonth(page, 2026, 8);
+  const lessonDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
+  await lessonDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
+  const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
+  await expect(lessonJournal).toBeVisible();
+  await lessonJournal.getByRole("button", { name: "학부모 알림톡" }).first().click();
+  const alimtalkModal = page.getByRole("dialog", { name: /학부모 알림톡/ });
+  await expect(alimtalkModal.locator(".commentPreviewPanel")).toContainText("20문항 중 10문항 정답 · 재시험 필요");
 });
