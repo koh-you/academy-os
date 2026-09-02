@@ -774,7 +774,7 @@ summary:focus-visible {
   color: var(--academy-surface, #ffffff);
   font-size: 16px;
   font-weight: 900;
-  min-height: 46px;
+  min-height: var(--academy-touch-target);
   padding: 0 20px;
 }
 
@@ -5518,8 +5518,8 @@ textarea {
 .dangerButton {
   border-radius: 8px;
   font-weight: 900;
-  min-height: 34px;
-  padding: 0 12px;
+  min-height: var(--academy-touch-target);
+  padding: 0 20px;
 }
 
 .dangerButton.mini {
@@ -14690,8 +14690,8 @@ textarea.profileEditInput {
   border-radius: 8px;
   color: var(--status-destructive-text);
   font-weight: 900;
-  min-height: 38px;
-  padding: 0 14px;
+  min-height: var(--academy-touch-target);
+  padding: 0 20px;
 }
 
 .softButton.subtle {
