@@ -1042,9 +1042,11 @@ test("previous-lesson-source toggle requires edit mode and persists the selected
 test("individual comment send button always sends immediately regardless of the lesson reservation plan", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);
-  await navigateCalendarToMonth(page, 2026, 9);
+  const todayDate = getKoreaDateAfterDays(0);
+  const [todayYear, todayMonth] = todayDate.split("-").map(Number);
+  await navigateCalendarToMonth(page, todayYear, todayMonth);
 
-  const currentDateCell = page.getByRole("gridcell", { name: /2026-09-01 · \d+개 수업/ });
+  const currentDateCell = page.getByRole("gridcell", { name: new RegExp(`${todayDate} · \\d+개 수업`) });
   await currentDateCell.getByRole("button", { name: /고1 정규 가상수업/ }).click();
   const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
   await expect(lessonJournal).toBeVisible();
