@@ -7,6 +7,7 @@ export const lessonRecordRouteSignatures = Object.freeze([
   Object.freeze({ method: "GET", path: "/api/lesson-records" }),
   Object.freeze({ method: "POST", path: "/api/lesson-records" }),
   Object.freeze({ method: "POST", path: "/api/lesson-records/notification-status" }),
+  Object.freeze({ method: "POST", path: "/api/lesson-records/retest-status" }),
   Object.freeze({ method: "POST", path: "/api/lesson-records/prune-stale" }),
   Object.freeze({ method: "POST", path: "/api/lesson-records/bulk" })
 ]);
@@ -18,6 +19,7 @@ export const lessonRecordRouteSignatures = Object.freeze([
  * @param {(lessons: *[]) => Promise<*>} deps.listLessonStudentRecordsForLessons
  * @param {(lessonId: string) => Promise<*>} deps.pruneStaleLessonStudentRecords
  * @param {(record: *) => Promise<*>} deps.patchLessonStudentRecordNotificationStatus
+ * @param {(record: *) => Promise<*>} deps.patchLessonStudentRecordRetestStatus
  * @param {(request: *) => Promise<Record<string, *>>} deps.readJsonBody
  * @param {(request: *, response: *, statusCode: number, data: *) => void} deps.sendJson
  * @param {(record: *) => Promise<*>} deps.upsertLessonStudentRecord
@@ -30,6 +32,7 @@ export function createLessonRecordRouteRegistry({
   listLessonStudentRecordsForLessons,
   pruneStaleLessonStudentRecords,
   patchLessonStudentRecordNotificationStatus,
+  patchLessonStudentRecordRetestStatus,
   readJsonBody,
   sendJson,
   upsertLessonStudentRecord,
@@ -65,6 +68,17 @@ export function createLessonRecordRouteRegistry({
       try {
         const payload = await readJsonBody(request);
         const result = await patchLessonStudentRecordNotificationStatus(payload.record ?? payload);
+        sendJson(request, response, 200, { ok: true, ...result });
+      } catch (error) {
+        sendJson(request, response, 500, { ok: false, error: error.message });
+      }
+      return true;
+    }
+
+    if (request.method === "POST" && requestUrl.pathname === "/api/lesson-records/retest-status") {
+      try {
+        const payload = await readJsonBody(request);
+        const result = await patchLessonStudentRecordRetestStatus(payload.record ?? payload);
         sendJson(request, response, 200, { ok: true, ...result });
       } catch (error) {
         sendJson(request, response, 500, { ok: false, error: error.message });

@@ -866,10 +866,12 @@ export function MaterialManager({
   const [attemptSubject, setAttemptSubject] = useState(testPaperSubjectOptions[0]);
   const [attemptUnit, setAttemptUnit] = useState("");
   const [attemptTotalQuestions, setAttemptTotalQuestions] = useState("");
+  const [attemptPassCorrectCount, setAttemptPassCorrectCount] = useState("");
   const [attemptMemo, setAttemptMemo] = useState("");
   const [attemptDrafts, setAttemptDrafts] = useState({});
   const [attemptError, setAttemptError] = useState("");
   const [editingTestSessionId, setEditingTestSessionId] = useState("");
+  const attemptFormRef = useRef(null);
   const [selectedHistoryStudentId, setSelectedHistoryStudentId] = useState("");
   const activeStudents = students.filter(isActiveStudent);
   const selectedAttemptTemplate = templates.find((template) => template.classTemplateId === attemptClassTemplateId) ?? null;
@@ -922,7 +924,8 @@ export function MaterialManager({
           status: attempt?.status ?? currentDraft.status ?? "",
           correctCount: attempt?.correctCount ?? currentDraft.correctCount ?? "",
           notTakenReason: attempt?.notTakenReason ?? currentDraft.notTakenReason ?? "",
-          memo: attempt?.memo ?? currentDraft.memo ?? ""
+          memo: attempt?.memo ?? currentDraft.memo ?? "",
+          retestNeeded: attempt ? attempt.passStatus === "failed" : Boolean(currentDraft.retestNeeded)
         };
       });
       return nextDrafts;
@@ -940,6 +943,7 @@ export function MaterialManager({
     setAttemptSubject(testPaperSubjectOptions[0]);
     setAttemptUnit("");
     setAttemptTotalQuestions("");
+    setAttemptPassCorrectCount("");
     setAttemptMemo("");
     setAttemptDrafts({});
     setAttemptError("");
@@ -954,9 +958,11 @@ export function MaterialManager({
     setAttemptSubject(session.subject || testPaperSubjectOptions[0]);
     setAttemptUnit(session.unit || "");
     setAttemptTotalQuestions(session.totalQuestions === null || session.totalQuestions === undefined ? "" : String(session.totalQuestions));
+    setAttemptPassCorrectCount(session.passCorrectCount === null || session.passCorrectCount === undefined ? "" : String(session.passCorrectCount));
     setAttemptMemo(session.memo || "");
     setAttemptError("");
     setActiveTab("attempts");
+    attemptFormRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function updateAttemptDraft(studentId, field, value) {
@@ -981,6 +987,11 @@ export function MaterialManager({
       setAttemptError("총 문항 수를 1 이상으로 입력해 주세요.");
       return;
     }
+    const parsedPassCorrectCount = Number(attemptPassCorrectCount);
+    const normalizedAttemptPassCorrectCount =
+      attemptPassCorrectCount !== "" && Number.isFinite(parsedPassCorrectCount) && parsedPassCorrectCount >= 0 && parsedPassCorrectCount <= totalQuestions
+        ? parsedPassCorrectCount
+        : "";
 
     const attempts = [];
     for (const student of attemptStudents) {
@@ -1004,6 +1015,7 @@ export function MaterialManager({
           return;
         }
         attempt.correctCount = correctCount;
+        attempt.passStatus = draft.retestNeeded ? "failed" : "passed";
       }
       if (status === "not_taken") {
         const reason = String(draft.notTakenReason ?? "").trim();
@@ -1032,7 +1044,7 @@ export function MaterialManager({
       subject: attemptSubject,
       unit: attemptUnit,
       totalQuestions,
-      passCorrectCount: "",
+      passCorrectCount: normalizedAttemptPassCorrectCount,
       source: "manual_test_result",
       memo: attemptMemo
     };
@@ -1051,12 +1063,13 @@ export function MaterialManager({
       <TestManagerTabs activeTab={activeTab} onChange={setActiveTab} />
 
       {activeTab === "attempts" ? (
-        <section className="panel materialPanel testAttemptPanel">
+        <section className="panel materialPanel testAttemptPanel" ref={attemptFormRef}>
           <TestAttemptPanelHeader testResultSaveState={testResultSaveState} />
           <TestAttemptFormGrid
             attemptClassTemplateId={attemptClassTemplateId}
             attemptDate={attemptDate}
             attemptMemo={attemptMemo}
+            attemptPassCorrectCount={attemptPassCorrectCount}
             attemptSubject={attemptSubject}
             attemptTestKind={attemptTestKind}
             attemptTitle={attemptTitle}
@@ -1065,6 +1078,7 @@ export function MaterialManager({
             onAttemptClassTemplateIdChange={setAttemptClassTemplateId}
             onAttemptDateChange={setAttemptDate}
             onAttemptMemoChange={setAttemptMemo}
+            onAttemptPassCorrectCountChange={setAttemptPassCorrectCount}
             onAttemptSubjectChange={setAttemptSubject}
             onAttemptTestKindChange={setAttemptTestKind}
             onAttemptTitleChange={setAttemptTitle}
@@ -1082,6 +1096,7 @@ export function MaterialManager({
           />
           <TestAttemptTable
             attemptDrafts={attemptDrafts}
+            attemptPassCorrectCount={attemptPassCorrectCount}
             onUpdateAttemptDraft={updateAttemptDraft}
             statusOptions={testAttemptStatusOptions}
             students={attemptStudents}

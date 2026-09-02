@@ -4402,6 +4402,52 @@ export async function patchLessonStudentRecordNotificationStatus({
   return upsertLessonStudentRecord(record);
 }
 
+export async function patchLessonStudentRecordRetestStatus({
+  lessonId,
+  lessonStudentRecordId,
+  studentId,
+  needsRetest,
+  updatedBy = "instructor_owner_001"
+} = {}) {
+  if (!lessonId || !studentId) throw new Error("재시험 여부를 저장할 수업/학생 ID가 필요합니다.");
+  const nowIso = new Date().toISOString();
+  const patch = { updated_at: nowIso, needs_retest: Boolean(needsRetest) };
+  if (!isSupabaseConfigured({ requireServiceRole: true })) {
+    return {
+      source: fallbackSource,
+      record: {
+        lessonStudentRecordId,
+        lessonId,
+        studentId,
+        needsRetest: Boolean(needsRetest),
+        updatedBy,
+        updatedAt: nowIso
+      }
+    };
+  }
+
+  await assertLessonStudentRecordBelongsToLesson(lessonId, studentId);
+  const encodedLessonId = encodeURIComponent(lessonId);
+  const encodedStudentId = encodeURIComponent(studentId);
+  const rows = await patchRows(
+    "lesson_student_records",
+    `lesson_id=eq.${encodedLessonId}&student_id=eq.${encodedStudentId}`,
+    patch
+  );
+  if (rows[0]) return { source: databaseSource, record: fromLessonRecordRow(rows[0]) };
+
+  const record = {
+    lessonStudentRecordId: lessonStudentRecordId || `lsr_${lessonId.replace("lesson_", "")}_${studentId}`,
+    lessonId,
+    studentId,
+    attendanceStatus: "pending",
+    needsRetest: Boolean(needsRetest),
+    updatedBy,
+    updatedAt: nowIso
+  };
+  return upsertLessonStudentRecord(record);
+}
+
 export async function claimNotificationJob(job, claimId) {
   if (!isSupabaseConfigured({ requireServiceRole: true })) {
     return { source: fallbackSource, notificationJob: job };

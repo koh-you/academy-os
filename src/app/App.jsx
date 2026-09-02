@@ -107,6 +107,7 @@ import { createLessonNotificationJob } from "../domains/lessons/lessonNotificati
 import { createLessonNotificationJobBatch } from "../domains/lessons/lessonNotificationJobBatch.js";
 import { createLessonNotificationRecordStatusPayload } from "../domains/lessons/lessonNotificationRecordStatusPayload.js";
 import { createLessonNotificationRecordStatusRows } from "../domains/lessons/lessonNotificationRecordStatusRows.js";
+import { createLessonRetestStatusPayload } from "../domains/lessons/lessonRetestStatusPayload.js";
 import { getExamPrepIdFromDerivedMathEvent } from "../domains/lessons/derivedMathEventExamPrepIdSelector.js";
 import { createExamPeriodSundayDateSelector } from "../domains/lessons/examPeriodSundayDateSelector.js";
 import { createExamPrepLessonCandidateBuilder } from "../domains/lessons/examPrepLessonCandidateBuilder.js";
@@ -1464,6 +1465,10 @@ function generateExamAnalysisOutputDraftRequest(payload) {
 
 function patchLessonRecordNotificationStatusRequest(record) {
   return postJson("/api/lesson-records/notification-status", { record });
+}
+
+function patchLessonRecordRetestStatusRequest(record) {
+  return postJson("/api/lesson-records/retest-status", { record });
 }
 
 function postSchoolEvents(schoolEvents) {
@@ -4789,6 +4794,43 @@ export function App() {
     return persistScoreRecords(nextScoreRecords);
   }
 
+  function getLessonsMatchingTestSession(session, studentId) {
+    return lessons.filter((lesson) =>
+      lesson.date === session.testDate &&
+      (!session.classTemplateId || lesson.classTemplateId === session.classTemplateId) &&
+      (lesson.studentIds ?? []).includes(studentId)
+    );
+  }
+
+  async function syncRetestFlagsForTestSession(savedSession, savedAttempts) {
+    const retestUpdates = [];
+    for (const attempt of savedAttempts) {
+      if (attempt.status !== "taken") continue;
+      const desiredNeedsRetest = attempt.passStatus === "failed";
+      const student = students.find((item) => item.studentId === attempt.studentId);
+      if (!student) continue;
+      for (const lesson of getLessonsMatchingTestSession(savedSession, attempt.studentId)) {
+        const existingRecord = findLessonStudentRecord(recordsRef.current, lesson, student);
+        if (Boolean(existingRecord?.needsRetest) === desiredNeedsRetest) continue;
+        retestUpdates.push({
+          ...(existingRecord ?? createEmptyRecord(lesson, student)),
+          needsRetest: desiredNeedsRetest,
+          updatedBy: "instructor_owner_001"
+        });
+      }
+    }
+    if (!retestUpdates.length) return;
+    const nextRecords = retestUpdates.reduce(
+      (currentRecords, record) => upsertLessonStudentRecord(currentRecords, record),
+      recordsRef.current
+    );
+    recordsRef.current = nextRecords;
+    setRecords(nextRecords);
+    await Promise.all(retestUpdates.map((record) =>
+      patchLessonRecordRetestStatusRequest(createLessonRetestStatusPayload(record)).catch((error) => console.error(error))
+    ));
+  }
+
   async function handleSaveTestSession(testSession, testAttemptsForSession = []) {
     setTestResultSaveState("saving");
     try {
@@ -4800,6 +4842,7 @@ export function App() {
         const otherAttempts = current.filter((attempt) => attempt.testSessionId !== savedSession.testSessionId);
         return [...otherAttempts, ...savedAttempts];
       });
+      await syncRetestFlagsForTestSession(savedSession, savedAttempts);
       setTestResultSaveState("saved");
       return { ok: true, testSession: savedSession, testAttempts: savedAttempts };
     } catch (error) {

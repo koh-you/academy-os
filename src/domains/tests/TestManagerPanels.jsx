@@ -45,6 +45,7 @@ export function TestAttemptFormGrid({
   attemptClassTemplateId = "all",
   attemptDate = "",
   attemptMemo = "",
+  attemptPassCorrectCount = "",
   attemptSubject = "",
   attemptTestKind = "",
   attemptTitle = "",
@@ -53,6 +54,7 @@ export function TestAttemptFormGrid({
   onAttemptClassTemplateIdChange,
   onAttemptDateChange,
   onAttemptMemoChange,
+  onAttemptPassCorrectCountChange,
   onAttemptSubjectChange,
   onAttemptTestKindChange,
   onAttemptTitleChange,
@@ -102,6 +104,10 @@ export function TestAttemptFormGrid({
         <input min="1" type="number" value={attemptTotalQuestions} onChange={(event) => onAttemptTotalQuestionsChange?.(event.target.value)} placeholder="예: 20" />
       </label>
       <label>
+        재시험 합격 기준 정답 수
+        <input min="0" type="number" value={attemptPassCorrectCount} onChange={(event) => onAttemptPassCorrectCountChange?.(event.target.value)} placeholder="선택 입력 · 예: 16" />
+      </label>
+      <label>
         회차 메모
         <input value={attemptMemo} onChange={(event) => onAttemptMemoChange?.(event.target.value)} placeholder="선택 입력" />
       </label>
@@ -127,6 +133,7 @@ export function TestAttemptMeta({
 
 export function TestAttemptTable({
   attemptDrafts = {},
+  attemptPassCorrectCount = "",
   onUpdateAttemptDraft,
   statusOptions = [],
   students = []
@@ -141,6 +148,9 @@ export function TestAttemptTable({
     );
   }
 
+  const passThreshold = Number(attemptPassCorrectCount);
+  const hasPassThreshold = attemptPassCorrectCount !== "" && Number.isFinite(passThreshold);
+
   return (
     <DataTableShell className="testAttemptTable" label="학생별 테스트 응시 입력">
       <div className="testAttemptRow head">
@@ -148,9 +158,12 @@ export function TestAttemptTable({
         <span>응시 상태</span>
         <span>정답 수</span>
         <span>미응시 사유</span>
+        <span>재시험 필요</span>
       </div>
       {students.map((student) => {
         const draft = attemptDrafts[student.studentId] ?? {};
+        const correctCount = draft.correctCount === "" || draft.correctCount === undefined ? null : Number(draft.correctCount);
+        const isBelowThreshold = draft.status === "taken" && hasPassThreshold && Number.isFinite(correctCount) && correctCount < passThreshold;
         return (
           <div className="testAttemptRow" key={student.studentId}>
             <strong>{student.name}</strong>
@@ -173,6 +186,16 @@ export function TestAttemptTable({
               onChange={(event) => onUpdateAttemptDraft?.(student.studentId, "notTakenReason", event.target.value)}
               placeholder="예: 결석, 다음 시간 응시"
             />
+            <label className="testAttemptRetestCell">
+              <input
+                aria-label={`${student.name} 재시험 필요`}
+                checked={Boolean(draft.retestNeeded)}
+                disabled={draft.status !== "taken"}
+                onChange={(event) => onUpdateAttemptDraft?.(student.studentId, "retestNeeded", event.target.checked)}
+                type="checkbox"
+              />
+              {isBelowThreshold ? <span className="testAttemptRetestHint">합격 기준 미달</span> : null}
+            </label>
           </div>
         );
       })}
@@ -265,6 +288,11 @@ export function StudentTestHistoryPanel({
             <div>
               <b>{attempt.status === "not_taken" ? "미응시" : `${session.totalQuestions || "-"}문항 중 ${attempt.correctCount || "-"}문항 정답`}</b>
               <small>{attempt.status === "not_taken" ? (attempt.notTakenReason || "사유 미입력") : (session.unit || session.subject || "범위 미입력")}</small>
+              {attempt.passStatus ? (
+                <span className={`testAttemptPass pass-${attempt.passStatus}`}>
+                  {attempt.passStatus === "failed" ? "재시험 필요" : "합격"}
+                </span>
+              ) : null}
             </div>
           </article>
         ))}

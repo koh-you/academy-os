@@ -297,22 +297,22 @@ const orderedRoutes = [
 ];
 const routes = orderedRoutes.map((route, index) => ({ ...route, index }));
 
-assert.equal(routes.length, 121);
+assert.equal(routes.length, 122);
 assert.equal(directRouteMatches.length, 20);
-assert.equal(new Set(routes.map(({ signature }) => signature)).size, 121);
+assert.equal(new Set(routes.map(({ signature }) => signature)).size, 122);
 assert.deepEqual(
   Object.fromEntries(["DELETE", "GET", "POST"].map((method) => [
     method,
     routes.filter((route) => route.method === method).length
   ])),
-  { DELETE: 13, GET: 31, POST: 77 }
+  { DELETE: 13, GET: 31, POST: 78 }
 );
 
 const routeOrderHash = crypto
   .createHash("sha256")
   .update(routes.map(({ signature }) => signature).join("\n"))
   .digest("hex");
-assert.equal(routeOrderHash, "6cc41d1b5388c7fd4f3feef162c1665d61848526b00efd0b9d92fff88ebbcb9f");
+assert.equal(routeOrderHash, "bac7a279c43fd86c8c94c54e9dddf2851c829ecfe0a26ad4a4f5d2ef3063b400");
 
 function getRouteFamily(path) {
   if (
@@ -379,7 +379,7 @@ assert.deepEqual(familyCounts, {
   "app-core": 9,
   "calendar-planning": 10,
   "exam-analysis": 20,
-  "lesson-attendance-supplement": 29,
+  "lesson-attendance-supplement": 30,
   "notification-provider": 20,
   resource: 6,
   "student-intake-special": 15,
@@ -562,5 +562,5 @@ assert.ok(packageJson.scripts["test:production"].includes("npm run test:exam-ana
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:exam-analysis-question-count-route-registry"));
 
 console.log(
-  "fourth-pass server route baseline passed · 121 routes · GET 31/POST 77/DELETE 13 · session/credential 15 + dispatch 2"
+  "fourth-pass server route baseline passed · 122 routes · GET 31/POST 78/DELETE 13 · session/credential 15 + dispatch 2"
 );
