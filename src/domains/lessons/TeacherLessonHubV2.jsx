@@ -8,7 +8,7 @@ import { compareLessonCalendarDisplayOrder } from "./lessonCalendarDisplayOrder.
 import { LessonJournalErrorBoundary } from "./LessonJournalErrorBoundary.jsx";
 import { LessonJournalDetail } from "./LessonJournalDetail.jsx";
 import { useLessonCalendarKeyboardNavigation } from "./useLessonCalendarKeyboardNavigation.js";
-import { getEffectiveLessonStudentIds } from "../../shared/utils/studentSchedule.js";
+import { getLessonJournalStudents } from "../students/lessonRosterSelectors.js";
 import { ExamPrepScheduleModal } from "./ExamPrepScheduleModal.jsx";
 
 export function TeacherLessonHubV2({
@@ -88,7 +88,7 @@ export function TeacherLessonHubV2({
     nestedPanels,
     sortByTime
   } = runtime;
-  const getLessonStudentIds = (lesson) => getEffectiveLessonStudentIds(lesson, students);
+  const getLessonStudentIds = (lesson) => getLessonJournalStudents(lesson, students).map((student) => student.studentId);
   const [lessonTypeFilter, setLessonTypeFilter] = useState("all");
   const selectedCalendarDayRef = useRef(null);
   useLessonCalendarKeyboardNavigation({
