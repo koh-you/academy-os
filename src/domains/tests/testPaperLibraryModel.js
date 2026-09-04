@@ -31,6 +31,16 @@ export const TEST_PAPER_SOURCE_BY_KIND_DIFFICULTY = {
   unit: { 1: "베이직쎈 단원마무리", 2: "쎈B 단원마무리" }
 };
 
+// 재시험 기본 합격률. 통과 기준 정답 수를 따로 정하지 않으면 총 문항의 이 비율(올림)을 쓴다.
+export const TEST_PAPER_DEFAULT_PASS_RATE = 0.8;
+
+/** 총 문항 수에서 기본 합격 정답 수(80% 올림)를 구한다. 값이 없으면 "" 를 반환한다. */
+export function defaultPassCorrectCount(totalQuestions) {
+  const total = Number(totalQuestions);
+  if (!Number.isFinite(total) || total <= 0) return "";
+  return Math.ceil(total * TEST_PAPER_DEFAULT_PASS_RATE);
+}
+
 // 준비 상태. 기존 testPaperPreparationOptions 와 같은 어휘를 쓴다.
 export const TEST_PAPER_STATUSES = [
   { id: "draft", label: "준비중" },
