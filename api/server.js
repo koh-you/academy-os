@@ -4799,17 +4799,24 @@ const server = http.createServer(async (request, response) => {
   const requestUrl = new URL(request.url, "http://127.0.0.1");
 
   // === 전역 인증·권한 게이트 (docs/security/attendance-prototype-plan.md) ===
-  // 인증 주체 판정: 교사 세션 > ops 토큰 > dispatch 토큰 > 없음.
+  // 인증 주체 판정: 교사 세션 > ops 토큰 > 키오스크 토큰 > dispatch 토큰 > 없음.
   const teacherSession = getTeacherSession(request);
   const opsSession = teacherSession ? null : getOpsSession(request);
-  const dispatchOk = !teacherSession && !opsSession && getDispatchAuthState(request, {}).ok;
+  const kioskToken = String(getRequestHeader(request, "x-kiosk-token") || "").trim();
+  const expectedKioskToken = String(process.env.ACADEMY_KIOSK_TOKEN || "").trim();
+  const kioskOk =
+    !teacherSession && !opsSession && Boolean(expectedKioskToken) &&
+    Boolean(kioskToken) && timingSafeEqualText(kioskToken, expectedKioskToken);
+  const dispatchOk = !teacherSession && !opsSession && !kioskOk && getDispatchAuthState(request, {}).ok;
   const auth = teacherSession
     ? { kind: "teacher", teacherRole: teacherSession.teacherRole || "owner", tenantId: teacherSession.tenantId || "tenant_default" }
     : opsSession
       ? { kind: "ops", opsScope: opsSession.scope, tenantId: opsSession.tenantId ?? null, crossTenant: Boolean(opsSession.crossTenant) }
-      : dispatchOk
-        ? { kind: "dispatch" }
-        : { kind: "none" };
+      : kioskOk
+        ? { kind: "kiosk", tenantId: "tenant_default" }
+        : dispatchOk
+          ? { kind: "dispatch" }
+          : { kind: "none" };
   request.__auth = auth;
 
   // 멀티테넌트: 요청 컨텍스트에 tenantId 를 심는다(세션 없으면 null → 스코핑 no-op).

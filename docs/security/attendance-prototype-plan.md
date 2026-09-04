@@ -73,9 +73,14 @@ Slack, 정산·리포트, 학생 생성/수정/삭제, 반 관리, 운영 알림
 | 8 | `scripts/seed-assistant-teacher.mjs` — 신규 tenant + `teacher_accounts` INSERT SQL 생성(사용자가 SQL Editor 실행) | 완료 | (this) |
 | 9 | tenantId 배관 (`enterTenantContext`, `tenantScope.js`) | 완료 | `e0ce045c`/`faf6daef` |
 | 10 | `supabase/20260904_tenant_id_phase1.sql` + `_rollback.sql` (컬럼 + `teacher_accounts.role` + 인덱스) | 완료 | (this) |
+| 11 | 키오스크 인증: `X-Kiosk-Token`(== `ACADEMY_KIOSK_TOKEN`) → `kind:"kiosk"`. 허용 = 모든 GET `/api/*` + `POST /api/attendance/(check\|preview)`. 프론트는 `VITE_KIOSK_TOKEN` 을 첨부. CORS 헤더에 `X-Kiosk-Token` 추가. `GET/HEAD /` 공개(uptime 프로브) | 완료 | `codex/kiosk-auth-token-20260904` |
+
+### 관찰 결과 (2026-09-04, 배포 후 Render 로그)
+- 게이트 정상 작동, 에러 0. 교사 재로그인 후 교사 요청은 게이트 통과(로그 없음).
+- 남은 `wouldBlock`: `/attendance` 키오스크 1대의 `GET /api/lesson-records` 폴링(7초) + 부팅 시 코어 데이터 GET. → #11 로 해결.
 
 ### 알려진 Phase 2 갭
-- `/attendance` 키오스크(로그인 없는 태블릿 자가 체크인)는 `API_REQUIRE_AUTH=true` 시 401. 별도 키오스크 토큰(`X-Kiosk-Token`) 또는 정책 예외 필요.
+- 키오스크 토큰은 프론트 빌드에 심겨 반(半)공개다. 데이터 기밀이 아니라 "쓰기 범위 축소"가 목적(키오스크는 GET + 출결 체크인만). 진짜 기기 인증은 별도 과제.
 - 크론(`dispatch:notifications` 등)은 요청 컨텍스트가 없어 전 테넌트 대상 — per-tenant 순회 필요.
 - `hashPassword` 로직이 `api/server.js` 와 `scripts/seed-assistant-teacher.mjs` 두 곳 — 공유 모듈로 통합 여지.
 

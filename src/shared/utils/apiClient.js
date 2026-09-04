@@ -30,8 +30,17 @@ let currentAuthToken = "";
 export function setApiAuthToken(token) {
   currentAuthToken = String(token || "");
 }
+
+// 키오스크(/attendance 로비 태블릿)는 로그인이 없으므로 빌드에 심어둔 반(半)공개 토큰을
+// X-Kiosk-Token 으로 보낸다. 서버는 이 토큰이 있으면 GET /api/* + 출결 체크인만 허용한다.
+// 교사/ops 토큰이 있으면 서버가 그쪽을 우선하므로 로그인 사용자에겐 무해하다.
+const kioskToken = (import.meta.env?.VITE_KIOSK_TOKEN || "").trim();
+
 export function withAuthHeaders(headers = {}) {
-  return currentAuthToken ? { Authorization: `Bearer ${currentAuthToken}`, ...headers } : { ...headers };
+  const merged = { ...headers };
+  if (currentAuthToken) merged.Authorization = `Bearer ${currentAuthToken}`;
+  if (kioskToken) merged["X-Kiosk-Token"] = kioskToken;
+  return merged;
 }
 
 export async function postJson(path, body) {

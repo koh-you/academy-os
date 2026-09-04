@@ -78,7 +78,7 @@ export function getCorsOrigin(request, allowedOrigins = ["*"]) {
  */
 export function sendJson(request, response, statusCode, data, { allowedOrigins = ["*"] } = {}) {
   response.writeHead(statusCode, {
-    "Access-Control-Allow-Headers": "Content-Type,Tally-Signature,Authorization",
+    "Access-Control-Allow-Headers": "Content-Type,Tally-Signature,Authorization,X-Kiosk-Token",
     "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS",
     "Access-Control-Allow-Origin": getCorsOrigin(request, allowedOrigins),
     "Content-Type": "application/json; charset=utf-8"
