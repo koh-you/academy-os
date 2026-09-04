@@ -60,6 +60,7 @@ export function TestAttemptFormGrid({
   attemptTitle = "",
   attemptTotalQuestions = "",
   attemptUnit = "",
+  getTestPaperOptionLabel,
   onAttemptClassTemplateIdChange,
   onAttemptDateChange,
   onAttemptMemoChange,
@@ -69,12 +70,29 @@ export function TestAttemptFormGrid({
   onAttemptTitleChange,
   onAttemptTotalQuestionsChange,
   onAttemptUnitChange,
+  onSelectTestPaper,
+  selectedTestPaperId = "",
   subjectOptions = [],
   templates = [],
-  testKindOptions = []
+  testKindOptions = [],
+  testPaperOptions = []
 }) {
   return (
     <div className="testAttemptFormGrid">
+      <label className="wideField">
+        시험지 선택
+        <select value={selectedTestPaperId} onChange={(event) => onSelectTestPaper?.(event.target.value)}>
+          <option value="">직접 입력</option>
+          {testPaperOptions.map((paper) => (
+            <option key={paper.testPaperId} value={paper.testPaperId}>
+              {getTestPaperOptionLabel ? getTestPaperOptionLabel(paper) : paper.testPaperId}
+            </option>
+          ))}
+        </select>
+        {testPaperOptions.length === 0 ? (
+          <span className="fieldHint">이 과목·종류로 준비된 시험지가 없습니다. 직접 입력하세요.</span>
+        ) : null}
+      </label>
       <label>
         응시일
         <input type="date" value={attemptDate} onChange={(event) => onAttemptDateChange?.(event.target.value)} />
