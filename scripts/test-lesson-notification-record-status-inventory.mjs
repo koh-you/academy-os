@@ -19,7 +19,7 @@ assert.equal(
 );
 
 for (const rowRule of [
-  "const lessonStudentsForRecords = getActiveLessonStudents(lesson, students)",
+  "const lessonStudentsForRecords = getLessonJournalStudents(lesson, students)",
   "const updatedAt = new Date().toISOString()",
   "const recordsToSave = createLessonNotificationRecordStatusRows({",
   "createRecordId: createLessonStudentRecordId,",
