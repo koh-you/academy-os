@@ -2935,6 +2935,7 @@ export function App() {
       });
   }
 
+  const handleSaveTestPaperLibrary = persistTestPaperLibraryNow;
 
   function persistProblemBooksNow(nextProblemBooks) {
     const normalizedBooks = normalizeProblemBooks(nextProblemBooks);
@@ -6553,7 +6554,7 @@ export function App() {
       handleSaveStudentConsultation,
       handleSaveStudentProfile,
       handleSaveTeacherOperatingMemo,
-      handleSaveTestPaperLibrary: persistTestPaperLibraryNow,
+      handleSaveTestPaperLibrary,
       handleSaveTestSession,
       handleScheduleLessonNotificationsAt,
       handleScheduleSupplementTask,
