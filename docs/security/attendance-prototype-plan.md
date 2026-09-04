@@ -61,17 +61,23 @@ Slack, 정산·리포트, 학생 생성/수정/삭제, 반 관리, 운영 알림
 
 ## 구현 단계 (상태)
 
-| # | 단계 | 상태 |
-|---|---|---|
-| 1 | `sessionRouteGuard`: `createOpsSessionToken`/`verifyOpsSessionToken` (scope read/cas-write/highrisk, `OPS_TOKEN_SIGNING_SECRET` 전용, tenantId/crossTenant) | 진행 중 |
-| 2 | `apiAccessPolicy.js` + 단위 테스트 (공개/역할/스코프 판정) | 대기 |
-| 3 | `api/server.js` 전역 게이트: teacher/ops/dispatch 인증 → `request.__auth` → `enterTenantContext` → `evaluateApiAccess`. `API_REQUIRE_AUTH` OFF=관찰 | 대기 |
-| 4 | `scripts/test-api-auth-matrix.mjs` — `*RouteSignatures` 자동 수집, 토큰없음→401 / assistant→비허용403 / ops read→POST403 / 버전없음→422 / 만료→401 | 대기 |
-| 5 | `src/shared/utils/apiClient.js` — 저장된 세션 토큰을 `Authorization: Bearer` 자동 첨부 | 대기 |
-| 6 | `scripts/ops-mint-token.mjs` + `npm run ops:mint-token` (`--scope --ttl --label --reason`, tenantId/crossTenant) | 대기 |
-| 7 | 프론트 assistant 출결 화면: 수업 캘린더+출결 패널+출결 알림톡만. 나머지 숨김(메뉴 필터 기존) + 진입 가드 | 대기 |
-| 8 | `scripts/seed-assistant-teacher.mjs` — 신규 tenant + `teacher_accounts` row (사용자가 실행) | 대기 |
-| 9 | tenantId 배관은 `codex/multi-tenant-impl` 에 이미 있음 (`enterTenantContext`, `tenantScope.js`) | 완료 |
+| # | 단계 | 상태 | 커밋 |
+|---|---|---|---|
+| 1 | `sessionRouteGuard`: `createOpsSessionToken`/`verifyOpsSessionToken`/`getOpsSession` (scope read/cas-write/highrisk, `OPS_TOKEN_SIGNING_SECRET` 전용, tenantId/crossTenant, TTL 2h/30m/15m) | 완료 | `fb5be5b3` |
+| 2 | `src/shared/server/apiAccessPolicy.js` + `scripts/test-api-access-policy.mjs` (공개/dispatch/teacher owner·assistant/ops read·cas-write·highrisk) | 완료 | `fb5be5b3` |
+| 3 | `api/server.js` 전역 게이트: teacher/ops/dispatch 인증 → `request.__auth` → `enterTenantContext` → `evaluateApiAccess`. `API_REQUIRE_AUTH` OFF=관찰(`[api-auth-audit]` 로그) | 완료 | `fb5be5b3` |
+| 4 | `scripts/test-api-auth-matrix.mjs` — `*RouteSignatures` 자동 수집 매트릭스 | 대기 (정책 로직은 test-api-access-policy 가 커버) |  |
+| 5 | `src/shared/utils/apiClient.js` — `setApiAuthToken`/`withAuthHeaders`, 7개 fetch 첨부. `App.jsx` 가 `session.sessionToken` 동기화 | 완료 | `ddbaeb87` |
+| 6 | `scripts/ops-mint-token.mjs` + `npm run ops:mint-token` (`--scope --tenant --cross-tenant --ttl --label --reason`) | 완료 | (this) |
+| 7 | 프론트 assistant 출결 화면 다듬기 — 현재는 메뉴 필터(lessons+students) + 진입 가드만. `lessons` 센터 내부의 assistant 비허용 기능 숨김은 후속 | 부분 (메커니즘 완료, intra-center 다듬기 후속) | `69365c20` |
+| 8 | `scripts/seed-assistant-teacher.mjs` — 신규 tenant + `teacher_accounts` INSERT SQL 생성(사용자가 SQL Editor 실행) | 완료 | (this) |
+| 9 | tenantId 배관 (`enterTenantContext`, `tenantScope.js`) | 완료 | `e0ce045c`/`faf6daef` |
+| 10 | `supabase/20260904_tenant_id_phase1.sql` + `_rollback.sql` (컬럼 + `teacher_accounts.role` + 인덱스) | 완료 | (this) |
+
+### 알려진 Phase 2 갭
+- `/attendance` 키오스크(로그인 없는 태블릿 자가 체크인)는 `API_REQUIRE_AUTH=true` 시 401. 별도 키오스크 토큰(`X-Kiosk-Token`) 또는 정책 예외 필요.
+- 크론(`dispatch:notifications` 등)은 요청 컨텍스트가 없어 전 테넌트 대상 — per-tenant 순회 필요.
+- `hashPassword` 로직이 `api/server.js` 와 `scripts/seed-assistant-teacher.mjs` 두 곳 — 공유 모듈로 통합 여지.
 
 ## 사람 Gate (사용자 실행)
 
