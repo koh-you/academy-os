@@ -133,6 +133,7 @@ export function TestAttemptFormGrid({
       <label>
         재시험 합격 기준 정답 수
         <input min="0" type="number" value={attemptPassCorrectCount} onChange={(event) => onAttemptPassCorrectCountChange?.(event.target.value)} placeholder="선택 입력 · 예: 16" />
+        <span className="fieldHint">입력하면 학생별 정답 수에 따라 재시험 필요를 자동 표시합니다. 체크박스로 직접 수정 가능.</span>
       </label>
       <label>
         회차 메모

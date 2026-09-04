@@ -940,6 +940,31 @@ export function MaterialManager({
     }
   }, [attemptTestPaperOptions, selectedAttemptTestPaperId]);
 
+  // 합격 기준 정답 수가 바뀌면 이미 입력된 정답 수 행의 재시험 필요를 다시 계산한다.
+  useEffect(() => {
+    const cutline = Number(attemptPassCorrectCount);
+    if (!Number.isFinite(cutline) || cutline <= 0) return;
+    setAttemptDrafts((current) => {
+      let changed = false;
+      const next = {};
+      for (const [studentId, draft] of Object.entries(current)) {
+        const count = Number(draft.correctCount);
+        if (draft.correctCount === "" || draft.correctCount === undefined || !Number.isFinite(count)) {
+          next[studentId] = draft;
+          continue;
+        }
+        const retestNeeded = count < cutline;
+        if (draft.retestNeeded === retestNeeded) {
+          next[studentId] = draft;
+          continue;
+        }
+        next[studentId] = { ...draft, retestNeeded };
+        changed = true;
+      }
+      return changed ? next : current;
+    });
+  }, [attemptPassCorrectCount]);
+
   useEffect(() => {
     const attemptByStudent = new Map(currentTestAttempts.map((attempt) => [attempt.studentId, attempt]));
     setAttemptDrafts((current) => {
@@ -1013,14 +1038,20 @@ export function MaterialManager({
   }
 
   function updateAttemptDraft(studentId, field, value) {
-    setAttemptDrafts((current) => ({
-      ...current,
-      [studentId]: {
-        ...(current[studentId] ?? {}),
-        [field]: value,
-        ...(field === "correctCount" && value !== "" ? { status: "taken" } : {})
+    setAttemptDrafts((current) => {
+      const draft = { ...(current[studentId] ?? {}), [field]: value };
+      if (field === "correctCount" && value !== "") {
+        draft.status = "taken";
+        // 합격 기준 정답 수가 있으면 정답 수 입력 시 재시험 필요를 자동 표시한다.
+        // 강사는 이후 체크박스로 직접 덮어쓸 수 있다.
+        const cutline = Number(attemptPassCorrectCount);
+        const count = Number(value);
+        if (Number.isFinite(cutline) && cutline > 0 && Number.isFinite(count)) {
+          draft.retestNeeded = count < cutline;
+        }
       }
-    }));
+      return { ...current, [studentId]: draft };
+    });
     setAttemptError("");
   }
 
