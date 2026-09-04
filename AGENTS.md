@@ -64,11 +64,18 @@
 ## Git·폴더 소유권
 
 - canonical main 작업 폴더: `C:\Dev\academy-os`.
-- `C:\Users\PC\Documents\academy os`는 오전 9시 자동 작업 전용 clone이며 사람 작업에 사용하지 않는다.
+- `C:\Users\PC\Documents\academy os`는 인터랙티브 AI 세션이 도는 기본 clone이며, 여러 세션이 동시에 붙어 있을 수 있다. 사용자는 git/GitHub를 직접 다루지 않는다 — branch 생성·commit·push·PR·worktree 정리는 전부 AI가 안전 범위에서 자율로 수행한다.
 - 시험분석 독립 작업: `C:\Dev\academy-os-exam-analysis`의 전용 branch.
-- 동시 작업은 같은 worktree/index를 공유하지 않는다. 별도 `codex/` branch와 worktree를 사용하고 main 통합 owner는 한 세션만 둔다.
+
+### 동시 세션 규칙 (공유 clone에서 필수)
+
+- 공유 clone의 root checkout에서 `git checkout`/`git switch`로 branch를 바꾸지 않는다. 다른 세션이 그 HEAD 위에서 작업 중일 수 있다.
+- 새 작업은 반드시 자기 전용 worktree에서 한다: `git worktree add ../academy-os-wt-<slug> -b codex/<slug>-<YYYYMMDD> origin/main`. 작업·검증·commit·push가 끝나면 `git worktree remove ../academy-os-wt-<slug>`로 정리한다.
+- 매 commit 직전 `git branch --show-current`로 의도한 branch인지 확인한다. 동시 세션이 그 사이 ref를 옮겼을 수 있다.
+- 예상 밖 branch 전환·index 충돌, 또는 `git checkout -b`와 `git commit` 사이의 HEAD 이동을 발견하면 중단하고 사용자에게 보고한 뒤 복구한다: 내 commit은 cherry-pick으로 올바른 branch에 재배치하고, 잘못 건드린 다른 branch는 `origin` 기준으로 되돌린다.
+- 같은 worktree/index를 공유하지 않는다. `main` 통합 owner는 한 세션만 둔다.
 - 사용자 소유 변경을 임의로 stage/revert하지 않는다. 예상 밖 변경이나 충돌이 있으면 중단하고 보고한다.
-- 검증이 끝난 AI 변경은 별도 지시가 없어도 의도적으로 commit하고 GitHub에 push한다.
+- 검증이 끝난 AI 변경은 별도 지시가 없어도 의도적으로 commit하고 GitHub에 push한다. force push·`main` 직접 push·비밀값 commit은 금지한다.
 - 매일 9시 자동 task의 1~3번 작업은 사람 Gate가 없고 시작 기준 `origin/main` 불변·동시 통합 owner 없음·fast-forward 가능 조건을 만족하면 AI가 force 없이 main까지 통합한다. 정확한 branch HEAD 전체 검사는 진짜 고위험에서만 필수이며, 저·중위험은 관련 검사·focused smoke를 Gate로 사용한다. main CI는 백그라운드 monitor로 두고 배포 commit·변경 smoke를 확인한다.
 - 비밀값, `.env`, PDF/HWP/HWPX/ZIP, 대용량 운영 자료는 commit하지 않는다. API key 값은 출력하지 않는다.
 
