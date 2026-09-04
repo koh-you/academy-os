@@ -33,6 +33,17 @@
   ALIMTALK_DRY_RUN 등 기존 안전 스위치 동작을 바꾸지 말 것.
 - 비밀키 값을 로그·출력·커밋에 남기지 말 것.
 
+## 크로스 브랜치 조율 (codex/multi-tenant-attendance-prototype-20260904)
+멀티테넌트 작업 세션과 아래를 합의함. Phase 1 시작 전 그 브랜치 상태를 확인할 것:
+- 교사 세션 토큰 payload에 `tenantId` (string, "tenant_default" | "tenant_<uuid>") 필드가
+  추가되고 verify 경로에서 `request.__auth.tenantId` 로 전파된다 — 멀티테넌트 브랜치가 먼저
+  넣는다. Phase 1 게이트는 그 payload 모양 위에서 동작.
+- ops 토큰(role:"ops") payload 에도 같은 `tenantId` 필드를 넣는다. "전 테넌트, 운영자 전용"
+  케이스는 문자열 sentinel 대신 별도 `crossTenant:true` 플래그로 표현하고, `tenantId` 없는
+  ops 토큰은 `crossTenant:true` 없으면 게이트가 거절, 있으면 [ops-audit] 에 highrisk급 기록.
+- 데이터 소유권(tenant_id 필터/RLS)은 이 작업 범위 밖. 이 작업은 인증(누가 호출 가능한가)만.
+  서버는 계속 service-role 로 Supabase 접속(멀티테넌트는 앱 레이어에서 tenant_id 필터).
+
 ## 작업 방식
 - AGENTS.md 원칙을 따른다: 한 번에 하나의 안전한 단위, worktree 격리, 시작 origin/main 불변,
   fast-forward only, force push 금지.
