@@ -88,6 +88,27 @@ export function extractUnitsBySubject(ssenTypeIndex = []) {
 }
 
 /**
+ * App.jsx 의 ssenTypeCatalog({ [과목]: [{ units: [{ unitNo, title }] }] }) 를
+ * extractUnitsBySubject 가 받는 평면 행 배열로 바꾼다.
+ */
+export function ssenCatalogToUnitRows(ssenTypeCatalog = {}) {
+  const rows = [];
+  for (const [subject, chapters] of Object.entries(ssenTypeCatalog ?? {})) {
+    for (const chapter of Array.isArray(chapters) ? chapters : []) {
+      for (const unit of Array.isArray(chapter?.units) ? chapter.units : []) {
+        rows.push({
+          subject,
+          unitNo: unit.unitNo ?? "",
+          unitName: unit.title ?? "",
+          partName: chapter.title ?? ""
+        });
+      }
+    }
+  }
+  return rows;
+}
+
+/**
  * 만들어야 할 시험지 전체 목록(예정 카탈로그).
  * 과목(6) × 종류(2) × 중단원 × 난이도(2).
  */

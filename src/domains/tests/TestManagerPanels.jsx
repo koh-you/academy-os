@@ -26,6 +26,15 @@ export function TestManagerTabs({ activeTab = "attempts", onChange }) {
       >
         학생 이력
       </button>
+      <button
+        aria-selected={activeTab === "library"}
+        className={activeTab === "library" ? "active" : ""}
+        onClick={() => onChange?.("library")}
+        role="tab"
+        type="button"
+      >
+        시험지 목록
+      </button>
     </WorkspaceTabs>
   );
 }

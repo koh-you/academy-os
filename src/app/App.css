@@ -16724,6 +16724,127 @@ textarea.profileEditInput {
   text-align: right;
 }
 
+.testPaperLibraryPanel {
+  display: grid;
+  gap: 14px;
+}
+
+.testPaperCoverage {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.testPaperCoverage span {
+  background: var(--academy-surface-muted, #f8fafc);
+  border: 1px solid var(--status-neutral-border, #e2e8f0);
+  border-radius: 999px;
+  color: var(--academy-text-strong, #475569);
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 10px;
+}
+
+.testPaperCoverage .pass-passed {
+  background: var(--status-success-bg, #ecfdf5);
+  border-color: var(--status-success-bg, #ecfdf5);
+  color: var(--status-success-text, #047857);
+}
+
+.testPaperCoverage .pass-pending {
+  background: var(--status-pending-bg, #fff7ed);
+  border-color: var(--status-pending-bg, #fff7ed);
+  color: var(--status-pending-text, #c2410c);
+}
+
+.testPaperCoverage .pass-failed {
+  background: var(--status-neutral-bg, #f1f5f9);
+  border-color: var(--status-neutral-border, #e2e8f0);
+  color: var(--academy-muted, #64748b);
+}
+
+.testPaperLibraryRow {
+  align-items: center;
+  background: var(--academy-surface, #ffffff);
+  border: 0;
+  border-top: 1px solid var(--status-neutral-border, #e2e8f0);
+  color: inherit;
+  cursor: pointer;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(180px, 1.6fr) 96px 78px minmax(120px, 1fr) 56px 84px minmax(90px, 1fr);
+  min-width: 860px;
+  padding: 10px 12px;
+  text-align: left;
+  width: 100%;
+}
+
+.testPaperLibraryRow:first-child {
+  border-top: 0;
+}
+
+.testPaperLibraryRow.head {
+  background: var(--academy-surface-muted, #f8fafc);
+  color: var(--academy-muted, #64748b);
+  cursor: default;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.testPaperLibraryRow > strong {
+  color: var(--academy-primary, #17213d);
+  font-size: 13px;
+}
+
+.testPaperLibraryRow > span {
+  color: var(--academy-text-strong, #475569);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.testPaperLibraryRow.selected {
+  background: var(--status-info-bg, #eff6ff);
+}
+
+.testPaperEditPanel {
+  display: grid;
+  gap: 12px;
+}
+
+.testPaperEditPanel .testAttemptFormGrid label.wideField {
+  grid-column: 1 / -1;
+}
+
+.testAttemptFormGrid label.testPaperCheckLabel {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  font-weight: 800;
+  gap: 8px;
+}
+
+.testAttemptFormGrid label.testPaperCheckLabel input {
+  min-height: 0;
+  width: auto;
+}
+
+.testPaperFolderPath {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.testPaperFolderPath code {
+  background: var(--academy-surface-muted, #f8fafc);
+  border: 1px solid var(--status-neutral-border, #e2e8f0);
+  border-radius: 8px;
+  font-size: 12px;
+  overflow-x: auto;
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+
 .dangerTextButton {
   background: var(--status-pending-bg, #fff7ed);
   border: 1px solid var(--status-danger-border, #fecaca);

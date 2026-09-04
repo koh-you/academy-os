@@ -57,8 +57,12 @@ const directCallHandlers = handlers.filter((item) => item.hasDirectCall).map((it
 // the count to 45 — still within the stated target.
 const expectedDirectCallHandlers = [];
 
+// 117: the 116 4-4a baseline plus handleSaveTestPaperLibrary, the sole new
+// teacher action for the 시험지 목록 tab. It calls postAppState (not
+// fetch/postJson*), so it adds no direct-call candidate and no direct
+// request call.
 assert.deepEqual(directCallHandlers, expectedDirectCallHandlers);
-assert.equal(handlers.length, 116, `handle* count drifted from the 4-4a baseline (116), now ${handlers.length}`);
+assert.equal(handlers.length, 117, `handle* count drifted from the baseline (117), now ${handlers.length}`);
 
 const directRequestCallCount = (appSource.match(/\bfetch\(|\bpostJson[A-Za-z]*\(/g) || []).length;
 assert.equal(directRequestCallCount, 45, `direct fetch/postJson call count drifted from the 4-4 closeout (45), now ${directRequestCallCount}`);
@@ -68,5 +72,5 @@ assert.ok(
 );
 
 console.log(
-  `fourth-pass app action baseline passed · handlers 116 · direct-call candidates 0 · thin wrappers ${handlers.length} · direct request calls 45`
+  `fourth-pass app action baseline passed · handlers 117 · direct-call candidates 0 · thin wrappers ${handlers.length} · direct request calls 45`
 );

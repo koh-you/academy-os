@@ -14,6 +14,7 @@ import {
   TestAttemptTable,
   TestManagerTabs
 } from "../tests/TestManagerPanels.jsx";
+import { TestPaperLibraryPanel } from "../tests/TestPaperLibraryPanel.jsx";
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { Disclosure } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
@@ -851,10 +852,13 @@ export function MaterialManager({
   runtime,
   students,
   testAttempts = [],
+  testPaperLibrary = [],
+  testPaperLibrarySaveState = "idle",
   testResultSaveState = "idle",
   testSessions = [],
   templates = [],
   onDeleteTestSession,
+  onSaveTestPaperLibrary,
   onSaveTestSession
 }) {
   const { isActiveStudent, testPaperSubjectOptions, today } = runtime;
@@ -1126,6 +1130,14 @@ export function MaterialManager({
           rows={historyRows}
           selectedStudentId={historyStudent?.studentId ?? ""}
           students={activeStudents}
+        />
+      ) : null}
+
+      {activeTab === "library" ? (
+        <TestPaperLibraryPanel
+          library={testPaperLibrary}
+          onSave={onSaveTestPaperLibrary}
+          saveState={testPaperLibrarySaveState}
         />
       ) : null}
     </section>

@@ -141,10 +141,13 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
         runtime: runtimeBindings.learningSupport,
         students: models.students,
         testAttempts: models.testAttempts,
+        testPaperLibrary: models.testPaperLibrary,
+        testPaperLibrarySaveState: models.testPaperLibrarySaveState,
         testResultSaveState: models.testResultSaveState,
         testSessions: models.testSessions,
         templates: models.classTemplates,
         onDeleteTestSession: actions.handleDeleteTestSession,
+        onSaveTestPaperLibrary: actions.handleSaveTestPaperLibrary,
         onSaveTestSession: actions.handleSaveTestSession
       }
     },
