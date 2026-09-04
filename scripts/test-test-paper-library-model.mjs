@@ -8,7 +8,8 @@ import {
   normalizeTestPaperEntry,
   normalizeTestPaperLibrary,
   selectPapersForSession,
-  selectRetestPaperCandidates
+  selectRetestPaperCandidates,
+  ssenCatalogToUnitRows
 } from "../src/domains/tests/testPaperLibraryModel.js";
 
 // 합성 ssen 목차: 두 과목, 각 2개 중단원.
@@ -27,6 +28,30 @@ assert.deepEqual(
 );
 assert.equal(units.get("공통수학1")[0].unitName, "다항식의 연산");
 assert.equal(units.get("대수").length, 1);
+
+// --- ssenCatalogToUnitRows: App.jsx ssenTypeCatalog 모양을 평면 행으로 ---
+const fakeCatalog = {
+  공통수학1: [
+    {
+      title: "다항식",
+      units: [
+        { unitNo: "01", title: "다항식의 연산" },
+        { unitNo: "02", title: "나머지 정리" }
+      ]
+    }
+  ],
+  대수: [{ title: "지수함수와 로그함수", units: [{ unitNo: "01", title: "지수와 로그" }] }]
+};
+const rowsFromCatalog = ssenCatalogToUnitRows(fakeCatalog);
+assert.equal(rowsFromCatalog.length, 3);
+assert.deepEqual(rowsFromCatalog[0], {
+  subject: "공통수학1",
+  unitNo: "01",
+  unitName: "다항식의 연산",
+  partName: "다항식"
+});
+assert.equal(buildExpectedPaperCatalog(rowsFromCatalog).length, 12);
+assert.deepEqual(ssenCatalogToUnitRows(null), []);
 
 // --- createTestPaperId: 결정적, 같은 입력이면 같은 ID ---
 const id1 = createTestPaperId({ subject: "공통수학1", testKind: "unit", unitNo: "1", difficulty: 2 });

@@ -221,16 +221,6 @@ import {
   getTestPaperKindLabel
 } from "../domains/tests/testManagerUtils.js";
 import {
-  RecentTestSessionList,
-  StudentTestHistoryPanel,
-  TestAttemptActions,
-  TestAttemptFormGrid,
-  TestAttemptMeta,
-  TestAttemptPanelHeader,
-  TestAttemptTable,
-  TestManagerTabs
-} from "../domains/tests/TestManagerPanels.jsx";
-import {
   SpecialLectureGuideBasicFields,
   SpecialLectureGuideLinkFields,
   SpecialLectureGuideSelector,
