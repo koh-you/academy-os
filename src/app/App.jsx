@@ -781,8 +781,12 @@ function formatTestAttemptMessageLine(session = {}, attempt = {}) {
   const total = session.totalQuestions !== "" && session.totalQuestions !== null && session.totalQuestions !== undefined
     ? `${session.totalQuestions}문항 중 `
     : "";
-  const retestSuffix = attempt.passStatus === "failed" ? " · 재시험 필요" : "";
-  return `${title} · ${hasCorrect ? `${total}${attempt.correctCount}문항 정답` : "응시"}${retestSuffix}`;
+  const passSuffix = attempt.passStatus === "failed"
+    ? " · 재시험"
+    : attempt.passStatus === "passed"
+      ? " · 통과"
+      : "";
+  return `${title} · ${hasCorrect ? `${total}${attempt.correctCount}문항 정답` : "응시"}${passSuffix}`;
 }
 
 function getLessonTestResultLines(testSessions = [], testAttempts = [], lesson = {}, student = {}) {
