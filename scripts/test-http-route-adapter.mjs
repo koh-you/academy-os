@@ -92,7 +92,7 @@ sendJson(
 );
 assert.equal(response.statusCode, 202);
 assert.equal(response.headers["Access-Control-Allow-Origin"], "https://two.test");
-assert.equal(response.headers["Access-Control-Allow-Headers"], "Content-Type,Tally-Signature,Authorization");
+assert.equal(response.headers["Access-Control-Allow-Headers"], "Content-Type,Tally-Signature,Authorization,X-Kiosk-Token");
 assert.equal(response.headers["Access-Control-Allow-Methods"], "GET,POST,DELETE,OPTIONS");
 assert.equal(response.headers["Content-Type"], "application/json; charset=utf-8");
 assert.equal(response.body, "{\"ok\":true}");

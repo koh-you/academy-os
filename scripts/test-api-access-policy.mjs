@@ -5,6 +5,7 @@ import {
   evaluateApiAccess,
   isAssistantAllowed,
   isDispatchTokenRoute,
+  isKioskAllowed,
   isPublicRoute
 } from "../src/shared/server/apiAccessPolicy.js";
 
@@ -40,10 +41,21 @@ assert.equal(guard.verifyOpsSessionToken(readToken), null);
 
 // ---------- 공개 / dispatch 라우트 ----------
 assert.equal(isPublicRoute("GET", "/health"), true);
+assert.equal(isPublicRoute("GET", "/"), true);
+assert.equal(isPublicRoute("HEAD", "/"), true);
 assert.equal(isPublicRoute("POST", "/api/auth/login"), true);
 assert.equal(isPublicRoute("GET", "/api/portal-data"), true);
 assert.equal(isPublicRoute("GET", "/api/students"), false);
 assert.equal(isDispatchTokenRoute("POST", "/api/notification-jobs/dispatch-due"), true);
+
+// ---------- 키오스크 ----------
+assert.equal(isKioskAllowed("GET", "/api/students"), true);
+assert.equal(isKioskAllowed("GET", "/api/lesson-records"), true);
+assert.equal(isKioskAllowed("POST", "/api/attendance/check"), true);
+assert.equal(isKioskAllowed("POST", "/api/attendance/preview"), true);
+assert.equal(isKioskAllowed("POST", "/api/students"), false);
+assert.equal(isKioskAllowed("DELETE", "/api/lessons"), false);
+assert.equal(isKioskAllowed("POST", "/api/notifications/attendance-alimtalk"), false);
 
 // ---------- evaluateApiAccess ----------
 const A = (method, pathname, auth) => evaluateApiAccess({ method, pathname, auth });
@@ -94,4 +106,17 @@ assert.equal(A("POST", "/api/ai/comment-polish", { kind: "ops", opsScope: "cas-w
 assert.equal(A("DELETE", "/api/lessons", { kind: "ops", opsScope: "highrisk" }).ok, true);
 assert.equal(A("POST", "/api/notifications/attendance-alimtalk", { kind: "ops", opsScope: "highrisk" }).ok, true);
 
-console.log("api access policy: ops token, public/dispatch, teacher owner/assistant, ops read/cas-write/highrisk contracts passed");
+// 키오스크 → GET /api/* + 출결 체크인만
+assert.equal(A("GET", "/api/lesson-records", { kind: "kiosk" }).ok, true);
+assert.equal(A("GET", "/api/students", { kind: "kiosk" }).ok, true);
+assert.equal(A("POST", "/api/attendance/check", { kind: "kiosk" }).ok, true);
+assert.equal(A("POST", "/api/attendance/preview", { kind: "kiosk" }).ok, true);
+assert.deepEqual(A("POST", "/api/students", { kind: "kiosk" }), { ok: false, status: 403, code: "kiosk_forbidden" });
+assert.equal(A("DELETE", "/api/lessons", { kind: "kiosk" }).status, 403);
+assert.equal(A("POST", "/api/notifications/attendance-alimtalk", { kind: "kiosk" }).status, 403);
+assert.equal(A("POST", "/api/lesson-records", { kind: "kiosk" }).status, 403);
+// 루트/uptime 프로브는 공개
+assert.equal(A("GET", "/", { kind: "none" }).ok, true);
+assert.equal(A("HEAD", "/", { kind: "none" }).ok, true);
+
+console.log("api access policy: ops token, public/dispatch, teacher owner/assistant, ops read/cas-write/highrisk, kiosk contracts passed");
