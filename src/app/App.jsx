@@ -6,6 +6,7 @@ import { lazyTeacherViewComponents } from "./lazyTeacherViewComponents.js";
 import { useAppSession } from "./useAppSession.js";
 import { RoleLoginScreen } from "./RoleLoginScreen.jsx";
 import { Sidebar } from "./Sidebar.jsx";
+import { isViewAllowedForRole } from "./sidebarMenuModel.js";
 import { EvaluationCenter } from "../domains/teacher/EvaluationCenter.jsx";
 
 const lessonJournalRowsSaveActionModulePromise = import(
@@ -6227,6 +6228,8 @@ export function App() {
 
   function handleChangeView(nextView) {
     const plan = createAppViewChangePlan(nextView);
+    // 협력 교사(assistant)는 허용된 화면 밖으로 이동 불가.
+    if (!isViewAllowedForRole(plan.activeView, session?.teacherRole)) return;
     setActiveView(plan.activeView);
     setIsMobileNavigationOpen(plan.mobileNavigationOpen);
     if (plan.shouldScrollToTop && typeof window !== "undefined") {
@@ -6598,6 +6601,7 @@ export function App() {
         onChangeView={handleChangeView}
         onLogout={handleLogout}
         supplementAttention={supplementAttention}
+        teacherRole={session?.teacherRole}
         today={today}
         onToggle={() => setIsSidebarCollapsed((current) => !current)}
         onToggleMobileNavigation={() => setIsMobileNavigationOpen((current) => !current)}

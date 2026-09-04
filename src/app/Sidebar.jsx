@@ -10,9 +10,10 @@ export function Sidebar({
   onToggle,
   onToggleMobileNavigation,
   supplementAttention = null,
+  teacherRole = "owner",
   today
 }) {
-  const menuGroups = createSidebarMenuGroups(supplementAttention);
+  const menuGroups = createSidebarMenuGroups(supplementAttention, { teacherRole });
   const activeMenuItem = menuGroups
     .flatMap((group) => group.items)
     .find((item) => item.id === activeView);

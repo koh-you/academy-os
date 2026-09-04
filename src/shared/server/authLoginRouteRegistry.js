@@ -64,6 +64,7 @@ export function createAuthLoginRouteRegistry({
               name: account.name,
               teacherId: account.teacherId,
               tenantId: account.tenantId || "tenant_default",
+              teacherRole: account.teacherRole || "owner",
               sessionToken: createTeacherSessionToken(account)
             }
           : null

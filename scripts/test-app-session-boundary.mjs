@@ -23,7 +23,9 @@ const storedTeacher = {
   name: "교사",
   role: "teacher",
   sessionToken: "fixture-token",
-  teacherId: "teacher_001"
+  teacherId: "teacher_001",
+  tenantId: "tenant_default",
+  teacherRole: "owner"
 };
 const localStorage = new FakeStorage({ [storageKey]: JSON.stringify(storedTeacher) });
 const sessionStorage = new FakeStorage();
@@ -78,8 +80,30 @@ assert.deepEqual(teacherResult.session, {
   name: "서버 교사",
   role: "teacher",
   sessionToken: "server-token",
-  teacherId: "teacher_server"
+  teacherId: "teacher_server",
+  tenantId: "tenant_default",
+  teacherRole: "owner"
 });
+
+// 서버가 tenantId / teacherRole 을 주면 세션에 그대로 반영된다.
+const scopedTeacherResult = await authenticateAppSession({
+  loginId: "assistant",
+  password: "fixture-password",
+  request: async () => ({
+    authenticated: true,
+    account: {
+      name: "협력 교사",
+      sessionToken: "assistant-token",
+      teacherId: "teacher_assistant",
+      tenantId: "tenant_abc123",
+      teacherRole: "assistant"
+    }
+  }),
+  role: "teacher",
+  teacherAccount: { name: "설정 교사" }
+});
+assert.equal(scopedTeacherResult.session.tenantId, "tenant_abc123");
+assert.equal(scopedTeacherResult.session.teacherRole, "assistant");
 assert.deepEqual(requests, [["/api/auth/login", {
   loginId: "teacher",
   password: "fixture-password",

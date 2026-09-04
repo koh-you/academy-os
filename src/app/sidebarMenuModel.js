@@ -1,7 +1,17 @@
-export function createSidebarMenuGroups(supplementAttention = null) {
+// 멀티테넌트 1단계 · 협력 교사(assistant) 프로토타입에 노출하는 메뉴.
+// 출결 + 수업 캘린더(수업일지 화면 안) + 학생 명단만. 정확한 범위는 제품 확정 대상.
+export const ASSISTANT_VISIBLE_MENU_IDS = new Set(["lessons", "students"]);
+
+/** 해당 role 이 이 화면(view id)에 접근 가능한가. owner 는 전부 허용. */
+export function isViewAllowedForRole(viewId, teacherRole = "owner") {
+  if (teacherRole !== "assistant") return true;
+  return ASSISTANT_VISIBLE_MENU_IDS.has(viewId);
+}
+
+export function createSidebarMenuGroups(supplementAttention = null, { teacherRole = "owner" } = {}) {
   const supplementAttentionCount = Number(supplementAttention?.total ?? 0);
   const supplementAttentionLabel = supplementAttention?.label || "";
-  return [
+  const groups = [
     {
       title: "Lesson Hub",
       items: [
@@ -51,4 +61,12 @@ export function createSidebarMenuGroups(supplementAttention = null) {
       ]
     }
   ];
+
+  if (teacherRole !== "assistant") return groups;
+  return groups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => ASSISTANT_VISIBLE_MENU_IDS.has(item.id))
+    }))
+    .filter((group) => group.items.length > 0);
 }

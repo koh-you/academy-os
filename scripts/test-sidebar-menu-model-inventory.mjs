@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { createSidebarMenuGroups } from "../src/app/sidebarMenuModel.js";
+import {
+  ASSISTANT_VISIBLE_MENU_IDS,
+  createSidebarMenuGroups,
+  isViewAllowedForRole
+} from "../src/app/sidebarMenuModel.js";
 
 const expectedGroups = [
   {
@@ -69,9 +73,20 @@ assert.deepEqual(
   }
 );
 
+// 협력 교사(assistant) 역할: 허용된 메뉴만 남고 빈 그룹은 사라진다.
+const assistantGroups = createSidebarMenuGroups(null, { teacherRole: "assistant" });
+const assistantItemIds = assistantGroups.flatMap((group) => group.items.map((item) => item.id));
+assert.deepEqual(assistantItemIds.sort(), [...ASSISTANT_VISIBLE_MENU_IDS].sort());
+assert.ok(assistantGroups.every((group) => group.items.length > 0));
+assert.equal(isViewAllowedForRole("lessons", "assistant"), true);
+assert.equal(isViewAllowedForRole("students", "assistant"), true);
+assert.equal(isViewAllowedForRole("settlements", "assistant"), false);
+assert.equal(isViewAllowedForRole("settlements", "owner"), true);
+assert.equal(isViewAllowedForRole("settlements", undefined), true);
+
 for (const appBoundary of [
   'from "./sidebarMenuModel.js"',
-  "createSidebarMenuGroups(supplementAttention)",
+  "createSidebarMenuGroups(supplementAttention, { teacherRole })",
   "const activeMenuItem = menuGroups",
   "menuGroups.map((group) =>",
   "onClick={() => onChangeView(item.id)}"
@@ -98,7 +113,7 @@ assert.equal(
   1
 );
 assert.equal(
-  sidebarSource.split("createSidebarMenuGroups(supplementAttention)").length - 1,
+  sidebarSource.split("createSidebarMenuGroups(supplementAttention, { teacherRole })").length - 1,
   1
 );
 for (const sidebarOwnedBoundary of [

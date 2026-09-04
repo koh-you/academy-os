@@ -9,7 +9,7 @@ import {
   requireTenantScopedMutationQuery,
   resolveTenantId,
   runWithTenant
-} from "../api/lib/tenantScope.js";
+} from "../src/shared/server/tenantScope.js";
 
 const TID = "tenant_abc123";
 

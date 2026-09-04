@@ -4,7 +4,7 @@ import {
   applyTenantToRows,
   requireTenantScopedMutationQuery,
   resolveTenantId
-} from "./tenantScope.js";
+} from "../../src/shared/server/tenantScope.js";
 
 loadEnvFile();
 

@@ -71,7 +71,9 @@ export const TENANT_SCOPED_TABLES = new Set([
 ]);
 
 export function isTenantScopingEnabled() {
-  return String(process.env.MULTITENANT_SCOPING || "").trim().toLowerCase() === "true";
+  // 서버 전용 모듈이지만 src/ eslint 는 node 글로벌을 안 준다. globalThis 경유로 읽는다.
+  const flag = globalThis.process?.env?.MULTITENANT_SCOPING;
+  return String(flag || "").trim().toLowerCase() === "true";
 }
 
 function shouldScope(table, tenantId) {
