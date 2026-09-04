@@ -17,15 +17,23 @@ export function timingSafeEqualText(left = "", right = "") {
  * @param {Object} deps
  * @param {(request: MinimalHttpRequest, name: string) => string|string[]} deps.getRequestHeader
  * @param {() => string} deps.getSecret
+ * @param {() => string} [deps.getOpsSecret] -- ops(기계) 토큰 서명 전용 비밀. 미지정 시 getSecret.
  * @param {() => number} [deps.now]
  */
-export function createSessionRouteGuard({ getRequestHeader, getSecret, now = () => Date.now() }) {
+export function createSessionRouteGuard({ getRequestHeader, getSecret, getOpsSecret, now = () => Date.now() }) {
+  const resolveOpsSecret = getOpsSecret || getSecret;
+  const OPS_SCOPES = ["read", "cas-write", "highrisk"];
+
   function encodeBase64Url(value) {
     return Buffer.from(JSON.stringify(value)).toString("base64url");
   }
 
   function signSessionPayload(payload) {
     return crypto.createHmac("sha256", getSecret()).update(payload).digest("base64url");
+  }
+
+  function signOpsPayload(payload) {
+    return crypto.createHmac("sha256", resolveOpsSecret()).update(payload).digest("base64url");
   }
 
   function createPortalSessionToken(account) {
@@ -52,11 +60,43 @@ export function createSessionRouteGuard({ getRequestHeader, getSecret, now = () 
     return `${payload}.${signSessionPayload(payload)}`;
   }
 
+  /**
+   * ops(기계) 토큰. Claude/Codex 가 최소권한으로 운영 API 를 호출할 때 사용.
+   * @param {{ scope: string, tenantId?: string|null, crossTenant?: boolean, label?: string, ttlMs?: number }} options
+   */
+  function createOpsSessionToken({ scope, tenantId = null, crossTenant = false, label = "", ttlMs } = {}) {
+    if (!OPS_SCOPES.includes(scope)) throw new Error(`잘못된 ops scope: ${scope}`);
+    if (!tenantId && !crossTenant) throw new Error("ops 토큰에는 tenantId 또는 crossTenant:true 가 필요합니다.");
+    const defaultTtl = scope === "read" ? 1000 * 60 * 60 * 2 : scope === "cas-write" ? 1000 * 60 * 30 : 1000 * 60 * 15;
+    const payload = encodeBase64Url({
+      role: "ops",
+      scope,
+      tenantId: crossTenant ? null : tenantId,
+      crossTenant: Boolean(crossTenant),
+      label: String(label || ""),
+      exp: now() + (Number(ttlMs) > 0 ? Number(ttlMs) : defaultTtl)
+    });
+    return `${payload}.${signOpsPayload(payload)}`;
+  }
+
   function verifySignedSessionToken(token = "") {
     const [payload, signature] = String(token).split(".");
     if (!payload || !signature || !timingSafeEqualText(signSessionPayload(payload), signature)) return null;
     try {
       const session = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+      return Number(session.exp) >= now() ? session : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function verifyOpsSessionToken(token = "") {
+    const [payload, signature] = String(token).split(".");
+    if (!payload || !signature || !timingSafeEqualText(signOpsPayload(payload), signature)) return null;
+    try {
+      const session = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+      if (session.role !== "ops" || !OPS_SCOPES.includes(session.scope)) return null;
+      if (!session.tenantId && !session.crossTenant) return null;
       return Number(session.exp) >= now() ? session : null;
     } catch {
       return null;
@@ -89,6 +129,11 @@ export function createSessionRouteGuard({ getRequestHeader, getSecret, now = () 
   }
 
   /** @param {MinimalHttpRequest} request */
+  function getOpsSession(request) {
+    return verifyOpsSessionToken(getAuthorizationToken(request));
+  }
+
+  /** @param {MinimalHttpRequest} request */
   function getTeacherOrPortalSession(request) {
     const token = getAuthorizationToken(request);
     const teacherSession = verifyTeacherSessionToken(token);
@@ -97,12 +142,15 @@ export function createSessionRouteGuard({ getRequestHeader, getSecret, now = () 
   }
 
   return Object.freeze({
+    createOpsSessionToken,
     createPortalSessionToken,
     createTeacherSessionToken,
     getAuthorizationToken,
+    getOpsSession,
     getPortalSession,
     getTeacherOrPortalSession,
     getTeacherSession,
+    verifyOpsSessionToken,
     verifyPortalSessionToken,
     verifySignedSessionToken,
     verifyTeacherSessionToken
