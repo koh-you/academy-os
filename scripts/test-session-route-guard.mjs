@@ -26,10 +26,19 @@ assert.deepEqual(teacherPayload, {
   exp: clock + 1000 * 60 * 60 * 8,
   name: "고태영T",
   role: "teacher",
-  teacherId: "teacher-1"
+  teacherId: "teacher-1",
+  tenantId: "tenant_default"
 });
 assert.deepEqual(guard.verifyTeacherSessionToken(teacherToken), teacherPayload);
 assert.equal(guard.verifyPortalSessionToken(teacherToken), null);
+
+// 멀티테넌트: 명시된 tenantId 는 토큰 payload 와 verify 결과에 그대로 실린다.
+const tenantScopedToken = guard.createTeacherSessionToken({
+  name: "협력 교사",
+  teacherId: "teacher-2",
+  tenantId: "tenant_abc123"
+});
+assert.equal(guard.verifyTeacherSessionToken(tenantScopedToken)?.tenantId, "tenant_abc123");
 
 const portalToken = guard.createPortalSessionToken({
   name: "학생",

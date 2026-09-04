@@ -63,6 +63,7 @@ export function createAuthLoginRouteRegistry({
               loginId: account.loginId,
               name: account.name,
               teacherId: account.teacherId,
+              tenantId: account.tenantId || "tenant_default",
               sessionToken: createTeacherSessionToken(account)
             }
           : null

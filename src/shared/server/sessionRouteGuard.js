@@ -43,6 +43,8 @@ export function createSessionRouteGuard({ getRequestHeader, getSecret, now = () 
       role: "teacher",
       teacherId: account.teacherId,
       name: account.name,
+      // 멀티테넌트 1단계: 소속 학원 식별자. 단일 교사 데이터는 "tenant_default".
+      tenantId: account.tenantId || "tenant_default",
       exp: now() + 1000 * 60 * 60 * 8
     });
     return `${payload}.${signSessionPayload(payload)}`;

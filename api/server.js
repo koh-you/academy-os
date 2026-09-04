@@ -579,11 +579,13 @@ const { dispatch: dispatchStudentRoute } = createStudentRouteRegistry({
   upsertStudents
 });
 const teacherAccountTable = "teacher_accounts";
+const defaultTenantId = "tenant_default";
 const defaultTeacherAccount = {
   teacherId: "instructor_owner_001",
   loginId: process.env.TEACHER_LOGIN_ID ?? "teacher",
   name: "고태영T",
-  password: process.env.TEACHER_PASSWORD ?? "1234"
+  password: process.env.TEACHER_PASSWORD ?? "1234",
+  tenantId: defaultTenantId
 };
 
 function summarizeNotificationJobResult(result) {
@@ -1642,7 +1644,9 @@ function toTeacherAccount(row) {
   return {
     teacherId: row.teacher_id,
     loginId: row.login_id,
-    name: row.name ?? defaultTeacherAccount.name
+    name: row.name ?? defaultTeacherAccount.name,
+    // tenant_id 컬럼은 멀티테넌트 마이그레이션 이후 존재. 그 전에는 undefined -> 기본 테넌트.
+    tenantId: row.tenant_id ?? defaultTenantId
   };
 }
 
@@ -1687,7 +1691,8 @@ async function authenticateTeacher(loginId, password) {
     return {
       teacherId: defaultTeacherAccount.teacherId,
       loginId: defaultTeacherAccount.loginId,
-      name: defaultTeacherAccount.name
+      name: defaultTeacherAccount.name,
+      tenantId: defaultTeacherAccount.tenantId
     };
   }
   return null;
