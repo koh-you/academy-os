@@ -8,6 +8,37 @@
 
 ---
 
+## 구현 상태 (2026-09-04, 브랜치 `codex/multi-tenant-impl-20260904`)
+
+코드 레이어 §6 Step 2·3·5·6 완료. **전부 플래그 OFF / role="owner" 기본이라 동작 변화 없음.**
+스키마 마이그레이션(Step 7)·신규 계정(Step 8)은 사람 Gate로 남음. Step 4 는 요청 컨텍스트
+방식으로 대체되어 별도 작업 불필요.
+
+| 커밋 | 내용 |
+|---|---|
+| `1efd5df5` | 이 계획 문서 |
+| `1b20955b` | 교사 세션 토큰·`toTeacherAccount`·로그인 응답에 `tenantId` (컬럼 없어도 `"tenant_default"`) |
+| `e0ce045c` | `src/shared/server/tenantScope.js` — `TENANT_SCOPED_TABLES`(29), `MULTITENANT_SCOPING` 플래그(기본 OFF), `applyTenantFilterToQuery`/`applyTenantToRows`/`requireTenantScopedMutationQuery`. `supabaseRest` 5개 함수에 opt-in `options.tenantId` |
+| `faf6daef` | 요청 단위 테넌트 컨텍스트(`AsyncLocalStorage`). `api/server.js` http 핸들러가 `enterTenantContext(교사 세션 tenantId)`. → **Step 4(coreData ~204 호출 스레딩) 불필요** |
+| `69365c20` | `teacherRole`("owner"/"assistant") 배관 + 사이드바 메뉴 role 필터(assistant = `lessons`+`students`) + `handleChangeView` 가드. `tenantScope.js` 를 `api/lib` → `src/shared/server` 로 이동(Vercel 12-file 한도) |
+
+### 활성화 절차 (마이그레이션 후, 사람)
+1. `supabase/20260904_tenant_id_phase1.sql` (§b) 실행 — `tenant_id` 컬럼 + `teacher_accounts.role text default 'owner'`.
+2. 백필 확인 → Render 에 `MULTITENANT_SCOPING=true`.
+3. 신규 교사 계정 1개: `teacher_accounts` 에 `{ tenant_id: "tenant_<uuid>", role: "assistant", ... }` (사용자가 UI/스크립트로).
+4. 스모크: 기존 고태영T 로그인 전체 기능 회귀 없음 / 신규 교사는 출결·수업 캘린더·학생 명단만.
+
+### 미구현 / 후속
+- **서버측 role 403 강제** — 현재는 UI 숨김 + 클라 가드만. 숨긴 기능의 API 라우트를 assistant
+  세션에 403 하는 건 API 인증 경계(`codex/ops-api-auth-boundary`) 스코프 판정과 같은 층 → 그쪽에서.
+- **크론/배치** — 요청 컨텍스트가 없어 전 테넌트 대상. 멀티테넌트가 여러 학원이 되면 per-tenant 순회 필요.
+- **intra-center 숨김** — "수업일지 상세" 등 `lessons` 화면 안의 세부 기능 숨김은 메뉴 레벨 밖. 후속.
+- **포털(학생/학부모)** — Phase 1 프로토타입 범위 밖. studentId 스코프로만 접근.
+- **`app_state` (Tier C)** — 프로토타입 화면이 쓰는지 확인 후 결정. 현재 미변경.
+- **`ASSISTANT_VISIBLE_MENU_IDS` 정확한 목록** — 제품 확정 대상. `src/app/sidebarMenuModel.js` 상수 한 곳.
+
+---
+
 ## 0. 접근 방식 요약
 
 - 격리 방식: **모든 대상 테이블에 `tenant_id text` 컬럼을 비정규화**해서 직접 부착. FK로 파생 가능한 하위 테이블도 컬럼을 직접 갖는다.
