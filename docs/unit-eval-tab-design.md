@@ -53,8 +53,12 @@
 - app_state key `academy-os.testPaperLibrary.v1`, 배열.
 - AGENTS.md 저장 원칙: `local draft → 명시적 저장 또는 안전한 debounce → API 성공 →
   Supabase 재조회·대조 → 저장 완료 표시`. 낙관적 UI 금지.
-- `problemBooks` 저장 패턴(`persistProblemBooks`, 500ms debounce, requestId 경쟁 방지,
-  `App.jsx:2919`)을 그대로 따른다.
+- App.jsx는 `testPaperLibrary` state + hydration + `persistTestPaperLibraryNow`(requestId
+  경쟁 방지, `postAppState` 성공 시에만 state·저장상태 갱신)만 소유한다. `models.testPaperLibrary`,
+  `models.testPaperLibrarySaveState`, `actions.handleSaveTestPaperLibrary`로 노출한다.
+- **정규화(`normalizeTestPaperLibrary`)는 App.jsx가 아니라 이를 소비하는 lazy 컴포넌트에서
+  적용한다.** App.jsx가 모델을 import하면 main 청크가 `check-teacher-view-chunks` 예산
+  (946 KB)을 넘는다. hydration은 raw 배열을 그대로 담고, 화면이 로드·저장 시 정규화한다.
 - 파일 업로드는 저장과 **별도 행동**. 저장 위치(TBD: Drive / Supabase Storage) 확정 후 별도 단위.
 
 ## UI
@@ -93,8 +97,11 @@
 1. **[완료]** 순수 모델 `testPaperLibraryModel.js` + 결정적 테스트
    `scripts/test-test-paper-library-model.mjs`.
 2. **[완료]** 폴더 스캐폴드 생성기 `scripts/build-test-paper-folders.mjs`.
-3. app_state key `testPaperLibrary` load/normalize/persist 추가. 화면 없음, fixture만.
-4. `시험지 목록` 서브탭 UI (읽기 + 메타 편집·저장). 파일 업로드 제외.
+3. **[완료]** app_state key `testPaperLibrary` state + hydration + `persistTestPaperLibraryNow`,
+   `models`/`actions` 노출 (`appConfig.js`, `App.jsx`). 화면 없음.
+4. `시험지 목록` 서브탭 UI (읽기 + 메타 편집·저장). `MaterialManager`(lazy)에서 모델 import·정규화.
+   `TeacherViewOutlet` `materials` props에 `testPaperLibrary` / `testPaperLibrarySaveState` /
+   `onSaveTestPaperLibrary` 추가. 파일 업로드 제외.
 5. `응시 기록`에 시험지 선택 드롭다운 + 자동 채움 + `problemBookId` 연결.
 6. `passStatus` 자동 계산 → `needsRetest` 연결.
 7. 파일 업로드 / 워터마크 파이프라인 (저장 위치 확정 후).
