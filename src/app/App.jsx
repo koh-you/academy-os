@@ -2915,7 +2915,7 @@ export function App() {
 
   // 시험지 라이브러리 저장. 정규화(normalizeTestPaperLibrary)는 호출 측(시험지 목록 화면)이
   // 저장 전에 적용하고, 여기서는 problemBooks 와 같은 요청 경쟁 방지·상태 전이만 담당한다.
-  function persistTestPaperLibraryNow(nextLibrary) {
+  function handleSaveTestPaperLibrary(nextLibrary) {
     const library = Array.isArray(nextLibrary) ? nextLibrary : [];
     const requestId = testPaperLibrarySaveRequestRef.current + 1;
     testPaperLibrarySaveRequestRef.current = requestId;
@@ -2934,8 +2934,6 @@ export function App() {
         throw error;
       });
   }
-
-  const handleSaveTestPaperLibrary = persistTestPaperLibraryNow;
 
   function persistProblemBooksNow(nextProblemBooks) {
     const normalizedBooks = normalizeProblemBooks(nextProblemBooks);
