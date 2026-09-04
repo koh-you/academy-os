@@ -6,8 +6,33 @@
 //   → tenant_id 컬럼이 아직 없는 마이그레이션 이전에도 coreData 배관을 미리 넣어둘 수 있다.
 // - 마이그레이션 + MULTITENANT_SCOPING=true 이후에만 실제로 쿼리/행에 tenant_id 가 붙는다.
 
+import { AsyncLocalStorage } from "node:async_hooks";
+
 export const TENANT_COLUMN = "tenant_id";
 export const DEFAULT_TENANT_ID = "tenant_default";
+
+// 요청 단위 테넌트 컨텍스트. HTTP 핸들러가 진입 직후 enterTenantContext(tenantId) 로 심으면,
+// coreData 의 수백 개 쿼리 호출부를 건드리지 않아도 supabaseRest 가 자동으로 스코핑한다.
+const tenantContext = new AsyncLocalStorage();
+
+/** HTTP 핸들러 진입 직후 1회. 이후 비동기 연쇄에 값이 전파된다. */
+export function enterTenantContext(tenantId) {
+  tenantContext.enterWith({ tenantId: tenantId || null });
+}
+
+/** 콜백 범위에만 테넌트를 적용(크론/배치/테스트용). */
+export function runWithTenant(tenantId, fn) {
+  return tenantContext.run({ tenantId: tenantId || null }, fn);
+}
+
+export function getCurrentTenantId() {
+  return tenantContext.getStore()?.tenantId ?? null;
+}
+
+/** 명시 tenantId 가 있으면 그것, 없으면 요청 컨텍스트의 tenantId. */
+export function resolveTenantId(explicitTenantId) {
+  return explicitTenantId ?? getCurrentTenantId() ?? null;
+}
 
 // 실제로 학원(tenant) 단위로 분리돼야 하는 테이블. docs/security/multi-tenant-phase1-plan.md (a) 기준.
 // 새 스코핑 대상 테이블은 반드시 여기에 추가한다(test-tenant-scope.mjs 가 목록 드리프트를 잡는다).

@@ -103,6 +103,7 @@ import {
   upsertRows,
   uploadStorageObjectWithBucketRetry
 } from "./lib/supabaseRest.js";
+import { enterTenantContext } from "./lib/tenantScope.js";
 import {
   createClientRuntimeErrorRateLimiter,
   normalizeClientRuntimeErrorReport
@@ -4790,6 +4791,9 @@ async function reserveTodayTeacherScheduleSlack({
 
 const server = http.createServer(async (request, response) => {
   const requestUrl = new URL(request.url, "http://127.0.0.1");
+  // 멀티테넌트: 검증된 교사 세션의 tenantId 를 요청 컨텍스트에 심는다. 세션이 없으면 null →
+  // MULTITENANT_SCOPING 이 켜져 있어도 스코핑 no-op (로그인·포털·웹훅 경로는 그대로).
+  enterTenantContext(getTeacherSession(request)?.tenantId ?? null);
   if (await dispatchSystemRoute({ request, response, requestUrl })) return;
   if (await dispatchAuthLoginRoute({ request, response, requestUrl })) return;
   if (await dispatchPortalReadRoute({ request, response, requestUrl })) return;

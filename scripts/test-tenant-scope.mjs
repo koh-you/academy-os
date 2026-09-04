@@ -3,11 +3,32 @@ import {
   TENANT_SCOPED_TABLES,
   applyTenantFilterToQuery,
   applyTenantToRows,
+  enterTenantContext,
+  getCurrentTenantId,
   isTenantScopingEnabled,
-  requireTenantScopedMutationQuery
+  requireTenantScopedMutationQuery,
+  resolveTenantId,
+  runWithTenant
 } from "../api/lib/tenantScope.js";
 
 const TID = "tenant_abc123";
+
+// --- AsyncLocalStorage 요청 컨텍스트 ---
+assert.equal(getCurrentTenantId(), null);
+assert.equal(resolveTenantId(undefined), null);
+assert.equal(resolveTenantId("tenant_x"), "tenant_x"); // 명시값은 컨텍스트 없이도 우선
+await runWithTenant("tenant_ctx", async () => {
+  assert.equal(getCurrentTenantId(), "tenant_ctx");
+  assert.equal(resolveTenantId(undefined), "tenant_ctx");
+  assert.equal(resolveTenantId("tenant_explicit"), "tenant_explicit"); // 명시 > 컨텍스트
+  await new Promise((r) => setTimeout(r, 1));
+  assert.equal(getCurrentTenantId(), "tenant_ctx"); // 비동기 연쇄에도 전파
+});
+assert.equal(getCurrentTenantId(), null); // run 밖으로 나오면 복원
+enterTenantContext("tenant_enter");
+assert.equal(getCurrentTenantId(), "tenant_enter");
+enterTenantContext(null);
+assert.equal(getCurrentTenantId(), null);
 
 // --- 스코핑 OFF (기본): tenantId 를 넘겨도 아무것도 안 바뀐다 ---
 delete process.env.MULTITENANT_SCOPING;
