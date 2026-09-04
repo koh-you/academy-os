@@ -24,10 +24,20 @@ export function apiUrl(path) {
   return `${apiBaseUrl}${path}`;
 }
 
+// 로그인 세션 토큰을 모든 API 요청에 Authorization 헤더로 첨부한다.
+// App 이 로그인/세션 복원/로그아웃 시 setApiAuthToken 을 호출한다.
+let currentAuthToken = "";
+export function setApiAuthToken(token) {
+  currentAuthToken = String(token || "");
+}
+export function withAuthHeaders(headers = {}) {
+  return currentAuthToken ? { Authorization: `Bearer ${currentAuthToken}`, ...headers } : { ...headers };
+}
+
 export async function postJson(path, body) {
   const response = await fetch(apiUrl(path), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: withAuthHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(body)
   });
   const result = await response.json();
@@ -64,6 +74,7 @@ export async function getJsonWithTimeout(path, timeoutMs = 12000, timeoutMessage
   try {
     const response = await fetch(apiUrl(path), {
       cache: "no-store",
+      headers: withAuthHeaders(),
       signal: controller.signal
     });
     const result = await response.json();
@@ -84,7 +95,7 @@ export async function getJsonWithTimeout(path, timeoutMs = 12000, timeoutMessage
 export async function getJsonWithHeaders(path, headers = {}) {
   const response = await fetch(apiUrl(path), {
     cache: "no-store",
-    headers
+    headers: withAuthHeaders(headers)
   });
   const result = await response.json();
   if (!response.ok || result.ok === false) {
@@ -102,7 +113,7 @@ export async function postJsonWithTimeout(path, body, timeoutMs = 30000, timeout
   try {
     const response = await fetch(apiUrl(path), {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: withAuthHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(body),
       signal: controller.signal
     });
@@ -132,7 +143,7 @@ export async function deleteJsonWithTimeout(path, body, timeoutMs = 30000, timeo
   try {
     const response = await fetch(apiUrl(path), {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
+      headers: withAuthHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(body),
       signal: controller.signal
     });
@@ -157,7 +168,7 @@ export async function deleteJsonWithTimeout(path, body, timeoutMs = 30000, timeo
 export async function postJsonWithHeaders(path, body, headers = {}) {
   const response = await fetch(apiUrl(path), {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...headers },
+    headers: withAuthHeaders({ "Content-Type": "application/json", ...headers }),
     body: JSON.stringify(body)
   });
   const result = await response.json();

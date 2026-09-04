@@ -458,7 +458,8 @@ import {
   getJsonWithTimeout,
   postJson,
   postJsonWithHeaders,
-  postJsonWithTimeout
+  postJsonWithTimeout,
+  setApiAuthToken
 } from "../shared/utils/apiClient.js";
 import { safeIdPart } from "../shared/utils/id.js";
 import { getKoreaDateString } from "../shared/utils/koreaDate.js";
@@ -2251,6 +2252,10 @@ export function App() {
     teacherAccount: { ...defaultTeacherAccountSettings, ...teacherAccountSettings },
     windowTarget: typeof window === "undefined" ? null : window
   });
+  // 로그인 세션 토큰을 모든 API 요청 헤더에 싣는다(로그인·복원·로그아웃 모두 반영).
+  useEffect(() => {
+    setApiAuthToken(session?.sessionToken || "");
+  }, [session?.sessionToken]);
   const [selectedDate, setSelectedDate] = useState(today);
   const [selectedLessonId, setSelectedLessonId] = useState("");
   const [lessonClipboard, setLessonClipboard] = useState(null);

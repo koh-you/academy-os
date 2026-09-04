@@ -37,6 +37,7 @@
     "test:http-route-adapter": "node scripts/test-http-route-adapter.mjs",
     "test:session-route-guard": "node scripts/test-session-route-guard.mjs",
     "test:api-access-policy": "node scripts/test-api-access-policy.mjs",
+    "test:api-client-auth-header": "node scripts/test-api-client-auth-header.mjs",
     "test:tenant-scope": "node scripts/test-tenant-scope.mjs",
     "test:system-route-registry": "node scripts/test-system-route-registry.mjs",
     "test:auth-login-route-registry": "node scripts/test-auth-login-route-registry.mjs",
