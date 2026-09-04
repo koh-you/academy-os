@@ -6,6 +6,7 @@ import { lazyTeacherViewComponents } from "./lazyTeacherViewComponents.js";
 import { useAppSession } from "./useAppSession.js";
 import { RoleLoginScreen } from "./RoleLoginScreen.jsx";
 import { Sidebar } from "./Sidebar.jsx";
+import { isViewAllowedForRole } from "./sidebarMenuModel.js";
 import { EvaluationCenter } from "../domains/teacher/EvaluationCenter.jsx";
 
 const lessonJournalRowsSaveActionModulePromise = import(
@@ -457,7 +458,8 @@ import {
   getJsonWithTimeout,
   postJson,
   postJsonWithHeaders,
-  postJsonWithTimeout
+  postJsonWithTimeout,
+  setApiAuthToken
 } from "../shared/utils/apiClient.js";
 import { safeIdPart } from "../shared/utils/id.js";
 import { getKoreaDateString } from "../shared/utils/koreaDate.js";
@@ -2250,6 +2252,10 @@ export function App() {
     teacherAccount: { ...defaultTeacherAccountSettings, ...teacherAccountSettings },
     windowTarget: typeof window === "undefined" ? null : window
   });
+  // 로그인 세션 토큰을 모든 API 요청 헤더에 싣는다(로그인·복원·로그아웃 모두 반영).
+  useEffect(() => {
+    setApiAuthToken(session?.sessionToken || "");
+  }, [session?.sessionToken]);
   const [selectedDate, setSelectedDate] = useState(today);
   const [selectedLessonId, setSelectedLessonId] = useState("");
   const [lessonClipboard, setLessonClipboard] = useState(null);
@@ -6227,6 +6233,8 @@ export function App() {
 
   function handleChangeView(nextView) {
     const plan = createAppViewChangePlan(nextView);
+    // 협력 교사(assistant)는 허용된 화면 밖으로 이동 불가.
+    if (!isViewAllowedForRole(plan.activeView, session?.teacherRole)) return;
     setActiveView(plan.activeView);
     setIsMobileNavigationOpen(plan.mobileNavigationOpen);
     if (plan.shouldScrollToTop && typeof window !== "undefined") {
@@ -6598,6 +6606,7 @@ export function App() {
         onChangeView={handleChangeView}
         onLogout={handleLogout}
         supplementAttention={supplementAttention}
+        teacherRole={session?.teacherRole}
         today={today}
         onToggle={() => setIsSidebarCollapsed((current) => !current)}
         onToggleMobileNavigation={() => setIsMobileNavigationOpen((current) => !current)}

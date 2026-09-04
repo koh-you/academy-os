@@ -1,4 +1,10 @@
 import { loadEnvFile } from "./loadEnv.js";
+import {
+  applyTenantFilterToQuery,
+  applyTenantToRows,
+  requireTenantScopedMutationQuery,
+  resolveTenantId
+} from "../../src/shared/server/tenantScope.js";
 
 loadEnvFile();
 
@@ -108,6 +114,7 @@ const listRowsExplicitLimitPattern = /(^|&)limit=/;
 
 export async function listRows(table, query = "select=*", options = {}) {
   const requireServiceRole = options.requireServiceRole ?? false;
+  query = applyTenantFilterToQuery(table, query, resolveTenantId(options.tenantId));
   if (listRowsExplicitLimitPattern.test(query)) {
     return supabaseRestRequest(`${table}?${query}`, { requireServiceRole });
   }
@@ -128,6 +135,7 @@ export async function listRows(table, query = "select=*", options = {}) {
 
 export async function upsertRows(table, rows, options = {}) {
   if (!Array.isArray(rows) || rows.length === 0) return [];
+  rows = applyTenantToRows(table, rows, resolveTenantId(options.tenantId));
   const conflictQuery = options.onConflict ? `?on_conflict=${encodeURIComponent(options.onConflict)}` : "";
   return supabaseRestRequest(`${table}${conflictQuery}`, {
     method: "POST",
@@ -139,6 +147,7 @@ export async function upsertRows(table, rows, options = {}) {
 
 export async function insertRows(table, rows, options = {}) {
   if (!Array.isArray(rows) || rows.length === 0) return [];
+  rows = applyTenantToRows(table, rows, resolveTenantId(options.tenantId));
   return supabaseRestRequest(table, {
     method: "POST",
     body: rows,
@@ -158,7 +167,8 @@ export async function callRpc(functionName, args = {}, options = {}) {
   });
 }
 
-export async function patchRows(table, query, values) {
+export async function patchRows(table, query, values, options = {}) {
+  query = requireTenantScopedMutationQuery(table, query, resolveTenantId(options.tenantId));
   return supabaseRestRequest(`${table}?${query}`, {
     method: "PATCH",
     body: values,
@@ -167,7 +177,8 @@ export async function patchRows(table, query, values) {
   });
 }
 
-export async function deleteRows(table, query) {
+export async function deleteRows(table, query, options = {}) {
+  query = requireTenantScopedMutationQuery(table, query, resolveTenantId(options.tenantId));
   return supabaseRestRequest(`${table}?${query}`, {
     method: "DELETE",
     prefer: "return=representation",

@@ -104,11 +104,26 @@ assert.deepEqual(sends.at(-1).body, {
     loginId: "teacher",
     name: "고태영T",
     sessionToken: "teacher-token",
-    teacherId: "teacher-1"
+    teacherId: "teacher-1",
+    tenantId: "tenant_default",
+    teacherRole: "owner"
   },
   authenticated: true,
   ok: true
 });
+
+// 멀티테넌트: 교사 계정의 tenantId / teacherRole 이 로그인 응답 account 에 그대로 실린다.
+teacherAccount = {
+  loginId: "assistant",
+  name: "협력 교사",
+  teacherId: "teacher-2",
+  tenantId: "tenant_abc123",
+  teacherRole: "assistant"
+};
+payload = { loginId: "assistant", password: "secret", role: "teacher" };
+assert.equal(await registry.dispatch(request()), true);
+assert.equal(sends.at(-1).body.account.tenantId, "tenant_abc123");
+assert.equal(sends.at(-1).body.account.teacherRole, "assistant");
 
 teacherAccount = null;
 assert.equal(await registry.dispatch(request()), true);

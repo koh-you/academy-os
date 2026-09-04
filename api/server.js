@@ -103,6 +103,8 @@ import {
   upsertRows,
   uploadStorageObjectWithBucketRetry
 } from "./lib/supabaseRest.js";
+import { enterTenantContext } from "../src/shared/server/tenantScope.js";
+import { evaluateApiAccess } from "../src/shared/server/apiAccessPolicy.js";
 import {
   createClientRuntimeErrorRateLimiter,
   normalizeClientRuntimeErrorReport
@@ -283,12 +285,14 @@ const { getRequestHeader, readJsonBody, sendJson } = createHttpRouteAdapter({ al
 const {
   createPortalSessionToken,
   createTeacherSessionToken,
+  getOpsSession,
   getPortalSession,
   getTeacherOrPortalSession,
   getTeacherSession
 } = createSessionRouteGuard({
   getRequestHeader,
-  getSecret: () => process.env.APP_SESSION_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || "academy-os-dev-session-secret"
+  getSecret: () => process.env.APP_SESSION_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || "academy-os-dev-session-secret",
+  getOpsSecret: () => process.env.OPS_TOKEN_SIGNING_SECRET || process.env.APP_SESSION_SECRET || "academy-os-dev-ops-secret"
 });
 const dispatchableNotificationStatuses = new Set(["queued", "pending_send"]);
 const readinessCheckStatuses = new Set(["queued", "pending_send", "scheduled"]);
@@ -579,11 +583,14 @@ const { dispatch: dispatchStudentRoute } = createStudentRouteRegistry({
   upsertStudents
 });
 const teacherAccountTable = "teacher_accounts";
+const defaultTenantId = "tenant_default";
 const defaultTeacherAccount = {
   teacherId: "instructor_owner_001",
   loginId: process.env.TEACHER_LOGIN_ID ?? "teacher",
   name: "고태영T",
-  password: process.env.TEACHER_PASSWORD ?? "1234"
+  password: process.env.TEACHER_PASSWORD ?? "1234",
+  tenantId: defaultTenantId,
+  teacherRole: "owner"
 };
 
 function summarizeNotificationJobResult(result) {
@@ -1642,7 +1649,10 @@ function toTeacherAccount(row) {
   return {
     teacherId: row.teacher_id,
     loginId: row.login_id,
-    name: row.name ?? defaultTeacherAccount.name
+    name: row.name ?? defaultTeacherAccount.name,
+    // tenant_id / role 컬럼은 멀티테넌트 마이그레이션 이후 존재. 그 전에는 undefined -> 기본값.
+    tenantId: row.tenant_id ?? defaultTenantId,
+    teacherRole: row.role ?? "owner"
   };
 }
 
@@ -1687,7 +1697,9 @@ async function authenticateTeacher(loginId, password) {
     return {
       teacherId: defaultTeacherAccount.teacherId,
       loginId: defaultTeacherAccount.loginId,
-      name: defaultTeacherAccount.name
+      name: defaultTeacherAccount.name,
+      tenantId: defaultTeacherAccount.tenantId,
+      teacherRole: defaultTeacherAccount.teacherRole
     };
   }
   return null;
@@ -4785,6 +4797,45 @@ async function reserveTodayTeacherScheduleSlack({
 
 const server = http.createServer(async (request, response) => {
   const requestUrl = new URL(request.url, "http://127.0.0.1");
+
+  // === 전역 인증·권한 게이트 (docs/security/attendance-prototype-plan.md) ===
+  // 인증 주체 판정: 교사 세션 > ops 토큰 > dispatch 토큰 > 없음.
+  const teacherSession = getTeacherSession(request);
+  const opsSession = teacherSession ? null : getOpsSession(request);
+  const dispatchOk = !teacherSession && !opsSession && getDispatchAuthState(request, {}).ok;
+  const auth = teacherSession
+    ? { kind: "teacher", teacherRole: teacherSession.teacherRole || "owner", tenantId: teacherSession.tenantId || "tenant_default" }
+    : opsSession
+      ? { kind: "ops", opsScope: opsSession.scope, tenantId: opsSession.tenantId ?? null, crossTenant: Boolean(opsSession.crossTenant) }
+      : dispatchOk
+        ? { kind: "dispatch" }
+        : { kind: "none" };
+  request.__auth = auth;
+
+  // 멀티테넌트: 요청 컨텍스트에 tenantId 를 심는다(세션 없으면 null → 스코핑 no-op).
+  enterTenantContext(auth.tenantId ?? null);
+
+  const verdict = evaluateApiAccess({ method: request.method, pathname: requestUrl.pathname, auth });
+  if (!verdict.ok) {
+    if (process.env.API_REQUIRE_AUTH === "true") {
+      sendJson(request, response, verdict.status, { ok: false, error: verdict.code || "forbidden" });
+      return;
+    }
+    // 관찰 모드: 차단하지 않고 기록만 (비밀값·본문 제외).
+    console.info(
+      "[api-auth-audit]",
+      JSON.stringify({
+        method: request.method,
+        path: requestUrl.pathname,
+        authKind: auth.kind,
+        role: auth.teacherRole || auth.opsScope || null,
+        wouldBlock: true,
+        status: verdict.status,
+        code: verdict.code
+      })
+    );
+  }
+
   if (await dispatchSystemRoute({ request, response, requestUrl })) return;
   if (await dispatchAuthLoginRoute({ request, response, requestUrl })) return;
   if (await dispatchPortalReadRoute({ request, response, requestUrl })) return;

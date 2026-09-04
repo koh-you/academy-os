@@ -57,8 +57,16 @@ function readCookieValue(documentTarget, name) {
 
 function normalizeTeacherSessionForStorage(session) {
   if (session?.role !== "teacher") return null;
-  const { actorId, name, role, sessionToken, teacherId } = session;
-  return { actorId, name, role, sessionToken, teacherId };
+  const { actorId, name, role, sessionToken, teacherId, tenantId, teacherRole } = session;
+  return {
+    actorId,
+    name,
+    role,
+    sessionToken,
+    teacherId,
+    tenantId: tenantId || "tenant_default",
+    teacherRole: teacherRole || "owner"
+  };
 }
 
 function encodeTeacherSession(session) {
@@ -114,6 +122,8 @@ export async function authenticateAppSession({
           actorId: "instructor_owner_001",
           name: result.account?.name || teacherAccount.name,
           teacherId: result.account?.teacherId || "",
+          tenantId: result.account?.tenantId || "tenant_default",
+          teacherRole: result.account?.teacherRole || "owner",
           sessionToken: result.account?.sessionToken || ""
         }
       };
