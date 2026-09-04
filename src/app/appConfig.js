@@ -13,6 +13,7 @@ export const storageKeys = {
   notificationLogs: "academy-os.notificationLogs.v1",
   wrongProblems: "academy-os.wrongProblems.v1",
   problemBooks: "academy-os.problemBooks.v1",
+  testPaperLibrary: "academy-os.testPaperLibrary.v1",
   scoreRecords: "academy-os.scoreRecords.v1",
   academyTests: "academy-os.academyTests.v1",
   examPrepRows: "academy-os.examPrepRows.v2",

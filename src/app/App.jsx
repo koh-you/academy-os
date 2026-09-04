@@ -2284,6 +2284,7 @@ export function App() {
   const [notificationJobsStatus, setNotificationJobsStatus] = useState({ state: "idle", message: "" });
   const [wrongProblems, setWrongProblems] = useStoredState(storageKeys.wrongProblems, sampleData.wrongProblems ?? []);
   const [problemBooks, setProblemBooks] = useStoredState(storageKeys.problemBooks, createDefaultProblemBooks());
+  const [testPaperLibrary, setTestPaperLibrary] = useStoredState(storageKeys.testPaperLibrary, []);
   const [testSessions, setTestSessions] = useState([]);
   const [testAttempts, setTestAttempts] = useState([]);
   const [scoreRecords, setScoreRecords] = useStoredState(storageKeys.scoreRecords, sampleData.scoreRecords ?? []);
@@ -2352,6 +2353,7 @@ export function App() {
   const [wrongProblemSaveState, setWrongProblemSaveState] = useState("idle");
   const [wrongProblemSaveBusy, setWrongProblemSaveBusy] = useState(false);
   const [problemBookSaveState, setProblemBookSaveState] = useState("idle");
+  const [testPaperLibrarySaveState, setTestPaperLibrarySaveState] = useState("idle");
   const [testResultSaveState, setTestResultSaveState] = useState("idle");
   const [scoreRecordSaveState, setScoreRecordSaveState] = useState("idle");
   const [academyTestSaveState, setAcademyTestSaveState] = useState("idle");
@@ -2403,6 +2405,7 @@ export function App() {
   const appStateSaveTimerRef = useRef(null);
   const problemBookSaveRequestRef = useRef(0);
   const problemBookSaveTimerRef = useRef(null);
+  const testPaperLibrarySaveRequestRef = useRef(0);
   const scoreRecordSaveRequestRef = useRef(0);
   const academyTestSaveRequestRef = useRef(0);
   const studentConsultationSaveRequestRef = useRef(0);
@@ -2765,6 +2768,7 @@ export function App() {
           if (Array.isArray(states.lessonResearchItems)) setLessonResearchItems(normalizeLessonResearchItems(states.lessonResearchItems));
           if (Array.isArray(states.notificationLogs)) setNotificationLogs(states.notificationLogs);
           if (Array.isArray(states.problemBooks)) setProblemBooks(normalizeProblemBooks(states.problemBooks));
+          if (Array.isArray(states.testPaperLibrary)) setTestPaperLibrary(states.testPaperLibrary);
           setReportSnapshots(Array.isArray(states.reportSnapshots) ? states.reportSnapshots : []);
           if (Array.isArray(states.scoreRecords)) setScoreRecords(states.scoreRecords);
           if (Array.isArray(states.examPostSubmissions)) setExamPostSubmissions(states.examPostSubmissions);
@@ -2918,6 +2922,29 @@ export function App() {
   useEffect(() => () => {
     if (problemBookSaveTimerRef.current) window.clearTimeout(problemBookSaveTimerRef.current);
   }, []);
+
+  // 시험지 라이브러리 저장. 정규화(normalizeTestPaperLibrary)는 호출 측(시험지 목록 화면)이
+  // 저장 전에 적용하고, 여기서는 problemBooks 와 같은 요청 경쟁 방지·상태 전이만 담당한다.
+  function persistTestPaperLibraryNow(nextLibrary) {
+    const library = Array.isArray(nextLibrary) ? nextLibrary : [];
+    const requestId = testPaperLibrarySaveRequestRef.current + 1;
+    testPaperLibrarySaveRequestRef.current = requestId;
+    setTestPaperLibrarySaveState("saving");
+    return postAppState({ testPaperLibrary: library })
+      .then(() => {
+        if (testPaperLibrarySaveRequestRef.current === requestId) {
+          setTestPaperLibrary(library);
+          setTestPaperLibrarySaveState("saved");
+        }
+        return library;
+      })
+      .catch((error) => {
+        console.error(error);
+        if (testPaperLibrarySaveRequestRef.current === requestId) setTestPaperLibrarySaveState("failed");
+        throw error;
+      });
+  }
+
 
   function persistProblemBooksNow(nextProblemBooks) {
     const normalizedBooks = normalizeProblemBooks(nextProblemBooks);
@@ -6453,6 +6480,8 @@ export function App() {
       teacherOperatingMemos,
       teacherOperatingMemoSaveStates,
       testAttempts,
+      testPaperLibrary,
+      testPaperLibrarySaveState,
       testResultSaveState,
       testSessions,
       wrongProblems,
@@ -6534,6 +6563,7 @@ export function App() {
       handleSaveStudentConsultation,
       handleSaveStudentProfile,
       handleSaveTeacherOperatingMemo,
+      handleSaveTestPaperLibrary: persistTestPaperLibraryNow,
       handleSaveTestSession,
       handleScheduleLessonNotificationsAt,
       handleScheduleSupplementTask,
