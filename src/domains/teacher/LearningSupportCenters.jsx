@@ -16,6 +16,7 @@ import {
 } from "../tests/TestManagerPanels.jsx";
 import { TestPaperLibraryPanel } from "../tests/TestPaperLibraryPanel.jsx";
 import {
+  defaultPassCorrectCount,
   getTestPaperKindLabel as getTestPaperLibraryKindLabel,
   normalizeTestPaperLibrary,
   selectPapersForSession
@@ -1034,6 +1035,10 @@ export function MaterialManager({
     if (paper.totalQuestions) setAttemptTotalQuestions(String(paper.totalQuestions));
     if (paper.passCorrectCount !== "" && paper.passCorrectCount !== undefined && paper.passCorrectCount !== null) {
       setAttemptPassCorrectCount(String(paper.passCorrectCount));
+    } else {
+      // 시험지에 합격 기준이 없으면 총 문항의 80%(올림)를 채운다.
+      const fallback = defaultPassCorrectCount(paper.totalQuestions);
+      if (fallback !== "") setAttemptPassCorrectCount(String(fallback));
     }
   }
 

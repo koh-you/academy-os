@@ -4,6 +4,7 @@ import {
   buildExpectedPaperCatalog,
   buildLibraryCoverage,
   createTestPaperId,
+  defaultPassCorrectCount,
   extractUnitsBySubject,
   normalizeTestPaperEntry,
   normalizeTestPaperLibrary,
@@ -11,6 +12,14 @@ import {
   selectRetestPaperCandidates,
   ssenCatalogToUnitRows
 } from "../src/domains/tests/testPaperLibraryModel.js";
+
+// --- defaultPassCorrectCount: 총 문항의 80% 올림 ---
+assert.equal(defaultPassCorrectCount(20), 16);
+assert.equal(defaultPassCorrectCount(12), 10);
+assert.equal(defaultPassCorrectCount(25), 20);
+assert.equal(defaultPassCorrectCount(0), "");
+assert.equal(defaultPassCorrectCount(""), "");
+assert.equal(defaultPassCorrectCount("15"), 12);
 
 // 합성 ssen 목차: 두 과목, 각 2개 중단원.
 const fakeIndex = [

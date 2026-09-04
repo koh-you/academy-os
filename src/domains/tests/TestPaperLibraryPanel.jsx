@@ -10,6 +10,7 @@ import {
   TEST_PAPER_SUBJECTS,
   buildExpectedPaperCatalog,
   buildLibraryCoverage,
+  defaultPassCorrectCount,
   getTestPaperKindLabel,
   getTestPaperStatusLabel,
   normalizeTestPaperEntry,
@@ -92,6 +93,7 @@ export function TestPaperLibraryPanel({
       totalQuestions: base.totalQuestions ?? "",
       passCorrectCount: base.passCorrectCount ?? "",
       status: base.status ?? "draft",
+      source: base.source ?? row.source ?? "",
       questionFileUrl: base.questionFileUrl ?? "",
       answerFileUrl: base.answerFileUrl ?? "",
       watermarked: Boolean(base.watermarked),
@@ -101,12 +103,24 @@ export function TestPaperLibraryPanel({
   }
 
   function updateDraft(field, value) {
-    setDraft((current) => ({ ...(current ?? {}), [field]: value }));
+    setDraft((current) => {
+      const next = { ...(current ?? {}), [field]: value };
+      // 총 문항 수를 넣고 통과 기준이 비어 있으면 80% 기본값을 채운다.
+      if (field === "totalQuestions" && (next.passCorrectCount ?? "") === "") {
+        const suggested = defaultPassCorrectCount(value);
+        if (suggested !== "") next.passCorrectCount = String(suggested);
+      }
+      return next;
+    });
   }
 
   function handleSave() {
     if (!selectedRow || !draft || typeof onSave !== "function") return;
     const nowIso = new Date().toISOString();
+    const passCorrectCount =
+      (draft.passCorrectCount ?? "") === ""
+        ? defaultPassCorrectCount(draft.totalQuestions)
+        : draft.passCorrectCount;
     const merged = normalizeTestPaperEntry({
       testPaperId: selectedRow.testPaperId,
       subject: selectedRow.subject,
@@ -115,11 +129,12 @@ export function TestPaperLibraryPanel({
       unitName: selectedRow.unitName,
       partName: selectedRow.partName,
       difficulty: selectedRow.difficulty,
-      source: selectedRow.source,
       folderPath: selectedRow.folderPath,
       createdAt: selectedRow.entry?.createdAt || nowIso,
       updatedAt: nowIso,
-      ...draft
+      ...draft,
+      source: (draft.source ?? "").trim() || selectedRow.source,
+      passCorrectCount
     });
     const next = [
       ...normalizedLibrary.filter((entry) => entry.testPaperId !== merged.testPaperId),
@@ -217,7 +232,7 @@ export function TestPaperLibraryPanel({
               <strong>{row.unitNo}. {row.unitName}</strong>
               <span>{getTestPaperKindLabel(row.testKind)}</span>
               <span>난이도{row.difficulty}</span>
-              <span>{row.source}</span>
+              <span>{row.entry?.source || row.source}</span>
               <span>{row.entry?.totalQuestions || "-"}</span>
               <span className={`testAttemptPass pass-${rowStatusBucket(row) === "ready" ? "passed" : rowStatusBucket(row) === "inProgress" ? "pending" : "failed"}`}>
                 {row.entry ? getTestPaperStatusLabel(row.entry.status) : "미등록"}
@@ -244,9 +259,16 @@ export function TestPaperLibraryPanel({
           <div className="testAttemptMeta">
             <span>{getTestPaperKindLabel(selectedRow.testKind)}</span>
             <span>난이도{selectedRow.difficulty}</span>
-            <span>{selectedRow.source}</span>
           </div>
           <div className="testAttemptFormGrid">
+            <label>
+              출처 교재
+              <input
+                value={draft?.source ?? ""}
+                onChange={(event) => updateDraft("source", event.target.value)}
+                placeholder={selectedRow.source}
+              />
+            </label>
             <label>
               총 문항 수
               <input
@@ -254,7 +276,7 @@ export function TestPaperLibraryPanel({
                 type="number"
                 value={draft?.totalQuestions ?? ""}
                 onChange={(event) => updateDraft("totalQuestions", event.target.value)}
-                placeholder="예: 20"
+                placeholder="예: 12"
               />
             </label>
             <label>
@@ -264,8 +286,13 @@ export function TestPaperLibraryPanel({
                 type="number"
                 value={draft?.passCorrectCount ?? ""}
                 onChange={(event) => updateDraft("passCorrectCount", event.target.value)}
-                placeholder="예: 16"
+                placeholder={
+                  defaultPassCorrectCount(draft?.totalQuestions) === ""
+                    ? "예: 10"
+                    : `기본 ${defaultPassCorrectCount(draft?.totalQuestions)} (80%)`
+                }
               />
+              <span className="fieldHint">비우면 총 문항의 80%(올림)를 씁니다.</span>
             </label>
             <label>
               상태
