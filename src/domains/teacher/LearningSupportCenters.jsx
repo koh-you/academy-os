@@ -15,6 +15,11 @@ import {
   TestManagerTabs
 } from "../tests/TestManagerPanels.jsx";
 import { TestPaperLibraryPanel } from "../tests/TestPaperLibraryPanel.jsx";
+import {
+  getTestPaperKindLabel as getTestPaperLibraryKindLabel,
+  normalizeTestPaperLibrary,
+  selectPapersForSession
+} from "../tests/testPaperLibraryModel.js";
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { Disclosure } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
@@ -875,7 +880,16 @@ export function MaterialManager({
   const [attemptDrafts, setAttemptDrafts] = useState({});
   const [attemptError, setAttemptError] = useState("");
   const [editingTestSessionId, setEditingTestSessionId] = useState("");
+  const [selectedAttemptTestPaperId, setSelectedAttemptTestPaperId] = useState("");
   const attemptFormRef = useRef(null);
+  const normalizedTestPaperLibrary = useMemo(
+    () => normalizeTestPaperLibrary(testPaperLibrary),
+    [testPaperLibrary]
+  );
+  const attemptTestPaperOptions = useMemo(
+    () => selectPapersForSession(normalizedTestPaperLibrary, { subject: attemptSubject, testKind: attemptTestKind }),
+    [normalizedTestPaperLibrary, attemptSubject, attemptTestKind]
+  );
   const [selectedHistoryStudentId, setSelectedHistoryStudentId] = useState("");
   const activeStudents = students.filter(isActiveStudent);
   const selectedAttemptTemplate = templates.find((template) => template.classTemplateId === attemptClassTemplateId) ?? null;
@@ -918,6 +932,15 @@ export function MaterialManager({
   }, [activeStudents, selectedHistoryStudentId]);
 
   useEffect(() => {
+    if (
+      selectedAttemptTestPaperId &&
+      !attemptTestPaperOptions.some((paper) => paper.testPaperId === selectedAttemptTestPaperId)
+    ) {
+      setSelectedAttemptTestPaperId("");
+    }
+  }, [attemptTestPaperOptions, selectedAttemptTestPaperId]);
+
+  useEffect(() => {
     const attemptByStudent = new Map(currentTestAttempts.map((attempt) => [attempt.studentId, attempt]));
     setAttemptDrafts((current) => {
       const nextDrafts = {};
@@ -940,6 +963,7 @@ export function MaterialManager({
 
   function resetAttemptForm() {
     setEditingTestSessionId("");
+    setSelectedAttemptTestPaperId("");
     setAttemptDate(today);
     setAttemptClassTemplateId("all");
     setAttemptTestKind(testPaperKindOptions[0].id);
@@ -955,6 +979,7 @@ export function MaterialManager({
 
   function openTestSession(session) {
     setEditingTestSessionId(session.testSessionId);
+    setSelectedAttemptTestPaperId(session.problemBookId || "");
     setAttemptDate(session.testDate || today);
     setAttemptClassTemplateId(session.classTemplateId || "all");
     setAttemptTestKind(session.testKind || testPaperKindOptions[0].id);
@@ -967,6 +992,24 @@ export function MaterialManager({
     setAttemptError("");
     setActiveTab("attempts");
     attemptFormRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function selectAttemptTestPaper(testPaperId) {
+    setSelectedAttemptTestPaperId(testPaperId);
+    setAttemptError("");
+    if (!testPaperId) return;
+    const paper = normalizedTestPaperLibrary.find((entry) => entry.testPaperId === testPaperId);
+    if (!paper) return;
+    setAttemptSubject(paper.subject);
+    setAttemptTestKind(paper.testKind);
+    setAttemptUnit(`${paper.unitNo}. ${paper.unitName}`.trim());
+    setAttemptTitle(
+      `${paper.unitName} ${getTestPaperLibraryKindLabel(paper.testKind)} 난이도${paper.difficulty}`.trim()
+    );
+    if (paper.totalQuestions) setAttemptTotalQuestions(String(paper.totalQuestions));
+    if (paper.passCorrectCount !== "" && paper.passCorrectCount !== undefined && paper.passCorrectCount !== null) {
+      setAttemptPassCorrectCount(String(paper.passCorrectCount));
+    }
   }
 
   function updateAttemptDraft(studentId, field, value) {
@@ -1039,7 +1082,7 @@ export function MaterialManager({
 
     const testSession = {
       testSessionId: currentTestSessionId,
-      problemBookId: "",
+      problemBookId: selectedAttemptTestPaperId || currentTestSession?.problemBookId || "",
       testDate: attemptDate,
       classTemplateId: attemptClassTemplateId === "all" ? "" : attemptClassTemplateId,
       className: selectedAttemptTemplate?.name ?? (attemptClassTemplateId === "all" ? "전체 학생" : ""),
@@ -1088,9 +1131,15 @@ export function MaterialManager({
             onAttemptTitleChange={setAttemptTitle}
             onAttemptTotalQuestionsChange={setAttemptTotalQuestions}
             onAttemptUnitChange={setAttemptUnit}
+            getTestPaperOptionLabel={(paper) =>
+              `${paper.unitNo}. ${paper.unitName} · ${getTestPaperLibraryKindLabel(paper.testKind)} 난이도${paper.difficulty} · ${paper.source}`
+            }
+            onSelectTestPaper={selectAttemptTestPaper}
+            selectedTestPaperId={selectedAttemptTestPaperId}
             subjectOptions={testPaperSubjectOptions}
             templates={templates}
             testKindOptions={testPaperKindOptions}
+            testPaperOptions={attemptTestPaperOptions}
           />
           <TestAttemptMeta
             isEditing={Boolean(currentTestSession)}
