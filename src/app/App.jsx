@@ -5500,7 +5500,7 @@ export function App() {
   }
 
   function updateLessonNotificationRecordStatuses(lesson, statusText) {
-    const lessonStudentsForRecords = getActiveLessonStudents(lesson, students);
+    const lessonStudentsForRecords = getLessonJournalStudents(lesson, students);
     const updatedAt = new Date().toISOString();
     const recordsToSave = createLessonNotificationRecordStatusRows({
       createRecordId: createLessonStudentRecordId,
@@ -5781,7 +5781,7 @@ export function App() {
     const lesson = lessons.find((item) => item.lessonId === lessonId);
     if (!lesson) return { ok: false, error: "수업을 찾지 못했습니다." };
     const effectiveMode = getIsClosureLesson(lesson) ? "none" : mode;
-    const lessonStudents = getActiveLessonStudents(lesson, students);
+    const lessonStudents = getLessonJournalStudents(lesson, students);
     if (lessonStudents.length === 0) {
       cancelActiveLessonNotificationJobs(lesson, "수업 학생 없음");
       return { ok: true, canceledCount: 0, reservedCount: 0 };
@@ -5838,7 +5838,7 @@ export function App() {
   function scheduleLessonNotificationsAt(lesson, scheduledDate, mode = "manual") {
     if (!lesson?.lessonId || !scheduledDate) return;
     if (getIsClosureLesson(lesson)) return;
-    const lessonStudents = getActiveLessonStudents(lesson, students);
+    const lessonStudents = getLessonJournalStudents(lesson, students);
     if (lessonStudents.length === 0) {
       cancelActiveLessonNotificationJobs(lesson, "수업 학생 없음");
       return;

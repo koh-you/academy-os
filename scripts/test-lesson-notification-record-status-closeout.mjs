@@ -32,7 +32,7 @@ assert.equal(
 );
 
 for (const AppOwnedBoundary of [
-  "const lessonStudentsForRecords = getActiveLessonStudents(lesson, students)",
+  "const lessonStudentsForRecords = getLessonJournalStudents(lesson, students)",
   "const updatedAt = new Date().toISOString()",
   "const recordsToSave = createLessonNotificationRecordStatusRows({",
   "createRecordId: createLessonStudentRecordId,",
@@ -57,7 +57,7 @@ for (const AppOwnedBoundary of [
 }
 
 const orderedBoundaries = [
-  "getActiveLessonStudents(lesson, students)",
+  "getLessonJournalStudents(lesson, students)",
   "new Date().toISOString()",
   "createLessonNotificationRecordStatusRows({",
   "if (recordsToSave.length === 0) return",
