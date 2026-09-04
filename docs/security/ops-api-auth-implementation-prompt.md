@@ -1,5 +1,7 @@
 # 운영 API 인증 경계 — 구현 핸드오프 프롬프트
 
+> 2026-09-04 후속: 이 문서는 구현 전의 역사적 프롬프트다. #262·#266 반영 및 운영 인증 설정 이후에는 [현재 인계 기준](ops-api-auth-current-handoff.md)을 먼저 읽고, 아래 branch·단계를 그대로 재실행하지 않는다. 허가받은 AI의 기존 접근·수정 권한을 유지한다.
+
 브랜치: `codex/ops-api-auth-boundary-20260904` (origin/main 기준)
 배경 감사: [ops-api-auth-audit.md](ops-api-auth-audit.md)
 
