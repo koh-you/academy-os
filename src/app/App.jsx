@@ -2193,11 +2193,6 @@ const teacherLessonHubRuntime = Object.freeze({
   isExamPrepLesson,
   isLegacyExamPrepLesson,
   isSupplementMakeupTaskLesson,
-  loadCanceledLessons: () => getJsonWithTimeout(
-    "/api/lessons?includeCanceled=true",
-    15000,
-    "삭제한 수업 조회가 15초를 넘었습니다."
-  ),
   lessonJournal: lessonJournalRuntime,
   nestedPanels: lessonNestedPanelRuntime,
   sortByTime
@@ -4002,6 +3997,9 @@ export function App() {
     if (!latestAction) return;
     const bundle = latestAction.bundle ?? {};
     try {
+      if (canceledLesson?.restoreMode === "visibility") {
+        return unsuppressGeneratedLessonKey(canceledLesson.restoreGeneratedKey);
+      }
       if (latestAction.type === "copy") {
         await runLessonJournalHistoryAction({
           action: "undo_copy",
@@ -4025,6 +4023,7 @@ export function App() {
           beforeLesson: latestAction.canceledLesson
         });
         const restoredLesson = result.lesson;
+        await unsuppressGeneratedLessonKey(getGeneratedLessonKey(restoredLesson));
         setLessons((current) => upsertById(current, restoredLesson, "lessonId"));
         setRecords((current) => [...result.relatedRecords, ...current.filter((record) => record.lessonId !== bundle.lesson.lessonId)]);
         setHomeworks((current) => [...result.relatedHomeworks, ...current.filter((homework) => homework.lessonId !== bundle.lesson.lessonId)]);
@@ -6428,6 +6427,7 @@ export function App() {
       examPostTargetStudentIds,
       examPrepRows,
       examPrepRowSaveStates,
+      generatedLessonControls,
       generatedLessonSaveStatus,
       examPrepScheduleLessons,
       homeworks,

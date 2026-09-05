@@ -31,7 +31,9 @@ export function CanceledLessonRestoreModal({
               <div>
                 <strong>{lesson.date} · {lesson.startTime || "시간 미정"}–{lesson.endTime || "시간 미정"}</strong>
                 <p>{lesson.className || "수업"}{lesson.sourceLabel ? ` · ${lesson.sourceLabel}` : ""}</p>
-                <p className="muted">학생 {(lesson.studentIds || []).length}명 · 복구 가능 {getCanceledLessonRemainingDays(lesson)}일 남음</p>
+                <p className="muted">
+                  학생 {(lesson.studentIds || []).length}명 · {lesson.restoreMode === "visibility" ? "달력 표시 복구 필요" : `복구 가능 ${getCanceledLessonRemainingDays(lesson)}일 남음`}
+                </p>
               </div>
               <button
                 className="softButton"
@@ -39,7 +41,7 @@ export function CanceledLessonRestoreModal({
                 onClick={() => onRestore(lesson)}
                 type="button"
               >
-                {restoringLessonId === lesson.lessonId ? "복구 중" : "이 수업 복구"}
+                {restoringLessonId === lesson.lessonId ? "복구 중" : lesson.restoreMode === "visibility" ? "달력 표시 복구" : "이 수업 복구"}
               </button>
             </article>
           ))}
