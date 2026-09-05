@@ -7,7 +7,6 @@ export function createLessonHubViewProps({ actions, models, runtimeBindings, les
     attendanceSettings: models.attendanceSettings,
     attendanceSyncStatus: models.attendanceSyncStatus,
     generatedLessonSaveStatus: models.generatedLessonSaveStatus,
-    generatedLessonControls: models.generatedLessonControls,
     examPrepScheduleLessons: models.examPrepScheduleLessons,
     integrationStatus: models.integrationStatus,
     lessonJournalEffects,

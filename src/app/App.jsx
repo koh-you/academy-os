@@ -6427,7 +6427,6 @@ export function App() {
       examPostTargetStudentIds,
       examPrepRows,
       examPrepRowSaveStates,
-      generatedLessonControls,
       generatedLessonSaveStatus,
       examPrepScheduleLessons,
       homeworks,

@@ -11,7 +11,7 @@ import { useLessonCalendarKeyboardNavigation } from "./useLessonCalendarKeyboard
 import { getLessonJournalStudents } from "../students/lessonRosterSelectors.js";
 import { ExamPrepScheduleModal } from "./ExamPrepScheduleModal.jsx";
 import { CanceledLessonRestoreModal } from "./CanceledLessonRestoreModal.jsx";
-import { selectRecentRestorableLessons } from "./recentCanceledLessons.js";
+import { getStoredGeneratedLessonSuppressedKeys, selectRecentRestorableLessons } from "./recentCanceledLessons.js";
 import { loadCanceledLessonRestoreCandidates } from "./canceledLessonRestoreApi.js";
 
 export function TeacherLessonHubV2({
@@ -21,7 +21,6 @@ export function TeacherLessonHubV2({
   allRecords = [],
   attendanceSettings = defaultAttendanceSettings,
   attendanceSyncStatus = { lastSyncedAt: "", message: "출결 서버 확인 대기", state: "idle" },
-  generatedLessonControls = { manualOverrideKeys: [], suppressedKeys: [] },
   generatedLessonSaveStatus = { lessons: [], message: "", state: "idle" },
   examPrepScheduleLessons = [],
   integrationStatus,
@@ -134,7 +133,7 @@ export function TeacherLessonHubV2({
         ...current,
         isLoading: false,
         lessons: selectRecentRestorableLessons(result.lessons ?? [], {
-          suppressedKeys: generatedLessonControls.suppressedKeys
+          suppressedKeys: getStoredGeneratedLessonSuppressedKeys()
         })
       }));
     } catch (error) {
