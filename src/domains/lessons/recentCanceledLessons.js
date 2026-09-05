@@ -8,6 +8,14 @@ function getRestorableGeneratedKey(lesson = {}) {
   return lesson.generatedKey || "";
 }
 
+export function getStoredGeneratedLessonSuppressedKeys(storage = globalThis.localStorage) {
+  try {
+    return JSON.parse(storage?.getItem("academy-os.generatedLessonControls.v1") || "{}")?.suppressedKeys ?? [];
+  } catch {
+    return [];
+  }
+}
+
 function canceledAtMs(lesson = {}) {
   return new Date(lesson.updatedAt || lesson.deletedAt || "").getTime();
 }
