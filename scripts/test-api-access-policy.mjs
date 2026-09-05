@@ -76,17 +76,36 @@ assert.equal(A("POST", "/api/students", { kind: "dispatch" }).status, 403);
 assert.equal(A("DELETE", "/api/lessons", { kind: "teacher", teacherRole: "owner" }).ok, true);
 assert.equal(A("POST", "/api/admin/seed-core-data", { kind: "teacher", teacherRole: "owner" }).ok, true);
 
-// teacher assistant → 출결 표면만
+// teacher assistant → "수업일지 중심" 워크플로는 넓게, 그 밖은 막힘
+// (자기 tenant 학생 등록·수업 개설·출결·숙제·데일리 테스트·알림톡·정리 삭제)
 assert.equal(A("POST", "/api/attendance/check", { kind: "teacher", teacherRole: "assistant" }).ok, true);
 assert.equal(A("GET", "/api/lessons", { kind: "teacher", teacherRole: "assistant" }).ok, true);
 assert.equal(A("GET", "/api/students", { kind: "teacher", teacherRole: "assistant" }).ok, true);
 assert.equal(A("POST", "/api/notifications/attendance-alimtalk", { kind: "teacher", teacherRole: "assistant" }).ok, true);
-assert.deepEqual(A("POST", "/api/students", { kind: "teacher", teacherRole: "assistant" }), { ok: false, status: 403, code: "role_forbidden" });
-assert.equal(A("DELETE", "/api/lessons", { kind: "teacher", teacherRole: "assistant" }).status, 403);
-assert.equal(A("POST", "/api/notifications/daily-report-alimtalk", { kind: "teacher", teacherRole: "assistant" }).status, 403);
-assert.equal(A("POST", "/api/lesson-journal/rows/save", { kind: "teacher", teacherRole: "assistant" }).status, 403);
+assert.equal(A("POST", "/api/notifications/comment-alimtalk", { kind: "teacher", teacherRole: "assistant" }).ok, true);
+assert.equal(A("POST", "/api/notifications/daily-report-alimtalk", { kind: "teacher", teacherRole: "assistant" }).ok, true);
+assert.equal(A("POST", "/api/students", { kind: "teacher", teacherRole: "assistant" }).ok, true);
+assert.equal(A("POST", "/api/students/bulk", { kind: "teacher", teacherRole: "assistant" }).ok, true);
+assert.equal(A("DELETE", "/api/students", { kind: "teacher", teacherRole: "assistant" }).ok, true);
+assert.equal(A("POST", "/api/lessons", { kind: "teacher", teacherRole: "assistant" }).ok, true);
+assert.equal(A("DELETE", "/api/lessons", { kind: "teacher", teacherRole: "assistant" }).ok, true);
+assert.equal(A("POST", "/api/homeworks", { kind: "teacher", teacherRole: "assistant" }).ok, true);
+assert.equal(A("POST", "/api/test-sessions", { kind: "teacher", teacherRole: "assistant" }).ok, true);
+assert.equal(A("DELETE", "/api/test-sessions", { kind: "teacher", teacherRole: "assistant" }).ok, true);
+assert.equal(A("POST", "/api/lesson-journal/rows/save", { kind: "teacher", teacherRole: "assistant" }).ok, true);
+assert.equal(A("POST", "/api/notification-jobs/reserve", { kind: "teacher", teacherRole: "assistant" }).ok, true);
+assert.equal(A("DELETE", "/api/notification-jobs", { kind: "teacher", teacherRole: "assistant" }).ok, true);
+// 여전히 막히는 것: 유료 AI·시험분석 파이프라인·운영자 전용
+assert.deepEqual(A("POST", "/api/ai/comment-polish", { kind: "teacher", teacherRole: "assistant" }), { ok: false, status: 403, code: "role_forbidden" });
+assert.equal(A("POST", "/api/admin/seed-core-data", { kind: "teacher", teacherRole: "assistant" }).status, 403);
+assert.equal(A("POST", "/api/exam-analysis-runs/detect-question-boundaries", { kind: "teacher", teacherRole: "assistant" }).status, 403);
+assert.equal(A("POST", "/api/notifications/slack-daily-schedule", { kind: "teacher", teacherRole: "assistant" }).status, 403);
+assert.equal(A("POST", "/api/special-lecture-applications", { kind: "teacher", teacherRole: "assistant" }).status, 403);
 assert.equal(isAssistantAllowed("POST", "/api/attendance/check"), true);
-assert.equal(isAssistantAllowed("POST", "/api/lessons"), false);
+assert.equal(isAssistantAllowed("POST", "/api/lessons"), true);
+assert.equal(isAssistantAllowed("POST", "/api/students"), true);
+assert.equal(isAssistantAllowed("POST", "/api/homeworks"), true);
+assert.equal(isAssistantAllowed("POST", "/api/ai/comment-polish"), false);
 
 // ops read → GET 만
 assert.equal(A("GET", "/api/students", { kind: "ops", opsScope: "read" }).ok, true);
