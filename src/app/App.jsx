@@ -2193,6 +2193,11 @@ const teacherLessonHubRuntime = Object.freeze({
   isExamPrepLesson,
   isLegacyExamPrepLesson,
   isSupplementMakeupTaskLesson,
+  loadCanceledLessons: () => getJsonWithTimeout(
+    "/api/lessons?includeCanceled=true",
+    15000,
+    "삭제한 수업 조회가 15초를 넘었습니다."
+  ),
   lessonJournal: lessonJournalRuntime,
   nestedPanels: lessonNestedPanelRuntime,
   sortByTime
@@ -4031,11 +4036,6 @@ export function App() {
     } catch {
       // Keep the undo entry and local source bundle for an explicit retry.
     }
-  }
-
-  function handleListCanceledLessons() {
-    return import("../domains/lessons/lessonJournalHistoryAction.js")
-      .then(({ listCanceledLessons }) => listCanceledLessons({ request: getJsonWithTimeout }));
   }
 
   function handleDeleteSelectedLessonFromCalendar() {
@@ -6530,7 +6530,6 @@ export function App() {
       handleEditLesson,
       handleEnsureExamCycleRows,
       handleLogNotification,
-      handleListCanceledLessons,
       handleOpenAddLesson,
       handleOpenAddStudent,
       handleOpenExamPostSubmissionFile,

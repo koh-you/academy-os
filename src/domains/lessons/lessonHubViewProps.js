@@ -48,7 +48,6 @@ export function createLessonHubViewProps({ actions, models, runtimeBindings, les
     onOpenAttendance: actions.setAttendanceModal,
     onOpenExamPrep: actions.handleOpenExamPrepView,
     onOpenLessonJournal: actions.handleOpenLessonJournal,
-    onListCanceledLessons: actions.handleListCanceledLessons,
     onPasteLesson: actions.handlePasteLessonToSelectedDate,
     onOpenReport: actions.handleOpenReport,
     onPassMakeupTask: actions.handlePassSupplementTask,

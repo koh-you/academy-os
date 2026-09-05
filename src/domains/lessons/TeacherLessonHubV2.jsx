@@ -59,7 +59,6 @@ export function TeacherLessonHubV2({
   onOpenAttendance,
   onOpenExamPrep,
   onOpenLessonJournal,
-  onListCanceledLessons,
   onOpenReport,
   onPasteLesson,
   onPassMakeupTask,
@@ -88,6 +87,7 @@ export function TeacherLessonHubV2({
     isExamPrepLesson,
     isLegacyExamPrepLesson,
     isSupplementMakeupTaskLesson,
+    loadCanceledLessons,
     lessonJournal,
     nestedPanels,
     sortByTime
@@ -128,7 +128,7 @@ export function TeacherLessonHubV2({
   async function openCanceledLessonRestore() {
     setCanceledLessonRestoreState((current) => ({ ...current, error: "", isLoading: true, isOpen: true, lessons: [] }));
     try {
-      const result = await onListCanceledLessons();
+      const result = await loadCanceledLessons();
       setCanceledLessonRestoreState((current) => ({
         ...current,
         isLoading: false,

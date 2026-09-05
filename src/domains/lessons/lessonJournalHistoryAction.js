@@ -145,7 +145,3 @@ export async function saveLessonJournalHistoryAction({
     throw error;
   }
 }
-
-export function listCanceledLessons({ request }) {
-  return request("/api/lessons?includeCanceled=true", 15000, "삭제한 수업 조회가 15초를 넘었습니다.");
-}
