@@ -29,29 +29,48 @@
 - 새 코드는 전부 플래그 뒤 (`API_REQUIRE_AUTH` OFF, `MULTITENANT_SCOPING` OFF, `teacherRole` 기본
   "owner") → main 에 들어가도 동작 변화 없음.
 
-## assistant 가 할 수 있는 것 (기능 표면)
+## assistant 가 할 수 있는 것 (2026-09-05 개정 — "수업일지 중심" 워크플로)
 
-| 기능 | 화면 | API |
-|---|---|---|
-| 로그인 | 기존 교사 로그인 화면 | `POST /api/auth/login` (role="teacher") |
-| 오늘 수업 목록·학생 배정 보기 | 수업 캘린더(간소화) | `GET /api/lessons`, `GET /api/lesson-records` |
-| 학생 명단 보기 | 학생 명단(읽기) | `GET /api/students`, `GET /api/classes` |
-| 출결 체크인/체크아웃/상태변경 | 출결 패널 | `POST /api/attendance/check`, `POST /api/attendance/preview`, `POST /api/lesson-records` (출결 필드) |
-| 출결 알림톡 발송 | 출결 패널 버튼 | `POST /api/notifications/attendance-alimtalk`, `GET /api/notification-jobs` (상태 확인) |
+**tenant 는 owner 와 분리된 새 tenant.** 같은 학원 로그인 화면을 쓰지만, 다루는 학생·수업이
+달라서 데이터는 공유하지 않는다(`seed-assistant-teacher.mjs` 로 신규 tenant 발급). tenant_id
+스코핑이 실제 격리 경계이므로, 그 tenant **안에서는** 아래처럼 owner 에 가깝게 넓게 허용한다.
 
-assistant 가 **못 하는 것**: 수업일지 상세 저장, 숙제/보충/시험/시험분석, 코멘트 알림톡·일일리포트·
-Slack, 정산·리포트, 학생 생성/수정/삭제, 반 관리, 운영 알림, 유료 AI, 삭제 계열 전부.
+| 기능 | API |
+|---|---|
+| 로그인 | `POST /api/auth/login` |
+| 학생 등록/일괄/삭제 | `POST /api/students(/bulk)`, `DELETE /api/students` |
+| 수업 개설/일괄/삭제 | `POST /api/lessons(/bulk)`, `DELETE /api/lessons` |
+| 출결 + 수업기록 | `POST /api/attendance/check|preview`, `POST /api/lesson-records(/bulk|/retest-status|/prune-stale|/notification-status)` |
+| 숙제 | `POST /api/homeworks(/bulk)` |
+| 데일리 테스트 | `POST/DELETE /api/test-sessions` |
+| 수업일지 저장(코멘트 등) | `POST /api/lesson-journal/rows/save`, `/history-action`, `/makeup-tasks/save` |
+| 알림톡(출결·코멘트·일일리포트·리마인더) | `POST /api/notifications/attendance-alimtalk|comment-alimtalk|daily-report-alimtalk|student-schedule-reminder` |
+| 알림 job 관리 | `POST/DELETE /api/notification-jobs`, `/reserve(-bulk)`, `/cancel`, `/readiness-check`, `/reconcile-solapi` |
+
+**여전히 막힘**: 유료 AI(`/api/ai/*`), 시험분석/시험지 파이프라인(`/api/exam-analysis-*`), 운영자
+전용(`/api/admin/*`), 교사 일정 Slack, 특강/입학상담, 자료함·학사일정·정산·SOLAPI 직접 취소.
+"수업일지" 밖의 별도 고비용/운영 기능이라 별개 취급.
+
+### 후속 — 계정별 기능 온오프 (2026-09-05 요청, 미착수)
+
+지금은 assistant 전원이 위 고정 목록을 그대로 씀. 다음 단계로 **계정별로 기능을 켜고 끌 수 있게**:
+1. 위 표를 이름 붙은 기능 묶음으로 그룹화(`attendance`/`students`/`lessons`/`homework`/`tests`/
+   `notifications`/`notificationJobs`).
+2. `teacher_accounts` 에 `feature_flags jsonb` 컬럼(예: `{"attendance":true,"homework":false,...}`).
+3. 교사 세션 토큰에 `featureFlags` 포함(로그인 시 DB에서 읽어 실음), 게이트가 라우트→기능→플래그로 판정.
+4. owner 가 협력 교사별로 체크박스로 켜고 끄는 설정 화면 — 이게 있어야 코드 배포 없이 기능 단위
+   허용/차단이 됨.
 
 ## 라우트 → 역할/스코프 정책 (게이트 2차 판정)
 
-`src/shared/server/apiAccessPolicy.js` (신규, 순수·테스트 대상):
+`src/shared/server/apiAccessPolicy.js` (순수·테스트 대상, `ASSISTANT_ALLOW_EXACT` 상수):
 
-- **공개**: `GET /health`, `POST /api/auth/login`, prefix `/api/portal-`, `/api/intake/tally`,
-  `/api/special-lecture-applications/tally`, `/api/exam-post-files`.
+- **공개**: `GET/HEAD /`, `GET/HEAD /health`, `POST /api/auth/login`, prefix `/api/portal-`,
+  `/api/intake/tally`, `/api/special-lecture-applications/tally`, `/api/exam-post-files`.
 - **dispatch 토큰**: `POST /api/notification-jobs/dispatch-due`, `POST /api/notifications/slack-today-schedule/reserve`.
 - **teacher owner**: 전체 허용 (종전과 동일).
-- **teacher assistant**: 위 "기능 표면" 표의 API 만 허용. 그 외 403 `{code:"role_forbidden"}`.
-  - assistant 허용 목록 상수: `ASSISTANT_API_ALLOW` (method+path, 접두 매칭 일부).
+- **teacher assistant**: 위 표의 API 만 허용. 그 외 403 `{code:"role_forbidden"}`.
+- **kiosk**: 모든 `GET /api/*` + `POST /api/attendance/check|preview`. 그 외 403 `kiosk_forbidden`.
 - **ops read**: GET 만. **ops cas-write**: GET + 지정 versioned POST + 버전필드 필수(없으면 422).
   **ops highrisk**: 제한 없음 + `[api-auth-audit]` 기록. (ops-api-auth-implementation-prompt.md §1b)
 - 인증 없음: 공개/ dispatch 외 전부 401 `{code:"auth_required"}`.

@@ -33,22 +33,61 @@ const DISPATCH_TOKEN_ROUTES = new Set([
   "POST /api/notifications/slack-today-schedule/reserve"
 ]);
 
-// 협력 교사(assistant)가 호출 가능한 라우트 — 출결 프로토타입 기능 표면.
+// 협력 교사(assistant)가 호출 가능한 라우트 — "수업일지 중심" 기능 표면.
+// assistant 는 소유주와 다른 tenant(자기 학생만)를 쓰므로, 그 tenant 안에서는
+// 수업일지 워크플로(학생 등록·수업 개설·출결·숙제·데일리 테스트·알림톡·정리 삭제)가
+// 온전히 돌아가야 한다. tenant_id 스코핑이 실제 데이터 격리 경계이므로 이 안에서는
+// owner 에 가깝게 넓게 허용한다.
+// 계속 막는 것: 시험분석/시험지 파이프라인(유료 AI), /api/ai/*, /api/admin/*,
+// 교사 일정 Slack, 특강/입학상담, 자료함·학사일정·정산 등 수업일지 밖 기능.
 const ASSISTANT_ALLOW_EXACT = new Set([
   "GET /api/lessons",
   "GET /api/lessons/closure-preflight",
   "GET /api/lesson-records",
   "GET /api/students",
+  "GET /api/students/delete-audit",
   "GET /api/classes",
   "GET /api/school-events",
   "GET /api/app-state",
   "GET /api/integrations/status",
   "GET /api/notification-jobs",
+  "GET /api/makeup-tasks",
+  "GET /api/test-sessions",
+  "GET /api/test-attempts",
+  "POST /api/students",
+  "POST /api/students/bulk",
+  "DELETE /api/students",
+  "POST /api/lessons",
+  "POST /api/lessons/bulk",
+  "DELETE /api/lessons",
   "POST /api/attendance/check",
   "POST /api/attendance/preview",
   "POST /api/lesson-records",
+  "POST /api/lesson-records/bulk",
   "POST /api/lesson-records/notification-status",
-  "POST /api/notifications/attendance-alimtalk"
+  "POST /api/lesson-records/retest-status",
+  "POST /api/lesson-records/prune-stale",
+  "POST /api/homeworks",
+  "POST /api/homeworks/bulk",
+  "POST /api/makeup-tasks",
+  "POST /api/makeup-tasks/bulk",
+  "DELETE /api/makeup-tasks",
+  "POST /api/test-sessions",
+  "DELETE /api/test-sessions",
+  "POST /api/lesson-journal/rows/save",
+  "POST /api/lesson-journal/history-action",
+  "POST /api/lesson-journal/makeup-tasks/save",
+  "POST /api/notifications/attendance-alimtalk",
+  "POST /api/notifications/comment-alimtalk",
+  "POST /api/notifications/daily-report-alimtalk",
+  "POST /api/notifications/student-schedule-reminder",
+  "POST /api/notification-jobs",
+  "DELETE /api/notification-jobs",
+  "POST /api/notification-jobs/reserve",
+  "POST /api/notification-jobs/reserve-bulk",
+  "POST /api/notification-jobs/cancel",
+  "POST /api/notification-jobs/readiness-check",
+  "POST /api/notification-jobs/reconcile-solapi"
 ]);
 
 // ops cas-write 스코프가 호출 가능한 POST (그 외 POST/DELETE 는 highrisk 만).
