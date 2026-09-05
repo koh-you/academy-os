@@ -259,11 +259,10 @@ test("exam prep exclusion survives reread and can be restored without deleting t
   let safeSchoolRow = page.locator(".examPrepRow").filter({ hasText: "안전고" });
   await safeSchoolRow.getByRole("button", { name: /상세 관리/ }).click();
   let detailDialog = page.getByRole("dialog", { name: "안전고 시험정보 수정" });
-  const scopeActions = detailDialog.getByRole("group", { name: "시험정보 관리 범위 변경" });
-  const mainActions = detailDialog.getByRole("group", { name: "시험정보 주요 작업" });
-  await expect(scopeActions.getByText("관리 범위 변경")).toBeVisible();
+  const scopeActions = detailDialog.getByRole("group", { name: "이 시험정보에 대한 작업" });
+  const mainActions = detailDialog.getByRole("group", { name: "모달 처리" });
   await expect(scopeActions.getByRole("button", { name: "이번 고사 내신 준비 제외" })).toBeVisible();
-  await expect(mainActions.getByRole("button", { name: "시험 후 총평 작성" })).toBeVisible();
+  await expect(scopeActions.getByRole("button", { name: "시험 후 총평 작성" })).toBeVisible();
   await expect(mainActions.getByRole("button", { name: "닫기", exact: true })).toBeVisible();
   await expect(mainActions.getByRole("button", { name: "변경 저장" })).toBeDisabled();
   await detailDialog.getByRole("button", { name: "이번 고사 내신 준비 제외" }).click();
