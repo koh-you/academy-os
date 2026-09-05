@@ -3679,8 +3679,8 @@ export function App() {
     [generatedLessonPlan]
   );
   const currentGeneratedLessonSourceLessons = useMemo(
-    () => filterStaleGeneratedExamPrepLessons({ lessons, planItems: generatedLessonPlan }),
-    [generatedLessonPlan, lessons]
+    () => filterStaleGeneratedExamPrepLessons(lessons, generatedLessonPlan, generatedLessonControls),
+    [generatedLessonControls, generatedLessonPlan, lessons]
   );
   const calendarLessons = useMemo(
     () => mergeGeneratedCalendarLessons({
@@ -4000,7 +4000,9 @@ export function App() {
     const bundle = latestAction.bundle ?? {};
     try {
       if (canceledLesson?.restoreMode === "visibility") {
-        return unsuppressGeneratedLessonKey(canceledLesson.restoreGeneratedKey);
+        unsuppressGeneratedLessonKey(canceledLesson.restoreGeneratedKey);
+        markGeneratedLessonManualOverride(canceledLesson);
+        return;
       }
       if (latestAction.type === "copy") {
         await runLessonJournalHistoryAction({
@@ -4025,7 +4027,8 @@ export function App() {
           beforeLesson: latestAction.canceledLesson
         });
         const restoredLesson = result.lesson;
-        await unsuppressGeneratedLessonKey(getGeneratedLessonKey(restoredLesson));
+        unsuppressGeneratedLessonKey(getGeneratedLessonKey(restoredLesson));
+        markGeneratedLessonManualOverride(restoredLesson);
         setLessons((current) => upsertById(current, restoredLesson, "lessonId"));
         setRecords((current) => [...result.relatedRecords, ...current.filter((record) => record.lessonId !== bundle.lesson.lessonId)]);
         setHomeworks((current) => [...result.relatedHomeworks, ...current.filter((homework) => homework.lessonId !== bundle.lesson.lessonId)]);

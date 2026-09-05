@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import {
   getCanceledLessonRemainingDays,
-  getStoredGeneratedLessonSuppressedKeys,
   selectRecentCanceledLessons,
   selectRecentRestorableLessons
 } from "../src/domains/lessons/recentCanceledLessons.js";
@@ -34,8 +33,6 @@ assert.deepEqual(
 );
 assert.equal(getCanceledLessonRemainingDays(recent, now), 3);
 assert.equal(getCanceledLessonRemainingDays({ ...recent, updatedAt: "invalid" }, now), 0);
-assert.deepEqual(getStoredGeneratedLessonSuppressedKeys({ getItem: () => JSON.stringify({ suppressedKeys: ["one"] }) }), ["one"]);
-assert.deepEqual(getStoredGeneratedLessonSuppressedKeys({ getItem: () => "invalid" }), []);
 
 const hiddenRestored = {
   ...recent,
@@ -45,7 +42,7 @@ const hiddenRestored = {
 };
 assert.deepEqual(
   selectRecentRestorableLessons([recent, newer, hiddenRestored], {
-    suppressedKeys: [hiddenRestored.generatedKey]
+    visibleLessonIds: []
   }, now).map(({ lessonId, restoreMode }) => ({ lessonId, restoreMode })),
   [
     { lessonId: "newer", restoreMode: "lesson" },

@@ -11,7 +11,7 @@ import { useLessonCalendarKeyboardNavigation } from "./useLessonCalendarKeyboard
 import { getLessonJournalStudents } from "../students/lessonRosterSelectors.js";
 import { ExamPrepScheduleModal } from "./ExamPrepScheduleModal.jsx";
 import { CanceledLessonRestoreModal } from "./CanceledLessonRestoreModal.jsx";
-import { getStoredGeneratedLessonSuppressedKeys, selectRecentRestorableLessons } from "./recentCanceledLessons.js";
+import { selectRecentRestorableLessons } from "./recentCanceledLessons.js";
 import { loadCanceledLessonRestoreCandidates } from "./canceledLessonRestoreApi.js";
 
 export function TeacherLessonHubV2({
@@ -133,7 +133,7 @@ export function TeacherLessonHubV2({
         ...current,
         isLoading: false,
         lessons: selectRecentRestorableLessons(result.lessons ?? [], {
-          suppressedKeys: getStoredGeneratedLessonSuppressedKeys()
+          visibleLessonIds: lessons.map((lesson) => lesson.lessonId)
         })
       }));
     } catch (error) {

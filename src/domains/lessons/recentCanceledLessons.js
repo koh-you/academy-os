@@ -8,14 +8,6 @@ function getRestorableGeneratedKey(lesson = {}) {
   return lesson.generatedKey || "";
 }
 
-export function getStoredGeneratedLessonSuppressedKeys(storage = globalThis.localStorage) {
-  try {
-    return JSON.parse(storage?.getItem("academy-os.generatedLessonControls.v1") || "{}")?.suppressedKeys ?? [];
-  } catch {
-    return [];
-  }
-}
-
 function canceledAtMs(lesson = {}) {
   return new Date(lesson.updatedAt || lesson.deletedAt || "").getTime();
 }
@@ -38,18 +30,20 @@ export function selectRecentCanceledLessons(lessons = [], now = Date.now()) {
 
 export function selectRecentRestorableLessons(
   lessons = [],
-  { suppressedKeys = [] } = {},
+  { suppressedKeys = [], visibleLessonIds = [] } = {},
   now = Date.now()
 ) {
   const nowMs = new Date(now).getTime();
   if (!Number.isFinite(nowMs)) return [];
   const suppressed = new Set(suppressedKeys);
+  const visible = new Set(visibleLessonIds);
   return lessons
     .filter((lesson) => {
       const timestamp = canceledAtMs(lesson);
       if (!Number.isFinite(timestamp) || timestamp > nowMs || nowMs - timestamp >= canceledLessonRetentionMs) return false;
       if (lesson?.status === "canceled") return true;
-      return suppressed.has(getRestorableGeneratedKey(lesson));
+      const generatedKey = getRestorableGeneratedKey(lesson);
+      return Boolean(generatedKey) && (suppressed.has(generatedKey) || !visible.has(lesson.lessonId));
     })
     .map((lesson) => ({
       ...lesson,

@@ -56,6 +56,11 @@ assert.deepEqual(plan.lesson.studentIds, ["target"]);
 assert.deepEqual(plan.lesson.specialLectureStudentSchedules.map((schedule) => schedule.studentId), ["target"]);
 
 const staleOnlyLesson = { ...existing, lessonId: "lesson_exam_prep_2026-08-30", generatedKey: "generated:exam_prep:2026-08-30", sourceSchoolEventId: "generated:exam_prep:2026-08-30" };
-assert.deepEqual(filterStaleGeneratedExamPrepLessons({ lessons: [existing, staleOnlyLesson], planItems: [plan] }).map((lesson) => lesson.lessonId), [existing.lessonId]);
+assert.deepEqual(filterStaleGeneratedExamPrepLessons([existing, staleOnlyLesson], [plan]).map((lesson) => lesson.lessonId), [existing.lessonId]);
+assert.deepEqual(filterStaleGeneratedExamPrepLessons(
+  [existing, staleOnlyLesson],
+  [plan],
+  { manualOverrideKeys: [staleOnlyLesson.generatedKey] }
+).map((lesson) => lesson.lessonId), [existing.lessonId, staleOnlyLesson.lessonId]);
 
 console.log("exam prep authoritative roster tests passed");
