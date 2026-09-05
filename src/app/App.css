@@ -9089,23 +9089,13 @@ textarea {
   justify-content: space-between;
 }
 
-.examPrepEditScopeActions {
+.examPrepEditRowActions {
   align-items: center;
-  background: var(--status-pending-bg, #fff7ed);
-  border: 1px solid var(--status-pending-border, #fed7aa);
-  border-radius: 10px;
+  border-right: 1px solid var(--status-neutral-border, #e2e8f0);
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  padding: 7px 9px;
-}
-
-.examPrepActionGroupLabel {
-  color: var(--status-pending-text, #c2410c);
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
+  padding-right: 20px;
 }
 
 .examPrepRosterPanel {
@@ -9210,13 +9200,12 @@ textarea {
   color: var(--status-pending-text, #c2410c);
 }
 
-.examPrepEditMainActions {
+.examPrepEditModalActions {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   justify-content: flex-end;
-  margin-left: auto;
 }
 
 @media (max-width: 720px) {
@@ -9226,13 +9215,17 @@ textarea {
     gap: 10px;
   }
 
-  .examPrepEditScopeActions,
-  .examPrepEditMainActions {
-    margin-left: 0;
+  .examPrepEditRowActions {
+    border-right: none;
+    padding-right: 0;
     width: 100%;
   }
 
-  .examPrepEditMainActions > button {
+  .examPrepEditModalActions {
+    width: 100%;
+  }
+
+  .examPrepEditModalActions > button {
     flex: 1 1 auto;
   }
 }
