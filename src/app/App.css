@@ -16844,6 +16844,22 @@ textarea.profileEditInput {
   white-space: nowrap;
 }
 
+.testPaperFileFieldRow {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.testPaperFileFieldRow input:not([type="file"]) {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.testAttemptFormGrid .fieldHintError {
+  color: var(--status-destructive-text, #dc2626);
+}
+
 .dangerTextButton {
   background: var(--status-pending-bg, #fff7ed);
   border: 1px solid var(--status-danger-border, #fecaca);

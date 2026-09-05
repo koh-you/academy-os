@@ -119,10 +119,28 @@
 2. **단원테스트 난이도2 출처 교재** — 베이직쎈은 소단원별 12문항 세트가 쓸 만하나 쎈B에는
    해당 세트가 없음. 유사한 중난이도 단원마무리 교재를 찾는 중. 카탈로그 기본 라벨은
    `쎈B 단원마무리`로 두되 시험지별로 `출처 교재`를 직접 수정한다.
-3. 시험지 파일 저장 위치 — 사용자 요청: **Drive · Supabase Storage · 로컬 3곳 모두**.
-   설계안: Supabase Storage = 앱이 읽는 원천, Google Drive = 백업·공유 미러, 로컬 = 제작 작업본.
-   업로드 UI·Storage 연동은 아직 별도 단계(워터마크 로직 자체는 완료, 4번 참고).
+3. 시험지 파일 저장 위치 — **Supabase Storage 업로드는 완료(step 7-b)**. Google Drive 미러는
+   아직 안 만듦(필요해지면 별도 단계).
 4. 실제 시험지 생성 도구·절차 (매쓰플랫 / 수학비서) — 사용자 검토 중.
+
+## 7-b. 파일 업로드 + Storage 연동 — 완료
+
+- `test-papers` Supabase Storage 버킷(최초 업로드 시 자동 생성, `ensureStorageBucket`). PDF만
+  허용, 20MB 제한.
+- `src/domains/tests/testPaperStorageModel.js`(참조 문자열 `test-paper-storage://버킷/경로`,
+  검증) + `testPaperStorageOperation.js`(업로드 시 워터마크 선택 적용·삭제·서명 URL) — `app_state`
+  DB row 없이 순수 Storage 참조만 다룬다. `problem_books`/`resource_materials`처럼 별도
+  테이블을 두지 않는다.
+- `src/shared/server/testPaperFileRouteRegistry.js` — `POST/DELETE /api/test-paper-files`,
+  `GET /api/test-paper-files/open`. `api/` 대신 여기 둔 이유는 4번 워터마크와 동일
+  (Vercel Hobby 함수 12개 제한).
+- `TestPaperLibraryPanel`의 문제/정답 파일 필드에 PDF 업로드 버튼 + 열기 버튼 추가. **문제 파일을
+  업로드하면 서버가 자동으로 워터마크를 찍는다**(정답 파일은 안 찍음). Drive 링크 직접 붙여넣기도
+  계속 지원(외부 https 링크는 Storage를 거치지 않고 그대로 연다).
+- 같은 원본을 워터마크 유무로 두 번 올려도 경로가 겹치지 않도록 워터마크 여부를 저장 경로에
+  반영했다(원본 다이제스트만 쓰면 워터마크 버전과 원본이 같은 경로에서 서로 덮어씀).
+- 파일을 교체/삭제해도 이전 Storage 객체를 자동으로 정리하진 않는다(orphan 파일 누적 — 필요해지면
+  별도 정리 작업).
 
 ### 확정됨
 
