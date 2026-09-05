@@ -1,4 +1,5 @@
 ﻿import http from "node:http";
+import { readFile } from "node:fs/promises";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import {
   cancelNotificationJob,
@@ -211,6 +212,20 @@ import {
   deleteResourceMaterialWithFile,
   saveResourceMaterialFile
 } from "../src/domains/resources/resourceMaterialStorageOperation.js";
+import {
+  testPaperStorageAllowedMimeTypes,
+  testPaperStorageMaxBytes
+} from "../src/domains/tests/testPaperStorageModel.js";
+import {
+  deleteTestPaperFile,
+  resolveTestPaperOpenUrl,
+  saveTestPaperFile
+} from "../src/domains/tests/testPaperStorageOperation.js";
+import {
+  addCenteredDiagonalWatermark,
+  defaultWatermarkLogoPath
+} from "../src/shared/server/testPaperWatermark.js";
+import { createTestPaperFileRouteRegistry } from "../src/shared/server/testPaperFileRouteRegistry.js";
 import { saveReportSnapshotWithVerification } from "../src/domains/reports/reportSnapshotPersistence.js";
 import {
   parseExamAnalysisQuestionCountConfirmRequest,
@@ -544,6 +559,17 @@ const { dispatch: dispatchResourceMaterialRoute } = createResourceMaterialRouteR
   saveResourceMaterialFile,
   sendJson,
   upsertResourceMaterial
+});
+const { dispatch: dispatchTestPaperFileRoute } = createTestPaperFileRouteRegistry({
+  createFileDigest: (buffer) => crypto.createHash("sha256").update(buffer).digest("hex"),
+  createTestPaperStorageOperations,
+  deleteTestPaperFile,
+  getTeacherSession,
+  parseDataUrl,
+  readJsonBody,
+  resolveTestPaperOpenUrl,
+  saveTestPaperFile,
+  sendJson
 });
 const { dispatch: dispatchSolapiRoute } = createSolapiRouteRegistry({
   cancelSolapiReservationGroup,
@@ -3020,6 +3046,24 @@ function createResourceMaterialStorageOperations() {
   };
 }
 
+function createTestPaperStorageOperations() {
+  return {
+    createSignedUrl: createSignedStorageUrl,
+    deleteObject: deleteStorageObject,
+    upload: (bucketId, storagePath, options) => uploadStorageObjectWithBucketRetry(bucketId, storagePath, {
+      ...options,
+      bucketOptions: {
+        allowedMimeTypes: testPaperStorageAllowedMimeTypes,
+        fileSizeLimit: testPaperStorageMaxBytes
+      }
+    }),
+    watermark: async (pdfBuffer) => {
+      const logoBytes = await readFile(defaultWatermarkLogoPath);
+      return addCenteredDiagonalWatermark(pdfBuffer, logoBytes);
+    }
+  };
+}
+
 function createExamAnalysisStorageOperations() {
   return {
     deleteObject: deleteStorageObject,
@@ -4857,6 +4901,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchReportSnapshotRoute({ request, response, requestUrl })) return;
   if (await dispatchTestSessionReadRoute({ request, response, requestUrl })) return;
   if (await dispatchTestSessionWriteRoute({ request, response, requestUrl })) return;
+  if (await dispatchTestPaperFileRoute({ request, response, requestUrl })) return;
   if (await dispatchIntegrationStatusRoute({ request, response, requestUrl })) return;
   if (await dispatchExamAnalysisReadRoute({ request, response, requestUrl })) return;
   if (await dispatchExamAnalysisRunWriteRoute({ request, response, requestUrl })) return;

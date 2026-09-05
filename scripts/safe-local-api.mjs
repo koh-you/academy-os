@@ -32,6 +32,14 @@ import {
 } from "../src/domains/resources/resourceMaterialStorageModel.js";
 import { saveReportSnapshotWithVerification } from "../src/domains/reports/reportSnapshotPersistence.js";
 import {
+  createTestPaperStoragePath,
+  createTestPaperStorageReference,
+  parseTestPaperStorageReference,
+  validateTestPaperFile
+} from "../src/domains/tests/testPaperStorageModel.js";
+import { addCenteredDiagonalWatermark, defaultWatermarkLogoPath } from "../src/shared/server/testPaperWatermark.js";
+import { readFile } from "node:fs/promises";
+import {
   parseExamAnalysisQuestionCountConfirmRequest,
   parseExamAnalysisQuestionReviewsSaveRequest,
   parseExamAnalysisOutputDraftsSaveRequest,
@@ -458,6 +466,7 @@ function createInitialState() {
 
 let state = createInitialState();
 let resourceMaterialFiles = new Map();
+let testPaperFiles = new Map();
 
 const listRoutes = new Map([
   ["/api/academy-reminders", ["academyReminders", "academyReminders"]],
@@ -2156,6 +2165,65 @@ const server = http.createServer(async (request, response) => {
     response.end(storedFile.buffer);
     return;
   }
+  if (request.method === "POST" && requestUrl.pathname === "/api/test-paper-files") {
+    const payload = await readJson(request);
+    const match = String(payload.file?.dataUrl ?? "").match(/^data:([^;,]+)?(;base64)?,(.*)$/);
+    if (!match) return sendJson(response, 400, { ok: false, error: "안전 fixture 파일 형식이 올바르지 않습니다." });
+    const buffer = Buffer.from(match[3], match[2] ? "base64" : "utf8");
+    const mimeType = match[1] || "application/octet-stream";
+    try {
+      validateTestPaperFile({ fileName: payload.file?.fileName, mimeType, size: buffer.length });
+    } catch (error) {
+      return sendJson(response, 400, { ok: false, error: error.message });
+    }
+    const watermark = Boolean(payload.watermark);
+    const storeBuffer = watermark
+      ? Buffer.from(await addCenteredDiagonalWatermark(buffer, await readFile(defaultWatermarkLogoPath)))
+      : buffer;
+    const digest = crypto.createHash("sha256").update(buffer).digest("hex");
+    const storagePath = createTestPaperStoragePath({
+      digest: watermark ? `${digest}-wm` : digest,
+      fileName: payload.file?.fileName
+    });
+    const fileReference = createTestPaperStorageReference({ storagePath });
+    testPaperFiles.set(storagePath, { buffer: storeBuffer, mimeType });
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    return sendJson(response, 200, {
+      fileName: payload.file?.fileName,
+      fileReference,
+      ok: true,
+      safeFixture: true,
+      watermarked: watermark
+    });
+  }
+  if (request.method === "DELETE" && requestUrl.pathname === "/api/test-paper-files") {
+    const reference = parseTestPaperStorageReference(requestUrl.searchParams.get("ref") || "");
+    const deleted = reference ? testPaperFiles.delete(reference.storagePath) : false;
+    return sendJson(response, 200, { deleted, ok: true, safeFixture: true });
+  }
+  if (request.method === "GET" && requestUrl.pathname === "/api/test-paper-files/open") {
+    const fileUrl = requestUrl.searchParams.get("ref") || "";
+    if (/^https?:\/\//i.test(fileUrl)) return sendJson(response, 200, { ok: true, safeFixture: true, signedUrl: fileUrl });
+    const reference = parseTestPaperStorageReference(fileUrl);
+    if (!reference || !testPaperFiles.has(reference.storagePath)) {
+      return sendJson(response, 404, { ok: false, error: "안전 fixture 시험지 파일을 찾지 못했습니다." });
+    }
+    return sendJson(response, 200, {
+      ok: true,
+      safeFixture: true,
+      signedUrl: `http://${host}:${port}/api/safe-fixture/test-paper-file?path=${encodeURIComponent(reference.storagePath)}`
+    });
+  }
+  if (request.method === "GET" && requestUrl.pathname === "/api/safe-fixture/test-paper-file") {
+    const storedFile = testPaperFiles.get(requestUrl.searchParams.get("path") || "");
+    if (!storedFile) return sendJson(response, 404, { ok: false, error: "안전 fixture 시험지 파일을 찾지 못했습니다." });
+    response.writeHead(200, {
+      "Access-Control-Allow-Origin": "*",
+      "Content-Type": storedFile.mimeType
+    });
+    response.end(storedFile.buffer);
+    return;
+  }
   if (request.method === "GET" && listRoutes.has(requestUrl.pathname)) {
     const [stateKey, responseKey] = listRoutes.get(requestUrl.pathname);
     return sendJson(response, 200, { ok: true, safeFixture: true, source: "supabase", [responseKey]: state[stateKey] });
@@ -2165,6 +2233,7 @@ const server = http.createServer(async (request, response) => {
     if (requestUrl.pathname === "/api/safe-fixture/reset") {
       state = createInitialState();
       resourceMaterialFiles = new Map();
+      testPaperFiles = new Map();
       return sendJson(response, 200, { ok: true, safeFixture: true });
     }
     if (["/api/app-state", "/api/lesson-records/bulk", "/api/lesson-journal/makeup-tasks/save", "/api/lesson-journal/rows/save", "/api/resource-materials", "/api/supplement-schedules/save", "/api/school-events", "/api/school-calendar/derived-save"].includes(requestUrl.pathname)) {

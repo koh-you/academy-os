@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
+import { getJsonWithTimeout, postJson } from "../../shared/utils/apiClient.js";
 import {
   TEST_PAPER_DIFFICULTIES,
   TEST_PAPER_LIBRARY_KINDS,
@@ -31,6 +32,70 @@ function rowStatusBucket(row) {
   return "missing";
 }
 
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result ?? ""));
+    reader.onerror = () => reject(reader.error ?? new Error("파일을 읽지 못했습니다."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function isExternalFileLink(value = "") {
+  return /^https?:\/\//i.test(String(value).trim());
+}
+
+function TestPaperFileField({
+  label,
+  note,
+  onChangeValue,
+  onOpen,
+  onUploadFile,
+  placeholder,
+  uploadError,
+  uploadStatus = "idle",
+  value
+}) {
+  const fileInputRef = useRef(null);
+  return (
+    <label className="wideField">
+      {label}
+      <div className="testPaperFileFieldRow">
+        <input
+          onChange={(event) => onChangeValue(event.target.value)}
+          placeholder={placeholder}
+          value={value ?? ""}
+        />
+        <input
+          accept="application/pdf"
+          className="visuallyHiddenInput"
+          onChange={(event) => {
+            const file = event.target.files?.[0] ?? null;
+            event.target.value = "";
+            if (file) onUploadFile(file);
+          }}
+          ref={fileInputRef}
+          type="file"
+        />
+        <button
+          className="softButton"
+          disabled={uploadStatus === "uploading"}
+          onClick={() => fileInputRef.current?.click()}
+          type="button"
+        >
+          {uploadStatus === "uploading" ? "업로드 중" : "PDF 업로드"}
+        </button>
+        {value ? (
+          <button className="softButton" onClick={() => onOpen(value)} type="button">열기</button>
+        ) : null}
+      </div>
+      {note ? <span className="fieldHint">{note}</span> : null}
+      {uploadStatus === "error" ? <span className="fieldHint fieldHintError">{uploadError}</span> : null}
+      {uploadStatus === "done" ? <span className="fieldHint">업로드 완료 · 저장을 눌러야 반영됩니다.</span> : null}
+    </label>
+  );
+}
+
 export function TestPaperLibraryPanel({
   library = [],
   saveState = "idle",
@@ -55,6 +120,7 @@ export function TestPaperLibraryPanel({
   const [selectedId, setSelectedId] = useState("");
   const [draft, setDraft] = useState(null);
   const [copiedPath, setCopiedPath] = useState("");
+  const [fileUploadState, setFileUploadState] = useState({});
 
   useEffect(() => {
     if (catalogSubjects.length && !catalogSubjects.includes(subject)) {
@@ -100,6 +166,7 @@ export function TestPaperLibraryPanel({
       note: base.note ?? ""
     });
     setCopiedPath("");
+    setFileUploadState({});
   }
 
   function updateDraft(field, value) {
@@ -112,6 +179,47 @@ export function TestPaperLibraryPanel({
       }
       return next;
     });
+  }
+
+  async function uploadTestPaperFile(field, file) {
+    if (!file) return;
+    if (!/\.pdf$/i.test(file.name)) {
+      setFileUploadState((current) => ({ ...current, [field]: { error: "PDF 파일만 업로드할 수 있습니다.", status: "error" } }));
+      return;
+    }
+    setFileUploadState((current) => ({ ...current, [field]: { error: "", status: "uploading" } }));
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      const watermark = field === "questionFileUrl";
+      const result = await postJson("/api/test-paper-files", { file: { dataUrl, fileName: file.name }, watermark });
+      updateDraft(field, result.fileReference);
+      if (watermark) updateDraft("watermarked", true);
+      setFileUploadState((current) => ({ ...current, [field]: { error: "", status: "done" } }));
+    } catch (error) {
+      setFileUploadState((current) => ({ ...current, [field]: { error: error.message, status: "error" } }));
+    }
+  }
+
+  async function openTestPaperFile(fileUrl) {
+    if (!fileUrl) return;
+    if (isExternalFileLink(fileUrl)) {
+      window.open(fileUrl, "_blank", "noopener");
+      return;
+    }
+    // 서명 URL은 fetch 이후에 나오는데, 클릭 시점에 미리 탭을 열어 두지 않으면
+    // 팝업 차단(브라우저가 그 사이 사용자 제스처가 끊겼다고 판단)에 걸릴 수 있다.
+    const openedTab = window.open("", "_blank");
+    try {
+      const result = await getJsonWithTimeout(`/api/test-paper-files/open?ref=${encodeURIComponent(fileUrl)}`);
+      if (result.signedUrl && openedTab) {
+        openedTab.location.href = result.signedUrl;
+      } else {
+        openedTab?.close();
+      }
+    } catch (error) {
+      openedTab?.close();
+      window.alert(`시험지 파일을 열지 못했습니다: ${error.message}`);
+    }
   }
 
   function handleSave() {
@@ -310,22 +418,27 @@ export function TestPaperLibraryPanel({
               />
               워터마크 삽입 완료
             </label>
-            <label className="wideField">
-              문제 파일 링크
-              <input
-                value={draft?.questionFileUrl ?? ""}
-                onChange={(event) => updateDraft("questionFileUrl", event.target.value)}
-                placeholder="Drive / Storage 링크"
-              />
-            </label>
-            <label className="wideField">
-              정답 파일 링크
-              <input
-                value={draft?.answerFileUrl ?? ""}
-                onChange={(event) => updateDraft("answerFileUrl", event.target.value)}
-                placeholder="Drive / Storage 링크"
-              />
-            </label>
+            <TestPaperFileField
+              label="문제 파일"
+              note="PDF 업로드 시 대각선 반투명 워터마크가 자동으로 찍힙니다."
+              onChangeValue={(value) => updateDraft("questionFileUrl", value)}
+              onOpen={openTestPaperFile}
+              onUploadFile={(file) => uploadTestPaperFile("questionFileUrl", file)}
+              placeholder="Drive 링크를 붙여넣거나 PDF를 업로드하세요"
+              uploadError={fileUploadState.questionFileUrl?.error}
+              uploadStatus={fileUploadState.questionFileUrl?.status ?? "idle"}
+              value={draft?.questionFileUrl}
+            />
+            <TestPaperFileField
+              label="정답 파일"
+              onChangeValue={(value) => updateDraft("answerFileUrl", value)}
+              onOpen={openTestPaperFile}
+              onUploadFile={(file) => uploadTestPaperFile("answerFileUrl", file)}
+              placeholder="Drive 링크를 붙여넣거나 PDF를 업로드하세요"
+              uploadError={fileUploadState.answerFileUrl?.error}
+              uploadStatus={fileUploadState.answerFileUrl?.status ?? "idle"}
+              value={draft?.answerFileUrl}
+            />
             <label className="wideField">
               메모
               <input
