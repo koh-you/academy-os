@@ -4824,11 +4824,9 @@ const server = http.createServer(async (request, response) => {
 
   const verdict = evaluateApiAccess({ method: request.method, pathname: requestUrl.pathname, auth });
   if (!verdict.ok) {
-    if (process.env.API_REQUIRE_AUTH === "true") {
-      sendJson(request, response, verdict.status, { ok: false, error: verdict.code || "forbidden" });
-      return;
-    }
-    // 관찰 모드: 차단하지 않고 기록만 (비밀값·본문 제외).
+    const enforcing = process.env.API_REQUIRE_AUTH === "true";
+    // 관찰 모드든 실제 차단이든 항상 기록한다(비밀값·본문 제외).
+    // enforce 모드에서 기록이 없으면 401/403 원인을 서버에서 추적할 수 없다.
     console.info(
       "[api-auth-audit]",
       JSON.stringify({
@@ -4836,11 +4834,16 @@ const server = http.createServer(async (request, response) => {
         path: requestUrl.pathname,
         authKind: auth.kind,
         role: auth.teacherRole || auth.opsScope || null,
-        wouldBlock: true,
+        blocked: enforcing,
+        wouldBlock: !enforcing,
         status: verdict.status,
         code: verdict.code
       })
     );
+    if (enforcing) {
+      sendJson(request, response, verdict.status, { ok: false, error: verdict.code || "forbidden" });
+      return;
+    }
   }
 
   if (await dispatchSystemRoute({ request, response, requestUrl })) return;
