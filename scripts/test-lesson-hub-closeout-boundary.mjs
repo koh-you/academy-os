@@ -107,7 +107,7 @@ for (const required of [
   "runLessonJournalHistoryAction({",
   'action: "copy"',
   'action: "undo_copy"',
-  "function handleUndoLessonAction()",
+  "function handleUndoLessonAction(canceledLesson = null)",
   "function confirmDeleteLesson(lessonId)",
   'action: "cancel"',
   'action: "undo_cancel"',
