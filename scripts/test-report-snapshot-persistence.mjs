@@ -216,7 +216,7 @@ for (const boundary of [
   assert.ok(appSource.includes(boundary), `missing App report snapshot boundary: ${boundary}`);
 }
 for (const boundary of [
-  'apiUrl("/api/report-snapshots")',
+  'apiFetch("/api/report-snapshots"',
   "Authorization: `Bearer ${sessionToken}`",
   'parseVersionedWriteRequest("POST", "/api/report-snapshots"',
   'parseVersionedWriteResponse("POST", "/api/report-snapshots"',

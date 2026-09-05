@@ -1,4 +1,4 @@
-import { apiUrl, postJson } from "../../shared/utils/apiClient.js";
+import { apiFetch, postJson } from "../../shared/utils/apiClient.js";
 import { isSpecialLectureStudentScheduleSynced } from "./specialLecturePlanSync.js";
 import {
   createSpecialLectureSettlementStateWithDraft,
@@ -30,7 +30,7 @@ async function readJsonResponse(response) {
  * logic, not app_state's own contract.
  */
 export async function saveSpecialLectureSettlementStateAction(draftState, { postAppState }) {
-  const currentResult = await readJsonResponse(await fetch(apiUrl("/api/app-state"), { cache: "no-store" }));
+  const currentResult = await readJsonResponse(await apiFetch("/api/app-state", { cache: "no-store" }));
   if (!currentResult.ok || currentResult.source !== "supabase") {
     throw new Error(currentResult.error || "Supabase의 현재 특강 정산 원천을 불러오지 못했습니다.");
   }
@@ -40,7 +40,7 @@ export async function saveSpecialLectureSettlementStateAction(draftState, { post
   if (!saveResult.ok || saveResult.source !== "supabase") {
     throw new Error(saveResult.error || "특강 정산이 Supabase에 저장되지 않았습니다.");
   }
-  const verifyResult = await readJsonResponse(await fetch(apiUrl("/api/app-state"), { cache: "no-store" }));
+  const verifyResult = await readJsonResponse(await apiFetch("/api/app-state", { cache: "no-store" }));
   if (!verifyResult.ok || verifyResult.source !== "supabase") {
     throw new Error(verifyResult.error || "특강 정산 저장 결과를 다시 확인하지 못했습니다.");
   }
@@ -66,7 +66,7 @@ export async function deleteSpecialLectureApplicationAction(applicationId) {
   const normalizedApplicationId = String(applicationId ?? "").trim();
   if (!normalizedApplicationId) throw new Error("삭제할 특강 신청 원본 ID가 필요합니다.");
   const result = await readJsonResponse(
-    await fetch(apiUrl(`/api/special-lecture-applications?id=${encodeURIComponent(normalizedApplicationId)}&confirm=true`), {
+    await apiFetch(`/api/special-lecture-applications?id=${encodeURIComponent(normalizedApplicationId)}&confirm=true`, {
       method: "DELETE"
     })
   );
@@ -75,7 +75,7 @@ export async function deleteSpecialLectureApplicationAction(applicationId) {
     throw new Error("Supabase에서 특강 신청 원본 삭제를 확인하지 못했습니다.");
   }
 
-  const verifyResult = await readJsonResponse(await fetch(apiUrl("/api/special-lecture-applications"), { cache: "no-store" }));
+  const verifyResult = await readJsonResponse(await apiFetch("/api/special-lecture-applications", { cache: "no-store" }));
   if (!verifyResult.ok || verifyResult.source !== "supabase") {
     throw new Error(verifyResult.error || "삭제 후 특강 신청 원본을 다시 확인하지 못했습니다.");
   }
@@ -87,7 +87,7 @@ export async function deleteSpecialLectureApplicationAction(applicationId) {
 }
 
 export async function readPersistedSpecialLectureEnrollments() {
-  const result = await readJsonResponse(await fetch(apiUrl("/api/special-lecture-enrollments"), { cache: "no-store" }));
+  const result = await readJsonResponse(await apiFetch("/api/special-lecture-enrollments", { cache: "no-store" }));
   if (!result.ok) {
     throw new Error(result.error || "특강 회차 저장 결과를 다시 확인하지 못했습니다.");
   }
@@ -179,7 +179,7 @@ export async function createSpecialLectureLessonsAction(lessonDrafts = [], { nor
   const result = await postJson("/api/lessons/bulk", { lessons: normalizedLessons });
   if (!result.ok) throw new Error(result.error || "특강 수업일지 생성 실패");
   const verification = await readJsonResponse(
-    await fetch(apiUrl(`/api/lessons?verify=special-lecture-${Date.now()}`), { cache: "no-store" })
+    await apiFetch(`/api/lessons?verify=special-lecture-${Date.now()}`, { cache: "no-store" })
   );
   if (!verification.ok || verification.source !== "supabase") {
     throw new Error(verification.error || "특강 수업 저장 후 Supabase 재조회에 실패했습니다. 저장됐을 수 있으므로 다시 누르기 전에 확인해 주세요.");
@@ -226,7 +226,7 @@ export async function syncSpecialLectureStudentSchedulesAction(syncRequests = []
     }
   }
   const verification = await readJsonResponse(
-    await fetch(apiUrl(`/api/lessons?verify=special-lecture-student-${Date.now()}`), { cache: "no-store" })
+    await apiFetch(`/api/lessons?verify=special-lecture-student-${Date.now()}`, { cache: "no-store" })
   );
   if (!verification.ok || verification.source !== "supabase") {
     throw new Error(verification.error || "특강 학생별 시간 저장 후 Supabase 재조회에 실패했습니다.");

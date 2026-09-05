@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { academyBrandName } from "../../app/appConfig.js";
-import { apiUrl } from "../../shared/utils/apiClient.js";
+import { apiFetch } from "../../shared/utils/apiClient.js";
 import {
   createSpecialLectureCalendarMonths,
   defaultSpecialLectureGuides,
@@ -220,7 +220,7 @@ export function SpecialLecturePublicPage() {
 
   useEffect(() => {
     let isMounted = true;
-    fetch(apiUrl("/api/special-lecture-guides"))
+    apiFetch("/api/special-lecture-guides")
       .then((response) => response.json())
       .then((result) => {
         if (!isMounted) return;

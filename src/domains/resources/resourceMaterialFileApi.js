@@ -1,4 +1,4 @@
-import { apiUrl } from "../../shared/utils/apiClient.js";
+import { apiFetch } from "../../shared/utils/apiClient.js";
 import { readFileAsDataUrl } from "../../shared/utils/file.js";
 import {
   parseVersionedWriteRequest,
@@ -19,7 +19,7 @@ async function requestResourceMaterialFile(path, {
   const controller = new AbortController();
   const timeoutId = globalThis.setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(apiUrl(path), {
+    const response = await apiFetch(path, {
       body: body === undefined ? undefined : JSON.stringify(body),
       cache: "no-store",
       headers: {
