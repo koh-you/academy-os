@@ -116,6 +116,7 @@
     "test:exam-prep-lesson-reconcile-plan": "node scripts/test-exam-prep-lesson-reconcile-plan.mjs",
     "test:exam-prep-row-save-controller": "node scripts/test-exam-prep-row-save-controller.mjs",
     "test:exam-prep-rows-api": "node scripts/test-exam-prep-rows-api.mjs",
+    "test:exam-prep-row-jsonb-verification": "node scripts/test-exam-prep-row-jsonb-verification.mjs",
     "test:exam-review-api": "node scripts/test-exam-review-api.mjs",
     "test:exam-review-draft": "node scripts/test-exam-review-draft.mjs",
     "test:exam-review-draft-save-controller": "node scripts/test-exam-review-draft-save-controller.mjs",

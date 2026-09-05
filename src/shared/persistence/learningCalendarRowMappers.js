@@ -123,6 +123,22 @@ function getKoreaDateString(date = new Date()) {
   }).format(date);
 }
 
+// Postgres jsonb 는 객체 키 순서를 보존하지 않는다(길이 → 바이트순으로 재정렬).
+// math_exam_dates 항목을 클라이언트는 {id,date,grade,subject,label,...} 순으로 보내는데
+// 재조회하면 {id,date,grade,label,subject,...} 순으로 돌아온다. 저장 검증이 JSON.stringify
+// 문자열 비교라서 값이 같아도 불일치로 판정됐다. 비교 전에 키를 재귀적으로 정렬한다.
+export function canonicalizeRowForComparison(value) {
+  if (Array.isArray(value)) return value.map(canonicalizeRowForComparison);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.keys(value)
+        .sort()
+        .map((key) => [key, canonicalizeRowForComparison(value[key])])
+    );
+  }
+  return value;
+}
+
 export function toExamPrepRow(row) {
   const inferredExamCycle = inferExamCycleFromPrepId(row.examPrepId);
   const examCycle = inferredExamCycle || row.examCycle || row.examTerm || getDefaultExamCycleForDate();
@@ -149,6 +165,17 @@ export function toExamPrepRow(row) {
     review_ai_status: compact(row.reviewAiStatus),
     updated_at: new Date().toISOString()
   };
+}
+
+export function areExamPrepRowsPersistedEqual(requestedRow = {}, verifiedRow = {}) {
+  const requestedDbRow = toExamPrepRow(requestedRow);
+  const verifiedDbRow = toExamPrepRow(verifiedRow);
+  delete requestedDbRow.updated_at;
+  delete verifiedDbRow.updated_at;
+  return (
+    JSON.stringify(canonicalizeRowForComparison(requestedDbRow)) ===
+    JSON.stringify(canonicalizeRowForComparison(verifiedDbRow))
+  );
 }
 
 export function fromExamPrepRow(row) {

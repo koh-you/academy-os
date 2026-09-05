@@ -127,6 +127,7 @@ import {
   createAcademyReminderId,
   fromAcademyReminderRow,
   fromExamPrepRow,
+  areExamPrepRowsPersistedEqual,
   fromSchoolEventRow,
   fromTestAttemptRow,
   fromTestSessionRow,
@@ -253,14 +254,6 @@ async function getExistingExamPrepRowMap(examPrepIds = []) {
       .filter((row) => idSet.has(row.examPrepId))
       .map((row) => [row.examPrepId, row])
   );
-}
-
-function areExamPrepRowsPersistedEqual(requestedRow = {}, verifiedRow = {}) {
-  const requestedDbRow = toExamPrepRow(requestedRow);
-  const verifiedDbRow = toExamPrepRow(verifiedRow);
-  delete requestedDbRow.updated_at;
-  delete verifiedDbRow.updated_at;
-  return JSON.stringify(requestedDbRow) === JSON.stringify(verifiedDbRow);
 }
 
 function getExamPrepLogicalKey(row = {}) {
