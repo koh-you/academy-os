@@ -3989,9 +3989,11 @@ export function App() {
     }
   }
 
-  async function handleUndoLessonAction() {
+  async function handleUndoLessonAction(canceledLesson = null) {
     if (lessonHistoryActionRequestRef.current) return;
-    const [latestAction, ...restActions] = lessonUndoStack;
+    const [latestAction, ...restActions] = canceledLesson
+      ? [{ bundle: { lesson: canceledLesson }, canceledLesson, type: "cancel" }, ...lessonUndoStack]
+      : lessonUndoStack;
     if (!latestAction) return;
     const bundle = latestAction.bundle ?? {};
     try {
@@ -4021,14 +4023,19 @@ export function App() {
         setLessons((current) => upsertById(current, restoredLesson, "lessonId"));
         setRecords((current) => [...result.relatedRecords, ...current.filter((record) => record.lessonId !== bundle.lesson.lessonId)]);
         setHomeworks((current) => [...result.relatedHomeworks, ...current.filter((homework) => homework.lessonId !== bundle.lesson.lessonId)]);
-        setDeletedLessonBundles((current) => current.filter((item) => item.bundleId !== bundle.bundleId));
+        setDeletedLessonBundles((current) => current.filter((item) => item.lesson?.lessonId !== bundle.lesson.lessonId));
         setSelectedDate(restoredLesson.date);
         setSelectedLessonId(restoredLesson.lessonId);
       }
-      setLessonUndoStack(restActions);
+      if (!canceledLesson) setLessonUndoStack(restActions);
     } catch {
       // Keep the undo entry and local source bundle for an explicit retry.
     }
+  }
+
+  function handleListCanceledLessons() {
+    return import("../domains/lessons/lessonJournalHistoryAction.js")
+      .then(({ listCanceledLessons }) => listCanceledLessons({ request: getJsonWithTimeout }));
   }
 
   function handleDeleteSelectedLessonFromCalendar() {
@@ -6523,6 +6530,7 @@ export function App() {
       handleEditLesson,
       handleEnsureExamCycleRows,
       handleLogNotification,
+      handleListCanceledLessons,
       handleOpenAddLesson,
       handleOpenAddStudent,
       handleOpenExamPostSubmissionFile,

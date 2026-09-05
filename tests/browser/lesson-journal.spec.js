@@ -1158,6 +1158,34 @@ test("lesson cancellation keeps its confirmation on conflict and verified undo r
   expect(pageErrors).toEqual([]);
 });
 
+test("recent canceled lesson can be restored from the calendar after reload", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, 2026, 8);
+
+  const sourceDay = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
+  await sourceDay.locator(".dayNumber").click();
+  await sourceDay.focus();
+  await page.keyboard.press("Delete");
+  const confirmDialog = page.getByRole("dialog", { name: "수업 취소 확인" });
+  await confirmDialog.getByRole("button", { name: "수업 취소 처리" }).click();
+  await expect(confirmDialog).toHaveCount(0);
+
+  await page.reload();
+  await expect(page.getByRole("navigation", { name: "주요 화면" })).toBeVisible();
+  await page.getByRole("button", { name: "삭제한 수업 복구" }).click();
+  const restoreDialog = page.getByRole("dialog", { name: "삭제한 수업 복구" });
+  await expect(restoreDialog).toContainText("2026-08-01 · 10:00–13:00");
+  await expect(restoreDialog).toContainText("월 경계 연동반");
+  await restoreDialog.getByRole("button", { name: "이 수업 복구" }).click();
+  await expect(restoreDialog.getByText("최근 7일 안에 취소한 수업이 없습니다.")).toBeVisible();
+  await expect(page.locator(".generatedLessonSaveNotice.saved")).toContainText("복구 완료");
+
+  const reread = await (await request.get(`${safeApiBaseUrl}/api/lessons?date=2026-08-01&includeCanceled=true`)).json();
+  expect(reread.lessons.find((lesson) => lesson.lessonId === "safe-cross-month-current-lesson")?.status).toBe("scheduled");
+  expect(pageErrors).toEqual([]);
+});
+
 test("lesson hub top reminders can collapse and expand without runtime errors", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);

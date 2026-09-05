@@ -14,6 +14,7 @@ export function LessonCalendarView({
   onMoveDate,
   onOpenMonthlyRegularLessons,
   onOpenLessonJournal,
+  onOpenCanceledLessonRestore,
   onShiftMonth,
   selectedCalendarDayRef,
   showMonthlyRegularLessonOpen,
@@ -61,6 +62,7 @@ export function LessonCalendarView({
         </div>
         <div aria-label="수업일지 생성" className="lessonCalendarPrimaryActions" role="group">
           <button className="primaryButton" onClick={onAddLesson} type="button">+ 수업 등록</button>
+          <button className="softButton" onClick={onOpenCanceledLessonRestore} type="button">삭제한 수업 복구</button>
           {showMonthlyRegularLessonOpen ? (
             <button className="softButton" onClick={onOpenMonthlyRegularLessons} type="button">
               {monthlyRegularLessonOpenLabel}

@@ -10,6 +10,8 @@ import { LessonJournalDetail } from "./LessonJournalDetail.jsx";
 import { useLessonCalendarKeyboardNavigation } from "./useLessonCalendarKeyboardNavigation.js";
 import { getLessonJournalStudents } from "../students/lessonRosterSelectors.js";
 import { ExamPrepScheduleModal } from "./ExamPrepScheduleModal.jsx";
+import { CanceledLessonRestoreModal } from "./CanceledLessonRestoreModal.jsx";
+import { selectRecentCanceledLessons } from "./recentCanceledLessons.js";
 
 export function TeacherLessonHubV2({
   academyReminders = [],
@@ -57,12 +59,14 @@ export function TeacherLessonHubV2({
   onOpenAttendance,
   onOpenExamPrep,
   onOpenLessonJournal,
+  onListCanceledLessons,
   onOpenReport,
   onPasteLesson,
   onPassMakeupTask,
   onRetryGeneratedLessonSave,
   onSaveExamPrepSchedule,
   onSaveRecord,
+  onRestoreCanceledLesson,
   onScheduleMakeupTask,
   onSaveAcademyReminder,
   onSelectLesson,
@@ -90,6 +94,13 @@ export function TeacherLessonHubV2({
   } = runtime;
   const getLessonStudentIds = (lesson) => getLessonJournalStudents(lesson, students).map((student) => student.studentId);
   const [lessonTypeFilter, setLessonTypeFilter] = useState("all");
+  const [canceledLessonRestoreState, setCanceledLessonRestoreState] = useState({
+    error: "",
+    isLoading: false,
+    isOpen: false,
+    lessons: [],
+    restoringLessonId: ""
+  });
   const selectedCalendarDayRef = useRef(null);
   useLessonCalendarKeyboardNavigation({
     isHistoryActionBusy: lessonHistoryActionState.state === "saving",
@@ -114,6 +125,40 @@ export function TeacherLessonHubV2({
   const selectedMakeupTask = selectedLesson
     ? makeupTasks.find((task) => task.makeupTaskId === selectedLesson.sourceMakeupTaskId || task.linkedLessonId === selectedLesson.lessonId)
     : null;
+  async function openCanceledLessonRestore() {
+    setCanceledLessonRestoreState((current) => ({ ...current, error: "", isLoading: true, isOpen: true, lessons: [] }));
+    try {
+      const result = await onListCanceledLessons();
+      setCanceledLessonRestoreState((current) => ({
+        ...current,
+        isLoading: false,
+        lessons: selectRecentCanceledLessons(result.lessons ?? [])
+      }));
+    } catch (error) {
+      setCanceledLessonRestoreState((current) => ({
+        ...current,
+        error: error.message || "삭제한 수업을 불러오지 못했습니다.",
+        isLoading: false
+      }));
+    }
+  }
+  async function restoreCanceledLesson(lesson) {
+    setCanceledLessonRestoreState((current) => ({ ...current, error: "", restoringLessonId: lesson.lessonId }));
+    try {
+      await onRestoreCanceledLesson(lesson);
+      setCanceledLessonRestoreState((current) => ({
+        ...current,
+        lessons: current.lessons.filter((item) => item.lessonId !== lesson.lessonId),
+        restoringLessonId: ""
+      }));
+    } catch (error) {
+      setCanceledLessonRestoreState((current) => ({
+        ...current,
+        error: error.message || "수업 복구에 실패했습니다.",
+        restoringLessonId: ""
+      }));
+    }
+  }
   const isSupplementMakeupLesson = isSupplementMakeupTaskLesson(selectedLesson, selectedMakeupTask);
   const isHomeworkMakeupLesson = isSupplementMakeupLesson && selectedMakeupTask?.taskType === "homework_makeup";
   const isExamPrepLessonSelected = isExamPrepLesson(selectedLesson);
@@ -279,11 +324,22 @@ export function TeacherLessonHubV2({
         onMoveDate={onMoveDate}
         onOpenMonthlyRegularLessons={onOpenMonthlyRegularLessons}
         onOpenLessonJournal={onOpenLessonJournal}
+        onOpenCanceledLessonRestore={openCanceledLessonRestore}
         onShiftMonth={onShiftMonth}
         selectedCalendarDayRef={selectedCalendarDayRef}
         showMonthlyRegularLessonOpen={!isMonthlyRegularLessonOpened && monthlyRegularLessonOpenPlan.lessonsToCreate.length > 0}
         viewModel={lessonCalendarViewModel}
       />
+      {canceledLessonRestoreState.isOpen ? (
+        <CanceledLessonRestoreModal
+          error={canceledLessonRestoreState.error}
+          isLoading={canceledLessonRestoreState.isLoading}
+          lessons={canceledLessonRestoreState.lessons}
+          onClose={() => setCanceledLessonRestoreState((current) => ({ ...current, isOpen: false }))}
+          onRestore={restoreCanceledLesson}
+          restoringLessonId={canceledLessonRestoreState.restoringLessonId}
+        />
+      ) : null}
       {lessonJournalDialog}
     </>
   );
