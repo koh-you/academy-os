@@ -131,7 +131,7 @@ const lessonCommentApiSource = await readFile(
   "utf8"
 );
 assert.ok(
-  lessonCommentApiSource.includes('fetch(apiUrl("/api/notifications/comment-alimtalk"), {'),
+  lessonCommentApiSource.includes('apiFetch("/api/notifications/comment-alimtalk", {'),
   "comment alimtalk fetch must live in lessonCommentApi.js"
 );
 assert.ok(

@@ -126,7 +126,7 @@ assert.ok(
   "manual absence partial failure must remain explicitly surfaced"
 );
 assert.ok(
-  appSource.includes('fetch(apiUrl("/api/students"))') &&
+  appSource.includes('apiFetch("/api/students")') &&
     !appSource.slice(
       appSource.indexOf("if (attendanceOnlyMode) {"),
       appSource.indexOf("if (session && [\"student\", \"parent\"].includes(session.role))")

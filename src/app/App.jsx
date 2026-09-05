@@ -453,8 +453,10 @@ import { SelectionToolbar } from "../shared/components/SelectionToolbar.jsx";
 import { StickySaveBar } from "../shared/components/StickySaveBar.jsx";
 import { sampleData } from "../shared/data/sampleData.js";
 import {
+  apiFetch,
   apiUrl,
   deleteJsonWithTimeout,
+  fetchWithAuth,
   getJsonWithTimeout,
   postJson,
   postJsonWithHeaders,
@@ -1332,7 +1334,7 @@ function postAcademyReminder(academyReminder) {
 }
 
 function deleteAcademyReminderFromApi(reminderId) {
-  return fetch(apiUrl(`/api/academy-reminders?id=${encodeURIComponent(reminderId)}`), { method: "DELETE" })
+  return apiFetch(`/api/academy-reminders?id=${encodeURIComponent(reminderId)}`, { method: "DELETE" })
     .then(async (response) => {
       const result = await response.json();
       if (!response.ok || !result.ok) throw new Error(result.error || "운영 알림 삭제 실패");
@@ -1352,7 +1354,7 @@ async function postMakeupTasks(makeupTasks) {
 }
 
 function deleteExamAnalysisRunRequest(analysisRunId) {
-  return fetch(apiUrl(`/api/exam-analysis-runs?id=${encodeURIComponent(analysisRunId)}`), { method: "DELETE" })
+  return apiFetch(`/api/exam-analysis-runs?id=${encodeURIComponent(analysisRunId)}`, { method: "DELETE" })
     .then(async (response) => {
       const result = await response.json();
       if (!response.ok || !result.ok) throw new Error(result.error || "시험분석 삭제 실패");
@@ -1361,7 +1363,7 @@ function deleteExamAnalysisRunRequest(analysisRunId) {
 }
 
 function deleteExamAnalysisSourceRequest(sourceId) {
-  return fetch(apiUrl(`/api/exam-analysis-source-files?id=${encodeURIComponent(sourceId)}`), { method: "DELETE" })
+  return apiFetch(`/api/exam-analysis-source-files?id=${encodeURIComponent(sourceId)}`, { method: "DELETE" })
     .then(async (response) => {
       const result = await response.json();
       if (!response.ok || !result.ok) throw new Error(result.error || "PDF 원본 삭제 실패");
@@ -1501,7 +1503,7 @@ function postTestSession(testSession, testAttempts = []) {
 }
 
 function deleteTestSessionFromApi(testSessionId) {
-  return fetch(apiUrl(`/api/test-sessions?testSessionId=${encodeURIComponent(testSessionId)}`), { method: "DELETE" })
+  return apiFetch(`/api/test-sessions?testSessionId=${encodeURIComponent(testSessionId)}`, { method: "DELETE" })
     .then((response) => response.json())
     .then((result) => {
       if (!result.ok) throw new Error(result.error || "테스트 응시 기록 삭제 실패");
@@ -1510,7 +1512,7 @@ function deleteTestSessionFromApi(testSessionId) {
 }
 
 async function fetchPortalData(sessionToken) {
-  const response = await fetch(apiUrl("/api/portal-data"), {
+  const response = await apiFetch("/api/portal-data", {
     headers: { Authorization: `Bearer ${sessionToken}` }
   });
   const result = await response.json();
@@ -2539,9 +2541,9 @@ export function App() {
         if (attendanceOnlyMode) {
           const attendanceDate = getKoreaDateString();
           const [studentsResponse, lessonsResponse, recordsResponse] = await Promise.all([
-            fetch(apiUrl("/api/students")),
-            fetch(apiUrl(`/api/lessons?date=${encodeURIComponent(attendanceDate)}`)),
-            fetch(apiUrl(`/api/lesson-records?date=${encodeURIComponent(attendanceDate)}`))
+            apiFetch("/api/students"),
+            apiFetch(`/api/lessons?date=${encodeURIComponent(attendanceDate)}`),
+            apiFetch(`/api/lesson-records?date=${encodeURIComponent(attendanceDate)}`)
           ]);
           const [studentsResult, lessonsResult, recordsResult] = await Promise.all([
             studentsResponse.json(),
@@ -2608,22 +2610,22 @@ export function App() {
           appStateResponse,
           resourceMaterialsResponse
         ] = await Promise.all([
-          fetch(apiUrl("/api/students")),
-          fetch(apiUrl("/api/student-intake-applicants")),
-          fetch(apiUrl("/api/special-lecture-applications")),
-          fetch(apiUrl("/api/special-lecture-enrollments"), { cache: "no-store" }),
-          fetch(apiUrl("/api/classes")),
-          fetch(apiUrl("/api/lessons")),
-          fetch(apiUrl("/api/lesson-records")),
-          fetch(apiUrl("/api/homeworks")),
-          fetch(apiUrl("/api/makeup-tasks")),
-          fetch(apiUrl("/api/academy-reminders")),
-          fetch(apiUrl("/api/exam-prep-rows")),
-          fetch(apiUrl("/api/school-events")),
-          fetch(apiUrl("/api/test-sessions")),
-          fetch(apiUrl("/api/test-attempts")),
-          fetch(apiUrl("/api/app-state?includeRows=true"), { cache: "no-store" }),
-          fetch(apiUrl("/api/resource-materials"))
+          apiFetch("/api/students"),
+          apiFetch("/api/student-intake-applicants"),
+          apiFetch("/api/special-lecture-applications"),
+          apiFetch("/api/special-lecture-enrollments", { cache: "no-store" }),
+          apiFetch("/api/classes"),
+          apiFetch("/api/lessons"),
+          apiFetch("/api/lesson-records"),
+          apiFetch("/api/homeworks"),
+          apiFetch("/api/makeup-tasks"),
+          apiFetch("/api/academy-reminders"),
+          apiFetch("/api/exam-prep-rows"),
+          apiFetch("/api/school-events"),
+          apiFetch("/api/test-sessions"),
+          apiFetch("/api/test-attempts"),
+          apiFetch("/api/app-state?includeRows=true", { cache: "no-store" }),
+          apiFetch("/api/resource-materials")
         ]);
         const [
           studentsResult,
@@ -3542,7 +3544,7 @@ export function App() {
 
     async function loadIntegrationStatus() {
       try {
-        const response = await fetch(apiUrl("/api/integrations/status"));
+        const response = await apiFetch("/api/integrations/status");
         const result = await response.json();
         if (isMounted && result.ok) {
           setIntegrationStatus(result.result);
@@ -5111,7 +5113,7 @@ export function App() {
     for (const lessonId of plan.lessonIdsToDelete) {
       await deleteExamPrepLessonRequest({
         auditId,
-        fetchImpl: fetch,
+        fetchImpl: fetchWithAuth,
         lessonId,
         resolveApiUrl: apiUrl
       });
@@ -5141,7 +5143,7 @@ export function App() {
           deleteExamPrepRowRequest({
             auditId: requestAuditId,
             examPrepId: targetId,
-            fetchImpl: fetch,
+            fetchImpl: fetchWithAuth,
             resolveApiUrl: apiUrl
           }),
         applyLessonPlan: applyExamPrepLessonDeletePlan,
@@ -6307,6 +6309,7 @@ export function App() {
     const currentEvent = schoolEvents.find((event) => event.eventId === eventId);
     const result = await deleteAndVerifySchoolEvent({
       event: currentEvent,
+      fetchImpl: fetchWithAuth,
       read: getJsonWithTimeout,
       resolveApiUrl: apiUrl
     });

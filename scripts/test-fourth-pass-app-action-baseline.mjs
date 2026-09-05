@@ -55,6 +55,8 @@ const directCallHandlers = handlers.filter((item) => item.hasDirectCall).map((it
 // 66 to 44, meeting the fourth-pass plan's "45 or fewer" 4-4 exit target.
 // A later thin request helper (patchLessonRecordRetestStatusRequest) moved
 // the count to 45 — still within the stated target.
+// 2026-09-05: 인증 헤더 누락 버그 수정으로 `fetch(apiUrl(...))` 25곳이 전부
+// `apiFetch(...)` 로 바뀌면서 45 → 20 으로 더 내려갔다. 래칫이므로 하향만 허용.
 const expectedDirectCallHandlers = [];
 
 // 117: the 116 4-4a baseline plus handleSaveTestPaperLibrary, the sole new
@@ -65,12 +67,12 @@ assert.deepEqual(directCallHandlers, expectedDirectCallHandlers);
 assert.equal(handlers.length, 117, `handle* count drifted from the baseline (117), now ${handlers.length}`);
 
 const directRequestCallCount = (appSource.match(/\bfetch\(|\bpostJson[A-Za-z]*\(/g) || []).length;
-assert.equal(directRequestCallCount, 45, `direct fetch/postJson call count drifted from the 4-4 closeout (45), now ${directRequestCallCount}`);
+assert.equal(directRequestCallCount, 20, `direct fetch/postJson call count drifted from the 4-4 closeout (20), now ${directRequestCallCount}`);
 
 assert.ok(
   packageJson.scripts["test:production"].includes("npm run test:fourth-pass-app-action-baseline")
 );
 
 console.log(
-  `fourth-pass app action baseline passed · handlers 117 · direct-call candidates 0 · thin wrappers ${handlers.length} · direct request calls 45`
+  `fourth-pass app action baseline passed · handlers 117 · direct-call candidates 0 · thin wrappers ${handlers.length} · direct request calls ${directRequestCallCount}`
 );

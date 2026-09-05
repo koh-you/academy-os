@@ -1,4 +1,4 @@
-import { apiUrl } from "../../shared/utils/apiClient.js";
+import { apiFetch } from "../../shared/utils/apiClient.js";
 
 /**
  * Requests AI-polished comment text. Owns only the request/response
@@ -9,7 +9,7 @@ import { apiUrl } from "../../shared/utils/apiClient.js";
  * @returns {Promise<{ polishedText: string, provider: string }>}
  */
 export async function requestCommentPolish(payload) {
-  const response = await fetch(apiUrl("/api/ai/comment-polish"), {
+  const response = await apiFetch("/api/ai/comment-polish", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
@@ -28,7 +28,7 @@ export async function requestCommentPolish(payload) {
  * in App.jsx's handleSendLessonComment.
  */
 export async function requestCommentAlimtalk(notificationPayload) {
-  const response = await fetch(apiUrl("/api/notifications/comment-alimtalk"), {
+  const response = await apiFetch("/api/notifications/comment-alimtalk", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(notificationPayload)

@@ -1,4 +1,4 @@
-import { apiUrl } from "../utils/apiClient.js";
+import { apiFetch } from "../utils/apiClient.js";
 
 const clientErrorStorageKey = "academy-os.clientErrors.v1";
 const maxStoredErrors = 20;
@@ -62,7 +62,7 @@ export function reportClientError(error, context = {}) {
   const report = createClientErrorReport(error, context);
   storeClientErrorReport(report);
   if (typeof fetch === "function" && shouldSendReport(report)) {
-    fetch(apiUrl("/api/client-errors"), {
+    apiFetch("/api/client-errors", {
       body: JSON.stringify({ report }),
       headers: { "Content-Type": "application/json" },
       keepalive: true,

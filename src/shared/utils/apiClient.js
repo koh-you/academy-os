@@ -38,9 +38,22 @@ const kioskToken = (import.meta.env?.VITE_KIOSK_TOKEN || "").trim();
 
 export function withAuthHeaders(headers = {}) {
   const merged = { ...headers };
-  if (currentAuthToken) merged.Authorization = `Bearer ${currentAuthToken}`;
+  // 호출부가 Authorization 을 직접 넘겼으면(보고서 저장 등) 그쪽을 존중한다.
+  if (currentAuthToken && !merged.Authorization) merged.Authorization = `Bearer ${currentAuthToken}`;
   if (kioskToken) merged["X-Kiosk-Token"] = kioskToken;
   return merged;
+}
+
+// 인증 헤더가 붙은 fetch. 직접 `fetch(apiUrl(path))` 를 쓰면 토큰이 빠져 401 이 되므로
+// 앱 코드는 반드시 이걸 쓴다. path 는 apiUrl 로 감싸므로 "/api/..." 형태를 그대로 넘긴다.
+export function apiFetch(path, options = {}) {
+  return fetchWithAuth(apiUrl(path), options);
+}
+
+// fetch 와 시그니처가 같은(절대 URL 을 받는) 버전. 도메인 모듈이 `fetchImpl` 로 주입받는 자리에
+// 전역 fetch 대신 이걸 넘겨야 인증 헤더가 붙는다.
+export function fetchWithAuth(url, options = {}) {
+  return fetch(url, { ...options, headers: withAuthHeaders(options.headers) });
 }
 
 export async function postJson(path, body) {

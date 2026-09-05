@@ -1,4 +1,4 @@
-import { apiUrl } from "../../shared/utils/apiClient.js";
+import { apiFetch } from "../../shared/utils/apiClient.js";
 import {
   parseVersionedWriteRequest,
   parseVersionedWriteResponse
@@ -17,7 +17,7 @@ export async function saveReportSnapshotRequest({ sessionToken, snapshot, timeou
   const timeoutId = globalThis.setTimeout(() => controller.abort(), timeoutMs);
   try {
     const payload = parseVersionedWriteRequest("POST", "/api/report-snapshots", { snapshot });
-    const response = await fetch(apiUrl("/api/report-snapshots"), {
+    const response = await apiFetch("/api/report-snapshots", {
       body: JSON.stringify(payload),
       cache: "no-store",
       headers: {

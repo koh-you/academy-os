@@ -8,7 +8,9 @@ const PUBLIC_EXACT = new Set([
   "HEAD /",
   "GET /api/core/status",
   "POST /api/auth/login",
-  "POST /api/client-errors"
+  "POST /api/client-errors",
+  // 로그인 없는 특강 안내 랜딩 페이지(SpecialLecturePublicPage)가 읽는다. 읽기 전용 공개 콘텐츠.
+  "GET /api/special-lecture-guides"
 ]);
 
 // /attendance 키오스크(로그인 없는 로비 태블릿)가 호출 가능한 것.

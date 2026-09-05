@@ -138,7 +138,7 @@ const portalLoadStart = appSource.indexOf(
 );
 const attendanceOnlyLoad = appSource.slice(attendanceOnlyLoadStart, portalLoadStart);
 assert.ok(
-  attendanceOnlyLoad.includes('fetch(apiUrl("/api/students"))') &&
+  attendanceOnlyLoad.includes('apiFetch("/api/students")') &&
     attendanceOnlyLoad.includes("/api/lessons?date=") &&
     attendanceOnlyLoad.includes("/api/lesson-records?date="),
   "attendance-only initial data adapter must remain visible for the security/maintenance gate"

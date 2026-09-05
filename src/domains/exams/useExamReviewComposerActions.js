@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { apiUrl } from "../../shared/utils/apiClient.js";
+import { apiUrl, fetchWithAuth } from "../../shared/utils/apiClient.js";
 import { copyTextToClipboard } from "./outputPreview.js";
 import {
   buildExamReviewPolishPayload,
@@ -41,7 +41,7 @@ export function useExamReviewComposerActions({
     onUpdateRow(row.examPrepId, "reviewAiStatus", "AI 수정 중");
     try {
       const result = await polishExamReviewRequest({
-        fetchImpl: fetch,
+        fetchImpl: fetchWithAuth,
         resolveApiUrl: apiUrl,
         payload: buildExamReviewPolishPayload({
           aiProvider,
