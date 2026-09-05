@@ -130,6 +130,7 @@
   "scripts/test-exam-review-draft-save-controller.mjs",
   "scripts/test-exam-review-api.mjs",
   "scripts/test-exam-prep-rows-api.mjs",
+  "scripts/test-exam-prep-row-jsonb-verification.mjs",
   "scripts/test-exam-prep-row-save-controller.mjs",
   "scripts/test-exam-prep-lesson-reconcile-plan.mjs",
   "scripts/test-exam-prep-lesson-api.mjs",
