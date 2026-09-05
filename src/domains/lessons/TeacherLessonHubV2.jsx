@@ -11,7 +11,8 @@ import { useLessonCalendarKeyboardNavigation } from "./useLessonCalendarKeyboard
 import { getLessonJournalStudents } from "../students/lessonRosterSelectors.js";
 import { ExamPrepScheduleModal } from "./ExamPrepScheduleModal.jsx";
 import { CanceledLessonRestoreModal } from "./CanceledLessonRestoreModal.jsx";
-import { selectRecentCanceledLessons } from "./recentCanceledLessons.js";
+import { selectRecentRestorableLessons } from "./recentCanceledLessons.js";
+import { loadCanceledLessonRestoreCandidates } from "./canceledLessonRestoreApi.js";
 
 export function TeacherLessonHubV2({
   academyReminders = [],
@@ -20,6 +21,7 @@ export function TeacherLessonHubV2({
   allRecords = [],
   attendanceSettings = defaultAttendanceSettings,
   attendanceSyncStatus = { lastSyncedAt: "", message: "출결 서버 확인 대기", state: "idle" },
+  generatedLessonControls = { manualOverrideKeys: [], suppressedKeys: [] },
   generatedLessonSaveStatus = { lessons: [], message: "", state: "idle" },
   examPrepScheduleLessons = [],
   integrationStatus,
@@ -87,7 +89,6 @@ export function TeacherLessonHubV2({
     isExamPrepLesson,
     isLegacyExamPrepLesson,
     isSupplementMakeupTaskLesson,
-    loadCanceledLessons,
     lessonJournal,
     nestedPanels,
     sortByTime
@@ -128,11 +129,13 @@ export function TeacherLessonHubV2({
   async function openCanceledLessonRestore() {
     setCanceledLessonRestoreState((current) => ({ ...current, error: "", isLoading: true, isOpen: true, lessons: [] }));
     try {
-      const result = await loadCanceledLessons();
+      const result = await loadCanceledLessonRestoreCandidates();
       setCanceledLessonRestoreState((current) => ({
         ...current,
         isLoading: false,
-        lessons: selectRecentCanceledLessons(result.lessons ?? [])
+        lessons: selectRecentRestorableLessons(result.lessons ?? [], {
+          suppressedKeys: generatedLessonControls.suppressedKeys
+        })
       }));
     } catch (error) {
       setCanceledLessonRestoreState((current) => ({

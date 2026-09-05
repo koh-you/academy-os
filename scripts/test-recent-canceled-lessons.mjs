@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import {
   getCanceledLessonRemainingDays,
-  selectRecentCanceledLessons
+  selectRecentCanceledLessons,
+  selectRecentRestorableLessons
 } from "../src/domains/lessons/recentCanceledLessons.js";
 
 const now = new Date("2026-09-05T12:00:00+09:00");
@@ -32,5 +33,22 @@ assert.deepEqual(
 );
 assert.equal(getCanceledLessonRemainingDays(recent, now), 3);
 assert.equal(getCanceledLessonRemainingDays({ ...recent, updatedAt: "invalid" }, now), 0);
+
+const hiddenRestored = {
+  ...recent,
+  generatedKey: "generated:exam_prep:2026-09-06",
+  lessonId: "hidden-restored",
+  status: "scheduled"
+};
+assert.deepEqual(
+  selectRecentRestorableLessons([recent, newer, hiddenRestored], {
+    suppressedKeys: [hiddenRestored.generatedKey]
+  }, now).map(({ lessonId, restoreMode }) => ({ lessonId, restoreMode })),
+  [
+    { lessonId: "newer", restoreMode: "lesson" },
+    { lessonId: "recent", restoreMode: "lesson" },
+    { lessonId: "hidden-restored", restoreMode: "visibility" }
+  ]
+);
 
 console.log("recent canceled lesson selection and retention labels passed");
