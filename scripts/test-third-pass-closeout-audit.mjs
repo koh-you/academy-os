@@ -134,8 +134,8 @@ for (const token of [
 }
 
 assert.equal(Object.isFrozen(lazyTeacherViewComponents), true);
-assert.equal(Object.keys(lazyTeacherViewComponents).length, 21);
-assert.equal((lazySource.match(/lazyNamedExport\(/g) ?? []).length, 22);
+assert.ok(lazyTeacherViewComponents.BlogContentStudio, "blog studio must load lazily");
+assert.equal((lazySource.match(/lazyNamedExport\(/g) ?? []).length, Object.keys(lazyTeacherViewComponents).length + 1);
 
 for (const [index, source] of screenSources.entries()) {
   assert.equal(
