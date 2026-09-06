@@ -51,4 +51,4 @@
 .blogSteps button[aria-selected=true]{background:var(--academy-primary,#17213d);color:white}
 .blogStudio .primaryButton{background:var(--academy-primary,#17213d);color:white;border-color:var(--academy-primary,#17213d)}
 .blogStudio .stickySaveBar{position:sticky;bottom:12px;z-index:3;background:var(--academy-surface,#fff);margin-top:20px}
-.blogEditor{padding-bottom:24px}.blogStudio .pageHeader{margin-bottom:16px}
+.blogStudio .pageHeader{margin-bottom:16px}
