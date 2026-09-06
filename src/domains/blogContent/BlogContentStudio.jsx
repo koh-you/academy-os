@@ -1,3 +1,8 @@
+import { PageHeader } from "../../shared/components/PageHeader.jsx";
+import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
+import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
+import { StudioEditor } from "../../shared/components/StudioEditor.jsx";
+import { StudioDialog } from "../../shared/components/StudioDialog.jsx";
 import { Disclosure } from "../../shared/components/Disclosure.jsx";
 import { useState } from "react";
 import { BLOG_KEY, CONTENT_TYPES, COPY_FIELDS, newBlogDraft, seedScore, buildChatPrompt, exportBlocker, parseChatResult, isNaverPostUrl, finalizeDraft, suggestHashtags } from "./blogHybridModel.js";
@@ -14,6 +19,8 @@ export function BlogContentStudio({ students = [], scoreRecords = [], postAppSta
   const store = useBlogWorkspace(postAppState);
   const [selected, setSelected] = useState("");
   const [step, setStep] = useState(0);
+  const [tagsOpen, setTagsOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [raw, setRaw] = useState("");
   const [proposal, setProposal] = useState(null);
   const [message, setMessage] = useState("");
@@ -40,12 +47,13 @@ export function BlogContentStudio({ students = [], scoreRecords = [], postAppSta
   const blocker = draft ? exportBlocker(draft) : "";
   const prompt = draft && !blocker ? buildChatPrompt(draft) : "";
   return <main className="blogStudio">
-    <header className="blogHero"><div><span className="blogEyebrow">으뜸수학 고태영T · CONTENT STUDIO</span><h1>SNS 콘텐츠 스튜디오</h1><p>블로그 글과 인스타그램 캡션을 한곳에서. OS에서 준비하고, Chat에서 다듬고, 완성본을 보관하세요.</p></div><button onClick={create} disabled={!store.ready || store.busy}>+ 새 콘텐츠</button></header>
+    <PageHeader title="SNS 콘텐츠 스튜디오" eyebrow="으뜸수학 고태영T" description="자료 준비 → Chat 작업 → 채널별 완성본 편집" actions={<button className="primaryButton" onClick={create} disabled={!store.ready || store.busy}>+ 새 콘텐츠</button>} />
     <div role="status" className="blogStatus">{store.ready ? states[store.status] : "서버 자료 확인 중…"}{store.dirty && " · 화면을 나가기 전에 저장해 주세요."}</div>
     {store.error && <div role="alert" className="blogNotice">{store.error}<p>다른 화면과 충돌했다면 편집 내용을 복사해 보관한 뒤 새로고침해서 최신 자료를 확인하세요.</p></div>}
     {message && <p role="status" className="blogNotice">{message}</p>}
     <div className="blogLayout"><aside className="blogHistory" aria-label="콘텐츠 목록"><h2>내 콘텐츠 <small>{store.items.length}</small></h2>{!store.items.length && <p>새 콘텐츠를 만들어 첫 이야기를 준비하세요.</p>}{store.items.map(item => <button key={item.id} aria-pressed={item.id === draft?.id} disabled={store.busy} onClick={() => select(item.id)}><strong>{item.copy.title || item.exam || "새 콘텐츠"}</strong><span>{item.school || "학교 미입력"} · {item.type}</span><small>{item.publishedUrl && isNaverPostUrl(item.publishedUrl) ? "발행 정보 입력됨" : item.versions.length ? "확정본 있음" : "준비 중"}</small></button>)}</aside>
-    {draft && <section className="blogEditor" aria-label="콘텐츠 편집"><div className="blogSteps">{["1 자료 준비", "2 Chat 전달", "3 완성본"].map((name, index) => <button key={name} aria-pressed={step === index} onClick={() => setStep(index)}>{name}</button>)}</div>
+    {draft && <section className="blogEditor" aria-label="콘텐츠 편집"><WorkspaceTabs label="SNS 작업 단계" className="blogSteps">{["1 자료 준비", "2 Chat 전달", "3 완성본"].map((name, index) => <button key={name} role="tab" aria-selected={step === index} onClick={() => setStep(index)}>{name}</button>)}</WorkspaceTabs>
+      <div className="studioSummary"><strong>{draft.school || "학교 미입력"} · {draft.exam || "시험·수업 미입력"}</strong><p>{draft.type} · {draft.versions.length ? "확정본 있음" : "편집 중"}</p></div>
       <fieldset disabled={store.busy || !store.ready}>
       {step === 0 && <><h2>게시할 자료 준비</h2><p>성적 원천은 참고 자료입니다. 시험명과 공개할 사실을 직접 확인해 주세요.</p>
         <Disclosure trigger="기존 내신 성적에서 가져오기"><Field label="학생·학교 검색" value={search} onChange={setSearch} /><div className="blogCandidates">{candidates.slice(0, 40).map(({ record, student }) => <button key={record.scoreRecordId} onClick={() => { if (window.confirm("학교·학생·성과 입력을 선택한 기록으로 바꿀까요? 선생님 메모와 완성본은 유지됩니다.")) patchFacts(seedScore(record, student)); }}>{student.name} · {student.schoolName} · {record.examDate} · {record.subject} · {record.score ?? "점수 없음"}</button>)}{!candidates.length && <p>해당 내신 기록이 없습니다. 아래에 직접 입력할 수 있습니다.</p>}</div></Disclosure>
@@ -61,15 +69,30 @@ export function BlogContentStudio({ students = [], scoreRecords = [], postAppSta
       </>}
       {step === 1 && <><h2>Chat으로 작업 이어가기</h2><p>자료를 복사해서 원하는 Chat에 붙여 넣으세요. 사진 파일은 Chat에 따로 첨부하고, 글과 디자인을 대화로 완성하세요.</p>{blocker && <p className="blogNotice">{blocker}</p>}<button disabled={Boolean(blocker)} onClick={() => copy(prompt)}>Chat 작업용 복사</button><Field label="Chat 전달 자료 미리보기" value={prompt} onChange={() => {}} readOnly multiline rows={20} /><p>Chat에서 최종 JSON을 요청하면 완성본 탭에서 한 번에 가져올 수 있습니다.</p></>}
       {step === 2 && <><h2>Chat에서 다듬은 완성본</h2><p>각 항목에 직접 붙여 넣거나, Chat의 최종 JSON을 미리보기 후 반영하세요.</p>
-        <Disclosure trigger="Chat 결과 한 번에 가져오기"><Field label="Chat 결과 JSON" value={raw} onChange={value => { setRaw(value); setProposal(null); }} multiline rows={6} /><button onClick={() => attempt(() => { setProposal(parseChatResult(raw)); setMessage(""); })}>가져오기 미리보기</button>{proposal && <div className="blogImport"><h3>반영할 내용</h3><pre>{JSON.stringify(proposal, null, 2)}</pre><button onClick={() => { patch({ copy: { ...draft.copy, ...proposal } }); setProposal(null); setRaw(""); setMessage("편집본에 반영했습니다. 이전 확정본은 유지됩니다."); }}>미리본 결과를 편집본에 반영</button></div>}</Disclosure>
-        <section aria-label="자동 해시태그 추천" className="blogNotice"><h3>자동 해시태그 추천</h3><p>학교·지역·콘텐츠 유형을 바꾸면 추천도 갱신됩니다. 반영 버튼은 해당 해시태그 편집칸을 바꿉니다. 직접 수정한 글은 자동으로 덮어쓰지 않습니다.</p><p aria-label="블로그 추천 태그">{tags.blog}</p><button onClick={() => patch({ copy: { ...draft.copy, hashtags: tags.blog } })}>블로그 추천 태그 반영</button><p aria-label="인스타그램 추천 태그">{tags.instagram}</p><button onClick={() => patch({ copy: { ...draft.copy, instagramHashtags: tags.instagram } })}>인스타그램 추천 태그 반영</button><p>인스타그램은 관련 태그를 최대 5개 추천합니다. 유료 AI 호출 없이 생성하며 자유롭게 편집할 수 있습니다.</p></section>
-        {Object.entries(COPY_FIELDS).map(([key, label]) => <div key={key}><Field label={`최종 ${label}`} value={draft.copy[key] ?? ""} onChange={value => patch({ copy: { ...draft.copy, [key]: value } })} multiline={key !== "title"} rows={key === "body" ? 12 : 3} maxLength={40000} /><button className="blogCopy" onClick={() => copy(draft.copy[key] ?? "")}>{label} 복사</button></div>)}
+        <button onClick={() => { setRaw(""); setProposal(null); setImportOpen(true); }}>Chat 결과 한 번에 가져오기</button>
+
+        <button onClick={() => setTagsOpen(true)}>해시태그 추천 열기</button>
+
+        <StudioEditor channels={[{ id: "blog", label: "블로그" }, { id: "instagram", label: "인스타그램" }, { id: "card", label: "카드" }]} preview={channel => (channel === "blog" ? [draft.copy.title, draft.copy.body, draft.copy.hashtags] : channel === "instagram" ? [draft.copy.social, draft.copy.instagramHashtags] : [draft.copy.card, draft.copy.imageLinks]).filter(Boolean).join("\n\n")}>
+          {channel => Object.entries(COPY_FIELDS).filter(([key]) => (channel === "blog" ? ["title", "body", "hashtags"] : channel === "instagram" ? ["social", "instagramHashtags"] : ["card", "imageLinks"]).includes(key)).map(([key, label]) => <div key={key}><Field label={`최종 ${label}`} value={draft.copy[key] ?? ""} onChange={value => patch({ copy: { ...draft.copy, [key]: value } })} multiline={key !== "title"} rows={key === "body" ? 12 : 3} maxLength={40000} /><button className="blogCopy" onClick={() => copy(draft.copy[key] ?? "")}>{label} 복사</button></div>)}
+        </StudioEditor>
         <button onClick={finalize}>완성본 확정 및 저장</button>
         <Disclosure trigger={`이전 확정본 (${draft.versions.length})`}>{draft.versions.map((v, i) => <article key={`${v.at}-${i}`}><h3>{i + 1}차 · {v.at.slice(0, 16).replace("T", " ")} UTC</h3><pre>{JSON.stringify(v.copy, null, 2)}</pre></article>)}</Disclosure>
         <h2>발행 기록</h2><a href="https://blog.naver.com/koh_you_math/postwrite" target="_blank" rel="noreferrer">네이버 블로그 글쓰기 열기 ↗</a><Field label="발행 URL" value={draft.publishedUrl} onChange={publishedUrl => patch({ publishedUrl })} type="url" maxLength={2000} /><Field label="발행일" value={draft.publishedDate} onChange={publishedDate => patch({ publishedDate })} type="date" /><button onClick={savePublication}>발행 기록 저장</button>
       </>}
-      <footer className="blogSave"><button onClick={() => store.save()}>편집 내용 저장</button><span>{states[store.status]}</span></footer>
+      <StickySaveBar label="SNS 편집본" message={states[store.status]} saveState={store.status}><button className="primaryButton" onClick={() => store.save()}>편집 내용 저장</button></StickySaveBar>
       </fieldset>
-    </section>}</div><span className="blogStorageHint" data-storage-key={BLOG_KEY}>초안과 완성본은 저장 버튼을 누른 뒤 서버에서 다시 확인합니다.</span>
+    </section>}</div>
+    {tagsOpen && draft && <StudioDialog title="해시태그 추천" className="studioSidePanel" onClose={() => setTagsOpen(false)} subtitle="반영 버튼은 편집본에 적용합니다. 서버 보관은 편집 내용 저장을 눌러주세요.">
+        <section aria-label="자동 해시태그 추천" className="blogNotice"><h3>자동 해시태그 추천</h3><p>학교·지역·콘텐츠 유형을 바꾸면 추천도 갱신됩니다. 반영 버튼은 해당 해시태그 편집칸을 바꿉니다. 직접 수정한 글은 자동으로 덮어쓰지 않습니다.</p><p aria-label="블로그 추천 태그">{tags.blog}</p><button onClick={() => patch({ copy: { ...draft.copy, hashtags: tags.blog } })}>블로그 추천 태그 반영</button><p aria-label="인스타그램 추천 태그">{tags.instagram}</p><button onClick={() => patch({ copy: { ...draft.copy, instagramHashtags: tags.instagram } })}>인스타그램 추천 태그 반영</button><p>인스타그램은 관련 태그를 최대 5개 추천합니다. 유료 AI 호출 없이 생성하며 자유롭게 편집할 수 있습니다.</p></section>
+      <button className="ghostButton" onClick={() => setTagsOpen(false)}>추천 패널 닫기</button>
+    </StudioDialog>}
+    {importOpen && draft && <StudioDialog title="Chat 결과 가져오기" subtitle="미리보기 후 반영합니다. 취소하면 붙여넣은 내용만 버리고 기존 편집본은 유지합니다." onClose={() => setImportOpen(false)}>
+      <Field label="Chat 결과 JSON" value={raw} onChange={value => { setRaw(value); setProposal(null); }} multiline rows={8} />
+      <button className="primaryButton" onClick={() => attempt(() => { setProposal(parseChatResult(raw)); setMessage(""); })}>가져오기 미리보기</button>
+      {message && <p role="status">{message}</p>}
+      {proposal && <div><h3>반영할 내용</h3><pre>{JSON.stringify(proposal, null, 2)}</pre><button className="primaryButton" onClick={() => { patch({ copy: { ...draft.copy, ...proposal } }); setImportOpen(false); setProposal(null); setRaw(""); setMessage("편집본에 반영했습니다. 이전 확정본은 유지됩니다."); }}>미리본 결과를 편집본에 반영</button></div>}
+      <button className="ghostButton" onClick={() => setImportOpen(false)}>가져오기 취소</button>
+    </StudioDialog>}<span className="blogStorageHint" data-storage-key={BLOG_KEY}>초안과 완성본은 저장 버튼을 누른 뒤 서버에서 다시 확인합니다.</span>
   </main>;
 }

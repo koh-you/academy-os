@@ -1,5 +1,11 @@
 # Academy OS Current Worklog
 
+## 2026-09-06 시험분석·SNS 공통 UI
+
+- PageHeader·WorkspaceTabs·StickySaveBar와 공통 StudioEditor를 사용한다. 시험 7단계/저장 계약은 유지하고 원본 참고 선택·산출물 채널 편집/미리보기를 추가했다. SNS는 채널별 편집, JSON 가져오기 모달, 해시태그 옆 패널, 고정 저장 바를 적용했다.
+- 기능 대응 및 검증 범위: docs/studio-ui-unification.md. API·DB·권한 변경 없음. 기존 SNS 확장 PR #280 내용을 포함한 후속 branch이며 병합·운영 배포 전이다.
+- 검증: check:fast 828 scenario·lint·build(947.94KB), 관련 output/prompt/blog/boundary fixture, 집중 browser 5개 시나리오 통과. 추가 원본 참고 테스트의 잘못된 fixture 필드(sourceFiles→sources)를 수정해 해당 검사를 재통과했다. 유료 AI·운영 PDF 업로드는 실행하지 않았으며 원본 뷰어는 가상 응답으로 확인했다.
+
 ## 2026-09-06 SNS 콘텐츠 스튜디오 확장
 
 - 메뉴·화면을 SNS 콘텐츠 스튜디오로 변경하고, Chat 지시문과 완성본에서 인스타그램 캡션·태그를 분리했다. 학교·지역·과목·유형의 자동 태그 추천은 명시적 반영으로만 편집본을 변경한다. 기존 blogHybridContents와 social 필드는 유지한다.

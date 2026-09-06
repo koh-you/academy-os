@@ -225,6 +225,14 @@ test("exam analysis non-paid teacher saves use the safe source and survive reloa
     }
   });
   expect(seededReviewResponse.ok()).toBe(true);
+  await page.route("**/api/exam-analysis-runs?id=*", async route => {
+    const response = await route.fetch();
+    const payload = await response.json();
+    payload.sources = [{ sourceId: "safe-reference", originalFileName: "가상 시험 원본.pdf", signedUrl: "https://example.com/safe-reference.pdf" }];
+    await route.fulfill({ response, json: payload });
+  });
+  await page.route("https://example.com/safe-reference.pdf", route => route.fulfill({ status: 200, contentType: "text/html", body: "<p>가상 원본 뷰어</p>" }));
+
 
   await page.reload();
   await expect(page.getByRole("navigation", { name: "주요 화면" })).toBeVisible();
@@ -235,6 +243,10 @@ test("exam analysis non-paid teacher saves use the safe source and survive reloa
   await page.getByRole("tab", { name: "선생님 검수" }).click();
   const firstReviewNote = page.getByRole("textbox", { name: "1번 재확인 근거", exact: true });
   await expect(firstReviewNote).toHaveValue("안전 검수 seed");
+  await page.getByText("원본 PDF와 함께 검수하기", { exact: true }).click();
+  await page.getByLabel("검수 참고 원본", { exact: true }).selectOption("safe-reference");
+  await expect(page.getByTitle("검수 참고 PDF", { exact: true })).toHaveAttribute("src", "https://example.com/safe-reference.pdf");
+  await expect(page.getByRole("link", { name: "검수 원본 열기 ↗" })).toHaveAttribute("href", "https://example.com/safe-reference.pdf");
   await firstReviewNote.fill("안전 검수 저장 완료");
   await page.getByRole("checkbox", { name: "1번 확정", exact: true }).check();
   await page.getByRole("checkbox", { name: "1번 주요문항", exact: true }).check();
@@ -296,6 +308,14 @@ test("exam analysis non-paid teacher saves use the safe source and survive reloa
   const outputSummaryInput = page.getByRole("textbox", { name: "첫 문단 핵심 요약", exact: true });
   await expect(outputSummaryInput).toBeVisible();
   await outputSummaryInput.fill("안전 산출물 저장 후 새로고침 유지");
+  await page.locator('button[aria-controls="exam-output-final-drafts"]').click();
+  await page.getByRole("textbox", { name: "블로그 최종 초안", exact: true }).fill("선생님 블로그 편집본");
+  await page.getByRole("tab", { name: "인스타그램", exact: true }).click();
+  await page.getByRole("textbox", { name: "인스타 카드 최종 초안", exact: true }).fill("선생님 카드 편집본");
+  await page.getByRole("tab", { name: "블로그", exact: true }).click();
+  await expect(page.getByRole("textbox", { name: "블로그 최종 초안", exact: true })).toHaveValue("선생님 블로그 편집본");
+  await page.screenshot({ path: "test-results/studio-exam-output-desktop.png", fullPage: true });
+
   await page.getByRole("button", { name: "산출물 작업본 저장", exact: true }).click();
   const outputSaveBar = page.getByRole("complementary", { name: "산출물 작업본 하단 고정 저장 바" });
   await expect(outputSaveBar.getByText("시험분석 산출물 · 저장 완료", { exact: true })).toBeVisible();
@@ -314,6 +334,15 @@ test("exam analysis non-paid teacher saves use the safe source and survive reloa
   await page.getByRole("tab", { name: "산출물" }).click();
   await expect(page.getByRole("textbox", { name: "첫 문단 핵심 요약", exact: true }))
     .toHaveValue("안전 산출물 저장 후 새로고침 유지");
+  await page.locator('button[aria-controls="exam-output-final-drafts"]').click();
+  await expect(page.getByRole("textbox", { name: "블로그 최종 초안", exact: true })).toHaveValue("선생님 블로그 편집본");
+  await page.getByRole("tab", { name: "인스타그램", exact: true }).click();
+  await expect(page.getByRole("textbox", { name: "인스타 카드 최종 초안", exact: true })).toHaveValue("선생님 카드 편집본");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole("button", { name: "미리보기", exact: true }).click();
+  await expect(page.getByRole("region", { name: "콘텐츠 미리보기" })).toContainText("선생님 카드 편집본");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: "test-results/studio-exam-output-mobile.png", fullPage: true });
   expect(pageErrors).toEqual([]);
 });
 

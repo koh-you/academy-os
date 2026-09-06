@@ -1834,6 +1834,8 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
       tone: events.length > 0 ? "complete" : "idle"
     }
   ];
+  const [reviewSourceId, setReviewSourceId] = useState("");
+  const reviewSource = sourceFiles.find(file => file.sourceId === reviewSourceId);
   const questionCountStageCollapsed = isExamAnalysisStageCollapsed("question-count", questionCountStageComplete);
   const boundaryStageCollapsed = isExamAnalysisStageCollapsed("boundary", boundaryStageComplete);
   const rowFillStageCollapsed = isExamAnalysisStageCollapsed("row-fill", rowFillStageComplete);
@@ -1912,6 +1914,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
         ))}
       </div>
 
+      <div className="studioSummary"><strong>{activeRun?.title || "새 시험분석"}</strong><p>원본 준비 → 문항 구조·AI 분석 → 선생님 검수 → 미리보기·산출물</p><small>분석 저장은 기본정보, 문항 검수본 저장은 문항 수정, 산출물 작업본 저장은 글과 카드 문구를 저장합니다.</small></div>
       <WorkspaceTabs as="nav" className="examAnalysisWorkspaceTabs" label="시험분석 작업 단계">
         {examAnalysisWorkspaceTabs.map((tab) => (
           <button
@@ -2501,6 +2504,12 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
               open={!reviewStageCollapsed}
               collapsedContent={renderExamAnalysisStageCollapsedHint("AI 결과 검수", reviewStageComplete)}
             >
+                <Disclosure trigger="원본 PDF와 함께 검수하기">
+                  <p>원본을 선택해 확인하면서 아래 문항을 연속 검수하세요. PDF 표시가 지원되지 않으면 원본 열기를 이용하세요.</p>
+                  <select aria-label="검수 참고 원본" value={reviewSourceId} onChange={e => setReviewSourceId(e.target.value)}><option value="">원본 선택</option>{sourceFiles.map(file => <option key={file.sourceId} value={file.sourceId}>{file.originalFileName || "PDF 원본"}</option>)}</select>
+                  {!sourceFiles.length && <p>원본·PDF 탭에서 시험지를 먼저 등록하세요.</p>}
+                  {reviewSource && <><a href={getExamAnalysisSourceOpenUrl(reviewSource)} target="_blank" rel="noreferrer">검수 원본 열기 ↗</a><iframe title="검수 참고 PDF" className="studioReviewPdf" src={getExamAnalysisSourceOpenUrl(reviewSource)} /></>}
+                </Disclosure>
                 {teacherReview ? (
                   <div className={teacherReview.status === "completed" ? "examAnalysisReviewSummary ok" : "examAnalysisReviewSummary needsReview"}>
                     <strong>{teacherReview.status === "completed" ? "검수 완료" : "검수 진행 중"}</strong>

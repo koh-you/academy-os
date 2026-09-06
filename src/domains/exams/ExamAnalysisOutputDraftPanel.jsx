@@ -1,3 +1,4 @@
+import { StudioEditor } from "../../shared/components/StudioEditor.jsx";
 import { useState } from "react";
 import {
   examAnalysisBlogBlockFields,
@@ -469,8 +470,10 @@ export function ExamAnalysisOutputDraftPanel({
         </button>
       </div>
       <Disclosure hideTrigger id="exam-output-final-drafts" open={!isOutputSectionCollapsed("finalDrafts")}>
-        <div className="examAnalysisOutputEditorGrid">
-          <section>
+        <StudioEditor channels={[{ id: "blog", label: "블로그" }, { id: "instagram", label: "인스타그램" }]} preview={channel => channel === "blog" ? blogText : instagramText}>
+          {channel => <>
+
+          <section hidden={channel !== "blog"}>
             <div>
               <div>
                 <strong>블로그 초안</strong>
@@ -489,7 +492,7 @@ export function ExamAnalysisOutputDraftPanel({
               value={blogText}
             />
           </section>
-          <section>
+          <section hidden={channel !== "instagram"}>
             <div>
               <div>
                 <strong>인스타 카드 초안</strong>
@@ -508,7 +511,8 @@ export function ExamAnalysisOutputDraftPanel({
               value={instagramText}
             />
           </section>
-        </div>
+          </>}
+        </StudioEditor>
       </Disclosure>
 
       <div className="examAnalysisOutputPolicy">
