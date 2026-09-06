@@ -75,7 +75,10 @@ export function fromStudentRow(row) {
     withdrawalComment: row.withdrawal_comment ?? "",
     withdrawalReason: row.withdrawal_reason ?? "",
     withdrawnAt: row.withdrawn_at ?? "",
-    updatedAt: row.updated_at ?? ""
+    updatedAt: row.updated_at ?? "",
+    // 읽기 전용 통과값. 여러 테넌트를 함께 받는 키오스크가 "이 학생이 어느 학원 소속인지"를
+    // 알아야 출결을 올바른 테넌트로 저장할 수 있다. toStudentRow 는 이 값을 쓰지 않는다.
+    tenantId: row.tenant_id ?? ""
   };
 }
 

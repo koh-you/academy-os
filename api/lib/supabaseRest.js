@@ -3,6 +3,7 @@ import {
   applyTenantFilterToQuery,
   applyTenantToRows,
   requireTenantScopedMutationQuery,
+  resolveReadTenantIds,
   resolveTenantId
 } from "../../src/shared/server/tenantScope.js";
 
@@ -114,7 +115,7 @@ const listRowsExplicitLimitPattern = /(^|&)limit=/;
 
 export async function listRows(table, query = "select=*", options = {}) {
   const requireServiceRole = options.requireServiceRole ?? false;
-  query = applyTenantFilterToQuery(table, query, resolveTenantId(options.tenantId));
+  query = applyTenantFilterToQuery(table, query, resolveReadTenantIds(options.tenantId));
   if (listRowsExplicitLimitPattern.test(query)) {
     return supabaseRestRequest(`${table}?${query}`, { requireServiceRole });
   }

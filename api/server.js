@@ -104,7 +104,8 @@ import {
   upsertRows,
   uploadStorageObjectWithBucketRetry
 } from "./lib/supabaseRest.js";
-import { enterTenantContext } from "../src/shared/server/tenantScope.js";
+import { enterTenantContext, getCurrentTenantId, setWriteTenant } from "../src/shared/server/tenantScope.js";
+import { createKioskDeviceRegistry } from "../src/shared/server/kioskDeviceRegistry.js";
 import { evaluateApiAccess } from "../src/shared/server/apiAccessPolicy.js";
 import {
   createClientRuntimeErrorRateLimiter,
@@ -958,6 +959,29 @@ function buildManualAbsenceAttendanceJob({ alimtalkPayload, lesson, now, record,
   };
 }
 
+// 키오스크 기기 등록부. kiosk_devices 는 여러 테넌트를 가로지르는 것이 존재 이유라
+// 테넌트 스코핑 대상이 아니다(TENANT_SCOPED_TABLES 에 없음).
+const kioskDeviceRegistry = createKioskDeviceRegistry({
+  loadDeviceByTokenHash: async (tokenHash) => {
+    if (!isSupabaseConfigured({ requireServiceRole: true })) return null;
+    const rows = await listRows(
+      "kiosk_devices",
+      `select=kiosk_id,label,tenant_ids,is_active&token_sha256=eq.${encodeURIComponent(tokenHash)}&limit=1`,
+      { requireServiceRole: true }
+    );
+    return rows[0] ?? null;
+  }
+});
+
+async function resolveKioskDeviceForRequest(token) {
+  try {
+    return await kioskDeviceRegistry.resolveDevice(token);
+  } catch {
+    // 등록부 조회가 실패해도 레거시 단일 토큰 경로가 남아 있어야 태블릿이 멈추지 않는다.
+    return null;
+  }
+}
+
 async function handleAttendanceCheck(payload = {}) {
   const source = String(payload.source || "kiosk");
   const now = new Date();
@@ -997,6 +1021,13 @@ async function handleAttendanceCheck(payload = {}) {
     student = matchedStudents[0];
   }
   if (!student) throw new Error("학생을 찾지 못했습니다.");
+
+  // 여러 선생님(테넌트) 학생을 함께 받는 태블릿은 명단을 넓게 읽고 쓰기 테넌트는 비워둔 채로
+  // 여기까지 온다. 학생이 정해진 지금 그 학생의 테넌트로 쓰기를 고정한다.
+  // setWriteTenant 는 읽기 범위 밖의 테넌트를 거부하므로, 기기가 담당 밖에 쓰는 일은 없다.
+  if (!getCurrentTenantId() && student.tenantId) {
+    setWriteTenant(student.tenantId);
+  }
 
   let attendanceCandidates = getAttendanceLessonCandidatesForStudent(lessons, student, now);
   let lesson = payload.lessonId
@@ -4847,24 +4878,44 @@ const server = http.createServer(async (request, response) => {
   const teacherSession = getTeacherSession(request);
   const opsSession = teacherSession ? null : getOpsSession(request);
   const kioskToken = String(getRequestHeader(request, "x-kiosk-token") || "").trim();
+  // 키오스크는 기기 등록부(kiosk_devices)에서 찾는다. 못 찾으면 레거시 단일 토큰으로 폴백한다.
+  // 폴백이 있어야 기기를 등록하기 전에 배포돼도 이미 쓰고 있는 태블릿이 죽지 않는다.
+  const kioskDevice = !teacherSession && !opsSession && kioskToken
+    ? await resolveKioskDeviceForRequest(kioskToken)
+    : null;
   const expectedKioskToken = String(process.env.ACADEMY_KIOSK_TOKEN || "").trim();
-  const kioskOk =
-    !teacherSession && !opsSession && Boolean(expectedKioskToken) &&
+  const legacyKioskOk =
+    !teacherSession && !opsSession && !kioskDevice && Boolean(expectedKioskToken) &&
     Boolean(kioskToken) && timingSafeEqualText(kioskToken, expectedKioskToken);
+  const kioskOk = Boolean(kioskDevice) || legacyKioskOk;
   const dispatchOk = !teacherSession && !opsSession && !kioskOk && getDispatchAuthState(request, {}).ok;
   const auth = teacherSession
     ? { kind: "teacher", teacherRole: teacherSession.teacherRole || "owner", tenantId: teacherSession.tenantId || "tenant_default" }
     : opsSession
       ? { kind: "ops", opsScope: opsSession.scope, tenantId: opsSession.tenantId ?? null, crossTenant: Boolean(opsSession.crossTenant) }
-      : kioskOk
-        ? { kind: "kiosk", tenantId: "tenant_default" }
-        : dispatchOk
-          ? { kind: "dispatch" }
-          : { kind: "none" };
+      : kioskDevice
+        // 담당 테넌트가 하나면 그대로 쓰기 테넌트가 된다. 둘 이상이면 쓰기 테넌트는 null 로 두고
+        // 학생을 고른 뒤 handleAttendanceCheck 에서 setWriteTenant 로 정한다.
+        ? {
+            kind: "kiosk",
+            kioskId: kioskDevice.kioskId,
+            tenantId: kioskDevice.tenantIds.length === 1 ? kioskDevice.tenantIds[0] : null,
+            readTenantIds: kioskDevice.tenantIds
+          }
+        : legacyKioskOk
+          ? {
+              kind: "kiosk",
+              kioskId: "legacy_shared_token",
+              tenantId: "tenant_default",
+              readTenantIds: ["tenant_default"]
+            }
+          : dispatchOk
+            ? { kind: "dispatch" }
+            : { kind: "none" };
   request.__auth = auth;
 
-  // 멀티테넌트: 요청 컨텍스트에 tenantId 를 심는다(세션 없으면 null → 스코핑 no-op).
-  enterTenantContext(auth.tenantId ?? null);
+  // 멀티테넌트: 요청 컨텍스트에 쓰기 테넌트와 읽기 범위를 심는다(둘 다 없으면 스코핑 no-op).
+  enterTenantContext(auth.tenantId ?? null, { readTenantIds: auth.readTenantIds });
 
   const verdict = evaluateApiAccess({ method: request.method, pathname: requestUrl.pathname, auth });
   if (!verdict.ok) {
