@@ -1,7 +1,7 @@
 import { expect, test } from "./fixtures.js";
 import { loginAsTeacher, resetSafeFixture, safeApiBaseUrl } from "./safeSmokeSupport.js";
 test.beforeEach(async ({ request }) => { await resetSafeFixture(request); });
-async function openStudio(page) { await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /블로그 스튜디오/ }).click(); }
+async function openStudio(page) { await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /SNS 콘텐츠 스튜디오/ }).click(); }
 async function prepare(page) {
   await loginAsTeacher(page); await openStudio(page);
   await page.getByRole("button", { name: "+ 새 콘텐츠" }).click();
@@ -30,13 +30,27 @@ test("blog hybrid exports approved facts, imports preview and persists final ver
   await page.getByRole("button", { name: "가져오기 미리보기" }).click();
   await expect(page.getByLabel("최종 제목", { exact: true })).toHaveValue("사람이 쓴 제목");
   await page.getByRole("button", { name: "미리본 결과를 편집본에 반영" }).click();
+  await page.getByRole("button", { name: "블로그 추천 태그 반영" }).click();
+  await page.getByRole("button", { name: "인스타그램 추천 태그 반영" }).click();
+  await expect(page.getByLabel("최종 인스타그램 해시태그", { exact: true })).toHaveValue(/#안전고수학/);
+  await page.getByLabel("최종 인스타그램 캡션", { exact: true }).fill("한 걸음씩 쌓은 노력\n다음 도전도 응원합니다.");
+  await page.getByLabel("최종 블로그 해시태그", { exact: true }).fill("#직접편집");
+  await page.getByRole("button", { name: "1 자료 준비" }).click();
+  await page.getByLabel("지역", { exact: true }).fill("도봉");
+  await page.getByLabel(/공개할 사실·수치를 확인/).check();
+  await page.getByRole("button", { name: "3 완성본" }).click();
+  await expect(page.getByLabel("블로그 추천 태그", { exact: true })).toContainText("#도봉수학학원");
+  await expect(page.getByLabel("최종 블로그 해시태그", { exact: true })).toHaveValue("#직접편집");
   await page.getByRole("button", { name: "완성본 확정 및 저장" }).click();
   await expect(page.locator(".blogStatus")).toHaveText("서버 저장 확인 완료");
   const state = await (await request.get(`${safeApiBaseUrl}/api/app-state?includeRows=true`)).json();
+  expect(state.states.blogHybridContents[0].copy.instagramHashtags).toContain("#안전고수학");
+  expect(state.states.blogHybridContents[0].copy.hashtags).toBe("#직접편집");
   expect(state.states.blogHybridContents[0].versions[0].copy.body).toBe("실제 노력의 기록");
   await page.reload(); await openStudio(page);
   await page.getByRole("button", { name: "3 완성본" }).click();
   await expect(page.getByLabel("최종 제목", { exact: true })).toHaveValue("새 제목");
+  await expect(page.getByLabel("최종 인스타그램 캡션", { exact: true })).toHaveValue(/한 걸음씩/);
   await page.getByLabel("최종 본문", { exact: true }).fill("추가 편집");
   await page.getByRole("button", { name: "편집 내용 저장" }).click();
   await expect(page.locator(".blogStatus")).toHaveText("서버 저장 확인 완료");

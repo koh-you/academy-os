@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { newBlogDraft, seedScore, buildChatPrompt, parseChatResult, finalizeDraft, isNaverPostUrl } from "../src/domains/blogContent/blogHybridModel.js";
+import { newBlogDraft, seedScore, buildChatPrompt, parseChatResult, finalizeDraft, isNaverPostUrl, suggestHashtags } from "../src/domains/blogContent/blogHybridModel.js";
 const d = newBlogDraft();
 assert.throws(() => buildChatPrompt(d));
 const seed = seedScore({ scoreRecordId: "private-id", score: 0, grade: 2, subject: "수학Ⅰ" }, { name: "안서준", schoolName: "창동고", grade: "2" });
@@ -21,3 +21,13 @@ assert.equal(isNaverPostUrl("https://blog.naver.com/koh_you_math/1234"), true);
 assert.equal(isNaverPostUrl("https://blog.naver.com.evil.example/user/123"), false);
 assert.equal(isNaverPostUrl("javascript:alert(1)"), false);
 console.log("blog hybrid: facts, consent, export privacy, import and version history passed");
+
+const tags = suggestHashtags({ ...ready, region: "창 동#", displayName: "비공개이름", achievement: "100점 1등급" });
+assert.ok(tags.blog.includes("#창동수학학원"));
+assert.ok(tags.blog.includes("#창동고수학"));
+assert.ok(!tags.blog.includes("100점") && !tags.blog.includes("비공개이름"));
+assert.ok(tags.instagram.split(" ").length <= 5);
+assert.equal(new Set(tags.blog.split(" ")).size, tags.blog.split(" ").length);
+assert.ok(!suggestHashtags({ ...ready, region: "" }).blog.includes("창동수학학원"));
+assert.ok(prompt.includes("인스타그램용 캡션"));
+assert.equal(parseChatResult('{"title":"제목","body":"본문","instagramHashtags":"#수학"}').instagramHashtags, "#수학");

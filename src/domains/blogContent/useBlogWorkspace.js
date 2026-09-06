@@ -31,7 +31,7 @@ export function useBlogWorkspace(postAppState) {
     const unload = e => { e.preventDefault(); e.returnValue = ""; };
     const navigate = e => {
       if (!e.target.closest?.('#academy-primary-navigation button')) return;
-      if (busy || !window.confirm("저장하지 않은 블로그 편집 내용이 있습니다. 이 화면을 나갈까요?")) { e.preventDefault(); e.stopPropagation(); }
+      if (busy || !window.confirm("저장하지 않은 SNS 콘텐츠 편집 내용이 있습니다. 이 화면을 나갈까요?")) { e.preventDefault(); e.stopPropagation(); }
     };
     window.addEventListener("beforeunload", unload);
     document.addEventListener("click", navigate, true);

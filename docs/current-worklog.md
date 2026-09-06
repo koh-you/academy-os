@@ -1,5 +1,11 @@
 # Academy OS Current Worklog
 
+## 2026-09-06 SNS 콘텐츠 스튜디오 확장
+
+- 메뉴·화면을 SNS 콘텐츠 스튜디오로 변경하고, Chat 지시문과 완성본에서 인스타그램 캡션·태그를 분리했다. 학교·지역·과목·유형의 자동 태그 추천은 명시적 반영으로만 편집본을 변경한다. 기존 blogHybridContents와 social 필드는 유지한다.
+- skills_in_math2 공개 937개 목록·페이지 확인, 본문 934개 추출(공유 3개 미추출). 이미지 OCR·조회/전환 성과는 조사하지 않았다. 보고서와 전체 CSV: docs/research/skills-in-math2-audit-20260906.md.
+- 검증: test:blog-hybrid, check:fast(lint·828 scenario·build), focused safe browser 3/3. 직접 편집 태그 보존, 캡션·태그 서버 재조회와 새로고침 지속성 확인. 운영 SQL·유료 AI·외부 발행 없음. branch 구현·검증 완료, main 병합·배포 전.
+
 ## 2026-09-06 블로그 하이브리드 스튜디오
 
 - 연구실 → 블로그 스튜디오에서 자료 준비·Chat 전달·완성본을 편집한다. 내신 원천 seed·익명 표시명·공개 동의·사실 확인 뒤 Chat 프롬프트를 복사하고, JSON 결과를 미리보기 후 편집본에 반영한다. 확정본은 별도 버전으로 보존한다.
