@@ -1,5 +1,11 @@
 # Daily Development Handoff
 
+## 2026-09-06 시험분석 작업 흐름 간소화
+
+- 전체 흐름(원본 준비·AI 분석·선생님 검수·결과 활용)과 현재 할 일을 표시한다. 비원본 단계에서는 분석 목록을 접고 다시 열 수 있다. 모바일 세부 단계는 선택 메뉴다.
+- 산출물은 총평 메모·글 구성·주요문항·Chat 전달·완성본·공개 기준 중 한 작업씩 표시한다. 안내문은 작성 도움말로 전환하고, 프롬프트 작업/역할 카드는 명시적으로 펼친다. 기존 입력 원천·API·DB·AI 실행·검수 저장은 유지한다.
+- 검증: check:fast 828/828·lint·build, 관련 domain/prompt/CSS fixture, focused browser 2/2 통과. 모바일 작업 메뉴와 버튼 줄바꿈 추가 검사 통과. 기능 위치: docs/exam-workflow-ui.md. 병합·배포 전.
+
 ## 2026-09-06 시험분석·SNS 공통 UI
 
 - 사용자 병합 승인 후 CI의 모달 개수/선택자 오탐 및 중복 CSS를 교정했다. test:production 전체 로컬 재검증 통과, 기존 branch browser-smoke 성공을 확인했다.

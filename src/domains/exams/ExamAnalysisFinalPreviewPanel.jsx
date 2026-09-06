@@ -1,3 +1,4 @@
+import { Disclosure } from "../../shared/components/Disclosure.jsx";
 import { examAnalysisPreviewPalette } from "./finalPreview.js";
 import { ExamAnalysisPromptStudioPanel } from "./ExamAnalysisPromptStudioPanel.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
@@ -254,7 +255,7 @@ export function ExamAnalysisFinalPreviewPanel({ model }) {
         <span>{model.notes.formulaPolicy}</span>
         <span>{model.notes.publicOutputPolicy}</span>
       </div>
-      <ExamAnalysisPromptStudioPanel analysisRunId={model.meta.analysisRunId} />
+      <Disclosure trigger="카드 제작 작업 열기"><ExamAnalysisPromptStudioPanel analysisRunId={model.meta.analysisRunId} /></Disclosure>
     </div>
   );
 }

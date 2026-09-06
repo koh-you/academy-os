@@ -272,6 +272,8 @@ test("exam analysis non-paid teacher saves use the safe source and survive reloa
   await expect(page.getByRole("checkbox", { name: "1번 주요문항", exact: true })).toBeChecked();
 
   await page.getByRole("tab", { name: "최종 미리보기" }).click();
+  await page.getByRole("button", { name: "카드 제작 작업 열기", exact: true }).click();
+  await page.getByRole("button", { name: /^2\. 시험 분석/ }).click();
   const scoreStructureInput = page.getByRole("textbox", { name: /^배점\/문항 구조/ });
   await expect(scoreStructureInput).toBeVisible();
   await scoreStructureInput.fill("객관식 12문항 · 안전 계약 검수");
@@ -301,6 +303,8 @@ test("exam analysis non-paid teacher saves use the safe source and survive reloa
   await expect(page.getByRole("navigation", { name: "주요 화면" })).toBeVisible();
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /시험분석/ }).click();
   await page.getByRole("tab", { name: "최종 미리보기" }).click();
+  await page.getByRole("button", { name: "카드 제작 작업 열기", exact: true }).click();
+  await page.getByRole("button", { name: /^2\. 시험 분석/ }).click();
   await expect(page.getByRole("textbox", { name: /^배점\/문항 구조/ }))
     .toHaveValue("객관식 12문항 · 안전 계약 검수");
 
@@ -308,7 +312,17 @@ test("exam analysis non-paid teacher saves use the safe source and survive reloa
   const outputSummaryInput = page.getByRole("textbox", { name: "첫 문단 핵심 요약", exact: true });
   await expect(outputSummaryInput).toBeVisible();
   await outputSummaryInput.fill("안전 산출물 저장 후 새로고침 유지");
-  await page.locator('button[aria-controls="exam-output-final-drafts"]').click();
+  await expect(page.getByRole("region", { name: "시험분석 학교 목록" })).toBeHidden();
+  await page.getByRole("tab", { name: "Chat 전달", exact: true }).click();
+  await expect(outputSummaryInput).toBeHidden();
+  await expect(page.getByRole("textbox", { name: "GPT 프로젝트 기획 패킷" })).toBeVisible();
+  await page.getByRole("tab", { name: "총평 메모", exact: true }).click();
+  await expect(outputSummaryInput).toHaveValue("안전 산출물 저장 후 새로고침 유지");
+  await page.getByRole("button", { name: "작성 도움말 보기", exact: true }).click();
+  await expect(page.getByRole("button", { name: "작성 도움말 닫기", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "작성 도움말 닫기", exact: true }).click();
+
+  await page.getByRole("tab", { name: "완성본", exact: true }).click();
   await page.getByRole("textbox", { name: "블로그 최종 초안", exact: true }).fill("선생님 블로그 편집본");
   await page.getByRole("tab", { name: "인스타그램", exact: true }).click();
   await page.getByRole("textbox", { name: "인스타 카드 최종 초안", exact: true }).fill("선생님 카드 편집본");
@@ -334,11 +348,15 @@ test("exam analysis non-paid teacher saves use the safe source and survive reloa
   await page.getByRole("tab", { name: "산출물" }).click();
   await expect(page.getByRole("textbox", { name: "첫 문단 핵심 요약", exact: true }))
     .toHaveValue("안전 산출물 저장 후 새로고침 유지");
-  await page.locator('button[aria-controls="exam-output-final-drafts"]').click();
+  await page.getByRole("tab", { name: "완성본", exact: true }).click();
   await expect(page.getByRole("textbox", { name: "블로그 최종 초안", exact: true })).toHaveValue("선생님 블로그 편집본");
   await page.getByRole("tab", { name: "인스타그램", exact: true }).click();
   await expect(page.getByRole("textbox", { name: "인스타 카드 최종 초안", exact: true })).toHaveValue("선생님 카드 편집본");
   await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByLabel("작업 단계", { exact: true }).selectOption("review");
+  await expect(page.getByRole("textbox", { name: "1번 재확인 근거", exact: true })).toHaveValue("안전 검수 저장 완료");
+  await page.getByLabel("작업 단계", { exact: true }).selectOption("output");
+  expect(await page.locator(".examOutputWorkTabs").evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
   await page.getByRole("button", { name: "미리보기", exact: true }).click();
   await expect(page.getByRole("region", { name: "콘텐츠 미리보기" })).toContainText("선생님 카드 편집본");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);

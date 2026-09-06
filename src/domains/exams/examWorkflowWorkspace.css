@@ -1,0 +1,33 @@
+.examWorkflowOverview{padding:18px;border:1px solid var(--academy-border-strong,#cbd8ee);border-radius:12px;background:var(--academy-surface,#fff)}
+.examWorkflowOverview>strong{font-size:18px;line-height:1.5}
+.examWorkflowOverview ol{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:0;margin:16px 0 0}
+.examWorkflowOverview li{display:flex;align-items:center;gap:10px;padding:12px;border-radius:8px;background:var(--academy-surface-muted,#f1f5f9);font-size:15px;font-weight:700}
+.examWorkflowOverview li[aria-current=step]{background:var(--academy-primary,#17213d);color:white}
+.examWorkflowOverview b{font-size:18px}
+.examCurrentTask{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 18px;background:var(--academy-surface,#fff);border-radius:10px;border:1px solid var(--academy-border-strong,#cbd8ee)}
+.examCurrentTask strong{font-size:16px}.examCurrentTask p{margin:6px 0 0;font-size:15px;line-height:1.6}
+.examWorkflowPage .examAnalysisLibraryPanel[hidden],.examOutputWorkSection[hidden]{display:none}
+.examOutputToolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:12px 0;font-size:15px}
+.examOutputTaskHint{font-size:16px;line-height:1.6;margin:16px 0}
+.examOutputWorkspace[data-help=false] .examOutputWorkSection label>small,
+.examOutputWorkspace[data-help=false] .examAnalysisOutputCollapsibleHeader>div>span,
+.examOutputWorkspace[data-help=false] .examAnalysisInstructorSectionHeader>div>span,
+.examOutputWorkspace[data-help=false] .examAnalysisKeyQuestionHeader>div>span,
+.examOutputWorkspace[data-help=false] .examAnalysisInstructorBlock>p,
+.examOutputWorkspace[data-help=false] .examAnalysisInstructorBlock>small{display:none}
+.examWorkflowPage .examOutputWorkSection label>span{font-size:15px;line-height:1.6}
+.examWorkflowPage .examOutputWorkSection textarea{font-size:15px;line-height:1.7}
+.examWorkflowPage .examOutputWorkSection label>small{font-size:14px;line-height:1.6}
+.examWorkflowPage .examAnalysisWorkspaceTabs button>small{font-size:12px}
+.examWorkflowPage .examAnalysisOutputPolicy{font-size:14px}
+.examWorkflowPage .examAnalysisOutputStickySaveBar{bottom:12px}
+@media(max-width:760px){.examWorkflowOverview ol{grid-template-columns:repeat(2,minmax(0,1fr))}.examWorkflowOverview li{font-size:14px;padding:10px}.examCurrentTask{align-items:stretch;flex-direction:column}.examOutputToolbar{flex-wrap:wrap}}
+
+.examWorkflowPage .workspaceTabs.examAnalysisWorkspaceTabs{flex-wrap:wrap;overflow:visible}
+.examWorkflowPage .examPromptFieldHint{font-size:14px;line-height:1.6}
+
+.examMobileStage{display:none}
+.examWorkflowPage .workspaceTabs.examOutputWorkTabs{flex-wrap:wrap;overflow:visible}
+.examWorkflowPage .studioViewSwitch button{padding:10px 16px;border-radius:8px;border:1px solid #cbd8ee;background:#fff;font:inherit}
+.examWorkflowPage .studioViewSwitch button[aria-pressed=true]{background:#17213d;color:white}
+@media(max-width:760px){.examWorkflowPage .workspaceTabs.examAnalysisWorkspaceTabs{display:none}.examMobileStage{display:grid;gap:8px;font-size:15px;font-weight:700}.examMobileStage select{width:100%;padding:12px;border:1px solid #cbd8ee;border-radius:8px;background:#fff;font:inherit}}
