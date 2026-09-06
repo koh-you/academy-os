@@ -29,3 +29,10 @@ npm run test:browser-smoke -- tests/browser/blog-hybrid.spec.js
 npm run check:fast
 
 공개 동의, 점수 0 보존, 익명화, 원천 ID 제외, JSON 미리보기, 확정 이력, clipboard, 서버 저장/재조회, 새로고침, 충돌·검증 실패 입력 보존을 검사한다.
+
+
+## SNS 확장 · 2026-09-06
+
+메뉴는 SNS 콘텐츠 스튜디오다. 완성본의 social은 인스타그램 캡션이며 instagramHashtags는 별도 선택 필드다. 기존 저장 자료를 마이그레이션하지 않고 누락된 새 필드는 빈 문자열로 표시한다. 자료 준비의 지역은 기본 창동이며 변경·삭제할 수 있다. 자동 추천은 입력 자료로 계산하고, 반영 버튼에서만 해당 태그 편집칸을 바꾼다. 인스타그램 추천 최대 5개는 제품 기본값이다. 캡션과 태그를 각각 복사해 인스타그램에서 게시한다. 현재 발행 기록 URL은 네이버 게시물용이다.
+
+[참고 블로그 조사](research/skills-in-math2-audit-20260906.md)

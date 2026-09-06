@@ -49,7 +49,7 @@ export function createSidebarMenuGroups(supplementAttention = null, { teacherRol
       title: "연구실",
       items: [
         { id: "lessonResearch", label: "수업연구", icon: "📚" },
-        { id: "blogContent", label: "블로그 스튜디오", icon: "✍️" },
+        { id: "blogContent", label: "SNS 콘텐츠 스튜디오", icon: "✍️" },
         { id: "aiVariants", label: "AI 도구", icon: "✨" }
       ]
     },
