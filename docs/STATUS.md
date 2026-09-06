@@ -1,5 +1,12 @@
 # Academy OS Current Status
 
+## 2026-09-06 블로그 하이브리드 스튜디오
+
+- 연구실 → 블로그 스튜디오에서 자료 준비·Chat 전달·완성본을 편집한다. 내신 원천 seed·익명 표시명·공개 동의·사실 확인 뒤 Chat 프롬프트를 복사하고, JSON 결과를 미리보기 후 편집본에 반영한다. 확정본은 별도 버전으로 보존한다.
+- 기존 app_state의 blogHybridContents key와 인증된 CAS·Supabase 재조회 controller를 재사용한다. 신규 SQL·유료 AI 호출·자동 발행은 없다. 이미지는 링크로 보관하며 파일은 Chat에 별도로 첨부한다.
+- 첨부 ZIP은 이전 AI 생성형 초안으로 검토만 하고 직접 적용하지 않았다. 동의는 콘텐츠에 사용한 자료 범위의 교사 확인이며 학생 전역 동의 시스템은 아니다. 학교별 종합·분석·수업 소개는 수동 입력, 내신 학생 1명만 원천 선택을 지원한다.
+- 검증: 관련 domain/controller/view fixture, check:fast 828/828·lint·build, focused safe browser 3/3 통과. 복사·미리보기·서버 재조회·새로고침·확정 이력·409 충돌·재조회 불일치·모바일 폭을 확인했다. 초기 번들 947.86KB, 신규 메뉴/adapter 배선용 예산 +500B(948KB), 편집 기능은 lazy chunk다.
+
 ## 2026-09-05 삭제한 수업 복구 UI
 
 - 운영의 2026-09-06 13:00~18:00 `시험대비` 수업(`정의여고 2학기 중간고사`, 학생 2명)을 기존 `undo_cancel` CAS 경로로 복구했다. audit `restore_lesson_exam_prep_2026-09-06_f6fddd17-b2d4-462b-a11a-38bb3d3e2ef0`은 Supabase 재조회 `verified:true`이며 연결 기록·숙제 0건, 알림 작업 0건이었다.

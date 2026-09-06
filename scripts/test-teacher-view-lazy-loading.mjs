@@ -5,6 +5,7 @@ import { lazyTeacherViewComponents } from "../src/app/lazyTeacherViewComponents.
 const expectedLazyComponents = Object.freeze([
   "AcademyReminderList",
   "AcademyReminderPanel",
+  "BlogContentStudio",
   "AIVariantProblemCenter",
   "ClassManager",
   "ExamAnalysisPipelineCenter",
@@ -44,6 +45,7 @@ const [appSource, registrySource, outletSource, boundarySource] = await Promise.
 ]);
 
 const lazyModuleContracts = [
+  ["BlogContentStudio", "../domains/blogContent/BlogContentStudio.jsx"],
   ["AcademyReminderList", "../domains/teacher/DashboardAuxiliaryPanels.jsx"],
   ["AcademyReminderPanel", "../domains/teacher/DashboardAuxiliaryPanels.jsx"],
   ["AIVariantProblemCenter", "../domains/teacher/PlanningToolCenters.jsx"],

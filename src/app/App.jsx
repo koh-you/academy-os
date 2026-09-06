@@ -6408,6 +6408,7 @@ export function App() {
       Modal,
     },
     runtimeBindings: {
+      blogPostAppState: postAppState,
       examAnalysisPipeline: examAnalysisPipelineRuntime,
       examPrepCenter: examPrepCenterRuntime,
       learningSupport: learningSupportRuntime,

@@ -7,6 +7,7 @@ import { createSupplementEffectAdapter } from "../domains/supplements/supplement
 import { createLessonHubViewProps } from "../domains/lessons/lessonHubViewProps.js";
 
 const teacherViewContractDefinitions = [
+  { id: "blogContent", componentName: "BlogContentStudio", effectKinds: ["save"] },
   { id: "lessons", componentName: "TeacherLessonHubV2", effectKinds: ["save", "delete", "reserve", "cancel", "send", "reconcile"] },
   { id: "specialLectureManagement", componentName: "NotificationCenter", effectKinds: ["save", "delete", "reserve", "reconcile"] },
   { id: "overdue", componentName: "OverdueHomework", effectKinds: ["save"] },
@@ -49,6 +50,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
   const studentEffects = createStudentEffectAdapter({ actions });
   const supplementEffects = createSupplementEffectAdapter({ actions });
   return {
+    blogContent: { Component: components.BlogContentStudio, props: { students: models.students, scoreRecords: models.scoreRecords, postAppState: runtimeBindings.blogPostAppState } },
     lessons: {
       Component: components.TeacherLessonHubV2,
       props: createLessonHubViewProps({ actions, models, runtimeBindings, lessonJournalEffects })

@@ -16,6 +16,7 @@ export const lazyTeacherViewComponents = Object.freeze({
     () => import("../domains/teacher/DashboardAuxiliaryPanels.jsx"),
     "AcademyReminderPanel"
   ),
+  BlogContentStudio: lazyNamedExport(() => import("../domains/blogContent/BlogContentStudio.jsx"), "BlogContentStudio"),
   AIVariantProblemCenter: lazyNamedExport(
     () => import("../domains/teacher/PlanningToolCenters.jsx"),
     "AIVariantProblemCenter"
