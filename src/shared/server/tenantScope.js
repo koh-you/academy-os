@@ -15,18 +15,60 @@ export const DEFAULT_TENANT_ID = "tenant_default";
 // coreData 의 수백 개 쿼리 호출부를 건드리지 않아도 supabaseRest 가 자동으로 스코핑한다.
 const tenantContext = new AsyncLocalStorage();
 
-/** HTTP 핸들러 진입 직후 1회. 이후 비동기 연쇄에 값이 전파된다. */
-export function enterTenantContext(tenantId) {
-  tenantContext.enterWith({ tenantId: tenantId || null });
+function normalizeTenantIdList(values) {
+  if (!Array.isArray(values)) return [];
+  return [...new Set(values.map((value) => String(value || "").trim()).filter(Boolean))];
+}
+
+/**
+ * HTTP 핸들러 진입 직후 1회. 이후 비동기 연쇄에 값이 전파된다.
+ *
+ * `tenantId` 는 **쓰기** 테넌트다(행에 주입되고 PATCH/DELETE 필터가 된다). 반드시 하나다.
+ * `readTenantIds` 는 **읽기** 범위다. 여러 학원을 한 화면에 모아 보여줘야 하는 주체
+ * (예: 여러 선생님 학생을 같이 받는 로비 태블릿)만 두 개 이상을 갖는다.
+ * 생략하면 읽기 범위는 쓰기 테넌트 하나와 같다.
+ */
+export function enterTenantContext(tenantId, { readTenantIds } = {}) {
+  tenantContext.enterWith({
+    tenantId: tenantId || null,
+    readTenantIds: normalizeTenantIdList(readTenantIds)
+  });
 }
 
 /** 콜백 범위에만 테넌트를 적용(크론/배치/테스트용). */
-export function runWithTenant(tenantId, fn) {
-  return tenantContext.run({ tenantId: tenantId || null }, fn);
+export function runWithTenant(tenantId, fn, { readTenantIds } = {}) {
+  return tenantContext.run(
+    { tenantId: tenantId || null, readTenantIds: normalizeTenantIdList(readTenantIds) },
+    fn
+  );
+}
+
+/**
+ * 읽기 범위는 그대로 두고 쓰기 테넌트만 바꾼다.
+ * 키오스크처럼 "여러 학원의 명단을 읽은 뒤, 고른 학생이 속한 학원에만 쓰는" 흐름에서 쓴다.
+ * 읽기 범위가 지정돼 있으면 그 안의 테넌트로만 바꿀 수 있다.
+ */
+export function setWriteTenant(tenantId) {
+  const store = tenantContext.getStore();
+  const readTenantIds = store?.readTenantIds ?? [];
+  const nextTenantId = String(tenantId || "").trim();
+  if (!nextTenantId) throw new Error("쓰기 테넌트가 필요합니다.");
+  if (readTenantIds.length && !readTenantIds.includes(nextTenantId)) {
+    throw new Error(`허용되지 않은 테넌트입니다: ${nextTenantId}`);
+  }
+  tenantContext.enterWith({ tenantId: nextTenantId, readTenantIds });
 }
 
 export function getCurrentTenantId() {
   return tenantContext.getStore()?.tenantId ?? null;
+}
+
+/** 읽기에 적용할 테넌트 목록. 지정이 없으면 쓰기 테넌트 하나. */
+export function getReadTenantIds() {
+  const store = tenantContext.getStore();
+  const readTenantIds = store?.readTenantIds ?? [];
+  if (readTenantIds.length) return readTenantIds;
+  return store?.tenantId ? [store.tenantId] : [];
 }
 
 /** 명시 tenantId 가 있으면 그것, 없으면 요청 컨텍스트의 tenantId. */
@@ -80,13 +122,27 @@ function shouldScope(table, tenantId) {
   return isTenantScopingEnabled() && TENANT_SCOPED_TABLES.has(table) && Boolean(tenantId);
 }
 
+/** 명시 값이 있으면 그것, 없으면 요청 컨텍스트의 읽기 범위. 항상 배열. */
+export function resolveReadTenantIds(explicitTenantId) {
+  if (Array.isArray(explicitTenantId)) return normalizeTenantIdList(explicitTenantId);
+  if (explicitTenantId) return [String(explicitTenantId)];
+  return getReadTenantIds();
+}
+
 /**
- * 읽기 쿼리스트링에 `&tenant_id=eq.<tenantId>` 를 덧붙인다.
- * 스코핑 비활성/비대상 테이블/tenantId 없음이면 원본 쿼리를 그대로 돌려준다.
+ * 읽기 쿼리스트링에 테넌트 필터를 덧붙인다. 하나면 `tenant_id=eq.<id>`,
+ * 여럿이면 `tenant_id=in.(<id>,<id>)`.
+ * 스코핑 비활성/비대상 테이블/테넌트 없음이면 원본 쿼리를 그대로 돌려준다.
  */
 export function applyTenantFilterToQuery(table, query, tenantId) {
-  if (!shouldScope(table, tenantId)) return query;
-  const filter = `${TENANT_COLUMN}=eq.${encodeURIComponent(tenantId)}`;
+  const tenantIds = Array.isArray(tenantId)
+    ? normalizeTenantIdList(tenantId)
+    : (tenantId ? [String(tenantId)] : []);
+  if (!shouldScope(table, tenantIds.length ? tenantIds[0] : null)) return query;
+  // PostgREST in.(...) 값에 콤마·괄호·따옴표가 들어가면 목록이 깨지므로 각 값을 큰따옴표로 감싼다.
+  const filter = tenantIds.length === 1
+    ? `${TENANT_COLUMN}=eq.${encodeURIComponent(tenantIds[0])}`
+    : `${TENANT_COLUMN}=in.${encodeURIComponent(`(${tenantIds.map((id) => `"${id}"`).join(",")})`)}`;
   return query ? `${query}&${filter}` : filter;
 }
 
