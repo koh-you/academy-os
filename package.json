@@ -17,6 +17,7 @@
     "check:orphans": "depcruise --include-only \"^src|^api\" --output-type err-long src api",
     "check:file-size-ratchet": "node scripts/check-file-size-ratchet.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test:blog-hybrid": "node scripts/test-blog-hybrid.mjs",
     "test:scenario-summary": "node scripts/run-scenario-summary.mjs",
     "test:browser-smoke": "node scripts/run-browser-smoke-isolated.mjs",
     "test:browser-smoke:direct": "playwright test",

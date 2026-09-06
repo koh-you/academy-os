@@ -8,16 +8,15 @@ const mainJavaScript = assetNames.find((name) => /^main-[^.]+\.js$/.test(name));
 assert.ok(mainJavaScript, "production build must emit one hashed main JavaScript entry");
 
 const mainBytes = (await stat(resolve(assetsDirectory, mainJavaScript))).size;
-// 947.5 KB: raised from 946 KB for the 시험지 목록 tab wiring (models/actions +
-// TeacherViewOutlet materials props). The panel, model and unit catalogue all
-// live in the lazy LearningSupportCenters chunk; only the adapter plumbing adds
-// to main. Deliberate, diff-visible bump.
+// 948 KB: +500 bytes for the blog studio menu, lazy import and view/transport adapter.
+// Editor, prompt, import and persistence controller stay in lazy chunks.
 assert.ok(
-  mainBytes <= 947_500,
-  `initial main JavaScript exceeded the 0.9475 MB 3-7 budget: ${mainBytes.toLocaleString()} bytes`
+  mainBytes <= 948_000,
+  `initial main JavaScript exceeded the 0.948 MB 3-7 budget: ${mainBytes.toLocaleString()} bytes`
 );
 
 const expectedLazyChunks = [
+  "BlogContentStudio",
   "DashboardAuxiliaryPanels",
   "ExamAnalysisPipelineCenter",
   "ExamPrepCenter",

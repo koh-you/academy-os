@@ -1,0 +1,49 @@
+.blogStudio{max-width:1250px;margin:auto;padding:24px;color:#233448}
+.blogHero{display:flex;justify-content:space-between;align-items:center;gap:24px;border-bottom:1px solid #dce3ea;padding-bottom:24px}
+.blogHero h1{font-size:28px;margin:10px 0}
+.blogHero p,.blogEditor p{line-height:1.7;color:#5c6d7c}
+.blogEyebrow{font-size:11px;letter-spacing:2px;color:#337773}
+.blogStudio button{border:1px solid #c8d7d6;background:#fff;border-radius:9px;padding:10px 15px;cursor:pointer;color:#264b48}
+.blogStudio button:disabled{opacity:.5;cursor:default}
+.blogStudio button:focus-visible,.blogStudio a:focus-visible{outline:3px solid #4ba79b;outline-offset:3px}
+.blogHero>button,.blogSave button{background:#21645e;color:white;border-color:#21645e;white-space:nowrap}
+.blogStatus{padding:15px 0;font-size:13px}
+.blogLayout{display:grid;grid-template-columns:245px minmax(0,1fr);gap:24px}
+.blogHistory{padding:18px;background:#f2f6f5;border-radius:14px}
+.blogHistory h2{font-size:16px}
+.blogHistory button{display:flex;flex-direction:column;gap:7px;width:100%;text-align:left;margin:10px 0;overflow-wrap:anywhere}
+.blogHistory button[aria-pressed=true]{border-color:#21645e;background:#e4f0ec}
+.blogHistory span,.blogHistory small{color:#63776f}
+.blogEditor{min-width:0;border:1px solid #dce3ea;border-radius:14px;padding:24px;background:white}
+.blogSteps{display:flex;gap:8px;margin-bottom:25px}
+.blogSteps button{flex:1}
+.blogSteps button[aria-pressed=true]{background:#21645e;color:white}
+.blogEditor fieldset{border:0;padding:0;margin:0;min-width:0}
+.blogEditor h2{font-size:20px}
+.blogFields{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+.blogField{display:flex;flex-direction:column;gap:7px;margin:17px 0;font-size:13px;font-weight:600}
+.blogField input,.blogField textarea,.blogField select{width:100%;box-sizing:border-box;border:1px solid #cbd5df;border-radius:8px;padding:11px;background:#fff;color:#233448;font:inherit;font-weight:400;line-height:1.6}
+.blogField textarea{resize:vertical}
+.blogField input:focus,.blogField textarea:focus,.blogField select:focus{outline:2px solid #78b3a9}
+.blogCheck{display:flex;align-items:flex-start;gap:10px;line-height:1.6;font-size:13px;margin:24px 0}
+.blogCheck input{width:auto;margin-top:5px}
+.blogNotice{background:#fff4de;border:1px solid #efdbb4;border-radius:8px;padding:13px;font-size:13px;overflow-wrap:anywhere}
+.blogEditor .disclosure{margin:20px 0;padding:15px;background:#f7f9fa;border-radius:9px}
+.blogEditor .disclosureTrigger{cursor:pointer;font-weight:600}
+.blogEditor pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line-height:1.7;max-height:380px;overflow:auto}
+.blogCandidates{display:grid;gap:7px;max-height:250px;overflow:auto}
+.blogCandidates button{text-align:left}
+.blogSave{display:flex;align-items:center;gap:15px;border-top:1px solid #e2e8ed;margin-top:28px;padding-top:20px;font-size:12px}
+.blogCopy{font-size:12px}
+.blogStorageHint{display:block;font-size:12px;color:#6d7d8a;margin-top:15px}
+@media(max-width:760px){.blogStudio{padding:12px}
+.blogLayout{grid-template-columns:1fr}
+.blogHero{align-items:flex-start;flex-direction:column}
+.blogHero h1{font-size:23px}
+.blogHistory{max-height:230px;overflow:auto}
+.blogFields{grid-template-columns:1fr}
+.blogEditor{padding:15px}
+.blogSteps button{font-size:12px;padding:10px 5px}
+.blogSave{flex-wrap:wrap}
+}
+

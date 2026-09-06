@@ -10,6 +10,7 @@ import { TeacherViewLoadBoundary } from "../src/app/TeacherViewLoadBoundary.js";
 import { lazyTeacherViewComponents } from "../src/app/lazyTeacherViewComponents.js";
 
 const expectedContracts = [
+  ["blogContent", "BlogContentStudio"],
   ["lessons", "TeacherLessonHubV2"],
   ["specialLectureManagement", "NotificationCenter"],
   ["overdue", "OverdueHomework"],
@@ -29,7 +30,7 @@ const expectedContracts = [
   ["settings", "SettingsCenter"]
 ];
 
-assert.equal(teacherViewContracts.length, 17);
+assert.equal(teacherViewContracts.length, expectedContracts.length);
 assert.deepEqual(teacherViewIds, expectedContracts.map(([id]) => id));
 assert.deepEqual(
   teacherViewContracts.map(({ id, componentName }) => [id, componentName]),
