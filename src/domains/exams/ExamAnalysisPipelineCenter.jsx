@@ -1,3 +1,4 @@
+import "./examWorkflowWorkspace.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./examAnalysisPipelineCenter.css";
 import { createExamAnalysisFinalPreviewModel } from "./finalPreview.js";
@@ -1864,7 +1865,9 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
     });
   }
 
+  const [libraryOpen, setLibraryOpen] = useState(true);
   function selectExamAnalysisWorkspaceTab(tabId) {
+    setLibraryOpen(tabId === "source");
     setExamAnalysisWorkspaceTab(tabId);
     const stagesByTab = {
       structure: ["question-count", "boundary"],
@@ -1896,7 +1899,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
   }
 
   return (
-    <section className="examAnalysisPipelinePage">
+    <section className="examAnalysisPipelinePage examWorkflowPage">
       <PageHeader
         actions={(
           <>
@@ -1914,7 +1917,11 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
         ))}
       </div>
 
-      <div className="studioSummary"><strong>{activeRun?.title || "새 시험분석"}</strong><p>원본 준비 → 문항 구조·AI 분석 → 선생님 검수 → 미리보기·산출물</p><small>분석 저장은 기본정보, 문항 검수본 저장은 문항 수정, 산출물 작업본 저장은 글과 카드 문구를 저장합니다.</small></div>
+      <div className="examWorkflowOverview" aria-label="시험분석 전체 흐름">
+        <strong>{activeRun?.title || "새 시험분석"}</strong>
+        <ol>{[["원본 준비", ["source"]], ["AI 분석", ["structure", "analysis"]], ["선생님 검수", ["review"]], ["결과 활용", ["preview", "output", "history"]]].map(([label, tabs], index) => <li key={label} aria-current={tabs.includes(examAnalysisWorkspaceTab) ? "step" : undefined}><b>{index + 1}</b>{label}</li>)}</ol>
+      </div>
+      <label className="examMobileStage">작업 단계<select aria-label="작업 단계" value={examAnalysisWorkspaceTab} onChange={event => selectExamAnalysisWorkspaceTab(event.target.value)}>{examAnalysisWorkspaceTabs.map(tab => <option key={tab.id} value={tab.id}>{tab.label} · {tab.meta}</option>)}</select></label>
       <WorkspaceTabs as="nav" className="examAnalysisWorkspaceTabs" label="시험분석 작업 단계">
         {examAnalysisWorkspaceTabs.map((tab) => (
           <button
@@ -1931,8 +1938,9 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
         ))}
       </WorkspaceTabs>
 
+      <div className="examCurrentTask"><div><strong>지금 할 일</strong><p>{({ source: "시험 정보와 원본 PDF를 준비하세요.", structure: "문항 수를 확정하고 문항 경계를 확인하세요.", analysis: "AI 분석 결과를 확인하세요. 실행 버튼은 별도 작업입니다.", review: "원본과 비교하며 문항을 수정·확정하고 검수본을 저장하세요.", preview: "확정된 분석을 확인하세요. 카드 제작은 아래에서 따로 열 수 있습니다.", output: "필요한 글·카드 작업을 선택하고 편집본을 저장하세요.", history: "분석 실행과 변경 기록을 확인하세요." })[examAnalysisWorkspaceTab]}</p></div><button className="ghostButton" type="button" aria-expanded={libraryOpen} onClick={() => setLibraryOpen(value => !value)}>{libraryOpen ? "분석 목록 접기" : "다른 분석 선택"}</button></div>
       <div className="examAnalysisGrid">
-        <section className="examAnalysisLibraryPanel panel">
+        <section className="examAnalysisLibraryPanel panel" hidden={!libraryOpen}>
           <div className="examAnalysisColumnBoard">
             <div className="examAnalysisColumn">
               <div className="examAnalysisColumnHeader">

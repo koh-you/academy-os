@@ -34,11 +34,11 @@ const roleLabels = {
   cta: "CTA",
 };
 
-function PromptField({ hint = "", label, value, onChange, multiline = false, placeholder = "", sourceLabel = "프롬프트 작업본" }) {
+function PromptField({ hint = "", label, value, onChange, multiline = false, placeholder = "", sourceLabel = "" }) {
   const Control = multiline ? "textarea" : "input";
   return (
     <label className="examPromptField">
-      <span><b>{label}</b><small>{sourceLabel}</small></span>
+      <span><b>{label}</b>{sourceLabel && <small>{sourceLabel}</small>}</span>
       <Control value={value ?? ""} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} rows={multiline ? 2 : undefined} />
       {hint ? <small className="examPromptFieldHint">{hint}</small> : null}
     </label>
@@ -319,7 +319,7 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
       </div>
 
       <div className="examPromptRoleGrid">
-        <Disclosure bodyClassName="examPromptRoleCardBody" className="examPromptRoleCard" defaultOpen trigger={(
+        <Disclosure bodyClassName="examPromptRoleCardBody" className="examPromptRoleCard" trigger={(
           <>
             <span><b>1. 공통 정보</b><small>자동 입력값을 확인하고 학교 분위기만 보완</small></span>
             <em>기본 확인</em>
@@ -339,7 +339,7 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
             />
         </Disclosure>
 
-        <Disclosure bodyClassName="examPromptRoleCardBody" className="examPromptRoleCard" defaultOpen trigger={(
+        <Disclosure bodyClassName="examPromptRoleCardBody" className="examPromptRoleCard" trigger={(
           <>
             <span><b>2. 시험 분석</b><small>숫자는 확인하고, 시험의 특징을 짧게 설명</small></span>
             <em>필수 입력</em>

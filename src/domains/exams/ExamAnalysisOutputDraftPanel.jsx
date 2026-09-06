@@ -1,3 +1,4 @@
+import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 import { StudioEditor } from "../../shared/components/StudioEditor.jsx";
 import { useState } from "react";
 import {
@@ -79,6 +80,13 @@ export function ExamAnalysisOutputDraftPanel({
         ? `마지막 저장 ${formatExamAnalysisEventTime(lastSavedAt)} · 새로고침 유지`
         : "산출물 저장을 누르면 입력칸과 선생님 수정본이 저장됩니다.";
   const outputStickySaveState = outputStatus.state === "success" ? "saved" : outputStatus.state;
+  const [outputStep, setOutputStep] = useState("baseInputs");
+  const [showHelp, setShowHelp] = useState(false);
+  const outputWorkSteps = [["baseInputs", "총평 메모"], ["blogBlocks", "글 구성"], ["keyQuestions", "주요문항"], ["gptChecklist", "Chat 전달"], ["finalDrafts", "완성본"], ["settings", "공개·작성 기준"]];
+  function selectOutputWork(key) {
+    setOutputStep(key);
+    setCollapsedOutputSections(current => ({ ...current, [key]: false, ...(key === "settings" ? { topSummary: false, guide: false } : {}) }));
+  }
   const [collapsedOutputSections, setCollapsedOutputSections] = useState({
     topSummary: false,
     guide: true,
@@ -96,7 +104,7 @@ export function ExamAnalysisOutputDraftPanel({
   };
   const isOutputSectionCollapsed = (sectionKey) => Boolean(collapsedOutputSections[sectionKey]);
   return (
-    <div className="panel examAnalysisOutputDraftPanel">
+    <div className="panel examAnalysisOutputDraftPanel examOutputWorkspace" data-help={showHelp}>
       <SectionHeader
         actions={(
           <>
@@ -128,11 +136,15 @@ export function ExamAnalysisOutputDraftPanel({
         )}
         actionsClassName="headerActions"
         density="slim"
-        description="선생님 총평 입력 · AI 초안 · 선생님 수정본 저장"
-        title="블로그/인스타 산출물 초안"
+        description="작업을 선택하면 필요한 입력만 표시됩니다."
+        title="글·카드 만들기"
         titleAs="strong"
       />
 
+      <div className="examOutputToolbar"><strong>{saveCheckpointTitle}</strong><button className="ghostButton" aria-pressed={showHelp} onClick={() => setShowHelp(value => !value)} type="button">{showHelp ? "작성 도움말 닫기" : "작성 도움말 보기"}</button></div>
+      <WorkspaceTabs label="산출물 작업 선택" className="examOutputWorkTabs">{outputWorkSteps.map(([key, label]) => <button type="button" role="tab" aria-selected={outputStep === key} key={key} onClick={() => selectOutputWork(key)}>{label}</button>)}</WorkspaceTabs>
+      <p className="examOutputTaskHint">{({ baseInputs: "시험의 특징과 다음 학습 방향을 적으세요.", blogBlocks: "글에 넣을 내용을 문단별로 정리하세요.", keyQuestions: "소개할 문항과 풀이 설명을 정리하세요.", gptChecklist: "확인한 자료를 모아 Chat 작업용으로 복사하세요.", finalDrafts: "채널별 완성 문구를 편집하고 저장하세요.", settings: "공개할 채널과 작성 기준을 확인하세요." })[outputStep]}</p>
+      <section className="examOutputWorkSection" hidden={outputStep !== "settings"}>
       <div className="examAnalysisOutputCollapsibleHeader">
         <div>
           <strong>상단 안내/저장 상태</strong>
@@ -195,6 +207,8 @@ export function ExamAnalysisOutputDraftPanel({
           </div>
       </Disclosure>
 
+      </section>
+      <section className="examOutputWorkSection" hidden={outputStep !== "settings"}>
       <div className="examAnalysisOutputCollapsibleHeader">
         <div>
           <strong>작성 방향/AI 편집 룰</strong>
@@ -237,6 +251,8 @@ export function ExamAnalysisOutputDraftPanel({
         </div>
       </Disclosure>
 
+      </section>
+      <section className="examOutputWorkSection" hidden={outputStep !== "gptChecklist"}>
       <div className="examAnalysisOutputCollapsibleHeader">
         <div>
           <strong>GPT 대화세션 체크리스트</strong>
@@ -303,6 +319,8 @@ export function ExamAnalysisOutputDraftPanel({
         </div>
       </Disclosure>
 
+      </section>
+      <section className="examOutputWorkSection" hidden={outputStep !== "baseInputs"}>
       <div className="examAnalysisOutputCollapsibleHeader">
         <div>
           <strong>공개글 발췌/보충 메모</strong>
@@ -337,6 +355,8 @@ export function ExamAnalysisOutputDraftPanel({
         </div>
       </Disclosure>
 
+      </section>
+      <section className="examOutputWorkSection" hidden={outputStep !== "blogBlocks"}>
       <div className="examAnalysisInstructorSectionHeader withAction">
         <div>
           <strong>블로그 흐름 블록</strong>
@@ -379,6 +399,8 @@ export function ExamAnalysisOutputDraftPanel({
         </div>
       </Disclosure>
 
+      </section>
+      <section className="examOutputWorkSection" hidden={outputStep !== "keyQuestions"}>
       <div className="examAnalysisKeyQuestionHeader">
         <div>
           <strong>주요문항 반복 블록</strong>
@@ -453,6 +475,8 @@ export function ExamAnalysisOutputDraftPanel({
         </div>
       </Disclosure>
 
+      </section>
+      <section className="examOutputWorkSection" hidden={outputStep !== "finalDrafts"}>
       <div className="examAnalysisOutputCollapsibleHeader">
         <div>
           <strong>최종 초안 / 복사 / TXT</strong>
@@ -488,7 +512,7 @@ export function ExamAnalysisOutputDraftPanel({
               aria-label="블로그 최종 초안"
               onChange={(event) => onUpdateTeacherDraft("blog", event.target.value)}
               placeholder="블로그 초안 생성 후 선생님이 최종 문장으로 수정합니다."
-              rows={18}
+              rows={10}
               value={blogText}
             />
           </section>
@@ -507,7 +531,7 @@ export function ExamAnalysisOutputDraftPanel({
               aria-label="인스타 카드 최종 초안"
               onChange={(event) => onUpdateTeacherDraft("instagram", event.target.value)}
               placeholder="인스타 카드 초안 생성 후 카드별 문구, 슬라이드 유형, 주요문항/손풀이 슬롯 안내를 수정합니다."
-              rows={18}
+              rows={10}
               value={instagramText}
             />
           </section>
@@ -515,6 +539,7 @@ export function ExamAnalysisOutputDraftPanel({
         </StudioEditor>
       </Disclosure>
 
+      </section>
       <div className="examAnalysisOutputPolicy">
         <span>입력칸과 선생님 수정본은 저장 후 새로고침해도 유지됩니다.</span>
         <span>읽기 우선순위: 선생님 수정본 &gt; AI 초안 &gt; 빈 값입니다.</span>
