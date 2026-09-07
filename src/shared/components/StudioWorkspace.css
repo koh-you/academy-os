@@ -1,0 +1,32 @@
+.studioPage.studioPage{max-width:1440px;width:100%;margin:0 auto;padding:24px;box-sizing:border-box;display:grid;gap:16px;color:var(--academy-text,#233448)}
+.studioPage .pageHeader{margin:0}
+.studioWorkspace{display:grid;gap:16px;min-width:0}
+.studioWorkspaceSummary{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;background:var(--academy-surface,#fff);border:1px solid var(--academy-border-strong,#cbd8ee);border-radius:12px}
+.studioWorkspaceSummary strong{font-size:18px;line-height:1.5}
+.studioWorkspaceSummary p{margin:5px 0 0;font-size:15px;line-height:1.6;color:var(--academy-text-muted,#5c6d7c)}
+.studioWorkspaceSummary>button{flex-shrink:0}
+.studioWorkspaceGrid{display:grid;grid-template-columns:250px minmax(0,1fr);gap:20px;align-items:start}
+.studioWorkspaceGrid[data-library-open=false]{grid-template-columns:minmax(0,1fr)}
+.studioWorkspaceLibrary{border:1px solid var(--academy-border-strong,#cbd8ee);border-radius:12px;background:var(--academy-surface-muted,#f2f6fa);padding:14px;min-width:0;max-height:70vh;overflow:auto}
+.studioWorkspaceLibrary[hidden]{display:none}
+.studioWorkspaceMain{min-width:0;border:1px solid var(--academy-border-strong,#cbd8ee);border-radius:12px;background:var(--academy-surface,#fff);overflow:clip}
+.studioPage .workspaceTabs.studioWorkspaceSteps{width:100%;box-sizing:border-box;flex-wrap:wrap;overflow:visible;gap:6px;margin:0;padding:14px;border-radius:0;border:0;border-bottom:1px solid var(--academy-border-strong,#cbd8ee);background:var(--academy-surface-muted,#f2f6fa)}
+.studioWorkspaceSteps button{display:flex;align-items:center;gap:8px;min-height:44px;padding:10px 14px!important;font-size:14px!important}
+.studioWorkspaceSteps button>span{font-weight:700;opacity:.75}
+.studioWorkspaceSteps button[aria-selected=true]{background:var(--academy-primary,#17213d);color:#fff}
+.studioWorkspaceBody{padding:20px;min-width:0}
+.studioWorkspaceMobileStep{display:none}
+.studioPage .blogHistory,.studioPage .examAnalysisLibraryPanel{padding:0;border:0;background:transparent;box-shadow:none}
+.studioPage .examAnalysisColumnBoard{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.studioPage .examAnalysisColumnList{min-height:0;max-height:180px}
+.studioPage .blogEditor{padding:0;border:0;background:transparent}
+.studioPage .blogStatus{padding:0;font-size:14px}
+.studioPage .blogField,.studioPage .blogCheck{font-size:15px}
+.studioPage .examAnalysisWorkPanel>.panel{box-shadow:none}
+.studioPage .examAnalysisWorkPanel{min-width:0}
+@media(max-width:760px){.studioPage.studioPage{padding:12px;gap:12px}.studioWorkspaceSummary{padding:14px;align-items:flex-start;flex-direction:column}.studioWorkspaceGrid{grid-template-columns:minmax(0,1fr);gap:12px}.studioWorkspaceLibrary{max-height:260px}.studioWorkspaceBody{padding:14px}.studioPage .workspaceTabs.studioWorkspaceSteps{display:none}.studioWorkspaceMobileStep{display:grid;gap:8px;padding:14px;border-bottom:1px solid #cbd8ee;font-size:15px;font-weight:700}.studioWorkspaceMobileStep select{width:100%;padding:12px;border:1px solid #cbd8ee;border-radius:8px;background:#fff;font:inherit}.studioPage .blogHistory{max-height:none}}
+
+.studioLibraryFilters{display:grid;gap:14px}
+.studioLibraryFilters label{display:grid;gap:7px;font-size:15px;font-weight:700}
+.studioLibraryFilters select{width:100%;padding:10px 8px;border:1px solid var(--academy-border-strong,#cbd8ee);border-radius:8px;background:#fff;font:inherit}
+.studioLibraryFilters select:focus-visible{outline:2px solid var(--academy-focus-ring,#4b80ed);outline-offset:2px}

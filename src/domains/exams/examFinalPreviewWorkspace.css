@@ -1,0 +1,16 @@
+.examFinalPreviewViews>section[hidden],.examFinalPreviewCards[hidden]{display:none}
+.examFinalPreviewViews:has(>section:not([hidden])){max-height:58vh;overflow:auto;align-content:start;padding:2px}
+.examFinalPreviewViews[data-preview-view=cards]{display:none}
+.examFinalPreviewCards{min-width:0}
+.examWorkflowPage .workspaceTabs.examFinalPreviewTabs{flex-wrap:wrap;width:100%;box-sizing:border-box}
+.examFinalPreviewTabs button{min-height:44px}
+.examWorkflowPage .examAnalysisPreviewPolicy{font-size:14px;line-height:1.6}
+@media(max-width:760px){.examFinalPreviewViews:has(>section:not([hidden])){max-height:62vh}.examFinalPreviewTabs button{flex:1 1 40%}.examWorkflowPage .examAnalysisPreviewHero{padding:12px}}
+
+.examFinalPreviewViews:focus-visible{outline:2px solid var(--academy-focus-ring,#4b80ed);outline-offset:3px}
+
+.examWorkflowPage .examAnalysisPreviewMetricGrid .metricCard{min-width:0;padding:10px;text-align:center}
+.examWorkflowPage .examAnalysisPreviewMetricGrid .metricCard span{display:block;min-height:0;padding:0;border:0;background:transparent;white-space:nowrap;font-size:13px}
+.examWorkflowPage .examAnalysisPreviewMetricGrid .metricCard strong{font-size:22px}
+.examWorkflowPage .examAnalysisPreviewHero{background:var(--academy-surface-muted,#f2f6fa);border-color:var(--academy-border-strong,#cbd8ee)}
+.examWorkflowPage .examAnalysisPreviewPolicy>.disclosure{flex:1 1 100%}

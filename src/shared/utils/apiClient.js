@@ -1,3 +1,5 @@
+import { resolveKioskDeviceToken } from "./kioskToken.js";
+
 const localApiBaseUrl = "http://127.0.0.1:8787";
 const productionApiBaseUrl = "https://koh-you-math-academy-os-api.onrender.com";
 const configuredApiBaseUrl = (import.meta.env?.VITE_API_BASE_URL || "").trim();
@@ -31,10 +33,13 @@ export function setApiAuthToken(token) {
   currentAuthToken = String(token || "");
 }
 
-// 키오스크(/attendance 로비 태블릿)는 로그인이 없으므로 빌드에 심어둔 반(半)공개 토큰을
-// X-Kiosk-Token 으로 보낸다. 서버는 이 토큰이 있으면 GET /api/* + 출결 체크인만 허용한다.
+// 키오스크(/attendance 로비 태블릿)는 로그인이 없으므로 기기 토큰을 X-Kiosk-Token 으로 보낸다.
+// 서버는 이 토큰으로 기기를 찾아 그 기기가 담당하는 학원 범위만 열어준다.
 // 교사/ops 토큰이 있으면 서버가 그쪽을 우선하므로 로그인 사용자에겐 무해하다.
-const kioskToken = (import.meta.env?.VITE_KIOSK_TOKEN || "").trim();
+//
+// 토큰은 태블릿마다 다르다. 빌드 하나로 여러 태블릿을 쓰려면 기기가 자기 토큰을 들고 있어야 하므로
+// `/attendance?kiosk=<토큰>` 을 그 태블릿에서 한 번 열어 저장시킨다(자세한 내용은 kioskToken.js).
+const kioskToken = resolveKioskDeviceToken(import.meta.env?.VITE_KIOSK_TOKEN);
 
 export function withAuthHeaders(headers = {}) {
   const merged = { ...headers };
