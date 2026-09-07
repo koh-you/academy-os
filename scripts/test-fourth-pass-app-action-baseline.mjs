@@ -59,12 +59,12 @@ const directCallHandlers = handlers.filter((item) => item.hasDirectCall).map((it
 // `apiFetch(...)` 로 바뀌면서 45 → 20 으로 더 내려갔다. 래칫이므로 하향만 허용.
 const expectedDirectCallHandlers = [];
 
-// 117: the 116 4-4a baseline plus handleSaveTestPaperLibrary, the sole new
-// teacher action for the 시험지 목록 tab. It calls postAppState (not
-// fetch/postJson*), so it adds no direct-call candidate and no direct
-// request call.
+// 118: the 116 4-4a baseline plus handleSaveTestPaperLibrary (시험지 목록 tab)
+// and handleToggleExamPrepDailyJournal (시험대비 수업의 데일리 알림톡 사용 여부).
+// 둘 다 postAppState 만 호출하고 fetch/postJson* 은 쓰지 않으므로 direct-call
+// 후보도, direct request call 도 늘리지 않는다.
 assert.deepEqual(directCallHandlers, expectedDirectCallHandlers);
-assert.equal(handlers.length, 117, `handle* count drifted from the baseline (117), now ${handlers.length}`);
+assert.equal(handlers.length, 118, `handle* count drifted from the baseline (118), now ${handlers.length}`);
 
 const directRequestCallCount = (appSource.match(/\bfetch\(|\bpostJson[A-Za-z]*\(/g) || []).length;
 assert.equal(directRequestCallCount, 20, `direct fetch/postJson call count drifted from the 4-4 closeout (20), now ${directRequestCallCount}`);

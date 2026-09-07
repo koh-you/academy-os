@@ -16,7 +16,7 @@ import { getLessonStudentIds } from "../students/lessonRosterSelectors.js";
 
 const ExamPrepContentEditor = lazy(() => import("./ExamPrepContentEditor.jsx").then((module) => ({ default: module.ExamPrepContentEditor })));
 
-export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSettings, createEmptyRecord, examPrepScheduleLessons = [], lesson, onDeleteLesson, onSaveExamPrepSchedule, onSaveRecord, persistedLessons = [], records = [], ScheduleModalComponent, students = [], templates = [] }) {
+export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSettings, createEmptyRecord, examPrepScheduleLessons = [], lesson, onDeleteLesson, onSaveExamPrepSchedule, onSaveRecord, onToggleDailyJournal, persistedLessons = [], records = [], ScheduleModalComponent, students = [], templates = [] }) {
   const [rosterView, setRosterView] = useState("time");
   const [isScheduleEditorOpen, setIsScheduleEditorOpen] = useState(false);
   const sourceItems = getExamPrepSourceItems(lesson);
@@ -105,6 +105,16 @@ export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSet
         <SectionHeader
           actions={(
             <>
+              {onToggleDailyJournal ? (
+                <label className="examPrepDailyJournalToggle">
+                  <input
+                    checked={false}
+                    onChange={(event) => onToggleDailyJournal(lesson.lessonId, event.target.checked)}
+                    type="checkbox"
+                  />
+                  데일리 알림톡 사용
+                </label>
+              ) : null}
               <button className="ghostButton" onClick={() => setIsScheduleEditorOpen(true)} type="button">
                 일정 수정
               </button>

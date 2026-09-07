@@ -70,3 +70,74 @@ test("exam prep lesson detail shows kiosk attendance per student and a roster su
   await expect(examPrepBody.getByLabel("정산 미리보기 학생 출결")).toContainText("대기");
   expect(pageErrors).toEqual([]);
 });
+
+test("exam prep lesson can opt into the daily Alimtalk and carries that day's test result", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  const lessonDate = getKoreaDateAfterDays(0);
+  const [lessonYear, lessonMonth] = lessonDate.split("-").map(Number);
+
+  const lessonResponse = await request.post(`${safeApiBaseUrl}/api/lessons/bulk`, {
+    data: {
+      lessons: [{
+        className: "시험대비",
+        date: lessonDate,
+        endTime: "18:00",
+        lessonId: "safe-exam-prep-daily-lesson",
+        lessonType: "examPrep",
+        sourceLabel: "안전고 2학기 중간고사",
+        startTime: "13:00",
+        status: "scheduled",
+        studentIds: ["safe-active-student"],
+        updatedAt: "2026-08-03T00:00:00.000Z"
+      }]
+    }
+  });
+  expect(lessonResponse.ok(), await lessonResponse.text()).toBe(true);
+
+  // 시험대비 수업은 반이 없으므로, 반이 지정된 응시 기록도 명단 기준으로 붙어야 한다.
+  const testResponse = await request.post(`${safeApiBaseUrl}/api/test-sessions`, {
+    data: {
+      testAttempts: [{
+        correctCount: 18,
+        passStatus: "passed",
+        status: "taken",
+        studentId: "safe-active-student",
+        testAttemptId: "safe-exam-prep-daily-attempt",
+        testSessionId: "safe-exam-prep-daily-session"
+      }],
+      testSession: {
+        classTemplateId: "safe-cross-month-class",
+        testDate: lessonDate,
+        testKind: "unit",
+        testSessionId: "safe-exam-prep-daily-session",
+        testTitle: "안전고 2학기 중간 기출",
+        totalQuestions: 20
+      }
+    }
+  });
+  expect(testResponse.ok(), await testResponse.text()).toBe(true);
+
+  await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, lessonYear, lessonMonth);
+  await page.getByRole("button", { name: /시험대비/ }).first().click();
+
+  const examPrepBody = page.locator(".examPrepLessonBody");
+  await expect(examPrepBody).toBeVisible();
+  await expect(page.locator(".journalRow")).toHaveCount(0);
+
+  await page.getByText("데일리 알림톡 사용").click();
+
+  const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
+  await expect(lessonJournal.getByRole("button", { name: "학부모 알림톡" }).first()).toBeVisible();
+  await lessonJournal.getByRole("button", { name: "학부모 알림톡" }).first().click();
+
+  const alimtalkModal = page.getByRole("dialog", { name: /학부모 알림톡/ });
+  await expect(alimtalkModal.locator(".commentPreviewPanel")).toContainText("안전고 2학기 중간 기출");
+  await expect(alimtalkModal.locator(".commentPreviewPanel")).toContainText("20문항 중 18문항 정답 · 통과");
+  await alimtalkModal.getByRole("button", { name: "닫기" }).click();
+
+  // 되돌리면 다시 시험대비 명단 화면으로 돌아온다.
+  await lessonJournal.getByRole("button", { name: "시험대비 명단 화면" }).click();
+  await expect(page.locator(".examPrepLessonBody")).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});

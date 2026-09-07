@@ -53,6 +53,7 @@ export function createLessonHubViewProps({ actions, models, runtimeBindings, les
     onPassMakeupTask: actions.handlePassSupplementTask,
     onRetryGeneratedLessonSave: actions.handleRetryGeneratedLessonSave,
     onSaveExamPrepSchedule: actions.handleSaveExamPrepSchedule,
+    onToggleExamPrepDailyJournal: actions.handleToggleExamPrepDailyJournal,
     onSaveRecord: actions.handleSaveRecord,
     onRestoreCanceledLesson: actions.handleUndoLessonAction,
     onScheduleMakeupTask: actions.handleScheduleSupplementTask,

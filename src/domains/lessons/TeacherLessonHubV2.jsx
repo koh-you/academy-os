@@ -65,6 +65,7 @@ export function TeacherLessonHubV2({
   onPassMakeupTask,
   onRetryGeneratedLessonSave,
   onSaveExamPrepSchedule,
+  onToggleExamPrepDailyJournal,
   onSaveRecord,
   onRestoreCanceledLesson,
   onScheduleMakeupTask,
@@ -163,7 +164,9 @@ export function TeacherLessonHubV2({
   }
   const isSupplementMakeupLesson = isSupplementMakeupTaskLesson(selectedLesson, selectedMakeupTask);
   const isHomeworkMakeupLesson = isSupplementMakeupLesson && selectedMakeupTask?.taskType === "homework_makeup";
-  const isExamPrepLessonSelected = isExamPrepLesson(selectedLesson);
+  const selectedLessonNotificationPlan = selectedLesson ? lessonNotificationPlans[selectedLesson.lessonId] : null;
+  const isExamPrepDailyJournalEnabled = selectedLessonNotificationPlan?.dailyJournalEnabled === true;
+  const isExamPrepLessonSelected = isExamPrepLesson(selectedLesson) && !isExamPrepDailyJournalEnabled;
   const lessonJournalDialog = isLessonJournalOpen && selectedLesson ? (
     isHomeworkMakeupLesson ? (
       <Modal
@@ -205,6 +208,7 @@ export function TeacherLessonHubV2({
           lesson={selectedLesson}
           onDeleteLesson={onDeleteLesson}
           onSaveExamPrepSchedule={onSaveExamPrepSchedule}
+          onToggleDailyJournal={onToggleExamPrepDailyJournal}
           onSaveRecord={onSaveRecord}
           persistedLessons={persistedLessons}
           records={records}
@@ -242,6 +246,7 @@ export function TeacherLessonHubV2({
             attendanceSettings={attendanceSettings}
             integrationStatus={integrationStatus}
             lessonNotificationPlan={lessonNotificationPlans[selectedLesson.lessonId] ?? { mode: "default" }}
+            onToggleExamPrepDailyJournal={onToggleExamPrepDailyJournal}
             notificationJobs={notificationJobs}
             homeworks={homeworks}
             lesson={selectedLesson}
