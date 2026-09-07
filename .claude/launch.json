@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "academy-os-kiosk-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 5178,
+      "env": { "ACADEMY_SAFE_FRONTEND_PORT": "5178" }
+    }
+  ]
+}
