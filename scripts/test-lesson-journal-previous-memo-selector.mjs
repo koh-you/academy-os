@@ -464,6 +464,72 @@ assert.equal(
   "lesson_alternate_thursday_previous"
 );
 
+// 일요일 시험대비 수업이 정규수업 사이에 끼면, 정규 소스로 그 앞의 정규수업 내용을
+// 가져올 수 있어야 한다. 시험대비는 출결이 찍혀 있어도 정규 진도의 연장이 아니다.
+const examPrepStudent = { studentId: "student_exam_prep" };
+const examPrepMondayLesson = {
+  classTemplateId: "class_a",
+  date: "2026-09-07",
+  lessonId: "lesson_monday",
+  startTime: "16:00",
+  studentIds: [examPrepStudent.studentId]
+};
+const examPrepSundayLesson = {
+  date: "2026-09-06",
+  lessonId: "lesson_exam_prep_sunday",
+  lessonType: "examPrep",
+  startTime: "13:00",
+  studentIds: [examPrepStudent.studentId]
+};
+const examPrepFridayLesson = {
+  classTemplateId: "class_a",
+  date: "2026-09-04",
+  lessonId: "lesson_friday",
+  startTime: "19:00",
+  studentIds: [examPrepStudent.studentId]
+};
+const examPrepLessons = [examPrepMondayLesson, examPrepSundayLesson, examPrepFridayLesson];
+const examPrepRecords = [
+  { attendanceStatus: "late", lessonId: "lesson_exam_prep_sunday", studentId: examPrepStudent.studentId },
+  {
+    attendanceStatus: "present",
+    lessonId: "lesson_friday",
+    lessonMaterial: "공통수학2 쎈",
+    lessonProgress: "9월 모의고사 풀이",
+    studentId: examPrepStudent.studentId
+  }
+];
+
+// 직전 소스: 출결이 있는 시험대비 수업이 그대로 잡힌다.
+assert.equal(
+  findActualPreviousLessonsForStudent(examPrepLessons, examPrepMondayLesson, examPrepStudent.studentId, {
+    records: examPrepRecords
+  })[0]?.lessonId,
+  "lesson_exam_prep_sunday"
+);
+
+// 정규 소스: 시험대비를 건너뛰고 직전 정규수업이 잡힌다.
+assert.equal(
+  findActualPreviousLessonsForStudent(examPrepLessons, examPrepMondayLesson, examPrepStudent.studentId, {
+    onlyRegularLessons: true,
+    records: examPrepRecords
+  })[0]?.lessonId,
+  "lesson_friday"
+);
+
+// 두 소스가 달라지므로 수업일지에 직전/정규 토글이 뜨고, 정규 쪽은 실제 교재·진도를 준다.
+const examPrepRegularContext = selectPreviousLessonMemoContext({
+  ...dependencies,
+  allRecords: examPrepRecords,
+  currentLesson: examPrepMondayLesson,
+  lessons: examPrepLessons,
+  onlyRegularLessons: true,
+  records: examPrepRecords,
+  student: examPrepStudent
+});
+assert.equal(examPrepRegularContext.previousRecord?.lessonId, "lesson_friday");
+assert.equal(examPrepRegularContext.previousRecord?.lessonMaterial, "공통수학2 쎈");
+
 const appSource = await readAppWithLessonJournalSource(import.meta.url);
 assert.match(appSource, /selectPreviousLessonMemoContext\(\{/);
 assert.match(appSource, /previousMemoContext\.previousEditableRecord \?\? previousRecord/);
