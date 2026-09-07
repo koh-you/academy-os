@@ -16,9 +16,15 @@ import { allowedClasses, buildKioskCss, kioskCssPath } from "./build-kiosk-css.m
 const committed = await readFile(kioskCssPath, "utf8");
 const regenerated = buildKioskCss();
 
+// 줄바꿈은 무시하고 내용만 비교한다.
+// git 이 Windows 체크아웃에서 CRLF 로 바꿔놓기 때문에, 그대로 비교하면 내용이 같은데도
+// Linux(LF)에서는 통과하고 Windows 에서는 실패한다. 우리가 지키려는 것은 "규칙이 갈라지지
+// 않는 것"이지 파일의 줄바꿈 형식이 아니다.
+const normalizeLineEndings = (css) => css.replace(/\r\n/g, "\n");
+
 assert.equal(
-  regenerated,
-  committed,
+  normalizeLineEndings(regenerated),
+  normalizeLineEndings(committed),
   "App.css 가 바뀌었는데 태블릿 CSS 가 따라오지 않았습니다.\n" +
   "  `node scripts/build-kiosk-css.mjs` 로 다시 생성한 뒤 함께 커밋하세요.\n" +
   "  (그대로 두면 교사 화면과 태블릿의 버튼·모달 규칙이 갈라집니다.)"
