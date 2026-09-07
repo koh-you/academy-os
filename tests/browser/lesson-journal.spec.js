@@ -196,6 +196,14 @@ test("exam analysis non-paid teacher saves use the safe source and survive reloa
   await page.getByRole("button", { name: "분석 저장" }).click();
   await expect(page.getByText("시험분석 · 저장 완료", { exact: true })).toBeVisible();
   await expect(page.getByRole("region", { name: "시험분석 분석본 목록" }).getByText(title, { exact: true })).toBeVisible();
+  await page.getByLabel("분석 목록 학교", { exact: true }).selectOption("안전고");
+  await page.getByLabel("분석 목록 학년", { exact: true }).selectOption("고1");
+  await page.getByLabel("분석 목록 고사", { exact: true }).selectOption("2학기 중간");
+  await expect(page.getByRole("region", { name: "시험분석 분석본 목록" }).getByText(title, { exact: true })).toBeVisible();
+  await page.getByRole("region", { name: "시험분석 분석본 목록" }).getByText(title, { exact: true }).click();
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.locator(".studioPage").scrollIntoViewIfNeeded();
+  await page.screenshot({ path: "test-results/studio-exam-source-desktop.png", fullPage: true });
   await page.getByRole("tab", { name: /문항 구조/ }).click();
   await page.getByRole("spinbutton", { name: "선생님 확정 문항 수" }).fill("12");
   await page.getByRole("button", { name: "12문항 확정" }).click();
@@ -272,11 +280,33 @@ test("exam analysis non-paid teacher saves use the safe source and survive reloa
   await expect(page.getByRole("checkbox", { name: "1번 주요문항", exact: true })).toBeChecked();
 
   await page.getByRole("tab", { name: "최종 미리보기" }).click();
-  await page.getByRole("button", { name: "카드 제작 작업 열기", exact: true }).click();
+  await expect(page.getByText("쎈 중단원별 출제 비중", { exact: true })).toBeVisible();
+  await expect(page.getByText("선생님 체크 저장본", { exact: true })).toBeHidden();
+  await page.getByRole("tab", { name: "난이도·문항 흐름", exact: true }).click();
+  await expect(page.getByText("쎈 중단원별 출제 비중", { exact: true })).toBeHidden();
+  await expect(page.getByText("문항 흐름", { exact: true })).toBeVisible();
+  await page.getByRole("tab", { name: "주요문항", exact: true }).click();
+  await expect(page.getByText("선생님 체크 저장본", { exact: true })).toBeVisible();
+  await expect(page.getByText("문항 흐름", { exact: true })).toBeHidden();
+  await page.getByRole("tab", { name: "출제 비중", exact: true }).click();
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.locator(".studioPage").scrollIntoViewIfNeeded();
+  await page.screenshot({ path: "test-results/studio-final-preview-desktop.png", fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.getByRole("tab", { name: "출제 비중", exact: true })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: "test-results/studio-final-preview-mobile.png", fullPage: true });
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.getByRole("tab", { name: "카드 제작", exact: true }).click();
   await page.getByRole("button", { name: /^2\. 시험 분석/ }).click();
   const scoreStructureInput = page.getByRole("textbox", { name: /^배점\/문항 구조/ });
   await expect(scoreStructureInput).toBeVisible();
   await scoreStructureInput.fill("객관식 12문항 · 안전 계약 검수");
+  await page.getByRole("tab", { name: "출제 비중", exact: true }).click();
+  await expect(scoreStructureInput).toBeHidden();
+  await page.getByRole("tab", { name: "카드 제작", exact: true }).click();
+  await expect(scoreStructureInput).toHaveValue("객관식 12문항 · 안전 계약 검수");
+
   await page.getByRole("button", { name: "프롬프트 작업본 저장" }).click();
   await expect(page.getByRole("status").filter({ hasText: "프롬프트 작업본 · 저장 완료" })).toBeVisible();
 
@@ -303,7 +333,7 @@ test("exam analysis non-paid teacher saves use the safe source and survive reloa
   await expect(page.getByRole("navigation", { name: "주요 화면" })).toBeVisible();
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /시험분석/ }).click();
   await page.getByRole("tab", { name: "최종 미리보기" }).click();
-  await page.getByRole("button", { name: "카드 제작 작업 열기", exact: true }).click();
+  await page.getByRole("tab", { name: "카드 제작", exact: true }).click();
   await page.getByRole("button", { name: /^2\. 시험 분석/ }).click();
   await expect(page.getByRole("textbox", { name: /^배점\/문항 구조/ }))
     .toHaveValue("객관식 12문항 · 안전 계약 검수");
