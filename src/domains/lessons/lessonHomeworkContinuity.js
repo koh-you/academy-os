@@ -42,6 +42,23 @@ export function isMakeupLesson(lesson = {}) {
   return lesson.lessonType === "makeup";
 }
 
+// 시험대비는 학교 시험 대비용으로 따로 개설한 수업이라 정규 진도의 연장이 아니다.
+// (레거시 데이터의 일요 보강 타입도 같은 성격이라 함께 본다.)
+export function isExamPrepContinuityLesson(lesson = {}) {
+  return (
+    lesson?.lessonType === "examPrep" ||
+    lesson?.lessonType === "examSundayMakeup" ||
+    String(lesson?.lessonId || "").startsWith("lesson_exam_sunday_makeup_") ||
+    String(lesson?.sourceSchoolEventId || "").startsWith("generated:sunday_makeup:")
+  );
+}
+
+// 정규 수업 소스 모드에서 건너뛸 수업. 보충과 시험대비는 그날의 진도를 이어받는
+// 대상이 아니므로, 그 사이에 끼어 있어도 직전 정규 수업 내용을 가져올 수 있어야 한다.
+export function isNonRegularContinuityLesson(lesson = {}) {
+  return isMakeupLesson(lesson) || isExamPrepContinuityLesson(lesson);
+}
+
 const attendedStatuses = new Set(["late", "present"]);
 
 export function hasStudentAttendedLesson(records = [], lessonId = "", studentId = "") {
@@ -63,7 +80,7 @@ export function findPreviousLessonsForStudent(lessons, lesson, studentId, { only
     .filter((candidate) => !shouldIgnoreLessonAttendance(candidate))
     .filter((candidate) => candidate.studentIds?.includes(studentId))
     .filter((candidate) => isSameLessonContinuityForStudent(lesson, candidate))
-    .filter((candidate) => !onlyRegularLessons || !isMakeupLesson(candidate))
+    .filter((candidate) => !onlyRegularLessons || !isNonRegularContinuityLesson(candidate))
     .filter((candidate) => !canVerifyAttendance || hasStudentAttendedLesson(records, candidate.lessonId, studentId))
     .filter((candidate) => getLessonSortValue(candidate) < currentSortValue)
     .sort((a, b) => getLessonSortValue(b).localeCompare(getLessonSortValue(a)));
