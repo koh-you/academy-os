@@ -9160,6 +9160,38 @@ textarea {
   padding: 11px 14px;
 }
 
+.examPrepDailyJournalToggle {
+  align-items: center;
+  background: var(--academy-surface-muted, #f8fafc);
+  border: 1px solid var(--academy-border, #d8e3f8);
+  border-radius: 8px;
+  color: var(--academy-text-strong, #475569);
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 900;
+  gap: 6px;
+  min-height: var(--academy-touch-target);
+  padding: 0 12px;
+}
+
+.examPrepRosterRowMeta {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.examPrepAttendanceBadge {
+  min-width: 96px;
+  padding: 5px 9px;
+}
+
+.examPrepAttendanceBadge > span {
+  font-size: 13px;
+  line-height: 1.15;
+}
+
 .examPrepRosterRow:first-child {
   border-top: 0;
 }

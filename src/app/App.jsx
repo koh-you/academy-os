@@ -789,7 +789,14 @@ function getLessonTestResultLines(testSessions = [], testAttempts = [], lesson =
     .filter((attempt) => attempt.studentId === student.studentId)
     .map((attempt) => ({ attempt, session: sessionById.get(attempt.testSessionId) }))
     .filter(({ session }) => session && session.testDate === lesson.date)
-    .filter(({ session }) => !session.classTemplateId || session.classTemplateId === lesson.classTemplateId)
+    // 시험대비 수업은 반이 지정돼 있지 않다. 그런 수업에서는 반이 정해진
+    // 응시 기록도 그날 그 학생의 결과이므로 명단 기준으로 붙인다. 반이 있는 수업은
+    // 같은 날 두 수업에 중복 발송되지 않도록 기존처럼 반이 일치할 때만 붙인다.
+    .filter(({ session }) => {
+      if (!session.classTemplateId) return true;
+      if (!lesson.classTemplateId) return (lesson.studentIds ?? []).includes(student.studentId);
+      return session.classTemplateId === lesson.classTemplateId;
+    })
     .sort((a, b) => String(a.session.updatedAt || a.session.createdAt || "").localeCompare(String(b.session.updatedAt || b.session.createdAt || "")))
     .map(({ session, attempt }) => formatTestAttemptMessageLine(session, attempt));
 }
@@ -5454,6 +5461,21 @@ export function App() {
     persistLessonNotificationPlans(nextPlans);
   }
 
+  function handleToggleExamPrepDailyJournal(lessonId, enabled) {
+    if (!lessonId) return;
+    const currentPlan = lessonNotificationPlans[lessonId];
+    const nextPlans = {
+      ...lessonNotificationPlans,
+      [lessonId]: {
+        ...(currentPlan ?? {}),
+        dailyJournalEnabled: enabled === true,
+        updatedAt: new Date().toISOString()
+      }
+    };
+    setLessonNotificationPlans(nextPlans);
+    persistLessonNotificationPlans(nextPlans);
+  }
+
   async function handleApplyLessonNotificationPlan(lessonId) {
     const mode = lessonNotificationPlans[lessonId]?.mode || "default";
     return applyLessonNotificationPlan(lessonId, mode);
@@ -6582,6 +6604,7 @@ export function App() {
       handleSaveExamPrepSchedule,
       handleSyncSpecialLectureStudentSchedules,
       handleTeacherVerifyHomework,
+      handleToggleExamPrepDailyJournal,
       handleToggleStudentNotificationMute,
       handleUndoLessonAction,
       handleUndoPassSupplementTask,

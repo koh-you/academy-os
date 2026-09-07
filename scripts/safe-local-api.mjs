@@ -1931,6 +1931,18 @@ function handleMutation(pathname, payload) {
     state.lessons = upsertById(state.lessons, lesson, ["lessonId", "id"]);
     return { lesson, lessons: state.lessons, ok: true };
   }
+  if (pathname === "/api/test-sessions") {
+    const testSession = payload.testSession || {};
+    const testAttempts = Array.isArray(payload.testAttempts) ? payload.testAttempts : [];
+    if (testSession.testSessionId) {
+      state.testSessions = upsertById(state.testSessions, testSession, ["testSessionId"]);
+      state.testAttempts = state.testAttempts.filter((attempt) => attempt.testSessionId !== testSession.testSessionId);
+      testAttempts.forEach((attempt) => {
+        state.testAttempts = upsertById(state.testAttempts, attempt, ["testAttemptId"]);
+      });
+    }
+    return { ok: true, testSession, testAttempts, source: "supabase", verified: true };
+  }
   if (pathname === "/api/lesson-records") {
     const record = payload.record || {};
     state.records = upsertById(state.records, record, ["lessonStudentRecordId", "recordId", "id"]);

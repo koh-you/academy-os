@@ -55,19 +55,21 @@ const teacherHubPropNames = [...teacherLessonHubSource.matchAll(/<ExamPrepLesson
 assert.deepEqual(
   [...teacherHubPropNames].sort(),
   [
+    "attendanceSettings",
     "createEmptyRecord",
     "examPrepScheduleLessons",
     "lesson",
     "onDeleteLesson",
     "onSaveExamPrepSchedule",
     "onSaveRecord",
+    "onToggleDailyJournal",
     "persistedLessons",
     "records",
     "ScheduleModalComponent",
     "students",
     "templates"
   ].sort(),
-  "TeacherLessonHubV2's full-featured call site must pass exactly the same prop set as before plus the one disclosed addition (createEmptyRecord)"
+  "TeacherLessonHubV2's full-featured call site must pass exactly the same prop set as before plus the disclosed additions (createEmptyRecord, attendanceSettings, onToggleDailyJournal)"
 );
 
 console.log("exam prep lesson detail extraction: no App back-reference, preserved contract snippets, and exact call-site prop sets verified");

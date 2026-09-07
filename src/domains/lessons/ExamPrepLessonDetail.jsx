@@ -3,7 +3,10 @@ import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
+import { getAttendanceDisplay, hasMissingCheckOut } from "./attendance.js";
+import { defaultAttendanceSettings } from "./attendanceSettings.js";
 import {
+  createExamPrepAttendanceSummary,
   createExamPrepStudentRows,
   getExamPrepSourceItems,
   groupExamPrepStudentsBySchool,
@@ -13,12 +16,13 @@ import { getLessonStudentIds } from "../students/lessonRosterSelectors.js";
 
 const ExamPrepContentEditor = lazy(() => import("./ExamPrepContentEditor.jsx").then((module) => ({ default: module.ExamPrepContentEditor })));
 
-export function ExamPrepLessonDetail({ createEmptyRecord, examPrepScheduleLessons = [], lesson, onDeleteLesson, onSaveExamPrepSchedule, onSaveRecord, persistedLessons = [], records = [], ScheduleModalComponent, students = [], templates = [] }) {
+export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSettings, createEmptyRecord, examPrepScheduleLessons = [], lesson, onDeleteLesson, onSaveExamPrepSchedule, onSaveRecord, onToggleDailyJournal, persistedLessons = [], records = [], ScheduleModalComponent, students = [], templates = [] }) {
   const [rosterView, setRosterView] = useState("time");
   const [isScheduleEditorOpen, setIsScheduleEditorOpen] = useState(false);
   const sourceItems = getExamPrepSourceItems(lesson);
   const lessonStudentCount = getLessonStudentIds(lesson).length;
-  const studentRows = createExamPrepStudentRows(lesson, students);
+  const studentRows = createExamPrepStudentRows(lesson, students, records);
+  const attendanceSummary = createExamPrepAttendanceSummary(studentRows);
   const studentGroups = rosterView === "school"
     ? groupExamPrepStudentsBySchool(studentRows)
     : groupExamPrepStudentsByTime(studentRows);
@@ -30,6 +34,14 @@ export function ExamPrepLessonDetail({ createEmptyRecord, examPrepScheduleLesson
         <MetricCard density="compact" hint="시험대비" label="수업일" value={lesson.date} />
         <MetricCard density="compact" hint={lesson.status === "canceled" ? "취소됨" : "진행 예정"} label="시간" value={`${lesson.startTime || "미정"}-${lesson.endTime || "미정"}`} />
         <MetricCard density="compact" hint={`${displaySchoolCount}개교 준비`} label="참여 학생" value={`${lessonStudentCount}명`} />
+        <MetricCard
+          density="compact"
+          hint={attendanceSummary.total
+            ? `하원 ${attendanceSummary.checkedOut}명 · 미등원 ${attendanceSummary.pending}명${attendanceSummary.absent ? ` · 결석 ${attendanceSummary.absent}명` : ""}`
+            : "태블릿 출결이 연동됩니다"}
+          label="출결"
+          value={`${attendanceSummary.arrived}/${attendanceSummary.total}명 등원`}
+        />
       </div>
 
       <section className="panel examPrepRosterPanel">
@@ -54,17 +66,32 @@ export function ExamPrepLessonDetail({ createEmptyRecord, examPrepScheduleLesson
                   <span>{group.students.length}명</span>
                 </header>
                 <div className="examPrepRosterRows">
-                  {group.students.map((student) => (
-                    <div className="examPrepRosterRow" key={student.studentId}>
-                      <div>
-                        <strong>{student.name}</strong>
-                        <span className="examPrepStudentSchool">{student.schoolName}</span>
+                  {group.students.map((student) => {
+                    const attendanceLesson = { ...lesson, endTime: student.endTime || lesson.endTime, startTime: student.startTime || lesson.startTime };
+                    const attendanceDisplay = getAttendanceDisplay(student.record ?? {}, attendanceLesson, attendanceSettings.lateGraceMinutes);
+                    const checkoutMissing = Boolean(student.record) && hasMissingCheckOut(student.record, attendanceLesson);
+                    return (
+                      <div className="examPrepRosterRow" key={student.studentId}>
+                        <div>
+                          <strong>{student.name}</strong>
+                          <span className="examPrepStudentSchool">{student.schoolName}</span>
+                        </div>
+                        <div className="examPrepRosterRowMeta">
+                          <span className={student.timeLabel === "시간 미정" ? "examPrepStudentTime missing" : "examPrepStudentTime"}>
+                            {student.timeLabel}
+                          </span>
+                          <span
+                            aria-label={`${student.name} 출결`}
+                            className={`attendanceBadge examPrepAttendanceBadge attendance-${attendanceDisplay.statusClass}`}
+                          >
+                            <span>{attendanceDisplay.label}</span>
+                            {attendanceDisplay.detail ? <small>{attendanceDisplay.detail}</small> : null}
+                            {checkoutMissing ? <small className="checkoutMissingText">하원 미체크</small> : null}
+                          </span>
+                        </div>
                       </div>
-                      <span className={student.timeLabel === "시간 미정" ? "examPrepStudentTime missing" : "examPrepStudentTime"}>
-                        {student.timeLabel}
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
             ))}
@@ -78,6 +105,16 @@ export function ExamPrepLessonDetail({ createEmptyRecord, examPrepScheduleLesson
         <SectionHeader
           actions={(
             <>
+              {onToggleDailyJournal ? (
+                <label className="examPrepDailyJournalToggle">
+                  <input
+                    checked={false}
+                    onChange={(event) => onToggleDailyJournal(lesson.lessonId, event.target.checked)}
+                    type="checkbox"
+                  />
+                  데일리 알림톡 사용
+                </label>
+              ) : null}
               <button className="ghostButton" onClick={() => setIsScheduleEditorOpen(true)} type="button">
                 일정 수정
               </button>

@@ -53,6 +53,7 @@ export function LessonJournalDetail({
   onEditLesson,
   onOpenAttendance,
   onOpenExamPrep,
+  onToggleExamPrepDailyJournal,
   onOpenReport,
   notificationJobs = [],
   records,
@@ -218,7 +219,8 @@ export function LessonJournalDetail({
   const isSupplementMakeupLesson = isSupplementMakeupTaskLesson(lesson, linkedMakeupTask);
   const isAbsenceMakeupLesson = isSupplementMakeupLesson && linkedMakeupTask?.taskType === "absence_makeup";
   const isHomeworkMakeupLesson = isSupplementMakeupLesson && linkedMakeupTask?.taskType === "homework_makeup";
-  const isExamPrepLessonCurrent = isExamPrepLesson(lesson);
+  const isExamPrepDailyJournalEnabled = lessonNotificationPlan?.dailyJournalEnabled === true;
+  const isExamPrepLessonCurrent = isExamPrepLesson(lesson) && !isExamPrepDailyJournalEnabled;
 
   const {
     applyHomeworkFollowupMethod,
@@ -413,10 +415,12 @@ export function LessonJournalDetail({
   if (isExamPrepLessonCurrent) {
     return (
       <ExamPrepLessonDetail
+        attendanceSettings={attendanceSettings}
         createEmptyRecord={createEmptyRecord}
         lesson={lesson}
         onDeleteLesson={onDeleteLesson}
         onEditLesson={onEditLesson}
+        records={records}
         students={students}
       />
     );
@@ -504,6 +508,9 @@ export function LessonJournalDetail({
         onDeleteLesson={onDeleteLesson}
         onEditLesson={onEditLesson}
         onOpenExamPrep={onOpenExamPrep}
+        onReturnToExamPrepRoster={isExamPrepDailyJournalEnabled && isExamPrepLesson(lesson) && onToggleExamPrepDailyJournal
+          ? () => onToggleExamPrepDailyJournal(lesson.lessonId, false)
+          : undefined}
         studentCount={lessonStudents.length}
       />
 

@@ -8,6 +8,7 @@ export function LessonJournalHeader({
   onDeleteLesson,
   onEditLesson,
   onOpenExamPrep,
+  onReturnToExamPrepRoster,
   studentCount
 }) {
   const model = createLessonJournalHeaderModel({
@@ -20,6 +21,9 @@ export function LessonJournalHeader({
     <NavigationHeader
       actions={(
         <>
+          {onReturnToExamPrepRoster ? (
+            <button className="softButton" onClick={onReturnToExamPrepRoster} type="button">시험대비 명단 화면</button>
+          ) : null}
           <button className="softButton" onClick={() => onEditLesson(lesson)} type="button">수업 수정</button>
           <button className="dangerButton" onClick={() => onDeleteLesson(lesson.lessonId)} type="button">수업 취소 처리</button>
         </>
