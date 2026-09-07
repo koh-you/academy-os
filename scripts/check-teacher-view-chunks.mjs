@@ -42,6 +42,25 @@ assert.ok(
   `출결 태블릿 JavaScript 가 예산을 넘었다: ${attendanceBytes.toLocaleString()} bytes (${attendanceScripts.join(", ")})`
 );
 
+// 출결 태블릿이 받는 CSS 총량.
+// JS 를 걷어낸 뒤에도 태블릿은 교사용 통짜 App.css(347 KB)를 그대로 받고 있었다.
+// 이제 출결 화면에 실제로 닿는 규칙만 뽑은 attendanceKiosk.css(8 KB)를 받는다.
+// kioskMain.jsx 에서 App.css 를 다시 import 하면 여기서 걸린다.
+const attendanceStyles = [...attendanceHtml.matchAll(/\/assets\/([^"']+\.css)/g)].map((match) => match[1]);
+assert.ok(attendanceStyles.length > 0, "attendance.html 이 참조하는 CSS 를 찾지 못했다");
+assert.ok(
+  !attendanceStyles.some((name) => /^main-/.test(name)),
+  `출결 태블릿이 교사용 main CSS 를 받고 있다: ${attendanceStyles.join(", ")}`
+);
+const attendanceStyleBytes = (
+  await Promise.all(attendanceStyles.map((name) => stat(resolve(assetsDirectory, name))))
+).reduce((total, entry) => total + entry.size, 0);
+// 실측 9,648 bytes(공용 토큰 1.7 KB + 출결 전용 7.9 KB) + 여유.
+assert.ok(
+  attendanceStyleBytes <= 16_000,
+  `출결 태블릿 CSS 가 예산을 넘었다: ${attendanceStyleBytes.toLocaleString()} bytes (${attendanceStyles.join(", ")})`
+);
+
 const expectedLazyChunks = [
   "BlogContentStudio",
   "DashboardAuxiliaryPanels",
@@ -65,5 +84,7 @@ for (const chunkName of expectedLazyChunks) {
 }
 
 console.log(
-  `teacher view chunk budget passed · main ${(mainBytes / 1000).toFixed(2)} kB · lazy ${expectedLazyChunks.length}/12`
+  `teacher view chunk budget passed · main ${(mainBytes / 1000).toFixed(2)} kB · ` +
+  `lazy ${expectedLazyChunks.length} · ` +
+  `태블릿 JS ${(attendanceBytes / 1000).toFixed(1)} kB + CSS ${(attendanceStyleBytes / 1000).toFixed(1)} kB`
 );

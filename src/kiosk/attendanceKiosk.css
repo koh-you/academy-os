@@ -1,0 +1,518 @@
+/* 출결 태블릿(attendance.html) 전용 CSS — 자동 생성물이다. 직접 고치지 말 것.
+ *
+ * 생성: node scripts/build-kiosk-css.mjs
+ * 검사: npm run test:kiosk-css-sync  (App.css 와 어긋나면 실패한다)
+ *
+ * App.css 에서 키오스크 DOM 에 실제로 닿는 규칙만 셀렉터 기준으로 골라냈다.
+ * 대상: kioskMain.jsx -> AttendanceKioskApp.jsx -> AttendanceKiosk.jsx -> Modal.jsx
+ *
+ * 여기에 교사 화면 규칙을 직접 추가하지 말 것 — 태블릿이 다시 통짜 CSS 를 받게 된다.
+ */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  width: 100%;
+}
+
+body {
+  margin: 0;
+  font-size: 16px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible,
+summary:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--academy-focus-ring, #2563eb) 35%, transparent);
+  outline-offset: 2px;
+}
+
+.muted {
+  color: var(--academy-muted, #64748b);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.iconButton {
+  align-items: center;
+  background: var(--academy-surface, #ffffff);
+  border: 1px solid var(--academy-border);
+  border-radius: var(--academy-radius);
+  color: var(--academy-muted);
+  display: inline-flex;
+  font-size: 24px;
+  font-weight: 800;
+  height: var(--academy-touch-target);
+  justify-content: center;
+  width: var(--academy-touch-target);
+}
+
+.primaryButton {
+  background: var(--academy-primary);
+  border: 0;
+  border-radius: var(--academy-radius);
+  color: var(--academy-surface, #ffffff);
+  font-size: 16px;
+  font-weight: 900;
+  min-height: var(--academy-touch-target);
+  padding: 0 20px;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: var(--academy-primary-hover);
+}
+
+.primaryButton:disabled,
+.iconButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.eyebrow {
+  color: var(--academy-focus-ring, #2563eb);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0;
+  margin: 0 0 5px;
+  text-transform: uppercase;
+}
+
+select,
+textarea,
+input {
+  background: var(--academy-surface, #ffffff);
+  border: 1px solid var(--academy-border-strong, #cbd8ee);
+  border-radius: 8px;
+  color: var(--academy-text, #0f172a);
+  font-size: 16px;
+  width: 100%;
+}
+
+select,
+input {
+  min-height: 52px;
+  padding: 0 16px;
+}
+
+input[type="checkbox"] {
+  appearance: auto;
+  accent-color: var(--academy-focus-ring, #2563eb);
+  flex: 0 0 18px;
+  height: 18px;
+  margin: 0;
+  min-height: 0;
+  min-width: 18px;
+  padding: 0;
+  width: 18px;
+}
+
+textarea {
+  font-size: 16px;
+  line-height: 1.45;
+  min-height: 86px;
+  padding: 14px 16px;
+  resize: vertical;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.modalBackdrop {
+  align-items: start;
+  background: color-mix(in srgb, var(--academy-text, #0f172a) 42%, transparent);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  overflow: auto;
+  padding: 56px 18px;
+  position: fixed;
+  z-index: 50;
+}
+
+.modalCard {
+  background: var(--academy-surface, #ffffff);
+  border-radius: 8px;
+  box-shadow: 0 20px 60px color-mix(in srgb, var(--academy-text, #0f172a) 24%, transparent);
+  display: grid;
+  gap: 20px;
+  justify-items: stretch;
+  max-width: 720px;
+  padding: 30px;
+  text-align: left;
+  width: 100%;
+}
+
+.modalCard.modalScrollable {
+  grid-template-rows: auto minmax(0, 1fr);
+  max-height: calc(100dvh - 48px);
+  overflow: hidden;
+}
+
+.modalScrollBody {
+  display: grid;
+  gap: 20px;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding-right: 2px;
+}
+
+.modalFooter {
+  align-items: center;
+  border-top: 1px solid var(--academy-border, #d8e3f8);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 14px;
+}
+
+.modalFooter.align-start {
+  justify-content: flex-start;
+}
+
+.modalFooter.align-center {
+  justify-content: center;
+}
+
+.modalFooter.align-between {
+  justify-content: space-between;
+}
+
+.modalFooter.tone-danger {
+  border-top-color: var(--status-danger-border, #fecaca);
+}
+
+.modalHeader {
+  align-items: start;
+  display: flex;
+  justify-content: space-between;
+}
+
+.modalHeader h2 {
+  font-size: 26px;
+  font-weight: 900;
+  margin: 0;
+}
+
+.attendanceConfirmActions {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.attendanceConfirmActions.single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+label {
+  color: var(--academy-text-strong, #475569);
+  display: grid;
+  font-size: 15px;
+  font-weight: 800;
+  gap: 8px;
+  justify-items: stretch;
+  text-align: left;
+}
+
+input,
+select,
+textarea {
+  text-align: left;
+}
+
+.attendanceKioskPage {
+  align-content: center;
+  display: grid;
+  gap: 18px;
+  min-height: calc(100vh - 80px);
+  place-items: center;
+}
+
+body.attendanceOnlyBody,
+body.attendanceOnlyBody #root {
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body.attendanceOnlyBody {
+  position: fixed;
+  width: 100%;
+}
+
+.attendanceKioskPage.standalone {
+  background: var(--status-info-bg, #eff6ff);
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+  padding: 24px;
+  width: 100vw;
+}
+
+.attendanceKioskPage.standalone .attendanceKioskCard {
+  justify-self: center;
+  width: min(760px, 94vw);
+}
+
+.attendanceKioskCard {
+  background: var(--academy-surface, #ffffff);
+  border: 1px solid var(--academy-border, #d8e3f8);
+  border-radius: 8px;
+  box-shadow: 0 18px 40px color-mix(in srgb, var(--academy-text, #0f172a) 8%, transparent);
+  display: grid;
+  gap: 22px;
+  max-width: 760px;
+  padding: 34px;
+  width: min(760px, 94vw);
+}
+
+.attendanceKioskHeader {
+  align-items: start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  text-align: left;
+}
+
+.attendanceKioskHeader h1 {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+
+.attendancePinForm {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) 140px;
+}
+
+.attendancePinForm input {
+  border: 1px solid var(--status-info-border, #bfdbfe);
+  border-radius: 8px;
+  color: var(--academy-text, #0f172a);
+  font-size: 58px;
+  font-weight: 900;
+  letter-spacing: 0;
+  min-height: 96px;
+  text-align: center;
+}
+
+.attendancePinForm button {
+  font-size: 20px;
+  min-height: 96px;
+}
+
+.attendanceNumberPad {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.attendanceNumberPad button {
+  background: var(--academy-surface-muted, #f8fafc);
+  border: 1px solid var(--academy-border, #d8e3f8);
+  border-radius: 8px;
+  color: var(--academy-text, #0f172a);
+  font-size: 34px;
+  font-weight: 900;
+  min-height: 88px;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.attendanceNumberPad button:hover {
+  background: var(--status-info-bg, #eff6ff);
+  border-color: var(--status-info-border, #bfdbfe);
+}
+
+.attendanceNumberPad button:active {
+  transform: translateY(1px);
+}
+
+.attendanceNumberPad.disabled {
+  opacity: 0.55;
+}
+
+.attendanceNumberPad button:disabled {
+  cursor: wait;
+}
+
+.attendanceNumberPad .secondaryKey {
+  background: var(--academy-accent-bg, #eef2ff);
+  color: var(--academy-muted, #64748b);
+  font-size: 22px;
+}
+
+.modalCard.attendanceResultModal {
+  max-width: 520px;
+  text-align: center;
+}
+
+.modalCard.attendanceResultModal.success {
+  border: 2px solid var(--status-success-border, #86efac);
+}
+
+.modalCard.attendanceResultModal.error {
+  border: 2px solid var(--status-destructive-border, #fecdd3);
+}
+
+.attendanceResultContent {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+}
+
+.attendanceResultContent strong {
+  font-size: 24px;
+}
+
+.attendanceResultContent p {
+  color: var(--academy-muted, #64748b);
+  font-weight: 800;
+  margin: 0;
+}
+
+.attendancePreviewSummary {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  text-align: left;
+  width: 100%;
+}
+
+.attendancePreviewSummary span {
+  background: var(--academy-surface-muted, #f8fafc);
+  border: 1px solid var(--academy-border, #d8e3f8);
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  min-height: 68px;
+  padding: 10px 12px;
+}
+
+.attendancePreviewSummary small {
+  color: var(--academy-muted, #64748b);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.attendancePreviewSummary b {
+  color: var(--academy-text, #0f172a);
+  font-size: 18px;
+  line-height: 1.25;
+  word-break: keep-all;
+}
+
+.attendanceLessonChoiceGrid {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+}
+
+.attendanceLessonChoiceButton {
+  background: var(--academy-surface-muted, #f8fafc);
+  border: 2px solid var(--status-info-border, #bfdbfe);
+  border-radius: 8px;
+  color: var(--academy-text, #0f172a);
+  display: grid;
+  gap: 6px;
+  min-height: 92px;
+  padding: 16px 18px;
+  text-align: left;
+  width: 100%;
+}
+
+.attendanceLessonChoiceButton strong {
+  color: var(--academy-text, #0f172a);
+  font-size: 22px;
+  line-height: 1.25;
+}
+
+.attendanceLessonChoiceButton small {
+  color: var(--academy-focus-ring, #2563eb);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.attendanceLessonChoiceButton.latest {
+  border-color: var(--academy-focus-ring, #2563eb);
+}
+
+.attendanceLessonChoiceButton:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+@media (max-width: 640px) {
+  button,
+  a[href],
+  [role="button"] {
+    min-height: var(--academy-touch-target) !important;
+  }
+
+  summary {
+    min-height: var(--academy-touch-target) !important;
+  }
+
+  :where(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
+    select,
+    textarea
+  ) {
+    font-size: 16px;
+    max-width: 100%;
+  }
+
+  :where(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
+    select
+  ) {
+    min-height: var(--academy-touch-target);
+  }
+
+  .modalFooter {
+    align-items: stretch;
+  }
+
+  .modalFooter > button,
+  .modalFooter > a {
+    flex: 1 1 140px;
+  }
+
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .modalBackdrop {
+    background: var(--academy-surface, #ffffff);
+    display: block;
+    padding: 0;
+    position: absolute;
+  }
+}
