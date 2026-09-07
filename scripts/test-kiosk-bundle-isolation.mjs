@@ -66,4 +66,18 @@ assert.ok(
   "수업·기록 목록 헬퍼는 공용 모듈(lessonRecordCollections.js)에서 가져와야 한다"
 );
 
+// attendanceApi 의 원본 checkAttendanceRequest / previewAttendanceRequest 는
+// { payload, request } 를 받는다. 컨트롤러는 payload 하나만 넘기므로, 원본을 그대로
+// 주입하면 request 가 undefined 가 되어 **HTTP 요청이 조용히 나가지 않는다**.
+// 화면에는 실패 메시지만 뜨고 네트워크 탭에는 아무것도 안 남는다 — 찾기 어려운 종류다.
+// 반드시 createAttendanceRequestBindings 로 묶은 형태를 써야 한다.
+assert.ok(
+  kioskApp.includes("createAttendanceRequestBindings"),
+  "출결 요청은 createAttendanceRequestBindings 로 묶어서 써야 한다(원본은 { payload, request } 를 받는다)"
+);
+assert.ok(
+  !/import \{[^}]*\bcheckAttendanceRequest\b[^}]*\} from ".*attendanceApi\.js"/s.test(kioskApp),
+  "attendanceApi 의 원본 요청 함수를 직접 import 하면 안 된다"
+);
+
 console.log("kiosk bundle isolation: 태블릿 진입점이 교사 화면과 분리되어 있음");

@@ -11,7 +11,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AttendanceKiosk } from "../domains/lessons/AttendanceKiosk.jsx";
 import { checkKioskAttendanceAction } from "../domains/lessons/attendanceKioskCheckController.js";
 import { previewKioskAttendanceAction } from "../domains/lessons/attendanceKioskPreviewController.js";
-import { checkAttendanceRequest, previewAttendanceRequest } from "../domains/lessons/attendanceApi.js";
+import { createAttendanceRequestBindings } from "../domains/lessons/attendanceApi.js";
 import { defaultAttendanceSettings, normalizeAttendanceSettings } from "../domains/lessons/attendanceSettings.js";
 import {
   useAttendanceDateRollover,
@@ -23,8 +23,15 @@ import {
   upsertById,
   upsertLessonStudentRecord
 } from "../domains/lessons/lessonRecordCollections.js";
-import { apiFetch, getJsonWithTimeout } from "../shared/utils/apiClient.js";
+import { apiFetch, getJsonWithTimeout, postJsonWithTimeout } from "../shared/utils/apiClient.js";
 import { getKoreaDateString } from "../shared/utils/koreaDate.js";
+
+// attendanceApi 의 원본 함수는 { payload, request } 를 받는다. 컨트롤러는 payload 하나만
+// 넘기므로 반드시 바인딩된 형태를 써야 한다 — 원본을 그대로 넘기면 요청이 조용히 안 나간다.
+const {
+  checkAttendanceRequest,
+  previewAttendanceRequest
+} = createAttendanceRequestBindings({ request: postJsonWithTimeout });
 
 function formatLessonTimeRange(lesson = {}) {
   return [lesson.startTime, lesson.endTime].filter(Boolean).join(" ~ ");
