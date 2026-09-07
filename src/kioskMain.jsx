@@ -7,10 +7,11 @@ import { AttendanceKioskApp } from "./kiosk/AttendanceKioskApp.jsx";
 import { AppErrorBoundary } from "./shared/runtime/AppErrorBoundary.jsx";
 import { installGlobalClientErrorHandlers } from "./shared/runtime/clientErrorReporter.js";
 import "./app/App.tokens.css";
-// CSS 는 아직 통짜 App.css 다(348 KB). 키오스크 규칙만 떼는 것은 별도 작업으로 남긴다 —
-// 줄 번호로 자르면 규칙을 흘리기 쉽고, 공용 프리미티브(.modalCard, .primaryButton 등)까지
-// 같이 따라와야 한다. JS 를 먼저 분리해 큰 비용을 걷어내고 CSS 는 그다음에 다룬다.
-import "./app/App.css";
+// 교사용 통짜 App.css(400 KB) 대신 출결 화면에 실제로 닿는 규칙만 받는다(10 KB).
+// attendanceKiosk.css 는 App.css 에서 셀렉터 기준으로 뽑아낸 생성물이다 —
+// 직접 고치지 말고 `node scripts/build-kiosk-css.mjs` 로 다시 만든다.
+// 여기서 App.css 를 import 하면 분리가 원상복구된다(test:kiosk-css-sync 가 막는다).
+import "./kiosk/attendanceKiosk.css";
 
 installGlobalClientErrorHandlers();
 
