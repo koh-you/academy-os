@@ -86,7 +86,11 @@ assert.ok(platformMapperSource.includes("export function fromAppStateRow(row)"))
 assert.ok(platformMapperSource.includes("updatedAt: row.updated_at"));
 
 const upsertSource = sourceBetween(coreDataSource, "export async function upsertAppState(states, { expectedUpdatedAt = null } = {})", "export async function listResourceMaterials()");
-assert.ok(upsertSource.includes('upsertRows("app_state", [row])'));
+// 2026-09-07: CAS 가 없는 키는 한 번의 upsert 로 묶어 보낸다(예전에는 키마다 왕복 1회라
+// 운영 22행 저장에 왕복 22회가 들었다). CAS 가 걸린 키는 충돌을 키 단위로 판정해야 하므로
+// 지금도 하나씩 보낸다 — 그 구분이 이 단언의 요지다.
+assert.ok(upsertSource.includes('upsertRows("app_state", mergeRows)'));
+assert.ok(upsertSource.includes("entries.filter(([key]) => !hasExpectedVersion(key))"));
 assert.ok(upsertSource.includes('insertRows("app_state", [row])'));
 assert.ok(upsertSource.includes('patchRows('));
 assert.ok(upsertSource.includes("createAppStateVersionFilter(key, expectedVersion)"));

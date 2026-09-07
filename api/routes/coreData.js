@@ -394,8 +394,11 @@ function filterLessonRecordsToCurrentRosters(records = [], lessons = []) {
   });
 }
 
-async function assertLessonStudentRecordBelongsToLesson(lessonId, studentId) {
-  if (!lessonId || !studentId || !isSupabaseConfigured({ requireServiceRole: true })) return;
+// rosterCache 는 "저장 요청 한 번" 범위의 Map 이다(밖으로 들고 나가지 말 것). 없으면 같은 수업
+// 명단을 학생 수만큼 다시 읽는다. 쓰기와 원자적이지 않은 사전 점검이라 보장 수준은 같다.
+async function getLessonRosterStudentIds(lessonId, rosterCache = null) {
+  const cached = rosterCache?.get(lessonId);
+  if (cached) return cached;
   const rows = await listRows(
     "lessons",
     `select=lesson_id,student_ids&lesson_id=eq.${encodeURIComponent(lessonId)}&limit=1`,
@@ -403,8 +406,15 @@ async function assertLessonStudentRecordBelongsToLesson(lessonId, studentId) {
   );
   const [lesson] = rows;
   if (!lesson) throw new Error("수업을 찾지 못했습니다.");
-  const studentIds = Array.isArray(lesson.student_ids) ? lesson.student_ids : [];
-  if (!studentIds.includes(studentId)) {
+  const studentIds = new Set(Array.isArray(lesson.student_ids) ? lesson.student_ids : []);
+  rosterCache?.set(lessonId, studentIds);
+  return studentIds;
+}
+
+async function assertLessonStudentRecordBelongsToLesson(lessonId, studentId, rosterCache = null) {
+  if (!lessonId || !studentId || !isSupabaseConfigured({ requireServiceRole: true })) return;
+  const studentIds = await getLessonRosterStudentIds(lessonId, rosterCache);
+  if (!studentIds.has(studentId)) {
     throw new Error("수업 명단에 없는 학생의 수업일지는 저장할 수 없습니다.");
   }
 }
@@ -2363,16 +2373,16 @@ async function persistLessonJournalRowsHomeworkChange(change = {}) {
         homeworkId
       });
     }
-    const verified = await getLessonJournalHistoryHomework(homeworkId);
+    // 수업기록과 같은 이유로 저장 응답이 돌려준 행을 그대로 대조한다(재조회 왕복 제거).
+    const verified = savedRows.length === 1 ? fromHomeworkRow(savedRows[0]) : null;
     if (
-      savedRows.length !== 1 ||
       !verified ||
       !areLessonJournalHistoryHomeworksEqual(after, verified) ||
       !areLessonJournalHistoryTimestampsEqual(nextUpdatedAt, verified.updatedAt)
     ) {
-      const error = createLessonJournalRowsConflict("숙제 저장 후 Supabase 재조회가 일치하지 않습니다.", { homeworkId });
+      const error = createLessonJournalRowsConflict("숙제 저장 결과가 요청과 일치하지 않습니다.", { homeworkId });
       error.appliedResult = {
-        homework: verified ?? (savedRows[0] ? fromHomeworkRow(savedRows[0]) : { ...after, updatedAt: nextUpdatedAt }),
+        homework: verified ?? { ...after, updatedAt: nextUpdatedAt },
         mutated: true,
         operation: "create"
       };
@@ -2426,24 +2436,24 @@ async function persistLessonJournalRowsHomeworkChange(change = {}) {
       homeworkId
     });
   }
-  const verified = await getLessonJournalHistoryHomework(homeworkId);
+  const verified = fromHomeworkRow(savedRows[0]);
   if (
     !verified ||
     !areLessonJournalHistoryHomeworksEqual(after, verified) ||
     !areLessonJournalHistoryTimestampsEqual(nextUpdatedAt, verified.updatedAt)
   ) {
-    const error = createLessonJournalRowsConflict("숙제 저장 후 Supabase 재조회가 일치하지 않습니다.", { homeworkId });
-    error.appliedResult = { beforeHomework: current, homework: verified ?? fromHomeworkRow(savedRows[0]), mutated: true, operation: "update" };
+    const error = createLessonJournalRowsConflict("숙제 저장 결과가 요청과 일치하지 않습니다.", { homeworkId });
+    error.appliedResult = { beforeHomework: current, homework: verified, mutated: true, operation: "update" };
     throw error;
   }
   return { beforeHomework: current, homework: verified, mutated: true, operation: "update" };
 }
 
-async function persistLessonJournalRowsRecordChange(change = {}) {
+async function persistLessonJournalRowsRecordChange(change = {}, rosterCache = null) {
   let after = change.after;
   const before = change.before ?? null;
   const { lessonId, studentId } = after;
-  await assertLessonStudentRecordBelongsToLesson(lessonId, studentId);
+  await assertLessonStudentRecordBelongsToLesson(lessonId, studentId, rosterCache);
   const current = await getLessonJournalRecordForRowsSave(lessonId, studentId);
   if (
     before &&
@@ -2497,16 +2507,16 @@ async function persistLessonJournalRowsRecordChange(change = {}) {
         studentId
       });
     }
-    const verified = await getLessonJournalRecordForRowsSave(lessonId, studentId);
+    // 신규 저장도 insertRows 가 저장된 행을 돌려준다. 같은 행을 다시 SELECT 하지 않는다.
+    const verified = savedRows.length === 1 ? fromLessonRecordRow(savedRows[0]) : null;
     if (
-      savedRows.length !== 1 ||
       !verified ||
       !areLessonJournalRecordsEqual(effectiveAfter, verified) ||
       !areLessonJournalHistoryTimestampsEqual(nextUpdatedAt, verified.updatedAt)
     ) {
-      const error = createLessonJournalRowsConflict("수업기록 저장 후 Supabase 재조회가 일치하지 않습니다.", { lessonId, studentId });
+      const error = createLessonJournalRowsConflict("수업기록 저장 결과가 요청과 일치하지 않습니다.", { lessonId, studentId });
       error.appliedResult = {
-        record: verified ?? (savedRows[0] ? fromLessonRecordRow(savedRows[0]) : { ...effectiveAfter, updatedAt: nextUpdatedAt }),
+        record: verified ?? { ...effectiveAfter, updatedAt: nextUpdatedAt },
         mutated: true,
         operation: "create"
       };
@@ -2545,14 +2555,17 @@ async function persistLessonJournalRowsRecordChange(change = {}) {
       studentId
     });
   }
-  const verified = await getLessonJournalRecordForRowsSave(lessonId, studentId);
+  // 대조는 그대로 하되 원천은 쓰기 응답이 돌려준 행을 쓴다(patchRows 의 return=representation).
+  // 같은 행을 다시 SELECT 하면 왕복이 학생마다 한 번 더 들고, 그 사이 다른 화면이 정상 CAS 로
+  // 이어서 저장하면 우리 저장이 실패로 뒤집혀 롤백이 남의 최신 값을 되돌린다.
+  const verified = fromLessonRecordRow(savedRows[0]);
   if (
     !verified ||
     !areLessonJournalRecordsEqual(effectiveAfter, verified) ||
     !areLessonJournalHistoryTimestampsEqual(nextUpdatedAt, verified.updatedAt)
   ) {
-    const error = createLessonJournalRowsConflict("수업기록 저장 후 Supabase 재조회가 일치하지 않습니다.", { lessonId, studentId });
-    error.appliedResult = { beforeRecord: current, record: verified ?? fromLessonRecordRow(savedRows[0]), mutated: true, operation: "update" };
+    const error = createLessonJournalRowsConflict("수업기록 저장 결과가 요청과 일치하지 않습니다.", { lessonId, studentId });
+    error.appliedResult = { beforeRecord: current, record: verified, mutated: true, operation: "update" };
     throw error;
   }
   return { beforeRecord: current, record: verified, mutated: true, operation: "update" };
@@ -2634,9 +2647,11 @@ export async function saveLessonJournalRowsPlan({
       }
     }
     failedStage = "records";
+    // 한 저장 요청 안에서 같은 수업의 명단을 학생마다 다시 읽지 않는다.
+    const rosterCache = new Map();
     for (const change of recordChanges) {
       try {
-        appliedRecords.push({ change, ...(await persistLessonJournalRowsRecordChange(change)) });
+        appliedRecords.push({ change, ...(await persistLessonJournalRowsRecordChange(change, rosterCache)) });
       } catch (error) {
         if (error.appliedResult) appliedRecords.push({ change, ...error.appliedResult });
         throw error;
@@ -4099,30 +4114,35 @@ export async function upsertAppState(states, { expectedUpdatedAt = null } = {}) 
     return { source: fallbackSource, states };
   }
 
-  for (const key of hiddenAppStateKeys) {
-    await deleteRows("app_state", `state_key=eq.${encodeURIComponent(key)}`);
-  }
+  // 숨김 키 삭제도 한 번에 보낸다(예전에는 키마다 왕복 1회였다).
+  const hiddenKeyList = [...hiddenAppStateKeys].map((key) => `"${encodeURIComponent(key)}"`).join(",");
+  await deleteRows("app_state", `state_key=in.(${hiddenKeyList})`);
   const entries = Object.entries(states)
     .filter(([key]) => !hiddenAppStateKeys.has(key))
     .map(([key, value]) => [key, toAppStateRow(key, value)]);
   if (entries.length === 0) return { source: databaseSource, states: {} };
 
-  const savedRows = [];
-  for (const [key, row] of entries) {
-    const hasExpectedVersion = Boolean(
-      expectedUpdatedAt && Object.prototype.hasOwnProperty.call(expectedUpdatedAt, key)
-    );
-    if (!hasExpectedVersion) {
-      const [savedRow] = await upsertRows("app_state", [row]);
-      if (savedRow) savedRows.push(savedRow);
-      continue;
-    }
+  const hasExpectedVersion = (key) => Boolean(
+    expectedUpdatedAt && Object.prototype.hasOwnProperty.call(expectedUpdatedAt, key)
+  );
 
+  // CAS 가 걸린 키는 충돌을 키 단위로 판정해야 해서 하나씩, 나머지는 한 번의 upsert 로 묶는다
+  // (운영 22행 = 예전엔 왕복 22회). on_conflict 는 예전처럼 기본키(tenant_id, state_key).
+  const savedRowByKey = new Map();
+  const mergeRows = entries.filter(([key]) => !hasExpectedVersion(key)).map(([, row]) => row);
+  if (mergeRows.length) {
+    for (const savedRow of await upsertRows("app_state", mergeRows)) {
+      savedRowByKey.set(savedRow.state_key, savedRow);
+    }
+  }
+
+  for (const [key, row] of entries) {
+    if (!hasExpectedVersion(key)) continue;
     const expectedVersion = expectedUpdatedAt[key];
     if (expectedVersion === null) {
       try {
         const [savedRow] = await insertRows("app_state", [row]);
-        if (savedRow) savedRows.push(savedRow);
+        if (savedRow) savedRowByKey.set(key, savedRow);
       } catch (error) {
         if (isAppStateInsertConflict(error)) throw createAppStateConflictError(key);
         throw error;
@@ -4136,8 +4156,11 @@ export async function upsertAppState(states, { expectedUpdatedAt = null } = {}) 
       row
     );
     if (!patchedRows.length) throw createAppStateConflictError(key);
-    savedRows.push(...patchedRows);
+    for (const patchedRow of patchedRows) savedRowByKey.set(patchedRow.state_key, patchedRow);
   }
+
+  // 묶음 처리로 바뀌어도 응답의 키 순서는 요청 순서를 그대로 따른다.
+  const savedRows = entries.map(([key]) => savedRowByKey.get(key)).filter(Boolean);
   return {
     source: databaseSource,
     states: Object.fromEntries(savedRows.map((row) => [row.state_key, row.state_value])),
