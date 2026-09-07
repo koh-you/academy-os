@@ -1012,7 +1012,6 @@ const lessonModalRuntime = Object.freeze({
   today
 });
 const futureAbsenceMakeupVisibleDays = 7;
-const appRuntimeSessionId = `runtime_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
 function getAcademyReminderTypeLabel(type = "custom") {
   return academyReminderTypeOptions.find((option) => option.value === type)?.label ?? "운영 알림";
@@ -1161,29 +1160,12 @@ function formatAcademyReminderDateTime(reminder = {}) {
     .join(" ");
 }
 
-function getAcademyReminderSummary(reminder = {}, students = [], templates = []) {
-  const studentName = getAcademyReminderStudentName(reminder, students);
-  const className = getAcademyReminderClassName(reminder, templates);
-  return [
-    getAcademyReminderTypeLabel(reminder.reminderType ?? reminder.type),
-    studentName,
-    className ? `반 ${className}` : "",
-    reminder.title,
-    formatAcademyReminderDateTime(reminder)
-  ].filter(Boolean).join(" · ");
-}
-
 function getAcademyRemindersForDate(reminders = [], date = today, { includeDone = false } = {}) {
   return sortAcademyReminders(reminders).filter((reminder) => {
     if ((reminder.reminderDate || reminder.date) !== date) return false;
     if (includeDone) return true;
     return normalizeAcademyReminderStatus(reminder.status) === "pending";
   });
-}
-
-function getAcademyRemindersForStudent(reminders = [], studentId = "") {
-  if (!studentId) return [];
-  return sortAcademyReminders(reminders).filter((reminder) => reminder.studentId === studentId);
 }
 
 function getAcademyRemindersForLesson(reminders = [], lesson = {}, lessonStudents = []) {
@@ -1477,10 +1459,6 @@ function patchLessonRecordRetestStatusRequest(record) {
   return postJson("/api/lesson-records/retest-status", { record });
 }
 
-function postSchoolEvents(schoolEvents) {
-  return postJson("/api/school-events/bulk", { schoolEvents });
-}
-
 async function createAppStateWritePayload(states, { expectedUpdatedAt = null } = {}) {
   const { parseVersionedWriteRequest } = await import("../shared/contracts/versionedWriteRouteContracts.js");
   return parseVersionedWriteRequest("POST", "/api/app-state", {
@@ -1585,10 +1563,6 @@ const {
 
 function createParentLoginId(student) {
   return `parent-${student.loginId}`;
-}
-
-function getDemoStudent(students) {
-  return students.find((student) => student.studentId === "student_mwf710_001") ?? students[0];
 }
 
 function mergeById(currentItems, nextItems, idKey) {
@@ -1766,45 +1740,9 @@ function buildSsenTypeCatalog(rows = []) {
 const ssenTypeCatalog = buildSsenTypeCatalog(ssenTypeIndex);
 const testPaperSubjectOptions = Object.keys(ssenTypeCatalog);
 
-function getTestPaperPreparationLabel(value = "") {
-  return testPaperPreparationOptions.find((option) => option.id === value)?.label ?? "준비중";
-}
-
-function getTestPaperProgressLabel(value = "") {
-  return testPaperProgressOptions.find((option) => option.id === value)?.label ?? "대기";
-}
-
-function getTestAttemptStatusLabel(value = "") {
-  return testAttemptStatusOptions.find((option) => option.id === value)?.label ?? "미입력";
-}
-
 function getProblemBookTotalQuestions(book = {}) {
   const problemsCount = Array.isArray(book.problems) ? book.problems.length : 0;
   return Number(book.totalProblems || problemsCount || 0);
-}
-
-function getProblemBookPassCorrectCount(book = {}) {
-  const totalQuestions = getProblemBookTotalQuestions(book);
-  const passScore = Number(book.passScore || 0);
-  if (!Number.isFinite(passScore) || passScore <= 0 || totalQuestions <= 0) return "";
-  if (passScore <= totalQuestions) return Math.ceil(passScore);
-  return Math.ceil(totalQuestions * Math.min(passScore, 100) / 100);
-}
-
-function getTestAttemptPassStatus(attempt = {}, session = {}) {
-  if (attempt.status === "not_taken") return "not_taken";
-  const correctCount = Number(attempt.correctCount);
-  const passCorrectCount = Number(session.passCorrectCount);
-  if (!Number.isFinite(correctCount) || !Number.isFinite(passCorrectCount) || passCorrectCount <= 0) return "";
-  return correctCount >= passCorrectCount ? "passed" : "failed";
-}
-
-function getTestAttemptPassLabel(value = "") {
-  return {
-    failed: "미통과",
-    not_taken: "미응시",
-    passed: "통과"
-  }[value] ?? "판정 전";
 }
 
 function inferTestPaperKind(book = {}) {
@@ -1838,30 +1776,6 @@ function getBooksForType(problemBooks = [], subject = "", type = {}) {
   return problemBooks.filter((book) =>
     (book.subject || "") === subject && typeNodeMatchesBook(book, type)
   );
-}
-
-function getTypeNodeStats(problemBooks = [], subject = "", type = {}) {
-  const books = getBooksForType(problemBooks, subject, type);
-  const registeredProblemCount = books.reduce((sum, book) => sum + Number(book.problems?.length ?? book.totalProblems ?? 0), 0);
-  const recentUsedAt = books
-    .map((book) => book.lastUsedAt || book.plannedDate || "")
-    .filter(Boolean)
-    .sort()
-    .slice(-1)[0] || "";
-  const kindLabels = [...new Set(books.map((book) => getTestPaperKindLabel(inferTestPaperKind(book))))];
-  const preparedCount = books.filter((book) => (book.preparationStatus || "draft") === "ready").length;
-  return {
-    books,
-    kindLabels,
-    preparedCount,
-    recentUsedAt,
-    registeredProblemCount
-  };
-}
-
-function getBookStudentProgress(book = {}, studentId = "") {
-  const progress = book.studentProgress && typeof book.studentProgress === "object" ? book.studentProgress : {};
-  return progress[studentId] ?? { status: "waiting", attempt: 0, score: "" };
 }
 
 function isRetiredProblemBookSeed(book = {}) {
@@ -2206,12 +2120,6 @@ const teacherLessonHubRuntime = Object.freeze({
   nestedPanels: lessonNestedPanelRuntime,
   sortByTime
 });
-
-function hasBrokenPromptEncoding(prompt = "") {
-  const text = String(prompt ?? "");
-  const replacementCount = (text.match(/\uFFFD/g) || []).length;
-  return replacementCount >= 6 || /����|��/.test(text);
-}
 
 function normalizeAiPrompts(prompts = {}) {
   const sourcePrompts = prompts && typeof prompts === "object" ? prompts : {};
@@ -8541,17 +8449,6 @@ function getDayKey(date) {
   return ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][new Date(`${date}T00:00:00+09:00`).getDay()];
 }
 
-function getKoreaDateTimeString(date = new Date()) {
-  return new Intl.DateTimeFormat("ko-KR", {
-    timeZone: "Asia/Seoul",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit"
-  }).format(date);
-}
-
 function getLessonAlimtalkBaseScheduledDate(lesson, delayMinutes = 0) {
   if (delayMinutes === "nextDay11am") {
     const nextDate = addDaysInKorea(lesson?.date ?? getKoreaDateString(), 1);
@@ -8843,16 +8740,6 @@ function upsertById(items, nextItem, idKey) {
   return items.some((item) => item[idKey] === nextItem[idKey])
     ? items.map((item) => (item[idKey] === nextItem[idKey] ? nextItem : item))
     : [...items, nextItem];
-}
-
-function createReportBody(student, lesson, record) {
-  return sampleData.reportTemplates[0].body
-    .replace("{studentName}", student.name)
-    .replace("{lessonDate}", lesson.date)
-    .replace("{className}", lesson.className)
-    .replace("{attendance}", attendanceLabels[record?.attendanceStatus ?? "pending"])
-    .replace("{homework}", homeworkLabels[record?.homeworkStatus ?? "not_started"])
-    .replace("{teacherComment}", record?.teacherComment || "아직 강사 코멘트가 입력되지 않았습니다.");
 }
 
 function getLessonHomework(homeworks, lesson, student, homeworkType, lessons = [], records = null, { onlyRegularLessons = false } = {}) {
