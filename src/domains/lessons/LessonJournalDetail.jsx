@@ -413,10 +413,12 @@ export function LessonJournalDetail({
   if (isExamPrepLessonCurrent) {
     return (
       <ExamPrepLessonDetail
+        attendanceSettings={attendanceSettings}
         createEmptyRecord={createEmptyRecord}
         lesson={lesson}
         onDeleteLesson={onDeleteLesson}
         onEditLesson={onEditLesson}
+        records={records}
         students={students}
       />
     );
