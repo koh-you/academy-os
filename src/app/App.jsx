@@ -466,7 +466,10 @@ import {
 import { safeIdPart } from "../shared/utils/id.js";
 import { getKoreaDateString } from "../shared/utils/koreaDate.js";
 import { applyStudentScheduleToLesson } from "../shared/utils/studentSchedule.js";
-import ssenTypeIndex from "../../api/data/ssenTypeIndex.json";
+// 쎈 유형 카탈로그(api/data/ssenTypeIndex.json 284 KB)는 여기서 import 하지 않는다.
+// 수업연구 화면에서만 쓰는 데이터라 lazy 청크(src/domains/tests/ssenTypeCatalog.js)에 둔다.
+// 과목 목록만 필요하므로 작은 상수를 가져다 쓴다.
+import { TEST_PAPER_SUBJECTS } from "../domains/tests/testPaperLibraryModel.js";
 import {
   academyBrandName,
   academyOperationalStartDate,
@@ -1687,58 +1690,9 @@ function createDefaultLessonResearchItems() {
   ]);
 }
 
-function buildSsenTypeCatalog(rows = []) {
-  const subjectMap = new Map();
-  rows.forEach((row) => {
-    const subject = row.subject || "과목 미지정";
-    const chapterName = row.partName || "대단원 미지정";
-    const unitName = row.unitName || "중단원 미지정";
-    if (!subjectMap.has(subject)) subjectMap.set(subject, new Map());
-    const chapterMap = subjectMap.get(subject);
-    const chapterId = `${row.bookCode || subject}_${safeIdPart(chapterName)}`;
-    if (!chapterMap.has(chapterName)) {
-      chapterMap.set(chapterName, {
-        id: chapterId,
-        title: chapterName,
-        units: new Map()
-      });
-    }
-    const chapter = chapterMap.get(chapterName);
-    const unitKey = `${row.unitNo || ""}_${unitName}`;
-    if (!chapter.units.has(unitKey)) {
-      chapter.units.set(unitKey, {
-        id: `${row.bookCode || subject}_${row.unitNo || safeIdPart(unitName)}`,
-        title: unitName,
-        unitNo: row.unitNo || "",
-        types: []
-      });
-    }
-    chapter.units.get(unitKey).types.push({
-      id: row.typeCode || `${subject}_${row.unitNo || ""}_${row.typeNo || ""}_${safeIdPart(row.typeName || "")}`,
-      title: row.typeName || "유형명 미입력",
-      typeNo: row.typeNo || "",
-      bookTitle: row.bookTitle || "",
-      partName: chapterName,
-      unitName
-    });
-  });
-
-  return Object.fromEntries(
-    Array.from(subjectMap.entries()).map(([subject, chapterMap]) => [
-      subject,
-      Array.from(chapterMap.values()).map((chapter) => ({
-        ...chapter,
-        units: Array.from(chapter.units.values()).map((unit) => ({
-          ...unit,
-          types: unit.types.sort((a, b) => String(a.typeNo).localeCompare(String(b.typeNo), "ko", { numeric: true }))
-        }))
-      }))
-    ])
-  );
-}
-
-const ssenTypeCatalog = buildSsenTypeCatalog(ssenTypeIndex);
-const testPaperSubjectOptions = Object.keys(ssenTypeCatalog);
+// 과목 목록은 쎈 카탈로그 키와 같다(첫 등장 순서). 284 KB JSON 을 첫 로딩에 끌어오지
+// 않으려고 작은 상수를 쓴다 — 둘이 어긋나면 test:ssen-subject-parity 가 잡는다.
+const testPaperSubjectOptions = TEST_PAPER_SUBJECTS;
 
 function getProblemBookTotalQuestions(book = {}) {
   const problemsCount = Array.isArray(book.problems) ? book.problems.length : 0;
@@ -1969,6 +1923,8 @@ const learningSupportRuntime = Object.freeze({
   today
 });
 
+// ssenTypeCatalog 는 이 runtime 에 담지 않는다 — 원천 JSON 284 KB 가 교사 첫 로딩
+// 번들에 딸려온다. 쓰는 쪽(PlanningToolCenters)이 직접 import 해서 lazy 청크에 담는다.
 const planningToolRuntime = Object.freeze({
   appStateAutosaveRisk,
   buildExamCalendarEvents,
@@ -1990,7 +1946,6 @@ const planningToolRuntime = Object.freeze({
   normalizeMathExamEntries,
   normalizeMathSubject,
   schoolCalendarAutosaveRisk,
-  ssenTypeCatalog,
   syncPrimaryMathExamDate,
   today,
   upsertMathExamEntryFromSchoolEvent

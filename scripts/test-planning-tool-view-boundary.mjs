@@ -52,11 +52,20 @@ assert.deepEqual(runtimeKeys, [
   "normalizeMathExamEntries",
   "normalizeMathSubject",
   "schoolCalendarAutosaveRisk",
-  "ssenTypeCatalog",
+  // ssenTypeCatalog 는 2026-09-07 에 이 목록에서 빠졌다. 원천 JSON 이 284 KB 라
+  // runtime 으로 넘기면 교사 첫 로딩 번들에 딸려온다 — 쓰는 쪽(LessonResearchCenter)이
+  // src/domains/tests/ssenTypeCatalog.js 를 직접 import 해서 lazy 청크에 담는다.
+  // 다시 넣지 말 것. test:ssen-subject-parity 도 같은 경계를 지킨다.
   "syncPrimaryMathExamDate",
   "today",
   "upsertMathExamEntryFromSchoolEvent"
 ].sort());
+
+// 카탈로그가 lazy 쪽에 남아 있는지 함께 본다(runtime 에서 빠졌다고 화면이 못 쓰면 안 된다).
+assert.ok(
+  screenSource.includes('from "../tests/ssenTypeCatalog.js"'),
+  "수업연구 화면이 쎈 카탈로그를 직접 import 해야 한다"
+);
 
 assert.equal(outletSource.includes("onSaveDerivedEvent: actions.handleSaveDerivedSchoolCalendar"), true);
 assert.equal(screenSource.includes("시험관리 행과 직전수업을 함께 저장하는 중입니다."), true);
