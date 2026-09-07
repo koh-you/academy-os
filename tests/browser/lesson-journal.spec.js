@@ -182,6 +182,8 @@ test("exam analysis pipeline opens from its deferred chunk without running paid 
 });
 
 test("exam analysis non-paid teacher saves use the safe source and survive reload", async ({ page, request }) => {
+  // Multiple server rereads, reloads and responsive screenshots exceed the default on shared CI runners.
+  test.setTimeout(90000);
   const pageErrors = collectPageErrors(page);
   const title = "안전 시험분석 계약 저장";
   await loginAsTeacher(page);
