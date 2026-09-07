@@ -106,7 +106,7 @@ import {
 } from "./lib/supabaseRest.js";
 import { enterTenantContext, getCurrentTenantId, setWriteTenant } from "../src/shared/server/tenantScope.js";
 import { createKioskDeviceRegistry } from "../src/shared/server/kioskDeviceRegistry.js";
-import { evaluateApiAccess } from "../src/shared/server/apiAccessPolicy.js";
+import { evaluateApiAccess, mayAuthenticateAsKiosk } from "../src/shared/server/apiAccessPolicy.js";
 import {
   createClientRuntimeErrorRateLimiter,
   normalizeClientRuntimeErrorReport
@@ -4878,14 +4878,15 @@ const server = http.createServer(async (request, response) => {
   const teacherSession = getTeacherSession(request);
   const opsSession = teacherSession ? null : getOpsSession(request);
   const kioskToken = String(getRequestHeader(request, "x-kiosk-token") || "").trim();
+  const mayFallBackToKiosk = mayAuthenticateAsKiosk(teacherSession, opsSession, getRequestHeader(request, "authorization"));
   // 키오스크는 기기 등록부(kiosk_devices)에서 찾는다. 못 찾으면 레거시 단일 토큰으로 폴백한다.
   // 폴백이 있어야 기기를 등록하기 전에 배포돼도 이미 쓰고 있는 태블릿이 죽지 않는다.
-  const kioskDevice = !teacherSession && !opsSession && kioskToken
+  const kioskDevice = mayFallBackToKiosk && kioskToken
     ? await resolveKioskDeviceForRequest(kioskToken)
     : null;
   const expectedKioskToken = String(process.env.ACADEMY_KIOSK_TOKEN || "").trim();
   const legacyKioskOk =
-    !teacherSession && !opsSession && !kioskDevice && Boolean(expectedKioskToken) &&
+    mayFallBackToKiosk && !kioskDevice && Boolean(expectedKioskToken) &&
     Boolean(kioskToken) && timingSafeEqualText(kioskToken, expectedKioskToken);
   const kioskOk = Boolean(kioskDevice) || legacyKioskOk;
   const dispatchOk = !teacherSession && !opsSession && !kioskOk && getDispatchAuthState(request, {}).ok;

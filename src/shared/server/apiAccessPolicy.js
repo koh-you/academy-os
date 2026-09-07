@@ -144,6 +144,18 @@ export function isAssistantAllowed(method, pathname) {
   return ASSISTANT_ALLOW_EXACT.has(`${method} ${pathname}`);
 }
 
+/**
+ * 이 요청을 키오스크로 인증해도 되는가.
+ *
+ * 교사 세션이 만료된 요청을 키오스크로 강등하면 안 된다. 그렇게 되면 화면에는
+ * "다시 로그인하세요" 대신 kiosk_forbidden 이 떠서, 교사가 원인을 알 수 없는 저장
+ * 실패를 보게 된다(2026-09-07 수업일지 저장 실패로 실제 발생).
+ * Authorization 을 보냈다는 것은 로그인 사용자라는 뜻이므로 401 로 답해야 한다.
+ */
+export function mayAuthenticateAsKiosk(teacherSession, opsSession, authorizationHeader) {
+  return !teacherSession && !opsSession && !String(authorizationHeader ?? "").trim();
+}
+
 export function isKioskAllowed(method, pathname) {
   if (method === "GET" && pathname.startsWith("/api/")) return true;
   return KIOSK_WRITE_ALLOW.has(`${method} ${pathname}`);

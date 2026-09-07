@@ -33,13 +33,21 @@ export function setApiAuthToken(token) {
   currentAuthToken = String(token || "");
 }
 
-// 키오스크(/attendance 로비 태블릿)는 로그인이 없으므로 기기 토큰을 X-Kiosk-Token 으로 보낸다.
-// 서버는 이 토큰으로 기기를 찾아 그 기기가 담당하는 학원 범위만 열어준다.
-// 교사/ops 토큰이 있으면 서버가 그쪽을 우선하므로 로그인 사용자에겐 무해하다.
+// 키오스크(/attendance 로비 태블릿) 기기 토큰. **명시적으로 켠 진입점만** 보낸다.
 //
-// 토큰은 태블릿마다 다르다. 빌드 하나로 여러 태블릿을 쓰려면 기기가 자기 토큰을 들고 있어야 하므로
-// `/attendance?kiosk=<토큰>` 을 그 태블릿에서 한 번 열어 저장시킨다(자세한 내용은 kioskToken.js).
-const kioskToken = resolveKioskDeviceToken(import.meta.env?.VITE_KIOSK_TOKEN);
+// 예전에는 빌드에 박힌 값을 모든 진입점이 무조건 보냈다. 그래서 교사 브라우저도
+// X-Kiosk-Token 을 달고 다녔고, 로그인 세션이 만료되자 서버가 그 요청을 키오스크로
+// 판정해 kiosk_forbidden 을 돌려줬다. 교사 화면에는 "다시 로그인하세요" 대신
+// 원인 모를 저장 실패가 떴다(2026-09-07 수업일지 저장 실패).
+//
+// 키오스크 토큰은 태블릿 진입점(kioskMain.jsx)만의 것이다. 교사 앱은 보내지 않는다.
+let kioskToken = "";
+
+/** 태블릿 진입점이 앱을 그리기 전에 1회 호출한다. */
+export function enableKioskDeviceToken() {
+  kioskToken = resolveKioskDeviceToken(import.meta.env?.VITE_KIOSK_TOKEN);
+  return kioskToken;
+}
 
 export function withAuthHeaders(headers = {}) {
   const merged = { ...headers };
