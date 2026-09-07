@@ -38,7 +38,12 @@ export function AttendanceKioskApp() {
   const [students, setStudents] = useState([]);
   const [lessons, setLessons] = useState([]);
   const [records, setRecords] = useState([]);
-  const [isReady, setIsReady] = useState(false);
+  // 첫 조회가 끝났는지만 본다. 한 번 true 가 되면 다시 false 로 돌아가지 않는다.
+  //
+  // 날짜가 바뀌거나 60초 동기화로 다시 불러올 때 입력을 잠그면, 학생이 번호를 누르는
+  // 순간 키패드가 죽는다. 출결 미리보기/체크인은 서버로 바로 나가므로 로컬 명단이
+  // 갱신 중이어도 정확하다. 화면은 계속 쓸 수 있어야 한다.
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [attendanceSettings] = useState(() => normalizeAttendanceSettings(defaultAttendanceSettings));
   const recordsRef = useRef(records);
   // 교사 화면은 저장 중인 셀을 덮어쓰지 않으려고 저장 상태를 추적하지만, 태블릿에는
@@ -57,8 +62,9 @@ export function AttendanceKioskApp() {
   } = useAttendanceDateRollover({
     enabled: true,
     getCurrentDate: getKoreaDateString,
-    isReady,
-    onReloadRequested: () => setIsReady(false)
+    isReady: hasLoadedOnce,
+    // 재조회만 예약한다. 화면을 잠그지 않는다.
+    onReloadRequested: () => {}
   });
 
   useEffect(() => {
@@ -70,7 +76,6 @@ export function AttendanceKioskApp() {
     let isMounted = true;
 
     async function loadToday() {
-      setIsReady(false);
       const attendanceDate = getKoreaDateString();
       try {
         const [studentsResponse, lessonsResponse, recordsResponse] = await Promise.all([
@@ -104,7 +109,7 @@ export function AttendanceKioskApp() {
         // 네트워크가 끊겨도 화면은 뜬다. 다음 날짜 롤오버나 60초 동기화에서 다시 시도한다.
         if (!isMounted) return;
       } finally {
-        if (isMounted) setIsReady(true);
+        if (isMounted) setHasLoadedOnce(true);
       }
     }
 
@@ -115,7 +120,7 @@ export function AttendanceKioskApp() {
   }, [markLoadedDate, reloadKey]);
 
   useAttendanceRecordSync({
-    enabled: isReady,
+    enabled: hasLoadedOnce,
     recordsRef,
     request: getJsonWithTimeout,
     saveStatesRef,
@@ -168,7 +173,7 @@ export function AttendanceKioskApp() {
     <AttendanceKiosk
       isStandalone
       formatLessonDisplayName={formatLessonDisplayName}
-      isLoading={!isReady}
+      isLoading={!hasLoadedOnce}
       lessons={lessons}
       onAttendanceCheck={handleAttendanceCheck}
       onAttendancePreview={handleAttendancePreview}
