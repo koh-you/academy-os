@@ -1,4 +1,4 @@
-.studioPage.studioPage{max-width:1440px;width:100%;margin:0 auto;padding:24px;box-sizing:border-box;display:grid;gap:16px;color:var(--academy-text,#233448)}
+.studioPage.studioPage{max-width:none;width:100%;margin:0;padding:0;box-sizing:border-box;display:grid;gap:16px;color:var(--academy-text,#233448)}
 .studioPage .pageHeader{margin:0}
 .studioWorkspace{display:grid;gap:16px;min-width:0}
 .studioWorkspaceSummary{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;background:var(--academy-surface,#fff);border:1px solid var(--academy-border-strong,#cbd8ee);border-radius:12px}
@@ -14,7 +14,7 @@
 .studioWorkspaceSteps button{display:flex;align-items:center;gap:8px;min-height:44px;padding:10px 14px!important;font-size:14px!important}
 .studioWorkspaceSteps button>span{font-weight:700;opacity:.75}
 .studioWorkspaceSteps button[aria-selected=true]{background:var(--academy-primary,#17213d);color:#fff}
-.studioWorkspaceBody{padding:20px;min-width:0}
+.studioWorkspaceBody{padding:20px;min-width:0;container-type:inline-size;container-name:studioContent}
 .studioWorkspaceMobileStep{display:none}
 .studioPage .blogHistory,.studioPage .examAnalysisLibraryPanel{padding:0;border:0;background:transparent;box-shadow:none}
 .studioPage .examAnalysisColumnBoard{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
@@ -24,9 +24,26 @@
 .studioPage .blogField,.studioPage .blogCheck{font-size:15px}
 .studioPage .examAnalysisWorkPanel>.panel{box-shadow:none}
 .studioPage .examAnalysisWorkPanel{min-width:0}
-@media(max-width:760px){.studioPage.studioPage{padding:12px;gap:12px}.studioWorkspaceSummary{padding:14px;align-items:flex-start;flex-direction:column}.studioWorkspaceGrid{grid-template-columns:minmax(0,1fr);gap:12px}.studioWorkspaceLibrary{max-height:260px}.studioWorkspaceBody{padding:14px}.studioPage .workspaceTabs.studioWorkspaceSteps{display:none}.studioWorkspaceMobileStep{display:grid;gap:8px;padding:14px;border-bottom:1px solid #cbd8ee;font-size:15px;font-weight:700}.studioWorkspaceMobileStep select{width:100%;padding:12px;border:1px solid #cbd8ee;border-radius:8px;background:#fff;font:inherit}.studioPage .blogHistory{max-height:none}}
+@media(max-width:760px){.studioPage.studioPage{padding:0;gap:12px}.studioWorkspaceSummary{padding:14px;align-items:flex-start;flex-direction:column}.studioWorkspaceGrid{grid-template-columns:minmax(0,1fr);gap:12px}.studioWorkspaceLibrary{max-height:260px}.studioWorkspaceBody{padding:14px}.studioPage .workspaceTabs.studioWorkspaceSteps{display:none}.studioWorkspaceMobileStep{display:grid;gap:8px;padding:14px;border-bottom:1px solid #cbd8ee;font-size:15px;font-weight:700}.studioWorkspaceMobileStep select{width:100%;padding:12px;border:1px solid #cbd8ee;border-radius:8px;background:#fff;font:inherit}.studioPage .blogHistory{max-height:none}}
 
 .studioLibraryFilters{display:grid;gap:14px}
 .studioLibraryFilters label{display:grid;gap:7px;font-size:15px;font-weight:700}
 .studioLibraryFilters select{width:100%;padding:10px 8px;border:1px solid var(--academy-border-strong,#cbd8ee);border-radius:8px;background:#fff;font:inherit}
 .studioLibraryFilters select:focus-visible{outline:2px solid var(--academy-focus-ring,#4b80ed);outline-offset:2px}
+
+/* Wider workspaces show related tasks together instead of stretching one form. */
+.studioPreparation,.studioChatHandoff{display:grid;gap:24px;align-items:start}
+.studioPreparation>section,.studioTaskGuide,.studioWelcomeSteps>article{min-width:0;padding:18px;border:1px solid var(--academy-border-strong,#cbd8ee);border-radius:10px;background:var(--academy-surface,#fff)}
+.studioPreparation h3,.studioTaskGuide h2,.studioWelcome h2{margin-top:0}
+.studioWelcomeSteps{display:grid;gap:18px;margin:20px 0;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+.studioWelcome p{max-width:55ch;line-height:1.7}
+.studioPage .studioPreviewText{max-width:72ch;margin-inline:auto;font-size:15px}
+.studioPage .studioInput textarea{font-size:15px;line-height:1.8}
+@container studioContent (min-width:1100px){
+  .studioPreparation{grid-template-columns:minmax(380px,.85fr) minmax(0,1.15fr)}
+  .studioChatHandoff{grid-template-columns:340px minmax(0,1fr)}
+  .studioChatHandoff>.blogField{margin-top:0}
+  .studioPage .examAnalysisWorkPanel[data-active-tab=source]{grid-template-columns:minmax(360px,420px) minmax(0,1fr);align-items:start}
+  .studioPage .examAnalysisFormPanel .examAnalysisFormGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .studioPage .examAnalysisFormPanel .examAnalysisFormGrid>label:first-child,.studioPage .examAnalysisFormPanel .examAnalysisFormGrid>label:nth-child(2){grid-column:1/-1}
+}
