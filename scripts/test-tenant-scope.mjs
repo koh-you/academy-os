@@ -54,8 +54,13 @@ assert.equal(applyTenantFilterToQuery("lessons", "", TID), "tenant_id=eq.tenant_
 // 값 인코딩
 assert.equal(applyTenantFilterToQuery("lessons", "select=*", "tenant a/b"), "select=*&tenant_id=eq.tenant%20a%2Fb");
 
-// 비대상 테이블 → 그대로
-assert.equal(applyTenantFilterToQuery("app_state", "select=*", TID), "select=*");
+// 비대상 테이블 → 그대로 (kiosk_devices 는 여러 테넌트를 가로지르는 것이 존재 이유다)
+assert.equal(applyTenantFilterToQuery("kiosk_devices", "select=*", TID), "select=*");
+// app_state 는 정산·상담·성적이 들어가므로 반드시 스코핑 대상이다
+assert.equal(
+  applyTenantFilterToQuery("app_state", "select=*", TID),
+  "select=*&tenant_id=eq.tenant_abc123"
+);
 // tenantId 없음 → 그대로 (읽기는 막지 않음)
 assert.equal(applyTenantFilterToQuery("students", "select=*", ""), "select=*");
 
@@ -71,7 +76,11 @@ assert.deepEqual(applyTenantToRows("students", [{ student_id: "s1", tenant_id: T
 // 다른 tenant_id → 교차 테넌트 쓰기 차단
 assert.throws(() => applyTenantToRows("students", [{ student_id: "s1", tenant_id: "tenant_other" }], TID), /테넌트 불일치/);
 // 비대상 테이블 → 주입 안 함
-assert.deepEqual(applyTenantToRows("app_state", [{ state_key: "k" }], TID), [{ state_key: "k" }]);
+assert.deepEqual(applyTenantToRows("kiosk_devices", [{ kiosk_id: "k" }], TID), [{ kiosk_id: "k" }]);
+// app_state 는 주입한다(복합키 (tenant_id, state_key) 로 upsert 되어야 한다)
+assert.deepEqual(applyTenantToRows("app_state", [{ state_key: "k" }], TID), [
+  { state_key: "k", tenant_id: TID }
+]);
 
 // PATCH/DELETE selector: 대상 테이블 + tenantId 없음 → throw
 assert.throws(() => requireTenantScopedMutationQuery("lessons", "lesson_date=lt.2026-01-01", ""), /테넌트 스코프가 필요/);
@@ -81,11 +90,13 @@ assert.equal(
   "lesson_date=lt.2026-01-01&tenant_id=eq.tenant_abc123"
 );
 // 비대상 테이블 → 그대로 (tenantId 없어도 OK)
-assert.equal(requireTenantScopedMutationQuery("app_state", "state_key=eq.k", ""), "state_key=eq.k");
+assert.equal(requireTenantScopedMutationQuery("kiosk_devices", "kiosk_id=eq.k", ""), "kiosk_id=eq.k");
+// app_state 삭제/수정은 테넌트 없이는 막힌다(전 테넌트 삭제 방지)
+assert.throws(() => requireTenantScopedMutationQuery("app_state", "state_key=eq.k", ""), /테넌트 스코프가 필요/);
 
 // --- TENANT_SCOPED_TABLES 드리프트 가드 (docs/security/multi-tenant-phase1-plan.md (a)) ---
 const expectedTables = [
-  "academy_reminders", "attendance_events", "class_templates", "exam_analysis_ai_jobs",
+  "academy_reminders", "app_state", "attendance_events", "class_templates", "exam_analysis_ai_jobs",
   "exam_analysis_events", "exam_analysis_questions", "exam_analysis_runs", "exam_analysis_sources",
   "exam_post_submissions", "exam_prep_rows", "exam_submission_files", "homeworks",
   "lesson_student_records", "lessons", "makeup_tasks", "notification_jobs", "notification_logs",

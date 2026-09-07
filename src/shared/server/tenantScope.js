@@ -92,6 +92,9 @@ export const TENANT_SCOPED_TABLES = new Set([
   "notification_jobs",
   "notification_logs",
   "teacher_accounts",
+  // 정산·상담기록·성적·보고서 등 교사 소유 데이터가 state_key 별로 들어간다.
+  // 기본키가 (tenant_id, state_key) 복합키다 — supabase/20260907_app_state_tenant.sql
+  "app_state",
   "student_intake_applicants",
   "special_lecture_applications",
   // Tier B — FK 파생이지만 컬럼 직접 부착
