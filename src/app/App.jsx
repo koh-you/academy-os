@@ -1923,6 +1923,8 @@ const learningSupportRuntime = Object.freeze({
   today
 });
 
+// ssenTypeCatalog 는 이 runtime 에 담지 않는다 — 원천 JSON 284 KB 가 교사 첫 로딩
+// 번들에 딸려온다. 쓰는 쪽(PlanningToolCenters)이 직접 import 해서 lazy 청크에 담는다.
 const planningToolRuntime = Object.freeze({
   appStateAutosaveRisk,
   buildExamCalendarEvents,
@@ -1944,8 +1946,6 @@ const planningToolRuntime = Object.freeze({
   normalizeMathExamEntries,
   normalizeMathSubject,
   schoolCalendarAutosaveRisk,
-  // ssenTypeCatalog 는 여기로 넘기지 않는다 — 284 KB JSON 이 첫 로딩 번들에 딸려온다.
-  // 쓰는 쪽(PlanningToolCenters)이 직접 import 해서 lazy 청크에 담는다.
   syncPrimaryMathExamDate,
   today,
   upsertMathExamEntryFromSchoolEvent
