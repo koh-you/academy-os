@@ -31,6 +31,29 @@ setApiAuthToken("tok-session");
 assert.deepEqual(withAuthHeaders({ Authorization: "Bearer explicit" }), { Authorization: "Bearer explicit" });
 setApiAuthToken("");
 
+// 키오스크 토큰은 켜기 전까지 절대 나가지 않는다.
+// 교사 앱이 X-Kiosk-Token 을 달고 다니면, 세션이 만료됐을 때 서버가 그 요청을
+// 키오스크로 판정해 kiosk_forbidden 을 돌려준다. 교사 화면에는 "다시 로그인하세요"
+// 대신 원인 모를 저장 실패가 뜬다(2026-09-07 수업일지 저장 실패).
+assert.ok(
+  !Object.prototype.hasOwnProperty.call(withAuthHeaders(), "X-Kiosk-Token"),
+  "켜지 않은 진입점(교사 앱)은 X-Kiosk-Token 을 보내면 안 된다"
+);
+
+const kioskMainSource = await readFile(
+  new URL("../src/kioskMain.jsx", import.meta.url),
+  "utf8"
+);
+assert.ok(
+  kioskMainSource.includes("enableKioskDeviceToken()"),
+  "태블릿 진입점은 enableKioskDeviceToken() 을 호출해야 한다"
+);
+const teacherMainSource = await readFile(new URL("../src/main.jsx", import.meta.url), "utf8");
+assert.ok(
+  !teacherMainSource.includes("enableKioskDeviceToken"),
+  "교사 진입점은 키오스크 토큰을 켜면 안 된다"
+);
+
 // 회귀 방지: 앱 코드에서 인증 헤더를 우회하는 직접 호출이 다시 생기면 실패시킨다.
 // 2026-09-05 버그 — `fetch(apiUrl(...))` 40곳이 토큰 없이 나가 운영에서 전부 401 이 났다.
 const srcRoot = fileURLToPath(new URL("../src/", import.meta.url));

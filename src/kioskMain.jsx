@@ -6,6 +6,7 @@ import { createRoot } from "react-dom/client";
 import { AttendanceKioskApp } from "./kiosk/AttendanceKioskApp.jsx";
 import { AppErrorBoundary } from "./shared/runtime/AppErrorBoundary.jsx";
 import { installGlobalClientErrorHandlers } from "./shared/runtime/clientErrorReporter.js";
+import { enableKioskDeviceToken } from "./shared/utils/apiClient.js";
 import "./app/App.tokens.css";
 // 교사용 통짜 App.css(400 KB) 대신 출결 화면에 실제로 닿는 규칙만 받는다(10 KB).
 // attendanceKiosk.css 는 App.css 에서 셀렉터 기준으로 뽑아낸 생성물이다 —
@@ -14,6 +15,8 @@ import "./app/App.tokens.css";
 import "./kiosk/attendanceKiosk.css";
 
 installGlobalClientErrorHandlers();
+// 이 진입점만 X-Kiosk-Token 을 보낸다. 교사 앱은 보내지 않는다(apiClient.js 참고).
+enableKioskDeviceToken();
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
