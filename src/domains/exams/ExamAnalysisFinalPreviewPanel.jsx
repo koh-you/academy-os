@@ -1,4 +1,7 @@
 import { Disclosure } from "../../shared/components/Disclosure.jsx";
+import { useState } from "react";
+import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
+import "./examFinalPreviewWorkspace.css";
 import { examAnalysisPreviewPalette } from "./finalPreview.js";
 import { ExamAnalysisPromptStudioPanel } from "./ExamAnalysisPromptStudioPanel.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
@@ -149,6 +152,7 @@ function ExamAnalysisQuestionMap({ questions = [] }) {
 }
 
 export function ExamAnalysisFinalPreviewPanel({ model }) {
+  const [view, setView] = useState("distribution");
   if (!model?.questions?.length) {
     return (
       <div className="panel examAnalysisFinalPreviewPanel">
@@ -186,8 +190,9 @@ export function ExamAnalysisFinalPreviewPanel({ model }) {
         </div>
       </div>
 
-      <div className="examAnalysisPreviewGrid">
-        <section className="examAnalysisPreviewCard wide">
+      <WorkspaceTabs label="최종 미리보기 보기 선택" className="examFinalPreviewTabs">{[{ id: "distribution", label: "출제 비중" }, { id: "difficulty", label: "난이도·문항 흐름" }, { id: "questions", label: "주요문항" }, { id: "cards", label: "카드 제작" }].map(item => <button type="button" role="tab" key={item.id} aria-selected={view === item.id} onClick={() => setView(item.id)}>{item.label}</button>)}</WorkspaceTabs>
+      <div role="region" aria-label="선택한 분석 미리보기" tabIndex={0} className="examAnalysisPreviewGrid examFinalPreviewViews" data-preview-view={view}>
+        <section hidden={view !== "distribution"} className="examAnalysisPreviewCard wide">
           <div className="examAnalysisPreviewCardHeader">
             <strong>쎈 중단원별 출제 비중</strong>
             <span>주요유형 분포</span>
@@ -201,7 +206,7 @@ export function ExamAnalysisFinalPreviewPanel({ model }) {
           </div>
         </section>
 
-        <section className="examAnalysisPreviewCard">
+        <section hidden={view !== "difficulty"} className="examAnalysisPreviewCard">
           <div className="examAnalysisPreviewCardHeader">
             <strong>난이도 분포</strong>
             <span>고정 색상</span>
@@ -209,7 +214,7 @@ export function ExamAnalysisFinalPreviewPanel({ model }) {
           <ExamAnalysisBarList items={model.difficultyDistribution} />
         </section>
 
-        <section className="examAnalysisPreviewCard">
+        <section hidden={view !== "difficulty"} className="examAnalysisPreviewCard">
           <div className="examAnalysisPreviewCardHeader">
             <strong>쎈 중단원별 난이도</strong>
             <span>검수 저장본</span>
@@ -217,7 +222,7 @@ export function ExamAnalysisFinalPreviewPanel({ model }) {
           <ExamAnalysisPartDifficultyList items={model.difficultyByPart} />
         </section>
 
-        <section className="examAnalysisPreviewCard wide">
+        <section hidden={view !== "difficulty"} className="examAnalysisPreviewCard wide">
           <div className="examAnalysisPreviewCardHeader">
             <strong>문항 흐름</strong>
             <span>난이도 색상 기준</span>
@@ -225,7 +230,7 @@ export function ExamAnalysisFinalPreviewPanel({ model }) {
           <ExamAnalysisQuestionMap questions={model.questions} />
         </section>
 
-        <section className="examAnalysisPreviewCard wide">
+        <section hidden={view !== "questions"} className="examAnalysisPreviewCard wide">
           <div className="examAnalysisPreviewCardHeader">
             <strong>주요문항</strong>
             <span>선생님 체크 저장본</span>
@@ -251,11 +256,10 @@ export function ExamAnalysisFinalPreviewPanel({ model }) {
       </div>
 
       <div className="examAnalysisPreviewPolicy">
-        <span>난이도 수정과 저장은 위 AI 결과 검수 표에서 진행합니다.</span>
-        <span>{model.notes.formulaPolicy}</span>
-        <span>{model.notes.publicOutputPolicy}</span>
+        <span>난이도 수정·저장: 선생님 검수 탭</span>
+        <Disclosure trigger="미리보기 표시 기준"><p>{model.notes.formulaPolicy}</p><p>{model.notes.publicOutputPolicy}</p></Disclosure>
       </div>
-      <Disclosure trigger="카드 제작 작업 열기"><ExamAnalysisPromptStudioPanel analysisRunId={model.meta.analysisRunId} /></Disclosure>
+      <section className="examFinalPreviewCards" hidden={view !== "cards"}><ExamAnalysisPromptStudioPanel analysisRunId={model.meta.analysisRunId} /></section>
     </div>
   );
 }

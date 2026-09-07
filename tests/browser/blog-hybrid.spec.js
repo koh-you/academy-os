@@ -1,7 +1,7 @@
 import { expect, test } from "./fixtures.js";
 import { loginAsTeacher, resetSafeFixture, safeApiBaseUrl } from "./safeSmokeSupport.js";
 test.beforeEach(async ({ request }) => { await resetSafeFixture(request); });
-async function openStudio(page) { await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /SNS 콘텐츠 스튜디오/ }).click(); }
+async function openStudio(page) { await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /SNS 스튜디오/ }).click(); }
 async function prepare(page) {
   await loginAsTeacher(page); await openStudio(page);
   await page.getByRole("button", { name: "+ 새 콘텐츠" }).click();

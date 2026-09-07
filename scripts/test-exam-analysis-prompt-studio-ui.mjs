@@ -51,7 +51,7 @@ assert(component.includes("disabled={!selectedId}"));
 assert(component.includes("{option.draft}"));
 assert(component.includes("className=\"examPromptRoleCard\""));
 assert(!component.includes("className=\"examPromptRoleCard\" defaultOpen"), "role cards start collapsed to keep the workspace focused");
-assert(finalPanel.includes('trigger="카드 제작 작업 열기"'));
+assert(finalPanel.includes('label: "카드 제작"'));
 assert(component.includes("className=\"examPromptRoleCard wide\""));
 assert(component.includes("schoolLevel={schoolLevel}"));
 assert(component.includes("buildExamAnalysisSlideSequence"));

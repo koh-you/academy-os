@@ -1,5 +1,5 @@
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
-import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
+import { StudioWorkspace } from "../../shared/components/StudioWorkspace.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { StudioEditor } from "../../shared/components/StudioEditor.jsx";
 import { StudioDialog } from "../../shared/components/StudioDialog.jsx";
@@ -19,6 +19,7 @@ export function BlogContentStudio({ students = [], scoreRecords = [], postAppSta
   const store = useBlogWorkspace(postAppState);
   const [selected, setSelected] = useState("");
   const [step, setStep] = useState(0);
+  const [libraryOpen, setLibraryOpen] = useState(true);
   const [tagsOpen, setTagsOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [raw, setRaw] = useState("");
@@ -46,14 +47,17 @@ export function BlogContentStudio({ students = [], scoreRecords = [], postAppSta
   const tags = draft ? suggestHashtags(draft) : null;
   const blocker = draft ? exportBlocker(draft) : "";
   const prompt = draft && !blocker ? buildChatPrompt(draft) : "";
-  return <main className="blogStudio">
-    <PageHeader title="SNS 콘텐츠 스튜디오" eyebrow="으뜸수학 고태영T" description="자료 준비 → Chat 작업 → 채널별 완성본 편집" actions={<button className="primaryButton" onClick={create} disabled={!store.ready || store.busy}>+ 새 콘텐츠</button>} />
+  return <main className="blogStudio studioPage">
+    <PageHeader title="SNS 스튜디오" eyebrow="으뜸수학 고태영T" description="블로그·인스타그램 글과 카드 편집" actions={<button className="primaryButton" onClick={create} disabled={!store.ready || store.busy}>+ 새 콘텐츠</button>} />
     <div role="status" className="blogStatus">{store.ready ? states[store.status] : "서버 자료 확인 중…"}{store.dirty && " · 화면을 나가기 전에 저장해 주세요."}</div>
     {store.error && <div role="alert" className="blogNotice">{store.error}<p>다른 화면과 충돌했다면 편집 내용을 복사해 보관한 뒤 새로고침해서 최신 자료를 확인하세요.</p></div>}
     {message && <p role="status" className="blogNotice">{message}</p>}
-    <div className="blogLayout"><aside className="blogHistory" aria-label="콘텐츠 목록"><h2>내 콘텐츠 <small>{store.items.length}</small></h2>{!store.items.length && <p>새 콘텐츠를 만들어 첫 이야기를 준비하세요.</p>}{store.items.map(item => <button key={item.id} aria-pressed={item.id === draft?.id} disabled={store.busy} onClick={() => select(item.id)}><strong>{item.copy.title || item.exam || "새 콘텐츠"}</strong><span>{item.school || "학교 미입력"} · {item.type}</span><small>{item.publishedUrl && isNaverPostUrl(item.publishedUrl) ? "발행 정보 입력됨" : item.versions.length ? "확정본 있음" : "준비 중"}</small></button>)}</aside>
-    {draft && <section className="blogEditor" aria-label="콘텐츠 편집"><WorkspaceTabs label="SNS 작업 단계" className="blogSteps">{["1 자료 준비", "2 Chat 전달", "3 완성본"].map((name, index) => <button key={name} role="tab" aria-selected={step === index} onClick={() => setStep(index)}>{name}</button>)}</WorkspaceTabs>
-      <div className="studioSummary"><strong>{draft.school || "학교 미입력"} · {draft.exam || "시험·수업 미입력"}</strong><p>{draft.type} · {draft.versions.length ? "확정본 있음" : "편집 중"}</p></div>
+    <StudioWorkspace title={draft ? `${draft.school || "학교 미입력"} · ${draft.exam || "시험·수업 미입력"}` : "새 콘텐츠를 만들어 주세요"}
+      summary={draft ? `${draft.type} · ${draft.versions.length ? "확정본 있음" : "편집 중"} · 자료 준비 → Chat 작업 → 완성본` : "자료 준비 → Chat 작업 → 완성본"}
+      label="SNS 작업 단계" steps={[{ id: 0, label: "자료 준비" }, { id: 1, label: "Chat 전달" }, { id: 2, label: "완성본" }]}
+      activeStep={step} onStepChange={value => { setStep(value); setLibraryOpen(value === 0); }} libraryOpen={libraryOpen} onLibraryToggle={() => setLibraryOpen(value => !value)}
+      library={<aside className="blogHistory" aria-label="콘텐츠 목록"><h2>내 콘텐츠 <small>{store.items.length}</small></h2>{!store.items.length && <p>새 콘텐츠를 만들어 첫 이야기를 준비하세요.</p>}{store.items.map(item => <button key={item.id} aria-pressed={item.id === draft?.id} disabled={store.busy} onClick={() => select(item.id)}><strong>{item.copy.title || item.exam || "새 콘텐츠"}</strong><span>{item.school || "학교 미입력"} · {item.type}</span><small>{item.publishedUrl && isNaverPostUrl(item.publishedUrl) ? "발행 정보 입력됨" : item.versions.length ? "확정본 있음" : "준비 중"}</small></button>)}</aside>}>
+    {draft && <section className="blogEditor" aria-label="콘텐츠 편집">
       <fieldset disabled={store.busy || !store.ready}>
       {step === 0 && <><h2>게시할 자료 준비</h2><p>성적 원천은 참고 자료입니다. 시험명과 공개할 사실을 직접 확인해 주세요.</p>
         <Disclosure trigger="기존 내신 성적에서 가져오기"><Field label="학생·학교 검색" value={search} onChange={setSearch} /><div className="blogCandidates">{candidates.slice(0, 40).map(({ record, student }) => <button key={record.scoreRecordId} onClick={() => { if (window.confirm("학교·학생·성과 입력을 선택한 기록으로 바꿀까요? 선생님 메모와 완성본은 유지됩니다.")) patchFacts(seedScore(record, student)); }}>{student.name} · {student.schoolName} · {record.examDate} · {record.subject} · {record.score ?? "점수 없음"}</button>)}{!candidates.length && <p>해당 내신 기록이 없습니다. 아래에 직접 입력할 수 있습니다.</p>}</div></Disclosure>
@@ -82,7 +86,7 @@ export function BlogContentStudio({ students = [], scoreRecords = [], postAppSta
       </>}
       <StickySaveBar label="SNS 편집본" message={states[store.status]} saveState={store.status}><button className="primaryButton" onClick={() => store.save()}>편집 내용 저장</button></StickySaveBar>
       </fieldset>
-    </section>}</div>
+    </section>}</StudioWorkspace>
     {tagsOpen && draft && <StudioDialog title="해시태그 추천" className="studioSidePanel" onClose={() => setTagsOpen(false)} subtitle="반영 버튼은 편집본에 적용합니다. 서버 보관은 편집 내용 저장을 눌러주세요.">
         <section aria-label="자동 해시태그 추천" className="blogNotice"><h3>자동 해시태그 추천</h3><p>학교·지역·콘텐츠 유형을 바꾸면 추천도 갱신됩니다. 반영 버튼은 해당 해시태그 편집칸을 바꿉니다. 직접 수정한 글은 자동으로 덮어쓰지 않습니다.</p><p aria-label="블로그 추천 태그">{tags.blog}</p><button onClick={() => patch({ copy: { ...draft.copy, hashtags: tags.blog } })}>블로그 추천 태그 반영</button><p aria-label="인스타그램 추천 태그">{tags.instagram}</p><button onClick={() => patch({ copy: { ...draft.copy, instagramHashtags: tags.instagram } })}>인스타그램 추천 태그 반영</button><p>인스타그램은 관련 태그를 최대 5개 추천합니다. 유료 AI 호출 없이 생성하며 자유롭게 편집할 수 있습니다.</p></section>
       <button className="ghostButton" onClick={() => setTagsOpen(false)}>추천 패널 닫기</button>

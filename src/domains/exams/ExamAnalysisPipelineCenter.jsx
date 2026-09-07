@@ -28,7 +28,7 @@ import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { SelectableCard } from "../../shared/components/SelectableCard.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
-import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
+import { StudioWorkspace } from "../../shared/components/StudioWorkspace.jsx";
 import { apiUrl, getJsonWithTimeout, postJson, postJsonWithTimeout } from "../../shared/utils/apiClient.js";
 import { readFileAsDataUrl } from "../../shared/utils/file.js";
 
@@ -1899,7 +1899,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
   }
 
   return (
-    <section className="examAnalysisPipelinePage examWorkflowPage">
+    <section className="examAnalysisPipelinePage examWorkflowPage studioPage">
       <PageHeader
         actions={(
           <>
@@ -1907,7 +1907,8 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
           <button className="primaryButton" onClick={saveRun} type="button">분석 저장</button>
           </>
         )}
-        description="PDF 원본 저장과 분석 작업 관리"
+        eyebrow="으뜸수학 고태영T"
+        description="시험지 분석부터 검수·글·카드 제작까지"
         title="시험분석"
       />
 
@@ -1917,99 +1918,22 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
         ))}
       </div>
 
-      <div className="examWorkflowOverview" aria-label="시험분석 전체 흐름">
-        <strong>{activeRun?.title || "새 시험분석"}</strong>
-        <ol>{[["원본 준비", ["source"]], ["AI 분석", ["structure", "analysis"]], ["선생님 검수", ["review"]], ["결과 활용", ["preview", "output", "history"]]].map(([label, tabs], index) => <li key={label} aria-current={tabs.includes(examAnalysisWorkspaceTab) ? "step" : undefined}><b>{index + 1}</b>{label}</li>)}</ol>
-      </div>
-      <label className="examMobileStage">작업 단계<select aria-label="작업 단계" value={examAnalysisWorkspaceTab} onChange={event => selectExamAnalysisWorkspaceTab(event.target.value)}>{examAnalysisWorkspaceTabs.map(tab => <option key={tab.id} value={tab.id}>{tab.label} · {tab.meta}</option>)}</select></label>
-      <WorkspaceTabs as="nav" className="examAnalysisWorkspaceTabs" label="시험분석 작업 단계">
-        {examAnalysisWorkspaceTabs.map((tab) => (
-          <button
-            aria-selected={examAnalysisWorkspaceTab === tab.id}
-            className={examAnalysisWorkspaceTab === tab.id ? "active" : ""}
-            key={tab.id}
-            onClick={() => selectExamAnalysisWorkspaceTab(tab.id)}
-            role="tab"
-            type="button"
-          >
-            <span>{tab.label}</span>
-            <small className={tab.tone}>{tab.meta}</small>
-          </button>
-        ))}
-      </WorkspaceTabs>
-
-      <div className="examCurrentTask"><div><strong>지금 할 일</strong><p>{({ source: "시험 정보와 원본 PDF를 준비하세요.", structure: "문항 수를 확정하고 문항 경계를 확인하세요.", analysis: "AI 분석 결과를 확인하세요. 실행 버튼은 별도 작업입니다.", review: "원본과 비교하며 문항을 수정·확정하고 검수본을 저장하세요.", preview: "확정된 분석을 확인하세요. 카드 제작은 아래에서 따로 열 수 있습니다.", output: "필요한 글·카드 작업을 선택하고 편집본을 저장하세요.", history: "분석 실행과 변경 기록을 확인하세요." })[examAnalysisWorkspaceTab]}</p></div><button className="ghostButton" type="button" aria-expanded={libraryOpen} onClick={() => setLibraryOpen(value => !value)}>{libraryOpen ? "분석 목록 접기" : "다른 분석 선택"}</button></div>
-      <div className="examAnalysisGrid">
+      <StudioWorkspace
+        title={activeRun?.title || "새 시험분석"}
+        summary="원본 준비 → 문항 구조·AI 분석 → 선생님 검수 → 결과 활용"
+        label="시험분석 작업 단계"
+        steps={examAnalysisWorkspaceTabs}
+        activeStep={examAnalysisWorkspaceTab}
+        onStepChange={selectExamAnalysisWorkspaceTab}
+        libraryOpen={libraryOpen}
+        onLibraryToggle={() => setLibraryOpen(value => !value)}
+        library={(
         <section className="examAnalysisLibraryPanel panel" hidden={!libraryOpen}>
           <div className="examAnalysisColumnBoard">
-            <div className="examAnalysisColumn">
-              <div className="examAnalysisColumnHeader">
-                <div>
-                  <strong>학교</strong>
-                  <span>{schoolCards.length}개</span>
-                </div>
-              </div>
-              <div aria-label="시험분석 학교 목록" className="examAnalysisColumnList" role="region" tabIndex={0}>
-                {schoolCards.length === 0 ? (
-                  <EmptyState className="emptyState compact">학교 없음</EmptyState>
-                ) : schoolCards.map((school) => (
-                  <SelectableCard
-                    active={selectedSchoolName === school.name}
-                    density="compact"
-                    key={school.name}
-                    onClick={() => selectSchoolCard(school)}
-                  >
-                    <strong>{school.name}</strong>
-                    <span>{school.gradeCount}학년 · {school.examCount}고사 · {school.runCount}건</span>
-                  </SelectableCard>
-                ))}
-              </div>
-            </div>
-
-            <div className="examAnalysisColumn">
-              <div className="examAnalysisColumnHeader">
-                <div>
-                  <strong>학년</strong>
-                  <span>{gradeCards.length}개</span>
-                </div>
-              </div>
-              <div aria-label="시험분석 학년 목록" className="examAnalysisColumnList" role="region" tabIndex={0}>
-                {gradeCards.length === 0 ? (
-                  <EmptyState className="emptyState compact">학년 없음</EmptyState>
-                ) : gradeCards.map((grade) => (
-                  <SelectableCard
-                    active={selectedGrade === grade.name}
-                    density="compact"
-                    key={grade.name}
-                    onClick={() => selectGradeCard(grade)}
-                  >
-                    <strong>{grade.name}</strong>
-                    <span>{grade.examCount}고사 · {grade.runCount}건</span>
-                  </SelectableCard>
-                ))}
-              </div>
-            </div>
-
-            <div className="examAnalysisColumn">
-              <div className="examAnalysisColumnHeader">
-                <div>
-                  <strong>고사</strong>
-                  <span>{examCycleCards.length}개</span>
-                </div>
-              </div>
-              <div aria-label="시험분석 고사 목록" className="examAnalysisColumnList" role="region" tabIndex={0}>
-                {examCycleCards.map((examCycle) => (
-                  <SelectableCard
-                    active={selectedExamCycle === examCycle.name}
-                    density="compact"
-                    key={examCycle.name}
-                    onClick={() => selectExamCycleCard(examCycle)}
-                  >
-                    <strong>{examCycle.name}</strong>
-                    <span>{examCycle.runCount}건</span>
-                  </SelectableCard>
-                ))}
-              </div>
+            <div className="studioLibraryFilters">
+              <label>학교<div role="region" aria-label="시험분석 학교 목록"><select aria-label="분석 목록 학교" value={selectedSchoolName} onChange={event => { const school = schoolCards.find(item => item.name === event.target.value); if (school) selectSchoolCard(school); }}><option value="" disabled>학교 선택</option>{schoolCards.map(school => <option key={school.name} value={school.name}>{school.name} · {school.runCount}건</option>)}</select></div></label>
+              <label>학년<div role="region" aria-label="시험분석 학년 목록"><select aria-label="분석 목록 학년" value={selectedGrade} onChange={event => { const grade = gradeCards.find(item => item.name === event.target.value); if (grade) selectGradeCard(grade); }}><option value="" disabled>학년 선택</option>{gradeCards.map(grade => <option key={grade.name} value={grade.name}>{grade.name} · {grade.runCount}건</option>)}</select></div></label>
+              <label>고사<div role="region" aria-label="시험분석 고사 목록"><select aria-label="분석 목록 고사" value={selectedExamCycle} onChange={event => { const examCycle = examCycleCards.find(item => item.name === event.target.value); if (examCycle) selectExamCycleCard(examCycle); }}><option value="" disabled>고사 선택</option>{examCycleCards.map(examCycle => <option key={examCycle.name} value={examCycle.name}>{examCycle.name} · {examCycle.runCount}건</option>)}</select></div></label>
             </div>
 
             <div className="examAnalysisColumn">
@@ -2047,6 +1971,8 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
             </div>
           </div>
         </section>
+        )}>
+
 
         <section className="examAnalysisWorkPanel" data-active-tab={examAnalysisWorkspaceTab}>
           <div className="panel examAnalysisFormPanel">
@@ -2844,7 +2770,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
             </div>
           </div>
         </section>
-      </div>
+      </StudioWorkspace>
     </section>
   );
 }
