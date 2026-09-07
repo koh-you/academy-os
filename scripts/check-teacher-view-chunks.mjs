@@ -19,9 +19,14 @@ const mainBytes = (await stat(resolve(assetsDirectory, mainJavaScript))).size;
 //
 // 2026-09-07 · 760 KB 로 내림: 출결 태블릿을 별도 진입점(kioskMain.jsx)으로 분리하면서
 // React 등 공용 코드가 별도 청크로 빠져 main 이 726 KB 로 줄었다. 실측 + 여유 34 KB.
+//
+// 2026-09-07 · 530 KB 로 내림: 수업연구 화면에서만 쓰는 쎈 유형 데이터
+// (api/data/ssenTypeIndex.json 284 KB)를 App.jsx 가 정적 import 하고 있어서 교사
+// 첫 로딩에 통째로 들어가 있었다. 쓰는 쪽(PlanningToolCenters, lazy)이 직접 import
+// 하도록 옮겨 main 이 728 KB → 503 KB 가 됐다. 실측 + 여유 26 KB.
 assert.ok(
-  mainBytes <= 760_000,
-  `initial main JavaScript exceeded the 0.76 MB budget: ${mainBytes.toLocaleString()} bytes`
+  mainBytes <= 530_000,
+  `initial main JavaScript exceeded the 0.53 MB budget: ${mainBytes.toLocaleString()} bytes`
 );
 
 // 출결 태블릿이 받는 JavaScript 총량.

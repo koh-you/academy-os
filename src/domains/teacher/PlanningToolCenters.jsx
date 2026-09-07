@@ -19,6 +19,9 @@ import {
   isDateWithinEvent,
   joinCalendarLabel
 } from "../schoolCalendar/schoolCalendarUtils.js";
+// 쎈 유형 카탈로그는 이 화면에서만 쓴다. runtime 으로 받지 않고 직접 import 해야
+// 원천 JSON(284 KB)이 교사 첫 로딩이 아니라 이 lazy 청크에 담긴다.
+import { ssenTypeCatalog } from "../tests/ssenTypeCatalog.js";
 import { AutosaveRiskNotice } from "../../shared/components/AutosaveRiskNotice.jsx";
 import { Disclosure } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
@@ -859,7 +862,7 @@ export function LessonResearchCenter({
   onSaveItems,
   onUpdateItem
 }) {
-  const { normalizeLessonResearchSubject, ssenTypeCatalog } = runtime;
+  const { normalizeLessonResearchSubject } = runtime;
   const [selectedSubject, setSelectedSubject] = useState(lessonResearchSubjects[0]);
   const [selectedItemId, setSelectedItemId] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("전체");
