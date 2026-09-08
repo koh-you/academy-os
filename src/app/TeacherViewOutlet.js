@@ -305,6 +305,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
       Component: components.SettingsCenter,
       props: {
         runtime: runtimeBindings.settingsCenter,
+        teacherRole: models.teacherRole,
         aiSettings: models.aiSettings,
         appStateSaveState: models.appStateSaveState,
         attendanceSettings: models.attendanceSettings,

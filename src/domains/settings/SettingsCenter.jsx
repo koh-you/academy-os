@@ -193,8 +193,11 @@ function NotificationSettingsSection({ integrationStatus, runtime }) {
   );
 }
 
+import { TeacherAccountAdminPanel } from "./TeacherAccountAdminPanel.jsx";
+
 export function SettingsCenter({
   runtime,
+  teacherRole = "owner",
   aiSettings,
   appStateSaveState = "idle",
   attendanceSettings = defaultAttendanceSettings,
@@ -271,8 +274,11 @@ export function SettingsCenter({
   ];
   const activePrompt = promptRows.find((row) => row.key === activePromptKey) ?? promptRows[0];
   const normalizedPromptSettings = normalizeAiPrompts(settings.prompts);
+  const isOwner = teacherRole !== "assistant";
   const settingsSections = [
     { id: "account", label: "계정" },
+    // 교사 계정 관리는 원장만 본다. 서버도 owner 만 통과시킨다(apiAccessPolicy).
+    ...(isOwner ? [{ id: "teacherAccounts", label: "교사 계정" }] : []),
     { id: "notification", label: "알림톡 연결" },
     { id: "notificationTemplates", label: "알림톡 문구" },
     { id: "ai", label: "AI 모델" },
@@ -471,6 +477,8 @@ export function SettingsCenter({
         </form>
       </section>
       ) : null}
+
+      {activeSettingsSection === "teacherAccounts" && isOwner ? <TeacherAccountAdminPanel /> : null}
 
       {activeSettingsSection === "notification" ? (
         <NotificationSettingsSection integrationStatus={integrationStatus} runtime={runtime} />
