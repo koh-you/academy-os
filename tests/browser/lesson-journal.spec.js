@@ -848,9 +848,12 @@ test("student class move preserves today's journal row when applying from tomorr
   const classSelect = page.getByLabel("정산 미리보기 학생 반");
   const studentRow = classSelect.locator("xpath=ancestor::div[contains(@class, 'studentListRow')]");
   await classSelect.selectOption("safe-cross-month-class");
+  // 반 변경은 부작용(미래 명단)이 있어 적용 시점 선택은 행에 남고, 저장만 하단 저장 바로 모였다(docs/ui-row-actions.md R2).
   await expect(page.getByLabel("정산 미리보기 학생 반 변경 적용 시점")).toHaveValue("tomorrow");
-  await studentRow.getByRole("button", { name: "저장", exact: true }).click();
-  await expect(studentRow.getByRole("button", { name: "저장됨", exact: true })).toBeVisible();
+  await expect(studentRow).toHaveClass(/dirtyStudentRow/);
+  const saveBar = page.getByRole("complementary", { name: "학생 목록 하단 고정 저장 바" });
+  await saveBar.getByRole("button", { name: "변경 저장", exact: true }).click();
+  await expect(saveBar).toContainText("저장 완료");
 
   expect(rosterRequests).toHaveLength(1);
   const changedLessonIds = rosterRequests[0].lessonChanges.map((change) => change.lessonId);

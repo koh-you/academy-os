@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
-import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
+import { getAggregateSaveState, InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { ListCard, ListCardActions } from "../../shared/components/ListCard.jsx";
+import { OverflowMenu } from "../../shared/components/OverflowMenu.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
+import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 import { buildStudentHandoverPdfModel, openStudentHandoverPdf } from "./studentHandoverPdf.js";
 import { StudentLifecycleOverlays } from "./StudentLifecycleOverlays.jsx";
@@ -87,6 +89,7 @@ export function StudentManager({
   const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("template_mwf_7_10");
   const [dirtyStudentIds, setDirtyStudentIds] = useState(() => new Set());
   const [originalClassTemplateIds, setOriginalClassTemplateIds] = useState({});
+  const [originalStudentFields, setOriginalStudentFields] = useState({});
   const [rosterEffectiveModes, setRosterEffectiveModes] = useState({});
   const [studentSaveStates, setStudentSaveStates] = useState({});
   const studentSaveRevisionsRef = useRef({});
@@ -184,13 +187,18 @@ export function StudentManager({
   }
 
   function updateStudentField(studentId, field, value) {
+    const currentStudent = students.find((student) => student.studentId === studentId);
     if (field === "defaultClassTemplateId" && !Object.prototype.hasOwnProperty.call(originalClassTemplateIds, studentId)) {
-      const currentStudent = students.find((student) => student.studentId === studentId);
       setOriginalClassTemplateIds((current) => ({
         ...current,
         [studentId]: currentStudent?.defaultClassTemplateId ?? ""
       }));
     }
+    // 되돌리기용 원본: 한 필드를 처음 건드릴 때의 값만 담는다(이후 편집은 덮어쓰지 않는다).
+    setOriginalStudentFields((current) => {
+      if (Object.prototype.hasOwnProperty.call(current[studentId] ?? {}, field)) return current;
+      return { ...current, [studentId]: { ...current[studentId], [field]: currentStudent?.[field] ?? "" } };
+    });
     onUpdateStudent(studentId, field, value, { persist: false });
     studentSaveRevisionsRef.current[studentId] = (studentSaveRevisionsRef.current[studentId] ?? 0) + 1;
     setDirtyStudentIds((current) => new Set(current).add(studentId));
@@ -227,6 +235,11 @@ export function StudentManager({
         delete next[studentId];
         return next;
       });
+      setOriginalStudentFields((current) => {
+        const next = { ...current };
+        delete next[studentId];
+        return next;
+      });
       setStudentSaveStates((current) => ({ ...current, [studentId]: "saved" }));
     } catch (error) {
       console.error(error);
@@ -234,12 +247,38 @@ export function StudentManager({
     }
   }
 
-  function getStudentSaveLabel(studentId) {
-    const saveState = studentSaveStates[studentId];
-    if (saveState === "saving") return "저장 중";
-    if (saveState === "saved") return "저장됨";
-    if (saveState === "failed") return "재시도";
-    return "저장";
+  async function saveDirtyVisibleStudents() {
+    const dirtyIds = visibleStudents
+      .filter((student) => dirtyStudentIds.has(student.studentId))
+      .map((student) => student.studentId);
+    for (const studentId of dirtyIds) await saveStudentRow(studentId);
+  }
+
+  function revertDirtyVisibleStudents() {
+    for (const student of visibleStudents) {
+      const originalFields = originalStudentFields[student.studentId];
+      if (!originalFields) continue;
+      for (const [field, value] of Object.entries(originalFields)) {
+        onUpdateStudent(student.studentId, field, value, { persist: false });
+      }
+      studentSaveRevisionsRef.current[student.studentId] = (studentSaveRevisionsRef.current[student.studentId] ?? 0) + 1;
+      forgetStudentDraft(student.studentId);
+    }
+  }
+
+  function forgetStudentDraft(studentId) {
+    setDirtyStudentIds((current) => {
+      const next = new Set(current);
+      next.delete(studentId);
+      return next;
+    });
+    for (const clearDraftMap of [setOriginalClassTemplateIds, setRosterEffectiveModes, setOriginalStudentFields, setStudentSaveStates]) {
+      clearDraftMap((current) => {
+        const next = { ...current };
+        delete next[studentId];
+        return next;
+      });
+    }
   }
 
   function openWithdrawStudentModal(student) {
@@ -503,6 +542,10 @@ export function StudentManager({
     }
   }
 
+  const dirtyVisibleStudentCount = visibleStudents.filter((student) => dirtyStudentIds.has(student.studentId)).length;
+  const visibleStudentsSaveState = getAggregateSaveState(visibleStudents.map((student) => studentSaveStates[student.studentId]));
+  const isSavingVisibleStudents = visibleStudentsSaveState === "saving" || visibleStudentsSaveState === "verifying";
+
   return (
     <section className="panel fullPanel">
       <PageHeader
@@ -632,6 +675,7 @@ export function StudentManager({
           withdrawnStudentSort={withdrawnStudentSort}
         />
       ) : (
+        <>
         <DataTableShell className="studentListTable" label="학생 목록">
           <div className="studentListRow studentListHead">
             <span>#</span>
@@ -644,14 +688,12 @@ export function StudentManager({
             <span>학생전화번호</span>
             <span>학부모전화번호</span>
             <span>출생연도</span>
-            <span>저장</span>
-            <span>퇴원</span>
+            <span>작업</span>
           </div>
           {visibleStudents.map((student, index) => {
             const saveState = studentSaveStates[student.studentId];
             const isDirty = dirtyStudentIds.has(student.studentId);
             const isSaving = saveState === "saving";
-            const isSaveDisabled = !isDirty || isSaving;
             return (
               <div className={isDirty ? "studentListRow dirtyStudentRow" : "studentListRow"} key={student.studentId}>
                 <span>{index + 1}</span>
@@ -758,22 +800,12 @@ export function StudentManager({
                     <option key={year} value={year}>{year}년</option>
                   ))}
                 </select>
-                <button
-                  className="primaryButton compact"
-                  disabled={isSaveDisabled}
-                  onClick={() => saveStudentRow(student.studentId)}
-                  type="button"
-                >
-                  {getStudentSaveLabel(student.studentId)}
-                </button>
-                <button
-                  aria-label={`${student.name} 퇴원 처리`}
-                  className="dangerButton"
-                  onClick={() => openWithdrawStudentModal(student)}
-                  type="button"
-                >
-                  퇴원
-                </button>
+                <OverflowMenu
+                  items={[
+                    { key: "withdraw", label: "퇴원 처리", onSelect: () => openWithdrawStudentModal(student), tone: "danger" }
+                  ]}
+                  label={`${student.name} 추가 작업`}
+                />
               </div>
             );
           })}
@@ -785,6 +817,31 @@ export function StudentManager({
             />
           ) : null}
         </DataTableShell>
+        {dirtyVisibleStudentCount > 0 || visibleStudentsSaveState !== "idle" ? (
+          <StickySaveBar
+            label="학생 목록"
+            message={dirtyVisibleStudentCount > 0 ? `${dirtyVisibleStudentCount}개 행 변경됨` : ""}
+            saveState={visibleStudentsSaveState}
+          >
+            <button
+              className="softButton compact"
+              disabled={dirtyVisibleStudentCount === 0 || isSavingVisibleStudents}
+              onClick={revertDirtyVisibleStudents}
+              type="button"
+            >
+              되돌리기
+            </button>
+            <button
+              className="primaryButton compact"
+              disabled={dirtyVisibleStudentCount === 0 || isSavingVisibleStudents}
+              onClick={saveDirtyVisibleStudents}
+              type="button"
+            >
+              변경 저장
+            </button>
+          </StickySaveBar>
+        ) : null}
+        </>
       )}
 
       {selectedStudent ? (
