@@ -305,5 +305,6 @@
   "scripts/test-lesson-journal-comment-send-status.mjs",
   "scripts/test-lesson-journal-comment-status-model.mjs",
   "scripts/test-ui-css-hygiene.cjs",
-  "scripts/scenario-tests-production.cjs"
+  "scripts/scenario-tests-production.cjs",
+  "scripts/test-overflow-menu.mjs"
 ]
