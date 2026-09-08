@@ -70,7 +70,9 @@ test("resource material converges an edited draft after an unknown insert, survi
       status: 409
     });
   });
-  await savedRow.getByRole("button", { name: "삭제" }).click();
+  // 삭제는 행에 상시 노출되지 않고 ⋯ 메뉴 안에 있다(docs/ui-row-actions.md R3).
+  await savedRow.getByRole("button", { name: /추가 작업$/ }).click();
+  await page.getByRole("menuitem", { name: "자료 삭제" }).click();
   await expect(savedRow).toHaveCount(1);
   await expect(savedRow.locator(".resourceMaterialSaveFeedback.failed")).toContainText("다른 화면에서 먼저 변경되었습니다.");
   expect(pageErrors).toEqual([]);
@@ -106,7 +108,8 @@ test("resource material file uploads privately, opens through an authenticated U
   await expect.poll(() => popup.url()).toContain("/api/safe-fixture/resource-material-file?path=");
   await popup.close();
 
-  await reloadedRow.getByRole("button", { name: "삭제" }).click();
+  await reloadedRow.getByRole("button", { name: /추가 작업$/ }).click();
+  await page.getByRole("menuitem", { name: "자료 삭제" }).click();
   await expect(reloadedRow).toHaveCount(0);
   await page.reload();
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /자료함/ }).click();

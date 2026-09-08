@@ -28,6 +28,7 @@ import { FilterBar } from "../../shared/components/FilterBar.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
+import { OverflowMenu } from "../../shared/components/OverflowMenu.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { SelectableCard } from "../../shared/components/SelectableCard.jsx";
@@ -830,14 +831,12 @@ export function ResourceLibraryCenter({
                     열기
                   </button>
                 ) : null}
-                <button
-                  className="dangerButton mini"
-                  disabled={resourceMaterialBusy}
-                  onClick={() => onDeleteMaterial(material.materialId)}
-                  type="button"
-                >
-                  {deleteState.state === "saving" ? "삭제 중..." : "삭제"}
-                </button>
+                <OverflowMenu
+                  items={resourceMaterialBusy
+                    ? []
+                    : [{ key: "delete", label: "자료 삭제", onSelect: () => onDeleteMaterial(material.materialId), tone: "danger" }]}
+                  label={`${material.title || "자료"} 추가 작업`}
+                />
                 {deleteState.state !== "idle" ? (
                   <div className={`resourceMaterialSaveFeedback ${deleteState.state}`} aria-live="polite" role="status">
                     <InlineSaveStatus label="자료 삭제" saveState={deleteState.state} />

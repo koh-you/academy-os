@@ -53,6 +53,7 @@ import { copyTextToClipboard } from "../exams/outputPreview.js";
 import { Disclosure, DisclosureChevron } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
+import { OverflowMenu } from "../../shared/components/OverflowMenu.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 import {
@@ -742,30 +743,19 @@ export function AcademyReminderList({
             </div>
             {showActions ? (
               <div className="academyReminderActions">
-                <button
-                  className="softButton compact"
-                  disabled={!reminderId || busyReminderId === reminderId}
-                  onClick={() => onEditAcademyReminder?.(reminder)}
-                  type="button"
-                >
-                  수정
-                </button>
-                <button
-                  className="softButton compact"
-                  disabled={status === "done" || !reminderId || busyReminderId === reminderId}
-                  onClick={() => markDone(reminder)}
-                  type="button"
-                >
-                  {busyReminderId === reminderId ? "처리 중" : "완료"}
-                </button>
-                <button
-                  className="dangerSoftButton compact"
-                  disabled={!reminderId || busyReminderId === reminderId}
-                  onClick={() => removeReminder(reminder)}
-                  type="button"
-                >
-                  삭제
-                </button>
+                {busyReminderId === reminderId ? <InlineSaveStatus label="운영 알림" saveState="saving" /> : null}
+                {status !== "done" && reminderId && busyReminderId !== reminderId ? (
+                  <button className="softButton compact" onClick={() => markDone(reminder)} type="button">완료</button>
+                ) : null}
+                <OverflowMenu
+                  items={reminderId && busyReminderId !== reminderId
+                    ? [
+                        { key: "edit", label: "알림 수정", onSelect: () => onEditAcademyReminder?.(reminder) },
+                        { key: "delete", label: "알림 삭제", onSelect: () => removeReminder(reminder), tone: "danger" }
+                      ]
+                    : []}
+                  label={`${reminder.title || "운영 알림"} 추가 작업`}
+                />
               </div>
             ) : null}
           </article>
