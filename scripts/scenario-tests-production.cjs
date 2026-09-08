@@ -2727,7 +2727,9 @@ check(
     'from "./Sidebar.jsx"',
     "const sessionSurface = selectAppSessionSurface({",
     "function handleChangeView(nextView)",
-      "const { login: handleLogin, logout: handleLogout, session } = useAppSession({",
+      // refresh 추가: 교사 토큰이 8시간짜리라 수업 도중 끊기면 저장이 전부 401 이 됐다
+      // (2026-09-08 장애). 화면이 활동 중일 때만 세션을 연장한다.
+      "const { login: handleLogin, logout: handleLogout, refresh: refreshSession, session } = useAppSession({",
     "async function refreshNotificationJobs(",
       "request: postJson",
     "const teacherViewAdapters = createTeacherViewAdapters({",

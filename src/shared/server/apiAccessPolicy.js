@@ -43,6 +43,8 @@ const DISPATCH_TOKEN_ROUTES = new Set([
 // 계속 막는 것: 시험분석/시험지 파이프라인(유료 AI), /api/ai/*, /api/admin/*,
 // 교사 일정 Slack, 특강/입학상담, 자료함·학사일정·정산 등 수업일지 밖 기능.
 const ASSISTANT_ALLOW_EXACT = new Set([
+  // 자기 세션 연장. 역할과 무관하게 로그인한 교사면 쓸 수 있어야 수업 중에 끊기지 않는다.
+  "POST /api/auth/refresh",
   "GET /api/lessons",
   "GET /api/lessons/closure-preflight",
   "GET /api/lesson-records",

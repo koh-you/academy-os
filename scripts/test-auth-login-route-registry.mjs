@@ -13,6 +13,8 @@ let payload = {};
 let readError = null;
 let studentAccount = null;
 let teacherAccount = null;
+let refreshTeacherSession = null;
+const refreshSessionCalls = [];
 const registry = createAuthLoginRouteRegistry({
   authenticateStudentOrParent: async (...args) => {
     studentAuthCalls.push(args);
@@ -30,6 +32,10 @@ const registry = createAuthLoginRouteRegistry({
     teacherTokenCalls.push(account);
     return "teacher-token";
   },
+  getTeacherSession: (request) => {
+    refreshSessionCalls.push(request);
+    return refreshTeacherSession;
+  },
   readJsonBody: async () => {
     if (readError) throw readError;
     return payload;
@@ -38,7 +44,10 @@ const registry = createAuthLoginRouteRegistry({
 });
 
 assert.equal(Object.isFrozen(registry), true);
-assert.deepEqual(authLoginRouteSignatures, [{ method: "POST", path: "/api/auth/login" }]);
+assert.deepEqual(authLoginRouteSignatures, [
+  { method: "POST", path: "/api/auth/login" },
+  { method: "POST", path: "/api/auth/refresh" }
+]);
 
 function request(method = "POST", path = "/api/auth/login") {
   return {
@@ -134,4 +143,48 @@ assert.equal(await registry.dispatch(request()), true);
 assert.deepEqual(sends.at(-1).body, { ok: false, error: "body failed" });
 assert.equal(sends.at(-1).statusCode, 500);
 
-console.log("auth login role, credential routing, token, account response, and failure contracts passed");
+// 세션 연장. 교사 토큰은 8시간짜리라 수업 도중 끊기면 저장이 전부 401 이 됐다
+// (2026-09-08 장애). 살아 있는 세션만 새 토큰으로 바꿔 주고, 만료된 건 그대로 401 이다 —
+// 만료까지 연장해 주면 8시간 제한이 의미를 잃는다.
+refreshTeacherSession = null;
+assert.equal(await registry.dispatch(request("POST", "/api/auth/refresh")), true);
+assert.equal(sends.at(-1).statusCode, 401);
+assert.deepEqual(sends.at(-1).body, {
+  ok: false,
+  code: "auth_required",
+  error: "로그인 세션이 만료되었습니다. 다시 로그인해 주세요."
+});
+
+refreshTeacherSession = {
+  name: "고태영T",
+  role: "teacher",
+  teacherId: "teacher-1",
+  tenantId: "tenant_abc123",
+  teacherRole: "assistant"
+};
+assert.equal(await registry.dispatch(request("POST", "/api/auth/refresh")), true);
+assert.equal(sends.at(-1).statusCode, 200);
+assert.deepEqual(sends.at(-1).body, {
+  account: {
+    name: "고태영T",
+    sessionToken: "teacher-token",
+    teacherId: "teacher-1",
+    tenantId: "tenant_abc123",
+    teacherRole: "assistant"
+  },
+  authenticated: true,
+  ok: true
+});
+// 연장은 로그인 자격을 다시 묻지 않는다(본문도 읽지 않는다).
+assert.deepEqual(teacherAuthCalls.at(-1), ["assistant", "secret"]);
+
+// tenantId / teacherRole 이 비어 있던 옛 토큰은 기본값으로 채워 재발급한다.
+refreshTeacherSession = { name: "고태영T", role: "teacher", teacherId: "teacher-1" };
+assert.equal(await registry.dispatch(request("POST", "/api/auth/refresh")), true);
+assert.equal(sends.at(-1).body.account.tenantId, "tenant_default");
+assert.equal(sends.at(-1).body.account.teacherRole, "owner");
+
+// GET 은 이 레지스트리가 잡지 않는다.
+assert.equal(await registry.dispatch(request("GET", "/api/auth/refresh")), false);
+
+console.log("auth login role, credential routing, token, account response, refresh, and failure contracts passed");

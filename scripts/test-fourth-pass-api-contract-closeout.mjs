@@ -111,6 +111,8 @@ const deferredRouteMapperSignatures = [
   "POST /api/academy-reminders",
   "POST /api/attendance/preview",
   "POST /api/auth/login",
+  // 세션 연장. 로그인과 같은 성격이라 같은 자리에 둔다(2026-09-08 세션 만료 장애 대응).
+  "POST /api/auth/refresh",
   "POST /api/auth/teacher-account",
   "POST /api/client-errors",
   "POST /api/exam-post-submissions/confirm",
@@ -246,8 +248,11 @@ const directWriteSignatures = [
   ...teacherAccountRouteSignatures.map(signatureOf),
   ...testSessionWriteRouteSignatures.map(signatureOf)
 ].sort();
-assert.equal(directWriteSignatures.length, 91);
-assert.equal(new Set(directWriteSignatures).size, 91);
+// 91 -> 92: POST /api/auth/refresh 추가. 교사 토큰은 8시간짜리인데 학원 하루는 그보다
+// 길어서, 수업 도중 세션이 끊기면 저장이 전부 401 이 됐다(2026-09-08 장애). 화면이
+// 활동 중일 때만 부르는 세션 연장 경로다.
+assert.equal(directWriteSignatures.length, 92);
+assert.equal(new Set(directWriteSignatures).size, 92);
 
 const classifiedSignatures = [
   ...expectedContractSignatures,
@@ -255,7 +260,8 @@ const classifiedSignatures = [
   ...deferredRouteMapperSignatures
 ].sort();
 assert.equal(deferredExternalSignatures.length, 23);
-assert.equal(deferredRouteMapperSignatures.length, 43);
+// 43 -> 44: POST /api/auth/refresh 추가(위 목록 주석 참고).
+assert.equal(deferredRouteMapperSignatures.length, 44);
 assert.deepEqual(classifiedSignatures, directWriteSignatures);
 
 const specializedParserBySignature = new Map([
@@ -306,5 +312,5 @@ assert.equal(
 );
 
 console.log(
-  "fourth-pass API contract closeout passed · direct writes 91 · contracted 25 · route/mapper deferred 43 · external gated 23"
+  "fourth-pass API contract closeout passed · direct writes 92 · contracted 25 · route/mapper deferred 44 · external gated 23"
 );
