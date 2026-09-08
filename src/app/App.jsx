@@ -453,6 +453,7 @@ import { SelectionToolbar } from "../shared/components/SelectionToolbar.jsx";
 import { StickySaveBar } from "../shared/components/StickySaveBar.jsx";
 import {
   apiFetch,
+  roleAwareApiFetch,
   apiUrl,
   deleteJsonWithTimeout,
   fetchWithAuth,
@@ -2461,6 +2462,7 @@ export function App() {
           return;
         }
         setIsPortalDataReady(false);
+        const teacherRole = session?.teacherRole;
         const [
           studentsResponse,
           studentIntakeApplicantsResponse,
@@ -2479,22 +2481,22 @@ export function App() {
           appStateResponse,
           resourceMaterialsResponse
         ] = await Promise.all([
-          apiFetch("/api/students"),
-          apiFetch("/api/student-intake-applicants"),
-          apiFetch("/api/special-lecture-applications"),
-          apiFetch("/api/special-lecture-enrollments", { cache: "no-store" }),
-          apiFetch("/api/classes"),
-          apiFetch("/api/lessons"),
-          apiFetch("/api/lesson-records"),
-          apiFetch("/api/homeworks"),
-          apiFetch("/api/makeup-tasks"),
-          apiFetch("/api/academy-reminders"),
-          apiFetch("/api/exam-prep-rows"),
-          apiFetch("/api/school-events"),
-          apiFetch("/api/test-sessions"),
-          apiFetch("/api/test-attempts"),
-          apiFetch("/api/app-state?includeRows=true", { cache: "no-store" }),
-          apiFetch("/api/resource-materials")
+          roleAwareApiFetch("/api/students", teacherRole),
+          roleAwareApiFetch("/api/student-intake-applicants", teacherRole),
+          roleAwareApiFetch("/api/special-lecture-applications", teacherRole),
+          roleAwareApiFetch("/api/special-lecture-enrollments", teacherRole, { cache: "no-store" }),
+          roleAwareApiFetch("/api/classes", teacherRole),
+          roleAwareApiFetch("/api/lessons", teacherRole),
+          roleAwareApiFetch("/api/lesson-records", teacherRole),
+          roleAwareApiFetch("/api/homeworks", teacherRole),
+          roleAwareApiFetch("/api/makeup-tasks", teacherRole),
+          roleAwareApiFetch("/api/academy-reminders", teacherRole),
+          roleAwareApiFetch("/api/exam-prep-rows", teacherRole),
+          roleAwareApiFetch("/api/school-events", teacherRole),
+          roleAwareApiFetch("/api/test-sessions", teacherRole),
+          roleAwareApiFetch("/api/test-attempts", teacherRole),
+          roleAwareApiFetch("/api/app-state?includeRows=true", teacherRole, { cache: "no-store" }),
+          roleAwareApiFetch("/api/resource-materials", teacherRole)
         ]);
         const [
           studentsResult,

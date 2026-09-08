@@ -54,6 +54,11 @@ const ASSISTANT_ALLOW_EXACT = new Set([
   "GET /api/integrations/status",
   "GET /api/notification-jobs",
   "GET /api/makeup-tasks",
+  // 수업일지의 "지난 숙제 / 다음 숙제" 칸이 읽는다. POST 만 열려 있어서 숙제를 만들 수는
+  // 있는데 읽지는 못하는 상태였다(2026-09-08 발견).
+  "GET /api/homeworks",
+  // 수업일지 상단 "운영 알림 원본" 패널이 읽는다. tenant 스코핑으로 자기 것만 보인다.
+  "GET /api/academy-reminders",
   "GET /api/test-sessions",
   "GET /api/test-attempts",
   "POST /api/students",
@@ -154,6 +159,19 @@ export function isAssistantAllowed(method, pathname) {
  */
 export function mayAuthenticateAsKiosk(teacherSession, opsSession, authorizationHeader) {
   return !teacherSession && !opsSession && !String(authorizationHeader ?? "").trim();
+}
+
+/**
+ * 이 역할이 이 라우트를 호출해도 되는가. 클라이언트가 **부르기 전에** 확인하는 용도다.
+ *
+ * 예전에는 앱이 역할과 무관하게 부트스트랩에서 20여 개를 전부 불렀다. 협력 교사에게는
+ * 그 중 다수가 403 으로 돌아왔고(설계대로 막은 것이다), 화면은 정상 동작했지만 로그인할
+ * 때마다 콘솔이 403 으로 도배돼 진짜 오류가 묻혔다. 사이드바는 이미 역할로 메뉴를 거르니
+ * 데이터 로드도 같은 기준을 쓴다. 서버 정책과 갈라지지 않도록 여기서 함께 판정한다.
+ */
+export function canTeacherRoleCallRoute(teacherRole, method, pathname) {
+  if (teacherRole !== "assistant") return true;
+  return isAssistantAllowed(method, pathname);
 }
 
 export function isKioskAllowed(method, pathname) {
