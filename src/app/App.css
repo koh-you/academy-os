@@ -6754,39 +6754,6 @@ button:disabled {
   gap: 8px;
 }
 
-.specialLectureCancellationActions {
-  border-top: 1px solid var(--status-neutral-border, #e2e8f0);
-  padding-top: 7px;
-}
-
-.specialLectureCancellationActions > .disclosureTrigger {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 7px;
-  color: var(--academy-text-muted, #52647c);
-  font-size: 11px;
-  font-weight: 900;
-  min-height: 34px;
-  padding: 6px 9px;
-}
-
-.specialLectureCancellationActions .disclosureBodyInner {
-  background: var(--status-pending-bg, #fff7ed);
-  border: 1px solid var(--status-danger-border, #fecaca);
-  border-radius: 7px;
-  display: grid;
-  gap: 7px;
-  margin-top: 6px;
-  padding: 8px;
-}
-
-.specialLectureCancellationActions p {
-  color: var(--status-danger-text, #b91c1c);
-  font-size: 10px;
-  line-height: 1.45;
-  margin: 0;
-}
-
 .specialLectureRosterModal,
 .specialLectureSessionModal,
 .specialLectureProgressModal {

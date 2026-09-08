@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { copyTextToClipboard } from "../exams/outputPreview.js";
 import { Disclosure, DisclosureChevron } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
+import { OverflowMenu } from "../../shared/components/OverflowMenu.jsx";
 import { SearchField } from "../../shared/components/SearchField.jsx";
 import { SelectionToolbar } from "../../shared/components/SelectionToolbar.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
@@ -1495,6 +1497,10 @@ export function SpecialLectureApplicationPanel({
                     ) : <span className="pending">수강 회차 미확정</span>}
                   </div>
                   <div className="specialLectureEnrollmentControls">
+                    {savingEnrollmentId === enrollment.enrollmentId
+                      || (enrollment.applicationId && updatingApplicationId === enrollment.applicationId) ? (
+                      <InlineSaveStatus label={student?.name || "수강생"} saveState="saving" />
+                    ) : null}
                     <button
                       className="primaryButton compact"
                       disabled={!isGuideSaved}
@@ -1503,40 +1509,23 @@ export function SpecialLectureApplicationPanel({
                     >
                       {enrollment.planReviewedAt ? "회차·진행 관리" : "회차 설정"}
                     </button>
-                    {enrollment.applicationId &&
-                    applications.some((application) =>
-                      application.applicationId === enrollment.applicationId && application.source === "tally"
-                    ) ? (
-                      <button
-                        className="softButton compact"
-                        disabled={!onReplaceStudent || updatingApplicationId === enrollment.applicationId}
-                        onClick={() => refreshLinkedStudentFromTally(enrollment)}
-                        type="button"
-                      >
-                        {updatingApplicationId === enrollment.applicationId
-                          ? "Tally 기본정보 반영 중"
-                          : "학생 기본정보를 Tally로 다시 반영"}
-                      </button>
-                    ) : null}
-                    <Disclosure className="specialLectureCancellationActions" trigger="취소 관리">
-                        <p>남은 회차만 취소하거나 특강 신청 전체를 취소할 수 있습니다.</p>
-                        <button
-                          className="softButton compact subtle"
-                          disabled={!onSaveEnrollment || !isGuideSaved || savingEnrollmentId === enrollment.enrollmentId}
-                          onClick={() => excludeRemainingSessions(enrollment)}
-                          type="button"
-                        >
-                          {savingEnrollmentId === enrollment.enrollmentId ? "저장 중" : "남은 회차 취소"}
-                        </button>
-                        <button
-                          className="dangerSoftButton compact"
-                          disabled={!onSaveEnrollment || !isGuideSaved || savingEnrollmentId === enrollment.enrollmentId}
-                          onClick={() => cancelEnrollment(enrollment)}
-                          type="button"
-                        >
-                          {savingEnrollmentId === enrollment.enrollmentId ? "취소 저장 중" : "특강 신청 전체 취소"}
-                        </button>
-                    </Disclosure>
+                    <OverflowMenu
+                      items={[
+                        ...(enrollment.applicationId
+                          && applications.some((application) => application.applicationId === enrollment.applicationId && application.source === "tally")
+                          && onReplaceStudent
+                          && updatingApplicationId !== enrollment.applicationId
+                          ? [{ key: "tally", label: "학생 기본정보를 Tally로 다시 반영", onSelect: () => refreshLinkedStudentFromTally(enrollment) }]
+                          : []),
+                        ...(onSaveEnrollment && isGuideSaved && savingEnrollmentId !== enrollment.enrollmentId
+                          ? [
+                              { key: "excludeRemaining", label: "남은 회차 취소", onSelect: () => excludeRemainingSessions(enrollment) },
+                              { key: "cancelEnrollment", label: "특강 신청 전체 취소", onSelect: () => cancelEnrollment(enrollment), tone: "danger" }
+                            ]
+                          : [])
+                      ]}
+                      label={`${student?.name || "수강생"} 추가 작업`}
+                    />
                   </div>
                 </article>
               );
