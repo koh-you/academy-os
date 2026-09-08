@@ -5,6 +5,38 @@ test.beforeEach(async ({ request }) => {
   await resetSafeFixture(request);
 });
 
+test("student row overflow menu opens by keyboard, closes on Escape, and hides destructive actions until opened", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
+
+  // R1·R3: 퇴원 같은 파괴적 액션은 행에 상시 노출되지 않고, 저장 버튼도 행마다 깔리지 않는다.
+  await expect(page.getByRole("button", { name: "퇴원", exact: true })).toHaveCount(0);
+  await expect(page.locator(".studentListRow").getByRole("button", { name: "저장", exact: true })).toHaveCount(0);
+
+  const trigger = page.getByRole("button", { name: "월경계 학생 추가 작업" });
+  await expect(trigger).toHaveAttribute("aria-haspopup", "menu");
+  await expect(trigger).toHaveAttribute("aria-expanded", "false");
+
+  // 트리거에서 ↓ 로 열면 첫 항목에 포커스가 간다.
+  await trigger.focus();
+  await page.keyboard.press("ArrowDown");
+  const withdrawItem = page.getByRole("menuitem", { name: "퇴원 처리" });
+  await expect(withdrawItem).toBeFocused();
+  await expect(trigger).toHaveAttribute("aria-expanded", "true");
+
+  // Esc 로 닫으면 트리거로 포커스가 되돌아온다.
+  await page.keyboard.press("Escape");
+  await expect(withdrawItem).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+
+  // 메뉴에서 선택하면 기존 확인 모달이 그대로 뜬다(확인 단계를 없애지 않는다).
+  await trigger.click();
+  await page.getByRole("menuitem", { name: "퇴원 처리" }).click();
+  await expect(page.getByRole("dialog", { name: "학생 퇴원 처리 확인" })).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
 test("Tally candidate rapid edits serialize, rebase CAS, and persist the verified latest input", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   const requests = [];
@@ -212,7 +244,9 @@ test("student withdrawal rebases a stale student row before saving future roster
   const externallySavedStudent = (await externalSaveResponse.json()).student;
   expect(externallySavedStudent.updatedAt).not.toBe(staleTarget.updatedAt);
 
-  await page.getByRole("button", { name: "정산 미리보기 학생 퇴원 처리" }).click();
+  // 퇴원은 행의 빨간 버튼이 아니라 행 끝 ⋯ 메뉴 항목이다(docs/ui-row-actions.md R3).
+  await page.getByRole("button", { name: "정산 미리보기 학생 추가 작업" }).click();
+  await page.getByRole("menuitem", { name: "퇴원 처리" }).click();
   const withdrawalModal = page.getByRole("dialog", { name: "학생 퇴원 처리 확인" });
   await expect(withdrawalModal.getByLabel("정산 미리보기 학생 퇴원 적용 시점")).toHaveValue("tomorrow");
   await withdrawalModal.getByLabel("코멘트").fill("특강수강생");
@@ -260,18 +294,23 @@ test("student row save rebases its version and preserves an in-flight follow-up 
 
   await loginAsTeacher(page);
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
+  // 행별 저장 버튼 대신 하단 고정 저장 바 하나로 저장한다(docs/ui-row-actions.md R2).
+  // 저장 중 들어온 후속 편집을 잃지 않고 두 번째 저장이 새 버전으로 재기반하는지가 이 테스트의 핵심이다.
   const studentRow = page.locator(".studentListRow").filter({ hasText: "월경계 학생" });
   const schoolInput = studentRow.getByLabel("월경계 학생 학교");
+  const saveBar = page.getByRole("complementary", { name: "학생 목록 하단 고정 저장 바" });
+  const saveButton = saveBar.getByRole("button", { name: "변경 저장", exact: true });
   await schoolInput.fill("A 저장 학교");
-  await studentRow.getByRole("button", { name: "저장", exact: true }).click();
+  await expect(saveBar).toContainText("1개 행 변경됨");
+  await saveButton.click();
   await expect.poll(() => requests.length).toBe(1);
   await schoolInput.fill("B 후속 학교");
   releaseFirstRequest();
 
   await expect(schoolInput).toHaveValue("B 후속 학교");
-  await expect(studentRow.getByRole("button", { name: "저장", exact: true })).toBeEnabled();
-  await studentRow.getByRole("button", { name: "저장", exact: true }).click();
-  await expect(studentRow.getByRole("button", { name: "저장됨", exact: true })).toBeVisible();
+  await expect(saveButton).toBeEnabled();
+  await saveButton.click();
+  await expect(saveBar).toContainText("저장 완료");
   expect(requests).toHaveLength(2);
   expect(requests[1].expectedUpdatedAt).not.toBe(requests[0].expectedUpdatedAt);
 
