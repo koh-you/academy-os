@@ -1,3 +1,4 @@
+import { canTeacherRoleCallRoute } from "../server/apiAccessPolicy.js";
 import { resolveKioskDeviceToken } from "./kioskToken.js";
 
 const localApiBaseUrl = "http://127.0.0.1:8787";
@@ -67,6 +68,25 @@ export function apiFetch(path, options = {}) {
 // 전역 fetch 대신 이걸 넘겨야 인증 헤더가 붙는다.
 export function fetchWithAuth(url, options = {}) {
   return fetch(url, { ...options, headers: withAuthHeaders(options.headers) });
+}
+
+// 이 역할이 못 부르는 라우트는 아예 부르지 않는다. 서버가 403 으로 막아주긴 하지만,
+// 로그인할 때마다 콘솔이 403 으로 도배되면 진짜 오류가 묻힌다(2026-09-08 협력 교사
+// 로그인 시 14건). 판정은 서버와 같은 정책 모듈을 써서 목록이 갈라지지 않게 한다.
+// 건너뛴 요청은 실패가 아니라 "해당 없음"이므로 ok:false + skipped:true 로 답한다.
+function skippedApiResponse() {
+  return new Response(JSON.stringify({ ok: false, skipped: true }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" }
+  });
+}
+
+export function roleAwareApiFetch(path, teacherRole, options = {}) {
+  const pathname = String(path).split("?")[0];
+  if (!canTeacherRoleCallRoute(teacherRole, "GET", pathname)) {
+    return Promise.resolve(skippedApiResponse());
+  }
+  return apiFetch(path, options);
 }
 
 export async function postJson(path, body) {
