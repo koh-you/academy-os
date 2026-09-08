@@ -208,6 +208,7 @@
     "test:student-modal-css-domain-split": "node scripts/test-student-modal-css-domain-split.mjs",
     "test:student-lifecycle-overlays": "node scripts/test-student-lifecycle-overlays.mjs",
     "test:student-withdrawn-list-boundary": "node scripts/test-student-withdrawn-list-boundary.mjs",
+    "test:overflow-menu": "node scripts/test-overflow-menu.mjs",
     "test:student-handover-pdf": "node scripts/test-student-handover-pdf.mjs",
     "test:student-monthly-report": "node scripts/test-student-monthly-report.mjs",
     "test:parent-response-context": "node scripts/test-parent-response-context.mjs",

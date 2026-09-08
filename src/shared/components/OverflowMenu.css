@@ -1,0 +1,51 @@
+.overflowMenu {
+  position: relative;
+}
+
+/* 트리거는 .iconButton 을 그대로 쓰므로 크기(--academy-touch-target)는 그쪽에서 온다. */
+.overflowMenuTrigger {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.overflowMenuList {
+  background: var(--academy-surface, #ffffff);
+  border: 1px solid var(--academy-border, #d8e3f8);
+  border-radius: var(--academy-radius, 8px);
+  box-shadow: var(--academy-shadow, 0 12px 28px rgba(30, 64, 175, 0.06));
+  display: grid;
+  min-width: 176px;
+  padding: 6px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 30;
+}
+
+.overflowMenuItem {
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: var(--academy-text, #17213d);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  min-height: var(--academy-touch-target, 44px);
+  padding: 0 12px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.overflowMenuItem:hover,
+.overflowMenuItem:focus-visible {
+  background: var(--status-info-bg, #eff6ff);
+}
+
+.overflowMenuItem-danger {
+  color: var(--status-danger-text, #b91c1c);
+}
+
+.overflowMenuItem-danger:hover,
+.overflowMenuItem-danger:focus-visible {
+  background: var(--status-danger-bg, #fef2f2);
+}
