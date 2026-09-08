@@ -248,7 +248,7 @@ export function StudentModal({
       {mode === "single" ? (
         <>
           <div className="studentAddGrid">
-            <label>이름<input disabled={singleSaveState === "saving"} value={form.name} onChange={(event) => update("name", event.target.value)} placeholder="박수빈" /></label>
+            <label>이름<input disabled={singleSaveState === "saving"} value={form.name} onChange={(event) => update("name", event.target.value)} placeholder="홍길동" /></label>
             <label>
               출생연도
               <div className="birthYearWithGrade">
@@ -256,7 +256,7 @@ export function StudentModal({
                 <span>{form.grade || "학년"}</span>
               </div>
             </label>
-            <label>학교<input disabled={singleSaveState === "saving"} value={form.schoolName} onChange={(event) => update("schoolName", event.target.value)} placeholder="자운고등학교" /></label>
+            <label>학교<input disabled={singleSaveState === "saving"} value={form.schoolName} onChange={(event) => update("schoolName", event.target.value)} placeholder="○○고등학교" /></label>
             <label>PIN<input disabled={singleSaveState === "saving"} value={form.pin} onChange={(event) => update("pin", event.target.value)} placeholder="1234" /></label>
             <label>학생전화번호<input disabled={singleSaveState === "saving"} inputMode="tel" value={form.studentPhone} onChange={(event) => update("studentPhone", event.target.value)} placeholder="01012345678" /></label>
             <label>학부모전화번호<input disabled={singleSaveState === "saving"} inputMode="tel" value={form.parentPhone} onChange={(event) => update("parentPhone", event.target.value)} placeholder="01012345678" /></label>
@@ -281,7 +281,7 @@ export function StudentModal({
         <div className="studentBulkPlaceholder">
           <strong>엑셀 일괄 등록</strong>
           <p className="muted">이름, 출생연도, 학교, PIN 순서로 복사한 목록을 붙여넣는 기능으로 확장 예정입니다.</p>
-          <textarea aria-label="학생 엑셀 일괄 등록 원본" placeholder={"박수빈\t2010\t자운고등학교\t1234"} rows="6" />
+          <textarea aria-label="학생 엑셀 일괄 등록 원본" placeholder={"홍길동\t2010\t○○고등학교\t1234"} rows="6" />
           <button className="primaryButton full" disabled type="button">일괄 등록 준비 중</button>
         </div>
       ) : (
