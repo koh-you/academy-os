@@ -451,7 +451,6 @@ import { PageHeader } from "../shared/components/PageHeader.jsx";
 import { SearchField } from "../shared/components/SearchField.jsx";
 import { SelectionToolbar } from "../shared/components/SelectionToolbar.jsx";
 import { StickySaveBar } from "../shared/components/StickySaveBar.jsx";
-import { sampleData } from "../shared/data/sampleData.js";
 import {
   apiFetch,
   apiUrl,
@@ -2135,29 +2134,29 @@ export function App() {
   const lessonHistoryActionRequestRef = useRef(null);
   const [lessonHistoryActionState, setLessonHistoryActionState] = useState({ message: "", state: "idle" });
   const [deletedLessonBundles, setDeletedLessonBundles] = useStoredState(storageKeys.deletedLessonBundles, []);
-  const [classTemplates, setClassTemplates] = useStoredState(storageKeys.classTemplates, sampleData.classTemplates);
-  const [students, setStudents] = useStoredState(storageKeys.students, sampleData.students);
+  const [classTemplates, setClassTemplates] = useStoredState(storageKeys.classTemplates, []);
+  const [students, setStudents] = useStoredState(storageKeys.students, []);
   const [studentIntakeApplicants, setStudentIntakeApplicants] = useStoredState(storageKeys.studentIntakeApplicants, []);
   const studentIntakeApplicantsRef = useRef(studentIntakeApplicants);
   const [specialLectureApplications, setSpecialLectureApplications] = useStoredState(storageKeys.specialLectureApplications, []);
   const [specialLectureEnrollments, setSpecialLectureEnrollments] = useStoredState(storageKeys.specialLectureEnrollments, []);
-  const [lessons, setLessons] = useStoredState(storageKeys.lessons, sampleData.lessons);
-  const [records, setRecords] = useStoredState(storageKeys.records, sampleData.lessonStudentRecords);
-  const [homeworks, setHomeworks] = useStoredState(storageKeys.homeworks, sampleData.homeworks);
+  const [lessons, setLessons] = useStoredState(storageKeys.lessons, []);
+  const [records, setRecords] = useStoredState(storageKeys.records, []);
+  const [homeworks, setHomeworks] = useStoredState(storageKeys.homeworks, []);
   const [reportSnapshots, setReportSnapshots] = useStoredState(storageKeys.reportSnapshots, []);
   const [makeupTasks, setMakeupTasks] = useStoredState(storageKeys.makeupTasks, []);
   const [academyReminders, setAcademyReminders] = useStoredState(storageKeys.academyReminders, []);
   const [notificationLogs, setNotificationLogs] = useStoredState(storageKeys.notificationLogs, []);
   const [notificationJobs, setNotificationJobs] = useState([]);
   const [notificationJobsStatus, setNotificationJobsStatus] = useState({ state: "idle", message: "" });
-  const [wrongProblems, setWrongProblems] = useStoredState(storageKeys.wrongProblems, sampleData.wrongProblems ?? []);
+  const [wrongProblems, setWrongProblems] = useStoredState(storageKeys.wrongProblems, []);
   const [problemBooks, setProblemBooks] = useStoredState(storageKeys.problemBooks, createDefaultProblemBooks());
   const [testPaperLibrary, setTestPaperLibrary] = useStoredState(storageKeys.testPaperLibrary, []);
   const [testSessions, setTestSessions] = useState([]);
   const [testAttempts, setTestAttempts] = useState([]);
-  const [scoreRecords, setScoreRecords] = useStoredState(storageKeys.scoreRecords, sampleData.scoreRecords ?? []);
-  const [academyTests, setAcademyTests] = useStoredState(storageKeys.academyTests, sampleData.academyTests ?? []);
-  const [examPrepRows, setExamPrepRows] = useStoredState(storageKeys.examPrepRows, normalizeExamPrepRows(sampleData.examPrepRows ?? []));
+  const [scoreRecords, setScoreRecords] = useStoredState(storageKeys.scoreRecords, []);
+  const [academyTests, setAcademyTests] = useStoredState(storageKeys.academyTests, []);
+  const [examPrepRows, setExamPrepRows] = useStoredState(storageKeys.examPrepRows, []);
   const [tallySubmissions, setTallySubmissions] = useStoredState(storageKeys.tallySubmissions, []);
   const [tallySummaries, setTallySummaries] = useStoredState(storageKeys.tallySummaries, {});
   const [studentQuestions, setStudentQuestions] = useStoredState(storageKeys.studentQuestions, []);
@@ -2167,7 +2166,7 @@ export function App() {
   const [teacherOperatingMemos, setTeacherOperatingMemos] = useStoredState(storageKeys.teacherOperatingMemos, {});
   const [schoolEvents, setSchoolEvents] = useStoredState(
     storageKeys.schoolEvents,
-    createDefaultSchoolEvents(sampleData.examPrepRows ?? [])
+    createDefaultSchoolEvents([])
   );
   const [lessonResearchItems, setLessonResearchItems] = useStoredState(
     storageKeys.lessonResearchItems,
@@ -2533,7 +2532,7 @@ export function App() {
           resourceMaterialsResponse.json()
         ]);
         if (!isMounted) return;
-        if (studentsResult.ok && Array.isArray(studentsResult.students) && studentsResult.students.length > 0) {
+        if (studentsResult.ok && Array.isArray(studentsResult.students)) {
           setStudents(studentsResult.students);
         }
         if (studentIntakeApplicantsResult.ok && Array.isArray(studentIntakeApplicantsResult.applicants)) {
@@ -2545,26 +2544,27 @@ export function App() {
         if (specialLectureEnrollmentsResult.ok && Array.isArray(specialLectureEnrollmentsResult.enrollments)) {
           setSpecialLectureEnrollments(normalizeSpecialLectureEnrollments(specialLectureEnrollmentsResult.enrollments));
         }
-        const normalizedClassTemplates = classesResult.ok && Array.isArray(classesResult.classTemplates) && classesResult.classTemplates.length > 0
+        const normalizedClassTemplates = classesResult.ok && Array.isArray(classesResult.classTemplates)
           ? normalizeClassTemplates(classesResult.classTemplates)
           : classTemplates;
-        if (classesResult.ok && Array.isArray(classesResult.classTemplates) && classesResult.classTemplates.length > 0) {
+        if (classesResult.ok && Array.isArray(classesResult.classTemplates)) {
           setClassTemplates(normalizedClassTemplates);
         }
         const normalizedLessons = lessonsResult.ok && Array.isArray(lessonsResult.lessons)
           ? normalizeLessonCalendarRules(lessonsResult.lessons, makeupTasksResult.makeupTasks ?? [], normalizedClassTemplates)
           : [];
-        if (normalizedLessons.length > 0) {
+        // 서버가 ok 로 빈 목록을 주면 그대로 반영한다(수업이 아직 없는 새 교사).
+        if (lessonsResult.ok) {
           setLessons(filterActiveLessons(normalizedLessons));
           normalizedLessons
             .filter((lesson, index) => !areLessonCalendarRuleFieldsEqual(lesson, lessonsResult.lessons[index]))
             .forEach((lesson) => postJson("/api/lessons", { lesson }).catch((error) => console.error(error)));
         }
-        if (recordsResult.ok && Array.isArray(recordsResult.records) && recordsResult.records.length > 0) {
+        if (recordsResult.ok && Array.isArray(recordsResult.records)) {
           const sourceLessons = normalizedLessons.length > 0 ? normalizedLessons : lessons;
           setRecords(filterRecordsForLessons(recordsResult.records, sourceLessons));
         }
-        if (homeworksResult.ok && Array.isArray(homeworksResult.homeworks) && homeworksResult.homeworks.length > 0) {
+        if (homeworksResult.ok && Array.isArray(homeworksResult.homeworks)) {
           const sourceLessons = normalizedLessons.length > 0 ? normalizedLessons : lessons;
           setHomeworks(filterHomeworksForLessons(homeworksResult.homeworks, sourceLessons));
         }

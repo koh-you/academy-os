@@ -19,7 +19,7 @@ export function SupplementHistoryModal({ getMethodLabel, getTypeLabel, onChangeQ
           autoFocus
           label="학생/학교/항목 검색"
           onChange={onChangeQuery}
-          placeholder="예: 최선호, 창동고, 숙제보충"
+          placeholder="예: 홍길동, ○○고, 숙제보충"
           result={`${historyItems.length}건`}
           value={query}
         />
