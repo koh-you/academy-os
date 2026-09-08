@@ -6,7 +6,9 @@ import { Modal } from "../../shared/components/Modal.jsx";
 import { NavigationHeader } from "../../shared/components/NavigationHeader.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
+import { OverflowMenu } from "../../shared/components/OverflowMenu.jsx";
 import { SelectableCard } from "../../shared/components/SelectableCard.jsx";
+import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import {
   formatCalendarEventLabel,
   formatCalendarSummaryLabel,
@@ -14,8 +16,10 @@ import {
   getMonthCellDisplayEvents,
   getSchoolCalendarEventColor,
   getSchoolCalendarSchoolColor,
-  isDateWithinEvent
+  isDateWithinEvent,
+  isSchoolCalendarEventDirty
 } from "./schoolCalendarUtils.js";
+import "./schoolCalendarDateModal.css";
 
 export function SchoolCalendarSaveNotice({ saveState = {} }) {
   return (
@@ -292,6 +296,7 @@ export function SchoolDateScheduleModal({
   onCreateEvent,
   onDeleteEvent,
   onSaveEvent,
+  saveState = "idle",
   schools = [],
   selectedDate = ""
 }) {
@@ -320,6 +325,20 @@ export function SchoolDateScheduleModal({
         [field]: value
       }
     }));
+  }
+
+  const dirtyEvents = events.filter((event) => isSchoolCalendarEventDirty(event, draftEvents[event.eventId]));
+
+  async function saveDirtyEvents() {
+    for (const event of dirtyEvents) await onSaveEvent?.(event, getDraftEvent(event));
+  }
+
+  function revertDirtyEvents() {
+    setDraftEvents((current) => {
+      const next = { ...current };
+      for (const event of dirtyEvents) next[event.eventId] = { ...event };
+      return next;
+    });
   }
 
   return (
@@ -354,24 +373,28 @@ export function SchoolDateScheduleModal({
                 const eventColorOptionsForDisplay = eventColorOptions.includes(eventColor)
                   ? eventColorOptions
                   : [eventColor, ...eventColorOptions];
+                const isDirtyEvent = isSchoolCalendarEventDirty(event, draftEvents[event.eventId]);
+                const eventLabel = formatCalendarSummaryLabel(draftEvent);
                 return (
-                  <article className="schoolDateEventEditor" key={event.eventId} style={{ "--school-color": eventColor }}>
+                  <article
+                    className={isDirtyEvent ? "schoolDateEventEditor dirtySchoolDateEvent" : "schoolDateEventEditor"}
+                    key={event.eventId}
+                    style={{ "--school-color": eventColor }}
+                  >
                     <div className="schoolDateEventEditorTop">
                       <div>
-                        <strong>{formatCalendarSummaryLabel(draftEvent)}</strong>
+                        <strong>{eventLabel}</strong>
                         <span>{event.type === "examPeriod" ? `${draftEvent.date} ~ ${draftEvent.endDate || draftEvent.date}` : draftEvent.date}</span>
                       </div>
                       <div className="schoolDateEventActions">
-                        {isReadonlyEvent ? (
-                          <span>읽기 전용 일정</span>
-                        ) : event.derived ? (
-                          <span>시험관리 연동</span>
-                        ) : (
-                          <button className="dangerSoftButton" onClick={() => onDeleteEvent?.(event.eventId)} type="button">삭제</button>
-                        )}
-                        {!isReadonlyEvent ? (
-                          <button className="softButton" onClick={() => onSaveEvent?.(event, draftEvent)} type="button">저장</button>
-                        ) : null}
+                        {isReadonlyEvent ? <span>읽기 전용 일정</span> : event.derived ? <span>시험관리 연동</span> : null}
+                        {isDirtyEvent ? <span className="schoolDateEventDirtyMark">변경됨</span> : null}
+                        <OverflowMenu
+                          items={canEditEventDetails
+                            ? [{ key: "delete", label: "일정 삭제", onSelect: () => onDeleteEvent?.(event.eventId), tone: "danger" }]
+                            : []}
+                          label={`${eventLabel} 추가 작업`}
+                        />
                       </div>
                     </div>
                     <div className="fieldGrid two">
@@ -458,6 +481,21 @@ export function SchoolDateScheduleModal({
           ))}
         </div>
       )}
+      {dirtyEvents.length > 0 || (saveState !== "idle" && events.length > 0) ? (
+        <StickySaveBar
+          className="schoolDateStickySaveBar"
+          label="학사일정"
+          message={dirtyEvents.length > 0 ? `${dirtyEvents.length}개 일정 변경됨` : ""}
+          saveState={dirtyEvents.length > 0 && saveState !== "saving" ? "dirty" : saveState}
+        >
+          <button className="softButton compact" disabled={busy || dirtyEvents.length === 0} onClick={revertDirtyEvents} type="button">
+            되돌리기
+          </button>
+          <button className="primaryButton compact" disabled={busy || dirtyEvents.length === 0} onClick={saveDirtyEvents} type="button">
+            변경 저장
+          </button>
+        </StickySaveBar>
+      ) : null}
       </fieldset>
     </Modal>
   );

@@ -51,6 +51,55 @@ test("school calendar shows the full exam period with a stronger math exam date 
   expect(pageErrors).toEqual([]);
 });
 
+test("school date modal shows no save button until an event actually changes, then saves through one bar", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  const created = await request.post(`${safeApiBaseUrl}/api/school-events`, {
+    data: {
+      schoolEvent: {
+        date: "2026-09-14",
+        eventId: "safe-row-rule-event",
+        grade: "고1",
+        schoolName: "안전고",
+        title: "행 액션 규칙 확인 일정",
+        type: "etc"
+      }
+    }
+  });
+  expect(created.ok()).toBeTruthy();
+
+  await loginAsTeacher(page);
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학사일정/ }).click();
+  await navigateSchoolCalendarToMonth(page, 2026, 9);
+
+  await page.getByRole("gridcell", { name: /2026-09-14/ }).click();
+  const dateModal = page.getByRole("dialog", { name: "2026-09-14 일정" });
+  const saveBar = dateModal.getByRole("complementary", { name: "학사일정 하단 고정 저장 바" });
+
+  // R1·R2: 바꾼 게 없으면 저장 바 자체가 없다(예전에는 카드마다 저장 버튼이 항상 활성이었다).
+  await expect(saveBar).toHaveCount(0);
+  await expect(dateModal.getByRole("button", { name: "저장", exact: true })).toHaveCount(0);
+
+  const titleInput = dateModal.locator('.fieldGrid input:not([type="date"])').first();
+  await titleInput.fill("규칙 확인 일정 수정본");
+  await expect(saveBar).toContainText("1개 일정 변경됨");
+  await expect(dateModal.locator(".dirtySchoolDateEvent")).toHaveCount(1);
+
+  // 되돌리기는 원본으로 되돌리고 저장 바를 다시 숨긴다.
+  await saveBar.getByRole("button", { name: "되돌리기" }).click();
+  await expect(titleInput).toHaveValue("행 액션 규칙 확인 일정");
+  await expect(saveBar).toHaveCount(0);
+
+  await titleInput.fill("규칙 확인 일정 수정본");
+  await saveBar.getByRole("button", { name: "변경 저장" }).click();
+  await expect(saveBar).toContainText("저장 완료");
+  await expect(dateModal.locator(".dirtySchoolDateEvent")).toHaveCount(0);
+
+  const source = await request.get(`${safeApiBaseUrl}/api/school-events`);
+  const sourceBody = await source.json();
+  expect(sourceBody.schoolEvents.find((event) => event.eventId === "safe-row-rule-event")?.title).toBe("규칙 확인 일정 수정본");
+  expect(pageErrors).toEqual([]);
+});
+
 test("manual school event keeps its draft and stable id across an unknown save result, then verifies delete", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   let postCount = 0;
@@ -101,7 +150,9 @@ test("manual school event keeps its draft and stable id across an unknown save r
   await page.getByRole("gridcell", { name: new RegExp(eventDate) }).click();
   const dateModal = page.getByRole("dialog", { name: `${eventDate} 일정` });
   await expect(dateModal.locator('.fieldGrid input:not([type="date"])')).toHaveValue("안전 저장 학사일정");
-  await dateModal.getByRole("button", { name: "삭제" }).click();
+  // 삭제는 카드에 상시 노출되지 않고 ⋯ 메뉴 안에 있다(docs/ui-row-actions.md R3).
+  await dateModal.getByRole("button", { name: /추가 작업$/ }).click();
+  await dateModal.getByRole("menuitem", { name: "일정 삭제" }).click();
   await expect(dateModal).toHaveAttribute("aria-busy", "true");
   await expect(dateModal.getByRole("button", { name: "창 닫기" })).toBeDisabled();
   releaseDeleteRequest();
