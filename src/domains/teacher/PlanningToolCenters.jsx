@@ -13,6 +13,7 @@ import {
   formatCalendarEventLabel,
   formatDateRangeText,
   formatPeriodSummaryLabel,
+  getSchoolCalendarEditableFields,
   getSchoolCalendarEventColor,
   getSchoolCalendarFilterGroup,
   getSchoolCalendarSchoolColor,
@@ -275,10 +276,8 @@ export function SchoolCalendarCenter({
       endDate: draftEvent.type === "mathExam" ? "" : draftEvent.endDate,
       color: draftEvent.color || getSchoolCalendarSchoolColor(draftEvent.schoolName)
     };
-    const editableFields = originalEvent.derived
-      ? originalEvent.type === "examPeriod" ? ["date", "endDate"] : ["date", "examSubject"]
-      : ["date", "endDate", "schoolName", "grade", "type", "title", "memo", "color", "examSubject"];
-    const changedFields = editableFields.filter((field) => String(originalEvent[field] ?? "") !== String(nextEvent[field] ?? ""));
+    const changedFields = getSchoolCalendarEditableFields(originalEvent)
+      .filter((field) => String(originalEvent[field] ?? "") !== String(nextEvent[field] ?? ""));
     if (!changedFields.length) {
       setSchoolCalendarSaveState({ state: "saved", message: "변경된 내용이 없습니다." });
       closeEventForm();
@@ -690,6 +689,7 @@ export function SchoolCalendarCenter({
           onDeleteEvent={deleteAcademicEvent}
           onCreateEvent={openEventForm}
           onSaveEvent={saveAcademicEventDraft}
+          saveState={schoolCalendarSaveState.state}
           schools={schools}
           selectedDate={selectedDate}
         />

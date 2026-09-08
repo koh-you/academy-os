@@ -49,6 +49,20 @@ export function getSchoolCalendarEventColor(event = {}) {
   return normalizeSchoolCalendarColor(event.color) || getSchoolCalendarSchoolColor(event.schoolName);
 }
 
+// 저장 시 실제로 서버에 반영되는 필드. 변경 여부(dirty) 판정도 같은 목록을 써야
+// "변경됨"으로 보이는데 저장할 게 없는 상태가 생기지 않는다.
+export function getSchoolCalendarEditableFields(event = {}) {
+  if (event.derived) return event.type === "examPeriod" ? ["date", "endDate"] : ["date", "examSubject"];
+  return ["date", "endDate", "schoolName", "grade", "type", "title", "memo", "color", "examSubject"];
+}
+
+export function isSchoolCalendarEventDirty(event = {}, draftEvent = null) {
+  if (!draftEvent || event.readonly) return false;
+  return getSchoolCalendarEditableFields(event).some(
+    (field) => String(draftEvent[field] ?? "") !== String(event[field] ?? "")
+  );
+}
+
 export function parseDateRangeText(value = "") {
   const text = String(value).trim();
   if (!text) return null;
