@@ -2,6 +2,7 @@ import { useState } from "react";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { ListCard, ListCardActions, ListCardBody } from "../../shared/components/ListCard.jsx";
 import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
+import { OverflowMenu } from "../../shared/components/OverflowMenu.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 
 function QuestionSaveFeedback({ saveState, targetId }) {
@@ -86,24 +87,21 @@ export function StudentQuestionPanel({
             </ListCardBody>
             <ListCardActions className="studentQuestionItemActions">
               <div>
-                <button
-                  className="softButton"
-                  disabled={!writeEnabled || isSaving}
-                  onClick={() => onUpdateQuestion?.(question.questionId, { status: question.status === "resolved" ? "ready" : "resolved" })}
-                  type="button"
-                >
-                  {saveState.targetId === question.questionId && saveState.action === "update" && isSaving
-                    ? "저장 중..."
-                    : question.status === "resolved" ? "다시 질문" : "해결 체크"}
-                </button>
-                <button
-                  className="dangerSoftButton"
-                  disabled={!writeEnabled || isSaving}
-                  onClick={() => setDeleteQuestionId(question.questionId)}
-                  type="button"
-                >
-                  {saveState.targetId === question.questionId && saveState.action === "delete" && isSaving ? "삭제 중..." : "삭제"}
-                </button>
+                {writeEnabled && !isSaving ? (
+                  <button
+                    className="softButton"
+                    onClick={() => onUpdateQuestion?.(question.questionId, { status: question.status === "resolved" ? "ready" : "resolved" })}
+                    type="button"
+                  >
+                    {question.status === "resolved" ? "다시 질문" : "해결 체크"}
+                  </button>
+                ) : null}
+                <OverflowMenu
+                  items={writeEnabled && !isSaving
+                    ? [{ key: "delete", label: "질문 삭제", onSelect: () => setDeleteQuestionId(question.questionId), tone: "danger" }]
+                    : []}
+                  label={`${question.text || "질문"} 추가 작업`}
+                />
               </div>
               <QuestionSaveFeedback saveState={saveState} targetId={question.questionId} />
             </ListCardActions>
