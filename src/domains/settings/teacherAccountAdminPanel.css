@@ -1,0 +1,43 @@
+/* 교사 계정 관리(설정 · 원장 전용) */
+.teacherAccountForm {
+  align-items: end;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  margin-top: 12px;
+}
+
+.teacherAccountForm label {
+  display: grid;
+  gap: 4px;
+}
+
+.teacherAccountMessage {
+  background: var(--status-neutral-bg);
+  border-radius: 8px;
+  color: var(--academy-text-strong);
+  font-size: 13px;
+  margin-top: 12px;
+  padding: 8px 10px;
+}
+
+.teacherAccountList {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.teacherAccountRow {
+  align-items: center;
+  border: 1px solid var(--status-neutral-border);
+  border-radius: 10px;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 10px 12px;
+}
+
+.teacherAccountRow small {
+  display: block;
+  margin-top: 2px;
+}

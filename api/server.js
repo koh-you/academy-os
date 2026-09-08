@@ -97,14 +97,16 @@ import {
   downloadStorageObjectWithMetadata,
   ensureStorageBucket,
   getStorageSafeFileName,
+  insertRows,
   isSupabaseConfigured,
   listRows,
   parseDataUrl,
+  patchRows,
   sanitizeStorageSegment,
   upsertRows,
   uploadStorageObjectWithBucketRetry
 } from "./lib/supabaseRest.js";
-import { enterTenantContext, getCurrentTenantId, setWriteTenant } from "../src/shared/server/tenantScope.js";
+import { enterTenantContext, getCurrentTenantId, runWithTenant, setWriteTenant } from "../src/shared/server/tenantScope.js";
 import { createKioskDeviceRegistry } from "../src/shared/server/kioskDeviceRegistry.js";
 import { evaluateApiAccess, mayAuthenticateAsKiosk } from "../src/shared/server/apiAccessPolicy.js";
 import {
@@ -160,6 +162,8 @@ import {
 import { createSystemRouteRegistry } from "../src/shared/server/systemRouteRegistry.js";
 import { createAuthLoginRouteRegistry } from "../src/shared/server/authLoginRouteRegistry.js";
 import { createTeacherAccountRouteRegistry } from "../src/shared/server/teacherAccountRouteRegistry.js";
+import { createTeacherAccountAdminRouteRegistry } from "../src/shared/server/teacherAccountAdminRouteRegistry.js";
+import { createTeacherAccountAdminStore } from "../src/shared/server/teacherAccountAdminStore.js";
 import { createPortalReadRouteRegistry } from "../src/shared/server/portalReadRouteRegistry.js";
 import { createPortalWriteRouteRegistry } from "../src/shared/server/portalWriteRouteRegistry.js";
 import { createExamPostConfirmRouteRegistry } from "../src/shared/server/examPostConfirmRouteRegistry.js";
@@ -338,6 +342,23 @@ const { dispatch: dispatchTeacherAccountRoute } = createTeacherAccountRouteRegis
   saveTeacherAccount,
   sendJson,
   toTeacherAccount
+});
+const teacherAccountAdminStore = createTeacherAccountAdminStore({
+  defaultTenantId,
+  hashPassword,
+  insertRows,
+  listRows,
+  patchRows,
+  teacherAccountTable
+});
+const { dispatch: dispatchTeacherAccountAdminRoute } = createTeacherAccountAdminRouteRegistry({
+  createTeacherAccount: teacherAccountAdminStore.createTeacherAccountWithTenant,
+  findTeacherAccountByLoginId: teacherAccountAdminStore.findTeacherAccountByLoginId,
+  isSupabaseConfigured,
+  listTeacherAccounts: teacherAccountAdminStore.listTeacherAccounts,
+  readJsonBody,
+  sendJson,
+  setTeacherAccountActive: teacherAccountAdminStore.setTeacherAccountActive
 });
 const { dispatch: dispatchPortalReadRoute } = createPortalReadRouteRegistry({
   getPortalData,
@@ -4948,6 +4969,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchPortalWriteRoute({ request, response, requestUrl })) return;
   if (await dispatchExamPostConfirmRoute({ request, response, requestUrl })) return;
   if (await dispatchTeacherAccountRoute({ request, response, requestUrl })) return;
+  if (await dispatchTeacherAccountAdminRoute({ request, response, requestUrl })) return;
   if (await dispatchAppCoreReadRoute({ request, response, requestUrl })) return;
   if (await dispatchAppStateWriteRoute({ request, response, requestUrl })) return;
   if (await dispatchReportSnapshotRoute({ request, response, requestUrl })) return;

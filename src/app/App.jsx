@@ -2290,6 +2290,7 @@ export function App() {
   const wrongProblemSaveRevisionRef = useRef(0);
   const notificationJobsRefreshControllerRef = useRef(null);
   const notificationJobsReconcileControllerRef = useRef(null);
+  const teacherRole = session?.teacherRole;
   const attendanceOnlyMode = isAttendanceOnlyRoute();
   const specialLectureOnlyMode = isSpecialLectureRoute();
   const {
@@ -2462,7 +2463,6 @@ export function App() {
           return;
         }
         setIsPortalDataReady(false);
-        const teacherRole = session?.teacherRole;
         const [
           studentsResponse,
           studentIntakeApplicantsResponse,
@@ -6307,6 +6307,7 @@ export function App() {
       teacherLessonHub: teacherLessonHubRuntime
     },
     models: {
+      teacherRole,
       academyReminders,
       academyTests,
       academyTestSaveState,
