@@ -117,8 +117,13 @@ export function ExamPrepEditModal({
                     onChange={(event) => onUpdateMathExamEntry(row, entryIndex, "label", event.target.value)}
                   />
                 </label>
-                <button className="dangerButton mini" type="button" onClick={() => onRemoveMathExamEntry(row, entryIndex)}>
-                  삭제
+                <button
+                  aria-label={`${entryIndex + 1}번째 수학시험 제거`}
+                  className="iconButton"
+                  onClick={() => onRemoveMathExamEntry(row, entryIndex)}
+                  type="button"
+                >
+                  ×
                 </button>
               </div>
             ))}

@@ -392,7 +392,7 @@ export function SpecialLectureScheduleCalculator({
                   종료
                   <input type="time" value={rule.endTime} onChange={(event) => onUpdateScheduleRule?.(index, { endTime: event.target.value })} />
                 </label>
-                <button className="dangerSoftButton compact" onClick={() => onRemoveScheduleRule?.(index)} type="button">삭제</button>
+                <button aria-label={`${index + 1}번째 요일 규칙 제거`} className="iconButton" onClick={() => onRemoveScheduleRule?.(index)} type="button">×</button>
               </div>
             ))}
           </div>
@@ -467,7 +467,7 @@ export function SpecialLectureSessionPlanEditor({
               <div className="specialLectureSessionCardHeader">
                 <strong>{index + 1}회차</strong>
                 <span>{session.day || getWeekdayLabel(createDateFromKey(session.dateKey)?.getDay()) || "요일 없음"}</span>
-                <button className="dangerSoftButton compact" onClick={() => onRemoveSession?.(index)} type="button">삭제</button>
+                <button aria-label={`${index + 1}회차 제거`} className="iconButton" onClick={() => onRemoveSession?.(index)} type="button">×</button>
               </div>
               <div className="specialLectureSessionCardGrid">
                 <label>

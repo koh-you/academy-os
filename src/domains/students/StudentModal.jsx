@@ -8,6 +8,7 @@ import {
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
+import { OverflowMenu } from "../../shared/components/OverflowMenu.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 import "./studentModal.css";
 
@@ -348,22 +349,31 @@ export function StudentModal({
                   ) : null}
                   {getApplicantTargetStudent(applicant) ? (
                     <div className="studentIntakeActionButtons">
-                      <button
-                        className="softButton"
-                        disabled={!applicant.name || applicantRegistrationStates[applicant.applicantId] === "saving"}
-                        onClick={() => registerApplicant(applicant)}
-                        type="button"
-                      >
-                        {applicantRegistrationStates[applicant.applicantId] === "saving" ? "추가 중" : "기존 정보에 Tally 내용 추가"}
-                      </button>
-                      <button
-                        className="dangerButton"
-                        disabled={!applicant.name || applicantRegistrationStates[applicant.applicantId] === "saving"}
-                        onClick={() => registerApplicant(applicant, { replaceExisting: true })}
-                        type="button"
-                      >
-                        {applicantRegistrationStates[applicant.applicantId] === "saving" ? "교체 중" : "Tally 내용으로 기본정보 교체"}
-                      </button>
+                      {applicantRegistrationStates[applicant.applicantId] === "saving" ? (
+                        <InlineSaveStatus label="Tally 반영" saveState="saving" />
+                      ) : (
+                        <>
+                          <button
+                            className="softButton"
+                            disabled={!applicant.name}
+                            onClick={() => registerApplicant(applicant)}
+                            type="button"
+                          >
+                            기존 정보에 Tally 내용 추가
+                          </button>
+                          <OverflowMenu
+                            items={applicant.name
+                              ? [{
+                                  key: "replace",
+                                  label: "Tally 내용으로 기본정보 교체",
+                                  onSelect: () => registerApplicant(applicant, { replaceExisting: true }),
+                                  tone: "danger"
+                                }]
+                              : []}
+                            label={`${applicant.name || "접수"} 추가 작업`}
+                          />
+                        </>
+                      )}
                     </div>
                   ) : (
                     <button
