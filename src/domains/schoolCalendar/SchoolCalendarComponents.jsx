@@ -14,6 +14,7 @@ import {
   formatCalendarSummaryLabel,
   formatPeriodSummaryLabel as formatCalendarPeriodSummaryLabel,
   getMonthCellDisplayEvents,
+  getSchoolCalendarEditableFields,
   getSchoolCalendarEventColor,
   getSchoolCalendarSchoolColor,
   isDateWithinEvent,
@@ -309,9 +310,15 @@ export function SchoolDateScheduleModal({
   const groupedEventEntries = [...groupedEvents.entries()].sort(([schoolA], [schoolB]) => schoolA.localeCompare(schoolB));
   const [draftEvents, setDraftEvents] = useState({});
 
+  // events 는 부모에서 filter 로 만들어져 렌더마다 새 배열이다. 참조에 의존하면 부모가
+  // 한 번 리렌더될 때마다 입력 중이던 초안이 원본으로 되돌아가므로, 실제 내용이 바뀔 때만 초기화한다.
+  const eventsSignature = JSON.stringify(
+    events.map((event) => [event.eventId, ...getSchoolCalendarEditableFields(event).map((field) => event[field] ?? "")])
+  );
+
   useEffect(() => {
     setDraftEvents(Object.fromEntries(events.map((event) => [event.eventId, { ...event }])));
-  }, [events]);
+  }, [eventsSignature]);
 
   function getDraftEvent(event) {
     return draftEvents[event.eventId] ?? event;
