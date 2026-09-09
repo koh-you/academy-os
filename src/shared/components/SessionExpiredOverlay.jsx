@@ -24,7 +24,7 @@ export function SessionExpiredOverlay({ onDismiss, onRelogin }) {
           새로고침으로는 풀리지 않습니다. 아래 버튼으로 다시 로그인해 주세요.
         </p>
         <p className="sessionExpiredPending">
-          작성 중이던 내용은 다시 로그인하면 사라집니다. 남겨야 할 내용이 있으면
+          작성 중이던 내용은 다시 로그인하면 사라집니다. 남겨야 할 내용이 있으면{" "}
           <strong>닫기</strong>를 눌러 먼저 복사해 두세요.
         </p>
         <div className="sessionExpiredActions">
