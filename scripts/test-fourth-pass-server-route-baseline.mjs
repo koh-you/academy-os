@@ -297,22 +297,24 @@ const orderedRoutes = [
 ];
 const routes = orderedRoutes.map((route, index) => ({ ...route, index }));
 
-assert.equal(routes.length, 122);
+// 122 -> 123: POST /api/auth/refresh 추가. 교사 토큰 8시간 만료로 수업 중 저장이 전부
+// 401 이 된 장애(2026-09-08) 대응 — 화면이 활동 중일 때만 부르는 세션 연장 경로다.
+assert.equal(routes.length, 123);
 assert.equal(directRouteMatches.length, 20);
-assert.equal(new Set(routes.map(({ signature }) => signature)).size, 122);
+assert.equal(new Set(routes.map(({ signature }) => signature)).size, 123);
 assert.deepEqual(
   Object.fromEntries(["DELETE", "GET", "POST"].map((method) => [
     method,
     routes.filter((route) => route.method === method).length
   ])),
-  { DELETE: 13, GET: 31, POST: 78 }
+  { DELETE: 13, GET: 31, POST: 79 }
 );
 
 const routeOrderHash = crypto
   .createHash("sha256")
   .update(routes.map(({ signature }) => signature).join("\n"))
   .digest("hex");
-assert.equal(routeOrderHash, "bac7a279c43fd86c8c94c54e9dddf2851c829ecfe0a26ad4a4f5d2ef3063b400");
+assert.equal(routeOrderHash, "21c1a953549bf4840b7a92dd858a4a9447105a4857eb8861651a414611e33e7b");
 
 function getRouteFamily(path) {
   if (
@@ -383,11 +385,11 @@ assert.deepEqual(familyCounts, {
   "notification-provider": 20,
   resource: 6,
   "student-intake-special": 15,
-  "system-auth-portal": 11
+  "system-auth-portal": 12
 });
 
 const expectedAuthRoutes = {
-  credential: ["POST /api/auth/login", "POST /api/auth/teacher-account"],
+  credential: ["POST /api/auth/login", "POST /api/auth/refresh", "POST /api/auth/teacher-account"],
   dispatchConditional: ["POST /api/notification-jobs/dispatch-due"],
   dispatchRequired: ["POST /api/notifications/slack-today-schedule/reserve"],
   portal: [
@@ -562,5 +564,5 @@ assert.ok(packageJson.scripts["test:production"].includes("npm run test:exam-ana
 assert.ok(packageJson.scripts["test:production"].includes("npm run test:exam-analysis-question-count-route-registry"));
 
 console.log(
-  "fourth-pass server route baseline passed · 122 routes · GET 31/POST 78/DELETE 13 · session/credential 15 + dispatch 2"
+  "fourth-pass server route baseline passed · 123 routes · GET 31/POST 79/DELETE 13 · session/credential 16 + dispatch 2"
 );

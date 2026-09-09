@@ -332,6 +332,7 @@ const { dispatch: dispatchAuthLoginRoute } = createAuthLoginRouteRegistry({
   authenticateTeacher,
   createPortalSessionToken,
   createTeacherSessionToken,
+  getTeacherSession,
   readJsonBody,
   sendJson
 });

@@ -451,6 +451,7 @@ import { PageHeader } from "../shared/components/PageHeader.jsx";
 import { SearchField } from "../shared/components/SearchField.jsx";
 import { SelectionToolbar } from "../shared/components/SelectionToolbar.jsx";
 import { StickySaveBar } from "../shared/components/StickySaveBar.jsx";
+import { SessionExpiredOverlay } from "../shared/components/SessionExpiredOverlay.jsx";
 import {
   apiFetch,
   roleAwareApiFetch,
@@ -458,6 +459,7 @@ import {
   deleteJsonWithTimeout,
   fetchWithAuth,
   getJsonWithTimeout,
+  onApiUnauthorized,
   postJson,
   postJsonWithHeaders,
   postJsonWithTimeout,
@@ -2109,15 +2111,18 @@ export function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileNavigationOpen, setIsMobileNavigationOpen] = useState(false);
   const [teacherAccountSettings, setTeacherAccountSettings] = useState(defaultTeacherAccountSettings);
-  const { login: handleLogin, logout: handleLogout, session } = useAppSession({
+  const [isSessionExpired, setIsSessionExpired] = useState(false);
+  const { login: handleLogin, logout: handleLogout, refresh: refreshSession, session } = useAppSession({
     documentTarget: typeof document === "undefined" ? null : document,
     onLogout: () => {
       setIsPortalDataReady(false);
       setActiveView("lessons");
+      setIsSessionExpired(false);
     },
     onSessionAccepted: (nextSession) => {
       setIsPortalDataReady(false);
       if (nextSession.role === "teacher") setActiveView("lessons");
+      setIsSessionExpired(false);
     },
     request: postJson,
     storageKey: storageKeys.teacherSession,
@@ -2128,6 +2133,28 @@ export function App() {
   useEffect(() => {
     setApiAuthToken(session?.sessionToken || "");
   }, [session?.sessionToken]);
+  // 어느 요청이든 401 이 오면 화면 전체에 재로그인을 안내한다. 이게 없으면 만료가
+  // "저장 실패" 로만 보이고, 새로고침해도 같은 만료 토큰을 다시 보내 원인을 알 수 없다
+  // (2026-09-08 수업일지·출결 장애).
+  useEffect(() => onApiUnauthorized(() => setIsSessionExpired(true)), []);
+  // 교사 토큰은 8시간짜리인데 학원 하루는 그보다 길다. 화면을 실제로 쓰는 동안에만
+  // 연장한다 — 켜두기만 한 탭이 세션을 무한정 늘리면 만료 자체가 의미를 잃는다.
+  useEffect(() => {
+    if (session?.role !== "teacher" || !session?.sessionToken || isSessionExpired) return undefined;
+    const minimumIntervalMs = 30 * 60 * 1000;
+    let lastRefreshAt = Date.now();
+    function refreshIfStale() {
+      if (document.visibilityState === "hidden") return;
+      if (Date.now() - lastRefreshAt < minimumIntervalMs) return;
+      lastRefreshAt = Date.now();
+      refreshSession();
+    }
+    const events = ["visibilitychange", "focus", "pointerdown", "keydown"];
+    for (const eventName of events) document.addEventListener(eventName, refreshIfStale, { passive: true });
+    return () => {
+      for (const eventName of events) document.removeEventListener(eventName, refreshIfStale);
+    };
+  }, [isSessionExpired, refreshSession, session?.role, session?.sessionToken]);
   const [selectedDate, setSelectedDate] = useState(today);
   const [selectedLessonId, setSelectedLessonId] = useState("");
   const [lessonClipboard, setLessonClipboard] = useState(null);
@@ -6500,6 +6527,9 @@ export function App() {
 
   return (
     <main className={isSidebarCollapsed ? "appFrame sidebarCollapsed" : "appFrame"}>
+      {isSessionExpired ? (
+        <SessionExpiredOverlay onDismiss={() => setIsSessionExpired(false)} onRelogin={handleLogout} />
+      ) : null}
       <Sidebar
         academyBrandName={academyBrandName}
         activeView={activeView}

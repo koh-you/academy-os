@@ -189,11 +189,29 @@ export function useAppSession({
     return { ok: true };
   }
 
+  // 아직 살아 있는 교사 세션을 새 토큰으로 갈아끼운다. 화면이 활동 중일 때만 부른다
+  // (App 참고). 서버가 거절하면 세션은 그대로 두고 실패만 알린다 — 여기서 로그아웃까지
+  // 해버리면 일시적인 네트워크 오류로 작성 중인 수업일지가 날아간다.
+  async function refresh() {
+    if (session?.role !== "teacher" || !session?.sessionToken) return { ok: false };
+    try {
+      const result = await request("/api/auth/refresh", {});
+      const sessionToken = result?.account?.sessionToken;
+      if (!sessionToken) return { ok: false };
+      const nextSession = { ...session, sessionToken };
+      setSession(nextSession);
+      persistTeacherSession({ documentTarget, session: nextSession, storageKey, windowTarget });
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, expired: Boolean(error?.sessionExpired) };
+    }
+  }
+
   function logout() {
     persistTeacherSession({ documentTarget, session: null, storageKey, windowTarget });
     setSession(null);
     onLogout();
   }
 
-  return { login, logout, session };
+  return { login, logout, refresh, session };
 }

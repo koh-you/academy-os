@@ -50,6 +50,54 @@ export function enableKioskDeviceToken() {
   return kioskToken;
 }
 
+// 세션 만료(401)를 앱 한 곳으로 모으는 통로.
+//
+// 교사 세션이 끝나면 서버는 401 auth_required 를 준다. 예전에는 화면이 그걸 그냥
+// "저장 실패"로만 보여줬다. 로그인 정보는 브라우저에 30일짜리로 남아 있어서 새로고침해도
+// 같은 만료 토큰을 다시 보내고, 그래서 원장님이 이유를 모른 채 저장을 반복했다
+// (2026-09-08 수업일지·출결 장애). 401 은 반드시 여기로 모아 재로그인을 안내한다.
+const unauthorizedListeners = new Set();
+
+/** 401 이 오면 부른다. 해제 함수를 돌려준다. */
+export function onApiUnauthorized(listener) {
+  if (typeof listener !== "function") return () => {};
+  unauthorizedListeners.add(listener);
+  return () => {
+    unauthorizedListeners.delete(listener);
+  };
+}
+
+export function isSessionExpiredError(error) {
+  return Boolean(error?.sessionExpired);
+}
+
+// 응답 오류를 한 모양으로 만든다. 401 이면 sessionExpired 를 달아서, 호출부가
+// "저장 실패"와 "다시 로그인해야 함"을 구분할 수 있게 한다.
+function createApiError(response, result, fallbackMessage) {
+  const sessionExpired = response.status === 401 || result?.code === "auth_required";
+  const error = new Error(
+    sessionExpired
+      ? "로그인 세션이 만료되었습니다. 다시 로그인해 주세요."
+      : result?.error || fallbackMessage
+  );
+  error.audit = result?.audit;
+  error.code = result?.code;
+  error.result = result;
+  error.responseReceived = true;
+  error.statusCode = response.status;
+  if (sessionExpired) {
+    error.sessionExpired = true;
+    for (const listener of unauthorizedListeners) {
+      try {
+        listener(error);
+      } catch {
+        // 안내 한 곳이 실패해도 다른 구독자와 원래 오류 전파를 막지 않는다.
+      }
+    }
+  }
+  return error;
+}
+
 export function withAuthHeaders(headers = {}) {
   const merged = { ...headers };
   // 호출부가 Authorization 을 직접 넘겼으면(보고서 저장 등) 그쪽을 존중한다.
@@ -96,14 +144,7 @@ export async function postJson(path, body) {
     body: JSON.stringify(body)
   });
   const result = await response.json();
-  if (!response.ok || !result.ok) {
-    const error = new Error(result.error || "API 저장 실패");
-    error.audit = result.audit;
-    error.code = result.code;
-    error.result = result;
-    error.statusCode = response.status;
-    throw error;
-  }
+  if (!response.ok || !result.ok) throw createApiError(response, result, "API 저장 실패");
   return result;
 }
 
@@ -134,7 +175,7 @@ export async function getJsonWithTimeout(path, timeoutMs = 12000, timeoutMessage
     });
     const result = await response.json();
     if (!response.ok || !result.ok) {
-      throw new Error(result.error || `API 조회 실패: ${response.status}`);
+      throw createApiError(response, result, `API 조회 실패: ${response.status}`);
     }
     return result;
   } catch (error) {
@@ -154,10 +195,7 @@ export async function getJsonWithHeaders(path, headers = {}) {
   });
   const result = await response.json();
   if (!response.ok || result.ok === false) {
-    const error = new Error(result.error || `API 조회 실패: ${response.status}`);
-    error.responseReceived = true;
-    error.statusCode = response.status;
-    throw error;
+    throw createApiError(response, result, `API 조회 실패: ${response.status}`);
   }
   return result;
 }
@@ -173,14 +211,7 @@ export async function postJsonWithTimeout(path, body, timeoutMs = 30000, timeout
       signal: controller.signal
     });
     const result = await response.json();
-    if (!response.ok || !result.ok) {
-      const error = new Error(result.error || "API 저장 실패");
-      error.audit = result.audit;
-      error.code = result.code;
-      error.result = result;
-      error.statusCode = response.status;
-      throw error;
-    }
+    if (!response.ok || !result.ok) throw createApiError(response, result, "API 저장 실패");
     return result;
   } catch (error) {
     if (error.name === "AbortError") {
@@ -203,12 +234,7 @@ export async function deleteJsonWithTimeout(path, body, timeoutMs = 30000, timeo
       signal: controller.signal
     });
     const result = await response.json();
-    if (!response.ok || !result.ok) {
-      const error = new Error(result.error || "API 삭제 실패");
-      error.audit = result.audit;
-      error.statusCode = response.status;
-      throw error;
-    }
+    if (!response.ok || !result.ok) throw createApiError(response, result, "API 삭제 실패");
     return result;
   } catch (error) {
     if (error.name === "AbortError") {
@@ -228,10 +254,7 @@ export async function postJsonWithHeaders(path, body, headers = {}) {
   });
   const result = await response.json();
   if (!response.ok || result.ok === false) {
-    const error = new Error(result.error || "요청에 실패했습니다.");
-    error.responseReceived = true;
-    error.statusCode = response.status;
-    throw error;
+    throw createApiError(response, result, "요청에 실패했습니다.");
   }
   return result;
 }
