@@ -34,7 +34,6 @@ export function Sidebar({
           </button>
         </div>
         <strong>{academyBrandName}</strong>
-        <span>고태영T Lesson OS</span>
       </div>
       <button
         aria-controls="academy-primary-navigation"
