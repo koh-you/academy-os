@@ -471,7 +471,7 @@ import { applyStudentScheduleToLesson } from "../shared/utils/studentSchedule.js
 // 쎈 유형 카탈로그(api/data/ssenTypeIndex.json 284 KB)는 여기서 import 하지 않는다.
 // 수업연구 화면에서만 쓰는 데이터라 lazy 청크(src/domains/tests/ssenTypeCatalog.js)에 둔다.
 // 과목 목록만 필요하므로 작은 상수를 가져다 쓴다.
-import { TEST_PAPER_SUBJECTS } from "../domains/tests/testPaperLibraryModel.js";
+import { TEST_ATTEMPT_SUBJECTS } from "../domains/tests/testPaperLibraryModel.js";
 import {
   academyBrandName,
   academyOperationalStartDate,
@@ -1692,9 +1692,8 @@ function createDefaultLessonResearchItems() {
   ]);
 }
 
-// 과목 목록은 쎈 카탈로그 키와 같다(첫 등장 순서). 284 KB JSON 을 첫 로딩에 끌어오지
-// 않으려고 작은 상수를 쓴다 — 둘이 어긋나면 test:ssen-subject-parity 가 잡는다.
-const testPaperSubjectOptions = TEST_PAPER_SUBJECTS;
+// 응시 기록용 과목 목록은 쎈 카탈로그 과목과 직접 입력 가능한 중학 과목을 함께 제공한다.
+const testPaperSubjectOptions = TEST_ATTEMPT_SUBJECTS;
 
 function getProblemBookTotalQuestions(book = {}) {
   const problemsCount = Array.isArray(book.problems) ? book.problems.length : 0;

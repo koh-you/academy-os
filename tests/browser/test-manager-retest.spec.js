@@ -21,6 +21,10 @@ test("marking a test attempt below the pass threshold flags the matching lesson 
   await loginAsTeacher(page);
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /시험지관리/ }).click();
 
+  const subjectSelect = page.getByRole("combobox", { name: "과목", exact: true });
+  await subjectSelect.selectOption("중학 3-2");
+  await expect(subjectSelect).toHaveValue("중학 3-2");
+  await subjectSelect.selectOption("중학 3-1");
   await page.getByLabel("응시일").fill("2026-08-01");
   await page.getByLabel("테스트명").fill("평면좌표 재시험 테스트");
   await page.getByLabel("총 문항 수").fill("20");
@@ -33,6 +37,9 @@ test("marking a test attempt below the pass threshold flags the matching lesson 
 
   await page.getByRole("button", { name: "응시 기록 저장" }).click();
   await expect(page.getByText("응시 기록 · 저장 완료")).toBeVisible();
+
+  const savedSessions = (await (await request.get(`${safeApiBaseUrl}/api/test-sessions`)).json()).testSessions;
+  expect(savedSessions.find((session) => session.testTitle === "평면좌표 재시험 테스트")?.subject).toBe("중학 3-1");
 
   // The lesson record the retest sync targets belongs to the safe fixture's
   // cross-month lesson on 2026-08-01, which "월경계 학생" (safe-active-student) attends.
@@ -49,6 +56,7 @@ test("marking a test attempt below the pass threshold flags the matching lesson 
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.getByRole("button", { name: /2026-08-01.*평면좌표 재시험 테스트/ }).click();
   await expect(page.locator(".testAttemptPanel")).toBeInViewport();
+  await expect(page.getByRole("combobox", { name: "과목", exact: true })).toHaveValue("중학 3-1");
   await expect(page.getByLabel("월경계 학생 정답 수")).toHaveValue("10");
   await expect(page.getByLabel("월경계 학생 재시험 필요")).toBeChecked();
 
