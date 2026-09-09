@@ -1359,12 +1359,16 @@ const studentPortalTodaySource = `${app}\n${studentPortalShellSource}\n${student
 const portalShellSource = `${app}\n${studentPortalShellSource}\n${parentPortalSource}`;
 const vercelApiFunctionCount = countMatchingFiles(path.join(root, "api"), (filePath) => /\.m?js$/i.test(filePath));
 
-check("01 login form does not expose default credentials", !app.includes("setLoginId(nextRole)") && app.includes('const [loginId, setLoginId] = useState("");'));
+// 아이디 칸은 이제 이 브라우저에 저장해 둔 아이디로 시작한다(2026-09-09 요청 — 교사 토큰이
+// 8시간이라 앱을 닫아 두면 재로그인이 남는데, 아이디까지 매번 칠 이유는 없다).
+// 원래 취지인 "기본 계정 문자열이 코드에 박혀 있지 않다"는 그대로 지킨다.
+check("01 login form does not expose default credentials", !app.includes("setLoginId(nextRole)") && app.includes("const [loginId, setLoginId] = useState(() => getRememberedLoginId(windowTarget, initialRole));") && !roleLoginScreenSource.includes("koh_you_math") && !/useState\(\s*["'][^"']+["']\s*\)/.test(roleLoginScreenSource));
 check("01a public page metadata uses academy brand name", hasAll(indexHtml, ["<title>으뜸수학 고태영T Academy OS</title>", 'property="og:title" content="으뜸수학 고태영T Academy OS"', 'name="twitter:title" content="으뜸수학 고태영T Academy OS"']) && hasAll(attendanceHtml, ["<title>으뜸수학 고태영T 출결</title>", 'property="og:title" content="으뜸수학 고태영T 출결"', 'name="twitter:title" content="으뜸수학 고태영T 출결"']) && hasAll(specialLectureHtml, ["<title>으뜸수학 고태영T 특강 안내</title>", 'property="og:title" content="으뜸수학 고태영T 특강 안내"', 'name="twitter:title" content="으뜸수학 고태영T 특강 안내"']) && !indexHtml.includes("koh_you_math") && !attendanceHtml.includes("koh_you_math") && !specialLectureHtml.includes("koh_you_math"));
 check("01a-1 Vercel Hobby serverless function inventory stays within the 12-file deployment limit", vercelApiFunctionCount <= 12, `api JavaScript files: ${vercelApiFunctionCount}/12`);
 check("01b sidebar does not show legacy KYM brand mark", !app.includes("brandMark") && !app.includes(">KYM<") && !css.includes(".brandMark"));
 check("02 login form does not include temporary lockout", !hasAll(app, ["loginAttempts", "lockedUntil"]) && !css.includes("loginSecurityNotice"));
-check("03 role switching clears credentials", hasAll(app, ["function selectRole(nextRole)", 'setLoginId("");', 'setPassword("");', 'setError("");']));
+// 역할별로 저장해 둔 아이디는 다시 채우되, 비밀번호와 오류는 예전대로 반드시 지운다.
+check("03 role switching clears credentials", hasAll(app, ["function selectRole(nextRole)", "const rememberedLoginId = getRememberedLoginId(windowTarget, nextRole);", "setLoginId(rememberedLoginId);", 'setPassword("");', 'setError("");']));
 check("03b teacher account can be changed from settings without app_state password storage", hasAll(app, ["teacherAccountSettings", "defaultTeacherAccountSettings", "onUpdateTeacherAccountSettings", "function saveTeacherAccount(event)", "postJson(\"/api/auth/teacher-account\"", "계정 설정", "계정 저장"]) && !app.includes("currentPassword !== account.password") && !app.includes("password: nextPassword || currentPassword") && hasAll(css, [".accountSettingsGrid", ".accountSettingsActions"]));
 check("03b-2 teacher login does not fall back to local password storage", !app.includes("loginWithLocalTeacherAccount") && !app.includes("Server teacher auth failed; falling back to local settings."));
 check("03c server teacher auth disables default fallback after bootstrap", hasAll(serverSource, ["function hasAnyTeacherAccount", "const needsBootstrap = !(await hasAnyTeacherAccount())", "needsBootstrap && loginId === defaultTeacherAccount.loginId"]));
@@ -2679,7 +2683,11 @@ check(
     'useState(initialRole)',
     'useState("")',
     "function selectRole(nextRole)",
-    "setLoginId(\"\")",
+    // 역할을 바꾸면 아이디 칸을 비우는 대신, 기억해 둔 아이디가 있으면 그걸 채운다.
+    // 교사 토큰이 8시간이라 앱을 닫아 두면 재로그인이 남는데, 매번 아이디까지 다시
+    // 치게 할 이유는 없다(2026-09-09 요청). 비밀번호는 저장하지 않는다.
+    "setLoginId(rememberedLoginId)",
+    "setShouldRememberLoginId(Boolean(rememberedLoginId))",
     "setPassword(\"\")",
     "setError(\"\")",
     "async function submit(event)",
