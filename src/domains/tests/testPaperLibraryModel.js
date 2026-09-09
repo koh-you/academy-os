@@ -17,6 +17,13 @@ export const TEST_PAPER_SUBJECTS = [
   "기하"
 ];
 
+// 응시 기록은 쎈 단원 카탈로그가 없는 과목도 직접 입력 시험지로 기록할 수 있다.
+export const TEST_ATTEMPT_SUBJECTS = [
+  ...TEST_PAPER_SUBJECTS,
+  "중학 3-1",
+  "중학 3-2"
+];
+
 // 라이브러리에서 쓰는 종류. 기존 testPaperKindOptions 의 id 와 정렬을 맞춘다.
 export const TEST_PAPER_LIBRARY_KINDS = [
   { id: "daily", label: "데일리테스트" },

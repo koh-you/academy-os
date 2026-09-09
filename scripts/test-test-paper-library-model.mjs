@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  TEST_ATTEMPT_SUBJECTS,
   TEST_PAPER_SUBJECTS,
   buildExpectedPaperCatalog,
   buildLibraryCoverage,
@@ -82,8 +83,13 @@ const dailyEasyCm1 = catalog.find(
 );
 assert.equal(dailyEasyCm1.source, "개념원리");
 
-// 실제 6과목이 상수에 다 있는지
+// 시험지 카탈로그 6과목과 응시 기록에서 직접 선택할 중학 과목을 구분한다.
 assert.deepEqual(TEST_PAPER_SUBJECTS.length, 6);
+assert.deepEqual(TEST_ATTEMPT_SUBJECTS, [
+  ...TEST_PAPER_SUBJECTS,
+  "중학 3-1",
+  "중학 3-2"
+]);
 
 // --- normalizeTestPaperEntry: 사람이 넣은 값 보존 + 잘못된 값 교정 ---
 const normalized = normalizeTestPaperEntry({
