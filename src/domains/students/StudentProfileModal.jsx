@@ -873,7 +873,7 @@ export function StudentProfileModal({
                             onChange={(event) => updateProfileScheduleRow(rowIndex, { endTime: event.target.value || row.endTime })}
                           />
                         </label>
-                        <button className="dangerSoftButton compact" onClick={() => removeProfileScheduleRow(rowIndex)} type="button">삭제</button>
+                        <button aria-label={`${rowIndex + 1}번째 개별 일정 제거`} className="iconButton" onClick={() => removeProfileScheduleRow(rowIndex)} type="button">×</button>
                       </div>
                     ))}
                     {profileScheduleRows.length ? (

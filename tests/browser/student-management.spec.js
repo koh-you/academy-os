@@ -66,7 +66,13 @@ test("Tally candidate rapid edits serialize, rebase CAS, and persist the verifie
   await candidateList.getByLabel("Tally 반영 대상").selectOption({ index: 1 });
   await expect(candidateList.getByText(/학생이 이미 등록되어 있습니다\. Tally 답변을 어떻게 반영할까요\?/)).toBeVisible();
   await expect(candidateList.getByRole("button", { name: "기존 정보에 Tally 내용 추가" })).toBeVisible();
-  await expect(candidateList.getByRole("button", { name: "Tally 내용으로 기본정보 교체" })).toBeVisible();
+  // 기본정보 교체는 되돌리기 어려워 ⋯ 메뉴 안에 있다(docs/ui-row-actions.md R3).
+  await candidateList.getByRole("button", { name: /추가 작업$/ }).click();
+  await expect(page.getByRole("menuitem", { name: "Tally 내용으로 기본정보 교체" })).toBeVisible();
+  // Esc 는 메뉴만 닫고 감싸고 있는 모달은 열어둔다.
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("menuitem", { name: "Tally 내용으로 기본정보 교체" })).toHaveCount(0);
+  await expect(studentModal).toBeVisible();
 
   await learningProcessInput.fill("직렬화 첫 입력");
   await expect.poll(() => requests.length).toBe(1);

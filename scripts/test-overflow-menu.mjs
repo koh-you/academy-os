@@ -35,6 +35,9 @@ for (const keyboardContract of [
   assert.ok(menuSource.includes(keyboardContract), `overflow menu must keep ${keyboardContract}`);
 }
 
+// 모달 안에서 열린 메뉴의 Esc 는 메뉴만 닫아야 한다(모달까지 닫히면 안 된다).
+assert.ok(menuSource.includes("event.stopPropagation()"), "Escape must not bubble to the surrounding modal");
+
 // 바깥 클릭으로 닫히고, 리스너는 열렸을 때만 붙였다가 정리한다.
 assert.ok(menuSource.includes('document.addEventListener("mousedown", handlePointerDown)'));
 assert.ok(menuSource.includes('document.removeEventListener("mousedown", handlePointerDown)'));

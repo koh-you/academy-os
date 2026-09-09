@@ -49,6 +49,8 @@ export function OverflowMenu({ className = "", items = [], label, triggerClassNa
   function handleMenuKeyDown(event) {
     if (event.key === "Escape") {
       event.preventDefault();
+      // 모달 안에서 열린 메뉴의 Esc 가 모달까지 닫지 않도록 여기서 멈춘다.
+      event.stopPropagation();
       closeMenu();
       return;
     }

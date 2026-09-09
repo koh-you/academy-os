@@ -20,6 +20,8 @@ export function Modal({
   useEffect(() => {
     function handleEscapeKey(event) {
       if (event.key === "Escape") {
+        // 모달 위에 열려 있는 더 안쪽 레이어(오버플로 메뉴)가 Esc 를 먼저 가져간다.
+        if (document.querySelector(".overflowMenuList")) return;
         const modalBackdrops = document.querySelectorAll(".modalBackdrop");
         const topmostModalBackdrop = modalBackdrops[modalBackdrops.length - 1];
         if (topmostModalBackdrop !== backdropRef.current) return;

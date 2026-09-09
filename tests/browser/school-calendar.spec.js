@@ -84,6 +84,11 @@ test("school date modal shows no save button until an event actually changes, th
   await expect(saveBar).toContainText("1개 일정 변경됨");
   await expect(dateModal.locator(".dirtySchoolDateEvent")).toHaveCount(1);
 
+  // 이어서 다른 필드를 건드려 리렌더가 나도 앞선 초안이 원본으로 되돌아가지 않아야 한다.
+  await dateModal.locator("textarea").first().fill("메모도 함께 수정");
+  await expect(titleInput).toHaveValue("규칙 확인 일정 수정본");
+  await expect(saveBar).toContainText("1개 일정 변경됨");
+
   // 되돌리기는 원본으로 되돌리고 저장 바를 다시 숨긴다.
   await saveBar.getByRole("button", { name: "되돌리기" }).click();
   await expect(titleInput).toHaveValue("행 액션 규칙 확인 일정");
