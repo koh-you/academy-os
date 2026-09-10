@@ -37,7 +37,7 @@ import {
   parseTestPaperStorageReference,
   validateTestPaperFile
 } from "../src/domains/tests/testPaperStorageModel.js";
-import { addCenteredDiagonalWatermark, defaultWatermarkLogoPath } from "../src/shared/server/testPaperWatermark.js";
+import { addCenteredWatermark, defaultWatermarkLogoPath } from "../src/shared/server/testPaperWatermark.js";
 import { readFile } from "node:fs/promises";
 import {
   parseExamAnalysisQuestionCountConfirmRequest,
@@ -2190,7 +2190,7 @@ const server = http.createServer(async (request, response) => {
     }
     const watermark = Boolean(payload.watermark);
     const storeBuffer = watermark
-      ? Buffer.from(await addCenteredDiagonalWatermark(buffer, await readFile(defaultWatermarkLogoPath)))
+      ? Buffer.from(await addCenteredWatermark(buffer, await readFile(defaultWatermarkLogoPath)))
       : buffer;
     const digest = crypto.createHash("sha256").update(buffer).digest("hex");
     const storagePath = createTestPaperStoragePath({

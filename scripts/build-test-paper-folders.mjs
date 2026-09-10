@@ -85,7 +85,7 @@ function leafReadme({ subject, kind, unitLabel, difficulty }) {
     `문제 출처: ${difficulty.source}`,
     ``,
     `이 폴더에 넣을 파일:`,
-    `  - 문제.pdf   (워터마크: 대각선 반투명 중앙 "으뜸수학학원" + 로고)`,
+    `  - 문제.pdf   (워터마크: 반투명 중앙 "으뜸수학학원" + 로고)`,
     `  - 정답.pdf`,
     ``,
     `시험지 PDF 는 git 에 커밋하지 않는다.`,

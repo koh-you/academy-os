@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 시험지 PDF에 학원 로고 워터마크(대각선·반투명·페이지 중앙)를 찍는다.
+// 시험지 PDF에 학원 로고 워터마크(반투명·페이지 중앙)를 찍는다.
 //
 // 사용:
 //   node scripts/watermark-test-papers.mjs "공통수학1/06. 여러 가지 방정식/난이도2 (개념원리)/문제.pdf"
@@ -13,7 +13,7 @@
 import { readdir, mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { extname, dirname, basename, join, resolve } from "node:path";
 import {
-  addCenteredDiagonalWatermark,
+  addCenteredWatermark,
   defaultWatermarkLogoPath,
   defaultWatermarkOptions
 } from "../src/shared/server/testPaperWatermark.js";
@@ -69,7 +69,7 @@ function watermarkedPathFor(inputPath) {
 
 async function processOne(inputPath, outputPath, logoBytes, watermarkOptions) {
   const pdfBytes = await readFile(inputPath);
-  const watermarked = await addCenteredDiagonalWatermark(pdfBytes, logoBytes, watermarkOptions);
+  const watermarked = await addCenteredWatermark(pdfBytes, logoBytes, watermarkOptions);
   await mkdir(dirname(outputPath), { recursive: true });
   await writeFile(outputPath, watermarked);
 }

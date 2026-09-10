@@ -227,7 +227,7 @@ import {
   saveTestPaperFile
 } from "../src/domains/tests/testPaperStorageOperation.js";
 import {
-  addCenteredDiagonalWatermark,
+  addCenteredWatermark,
   defaultWatermarkLogoPath
 } from "../src/shared/server/testPaperWatermark.js";
 import { createTestPaperFileRouteRegistry } from "../src/shared/server/testPaperFileRouteRegistry.js";
@@ -3118,7 +3118,7 @@ function createTestPaperStorageOperations() {
     }),
     watermark: async (pdfBuffer) => {
       const logoBytes = await readFile(defaultWatermarkLogoPath);
-      return addCenteredDiagonalWatermark(pdfBuffer, logoBytes);
+      return addCenteredWatermark(pdfBuffer, logoBytes);
     }
   };
 }

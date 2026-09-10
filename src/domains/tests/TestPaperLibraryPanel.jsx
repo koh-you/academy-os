@@ -422,7 +422,7 @@ export function TestPaperLibraryPanel({
             </label>
             <TestPaperFileField
               label="문제 파일"
-              note="PDF 업로드 시 대각선 반투명 워터마크가 자동으로 찍힙니다."
+              note="PDF 업로드 시 반투명 워터마크가 자동으로 찍힙니다."
               onChangeValue={(value) => updateDraft("questionFileUrl", value)}
               onOpen={openTestPaperFile}
               onUploadFile={(file) => uploadTestPaperFile("questionFileUrl", file)}
@@ -433,7 +433,7 @@ export function TestPaperLibraryPanel({
             />
             <TestPaperFileField
               label="정답 파일"
-              note="PDF 업로드 시 대각선 반투명 워터마크가 자동으로 찍힙니다."
+              note="PDF 업로드 시 반투명 워터마크가 자동으로 찍힙니다."
               onChangeValue={(value) => updateDraft("answerFileUrl", value)}
               onOpen={openTestPaperFile}
               onUploadFile={(file) => uploadTestPaperFile("answerFileUrl", file)}
