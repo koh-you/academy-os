@@ -61,6 +61,17 @@ const ASSISTANT_ALLOW_EXACT = new Set([
   "GET /api/homeworks",
   // 수업일지 상단 "운영 알림 원본" 패널이 읽는다. tenant 스코핑으로 자기 것만 보인다.
   "GET /api/academy-reminders",
+  // 반관리 · 시험관리 · 학사일정 화면(2026-09-09 협력 교사에게 개방).
+  // 전부 tenant 스코핑 대상이라 각자 자기 것만 보고 쓴다.
+  "POST /api/class-rosters/save",
+  "GET /api/exam-prep-rows",
+  "POST /api/exam-prep-rows",
+  "POST /api/exam-prep-rows/bulk",
+  "DELETE /api/exam-prep-rows",
+  "POST /api/exam-prep-schedule/save",
+  "POST /api/school-events",
+  "DELETE /api/school-events",
+  "POST /api/school-calendar/derived-save",
   "GET /api/test-sessions",
   "GET /api/test-attempts",
   "POST /api/students",

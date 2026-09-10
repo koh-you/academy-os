@@ -465,6 +465,7 @@ import {
   postJsonWithTimeout,
   setApiAuthToken
 } from "../shared/utils/apiClient.js";
+import { resetCacheForAccount } from "../shared/utils/accountScopedCache.js";
 import { safeIdPart } from "../shared/utils/id.js";
 import { getKoreaDateString } from "../shared/utils/koreaDate.js";
 import { applyStudentScheduleToLesson } from "../shared/utils/studentSchedule.js";
@@ -494,7 +495,8 @@ import {
   testAttemptStatusOptions,
   testPaperKindOptions,
   testPaperPreparationOptions,
-  testPaperProgressOptions
+  testPaperProgressOptions,
+  formatTeacherBrandName
 } from "./appConfig.js";
 
 const ReportModal = lazy(async () => ({
@@ -2132,6 +2134,17 @@ export function App() {
   useEffect(() => {
     setApiAuthToken(session?.sessionToken || "");
   }, [session?.sessionToken]);
+  // 같은 브라우저에서 계정이 바뀌면 이전 계정의 화면 캐시를 지운다.
+  // 여기서 새로고침하지 않는다 — 첫 로그인에도 항상 걸려서 매번 페이지가 두 번 로드된다.
+  // 저장소만 비우면 되고, 화면은 이어지는 부트스트랩이 새 계정 데이터로 덮어쓴다
+  // (빈 응답도 그대로 반영하므로 이전 계정 데이터가 남지 않는다).
+  useEffect(() => {
+    if (typeof window === "undefined" || !session?.teacherId) return;
+    const cachedStateKeys = Object.entries(storageKeys)
+      .filter(([name]) => name !== "teacherSession")
+      .map(([, key]) => key);
+    resetCacheForAccount(window.localStorage, session.teacherId, cachedStateKeys);
+  }, [session?.teacherId]);
   // 어느 요청이든 401 이 오면 화면 전체에 재로그인을 안내한다. 이게 없으면 만료가
   // "저장 실패" 로만 보이고, 새로고침해도 같은 만료 토큰을 다시 보내 원인을 알 수 없다
   // (2026-09-08 수업일지·출결 장애).
@@ -6530,7 +6543,7 @@ export function App() {
         <SessionExpiredOverlay onDismiss={() => setIsSessionExpired(false)} onRelogin={handleLogout} />
       ) : null}
       <Sidebar
-        academyBrandName={academyBrandName}
+        academyBrandName={formatTeacherBrandName(session?.name)}
         activeView={activeView}
         isCollapsed={isSidebarCollapsed}
         isMobileNavigationOpen={isMobileNavigationOpen}

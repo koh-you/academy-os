@@ -40,6 +40,20 @@ export const storageKeys = {
 export const legacySensitiveStorageKeys = ["academy-os.teacherAccountSettings.v1"];
 
 export const academyBrandName = "으뜸수학 고태영T";
+// 학원 이름만. 사이드바는 여기에 "로그인한 선생님" 이름을 붙여서 보여준다 —
+// academyBrandName 은 원장 이름이 박혀 있어서 협력 교사 화면에도 원장 이름이 떴다.
+// (알림톡·키오스크·페이지 제목은 학원 대표 이름이 맞으므로 academyBrandName 을 계속 쓴다.)
+export const academyName = "으뜸수학";
+
+/**
+ * 사이드바 좌상단 문구. "으뜸수학 최경석T" 처럼 학원 이름 + 선생님 이름으로 만든다.
+ * 계정 이름이 이미 "T" 로 끝나면(고태영T) 덧붙이지 않는다.
+ */
+export function formatTeacherBrandName(teacherName = "") {
+  const name = String(teacherName ?? "").trim();
+  if (!name) return academyBrandName;
+  return `${academyName} ${name.endsWith("T") ? name : `${name}T`}`;
+}
 export const academyOperationalStartDate = "2026-06-19";
 export const lessonDeleteRetentionMs = 7 * 24 * 60 * 60 * 1000;
 

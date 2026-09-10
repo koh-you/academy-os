@@ -1,6 +1,14 @@
 // 멀티테넌트 1단계 · 협력 교사(assistant) 프로토타입에 노출하는 메뉴.
 // 출결 + 수업 캘린더(수업일지 화면 안) + 학생 명단만. 정확한 범위는 제품 확정 대상.
-export const ASSISTANT_VISIBLE_MENU_IDS = new Set(["lessons", "students"]);
+export const ASSISTANT_VISIBLE_MENU_IDS = new Set([
+  "lessons",
+  "students",
+  // 협력 교사도 자기 반을 짜고, 담당 학교 시험정보와 학사일정을 봐야 수업일지를 채울 수 있다.
+  // 각자 다른 tenant 이므로 여기서 보이는 것은 전부 자기 것뿐이다.
+  "classes",
+  "examPrep",
+  "schoolCalendar"
+]);
 
 /** 해당 role 이 이 화면(view id)에 접근 가능한가. owner 는 전부 허용. */
 export function isViewAllowedForRole(viewId, teacherRole = "owner") {
