@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { PDFDocument } from "pdf-lib";
 import {
-  addCenteredDiagonalWatermark,
+  addCenteredWatermark,
   centeredRotatedOrigin,
   defaultWatermarkLogoPath,
   defaultWatermarkOptions,
@@ -13,7 +13,7 @@ import {
 } from "../src/shared/server/testPaperWatermark.js";
 
 // --- 기본값 ---
-assert.deepEqual(defaultWatermarkOptions, { opacity: 0.1, rotationDegrees: 45, widthRatio: 0.5 });
+assert.deepEqual(defaultWatermarkOptions, { opacity: 0.1, rotationDegrees: 0, widthRatio: 0.5 });
 assert.ok(existsSync(defaultWatermarkLogoPath), `기본 로고 파일이 없습니다: ${defaultWatermarkLogoPath}`);
 
 // --- centeredRotatedOrigin: 회전 없음이면 단순 중앙 정렬과 같다 ---
@@ -41,7 +41,7 @@ const expectedY = 400 - (100 * Math.sin(theta) + 50 * Math.cos(theta));
 assert.ok(Math.abs(rotated.x - expectedX) < 1e-9);
 assert.ok(Math.abs(rotated.y - expectedY) < 1e-9);
 
-// --- addCenteredDiagonalWatermark: 페이지 수 유지, 페이지마다 이미지 XObject 삽입 ---
+// --- addCenteredWatermark: 페이지 수 유지, 페이지마다 이미지 XObject 삽입 ---
 const sourceDoc = await PDFDocument.create();
 const pageA4 = sourceDoc.addPage([595.28, 841.89]);
 pageA4.drawText("Question 1.");
@@ -50,7 +50,7 @@ pageCustom.drawText("Question 2.");
 const sourcePdfBytes = await sourceDoc.save();
 const logoBytes = await readFile(defaultWatermarkLogoPath);
 
-const watermarkedBytes = await addCenteredDiagonalWatermark(sourcePdfBytes, logoBytes);
+const watermarkedBytes = await addCenteredWatermark(sourcePdfBytes, logoBytes);
 assert.ok(watermarkedBytes.length > sourcePdfBytes.length, "이미지가 삽입되면 파일 크기가 커져야 한다");
 
 const reloaded = await PDFDocument.load(watermarkedBytes);
@@ -61,7 +61,7 @@ assert.ok(watermarkedText.includes("/XObject"), "이미지 XObject 리소스가 
 assert.ok(watermarkedText.includes("/Image"), "이미지 Subtype 이 있어야 한다");
 
 // --- 옵션을 바꾸면 결과가 달라진다(같은 입력을 그대로 반환하지 않는다) ---
-const customBytes = await addCenteredDiagonalWatermark(sourcePdfBytes, logoBytes, {
+const customBytes = await addCenteredWatermark(sourcePdfBytes, logoBytes, {
   opacity: 0.25,
   widthRatio: 0.3,
   rotationDegrees: 20

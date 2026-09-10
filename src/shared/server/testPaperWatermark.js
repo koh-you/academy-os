@@ -7,14 +7,16 @@ export const defaultWatermarkLogoPath = fileURLToPath(
   new URL("../../../assets/branding/academy-mark.png", import.meta.url)
 );
 
+// 회전 없음이 기본이다. 45° 대각선도 만들어 비교한 뒤 사용자가 0°(수평)로 확정했다.
+// rotationDegrees 는 그대로 살려 두므로 CLI --rotate 로 언제든 기울일 수 있다.
 export const defaultWatermarkOptions = Object.freeze({
   opacity: 0.1,
-  rotationDegrees: 45,
+  rotationDegrees: 0,
   widthRatio: 0.5
 });
 
 /**
- * 페이지 중앙에 로고를 대각선으로 회전시켜 그릴 (x, y) 를 계산한다.
+ * 페이지 중앙에 로고를 (필요하면 회전시켜) 그릴 (x, y) 를 계산한다.
  * pdf-lib 는 (x, y) 를 이미지의 회전 전 좌하단 기준점으로 삼아 그 점을 축으로 회전시키므로,
  * 회전 후에도 이미지 중심이 페이지 중심에 오도록 역산한다.
  */
@@ -31,13 +33,13 @@ export function centeredRotatedOrigin({ pageWidth, pageHeight, width, height, ro
 }
 
 /**
- * PDF 의 모든 페이지 중앙에 로고를 대각선·반투명으로 찍는다.
+ * PDF 의 모든 페이지 중앙에 로고를 반투명으로 찍는다.
  * @param {Uint8Array|ArrayBuffer} pdfBytes
  * @param {Uint8Array|ArrayBuffer} logoPngBytes
  * @param {{ opacity?: number, rotationDegrees?: number, widthRatio?: number }} [options]
  * @returns {Promise<Uint8Array>} 워터마크가 찍힌 PDF bytes
  */
-export async function addCenteredDiagonalWatermark(pdfBytes, logoPngBytes, options = {}) {
+export async function addCenteredWatermark(pdfBytes, logoPngBytes, options = {}) {
   const { opacity, rotationDegrees, widthRatio } = { ...defaultWatermarkOptions, ...options };
 
   const pdfDoc = await PDFDocument.load(pdfBytes);
@@ -71,5 +73,5 @@ export async function addCenteredDiagonalWatermark(pdfBytes, logoPngBytes, optio
 export async function watermarkTestPaperFile(pdfPath, options = {}) {
   const { logoPath = defaultWatermarkLogoPath, ...watermarkOptions } = options;
   const [pdfBytes, logoPngBytes] = await Promise.all([readFile(pdfPath), readFile(logoPath)]);
-  return addCenteredDiagonalWatermark(pdfBytes, logoPngBytes, watermarkOptions);
+  return addCenteredWatermark(pdfBytes, logoPngBytes, watermarkOptions);
 }
