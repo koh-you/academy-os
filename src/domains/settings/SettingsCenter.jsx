@@ -275,16 +275,18 @@ export function SettingsCenter({
   const activePrompt = promptRows.find((row) => row.key === activePromptKey) ?? promptRows[0];
   const normalizedPromptSettings = normalizeAiPrompts(settings.prompts);
   const isOwner = teacherRole !== "assistant";
-  const settingsSections = [
+  // 협력 교사에게는 "계정" 만 보인다. 알림톡 연결·AI·출결 설정은 학원 공통 설정이라
+  // 서버가 owner 만 허용하고(apiAccessPolicy), 탭만 열어두면 눌렀을 때 403 이 난다.
+  const settingsSections = isOwner ? [
     { id: "account", label: "계정" },
     // 교사 계정 관리는 원장만 본다. 서버도 owner 만 통과시킨다(apiAccessPolicy).
-    ...(isOwner ? [{ id: "teacherAccounts", label: "교사 계정" }] : []),
+    { id: "teacherAccounts", label: "교사 계정" },
     { id: "notification", label: "알림톡 연결" },
     { id: "notificationTemplates", label: "알림톡 문구" },
     { id: "ai", label: "AI 모델" },
     { id: "prompts", label: "AI 프롬프트" },
     { id: "attendance", label: "출결" }
-  ];
+  ] : [{ id: "account", label: "계정" }];
 
   useEffect(() => {
     setAccountForm((current) => ({
