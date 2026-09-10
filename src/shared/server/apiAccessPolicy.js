@@ -100,17 +100,23 @@ const ASSISTANT_ALLOW_EXACT = new Set([
   "POST /api/lesson-journal/rows/save",
   "POST /api/lesson-journal/history-action",
   "POST /api/lesson-journal/makeup-tasks/save",
-  "POST /api/notifications/attendance-alimtalk",
-  "POST /api/notifications/comment-alimtalk",
-  "POST /api/notifications/daily-report-alimtalk",
-  "POST /api/notifications/student-schedule-reminder",
-  "POST /api/notification-jobs",
-  "DELETE /api/notification-jobs",
-  "POST /api/notification-jobs/reserve",
-  "POST /api/notification-jobs/reserve-bulk",
-  "POST /api/notification-jobs/cancel",
-  "POST /api/notification-jobs/readiness-check",
-  "POST /api/notification-jobs/reconcile-solapi"
+  // 알림톡 발송·예약은 협력 교사에게 닫아둔다(2026-09-10 원장 요청).
+  //
+  // 이유: 솔라피 설정이 Render 환경변수 하나뿐이라 모든 계정이 공유한다. 협력 교사가
+  // 보내도 **원장님 계정에서 실제 학부모에게 발송되고 요금도 원장님 앞으로** 달린다.
+  // 시험 단계에서 실수로 나가면 되돌릴 수 없다.
+  //
+  // 다시 열 때는 아래 6줄과 lesson-records/notification-status 를 되살리고,
+  // 화면 쪽 canSendAlimtalk 도 함께 풀어야 한다.
+  //   "POST /api/notifications/attendance-alimtalk",
+  //   "POST /api/notifications/comment-alimtalk",
+  //   "POST /api/notifications/daily-report-alimtalk",
+  //   "POST /api/notifications/student-schedule-reminder",
+  //   "POST /api/notification-jobs", "DELETE /api/notification-jobs",
+  //   "POST /api/notification-jobs/reserve|reserve-bulk|cancel|readiness-check|reconcile-solapi"
+  //
+  // GET /api/notification-jobs 는 남겨둔다 — 자기 테넌트의 (비어 있는) 발송 기록을
+  // 읽는 것뿐이고, 부트스트랩이 부른다.
 ]);
 
 // ops cas-write 스코프가 호출 가능한 POST (그 외 POST/DELETE 는 highrisk 만).

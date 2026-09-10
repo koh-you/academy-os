@@ -81,9 +81,29 @@ assert.equal(A("POST", "/api/admin/seed-core-data", { kind: "teacher", teacherRo
 assert.equal(A("POST", "/api/attendance/check", { kind: "teacher", teacherRole: "assistant" }).ok, true);
 assert.equal(A("GET", "/api/lessons", { kind: "teacher", teacherRole: "assistant" }).ok, true);
 assert.equal(A("GET", "/api/students", { kind: "teacher", teacherRole: "assistant" }).ok, true);
-assert.equal(A("POST", "/api/notifications/attendance-alimtalk", { kind: "teacher", teacherRole: "assistant" }).ok, true);
-assert.equal(A("POST", "/api/notifications/comment-alimtalk", { kind: "teacher", teacherRole: "assistant" }).ok, true);
-assert.equal(A("POST", "/api/notifications/daily-report-alimtalk", { kind: "teacher", teacherRole: "assistant" }).ok, true);
+// 알림톡 발송·예약은 협력 교사에게 닫혀 있다(2026-09-10 원장 요청).
+// 솔라피 설정을 모든 계정이 공유하므로, 협력 교사가 보내도 원장님 계정에서 실제
+// 학부모에게 나가고 요금도 원장님 앞으로 달린다.
+for (const path of [
+  "/api/notifications/attendance-alimtalk",
+  "/api/notifications/comment-alimtalk",
+  "/api/notifications/daily-report-alimtalk",
+  "/api/notifications/student-schedule-reminder",
+  "/api/notification-jobs",
+  "/api/notification-jobs/reserve",
+  "/api/notification-jobs/reserve-bulk",
+  "/api/notification-jobs/cancel",
+  "/api/notification-jobs/reconcile-solapi"
+]) {
+  const verdict = A("POST", path, { kind: "teacher", teacherRole: "assistant" });
+  assert.equal(verdict.ok, false, `assistant 는 ${path} 를 못 불러야 한다`);
+  assert.equal(verdict.code, "role_forbidden");
+}
+assert.equal(A("DELETE", "/api/notification-jobs", { kind: "teacher", teacherRole: "assistant" }).ok, false);
+// 발송 기록 조회는 남겨둔다 — 자기 테넌트의 기록이고 부트스트랩이 부른다.
+assert.equal(A("GET", "/api/notification-jobs", { kind: "teacher", teacherRole: "assistant" }).ok, true);
+// 원장은 그대로 보낼 수 있다.
+assert.equal(A("POST", "/api/notifications/attendance-alimtalk", { kind: "teacher", teacherRole: "owner" }).ok, true);
 assert.equal(A("POST", "/api/students", { kind: "teacher", teacherRole: "assistant" }).ok, true);
 assert.equal(A("POST", "/api/students/bulk", { kind: "teacher", teacherRole: "assistant" }).ok, true);
 assert.equal(A("DELETE", "/api/students", { kind: "teacher", teacherRole: "assistant" }).ok, true);
@@ -93,8 +113,6 @@ assert.equal(A("POST", "/api/homeworks", { kind: "teacher", teacherRole: "assist
 assert.equal(A("POST", "/api/test-sessions", { kind: "teacher", teacherRole: "assistant" }).ok, true);
 assert.equal(A("DELETE", "/api/test-sessions", { kind: "teacher", teacherRole: "assistant" }).ok, true);
 assert.equal(A("POST", "/api/lesson-journal/rows/save", { kind: "teacher", teacherRole: "assistant" }).ok, true);
-assert.equal(A("POST", "/api/notification-jobs/reserve", { kind: "teacher", teacherRole: "assistant" }).ok, true);
-assert.equal(A("DELETE", "/api/notification-jobs", { kind: "teacher", teacherRole: "assistant" }).ok, true);
 // 여전히 막히는 것: 유료 AI·시험분석 파이프라인·운영자 전용
 assert.deepEqual(A("POST", "/api/ai/comment-polish", { kind: "teacher", teacherRole: "assistant" }), { ok: false, status: 403, code: "role_forbidden" });
 assert.equal(A("POST", "/api/admin/seed-core-data", { kind: "teacher", teacherRole: "assistant" }).status, 403);

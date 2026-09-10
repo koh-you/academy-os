@@ -6,8 +6,15 @@ import { fileURLToPath } from "node:url";
 // apiClient.js 는 import.meta.env / window 를 참조하므로 최소 stub 후 import.
 globalThis.window = globalThis.window || { location: { hostname: "localhost" }, setTimeout, clearTimeout };
 
-const { isSessionExpiredError, onApiUnauthorized, postJson, setApiAuthToken, withAuthHeaders } =
-  await import("../src/shared/utils/apiClient.js");
+const {
+  canCurrentRoleSendAlimtalk,
+  isSessionExpiredError,
+  onApiUnauthorized,
+  postJson,
+  setApiAuthToken,
+  setCurrentTeacherRole,
+  withAuthHeaders
+} = await import("../src/shared/utils/apiClient.js");
 
 // 토큰 없음 → Authorization 없음
 assert.deepEqual(withAuthHeaders(), {});
@@ -53,6 +60,33 @@ const teacherMainSource = await readFile(new URL("../src/main.jsx", import.meta.
 assert.ok(
   !teacherMainSource.includes("enableKioskDeviceToken"),
   "교사 진입점은 키오스크 토큰을 켜면 안 된다"
+);
+
+// 알림톡 잠금은 서버 정책에서 파생한다.
+// 화면에 별도 목록을 두면 "서버는 열렸는데 버튼은 잠긴" 상태가 남는다.
+setCurrentTeacherRole("assistant");
+assert.equal(canCurrentRoleSendAlimtalk(), false, "협력 교사는 알림톡 버튼이 잠겨야 한다");
+setCurrentTeacherRole("owner");
+assert.equal(canCurrentRoleSendAlimtalk(), true, "원장은 알림톡을 보낼 수 있어야 한다");
+setCurrentTeacherRole("");
+assert.equal(canCurrentRoleSendAlimtalk(), true, "역할을 모르면 원장으로 본다(기존 동작 유지)");
+
+// 화면이 이 판정을 실제로 쓰는지 — 안 쓰면 위 계약이 있으나 마나다.
+const journalSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalDetail.jsx", import.meta.url),
+  "utf8"
+);
+assert.ok(
+  journalSource.includes("const isAlimtalkLocked = !canCurrentRoleSendAlimtalk()"),
+  "수업일지가 알림톡 잠금 여부를 정책에서 파생해야 한다"
+);
+const cellSource = await readFile(
+  new URL("../src/domains/lessons/LessonJournalNotificationCommentCell.jsx", import.meta.url),
+  "utf8"
+);
+assert.ok(
+  cellSource.includes("disabled={isAlimtalkLocked}"),
+  "알림톡 버튼은 숨기지 말고 잠가야 한다(권한을 풀면 그대로 동작해야 한다)"
 );
 
 // 회귀 방지: 앱 코드에서 인증 헤더를 우회하는 직접 호출이 다시 생기면 실패시킨다.
@@ -122,6 +156,17 @@ assert.equal(conflictError.statusCode, 409);
 assert.equal(isSessionExpiredError(conflictError), false);
 assert.equal(conflictError.message, "수업기록이 다른 화면에서 먼저 변경되었습니다.");
 assert.equal(unauthorizedEvents.length, 1);
+
+// 권한 없음(role_forbidden)은 영문 코드가 아니라 읽을 수 있는 문장으로 보여준다.
+// 협력 교사에게 닫아둔 알림톡 등을 눌렀을 때 "role_forbidden" 이 그대로 뜨면 안 된다.
+stubFetch(403, { ok: false, code: "role_forbidden", error: "role_forbidden" });
+const forbiddenError = await postJson("/api/notifications/comment-alimtalk", {}).then(
+  () => null,
+  (error) => error
+);
+assert.equal(forbiddenError.statusCode, 403);
+assert.equal(isSessionExpiredError(forbiddenError), false, "권한 없음은 세션 만료가 아니다");
+assert.equal(forbiddenError.message, "이 계정에는 이 기능의 권한이 없습니다. 원장님께 문의해 주세요.");
 
 // 200 이지만 본문이 auth_required 인 경우도 만료로 본다.
 stubFetch(200, { ok: false, code: "auth_required", error: "auth_required" });
