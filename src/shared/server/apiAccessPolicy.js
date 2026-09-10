@@ -187,6 +187,29 @@ export function canTeacherRoleCallRoute(teacherRole, method, pathname) {
   return isAssistantAllowed(method, pathname);
 }
 
+/**
+ * 원장이 "다른 선생님으로 보기" 를 할 때 실제로 적용할 테넌트를 정한다.
+ *
+ * 원장은 학원 전체를 관리하므로 각 선생님의 명단·수업일지를 열어보고 고칠 수 있어야 한다.
+ * 다만 이건 권한 경계를 넘는 일이므로 세 가지를 모두 만족할 때만 허용한다:
+ *   1) 교사 세션이고 역할이 owner 다 (협력 교사는 절대 불가)
+ *   2) 요청한 테넌트가 실제 등록된 교사의 테넌트다 (임의 문자열로 넘어갈 수 없다)
+ *   3) 값이 있다 (없으면 자기 테넌트 그대로)
+ * 하나라도 어긋나면 조용히 자기 테넌트로 되돌린다 — 거부보다 안전한 기본값이다.
+ *
+ * @param {{ kind?: string, teacherRole?: string, tenantId?: string|null }} auth
+ * @param {string} requestedTenantId
+ * @param {Set<string>|string[]} knownTenantIds 등록된 교사들의 테넌트
+ */
+export function resolveViewAsTenantId(auth = {}, requestedTenantId = "", knownTenantIds = []) {
+  const ownTenantId = auth.tenantId ?? null;
+  const requested = String(requestedTenantId ?? "").trim();
+  if (!requested || requested === ownTenantId) return ownTenantId;
+  if (auth.kind !== "teacher" || auth.teacherRole !== "owner") return ownTenantId;
+  const known = knownTenantIds instanceof Set ? knownTenantIds : new Set(knownTenantIds);
+  return known.has(requested) ? requested : ownTenantId;
+}
+
 export function isKioskAllowed(method, pathname) {
   if (method === "GET" && pathname.startsWith("/api/")) return true;
   return KIOSK_WRITE_ALLOW.has(`${method} ${pathname}`);

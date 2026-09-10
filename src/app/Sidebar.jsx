@@ -10,6 +10,7 @@ export function Sidebar({
   onToggle,
   onToggleMobileNavigation,
   supplementAttention = null,
+  teacherViewSwitcher = null,
   teacherRole = "owner",
   today
 }) {
@@ -35,6 +36,7 @@ export function Sidebar({
         </div>
         <strong>{academyBrandName}</strong>
       </div>
+      {teacherViewSwitcher}
       <button
         aria-controls="academy-primary-navigation"
         aria-expanded={isMobileNavigationOpen}
