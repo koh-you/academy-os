@@ -88,4 +88,15 @@ assert.ok(
   "로그아웃 없이 계정이 바뀌는 경우도 App 이 정리해야 한다"
 );
 
-console.log("account scoped cache: 계정 전환 시 이전 계정 화면 캐시 제거 계약 통과");
+// 7. 로그아웃도 캐시를 비워야 한다. 계정 전환 가드만으로는 부족하다 —
+//    같은 브라우저에서 다른 선생님이 로그인하기 전까지 이전 계정 데이터가 남아 있다.
+assert.ok(
+  appSource.includes("clearCachedScreenState()"),
+  "로그아웃 시 화면 캐시를 비워야 한다"
+);
+assert.ok(
+  appSource.includes("clearCacheOwner(window.localStorage)"),
+  "로그아웃 시 캐시 주인 표시도 지워야 다음 로그인이 새로 시작한다"
+);
+
+console.log("account scoped cache: 계정 전환·로그아웃 시 화면 캐시 제거 계약 통과");

@@ -465,7 +465,7 @@ import {
   postJsonWithTimeout,
   setApiAuthToken
 } from "../shared/utils/apiClient.js";
-import { resetCacheForAccount } from "../shared/utils/accountScopedCache.js";
+import { clearCacheOwner, resetCacheForAccount } from "../shared/utils/accountScopedCache.js";
 import { safeIdPart } from "../shared/utils/id.js";
 import { getKoreaDateString } from "../shared/utils/koreaDate.js";
 import { applyStudentScheduleToLesson } from "../shared/utils/studentSchedule.js";
@@ -2113,9 +2113,21 @@ export function App() {
   const [isMobileNavigationOpen, setIsMobileNavigationOpen] = useState(false);
   const [teacherAccountSettings, setTeacherAccountSettings] = useState(defaultTeacherAccountSettings);
   const [isSessionExpired, setIsSessionExpired] = useState(false);
+  // 로그아웃하면 화면 캐시를 통째로 비운다. 남겨두면 다음에 로그인한 다른 선생님 화면에
+  // 이전 계정 데이터가 그대로 보인다(2026-09-09 협력 교사 화면에 원장님 수업이 뜬 건).
+  function clearCachedScreenState() {
+    if (typeof window === "undefined") return;
+    for (const [name, key] of Object.entries(storageKeys)) {
+      if (name === "teacherSession") continue;
+      removeStorageValue(window.localStorage, key);
+    }
+    clearCacheOwner(window.localStorage);
+  }
+
   const { login: handleLogin, logout: handleLogout, refresh: refreshSession, session } = useAppSession({
     documentTarget: typeof document === "undefined" ? null : document,
     onLogout: () => {
+      clearCachedScreenState();
       setIsPortalDataReady(false);
       setActiveView("lessons");
       setIsSessionExpired(false);
