@@ -134,9 +134,11 @@
 - `src/shared/server/testPaperFileRouteRegistry.js` — `POST/DELETE /api/test-paper-files`,
   `GET /api/test-paper-files/open`. `api/` 대신 여기 둔 이유는 4번 워터마크와 동일
   (Vercel Hobby 함수 12개 제한).
-- `TestPaperLibraryPanel`의 문제/정답 파일 필드에 PDF 업로드 버튼 + 열기 버튼 추가. **문제 파일을
-  업로드하면 서버가 자동으로 워터마크를 찍는다**(정답 파일은 안 찍음). Drive 링크 직접 붙여넣기도
+- `TestPaperLibraryPanel`의 문제/정답 파일 필드에 PDF 업로드 버튼 + 열기 버튼 추가. **문제·정답
+  둘 다 업로드하면 서버가 자동으로 워터마크를 찍는다**. Drive 링크 직접 붙여넣기도
   계속 지원(외부 https 링크는 Storage를 거치지 않고 그대로 연다).
+  라우트(`POST /api/test-paper-files`)는 `watermark` 플래그를 그대로 받으므로, 워터마크 없이
+  올려야 할 일이 생기면 CLI/API 에서 `false` 로 호출하면 된다.
 - 같은 원본을 워터마크 유무로 두 번 올려도 경로가 겹치지 않도록 워터마크 여부를 저장 경로에
   반영했다(원본 다이제스트만 쓰면 워터마크 버전과 원본이 같은 경로에서 서로 덮어씀).
 - 파일을 교체/삭제해도 이전 Storage 객체를 자동으로 정리하진 않는다(orphan 파일 누적 — 필요해지면

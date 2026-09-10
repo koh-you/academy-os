@@ -190,10 +190,12 @@ export function TestPaperLibraryPanel({
     setFileUploadState((current) => ({ ...current, [field]: { error: "", status: "uploading" } }));
     try {
       const dataUrl = await readFileAsDataUrl(file);
-      const watermark = field === "questionFileUrl";
-      const result = await postJson("/api/test-paper-files", { file: { dataUrl, fileName: file.name }, watermark });
+      const result = await postJson("/api/test-paper-files", {
+        file: { dataUrl, fileName: file.name },
+        watermark: true
+      });
       updateDraft(field, result.fileReference);
-      if (watermark) updateDraft("watermarked", true);
+      updateDraft("watermarked", true);
       setFileUploadState((current) => ({ ...current, [field]: { error: "", status: "done" } }));
     } catch (error) {
       setFileUploadState((current) => ({ ...current, [field]: { error: error.message, status: "error" } }));
@@ -431,6 +433,7 @@ export function TestPaperLibraryPanel({
             />
             <TestPaperFileField
               label="정답 파일"
+              note="PDF 업로드 시 대각선 반투명 워터마크가 자동으로 찍힙니다."
               onChangeValue={(value) => updateDraft("answerFileUrl", value)}
               onOpen={openTestPaperFile}
               onUploadFile={(file) => uploadTestPaperFile("answerFileUrl", file)}
