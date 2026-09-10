@@ -1,8 +1,8 @@
 {
   "_comment": "Line-count ceiling per tracked file. npm run check:file-size-ratchet fails if a file exceeds its ceiling. Ceilings only ratchet down automatically when a file shrinks — growth requires editing this number by hand, which shows up in the diff and forces a deliberate decision instead of silent creep.",
   "files": {
-    "src/app/App.jsx": 9276,
-    "api/server.js": 5423,
+    "src/app/App.jsx": 9293,
+    "api/server.js": 5440,
     "api/routes/coreData.js": 4923,
     "src/app/App.css": 18372
   }

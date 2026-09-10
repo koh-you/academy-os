@@ -119,7 +119,19 @@ export function createTeacherAccountAdminStore({
     });
   }
 
+  // 원장의 "다른 선생님으로 보기" 가 요청한 테넌트를 검증할 때 쓴다. 요청마다 DB 를
+  // 때리지 않도록 짧게 캐시한다. 교사 계정이 추가되면 최대 ttl 만큼 늦게 보인다.
+  let tenantCache = { expiresAt: 0, value: new Set() };
+  async function listKnownTeacherTenantIds({ now = Date.now, ttlMs = 60_000 } = {}) {
+    if (tenantCache.expiresAt > now()) return tenantCache.value;
+    const accounts = await listTeacherAccounts();
+    const value = new Set(accounts.map((account) => account.tenantId).filter(Boolean));
+    tenantCache = { expiresAt: now() + ttlMs, value };
+    return value;
+  }
+
   return Object.freeze({
+    listKnownTeacherTenantIds,
     createTeacherAccountWithTenant,
     findTeacherAccountByLoginId,
     listTeacherAccounts,

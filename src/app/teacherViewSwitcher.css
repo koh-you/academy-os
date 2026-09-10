@@ -1,0 +1,51 @@
+/* 원장 전용 · 선생님별 자료 보기 전환기 */
+.teacherViewSwitcher {
+  border-bottom: 1px solid var(--status-neutral-border);
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+}
+
+/* 남의 자료를 보고 있을 때는 배경으로 확실히 구분한다.
+   여기서 수정하면 그 선생님 자료가 바뀌므로 착각하면 안 된다. */
+.teacherViewSwitcher.viewingOther {
+  background: var(--status-pending-bg);
+  border-bottom-color: var(--status-pending-border);
+}
+
+.teacherViewSwitcherLabel {
+  color: var(--academy-text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.teacherViewSwitcherList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.teacherViewSwitcherItem {
+  background: var(--academy-surface);
+  border: 1px solid var(--status-neutral-border);
+  border-radius: 999px;
+  color: var(--academy-text-strong);
+  cursor: pointer;
+  font-size: 12px;
+  min-height: var(--academy-touch-target, 32px);
+  padding: 4px 10px;
+}
+
+.teacherViewSwitcherItem.active {
+  background: var(--academy-accent-soft);
+  border-color: var(--academy-accent);
+  font-weight: 700;
+}
+
+.teacherViewSwitcherNotice {
+  color: var(--status-pending-text);
+  font-size: 11px;
+  line-height: 1.4;
+  margin: 0;
+}

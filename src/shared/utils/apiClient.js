@@ -98,11 +98,24 @@ function createApiError(response, result, fallbackMessage) {
   return error;
 }
 
+// 원장이 "다른 선생님으로 보기" 를 켜면 그 테넌트를 모든 요청에 실어 보낸다.
+// 서버가 owner 인지, 실제 등록된 테넌트인지 다시 확인하므로 이 값만으로는 권한이 생기지 않는다.
+let viewTenantId = "";
+
+export function setViewTenantId(tenantId) {
+  viewTenantId = String(tenantId || "");
+}
+
+export function getViewTenantId() {
+  return viewTenantId;
+}
+
 export function withAuthHeaders(headers = {}) {
   const merged = { ...headers };
   // 호출부가 Authorization 을 직접 넘겼으면(보고서 저장 등) 그쪽을 존중한다.
   if (currentAuthToken && !merged.Authorization) merged.Authorization = `Bearer ${currentAuthToken}`;
   if (kioskToken) merged["X-Kiosk-Token"] = kioskToken;
+  if (viewTenantId) merged["X-View-Tenant-Id"] = viewTenantId;
   return merged;
 }
 

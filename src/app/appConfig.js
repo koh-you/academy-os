@@ -34,7 +34,9 @@ export const storageKeys = {
   specialLectureInstructorSettlements: "academy-os.specialLectureInstructorSettlements.v1",
   lessonNotificationPlans: "academy-os.lessonNotificationPlans.v1",
   deletedLessonBundles: "academy-os.deletedLessonBundles.v1",
-  teacherSession: "academy-os.teacherSession.v1"
+  teacherSession: "academy-os.teacherSession.v1",
+  // 원장이 어느 선생님 자료를 보고 있었는지. 새로고침해도 유지된다.
+  viewTenantId: "academy-os.viewTenantId.v1"
 };
 
 export const legacySensitiveStorageKeys = ["academy-os.teacherAccountSettings.v1"];

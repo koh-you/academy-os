@@ -108,7 +108,7 @@ import {
 } from "./lib/supabaseRest.js";
 import { enterTenantContext, getCurrentTenantId, runWithTenant, setWriteTenant } from "../src/shared/server/tenantScope.js";
 import { createKioskDeviceRegistry } from "../src/shared/server/kioskDeviceRegistry.js";
-import { evaluateApiAccess, mayAuthenticateAsKiosk } from "../src/shared/server/apiAccessPolicy.js";
+import { evaluateApiAccess, mayAuthenticateAsKiosk, resolveViewAsTenantId } from "../src/shared/server/apiAccessPolicy.js";
 import {
   createClientRuntimeErrorRateLimiter,
   normalizeClientRuntimeErrorReport
@@ -637,6 +637,7 @@ const teacherAccountAdminStore = createTeacherAccountAdminStore({
   patchRows,
   teacherAccountTable
 });
+const { listKnownTeacherTenantIds } = teacherAccountAdminStore;
 const { dispatch: dispatchTeacherAccountAdminRoute } = createTeacherAccountAdminRouteRegistry({
   createTeacherAccount: teacherAccountAdminStore.createTeacherAccountWithTenant,
   findTeacherAccountByLoginId: teacherAccountAdminStore.findTeacherAccountByLoginId,
@@ -4942,8 +4943,24 @@ const server = http.createServer(async (request, response) => {
             : { kind: "none" };
   request.__auth = auth;
 
+  // 원장이 "다른 선생님으로 보기" 를 켜면 그 선생님 테넌트로 작업한다(조회·수정 모두).
+  // 협력 교사가 같은 헤더를 보내도 resolveViewAsTenantId 가 자기 테넌트로 되돌린다.
+  const requestedTenantId = String(getRequestHeader(request, "x-view-tenant-id") || "").trim();
+  const effectiveTenantId = requestedTenantId
+    ? resolveViewAsTenantId(auth, requestedTenantId, await listKnownTeacherTenantIds())
+    : (auth.tenantId ?? null);
+  if (requestedTenantId && effectiveTenantId !== (auth.tenantId ?? null)) {
+    // 권한 경계를 넘는 작업이라 흔적을 남긴다. 나중에 "누가 남의 자료를 고쳤나" 를 볼 수 있어야 한다.
+    console.info("[view-as-tenant]", JSON.stringify({
+      method: request.method,
+      path: requestUrl.pathname,
+      ownerTenantId: auth.tenantId ?? null,
+      viewTenantId: effectiveTenantId
+    }));
+  }
+
   // 멀티테넌트: 요청 컨텍스트에 쓰기 테넌트와 읽기 범위를 심는다(둘 다 없으면 스코핑 no-op).
-  enterTenantContext(auth.tenantId ?? null, { readTenantIds: auth.readTenantIds });
+  enterTenantContext(effectiveTenantId, { readTenantIds: auth.readTenantIds });
 
   const verdict = evaluateApiAccess({ method: request.method, pathname: requestUrl.pathname, auth });
   if (!verdict.ok) {

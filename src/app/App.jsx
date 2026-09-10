@@ -463,9 +463,11 @@ import {
   postJson,
   postJsonWithHeaders,
   postJsonWithTimeout,
-  setApiAuthToken
+  setApiAuthToken,
+  setViewTenantId as setApiViewTenantId
 } from "../shared/utils/apiClient.js";
 import { clearCacheOwner, resetCacheForAccount } from "../shared/utils/accountScopedCache.js";
+import { TeacherViewSwitcher } from "./TeacherViewSwitcher.jsx";
 import { safeIdPart } from "../shared/utils/id.js";
 import { getKoreaDateString } from "../shared/utils/koreaDate.js";
 import { applyStudentScheduleToLesson } from "../shared/utils/studentSchedule.js";
@@ -2142,10 +2144,19 @@ export function App() {
     teacherAccount: { ...defaultTeacherAccountSettings, ...teacherAccountSettings },
     windowTarget: typeof window === "undefined" ? null : window
   });
+  const teacherRole = session?.teacherRole;
+  // 원장이 지금 보고 있는 선생님의 테넌트. 빈 값이면 자기 자료를 본다.
+  // 협력 교사는 이 값을 쓰지 않는다(서버도 owner 가 아니면 무시한다).
+  const [viewTenantId, setViewTenantId] = useStoredState(storageKeys.viewTenantId, "");
+  const activeViewTenantId = teacherRole === "owner" ? viewTenantId : "";
   // 로그인 세션 토큰을 모든 API 요청 헤더에 싣는다(로그인·복원·로그아웃 모두 반영).
   useEffect(() => {
     setApiAuthToken(session?.sessionToken || "");
   }, [session?.sessionToken]);
+  // 고른 선생님을 모든 요청 헤더에 싣는다. 서버가 owner 인지 다시 확인한다.
+  useEffect(() => {
+    setApiViewTenantId(activeViewTenantId);
+  }, [activeViewTenantId]);
   // 같은 브라우저에서 계정이 바뀌면 이전 계정의 화면 캐시를 지운다.
   // 여기서 새로고침하지 않는다 — 첫 로그인에도 항상 걸려서 매번 페이지가 두 번 로드된다.
   // 저장소만 비우면 되고, 화면은 이어지는 부트스트랩이 새 계정 데이터로 덮어쓴다
@@ -2155,8 +2166,8 @@ export function App() {
     const cachedStateKeys = Object.entries(storageKeys)
       .filter(([name]) => name !== "teacherSession")
       .map(([, key]) => key);
-    resetCacheForAccount(window.localStorage, session.teacherId, cachedStateKeys);
-  }, [session?.teacherId]);
+    resetCacheForAccount(window.localStorage, `${session.teacherId}:${activeViewTenantId}`, cachedStateKeys);
+  }, [session?.teacherId, activeViewTenantId]);
   // 어느 요청이든 401 이 오면 화면 전체에 재로그인을 안내한다. 이게 없으면 만료가
   // "저장 실패" 로만 보이고, 새로고침해도 같은 만료 토큰을 다시 보내 원인을 알 수 없다
   // (2026-09-08 수업일지·출결 장애).
@@ -2341,7 +2352,6 @@ export function App() {
   const wrongProblemSaveRevisionRef = useRef(0);
   const notificationJobsRefreshControllerRef = useRef(null);
   const notificationJobsReconcileControllerRef = useRef(null);
-  const teacherRole = session?.teacherRole;
   const attendanceOnlyMode = isAttendanceOnlyRoute();
   const specialLectureOnlyMode = isSpecialLectureRoute();
   const {
@@ -6556,6 +6566,13 @@ export function App() {
       ) : null}
       <Sidebar
         academyBrandName={formatTeacherBrandName(session?.name)}
+        teacherViewSwitcher={teacherRole === "owner" ? (
+          <TeacherViewSwitcher
+            onChangeViewTenant={setViewTenantId}
+            ownTenantId={session?.tenantId ?? ""}
+            viewTenantId={activeViewTenantId}
+          />
+        ) : null}
         activeView={activeView}
         isCollapsed={isSidebarCollapsed}
         isMobileNavigationOpen={isMobileNavigationOpen}
