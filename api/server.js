@@ -224,7 +224,8 @@ import {
 import {
   deleteTestPaperFile,
   resolveTestPaperOpenUrl,
-  saveTestPaperFile
+  saveTestPaperFile,
+  watermarkTestPaperBuffer
 } from "../src/domains/tests/testPaperStorageOperation.js";
 import {
   addCenteredWatermark,
@@ -575,7 +576,8 @@ const { dispatch: dispatchTestPaperFileRoute } = createTestPaperFileRouteRegistr
   readJsonBody,
   resolveTestPaperOpenUrl,
   saveTestPaperFile,
-  sendJson
+  sendJson,
+  watermarkTestPaperBuffer
 });
 const { dispatch: dispatchSolapiRoute } = createSolapiRouteRegistry({
   cancelSolapiReservationGroup,
@@ -3116,9 +3118,9 @@ function createTestPaperStorageOperations() {
         fileSizeLimit: testPaperStorageMaxBytes
       }
     }),
-    watermark: async (pdfBuffer) => {
+    watermark: async (pdfBuffer, watermarkOptions) => {
       const logoBytes = await readFile(defaultWatermarkLogoPath);
-      return addCenteredWatermark(pdfBuffer, logoBytes);
+      return addCenteredWatermark(pdfBuffer, logoBytes, watermarkOptions);
     }
   };
 }

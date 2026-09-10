@@ -15,6 +15,7 @@ import {
   TestManagerTabs
 } from "../tests/TestManagerPanels.jsx";
 import { TestPaperLibraryPanel } from "../tests/TestPaperLibraryPanel.jsx";
+import { WatermarkToolPanel } from "../tests/WatermarkToolPanel.jsx";
 import {
   defaultPassCorrectCount,
   getTestPaperKindLabel as getTestPaperLibraryKindLabel,
@@ -1224,6 +1225,8 @@ export function MaterialManager({
           saveState={testPaperLibrarySaveState}
         />
       ) : null}
+
+      {activeTab === "watermark" ? <WatermarkToolPanel /> : null}
     </section>
   );
 }

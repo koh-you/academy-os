@@ -16,6 +16,8 @@ let saveArgs = null;
 let deleteArgs = null;
 let openArgs = null;
 let routeError = null;
+let watermarkArgs = null;
+let watermarkResult = { fileName: "a.pdf", pdfBase64: "d2F0ZXJtYXJrZWQ=" };
 
 const parsedFile = { buffer: Buffer.from("file-bytes"), mimeType: "application/pdf" };
 
@@ -52,6 +54,12 @@ const registry = createTestPaperFileRouteRegistry({
   },
   sendJson: (request, response, statusCode, body) => {
     sends.push({ body, statusCode });
+  },
+  watermarkTestPaperBuffer: async (args) => {
+    events.push("watermarkBuffer");
+    watermarkArgs = args;
+    if (routeError?.stage === "watermarkBuffer") throw routeError.error;
+    return watermarkResult;
   }
 });
 
@@ -67,7 +75,8 @@ assert.equal(testPaperFileRouteSignatures.every(Object.isFrozen), true);
 assert.deepEqual(testPaperFileRouteSignatures, [
   { method: "POST", path: "/api/test-paper-files" },
   { method: "DELETE", path: "/api/test-paper-files" },
-  { method: "GET", path: "/api/test-paper-files/open" }
+  { method: "GET", path: "/api/test-paper-files/open" },
+  { method: "POST", path: "/api/test-paper-files/watermark" }
 ]);
 
 // 등록되지 않은 경로/메서드는 처리하지 않는다
@@ -112,6 +121,38 @@ routeError = { error: conflictError, stage: "save" };
 await registry.dispatch(route("POST", "/api/test-paper-files"));
 assert.equal(sends.at(-1).statusCode, 400);
 assert.equal(sends.at(-1).body.code, "TEST_PAPER_STORAGE_REFERENCE_INVALID");
+routeError = null;
+
+// --- POST 워터마크 전용(Storage 미경유) ---
+events.length = 0;
+rawBody = { file: { dataUrl: "data:application/pdf;base64,xxx", fileName: "a.pdf" }, opacity: 0.15 };
+assert.equal(await registry.dispatch(route("POST", "/api/test-paper-files/watermark")), true);
+assert.deepEqual(events, ["read", "parseDataUrl", "watermarkBuffer"]);
+assert.deepEqual(watermarkArgs, {
+  file: { buffer: parsedFile.buffer, fileName: "a.pdf", mimeType: "application/pdf", size: parsedFile.buffer.length },
+  opacity: 0.15,
+  operations: { marker: "storage-operations" }
+});
+assert.deepEqual(sends.at(-1).body, { ok: true, ...watermarkResult });
+// Storage 를 전혀 건드리지 않는다
+assert.equal(events.includes("save"), false);
+
+// 교사 세션이 없으면 401
+teacherSession = null;
+events.length = 0;
+assert.equal(await registry.dispatch(route("POST", "/api/test-paper-files/watermark")), true);
+assert.deepEqual(events, []);
+assert.equal(sends.at(-1).statusCode, 401);
+teacherSession = { teacherId: "teacher-1" };
+
+// 워터마크 실패는 statusCode 를 그대로 전달한다
+events.length = 0;
+const invalidFileError = new Error("시험지 파일은 PDF만 등록할 수 있습니다.");
+invalidFileError.statusCode = 400;
+routeError = { error: invalidFileError, stage: "watermarkBuffer" };
+await registry.dispatch(route("POST", "/api/test-paper-files/watermark"));
+assert.equal(sends.at(-1).statusCode, 400);
+assert.equal(sends.at(-1).body.error, "시험지 파일은 PDF만 등록할 수 있습니다.");
 routeError = null;
 
 // --- DELETE ---

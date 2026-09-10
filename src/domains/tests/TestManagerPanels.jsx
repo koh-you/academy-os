@@ -35,6 +35,15 @@ export function TestManagerTabs({ activeTab = "attempts", onChange }) {
       >
         시험지 목록
       </button>
+      <button
+        aria-selected={activeTab === "watermark"}
+        className={activeTab === "watermark" ? "active" : ""}
+        onClick={() => onChange?.("watermark")}
+        role="tab"
+        type="button"
+      >
+        워터마크
+      </button>
     </WorkspaceTabs>
   );
 }

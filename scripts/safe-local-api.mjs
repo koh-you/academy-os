@@ -2177,6 +2177,30 @@ const server = http.createServer(async (request, response) => {
     response.end(storedFile.buffer);
     return;
   }
+  if (request.method === "POST" && requestUrl.pathname === "/api/test-paper-files/watermark") {
+    const payload = await readJson(request);
+    const match = String(payload.file?.dataUrl ?? "").match(/^data:([^;,]+)?(;base64)?,(.*)$/);
+    if (!match) return sendJson(response, 400, { ok: false, error: "안전 fixture 파일 형식이 올바르지 않습니다." });
+    const buffer = Buffer.from(match[3], match[2] ? "base64" : "utf8");
+    const mimeType = match[1] || "application/octet-stream";
+    try {
+      validateTestPaperFile({ fileName: payload.file?.fileName, mimeType, size: buffer.length });
+    } catch (error) {
+      return sendJson(response, 400, { ok: false, error: error.message });
+    }
+    const numericOpacity = Number(payload.opacity);
+    const watermarkedBytes = await addCenteredWatermark(
+      buffer,
+      await readFile(defaultWatermarkLogoPath),
+      Number.isFinite(numericOpacity) && numericOpacity > 0 && numericOpacity <= 1 ? { opacity: numericOpacity } : {}
+    );
+    return sendJson(response, 200, {
+      fileName: payload.file?.fileName,
+      ok: true,
+      pdfBase64: Buffer.from(watermarkedBytes).toString("base64"),
+      safeFixture: true
+    });
+  }
   if (request.method === "POST" && requestUrl.pathname === "/api/test-paper-files") {
     const payload = await readJson(request);
     const match = String(payload.file?.dataUrl ?? "").match(/^data:([^;,]+)?(;base64)?,(.*)$/);
