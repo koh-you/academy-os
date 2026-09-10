@@ -75,10 +75,15 @@ export function isSessionExpiredError(error) {
 // "저장 실패"와 "다시 로그인해야 함"을 구분할 수 있게 한다.
 function createApiError(response, result, fallbackMessage) {
   const sessionExpired = response.status === 401 || result?.code === "auth_required";
+  // 권한 코드는 그대로 보여주면 "role_forbidden" 같은 영문 코드가 화면에 뜬다.
+  // 읽을 수 있는 문장으로 바꿔서, 쓰는 사람이 "고장" 과 "권한 없음" 을 구분할 수 있게 한다.
+  const roleForbidden = result?.code === "role_forbidden";
   const error = new Error(
     sessionExpired
       ? "로그인 세션이 만료되었습니다. 다시 로그인해 주세요."
-      : result?.error || fallbackMessage
+      : roleForbidden
+        ? "이 계정에는 이 기능의 권한이 없습니다. 원장님께 문의해 주세요."
+        : result?.error || fallbackMessage
   );
   error.audit = result?.audit;
   error.code = result?.code;
@@ -140,6 +145,23 @@ function skippedApiResponse() {
     status: 200,
     headers: { "Content-Type": "application/json" }
   });
+}
+
+// 지금 로그인한 교사 역할. 화면이 "이 기능을 쓸 수 있나" 를 물을 때 쓴다.
+// App 이 로그인·복원·로그아웃 때 설정한다.
+let currentTeacherRole = "owner";
+
+export function setCurrentTeacherRole(role) {
+  currentTeacherRole = String(role || "owner");
+}
+
+/**
+ * 이 계정이 알림톡을 보낼 수 있나. 판정은 **서버와 같은 정책 모듈**에서 파생한다.
+ * 그래서 나중에 알림톡 권한을 다시 열면 화면 잠금도 저절로 풀린다 — 화면에 별도
+ * 목록을 두면 서버는 열렸는데 버튼은 잠긴 상태가 남는다.
+ */
+export function canCurrentRoleSendAlimtalk() {
+  return canTeacherRoleCallRoute(currentTeacherRole, "POST", "/api/notifications/comment-alimtalk");
 }
 
 export function roleAwareApiFetch(path, teacherRole, options = {}) {

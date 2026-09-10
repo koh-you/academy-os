@@ -1,3 +1,4 @@
+import { canCurrentRoleSendAlimtalk } from "../../shared/utils/apiClient.js";
 import { useEffect } from "react";
 import { applyStudentScheduleToLesson } from "../../shared/utils/studentSchedule.js";
 import {
@@ -64,6 +65,9 @@ export function LessonJournalDetail({
   testAttempts = [],
   testSessions = []
 }) {
+  // 알림톡 권한이 없는 계정은 관련 버튼을 잠근다(숨기지 않는다). 권한이 다시 열리면
+  // 이 값이 저절로 true 가 되어 버튼이 풀린다 — 판정을 정책 모듈에서 파생하기 때문이다.
+  const isAlimtalkLocked = !canCurrentRoleSendAlimtalk();
   const {
     AcademyReminderList,
     academyReminder,
@@ -723,6 +727,7 @@ export function LessonJournalDetail({
                 key={student.studentId}
                 parentNotificationCommentProps={{
                   audienceLabel: "학부모",
+                  isAlimtalkLocked,
                   commentState: parentCommentState,
                   isLessonNotificationOff,
                   isNotificationMuted: record.notificationMutedParent,
@@ -759,6 +764,7 @@ export function LessonJournalDetail({
                 }}
                 studentNotificationCommentProps={{
                   audienceLabel: "학생",
+                  isAlimtalkLocked,
                   commentState: studentCommentState,
                   isLessonNotificationOff,
                   isNotificationMuted: record.notificationMutedStudent,

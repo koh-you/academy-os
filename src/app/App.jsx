@@ -464,6 +464,7 @@ import {
   postJsonWithHeaders,
   postJsonWithTimeout,
   setApiAuthToken,
+  setCurrentTeacherRole,
   setViewTenantId as setApiViewTenantId
 } from "../shared/utils/apiClient.js";
 import { clearCacheOwner, resetCacheForAccount } from "../shared/utils/accountScopedCache.js";
@@ -2157,6 +2158,10 @@ export function App() {
   useEffect(() => {
     setApiViewTenantId(activeViewTenantId);
   }, [activeViewTenantId]);
+  // 화면이 기능 잠금을 판단할 수 있게 역할을 공유한다(알림톡 등).
+  useEffect(() => {
+    setCurrentTeacherRole(teacherRole);
+  }, [teacherRole]);
   // 같은 브라우저에서 계정이 바뀌면 이전 계정의 화면 캐시를 지운다.
   // 여기서 새로고침하지 않는다 — 첫 로그인에도 항상 걸려서 매번 페이지가 두 번 로드된다.
   // 저장소만 비우면 되고, 화면은 이어지는 부트스트랩이 새 계정 데이터로 덮어쓴다
