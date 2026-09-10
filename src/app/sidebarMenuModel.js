@@ -7,7 +7,10 @@ export const ASSISTANT_VISIBLE_MENU_IDS = new Set([
   // 각자 다른 tenant 이므로 여기서 보이는 것은 전부 자기 것뿐이다.
   "classes",
   "examPrep",
-  "schoolCalendar"
+  "schoolCalendar",
+  // 자기 아이디·비밀번호를 스스로 바꿀 수 있어야 한다. 초기 비밀번호를 원장이 정해서
+  // 넘겨주므로, 받은 사람이 바로 바꿀 방법이 없으면 그 비밀번호가 계속 남는다.
+  "settings"
 ]);
 
 /** 해당 role 이 이 화면(view id)에 접근 가능한가. owner 는 전부 허용. */

@@ -45,6 +45,9 @@ const DISPATCH_TOKEN_ROUTES = new Set([
 const ASSISTANT_ALLOW_EXACT = new Set([
   // 자기 세션 연장. 역할과 무관하게 로그인한 교사면 쓸 수 있어야 수업 중에 끊기지 않는다.
   "POST /api/auth/refresh",
+  // 자기 아이디·비밀번호 변경. 현재 아이디·비밀번호를 맞춰야 통과하고, 인증된 본인
+  // 계정만 수정한다(다른 계정을 건드릴 수 없다).
+  "POST /api/auth/teacher-account",
   "GET /api/lessons",
   "GET /api/lessons/closure-preflight",
   "GET /api/lesson-records",
