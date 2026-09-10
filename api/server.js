@@ -344,23 +344,6 @@ const { dispatch: dispatchTeacherAccountRoute } = createTeacherAccountRouteRegis
   sendJson,
   toTeacherAccount
 });
-const teacherAccountAdminStore = createTeacherAccountAdminStore({
-  defaultTenantId,
-  hashPassword,
-  insertRows,
-  listRows,
-  patchRows,
-  teacherAccountTable
-});
-const { dispatch: dispatchTeacherAccountAdminRoute } = createTeacherAccountAdminRouteRegistry({
-  createTeacherAccount: teacherAccountAdminStore.createTeacherAccountWithTenant,
-  findTeacherAccountByLoginId: teacherAccountAdminStore.findTeacherAccountByLoginId,
-  isSupabaseConfigured,
-  listTeacherAccounts: teacherAccountAdminStore.listTeacherAccounts,
-  readJsonBody,
-  sendJson,
-  setTeacherAccountActive: teacherAccountAdminStore.setTeacherAccountActive
-});
 const { dispatch: dispatchPortalReadRoute } = createPortalReadRouteRegistry({
   getPortalData,
   getPortalSession,
@@ -641,6 +624,28 @@ const defaultTeacherAccount = {
   tenantId: defaultTenantId,
   teacherRole: "owner"
 };
+
+// 라우트 레지스트리 조립은 여기서 한다 — teacherAccountTable / defaultTenantId 같은
+// const 뒤여야 한다. 파일 앞쪽에서 조립하면 const 는 호이스팅되지 않으므로
+// "Cannot access 'defaultTenantId' before initialization" 으로 서버가 부팅 즉시 죽는다.
+// 2026-09-08 PR #300 이 실제로 그렇게 했고, Render 배포가 이틀간 전부 실패했다.
+const teacherAccountAdminStore = createTeacherAccountAdminStore({
+  defaultTenantId,
+  hashPassword,
+  insertRows,
+  listRows,
+  patchRows,
+  teacherAccountTable
+});
+const { dispatch: dispatchTeacherAccountAdminRoute } = createTeacherAccountAdminRouteRegistry({
+  createTeacherAccount: teacherAccountAdminStore.createTeacherAccountWithTenant,
+  findTeacherAccountByLoginId: teacherAccountAdminStore.findTeacherAccountByLoginId,
+  isSupabaseConfigured,
+  listTeacherAccounts: teacherAccountAdminStore.listTeacherAccounts,
+  readJsonBody,
+  sendJson,
+  setTeacherAccountActive: teacherAccountAdminStore.setTeacherAccountActive
+});
 
 function summarizeNotificationJobResult(result) {
   if (!result || typeof result !== "object") return result ?? null;
