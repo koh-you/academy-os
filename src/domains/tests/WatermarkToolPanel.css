@@ -1,0 +1,48 @@
+.watermarkToolControls {
+  align-items: flex-end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 12px 0 16px;
+}
+
+.watermarkToolControls label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 800;
+  gap: 6px;
+}
+
+.watermarkToolJobList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.watermarkToolJob {
+  align-items: center;
+  background: var(--academy-surface-muted, #f8fafc);
+  border: 1px solid var(--status-neutral-border, #e2e8f0);
+  border-radius: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+  padding: 10px 12px;
+}
+
+.watermarkToolJob.error {
+  border-color: var(--status-danger-border, #fecaca);
+}
+
+.watermarkToolJobName {
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.watermarkToolPanel .fieldHintError {
+  color: var(--status-destructive-text, #dc2626);
+}

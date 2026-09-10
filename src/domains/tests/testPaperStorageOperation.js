@@ -50,6 +50,32 @@ export async function saveTestPaperFile({ digest, file, watermark = false, opera
   return { fileName: validatedFile.fileName, fileReference, storagePath, watermarked: Boolean(watermark) };
 }
 
+// 이 파일은 브라우저 번들 규칙(eslint src/**)을 따르므로 node 전용 Buffer 를 쓰지 않는다.
+// btoa 는 node·브라우저 양쪽에 있고, 한 번에 넘기면 인자 수 제한에 걸리므로 나눠서 붙인다.
+function bytesToBase64(bytes) {
+  const chunkSize = 0x8000;
+  let binary = "";
+  for (let index = 0; index < bytes.length; index += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(index, index + chunkSize));
+  }
+  return btoa(binary);
+}
+
+/**
+ * 시험지 목록 등록 없이 PDF 한 장에만 워터마크를 찍어 돌려준다. Storage 를 거치지 않으므로
+ * 업로드된 바이트도, 찍힌 결과물도 서버에 남지 않는다.
+ * @param {{ file: { buffer: *, fileName: string, mimeType: string, size: number }, opacity?: number, operations: * }} params
+ */
+export async function watermarkTestPaperBuffer({ file, opacity, operations } = {}) {
+  const validatedFile = validateTestPaperFile(file);
+  const numericOpacity = Number(opacity);
+  const watermarkOptions = Number.isFinite(numericOpacity) && numericOpacity > 0 && numericOpacity <= 1
+    ? { opacity: numericOpacity }
+    : {};
+  const watermarkedBytes = await operations.watermark(file.buffer, watermarkOptions);
+  return { fileName: validatedFile.fileName, pdfBase64: bytesToBase64(watermarkedBytes) };
+}
+
 /** 시험지 파일을 Storage 에서 지운다. 외부 링크(Drive 등)면 아무것도 하지 않는다. */
 export async function deleteTestPaperFile({ fileUrl, operations } = {}) {
   if (!fileUrl || isExternalTestPaperFileUrl(fileUrl)) return { deleted: false };

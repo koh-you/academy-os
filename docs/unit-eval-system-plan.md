@@ -145,6 +145,23 @@
 - 파일을 교체/삭제해도 이전 Storage 객체를 자동으로 정리하진 않는다(orphan 파일 누적 — 필요해지면
   별도 정리 작업).
 
+## 7-c. 워터마크 도구(시험지 등록 없이) — 완료
+
+시험지 목록에 등록하지 않고 손에 있는 PDF 에 워터마크만 찍고 싶은 경우를 위한 도구.
+`시험지관리 → 워터마크` 탭에서 PDF 를 고르면 워터마크가 찍힌 파일이 바로 내려받아진다.
+
+- 경로: `POST /api/test-paper-files/watermark`. `{ file: { dataUrl, fileName }, opacity? }` 를 받고
+  `{ ok, fileName, pdfBase64 }` 를 돌려준다. **Storage 를 전혀 거치지 않아 업로드한 원본도,
+  찍힌 결과물도 서버에 남지 않는다.** 교사 세션이 있어야 한다.
+- 서버: `watermarkTestPaperBuffer`(`src/domains/tests/testPaperStorageOperation.js`).
+  `validateTestPaperFile` 로 PDF·20MB 를 확인하고, 주입된 `operations.watermark` 로 찍은 뒤
+  base64 로 만들어 돌려준다. `src/**` 는 브라우저 번들 규칙을 따르므로 node 전용 `Buffer` 대신
+  `btoa` 기반 인코더를 쓴다(6MB 까지 `Buffer.toString("base64")` 와 바이트 단위로 일치 확인).
+- 화면: `src/domains/tests/WatermarkToolPanel.jsx`. 여러 파일을 한 번에 고를 수 있고, 진하기는
+  5/10/15/20% 중에 고른다(기본 10%). 끝난 파일은 `<원본이름>_wm.pdf` 로 자동 저장되고
+  `다시 받기` 로 다시 내려받을 수 있다.
+- 배치로 많이 처리할 때는 CLI(`npm run watermark-test-papers`)가 계속 더 빠르다.
+
 ### 확정됨
 
 - 과정(선행/현행) 구분 안 함, 난이도 2단계.
