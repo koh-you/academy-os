@@ -1,5 +1,11 @@
 # Daily Development Handoff
 
+## 2026-09-12 문제은행(오답은행) 1단계
+
+- 다음 할 일: ① `supabase/20260912_problem_bank.sql` 을 SQL Editor 에 적용 ② 로컬에서 RPM 패키지 생성(README 명령) ③ 교재관리 › 패키지 등록 ④ 교재별 오답에서 학생 1명 기록 → 선택 인쇄 → 첫 인쇄본 확인. ①·④가 사람 Gate 다.
+- 정답·해설은 RPM 정답 별책이 따로라 이번 패키지에 없다(빠른정답·해설 옵션은 등록된 것이 있을 때만 켜진다). 「중단원 마무리」의 2자리 번호 문항은 아직 안 잡는다.
+- 스캔 PDF(쎈)·HWPX(EBS → 글자 레이어 PDF) 경로는 2단계. 상세와 코드 위치: `docs/problem-bank/README.md`.
+
 ## 2026-09-12 AI 운영 읽기 인증 기준
 
 - 무인증 운영 GET은 `401 auth_required`, 로그인된 교사 화면의 알림 기록 재조회는 정상 완료됐다. 화면 조회는 교사 세션, 원시 API는 `tenant_default` 단기 `read` ops 토큰을 사용한다.

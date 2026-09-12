@@ -100,6 +100,7 @@ const expectedTables = [
   "exam_analysis_events", "exam_analysis_questions", "exam_analysis_runs", "exam_analysis_sources",
   "exam_post_submissions", "exam_prep_rows", "exam_submission_files", "homeworks",
   "lesson_student_records", "lessons", "makeup_tasks", "notification_jobs", "notification_logs",
+  "problem_bank_attempts", "problem_bank_books", "problem_bank_items", "problem_bank_regions", "problem_bank_units",
   "problem_books", "resource_materials", "school_events", "score_records", "special_lecture_applications",
   "special_lecture_enrollments", "student_intake_applicants", "students", "teacher_accounts",
   "test_attempts", "test_sessions", "wrong_problem_statuses"
