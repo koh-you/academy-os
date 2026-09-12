@@ -404,14 +404,26 @@ assert.ok(
 for (const extractedHeaderContract of [
   "createLessonJournalHeaderModel",
   "onClick={onBack}",
-  "onClick={onOpenExamPrep}",
-  "onClick={() => onEditLesson(lesson)}",
-  "onClick={() => onDeleteLesson(lesson.lessonId)}"
+  "onClick={onOpenExamPrep}"
 ]) {
   assert.ok(
     `${journalHeaderSource}\n${journalHeaderModelSource}`.includes(extractedHeaderContract),
     `missing extracted 17B-1 contract: ${extractedHeaderContract}`
   );
+}
+// 2026-09-12 · 수업 수정·수업 취소는 상단 헤더가 아니라 하단 고정바의 "수업 작업" 그룹에 있다.
+// 헤더에는 조작 버튼을 두지 않는다. 수업 취소는 자동 생성 수업일 때 확인을 한 번 더 거친다.
+for (const bottomBarLessonContract of [
+  "lessonActions={(",
+  "onClick={() => onEditLesson(lesson)}",
+  "onClick={requestDeleteLesson}",
+  "function requestDeleteLesson()",
+  "onDeleteLesson(lesson.lessonId)"
+]) {
+  assert.ok(journalSource.includes(bottomBarLessonContract), `missing bottom bar lesson contract: ${bottomBarLessonContract}`);
+}
+for (const removedHeaderAction of ["onEditLesson", "onDeleteLesson", "수업 취소 처리"]) {
+  assert.ok(!journalHeaderSource.includes(removedHeaderAction), `header must not keep ${removedHeaderAction}`);
 }
 assert.ok(
   journalSource.includes("<LessonJournalClosureNotice"),
@@ -460,18 +472,35 @@ assert.ok(
   !journalSource.includes('<section className="panel lessonSaveSummary"'),
   "LessonJournalDetail must not retain the notification bar markup"
 );
+// 2026-09-12 · 상단 알림 바는 발송 상태 pill 만 남기고, 조작(예약 설정·예약 확인·발송 결과·Solapi 예약
+// 업데이트)은 하단 고정바의 "알림톡 작업" 그룹으로 옮겼다. 모델의 표시 조건은 그대로 하단바가 쓴다.
 for (const extractedNotificationBarContract of [
   "createLessonJournalNotificationBarModel",
-  "onUpdateLessonNotificationPlan?.(lessonId, event.target.value)",
-  "onClick={onOpenReservationAudit}",
-  "onClick={onRefreshSolapiSendResults}",
-  "onClick={onApplySolapiReservationPlan}",
-  "disabled={!canApplySolapiReservation}"
+  "lessonNotificationPlanStatus",
+  "checkoutMissingSummary",
+  "solapiReservationSync"
 ]) {
   assert.ok(
     `${notificationBarSource}\n${notificationBarModelSource}`.includes(extractedNotificationBarContract),
     `missing extracted 17B-4 contract: ${extractedNotificationBarContract}`
   );
+}
+for (const removedNotificationBarAction of ["<button", "<select", "수정 시작", "onStartJournalEditMode", "showEditAction"]) {
+  assert.ok(
+    !`${notificationBarSource}\n${notificationBarModelSource}`.includes(removedNotificationBarAction),
+    `notification bar must not keep ${removedNotificationBarAction}`
+  );
+}
+for (const bottomBarNotificationContract of [
+  "notificationActions={(",
+  "onUpdateLessonNotificationPlan?.(lesson.lessonId, event.target.value)",
+  "onClick={refreshSolapiSendResults}",
+  "onClick={applySolapiReservationPlan}",
+  "disabled={!canApplySolapiReservation}",
+  "notificationBarModel.showRefreshAction",
+  "notificationBarModel.showApplyAction"
+]) {
+  assert.ok(journalSource.includes(bottomBarNotificationContract), `missing bottom bar notification contract: ${bottomBarNotificationContract}`);
 }
 assert.ok(
   journalSource.includes("<LessonJournalReservationModal"),

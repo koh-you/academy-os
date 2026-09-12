@@ -10,7 +10,7 @@ assert.deepEqual(createLessonJournalSaveViewModel(), {
   lessonJournalSaveStatus: { label: "", tone: "idle" },
   makeupTaskDraftCount: 0,
   recordDraftCount: 0,
-  stickySaveMessage: "편집을 시작하면 변경 내용이 여기에 표시됩니다.",
+  stickySaveMessage: "칸을 고치면 변경 내용이 여기에 표시됩니다.",
   stickySaveState: "idle"
 });
 

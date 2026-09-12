@@ -1,17 +1,15 @@
 export function createLessonJournalNotificationBarModel({
-  canApplySolapiReservation,
+  canApplySolapiReservation = false,
   checkoutMissingStudents = [],
-  hasSolapiResultRefreshTarget,
-  journalEditMode,
-  reservationApplyState,
-  solapiResultRefreshState
+  hasSolapiResultRefreshTarget = false,
+  reservationApplyState = "idle",
+  solapiResultRefreshState = "idle"
 }) {
   return {
     checkoutMissingCount: checkoutMissingStudents.length,
     checkoutMissingTitle: checkoutMissingStudents.map((student) => student.name).join(", "),
     refreshButtonLabel: solapiResultRefreshState === "loading" ? "확인 중" : "발송 결과",
     showApplyAction: canApplySolapiReservation || reservationApplyState === "applying",
-    showEditAction: !journalEditMode,
     showRefreshAction: hasSolapiResultRefreshTarget
   };
 }

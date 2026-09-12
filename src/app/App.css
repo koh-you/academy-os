@@ -2087,18 +2087,12 @@ summary:focus-visible {
   padding: 10px 14px;
 }
 
-.lessonNotificationStatusRow,
-.lessonNotificationActionRow {
+.lessonNotificationStatusRow {
   align-items: center;
   display: flex;
   gap: 8px;
-  min-width: 0;
-}
-
-.lessonNotificationStatusRow {
-  border-bottom: 1px solid var(--status-neutral-border, #e2e8f0);
   min-height: 34px;
-  padding-bottom: 8px;
+  min-width: 0;
 }
 
 .lessonNotificationStatusRow > strong {
@@ -2128,19 +2122,9 @@ summary:focus-visible {
   color: var(--status-danger-text, #b91c1c);
 }
 
-.lessonNotificationActionRow {
-  padding-bottom: 2px;
-}
-
-.lessonNotificationStatusRow:focus-visible,
-.lessonNotificationActionRow:focus-visible {
+.lessonNotificationStatusRow:focus-visible {
   outline: 2px solid var(--academy-focus-ring, rgba(37, 99, 235, 0.55));
   outline-offset: 2px;
-}
-
-.lessonNotificationActionRow > button,
-.lessonNotificationPlanSelect {
-  flex: 0 0 auto;
 }
 
 .lessonNotificationPlanSelect {
@@ -2150,6 +2134,7 @@ summary:focus-visible {
   border-radius: 8px;
   color: var(--academy-text-strong, #475569);
   display: inline-flex;
+  flex: 0 0 auto;
   gap: 6px;
   min-height: 38px;
   padding: 0 8px 0 10px;
