@@ -48,4 +48,17 @@ for (const forbiddenOwner of [
   assert.ok(!modalSource.includes(forbiddenOwner), `StudentModal must not own transport/provider boundary: ${forbiddenOwner}`);
 }
 
-console.log("student modal extraction boundary passed · App persistence callbacks preserved");
+// 반이 하나도 없는 새 계정에서도 학생 등록 창이 열려야 한다.
+// 2026-09-12 협력 교사 첫 로그인에서 templates[0].classTemplateId 로 창을 여는 순간 죽었다.
+// 이전에는 샘플 반이 항상 있어서 드러나지 않았다. 선택지에 "미배정" 이 이미 있으므로
+// 초기값은 빈 문자열이면 된다.
+assert.ok(
+  modalSource.includes('defaultClassTemplateId: templates[0]?.classTemplateId ?? ""'),
+  "학생 등록 초기 반은 templates 가 비어 있어도 안전해야 한다"
+);
+assert.ok(
+  !modalSource.includes("templates[0].classTemplateId"),
+  "templates[0] 을 무조건 있다고 가정하면 안 된다"
+);
+
+console.log("student modal extraction boundary passed · App persistence callbacks preserved · empty-template safe");
