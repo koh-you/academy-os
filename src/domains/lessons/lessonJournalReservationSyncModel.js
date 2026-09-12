@@ -65,12 +65,14 @@ export function createLessonJournalReservationSyncStatus({
   const activeById = new Map(activeJobs.map((job) => [job.notificationJobId, job]));
   const missingCount = expectedItems.filter((item) => !activeById.has(item.notificationJobId)).length;
   const extraCount = activeJobs.filter((job) => !expectedIds.has(job.notificationJobId)).length;
-  const staleCount = expectedItems.filter((item) => {
+  const staleJobIds = expectedItems.filter((item) => {
     const job = activeById.get(item.notificationJobId);
     if (!job) return false;
     if (job.status !== "scheduled") return true;
     if (job.provider !== "solapi" || !getProviderReference(job)) return true;
-    const payloadFingerprint = String(job.payload?.reservationFingerprint ?? "") || getPayloadFingerprint({
+    // The persisted string was captured before the server refreshed the payload that was
+    // actually reserved. Rebuild both legacy and current jobs with today's symmetric rule.
+    const payloadFingerprint = getPayloadFingerprint({
       ...(job.payload ?? {}),
       previousHomework: isAssignmentStatusUnrecorded(job.payload?.assignmentStatus)
         ? ""
@@ -79,12 +81,14 @@ export function createLessonJournalReservationSyncStatus({
       scheduledDate: job.scheduledAt || job.payload?.scheduledDate || ""
     });
     return payloadFingerprint !== item.fingerprint;
-  }).length;
+  }).map((item) => item.notificationJobId);
+  const staleCount = staleJobIds.length;
   if (missingCount || extraCount || staleCount) {
     return {
       detail: [`누락 ${missingCount}건`, `남은 예약 ${extraCount}건`, `내용 변경 ${staleCount}건`].join(" · "),
       state: "needs",
-      label: "Solapi 예약 업데이트 필요"
+      label: "Solapi 예약 업데이트 필요",
+      staleJobIds
     };
   }
   return { detail: `저장된 최종본 기준 Solapi 예약 ${expectedItems.length}건이 맞습니다.`, state: "synced", label: "Solapi 반영 완료" };

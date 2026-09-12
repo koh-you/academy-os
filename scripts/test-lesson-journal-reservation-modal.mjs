@@ -54,6 +54,7 @@ assert.match(journalSource, /<LessonJournalReservationModal/);
 assert.match(journalSource, /onRefreshReservationAudit=\{refreshReservationAudit\}/);
 assert.match(journalSource, /onCancelReservationJob=\{cancelReservationJob\}/);
 assert.match(journalSource, /onRefreshSolapiSendResults=\{refreshSolapiSendResults\}/);
+assert.match(journalSource, /solapiReservationSyncStatus=\{solapiReservationSyncStatus\}/);
 assert.doesNotMatch(journalSource, /className="reservationSummaryGrid"/);
 assert.doesNotMatch(journalSource, /onCancelSolapiGroup=/);
 
@@ -62,6 +63,8 @@ for (const contract of [
   "명단 밖 예약",
   "오늘 14:00 일괄예약",
   "Academy OS 상태",
+  "예약 업데이트 필요",
+  "현재 저장본과 예약 내용이 다릅니다.",
   "onCancelReservationJob(job)",
   "onRefreshReservationAudit",
   "onRefreshSolapiSendResults",

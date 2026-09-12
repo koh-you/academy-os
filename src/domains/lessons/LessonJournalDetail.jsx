@@ -603,6 +603,7 @@ export function LessonJournalDetail({
           scheduledParentCount={scheduledParentCount}
           scheduledStudentCount={scheduledStudentCount}
           shouldShowIssueAudit={shouldShowIssueAudit}
+          solapiReservationSyncStatus={solapiReservationSyncStatus}
           solapiResultRefreshState={solapiResultRefreshState}
           students={students}
           visibleReservationStudents={visibleReservationStudents}
@@ -789,6 +790,7 @@ export function LessonJournalDetail({
         manualSaveMessage={journalManualSaveMessage}
         message={journalStickySaveMessage}
         onSave={saveJournalDrafts}
+        reservationSyncStatus={solapiReservationSyncStatus}
         saveState={journalStickySaveState}
       />
 

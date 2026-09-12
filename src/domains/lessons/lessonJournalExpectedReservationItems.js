@@ -32,7 +32,7 @@ export function createLessonJournalExpectedReservationItems({
 
   return students.flatMap((student) => {
     const record = findRecord(records, lesson, student) ?? createEmptyRecord(lesson, student);
-    const previousHomework = getHomework(homeworks, lesson, student, "previous", lessons);
+    const previousHomework = getHomework(homeworks, lesson, student, "previous", lessons, records);
     const nextHomework = getHomework(homeworks, lesson, student, "next");
     const supplementSchedules = getSupplementSchedules(makeupTasks, student.studentId, {
       lesson,

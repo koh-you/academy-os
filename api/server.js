@@ -2477,7 +2477,7 @@ function getLessonHomeworkForNotification(homeworks = [], lessons = [], lesson =
     lessons,
     lesson,
     student.studentId,
-    { allowRegularClassFallback: true, student }
+    { allowRegularClassFallback: true, records, student }
   );
 
   return selectLinkedPreviousHomework({

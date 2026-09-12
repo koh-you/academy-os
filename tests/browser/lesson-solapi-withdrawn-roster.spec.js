@@ -12,7 +12,7 @@ test.beforeEach(async ({ request }) => {
   await resetSafeFixture(request);
 });
 
-test("applying the Solapi reservation plan reserves jobs for a student still visible on the lesson date", async ({ page, request }) => {
+test("safe Solapi plan keeps a visible withdrawal-date student without showing a false completion", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   // Use tomorrow (not today) for the lesson so its default pre-lesson
   // reservation window can never have already passed by the time this test
@@ -67,7 +67,6 @@ test("applying the Solapi reservation plan reserves jobs for a student still vis
   await expect(lessonJournal.getByText("예약 검증 퇴원생")).toBeVisible();
 
   await lessonJournal.getByRole("button", { name: /Solapi 예약/ }).click();
-  await expect(lessonJournal.getByText(/Solapi (예약|취소) 반영 완료/)).toBeVisible();
 
   const jobs = (await (await request.get(
     `${safeApiBaseUrl}/api/notification-jobs?lessonId=safe-solapi-roster-withdrawn-lesson&limit=50`
@@ -76,5 +75,9 @@ test("applying the Solapi reservation plan reserves jobs for a student still vis
     (job) => job.studentId === "safe-solapi-roster-withdrawn-student"
   );
   expect(reservedForWithdrawnStudent.length).toBeGreaterThan(0);
+  expect(reservedForWithdrawnStudent.every((job) => job.status === "dry_run")).toBe(true);
+  const saveBar = lessonJournal.getByRole("complementary", { name: "수업일지 하단 고정 저장 바" });
+  await expect(saveBar.getByText("Solapi 예약 업데이트 필요")).toBeVisible();
+  await expect(saveBar.getByText(/Solapi (예약|취소) 반영 완료/)).toHaveCount(0);
   expect(pageErrors).toEqual([]);
 });
