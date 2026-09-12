@@ -533,14 +533,18 @@ function getLessonContent(record) {
   return record?.lessonProgress?.trim() || record?.progress?.trim() || record?.lessonContent?.trim() || "";
 }
 
-function getLessonRecordWithPreviousDefaults(record = {}, previousRecord = null) {
+// 강의 교재·내용이 비어 있으면 지난 수업 것을 **시작값**으로 채운다. 그래야 매번 처음부터
+// 안 쳐도 된다. 단, 선생님이 편집 중(초안 있음)이면 채우지 않는다 — 다 지우고 새로 쓰려는
+// 순간 지난 내용이 다시 들어와 지울 수 없었다(2026-09-12 보고). 편집 중에는 빈 값도 뜻이 있다.
+function getLessonRecordWithPreviousDefaults(record = {}, previousRecord = null, { applyFallback = true } = {}) {
+  const fallbackRecord = applyFallback ? previousRecord : null;
   const lessonMaterial = resolveLessonJournalEditableText({
     currentValues: [record?.lessonMaterial],
-    fallbackValues: [previousRecord?.lessonMaterial]
+    fallbackValues: [fallbackRecord?.lessonMaterial]
   });
   const lessonContent = resolveLessonJournalEditableText({
     currentValues: [record?.lessonProgress, record?.progress, record?.lessonContent],
-    fallbackValues: [previousRecord?.lessonProgress, previousRecord?.progress, previousRecord?.lessonContent]
+    fallbackValues: [fallbackRecord?.lessonProgress, fallbackRecord?.progress, fallbackRecord?.lessonContent]
   });
   return {
     ...record,

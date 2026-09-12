@@ -241,7 +241,8 @@ export function LessonJournalDetail({
     setJournalManualSaveMessage,
     startJournalEditMode: beginJournalEditMode,
     updateJournalHomeworkDraft,
-    updateJournalRecordDraft
+    updateJournalRecordDraft,
+    journalRecordDrafts
   } = useLessonJournalDraftController({
     createEmptyRecord,
     createLessonStudentRecordId,
@@ -649,7 +650,11 @@ export function LessonJournalDetail({
             });
             const previousRecord = previousMemoContext.previousRecord;
             const previousEditableRecord = previousMemoContext.previousEditableRecord ?? previousRecord;
-            const record = getLessonRecordWithPreviousDefaults(editableRecord, previousEditableRecord);
+            // 초안이 있으면 선생님이 편집 중이다. 그때는 비워둔 칸을 지난 내용으로 되채우지 않는다.
+            const hasRecordDraft = journalRecordDrafts?.[recordId] !== undefined;
+            const record = getLessonRecordWithPreviousDefaults(editableRecord, previousEditableRecord, {
+              applyFallback: !hasRecordDraft
+            });
             const attendanceDisplay = isClosureLesson
               ? { detail: "", label: "휴강", statusClass: "pending" }
               : getAttendanceDisplay(record, attendanceLesson, attendanceSettings.lateGraceMinutes);
