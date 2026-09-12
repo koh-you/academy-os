@@ -47,7 +47,9 @@ export function StudentModal({
     grade: "고1",
     textbook: "",
     specialNote: "",
-    defaultClassTemplateId: templates[0].classTemplateId,
+    // 반이 아직 없는 새 계정(협력 교사 첫 로그인)에서는 "미배정" 으로 시작한다.
+    // templates[0] 을 무조건 있다고 가정하면 창을 여는 순간 죽는다(2026-09-12 실제 발생).
+    defaultClassTemplateId: templates[0]?.classTemplateId ?? "",
     scheduleOverride: ""
   });
   const [applicantTargetStudentIds, setApplicantTargetStudentIds] = useState({});
