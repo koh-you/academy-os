@@ -49,14 +49,14 @@ assert.doesNotMatch(journalSource, /<header className="pageTop lessonJournalHead
 for (const contract of [
   "onClick={onBack}",
   "onClick={onOpenExamPrep}",
-  "onClick={() => onEditLesson(lesson)}",
-  "onClick={() => onDeleteLesson(lesson.lessonId)}",
   'aria-label="수업 목록으로 돌아가기"',
-  "<NavigationHeader",
-  "수업 수정",
-  "수업 취소 처리"
+  "<NavigationHeader"
 ]) {
   assert.ok(componentSource.includes(contract), `missing controlled header contract: ${contract}`);
+}
+// 2026-09-12 · 수업 수정·수업 취소는 하단 고정바로 옮겼다. 헤더는 길찾기(뒤로·시험대비 열기)만 담당한다.
+for (const movedToBottomBar of ["onEditLesson", "onDeleteLesson", "수업 수정", "수업 취소"]) {
+  assert.ok(!componentSource.includes(movedToBottomBar), `header must not keep ${movedToBottomBar}`);
 }
 
 console.log("lesson journal header model and controlled component fixtures passed");

@@ -1,0 +1,34 @@
+/* 수업일지 하단 고정바의 액션 그룹. 성격이 다른 버튼(수업 자체 / 알림톡 / 저장)을
+   한 덩어리로 붙이지 않고 옅은 세로 구분선으로 나눈다. App.css 가 파일 크기 상한에
+   걸려 있어 도메인 CSS 로 둔다. */
+
+.lessonJournalStickySaveBar .stickySaveBarActions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  row-gap: 8px;
+}
+
+.lessonJournalBarGroup {
+  align-items: center;
+  border-right: 1px solid var(--status-neutral-border, #e2e8f0);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-right: 12px;
+}
+
+/* 수업 취소는 되돌리기 어려운 액션이라 옆 버튼과 간격을 더 띄운다. */
+.lessonJournalBarGroup .dangerSoftButton {
+  margin-left: 8px;
+}
+
+@media (max-width: 720px) {
+  .lessonJournalBarGroup {
+    border-right: 0;
+    padding-right: 0;
+  }
+
+  .lessonJournalBarGroup .dangerSoftButton {
+    margin-left: 0;
+  }
+}

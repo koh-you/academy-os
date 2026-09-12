@@ -28,8 +28,9 @@ const lessonAState = {
 const lessonASnapshot = structuredClone(lessonAState);
 const lessonBState = createLessonJournalDraftLifecycleInitialState();
 
+// 2026-09-12 · 수업일지는 열자마자 편집 모드다. "수정 시작" 단계를 없애 "수업 수정"(LessonModal)과 헷갈리지 않게 했다.
 assert.deepEqual(lessonBState, {
-  journalEditMode: false,
+  journalEditMode: true,
   journalHomeworkDrafts: {},
   journalMakeupTaskDrafts: {},
   journalManualSaveMessage: "",
@@ -64,7 +65,6 @@ for (const binding of [
   "journalMakeupTaskDrafts,",
   "journalManualSaveMessage,",
   "journalRecordDrafts,",
-  "setJournalEditMode,",
   "setJournalHomeworkDrafts,",
   "setJournalMakeupTaskDrafts,",
   "setJournalManualSaveMessage,",
@@ -84,7 +84,7 @@ for (const removedLocalState of [
 for (const hookContract of [
   "export function createLessonJournalDraftLifecycleInitialState()",
   "export function useLessonJournalDraftLifecycle(lessonId)",
-  "const [journalEditMode, setJournalEditMode] = useState(false)",
+  "const [journalEditMode, setJournalEditMode] = useState(true)",
   "const [journalRecordDrafts, setJournalRecordDrafts] = useState({})",
   "const [journalHomeworkDrafts, setJournalHomeworkDrafts] = useState({})",
   "const [journalMakeupTaskDrafts, setJournalMakeupTaskDrafts] = useState({})",

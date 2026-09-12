@@ -43,7 +43,7 @@ export function createLessonJournalSaveViewModel({
         : `저장 전 변경 ${draftChangeCount}건`
       : manualSaveMessage ||
         lessonJournalSaveStatus.label ||
-        "편집을 시작하면 변경 내용이 여기에 표시됩니다.";
+        "칸을 고치면 변경 내용이 여기에 표시됩니다.";
 
   return {
     draftChangeCount,

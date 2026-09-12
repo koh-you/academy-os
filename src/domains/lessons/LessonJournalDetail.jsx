@@ -12,6 +12,7 @@ import { LessonJournalClosureNotice } from "./LessonJournalClosureNotice.jsx";
 import { LessonJournalAbsenceSourceNotice } from "./LessonJournalAbsenceSourceNotice.jsx";
 import { LessonJournalHeader } from "./LessonJournalHeader.jsx";
 import { LessonJournalNotificationBar } from "./LessonJournalNotificationBar.jsx";
+import { createLessonJournalNotificationBarModel } from "./lessonJournalNotificationBarModel.js";
 import { LessonJournalReminderPanel } from "./LessonJournalReminderPanel.jsx";
 import { LessonJournalReservationModal } from "./LessonJournalReservationModal.jsx";
 import { LessonJournalSaveBar } from "./LessonJournalSaveBar.jsx";
@@ -239,7 +240,6 @@ export function LessonJournalDetail({
     journalStickySaveState,
     saveJournalDrafts: saveJournalDraftChanges,
     setJournalManualSaveMessage,
-    startJournalEditMode: beginJournalEditMode,
     updateJournalHomeworkDraft,
     updateJournalRecordDraft,
     journalRecordDrafts
@@ -249,7 +249,6 @@ export function LessonJournalDetail({
     getHomeworkFollowupOptionsForAssignmentStatus,
     getHomeworkFollowupPatch,
     lesson,
-    lessonStudents,
     onSaveLessonJournalDrafts,
     recordSaveStates: lessonRecordSaveStates
   });
@@ -339,12 +338,20 @@ export function LessonJournalDetail({
     resultRefreshTargetCount: solapiResultRefreshTargetJobs.length,
     syncStatus: solapiReservationSyncStatus
   });
+  const notificationBarModel = createLessonJournalNotificationBarModel({
+    canApplySolapiReservation,
+    checkoutMissingStudents,
+    hasSolapiResultRefreshTarget,
+    reservationApplyState,
+    solapiResultRefreshState
+  });
 
-  function startJournalEditMode() {
-    const firstRecordId = beginJournalEditMode();
-    if (firstRecordId) {
-      setEditingMemoKey(`${firstRecordId}:lessonMaterial`);
-    }
+  function requestDeleteLesson() {
+    // 일반 수업은 onDeleteLesson 이 "수업 취소 확인" 모달을 띄운다. 자동 생성 수업은
+    // 모달 없이 바로 달력에서 사라지므로 그 경로에만 확인을 넣어 두 경우 모두 한 번씩 묻는다.
+    const isGeneratedLesson = lesson.isVirtualGeneratedLesson || lesson.isExamPrepAutoLesson;
+    if (isGeneratedLesson && !window.confirm("이 자동 생성 수업을 취소할까요? 달력에서 바로 사라집니다.")) return;
+    onDeleteLesson(lesson.lessonId);
   }
 
   async function refreshReservationAudit() {
@@ -510,8 +517,6 @@ export function LessonJournalDetail({
         formatLessonTimeRange={formatLessonTimeRange}
         lesson={lesson}
         onBack={onBack}
-        onDeleteLesson={onDeleteLesson}
-        onEditLesson={onEditLesson}
         onOpenExamPrep={onOpenExamPrep}
         onReturnToExamPrepRoster={isExamPrepDailyJournalEnabled && isExamPrepLesson(lesson) && onToggleExamPrepDailyJournal
           ? () => onToggleExamPrepDailyJournal(lesson.lessonId, false)
@@ -541,36 +546,10 @@ export function LessonJournalDetail({
       </LessonJournalReminderPanel>
 
       <LessonJournalNotificationBar
-        canApplySolapiReservation={canApplySolapiReservation}
-        canRefreshSolapiResults={canRefreshSolapiResults}
         checkoutMissingStudents={checkoutMissingStudents}
-        defaultAlimtalkTimeLabel={defaultAlimtalkTimeLabel}
-        delayedAlimtalkTimeLabel={delayedAlimtalkTimeLabel}
-        formatKoreaTimeLabel={formatKoreaTimeLabel}
-        hasSolapiResultRefreshTarget={hasSolapiResultRefreshTarget}
-        isClosureLesson={isClosureLesson}
-        isDefaultScheduleExpired={isDefaultScheduleExpired}
-        isDelayedScheduleExpired={isDelayedScheduleExpired}
-        isNextDay11amScheduleExpired={isNextDay11amScheduleExpired}
-        journalEditMode={journalEditMode}
-        lessonId={lesson.lessonId}
-        lessonNotificationPlan={lessonNotificationPlan}
-        nextDay11amAlimtalkTimeLabel={nextDay11amAlimtalkTimeLabel}
         notificationPlanMode={notificationPlanMode}
         notificationPlanSummaryText={notificationPlanSummaryText}
-        onApplySolapiReservationPlan={applySolapiReservationPlan}
-        onOpenReservationAudit={() => {
-          setReservationInspectMode("all");
-          setReservationModalOpen(true);
-        }}
-        onRefreshSolapiSendResults={refreshSolapiSendResults}
-        onStartJournalEditMode={startJournalEditMode}
-        onUpdateLessonNotificationPlan={onUpdateLessonNotificationPlan}
-        reservationApplyState={reservationApplyState}
-        solapiApplyButtonLabel={solapiApplyButtonLabel}
         solapiReservationSyncStatus={solapiReservationSyncStatus}
-        solapiResultRefreshState={solapiResultRefreshState}
-        solapiResultRefreshTitle={solapiResultRefreshTitle}
       />
 
       {reservationModalOpen ? (
@@ -786,8 +765,66 @@ export function LessonJournalDetail({
       <LessonJournalSaveBar
         hasDraftChanges={hasJournalDraftChanges}
         isEditMode={journalEditMode}
+        lessonActions={(
+          <>
+            <button className="softButton" onClick={() => onEditLesson(lesson)} type="button">수업 수정</button>
+            <button className="dangerSoftButton" onClick={requestDeleteLesson} type="button">수업 취소</button>
+          </>
+        )}
         manualSaveMessage={journalManualSaveMessage}
         message={journalStickySaveMessage}
+        notificationActions={(
+          <>
+            <label className="lessonNotificationPlanSelect">
+              <span>예약 설정</span>
+              <select
+                aria-label="알림톡 예약 설정"
+                disabled={isClosureLesson}
+                onChange={(event) => onUpdateLessonNotificationPlan?.(lesson.lessonId, event.target.value)}
+                value={notificationPlanMode}
+              >
+                {notificationPlanMode === "manual" ? (
+                  <option value="manual">수동 예약 · {lessonNotificationPlan?.scheduledAt ? formatKoreaTimeLabel(lessonNotificationPlan.scheduledAt) : "시각 미정"}</option>
+                ) : null}
+                <option disabled={isDefaultScheduleExpired} value="default">기본 예약 · {defaultAlimtalkTimeLabel}</option>
+                <option disabled={isDelayedScheduleExpired} value="delay30">30분 지연 · {delayedAlimtalkTimeLabel}</option>
+                <option disabled={isNextDay11amScheduleExpired} value="nextDay11am">다음날 11시 · {nextDay11amAlimtalkTimeLabel}</option>
+                <option value="none">알림톡 없음</option>
+              </select>
+            </label>
+            <button
+              className="ghostButton check"
+              onClick={() => {
+                setReservationInspectMode("all");
+                setReservationModalOpen(true);
+              }}
+              type="button"
+            >
+              예약 확인
+            </button>
+            {notificationBarModel.showRefreshAction ? (
+              <button
+                className={solapiResultRefreshState === "failed" ? "dangerSoftButton" : "ghostButton check"}
+                disabled={!canRefreshSolapiResults}
+                onClick={refreshSolapiSendResults}
+                title={solapiResultRefreshTitle}
+                type="button"
+              >
+                {notificationBarModel.refreshButtonLabel}
+              </button>
+            ) : null}
+            {notificationBarModel.showApplyAction ? (
+              <button
+                className="softButton"
+                disabled={!canApplySolapiReservation}
+                onClick={applySolapiReservationPlan}
+                type="button"
+              >
+                {solapiApplyButtonLabel}
+              </button>
+            ) : null}
+          </>
+        )}
         onSave={saveJournalDrafts}
         saveState={journalStickySaveState}
       />

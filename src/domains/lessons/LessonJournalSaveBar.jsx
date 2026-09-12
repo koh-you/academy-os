@@ -1,11 +1,14 @@
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { createLessonJournalSaveBarModel } from "./lessonJournalSaveBarModel.js";
+import "./lessonJournalSaveBar.css";
 
 export function LessonJournalSaveBar({
   hasDraftChanges,
   isEditMode,
+  lessonActions = null,
   manualSaveMessage,
   message,
+  notificationActions = null,
   onSave,
   saveState
 }) {
@@ -25,6 +28,16 @@ export function LessonJournalSaveBar({
       message={message}
       saveState={saveState}
     >
+      {lessonActions ? (
+        <div aria-label="수업 작업" className="lessonJournalBarGroup" role="group">
+          {lessonActions}
+        </div>
+      ) : null}
+      {notificationActions ? (
+        <div aria-label="알림톡 작업" className="lessonJournalBarGroup" role="group">
+          {notificationActions}
+        </div>
+      ) : null}
       <button
         className="primaryButton"
         disabled={model.buttonDisabled}
