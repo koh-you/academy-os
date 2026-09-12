@@ -35,6 +35,7 @@ export function LessonJournalReservationModal({
   scheduledParentCount,
   scheduledStudentCount,
   shouldShowIssueAudit,
+  solapiReservationSyncStatus,
   solapiResultRefreshState,
   students,
   visibleReservationStudents
@@ -54,10 +55,12 @@ export function LessonJournalReservationModal({
   function renderReservationStatusCell(job, isMuted = false) {
     if (isMuted) return <span className="reservationStatusCell muted">알림 제외</span>;
     const providerReference = getNotificationJobProviderReference(job);
+    const needsContentUpdate = solapiReservationSyncStatus?.staleJobIds?.includes(job?.notificationJobId);
     return (
       <span className="reservationStatusCell">
         <small className="reservationStatusSource">Academy OS 상태</small>
-        <span>{formatNotificationJobStatus(job)}</span>
+        <span>{needsContentUpdate ? "예약 업데이트 필요" : formatNotificationJobStatus(job)}</span>
+        {needsContentUpdate ? <small>현재 저장본과 예약 내용이 다릅니다.</small> : null}
         {providerReference ? <small>Solapi 그룹 · {providerReference}</small> : null}
         {canCancelNotificationJob(job) ? (
           <button
@@ -97,7 +100,10 @@ export function LessonJournalReservationModal({
         ))}
       </div>
       <div className="reservationModalActions">
-        <span>{model.auditMessage}</span>
+        <span aria-live="polite">
+          {solapiReservationSyncStatus?.label || model.auditMessage}
+          {solapiReservationSyncStatus?.detail ? ` · ${solapiReservationSyncStatus.detail}` : ""}
+        </span>
         <button
           className="softButton compact"
           disabled={reservationAudit.state === "loading"}

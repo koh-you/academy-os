@@ -1,8 +1,48 @@
 import assert from "node:assert/strict";
 import {
+  findPreviousLessonsForStudent,
   hasPersistedLessonProgress,
   selectLinkedPreviousHomework
 } from "../src/domains/lessons/lessonHomeworkContinuity.js";
+
+const currentSaturdayLesson = {
+  classTemplateId: "template_tt_sat_front",
+  date: "2026-09-12",
+  lessonId: "lesson_current_saturday",
+  startTime: "10:00",
+  studentIds: ["student_individual_schedule"]
+};
+const recentAbsentWednesday = {
+  classTemplateId: "template_mwf_evening",
+  date: "2026-09-09",
+  lessonId: "lesson_recent_absent",
+  startTime: "19:00",
+  studentIds: ["student_individual_schedule"]
+};
+const attendedPreviousSaturday = {
+  classTemplateId: "template_tt_sat_front",
+  date: "2026-09-05",
+  lessonId: "lesson_attended_previous",
+  startTime: "10:00",
+  studentIds: ["student_individual_schedule"]
+};
+const continuityLessons = [currentSaturdayLesson, recentAbsentWednesday, attendedPreviousSaturday];
+assert.equal(
+  findPreviousLessonsForStudent(
+    continuityLessons,
+    currentSaturdayLesson,
+    "student_individual_schedule",
+    {
+      records: [{
+        attendanceStatus: "late",
+        lessonId: attendedPreviousSaturday.lessonId,
+        studentId: "student_individual_schedule"
+      }]
+    }
+  )[0]?.lessonId,
+  attendedPreviousSaturday.lessonId,
+  "개별 시간표 학생은 더 최근의 결석 회차가 아니라 실제 출석한 직전 수업을 사용해야 합니다."
+);
 
 const studentId = "student_mwf710";
 const regularFriday = { date: "2026-08-07", lessonId: "lesson_regular_friday" };

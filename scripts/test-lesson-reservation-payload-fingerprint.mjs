@@ -51,7 +51,6 @@ assert.equal(
     attendanceReason: "",
     attendanceStatus: "present",
     checkInTime: "13:55",
-    checkOutTime: "16:05",
     commentBodyOverride: "가상 TARGET 코멘트",
     homeworkFollowupNotice: "보충 확인",
     lateMinutes: "0",
@@ -113,7 +112,6 @@ assert.deepEqual(emptyFingerprint, {
   attendanceReason: "",
   attendanceStatus: "",
   checkInTime: "",
-  checkOutTime: "",
   commentBodyOverride: "",
   homeworkFollowupNotice: "",
   lateMinutes: "",
@@ -130,6 +128,28 @@ assert.deepEqual(emptyFingerprint, {
   testResult: "",
   target: ""
 });
+
+const changedCheckOutFingerprint = createLessonReservationPayloadFingerprint({
+  normalizeMessage,
+  normalizePhone,
+  payload: { ...targetPayload, checkOutTime: "18:30" }
+});
+assert.equal(
+  changedCheckOutFingerprint,
+  fingerprint,
+  "하원 시각은 데일리 알림톡 본문에 쓰이지 않으므로 예약 내용을 stale로 만들면 안 됩니다."
+);
+
+const changedLessonContentFingerprint = createLessonReservationPayloadFingerprint({
+  normalizeMessage,
+  normalizePhone,
+  payload: { ...targetPayload, lessonContent: "삼차방정식" }
+});
+assert.notEqual(
+  changedLessonContentFingerprint,
+  fingerprint,
+  "실제 발송 본문에 포함되는 강의 내용 변경은 계속 stale로 판정해야 합니다."
+);
 
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
 const modelSource = await readFile(
@@ -154,7 +174,6 @@ for (const requiredField of [
   "attendanceReason:",
   "attendanceStatus:",
   "checkInTime:",
-  "checkOutTime:",
   "commentBodyOverride:",
   "homeworkFollowupNotice:",
   "lateMinutes:",
@@ -173,6 +192,7 @@ for (const requiredField of [
 ]) {
   assert.ok(modelSource.includes(requiredField), `missing fingerprint field: ${requiredField}`);
 }
+assert.ok(!modelSource.includes("checkOutTime:"), "checkout-only changes must be excluded from the reservation fingerprint");
 for (const forbiddenSideEffect of [
   "useState",
   "useEffect",

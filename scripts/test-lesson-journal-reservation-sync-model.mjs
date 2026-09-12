@@ -147,7 +147,8 @@ assert.deepEqual(
   {
     detail: "누락 1건 · 남은 예약 1건 · 내용 변경 1건",
     state: "needs",
-    label: "Solapi 예약 업데이트 필요"
+    label: "Solapi 예약 업데이트 필요",
+    staleJobIds: ["job_TARGET"]
   }
 );
 assert.deepEqual(expectedItems, expectedItemsSnapshot);
@@ -164,7 +165,8 @@ const matchingActiveJobs = [
     notificationJobId: "job_MATCH",
     payload: {
       assignmentStatus: "not_entered",
-      previousHomework: "이 값은 fingerprint에서 비워짐"
+      previousHomework: "이 값은 fingerprint에서 비워짐",
+      reservationFingerprint: "오래된 저장 지문은 비교에 쓰이면 안 됨"
     },
     provider: "solapi",
     providerReference: "group_MATCH",

@@ -12,6 +12,8 @@ assert.deepEqual(
   {
     buttonDisabled: false,
     buttonLabel: "변경 저장",
+    message: "",
+    saveState: "idle",
     shouldShow: true
   }
 );
@@ -25,6 +27,8 @@ assert.deepEqual(
   {
     buttonDisabled: true,
     buttonLabel: "저장 중",
+    message: "",
+    saveState: "saving",
     shouldShow: true
   }
 );
@@ -39,6 +43,8 @@ assert.deepEqual(
   {
     buttonDisabled: true,
     buttonLabel: "변경 저장",
+    message: "",
+    saveState: "saved",
     shouldShow: true
   }
 );
@@ -53,8 +59,33 @@ assert.deepEqual(
   {
     buttonDisabled: true,
     buttonLabel: "변경 저장",
+    message: "",
+    saveState: "idle",
     shouldShow: false
   }
+);
+
+assert.deepEqual(
+  createLessonJournalSaveBarModel({
+    hasDraftChanges: false,
+    isEditMode: false,
+    manualSaveMessage: "Solapi 예약 반영 완료",
+    message: "Solapi 예약 반영 완료",
+    reservationSyncStatus: {
+      detail: "누락 0건 · 남은 예약 0건 · 내용 변경 2건",
+      label: "Solapi 예약 업데이트 필요",
+      state: "needs"
+    },
+    saveState: "saved"
+  }),
+  {
+    buttonDisabled: true,
+    buttonLabel: "변경 저장",
+    message: "Solapi 예약 업데이트 필요",
+    saveState: "dirty",
+    shouldShow: true
+  },
+  "실시간 예약 상태가 needs이면 하단바가 이전의 반영 완료 문구를 계속 보여주면 안 됩니다."
 );
 
 const appSource = await readAppWithLessonJournalSource(import.meta.url);
@@ -71,6 +102,7 @@ assert.match(journalSource, /hasDraftChanges=\{hasJournalDraftChanges\}/);
 assert.match(journalSource, /isEditMode=\{journalEditMode\}/);
 assert.match(journalSource, /manualSaveMessage=\{journalManualSaveMessage\}/);
 assert.match(journalSource, /onSave=\{saveJournalDrafts\}/);
+assert.match(journalSource, /reservationSyncStatus=\{solapiReservationSyncStatus\}/);
 assert.doesNotMatch(journalSource, /className="lessonJournalStickySaveBar"/);
 
 for (const contract of [
@@ -79,8 +111,10 @@ for (const contract of [
   'label="수업일지"',
   'className="primaryButton"',
   "disabled={model.buttonDisabled}",
+  "message={model.message}",
   "onClick={onSave}",
-  "model.buttonLabel"
+  "model.buttonLabel",
+  "saveState={model.saveState}"
 ]) {
   assert.ok(componentSource.includes(contract), `missing lesson journal save bar contract: ${contract}`);
 }

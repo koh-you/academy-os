@@ -16,7 +16,6 @@ export function createLessonReservationPayloadFingerprint({
     ),
     attendanceStatus: String(payload.attendanceStatus ?? ""),
     checkInTime: String(payload.checkInTime ?? ""),
-    checkOutTime: String(payload.checkOutTime ?? ""),
     commentBodyOverride: normalizeMessage(
       payload.commentBodyOverride ?? payload.message ?? ""
     ),

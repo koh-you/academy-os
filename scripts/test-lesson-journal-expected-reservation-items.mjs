@@ -127,9 +127,10 @@ assert.deepEqual(calls.scheduledDates, [
 ]);
 assert.deepEqual(calls.emptyRecords, [["lesson_TARGET", "student_CONTROL"]]);
 assert.equal(calls.homeworkArgs.length, 4);
-assert.equal(calls.homeworkArgs[0].length, 5);
+assert.equal(calls.homeworkArgs[0].length, 6);
 assert.equal(calls.homeworkArgs[0][3], "previous");
 assert.equal(calls.homeworkArgs[0][4], lessons);
+assert.equal(calls.homeworkArgs[0][5], records);
 assert.equal(calls.homeworkArgs[1].length, 4);
 assert.equal(calls.homeworkArgs[1][3], "next");
 assert.deepEqual(calls.payloads.map((payload) => [payload.student.studentId, payload.audience]), [

@@ -7,12 +7,15 @@ export function LessonJournalSaveBar({
   manualSaveMessage,
   message,
   onSave,
+  reservationSyncStatus,
   saveState
 }) {
   const model = createLessonJournalSaveBarModel({
     hasDraftChanges,
     isEditMode,
     manualSaveMessage,
+    message,
+    reservationSyncStatus,
     saveState
   });
 
@@ -22,8 +25,8 @@ export function LessonJournalSaveBar({
     <StickySaveBar
       className="lessonJournalStickySaveBar"
       label="수업일지"
-      message={message}
-      saveState={saveState}
+      message={model.message}
+      saveState={model.saveState}
     >
       <button
         className="primaryButton"
