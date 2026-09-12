@@ -5395,7 +5395,12 @@ const server = http.createServer(async (request, response) => {
         ok: false,
         error: error.message,
         ...(error.code ? { code: error.code } : {}),
-        ...(error.audit ? { audit: error.audit } : {})
+        ...(error.audit ? { audit: error.audit } : {}),
+        // 버전 충돌이면 서버가 지금 들고 있는 수업을 같이 준다. 화면이 그걸로 원본을
+        // 갈아끼우고 같은 편집을 다시 얹을 수 있게 — rows/save 가 currentRecord 를 주는 것과
+        // 같은 이유다. 이게 없으면 원장님은 새로고침 말고는 빠져나갈 길이 없었다.
+        ...(error.currentLesson ? { currentLesson: error.currentLesson } : {}),
+        ...(error.lessonId ? { lessonId: error.lessonId } : {})
       });
     }
     return;

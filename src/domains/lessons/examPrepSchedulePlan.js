@@ -61,20 +61,9 @@ export function createExamPrepScheduleSavePlan({
     .filter((lesson) => lesson.lessonType === "examPrep" && lesson.date >= sourceLesson.date)
     .sort((left, right) => left.date.localeCompare(right.date))
     .flatMap((lesson) => {
-      const lessonTargets = (lesson.studentIds ?? []).filter((studentId) => targets.has(studentId));
-      if (!lessonTargets.length) return [];
-      const targetSet = new Set(lessonTargets);
-      const schedules = (lesson.specialLectureStudentSchedules ?? [])
-        .filter((schedule) => !targetSet.has(schedule.studentId));
-      lessonTargets.forEach((studentId) => schedules.push({
-        endTime: normalizedEnd,
-        overrideReason: "시험대비 일정 수정",
-        scheduleType: "adjusted",
-        startTime: normalizedStart,
-        studentId
-      }));
+      const after = applyExamPrepScheduleToLesson(lesson, { endTime: normalizedEnd, startTime: normalizedStart, targets });
+      if (!after) return [];
       const before = persistedById.get(lesson.lessonId) ?? null;
-      const after = { ...lesson, specialLectureStudentSchedules: schedules };
       return [{ after, before }];
     });
   return {
@@ -84,4 +73,44 @@ export function createExamPrepScheduleSavePlan({
     startTime: normalizedStart,
     targetStudentIds
   };
+}
+
+// 한 수업에 "선택한 학생들의 시간을 이걸로" 를 적용한 결과. 대상 학생이 명단에 없으면 null.
+function applyExamPrepScheduleToLesson(lesson, { endTime, startTime, targets }) {
+  const lessonTargets = (lesson.studentIds ?? []).filter((studentId) => targets.has(studentId));
+  if (!lessonTargets.length) return null;
+  const targetSet = new Set(lessonTargets);
+  const schedules = (lesson.specialLectureStudentSchedules ?? [])
+    .filter((schedule) => !targetSet.has(schedule.studentId));
+  lessonTargets.forEach((studentId) => schedules.push({
+    endTime,
+    overrideReason: "시험대비 일정 수정",
+    scheduleType: "adjusted",
+    startTime,
+    studentId
+  }));
+  return { ...lesson, specialLectureStudentSchedules: schedules };
+}
+
+/**
+ * 서버가 "수업 원본이 다른 화면에서 먼저 변경되었습니다" 와 함께 돌려준 최신 수업 위에,
+ * 같은 편집(선택 학생 · 시작/종료 시간)을 다시 얹는다.
+ *
+ * 편집은 수업 내용이 아니라 "이 학생들의 시간을 이걸로" 라는 의도이므로, 원본이 바뀌었어도
+ * 최신 원본에 그대로 다시 적용하는 게 원장님이 저장을 한 번 더 누르는 것과 같은 결과다.
+ * 화면이 옛 원본을 들고 있던 이유는 대개 태블릿 출결이 명단을 바꿨거나, 자동 생성 수업을
+ * 처음 저장할 때 서버 updatedAt 을 받아두지 않아서였다(2026-09-12 보고).
+ *
+ * 최신 명단에 대상 학생이 하나도 없으면 null — 그 수업은 이번 저장에서 뺀다.
+ */
+export function rebaseExamPrepScheduleChange(change, currentLesson, { endTime, startTime, targetStudentIds } = {}) {
+  const lessonId = change?.after?.lessonId;
+  if (!lessonId || !currentLesson?.lessonId || currentLesson.lessonId !== lessonId) return change;
+  const after = applyExamPrepScheduleToLesson(currentLesson, {
+    endTime: normalizeTimeInput(endTime),
+    startTime: normalizeTimeInput(startTime),
+    targets: new Set(targetStudentIds ?? [])
+  });
+  if (!after) return null;
+  return { after, before: currentLesson };
 }
