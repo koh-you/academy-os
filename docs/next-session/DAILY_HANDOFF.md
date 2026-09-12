@@ -1,5 +1,11 @@
 # Daily Development Handoff
 
+## 2026-09-12 AI 운영 읽기 인증 기준
+
+- 무인증 운영 GET은 `401 auth_required`, 로그인된 교사 화면의 알림 기록 재조회는 정상 완료됐다. 화면 조회는 교사 세션, 원시 API는 `tenant_default` 단기 `read` ops 토큰을 사용한다.
+- 현재 일반 셸에는 `ACADEMY_OPS_TOKEN`·`OPS_TOKEN_SIGNING_SECRET`이 없다. 이 경우 Render service-role을 복사하지 말고 운영자에게 2시간 read 토큰만 요청한다.
+- Claude Code는 루트 `CLAUDE.md`가 import하는 `docs/security/ai-operational-read-access.md`를 우선 읽는다. 운영 쓰기·발송·예약·취소는 별도 사람 Gate다.
+
 ## 2026-09-12 수업일지 Solapi 예약 상태 단일화
 
 - 운영 원천을 읽기 전용으로 대조해 활성 예약 10건 중 개별 시간표 학생 1명의 부모·학생 2건만 실제 내용 변경 상태임을 확인했다. 직전 숙제 계산에서 출결 기록을 빠뜨린 화면/서버 비대칭이 원인이었고, 저장된 예약 지문을 실제 payload보다 우선해 비교하는 경계와 발송문에 쓰지 않는 하원 시각까지 지문에 포함한 잠재 오탐도 함께 제거했다.

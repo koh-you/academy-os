@@ -1,5 +1,11 @@
 # Academy OS Current Worklog
 
+## 2026-09-12 Codex·Claude Code 운영 읽기 인증
+
+- 무인증 `/api/notification-jobs?limit=1`은 `401 auth_required`, 로그인된 Academy OS 교사 화면의 알림 기록 새로고침은 전체 323건 로드 완료로 실측했다. 운영 쓰기·알림 side effect·service-role 조회는 없었다.
+- 화면 조회는 로그인 교사 세션, 원시 API는 단기 `read` ops 토큰을 공통 표준으로 정했다. 현재 셸에는 토큰·서명 비밀이 없어 완전 무인 터미널 인증은 준비되지 않았다는 한계도 명시했다.
+- Claude Code가 자동으로 읽도록 루트 `CLAUDE.md`에서 `AGENTS.md`와 `docs/security/ai-operational-read-access.md`를 import한다.
+
 ## 2026-09-12 수업일지 Solapi 예약 상태 단일화
 
 - 운영 원천을 읽기 전용으로 대조해 활성 예약 10건 중 개별 시간표 학생 1명의 부모·학생 2건만 실제 내용 변경 상태임을 확인했다. 직전 숙제 계산에서 출결 기록을 빠뜨린 화면/서버 비대칭이 원인이었고, 저장된 예약 지문을 실제 payload보다 우선해 비교하는 경계와 발송문에 쓰지 않는 하원 시각까지 지문에 포함한 잠재 오탐도 함께 제거했다.

@@ -27,6 +27,13 @@
 - 운영 데이터 삭제·대량 변경, 실제 알림 발송/예약/취소, 유료 AI 호출, 운영 SQL 적용, 계정 로그인/관리자 승인이 필요한 순간에만 최소한의 사람 gate를 요청한다.
 - 완료된 gate는 `docs/STATUS.md`에 한 줄만 남기고 상세 내용은 worklog/archive로 보낸다.
 
+## AI 운영 읽기 인증 · 2026-09-12
+
+- Codex와 Claude Code의 운영 읽기 인증 source of truth는 `docs/security/ai-operational-read-access.md`다.
+- 화면에 보이는 조회는 기존 로그인 교사 세션을 사용하고, 원시 API 조회는 짧게 만료되는 `ACADEMY_OPS_TOKEN`의 `read` scope를 사용한다.
+- 무인증 운영 API, 키오스크/dispatch 토큰 재사용, 브라우저 저장소의 세션 토큰 추출, Render에서 service-role 키 복사를 표준 경로로 사용하지 않는다.
+- read 토큰이 없으면 `OPS_TOKEN_SIGNING_SECRET`이나 service-role을 에이전트에 넘기지 말고 운영자에게 최소 범위·단기 read 토큰만 요청한다.
+
 ## 작업 원칙
 
 1. 사용자의 현재 요청을 우선하되 한 번에 하나의 안전한 단위로 구현한다.

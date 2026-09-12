@@ -1,5 +1,11 @@
 # Academy OS Current Status
 
+## 2026-09-12 AI 운영 읽기 인증 기준
+
+- Codex 실측에서 무인증 운영 API는 `401 auth_required`, 기존 로그인 교사 화면의 알림 기록 재조회는 정상 완료됐다. Render/Supabase service-role 없이 가능한 화면 조회 경로를 확인했다.
+- Codex·Claude Code 공통 원시 API 인증은 단기 `read` scope의 `ACADEMY_OPS_TOKEN`으로 고정했다. 현재 일반 셸에는 토큰·서명 비밀이 없어 무인 인증은 준비되지 않았으며, 이때는 service-role 대신 운영자 발급 단기 read 토큰만 요청한다.
+- 루트 `CLAUDE.md`가 `AGENTS.md`와 공통 인증 runbook을 import한다. 상세: [AI 운영 읽기 인증 기준](security/ai-operational-read-access.md).
+
 ## 2026-09-12 수업일지 Solapi 예약 상태 단일화
 
 - 운영 원천을 읽기 전용으로 대조해 활성 예약 10건 중 개별 시간표 학생 1명의 부모·학생 2건만 실제 내용 변경 상태임을 확인했다. 직전 숙제 계산에서 출결 기록을 빠뜨린 화면/서버 비대칭이 원인이었고, 저장된 예약 지문을 실제 payload보다 우선해 비교하는 경계와 발송문에 쓰지 않는 하원 시각까지 지문에 포함한 잠재 오탐도 함께 제거했다.
