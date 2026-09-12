@@ -113,7 +113,7 @@ import { getExamPrepIdFromDerivedMathEvent } from "../domains/lessons/derivedMat
 import { createExamPeriodSundayDateSelector } from "../domains/lessons/examPeriodSundayDateSelector.js";
 import { createExamPrepLessonCandidateBuilder } from "../domains/lessons/examPrepLessonCandidateBuilder.js";
 import { filterStaleGeneratedExamPrepLessons } from "../domains/lessons/examPrepGeneratedLessonSourceFilter.js";
-import { saveExamPrepSchedulePlanRequest } from "../domains/lessons/examPrepScheduleApi.js";
+import { saveExamPrepScheduleWithConflictRecovery } from "../domains/lessons/examPrepScheduleApi.js";
 import { ExamPrepLessonDetail } from "../domains/lessons/ExamPrepLessonDetail.jsx";
 import { LessonJournalFallback } from "../domains/lessons/LessonJournalFallback.jsx";
 import { MonthlyRegularLessonOpenModal } from "../domains/lessons/MonthlyRegularLessonOpenModal.jsx";
@@ -3374,9 +3374,11 @@ export function App() {
   }
 
   async function handleSaveExamPrepSchedule(plan) {
-    const result = await saveExamPrepSchedulePlanRequest({
-      auditId: `exam-prep-schedule-${Date.now()}`,
-      changes: plan.changes,
+    // 버전 충돌이면 서버 최신본으로 원본을 갈아끼우고 같은 편집을 다시 얹어 한 번 재시도한다
+    // (examPrepScheduleApi 참고). 최신본은 재시도 성공 여부와 무관하게 화면에 반영해 둔다.
+    const result = await saveExamPrepScheduleWithConflictRecovery({
+      onLessonRefreshed: (lesson) => setLessons((current) => upsertById(current, lesson, "lessonId")),
+      plan,
       request: postJsonWithTimeout
     });
     if (result?.source !== "supabase" || result?.verified !== true || !Array.isArray(result.lessons)) {
@@ -5363,8 +5365,14 @@ export function App() {
     };
     if (markManualOverride) markGeneratedLessonManualOverride(lesson);
     setLessons((current) => upsertById(current, persistedLesson, "lessonId"));
-    await postJson("/api/lessons", { lesson: persistedLesson });
-    return persistedLesson;
+    const result = await postJson("/api/lessons", { lesson: persistedLesson });
+    // 서버가 돌려준 행(updatedAt 포함)으로 바꿔 둔다. 예전에는 응답을 버리고 클라이언트가
+    // 만든 객체를 그대로 들고 있었는데, 그 객체엔 서버 updatedAt 이 없어서 이후 이 수업에
+    // 대한 CAS 저장(시험대비 일정 수정 등)이 매번 "수업 원본이 다른 화면에서 먼저 변경
+    // 되었습니다"로 거절됐다(2026-09-12 보고).
+    const savedLesson = result?.lesson?.lessonId ? result.lesson : persistedLesson;
+    setLessons((current) => upsertById(current, savedLesson, "lessonId"));
+    return savedLesson;
   }
 
   function persistLessonNotificationPlans(nextPlans) {
