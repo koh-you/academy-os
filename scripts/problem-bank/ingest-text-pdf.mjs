@@ -19,147 +19,23 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createCanvas } from "@napi-rs/canvas";
-import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
 import {
   checkNumberContinuity,
   detectBadgeHeight,
   readFooterUnit,
   segmentPage
 } from "../../src/domains/problems/textPdfSegmenter.js";
-
+import {
+  cleanLabel,
+  findGutterX,
+  inkExtent,
+  parseArgs,
+  parsePageRange,
+  pdfjs,
+  renderPage,
+  toViewportTokens
+} from "./pdfTools.mjs";
 const INGEST_VERSION = "text-pdf-1.0";
-
-function parseArgs(argv) {
-  const args = {};
-  for (let index = 0; index < argv.length; index += 1) {
-    const arg = argv[index];
-    if (!arg.startsWith("--")) continue;
-    const key = arg.slice(2);
-    const next = argv[index + 1];
-    if (next === undefined || next.startsWith("--")) {
-      args[key] = true;
-    } else {
-      args[key] = next;
-      index += 1;
-    }
-  }
-  return args;
-}
-
-function parsePageRange(value, pageCount) {
-  if (!value) return [1, pageCount];
-  const match = String(value).match(/^(\d+)\s*-\s*(\d+)$/);
-  if (!match) throw new Error(`--pages 형식은 "8-117" 처럼 씁니다: ${value}`);
-  return [Math.max(1, Number(match[1])), Math.min(pageCount, Number(match[2]))];
-}
-
-/** 교재 서체의 사설 글리프(ù = °) 와 조판용 백틱을 사람이 읽는 글자로 바꾼다. */
-function cleanLabel(text) {
-  return String(text ?? "").replace(/ù/g, "°").replace(/`/g, "").replace(/\s+/g, " ").trim();
-}
-
-function createCanvasFactory() {
-  return {
-    create(width, height) {
-      const canvas = createCanvas(width, height);
-      return { canvas, context: canvas.getContext("2d") };
-    },
-    reset(target, width, height) {
-      target.canvas.width = width;
-      target.canvas.height = height;
-    },
-    destroy() {}
-  };
-}
-
-async function renderPage(page, scale) {
-  const viewport = page.getViewport({ scale });
-  const canvas = createCanvas(Math.ceil(viewport.width), Math.ceil(viewport.height));
-  const context = canvas.getContext("2d");
-  context.fillStyle = "#ffffff";
-  context.fillRect(0, 0, canvas.width, canvas.height);
-  await page.render({ canvasContext: context, viewport, canvasFactory: createCanvasFactory() }).promise;
-  return { canvas, context, viewport };
-}
-
-/** pdf.js 텍스트 항목을 뷰포트(좌상단 원점) 좌표로 바꾼다. y 는 baseline. */
-function toViewportTokens(textContent, viewport) {
-  const tokens = [];
-  for (const item of textContent.items) {
-    if (!("str" in item)) continue;
-    const [, , , , x, y] = pdfjs.Util.transform(viewport.transform, item.transform);
-    // 교재 PDF 에는 제어문자(\u0007 등)가 글자 사이에 섞여 있다. 공백으로 바꾼다.
-    const str = String(item.str).replace(/[\u0000-\u001f]/g, " ");
-    tokens.push({ str, x, y, w: item.width, h: item.height, fontName: item.fontName });
-  }
-  return tokens;
-}
-
-/**
- * 잉크 투영. [x0,x1]×[y0,y1] (pt) 안에서 첫/마지막 잉크 행을 pt 로 돌려준다.
- * 회색 임계 200 · 한 행에 어두운 픽셀 2개 이상이면 잉크.
- *
- * 다음 문항 번호 바로 위에 붙는 「중요」 아이콘(작은 그림)이 같은 컬럼에 있으면 하단이 거기까지 늘어난다
- * (0126번 사례). 아이콘은 폭이 좁으므로, 세그먼트 하단 근처(iconZonePt)에서 잉크 폭이 iconMaxWidthPt 보다
- * 좁은 행은 내용으로 세지 않는다. 소문항 (2)처럼 빈 줄 뒤에 오는 진짜 내용은 폭이 넓어 그대로 남는다.
- */
-function inkExtent(imageData, imageWidth, scale, box, { iconZonePt = 18, iconMaxWidthPt = 18 } = {}) {
-  const x0 = Math.max(0, Math.floor(box.x0 * scale));
-  const x1 = Math.min(imageWidth, Math.ceil(box.x1 * scale));
-  const y0 = Math.max(0, Math.floor(box.y0 * scale));
-  const y1 = Math.min(Math.floor(imageData.length / 4 / imageWidth), Math.ceil(box.y1 * scale));
-  const iconZoneStart = y1 - Math.round(iconZonePt * scale);
-  const iconMaxWidth = iconMaxWidthPt * scale;
-  let first = -1;
-  let last = -1;
-  for (let y = y0; y < y1; y += 1) {
-    let dark = 0;
-    let minX = -1;
-    let maxX = -1;
-    const rowOffset = y * imageWidth * 4;
-    for (let x = x0; x < x1; x += 2) {
-      const offset = rowOffset + x * 4;
-      const gray = (imageData[offset] + imageData[offset + 1] + imageData[offset + 2]) / 3;
-      if (gray < 200) {
-        dark += 1;
-        if (minX === -1) minX = x;
-        maxX = x;
-      }
-    }
-    if (dark < 2) continue;
-    // 아이콘은 컬럼 왼쪽 가장자리에 붙는다. 오른쪽 그림 라벨(x·C 같은 한 글자)은 건드리지 않는다.
-    if (y >= iconZoneStart && maxX - minX < iconMaxWidth && minX - x0 < iconMaxWidth * 1.5) continue;
-    if (first === -1) first = y;
-    last = y;
-  }
-  if (first === -1) return null;
-  return { top: first / scale, bottom: (last + 1) / scale };
-}
-
-/** 컬럼 사이 세로 점선(거터)의 x 를 찾는다 — 어떤 x 에서 잉크 행 비율이 60% 를 넘으면 그것. */
-function findGutterX(imageData, imageWidth, imageHeight, scale, fromX, toX, fromY, toY) {
-  const x0 = Math.floor(fromX * scale);
-  const x1 = Math.ceil(toX * scale);
-  const y0 = Math.floor(fromY * scale);
-  const y1 = Math.min(imageHeight, Math.ceil(toY * scale));
-  let bestX = -1;
-  let bestRatio = 0;
-  for (let x = x0; x < x1; x += 1) {
-    let inked = 0;
-    for (let y = y0; y < y1; y += 2) {
-      const offset = (y * imageWidth + x) * 4;
-      const gray = (imageData[offset] + imageData[offset + 1] + imageData[offset + 2]) / 3;
-      if (gray < 215) inked += 1;
-    }
-    const ratio = inked / ((y1 - y0) / 2);
-    if (ratio > bestRatio) {
-      bestRatio = ratio;
-      bestX = x;
-    }
-  }
-  // 점선이라 잉크 비율이 0.3 안팎이다. 0.2 를 넘는 가장 진한 세로줄을 거터로 본다.
-  return bestRatio >= 0.2 ? bestX / scale : -1;
-}
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));

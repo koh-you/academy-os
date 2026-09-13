@@ -13,6 +13,26 @@ function svgImage(label, height = 120) {
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
+/** 정답 줄·해설 가상 이미지 (해설 PDF 의 「답」 줄과 풀이를 흉내 낸다). */
+function answerImage(label, kind) {
+  const height = kind === "answer" ? 40 : 160;
+  const width = kind === "answer" ? 120 : 520;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">` +
+    `<rect width="${width}" height="${height}" fill="#fff"/>` +
+    (kind === "answer"
+      ? `<text x="6" y="27" font-family="sans-serif" font-size="20" font-weight="700" fill="#111">답 ${label}</text>`
+      : `<text x="14" y="34" font-family="sans-serif" font-size="20" font-weight="700" fill="#2563eb">${label}</text>` +
+        `<text x="14" y="70" font-family="sans-serif" font-size="16" fill="#111">가상 해설 · sin A = 15/17 이므로 …</text>` +
+        `<text x="14" y="120" font-family="sans-serif" font-size="18" font-weight="700" fill="#111">답 ${label}</text>`) +
+    "</svg>";
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+// 1~10번에는 정답·해설이 붙어 있다(11~20번은 아직 없음 → 인쇄 때 「해설 없음」 경로).
+function hasAnswerPackage(number) {
+  return number <= 10;
+}
+
 const units = [
   { unitId: `${bookId}-u0`, bookId, position: 0, title: "01 삼각비", itemNumberFrom: "0001", itemNumberTo: "0012" },
   { unitId: `${bookId}-u1`, bookId, position: 1, title: "02 삼각비의 활용", itemNumberFrom: "0013", itemNumberTo: "0020" }
@@ -31,8 +51,8 @@ const items = Array.from({ length: 20 }, (_, index) => {
     pdfPage: 10 + Math.floor(index / 4),
     typeLabel: number <= 12 ? "삼각비의 값" : "삼각비의 활용",
     tags: number % 5 === 0 ? ["서술형"] : [],
-    answer: number % 3 === 0 ? String(number) : "",
-    hasSolution: false,
+    answer: "",
+    hasSolution: hasAnswerPackage(number),
     hasSubquestions: number >= 3 && number <= 5,
     reviewStatus: number === 7 ? "flagged" : "ai_checked",
     reviewNote: number === 7 ? "too_short" : "",
@@ -59,7 +79,31 @@ const items = Array.from({ length: 20 }, (_, index) => {
         storagePath: `${bookId}/items/${bookId}-group-0003-0005-p10.jpg`,
         imageWidth: 520,
         imageHeight: 480
-      }] : [])
+      }] : []),
+      ...(hasAnswerPackage(number) ? [
+        {
+          regionId: `${bookId}-${numberLabel}-answer`,
+          itemId: `${bookId}-${numberLabel}`,
+          position: 90,
+          kind: "answer",
+          pdfPage: 2,
+          bboxNormalized: [0.4, 0.1, 0.5, 0.12],
+          storagePath: `${bookId}/answers/${bookId}-${numberLabel}.jpg`,
+          imageWidth: 120,
+          imageHeight: 40
+        },
+        {
+          regionId: `${bookId}-${numberLabel}-solution`,
+          itemId: `${bookId}-${numberLabel}`,
+          position: 91,
+          kind: "solution",
+          pdfPage: 2,
+          bboxNormalized: [0.06, 0.1, 0.49, 0.3],
+          storagePath: `${bookId}/solutions/${bookId}-${numberLabel}.jpg`,
+          imageWidth: 520,
+          imageHeight: 160
+        }
+      ] : [])
     ]
   };
 });
@@ -119,7 +163,11 @@ export async function handleProblemBankFixtureRoute({ request, requestUrl, state
       .filter((item) => ids.has(item.itemId))
       .flatMap((item) => item.regions.map((region) => ({
         ...region,
-        url: region.kind === "passage" ? svgImage("[0003~0005] 공통 지시문", 480) : svgImage(`${item.numberLabel}`)
+        url: region.kind === "passage"
+          ? svgImage("[0003~0005] 공통 지시문", 480)
+          : region.kind === "answer" || region.kind === "solution"
+            ? answerImage(item.numberLabel, region.kind)
+            : svgImage(`${item.numberLabel}`)
       })));
     sendJson(response, 200, { ok: true, safeFixture: true, regions });
     return true;
@@ -186,7 +234,7 @@ export async function handleProblemBankFixtureRoute({ request, requestUrl, state
     sendJson(response, 200, { ok: true, safeFixture: true, bookId: requested, deletedAttempts: removedAttempts, deletedImages: bank.items.length });
     return true;
   }
-  if (request.method === "POST" && (pathname === "/api/problem-bank/import" || pathname === "/api/problem-bank/images")) {
+  if (request.method === "POST" && (pathname === "/api/problem-bank/import" || pathname === "/api/problem-bank/import-answers" || pathname === "/api/problem-bank/images")) {
     sendJson(response, 503, { ok: false, safeFixture: true, error: "안전 미리보기에서는 패키지를 등록하지 않습니다. 운영 API 에서만 올립니다." });
     return true;
   }

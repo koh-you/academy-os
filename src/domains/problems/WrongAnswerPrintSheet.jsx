@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import academyMark from "../../../assets/branding/academy-mark.png";
-import { buildPrintEntries } from "./problemBankModel.js";
+import { buildPrintEntries, flattenPrintItems, printWidthMm } from "./problemBankModel.js";
 
 // 인쇄 워터마크는 서버 시험지 워터마크(src/shared/server/testPaperWatermark.js)와 같은 로고·같은 값이다:
 // 페이지 중앙 · 폭 50% · 불투명도 0.1 · 회전 없음. 문항 이미지가 흰 바탕이라 뒤에 두면 가려지므로
@@ -22,8 +22,9 @@ export function WrongAnswerPrintSheet({ book, units, items, selectedItemIds, ima
     () => buildPrintEntries({ book, units, items, selectedItemIds, imagesByItem }),
     [book, units, items, selectedItemIds, imagesByItem]
   );
-  const answerEntries = entries.filter((entry) => entry.kind === "item" && entry.item.answer);
-  const solutionEntries = entries.filter((entry) => entry.solutionUrl);
+  const printRows = useMemo(() => flattenPrintItems(entries), [entries]);
+  const answerEntries = printRows.filter((row) => row.answerUrl);
+  const solutionEntries = printRows.filter((row) => row.solutionUrl);
   const missingImages = entries.filter((entry) => entry.kind === "item" && !entry.bodyUrl).length;
   const selectedCount = selectedItemIds.length;
   const title = `${book.title} 오답지`;
@@ -60,8 +61,8 @@ export function WrongAnswerPrintSheet({ book, units, items, selectedItemIds, ima
             <option value="wide">넓게</option>
           </select>
         </label>
-        <label><input checked={includeAnswers} disabled={answerEntries.length === 0} onChange={(event) => setIncludeAnswers(event.target.checked)} type="checkbox" /> 빠른정답 {answerEntries.length === 0 ? "(등록된 정답 없음)" : `(${answerEntries.length})`}</label>
-        <label><input checked={includeSolutions} disabled={solutionEntries.length === 0} onChange={(event) => setIncludeSolutions(event.target.checked)} type="checkbox" /> 해설 {solutionEntries.length === 0 ? "(등록된 해설 없음)" : `(${solutionEntries.length})`}</label>
+        <label><input checked={includeAnswers} disabled={answerEntries.length === 0} onChange={(event) => setIncludeAnswers(event.target.checked)} type="checkbox" /> 빠른정답 {answerEntries.length === 0 ? "(등록된 정답 없음)" : `(${answerEntries.length}/${printRows.length})`}</label>
+        <label><input checked={includeSolutions} disabled={solutionEntries.length === 0} onChange={(event) => setIncludeSolutions(event.target.checked)} type="checkbox" /> 해설 {solutionEntries.length === 0 ? "(등록된 해설 없음)" : `(${solutionEntries.length}/${printRows.length})`}</label>
         <button className="primaryButton" onClick={() => window.print()} type="button">🖨 인쇄</button>
         <button className="softButton" onClick={onClose} type="button">닫기</button>
       </div>
@@ -107,13 +108,16 @@ export function WrongAnswerPrintSheet({ book, units, items, selectedItemIds, ima
           <section className="problemBankPrintAnswers">
             <h3>빠른정답</h3>
             <div className="problemBankPrintAnswerGrid">
-              {answerEntries.map((entry) => (
-                <div key={entry.key}>
-                  <b>{String(entries.indexOf(entry) + 1).padStart(2, "0")}</b>
-                  <span>{entry.item.answer}</span>
-                  <small>{entry.item.numberLabel}번</small>
-                </div>
-              ))}
+              {answerEntries.map((row) => {
+                const widthMm = printWidthMm(row.answerRegion);
+                return (
+                  <div key={row.item.itemId}>
+                    <b>{String(row.entryNumber).padStart(2, "0")}</b>
+                    <img alt={`${row.item.numberLabel}번 정답`} src={row.answerUrl} style={widthMm ? { width: `${Math.min(widthMm, 60)}mm` } : undefined} />
+                    <small>{row.item.numberLabel}번</small>
+                  </div>
+                );
+              })}
             </div>
           </section>
         ) : null}
@@ -122,10 +126,11 @@ export function WrongAnswerPrintSheet({ book, units, items, selectedItemIds, ima
           <section className="problemBankPrintSolutions">
             <h3>해설</h3>
             <div className="problemBankPrintColumns">
-              {solutionEntries.map((entry) => (
-                <article className="problemBankPrintItem" key={`${entry.key}-solution`}>
-                  <div className="problemBankPrintSource"><span>{entry.sourceLine}</span></div>
-                  <img alt={`${entry.item.numberLabel}번 해설`} src={entry.solutionUrl} />
+              {solutionEntries.map((row) => (
+                <article className="problemBankPrintItem" key={`${row.item.itemId}-solution`}>
+                  <div className="problemBankPrintSource"><span>{row.sourceLine}</span></div>
+                  <div className="problemBankPrintNumber">{String(row.entryNumber).padStart(2, "0")}</div>
+                  <img alt={`${row.item.numberLabel}번 해설`} src={row.solutionUrl} />
                 </article>
               ))}
             </div>

@@ -54,6 +54,7 @@ export function BookWrongAnswerBoard({ students = [] }) {
   const [selectedItemIds, setSelectedItemIds] = useState(() => new Set());
   const [previewItemId, setPreviewItemId] = useState("");
   const [imagesByItem, setImagesByItem] = useState(() => new Map());
+  const [showSolutionPreview, setShowSolutionPreview] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
   const [isPrintOpen, setIsPrintOpen] = useState(false);
   const imageRequestsRef = useRef(new Set());
@@ -238,6 +239,8 @@ export function BookWrongAnswerBoard({ students = [] }) {
   const previewStat = previewItem ? itemStats.get(previewItem.itemId) : null;
   const previewPassage = previewRegions.find((region) => region.kind === "passage");
   const previewBody = previewRegions.find((region) => region.kind === "body");
+  const previewAnswer = previewRegions.find((region) => region.kind === "answer");
+  const previewSolution = previewRegions.find((region) => region.kind === "solution");
   const previewHighlight = previewPassage && previewBody ? rectWithin(previewPassage.bboxNormalized, previewBody.bboxNormalized) : null;
 
   return (
@@ -464,7 +467,22 @@ export function BookWrongAnswerBoard({ students = [] }) {
                 <p className="problemBankPreviewMeta">
                   원본 {previewItem.printedPage}쪽 · {previewItem.reviewStatus === "flagged" ? "경계 확인 필요" : "경계 자동 확인"}
                   {previewPassage ? " · 공통 지시문 문항 (인쇄 때 지시문과 함께 나가고 이 번호에 강조 상자가 붙습니다)" : ""}
+                  {previewRegions.length && !previewSolution ? " · 해설 없음" : ""}
                 </p>
+                {previewAnswer ? (
+                  <div className="problemBankPreviewAnswer">
+                    <strong>정답</strong>
+                    <img alt={`${previewItem.numberLabel}번 정답`} src={previewAnswer.url} />
+                  </div>
+                ) : null}
+                {previewSolution ? (
+                  <div className="problemBankPreviewAnswer">
+                    <button aria-pressed={showSolutionPreview} className="problemBankLinkButton" onClick={() => setShowSolutionPreview((current) => !current)} type="button">
+                      {showSolutionPreview ? "해설 접기" : "해설 보기"}
+                    </button>
+                    {showSolutionPreview ? <img alt={`${previewItem.numberLabel}번 해설`} src={previewSolution.url} /> : null}
+                  </div>
+                ) : null}
               </div>
             ) : null}
           </aside>

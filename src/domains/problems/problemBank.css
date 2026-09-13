@@ -215,6 +215,11 @@
 .problemBankDangerButton { background: #b91c1c; border: 1px solid #b91c1c; color: #fff; }
 .problemBankDeleteWarn { color: #b91c1c; font-size: 12px; }
 .problemBankEditForm .problemBankUploadMessage { grid-column: 1 / -1; }
+.problemBankAnswerImport { border: 1px dashed var(--academy-border, #e2e6ec); border-radius: 10px; display: grid; gap: 8px; margin-bottom: 12px; padding: 10px 12px; }
+.problemBankAnswerImport h3 { font-size: 14px; margin: 0; }
+.problemBankAnswerImport .softButton, .problemBankAnswerImport .primaryButton { border-radius: 8px; cursor: pointer; font-size: 13px; justify-self: start; padding: 6px 12px; }
+.problemBankAnswerImport .softButton { background: var(--academy-surface, #fff); border: 1px solid var(--academy-border, #e2e6ec); }
+.problemBankAnswerImport .primaryButton { background: var(--academy-text-strong, #111827); border: 1px solid var(--academy-text-strong, #111827); color: #fff; }
 .problemBankDetailMeta { display: grid; font-size: 13px; gap: 4px 12px; grid-template-columns: 60px 1fr; margin: 0 0 12px; }
 .problemBankDetailMeta dt { color: var(--academy-text-muted, #6b7280); }
 .problemBankDetailMeta dd { margin: 0; }
@@ -311,8 +316,13 @@
 .problemBankPrintAnswers h3,
 .problemBankPrintSolutions h3 { border-bottom: 1.2pt solid #000; font-size: 13pt; margin: 0 0 4mm; padding-bottom: 1.5mm; }
 .problemBankPrintAnswerGrid { display: grid; gap: 2mm 4mm; grid-template-columns: repeat(5, 1fr); }
-.problemBankPrintAnswerGrid > div { border: 0.4pt solid #000; display: grid; font-size: 10pt; gap: 1mm; padding: 2mm; }
+.problemBankPrintAnswerGrid > div { align-content: start; border: 0.4pt solid #000; display: grid; font-size: 10pt; gap: 1mm; padding: 2mm; }
+.problemBankPrintAnswerGrid img { display: block; height: auto; max-width: 100%; }
 .problemBankPrintAnswerGrid small { color: #000; font-size: 7pt; }
+.problemBankPreviewAnswer { border-top: 1px dashed var(--academy-border, #e2e6ec); margin-top: 8px; padding-top: 6px; }
+.problemBankPreviewAnswer strong { font-size: 12.5px; }
+.problemBankPreviewAnswer .problemBankLinkButton { background: none; border: 0; color: var(--academy-accent, #176e59); cursor: pointer; font-size: 12.5px; font-weight: 600; padding: 0; }
+.problemBankPreviewAnswer img { display: block; margin-top: 6px; max-width: 100%; }
 
 @media print {
   @page { size: A4 portrait; margin: 0; }
