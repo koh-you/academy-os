@@ -140,8 +140,43 @@ export function createProblemBankFixtureState() {
 /** 안전 API 라우트. 처리했으면 true. */
 export async function handleProblemBankFixtureRoute({ request, requestUrl, state, readJson, sendJson, response }) {
   const { pathname } = requestUrl;
-  if (!pathname.startsWith("/api/problem-bank/")) return false;
   const bank = state.problemBank;
+  const regionsWithUrls = (ids) => bank.items
+    .filter((item) => ids.has(item.itemId))
+    .flatMap((item) => item.regions.map((region) => ({
+      ...region,
+      url: region.kind === "passage"
+        ? svgImage("[0003~0005] 공통 지시문", 480)
+        : region.kind === "answer" || region.kind === "solution"
+          ? answerImage(item.numberLabel, region.kind)
+          : svgImage(`${item.numberLabel}`)
+    })));
+  // 학생 포털(가상 학생 safe-active-student 고정): 자기 기록이 있는 교재·문항만.
+  if (request.method === "GET" && pathname === "/api/portal-problem-bank") {
+    const attempts = bank.attempts.filter((attempt) => attempt.studentId === "safe-active-student");
+    const itemIds = new Set(attempts.map((attempt) => attempt.itemId));
+    const books = attempts.length
+      ? bank.books.map((book) => ({ ...book, units: bank.units, items: bank.items.filter((item) => itemIds.has(item.itemId)) }))
+      : [];
+    sendJson(response, 200, { ok: true, safeFixture: true, books, attempts });
+    return true;
+  }
+  if (request.method === "POST" && pathname === "/api/portal-problem-bank/item-images") {
+    const payload = await readJson(request);
+    const owned = new Set(bank.attempts.filter((attempt) => attempt.studentId === "safe-active-student").map((attempt) => attempt.itemId));
+    const ids = new Set((Array.isArray(payload.itemIds) ? payload.itemIds : []).filter((itemId) => owned.has(itemId)));
+    sendJson(response, 200, { ok: true, safeFixture: true, regions: regionsWithUrls(ids) });
+    return true;
+  }
+  if (!pathname.startsWith("/api/problem-bank/")) return false;
+  if (request.method === "GET" && pathname === "/api/problem-bank/book-audit") {
+    const requested = requestUrl.searchParams.get("bookId") ?? "";
+    const regionCount = bank.items.reduce((sum, item) => sum + item.regions.length, 0);
+    // 가상 데이터는 7번 문항 이미지가 빠진 것으로 둔다(누락 검사 화면 확인용).
+    const missing = bank.items.filter((item) => item.numberLabel === "0007").flatMap((item) => item.regions.map((region) => ({ itemId: item.itemId, kind: region.kind, storagePath: region.storagePath })));
+    sendJson(response, 200, { ok: true, safeFixture: true, bookId: requested, regionCount, storedCount: regionCount - missing.length, missing, orphanCount: 0 });
+    return true;
+  }
   if (request.method === "GET" && pathname === "/api/problem-bank/books") {
     sendJson(response, 200, { ok: true, safeFixture: true, books: bank.books });
     return true;
@@ -159,17 +194,7 @@ export async function handleProblemBankFixtureRoute({ request, requestUrl, state
   if (request.method === "POST" && pathname === "/api/problem-bank/item-images") {
     const payload = await readJson(request);
     const ids = new Set(Array.isArray(payload.itemIds) ? payload.itemIds : []);
-    const regions = bank.items
-      .filter((item) => ids.has(item.itemId))
-      .flatMap((item) => item.regions.map((region) => ({
-        ...region,
-        url: region.kind === "passage"
-          ? svgImage("[0003~0005] 공통 지시문", 480)
-          : region.kind === "answer" || region.kind === "solution"
-            ? answerImage(item.numberLabel, region.kind)
-            : svgImage(`${item.numberLabel}`)
-      })));
-    sendJson(response, 200, { ok: true, safeFixture: true, regions });
+    sendJson(response, 200, { ok: true, safeFixture: true, regions: regionsWithUrls(ids) });
     return true;
   }
   if (request.method === "GET" && pathname === "/api/problem-bank/attempts") {

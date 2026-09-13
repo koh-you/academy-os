@@ -131,7 +131,7 @@ function WrongProblemBoard({ students, wrongProblems, onAddWrongProblem, onUpdat
       </WorkspaceTabs>
 
       {activeTab === "bookWrong" ? (
-        <BookWrongAnswerBoard students={activeStudents} />
+        <BookWrongAnswerBoard mode="class" students={activeStudents} />
       ) : (
         <>
           <FilterBar
@@ -163,6 +163,7 @@ function WrongProblemBoard({ students, wrongProblems, onAddWrongProblem, onUpdat
               </select>
             </label>
           </FilterBar>
+          <BookWrongAnswerBoard mode="student" studentId={selectedStudent?.studentId ?? ""} students={activeStudents} />
           <StudentWrongProblemBoard
             selectedStudent={selectedStudent}
             wrongProblems={wrongProblems.filter((item) => item.studentId === selectedStudent?.studentId)}
@@ -188,8 +189,8 @@ function StudentWrongProblemBoard({ selectedStudent, wrongProblems, onAddWrongPr
             + 오답 추가
           </button>
         )}
-        description="학생 프로파일에서 분리한 교재오답 기록입니다. 교재/범위/상태/후속 메모를 여기서 관리합니다."
-        title={`${selectedStudent.name} 학생별 오답`}
+        description="등록되지 않은 교재의 오답이나 후속 메모를 적는 곳입니다. 등록된 교재는 위 번호 그리드에서 기록합니다."
+        title={`${selectedStudent.name} 교재 외 오답 메모`}
       />
       <DataTableShell className="managementTable studentWrongTable" label="학생별 오답 목록">
         <div className="managementRow wrongProblemProfileRow managementHead">

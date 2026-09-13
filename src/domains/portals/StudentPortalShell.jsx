@@ -7,6 +7,7 @@ import { StudentMyPageTab } from "./StudentMyPageTab.jsx";
 import { StudentPortalMetrics } from "./StudentPortalMetrics.jsx";
 import { StudentEmptyTab, StudentEvaluationTab } from "./PortalStaticTabs.jsx";
 import { StudentTodayTab } from "./StudentTodayTab.jsx";
+import { StudentWrongAnswersTab } from "./StudentWrongAnswersTab.jsx";
 
 export function StudentPortalShell({
   academyName,
@@ -24,7 +25,8 @@ export function StudentPortalShell({
   reports,
   selectedStudent,
   students,
-  today
+  today,
+  wrongAnswers = {}
 }) {
   return (
     <section className={previewMode ? "studentPortal studentPortalTabletFirst teacherPreviewPortal" : "studentPortal studentPortalTabletFirst"}>
@@ -60,6 +62,7 @@ export function StudentPortalShell({
         {activeTab === "today" ? <StudentTodayTab {...today} /> : null}
         {activeTab === "all" ? <StudentAllHomeworkTab {...allHomework} /> : null}
         {activeTab === "materials" ? <PortalMaterialsTab materials={materials} emptyMessage="아직 공개된 자료가 없습니다." openMaterial={openMaterial} /> : null}
+        {activeTab === "wrong" ? <StudentWrongAnswersTab {...wrongAnswers} /> : null}
         {activeTab === "curriculum" ? <StudentEmptyTab message="아직 커리큘럼이 설정되지 않았습니다. 선생님께 문의하세요." /> : null}
         {activeTab === "evaluation" ? <StudentEvaluationTab /> : null}
         {activeTab === "mypage" ? <StudentMyPageTab {...myPage} /> : null}

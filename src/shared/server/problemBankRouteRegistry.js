@@ -1,5 +1,5 @@
 // @ts-check
-// 문제은행(오답은행) 라우트. 전부 교사 세션이 필요하다(읽기는 ops read 토큰도 정책상 통과).
+// 문제은행(오답은행) 라우트. /api/problem-bank/* 는 교사 세션, /api/portal-problem-bank* 는 학생 포털 세션이 필요하다.
 
 /** @typedef {import("./routeRegistryTypes.js").RouteDispatchContext} RouteDispatchContext */
 /** @typedef {import("./routeRegistryTypes.js").RouteRegistry} RouteRegistry */
@@ -14,12 +14,16 @@ export const problemBankRouteSignatures = Object.freeze([
   Object.freeze({ method: "POST", path: "/api/problem-bank/import-answers" }),
   Object.freeze({ method: "POST", path: "/api/problem-bank/images" }),
   Object.freeze({ method: "GET", path: "/api/problem-bank/attempts" }),
-  Object.freeze({ method: "POST", path: "/api/problem-bank/attempts" })
+  Object.freeze({ method: "POST", path: "/api/problem-bank/attempts" }),
+  Object.freeze({ method: "GET", path: "/api/problem-bank/book-audit" }),
+  Object.freeze({ method: "GET", path: "/api/portal-problem-bank" }),
+  Object.freeze({ method: "POST", path: "/api/portal-problem-bank/item-images" })
 ]);
 
 /**
  * @param {Object} deps
  * @param {(request: *) => *} deps.getTeacherSession
+ * @param {(request: *) => *} deps.getPortalSession
  * @param {() => Promise<*>} deps.listProblemBankBooks
  * @param {(bookId: string) => Promise<*>} deps.getProblemBankBook
  * @param {(bookId: string, patch: *) => Promise<*>} deps.updateProblemBankBook
@@ -30,6 +34,9 @@ export const problemBankRouteSignatures = Object.freeze([
  * @param {(bookId: string, files: *[]) => Promise<*>} deps.uploadProblemBankImages
  * @param {(query: { bookId?: string, studentId?: string }) => Promise<*>} deps.listProblemBankAttempts
  * @param {(entries: *[]) => Promise<*>} deps.saveProblemBankAttempts
+ * @param {(studentId: string) => Promise<*>} deps.listStudentProblemBankSummary
+ * @param {(studentId: string, itemIds: string[]) => Promise<*>} deps.resolveStudentProblemBankImages
+ * @param {(bookId: string) => Promise<*>} deps.auditProblemBankBookImages
  * @param {(dataUrl: string) => { buffer: *, mimeType: string }} deps.parseDataUrl
  * @param {(request: *, options?: { limitBytes?: number }) => Promise<Record<string, *>>} deps.readJsonBody
  * @param {(request: *, response: *, statusCode: number, data: *) => void} deps.sendJson
@@ -37,6 +44,7 @@ export const problemBankRouteSignatures = Object.freeze([
  */
 export function createProblemBankRouteRegistry({
   getTeacherSession,
+  getPortalSession,
   listProblemBankBooks,
   getProblemBankBook,
   updateProblemBankBook,
@@ -47,6 +55,9 @@ export function createProblemBankRouteRegistry({
   uploadProblemBankImages,
   listProblemBankAttempts,
   saveProblemBankAttempts,
+  listStudentProblemBankSummary,
+  resolveStudentProblemBankImages,
+  auditProblemBankBookImages,
   parseDataUrl,
   readJsonBody,
   sendJson
@@ -62,6 +73,30 @@ export function createProblemBankRouteRegistry({
   /** @param {RouteDispatchContext} context */
   async function dispatch({ request, response, requestUrl }) {
     const { pathname } = requestUrl;
+    if (pathname === "/api/portal-problem-bank" || pathname === "/api/portal-problem-bank/item-images") {
+      // 학생·학부모 포털: 자기 학생의 기록만 읽는다. 쓰기는 없다.
+      const portalSession = getPortalSession(request);
+      if (!portalSession?.studentId) {
+        sendJson(request, response, 401, { ok: false, error: "학생 세션 인증이 필요합니다." });
+        return true;
+      }
+      try {
+        if (request.method === "GET" && pathname === "/api/portal-problem-bank") {
+          sendJson(request, response, 200, { ok: true, ...(await listStudentProblemBankSummary(portalSession.studentId)) });
+          return true;
+        }
+        if (request.method === "POST" && pathname === "/api/portal-problem-bank/item-images") {
+          const payload = await readJsonBody(request);
+          const regions = await resolveStudentProblemBankImages(portalSession.studentId, payload.itemIds);
+          sendJson(request, response, 200, { ok: true, regions });
+          return true;
+        }
+      } catch (error) {
+        sendError(request, response, error);
+        return true;
+      }
+      return false;
+    }
     if (!pathname.startsWith("/api/problem-bank/")) return false;
 
     const teacherSession = getTeacherSession(request);
@@ -118,6 +153,11 @@ export function createProblemBankRouteRegistry({
         });
         const result = await uploadProblemBankImages(payload.bookId, files);
         sendJson(request, response, 200, { ok: true, ...result });
+        return true;
+      }
+      if (request.method === "GET" && pathname === "/api/problem-bank/book-audit") {
+        const bookId = requestUrl.searchParams.get("bookId") ?? "";
+        sendJson(request, response, 200, { ok: true, ...(await auditProblemBankBookImages(bookId)) });
         return true;
       }
       if (request.method === "GET" && pathname === "/api/problem-bank/attempts") {

@@ -3817,6 +3817,7 @@ export function App() {
         reportSnapshots={reportSnapshots}
         schoolEvents={schoolEvents}
         sessionStudentId={session.studentId}
+        sessionToken={session.sessionToken}
         questionSaveState={studentQuestionSaveState}
         studentQuestions={studentQuestions}
         students={students.filter((student) => student.studentId === session.studentId)}
@@ -7915,6 +7916,7 @@ function StudentPortalV2({
   studentQuestions = [],
   students,
   sessionStudentId = "",
+  sessionToken = "",
   previewMode = false,
   onLogout,
   onStudentAddQuestion,
@@ -7986,6 +7988,7 @@ function StudentPortalV2({
       }}
       currentDate={today}
       materials={studentMaterials}
+      wrongAnswers={{ previewMode, sessionToken: previewMode ? "" : sessionToken, studentId: selectedStudent?.studentId ?? "" }}
       metrics={{
         overdueCount: overdueHomeworks.length,
         streakDays,

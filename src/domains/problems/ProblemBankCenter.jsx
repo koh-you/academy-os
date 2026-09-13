@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import {
+  auditProblemBankBook,
   deleteProblemBankBook,
   fetchProblemBankBook,
   fetchProblemBankBooks,
@@ -10,7 +11,8 @@ import {
   importProblemBankManifest,
   readFileAsDataUrl,
   updateProblemBankBook,
-  uploadProblemBankImages
+  uploadProblemBankImages,
+  wakeProblemBankApi
 } from "./problemBankApi.js";
 import "./problemBank.css";
 
@@ -78,6 +80,7 @@ export function ProblemBankCenter() {
   const [editMessage, setEditMessage] = useState("");
   const [deleteArmed, setDeleteArmed] = useState(false);
   const [answerUpload, setAnswerUpload] = useState(emptyAnswerUpload);
+  const [audit, setAudit] = useState({ stage: "idle", message: "", missing: [] });
   const folderInputRef = useRef(null);
   const answerFolderInputRef = useRef(null);
 
@@ -112,6 +115,7 @@ export function ProblemBankCenter() {
         setEditMessage("");
         setDeleteArmed(false);
         setAnswerUpload(emptyAnswerUpload);
+        setAudit({ stage: "idle", message: "", missing: [] });
         const flagged = (result.items ?? []).filter((item) => item.reviewStatus === "flagged").slice(0, 30);
         if (flagged.length) {
           fetchProblemBankItemImages(flagged.map((item) => item.itemId))
@@ -188,7 +192,11 @@ export function ProblemBankCenter() {
     const { manifest, imageFiles, answerManifest, answerImageFiles } = upload;
     if (!manifest) return;
     try {
-      setUpload((current) => ({ ...current, stage: "importing", message: "문항 목록을 등록하는 중…", progress: 0 }));
+      setUpload((current) => ({ ...current, stage: "importing", message: "서버 상태를 확인하는 중…", progress: 0 }));
+      // 서버가 재배포·절전에서 깨어나는 중이면 「Failed to fetch」가 난다. 먼저 깨우고 시작한다.
+      const awake = await wakeProblemBankApi({ onWait: () => setUpload((current) => ({ ...current, message: "서버를 깨우는 중… (최대 90초)" })) });
+      if (!awake) throw new Error("서버가 응답하지 않습니다. 1~2분 뒤 다시 등록을 눌러 주세요.");
+      setUpload((current) => ({ ...current, message: "문항 목록을 등록하는 중…" }));
       const result = await importProblemBankManifest(manifest);
       for (let offset = 0; offset < imageFiles.length; offset += imageBatchSize) {
         const batch = imageFiles.slice(offset, offset + imageBatchSize);
@@ -276,6 +284,24 @@ export function ProblemBankCenter() {
       });
     } catch (error) {
       setAnswerUpload((current) => ({ ...current, stage: "error", message: error.message || "정답·해설 패키지 등록에 실패했습니다." }));
+    }
+  }
+
+  async function runAudit() {
+    if (!detail) return;
+    setAudit({ stage: "running", message: "Storage 파일 목록과 영역 표를 대조하는 중…", missing: [] });
+    try {
+      const result = await auditProblemBankBook(detail.book.bookId);
+      const missing = result.missing ?? [];
+      setAudit({
+        stage: "done",
+        message: missing.length
+          ? `이미지 ${missing.length}개가 Storage 에 없습니다 (영역 ${result.regionCount}개 · 파일 ${result.storedCount}개). 패키지 폴더를 다시 등록하면 채워집니다.`
+          : `이미지 누락 없음 · 영역 ${result.regionCount}개 · 파일 ${result.storedCount}개${result.orphanCount ? ` · 참조 없는 파일 ${result.orphanCount}개` : ""}`,
+        missing
+      });
+    } catch (error) {
+      setAudit({ stage: "error", message: error.message || "누락 검사에 실패했습니다.", missing: [] });
     }
   }
 
@@ -406,6 +432,20 @@ export function ProblemBankCenter() {
                 <dt>정답·해설</dt><dd>해설 {solutionItems}개 · 빠른정답 {answerItems}개 {solutionItems === 0 ? "· 아직 없음 (오답지 인쇄에서 빠른정답·해설을 켤 수 없음)" : ""}</dd>
                 <dt>다시 등록</dt><dd>같은 PDF 패키지를 다시 올리면 문항 이미지·경계만 새로 들어가고 학생 기록·정답·해설·여기서 고친 정보는 남습니다.</dd>
               </dl>
+              <div className="problemBankAnswerImport">
+                <h3>이미지 누락 검사</h3>
+                <p className="muted">문항·정답·해설 이미지가 화면에 안 보이면 여기서 Storage 와 대조합니다. 등록이 중간에 끊긴 경우 빠진 파일이 나옵니다.</p>
+                <button className="softButton" disabled={audit.stage === "running"} onClick={runAudit} type="button">이미지 누락 검사</button>
+                {audit.message ? <p aria-live="polite" className={`problemBankUploadMessage stage-${audit.stage === "error" ? "error" : audit.missing.length ? "error" : "done"}`}>{audit.message}</p> : null}
+                {audit.missing.length ? (
+                  <ul className="problemBankAuditList">
+                    {audit.missing.slice(0, 20).map((entry) => (
+                      <li key={`${entry.itemId}-${entry.kind}`}>{entry.itemId.replace(`${detail.book.bookId}-`, "")}번 · {entry.kind} · <code>{entry.storagePath}</code></li>
+                    ))}
+                    {audit.missing.length > 20 ? <li>… 외 {audit.missing.length - 20}개</li> : null}
+                  </ul>
+                ) : null}
+              </div>
               <div className="problemBankAnswerImport">
                 <h3>정답·해설 패키지 등록</h3>
                 <p className="muted">

@@ -2,6 +2,7 @@ export const studentPortalTabs = [
   ["today", "오늘"],
   ["all", "전체"],
   ["materials", "자료함"],
+  ["wrong", "오답"],
   ["evaluation", "평가"],
   ["mypage", "마이 페이지"],
   ["curriculum", "커리큘럼"]

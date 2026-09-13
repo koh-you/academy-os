@@ -586,6 +586,7 @@ const { dispatch: dispatchTestPaperFileRoute } = createTestPaperFileRouteRegistr
 });
 const { dispatch: dispatchProblemBankRoute } = createProblemBankRouteRegistry({
   getTeacherSession,
+  getPortalSession,
   parseDataUrl,
   readJsonBody,
   sendJson,
