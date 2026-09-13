@@ -76,8 +76,8 @@ test("교재관리: 문항과 정답·해설이 든 폴더 하나로 한 번에 
   // 가상 서버의 교재는 문항 20개라 「문항 수 불일치」로 끝나지만, 요청 순서와 파일 이름은 그대로 검증된다.
   await expect(message).toContainText(/서버 20 \/ 패키지 2/);
   expect(posts.map((post) => post.path)).toEqual(["import", "images", "import-answers", "images"]);
-  expect(posts[1].files).toEqual(["items/pbk_safefixture1-0001.jpg", "items/pbk_safefixture1-0002.jpg"]);
-  expect(posts[3].files.sort()).toEqual([
+  expect([...posts[1].files].sort()).toEqual(["items/pbk_safefixture1-0001.jpg", "items/pbk_safefixture1-0002.jpg"]);
+  expect([...posts[3].files].sort()).toEqual([
     "answers/pbk_safefixture1-0001.jpg",
     "answers/pbk_safefixture1-0002.jpg",
     "solutions/pbk_safefixture1-0001.jpg",

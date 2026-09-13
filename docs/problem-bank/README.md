@@ -35,11 +35,11 @@ node scripts/problem-bank/ingest-text-pdf.mjs --pdf "C:\Users\PC\Desktop\rpm 중
 ### 1-2. 정답·해설 원천화 (로컬)
 
 ```powershell
-node scripts/problem-bank/ingest-answers.mjs --book-id pbk_c9a59dba4b `
-  --solutions "C:\Users\PC\Downloads\중등RPM3-2[2020]_정답.pdf" --out output\problem-bank\rpm-m3-2-answers
+node scripts/problem-bank/ingest-answers.mjs `
+  --solutions "C:\Users\PC\Desktop\교재 pdf\중등RPM3-2[2020]_정답.pdf" --out output\problem-bank\rpm-m3-2
 ```
 
-- `--book-id` 는 교재관리에 등록된 교재 ID(문항 패키지 `manifest.json` 의 `book.book_id`).
+- `--out` 을 **문항 패키지 폴더(ingest-text-pdf 의 출력)** 로 주면 `manifest.json` 옆에 `manifest-answers.json`·`answers/`·`solutions/` 가 들어가고, 교재관리 「패키지 등록」에서 폴더 하나로 문항·정답·해설이 한 번에 올라간다. `--book-id` 는 그 `manifest.json` 에서 읽는다(다른 폴더로 낼 때만 지정).
 - 「정답과 풀이」 PDF 를 같은 세그먼터로 자른다: 번호 배지(12pt) · 2컬럼 · 「본문 p.9, 11」 배너 줄에서 끊기 · 잉크 하단. 컬럼·쪽 맨 위에 배지 없이 이어지는 풀이는 앞 문항에 이어 붙여 한 장으로 만든다(RPM 44건, 채점 기준표 포함).
 - 빠른정답은 별도 PDF 를 쓰지 않고 해설 안의 「답」 아이콘(U+E34C) 줄을 오려 낸다 — 분수·근호가 글자로 안 풀리므로 이미지로 두고, 답이 그래프·표면 그 상자 끝까지 넓힌다. RPM 3-2: 해설 644/644 · 답 줄 644/644, 번호 연속, 21초.
 - **판(edition) 주의**: 「RPM 중학 수학 3-2 빠른 정답.pdf」는 673문항판(0001 답 12/13)이고 교재·「중등RPM3-2[2020]_정답.pdf」는 644문항판(0001 답 15/17)이라 빠른정답 PDF 는 쓰지 않았다. 다른 교재도 `qa/` 첫 쪽에서 번호·답이 교재와 맞는지 먼저 본다.
@@ -51,7 +51,7 @@ node scripts/problem-bank/ingest-answers.mjs --book-id pbk_c9a59dba4b `
 
 Supabase SQL: `supabase/20260912_problem_bank.sql` (SQL Editor 에서 1회 적용). Storage 버킷 `problem-bank` 는 첫 업로드 때 서버가 private 로 만든다.
 
-정답·해설은 `교재관리 › 교재 상세 › 정답·해설 패키지 등록`에서 ingest-answers 출력 폴더를 선택한다. `POST /api/problem-bank/import-answers` 가 번호(number_label)로 문항을 찾아 `answer`·`solution` 영역을 교체하고 `has_solution` 을 다시 정한 뒤, 이미지를 `answers/`·`solutions/` 아래로 올린다. 문항 패키지를 다시 등록해도 정답·해설 영역과 `has_solution` 은 남는다. SQL: `supabase/20260913_problem_bank_answers.sql`(`answer` 영역 종류 허용 · 1회 적용).
+폴더에 `manifest-answers.json` 이 함께 있으면 「패키지 등록」이 문항 → 이미지 → 정답·해설 → 이미지 순으로 올리고 문항 수·해설 수를 재조회해 대조한다. 정답·해설만 따로 올릴 때는 `교재관리 › 교재 상세 › 정답·해설 패키지 등록`에서 그 폴더를 선택한다. `POST /api/problem-bank/import-answers` 가 번호(number_label)로 문항을 찾아 `answer`·`solution` 영역을 교체하고 `has_solution` 을 다시 정한 뒤, 이미지를 `answers/`·`solutions/` 아래로 올린다. 문항 패키지를 다시 등록해도 정답·해설 영역과 `has_solution` 은 남는다. SQL: `supabase/20260913_problem_bank_answers.sql`(`answer` 영역 종류 허용 · 1회 적용).
 
 ### 3. 오답 기록·인쇄 (오답관리 › 교재별 오답)
 
@@ -72,7 +72,7 @@ Supabase SQL: `supabase/20260912_problem_bank.sql` (SQL Editor 에서 1회 적�
 | 서버 저장소·라우트 | `src/shared/server/problemBankStore.js` · `src/shared/server/problemBankRouteRegistry.js` (api/server.js 에서 주입) |
 | 화면 | `src/domains/problems/BookWrongAnswerBoard.jsx`(교재별 오답) · `ProblemBankCenter.jsx`(교재관리) · `WrongAnswerPrintSheet.jsx`(오답지) · `problemBankModel.js` · `problemBankApi.js` · `problemBank.css` |
 | 가상 데이터 | `scripts/safe-fixtures/problemBankFixture.mjs` (`npm run dev:safe`) |
-| 검사 | `npm run test:problem-bank-segmenter` · `test:problem-bank-route-registry` · `test:problem-bank-store` · `tests/browser/problem-bank.spec.js` |
+| 검사 | `npm run test:problem-bank-segmenter` · `test:problem-bank-route-registry` · `test:problem-bank-store` · `tests/browser/problem-bank.spec.js` · `problem-bank-package.spec.js`(폴더 하나 등록) |
 
 ## 남은 일
 
