@@ -45,6 +45,7 @@ import {
   problemStatusMeta
 } from "./learningSupportModel.js";
 import { createResourceMaterialDraftId } from "../resources/resourceMaterialPersistence.js";
+import { BookWrongAnswerBoard } from "../problems/BookWrongAnswerBoard.jsx";
 
 const wrongProblemSaveMessages = {
   dirty: "아직 저장되지 않은 입력이 있습니다. 저장 중 수정했다면 한 번 더 저장해 주세요.",
@@ -198,6 +199,7 @@ function WrongProblemBoard({
         ))}
       </WorkspaceTabs>
 
+      {activeTab !== "bookWrong" ? (
       <FilterBar
         actions={(
           <>
@@ -249,7 +251,9 @@ function WrongProblemBoard({
           </select>
         </label>
       </FilterBar>
+      ) : null}
 
+      {activeTab !== "bookWrong" ? (
       <Disclosure
         id="wrong-board-diagnosis-content"
         open={isDiagnosisOpen}
@@ -263,8 +267,11 @@ function WrongProblemBoard({
             : "PDF 자동 크롭 전 단계에서는 파일명, 단원, 문항 번호, 상태, 풀이 메모를 먼저 저장합니다. 서버 크롭이 붙으면 이 미리보기 영역에 실제 문항 이미지가 표시됩니다."}
         </p>
       </Disclosure>
+      ) : null}
 
-      {activeTab === "studentWrong" ? (
+      {activeTab === "bookWrong" ? (
+        <BookWrongAnswerBoard students={students} />
+      ) : activeTab === "studentWrong" ? (
         <StudentWrongProblemBoard
           selectedStudent={selectedStudent}
           wrongProblems={wrongProblems.filter((item) => item.studentId === selectedStudent?.studentId)}

@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-09-12 문제은행(오답은행) 1단계
+
+- `Math books prototype` 115세션 분석(바탕화면 PDF 2종)에서 「AI 는 원천을 만들지 않는다 · 규칙 하나 = 검사 하나 · 저장 후 재조회」를 설계 원칙으로 가져왔다.
+- 텍스트 PDF 세그먼터(`src/domains/problems/textPdfSegmenter.js`): 번호 배지 서체 높이(RPM 13pt)로 배지를 찾고, 유형 헤더·소단원 헤더(`01-3`)·공통 지시문(`[0025~0029]`)에서 자르며, 같은 행 두 문항은 가로로 나눈다. 하단은 220 DPI 렌더의 잉크 투영으로 조인다. 거터 점선(x≈299pt)을 찾아 컬럼 폭을 고정한다.
+- 서버: `problem_bank_*` 표 5개(tenant 스코핑), `src/shared/server/problemBankStore.js`(Supabase 함수 주입 · api/ 함수 파일 수 12 제한 유지), `problemBankRouteRegistry.js` 7개 라우트. 이미지는 private 버킷 `problem-bank`, 서명 URL 은 미리보기·인쇄 직전에만.
+- 화면: `BookWrongAnswerBoard`(교재별 오답) · `ProblemBankCenter`(교재관리) · `WrongAnswerPrintSheet`(body 포털 · `#root` 숨김 인쇄 · 워터마크 opacity 0.1 · 폭 50%). 인쇄 미리보기 스크린샷 `test-results/problem-bank-print-sheet.png`.
+- 인벤토리 검사 정정: 사이드바 연구실 목록에 이미 있던 `blogContent` 누락(17→18), tenant 표 목록에 새 표 추가, 자료함 browser spec 삭제(메뉴에서 빠짐).
+
 ## 2026-09-12 Codex·Claude Code 운영 읽기 인증
 
 - 무인증 `/api/notification-jobs?limit=1`은 `401 auth_required`, 로그인된 Academy OS 교사 화면의 알림 기록 새로고침은 전체 323건 로드 완료로 실측했다. 운영 쓰기·알림 side effect·service-role 조회는 없었다.

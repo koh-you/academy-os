@@ -38,7 +38,8 @@ export function createSidebarMenuGroups(supplementAttention = null, { teacherRol
           badgeTitle: supplementAttentionLabel || "확인할 보충관리 항목 없음"
         },
         { id: "materials", label: "시험지관리", icon: "📚" },
-        { id: "resources", label: "자료함", icon: "📁" }
+        // 자료함(resources)은 2026-09-12 에 교재관리로 바꿨다. 문제은행 교재 등록·검수 화면이다.
+        { id: "bookBank", label: "교재관리", icon: "📖" }
       ]
     },
     {

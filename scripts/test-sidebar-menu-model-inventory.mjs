@@ -16,7 +16,7 @@ const expectedGroups = [
       "followups",
       "supplements",
       "materials",
-      "resources"
+      "bookBank"
     ]
   },
   { title: "학생", itemIds: ["students", "classes"] },
@@ -24,7 +24,7 @@ const expectedGroups = [
     title: "시험",
     itemIds: ["examPrep", "examAnalysisPipeline", "schoolCalendar"]
   },
-  { title: "연구실", itemIds: ["lessonResearch", "aiVariants"] },
+  { title: "연구실", itemIds: ["lessonResearch", "blogContent", "aiVariants"] },
   {
     title: "운영",
     itemIds: ["settlements", "notifications", "settings"]
@@ -96,9 +96,10 @@ for (const appBoundary of [
     `sidebar boundary changed: ${appBoundary}`
   );
 }
+// 17 -> 18: SNS 스튜디오(blogContent)가 연구실 메뉴에 이미 있었는데 이 목록에 빠져 있었다(2026-09-12 정정).
 assert.equal(
   expectedGroups.flatMap((group) => group.itemIds).length,
-  17
+  18
 );
 const moduleSource = await readFile(
   new URL("../src/app/sidebarMenuModel.js", import.meta.url),

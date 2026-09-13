@@ -1,0 +1,310 @@
+/* 문제은행(교재관리 · 교재별 오답 · 오답지 인쇄). 선택자는 전부 .problemBank 로 시작한다. */
+
+.problemBankBoard {
+  display: grid;
+  gap: var(--academy-space-3, 16px);
+  grid-template-columns: 260px minmax(0, 1fr);
+  align-items: start;
+}
+
+.problemBankSidebar {
+  background: var(--academy-surface, #fff);
+  border: 1px solid var(--academy-border, #e2e6ec);
+  border-radius: var(--academy-radius, 12px);
+  padding: 14px;
+  position: sticky;
+  top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.problemBankSidebarHead strong { display: block; font-size: 15px; }
+.problemBankSidebarHead small { color: var(--academy-text-muted, #6b7280); }
+
+.problemBankBreadcrumb { display: flex; flex-wrap: wrap; gap: 4px; }
+.problemBankBreadcrumb button {
+  background: var(--academy-surface-muted, #f3f4f6);
+  border: 1px solid var(--academy-border, #e2e6ec);
+  border-radius: 6px;
+  color: var(--academy-text, #1f2937);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 3px 8px;
+}
+
+.problemBankUpButton {
+  background: var(--academy-surface, #fff);
+  border: 1px solid var(--academy-border, #e2e6ec);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.problemBankFolderList { display: grid; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.problemBankFolderItem,
+.problemBankBookItem {
+  background: var(--academy-surface, #fff);
+  border: 1px solid var(--academy-border, #e2e6ec);
+  border-radius: 10px;
+  cursor: pointer;
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  text-align: left;
+  width: 100%;
+}
+.problemBankBookItem.active { border-color: var(--academy-primary, #1e4a8f); box-shadow: 0 0 0 2px var(--academy-accent-bg, #e8eff8); }
+.problemBankFolderItem strong,
+.problemBankBookItem strong { font-size: 13.5px; }
+.problemBankFolderItem small,
+.problemBankBookItem small { color: var(--academy-text-muted, #6b7280); font-size: 12px; }
+
+.problemBankMain { display: grid; gap: 12px; min-width: 0; }
+
+.problemBankHeader { align-items: flex-start; display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; }
+.problemBankHeader h2 { font-size: 18px; margin: 0; }
+.problemBankHeader small { color: var(--academy-text-muted, #6b7280); }
+
+.problemBankModeSwitch { display: inline-flex; border: 1px solid var(--academy-border, #e2e6ec); border-radius: 999px; overflow: hidden; }
+.problemBankModeSwitch button { background: transparent; border: 0; cursor: pointer; font-size: 13px; padding: 7px 14px; }
+.problemBankModeSwitch button.active { background: var(--academy-text-strong, #111827); color: #fff; }
+
+.problemBankMetrics { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+
+.problemBankToolbar { align-items: center; display: flex; flex-wrap: wrap; gap: 10px 16px; }
+.problemBankGradeChips { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.problemBankGradeChips button {
+  background: var(--academy-surface-muted, #f3f4f6);
+  border: 1px solid var(--academy-border, #e2e6ec);
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 10px;
+}
+.problemBankGradeChips button.active { background: var(--academy-text-strong, #111827); border-color: var(--academy-text-strong, #111827); color: #fff; }
+.problemBankStudentPick,
+.problemBankRoundPick { align-items: center; display: inline-flex; font-size: 13px; gap: 6px; }
+.problemBankStudentPick select,
+.problemBankRoundPick select { border: 1px solid var(--academy-border, #e2e6ec); border-radius: 8px; padding: 6px 8px; }
+.problemBankSelectionActions { align-items: center; display: inline-flex; gap: 6px; margin-left: auto; }
+.problemBankSelectionActions button {
+  background: var(--academy-surface, #fff);
+  border: 1px solid var(--academy-border, #e2e6ec);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 6px 12px;
+}
+.problemBankSelectionActions button.primaryButton { background: var(--academy-text-strong, #111827); border-color: var(--academy-text-strong, #111827); color: #fff; }
+.problemBankSelectionActions button:disabled { cursor: not-allowed; opacity: 0.5; }
+.problemBankSelectionCount { color: var(--academy-primary, #1e4a8f); font-weight: 600; font-size: 13px; }
+
+.problemBankLegend { align-items: center; display: flex; flex-wrap: wrap; font-size: 12px; gap: 6px 14px; }
+.problemBankLegend > span { align-items: center; display: inline-flex; gap: 5px; }
+.problemBankLegendHint { color: var(--academy-text-muted, #6b7280); margin-left: auto; }
+.problemBankBand { border: 1px solid rgba(0, 0, 0, 0.12); border-radius: 4px; display: inline-block; height: 12px; width: 12px; }
+.problemBankBand.band-none { background: #eceff3; }
+.problemBankBand.band-allCorrect { background: #3b82f6; }
+.problemBankBand.band-band1 { background: #22c55e; }
+.problemBankBand.band-band2 { background: #eab308; }
+.problemBankBand.band-band3 { background: #f97316; }
+.problemBankBand.band-band4 { background: #ef4444; }
+.problemBankBand.band-band5 { background: #8b5cf6; }
+
+.problemBankSaveMessage { color: var(--academy-text-muted, #6b7280); font-size: 12.5px; margin: 0; }
+.problemBankError { color: #b91c1c; font-size: 12.5px; }
+
+.problemBankBody { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr) 300px; align-items: start; }
+.problemBankUnits { display: grid; gap: 12px; min-width: 0; }
+
+.problemBankUnitCard {
+  background: var(--academy-surface, #fff);
+  border: 1px solid var(--academy-border, #e2e6ec);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.problemBankUnitHead { align-items: flex-start; display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; margin-bottom: 10px; }
+.problemBankUnitHead strong { display: block; font-size: 14px; }
+.problemBankUnitHead small { color: var(--academy-text-muted, #6b7280); font-size: 11.5px; }
+.problemBankUnitStats { align-items: center; display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.problemBankPill { background: var(--academy-accent-bg, #e8eff8); border-radius: 999px; color: var(--academy-primary, #1e4a8f); font-size: 11.5px; font-weight: 600; padding: 2px 9px; }
+.problemBankPill.warn { background: #f3e8ff; color: #7e22ce; }
+.problemBankPill.danger { background: #ffedd5; color: #c2410c; }
+.problemBankUnitSelect { background: transparent; border: 1px solid var(--academy-border, #e2e6ec); border-radius: 999px; cursor: pointer; font-size: 11.5px; padding: 2px 9px; }
+
+.problemBankNumberGrid { display: grid; gap: 6px; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); }
+.problemBankNumber {
+  background: var(--academy-surface-muted, #f3f4f6);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  color: var(--academy-text, #1f2937);
+  cursor: pointer;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  height: 40px;
+  position: relative;
+}
+.problemBankNumber.band-allCorrect { background: #dbeafe; }
+.problemBankNumber.band-band1 { background: #dcfce7; }
+.problemBankNumber.band-band2 { background: #fef9c3; }
+.problemBankNumber.band-band3 { background: #ffedd5; }
+.problemBankNumber.band-band4 { background: #fee2e2; }
+.problemBankNumber.band-band5 { background: #ede9fe; }
+.problemBankNumber.selected { border-color: var(--academy-text-strong, #111827); }
+.problemBankNumber.previewing { box-shadow: 0 0 0 2px var(--academy-accent-border, #bdd0e5); }
+.problemBankNumber.flagged::before { background: #f59e0b; border-radius: 50%; content: ""; height: 6px; left: 4px; position: absolute; top: 4px; width: 6px; }
+.problemBankNumber.student-wrong { color: #b91c1c; }
+.problemBankNumber.student-correct { color: #15803d; }
+.problemBankStudentMark { bottom: 1px; font-size: 10px; font-style: normal; position: absolute; right: 4px; }
+
+.problemBankPreview {
+  background: var(--academy-surface, #fff);
+  border: 1px solid var(--academy-border, #e2e6ec);
+  border-radius: 12px;
+  padding: 14px;
+  position: sticky;
+  top: 12px;
+}
+.problemBankPreview header { display: grid; gap: 4px; margin-bottom: 10px; }
+.problemBankPreview header strong { font-size: 13.5px; }
+.problemBankPreview header small { color: var(--academy-text-muted, #6b7280); font-size: 11.5px; }
+.problemBankPreview header .problemBankPill { justify-self: start; }
+.problemBankPreviewBody { display: grid; gap: 8px; }
+.problemBankPreviewBody img { border: 1px solid var(--academy-border, #e2e6ec); border-radius: 6px; max-width: 100%; }
+.problemBankTypeLabel { color: var(--academy-primary, #1e4a8f); font-size: 12px; margin: 0; }
+.problemBankPreviewMeta { color: var(--academy-text-muted, #6b7280); font-size: 11.5px; margin: 0; }
+
+/* ── 교재관리 ── */
+.problemBankCenterLayout { display: grid; gap: 14px; grid-template-columns: 320px minmax(0, 1fr); align-items: start; }
+.problemBankImportPanel { display: grid; gap: 10px; }
+.problemBankImportPanel h2,
+.problemBankListPanel h2,
+.problemBankDetailPanel h2 { font-size: 15px; margin: 0 0 6px; }
+.problemBankSteps { color: var(--academy-text-muted, #6b7280); font-size: 12.5px; margin: 0; padding-left: 18px; }
+.problemBankSteps code { font-size: 11.5px; word-break: break-all; }
+.problemBankUploadMessage { font-size: 12.5px; margin: 0; }
+.problemBankUploadMessage.stage-error { color: #b91c1c; }
+.problemBankUploadMessage.stage-done { color: #15803d; }
+.problemBankListPanel { grid-column: 1; }
+.problemBankDetailPanel { grid-column: 2; grid-row: 1 / span 2; }
+.problemBankBookList { display: grid; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.problemBankDetailMeta { display: grid; font-size: 13px; gap: 4px 12px; grid-template-columns: 60px 1fr; margin: 0 0 12px; }
+.problemBankDetailMeta dt { color: var(--academy-text-muted, #6b7280); }
+.problemBankDetailMeta dd { margin: 0; }
+.problemBankUnitList { display: grid; font-size: 13px; gap: 0; list-style: none; margin: 0; padding: 0; }
+.problemBankUnitRow { border-bottom: 1px solid var(--academy-border, #e2e6ec); display: grid; gap: 8px; grid-template-columns: minmax(0, 1fr) 120px 48px; padding: 5px 6px; }
+.problemBankUnitRow.head { border-bottom-color: var(--academy-border-strong, #cbd5e1); color: var(--academy-text-muted, #6b7280); }
+.problemBankUnitRow span:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+.problemBankFlagged { margin-top: 14px; }
+.problemBankFlagged h3 { font-size: 14px; margin: 0 0 4px; }
+.problemBankFlagged ul { display: grid; gap: 10px; list-style: none; margin: 8px 0 0; padding: 0; }
+.problemBankFlagged img { border: 1px solid var(--academy-border, #e2e6ec); display: block; margin-top: 4px; max-width: 100%; }
+
+/* ── 오답지 인쇄 레이어 ── */
+.problemBankPrintLayer {
+  background: rgba(17, 24, 39, 0.6);
+  inset: 0;
+  overflow: auto;
+  padding: 16px;
+  position: fixed;
+  z-index: 60;
+}
+.problemBankPrintToolbar {
+  align-items: center;
+  background: var(--academy-surface, #fff);
+  border-radius: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 0 auto 12px;
+  max-width: 210mm;
+  padding: 10px 14px;
+}
+.problemBankPrintToolbar strong { display: block; font-size: 14px; }
+.problemBankPrintToolbar small { color: var(--academy-text-muted, #6b7280); }
+.problemBankPrintToolbar label { align-items: center; display: inline-flex; font-size: 13px; gap: 6px; }
+.problemBankPrintToolbar button { border-radius: 8px; cursor: pointer; font-size: 13px; padding: 6px 14px; }
+.problemBankPrintToolbar .primaryButton { background: #111; border: 1px solid #111; color: #fff; margin-left: auto; }
+.problemBankPrintToolbar .softButton { background: #fff; border: 1px solid var(--academy-border, #e2e6ec); }
+
+/* 종이: A4 세로. 화면에서도 종이 크기로 보여 인쇄와 같게 한다. */
+.problemBankPrintSheet {
+  background: #fff;
+  color: #000;
+  margin: 0 auto;
+  min-height: 297mm;
+  padding: 14mm 13mm 16mm;
+  position: relative;
+  width: 210mm;
+}
+.problemBankWatermark {
+  left: 50%;
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 50%;
+  z-index: 0;
+}
+.problemBankPrintHead {
+  align-items: baseline;
+  border-bottom: 1.2pt solid #000;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 10pt;
+  gap: 6px 16px;
+  margin-bottom: 5mm;
+  padding-bottom: 2mm;
+  position: relative;
+  z-index: 1;
+}
+.problemBankPrintHead strong { font-size: 15pt; margin-right: auto; }
+.problemBankPrintColumns {
+  column-count: 2;
+  column-fill: auto;
+  column-gap: 8mm;
+  column-rule: 0.4pt solid #000;
+  position: relative;
+  z-index: 1;
+}
+.problemBankPrintItem { break-inside: avoid; display: block; margin-bottom: 6mm; padding-bottom: 2mm; }
+.problemBankPrintSource { color: #000; display: flex; flex-wrap: wrap; font-size: 7.5pt; gap: 8px; justify-content: space-between; }
+.problemBankPrintType { color: #000; }
+.problemBankPrintNumber { font-family: "Segoe UI", "Noto Sans KR", sans-serif; font-size: 14pt; font-weight: 700; letter-spacing: 0.02em; margin: 1mm 0 1.5mm; }
+.problemBankPrintItem img { display: block; margin-bottom: 1.5mm; max-width: 100%; }
+.problemBankPrintMissing { color: #000; font-size: 9pt; }
+.problemBankPrintSpace { height: 40mm; }
+.problemBankPrintSheet.space-compact .problemBankPrintSpace { height: 20mm; }
+.problemBankPrintSheet.space-wide .problemBankPrintSpace { height: 70mm; }
+.problemBankPrintAnswers,
+.problemBankPrintSolutions { break-before: page; margin-top: 8mm; position: relative; z-index: 1; }
+.problemBankPrintAnswers h3,
+.problemBankPrintSolutions h3 { border-bottom: 1.2pt solid #000; font-size: 13pt; margin: 0 0 4mm; padding-bottom: 1.5mm; }
+.problemBankPrintAnswerGrid { display: grid; gap: 2mm 4mm; grid-template-columns: repeat(5, 1fr); }
+.problemBankPrintAnswerGrid > div { border: 0.4pt solid #000; display: grid; font-size: 10pt; gap: 1mm; padding: 2mm; }
+.problemBankPrintAnswerGrid small { color: #000; font-size: 7pt; }
+
+@media print {
+  @page { size: A4 portrait; margin: 0; }
+  /* 앱 화면(#root)은 통째로 감추고 body 아래 인쇄 레이어만 남긴다. */
+  body.problemBankPrinting > #root { display: none !important; }
+  .problemBankPrintLayer { background: #fff; inset: auto; overflow: visible; padding: 0; position: static; }
+  .problemBankPrintLayer,
+  .problemBankPrintLayer * { visibility: visible; }
+  .problemBankPrintLayer .noPrint,
+  .problemBankPrintLayer .noPrint * { display: none !important; }
+  .problemBankPrintSheet { box-shadow: none; margin: 0; width: auto; }
+  .problemBankWatermark { position: fixed; }
+  .problemBankPrintColumns { column-fill: auto; }
+}
+
+@media (max-width: 960px) {
+  .problemBankBoard,
+  .problemBankBody,
+  .problemBankCenterLayout { grid-template-columns: minmax(0, 1fr); }
+  .problemBankSidebar,
+  .problemBankPreview { position: static; }
+  .problemBankDetailPanel { grid-column: 1; grid-row: auto; }
+}

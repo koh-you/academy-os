@@ -1,5 +1,11 @@
 # Academy OS Current Status
 
+## 2026-09-12 문제은행(오답은행) 1단계 — 교재관리 · 교재별 오답 · 오답지 인쇄
+
+- 오답관리 안에 `교재별 오답` 탭을 만들었다. 교재 폴더 트리 → 단원별 번호 그리드(반 오답률 색 띠) → 학생·회차별 정오답 기록 → 선택 인쇄(A4 2단 · 시험지와 같은 로고 워터마크). 사이드바의 `자료함`은 `교재관리`(패키지 등록·검수)로 바꿨고 자료함 화면 계약·포털 자료 공유는 코드에 남겼다.
+- 텍스트 PDF 원천화 CLI(`scripts/problem-bank/ingest-text-pdf.mjs`)가 글자 좌표만으로 문항을 자른다. RPM 중3-2 수학 120쪽 → 644문항·6단원·공통 지시문 그룹 37개, 번호 연속·flagged 0, 비전 토큰 0, 17초. 새 표 5개는 `supabase/20260912_problem_bank.sql`(미적용 · 사람 Gate).
+- 검증: 세그먼터·라우트 registry 단위 검사, safe browser 2/2(기록 → 서버 재조회 → 인쇄 레이어), `check:fast` 828/828·lint·build, 서버 라우트 baseline/closeout·tenant-scope·access-policy 통과. 운영 쓰기 없음. 상세: [문제은행 README](problem-bank/README.md).
+
 ## 2026-09-12 AI 운영 읽기 인증 기준
 
 - Codex 실측에서 무인증 운영 API는 `401 auth_required`, 기존 로그인 교사 화면의 알림 기록 재조회는 정상 완료됐다. Render/Supabase service-role 없이 가능한 화면 조회 경로를 확인했다.

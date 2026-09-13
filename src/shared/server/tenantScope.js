@@ -87,6 +87,12 @@ export const TENANT_SCOPED_TABLES = new Set([
   "exam_prep_rows",
   "academy_reminders",
   "problem_books",
+  // 문제은행(오답은행) — supabase/20260912_problem_bank.sql
+  "problem_bank_books",
+  "problem_bank_units",
+  "problem_bank_items",
+  "problem_bank_regions",
+  "problem_bank_attempts",
   "resource_materials",
   "test_sessions",
   "notification_jobs",
