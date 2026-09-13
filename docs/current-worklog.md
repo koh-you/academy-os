@@ -5,6 +5,14 @@
 - 수업일지는 초기 읽기 모드와 항상 보이는 하단 바를 사용한다. 주 버튼은 `편집` → `변경 저장`으로 전환되고, 변경 없음/저장 성공 뒤 읽기 모드로 복귀하며 별도 “편집 중” 메시지는 표시하지 않는다.
 - 하단 바에는 수업 수정·알림톡·편집/저장만 남겼다. `수업 취소`는 수업 수정 모달의 왼쪽 위험 버튼으로 이동했고, 일반 수업 확인 모달과 생성 수업 확인창을 재사용한다. 취소 성공 뒤 겹친 두 모달을 모두 닫는다.
 - 관련 lesson fixture와 확정 취소 종료 경로 focused browser, `check:duplication`, `check:fast` 828/828, `test:production` 308/308, safe browser 97/97 통과. 실제 안전 미리보기에서도 세 상태를 확인했으며 운영 쓰기·알림 발송은 없었다.
+## 2026-09-13 문제은행 피드백 7건
+
+- 운영 조회(로그인 교사 화면·자기 세션으로 GET/POST 만): `GET /api/problem-bank/books` 는 200 빈 목록, `book?bookId=pbk_c9a59dba4b` 는 404 → 교재가 삭제된 상태였고, 1.5MB POST 도 정상이라 「Failed to fetch」는 Render 재배포 창의 일시 오류로 판단. 등록 전 `/health` 깨우기 + 재시도로 대비했다.
+- 「이미지가 안 나타남」(공통 지시문 문항·0134)은 재현 데이터가 없어 원인 확정 불가 — 미리보기에 img onError 안내와 교재관리 「이미지 누락 검사」(영역 storage_path ↔ Storage 목록 대조)를 넣어 다음에 바로 짚을 수 있게 했다.
+- 보드는 `mode` prop 하나로 반/학생을 가른다. 학생별 오답 탭은 기존 FilterBar 학생 선택을 그대로 보드의 `studentId` 로 넘기고, 레거시 `wrongProblems` 메모 표는 「교재 외 오답 메모」로 이름만 바꿔 아래에 뒀다(명시 저장 계약·scenario·browser spec 유지).
+- 인쇄 2단은 multicol(`column-fill: auto`)이 화면에서 왼쪽 열만 채우던 것을 grid 2열로 바꿨다(홀수 항목 오른쪽에 구분선). PPT 는 서명 URL 을 data URL 로 바꿔 넣고 공통 지시문 강조 상자는 도형으로 그린다.
+- App.jsx +3줄, api/server.js +1줄이라 ratchet 을 9313·5471 로 올렸다. `<details>` 는 disclosure 인벤토리 때문에 쓰지 않는다.
+
 ## 2026-09-13 정답·해설 연결
 
 - 사용자 요청으로 문항·정답·해설을 **폴더 하나**로 등록하게 했다: ingest-answers 가 문항 패키지 폴더를 `--out` 으로 받아 `manifest.json` 에서 book_id 를 읽고, 교재관리 「패키지 등록」이 `manifest-answers.json` 을 발견하면 이어서 올린다. 폴더 pick → 4개 요청 순서·파일 이름을 stub 라우트로 검증하는 browser spec 을 추가했다.

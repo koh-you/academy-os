@@ -7,11 +7,25 @@ import {
 const sends = [];
 const calls = [];
 let teacherSession = { teacherId: "teacher-1" };
+let portalSession = { role: "student", studentId: "s1" };
 let rawBody = {};
 let readOptions = null;
 
 const registry = createProblemBankRouteRegistry({
   getTeacherSession: () => teacherSession,
+  getPortalSession: () => portalSession,
+  listStudentProblemBankSummary: async (studentId) => {
+    calls.push(`portalSummary:${studentId}`);
+    return { books: [{ bookId: "pbk_1", items: [] }], attempts: [] };
+  },
+  resolveStudentProblemBankImages: async (studentId, itemIds) => {
+    calls.push(`portalImages:${studentId}:${itemIds.join(",")}`);
+    return itemIds.map((itemId) => ({ itemId, kind: "body", url: `signed://${itemId}` }));
+  },
+  auditProblemBankBookImages: async (bookId) => {
+    calls.push(`audit:${bookId}`);
+    return { bookId, regionCount: 3, storedCount: 2, missing: [{ itemId: `${bookId}-0002`, kind: "body", storagePath: `${bookId}/items/x.jpg` }], orphanCount: 0 };
+  },
   listProblemBankBooks: async () => {
     calls.push("listBooks");
     return [{ bookId: "pbk_1", title: "RPM", units: [] }];
@@ -79,7 +93,10 @@ assert.deepEqual(problemBankRouteSignatures.map((signature) => `${signature.meth
   "POST /api/problem-bank/import-answers",
   "POST /api/problem-bank/images",
   "GET /api/problem-bank/attempts",
-  "POST /api/problem-bank/attempts"
+  "POST /api/problem-bank/attempts",
+  "GET /api/problem-bank/book-audit",
+  "GET /api/portal-problem-bank",
+  "POST /api/portal-problem-bank/item-images"
 ]);
 assert.equal(registry.routeSignatures, problemBankRouteSignatures);
 
@@ -136,5 +153,23 @@ rawBody = { entries: [{ studentId: "s1", bookId: "pbk_1", itemId: "pbk_1-0001", 
 assert.equal(await registry.dispatch(makeRequest("POST", "/api/problem-bank/attempts")), true);
 assert.equal(sends.at(-1).body.attempts.length, 1);
 assert.ok(calls.includes("save:1"));
+
+assert.equal(await registry.dispatch(makeRequest("GET", "/api/problem-bank/book-audit?bookId=pbk_1")), true);
+assert.equal(sends.at(-1).body.missing.length, 1);
+assert.ok(calls.includes("audit:pbk_1"));
+
+// 학생 포털: 교사 세션이 없어도 학생 세션이면 읽고, 학생 세션이 없으면 401.
+teacherSession = null;
+assert.equal(await registry.dispatch(makeRequest("GET", "/api/portal-problem-bank")), true);
+assert.deepEqual(sends.at(-1).body, { ok: true, books: [{ bookId: "pbk_1", items: [] }], attempts: [] });
+assert.ok(calls.includes("portalSummary:s1"));
+rawBody = { itemIds: ["pbk_1-0001"] };
+assert.equal(await registry.dispatch(makeRequest("POST", "/api/portal-problem-bank/item-images")), true);
+assert.deepEqual(sends.at(-1).body.regions.map((region) => region.url), ["signed://pbk_1-0001"]);
+assert.ok(calls.includes("portalImages:s1:pbk_1-0001"));
+portalSession = null;
+assert.equal(await registry.dispatch(makeRequest("GET", "/api/portal-problem-bank")), true);
+assert.equal(sends.at(-1).statusCode, 401);
+teacherSession = { teacherId: "teacher-1" };
 
 console.log("problem bank route registry fixtures passed");

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import academyMark from "../../../assets/branding/academy-mark.png";
 import { buildPrintEntries, flattenPrintItems, printWidthMm } from "./problemBankModel.js";
+import { exportWrongAnswerPptx } from "./problemBankPptx.js";
 
 // 인쇄 워터마크는 서버 시험지 워터마크(src/shared/server/testPaperWatermark.js)와 같은 로고·같은 값이다:
 // 페이지 중앙 · 폭 50% · 불투명도 0.1 · 회전 없음. 문항 이미지가 흰 바탕이라 뒤에 두면 가려지므로
@@ -18,6 +19,7 @@ export function WrongAnswerPrintSheet({ book, units, items, selectedItemIds, ima
   const [includeSolutions, setIncludeSolutions] = useState(false);
   const [solutionSpace, setSolutionSpace] = useState("normal");
   const [columns, setColumns] = useState(2);
+  const [pptxState, setPptxState] = useState({ stage: "idle", message: "" });
   const entries = useMemo(
     () => buildPrintEntries({ book, units, items, selectedItemIds, imagesByItem }),
     [book, units, items, selectedItemIds, imagesByItem]
@@ -38,6 +40,24 @@ export function WrongAnswerPrintSheet({ book, units, items, selectedItemIds, ima
     document.body.classList.add("problemBankPrinting");
     return () => document.body.classList.remove("problemBankPrinting");
   }, []);
+
+  async function savePptx() {
+    if (pptxState.stage === "running") return;
+    setPptxState({ stage: "running", message: "PPT 만드는 중… 0%" });
+    try {
+      const result = await exportWrongAnswerPptx({
+        title,
+        subtitle,
+        entries,
+        includeSolutions,
+        watermarkUrl: academyMark,
+        onProgress: (done, total) => setPptxState({ stage: "running", message: `PPT 만드는 중… ${Math.round((done / total) * 100)}%` })
+      });
+      setPptxState({ stage: "done", message: `${result.fileName} 저장 (${result.slideCount}장)` });
+    } catch (error) {
+      setPptxState({ stage: "error", message: error.message || "PPT 를 만들지 못했습니다." });
+    }
+  }
 
   return createPortal(
     <div className="problemBankPrintLayer" role="region" aria-label="오답지 인쇄 미리보기">
@@ -64,7 +84,9 @@ export function WrongAnswerPrintSheet({ book, units, items, selectedItemIds, ima
         <label><input checked={includeAnswers} disabled={answerEntries.length === 0} onChange={(event) => setIncludeAnswers(event.target.checked)} type="checkbox" /> 빠른정답 {answerEntries.length === 0 ? "(등록된 정답 없음)" : `(${answerEntries.length}/${printRows.length})`}</label>
         <label><input checked={includeSolutions} disabled={solutionEntries.length === 0} onChange={(event) => setIncludeSolutions(event.target.checked)} type="checkbox" /> 해설 {solutionEntries.length === 0 ? "(등록된 해설 없음)" : `(${solutionEntries.length}/${printRows.length})`}</label>
         <button className="primaryButton" onClick={() => window.print()} type="button">🖨 인쇄</button>
+        <button className="softButton" disabled={pptxState.stage === "running"} onClick={savePptx} type="button">PPT 저장</button>
         <button className="softButton" onClick={onClose} type="button">닫기</button>
+        {pptxState.message ? <small aria-live="polite" className={`problemBankPptxMessage stage-${pptxState.stage}`}>{pptxState.message}</small> : null}
       </div>
 
       <div className={`problemBankPrintSheet space-${solutionSpace} cols-${columns}`}>

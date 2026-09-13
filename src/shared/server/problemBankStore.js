@@ -444,6 +444,85 @@ export function createProblemBankStore({
     return { bookId: safeBookId, uploaded };
   }
 
+  /**
+   * 학생 포털용 요약: 그 학생의 기록이 있는 교재마다 단원과 기록 문항(최신 회차 결과)을 돌려준다.
+   * 이미지 URL 은 여기서 만들지 않는다(포털은 resolveStudentProblemBankImages 로 필요한 것만 받는다).
+   */
+  async function listStudentProblemBankSummary(studentId) {
+    requireDatabase();
+    const safeStudentId = textOf(studentId);
+    if (!safeStudentId) throw createStatusError("학생 ID가 필요합니다.", 400);
+    const attemptRows = await listRows("problem_bank_attempts", `select=*&student_id=eq.${encodeURIComponent(safeStudentId)}&order=recorded_at.desc`, { requireServiceRole: true });
+    const attempts = attemptRows.map(fromAttemptRow);
+    const bookIds = [...new Set(attempts.map((attempt) => attempt.bookId))];
+    if (bookIds.length === 0) return { books: [], attempts: [] };
+    const bookFilter = `book_id=in.(${bookIds.map((id) => encodeURIComponent(id)).join(",")})`;
+    const itemIds = [...new Set(attempts.map((attempt) => attempt.itemId))];
+    const [bookRows, unitRows, itemRows] = await Promise.all([
+      listRows("problem_bank_books", `select=*&${bookFilter}`, { requireServiceRole: true }),
+      listRows("problem_bank_units", `select=*&${bookFilter}&order=position.asc`, { requireServiceRole: true }),
+      listRows("problem_bank_items", `select=*&item_id=in.(${itemIds.map((id) => encodeURIComponent(id)).join(",")})&order=number_sort.asc`, { requireServiceRole: true })
+    ]);
+    const unitsByBook = new Map();
+    for (const row of unitRows) {
+      const unit = fromUnitRow(row);
+      if (!unitsByBook.has(unit.bookId)) unitsByBook.set(unit.bookId, []);
+      unitsByBook.get(unit.bookId).push(unit);
+    }
+    const itemsByBook = new Map();
+    for (const row of itemRows) {
+      const item = fromItemRow(row);
+      if (!itemsByBook.has(item.bookId)) itemsByBook.set(item.bookId, []);
+      itemsByBook.get(item.bookId).push(item);
+    }
+    return {
+      books: bookRows.map((row) => ({
+        ...fromBookRow(row),
+        units: unitsByBook.get(row.book_id) ?? [],
+        items: itemsByBook.get(row.book_id) ?? []
+      })),
+      attempts
+    };
+  }
+
+  /** 학생 포털: 자기 기록이 있는 문항의 이미지 URL 만 준다. 남의 문항 ID 는 조용히 뺀다. */
+  async function resolveStudentProblemBankImages(studentId, itemIds) {
+    requireDatabase();
+    const safeStudentId = textOf(studentId);
+    if (!safeStudentId) throw createStatusError("학생 ID가 필요합니다.", 400);
+    const requested = [...new Set((Array.isArray(itemIds) ? itemIds : []).map((value) => textOf(value)).filter(Boolean))].slice(0, 60);
+    if (requested.length === 0) return [];
+    const owned = await listRows(
+      "problem_bank_attempts",
+      `select=item_id&student_id=eq.${encodeURIComponent(safeStudentId)}&item_id=in.(${requested.map((id) => encodeURIComponent(id)).join(",")})`,
+      { requireServiceRole: true }
+    );
+    const allowed = [...new Set(owned.map((row) => textOf(row.item_id)))];
+    return allowed.length ? resolveProblemBankItemImages(allowed) : [];
+  }
+
+  /**
+   * 교재 이미지 누락 검사: 영역 표의 storage_path 와 실제 Storage 객체를 대조한다.
+   * 등록이 중간에 끊겼거나 패키지가 바뀐 뒤 이미지가 안 보일 때 어느 파일이 없는지 알려 준다.
+   */
+  async function auditProblemBankBookImages(bookId) {
+    requireDatabase();
+    const safeBookId = textOf(bookId);
+    if (!/^pbk_[a-f0-9]{6,32}$/.test(safeBookId)) throw createStatusError("교재 ID 형식이 올바르지 않습니다.", 400);
+    const regionRows = await listRows(
+      "problem_bank_regions",
+      `select=item_id,kind,storage_path&item_id=like.${encodeURIComponent(`${safeBookId}-%`)}`,
+      { requireServiceRole: true }
+    );
+    const storedPaths = new Set(await listStorageObjectPaths(problemBankStorageBucket, `${safeBookId}/`));
+    const missing = regionRows
+      .filter((row) => textOf(row.storage_path) && !storedPaths.has(textOf(row.storage_path)))
+      .map((row) => ({ itemId: row.item_id, kind: row.kind, storagePath: row.storage_path }));
+    const referenced = new Set(regionRows.map((row) => textOf(row.storage_path)));
+    const orphanCount = [...storedPaths].filter((storagePath) => !referenced.has(storagePath)).length;
+    return { bookId: safeBookId, regionCount: regionRows.length, storedCount: storedPaths.size, missing, orphanCount };
+  }
+
   /** 학생별 정오답 기록. bookId 만 주면 그 교재의 전 학생 기록(오답률 계산용). */
   async function listProblemBankAttempts({ bookId, studentId } = {}) {
     requireDatabase();
@@ -508,6 +587,9 @@ export function createProblemBankStore({
     importProblemBankAnswers,
     uploadProblemBankImages,
     listProblemBankAttempts,
-    saveProblemBankAttempts
+    saveProblemBankAttempts,
+    listStudentProblemBankSummary,
+    resolveStudentProblemBankImages,
+    auditProblemBankBookImages
   };
 }
