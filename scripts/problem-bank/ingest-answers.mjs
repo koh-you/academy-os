@@ -2,8 +2,10 @@
 // 정답과 풀이(해설) PDF → 문항별 해설 이미지 + 「답」 줄만 오려 낸 빠른정답 이미지. 비전 AI 호출 0.
 //
 // 사용:
-//   node scripts/problem-bank/ingest-answers.mjs --book-id pbk_xxxxxxxxxx --solutions "…정답.pdf" \
-//     --out output/problem-bank/rpm-m3-2-answers [--dpi 220]
+//   node scripts/problem-bank/ingest-answers.mjs --solutions "…정답.pdf" --out <문항 패키지 폴더> [--book-id pbk_…] [--dpi 220]
+//
+// --out 을 ingest-text-pdf 의 출력 폴더로 주면 manifest.json 옆에 정답·해설이 들어가 교재관리에서 한 번에 등록된다.
+// 그때 --book-id 는 그 manifest.json 에서 읽는다(다른 폴더면 --book-id 필수).
 //
 // 출력 폴더:
 //   manifest-answers.json   { book_id, solutions: [{number_label, file, parts, …}], answers: [{number_label, file, …}] }
@@ -224,14 +226,20 @@ async function ingestSolutions({ pdfPath, outDir, bookId, dpi }) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  if (!args["book-id"] || !args.out || !args.solutions) {
-    console.error("사용: --book-id <pbk_…> --solutions <해설.pdf> --out <폴더> [--dpi 220]");
+  if (!args.out || !args.solutions) {
+    console.error("사용: --solutions <해설.pdf> --out <문항 패키지 폴더> [--book-id <pbk_…>] [--dpi 220]");
     process.exit(2);
   }
-  const bookId = String(args["book-id"]);
+  const outDir = path.resolve(args.out);
+  let bookId = String(args["book-id"] ?? "");
+  if (!bookId) {
+    const itemManifest = await readFile(path.join(outDir, "manifest.json"), "utf8").then(JSON.parse).catch(() => null);
+    bookId = String(itemManifest?.book?.book_id ?? "");
+    if (!bookId) throw new Error("--book-id 가 없고 --out 폴더에 manifest.json 도 없습니다. 문항 패키지 폴더를 --out 으로 주거나 --book-id 를 지정하세요.");
+    console.log(`book_id ${bookId} (manifest.json 에서 읽음)`);
+  }
   if (!/^pbk_[a-f0-9]{6,32}$/.test(bookId)) throw new Error("--book-id 는 교재관리에 등록된 pbk_… 값이어야 합니다.");
   const dpi = Number(args.dpi) || 220;
-  const outDir = path.resolve(args.out);
   await Promise.all(["answers", "solutions", "qa"].map((dir) => mkdir(path.join(outDir, dir), { recursive: true })));
 
   const { solutions, answers } = await ingestSolutions({ pdfPath: String(args.solutions), outDir, bookId, dpi });

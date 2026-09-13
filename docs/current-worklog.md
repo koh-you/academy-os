@@ -2,6 +2,8 @@
 
 ## 2026-09-13 정답·해설 연결
 
+- 사용자 요청으로 문항·정답·해설을 **폴더 하나**로 등록하게 했다: ingest-answers 가 문항 패키지 폴더를 `--out` 으로 받아 `manifest.json` 에서 book_id 를 읽고, 교재관리 「패키지 등록」이 `manifest-answers.json` 을 발견하면 이어서 올린다. 폴더 pick → 4개 요청 순서·파일 이름을 stub 라우트로 검증하는 browser spec 을 추가했다.
+
 - 빠른정답 PDF 는 2쪽 가로 격자였고 번호·답을 줄 단위로 묶는 데까지 갔으나, 0001 답이 12/13(673문항판)으로 교재(15/17 · 644문항판)와 달라 폐기했다. 해설 PDF 의 「답」 아이콘(U+E34C, 7.5pt) 줄을 잉크 띠(`inkBand`: 분수 틈 1.6pt 는 잇고 이웃 줄에서 멈춤, 한계까지 잉크가 이어지면 그래프로 보고 상자 끝까지)로 오려 빠른정답 이미지로 삼았다.
 - 해설 세그먼트: `segmentPage` 에 `markerPattern`(「본문 p.」 배너 위 20pt 에서 끊기)과 `bodyBottom → badgeBottom`(해설은 마지막 줄이 0.93H 를 넘어 0386 번이 바닥글로 버려지던 것) 을 더했다. 컬럼 맨 위 배지 없는 본문 글줄은 직전 문항의 이어지는 풀이로 붙이되, 그래프 세로축 라벨(큰 글자·오른쪽)을 대단원 배너로 오인하던 것을 컬럼 왼쪽 60pt 안으로 한정해 고쳤다(0626).
 - 서버: `answer` 영역 종류(SQL 1개), `importProblemBankAnswers`(번호로 연결 · 기존 answer/solution 만 교체 · `has_solution` 재계산), 문항 재등록 시 정답·해설 영역과 `has_solution` 보존. `packageFilePattern` 을 `items|answers|solutions` 로 넓혔다. 메모리 표 fixture 로 `test:problem-bank-store` 를 추가했다.
