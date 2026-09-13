@@ -28,13 +28,14 @@ export function WrongAnswerPrintSheet({ book, units, items, selectedItemIds, ima
     .join(" · ");
 
   // 인쇄 레이어는 body 바로 아래에 둔다. 인쇄할 때 #root 를 통째로 숨겨야 앱 화면이 빈 쪽으로 딸려 나오지 않는다.
+  // 공용 Modal 셸은 #root 안에 그려져 인쇄에 같이 숨겨지므로 여기서는 쓰지 않는다(대화상자가 아니라 종이 미리보기 영역).
   useEffect(() => {
     document.body.classList.add("problemBankPrinting");
     return () => document.body.classList.remove("problemBankPrinting");
   }, []);
 
   return createPortal(
-    <div className="problemBankPrintLayer" role="dialog" aria-label="오답지 인쇄 미리보기">
+    <div className="problemBankPrintLayer" role="region" aria-label="오답지 인쇄 미리보기">
       <div className="problemBankPrintToolbar noPrint">
         <div>
           <strong>{title}</strong>
