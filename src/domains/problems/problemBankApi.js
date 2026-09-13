@@ -1,6 +1,6 @@
 // 문제은행 API 호출. 서버 라우트는 src/shared/server/problemBankRouteRegistry.js.
 
-import { getJsonWithTimeout, postJson, postJsonWithTimeout } from "../../shared/utils/apiClient.js";
+import { apiUrl, getJsonWithTimeout, postJson, postJsonWithTimeout, withAuthHeaders } from "../../shared/utils/apiClient.js";
 
 export function fetchProblemBankBooks() {
   return getJsonWithTimeout("/api/problem-bank/books", 15000).then((result) => result.books ?? []);
@@ -8,6 +8,21 @@ export function fetchProblemBankBooks() {
 
 export function fetchProblemBankBook(bookId) {
   return getJsonWithTimeout(`/api/problem-bank/book?bookId=${encodeURIComponent(bookId)}`, 20000);
+}
+
+export function updateProblemBankBook(bookId, patch) {
+  return postJson("/api/problem-bank/book", { bookId, patch }).then((result) => result.book);
+}
+
+/** 교재와 그 아래 문항·기록·이미지를 지운다. 되돌릴 수 없다. */
+export async function deleteProblemBankBook(bookId) {
+  const response = await fetch(apiUrl(`/api/problem-bank/book?bookId=${encodeURIComponent(bookId)}`), {
+    method: "DELETE",
+    headers: withAuthHeaders()
+  });
+  const result = await response.json();
+  if (!response.ok || !result.ok) throw new Error(result?.error || `교재 삭제 실패: ${response.status}`);
+  return result;
 }
 
 /** 문항 몇 개의 영역 이미지 서명 URL. 미리보기·인쇄 직전에만 부른다. */

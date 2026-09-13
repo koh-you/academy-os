@@ -98,29 +98,39 @@ function toViewportTokens(textContent, viewport) {
 /**
  * 잉크 투영. [x0,x1]×[y0,y1] (pt) 안에서 첫/마지막 잉크 행을 pt 로 돌려준다.
  * 회색 임계 200 · 한 행에 어두운 픽셀 2개 이상이면 잉크.
+ *
+ * 다음 문항 번호 바로 위에 붙는 「중요」 아이콘(작은 그림)이 같은 컬럼에 있으면 하단이 거기까지 늘어난다
+ * (0126번 사례). 아이콘은 폭이 좁으므로, 세그먼트 하단 근처(iconZonePt)에서 잉크 폭이 iconMaxWidthPt 보다
+ * 좁은 행은 내용으로 세지 않는다. 소문항 (2)처럼 빈 줄 뒤에 오는 진짜 내용은 폭이 넓어 그대로 남는다.
  */
-function inkExtent(imageData, imageWidth, scale, box) {
+function inkExtent(imageData, imageWidth, scale, box, { iconZonePt = 18, iconMaxWidthPt = 18 } = {}) {
   const x0 = Math.max(0, Math.floor(box.x0 * scale));
   const x1 = Math.min(imageWidth, Math.ceil(box.x1 * scale));
   const y0 = Math.max(0, Math.floor(box.y0 * scale));
   const y1 = Math.min(Math.floor(imageData.length / 4 / imageWidth), Math.ceil(box.y1 * scale));
+  const iconZoneStart = y1 - Math.round(iconZonePt * scale);
+  const iconMaxWidth = iconMaxWidthPt * scale;
   let first = -1;
   let last = -1;
   for (let y = y0; y < y1; y += 1) {
     let dark = 0;
+    let minX = -1;
+    let maxX = -1;
     const rowOffset = y * imageWidth * 4;
     for (let x = x0; x < x1; x += 2) {
       const offset = rowOffset + x * 4;
       const gray = (imageData[offset] + imageData[offset + 1] + imageData[offset + 2]) / 3;
       if (gray < 200) {
         dark += 1;
-        if (dark >= 2) break;
+        if (minX === -1) minX = x;
+        maxX = x;
       }
     }
-    if (dark >= 2) {
-      if (first === -1) first = y;
-      last = y;
-    }
+    if (dark < 2) continue;
+    // 아이콘은 컬럼 왼쪽 가장자리에 붙는다. 오른쪽 그림 라벨(x·C 같은 한 글자)은 건드리지 않는다.
+    if (y >= iconZoneStart && maxX - minX < iconMaxWidth && minX - x0 < iconMaxWidth * 1.5) continue;
+    if (first === -1) first = y;
+    last = y;
   }
   if (first === -1) return null;
   return { top: first / scale, bottom: (last + 1) / scale };

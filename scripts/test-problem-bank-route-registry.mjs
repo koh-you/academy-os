@@ -16,6 +16,14 @@ const registry = createProblemBankRouteRegistry({
     calls.push("listBooks");
     return [{ bookId: "pbk_1", title: "RPM", units: [] }];
   },
+  updateProblemBankBook: async (bookId, patch) => {
+    calls.push(`update:${bookId}:${JSON.stringify(patch)}`);
+    return { bookId, ...patch };
+  },
+  deleteProblemBankBook: async (bookId) => {
+    calls.push(`delete:${bookId}`);
+    return { bookId, deletedAttempts: 2, deletedImages: 3 };
+  },
   getProblemBankBook: async (bookId) => {
     calls.push(`getBook:${bookId}`);
     if (!bookId) {
@@ -60,6 +68,8 @@ function makeRequest(method, path) {
 assert.deepEqual(problemBankRouteSignatures.map((signature) => `${signature.method} ${signature.path}`), [
   "GET /api/problem-bank/books",
   "GET /api/problem-bank/book",
+  "POST /api/problem-bank/book",
+  "DELETE /api/problem-bank/book",
   "POST /api/problem-bank/item-images",
   "POST /api/problem-bank/import",
   "POST /api/problem-bank/images",
@@ -85,6 +95,13 @@ assert.equal(sends.at(-1).body.book.bookId, "pbk_1");
 assert.equal(await registry.dispatch(makeRequest("GET", "/api/problem-bank/book")), true);
 assert.equal(sends.at(-1).statusCode, 400);
 assert.equal(sends.at(-1).body.ok, false);
+
+rawBody = { bookId: "pbk_1", patch: { title: "RPM 새 제목", folderPath: "중3 / RPM" } };
+assert.equal(await registry.dispatch(makeRequest("POST", "/api/problem-bank/book")), true);
+assert.deepEqual(sends.at(-1).body, { ok: true, book: { bookId: "pbk_1", title: "RPM 새 제목", folderPath: "중3 / RPM" } });
+assert.equal(await registry.dispatch(makeRequest("DELETE", "/api/problem-bank/book?bookId=pbk_1")), true);
+assert.deepEqual(sends.at(-1).body, { ok: true, bookId: "pbk_1", deletedAttempts: 2, deletedImages: 3 });
+assert.ok(calls.includes("delete:pbk_1"));
 
 rawBody = { itemIds: ["pbk_1-0001", "pbk_1-0002"] };
 assert.equal(await registry.dispatch(makeRequest("POST", "/api/problem-bank/item-images")), true);

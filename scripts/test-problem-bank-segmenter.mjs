@@ -9,8 +9,11 @@ import {
 } from "../src/domains/problems/textPdfSegmenter.js";
 import {
   buildFolderTree,
+  buildPrintEntries,
   computeBoardMetrics,
   computeItemStats,
+  rectWithin,
+  studentItemState,
   studentWrongItemIds,
   wrongRateBand
 } from "../src/domains/problems/problemBankModel.js";
@@ -82,5 +85,33 @@ const tree = buildFolderTree([
 assert.deepEqual([...tree.folders.keys()], ["중3"]);
 assert.deepEqual(tree.books.map((book) => book.bookId), ["c"]);
 assert.deepEqual([...tree.folders.get("중3").folders.keys()], ["RPM"]);
+
+assert.equal(studentItemState(attempts, "s1", "i1"), "recovered");
+assert.equal(studentItemState(attempts, "s1", "i2"), "wrong");
+assert.equal(studentItemState(attempts, "s2", "i1"), "correct");
+assert.equal(studentItemState(attempts, "s9", "i1"), "none");
+assert.deepEqual(rectWithin([0.1, 0.1, 0.5, 0.5], [0.1, 0.2, 0.5, 0.3]), { left: 0, top: 25, width: 100, height: 25 });
+
+// 공통 지시문 문항은 같은 지시문끼리 한 항목으로 묶이고 고른 번호마다 강조 상자가 붙는다.
+const printBook = { title: "RPM" };
+const printUnits = [{ unitId: "u1", title: "01 삼각비" }];
+const printItems = [
+  { itemId: "b-0001", numberLabel: "0001", numberSort: 1, unitId: "u1", pdfPage: 9, typeLabel: "삼각비의 뜻", regions: [{ kind: "body", bboxNormalized: [0.1, 0.2, 0.5, 0.3] }, { kind: "passage", bboxNormalized: [0.1, 0.1, 0.5, 0.5] }] },
+  { itemId: "b-0002", numberLabel: "0002", numberSort: 2, unitId: "u1", pdfPage: 9, typeLabel: "삼각비의 뜻", regions: [{ kind: "body", bboxNormalized: [0.1, 0.3, 0.5, 0.4] }, { kind: "passage", bboxNormalized: [0.1, 0.1, 0.5, 0.5] }] },
+  { itemId: "b-0061", numberLabel: "0061", numberSort: 61, unitId: "u1", pdfPage: 13, typeLabel: "", regions: [{ kind: "body", bboxNormalized: [0.1, 0.1, 0.5, 0.3] }] }
+];
+const printImages = new Map([
+  ["b-0001", [{ kind: "body", url: "body-1" }, { kind: "passage", url: "passage-a" }]],
+  ["b-0002", [{ kind: "body", url: "body-2" }, { kind: "passage", url: "passage-a" }]],
+  ["b-0061", [{ kind: "body", url: "body-61" }]]
+]);
+const printEntries = buildPrintEntries({ book: printBook, units: printUnits, items: printItems, selectedItemIds: ["b-0061", "b-0002", "b-0001"], imagesByItem: printImages });
+assert.deepEqual(printEntries.map((entry) => entry.kind), ["group", "item"]);
+assert.equal(printEntries[0].passageUrl, "passage-a");
+assert.deepEqual(printEntries[0].members.map((member) => member.item.numberLabel), ["0001", "0002"]);
+assert.deepEqual(printEntries[0].members[1].highlight, { left: 0, top: 50, width: 100, height: 25 });
+assert.equal(printEntries[0].sourceLine, "RPM · 01 삼각비 · 0001 · 0002번");
+assert.equal(printEntries[1].sourceLine, "RPM · 01 삼각비 · 0061번");
+assert.equal(printEntries[1].bodyUrl, "body-61");
 
 console.log("problem bank segmenter · model fixtures passed");

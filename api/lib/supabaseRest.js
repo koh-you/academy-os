@@ -343,6 +343,46 @@ export async function downloadStorageObject(bucketId, storagePath) {
   return (await downloadStorageObjectWithMetadata(bucketId, storagePath)).buffer;
 }
 
+/** 접두사 아래 객체 이름 목록(최대 1000개씩 · 하위 폴더는 재귀). 교재 삭제 때 이미지 정리에 쓴다. */
+export async function listStorageObjectPaths(bucketId, prefix) {
+  const paths = [];
+  const folders = [String(prefix ?? "").replace(/^\/+|\/+$/g, "")];
+  while (folders.length) {
+    const folder = folders.pop();
+    let offset = 0;
+    for (;;) {
+      const page = await supabaseStorageRequest(`object/list/${bucketId}`, {
+        method: "POST",
+        contentType: "application/json",
+        body: JSON.stringify({ prefix: folder, limit: 1000, offset, sortBy: { column: "name", order: "asc" } })
+      });
+      const entries = Array.isArray(page) ? page : [];
+      for (const entry of entries) {
+        const name = `${folder ? `${folder}/` : ""}${entry.name}`;
+        // 폴더 항목은 id 가 없다.
+        if (entry.id) paths.push(name);
+        else folders.push(name);
+      }
+      if (entries.length < 1000) break;
+      offset += 1000;
+    }
+  }
+  return paths;
+}
+
+/** 여러 객체를 한 번에 지운다(100개씩). */
+export async function deleteStorageObjects(bucketId, storagePaths) {
+  const list = (Array.isArray(storagePaths) ? storagePaths : []).filter(Boolean);
+  for (let offset = 0; offset < list.length; offset += 100) {
+    await supabaseStorageRequest(`object/${bucketId}`, {
+      method: "DELETE",
+      contentType: "application/json",
+      body: JSON.stringify({ prefixes: list.slice(offset, offset + 100) })
+    });
+  }
+  return list.length;
+}
+
 export async function deleteStorageObject(bucketId, storagePath) {
   if (!bucketId || !storagePath) return false;
   try {

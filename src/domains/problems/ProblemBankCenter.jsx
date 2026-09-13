@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import {
+  deleteProblemBankBook,
   fetchProblemBankBook,
   fetchProblemBankBooks,
   fetchProblemBankItemImages,
   importProblemBankManifest,
   readFileAsDataUrl,
+  updateProblemBankBook,
   uploadProblemBankImages
 } from "./problemBankApi.js";
 import "./problemBank.css";
@@ -27,6 +29,9 @@ export function ProblemBankCenter() {
   const [detailError, setDetailError] = useState("");
   const [flaggedImages, setFlaggedImages] = useState(new Map());
   const [upload, setUpload] = useState({ stage: "idle", message: "", progress: 0, total: 0, manifest: null, imageFiles: [] });
+  const [editForm, setEditForm] = useState(null);
+  const [editMessage, setEditMessage] = useState("");
+  const [deleteArmed, setDeleteArmed] = useState(false);
   const folderInputRef = useRef(null);
 
   async function reloadBooks() {
@@ -56,6 +61,9 @@ export function ProblemBankCenter() {
         if (cancelled) return;
         setDetail(result);
         setDetailError("");
+        setEditForm({ title: result.book.title, folderPath: result.book.folderPath, grade: result.book.grade, subject: result.book.subject });
+        setEditMessage("");
+        setDeleteArmed(false);
         const flagged = (result.items ?? []).filter((item) => item.reviewStatus === "flagged").slice(0, 30);
         if (flagged.length) {
           fetchProblemBankItemImages(flagged.map((item) => item.itemId))
@@ -152,6 +160,35 @@ export function ProblemBankCenter() {
     }
   }
 
+  async function saveBookMeta(event) {
+    event.preventDefault();
+    if (!detail || !editForm) return;
+    try {
+      const book = await updateProblemBankBook(detail.book.bookId, editForm);
+      // 저장 뒤 목록을 다시 읽어 화면 값이 서버 값과 같은지 본다.
+      const list = await reloadBooks();
+      const saved = list.find((entry) => entry.bookId === book.bookId);
+      setDetail((current) => (current ? { ...current, book: { ...current.book, ...book } } : current));
+      setEditMessage(saved && saved.title === editForm.title.trim() ? "저장했습니다 (서버 재조회 일치)." : "저장은 됐지만 재조회 값이 다릅니다. 새로고침해 확인해 주세요.");
+    } catch (error) {
+      setEditMessage(error.message || "교재 정보를 저장하지 못했습니다.");
+    }
+  }
+
+  async function deleteBook() {
+    if (!detail) return;
+    try {
+      const result = await deleteProblemBankBook(detail.book.bookId);
+      setEditMessage(`삭제했습니다 · 정오답 기록 ${result.deletedAttempts}건 · 이미지 ${result.deletedImages}장`);
+      setSelectedBookId("");
+      setDetail(null);
+      setDeleteArmed(false);
+      await reloadBooks();
+    } catch (error) {
+      setEditMessage(error.message || "교재를 삭제하지 못했습니다.");
+    }
+  }
+
   const flaggedItems = (detail?.items ?? []).filter((item) => item.reviewStatus === "flagged");
   const passageItems = (detail?.items ?? []).filter((item) => item.hasSubquestions).length;
 
@@ -220,11 +257,31 @@ export function ProblemBankCenter() {
           {!detail && !detailError ? <EmptyState className="emptyState">교재를 선택하면 단원과 검수 상태가 나타납니다.</EmptyState> : null}
           {detail ? (
             <>
+              {editForm ? (
+                <form className="problemBankEditForm" onSubmit={saveBookMeta}>
+                  <label>제목<input value={editForm.title} onChange={(event) => setEditForm({ ...editForm, title: event.target.value })} /></label>
+                  <label>폴더<input placeholder="예: 중3 / RPM" value={editForm.folderPath} onChange={(event) => setEditForm({ ...editForm, folderPath: event.target.value })} /></label>
+                  <label>학년<input value={editForm.grade} onChange={(event) => setEditForm({ ...editForm, grade: event.target.value })} /></label>
+                  <label>과목<input value={editForm.subject} onChange={(event) => setEditForm({ ...editForm, subject: event.target.value })} /></label>
+                  <div className="problemBankEditActions">
+                    <button className="primaryButton" type="submit">교재 정보 저장</button>
+                    {deleteArmed ? (
+                      <>
+                        <span className="problemBankDeleteWarn">문항 {detail.items.length}개와 학생 기록·이미지가 모두 지워집니다. 되돌릴 수 없습니다.</span>
+                        <button className="problemBankDangerButton" onClick={deleteBook} type="button">삭제 확정</button>
+                        <button className="softButton" onClick={() => setDeleteArmed(false)} type="button">취소</button>
+                      </>
+                    ) : (
+                      <button className="softButton" onClick={() => setDeleteArmed(true)} type="button">교재 삭제</button>
+                    )}
+                  </div>
+                  {editMessage ? <p aria-live="polite" className="problemBankUploadMessage">{editMessage}</p> : null}
+                </form>
+              ) : null}
               <dl className="problemBankDetailMeta">
-                <dt>제목</dt><dd>{detail.book.title}</dd>
-                <dt>폴더</dt><dd>{detail.book.folderPath || "-"}</dd>
                 <dt>원천</dt><dd>{detail.book.sourceFileName} · {detail.book.pageCount}쪽 · {detail.book.sourceKind} · {detail.book.ingestVersion}</dd>
                 <dt>문항</dt><dd>{detail.items.length}개 · 공통 지시문 포함 {passageItems}개 · 경계 확인 필요 {flaggedItems.length}개</dd>
+                <dt>다시 등록</dt><dd>같은 PDF 패키지를 다시 올리면 문항 이미지·경계만 새로 들어가고 학생 기록과 여기서 고친 정보는 남습니다.</dd>
               </dl>
               <ul aria-label="단원 목록" className="problemBankUnitList">
                 <li className="problemBankUnitRow head"><span>단원</span><span>문항 범위</span><span>개수</span></li>
