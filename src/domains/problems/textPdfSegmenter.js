@@ -81,12 +81,12 @@ export function detectBadgeHeight(pagesTokens) {
  * @param {TextToken[]} tokens
  * @param {{ badgeHeight: number, pageWidth: number }} options
  */
-export function findBadges(tokens, { badgeHeight, pageWidth, pageHeight = Infinity }) {
+export function findBadges(tokens, { badgeHeight, pageWidth, pageHeight = Infinity, badgeBottom = pageHeight * 0.93 }) {
   if (!badgeHeight) return [];
   return mergeNumberRuns(tokens)
     .filter((run) => NUMBER_RUN_PATTERN.test(run.str) && Math.abs(run.h - badgeHeight) <= 1.0)
     // 페이지 좌우 가장자리(측면 탭)와 바닥글(쪽번호는 배지와 같은 크기다)은 배지가 아니다.
-    .filter((run) => run.x > pageWidth * 0.05 && run.x < pageWidth * 0.9 && run.y < pageHeight * 0.93)
+    .filter((run) => run.x > pageWidth * 0.05 && run.x < pageWidth * 0.9 && run.y < badgeBottom)
     .map((run) => ({ number: run.str, x: run.x, y: run.y, w: run.w, h: run.h }))
     .sort((a, b) => a.x - b.x || a.y - b.y);
 }
@@ -295,17 +295,26 @@ export function findRangeLabels(tokens, { badgeHeight, columns }) {
  * - 「[0025~0029] 지시문」이 있으면 지시문 줄부터 마지막 문항 끝까지를 group 으로 묶어
  *   그 범위의 문항마다 공통 지문(passage)으로 붙인다.
  *
+ * - `markerPattern` 이 있으면 그 정규식에 맞는 작은 글자(배지보다 작은)의 줄을 배너로 보고
+ *   그 위 `markerPad` 만큼에서 자른다. 해설 PDF 의 「본문 p.9, 11」 배너가 이 경우다.
+ *
  * @param {TextToken[]} tokens
- * @param {{ badgeHeight: number, pageWidth: number, pageHeight: number, bodyBottom?: number, topPad?: number }} options
+ * @param {{ badgeHeight: number, pageWidth: number, pageHeight: number, bodyBottom?: number, topPad?: number, markerPattern?: RegExp, markerPad?: number }} options
  */
-export function segmentPage(tokens, { badgeHeight, pageWidth, pageHeight, bodyBottom, topPad = 4 }) {
-  const badges = findBadges(tokens, { badgeHeight, pageWidth, pageHeight });
+export function segmentPage(tokens, { badgeHeight, pageWidth, pageHeight, bodyBottom, topPad = 4, markerPattern, markerPad = 20 }) {
+  // bodyBottom 을 준 호출자는 그 아래 배지도 바닥글로 본다(해설 PDF 는 마지막 글줄이 0.93H 를 넘는다).
+  const badges = findBadges(tokens, { badgeHeight, pageWidth, pageHeight, ...(bodyBottom ? { badgeBottom: bodyBottom } : {}) });
   if (badges.length === 0) return { badges: [], columns: [], headers: [], groups: [], segments: [] };
   const columns = inferColumns(badges, pageWidth);
   const typeHeaders = findTypeHeaders(tokens, { badgeHeight, columns });
   const subHeaders = findSubHeaders(tokens, { badgeHeight, columns });
   const rangeLabels = findRangeLabels(tokens, { badgeHeight, columns });
   const bottomLimit = bodyBottom ?? pageHeight * 0.925; // 바닥글(쪽번호·단원명) 위
+  const markers = markerPattern
+    ? tokens
+      .filter((token) => token.h < badgeHeight && token.y < bottomLimit && markerPattern.test(token.str.trim()))
+      .map((token) => ({ column: columnIndexOf(columns, token.x), y: token.y - markerPad, kind: "marker", title: token.str.trim() }))
+    : [];
 
   const segments = [];
   const groups = [];
@@ -317,7 +326,8 @@ export function segmentPage(tokens, { badgeHeight, pageWidth, pageHeight, bodyBo
     const cuts = [
       ...typeHeaders.filter((header) => header.column === columnIndex).map((header) => ({ y: header.y - 24, kind: "type", title: header.title })),
       ...subHeaders.filter((header) => header.column === columnIndex).map((header) => ({ y: header.y - header.h - 8, kind: "sub", title: header.title, code: header.code })),
-      ...rangeLabels.filter((label) => label.column === columnIndex).map((label) => ({ y: label.y - label.h - 3, kind: "range", from: label.from, to: label.to }))
+      ...rangeLabels.filter((label) => label.column === columnIndex).map((label) => ({ y: label.y - label.h - 3, kind: "range", from: label.from, to: label.to })),
+      ...markers.filter((marker) => marker.column === columnIndex)
     ].sort((a, b) => a.y - b.y);
 
     // 같은 글줄의 배지를 한 행으로 묶는다.

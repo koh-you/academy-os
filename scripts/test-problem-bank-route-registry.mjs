@@ -41,6 +41,10 @@ const registry = createProblemBankRouteRegistry({
     calls.push(`import:${manifest.book.book_id}`);
     return { bookId: manifest.book.book_id, itemCount: manifest.items.length };
   },
+  importProblemBankAnswers: async (manifest) => {
+    calls.push(`importAnswers:${manifest.book_id}`);
+    return { bookId: manifest.book_id, answerCount: manifest.answers.length, solutionCount: manifest.solutions.length, unmatched: [] };
+  },
   uploadProblemBankImages: async (bookId, files) => {
     calls.push(`upload:${bookId}:${files.map((file) => `${file.file}/${file.mimeType}/${file.buffer.toString()}`).join("|")}`);
     return { bookId, uploaded: files.map((file) => file.file) };
@@ -72,6 +76,7 @@ assert.deepEqual(problemBankRouteSignatures.map((signature) => `${signature.meth
   "DELETE /api/problem-bank/book",
   "POST /api/problem-bank/item-images",
   "POST /api/problem-bank/import",
+  "POST /api/problem-bank/import-answers",
   "POST /api/problem-bank/images",
   "GET /api/problem-bank/attempts",
   "POST /api/problem-bank/attempts"
@@ -110,6 +115,12 @@ assert.deepEqual(sends.at(-1).body.regions.map((region) => region.url), ["signed
 rawBody = { manifest: { book: { book_id: "pbk_abc" }, items: [{}, {}] } };
 assert.equal(await registry.dispatch(makeRequest("POST", "/api/problem-bank/import")), true);
 assert.deepEqual(sends.at(-1).body, { ok: true, bookId: "pbk_abc", itemCount: 2 });
+assert.equal(readOptions.limitBytes, 12 * 1024 * 1024);
+
+rawBody = { manifest: { book_id: "pbk_abc", answers: [{}], solutions: [{}, {}] } };
+assert.equal(await registry.dispatch(makeRequest("POST", "/api/problem-bank/import-answers")), true);
+assert.deepEqual(sends.at(-1).body, { ok: true, bookId: "pbk_abc", answerCount: 1, solutionCount: 2, unmatched: [] });
+assert.ok(calls.includes("importAnswers:pbk_abc"));
 assert.equal(readOptions.limitBytes, 12 * 1024 * 1024);
 
 rawBody = { bookId: "pbk_abc", files: [{ file: "items/pbk_abc-0001.jpg", dataUrl: "data:image/jpeg;base64,aGVsbG8=" }] };

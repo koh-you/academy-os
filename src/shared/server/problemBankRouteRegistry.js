@@ -11,6 +11,7 @@ export const problemBankRouteSignatures = Object.freeze([
   Object.freeze({ method: "DELETE", path: "/api/problem-bank/book" }),
   Object.freeze({ method: "POST", path: "/api/problem-bank/item-images" }),
   Object.freeze({ method: "POST", path: "/api/problem-bank/import" }),
+  Object.freeze({ method: "POST", path: "/api/problem-bank/import-answers" }),
   Object.freeze({ method: "POST", path: "/api/problem-bank/images" }),
   Object.freeze({ method: "GET", path: "/api/problem-bank/attempts" }),
   Object.freeze({ method: "POST", path: "/api/problem-bank/attempts" })
@@ -25,6 +26,7 @@ export const problemBankRouteSignatures = Object.freeze([
  * @param {(bookId: string) => Promise<*>} deps.deleteProblemBankBook
  * @param {(itemIds: string[]) => Promise<*>} deps.resolveProblemBankItemImages
  * @param {(manifest: *) => Promise<*>} deps.importProblemBankManifest
+ * @param {(manifest: *) => Promise<*>} deps.importProblemBankAnswers
  * @param {(bookId: string, files: *[]) => Promise<*>} deps.uploadProblemBankImages
  * @param {(query: { bookId?: string, studentId?: string }) => Promise<*>} deps.listProblemBankAttempts
  * @param {(entries: *[]) => Promise<*>} deps.saveProblemBankAttempts
@@ -41,6 +43,7 @@ export function createProblemBankRouteRegistry({
   deleteProblemBankBook,
   resolveProblemBankItemImages,
   importProblemBankManifest,
+  importProblemBankAnswers,
   uploadProblemBankImages,
   listProblemBankAttempts,
   saveProblemBankAttempts,
@@ -98,6 +101,12 @@ export function createProblemBankRouteRegistry({
       if (request.method === "POST" && pathname === "/api/problem-bank/import") {
         const payload = await readJsonBody(request, { limitBytes: 12 * 1024 * 1024 });
         const result = await importProblemBankManifest(payload.manifest);
+        sendJson(request, response, 200, { ok: true, ...result });
+        return true;
+      }
+      if (request.method === "POST" && pathname === "/api/problem-bank/import-answers") {
+        const payload = await readJsonBody(request, { limitBytes: 12 * 1024 * 1024 });
+        const result = await importProblemBankAnswers(payload.manifest);
         sendJson(request, response, 200, { ok: true, ...result });
         return true;
       }

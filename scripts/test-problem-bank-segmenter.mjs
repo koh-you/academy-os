@@ -10,6 +10,8 @@ import {
 import {
   buildFolderTree,
   buildPrintEntries,
+  flattenPrintItems,
+  printWidthMm,
   computeBoardMetrics,
   computeItemStats,
   rectWithin,
@@ -109,9 +111,9 @@ const printItems = [
   { itemId: "b-0061", numberLabel: "0061", numberSort: 61, unitId: "u1", pdfPage: 13, typeLabel: "", regions: [{ kind: "body", bboxNormalized: [0.1, 0.1, 0.5, 0.3] }] }
 ];
 const printImages = new Map([
-  ["b-0001", [{ kind: "body", url: "body-1" }, { kind: "passage", url: "passage-a" }]],
+  ["b-0001", [{ kind: "body", url: "body-1" }, { kind: "passage", url: "passage-a" }, { kind: "answer", url: "answer-1", imageWidth: 81 }, { kind: "solution", url: "solution-1" }]],
   ["b-0002", [{ kind: "body", url: "body-2" }, { kind: "passage", url: "passage-a" }]],
-  ["b-0061", [{ kind: "body", url: "body-61" }]]
+  ["b-0061", [{ kind: "body", url: "body-61" }, { kind: "solution", url: "solution-61" }]]
 ]);
 const printEntries = buildPrintEntries({ book: printBook, units: printUnits, items: printItems, selectedItemIds: ["b-0061", "b-0002", "b-0001"], imagesByItem: printImages });
 assert.deepEqual(printEntries.map((entry) => entry.kind), ["group", "item"]);
@@ -121,5 +123,19 @@ assert.deepEqual(printEntries[0].members[1].highlight, { left: 0, top: 50, width
 assert.equal(printEntries[0].sourceLine, "RPM · 01 삼각비 · 0001 · 0002번");
 assert.equal(printEntries[1].sourceLine, "RPM · 01 삼각비 · 0061번");
 assert.equal(printEntries[1].bodyUrl, "body-61");
+// 정답·해설은 문항마다 붙고, 그룹은 구성 문항별로 펼쳐진다. 번호는 인쇄 항목 번호를 따른다.
+assert.equal(printEntries[0].members[0].answerUrl, "answer-1");
+assert.equal(printEntries[0].members[0].solutionUrl, "solution-1");
+assert.equal(printEntries[0].members[1].answerUrl, "");
+assert.equal(printEntries[1].solutionUrl, "solution-61");
+const printRows = flattenPrintItems(printEntries);
+assert.deepEqual(printRows.map((row) => `${row.entryNumber}:${row.item.numberLabel}:${row.answerUrl || "-"}:${row.solutionUrl || "-"}`), [
+  "1:0001:answer-1:solution-1",
+  "1:0002:-:-",
+  "2:0061:-:solution-61"
+]);
+assert.equal(printRows[0].sourceLine, "RPM · 01 삼각비 · 0001 · 0002번");
+assert.equal(printWidthMm(printRows[0].answerRegion), 9.4);
+assert.equal(printWidthMm(null), null);
 
 console.log("problem bank segmenter · model fixtures passed");

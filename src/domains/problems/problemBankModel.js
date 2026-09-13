@@ -213,8 +213,11 @@ export function buildPrintEntries({ book, units, items, selectedItemIds, imagesB
   const unitTitleById = new Map(units.map((unit) => [unit.unitId, unit.title]));
   const selected = new Set(selectedItemIds);
   const sourceLine = (item) => [book.title, unitTitleById.get(item.unitId) ?? "", `${item.numberLabel}번`].filter(Boolean).join(" · ");
-  const urlOf = (item, kind) => (imagesByItem.get(item.itemId) ?? []).find((region) => region.kind === kind)?.url ?? "";
+  const regionOf = (item, kind) => (imagesByItem.get(item.itemId) ?? []).find((region) => region.kind === kind) ?? null;
+  const urlOf = (item, kind) => regionOf(item, kind)?.url ?? "";
   const bboxOf = (item, kind) => (item.regions ?? []).find((region) => region.kind === kind)?.bboxNormalized ?? null;
+  // 정답·해설 이미지는 문항마다 하나씩. 그룹 항목도 구성 문항별로 갖는다.
+  const answerOf = (item) => ({ answerUrl: urlOf(item, "answer"), answerRegion: regionOf(item, "answer"), solutionUrl: urlOf(item, "solution") });
 
   const entries = [];
   const groupsByKey = new Map();
@@ -240,7 +243,7 @@ export function buildPrintEntries({ book, units, items, selectedItemIds, imagesB
       }
       const group = groupsByKey.get(key);
       const bodyBbox = bboxOf(item, "body");
-      group.members.push({ item, highlight: bodyBbox ? rectWithin(passageBbox, bodyBbox) : null });
+      group.members.push({ item, highlight: bodyBbox ? rectWithin(passageBbox, bodyBbox) : null, ...answerOf(item) });
       group.sourceLine = [book.title, unitTitleById.get(item.unitId) ?? "", `${group.members.map((member) => member.item.numberLabel).join(" · ")}번`]
         .filter(Boolean)
         .join(" · ");
@@ -253,8 +256,34 @@ export function buildPrintEntries({ book, units, items, selectedItemIds, imagesB
       sourceLine: sourceLine(item),
       typeLabel: item.typeLabel,
       bodyUrl: urlOf(item, "body"),
-      solutionUrl: urlOf(item, "solution")
+      ...answerOf(item)
     });
   }
   return entries;
+}
+
+/**
+ * 인쇄 항목을 문항 단위로 펼친다(그룹은 구성 문항마다 한 줄). 빠른정답·해설 목록의 순서와 번호 표기에 쓴다.
+ * @returns {{ entryNumber: number, item: *, answerUrl: string, answerRegion: *, solutionUrl: string, sourceLine: string }[]}
+ */
+export function flattenPrintItems(entries) {
+  const rows = [];
+  entries.forEach((entry, index) => {
+    const entryNumber = index + 1;
+    if (entry.kind === "group") {
+      for (const member of entry.members) {
+        rows.push({ entryNumber, item: member.item, answerUrl: member.answerUrl, answerRegion: member.answerRegion, solutionUrl: member.solutionUrl, sourceLine: entry.sourceLine });
+      }
+      return;
+    }
+    rows.push({ entryNumber, item: entry.item, answerUrl: entry.answerUrl, answerRegion: entry.answerRegion, solutionUrl: entry.solutionUrl, sourceLine: entry.sourceLine });
+  });
+  return rows;
+}
+
+/** 220dpi 로 오려 낸 이미지를 원본 크기(mm)로 인쇄하기 위한 폭. 크기를 모르면 null. */
+export function printWidthMm(region, dpi = 220) {
+  const width = Number(region?.imageWidth) || 0;
+  if (!width) return null;
+  return Math.round((width / dpi) * 25.4 * 10) / 10;
 }

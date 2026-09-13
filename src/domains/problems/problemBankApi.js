@@ -45,6 +45,11 @@ export function importProblemBankManifest(manifest) {
   return postJsonWithTimeout("/api/problem-bank/import", { manifest }, 120000, "패키지 등록이 2분을 넘었습니다.");
 }
 
+/** 정답·해설 패키지(manifest-answers.json)를 등록된 교재에 붙인다. 이미지는 uploadProblemBankImages 로 따로 올린다. */
+export function importProblemBankAnswers(manifest) {
+  return postJsonWithTimeout("/api/problem-bank/import-answers", { manifest }, 120000, "정답·해설 등록이 2분을 넘었습니다.");
+}
+
 export function uploadProblemBankImages(bookId, files) {
   return postJsonWithTimeout("/api/problem-bank/images", { bookId, files }, 120000, "이미지 업로드가 2분을 넘었습니다.");
 }

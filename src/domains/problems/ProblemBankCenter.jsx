@@ -6,6 +6,7 @@ import {
   fetchProblemBankBook,
   fetchProblemBankBooks,
   fetchProblemBankItemImages,
+  importProblemBankAnswers,
   importProblemBankManifest,
   readFileAsDataUrl,
   updateProblemBankBook,
@@ -20,7 +21,10 @@ const imageBatchSize = 20;
  * 등록된 교재의 단원·문항 수·경계 확인 필요 문항을 본다.
  *
  * 패키지 폴더 = manifest.json + validation.json + items/*.jpg (+ pages/, qa/ 는 올리지 않는다).
+ * 정답·해설 패키지 폴더 = manifest-answers.json + answers/*.jpg + solutions/*.jpg (ingest-answers 출력).
  */
+const emptyAnswerUpload = { stage: "idle", message: "", progress: 0, total: 0, manifest: null, imageFiles: [] };
+
 export function ProblemBankCenter() {
   const [books, setBooks] = useState([]);
   const [listError, setListError] = useState("");
@@ -32,7 +36,9 @@ export function ProblemBankCenter() {
   const [editForm, setEditForm] = useState(null);
   const [editMessage, setEditMessage] = useState("");
   const [deleteArmed, setDeleteArmed] = useState(false);
+  const [answerUpload, setAnswerUpload] = useState(emptyAnswerUpload);
   const folderInputRef = useRef(null);
+  const answerFolderInputRef = useRef(null);
 
   async function reloadBooks() {
     try {
@@ -64,6 +70,7 @@ export function ProblemBankCenter() {
         setEditForm({ title: result.book.title, folderPath: result.book.folderPath, grade: result.book.grade, subject: result.book.subject });
         setEditMessage("");
         setDeleteArmed(false);
+        setAnswerUpload(emptyAnswerUpload);
         const flagged = (result.items ?? []).filter((item) => item.reviewStatus === "flagged").slice(0, 30);
         if (flagged.length) {
           fetchProblemBankItemImages(flagged.map((item) => item.itemId))
@@ -160,6 +167,76 @@ export function ProblemBankCenter() {
     }
   }
 
+  async function handleAnswerFolderPicked(event) {
+    const files = [...(event.target.files ?? [])];
+    event.target.value = "";
+    if (!detail) return;
+    const manifestFile = files.find((file) => file.name === "manifest-answers.json");
+    if (!manifestFile) {
+      setAnswerUpload({ ...emptyAnswerUpload, stage: "error", message: "폴더 안에 manifest-answers.json 이 없습니다. ingest-answers 출력 폴더를 그대로 선택해 주세요." });
+      return;
+    }
+    let manifest;
+    try {
+      manifest = JSON.parse(await manifestFile.text());
+    } catch {
+      setAnswerUpload({ ...emptyAnswerUpload, stage: "error", message: "manifest-answers.json 을 읽지 못했습니다." });
+      return;
+    }
+    if (manifest.book_id !== detail.book.bookId) {
+      setAnswerUpload({ ...emptyAnswerUpload, stage: "error", message: `이 패키지는 다른 교재(${manifest.book_id}) 것입니다. 선택한 교재는 ${detail.book.bookId} 입니다.` });
+      return;
+    }
+    const expected = new Set([...(manifest.answers ?? []), ...(manifest.solutions ?? [])].map((entry) => entry.file));
+    const imageFiles = files
+      .filter((file) => /(^|[\\/])(answers|solutions)[\\/][^\\/]+\.(jpe?g|png|webp)$/i.test(file.webkitRelativePath || file.name))
+      .map((file) => ({ file, key: `${/answers[\\/]/i.test(file.webkitRelativePath || "") ? "answers" : "solutions"}/${file.name}` }))
+      .filter((entry) => expected.has(entry.key));
+    if (imageFiles.length !== expected.size) {
+      setAnswerUpload({ ...emptyAnswerUpload, stage: "error", message: `이미지 개수가 맞지 않습니다. manifest ${expected.size}개 · 폴더 ${imageFiles.length}개.` });
+      return;
+    }
+    const numbers = new Set(detail.items.map((item) => item.numberLabel));
+    const unmatched = (manifest.solutions ?? []).filter((entry) => !numbers.has(entry.number_label)).length;
+    setAnswerUpload({
+      stage: "ready",
+      message: `해설 ${manifest.solutions?.length ?? 0}개 · 답 ${manifest.answers?.length ?? 0}개 · 이미지 ${imageFiles.length}개${unmatched ? ` · 교재에 없는 번호 ${unmatched}개는 건너뜁니다` : ""}. 등록을 누르면 서버에 올립니다.`,
+      progress: 0,
+      total: imageFiles.length,
+      manifest,
+      imageFiles
+    });
+  }
+
+  async function runAnswerImport() {
+    const { manifest, imageFiles } = answerUpload;
+    if (!manifest || !detail) return;
+    try {
+      setAnswerUpload((current) => ({ ...current, stage: "importing", message: "정답·해설 목록을 등록하는 중…", progress: 0 }));
+      const result = await importProblemBankAnswers(manifest);
+      for (let offset = 0; offset < imageFiles.length; offset += imageBatchSize) {
+        const batch = imageFiles.slice(offset, offset + imageBatchSize);
+        const payload = await Promise.all(batch.map(async (entry) => ({ file: entry.key, dataUrl: await readFileAsDataUrl(entry.file) })));
+        await uploadProblemBankImages(result.bookId, payload);
+        setAnswerUpload((current) => ({ ...current, message: `이미지 올리는 중… ${Math.min(offset + batch.length, imageFiles.length)}/${imageFiles.length}`, progress: offset + batch.length }));
+      }
+      // 저장 뒤 교재를 다시 읽어 해설이 붙은 문항 수가 서버 값과 맞는지 본다.
+      const refreshed = await fetchProblemBankBook(result.bookId);
+      setDetail(refreshed);
+      const solvedCount = refreshed.items.filter((item) => item.hasSolution).length;
+      const countMatches = solvedCount === result.solutionCount;
+      setAnswerUpload({
+        ...emptyAnswerUpload,
+        stage: countMatches ? "done" : "error",
+        message: countMatches
+          ? `등록 완료 · 해설 ${result.solutionCount}개 · 답 ${result.answerCount}개 (서버 재조회 일치)${result.unmatched?.length ? ` · 건너뜀 ${result.unmatched.length}개` : ""}`
+          : `등록 뒤 재조회한 해설 수가 다릅니다 (서버 ${solvedCount} / 패키지 ${result.solutionCount}).`
+      });
+    } catch (error) {
+      setAnswerUpload((current) => ({ ...current, stage: "error", message: error.message || "정답·해설 패키지 등록에 실패했습니다." }));
+    }
+  }
+
   async function saveBookMeta(event) {
     event.preventDefault();
     if (!detail || !editForm) return;
@@ -190,6 +267,8 @@ export function ProblemBankCenter() {
   }
 
   const flaggedItems = (detail?.items ?? []).filter((item) => item.reviewStatus === "flagged");
+  const solutionItems = (detail?.items ?? []).filter((item) => item.hasSolution).length;
+  const answerItems = (detail?.items ?? []).filter((item) => item.regions.some((region) => region.kind === "answer")).length;
   const passageItems = (detail?.items ?? []).filter((item) => item.hasSubquestions).length;
 
   return (
@@ -281,8 +360,35 @@ export function ProblemBankCenter() {
               <dl className="problemBankDetailMeta">
                 <dt>원천</dt><dd>{detail.book.sourceFileName} · {detail.book.pageCount}쪽 · {detail.book.sourceKind} · {detail.book.ingestVersion}</dd>
                 <dt>문항</dt><dd>{detail.items.length}개 · 공통 지시문 포함 {passageItems}개 · 경계 확인 필요 {flaggedItems.length}개</dd>
-                <dt>다시 등록</dt><dd>같은 PDF 패키지를 다시 올리면 문항 이미지·경계만 새로 들어가고 학생 기록과 여기서 고친 정보는 남습니다.</dd>
+                <dt>정답·해설</dt><dd>해설 {solutionItems}개 · 빠른정답 {answerItems}개 {solutionItems === 0 ? "· 아직 없음 (오답지 인쇄에서 빠른정답·해설을 켤 수 없음)" : ""}</dd>
+                <dt>다시 등록</dt><dd>같은 PDF 패키지를 다시 올리면 문항 이미지·경계만 새로 들어가고 학생 기록·정답·해설·여기서 고친 정보는 남습니다.</dd>
               </dl>
+              <div className="problemBankAnswerImport">
+                <h3>정답·해설 패키지 등록</h3>
+                <p className="muted">
+                  PC에서 <code>node scripts/problem-bank/ingest-answers.mjs --book-id {detail.book.bookId} --solutions "정답과풀이.pdf" --out 출력폴더</code> 실행 뒤 그 폴더를 선택합니다.
+                  해설 PDF 는 교재와 같은 판이어야 합니다(번호와 답이 맞는지 <code>qa/</code> 로 확인).
+                </p>
+                <button className="softButton" onClick={() => answerFolderInputRef.current?.click()} type="button">정답·해설 폴더 선택</button>
+                <input
+                  aria-label="정답·해설 폴더 선택"
+                  hidden
+                  multiple
+                  onChange={handleAnswerFolderPicked}
+                  ref={answerFolderInputRef}
+                  type="file"
+                  webkitdirectory=""
+                />
+                {answerUpload.message ? (
+                  <p aria-live="polite" className={`problemBankUploadMessage stage-${answerUpload.stage}`}>{answerUpload.message}</p>
+                ) : null}
+                {answerUpload.stage === "importing" && answerUpload.total ? (
+                  <progress max={answerUpload.total} value={answerUpload.progress} />
+                ) : null}
+                {answerUpload.stage === "ready" ? (
+                  <button className="primaryButton" onClick={runAnswerImport} type="button">정답·해설 등록</button>
+                ) : null}
+              </div>
               <ul aria-label="단원 목록" className="problemBankUnitList">
                 <li className="problemBankUnitRow head"><span>단원</span><span>문항 범위</span><span>개수</span></li>
                 {detail.units.map((unit) => {

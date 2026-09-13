@@ -12,7 +12,10 @@ export const problemBankStorageBucket = "problem-bank";
 const problemBankStorageAllowedMimeTypes = ["image/jpeg", "image/png", "image/webp"];
 const problemBankStorageMaxBytes = 8 * 1024 * 1024;
 // 패키지 파일 이름은 CLI 가 만든 것만 받는다. 경로 조작(../)과 임의 확장자를 막는다.
-const packageFilePattern = /^items\/[A-Za-z0-9_.-]{1,120}\.(?:jpg|jpeg|png|webp)$/;
+const packageFilePattern = /^(?:items|answers|solutions)\/[A-Za-z0-9_.-]{1,120}\.(?:jpg|jpeg|png|webp)$/;
+const itemRegionKinds = ["body", "choices", "figure", "passage"];
+// 정답·해설 영역은 별도 패키지(ingest-answers)로 들어오고, 문항 패키지를 다시 올려도 지워지지 않는다.
+const answerRegionKinds = ["answer", "solution"];
 const attemptResults = new Set(["correct", "wrong", "unanswered"]);
 
 function createStatusError(message, statusCode = 400, code = "") {
@@ -272,7 +275,7 @@ export function createProblemBankStore({
       region_id: `${textOf(item.item_id)}-r${index}`,
       item_id: textOf(item.item_id),
       position: integerOf(region.position, index),
-      kind: ["body", "choices", "figure", "passage", "solution"].includes(region.kind) ? region.kind : "body",
+      kind: itemRegionKinds.includes(region.kind) ? region.kind : "body",
       pdf_page: integerOf(region.pdf_page),
       bbox_normalized: Array.isArray(region.bbox_normalized) ? region.bbox_normalized : [0, 0, 1, 1],
       storage_path: `${bookId}/${textOf(region.file)}`,
@@ -292,7 +295,10 @@ export function createProblemBankStore({
     await upsertRows("problem_bank_books", [bookRow], { onConflict: "book_id" });
     // 문항은 지우지 않고 덮어쓴다 — 문항 행을 지우면 학생 정오답 기록(cascade)까지 사라진다.
     // 패키지에서 사라진 문항만 지우고, 영역은 전부 새로 넣는다.
-    const existingItems = await listRows("problem_bank_items", `select=item_id&book_id=eq.${encodeURIComponent(bookId)}`, { requireServiceRole: true });
+    const existingItems = await listRows("problem_bank_items", `select=item_id,has_solution&book_id=eq.${encodeURIComponent(bookId)}`, { requireServiceRole: true });
+    // 정답·해설 패키지로 붙은 has_solution 은 문항 패키지 재등록으로 되돌리지 않는다.
+    const existingSolution = new Map(existingItems.map((row) => [row.item_id, Boolean(row.has_solution)]));
+    for (const row of itemRows) if (existingSolution.has(row.item_id)) row.has_solution = existingSolution.get(row.item_id);
     const nextItemIds = new Set(itemRows.map((row) => row.item_id));
     const staleItemIds = existingItems.map((row) => row.item_id).filter((itemId) => !nextItemIds.has(itemId));
     for (let offset = 0; offset < staleItemIds.length; offset += 100) {
@@ -304,11 +310,79 @@ export function createProblemBankStore({
     for (let offset = 0; offset < itemRows.length; offset += 200) {
       await upsertRows("problem_bank_items", itemRows.slice(offset, offset + 200), { onConflict: "item_id" });
     }
-    await deleteRows("problem_bank_regions", `item_id=like.${encodeURIComponent(`${bookId}-%`)}`);
+    await deleteRows("problem_bank_regions", `item_id=like.${encodeURIComponent(`${bookId}-%`)}&kind=not.in.(${answerRegionKinds.join(",")})`);
     for (let offset = 0; offset < regionRows.length; offset += 200) {
       await upsertRows("problem_bank_regions", regionRows.slice(offset, offset + 200), { onConflict: "region_id" });
     }
     return { bookId, unitCount: unitRows.length, itemCount: itemRows.length, regionCount: regionRows.length, removedItemCount: staleItemIds.length };
+  }
+
+  /**
+   * 정답·해설 패키지(manifest-answers.json)를 문항에 붙인다. 번호(number_label)로 문항을 찾고,
+   * 그 교재의 기존 answer/solution 영역은 모두 새 것으로 바꾼다(멱등). 문항·기록은 건드리지 않는다.
+   * 이미지는 uploadProblemBankImages 로 answers/·solutions/ 아래에 올린다.
+   */
+  async function importProblemBankAnswers(manifest) {
+    requireDatabase();
+    const bookId = textOf(manifest?.book_id);
+    if (!/^pbk_[a-f0-9]{6,32}$/.test(bookId)) throw createStatusError("정답 패키지의 book_id 형식이 올바르지 않습니다.", 400, "bad_manifest");
+    const solutions = Array.isArray(manifest?.solutions) ? manifest.solutions : [];
+    const answers = Array.isArray(manifest?.answers) ? manifest.answers : [];
+    if (solutions.length === 0 && answers.length === 0) throw createStatusError("정답 패키지에 해설·정답이 없습니다.", 400, "bad_manifest");
+    for (const entry of [...solutions, ...answers]) {
+      if (!packageFilePattern.test(textOf(entry.file))) throw createStatusError(`영역 파일 이름이 올바르지 않습니다: ${entry.file}`, 400, "bad_manifest");
+    }
+    const encoded = encodeURIComponent(bookId);
+    const bookRows = await listRows("problem_bank_books", `select=book_id&book_id=eq.${encoded}`, { requireServiceRole: true });
+    if (!bookRows[0]) throw createStatusError("먼저 문항 패키지로 교재를 등록해 주세요.", 404, "book_not_found");
+    const itemRows = await listRows("problem_bank_items", `select=item_id,number_label&book_id=eq.${encoded}`, { requireServiceRole: true });
+    const itemIdByNumber = new Map(itemRows.map((row) => [textOf(row.number_label), textOf(row.item_id)]));
+
+    const unmatched = [];
+    const regionRows = [];
+    const toRegion = (entry, kind) => {
+      const itemId = itemIdByNumber.get(textOf(entry.number_label));
+      if (!itemId) {
+        unmatched.push(`${kind}:${textOf(entry.number_label)}`);
+        return;
+      }
+      regionRows.push({
+        region_id: `${itemId}-${kind}`,
+        item_id: itemId,
+        position: kind === "answer" ? 90 : 91,
+        kind,
+        pdf_page: integerOf(entry.pdf_page),
+        bbox_normalized: Array.isArray(entry.bbox_normalized) ? entry.bbox_normalized : [0, 0, 1, 1],
+        storage_path: `${bookId}/${textOf(entry.file)}`,
+        image_width: integerOf(entry.width),
+        image_height: integerOf(entry.height)
+      });
+    };
+    answers.forEach((entry) => toRegion(entry, "answer"));
+    solutions.forEach((entry) => toRegion(entry, "solution"));
+
+    await deleteRows("problem_bank_regions", `item_id=like.${encodeURIComponent(`${bookId}-%`)}&kind=in.(${answerRegionKinds.join(",")})`);
+    for (let offset = 0; offset < regionRows.length; offset += 200) {
+      await upsertRows("problem_bank_regions", regionRows.slice(offset, offset + 200), { onConflict: "region_id" });
+    }
+    const solutionItemIds = regionRows.filter((row) => row.kind === "solution").map((row) => row.item_id);
+    const solutionSet = new Set(solutionItemIds);
+    const withoutSolution = itemRows.map((row) => textOf(row.item_id)).filter((itemId) => !solutionSet.has(itemId));
+    const now = new Date().toISOString();
+    for (let offset = 0; offset < solutionItemIds.length; offset += 100) {
+      const batch = solutionItemIds.slice(offset, offset + 100);
+      await patchRows("problem_bank_items", `item_id=in.(${batch.map((id) => encodeURIComponent(id)).join(",")})`, { has_solution: true, updated_at: now });
+    }
+    for (let offset = 0; offset < withoutSolution.length; offset += 100) {
+      const batch = withoutSolution.slice(offset, offset + 100);
+      await patchRows("problem_bank_items", `item_id=in.(${batch.map((id) => encodeURIComponent(id)).join(",")})`, { has_solution: false, updated_at: now });
+    }
+    return {
+      bookId,
+      answerCount: regionRows.filter((row) => row.kind === "answer").length,
+      solutionCount: solutionItemIds.length,
+      unmatched
+    };
   }
 
   /** 교재 메타(제목·폴더·학년·과목)만 고친다. 문항·기록은 그대로다. */
@@ -431,6 +505,7 @@ export function createProblemBankStore({
     deleteProblemBankBook,
     resolveProblemBankItemImages,
     importProblemBankManifest,
+    importProblemBankAnswers,
     uploadProblemBankImages,
     listProblemBankAttempts,
     saveProblemBankAttempts

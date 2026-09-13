@@ -60,6 +60,11 @@ test("교재별 오답: 학생 기준 색으로 바로 바뀌고, 서버 재조�
   await board.getByRole("button", { name: /^0004번 ·/ }).click();
   await expect(board.locator(".problemBankPreview .problemBankPrintGroup img")).toBeVisible();
   await expect(board.locator(".problemBankPreview .problemBankPrintHighlight")).toHaveCount(1);
+  // 정답·해설이 등록된 문항은 미리보기에서 펼쳐 볼 수 있다.
+  await expect(board.locator(".problemBankPreview .problemBankPreviewAnswer")).toHaveCount(2);
+  await expect(board.locator(".problemBankPreview img[alt='0004번 정답']")).toBeVisible();
+  await board.getByRole("button", { name: "해설 보기" }).click();
+  await expect(board.locator(".problemBankPreview .problemBankPreviewAnswer img[alt='0004번 해설']")).toBeVisible();
   // 눌렀으니 0004 도 오답이 됐다 → 오답 전체 선택 = 0002·0004.
   await board.getByRole("button", { name: "오답 전체 선택" }).click();
   await expect(board.locator(".problemBankSelectionCount")).toContainText("선택 2개");
@@ -83,6 +88,15 @@ test("교재별 오답: 학생 기준 색으로 바로 바뀌고, 서버 재조�
   await expect(sheet.locator(".problemBankPrintSource").first()).toContainText("0002번");
   await page.getByLabel("단 구성").selectOption("1");
   await expect(sheet).toHaveClass(/cols-1/);
+  // 빠른정답·해설은 등록된 문항(0002·0004 모두 1~10번 안) 수만큼 켜지고, 그룹 문항(0004)도 자기 번호로 나온다.
+  await page.getByLabel(/빠른정답/).check();
+  await expect(sheet.locator(".problemBankPrintAnswerGrid > div")).toHaveCount(2);
+  await expect(sheet.locator(".problemBankPrintAnswerGrid img[alt='0004번 정답']")).toBeVisible();
+  await page.getByLabel(/해설 \(/).check();
+  await expect(sheet.locator(".problemBankPrintSolutions .problemBankPrintItem")).toHaveCount(2);
+  await expect(sheet.locator(".problemBankPrintSolutions img[alt='0002번 해설']")).toBeVisible();
+  await sheet.locator(".problemBankPrintAnswers").screenshot({ path: "test-results/problem-bank-print-answers.png" });
+  await sheet.locator(".problemBankPrintSolutions").screenshot({ path: "test-results/problem-bank-print-solutions.png" });
   await page.screenshot({ path: "test-results/problem-bank-print-sheet.png", fullPage: true });
   await page.getByRole("button", { name: "닫기" }).click();
   await expect(sheet).toHaveCount(0);
@@ -100,6 +114,8 @@ test("교재관리: 교재 정보를 고치고 서버 재조회로 확인한 뒤
   await page.locator(".problemBankBookList .problemBankBookItem").first().click();
   await expect(page.locator(".problemBankUnitRow:not(.head)")).toHaveCount(2);
   await expect(page.locator(".problemBankFlagged")).toContainText("경계 확인 필요 (1)");
+  await expect(page.locator(".problemBankDetailMeta")).toContainText("해설 10개 · 빠른정답 10개");
+  await expect(page.locator(".problemBankAnswerImport")).toContainText("--book-id pbk_safefixture1");
 
   const form = page.locator(".problemBankEditForm");
   await form.getByLabel("제목").fill("RPM 중3-2 수학 (이름 변경)");
