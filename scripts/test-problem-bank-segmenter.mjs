@@ -57,6 +57,14 @@ assert.ok(group25.y1 >= bySeg.get("0029").y1);
 const group30 = page11.groups.find((group) => group.key === "0030-0034");
 assert.ok(bySeg.get("0029").y1 <= group30.y0 + 0.01);
 
+// 97쪽: 「[0609~061」 + 「1]」 처럼 baseline 이 0.4pt 어긋나 쪼개진 지시문도 한 줄로 읽는다.
+const page97 = segmentPage(fixture.p97.tokens, { badgeHeight, pageWidth: fixture.p97.pageWidth, pageHeight: fixture.p97.pageHeight });
+assert.deepEqual(page97.groups.map((group) => group.key).sort(), ["0605-0607", "0609-0611"]);
+const seg97 = new Map(page97.segments.map((segment) => [segment.number, segment]));
+assert.equal(seg97.get("0608").groupKey, "");
+assert.ok(seg97.get("0608").y1 <= page97.groups.find((group) => group.key === "0609-0611").y0 + 0.01, "0608 은 다음 지시문 앞에서 끝난다");
+assert.equal(seg97.get("0603").groupKey, "");
+
 assert.deepEqual(checkNumberContinuity(["0061", "0062", "0064"]).gaps, [{ after: 62, before: 64 }]);
 assert.deepEqual(checkNumberContinuity(["0001", "0002", "0002"]).duplicates, [2]);
 
