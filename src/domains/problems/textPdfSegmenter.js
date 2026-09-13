@@ -258,20 +258,25 @@ export function findSubHeaders(tokens, { badgeHeight, columns }) {
  * 같은 글줄의 토큰을 이어 붙여 대괄호 범위를 읽는다.
  */
 export function findRangeLabels(tokens, { badgeHeight, columns }) {
-  const lines = new Map();
-  for (const token of tokens) {
-    const text = token.str.trim();
-    if (!text || token.h >= badgeHeight) continue;
-    const column = columnIndexOf(columns, token.x);
-    const key = `${column}:${Math.round(token.y)}`;
-    if (!lines.has(key)) lines.set(key, { column, y: token.y, h: token.h, x: token.x, tokens: [] });
-    const line = lines.get(key);
-    line.tokens.push(token);
-    line.x = Math.min(line.x, token.x);
-    line.h = Math.max(line.h, token.h);
+  // 같은 글줄이라도 baseline 이 0.4pt 쯤 어긋난 토큰이 있다(「[0609~061」 633.13 · 「1]」 633.53).
+  // 반올림으로 묶으면 갈라지므로 컬럼별로 y 순서대로 훑으며 1.5pt 안쪽은 같은 줄로 본다.
+  const sorted = tokens
+    .filter((token) => token.str.trim() && token.h < badgeHeight)
+    .map((token) => ({ token, column: columnIndexOf(columns, token.x) }))
+    .sort((a, b) => a.column - b.column || a.token.y - b.token.y || a.token.x - b.token.x);
+  const lines = [];
+  for (const { token, column } of sorted) {
+    const line = lines[lines.length - 1];
+    if (line && line.column === column && Math.abs(line.y - token.y) <= 1.5) {
+      line.tokens.push(token);
+      line.x = Math.min(line.x, token.x);
+      line.h = Math.max(line.h, token.h);
+      continue;
+    }
+    lines.push({ column, y: token.y, h: token.h, x: token.x, tokens: [token] });
   }
   const labels = [];
-  for (const line of lines.values()) {
+  for (const line of lines) {
     const text = line.tokens.sort((a, b) => a.x - b.x).map((token) => token.str.trim()).join("");
     const match = text.match(RANGE_LABEL_PATTERN);
     if (!match) continue;
