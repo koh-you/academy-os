@@ -18,6 +18,7 @@ const expectedContracts = [
   ["supplements", "SupplementCenter"],
   ["materials", "MaterialManager"],
   ["resources", "ResourceLibraryCenter"],
+  ["bookBank", "ProblemBankCenter"],
   ["students", "StudentManager"],
   ["classes", "ClassManager"],
   ["examPrep", "ExamPrepCenter"],

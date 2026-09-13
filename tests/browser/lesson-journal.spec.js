@@ -408,8 +408,9 @@ test("learning support screens open from their shared deferred chunk without mut
   await navigation.getByRole("button", { name: /오답관리/ }).click();
   await expect(page.locator('.teacherViewLoadState[role="status"]')).toContainText("교사 화면을 불러오는 중입니다.");
   await expect(page.getByRole("heading", { name: "오답관리" })).toBeVisible();
-  await navigation.getByRole("button", { name: /자료함/ }).click();
-  await expect(page.getByRole("heading", { name: "자료함" })).toBeVisible();
+  // 자료함은 2026-09-12 교재관리(문제은행)로 바뀌었다. 같은 지연 청크 밖의 화면이라 별도 청크가 뜬다.
+  await navigation.getByRole("button", { name: /교재관리/ }).click();
+  await expect(page.getByRole("heading", { name: "교재관리" })).toBeVisible();
   expect(pageErrors).toEqual([]);
 });
 

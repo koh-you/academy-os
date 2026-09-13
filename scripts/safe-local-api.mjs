@@ -5,6 +5,7 @@ import {
   areLessonJournalHistoryLessonsEqual
 } from "../src/domains/lessons/lessonJournalHistoryPersistence.js";
 import { areLessonJournalRecordsEqual } from "../src/domains/lessons/lessonJournalRowsPersistence.js";
+import { createProblemBankFixtureState, handleProblemBankFixtureRoute } from "./safe-fixtures/problemBankFixture.mjs";
 import {
   areLessonJournalMakeupTasksEqual,
   createNextLessonJournalMakeupTaskUpdatedAt
@@ -425,6 +426,7 @@ const initialState = {
 
 function createInitialState() {
   const snapshot = JSON.parse(JSON.stringify(initialState));
+  snapshot.problemBank = createProblemBankFixtureState();
   const attendanceDate = getSafeKoreaDateString();
   snapshot.students.push({
     grade: "고1",
@@ -1967,6 +1969,8 @@ function handleMutation(pathname, payload) {
 const server = http.createServer(async (request, response) => {
   const requestUrl = new URL(request.url || "/", `http://${host}:${port}`);
   if (request.method === "OPTIONS") return sendJson(response, 204, {});
+  // 문제은행 가상 라우트는 아래의 범용 POST 응답보다 먼저 잡아야 한다.
+  if (await handleProblemBankFixtureRoute({ request, requestUrl, state, readJson, sendJson, response })) return undefined;
   if (request.method === "GET" && requestUrl.pathname === "/health") {
     return sendJson(response, 200, { mode: "safe-fixture", ok: true, service: "academy-os-safe-local-api" });
   }

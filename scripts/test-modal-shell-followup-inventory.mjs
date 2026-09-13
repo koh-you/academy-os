@@ -34,9 +34,10 @@ const rawDialogEntries = sourceEntries.filter((entry) => (
   entry.path !== "src/shared/components/Modal.jsx" && /<[^>]*\brole="dialog"/.test(entry.source)
 ));
 
-assert.equal(directModalCount, 41, "unexpected direct common Modal surface count");
+// 41 -> 40: 오답관리 옛 「뽑은 문제」 인쇄 모달(PickedProblemModal)을 2026-09-13 에 뺐다.
+assert.equal(directModalCount, 40, "unexpected direct common Modal surface count");
 assert.equal(injectedModalCount, 14, "unexpected injected common Modal surface count");
-assert.equal(modalFooterCount, 21, "unexpected common ModalFooter count");
+assert.equal(modalFooterCount, 20, "unexpected common ModalFooter count");
 assert.equal(modalActionCount, 2, "unexpected legacy modalActions wrapper count");
 assert.deepEqual(
   rawDialogEntries.map((entry) => entry.path),

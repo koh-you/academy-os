@@ -28,7 +28,7 @@ import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
-import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
+import { Modal } from "../../shared/components/Modal.jsx";
 import { OverflowMenu } from "../../shared/components/OverflowMenu.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
@@ -39,12 +39,9 @@ import {
   testAttemptStatusOptions,
   testPaperKindOptions
 } from "../../app/appConfig.js";
-import {
-  countProblemStatuses,
-  problemClickCycle,
-  problemStatusMeta
-} from "./learningSupportModel.js";
 import { createResourceMaterialDraftId } from "../resources/resourceMaterialPersistence.js";
+import { BookWrongAnswerBoard } from "../problems/BookWrongAnswerBoard.jsx";
+import { isActiveStudent } from "../students/lessonRosterSelectors.js";
 
 const wrongProblemSaveMessages = {
   dirty: "아직 저장되지 않은 입력이 있습니다. 저장 중 수정했다면 한 번 더 저장해 주세요.",
@@ -56,25 +53,13 @@ const wrongProblemSaveMessages = {
 };
 
 export function FollowUpCenter({
-  homeworks,
-  lessons,
-  notificationLogs,
-  problemBooks,
-  records,
   students,
   tasks,
   wrongProblems,
   wrongProblemSaveBusy = false,
   wrongProblemSaveState = "idle",
-  onAddProblemBook,
   onAddWrongProblem,
-  onAssignHomework,
-  onCreateTask,
-  onLogNotification,
   onSaveWrongProblems,
-  onUpdateProblemBook,
-  onUpdateProblemMeta,
-  onUpdateTask,
   onUpdateWrongProblem
 }) {
   const canSaveWrongProblems = ["dirty", "failed"].includes(wrongProblemSaveState) && !wrongProblemSaveBusy;
@@ -97,7 +82,7 @@ export function FollowUpCenter({
           </div>
         )}
         actionsClassName="followUpTopActions"
-        description="교재 PDF를 원본으로 등록하고, 단원별 문항 상태와 학생별 오답 흐름을 관리합니다."
+        description="교재별로 학생의 오답을 기록하고 개별 오답지를 인쇄합니다. 교재 등록은 교재관리에서 합니다."
         title="오답관리"
       />
       {wrongProblemSaveMessage ? (
@@ -107,81 +92,28 @@ export function FollowUpCenter({
       ) : null}
 
       <WrongProblemBoard
-        problemBooks={problemBooks}
         students={students}
         wrongProblems={wrongProblems}
-        onAddProblemBook={onAddProblemBook}
         onAddWrongProblem={onAddWrongProblem}
-        onUpdateProblemBook={onUpdateProblemBook}
-        onUpdateProblemMeta={onUpdateProblemMeta}
         onUpdateWrongProblem={onUpdateWrongProblem}
       />
     </section>
   );
 }
-function WrongProblemBoard({
-  problemBooks,
-  students,
-  wrongProblems,
-  onAddProblemBook,
-  onAddWrongProblem,
-  onUpdateProblemBook,
-  onUpdateProblemMeta,
-  onUpdateWrongProblem
-}) {
-  const [activeTab, setActiveTab] = useState("current");
+
+// 현행·추가1·추가2 탭(PDF 파일명만 받아 빈 문항 30개를 만들던 자리)은 2026-09-13 에 뺐다.
+// 문항 원천은 교재관리 › 패키지 등록으로만 들어온다.
+function WrongProblemBoard({ students, wrongProblems, onAddWrongProblem, onUpdateWrongProblem }) {
+  const [activeTab, setActiveTab] = useState("bookWrong");
   const [gradeFilter, setGradeFilter] = useState("전체");
-  const [selectedStudentId, setSelectedStudentId] = useState(students[0]?.studentId ?? "");
-  const [selectedProblemRef, setSelectedProblemRef] = useState(null);
-  const [isPickedProblemModalOpen, setIsPickedProblemModalOpen] = useState(false);
-  const [isDiagnosisOpen, setIsDiagnosisOpen] = useState(true);
-  const selectedStudent = students.find((student) => student.studentId === selectedStudentId) ?? students[0];
-  const filteredBooks = problemBooks.filter((book) => gradeFilter === "전체" || book.grade === gradeFilter);
-  const totalProblems = filteredBooks.reduce((sum, book) => sum + (book.problems?.length ?? book.totalProblems ?? 0), 0);
-  const pickedProblems = problemBooks.flatMap((book) =>
-    (book.problems ?? [])
-      .filter((problem) => problem.isPicked || problem.status === "selected")
-      .map((problem) => ({ book, problem }))
-  );
-  const selectedProblem =
-    selectedProblemRef
-      ? problemBooks
-          .find((book) => book.problemBookId === selectedProblemRef.problemBookId)
-          ?.problems.find((problem) => problem.problemId === selectedProblemRef.problemId)
-      : null;
-  const selectedBook = selectedProblemRef
-    ? problemBooks.find((book) => book.problemBookId === selectedProblemRef.problemBookId)
-    : null;
-
-  const selectedProblemsCount = pickedProblems.length;
-
-  function handleFileUpload(event) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    onAddProblemBook(file.name);
-    event.target.value = "";
-  }
-
-  function handleProblemClick(book, problem, event) {
-    setSelectedProblemRef({ problemBookId: book.problemBookId, problemId: problem.problemId });
-    if (event.ctrlKey || event.metaKey) {
-      onUpdateProblemMeta(book.problemBookId, problem.problemId, "isPicked", !problem.isPicked);
-      return;
-    }
-
-    const currentStatus = problem.status === "selected" ? "first" : problem.status;
-    const currentIndex = problemClickCycle.indexOf(currentStatus);
-    const nextStatus = problemClickCycle[(currentIndex + 1) % problemClickCycle.length];
-    onUpdateProblemMeta(book.problemBookId, problem.problemId, "status", nextStatus);
-  }
+  const activeStudents = students.filter((student) => isActiveStudent(student));
+  const [selectedStudentId, setSelectedStudentId] = useState(activeStudents[0]?.studentId ?? "");
+  const selectedStudent = activeStudents.find((student) => student.studentId === selectedStudentId) ?? activeStudents[0];
 
   return (
     <section className="wrongProblemBoard">
       <WorkspaceTabs className="wrongBoardTabs" label="오답관리 작업 구분" variant="secondary">
         {[
-          ["current", "현행"],
-          ["extra1", "추가1"],
-          ["extra2", "추가2"],
           ["bookWrong", "교재별 오답"],
           ["studentWrong", "학생별 오답"]
         ].map(([tab, label]) => (
@@ -198,149 +130,47 @@ function WrongProblemBoard({
         ))}
       </WorkspaceTabs>
 
-      <FilterBar
-        actions={(
-          <>
-            <label className="pdfUploadButton">
-              PDF 교재 등록
-              <input accept="application/pdf,image/*" onChange={handleFileUpload} type="file" />
-            </label>
-            <button
-              className="softButton"
-              disabled={selectedProblemsCount === 0}
-              onClick={() => setIsPickedProblemModalOpen(true)}
-              type="button"
-            >
-              수업용 화면 ({selectedProblemsCount})
-            </button>
-            <button
-              className="primaryButton"
-              disabled={selectedProblemsCount === 0}
-              onClick={() => setIsPickedProblemModalOpen(true)}
-              type="button"
-            >
-              선택 문제 보기 ({selectedProblemsCount})
-            </button>
-          </>
-        )}
-        className="wrongBoardFilterPanel"
-        label="오답관리 학년과 학생 필터"
-        result={<span>연결 교재 {filteredBooks.length}개 · 총 {totalProblems}문제</span>}
-      >
-        {["전체", "고1", "고2", "중1", "중2"].map((grade) => (
-          <button
-            aria-pressed={gradeFilter === grade}
-            className={`filterBarOption${gradeFilter === grade ? " active" : ""}`}
-            key={grade}
-            onClick={() => setGradeFilter(grade)}
-            type="button"
-          >
-            {grade}
-          </button>
-        ))}
-        <label className="filterBarField">
-          <span>학생</span>
-          <select value={selectedStudent?.studentId ?? ""} onChange={(event) => setSelectedStudentId(event.target.value)}>
-            {students.map((student) => (
-              <option key={student.studentId} value={student.studentId}>
-                {student.name} ({student.grade})
-              </option>
-            ))}
-          </select>
-        </label>
-      </FilterBar>
-
-      <Disclosure
-        id="wrong-board-diagnosis-content"
-        open={isDiagnosisOpen}
-        onToggle={setIsDiagnosisOpen}
-        trigger={`🔍 커리큘럼 진단 | 보드 ${filteredBooks.length}개 · 이 학생 연결: ${selectedStudent ? 1 : 0}개 · 표시 교재: ${filteredBooks.length}개`}
-      >
-        <strong>{selectedStudent?.name ?? "학생"} 기준 오답 보드</strong>
-        <p>
-          {activeTab === "studentWrong"
-            ? "학생 프로파일에 있던 교재오답 기록은 이 탭에서 별도로 관리합니다."
-            : "PDF 자동 크롭 전 단계에서는 파일명, 단원, 문항 번호, 상태, 풀이 메모를 먼저 저장합니다. 서버 크롭이 붙으면 이 미리보기 영역에 실제 문항 이미지가 표시됩니다."}
-        </p>
-      </Disclosure>
-
-      {activeTab === "studentWrong" ? (
-        <StudentWrongProblemBoard
-          selectedStudent={selectedStudent}
-          wrongProblems={wrongProblems.filter((item) => item.studentId === selectedStudent?.studentId)}
-          onAddWrongProblem={onAddWrongProblem}
-          onUpdateWrongProblem={onUpdateWrongProblem}
-        />
+      {activeTab === "bookWrong" ? (
+        <BookWrongAnswerBoard students={activeStudents} />
       ) : (
-        <div className="wrongBookStack">
-          {filteredBooks.map((book) => (
-            <WrongBookCard
-              book={book}
-              key={book.problemBookId}
-              selectedProblemRef={selectedProblemRef}
-              onSelectProblem={(problem, event) => handleProblemClick(book, problem, event)}
-              onUpdateBook={(field, value) => onUpdateProblemBook(book.problemBookId, field, value)}
-              onUpdateProblem={(problemId, field, value) => onUpdateProblemMeta(book.problemBookId, problemId, field, value)}
-            />
-          ))}
-        </div>
-      )}
-
-      {activeTab !== "studentWrong" && selectedProblem && selectedBook ? (
-        <div className="floatingProblemInspector">
-          <SectionHeader
-            actions={<button aria-label="문항 상세 닫기" className="iconButton" onClick={() => setSelectedProblemRef(null)} type="button">×</button>}
-            description="문항 원문, 상태, 해설 메모를 계속 업데이트합니다."
-            title={`${selectedBook.title} · ${selectedProblem.number}번`}
-          />
-          <div className="problemInspectorGrid">
-            <ProblemPreview book={selectedBook} problem={selectedProblem} />
-            <div className="problemEditPanel">
-              <label>
-                문항 상태
-                <select
-                  value={selectedProblem.status}
-                  onChange={(event) =>
-                    onUpdateProblemMeta(selectedBook.problemBookId, selectedProblem.problemId, "status", event.target.value)
-                  }
-                >
-                  {Object.entries(problemStatusMeta).map(([status, meta]) => (
-                    <option key={status} value={status}>{meta.label}</option>
+        <>
+          <FilterBar
+            className="wrongBoardFilterPanel"
+            label="오답관리 학년과 학생 필터"
+            result={<span>재원생 {activeStudents.length}명</span>}
+          >
+            {["전체", "고1", "고2", "중1", "중2", "중3"].map((grade) => (
+              <button
+                aria-pressed={gradeFilter === grade}
+                className={`filterBarOption${gradeFilter === grade ? " active" : ""}`}
+                key={grade}
+                onClick={() => setGradeFilter(grade)}
+                type="button"
+              >
+                {grade}
+              </button>
+            ))}
+            <label className="filterBarField">
+              <span>학생</span>
+              <select value={selectedStudent?.studentId ?? ""} onChange={(event) => setSelectedStudentId(event.target.value)}>
+                {activeStudents
+                  .filter((student) => gradeFilter === "전체" || student.grade === gradeFilter)
+                  .map((student) => (
+                    <option key={student.studentId} value={student.studentId}>
+                      {student.name} ({student.grade})
+                    </option>
                   ))}
-                </select>
-              </label>
-              <label>
-                문항 내용/OCR
-                <textarea
-                  value={selectedProblem.text}
-                  onChange={(event) =>
-                    onUpdateProblemMeta(selectedBook.problemBookId, selectedProblem.problemId, "text", event.target.value)
-                  }
-                  placeholder="PDF 크롭 후 OCR 또는 직접 입력"
-                />
-              </label>
-              <label>
-                해설/메모
-                <textarea
-                  value={selectedProblem.note}
-                  onChange={(event) =>
-                    onUpdateProblemMeta(selectedBook.problemBookId, selectedProblem.problemId, "note", event.target.value)
-                  }
-                  placeholder="학생이 자주 틀리는 포인트, 수업 설명 메모"
-                />
-              </label>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {isPickedProblemModalOpen ? (
-        <PickedProblemModal
-          pickedProblems={pickedProblems}
-          selectedStudent={selectedStudent}
-          onClose={() => setIsPickedProblemModalOpen(false)}
-        />
-      ) : null}
+              </select>
+            </label>
+          </FilterBar>
+          <StudentWrongProblemBoard
+            selectedStudent={selectedStudent}
+            wrongProblems={wrongProblems.filter((item) => item.studentId === selectedStudent?.studentId)}
+            onAddWrongProblem={onAddWrongProblem}
+            onUpdateWrongProblem={onUpdateWrongProblem}
+          />
+        </>
+      )}
     </section>
   );
 }
@@ -405,139 +235,6 @@ function StudentWrongProblemBoard({ selectedStudent, wrongProblems, onAddWrongPr
         )}
       </DataTableShell>
     </section>
-  );
-}
-
-function PickedProblemModal({ pickedProblems, selectedStudent, onClose }) {
-  const sortedProblems = [...pickedProblems].sort((a, b) => {
-    const bookCompare = a.book.title.localeCompare(b.book.title);
-    return bookCompare || Number(a.problem.number) - Number(b.problem.number);
-  });
-
-  return (
-    <Modal
-      className="pickedProblemModal"
-      title={`뽑은 문제 — ${sortedProblems.length}문제`}
-      subtitle={`${selectedStudent?.name ?? "학생"} 오답/보충 출력용`}
-      onClose={onClose}
-    >
-      <ModalFooter className="pickedProblemActions noPrint">
-        <button className="primaryButton" onClick={() => window.print()} type="button">🖨 인쇄</button>
-        <button className="softButton" onClick={onClose} type="button">닫기</button>
-      </ModalFooter>
-      <div className="printProblemSheet">
-        <div className="printSheetHeader">
-          <strong>{selectedStudent?.grade ?? ""} {selectedStudent?.name ?? "학생"}</strong>
-          <span>오답 문제 ({sortedProblems.length}문제)</span>
-        </div>
-        <div className="printProblemGrid">
-          {sortedProblems.map(({ book, problem }, index) => (
-            <article className="printProblemCard" key={`${book.problemBookId}_${problem.problemId}`}>
-              <div className="printProblemTitle">
-                <strong>{book.title} {problem.number}번</strong>
-                <span>{problemStatusMeta[problem.status]?.shortLabel ?? "미체크"}</span>
-              </div>
-              <ProblemPreview book={book} problem={problem} />
-              <small>{index + 1}/{sortedProblems.length}</small>
-            </article>
-          ))}
-        </div>
-      </div>
-    </Modal>
-  );
-}
-
-function WrongBookCard({ book, selectedProblemRef, onSelectProblem, onUpdateBook, onUpdateProblem }) {
-  const counts = countProblemStatuses(book.problems ?? []);
-  const selectedProblem =
-    selectedProblemRef?.problemBookId === book.problemBookId
-      ? book.problems.find((problem) => problem.problemId === selectedProblemRef.problemId)
-      : null;
-
-  return (
-    <article className="wrongBookCard">
-      <div className="wrongBookHeader">
-        <div>
-          <div className="wrongBookTitleRow">
-            <input
-              aria-label="교재명"
-              value={book.title}
-              onChange={(event) => onUpdateBook("title", event.target.value)}
-            />
-            <span>전체 {book.problems?.length ?? book.totalProblems ?? 0}개</span>
-          </div>
-          <small>{book.sourceFileName} · {book.grade} · {book.subject} · {book.unit}</small>
-        </div>
-        <div className="problemLegend">
-          {["first", "retry", "wrong", "mistake", "second", "question", "outOfScope", "unchecked"].map((status) => (
-            <span key={status}>
-              <i className={`legendDot ${problemStatusMeta[status].className}`} />
-              {problemStatusMeta[status].shortLabel} {counts[status] ?? 0}
-            </span>
-          ))}
-        </div>
-      </div>
-      <div className="wrongBookHint">클릭: 맞음→한번 틀림→두번 틀림→실수/확실히 앎 · Ctrl+클릭: 여러 문제 선택</div>
-      <div className="wrongBookBody">
-        <div className="problemNumberGrid">
-          {(book.problems ?? []).map((problem) => (
-            <button
-              className={`problemNumberButton ${problemStatusMeta[problem.status]?.className ?? "unchecked"} ${
-                selectedProblem?.problemId === problem.problemId ? "active" : ""
-              } ${problem.isPicked || problem.status === "selected" ? "picked" : ""}`}
-              key={problem.problemId}
-              onClick={(event) => onSelectProblem(problem, event)}
-              type="button"
-            >
-              {problem.number}
-            </button>
-          ))}
-        </div>
-        <div className="problemPreviewBox">
-          {selectedProblem ? (
-            <>
-              <ProblemPreview book={book} problem={selectedProblem} />
-              <select
-                aria-label={`${book.title} ${selectedProblem.number}번 상태`}
-                value={selectedProblem.status}
-                onChange={(event) => onUpdateProblem(selectedProblem.problemId, "status", event.target.value)}
-              >
-                {Object.entries(problemStatusMeta).map(([status, meta]) => (
-                  <option key={status} value={status}>{meta.label}</option>
-                ))}
-              </select>
-            </>
-          ) : (
-            <span>문제를 클릭하면 미리보기</span>
-          )}
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function ProblemPreview({ book, problem }) {
-  return (
-    <div className="problemPreviewCard">
-      <div className="problemPreviewTop">
-        <strong>{problem.number}번</strong>
-        <span>{problemStatusMeta[problem.status]?.label ?? "미체크"}</span>
-      </div>
-      {problem.cropImageUrl ? (
-        <img alt={`${book.title} ${problem.number}번`} src={problem.cropImageUrl} />
-      ) : (
-        <div className="mockProblemCrop">
-          <small>{book.unit}</small>
-          <strong>{String(problem.number).padStart(3, "0")}</strong>
-          <p>{problem.text || "PDF 크롭 이미지가 등록되면 이 영역에 문항이 표시됩니다."}</p>
-          <ol>
-            <li>보기 또는 조건 1</li>
-            <li>보기 또는 조건 2</li>
-            <li>보기 또는 조건 3</li>
-          </ol>
-        </div>
-      )}
-    </div>
   );
 }
 

@@ -14,7 +14,9 @@ const teacherViewContractDefinitions = [
   { id: "followups", componentName: "FollowUpCenter", effectKinds: ["save"] },
   { id: "supplements", componentName: "SupplementCenter", effectKinds: ["save", "reserve", "cancel"] },
   { id: "materials", componentName: "MaterialManager", effectKinds: ["save", "delete"] },
+  // resources(자료함)는 2026-09-12 사이드바에서 빠졌다. 포털 자료 공유 저장 계약은 그대로라 화면 계약만 남긴다.
   { id: "resources", componentName: "ResourceLibraryCenter", effectKinds: ["save", "delete"] },
+  { id: "bookBank", componentName: "ProblemBankCenter", effectKinds: [] },
   { id: "students", componentName: "StudentManager", effectKinds: ["save", "delete"] },
   { id: "classes", componentName: "ClassManager", effectKinds: ["save"] },
   { id: "examPrep", componentName: "ExamPrepCenter", effectKinds: ["save", "delete"] },
@@ -166,6 +168,11 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
         onDeleteMaterial: actions.handleDeleteResourceMaterial,
         openMaterial: actions.openResourceMaterial
       }
+    },
+    // 교재관리는 자체 API(problem-bank)만 쓰므로 App 상태를 받지 않는다.
+    bookBank: {
+      Component: components.ProblemBankCenter,
+      props: {}
     },
     students: {
       Component: components.StudentManager,

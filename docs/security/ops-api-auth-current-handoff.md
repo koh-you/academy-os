@@ -1,5 +1,7 @@
 # 운영 API 인증 · 현재 인계 기준
 
+일상적인 Codex·Claude Code 운영 읽기 인증 순서는 [AI 운영 읽기 인증 기준](ai-operational-read-access.md)을 따른다. 이 문서는 권한 구현의 역사와 현재 코드 경계를 설명한다.
+
 확인일: 2026-09-04 · 코드 기준: `7c426e88dcded8893df9d1b2a17028bac46fb46d`
 
 ## 현재 사용자 의도와 확인 범위

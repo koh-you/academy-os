@@ -92,7 +92,9 @@ import {
 } from "./lib/solapiAutoReconcile.js";
 import {
   createSignedStorageUrl,
+  deleteRows,
   deleteStorageObject,
+  deleteStorageObjects,
   downloadStorageObject,
   downloadStorageObjectWithMetadata,
   ensureStorageBucket,
@@ -100,6 +102,7 @@ import {
   insertRows,
   isSupabaseConfigured,
   listRows,
+  listStorageObjectPaths,
   parseDataUrl,
   patchRows,
   sanitizeStorageSegment,
@@ -232,6 +235,8 @@ import {
   defaultWatermarkLogoPath
 } from "../src/shared/server/testPaperWatermark.js";
 import { createTestPaperFileRouteRegistry } from "../src/shared/server/testPaperFileRouteRegistry.js";
+import { createProblemBankRouteRegistry } from "../src/shared/server/problemBankRouteRegistry.js";
+import { createProblemBankStore } from "../src/shared/server/problemBankStore.js";
 import { saveReportSnapshotWithVerification } from "../src/domains/reports/reportSnapshotPersistence.js";
 import {
   parseExamAnalysisQuestionCountConfirmRequest,
@@ -578,6 +583,23 @@ const { dispatch: dispatchTestPaperFileRoute } = createTestPaperFileRouteRegistr
   saveTestPaperFile,
   sendJson,
   watermarkTestPaperBuffer
+});
+const { dispatch: dispatchProblemBankRoute } = createProblemBankRouteRegistry({
+  getTeacherSession,
+  parseDataUrl,
+  readJsonBody,
+  sendJson,
+  ...createProblemBankStore({
+    createSignedStorageUrl,
+    deleteRows,
+    deleteStorageObjects,
+    isSupabaseConfigured,
+    listRows,
+    listStorageObjectPaths,
+    patchRows,
+    uploadStorageObjectWithBucketRetry,
+    upsertRows
+  })
 });
 const { dispatch: dispatchSolapiRoute } = createSolapiRouteRegistry({
   cancelSolapiReservationGroup,
@@ -5001,6 +5023,7 @@ const server = http.createServer(async (request, response) => {
   if (await dispatchTestSessionReadRoute({ request, response, requestUrl })) return;
   if (await dispatchTestSessionWriteRoute({ request, response, requestUrl })) return;
   if (await dispatchTestPaperFileRoute({ request, response, requestUrl })) return;
+  if (await dispatchProblemBankRoute({ request, response, requestUrl })) return;
   if (await dispatchIntegrationStatusRoute({ request, response, requestUrl })) return;
   if (await dispatchExamAnalysisReadRoute({ request, response, requestUrl })) return;
   if (await dispatchExamAnalysisRunWriteRoute({ request, response, requestUrl })) return;

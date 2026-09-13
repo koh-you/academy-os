@@ -5,6 +5,39 @@
 - 수업일지는 초기 읽기 모드와 항상 보이는 하단 바를 사용한다. 주 버튼은 `편집` → `변경 저장`으로 전환되고, 변경 없음/저장 성공 뒤 읽기 모드로 복귀하며 별도 “편집 중” 메시지는 표시하지 않는다.
 - 하단 바에는 수업 수정·알림톡·편집/저장만 남겼다. `수업 취소`는 수업 수정 모달의 왼쪽 위험 버튼으로 이동했고, 일반 수업 확인 모달과 생성 수업 확인창을 재사용한다. 취소 성공 뒤 겹친 두 모달을 모두 닫는다.
 - 관련 lesson fixture와 확정 취소 종료 경로 focused browser, `check:duplication`, `check:fast` 828/828, `test:production` 308/308, safe browser 97/97 통과. 실제 안전 미리보기에서도 세 상태를 확인했으며 운영 쓰기·알림 발송은 없었다.
+## 2026-09-13 정답·해설 연결
+
+- 사용자 요청으로 문항·정답·해설을 **폴더 하나**로 등록하게 했다: ingest-answers 가 문항 패키지 폴더를 `--out` 으로 받아 `manifest.json` 에서 book_id 를 읽고, 교재관리 「패키지 등록」이 `manifest-answers.json` 을 발견하면 이어서 올린다. 폴더 pick → 4개 요청 순서·파일 이름을 stub 라우트로 검증하는 browser spec 을 추가했다.
+
+- 빠른정답 PDF 는 2쪽 가로 격자였고 번호·답을 줄 단위로 묶는 데까지 갔으나, 0001 답이 12/13(673문항판)으로 교재(15/17 · 644문항판)와 달라 폐기했다. 해설 PDF 의 「답」 아이콘(U+E34C, 7.5pt) 줄을 잉크 띠(`inkBand`: 분수 틈 1.6pt 는 잇고 이웃 줄에서 멈춤, 한계까지 잉크가 이어지면 그래프로 보고 상자 끝까지)로 오려 빠른정답 이미지로 삼았다.
+- 해설 세그먼트: `segmentPage` 에 `markerPattern`(「본문 p.」 배너 위 20pt 에서 끊기)과 `bodyBottom → badgeBottom`(해설은 마지막 줄이 0.93H 를 넘어 0386 번이 바닥글로 버려지던 것) 을 더했다. 컬럼 맨 위 배지 없는 본문 글줄은 직전 문항의 이어지는 풀이로 붙이되, 그래프 세로축 라벨(큰 글자·오른쪽)을 대단원 배너로 오인하던 것을 컬럼 왼쪽 60pt 안으로 한정해 고쳤다(0626).
+- 서버: `answer` 영역 종류(SQL 1개), `importProblemBankAnswers`(번호로 연결 · 기존 answer/solution 만 교체 · `has_solution` 재계산), 문항 재등록 시 정답·해설 영역과 `has_solution` 보존. `packageFilePattern` 을 `items|answers|solutions` 로 넓혔다. 메모리 표 fixture 로 `test:problem-bank-store` 를 추가했다.
+- 화면: 미리보기의 `<details>` 는 disclosure 인벤토리(0건 고정)에 걸려 버튼 토글로 바꿨다.
+
+## 2026-09-13 공통 지시문 줄 인식 보강
+
+- 「[0609~061」+「1]」처럼 baseline 이 0.4pt 어긋나 쪼개진 지시문을 반올림으로 묶다가 놓쳤다. 컬럼별 y 순서로 1.5pt 안을 한 줄로 묶도록 바꿔 RPM 그룹 37→39(0117~0118 · 0609~0611), 0116·0608 하단이 지시문 앞에서 끝난다. 97쪽 좌표 픽스처를 회귀 검사에 추가했다.
+
+## 2026-09-13 문제은행 피드백 반영
+
+- 세그먼터 잉크 규칙: 처음엔 「빈 줄 22pt 초과면 끊기」로 했다가 소문항 (2)가 잘리는 것을 0629번에서 확인하고 폐기. 「세그먼트 하단 18pt 안 · 폭 18pt 미만 · 컬럼 왼쪽 가장자리」 잉크만 무시하는 규칙으로 바꿔 17건만 바뀌고 나머지 627건은 그대로임을 대조했다.
+- 공통 지시문 인쇄는 `buildPrintEntries` 가 같은 passage 영역끼리 group 항목으로 묶고 `rectWithin` 으로 강조 상자 백분율을 계산한다. 미리보기도 같은 상자를 쓴다.
+- 서버: `POST/DELETE /api/problem-bank/book`, Storage 접두사 목록·일괄 삭제 헬퍼, 재등록 시 사라진 문항만 삭제(정오답 cascade 보존). `problemBankStore` 에 `patchRows`·storage 함수를 주입한다.
+- 옛 오답 보드(PickedProblemModal·WrongBookCard·진단 Disclosure)를 지우며 scenario 4건·modal 인벤토리(41→40, footer 21→20)를 새 파일 기준으로 옮겼다.
+
+## 2026-09-12 문제은행(오답은행) 1단계
+
+- `Math books prototype` 115세션 분석(바탕화면 PDF 2종)에서 「AI 는 원천을 만들지 않는다 · 규칙 하나 = 검사 하나 · 저장 후 재조회」를 설계 원칙으로 가져왔다.
+- 텍스트 PDF 세그먼터(`src/domains/problems/textPdfSegmenter.js`): 번호 배지 서체 높이(RPM 13pt)로 배지를 찾고, 유형 헤더·소단원 헤더(`01-3`)·공통 지시문(`[0025~0029]`)에서 자르며, 같은 행 두 문항은 가로로 나눈다. 하단은 220 DPI 렌더의 잉크 투영으로 조인다. 거터 점선(x≈299pt)을 찾아 컬럼 폭을 고정한다.
+- 서버: `problem_bank_*` 표 5개(tenant 스코핑), `src/shared/server/problemBankStore.js`(Supabase 함수 주입 · api/ 함수 파일 수 12 제한 유지), `problemBankRouteRegistry.js` 7개 라우트. 이미지는 private 버킷 `problem-bank`, 서명 URL 은 미리보기·인쇄 직전에만.
+- 화면: `BookWrongAnswerBoard`(교재별 오답) · `ProblemBankCenter`(교재관리) · `WrongAnswerPrintSheet`(body 포털 · `#root` 숨김 인쇄 · 워터마크 opacity 0.1 · 폭 50%). 인쇄 미리보기 스크린샷 `test-results/problem-bank-print-sheet.png`.
+- 인벤토리 검사 정정: 사이드바 연구실 목록에 이미 있던 `blogContent` 누락(17→18), tenant 표 목록에 새 표 추가, 자료함 browser spec 삭제(메뉴에서 빠짐).
+
+## 2026-09-12 Codex·Claude Code 운영 읽기 인증
+
+- 무인증 `/api/notification-jobs?limit=1`은 `401 auth_required`, 로그인된 Academy OS 교사 화면의 알림 기록 새로고침은 전체 323건 로드 완료로 실측했다. 운영 쓰기·알림 side effect·service-role 조회는 없었다.
+- 화면 조회는 로그인 교사 세션, 원시 API는 단기 `read` ops 토큰을 공통 표준으로 정했다. 현재 셸에는 토큰·서명 비밀이 없어 완전 무인 터미널 인증은 준비되지 않았다는 한계도 명시했다.
+- Claude Code가 자동으로 읽도록 루트 `CLAUDE.md`에서 `AGENTS.md`와 `docs/security/ai-operational-read-access.md`를 import한다.
 
 ## 2026-09-12 수업일지 Solapi 예약 상태 단일화
 
