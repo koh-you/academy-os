@@ -960,20 +960,19 @@ test("lesson journal skips an unused intermediate lesson but stops at an attende
     return page.getByRole("dialog", { name: "수업일지" });
   };
 
-  // 수업일지는 항상 편집 모드라 셀이 textarea 다. 빈 지난 숙제는 값이 비고 placeholder 로만 "미입력"을 보인다.
-  const previousHomeworkField = (row) => row.getByLabel(/지난 숙제$/);
+  // Field render order is fixed: lessonMaterial, lessonProgress, previousHomework, nextHomework.
+  const previousHomeworkButton = (row) => row.locator("button.journalMemoCardRead").nth(2);
 
   let journal = await openCurrentJournal();
   let studentRow = journal.getByRole("region", { name: "수업일지 학생 기록" }).locator(".journalRow:not(.journalHead)").first();
-  await expect(previousHomeworkField(studentRow)).toHaveValue("안전 이전 숙제");
+  await expect(previousHomeworkButton(studentRow)).toHaveText("안전 이전 숙제");
 
   intermediateLessonAttended = true;
   await page.reload();
   await navigateCalendarToMonth(page, 2026, 8);
   journal = await openCurrentJournal();
   studentRow = journal.getByRole("region", { name: "수업일지 학생 기록" }).locator(".journalRow:not(.journalHead)").first();
-  await expect(previousHomeworkField(studentRow)).toHaveValue("");
-  await expect(previousHomeworkField(studentRow)).toHaveAttribute("placeholder", "미입력");
+  await expect(previousHomeworkButton(studentRow)).toHaveText("미입력");
   expect(pageErrors).toEqual([]);
 });
 
@@ -1042,15 +1041,14 @@ test("lesson journal follows a student's immediately previous attended lesson ac
   const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
   await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
   const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
-  // 항상 편집 모드라 셀 값은 textarea 의 value 로 읽는다.
-  await expect(lessonJournal.getByLabel(/강의 교재$/).first()).toHaveValue("목요일 개인 시간표 교재");
-  await expect(lessonJournal.getByLabel(/오늘 강의 내용$/).first()).toHaveValue("목요일 개인 시간표 진도");
-  await expect(lessonJournal.getByLabel(/지난 숙제$/).first()).toHaveValue("안전 이전 숙제");
+  await expect(lessonJournal.getByRole("button", { name: "목요일 개인 시간표 교재" })).toBeVisible();
+  await expect(lessonJournal.getByRole("button", { name: "목요일 개인 시간표 진도" })).toBeVisible();
+  await expect(lessonJournal.getByRole("button", { name: "안전 이전 숙제" })).toBeVisible();
   await expect(lessonJournal).not.toContainText("7월 최신 교재");
   expect(pageErrors).toEqual([]);
 });
 
-test("previous-lesson-source toggle is usable immediately and persists the selected homework on save", async ({ page, request }) => {
+test("previous-lesson-source toggle requires edit mode and persists the selected homework on save", async ({ page, request }) => {
   const pageErrors = collectPageErrors(page);
   await page.route("**/api/lesson-records*", async (route) => {
     const response = await route.fetch();
@@ -1102,14 +1100,16 @@ test("previous-lesson-source toggle is usable immediately and persists the selec
   const toggle = lessonJournal.getByRole("group", { name: "지난 숙제 참고 수업 선택" });
   const regularButton = toggle.getByRole("button", { name: "정규 07.22" });
   await expect(toggle.getByRole("button", { name: "직전 07.28" })).toBeVisible();
-  // 수업일지는 열자마자 편집 모드라 "수정 시작" 단계 없이 바로 고를 수 있다.
+  await expect(regularButton).toBeDisabled();
+
+  await lessonJournal.getByRole("button", { name: "편집" }).click();
   await expect(regularButton).toBeEnabled();
   await regularButton.click();
   await expect(lessonJournal).toContainText("저장 전 변경 1건");
 
   await lessonJournal.getByRole("button", { name: "변경 저장" }).click();
   await expect(lessonJournal).toContainText("수업일지 · 저장 완료");
-  // 저장 후에도 편집 모드는 유지되고, 고른 참고 수업이 선택 상태로 남아 있어야 한다.
+  await expect(regularButton).toBeDisabled();
   await expect(regularButton).toHaveAttribute("aria-pressed", "true");
 
   const homeworksAfter = (await (await request.get(`${safeApiBaseUrl}/api/homeworks`)).json()).homeworks;
@@ -1404,33 +1404,51 @@ test("lesson journal bottom bar groups lesson, notification, and save actions wh
   await page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ }).getByRole("button", { name: /월 경계 연동반/ }).click();
   const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
 
-  // 상단: 발송 상태 pill 만 있고 조작 버튼·select 는 없다. "수정 시작"도 없다.
+  // 상단: 발송 상태 pill 만 있고 조작 버튼·select 는 없다.
   const statusPanel = lessonJournal.getByRole("region", { name: "알림톡 상태" });
   await expect(statusPanel).toBeVisible();
   await expect(statusPanel.locator("button, select")).toHaveCount(0);
-  await expect(lessonJournal.getByRole("button", { name: "수정 시작" })).toHaveCount(0);
   await expect(lessonJournal.getByRole("button", { name: "수업 취소 처리" })).toHaveCount(0);
 
-  // 하단 고정바: 수업 작업 / 알림톡 작업 / 변경 저장 세 덩어리.
+  // 하단 고정바: 수업 수정 / 알림톡 작업 / 편집 세 덩어리. 수업 취소는 이곳에 없다.
   const saveBar = lessonJournal.getByRole("complementary", { name: "수업일지 하단 고정 저장 바" });
   const lessonGroup = saveBar.getByRole("group", { name: "수업 작업" });
   const notificationGroup = saveBar.getByRole("group", { name: "알림톡 작업" });
   await expect(lessonGroup.getByRole("button", { name: "수업 수정" })).toBeVisible();
-  await expect(lessonGroup.getByRole("button", { name: "수업 취소", exact: true })).toBeVisible();
+  await expect(saveBar.getByRole("button", { name: "수업 취소", exact: true })).toHaveCount(0);
   await expect(notificationGroup.getByLabel("알림톡 예약 설정")).toBeVisible();
   await expect(notificationGroup.getByRole("button", { name: "예약 확인" })).toBeVisible();
-  await expect(saveBar.getByRole("button", { name: "변경 저장" })).toBeVisible();
+  await expect(saveBar.getByRole("button", { name: "편집" })).toBeVisible();
 
-  // 열자마자 편집 모드: 표 셀이 바로 입력 가능하다.
-  await expect(lessonJournal.getByLabel(/강의 교재$/).first()).toBeEnabled();
+  // 읽기 모드에서는 입력칸이 없고, 편집을 누르면 같은 주 액션 자리가 변경 저장으로 바뀐다.
+  await expect(lessonJournal.getByLabel(/강의 교재$/).first()).toHaveCount(0);
 
-  // 수업 취소는 바로 실행되지 않고 기존 확인 모달을 거친다.
-  await lessonGroup.getByRole("button", { name: "수업 취소", exact: true }).click();
+  // 수업 취소는 수업 수정 모달 안에 있고, 일반 수업은 기존 확인 모달을 그 위에 띄운다.
+  await lessonGroup.getByRole("button", { name: "수업 수정" }).click();
+  const editModal = page.getByRole("dialog", { name: "수업 수정" });
+  await expect(editModal.getByRole("button", { name: "수업 취소", exact: true })).toBeVisible();
+  await editModal.getByRole("button", { name: "수업 취소", exact: true }).click();
   const confirmDialog = page.getByRole("dialog", { name: "수업 취소 확인" });
   await expect(confirmDialog).toBeVisible();
   await confirmDialog.getByRole("button", { name: "취소", exact: true }).click();
   await expect(confirmDialog).toHaveCount(0);
+  await expect(editModal).toBeVisible();
   await expect(lessonJournal).toBeVisible();
+  await editModal.getByRole("button", { name: "취소", exact: true }).click();
+
+  await saveBar.getByRole("button", { name: "편집" }).click();
+  await expect(saveBar.getByRole("button", { name: "변경 저장" })).toBeVisible();
+  await expect(lessonJournal.getByLabel(/강의 교재$/).first()).toBeEnabled();
+
+  // 취소 확정 뒤에는 수업 수정 창뿐 아니라 그 아래 수업일지도 함께 닫힌다.
+  await lessonGroup.getByRole("button", { name: "수업 수정" }).click();
+  const reopenedEditModal = page.getByRole("dialog", { name: "수업 수정" });
+  await reopenedEditModal.getByRole("button", { name: "수업 취소", exact: true }).click();
+  const reopenedConfirmDialog = page.getByRole("dialog", { name: "수업 취소 확인" });
+  await reopenedConfirmDialog.getByRole("button", { name: "수업 취소 처리" }).click();
+  await expect(reopenedConfirmDialog).toHaveCount(0);
+  await expect(reopenedEditModal).toHaveCount(0);
+  await expect(lessonJournal).toHaveCount(0);
   expect(pageErrors).toEqual([]);
 });
 
@@ -1453,6 +1471,7 @@ test("lesson journal keeps an in-flight edit and verifies the retried record fro
   await expect(lessonJournal.getByRole("button", { name: "월 경계 연동반" })).toBeVisible();
   await expect(lessonJournal).not.toContainText("7월 최신 교재");
   await expect(lessonJournal).not.toContainText("7월 최신 진도");
+  await lessonJournal.getByRole("button", { name: "편집" }).click();
   const materialDraft = lessonJournal.getByRole("textbox", { name: "월경계 학생 강의 교재" });
   await expect(materialDraft).toHaveValue("");
   await materialDraft.fill("8월 저장 요청 A");
@@ -1467,8 +1486,7 @@ test("lesson journal keeps an in-flight edit and verifies the retried record fro
   await expect(saveButton).toBeEnabled();
   await saveButton.click();
   await expect(saveBar).toContainText("저장 완료");
-  // 저장 후에도 편집 모드가 유지되므로 textarea 값으로 확인한다.
-  await expect(materialDraft).toHaveValue("8월 후속 수정 B");
+  await expect(lessonJournal.getByRole("button", { name: "8월 후속 수정 B" })).toBeVisible();
   const savedRecords = (await (await request.get(`${safeApiBaseUrl}/api/lesson-records`)).json()).records;
   expect(savedRecords.find((record) => record.lessonId === "safe-cross-month-current-lesson")?.lessonMaterial)
     .toBe("8월 후속 수정 B");
@@ -1496,6 +1514,7 @@ test("lesson journal keeps drafts after a version conflict and saves them on a v
   await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
 
   const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
+  await lessonJournal.getByRole("button", { name: "편집" }).click();
   const materialDraft = lessonJournal.getByRole("textbox", { name: "월경계 학생 강의 교재" });
   await materialDraft.fill("충돌 뒤 보존할 수정본");
   const saveBar = lessonJournal.getByRole("complementary", { name: "수업일지 하단 고정 저장 바" });
@@ -1567,6 +1586,7 @@ test("lesson journal rebases a newly created homework conflict before a verified
   await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
 
   const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
+  await lessonJournal.getByRole("button", { name: "편집" }).click();
   const nextHomeworkDraft = lessonJournal.getByRole("textbox", { name: "월경계 학생 다음 숙제" });
   await nextHomeworkDraft.fill("수업일지에서 저장할 숙제");
   const saveBar = lessonJournal.getByRole("complementary", { name: "수업일지 하단 고정 저장 바" });
@@ -1578,7 +1598,7 @@ test("lesson journal rebases a newly created homework conflict before a verified
 
   await saveButton.click();
   await expect(saveBar).toContainText("저장 완료");
-  await expect(nextHomeworkDraft).toHaveValue("수업일지에서 저장할 숙제");
+  await expect(lessonJournal.getByRole("button", { name: "수업일지에서 저장할 숙제" })).toBeVisible();
   expect(saveAttempt).toBe(2);
   expect(pageErrors).toEqual([]);
 });
@@ -1634,6 +1654,7 @@ test("lesson journal rebases an updated homework conflict before a verified retr
   await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
 
   const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
+  await lessonJournal.getByRole("button", { name: "편집" }).click();
   const studentRow = lessonJournal.getByRole("region", { name: "수업일지 학생 기록" })
     .locator(".journalRow:not(.journalHead)")
     .first();
@@ -1674,6 +1695,7 @@ test("lesson journal reuses one stable makeup task after an unknown save respons
   const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
   await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
   const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
+  await lessonJournal.getByRole("button", { name: "편집" }).click();
   await lessonJournal.getByRole("combobox", { name: "월경계 학생 숙제 상태" }).selectOption("not_done");
   await lessonJournal.getByRole("button", { name: "등원보충" }).click();
 

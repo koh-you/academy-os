@@ -40,6 +40,7 @@ import {
 } from "./LessonModalClosureMakeupPanel.jsx";
 import { LessonModalNewStudentMakeupPanel } from "./LessonModalNewStudentMakeupPanel.jsx";
 import { LessonModalStudentPicker } from "./LessonModalStudentPicker.jsx";
+import "./lessonModalActions.css";
 
 export function LessonModal({
   initialLesson = null,
@@ -49,6 +50,7 @@ export function LessonModal({
   students,
   templates,
   onClose,
+  onDeleteLesson = null,
   onSubmit
 }) {
   const {
@@ -350,6 +352,13 @@ export function LessonModal({
     setClosureMakeupNotificationDrafts((current) => ({ ...current, [field]: value }));
   }
 
+  function requestDeleteLesson() {
+    if (!initialLesson?.lessonId || !onDeleteLesson) return;
+    const isGeneratedLesson = initialLesson.isVirtualGeneratedLesson || initialLesson.isExamPrepAutoLesson;
+    if (isGeneratedLesson && !window.confirm("이 자동 생성 수업을 취소할까요? 달력에서 바로 사라집니다.")) return;
+    onDeleteLesson(initialLesson.lessonId);
+  }
+
   return (
     <Modal className="lessonModal" title={initialLesson ? "수업 수정" : "수업 등록"} onClose={isSaving ? () => {} : onClose}>
       <LessonModalBasics
@@ -433,6 +442,7 @@ export function LessonModal({
         lessonType={lessonType}
         notificationEnabled={notificationEnabled}
         onClose={onClose}
+        onDelete={initialLesson && onDeleteLesson ? requestDeleteLesson : null}
         onSave={submitLesson}
         saveMessage={saveMessage}
         saveState={saveState}

@@ -20,10 +20,10 @@ export function createLessonJournalSaveBarModel({
       : "dirty";
 
   return {
-    buttonDisabled: !isEditMode || !hasDraftChanges || isSaving,
-    buttonLabel: isSaving ? "저장 중" : "변경 저장",
+    buttonDisabled: isEditMode && (!hasDraftChanges || isSaving),
+    buttonLabel: isEditMode ? (isSaving ? "저장 중" : "변경 저장") : "편집",
     message: shouldUseLiveReservationStatus ? reservationSyncStatus.label : message,
     saveState: shouldUseLiveReservationStatus ? reservationSaveState : saveState,
-    shouldShow: isEditMode || Boolean(manualSaveMessage)
+    shouldShow: true
   };
 }

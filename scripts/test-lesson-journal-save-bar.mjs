@@ -41,8 +41,8 @@ assert.deepEqual(
     saveState: "saved"
   }),
   {
-    buttonDisabled: true,
-    buttonLabel: "변경 저장",
+    buttonDisabled: false,
+    buttonLabel: "편집",
     message: "",
     saveState: "saved",
     shouldShow: true
@@ -57,11 +57,11 @@ assert.deepEqual(
     saveState: "idle"
   }),
   {
-    buttonDisabled: true,
-    buttonLabel: "변경 저장",
+    buttonDisabled: false,
+    buttonLabel: "편집",
     message: "",
     saveState: "idle",
-    shouldShow: false
+    shouldShow: true
   }
 );
 
@@ -79,8 +79,8 @@ assert.deepEqual(
     saveState: "saved"
   }),
   {
-    buttonDisabled: true,
-    buttonLabel: "변경 저장",
+    buttonDisabled: false,
+    buttonLabel: "편집",
     message: "Solapi 예약 업데이트 필요",
     saveState: "dirty",
     shouldShow: true
@@ -101,6 +101,7 @@ assert.match(journalSource, /<LessonJournalSaveBar/);
 assert.match(journalSource, /hasDraftChanges=\{hasJournalDraftChanges\}/);
 assert.match(journalSource, /isEditMode=\{journalEditMode\}/);
 assert.match(journalSource, /manualSaveMessage=\{journalManualSaveMessage\}/);
+assert.match(journalSource, /onEdit=\{startJournalEditMode\}/);
 assert.match(journalSource, /onSave=\{saveJournalDrafts\}/);
 assert.match(journalSource, /reservationSyncStatus=\{solapiReservationSyncStatus\}/);
 assert.doesNotMatch(journalSource, /className="lessonJournalStickySaveBar"/);
@@ -112,7 +113,7 @@ for (const contract of [
   'className="primaryButton"',
   "disabled={model.buttonDisabled}",
   "message={model.message}",
-  "onClick={onSave}",
+  "onClick={isEditMode ? onSave : onEdit}",
   "model.buttonLabel",
   "saveState={model.saveState}"
 ]) {

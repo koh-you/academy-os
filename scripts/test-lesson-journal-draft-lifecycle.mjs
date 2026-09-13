@@ -5,7 +5,7 @@ import { createLessonJournalDraftLifecycleInitialState } from "../src/domains/le
 
 const lessonAState = {
   ...createLessonJournalDraftLifecycleInitialState(),
-  journalEditMode: true,
+  journalEditMode: false,
   journalHomeworkDrafts: {
     "lesson_A:student_TARGET:previous": {
       studentId: "student_TARGET",
@@ -28,9 +28,9 @@ const lessonAState = {
 const lessonASnapshot = structuredClone(lessonAState);
 const lessonBState = createLessonJournalDraftLifecycleInitialState();
 
-// 2026-09-12 · 수업일지는 열자마자 편집 모드다. "수정 시작" 단계를 없애 "수업 수정"(LessonModal)과 헷갈리지 않게 했다.
+// 2026-09-12 · 읽기 모드에서 하단바의 "편집"을 눌러 명시적으로 학생 기록 편집을 시작한다.
 assert.deepEqual(lessonBState, {
-  journalEditMode: true,
+  journalEditMode: false,
   journalHomeworkDrafts: {},
   journalMakeupTaskDrafts: {},
   journalManualSaveMessage: "",
@@ -65,6 +65,7 @@ for (const binding of [
   "journalMakeupTaskDrafts,",
   "journalManualSaveMessage,",
   "journalRecordDrafts,",
+  "setJournalEditMode,",
   "setJournalHomeworkDrafts,",
   "setJournalMakeupTaskDrafts,",
   "setJournalManualSaveMessage,",
@@ -84,7 +85,7 @@ for (const removedLocalState of [
 for (const hookContract of [
   "export function createLessonJournalDraftLifecycleInitialState()",
   "export function useLessonJournalDraftLifecycle(lessonId)",
-  "const [journalEditMode, setJournalEditMode] = useState(true)",
+  "const [journalEditMode, setJournalEditMode] = useState(false)",
   "const [journalRecordDrafts, setJournalRecordDrafts] = useState({})",
   "const [journalHomeworkDrafts, setJournalHomeworkDrafts] = useState({})",
   "const [journalMakeupTaskDrafts, setJournalMakeupTaskDrafts] = useState({})",

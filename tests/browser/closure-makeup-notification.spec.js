@@ -46,6 +46,7 @@ test("closure makeup edit opens notification management modal and reserves three
   const journal = page.getByRole("dialog", { name: "수업일지" });
   await journal.getByRole("button", { name: "수업 수정" }).click();
   const editModal = page.getByRole("dialog", { name: "수업 수정" });
+  await expect(editModal.getByRole("button", { name: "수업 취소", exact: true })).toBeVisible();
   await editModal.getByRole("button", { name: "휴강 보충 알림 관리" }).click();
   const notificationModal = page.getByRole("dialog", { name: "휴강 보충 알림 관리" });
   await expect(notificationModal).toBeVisible();

@@ -66,6 +66,7 @@ export function useLessonJournalDraftController({
   getHomeworkFollowupOptionsForAssignmentStatus,
   getHomeworkFollowupPatch,
   lesson,
+  lessonStudents,
   onSaveLessonJournalDrafts,
   recordSaveStates
 }) {
@@ -83,6 +84,7 @@ export function useLessonJournalDraftController({
     journalMakeupTaskDrafts,
     journalManualSaveMessage,
     journalRecordDrafts,
+    setJournalEditMode,
     setJournalHomeworkDrafts,
     setJournalMakeupTaskDrafts,
     setJournalManualSaveMessage,
@@ -107,6 +109,14 @@ export function useLessonJournalDraftController({
     makeupTaskDrafts: journalMakeupTaskDrafts,
     recordDrafts: journalRecordDrafts
   });
+
+  function startJournalEditMode() {
+    setJournalEditMode(true);
+    const firstStudent = lessonStudents[0];
+    return firstStudent
+      ? createLessonStudentRecordId(lesson.lessonId, firstStudent.studentId)
+      : "";
+  }
 
   function getEditableRecord(recordId, baseRecord) {
     return getLessonJournalEditableRecord({
@@ -244,6 +254,7 @@ export function useLessonJournalDraftController({
   async function saveJournalDrafts() {
     if (saveInFlightRef.current) return saveInFlightRef.current;
     if (!journalDraftSaveRequest.hasDraftChanges) {
+      setJournalEditMode(false);
       setJournalManualSaveMessage("수업일지 · 변경 없음");
       return undefined;
     }
@@ -273,6 +284,7 @@ export function useLessonJournalDraftController({
       setJournalRecordDrafts({});
       setJournalHomeworkDrafts({});
       setJournalMakeupTaskDrafts({});
+      setJournalEditMode(false);
       setJournalManualSaveMessage(resolution.message);
       return saved;
     })();
@@ -300,6 +312,7 @@ export function useLessonJournalDraftController({
     journalStickySaveState,
     saveJournalDrafts,
     setJournalManualSaveMessage,
+    startJournalEditMode,
     updateJournalHomeworkDraft,
     updateJournalRecordDraft
   };

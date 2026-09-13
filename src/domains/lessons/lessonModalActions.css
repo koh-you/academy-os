@@ -1,0 +1,34 @@
+.lessonModalActions.hasDeleteAction {
+  grid-template-columns: auto minmax(24px, 1fr) auto minmax(160px, 1fr);
+}
+
+.lessonModalActions.hasDeleteAction .lessonModalDeleteButton {
+  grid-column: 1;
+}
+
+.lessonModalActions.hasDeleteAction .lessonModalCancelButton {
+  grid-column: 3;
+}
+
+.lessonModalActions.hasDeleteAction .primaryButton {
+  grid-column: 4;
+}
+
+@media (max-width: 560px) {
+  .lessonModalActions.hasDeleteAction {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .lessonModalActions.hasDeleteAction .lessonModalDeleteButton {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .lessonModalActions.hasDeleteAction .lessonModalCancelButton {
+    grid-column: 1;
+  }
+
+  .lessonModalActions.hasDeleteAction .primaryButton {
+    grid-column: 2;
+  }
+}

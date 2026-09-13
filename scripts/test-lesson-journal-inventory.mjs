@@ -3,6 +3,14 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const appSource = await readAppWithLessonJournalSource(import.meta.url);
+const lessonModalSource = await readFile(
+  new URL("../src/domains/lessons/LessonModal.jsx", import.meta.url),
+  "utf8"
+);
+const lessonModalActionsSource = await readFile(
+  new URL("../src/domains/lessons/LessonModalActions.jsx", import.meta.url),
+  "utf8"
+);
 const saveViewModelSource = await readFile(
   new URL("../src/domains/lessons/lessonJournalSaveViewModel.js", import.meta.url),
   "utf8"
@@ -411,17 +419,23 @@ for (const extractedHeaderContract of [
     `missing extracted 17B-1 contract: ${extractedHeaderContract}`
   );
 }
-// 2026-09-12 · 수업 수정·수업 취소는 상단 헤더가 아니라 하단 고정바의 "수업 작업" 그룹에 있다.
-// 헤더에는 조작 버튼을 두지 않는다. 수업 취소는 자동 생성 수업일 때 확인을 한 번 더 거친다.
+// 2026-09-12 · 하단바의 수업 작업은 "수업 수정"만 담당하고, 파괴적 취소는 수정 모달로 옮겼다.
+// 일반 수업은 기존 중첩 확인 모달, 자동 생성 수업은 즉시 제거 전에 native confirm을 거친다.
 for (const bottomBarLessonContract of [
   "lessonActions={(",
-  "onClick={() => onEditLesson(lesson)}",
-  "onClick={requestDeleteLesson}",
-  "function requestDeleteLesson()",
-  "onDeleteLesson(lesson.lessonId)"
+  "onClick={() => onEditLesson(lesson)}"
 ]) {
   assert.ok(journalSource.includes(bottomBarLessonContract), `missing bottom bar lesson contract: ${bottomBarLessonContract}`);
 }
+for (const lessonModalDeleteContract of [
+  "function requestDeleteLesson()",
+  "onDeleteLesson(initialLesson.lessonId)",
+  "이 자동 생성 수업을 취소할까요? 달력에서 바로 사라집니다."
+]) {
+  assert.ok(lessonModalSource.includes(lessonModalDeleteContract), `missing LessonModal delete contract: ${lessonModalDeleteContract}`);
+}
+assert.ok(lessonModalActionsSource.includes("dangerSoftButton lessonModalDeleteButton"), "LessonModal must expose a soft-danger cancel action");
+assert.ok(!journalSource.includes("requestDeleteLesson"), "lesson journal bottom bar must not own lesson cancellation");
 for (const removedHeaderAction of ["onEditLesson", "onDeleteLesson", "수업 취소 처리"]) {
   assert.ok(!journalHeaderSource.includes(removedHeaderAction), `header must not keep ${removedHeaderAction}`);
 }
@@ -719,7 +733,7 @@ for (const extractedSaveBarContract of [
   "buttonDisabled",
   "buttonLabel",
   "shouldShow",
-  "onClick={onSave}",
+  "onClick={isEditMode ? onSave : onEdit}",
   'className="lessonJournalStickySaveBar"'
 ]) {
   assert.ok(

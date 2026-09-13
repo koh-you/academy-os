@@ -3985,7 +3985,6 @@ export function App() {
       // Keep the undo entry and local source bundle for an explicit retry.
     }
   }
-
   function handleDeleteSelectedLessonFromCalendar() {
     const lesson = calendarLessons.find((item) => item.lessonId === selectedLessonId);
     if (!lesson) return;
@@ -3998,7 +3997,6 @@ export function App() {
     }
     setLessonDeleteModalId(lesson.lessonId);
   }
-
   async function confirmDeleteLesson(lessonId) {
     if (lessonHistoryActionRequestRef.current) return;
     const lesson = calendarLessons.find((item) => item.lessonId === lessonId);
@@ -4009,6 +4007,8 @@ export function App() {
       setLessonDeleteModalId("");
       setSelectedLessonId("");
       setIsLessonJournalOpen(false);
+      setEditingLesson(null);
+      setIsLessonModalOpen(false);
       return;
     }
     const deletedAt = new Date().toISOString();
@@ -4044,11 +4044,12 @@ export function App() {
         .sort(sortByTime)[0];
       setSelectedLessonId(nextLessonForDate?.lessonId ?? "");
       setIsLessonJournalOpen(false);
+      setEditingLesson(null);
+      setIsLessonModalOpen(false);
     } catch {
       // Keep the confirmation modal and source bundle intact for retry.
     }
   }
-
   function handleOpenLessonJournal(lessonId) {
     const lesson = calendarLessons.find((item) => item.lessonId === lessonId);
     if (!lesson) return;
@@ -4247,7 +4248,6 @@ export function App() {
             : "수업일지 수정 저장 완료"
     };
   }
-
   function handleDeleteLesson(lessonId) {
     const lesson = calendarLessons.find((item) => item.lessonId === lessonId);
     if (!lesson) return;
@@ -4256,11 +4256,12 @@ export function App() {
       suppressGeneratedLessonKey(generatedKey);
       setSelectedLessonId("");
       setIsLessonJournalOpen(false);
+      setEditingLesson(null);
+      setIsLessonModalOpen(false);
       return;
     }
     setLessonDeleteModalId(lesson.lessonId);
   }
-
   function createUniqueStudentLoginId(name = "") {
     const baseLoginId = `04${String(name || "student").replace(/\s+/g, "")}`;
     const existingLoginIds = new Set(students.map((student) => student.loginId).filter(Boolean));
@@ -6677,7 +6678,6 @@ export function App() {
           />
         ) : null}
       </section>
-
       {isLessonModalOpen ? (
         <Suspense fallback={<div className="modalLoadingState" role="status">수업 등록 화면을 불러오는 중입니다.</div>}>
           <LessonModal
@@ -6691,11 +6691,11 @@ export function App() {
               setEditingLesson(null);
               setIsLessonModalOpen(false);
             }}
+            onDeleteLesson={handleDeleteLesson}
             onSubmit={editingLesson ? handleUpdateLesson : handleAddLesson}
           />
         </Suspense>
       ) : null}
-
       {isMonthlyRegularLessonOpenModal ? (
         <MonthlyRegularLessonOpenModal
           plan={monthlyRegularLessonOpenPlan}

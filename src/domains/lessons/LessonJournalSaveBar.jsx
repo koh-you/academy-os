@@ -9,6 +9,7 @@ export function LessonJournalSaveBar({
   manualSaveMessage,
   message,
   notificationActions = null,
+  onEdit,
   onSave,
   reservationSyncStatus,
   saveState
@@ -44,7 +45,7 @@ export function LessonJournalSaveBar({
       <button
         className="primaryButton"
         disabled={model.buttonDisabled}
-        onClick={onSave}
+        onClick={isEditMode ? onSave : onEdit}
         type="button"
       >
         {model.buttonLabel}

@@ -93,8 +93,8 @@ test("absence makeup opens the regular lesson journal with only its source lesso
   await expect(absenceSource).toContainText("19:00-22:00");
   await expect(absenceSource).toContainText("결석 사유 · 병결");
   await expect(lessonJournal.getByRole("region", { name: "수업일지 학생 기록" })).toBeVisible();
-  // 수업일지는 열자마자 편집 모드라 하단 고정바(변경 저장)가 바로 보인다.
-  await expect(lessonJournal.getByRole("button", { name: "변경 저장" })).toBeVisible();
+  // 수업일지는 읽기 모드로 열리고 하단 고정바의 "편집"으로 명시적으로 진입한다.
+  await expect(lessonJournal.getByRole("button", { name: "편집" })).toBeVisible();
   await expect(page.locator(".homeworkMakeupScheduleModal")).toHaveCount(0);
   await expect(lessonJournal.getByText("보충 처리", { exact: true })).toHaveCount(0);
   expect(pageErrors).toEqual([]);

@@ -240,6 +240,7 @@ export function LessonJournalDetail({
     journalStickySaveState,
     saveJournalDrafts: saveJournalDraftChanges,
     setJournalManualSaveMessage,
+    startJournalEditMode: beginJournalEditMode,
     updateJournalHomeworkDraft,
     updateJournalRecordDraft,
     journalRecordDrafts
@@ -249,6 +250,7 @@ export function LessonJournalDetail({
     getHomeworkFollowupOptionsForAssignmentStatus,
     getHomeworkFollowupPatch,
     lesson,
+    lessonStudents,
     onSaveLessonJournalDrafts,
     recordSaveStates: lessonRecordSaveStates
   });
@@ -346,12 +348,11 @@ export function LessonJournalDetail({
     solapiResultRefreshState
   });
 
-  function requestDeleteLesson() {
-    // 일반 수업은 onDeleteLesson 이 "수업 취소 확인" 모달을 띄운다. 자동 생성 수업은
-    // 모달 없이 바로 달력에서 사라지므로 그 경로에만 확인을 넣어 두 경우 모두 한 번씩 묻는다.
-    const isGeneratedLesson = lesson.isVirtualGeneratedLesson || lesson.isExamPrepAutoLesson;
-    if (isGeneratedLesson && !window.confirm("이 자동 생성 수업을 취소할까요? 달력에서 바로 사라집니다.")) return;
-    onDeleteLesson(lesson.lessonId);
+  function startJournalEditMode() {
+    const firstRecordId = beginJournalEditMode();
+    if (firstRecordId) {
+      setEditingMemoKey(`${firstRecordId}:lessonMaterial`);
+    }
   }
 
   async function refreshReservationAudit() {
@@ -767,10 +768,7 @@ export function LessonJournalDetail({
         hasDraftChanges={hasJournalDraftChanges}
         isEditMode={journalEditMode}
         lessonActions={(
-          <>
-            <button className="softButton" onClick={() => onEditLesson(lesson)} type="button">수업 수정</button>
-            <button className="dangerSoftButton" onClick={requestDeleteLesson} type="button">수업 취소</button>
-          </>
+          <button className="softButton" onClick={() => onEditLesson(lesson)} type="button">수업 수정</button>
         )}
         manualSaveMessage={journalManualSaveMessage}
         message={journalStickySaveMessage}
@@ -826,6 +824,7 @@ export function LessonJournalDetail({
             ) : null}
           </>
         )}
+        onEdit={startJournalEditMode}
         onSave={saveJournalDrafts}
         reservationSyncStatus={solapiReservationSyncStatus}
         saveState={journalStickySaveState}

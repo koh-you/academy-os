@@ -9,6 +9,7 @@ export function LessonModalActions({
   lessonType,
   notificationEnabled,
   onClose,
+  onDelete = null,
   onSave,
   saveMessage,
   saveState
@@ -34,7 +35,25 @@ export function LessonModalActions({
         <span>{saveMessage}</span>
       </div>
 
-      <div className="lessonModalActions">
+      <div className={`lessonModalActions${onDelete ? " hasDeleteAction" : ""}`}>
+        {onDelete ? (
+          <button
+            className="dangerSoftButton lessonModalDeleteButton"
+            disabled={isSaving}
+            onClick={onDelete}
+            type="button"
+          >
+            수업 취소
+          </button>
+        ) : null}
+        <button
+          className="softButton lessonModalCancelButton"
+          disabled={isSaving}
+          onClick={onClose}
+          type="button"
+        >
+          {isSaved ? "달력에서 확인" : "취소"}
+        </button>
         <button
           className="primaryButton full"
           disabled={isSaving || isSaved}
@@ -42,14 +61,6 @@ export function LessonModalActions({
           type="button"
         >
           {saveButtonLabel}
-        </button>
-        <button
-          className="softButton"
-          disabled={isSaving}
-          onClick={onClose}
-          type="button"
-        >
-          {isSaved ? "달력에서 확인" : "취소"}
         </button>
       </div>
     </>
