@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-09-13 문제은행 피드백 반영
+
+- 세그먼터 잉크 규칙: 처음엔 「빈 줄 22pt 초과면 끊기」로 했다가 소문항 (2)가 잘리는 것을 0629번에서 확인하고 폐기. 「세그먼트 하단 18pt 안 · 폭 18pt 미만 · 컬럼 왼쪽 가장자리」 잉크만 무시하는 규칙으로 바꿔 17건만 바뀌고 나머지 627건은 그대로임을 대조했다.
+- 공통 지시문 인쇄는 `buildPrintEntries` 가 같은 passage 영역끼리 group 항목으로 묶고 `rectWithin` 으로 강조 상자 백분율을 계산한다. 미리보기도 같은 상자를 쓴다.
+- 서버: `POST/DELETE /api/problem-bank/book`, Storage 접두사 목록·일괄 삭제 헬퍼, 재등록 시 사라진 문항만 삭제(정오답 cascade 보존). `problemBankStore` 에 `patchRows`·storage 함수를 주입한다.
+- 옛 오답 보드(PickedProblemModal·WrongBookCard·진단 Disclosure)를 지우며 scenario 4건·modal 인벤토리(41→40, footer 21→20)를 새 파일 기준으로 옮겼다.
+
 ## 2026-09-12 문제은행(오답은행) 1단계
 
 - `Math books prototype` 115세션 분석(바탕화면 PDF 2종)에서 「AI 는 원천을 만들지 않는다 · 규칙 하나 = 검사 하나 · 저장 후 재조회」를 설계 원칙으로 가져왔다.

@@ -172,25 +172,89 @@ export function groupItemsByUnit(units, items) {
   return groups.map((group) => ({ ...group, items: [...group.items].sort((a, b) => a.numberSort - b.numberSort) }));
 }
 
-/** 오답지에 실을 문항을 교재 순서로 정렬하고 인쇄용 출처 문구를 붙인다. */
+/** 한 학생 기준 문항 상태: none · wrong · correct · recovered(1회차 오답 → 뒤 회차 정답). */
+export function studentItemState(attempts, studentId, itemId) {
+  const { latest, first } = summarizeAttempts(attempts, new Set([studentId]));
+  const key = `${studentId}|${itemId}`;
+  const last = latest.get(key);
+  if (!last || last.result === "unanswered") return "none";
+  if (last.result === "wrong") return "wrong";
+  return first.get(key)?.result === "wrong" && last.round > 1 ? "recovered" : "correct";
+}
+
+export const studentStateLegend = Object.freeze([
+  { key: "none", label: "기록 없음 (클릭 → 오답)" },
+  { key: "wrong", label: "오답 (클릭 → 정답)" },
+  { key: "correct", label: "정답 (클릭 → 기록 지움)" },
+  { key: "recovered", label: "재풀이 정답" }
+]);
+
+/** bbox [x0,y0,x1,y1] 을 다른 bbox 안의 백분율 사각형으로 바꾼다(공통 지시문 이미지 위 강조 상자). */
+export function rectWithin(outer, inner) {
+  const width = outer[2] - outer[0];
+  const height = outer[3] - outer[1];
+  if (width <= 0 || height <= 0) return null;
+  // 소수 오차가 화면에 새지 않게 0.01% 단위로 반올림한다.
+  const clamp = (value) => Math.round(Math.max(0, Math.min(100, value)) * 100) / 100;
+  return {
+    left: clamp(((inner[0] - outer[0]) / width) * 100),
+    top: clamp(((inner[1] - outer[1]) / height) * 100),
+    width: clamp(((inner[2] - inner[0]) / width) * 100),
+    height: clamp(((inner[3] - inner[1]) / height) * 100)
+  };
+}
+
+/**
+ * 오답지에 실을 항목. 공통 지시문(passage)을 가진 문항들은 같은 지시문끼리 한 항목으로 묶어
+ * 지시문 이미지를 한 번만 싣고, 고른 문항 자리에 강조 상자를 얹는다.
+ * @returns {Array<{ kind: "item" | "group", ... }>}
+ */
 export function buildPrintEntries({ book, units, items, selectedItemIds, imagesByItem }) {
   const unitTitleById = new Map(units.map((unit) => [unit.unitId, unit.title]));
   const selected = new Set(selectedItemIds);
-  return items
-    .filter((item) => selected.has(item.itemId))
-    .sort((a, b) => a.numberSort - b.numberSort)
-    .map((item) => {
-      const regions = imagesByItem.get(item.itemId) ?? [];
-      const body = regions.find((region) => region.kind === "body");
-      const passage = regions.find((region) => region.kind === "passage");
-      const solution = regions.find((region) => region.kind === "solution");
-      return {
-        item,
-        sourceLine: [book.title, unitTitleById.get(item.unitId) ?? "", `${item.numberLabel}번`].filter(Boolean).join(" · "),
-        typeLabel: item.typeLabel,
-        bodyUrl: body?.url ?? "",
-        passageUrl: passage?.url ?? "",
-        solutionUrl: solution?.url ?? ""
-      };
+  const sourceLine = (item) => [book.title, unitTitleById.get(item.unitId) ?? "", `${item.numberLabel}번`].filter(Boolean).join(" · ");
+  const urlOf = (item, kind) => (imagesByItem.get(item.itemId) ?? []).find((region) => region.kind === kind)?.url ?? "";
+  const bboxOf = (item, kind) => (item.regions ?? []).find((region) => region.kind === kind)?.bboxNormalized ?? null;
+
+  const entries = [];
+  const groupsByKey = new Map();
+  for (const item of [...items].filter((entry) => selected.has(entry.itemId)).sort((a, b) => a.numberSort - b.numberSort)) {
+    const passageBbox = bboxOf(item, "passage");
+    const passageUrl = urlOf(item, "passage");
+    if (passageBbox && passageUrl) {
+      const key = `${item.pdfPage}:${passageBbox.join(",")}`;
+      if (!groupsByKey.has(key)) {
+        const group = {
+          kind: "group",
+          key,
+          item,
+          passageUrl,
+          passageBbox,
+          members: [],
+          sourceLine: "",
+          typeLabel: item.typeLabel,
+          solutionUrl: ""
+        };
+        groupsByKey.set(key, group);
+        entries.push(group);
+      }
+      const group = groupsByKey.get(key);
+      const bodyBbox = bboxOf(item, "body");
+      group.members.push({ item, highlight: bodyBbox ? rectWithin(passageBbox, bodyBbox) : null });
+      group.sourceLine = [book.title, unitTitleById.get(item.unitId) ?? "", `${group.members.map((member) => member.item.numberLabel).join(" · ")}번`]
+        .filter(Boolean)
+        .join(" · ");
+      continue;
+    }
+    entries.push({
+      kind: "item",
+      key: item.itemId,
+      item,
+      sourceLine: sourceLine(item),
+      typeLabel: item.typeLabel,
+      bodyUrl: urlOf(item, "body"),
+      solutionUrl: urlOf(item, "solution")
     });
+  }
+  return entries;
 }

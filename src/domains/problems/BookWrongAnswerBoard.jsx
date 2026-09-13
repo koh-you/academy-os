@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
+import { isActiveStudent } from "../students/lessonRosterSelectors.js";
 import {
   fetchProblemBankAttempts,
   fetchProblemBankBook,
@@ -16,7 +17,10 @@ import {
   computeItemStats,
   findFolderNode,
   groupItemsByUnit,
+  rectWithin,
+  studentItemState,
   studentResultMap,
+  studentStateLegend,
   studentWrongItemIds,
   wrongRateBand,
   wrongRateLegend
@@ -28,6 +32,11 @@ const gradeOptions = ["전체", "중1", "중2", "중3", "고1", "고2", "고3"];
 
 /**
  * 오답관리 › 교재별 오답. 교재 폴더 → 단원별 번호 그리드 → 학생별 정오답 기록 → 선택 인쇄.
+ *
+ * 번호 색의 뜻:
+ * - 학생을 고르면 그 학생 기준이다 — 기록 없음(회색) / 오답(빨강) / 정답(초록) / 재풀이 정답(파랑).
+ *   번호를 누를 때마다 기록 없음 → 오답 → 정답 → 기록 없음 순으로 돌고, 화면이 먼저 바뀐 뒤 서버 저장을 맞춘다.
+ * - 학생을 고르지 않으면 반 전체 오답률 띠다(미풀이 / 전원 정답 / 1~20% … 81%~).
  * 문항 본문은 서버 서명 URL 로 그때그때 받는다.
  */
 export function BookWrongAnswerBoard({ students = [] }) {
@@ -95,12 +104,14 @@ export function BookWrongAnswerBoard({ students = [] }) {
 
   const tree = useMemo(() => buildFolderTree(books), [books]);
   const folderNode = useMemo(() => findFolderNode(tree, folderPath), [tree, folderPath]);
+  // 퇴원생은 오답을 기록할 대상이 아니다. 과거 기록은 표(반 오답률)에는 남는다.
+  const activeStudents = useMemo(() => students.filter((student) => isActiveStudent(student)), [students]);
   const filteredStudents = useMemo(
-    () => students.filter((student) => gradeFilter === "전체" || student.grade === gradeFilter),
-    [students, gradeFilter]
+    () => activeStudents.filter((student) => gradeFilter === "전체" || student.grade === gradeFilter),
+    [activeStudents, gradeFilter]
   );
   const studentFilter = useMemo(() => new Set(filteredStudents.map((student) => student.studentId)), [filteredStudents]);
-  const selectedStudent = students.find((student) => student.studentId === selectedStudentId) ?? null;
+  const selectedStudent = activeStudents.find((student) => student.studentId === selectedStudentId) ?? null;
   const items = bookDetail?.items ?? [];
   const units = bookDetail?.units ?? [];
   const itemStats = useMemo(() => computeItemStats(attempts, studentFilter), [attempts, studentFilter]);
@@ -113,6 +124,12 @@ export function BookWrongAnswerBoard({ students = [] }) {
     () => (selectedStudentId ? studentResultMap(attempts, selectedStudentId) : new Map()),
     [attempts, selectedStudentId]
   );
+  const studentStates = useMemo(() => {
+    const map = new Map();
+    if (!selectedStudentId) return map;
+    for (const item of items) map.set(item.itemId, studentItemState(attempts, selectedStudentId, item.itemId));
+    return map;
+  }, [attempts, selectedStudentId, items]);
   const itemById = useMemo(() => new Map(items.map((item) => [item.itemId, item])), [items]);
   const unitTitleById = useMemo(() => new Map(units.map((unit) => [unit.unitId, unit.title])), [units]);
 
@@ -140,30 +157,36 @@ export function BookWrongAnswerBoard({ students = [] }) {
 
   async function recordAttempt(item) {
     if (!selectedStudent) {
-      setSaveMessage("먼저 학생을 선택해 주세요.");
+      setSaveMessage("먼저 학생을 선택해 주세요. 학생을 고르면 번호를 눌러 오답을 기록할 수 있습니다.");
       return;
     }
-    const current = attempts.find(
-      (attempt) => attempt.studentId === selectedStudent.studentId && attempt.itemId === item.itemId && attempt.round === round
-    );
+    const matches = (attempt) =>
+      attempt.studentId === selectedStudent.studentId && attempt.itemId === item.itemId && attempt.round === round;
+    const current = attempts.find(matches);
     const currentIndex = current ? attemptClickCycle.indexOf(current.result) : -1;
     const nextResult = attemptClickCycle[(currentIndex + 1) % attemptClickCycle.length];
     const entry = { studentId: selectedStudent.studentId, bookId: selectedBookId, itemId: item.itemId, round, result: nextResult };
+    const optimistic = nextResult === "clear"
+      ? null
+      : { attemptId: `${entry.studentId}__${entry.itemId}__r${round}`, ...entry, recordedAt: new Date().toISOString(), note: "", pending: true };
+    // 화면을 먼저 바꾼다. 저장이 끝나면 서버가 돌려준 행으로 바꾸고, 실패하면 되돌린다.
+    setAttempts((previous) => [...previous.filter((attempt) => !matches(attempt)), ...(optimistic ? [optimistic] : [])]);
+    setSaveMessage(
+      nextResult === "clear"
+        ? `${item.numberLabel}번 기록을 지우는 중…`
+        : `${selectedStudent.name} · ${item.numberLabel}번 ${attemptResultMeta[nextResult].label} 저장 중…`
+    );
     try {
       const result = await saveProblemBankAttempts([entry]);
-      setAttempts((previous) => {
-        const withoutCurrent = previous.filter(
-          (attempt) => !(attempt.studentId === entry.studentId && attempt.itemId === entry.itemId && attempt.round === entry.round)
-        );
-        return [...withoutCurrent, ...(result.attempts ?? [])];
-      });
+      setAttempts((previous) => [...previous.filter((attempt) => !matches(attempt)), ...(result.attempts ?? [])]);
       setSaveMessage(
         nextResult === "clear"
           ? `${item.numberLabel}번 기록을 지웠습니다.`
           : `${selectedStudent.name} · ${item.numberLabel}번 ${attemptResultMeta[nextResult].label} 저장됨 (${round}회차)`
       );
     } catch (error) {
-      setSaveMessage(error.message || "정오답을 저장하지 못했습니다.");
+      setAttempts((previous) => [...previous.filter((attempt) => !matches(attempt)), ...(current ? [current] : [])]);
+      setSaveMessage(`${item.numberLabel}번 저장 실패 — ${error.message || "다시 눌러 주세요."}`);
     }
   }
 
@@ -191,7 +214,9 @@ export function BookWrongAnswerBoard({ students = [] }) {
       setSaveMessage("먼저 학생을 선택해 주세요.");
       return;
     }
-    setSelectedItemIds(new Set(studentWrongItemIds(attempts, selectedStudentId)));
+    const wrongIds = studentWrongItemIds(attempts, selectedStudentId);
+    setSelectedItemIds(new Set(wrongIds));
+    setSaveMessage(wrongIds.length ? `${selectedStudent.name}의 오답 ${wrongIds.length}개를 골랐습니다.` : `${selectedStudent.name}의 오답 기록이 아직 없습니다.`);
   }
 
   function selectUnitItems(group) {
@@ -211,6 +236,9 @@ export function BookWrongAnswerBoard({ students = [] }) {
   const previewItem = previewItemId ? itemById.get(previewItemId) : null;
   const previewRegions = previewItem ? imagesByItem.get(previewItem.itemId) ?? [] : [];
   const previewStat = previewItem ? itemStats.get(previewItem.itemId) : null;
+  const previewPassage = previewRegions.find((region) => region.kind === "passage");
+  const previewBody = previewRegions.find((region) => region.kind === "body");
+  const previewHighlight = previewPassage && previewBody ? rectWithin(previewPassage.bboxNormalized, previewBody.bboxNormalized) : null;
 
   return (
     <section className="problemBankBoard">
@@ -290,7 +318,7 @@ export function BookWrongAnswerBoard({ students = [] }) {
               </button>
             ))}
           </div>
-          <label className="problemBankStudentPick">
+          <label className={`problemBankStudentPick${selectedStudent ? "" : " attention"}`}>
             학생
             <select value={selectedStudentId} onChange={(event) => setSelectedStudentId(event.target.value)}>
               <option value="">학생 선택</option>
@@ -315,13 +343,24 @@ export function BookWrongAnswerBoard({ students = [] }) {
           </div>
         </div>
 
-        <div className="problemBankLegend" aria-label="오답률 범례">
-          {wrongRateLegend.map((band) => (
-            <span key={band.key}><i className={`problemBankBand band-${band.key}`} />{band.label}</span>
-          ))}
-          <span className="problemBankLegendHint">
-            {selectedStudent ? `${selectedStudent.name} 기준 · 클릭: 오답 → 정답 → 지움 · Ctrl+클릭: 인쇄 선택` : "학생을 선택하면 번호를 눌러 오답을 기록합니다"}
-          </span>
+        <div className="problemBankLegend" aria-label="번호 색 뜻">
+          {selectedStudent ? (
+            <>
+              <strong>{selectedStudent.name} 기준</strong>
+              {studentStateLegend.map((state) => (
+                <span key={state.key}><i className={`problemBankBand mine-${state.key}`} />{state.label}</span>
+              ))}
+              <span className="problemBankLegendHint">테두리 = 인쇄 선택 · Ctrl+클릭으로 고르기</span>
+            </>
+          ) : (
+            <>
+              <strong>반 전체 오답률</strong>
+              {wrongRateLegend.map((band) => (
+                <span key={band.key}><i className={`problemBankBand band-${band.key}`} />{band.label}</span>
+              ))}
+              <span className="problemBankLegendHint">학생을 고르면 그 학생 기준 색으로 바뀌고 번호를 눌러 기록합니다</span>
+            </>
+          )}
         </div>
         {saveMessage ? <p aria-live="polite" className="problemBankSaveMessage">{saveMessage}</p> : null}
 
@@ -333,6 +372,7 @@ export function BookWrongAnswerBoard({ students = [] }) {
               const unitWrong = group.items.reduce((sum, item) => sum + (itemStats.get(item.itemId)?.wrong ?? 0), 0);
               const unitAttempted = group.items.reduce((sum, item) => sum + (itemStats.get(item.itemId)?.attempted ?? 0), 0);
               const unitCurrentWrong = group.items.reduce((sum, item) => sum + (itemStats.get(item.itemId)?.currentWrong ?? 0), 0);
+              const myWrongInUnit = selectedStudent ? group.items.filter((item) => studentStates.get(item.itemId) === "wrong").length : 0;
               const percent = (numerator, denominator) => (denominator ? Math.round((numerator / denominator) * 100) : 0);
               return (
                 <section className="problemBankUnitCard" key={group.unit.unitId || "orphan"}>
@@ -342,6 +382,7 @@ export function BookWrongAnswerBoard({ students = [] }) {
                       <small>{[bookDetail.book.folderPath, bookDetail.book.title, group.unit.title].filter(Boolean).join(" / ")}</small>
                     </div>
                     <div className="problemBankUnitStats">
+                      {selectedStudent ? <span className="problemBankPill mine">{selectedStudent.name} 오답 {myWrongInUnit}</span> : null}
                       <span className="problemBankPill">{recordedInUnit}/{group.items.length}</span>
                       <span className="problemBankPill warn">풀이오답 {percent(unitWrong, unitAttempted)}%</span>
                       <span className="problemBankPill danger">현재 {percent(unitCurrentWrong, unitAttempted)}%</span>
@@ -351,18 +392,22 @@ export function BookWrongAnswerBoard({ students = [] }) {
                   <div className="problemBankNumberGrid">
                     {group.items.map((item) => {
                       const band = wrongRateBand(itemStats.get(item.itemId));
+                      const studentState = studentStates.get(item.itemId) ?? "none";
                       const studentResult = studentResults.get(item.itemId);
                       const classes = [
                         "problemBankNumber",
-                        `band-${band.key}`,
+                        selectedStudent ? `mine-${studentState}` : `band-${band.key}`,
                         selectedItemIds.has(item.itemId) ? "selected" : "",
                         previewItemId === item.itemId ? "previewing" : "",
-                        studentResult ? `student-${studentResult.result}` : "",
+                        studentResult?.pending ? "pending" : "",
                         item.reviewStatus === "flagged" ? "flagged" : ""
                       ].filter(Boolean).join(" ");
+                      const stateLabel = selectedStudent
+                        ? studentStateLegend.find((state) => state.key === studentState)?.label.split(" (")[0] ?? ""
+                        : band.label;
                       return (
                         <button
-                          aria-label={`${item.numberLabel}번 · ${band.label}${studentResult ? ` · ${selectedStudent?.name ?? ""} ${attemptResultMeta[studentResult.result].label}` : ""}`}
+                          aria-label={`${item.numberLabel}번 · ${stateLabel}`}
                           aria-pressed={selectedItemIds.has(item.itemId)}
                           className={classes}
                           key={item.itemId}
@@ -371,7 +416,9 @@ export function BookWrongAnswerBoard({ students = [] }) {
                           type="button"
                         >
                           {Number.parseInt(item.numberLabel, 10) || item.numberLabel}
-                          {studentResult ? <i className="problemBankStudentMark">{attemptResultMeta[studentResult.result].shortLabel}</i> : null}
+                          {selectedStudent && studentState !== "none" ? (
+                            <i className="problemBankStudentMark">{studentState === "wrong" ? "✕" : "○"}</i>
+                          ) : null}
                         </button>
                       );
                     })}
@@ -400,15 +447,23 @@ export function BookWrongAnswerBoard({ students = [] }) {
               <div className="problemBankPreviewBody">
                 {previewItem.typeLabel ? <p className="problemBankTypeLabel">{previewItem.typeLabel}</p> : null}
                 {previewRegions.length === 0 ? <p className="muted">이미지를 불러오는 중…</p> : null}
-                {previewRegions
-                  .filter((region) => region.kind === "passage" || region.kind === "body")
-                  .sort((a, b) => (a.kind === "passage" ? -1 : 1) - (b.kind === "passage" ? -1 : 1))
-                  .map((region) => (
-                    <img alt={`${previewItem.numberLabel}번 ${region.kind === "passage" ? "공통 지시문" : "문항"}`} key={region.regionId} src={region.url} />
-                  ))}
+                {previewPassage ? (
+                  <div className="problemBankPrintGroup">
+                    <img alt={`${previewItem.numberLabel}번 공통 지시문과 문항`} src={previewPassage.url} />
+                    {previewHighlight ? (
+                      <span
+                        aria-hidden="true"
+                        className="problemBankPrintHighlight"
+                        style={{ left: `${previewHighlight.left}%`, top: `${previewHighlight.top}%`, width: `${previewHighlight.width}%`, height: `${previewHighlight.height}%` }}
+                      />
+                    ) : null}
+                  </div>
+                ) : previewBody ? (
+                  <img alt={`${previewItem.numberLabel}번 문항`} src={previewBody.url} />
+                ) : null}
                 <p className="problemBankPreviewMeta">
                   원본 {previewItem.printedPage}쪽 · {previewItem.reviewStatus === "flagged" ? "경계 확인 필요" : "경계 자동 확인"}
-                  {previewItem.hasSubquestions ? " · 공통 지시문 포함" : ""}
+                  {previewPassage ? " · 공통 지시문 문항 (인쇄 때 지시문과 함께 나가고 이 번호에 강조 상자가 붙습니다)" : ""}
                 </p>
               </div>
             ) : null}

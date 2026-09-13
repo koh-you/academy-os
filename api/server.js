@@ -94,6 +94,7 @@ import {
   createSignedStorageUrl,
   deleteRows,
   deleteStorageObject,
+  deleteStorageObjects,
   downloadStorageObject,
   downloadStorageObjectWithMetadata,
   ensureStorageBucket,
@@ -101,6 +102,7 @@ import {
   insertRows,
   isSupabaseConfigured,
   listRows,
+  listStorageObjectPaths,
   parseDataUrl,
   patchRows,
   sanitizeStorageSegment,
@@ -590,8 +592,11 @@ const { dispatch: dispatchProblemBankRoute } = createProblemBankRouteRegistry({
   ...createProblemBankStore({
     createSignedStorageUrl,
     deleteRows,
+    deleteStorageObjects,
     isSupabaseConfigured,
     listRows,
+    listStorageObjectPaths,
+    patchRows,
     uploadStorageObjectWithBucketRetry,
     upsertRows
   })

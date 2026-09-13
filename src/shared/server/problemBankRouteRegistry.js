@@ -7,6 +7,8 @@
 export const problemBankRouteSignatures = Object.freeze([
   Object.freeze({ method: "GET", path: "/api/problem-bank/books" }),
   Object.freeze({ method: "GET", path: "/api/problem-bank/book" }),
+  Object.freeze({ method: "POST", path: "/api/problem-bank/book" }),
+  Object.freeze({ method: "DELETE", path: "/api/problem-bank/book" }),
   Object.freeze({ method: "POST", path: "/api/problem-bank/item-images" }),
   Object.freeze({ method: "POST", path: "/api/problem-bank/import" }),
   Object.freeze({ method: "POST", path: "/api/problem-bank/images" }),
@@ -19,6 +21,8 @@ export const problemBankRouteSignatures = Object.freeze([
  * @param {(request: *) => *} deps.getTeacherSession
  * @param {() => Promise<*>} deps.listProblemBankBooks
  * @param {(bookId: string) => Promise<*>} deps.getProblemBankBook
+ * @param {(bookId: string, patch: *) => Promise<*>} deps.updateProblemBankBook
+ * @param {(bookId: string) => Promise<*>} deps.deleteProblemBankBook
  * @param {(itemIds: string[]) => Promise<*>} deps.resolveProblemBankItemImages
  * @param {(manifest: *) => Promise<*>} deps.importProblemBankManifest
  * @param {(bookId: string, files: *[]) => Promise<*>} deps.uploadProblemBankImages
@@ -33,6 +37,8 @@ export function createProblemBankRouteRegistry({
   getTeacherSession,
   listProblemBankBooks,
   getProblemBankBook,
+  updateProblemBankBook,
+  deleteProblemBankBook,
   resolveProblemBankItemImages,
   importProblemBankManifest,
   uploadProblemBankImages,
@@ -69,6 +75,18 @@ export function createProblemBankRouteRegistry({
       if (request.method === "GET" && pathname === "/api/problem-bank/book") {
         const bookId = requestUrl.searchParams.get("bookId") ?? "";
         sendJson(request, response, 200, { ok: true, ...(await getProblemBankBook(bookId)) });
+        return true;
+      }
+      if (request.method === "POST" && pathname === "/api/problem-bank/book") {
+        const payload = await readJsonBody(request);
+        const book = await updateProblemBankBook(payload.bookId, payload.patch ?? {});
+        sendJson(request, response, 200, { ok: true, book });
+        return true;
+      }
+      if (request.method === "DELETE" && pathname === "/api/problem-bank/book") {
+        const bookId = requestUrl.searchParams.get("bookId") ?? "";
+        const result = await deleteProblemBankBook(bookId);
+        sendJson(request, response, 200, { ok: true, ...result });
         return true;
       }
       if (request.method === "POST" && pathname === "/api/problem-bank/item-images") {

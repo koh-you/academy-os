@@ -5,7 +5,14 @@ test.beforeEach(async ({ request }) => {
   await resetSafeFixture(request);
 });
 
-test("교재별 오답: 학생 오답을 기록하고 서버 재조회와 맞춘 뒤 오답지를 워터마크와 함께 연다", async ({ page }) => {
+async function openBookWrongTab(page) {
+  const navigation = page.getByRole("navigation", { name: "주요 화면" });
+  await navigation.getByRole("button", { name: /오답관리/ }).click();
+  await page.getByRole("tab", { name: "교재별 오답" }).click();
+  return page.locator(".problemBankBoard");
+}
+
+test("교재별 오답: 학생 기준 색으로 바로 바뀌고, 서버 재조회와 맞춘 뒤 오답지를 워터마크·1단/2단으로 연다", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   const attemptPosts = [];
   await page.route("**/api/problem-bank/attempts", async (route) => {
@@ -14,58 +21,68 @@ test("교재별 오답: 학생 오답을 기록하고 서버 재조회와 맞춘
   });
 
   await loginAsTeacher(page);
-  const navigation = page.getByRole("navigation", { name: "주요 화면" });
-  await navigation.getByRole("button", { name: /오답관리/ }).click();
-  await page.getByRole("tab", { name: "교재별 오답" }).click();
-
-  const board = page.locator(".problemBankBoard");
+  const board = await openBookWrongTab(page);
   await expect(board.getByRole("heading", { name: "교재별 오답 · 유형분석" })).toBeVisible();
+  // 현행·추가1·추가2 탭은 없다.
+  await expect(page.getByRole("tab", { name: /^현행$|추가1|추가2/ })).toHaveCount(0);
   await expect(board.locator(".problemBankBookItem.active")).toContainText("RPM 중3-2 수학 (가상)");
-  await expect(board.locator(".problemBankUnitCard")).toHaveCount(2);
   await expect(board.locator(".problemBankNumber")).toHaveCount(20);
 
-  // 기록된 가상 데이터: 0002 오답 · 0003 정답 → 반 오답률 색이 붙는다.
+  // 학생을 고르기 전에는 반 오답률 띠(0002 오답 · 0003 정답).
   await expect(board.locator(".problemBankNumber.band-band5")).toHaveCount(1);
   await expect(board.locator(".problemBankNumber.band-allCorrect")).toHaveCount(1);
 
-  // 학생을 고르고 1번을 누르면 오답이 저장되고, 서버 응답으로 되돌아온 행이 그대로 표시된다.
-  await board.locator(".problemBankStudentPick select").selectOption({ label: "월경계 학생 (중3)" });
-  await board.getByRole("button", { name: /^0001번 ·/ }).click();
-  await expect(board.locator(".problemBankSaveMessage")).toContainText("월경계 학생 · 0001번 오답 저장됨 (1회차)");
-  // 가상 데이터의 0002 오답 + 방금 기록한 0001 오답.
-  await expect(board.locator(".problemBankNumber.student-wrong")).toHaveCount(2);
+  // 퇴원생은 학생 목록에 없다.
+  const studentSelect = board.locator(".problemBankStudentPick select");
+  await expect(studentSelect.locator("option", { hasText: "퇴원생" })).toHaveCount(0);
+
+  // 학생을 고르면 그 학생 기준 색으로 바뀐다: 0002 오답(빨강) · 0003 정답(초록).
+  await studentSelect.selectOption({ label: "월경계 학생 (중3)" });
+  await expect(board.locator(".problemBankLegend")).toContainText("월경계 학생 기준");
+  await expect(board.locator(".problemBankNumber.mine-wrong")).toHaveCount(1);
+  await expect(board.locator(".problemBankNumber.mine-correct")).toHaveCount(1);
+  await expect(board.locator(".problemBankNumber.mine-none")).toHaveCount(18);
+
+  // 1번을 누르면 응답을 기다리지 않고 바로 오답색이 되고, 서버 응답 행으로 확정된다.
+  const first = board.getByRole("button", { name: /^0001번 ·/ });
+  await first.click();
+  await expect(first).toHaveClass(/mine-wrong/);
+  await expect(board.locator(".problemBankSaveMessage")).toContainText("0001번 오답 저장됨 (1회차)");
   expect(attemptPosts).toHaveLength(1);
   expect(attemptPosts[0].entries[0]).toMatchObject({ itemId: "pbk_safefixture1-0001", round: 1, result: "wrong" });
-
-  // 미리보기는 눌렀던 문항을 서명 URL 로 보여 준다.
-  await expect(board.locator(".problemBankPreview img").first()).toBeVisible();
-
-  // 다시 누르면 정답, 한 번 더 누르면 기록이 지워진다.
-  await board.getByRole("button", { name: /^0001번 ·/ }).click();
-  await expect(board.locator(".problemBankSaveMessage")).toContainText("0001번 정답 저장됨");
-  await board.getByRole("button", { name: /^0001번 ·/ }).click();
+  await first.click();
+  await expect(first).toHaveClass(/mine-correct/);
+  await first.click();
+  await expect(first).toHaveClass(/mine-none/);
   await expect(board.locator(".problemBankSaveMessage")).toContainText("0001번 기록을 지웠습니다");
 
-  // 새로고침해도 서버 기록이 남아 있다(가상 API 메모리).
-  await page.reload();
-  await navigation.getByRole("button", { name: /오답관리/ }).click();
-  await page.getByRole("tab", { name: "교재별 오답" }).click();
-  await board.locator(".problemBankStudentPick select").selectOption({ label: "월경계 학생 (중3)" });
-  await expect(board.locator(".problemBankNumber.student-wrong")).toHaveCount(1);
-  await expect(board.locator(".problemBankNumber.band-band5")).toHaveCount(1);
-
-  await page.screenshot({ path: "test-results/problem-bank-board.png", fullPage: true });
-
-  // 오답 전체 선택 → 선택 인쇄 → 오답지 레이어(워터마크 + 문항 이미지).
+  // 공통 지시문 문항(0004)은 미리보기에 지시문 블록 + 강조 상자가 뜬다.
+  await board.getByRole("button", { name: /^0004번 ·/ }).click();
+  await expect(board.locator(".problemBankPreview .problemBankPrintGroup img")).toBeVisible();
+  await expect(board.locator(".problemBankPreview .problemBankPrintHighlight")).toHaveCount(1);
+  // 눌렀으니 0004 도 오답이 됐다 → 오답 전체 선택 = 0002·0004.
   await board.getByRole("button", { name: "오답 전체 선택" }).click();
-  await expect(board.locator(".problemBankSelectionCount")).toContainText("선택 1개");
-  await board.getByRole("button", { name: "선택 인쇄" }).click();
+  await expect(board.locator(".problemBankSelectionCount")).toContainText("선택 2개");
+
+  await page.reload();
+  const boardAfter = await openBookWrongTab(page);
+  await boardAfter.locator(".problemBankStudentPick select").selectOption({ label: "월경계 학생 (중3)" });
+  await expect(boardAfter.locator(".problemBankNumber.mine-wrong")).toHaveCount(2);
+  await boardAfter.getByRole("button", { name: "오답 전체 선택" }).click();
+  await boardAfter.getByRole("button", { name: "선택 인쇄" }).click();
+
   const sheet = page.locator(".problemBankPrintSheet");
   await expect(sheet).toBeVisible();
+  await expect(sheet).toHaveClass(/cols-2/);
   await expect(sheet.locator(".problemBankWatermark")).toHaveAttribute("src", /academy-mark/);
-  await expect(sheet.locator(".problemBankPrintItem")).toHaveCount(1);
-  await expect(sheet.locator(".problemBankPrintItem img")).toHaveCount(1);
-  await expect(sheet.locator(".problemBankPrintSource")).toContainText("RPM 중3-2 수학 (가상) · 01 삼각비 · 0002번");
+  // 워터마크는 문항 이미지 위에 있다.
+  const watermarkZ = await sheet.locator(".problemBankWatermark").evaluate((element) => window.getComputedStyle(element).zIndex);
+  expect(Number(watermarkZ)).toBeGreaterThan(1);
+  await expect(sheet.locator(".problemBankPrintItem")).toHaveCount(2);
+  await expect(sheet.locator(".problemBankPrintGroup .problemBankPrintHighlight")).toHaveCount(1);
+  await expect(sheet.locator(".problemBankPrintSource").first()).toContainText("0002번");
+  await page.getByLabel("단 구성").selectOption("1");
+  await expect(sheet).toHaveClass(/cols-1/);
   await page.screenshot({ path: "test-results/problem-bank-print-sheet.png", fullPage: true });
   await page.getByRole("button", { name: "닫기" }).click();
   await expect(sheet).toHaveCount(0);
@@ -73,7 +90,7 @@ test("교재별 오답: 학생 오답을 기록하고 서버 재조회와 맞춘
   expect(pageErrors).toEqual([]);
 });
 
-test("교재관리: 사이드바 자료함 자리에 교재관리가 뜨고 등록된 교재 상세를 보여 준다", async ({ page }) => {
+test("교재관리: 교재 정보를 고치고 서버 재조회로 확인한 뒤 삭제한다", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);
   const navigation = page.getByRole("navigation", { name: "주요 화면" });
@@ -81,8 +98,18 @@ test("교재관리: 사이드바 자료함 자리에 교재관리가 뜨고 등�
   await navigation.getByRole("button", { name: /교재관리/ }).click();
   await expect(page.getByRole("heading", { name: "교재관리" })).toBeVisible();
   await page.locator(".problemBankBookList .problemBankBookItem").first().click();
-  await expect(page.locator(".problemBankDetailMeta")).toContainText("문항");
   await expect(page.locator(".problemBankUnitRow:not(.head)")).toHaveCount(2);
   await expect(page.locator(".problemBankFlagged")).toContainText("경계 확인 필요 (1)");
+
+  const form = page.locator(".problemBankEditForm");
+  await form.getByLabel("제목").fill("RPM 중3-2 수학 (이름 변경)");
+  await form.getByRole("button", { name: "교재 정보 저장" }).click();
+  await expect(form.locator(".problemBankUploadMessage")).toContainText("서버 재조회 일치");
+  await expect(page.locator(".problemBankBookList")).toContainText("RPM 중3-2 수학 (이름 변경)");
+
+  await form.getByRole("button", { name: "교재 삭제" }).click();
+  await expect(form.locator(".problemBankDeleteWarn")).toContainText("되돌릴 수 없습니다");
+  await form.getByRole("button", { name: "삭제 확정" }).click();
+  await expect(page.locator(".problemBankBookList .problemBankBookItem")).toHaveCount(0);
   expect(pageErrors).toEqual([]);
 });

@@ -155,9 +155,24 @@
 .problemBankNumber.selected { border-color: var(--academy-text-strong, #111827); }
 .problemBankNumber.previewing { box-shadow: 0 0 0 2px var(--academy-accent-border, #bdd0e5); }
 .problemBankNumber.flagged::before { background: #f59e0b; border-radius: 50%; content: ""; height: 6px; left: 4px; position: absolute; top: 4px; width: 6px; }
-.problemBankNumber.student-wrong { color: #b91c1c; }
-.problemBankNumber.student-correct { color: #15803d; }
+/* 학생을 고른 뒤: 그 학생 기준 색. 클릭할 때마다 기록 없음 → 오답 → 정답 → 기록 없음. */
+.problemBankNumber.mine-none { background: var(--academy-surface-muted, #f3f4f6); }
+.problemBankNumber.mine-wrong { background: #fecaca; color: #991b1b; }
+.problemBankNumber.mine-correct { background: #bbf7d0; color: #166534; }
+.problemBankNumber.mine-recovered { background: #bfdbfe; color: #1e40af; }
+.problemBankNumber.pending { opacity: 0.7; }
+.problemBankBand.mine-none { background: #f3f4f6; }
+.problemBankBand.mine-wrong { background: #fecaca; }
+.problemBankBand.mine-correct { background: #bbf7d0; }
+.problemBankBand.mine-recovered { background: #bfdbfe; }
+.problemBankLegend > strong { font-size: 12px; }
+.problemBankPill.mine { background: #fee2e2; color: #991b1b; }
+.problemBankStudentPick.attention select { border-color: #b91c1c; box-shadow: 0 0 0 2px #fee2e2; }
 .problemBankStudentMark { bottom: 1px; font-size: 10px; font-style: normal; position: absolute; right: 4px; }
+/* 공통 지시문 블록 위 강조 상자(미리보기·인쇄 공용). 완전 검정 테두리만. */
+.problemBankPrintGroup { position: relative; }
+.problemBankPrintGroup img { display: block; max-width: 100%; }
+.problemBankPrintHighlight { border: 1.5pt solid #000; border-radius: 3px; box-sizing: border-box; pointer-events: none; position: absolute; }
 
 .problemBankPreview {
   background: var(--academy-surface, #fff);
@@ -190,6 +205,16 @@
 .problemBankListPanel { grid-column: 1; }
 .problemBankDetailPanel { grid-column: 2; grid-row: 1 / span 2; }
 .problemBankBookList { display: grid; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.problemBankEditForm { display: grid; gap: 8px; grid-template-columns: 1fr 1fr; margin-bottom: 12px; }
+.problemBankEditForm label { display: grid; font-size: 12.5px; gap: 3px; }
+.problemBankEditForm input { border: 1px solid var(--academy-border, #e2e6ec); border-radius: 8px; padding: 6px 8px; }
+.problemBankEditActions { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; grid-column: 1 / -1; }
+.problemBankEditActions button { border-radius: 8px; cursor: pointer; font-size: 13px; padding: 6px 12px; }
+.problemBankEditActions .primaryButton { background: var(--academy-text-strong, #111827); border: 1px solid var(--academy-text-strong, #111827); color: #fff; }
+.problemBankEditActions .softButton { background: var(--academy-surface, #fff); border: 1px solid var(--academy-border, #e2e6ec); }
+.problemBankDangerButton { background: #b91c1c; border: 1px solid #b91c1c; color: #fff; }
+.problemBankDeleteWarn { color: #b91c1c; font-size: 12px; }
+.problemBankEditForm .problemBankUploadMessage { grid-column: 1 / -1; }
 .problemBankDetailMeta { display: grid; font-size: 13px; gap: 4px 12px; grid-template-columns: 60px 1fr; margin: 0 0 12px; }
 .problemBankDetailMeta dt { color: var(--academy-text-muted, #6b7280); }
 .problemBankDetailMeta dd { margin: 0; }
@@ -239,14 +264,16 @@
   position: relative;
   width: 210mm;
 }
+/* 문항 이미지가 흰 바탕이라 뒤에 두면 가려진다 — 맨 앞에 두고 multiply 로 섞어 아래 글자가 비치게 한다. */
 .problemBankWatermark {
   left: 50%;
+  mix-blend-mode: multiply;
   pointer-events: none;
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%);
   width: 50%;
-  z-index: 0;
+  z-index: 5;
 }
 .problemBankPrintHead {
   align-items: baseline;
@@ -269,6 +296,7 @@
   position: relative;
   z-index: 1;
 }
+.problemBankPrintSheet.cols-1 .problemBankPrintColumns { column-count: 1; column-rule: none; }
 .problemBankPrintItem { break-inside: avoid; display: block; margin-bottom: 6mm; padding-bottom: 2mm; }
 .problemBankPrintSource { color: #000; display: flex; flex-wrap: wrap; font-size: 7.5pt; gap: 8px; justify-content: space-between; }
 .problemBankPrintType { color: #000; }
@@ -296,7 +324,7 @@
   .problemBankPrintLayer .noPrint,
   .problemBankPrintLayer .noPrint * { display: none !important; }
   .problemBankPrintSheet { box-shadow: none; margin: 0; width: auto; }
-  .problemBankWatermark { position: fixed; }
+  .problemBankWatermark { position: fixed; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .problemBankPrintColumns { column-fill: auto; }
 }
 

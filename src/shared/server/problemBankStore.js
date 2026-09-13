@@ -28,6 +28,9 @@ function createStatusError(message, statusCode = 400, code = "") {
  * @param {(table: string, query: string, options?: *) => Promise<*[]>} deps.listRows
  * @param {(table: string, rows: *[], options?: *) => Promise<*[]>} deps.upsertRows
  * @param {(table: string, query: string, options?: *) => Promise<*[]>} deps.deleteRows
+ * @param {(table: string, query: string, values: *, options?: *) => Promise<*[]>} deps.patchRows
+ * @param {(bucketId: string, prefix: string) => Promise<string[]>} [deps.listStorageObjectPaths]
+ * @param {(bucketId: string, paths: string[]) => Promise<number>} [deps.deleteStorageObjects]
  * @param {(bucketId: string, storagePath: string, expiresIn?: number) => Promise<string>} deps.createSignedStorageUrl
  * @param {(bucketId: string, storagePath: string, options: *) => Promise<*>} deps.uploadStorageObjectWithBucketRetry
  */
@@ -37,7 +40,10 @@ export function createProblemBankStore({
   upsertRows,
   deleteRows,
   createSignedStorageUrl,
-  uploadStorageObjectWithBucketRetry
+  uploadStorageObjectWithBucketRetry,
+  patchRows,
+  listStorageObjectPaths = async () => [],
+  deleteStorageObjects = async () => 0
 }) {
   function requireDatabase() {
     if (!isSupabaseConfigured({ requireServiceRole: true })) {
@@ -274,18 +280,68 @@ export function createProblemBankStore({
       image_height: integerOf(region.height)
     })));
 
+    const existingBooks = await listRows("problem_bank_books", `select=book_id,title,folder_path,grade,subject&book_id=eq.${encodeURIComponent(bookId)}`, { requireServiceRole: true });
+    const existingBook = existingBooks[0];
+    if (existingBook) {
+      // 다시 올릴 때 교재관리에서 고친 제목·폴더·학년·과목은 패키지 값으로 되돌리지 않는다.
+      bookRow.title = existingBook.title || bookRow.title;
+      bookRow.folder_path = existingBook.folder_path ?? bookRow.folder_path;
+      bookRow.grade = existingBook.grade ?? bookRow.grade;
+      bookRow.subject = existingBook.subject ?? bookRow.subject;
+    }
     await upsertRows("problem_bank_books", [bookRow], { onConflict: "book_id" });
-    // 다시 올릴 때 사라진 단원·문항이 남지 않도록 교재 아래를 비우고 다시 넣는다(영역은 cascade).
-    await deleteRows("problem_bank_items", `book_id=eq.${encodeURIComponent(bookId)}`);
+    // 문항은 지우지 않고 덮어쓴다 — 문항 행을 지우면 학생 정오답 기록(cascade)까지 사라진다.
+    // 패키지에서 사라진 문항만 지우고, 영역은 전부 새로 넣는다.
+    const existingItems = await listRows("problem_bank_items", `select=item_id&book_id=eq.${encodeURIComponent(bookId)}`, { requireServiceRole: true });
+    const nextItemIds = new Set(itemRows.map((row) => row.item_id));
+    const staleItemIds = existingItems.map((row) => row.item_id).filter((itemId) => !nextItemIds.has(itemId));
+    for (let offset = 0; offset < staleItemIds.length; offset += 100) {
+      const batch = staleItemIds.slice(offset, offset + 100);
+      await deleteRows("problem_bank_items", `item_id=in.(${batch.map((id) => encodeURIComponent(id)).join(",")})`);
+    }
     await deleteRows("problem_bank_units", `book_id=eq.${encodeURIComponent(bookId)}`);
     if (unitRows.length) await upsertRows("problem_bank_units", unitRows, { onConflict: "unit_id" });
     for (let offset = 0; offset < itemRows.length; offset += 200) {
       await upsertRows("problem_bank_items", itemRows.slice(offset, offset + 200), { onConflict: "item_id" });
     }
+    await deleteRows("problem_bank_regions", `item_id=like.${encodeURIComponent(`${bookId}-%`)}`);
     for (let offset = 0; offset < regionRows.length; offset += 200) {
       await upsertRows("problem_bank_regions", regionRows.slice(offset, offset + 200), { onConflict: "region_id" });
     }
-    return { bookId, unitCount: unitRows.length, itemCount: itemRows.length, regionCount: regionRows.length };
+    return { bookId, unitCount: unitRows.length, itemCount: itemRows.length, regionCount: regionRows.length, removedItemCount: staleItemIds.length };
+  }
+
+  /** 교재 메타(제목·폴더·학년·과목)만 고친다. 문항·기록은 그대로다. */
+  async function updateProblemBankBook(bookId, patch) {
+    requireDatabase();
+    const safeBookId = textOf(bookId);
+    if (!/^pbk_[a-f0-9]{6,32}$/.test(safeBookId)) throw createStatusError("교재 ID 형식이 올바르지 않습니다.", 400);
+    const values = { updated_at: new Date().toISOString() };
+    if (patch?.title !== undefined) {
+      const title = textOf(patch.title);
+      if (!title) throw createStatusError("교재 제목은 비울 수 없습니다.", 400);
+      values.title = title;
+    }
+    if (patch?.folderPath !== undefined) values.folder_path = textOf(patch.folderPath);
+    if (patch?.grade !== undefined) values.grade = textOf(patch.grade);
+    if (patch?.subject !== undefined) values.subject = textOf(patch.subject);
+    const rows = await patchRows("problem_bank_books", `book_id=eq.${encodeURIComponent(safeBookId)}`, values);
+    const row = rows[0];
+    if (!row) throw createStatusError("교재를 찾지 못했습니다.", 404, "book_not_found");
+    return fromBookRow(row);
+  }
+
+  /** 교재와 그 아래 단원·문항·영역·정오답 기록(cascade)·Storage 이미지를 지운다. 되돌릴 수 없다. */
+  async function deleteProblemBankBook(bookId) {
+    requireDatabase();
+    const safeBookId = textOf(bookId);
+    if (!/^pbk_[a-f0-9]{6,32}$/.test(safeBookId)) throw createStatusError("교재 ID 형식이 올바르지 않습니다.", 400);
+    const attempts = await listRows("problem_bank_attempts", `select=attempt_id&book_id=eq.${encodeURIComponent(safeBookId)}`, { requireServiceRole: true });
+    const deletedBooks = await deleteRows("problem_bank_books", `book_id=eq.${encodeURIComponent(safeBookId)}`);
+    if (deletedBooks.length === 0) throw createStatusError("교재를 찾지 못했습니다.", 404, "book_not_found");
+    const paths = await listStorageObjectPaths(problemBankStorageBucket, safeBookId);
+    const deletedImages = await deleteStorageObjects(problemBankStorageBucket, paths);
+    return { bookId: safeBookId, deletedAttempts: attempts.length, deletedImages };
   }
 
   /** 패키지 이미지 배치 업로드. 파일 이름은 manifest 의 region.file 과 같아야 한다. */
@@ -371,6 +427,8 @@ export function createProblemBankStore({
   return {
     listProblemBankBooks,
     getProblemBankBook,
+    updateProblemBankBook,
+    deleteProblemBankBook,
     resolveProblemBankItemImages,
     importProblemBankManifest,
     uploadProblemBankImages,

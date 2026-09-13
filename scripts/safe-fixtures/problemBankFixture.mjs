@@ -43,11 +43,23 @@ const items = Array.from({ length: 20 }, (_, index) => {
         position: 0,
         kind: "body",
         pdfPage: 10 + Math.floor(index / 4),
-        bboxNormalized: [0.1, 0.1, 0.5, 0.3],
+        // 3~5번은 공통 지시문 그룹 [0003~0005] 의 세 줄이다(그룹 상자 0.1~0.5 × 0.1~0.5 안에 세로로).
+        bboxNormalized: number >= 3 && number <= 5 ? [0.1, 0.2 + (number - 3) * 0.1, 0.5, 0.3 + (number - 3) * 0.1] : [0.1, 0.1, 0.5, 0.3],
         storagePath: `${bookId}/items/${bookId}-${numberLabel}.jpg`,
         imageWidth: 520,
         imageHeight: 120
-      }
+      },
+      ...(number >= 3 && number <= 5 ? [{
+        regionId: `${bookId}-${numberLabel}-r1`,
+        itemId: `${bookId}-${numberLabel}`,
+        position: 1,
+        kind: "passage",
+        pdfPage: 10,
+        bboxNormalized: [0.1, 0.1, 0.5, 0.5],
+        storagePath: `${bookId}/items/${bookId}-group-0003-0005-p10.jpg`,
+        imageWidth: 520,
+        imageHeight: 480
+      }] : [])
     ]
   };
 });
@@ -105,7 +117,10 @@ export async function handleProblemBankFixtureRoute({ request, requestUrl, state
     const ids = new Set(Array.isArray(payload.itemIds) ? payload.itemIds : []);
     const regions = bank.items
       .filter((item) => ids.has(item.itemId))
-      .flatMap((item) => item.regions.map((region) => ({ ...region, url: svgImage(`${item.numberLabel}`) })));
+      .flatMap((item) => item.regions.map((region) => ({
+        ...region,
+        url: region.kind === "passage" ? svgImage("[0003~0005] 공통 지시문", 480) : svgImage(`${item.numberLabel}`)
+      })));
     sendJson(response, 200, { ok: true, safeFixture: true, regions });
     return true;
   }
@@ -143,6 +158,32 @@ export async function handleProblemBankFixtureRoute({ request, requestUrl, state
       saved.push(attempt);
     }
     sendJson(response, 200, { ok: true, safeFixture: true, attempts: saved, cleared });
+    return true;
+  }
+  if (request.method === "POST" && pathname === "/api/problem-bank/book") {
+    const payload = await readJson(request);
+    const book = bank.books.find((entry) => entry.bookId === payload.bookId);
+    if (!book) {
+      sendJson(response, 404, { ok: false, safeFixture: true, error: "교재를 찾지 못했습니다." });
+      return true;
+    }
+    for (const [key, field] of [["title", "title"], ["folderPath", "folderPath"], ["grade", "grade"], ["subject", "subject"]]) {
+      if (payload.patch?.[key] !== undefined) book[field] = String(payload.patch[key]).trim();
+    }
+    sendJson(response, 200, { ok: true, safeFixture: true, book });
+    return true;
+  }
+  if (request.method === "DELETE" && pathname === "/api/problem-bank/book") {
+    const requested = requestUrl.searchParams.get("bookId") ?? "";
+    const index = bank.books.findIndex((entry) => entry.bookId === requested);
+    if (index === -1) {
+      sendJson(response, 404, { ok: false, safeFixture: true, error: "교재를 찾지 못했습니다." });
+      return true;
+    }
+    bank.books.splice(index, 1);
+    const removedAttempts = bank.attempts.filter((attempt) => attempt.bookId === requested).length;
+    bank.attempts = bank.attempts.filter((attempt) => attempt.bookId !== requested);
+    sendJson(response, 200, { ok: true, safeFixture: true, bookId: requested, deletedAttempts: removedAttempts, deletedImages: bank.items.length });
     return true;
   }
   if (request.method === "POST" && (pathname === "/api/problem-bank/import" || pathname === "/api/problem-bank/images")) {
