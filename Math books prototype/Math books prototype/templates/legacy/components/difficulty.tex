@@ -1,0 +1,16 @@
+%% difficulty.tex — 난이도 점 ●○○ ●●○ ●●● 매크로
+%% 명확한 기준: ●○○(하)·●●○(중)·●●●(상)
+
+\newcommand{\diffdot}[1]{%
+  % #1 = h(하)/m(중)/s(상)
+  \ifstrequal{#1}{h}{\color{tbk-accent}\ding{108}\color{tbk-rule}\ding{108}\ding{108}}{%
+  \ifstrequal{#1}{m}{\color{tbk-accent}\ding{108}\ding{108}\color{tbk-rule}\ding{108}}{%
+  \ifstrequal{#1}{s}{\color{tbk-accent}\ding{108}\ding{108}\ding{108}}{%
+    \color{tbk-warn}??? % 잘못된 인자
+  }}}%
+  \color{tbk-ink}%
+}
+
+% 사용: \diffdot{h} → ●○○
+%       \diffdot{m} → ●●○
+%       \diffdot{s} → ●●●

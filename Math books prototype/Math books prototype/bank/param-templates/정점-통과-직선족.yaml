@@ -1,0 +1,38 @@
+name: 정점-통과-직선족
+source_id: 고쟁이-CH02-STEP2-#075
+tier: star_5
+mechanism_primary: "정점 통과 직선족 (매개변수 k에 대해 정리하여 항상 지나는 점)"
+mechanism_secondary:
+  - "직선이 삼각형 넓이를 1:2로 이등분 → 대변 내분점 통과"
+  - "정점이 꼭짓점 중 하나일 경우 대변 활용"
+unit_code: CM2-GM
+description: "삼각형 ABC의 꼭짓점 좌표가 주어지고, 직선족 (k+1)x+(2-k)y-... = 0이 삼각형을 두 부분으로 나누는 넓이비 1:2 조건에서 k의 두 값을 구함."
+
+parameters:
+  A: {structure: point, x: {range: [0, 5], type: integer}, y: {range: [-3, 5], type: integer}}
+  B: {structure: point, x: {range: [0, 5], type: integer}, y: {range: [-3, 5], type: integer}}
+  C: {structure: point, x: {range: [0, 5], type: integer}, y: {range: [-3, 5], type: integer}}
+  # 정점 P: 삼각형의 한 꼭짓점 (예: B) → 대변 AC를 1:2 or 2:1 내분
+  vertex_pass: {choices: [A, B, C]}  # 정점이 어느 꼭짓점을 지나는지
+
+constraints:
+  - "A, B, C 서로 다르고 일직선 아님"
+  - "vertex_pass가 A·B·C 중 하나 · 직선족 정점 = 해당 꼭짓점"
+  - "내분점 두 개 (1:2·2:1) 각각에서 k 유도 → 두 k의 합"
+
+answer_formula: |
+  # vertex_pass = B (예시). 정점 = B. 대변 = AC.
+  P1 = (2*A + C) / 3  # AC를 1:2 내분
+  P2 = (A + 2*C) / 3  # AC를 2:1 내분
+  # 직선 (k+1)x + (2-k)y - c(k) = 0이 P1·P2를 지나며 정점 B(bx, by)도 지남
+  # k 두 값의 합 = k1 + k2
+
+prompt_template: |
+  세 점 $\mathrm{A}({{A.x}},\,{{A.y}})$, $\mathrm{B}({{B.x}},\,{{B.y}})$, $\mathrm{C}({{C.x}},\,{{C.y}})$를 꼭짓점으로 하는 삼각형 $\mathrm{ABC}$가 직선
+  $$(k+1)x+(2-k)y-4k-1=0$$
+  에 의해 두 도형으로 나누어질 때, 한쪽의 넓이가 다른 쪽의 넓이의 $2$배가 되도록 하는 모든 실수 $k$의 값의 합을 구하시오.
+
+variation_notes_template: "정점 통과 직선족 · A({{A.x}},{{A.y}})·B·C · 정점={{vertex_pass}} · k합={{answer}}"
+
+verified_seeds:
+  - {seed: 1, A: [1,1], B: [3,-1], C: [4,2], vertex_pass: B, answer: "31/10", source_ref: "원본 #075"}

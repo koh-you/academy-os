@@ -1,0 +1,15 @@
+# 결함 주입 ground-truth 라벨 (flaw-injection-generator)
+label_id: FLAW-01-F4
+source: bank/creation-archive/phase-a2/creations/creation-01.tex
+flawed: bank/creation-archive/phase-a2/flawed/creation-01-F4.tex
+flaw_type: F4
+flaw_name: 교육과정 침투
+expected_verdict: LOSS
+ground_truth: flawed
+seed: false
+injection:
+  method: replace
+  find: "삼각형 $\\mathrm{ABP}$의 넓이가 자연수인"
+  replace: "벡터 $\\overrightarrow{\\mathrm{AB}}$와 $\\overrightarrow{\\mathrm{AP}}$의 외적의 크기가 자연수인"
+note: "벡터·외적 삽입 → CM 스코프 침투"
+date: 2026-07-28

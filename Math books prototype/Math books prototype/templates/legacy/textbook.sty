@@ -1,0 +1,83 @@
+%% textbook.sty — 공통수학1 재디자인 메인 스타일
+%% 쎈 + 고쟁이 + 마플시너지 하이브리드
+%% xelatex + kotex 기반
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{textbook}[2026/06/11 Math Textbook Style]
+
+%% ── 패키지 ──
+\RequirePackage{kotex}
+\RequirePackage{geometry}
+\RequirePackage{multicol}
+\RequirePackage{amsmath, amssymb, amsthm}
+\RequirePackage{mathtools}
+\RequirePackage{graphicx}
+\RequirePackage{xcolor}
+\RequirePackage[most]{tcolorbox}     % 가벼운 박스용 — 과용 금지
+\RequirePackage{enumitem}
+\RequirePackage{titlesec}
+\RequirePackage{titletoc}
+\RequirePackage{fancyhdr}
+\RequirePackage{etoolbox}
+\RequirePackage{pifont}              % ●○ 동그라미 점
+\RequirePackage{calc}
+
+%% ── 색상 (절제된 팔레트) ──
+\definecolor{tbk-ink}{HTML}{1A1A1A}        % 본문 글자
+\definecolor{tbk-accent}{HTML}{0E5EA8}     % 챕터/STEP 강조
+\definecolor{tbk-light}{HTML}{F2F4F7}      % 옅은 배경
+\definecolor{tbk-rule}{HTML}{C8CDD3}       % 가는 선
+\definecolor{tbk-tip}{HTML}{2B6F49}        % TIP 좌측 바
+\definecolor{tbk-warn}{HTML}{B85C00}       % 주의
+
+%% ── 페이지 레이아웃 ──
+\geometry{
+  paperwidth=188mm, paperheight=257mm,    % 4×6배판 (한국 교재 표준)
+  inner=14mm, outer=12mm, top=18mm, bottom=18mm,
+  headheight=10mm, headsep=4mm, footskip=8mm
+}
+
+%% ── 한글 폰트 (kotex 기본) ──
+%% 필요시 \setmainhangulfont{나눔명조}/{나눔고딕} 등 사용자 환경에 맞춰 사용
+%% MiKTeX은 시스템 폰트 사용 가능. fallback은 kotex 기본.
+
+%% ── multicols 기본 설정 ──
+\setlength{\columnsep}{6mm}
+\setlength{\columnseprule}{0pt}
+
+%% ── 본문 간격 ──
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt plus 1pt minus 1pt}
+\linespread{1.12}
+
+%% ── 챕터/섹션 타이틀 ──
+\titleformat{\chapter}[display]
+  {\normalfont\sffamily\Huge\bfseries\color{tbk-accent}}
+  {\filright\Large CHAPTER \thechapter}
+  {0.4em}
+  {\filright}
+  [\vspace{0.2em}{\color{tbk-rule}\rule{\linewidth}{0.6pt}}]
+
+\titleformat{\section}
+  {\normalfont\sffamily\large\bfseries\color{tbk-accent}}
+  {\thesection}{0.6em}{}
+\titlespacing*{\section}{0pt}{14pt plus 4pt}{6pt}
+
+\titleformat{\subsection}
+  {\normalfont\sffamily\normalsize\bfseries}
+  {\thesubsection}{0.5em}{}
+
+%% ── 페이지 헤더/푸터 ──
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE,RO]{\small\bfseries\thepage}
+\fancyhead[RE]{\small\color{tbk-accent}공통수학1}
+\fancyhead[LO]{\small\color{tbk-accent}\leftmark}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\input{../components/difficulty}
+\input{../components/problem}
+\input{../components/tip}
+\input{../components/step}
+\input{../components/concept}
+\input{../components/citation}

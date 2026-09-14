@@ -1,0 +1,615 @@
+% DeeP Math 정리편 · CM2-GM-02 직선의 방정식
+% Phase 2 (2026-07-20 세션 55) : 청사진 v1.0 반영 · 정리편 CM2-GM-02 첫 본편
+% 시리즈: jeongribyeon · DeeP Math 정리편 · 상위권
+% 구조: 개념 3 + 대표 6 + 확인 12 + Level1 12 + Level2 12 + Level3 3 + 실전 3 = 총 19p / 48 슬롯
+% 원본 은행: 개념원리·RPM·고쟁이 STEP1·STEP2·STEP3·전국연합 (모든 슬롯 source 명시)
+% 스타일: templates/deep-math.sty v5.1 (\dmlevelspace·\dmrealtypespace·\dmkichul 신설)
+\documentclass[10pt]{article}
+\usepackage{dm-editorial}
+\renewcommand{\dmchapunit}{I. 도형의 방정식}
+
+\begin{document}
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 1 · 챕터 배너 + 개념 C1 (직선의 방정식)
+% ══════════════════════════════════════════════════════════════
+\dmchapter{02}{직선의 방정식}
+\dmbracket{6}
+
+\begin{dmconcept}{1}{직선의 방정식}
+% 세션 86 (마스터 지시) : 좀 더 상세한 기술 · 유도·직관·특수 케이스 확대
+\setlength{\parskip}{2.0mm plus 2.1mm minus 0mm}\linespread{1.30}\selectfont%
+
+\dmsub{1}{한 점과 기울기가 주어진 직선}
+
+기울기가 $m$\ 이고 점 $(x_1,\, y_1)$\ 을 지나는 직선의 방정식은
+\begin{equation*}
+  y - y_1 = m(x - x_1)
+\end{equation*}
+이다. 이 직선의 $y$절편이 $n$\ 이면 $y = mx + n$의 꼴로 나타나며 이를 직선의 \dmstrong{기울기$\cdot$$y$절편 표준형}이라 한다.
+
+\begin{dmexplain}
+기울기 $m$\ 은 $x$\ 가 $1$\ 만큼 증가할 때 $y$\ 의 증가량이며, 직선이 $x$축의 양의 방향과 이루는 각의 크기를 $\theta$\ 라 하면 $m = \tan \theta$\ 이다. 한 점과 기울기가 결정되면 직선이 유일하게 정해진다.
+\end{dmexplain}
+
+\begin{dmexample}
+점 $(2,\, -1)$\ 을 지나고 기울기가 $3$\ 인 직선의 방정식은 $y + 1 = 3(x - 2)$, 즉 $y = 3x - 7$이다.
+\end{dmexample}
+
+\dmsub{2}{두 점을 지나는 직선}
+
+두 점 $\mathrm{A}(x_1,\, y_1)$,\ $\mathrm{B}(x_2,\, y_2)$ ($x_1 \ne x_2$)를 지나는 직선의 기울기는 두 좌표 차이의 비 $\dfrac{y_2 - y_1}{x_2 - x_1}$\ 이고, 방정식은
+\begin{equation*}
+  y - y_1 = \frac{y_2 - y_1}{x_2 - x_1}(x - x_1)
+\end{equation*}
+이다. $x_1 = x_2$\ 이면 두 점이 같은 $x$좌표를 가지므로 $y$축에 평행한 직선 $x = x_1$이다.
+
+\begin{dmexample}
+두 점 $(1,\, 2)$,\ $(4,\, 8)$\ 을 지나는 직선은 기울기 $\dfrac{8 - 2}{4 - 1} = 2$\ 이므로 $y - 2 = 2(x - 1)$, 즉 $y = 2x$이다.
+\end{dmexample}
+
+\dmsub{3}{$x$절편과 $y$절편이 주어진 직선}
+
+$x$절편이 $a$,\ $y$절편이 $b$\ 인 직선 ($a \ne 0$,\ $b \ne 0$)의 방정식은
+\begin{equation*}
+  \frac{x}{a} + \frac{y}{b} = 1
+\end{equation*}
+이다. 이 식을 절편형이라 한다.
+
+\begin{dmnote}
+절편형은 두 점 $(a,\, 0)$,\ $(0,\, b)$를 지나는 직선의 방정식을 두 점 공식으로 정리해 얻는다. 좌표축에 평행한 직선은 절편형이 정의되지 않아 $y = c$나 $x = c$\ 꼴로 따로 다룬다.
+\end{dmnote}
+
+\vspace{45.0mm}% dmconcept-auto-tune vspace (v2.0)
+\end{dmconcept}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 2 · 대표예제 E1 (개념원리-CM2-GM-직선-예제-02) + 확인 CHK1·CHK2
+% ══════════════════════════════════════════════════════════════
+\dmex{1}{내분점과 한 점을 지나는 직선}
+
+\begin{dmproblem}
+두 점 $\mathrm{A}(7,\, -3)$,\ $\mathrm{B}(2,\, -8)$을 이은 선분 $\overline{\mathrm{AB}}$를 $3 : 2$로 내분하는 점과 점 $(5,\, 2)$를 지나는 직선의 방정식을 구하시오.
+\end{dmproblem}
+
+\begin{dmapproach}
+먼저 내분점의 좌표를 내분점 공식으로 구한 뒤, 그 점과 주어진 다른 한 점을 지나는 직선의 방정식을 두 점 공식으로 세운다.
+\end{dmapproach}
+
+\begin{dmsolution}
+선분 $\overline{\mathrm{AB}}$를 $3 : 2$로 내분하는 점의 좌표는
+\begin{equation*}
+  \left( \frac{3 \cdot 2 + 2 \cdot 7}{5},\ \frac{3 \cdot (-8) + 2 \cdot (-3)}{5} \right) = (4,\, -6).
+\end{equation*}
+두 점 $(4,\, -6)$,\ $(5,\, 2)$의 기울기는 $\dfrac{2-(-6)}{5-4} = 8$이므로 직선은 $y - 2 = 8(x - 5)$이다.
+
+$\therefore\ y = 8x - 38$.
+\dmanswer{$y = 8x - 38$}
+\end{dmsolution}
+
+\dmchecktitle
+
+\dmcheck{1}{%
+직선 $y = (m - 2)x - n - 1$이 점 $(2,\, -1)$을 지나고 $x$축의 양의 방향과 이루는 각의 크기가 $45^{\circ}$일 때, $m + n$의 값을 구하시오.%
+}
+
+\dmcheck{2}{%
+세 점 $\mathrm{A}(-1,\, 3)$,\ $\mathrm{B}(5,\, 0)$,\ $\mathrm{C}(-3,\, -2)$에 대하여 선분 $\overline{\mathrm{AB}}$를 $2 : 1$로 내분하는 점을 $\mathrm{P}$, 선분 $\overline{\mathrm{BC}}$의 중점을 $\mathrm{Q}$라 하자. 두 점 $\mathrm{P}$,\ $\mathrm{Q}$를 지나는 직선의 $x$절편을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 3 · 대표예제 E2 (개념원리-CM2-GM-직선-예제-05) + 확인 CHK3·CHK4
+% ══════════════════════════════════════════════════════════════
+\dmex{2}{삼각형의 넓이를 이등분하는 직선}
+
+\begin{dmproblem}
+세 점 $\mathrm{A}(-2,\, 4)$,\ $\mathrm{B}(-1,\, 2)$,\ $\mathrm{C}(3,\, 4)$를 꼭짓점으로 하는 삼각형 $\mathrm{ABC}$에서 점 $\mathrm{A}$를 지나고 삼각형 $\mathrm{ABC}$의 넓이를 이등분하는 직선의 방정식을 구하시오.
+\end{dmproblem}
+
+\begin{dmapproach}
+꼭짓점 $\mathrm{A}$를 지나면서 삼각형의 넓이를 이등분하는 직선은 대변 $\overline{\mathrm{BC}}$의 중점을 지난다. 중선이 삼각형을 밑변이 같고 높이가 같은 두 삼각형으로 나누기 때문이다.
+\end{dmapproach}
+
+\begin{dmsolution}
+꼭짓점 $\mathrm{A}$\ 를 지나 넓이를 이등분하는 직선은 중선 $\overline{\mathrm{AM}}$\ 이다$\quad(\because\ \text{밑변·높이 동일})$.
+
+중점 $\mathrm{M} = \left( \dfrac{-1+3}{2},\ \dfrac{2+4}{2} \right) = (1,\, 3)$\ 이므로 기울기는 $\dfrac{3-4}{1-(-2)} = -\dfrac{1}{3}$.
+
+$\therefore\ y - 4 = -\dfrac{1}{3}(x+2)$,\ 즉 $y = -\dfrac{1}{3}x + \dfrac{10}{3}$.
+\dmanswer{$y = -\dfrac{1}{3}x + \dfrac{10}{3}$}
+\end{dmsolution}
+
+\dmchecktitle
+
+\dmcheck{3}{%
+세 점 $\mathrm{A}(3,\, 3)$,\ $\mathrm{B}(5,\, -5)$,\ $\mathrm{C}(-1,\, 1)$을 꼭짓점으로 하는 삼각형 $\mathrm{ABC}$의 넓이를 점 $\mathrm{A}$를 지나는 직선 $y = ax + b$가 이등분할 때, $a + b$의 값을 구하시오.%
+}
+
+\dmcheck{4}{%
+점 $(6,\, -4)$를 지나고 $x$절편이 $y$절편의 $2$배인 직선의 방정식을 구하시오. (단, $y$절편은 $0$이 아니다.)%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 4 · 개념 C2 (두 직선의 위치 관계)
+% ══════════════════════════════════════════════════════════════
+\dmconcepthead
+\dmbracket{7}
+
+\begin{dmconcept}{2}{두 직선의 위치 관계}
+% 세션 86 (마스터 지시) : 좀 더 상세한 기술 · dmsub 세분화 + 유도 · 케이스 확대
+\setlength{\parskip}{0.2mm plus 0.3mm minus 0mm}\linespread{1.04}\selectfont%
+
+\dmsub{1}{두 직선의 위치 관계}
+
+한 평면 위에서 서로 다른 두 직선의 위치 관계는 다음 세 가지 중 하나이다.
+\begin{itemize}[leftmargin=8mm, itemsep=0.5mm, topsep=1mm]
+  \item \dmstrong{평행하다} : 만나지 않는다.
+  \item \dmstrong{일치한다} : 모든 점이 두 직선 위에 있어 하나의 직선처럼 다루어진다.
+  \item \dmstrong{한 점에서 만난다}.
+\end{itemize}
+두 직선의 방정식을 연립한 방정식의 해의 개수가 순서대로 $0$개,\ 무수히 많음,\ 한 개인 경우에 대응한다.
+
+\dmsub{2}{표준형의 평행 조건과 수직 조건}
+
+두 직선 $y = mx + n$과 $y = m'x + n'$에 대하여
+\begin{itemize}[leftmargin=8mm, itemsep=0.5mm, topsep=1mm]
+  \item \dmstrong{평행} $\Longleftrightarrow m = m'$이고 $n \ne n'$
+  \item \dmstrong{일치} $\Longleftrightarrow m = m'$이고 $n = n'$
+  \item \dmstrong{수직} $\Longleftrightarrow mm' = -1$
+\end{itemize}
+평행 조건에서 기울기가 같으면 두 직선은 결코 만나지 않거나 완전히 겹치므로 $y$절편의 일치 여부로 두 경우를 가른다.
+
+\begin{dmexplain}
+수직 조건 유도: 두 직선을 원점을 지나도록 평행이동해 얻은 $y = mx$,\ $y = m'x$와 직선 $x = 1$의 두 교점 $\mathrm{P}(1, m)$,\ $\mathrm{Q}(1, m')$이 원점 $\mathrm{O}$와 이루는 삼각형에서 $\angle\mathrm{POQ} = 90^\circ$이므로 피타고라스 정리에서 $mm' = -1$이 얻어진다.
+\end{dmexplain}
+
+\dmsub{3}{일반형 두 직선의 위치 관계 판별}
+
+두 직선의 방정식이 일반형 $ax + by + c = 0$과 $a'x + b'y + c' = 0$ ($a$,\ $b$가 동시에 $0$은 아님 · $a'$,\ $b'$도 마찬가지) 으로 주어지면 계수 비교로 위치 관계를 판별한다.
+\begin{itemize}[leftmargin=8mm, itemsep=0.5mm, topsep=1mm]
+  \item 평행 : $\dfrac{a}{a'} = \dfrac{b}{b'} \ne \dfrac{c}{c'}$
+  \item 일치 : $\dfrac{a}{a'} = \dfrac{b}{b'} = \dfrac{c}{c'}$
+  \item 한 점에서 만난다 : $\dfrac{a}{a'} \ne \dfrac{b}{b'}$
+  \item 수직 : $aa' + bb' = 0$
+\end{itemize}
+
+\begin{dmexample}
+$2x - y + 3 = 0$과 $x + 2y - 5 = 0$은 $2 \cdot 1 + (-1) \cdot 2 = 0$이므로 서로 수직이다.
+\end{dmexample}
+
+\begin{dmnote}
+표준형은 $y$축에 평행한 직선 ($x = a$ 꼴 · 기울기 정의 불가) 을 다루지 못하지만 일반형은 이 경우도 포함해 통합해 판별할 수 있다. 방정식이 일반형으로 주어지면 굳이 표준형으로 바꾸지 말고 계수 비교로 바로 판별하는 편이 안전하다.
+\end{dmnote}
+
+\end{dmconcept}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 5 · 대표예제 E3 (개념원리-CM2-GM-직선-예제-12) + 확인 CHK5·CHK6
+% ══════════════════════════════════════════════════════════════
+\dmex{3}{수직이등분선의 방정식}
+
+\begin{dmproblem}
+두 점 $\mathrm{A}(-1,\, 3)$,\ $\mathrm{B}(3,\, -5)$를 이은 선분 $\overline{\mathrm{AB}}$의 수직이등분선의 방정식이 $x + ay + b = 0$일 때, 상수 $a$,\ $b$에 대하여 $ab$의 값을 구하시오.
+\end{dmproblem}
+
+\begin{dmapproach}
+수직이등분선은 선분의 중점을 지나고 원래 선분에 수직이다. 중점의 좌표를 구하고, 직선 $\mathrm{AB}$의 기울기의 음의 역수를 기울기로 하는 직선의 방정식을 세운다.
+\end{dmapproach}
+
+\begin{dmsolution}
+중점 $\mathrm{M} = (1,\, -1)$,\ 기울기 $\dfrac{-5-3}{3-(-1)} = -2$에서 수직이등분선의 기울기는 $\dfrac{1}{2}$이다.
+
+방정식은 $y + 1 = \dfrac{1}{2}(x - 1)$,\ 즉 $x - 2y - 3 = 0$.
+
+$x + ay + b = 0$과 비교하면 $a = -2$,\ $b = -3$이므로 $ab = 6$.
+\dmanswer{$6$}
+\end{dmsolution}
+
+\dmchecktitle
+
+\dmcheck{5}{%
+점 $(2,\, 1)$을 지나고 직선 $3x - y + 2 = 0$과 수직인 직선의 $y$절편을 구하시오.%
+}
+
+\dmcheck{6}{%
+두 점 $\mathrm{A}(-1,\, 1)$,\ $\mathrm{B}(3,\, 3)$에 대하여 선분 $\overline{\mathrm{AB}}$의 수직이등분선의 방정식을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 6 · 대표예제 E4 (개념원리-CM2-GM-직선-예제-13) + 확인 CHK7·CHK8
+% ══════════════════════════════════════════════════════════════
+\dmex{4}{세 직선이 삼각형을 이루지 않을 조건}
+
+\begin{dmproblem}
+세 직선 $x - y = 0$,\ $x + y = 2$,\ $5x - ky = 15$가 삼각형을 이루지 않도록 하는 상수 $k$의 값을 모두 구하시오.
+\end{dmproblem}
+
+\begin{dmapproach}
+세 직선이 삼각형을 이루지 않는 경우는 (i) 어느 두 직선이 서로 평행하거나 (ii) 세 직선이 한 점에서 만나는 경우이다. 두 경우로 나누어 $k$의 값을 모두 찾는다.
+\end{dmapproach}
+
+\begin{dmsolution}
+세 직선 $l_1 : x - y = 0$,\ $l_2 : x + y = 2$,\ $l_3 : 5x - ky = 15$\ 의 기울기는 각각 $1$,\ $-1$,\ $\dfrac{5}{k}$\ 이다$\quad(k \ne 0)$.
+
+\dmemph{(i) 두 직선이 평행한 경우} $l_3 \mathbin{/\!/} l_1$: $\dfrac{5}{k} = 1$이므로 $k = 5$. $l_3 \mathbin{/\!/} l_2$: $\dfrac{5}{k} = -1$이므로 $k = -5$.
+
+\dmemph{(ii) 세 직선이 한 점에서 만나는 경우} 두 직선 $l_1$과 $l_2$의 교점 $(1,\, 1)$이 $l_3$ 위에 있으면 $5 - k = 15$이므로 $k = -10$.
+
+$\therefore\ k = 5$ 또는 $k = -5$ 또는 $k = -10$.
+\dmanswer{$k = 5$,\ $k = -5$,\ $k = -10$}
+\end{dmsolution}
+
+\dmchecktitle
+
+\dmcheck{7}{%
+세 직선 $2x + y + 1 = 0$,\ $x - y + 2 = 0$,\ $ax - y = 0$이 삼각형을 이루지 않도록 하는 모든 상수 $a$의 값의 합을 구하시오.%
+}
+
+\dmcheck{8}{%
+세 직선 $x + 2y - 6 = 0$,\ $4x - 3y - 12 = 0$,\ $ax + y - 1 = 0$으로 둘러싸인 삼각형이 직각삼각형이 되도록 하는 모든 상수 $a$의 값의 합을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 7 · 개념 C3 (정점을 지나는 직선 · 점과 직선 사이의 거리)
+% ══════════════════════════════════════════════════════════════
+\dmconcepthead
+\dmbracket{8}
+
+\begin{dmconcept}{3}{점과 직선 사이의 거리}
+% 세션 85 (마스터 지시) : 정점·삼각형 넓이 응용 삭제 · dmconceptcont 8p 폐기 · 1p 통합
+\setlength{\parskip}{2.0mm plus 2.1mm minus 0mm}\linespread{1.30}\selectfont%
+
+\dmsub{1}{점과 직선 사이의 거리}
+
+좌표평면 위의 점 $\mathrm{P}$에서 이 점을 지나지 않는 직선 $\ell$에 내린 수선의 발을 $\mathrm{H}$라 할 때, 선분 $\overline{\mathrm{PH}}$의 길이를 점 $\mathrm{P}$와 직선 $\ell$ 사이의 거리라 한다. 점 $\mathrm{P}(x_1,\, y_1)$과 직선 $ax + by + c = 0$ 사이의 거리 $d$는
+\begin{equation*}
+  d = \frac{|ax_1 + by_1 + c|}{\sqrt{a^2 + b^2}}
+\end{equation*}
+이다. 특히 원점과 직선 $ax + by + c = 0$ 사이의 거리는 $\dfrac{|c|}{\sqrt{a^2 + b^2}}$이다.
+
+\begin{dmexplain}
+공식을 사용하기 위해서는 직선의 방정식을 반드시 $ax + by + c = 0$의 꼴로 먼저 정리한다. 직선이 $y = mx + n$의 꼴이면 $mx - y + n = 0$으로 옮겨 계수 $a = m$,\ $b = -1$,\ $c = n$을 대입한다. 분모 $\sqrt{a^2 + b^2}$은 직선의 법선벡터 $(a, b)$의 길이이고, 분자 $|ax_1 + by_1 + c|$의 부호는 점이 직선의 어느 쪽에 놓이는지를 나타내므로 두 점이 같은 부호이면 두 점이 직선을 기준으로 같은 쪽에 있다.
+\end{dmexplain}
+
+\begin{dmexample}
+점 $(2,\, -1)$\ 과 직선 $3x + 4y - 1 = 0$ 사이의 거리는 $\dfrac{|3 \cdot 2 + 4 \cdot (-1) - 1|}{\sqrt{9 + 16}} = \dfrac{1}{5}$이다.
+\end{dmexample}
+
+\begin{dmexample}
+원점과 직선 $2x - y + 5 = 0$ 사이의 거리는 $\dfrac{|5|}{\sqrt{4 + 1}} = \sqrt{5}$이다. 직선이 $y = mx + n$의 꼴이면 $mx - y + n = 0$으로 옮겨 대입한다.
+\end{dmexample}
+
+\dmsub{2}{평행한 두 직선 사이의 거리}
+
+두 직선 $\ell$,\ $\ell'$이 평행할 때 한 직선 위 임의의 점과 나머지 직선 사이의 거리는 어느 점을 택해도 항상 같다. 이 값을 두 직선 사이의 거리라 하며, 좌표가 간단한 점 (좌표축과의 교점 등) 을 택해 점과 직선 사이의 거리 공식을 그대로 적용해 얻는다.
+
+\begin{dmexample}
+두 평행 직선 $3x + 4y + 1 = 0$,\ $3x + 4y - 9 = 0$에서 첫 직선 위의 점 $\left(-\dfrac{1}{3},\, 0\right)$을 택해 둘째 직선까지의 거리는 $\dfrac{|3 \cdot (-1/3) + 4 \cdot 0 - 9|}{\sqrt{9 + 16}} = 2$이다.
+\end{dmexample}
+
+\begin{dmnote}
+두 평행 직선의 방정식이 $x$,\ $y$의 계수까지 완전히 같은 꼴 $ax + by + c = 0$,\ $ax + by + c' = 0$으로 정리되어 있으면 첫 직선 위 좌표가 간단한 점을 대입한다. 두 직선의 계수가 다르면 한쪽 방정식을 상수배해 계수를 맞춘 뒤 진행하면 된다.
+\end{dmnote}
+
+\vspace{60.0mm}% dmconcept-auto-tune vspace (v2.0)
+\end{dmconcept}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 8 · 대표예제 E5 (개념원리-CM2-GM-직선-예제-14) + 확인 CHK9·CHK10
+% ══════════════════════════════════════════════════════════════
+\dmex{5}{점과 직선 사이의 거리의 조건}
+
+\begin{dmproblem}
+점 $(2,\, 3)$과 직선 $y = \dfrac{3}{4}x + \dfrac{k}{2}$ 사이의 거리가 $2$일 때, 모든 상수 $k$의 값의 합을 구하시오.
+\end{dmproblem}
+
+\begin{dmapproach}
+주어진 직선을 일반형 $ax + by + c = 0$으로 정리한 뒤, 점과 직선 사이의 거리 공식에 대입한다. 절댓값 방정식이 얻어지므로 부호에 따라 두 근이 나오고, 두 근의 합은 계수 관계로부터 바로 얻어진다.
+\end{dmapproach}
+
+\begin{dmsolution}
+주어진 직선을 정리하면 $3x - 4y + 2k = 0$\ 이다. 점 $(2,\, 3)$\ 과 이 직선 사이의 거리는
+\begin{equation*}
+  \frac{|3 \cdot 2 - 4 \cdot 3 + 2k|}{\sqrt{3^2 + 4^2}} = \frac{|2k - 6|}{5} = 2
+\end{equation*}
+에서 $|2k - 6| = 10$,\ 즉 $2k - 6 = \pm 10$\ 이므로 $k = 8$ 또는 $k = -2$.
+
+$\therefore$ 모든 $k$의 합 $= 6$.
+\dmanswer{$k$의 값의 합은 $6$}
+\end{dmsolution}
+
+\dmchecktitle
+
+\dmcheck{9}{%
+평행한 두 직선 $x + 2y + 1 = 0$,\ $x + 2y + k = 0$ 사이의 거리가 $4\sqrt{5}$일 때, 모든 상수 $k$의 값의 합을 구하시오.%
+}
+
+\dmcheck{10}{%
+직선 $3x + 4y + 1 = 0$에 수직이고 원점으로부터의 거리가 $1$인 직선의 방정식을 모두 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 9 · 대표예제 E6 (개념원리-CM2-GM-직선-예제-16) + 확인 CHK11·CHK12
+% ══════════════════════════════════════════════════════════════
+\dmex{6}{세 점을 꼭짓점으로 하는 삼각형의 넓이}
+
+\begin{dmproblem}
+세 점 $\mathrm{A}(2,\, 5)$,\ $\mathrm{B}(-3,\, 2)$,\ $\mathrm{C}(1,\, -4)$를 꼭짓점으로 하는 삼각형 $\mathrm{ABC}$의 넓이를 구하시오.
+\end{dmproblem}
+
+\begin{dmapproach}
+한 변을 밑변으로 잡고, 그 변을 지나는 직선의 방정식을 세운 뒤, 나머지 꼭짓점과 이 직선 사이의 거리를 높이로 하여 넓이를 계산한다.
+\end{dmapproach}
+
+\begin{dmsolution}
+$\overline{\mathrm{BC}} = \sqrt{4^2 + 6^2} = 2\sqrt{13}$\ 이고, 직선 $\mathrm{BC}$의 기울기는 $\dfrac{-6}{4} = -\dfrac{3}{2}$\ 이므로 방정식은 $3x + 2y + 5 = 0$. 점 $\mathrm{A}(2,\, 5)$\ 와 이 직선 사이의 거리는
+\begin{equation*}
+  h = \frac{|3 \cdot 2 + 2 \cdot 5 + 5|}{\sqrt{13}} = \frac{21}{\sqrt{13}}.
+\end{equation*}
+$\therefore\ S = \dfrac{1}{2} \cdot 2\sqrt{13} \cdot \dfrac{21}{\sqrt{13}} = 21$.
+\dmanswer{$21$}
+\end{dmsolution}
+
+\dmchecktitle
+
+\dmcheck{11}{%
+세 점 $\mathrm{A}(1,\, 2)$,\ $\mathrm{B}(3,\, -1)$,\ $\mathrm{C}(a,\, 4)$를 꼭짓점으로 하는 삼각형 $\mathrm{ABC}$의 넓이가 $8$이 되도록 하는 모든 $a$의 값을 구하시오.%
+}
+
+\dmcheck{12}{%
+점 $\mathrm{A}(6,\, 11)$에서 직선 $x + 3y - 9 = 0$에 내린 수선의 발을 $\mathrm{H}(a,\, b)$라 할 때, $ab$의 값을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 10 · Level 1 (기초 연습) 1/3 · L1-1 ~ L1-4 · 배지 있음
+% ══════════════════════════════════════════════════════════════
+\dmlevel{1}
+
+\dmpnum{1}{%
+두 점 $(-4,\, 2)$,\ $(6,\, 8)$을 이은 선분의 중점을 지나고 기울기가 $-3$인 직선이 $x$축, $y$축과 만나는 점을 각각 $\mathrm{P}$,\ $\mathrm{Q}$라 할 때, 삼각형 $\mathrm{OPQ}$의 넓이를 구하시오. (단, $\mathrm{O}$는 원점이다.)%
+}
+
+\dmpnum{2}{%
+점 $(-2,\, 4)$를 지나는 직선의 $x$절편과 $y$절편의 합이 $0$일 때, 이 직선과 $x$축, $y$축으로 둘러싸인 부분의 넓이를 구하시오. (단, 이 직선은 원점을 지나지 않는다.)%
+}
+
+\dmpnum{3}{%
+세 점 $\mathrm{A}(2,\, 4)$,\ $\mathrm{B}(-3,\, -1)$,\ $\mathrm{C}(7,\, -6)$을 꼭짓점으로 하는 삼각형 $\mathrm{ABC}$의 무게중심 $\mathrm{G}$와 점 $\mathrm{C}$를 지나는 직선의 방정식을 구하시오.%
+}
+
+\dmpnum{4}{%
+세 점 $\mathrm{A}(1,\, 3)$,\ $\mathrm{B}(a,\, 5)$,\ $\mathrm{C}(3,\, 2a + 3)$이 한 직선 위에 있을 때, 이 직선의 방정식을 구하시오. (단, $a > 0$)%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 11 · Level 1 2/3 · L1-5 ~ L1-8 · 배지 없음 (공간만 유지)
+% ══════════════════════════════════════════════════════════════
+\dmlevelspace
+
+\dmpnum{5}{%
+두 점 $\mathrm{A}(-3,\, 1)$,\ $\mathrm{B}(6,\, 4)$를 지나는 직선에 수직이고 선분 $\overline{\mathrm{AB}}$를 $1 : 2$로 내분하는 점을 지나는 직선의 방정식을 구하시오.%
+}
+
+\dmpnum{6}{%
+직선 $ax - 4y = c$가 직선 $x - 2y = 5$와 평행하고 점 $(3,\, 1)$을 지나며, 직선 $4x - by + 3 = 0$과 수직일 때, 상수 $a$,\ $b$,\ $c$에 대하여 $a + b + c$의 값을 구하시오.%
+}
+
+\dmpnum{7}{%
+두 점 $\mathrm{A}(a,\, 2)$,\ $\mathrm{B}(4,\, b)$에 대하여 선분 $\overline{\mathrm{AB}}$의 수직이등분선의 방정식이 $x + 2y - 5 = 0$일 때, $a^2 + b^2$의 값을 구하시오.%
+}
+
+\dmpnum{8}{%
+두 점 $\mathrm{A}(1,\, -4)$와 $\mathrm{B}$에 대하여 직선 $x + 3y + 1 = 0$이 선분 $\overline{\mathrm{AB}}$의 수직이등분선일 때, 점 $\mathrm{B}$의 좌표를 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 12 · Level 1 3/3 · L1-9 ~ L1-12 · 배지 없음 (공간만 유지)
+% ══════════════════════════════════════════════════════════════
+\dmlevelspace
+
+\dmpnum{9}{%
+직선 $(2k + 1)x - (k - 1)y - 5k - 4 = 0$이 실수 $k$의 값에 관계없이 항상 지나는 점을 $\mathrm{P}$라 하자. 기울기가 $-2$이고 점 $\mathrm{P}$를 지나는 직선의 방정식을 구하시오.%
+}
+
+\dmpnum{10}{%
+점 $(a,\, 3)$에서 두 직선 $2x - y + 1 = 0$,\ $x + 2y - 1 = 0$까지의 거리가 서로 같을 때, 양수 $a$의 값을 구하시오.%
+}
+
+\dmpnum{11}{%
+세 점 $\mathrm{A}(3,\, 4)$,\ $\mathrm{B}(2,\, 0)$,\ $\mathrm{C}(4,\, 2)$를 꼭짓점으로 하는 삼각형 $\mathrm{ABC}$의 넓이를 구하시오.%
+}
+
+\dmpnum{12}{%
+두 점 $\mathrm{A}(-3,\, 2)$,\ $\mathrm{B}(9,\, -4)$에 대하여 선분 $\overline{\mathrm{AB}}$를 $2 : 1$로 내분하는 점을 $\mathrm{C}$라 하자. 점 $\mathrm{C}$를 지나고 직선 $\mathrm{AB}$에 수직인 직선과 $x$축, $y$축으로 둘러싸인 부분의 넓이를 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 13 · Level 2 (표준 연습) 1/3 · L2-1 ~ L2-4 · 배지 있음
+% ══════════════════════════════════════════════════════════════
+\dmlevel{2}
+
+\dmpnum{1}{%
+두 직선 $3x + 2y - 5 = 0$,\ $3x + y - 1 = 0$의 교점을 지나고 직선 $2x - y + 4 = 0$과 수직인 직선이 점 $(a,\, -1)$을 지날 때, 상수 $a$의 값을 구하시오.%
+}
+
+\dmpnum{2}{%
+세 직선 $2x - y = 4$,\ $3x + 2y = -1$,\ $x - ay = 0$이 삼각형을 이루지 않도록 하는 모든 상수 $a$의 값의 곱을 구하시오.%
+}
+
+\dmpnum{3}{%
+두 직선 $2x - ky + 1 = 0$,\ $(k + 1)x - y + k = 0$이 서로 평행할 때 $k = \alpha$, 서로 수직일 때 $k = \beta$라 하자. $\alpha - \beta$의 값을 구하시오.%
+}
+
+\dmpnum{4}{%
+$-3 \le x \le 0$,\ $2 \le y \le 6$을 만족시키는 점 $(x,\, y)$가 나타내는 직사각형과, $3 \le x \le 7$,\ $-4 \le y \le -1$을 만족시키는 점 $(x,\, y)$가 나타내는 직사각형이 있다. 이 두 직사각형의 넓이를 동시에 이등분하는 직선의 방정식을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 14 · Level 2 2/3 · L2-5 ~ L2-8 · 배지 없음 (공간만 유지)
+% ══════════════════════════════════════════════════════════════
+\dmlevelspace
+
+\dmpnum{5}{%
+직선 $kx - y + 3k - 1 = 0$이 네 꼭짓점의 좌표가 $(2,\, 1)$,\ $(3,\, 1)$,\ $(3,\, 4)$,\ $(2,\, 4)$인 직사각형과 만나도록 하는 실수 $k$의 최댓값을 구하시오.%
+}
+
+\dmpnum{6}{%
+좌표평면 위의 네 점 $\mathrm{O}(0,\, 0)$,\ $\mathrm{A}(4,\, 0)$,\ $\mathrm{B}(4,\, 6)$,\ $\mathrm{C}(0,\, 6)$에 대하여 선분 $\overline{\mathrm{BA}}$ 위의 두 점 $\mathrm{D}$,\ $\mathrm{E}$가 서로 다른 점이고 두 끝점이 아니라 하자. 두 직선 $\mathrm{OD}$와 $\mathrm{CE}$의 교점을 $\mathrm{F}$라 할 때, 사각형 $\mathrm{OAEF}$의 넓이가 사각형 $\mathrm{BCFD}$의 넓이보다 $4$만큼 크고 두 직선 $\mathrm{OD}$,\ $\mathrm{CE}$의 기울기의 곱이 $-\dfrac{15}{16}$이다. 직선 $\mathrm{CE}$의 방정식을 구하시오.%
+}
+
+\dmpnum{7}{%
+세 직선 $x + 2y = 3$,\ $2x - 3y - 12 = 0$,\ $ax + y = 1$로 둘러싸인 삼각형이 직각삼각형이 되도록 하는 모든 상수 $a$의 값의 합을 구하시오.%
+}
+
+\dmpnum{8}{%
+세 점 $\mathrm{A}(4,\, 3)$,\ $\mathrm{B}(1,\, 5)$,\ $\mathrm{C}(-2,\, -2)$를 꼭짓점으로 하는 삼각형 $\mathrm{ABC}$의 무게중심을 지나는 직선 중 점 $\mathrm{A}$와의 거리가 최대인 직선의 $x$절편을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 15 · Level 2 3/3 · L2-9 ~ L2-12 · 배지 없음 (공간만 유지)
+% ══════════════════════════════════════════════════════════════
+\dmlevelspace
+
+\dmpnum{9}{%
+이차함수 $y = x^2 - 4x + 6$의 그래프 위의 점과 직선 $y = 2x + k$ 사이의 거리의 최솟값이 $\sqrt{5}$일 때, 상수 $k$의 값을 구하시오. (단, 직선 $y = 2x + k$는 이차함수의 그래프보다 아래쪽에 있다.)%
+}
+
+\dmpnum{10}{%
+두 직선 $kx - y = 0$,\ $x + ky = 0$이 직선 $x + 2y - 10 = 0$과 만나는 점을 각각 $\mathrm{A}$,\ $\mathrm{B}$라 하자. $\angle \mathrm{AOB}$를 이등분하는 직선이 선분 $\overline{\mathrm{AB}}$를 수직이등분할 때, 삼각형 $\mathrm{OAB}$의 넓이를 $S$라 하자. $k + S$의 값을 구하시오. (단, $\mathrm{O}$는 원점, $k < 0$이다.)%
+}
+
+\dmpnum{11}{%
+서로 다른 세 직선 $ax + y + 5 = 0$,\ $2x + by - 4 = 0$,\ $x + 2y + 3 = 0$에 의해 좌표평면이 네 부분으로 나누어질 때, 상수 $a$,\ $b$에 대하여 $a + b$의 값을 구하시오.%
+}
+
+\dmpnum{12}{%
+좌표평면 위의 세 점 $\mathrm{A}(6,\, 0)$,\ $\mathrm{B}(0,\, -3)$,\ $\mathrm{C}(10,\, -8)$에 대하여 삼각형 $\mathrm{ABC}$의 내접원의 중심을 $\mathrm{P}$라 할 때, 선분 $\overline{\mathrm{OP}}$의 길이를 구하시오. (단, $\mathrm{O}$는 원점이다.)%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 16 · Level 3 (심화 연습) · L3-1 · L3-2 · L3-3 · 3문 한 페이지 (마스터 세션 55 지시)
+% 세 문제 모두 짧고 그림 없음 → 3문 배치 예외 허용 · 최대 2문 규칙 예외
+% ══════════════════════════════════════════════════════════════
+\dmlevel{3}
+
+\dmpnum{1}{%
+직선 $l_1$이 $x$축, $y$축과 만나는 점을 각각 $\mathrm{A}$,\ $\mathrm{B}$라 하고, 직선 $l_2$가 $x$축, $y$축과 만나는 점을 각각 $\mathrm{C}$,\ $\mathrm{D}$라 하자. 두 직선 $l_1$,\ $l_2$의 교점을 $\mathrm{P}$라 할 때, 두 삼각형 $\mathrm{ACP}$와 $\mathrm{BDP}$의 넓이가 서로 같다. $\overline{\mathrm{OA}} = 2\,\overline{\mathrm{AC}}$이고 $l_1$의 기울기가 $-3$일 때, 직선 $l_2$의 기울기를 구하시오. (단, $\mathrm{O}$는 원점, 점 $\mathrm{A}$는 점 $\mathrm{C}$와 원점 $\mathrm{O}$ 사이에 있다.)%
+}
+
+\dmpnum{2}{%
+세 직선 $y = 3x$,\ $y = -\dfrac{1}{3}x$,\ $y = mx + 2$로 둘러싸인 도형이 이등변삼각형일 때, 이 삼각형의 넓이를 구하시오. (단, $m > 0$)%
+}
+
+\dmpnum{3}{%
+$\overline{\mathrm{AB}} = 8$,\ $\overline{\mathrm{BC}} = 16$인 직사각형 $\mathrm{ABCD}$의 내부와 둘레 위의 점 $\mathrm{P}$가 $\overline{\mathrm{AP}}^{\,2} - \overline{\mathrm{CP}}^{\,2} = 16$을 만족시킬 때, 점 $\mathrm{P}$가 나타내는 도형의 길이를 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 18 · 실전 R-1 + R-2 (2문 한 페이지 · 짧은 발문 · 그림 없음 · 세션 55 재편)
+% R-1 : 전국연합-2018-11월-고1-17번 (두 직선 교점 · 넓이 등식) — 원 R-1
+% R-2 : 전국연합-2017-11월-고1-19번 (이차곡선-직선 거리 이중 최적화) — 원 R-3
+% ══════════════════════════════════════════════════════════════
+\dmrealtype
+
+\dmpnum{1}{%
+\dmkichul{2018학년도 11월 고1 학평 17번}
+직선 $y = -x + 10$과 $y$축의 교점을 $\mathrm{A}$, 직선 $y = 3x - 6$과 $x$축의 교점을 $\mathrm{B}$라 하고, 두 직선의 교점을 $\mathrm{C}$라 하자. $x$축 위의 점 $\mathrm{D}(a,\, 0)$ ($a > 2$)에 대하여 삼각형 $\mathrm{ABD}$의 넓이가 삼각형 $\mathrm{ABC}$의 넓이와 같을 때, 상수 $a$의 값을 구하시오.%
+}
+
+\dmpnum{2}{%
+\dmkichul{2017학년도 11월 고1 학평 19번}
+$3 < a < 7$인 실수 $a$에 대하여 이차함수 $y = x^2 - 2ax - 20$의 그래프 위의 점 $\mathrm{P}$와 직선 $y = 2x - 12a$ 사이의 거리의 최솟값을 $f(a)$라 하자. $f(a)$의 최댓값을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 19 · 실전 R-3 (1문 단독 · 긴 발문·그림 있음 · 세션 55 재편)
+% R-3 : 전국연합-2020-3월-고2-18번 (무게중심 · 점-직선 거리 · 빈칸) — 원 R-2
+% ══════════════════════════════════════════════════════════════
+\dmrealtypespace
+
+\dmpnum{3}{%
+\dmkichul{2020학년도 3월 고2 학평 18번}
+좌표평면의 제 $1$ 사분면에 있는 두 점 $\mathrm{A}$,\ $\mathrm{B}$와 원점 $\mathrm{O}$에 대하여 삼각형 $\mathrm{OAB}$의 무게중심 $\mathrm{G}$의 좌표는 $(8,\, 4)$이고, 점 $\mathrm{B}$와 직선 $\mathrm{OA}$ 사이의 거리는 $6\sqrt{2}$이다. 다음은 직선 $\mathrm{OB}$의 기울기가 직선 $\mathrm{OA}$의 기울기보다 클 때, 직선 $\mathrm{OA}$의 기울기를 구하는 과정이다.
+
+\begin{dmoptionbox}
+선분 $\overline{\mathrm{OA}}$의 중점을 $\mathrm{M}$이라 하자.
+
+점 $\mathrm{G}$가 삼각형 $\mathrm{OAB}$의 무게중심이므로 $\overline{\mathrm{BG}} : \overline{\mathrm{GM}} = 2 : 1$이고, 점 $\mathrm{B}$와 직선 $\mathrm{OA}$ 사이의 거리가 $6\sqrt{2}$이므로 점 $\mathrm{G}$와 직선 $\mathrm{OA}$ 사이의 거리는 \dmemph{(가)}이다.
+
+직선 $\mathrm{OA}$의 기울기를 $m$이라 하면 점 $\mathrm{G}$와 직선 $\mathrm{OA}$ 사이의 거리는
+\begin{equation*}
+  \frac{\text{\dmemph{(나)}}}{\sqrt{m^2 + (-1)^2}}
+\end{equation*}
+이고, \dmemph{(가)}와 같다. 즉,
+\begin{equation*}
+  \text{\dmemph{(나)}} = \text{\dmemph{(가)}} \times \sqrt{m^2 + 1}
+\end{equation*}
+이다. 양변을 제곱하여 $m$의 값을 구하면 $m$에 관한 이차방정식의 두 근이 얻어진다. 이때 직선 $\mathrm{OG}$의 기울기가 $\dfrac{1}{2}$이므로 직선 $\mathrm{OA}$의 기울기는 \dmemph{(다)}이다.
+\end{dmoptionbox}
+
+\vspace{3mm}
+
+위의 (가), (다)에 알맞은 수를 각각 $p$,\ $q$라 하고, (나)에 알맞은 식을 $f(m)$이라 할 때, $\dfrac{f(q)}{p^2}$의 값을 구하시오.
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % scale=1.0 표준화 (feedback_figure_effective_rendering v1.0) · 원 scale=0.4 좌표 × 0.4 반영
+  % 좌표축 (0.8pt · 실효=0.80pt · 목표 [0.55,0.85]pt) · 세션 55 신정책: 평면도형 여백 ≥20% (콘텐츠 ≤80%)
+  % 삼각형 OAB x[0,5.6] y[0,4] · 축 x[-0.8,7.2] y[-0.4,5.2] · 여백 x 30% y 29%
+  \draw[black, line width=0.8pt] (-0.8, 0) -- (0, 0);
+  \draw[-stealth, black, line width=0.8pt] (0, 0) -- (7.2, 0);
+  \draw[black, line width=0.8pt] (0, -0.4) -- (0, 0);
+  \draw[-stealth, black, line width=0.8pt] (0, 0) -- (0, 5.2);
+  \node[font=\scriptsize, below] at (7.2, 0) {$x$};
+  \node[font=\scriptsize, left] at (0, 5.2) {$y$};
+  \node[font=\scriptsize, below left] at (0, 0) {$\mathrm{O}$};
+  % m=1/7 : A(14, 2), B(10, 10) 라 하면 G = ((14+10)/3, (2+10)/3)=(8, 4)  ✔ (원 좌표 × 0.4)
+  \coordinate (O) at (0, 0);
+  \coordinate (A) at (5.6, 0.8);
+  \coordinate (B) at (4, 4);
+  \coordinate (G) at (3.2, 1.6);
+  % 삼각형 OAB
+  \draw[black, line width=0.5pt] (O) -- (A) -- (B) -- cycle;
+  % 무게중심점 G
+  \filldraw[black] (A) circle (0.8pt) node[above right, font=\footnotesize] {$\mathrm{A}$};
+  \filldraw[black] (B) circle (0.8pt) node[above, font=\footnotesize] {$\mathrm{B}$};
+  \filldraw[black] (G) circle (0.7pt) node[above left, font=\footnotesize] {$\mathrm{G}$};
+\end{tikzpicture}
+\end{center}%
+}
+
+\end{document}

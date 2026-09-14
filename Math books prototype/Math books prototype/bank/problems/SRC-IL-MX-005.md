@@ -1,0 +1,31 @@
+---
+id: SRC-IL-MX-005
+unit: CM1-MX
+type: SRC-IL
+type_in_source: $XY-YX=(0,1;1,0)$ + $(X^2Y-YX^2)^2=E$ + $X^4+X^2+E=O$, $T(X)+S(X)$ 최댓값
+status: meta_only
+external_labels:
+  - source: 일품 공통수학
+    cohort_type: commercial_textbook
+    book_key: IL
+    item_number: 05 [1등급+]
+    insights_summary: EQV(3)·MI(3)·CON(3)·XU(3)
+    score: 9
+    cohort_normalized_star: 5
+    insights_depth:
+      I-EQV: 3
+      I-MI: 3
+      I-CON: 3
+      I-XU: 3
+patterns_1x: []
+homebase_for_1x: []
+frequency: 3
+grade_origin: 고1
+created: '2026-06-24'
+---
+
+*(status: meta_only — 시판 책 일품 공통수학 정점 표본. 본문/풀이 미등록 (저작권 정책). 통찰 라벨링·★ 메타만 등록.)*
+
+**발문 요지**: $XY-YX=(0,1;1,0)$ + $(X^2Y-YX^2)^2=E$ + $X^4+X^2+E=O$, $T(X)+S(X)$ 최댓값
+
+**원 출처**: 일품 공통수학 / 항목 05 [1등급+] / score: 9 / 통찰: EQV(3)·MI(3)·CON(3)·XU(3)

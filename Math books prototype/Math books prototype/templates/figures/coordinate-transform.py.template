@@ -1,0 +1,127 @@
+"""좌표 평행이동/대칭 template · Phase 2 신설 (2026-07-14)
+CM1/CM2 도형의 방정식 · 평행이동·대칭이동 시각화
+
+# --- CONFIG ---
+shape_type = 'circle'   # 'circle' or 'polygon'
+shape_orig_center = (2, 2)    # 원본 중심
+shape_orig_radius = 1         # 원본 반지름
+transform_type = 'translate'  # 'translate' or 'symmetry_x' or 'symmetry_y' or 'symmetry_yx'
+translate_vec = (3, 2)        # 평행이동 벡터 (translate 시)
+# ---
+
+의무 검증:
+  node scripts/figure-completeness-check.mjs <name>.py
+  node scripts/figure-label-overlap-check.mjs <name>.py
+
+답 노출 주의:
+  - 이동 후 좌표 표시가 답인 경우 shape_result 위치 라벨 숨김
+"""
+import matplotlib.pyplot as plt
+from matplotlib.patches import Circle, Polygon, FancyArrow
+from matplotlib.lines import Line2D
+import numpy as np
+
+plt.rcParams['font.family'] = 'Malgun Gothic'
+plt.rcParams['axes.unicode_minus'] = False
+
+# ── CONFIG ──
+shape_type = 'circle'
+shape_orig_center = (2, 2)
+shape_orig_radius = 1
+transform_type = 'translate'
+translate_vec = (3, 2)
+
+# ── 색상 ──
+axis_color = '#1A1A1A'
+orig_color = '#1959B8'    # 원본 (파랑)
+result_color = '#C05A1A'  # 결과 (오렌지)
+arrow_color = '#666666'   # 이동 화살표
+
+fig, ax = plt.subplots(figsize=(7.5, 6.0), dpi=150)
+ax.set_aspect('equal')
+
+# 좌표 범위 자동
+if transform_type == 'translate':
+    tx, ty = translate_vec
+    all_x = [shape_orig_center[0] - shape_orig_radius, shape_orig_center[0] + shape_orig_radius,
+              shape_orig_center[0] + tx - shape_orig_radius, shape_orig_center[0] + tx + shape_orig_radius]
+    all_y = [shape_orig_center[1] - shape_orig_radius, shape_orig_center[1] + shape_orig_radius,
+              shape_orig_center[1] + ty - shape_orig_radius, shape_orig_center[1] + ty + shape_orig_radius]
+elif transform_type == 'symmetry_x':
+    all_x = [shape_orig_center[0] - shape_orig_radius, shape_orig_center[0] + shape_orig_radius]
+    all_y = [-(shape_orig_center[1] + shape_orig_radius), shape_orig_center[1] + shape_orig_radius]
+elif transform_type == 'symmetry_y':
+    all_x = [-(shape_orig_center[0] + shape_orig_radius), shape_orig_center[0] + shape_orig_radius]
+    all_y = [shape_orig_center[1] - shape_orig_radius, shape_orig_center[1] + shape_orig_radius]
+elif transform_type == 'symmetry_yx':   # y=x 대칭
+    all_x = [shape_orig_center[0] - shape_orig_radius, shape_orig_center[0] + shape_orig_radius,
+              shape_orig_center[1] - shape_orig_radius, shape_orig_center[1] + shape_orig_radius]
+    all_y = [shape_orig_center[1] - shape_orig_radius, shape_orig_center[1] + shape_orig_radius,
+              shape_orig_center[0] - shape_orig_radius, shape_orig_center[0] + shape_orig_radius]
+
+xmin = min(min(all_x), 0) - 1.5; xmax = max(max(all_x), 0) + 1.5
+ymin = min(min(all_y), 0) - 1.5; ymax = max(max(all_y), 0) + 1.5
+ax.set_xlim(xmin, xmax); ax.set_ylim(ymin, ymax)
+
+# ── 좌표축 진하기 ──
+ax.annotate('', xy=(xmax, 0), xytext=(xmin, 0),
+            arrowprops=dict(arrowstyle='->', color=axis_color, linewidth=1.6, alpha=0.95))
+ax.annotate('', xy=(0, ymax), xytext=(0, ymin),
+            arrowprops=dict(arrowstyle='->', color=axis_color, linewidth=1.6, alpha=0.95))
+ax.text(xmax - 0.2, -0.4, '$x$', color=axis_color, fontsize=13, fontweight='bold')
+ax.text(-0.4, ymax - 0.2, '$y$', color=axis_color, fontsize=13, fontweight='bold')
+
+# ── 원본 도형 ──
+if shape_type == 'circle':
+    ax.add_patch(Circle(shape_orig_center, shape_orig_radius, fill=False, edgecolor=orig_color, linewidth=1.8))
+    ax.text(shape_orig_center[0] + shape_orig_radius + 0.3, shape_orig_center[1] + 0.3, '$C$',
+            color=orig_color, fontsize=13, fontweight='bold',
+            bbox=dict(boxstyle='round,pad=0.15', facecolor='white', edgecolor='none', alpha=0.9))
+
+# ── 이동 후 도형 ──
+if transform_type == 'translate':
+    result_center = (shape_orig_center[0] + translate_vec[0], shape_orig_center[1] + translate_vec[1])
+    ax.add_patch(Circle(result_center, shape_orig_radius, fill=False, edgecolor=result_color, linewidth=1.8, alpha=0.85))
+    ax.text(result_center[0] + shape_orig_radius + 0.3, result_center[1] + 0.3, "$C'$",
+            color=result_color, fontsize=13, fontweight='bold',
+            bbox=dict(boxstyle='round,pad=0.15', facecolor='white', edgecolor='none', alpha=0.9))
+
+    # 이동 화살표
+    ax.annotate('', xy=result_center, xytext=shape_orig_center,
+                arrowprops=dict(arrowstyle='->', color=arrow_color, linewidth=1.2, alpha=0.7, connectionstyle="arc3,rad=0"))
+    mid = ((shape_orig_center[0] + result_center[0]) / 2, (shape_orig_center[1] + result_center[1]) / 2)
+    ax.text(mid[0] + 0.4, mid[1] + 0.2, f'$({translate_vec[0]}, {translate_vec[1]})$',
+            color=arrow_color, fontsize=10, fontstyle='italic',
+            bbox=dict(boxstyle='round,pad=0.1', facecolor='white', edgecolor='none', alpha=0.85))
+
+elif transform_type == 'symmetry_x':
+    result_center = (shape_orig_center[0], -shape_orig_center[1])
+    ax.add_patch(Circle(result_center, shape_orig_radius, fill=False, edgecolor=result_color, linewidth=1.8, alpha=0.85))
+    ax.text(result_center[0] + shape_orig_radius + 0.3, result_center[1] + 0.3, "$C'$",
+            color=result_color, fontsize=13, fontweight='bold',
+            bbox=dict(boxstyle='round,pad=0.15', facecolor='white', edgecolor='none', alpha=0.9))
+
+elif transform_type == 'symmetry_y':
+    result_center = (-shape_orig_center[0], shape_orig_center[1])
+    ax.add_patch(Circle(result_center, shape_orig_radius, fill=False, edgecolor=result_color, linewidth=1.8, alpha=0.85))
+    ax.text(result_center[0] - shape_orig_radius - 0.5, result_center[1] + 0.3, "$C'$",
+            color=result_color, fontsize=13, fontweight='bold',
+            bbox=dict(boxstyle='round,pad=0.15', facecolor='white', edgecolor='none', alpha=0.9))
+
+elif transform_type == 'symmetry_yx':
+    result_center = (shape_orig_center[1], shape_orig_center[0])
+    ax.add_patch(Circle(result_center, shape_orig_radius, fill=False, edgecolor=result_color, linewidth=1.8, alpha=0.85))
+    ax.text(result_center[0] + shape_orig_radius + 0.3, result_center[1] + 0.3, "$C'$",
+            color=result_color, fontsize=13, fontweight='bold',
+            bbox=dict(boxstyle='round,pad=0.15', facecolor='white', edgecolor='none', alpha=0.9))
+    # y=x 축
+    lim = max(xmax, ymax)
+    ax.plot([-lim, lim], [-lim, lim], color='gray', linewidth=0.6, linestyle=(0, (5, 3)), alpha=0.5)
+    ax.text(lim - 0.5, lim - 0.9, '$y=x$', color='gray', fontsize=9, fontstyle='italic', alpha=0.7,
+            bbox=dict(boxstyle='round,pad=0.1', facecolor='white', edgecolor='none', alpha=0.85))
+
+ax.set_xticks([]); ax.set_yticks([])
+for spine in ax.spines.values(): spine.set_visible(False)
+
+plt.tight_layout(pad=0.3)
+plt.savefig('transform.pdf', bbox_inches='tight', pad_inches=0.05)

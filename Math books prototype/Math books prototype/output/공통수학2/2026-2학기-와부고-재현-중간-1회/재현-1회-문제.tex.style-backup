@@ -1,0 +1,305 @@
+\documentclass[10pt]{article}
+\usepackage{style}
+\renewcommand{\examround}{2학기 중간 대비}
+\renewcommand{\examvol}{vol.1}
+
+\usepackage{eso-pic}
+\AddToShipoutPictureFG{%
+  \ifnum\value{page}=1
+    \begin{tikzpicture}[overlay,remember picture]
+      \draw[color=vB-rule,line width=0.4pt]
+        ([xshift=1mm,yshift=-82.5mm]current page.north)
+        -- ([xshift=1mm,yshift=15.8mm]current page.south);
+    \end{tikzpicture}%
+  \else
+    \begin{tikzpicture}[overlay,remember picture]
+      \draw[color=vB-rule,line width=0.4pt]
+        ([xshift=1mm,yshift=-13.6mm]current page.north)
+        -- ([xshift=1mm,yshift=15.8mm]current page.south);
+    \end{tikzpicture}%
+  \fi
+}
+
+% ── 문항 스타일 재정의 (골든 템플릿 계승) ──
+\makeatletter
+% problem 환경 로컬 override: 자연 크기 minipage (\probpair 자동 측정용)
+\renewenvironment{problem}[2]{%
+  \par%
+  \setcounter{probnum}{#1}%
+  \noindent
+  \begin{minipage}[t]{\linewidth}%
+  \setlength{\parskip}{4pt plus 1pt}%
+  {\sffamily\bfseries\large\color{black}#1.}\par\smallskip\ignorespaces
+}{%
+  \end{minipage}\par%
+}
+\renewcommand{\pointbadge}[1]{}
+\newcommand{\pts}[1]{\nobreak\hspace*{\fill}\mbox{\textbf{[#1점]}}\par}
+\renewenvironment{choices}{\par\vspace{5mm}\setcounter{choicecnt}{0}%
+  \noindent\hbox to \linewidth\bgroup\small\ignorespaces}{%
+  \egroup\par\medskip}
+\makeatother
+
+\begin{document}
+
+\examheader{}{공통수학2 \textperiodcentered\ 도형의 방정식 \textperiodcentered\ 집합과 명제 \textperiodcentered\ 17문 / 100점}
+
+\examsection{선택형 12문 (52점) \textperiodcentered\ 서술형 5문 (48점) \textperiodcentered\ 총 17문 100점}
+
+% ── 페이지 1 (문제 1~4) — examheader 동반 페이지: pagecolumnpair로 잔여공간 자동 균등 ──
+%   좌 컬럼: 1(상)·3(하) / 우 컬럼: 2(상)·4(하) → 시각 격자는 probpair와 동일 (1|2 위, 3|4 아래)
+\begin{pagepair}
+\pagecolumnpair{%
+\begin{problem}{1}{s}
+세 점 $\mathrm{A}(2,\,-1)$, $\mathrm{B}(8,\,5)$, $\mathrm{C}(5,\,8)$에 대하여 삼각형 $\mathrm{ABC}$의 무게중심을 $\mathrm{G}$라 하고, 선분 $\mathrm{AB}$를 $2:1$로 내분하는 점을 $\mathrm{P}$라 하자. 점 $\mathrm{G}$의 $x$좌표와 점 $\mathrm{P}$의 $x$좌표의 합은? \pts{3.5}
+\begin{choices}
+\choice{$9$}
+\choice{$10$}
+\choice{$11$}
+\choice{$12$}
+\choice{$13$}
+\end{choices}
+\end{problem}
+\vfill
+\begin{problem}{3}{s}
+전체집합 $U$의 세 부분집합 $A$, $B$, $C$에 대하여 $A\cup B\subset C$가 성립할 때, 집합 $(C-A)^{c}\cap B$와 항상 같은 집합은? \pts{4}
+\begin{choices}
+\choice{$A\cap B$}
+\choice{$A\cup B$}
+\choice{$B-A$}
+\choice{$C-B$}
+\choice{$\varnothing$}
+\end{choices}
+\end{problem}
+}{%
+\begin{problem}{2}{s}
+$x$, $y$에 대한 방정식 $x^{2}+y^{2}-2kx-2y+2k^{2}-3=0$이 원을 나타내도록 하는 정수 $k$의 개수는? \pts{4}
+\begin{choices}
+\choice{$2$}
+\choice{$3$}
+\choice{$4$}
+\choice{$5$}
+\choice{$6$}
+\end{choices}
+\end{problem}
+\vfill
+\begin{problem}{4}{s}
+실수 $x$에 대한 세 조건
+\begin{align*}
+&p:\ 2\le x\le 6,\quad q:\ x^{2}-8x+12\le 0,\\
+&r:\ x^{2}-6x+8\le 0
+\end{align*}
+에 대하여 다음 〈보기〉에서 옳은 것을 모두 고른 것은? \pts{4}
+\vspace{2mm}
+
+\begin{bogibox}
+ㄱ. $q$는 $p$이기 위한 필요충분조건이다.\\[2pt]
+ㄴ. $r$는 $p$이기 위한 충분조건이다.\\[2pt]
+ㄷ. $r$는 $q$이기 위한 필요조건이다.
+\end{bogibox}
+\begin{choices32}{ㄱ}{ㄷ}{ㄱ,ㄴ}{ㄴ,ㄷ}{ㄱ,ㄴ,ㄷ}\end{choices32}
+\end{problem}
+}
+\end{pagepair}
+
+% ── 페이지 2 (문제 5~8) ───────────────────────────────────
+\begin{pagepair}
+\vfill
+\probpair{%
+\begin{problem}{5}{s}
+방정식 $f(x,\,y)=0$이 나타내는 도형을 직선 $y=x$에 대하여 대칭이동한 후, $x$축의 방향으로 $2$만큼 평행이동한 도형의 방정식은? \pts{4}
+\begin{choicesii}{$f(x-2,\,y)=0$}{$f(y,\,x-2)=0$}{$f(y-2,\,x)=0$}{$f(x,\,y-2)=0$}{$f(y+2,\,x)=0$}\end{choicesii}
+\end{problem}
+}{%
+\begin{problem}{6}{s}
+전체집합 $U$의 두 부분집합 $A$, $B$에 대하여 $n(U)=30$, $n(A)=20$, $n(B)=15$이다. $n(A\cap B)$의 최댓값을 $M$, 최솟값을 $m$이라 할 때, $M+m$의 값은? \pts{4.5}
+\begin{choices}
+\choice{$18$}
+\choice{$19$}
+\choice{$20$}
+\choice{$21$}
+\choice{$22$}
+\end{choices}
+\end{problem}
+}
+
+\vfill
+
+\probpair{%
+\begin{problem}{7}{s}
+원 $x^{2}+y^{2}=8$과 직선 $x+y+k=0$이 서로 다른 두 점에서 만나도록 하는 정수 $k$의 개수는? \pts{4.5}
+\begin{choices}
+\choice{$5$}
+\choice{$6$}
+\choice{$7$}
+\choice{$8$}
+\choice{$9$}
+\end{choices}
+\end{problem}
+}{%
+\begin{problem}{8}{s}
+전체집합 $U=\{1,2,3,4,5,6\}$의 두 부분집합 $A=\{3,4\}$, $B=\{3,4,5,6\}$이 있다. $U$의 부분집합 $X$ 중에서 ``$A\subset X$이거나 $X\subset B$''를 만족시키는 집합 $X$의 개수는? \pts{4.5}
+\begin{choices}
+\choice{$24$}
+\choice{$26$}
+\choice{$28$}
+\choice{$30$}
+\choice{$32$}
+\end{choices}
+\end{problem}
+}
+\vfill
+\end{pagepair}
+
+% ── 페이지 3 (문제 9~12) ──────────────────────────────────
+\begin{pagepair}
+\vfill
+\probpair{%
+\begin{problem}{9}{s}
+실수 $x$에 대한 명제 ``$x=2$이면 $x^{2}=4$이다''와 그 역, 이, 대우 중에서 참인 것의 개수는? \pts{4}
+\begin{choices}
+\choice{$1$}
+\choice{$2$}
+\choice{$3$}
+\choice{$4$}
+\choice{$0$}
+\end{choices}
+\end{problem}
+}{%
+\begin{problem}{10}{s}
+두 점 $\mathrm{A}(4,\,0)$, $\mathrm{B}(0,\,2)$와 직선 $y=x$ 위의 점 중 $x$좌표가 정수인 점 $\mathrm{P}$가 있다. 삼각형 $\mathrm{ABP}$의 넓이가 $10$ 이하가 되도록 하는 점 $\mathrm{P}$의 개수를 $n$, 그때 넓이의 최댓값을 $M$이라 할 때, $n+M$의 값은? \pts{5}
+\begin{choices}
+\choice{$15$}
+\choice{$16$}
+\choice{$17$}
+\choice{$18$}
+\choice{$19$}
+\end{choices}
+\end{problem}
+}
+
+\vfill
+
+\probpair{%
+\begin{problem}{11}{s}
+양의 실수 $a$에 대하여 점 $\mathrm{A}(a,\,3a)$, $y$축 위의 점 $\mathrm{P}$, 직선 $y=x$ 위의 점 $\mathrm{Q}$가 있다. 삼각형 $\mathrm{APQ}$의 둘레의 길이가 최소일 때, 그 삼각형의 무게중심을 $\mathrm{G}$라 하자. 다음 〈보기〉에서 옳은 것을 모두 고른 것은? \pts{5}
+\vspace{2mm}
+
+\begin{bogibox}
+ㄱ. $a=1$일 때, 삼각형 $\mathrm{APQ}$의 둘레의 최솟값은 $2\sqrt{5}$이다.\\[2pt]
+ㄴ. 둘레가 최소일 때, 점 $\mathrm{P}$의 좌표는 $(0,\,2a)$이다.\\[2pt]
+ㄷ. 점 $\mathrm{G}$는 양의 실수 $a$의 값에 관계없이 항상 직선 $43x-16y=0$ 위에 있다.
+\end{bogibox}
+\begin{choices32}{ㄱ}{ㄷ}{ㄱ,ㄴ}{ㄱ,ㄷ}{ㄱ,ㄴ,ㄷ}\end{choices32}
+\end{problem}
+}{%
+\begin{problem}{12}{s}
+양수 $a$, $b$에 대하여 점 $\mathrm{A}(a,\,0)$, $\mathrm{B}(0,\,b)$를 지나는 직선이 점 $(2,\,3)$을 지난다. 원점 $\mathrm{O}$에 대하여 삼각형 $\mathrm{OAB}$의 넓이의 최솟값은? \pts{5}
+\begin{choices}
+\choice{$10$}
+\choice{$11$}
+\choice{$12$}
+\choice{$13$}
+\choice{$24$}
+\end{choices}
+\end{problem}
+}
+\vfill
+\end{pagepair}
+
+% ── 페이지 4 (서술형 13, 14) — 좌우 minipage, 논술 공간 ─────
+\setlength{\probboxheight}{205mm}
+
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}\raggedright
+\begin{problem}{13}{s}
+세 점 $\mathrm{A}(1,\,1)$, $\mathrm{B}(5,\,3)$, $\mathrm{C}(2,\,6)$을 꼭짓점으로 하는 삼각형 $\mathrm{ABC}$의 넓이를, 밑변 $\overline{\mathrm{AB}}$의 길이와 점 $\mathrm{C}$에서 직선 $\mathrm{AB}$에 이르는 거리(높이)를 각각 구하는 과정이 나타나도록 하여 구하시오. \big(넓이 공식 $\dfrac{1}{2}\times(\text{밑변})\times(\text{높이})$의 원리로 유도할 것\big) \pts{6}
+\end{problem}
+\end{minipage}%
+\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}\raggedright
+\begin{problem}{14}{s}
+점 $\mathrm{P}$가 원 $(x+1)^{2}+(y-3)^{2}=5$ 위를 움직인다. 점 $\mathrm{P}$를 직선 $y=x$에 대하여 대칭이동한 후, $x$축의 방향으로 $3$만큼 평행이동한 점을 $\mathrm{Q}$라 하자. 점 $\mathrm{Q}$가 그리는 도형(자취)의 방정식을, 매개변수를 소거하는 과정이 나타나도록 하여 구하시오. \pts{8}
+\end{problem}
+\end{minipage}
+
+\clearpage
+
+% ── 페이지 5 (서술형 15) — 좌우 분할, (1) | (2)(3) ─────────
+\begin{pagepair}
+\vfill
+\probpair{%
+\begin{problem}{15}{s}
+전체집합 $U=\{(x,\,y)\mid x,\ y\text{는 정수}\}$의 부분집합
+$$A=\{(x,\,y)\in U\mid x^{2}+y^{2}<4\}$$
+가 있다. 정수 $a$, $b$에 대하여
+$$A_{(a,\,b)}=\{(x+a,\,y+b)\mid (x,\,y)\in A\}$$
+라 할 때, 다음 물음에 답하시오. (각 과정을 논술할 것) \pts{10}
+\end{problem}
+
+\vspace*{8mm}
+\textbf{(1)} $n(A)$를 구하시오.
+\vspace{48mm}
+}{%
+\textbf{(2)} $n(A\cap A_{(a,\,b)})=4$를 만족시키는 정수 순서쌍 $(a,\,b)$의 개수를 구하시오.
+\vspace{72mm}
+
+\textbf{(3)} $n(A\cap A_{(a,\,b)})\ge 4$를 만족시키는 정수 순서쌍 $(a,\,b)$의 개수를 구하시오.
+\vspace{58mm}
+}
+\vfill
+\end{pagepair}
+
+% ── 페이지 6 (서술형 16) — 좌우 분할, (1) | (2)(3) ─────────
+\begin{pagepair}
+\vfill
+\probpair{%
+\begin{problem}{16}{s}
+다음 물음에 답하시오. (각 증명 \textperiodcentered\ 과정을 논술할 것) \pts{12}
+\end{problem}
+
+\vspace*{6mm}
+\textbf{(1)} 세 실수 $a$, $b$, $c$에 대하여
+$$a^{2}+b^{2}+c^{2}\ge ab+bc+ca$$
+가 성립함을 보이고, 등호가 성립할 조건을 구하시오.
+\vspace{78mm}
+}{%
+\textbf{(2)} 세 실수 $a$, $b$, $c$에 대하여 명제 ``$a^{2}+b^{2}+c^{2}=ab+bc+ca$이면 $a=b=c$이다''가 참임을 귀류법으로 논술하시오.
+\vspace{58mm}
+
+\textbf{(3)} 양의 실수 $x$, $y$, $z$가 $x+y+z=6$을 만족시킬 때, \textbf{(1)}을 활용하여 $xy+yz+zx$의 최댓값을 구하시오.
+\vspace{52mm}
+}
+\vfill
+\end{pagepair}
+
+% ── 페이지 7 (서술형 17 · 위성 중계 지문형) — 좌우 분할 ─────
+\begin{pagepair}
+\vfill
+\probpair{%
+\begin{problem}{17}{s}
+\begin{tcolorbox}[colback=white, colframe=black, boxrule=0.4pt, arc=0pt, left=4pt, right=4pt, top=3pt, bottom=3pt]
+{\small\sffamily\bfseries [상황]}\\[2pt]
+{\small
+인공위성 통신에서는 두 위성이 직접 신호를 주고받기 어려운 구간에 중계 위성을 두어 신호를 이어 준다. 좌표평면에서 지구의 중심을 원점 $\mathrm{O}$, 저궤도 위성의 궤도를 원 $C_{1}:\ x^{2}+y^{2}=4$, 정지궤도에 있는 통신 거점을 점 $\mathrm{A}(8,\,0)$이라 하자. 거점 $\mathrm{A}$와 궤도 $C_{1}$ 위의 위성 $\mathrm{P}$를 잇는 선분의 중점에 중계 위성을 배치한다.
+}
+\end{tcolorbox}
+\vspace{2mm}
+
+다음 물음에 답하시오. (각 과정을 논술할 것) \pts{12}
+\end{problem}
+
+\vspace*{6mm}
+\textbf{(1)} 위성 $\mathrm{P}$가 궤도 $C_{1}$을 한 바퀴 도는 동안 중계 위성이 그리는 도형(자취) $C_{2}$의 방정식을 구하시오.
+\vspace{42mm}
+}{%
+\textbf{(2)} 두 궤도 $C_{1}$, $C_{2}$의 중심 사이의 거리를 구하고, 두 원의 위치 관계를 밝히시오.
+\vspace{60mm}
+
+\textbf{(3)} 궤도 $C_{1}$ 위의 위성 한 대와 궤도 $C_{2}$ 위의 중계 위성 한 대를 서로 독립적으로 택할 때, 두 위성 사이 거리의 최솟값과 최댓값을 구하시오.
+\vspace{58mm}
+}
+\vfill
+\end{pagepair}
+
+\end{document}

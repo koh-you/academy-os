@@ -1,0 +1,55 @@
+pair_id: BT-002
+p_file: creation-02.tex
+q_file: anchor-02.tex
+p_grade: C
+q_grade: A
+p_insight_count: 3
+q_insight_count: 3
+p_answer_cleanliness: rational
+q_answer_cleanliness: integer
+p_well_defined: false
+q_well_defined: true
+winner: Q
+confidence: 0.9
+reasoning: |
+  [문항 개요]
+  P: 원 (x-2)^2+y^2=9를 선분 AB로 접어 x축과 (4,0)에서 접함. AB: x+ay+b=0, a+b?
+  Q: 원 x^2+(y+3)^2=16을 선분 AB로 접어 y축과 (0,-2)에서 접함. AB: y=mx+n (m>0), m*n?
+
+  [3층 모델 통찰 카드 밀도]
+  두 문항 모두 동일한 mechanism (원 접기 = 대칭이동, AB = 두 원의 중심을 잇는 선분의 수직이등분선 = 공통현):
+    - I-RT (표현 전환): 접기 -> 대칭이동 재해석
+    - I-EQV (동치 변환): 접힌 원 중심 = 접점 기준 반사 위치
+    - I-SYM (대칭성): AB는 두 원 중심의 수직이등분선
+  통찰 개수 동일 (각 3장).
+
+  [답 청결도]
+  P: 접힌 원 중심 (4,3) case -> AB: 2x+3y-10.5=0 -> x+1.5y-5.25=0 -> a=1.5, b=-5.25, a+b=-3.75
+     (반대 case (4,-3)이면 a+b=+3.75)
+     답이 소수 (rational · 분수꼴 -15/4)
+  Q: 접힌 원 중심 (-4,-2) case (m>0 필터) -> AB: y=4x+11/2 -> m=4, n=11/2, m*n=22
+     답이 정수 (integer)
+
+  [well-defined 여부 · 핵심 차이]
+  P: 접힌 원 중심이 (4,3) 또는 (4,-3) 두 case 존재. AB의 방정식 형태 x+ay+b=0에는
+     계수 부호나 case 제한이 없음. a+b가 +3.75 또는 -3.75 두 값 가능 -> WELL-DEFINED 실패
+  Q: 접힌 원 중심이 (4,-2) 또는 (-4,-2) 두 case 존재. 하지만 m>0 조건이 명시적으로
+     한 case (음의 기울기 case 배제)를 선택 -> WELL-DEFINED 성공
+
+  [발문 표현 자연스러움]
+  P: "x+ay+b=0" 형식은 계수 부호 자유도가 남아 있어 애매. 답이 -3.75 (지저분)
+  Q: "y=mx+n (m>0)" 표현이 표준 · case 필터 · 답이 정수 22
+
+  [Winner 판정]
+  Q 승 (confidence 0.9).
+  - Q는 well-defined 조건 (m>0)을 명시적으로 제공 -> 학생에게 유일해 보장
+  - P는 두 case에서 서로 다른 답 발생 (a+b = 3.75 vs -3.75) -> 출제 결함 (RED)
+  - Q는 답이 정수 22로 청결, P는 -15/4로 지저분
+  - 두 문항 mechanism·통찰 밀도 동일하나 well-defined + 답 청결도에서 Q가 명확히 우위
+
+  [P 등급 C 사유]
+  통찰 mechanism은 우수 (fold 대칭 · 공통현) 하나 case 필터링 부재 -> 유일해 조건 결함
+  단순 수치 변경으로 회복 불가 (형식 x+ay+b=0 자체가 계수 자유도 남음). B 이하로 감점
+
+  [Q 등급 A 사유]
+  well-defined + 정수 답 + m>0 case 필터 = 교과서 golden 수준 · 학평 회수 가능

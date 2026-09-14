@@ -1,0 +1,77 @@
+# Phase A-2 Pilot Manifest (5 pair · 세션 98)
+# Blind Twin 원칙: anchor tex 파일에 메타데이터 노출 금지 (원본·star·통찰 라벨)
+# 본 manifest는 마스터 참조용 · 판정 시 노출 금지
+established: 2026-07-28
+phase: A-2 (파일럿 · 5 pair)
+scope: CM2-GM-원
+scale: pilot (10~20 pair 확장 예정 시 다음 세션)
+
+pairs:
+  - pair_id: BT-001
+    anchor_file: anchors/anchor-01.tex
+    anchor_source: 고쟁이-CH03-STEP3-#186
+    anchor_tier: premium
+    cell:
+      unit: CM2-GM-원
+      insight: [I-CON, I-VF, I-XU]
+      star: premium
+    mechanism: 원 위 점 삼각형 넓이 자연수 조건 (연속→이산)
+    creation_slot: creations/creation-01.tex     # TBD (Task #16 · Agent 창작)
+    status: pending_creation
+
+  - pair_id: BT-002
+    anchor_file: anchors/anchor-02.tex
+    anchor_source: 고쟁이-CH03-STEP3-#189
+    anchor_tier: premium
+    cell:
+      unit: CM2-GM-원
+      insight: [I-SYM, I-EQV]
+      star: premium
+    mechanism: 원 접기 (fold) 대칭 + 근축으로 접는 선 유도
+    creation_slot: creations/creation-02.tex
+    status: pending_creation
+
+  - pair_id: BT-003
+    anchor_file: anchors/anchor-03.tex
+    anchor_source: 고쟁이-CH03-STEP3-#193
+    anchor_tier: premium
+    cell:
+      unit: CM2-GM-원
+      insight: [I-EQV, I-CON, I-BW]
+      star: premium
+    mechanism: 두 원 교점 현 길이 조건 → 두 케이스 분기
+    creation_slot: creations/creation-03.tex
+    status: pending_creation
+
+  - pair_id: BT-004
+    anchor_file: anchors/anchor-04.tex
+    anchor_source: 고쟁이-CH03-STEP2-#161
+    anchor_tier: high
+    cell:
+      unit: CM2-GM-원
+      insight: [I-EQV, I-CON]
+      star: 5
+    mechanism: 두 평행선 사이 접하는 원 (지름 = 두 평행선 거리)
+    creation_slot: creations/creation-04.tex
+    status: pending_creation
+
+  - pair_id: BT-005
+    anchor_file: anchors/anchor-05.tex
+    anchor_source: 고쟁이-CH03-STEP2-#172
+    anchor_tier: high
+    cell:
+      unit: CM2-GM-원
+      insight: [I-EQV, I-SYM]
+      star: 5
+    mechanism: 두 접선이 이루는 각의 이등분선 (외부점-중심 잇는 직선 + 수직선)
+    creation_slot: creations/creation-05.tex
+    status: pending_creation
+
+# ── Blind Twin 프로토콜 준수 ──
+# 1. anchor tex 파일에는 문제 발문만 · 원본·star·통찰 라벨 노출 금지
+# 2. 마스터 blind 판정 시 이 manifest 노출 금지 (P·Q 라벨만 유지)
+# 3. 자동 판정 후 정확도 산출 단계에서만 manifest 참조
+
+# ── 발견된 시스템 이점 ──
+# 세션 98 실측: master-feedback-check.mjs hook이 "star_premium" 노출 자동 차단
+# → Blind Twin 원칙 시스템 차원에서 강제 확인. 예상 밖 정책 정합 이점.

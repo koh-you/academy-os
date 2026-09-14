@@ -1,0 +1,581 @@
+# CM2-RF-01 유리함수 청사진 v6.2 (2026-07-20 · 세션 57 정합화)
+# 통합 문제출제 시스템 v1.0 · schema.md v3.0 · Gate 5.0 대상
+# 도형의 방정식 4권 (평면좌표·직선·원·이동) 골든 계승 · 정독 파일 5종
+# 유리식 + 유리함수만 담당 (무리식·무리함수는 CM2-RF-02 별도 편)
+#
+# v6.2 변경 (2026-07-20 세션 57 rename + tex 정합화):
+#   - 파일명: 05-청사진.yaml → 07-RF01-청사진.yaml (RF-02 무리함수 06과 구분)
+#   - L3-1·L3-2 산술기하평균 편입 → 유리함수 고유 도구 (완전제곱꼴·판별식·수선의 발) 재구성
+#     사유: 세션 56 handoff 지시 · CM2-RF는 유리함수 자체 통찰 우선 (산술기하는 CM2-ST 도구)
+#   - tex 파일 (07-RF01-유리함수.tex · 세션 55 오후 작성) 실제 상태 반영
+
+series_type: jeongribyeon
+series_name: DeeP Math 정리편
+book_title: 공통수학2 정리편 · CM2-RF-01 유리함수
+unit_code: CM2-RF
+target_audience: 상위권
+version: v6.2
+established: 2026-07-20
+
+jeongribyeon_meta:
+  page_count_est: 18~19       # 세션 55 3문/페이지 통합 규약 · L3 1p·실전 2~3p 유연
+  개념_count: 3
+  대표예제_count: 6
+  확인_count: 12
+  Level1_count: 12
+  Level2_count: 12
+  Level3_count: 3
+  실전_count: 3
+  total_problem_slots: 48
+
+# ── 정독 원본 은행 7종 (세션 55 확립 · 유리함수 파트만 선별) ─
+source_banks:
+  - bank/mechanism-데이터-개념원리-CM2-RF.md                     # 예제 07~14 + 유제 608~630 + 연습 631~646 · star 3~5
+  - bank/mechanism-데이터-RPM-CM2-RF.md                          # #0930~1035 · star 1~5 (유형 09~20)
+  - bank/mechanism-데이터-고쟁이-CM2-CH08-유리무리-STEP1.md      # #612~#627 · star 3·4 (유형 02 유리함수)
+  - bank/mechanism-데이터-고쟁이-CM2-CH08-유리무리.md            # STEP2·3 · star_5·premium (#646~#671 유리함수)
+  - bank/mechanism-데이터-전국연합-CM2-RF.md                     # 유리함수 학평 star_5·premium (유형 03·05·06·07)
+  - bank/mechanism-데이터-블랙라벨-CM2-STEP2.md                  # 유리함수 star_5 (선택)
+  - bank/mechanism-데이터-블랙라벨-CM2-STEP3.md                  # 유리함수 star_premium (선택)
+
+# ══════════════════════════════════════════════════════════════
+# §1. 개념 슬롯 (3개 · 원본 pick 아님 · 2022 개정 표준 용어 CM2-RF)
+# ══════════════════════════════════════════════════════════════
+concept_slots:
+  - slot_id: C1
+    slot_type: 개념
+    sub_section: 유리식
+    page_placement: {page_num: 1, layout: dmconcept_full}
+    contents:
+      - dmsub 1: 유리식의 뜻과 성질 (분모≠0 · 유리식 = 다항식/다항식 · 약분·기약)
+      - dmsub 2: 유리식의 사칙연산 (통분·약분·곱나눗셈은 인수분해 후)
+      - dmsub 3: 부분분수 분해 (1/{AB} = 1/(B-A)·(1/A - 1/B) · 텔레스코핑)
+      - dmsub 4: 비례식과 조건식 유리식 (a:b:c = k꼴 대입 · 대칭식 값 계산)
+    signature: {defBox: true, primary_axis: 유리식 항등식·분해·값}
+
+  - slot_id: C2
+    slot_type: 개념
+    sub_section: 유리함수와 그래프
+    page_placement: {page_num: 4, layout: dmconcept_full}
+    contents:
+      - dmsub 1: 유리함수의 뜻과 정의역 (분모≠0 · 표준형 y=k/x)
+      - dmsub 2: y=k/x 그래프 (k>0 1·3사분면 · k<0 2·4사분면 · 원점 대칭 · 두 좌표축이 점근선)
+      - dmsub 3: y=k/(x-p)+q 표준형 (평행이동 (p,q) · 점근선 x=p, y=q · 대칭 중심 (p,q))
+      - dmsub 4: 일반형 y=(ax+b)/(cx+d) 표준형 변형 (분자를 분모로 나누기 · 점근선 x=-d/c, y=a/c)
+    signature: {defBox: true, primary_axis: 표준형·평행이동·점근선}
+
+  - slot_id: C3
+    slot_type: 개념
+    sub_section: 유리함수의 활용 (대칭·역함수·최대최소)
+    page_placement: {page_num: 7, layout: dmconcept_full}
+    contents:
+      - dmsub 1: 유리함수 그래프의 대칭성 (대칭 중심 = 점근선 교점 · 대칭축 = 기울기 ±1인 두 직선 · 모두 대칭 중심 지남)
+      - dmsub 2: 유리함수의 역함수 (y와 x 교환 후 y에 대해 풀기 · 그래프는 y=x 대칭)
+      - dmsub 3: 역함수가 자기 자신과 같을 조건 (f=f⁻¹ · f∘f=x · 계수 관계 a+d=0 등) — "자기역함수" 관례 미사용
+      - dmsub 4: 폐구간 최대·최소 (표준형 → 감소/증가 판단 → 경계값 대입) · 유리함수와 직선 위치 관계 (판별식·k=0 경계)
+    signature: {defBox: true, primary_axis: 대칭·역함수·경계값}
+
+# ══════════════════════════════════════════════════════════════
+# §2. 대표예제 슬롯 (6개 · 개념당 2문 · 풀이 포함 · star 3·4)
+# ══════════════════════════════════════════════════════════════
+representative_slots:
+  - slot_id: E1
+    slot_type: 대표예제
+    parent_concept: C1
+    target_star: 3
+    composite_range: [13, 19]
+    source: {source_id: 개념원리-CM2-RF-유리-예제-02, tier: star_3, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 유리식 항등식 · 부분분수 분해 · 계수 비교, insight_type: 절차형, depth: 1}
+    structure: {constraint_count: 1, unknowns_count: 2, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      부분분수 분해 (x, x+1, x+3 분모) 항등식 계수 결정.
+      1/{x(x+1)(x+3)} = a/x + b/(x+1) + c/(x+3) 꼴 상수 결정.
+    answer: "a=1/3, b=-1/2, c=1/6"
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 2, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 부분분수 분해, layout_hint: dmex+problem+approach+solution}
+
+  - slot_id: E2
+    slot_type: 대표예제
+    parent_concept: C1
+    target_star: 4
+    composite_range: [20, 26]
+    source: {source_id: 개념원리-CM2-RF-유리-예제-04, tier: star_3, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 부분분수 텔레스코핑 · 유한 합, insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 1, unknowns_count: 0, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      1/(1·3) + 1/(3·5) + 1/(5·7) + ... + 1/{(2n-1)(2n+1)} 형태 유한 합 값.
+    answer: "n/(2n+1) 꼴"
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 3, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 텔레스코핑}
+
+  - slot_id: E3
+    slot_type: 대표예제
+    parent_concept: C2
+    target_star: 3
+    composite_range: [13, 19]
+    source: {source_id: 개념원리-CM2-RF-유리함수-예제-08, tier: star_3, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 일반형→표준형 변형 · 평행이동 벡터·k 결정, insight_type: 절차형, depth: 1}
+    structure: {constraint_count: 1, unknowns_count: 3, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      y=(-x+5)/(x-2)의 그래프는 y=a/x 그래프를 x축 방향 b, y축 방향 c만큼
+      평행이동한 것일 때 상수 a, b, c의 값.
+    answer: "a=3, b=2, c=-1"   # (-x+5)/(x-2) = 3/(x-2) - 1 · 개념원리 예제-08 원문
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 5, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 표준형 변형}
+
+  - slot_id: E4
+    slot_type: 대표예제
+    parent_concept: C2
+    target_star: 4
+    composite_range: [20, 26]
+    source: {source_id: 개념원리-CM2-RF-유리함수-예제-09, tier: star_4, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 정의역 제한 유리함수 · 표준형+경계값 조사 → 치역, insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 1, unknowns_count: 0, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      y=(-2x+4)/(x-1)의 정의역이 {x | -1≤x<1 또는 1<x≤2}일 때 치역.
+    answer: "{y | y≤-3 또는 y≥0}"   # 개념원리 예제-09 원문
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 6, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 표준형·경계값}
+
+  - slot_id: E5
+    slot_type: 대표예제
+    parent_concept: C3
+    target_star: 4
+    composite_range: [20, 26]
+    source: {source_id: 개념원리-CM2-RF-유리함수-예제-10, tier: star_4, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 대칭 중심 = 점근선 교점 · 기울기 ±1 두 대칭축, insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 2, unknowns_count: 2, subquestion_count: 2, figure_needed: false}
+    problem_summary: |
+      (1) y=(ax-2)/(x+1)의 그래프가 점 (b, 5)에 대하여 대칭일 때 a, b.
+      (2) y=(2x+1)/(x-1)의 그래프가 두 직선 y=x+a, y=-x+b에 대하여 대칭일 때 a, b.
+    answer: "(1) a=5, b=-1  (2) a=1, b=3"   # 개념원리 예제-10 원문
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 8, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 대칭 중심·대칭축}
+
+  - slot_id: E6
+    slot_type: 대표예제
+    parent_concept: C3
+    target_star: 4
+    composite_range: [20, 26]
+    source: {source_id: 개념원리-CM2-RF-유리함수-예제-14, tier: star_4, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 유리함수 역함수 · 역함수가 자기 자신과 같을 조건 (f=f⁻¹ ⇔ a+d=0 형태), insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 1, unknowns_count: 1, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      f(x)=(ax+3)/(x-1)에 대하여 f=f⁻¹가 성립할 때 상수 a의 값.
+    answer: "a=1"   # (ax+3)/(x-1) f=f⁻¹ 조건 · 개념원리 예제-14 원문
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 9, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: f=f⁻¹ 조건}
+
+# ══════════════════════════════════════════════════════════════
+# §3. 확인 슬롯 (12개 · 대표예제 페이지 하단 · 발문만 · star 3·4)
+# ══════════════════════════════════════════════════════════════
+check_slots:
+  # 페이지 2 (E1 뒤 · 유리식 사칙연산·항등식)
+  - slot_id: CHK1
+    slot_type: 확인
+    parent_representative: E1
+    target_star: 3
+    source: {source_id: 개념원리-CM2-RF-유리-유제-592, tier: star_3, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      유리식 사칙연산 기본 계산.
+      (2x-3)/(x²-x-2) - (x-4)/(x²-4x+3) 계산.
+    answer: "간단화된 유리식"   # 개념원리 유제-592 원문
+    page_placement: {page_num: 2, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK2
+    slot_type: 확인
+    parent_representative: E1
+    target_star: 3
+    source: {source_id: 개념원리-CM2-RF-유리-유제-594, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      유리식 항등식 (분모 인수분해된 세 유리식으로 부분분수 분해)에서
+      계수 a, b, c 결정.
+    answer: "a+b+c 형태"   # 개념원리 유제-594 원문
+    page_placement: {page_num: 2, layout: dmchecktitle+dmcheck}
+
+  # 페이지 3 (E2 뒤 · 텔레스코핑·번분수)
+  - slot_id: CHK3
+    slot_type: 확인
+    parent_representative: E2
+    target_star: 3
+    source: {source_id: 개념원리-CM2-RF-유리-유제-597, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      부분분수 확장 · 텔레스코핑 유한 합 (분모가 곱꼴 n개 항).
+    answer: "간단한 분수"   # 개념원리 유제-597 원문
+    page_placement: {page_num: 3, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK4
+    slot_type: 확인
+    parent_representative: E2
+    target_star: 4
+    source: {source_id: RPM-CM2-RF-유리-#0958, tier: star_3, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      부분분수 망원 (텔레스코핑) · 초·말 항만 남기고 소거.
+    answer: "간단화 값"   # RPM 유형 04 대표
+    page_placement: {page_num: 3, layout: dmchecktitle+dmcheck}
+
+  # 페이지 5 (E3 뒤 · 유리함수 표준형·평행이동)
+  - slot_id: CHK5
+    slot_type: 확인
+    parent_representative: E3
+    target_star: 3
+    source: {source_id: 개념원리-CM2-RF-유리함수-유제-611, tier: star_3, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      유리함수 표준형 변형 후 정의역·치역·점근선 3제.
+      (2) y=(-2x+1)/(x+3)의 정의역·치역·점근선.
+    answer: "정의역 x≠-3, 치역 y≠-2, 점근선 x=-3·y=-2"   # 개념원리 유제-611 (2) 원문
+    page_placement: {page_num: 5, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK6
+    slot_type: 확인
+    parent_representative: E3
+    target_star: 4
+    source: {source_id: 개념원리-CM2-RF-유리함수-유제-612, tier: star_3, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      y=-3/x를 x축 3, y축 -2 평행이동한 그래프의 식이 y=(ax+b)/(x-c)일 때 abc.
+    answer: "abc=-18"   # a=-2, b=3, c=3 · 개념원리 유제-612 원문
+    page_placement: {page_num: 5, layout: dmchecktitle+dmcheck}
+
+  # 페이지 6 (E4 뒤 · 폐구간 최대·최소·역추적)
+  - slot_id: CHK7
+    slot_type: 확인
+    parent_representative: E4
+    target_star: 4
+    source: {source_id: 개념원리-CM2-RF-유리함수-유제-616, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      0≤x≤2에서 y=(2x-3)/(x+1)의 최댓값·최솟값.
+    answer: "최댓값 1/3, 최솟값 -3"   # 개념원리 유제-616 원문
+    page_placement: {page_num: 6, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK8
+    slot_type: 확인
+    parent_representative: E4
+    target_star: 4
+    source: {source_id: 개념원리-CM2-RF-유리함수-유제-617, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      0≤x≤a에서 y=(3x+k)/(x+2)의 최댓값 5·최솟값 4일 때 (a>0, k>6) a+k.
+    answer: "a+k=12"   # a=2, k=10 · 개념원리 유제-617 원문
+    page_placement: {page_num: 6, layout: dmchecktitle+dmcheck}
+
+  # 페이지 8 (E5 뒤 · 대칭·그래프에서 식 결정)
+  - slot_id: CHK9
+    slot_type: 확인
+    parent_representative: E5
+    target_star: 3
+    source: {source_id: 개념원리-CM2-RF-유리함수-유제-618, tier: star_3, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      y=(5x+6)/(2x+3)의 그래프가 점 (a, b)에 대하여 대칭일 때 a+b.
+    answer: "a+b=1"   # 대칭 중심 (-3/2, 5/2) · 개념원리 유제-618 원문
+    page_placement: {page_num: 8, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK10
+    slot_type: 확인
+    parent_representative: E5
+    target_star: 4
+    source: {source_id: 개념원리-CM2-RF-유리함수-유제-620, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      y=(bx+3)/(x+a)의 그래프가 두 직선 y=x+6, y=-x-2에 대하여 대칭일 때 ab.
+    answer: "ab=8"   # 대칭 중심 (-4, 2) · 개념원리 유제-620 원문
+    page_placement: {page_num: 8, layout: dmchecktitle+dmcheck}
+
+  # 페이지 9 (E6 뒤 · 역함수·합성)
+  - slot_id: CHK11
+    slot_type: 확인
+    parent_representative: E6
+    target_star: 3
+    source: {source_id: 개념원리-CM2-RF-유리함수-유제-628, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      유리함수 역함수 매칭 · 계수 비교 (일반형 (ax+b)/(cx+d) 형태).
+    answer: "매개변수 값 조합"   # 개념원리 유제-628 원문
+    page_placement: {page_num: 9, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK12
+    slot_type: 확인
+    parent_representative: E6
+    target_star: 4
+    source: {source_id: 개념원리-CM2-RF-유리함수-유제-626, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      유리함수의 반복 합성으로 주기 발견 후 fⁿ(x₀) 값 계산 (주기 3).
+    answer: "주기 3 · fⁿ 값"   # 개념원리 유제-626 원문
+    page_placement: {page_num: 9, layout: dmchecktitle+dmcheck}
+
+# ══════════════════════════════════════════════════════════════
+# §4. Level 1 슬롯 (12개 · ★ 3·4 · 기초·응용 · 발문만 · 답지 별도)
+# ══════════════════════════════════════════════════════════════
+level1_slots:
+  # 유리식 (4문 · 표준형·항등식·번분수·값 계산)
+  - {slot_id: L1-1, target_star: 3, source: {source_id: 개념원리-CM2-RF-유리-유제-591, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 유리식 약분·인수분해, insight_type: 절차형, depth: 1}, problem_summary: "유리식 약분 (분자·분모 인수분해 후 공통 인수 소거)", answer: "기약형"}
+  - {slot_id: L1-2, target_star: 3, source: {source_id: 개념원리-CM2-RF-유리-유제-593, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 유리식 사칙연산 복합, insight_type: 절차형, depth: 1}, problem_summary: "유리식 사칙연산 복합 (덧셈·뺄셈·곱셈 결합)", answer: "간단한 유리식"}
+  - {slot_id: L1-3, target_star: 3, source: {source_id: 개념원리-CM2-RF-유리-유제-599, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 번분수 계산 · A/B ÷ C/D = AD/BC, insight_type: 절차형, depth: 1}, problem_summary: "번분수 종합 계산 (분자·분모에 유리식 포함)", answer: "간단한 유리식"}
+  - {slot_id: L1-4, target_star: 4, source: {source_id: 개념원리-CM2-RF-유리-유제-601, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 조건식 유리식 값 · 대칭식 활용, insight_type: 조건통합형, depth: 2}, problem_summary: "조건 xyz=1 · x+y+z=k 등에서 유리식 값 계산", answer: "조건식 대입 값"}
+  # 유리함수 그래프·평행이동·점근선 (4문)
+  - {slot_id: L1-5, target_star: 3, source: {source_id: 개념원리-CM2-RF-유리함수-유제-610, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 일반형 → 표준형 변형, insight_type: 절차형, depth: 1}, problem_summary: "일반형 y=(bx+c)/(x+a) 표준형 y=k/(x-p)+q 꼴로 변형", answer: "k, p, q 값 조합"}
+  - {slot_id: L1-6, target_star: 3, source: {source_id: 개념원리-CM2-RF-유리함수-유제-613, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 표준형 k값 동일 = 평행이동 겹침, insight_type: 조건통합형, depth: 2}, problem_summary: "보기에서 평행이동에 의해 y=2/x 그래프와 겹치는 유리함수를 모두 고르기", answer: "ㄱ, ㄷ (또는 유사)"}
+  - {slot_id: L1-7, target_star: 3, source: {source_id: 개념원리-CM2-RF-유리함수-유제-621, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 점근선·지나는 점으로 표준형 결정, insight_type: 절차형, depth: 2}, problem_summary: "y=k/(x+a)+b 그래프가 점근선 x=3, y=2 · 점 (2,0)을 지날 때 a+b+k", answer: "a+b+k=1"}
+  - {slot_id: L1-8, target_star: 4, source: {source_id: 개념원리-CM2-RF-유리함수-유제-615, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 표준형 · 경계값 역계산 (치역→정의역), insight_type: 조건통합형, depth: 2}, problem_summary: "y=(2x+3)/(x+2)의 치역이 {y | y≤3/2 또는 y≥3}일 때 정의역", answer: "{x | -3≤x<-2 또는 -2<x≤0}"}
+  # 대칭·역함수·최대최소 (4문)
+  - {slot_id: L1-9, target_star: 3, source: {source_id: 개념원리-CM2-RF-유리함수-유제-619, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 대칭축 직선이 대칭 중심 지남, insight_type: 조건통합형, depth: 2}, problem_summary: "y=(3x+4)/(x+2)의 그래프가 직선 y=-x+k에 대해 대칭일 때 k", answer: "k=1"}
+  - {slot_id: L1-10, target_star: 4, source: {source_id: 개념원리-CM2-RF-유리함수-유제-629, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 역함수 = 자기 자신 특수 케이스, insight_type: 조건통합형, depth: 2}, problem_summary: "유리함수 y=(ax+b)/(cx+d)가 y=f⁻¹(x)와 같을 조건 · 상수 결정", answer: "f=f⁻¹ 계수 조건 값"}
+  - {slot_id: L1-11, target_star: 3, source: {source_id: 개념원리-CM2-RF-유리함수-유제-624, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 유리함수 · 직선 접함 (한 점 만남 · 이차 판별식 0), insight_type: 조건통합형, depth: 2}, problem_summary: "유리함수와 직선이 한 점에서 만날 때 (접할 때) 상수 결정", answer: "접선 조건 값"}
+  - {slot_id: L1-12, target_star: 4, source: {source_id: 고쟁이-CM2-CH08-STEP1-#623, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 폐구간 최대·최소 → 정의역 결정, insight_type: 조건통합형, depth: 2}, problem_summary: "정의역 제한 유리함수의 최대·최소 · 표준형 · 단조성 활용", answer: "a=0 (케이스 (ii) 전제 모순 배제)"}
+
+# ══════════════════════════════════════════════════════════════
+# §5. Level 2 슬롯 (12개 · ★ 4·5 · 실전적 심화 · 발문만)
+# ══════════════════════════════════════════════════════════════
+level2_slots:
+  # star 4 (5문)
+  - {slot_id: L2-1, target_star: 4, source: {source_id: 개념원리-CM2-RF-유리함수-연습-631, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 두 유리함수 점근선 일치 · 계수 비교, insight_type: 조건통합형, depth: 2}, problem_summary: "두 유리함수 y=(ax+3)/(2x+1), y=(x-2)/(3x+b)의 그래프의 점근선이 일치할 때 ab", answer: "ab=1"}
+  - {slot_id: L2-2, target_star: 4, source: {source_id: 개념원리-CM2-RF-유리함수-연습-632, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 폐구간 최대·최소 조건 · k+8 부호 판단, insight_type: 조건통합형, depth: 2}, problem_summary: "-1≤x≤1에서 y=(k-4x)/(x+2)의 최댓값이 1, 최솟값이 m일 때 k+m (k>-8)", answer: "k+m=-16/3"}
+  - {slot_id: L2-3, target_star: 4, source: {source_id: 개념원리-CM2-RF-유리함수-연습-633, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 유리함수 그래프 다층 성질 · 검증 5축, insight_type: 조건통합형, depth: 2}, problem_summary: "y=(x+1)/(2x-4)에 관한 설명 (점근선·대칭·평행이동·사분면) 중 옳지 않은 것", answer: "ㄹ (제 1, 2, 3 사분면 지남)"}
+  - {slot_id: L2-4, target_star: 4, source: {source_id: 개념원리-CM2-RF-유리함수-연습-634, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 함숫값 반복 · 주기 발견, insight_type: 조건통합형, depth: 2}, problem_summary: "f(x)=(3x-3)/(x-3)에 대하여 f^{2024}(6)의 값", answer: "f^{2024}(6)=6"}
+  - {slot_id: L2-5, target_star: 4, source: {source_id: 개념원리-CM2-RF-유리함수-연습-636, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: y=x 대칭 = 서로 역함수 · 계수 비교, insight_type: 조건통합형, depth: 2}, problem_summary: "두 함수 y=(ax-3)/(2x+b), y=-(2x+3)/(2x+5)의 그래프가 직선 y=x에 대해 대칭일 때 b-a", answer: "b-a=7"}
+  # star 5 (7문)
+  - {slot_id: L2-6, target_star: 5, source: {source_id: 개념원리-CM2-RF-유리함수-연습-637, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 유리함수 x·y절편 + 점근선 교점 세 점 공선 조건, insight_type: 통찰형, depth: 3}, problem_summary: "곡선 y=k/(x-2)+1 (k<0)이 x축·y축과 만나는 점 A, B와 두 점근선 교점 C가 한 직선 위에 있을 때 k", answer: "k=-2"}
+  - {slot_id: L2-7, target_star: 5, source: {source_id: 개념원리-CM2-RF-유리함수-연습-638, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 두 유리함수 점근선으로 둘러싸인 직사각형 넓이 · 절댓값 케이스 분기, insight_type: 통찰형, depth: 3}, problem_summary: "두 유리함수 y=(2x-3)/(x-a), y=(-ax+2)/(x-2)의 점근선으로 둘러싸인 부분의 넓이가 3일 때 모든 양수 a 값의 곱", answer: "곱 = √7"}
+  - {slot_id: L2-8, target_star: 5, source: {source_id: 개념원리-CM2-RF-유리함수-연습-640, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 유리함수 · 직선 교점 없음 · 판별식 D<0 + k=0 경계, insight_type: 조건통합형, depth: 3}, problem_summary: "두 집합 A={(x,y)|y=(2x-4)/(x-1)}, B={(x,y)|y=kx+1}에 대하여 A∩B=∅일 때 실수 k의 값의 범위", answer: "5-2√6 < k < 5+2√6"}
+  - {slot_id: L2-9, target_star: 5, source: {source_id: 개념원리-CM2-RF-유리함수-연습-641, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 역함수 표준형 · 평행이동 매칭, insight_type: 조건통합형, depth: 3}, problem_summary: "f(x)=(4x+1)/(x-1)의 역함수 g(x)를 x축 m, y축 n 평행이동하면 y=f(x)와 겹칠 때 n-m", answer: "n-m=6"}
+  - {slot_id: L2-10, target_star: 5, source: {source_id: 개념원리-CM2-RF-유리함수-연습-642, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 반비례 곡선 파라미터 a 도입 · 넓이 계산에서 a 소거, insight_type: 통찰형, depth: 3}, problem_summary: "y=1/x (x>0) 위 점 A에서 x·y축에 평행한 직선을 그어 y=k/x (k>1) 그래프와 만나는 두 점을 B, C라 할 때 삼각형 ABC의 넓이가 50일 때 k", answer: "k=11"}
+  - {slot_id: L2-11, target_star: 5, source: {source_id: 개념원리-CM2-RF-유리함수-연습-645, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 두 직선 (y=ax, y=bx)가 곡선을 상하로 감쌈 · 경계값 극한, insight_type: 통찰형, depth: 3}, problem_summary: "1≤x≤3인 모든 x에 대하여 ax≤2x/(x+1)≤bx가 항상 성립할 때 b-a의 최솟값", answer: "b-a 최솟값 = 1/2"}
+  - {slot_id: L2-12, target_star: 5, source: {source_id: 고쟁이-CM2-CH08-STEP2-#654, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 유리함수 두 점근선 교점 대칭 활용 · 여러 조건 결합, insight_type: 통찰형, depth: 3}, problem_summary: "유리함수의 두 점근선 교점을 중심으로 한 대칭성을 활용한 심화 문제 (원본 STEP2-#654 참조)", answer: "심화 조건 값"}
+
+# ══════════════════════════════════════════════════════════════
+# §6. Level 3 슬롯 (3문 · ★ 5 심화 · 통찰 정점 · 세션 55 3문/페이지 통합)
+# ══════════════════════════════════════════════════════════════
+level3_slots:
+  - slot_id: L3-1
+    slot_type: Level3
+    target_star: 5
+    composite_range: [27, 32]
+    source: {source_id: 자체출제-RF01-L3-1, tier: star_5, variation_type: reconstructed, base_reference: "개념원리 CM2-RF-유리함수 예제-11 계열 (점근선 수선 직사각형)"}
+    variation_status: reconstructed_by_scope
+    mechanism: {primary: 유리함수 두 점근선에 내린 수선의 발이 이루는 직사각형 넓이 · 곱꼴 좌표 파라미터에서 |xy|=|k| 상수, insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 1, unknowns_count: 2, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      유리함수 y=4/x+2의 그래프 위 점 P(a, b) (a>0)에서 두 점근선에 내린 수선의 발을
+      각각 H_1, H_2라 할 때, 직사각형 PH_1CH_2의 넓이. (C는 두 점근선의 교점)
+    answer: "4"   # 점근선 x=0, y=2. H_1=(0, b), H_2=(a, 2), C=(0, 2). PH_1=a, PH_2=b-2=4/a. 넓이 = a·(4/a) = 4. (상수 · a와 무관)
+    signature: {defBox: false, primary_axis: 점근선 수선·좌표 파라미터·|xy|=|k| 상수}
+    peak_qualification: {C_rf01_pure_scope: true, C_rf_asymptote_perpendicular: true, C_rf_parameter_reduction: true}
+
+  - slot_id: L3-2
+    slot_type: Level3
+    target_star: 5
+    source: {source_id: 자체출제-RF01-L3-2, tier: star_5, variation_type: reconstructed, base_reference: "개념원리 CM2-RF-유리함수 연습-644 계열 (수선 합 조건)"}
+    variation_status: reconstructed_by_scope
+    mechanism: {primary: 유리함수 그래프 위 점 · 두 점근선 수선의 합 조건 → 이차방정식 판별식 · x좌표 유일 결정, insight_type: 조건통합형, depth: 3}
+    structure: {constraint_count: 1, unknowns_count: 1, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      f(x)=(2x-3)/(x-2) (x>2)의 그래프 위 점 P에서 두 점근선에 내린 수선의 발을
+      각각 A, B라 하자. PA + PB = 2일 때 점 P의 x좌표를 모두 구하시오.
+    answer: "x = 3 · 유일해"   # PA=|1/(x-2)|, PB=|x-2|. x>2에서 1/(x-2)+(x-2)=2. t=x-2>0, t+1/t=2 → t²-2t+1=0 → t=1 → x=3.
+    peak_qualification: {C_rf01_pure_scope: true, C_asymptote_distance_composite: true, C_quadratic_uniqueness: true}
+
+  - slot_id: L3-3
+    slot_type: Level3
+    target_star: 5
+    source: {source_id: 개념원리-CM2-RF-유리함수-연습-646, tier: star_5, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    mechanism: {primary: 절댓값 유리함수 접함 조건 (|f|=2 오직 한 근 ⇔ 점근선 y=b) + 역함수 관계식 (f⁻¹(a)=b ⇔ f(b)=a) 다층 조건 통합, insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 2, unknowns_count: 2, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      f(x)=a/x+b (a≠0)가 다음 두 조건을 만족한다.
+      (가) 곡선 y=|f(x)|가 직선 y=2와 오직 한 점에서 만난다.
+      (나) f⁻¹(2)=f(2)-1.
+      이때 f(8)의 값.
+    answer: "f(8) = -1/2"   # b=-2, a=12 · 개념원리 연습-646 원문
+    peak_qualification: {C_rf01_pure_scope: true, C_absolute_value_asymptote_tangent: true, C_inverse_function_composite: true, C_multi_condition_integration: true}
+
+# ══════════════════════════════════════════════════════════════
+# §7. 실전유형 슬롯 (3문 · ★ 5 premium · 학평 기출 · verbatim_kichul)
+#     R-1: 전국연합-2024-3월-고2-17번 (반비례 그래프 두 점·기울기·평행사변형 넓이 · 원문 그림 없음 유력)
+#     R-2: 전국연합-2016-3월-고2-18번 (y=k/x + 직선 삼각형 넓이 · "그림과 같이" 원문 그림 있음)
+#     R-3: 전국연합-2023-11월-고1-16번 (유리함수 축교점·점근선 교점 사각형 넓이 · 원문 그림 있음 유력)
+# ══════════════════════════════════════════════════════════════
+real_slots:
+  - slot_id: R-1
+    slot_type: 실전
+    target_star: 5
+    target_star_premium: true
+    source: {source_id: 전국연합-2024-3월-고2-17번, tier: star_5, variation_type: verbatim_kichul}
+    verbatim_kichul: true
+    mechanism: {primary: 반비례곡선 y=k/x 위 두 점 P, Q 기울기 조건 → k=a(a+2) 유도 · 원점대칭 두 점 R, S 사각형 넓이 조건, insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 2, unknowns_count: 2, subquestion_count: 0, figure_needed: false}   # Phase 2 PDF 재확인: 조건 (가)·(나)만 텍스트 · 원문 그림 없음 유력
+    problem_summary: |
+      두 양수 a, k에 대하여 곡선 y=k/x 위의 두 점 P(a, f(a)), Q(a+2, f(a+2))가
+      다음 조건을 만족시킬 때 k의 값. (단, f(x)=k/x)
+      (가) 직선 PQ의 기울기는 -1이다.
+      (나) 두 점 P, Q를 원점에 대하여 대칭이동한 점을 각각 R, S라 할 때
+           사각형 PQRS의 넓이는 8√5이다.
+    answer: "k=4"   # k=a(a+2), a=√5-1, k=(√5-1)(√5+1)=4 · 학평 2024.3 고2 17번 원문
+    peak_qualification: {C_rf01_pure_scope: true, C_hyperbola_two_points: true, C_slope_condition_derivation: true, C_symmetric_area_condition: true}
+
+  - slot_id: R-2
+    slot_type: 실전
+    target_star: 5
+    target_star_premium: true
+    source: {source_id: 전국연합-2016-3월-고2-18번, tier: star_5, variation_type: verbatim_kichul}
+    verbatim_kichul: true
+    mechanism: {primary: y=k/x와 직선 y=-x+6의 y=x 대칭성 활용 · 삼각형 OPQ 넓이를 OAB에서 두 대칭 삼각형 뺀 값으로 · k 유일해, insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 2, unknowns_count: 1, subquestion_count: 0, figure_needed: true}   # 원문 "그림과 같이" 명시 · 좌표평면 위 y=k/x 곡선·직선·O·P·Q 도해 원문 제공
+    problem_summary: |
+      그림과 같이 유리함수 y=k/x (k>0)의 그래프가 직선 y=-x+6과 두 점 P, Q에서 만난다.
+      삼각형 OPQ의 넓이가 14일 때 상수 k의 값. (단, O는 원점)
+    answer: "k=32/9"   # △OAB=18, △OAP+△OBQ=4, △OAP=2, b=2/3, a=16/3, k=ab=32/9 · 학평 2016.3 고2 18번 원문 · 그림 있음
+    peak_qualification: {C_rf01_pure_scope: true, C_hyperbola_line_intersection: true, C_symmetry_area_reduction: true, C_visualization_complex: true}
+
+  - slot_id: R-3
+    slot_type: 실전
+    target_star: 5
+    target_star_premium: true
+    source: {source_id: 전국연합-2023-11월-고1-16번, tier: star_5, variation_type: verbatim_kichul}
+    verbatim_kichul: true
+    mechanism: {primary: 유리함수 f(x)=4/(x-a)-4의 축교점·점근선 교점으로 사각형 OBCA 좌표 결정 · 넓이 방정식 → a 유일해, insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 1, unknowns_count: 1, subquestion_count: 0, figure_needed: true}   # 사각형 OBCA 꼭짓점 대응 도해 · 원문 그림 있음 유력 (Phase 2 PDF 재확인)
+    problem_summary: |
+      유리함수 f(x)=4/(x-a)-4 (a>1)에 대하여 좌표평면에서 함수 y=f(x)의
+      그래프가 x축, y축과 만나는 점을 각각 A, B라 하고, 함수 y=f(x)의 그래프의
+      두 점근선이 만나는 점을 C라 하자. 사각형 OBCA의 넓이가 24일 때 상수 a의 값.
+      (단, O는 원점)
+    answer: "a=5"   # A(a+1, 0), B(0, -4/a-4), C(a, -4) · 사각형 넓이 = 4a+4 = 24 · a=5 · 학평 2023.11 고1 16번 원문
+    peak_qualification: {C_rf01_pure_scope: true, C_intercepts_asymptote_intersection: true, C_quadrilateral_area_equation: true, C_visualization_complex: true}
+
+# ══════════════════════════════════════════════════════════════
+# §8. 정점 자격 (Level3 + 실전 6문 총합)
+# ══════════════════════════════════════════════════════════════
+peak_qualification_summary:
+  peak_slots: [L2-6, L2-7, L2-8, L2-9, L2-10, L2-11, L2-12, L3-1, L3-2, L3-3, R-1, R-2, R-3]
+  qualified_count: 13
+  criteria_coverage:
+    C1_asymptote_intersection_symmetry: true    # L2-6·L2-12·E5 (점근선 교점 = 대칭 중심)
+    C2_rectangle_area_asymptotes: true          # L2-7 (두 유리함수 점근선 직사각형)
+    C3_asymptote_perpendicular_composite: true  # L3-1·L3-2 (점근선 수선 곱꼴 |xy|=|k| · 수선 합 조건 판별식)
+    C4_multi_condition_integration: true        # L3-3·R-1 (다층 조건 통합)
+    C5_symmetry_area_reduction: true            # R-2 (y=x 대칭 삼각형 넓이 환원)
+    C6_intercepts_asymptote_quadrilateral: true # R-3·L2-6 (축교점·점근선 교점 사각형)
+    C7_period_iteration: true                   # L2-4 (반복 합성 주기)
+    C8_visualization_complex: true              # R-2·R-3 (좌표평면 대응 도해)
+  distribution_target: {star_3: 14, star_4: 21, star_5: 10, star_5_premium: 3}
+
+# ══════════════════════════════════════════════════════════════
+# §9. 페이지 배치 요약 (세션 55 규약 · 18~19p 목표 · 3문/페이지 통합 유연)
+# ══════════════════════════════════════════════════════════════
+page_layout:
+  # 개념+대표+확인 (p1~p9)
+  p1: {content: [C1], type: 개념}
+  p2: {content: [E1, CHK1, CHK2], type: 대표+확인}
+  p3: {content: [E2, CHK3, CHK4], type: 대표+확인}
+  p4: {content: [C2], type: 개념}
+  p5: {content: [E3, CHK5, CHK6], type: 대표+확인}
+  p6: {content: [E4, CHK7, CHK8], type: 대표+확인}
+  p7: {content: [C3], type: 개념}
+  p8: {content: [E5, CHK9, CHK10], type: 대표+확인}
+  p9: {content: [E6, CHK11, CHK12], type: 대표+확인}
+  # Level 1 · 12문 · 4문/페이지 · 3페이지 (배지 p10만)
+  p10: {content: [L1-1, L1-2, L1-3, L1-4], type: Level1, banner: true}
+  p11: {content: [L1-5, L1-6, L1-7, L1-8], type: Level1, banner: false, banner_space: true}
+  p12: {content: [L1-9, L1-10, L1-11, L1-12], type: Level1, banner: false, banner_space: true}
+  # Level 2 · 12문 · 4문/페이지 · 3페이지 (배지 p13만)
+  p13: {content: [L2-1, L2-2, L2-3, L2-4], type: Level2, banner: true}
+  p14: {content: [L2-5, L2-6, L2-7, L2-8], type: Level2, banner: false, banner_space: true}
+  p15: {content: [L2-9, L2-10, L2-11, L2-12], type: Level2, banner: false, banner_space: true}
+  # Level 3 · 3문 · 1페이지 (세션 55 3문/페이지 통합 · 그림 없음 확인)
+  p16: {content: [L3-1, L3-2, L3-3], type: Level3, banner: true}
+  # 실전 · 3문 · R-2·R-3 그림 있음 (좌표평면 대응 도해)
+  #   R-1 (그림 없음·조건 (가)(나) 텍스트) · R-2 (도해 · y=k/x + 직선 + 삼각형 OPQ) · R-3 (도해 · 사각형 OBCA)
+  #   → p17: R-1 단독 상단 + R-2 하단 (2문/페이지 · R-2 도해) · p18: R-3 단독 (1문/페이지 · 도해)
+  #   조판 시 실측 판단 · 목표 18p (그림 크기에 따라 19p 허용)
+  p17: {content: [R-1, R-2], type: 실전, banner: true, figure_reproduction: true, source_badge: true, layout_hint: 2문/페이지_R2도해}
+  p18: {content: [R-3], type: 실전, banner: false, banner_space: true, figure_reproduction: true, source_badge: true, layout_hint: 1문/페이지_도해}
+  total_pages_est: 18
+
+# ══════════════════════════════════════════════════════════════
+# §10. Gate 5.0 준비 · 검증 대기 항목
+# ══════════════════════════════════════════════════════════════
+gate5_readiness:
+  source_id_all_present: true
+  tier_all_specified: true
+  target_star_all_specified: true
+  answer_verified: false            # concept-author 조판 후 mathjs 자체 검증 의무 (Phase 2)
+  copyright_similarity_pending: true
+  mechanism_all_specified: true
+  peak_qualification_documented: true
+
+# ══════════════════════════════════════════════════════════════
+# §11. 마스터 정책 준수 확인 (세션 55 신정책 4종 포함 · CM2-RF 스코프)
+# ══════════════════════════════════════════════════════════════
+master_policy_compliance:
+  policy_no_textbook_recap: true            # 개념 슬롯은 표준 정의 (교과 회고 아님)
+  policy_slot_size_uniform: N/A             # 정리편 · 시험지 pair×2 제약 무관
+  cm1_curriculum_scope: N/A                 # CM2 단원
+  star_notation_spacing: true               # 청사진 내부 필드는 star_5 등 YAML 형식 (학생 자료 노출 없음)
+  cm2_calculus_terms_check_pending: true    # Phase 2·3 답지 작성 시 매개변수·극한·삼각함수·벡터 등 자연어화 검증
+  cm2_infinity_symbol_check_pending: true   # 점근선 서술 · 치역 서술에서 \infty 사용 시 "가까워진다"·"모든 실수 y (y≠k)" 등 자연어 대체 권장
+  no_proof_problems: true                   # 2026-07-19 마스터 지시 · 증명 문제 편입 제외 (모두 값 구하기)
+  no_arithmetic_geometric_in_rf_scope: true        # 세션 56 handoff 지시: CM2-RF-01은 유리함수 고유 도구 우선. 산술기하는 CM2-ST 정규 도구이지 CM2-RF 주 도구 아님. L3-1·L3-2 완전제곱꼴·판별식·|xy|=|k|로 재구성 완료
+  verbatim_kichul_R1R2R3: true              # 실전 3문 학평 원본 인용 · \dmkichul 배지
+  # 세션 55 신정책 4종 (feedback_figure_source_original_only, feedback_figure_point_size_rule, feedback_figure_frame_screen_fill, feedback_page_layout_flexible_rule)
+  figure_source_original_only: true         # R-2·R-3 원문 그림 있음 · R-1 원문 그림 없음 (Phase 2 PDF 재확인)
+  figure_point_size_rule_pending: true      # Phase 2 TikZ 조판 시 주요 정점 2.2pt · 파생점 2pt 표준 적용
+  figure_frame_screen_fill_pending: true    # Phase 2 R-2·R-3 조판 시 평면도형 여백 ≥20% 확인
+  page_layout_flexible_rule: true           # 실전 R-1+R-2 페어 (2문/페이지·R2도해) · R-3 단독 (1문/페이지·도해) 유연 적용
+
+# ══════════════════════════════════════════════════════════════
+# §12. 각 슬롯 figure_needed 필드 (원본 은행 problem_summary 조회 기반)
+# ══════════════════════════════════════════════════════════════
+figure_needed_summary:
+  # 개념 (자체 도식 정도만 · 필요 시 y=k/x 표준 곡선·점근선·대칭 도해 최소한)
+  # 대표·확인·L1·L2·L3: 원본 은행 대조 결과 원문 그림 없음 (텍스트 발문 완결) → 조판 금지
+  #   예외: L2-3 유제-633 그림 유무 미확인 (선택형·판정형 · Phase 2 원문 재확인)
+  # 실전:
+  R-1_figure: {status: 원문없음_유력, note: "학평 2024.3월 고2 17번 · 조건 (가)·(나) 텍스트 완결 · 원문 도해 없음 유력 · Phase 2 PDF 재확인 필수"}
+  R-2_figure: {status: 원문있음_확정, note: "학평 2016.3월 고2 18번 · '그림과 같이' 명시 · 좌표평면 위 y=k/x 곡선·직선 y=-x+6·O·P·Q 도해 원문 제공 · Phase 2 TikZ 재현 (좌표평면 대응 · 세션 55 4대 정책 준수)"}
+  R-3_figure: {status: 원문있음_유력, note: "학평 2023.11월 고1 16번 · 사각형 OBCA 꼭짓점 대응 도해 · 원문 그림 있음 유력 · Phase 2 PDF 재확인 필수 (없으면 조판 금지)"}
+  # Phase 2 (2026-07-21~) PDF 크롭 재확인 · R-1 그림 없음이면 텍스트만 조판 · R-3 그림 없으면 텍스트만 조판
+
+# ══════════════════════════════════════════════════════════════
+# §13. 다음 Phase (본편·답지 작성) 착수 준비
+# ══════════════════════════════════════════════════════════════
+next_phase:
+  phase_2_main_tex:
+    priority_check:
+      - 각 슬롯 mathjs 답 자체 검증 재실행 (특히 L2-6·L2-7·L3-2·R-1·R-2·R-3 재계산 확인)
+      - 대표예제 6문 (E1·E2·E3·E4·E5·E6) 풀이 dmapproach + dmsolution + dmanswer 조판
+      - R-1·R-2·R-3 verbatim 발문 원문 확보 (2024.3·2016.3·2023.11 학평 pdf 크롭·읽기)
+      - R-2·R-3 좌표평면 대응 도해 TikZ 조판 (bank/도해-카탈로그.md archive 검색 → 신규 · 세션 55 4대 정책 준수)
+      - R-1·R-3 원문 그림 유무 PDF 재확인
+      - 개념 C2·C3 서술에서 \infty 대신 자연어 "가까워진다" 대체 · 치역 표현 "y≠k인 모든 실수 y" 활용
+    tex_template: templates/deep-math.sty (CM2-GM-01·02·03·04 정리편 골든 계승)
+    build_directory: output/공통수학2/DeeP-Math-정리편/
+  phase_3_answer_sheet:
+    priority_check:
+      - Critical Point 서술 스타일 (feedback_critical_point_style)
+      - CM2 답지 자연어 규정 (매개변수·극한·삼각함수·벡터 우회) · 유리함수 특수 (점근선·정의역·치역 서술 자연어화)
+      - 학평 3문 답지 (R-1·R-2·R-3) 그림 재현 (R-2·R-3)·풀이 완결
+      - quickgrid 답만 표기 (feedback_answer_display_final_value_only)
+      - L3-1·L3-2 유리함수 고유 도구 서술 (점근선 수선의 발 · 곱꼴 |xy|=|k| · 완전제곱꼴 판별식) · 산술기하 회피
+  master_review_items:
+    - 개념 3분 배분 (C1 유리식·C2 유리함수·C3 대칭·역함수·최대최소) 승인 요청
+    - 실전 3문 학평 회차 선정 승인 요청 (R-1 2024.3 고2 17번·R-2 2016.3 고2 18번·R-3 2023.11 고1 16번)
+    - R-1·R-3 원문 그림 유무 · Phase 2 조판 전 PDF 확인
+    - L3-1 원본 (고쟁이 STEP2-#660) 발문 확보 상세 정독 (본 청사진은 개요만 · Phase 2 정독)
+    - L2-12 원본 (고쟁이 STEP2-#654) 발문 확보 상세 정독 (본 청사진은 개요만 · Phase 2 정독)
+    - 세션 55 3문/페이지 규약 하 실전 R-1+R-2 페어 (2문/페이지·R2도해) 승인 or R-1·R-2·R-3 각 단독 (총 19p) 선택
+    - 산술기하평균 (L3-1·L3-2) 정점 슬롯 편입 승인 · CM1 상위 침투 여부 최종 확인

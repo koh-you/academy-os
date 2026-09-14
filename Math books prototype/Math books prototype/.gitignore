@@ -1,0 +1,53 @@
+# 참고자료 (저작권 보호 - 원본 PDF는 추적하지 않음)
+참고자료/
+
+# 추출물 (참고자료 PDF 파생물 — 페이지 PNG·크롭 그림)
+data/**/추출/
+
+# 시판 교재 파생물 (저작권 — 위 참고자료/ 와 같은 취지)
+data/pdf-pages-cache/
+data/ebs-render/
+data/gojaengi-cm2-scan/
+data/rpm_*
+temp_analysis/
+
+# 🔴 최상위에 그림을 두지 않는다 (2026-08-06 세션 116)
+# 시판 교재 크롭 mid-03~06.png 넷이 여기로 새어 GitHub 까지 올라갔었다.
+# 우리 그림은 figures/ 와 output/ 안에만 산다. 최상위에 놓일 까닭이 없다.
+/*.png
+/*.jpg
+/*.jpeg
+/*.gif
+
+# 대용량 원본 (쓰는 것은 같은 폴더의 png 하나뿐이다)
+figures/commons/*.pdf
+
+# 작업 임시물
+_scratch/
+_pass1_v3.txt
+.claude/worktrees/
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Temporary
+*.tmp
+~$*
+
+# Node
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+.antigravity/
+logs/
+
+# LaTeX 빌드 임시파일
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+texput.log

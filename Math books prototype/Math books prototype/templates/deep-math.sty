@@ -1,0 +1,614 @@
+% deep-math.sty — DeeP Math 정리편 시리즈 스타일
+% v5.4 (2026-07-21 세션 58 · 디자인 에이전트 진단) : dmconcept default height 225mm → 214mm
+%   → smoke-test.pdf p.1 개념 박스 밀림 이슈 근본 수정. 신규 파일 안전망.
+%   → 본편 8권은 이미 [214mm] 명시 사용이라 영향 없음.
+% v5.3 (2026-07-21 세션 58 · 디자인 에이전트) : 후보 A 기각 롤백 · 후보 H 조건 박스만 유지
+%   후보 A (좌측 stripe + dot 정박점) : 마스터 기각 → 인프라·flag·dot 전면 제거
+%   후보 H (조건 박스 · 조건 (가)(나)(다) 및 보기 ㄱ·ㄴ·ㄷ 감싸기) : 유지
+%     - \dmoptionbox{콘텐츠} : subtle dm-accent 라벤더 배경 · 왼쪽 3pt dm-gold accent bar · rounded corners
+%     - 조건형·보기형 통합 매크로 (마스터 편의 · 자동 감지 대신 매크로 명시)
+% v5.1 (2026-07-19 세션 50 후반부) : 마스터 6건 재조정 (페이지 번호·박스 세로 bar 삭제 등)
+% v5.0 (2026-07-19 세션 50) 유지 요소: 로고 배너 옆 · 01 배지 gradient+shadow · dmpnum elastic
+%   · dmconcept 배경 dm-accent · dmex banner shadow · dmchecktitle/Level·실전 배너 gradient
+% v4.0 (2026-07-19 Phase C5) · v3.1 (2026-07-18) — 유지
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{deep-math}[2026/07/21 v5.4 DeeP Math (dmconcept default height 214mm)]
+
+\RequirePackage{kotex}
+\RequirePackage[a4paper,top=22mm,bottom=22mm,left=24mm,right=24mm,headheight=22pt,headsep=6mm,footskip=12mm]{geometry}
+\RequirePackage{xcolor}
+\RequirePackage{tikz}
+\RequirePackage[most]{tcolorbox}
+\tcbuselibrary{skins}
+\RequirePackage{fancyhdr}
+\RequirePackage{amsmath,amssymb}
+\RequirePackage{array}
+\RequirePackage{enumitem}
+\RequirePackage{setspace}
+\RequirePackage{graphicx}
+\graphicspath{{../../../logo/}{../../logo/}{./}}
+\usetikzlibrary{shapes,shapes.geometric,positioning,calc,decorations.pathmorphing,shadows.blur,fadings}
+
+% ── 색 팔레트 v5.0 (기존 유지 + 그라디언트 보조색 3종) ─────
+\definecolor{dm-primary}{HTML}{4A1A5C}    % 짙은 퍼플. 배너·강조
+\definecolor{dm-secondary}{HTML}{8E44AD}  % 중간 퍼플. 서브
+\definecolor{dm-light}{HTML}{EBDEF0}      % 옅은 퍼플. 프레임·배경
+\definecolor{dm-accent}{HTML}{F5EEF8}     % 아주 옅은. 배경
+\definecolor{dm-ink}{HTML}{1A1A2E}        % 짙은 남색-검정. 본문
+\definecolor{dm-gold}{HTML}{B7791F}       % 골드. signature
+\definecolor{dm-goldlight}{HTML}{F9E7C2}  % 옅은 골드. 배지 배경
+\definecolor{dm-goldbg}{HTML}{FDF6E3}     % 아주 옅은 골드. answer pill 배경 (v5.0 신설)
+\definecolor{dm-rule}{HTML}{D2B4DE}       % 옅은 라벤더. 프레임 선
+\definecolor{dm-gray}{HTML}{6B6B6B}       % 회색
+\definecolor{dm-graybg}{HTML}{F4F4F4}     % 회색 배경
+\definecolor{dm-shadow}{HTML}{D4C5DA}     % 음영색 (옅은 라벤더 회색)
+\definecolor{dm-primarydark}{HTML}{2E0F3A} % 짙은 퍼플 gradient bottom (v5.0 신설)
+\definecolor{dm-goldark}{HTML}{8A5A16}    % 짙은 골드 gradient bottom (v5.0 신설)
+\definecolor{dm-copper}{HTML}{B87333}     % 메탈릭 구리 (실전 배지 · 세션 54 신설)
+\definecolor{dm-copperdark}{HTML}{7C4A20} % 짙은 카퍼 gradient bottom (세션 54 신설)
+
+% ── 시리즈 메타 ────────────────────────────────────────────
+\newcommand{\dmseriesname}{Deep{:}it}
+\newcommand{\dmseriessub}{깊이와 통찰 \textperiodcentered\ 공통수학2}
+\newcommand{\dmchapnum}{}
+\newcommand{\dmchapname}{}
+
+% ── 헤더·푸터 v5.1 (페이지 번호 텍스트만 · 원 배지 삭제) ────
+% 마스터 지시 1 : 원 배지 제거 · 정보 우선 · 장식 과잉 지양
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{{\small\sffamily\bfseries\color{dm-primary}\dmchapnum\ \dmchapname}}
+\fancyhead[R]{{\small\sffamily\bfseries\color{dm-primary}\dmseriesname}}
+\fancyfoot[L]{{\footnotesize\sffamily\color{dm-gray}\dmseriessub}}
+\fancyfoot[R]{{\small\sffamily\bfseries\color{dm-primary}\thepage}}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\fancypagestyle{dmchap}{%
+  \fancyhf{}%
+  \fancyfoot[L]{{\footnotesize\sffamily\color{dm-gray}\dmseriessub}}%
+  \fancyfoot[R]{{\small\sffamily\bfseries\color{dm-primary}\thepage}}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0pt}%
+}
+
+% flushbottom · 페이지 하단 채우기 강제
+\flushbottom
+\AtBeginDocument{\color{dm-ink}}
+
+% ── \dmlogo (backward-compat) ───────────────────────────
+\newcommand{\dmlogo}{}
+
+% ── \dmbracket v3.12 : 시각 요소 제거 · 공간만 유지 ────
+\newcommand{\dmbracket}[1]{%
+  \par\vspace{-7mm}\hfill
+  \begin{tikzpicture}[baseline=0pt]
+    \node[anchor=west, xshift=1mm, inner sep=1pt] at (10mm, 0) {%
+      \phantom{\footnotesize\sffamily 정답과 풀이 #1쪽}};
+  \end{tikzpicture}%
+  \par\vspace{2mm}%
+}
+
+% ── \dmconcepthead v5.0 (double rule로 시각 강화) ───────────
+% 개념 2·3·… 페이지 상단 · 위쪽 빈 텍스트 줄 + 골드+라벤더 이중 가로선
+\newcommand{\dmconcepthead}{%
+  \par\vspace{5mm}%
+  \strut\par
+  \noindent
+  \begin{tikzpicture}
+    \draw[dm-gold, line width=1.4pt] (0,0) -- (18mm,0);
+    \draw[dm-rule, line width=0.4pt] (18mm,0) -- (\linewidth,0);
+    \draw[dm-rule!60, line width=0.3pt] (0,-0.8mm) -- (\linewidth,-0.8mm);
+  \end{tikzpicture}%
+  \par\vspace{5mm}%
+}
+
+% ── \dmchapter{01}{제목} v5.0 (v4.0 배지 + 로고 유지 · 하단 이중 rule) ─
+% v4.0 골든 유지 (지시 1·2)
+% v5.0 추가: 배너 하단 골드+라벤더 이중선으로 시각 무게 증대
+\newcommand{\dmchapter}[2]{%
+  \renewcommand{\dmchapnum}{#1}%
+  \renewcommand{\dmchapname}{#2}%
+  \thispagestyle{dmchap}%
+  \par\noindent
+  \begin{tikzpicture}[baseline=(cn.base)]
+    % 01 배지 · v4.0 골든 (14.4mm × 10.4mm · gradient + drop shadow)
+    \node[
+      rounded corners=1.5mm,
+      inner sep=0pt,
+      minimum width=14.4mm, minimum height=10.4mm,
+      top color=dm-primary, bottom color=dm-primarydark,
+      drop shadow={shadow xshift=0.6mm, shadow yshift=-0.6mm, fill=dm-shadow, opacity=0.7}
+    ] (cn) {%
+      {\sffamily\bfseries\Large\color{white}#1}};
+    % 단원명 · 배지 우측
+    \node[right=3mm of cn.east, anchor=west, inner sep=0pt] (cnm) {%
+      {\sffamily\bfseries\Huge\color{dm-primary}#2}};
+    % 로고 · 배너 오른쪽 끝 · 같은 세로
+    \node[anchor=east, inner sep=0pt] at ([xshift=\linewidth-1mm]cn.west) {%
+      \includegraphics[height=5mm]{logo}%
+    };
+  \end{tikzpicture}%
+  \par\vspace{2mm}%
+  % v5.0 : 이중 rule (골드 굵은선 + 라벤더 얇은선 이중)
+  \noindent\begin{tikzpicture}
+    \draw[dm-gold, line width=1.4pt] (0,0) -- (14.4mm,0);
+    \draw[dm-rule, line width=0.4pt] (14.4mm,0) -- (\linewidth,0);
+    \draw[dm-rule!60, line width=0.3pt] (0,-0.8mm) -- (\linewidth,-0.8mm);
+  \end{tikzpicture}%
+  \par\vspace{2mm}%
+}
+
+% ── dmconcept 환경 v5.5 (상하 여백 균형 · 세션 65) ────────
+% 마스터 지시 (v5.2) : 박스가 둥근 형태(arc=1mm)인데 좌측 세로 bar는 직선 → 시각 불일치. 삭제
+% 유지: 배경 dm-accent · 프레임 라벤더 · drop fuzzy shadow · 배지 shadow
+% v5.4 (세션 58): default height 225mm → 214mm (dmchapter 병존 A4 정합)
+% v5.5 → v5.6 (세션 65 후반 · valign=center 부작용 정정):
+%   v5.5 valign=center: 배지 overlay와 콘텐츠 상단이 세로 겹침 (콘텐츠가 중앙으로 밀려 배지 y-line 침범)
+%   v5.6 valign=top 복원: 배지 아래에서 콘텐츠 자연 시작 · top=7mm 유지 (마스터 지적 상단 축소)
+%         bottom=9mm (하단 확장으로 콘텐츠 꽉 찬 개념의 붙음 완화)
+%         콘텐츠 짧은 개념은 텍스트 (dmnote·dmexplain·dmexample) 보강으로 하단 여백 균형
+\newenvironment{dmconcept}[3][214mm]{%
+  \par\vspace{2mm}%
+  \begin{tcolorbox}[
+    enhanced,
+    height=#1, valign=top,
+    colback=dm-accent, colframe=dm-rule,
+    boxrule=0.7pt, arc=1mm,
+    left=7mm, right=7mm, top=7mm, bottom=9mm,
+    drop fuzzy shadow=dm-shadow,
+    overlay={%
+      % 소단원 배지 · 골드 사각 (v4.0 유지)
+      \node[fill=dm-gold, inner sep=0pt,
+            minimum width=8mm, minimum height=8mm,
+            anchor=center,
+            drop shadow={shadow xshift=0.4mm, shadow yshift=-0.4mm, fill=dm-shadow, opacity=0.6}
+            ] (badge) at ([xshift=8mm]frame.north west) {%
+        {\sffamily\bfseries\normalsize\color{white}#2}};
+      \node[fill=dm-primary, inner sep=0pt,
+            minimum height=8mm,
+            anchor=west,
+            text width=\dimexpr\linewidth-25mm\relax, align=left,
+            drop shadow={shadow xshift=0.4mm, shadow yshift=-0.4mm, fill=dm-shadow, opacity=0.6}
+            ] at (badge.east) {%
+        \hspace{4mm}{\sffamily\bfseries\normalsize\color{white}#3}};
+      % (v5.1) 우상단 브랜드 삼각 mark 삭제
+    }
+  ]
+  \ignorespaces
+}{%
+  \end{tcolorbox}\par\vspace{2mm}%
+}
+
+% ── 부속 라벨 3종 v5.1 (pill 라벨 유지 + 라벨 아래 subtle 짧은 실선) ────
+% ── 부속 라벨 3종 v5.3 (골드 pill · 실선 테두리 추가) ─────
+% v5.0 pill (goldlight bg + goldark text · 테두리 없음)
+% v5.1 오해석 폐기 (라벨 아래 밑줄)
+% v5.2 오해석 폐기 (콘텐츠 전체 tcolorbox)
+% v5.3 (마스터 정확 지시): pill 자체 테두리를 실선으로 (draw=dm-goldark · 0.4pt)
+%   → 예·참고 pill이 실선 테두리를 가진 골드 박스 (배경+텍스트+테두리 실선)
+%   콘텐츠는 라벨 뒤 hangindent 방식 (v5.0 이전 유지)
+\newcommand{\dmexlabel}{%
+  \tikz[baseline=(exl.base)]\node[
+    fill=dm-goldlight, draw=dm-goldark, line width=0.4pt,
+    rounded corners=1mm,
+    inner xsep=1.6mm, inner ysep=0.4mm, outer sep=0pt] (exl) {%
+    {\sffamily\bfseries\footnotesize\color{dm-goldark}예}};%
+}
+\newenvironment{dmexample}{%
+  \par\vspace{3mm}\noindent
+  \hangindent=8mm\hangafter=1
+  \makebox[7mm][l]{\dmexlabel}\ignorespaces
+}{%
+  \par\vspace{2mm}
+}
+
+\newcommand{\dmnotelabel}{%
+  \tikz[baseline=(ntl.base)]\node[
+    fill=dm-goldlight, draw=dm-goldark, line width=0.4pt,
+    rounded corners=1mm,
+    inner xsep=1.6mm, inner ysep=0.4mm, outer sep=0pt] (ntl) {%
+    {\sffamily\bfseries\footnotesize\color{dm-goldark}참고}};%
+}
+\newenvironment{dmnote}{%
+  \par\vspace{3mm}\noindent
+  \hangindent=11mm\hangafter=1
+  \makebox[10mm][l]{\dmnotelabel}\ignorespaces
+}{%
+  \par\vspace{2mm}
+}
+
+\newcommand{\dmexplainlabel}{%
+  \tikz[baseline=(epl.base)]\node[
+    fill=dm-goldlight, draw=dm-goldark, line width=0.4pt,
+    rounded corners=1mm,
+    inner xsep=1.6mm, inner ysep=0.4mm, outer sep=0pt] (epl) {%
+    {\sffamily\bfseries\footnotesize\color{dm-goldark}설명}};%
+}
+\newenvironment{dmexplain}{%
+  \par\vspace{3mm}\noindent
+  \hangindent=11mm\hangafter=1
+  \makebox[10mm][l]{\dmexplainlabel}\ignorespaces
+}{%
+  \par\vspace{2mm}
+}
+
+% ── \dmspecial 배지 : 교과과정 외 · 특강 표시 (2026-07-19 신설) ───
+% 사용: \dmspecial 을 dmsub 뒤에 붙이거나 개념 서두에 인라인 배치
+% 시각: dm-primary 배경 pill · 흰 텍스트 · rounded · subtle drop shadow
+\newcommand{\dmspecial}{%
+  \tikz[baseline=(sp.base)]\node[
+    fill=dm-primary, draw=dm-primary, line width=0.3pt,
+    rounded corners=1mm,
+    inner xsep=2mm, inner ysep=0.6mm, outer sep=0pt] (sp) {%
+    {\sffamily\bfseries\footnotesize\color{white}특강}};%
+}
+
+% ── \dmsub{N}{제목} v5.0 (그라디언트 배지 + drop shadow) ────
+% v4.0: flat gold 원 (6.5mm)
+% v5.0: top color goldlight → bottom color gold · drop shadow · 크기 유지
+\newcommand{\dmsub}[2]{%
+  \par\vspace{5mm}\noindent
+  \begin{tikzpicture}[baseline=(sb.base)]
+    \node[circle,
+          top color=dm-gold, bottom color=dm-goldark,
+          minimum size=6.5mm, inner sep=0pt,
+          drop shadow={shadow xshift=0.3mm, shadow yshift=-0.3mm, fill=dm-shadow, opacity=0.6}
+          ] (sb) {%
+      {\sffamily\bfseries\small\color{white}#1}};
+    \node[right=2mm of sb.east, anchor=west, inner sep=0pt] {%
+      {\sffamily\bfseries\normalsize\color{dm-primary}#2}};
+  \end{tikzpicture}%
+  \par\vspace{2mm}%
+}
+
+% ── \dmex{N}{제목} v5.2 (좌측 골드 accent bar 삭제 · 둥근 배너 정합) ─
+% 마스터 지시 (v5.2) : 배너가 둥근 형태(arc=2.5mm)인데 좌측 세로 bar 직선 → 시각 불일치. 삭제
+% 유지: colback dm-primary · drop fuzzy shadow (입체감)
+\newcommand{\dmex}[2]{%
+  \par\vspace{7mm}\noindent
+  \begin{tcolorbox}[
+    enhanced,
+    colback=dm-primary, colframe=dm-primary,
+    boxrule=0pt, arc=2.5mm,
+    left=6mm, right=6mm, top=2.5mm, bottom=2.5mm,
+    width=\linewidth,
+    drop fuzzy shadow=dm-shadow,
+  ]
+  {\sffamily\bfseries\large\color{white}예제\ #1\hspace{6mm}\color{dm-goldlight}\textperiodcentered\hspace{6mm}\color{white}#2}
+  \end{tcolorbox}%
+  \par\vspace{3mm}%
+}
+
+% ── dmproblem 환경 v5.1 (좌측 골드 세로 bar 삭제 · 둥근 형태 정합) ─
+% 마스터 지시 2 : 박스가 둥근 형태(arc=3mm)인데 좌측 세로 bar는 직선 → 시각 불일치
+% 유지: colback dm-accent · 라벤더 프레임 (arc=3mm) · drop fuzzy shadow
+\newenvironment{dmproblem}{%
+  \par\vspace{2mm}\noindent
+  \begin{tcolorbox}[
+    enhanced, breakable,
+    colback=dm-accent, colframe=dm-rule,
+    boxrule=0.7pt, arc=3mm,
+    left=7mm, right=6mm, top=4mm, bottom=4mm,
+    drop fuzzy shadow=dm-shadow,
+  ]
+  \ignorespaces
+}{%
+  \end{tcolorbox}\par\vspace{4mm}%
+}
+
+% ── dmapproach·dmsolution 환경 v5.0 (라벨 drop shadow 강화) ────
+% v4.0: rounded corners · flat fill
+% v5.0: drop shadow 추가 · 시각 무게 증대
+\newlength{\dmlabelw}\setlength{\dmlabelw}{11mm}
+\newlength{\dmlabelh}\setlength{\dmlabelh}{5mm}
+
+\newcommand{\dmapproachlabel}{%
+  \tikz[baseline=(al.base)]\node[
+    top color=dm-gold, bottom color=dm-goldark,
+    rounded corners=1.5mm,
+    minimum width=\dmlabelw, minimum height=\dmlabelh,
+    inner sep=0pt,
+    drop shadow={shadow xshift=0.3mm, shadow yshift=-0.3mm, fill=dm-shadow, opacity=0.6}
+    ] (al) {%
+    {\sffamily\bfseries\footnotesize\color{white}길잡이}};%
+}
+
+\newenvironment{dmapproach}{%
+  \par\vspace{3mm}\noindent
+  \hangindent=\dimexpr\dmlabelw+2mm\relax\hangafter=1
+  \makebox[\dimexpr\dmlabelw+1mm\relax][l]{\dmapproachlabel}\ignorespaces
+}{%
+  \par\vspace{2mm}
+}
+
+\newcommand{\dmsollabel}{%
+  \tikz[baseline=(sl.base)]\node[
+    top color=dm-primary, bottom color=dm-primarydark,
+    rounded corners=1.5mm,
+    minimum width=\dmlabelw, minimum height=\dmlabelh,
+    inner sep=0pt,
+    drop shadow={shadow xshift=0.3mm, shadow yshift=-0.3mm, fill=dm-shadow, opacity=0.6}
+    ] (sl) {%
+    {\sffamily\bfseries\footnotesize\color{white}풀이}};%
+}
+
+% v5.6 (세션 63) · hangindent → list 기반 재설계
+% 문제: \hangindent는 첫 문단만 유효 · \par·equation 뒤 텍스트가 좌측 여백까지 낙하
+% 해결: list 환경으로 \leftmargin이 매크로 종료까지 지속 · 다중 문단·display math 모두 정합
+\newenvironment{dmsolution}{%
+  \par\vspace{3mm}%
+  \begin{list}{}{%
+    \setlength{\leftmargin}{\dimexpr\dmlabelw+2mm\relax}%
+    \setlength{\rightmargin}{0pt}%
+    \setlength{\labelwidth}{\dmlabelw}%
+    \setlength{\labelsep}{2mm}%
+    \setlength{\itemindent}{0pt}%
+    \setlength{\listparindent}{0pt}%
+    \setlength{\topsep}{0pt}%
+    \setlength{\parsep}{4pt plus 1pt}%
+    \setlength{\itemsep}{0pt}%
+    \setlength{\partopsep}{0pt}%
+    \renewcommand{\makelabel}[1]{##1\hfil}%
+  }%
+  \item[\dmsollabel]\ignorespaces
+}{%
+  \end{list}\vspace{2mm}%
+}
+
+% ── \dmanswer{...} v5.1 (골드 pill/컬러 박스 삭제 · 텍스트만 · v3.1 유사) ─
+% 마스터 지시 3 : 정답 표기는 담백해야 · pill/컬러 박스 제거
+% 형식: 우측 정렬 · "답  xxx" · "답" 회색 · 값 dm-primary bold
+\newcommand{\dmanswer}[1]{%
+  \par\vspace{2mm}\hfill%
+  {\sffamily\small\color{dm-gray}답}\hspace{3mm}%
+  {\sffamily\color{dm-primary}\bfseries #1}%
+  \par
+}
+
+% ── \dmchecktitle v5.0 (gradient + drop shadow + accent dots) ─
+% v4.0: flat 골드 배너 (20mm × 7mm)
+% v5.0:
+%   - top color dm-gold → bottom color dm-goldark (gradient)
+%   - drop shadow
+%   - 우측 dm-primary dot 3개 accent (subtle · brand mark)
+\newcommand{\dmchecktitle}{%
+  \par\vspace{12mm}\noindent
+  \begin{tikzpicture}[baseline=(ct.base)]
+    \node[
+      top color=dm-gold, bottom color=dm-goldark,
+      inner sep=0pt,
+      minimum width=20mm, minimum height=7mm,
+      drop shadow={shadow xshift=0.4mm, shadow yshift=-0.4mm, fill=dm-shadow, opacity=0.6}
+      ] (ct) {%
+      {\sffamily\bfseries\small\color{white}확인 문제}};
+    \node[right=3mm of ct.east, anchor=west, inner sep=0pt] (ctsub) {%
+      {\sffamily\bfseries\small\color{dm-primary}스스로 풀어보기}};
+    % 우측 브랜드 accent dots 삭제 (세션 55 마스터 지시)
+  \end{tikzpicture}%
+  \par\vspace{1mm}\noindent
+  \begin{tikzpicture}
+    \draw[dm-gold, line width=0.8pt] (0,0) -- (20mm,0);
+    \draw[dm-rule, line width=0.4pt] (20mm,0) -- (\linewidth,0);
+  \end{tikzpicture}%
+  \par%
+}
+
+% ── \dmcheck{N}{문제} v5.5 (N) 형태 · dmpnum과 통일) ─
+% 2026-07-19 마스터 지시: 확인문제도 N) 형태로
+\newcommand{\dmcheck}[2]{%
+  \par\vspace{2mm}\noindent
+  \hangindent=10mm\hangafter=1
+  \makebox[9mm][l]{{\sffamily\bfseries\normalsize\color{dm-primary}#1)}}#2\par
+  \vspace*{0pt plus 1fill}%
+}
+
+% ── \dmlevel{N} v5.0 (gradient + drop shadow) ───────────────
+% v4.0: flat purple + 골드 원
+% v5.0: gradient purple + drop shadow · 골드 원도 gradient + shadow
+\newcommand{\dmlevel}[1]{%
+  \par\vspace{7mm}\noindent
+  \begin{tikzpicture}[baseline=(lvl.base)]
+    \node[
+      top color=dm-primary, bottom color=dm-primarydark,
+      inner sep=0pt,
+      minimum width=18mm, minimum height=9mm,
+      drop shadow={shadow xshift=0.4mm, shadow yshift=-0.4mm, fill=dm-shadow, opacity=0.6}
+      ] (lvl) {%
+      {\sffamily\bfseries\small\color{white}Level}};
+    \node[circle,
+          top color=dm-gold, bottom color=dm-goldark,
+          minimum size=8mm, inner sep=0pt,
+          anchor=west,
+          drop shadow={shadow xshift=0.3mm, shadow yshift=-0.3mm, fill=dm-shadow, opacity=0.6}
+          ] (lvnum) at ([xshift=-4mm]lvl.east) {%
+      {\sffamily\bfseries\normalsize\color{white}#1}};
+    \node[right=3mm of lvnum.east, anchor=west, inner sep=0pt] {%
+      {\sffamily\bfseries\normalsize\color{dm-primary}%
+        \ifcase#1\or 기초 연습\or 표준 연습\or 심화 연습\fi}};
+  \end{tikzpicture}%
+  \par\vspace{2mm}\noindent
+  \begin{tikzpicture}
+    \draw[dm-gold, line width=0.8pt] (0,0) -- (20mm,0);
+    \draw[dm-rule, line width=0.4pt] (20mm,0) -- (\linewidth,0);
+  \end{tikzpicture}%
+  \par\vspace{4mm}%
+}
+
+% ── \dmrealtype v6.0 (메탈릭 카퍼 gradient · 세션 54) ───────
+% v4.0: flat 골드 · v5.0: gradient 골드 · v6.0: 메탈릭 카퍼 (마스터 지시)
+\newcommand{\dmrealtype}{%
+  \par\vspace{7mm}\noindent
+  \begin{tikzpicture}[baseline=(rt.base)]
+    \node[
+      top color=dm-copper, bottom color=dm-copperdark,
+      inner sep=0pt,
+      minimum width=36mm, minimum height=9mm,
+      drop shadow={shadow xshift=0.4mm, shadow yshift=-0.4mm, fill=dm-shadow, opacity=0.6}
+      ] (rt) {%
+      {\sffamily\bfseries\small\color{white}실전유형 맛보기}};
+    \node[right=3mm of rt.east, anchor=west, inner sep=0pt] {%
+      {\sffamily\bfseries\normalsize\color{dm-primary}학평 기출 \textperiodcentered\ 변형}};
+  \end{tikzpicture}%
+  \par\vspace{2mm}\noindent
+  \begin{tikzpicture}
+    \draw[dm-copper, line width=0.8pt] (0,0) -- (36mm,0);
+    \draw[dm-rule, line width=0.4pt] (36mm,0) -- (\linewidth,0);
+  \end{tikzpicture}%
+  \par\vspace{4mm}%
+}
+
+% ── \dmlevelspace v5.1 (배지 텍스트 없이 이중 rule만 · 시각 일관성) ─
+% 마스터 지시 6 : Level 배너 텍스트는 없되 이중 rule은 있어야 함
+% Level 배지 (\dmlevel)는 첫 페이지에만. 2·3페이지는 이 매크로로 배지 자리 공간 유지 + 이중 rule
+% 이중 rule 스타일 : dmlevel 이후 rule과 동일 (골드 굵은선 20mm + 라벤더 얇은선) · 아래에 얇은 second rule
+% 배지 자리 9mm 공간은 vspace로 유지 (레이아웃 흔들림 방지)
+\newcommand{\dmlevelspace}{%
+  \par\vspace{7mm}%
+  \vspace{9mm}%            % 배지 자리 (18mm × 9mm 자리 · 텍스트 없음)
+  \par\vspace{2mm}\noindent
+  \begin{tikzpicture}
+    \draw[dm-gold, line width=0.8pt] (0,0) -- (20mm,0);
+    \draw[dm-rule, line width=0.4pt] (20mm,0) -- (\linewidth,0);
+    \draw[dm-rule!60, line width=0.3pt] (0,-0.8mm) -- (\linewidth,-0.8mm);
+  \end{tikzpicture}%
+  \par\vspace{4mm}%
+}
+
+% ── \dmrealtypespace v5.1 (실전유형 배지 텍스트 없이 이중 rule만) ─
+% 마스터 지시 6 동일 원칙 : dmrealtype과 시각 일관성 유지
+% 이중 rule 스타일 : dmrealtype 이후 rule과 동일 (골드 굵은선 36mm + 라벤더 얇은선)
+\newcommand{\dmrealtypespace}{%
+  \par\vspace{7mm}%
+  \vspace{9mm}%
+  \par\vspace{2mm}\noindent
+  \begin{tikzpicture}
+    \draw[dm-copper, line width=0.8pt] (0,0) -- (36mm,0);
+    \draw[dm-rule, line width=0.4pt] (36mm,0) -- (\linewidth,0);
+    \draw[dm-rule!60, line width=0.3pt] (0,-0.8mm) -- (\linewidth,-0.8mm);
+  \end{tikzpicture}%
+  \par\vspace{4mm}%
+}
+
+% ── \dmpnum{N}{문제 본문} v5.5 (N) 형태 · 세로 바 없음) ─
+% v4.0 골든 (2-arg + trailing elastic vspace) 유지 · 시그니처 무변경
+% v5.5 (2026-07-19 마스터 재지시): 세로 바 삭제 · N) 형태만 유지 (dmcheck와 통일)
+\newcommand{\dmpnum}[2]{%
+  \par\vspace{2mm}\noindent
+  \hangindent=10mm\hangafter=1
+  \makebox[9mm][l]{%
+    {\sffamily\bfseries\normalsize\color{dm-ink}#1)}%
+  }#2\par
+  \vspace*{0pt plus 1fill}%
+}
+
+% ── \dmkichul{출처} 학평·기출 출처 배지 (마더텅 스타일) ─────
+% 사용: \dmpnum{N}{\dmkichul{2022학년도 11월 고1 학평 19번} 본문...}
+% - 문항 번호 오른쪽 flushright 정렬
+% - 작은 sans-serif · dm-primary 색 · 옅은 dm-primary 테두리 rounded box
+% - dmpnum 첫 줄에 배지 후 개행 → 본문
+\newcommand{\dmkichul}[1]{%
+  \null\hfill\tikz[baseline=(x.base)]{
+    \node[draw=dm-primary!40, rounded corners=1.2pt, inner sep=2pt, inner ysep=1.2pt,
+          font=\footnotesize\sffamily, text=dm-primary!85, line width=0.4pt] (x) {#1};
+  }\par\noindent%
+}
+
+% ══════════════════════════════════════════════════════════════
+% ── v5.2 후보 H · 조건 박스 (\dmoptionbox) ─────────────────
+% ══════════════════════════════════════════════════════════════
+% 사용: \begin{dmoptionbox} ... \end{dmoptionbox}
+% 대상: 조건 목록 (가) X / (나) Y / (다) Z  또는  보기 목록 ㄱ. X · ㄴ. Y · ㄷ. Z
+% 시각 스펙:
+%   - 배경 dm-accent (기존 dmproblem·dmconcept과 톤 통일)
+%   - 왼쪽 accent bar 3pt · dm-gold (박스 좌측 굵은 세로선)
+%   - 내부 여백 : 상하 2mm · 좌우 3mm
+%   - 모서리 rounded 1pt (arc=1mm)
+%   - 프레임 없음 (colframe=dm-accent · 배경과 같은 색으로 프레임 시각 제거)
+% 매크로 사용 예:
+%   \begin{dmoptionbox}
+%   (가) $n(X) = 6$
+%
+%   (나) $A - X = B - X$
+%
+%   (다) $(X - A) \cap (X - B) \ne \varnothing$
+%   \end{dmoptionbox}
+%
+% \dmoptioninline{...} : 인라인 형태 (한 줄에 3개 나열 등 · minipage 대체)
+%   본문 안에서 자연 문단 흐름 유지하며 얇은 박스로 감싸는 경우 사용
+\newenvironment{dmoptionbox}{%
+  \par\vspace{2mm}%
+  \begin{tcolorbox}[
+    enhanced, breakable,
+    colback=dm-accent, colframe=dm-accent,
+    boxrule=0pt, arc=1mm,
+    left=6mm, right=3mm, top=2mm, bottom=2mm,
+    borderline west={3pt}{0pt}{dm-gold},
+  ]
+  \ignorespaces
+}{%
+  \end{tcolorbox}\par\vspace{2mm}%
+}
+
+% 인라인 사용 : \dmoptioninline{$\quad$ㄱ. ... \quad ㄴ. ... \quad ㄷ. ...}
+\newcommand{\dmoptioninline}[1]{%
+  \par\smallskip
+  \begin{tcolorbox}[
+    enhanced,
+    colback=dm-accent, colframe=dm-accent,
+    boxrule=0pt, arc=1mm,
+    left=6mm, right=3mm, top=1.5mm, bottom=1.5mm,
+    borderline west={3pt}{0pt}{dm-gold},
+  ]
+  #1
+  \end{tcolorbox}%
+  \par\smallskip
+}
+
+% ── 유틸 강조 ──────────────────────────────────────────────
+\newcommand{\dmstrong}[1]{{\color{dm-gold}\bfseries #1}}
+\newcommand{\dmmathstrong}[1]{{\color{dm-gold}\boldsymbol{#1}}}
+\newcommand{\dmemph}[1]{{\color{dm-primary}\bfseries #1}}
+
+% ── 문단·행간 v3.1 (여백 확대) ─────────────────────────────
+\setlength{\parskip}{6pt}
+\setlength{\parindent}{0pt}
+\linespread{1.35}
+
+% =============================================================================
+% v5.7 (세션 63 종료 후 추가) · \dmframepage — 페이지 전체 라운드 프레임
+% 배경: 세션 63 수능특강 5매크로 중 M2 만 마스터 승인 (전체 기각 후 재부활)
+% 근거: 수능특강 개념 페이지 (p.4·6·8·10 등) A2 요소 · dm-rule 라벤더 재해석
+% 사용: preamble 에 \dmframepageon (전 페이지 적용) · \dmframepageoff (해제)
+% =============================================================================
+\RequirePackage{atbegshi}
+
+\newif\ifdmframepage
+\dmframepagefalse
+\newcommand{\dmframepageon}{\dmframepagetrue}
+\newcommand{\dmframepageoff}{\dmframepagefalse}
+
+\AtBeginShipout{%
+  \ifdmframepage
+    \AtBeginShipoutUpperLeft{%
+      \begin{tikzpicture}[remember picture, overlay]
+        \begin{scope}[shift={(0,0)}]
+          % 라운드 프레임 (좌우 10mm · 상하 8mm 여백 안쪽 · 상단 hook 위해 세 부분 분할)
+          \draw[dm-rule, line width=0.4pt, rounded corners=3mm]
+            (55mm, -8mm) -- (10mm, -8mm)
+            -- (10mm, -289mm) -- (200mm, -289mm)
+            -- (200mm, -8mm) -- (75mm, -8mm);
+          % 상단 hook (U자 하향 절개 · 폭 20mm · 깊이 3mm · 55~75mm 구간)
+          \draw[dm-rule, line width=0.4pt]
+            (55mm, -8mm)
+            .. controls (57mm, -8mm) and (57mm, -11mm) .. (59mm, -11mm)
+            -- (71mm, -11mm)
+            .. controls (73mm, -11mm) and (73mm, -8mm) .. (75mm, -8mm);
+        \end{scope}
+      \end{tikzpicture}%
+    }%
+  \fi
+}
+
+\endinput

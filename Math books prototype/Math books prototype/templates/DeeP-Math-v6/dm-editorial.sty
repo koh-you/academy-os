@@ -1,0 +1,1014 @@
+% dm-editorial.sty — DeeP Math v6.4 · Editorial Premium (정리편 매크로 21종 통합)
+% ============================================================================
+% 세션 66 후속 · 마스터 재디자인 지시 (2026-07-22)
+% 시안 B 채택 · v6.3 (마스터 5개 지적 반영) · v6.4 (정리편 매크로 통합)
+% 팔레트: 딥 네이비 + 웜 오프화이트 + 뉴트럴 브론즈-토프 + 쿨 그레이 진한 rule
+% 목표: 깔끔함·차가움·정돈됨·입체감·가독성·풀이공간·고급감
+% 원칙:
+%   1. 순수 장식 요소 금지 (세션 58 계승)
+%   2. 위계·여백·진한 rule + 절제된 shadow 만으로 표현
+%   3. 영문 남용 배제 · 한글 라벨 우선 (챕터 CHAPTER 표기만 예외)
+%   4. 배지 대신 텍스트 · 문장 안 정보 통합
+% 매크로 21종:
+%   챕터/소단원: \dmchapter · \dmconcepthead · \dmbracket · \dmsub
+%   개념 블록: dmconcept · dmexample · dmnote · dmexplain · dmoptionbox · \dmformula
+%   대표예제: \dmex · dmproblem · dmapproach · dmsolution · \dmanswer
+%   확인/레벨: \dmchecktitle · \dmcheck · \dmlevel · \dmlevelspace · \dmpnum
+%   실전: \dmrealtype · \dmrealtypespace
+%   강조: \dmemph · \dmstrong
+% 빌드: xelatex smoke-test.tex (2-pass 권장)
+% ============================================================================
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{dm-editorial}[2026/07/23 v6.75 DeeP Math Editorial Premium]
+
+\RequirePackage{kotex}
+\RequirePackage{fontspec}
+% v6.10: 타이틀·헤딩 전용 폰트 · Malgun Gothic (산세리프) — 본문 세리프와 차별
+\newfontfamily\dmheadingfont[BoldFont={Malgun Gothic Bold},%
+  AutoFakeBold=2]{Malgun Gothic}
+% v6.71 세션 70 (마스터 A안 승인 · 2026-07-22): 본문 한글 폰트 · UnBatang → Noto Serif KR
+%   전 시리즈 본문·개념박스·힌트·풀이 통일 (헤딩 badges 는 Malgun 유지)
+\setmainhangulfont[BoldFont={Noto Serif KR}, BoldFeatures={Weight=Bold}]{Noto Serif KR}
+\RequirePackage[a4paper,top=22mm,bottom=22mm,left=22mm,right=22mm,%
+                headheight=14pt,headsep=8mm,footskip=14mm]{geometry}
+\RequirePackage{xcolor}
+\RequirePackage{tikz}
+\RequirePackage[most]{tcolorbox}
+\tcbuselibrary{skins}
+\RequirePackage{fancyhdr}
+\RequirePackage{amsmath,amssymb}
+\RequirePackage{array}
+\RequirePackage{enumitem}
+\RequirePackage{setspace}
+\RequirePackage{needspace}
+\RequirePackage{graphicx}
+\usetikzlibrary{shapes,shapes.geometric,positioning,calc,shadows.blur}
+
+% =============================================================================
+% [1] 팔레트 · Editorial Premium (v6.3 정착)
+% =============================================================================
+\definecolor{dm-navy}{HTML}{0A2540}
+\definecolor{dm-navydark}{HTML}{051629}
+\definecolor{dm-navylight}{HTML}{E8EEF4}
+\definecolor{dm-paper}{HTML}{FAF7F2}
+\definecolor{dm-paperdeep}{HTML}{F2ECE0}
+\definecolor{dm-gold}{HTML}{A08D6C}
+\definecolor{dm-goldlight}{HTML}{F1EEE6}
+\definecolor{dm-golddark}{HTML}{5C4E37}
+\definecolor{dm-rule}{HTML}{8798AB}
+\definecolor{dm-rulelight}{HTML}{C3CDD8}
+\definecolor{dm-ruledark}{HTML}{3A4C63}
+\definecolor{dm-ink}{HTML}{1B2838}
+\definecolor{dm-muted}{HTML}{6B7A8F}
+\definecolor{dm-shadow}{HTML}{9AA8B8}
+% v6.19: 포인트 컬러 도입 · 딥 테라코타-구리 (편집 잡지 액센트)
+% v6.31: 붉은 톤 강화 · 테라코타 → 브릭 레드 (#B85A2B → #B93A2B)
+% v6.53: 더 붉게 · 브릭 레드 → 딥 버밀리언 레드 (#B93A2B → #B7211E)
+\definecolor{dm-accent}{HTML}{B7211E}
+\definecolor{dm-accentdark}{HTML}{7A1315}
+
+\AtBeginDocument{\color{dm-ink}}
+
+% =============================================================================
+% [2] 시리즈 메타
+% =============================================================================
+% v6.20: 시리즈명 정정 · DeeP Math → Deep:it (마스터 확인 · 세션 57 계승)
+\newcommand{\dmseriesname}{Deep{:}it}
+\newcommand{\dmchapnum}{}
+\newcommand{\dmchapname}{}
+% v6.61 (세션 69): 대단원명 (마스트헤드 accent 라벨) · fallback "CHAPTER NN"
+% 사용: \renewcommand{\dmchapunit}{I. 도형의 방정식} (preamble 또는 \dmchapter 전)
+\newcommand{\dmchapunit}{}
+
+% =============================================================================
+% [3] 페이지 헤더·푸터
+% =============================================================================
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+% v6.66 (세션 73): 헤더·푸터 폰트 형식 답지 (dm-answer-classic)와 정합
+%   - fancyhead·fancyfoot 모두 \sffamily 통일 (serif UnBatang → sans-serif)
+%   - 하단 푸터 스펙 그대로 답지 계승 (\small\bfseries\color{dm-navydark})
+%   - 상단 헤더는 답지 상단과 동일 필체 (\sffamily), 콘텐츠(챕터명·Deep:it)는 유지
+\fancyhead[L]{\sffamily\small\color{dm-muted}\dmchapnum\ \ \dmchapname}
+\fancyhead[R]{\sffamily\bfseries\color{dm-navydark}\dmseriesname}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{dm-rulelight}\leaders\hrule height 0.4pt\hfill}}
+\fancyfoot[L]{\sffamily\small\bfseries\color{dm-navydark}DEPTH \& INSIGHT%
+  \hspace{2mm}\color{dm-rule}\textperiodcentered\hspace{2mm}%
+  \color{dm-navydark}공통수학2}
+\fancyfoot[R]{\sffamily\bfseries\color{dm-navy}\thepage}
+
+% v6.63 (세션 69): 챕터 첫 페이지 전용 스타일 — 헤더 텍스트 유지 · 가로 rule만 제거
+% v6.64 정정 (마스터 지적): 헤더 텍스트 (챕터명·Deep:it) 삭제 금지 · 실선만 삭제
+% v6.66 (세션 73): sans-serif 정합 반영
+\fancypagestyle{dmchapterfirst}{%
+  \fancyhf{}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\headrule}{}%
+  \fancyhead[L]{\sffamily\small\color{dm-muted}\dmchapnum\ \ \dmchapname}%
+  \fancyhead[R]{\sffamily\bfseries\color{dm-navydark}\dmseriesname}%
+  \fancyfoot[L]{\sffamily\small\bfseries\color{dm-navydark}DEPTH \& INSIGHT%
+    \hspace{2mm}\color{dm-rule}\textperiodcentered\hspace{2mm}%
+    \color{dm-navydark}공통수학2}%
+  \fancyfoot[R]{\sffamily\bfseries\color{dm-navy}\thepage}%
+}
+
+% =============================================================================
+% [4] \dmchapter — 챕터 헤더
+% -----------------------------------------------------------------------------
+% 사용: \dmchapter{01}{평면좌표}
+% =============================================================================
+\newcommand{\dmchapter}[2]{%
+  \renewcommand{\dmchapnum}{#1}%
+  \renewcommand{\dmchapname}{#2}%
+  \thispagestyle{dmchapterfirst}%
+  \vspace*{-10mm}%
+  % v6.64.7 (세션 69): 배너 내부 축소 (top/bottom 3.5→2mm, fontsize 14/15→13/14pt)
+  % + vspace* -12→-10mm 균형. concept 235mm 페이지 1 유지하면서 배너 위치도 자연스러움
+  {\color{dm-navy}\hrule height 0.6pt}%
+  \vspace{1mm}%
+  \noindent
+  {\color{dm-accent}\sffamily\dmheadingfont\fontsize{9}{11}\selectfont\bfseries \dmchapunit}%
+  \hfill
+  \par
+  \vspace{0.3mm}%
+  \begin{tcolorbox}[
+    enhanced,
+    colback=dm-navy, colframe=dm-navydark,
+    boxrule=0.3pt, sharp corners,
+    left=6mm, right=6mm, top=1.5mm, bottom=1.5mm,
+    boxsep=0mm,
+    interior style={left color=dm-navy,right color=dm-navydark},
+  ]
+  {\color{white}\dmheadingfont\fontsize{12}{14}\selectfont\bfseries CHAPTER\ \dmchapnum}%
+  \hspace{3mm}%
+  {\color{dm-rulelight}\fontsize{11}{13}\selectfont \textperiodcentered}%
+  \hspace{3mm}%
+  {\color{white}\fontsize{13}{15}\selectfont\bfseries #2}%
+  \end{tcolorbox}%
+  \vspace{0.4mm}%
+  {\color{dm-accent}\hrule height 0.7pt}%
+  \vspace{0.6mm}%
+  {\color{dm-navy}\hrule height 1.5pt}%
+  \vspace{1.5mm}%
+}
+
+% =============================================================================
+% [5] \dmconcepthead — 개념 이어짐 페이지 헤더 (배너 없음, 여백만)
+% -----------------------------------------------------------------------------
+% 사용: \dmconcepthead (챕터 배너 없이 소단원 개념 이어짐)
+% =============================================================================
+% v6.75 (세션 78 · 마스터 지시): 개념박스 상단 y-오프셋을 \dmchapter 와 통일
+%   기존: -4mm baseline + double rule ≈ 4.5mm below baseline
+%   dmchapter: -10mm baseline + unit + 배너 + double rule ≈ 7.0mm below baseline
+%   격차 ~2.5mm (마스터 시각 ~5mm) → 대단원 마스트헤드 라인 미러링으로 정합
+%   설계 원칙:
+%     - dmchapter line 133 의 chapter-unit-text 라인 재활용 (\dmchapunit accent · 9pt)
+%     - 우측 "이어지는 개념" sffamily muted 마커 (콘텐츠 기능적 정보 · 순수 장식 아님)
+%     - dmchapter 시각 그래머 미러링 (상단 hairline · unit 라인 · 반전 double rule)
+%     - fontsize·컬러·spacing 모두 dmchapter 와 동일 계열
+\newcommand{\dmconcepthead}{%
+  % v6.76 세션 78 (마스터 지시): 개념 이어짐 페이지도 헤더 옅은 회색 rule 제거
+  \thispagestyle{dmchapterfirst}%
+  \vspace*{-10mm}%
+  % 상단 hairline (dmchapter line 130 미러)
+  {\color{dm-navy}\hrule height 0.6pt}%
+  \vspace{1mm}%
+  % 마스트헤드 라인: 좌 \dmchapunit (accent) · 우 "이어지는 개념" (muted)
+  \noindent
+  {\color{dm-accent}\sffamily\dmheadingfont\fontsize{9}{11}\selectfont\bfseries \dmchapunit}%
+  \hfill
+  \par
+  \vspace{10mm}% v6.76 세션 78 (마스터 재지시 2): 개념 2가 아직 위 · 추가 하강 필요
+  % 반전 double rule (v6.61 컨셉 유지 · dmchapter 아래 double rule 미러)
+  {\color{dm-accent}\hrule height 0.7pt}%
+  \vspace{0.6mm}%
+  {\color{dm-navy}\hrule height 1.5pt}%
+  \vspace{1.5mm}%
+}
+
+% =============================================================================
+% [6] \dmbracket — 페이지 우측 정보 (사용 안 함 · 호환 stub)
+% -----------------------------------------------------------------------------
+% 사용: \dmbracket{6} (기존 파일 호환용 · 실제 시각 요소 없음)
+% =============================================================================
+\newcommand{\dmbracket}[1]{}
+
+% =============================================================================
+% [7] \dmsub — 소단원 헤더 (좌측 굵은 bar + 번호 + 한글)
+% -----------------------------------------------------------------------------
+% 사용: \dmsub{1}{두 점 사이의 거리}
+% =============================================================================
+% v6.72 세션 70: 소개념 hairline 구분선 (시안) · v6.73 마스터 지시로 hairline 제거 · 여백만 확대
+%   "개념 박스 안에 가로 분할선은 넣지마" (2026-07-22)
+% v6.74 세션 70: 개념 타이틀 ↔ 첫 소개념 간격 축소 (first-sub flag)
+%   dmconcept 시작 시 flag=true → 첫 \dmsub 은 2mm, 이후는 8mm
+\newif\ifdm@firstsub
+\dm@firstsubfalse
+\newcommand{\dmsub}[2]{%
+  \ifdm@firstsub
+    \vspace{2mm}%
+    \dm@firstsubfalse
+  \else
+    \vspace{8mm}%
+  \fi
+  \noindent
+  {\color{dm-golddark}\dmheadingfont\fontsize{12.5}{15}\selectfont\bfseries
+    #1)}%
+  \hspace{2.5mm}%
+  {\color{dm-navy}\dmheadingfont\fontsize{12.5}{15}\selectfont\bfseries
+    #2}\par
+  \vspace{4mm}%
+}
+
+% =============================================================================
+% [8] dmconcept — 개념 박스 (3-arg: [height]{section_num}{title})
+% -----------------------------------------------------------------------------
+% 좌측 굵은 네이비 bar (2.5pt) + 웜 오프화이트 배경 + fuzzy shadow
+% 사용: \begin{dmconcept}[214mm]{1}{두 점 사이의 거리} ... \end{dmconcept}
+% =============================================================================
+% v6.11: 개념 박스 fixed size 최대화 · 페이지 꽉 차게
+% - 기본 높이 214mm → 235mm (챕터 헤더 하단 ~13mm + concept box 235mm + 여유 ~5mm)
+% - before/after skip 축소 (3→1mm, 6→2mm)
+% - 마스터가 이 fixed height 기준으로 텍스트 분량 설계
+\newenvironment{dmconcept}[3][235mm]{%
+  \begin{tcolorbox}[
+    enhanced,
+    height=#1,
+    valign=top,
+    colback=dm-paper,
+    colframe=dm-rule,
+    boxrule=0.3pt,
+    leftrule=2.5pt,
+    overlay={%
+      \draw[dm-navy,line width=2.5pt]
+        ([xshift=1.25pt]frame.north west) --
+        ([xshift=1.25pt]frame.south west);
+    },
+    sharp corners,
+    left=6mm, right=6mm, top=6mm, bottom=6mm,
+    boxsep=0mm,
+    drop fuzzy shadow={dm-shadow},
+    before skip=1mm,
+    after skip=2mm,
+    % v6.72 세션 77 (마스터 지시) : 본편 개념박스 가독성 확대
+    %   linespread 1.15 → 1.25 · parskip 0.6mm → 1.4mm (문장간 여유)
+    fontupper=\linespread{1.25}\selectfont,
+  ]
+  \setlength{\parskip}{1.4mm plus 1.6mm minus 0mm}%
+  % 제목: 사각 번호 배지 + 한글 제목 (v6.5: 원형 → 직각)
+  \noindent
+  \tikz[baseline=(t.base)]{%
+    \node[fill=dm-navy,inner sep=0mm,%
+          minimum width=5.5mm,minimum height=5.5mm,%
+          text=white,font=\dmheadingfont\fontsize{10}{10}\bfseries] (t) {#2};%
+  }%
+  \hspace{3mm}%
+  {\color{dm-navy}\dmheadingfont\fontsize{12.5}{15}\selectfont\bfseries #3}\par
+  \vspace{2mm}%
+  {\color{dm-ruledark}\hrule height 0.6pt}%
+  \vspace{4mm}%
+  \dm@firstsubtrue%
+}{%
+  \end{tcolorbox}%
+}
+
+% =============================================================================
+% [8.5] dmconceptcont — 개념 박스 이어짐 (title 없음 · 상단 rule 유지 · v6.77 세션 79)
+% -----------------------------------------------------------------------------
+% 사용: 한 개념이 두 페이지에 걸칠 때 두 번째 페이지에서 사용
+% - 배지·제목 텍스트 삭제
+% - 상단 hrule 유지 (배지·제목 대체 시각 앵커)
+% - 그 외 스타일 dmconcept와 동일
+% =============================================================================
+\newenvironment{dmconceptcont}[1][235mm]{%
+  \begin{tcolorbox}[
+    enhanced,
+    height=#1,
+    valign=top,
+    colback=dm-paper,
+    colframe=dm-rule,
+    boxrule=0.3pt,
+    leftrule=2.5pt,
+    overlay={%
+      \draw[dm-navy,line width=2.5pt]
+        ([xshift=1.25pt]frame.north west) --
+        ([xshift=1.25pt]frame.south west);
+    },
+    sharp corners,
+    left=6mm, right=6mm, top=6mm, bottom=6mm,
+    boxsep=0mm,
+    drop fuzzy shadow={dm-shadow},
+    before skip=1mm,
+    after skip=2mm,
+    fontupper=\linespread{1.25}\selectfont,
+  ]
+  \setlength{\parskip}{1.4mm plus 1.6mm minus 0mm}%
+  % v6.77 세션 79 (마스터 지시): 상단 rule 위 여백 추가 · 전체 콘텐츠 아래로 이동
+  \vspace{8mm}%
+  % 상단 rule (배지·제목 대체 시각 앵커)
+  {\color{dm-ruledark}\hrule height 0.6pt}%
+  \vspace{4mm}%
+  \dm@firstsubtrue%
+}{%
+  \end{tcolorbox}%
+}
+
+% =============================================================================
+% [9] \dmformula — 개념 박스 안 공식 강조 박스 (선택적 사용)
+% =============================================================================
+\newcommand{\dmformula}[1]{%
+  \vspace{1mm}%
+  \begin{center}
+  \begin{tcolorbox}[
+    enhanced,
+    colback=white, colframe=dm-navy,
+    boxrule=0.5pt, sharp corners,
+    left=8mm, right=8mm, top=3mm, bottom=3mm,
+    boxsep=0mm,
+    width=\dimexpr\linewidth-6mm\relax,
+    drop fuzzy shadow={dm-shadow!85},
+  ]
+  \centering \color{dm-ink}
+  \(\displaystyle #1\)
+  \end{tcolorbox}
+  \end{center}
+  \vspace{1mm}%
+}
+
+% =============================================================================
+% [10] dmexample — 개념 안 소예제 (좌측 예 라벨 + 인라인 텍스트)
+% -----------------------------------------------------------------------------
+% 사용: \begin{dmexample} 두 점 A(1,2)... \end{dmexample}
+% =============================================================================
+\newenvironment{dmexample}{%
+  \vspace{1.5mm}%
+  \begin{list}{}{%
+    \setlength{\leftmargin}{9mm}%
+    \setlength{\rightmargin}{0mm}%
+    \setlength{\topsep}{0mm}\setlength{\parsep}{0mm}%
+    \setlength{\itemsep}{0mm}%
+  }%
+  \item[]%
+  \hspace{-9mm}%
+  \tikz[baseline=(e.base)]{%
+    \node[draw=dm-golddark,line width=0.4pt,%
+          inner xsep=1.5mm,inner ysep=0.4mm,%
+          fill=dm-goldlight,%
+          text=dm-golddark,font=\dmheadingfont\fontsize{8}{9}\selectfont\bfseries] (e) {예};%
+  }%
+  \hspace{2mm}%
+  \color{dm-ink}%
+}{%
+  \end{list}%
+  \vspace{1.5mm}%
+}
+
+% =============================================================================
+% [11] dmnote — 참고 박스 (좌측 굵은 bar + 진한 경계 · v6.3)
+% =============================================================================
+\newenvironment{dmnote}{%
+  \vspace{2mm}%
+  \begin{tcolorbox}[
+    enhanced,
+    colback=dm-navylight,
+    colframe=dm-ruledark,
+    boxrule=0.25pt,
+    leftrule=2pt,
+    sharp corners,
+    left=4mm, right=4mm, top=2.5mm, bottom=2.5mm,
+    boxsep=0mm,
+    overlay={%
+      \draw[dm-navy,line width=2pt]
+        ([xshift=1pt]frame.north west) --
+        ([xshift=1pt]frame.south west);
+    },
+  ]
+  \color{dm-ink}\fontsize{9.5}{12}\selectfont
+  {\color{dm-navy}\dmheadingfont\bfseries 참고.\ \ }%
+}{%
+  \end{tcolorbox}%
+  \vspace{2mm}%
+}
+
+% =============================================================================
+% [12] dmexplain — 풀이 관점 / 해설 블록 (같은 스타일 · 라벨만 다름)
+% =============================================================================
+\newenvironment{dmexplain}{%
+  \vspace{2mm}%
+  \begin{tcolorbox}[
+    enhanced,
+    colback=dm-navylight,
+    colframe=dm-ruledark,
+    boxrule=0.5pt,
+    leftrule=2pt,
+    sharp corners,
+    left=4mm, right=4mm, top=2.5mm, bottom=2.5mm,
+    boxsep=0mm,
+    overlay={%
+      \draw[dm-golddark,line width=2pt]
+        ([xshift=1pt]frame.north west) --
+        ([xshift=1pt]frame.south west);
+    },
+  ]
+  \color{dm-ink}\fontsize{9.5}{12}\selectfont
+  {\color{dm-golddark}\dmheadingfont\bfseries 해설.\ \ }%
+}{%
+  \end{tcolorbox}%
+  \vspace{2mm}%
+}
+
+% =============================================================================
+% [13] dmoptionbox — 조건 (가)(나)(다) · 보기 ㄱ·ㄴ·ㄷ 감쌈
+% =============================================================================
+\newenvironment{dmoptionbox}{%
+  \vspace{2mm}%
+  \begin{tcolorbox}[
+    enhanced,
+    colback=dm-paperdeep!40,
+    colframe=dm-golddark,
+    boxrule=0.4pt,
+    leftrule=2pt,
+    sharp corners,
+    left=6mm, right=6mm, top=3mm, bottom=3mm,
+    boxsep=0mm,
+    overlay={%
+      \draw[dm-golddark,line width=2pt]
+        ([xshift=1pt]frame.north west) --
+        ([xshift=1pt]frame.south west);
+    },
+  ]
+  % v6.74 세션 77 (마스터 지시): 조건 (가)(나)(다) 사이 간격 확대
+  \setlength{\parskip}{1.6mm plus 1.4mm minus 0mm}%
+  \linespread{1.22}\selectfont%
+  \color{dm-ink}%
+}{%
+  \end{tcolorbox}%
+  \vspace{2mm}%
+}
+
+% =============================================================================
+% [14] \dmex — 대표예제 배너 (딥 네이비 그라데이션 rounded · 큰 위계)
+% -----------------------------------------------------------------------------
+% 사용: \dmex{1}{거리 조건에서 미지수 결정}
+% =============================================================================
+\newcommand{\dmex}[2]{%
+  \vspace{4mm}%
+  \noindent
+  \begin{tcolorbox}[
+    enhanced,
+    colback=dm-navy,
+    colframe=dm-navydark,
+    boxrule=0.4pt,
+    sharp corners,
+    left=6mm, right=6mm, top=2.5mm, bottom=2.5mm,
+    boxsep=0mm,
+    interior style={left color=dm-navy,right color=dm-navydark},
+    drop fuzzy shadow={dm-shadow},
+  ]
+  {\color{white}\dmheadingfont\fontsize{12}{14}\selectfont\bfseries
+    예제\ #1}%
+  \hspace{3mm}%
+  {\color{dm-rulelight}\dmheadingfont\fontsize{11}{13}\selectfont \textperiodcentered}%
+  \hspace{3mm}%
+  {\color{white}\dmheadingfont\fontsize{12}{14}\selectfont #2}%
+  \end{tcolorbox}%
+  \vspace{2mm}%
+}
+
+% =============================================================================
+% [15] dmproblem — 문제 박스 (미묘한 웜 오프화이트 배경 · 얇은 outline)
+% =============================================================================
+\newenvironment{dmproblem}{%
+  \vspace{1mm}%
+  \begin{tcolorbox}[
+    enhanced,
+    colback=dm-paper,
+    colframe=dm-golddark!70,
+    boxrule=0.4pt,
+    sharp corners,
+    left=6mm, right=6mm, top=4mm, bottom=4mm,
+    boxsep=0mm,
+    drop fuzzy shadow={dm-shadow!60},
+  ]
+  % v6.12: 문제 텍스트 강조 · Malgun Gothic Bold 10.5pt · 넉넉한 행간
+  % v6.73 세션 77 (마스터 지시): 문장간 간격 확보 · parskip 주입
+  \setlength{\parskip}{1.4mm plus 1.2mm minus 0mm}%
+  \color{dm-ink}\dmheadingfont\fontsize{10.5}{15}\selectfont\bfseries%
+}{%
+  \end{tcolorbox}%
+  \vspace{2mm}%
+}
+
+% =============================================================================
+% [16] dmapproach — 길잡이 (전략) 블록
+% =============================================================================
+% v6.27: label 실측 \settowidth 로 정확한 alignment 보장 · 거리와 4가 같은 x좌표
+\newlength{\dmhintw}
+\newenvironment{dmapproach}{%
+  \par\vspace{2mm}%
+  % HINT. + 1.3mm 갭의 정확한 폭 실측
+  \settowidth{\dmhintw}{{\dmheadingfont\fontsize{9.5}{12}\selectfont\bfseries HINT.}}%
+  \addtolength{\dmhintw}{1.3mm}%
+  \begin{list}{}{%
+    \setlength{\leftmargin}{\dimexpr 6mm + \dmhintw\relax}%
+    \setlength{\rightmargin}{6mm}%
+    \setlength{\itemindent}{-\dmhintw}%
+    \setlength{\labelwidth}{0mm}%
+    \setlength{\labelsep}{0mm}%
+    \setlength{\topsep}{0mm}%
+    % v6.73 세션 77 (마스터 지시): 문장간 간격 확보 · parsep 확대
+    \setlength{\parsep}{1.4mm plus 1.2mm minus 0mm}%
+    \setlength{\itemsep}{0mm}%
+    \setlength{\listparindent}{0mm}%
+  }%
+  \item[]%
+  {\color{dm-accent}\dmheadingfont\fontsize{9.5}{12}\selectfont\bfseries\uppercase{hint.}}%
+  \hspace{1.3mm}%
+  \color{dm-muted}\fontsize{9.5}{13}\selectfont\itshape%
+}{%
+  \end{list}%
+  \par\vspace{2mm}%
+}
+
+% =============================================================================
+% [17] dmsolution — 풀이 (라벨 배지 · 세션 70 v6.66 리딩 레일 · 좌정렬 수식)
+% =============================================================================
+% v6.13: 풀이 · 소단원 헤더급 위계 (좌측 굵은 bar + 큰 텍스트 + 하단 진한 rule)
+% v6.15: 본문 좌측 들여쓰기 · 문항 박스와 매칭
+% v6.17: bar 정렬 정정 · \rule 로 baseline 정확 매칭 (12.5pt 텍스트 ascender 4mm)
+% v6.66 세션 70 (2026-07-22): 리딩 레일 (2pt navy borderline west) · 좁은 우측 여백 (18mm)
+%   + equation* 좌정렬 (4mm 인덴트) · 시각 집중도 개선 (마스터 A안 승인)
+% v6.69 세션 70 (마스터 재조정): rail 이 \dmanswer 앞에서 종료 (tcolorbox 조기 close)
+\newenvironment{dmsolution}{%
+  \par\vspace{5mm}%
+  \noindent
+  % v6.76 세션 78 (마스터 지시): "풀이" 단어 앞 작은 사각 rule dm-navy → dm-accent 포인트 색
+  {\color{dm-accent}\rule[-0.4mm]{3.5pt}{4.2mm}}%
+  \hspace{3mm}%
+  {\color{dm-navy}\fontsize{13.5}{16}\selectfont\bfseries 풀이}%
+  \par
+  \vspace{1.5mm}%
+  {\color{dm-ruledark}\hrule height 0.5pt}%
+  \vspace{2mm}%
+  \color{dm-ink}%
+  % v6.69: \dmanswer 호출 시 tcolorbox 를 먼저 close 하여 rail 이 답 앞에서 종료
+  \gdef\dm@sol@answerdone{0}%
+  \global\let\dm@sol@origanswer\dmanswer
+  \gdef\dmanswer##1{%
+    \end{tcolorbox}%
+    \dm@sol@origanswer{##1}%
+    \gdef\dm@sol@answerdone{1}%
+  }%
+  \begin{tcolorbox}[
+    enhanced, breakable,
+    boxsep=0pt, top=2mm, bottom=1mm, left=8mm, right=18mm,
+    frame hidden, colback=white, colbacktitle=white,
+    overlay={%
+      \draw[dm-navy, line width=2pt]
+        ([xshift=4.2mm]frame.north west) --
+        ([xshift=4.2mm]frame.south west);
+    },
+    parbox=false,
+  ]%
+    % equation* 좌정렬 (3mm 인덴트 · 계단식 마지막 계단)
+    % v6.77 세션 79 (마스터 지시): 예제 풀이 간격 확대 · equation* 앞뒤 여백 2.5mm
+    \renewenvironment{equation*}{%
+      \par\vspace{2.5mm}\noindent\hspace*{3mm}$\displaystyle%
+    }{%
+      $\par\vspace{2.5mm}%
+    }%
+    % v6.77 세션 79 : parskip 1.5ex → 2.2ex (예제 풀이 문장간 간격 확대)
+    \setlength{\parskip}{2.2ex}%
+    \setlength{\parindent}{0pt}%
+    \setlength{\abovedisplayskip}{10pt plus 1pt minus 1pt}%
+    \setlength{\belowdisplayskip}{10pt plus 1pt minus 1pt}%
+    \setlength{\abovedisplayshortskip}{8pt plus 1pt}%
+    \setlength{\belowdisplayshortskip}{8pt plus 1pt}%
+    \setlength{\jot}{6pt}%
+    \linespread{1.25}\selectfont%
+}{%
+  \ifnum\dm@sol@answerdone=0 \end{tcolorbox}\fi
+  \global\let\dmanswer\dm@sol@origanswer
+  \par\vspace{2mm}%
+}
+
+% =============================================================================
+% [18] \dmanswer — 정답 텍스트 (v6.3: 배지 폐지 · 우측 텍스트)
+% =============================================================================
+% v6.14: 답 표시 · 풀이 디자인 언어 계승 (좌측 bar + Malgun Bold) · 작은 스케일 closing marker
+% v6.17: bar 정렬 정정 · \rule 로 baseline 정확 매칭 (11.5pt 텍스트 ascender ~3.7mm)
+% v6.70 세션 70 (마스터 재조정): 답 우측 끝을 HINT 박스 우측 (rightmargin 6mm) 과 정렬
+\newcommand{\dmanswer}[1]{%
+  \par\vspace{3mm}%
+  \hfill
+  % v6.76 세션 78 (마스터 지시): 답 앞 사각 강조선 dm-navy → dm-accent 포인트 색
+  {\color{dm-accent}\rule[-0.3mm]{2.5pt}{3.7mm}}%
+  \hspace{2.5mm}%
+  {\color{dm-navy}\dmheadingfont\fontsize{10.5}{13}\selectfont\bfseries 답.}%
+  \hspace{2.5mm}%
+  {\color{dm-navy}\dmheadingfont\fontsize{11.5}{14}\selectfont\bfseries #1}%
+  \hspace*{6mm}%
+  \par
+  \vspace{2mm}%
+}
+
+% =============================================================================
+% [19] \dmchecktitle — 확인 문제 배너
+% =============================================================================
+% v6.18: 배지 색 dm-golddark(칙칙한 브라운) → dm-navy · 시스템 일관성 · 밝고 명확
+% v6.34: 폰트 · Malgun → UnBatang serif Bold · 헤더/푸터/평면좌표와 통일
+\newcommand{\dmchecktitle}{%
+  \vspace{5mm}%
+  \noindent
+  \tikz[baseline=(c.base)]{%
+    \node[fill=dm-navy,%
+          inner xsep=2.5mm,inner ysep=1mm,%
+          text=white,font=\fontsize{10.5}{12}\selectfont\bfseries] (c) {확인 문제};%
+  }%
+  \hspace{3mm}%
+  {\color{dm-navy}\fontsize{10.5}{12}\selectfont\bfseries 스스로 풀어보기}%
+  \par
+  \vspace{2mm}%
+  {\color{dm-ruledark}\hrule height 0.5pt}%
+  \vspace{4mm}%
+}
+
+% =============================================================================
+% [20] \dmcheck — 확인 문제 단문항 (번호 + 넉넉한 풀이 공간)
+% -----------------------------------------------------------------------------
+% 사용: \dmcheck{1}{...문제...}
+% =============================================================================
+% v6.75 세션 77 (마스터 지시): 본편 문항 번호 자동 카운터 · dmcheck + dmpnum 통합
+%   확인 1~12 · L1 13~24 · L2 25~36 · L3 37~39 · 실전 40~42 파일 전역 연속
+\newcounter{dmproblemcount}\setcounter{dmproblemcount}{0}
+\newcommand{\dmcheck}[2]{%
+  \par\vspace{2mm}%
+  \stepcounter{dmproblemcount}%
+  \noindent
+  \begin{minipage}[t]{9mm}%
+    \color{dm-navy}\fontsize{11}{13}\selectfont\bfseries \ifnum\value{dmproblemcount}<10 0\fi\arabic{dmproblemcount}.%
+  \end{minipage}%
+  \begin{minipage}[t]{\dimexpr\linewidth - 9mm\relax}%
+    % v6.73 세션 77 (마스터 지시) : 문장간 간격 확보 · linespread + parskip
+    \linespread{1.25}\selectfont%
+    \setlength{\parskip}{1.4mm plus 1.4mm minus 0mm}%
+    \color{dm-ink} #2%
+  \end{minipage}%
+  % v6.63 (세션 69 semantic 복원): 옛 deep-math.sty §400 elastic vfill 복원
+  \par\vspace*{0pt plus 1fill}%
+}
+
+% =============================================================================
+% [21] \dmlevel — Level 배너 (딥 네이비 + 부제 · v6.4 재해석)
+% -----------------------------------------------------------------------------
+% Level 1 (기초 연습) · Level 2 (표준 연습) · Level 3 (심화 연습)
+% =============================================================================
+% v6.33: dmcurrentlevel 상태 변수
+% v6.43: 시안 C 채택 · 슬림화 · 상하 rule 얇게 · vspace 축소 · 배너 padding 축소
+\newcommand{\dmcurrentlevel}{1}
+\newcommand{\dmlevel}[1]{%
+  \renewcommand{\dmcurrentlevel}{#1}%
+  \vspace{2mm}%
+  \noindent
+  % Top rule (얇게 · 단일선)
+  {\color{dm-navy}\hrule height 0.6pt}%
+  \vspace{1.2mm}%
+  % Masthead 라인 (No.NN 좌 + EXERCISE SERIES 우 · 소캡스 · 8.5pt)
+  \noindent
+  {\color{dm-accent}\fontsize{8.5}{10}\selectfont\bfseries No.\ifnum#1<10 0\fi#1}%
+  \hfill
+  {\color{dm-muted}\fontsize{8.5}{10}\selectfont\bfseries EXERCISE\ \ SERIES}%
+  \par
+  % v6.44: 마스트헤드 라인 ↔ 박스 사이 공간 제거 (직접 붙임)
+  \vspace{-1mm}%
+  % Main banner (v6.49: shadow 제거 · 순수 flat 배너)
+  \begin{tcolorbox}[
+    enhanced,
+    colback=dm-navy, colframe=dm-navydark,
+    boxrule=0.3pt, sharp corners,
+    left=6mm, right=6mm, top=1.8mm, bottom=1.8mm,
+    boxsep=0mm,
+    interior style={left color=dm-navy,right color=dm-navydark},
+  ]
+  {\color{white}\fontsize{11.5}{13}\selectfont\bfseries LEVEL\ #1}%
+  \hspace{2.5mm}%
+  {\color{dm-rulelight}\fontsize{10.5}{12}\selectfont \textperiodcentered}%
+  \hspace{2.5mm}%
+  {\color{white}\fontsize{11.5}{13}\selectfont\bfseries%
+    \ifcase#1\or 기초 연습\or 표준 연습\or 심화 연습\else 연습\fi}%
+  \hfill
+  {\color{dm-rulelight}\fontsize{9}{11}\selectfont\bfseries 12 문제}%
+  \end{tcolorbox}%
+  % v6.47: 하단 rule 박스에 밀착 (1.2mm → -1mm)
+  % v6.52: 너무 밀착 · 살짝 벌림 (-1mm → 0.4mm)
+  \vspace{0.4mm}%
+  % v6.46: 하단 double rule (1페이지 챕터 스타일) · 얇은 선 포인트 컬러
+  % v6.48: 포인트 라인 굵기 상향 (0.4pt → 0.9pt)
+  % v6.50: 포인트 라인 다시 얇게 (0.9pt → 0.6pt)
+  % v6.51: navy 굵기 · v6.54: gap 벌림 · v6.56: CHAPTER와 동일
+  % v6.59: 반전 (accent 얇게 위 · navy 굵게 아래) · CHAPTER·continuation과 통일
+  {\color{dm-accent}\hrule height 0.7pt}%
+  \vspace{0.7mm}%
+  {\color{dm-navy}\hrule height 1.5pt}%
+  \vspace{4mm}%
+}
+
+% v6.58: dmlevelspace = 시안 A 채택 · 이어짐 페이지 상단 반전 double rule
+% (accent 얇은 rule 위 · navy 굵은 rule 아래 · LEVEL 배너 하단의 미러)
+\newcommand{\dmlevelspace}{%
+  \vspace*{-4mm}%
+  {\color{dm-accent}\hrule height 0.7pt}%
+  \vspace{0.7mm}%
+  {\color{dm-navy}\hrule height 1.5pt}%
+  \vspace{7mm}%
+}
+
+% =============================================================================
+% v6.42 시안 · 화려 재디자인 3안 (마스터 A/B/C 시각 비교)
+% =============================================================================
+
+% --- 시안 A: 3층 마스트헤드 (상하 accent rule + 좌측 큰 사각 번호 배지 + 우측 메타) ---
+\newcommand{\dmlevelvA}[1]{%
+  \vspace{2mm}%
+  \renewcommand{\dmcurrentlevel}{#1}%
+  \noindent
+  {\color{dm-accent}\hrule height 0.6pt}%
+  \vspace{0.6mm}%
+  \begin{tcolorbox}[
+    enhanced,
+    colback=dm-navy, colframe=dm-navydark,
+    boxrule=0.3pt, sharp corners,
+    left=6mm, right=6mm, top=3.5mm, bottom=3.5mm,
+    boxsep=0mm,
+    interior style={left color=dm-navy,right color=dm-navydark},
+    drop fuzzy shadow={dm-shadow},
+  ]
+  \noindent
+  \begin{minipage}[c]{14mm}%
+    \tikz{\node[fill=white,inner sep=0mm,%
+      minimum width=11mm,minimum height=11mm,%
+      text=dm-navy,font=\fontsize{15}{17}\selectfont\bfseries] {\ifnum#1<10 0\fi#1};}%
+  \end{minipage}%
+  \hspace{2mm}%
+  \begin{minipage}[c]{85mm}%
+    {\color{dm-rulelight}\fontsize{8.5}{10}\selectfont\bfseries LEVEL}\\[0.4mm]
+    {\color{white}\fontsize{13}{15}\selectfont\bfseries
+      \ifcase#1\or 기초 연습\or 표준 연습\or 심화 연습\else 연습\fi}%
+  \end{minipage}%
+  \hfill
+  \begin{minipage}[c]{28mm}%
+    \raggedleft
+    {\color{dm-rulelight}\fontsize{9.5}{11}\selectfont\bfseries 12 문제}%
+  \end{minipage}%
+  \end{tcolorbox}%
+  \vspace{0.6mm}%
+  {\color{dm-accent}\hrule height 0.6pt}%
+  \vspace{4mm}%
+}
+
+% --- 시안 B: 좌측 굵은 accent bar (5pt) 배너 관통 · 미니멀 강조 ---
+\newcommand{\dmlevelvB}[1]{%
+  \vspace{2mm}%
+  \renewcommand{\dmcurrentlevel}{#1}%
+  \noindent
+  \begin{tcolorbox}[
+    enhanced,
+    colback=dm-navy, colframe=dm-navydark,
+    boxrule=0.3pt, leftrule=5pt,
+    sharp corners,
+    left=8mm, right=6mm, top=2.5mm, bottom=2.5mm,
+    boxsep=0mm,
+    interior style={left color=dm-navy,right color=dm-navydark},
+    overlay={%
+      \draw[dm-accent,line width=5pt]
+        ([xshift=2.5pt]frame.north west) --
+        ([xshift=2.5pt]frame.south west);
+    },
+    drop fuzzy shadow={dm-shadow},
+  ]
+  {\color{white}\fontsize{13}{15}\selectfont\bfseries LEVEL\ #1}%
+  \hspace{3mm}%
+  {\color{dm-rulelight}\fontsize{12}{14}\selectfont\textperiodcentered}%
+  \hspace{3mm}%
+  {\color{white}\fontsize{13}{15}\selectfont\bfseries%
+    \ifcase#1\or 기초 연습\or 표준 연습\or 심화 연습\else 연습\fi}%
+  \hfill
+  {\color{dm-rulelight}\fontsize{9.5}{11}\selectfont\bfseries 12 문제}%
+  \end{tcolorbox}%
+  \vspace{4mm}%
+}
+
+% --- 시안 C: 잡지 표지형 · 상하 double rule + No.NN·EXERCISE 마스트헤드 라인 + 메인 배너 ---
+\newcommand{\dmlevelvC}[1]{%
+  \vspace{2mm}%
+  \renewcommand{\dmcurrentlevel}{#1}%
+  \noindent
+  % Top double rule
+  {\color{dm-navy}\hrule height 1.2pt}%
+  \vspace{0.4mm}%
+  {\color{dm-rule}\hrule height 0.3pt}%
+  \vspace{2.5mm}%
+  % Masthead line
+  \noindent
+  {\color{dm-accent}\fontsize{9}{11}\selectfont\bfseries No.\ifnum#1<10 0\fi#1}%
+  \hfill
+  {\color{dm-muted}\fontsize{9}{11}\selectfont\bfseries EXERCISE\ \ SERIES}%
+  \par
+  \vspace{2.5mm}%
+  % Main banner
+  \begin{tcolorbox}[
+    enhanced,
+    colback=dm-navy, colframe=dm-navydark,
+    boxrule=0.3pt, sharp corners,
+    left=6mm, right=6mm, top=2.5mm, bottom=2.5mm,
+    boxsep=0mm,
+    interior style={left color=dm-navy,right color=dm-navydark},
+    drop fuzzy shadow={dm-shadow},
+  ]
+  {\color{white}\fontsize{13}{15}\selectfont\bfseries LEVEL\ #1}%
+  \hspace{3mm}%
+  {\color{dm-rulelight}\fontsize{12}{14}\selectfont\textperiodcentered}%
+  \hspace{3mm}%
+  {\color{white}\fontsize{13}{15}\selectfont\bfseries%
+    \ifcase#1\or 기초 연습\or 표준 연습\or 심화 연습\else 연습\fi}%
+  \hfill
+  {\color{dm-rulelight}\fontsize{9.5}{11}\selectfont\bfseries 12 문제}%
+  \end{tcolorbox}%
+  \vspace{2.5mm}%
+  % Bottom double rule (반대 순서)
+  {\color{dm-rule}\hrule height 0.3pt}%
+  \vspace{0.4mm}%
+  {\color{dm-navy}\hrule height 1.2pt}%
+  \vspace{4mm}%
+}
+
+% =============================================================================
+% [22] \dmpnum — Level 문제 (v6.33: A+B+C 디자인 요소 추가)
+% A: 번호 dm-accent 붉은 포인트 컬러 확대 (11pt navy → 14pt accent)
+% B: 별점 우측 자동 표시 (Level 1→★2 · Level 2→★3 · Level 3→★4)
+% C: 문제 간 얇은 divider rule (dm-rulelight 0.2pt)
+% =============================================================================
+% v6.75 세션 77 (마스터 지시): 본편 문항 번호 자동 카운터 · dmcheck + dmpnum 통합
+%   카운터 dmproblemcount 는 dmcheck 에서 초기화 (파일 첫 dmcheck 사용 시 1부터)
+\newcommand{\dmpnum}[2]{%
+  \par\vspace{2mm}%
+  \stepcounter{dmproblemcount}%
+  \needspace{40mm}%
+  \noindent
+  \begin{minipage}[t]{9mm}%
+    \color{dm-navy}\fontsize{11}{13}\selectfont\bfseries \ifnum\value{dmproblemcount}<10 0\fi\arabic{dmproblemcount}.%
+  \end{minipage}%
+  \begin{minipage}[t]{\dimexpr\linewidth - 9mm\relax}%
+    % v6.73 세션 77 : Level 문제도 문장간 간격 · linespread + parskip
+    \linespread{1.25}\selectfont%
+    \setlength{\parskip}{1.4mm plus 1.4mm minus 0mm}%
+    \color{dm-ink} #2%
+  \end{minipage}%
+  \par\vspace*{0pt plus 1fill}%
+}
+
+% =============================================================================
+% [23] \dmrealtype — 실전 문제 배너
+% =============================================================================
+\newcommand{\dmrealtype}{%
+  \vspace{2mm}%
+  \noindent
+  % v6.61 (세션 69 마스터 지시): LEVEL 배너와 통일 (다 똑같이) · gold → navy · 마스트헤드 + 반전 double rule
+  % Top rule (LEVEL과 동일 시각 앵커)
+  {\color{dm-navy}\hrule height 0.6pt}%
+  \vspace{1.2mm}%
+  % Masthead 라인 (좌측 REAL·TEST · 우측 EXAM SERIES)
+  {\color{dm-accent}\fontsize{8.5}{10}\selectfont\bfseries REAL\ \ TEST}%
+  \hfill
+  {\color{dm-muted}\fontsize{8.5}{10}\selectfont\bfseries EXAM\ \ SERIES}%
+  \par
+  \vspace{-1mm}%
+  \begin{tcolorbox}[
+    enhanced,
+    colback=dm-navy, colframe=dm-navydark,
+    boxrule=0.3pt, sharp corners,
+    left=6mm, right=6mm, top=1.8mm, bottom=1.8mm,
+    boxsep=0mm,
+    interior style={left color=dm-navy,right color=dm-navydark},
+  ]
+  {\color{white}\fontsize{11.5}{13}\selectfont\bfseries 실전유형 맛보기}%
+  \hspace{2.5mm}%
+  {\color{dm-rulelight}\fontsize{10.5}{12}\selectfont \textperiodcentered}%
+  \hspace{2.5mm}%
+  {\color{white}\fontsize{11.5}{13}\selectfont\bfseries 학평 기출\textperiodcentered\ 변형}%
+  \end{tcolorbox}%
+  \vspace{0.4mm}%
+  % 하단 반전 double rule (LEVEL과 통일)
+  {\color{dm-accent}\hrule height 0.7pt}%
+  \vspace{0.7mm}%
+  {\color{dm-navy}\hrule height 1.5pt}%
+  \vspace{4mm}%
+}
+
+\newcommand{\dmrealtypespace}{%
+  % v6.64 (세션 69): 실전 이어짐 페이지 상단 반전 double rule (dmlevelspace 미러)
+  \vspace*{-4mm}%
+  {\color{dm-accent}\hrule height 0.7pt}%
+  \vspace{0.7mm}%
+  {\color{dm-navy}\hrule height 1.5pt}%
+  \vspace{7mm}%
+}
+
+% =============================================================================
+% [24] 강조 매크로
+% =============================================================================
+\newcommand{\dmemph}[1]{{\color{dm-navy}\bfseries #1}}
+\newcommand{\dmstrong}[1]{{\color{dm-golddark}\bfseries #1}}
+
+% =============================================================================
+% [25] \dmoptioninline — 인라인 조건/보기 박스 (deep-math.sty §555 포팅)
+% -----------------------------------------------------------------------------
+% 사용: \dmoptioninline{ㄱ. X \quad ㄴ. Y \quad ㄷ. Z}
+% v6.64 semantic 복원 (feedback_macro_migration_semantic_preservation 계기)
+% 팔레트: dm-accent(old purple) → dm-paperdeep!40 · dm-gold → dm-navy (dmoptionbox와 통일)
+% arc=1mm → sharp corners (v6.5 정책)
+% =============================================================================
+\newcommand{\dmoptioninline}[1]{%
+  \par\smallskip
+  \begin{tcolorbox}[
+    enhanced,
+    colback=dm-paperdeep!40, colframe=dm-navy,
+    boxrule=0.4pt, sharp corners,
+    left=6mm, right=3mm, top=1.5mm, bottom=1.5mm,
+    boxsep=0mm,
+    overlay={%
+      \draw[dm-navy,line width=2pt]
+        ([xshift=1pt]frame.north west) --
+        ([xshift=1pt]frame.south west);
+    },
+  ]
+  \color{dm-ink} #1
+  \end{tcolorbox}%
+  \par\smallskip
+}
+
+% =============================================================================
+% [25] \dmkichul{출처} — 학평·기출 출처 배지 (deep-math.sty §506 포팅)
+% -----------------------------------------------------------------------------
+% 사용: \dmpnum{N}{\dmkichul{2022학년도 11월 고1 학평 19번} 본문...}
+% v6 : rounded corners=1.2pt → sharp corners · dm-primary → dm-navy 팔레트
+% =============================================================================
+\newcommand{\dmkichul}[1]{%
+  % v6.74 세션 77 (마스터 지시): 배지-문제 사이 간격 · raisebox 4mm → 7mm (과했음) → 5mm
+  \smash{\raisebox{5mm}{\rlap{\hbox to \linewidth{\hfill\tikz[baseline=(x.base)]{
+    \node[draw=dm-navy!40, sharp corners, inner sep=2pt, inner ysep=1.2pt,
+          font=\footnotesize\sffamily, text=dm-navy!85, line width=0.4pt] (x) {#1};
+  }}}}}%
+}
+
+% =============================================================================
+% choices32 · choicesii · choicesv — 선택형 5보기 배치 (시험지 style.sty 이식 · v6.75 세션 77)
+% =============================================================================
+% choices32 : 3-2 두 줄 (좌표·분수 등 짧은 5개)
+% choicesii : 2-2-1 (중간 길이 5개)
+% choicesv  : 5줄 세로 (긴 부등식·긴 수식)
+% 사용: \begin{choices32}{①본문}{②본문}{③본문}{④본문}{⑤본문}\end{choices32}
+% =============================================================================
+\newenvironment{choices32}[5]{%
+  \par\medskip\noindent
+  \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lll@{}}
+    \mbox{\small \textcircled{\scriptsize 1}\ #1} & \mbox{\small \textcircled{\scriptsize 2}\ #2} & \mbox{\small \textcircled{\scriptsize 3}\ #3} \\[8pt]
+    \mbox{\small \textcircled{\scriptsize 4}\ #4} & \mbox{\small \textcircled{\scriptsize 5}\ #5} & \\
+  \end{tabular*}%
+}{\par\medskip}
+\newenvironment{choicesii}[5]{%
+  \par\medskip\noindent
+  \begin{tabular}{@{}p{0.49\linewidth}@{\hskip 0.02\linewidth}p{0.49\linewidth}@{}}
+    \mbox{\small \textcircled{\scriptsize 1}\ #1} & \mbox{\small \textcircled{\scriptsize 2}\ #2} \\[2pt]
+    \mbox{\small \textcircled{\scriptsize 3}\ #3} & \mbox{\small \textcircled{\scriptsize 4}\ #4} \\[2pt]
+    \mbox{\small \textcircled{\scriptsize 5}\ #5} & \\
+  \end{tabular}%
+}{\par\medskip}
+\newenvironment{choicesv}[5]{%
+  \par\medskip\noindent
+  \begin{tabular}{@{}l@{}}
+    \mbox{\small \textcircled{\scriptsize 1}\ #1} \\[2pt]
+    \mbox{\small \textcircled{\scriptsize 2}\ #2} \\[2pt]
+    \mbox{\small \textcircled{\scriptsize 3}\ #3} \\[2pt]
+    \mbox{\small \textcircled{\scriptsize 4}\ #4} \\[2pt]
+    \mbox{\small \textcircled{\scriptsize 5}\ #5} \\
+  \end{tabular}%
+}{\par\medskip}
+
+% =============================================================================
+% \dmsubprob — 소문항 (1)(2)(3) hangindent 처리 (v6.71 세션 77)
+% -----------------------------------------------------------------------------
+% 마스터 지시 : 소문항 번호 밑으로 텍스트 이어지면 가독성 저해
+% 조치 : hangindent + hangafter=1 로 후속 줄 소문항 라벨 폭만큼 들여쓰기
+% 사용 : \dmsubprob{1} 텍스트 (라벨 (1) + 오른쪽 텍스트 · 다음 줄은 hangindent)
+% =============================================================================
+\newcommand{\dmsubprob}[1]{%
+  \par\noindent
+  \hangindent=1.6em\hangafter=1
+  \makebox[1.5em][l]{$(#1)$}\ignorespaces%
+}
+
+\endinput

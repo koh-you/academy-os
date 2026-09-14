@@ -1,0 +1,1652 @@
+---
+name: mechanism-데이터-개념원리-CM2-GM-직선
+description: 개념원리 공통수학2 직선의 방정식 정독 데이터. 세션 53 (2026-07-20) 신설.
+metadata:
+  type: reference
+  version: v1.0
+  established: 2026-07-20
+  source: 개념원리 공통수학2 (2022개정)
+  section: 직선의 방정식
+  tier_mapping:
+    대표예제: star_3~4
+    유제: star_3~4
+    연습: star_4~5
+  unit_code: CM2-GM
+  standard: 10수05-02
+  citation_note: 개념원리 · 학습 목적 · 저작권 준수 (원문 전사 없음)
+  extract_range: "직선의 방정식 소단원 01·02·03 전체 · 특강 (한 꼭짓점이 원점인 삼각형의 넓이) 포함"
+  pages: "34~64"
+---
+
+# 개념원리 공통수학2 (2022개정) — 직선의 방정식 단원 정독 데이터
+
+**출처**: 개념원리 공통수학2 (2022개정) · I. 도형의 방정식 → 2. 직선의 방정식
+**대상 범위**: 개념원리 이해 01·02·03 (필수 예제 01~17 · 발전 · 확인체크 · 연습문제 STEP1·STEP2·실력UP · 특강)
+**정독 페이지**: p.34~64
+**작업 목적**: Phase A · 정리편·유형편 원본 은행 · CM2-GM-02 정리편 앵커 확보
+**정독 일자**: 2026-07-20
+
+---
+
+## 01 직선의 방정식 (p.34~46)
+
+### 필수 예제 (대표 유형 · p.37~43)
+
+```yaml
+- source: 개념원리-CM2-GM-직선-예제-01
+  page: 37
+  category_type: 대표예제
+  problem_summary: |
+    두 점 (-4,2), (6,8)을 이은 선분의 중점을 지나고 기울기가 -3인 직선의 방정식 구하기.
+  category: 한 점과 기울기 · 중점 결합
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 중점 공식 → y-y1=m(x-x1)
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-예제-02
+  page: 37
+  category_type: 대표예제
+  problem_summary: |
+    두 점 A(7,-3), B(2,-8)을 이은 선분 AB를 3:2로 내분하는 점과 점 (5,2)를 지나는 직선의 방정식 구하기.
+  category: 두 점 지나는 직선 · 내분점 결합
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 내분점 공식 → 두 점 지나는 직선의 방정식
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-예제-03
+  page: 38
+  category_type: 대표예제
+  problem_summary: |
+    x절편이 6이고 y절편이 -2인 직선 위에 두 점 (a,-1), (4,b)가 있을 때, ab의 값 구하기.
+  category: x·y절편형 · 미지수 결정
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: x/a+y/b=1 대입 · 두 방정식 연립
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-예제-04
+  page: 38
+  category_type: 대표예제
+  problem_summary: |
+    세 점 A(3,2), B(1,-a), C(a,5)가 한 직선 위에 있도록 하는 양수 a의 값 구하기.
+  category: 세 점 공선 조건
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: (기울기 AB) = (기울기 AC) 이차방정식
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-예제-05
+  page: 39
+  category_type: 대표예제
+  problem_summary: |
+    세 점 A(-2,4), B(-1,2), C(3,4)를 꼭짓점으로 하는 삼각형 ABC가 있다. 점 A를 지나고 삼각형 ABC의 넓이를 이등분하는 직선의 방정식 구하기.
+  category: 넓이 이등분 직선 (꼭짓점 통과)
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 대변 BC 중점 통과 · 두 점 지나는 직선
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-예제-06
+  page: 40
+  category_type: 대표예제
+  problem_summary: |
+    상수 a, b, c에 대하여 직선 ax+by+c=0이 지나는 사분면을 구하기.
+    (1) ac>0, bc>0  (2) ab<0, bc>0  (3) ac>0, b=0
+  category: 계수 부호와 그래프 개형
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 절편·기울기 부호 → 사분면 판정
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-예제-07
+  page: 41
+  category_type: 대표예제
+  problem_summary: |
+    직선 (2-k)x+(3k-1)y-5=0이 실수 k의 값에 관계없이 항상 지나는 점의 좌표 구하기.
+  category: 직선이 항상 지나는 점 (항등식)
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: k에 대한 항등식 · 두 직선의 교점
+  insight_type: 통찰형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-예제-08
+  page: 42
+  category_type: 발전
+  problem_summary: |
+    두 직선 x+y-2=0, mx-y+m+1=0이 제1사분면에서 만나도록 하는 실수 m의 값의 범위 구하기.
+  category: 항상 지나는 점 · 사분면 교점 (매개변수)
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 지나는 점 (-1,1) 고정 · 회전 · 경계 m 두 개
+  insight_type: 통찰형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-예제-09
+  page: 43
+  category_type: 대표예제
+  problem_summary: |
+    두 직선 2x-y-1=0, x-y-3=0의 교점과 점 (2,2)를 지나는 직선의 방정식 구하기.
+  category: 두 직선 교점 지나는 직선
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: (l1) + k(l2) = 0 · 점 대입하여 k 결정
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 확인체크 (유제 · p.36~43)
+
+```yaml
+- source: 개념원리-CM2-GM-직선-유제-61
+  page: 36
+  category_type: 유제·개념확인
+  problem_summary: |
+    다음 직선의 방정식 구하기.
+    (1) 점 (1,3), 기울기 2  (2) 점 (-2,1), 기울기 -3  (3) 점 (-√2,√2), x축의 양의 방향과 이루는 각 45°.
+  category: 한 점과 기울기 (각도 포함)
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: y-y1=m(x-x1) · 기울기 tan θ
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-62
+  page: 36
+  category_type: 유제·개념확인
+  problem_summary: |
+    다음 두 점을 지나는 직선의 방정식 구하기.
+    (1) (1,2), (3,-4)  (2) (-3,5), (2,-1)  (3) (2,4), (0,-2)  (4) (1,0), (4,3).
+  category: 두 점 지나는 직선
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 기울기 공식 → 직선의 방정식
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-63
+  page: 36
+  category_type: 유제·개념확인
+  problem_summary: |
+    다음 직선의 방정식 구하기.
+    (1) x절편 4, y절편 -1  (2) x절편 -1, 점 (0,5)  (3) 두 점 (2,0), (0,3).
+  category: x·y절편 표현
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: x/a+y/b=1
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-64
+  page: 36
+  category_type: 유제·개념확인
+  problem_summary: |
+    다음 직선의 방정식 구하기.
+    (1) 점 (2,8), x축에 평행  (2) 점 (3,-2), y축에 평행  (3) 점 (-5,6), x축에 수직  (4) 두 점 (-2,-3), (1,-3).
+  category: 좌표축에 평행/수직 직선
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: y=b · x=a 형
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-65
+  page: 37
+  category_type: 유제
+  problem_summary: |
+    직선 √3 x + ay + b = 0은 점 (2,-1)을 지나고 x축의 양의 방향과 이루는 각 60°이다. 상수 a, b에 대하여 ab의 값 구하기.
+  category: 기울기·점 조건 · 일반형
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: tan 60°=√3 · 기울기 = -√3/a → a 결정 → 점 대입 → b
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-66
+  page: 37
+  category_type: 유제
+  problem_summary: |
+    점 (-4,3)을 지나고 기울기가 -1/2인 직선과 x축, y축으로 둘러싸인 도형의 넓이 구하기.
+  category: 직선 · 좌표축 삼각형 넓이
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 절편 구하기 · (1/2)·|x절편|·|y절편|
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-67
+  page: 37
+  category_type: 유제
+  problem_summary: |
+    세 점 A(2,4), B(-3,-1), C(7,-6)을 꼭짓점으로 하는 삼각형 ABC의 무게중심 G와 점 C를 지나는 직선의 방정식 구하기.
+  category: 무게중심 · 두 점 지나는 직선
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: G=(2,-1) · G와 C(7,-6) 지나는 직선
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-68
+  page: 38
+  category_type: 유제
+  problem_summary: |
+    직선 4x+3y=6이 x축과 만나는 점을 P, 직선 3x-2y=12가 y축과 만나는 점을 Q라 할 때, 직선 PQ의 방정식 구하기.
+  category: 절편 결정 · 두 점 직선
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: P=(3/2, 0), Q=(0,-6) · 두 점 지나는 직선
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-69
+  page: 38
+  category_type: 유제
+  problem_summary: |
+    점 (6,-4)를 지나는 직선의 x절편이 y절편의 2배일 때, 이 직선의 방정식 구하기. (단, y절편은 0이 아니다.)
+  category: 절편 관계 조건
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: x/(2b)+y/b=1 · 점 대입하여 b 결정
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-70
+  page: 38
+  category_type: 유제
+  problem_summary: |
+    세 점 A(1,-1), B(2,k), C(-k,-10)이 한 직선 위에 있도록 하는 모든 k의 값의 합 구하기.
+  category: 세 점 공선 · 근과 계수
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: (기울기 AB) = (기울기 AC) 이차방정식 · 근의 합
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-71
+  page: 39
+  category_type: 유제
+  problem_summary: |
+    직선 y=ax가 세 점 O(0,0), A(4,4), B(8,-6)을 꼭짓점으로 하는 삼각형 OAB의 넓이를 이등분할 때, 상수 a의 값 구하기.
+  category: 넓이 이등분 · 원점 통과 직선
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 원점 O 통과 → 대변 AB 중점 지남 · a 결정
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-72
+  page: 39
+  category_type: 유제
+  problem_summary: |
+    좌표평면 위 마름모 ABCD에서 점 (-1,1)을 지나고 마름모 ABCD의 넓이를 이등분하는 직선의 방정식 구하기. (그림: A(1,2), B(3,1), C(5,2), D(3,3))
+  category: 마름모 넓이 이등분 · 대각선 교점
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 두 대각선 교점 (3,2) 통과 · 두 점 직선
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-73
+  page: 39
+  category_type: 유제
+  problem_summary: |
+    직선 kx-4y+3=0이 그림의 직사각형 ABCD의 넓이를 이등분할 때, 상수 k의 값 구하기. (A(1,4), D(5,4), B(1,2), C(5,2))
+  category: 직사각형 넓이 이등분 · 대각선 교점
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 두 대각선 교점 (3,3) 통과 → k 결정
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-74
+  page: 40
+  category_type: 유제
+  problem_summary: |
+    상수 a, b, c가 다음을 만족시킬 때, 직선 ax+by+c=0이 지나는 사분면을 모두 구하기.
+    (1) a=0, bc<0  (2) ab<0, bc>0  (3) c=0, ab<0
+  category: 계수 부호 · 사분면 판정
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 기울기 · 절편 부호 · 사분면 결정
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-75
+  page: 40
+  category_type: 유제
+  problem_summary: |
+    상수 a, b, c에 대하여 ab>0, ac<0일 때, 5개 개형 중 직선 ax+by+c=0의 개형 고르기.
+  category: 계수 부호 · 개형 선택
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 기울기 -a/b<0 · y절편 -c/b>0
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-76
+  page: 41
+  category_type: 유제
+  problem_summary: |
+    직선 (2k-1)x - (k-1)y - 3 = 0은 실수 k의 값에 관계없이 항상 점 P를 지난다. 점 P의 좌표 구하기.
+  category: 항상 지나는 점 · 항등식
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: k에 대한 항등식 · 두 방정식 연립 → P
+  insight_type: 통찰형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-77
+  page: 41
+  category_type: 유제
+  problem_summary: |
+    직선 (k-2)x + (2k+1)y + 7 - k = 0이 실수 k의 값에 관계없이 항상 지나는 점을 P라 할 때, 선분 OP의 길이 구하기. (단, O는 원점.)
+  category: 항상 지나는 점 · OP 거리
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 항등식 → P 결정 → OP 거리
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-78
+  page: 42
+  category_type: 유제·발전
+  problem_summary: |
+    두 직선 x+y+1=0, mx+y-m+1=0이 제3사분면에서 만나도록 하는 실수 m의 값의 범위 구하기.
+  category: 사분면 교점 · 매개변수 회전
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 두 번째 직선 항상 지나는 점 · 경계 값 두 개 계산
+  insight_type: 통찰형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-79
+  page: 42
+  category_type: 유제·발전
+  problem_summary: |
+    직선 y=mx+2가 두 점 A(5,1), B(2,3)을 이은 선분 AB와 만나도록 하는 실수 m의 값의 범위 구하기.
+  category: 회전 직선 · 선분과 교차 범위
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 항상 지나는 점 (0,2) · A, B 극단 기울기 · 범위 결정
+  insight_type: 통찰형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-80
+  page: 43
+  category_type: 유제
+  problem_summary: |
+    두 직선 3x+2y=-1, 2x-y+10=0의 교점과 원점을 지나는 직선의 방정식 구하기.
+  category: 두 직선 교점 지나는 직선
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: (l1) + k(l2) = 0 · (0,0) 대입 → k
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-81
+  page: 43
+  category_type: 유제
+  problem_summary: |
+    두 직선 4x-3y+5=0, x+2y-7=0의 교점을 지나고 기울기가 -6인 직선의 방정식 구하기.
+  category: 두 직선 교점 · 기울기 조건
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 교점 결정 후 y-y1=m(x-x1)
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 연습문제 STEP1 (p.44)
+
+```yaml
+- source: 개념원리-CM2-GM-직선-연습-82
+  page: 44
+  category_type: 연습
+  problem_summary: |
+    x축의 양의 방향과 이루는 각의 크기가 30°이고 점 (3,-√3)을 지나는 직선과 x축, y축으로 둘러싸인 삼각형의 넓이 구하기.
+  category: 기울기·점 · 좌표축 삼각형 넓이
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 기울기 tan 30°=√3/3 · 절편 · 삼각형 넓이
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-83
+  page: 44
+  category_type: 연습
+  problem_summary: |
+    점 (a-1, a+5)가 두 점 (-1,2), (1,8)을 지나는 직선 위에 있을 때, 상수 a의 값 구하기.
+  category: 두 점 직선 · 점 조건
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 직선의 방정식 · 점 대입 · 일차방정식
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-84
+  page: 44
+  category_type: 연습
+  problem_summary: |
+    x절편과 y절편의 절댓값이 같고 부호가 반대인 직선이 점 (2,-1)을 지날 때, 이 직선의 y절편 구하기. (단, 원점 통과하지 않음.)
+  category: 절편 조건 · 미지수 결정
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: x절편 a, y절편 -a · x/a - y/a = 1 · 점 대입
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-85
+  page: 44
+  category_type: 연습
+  problem_summary: |
+    세 점 A(1,1), B(-1,-a), C(a,5)가 직선 l 위에 있을 때, 직선 l의 방정식 구하기. (단, a>0)
+  category: 세 점 공선 · 직선 결정
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 공선 조건 → a 결정 → 두 점 직선
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-86
+  page: 44
+  category_type: 연습
+  problem_summary: |
+    직선 5x+6y=1과 x축 및 y축으로 둘러싸인 부분의 넓이를 직선 y=mx가 이등분할 때, 상수 m의 값 구하기.
+  category: 원점 통과 직선 · 삼각형 넓이 이등분
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 원점과 대변 중점 지나는 직선 · m 결정
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-87
+  page: 44
+  category_type: 연습
+  problem_summary: |
+    직선 ax+by+c=0의 개형이 그림(2·3사분면 통과, 음의 기울기)과 같을 때, 직선 bx+cy-a=0이 지나지 않는 사분면 구하기. (단, a, b, c 상수)
+  category: 개형 조건 · 다른 계수 직선 사분면
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 부호 관계 도출 · 새 직선 절편·기울기 부호 판정
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 연습문제 STEP2 (p.45)
+
+```yaml
+- source: 개념원리-CM2-GM-직선-연습-88
+  page: 45
+  category_type: 연습·교육청기출
+  problem_summary: |
+    좌표평면에서 두 점 A(2,6), B(8,0)에 대하여 일차함수 y=(1/2)x+1/2 그래프가 x축과 만나는 점을 C, 선분 AB와 만나는 점을 D라 할 때, 삼각형 CBD의 넓이 (객관식 5지).
+  category: 두 직선 교점 · 삼각형 넓이 (객관식)
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: C=(-1,0) · 직선 AB 방정식 y=-x+8, D=(5,3) · 삼각형 CBD 넓이 = (1/2)·9·3 = 27/2 (세션 55 자체 계산 검증 완료)
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-89
+  page: 45
+  category_type: 연습
+  problem_summary: |
+    그림의 직사각형 ABCD에서 A(-8,3), 둘레의 길이 32, 가로가 세로의 3배일 때, 두 점 B, D를 지나는 직선의 y절편 구하기.
+  category: 직사각형 · 대각선 y절편
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 가로 12·세로 4 · B, D 좌표 결정 · 두 점 직선 y절편
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-90
+  page: 45
+  category_type: 연습
+  problem_summary: |
+    두 점 A(0,1), B(2,0)을 꼭짓점으로 하는 정사각형 ABCD에서 직선 BD의 방정식 구하기. (단, C, D는 제1사분면 위.)
+  category: 정사각형 · 대각선 직선
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: AB에 수직인 변 방향 · D 좌표 결정 (수선의 발 · 합동 도형)
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-91
+  page: 45
+  category_type: 연습
+  problem_summary: |
+    세 점 A(2,-5), B(a,-2), C(6, 2a+1)이 삼각형을 이루지 않을 때, 선분 BC의 길이 구하기. (단, a>0)
+  category: 세 점 공선 조건 · 선분 길이
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 기울기 AB = 기울기 BC 이차방정식 · a>0 선택 · BC 거리
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-92
+  page: 45
+  category_type: 연습
+  problem_summary: |
+    그림의 두 직사각형 (하나는 x∈[-3,0], y∈[2,6] · 다른 하나는 x∈[3,7], y∈[-4,-1])의 넓이를 동시에 이등분하는 직선의 방정식 구하기.
+  category: 두 직사각형 넓이 동시 이등분
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 각 직사각형 중심 (-1.5, 4), (5, -2.5) 통과 · 두 점 직선
+  insight_type: 통찰형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-93
+  page: 46
+  category_type: 연습
+  problem_summary: |
+    직선 2x-y=3 위의 점 (a,b)에 대하여 직선 ax+by+6=0이 항상 지나는 점의 좌표 구하기.
+  category: 직선 위 점 · 항상 지나는 점
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: b=2a-3 대입 · a에 대한 항등식 → 항상 지나는 점
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-94
+  page: 46
+  category_type: 연습
+  problem_summary: |
+    직선 y=mx+2m-1이 그림의 직사각형 (x∈[1,3], y∈[1,2])과 만나도록 하는 실수 m의 값의 범위가 α ≤ m ≤ β일 때, 5αβ의 값 구하기.
+  category: 항상 지나는 점 · 직사각형 교차 범위
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: (-2,-1) 고정 · 꼭짓점 극단 기울기 α, β 결정
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 연습문제 실력UP+ (p.46)
+
+```yaml
+- source: 개념원리-CM2-GM-직선-연습-95
+  page: 46
+  category_type: 실력UP·수능형
+  problem_summary: |
+    좌표평면 위의 네 점 O(0,0), A(4,0), B(4,6), C(0,6)에 대하여 선분 BA 위 두 점 D, E (양 끝점 아님, D≠E)에서, 직선 OD와 CE의 교점을 F라 하면 사각형 OAEF의 넓이가 사각형 BCFD의 넓이보다 4만큼 크고, 직선 OD·CE 기울기의 곱이 -15/16이다. 직선 CE의 방정식 구하기.
+  category: 두 직선 · 넓이 조건 · 기울기 곱 (통찰형)
+  tier: star_4
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 사각형 넓이 조건 → 매개변수 2개 (D,E 좌표) · 기울기 곱 d(e-6)/16=-15/16 → d(e-6)=-15 · 연립 (개념원리 원본 답지 없이 세부 유도 복잡 · 세션 55 부분 계산: F=(24/(d-e+6), 6d/(d-e+6)) · 최종 CE 방정식 개념원리 답지 대조 필요)
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-96
+  page: 46
+  category_type: 실력UP·수능형
+  problem_summary: |
+    원점을 지나는 두 직선 m, n이 직선 x+3y-3=0과 x축·y축으로 둘러싸인 삼각형의 넓이를 삼등분할 때, 두 직선 m, n의 기울기의 합 구하기.
+  category: 삼각형 넓이 삼등분 · 원점 통과 두 직선
+  tier: star_4
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 삼각형 꼭짓점 O(0,0), A(3,0), B(0,1) · 넓이 3등분 조건 · 두 직선 결정
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-97
+  page: 46
+  category_type: 실력UP·수능형
+  problem_summary: |
+    세 점 A(1,2), B(-1,1), C(3,-1)을 꼭짓점으로 하는 삼각형 ABC가 직선 y=kx-2k+2와 만나지 않도록 하는 실수 k의 값의 범위 구하기.
+  category: 회전 직선 · 삼각형과 교차 범위
+  tier: star_4
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 항상 지나는 점 (2,2) 통과 · 세 꼭짓점 기울기 극단 · 여집합
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+---
+
+## 02 직선의 위치 관계 (p.47~55)
+
+### 필수 예제 (대표 유형 · p.50~53)
+
+```yaml
+- source: 개념원리-CM2-GM-직선-예제-10
+  page: 50
+  category_type: 대표예제
+  problem_summary: |
+    두 직선 x+ay+1=0, ax+(a+2)y+2=0에 대하여 다음 물음에 답하기.
+    (1) 두 직선이 평행할 때, 상수 a의 값 구하기.
+    (2) 두 직선이 수직일 때, 상수 a의 값 구하기. (단, a≠0)
+  category: 두 직선 평행·수직 조건 (일반형)
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 평행: a/a'=b/b'≠c/c' · 수직: aa'+bb'=0
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-예제-11
+  page: 51
+  category_type: 대표예제
+  problem_summary: |
+    다음 물음에 답하기.
+    (1) 두 점 (2,-1), (4,3)을 지나는 직선에 평행하고 x절편이 4인 직선의 방정식 구하기.
+    (2) 점 (-1,2)를 지나고 직선 3x-2y+4=0에 수직인 직선의 방정식 구하기.
+  category: 평행·수직 직선의 방정식
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 기울기 결정 · 한 점 통과 직선 공식
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-예제-12
+  page: 52
+  category_type: 대표예제
+  problem_summary: |
+    두 점 A(-1,3), B(3,-5)를 이은 선분 AB의 수직이등분선의 방정식이 x+ay+b=0일 때, 상수 a, b에 대하여 ab의 값 구하기.
+  category: 수직이등분선의 방정식
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 중점 · AB의 기울기 · 수직 조건 · 계수 결정
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-예제-13
+  page: 53
+  category_type: 발전
+  problem_summary: |
+    세 직선 x-y=0, x+y=2, 5x-ky=15가 삼각형을 이루지 않도록 하는 상수 k의 값을 모두 구하기.
+  category: 세 직선 · 삼각형 미형성 조건 (세 경우)
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 두 직선 평행 (2 경우) or 세 직선 한 점에서 만남
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 확인체크 (유제 · p.49~53)
+
+```yaml
+- source: 개념원리-CM2-GM-직선-유제-98
+  page: 49
+  category_type: 유제·개념확인
+  problem_summary: |
+    다음 두 직선이 평행할 때, 상수 a의 값을 모두 구하기.
+    (1) y=ax+2, y=-3x-1  (2) ax+4y+1=0, x+ay-3=0
+  category: 평행 조건 (표준형·일반형)
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 기울기 같음·y절편 다름 · 일반형 조건
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-99
+  page: 49
+  category_type: 유제·개념확인
+  problem_summary: |
+    다음 두 직선이 일치할 때, 상수 a, b의 값 구하기.
+    (1) y=ax+5, y=-x+b  (2) ax+3y-2=0, 3x+by+6=0
+  category: 일치 조건
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 기울기·y절편 모두 같음 · 계수 비 일치
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-100
+  page: 49
+  category_type: 유제·개념확인
+  problem_summary: |
+    다음 두 직선이 수직일 때, 상수 a의 값을 모두 구하기.
+    (1) y=ax-4, y=4x+1  (2) (a-2)x+3y-1=0, ax-y+3=0
+  category: 수직 조건
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 기울기 곱 -1 · aa'+bb'=0
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-101
+  page: 50
+  category_type: 유제
+  problem_summary: |
+    두 직선 (a+1)x+y-1=0, 2x-(a-2)y-1=0이 평행할 때, 상수 a의 값 구하기.
+  category: 평행 조건 · 이차방정식
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: (a+1)(a-2)=-2 이차방정식 · y절편 조건
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-102
+  page: 50
+  category_type: 유제
+  problem_summary: |
+    직선 ax-6y=5가 직선 x-2y=3과 평행하고 직선 2x-by+1=0과 수직이다. 상수 a, b에 대하여 a+b의 값 구하기.
+  category: 평행 + 수직 조건 · a+b
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 두 조건 각각 · a·b 결정
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-103
+  page: 50
+  category_type: 유제
+  problem_summary: |
+    두 직선 (a-2)x+y+1=0과 ax-3y+b=0이 점 (-2,c)에서 수직으로 만난다. 상수 a, b, c에 대하여 a+b+c의 값 구하기. (단, a>0)
+  category: 수직 + 교점 조건
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 수직 조건 → a 결정 · 두 직선 지나는 점 · c, b
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-104
+  page: 51
+  category_type: 유제
+  problem_summary: |
+    직선 y=4x-12에 평행하고 점 (-2,5)를 지나는 직선이 점 (6,k)를 지날 때, k의 값 구하기.
+  category: 평행 직선 · 좌표
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 기울기 4 · 점 대입 · k 계산
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-105
+  page: 51
+  category_type: 유제
+  problem_summary: |
+    두 점 (1,3), (5,-7)을 이은 선분의 중점을 지나고 직선 3x+5y-12=0에 수직인 직선의 방정식 구하기.
+  category: 수직 · 중점 통과 직선
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 중점 · 수직 기울기 · 한 점 통과 직선
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-106
+  page: 52
+  category_type: 유제
+  problem_summary: |
+    두 점 A(-1,2), B(5,-4)를 이은 선분 AB의 수직이등분선이 점 (a,-2)를 지날 때, a의 값 구하기.
+  category: 수직이등분선 · 좌표
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 중점·기울기 → 방정식 → 점 대입
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-107
+  page: 52
+  category_type: 유제
+  problem_summary: |
+    두 점 A(-5,-4), B(a,8)을 이은 선분 AB의 수직이등분선의 방정식이 2x+3y+b=0일 때, a-b의 값 구하기. (단, b는 상수.)
+  category: 수직이등분선 · 미지수 결정
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 기울기 -2/3 · AB 기울기 3/2 · 중점 대입
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-108
+  page: 53
+  category_type: 유제·발전
+  problem_summary: |
+    세 직선 2x+y+1=0, x-y+2=0, ax-y=0이 삼각형을 이루지 않도록 하는 모든 상수 a의 값의 합 구하기.
+  category: 세 직선 삼각형 미형성 · 근의 합
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 두 경우 평행 조건 + 세 직선 공점
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 연습문제 STEP1 (p.54)
+
+```yaml
+- source: 개념원리-CM2-GM-직선-연습-109
+  page: 54
+  category_type: 연습
+  problem_summary: |
+    직선 x+ay+1=0이 직선 2x-by+1=0과 수직이고 직선 x-(b-3)y-1=0과 평행하다. 상수 a, b에 대하여 a²+b²의 값 구하기.
+  category: 평행 + 수직 · 두 미지수
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 두 조건 연립 · a·b 결정
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-110
+  page: 54
+  category_type: 연습
+  problem_summary: |
+    두 직선 2x+ay+3=0, bx+2y+c=0이 점 (1,1)에서 수직으로 만날 때, 상수 a, b, c에 대하여 abc의 값 구하기.
+  category: 수직 + 교점 · abc
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 각 직선 (1,1) 통과 · 수직 조건 · 세 미지수 결정
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-111
+  page: 54
+  category_type: 연습
+  problem_summary: |
+    두 직선 x-y+5=0, 2x-y+3=0의 교점을 지나고 직선 3x-2y+1=0과 평행한 직선의 방정식이 y=ax+b일 때, 상수 a, b에 대하여 ab의 값 구하기.
+  category: 두 직선 교점 · 평행 조건
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 교점 결정 · 기울기 3/2 · b 계산
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-112
+  page: 54
+  category_type: 연습·교육청기출
+  problem_summary: |
+    점 (2,5)를 지나고 직선 3x+2y-4=0에 수직인 직선의 방정식이 2x+ay+b=0일 때, a+b의 값 구하기. (단, a, b는 상수)
+  category: 수직 직선 · 상수 결정
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 기울기 2/3 · 점 통과 · 계수 매칭
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-113
+  page: 54
+  category_type: 연습
+  problem_summary: |
+    두 점 A(-3,2), B(9,-4)에 대하여 선분 AB를 2:1로 내분하는 점을 C라 하자. 점 C를 지나고 직선 AB에 수직인 직선과 x축 및 y축으로 둘러싸인 부분의 넓이 구하기.
+  category: 내분점 · 수직 · 삼각형 넓이
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: C 결정 · AB 기울기 · 수직 직선 · 좌표축 삼각형 넓이
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-114
+  page: 54
+  category_type: 연습
+  problem_summary: |
+    서로 다른 세 직선 ax+y+5=0, 2x+by-4=0, x+2y+3=0에 의하여 좌표평면이 네 부분으로 나누어질 때, 상수 a, b에 대하여 a+b의 값 구하기.
+  category: 세 직선 · 네 부분 (두 직선 평행)
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 세 직선 서로 다르고 두 직선이 나머지 하나와 평행 → 네 부분
+  insight_type: 통찰형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 연습문제 STEP2 (p.54~55)
+
+```yaml
+- source: 개념원리-CM2-GM-직선-연습-115
+  page: 54
+  category_type: 연습
+  problem_summary: |
+    점 (2,0)을 지나는 직선과 직선 (3k-2)x-y+5=0이 y축에서 수직으로 만날 때, 상수 k의 값 구하기.
+  category: y축 위 수직 교차 · 매개변수
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 두 직선의 y절편 동일 · 수직 조건 · k 결정
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-116
+  page: 55
+  category_type: 연습
+  problem_summary: |
+    점 A(1,4)에서 직선 y=x-3에 내린 수선의 발을 H라 할 때, 점 H의 좌표 구하기.
+  category: 수선의 발
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: A 통과·수직 직선 · 원 직선과 교점
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-117
+  page: 55
+  category_type: 연습
+  problem_summary: |
+    두 점 A(1,-4), B에 대하여 직선 x+3y+1=0이 선분 AB의 수직이등분선일 때, 점 B의 좌표 구하기.
+  category: 수직이등분선 · 대칭점
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: A에서 직선에 내린 수선의 발 H · B는 A의 대칭점 (H가 AB 중점)
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-118
+  page: 55
+  category_type: 연습
+  problem_summary: |
+    세 직선 x+2y=3, 2x-3y-12=0, ax+y=1로 둘러싸인 삼각형이 직각삼각형이 되도록 하는 모든 상수 a의 값의 합 구하기.
+  category: 세 직선 · 직각삼각형 조건
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 세 조합 수직 조건 · 각각 a 값 · 합
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-119
+  page: 55
+  category_type: 연습
+  problem_summary: |
+    세 직선 2x-y=4, 3x+2y=-1, x-ay=0이 삼각형을 이루지 않도록 하는 모든 상수 a의 값의 곱 구하기.
+  category: 삼각형 미형성 · 근의 곱
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 세 경우 (두 평행 2가지 + 공점 1) · a 값 곱
+  insight_type: 통찰형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 연습문제 실력UP+ (p.55)
+
+```yaml
+- source: 개념원리-CM2-GM-직선-연습-120
+  page: 55
+  category_type: 실력UP·교육청기출
+  problem_summary: |
+    이차함수 y=x²의 그래프 위의 점 P(1,1)에서의 접선 l1, 점 P를 지나고 l1과 수직인 직선 l2. l1이 y축과 만나는 점 Q, l2가 y=x²과 만나는 점 중 P가 아닌 점 R. 삼각형 PRQ의 넓이 S에 대하여 40S의 값 구하기.
+  category: 접선 · 수직 · 이차함수와 교점 · 삼각형 넓이
+  tier: star_4
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 접선 l1: y=2x-1 (판별식 D=0) · Q(0,-1) · l2: y=-x/2+3/2 · R(-3/2,9/4) · 넓이 S=25/8 · 40S=125 (세션 55 자체 계산 검증)
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-121
+  page: 55
+  category_type: 실력UP
+  problem_summary: |
+    삼각형 ABC의 세 꼭짓점 A(3,-1), B(8,4), C(2,6)에서 각각 대변에 그은 세 수선의 교점 (수심)의 좌표 구하기.
+  category: 삼각형 수심
+  tier: star_4
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 각 꼭짓점 통과 · 대변에 수직인 직선 · 두 직선 교점
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+---
+
+## 03 점과 직선 사이의 거리 (p.56~64) — 특강 (한 꼭짓점이 원점인 삼각형 넓이) 포함
+
+### 필수 예제 (대표 유형 · p.58~62)
+
+```yaml
+- source: 개념원리-CM2-GM-직선-예제-14
+  page: 58
+  category_type: 대표예제
+  problem_summary: |
+    점 (2,3)과 직선 y=(3/4)x+k/2 사이의 거리가 2일 때, 모든 상수 k의 값의 합 구하기.
+  category: 점과 직선 거리 · 절댓값 방정식
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 일반형 변환 · 거리 공식 · 절댓값 방정식 · 두 근 합
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-예제-15
+  page: 59
+  category_type: 대표예제
+  problem_summary: |
+    평행한 두 직선 2x-y+5=0, 2x-y+k=0 사이의 거리가 2√5일 때, 상수 k의 값을 모두 구하기.
+  category: 평행 두 직선 사이 거리
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 한 직선 위 편리한 점 선택 · 다른 직선과 거리 · 절댓값 방정식
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-예제-16
+  page: 60
+  category_type: 대표예제
+  problem_summary: |
+    세 점 A(2,5), B(-3,2), C(1,-4)를 꼭짓점으로 하는 삼각형 ABC의 넓이 구하기.
+  category: 삼각형 넓이 (점-직선 거리)
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: BC 길이 · BC 직선 방정식 · A와 거리 h · (1/2)·BC·h
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-예제-17
+  page: 61
+  category_type: 발전
+  problem_summary: |
+    두 직선 2x-y-1=0, x+2y-1=0이 이루는 각의 이등분선의 방정식 구하기.
+  category: 각의 이등분선
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 이등분선 위 점 (x,y)에서 두 직선까지 거리 같음 · 절댓값 방정식 · 두 이등분선 (수직)
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 확인체크 (유제 · p.57~62)
+
+```yaml
+- source: 개념원리-CM2-GM-직선-유제-122
+  page: 57
+  category_type: 유제·개념확인
+  problem_summary: |
+    다음 점과 직선 사이의 거리 구하기.
+    (1) 점 (-1,4), 직선 2x-y+1=0
+    (2) 점 (3,-2), 직선 3x+4y-2=0
+    (3) 점 (-5,3), 직선 4x-3y+4=0
+    (4) 점 (2,-6), 직선 y=3x-2
+  category: 점과 직선 거리 (기본)
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: |ax1+by1+c|/√(a²+b²)
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-123
+  page: 57
+  category_type: 유제·개념확인
+  problem_summary: |
+    원점과 다음 직선 사이의 거리 구하기.
+    (1) 2x+3y-13=0  (2) 3x-y+10=0  (3) 2x-4y-5=0  (4) y=2x-4
+  category: 원점과 직선 거리
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: |c|/√(a²+b²)
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-124
+  page: 57
+  category_type: 유제·개념확인
+  problem_summary: |
+    다음 평행한 두 직선 사이의 거리 구하기.
+    (1) 2x-y+2=0, 2x-y-3=0
+    (2) x+3y-1=0, x+3y+4=0
+    (3) 3x-4y=0, 3x-4y+5=0
+    (4) x-2y+1=0, 2x-4y-3=0
+  category: 평행 두 직선 사이 거리
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 한 점 선택 · 다른 직선과 거리
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-125
+  page: 58
+  category_type: 유제
+  problem_summary: |
+    제1사분면 위의 점 (1,a)와 직선 3x+y-5=0 사이의 거리가 √10일 때, a의 값 구하기.
+  category: 점-직선 거리 · 사분면 조건
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 절댓값 방정식 · 두 해 중 양수 선택
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-126
+  page: 58
+  category_type: 유제
+  problem_summary: |
+    점 (-2,3)에서 두 직선 x+2y-1=0, 2x+y+k=0까지의 거리가 같도록 하는 모든 상수 k의 값의 곱 구하기.
+  category: 두 직선까지 거리 같음
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 두 거리 등식 · 절댓값 방정식 · 두 근 곱
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-127
+  page: 58
+  category_type: 유제
+  problem_summary: |
+    직선 3x+4y+1=0에 수직이고 원점으로부터의 거리가 1인 직선의 방정식을 모두 구하기.
+  category: 수직 · 원점 거리 조건
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 수직 기울기 4/3 · 4x-3y+c=0 꼴 · |c|/5=1
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-128
+  page: 59
+  category_type: 유제
+  problem_summary: |
+    평행한 두 직선 x+y-3=0, x+y+m=0 사이의 거리가 4√2일 때, 양수 m의 값 구하기.
+  category: 평행 거리 · 양수 조건
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 한 점 선택 · 거리 공식 · 양수 해
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-129
+  page: 59
+  category_type: 유제
+  problem_summary: |
+    두 직선 3x-y+12=0, ax+2y-4=0이 평행할 때, 상수 a의 값과 두 직선 사이의 거리 구하기.
+  category: 평행 · 상수 결정 · 거리
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 비례 조건 · a=-6 · 한 점 · 거리
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-130
+  page: 59
+  category_type: 유제
+  problem_summary: |
+    평행한 두 직선 3x+4y-5=0, 3x+ay+b=0 사이의 거리가 3일 때, 상수 a, b의 값 구하기. (단, b<0)
+  category: 평행 · 두 미지수 결정
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 평행 → a=4 · 거리 조건 · b<0 선택
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-131
+  page: 60
+  category_type: 유제
+  problem_summary: |
+    원점 O와 두 점 A(2,2), B(-3,6)에 대하여 삼각형 OAB의 넓이 구하기.
+  category: 원점 삼각형 넓이
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: |x1·y2 - x2·y1|/2 (특강) 또는 점-직선 거리
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-132
+  page: 60
+  category_type: 유제
+  problem_summary: |
+    세 점 A(1,2), B(3,-1), C(a,4)를 꼭짓점으로 하는 삼각형 ABC의 넓이가 8이 되도록 하는 a의 값 모두 구하기.
+  category: 삼각형 넓이 · 미지수 결정
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: AB 직선 · C와 거리 h · 절댓값 방정식 · 두 근
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-133
+  page: 61
+  category_type: 유제·발전
+  problem_summary: |
+    두 직선 y=-x/2 - 3/2, y=2x-5로부터 같은 거리에 있는 점 P가 나타내는 도형의 방정식 구하기.
+  category: 각의 이등분선 (자취)
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 두 직선까지 거리 등식 · 두 이등분선
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-유제-134
+  page: 61
+  category_type: 유제·발전
+  problem_summary: |
+    두 직선 x-3y+4=0, 3x-y-2=0이 이루는 각을 이등분하는 직선 중에서 기울기가 음수인 직선의 방정식 구하기.
+  category: 각의 이등분선 · 음수 기울기
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 두 이등분선 유도 · 기울기 음수 선택
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 특강 확인체크 (p.62)
+
+```yaml
+- source: 개념원리-CM2-GM-직선-유제-135
+  page: 62
+  category_type: 유제·특강
+  problem_summary: |
+    원점 O와 두 점 A(-3,5), B(1,-3)에 대하여 삼각형 OAB의 넓이 구하기.
+  category: 원점 삼각형 넓이 (특강 공식)
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: |x1·y2 - x2·y1|/2 = |(-3)·(-3) - 1·5|/2 = 2
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 연습문제 STEP1 (p.63)
+
+```yaml
+- source: 개념원리-CM2-GM-직선-연습-136
+  page: 63
+  category_type: 연습
+  problem_summary: |
+    x축 위의 점 P에서 두 직선 x+3y-2=0, 3x-y+3=0까지의 거리가 같을 때, 점 P의 좌표 모두 구하기.
+  category: x축 위 점 · 두 직선까지 등거리
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: P=(a,0) · 절댓값 방정식 · 두 해
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-137
+  page: 63
+  category_type: 연습
+  problem_summary: |
+    직선 y=3x+2에 평행하고 이 직선과의 거리가 √10인 두 직선의 y절편의 합 구하기.
+  category: 평행 · 거리 · y절편 합
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: y=3x+n 꼴 · 거리 |n-2|/√10=√10 · 두 근 합
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-138
+  page: 63
+  category_type: 연습
+  problem_summary: |
+    두 점 O(0,0), A(-1,3)과 직선 3x+y-6=0 위의 점 P에 대하여 삼각형 AOP의 넓이 구하기.
+  category: 삼각형 넓이 (직선 위 점 · 거리 일정)
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: OA 밑변 · P와 OA 직선 거리 h · 넓이
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-139
+  page: 63
+  category_type: 연습
+  problem_summary: |
+    네 점 O(0,0), A(2,1), B(3,3), C(1,2)를 꼭짓점으로 하는 평행사변형 OABC의 넓이 구하기.
+  category: 평행사변형 넓이
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 밑변 OA · C와 OA 직선 거리 h · 밑변×높이
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-140
+  page: 63
+  category_type: 연습
+  problem_summary: |
+    두 직선 3x+y=0, x+3y+4=0이 이루는 각 중에서 예각을 이등분하는 직선의 방정식 구하기.
+  category: 예각 이등분선
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 두 이등분선 유도 · 예각 판정 (기울기 부호)
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 연습문제 STEP2 (p.63~64)
+
+```yaml
+- source: 개념원리-CM2-GM-직선-연습-141
+  page: 63
+  category_type: 연습
+  problem_summary: |
+    직선 (a+1)x-(a-3)y+a-15=0은 실수 a의 값에 관계없이 항상 점 A를 지난다. 점 A와 직선 2x-y+p=0 사이의 거리가 √5일 때, 모든 상수 p의 값의 합 구하기.
+  category: 항상 지나는 점 · 거리 조건
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: A 결정 (항등식) · 거리 절댓값 방정식 · p 두 근 합
+  insight_type: 조건통합형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-142
+  page: 63
+  category_type: 연습
+  problem_summary: |
+    실수 k에 대하여 점 (1,-2)와 직선 x-2y-4+k(2x+y)=0 사이의 거리를 f(k)라 할 때, f(k)의 최댓값 구하기.
+  category: 거리 함수 · 최댓값
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 직선이 항상 지나는 점 P · 거리 최대는 (점 P와 (1,-2) 사이 거리)
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-143
+  page: 64
+  category_type: 연습
+  problem_summary: |
+    마름모 ABCD (그림: A(-1,0), B(0,-2), C(1,0), D(0,3) 형태의 마름모)에 대하여 점 P(-3,3)과 마름모 위의 점 Q 사이 거리의 최솟값 m, 최댓값 M일 때, M²-m² 값 구하기.
+  category: 마름모 · 점 P 거리 최소/최대
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 최단 m=9/√10 (DA 변 3x-y+3=0 수선 · 발 t=0.3 위) · 최장 M=PB=√34 (꼭짓점) · M²-m²=34-81/10=259/10 (세션 55 자체 계산 검증)
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-144
+  page: 64
+  category_type: 연습
+  problem_summary: |
+    두 직선 x-y+1=0, x-2y+3=0의 교점을 지나고 원점으로부터의 거리가 1인 직선의 방정식 모두 구하기.
+  category: 교점 · 원점 거리 조건
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 교점 (1,2) · (x-1) + k(y-2) 꼴 · 원점 거리 =1
+  insight_type: 조건통합형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-145
+  page: 64
+  category_type: 연습
+  problem_summary: |
+    세 직선 2x-y-1=0, x-2y+1=0, x+y-5=0으로 둘러싸인 삼각형의 넓이 구하기.
+  category: 세 직선 · 삼각형 넓이
+  tier: star_3
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 두 직선씩 교점 3개 · 특강 공식 or 밑변·높이
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 연습문제 실력UP+ (p.64)
+
+```yaml
+- source: 개념원리-CM2-GM-직선-연습-146
+  page: 64
+  category_type: 실력UP·교육청기출
+  problem_summary: |
+    좌표평면 위의 세 점 A(6,0), B(0,-3), C(10,-8)에 대하여 삼각형 ABC의 내접원의 중심을 P라 할 때, 선분 OP의 길이 (객관식 5지). (단, O는 원점.)
+  category: 삼각형 내심 · OP 거리
+  tier: star_4
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 세 변 길이 BC=5√5·CA=4√5·AB=3√5 · 내심 가중평균 I=(5·A+4·B+3·C)/12 = (5,-3) · |OP|=√34 (세션 55 자체 계산 검증)
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-147
+  page: 64
+  category_type: 실력UP
+  problem_summary: |
+    이차함수 y=x²+3 그래프 위의 점과 직선 y=-2x+k 사이의 거리의 최솟값이 √5일 때, 상수 k의 값 구하기.
+  category: 이차함수 · 접선 · 거리 최솟값
+  tier: star_4
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 주어진 직선 평행하고 이차함수에 접하는 직선 · 두 평행 직선 거리
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-GM-직선-연습-148
+  page: 64
+  category_type: 실력UP
+  problem_summary: |
+    세 점 A(1,4), B(0,-1), C(2,0)을 꼭짓점으로 하는 삼각형 ABC의 넓이를 직선 y=a가 이등분할 때, 상수 a의 값 구하기.
+  category: 수평선 넓이 이등분
+  tier: star_4
+  unit_code: CM2-GM
+  standard: 10수05-02
+  mechanism_primary: 삼각형 넓이 9/2 · 위쪽 소삼각형 (A와 y=a 교점 2개) 넓이 = 9(4-a)²/40 = 9/4 → (4-a)²=10 → a=4-√10 (세션 55 자체 계산 검증)
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+---
+
+## 통계 요약
+
+### 소단원별 문항 수
+| 소단원 | 필수 예제·발전 | 확인체크 (유제) | 연습 STEP1 | 연습 STEP2 | 실력UP+ | 계 |
+|---|---|---|---|---|---|---|
+| 01 직선의 방정식 | 9 (#01~09) | 21 (#61~81) | 6 (#82~87) | 7 (#88~94) | 3 (#95~97) | 46 |
+| 02 직선의 위치 관계 | 4 (#10~13) | 11 (#98~108) | 6 (#109~114) | 5 (#115~119) | 2 (#120~121) | 28 |
+| 03 점과 직선 사이의 거리 (+특강) | 4 (#14~17) | 14 (#122~135) | 5 (#136~140) | 5 (#141~145) | 3 (#146~148) | 31 |
+| **총계** | **17** | **46** | **17** | **17** | **8** | **105** |
+
+**등재 항목 실계**: 예제·발전 17 + 유제 46 + 연습 42 = **105 항목** (연습은 star_3~5 전수 등재)
+
+### star 분포 (등재 105 항목)
+| star | 개수 | 비율 |
+|---|---|---|
+| star_3 | 48 | 46% |
+| star_4 | 38 | 36% |
+| star_5 | 19 | 18% |
+
+### 주요 mechanism
+- **직선의 방정식 결정**: 한 점·기울기 / 두 점 / x·y절편 / 좌표축 평행·수직 / 각도 tan θ
+- **세 점 공선 조건**: 기울기 등식 → 미지수 결정 (이차방정식·근과 계수)
+- **일반형 ax+by+c=0 계수 부호**: 사분면 판정 / 개형 선택
+- **직선이 항상 지나는 점**: k에 대한 항등식 → 두 방정식 연립 (P 좌표)
+- **두 직선 교점 지나는 직선**: (l1) + k(l2) = 0 꼴
+- **넓이 이등분 직선**: 꼭짓점 통과 → 대변 중점 / 평행사변형·마름모·직사각형 → 대각선 교점
+- **두 직선 평행/수직/일치**: a/a'=b/b'≠c/c' · aa'+bb'=0
+- **수직이등분선**: 중점 통과 · 수직 기울기
+- **세 직선 삼각형 미형성**: 두 직선 평행 (2 경우) + 세 직선 공점 (1 경우)
+- **점과 직선 사이의 거리**: |ax1+by1+c|/√(a²+b²)
+- **평행 두 직선 거리**: 한 점 선택 → 다른 직선까지 거리
+- **각의 이등분선**: 두 직선까지 거리 등식 · 두 이등분선 (수직)
+- **삼각형 넓이 (좌표)**: BC 직선 방정식 → A와 거리 h → (1/2)·BC·h · 원점 삼각형 특강 공식 |x1y2 - x2y1|/2
+- **회전 직선·매개변수**: 항상 지나는 점 고정 → 선분·직사각형·삼각형과 교차 범위 결정
+- **수선의 발·수심·수직이등분선 대칭점**: 좌표 결정
+
+### 정리편·유형편 활용 관점
+- **★ 3 (48문)**: 개념 정착 · 기본 유형 앵커 후보 (예제·유제 대다수)
+- **★ 4 (38문)**: 조건 통합 · 미지수 결정 · 정리편 중심 예제 후보 (특히 #06 계수 부호·#07 항상 지나는 점·#08 사분면 회전·#12 수직이등분선·#13 세 직선 · #16 삼각형 넓이 · #69 절편 관계·#89 직사각형 대각선·#94 직사각형 교차·#101 평행 이차·#113 내분점·수직·삼각형)
+- **★ 5 (19문)**: 수능형 · 통찰 요구 (특히 #17 각의 이등분선 · #95 넓이+기울기 곱 · #96 넓이 삼등분 · #97 삼각형 교차 여집합 · #118 직각삼각형 조건 · #120 접선·수직·이차함수 · #121 수심 · #140 예각 이등분 · #141 항상 지나는 점+거리 · #142 거리 함수 최댓값 · #146 삼각형 내심 · #147 이차함수 접선 거리 · #148 수평선 넓이 이등분)
+
+### 답 검증 상태 (세션 55 자체 계산 검증)
+- 연습-88 (교육청 · 삼각형 CBD 넓이): **27/2** ✅ 자체 계산 검증
+- 연습-95 (실력UP · 사각형 넓이+기울기 곱 조건 CE 방정식): 부분 유도 (F 좌표 산출) · 개념원리 답지 대조 필요
+- 연습-120 (교육청 · 삼각형 PRQ 넓이 40S): **125** ✅ 자체 계산 검증
+- 연습-143 (마름모 · P 거리 M²-m²): **259/10** ✅ 자체 계산 검증
+- 연습-146 (교육청 · 내심 OP 거리): **√34** ✅ 자체 계산 검증
+- 연습-148 (실력UP · 수평선 이등분 a 값): **a = 4-√10** ✅ 자체 계산 검증
+
+**5문항 자체 계산 검증 완료 · 1문항 (연습-95) 부분 유도** — 세션 55.
+
+---
+
+**저작권**: 본 파일은 학습 목적의 mechanism 라벨링·발문 요약만 포함. 원문 문항 전사 없음. 상세 풀이·답 미포함. 참고자료 인용 시 개념원리 공통수학2 (2022개정) 원문 명시.

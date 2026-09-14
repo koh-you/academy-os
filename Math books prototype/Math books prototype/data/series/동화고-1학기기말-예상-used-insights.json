@@ -1,0 +1,1768 @@
+{
+  "series": "동화고-1학기기말-예상",
+  "rounds": 9,
+  "total_slots": 215,
+  "card_frequency": {
+    "INSIGHT:SimulInequality": 9,
+    "UNIT:EQ": 64,
+    "UNIT:MX": 63,
+    "INSIGHT:CayleyHamilton": 4,
+    "UNIT:CB": 42,
+    "INSIGHT:QuarticSubst": 23,
+    "INSIGHT:FactorTheorem": 3,
+    "STRUCT:GaNaDa": 21,
+    "INSIGHT:AbsInequality": 15,
+    "INSIGHT:VietaRelation": 6,
+    "INSIGHT:NonCommMult": 5,
+    "INSIGHT:MatrixPeriod": 5,
+    "INSIGHT:ConjugateRoot": 2,
+    "INSIGHT:MatrixSpecial": 2,
+    "STRUCT:TwoPart": 3,
+    "STRUCT:GNGD": 5,
+    "INSIGHT:ImaginaryPower": 1,
+    "INSIGHT:FloorFunction": 1
+  },
+  "slots": [
+    {
+      "round": 1,
+      "slot": 1,
+      "point": 3,
+      "cards": [
+        "INSIGHT:SimulInequality",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 1,
+      "slot": 2,
+      "point": 2.5,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 1,
+      "slot": 3,
+      "point": 4,
+      "cards": [
+        "INSIGHT:CayleyHamilton",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 1,
+      "slot": 4,
+      "point": 3,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 1,
+      "slot": 5,
+      "point": 3.5,
+      "cards": [
+        "INSIGHT:QuarticSubst",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 1,
+      "slot": 6,
+      "point": 5,
+      "cards": [
+        "INSIGHT:FactorTheorem",
+        "STRUCT:GaNaDa",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 1,
+      "slot": 7,
+      "point": 3,
+      "cards": [
+        "INSIGHT:AbsInequality"
+      ]
+    },
+    {
+      "round": 1,
+      "slot": 8,
+      "point": 5,
+      "cards": []
+    },
+    {
+      "round": 1,
+      "slot": 9,
+      "point": 2.5,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 1,
+      "slot": 10,
+      "point": 3.5,
+      "cards": []
+    },
+    {
+      "round": 1,
+      "slot": 11,
+      "point": 3,
+      "cards": []
+    },
+    {
+      "round": 1,
+      "slot": 12,
+      "point": 4,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 1,
+      "slot": 13,
+      "point": 3.5,
+      "cards": [
+        "UNIT:CB",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 1,
+      "slot": 14,
+      "point": 5,
+      "cards": [
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 1,
+      "slot": 15,
+      "point": 5,
+      "cards": [
+        "UNIT:CB",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 1,
+      "slot": 16,
+      "point": 5,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 1,
+      "slot": 17,
+      "point": 3,
+      "cards": [
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 1,
+      "slot": 18,
+      "point": 4.5,
+      "cards": [
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 1,
+      "slot": 19,
+      "point": 3,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 1,
+      "slot": 20,
+      "point": 4,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 1,
+      "slot": 21,
+      "point": 3,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 1,
+      "slot": 22,
+      "point": 5.5,
+      "cards": [
+        "INSIGHT:QuarticSubst",
+        "INSIGHT:VietaRelation",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 1,
+      "slot": 23,
+      "point": 5.5,
+      "cards": [
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 1,
+      "slot": 24,
+      "point": 5.5,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 1,
+      "slot": 25,
+      "point": 5.5,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 2,
+      "slot": 1,
+      "point": 3,
+      "cards": [
+        "INSIGHT:AbsInequality",
+        "INSIGHT:SimulInequality",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 2,
+      "slot": 2,
+      "point": 3,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 2,
+      "slot": 3,
+      "point": 3,
+      "cards": [
+        "INSIGHT:QuarticSubst",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 2,
+      "slot": 4,
+      "point": 4,
+      "cards": [
+        "STRUCT:GaNaDa",
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 2,
+      "slot": 5,
+      "point": 3.5,
+      "cards": [
+        "INSIGHT:AbsInequality"
+      ]
+    },
+    {
+      "round": 2,
+      "slot": 6,
+      "point": 3.5,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 2,
+      "slot": 7,
+      "point": 4,
+      "cards": [
+        "INSIGHT:QuarticSubst",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 2,
+      "slot": 8,
+      "point": 4,
+      "cards": []
+    },
+    {
+      "round": 2,
+      "slot": 9,
+      "point": 4,
+      "cards": [
+        "STRUCT:GaNaDa",
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 2,
+      "slot": 10,
+      "point": 3.5,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 2,
+      "slot": 11,
+      "point": 4.5,
+      "cards": [
+        "STRUCT:GaNaDa"
+      ]
+    },
+    {
+      "round": 2,
+      "slot": 12,
+      "point": 4,
+      "cards": [
+        "INSIGHT:SimulInequality",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 2,
+      "slot": 13,
+      "point": 4,
+      "cards": []
+    },
+    {
+      "round": 2,
+      "slot": 14,
+      "point": 5,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 2,
+      "slot": 15,
+      "point": 3,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 2,
+      "slot": 16,
+      "point": 4.5,
+      "cards": [
+        "STRUCT:GaNaDa",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 2,
+      "slot": 17,
+      "point": 4.5,
+      "cards": [
+        "STRUCT:GaNaDa",
+        "UNIT:CB",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 2,
+      "slot": 18,
+      "point": 3.5,
+      "cards": [
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 2,
+      "slot": 19,
+      "point": 3.5,
+      "cards": []
+    },
+    {
+      "round": 2,
+      "slot": 20,
+      "point": 5,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 2,
+      "slot": 21,
+      "point": 3.5,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 2,
+      "slot": 22,
+      "point": 4.5,
+      "cards": []
+    },
+    {
+      "round": 2,
+      "slot": 23,
+      "point": 4.5,
+      "cards": [
+        "INSIGHT:VietaRelation",
+        "STRUCT:GaNaDa",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 2,
+      "slot": 24,
+      "point": 5,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 2,
+      "slot": 25,
+      "point": 5.5,
+      "cards": [
+        "INSIGHT:VietaRelation",
+        "STRUCT:GaNaDa",
+        "UNIT:EQ",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 3,
+      "slot": 1,
+      "point": 3,
+      "cards": []
+    },
+    {
+      "round": 3,
+      "slot": 2,
+      "point": 3,
+      "cards": [
+        "INSIGHT:NonCommMult",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 3,
+      "slot": 3,
+      "point": 3,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 3,
+      "slot": 4,
+      "point": 3,
+      "cards": [
+        "INSIGHT:VietaRelation",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 3,
+      "slot": 5,
+      "point": 3,
+      "cards": [
+        "INSIGHT:AbsInequality"
+      ]
+    },
+    {
+      "round": 3,
+      "slot": 6,
+      "point": 3.5,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 3,
+      "slot": 7,
+      "point": 3.5,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 3,
+      "slot": 8,
+      "point": 3.5,
+      "cards": [
+        "INSIGHT:QuarticSubst",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 3,
+      "slot": 9,
+      "point": 4,
+      "cards": [
+        "INSIGHT:AbsInequality"
+      ]
+    },
+    {
+      "round": 3,
+      "slot": 10,
+      "point": 4,
+      "cards": [
+        "INSIGHT:MatrixPeriod",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 3,
+      "slot": 11,
+      "point": 4,
+      "cards": [
+        "STRUCT:GaNaDa"
+      ]
+    },
+    {
+      "round": 3,
+      "slot": 12,
+      "point": 4,
+      "cards": [
+        "INSIGHT:QuarticSubst",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 3,
+      "slot": 13,
+      "point": 4.5,
+      "cards": []
+    },
+    {
+      "round": 3,
+      "slot": 14,
+      "point": 4.5,
+      "cards": [
+        "STRUCT:GaNaDa",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 3,
+      "slot": 15,
+      "point": 5,
+      "cards": []
+    },
+    {
+      "round": 3,
+      "slot": 16,
+      "point": 5,
+      "cards": [
+        "UNIT:EQ",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 3,
+      "slot": 17,
+      "point": 3.5,
+      "cards": []
+    },
+    {
+      "round": 3,
+      "slot": 18,
+      "point": 3.5,
+      "cards": []
+    },
+    {
+      "round": 3,
+      "slot": 19,
+      "point": 3.5,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 3,
+      "slot": 20,
+      "point": 4.5,
+      "cards": [
+        "INSIGHT:QuarticSubst",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 3,
+      "slot": 21,
+      "point": 4.5,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 3,
+      "slot": 22,
+      "point": 4.5,
+      "cards": []
+    },
+    {
+      "round": 3,
+      "slot": 23,
+      "point": 5,
+      "cards": [
+        "INSIGHT:ConjugateRoot",
+        "INSIGHT:FactorTheorem",
+        "INSIGHT:QuarticSubst",
+        "STRUCT:GaNaDa",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 3,
+      "slot": 24,
+      "point": 5,
+      "cards": [
+        "INSIGHT:MatrixPeriod",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 3,
+      "slot": 25,
+      "point": 5.5,
+      "cards": [
+        "INSIGHT:VietaRelation",
+        "STRUCT:GaNaDa",
+        "UNIT:EQ",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 4,
+      "slot": 1,
+      "point": 2.5,
+      "cards": [
+        "INSIGHT:SimulInequality",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 4,
+      "slot": 2,
+      "point": 2.5,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 4,
+      "slot": 3,
+      "point": 3,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 4,
+      "slot": 4,
+      "point": 3,
+      "cards": [
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 4,
+      "slot": 5,
+      "point": 3.5,
+      "cards": [
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 4,
+      "slot": 6,
+      "point": 4.5,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 4,
+      "slot": 7,
+      "point": 4,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 4,
+      "slot": 8,
+      "point": 3,
+      "cards": [
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 4,
+      "slot": 9,
+      "point": 3.5,
+      "cards": [
+        "INSIGHT:AbsInequality"
+      ]
+    },
+    {
+      "round": 4,
+      "slot": 10,
+      "point": 4,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 4,
+      "slot": 11,
+      "point": 3.5,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 4,
+      "slot": 12,
+      "point": 4,
+      "cards": [
+        "INSIGHT:QuarticSubst",
+        "INSIGHT:VietaRelation",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 4,
+      "slot": 13,
+      "point": 4.5,
+      "cards": []
+    },
+    {
+      "round": 4,
+      "slot": 14,
+      "point": 4.5,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 4,
+      "slot": 15,
+      "point": 5,
+      "cards": []
+    },
+    {
+      "round": 4,
+      "slot": 16,
+      "point": 5,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 4,
+      "slot": 17,
+      "point": 3,
+      "cards": []
+    },
+    {
+      "round": 4,
+      "slot": 18,
+      "point": 3,
+      "cards": []
+    },
+    {
+      "round": 4,
+      "slot": 19,
+      "point": 3.5,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 4,
+      "slot": 20,
+      "point": 4,
+      "cards": []
+    },
+    {
+      "round": 4,
+      "slot": 21,
+      "point": 5.5,
+      "cards": [
+        "INSIGHT:QuarticSubst",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 4,
+      "slot": 22,
+      "point": 5,
+      "cards": []
+    },
+    {
+      "round": 4,
+      "slot": 23,
+      "point": 5,
+      "cards": [
+        "INSIGHT:ConjugateRoot",
+        "INSIGHT:FactorTheorem",
+        "INSIGHT:QuarticSubst",
+        "STRUCT:GaNaDa",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 4,
+      "slot": 24,
+      "point": 5.5,
+      "cards": [
+        "INSIGHT:MatrixSpecial",
+        "STRUCT:TwoPart",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 4,
+      "slot": 25,
+      "point": 5.5,
+      "cards": [
+        "STRUCT:GaNaDa",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 5,
+      "slot": 1,
+      "point": 2.5,
+      "cards": []
+    },
+    {
+      "round": 5,
+      "slot": 2,
+      "point": 2.5,
+      "cards": [
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 5,
+      "slot": 3,
+      "point": 3.5,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 5,
+      "slot": 4,
+      "point": 3.5,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 5,
+      "slot": 5,
+      "point": 4,
+      "cards": [
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 5,
+      "slot": 6,
+      "point": 4,
+      "cards": [
+        "INSIGHT:QuarticSubst",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 5,
+      "slot": 7,
+      "point": 4,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 5,
+      "slot": 8,
+      "point": 4,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 5,
+      "slot": 9,
+      "point": 4.5,
+      "cards": [
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 5,
+      "slot": 10,
+      "point": 4.5,
+      "cards": []
+    },
+    {
+      "round": 5,
+      "slot": 11,
+      "point": 4.5,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 5,
+      "slot": 12,
+      "point": 4.5,
+      "cards": [
+        "INSIGHT:QuarticSubst",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 5,
+      "slot": 13,
+      "point": 5,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 5,
+      "slot": 14,
+      "point": 5,
+      "cards": [
+        "INSIGHT:MatrixSpecial",
+        "STRUCT:GNGD",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 5,
+      "slot": 15,
+      "point": 3,
+      "cards": [
+        "INSIGHT:AbsInequality"
+      ]
+    },
+    {
+      "round": 5,
+      "slot": 16,
+      "point": 4,
+      "cards": [
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 5,
+      "slot": 17,
+      "point": 4.5,
+      "cards": [
+        "INSIGHT:MatrixPeriod",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 5,
+      "slot": 18,
+      "point": 5,
+      "cards": []
+    },
+    {
+      "round": 5,
+      "slot": 19,
+      "point": 5.5,
+      "cards": [
+        "INSIGHT:QuarticSubst",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 5,
+      "slot": 20,
+      "point": 5.5,
+      "cards": [
+        "STRUCT:GaNaDa",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 5,
+      "slot": 21,
+      "point": 5.5,
+      "cards": [
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 5,
+      "slot": 22,
+      "point": 5.5,
+      "cards": [
+        "INSIGHT:CayleyHamilton",
+        "STRUCT:TwoPart",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 5,
+      "slot": 23,
+      "point": 5.5,
+      "cards": [
+        "STRUCT:GaNaDa",
+        "UNIT:EQ",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 6,
+      "slot": 1,
+      "point": 2.5,
+      "cards": [
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 6,
+      "slot": 2,
+      "point": 2.5,
+      "cards": [
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 6,
+      "slot": 3,
+      "point": 3.5,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 6,
+      "slot": 4,
+      "point": 3.5,
+      "cards": [
+        "INSIGHT:NonCommMult",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 6,
+      "slot": 5,
+      "point": 4,
+      "cards": [
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 6,
+      "slot": 6,
+      "point": 4,
+      "cards": [
+        "INSIGHT:ImaginaryPower",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 6,
+      "slot": 7,
+      "point": 4,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 6,
+      "slot": 8,
+      "point": 4,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 6,
+      "slot": 9,
+      "point": 4.5,
+      "cards": [
+        "INSIGHT:AbsInequality"
+      ]
+    },
+    {
+      "round": 6,
+      "slot": 10,
+      "point": 4.5,
+      "cards": []
+    },
+    {
+      "round": 6,
+      "slot": 11,
+      "point": 4.5,
+      "cards": [
+        "INSIGHT:NonCommMult",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 6,
+      "slot": 12,
+      "point": 4.5,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 6,
+      "slot": 13,
+      "point": 5,
+      "cards": [
+        "INSIGHT:QuarticSubst",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 6,
+      "slot": 14,
+      "point": 5,
+      "cards": [
+        "STRUCT:GNGD",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 6,
+      "slot": 15,
+      "point": 3,
+      "cards": []
+    },
+    {
+      "round": 6,
+      "slot": 16,
+      "point": 4,
+      "cards": [
+        "INSIGHT:QuarticSubst",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 6,
+      "slot": 17,
+      "point": 4.5,
+      "cards": [
+        "STRUCT:GaNaDa",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 6,
+      "slot": 18,
+      "point": 5,
+      "cards": [
+        "INSIGHT:FloorFunction"
+      ]
+    },
+    {
+      "round": 6,
+      "slot": 19,
+      "point": 5.5,
+      "cards": [
+        "INSIGHT:SimulInequality",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 6,
+      "slot": 20,
+      "point": 5.5,
+      "cards": [
+        "INSIGHT:QuarticSubst",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 6,
+      "slot": 21,
+      "point": 5.5,
+      "cards": [
+        "INSIGHT:AbsInequality"
+      ]
+    },
+    {
+      "round": 6,
+      "slot": 22,
+      "point": 5.5,
+      "cards": [
+        "STRUCT:GaNaDa",
+        "STRUCT:TwoPart",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 6,
+      "slot": 23,
+      "point": 5.5,
+      "cards": [
+        "INSIGHT:QuarticSubst",
+        "STRUCT:GaNaDa",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 7,
+      "slot": 1,
+      "point": 3.5,
+      "cards": [
+        "INSIGHT:SimulInequality",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 7,
+      "slot": 2,
+      "point": 3.5,
+      "cards": [
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 7,
+      "slot": 3,
+      "point": 3.5,
+      "cards": [
+        "INSIGHT:AbsInequality"
+      ]
+    },
+    {
+      "round": 7,
+      "slot": 4,
+      "point": 3.5,
+      "cards": []
+    },
+    {
+      "round": 7,
+      "slot": 5,
+      "point": 3.5,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 7,
+      "slot": 6,
+      "point": 3.5,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 7,
+      "slot": 7,
+      "point": 4,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 7,
+      "slot": 8,
+      "point": 4,
+      "cards": [
+        "UNIT:CB",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 7,
+      "slot": 9,
+      "point": 4,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 7,
+      "slot": 10,
+      "point": 4,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 7,
+      "slot": 11,
+      "point": 4.5,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 7,
+      "slot": 12,
+      "point": 4.5,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 7,
+      "slot": 13,
+      "point": 4.5,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 7,
+      "slot": 14,
+      "point": 4.5,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 7,
+      "slot": 15,
+      "point": 4.5,
+      "cards": []
+    },
+    {
+      "round": 7,
+      "slot": 16,
+      "point": 4.5,
+      "cards": [
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 7,
+      "slot": 17,
+      "point": 5,
+      "cards": [
+        "INSIGHT:QuarticSubst",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 7,
+      "slot": 18,
+      "point": 5,
+      "cards": [
+        "INSIGHT:SimulInequality",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 7,
+      "slot": 19,
+      "point": 5,
+      "cards": [
+        "STRUCT:GaNaDa",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 7,
+      "slot": 20,
+      "point": 5,
+      "cards": []
+    },
+    {
+      "round": 7,
+      "slot": 21,
+      "point": 5,
+      "cards": [
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 7,
+      "slot": 22,
+      "point": 5.5,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 7,
+      "slot": 23,
+      "point": 5.5,
+      "cards": [
+        "INSIGHT:MatrixPeriod",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 8,
+      "slot": 1,
+      "point": 4,
+      "cards": [
+        "INSIGHT:SimulInequality",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 8,
+      "slot": 2,
+      "point": 4,
+      "cards": [
+        "INSIGHT:QuarticSubst",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 8,
+      "slot": 3,
+      "point": 4,
+      "cards": [
+        "INSIGHT:AbsInequality"
+      ]
+    },
+    {
+      "round": 8,
+      "slot": 4,
+      "point": 4,
+      "cards": []
+    },
+    {
+      "round": 8,
+      "slot": 5,
+      "point": 4,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 8,
+      "slot": 6,
+      "point": 4,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 8,
+      "slot": 7,
+      "point": 4,
+      "cards": [
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 8,
+      "slot": 8,
+      "point": 4,
+      "cards": []
+    },
+    {
+      "round": 8,
+      "slot": 9,
+      "point": 4,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 8,
+      "slot": 10,
+      "point": 4,
+      "cards": []
+    },
+    {
+      "round": 8,
+      "slot": 11,
+      "point": 4,
+      "cards": []
+    },
+    {
+      "round": 8,
+      "slot": 12,
+      "point": 4,
+      "cards": [
+        "INSIGHT:NonCommMult",
+        "STRUCT:GNGD",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 8,
+      "slot": 13,
+      "point": 4,
+      "cards": [
+        "INSIGHT:CayleyHamilton",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 8,
+      "slot": 14,
+      "point": 4,
+      "cards": [
+        "INSIGHT:NonCommMult",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 8,
+      "slot": 15,
+      "point": 4,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 8,
+      "slot": 16,
+      "point": 4.5,
+      "cards": [
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 8,
+      "slot": 17,
+      "point": 4.5,
+      "cards": [
+        "INSIGHT:QuarticSubst",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 8,
+      "slot": 18,
+      "point": 5,
+      "cards": []
+    },
+    {
+      "round": 8,
+      "slot": 19,
+      "point": 5,
+      "cards": [
+        "INSIGHT:AbsInequality"
+      ]
+    },
+    {
+      "round": 8,
+      "slot": 20,
+      "point": 5,
+      "cards": []
+    },
+    {
+      "round": 8,
+      "slot": 21,
+      "point": 5,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 8,
+      "slot": 22,
+      "point": 5.5,
+      "cards": [
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 8,
+      "slot": 23,
+      "point": 5.5,
+      "cards": [
+        "STRUCT:GaNaDa",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 9,
+      "slot": 1,
+      "point": 3.5,
+      "cards": [
+        "INSIGHT:AbsInequality"
+      ]
+    },
+    {
+      "round": 9,
+      "slot": 2,
+      "point": 3.5,
+      "cards": [
+        "INSIGHT:QuarticSubst",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 9,
+      "slot": 3,
+      "point": 3,
+      "cards": []
+    },
+    {
+      "round": 9,
+      "slot": 4,
+      "point": 4,
+      "cards": [
+        "INSIGHT:AbsInequality"
+      ]
+    },
+    {
+      "round": 9,
+      "slot": 5,
+      "point": 4,
+      "cards": [
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 9,
+      "slot": 6,
+      "point": 4,
+      "cards": []
+    },
+    {
+      "round": 9,
+      "slot": 7,
+      "point": 4,
+      "cards": []
+    },
+    {
+      "round": 9,
+      "slot": 8,
+      "point": 3.5,
+      "cards": [
+        "INSIGHT:MatrixPeriod",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 9,
+      "slot": 9,
+      "point": 3.5,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 9,
+      "slot": 10,
+      "point": 4,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 9,
+      "slot": 11,
+      "point": 4,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 9,
+      "slot": 12,
+      "point": 4,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 9,
+      "slot": 13,
+      "point": 3.5,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 9,
+      "slot": 14,
+      "point": 3.5,
+      "cards": []
+    },
+    {
+      "round": 9,
+      "slot": 15,
+      "point": 3.5,
+      "cards": [
+        "STRUCT:GNGD",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 9,
+      "slot": 16,
+      "point": 4.5,
+      "cards": [
+        "INSIGHT:AbsInequality",
+        "INSIGHT:SimulInequality",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 9,
+      "slot": 17,
+      "point": 4.5,
+      "cards": [
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 9,
+      "slot": 18,
+      "point": 5,
+      "cards": [
+        "INSIGHT:QuarticSubst",
+        "UNIT:EQ"
+      ]
+    },
+    {
+      "round": 9,
+      "slot": 19,
+      "point": 5.5,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 9,
+      "slot": 20,
+      "point": 5.5,
+      "cards": []
+    },
+    {
+      "round": 9,
+      "slot": 21,
+      "point": 6,
+      "cards": [
+        "UNIT:CB"
+      ]
+    },
+    {
+      "round": 9,
+      "slot": 22,
+      "point": 6.5,
+      "cards": [
+        "STRUCT:GNGD",
+        "UNIT:MX"
+      ]
+    },
+    {
+      "round": 9,
+      "slot": 23,
+      "point": 7,
+      "cards": [
+        "INSIGHT:CayleyHamilton",
+        "UNIT:MX"
+      ]
+    }
+  ]
+}

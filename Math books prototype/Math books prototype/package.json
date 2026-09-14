@@ -1,0 +1,21 @@
+{
+  "name": "math-books",
+  "version": "1.0.0",
+  "description": "수학 교재 제작 — 8축 라벨링·정답률 calibration·문제은행",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "extract-deepinsight": "node scripts/extract-deepinsight.mjs",
+    "normalize-deepinsight": "node scripts/normalize-deepinsight-cohort.mjs",
+    "map-deepinsight": "node scripts/map-deepinsight-types.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "mathjs": "^15.2.0",
+    "pdfjs-dist": "^4.10.38"
+  }
+}

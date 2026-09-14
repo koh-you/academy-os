@@ -1,0 +1,792 @@
+% DeeP Math 정리편 · CM2-GM-04 도형의 이동 · 답지 v1
+% Phase 3 (2026-07-20 세션 55) : 청사진 v1.0 · Phase 2 본편 대응
+% 원 답지 v1 골든 계승 (03-원-답지.tex) · deep-math-answer.sty 퍼플 톤
+% 대상: 확인 12 + Level1 12 + Level2 12 + Level3 3 + 실전 3 = 총 42 슬롯
+% Phase 2 확정 답 반영 (CHK2 ab=10, L1-10 p²+q²=5, L2-5 y절편=-1)
+% 세션 55 신정책:
+%   - \textbf 금지 (정답 zone \dmanswerbox 안 값만)
+%   - 정답 zone 값만 (유도 부연 금지)
+%   - cplabel 완성 문장 (짧고 굵게 · 15자 내 · 등호 표기 금지)
+%   - CM2 스코프 밖 용어 금지 (삼각함수·벡터·매개변수·극한·미분·트레이스·집합기호)
+%   - 극값·환원된다·피타고라스 정리·정점 표현 사전 방지
+%   - ★ 노출 금지 · "정리편" 표기 금지
+%   - Overfull 0 필수
+
+\documentclass[10pt,fleqn]{article}
+\usepackage{dm-answer-classic}
+\renewcommand{\dmexamname}{도형의 이동}
+
+\begin{document}
+\dmanswersetup
+
+\dmanswerheader{도형의 이동 정답 및 해설}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 1 — 확인 문제 (12문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[스스로 풀어보기]{확인 문제}
+
+\renewcommand{\dmquickgridstretch}{2.25}
+\begin{dmquickgrid}
+\dmquick{1}{$(-4,\, 7)$} & \dmquick{2}{$ab=10$} & \dmquick{3}{$ab=15$} & \dmquick{4}{$k=3$} & \dmquick{5}{$k=1$} \\
+\dmquick{6}{$y=-\dfrac{x}{3}+3$} & \dmquick{7}{$k=3$} & \dmquick{8}{$m=-\dfrac{5}{12}$} & \dmquick{9}{$\overline{\mathrm{AP}}+\overline{\mathrm{BP}}=\sqrt{106}$} & \dmquick{10}{$4\sqrt{5}$} \\
+\dmquick{11}{$ab=70$} & \dmquick{12}{$a+b=4$} & & & \\
+\end{dmquickgrid}
+
+\begin{multicols*}{2}
+
+% ─────────────── 확인 1 ───────────────
+\dmsoltitle{1}{두 점 대응으로 결정되는 평행이동}
+\begin{dmanswerbox}
+정답: $(-4,\, 7)$
+\end{dmanswerbox}
+
+$(2,\, -4) \to (1,\, -3)$\ 에서 이동량은 $(-1,\, +1)$\ 이다.
+
+같은 평행이동에 의해 $(-3,\, 6)$\ 은
+\[ (-3 - 1,\ 6 + 1) = (-4,\, 7) \]
+로 옮겨진다.
+
+% ─────────────── 확인 2 ───────────────
+\dmsoltitle{2}{평행이동에 의한 직선의 이동과 계수의 곱}
+\begin{dmanswerbox}
+정답: $ab=10$
+\end{dmanswerbox}
+
+평행이동 $(x,\, y) \to (x - 1,\, y + 4)$\ 의 옮겨진 식은 $x$ 대신 $x + 1$,\ $y$ 대신 $y - 4$\ 를 대입한 것이므로 $y = 2x - 1$\ 에서
+\[ y - 4 = 2(x + 1) - 1,\quad y = 2x + 5. \]
+$a = 2$,\ $b = 5$\ 이므로 $ab = 10$\ 이다.
+
+% ─────────────── 확인 3 ───────────────
+\dmsoltitle{3}{두 원의 대응으로 결정되는 평행이동}
+\begin{dmanswerbox}
+정답: $ab=15$
+\end{dmanswerbox}
+
+두 원의 표준형은
+\[ (x + 3)^2 + (y + 1)^2 = 2,\qquad (x - 2)^2 + (y - 2)^2 = 2 \]
+이므로 두 중심은 $(-3,\, -1),\ (2,\, 2)$\ 이다.
+
+첫 중심이 두 번째 중심으로 옮겨져야 하므로
+\[ (-3 + a,\ -1 + b) = (2,\, 2),\quad a = 5,\ b = 3. \]
+$\therefore\ ab = 15$.
+
+% ─────────────── 확인 4 ───────────────
+\dmsoltitle{4}{평행이동한 직선과 원의 접함 조건}
+\begin{dmanswerbox}
+정답: $k=3$
+\end{dmanswerbox}
+
+직선 $4x + 3y - 5 = 0$\ 에서 $y$ 대신 $y - k$\ 를 대입하면 $4x + 3y - 3k - 5 = 0$\ 이다.
+
+원 $(x - 1)^2 + y^2 = 4$\ 에 접하는 조건은 중심 $(1,\, 0)$\ 에서의 거리 $=$ 반지름 $2$\ 이므로
+\[ \dfrac{|4 - 3k - 5|}{\sqrt{16 + 9}} = 2,\quad |3k + 1| = 10. \]
+$3k + 1 = \pm 10$\ 에서 양수 $k = 3$\ 이다.
+
+% ─────────────── 확인 5 ───────────────
+\dmsoltitle{5}{$y$\ 축과 직선 $y=x$\ 에 대한 대칭점과 거리}
+\begin{dmanswerbox}
+정답: $k=1$
+\end{dmanswerbox}
+
+$y$\ 축 대칭점은 $\mathrm{P}(-k,\, 3)$\ 이고 직선 $y = x$ 대칭점은 $\mathrm{Q}(3,\, k)$\ 이므로
+\[ \overline{\mathrm{PQ}}^{\,2} = (3 + k)^2 + (k - 3)^2 = 2k^2 + 18. \]
+$\overline{\mathrm{PQ}} = 2\sqrt{5}$\ 에서 $2k^2 + 18 = 20$\ 이므로 $k^2 = 1$\ 이고 양수 $k = 1$\ 이다.
+
+% ─────────────── 확인 6 ───────────────
+\dmsoltitle{6}{$y$\ 축 대칭 직선에 수직인 직선의 방정식}
+\begin{dmanswerbox}
+정답: $y=-\dfrac{x}{3}+3$
+\end{dmanswerbox}
+
+$y$\ 축 대칭에서 $x \to -x$\ 이므로 직선 $y = -3x + 6$\ 은 $y = 3x + 6$\ 이 된다.
+
+수직 조건에서 기울기는 $-\dfrac{1}{3}$\ 이고 $(-3,\, 4)$\ 를 지나므로
+\[ y - 4 = -\dfrac{1}{3}(x + 3),\quad y = -\dfrac{x}{3} + 3. \]
+
+% ─────────────── 확인 7 ───────────────
+\dmsoltitle{7}{대칭이동한 직선이 원의 넓이를 이등분하는 조건}
+\begin{dmanswerbox}
+정답: $k=3$
+\end{dmanswerbox}
+
+$x$\ 축 대칭에서 $y \to -y$\ 이므로 직선 $2x - 3y + 1 = 0$\ 은 $2x + 3y + 1 = 0$\ 이 된다.
+
+원 $(x - 4)^2 + (y + k)^2 = 3$\ 의 넓이를 이등분하는 조건은 중심 $(4,\, -k)$\ 를 지나는 것이므로
+\[ 2 \cdot 4 + 3 \cdot (-k) + 1 = 0,\quad k = 3. \]
+
+% ─────────────── 확인 8 ───────────────
+\dmsoltitle{8}{대칭이동 후 평행이동한 원과 직선의 접함 조건}
+\begin{dmanswerbox}
+정답: $m=-\dfrac{5}{12}$
+\end{dmanswerbox}
+
+원 $x^2 + y^2 - 4x = 0$\ 의 표준형은 $(x - 2)^2 + y^2 = 4$\ 이므로 중심 $(2,\, 0)$,\ 반지름 $2$\ 이다.
+
+$y$\ 축 대칭 후 중심은 $(-2,\, 0)$,\ $y$\ 축 방향 $1$\ 만큼 평행이동한 뒤 중심은 $(-2,\, 1)$\ 이며 반지름은 그대로이다.
+
+직선 $mx - y - 2 = 0$\ 에 접하는 조건은 중심에서의 거리 $=$ $2$\ 이므로
+\[ \dfrac{|{-2m - 1 - 2}|}{\sqrt{m^2 + 1}} = 2,\quad (2m + 3)^2 = 4(m^2 + 1). \]
+전개하면 $12m + 5 = 0$\ 이므로 $m = -\dfrac{5}{12}$\ 이다.
+
+% ─────────────── 확인 9 ───────────────
+% 세션 73 : 그래프 추가 (feedback_solution_graph_requirement · 유형 5 대칭)
+%   좌표 압축 0.5 · 실효 규약 scale=1.0
+\dmsoltitle{9}{$y$\ 축 대칭을 이용한 최단 경로}
+\begin{dmanswerbox}
+정답: $\overline{\mathrm{AP}}+\overline{\mathrm{BP}}=\sqrt{106}$
+\end{dmanswerbox}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % 압축 0.5 : A(2,4)→(1,2), B(3,-5)→(1.5,-2.5), A'(-2,4)→(-1,2)
+  % ── 축 (여백 ≥25% 확보)
+  \draw[-stealth, black, line width=0.7pt] (-1.7, 0) -- (2, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -3.5) -- (0, 3) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, above right] at (0, 0) {$\mathrm{O}$};
+  % ── 반사 대응 A ~ A' (점선)
+  \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt] (1, 2) -- (-1, 2);
+  % ── 최소 거리 · A' -- B (선분)
+  \draw[black, line width=0.5pt] (-1, 2) -- (1.5, -2.5);
+  % ── 실제 경로 · A -- P -- B (P는 A'B와 y축의 교점 (0, 0.2))
+  \draw[black, line width=0.5pt] (1, 2) -- (0, 0.2) -- (1.5, -2.5);
+  % ── 점
+  \filldraw[black] (1, 2) circle (0.8pt) node[above right, font=\scriptsize] {$\mathrm{A}$};
+  \filldraw[dm-accent] (-1, 2) circle (0.7pt) node[above left, font=\scriptsize] {$\mathrm{A}'$};
+  \filldraw[black] (1.5, -2.5) circle (0.8pt) node[right, font=\scriptsize] {$\mathrm{B}$};
+  % v2.4 정정 (세션 76) : P 라벨 · 두 선분 사이 자유공간 (오른쪽 · 두 선분 사이)
+  \filldraw[dm-accent] (0, 0.2) circle (0.7pt);
+  \node[font=\scriptsize] at (0.5, 0.3) {$\mathrm{P}$};
+\end{tikzpicture}
+\end{center}
+
+$\mathrm{A}(2,\, 4)$,\ $\mathrm{B}(3,\, -5)$\ 가 $y$\ 축 같은 쪽에 있으므로 $\mathrm{A}$\ 의 $y$\ 축 대칭점 $\mathrm{A}'(-2,\, 4)$\ 에 대해 $\overline{\mathrm{AP}} = \overline{\mathrm{A}'\mathrm{P}}$\ 이다.
+
+$y$\ 축 위 임의의 $\mathrm{P}$\ 에서
+\[ \overline{\mathrm{AP}} + \overline{\mathrm{BP}} = \overline{\mathrm{A}'\mathrm{P}} + \overline{\mathrm{BP}} \ge \overline{\mathrm{A}'\mathrm{B}} \]
+이고 최솟값은
+\[ \overline{\mathrm{A}'\mathrm{B}} = \sqrt{5^2 + (-9)^2} = \sqrt{106}. \]
+
+% ─────────────── 확인 10 ───────────────
+% 세션 73 : 그래프 추가 (feedback_solution_graph_requirement · 유형 5 대칭)
+%   두 축에 대한 대칭 · A→A' (y축), B→B' (x축) · A'B'가 최단 경로
+\dmsoltitle{10}{두 축에 대한 대칭을 이용한 최단 경로}
+\begin{dmanswerbox}
+정답: $4\sqrt{5}$
+\end{dmanswerbox}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.0]
+  % 세션 75 재조판 · scale=1.0 통일 · 좌표 0.7배 압축
+  % 원 좌표 : A(2, 3), A'(-2, 3), B(6, 1), B'(6, -1), P(0, 2), Q(4, 0)
+  % 압축 : A(1.4, 2.1), A'(-1.4, 2.1), B(4.2, 0.7), B'(4.2, -0.7), P(0, 1.4), Q(2.8, 0)
+  % ── 축 (실효 0.7pt · 여백 ≥25% 확보)
+  \draw[-stealth, black, line width=0.7pt] (-2.5, 0) -- (5.3, 0) node[below, font=\scriptsize] {$x$};
+  \draw[-stealth, black, line width=0.7pt] (0, -1.4) -- (0, 2.8) node[left, font=\scriptsize] {$y$};
+  \node[font=\scriptsize, above right] at (0, 0) {$\mathrm{O}$};
+  % ── 반사 대응 (점선)
+  \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt] (1.4, 2.1) -- (-1.4, 2.1);
+  \draw[dm-accent, line width=0.4pt, dash pattern=on 2pt off 1.5pt] (4.2, 0.7) -- (4.2, -0.7);
+  % ── 최소 거리 · A'B' 선분
+  \draw[black, line width=0.5pt] (-1.4, 2.1) -- (4.2, -0.7);
+  % ── 실제 경로 A -- P -- Q -- B
+  \draw[black, line width=0.5pt] (1.4, 2.1) -- (0, 1.4) -- (2.8, 0) -- (4.2, 0.7);
+  % ── 점 (정점 0.8pt · 파생점 0.7pt)
+  \filldraw[black] (1.4, 2.1) circle (0.8pt) node[above right, font=\scriptsize] {$\mathrm{A}$};
+  \filldraw[dm-accent] (-1.4, 2.1) circle (0.7pt) node[above left, font=\scriptsize] {$\mathrm{A}'$};
+  \filldraw[black] (4.2, 0.7) circle (0.8pt) node[above right, font=\scriptsize] {$\mathrm{B}$};
+  \filldraw[dm-accent] (4.2, -0.7) circle (0.7pt) node[below right, font=\scriptsize] {$\mathrm{B}'$};
+  % v2.4 정정 (세션 76) : P 라벨 y축 겹침 회피 · offset 1pt
+  \filldraw[dm-accent] (0, 1.4) circle (0.7pt) node[left=1pt, font=\scriptsize] {$\mathrm{P}$};
+  \filldraw[dm-accent] (2.8, 0) circle (0.7pt) node[above, font=\scriptsize] {$\mathrm{Q}$};
+\end{tikzpicture}
+\end{center}
+
+$\mathrm{A}$\ 의 $y$\ 축 대칭점 $\mathrm{A}'(-2,\, 3)$,\ $\mathrm{B}$\ 의 $x$\ 축 대칭점 $\mathrm{B}'(6,\, -1)$\ 을 잡으면 $y$\ 축 위 $\mathrm{P}$\ 와 $x$\ 축 위 $\mathrm{Q}$\ 에 대해 $\overline{\mathrm{AP}} = \overline{\mathrm{A}'\mathrm{P}}$,\ $\overline{\mathrm{QB}} = \overline{\mathrm{QB}'}$\ 이다.
+\[ \overline{\mathrm{AP}} + \overline{\mathrm{PQ}} + \overline{\mathrm{QB}} = \overline{\mathrm{A}'\mathrm{P}} + \overline{\mathrm{PQ}} + \overline{\mathrm{QB}'} \ge \overline{\mathrm{A}'\mathrm{B}'} \]
+이고 최솟값은
+\[ \overline{\mathrm{A}'\mathrm{B}'} = \sqrt{8^2 + (-4)^2} = 4\sqrt{5}. \]
+
+% ─────────────── 확인 11 ───────────────
+\dmsoltitle{11}{점에 대한 대칭이동과 좌표}
+\begin{dmanswerbox}
+정답: $ab=70$
+\end{dmanswerbox}
+
+점 $(a,\, 3)$\ 의 $(4,\, 5)$\ 에 대한 대칭점은
+\[ (2 \cdot 4 - a,\ 2 \cdot 5 - 3) = (8 - a,\ 7). \]
+이 점이 $(-2,\, b)$\ 와 같으므로 $a = 10$,\ $b = 7$\ 이고 $ab = 70$\ 이다.
+
+% ─────────────── 확인 12 ───────────────
+\dmsoltitle{12}{두 점이 직선에 대하여 대칭일 조건}
+\begin{dmanswerbox}
+정답: $a+b=4$
+\end{dmanswerbox}
+
+$\mathrm{P}(-3,\, 4)$\ 와 $\mathrm{Q}(1,\, 8)$\ 이 직선 $y = ax + b$\ 에 대해 서로 대칭이 되는 조건은 두 가지이다.
+
+첫째, 중점 $(-1,\, 6)$\ 이 직선 위:
+\[ 6 = -a + b. \]
+
+둘째, $\overline{\mathrm{PQ}}$\ 의 기울기 $\dfrac{8 - 4}{1 + 3} = 1$\ 과 대칭축 기울기 $a$\ 의 곱이 $-1$:
+\[ a = -1. \]
+
+첫 식에 대입하면 $b = 5$\ 이므로 $a + b = 4$\ 이다.
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 2 — Level 1 (12문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[기초 연습]{Level 1}
+
+\renewcommand{\dmquickgridstretch}{2.25}
+\begin{dmquickgrid}
+\dmquick{1}{$a=5$} & \dmquick{2}{$k=-6$} & \dmquick{3}{$pq=-12$} & \dmquick{4}{$\dfrac{a}{b}=\dfrac{1}{2}$} & \dmquick{5}{$3x-2y-1=0$} \\
+\dmquick{6}{$a=-3$} & \dmquick{7}{$m+k=7$} & \dmquick{8}{$2x-4y+7=0$} & \dmquick{9}{$(x+1)^2+(y-5)^2=4$} & \dmquick{10}{$p^2+q^2=5$} \\
+\dmquick{11}{$4\sqrt{2}$} & \dmquick{12}{$a=1$} & & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── L1-1 ───────────────
+\dmsoltitle{1}{평행이동한 점이 직선 위에 있을 조건}
+\begin{dmanswerbox}
+정답: $a=5$
+\end{dmanswerbox}
+
+평행이동 $(x,\, y) \to (x - 3,\, y + 2)$\ 에서 점 $(a,\, -1)$\ 은 $(a - 3,\, 1)$\ 로 옮겨진다.
+
+이 점이 $y = 2x - 3$ 위이므로
+\[ 1 = 2(a - 3) - 3,\quad 2a = 10 \quad\therefore\ a = 5. \]
+
+% ─────────────── L1-2 ───────────────
+\dmsoltitle{2}{평행이동한 직선이 한 점을 지날 조건}
+\begin{dmanswerbox}
+정답: $k=-6$
+\end{dmanswerbox}
+
+$x$ 대신 $x - 1$,\ $y$ 대신 $y + 2$\ 를 대입하면 직선은
+\[ 2(x - 1) - 3(y + 2) + k = 0,\quad 2x - 3y - 8 + k = 0 \]
+이다.
+
+점 $(1,\, -4)$\ 를 지나므로 $2 + 12 - 8 + k = 0$\ 에서 $k = -6$\ 이다.
+
+% ─────────────── L1-3 ───────────────
+\dmsoltitle{3}{두 원의 대응으로 결정되는 이동량}
+\begin{dmanswerbox}
+정답: $pq=-12$
+\end{dmanswerbox}
+
+두 원의 표준형은
+\[ (x - 1)^2 + (y + 2)^2 = 11,\qquad (x + 3)^2 + (y - 1)^2 = 11 \]
+이므로 두 중심은 $(1,\, -2),\ (-3,\, 1)$\ 이다.
+
+첫 중심이 두 번째 중심으로 옮겨져야 하므로
+\[ (1 + p,\ -2 + q) = (-3,\, 1),\quad p = -4,\ q = 3. \]
+$\therefore\ pq = -12$.
+
+% ─────────────── L1-4 ───────────────
+\dmsoltitle{4}{평행이동해도 자기 자신과 일치하는 직선}
+\begin{dmanswerbox}
+정답: $\dfrac{a}{b}=\dfrac{1}{2}$
+\end{dmanswerbox}
+
+평행이동한 직선은
+\[ 2(x - a) - (y - b) + 4 = 0,\quad 2x - y + (b - 2a + 4) = 0 \]
+이다.
+
+원래 직선과 일치하려면 상수항이 같아야 하므로 $b - 2a + 4 = 4$,\ $b = 2a$\ 이고 $\dfrac{a}{b} = \dfrac{1}{2}$\ 이다.
+% ─────────────── L1-5 ───────────────
+\dmsoltitle{5}{원점에 대한 직선의 대칭이동}
+\begin{dmanswerbox}
+정답: $3x-2y-1=0$
+\end{dmanswerbox}
+
+원점 대칭은 $x \to -x,\ y \to -y$\ 이므로
+\[ -3x + 2y + 1 = 0. \]
+양변에 $-1$\ 을 곱하면 $3x - 2y - 1 = 0$\ 이다.
+
+% ─────────────── L1-6 ───────────────
+\dmsoltitle{6}{원점 대칭점이 직선 위에 있을 조건}
+\begin{dmanswerbox}
+정답: $a=-3$
+\end{dmanswerbox}
+
+$(3,\, -5)$\ 의 원점 대칭점은 $(-3,\, 5)$\ 이고 이 점이 $ax - 2y + 1 = 0$ 위이므로
+\[ -3a - 10 + 1 = 0 \quad\therefore\ a = -3. \]
+
+% ─────────────── L1-7 ───────────────
+\dmsoltitle{7}{포물선의 원점 대칭과 꼭짓점 대응}
+\begin{dmanswerbox}
+정답: $m+k=7$
+\end{dmanswerbox}
+
+$y = (x - m)^2 - 5$\ 의 꼭짓점은 $(m,\, -5)$\ 이고, 원점 대칭한 꼭짓점은 $(-m,\, 5)$\ 이다.
+
+이 점이 $(-2,\, k)$\ 이므로 $m = 2,\ k = 5$\ 이고 $m + k = 7$\ 이다.
+
+% ─────────────── L1-8 ───────────────
+\dmsoltitle{8}{$y=x$ 대칭 후 평행이동한 직선}
+\begin{dmanswerbox}
+정답: $2x-4y+7=0$
+\end{dmanswerbox}
+
+$y = x$ 대칭은 $x \leftrightarrow y$\ 이므로 직선 $4x - 2y + 3 = 0$\ 은 $-2x + 4y + 3 = 0$\ 이 된다.
+
+$x$ 대신 $x + 1$,\ $y$ 대신 $y - 2$\ 를 대입하면
+\[ -2(x + 1) + 4(y - 2) + 3 = 0,\quad -2x + 4y - 7 = 0. \]
+양변에 $-1$\ 을 곱하면 $2x - 4y + 7 = 0$\ 이다.
+
+% ─────────────── L1-9 ───────────────
+\dmsoltitle{9}{점에 대한 원의 대칭이동}
+\begin{dmanswerbox}
+정답: $(x+1)^2+(y-5)^2=4$
+\end{dmanswerbox}
+
+원의 중심은 $(3,\, -1)$,\ 반지름 $2$\ 이다.
+
+$(1,\, 2)$\ 에 대한 중심의 대칭점은
+\[ (2 \cdot 1 - 3,\ 2 \cdot 2 + 1) = (-1,\, 5) \]
+이고 반지름은 그대로이므로
+\[ (x + 1)^2 + (y - 5)^2 = 4. \]
+
+% ─────────────── L1-10 ───────────────
+\dmsoltitle{10}{임의 직선에 대한 점의 대칭이동}
+\begin{dmanswerbox}
+정답: $p^2+q^2=5$
+\end{dmanswerbox}
+
+중점이 대칭축 위, 그리고 $\overline{(3,4)(p,q)}$\ 가 대칭축과 수직인 두 조건이 각각 일차식을 준다.
+
+중점 $\left( \dfrac{3 + p}{2},\ \dfrac{4 + q}{2} \right)$\ 이 $y = -x + 2$ 위이므로
+\[ \dfrac{4 + q}{2} = -\dfrac{3 + p}{2} + 2,\quad p + q = -3. \]
+
+대칭축 기울기 $-1$\ 의 수직 방향 기울기 $1$\ 이 잇는 선분의 기울기와 같으므로
+\[ \dfrac{q - 4}{p - 3} = 1,\quad q = p + 1. \]
+
+연립하면 $p = -2,\ q = -1$\ 이고 $p^2 + q^2 = 5$\ 이다.
+% ─────────────── L1-11 ───────────────
+\dmsoltitle{11}{$y$\ 축 대칭을 이용한 최단 경로}
+\begin{dmanswerbox}
+정답: $4\sqrt{2}$
+\end{dmanswerbox}
+
+$\mathrm{A}(-3,\, 2)$,\ $\mathrm{B}(-1,\, -2)$\ 가 $y$\ 축의 같은 쪽에 있으므로 $\mathrm{A}$\ 의 $y$\ 축 대칭점 $\mathrm{A}'(3,\, 2)$\ 에 대해 $\overline{\mathrm{AP}} = \overline{\mathrm{A}'\mathrm{P}}$\ 이다.
+\[ \overline{\mathrm{AP}} + \overline{\mathrm{PB}} = \overline{\mathrm{A}'\mathrm{P}} + \overline{\mathrm{PB}} \ge \overline{\mathrm{A}'\mathrm{B}} = \sqrt{4^2 + 4^2} = 4\sqrt{2}. \]
+% ─────────────── L1-12 ───────────────
+\dmsoltitle{12}{최솟값 조건에서 좌표 결정}
+\begin{dmanswerbox}
+정답: $a=1$
+\end{dmanswerbox}
+
+$\mathrm{A}(3,\, 1)$\ 의 $y$\ 축 대칭점 $\mathrm{A}'(-3,\, 1)$\ 에 대해 $y$\ 축 위 점 $\mathrm{P}$\ 에서
+\[ \overline{\mathrm{AP}} + \overline{\mathrm{BP}} \ge \overline{\mathrm{A}'\mathrm{B}} = \sqrt{(a + 3)^2 + 9}. \]
+최솟값이 $5$\ 이므로 $(a + 3)^2 + 9 = 25$,\ $(a + 3)^2 = 16$\ 이고 양수 $a = 1$\ 이다.
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 3 — Level 2 (12문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[표준 연습]{Level 2}
+
+\renewcommand{\dmquickgridstretch}{2.25}
+\begin{dmquickgrid}
+\dmquick{1}{$a+b=-1$} & \dmquick{2}{$\sqrt{13}$} & \dmquick{3}{$(1,\, \sqrt{5}-1)$} & \dmquick{4}{$a+b=5$} & \dmquick{5}{$y$\ 절편 $=-1$} \\
+\dmquick{6}{$(x-7)^2+(y+1)^2=1$} & \dmquick{7}{곱 $=-31$} & \dmquick{8}{$a+b+n=10$} & \dmquick{9}{곱 $=-2$} & \dmquick{10}{$a=4$} \\
+\dmquick{11}{$2\sqrt{5}$} & \dmquick{12}{$abc=-25$} & & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── L2-1 ───────────────
+\dmsoltitle{1}{두 원의 대응으로 결정되는 직선 이동}
+\begin{dmanswerbox}
+정답: $a+b=-1$
+\end{dmanswerbox}
+
+두 원의 중심은 $(0,\, 1),\ (1,\, 0)$\ 이므로 결정되는 평행이동은 $x$\ 축 방향 $1$,\ $y$\ 축 방향 $-1$\ 이다.
+
+같은 평행이동에서 직선 $x + 2y - 4 = 0$\ 은 $x \to x - 1,\ y \to y + 1$ 대입으로
+\[ (x - 1) + 2(y + 1) - 4 = 0,\quad x + 2y - 3 = 0 \]
+이 된다.
+
+$a = 2,\ b = -3$\ 이므로 $a + b = -1$\ 이다.
+
+% ─────────────── L2-2 ───────────────
+\dmsoltitle{2}{포물선 대응으로 결정되는 이동과 평행선 사이의 거리}
+\begin{dmanswerbox}
+정답: $\sqrt{13}$
+\end{dmanswerbox}
+
+$(x + 4)^2 - 7$\ 의 꼭짓점 $(-4,\, -7)$\ 과 $y = x^2$\ 의 꼭짓점 $(0,\, 0)$\ 의 대응에서 이동량은 $(4,\, 7)$\ 이다.
+
+$x \to x - 4,\ y \to y - 7$ 대입으로 $\ell : 2x - 3y - 2 = 0$\ 은
+\[ 2(x - 4) - 3(y - 7) - 2 = 0,\quad 2x - 3y + 11 = 0 \]
+이 된다.
+
+$x,\ y$ 계수가 같아 두 직선은 평행이므로 상수항 $-2$\ 와 $11$\ 에서
+\[ \dfrac{|11 - (-2)|}{\sqrt{2^2 + (-3)^2}} = \dfrac{13}{\sqrt{13}} = \sqrt{13}. \]
+% ─────────────── L2-3 ───────────────
+\dmsoltitle{3}{두 원의 중심 사이 거리 조건에서 이동량 결정}
+\begin{dmanswerbox}
+정답: 중심 $(1,\, \sqrt{5}-1)$
+\end{dmanswerbox}
+
+$\mathrm{C}_1$\ 의 표준형 $(x - 3)^2 + (y + 1)^2 = 8$\ 에서 중심 $(3,\, -1)$\ 이다.
+
+평행이동에서 $\mathrm{C}_2$\ 의 중심은 $(1,\, -1 + p)$\ 이다.
+
+두 중심 거리가 $3$\ 이므로
+\[ \sqrt{2^2 + p^2} = 3,\quad 4 + p^2 = 9. \]
+$p^2 = 5$\ 에서 양수 $p = \sqrt{5}$\ 이고 $\mathrm{C}_2$\ 의 중심은 $(1,\, \sqrt{5} - 1)$\ 이다.
+
+% ─────────────── L2-4 ───────────────
+\dmsoltitle{4}{평행이동한 원이 두 축에 모두 접할 조건}
+\begin{dmanswerbox}
+정답: $a+b=5$
+\end{dmanswerbox}
+
+평행이동한 원의 중심은 $(a + 3,\, b - 8)$\ 이고 반지름은 $b$\ 이다.
+
+$x$\ 축에 접하는 조건은 $|b - 8| = b$\ 이다. $b - 8 = -b$\ 에서 $b = 4$\ 이고, $b - 8 = b$\ 는 해가 없다. $\therefore\ b = 4$.
+
+$y$\ 축에 접하는 조건은 $|a + 3| = b = 4$\ 이다. $a > 0$\ 이므로 $a + 3 = 4,\ a = 1$\ 이고 $a + b = 5$\ 이다.
+% ─────────────── L2-5 ───────────────
+\dmsoltitle{5}{$y=x$ 대칭 후 평행이동한 직선의 $y$\ 절편}
+\begin{dmanswerbox}
+정답: $y$\ 절편 $=-1$
+\end{dmanswerbox}
+
+$y = x$ 대칭은 $x \leftrightarrow y$\ 이므로 $y = x + 3$\ 은 $y = x - 3$\ 이 된다.
+
+$x \to x + 1,\ y \to y - 1$ 대입으로
+\[ y - 1 = (x + 1) - 3,\quad y = x - 1 \]
+이 되므로 $y$\ 절편은 $-1$\ 이다.
+% ─────────────── L2-6 ───────────────
+\dmsoltitle{6}{평행이동한 삼각형의 내접원}
+\begin{dmanswerbox}
+정답: $(x-7)^2+(y+1)^2=1$
+\end{dmanswerbox}
+
+$\mathrm{B}(0,\, 4) \to \mathrm{B}'(6,\, 2)$\ 에서 이동량은 $(6,\, -2)$\ 이므로
+\[ \mathrm{O}'(6,\, -2),\qquad \mathrm{A}'(9,\, -2),\qquad \mathrm{B}'(6,\, 2). \]
+
+세 변의 길이는 $\overline{\mathrm{O}'\mathrm{A}'} = 3,\ \overline{\mathrm{O}'\mathrm{B}'} = 4,\ \overline{\mathrm{A}'\mathrm{B}'} = 5$\ 이므로 $3^2 + 4^2 = 5^2$\ 에서 $\mathrm{O}'$\ 이 직각 꼭짓점이다.
+
+직각삼각형의 내접원 반지름은
+\[ r = \dfrac{3 + 4 - 5}{2} = 1 \]
+이고 중심은 직각 꼭짓점 $\mathrm{O}'(6,\, -2)$\ 에서 두 변 방향으로 $1$\ 씩 떨어진 $(7,\, -1)$\ 이다.
+
+내접원의 방정식은
+\[ (x - 7)^2 + (y + 1)^2 = 1. \]
+
+% ─────────────── L2-7 ───────────────
+\dmsoltitle{7}{평행이동한 원이 직선에 접할 조건에서 두 상수의 곱}
+\begin{dmanswerbox}
+정답: 곱 $=-31$
+\end{dmanswerbox}
+
+원의 표준형 $(x + 1)^2 + (y - 3)^2 = 16$\ 에서 중심 $(-1,\, 3)$,\ 반지름 $4$\ 이다.
+
+평행이동한 원의 중심은 $(k - 1,\, 1)$\ 이다.
+
+직선 $3x + 4y + 10 = 0$\ 에 접하는 조건은 중심에서의 거리 $=$ $4$\ 이므로
+\[ \dfrac{|3(k - 1) + 4 + 10|}{5} = 4,\quad |3k + 11| = 20. \]
+$3k + 11 = \pm 20$\ 에서 $k = 3$ 또는 $k = -\dfrac{31}{3}$\ 이고 두 값의 곱은 $-31$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{절댓값 방정식의 두 해는 이동 방향의 두 부호에 대응해 모두 접선 조건을 만족한다}: $|3k+11|=20$\ 의 두 해 $k=3,\, -\dfrac{31}{3}$\ 은 원이 직선의 어느 쪽에 접하는지에 따라 나뉘는 두 이동량이다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-8 ───────────────
+\dmsoltitle{8}{조건에 따라 나뉘는 이동 규칙의 순차 적용}
+\begin{dmanswerbox}
+정답: $a+b+n=10$
+\end{dmanswerbox}
+
+점 $\mathrm{P}(5,\, 2)$\ 부터 규칙을 순차 적용하면
+\begin{align*}
+(5,\, 2) &\xrightarrow{y=x\ \text{대칭}} (2,\, 5) \xrightarrow{+4,\, -6} (6,\, -1) \\
+&\xrightarrow{x\text{축 대칭}} (6,\, 1) \xrightarrow{y=x\ \text{대칭}} (1,\, 6) \\
+&\xrightarrow{+4,\, -6} (5,\, 0).
+\end{align*}
+마지막에 $xy = 0$\ 이므로 정지한다.
+
+$n = 5,\ (a,\, b) = (5,\, 0)$\ 이고 $a + b + n = 10$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{이동 규칙은 좌표의 부호로 갈리므로 매 단계마다 갱신된 좌표의 부호를 다시 확인한다}: $xy > 0$·$xy < 0$·$xy = 0$\ 세 갈래가 각각 다른 이동으로 이어지므로 이동 후 좌표를 재점검하지 않으면 잘못된 규칙을 적용하게 된다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-9 ───────────────
+\dmsoltitle{9}{평행이동한 곡선과 직선의 교점이 원점에 대하여 대칭일 조건}
+\begin{dmanswerbox}
+정답: 곱 $=-2$
+\end{dmanswerbox}
+
+평행이동한 곡선의 방정식은 다음과 같다.
+\[ y = (x - a)^2 + 3(x - a) = x^2 + (3 - 2a)x + a^2 - 3a. \]
+
+직선 $y = -x$\ 와의 교점의 $x$\ 좌표는
+\[ x^2 + (4 - 2a)x + a^2 - 3a = 0 \]
+의 두 근이다.
+
+두 근 $\alpha,\ \beta$\ 가 원점 대칭이려면 $\alpha + \beta = 0$\ 이어야 하므로 근과 계수 관계에서
+\[ -(4 - 2a) = 0 \quad\therefore\ a = 2. \]
+두 근의 곱은 $\alpha\beta = a^2 - 3a = 4 - 6 = -2$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{두 교점이 원점에 대칭이면 두 $x$\ 좌표의 합이 $0$\ 이다}: 이차방정식의 두 근의 합에 관한 조건이 근과 계수의 관계로 곧바로 미지수를 결정한다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-10 ───────────────
+\dmsoltitle{10}{평행이동과 $y=x$ 대칭 순차 · 접함 조건}
+\begin{dmanswerbox}
+정답: $a=4$
+\end{dmanswerbox}
+
+평행이동한 원의 중심은 $(4,\, a - 2)$,\ 반지름 $2$\ 이다.
+
+$y = x$ 대칭에서 두 좌표가 바뀌므로 새 중심은 $(a - 2,\, 4)$\ 이고 반지름은 그대로이다.
+
+$y$\ 축에 접하는 조건은 $|a - 2| = 2$\ 이므로 $a = 4$ 또는 $a = 0$\ 이고 양수 $a = 4$\ 이다.
+% ─────────────── L2-11 ───────────────
+\dmsoltitle{11}{두 축에 대한 대칭이동으로 삼각형 둘레의 최솟값}
+\begin{dmanswerbox}
+정답: $2\sqrt{5}$
+\end{dmanswerbox}
+
+$\mathrm{A}(3,\, 1)$\ 의 $y = x$ 대칭점을 $\mathrm{A}_1(1,\, 3)$,\ $x$\ 축 대칭점을 $\mathrm{A}_2(3,\, -1)$\ 이라 하자.
+
+$y = x$ 위 $\mathrm{P}$\ 와 $x$\ 축 위 $\mathrm{Q}$\ 에 대해 $\overline{\mathrm{AP}} = \overline{\mathrm{A}_1 \mathrm{P}}$,\ $\overline{\mathrm{QA}} = \overline{\mathrm{Q} \mathrm{A}_2}$\ 이므로
+\[ \overline{\mathrm{AP}} + \overline{\mathrm{PQ}} + \overline{\mathrm{QA}} = \overline{\mathrm{A}_1 \mathrm{P}} + \overline{\mathrm{PQ}} + \overline{\mathrm{Q} \mathrm{A}_2} \ge \overline{\mathrm{A}_1 \mathrm{A}_2}. \]
+두 대칭점 사이의 거리는
+\[ \overline{\mathrm{A}_1 \mathrm{A}_2} = \sqrt{2^2 + 4^2} = 2\sqrt{5} \]
+이므로 둘레의 최솟값은 $2\sqrt{5}$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{두 번의 대칭이동으로 세 변을 한 선분으로 편다}: 시작점과 끝점의 대칭점 사이의 직선 거리가 세 선분의 합의 최솟값이 되어 좌표 계산 없이 바로 나온다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-12 ───────────────
+\dmsoltitle{12}{두 원의 대응으로 결정되는 대칭축의 방정식}
+\begin{dmanswerbox}
+정답: $abc=-25$
+\end{dmanswerbox}
+
+첫 원의 표준형 $(x - 2)^2 + (y - 4)^2 = 20$\ 에서 중심 $(2,\, 4)$,\ 반지름 제곱 $20$\ 이고, $x^2 + y^2 = c$\ 의 중심은 $(0,\, 0)$,\ 반지름 제곱 $c$\ 이다.
+
+대칭이동에서 반지름 불변이므로 $c = 20$\ 이다.
+
+대칭축은 두 중심 $(2,\, 4),\ (0,\, 0)$\ 을 잇는 선분의 수직이등분선이다.
+
+중점은 $(1,\, 2)$,\ 잇는 기울기 $2$\ 이므로 대칭축 기울기는 $-\dfrac{1}{2}$\ 이고
+\[ y - 2 = -\dfrac{1}{2}(x - 1),\quad y = -\dfrac{1}{2}x + \dfrac{5}{2}. \]
+$a = -\dfrac{1}{2},\ b = \dfrac{5}{2}$\ 이므로 $abc = \left(-\dfrac{1}{2}\right)\!\cdot\!\dfrac{5}{2}\!\cdot\!20 = -25$.
+
+\begin{dmcriticalpoint}
+\dmcplabel{직선에 대한 대칭이동에서 두 원의 반지름은 보존되고 대칭축은 두 중심을 잇는 선분의 수직이등분선이다}: 반지름 조건에서 상수 하나가 정해지고 수직이등분선의 두 조건에서 나머지 두 계수가 정해진다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 4 — Level 3 (3문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[심화 연습]{Level 3}
+
+\renewcommand{\dmquickgridstretch}{3.00}
+\begin{dmquickgrid}
+\dmquick{1}{$a=4$} & \dmquick{2}{$11+2\sqrt{10}$} & \dmquick{3}{$\overline{\mathrm{AB}}=\sqrt{26}$} & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── L3-1 ───────────────
+\dmsoltitle{1}{포물선 대응 이동 후 두 원의 공통현의 길이}
+\begin{dmanswerbox}
+정답: $a=4$
+\end{dmanswerbox}
+
+$(x + a)^2 + a^2$\ 의 꼭짓점 $(-a,\, a^2)$\ 과 $y = x^2 + a^2 - a$\ 의 꼭짓점 $(0,\, a^2 - a)$\ 의 대응에서 이동량은 $(a,\, -a)$\ 이다.
+
+$\mathrm{C}_1 : x^2 + (y - 5)^2 = 9$\ 의 중심 $(0,\, 5)$,\ 반지름 $3$\ 이므로 $\mathrm{C}_2$\ 의 중심은 $(a,\, 5 - a)$,\ 반지름 $3$\ 이다.
+
+두 중심 사이 거리는
+\[ \overline{\mathrm{C}_1 \mathrm{C}_2} = \sqrt{a^2 + a^2} = a\sqrt{2}. \]
+
+두 반지름이 같으므로 공통현이 두 중심의 수직이등분선 위에 있고 중심에서 현까지 거리는 $\dfrac{a\sqrt{2}}{2}$\ 이다.
+
+반지름·거리·현의 절반이 이루는 직각삼각형 관계 (공통현 길이 $2$)에서
+\[ 3^2 = \left( \dfrac{a\sqrt{2}}{2} \right)^2 + 1^2,\quad \dfrac{a^2}{2} = 8. \]
+$a^2 = 16$\ 에서 양수 $a = 4$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{두 원의 반지름이 같으면 공통현이 두 중심의 수직이등분선 위이다}: 중심에서 공통현까지의 거리가 두 중심 사이 거리의 절반과 같아진다.
+\end{dmcriticalpoint}
+
+% ─────────────── L3-2 (세션 63 교체) ───────────────
+% source : 블랙라벨-CM2-03-STEP3-#01 · 원의 점 대칭이동 · 외접 조건 → (a,b) 궤적 원 → 원점에서 최대 거리
+\dmsoltitle{2}{점 대칭이동으로 옮긴 원의 외접 조건과 중심의 궤적}
+\begin{dmanswerbox}
+정답: $(\sqrt{10} + 1)^{2} = 11 + 2\sqrt{10}$
+\end{dmanswerbox}
+
+$\mathrm{C}_{1}$\ 의 표준형 $(x + 1)^{2} + (y - 2)^{2} = 1$\ 에서 중심 $\mathrm{O}_{1}(-1,\, 2)$,\ 반지름 $1$\ 이다.
+
+$\mathrm{O}_{1}$\ 의 $(a,\, b)$ 대칭점이 $\mathrm{O}_{2}$\ 이므로
+\[ \mathrm{O}_{2}(2a + 1,\, 2b - 4). \]
+
+두 반지름이 $1$\ 로 같으므로 외접 조건은 중심 거리 $=$ $2$\ 이다.
+\[ (2a + 2)^{2} + (2b - 6)^{2} = 4 \quad\Longrightarrow\quad (a + 1)^{2} + (b - 3)^{2} = 1. \]
+
+$(a,\, b)$\ 가 중심 $(-1,\, 3)$,\ 반지름 $1$\ 인 원 위를 움직이므로 원점에서의 거리는 원점과 궤적 중심의 거리 $\sqrt{10}$\ 에 반지름 $1$\ 을 더한 값까지 커진다.
+\[ (a^{2} + b^{2})_{\max} = (\sqrt{10} + 1)^{2} = 11 + 2\sqrt{10}. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{$(a,\, b)$\ 가 두 중심의 중점이라는 정의를 직접 좌표로 옮긴다}: $\mathrm{O}_{2}(2a + 1,\, 2b - 4)$\ 로 표현되어 대칭 중심의 좌표가 옮겨진 원의 중심에 그대로 나타난다.
+\end{dmcriticalpoint}
+
+% ─────────────── L3-3 ───────────────
+\dmsoltitle{3}{$y=x$ 대칭인 포물선 위 두 점의 거리}
+\begin{dmanswerbox}
+정답: $\overline{\mathrm{AB}}=\sqrt{26}$
+\end{dmanswerbox}
+
+$\mathrm{A}(p,\, q)$\ 와 $\mathrm{B}(q,\, p)$\ 가 포물선 $y = x^2 - 2x - 2$ 위이므로
+\[ q = p^2 - 2p - 2,\qquad p = q^2 - 2q - 2. \]
+
+두 식을 변변 빼면
+\[ q - p = (p^2 - q^2) - 2(p - q) = -(q - p)(p + q) + 2(q - p) \]
+이므로 $(q - p)(p + q - 1) = 0$\ 이다. $p \ne q$\ 이므로 $p + q = 1$\ 이다.
+
+두 식을 변변 더하면 $p + q = p^2 + q^2 - 2(p + q) - 4$\ 이고 $p^2 + q^2 = (p+q)^2 - 2pq = 1 - 2pq$\ 이므로
+\[ 1 = 1 - 2pq - 2 - 4 \quad\therefore\ pq = -3. \]
+
+$\overline{\mathrm{AB}} = \sqrt{2}\, |p - q|$\ 이고
+\[ (p - q)^2 = (p + q)^2 - 4pq = 1 + 12 = 13 \]
+이므로 $\overline{\mathrm{AB}} = \sqrt{2}\cdot\sqrt{13} = \sqrt{26}$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{두 점의 좌표를 서로 바꾼 형태로 놓아 대칭적 두 식을 얻는다}: $y = x$ 대칭점 정의로 각 점을 곡선에 대입한 식이 $p \leftrightarrow q$ 대칭이 되어 차·합이 만들어진다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 5 — 실전 기출 (3문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[학평 기출]{실전 기출}
+
+\renewcommand{\dmquickgridstretch}{3.00}
+\begin{dmquickgrid}
+\dmquick{1}{$a+b+r=12$} & \dmquick{2}{$a^2=32$} & \dmquick{3}{최솟값 $=9$} & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── 실전 1 (R-1 · 2022.3월 고2 27번) ───────────────
+\dmsoltitle{1}{원 평행이동과 공통 접선 조건}
+\begin{dmanswerbox}
+정답: $a+b+r=12$
+\end{dmanswerbox}
+
+$\mathrm{C} : (x - 1)^2 + y^2 = r^2$\ 의 중심 $(1,\, 0)$,\ 반지름 $r$\ 이고 $\mathrm{C}'$\ 의 중심은 $(1 + a,\, b)$\ 이다.
+
+조건 (가)에서 $\mathrm{C}'$\ 이 $\mathrm{C}$\ 의 중심 $(1,\, 0)$\ 을 지나므로 중심 거리 $=$ 반지름:
+\[ \sqrt{a^2 + b^2} = r. \]
+
+조건 (나)에서 직선 $4x - 3y + 21 = 0$\ 이 $\mathrm{C}$\ 에 접하므로 중심 $(1,\, 0)$\ 에서의 거리 $=$ $r$:
+\[ \dfrac{|4 + 21|}{5} = 5 = r. \]
+
+같은 직선이 $\mathrm{C}'$\ 에도 접하므로 $\mathrm{C}'$\ 의 중심에서의 거리도 $5$:
+\[ \dfrac{|4(1 + a) - 3b + 21|}{5} = 5,\quad |4a - 3b + 25| = 25. \]
+
+두 원이 접선을 사이에 두고 같은 쪽에 있으므로 $4a - 3b + 25 = 25$,\ $4a = 3b$\ 이다.
+
+$a = 3t,\ b = 4t$ ($t > 0$)로 놓으면 $a^2 + b^2 = 25t^2 = 25$\ 에서 $t = 1$\ 이고 $a = 3,\ b = 4$\ 이므로 $a + b + r = 12$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{두 원이 서로의 중심을 지날 조건은 중심 거리 $=$ 반지름이다}: 이 조건이 이동량 $(a,\, b)$\ 와 반지름을 잇는 첫 번째 관계식을 준다.
+\end{dmcriticalpoint}
+
+% ─────────────── 실전 2 (R-2 · 2024.9월 고1 27번) ───────────────
+\dmsoltitle{2}{두 대칭이동으로 만들어지는 두 삼각형의 외접원 반지름}
+\begin{dmanswerbox}
+정답: $a^2=32$
+\end{dmanswerbox}
+
+$\mathrm{A}(a,\, 2)$\ 의 $y = x$ 대칭점은 $\mathrm{B}(2,\, a)$\ 이고 $\mathrm{B}$\ 의 $x$\ 축 대칭점은 $\mathrm{C}(2,\, -a)$\ 이다.
+
+$\mathrm{B},\ \mathrm{C}$\ 의 $x$\ 좌표가 같으므로 $\overline{\mathrm{BC}}$\ 는 수직선분이고 $\overline{\mathrm{BC}} = 2a$\ 이다.
+
+$\mathrm{A}$\ 에서 $\overline{\mathrm{BC}}$\ 에 내린 수선의 발은 $(2,\, 2)$\ 이므로 높이는 $a - 2$\ 이고
+\[ S_{ABC} = \dfrac{1}{2} \cdot 2a \cdot (a - 2) = a(a - 2). \]
+
+세 변의 길이는
+\begin{align*}
+  \overline{\mathrm{AB}} &= \sqrt{(a - 2)^2 + (2 - a)^2} = \sqrt{2}\, (a - 2),\\
+  \overline{\mathrm{BC}} &= 2a,\\
+  \overline{\mathrm{CA}} &= \sqrt{(a - 2)^2 + (2 - (-a))^2} = \sqrt{2}\, \sqrt{a^2 + 4}
+\end{align*}
+이다.
+
+외접원 반지름은 삼각형의 세 변 곱을 넓이의 $4$\ 배로 나눈 값과 같으므로
+\begin{align*}
+  r_1 &= \dfrac{\overline{\mathrm{AB}} \cdot \overline{\mathrm{BC}} \cdot \overline{\mathrm{CA}}}{4 S_{ABC}} \\
+      &= \dfrac{\sqrt{2}(a - 2) \cdot 2a \cdot \sqrt{2}\sqrt{a^2 + 4}}{4 a(a - 2)} \\
+      &= \sqrt{a^2 + 4}.
+\end{align*}
+
+삼각형 $\mathrm{AOC}$\ 에서 $\overline{\mathrm{OA}} = \overline{\mathrm{OC}} = \sqrt{a^2 + 4}$\ 이고 $\overline{\mathrm{AC}} = \sqrt{2}\sqrt{a^2 + 4}$\ 이므로
+\[ \overline{\mathrm{OA}}^{\,2} + \overline{\mathrm{OC}}^{\,2} = 2(a^2 + 4) = \overline{\mathrm{AC}}^{\,2} \]
+가 성립한다.
+
+원점이 직각 꼭짓점이므로 빗변 $\overline{\mathrm{AC}}$\ 가 외접원의 지름이고
+\[ r_2 = \dfrac{\overline{\mathrm{AC}}}{2} = \dfrac{\sqrt{2}\sqrt{a^2 + 4}}{2}. \]
+
+두 반지름의 곱은
+\[ r_1 \cdot r_2 = \dfrac{\sqrt{2}(a^2 + 4)}{2} = 18\sqrt{2} \]
+에서 $a^2 + 4 = 36$\ 이므로 $a^2 = 32$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{$y = x$ 대칭·$x$\ 축 대칭의 정의를 좌표에 직접 적용한다}: 세 점이 $(a,\, 2),\ (2,\, a),\ (2,\, -a)$\ 처럼 두 문자만으로 정돈되어 계산이 짧아진다.
+\end{dmcriticalpoint}
+
+% ─────────────── 실전 3 (R-3 · 2023.9월 고1 16번) ───────────────
+\dmsoltitle{3}{두 원과 두 축에 대한 대칭을 이용한 최단 경로}
+\begin{dmanswerbox}
+정답: 최솟값 $=9$
+\end{dmanswerbox}
+
+$\mathrm{C}_1$\ 의 중심 $(8,\, 2)$,\ $\mathrm{C}_2$\ 의 중심 $(3,\, -4)$,\ 두 반지름 $2$\ 이다.
+
+$\mathrm{A} \in \mathrm{C}_1$\ 과 $x$\ 축 위 $\mathrm{P}$\ 에 대해 $\mathrm{C}_1$\ 의 $x$\ 축 대칭원을 $\mathrm{C}_1'$,\ $\mathrm{A}$\ 의 대칭점을 $\mathrm{A}'$\ 이라 하면 $\overline{\mathrm{AP}} = \overline{\mathrm{A}'\mathrm{P}}$\ 이고 $\mathrm{C}_1'$\ 의 중심은 $(8,\, -2)$\ 이다.
+
+$\mathrm{B} \in \mathrm{C}_2$\ 와 $y = x$ 위 $\mathrm{Q}$\ 에 대해 $\mathrm{C}_2$\ 의 $y = x$ 대칭원을 $\mathrm{C}_2'$,\ $\mathrm{B}$\ 의 대칭점을 $\mathrm{B}'$\ 이라 하면 $\overline{\mathrm{QB}} = \overline{\mathrm{QB}'}$\ 이고 $\mathrm{C}_2'$\ 의 중심은 $(-4,\, 3)$\ 이다.
+
+\[ \overline{\mathrm{AP}} + \overline{\mathrm{PQ}} + \overline{\mathrm{QB}} = \overline{\mathrm{A}'\mathrm{P}} + \overline{\mathrm{PQ}} + \overline{\mathrm{QB}'} \ge \overline{\mathrm{A}'\mathrm{B}'} \]
+이고 $\mathrm{A}' \in \mathrm{C}_1',\ \mathrm{B}' \in \mathrm{C}_2'$\ 이므로 $\overline{\mathrm{A}'\mathrm{B}'}$\ 의 최솟값은 두 중심 거리 $-$ 두 반지름의 합이다.
+
+두 중심 거리는
+\[ \sqrt{12^2 + 5^2} = 13 \]
+이므로 최솟값은 $13 - 2 - 2 = 9$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{원 위 점의 대칭점은 원의 대칭원 위에 놓인다}: 원 위 점에서 축 위 점까지의 거리가 대칭원 위 점까지의 거리와 같아진다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+\end{document}

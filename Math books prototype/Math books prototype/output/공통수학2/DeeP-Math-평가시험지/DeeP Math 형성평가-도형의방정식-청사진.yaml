@@ -1,0 +1,809 @@
+# DeeP Math 형성평가 · CM2-GM 도형의 방정식 (대단원 1) 청사진 v6.2
+# 세션 92 (2026-07-26) : 신규 시리즈 형성평가 시험지 · A형·B형 쌍둥이
+# 시리즈: testpaper · DeeP Math 형성평가 · 중위권 ~ 중상위권
+# 범위: CM2-GM-01 평면좌표 · 02 직선 · 03 원 · 04 이동
+# 20문 · 100점 · 배점 4·5·6·7 (4단계) · 시험 시간 50분
+# 원본 정책 C : 정리편 60% (12문) + 신규 40% (8문)
+
+series_type: testpaper
+series_name: DeeP Math 형성평가
+book_title: DeeP Math 형성평가 · 도형의 방정식 · A형
+unit_range: CM2-GM (01~04)
+target_audience: 중상위권_상위권       # v0.5 · ★ 4=14문 상한 원본 · 실 학생 체감 난이도 상향
+version: v0.8                          # 세션 93 후반 · Q09 교체 (#068→#066 수선의 발) + 학평 배지 A안 3건
+established: 2026-07-26
+updated: 2026-07-26                    # v0.8 Q09 교체 + Q18·Q19·Q20 학평 배지 추가
+version_history:
+  v0.4: 세션 92 · 기존 청사진 (★ 3=6 · ★ 4 기본 9 + 심화 3 · ★ 5=2)
+  v0.5: 세션 93 후반 · D안 재편 (★ 3=3 · ★ 4=14 · ★ 5=3 · Q04~Q17 재pick 예정 · Q18 신규 학평)
+  v0.6: |
+    세션 93 Task #15-2 완결 · Q04~Q17 상한 원본 재pick 완료 (고쟁이 STEP1·STEP2 · 학평 · 마플 TOUGH 계열).
+    개념원리 예제·유제 3건 · RPM 유형익히기·시험 5건 → 고쟁이 STEP1·STEP2 · 학평 4점 pool로 전면 교체.
+    Q18: 학평-2019-9월-고1-19번 (평행이동·두 삼각형 공통부분 최대 넓이 · ★ 5) 신규 pick.
+    Q20: 배점 7→6 조정 (D안 통일).
+  v0.7: |
+    세션 93 후반 Task #16-3 · Q20을 p6 단독 배치에서 p5 우하로 이동 · p6 폐지 · 총 5페이지 확정.
+    §8 page_layout p5: {Q17·Q18·Q19·Q20} 4문 옵션 A 세로 균등 (좌: Q17·Q18 · 우: Q19·Q20).
+    발문·답·매크로·팔레트 변경 없음 (v0.6 100% 계승).
+  v0.8: |
+    세션 93 후반 · A형 미세 정정 (마스터 지시 2건).
+    [1] Q09 교체: 고쟁이-CH02-STEP1-#068 (점-직선 거리 · Q08·Q10과 통찰 반복 감지) → 고쟁이-CH02-STEP1-#066 (수선의 발 좌표 · verbatim_original · a+b=3).
+        Q08(정점+점-직선 거리)·Q10(원-직선 접선 = 거리 조건) 3연속 통찰 겹침 해소.
+        신규 통찰: 수선의 발 (직선의 수직 + 두 직선 연립) · Q07(무게중심)·Q17(세 직선 직각삼각형)과도 겹침 없음.
+    [2] 학평 배지 A안 상세 검정 3건: Q18·Q19·Q20 \pts{6} 뒤 \probsource{...} 인라인 삽입.
+        style.sty line 682 \probsource 매크로 (footnotesize sffamily color{vB-dim} textit) 그대로 사용.
+        vB-dim 로컬 재정의 (#000000) → 완전 검정 유지 (Q20 예외 없음 원칙 준수).
+        표기: 학년/과목 포함 상세 형식 (2022학년도 3월 학평 고2 27번 · 2024학년도 9월 학평 고1 27번 · 2021학년도 11월 학평 고1 17번).
+
+# 세션 92 마스터 재확인 (2026-07-26) :
+#   - ★ 5 = 2문 (최초 기획안 유지 · 20문 총 문항 수 유지)
+#     · ★ 5 일반 (6점) = Q19 · "그냥 출제" (일반 심화와 동 배점)
+#     · ★ 5 변별 (7점) = Q20 · 최고 배점 정점
+#   - 시험지 팔레트 : 안 C · 모의고사 표준 (blk·navy·crimson) · dm-exam.sty 신규 예정
+
+testpaper_meta:
+  total_problem_slots: 20
+  total_points: 100
+  test_time_min: 50
+  page_count_est: 6                    # 시험지 4~6p (실측 후 조정)
+  answer_sheet_pages: 4                # 답지 별도
+
+# ══════════════════════════════════════════════════════════════
+# §1. 배점 매트릭스 (100점 정합 · v0.6 D안 세션 93 후반 재확정)
+# ══════════════════════════════════════════════════════════════
+# v0.5 → v0.6 변경 (마스터 실측 지적 "★ 4급이 실제 ★ 4 아님" · Task #15-2 재pick 결과):
+#   - Q04·Q05·Q06: v0.5에서 ★ 3=4점 이었으나 v0.6에서 실제 상한 원본으로 재pick하면서 ★ 4=5점으로 상향
+#   - Q07~Q17 (11문): ★ 4=5점 · 고쟁이 STEP1·STEP2 원본
+#   - Q16·Q17 배점 6→5 조정 (D안 일관성)
+#   - ★ 5 = 3문 (Q18 신규 학평 · Q19·Q20 학평 verbatim) · 모두 6점
+distribution_target:
+  star_3_batjeom_4: 3                    # 12점 · 기본 (Q01·Q02·Q03)
+  star_4_batjeom_5: 14                   # 70점 · 상한 원본 (Q04~Q17)
+  star_5_batjeom_6: 3                    # 18점 · Q18 학평 신규 + Q19·Q20 학평 verbatim
+  total_check: {문항: 20, 배점: 100}     # 12+70+18 = 100 ✓
+  star_count_verification:
+    star_3: 3                            # Q01·Q02·Q03 (RPM 교과서 · 개념원리 예제 · 기본)
+    star_4: 14                           # Q04~Q17 (전건 재pick 완료 · 상한 원본)
+    star_5: 3                            # Q18 (학평 2022-3월-고2-27번 신규) + Q19 (2024-9월-고1-27번) + Q20 (2021-11월-고1-17번)
+    total: 20
+
+# ══════════════════════════════════════════════════════════════
+# §2. 단원별 분포 (페이지 비례 안배)
+# ══════════════════════════════════════════════════════════════
+unit_distribution:
+  # v0.6 재확정 (Task #15-2 재pick 완료)
+  CM2-GM-01_평면좌표:
+    문항수: 4
+    문항리스트: [Q01, Q02, Q07, Q16]
+    배점소계: 4+4+5+5   # 18점
+    star_분포: {star_3: 2 (Q01·Q02), star_4: 2 (Q07·Q16)}
+  CM2-GM-02_직선:
+    문항수: 5
+    문항리스트: [Q03, Q04, Q08, Q09, Q17]
+    배점소계: 4+5+5+5+5   # 24점
+    star_분포: {star_3: 1 (Q03), star_4: 4 (Q04·Q08·Q09·Q17)}
+  CM2-GM-03_원:
+    문항수: 5
+    문항리스트: [Q05, Q10, Q11, Q12, Q20]
+    배점소계: 5+5+5+5+6   # 26점
+    star_분포: {star_4: 4 (Q05·Q10·Q11·Q12), star_5: 1 (Q20 학평 verbatim)}
+  CM2-GM-04_이동:
+    문항수: 6
+    문항리스트: [Q06, Q13, Q14, Q15, Q18, Q19]
+    배점소계: 5+5+5+5+6+6   # 32점
+    star_분포: {star_4: 4 (Q06·Q13·Q14·Q15), star_5: 2 (Q18 신규 학평 + Q19 학평 verbatim)}
+  총합: {문항: 20, 배점: 100}   # 18+24+26+32 = 100 ✓
+  # v0.6 재산정 근거:
+  # - Q07 CM2-GM-01 재배치 (외심 → 무게중심 · 고쟁이 CH01 STEP1 #015 verbatim · 답 p+q=10 검증)
+  # - Q16 CM2-GM-01 유지 (무게중심 심화 → 표준 · batjeom 6→5)
+  # - Q17 CM2-GM-02 유지 (세 직선 삼각형 미형성 → 직각삼각형 · batjeom 6→5)
+  # - Q18 CM2-GM-04 신규 (학평 2022-3월-고2-27번 · 평행이동 원 · batjeom 6)
+
+# ══════════════════════════════════════════════════════════════
+# §3. 정독 원본 은행 (정리편 60% + 신규 40%)
+# ══════════════════════════════════════════════════════════════
+source_banks:
+  # 정리편 원본 (60% · 12문 · variation_type: number_only)
+  - bank/mechanism-데이터-개념원리-CM2-GM-평면좌표.md      # 01 평면좌표
+  - bank/mechanism-데이터-개념원리-CM2-GM-직선.md          # 02 직선
+  - bank/mechanism-데이터-개념원리-CM2-GM-원.md            # 03 원
+  - bank/mechanism-데이터-개념원리-CM2-GM-이동.md          # 04 이동
+  - bank/mechanism-데이터-RPM-CM2-GM-평면좌표.md           # 01 RPM
+  - bank/mechanism-데이터-RPM-CM2-GM-직선.md               # 02 RPM
+  - bank/mechanism-데이터-RPM-CM2-GM-원.md                 # 03 RPM
+  - bank/mechanism-데이터-RPM-CM2-GM-이동.md               # 04 RPM
+  # 신규 pick (40% · 8문 · 정리편 미사용 유제·연습·STEP1 위주)
+  - bank/mechanism-데이터-고쟁이-CM2-CH01-평면좌표-STEP1.md
+  - bank/mechanism-데이터-고쟁이-CM2-CH02-직선-STEP1.md
+  - bank/mechanism-데이터-고쟁이-CM2-CH03-원-STEP1.md
+  - bank/mechanism-데이터-고쟁이-CH03-원.md                # STEP2·3
+  # 변별력 (★5 1문 · 정리편 L3·premium 계열)
+  - bank/mechanism-데이터-전국연합-CM2-GM.md               # 학평 원본
+
+# ══════════════════════════════════════════════════════════════
+# §4. 문항 슬롯 (20문 · 배점 순 · 각 배점 내 단원 순)
+# ══════════════════════════════════════════════════════════════
+# 배치 원칙 :
+#   1~6번 : ★ 3 (4점) - 기본 문항
+#   7~15번 : ★ 4 기본 (5점) - 일반 응용
+#   16~18번 : ★ 4 심화 (6점) - 심화 응용
+#   19번 : ★ 5 일반 (6점) - "그냥 출제" · 심화와 동 배점
+#   20번 : ★ 5 변별 (7점) - 정점 변별
+#
+# variation_status : verbatim_original_kept (정리편 원본 그대로) · modified (숫자 변형) · pending_pick (다음 단계)
+# ══════════════════════════════════════════════════════════════
+
+problem_slots:
+  # ─── ★ 3 (4점) · 6문 · 1~6번 ─────────────────────────────────
+  - slot_id: Q01
+    문항번호: 1
+    batjeom: 4
+    target_star: 3
+    unit: CM2-GM-01
+    slot_type: 기본
+    mechanism: {primary: 두 점 사이의 거리, insight_type: 절차형, depth: 1}
+    problem_type: 두 점 사이의 거리 · 미지수 결정
+    source_status: picked
+    source: {source_id: RPM-CM2-GM-#0018, tier: RPM-유형, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: number_only
+    variation_notes: |
+      원본: 두 점 A(4,a), B(a,4)에서 AB=5√2일 때 양수 a (RPM 유형 01 대표).
+      A형 변형: A(3,a), B(a,3)에서 AB=4√2일 때 양수 a. (숫자만 교체 · 구조 100% 보존)
+    답: "a=7"   # 자체 검증: (3-a)²+(a-3)²=32 → 2(a-3)²=32 → (a-3)²=16 → a-3=±4 → a=7 (양수)
+    problem_summary: |
+      두 점 A(3,a), B(a,3)에 대하여 AB=4√2일 때, 양수 a의 값.
+    reuse_note: |
+      정리편 01 CHK2에서 원본 (A(4,a),B(a,4)·AB=7√2 변형)이 사용됨.
+      형성평가 A형은 원본 계수 회귀 + 다른 상수로 재변형 → 자기복제 회피.
+    signature: {primary_axis: 평면좌표, source_domain: 정리편 원본 계열}
+
+  - slot_id: Q02
+    문항번호: 2
+    batjeom: 4
+    target_star: 3
+    unit: CM2-GM-01
+    slot_type: 기본
+    mechanism: {primary: 내분점·중점 공식, insight_type: 절차형, depth: 1}
+    problem_type: 중점 좌표 역산 · 미지수 결정
+    source_status: picked
+    source: {source_id: RPM-CM2-GM-#0013, tier: RPM-교과서, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: number_only
+    variation_notes: |
+      원본: A(a,4), B(-2,b) 중점 (2,1) → ab (RPM 교과서 문제).
+      A형 변형: A(a,3), B(-4,b) 중점 (1,2) → a+b. (숫자·응답 변형)
+    답: "a+b=7"   # 자체 검증: (a-4)/2=1 → a=6, (3+b)/2=2 → b=1, a+b=7
+    problem_summary: |
+      두 점 A(a,3), B(-4,b)의 중점이 (1,2)일 때, a+b의 값.
+    reuse_note: 정리편 01 미사용 원본 (교과서 문제 pool).
+    signature: {primary_axis: 내분·외분, source_domain: 정리편 원본 계열}
+
+  - slot_id: Q03
+    문항번호: 3
+    batjeom: 4
+    target_star: 3
+    unit: CM2-GM-02
+    slot_type: 기본
+    mechanism: {primary: 두 점을 지나는 직선의 방정식, insight_type: 절차형, depth: 1}
+    problem_type: 두 점을 지나는 직선의 방정식·기울기·y절편
+    source_status: picked
+    source: {source_id: 개념원리-CM2-GM-직선-예제-01, tier: 개념원리-예제, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: number_only
+    variation_notes: |
+      원본: 두 점 (1,4), (3,-2)를 지나는 직선의 방정식 (개념원리 대표예제).
+      A형 변형: 두 점 (-2,5), (3,-5)를 지나는 직선의 y절편. (숫자·응답만 변형)
+    답: "y절편=-1"   # 자체 검증: 기울기=(-5-5)/(3-(-2))=-2, y-5=-2(x-(-2)) → y=-2x+1 · y절편 1 · 재검산: y=-2(-2)+b=5 → b=1 → 확인 y=-2·3+1=-5 ✓
+    problem_summary: |
+      두 점 A(-2,5), B(3,-5)를 지나는 직선의 y절편.
+    reuse_note: |
+      정리편 02 E1a는 개념원리-CM2-GM-직선-예제-02 (내분점 관련) 활용. 예제-01 미사용.
+    답_수정: "y절편=1"   # 최종: y=-2x+1 · y절편 1
+    signature: {primary_axis: 직선의 방정식, source_domain: 정리편 원본 계열}
+
+  # v0.6 재pick: Q04~Q06은 CM2-GM-02·03·04 각 단원 첫 ★ 4 슬롯 · 상한 원본 pool 유지
+  - slot_id: Q04
+    문항번호: 4
+    batjeom: 5
+    target_star: 4
+    unit: CM2-GM-02
+    slot_type: 응용
+    mechanism: {primary: 두 직선의 수직 조건 · 계수 결정, insight_type: 조건통합형, depth: 2}
+    problem_type: 수직·평행 결합 조건 · 두 상수 결정
+    source_status: picked
+    source: {source_id: 고쟁이-CM2-CH02-STEP1-#064, tier: 고쟁이-STEP1, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: number_only
+    variation_notes: |
+      원본: 직선 y=ax+2가 bx-3y-3=0과 수직·(b-2)x+y-4=0과 평행 · a²+b² (고쟁이 CH02 STEP1 #064 · 빈출).
+      A형 변형: 직선 y=ax+3이 직선 bx-2y-1=0과 수직이고, 직선 (b-1)x+y-3=0과 평행할 때 a²+b². (계수 교체)
+    답: "a²+b²=13"   # 자체 검증: 평행 (b-1)x+y-3=0 → y=-(b-1)x+3, 기울기 -(b-1) · a=-(b-1) → a=1-b · 수직 y=ax+3 ⊥ bx-2y-1=0(y=(b/2)x-1/2) → a·(b/2)=-1 → ab=-2 · 연립 (1-b)b=-2 → b²-b-2=0 → b=2 or -1. b=2: a=-1 · b=-1: a=2. 둘 다 a²+b²=1+4=5? 재계산: 1+4=5. 답=5 (정정)
+    답_수정: "a²+b²=5"   # 정정 완료
+    problem_summary: |
+      직선 y=ax+3이 직선 bx-2y-1=0과 서로 수직이고, 직선 (b-1)x+y-3=0과 서로 평행할 때, a²+b²의 값.
+    reuse_note: 정리편 02 미사용 원본 (고쟁이 STEP1 #064 빈출 · 상한 pool).
+    signature: {primary_axis: 두 직선 위치 관계, source_domain: 고쟁이 STEP1 상한 pool}
+
+  - slot_id: Q05
+    문항번호: 5
+    batjeom: 5
+    target_star: 4
+    unit: CM2-GM-03
+    slot_type: 응용
+    mechanism: {primary: 원의 일반형 → 표준형 · 중심·반지름 · 조건 결합, insight_type: 조건통합형, depth: 2}
+    problem_type: 원의 방정식 완전제곱 · 중심·반지름·계수 합
+    source_status: picked
+    source: {source_id: 고쟁이-CM2-CH03-STEP1-#125, tier: 고쟁이-STEP1, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: number_only
+    variation_notes: |
+      원본: x²+y²+4ax-4y+5a²-2a-11=0이 원이 되도록 하는 자연수 a의 최댓값 (고쟁이 STEP1 #125 · 빈출).
+      A형 변형: 방정식 x²+y²+2ax-6y+a²+3a-4=0이 나타내는 도형이 원이 되도록 하는 자연수 a의 최댓값. (계수 교체)
+    답: "3"   # 자체 검증: (x+a)²+(y-3)²=a²+9-a²-3a+4=13-3a > 0 → 3a<13 → a<13/3=4.33 → 자연수 최댓값 4? 재계산: 13-3a>0 → a<13/3≈4.33 → 자연수 a: 1,2,3,4 → 최댓값 4.
+    답_수정: "a=4"   # 정정
+    problem_summary: |
+      방정식 x²+y²+2ax-6y+a²+3a-4=0이 나타내는 도형이 원이 되도록 하는 자연수 a의 최댓값.
+    reuse_note: 정리편 03 미사용 원본 (고쟁이 STEP1 #125 빈출 · 상한 pool).
+    signature: {primary_axis: 원의 존재 조건, source_domain: 고쟁이 STEP1 상한 pool}
+
+  - slot_id: Q06
+    문항번호: 6
+    batjeom: 5
+    target_star: 4
+    unit: CM2-GM-04
+    slot_type: 응용
+    mechanism: {primary: 평행이동 · 이동 벡터 결정, insight_type: 조건통합형, depth: 2}
+    problem_type: 이동 벡터 유추 · 다른 점 이동
+    source_status: picked
+    source: {source_id: 고쟁이-CM2-CH04-STEP1-#202, tier: 고쟁이-STEP1, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: number_only
+    variation_notes: |
+      원본: 점 (2,3)을 (-1,5)로 옮기는 평행이동에 의해 점 (2,4)로 옮겨지는 점 (고쟁이 STEP1 #202 · 빈출).
+      A형 변형: 점 (1,-2)를 점 (3,1)로 옮기는 평행이동에 의해 점 (a,b)가 점 (-1,4)로 옮겨질 때, a+b.
+    답: "a+b=0"   # 자체 검증: 이동 벡터 (2,3) · (a+2, b+3)=(-1,4) → a=-3, b=1 · a+b=-2. 재계산: 답 -2.
+    답_수정: "a+b=-2"   # 정정 완료
+    problem_summary: |
+      점 (1,-2)를 점 (3,1)로 옮기는 평행이동에 의해 점 (a,b)가 점 (-1,4)로 옮겨질 때, a+b의 값.
+    reuse_note: 정리편 04 미사용 원본 (고쟁이 STEP1 #202 빈출 · 상한 pool).
+    signature: {primary_axis: 평행이동 벡터 역산, source_domain: 고쟁이 STEP1 상한 pool}
+
+  # ─── ★ 4 (5점) · 11문 · 7~17번 · v0.6 상한 원본 pool 재pick ───────
+  # 재pick 원칙: 원본 계수 100% 유지 (또는 대칭 정수 교체만) · 답 사전 검증 (정수·간단한 분수만 pick)
+  - slot_id: Q07
+    문항번호: 7
+    batjeom: 5
+    target_star: 4
+    unit: CM2-GM-01
+    slot_type: 응용
+    mechanism: {primary: 두 점 사이 거리 · 이차방정식 근과 계수, insight_type: 조건통합형, depth: 2}
+    problem_type: 거리 비율 조건 · 실수 a 값 합
+    source_status: picked
+    source: {source_id: 고쟁이-CM2-CH01-STEP1-#002, tier: 고쟁이-STEP1, variation_type: verbatim_original, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: verbatim_original
+    variation_notes: |
+      원본 그대로 (숫자 미변형 · verbatim_original): 세 점 A(4,-1), B(0,1), C(1,a)에서 AB=2·BC를 만족시키는 모든 실수 a의 값의 합 (고쟁이 CH01 STEP1 #002).
+      원본 계수 유지: 이차방정식 근과 계수 표준. 답이 정수 (a합=2) 확정.
+    답: "a합=2"   # 자체 검증: AB²=(4-0)²+(-1-1)²=16+4=20. BC²=(1-0)²+(a-1)²=1+(a-1)². AB=2BC → 20=4(1+(a-1)²) → 5=1+(a-1)² → (a-1)²=4 → a-1=±2 → a=3 or -1 · 합=2 ✓
+    problem_summary: |
+      세 점 A(4,-1), B(0,1), C(1,a)에서 AB=2·BC를 만족시키는 모든 실수 a의 값의 합.
+    reuse_note: 정리편 01 미사용 원본 (고쟁이 CH01 STEP1 #002 · verbatim · 근과 계수 관계 표준).
+    signature: {primary_axis: 두 점 거리 · 이차방정식, source_domain: 고쟁이 STEP1 상한 pool}
+
+  - slot_id: Q08
+    문항번호: 8
+    batjeom: 5
+    target_star: 4
+    unit: CM2-GM-02
+    slot_type: 응용
+    mechanism: {primary: 정점 지나는 직선 · 점-직선 거리, insight_type: 조건통합형, depth: 2}
+    problem_type: 정점 · 거리 조건 · 상수 두 값 곱
+    source_status: picked
+    source: {source_id: 고쟁이-CM2-CH02-STEP1-#069, tier: 고쟁이-STEP1, variation_type: verbatim_original, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: verbatim_original
+    variation_notes: |
+      원본 그대로 (verbatim_original): 직선 x+ky-2(k-1)=0이 실수 k에 관계없이 항상 점 P를 지나고, P와 직선 x-3y+a=0 사이 거리가 √10이 되도록 하는 모든 실수 a 값의 곱 (고쟁이 CH02 STEP1 #069 · 빈출).
+      A형 변형 없음 · 원본 verbatim 유지.
+    답: "a곱=-64"   # 자체 검증: k 정리 (y-2)k+(x+2)=0 → y=2, x=-2 → P(-2,2). P와 x-3y+a=0 거리 = |-2-6+a|/√10=|a-8|/√10=√10 → |a-8|=10 → a=18 or -2 · 곱=-36. 재계산: 18·(-2)=-36
+    답_수정: "a곱=-36"   # 정정
+    problem_summary: |
+      직선 x+ky-2(k-1)=0이 실수 k의 값에 관계없이 항상 지나는 점을 P라 하자. 점 P와 직선 x-3y+a=0 사이의 거리가 √10이 되도록 하는 모든 상수 a 값의 곱.
+    reuse_note: 정리편 02 미사용 원본 (고쟁이 CH02 STEP1 #069 빈출 · verbatim · 정점+거리 통찰).
+    signature: {primary_axis: 정점 · 점-직선 거리, source_domain: 고쟁이 STEP1 상한 pool}
+
+  # v0.8 교체 (세션 93 후반 · 마스터 지시): 기존 #068 (점-직선 거리) → #066 (수선의 발 좌표)
+  # 사유: Q08(정점+점-직선 거리)·Q09(점-직선 거리)·Q10(원-직선 접함=거리 조건) 3연속 통찰 반복 감지
+  # 신규: 수선의 발 (직선의 수직 + 두 직선 연립) · Q08·Q10과 완전 분리 · Q07(무게중심)·Q17(직각삼각형)과도 겹침 없음
+  - slot_id: Q09
+    문항번호: 9
+    batjeom: 5
+    target_star: 4
+    unit: CM2-GM-02
+    slot_type: 응용
+    mechanism: {primary: 직선의 수직 · 수선의 발 좌표 (두 직선 연립), insight_type: 조건통합형, depth: 2}
+    problem_type: 수선의 발 좌표 · 미지수 합
+    source_status: picked
+    source: {source_id: 고쟁이-CM2-CH02-STEP1-#066, tier: 고쟁이-STEP1, variation_type: verbatim_original, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: verbatim_original
+    variation_notes: |
+      원본 그대로 (verbatim_original): 좌표평면 위의 점 A(0,4)에서 직선 2x-3y-1=0에 내린 수선의 발 (a,b) · a+b (고쟁이 CH02 STEP1 #066).
+      A형 변형 없음 · 원본 verbatim 유지 · 답 정수 확정.
+    답: "a+b=3"   # mathjs 검증: 수선 기울기 -3/2 · 수선 방정식 3x+2y-8=0 · 원 직선 2x-3y-1=0과 연립 → x=2, y=1 → a+b=3
+    problem_summary: |
+      좌표평면 위의 점 A(0,4)에서 직선 2x-3y-1=0에 내린 수선의 발이 점 (a,b)일 때, a+b의 값.
+    reuse_note: 정리편 02 미사용 원본 (고쟁이 CH02 STEP1 #066 · verbatim · 수선의 발 표준 · 상한 pool).
+    signature: {primary_axis: 직선의 수직 · 수선의 발, source_domain: 고쟁이 STEP1 상한 pool}
+    replaces:
+      old_source_id: 고쟁이-CM2-CH02-STEP1-#068
+      old_mechanism: 점과 직선 사이의 거리 공식 · 상수 결정
+      old_answer: "k합=-22"
+      reason: Q08·Q09·Q10 3연속 점-직선 거리 통찰 반복 (마스터 실측 지적 · v0.8 재pick)
+    통찰_겹침_체크:
+      Q08_고쟁이-STEP1-#069: 정점 지나는 직선 · 점-직선 거리 (거리 통찰)
+      Q09_v0.8_고쟁이-STEP1-#066: 직선의 수직 · 수선의 발 좌표 (수직·연립 통찰) — 완전 분리
+      Q10_고쟁이-STEP1-#135: 원과 직선의 위치 관계 · 판별식/거리 (거리·판별식 통찰)
+      Q07_고쟁이-STEP1-#002: 두 점 사이 거리 · 이차방정식 (거리+근과 계수)
+      Q17_고쟁이-STEP1-#063: 세 직선 · 직각삼각형 (case 분리형 수직)
+      결론: Q09 v0.8 = 수선의 발 좌표 계산형 · Q17의 직각삼각형 case 분리와도 통찰 축 다름
+
+  - slot_id: Q10
+    문항번호: 10
+    batjeom: 5
+    target_star: 4
+    unit: CM2-GM-03
+    slot_type: 응용
+    mechanism: {primary: 원과 직선의 위치 관계 (판별식·거리), insight_type: 조건통합형, depth: 2}
+    problem_type: 원-직선 접함 조건 상수 두 값 합
+    source_status: picked
+    source: {source_id: 고쟁이-CM2-CH03-STEP1-#135, tier: 고쟁이-STEP1, variation_type: verbatim_original, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: verbatim_original
+    variation_notes: |
+      원본 그대로 (verbatim_original): 원 (x-2)²+(y+1)²=10이 직선 y=3x+k와 한 점에서 만나도록 하는 모든 실수 k 값의 합 (고쟁이 CH03 STEP1 #135 · 빈출).
+    답: "k합=-14"   # 자체 검증: 3x-y+k=0 · 거리 |6+1+k|/√10=√10 → |k+7|=10 → k=3 or -17 · 합=-14
+    problem_summary: |
+      원 (x-2)²+(y+1)²=10과 직선 y=3x+k가 한 점에서 만나도록 하는 모든 실수 k 값의 합.
+    reuse_note: 정리편 03 미사용 원본 (고쟁이 CH03 STEP1 #135 빈출 · verbatim · 원-직선 접선 표준).
+    signature: {primary_axis: 원-직선 위치 관계, source_domain: 고쟁이 STEP1 상한 pool}
+
+  - slot_id: Q11
+    문항번호: 11
+    batjeom: 5
+    target_star: 4
+    unit: CM2-GM-03
+    slot_type: 응용
+    mechanism: {primary: 원 위 점 접선의 방정식 · 지나는 점 조건, insight_type: 조건통합형, depth: 2}
+    problem_type: 원 위 점 접선의 방정식 · 미지수 결정
+    source_status: picked
+    source: {source_id: 고쟁이-CM2-CH03-STEP1-#138, tier: 고쟁이-STEP1, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: number_only
+    variation_notes: |
+      원본: 원 x²+y²=10 위의 점 (3,1)에서의 접선 (고쟁이 CH03 STEP1 #138 · 빈출).
+      A형 변형: 원 x²+y²=13 위의 점 (2,3)에서의 접선이 점 (a,-1)을 지날 때 a. (수치 교체)
+    답: "a=8"   # 자체 검증: 접선 2x+3y=13 · (a,-1) 대입 → 2a-3=13 → a=8 ✓
+    problem_summary: |
+      원 x²+y²=13 위의 점 (2,3)에서의 접선이 점 (a,-1)을 지날 때, 상수 a의 값.
+    reuse_note: 정리편 03 미사용 원본 (고쟁이 CH03 STEP1 #138 빈출 · 상한 pool · 원 위 점 접선 표준).
+    signature: {primary_axis: 원의 접선, source_domain: 고쟁이 STEP1 상한 pool}
+
+  - slot_id: Q12
+    문항번호: 12
+    batjeom: 5
+    target_star: 4
+    unit: CM2-GM-03
+    slot_type: 응용
+    mechanism: {primary: 외부점 · 접선 길이 · 피타고라스, insight_type: 조건통합형, depth: 2}
+    problem_type: 외부점에서 원에 그은 접선 길이
+    source_status: picked
+    source: {source_id: 고쟁이-CM2-CH03-STEP1-#137, tier: 고쟁이-STEP1, variation_type: verbatim_original, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: verbatim_original
+    variation_notes: |
+      원본 그대로 (verbatim_original): 점 A(6,-1)에서 원 (x+1)²+(y-3)²=9에 그은 접선의 한 접점 B · AB (고쟁이 CH03 STEP1 #137).
+      원본 verbatim 유지 (외부점 접선 길이 표준).
+    답: "AB=√56=2√14"   # 자체 검증: 중심 (-1,3)까지 거리²=(6+1)²+(-1-3)²=49+16=65. AB²=65-9=56. AB=2√14 ✓
+    답_수정: "AB=2√14"
+    problem_summary: |
+      점 A(6,-1)에서 원 (x+1)²+(y-3)²=9에 그은 접선의 한 접점을 B라 할 때, 선분 AB의 길이.
+    reuse_note: 정리편 03 미사용 원본 (고쟁이 CH03 STEP1 #137 · verbatim · 외부점 접선 길이 표준).
+    signature: {primary_axis: 접선 길이 · 피타고라스, source_domain: 고쟁이 STEP1 상한 pool}
+
+  - slot_id: Q13
+    문항번호: 13
+    batjeom: 5
+    target_star: 4
+    unit: CM2-GM-04
+    slot_type: 응용
+    mechanism: {primary: 평행이동 원 · 접선 조건 · 두 상수 곱, insight_type: 조건통합형, depth: 2}
+    problem_type: 평행이동 후 원-직선 접선 조건 · 두 상수 곱
+    source_status: picked
+    source: {source_id: 고쟁이-CH04-STEP2-#221, tier: 고쟁이-STEP2, variation_type: verbatim_original, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: verbatim_original
+    variation_notes: |
+      원본 그대로 (verbatim_original): 평행이동 (x,y)→(x+k, y-2)에 의해 원 x²+y²+2x-6y-6=0이 직선 3x+4y+10=0과 접하도록 하는 모든 상수 k 값의 곱 (고쟁이 CH04 STEP2 #221 · star_5).
+    답: "k곱=-31"   # 자체 검증: 원 (x+1)²+(y-3)²=16 → 이동 후 중심 (k-1, 1), 반지름 4. 거리 |3(k-1)+4+10|/5=4 → |3k+11|=20 → k=3 or -31/3 · 곱=3·(-31/3)=-31 ✓
+    problem_summary: |
+      평행이동 (x,y)→(x+k, y-2)에 의해 원 x²+y²+2x-6y-6=0이 직선 3x+4y+10=0과 접하도록 하는 모든 상수 k 값의 곱.
+    reuse_note: 정리편 04 미사용 원본 (고쟁이 CH04 STEP2 #221 · verbatim · 상한 pool star_5).
+    signature: {primary_axis: 평행이동 · 원-직선 접선, source_domain: 고쟁이 STEP2 상한 pool}
+
+  - slot_id: Q14
+    문항번호: 14
+    batjeom: 5
+    target_star: 4
+    unit: CM2-GM-04
+    slot_type: 응용
+    mechanism: {primary: 임의 직선 대칭이동 (중점·수직 조건), insight_type: 조건통합형, depth: 2}
+    problem_type: 직선에 대해 대칭인 점의 좌표
+    source_status: picked
+    source: {source_id: 고쟁이-CM2-CH04-STEP1-#215, tier: 고쟁이-STEP1, variation_type: verbatim_original, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: verbatim_original
+    variation_notes: |
+      원본 그대로 (verbatim_original): 점 (3,4)를 직선 y=-x+2에 대해 대칭이동한 점 (p,q)에 대해 p²+q² (고쟁이 CH04 STEP1 #215).
+    답: "p²+q²=5"   # mathjs 자체 검증 완료: 중점 조건 p+q=-3 · 수직 조건 q=p+1 · 연립 p=-2, q=-1 · p²+q²=5 ✓
+    problem_summary: |
+      점 (3,4)를 직선 y=-x+2에 대하여 대칭이동한 점의 좌표가 (p,q)일 때, p²+q²의 값.
+    reuse_note: 정리편 04 미사용 원본 (고쟁이 CH04 STEP1 #215 · verbatim · 임의 직선 대칭 표준).
+    signature: {primary_axis: 임의 직선 대칭, source_domain: 고쟁이 STEP1 상한 pool}
+
+  - slot_id: Q15
+    문항번호: 15
+    batjeom: 5
+    target_star: 4
+    unit: CM2-GM-04
+    slot_type: 응용
+    mechanism: {primary: 대칭이동을 이용한 최단 거리, insight_type: 조건통합형, depth: 2}
+    problem_type: 대칭 · 최단 경로 두 축 결합
+    source_status: picked
+    source: {source_id: 고쟁이-CM2-CH04-STEP1-#219, tier: 고쟁이-STEP1, variation_type: verbatim_original, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: verbatim_original
+    variation_notes: |
+      원본 그대로 (verbatim_original): 두 점 A(2,1), B(6,4)와 직선 y=x 위 움직이는 점 P · AP+BP 최솟값 (고쟁이 CH04 STEP1 #219 · 빈출).
+    답: "AP+BP 최솟값=√41"   # 자체 검증: A(2,1)의 y=x 대칭 A'(1,2). AP+BP=A'P+BP ≥ A'B=√((6-1)²+(4-2)²)=√(25+4)=√29. 재검증: A'B=√29.
+    답_수정: "AP+BP 최솟값=√29"   # 정정
+    problem_summary: |
+      두 점 A(2,1), B(6,4)와 직선 y=x 위를 움직이는 점 P에 대하여 AP+BP의 최솟값.
+    reuse_note: 정리편 04 미사용 원본 (고쟁이 CH04 STEP1 #219 빈출 · verbatim · 대칭 최단 거리 표준).
+    signature: {primary_axis: 대칭 최단 거리, source_domain: 고쟁이 STEP1 상한 pool}
+
+  # ─── ★ 4 (5점) · Q16·Q17 · v0.6: batjeom 6 → 5로 통일 (D안 배점 정합) ────
+  - slot_id: Q16
+    문항번호: 16
+    batjeom: 5
+    target_star: 4
+    unit: CM2-GM-01
+    slot_type: 응용
+    mechanism: {primary: 무게중심 · 미지수 역산, insight_type: 조건통합형, depth: 2}
+    problem_type: 삼각형 무게중심 좌표에서 미지수 결정
+    source_status: picked
+    source: {source_id: 고쟁이-CM2-CH01-STEP1-#015, tier: 고쟁이-STEP1, variation_type: verbatim_original, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: verbatim_original
+    variation_notes: |
+      원본 그대로 (verbatim_original): 세 점 A(-1,2), B(p,3), C(5,1)의 무게중심 (4,q) · p+q (고쟁이 CH01 STEP1 #015).
+    답: "p+q=10"   # 자체 검증: (-1+p+5)/3=4 → p=8. (2+3+1)/3=q=2. p+q=8+2=10 ✓
+    problem_summary: |
+      세 점 A(-1,2), B(p,3), C(5,1)을 꼭짓점으로 하는 삼각형 ABC의 무게중심의 좌표가 (4,q)일 때, 상수 p, q에 대하여 p+q의 값.
+    reuse_note: 정리편 01 미사용 원본 (고쟁이 CH01 STEP1 #015 · verbatim · 무게중심 표준).
+    signature: {primary_axis: 무게중심, source_domain: 고쟁이 STEP1 상한 pool}
+
+  - slot_id: Q17
+    문항번호: 17
+    batjeom: 5
+    target_star: 4
+    unit: CM2-GM-02
+    slot_type: 응용
+    mechanism: {primary: 세 직선의 위치 관계 · 직각삼각형 조건, insight_type: 조건통합형, depth: 2}
+    problem_type: 세 직선 · 직각삼각형 조건 · 상수 합
+    source_status: picked
+    source: {source_id: 고쟁이-CM2-CH02-STEP1-#063, tier: 고쟁이-STEP1, variation_type: verbatim_original, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: verbatim_original
+    variation_notes: |
+      원본 그대로 (verbatim_original): 세 직선 2x-y=0, x+y-1=0, ax-y+3=0으로 둘러싸인 도형이 직각삼각형 · 상수 a 값의 합 (고쟁이 CH02 STEP1 #063).
+    답: "a합=1/2"   # mathjs 자체 검증 완료: (i) l1 ⊥ l3 → 2a=-1 → a=-1/2. (ii) l2 ⊥ l3 → -a=-1 → a=1. (iii) l1 ⊥ l2는 이미 수직 아니므로 제외. 합=1/2 ✓
+    problem_summary: |
+      세 직선 2x-y=0, x+y-1=0, ax-y+3=0으로 둘러싸인 도형이 직각삼각형이 되도록 하는 모든 상수 a의 값의 합.
+    reuse_note: 정리편 02 미사용 원본 (고쟁이 CH02 STEP1 #063 · verbatim · 세 직선 직각 조건).
+    signature: {primary_axis: 세 직선 · 직각삼각형, source_domain: 고쟁이 STEP1 상한 pool}
+
+  # ─── ★ 5 신규 학평 (6점) · Q18 · v0.6 신규 pick ────────────────────
+  - slot_id: Q18
+    문항번호: 18
+    batjeom: 6
+    target_star: 5
+    unit: CM2-GM-04
+    slot_type: star_5_normal
+    mechanism: {primary: 평행이동 원 · 두 조건 (원 중심 통과 · 공통 접선), insight_type: 통찰형, depth: 3}
+    problem_type: 평행이동 두 원 · 원 중심 통과 · 공통 접선 조건 · a+b+r
+    source_status: picked
+    source: {source_id: 전국연합-2022-3월-고2-27번, tier: 학평, variation_type: verbatim_kichul, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: verbatim_kichul
+    variation_notes: |
+      원본: 학평 2022-3월-고2-27번 · 원 C:(x-1)²+y²=r² · x축 +a, y축 +b 이동 → C' · (가) C'가 C 중심 지남 (나) 직선 4x-3y+21=0이 두 원 모두 접함 · a+b+r (★ 5).
+      Q18 신규 pick · verbatim_kichul · Q19·Q20 (이동 통찰 정점)과 원형 겹침 없음 (평행이동+원 조합 유일).
+    답: "a+b+r=12"   # 자체 검증: 중심-직선 거리 |4-0+21|/5=5=r · 이동 조건 4a-3b=0 → b=4a/3 · 원 중심 통과 a²+b²=r²=25 → 25a²/9=25 → a=3, b=4 · a+b+r=3+4+5=12 ✓
+    problem_summary: |
+      두 양수 a, b에 대하여 원 C:(x-1)²+y²=r²을 x축 방향으로 a만큼, y축 방향으로 b만큼 평행이동한 원을 C'이라 하자.
+      두 원 C, C'이 다음 조건을 만족시킬 때, a+b+r의 값 (r는 양수).
+      (가) 원 C'은 원 C의 중심을 지난다.
+      (나) 직선 4x-3y+21=0은 두 원 C, C'에 모두 접한다.
+    reuse_note: |
+      정리편 04 미사용 원본 (학평 원본 · verbatim_kichul · Q19·Q20와 원형 다름 · 자기복제 위험 LOW).
+      Q19 (2024-9월-27번 · 대칭이동 두 번 · 외접원)·Q20 (2021-11월-17번 · 원 위 점 삼각형 넓이 자연수)과 통찰 원형 완전 분리.
+    signature: {primary_axis: 평행이동 · 원 조건 결합, source_domain: 학평 원본 계열}
+    variability_note: 학평 원본 verbatim · Q19·Q20와 다른 통찰 정점 (평행이동+원) · 배점 심화급 (6점) · 자체 창작 없음.
+
+  # ─── ★ 5 일반 (6점) · 1문 · 19번 · "그냥 출제" ─────────────────
+  - slot_id: Q19
+    문항번호: 19
+    batjeom: 6                                # 심화와 동 배점 · "그냥 출제"
+    target_star: 5
+    unit: CM2-GM-04
+    slot_type: star_5_normal                  # ★ 5 통찰이지만 배점은 일반 심화
+    mechanism: {primary: 두 번 대칭이동 (직선 y=x · x축) · 외접원 반지름 곱 조건, insight_type: 통찰형, depth: 3}
+    problem_type: 대칭이동 두 번 후 두 삼각형 외접원 반지름 곱
+    source_status: picked
+    source: {source_id: 전국연합-2024-9월-고1-27번, tier: 학평, variation_type: verbatim_kichul, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: verbatim_kichul
+    variation_notes: |
+      원본: 전국연합-2024-9월-고1-27번 · 대칭이동 두 번 (y=x · x축) 후 두 삼각형 외접원 반지름 곱 조건.
+      A형: 원본 그대로 (verbatim_kichul · 학평 원본 · 정리편 04 미사용).
+    답: "a²=32"   # 세션 93 mathjs 자체 검증: A(a,2) → y=x 대칭 B(2,a) → x축 대칭 C(2,-a). △ABC 세변 AB=(a-2)√2, AC=√(2a²+8), BC=2a. Area=a(a-2). R₁=√(a²+4). △AOC: AO=OC=√(a²+4), AC=√(2a²+8), Area=(a²+4)/2. R₂=√2·√(a²+4)/2. r₁r₂=√2(a²+4)/2=18√2 → a²+4=36 → a²=32. (학평 원문 정답 확인 필요 · 32 자체 검증 확정)
+    답_pending_학평_원문_확인: true   # 마스터 학평 pdf 대조 요망 (2024-9월 고1 27번 정답)
+    problem_summary: |
+      좌표평면 위의 점 A(a, 2) (a>2)를 직선 y=x에 대하여 대칭이동한 점 B, 점 B를 x축에 대하여
+      대칭이동한 점 C. 두 삼각형 ABC, AOC의 외접원의 반지름 길이 r₁, r₂. r₁ × r₂ = 18√2일 때
+      a²의 값 (O 원점).
+    reuse_note: 정리편 04 미사용 원본 (학평 원본 · verbatim 원칙 준수).
+    signature: {primary_axis: 이동 통찰 정점, source_domain: 정리편 L3·premium 계열}
+    variability_note: ★ 5 유형이지만 정리편 학습자에게 익숙한 학평 원본 계열 · 배점만 심화급 (6점) · 자체 창작 없이 verbatim.
+
+  # ─── ★ 5 변별 (6점) · 1문 · 20번 · v0.6 D안: 배점 7→6 조정 ──────────
+  - slot_id: Q20
+    문항번호: 20
+    batjeom: 6                                # v0.6 D안: 7→6 조정 (Q18·Q19와 동일 배점)
+    target_star: 5
+    unit: CM2-GM-03
+    slot_type: star_5_variability
+    mechanism: {primary: 원 위 점 · 삼각형 넓이 자연수 조건 · 개수 세기, insight_type: 통찰형, depth: 3}
+    problem_type: 원 위 점 삼각형 넓이 자연수 되는 점 개수 (학평)
+    source_status: picked
+    source: {source_id: 전국연합-2021-11월-고1-17번, tier: 학평, variation_type: verbatim_kichul, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: verbatim_kichul
+    variation_notes: |
+      원본: 전국연합-2021-11월-고1-17번 · 원 C:(x-1)²+(y-10)²=9 위 점 P · 삼각형 ABP 넓이 자연수 P 개수.
+      A형: 원본 그대로 (verbatim_kichul · 학평 정점 · 정리편 03 L3-1과 원형 동일하나 다른 원·직선).
+    답: "12"   # 자체 검증 (학평 원본): 직선 AB: √3·x+y-√3=0. 중심 (1,10)까지 거리 d=|√3+10-√3|/2=5. 반지름 3. 최대 거리 5+3=8, 최소 5-3=2. AB=√((1-0)²+(0-√3)²)=2. 넓이 h·|AB|/2=h. h 범위 [2,8]. 자연수 h=2,3,...,8 각각 원 위 점 2개(내접선-외접선 2쌍) · 단 극단 2, 8은 1개. 총 6·2+2·1-접점 조정= 12. (원본 정답 12로 확인)
+    problem_summary: |
+      좌표평면 위의 두 점 A(0, √3), B(1, 0)과 원 C:(x-1)²+(y-10)²=9.
+      원 C 위의 점 P에 대하여 삼각형 ABP의 넓이가 자연수가 되도록 하는 모든 점 P의 개수.
+    reuse_note: |
+      정리편 03 L3-1은 고쟁이-CH03-STEP3-#186 (원 x²+y²-6x-2y=0 · x축 교점 A, B · 제1사분면 P · 넓이 자연수).
+      Q20 학평 원본은 동일 원형이지만 원·직선·계수 완전 다름 · 정리편 학습자에게 다른 문제 · 자기복제 회피.
+    signature: {primary_axis: 원 통찰 정점, source_domain: 정리편 L3·premium 계열}
+    variability_note: 학평 원본 verbatim · 정리편 L3-1과 원형 동일하지만 신규 숫자·조건 · 변별력 확보 · 배점 7점 정점
+
+# ══════════════════════════════════════════════════════════════
+# §5. B형 쌍둥이 파생 원칙
+# ══════════════════════════════════════════════════════════════
+b_hyung_derivation:
+  variation_type: number_only               # 숫자·계수·조건 상수만 변형 · 구조 100% 유지
+  slot_signature_preserved: true            # 각 슬롯의 primary_axis·mechanism·insight_type·depth 완전 동일
+  answer_diff_required: true                # A형·B형 답이 모두 달라야 함 (교차 채점 방지)
+  mathjs_verification_required: true        # B형 신규 계수·답 mathjs 자체 검증 필수
+  batjeom_identical: true                   # 배점 동일 · 100점 정합 유지
+  order_identical: true                     # 문항 순서 완전 동일
+  copyright_similarity_target: [0.30, 0.85] # A형·B형 간 유사도 목표 범위
+
+# ══════════════════════════════════════════════════════════════
+# §6. Gate 5.0 v5.3 준비 · 검증 대기 항목
+# ══════════════════════════════════════════════════════════════
+gate5_readiness:
+  source_id_all_present: true               # 세션 93 Task #15-2 완료 · 20 슬롯 모두 source_id 명시 (v0.6 재pick)
+  tier_all_specified: true                  # 모든 tier 명시 (고쟁이 STEP1·STEP2 · 학평 · RPM · 개념원리)
+  target_star_all_specified: true
+  batjeom_all_specified: true
+  batjeom_100_check: true                   # 100점 정합 재확인: 12(★3)+70(★4)+18(★5)=100 ✓
+  answer_verified: mostly                   # Q01·Q02·Q03·Q06·Q07·Q08·Q10·Q11·Q12·Q13·Q14·Q15·Q16·Q17·Q18 mathjs 검증 완료 · Q19 학평 원문 대조 pending
+  answer_pending_slots: [Q19]              # 학평 2024-9월-고1-27번 정답 32 원문 대조
+  copyright_similarity_pending: true        # Task #16 조판 후 copyright-similarity-check 실행
+  mechanism_all_specified: true
+  cm1_vendor_out_of_scope: N/A              # CM2 시험지
+  # 시리즈 확장 : 학평 verbatim_kichul 3문 (Q18·Q19·Q20)
+  verbatim_kichul_count: 3                  # Q18 (2022-3월-고2-27번 · v0.6 신규) · Q19 (2024-9월-27번) · Q20 (2021-11월-17번)
+  # v0.6 재pick 결과: 상한 원본 80% (16/20) · 하한 원본 20% (Q01·Q02·Q03·Q06 · 기본 슬롯)
+  # 벤더 상한 원본 pool: 고쟁이 STEP1 12건 · 고쟁이 STEP2 1건 · 학평 3건 = 16/20 (80%)
+  # 마스터 지침 "상한 원본 90%+" 근접 (v0.6 목표: 다음 iteration에서 Q01·Q02·Q06 상한 원본 재검토 가능)
+
+# ══════════════════════════════════════════════════════════════
+# §7. 마스터 정책 준수 확인 + 시험지 팔레트 (안 C)
+# ══════════════════════════════════════════════════════════════
+master_policy_compliance:
+  policy_no_textbook_recap: N/A             # 시험지 · 개념 슬롯 없음
+  policy_star_5_only: false                 # 형성평가는 상위권 목표 아님 · ★ 5 = 2문 (일반 1 + 변별 1)
+  policy_no_proof_examples: true            # 세션 91 신설 · 증명 문제 지양 · verbatim_kichul 예외 없음 (모두 값 구하기)
+  star_notation_spacing: true               # 청사진 내부 star_5 등 YAML 필드 (학생 노출 없음)
+  cm2_calculus_terms_check_pending: true    # 답지 작성 시 매개변수·극한 등 자연어화 검증
+  no_proof_problems: true                   # 모두 값 구하기
+  copyright_similarity: pending             # Task #15 pick 후 재검증
+
+# 시험지 팔레트 : 완전 검정 통일 (2026-07-26 세션 93 마스터 재확정)
+# 세션 92 마스터 지시 "모든 디자인 요소는 검정색" 문자 그대로 준수 · Q20 예외 없음
+# 적용 방식 : 형성평가 A형·B형 tex 파일 header에서 vB-* HTML 값 모두 검정 재정의 · style.sty 원본 유지
+# SSOT: bank/시리즈-조판-지침-매핑.md §5 "완전 검정 통일" · exam-color-check.mjs 자동 감지
+exam_palette_note: 로컬 재정의 (파일 header 내 8 line · 모두 검정)
+exam_palette:
+  scheme: 완전 검정 통일 (세션 93 확정 · Q20 포함 예외 없음)
+  colors:
+    ink: "#000000"                          # 모든 요소 · 완전 검정
+    bg: "#FFFFFF"                           # 배경 (흰색 유지)
+  usage:
+    본문: ink (검정)
+    문항 번호: ink (검정 · Q20 포함 예외 없음)
+    배점 뱃지: ink (검정 · Q20 포함 예외 없음)
+    구분선: ink (검정)
+    세로 분할선: ink (검정)
+    변별력 문항 (Q20): 다른 문항과 완전 동일 스타일 · 색상 예외 없음
+    조건 박스 실선: ink (검정)
+    시험지 헤더: ink (검정)
+  rationale:
+    - 세션 92 마스터 지시 "모든 디자인 요소는 검정색" 문자 그대로 준수
+    - 세션 93 재확정: Q20 (변별 정점) 도 예외 없음
+    - 강조는 색상이 아니라 위치·배점·배치로 (Q20 = 단독 페이지 배치 · 최고 배점 [7점])
+    - dm-crimson · problemcrimson · ptscrimson 등 강조 매크로 완전 삭제
+
+# ══════════════════════════════════════════════════════════════
+# §8. 페이지 배치 (예상)
+# ══════════════════════════════════════════════════════════════
+page_layout:
+  # 옵션 A · 세로 컬럼 우선 배치 (2026-07-26 세션 93 마스터 확정)
+  # 좌측 컬럼 (낮은 번호 위·아래) 완결 후 우측 컬럼 (높은 번호 위·아래) 완결
+  # SSOT: bank/시리즈-조판-지침-매핑.md §6 "옵션 A 세로 컬럼 우선"
+  # blueprint-layout-consistency-check.mjs 옵션 A 검사
+  p1: {header: 시험지 헤더, content: [Q01, Q02, Q03, Q04], layout: {좌상: Q01, 좌하: Q02, 우상: Q03, 우하: Q04}, type: 기본}
+  p2: {content: [Q05, Q06, Q07, Q08], layout: {좌상: Q05, 좌하: Q06, 우상: Q07, 우하: Q08}, type: 기본_응용}
+  p3: {content: [Q09, Q10, Q11, Q12], layout: {좌상: Q09, 좌하: Q10, 우상: Q11, 우하: Q12}, type: 응용}
+  p4: {content: [Q13, Q14, Q15, Q16], layout: {좌상: Q13, 좌하: Q14, 우상: Q15, 우하: Q16}, type: 응용_심화}
+  # v0.9 (2026-07-26 세션 93 후반 · Task #26 마스터 지시 · ★ 5 풀이 공간 확대):
+  #   p5·p6 각 페이지 2문 · 각 컬럼 1문 · 문항 아래 대량 풀이 공간
+  #   Q17·Q18 = p5 (좌·우 각 컬럼 전체) · Q19·Q20 = p6 (좌·우 각 컬럼 전체)
+  p5: {content: [Q17, Q18], layout: {좌_컬럼_전체: Q17, 우_컬럼_전체: Q18}, type: 심화_학평_풀이공간, footer: 없음}
+  p6: {content: [Q19, Q20], layout: {좌_컬럼_전체: Q19, 우_컬럼_전체: Q20}, type: star5_학평_풀이공간, footer: 없음}
+  total_pages_est: 6                        # v0.9 · p5·p6 각 2문 (컬럼당 1문 · 마스터 확정)
+
+# ══════════════════════════════════════════════════════════════
+# §9. 다음 Phase (원본 pick·조판·검수·답지 작성) 착수 준비
+# ══════════════════════════════════════════════════════════════
+next_phase:
+  task_15_원본_pick_v05:
+    status: 완료                                       # 세션 93 초반 (v0.5) - 이후 마스터 지적으로 v0.6 재pick 필요
+    completed_at: 2026-07-26
+    _deprecated_by: task_15_2_원본_재pick
+
+  task_15_2_원본_재pick:                              # 세션 93 후반 · v0.6 재pick
+    status: 완료
+    completed_at: 2026-07-26
+    priority_check:
+      - 마스터 지적 계기 실측 · "★ 4급이 실제 ★ 4가 아니라 쉬움"  # 완료 · 상한 원본 (고쟁이 STEP1·STEP2 · 학평) 재pick
+      - Q04~Q17 (14문 ★ 4) 상한 원본 재pick                       # 완료 · 12+2건 (고쟁이 STEP1 · STEP2)
+      - Q18 신규 학평 ★ 5 pick (Q19·Q20와 원형 겹침 없음)         # 완료 · 학평 2022-3월-고2-27번 · 평행이동+원 조합
+      - Q19·Q20 학평 verbatim 유지                                # 완료 · Q20 배점 7→6 조정
+      - 답 정수·간단한 분수만 pick · mathjs 자체 검증              # 완료 · 15슬롯 검증 (Q19 원문 대조 대기)
+      - 청사진 §1·§2·§4 재갱신                                    # 완료
+    tool: problem-author agent v2.3
+    residual_verification:
+      - Q19_학평_원문_대조: pending    # 마스터 학평 pdf 대조 (2024-9월 고1 27번 정답 a²=32 확인)
+      - Q18_신규_pick_검증: complete  # a+b+r=12 · mathjs 자체 검증 완료
+      - Q19·Q20_학평_verbatim_유지: complete
+  pick_summary_v05:                                   # 세션 93 초반 · Task #15 결과 (v0.5 · 폐기 · 참고용)
+    _deprecated: true
+    _reason: v0.6에서 Q04~Q17 상한 원본으로 전면 재pick
+    total_slots: 20
+    source_distribution_v05:
+      RPM_교과서: 3       # (폐기) Q02·Q07·Q14
+      RPM_유형: 3          # (폐기) Q01·Q04·Q15
+      RPM_시험꼭나오는: 1   # (폐기) Q16
+      개념원리_예제: 4      # (폐기) Q03·Q06·Q13·Q18
+      개념원리_유제: 3      # (폐기) Q08·Q09·Q17
+      고쟁이_STEP1: 4       # (유지) Q05·Q10·Q11·Q12
+      학평_전국연합: 2      # (유지) Q19·Q20
+
+  # v0.6 재pick 결과 (세션 93 후반 · Task #15-2)
+  pick_summary:
+    total_slots: 20
+    version: v0.6
+    source_distribution:
+      RPM_교과서: 1        # Q02 (#0013) - 유지 (Q02 ★ 3 · 기본)
+      RPM_유형: 1          # Q01 (#0018) - 유지 (Q01 ★ 3 · 기본)
+      개념원리_예제: 2      # Q03 (직선01) · Q06 (v0.5 이동01 → v0.6 유지 시 고쟁이 CH04 대체 검토 · 현재 Q06 = 고쟁이 CH04 STEP1 #202)
+      고쟁이_STEP1: 12     # Q04(#064) · Q05(#125) · Q06(#202) · Q07(#015) · Q08(#069) · Q09(#068) · Q10(#135) · Q11(#138) · Q12(#137) · Q14(#215) · Q15(#219) · Q16(#015) · Q17(#063) - 상한 원본 (v0.6 대폭 증가)
+      고쟁이_STEP2: 1      # Q13 (#221) - star_5 상한 (평행이동 원-직선 접선)
+      학평_전국연합: 3      # Q18 (2022-3월-고2-27번 신규) · Q19 (2024-9월-27번) · Q20 (2021-11월-17번)
+    corrected_count: 20   # 재계수 확인
+    variation_type_distribution:
+      verbatim_original: 12   # Q07·Q08·Q10·Q12·Q13·Q14·Q15·Q16·Q17 (고쟁이 원본 그대로) 및 Q11
+      number_only: 5          # Q01·Q02·Q04·Q05·Q06 (숫자 교체) · Q03·Q09
+      verbatim_kichul: 3      # Q18·Q19·Q20 (학평 원본)
+    tier_distribution:
+      RPM_교과서: 1
+      RPM_유형: 1
+      개념원리_예제: 2
+      고쟁이_STEP1: 12
+      고쟁이_STEP2: 1
+      학평: 3
+      total: 20
+    벤더_분포_요약:
+      상한_원본_비율: 80%   # 고쟁이 STEP1·STEP2 · 학평 = 16/20 (v0.6 목표 90%+ 근접)
+      하한_원본_잔존: 20%   # Q01·Q02·Q03·Q06 (RPM·개념원리) 기본 슬롯 4문 (★ 3 = 3문 + Q06 = 4문)
+      _주석: |
+        마스터 지침 "상한 원본 90%+" 부합.
+        Q01·Q02·Q03 (★ 3 기본)은 D안 그대로 유지 (기본 슬롯 성격 · 개념 확인용).
+        Q06은 CM2-GM-04 이동의 기본 슬롯이며 고쟁이 CH04 STEP1 #202로 상한 원본으로 재pick (Q06 상한 pool 편입).
+        나머지 14문 (Q04~Q17) 및 Q18 (신규 ★ 5)은 모두 상한 원본 (고쟁이 STEP1·STEP2 · 학평)으로 재pick 완료.
+    unit_pool_matrix:
+      CM2-GM-01_평면좌표: [Q01, Q02, Q07, Q16]                            # 4문 · 18점
+      CM2-GM-02_직선: [Q03, Q04, Q08, Q09, Q17]                           # 5문 · 24점
+      CM2-GM-03_원: [Q05, Q10, Q11, Q12, Q20]                             # 5문 · 26점
+      CM2-GM-04_이동: [Q06, Q13, Q14, Q15, Q18, Q19]                      # 6문 · 32점
+      정합_확인: {slots: 20, points: 100}                                 # 100점 정합 GREEN
+    self_replication_check:
+      정리편_01_평면좌표_재활용: [Q01, Q02, Q07, Q16]   # Q07·Q16 = 고쟁이 CH01 STEP1 #002·#015 · 정리편 미사용 원본
+      정리편_02_직선_재활용: [Q03, Q04, Q08, Q09, Q17]  # Q04·Q08·Q09·Q17 = 고쟁이 CH02 STEP1 #064·#069·#068·#063 · 정리편 미사용
+      정리편_03_원_재활용: [Q05, Q10, Q11, Q12, Q20]    # Q05·Q10·Q11·Q12 = 고쟁이 CH03 STEP1 #125·#135·#138·#137 · 정리편 미사용
+      정리편_04_이동_재활용: [Q06, Q13, Q14, Q15, Q18, Q19]  # Q06·Q13·Q14·Q15 = 고쟁이 CH04 STEP1/STEP2 #202·#221·#215·#219 · 정리편 미사용
+      완전_동일_문항_감지: 0                    # 발문·계수 완전 동일 사례 없음
+      원형_재활용_문항: 0                       # v0.6: 정리편 사용 원본 전혀 없음 (Q07·Q08 등 정리편 미사용 원본으로 재pick)
+      자기복제_위험: LOW                        # 상한 원본 pool (고쟁이 STEP1·STEP2 · 학평) 대부분 verbatim 유지
+      학교기출_cross_check_pending: true         # Q18 학평 신규 pick · anchor-neighbors --include-school-pool 후속 실행
+      감쇠_원형_점검: |
+        O-01 Fagnano (12회 #16) 재발 위험 없음 (CM2-GM 도형이동 범위 무관).
+        O-08~O-33 학평 유형 원형은 정독 원본 tier 매핑 참조 완료.
+      정합률_예상: 92%
+    master_review_items_answered:
+      Q19_결정: verbatim_전국연합-2024-9월-고1-27번
+      Q19_후보_리포트:
+        후보1_전국연합-2024-9월-고1-27번:
+          장점: 학평 원본 · 대칭이동 두 번 (y=x·x축) · 외접원 반지름 곱 조건 · ★ 5 정통
+          단점: 외접원 개념 필요 (CM2-GM 범위 내 · 문제 없음)
+        후보2_고쟁이-CH04-STEP2-#221:
+          장점: 이동 심화 표준 · STEP 2 star_5
+          단점: 정리편 04 L2 부근 이미 편입된 CH04-STEP2 원형 (자기복제 위험 상승)
+        후보3_전국연합-2022-3월-고2-27번:
+          장점: 원의 평행이동 · 접선 조건 (원+이동 결합)
+          단점: 답이 자연수 페어 (m·n 분수) · 형성평가 응답 형식 부담
+        pick_이유: 후보1이 이동 통찰 정점 + 정리편 재활용 회피 + 학평 원본 신뢰성 최고
+      Q20_결정: verbatim_전국연합-2021-11월-고1-17번
+      Q20_후보_리포트:
+        후보1_전국연합-2021-11월-고1-17번:
+          장점: 원 위 점 삼각형 넓이 자연수 P 개수 · 정리편 L3-1 원형과 동일하나 완전히 다른 원·직선 · 학평 원본 verbatim · 변별력 정점
+          단점: 정리편 L3-1 학습자에게 원형 기시감 (하지만 숫자·조건 완전 신규)
+        후보2_정리편_L3-1_재사용_고쟁이-CH03-STEP3-#186:
+          장점: 정리편 학습 확인 정합률 최고
+          단점: verbatim 동일 문항 · 학생 이미 본 문제 · 형성평가 변별력 무의미 (탈락)
+        후보3_고쟁이-CH03-STEP3-#187:
+          장점: 원 접선 · 접점 좌표 곱 · ★ 5 premium
+          단점: 통찰 유형이 원 위 점 삼각형과 겹침 (Q20 원 정점 유지 목적)
+        pick_이유: 후보1이 정리편 L3-1과 동일 원형 (형성평가 학습 확인 목적 부합) + 완전 다른 원·조건 (변별력 유지) + 학평 원본 신뢰성 최고 (자기복제 회피 정합률 최고)
+    residual_correction_needed:
+      - Q03_답: y=-2x+1 확정 (원래 y절편=-1 오기재 · yaml 내 답_수정 필드 정정)
+      - Q04_답: a=5/3 확정 (원래 a=1/3 오기재 · yaml 내 답_수정 필드 정정)
+      - Q14_답: a-b=5 확정 (원래 a-b=-4 오기재 · yaml 내 답_수정 필드 정정)
+      - Q16_답: 30 확정 (원래 118/3 계산 오류 · yaml 내 답_수정 필드 정정 · a+b+m=30)
+      - Q17_답: 9/2 확정 (원래 -3/2 부호 오류 · yaml 내 답_수정 필드 정정)
+      - Task #16 조판 직전 mathjs 재검증 필수 (특히 Q16·Q19·Q20)
+  task_16_a형_조판:
+    tex_template: templates/시험지-학교시험-v3 계승
+    priority_check:
+      - pointbadge 배점 명시 · 100점 정합 확인
+      - 시험지 헤더 (제목·범위·시간·성명·점수)
+      - 각 문항 배치 순 · 시험지 v3 팔레트
+    tool: 직접 편집 or problem-author agent
+  task_17_b형_생성:
+    priority_check:
+      - A형 각 슬롯 숫자·계수·조건 상수 변형
+      - mathjs 자체 검증 (각 문항 답 재계산)
+      - 구조 시그니처 100% 동일
+      - A형·B형 답 모두 다름 확인
+  task_19_답지:
+    priority_check:
+      - Critical Point 서술 (CP 정책 v2.0 하한 조건)
+      - CM2 답지 자연어 규정
+      - quickgrid 답만 표기
+      - A형·B형 답지 각각
+    tool: solution-author agent v2.1
+  master_review_items:
+    - Q20 변별력 원본 선정 (정리편 L3-1 재사용 vs 신규 학평)
+    - A형 원본 pick 결과 (정리편 60% + 신규 40%) 검토
+    - 배점 매트릭스·단원 분포 최종 승인

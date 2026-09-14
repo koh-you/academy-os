@@ -1,0 +1,713 @@
+% DeeP Math 정리편 · CM2-ST 집합과 명제 · 답지 v1
+% Phase 3 (2026-07-20 세션 56) : 청사진 v1.0 · Phase 2 본편 대응
+% 답지 v1 골든 계승 (04-이동-답지.tex) · deep-math-answer.sty 퍼플 톤
+% 대상: 확인 12 + Level1 12 + Level2 12 + Level3 3 + 실전 3 = 총 42 슬롯
+% 세션 55 신정책 승계:
+%   - \textbf 금지 (정답 zone \dmanswerbox 안 값만)
+%   - 정답 zone 값만 (유도 부연 금지)
+%   - cplabel 완성 문장 (짧고 굵게 · 15자 내 · 등호 표기 금지)
+%   - CM2-ST 정규 도구: 집합 기호 ∪∩⊂ · 산술기하평균 · 코시-슈바르츠 · 진리집합
+%   - 상위 과정 용어 회피 및 세션 55 신정책 승계
+%   - ★ 노출 금지 · "정리편" 표기 금지
+%   - Overfull 0 필수 · 원문 그림 없음 (전 42슬롯)
+% 세션 75 재작성 (2026-07-23) : 와부고 서술 스타일 S1~S10 적용
+%   - S1 원자 압축 · S2 좌우 병렬 · S3 접속어 팔레트 절제
+%   - S4 인라인 등호 연쇄 · S5 이유 소괄호 부기 · S6 align 엄격
+%   - CP 라벨 완성 문장화 (통찰 → 문장)
+
+\documentclass[10pt,fleqn]{article}
+\usepackage{dm-answer-classic}
+\renewcommand{\dmexamname}{집합과 명제}
+
+\begin{document}
+\dmanswersetup
+
+\dmanswerheader{집합과 명제 정답 및 해설}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 1 — 확인 문제 (12문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[스스로 풀어보기]{확인 문제}
+
+\renewcommand{\dmquickgridstretch}{2.25}
+\begin{dmquickgrid}
+\dmquick{1}{$5$} & \dmquick{2}{\textcircled{\scriptsize 3}} & \dmquick{3}{$8$} & \dmquick{4}{$62$} & \dmquick{5}{$\{3\}$} \\
+\dmquick{6}{$1<x<2$ 또는 $5\le x\le 6$} & \dmquick{7}{$k\ge 6$} & \dmquick{8}{$16$} & \dmquick{9}{$24$} & \dmquick{10}{$9$} \\
+\dmquick{11}{$M-m=10$} & \dmquick{12}{$15$} & & & \\
+\end{dmquickgrid}
+
+\begin{multicols*}{2}
+
+% ─────────────── 확인 1 ───────────────
+\dmsoltitle{1}{조건제시법 집합의 원소 개수 계산}
+\begin{dmanswerbox}
+정답: $5$
+\end{dmanswerbox}
+
+$A=\{7,\,14,\,21,\,28,\,35,\,42,\,49\}$\ 에서 $n(A)=7$\ 이다. 실수의 제곱은 음이 될 수 없으므로 $B=\varnothing$,\ $n(B)=0$\ 이고, $C=\{-4,\,4\}$\ 에서 $n(C)=2$\ 이다.
+\[ n(A)+n(B)-n(C)=7+0-2=5. \]
+
+% ─────────────── 확인 2 ───────────────
+\dmsoltitle{2}{공집합과 원소가 공집합인 집합의 구별}
+\begin{dmanswerbox}
+정답: \textcircled{\scriptsize 3}
+\end{dmanswerbox}
+
+각 보기를 확인한다.
+
+\vspace{3mm}
+\textcircled{\scriptsize 1}\ $\{0\}$\ 의 원소는 $0$\ 하나이므로 $n(\{0\})=1$. 옳음.
+
+\textcircled{\scriptsize 2}\ $n(\varnothing)=0$. 옳음.
+
+\textcircled{\scriptsize 3}\ $\{\varnothing\}$\ 의 원소는 $\varnothing$\ 하나이므로 $n(\{\varnothing\})=1$. 보기는 $0$\ 이라 하였으므로 옳지 않음.
+
+\textcircled{\scriptsize 4}\ $\{\varnothing,\,\{\varnothing\}\}$\ 의 원소는 $\varnothing$\ 과 $\{\varnothing\}$\ 두 개. 옳음.
+
+\textcircled{\scriptsize 5}\ $2-3=-1$. 옳음.
+
+% ─────────────── 확인 3 ───────────────
+\dmsoltitle{3}{조건이 붙은 부분집합의 개수}
+\begin{dmanswerbox}
+정답: $8$
+\end{dmanswerbox}
+
+$A=\{1,\,3,\,5,\,7,\,9,\,11\}$\ 의 부분집합 $X$\ 가 $3\in X$,\ $5\in X$,\ $9\notin X$\ 를 만족시켜야 한다. 나머지 세 원소 $1,\,7,\,11$\ 의 포함 여부는 자유이므로
+\[ 2^{3}=8. \]
+
+% ─────────────── 확인 4 ───────────────
+\dmsoltitle{4}{두 부분집합 사이 조건을 만족시키는 집합의 개수}
+\begin{dmanswerbox}
+정답: $62$
+\end{dmanswerbox}
+
+$B\subset X\subset A$\ 인 $X$\ 는 $B=\{2,\,4,\,6,\,8\}$\ 을 반드시 포함하고 나머지 $6$\ 개 원소 $\{1,\,3,\,5,\,7,\,9,\,10\}$\ 의 포함 여부는 자유이므로 $2^{6}=64$\ 개이다. 이 중 $X=A$,\ $X=B$\ 두 경우를 제외하면
+\[ 64-2=62. \]
+
+% ─────────────── 확인 5 ───────────────
+\dmsoltitle{5}{진리집합의 교집합과 여집합}
+\begin{dmanswerbox}
+정답: $\{3\}$
+\end{dmanswerbox}
+
+$U=\{1,\,2,\,3,\,4,\,5,\,6\}$\ 에서 두 조건의 진리집합은 $P=\{2,\,4,\,6\}$,\ $Q=\{2,\,3\}$\ 이다. '$\sim p$\ 그리고 $q$'의 진리집합은
+\[ P^{\mathrm{c}}\cap Q=\{1,\,3,\,5\}\cap\{2,\,3\}=\{3\}. \]
+
+% ─────────────── 확인 6 ───────────────
+\dmsoltitle{6}{연결 조건의 부정}
+\begin{dmanswerbox}
+정답: $1<x<2$ 또는 $5\le x\le 6$
+\end{dmanswerbox}
+
+드모르간의 법칙에서 '$\sim p$\ 또는 $q$'의 부정은 '$p$\ 그리고 $\sim q$'이다. $p:\ 1<x\le 6$,\ $\sim q:\ x<2$\ 또는 $x\ge 5$\ 이므로 두 조건의 공통 범위는
+\[ (1<x<2)\ \text{또는}\ (5\le x\le 6). \]
+
+% ─────────────── 확인 7 ───────────────
+\dmsoltitle{7}{진리집합 포함관계로 결정되는 상수의 범위}
+\begin{dmanswerbox}
+정답: $k\ge 6$
+\end{dmanswerbox}
+
+두 진리집합은 $P=\{x\mid -1<x<4\}$,\ $Q=\{x\mid x\le k-2\}$\ 이다. $p\to q$\ 가 참이려면 $P\subset Q$\ 이므로 $P$\ 의 오른쪽 끝 $4$\ 가 $Q$\ 에 속해야 한다.
+\[ k-2\ge 4\quad\therefore\ k\ge 6. \]
+
+% ─────────────── 확인 8 ───────────────
+\dmsoltitle{8}{'모든' 명제의 부정과 판별식 조건}
+\begin{dmanswerbox}
+정답: $16$
+\end{dmanswerbox}
+
+주어진 명제의 부정은 '어떤 실수 $x$\ 에 대하여 $x^{2}+8x+k\le 0$\ 이다.'이다. 이 부정이 참이려면 이차식이 실근을 가져야 하므로
+\[ \dfrac{D}{4}=16-k\ge 0\quad\therefore\ k\le 16. \]
+$k$\ 의 최댓값은 $16$\ 이다.
+
+% ─────────────── 확인 9 ───────────────
+\dmsoltitle{9}{곱을 전개하여 산술기하평균 적용}
+\begin{dmanswerbox}
+정답: $24$
+\end{dmanswerbox}
+
+주어진 식을 전개하면
+\[ \left(2x+\dfrac{3}{y}\right)\!\left(2y+\dfrac{3}{x}\right)=4xy+\dfrac{9}{xy}+12. \]
+$4xy$\ 와 $\dfrac{9}{xy}$\ 의 곱은 $36$\ 으로 일정하므로 산술기하평균의 관계에서
+\[ 4xy+\dfrac{9}{xy}\ge 2\sqrt{36}=12\quad(\text{등호는 } xy=\dfrac{3}{2}). \]
+따라서 최솟값은 $12+12=24$\ 이다.
+
+% ─────────────── 확인 10 ───────────────
+\dmsoltitle{10}{반원 위의 점으로 만드는 삼각형 넓이의 최댓값}
+\begin{dmanswerbox}
+정답: $9$
+\end{dmanswerbox}
+
+지름의 양 끝점을 $\mathrm{A},\,\mathrm{B}$, 반원 위의 점을 $\mathrm{P}$\ 라 하자. $\overline{\mathrm{AB}}=6$\ 을 밑변으로 보면 $\mathrm{P}$\ 에서 지름까지의 수직 거리 $h$\ 가 반지름 $3$\ 일 때 넓이가 최대이므로
+\[ S_{\max}=\dfrac{1}{2}\cdot 6\cdot 3=9. \]
+
+% ─────────────── 확인 11 ───────────────
+\dmsoltitle{11}{코시-슈바르츠의 부등식 응용}
+\begin{dmanswerbox}
+정답: $M-m=10$
+\end{dmanswerbox}
+
+코시-슈바르츠의 부등식에서
+\[ (1^{2}+2^{2})(a^{2}+b^{2})\ge (a+2b)^{2}. \]
+$a^{2}+b^{2}=5$\ 이므로 $(a+2b)^{2}\le 25$,\ 즉 $-5\le a+2b\le 5$\ 이고 등호는 $\dfrac{a}{1}=\dfrac{b}{2}$\ 에서 성립한다. $M=5,\,m=-5$\ 이므로
+\[ M-m=10. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{계수의 제곱합을 두 짝으로 갈라 대입한다}: 계수 $1,\,2$\ 의 제곱합 $1^{2}+2^{2}$\ 과 변수 $a,\,b$\ 의 제곱합 $a^{2}+b^{2}$\ 을 곱하면 우변에 $(a+2b)^{2}$\ 이 나타난다.
+\end{dmcriticalpoint}
+
+% ─────────────── 확인 12 ───────────────
+\dmsoltitle{12}{합·곱이 상수가 되도록 변형한 산술기하평균}
+\begin{dmanswerbox}
+정답: $15$
+\end{dmanswerbox}
+
+$a>1$\ 이므로 $a-1>0$\ 이다. 주어진 식을 $a-1$\ 을 포함하도록 변형하면
+\[ 9a+\dfrac{1}{a-1}=9(a-1)+\dfrac{1}{a-1}+9. \]
+두 양수 $9(a-1)$\ 과 $\dfrac{1}{a-1}$\ 의 곱은 $9$\ 로 일정하므로
+\[ 9(a-1)+\dfrac{1}{a-1}\ge 2\sqrt{9}=6\quad(\text{등호는 } a-1=\dfrac{1}{3}). \]
+따라서 최솟값은 $6+9=15$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{두 항의 곱이 상수가 되도록 갈라놓는다}: 산술기하평균은 두 양수의 곱이 상수일 때에만 최솟값이 확정되므로 원래 식을 $a-1$ 항이 나타나도록 재구성한다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 2 — Level 1 (12문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[기초 연습]{Level 1}
+
+\renewcommand{\dmquickgridstretch}{2.25}
+\begin{dmquickgrid}
+\dmquick{1}{\textcircled{\scriptsize 3}} & \dmquick{2}{$19$} & \dmquick{3}{$9$} & \dmquick{4}{$n=9$} & \dmquick{5}{$24$} \\
+\dmquick{6}{$a=2$} & \dmquick{7}{$n(A\cup B)=19$} & \dmquick{8}{$8$} & \dmquick{9}{$3$} & \dmquick{10}{\textcircled{\scriptsize 3}} \\
+\dmquick{11}{\textcircled{\scriptsize 5}} & \dmquick{12}{$a^2+b^2=5$} & & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── L1-1 ───────────────
+\dmsoltitle{1}{이차부등식의 정수해와 원소 판별}
+\begin{dmanswerbox}
+정답: \textcircled{\scriptsize 3}
+\end{dmanswerbox}
+
+$x^{2}-8x+12<0$\ 에서 $(x-2)(x-6)<0$,\ 즉 $2<x<6$\ 이므로 $A=\{3,\,4,\,5\}$\ 이다.
+
+\vspace{3mm}
+\textcircled{\scriptsize 1}\ $-2\notin A$. 옳음. \quad \textcircled{\scriptsize 2}\ $0\notin A$. 옳음.
+
+\textcircled{\scriptsize 3}\ $2\notin A$\ 이므로 $2\in A$\ 는 옳지 않음.
+
+\textcircled{\scriptsize 4}\ $5\in A$. 옳음. \quad \textcircled{\scriptsize 5}\ $7\notin A$. 옳음.
+
+% ─────────────── L1-2 ───────────────
+\dmsoltitle{2}{세 유한집합의 원소 개수 합}
+\begin{dmanswerbox}
+정답: $19$
+\end{dmanswerbox}
+
+$A=\{0,\,1\}$\ 에서 $n(A)=2$,\ $B=\{-5,\,-4,\,\ldots,\,5\}$\ 에서 $n(B)=11$,\ $C=\{1,\,2,\,3,\,4,\,6,\,12\}$\ 에서 $n(C)=6$\ 이다.
+\[ n(A)+n(B)+n(C)=2+11+6=19. \]
+
+% ─────────────── L1-3 ───────────────
+\dmsoltitle{3}{부분집합 포함관계와 부등식}
+\begin{dmanswerbox}
+정답: $9$
+\end{dmanswerbox}
+
+$A\subset B$\ 이려면 $A$\ 의 양 끝 $-5,\,-2$\ 가 모두 $B$\ 의 개구간 $-3a-2<x<-a+6$\ 안에 있어야 한다.
+\[ -3a-2<-5,\qquad -a+6>-2 \]
+에서 $a>1$\ 이고 $a<8$\ 이므로 $1<a<8$\ 이다. 정수 $a$\ 는 $2,\,3,\,4,\,5,\,6,\,7$\ 이고 최댓값과 최솟값의 합은
+\[ 7+2=9. \]
+
+% ─────────────── L1-4 ───────────────
+\dmsoltitle{4}{두 집합 사이 자유원소 부분집합의 개수}
+\begin{dmanswerbox}
+정답: $n=9$
+\end{dmanswerbox}
+
+$A\subset X\subset B$\ 인 $X$\ 는 $A=\{1,\,2\}$\ 의 원소 $2$\ 개를 반드시 포함하고 나머지 $\{3,\,4,\,\ldots,\,n\}$\ 의 포함 여부는 자유이므로
+\[ 2^{n-2}=128=2^{7}\quad\therefore\ n=9. \]
+
+% ─────────────── L1-5 ───────────────
+\dmsoltitle{5}{차집합의 여집합과 원소의 합}
+\begin{dmanswerbox}
+정답: $24$
+\end{dmanswerbox}
+
+$A-B=\{4,\,8\}$\ 이고 $(A-B)^{\mathrm{c}}=U-\{4,\,8\}=\{1,\,2,\,3,\,5,\,6,\,7\}$\ 이므로 원소의 합은
+\[ 1+2+3+5+6+7=24. \]
+
+% ─────────────── L1-6 ───────────────
+\dmsoltitle{6}{교집합 조건에서 상수의 결정과 검증}
+\begin{dmanswerbox}
+정답: $a=2$
+\end{dmanswerbox}
+
+$A\cap B=\{1,\,6\}$\ 이므로 $6\in A$\ 이다. $A$\ 의 원소 중 $1,\,4$\ 는 $6$\ 이 될 수 없으므로 $a^{2}+2=6$\ 에서 $a=\pm 2$\ 이다.
+
+$a=2$\ 일 때: $A=\{1,\,4,\,6\}$,\ $B=\{3,\,1,\,6\}$\ 이므로 $A\cap B=\{1,\,6\}$. 조건 만족.
+
+$a=-2$\ 일 때: $B=\{3,\,-11,\,-2\}$\ 이므로 $A\cap B=\varnothing$. 조건 불만족.
+
+$\therefore\ a=2$.
+
+\begin{dmcriticalpoint}
+\dmcplabel{후보 값은 반드시 원래 집합에 대입해 검증한다}: 방정식으로 얻은 값은 필요조건일 뿐이므로 두 집합의 원소를 실제로 계산해 요구된 교집합이 정확히 얻어지는지 확인한다.
+\end{dmcriticalpoint}
+
+% ─────────────── L1-7 ───────────────
+\dmsoltitle{7}{드모르간 법칙과 원소 개수의 계산}
+\begin{dmanswerbox}
+정답: $n(A\cup B)=19$
+\end{dmanswerbox}
+
+드모르간의 법칙에서 $A^{\mathrm{c}}\cup B^{\mathrm{c}}=(A\cap B)^{\mathrm{c}}$\ 이므로 $n((A\cap B)^{\mathrm{c}})=n(U)-n(A\cap B)=24$\ 에서 $n(A\cap B)=30-24=6$\ 이다.
+\[ n(A\cup B)=n(A)+n(B)-n(A\cap B)=10+15-6=19. \]
+
+% ─────────────── L1-8 ───────────────
+\dmsoltitle{8}{교집합과 합집합 조건에서 부분집합의 개수}
+\begin{dmanswerbox}
+정답: $8$
+\end{dmanswerbox}
+
+$A\cap X=X$\ 는 $X\subset A$,\ $(A\cap B)\cup X=X$\ 는 $A\cap B\subset X$\ 를 의미한다. $A\cap B=\{4,\,5,\,6\}$\ 이므로 $X$\ 는 $\{4,\,5,\,6\}$\ 을 반드시 포함하고 $A=\{1,\,2,\,3,\,4,\,5,\,6\}$\ 의 부분집합이어야 한다. 나머지 $\{1,\,2,\,3\}$\ 의 포함 여부가 자유이므로
+\[ 2^{3}=8. \]
+
+% ─────────────── L1-9 ───────────────
+\dmsoltitle{9}{'모든' '어떤' 명제의 참·거짓 판별}
+\begin{dmanswerbox}
+정답: $3$
+\end{dmanswerbox}
+
+각 명제를 확인한다.
+
+\vspace{3mm}
+ㄱ. $x=0$\ 일 때 $x^{2}=0$\ 이므로 $x^{2}>0$\ 이 성립하지 않는다. 거짓.
+
+ㄴ. $(x-2)^{2}\le 0$\ 은 $x=2$\ 에서 등호가 성립한다. 참.
+
+ㄷ. 실수 $x$\ 에 대하여 $|x|^{2}=x^{2}$\ 은 항상 성립. 참.
+
+ㄹ. $x^{2}+x+1=0$\ 의 판별식 $1-4=-3<0$\ 이므로 실수해가 없다. 거짓.
+
+ㅁ. $x^{2}+2x+3=(x+1)^{2}+2\ge 2>0$. 참.
+
+\vspace{3mm}
+따라서 참인 명제는 ㄴ, ㄷ, ㅁ의 $3$\ 개.
+
+% ─────────────── L1-10 ───────────────
+\dmsoltitle{10}{역의 참·거짓 판별}
+\begin{dmanswerbox}
+정답: \textcircled{\scriptsize 3}
+\end{dmanswerbox}
+
+각 명제의 역을 세운다.
+
+\vspace{3mm}
+\textcircled{\scriptsize 1}\ 역: $x^{2}=y^{2}\Rightarrow x=y$. 반례 $x=1,\,y=-1$. 거짓.
+
+\textcircled{\scriptsize 2}\ 역: $x^{2}=9\Rightarrow x^{2}-6x+9=0$. 반례 $x=-3$. 거짓.
+
+\textcircled{\scriptsize 3}\ 역: $x^{2}\le 1\Rightarrow x\le 1$. $-1\le x\le 1$\ 이면 항상 $x\le 1$. 참.
+
+\textcircled{\scriptsize 4}\ 역: $x+y>0\Rightarrow x>0,\,y>0$. 반례 $x=2,\,y=-1$. 거짓.
+
+\textcircled{\scriptsize 5}\ 역: $-2\le x\le 4\Rightarrow -1\le x<2$. 반례 $x=3$. 거짓.
+
+% ─────────────── L1-11 ───────────────
+\dmsoltitle{11}{진리집합 포함관계와 항상 참인 명제}
+\begin{dmanswerbox}
+정답: \textcircled{\scriptsize 5}
+\end{dmanswerbox}
+
+$P\cup Q=P$\ 에서 $Q\subset P$,\ $Q\cap R=R$\ 에서 $R\subset Q$\ 이므로 $R\subset Q\subset P$\ 이다.
+
+\vspace{3mm}
+\textcircled{\scriptsize 1}\ $r\to q$: $R\subset Q$. 참.
+
+\textcircled{\scriptsize 2}\ $\sim q\to\sim r$\ 의 대우 $r\to q$\ 가 참. 참.
+
+\textcircled{\scriptsize 3}\ $\sim p\to\sim q$\ 의 대우 $q\to p$\ 는 $Q\subset P$\ 이므로 참. 참.
+
+\textcircled{\scriptsize 4}\ $q\to p$: $Q\subset P$. 참.
+
+\textcircled{\scriptsize 5}\ $\sim r\to\sim p$\ 의 대우 $p\to r$\ 은 $P\subset R$\ 인데 이는 성립하지 않을 수 있다. 항상 참이라 할 수 없음.
+
+% ─────────────── L1-12 ───────────────
+\dmsoltitle{12}{필요충분조건과 이차부등식의 계수 결정}
+\begin{dmanswerbox}
+정답: $a^2+b^2=5$
+\end{dmanswerbox}
+
+$p\Leftrightarrow q$\ 이므로 두 진리집합이 같다. $P=\{x\mid -2\le x\le 1\}$\ 이 $Q=\{x\mid x^{2}+ax+b\le 0\}$\ 과 일치하려면 이차식의 두 근이 $-2,\,1$\ 이므로
+\[ x^{2}+ax+b=(x+2)(x-1)=x^{2}+x-2 \]
+에서 $a=1,\,b=-2$\ 이다. $\therefore\ a^{2}+b^{2}=1+4=5$.
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 3 — Level 2 (12문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[표준 연습]{Level 2}
+
+\renewcommand{\dmquickgridstretch}{2.25}
+\begin{dmquickgrid}
+\dmquick{1}{$7$} & \dmquick{2}{$k=13$} & \dmquick{3}{$30$} & \dmquick{4}{$27$} & \dmquick{5}{$Mm=4$} \\
+\dmquick{6}{$9$} & \dmquick{7}{$4$} & \dmquick{8}{$41$} & \dmquick{9}{$n(A\cap B\cap C)=8$} & \dmquick{10}{$k=9$} \\
+\dmquick{11}{$k=5$} & \dmquick{12}{$64$} & & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── L2-1 ───────────────
+\dmsoltitle{1}{공집합이 되도록 하는 판별식 조건}
+\begin{dmanswerbox}
+정답: $7$
+\end{dmanswerbox}
+
+$X=\varnothing$\ 이려면 이차식 $x^{2}-ax+4$\ 가 항상 양수이어야 한다. 최고차항이 양수이므로 실근이 없으면 되므로
+\[ D=a^{2}-16<0\quad\therefore\ -4<a<4. \]
+정수 $a$\ 는 $-3,\,-2,\,-1,\,0,\,1,\,2,\,3$\ 의 $7$\ 개.
+
+% ─────────────── L2-2 ───────────────
+\dmsoltitle{2}{정수해의 개수와 자연수 결정}
+\begin{dmanswerbox}
+정답: $k=13$
+\end{dmanswerbox}
+
+$25=0^{2}+5^{2}=3^{2}+4^{2}$\ 이므로 $x^{2}+y^{2}=25$\ 의 정수해는
+\[ (\pm 5,\,0),\ (0,\,\pm 5),\ (\pm 3,\,\pm 4),\ (\pm 4,\,\pm 3) \]
+의 $2+2+4+4=12$\ 개이다. $n(A)=12,\,n(B)=k$\ 이므로 $12+k=25$\ 에서 $k=13$.
+
+% ─────────────── L2-3 ───────────────
+\dmsoltitle{3}{두 집합 사이 자유원소 부분집합에서 두 경우 제외}
+\begin{dmanswerbox}
+정답: $30$
+\end{dmanswerbox}
+
+$A=\{-3,\,-2,\,-1,\,0,\,1,\,2,\,3\}$\ 이고 $B=\{-2,\,2\}$\ 이므로 $B\subset X\subset A$\ 인 $X$\ 는 $B$\ 의 $2$\ 개를 반드시 포함하고 나머지 $5$\ 개의 포함 여부가 자유이다. 그 개수는 $2^{5}=32$\ 이고, $X=A,\,X=B$\ 두 경우를 제외하면
+\[ 32-2=30. \]
+
+% ─────────────── L2-4 ───────────────
+\dmsoltitle{4}{원소 개수 공식과 두 집합의 차이}
+\begin{dmanswerbox}
+정답: $27$
+\end{dmanswerbox}
+
+영어를 맞힌 학생을 $E$, 수학을 맞힌 학생을 $M$\ 이라 하자. 두 문제 모두 틀린 학생 수는
+\[ n(E^{\mathrm{c}}\cap M^{\mathrm{c}})=n((E\cup M)^{\mathrm{c}})=5 \]
+이므로 $n(E\cup M)=60-5=55$\ 이다. 원소 개수 공식에서 $55=35+28-n(E\cap M)$\ 이므로 $n(E\cap M)=8$\ 이다. 영어만 맞힌 학생 수는
+\[ n(E)-n(E\cap M)=35-8=27. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{모두 틀림은 합집합의 여집합이다}: 두 조건을 모두 만족하지 않는 부분은 합집합의 밖이므로 전체에서 합집합의 원소 개수를 뺀 값과 같다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-5 ───────────────
+\dmsoltitle{5}{두 구간 집합의 포함관계로 최댓·최솟값 결정}
+\begin{dmanswerbox}
+정답: $Mm=4$
+\end{dmanswerbox}
+
+$A\ne\varnothing$\ 에서 $-2\le -3k$,\ 즉 $k\le\dfrac{2}{3}$\ 이다.
+
+$A\subset B$\ 이려면 $A$\ 의 양 끝 $-2,\,-3k$\ 가 모두 $B=[2k,\,12]$\ 안에 있어야 하므로
+\[ 2k\le -2,\qquad -3k\le 12 \]
+에서 $k\le -1$\ 이고 $k\ge -4$,\ 즉 $-4\le k\le -1$\ 이다.
+
+두 범위의 공통 부분은 $-4\le k\le -1$\ 이므로 $M=-1,\,m=-4$\ 이고 $Mm=4$.
+
+% ─────────────── L2-6 ───────────────
+\dmsoltitle{6}{나머지가 같은 자연수의 집합의 교집합}
+\begin{dmanswerbox}
+정답: $9$
+\end{dmanswerbox}
+
+$A_{n}$\ 은 $50$\ 이하의 자연수 중 $n$\ 으로 나눈 나머지가 $2$\ 인 것들의 집합이다.
+
+$A_{3}\cap A_{4}$\ 는 $12$\ 로 나눈 나머지가 $2$\ 인 자연수의 집합이므로 $\{2,\,14,\,26,\,38,\,50\}$\ 의 $5$\ 개이다.
+
+$6$\ 의 배수는 $3$\ 의 배수이므로 $A_{6}\subset A_{3}$\ 이고
+\[ A_{3}\cap A_{6}=A_{6}=\{2,\,8,\,14,\,20,\,26,\,32,\,38,\,44,\,50\} \]
+의 $9$\ 개이다. 또 $A_{3}\cap A_{4}\subset A_{6}$\ 이므로
+\[ A_{3}\cap(A_{4}\cup A_{6})=(A_{3}\cap A_{4})\cup(A_{3}\cap A_{6})=A_{6} \]
+에서 원소의 개수는 $9$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{두 집합의 교집합은 두 나눗수의 최소공배수로 나눈 나머지가 같은 원소들의 집합이다}: 배수 포함관계를 이용해 분배법칙으로 식을 축약하면 나열 없이 개수가 결정된다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-7 ───────────────
+\dmsoltitle{7}{두 포함관계를 동시에 만족시키는 정수의 개수}
+\begin{dmanswerbox}
+정답: $4$
+\end{dmanswerbox}
+
+각 집합을 정돈하면 $A=\{y\mid -1<y\le 1\}$,\ $B=\{y\mid a-1\le y<a+7\}$,\ $C=\{x\mid x>2a\}$\ 이다.
+
+$A\subset B$: $A$\ 의 양 끝 $-1,\,1$\ 이 $B$\ 안에 있어야 한다. $A$\ 의 왼쪽 끝은 개구간이지만 $B$\ 의 왼쪽 끝은 폐구간이므로
+\[ a-1\le -1,\qquad 1<a+7 \]
+에서 $-6<a\le 0$\ 이다.
+
+$B\subset C$: $B$\ 의 왼쪽 끝 $a-1$\ 이 $C$\ 안에 있어야 하므로 $2a<a-1$,\ 즉 $a<-1$\ 이다.
+
+공통 범위는 $-6<a<-1$\ 이고, 정수 $a$\ 는 $-5,\,-4,\,-3,\,-2$\ 의 $4$\ 개.
+
+\begin{dmcriticalpoint}
+\dmcplabel{끝점이 어느 집합의 원소인지 확인한다}: 부분집합 조건에서 개·폐구간 여부에 따라 등호 포함이 갈리므로 두 구간의 끝점을 정확히 반영해 부등식을 세운다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-8 ───────────────
+\dmsoltitle{8}{부분집합의 최소원소의 총합}
+\begin{dmanswerbox}
+정답: $41$
+\end{dmanswerbox}
+
+$A=\{2,\,3,\,4,\,5\}$\ 의 공집합이 아닌 부분집합은 $2^{4}-1=15$\ 개이다. 최소원소별로 개수를 세면 다음과 같다.
+
+\vspace{3mm}
+최소원소가 $2$: $2$\ 를 포함하고 나머지 $\{3,\,4,\,5\}$\ 자유. $2^{3}=8$\ 개.
+
+최소원소가 $3$: $2$\ 제외, $3$\ 포함, 나머지 $\{4,\,5\}$\ 자유. $2^{2}=4$\ 개.
+
+최소원소가 $4$: $2,\,3$\ 제외, $4$\ 포함, 나머지 $\{5\}$\ 자유. $2^{1}=2$\ 개.
+
+최소원소가 $5$: $\{5\}$\ 하나뿐. $1$\ 개.
+
+\vspace{3mm}
+각 최소원소에 부분집합의 개수를 곱해 더하면
+\[ 2\cdot 8+3\cdot 4+4\cdot 2+5\cdot 1=16+12+8+5=41. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{최소원소를 기준으로 부분집합을 나눈다}: 최소원소 $k$\ 는 자신을 반드시 포함하고 $k$\ 보다 작은 원소는 모두 제외해야 하므로 자유 원소가 정해지고 그 개수만큼의 부분집합이 대응된다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-9 ───────────────
+\dmsoltitle{9}{대칭차집합과 세 집합의 원소 개수}
+\begin{dmanswerbox}
+정답: $n(A\cap B\cap C)=8$
+\end{dmanswerbox}
+
+대칭차집합의 정의에서
+\[ n(X\triangle Y)=n(X)+n(Y)-2\,n(X\cap Y). \]
+세 원소 개수의 합을 $\Sigma_1=n(A)+n(B)+n(C)$, 두 교집합 원소 개수의 합을 $\Sigma_2=n(A\cap B)+n(B\cap C)+n(C\cap A)$\ 라 하면 세 대칭차의 관계식을 모두 더한 좌변은 $45+47+42=134$,\ 우변은 $2\Sigma_1-2\Sigma_2$\ 이므로
+\[ \Sigma_1-\Sigma_2=67. \]
+
+세 집합 합집합 공식에서 $n(A\cup B\cup C)=\Sigma_1-\Sigma_2+n(A\cap B\cap C)$\ 이므로
+\[ 75=67+n(A\cap B\cap C)\quad\therefore\ n(A\cap B\cap C)=8. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{대칭차는 두 집합에서 공통 부분을 두 번 뺀다}: 대칭차의 원소는 한쪽에만 속하므로 두 원소 개수의 합에서 공통 원소 개수의 두 배를 뺀 값이다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-10 ───────────────
+\dmsoltitle{10}{'어떤' 명제의 부정과 판별식 조건}
+\begin{dmanswerbox}
+정답: $k=9$
+\end{dmanswerbox}
+
+주어진 명제가 거짓이려면 그 부정 '모든 실수 $x$\ 에 대하여 $x^{2}+8x+2k-1>0$\ 이다.'가 참이어야 한다. 이차식이 항상 양수이려면 판별식이 음수이어야 하므로
+\[ \dfrac{D}{4}=16-(2k-1)<0\quad\therefore\ k>\dfrac{17}{2}. \]
+정수 $k$\ 의 최솟값은 $9$.
+
+% ─────────────── L2-11 ───────────────
+\dmsoltitle{11}{충분조건과 진리집합의 포함관계}
+\begin{dmanswerbox}
+정답: $k=5$
+\end{dmanswerbox}
+
+$p:\ x^{2}-4x-12=0$\ 에서 $(x-6)(x+2)=0$\ 이므로 $P=\{-2,\,6\}$\ 이다. $\sim q:\ |x-3|\le k$\ 의 진리집합은 $\sim Q=\{x\mid 3-k\le x\le 3+k\}$\ 이다.
+
+$p\Rightarrow\sim q$\ 이려면 $P\subset \sim Q$\ 이므로 $-2,\,6$\ 이 모두 $[3-k,\,3+k]$\ 안에 있어야 한다.
+\[ 3-k\le -2,\qquad 6\le 3+k \]
+에서 $k\ge 5$\ 이므로 자연수 $k$\ 의 최솟값은 $5$.
+
+% ─────────────── L2-12 ───────────────
+\dmsoltitle{12}{산술기하평균으로 얻는 빗변 제곱의 최솟값}
+\begin{dmanswerbox}
+정답: $64$
+\end{dmanswerbox}
+
+$\angle\mathrm{C}=90^{\circ}$\ 인 직각삼각형에서 두 직각변을 $a=\overline{\mathrm{BC}},\,b=\overline{\mathrm{CA}}$\ 라 하자. 넓이가 $16$\ 이므로 $\dfrac{1}{2}ab=16$,\ 즉 $ab=32$\ 이다.
+
+빗변 제곱은 $\overline{\mathrm{AB}}^{\,2}=a^{2}+b^{2}$\ 이고 산술기하평균의 관계에서
+\[ a^{2}+b^{2}\ge 2\sqrt{a^{2}b^{2}}=2ab=64\quad(\text{등호는 } a=b=4\sqrt{2}). \]
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 4 — Level 3 (3문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[심화 연습]{Level 3}
+
+\renewcommand{\dmquickgridstretch}{3.00}
+\begin{dmquickgrid}
+\dmquick{1}{$21$} & \dmquick{2}{$27$} & \dmquick{3}{$12$} & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── L3-1 (세션 63 교체) ───────────────
+% source : 블랙라벨-CM2-04-STEP3-#08 · O-NEW-24 확장 · mod 5 잔여 금지 쌍 회피
+\dmsoltitle{1}{$5$\ 의 배수 회피 조건과 나머지에 따른 최대 부분집합}
+\begin{dmanswerbox}
+정답: $21$
+\end{dmanswerbox}
+
+$U=\{1,\,2,\,\ldots,\,50\}$\ 의 각 자연수를 $5$\ 로 나눈 나머지 $0,\,1,\,2,\,3,\,4$\ 에 따라 다섯 그룹 $R_{0},\,R_{1},\,R_{2},\,R_{3},\,R_{4}$\ 로 나누면 각 그룹의 원소는 $10$\ 개이다.
+
+두 자연수 $x,\,y$\ 의 합 $x+y$\ 가 $5$\ 의 배수가 되는 것은 두 나머지의 합이 $5$\ 의 배수인 경우이므로 나머지 쌍은
+\[ (R_{0},\,R_{0}),\quad (R_{1},\,R_{4}),\quad (R_{2},\,R_{3}) \]
+의 세 가지이다.
+
+조건을 만족시키려면
+\begin{itemize}[leftmargin=8mm, itemsep=0.5mm, topsep=1mm]
+  \item $R_{0}$\ 에서는 서로 다른 두 원소를 함께 뽑을 수 없으므로 최대 $1$\ 개.
+  \item $R_{1}$\ 과 $R_{4}$\ 는 한쪽만 통째로 선택. 최대 $10$\ 개.
+  \item $R_{2}$\ 와 $R_{3}$\ 도 한쪽만 통째로 선택. 최대 $10$\ 개.
+\end{itemize}
+
+따라서 $n(A)$\ 의 최댓값은
+\[ 1+10+10=21. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{합의 배수 조건은 나머지 쌍 조건으로 바뀐다}: 합이 $5$\ 의 배수라는 조건은 두 나머지의 합만으로 결정되므로 원소별 조건이 나머지 그룹 사이의 짝 조건으로 바뀐다.
+\end{dmcriticalpoint}
+
+% ─────────────── L3-2 ───────────────
+\dmsoltitle{2}{세 조건에서 원소합의 최솟값}
+\begin{dmanswerbox}
+정답: $27$
+\end{dmanswerbox}
+
+$A-X=B-X$\ 이려면 $A$\ 와 $B$\ 가 $X$\ 밖에서 완전히 일치해야 하므로 $A\triangle B\subset X$\ 이다. $A-B=\{1,\,2\},\,B-A=\{6,\,7\}$\ 이므로
+\[ \{1,\,2,\,6,\,7\}\subset X. \]
+
+$(X-A)\cap(X-B)=X-(A\cup B)=X\cap\{8,\,9,\,10\}$\ 이므로 이 조건이 공집합이 아니려면 $X$\ 가 $\{8,\,9,\,10\}$\ 의 원소를 적어도 하나 포함해야 한다.
+
+$n(X)=6$\ 이고 반드시 포함되는 $\{1,\,2,\,6,\,7\}$\ 이 $4$\ 개이므로 나머지 $2$\ 개는 $\{3,\,4,\,5\}\cup\{8,\,9,\,10\}$\ 에서 고르되 $\{8,\,9,\,10\}$\ 의 원소가 적어도 하나이다.
+
+원소합의 최솟값을 얻으려면 $\{8,\,9,\,10\}$\ 의 최솟값 $8$\ 과 $\{3,\,4,\,5\}$\ 의 최솟값 $3$\ 을 골라 $X=\{1,\,2,\,3,\,6,\,7,\,8\}$\ 로 잡는다. 그 합은
+\[ 1+2+3+6+7+8=27. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{대칭차의 원소는 반드시 $X$ 안에 있어야 한다}: 대칭차의 원소는 두 집합 중 정확히 한쪽에만 있으므로 $X$ 밖에 남으면 두 차집합이 서로 달라진다.
+\end{dmcriticalpoint}
+
+% ─────────────── L3-3 ───────────────
+\dmsoltitle{3}{포함배제와 두 동아리만 가입한 학생 수}
+\begin{dmanswerbox}
+정답: $12$
+\end{dmanswerbox}
+
+세 동아리의 학생 집합을 $A,\,B,\,C$\ 라 하자. 어느 동아리에도 가입하지 않은 학생이 $4$\ 명이므로
+\[ n(A\cup B\cup C)=50-4=46. \]
+
+두 교집합의 합을 $S=n(A\cap B)+n(B\cap C)+n(C\cap A)$\ 라 하면 세 집합 합집합 공식에서
+\[ 46=23+28+21-S+7\quad\therefore\ S=33. \]
+
+두 동아리에만 가입한 학생 수를 $T$\ 라 하면 세 동아리 모두 가입한 학생은 두 교집합에 세 번 세어지므로
+\[ S=T+3\,n(A\cap B\cap C),\qquad 33=T+21\quad\therefore\ T=12. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{세 집합 공통 원소는 두 교집합에 세 번 세어진다}: 두 교집합 $A\cap B,\,B\cap C,\,C\cap A$\ 의 합에서 세 집합에 모두 속하는 원소는 세 번 세어지므로 이 중복을 빼야 두 개에만 속하는 원소 수가 나온다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 5 — 실전 기출 (3문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[학평 기출]{실전 기출}
+
+\renewcommand{\dmquickgridstretch}{3.00}
+\begin{dmquickgrid}
+\dmquick{1}{$16$} & \dmquick{2}{$22$} & \dmquick{3}{$189$} & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── 실전 1 (R-1 · 2023.3월 고2 18번) ───────────────
+\dmsoltitle{1}{두 명제가 모두 거짓이 되는 진리집합의 위치}
+\begin{dmanswerbox}
+정답: $16$
+\end{dmanswerbox}
+
+두 진리집합은 $P=\{x\mid k-2\le x\le k+2\}$\ 이고, $x^{2}-4x-5\le 0$\ 에서 $(x-5)(x+1)\le 0$\ 이므로 $Q=\{x\mid -1\le x\le 5\}$\ 이다.
+
+$p\to q$\ 가 거짓이려면 $P\not\subset Q$\ 이므로 $P$\ 의 양 끝 중 적어도 하나가 $Q$\ 밖에 있어야 한다.
+\[ k-2<-1\ \text{또는}\ k+2>5,\quad\text{즉}\ k<1\ \text{또는}\ k>3. \]
+
+$p\to\sim q$\ 가 거짓이려면 $P\not\subset Q^{\mathrm{c}}$,\ 즉 $P\cap Q\ne\varnothing$\ 이므로
+\[ k-2\le 5,\qquad k+2\ge -1,\quad\text{즉}\ -3\le k\le 7. \]
+
+두 조건의 공통 범위는 $-3\le k<1$\ 또는 $3<k\le 7$\ 이고, 정수 $k$\ 는 $-3,\,-2,\,-1,\,0,\,4,\,5,\,6,\,7$\ 이므로 그 합은
+\[ (-3-2-1+0)+(4+5+6+7)=-6+22=16. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{$P\not\subset Q$\ 는 어느 끝이 $Q$ 밖으로 벗어나는 것이다}: 명제가 거짓이려면 $P$\ 의 어떤 원소가 $Q$\ 에 속하지 않으면 되므로 $P$\ 의 양 끝 중 적어도 하나가 $Q$ 밖에 있어야 한다.
+\end{dmcriticalpoint}
+
+% ─────────────── 실전 2 (R-2 · 2022.11월 고1 28번) ───────────────
+\dmsoltitle{2}{여집합의 원소합 관계와 원소합의 최솟값}
+\begin{dmanswerbox}
+정답: $22$
+\end{dmanswerbox}
+
+전체집합 $U=\{1,\,2,\,4,\,8,\,16,\,32\}$\ 의 원소의 합은
+\[ S(U)=1+2+4+8+16+32=63. \]
+
+$A\cup B^{\mathrm{c}}=U-(B-A)$\ 이므로 $S(A\cup B^{\mathrm{c}})=63-S(B-A)$\ 이다. 조건 (가)에서 $63-S(B-A)=6\,S(B-A)$\ 이므로 $7\,S(B-A)=63$\ 에서 $S(B-A)=9$\ 이다.
+
+$U$\ 의 원소는 모두 $2$\ 의 거듭제곱이므로 서로 다른 원소의 합이 $9$\ 가 되는 조합은 $\{1,\,8\}$\ 뿐이고, 원소 개수는 $2$\ 개로 $2\le n(B-A)\le 4$\ 를 만족한다.
+\[ B-A=\{1,\,8\}. \]
+
+조건 (나)에서 $n(A\cup B)=n(A)+n(B-A)=5$\ 이므로 $n(A)=3$\ 이다. 또 $A$\ 는 $B-A=\{1,\,8\}$\ 의 원소를 포함하지 않으므로 $A\subset\{2,\,4,\,16,\,32\}$\ 이다.
+
+이 네 원소 중 $3$\ 개를 골라 만드는 $A$\ 의 원소합이 최소가 되려면 가장 작은 세 원소를 택해야 한다.
+\[ A=\{2,\,4,\,16\},\quad S(A)=22. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{$A\cup B^{\mathrm{c}}$\ 의 원소합은 전체합에서 $B-A$\ 의 원소합을 뺀 값이다}: $A\cup B^{\mathrm{c}}$\ 의 원소는 전체집합에서 $B-A$\ 의 원소만 제외한 것이므로 그 원소합은 전체합에서 $B-A$\ 의 원소합을 빼서 얻는다.
+\end{dmcriticalpoint}
+
+% ─────────────── 실전 3 (R-3 · 2024.3월 고2 28번) ───────────────
+\dmsoltitle{3}{짝수·약수 조건에서 자연수의 결정과 원소의 곱}
+\begin{dmanswerbox}
+정답: $189$
+\end{dmanswerbox}
+
+$U=\{x\mid x\text{는 }k\text{ 이하의 자연수}\}$\ 에서 $A$\ 는 $k$\ 이하의 짝수 전체이므로 $n(A)$\ 는 $k$\ 가 짝수이면 $\dfrac{k}{2}$,\ $k$\ 가 홀수이면 $\dfrac{k-1}{2}$\ 이다.
+
+$n(A)\cdot n((A\cup B)^{\mathrm{c}})=15=1\cdot 15=3\cdot 5=5\cdot 3=15\cdot 1$\ 이므로 후보는 이 네 쌍이다.
+
+$n(A)=5$\ 인 경우 $k\in\{10,\,11\}$\ 이다. $k=10$\ 일 때
+\[ A=\{2,\,4,\,6,\,8,\,10\},\qquad B=\{1,\,2,\,5,\,10\} \]
+이므로 $A\cup B=\{1,\,2,\,4,\,5,\,6,\,8,\,10\}$\ 이고 $(A\cup B)^{\mathrm{c}}=\{3,\,7,\,9\}$\ 의 $3$\ 개로 조건을 만족한다.
+
+나머지 경우 ($n(A)=1,\,3,\,15$)는 $n((A\cup B)^{\mathrm{c}})$\ 가 요구된 값과 일치하지 않는다.
+
+$k=10$\ 이고 $(A\cup B)^{\mathrm{c}}=\{3,\,7,\,9\}$\ 이므로 원소의 곱은
+\[ 3\cdot 7\cdot 9=189. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{$15$\ 의 자연수 분해는 유한하므로 후보가 제한된다}: $15$\ 의 자연수 분해가 유한하므로 $(n(A),\,n((A\cup B)^{\mathrm{c}}))$\ 의 조합이 네 쌍으로 좁혀지고, 각 쌍마다 $k$\ 의 후보가 결정되어 검증이 가능해진다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+\end{document}

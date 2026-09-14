@@ -1,0 +1,283 @@
+% smoke-test.tex · DeeP Math 형성평가 시험지 · 시각 디자인 v2 (2026-07-26 세션 92)
+% 마스터 지시 요약 :
+%   1) 팔레트 안 C (블랙 · 남색 #003366 · 크림슨 #B71C1C · 순백) 기반 · 개선 여지 반영
+%   2) 좌우 분할 (pagepair + probpair) 구조 계승
+%   3) 고급스럽고 선명한 시각 · 배점 4단계 위계
+%   4) style.sty 원본 유지 · 로컬 재정의만 (파일 header)
+%   5) ★ 다음 숫자 띄어쓰기 필수 · style.sty 매크로 이름 유지
+
+\documentclass[10pt]{article}
+\usepackage{style}
+\renewcommand{\examround}{형성평가}
+\renewcommand{\examvol}{}
+
+% ══════════════════════════════════════════════════════════════
+% [1] 팔레트 안 C · v2 (모의고사 표준 · 고급감·선명감 강화)
+% ══════════════════════════════════════════════════════════════
+% - 잉크 (본문)      : 순수 블랙 #000000 (선명감 정점)
+% - 딥 (강조·헤더)  : 진한 남색 #003366 (마스터 확정)
+% - 액센트 (부속)   : 미드 남색 #1F4E79 (딥과 계층 · 딥과 구분 · 링크·배지 프레임)
+% - 룰 (구분선)     : 회청 #7A8FA6 (선명하지만 콘텐츠 방해 없음 · 대비 상향)
+% - 라이트 (배경)   : 순백 #FFFFFF
+% - 딤 (부속 텍스트): 다크 슬레이트 #37474F (부제·라벨 · WCAG AA)
+% - 프레임 (조건)   : 블랙 #000000 (조건 박스 · 극명한 대비)
+% - 웜 (변별 정점)  : 크림슨 #B71C1C (마스터 확정 · Q20 · 7점만 사용)
+% - 웜-라이트       : 옅은 로즈 #FFEBEE (변별 배지 배경)
+% 마스터 지시 (2026-07-26) : 전체 디자인 요소·텍스트 검정 통일
+\definecolor{vB-ink}{HTML}{000000}
+\definecolor{vB-deep}{HTML}{000000}
+\definecolor{vB-accent}{HTML}{000000}
+\definecolor{vB-rule}{HTML}{000000}
+\definecolor{vB-light}{HTML}{FFFFFF}
+\definecolor{vB-dim}{HTML}{000000}
+\definecolor{vB-frame}{HTML}{000000}
+\definecolor{vB-warn}{HTML}{000000}
+\definecolor{vB-warn-light}{HTML}{FFFFFF}
+
+% ══════════════════════════════════════════════════════════════
+% [2] pagepair 좌우 분할선 · **좌표 노드 기반 픽셀 정합** (세션 92 · 방안 1)
+% ──────────────────────────────────────────────────────────────
+% 원리 : 헤더 하단 룰·푸터 상단 룰이 그려지는 그 순간
+%        `\tikz\coordinate`로 해당 y-좌표를 페이지별로 기록
+%        → `\AddToShipoutPictureFG`가 두 좌표를 잇는 세로 룰을 그림
+%        → 어떤 헤더 크기·시안에도 자동 정합 (yshift 하드코딩 불필요)
+% 좌표명 : dm-vline-top-<page> · dm-vline-bot-<page>
+% ══════════════════════════════════════════════════════════════
+\usepackage{eso-pic}
+\usepackage{zref-savepos}
+% 좌표 기록 헬퍼 (헤더/푸터 룰에 삽입) · zref-savepos 절대 페이지 좌표 (mm 단위)
+%   zref-savepos 는 컴파일 시 페이지상 절대 y-좌표를 aux에 저장 → 다음 pass에서 참조 가능
+\newcounter{dmvlinetopcnt}
+\newcounter{dmvlinebotcnt}
+\newcommand{\dmvlinetop}{%
+  \stepcounter{dmvlinetopcnt}%
+  \zsavepos{dm-vline-top-\thepage}%
+}
+\newcommand{\dmvlinebot}{%
+  \stepcounter{dmvlinebotcnt}%
+  \zsavepos{dm-vline-bot-\thepage}%
+}
+% 세로 분할선 · 페이지 shipout 시 y좌표를 zref-savepos에서 조회
+%   x = current page.center + 1mm (기존 계승)
+%   y_top = zref y of dm-vline-top-<page>
+%   y_bot = zref y of dm-vline-bot-<page>
+% zposy는 sp 단위 정수 (bottom-up 좌표계 · 페이지 하단 원점) · undefined면 0 반환
+% \dimexpr ... sp \relax 로 sp 단위 dimension 안전 변환 (pgfmath 우회)
+% 2-pass 필요 (첫 pass zref 저장 → 두 번째 pass 사용)
+\AddToShipoutPictureFG{%
+  \begingroup
+  \edef\vlinetopsp{\zposy{dm-vline-top-\thepage}}%
+  \edef\vlinebotsp{\zposy{dm-vline-bot-\thepage}}%
+  \ifnum\vlinetopsp>0 %
+    \ifnum\vlinebotsp>0 %
+      \setlength{\dimen0}{\vlinetopsp sp}%
+      \setlength{\dimen2}{\vlinebotsp sp}%
+      \edef\vlinetoppt{\the\dimen0}%
+      \edef\vlinebotpt{\the\dimen2}%
+      \begin{tikzpicture}[overlay,remember picture]
+        \draw[color=vB-rule,line width=0.5pt]
+          ([xshift=1mm,yshift=\vlinetoppt]current page.south)
+          -- ([xshift=1mm,yshift=\vlinebotpt]current page.south);
+      \end{tikzpicture}%
+    \fi
+  \fi
+  \endgroup
+}
+
+% ══════════════════════════════════════════════════════════════
+% [3] examheader override · "기말대비" → "형성평가 · 도형의 방정식" · 학원명
+% ══════════════════════════════════════════════════════════════
+% style.sty examheader는 왼 박스 "기말대비" 하드코딩 → 형성평가에 부적합
+% 로컬 재정의 : 왼 박스 "DeeP Math" 시리즈 라벨 · 오른 박스 "A형"
+\makeatletter
+\renewcommand{\examheader}[2]{%
+  \thispagestyle{empty}%
+  \par\noindent
+  % ── 마스터 지시 : "형성평가" 만 앨버립스 프레임 박스 · 나머지 요소는 이전 스타일 유지 ──
+  \begin{tikzpicture}[remember picture]
+    % 형성평가 배너 : 상단 꽉 채우는 프레임 박스 (\linewidth · 중앙 정렬)
+    \node[draw=black, line width=0.5pt, rounded corners=3pt,
+          minimum width=\linewidth, inner ysep=8pt,
+          font=\sffamily\Huge\bfseries\color{black},
+          align=center, anchor=south west]
+      at (0, 0) {\examround};
+  \end{tikzpicture}%
+  \par\vspace{7pt}
+  % 상단 타이틀 영역 굵은 룰 (dmvlinetop 없음 · 세로 분할선 미접촉)
+  \noindent{\color{black}\rule{\linewidth}{1.2pt}}\par
+  \vspace{7pt}
+  \noindent
+  {\sffamily\small\color{black} #1}\par\vspace{1pt}
+  {\sffamily\scriptsize\color{black} #2}\par\vspace{7pt}
+  {\sffamily\footnotesize\color{black}
+    학년: \rule{42mm}{0.3pt}\hfill 이름: \rule{42mm}{0.3pt}}%
+  \par\addvspace{10pt}
+  % 상단 타이틀 영역 종결 룰 · 세로 분할선 시작점 (신규 · 마스터 지시)
+  %   학년·이름까지가 상단 타이틀 영역 · 문항 영역과 분리
+  \noindent{\color{black}\rule{\linewidth}{0.4pt}}\dmvlinetop\par
+  \addvspace{4pt}
+  \thispagestyle{examfooter}%
+}
+\makeatother
+
+% ══════════════════════════════════════════════════════════════
+% [3.5] 푸터 학원 로고 크기 축소 · 로컬 재정의 (마스터 지적)
+% style.sty 기본 : height=9mm · raisebox=-2.5mm → 축소 : height=6mm · raisebox=-1.5mm
+% 전체 시각 밸런스 개선 · 학원 브랜딩 유지하되 시험지 콘텐츠 방해 축소
+% ══════════════════════════════════════════════════════════════
+\makeatletter
+% (1) 통상 페이지 fancy 재정의 · 좌표 노드 삽입 (dm-vline-top·bot)
+\fancyfoot[R]{\raisebox{-0.8mm}{\includegraphics[height=4mm]{학원로고 (깊이와통찰).jpg}}}
+% 통상 페이지 headrule/footrule에 세로선 top·bot 좌표 기록
+\renewcommand{\headrule}{\hbox to\headwidth{\color{vB-rule}\leaders\hrule height \headrulewidth\hfill}\dmvlinetop}
+\renewcommand{\footrule}{\dmvlinebot\hbox to\headwidth{\color{vB-rule}\leaders\hrule height \footrulewidth\hfill}\vskip 4pt}
+% (2) 첫 페이지 examfooter 재정의 (헤더가 그림 · footrule에 bot 좌표)
+\fancypagestyle{examfooter}{%
+  \fancyhf{}%
+  \fancyfoot[L]{}%
+  \fancyfoot[C]{\sffamily\bfseries\color{black}-\,\thepage\,-}%
+  \fancyfoot[R]{\raisebox{-0.8mm}{\includegraphics[height=4mm]{학원로고 (깊이와통찰).jpg}}}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0.4pt}%
+  \renewcommand{\footrule}{\dmvlinebot\hbox to\headwidth{\color{vB-rule}\leaders\hrule height \footrulewidth\hfill}\vskip 4pt}%
+}
+\makeatother
+
+% ══════════════════════════════════════════════════════════════
+% [4] 문항 스타일 재정의
+%     · 번호 : 남색 굵은 sans (기존 계승 · 색만 vB-deep 로 승격)
+%     · 배점 pts{N} : 색·굵기 4단계 위계
+%       - 4점 : 회색 대괄호 (기본)
+%       - 5점 : 딥 남색 대괄호 (표준 응용)
+%       - 6점 : 딥 남색 굵은 대괄호 (심화)
+%       - 7점 : 크림슨 굵은 대괄호 (변별 · Q20 정점)
+% ══════════════════════════════════════════════════════════════
+\makeatletter
+\renewenvironment{problem}[2]{%
+  \par%
+  \setcounter{probnum}{#1}%
+  \noindent
+  \begin{minipage}[t]{\linewidth}%
+  \raggedright%
+  \setlength{\parskip}{4pt plus 1pt}%
+  % 번호 : 남색 굵은 sans + 뒤 얇은 세로 룰 = 정돈감
+  {\sffamily\bfseries\large\color{vB-deep}#1.}\par\smallskip\ignorespaces
+}{%
+  \end{minipage}\par%
+}
+\renewcommand{\pointbadge}[1]{}
+
+% pts{N} · 배점 4단계 위계 · \mbox 로 [N점] 통째 유지 (줄 중간 잘림 방지)
+\newcommand{\pts}[1]{%
+  \nobreak\hspace*{\fill}%
+  \ifstrequal{#1}{4}{\mbox{\sffamily\small\color{vB-dim}[\textbf{4점}]}}{%
+  \ifstrequal{#1}{5}{\mbox{\sffamily\small\color{vB-deep}[\textbf{5점}]}}{%
+  \ifstrequal{#1}{6}{\mbox{\sffamily\bfseries\small\color{vB-deep}[6점]}}{%
+  \ifstrequal{#1}{7}{\mbox{\sffamily\bfseries\small\color{vB-warn}[7점]}}{%
+  \mbox{\sffamily\small\color{vB-dim}[\textbf{#1점}]}}}}}%
+  \par%
+}
+
+% 변별 배지 · Q20 전용 · 크림슨 필드 (흰 글자)
+\newcommand{\varibadge}{%
+  \tikz[baseline=(vb.base)]\node[fill=vB-warn, draw=vB-warn, line width=0pt,
+    rounded corners=1pt, inner xsep=5pt, inner ysep=1.5pt,
+    font=\sffamily\bfseries\scriptsize\color{white}] (vb) {\,변별\,};%
+}
+% ★ 5 일반 배지 · Q19 전용 · 딥 남색 필드 (흰 글자)
+\newcommand{\advbadge}{%
+  \tikz[baseline=(ab.base)]\node[fill=vB-deep, draw=vB-deep, line width=0pt,
+    rounded corners=1pt, inner xsep=5pt, inner ysep=1.5pt,
+    font=\sffamily\bfseries\scriptsize\color{white}] (ab) {\,심화\,};%
+}
+
+\renewenvironment{choices}{\par\vspace{5mm}\setcounter{choicecnt}{0}%
+  \noindent\hbox to \linewidth\bgroup\small\ignorespaces}{%
+  \egroup\par\medskip}
+\makeatother
+
+% ══════════════════════════════════════════════════════════════
+% [5] examsection override · 좌측 굵은 딥 바 + 딥 남색 굵은 텍스트 · 상하 이중 룰
+% ══════════════════════════════════════════════════════════════
+\makeatletter
+\renewcommand{\examsection}[1]{%
+  \par\addvspace{12pt}\needspace{4\baselineskip}%
+  \noindent\textcolor{vB-deep}{\rule[-3pt]{4pt}{15pt}}\,\,%
+  {\sffamily\bfseries\color{vB-deep}#1}%
+  \par\vspace{3pt}%
+  \noindent\textcolor{vB-rule}{\rule{\linewidth}{0.4pt}}%
+  \par\addvspace{4pt}%
+}
+\makeatother
+
+\begin{document}
+
+\examheader{형성평가 A형 \textperiodcentered\ 평면좌표 · 직선 · 원 · 이동 (대단원 1)}{총 20문 \textperiodcentered\ 100점 \textperiodcentered\ 50분}
+
+% ── 페이지 1 (문제 1~4) · probpair × 2 + 3-vfill (feedback_probpair_system 준수) ────
+\begin{pagepair}
+\vfill
+\probpair{%
+\begin{problem}{1}{s}
+좌표평면 위의 두 점 $\mathrm{A}(2,\, 3)$,\ $\mathrm{B}(-1,\, 7)$ 사이의 거리를 구하시오. \pts{4}
+\begin{choicesii}{$3$}{$4$}{$5$}{$6$}{$7$}
+\end{choicesii}
+\end{problem}
+}{%
+\begin{problem}{2}{s}
+두 점 $\mathrm{A}(4,\, 3)$,\ $\mathrm{B}(-2,\, -6)$에 대하여 선분 $\overline{\mathrm{AB}}$를 $2:1$로 내분하는 점의 좌표를 구하시오. \pts{4}
+\begin{choicesii}{$(0,\, -3)$}{$(1,\, -2)$}{$(2,\, -3)$}{$(0,\, 0)$}{$(2,\, 0)$}
+\end{choicesii}
+\end{problem}
+}
+
+\vfill
+
+\probpair{%
+\begin{problem}{3}{s}
+두 점 $(1,\, 2)$,\ $(3,\, -4)$를 지나는 직선의 방정식이 $y = ax + b$일 때, 상수 $a$,\ $b$에 대하여 $a + b$의 값을 구하시오. \pts{5}
+\begin{choicesii}{$1$}{$2$}{$3$}{$4$}{$5$}
+\end{choicesii}
+\end{problem}
+}{%
+\begin{problem}{4}{s}
+두 직선 $y = 2x + 1$과 $y = ax - 3$이 서로 수직일 때, 상수 $a$의 값을 구하시오. \pts{5}
+\begin{choicesii}{$-\dfrac{1}{2}$}{$-\dfrac{1}{3}$}{$\dfrac{1}{3}$}{$\dfrac{1}{2}$}{$2$}
+\end{choicesii}
+\end{problem}
+}
+\vfill
+\end{pagepair}
+
+% ── 페이지 2 (문제 5·6·19·20) · probpair × 2 + 3-vfill ────────────
+\begin{pagepair}
+\vfill
+\probpair{%
+\begin{problem}{5}{s}
+원 $x^2 + y^2 + 4x - 6y + 4 = 0$의 중심의 좌표와 반지름의 길이를 각각 $\mathrm{C}(a,\, b)$,\ $r$이라 할 때, $a + b + r$의 값을 구하시오. \pts{6}
+\begin{choicesii}{$3$}{$4$}{$5$}{$6$}{$7$}
+\end{choicesii}
+\end{problem}
+}{%
+\begin{problem}{6}{s}
+점 $(3,\, -2)$를 $x$축의 방향으로 $2$만큼,\ $y$축의 방향으로 $-1$만큼 평행이동한 점의 좌표를 구하시오. \pts{4}
+\begin{choicesii}{$(1,\, -3)$}{$(5,\, -1)$}{$(5,\, -3)$}{$(1,\, -1)$}{$(3,\, -1)$}
+\end{choicesii}
+\end{problem}
+}
+
+\vfill
+
+\probpair{%
+\begin{problem}{19}{s}
+이차함수 $y = x^2$의 그래프 위의 점을 중심으로 하고 $y$축에 접하는 원 중 직선 $y = \sqrt{3}\, x - 2$와 접하는 원은 두 개 있다. 이 두 원의 반지름의 길이를 각각 $a$,\ $b$라 할 때, $100ab$의 값을 구하시오. \pts{6}
+\end{problem}
+}{%
+\begin{problem}{20}{s}
+원 $x^2 + y^2 - 6x - 2y = 0$이 $x$축과 만나는 두 점을 $\mathrm{A}$,\ $\mathrm{B}$라 하자. 이 원 위의 제 $1$ 사분면 위에 있는 점 $\mathrm{P}$에 대하여 삼각형 $\mathrm{ABP}$의 넓이가 자연수가 되도록 하는 점 $\mathrm{P}$의 개수를 구하시오. \pts{7}
+\end{problem}
+}
+\vfill
+\end{pagepair}
+
+\end{document}

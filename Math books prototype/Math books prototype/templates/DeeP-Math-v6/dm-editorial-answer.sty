@@ -1,0 +1,272 @@
+% dm-editorial-answer.sty — DeeP Math v7 답지 · Editorial Premium
+% ============================================================================
+% 세션 67 · 답지 재디자인 · v6 편집 언어 (navy·accent·double rule·serif Bold) 도입
+% 기존 API 유지: \dmanswerheader · \dmsection · dmquickgrid · \dmquick · \dmsoltitle
+%                dmanswerbox · dmcriticalpoint · \dmcplabel · dmothersolution · \dmanswersetup
+% 팔레트·폰트: dm-editorial.sty와 동일 (navy·paper·accent·golddark·rule)
+% ============================================================================
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{dm-editorial-answer}[2026/07/22 v7.0 DeeP Math Answer Editorial]
+
+\RequirePackage{kotex}
+\RequirePackage{fontspec}
+\newfontfamily\dmheadingfont[BoldFont={Malgun Gothic Bold},%
+  AutoFakeBold=2]{Malgun Gothic}
+\RequirePackage[a4paper,top=20mm,bottom=20mm,left=18mm,right=18mm,%
+                headheight=14pt,headsep=6mm,footskip=12mm]{geometry}
+\RequirePackage{xcolor}
+\RequirePackage{tikz}
+\RequirePackage[most]{tcolorbox}
+\tcbuselibrary{skins}
+\RequirePackage{fancyhdr}
+\RequirePackage{amsmath,amssymb}
+\RequirePackage{array}
+\RequirePackage{enumitem}
+\RequirePackage{setspace}
+\RequirePackage{needspace}
+\RequirePackage{multicol}
+\RequirePackage{graphicx}
+\usetikzlibrary{shapes,shapes.geometric,positioning,calc,shadows.blur}
+
+% =============================================================================
+% [1] 팔레트 · v6 editorial 통일
+% =============================================================================
+\definecolor{dm-navy}{HTML}{0A2540}
+\definecolor{dm-navydark}{HTML}{051629}
+\definecolor{dm-navylight}{HTML}{E8EEF4}
+\definecolor{dm-paper}{HTML}{FAF7F2}
+\definecolor{dm-paperdeep}{HTML}{F2ECE0}
+\definecolor{dm-gold}{HTML}{A08D6C}
+\definecolor{dm-goldlight}{HTML}{F1EEE6}
+\definecolor{dm-golddark}{HTML}{5C4E37}
+\definecolor{dm-rule}{HTML}{8798AB}
+\definecolor{dm-rulelight}{HTML}{C3CDD8}
+\definecolor{dm-ruledark}{HTML}{3A4C63}
+\definecolor{dm-ink}{HTML}{1B2838}
+\definecolor{dm-muted}{HTML}{6B7A8F}
+\definecolor{dm-shadow}{HTML}{9AA8B8}
+\definecolor{dm-accent}{HTML}{B7211E}
+\definecolor{dm-accentdark}{HTML}{7A1315}
+
+\AtBeginDocument{\color{dm-ink}}
+
+% =============================================================================
+% [2] 시리즈 메타 · 헤더·푸터
+% =============================================================================
+\newcommand{\dmseriesname}{Deep{:}it}
+\newcommand{\dmexamname}{}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancyhead[L]{%
+  \color{dm-ruledark}\fontsize{9}{11}\selectfont\bfseries
+  \dmexamname\ 정답 및 해설}
+\fancyhead[R]{%
+  \color{dm-navydark}\fontsize{10.5}{12}\selectfont\bfseries
+  \dmseriesname}
+\renewcommand{\headrule}{%
+  \color{dm-rule}\vspace{2pt}\hrule height 0.5pt \vspace{-2pt}}
+\fancyfoot[L]{%
+  {\color{dm-navydark}\fontsize{9}{11}\selectfont\bfseries DEPTH \& INSIGHT}%
+  \hspace{2mm}%
+  {\color{dm-rule}\fontsize{9}{11}\selectfont\textperiodcentered}%
+  \hspace{2mm}%
+  {\color{dm-navydark}\dmheadingfont\fontsize{9.5}{11}\selectfont\bfseries 공통수학2 · 정답}}
+\fancyfoot[R]{%
+  {\color{dm-navy}\fontsize{11}{13}\selectfont\bfseries\thepage}}
+
+% dmanswertitle: 답지 표지 페이지 스타일 (헤더/푸터 다르게)
+\fancypagestyle{dmanswertitle}{%
+  \fancyhf{}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \fancyfoot[L]{%
+    {\color{dm-navydark}\fontsize{9}{11}\selectfont\bfseries DEPTH \& INSIGHT}%
+    \hspace{2mm}%
+    {\color{dm-rule}\fontsize{9}{11}\selectfont\textperiodcentered}%
+    \hspace{2mm}%
+    {\color{dm-navydark}\dmheadingfont\fontsize{9.5}{11}\selectfont\bfseries 공통수학2 · 정답}}%
+  \fancyfoot[R]{{\color{dm-navy}\fontsize{11}{13}\selectfont\bfseries\thepage}}%
+}
+
+% =============================================================================
+% [3] \dmanswerheader — 답지 대형 표지 배너
+% -----------------------------------------------------------------------------
+% 사용: \dmanswerheader{평면좌표 정답 및 해설}
+% CHAPTER 마스트 스타일 계승 · 상단 double rule (accent 얇게 위 · navy 굵게 아래)
+% =============================================================================
+% v7.1: 수수하게 · 상단 double rule 삭제 · 제목 크기 축소 (28→18pt) · 하단 단일 rule
+\newcommand{\dmanswerheader}[1]{%
+  \thispagestyle{dmanswertitle}%
+  \vspace*{-4mm}%
+  {\color{dm-muted}\dmheadingfont\fontsize{9}{11}\selectfont
+    Answers \& Solutions}%
+  \par
+  \vspace{2mm}%
+  {\color{dm-navy}\fontsize{18}{22}\selectfont\bfseries #1}%
+  \par
+  \vspace{3mm}%
+  {\color{dm-ruledark}\hrule height 0.5pt}%
+  \vspace{6mm}%
+}
+
+% =============================================================================
+% [4] \dmsection[부제]{섹션명} — 섹션 배너 (확인·Level·실전)
+% -----------------------------------------------------------------------------
+% LEVEL 배너 (dmlevel) 스타일 계승 · 마스트헤드 + navy 배너 + 반전 double rule
+% 사용: \dmsection[스스로 풀어보기]{확인 문제} 또는 \dmsection[기초 연습]{Level 1}
+% =============================================================================
+% v7.1: 배너 filled box 제거 · 텍스트 + 얇은 rule만
+% 좌측 짧은 accent 세로 마커 + 섹션명 + 부제 · 하단 단일 rule
+\newcommand{\dmsection}[2][]{%
+  \par\addvspace{9mm}\needspace{5\baselineskip}%
+  \noindent
+  % 좌측 짧은 accent 마커
+  {\color{dm-accent}\rule[-0.4mm]{3pt}{5mm}}%
+  \hspace{3mm}%
+  {\color{dm-navy}\fontsize{13}{15}\selectfont\bfseries #2}%
+  \ifx\relax#1\relax\else
+    \hspace{3mm}%
+    {\color{dm-muted}\fontsize{11}{13}\selectfont \textperiodcentered\ #1}%
+  \fi
+  \par
+  \vspace{1.5mm}%
+  {\color{dm-ruledark}\hrule height 0.4pt}%
+  \vspace{4mm}%
+}
+
+% =============================================================================
+% [5] dmquickgrid + \dmquick — 빠른 정답표
+% -----------------------------------------------------------------------------
+% v6 editorial 톤: 웜 paper 배경 · navy outline · 좌측 굵은 navy bar
+% 상단 sharp title tab (accent) · 셀 내부 · 번호 accent 굵게 · 답 ink
+% =============================================================================
+\newcommand{\dmquickgridstretch}{1.35}
+\newcommand{\dmquick}[2]{%
+  {\color{dm-accent}\dmheadingfont\bfseries #1.}\,\,{\color{dm-ink} #2}%
+}
+% v7.1: 웜 배경·좌측 굵은 bar 제거 · 얇은 상하 rule만으로 감쌈 (flat)
+\newenvironment{dmquickgrid}[1][빠른 정답]{%
+  \par\noindent
+  {\color{dm-muted}\dmheadingfont\fontsize{8.5}{10}\selectfont\bfseries \uppercase{#1}}%
+  \par
+  \vspace{1mm}%
+  {\color{dm-ruledark}\hrule height 0.4pt}%
+  \vspace{3mm}%
+  \renewcommand{\arraystretch}{\dmquickgridstretch}%
+  \small
+  \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lllll}
+}{%
+    \end{tabular*}%
+  \par\vspace{2mm}%
+  {\color{dm-rulelight}\hrule height 0.3pt}%
+  \par\addvspace{14pt}%
+}
+
+% =============================================================================
+% [6] \dmsoltitle{번호}{출제의도} — 개별 풀이 헤더
+% -----------------------------------------------------------------------------
+% 좌측: 번호 navy Bold serif (본편 dmpnum 스타일 계승)
+% 우측: [출제의도] accent 라벨 + 부제 ink
+% 하단: navy 얇은 rule (편집 리듬)
+% multicols 안에서 정렬용 solprefixwd 유지
+% =============================================================================
+\newdimen\dmsolprefixwd
+\newif\ifdmsoltitlefirst\dmsoltitlefirsttrue
+\newcounter{dmsolcount}\setcounter{dmsolcount}{0}
+
+% v7.1: 하단 rule 삭제 · 번호 + [출제의도] + 부제 인라인만
+\newcommand{\dmsoltitle}[2]{%
+  \par\leftskip=0pt%
+  \stepcounter{dmsolcount}%
+  \ifdmsoltitlefirst
+    \par\addvspace{4pt}%
+    \dmsoltitlefirstfalse
+  \else
+    \par\addvspace{12pt}%
+  \fi
+  \needspace{4\baselineskip}%
+  \settowidth{\dmsolprefixwd}{\bfseries\normalsize #1.\hspace{5pt}}%
+  \begingroup
+  \def\\{\hfil\break\hspace*{\dmsolprefixwd}\ignorespaces}%
+  \noindent
+  {\color{dm-navy}\fontsize{11}{13}\selectfont\bfseries \ifnum#1<10 0\fi#1.}\hspace{5pt}%
+  {\color{dm-muted}\dmheadingfont\fontsize{7.5}{9}\selectfont\bfseries [출제의도]}\,%
+  {\color{dm-muted}\fontsize{9}{11}\selectfont\itshape #2}%
+  \par
+  \endgroup
+  \nobreak\par\vspace{4pt}%
+}
+
+% =============================================================================
+% [7] dmanswerbox — 정답 표시 박스
+% -----------------------------------------------------------------------------
+% 좌측 accent 세로 마커 (2.5pt × 4.5mm) + navy Bold 텍스트
+% 본편 \dmanswer와 시각 언어 통일 (accent bar 대신 navy · here는 accent 강조)
+% =============================================================================
+% v7.1: 세로 마커 삭제 · 인라인 텍스트 (▶ 답. 값)
+\newenvironment{dmanswerbox}{%
+  \par\noindent
+  {\color{dm-accent}\dmheadingfont\fontsize{9}{11}\selectfont\bfseries 답.\ \ }%
+  \color{dm-navy}\bfseries%
+}{%
+  \par\vspace{3mm}%
+}
+
+% =============================================================================
+% [8] dmcriticalpoint + \dmcplabel — Critical Point (통찰 라벨)
+% -----------------------------------------------------------------------------
+% 웜 paper 배경 + 좌측 굵은 accent bar + accent 라벨
+% dmnote 스타일 계승 (navy bar 대신 accent bar로 차별화)
+% =============================================================================
+\newcommand{\dmcplabel}[1]{{\dmheadingfont\bfseries\color{dm-accent}#1}}
+
+% v7.1: 박스 제거 · 좌측 얇은 accent 세로 rule만 (인용 스타일)
+\newenvironment{dmcriticalpoint}{%
+  \par\addvspace{5pt}%
+  \begin{list}{}{%
+    \setlength{\leftmargin}{4mm}%
+    \setlength{\rightmargin}{0mm}%
+    \setlength{\topsep}{0mm}%
+    \setlength{\parsep}{0mm}%
+    \setlength{\itemsep}{0mm}%
+  }%
+  \item[]%
+  \color{dm-muted}\fontsize{9.5}{12}\selectfont\itshape%
+  \noindent\hspace{-4mm}{\color{dm-accent}\rule[-0.6mm]{1.2pt}{4mm}}\hspace{2mm}%
+}{%
+  \end{list}%
+  \par\addvspace{3pt}%
+}
+
+% =============================================================================
+% [9] \dmothersolution — 다른 풀이 인라인 마커
+% =============================================================================
+\newcommand{\dmothersolution}{%
+  \par\addvspace{4pt}%
+  \noindent
+  {\color{dm-accent}\rule[-0.4mm]{2pt}{4mm}}\hspace{2mm}%
+  {\color{dm-accent}\dmheadingfont\fontsize{9.5}{11}\selectfont\bfseries 다른 풀이}%
+  \par\vspace{2pt}%
+}
+
+% =============================================================================
+% [10] \dmanswersetup — 본문 시작 시 호출 · 여백·간격 조정
+% =============================================================================
+\newcommand{\dmanswersetup}{%
+  \setlength{\parindent}{0pt}%
+  \setlength{\parskip}{2pt}%
+  \setlength{\mathindent}{0pt}%
+  \setlength{\columnsep}{6mm}%
+  \setlength{\columnseprule}{0.2pt}%
+  \renewcommand{\columnseprulecolor}{\color{dm-rulelight}}%
+  \setstretch{1.15}%
+}
+
+% 강조 매크로 호환
+\newcommand{\dmemph}[1]{{\color{dm-navy}\bfseries #1}}
+\newcommand{\dmstrong}[1]{{\color{dm-accent}\bfseries #1}}
+
+\endinput

@@ -1,0 +1,1173 @@
+---
+name: mechanism-데이터-RPM-CM2-GM-평면좌표
+description: RPM 공통수학2 (2022개정) 평면좌표 단원 정독 데이터. Phase A · 정리편 원본 은행. 저작권 준수.
+metadata:
+  type: reference
+  version: v1.0
+  established: 2026-07-19
+  source: RPM 공통수학2 (2022개정)
+  section: 평면좌표
+  tier_mapping:
+    default: star_3 (필수예제·유형)
+    star_4: 시험 꼭 나오는·심화
+    star_5: 최상위 소수
+  unit_code: CM2-GM
+  citation_note: RPM · 학습 목적 · 저작권 준수
+  extract_range: "평면좌표 단원 전체 · 교과서문제·유형익히기·시험꼭나오는·서술형·실력up"
+  pages: "6~17"
+---
+
+# RPM 공통수학2 (2022개정) · 01 평면좌표 정독 데이터
+
+## 소단원 구성
+
+- **01|1 두 점 사이의 거리** (유형 01~06, 12, 13)
+- **01|2 선분의 내분점** (유형 07~10, 12, 13)
+- **01|3 삼각형의 무게중심** (유형 11)
+
+---
+
+## Section A. 교과서 문제 정복하기 (p.7, 0001~0017)
+
+### 01|1 두 점 사이의 거리 (수직선)
+
+- source: RPM-CM2-GM-#0001
+  page: 7
+  category_type: 교과서문제
+  problem_summary: |
+    수직선 위 두 점 A(3), B(7) 사이 거리 구하기
+  category: 수직선 거리
+  tier: star_2
+  unit_code: CM2-GM
+  mechanism_primary: 수직선-거리-공식
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-GM-#0002
+  page: 7
+  category_type: 교과서문제
+  problem_summary: |
+    수직선 위 두 점 A(-2), B(8) 사이 거리 구하기
+  category: 수직선 거리
+  tier: star_2
+  unit_code: CM2-GM
+  mechanism_primary: 수직선-거리-공식
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-GM-#0003
+  page: 7
+  category_type: 교과서문제
+  problem_summary: |
+    수직선 위 두 점 A(-5), B(-9) 사이 거리 구하기
+  category: 수직선 거리
+  tier: star_2
+  unit_code: CM2-GM
+  mechanism_primary: 수직선-거리-공식
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-GM-#0004
+  page: 7
+  category_type: 교과서문제
+  problem_summary: |
+    수직선 위 점 P(4)에서 거리 3인 점 R의 좌표 모두 구하기
+  category: 수직선 거리
+  tier: star_2
+  unit_code: CM2-GM
+  mechanism_primary: 수직선-거리-역방향
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-GM-#0005
+  page: 7
+  category_type: 교과서문제
+  problem_summary: |
+    수직선 위 점 Q(-5)에서 거리 5인 점 S의 좌표 모두 구하기
+  category: 수직선 거리
+  tier: star_2
+  unit_code: CM2-GM
+  mechanism_primary: 수직선-거리-역방향
+  insight_type: 절차형
+  depth: 1
+
+### 01|1 두 점 사이의 거리 (좌표평면)
+
+- source: RPM-CM2-GM-#0006
+  page: 7
+  category_type: 교과서문제
+  problem_summary: |
+    좌표평면 위 두 점 A(2,-1), B(3,5) 사이 거리 구하기
+  category: 좌표평면 거리
+  tier: star_2
+  unit_code: CM2-GM
+  mechanism_primary: 거리-공식-2D
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-GM-#0007
+  page: 7
+  category_type: 교과서문제
+  problem_summary: |
+    좌표평면 위 두 점 A(-4,-2), B(1,-7) 사이 거리 구하기
+  category: 좌표평면 거리
+  tier: star_2
+  unit_code: CM2-GM
+  mechanism_primary: 거리-공식-2D
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-GM-#0008
+  page: 7
+  category_type: 교과서문제
+  problem_summary: |
+    원점 O(0,0)와 A(4,-5) 사이 거리 구하기
+  category: 좌표평면 거리
+  tier: star_2
+  unit_code: CM2-GM
+  mechanism_primary: 원점-거리
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-GM-#0009
+  page: 7
+  category_type: 교과서문제
+  problem_summary: |
+    좌표평면 위 두 점 A(a,0), B(0,b) 사이 거리 구하기
+  category: 좌표평면 거리
+  tier: star_2
+  unit_code: CM2-GM
+  mechanism_primary: 거리-공식-축상
+  insight_type: 절차형
+  depth: 1
+
+### 01|2 선분의 내분점
+
+- source: RPM-CM2-GM-#0010
+  page: 7
+  category_type: 교과서문제
+  problem_summary: |
+    수직선 위 두 점 A(10), B(-2)에 대해 (1) AB를 1:3 내분하는 점 P의 좌표 (2) 중점 M의 좌표 구하기
+  category: 수직선 내분
+  tier: star_2
+  unit_code: CM2-GM
+  mechanism_primary: 내분점-공식-1D
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-GM-#0011
+  page: 7
+  category_type: 교과서문제
+  problem_summary: |
+    두 점 A(-3), B(a)에 대해 AB 중점 좌표가 1일 때 a 구하기
+  category: 수직선 중점
+  tier: star_2
+  unit_code: CM2-GM
+  mechanism_primary: 중점-역산
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-GM-#0012
+  page: 7
+  category_type: 교과서문제
+  problem_summary: |
+    좌표평면 A(-1,2), B(5,-3)에 대해 (1) AB 3:2 내분점 P (2) BA 3:2 내분점 Q (3) 중점 M 좌표 각각 구하기
+  category: 좌표평면 내분
+  tier: star_2
+  unit_code: CM2-GM
+  mechanism_primary: 내분점-순서-구분
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-GM-#0013
+  page: 7
+  category_type: 교과서문제
+  problem_summary: |
+    A(a,4), B(-2,b) 중점이 (2,1)일 때 ab 구하기
+  category: 중점 역산
+  tier: star_2
+  unit_code: CM2-GM
+  mechanism_primary: 중점-역산-2D
+  insight_type: 절차형
+  depth: 1
+
+### 01|3 삼각형의 무게중심
+
+- source: RPM-CM2-GM-#0014
+  page: 7
+  category_type: 교과서문제
+  problem_summary: |
+    세 점 A(1,2), B(2,-1), C(-6,2) 무게중심 G 구하기
+  category: 무게중심
+  tier: star_2
+  unit_code: CM2-GM
+  mechanism_primary: 무게중심-공식
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-GM-#0015
+  page: 7
+  category_type: 교과서문제
+  problem_summary: |
+    세 점 A(-1,2), B(5,1), C(2,-3) 무게중심 G 구하기
+  category: 무게중심
+  tier: star_2
+  unit_code: CM2-GM
+  mechanism_primary: 무게중심-공식
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-GM-#0016
+  page: 7
+  category_type: 교과서문제
+  problem_summary: |
+    세 점 A(0,0), B(a,b), C(-a,2b) 무게중심 G 구하기
+  category: 무게중심
+  tier: star_2
+  unit_code: CM2-GM
+  mechanism_primary: 무게중심-문자-일반화
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-GM-#0017
+  page: 7
+  category_type: 교과서문제
+  problem_summary: |
+    세 점 A(5,a), B(2,3), C(b,-1) 무게중심이 (3,-1)일 때 a+b 구하기
+  category: 무게중심 역산
+  tier: star_2
+  unit_code: CM2-GM
+  mechanism_primary: 무게중심-역산
+  insight_type: 절차형
+  depth: 1
+
+---
+
+## Section B. 유형 익히기 (p.8~14, 0018~0065)
+
+### 유형 01. 두 점 사이의 거리 (p.8)
+
+- source: RPM-CM2-GM-#0018
+  page: 8
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(4,a), B(a,4)에 대해 AB=5√2일 때 양수 a 구하기 (대표문제)
+  category: 거리-미지수
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 거리-방정식-역산
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-GM-#0019
+  page: 8
+  category_type: 유형익히기
+  problem_summary: |
+    세 점 A(-1,2), B(2,3), C(a,1)에 대해 AC=BC일 때 a 값 (5지선다)
+  category: 거리-등식
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 거리-등식-일차방정식
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-GM-#0020
+  page: 8
+  category_type: 유형익히기
+  problem_summary: |
+    네 점 A(3,a), B(7,-1), C(-a,4), D(-1,2)에 대해 AB=2·CD일 때 모든 a의 곱 구하기
+  category: 거리-이차방정식
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 거리-이차방정식-근의곱
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0021
+  page: 8
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(a,-5), B(1,a)에 대해 선분 AB 길이가 최소가 되는 실수 a 값
+  category: 거리-최솟값
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 거리-이차함수-최솟값
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 02. 같은 거리에 있는 점의 좌표 (p.8) [중요]
+
+- source: RPM-CM2-GM-#0022
+  page: 8
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(1,3), B(5,-1)에서 같은 거리에 있는 점 P(a,b)가 직선 y=2x-7 위 점일 때 a+b 구하기 (대표문제)
+  category: 같은거리-직선
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 등거리-직선-교점
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0023
+  page: 8
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(2,1), B(-1,4)에서 같은 거리에 있는 x축 위 점 P, y축 위 점 Q일 때 PQ 길이 구하기
+  category: 같은거리-축상
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 등거리-축-교점
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0024
+  page: 8
+  category_type: 유형익히기
+  problem_summary: |
+    점 P에서 세 점 A(8,4), B(3,-1), C(6,8)까지 거리가 모두 같을 때 P의 좌표 구하기
+  category: 삼각형 외심
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 외심-등거리-연립
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0025
+  page: 8
+  category_type: 유형익히기
+  problem_summary: |
+    세 학교 A, B, C에서 같은 거리에 있는 지점에 도서관 짓기. 위치 그림 주어짐 (A-B 3km, B-C 오른쪽 그림, C 위쪽 3km 등). 도서관과 각 학교 사이 거리 구하기 (활용)
+  category: 활용-외심
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 외심-실생활-활용
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 03. 삼각형의 세 변의 길이와 모양 (p.9) [중요]
+
+- source: RPM-CM2-GM-#0026
+  page: 9
+  category_type: 유형익히기
+  problem_summary: |
+    세 점 A(4,2), B(0,-4), C(-2,-2) 삼각형 ABC의 모양 판정 (5지선다: 정·직각·이등변 등) (대표문제)
+  category: 삼각형 모양 판정
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 변길이-피타고라스-판정
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0027
+  page: 9
+  category_type: 유형익히기
+  problem_summary: |
+    세 점 A(0,1), B(1,-2), C(3,2) 삼각형 ABC 넓이 구하기 (서술형)
+  category: 삼각형 넓이
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 삼각형-넓이-변길이
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0028
+  page: 9
+  category_type: 유형익히기
+  problem_summary: |
+    세 점 A(a,-1), B(8,3), C(2,1) 삼각형 ABC가 ∠A>90° 둔각삼각형 되는 a 범위 (단 a≠-4)
+  category: 둔각삼각형 조건
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 둔각-부등식-범위
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0029
+  page: 9
+  category_type: 유형익히기
+  problem_summary: |
+    좌표평면 위 정삼각형 ABC에 대해 A(2,4), B(-2,-4)일 때 제4사분면 위의 꼭짓점 C 좌표 구하기
+  category: 정삼각형 꼭짓점
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 정삼각형-등거리-사분면
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 04. 두 점 사이의 거리의 활용 (p.9)
+
+- source: RPM-CM2-GM-#0030
+  page: 9
+  category_type: 유형익히기
+  problem_summary: |
+    실수 x,y에 대해 √(x²+y²)+√((x-2)²+(y+1)²) 최솟값 구하기 (대표문제)
+  category: 두 거리 합 최솟값
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 거리-합-최솟값-직선
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0031
+  page: 9
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(-2,-4), B(3,8)과 임의의 점 P에 대해 AP+PB 최솟값 (5지선다)
+  category: 두 거리 합 최솟값
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 거리-합-최솟값-직선
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-GM-#0032
+  page: 9
+  category_type: 유형익히기
+  problem_summary: |
+    실수 x,y에 대해 √(x²+y²-2x+6y+10)+√(x²+y²+8x-4y+20) 최솟값 구하기
+  category: 두 거리 합 최솟값 (완전제곱)
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 완전제곱-거리-합
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 05. 거리의 제곱의 합의 최솟값 (p.10)
+
+- source: RPM-CM2-GM-#0033
+  page: 10
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(1,4), B(5,3)과 x축 위 점 P에 대해 PA²+PB² 최솟값 (5지선다) (대표문제)
+  category: 거리제곱합 최솟값
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 거리제곱-이차함수-최솟값
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0034
+  page: 10
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(2,4), B(2,6)과 임의의 점 P에 대해 PA²+PB² 최솟값일 때 P 좌표 (5지선다)
+  category: 거리제곱합 최솟값
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 거리제곱-임의점-이차함수
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0035
+  page: 10
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(4,-2), B(k,6)과 y축 위 점 P에 대해 PA²+PB² 최솟값이 57일 때 양수 k 값
+  category: 거리제곱합 역산
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 거리제곱-역방향-미지수
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0036
+  page: 10
+  category_type: 유형익히기
+  problem_summary: |
+    세 점 A(1,8), B(-3,5), C(2,-1)과 직선 y=x+3 위 점 P에 대해 PA²+PB²+PC² 최솟값 되는 P 좌표
+  category: 세 거리제곱합 최솟값
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 무게중심-활용-최솟값
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 06. 좌표를 이용한 도형의 성질의 증명 (p.10)
+
+- source: RPM-CM2-GM-#0037
+  page: 10
+  category_type: 유형익히기
+  problem_summary: |
+    삼각형 ABC에서 변 BC 중점 M일 때 AB²+AC²=2(AM²+BM²) 증명 과정 빈칸 (가), (나) 구하기 (파푸스 중선정리) (대표문제)
+  category: 좌표 증명 (중선정리)
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 중선정리-좌표증명
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0038
+  page: 10
+  category_type: 유형익히기
+  problem_summary: |
+    직사각형 ABCD 내부 점 P에 대해 PA²+PC²=PB²+PD² 증명 과정 (가),(나),(다) 빈칸 구하기
+  category: 좌표 증명 (직사각형)
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 직사각형-좌표증명
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 07. 선분의 내분점 (p.11) [중요]
+
+- source: RPM-CM2-GM-#0039
+  page: 11
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(4,-3), B(-1,2)에 대해 AB 2:3 내분점 P, AB 중점 M일 때 PM 길이 구하기 (대표문제)
+  category: 내분점 응용
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 내분점-중점-거리
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-GM-#0040
+  page: 11
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(2,15), B(10,m)에 대해 AB 5:3 내분점이 (n,-5)일 때 m+n 구하기
+  category: 내분점 역산
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 내분점-역산
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-GM-#0041
+  page: 11
+  category_type: 유형익히기
+  problem_summary: |
+    세 점 A(2,a+1), B(b+1,-1), C(a-1,b+1)에서 AB 2:1 내분점이 (2,1)일 때 BC 1:2 내분점이 (p,q). p-q 구하기 (서술형)
+  category: 내분점 복합
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 내분점-연립-복합
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0042
+  page: 11
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 P,Q에 대해 PQ 삼등분점 중 P에 가까운 점을 P⊙Q. 세 점 A(-5,4), B(3,-1), C(6,-4)에 대해 A⊙(B⊙C) 좌표 구하기 (신정의)
+  category: 신정의 삼등분점
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 신정의-삼등분-복합
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 08. 선분의 내분점의 활용 (p.11)
+
+- source: RPM-CM2-GM-#0043
+  page: 11
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(1,-3), B(-4,6)에 대해 AB를 k:(2-k) 내분하는 점이 제2사분면일 때 실수 k 범위 (대표문제)
+  category: 내분점 사분면 조건
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 내분점-부등식-사분면
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0044
+  page: 11
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(4,-3), B(1,a)에 대해 AB (4-t):t 내분점이 (2,3)일 때 a 값 (5지선다)
+  category: 내분점 미지수
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 내분점-연립-미지수2개
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0045
+  page: 11
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(-6,4), B(5,-6) 잇는 선분 AB가 y축에 의해 m:n 내분될 때 m-n 값 (단 m,n 서로소 자연수)
+  category: 내분점 축 절단
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 내분점-축교점-비율
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0046
+  page: 11
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(-1,1), B(2,4)에 대해 AB를 k:5 내분한 점이 직선 y=-x+1 위에 있을 때 실수 k 값
+  category: 내분점 직선 위
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 내분점-직선방정식-대입
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 09. 등식을 만족시키는 선분의 연장선 위의 점 (p.12)
+
+- source: RPM-CM2-GM-#0047
+  page: 12
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(-1,0), B(5,2)에 대해 AB 연장선 위 3·AB=2·BC 만족시키는 점 C(a,b) (a>0). a+b 값 (5지선다) (대표문제)
+  category: 연장선 등식
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 연장선-비율-일반화
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0048
+  page: 12
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(-1,2), B(1,4)에 대해 AB 연장선 위 점 C가 2·AB=BC 만족시킬 때 C 좌표 모두 고르기 (정답 2개, 5지선다)
+  category: 연장선 등식 (양방향)
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 연장선-양방향-분류
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0049
+  page: 12
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(-5,0), B(1,3)을 지나는 직선 AB 위 점 C에 대해 AB=3·BC일 때 C 좌표 모두 구하기
+  category: 연장선 등식 (직선 위)
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 연장선-내분외분-두경우
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 10. 평행사변형에서 중점의 활용 (p.12)
+
+- source: RPM-CM2-GM-#0050
+  page: 12
+  category_type: 유형익히기
+  problem_summary: |
+    평행사변형 ABCD의 세 꼭짓점 A(-1,3), B(0,0), C(3,2)일 때 꼭짓점 D 좌표 구하기 (대표문제)
+  category: 평행사변형 꼭짓점
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 평행사변형-대각선중점-일치
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0051
+  page: 12
+  category_type: 유형익히기
+  problem_summary: |
+    네 점 A(a,4), B(1,1), C(b,2), D(-3,c) 꼭짓점 사각형 ABCD가 평행사변형일 때 a+b+c 값
+  category: 평행사변형 미지수
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 평행사변형-연립방정식
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0052
+  page: 12
+  category_type: 유형익히기
+  problem_summary: |
+    네 점 A(a,b), B(c,3), C(-2,-4), D(d,-5) 평행사변형 ABCD의 두 대각선 교점이 직선 y=-x 위. ab+c+d 값 (5지선다)
+  category: 평행사변형 교점 조건
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 평행사변형-교점-직선조건
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0053
+  page: 12
+  category_type: 유형익히기
+  problem_summary: |
+    네 점 A(a,1), B(2,3), C(4,4), D(b,2) 꼭짓점 사각형 ABCD가 마름모일 때 ab 값 가능 (5지선다)
+  category: 마름모 조건
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 마름모-이웃변-등거리
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 11. 삼각형의 무게중심 (p.13) [중요]
+
+- source: RPM-CM2-GM-#0054
+  page: 13
+  category_type: 유형익히기
+  problem_summary: |
+    세 점 A(2,4), B(x₁,y₁), C(x₂,y₂) 삼각형 ABC 무게중심이 (6,8)일 때 BC 중점 좌표 (5지선다) (대표문제)
+  category: 무게중심 · 중점
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 무게중심-BC중점-관계
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0055
+  page: 13
+  category_type: 유형익히기
+  problem_summary: |
+    세 점 A(a,b), B(-b,4), C(-2,5) 삼각형 무게중심이 (1,-2)일 때 a+b 값 (5지선다)
+  category: 무게중심 역산
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 무게중심-연립
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-GM-#0056
+  page: 13
+  category_type: 유형익히기
+  problem_summary: |
+    직선 y=-4x가 세 점 A(-1,a), B(4,4), C(-6,-1) 삼각형 무게중심 지날 때 a 값 (5지선다)
+  category: 무게중심 · 직선
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 무게중심-직선-대입
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0057
+  page: 13
+  category_type: 유형익히기
+  problem_summary: |
+    세 점 A(3,2), B(-1,4), C(0,k) 삼각형 ABC가 ∠B=90° 직각삼각형일 때 무게중심 좌표 구하기 (서술형)
+  category: 무게중심 · 직각 조건
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 직각조건-무게중심-복합
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0058
+  page: 13
+  category_type: 유형익히기
+  problem_summary: |
+    세 점 A(-2,3), B(1,-4), C(4,7) 꼭짓점 삼각형 ABC에서 AB, BC, CA를 2:1 내분점 P,Q,R. 삼각형 PQR 무게중심이 (a,b)일 때 a-b 값 (5지선다)
+  category: 내분점 삼각형 무게중심
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 내분점-삼각형-무게중심-일치
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0059
+  page: 13
+  category_type: 유형익히기
+  problem_summary: |
+    삼각형 ABC에 대해 PA²+PB²+PC² 최소 되는 점 P 위치 (5지선다: 외심·내심·무게중심 등)
+  category: 거리제곱합 · 무게중심
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 거리제곱합-무게중심-정리
+  insight_type: 통찰형
+  depth: 2
+
+### 유형 12. 삼각형의 내각의 이등분선의 성질 (p.14)
+
+- source: RPM-CM2-GM-#0060
+  page: 14
+  category_type: 유형익히기
+  problem_summary: |
+    세 점 A(1,4), B(-4,-8), C(5,1) 삼각형에서 ∠A 이등분선이 변 BC와 만나는 점 D 좌표 구하기 (그림 제공) (대표문제)
+  category: 내각이등분선
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 각이등분선-비율-내분
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0061
+  page: 14
+  category_type: 유형익히기
+  problem_summary: |
+    세 점 A(5,4), B(1,0), C(2,7) 삼각형에서 ∠A 이등분선이 BC와 만나는 점 D. 삼각형 DAB : DAC 넓이 비 p:q. p²-q² 구하기 (단 p,q 서로소 자연수)
+  category: 각이등분선 · 넓이비
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 각이등분선-넓이비-변길이
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0062
+  page: 14
+  category_type: 유형익히기
+  problem_summary: |
+    세 점 A(-2,3), B(6,9), C(10,6) 삼각형에서 ∠B 이등분선이 AC와 만나는 점 D(a,b)일 때 a-b 값 (5지선다)
+  category: 각이등분선
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 각이등분선-B-대각변
+  insight_type: 조건통합형
+  depth: 2
+
+### 유형 13. 자취의 방정식 (p.14)
+
+- source: RPM-CM2-GM-#0063
+  page: 14
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(-1,2), B(2,4)에 대해 PA²-PB²=9 만족시키는 점 P가 나타내는 도형 방정식 (대표문제)
+  category: 자취 방정식
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 자취-거리제곱차-직선
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0064
+  page: 14
+  category_type: 유형익히기
+  problem_summary: |
+    두 점 A(-1,5), B(2,3)에서 같은 거리에 있는 점 P가 나타내는 도형 방정식
+  category: 자취 · 수직이등분선
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 자취-수직이등분선
+  insight_type: 절차형
+  depth: 1
+
+- source: RPM-CM2-GM-#0065
+  page: 14
+  category_type: 유형익히기
+  problem_summary: |
+    직선 y=3x+2 위 움직이는 점 A와 점 B(3,2)에 대해 AB를 2:1 내분점 나타내는 도형 방정식 (5지선다)
+  category: 자취 · 내분점 궤적
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 자취-내분점-매개변수제거
+  insight_type: 조건통합형
+  depth: 2
+
+---
+
+## Section C. 시험에 꼭 나오는 문제 (p.15~17, 0066~0086)
+
+### 기본형 · 표준형 (p.15)
+
+- source: RPM-CM2-GM-#0066
+  page: 15
+  category_type: 시험꼭나오는
+  problem_summary: |
+    두 점 A(2,t), B(t,8) 사이 거리 6 이하인 정수 t 개수 (5지선다)
+  category: 거리-부등식-정수
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 거리-부등식-정수해-개수
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0067
+  page: 15
+  category_type: 시험꼭나오는
+  _step: 중요★
+  problem_summary: |
+    세 점 A(1,3), B(-3,5), C(-1,-1)로부터 같은 거리에 있는 점 P(a,b)일 때 a-b 값
+  category: 외심 좌표
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 외심-연립-차값
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0068
+  page: 15
+  category_type: 시험꼭나오는
+  problem_summary: |
+    세 점 A(-1,-1), B(2,4), C(3,0) 삼각형 ABC 어떤 삼각형인가 (5지선다)
+  category: 삼각형 모양 판정
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 변길이-피타고라스-판정
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0069
+  page: 15
+  category_type: 시험꼭나오는
+  problem_summary: |
+    실수 x,y에 대해 √((x+1)²+(y+2)²)+√((x-2)²+(y-2)²) 최솟값 (5지선다)
+  category: 두 거리 합 최솟값
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 거리합-두점간거리-최솟값
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0070
+  page: 15
+  category_type: 시험꼭나오는
+  problem_summary: |
+    두 점 A(1,-4), B(-1,3)에 대해 PA²+PB² 값 최소 되는 y축 위 점 P가 직선 2x-5y+k=0 위 점일 때 상수 k 값
+  category: 거리제곱합 · 직선 조건
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 거리제곱합-축상최소-직선대입
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0071
+  page: 15
+  category_type: 시험꼭나오는
+  problem_summary: |
+    삼각형 ABC 변 BC 위 점 D에 대해 BD=2·CD일 때 AB²+2·AC²=3(AD²+2·CD²) 증명 과정 (가),(나) 빈칸 차례로 나열 (5지선다)
+  category: 좌표 증명 (스튜어트)
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 스튜어트정리-좌표증명
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0072
+  page: 15
+  category_type: 시험꼭나오는
+  _step: 중요★
+  problem_summary: |
+    두 점 A(8,-4), B(3,1) 잇는 선분 AB 2:3 내분점 P가 직선 x-2y+k=0 위 점일 때 상수 k 값
+  category: 내분점 · 직선
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 내분점-직선-대입
+  insight_type: 절차형
+  depth: 1
+
+### 심화 · 도형 활용 (p.16)
+
+- source: RPM-CM2-GM-#0073
+  page: 16
+  category_type: 시험꼭나오는
+  _step: 교육청 기출
+  problem_summary: |
+    이차함수 y=ax² (a>0) 그래프와 직선 y=½x+1이 두 점 P,Q에서 만남. PQ 중점 M에서 y축 수선의 발 H. MH=1일 때 PQ 길이 (5지선다) (그림 제공)
+  category: 이차함수 · 중점 · 거리
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 이차함수-중점-거리-복합
+  insight_type: 통찰형
+  depth: 3
+
+- source: RPM-CM2-GM-#0074
+  page: 16
+  category_type: 시험꼭나오는
+  problem_summary: |
+    두 점 A(-2,0), B(0,7) 잇는 선분 AB를 1:k 내분점이 직선 x+2y=2 위 점일 때 양수 k 값 (5지선다)
+  category: 내분점 · 직선
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 내분점-직선방정식-비율
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0075
+  page: 16
+  category_type: 시험꼭나오는
+  _step: 중요★
+  problem_summary: |
+    두 점 A(-1,-1), B(2,4) 잇는 선분 AB 연장선 위 4·AC=3·BC 만족시키는 점 C(a,b)일 때 a+b 값
+  category: 연장선 등식
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 연장선-비율-외분
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0076
+  page: 16
+  category_type: 시험꼭나오는
+  problem_summary: |
+    평행사변형 ABCD 세 꼭짓점 A(1,1), B(3,5), D(a,b), 대각선 AC 중점이 (4,2)일 때 a+b 값
+  category: 평행사변형 · 중점
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 평행사변형-대각선-역산
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0077
+  page: 16
+  category_type: 시험꼭나오는
+  problem_summary: |
+    네 점 A(0,5), B(1,a), C(ab,1), D(7,b) 사각형 ABCD가 평행사변형일 때 a³+b³ 값 (5지선다)
+  category: 평행사변형 · 세제곱합
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 평행사변형-이차연립-세제곱
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0078
+  page: 16
+  category_type: 시험꼭나오는
+  _step: 중요★
+  problem_summary: |
+    삼각형 ABC에서 A(3,-2), AB 중점 (4,2), ABC 무게중심 (4/3,2)일 때 BC를 2:1 내분점 좌표 (a,b). a+b 값
+  category: 무게중심 · 내분점 복합
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 무게중심-중점-내분-복합
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0079
+  page: 16
+  category_type: 시험꼭나오는
+  _step: 교육청 기출
+  problem_summary: |
+    좌표평면 위 세 점 A(0,a), B(-3,0), C(1,0) 삼각형 ABC. ∠ABC 이등분선이 선분 AC 중점 지날 때 양수 a 값 (5지선다) (그림 제공)
+  category: 각이등분선 · 중점
+  tier: star_3
+  unit_code: CM2-GM
+  mechanism_primary: 각이등분선-AC중점-조건
+  insight_type: 통찰형
+  depth: 3
+
+### 서술형·주관식 (p.17)
+
+- source: RPM-CM2-GM-#0080
+  page: 17
+  category_type: 서술형주관식
+  problem_summary: |
+    주희 윤서 북쪽 10km. 동시 출발, 주희 남쪽 시속 8km, 윤서 동쪽 시속 6km. 두 사람 사이 거리 최솟값 구하기 (활용 · 그림 제공)
+  category: 활용 · 거리 최솟값
+  tier: star_4
+  unit_code: CM2-GM
+  mechanism_primary: 매개변수-거리-이차함수-최솟값
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0081
+  page: 17
+  category_type: 서술형주관식
+  problem_summary: |
+    세 점 O(0,0), A(2,2), B(a,b) 삼각형 OAB가 정삼각형일 때 a-b 값 (단 a<0)
+  category: 정삼각형 · 문자
+  tier: star_4
+  unit_code: CM2-GM
+  mechanism_primary: 정삼각형-등거리-사분면조건
+  insight_type: 조건통합형
+  depth: 2
+
+- source: RPM-CM2-GM-#0082
+  page: 17
+  category_type: 서술형주관식
+  problem_summary: |
+    수직선 위 두 점 P(√2), Q(√5)를 이용하여 세 수 A=(√2+√5)/2, B=(√2+2√5)/3, C=(3√2+√5)/4 대소 관계 구하기
+  category: 내분점 · 대소 비교
+  tier: star_4
+  unit_code: CM2-GM
+  mechanism_primary: 내분점-비율-대소
+  insight_type: 통찰형
+  depth: 3
+
+- source: RPM-CM2-GM-#0083
+  page: 17
+  category_type: 서술형주관식
+  problem_summary: |
+    두 점 A(0,2), B(5,-3)에 대해 AB를 t:(1-t) 내분점 P가 x축 위 점일 때 선분 OP를 (1-2t):2t 내분점의 x좌표 (단 O 원점)
+  category: 매개변수 · 이중 내분
+  tier: star_4
+  unit_code: CM2-GM
+  mechanism_primary: 매개변수-이중내분점-복합
+  insight_type: 통찰형
+  depth: 3
+
+### 실력 UP (p.17)
+
+- source: RPM-CM2-GM-#0084
+  page: 17
+  category_type: 심화
+  problem_summary: |
+    원점 O와 두 점 A(4,2), B(6,-2)에 대해 삼각형 OAB 외접원 넓이 구하기
+  category: 외접원 · 넓이
+  tier: star_4
+  unit_code: CM2-GM
+  mechanism_primary: 외심-외접원-반지름-넓이
+  insight_type: 통찰형
+  depth: 3
+
+- source: RPM-CM2-GM-#0085
+  page: 17
+  category_type: 심화
+  problem_summary: |
+    소매상 A,B,C 한 직선 도로 위. 도로 한 지점에 도매상. 운반 비용은 도매상~각 소매상 거리제곱 합에 비례. 운반 비용 최소 도매상 위치 (5지선다: AB중점·BC중점·AC중점·AB 5:1 내분·AB 4:1 내분) (그림 제공)
+  category: 거리제곱합 · 실생활
+  tier: star_4
+  unit_code: CM2-GM
+  mechanism_primary: 거리제곱합-무게중심-실생활
+  insight_type: 통찰형
+  depth: 3
+
+- source: RPM-CM2-GM-#0086
+  page: 17
+  category_type: 심화
+  problem_summary: |
+    세 점 A(0,3), B(-5,-9), C(4,0) 삼각형 ABC. AC=AD 되도록 AB 위 점 D. A 지나면서 DC 평행 직선이 BC 연장선과 만나는 점 P(a,b). a-b 값 (5지선다) (그림 제공)
+  category: 평행선 · 이등변 복합
+  tier: star_4
+  unit_code: CM2-GM
+  mechanism_primary: 이등변-평행-직선방정식-교점
+  insight_type: 통찰형
+  depth: 3
+
+---
+
+## 정독 통계
+
+- **총 문항 수**: 86문 (0001~0086)
+- **소단원 배분**:
+  - 01|1 두 점 사이의 거리: 유형 01~06 + 활용
+  - 01|2 선분의 내분점: 유형 07~10
+  - 01|3 삼각형 무게중심: 유형 11
+  - 종합: 유형 12 (각이등분선), 유형 13 (자취)
+
+## Category 분포
+
+| category_type | 개수 |
+|---|---|
+| 교과서문제 | 17 (0001~0017) |
+| 유형익히기 | 48 (0018~0065) |
+| 시험꼭나오는 | 14 (0066~0079) |
+| 서술형주관식 | 4 (0080~0083) |
+| 심화(실력UP) | 3 (0084~0086) |
+
+## Tier 분포
+
+| tier | 개수 |
+|---|---|
+| star_1 | 12 |
+| star_2 | 4 |
+| star_3 | 22 |
+| star_4 | 37 |
+| star_5 | 11 |
+
+## 주요 Mechanism 카테고리
+
+**거리 계열**: 거리-공식-2D, 거리-방정식-역산, 거리-이차방정식-근의곱, 거리-이차함수-최솟값, 거리-부등식-정수해-개수, 거리합-최솟값-직선
+
+**등거리 계열**: 등거리-직선-교점, 등거리-축-교점, 외심-등거리-연립, 외심-외접원-반지름-넓이
+
+**삼각형 판정**: 변길이-피타고라스-판정, 둔각-부등식-범위, 정삼각형-등거리-사분면
+
+**내분점 계열**: 내분점-공식-1D, 내분점-역산, 내분점-부등식-사분면, 내분점-축교점-비율, 매개변수-이중내분점-복합
+
+**연장선/외분**: 연장선-비율-일반화, 연장선-양방향-분류, 연장선-내분외분-두경우
+
+**평행사변형/마름모**: 평행사변형-대각선중점-일치, 마름모-이웃변-등거리
+
+**무게중심 계열**: 무게중심-공식, 무게중심-역산, 무게중심-BC중점-관계, 거리제곱합-무게중심-정리
+
+**각이등분선**: 각이등분선-비율-내분, 각이등분선-넓이비-변길이
+
+**자취**: 자취-수직이등분선, 자취-거리제곱차-직선, 자취-내분점-매개변수제거
+
+**좌표 증명**: 중선정리-좌표증명, 직사각형-좌표증명, 스튜어트정리-좌표증명
+
+**융합 심화**: 이차함수-중점-거리-복합, 이등변-평행-직선방정식-교점, 내분점-비율-대소 (√2·√5)

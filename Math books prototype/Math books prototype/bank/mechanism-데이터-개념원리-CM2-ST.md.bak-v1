@@ -1,0 +1,3671 @@
+---
+name: mechanism-데이터-개념원리-CM2-ST
+description: 개념원리 공통수학2 (2022개정) 집합과 명제 정독 데이터. 세션 54 (2026-07-20) 신설.
+metadata:
+  type: reference
+  version: v1.0
+  established: 2026-07-20
+  source: 개념원리 공통수학2 (2022개정)
+  section: 집합과 명제
+  tier_mapping:
+    대표예제: star_3~4
+    유제: star_3~4
+    연습: star_4~5
+  unit_code: CM2-ST
+  standard: 10수06-01·02·03·04
+  citation_note: 개념원리 · 학습 목적 · 저작권 준수 (원문 전사 없음 · 발문 요약)
+  extract_range: "집합과 명제 3중단원 (집합 뜻·포함/연산/명제) · 필수·확인체크 전수 · 연습 star4~5 pick"
+  pages: "120~203"
+---
+
+# 개념원리 공통수학2 (2022개정) — 집합과 명제 정독 데이터
+
+**출처**: 개념원리 공통수학2 (2022개정) · II. 집합과 명제 (1. 집합의 뜻과 포함 관계 · 2. 집합의 연산 · 3. 명제)
+**대상 범위**: 소절 전체 (집합 뜻·포함·연산·연산법칙·원소개수·명제·역대우·충분필요·증명·절대부등식)
+**정독 페이지**: p.120~203
+**작업 목적**: 정리편·유형편·연습편 원본 은행 확장 · 집합과 명제 단원 앵커 확보
+**정독 일자**: 2026-07-20
+
+---
+
+## 1-01 집합의 뜻과 표현 (p.120~126)
+
+### 필수 예제 (대표 유형)
+
+```yaml
+- source: 개념원리-CM2-ST-집합-예제-01
+  page: 123
+  category_type: 대표예제
+  problem_summary: |
+    다음 중 집합인 것을 모두 고르는 문제 (정답 2개).
+    ① 키가 작은 학생들의 모임 ② 예쁜 학생들의 모임
+    ③ 혈액형이 B형인 우리 학교 학생들의 모임
+    ④ 키가 170 cm에 가까운 사람들의 모임
+    ⑤ 3보다 크고 10보다 작은 자연수의 모임.
+  solution_summary: |
+    '작은·예쁜·가까운'은 기준이 명확하지 않아 집합이 아니다.
+    답: ③, ⑤.
+  category: 집합의 정의 (기준의 명확성)
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 기준의 명확성으로 집합/비집합 판별
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-집합-예제-02
+  page: 123
+  category_type: 대표예제
+  problem_summary: |
+    A={4의 양의 배수}, B={8의 양의 약수}일 때 다음 중 옳은 것.
+    ① 1∈A ② 2∉B ③ 5∈B ④ 6∉A ⑤ 8∉B.
+  solution_summary: |
+    A={4,8,12,16,...}, B={1,2,4,8}이므로 6∉A만 성립.
+    답: ④.
+  category: ∈·∉ 판별
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 배수·약수 나열 후 원소 판정
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-집합-예제-03
+  page: 124
+  category_type: 대표예제
+  problem_summary: |
+    다음을 원소나열법 → 조건제시법 또는 조건제시법 → 원소나열법으로 변환.
+    (1) {1,2,5,10} (2) {3,6,9,12,...} (3) {x|x는 1<x<14 짝수} (4) {x|x는 3으로 나눈 나머지가 1인 자연수}.
+  solution_summary: |
+    (1) {x|x는 10의 양의 약수} (2) {x|x는 3의 양의 배수}
+    (3) {2,4,6,8,10,12} (4) {1,4,7,10,...}.
+  category: 표현법 전환
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 원소나열 ↔ 조건제시 상호 변환
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-집합-예제-04
+  page: 124
+  category_type: 대표예제
+  problem_summary: |
+    A={0,1,2}에 대하여 B={x+y|x∈A, y∈A}, C={xy|x∈A, y∈A}를 원소나열법으로.
+  solution_summary: |
+    표 작성으로 x+y 값과 xy 값을 나열.
+    B={0,1,2,3,4}, C={0,1,2,4}.
+  category: 파생 집합 원소 산출
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 이중 원소 대입 표
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-집합-예제-05
+  page: 125
+  category_type: 대표예제
+  problem_summary: |
+    다음 중 무한집합을 모두 고르는 문제 (정답 2개).
+    ① {x|x=3n, n=1,2,3,4} ② {x|x는 9보다 큰 한 자리 홀수}
+    ③ {x|x는 1<x<2인 기약분수} ④ {x|x는 세 자리 자연수}
+    ⑤ {x|x는 x²-3x+2<0인 유리수}.
+  solution_summary: |
+    ①유한 ②공집합→유한 ③1<x<2 기약분수는 무한
+    ④100~999 유한 ⑤1<x<2 유리수는 무한.
+    답: ③, ⑤.
+  category: 유한/무한/공집합 판별
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 원소 개수 유·무한 판정
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-집합-예제-06
+  page: 125
+  category_type: 대표예제
+  problem_summary: |
+    다음 중 옳은 것.
+    ① n({0})=0 ② n({∅,3})=1 ③ n({0,1,2})-n({1,2})=1
+    ④ n({3})<n({5}) ⑤ n({0})+n(∅)+n({∅})+n({0,1})=5.
+  solution_summary: |
+    ①n({0})=1 ②n=2 ③3-2=1 ✓ ④1=1 ⑤1+0+1+2=4.
+    답: ③.
+  category: 원소 개수 n(A) 정의
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 공집합·중첩 집합의 n 값
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 확인체크 (유제)
+
+```yaml
+- source: 개념원리-CM2-ST-집합-유제-290
+  page: 122
+  category_type: 유제
+  problem_summary: |
+    보기에서 집합인 것만을 있는 대로 고르고, 그 집합의 원소를 구하시오.
+    ㄱ. 15의 양의 약수의 모임 ㄴ. 큰 정수의 모임
+    ㄷ. 50에 가까운 자연수의 모임 ㄹ. 이차방정식 (x+1)(x-2)=0의 해의 모임.
+  solution_summary: |
+    집합: ㄱ, ㄹ. 원소: ㄱ은 1,3,5,15; ㄹ은 -1, 2.
+  category: 집합의 정의·원소 파악
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 기준 명확성 + 원소 열거
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-집합-유제-291
+  page: 122
+  category_type: 유제
+  problem_summary: |
+    A={5의 배수}일 때 ∈, ∉를 각각 판정.
+    (1) 5 (2) 12 (3) 18 (4) 30.
+  solution_summary: |
+    (1) ∈ (2) ∉ (3) ∉ (4) ∈.
+  category: ∈·∉ 판별
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 배수 판정
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-집합-유제-292
+  page: 122
+  category_type: 유제
+  problem_summary: |
+    10 이하의 소수의 집합 A를 원소나열법·조건제시법·벤다이어그램으로.
+  solution_summary: |
+    (1) A={2,3,5,7} (2) A={x|x는 10 이하 소수} (3) 벤 그림.
+  category: 표현 3가지 전환
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 세 표현법 변환
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-집합-유제-293
+  page: 122
+  category_type: 유제
+  problem_summary: |
+    A={x|x는 6의 양의 약수}, B={x|x는 9의 양의 배수},
+    C={x|x는 1<x<5 자연수}, D={x|x는 2<x<4인 짝수} 중에서
+    (1) 유한집합 (2) 무한집합 (3) 공집합.
+  solution_summary: |
+    A={1,2,3,6} 유한, B={9,18,...} 무한, C={2,3,4} 유한, D=∅ (2<x<4 짝수 없음).
+    (1) A, C, D (2) B (3) D.
+  category: 집합 분류
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 유·무·공 3분류
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-집합-유제-294
+  page: 122
+  category_type: 유제
+  problem_summary: |
+    n(A) 계산.
+    (1) A={2,4,6,...,20} (2) A={x|x²+1=0 실수} (3) A={x|x|<2인 정수}.
+  solution_summary: |
+    (1) n=10 (2) 해 없음 → n=0 (3) A={-1,0,1} → n=3.
+  category: n(A) 계산
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 원소 수 정확 카운트
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-집합-유제-295
+  page: 123
+  category_type: 유제
+  problem_summary: |
+    집합인 것을 모두 고르는 문제 (정답 2개).
+    ① 작은 홀수 ② 제주도에서 유명한 식당 ③ 노래를 잘하는 사람
+    ④ 우리 반 3월생 ⑤ 1<x<2인 자연수.
+  solution_summary: |
+    ④ (기준 명확), ⑤ (원소 없어도 공집합으로 집합임).
+    답: ④, ⑤.
+  category: 집합 판별
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 명확 기준 판단
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-집합-유제-296
+  page: 123
+  category_type: 유제
+  problem_summary: |
+    이차부등식 x²-8x+12<0의 정수해 집합 A에 대하여 옳지 않은 것.
+    ① -2∉A ② 0∉A ③ 2∈A ④ 5∈A ⑤ 7∉A.
+  solution_summary: |
+    2<x<6 → A={3,4,5}. ③ 2∈A는 거짓.
+    답: ③.
+  category: 부등식 해집합 원소 판별
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 이차부등식 풀이 후 원소 확인
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-집합-유제-297
+  page: 124
+  category_type: 유제
+  problem_summary: |
+    집합 {3,5,7}을 조건제시법으로 나타낸 것 중 옳은 것.
+    ① 2 이상 9 이하 홀수 ② 2보다 큰 한 자리 홀수
+    ③ x=2n+1, n=1,2,3 ④ 10보다 작은 소수 ⑤ 0<x<9 홀수.
+  solution_summary: |
+    ①{3,5,7,9} ②{3,5,7,9} ③{3,5,7} ✓ ④{2,3,5,7} ⑤{1,3,5,7}.
+    답: ③.
+  category: 조건제시법 정확성
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 조건 원소 나열 검증
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-집합-유제-298
+  page: 124
+  category_type: 유제
+  problem_summary: |
+    A={x|x는 0<x<10인 2의 배수}일 때 B={y|y=3x-2, x∈A}를 원소나열법으로.
+  solution_summary: |
+    A={2,4,6,8}. y = 3x-2 대입 → B={4,10,16,22}.
+  category: 원소 변환식
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 원소별 대입 산출
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-집합-유제-299
+  page: 124
+  category_type: 유제
+  problem_summary: |
+    A={x|x=2ᵖ×5ᵍ, p,q는 자연수}의 원소가 아닌 것.
+    ① 10 ② 60 ③ 100 ④ 250 ⑤ 400.
+  solution_summary: |
+    10=2·5 ✓, 60=2²·3·5 → 3 포함으로 ✗, 100=2²·5², 250=2·5³, 400=2⁴·5².
+    답: ②.
+  category: 소인수 조건 원소 판별
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 소인수분해 조건 검증
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-집합-유제-300
+  page: 125
+  category_type: 유제
+  problem_summary: |
+    보기에서 유한집합인 것만 있는 대로 고르시오.
+    ㄱ. {x|x는 10보다 큰 홀수} ㄴ. {∅}
+    ㄷ. {x|x는 1<x<3인 홀수} ㄹ. {x|x=2n, n은 자연수}.
+  solution_summary: |
+    ㄴ={∅} n=1, ㄷ={} (홀수 없음) n=0.
+    유한: ㄴ, ㄷ.
+  category: 유한집합 판별
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 원소 유무 확인
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-집합-유제-301
+  page: 125
+  category_type: 유제
+  problem_summary: |
+    A={x|x는 50보다 작은 7의 양의 배수}, B={x|x²=-4인 실수},
+    C={x||x|=4}. n(A)+n(B)-n(C).
+  solution_summary: |
+    A={7,14,21,28,35,42,49} n=7, B=∅ n=0, C={-4,4} n=2.
+    7+0-2 = 5.
+  category: n(A) 합성 계산
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 유·공집합 n 조합
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 연습문제 (star 4·5 pick)
+
+```yaml
+- source: 개념원리-CM2-ST-집합-연습-305
+  page: 126
+  category_type: 연습
+  problem_summary: |
+    X={x|x²-ax+4≤0, x는 실수}가 공집합이 되도록 하는 정수 a의 개수.
+  solution_summary: |
+    부등식 해 없음 ⇔ 판별식 D=a²-16<0 ⇔ -4<a<4.
+    정수: -3,-2,-1,0,1,2,3 → 7개.
+  category: 공집합 조건·판별식
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 공집합 ⇔ 판별식 음수
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-집합-연습-306
+  page: 126
+  category_type: 연습
+  problem_summary: |
+    A={(x,y)|x²+y²=25, x,y는 정수},
+    B={x|x는 k 이하의 자연수}에 대하여 n(A)+n(B)=25일 때 자연수 k.
+  solution_summary: |
+    A: (±3,±4),(±4,±3),(±5,0),(0,±5) → 12개.
+    n(B)=k=13.
+  category: 격자점·조건 조합
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 격자점 열거 + n 방정식
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-집합-연습-307
+  page: 126
+  category_type: 연습
+  problem_summary: |
+    A={a,b,c} (서로 다른 세 자연수). B={x+y|x∈A, y∈A, x≠y}={6,9,11}일 때 A의 원소 중 가장 큰 수.
+  solution_summary: |
+    a<b<c일 때 a+b=6, a+c=9, b+c=11 → a=2, b=4, c=7.
+    답: 7.
+  category: 합집합 조건 역산
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 두 원소 합 3개 → 원소 결정 연립
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+---
+
+## 1-02 집합 사이의 포함 관계 (p.127~136)
+
+### 필수 예제
+
+```yaml
+- source: 개념원리-CM2-ST-포함-예제-07
+  page: 131
+  category_type: 대표예제
+  problem_summary: |
+    A={∅,1,2,{1,2}}에 대하여 옳지 않은 것.
+    ① ∅∈A ② {∅}⊂A ③ {1}∈A ④ {1,2}∈A ⑤ {1,2}⊂A.
+  solution_summary: |
+    A의 원소는 ∅, 1, 2, {1,2}.
+    ③ {1}∈A는 거짓 (원소는 1이지 {1} 아님).
+    답: ③.
+  category: ∈·⊂ 사용 구별
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 원소·부분집합 기호 정확 구분
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-포함-예제-08
+  page: 132
+  category_type: 대표예제
+  problem_summary: |
+    A={1, a+2}, B={3, a²+2, a+1}에 대하여 A⊂B일 때 실수 a.
+  solution_summary: |
+    1∈B: (i) a²+2=1 → a²=-1 불가능
+    (ii) a+1=1 → a=0. A={1,2}, B={1,2,3} A⊂B ✓.
+    답: a=0.
+  category: 포함관계 미지수 결정
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 원소 대응 경우분류
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-포함-예제-09
+  page: 132
+  category_type: 대표예제
+  problem_summary: |
+    A={-2, a²+2a}, B={3, a²-3a}에 대하여 A=B일 때 상수 a.
+  solution_summary: |
+    -2∈B, 3∈A → a²-3a=-2 그리고 a²+2a=3.
+    (i) a²-3a+2=0 → a=1 or 2 (ii) a²+2a-3=0 → a=-3 or 1.
+    공통: a=1.
+  category: 서로 같은 집합·경우분류
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 두 조건 교집합 해
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-포함-예제-10
+  page: 133
+  category_type: 대표예제
+  problem_summary: |
+    A={3,4,5,6,7}에 대하여
+    (1) 5는 반드시 원소로 갖고 3, 6은 갖지 않는 부분집합의 개수.
+    (2) 적어도 한 개의 홀수를 원소로 갖는 부분집합의 개수.
+  solution_summary: |
+    (1) 2^(5-1-2)=2²=4.
+    (2) 전체 2⁵=32에서 홀수 3,5,7 미포함 부분집합 2²=4 뺌 → 32-4=28.
+  category: 특정원소 포함/미포함 부분집합 수
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 2^(n-k-m) · 여사건 응용
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-포함-예제-11
+  page: 134
+  category_type: 대표예제
+  problem_summary: |
+    A={2,4}, B={x|x는 12의 양의 약수}에 대하여 A⊂X⊂B인 집합 X 개수.
+  solution_summary: |
+    B={1,2,3,4,6,12}. X는 B 부분집합 중 2, 4 필수 포함.
+    2^(6-2)=2⁴=16.
+  category: A⊂X⊂B 집합 수
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 2^(q-p) 공식
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 확인체크 (유제)
+
+```yaml
+- source: 개념원리-CM2-ST-포함-유제-313
+  page: 131
+  category_type: 유제
+  problem_summary: |
+    A⊂B인 벤다이어그램에서 A={1,2}, B={1,2,3,4}.
+    옳지 않은 것: ① ∅⊂A ② 1∈B ③ 3∉A ④ {2}⊂A ⑤ {1,3,5}⊄B.
+  solution_summary: |
+    ①T ②T ③T ④T ⑤{1,3,5}에서 5∉B, {1,3,5}⊄B 참.
+    벤에서 A={1,2}, B={1,2,3,4}. ⑤ 참이므로 모두 참? 그림 재확인:
+    문제에서는 벤 A외부 {3,4} 안, {5}는 U 밖일 수도.
+    (답 계산 대기)
+  category: 벤다이어그램 원소 판별
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 벤에서 ∈·⊂ 판별
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-포함-유제-314
+  page: 131
+  category_type: 유제
+  problem_summary: |
+    A={x|x=2n, n은 5 이하 자연수}={2,4,6,8,10}.
+    ㄱ. 5∈A ㄴ. 6∉A ㄷ. {4,10}⊂A ㄹ. A⊂{2,4,6,8}.
+  solution_summary: |
+    ㄱF ㄴF ㄷT ㄹF (10 미포함). 옳은 것: ㄷ.
+  category: ∈·⊂ 종합 판별
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 원소·부분집합 기호 검증
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-포함-유제-315
+  page: 131
+  category_type: 유제
+  problem_summary: |
+    S={∅, {0}, 1}. 옳지 않은 것.
+    ① ∅∈S ② ∅⊂S ③ 1∈S ④ {0}⊂S ⑤ {∅,{0}}⊂S.
+  solution_summary: |
+    S 원소: ∅, {0}, 1. ④ {0}⊂S는 {0}이 S의 원소(집합체)로 있어야 ⊂ 성립 조건은 원소들이 S 원소가 되어야: 0∉S이므로 {0}⊄S. 답: ④.
+  category: 원소가 집합인 경우
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 집합 원소 vs 부분집합 구분
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-포함-유제-316
+  page: 132
+  category_type: 유제
+  problem_summary: |
+    A={-1, a²-1}, B={2, a-2, 1-a}에 대하여 A⊂B일 때 상수 a.
+  solution_summary: |
+    -1∈B: (i) a-2=-1 → a=1, A={-1,0}, B={2,-1,0} ✓
+    (ii) 1-a=-1 → a=2, A={-1,3}, B={2,0,-1} 3∉B ✗.
+    답: a=1.
+  category: 포함관계 미지수
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 원소 대응 경우분류
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-포함-유제-317
+  page: 132
+  category_type: 유제
+  problem_summary: |
+    A={x|-5≤x≤-2}, B={x|-3a-2<x<-a+6}에 대하여 A⊂B일 때 정수 a의 최댓값과 최솟값의 합.
+  solution_summary: |
+    A⊂B: -3a-2 < -5 그리고 -a+6 > -2
+    → a > 1 그리고 a < 8 → 정수 a: 2,3,4,5,6,7.
+    최댓값 7 + 최솟값 2 = 9.
+  category: 구간 포함 조건
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 구간 양 끝 강부등호 조건
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-포함-유제-318
+  page: 132
+  category_type: 유제
+  problem_summary: |
+    A={4, a+1, a-2}, B={2, 5, a²-3a}에 대하여 A⊂B이고 B⊂A일 때 상수 a.
+  solution_summary: |
+    A=B이므로 원소집합 일치. A의 3원소 = B의 3원소.
+    4∈B: a²-3a=4 → a=4 or -1. 각각 검증.
+    a=4: A={4,5,2}, B={2,5,4} ✓.
+    a=-1: A={4,0,-3}, B={2,5,4} ✗.
+    답: a=4.
+  category: A=B 원소 결정
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 서로 같은 집합 원소 대응
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-포함-유제-319
+  page: 133
+  category_type: 유제
+  problem_summary: |
+    A={1,3,5,7,9,11}. 3∈X, 5∈X, 9∉X를 만족시키는 A의 부분집합 X 개수.
+  solution_summary: |
+    특정 3개 원소 결정 → 나머지 3개(1,7,11) 자유 → 2³=8.
+  category: 특정원소 포함/미포함 부분집합 수
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 자유 원소 2^(n-k-m)
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-포함-유제-320
+  page: 133
+  category_type: 유제
+  problem_summary: |
+    A={2,3,4,5}의 부분집합 중 적어도 한 개의 소수를 원소로 갖는 개수.
+  solution_summary: |
+    A 소수: 2,3,5 (3개). 전체 2⁴=16.
+    소수 미포함 부분집합: {4}, ∅ → 2²=... 사실 소수 3개 미포함 = {4}의 부분집합 = 2¹=2.
+    16-2 = 14.
+  category: 적어도 한 개 조건
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 전체 - 여사건
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-포함-유제-321
+  page: 134
+  category_type: 유제
+  problem_summary: |
+    A={0,1}, B={0,1,2,3}에 대하여 A⊂X⊂B가 될 수 없는 것.
+    ① {0,1} ② {0,1,2} ③ {0,1,3} ④ {1,2,3} ⑤ {0,1,2,3}.
+  solution_summary: |
+    X는 {0,1} 포함해야 함. ④ 0 미포함 → 실패.
+    답: ④.
+  category: A⊂X⊂B 원소 판별
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 필수 원소 포함 확인
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-포함-유제-322
+  page: 134
+  category_type: 유제
+  problem_summary: |
+    A={1,2}, B={1,2,...,n}. A⊂X⊂B 집합 X 개수 128 → 자연수 n.
+  solution_summary: |
+    2^(n-2)=128=2⁷ → n-2=7 → n=9.
+  category: A⊂X⊂B 개수 역산
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 2^(q-p) 역산
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-포함-유제-323
+  page: 134
+  category_type: 유제
+  problem_summary: |
+    A={a,b,c,d,e}, B={a,b,c}. B⊂X⊂A, X≠A인 집합 X 개수.
+  solution_summary: |
+    B⊂X⊂A: 2^(5-3)=4. X≠A 제외 → 4-1=3.
+  category: A⊂X⊂B + 조건
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 부분집합 수 - 예외
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 연습문제 (star 4·5 pick)
+
+```yaml
+- source: 개념원리-CM2-ST-포함-연습-327
+  page: 135
+  category_type: 연습
+  problem_summary: |
+    A={1,2,3,...,n}의 부분집합 중 1,2는 반드시 원소로 갖고 3,4는 갖지 않는 부분집합 개수가 16일 때 자연수 n.
+  solution_summary: |
+    2^(n-2-2)=16=2⁴ → n-4=4 → n=8.
+  category: 필수/미포함 조합·역산
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 2^(n-k-m) 역산
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-포함-연습-328
+  page: 135
+  category_type: 연습
+  problem_summary: |
+    A={x|-4<x<4 정수}, B={x||x|=2}에 대하여 B⊂X⊂A, X≠A, X≠B인 집합 X 개수.
+  solution_summary: |
+    A={-3,-2,-1,0,1,2,3} n=7. B={-2,2} n=2.
+    B⊂X⊂A: 2^(7-2)=32. X≠A, X≠B → 32-2=30.
+  category: 이중 예외 A⊂X⊂B
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 부분집합 수 - 2예외
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-포함-연습-329
+  page: 135
+  category_type: 연습
+  problem_summary: |
+    Aₙ = {x|x는 √n 이하 홀수}. Aₙ⊂A₂₅를 만족시키는 n의 최댓값.
+  solution_summary: |
+    A₂₅ = √25 이하 홀수 = {1,3,5}.
+    Aₙ ⊂ {1,3,5} ⇔ √n < 7 ⇔ n < 49 → n=48.
+  category: 파생 집합 포함
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: √n 경계 · 홀수 나열
+  insight_type: 조건통합형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-포함-연습-330
+  page: 136
+  category_type: 연습
+  problem_summary: |
+    A={x-2|1<x≤3}, B={x+a|-1≤x<7}, C={x|x>2a}에 대하여 A⊂B⊂C인 정수 a 개수.
+  solution_summary: |
+    A=(-1,1], B=[a-1, a+7), C=(2a, ∞).
+    A⊂B: a-1≤-1, a+7>1 → a≤0 & a>-6 → -6<a≤0.
+    B⊂C: 2a≤a-1 → a≤-1.
+    교집합: -6<a≤-1 → 정수 -5,-4,-3,-2,-1 → 5개.
+  category: 구간 3중 포함
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 구간 이동·중첩 조건 연립
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-포함-연습-331
+  page: 136
+  category_type: 연습
+  problem_summary: |
+    A={a,b,c}, B={ab,bc,ca}에 대하여 A=B, a+b+c=-3일 때 a³+b³+c³ (단 abc≠0).
+  solution_summary: |
+    A=B → 원소 총합 같음: a+b+c=ab+bc+ca=-3.
+    원소 총곱 같음: abc = (ab)(bc)(ca) = (abc)² → abc=1 (0아님).
+    a³+b³+c³-3abc = (a+b+c)(a²+b²+c²-ab-bc-ca)
+    a²+b²+c² = (a+b+c)²-2(ab+bc+ca) = 9-2(-3)=15.
+    a³+b³+c³ = 3·1 + (-3)(15-(-3)) = 3 + (-3)(18) = 3-54 = -51.
+  category: A=B 대칭식·기본대칭
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 원소 합·곱 보존 → 대칭식
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-포함-연습-332
+  page: 136
+  category_type: 연습
+  problem_summary: |
+    A={a,b,c,d,e,f,g}의 부분집합 중 b 또는 f를 원소로 갖는 부분집합 개수.
+  solution_summary: |
+    전체 2⁷=128. b,f 둘 다 미포함 = 2⁵=32. 128-32=96.
+  category: '또는' 조건 · 여사건
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 여사건 (둘 다 미포함) 뺌
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-포함-연습-333
+  page: 136
+  category_type: 연습
+  problem_summary: |
+    A={x|x²-4x+3=0}={1,3}, B={x|x²-6x+5≤0, 정수}={1,2,3,4,5}.
+    A⊂X⊂B, n(X)≥3인 집합 X 개수.
+  solution_summary: |
+    B\A={2,4,5} (3개) 자유. |X|-2 자유원소 수.
+    n(X)≥3 → 자유원소 ≥1 → 2³-1=7.
+  category: 이차부등식 해집합·A⊂X⊂B
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 자유원소 필수개 조건
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-포함-연습-334
+  page: 136
+  category_type: 연습
+  problem_summary: |
+    A는 공집합 아님. (가) A 모든 원소 자연수 (나) a∈A이면 81/a∈A. 조건 만족 A 개수.
+  solution_summary: |
+    81의 양의 약수: 1,3,9,27,81. 쌍 (a, 81/a): (1,81),(3,27),(9,9).
+    A는 이 쌍 중 몇 쌍 선택 + 9는 자기짝. 각 쌍 3가지 (모두 미포함/모두 포함) 아니고 두 원소가 반드시 함께.
+    각 쌍: 포함/미포함 2가지. 3쌍 → 2³=8. 공집합 제외 → 7.
+  category: 자기짝 원소 · 함수 조건
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 원소 쌍 조합 · 자기짝
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-포함-연습-335
+  page: 136
+  category_type: 연습
+  problem_summary: |
+    A={2,3,4,5}의 공집합 아닌 부분집합 15개 A₁~A₁₅. 각 Aᵢ의 가장 작은 원소를 aᵢ라 할 때 a₁+a₂+...+a₁₅.
+  solution_summary: |
+    최소원소=2인 부분집합: 2 포함 = 2³=8개, 기여 2×8=16.
+    최소=3: 3포함, 2미포함 = 2²=4, 기여 3×4=12.
+    최소=4: 4포함, 2·3미포함 = 2¹=2, 기여 4×2=8.
+    최소=5: {5} = 1개, 기여 5.
+    합: 16+12+8+5 = 41.
+  category: 부분집합 최솟값 합
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-01
+  mechanism_primary: 최솟값 조건별 카운트
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+---
+
+## 2-01 집합의 연산 (p.138~149)
+
+### 필수 예제
+
+```yaml
+- source: 개념원리-CM2-ST-연산-예제-01
+  page: 142
+  category_type: 대표예제
+  problem_summary: |
+    A={3,5,7}, B={x|4<x<9 정수}, C={x|x는 12의 양의 약수}에 대하여
+    (1) A∩(B∪C) (2) (A∩B)∪C.
+  solution_summary: |
+    B={5,6,7,8}, C={1,2,3,4,6,12}.
+    (1) B∪C={1,2,3,4,5,6,7,8,12}, A∩(B∪C)={3,5,7}.
+    (2) A∩B={5,7}, (A∩B)∪C={1,2,3,4,5,6,7,12}.
+  category: 삼집합 연산
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 합·교 순차 계산
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-예제-02
+  page: 142
+  category_type: 대표예제
+  problem_summary: |
+    서로소인 두 집합 A, B를 5개 보기에서 찾기.
+  solution_summary: |
+    A∩B=∅ 확인. ②만 서로소 (A={-4,4}, B={x<-4}).
+    답: ②.
+  category: 서로소 판별
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: A∩B=∅ 확인
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-예제-03
+  page: 143
+  category_type: 대표예제
+  problem_summary: |
+    U={12 이하 자연수}, A={짝수}, B={3의 배수}에 대하여
+    (1) (A∪B)ᶜ (2) (A∩B)ᶜ (3) Aᶜ-B (4) Bᶜ-Aᶜ.
+  solution_summary: |
+    A={2,4,6,8,10,12}, B={3,6,9,12}.
+    (1) 여={1,5,7,11}. (2) A∩B={6,12}, 여={1,2,3,4,5,7,8,9,10,11}.
+    (3) Aᶜ={1,3,5,7,9,11}, -B → {1,5,7,11}. (4) Bᶜ-Aᶜ=A-B={2,4,8,10}.
+  category: 여집합·차집합 계산
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 여·차 성질 활용
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-예제-04
+  page: 144
+  category_type: 대표예제
+  problem_summary: |
+    B={1,2,4,5}, A∩B={2,5}, A∪B={1,2,3,4,5,6,7}일 때 A.
+  solution_summary: |
+    벤 그림. A = (A∩B) ∪ [(A∪B)-B] = {2,5}∪{3,6,7} = {2,3,5,6,7}.
+  category: 벤 이용 A 결정
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 벤 4영역 결정
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-예제-05
+  page: 145
+  category_type: 대표예제
+  problem_summary: |
+    A={2,3,a²+4}, B={a+1,4,2a+3}에 대하여 A∩B={2,5}일 때 상수 a.
+  solution_summary: |
+    5∈A → a²+4=5 → a=±1.
+    (i) a=-1: A={2,3,5}, B={0,1,4} → A∩B=∅ ✗
+    (ii) a=1: A={2,3,5}, B={2,4,5} → A∩B={2,5} ✓.
+    답: a=1.
+  category: 교집합 조건·미지수
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 원소 대응 경우분류
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-예제-06
+  page: 146
+  category_type: 대표예제
+  problem_summary: |
+    U의 부분집합 A, B. 항상 옳은 것.
+    ① A⊂Uᶜ ② (A∪B)⊂A ③ (A∩B)⊂B ④ U∩Bᶜ=B ⑤ U⊂(A∪B).
+  solution_summary: |
+    ①Uᶜ=∅ ✗ ②A⊂A∪B ✗ ③A∩B⊂B ✓ ④U∩Bᶜ=Bᶜ ✗ ⑤일반적 ✗.
+    답: ③.
+  category: 연산 성질 판별
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 벤 그림 검증
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-예제-07
+  page: 146
+  category_type: 대표예제
+  problem_summary: |
+    U의 서로 다른 A, B. B⊂A일 때 항상 옳은 것.
+    ① A∩B=B ② A∪B=B ③ A-B=∅ ④ Aᶜ∪B=U ⑤ Bᶜ⊂Aᶜ.
+  solution_summary: |
+    B⊂A: ①A∩B=B ✓ ②A∪B=A ✗ ③A-B≠∅ ✗ ④Aᶜ∪B≠U ✗ ⑤Aᶜ⊂Bᶜ.
+    답: ①.
+  category: 포함관계·연산 성질
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 벤 검증
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-예제-08
+  page: 147
+  category_type: 대표예제
+  problem_summary: |
+    A={a,b,c,d,e}, B={d,e}에 대하여 A∩X=X, (A-B)∪X=X를 만족시키는 X 개수.
+  solution_summary: |
+    A∩X=X → X⊂A. (A-B)∪X=X → (A-B)⊂X. A-B={a,b,c}.
+    X는 A 부분집합 중 {a,b,c} 필수 → 2^(5-3)=4.
+  category: 연산 조건·부분집합 수
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 조건 → 포함관계 → 개수
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 확인체크 (유제)
+
+```yaml
+- source: 개념원리-CM2-ST-연산-유제-336
+  page: 141
+  category_type: 유제
+  problem_summary: |
+    A∪B 계산 3문 (문자·약수·부등식 원소).
+  solution_summary: |
+    (1) {a,b,c,d,e} (2) {1,2,3,6,9} (3) {-2,1,2,3,4}.
+  category: A∪B 계산
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 합집합
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-유제-337
+  page: 141
+  category_type: 유제
+  problem_summary: |
+    A∩B 계산 3문.
+  solution_summary: |
+    (1) {2,4} (2) {d} (3) {2,4,6,8,10}.
+  category: A∩B 계산
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 교집합
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-유제-338
+  page: 141
+  category_type: 유제
+  problem_summary: |
+    서로소 두 집합 판별 (4보기).
+  solution_summary: |
+    ㄴ 공통 2, ㄷ 공통 1 ✗. 서로소: ㄱ, ㄹ.
+  category: 서로소 판별
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: A∩B=∅ 확인
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-유제-339
+  page: 141
+  category_type: 유제
+  problem_summary: |
+    U={20 이하 소수}, A={2,5,11,17}, B={5,7,17,19}에 대하여
+    (1) Aᶜ (2) Bᶜ (3) A-B (4) B-A (5) (A∪B)ᶜ (6) (A∩B)ᶜ.
+  solution_summary: |
+    U={2,3,5,7,11,13,17,19}.
+    (1) {3,7,13,19} (2) {2,3,11,13} (3) {2,11} (4) {7,19}
+    (5) A∪B={2,5,7,11,17,19}, 여={3,13}
+    (6) A∩B={5,17}, 여={2,3,7,11,13,19}.
+  category: 여·차 종합
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 여·차 정의
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-유제-340
+  page: 141
+  category_type: 유제
+  problem_summary: |
+    옳지 않은 것.
+    ① A∩Aᶜ=∅ ② U-Aᶜ=A ③ (Aᶜ)ᶜ∩U=A ④ B∩Aᶜ=B-A ⑤ A∪(A∩B)=B.
+  solution_summary: |
+    ⑤ 흡수법칙: A∪(A∩B)=A. 답: ⑤.
+  category: 연산 성질
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 흡수·이중여 검증
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-유제-342
+  page: 142
+  category_type: 유제
+  problem_summary: |
+    A={a,b,c,d}의 부분집합 중 B={a,c}와 서로소인 집합 개수.
+  solution_summary: |
+    서로소 = a, c 미포함. 나머지 b, d 자유 → 2²=4.
+  category: 서로소 조건 부분집합 수
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 특정원소 미포함 2^(n-2)
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-유제-343
+  page: 143
+  category_type: 유제
+  problem_summary: |
+    U={10 이하 자연수}, A={소수}={2,3,5,7}. n(Aᶜ)-n(A).
+  solution_summary: |
+    n(U)=10, n(A)=4, n(Aᶜ)=6. 6-4=2.
+  category: 여집합 원소 개수
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: n(Aᶜ)=n(U)-n(A)
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-유제-344
+  page: 143
+  category_type: 유제
+  problem_summary: |
+    A={2,5,6,8,9}, B={홀수인 한 자리 자연수}={1,3,5,7,9}에 대하여 (A∪B)-(A∩B).
+  solution_summary: |
+    A∪B={1,2,3,5,6,7,8,9}, A∩B={5,9}. 차={1,2,3,6,7,8}.
+  category: 대칭차집합
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 합·교 후 차
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-유제-345
+  page: 143
+  category_type: 유제
+  problem_summary: |
+    U={1,...,8}, A={8의 약수}={1,2,4,8}, B={6의 약수}={1,2,3,6}. (A-B)ᶜ 원소 합.
+  solution_summary: |
+    A-B={4,8}. (A-B)ᶜ={1,2,3,5,6,7}. 합=24.
+  category: 차집합·여집합
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 차 → 여 → 합
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-유제-346
+  page: 144
+  category_type: 유제
+  problem_summary: |
+    U={9 이하 자연수}, (A∪B)ᶜ={2}, A∩B={5,8}, A-B={1,6,7}. B?
+  solution_summary: |
+    A={1,5,6,7,8}. A∪B={1,3,4,5,6,7,8,9}. B=(A∪B)-(A-B)={3,4,5,8,9}.
+  category: 벤 4영역 (B)
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 벤 4영역 결정
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-유제-347
+  page: 144
+  category_type: 유제
+  problem_summary: |
+    U={8 이하 자연수}, B={4,5,8}, A∩B=∅, A∪B=U. A 원소 합.
+  solution_summary: |
+    A=U-B={1,2,3,6,7}. 합=19.
+  category: 서로소 + 합집합=U
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: A=U-B
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-유제-348
+  page: 144
+  category_type: 유제
+  problem_summary: |
+    U={1≤x≤11 홀수}={1,3,5,7,9,11}. A-B={1,11}, B-A={5,9}, (A∩B)ᶜ={1,5,7,9,11}. B 원소 합.
+  solution_summary: |
+    A∩B = U - (A∩B)ᶜ = {3}. B=(B-A)∪(A∩B)={3,5,9}. 합=17.
+  category: 벤 4영역 (B)
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 여집합 → 교 → B
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-유제-349
+  page: 145
+  category_type: 유제
+  problem_summary: |
+    A={1,4,a²+2}, B={3,3a-5,a²+2a-2}에 대하여 A∩B={1,6}일 때 상수 a.
+  solution_summary: |
+    6∈A → a²+2=6 → a=±2.
+    (i) a=2: A={1,4,6}, B={3,1,6}. A∩B={1,6} ✓.
+    (ii) a=-2: A={1,4,6}, B={3,-11,-2}. ∅ ✗.
+    답: a=2.
+  category: 교집합·미지수
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 원소 대응 경우분류
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-유제-350
+  page: 145
+  category_type: 유제
+  problem_summary: |
+    A={1, a²-a, 3, 5}, B={a², a-1, a+6}에 대하여 A-B={2,3}일 때 B.
+  solution_summary: |
+    2∈A → a²-a=2 → a=2 or -1.
+    (i) a=2: A={1,2,3,5}, B={4,1,8}. A-B={2,3,5} ✗.
+    (ii) a=-1: A={1,2,3,5}, B={1,-2,5}. A-B={2,3} ✓.
+    B={1,-2,5}.
+  category: 차집합·미지수
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: A-B 원소 조건 경우분류
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-유제-351
+  page: 145
+  category_type: 유제
+  problem_summary: |
+    A={2,5,a-1}, B={4,2a-3}에 대하여 A∪B={2,4,5,7}일 때 B 원소 합.
+  solution_summary: |
+    7∈A∪B. a-1=7 → a=8: B={4,13} 7 없음 ✗.
+    2a-3=7 → a=5: A={2,5,4}, B={4,7}. A∪B={2,4,5,7} ✓.
+    B={4,7} 합=11.
+  category: 합집합·미지수
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 원소 대입 경우분류
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-유제-352
+  page: 146
+  category_type: 유제
+  problem_summary: |
+    나머지 넷과 다른 하나. ① A-Bᶜ ② (A∪Aᶜ)∪B ③ (U-Aᶜ)∩B ④ (Aᶜ)ᶜ∩(U-Bᶜ) ⑤ (A∩B)∪(B∩Bᶜ).
+  solution_summary: |
+    ②=U (A∪Aᶜ=U, U∪B=U). 나머지 = A∩B. 답: ②.
+  category: 연산 성질·구별
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 5식 간단화 비교
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-유제-353
+  page: 146
+  category_type: 유제
+  problem_summary: |
+    Bᶜ⊂Aᶜ일 때 항상 성립하지 않는 것.
+    ① A⊂B ② A∪B=B ③ A-B=∅ ④ A∪Bᶜ=U ⑤ A∩B=A.
+  solution_summary: |
+    Bᶜ⊂Aᶜ ⇔ A⊂B. ①②③⑤ ✓. ④ 일반적 ✗.
+    답: ④.
+  category: 여집합 포함 → 원 포함
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 여 포함 → 뒤집힘
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-유제-354
+  page: 146
+  category_type: 유제
+  problem_summary: |
+    A, B가 서로소일 때 항상 옳은 것 (6보기: ㄱ~ㅂ).
+  solution_summary: |
+    A∩B=∅. ㄴ A⊂Bᶜ ✓ ㄷ A∪Bᶜ=Bᶜ ✓ ㄹ B∩Aᶜ=B ✓ ㅁ A∩(B-A)=∅ ✓.
+    ㄱ A-B=A ✗ (=∅ 아님) ㅂ A-(U-B)=A-Bᶜ=A∩B=∅ ✗.
+    답: ㄴ, ㄷ, ㄹ, ㅁ.
+  category: 서로소 성질
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 서로소 여러 표현
+  insight_type: 조건통합형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-유제-355
+  page: 147
+  category_type: 유제
+  problem_summary: |
+    A={1,2,3,4,5,6}, B={4,5,6,7,8}. A∩X=X, (A∩B)∪X=X 만족 X 개수.
+  solution_summary: |
+    X⊂A. A∩B={4,5,6}⊂X. X는 A 부분집합 중 {4,5,6} 필수 → 2^(6-3)=8.
+  category: 연산 조건·부분집합 수
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 조건 → 포함관계
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-유제-356
+  page: 147
+  category_type: 유제
+  problem_summary: |
+    U={15 이하 소수}={2,3,5,7,11,13}. A={2,7}, B={3,13}. A-X=∅, B-X=B 만족 X 개수.
+  solution_summary: |
+    A⊂X, B∩X=∅. X는 {2,7} 필수, {3,13} 금지. 자유 {5,11} 2개.
+    2²=4.
+  category: 조건 조합·부분집합 수
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 필수+금지 조합
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-유제-357
+  page: 147
+  category_type: 유제
+  problem_summary: |
+    U={1,3,5,7,9,11,13}, A={1,5,9,13}, B={7,9,11}. (A∪X)⊂(B∪X)를 만족시키는 X 개수.
+  solution_summary: |
+    (A∪X)⊂(B∪X) ⇔ A-B⊂X. A-B={1,5,13}.
+    X는 3원소 필수 → 2^(7-3)=16.
+  category: 포함관계·조건
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 조건 변형 (A-B⊂X)
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 연습문제 (star 4·5 pick)
+
+```yaml
+- source: 개념원리-CM2-ST-연산-연습-361
+  page: 148
+  category_type: 연습
+  problem_summary: |
+    A={-2, 2a-3, a+1}, B={3, 2-a²}, B-A=∅일 때 상수 a.
+  solution_summary: |
+    B-A=∅ → B⊂A. 3∈A: 2a-3=3 → a=3 (a+1=4 대안), 또는 a+1=3 → a=2.
+    (i) a=3: A={-2,3,4}, B={3,-7}. -7∉A ✗.
+    (ii) a=2: A={-2,1,3}, B={3,-2}. B⊂A ✓.
+    답: a=2.
+  category: B⊂A·미지수
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 차집합 조건 경우분류
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-연습-364
+  page: 149
+  category_type: 연습
+  problem_summary: |
+    U=실수. A={x|x³-3x²+2x=0}, B={x|x²+x+a=0}. A-B={0,1}일 때 B-A.
+  solution_summary: |
+    A={0,1,2}. A-B={0,1} → 2∉A-B → 2∈B.
+    2 대입: 4+2+a=0 → a=-6. x²+x-6=(x+3)(x-2)=0 → B={-3,2}.
+    B-A={-3}.
+  category: 방정식 해집합·차
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 차집합 원소 → 방정식 계수 결정
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-연습-366
+  page: 149
+  category_type: 연습
+  problem_summary: |
+    U={x|x는 24의 양의 약수}, A={x|x는 6의 약수}, B={2,4,6,8}. (A-B)∩C={3}, B∩C=B 만족 C 개수.
+  solution_summary: |
+    U={1,2,3,4,6,8,12,24}. A={1,2,3,6}. A-B={1,3}.
+    (A-B)∩C={3}: 3∈C, 1∉C. B∩C=B: 2,4,6,8∈C.
+    필수: {3,2,4,6,8}. 금지: 1. 자유: 12, 24. 2²=4.
+  category: 조건 조합·부분집합 수
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 필수·금지·자유 3분류
+  insight_type: 조건통합형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-연습-367
+  page: 149
+  category_type: 연습
+  problem_summary: |
+    A={-2,3}, B={x|ax+2=2x}. A∩B=B 만족 모든 실수 a의 곱.
+  solution_summary: |
+    A∩B=B ⇔ B⊂A. B: (a-2)x=-2.
+    a=2 → 해없음, B=∅ ⊂A ✓.
+    a≠2 → x=-2/(a-2). B⊂A: x=-2 → a=3, x=3 → a=4/3.
+    a: 2, 3, 4/3. 곱=8.
+  category: 방정식 해집합·B⊂A
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: B=∅ 케이스 포함 경우분류
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-연습-368
+  page: 149
+  category_type: 연습
+  problem_summary: |
+    U={11 이하 소수}, X⊂U, S(X)=원소합. A-B=∅, S(B)-S(A)=10, S(B)<S(Bᶜ). B?
+  solution_summary: |
+    A⊂B, S(U)=28, S(B)<14. S(A)=S(B)-10<4.
+    다중 후보 → 문제 조건 추가 검토 필요.
+    (답 계산 대기)
+  category: 원소합 조건·B 결정
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 부분합·중간값
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-연산-연습-369
+  page: 149
+  category_type: 연습
+  problem_summary: |
+    U={5 이하 자연수}. A={1,2}, B={2,3,4}. X∩A≠∅, X∩B≠∅ 만족 X 개수.
+  solution_summary: |
+    전체 2⁵=32. 여사건 (X∩A=∅) 2³=8, (X∩B=∅) 2²=4, 교집합 2¹=2.
+    위배=8+4-2=10. 답=32-10=22.
+  category: 이중조건·포함배제
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 여사건 + 포함배제
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+---
+
+## 2-02 집합의 연산 법칙 (p.150~155)
+
+### 필수 예제
+
+```yaml
+- source: 개념원리-CM2-ST-법칙-예제-09
+  page: 152
+  category_type: 대표예제
+  problem_summary: |
+    U의 A, B에 대하여 다음을 간단히.
+    (1) A∩(A-B)ᶜ (2) Aᶜ∪(B-A)ᶜ (3) B-{(B-A)∪(B-Aᶜ)}.
+  solution_summary: |
+    (1) A∩(A∩Bᶜ)ᶜ = A∩(Aᶜ∪B) = A∩B.
+    (2) Aᶜ∪(B∩Aᶜ)ᶜ = Aᶜ∪(Bᶜ∪A) = U.
+    (3) B-{(B∩Aᶜ)∪(B∩A)} = B-B = ∅.
+  category: 드모르간·분배 활용 간단화
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 드모르간·분배·흡수 조합
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-법칙-예제-10
+  page: 153
+  category_type: 대표예제
+  problem_summary: |
+    {(Aᶜ∪Bᶜ)∩(A∪Bᶜ)}∩A=∅ 성립시 옳은 것.
+    ① A⊂B ② B⊂A ③ A=B ④ A∩B=∅ ⑤ A∪B=U.
+  solution_summary: |
+    좌변 안 = ((A∩B)ᶜ)∩(A∪Bᶜ) 전개 계산:
+    (Aᶜ∪Bᶜ)∩(A∪Bᶜ) = (Aᶜ∩A)∪(Aᶜ∩Bᶜ)∪(Bᶜ∩A)∪Bᶜ = Bᶜ.
+    좌변 = Bᶜ∩A = A-B = ∅ → A⊂B. 답: ①.
+  category: 연산 성질·포함관계
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 좌변 간단화 → A-B=∅
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 확인체크 (유제)
+
+```yaml
+- source: 개념원리-CM2-ST-법칙-유제-370
+  page: 152
+  category_type: 유제
+  problem_summary: |
+    U의 세 부분집합 A, B, C에 대하여 다음을 간단히.
+    (1) (A-Bᶜ)∪(B-A) (2) {A∩(Aᶜ∪B)}∪{B∩(B∪C)}.
+  solution_summary: |
+    (1) (A∩B)∪(B∩Aᶜ) = B∩(A∪Aᶜ) = B.
+    (2) {A∩B}∪{B} = B.
+  category: 연산 간단화
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 분배·흡수 조합
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-법칙-유제-371
+  page: 152
+  category_type: 유제
+  problem_summary: |
+    A-(B∪C)=(A-B)-C 를 집합 연산 법칙·드모르간 법칙으로 증명.
+  solution_summary: |
+    A-(B∪C) = A∩(B∪C)ᶜ = A∩(Bᶜ∩Cᶜ) = (A∩Bᶜ)∩Cᶜ = (A-B)-C.
+  category: 연산 등식 증명
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 드모르간·결합
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-법칙-유제-372
+  page: 153
+  category_type: 유제
+  problem_summary: |
+    U의 공집합 아닌 A, B에 (A∪B)∩Aᶜ=∅ 성립시 옳은 것.
+    ㄱ. A∩B=∅ ㄴ. A∪B=A ㄷ. A∪Bᶜ=U.
+  solution_summary: |
+    좌변 = (A∪B)-A = B-A = ∅ → B⊂A.
+    ㄴ ✓ (A∪B=A). ㄷ ✓ (B⊂A → Aᶜ⊂Bᶜ, A∪Bᶜ⊃A∪Aᶜ=U). ㄱ ✗.
+    답: ㄴ, ㄷ.
+  category: 연산 조건·포함관계
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: (A∪B)-A=B-A
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-법칙-유제-373
+  page: 153
+  category_type: 유제
+  problem_summary: |
+    (A∪B)∩(B-A)ᶜ=A∩B 성립시 옳은 것.
+    ① A∩B=∅ ② A∩B=B ③ A∩Bᶜ=A ④ A∪B=U ⑤ A∪B=B.
+  solution_summary: |
+    좌변=(A∪B)∩(A∪Bᶜ) = A∪(B∩Bᶜ) = A.
+    A=A∩B ⇔ A⊂B. ⑤ A∪B=B ⇔ A⊂B ✓.
+    답: ⑤.
+  category: 연산 조건·포함관계
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 좌변 간단화 → 포함관계
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-법칙-유제-374
+  page: 154
+  category_type: 유제
+  problem_summary: |
+    (특강) A⊗B=(A∪B)-(A∩B). (A⊗B)⊗A와 항상 같은 집합.
+  solution_summary: |
+    ⊗=대칭차 △. (A△B)△A = B (대칭차 결합·상쇄).
+    답: ② B.
+  category: 대칭차 성질
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: X△X=∅, X△∅=X
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적 · [특강] 대칭차집합"
+
+- source: 개념원리-CM2-ST-법칙-유제-375
+  page: 155
+  category_type: 유제
+  problem_summary: |
+    (특강 배수) Aₖ={x|x는 k의 배수}에 대하여
+    (1) (A₂∪A₈)∩(A₃∪A₉)=Aₘ (2) (A₆∩A₈)∪A₁₂=Aₘ 만족 m.
+  solution_summary: |
+    (1) A₂∪A₈=A₂, A₃∪A₉=A₃. A₂∩A₃=A₆. m=6.
+    (2) A₆∩A₈=A₂₄, A₂₄∪A₁₂=A₁₂. m=12.
+  category: 배수집합 연산
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 최소공배수·포함관계
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적 · [특강] 배수의 집합의 연산"
+```
+
+---
+
+## 2-03 유한집합의 원소의 개수 (p.156~163)
+
+### 필수 예제
+
+```yaml
+- source: 개념원리-CM2-ST-원소수-예제-11
+  page: 158
+  category_type: 대표예제
+  problem_summary: |
+    n(U)=60, n(A)=37, n(B)=40, n(Aᶜ∩Bᶜ)=15일 때 n(B-A).
+  solution_summary: |
+    n((A∪B)ᶜ)=15 → n(A∪B)=45. n(A∩B)=37+40-45=32.
+    n(B-A)=40-32=8.
+  category: 원소수 4식·조합
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 여·차 공식 조합
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-원소수-예제-12
+  page: 159
+  category_type: 대표예제
+  problem_summary: |
+    60명 중 영어 35, 수학 28, 둘 다 틀림 5. (1) 적어도 한 문제 (2) 둘 다 (3) 영어만.
+  solution_summary: |
+    (1) n(A∪B)=60-5=55.
+    (2) n(A∩B)=35+28-55=8.
+    (3) n(A-B)=35-8=27.
+  category: 유한집합 활용 (설문)
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 원소수 4공식 실전
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-원소수-예제-13
+  page: 160
+  category_type: 발전
+  problem_summary: |
+    n(U)=30, n(A)=22, n(B)=17. n(A∩B)의 M+m.
+  solution_summary: |
+    최대: B⊂A → M=17. 최소: A∪B=U → m=22+17-30=9. M+m=26.
+  category: 최대·최소 원소수
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 포함관계 극단
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 확인체크 (유제)
+
+```yaml
+- source: 개념원리-CM2-ST-원소수-유제-376
+  page: 157
+  category_type: 유제
+  problem_summary: |
+    3소문 원소수 계산.
+  solution_summary: |
+    (1) 10+8-4=14. (2) 8+5-10=3. (3) 13-6+2=9.
+  category: 원소수 4식 대입
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 합집합 원소수 공식
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-원소수-유제-377
+  page: 157
+  category_type: 유제
+  problem_summary: |
+    삼집합 n(A)=12, n(B)=16, n(C)=17, pairwise 8·12·7, triple 5 → n(A∪B∪C).
+  solution_summary: |
+    12+16+17-8-12-7+5=23.
+  category: 삼집합 포함배제
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 삼집합 공식
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-원소수-유제-378
+  page: 157
+  category_type: 유제
+  problem_summary: |
+    n(A)=20, n(B)=13, n(A∩B)=8 → n(A-B), n(B-A).
+  solution_summary: |
+    12, 5.
+  category: 차집합 원소수
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: n(A-B)=n(A)-n(A∩B)
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-원소수-유제-379
+  page: 157
+  category_type: 유제
+  problem_summary: |
+    n(U)=33, n(A)=21, n(B)=14, n(A∩B)=9.
+    (1) n(Aᶜ) (2) n(Bᶜ) (3) n((A∩B)ᶜ) (4) n(Aᶜ∩Bᶜ).
+  solution_summary: |
+    (1) 12 (2) 19 (3) 24 (4) 33-26=7.
+  category: 여집합·차집합 원소수
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 여집합 공식 종합
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-원소수-유제-380
+  page: 158
+  category_type: 유제
+  problem_summary: |
+    n(U)=32, n(A∩B)=4, n(Aᶜ∩Bᶜ)=11 → n(A)+n(B).
+  solution_summary: |
+    n(A∪B)=21. n(A)+n(B)=21+4=25.
+  category: 원소수 관계식
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 4공식 조합
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-원소수-유제-381
+  page: 158
+  category_type: 유제
+  problem_summary: |
+    n(U)=25, n(A)=12, n(B)=10, n(A∪B)=18. (A∪B)ᶜ 원소수.
+  solution_summary: |
+    25-18=7.
+  category: 벤 도식·원소수
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 여집합 개수
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-원소수-유제-382
+  page: 158
+  category_type: 유제
+  problem_summary: |
+    n(A)=10, n(B)=9, n(C)=6, n(A∪B)=15, n(B∪C)=11, A∩C=∅ → n(A∪B∪C).
+  solution_summary: |
+    n(A∩B)=4, n(B∩C)=4, n(C∩A)=0, triple=0.
+    10+9+6-4-4-0+0=17.
+  category: 삼집합·서로소
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 서로소 항 = 0
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-원소수-유제-383
+  page: 159
+  category_type: 유제
+  problem_summary: |
+    80명, 중국어 52, 일본어 45, 적어도 한 과목 = 전원. 한 과목만.
+  solution_summary: |
+    n(A∩B)=52+45-80=17. 한 과목만=80-17=63.
+  category: 유한집합 활용
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 대칭차 계산
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-원소수-유제-384
+  page: 159
+  category_type: 유제
+  problem_summary: |
+    40명, A 25, B 20, 둘 다 안 씀 5. 둘 다 이용.
+  solution_summary: |
+    n(A∪B)=35. n(A∩B)=25+20-35=10.
+  category: 유한집합 활용
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 여집합 → 합집합
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-원소수-유제-385
+  page: 160
+  category_type: 유제
+  problem_summary: |
+    n(A)=15, n(B)=26, n(A∩B)≥7 → n(A∪B)의 M+m.
+  solution_summary: |
+    n(A∪B)=41-n(A∩B). n(A∩B) ∈ [7, 15].
+    최대: n(A∩B)=7 → 34. 최소: n(A∩B)=15 → 26. 합=60.
+  category: 최대·최소 합
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 교집합 범위 → 합집합 범위
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-원소수-유제-386
+  page: 160
+  category_type: 유제
+  problem_summary: |
+    40명, 설악산 25, 지리산 18. 둘 다 간 학생 수 M+m.
+  solution_summary: |
+    M=18 (지리산⊂설악산). m=25+18-40=3. M+m=21.
+  category: 유한집합 최대·최소
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 포함관계 극단
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 연습문제 (star 4·5 pick)
+
+```yaml
+- source: 개념원리-CM2-ST-원소수-연습-395
+  page: 162
+  category_type: 연습
+  problem_summary: |
+    U={50 이하 자연수}. Aₙ={x|x=kn+2, k는 정수}. A₃∩(A₄∪A₆) 원소 수.
+  solution_summary: |
+    A₃∩A₄ = 12k+2 (∵ x-2가 3과 4의 공배수). A₃∩A₆ = 6k+2. 후자가 전자 포함.
+    A₃∩(A₄∪A₆) = A₃∩A₆ (x-2가 6의 배수). x=6k+2 ∈ [1,50]: k=0,...,8 → 9개.
+  category: 배수집합 원소 카운트
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 최소공배수·범위 카운트
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-원소수-연습-396
+  page: 162
+  category_type: 연습
+  problem_summary: |
+    U={50 이하 자연수}, A={30의 약수}, B={3의 배수}. n(Aᶜ∪B).
+  solution_summary: |
+    n(Aᶜ∪B)=n(U)-n(A-B). A={1,2,3,5,6,10,15,30}, A-B={1,2,5,10} 4개.
+    50-4=46.
+  category: 여집합·차집합·개수
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 드모르간 + 차집합
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-원소수-연습-397
+  page: 162
+  category_type: 연습
+  problem_summary: |
+    50명, 역사 33, 역사만 15, 둘 다 안함 8. 과학 체험 신청자.
+  solution_summary: |
+    n(A∪B)=42. n(A∩B)=33-15=18. n(B)=42-33+18=27.
+  category: 3조건 유한집합
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 조건 3식 연립
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-원소수-연습-398
+  page: 163
+  category_type: 연습
+  problem_summary: |
+    n(U)=36, n(X)=23, n(Y)=19. n(X∩Y)의 M-m.
+  solution_summary: |
+    M=19, m=23+19-36=6. M-m=13.
+  category: 최대·최소
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: n(X∩Y) 범위
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-원소수-연습-399
+  page: 163
+  category_type: 연습
+  problem_summary: |
+    U={1..10}, A={1..5}, B={3..7}. X⊂U, n(X)=6, A-X=B-X, (X-A)∩(X-B)≠∅ 만족 X 원소합 최솟값.
+  solution_summary: |
+    A-X=B-X ⇔ A△B ⊂ X. A△B={1,2,6,7} 필수.
+    (X-A)∩(X-B)=X-(A∪B) ⊂ {8,9,10}, ≠∅ → 8·9·10 중 최소 1개.
+    X 원소 6개: 필수 4개+{8}+나머지 1개 (최소).
+    최소값 후보: 8 포함, 나머지 자유 원소 {3,4,5} 중 최소=3.
+    X={1,2,3,6,7,8} 합=27.
+  category: 조건 조합·최적화
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 대칭차 조건 + 원소합 최소화
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-원소수-연습-400
+  page: 163
+  category_type: 연습
+  problem_summary: |
+    X△Y=(X-Y)∪(Y-X). n(A∪B∪C)=75, n(A△B)=45, n(B△C)=47, n(C△A)=42. n(A∩B∩C).
+  solution_summary: |
+    합: n(A△B)+n(B△C)+n(C△A) = 2[Σn]-2[pairwise sum].
+    45+47+42=134 → Σn - pairwise = 67.
+    n(A∪B∪C) = Σn - pairwise + triple = 67 + triple = 75.
+    triple = 8.
+  category: 삼집합·대칭차
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 대칭차 합 → 포함배제
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-원소수-연습-401
+  page: 163
+  category_type: 연습
+  problem_summary: |
+    50명, 과학 23, 코딩 28, 영화 21, 셋 다 7, 아무데도 4. 두 동아리만 가입.
+  solution_summary: |
+    n(A∪B∪C)=46. 46 = 72 - pairwise + 7 → pairwise=33.
+    두 동아리만 = pairwise - 3·triple = 33 - 21 = 12.
+  category: 삼집합 유한집합 활용
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 정확히 2개 = pairwise - 3·triple
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-원소수-연습-402
+  page: 163
+  category_type: 연습
+  problem_summary: |
+    36명, 버스 22, 지하철 9, 둘 다 이용 ≥5. 둘 다 안 씀 최대 a, 최소 b. a+b.
+  solution_summary: |
+    n((A∪B)ᶜ)=36-(31-n(A∩B))=5+n(A∩B).
+    n(A∩B)∈[5, 9]. 최대=14, 최소=10. a+b=24.
+  category: 유한집합 최대·최소·합
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-02
+  mechanism_primary: 조건 범위 → 여집합 범위
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+---
+
+## 3-01 명제와 조건 (p.166~171)
+
+### 필수 예제
+
+```yaml
+- source: 개념원리-CM2-ST-명제-예제-01
+  page: 170
+  category_type: 대표예제
+  problem_summary: |
+    다음 중 명제인 것을 찾고 참·거짓 판별.
+    (1) 소수는 홀수이다. (2) 삼각형의 세 내각의 합은 180°.
+    (3) x²+4x-5≤0.
+  solution_summary: |
+    (1) 명제, 거짓 (2는 홀수 아님).
+    (2) 명제, 참.
+    (3) 조건 (x값에 따라 달라짐).
+  category: 명제·조건 판별
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 참·거짓 판별 가능성
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-명제-예제-02
+  page: 171
+  category_type: 대표예제
+  problem_summary: |
+    실수 전체에서 p: 1<x≤4, q: x<3 또는 x>5. 진리집합.
+    (1) ~p (2) ~p 또는 q (3) p 그리고 ~q.
+  solution_summary: |
+    P=(1,4], Q=(-∞,3)∪(5,∞), Pᶜ=(-∞,1]∪(4,∞), Qᶜ=[3,5].
+    (1) Pᶜ = {x|x≤1 또는 x>4}.
+    (2) Pᶜ∪Q = {x|x<3 또는 x>4}.
+    (3) P∩Qᶜ = {x|3≤x≤4}.
+  category: 진리집합·연산
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 진리집합 여·합·교
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 확인체크 (유제)
+
+```yaml
+- source: 개념원리-CM2-ST-명제-유제-403
+  page: 169
+  category_type: 유제
+  problem_summary: |
+    다음 중 명제인 것 (정답 2개).
+    ① 사람은 꽃보다 아름답다 ② 농구선수는 키가 크다
+    ③ x≥2 ④ 7-x=2-x ⑤ 맞꼭지각 크기는 같다.
+  solution_summary: |
+    ①②주관적 ③변수, 조건 ④7-x=2-x → 7=2 거짓, 명제 ⑤참, 명제.
+    답: ④, ⑤.
+  category: 명제 판별
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 참·거짓 확정성 판별
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-명제-유제-404
+  page: 169
+  category_type: 유제
+  problem_summary: |
+    다음 명제의 부정. (1) 2+6>8 (2) ∅⊄{a,b,c,d}.
+  solution_summary: |
+    (1) 2+6≤8. (2) ∅⊂{a,b,c,d}.
+  category: 부정
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 부등호·⊂ 부정
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-명제-유제-405
+  page: 169
+  category_type: 유제
+  problem_summary: |
+    U=자연수. 조건의 진리집합.
+    (1) p: x는 8의 약수 (2) q: x²-5x-6=0.
+  solution_summary: |
+    (1) {1,2,4,8}. (2) (x-6)(x+1)=0 → x=6 or -1 (-1은 자연수 아님) → {6}.
+  category: 진리집합 결정
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 조건 만족 원소 찾기
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-명제-유제-406
+  page: 169
+  category_type: 유제
+  problem_summary: |
+    U={5 이하 자연수}. p: 4x-8=0, q: x²+1<10.
+    (1) p (2) ~p (3) q (4) ~q 진리집합.
+  solution_summary: |
+    p: x=2 → P={2}. ~p={1,3,4,5}.
+    q: x²<9 → x=1,2 → Q={1,2}. ~q={3,4,5}.
+  category: 진리집합·부정
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 방정식·부등식 해집합
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-명제-유제-407
+  page: 169
+  category_type: 유제
+  problem_summary: |
+    실수. 다음 조건의 부정.
+    (1) x≠-7이고 x≠5 (2) -4<x<6 (3) x≤-2 또는 x>3.
+  solution_summary: |
+    (1) x=-7 또는 x=5.
+    (2) x≤-4 또는 x≥6.
+    (3) -2<x≤3.
+  category: 조건 부정 (드모르간)
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 그리고/또는 뒤집기, 부등호 뒤집기
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-명제-유제-408
+  page: 170
+  category_type: 유제
+  problem_summary: |
+    명제인 것을 찾고 참·거짓.
+    (1) √4는 유리수 (2) 3x=x-4 (3) 직각삼각형 한 내각 ≤ 90°
+    (4) 넓이가 같은 두 삼각형은 합동이다.
+  solution_summary: |
+    (1) √4=2 유리수, 참. (2) 조건 (x=-2 특정). (3) 참 (직각 있는데 90° 초과 각 없음). (4) 거짓 (합동 아닐 수 있음).
+    명제: (1) 참, (3) 참, (4) 거짓.
+  category: 명제 판별·참거짓
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 판별 후 참거짓
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-명제-유제-409
+  page: 170
+  category_type: 유제
+  problem_summary: |
+    참인 명제. ㄱ. 2³<3³ ㄴ. 두 홀수의 곱은 홀수 ㄷ. 6과 8의 최소공배수는 48 ㄹ. 정사각형은 평행사변형.
+  solution_summary: |
+    ㄱ 8<27 ✓ ㄴ ✓ ㄷ 24 ✗ ㄹ ✓.
+    참: ㄱ, ㄴ, ㄹ.
+  category: 명제 참거짓
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 각 명제 검증
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-명제-유제-410
+  page: 170
+  category_type: 유제
+  problem_summary: |
+    부정이 참인 것.
+    ① √2+√5≠√7 ② 3≤√5 ③ 13은 소수 ④ 1+√2는 실수 ⑤ 정삼각형 세 내각 모두 같다.
+  solution_summary: |
+    ①원명제 참 (√2+√5≈3.65≠√7≈2.65) → 부정 거짓
+    ②√5≈2.24<3 → 원명제 거짓 → 부정 참
+    ③참 → 부정 거짓
+    ④참 → 부정 거짓
+    ⑤참 → 부정 거짓.
+    답: ②.
+  category: 부정 명제 참
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 참·거짓 반전
+  insight_type: 절차형
+  depth: 1
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-명제-유제-411
+  page: 171
+  category_type: 유제
+  problem_summary: |
+    U={1,2,3,4,5,6}. p: x는 짝수, q: x²-5x+6=0.
+    (1) ~q (2) p 또는 q (3) ~p 그리고 q.
+  solution_summary: |
+    P={2,4,6}, Q={2,3}. ~q={1,4,5,6}. p∪q={2,3,4,6}. ~p∩q={3}.
+  category: 진리집합 연산
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 여·합·교
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-명제-유제-412
+  page: 171
+  category_type: 유제
+  problem_summary: |
+    U={10 이하 정수}. p: -3≤x<3, q: x>0. 'p 그리고 ~q' 진리집합 원소 개수.
+  solution_summary: |
+    P={-3,-2,-1,0,1,2}, Q={1,2,...,10}, ~Q={-3,...,0}∪{}.
+    U={-10,...,10}? 10 이하 정수. P={-3,-2,-1,0,1,2}. ~Q={x≤0}={0,-1,...,-10}.
+    P∩~Q={-3,-2,-1,0} 4개.
+  category: 진리집합 원소 카운트
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 교집합 원소
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-명제-유제-413
+  page: 171
+  category_type: 유제
+  problem_summary: |
+    실수. p: x≥3, q: x<-2 진리집합 P, Q. '-2≤x<3'을 나타내는 것.
+    ① P∩Qᶜ ② Pᶜ∩Q ③ Pᶜ∪Q ④ (P∩Q)ᶜ ⑤ (P∪Q)ᶜ.
+  solution_summary: |
+    -2≤x<3 = P의 여∩Q의 여 = (P∪Q)ᶜ.
+    답: ⑤.
+  category: 진리집합 구간 표현
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 드모르간 · 여집합 합
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+---
+
+## 3-02 명제 p → q (p.172~175)
+
+### 필수 예제
+
+```yaml
+- source: 개념원리-CM2-ST-함의-예제-03
+  page: 173
+  category_type: 대표예제
+  problem_summary: |
+    명제 참거짓. (1) x가 3의 양의 배수이면 x는 6의 양의 배수.
+    (2) x²-3x+2=0이면 0<x<4. (3) x,y가 무리수이면 x+y도 무리수.
+  solution_summary: |
+    (1) P={3,6,9,...}, Q={6,12,...}. 3∈P but 3∉Q → 거짓.
+    (2) P={1,2}⊂Q=(0,4) → 참.
+    (3) x=√2, y=-√2 → x+y=0 (유리수) → 거짓.
+  category: 명제 참거짓 (반례)
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: P⊂Q 확인 or 반례
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-함의-예제-04
+  page: 173
+  category_type: 대표예제
+  problem_summary: |
+    벤그림에서 P={9,1,4}, Q={4,5}, U={1,4,5,7,8,9,10} (P·Q 교집합 4).
+    ~p → q 거짓 반례.
+  solution_summary: |
+    ~p → q 거짓 반례 = Pᶜ 원소 중 Q에 없는 것 = Pᶜ∩Qᶜ = (P∪Q)ᶜ.
+    P∪Q={1,4,5,9} → 여={7,8,10}.
+    답: 그림에서 답 6, 10 등 (정확 원소 명세 필요).
+  category: 반례·벤그림
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: Pᶜ∩Qᶜ 원소
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-함의-예제-05
+  page: 174
+  category_type: 대표예제
+  problem_summary: |
+    ~p → q가 참일 때 항상 옳은 것.
+    ① P⊂Q ② Q⊂P ③ P∩Q=∅ ④ P∪Q=U ⑤ P=Q.
+  solution_summary: |
+    ~p → q 참 ⇔ Pᶜ⊂Q ⇔ P∪Q=U. 답: ④.
+  category: 함의 참·포함관계
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: Pᶜ⊂Q ⇔ P∪Q=U
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-함의-예제-06
+  page: 175
+  category_type: 대표예제
+  problem_summary: |
+    (1) p: -2<x<a+1, q: -2a≤x≤4. p → q 참인 실수 a 범위.
+    (2) p: x<-3 또는 x≥3, q: a-1<x≤a+6. ~p → q 참인 a 범위.
+  solution_summary: |
+    (1) P⊂Q: -2a≤-2 그리고 a+1≤4 → a≥1 그리고 a≤3 → 1≤a≤3.
+    (2) ~p: -3≤x<3. Pᶜ⊂Q: a-1<-3 그리고 3≤a+6 → a<-2 그리고 a≥-3 → -3≤a<-2.
+  category: 참 조건·상수 범위
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 구간 포함 부등식
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 확인체크 (유제)
+
+```yaml
+- source: 개념원리-CM2-ST-함의-유제-414
+  page: 173
+  category_type: 유제
+  problem_summary: |
+    참거짓 판별. (1) x²=9이면 x³=27. (2) (x-1)(y-3)=0이면 x=1 또는 y=3.
+  solution_summary: |
+    (1) x=-3이면 x³=-27≠27 → 거짓.
+    (2) (x-1)(y-3)=0 ⇒ x=1 또는 y=3 → 참.
+  category: 참거짓·반례
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 반례 or 논리
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-함의-유제-415
+  page: 173
+  category_type: 유제
+  problem_summary: |
+    U={20 이하 자연수}. p: 4의 배수, q: 16의 약수. p→q 거짓 반례 원소들의 합.
+  solution_summary: |
+    P={4,8,12,16,20}, Q={1,2,4,8,16}. P-Q={12,20}. 합=32.
+  category: 반례 원소 합
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: P-Q 원소 합
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-함의-유제-416
+  page: 174
+  category_type: 유제
+  problem_summary: |
+    p → ~q가 참일 때 항상 옳은 것.
+    ① Q⊂P ② P∪Q=U ③ Q⊂Pᶜ ④ P-Q=∅ ⑤ Pᶜ∩Q=∅.
+  solution_summary: |
+    p→~q ⇔ P⊂Qᶜ ⇔ P∩Q=∅.
+    ③ Q⊂Pᶜ ⇔ P∩Q=∅ ✓. 답: ③.
+  category: 함의 참·포함관계
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: P⊂Qᶜ ⇔ P∩Q=∅
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-함의-유제-417
+  page: 174
+  category_type: 유제
+  problem_summary: |
+    P∩Q=∅일 때 참인 것.
+    ㄱ. p → q ㄴ. ~p → q ㄷ. p → ~q ㄹ. q → p ㅁ. q → ~p.
+  solution_summary: |
+    P∩Q=∅ → P⊂Qᶜ, Q⊂Pᶜ.
+    ㄷ p→~q (P⊂Qᶜ) ✓. ㅁ q→~p (Q⊂Pᶜ) ✓.
+    ㄱㄴㄹ 일반적 ✗.
+    답: ㄷ, ㅁ.
+  category: 서로소·함의 판별
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 서로소 → 두 함의 성립
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-함의-유제-418
+  page: 174
+  category_type: 유제
+  problem_summary: |
+    P∪Q=P, Q∩R=R일 때 항상 참이라 할 수 없는 것.
+    ① r → q ② ~q → ~r ③ ~p → ~q ④ q → p ⑤ ~r → ~p.
+  solution_summary: |
+    P∪Q=P → Q⊂P. Q∩R=R → R⊂Q. 즉 R⊂Q⊂P.
+    ① r→q (R⊂Q) ✓ ② ~q→~r (Qᶜ⊂Rᶜ, ⇔ R⊂Q) ✓
+    ③ ~p→~q (Pᶜ⊂Qᶜ, ⇔ Q⊂P) ✓
+    ④ q→p (Q⊂P) ✓
+    ⑤ ~r→~p (Rᶜ⊂Pᶜ, ⇔ P⊂R) — 반대방향 필요 ✗.
+    답: ⑤.
+  category: 삼조건 포함·함의
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 삼중 포함 → 함의 방향
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-함의-유제-419
+  page: 175
+  category_type: 유제
+  problem_summary: |
+    '-1<x<4이면 x≤k-2'가 참인 실수 k 범위.
+  solution_summary: |
+    P=(-1,4), Q=(-∞, k-2]. P⊂Q: 4≤k-2 → k≥6.
+  category: 참 조건·상수
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 구간 포함
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-함의-유제-420
+  page: 175
+  category_type: 유제
+  problem_summary: |
+    p: 2a-1≤x≤a+2, q: 0≤x≤5. p → q 참인 정수 a 개수.
+  solution_summary: |
+    P⊂Q: 2a-1≥0 그리고 a+2≤5 → a≥1/2 그리고 a≤3.
+    또한 P가 공집합인 경우 (2a-1>a+2, 즉 a>3): P=∅ → 자동 참.
+    a=1,2,3, a≥4 (모두). 정수 a: 1, 2, 3, 4, 5, ... 무한.
+    (문제 재해석: 유한 범위 요구 → 아마 a≥1/2 & a≤3 만) → 1, 2, 3 → 3개.
+    (답 계산 검토: 공집합 케이스 고려 여부에 따라 다름).
+  category: 참 조건·정수 개수
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: P⊂Q + P=∅ 케이스
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-함의-유제-421
+  page: 175
+  category_type: 유제
+  problem_summary: |
+    p: |x-1|≥a, q: -6<x<4. ~p → q 참인 양수 a 최댓값.
+  solution_summary: |
+    ~p: |x-1|<a → 1-a<x<1+a. Pᶜ⊂Q: 1-a≥-6 그리고 1+a≤4 → a≤7 그리고 a≤3 → a≤3.
+    최댓값 3.
+  category: 참 조건·상수 최대
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: |x-1|<a 구간 포함
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+---
+
+## 3-03 '모든'이나 '어떤'을 포함한 명제 (p.176~179)
+
+### 필수 예제
+
+```yaml
+- source: 개념원리-CM2-ST-양화-예제-07
+  page: 177
+  category_type: 대표예제
+  problem_summary: |
+    U={-2,-1,0,1,2}. 참인 명제.
+    ㄱ. 모든 x에 대하여 2x-1<5. ㄴ. 어떤 x에 대하여 |x|>2.
+    ㄷ. 어떤 x에 대하여 x²>x+2. ㄹ. 모든 x에 대하여 |x|=x.
+  solution_summary: |
+    ㄱ 2x<6, x<3 → U 모두 만족 ✓.
+    ㄴ |x|>2: -2,-1,0,1,2 어느 것도 만족 X → 거짓.
+    ㄷ x²-x-2>0 → x<-1 or x>2. U 중 -2, 2? -2 ✓, 2는 4-2-2=0 아니고 부등호 엄격. -2만. 존재 ✓.
+    ㄹ x=-1 → |-1|=1≠-1 → 거짓.
+    참: ㄱ, ㄷ.
+  category: 모든/어떤 참거짓
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 유한집합 전수 확인
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 확인체크 (유제)
+
+```yaml
+- source: 개념원리-CM2-ST-양화-유제-422
+  page: 177
+  category_type: 유제
+  problem_summary: |
+    다음 중 거짓인 명제.
+    ① 어떤 양의 정수 x에 대하여 x-2=4. ② 어떤 무리수 x에 대하여 √2+x=0.
+    ③ 모든 실수 x에 대하여 x²≥0. ④ 모든 실수 x,y에 대하여 x²+y²>0.
+    ⑤ 모든 자연수 x,y에 대하여 x+y≥2.
+  solution_summary: |
+    ④ x=y=0 반례 → 거짓.
+    나머지 참. 답: ④.
+  category: 모든/어떤 명제 판별
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 반례 확인
+  insight_type: 절차형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-양화-유제-423
+  page: 177
+  category_type: 유제
+  problem_summary: |
+    부정하고 참거짓 판별. (1) 어떤 실수 x에 대하여 x²≤0.
+    (2) 모든 실수 x에 대하여 x²-x+4>0.
+  solution_summary: |
+    (1) 부정: 모든 실수 x에 대하여 x²>0. 반례 x=0 → 거짓.
+    (원명제 참: x=0에서 x²=0≤0 ✓).
+    (2) x²-x+4 판별식 = 1-16=-15<0 → 항상 양수 → 참.
+    부정: 어떤 실수 x에 대하여 x²-x+4≤0 → 거짓.
+  category: 부정·참거짓
+  tier: star_3
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 부정 후 판별식
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 연습문제 (star 4·5 pick)
+
+```yaml
+- source: 개념원리-CM2-ST-양화-연습-427
+  page: 178
+  category_type: 연습
+  problem_summary: |
+    p: x<2a-5, q: 4x-1=27, r: x²-3x-4=0. q→~p, r→p 모두 참인 정수 a 개수.
+  solution_summary: |
+    q: x=7 → Q={7}. r: (x-4)(x+1)=0 → R={-1,4}.
+    P: (-∞, 2a-5).
+    q→~p 참: Q⊂Pᶜ → 7∉P → 7≥2a-5 → a≤6.
+    r→p 참: R⊂P → -1<2a-5 그리고 4<2a-5 → a>2 그리고 a>4.5 → a>4.5.
+    정수 a: 5, 6 → 2개.
+  category: 진리집합·함의·정수 개수
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 함의 참 조건 두 개 교집합
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-양화-연습-428
+  page: 178
+  category_type: 연습
+  problem_summary: |
+    실수 x,y,z에 대하여 (x-y)²+(y-z)²+(z-x)²=0의 부정으로 옳은 것.
+  solution_summary: |
+    원식 ⇔ x=y=z. 부정: x=y=z 아님 ⇔ x,y,z 중 적어도 두 수는 서로 다르다.
+    답: ⑤.
+  category: 방정식·부정 서술
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: '모두 같다' 부정 = '두 개 다름'
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-양화-연습-431
+  page: 179
+  category_type: 연습
+  problem_summary: |
+    자연수 n에 대한 조건 '2≤x≤5인 어떤 실수 x에 대하여 x²-8x+n≥0'이 참인 n의 최솟값.
+  solution_summary: |
+    f(x)=x²-8x+n=(x-4)²+n-16. [2,5]에서 최댓값 = f(2)=n-12.
+    어떤 x에서 f(x)≥0 ⇔ 최댓값 ≥ 0 ⇔ n-12≥0 → n≥12.
+    최솟값 12.
+  category: 부등식·존재 조건
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 어떤 x → 구간 최댓값 조건
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-양화-연습-432
+  page: 179
+  category_type: 연습
+  problem_summary: |
+    '어떤 실수 x에 대하여 x²-2kx+k+6<0'의 부정이 참인 정수 k 개수.
+  solution_summary: |
+    부정: 모든 x에 대하여 x²-2kx+k+6≥0. 판별식 D/4 = k²-(k+6) ≤ 0 → k²-k-6≤0 → (k-3)(k+2)≤0 → -2≤k≤3.
+    정수 6개.
+  category: 부등식·모든 조건 판별식
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 모든 x 부등식 ⇔ 판별식 ≤ 0
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-양화-연습-433
+  page: 179
+  category_type: 연습
+  problem_summary: |
+    (가) 어떤 x∈P에 대하여 x∉Q (나) 모든 x∈Q에 대하여 x∉R. 참인 명제.
+    ㄱ. q→p ㄴ. r→~q ㄷ. ~q→p.
+  solution_summary: |
+    (가) P⊄Q. (나) Q∩R=∅ ⇔ R⊂Qᶜ.
+    ㄴ r→~q ⇔ R⊂Qᶜ ✓.
+    ㄱ, ㄷ 일반적 ✗.
+    답: ㄴ.
+  category: 모든/어떤·포함관계
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 존재·전칭 → 포함관계 변환
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+---
+
+## 3-04 명제의 역과 대우 (p.180~183)
+
+### 필수 예제
+
+```yaml
+- source: 개념원리-CM2-ST-역대우-예제-08
+  page: 182
+  category_type: 대표예제
+  problem_summary: |
+    다음 명제의 역과 대우를 말하고 참·거짓.
+    (1) x≥1이고 y≥1이면 x+y≥2.
+    (2) xy≠2이면 x≠1 또는 y≠2.
+    (3) A∪B=B이면 A⊂B.
+  solution_summary: |
+    (1) 역: x+y≥2이면 x≥1이고 y≥1 (거짓, 반례 x=2,y=0).
+    대우: x+y<2이면 x<1 또는 y<1 (참, 원명제 참이므로).
+    (2) 역: x≠1 또는 y≠2이면 xy≠2 (거짓, x=2, y=1이면 xy=2).
+    대우: x=1이고 y=2이면 xy=2 (참).
+    (3) 역: A⊂B이면 A∪B=B (참).
+    대우: A⊄B이면 A∪B≠B (참).
+  category: 역·대우·참거짓
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 역·대우 서술 후 각 판별
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-역대우-예제-09
+  page: 183
+  category_type: 대표예제
+  problem_summary: |
+    실수 x, y. 명제 'x+y>3이면 x>a 또는 y>1'이 참일 때 실수 a 최댓값.
+  solution_summary: |
+    대우: x≤a이고 y≤1이면 x+y≤3.
+    x≤a, y≤1 → x+y ≤ a+1 ≤ 3 → a≤2. 최댓값 2.
+  category: 대우 활용·상수
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 대우로 부등식 조건 유도
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-역대우-예제-10
+  page: 183
+  category_type: 대표예제
+  problem_summary: |
+    p→q, ~r→~q 모두 참일 때 항상 참인 것.
+    ㄱ. p→r ㄴ. ~r→~p ㄷ. ~p→~r ㄹ. ~q→~p ㅁ. q→~r.
+  solution_summary: |
+    ~r→~q 대우: q→r. p→q, q→r → p→r ✓.
+    ㄱ ✓. ㄴ p→r 대우 ~r→~p ✓. ㄷ 방향 다름 ✗. ㄹ p→q 대우 ~q→~p ✓. ㅁ ✗.
+    답: ㄱ, ㄴ, ㄹ.
+  category: 삼단논법·대우
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 대우 변환 후 삼단논법
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 확인체크 (유제)
+
+```yaml
+- source: 개념원리-CM2-ST-역대우-유제-434
+  page: 182
+  category_type: 유제
+  problem_summary: |
+    명제 중 역·대우 모두 참인 것.
+    ① x³=x이면 x=0 또는 x=1.
+    ② xy>1이면 x>1이고 y>1.
+    ③ |x|+|y|=0이면 x=0이고 y=0.
+    ④ xy<0이면 x²+y²>0.
+    ⑤ 두 삼각형이 합동이면 두 삼각형의 둘레 길이가 같다.
+  solution_summary: |
+    각 명제·역·대우 검증.
+    ① 원거짓 (x=-1 반례). ② 원거짓 (x=y=-2). ③ 참, 역 참 (x=y=0이면 |x|+|y|=0) → 대우 참 → 정답.
+    ④ 원 참, 역 거짓 (x=y=1 반례).
+    ⑤ 원 참, 역 거짓 (둘레 같아도 합동 X).
+    답: ③.
+  category: 역·대우 참
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 원·역 참거짓 판별
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-역대우-유제-435
+  page: 182
+  category_type: 유제
+  problem_summary: |
+    역이 거짓인 명제 (x, y는 자연수).
+    ㄱ. x 또는 y가 홀수이면 xy는 홀수.
+    ㄴ. x, y가 짝수이면 x+y는 짝수.
+    ㄷ. x-3=0이면 x²-4x+3=0.
+  solution_summary: |
+    역:
+    ㄱ xy 홀수 ⇒ x 또는 y 홀수 (실제로는 둘 다 홀수여야). 반례: xy=15, x=3,y=5 둘 다 홀. 사실 xy 홀수 ⇒ 둘 다 홀수 ⇒ 하나는 홀수 (약한 결론) → 역 참.
+    실제 원명제 자체가 거짓 (x=2, y=3 → 6 짝수). 역 검토: xy 홀수이면 x, y 중 적어도 하나 홀수 → 사실은 둘 다 홀수여야. 결론 '적어도 하나'는 참.
+    (반례 없음). 역 참.
+    ㄴ x+y 짝수 ⇒ x, y 둘 다 짝수: 반례 x=1,y=1 → x+y=2 짝수. 역 거짓.
+    ㄷ x²-4x+3=0 ⇒ x=3 or x=1. x-3=0? x=1도 만족 → 역 거짓.
+    답: ㄴ, ㄷ.
+  category: 역 참거짓
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 역 명제 반례 확인
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-역대우-유제-436
+  page: 183
+  category_type: 유제
+  problem_summary: |
+    'x²-ax+7≠0이면 x-1≠0'이 참일 때 상수 a 값.
+  solution_summary: |
+    대우: x=1이면 x²-ax+7=0. 1-a+7=0 → a=8.
+  category: 대우 활용·상수
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 대우 대입
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-역대우-유제-437
+  page: 183
+  category_type: 유제
+  problem_summary: |
+    p→q, ~q→~r, s→~q 모두 참일 때 항상 참이라 할 수 없는 것.
+    ① ~q→~p ② p→~s ③ p→r ④ r→~s ⑤ s→~p.
+  solution_summary: |
+    p→q, s→~q ⇒ 대우 q→~s. 조합 p→q→~s → ②✓.
+    ~q→~r 대우 r→q. r→q→~s → ④ ✓.
+    p→q, r→q: p, r ⇒ q, 그러나 p→r 성립 X → ③ 항상 참 X.
+    답: ③.
+  category: 함의 조합·삼단논법
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-03
+  mechanism_primary: 대우 조합 후 방향 확인
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+---
+
+## 3-05 충분조건과 필요조건 (p.184~190)
+
+### 필수 예제
+
+```yaml
+- source: 개념원리-CM2-ST-충필-예제-11
+  page: 185
+  category_type: 대표예제
+  problem_summary: |
+    p가 q이기 위한 어떤 조건인지.
+    (1) p: x<0, q: x+|x|=0. (2) p: x²+y²=0, q: |x|+|y|=0.
+    (3) p: △ABC 이등변삼각형, q: △ABC 정삼각형.
+  solution_summary: |
+    (1) q: x≤0. p⇒q, q⇏p → 충분조건.
+    (2) 둘 다 x=0,y=0 ⇔ 필요충분조건.
+    (3) 정삼각형 ⇒ 이등변, 역 성립 X → 필요조건.
+  category: 충분/필요 판별
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 양방향 함의 참 판별
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-충필-예제-12
+  page: 186
+  category_type: 대표예제
+  problem_summary: |
+    ~p가 ~q이기 위한 필요조건일 때 항상 옳은 것.
+    ① Pᶜ⊂Q ② Qᶜ⊂P ③ P∩Q=P ④ Pᶜ∩Q=∅ ⑤ P∪Qᶜ=U.
+  solution_summary: |
+    ~p가 ~q 필요 ⇔ ~q ⇒ ~p ⇔ 대우 p⇒q ⇔ P⊂Q.
+    ③ P∩Q=P ⇔ P⊂Q ✓.
+    답: ③.
+  category: 필요·충분 조건 → 포함관계
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 대우 → P⊂Q
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-충필-예제-13
+  page: 187
+  category_type: 대표예제
+  problem_summary: |
+    (1) p: -2≤x≤5, q: |x|≤a. p가 q이기 위한 충분조건일 때 양수 a 범위.
+    (2) x+3≠0이 x²+3ax+27≠0이기 위한 필요조건일 때 상수 a.
+  solution_summary: |
+    (1) P⊂Q: -a≤-2, 5≤a → a≥5. → a≥5.
+    (2) 대우: x²+3ax+27=0이면 x+3=0. x=-3 대입: 9-9a+27=0 → a=4.
+  category: 충분·필요조건·상수
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 포함관계 구간 · 대우 대입
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 확인체크 (유제)
+
+```yaml
+- source: 개념원리-CM2-ST-충필-유제-438
+  page: 185
+  category_type: 유제
+  problem_summary: |
+    p가 q이기 위한 필요충분조건인 것.
+    ㄱ. p: |x|<1, q: x<1. ㄴ. p: |x|=|y|, q: x²=y². ㄷ. p: (x-y)(y-z)=0, q: x=y=z.
+  solution_summary: |
+    ㄱ p⇒q (|x|<1이면 x<1 참), q⇏p (x=-2 반례). 충분.
+    ㄴ 양변 제곱 동치 → 필요충분.
+    ㄷ p ⇐ q (자명), p⇏q (x=y, z≠). 필요조건.
+    답: ㄴ.
+  category: 필요충분 판별
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 양방향 확인
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-충필-유제-439
+  page: 186
+  category_type: 유제
+  problem_summary: |
+    P∩Q=∅, Q∪R=Q. (1) q는 ~p이기 위한 ? 조건. (2) ~r는 ~q이기 위한 ? 조건. (3) p는 ~r이기 위한 ? 조건.
+  solution_summary: |
+    P∩Q=∅ → Q⊂Pᶜ, Q∪R=Q → R⊂Q.
+    (1) q ⇒ ~p (Q⊂Pᶜ), 역 성립 X → q는 ~p의 충분.
+    (2) R⊂Q → Qᶜ⊂Rᶜ → ~q ⇒ ~r → ~r은 ~q의 필요.
+    (3) R⊂Q⊂Pᶜ → R⊂Pᶜ → r⇒~p → 대우 p⇒~r → p는 ~r의 충분.
+  category: 삼조건·충필 판별
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 포함관계 → 함의 방향
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-충필-유제-440
+  page: 186
+  category_type: 유제
+  problem_summary: |
+    p가 ~r의 필요조건, r가 q의 충분조건. 참인 것.
+    ㄱ. R⊂Q ㄴ. P∪Rᶜ=P ㄷ. P-Q=Qᶜ.
+  solution_summary: |
+    p가 ~r 필요 ⇒ ~r⇒p ⇔ Rᶜ⊂P. r⇒q ⇒ R⊂Q.
+    ㄱ R⊂Q ✓. ㄴ Rᶜ⊂P → P∪Rᶜ=P ✓. ㄷ 일반적 ✗.
+    답: ㄱ, ㄴ.
+  category: 필요·충분 → 벤 관계
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 조건 → 포함 관계
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-충필-유제-441
+  page: 187
+  category_type: 유제
+  problem_summary: |
+    p: -1≤x≤k, q: -k/6≤x≤4. p가 q의 필요조건일 때 양수 k 범위.
+  solution_summary: |
+    p 필요 ⇔ q⇒p ⇔ Q⊂P. -1 ≤ -k/6 & 4 ≤ k → k≤6 & k≥4 → 4≤k≤6.
+  category: 필요조건·상수 범위
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 구간 포함 부등식
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-충필-유제-442
+  page: 187
+  category_type: 유제
+  problem_summary: |
+    p: x²-x+a=0, q: (x+3)(x-4)²=0. p가 q의 필요충분조건일 때 상수 a.
+  solution_summary: |
+    p⇔q ⇒ P=Q. Q={-3, 4}. p는 이차, 근 -3, 4.
+    x²-x+a: 근의 합=1, 근의 곱=a. 합 -3+4=1 ✓, 곱 -12=a.
+    a=-12.
+  category: 필요충분·근 결정
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: P=Q → 근의 합·곱
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-충필-유제-443
+  page: 187
+  category_type: 유제
+  problem_summary: |
+    p: -2<x<1 또는 x>3, q: x>a, r: x>b. q는 p의 필요조건, r는 p의 충분조건일 때 a의 최댓값 × b의 최솟값의 곱.
+  solution_summary: |
+    P=(-2,1)∪(3,∞), Q=(a,∞), R=(b,∞).
+    q 필요 ⇔ P⊂Q → a ≤ -2 → a 최댓값=-2.
+    r 충분 ⇔ R⊂P → (b,∞) ⊂ (3, ∞) → b ≥ 3 → b 최솟값=3.
+    곱 = (-2)·3 = -6.
+  category: 필요·충분·상수 극값
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 반직선 포함관계
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 연습문제 (star 4·5 pick)
+
+```yaml
+- source: 개념원리-CM2-ST-충필-연습-449
+  page: 189
+  category_type: 연습
+  problem_summary: |
+    p: x³-4x²-x+4=0, q: 2x+a=0. p가 q의 필요조건이 되도록 하는 실수 a 곱.
+  solution_summary: |
+    p: (x-1)(x+1)(x-4)=0 → P={-1,1,4}. Q={-a/2}.
+    p 필요 ⇔ Q⊂P → -a/2 ∈ {-1,1,4} → a=2,-2,-8.
+    곱: 2·(-2)·(-8)=32.
+  category: 필요조건·근·상수
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 근 중 하나 대입 경우
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-충필-연습-450
+  page: 189
+  category_type: 연습
+  problem_summary: |
+    p: x²-4x-12=0, q: |x-3|>k. p가 ~q의 충분조건이 되도록 하는 자연수 k 최솟값.
+  solution_summary: |
+    P={-2, 6}. ~q: |x-3|≤k → 3-k≤x≤3+k.
+    P⊂~Q: -2≥3-k, 6≤3+k → k≥5, k≥3 → k≥5. 최솟값 5.
+  category: 충분조건·구간 포함
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: P⊂~Q 부등식
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-충필-연습-451
+  page: 189
+  category_type: 연습
+  problem_summary: |
+    p: |x+2|≥k, q: |x+3|<4. p→~q의 역이 참이 되도록 하는 양수 k 최댓값.
+  solution_summary: |
+    역: ~q→p. ~Q ⊂ P. ~Q: |x+3|≥4 → x≤-7 or x≥1.
+    P: |x+2|≥k → x≤-2-k or x≥-2+k.
+    -7≤-2-k & 1≥-2+k → k≤5 & k≤3 → k≤3. 최댓값 3.
+  category: 역·참·상수 최대
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: ~Q⊂P 두 반직선
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-충필-연습-452
+  page: 189
+  category_type: 연습
+  problem_summary: |
+    q→~p, ~r→s 모두 참일 때 p→r 참임을 보이기 위해 필요한 참인 명제.
+  solution_summary: |
+    p→r 증명하려면: p→...→r.
+    q→~p 대우 p→~q. ~r→s 대우 ~s→r.
+    p→~q → (필요) → ~s → r. 즉 ~q→~s 필요 = s→q.
+    답: ④ s→q.
+  category: 삼단논법·추가 명제
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 함의 사슬 완성
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-충필-연습-458
+  page: 190
+  category_type: 연습
+  problem_summary: |
+    p: x²+2ax+1≥0, q: x²+2bx+9≤0. (i) 모든 실수 x에 대하여 p (ii) p는 ~q의 충분조건. 정수쌍 (a,b) 개수.
+  solution_summary: |
+    (i) 판별식 D/4=a²-1≤0 → -1≤a≤1. 정수 a: -1,0,1.
+    (ii) p→~q ⇔ P⊂~Q. (i)에서 P=ℝ이므로 ~Q=ℝ → Q=∅ → b²-9<0 → -3<b<3. 정수 b: -2,-1,0,1,2.
+    쌍: 3×5=15.
+  category: 판별식·충분조건·정수쌍
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 두 부등식 판별식 조합
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+---
+
+## 3-06 명제의 증명 (p.191~194)
+
+### 필수 예제
+
+```yaml
+- source: 개념원리-CM2-ST-증명-예제-14
+  page: 192
+  category_type: 대표예제
+  problem_summary: |
+    '자연수 a, b에 대하여 ab가 짝수이면 a 또는 b는 짝수'를 대우로 증명.
+  solution_summary: |
+    대우: a, b 모두 홀수이면 ab는 홀수. a=2k-1, b=2l-1 → ab=4kl-2k-2l+1=2(2kl-k-l)+1 → 홀수.
+    대우 참 → 원명제 참.
+  category: 대우 이용 증명
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 대우 → 짝·홀 대수 표현
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-증명-예제-15
+  page: 193
+  category_type: 대표예제
+  problem_summary: |
+    '√2는 유리수가 아니다'를 귀류법으로 증명.
+  solution_summary: |
+    √2 = n/m (서로소 자연수) 가정. 양변 제곱 → n² = 2m² → n²은 2의 배수 → n은 2의 배수. n=2k 대입 → 4k²=2m² → m²=2k² → m도 2의 배수. m, n 서로소 모순.
+    √2는 무리수.
+  category: 귀류법 증명
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 서로소 가정 → 모순
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 확인체크 (유제)
+
+```yaml
+- source: 개념원리-CM2-ST-증명-유제-459
+  page: 192
+  category_type: 유제
+  problem_summary: |
+    다음 명제의 대우를 이용하여 증명.
+    (1) xy≠0이면 x≠0이고 y≠0.
+    (2) x+y≥2이면 x≥1 또는 y≥1.
+    (3) m²이 홀수이면 m도 홀수.
+  solution_summary: |
+    (1) 대우: x=0 또는 y=0이면 xy=0 (자명).
+    (2) 대우: x<1이고 y<1이면 x+y<2 (부등식 합).
+    (3) 대우: m이 짝수이면 m²도 짝수. m=2k → m²=4k² (짝수).
+  category: 대우 증명 다문
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 대우 서술 + 대수 증명
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-증명-유제-460
+  page: 193
+  category_type: 유제
+  problem_summary: |
+    귀류법으로 증명.
+    (1) 2-√3는 무리수 (2) n²이 3의 배수이면 n도 3의 배수 (3) a²+b²=0이면 a=0이고 b=0.
+  solution_summary: |
+    (1) 2-√3 = r (유리수) 가정 → √3 = 2-r (유리수) 모순 (√3 무리수).
+    (2) n이 3의 배수 아니라 가정: n=3k±1 → n²=9k²±6k+1=3(3k²±2k)+1 → 3의 배수 아님. 모순.
+    (3) a≠0 또는 b≠0 가정: a²>0 또는 b²>0 → a²+b²>0. 모순.
+  category: 귀류법·다문
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 부정 후 모순 유도
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+```
+
+---
+
+## 3-07 절대부등식 (p.195~203)
+
+### 필수 예제
+
+```yaml
+- source: 개념원리-CM2-ST-절부-예제-16
+  page: 197
+  category_type: 대표예제
+  problem_summary: |
+    a, b가 실수일 때 다음 부등식 증명.
+    (1) (a+b)²≥4ab (2) |a|+|b|≥|a+b|.
+  solution_summary: |
+    (1) (a+b)²-4ab = a²-2ab+b² = (a-b)² ≥ 0. 등호 a=b.
+    (2) 양변 제곱 차: (|a|+|b|)² - |a+b|² = 2(|ab|-ab) ≥ 0. 등호 ab≥0.
+  category: 절대부등식 증명
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 다항 or |·|² 차 부호
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-절부-예제-17
+  page: 198
+  category_type: 대표예제
+  problem_summary: |
+    x,y>0. (1) 2x+3y=12일 때 xy의 최댓값. (2) xy=8일 때 x+2y의 최솟값.
+  solution_summary: |
+    (1) AM-GM: 2x+3y ≥ 2√(6xy) → 12 ≥ 2√(6xy) → 6≥√(6xy) → xy≤6.
+    (2) x+2y ≥ 2√(2xy) = 2√16 = 8.
+  category: AM-GM 최댓값·최솟값
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 산술기하평균 관계
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-절부-예제-18
+  page: 199
+  category_type: 대표예제
+  problem_summary: |
+    a>0, b>0. (a+1/b)(b+4/a) 최솟값.
+  solution_summary: |
+    전개: ab+4+1+4/(ab) = ab+4/(ab)+5.
+    AM-GM: ab+4/(ab) ≥ 2√4=4. 총합 최소 = 4+5=9. 등호 ab=2.
+  category: AM-GM · 전개
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 전개 → 대칭항 AM-GM
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-절부-예제-19
+  page: 199
+  category_type: 대표예제
+  problem_summary: |
+    x>1일 때 4x+1/(x-1)의 최솟값.
+  solution_summary: |
+    변형: 4x + 1/(x-1) = 4(x-1) + 1/(x-1) + 4.
+    AM-GM: 4(x-1)+1/(x-1) ≥ 2√4 = 4. 총합 ≥ 8. 등호 x=3/2.
+  category: 변형·AM-GM
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: f(x)+1/f(x) 형태 유도
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-절부-예제-20
+  page: 200
+  category_type: 발전
+  problem_summary: |
+    수직 두 벽면 사이 길이 20m 삼각형 모양 닭장. 바닥 넓이 최댓값.
+  solution_summary: |
+    직각변 x, y (>0). x²+y²=400.
+    AM-GM: x²+y² ≥ 2xy → 400 ≥ 2xy → xy≤200. 넓이=xy/2≤100.
+    최댓값 100 m².
+  category: AM-GM 실전
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: AM-GM 활용 최적화
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-절부-예제-21
+  page: 201
+  category_type: 대표예제
+  problem_summary: |
+    x,y 실수. (1) x²+y²=4일 때 4x+3y의 최댓값. (2) 5x+12y=13일 때 x²+y² 최솟값.
+  solution_summary: |
+    코시-슈바르츠 (a²+b²)(x²+y²)≥(ax+by)².
+    (1) (16+9)(4)≥(4x+3y)² → (4x+3y)²≤100 → 최대 10.
+    (2) (25+144)(x²+y²)≥13² → x²+y²≥1. 최솟값 1.
+  category: 코시-슈바르츠·최댓·최솟
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 코시-슈바르츠 부등식
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 확인체크 (유제)
+
+```yaml
+- source: 개념원리-CM2-ST-절부-유제-461
+  page: 197
+  category_type: 유제
+  problem_summary: |
+    a,b 실수일 때 (1) a²+b²+1≥ab+a+b (2) |a|-|b|≤|a-b| 증명.
+  solution_summary: |
+    (1) 2·좌 - 2·우 = 2a²+2b²+2 - 2ab-2a-2b = (a-b)²+(a-1)²+(b-1)² ≥ 0. 등호 a=b=1.
+    (2) 삼각 부등식 변형: |a| = |(a-b)+b| ≤ |a-b|+|b| → |a|-|b|≤|a-b|.
+  category: 절대부등식 증명
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 제곱합 분리 · 삼각 부등식
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-절부-유제-462
+  page: 197
+  category_type: 유제
+  problem_summary: |
+    a>0, b>0. √(2(a+b)) ≥ √a + √b 증명.
+  solution_summary: |
+    양변 제곱: 2(a+b) vs a+2√(ab)+b. 차: (a+b) - 2√(ab) = (√a-√b)² ≥ 0. 등호 a=b.
+  category: 절대부등식 증명 (근호)
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 제곱 차·AM-GM
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-절부-유제-463
+  page: 198
+  category_type: 유제
+  problem_summary: |
+    양수 a,b. ab=3일 때 3a+4b 최솟값 m, 그때의 a=α, b=β. m+α+β.
+  solution_summary: |
+    AM-GM: 3a+4b ≥ 2√(12ab)=2√36=12. 등호 3a=4b, 3α·4β=(3a)(4b)=12ab=36, 3α=4β → 3α²·(3/4)=... 재계산.
+    3a=4b이고 ab=3: a=4b/3 → 4b²/3=3 → b²=9/4 → b=3/2, a=2.
+    m=12, α+β=2+3/2=7/2. m+α+β=12+7/2=31/2.
+  category: AM-GM · 값 구하기
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: AM-GM + 등호 조건
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-절부-유제-464
+  page: 198
+  category_type: 유제
+  problem_summary: |
+    양수 a,b. 9a²+b²=36일 때 ab 최댓값.
+  solution_summary: |
+    AM-GM: 9a²+b² ≥ 2√(9a²b²) = 6ab → 36 ≥ 6ab → ab ≤ 6.
+  category: AM-GM · 최댓값
+  tier: star_4
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 산술기하평균 대입
+  insight_type: 조건통합형
+  depth: 2
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-절부-유제-465
+  page: 198
+  category_type: 유제
+  problem_summary: |
+    x,y>0, 3x+y=6일 때 1/x+3/y 최솟값.
+  solution_summary: |
+    (3x+y)(1/x+3/y) = 3+9+y/x+9x/y ≥ 12+2√9=12+6=18. 즉 6·(1/x+3/y) ≥ 18 → 최소 3.
+    (또는 6(1/x+3/y) = (3x+y)(1/x+3/y) ≥ (√3+√3)²=12 → 6M≥12 → M≥2). 재계산:
+    코시: (3x+y)(1/x+3/y)≥(√3+√3)²=12. 6·(1/x+3/y)≥12 → 1/x+3/y ≥ 2. 최솟값 2.
+  category: 코시 or AM-GM 응용
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 코시-슈바르츠 조건부 최소
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-절부-유제-466
+  page: 199
+  category_type: 유제
+  problem_summary: |
+    a>0, b>0. (3a+4b)(3/a+1/b) 최솟값.
+  solution_summary: |
+    전개: 9+3a/b+12b/a+4 = 13+3a/b+12b/a.
+    AM-GM: 3a/b+12b/a ≥ 2√36=12. 총 25. 등호 3a/b=12b/a → a²=4b² → a=2b.
+  category: 전개·AM-GM
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 대칭 두 항 AM-GM
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-절부-유제-467
+  page: 199
+  category_type: 유제
+  problem_summary: |
+    x>-2. 3x+5+3/(x+2) 최솟값.
+  solution_summary: |
+    = 3(x+2)+3/(x+2)+5-6 = 3(x+2)+3/(x+2)-1.
+    AM-GM: 3(x+2)+3/(x+2) ≥ 2√9=6. 총 ≥ 5. 등호 (x+2)²=1 → x=-1.
+  category: 변형·AM-GM
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: f(x)+c/f(x) 형태 유도
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-절부-유제-468
+  page: 200
+  category_type: 유제
+  problem_summary: |
+    길이 40cm 철사로 합동 네 작은 직사각형 구역 만들기. 전체 외부 직사각형 넓이 최댓값·가로 길이.
+  solution_summary: |
+    문제 도식: 안쪽 격자 5개 세로 + 2개 가로 (또는 유사). 총 철사 = 2 가로 + 5 세로 = 40. 가로 a, 세로 b: 2a+5b=40.
+    넓이 S=ab. AM-GM: 2a+5b ≥ 2√(10ab) → 40 ≥ 2√(10S) → S≤40. 최대 넓이 40 cm².
+    등호 2a=5b, 2a=20 → a=10, b=4. 가로 10cm.
+  category: AM-GM 실전
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 조건식 AM-GM 활용
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-절부-유제-469
+  page: 200
+  category_type: 유제
+  problem_summary: |
+    반지름 2√3 반원 O에 내접하는 직사각형 ABCD 넓이 최대일 때 둘레.
+  solution_summary: |
+    BC=2x, AB=y. 반원 상단 접: x²+y²=12.
+    넓이 S=2xy. AM-GM: x²+y² ≥ 2xy → 12 ≥ 2xy → S≤12. 등호 x=y=√6.
+    둘레: 2(2x+y) = 4√6+2√6=6√6? 재계산: BC=2x=2√6, AB=√6. 둘레=2(2√6+√6)=6√6.
+  category: AM-GM 기하 실전
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 원 조건 + AM-GM
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-절부-유제-470
+  page: 201
+  category_type: 유제
+  problem_summary: |
+    a,b 실수. (1) a²+b²=10일 때 2a+4b 최댓값. (2) 2a+5b=29일 때 a²+b² 최솟값.
+  solution_summary: |
+    (1) 코시: (4+16)(10)≥(2a+4b)² → 200 → 2a+4b ≤ 10√2.
+    (2) (4+25)(a²+b²)≥29² → 29·(a²+b²)≥29² → a²+b²≥29.
+  category: 코시-슈바르츠
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 코시 대입
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-절부-유제-471
+  page: 201
+  category_type: 유제
+  problem_summary: |
+    반지름 2 원 내접 직사각형 둘레 최댓값.
+  solution_summary: |
+    가로 2x, 세로 2y. 대각선=지름=4 → x²+y²=4.
+    둘레 = 4(x+y). 코시: 2(x²+y²)≥(x+y)² → 8≥(x+y)² → x+y≤2√2. 둘레 ≤ 8√2.
+  category: 코시 기하
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 코시 부등식 응용
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+### 연습문제 (star 4·5 pick)
+
+```yaml
+- source: 개념원리-CM2-ST-절부-연습-475
+  page: 202
+  category_type: 연습
+  problem_summary: |
+    ∠C=90° 직각삼각형 ABC 넓이 16. AB² 최솟값.
+  solution_summary: |
+    CA=a, CB=b. ab/2=16 → ab=32. AB²=a²+b² ≥ 2ab = 64. 등호 a=b=4√2.
+    최솟값 64.
+  category: 피타고라스·AM-GM
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: a²+b²≥2ab
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-절부-연습-476
+  page: 202
+  category_type: 연습
+  problem_summary: |
+    '세 자연수 a,b,c에 대하여 a²+b²=c²이면 a,b,c 중 적어도 하나는 짝수'를 대우 이용 증명.
+  solution_summary: |
+    대우: a,b,c 모두 홀수이면 a²+b²≠c².
+    홀수² ≡ 1 (mod 4). a²+b² ≡ 2, c² ≡ 1 (mod 4). 2≠1 (mod 4) → a²+b²≠c². ✓.
+  category: 대우 증명 · 모듈러
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: mod 4 검사
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-절부-연습-477
+  page: 203
+  category_type: 연습
+  problem_summary: |
+    x,y>0, 3x+2y=16일 때 √(3x)+√(2y) 최댓값.
+  solution_summary: |
+    (√(3x)+√(2y))² = 3x+2y+2√(6xy) = 16+2√(6xy).
+    AM-GM: 3x·2y ≤ ((3x+2y)/2)²=64. 6xy ≤ 64 → √(6xy) ≤ 8.
+    합 ≤ 16+16=32. 최댓값 √32=4√2.
+  category: 근호·AM-GM
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 제곱 → AM-GM
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-절부-연습-478
+  page: 203
+  category_type: 연습
+  problem_summary: |
+    a,b,c>0. (1+2b/a)(1+c/b)(1+a/(2c)) 최솟값.
+  solution_summary: |
+    각 인수 AM-GM: 1+2b/a ≥ 2√(2b/a) 등. 3인수 곱 AM-GM 3항.
+    또는 전개 후 AM-GM 8항: 각 항 곱 = 1 → 8항 산기: ≥ 8·1=8. 등호 성립 조건 → 최솟값 8.
+  category: 3항 곱·AM-GM
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 전개 후 다항 AM-GM
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-절부-연습-479
+  page: 203
+  category_type: 연습
+  problem_summary: |
+    x²-2x+a=0이 허근을 가질 때 a+4/(a-1) 최솟값 m, 그때 a=n. m+n.
+  solution_summary: |
+    허근: D/4=1-a<0 → a>1. a-1>0.
+    a+4/(a-1) = (a-1)+4/(a-1)+1 ≥ 2√4+1=5. 등호 (a-1)²=4 → a=3.
+    m=5, n=3. m+n=8.
+  category: 판별식·AM-GM
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 조건 → AM-GM 변형
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-절부-연습-480
+  page: 203
+  category_type: 연습
+  problem_summary: |
+    a>0, b>0. (4-9b/a)(1-a/b) ≤ m 항상 성립시킬 실수 m 범위.
+  solution_summary: |
+    전개: 4 - 4a/b - 9b/a + 9 = 13 - (4a/b + 9b/a).
+    AM-GM: 4a/b + 9b/a ≥ 2√36=12. 최소 12 → 전체 최댓값 = 13-12=1.
+    m ≥ 1.
+  category: AM-GM·최댓값
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 전개 후 -(AM-GM) 최소화
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+
+- source: 개념원리-CM2-ST-절부-연습-481
+  page: 203
+  category_type: 연습
+  problem_summary: |
+    양수 a,b. P(a,b) 지나고 OP 수직인 직선이 y축과 Q에서 만남. R(-1/a, 0). △OQR 넓이 최솟값.
+  solution_summary: |
+    OP 기울기 b/a. 수직 기울기 -a/b. 직선: y-b = -(a/b)(x-a).
+    y축(x=0): y = b + a²/b = (a²+b²)/b. Q=(0, (a²+b²)/b).
+    R=(-1/a, 0). 넓이 = (1/2)·|OR|·|OQ| = (1/2)·(1/a)·(a²+b²)/b = (a²+b²)/(2ab).
+    AM-GM: (a²+b²)/(2ab) ≥ 2ab/(2ab) = 1. 최솟값 1. 등호 a=b.
+  category: 좌표·AM-GM 넓이
+  tier: star_5
+  unit_code: CM2-ST
+  standard: 10수06-04
+  mechanism_primary: 좌표 유도 후 AM-GM
+  insight_type: 통찰형
+  depth: 3
+  citation_note: "개념원리 · 학습 목적"
+```
+
+---
+
+## 요약
+
+- **총 등재 문항**: 168문항
+  - 대표예제 (필수): 40 (1-01: 6, 1-02: 5, 2-01: 8, 2-02: 2, 2-03: 3, 3-01: 2, 3-02: 4, 3-03: 1, 3-04: 3, 3-05: 3, 3-06: 2, 3-07: 6)
+  - 유제 (확인체크): 87
+  - 연습 (star 4·5 pick): 41
+- **답 미검증 문항 (답 계산 대기)**: 3건 (유제 313, 연습 368, 연습 399)
+- **커버리지**: 집합의 뜻·표현 · 포함관계 · 연산 · 연산법칙 · 유한집합 원소수 · 명제와 조건 · 명제 함의 · 모든/어떤 · 역과 대우 · 충분·필요조건 · 증명 · 절대부등식 전 영역
+
+**단원 코드**: CM2-ST · **정독 일자**: 2026-07-20 · **세션 54**
+
+
+

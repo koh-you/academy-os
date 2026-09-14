@@ -1,0 +1,340 @@
+% dm-answer-classic.sty — 기존 style.sty(vB) 답지 디자인의 v6 팔레트 포팅
+% ============================================================================
+% 목적: 기존 시리즈물 답지 (style.sty vB 블루) 디자인 그대로 유지,
+%       팔레트만 v6 editorial (navy·accent·paper), 모든 라운드 박스 → 직각.
+%
+% 변경 요약:
+%   • vB-deep(#1E4A8F 네이비 블루) → dm-navy(#0A2540)
+%   • vB-accent(#3A78D8 밝은 블루) → dm-accent(#B7211E 딥 버밀리언)
+%   • vB-answer-rule(#D4A017 골드) → dm-accent(#B7211E)
+%   • vB-warn(#9A3412 갈오렌지)     → dm-accent(#B7211E)
+%   • vB-light(#E8EFF8 옅은 블루)   → dm-navylight(#E8EEF4)
+%   • vB-warn-light(#FED7AA 피치)   → dm-accentpale(#F9E9E8 신규)
+%   • 모든 rounded corners=Npt → sharp corners
+%   • 모든 arc=Npt → arc=0pt
+%   • 폰트·크기·간격·구조: **기존 vB 완전 유지**
+%
+% 제공 API (dm-editorial-answer.sty 와 이름 동일):
+%   \dmanswerheader{title} · \dmsection[sub]{title}
+%   dmquickgrid + \dmquick · \dmsoltitle{n}{intent}
+%   dmanswerbox · dmcriticalpoint + \dmcplabel · dmothersolution
+%   \dmanswersetup · \dmsolnote(선택) · \dmstep
+% ============================================================================
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{dm-answer-classic}[2026/07/22 v8.0 DeeP Math Answer · Classic port]
+
+\RequirePackage{kotex}
+% v8.4 (2026-07-23 세션 75) : 마스터 재지시 "정답지 본문들 폰트도 문제지와 동일하게 바꾸고 싶어"
+% → 본편 (dm-editorial.sty) 과 동일 setmainhangulfont 지정 · Noto Serif KR
+% (v8.3 이전 시도는 취소된 이력이나 명시 재지시로 재적용 · 본문 스코프)
+\RequirePackage{fontspec}
+\setmainhangulfont[BoldFont={Noto Serif KR}, BoldFeatures={Weight=Bold}]{Noto Serif KR}
+\RequirePackage[a4paper,top=20mm,bottom=20mm,left=18mm,right=18mm,
+                headheight=21pt,headsep=6mm,footskip=12mm]{geometry}
+\RequirePackage{xcolor}
+\RequirePackage[most]{tcolorbox}
+\tcbuselibrary{skins}
+\RequirePackage{fancyhdr}
+\RequirePackage{amsmath,amssymb}
+% 🔴 2026-08-04 세션 111 — 인라인 수식이 등호·이항연산자에서 끊기는 것을 막는다.
+%    계기: 마스터 지적 「답지 5번 풀이에 수식이 중간에 줄바꿈이 일어나」.
+%    실측 — 답지 3~11쪽에서 일곱 군데가 끊겼다. 문제지는 0건이었다.
+%    까닭: templates/style.sty:54~55 에는 이 두 줄이 있는데 이 파일에는 없었다.
+%          문제지는 style.sty 를, 답지는 이 파일을 쓴다. 그래서 답지만 끊겼다.
+\binoppenalty=10000
+\relpenalty=10000
+\RequirePackage{array}
+\RequirePackage{enumitem}
+\RequirePackage{setspace}
+\RequirePackage{needspace}
+\RequirePackage{multicol}
+\RequirePackage{graphicx}
+\RequirePackage{tikz}
+\usetikzlibrary{shapes,shapes.geometric,positioning,calc}
+
+% ============================================================================
+% [1] 팔레트 — v6 editorial 통일 (기존 vB 슬롯 그대로 매핑)
+% ============================================================================
+\definecolor{dm-navy}{HTML}{0A2540}       % vB-deep 대체 (구조·큰 제목·rule)
+\definecolor{dm-navydark}{HTML}{051629}
+\definecolor{dm-navylight}{HTML}{E8EEF4}  % vB-light 대체 (박스 배경)
+\definecolor{dm-paper}{HTML}{FAF7F2}
+\definecolor{dm-ink}{HTML}{1B2838}        % vB-ink 대체 (본문 텍스트)
+\definecolor{dm-muted}{HTML}{6B7A8F}      % vB-dim 대체 (희미한 텍스트·부제)
+\definecolor{dm-rule}{HTML}{8798AB}       % vB-frame 대체
+\definecolor{dm-rulelight}{HTML}{C3CDD8}  % vB-rule 대체 (얇은 구분선)
+\definecolor{dm-ruledark}{HTML}{3A4C63}
+\definecolor{dm-accent}{HTML}{B7211E}     % vB-accent + vB-answer-rule + vB-warn 통합
+\definecolor{dm-accentdark}{HTML}{7A1315}
+\definecolor{dm-accentpale}{HTML}{F9E9E8} % vB-warn-light 대체 (Critical Point 배경)
+\definecolor{dm-gold}{HTML}{A08D6C}       % v6 editorial 골드
+\definecolor{dm-goldlight}{HTML}{F1EEE6}
+\definecolor{dm-goldpale}{HTML}{F5EBD3}   % 빠른 정답표 배경용 옅은 골드톤
+
+\AtBeginDocument{\color{dm-ink}}
+
+% ============================================================================
+% [2] 시리즈 메타 · 헤더 · 푸터 (기존 vB 답지 구조 유지)
+% ============================================================================
+\newcommand{\dmseriesname}{Deep{:}it}
+\newcommand{\dmexamname}{}
+\providecommand{\examvol}{vol.1}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancyhead[L]{\sffamily\small\color{dm-muted}\dmexamname\ 정답 및 해설}
+\fancyhead[R]{\sffamily\bfseries\color{dm-navydark}\dmseriesname}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{dm-rulelight}\leaders\hrule height 0.4pt\hfill}}
+\fancyfoot[L]{\sffamily\small\bfseries\color{dm-navydark}DEPTH \& INSIGHT%
+  \hspace{2mm}\color{dm-rule}\textperiodcentered\hspace{2mm}%
+  \color{dm-navydark}공통수학2 · 정답}
+\fancyfoot[R]{\sffamily\bfseries\color{dm-navy}\thepage}
+
+% 답지 표지 페이지 스타일 (헤더 rule 없음)
+\fancypagestyle{dmanswertitle}{%
+  \fancyhf{}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\headrule}{}%
+  \fancyfoot[L]{\sffamily\small\bfseries\color{dm-navydark}DEPTH \& INSIGHT%
+    \hspace{2mm}\color{dm-rule}\textperiodcentered\hspace{2mm}%
+    \color{dm-navydark}공통수학2 · 정답}%
+  \fancyfoot[R]{\sffamily\bfseries\color{dm-navy}\thepage}%
+}
+
+% ============================================================================
+% [3] \dmanswerheader — 답지 상단 대형 헤더 (기존 style.sty §674 포팅)
+% -----------------------------------------------------------------------------
+% 원본: vol.n stamp (rounded 4pt, vB-deep 테두리)
+%      + 큰 타이틀 박스 (arc=10pt, vB-answer-rule 골드 테두리, 굵기 1.1pt)
+% v8 : vol.n stamp (sharp, dm-navy 테두리)
+%      + 큰 타이틀 박스 (arc=0pt, dm-accent 테두리, 굵기 1.1pt)
+% =============================================================================
+\newcommand{\dmanswerheader}[1]{%
+  \thispagestyle{dmanswertitle}%
+  \par\noindent
+  \begin{tcolorbox}[enhanced, colback=white, colframe=dm-navy,
+    boxrule=1.1pt, arc=0pt, sharp corners,
+    left=18pt, right=18pt, top=13pt, bottom=13pt,
+    halign=center]
+    {\sffamily\LARGE\bfseries\color{dm-navy} #1}
+  \end{tcolorbox}\par\addvspace{10pt}
+}
+
+% ============================================================================
+% [4] \dmsection[부제]{섹션명} — 슬림 섹션 라벨 (기존 style.sty §733 포팅)
+% -----------------------------------------------------------------------------
+% 원본: 좌측 굵은 vB-deep 세로 바 (3pt × 14pt) + 큰 sans Bold 제목 + vB-rule 얇은 rule
+% v8 : 세로 바 dm-navy → dm-accent로 포인트(선택). 부제 지원 추가.
+% =============================================================================
+\newcommand{\dmsection}[2][]{%
+  \par\addvspace{12pt}\needspace{4\baselineskip}%
+  \noindent\textcolor{dm-accent}{\rule[-3pt]{3pt}{14pt}}\,\,%
+  {\sffamily\bfseries\color{dm-navy} #2}%
+  \ifx\relax#1\relax\else
+    \hspace{3mm}%
+    {\sffamily\color{dm-muted}\small\textperiodcentered\ #1}%
+  \fi
+  \par\vspace{2pt}%
+  \noindent\textcolor{dm-accent}{\rule{\linewidth}{0.4pt}}%
+  \par\addvspace{6pt}%
+  \dmsoltitlefirsttrue
+}
+
+% ============================================================================
+% [5] dmquickgrid + \dmquick — 빠른 정답표 (기존 style.sty §710 포팅)
+% -----------------------------------------------------------------------------
+% 원본: tcolorbox arc=6pt, vB-answer-rule 골드 테두리, 상단 tab title (골드 배경)
+% v8 : arc=0pt sharp corners, dm-accent 테두리, 상단 tab title (accent 배경)
+% =============================================================================
+\newcommand{\dmquickgridstretch}{1.35}
+% v8.5 (세션 77 · 문항번호 정책 v2) : 파일 전역 연속 자연수 · dmquick·dmsoltitle 카운터 공유
+%   원 방식 : #1 수동 번호 → 확인 1~12 · L1 1~12 · L2 1~12 (섹션별 재시작)
+%   신 방식 : \thedmsolcount 자동 카운터 → 확인 1~12 · L1 13~24 · L2 25~36 · L3 37~39 · 실전 40~42
+%   기존 tex 파일의 #1 인자는 무시 (호환 유지 · 나중에 정리)
+\newcounter{dmslotcount}\setcounter{dmslotcount}{0}
+\newcommand{\dmquick}[2]{%
+  \stepcounter{dmslotcount}%
+  \textbf{\sffamily\color{dm-ink} \arabic{dmslotcount}.}\,\,{\sffamily\color{dm-ink} #2}%
+}
+% v8.3 (세션 77) : skin enhanced → enhanced jigsaw · boxrule 0.8pt → 1.0pt
+%   Chrome PDF 뷰어 tcolorbox 서브세그먼트 렌더링 결함 대응 (Critical Point 박스와 동일 조치)
+\newenvironment{dmquickgrid}[1][빠른 정답표]{%
+  \par\noindent
+  \begin{tcolorbox}[enhanced jigsaw, colback=dm-paper, colframe=dm-navy,
+    boxrule=1.0pt, arc=0pt, sharp corners,
+    left=8pt, right=8pt, top=6pt, bottom=6pt,
+    title={\raisebox{-0.1ex}{$\blacksquare$}\,\,#1},
+    fonttitle=\sffamily\bfseries,
+    coltitle=white, colbacktitle=dm-navy,
+    attach boxed title to top center={yshift=-3pt},
+    boxed title style={colback=dm-navy, sharp corners, boxrule=0pt,
+      left=10pt, right=10pt, top=2pt, bottom=2pt}]
+    \renewcommand{\arraystretch}{\dmquickgridstretch}\sffamily\small
+    \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lllll}
+}{%
+    \end{tabular*}\par
+  \end{tcolorbox}\par\addvspace{20pt}%
+}
+
+% ============================================================================
+% [6] \dmsoltitle{번호}{출제의도} — 개별 풀이 헤더 (기존 style.sty §940 포팅)
+% -----------------------------------------------------------------------------
+% 원본: 번호 + [출제의도] 라벨 + 부제 + 하단 굵은 navy 밑줄 (1.2pt)
+% v8 : 컬러만 dm-navy로 교체. 구조·크기 완전 동일.
+% =============================================================================
+\newif\ifdmsoltitlefirst\dmsoltitlefirsttrue
+\newcounter{dmsolcount}\setcounter{dmsolcount}{0}
+
+\newcommand{\dmsoltitle}[2]{%
+  \par\leftskip=0pt%
+  \stepcounter{dmsolcount}%
+  \ifdmsoltitlefirst
+    \par\addvspace{6pt}%
+    \dmsoltitlefirstfalse
+  \else
+    % v8.11 (세션 77 마스터 지시): 답지 페이지 축소 (5페이지 두 줄 흡수)
+    % 원 1.8cm → 1.2cm (문항 사이 vspace 완화 · 페이지 낭비 방지)
+    \par\vspace{1.2cm}%
+  \fi
+  % v8.2 (세션 69 마스터 재지적): 좌 채움 실패 원인 · needspace 5→2\baselineskip 축소
+  % 5→2로 threshold 21mm→8mm · 좌 컬럼 하단 유휴 공간 없이 채움 우선
+  \needspace{2\baselineskip}\noindent
+  % v8.5 (세션 77 · 문항번호 정책 v2) : #1 (수동 번호) 무시 · \thedmsolcount (파일 전역 자동)
+  {\sffamily\bfseries\large\color{dm-ink} \ifnum\value{dmsolcount}<10 0\fi\arabic{dmsolcount}.}\hspace{6pt}%
+  {\footnotesize\sffamily\bfseries\color{dm-navy}[출제의도]}\,%
+  {\footnotesize\sffamily\color{dm-ink} #2}%
+  \par\nobreak\vspace{-4pt}\noindent%
+  % v8.5 (세션 75 2026-07-23): 폰트 v8.4 Noto Serif KR 전환 후 tikz 밑줄 bbox 1.2pt Overfull 균일 발생 · \rule로 교체하여 정확한 폭 준수
+  {\color{dm-navy}\rule[0pt]{\linewidth}{1.2pt}}%
+  \par\vspace{12pt}
+}
+
+% ============================================================================
+% [7] dmanswerbox — 정답 표시 (기존 style.sty §907 포팅)
+% -----------------------------------------------------------------------------
+% 원본: 좌측 vB-answer-rule 골드 세로 마커 (2mm × 4.5mm) + 굵은 검정 텍스트
+% v8 : 좌측 dm-accent 세로 마커 (2mm × 4.5mm) + 굵은 검정 텍스트
+% =============================================================================
+% v8.10 (세션 77 마스터 재정정) : hangindent 실측이 폰트 metric 차이로 부정확 →
+%   tabular 방식으로 정확 정렬 · \dmans{...} 매크로로 소문항 각각 랩핑
+%   호환성 : 기존 인라인 사용 (한 문항만) 은 그대로 동작
+\newenvironment{dmanswerbox}{%
+  \par\noindent
+  \textcolor{dm-accent}{\rule[-0.6mm]{2mm}{4.5mm}}\hspace{2mm}%
+  \bfseries\color{black}%
+}{%
+  \par\vspace{5mm}%
+}
+% \dmans{정답 내용} : 정답 접두 후 인라인 값 (한 소문항 or 단일 답 · 기본 사용법)
+% 다중 소문항 정렬용 : \dmanslist 환경 사용
+\newenvironment{dmanslist}{%
+  \par\noindent
+  \begin{tabular}[t]{@{}l@{\hspace{0.4em}}l@{}}%
+  \textcolor{dm-accent}{\rule[-0.6mm]{2mm}{4.5mm}}\hspace{2mm}\bfseries 정답: &%
+}{%
+  \end{tabular}\par\vspace{5mm}%
+}
+\newcommand{\dmansitem}[1]{$(#1)$~}
+
+% ============================================================================
+% [8] \dmstep — 풀이 단계 마커 (기존 style.sty §920 포팅)
+% -----------------------------------------------------------------------------
+% 원본: rounded corners=2.5pt, vB-deep filled + 흰 텍스트 "단계 N"
+% v8 : sharp corners, dm-navy filled + 흰 텍스트 "단계 N"
+% =============================================================================
+\newsavebox{\dmstepboxsave}
+\newcommand{\dmstep}[1]{%
+  \par\leftskip=0pt%
+  \addvspace{10pt}\needspace{2\baselineskip}%
+  \sbox{\dmstepboxsave}{\tikz[baseline=-0.6ex]\node[fill=dm-navy, text=white, sharp corners,
+    inner xsep=6pt, inner ysep=2pt,
+    font=\sffamily\bfseries\footnotesize]{\,단계\,#1\,};}%
+  \leftskip=\dimexpr\wd\dmstepboxsave + 6pt\relax%
+  \noindent\llap{\usebox{\dmstepboxsave}\hspace*{6pt}}%
+  \ignorespaces
+}
+
+% ============================================================================
+% [9] dmcriticalpoint + \dmcplabel — Critical Point (기존 style.sty §597 포팅)
+% -----------------------------------------------------------------------------
+% 원본: colback=vB-warn-light(#FED7AA 피치), arc=0pt, leftrule=3pt vB-warn(갈오렌지)
+% v8 : colback=dm-accentpale(#F9E9E8 매우 옅은 accent), arc=0pt sharp,
+%      leftrule=3pt dm-navy · 라벨·삼각 배지 dm-navy (구조 컬러로 통일)
+% =============================================================================
+\newcommand{\dmcplabel}[1]{{\sffamily\bfseries\color{dm-accent}#1}}
+% v8.5 (세션 77 · 마스터 재지시) : Chrome 렌더링 결함은 뷰어 특유 (인쇄는 정상) →
+%   두꺼운 테두리 미관 문제 원상 회복 · boxrule 0.4pt 원본으로 되돌림
+%   skin은 breakable 없이 standard jigsaw 유지 (분할 없어도 무해 · 단순)
+\newenvironment{dmcriticalpoint}{%
+  \par\leftskip=0pt%
+  \par\addvspace{12pt}\noindent
+  \begin{tcolorbox}[standard jigsaw, colback=dm-accentpale, colframe=dm-navy,
+    boxrule=0.4pt, arc=0pt, sharp corners,
+    leftrule=3pt,
+    left=12pt, right=10pt, top=7pt, bottom=7pt,
+    fontupper=\sffamily\footnotesize\color{dm-ink}]
+    {\sffamily\bfseries\small\color{dm-navy}\raisebox{-0.1ex}{$\bigtriangleup$}\ Critical Point}%
+    \par\smallskip
+}{%
+  \end{tcolorbox}%
+  \par\addvspace{10pt}%
+}
+
+% ============================================================================
+% [10.5] \dmsubprob — 소문항 (1)(2)(3) hangindent 처리 (v8.6 세션 77)
+% -----------------------------------------------------------------------------
+% 마스터 지시 : 소문항 번호 밑으로 텍스트 이어지면 가독성 저해
+% 조치 : hangindent + hangafter=1 로 후속 줄 소문항 라벨 폭만큼 들여쓰기
+% 사용 : \dmsubprob{1} 텍스트 (라벨 (1) + 오른쪽 텍스트 · 다음 줄은 hangindent)
+% ============================================================================
+\newcommand{\dmsubprob}[1]{%
+  \par\noindent
+  \hangindent=1.6em\hangafter=1
+  \makebox[1.5em][l]{$(#1)$}\ignorespaces%
+}
+
+% ============================================================================
+% [11] \dmothersolution — "다른 풀이" 인라인 마커 (v7 계승)
+% ============================================================================
+\newcommand{\dmothersolution}{%
+  \par\addvspace{4pt}\noindent
+  \textcolor{dm-accent}{\rule[-0.4mm]{2pt}{4mm}}\hspace{2mm}%
+  {\sffamily\bfseries\small\color{dm-accent}다른 풀이}%
+  \par\vspace{2pt}%
+}
+
+% ============================================================================
+% [12] \dmanswersetup — 본문 조판 파라미터
+% ============================================================================
+% v8.6 세션 77 (2026-07-24): 마스터 지시 · 문장간 간격 확대 (가독성)
+%   parskip 5pt → 7pt · setstretch 1.20 → 1.28 · display 5pt → 7pt
+% v8.8 세션 77 : \jot 추가 (align 라인 간격 3pt → 6pt · 등호식 세로 여유)
+% v8.12 세션 83 (2026-07-24): 마스터 지시 · 분수식 위아래 여백 확대
+%   display 10pt → 14pt (본편 dmsolution v6.77 equation* +2.5mm/side 정합)
+%   $$...$$ 원시명령 재정의 불가 → display skip 값 자체를 +4pt 상향
+\newcommand{\dmanswersetup}{%
+  \setlength{\parindent}{0pt}%
+  \setlength{\parskip}{7pt}%
+  \setlength{\mathindent}{0pt}%
+  \setlength{\columnsep}{6mm}%
+  \setlength{\columnseprule}{0.2pt}%
+  \renewcommand{\columnseprulecolor}{\color{dm-rulelight}}%
+  \setstretch{1.28}%
+  % v8.12 세션 83 : 분수식 여유 · 10pt → 14pt (dfrac 세로 크기 대응)
+  \setlength{\abovedisplayskip}{14pt plus 2pt minus 1pt}%
+  \setlength{\belowdisplayskip}{14pt plus 2pt minus 1pt}%
+  \setlength{\abovedisplayshortskip}{10pt plus 1pt}%
+  \setlength{\belowdisplayshortskip}{10pt plus 1pt}%
+  \setlength{\jot}{6pt}%
+}
+
+% ============================================================================
+% [13] 강조 매크로 (v7 호환)
+% ============================================================================
+\newcommand{\dmemph}[1]{{\color{dm-navy}\bfseries #1}}
+\newcommand{\dmstrong}[1]{{\color{dm-accent}\bfseries #1}}
+
+\endinput
