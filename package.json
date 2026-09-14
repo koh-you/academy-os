@@ -75,6 +75,8 @@
     "test:notification-solapi-dispatch-service": "node scripts/test-notification-solapi-dispatch-service.mjs",
     "test:slack-scheduling-provider": "node scripts/test-slack-scheduling-provider.mjs",
     "test:slack-daily-workflow": "node scripts/test-slack-daily-workflow.mjs",
+    "test:attendance-realtime-lifecycle": "node scripts/test-attendance-realtime-lifecycle.mjs",
+    "test:attendance-realtime-route-registry": "node scripts/test-attendance-realtime-route-registry.mjs",
     "test:notification-provider-route-registry": "node scripts/test-notification-provider-route-registry.mjs",
     "test:resource-material-route-registry": "node scripts/test-resource-material-route-registry.mjs",
     "test:solapi-route-registry": "node scripts/test-solapi-route-registry.mjs",

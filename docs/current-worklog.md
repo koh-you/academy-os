@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-09-14 Supabase Realtime 안전 경계 1단계
+
+- 출결 동기화 hook에 선택적 Realtime 구독 어댑터 경계를 연결했다. 어댑터가 없으면 기존 7초 polling 동작은 그대로다.
+- 구독 성공 시 polling 중지, 연결 오류·종료·오프라인 시 polling 복구, 이벤트·탭 복귀·온라인 복귀 시 인증 API 원천 재조회, 중복 이벤트와 cleanup 차단을 테스트했다.
+- 운영 Supabase 설정·RLS·publication·데이터는 변경하지 않았다. 다음 단계는 교사 bearer와 tenant 소유권을 검증하는 구독 인증 경로 확정이다.
+- 교사 bearer와 owner/assistant tenant 범위를 전역 인증에서 확정한 뒤 사용하는 SSE route registry를 추가했다. 날짜 형식 검증, 비교사 차단, payload redaction, 연결 종료 cleanup, provider 미설정 503을 fixture로 확인했다. 다음 단계는 server-only Supabase provider와 브라우저 fetch-stream 어댑터다.
+
 ## 2026-09-14 Slack 실제 예약 검증 및 전날 예약 전환
 
 - Slack App `chat:write`, 비공개 채널 Bot 초대, Render Bot/채널/dispatch 환경변수를 설정하고 실제 미래 예약 1건이 지정 채널에 도착하는 것을 사람이 확인했다.

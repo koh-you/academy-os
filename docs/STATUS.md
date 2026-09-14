@@ -1,5 +1,12 @@
 # Academy OS Current Status
 
+## 2026-09-14 Supabase Realtime 전환 1단계 — 안전한 fallback 경계
+
+- 현재 교사 화면과 출결 키오스크는 `lesson_student_records`를 날짜 범위 API로 7초마다 재조회한다. 클라이언트 Supabase SDK와 교사 bearer/RLS 구독 경로는 아직 없어 운영 Realtime은 활성화하지 않았다.
+- `INSERT`/`UPDATE`/`DELETE` 이벤트만 받는 구독 lifecycle을 추가했다. `SUBSCRIBED` 전에는 polling을 유지하고, 연결 성공 뒤 중지하며 `CHANNEL_ERROR`/`TIMED_OUT`/`CLOSED`·오프라인에서 다시 polling으로 복구한다.
+- Realtime payload를 화면 원천으로 직접 채택하지 않고 기존 인증 API를 재조회한다. 중복 이벤트, 탭 복귀, 온라인 복귀, cleanup 뒤 무실행 계약을 fixture로 고정했다.
+- 교사 bearer 인증 뒤에만 열리는 `/api/lesson-records/realtime?date=YYYY-MM-DD` SSE 경계를 추가했다. 서버가 확정한 tenant와 날짜만 구독 어댑터에 전달하고, 브라우저에는 행 내용이나 tenant를 보내지 않고 변경 종류만 알린다. 실제 Supabase provider가 없을 때는 `503 realtime_unavailable`로 닫혀 기존 polling이 계속된다.
+
 ## 2026-09-13 수업일지 명시적 편집·수업 취소 위치 정리
 
 - 수업일지는 읽기 모드로 열리고 하단 주 버튼의 `편집`을 눌러야 학생별 기록 입력이 활성화된다. 같은 자리가 편집 중에는 `변경 저장`으로 바뀌며 저장 성공 또는 변경 없음 확인 뒤 다시 읽기 모드로 돌아간다.

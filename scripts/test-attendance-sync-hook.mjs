@@ -171,6 +171,8 @@ for (const expected of [
   "useAttendanceDateRollover({",
   "startAttendanceSyncLifecycle({",
   "startAttendanceDateRolloverLifecycle({",
+  "startAttendanceRealtimeLifecycle({",
+  'typeof createRealtimeSubscription !== "function"',
   "syncAttendanceRecordsAction({",
   "windowTarget.setInterval(",
   'windowTarget.addEventListener("focus"',

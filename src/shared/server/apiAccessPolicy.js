@@ -51,6 +51,7 @@ const ASSISTANT_ALLOW_EXACT = new Set([
   "GET /api/lessons",
   "GET /api/lessons/closure-preflight",
   "GET /api/lesson-records",
+  "GET /api/lesson-records/realtime",
   "GET /api/students",
   "GET /api/students/delete-audit",
   "GET /api/classes",
