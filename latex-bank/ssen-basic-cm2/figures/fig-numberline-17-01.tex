@@ -1,0 +1,5 @@
+% 유형 005 17-01(본책 17쪽) — 같은 간격의 8개 점 A~H. 원문 그림을 TikZ 로 다시 그림(스캔 화질).
+\begin{tikzpicture}[scale=0.62, line width=0.7pt]
+  \draw[<->, >=stealth] (-0.8,0) -- (7.8,0);
+  \foreach \x/\l in {0/A,1/B,2/C,3/D,4/E,5/F,6/G,7/H} {\fill (\x,0) circle (2.2pt); \node[below=4pt, font=\small] at (\x,0) {$\mathrm{\l}$};}
+\end{tikzpicture}

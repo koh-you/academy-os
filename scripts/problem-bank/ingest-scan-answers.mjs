@@ -403,6 +403,7 @@ async function main() {
         const known = tokens.find((other) => /^[0O]?\d{1,2}$/.test(other.text) && Math.abs(other.x - token.x) < 4 && Math.abs(other.y - token.y) < 4);
         if (!known) tokens.push(token);
       }
+      // 상자 왼쪽은 배지 x 로 정한다(아래에서 후보를 찾은 뒤 갱신). 잉크 여백 추정이 어긋나는 컬럼(답지 BOX 띠 옆)에 대비.
       const columnBox = { x0: left - 3, x1: column.x1 };
       const { bands, boxes } = findColorBands(imageData, canvas.width, renderScale, { x0: left, x1: column.x1 }, pageHeight);
       const insideBox = (y) => boxes.some((box) => y >= box.y0 - 1 && y <= box.y1 + 1);
@@ -427,6 +428,7 @@ async function main() {
         .filter((token) => token.h >= layout.badgeMinH && token.x >= column.x0 + 6 && token.x <= column.x0 + 60 && token.y > bodyTop && token.y + token.h < bodyBottom)
         .filter((token) => !insideBox(token.y + token.h / 2) && !insideBand(token.y + token.h / 2) && !sharesLine(token) && hasTextRight(token));
       const badgeLeft = candidates.length ? Math.min(...candidates.map((token) => token.x)) : left;
+      if (candidates.length) columnBox.x0 = badgeLeft - 3;
       const badges = candidates
         .filter((token) => token.x <= badgeLeft + 8)
         .sort((a, b) => a.y - b.y)

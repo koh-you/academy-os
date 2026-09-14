@@ -57,6 +57,7 @@ node scripts/problem-bank/ingest-scan-answers.mjs --pdf "C:\Users\PC\Downloads\2
 - 해설에는 문항 코드가 없고 구역마다 번호가 01 부터 다시 시작한다. 그래서 풀이 시작 배지(컬럼 왼쪽 여백의 굵은 9.5pt 이상 숫자)를 읽는 순서대로 모은 뒤 **문항 순서와 편집 거리 정렬**(`alignSegmentsToItems`: 번호 일치 0 · 못 읽음 0.3 · 오독 2 · 조각/문항 건너뜀 1.5)로 대응시킨다. 머리글의 외딴 숫자 같은 조각은 버려지고(`unmatched_segments`), 배지를 못 읽은 문항은 `missing` 에 남는다. 수행평가는 해설이 없어 대상에서 뺀다.
 - 풀이 상자는 배지 위 −3pt 부터 같은 컬럼 다음 배지·다음 색 띠(구역 상자·단원 머리)·컬럼 바닥 가운데 먼저 오는 것까지, 잉크로 조인다. 컬럼·쪽 맨 위에 배지 없이 이어지는 글은 직전 풀이에 이어 붙인다. 빠른정답은 각 풀이의 「답」 아이콘(5~10pt 검정 틀 안 흰 글자 · 네 귀퉁이 검정 — 채점 기준표의 ❶❷❸ 은 귀퉁이가 희어 제외)이 있는 줄을 오린다.
 - 실측(공통수학1): 아래 STATUS 참고. 못 읽은 배지는 `qa/solution-pNNN.jpg` 에서 상자가 없는 풀이로 보인다 — 그 문항은 해설 없이 등록되고, 다음 실행에서 OCR 규칙을 고친다.
+- 실행이 끝나면 패키지 폴더에 `검수-필요.md` 가 생긴다: 문항 수 = 해설 대상 수 = 빠른정답 수가 맞는지와, 해설을 못 찾은 문항(쪽·번호)·번호가 안 맞는 해설·답 줄이 없는 풀이·버린 조각을 사람이 먼저 볼 순서로 정리한다. 원칙적으로 세 개수는 같아야 하며, 차이는 전부 이 목록에 이유와 함께 남는다.
 
 #### 번호 배지형 스캔 교재 (베이직쎈)
 
@@ -70,7 +71,7 @@ node scripts/problem-bank/ingest-scan-answers.mjs --pdf "C:\…\베이직쎈 공
 - 문항 코드가 없고 번호가 구역(개념 쪽·기본&핵심 유형·실전 감각 UP)마다 다시 시작하는 책. `number_label` 은 「인쇄 쪽-번호」(`12-13`)라 학생이 책에서 찾는 방식 그대로이고 유일하다. 앵커는 컬럼 왼쪽의 굵은 두 자리 배지(개념 쪽 주황·유형 쪽 진초록·실전 쪽 검정) — 후보 x 를 4pt 칸으로 묶어 가장 많은 칸을 배지 x 로 잡는다(두 OCR 모드가 같은 배지를 다른 x 로 읽어도 흔들리지 않게). 배지 번호는 쪽 안에서 1씩 늘어야 하므로 중복·0·앞자리 오독(±10)은 순서로 고치고(`number_corrected`), 한두 개 차이는 읽은 값을 믿고 `number_gap` 으로만 표시한다.
 - 구역은 머리글 한글 OCR 로: 개념 쪽은 오른쪽 위 「유형 | 001~004」 목록 + 왼쪽 위 큰 색 번호 상자, 유형 쪽은 「개념 | 01」·「기본&핵심 유형」, 실전 쪽은 「실전 감각 UP」. 「유형 004 제목」 라벨(연한 초록 3자리 · 흑백 쪽에서는 3자리라는 것으로)은 배지가 아니라 `type_label`(「유형 004 선분의 길이의 제곱의 합의 최솟값」)이 되고, 개념 쪽 `type_label` 은 `--concepts` 로 준 차례 제목(「개념 03 좌표평면 위의 선분의 내분점」 — 장식 서체라 OCR 이 못 읽는다). 개념 쪽의 말풍선 아이콘 줄(공통 지시문)은 `passage` 영역으로 뒤따르는 문항에 붙는다.
 - 답지(별책)는 `--layout ssen`: 양쪽 컬럼(가운데 「베이직쎈 BOX」 띠 제외)·회색 「답」 상자(세로 테두리 두 줄로 찾음)·문항 순번은 `number_label` 뒤 두 자리. 대응은 올림포스와 같은 편집 거리 정렬.
-- 실측(1단원 = 중단원 01 평면좌표, 본책 2~15쪽): 문항 104 · flagged 1 · 해설 95/104 · 답 줄 48 · 번호 불일치 3. 전권(194쪽)은 문항 1,582개가 잘리지만 **중단원 경계(개념 쪽 → 실전 쪽 전환 규칙)가 흔들려 단원이 42개로 쪼개진다** — 전권 등록 전에 `--unit-pages` 같은 쪽 범위 지정을 붙여야 한다.
+- 실측(1단원 = 중단원 01 평면좌표, 본책 2~15쪽): 문항 104 · flagged 1 · 해설 95/104 · 답 줄 81 · 번호 불일치 3 · 해설 못 찾은 문항 9(패키지의 `검수-필요.md` 에 쪽·번호 정리). 전권(194쪽)은 문항 1,582개가 잘리지만 **중단원 경계(개념 쪽 → 실전 쪽 전환 규칙)가 흔들려 단원이 42개로 쪼개진다** — 전권 등록 전에 `--unit-pages` 같은 쪽 범위 지정을 붙여야 한다.
 
 ### 1-2. 정답·해설 원천화 (로컬)
 
@@ -118,6 +119,10 @@ Supabase SQL: `supabase/20260912_problem_bank.sql` (SQL Editor 에서 1회 적�
 | 화면 | `src/domains/problems/BookWrongAnswerBoard.jsx`(교재별·학생별 보드) · `ProblemBankCenter.jsx`(교재관리) · `WrongAnswerPrintSheet.jsx`(오답지) · `problemBankPptx.js`(PPT) · `problemBankModel.js` · `problemBankApi.js` · `problemBank.css` · 학생 앱 `src/domains/portals/StudentWrongAnswersTab.jsx` |
 | 가상 데이터 | `scripts/safe-fixtures/problemBankFixture.mjs` (`npm run dev:safe`) |
 | 검사 | `npm run test:problem-bank-segmenter` · `test:problem-bank-route-registry` · `test:problem-bank-store` · `tests/browser/problem-bank.spec.js` · `problem-bank-package.spec.js`(폴더 하나 등록) |
+
+## LaTeX 조판 오답은행
+
+스캔 화질이 낮아 크롭을 그대로 쓰기 어려운 책은 문항을 LaTeX 로 다시 조판한다(`latex-bank/README.md`, `scripts/latex-bank/build.mjs`). 베이직쎈 공통수학2 1단원 104문항이 시범(원본 전사 · TikZ 그림 4 · xelatex 빌드 · 정독 자산).
 
 ## 남은 일
 

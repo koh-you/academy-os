@@ -32,3 +32,7 @@ test-results/
 .DS_Store
 Thumbs.db
 .jscpd-report/
+
+# LaTeX 오답은행 빌드 산출물
+latex-bank/**/build/
+latex-bank/**/review/

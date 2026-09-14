@@ -1,0 +1,257 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage{../sty/dm-editorial}
+\usepackage{fontspec}
+\usepackage{multicol}
+% 문항 전사용 보조 매크로(dm-editorial 매크로를 덮어쓰지 않는다)
+\newcommand{\pt}[1]{\mathrm{#1}}
+\newcommand{\seg}[1]{\overline{\mathrm{#1}}}
+\newcommand{\blank}{\framebox[1.5em]{\rule{0pt}{1.4ex}}}
+\newcommand{\dmhint}[1]{\par\smallskip\begin{tcolorbox}[enhanced,colback=dm-navylight!60,colframe=dm-navy!40,boxrule=0.3pt,sharp corners,left=3mm,right=3mm,top=2mm,bottom=2mm,boxsep=0mm]\small\setlength{\parskip}{1mm}#1\end{tcolorbox}}
+\newcommand{\dmsection}[1]{\par\vspace{3mm}\noindent{\color{dm-navy}\hrule height 0.6pt}\vspace{1.2mm}\noindent{\dmheadingfont\bfseries\fontsize{11}{13}\selectfont\color{dm-navy}#1}\par\vspace{2mm}}
+\newcommand{\dmpassage}[1]{\par\medskip\noindent{\dmheadingfont\bfseries\color{dm-navy}#1}\par\smallskip}
+\renewcommand{\dmchapunit}{01 평면좌표}
+
+\begin{document}
+\dmchapter{01}{평면좌표}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념 01 두 점 사이의 거리}
+\dmpassage{다음 두 점 사이의 거리를 구하시오.}
+\dmpnum{8-01}{\input{items/8-01}}
+\dmpnum{8-02}{\input{items/8-02}}
+\dmpnum{8-03}{\input{items/8-03}}
+\dmpnum{8-04}{\input{items/8-04}}
+\dmpnum{8-05}{\input{items/8-05}}
+\dmpnum{8-06}{\input{items/8-06}}
+\dmpnum{8-07}{\input{items/8-07}}
+\dmpnum{8-08}{\input{items/8-08}}
+\dmpnum{8-09}{\input{items/8-09}}
+\dmpnum{8-10}{\input{items/8-10}}
+\dmpassage{두 점 $\pt{A}$, $\pt{B}$의 좌표와 선분 $\pt{AB}$의 길이가 다음과 같을 때, 실수 $a$의 값을 모두 구하시오.}
+\dmpnum{9-11}{\input{items/9-11}}
+\dmpnum{9-12}{\input{items/9-12}}
+\dmpnum{9-13}{\input{items/9-13}}
+\dmpnum{9-14}{\input{items/9-14}}
+\dmpnum{9-15}{\input{items/9-15}}
+\dmpnum{9-16}{\input{items/9-16}}
+\dmpnum{9-17}{\input{items/9-17}}
+\dmpassage{다음 두 점 $\pt{A}$, $\pt{B}$에서 같은 거리에 있는 $x$축 위의 점의 좌표를 구하시오.}
+\dmpnum{9-18}{\input{items/9-18}}
+\dmpnum{9-19}{\input{items/9-19}}
+\dmpnum{9-20}{\input{items/9-20}}
+\dmpassage{다음 두 점 $\pt{A}$, $\pt{B}$에서 같은 거리에 있는 $y$축 위의 점의 좌표를 구하시오.}
+\dmpnum{9-21}{\input{items/9-21}}
+\dmpnum{9-22}{\input{items/9-22}}
+\dmpnum{9-23}{\input{items/9-23}}
+\dmsection{유형 001 두 점 사이의 거리}
+\dmpnum{10-01}{\input{items/10-01}}
+\dmpnum{10-02}{\input{items/10-02}}
+\dmpnum{10-03}{\input{items/10-03}}
+\dmpnum{10-04}{\input{items/10-04}}
+\dmpnum{10-05}{\input{items/10-05}}
+\dmsection{유형 002 같은 거리에 있는 점}
+\dmpnum{10-06}{\input{items/10-06}}
+\dmpnum{11-07}{\input{items/11-07}}
+\dmpnum{11-08}{\input{items/11-08}}
+\dmpnum{11-09}{\input{items/11-09}}
+\dmpnum{11-10}{\input{items/11-10}}
+\dmpnum{11-11}{\input{items/11-11}}
+\dmsection{유형 003 두 점 사이의 거리와 삼각형}
+\dmpnum{11-12}{\input{items/11-12}}
+\dmpnum{12-13}{\input{items/12-13}}
+\dmpnum{12-14}{\input{items/12-14}}
+\dmpnum{12-15}{\input{items/12-15}}
+\dmsection{유형 004 선분의 길이의 제곱의 합의 최솟값}
+\dmpnum{12-16}{\input{items/12-16}}
+\dmpnum{12-17}{\input{items/12-17}}
+\dmpnum{12-18}{\input{items/12-18}}
+\dmsection{개념 02 수직선 위의 선분의 내분점}
+\dmpassage{다음 수직선 위의 점에 대하여 $\blank$ 안에 알맞은 것을 써넣으시오.}
+\begin{center}\input{figures/fig-numberline-13}\end{center}
+\dmpnum{13-01}{\input{items/13-01}}
+\dmpnum{13-02}{\input{items/13-02}}
+\dmpnum{13-03}{\input{items/13-03}}
+\dmpnum{13-04}{\input{items/13-04}}
+\dmpassage{두 점 $\pt{A}$, $\pt{B}$를 잇는 선분 $\pt{AB}$를 주어진 비로 내분하는 점 $\pt{P}$의 좌표를 구하시오.}
+\dmpnum{13-05}{\input{items/13-05}}
+\dmpnum{13-06}{\input{items/13-06}}
+\dmpnum{13-07}{\input{items/13-07}}
+\dmpnum{13-08}{\input{items/13-08}}
+\dmpnum{13-09}{\input{items/13-09}}
+\dmsection{개념 03 좌표평면 위의 선분의 내분점}
+\dmpassage{두 점 $\pt{A}$, $\pt{B}$를 잇는 선분 $\pt{AB}$를 주어진 비로 내분하는 점 $\pt{P}$의 좌표를 구하시오.}
+\dmpnum{14-10}{\input{items/14-10}}
+\dmpnum{14-11}{\input{items/14-11}}
+\dmpnum{14-12}{\input{items/14-12}}
+\dmpnum{14-13}{\input{items/14-13}}
+\dmpnum{14-14}{\input{items/14-14}}
+\dmpassage{다음을 만족시키는 $a$, $b$의 값을 구하시오.}
+\dmpnum{14-15}{\input{items/14-15}}
+\dmpnum{14-16}{\input{items/14-16}}
+\dmpnum{14-17}{\input{items/14-17}}
+\dmsection{개념 04 삼각형의 무게중심}
+\dmpassage{다음 세 점 $\pt{A}$, $\pt{B}$, $\pt{C}$를 꼭짓점으로 하는 삼각형 $\pt{ABC}$의 무게중심 $\pt{G}$의 좌표를 구하시오.}
+\dmpnum{15-18}{\input{items/15-18}}
+\dmpnum{15-19}{\input{items/15-19}}
+\dmpnum{15-20}{\input{items/15-20}}
+\dmpnum{15-21}{\input{items/15-21}}
+\dmpnum{15-22}{\input{items/15-22}}
+\dmpassage{다음 세 점 $\pt{A}$, $\pt{B}$, $\pt{C}$를 꼭짓점으로 하는 삼각형 $\pt{ABC}$의 무게중심이 $\pt{G}$일 때, $a$, $b$의 값을 구하시오.}
+\dmpnum{15-23}{\input{items/15-23}}
+\dmpnum{15-24}{\input{items/15-24}}
+\dmpnum{15-25}{\input{items/15-25}}
+\dmsection{개념 05 중점의 사각형에의 활용}
+\dmpassage{다음 네 점 $\pt{A}$, $\pt{B}$, $\pt{C}$, $\pt{D}$를 꼭짓점으로 하는 사각형 $\pt{ABCD}$가 평행사변형일 때, $a$, $b$의 값을 구하시오.}
+\dmpnum{16-26}{\input{items/16-26}}
+\dmpnum{16-27}{\input{items/16-27}}
+\dmpnum{16-28}{\input{items/16-28}}
+\dmpassage{다음 네 점 $\pt{A}$, $\pt{B}$, $\pt{C}$, $\pt{D}$를 꼭짓점으로 하는 사각형 $\pt{ABCD}$가 마름모일 때, $a$, $b$의 값을 구하시오.}
+\dmpnum{16-29}{\input{items/16-29}}
+\dmpnum{16-30}{\input{items/16-30}}
+\dmpnum{16-31}{\input{items/16-31}}
+\dmsection{유형 005 수직선 위의 선분의 내분점}
+\dmpnum{17-01}{\input{items/17-01}}
+\dmpnum{17-02}{\input{items/17-02}}
+\dmpnum{17-03}{\input{items/17-03}}
+\dmsection{유형 006 좌표평면 위의 선분의 내분점}
+\dmpnum{17-04}{\input{items/17-04}}
+\dmpnum{17-05}{\input{items/17-05}}
+\dmpnum{17-06}{\input{items/17-06}}
+\dmpnum{18-07}{\input{items/18-07}}
+\dmpnum{18-08}{\input{items/18-08}}
+\dmpnum{18-09}{\input{items/18-09}}
+\dmsection{유형 007 삼각형의 무게중심}
+\dmpnum{18-10}{\input{items/18-10}}
+\dmpnum{18-11}{\input{items/18-11}}
+\dmpnum{18-12}{\input{items/18-12}}
+\dmpnum{19-13}{\input{items/19-13}}
+\dmsection{유형 008 중점의 사각형에의 활용}
+\dmpnum{19-14}{\input{items/19-14}}
+\dmpnum{19-15}{\input{items/19-15}}
+\dmpnum{19-16}{\input{items/19-16}}
+\dmsection{유형 009 각의 이등분선의 성질}
+\dmpnum{19-17}{\input{items/19-17}}
+\dmpnum{19-18}{\input{items/19-18}}
+\dmsection{실전 감각 UP}
+\dmpnum{20-01}{\input{items/20-01}}
+\dmpnum{20-02}{\input{items/20-02}}
+\dmpnum{20-03}{\input{items/20-03}}
+\dmpnum{20-04}{\input{items/20-04}}
+\dmpnum{20-05}{\input{items/20-05}}
+\dmpnum{20-06}{\input{items/20-06}}
+\dmpnum{20-07}{\input{items/20-07}}
+\dmpnum{21-08}{\input{items/21-08}}
+\dmpnum{21-09}{\input{items/21-09}}
+\dmpnum{21-10}{\input{items/21-10}}
+\dmpnum{21-11}{\input{items/21-11}}
+\dmpnum{21-12}{\input{items/21-12}}
+\dmpnum{21-13}{\input{items/21-13}}
+\dmpnum{21-14}{\input{items/21-14}}
+\clearpage
+\dmsection{정답}
+\begin{multicols}{2}\small
+\noindent\textbf{8-01}\ 7\par
+\noindent\textbf{8-02}\ 4\par
+\noindent\textbf{8-03}\ 5\par
+\noindent\textbf{8-04}\ 9\par
+\noindent\textbf{8-05}\ 3\par
+\noindent\textbf{8-06}\ 6\par
+\noindent\textbf{8-07}\ $2\sqrt{13}$\par
+\noindent\textbf{8-08}\ $\sqrt{26}$\par
+\noindent\textbf{8-09}\ $\sqrt{13}$\par
+\noindent\textbf{8-10}\ 10\par
+\noindent\textbf{9-11}\ 2, 14 (힌트 $-6$, $6$, $14$, $2$)\par
+\noindent\textbf{9-12}\ $-3$, 3\par
+\noindent\textbf{9-13}\ $-6$, 10\par
+\noindent\textbf{9-14}\ 0, 6 (힌트 $6$, $0$, $6$)\par
+\noindent\textbf{9-15}\ 2\par
+\noindent\textbf{9-16}\ 0, 4\par
+\noindent\textbf{9-17}\ $-2$, 2\par
+\noindent\textbf{9-18}\ $(14,\,0)$ (힌트 $-5$, $25$, $28$, $14$, $14$)\par
+\noindent\textbf{9-19}\ $(-1,\,0)$\par
+\noindent\textbf{9-20}\ $\left(-\dfrac{10}{3},\,0\right)$\par
+\noindent\textbf{9-21}\ $(0,\,9)$ (힌트 $2$, $2$, $18$, $9$, $9$)\par
+\noindent\textbf{9-22}\ $(0,\,-2)$\par
+\noindent\textbf{9-23}\ $(0,\,-6)$\par
+\noindent\textbf{10-01}\ ①\par
+\noindent\textbf{10-02}\ 14\par
+\noindent\textbf{10-03}\ ①\par
+\noindent\textbf{10-04}\ $-4$\par
+\noindent\textbf{10-05}\ ⑤\par
+\noindent\textbf{10-06}\ ⑤\par
+\noindent\textbf{11-07}\ $(-5,\,0)$\par
+\noindent\textbf{11-08}\ ①\par
+\noindent\textbf{11-09}\ ③\par
+\noindent\textbf{11-10}\ $(1,\,1)$\par
+\noindent\textbf{11-11}\ ③\par
+\noindent\textbf{11-12}\ (1) $\seg{AB}=5\sqrt{2}$, $\seg{BC}=\sqrt{5}$, $\seg{CA}=3\sqrt{5}$ (2) $\angle\pt{C}=90^\circ$인 직각삼각형\par
+\noindent\textbf{12-13}\ (1) 정삼각형 (2) $4\sqrt{3}$\par
+\noindent\textbf{12-14}\ ②\par
+\noindent\textbf{12-15}\ ⑤\par
+\noindent\textbf{12-16}\ ①\par
+\noindent\textbf{12-17}\ $(0,\,3)$\par
+\noindent\textbf{12-18}\ $\left(\dfrac{3}{4},\,\dfrac{7}{4}\right)$\par
+\noindent\textbf{13-01}\ 3\par
+\noindent\textbf{13-02}\ 1\par
+\noindent\textbf{13-03}\ 4\par
+\noindent\textbf{13-04}\ $\pt{AQ}$\par
+\noindent\textbf{13-05}\ 4\par
+\noindent\textbf{13-06}\ 6\par
+\noindent\textbf{13-07}\ 0\par
+\noindent\textbf{13-08}\ 3\par
+\noindent\textbf{13-09}\ $-\dfrac{17}{5}$\par
+\noindent\textbf{14-10}\ $\left(\dfrac{7}{2},\,4\right)$\par
+\noindent\textbf{14-11}\ $(4,\,1)$\par
+\noindent\textbf{14-12}\ $\left(3,\,-\dfrac{3}{2}\right)$\par
+\noindent\textbf{14-13}\ $(4,\,1)$\par
+\noindent\textbf{14-14}\ $(3,\,-2)$\par
+\noindent\textbf{14-15}\ $a=-3$, $b=6$\par
+\noindent\textbf{14-16}\ $a=15$, $b=8$\par
+\noindent\textbf{14-17}\ $a=1$, $b=\dfrac{7}{2}$\par
+\noindent\textbf{15-18}\ $(1,\,2)$\par
+\noindent\textbf{15-19}\ $(2,\,2)$\par
+\noindent\textbf{15-20}\ $(4,\,-2)$\par
+\noindent\textbf{15-21}\ $(-3,\,1)$\par
+\noindent\textbf{15-22}\ $\left(\dfrac{4}{3},\,4\right)$\par
+\noindent\textbf{15-23}\ $a=-2$, $b=13$ (힌트 $3$, $3$, $3$, $3$, $4$, $-2$, $13$)\par
+\noindent\textbf{15-24}\ $a=-8$, $b=-1$\par
+\noindent\textbf{15-25}\ $a=2$, $b=5$\par
+\noindent\textbf{16-26}\ $a=4$, $b=5$ (힌트 $\frac{5}{2}$, $-1$, $-1$, $\frac{5}{2}$, $4$, $5$)\par
+\noindent\textbf{16-27}\ $a=0$, $b=11$\par
+\noindent\textbf{16-28}\ $a=-8$, $b=3$\par
+\noindent\textbf{16-29}\ $a=6$, $b=4$ (힌트 $2$, $2$, $2$, $2$, $12$, $6$, $6$, $4$)\par
+\noindent\textbf{16-30}\ $a=-3$, $b=-2$\par
+\noindent\textbf{16-31}\ $a=-3$, $b=-6$\par
+\noindent\textbf{17-01}\ ㈎ $\pt{E}$ \ ㈏ $\pt{D}$\par
+\noindent\textbf{17-02}\ ⑤\par
+\noindent\textbf{17-03}\ ③\par
+\noindent\textbf{17-04}\ $a=-1$, $b=1$\par
+\noindent\textbf{17-05}\ $\sqrt{17}$\par
+\noindent\textbf{17-06}\ ③\par
+\noindent\textbf{18-07}\ ①\par
+\noindent\textbf{18-08}\ (1) $(-1,\,1)$ (2) $(7,\,-1)$\par
+\noindent\textbf{18-09}\ $(-1,\,-9)$\par
+\noindent\textbf{18-10}\ 4\par
+\noindent\textbf{18-11}\ ④\par
+\noindent\textbf{18-12}\ $a=-8$, $b=3$\par
+\noindent\textbf{19-13}\ ③\par
+\noindent\textbf{19-14}\ ④\par
+\noindent\textbf{19-15}\ ③\par
+\noindent\textbf{19-16}\ 10\par
+\noindent\textbf{19-17}\ (1) $2:1$ (2) $\left(-\dfrac{4}{3},\,1\right)$\par
+\noindent\textbf{19-18}\ $\left(\dfrac{9}{2},\,-\dfrac{1}{2}\right)$\par
+\noindent\textbf{20-01}\ ①\par
+\noindent\textbf{20-02}\ ③\par
+\noindent\textbf{20-03}\ ①\par
+\noindent\textbf{20-04}\ ⑤\par
+\noindent\textbf{20-05}\ ②\par
+\noindent\textbf{20-06}\ ⑤\par
+\noindent\textbf{20-07}\ ④\par
+\noindent\textbf{21-08}\ ⑤\par
+\noindent\textbf{21-09}\ ②\par
+\noindent\textbf{21-10}\ 3분\par
+\noindent\textbf{21-11}\ 4\par
+\noindent\textbf{21-12}\ $\dfrac{7}{5}$\par
+\noindent\textbf{21-13}\ $\sqrt{73}$\par
+\noindent\textbf{21-14}\ 12\par
+\end{multicols}
+\end{document}

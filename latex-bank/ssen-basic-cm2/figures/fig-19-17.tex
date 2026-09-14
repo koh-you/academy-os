@@ -1,0 +1,21 @@
+% 유형 009 19-17(본책 19쪽) — 삼각형 ABC 와 ∠A 의 이등분선의 발 D. 원문 그림을 TikZ 로 다시 그림(스캔 화질).
+% 점 크기: 정점 2.2pt · 파생점 2pt (프로토타입 feedback_figure_point_size_rule). 좌표 안내는 파선.
+\begin{tikzpicture}[scale=0.55, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-5.2,0) -- (1.6,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.8) -- (0,4) node[left] {$y$};
+  \node[below right, font=\small] at (0,0) {$\mathrm{O}$};
+  \coordinate (A) at (-2,3); \coordinate (B) at (-4,-1); \coordinate (C) at (0,2); \coordinate (D) at (-4/3,1);
+  \draw[line width=0.6pt] (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.6pt] (A) -- (D);
+  \draw[dashed, line width=0.4pt] (A) -- (-2,0) (A) -- (0,3) (B) -- (-4,0) (B) -- (0,-1);
+  \fill (A) circle (2.2pt); \fill (B) circle (2.2pt); \fill (C) circle (2.2pt); \fill (D) circle (2pt);
+  \node[above, font=\small] at (A) {$\mathrm{A}$};
+  \node[below left, font=\small] at (B) {$\mathrm{B}$};
+  \node[right, font=\small] at (C) {$\mathrm{C}$};
+  \node[below right=1pt and -1pt, font=\small] at (D) {$\mathrm{D}$};
+  \node[right, font=\small] at (0,3) {$3$};
+  \node[right, font=\small] at (0,2) {$2$};
+  \node[right, font=\small] at (0,-1) {$-1$};
+  \node[below, font=\small] at (-2,0) {$-2$};
+  \node[above left=-1pt and -2pt, font=\small] at (-4,0) {$-4$};
+\end{tikzpicture}

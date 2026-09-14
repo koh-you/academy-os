@@ -1,5 +1,10 @@
 # Daily Development Handoff
 
+## 2026-09-14 베이직쎈 1단원 · LaTeX 조판 · 정독
+
+- 사람 Gate(바탕화면 `문제은행-패키지`): ① `베이직쎈-공통수학2-1단원-라텍스\review\*.png` 로 104문 전사 확정(틀린 곳은 `latex-bank/ssen-basic-cm2/items.json` 을 고치고 `node scripts/latex-bank/build.mjs --bank latex-bank/ssen-basic-cm2 --review` 재실행) ② `answer_source` 가 「계산」인 15문의 답을 답지와 대조 ③ `베이직쎈-공통수학2-1단원\검수-필요.md`(해설 못 찾음 9 · 불일치 3)와 `올림포스-공통수학1\검수-필요.md`(못 찾음 16 · 불일치 2) 확인 ④ PR #332(스캔 경로) · #333(프로토타입) 병합.
+- 다음: 풀이(해설) 전사 → 숫자 변형(level 1) → 자유 변형(level 2); 2단원 이후는 `--pages`·`--units`·`--concepts` 로 같은 절차; 전권은 `--unit-pages` 를 붙여야 단원이 안 쪼개진다.
+
 ## 2026-09-14 문제은행 스캔 경로(올림포스)
 
 - 사람 Gate: 바탕화면 `문제은행-패키지\올림포스-공통수학1\qa\p010~p111.jpg` 에서 상자(초록 = 컬럼, 파랑 = 전폭, 빨강 = flagged)를 훑어본 뒤 교재관리 › 패키지 등록. 등록 뒤 교재별 오답 › 2단 인쇄에서 전폭 문항이 두 열을 차지하는지 본다.

@@ -1,5 +1,11 @@
 # Academy OS Current Status
 
+## 2026-09-14 베이직쎈 공통수학2 1단원 — 스캔 문항·정답·LaTeX 조판·정독 자산
+
+- `scripts/problem-bank/ingest-scan-badges.mjs`(번호 배지형 스캔 책 · 「인쇄쪽-번호」 id) + `ingest-scan-answers.mjs --layout ssen`(별책 답지). 1단원(본책 2~15쪽): 문항 104 · 해설 95/104 · 답 줄 81 · 번호 불일치 3. 패키지마다 `검수-필요.md` 가 생겨 문항 = 해설 = 답 개수 차이와 사람이 먼저 볼 쪽·번호를 정리한다(올림포스 공통수학1: 해설 못 찾음 16 · 불일치 2, 베이직쎈: 못 찾음 9 · 불일치 3).
+- LaTeX 오답은행(`latex-bank/`, `scripts/latex-bank/build.mjs`): 스캔 화질이 낮은 책을 문항 단위로 다시 조판. 프로토타입 `dm-editorial.sty` 그대로, MiKTeX xelatex(무료·비전 API 0). 베이직쎈 1단원 104문 전사 → `items.json`(원천) → book.pdf 11쪽(Overfull 0) + review/ 104장(원본 크롭 ↔ 조판본). 그림 4개는 전부 TikZ(까닭 `latex-bank/README.md` 표에 기록 · 크롭 사용 0).
+- 정독 자산 `latex-bank/ssen-basic-cm2/정독/…평면좌표.md`(스키마 v2.0 · 104문 · ★1 46/★2 46/★3 12). **사람 Gate**: 바탕화면 `문제은행-패키지\베이직쎈-공통수학2-1단원-라텍스eview` 로 전사 확정, `answer_source` 「계산」 15문의 답을 답지와 대조, 두 패키지의 `검수-필요.md`. 풀이 전사·숫자 변형·2단원 이후·전권 단원 경계(`--unit-pages`)는 다음 작업.
+
 ## 2026-09-14 문제은행 스캔 PDF 경로 (올림포스 공통수학1)
 
 - `scripts/problem-bank/ingest-scan-pdf.mjs`: 글자 레이어 없는 스캔 교재를 로컬 tesseract(무료·비전 0)로 원천화한다. EBS 문항 코드(`▶ 25445-0017`)를 번호 배지로 쓰고, 코드 줄의 색 배지~코드 오른쪽으로 문항 폭을 정해 2단·전폭이 섞인 쪽(기본 유형·서술형·고난도)도 문항마다 잘린다. 풀이 딸린 예제는 코드가 없어 자동 제외.

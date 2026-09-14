@@ -91,7 +91,14 @@ function findInstructionMarkers(imageData, width, scale, { x0, x1, y0, y1 }) {
             if (gray(imageData, (y * width + x) * 4) < 150) { textRows += 1; break; }
           }
         }
-        if (borderRows < h * 0.6 && textRows >= h * 0.3) markers.push({ y: (top + h / 2) / scale, h: h / scale });
+        // 아이콘의 왼쪽 끝 x — 지시문 말풍선은 배지 자리에, 「◎」 풀이 힌트는 들여쓴 자리에 온다.
+        let iconLeft = px1;
+        for (let y = top; y < top + h; y += 1) {
+          for (let x = px0; x < px1; x += 1) {
+            if (isColored(imageData, (y * width + x) * 4)) { iconLeft = Math.min(iconLeft, x); break; }
+          }
+        }
+        if (borderRows < h * 0.6 && textRows >= h * 0.3) markers.push({ y: (top + h / 2) / scale, h: h / scale, x: iconLeft / scale });
       }
       start = -1;
     }
@@ -286,12 +293,27 @@ async function main() {
     // 3자리는 유형 라벨뿐이다(문항 배지는 두 자리까지). 앞의 0 이 떨어져 두 자리로 읽힌 라벨은 연한 초록 글자로 안다.
     const isTypeLabelToken = (token) => /^\d{3}$/.test(token.text) || isGreenGlyph(token);
     const ringColored = isTypeLabelToken;
+    let typeProbe = typeCounter;
     // 유형 라벨: 본문(위 14% 아래)의 색 상자 위 굵은 숫자. OCR 이 「001」을 「01」「1」로 읽어도 라벨이다.
     const typeLabels = tokens
       .filter((token) => /^\d{1,3}$/.test(token.text) && token.conf >= 50 && token.h >= 9 && token.h <= 13 && token.y > pageHeight * 0.06 && isTypeLabelToken(token))
       .sort((a, b) => a.y - b.y)
       // 같은 줄(6pt 안)에서는 가장 왼쪽 것만 라벨이다(제목 글자가 숫자로 읽히는 「491」 같은 것 제외).
-      .filter((token, index, list) => !list.some((other, otherIndex) => otherIndex !== index && Math.abs(other.y - token.y) <= 6 && other.x < token.x && token.x - other.x < 200));
+      .filter((token, index, list) => !list.some((other, otherIndex) => otherIndex !== index && Math.abs(other.y - token.y) <= 6 && other.x < token.x && token.x - other.x < 200))
+      // 라벨 번호는 책 순서로 1~3씩 는다. 본문 숫자(「C(2√3, 1)」→「428」)는 여기서 걸러 문항 하단을 자르지 않게 한다.
+      .sort((a, b) => (a.x < gutterX ? 0 : 1) - (b.x < gutterX ? 0 : 1) || a.y - b.y)
+      .filter((token) => {
+        const value = /^\d{3}$/.test(token.text) ? Number(token.text) : null;
+        if (value === null) {
+          typeProbe += 1;
+          return true;
+        }
+        if ((typeProbe === 0 && value <= 30) || (value > typeProbe && value <= typeProbe + 3)) {
+          typeProbe = value;
+          return true;
+        }
+        return false;
+      });
     if (process.env.DEBUG_SSEN === String(pageNumber)) {
       console.log(`  gutter dotted=${dotted.toFixed(1)} gutterX=${gutterX.toFixed(1)} columns=${JSON.stringify(columns.map((c) => [Math.round(c.x0), Math.round(c.x1)]))}`);
       for (const token of tokens.filter((token) => /^\d{1,3}$/.test(token.text) && token.h >= 8)) console.log(`  ${token.text}@(${token.x.toFixed(0)},${token.y.toFixed(0)} h${token.h.toFixed(1)} c${Math.round(token.conf)}) color=${JSON.stringify((glyphColor(token) ?? []).map(Math.round))}`);
@@ -333,7 +355,9 @@ async function main() {
         .sort((a, b) => a.y - b.y)
         .filter((token, index, list) => index === 0 || token.y - list[index - 1].y > 6);
       const columnTypes = typeLabels.filter((token) => token.x >= column.x0 && token.x < column.x0 + 80).sort((a, b) => a.y - b.y);
+      // 지시문 말풍선은 배지와 같은 x(+5pt 안)에 온다. 그보다 들여쓴 색 아이콘(「◎」 풀이 힌트)은 위 문항의 일부라 무시한다.
       const markers = currentBlock !== "개념" ? [] : findInstructionMarkers(imageData, canvas.width, renderScale, { x0: badgeLeft - 2, x1: badgeLeft + 14, y0: bodyTop, y1: bodyBottom })
+        .filter((marker) => marker.x <= badgeLeft + 5)
         .filter((marker) => !badges.some((badge) => Math.abs(badge.y + badge.h / 2 - marker.y) < 8) && !columnTypes.some((label) => Math.abs(label.y + label.h / 2 - marker.y) < 8));
       const columnBox = { x0: badgeLeft - 4, x1: column.x1 };
       // 아래 한계 후보: 다음 배지·유형 라벨·지시문 아이콘·컬럼 바닥
@@ -344,6 +368,7 @@ async function main() {
         bodyBottom
       ].sort((a, b) => a - b);
       const nextStop = (y) => stops.find((stop) => stop > y + 4) ?? bodyBottom;
+      if (process.env.DEBUG_SSEN === String(pageNumber)) console.log(`  col${column.index} badgeLeft=${badgeLeft.toFixed(0)} badges=${badges.map((b) => `${b.text}@${b.y.toFixed(0)}`).join(",")} types=${columnTypes.map((t) => `${t.text}@${t.y.toFixed(0)}`).join(",")} markers=${markers.map((m) => m.y.toFixed(0)).join(",")}`);
 
       // 공통 지시문: 아이콘 줄부터 다음 정지선까지
       for (const marker of markers) {
