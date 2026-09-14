@@ -1,0 +1,125 @@
+\documentclass[10pt]{article}
+\usepackage{style}
+\usepackage{figures-eq}
+\renewcommand{\examround}{미니모의고사}
+\renewcommand{\examvol}{vol.6}
+
+\newcommand{\solnote}[1]{\par\smallskip\noindent
+  \begin{tcolorbox}[enhanced, breakable, colback=vB-light, colframe=vB-light,
+    boxrule=0pt, arc=3pt, left=10pt, right=10pt, top=4pt, bottom=4pt,
+    fontupper=\sffamily\footnotesize\color{vB-ink}]
+    \textbf{\color{vB-deep}통찰}\quad #1
+  \end{tcolorbox}}
+
+\begin{document}
+
+\answerheader{정답·해설}{공통수학1 — 고차방정식·연립방정식·부등식·도형 — 8문 / 20분}
+
+\begin{quickgrid}
+\quick{01}{③ $-1$}    & \quick{02}{③ $8$}     & \quick{03}{③ $5$}     & \quick{04}{③ $2$} & \quick{05}{③ $7$}     \\
+\quick{06}{① ㄱ}  & \quick{07}{$45$} & \quick{08}{$12$} & & \\
+\end{quickgrid}
+
+\examsection{객관식 \#1\textendash{}\#6 풀 답지}
+
+\soltitle{1}{삼차방정식 — 한 근과 두 근의 곱으로 미정계수 결정}{3}
+\begin{answerbox}\sffamily\bfseries 정답: ③ $-1$\end{answerbox}
+\step{1} $x = 1$을 대입.
+\[ 1 + a + b = 0 \;\Longrightarrow\; a + b = -1. \]
+\step{2} 검산. 세 근을 $1, \alpha, \beta$라 하면 ($x^2$항 없으므로) 세 근의 합 $= 0$이라 $\alpha + \beta = -1$. 두 근의 곱 $\alpha\beta = -3$ (조건). 셋 곱 $= 1 \cdot \alpha\beta = -3 = -b \Rightarrow b = 3$. 두 개씩 곱의 합 $= a$: $1 \cdot \alpha + 1 \cdot \beta + \alpha\beta = -1 + (-3) = -4 = a$. $a + b = -4 + 3 = -1$ ✓.
+정답은 $\textbf{③}$.
+\solnote{한 근 대입으로 $a + b$가 \emph{한 줄에} 결정된다 ($x = 1$이라 다항식 값 $= 1 + a + b$가 그대로 합). 본 문제는 \emph{나머지 두 근의 곱}이 주어졌지만, 굳이 모든 계수를 구할 필요 없이 \emph{$x = 1$ 대입 한 단계}만으로 답이 나오는 \emph{최단 경로} 함정 — 학생이 \emph{근과 계수의 관계}로 우회하면 시간 손해.}
+
+\soltitle{2}{일차부등식 — 가장 작은 정수}{3}
+\begin{answerbox}\sffamily\bfseries 정답: ③ $8$\end{answerbox}
+\step{1} 부등식 풀이.
+\[ 3(x - 1) > 2x + 4 \;\Longrightarrow\; 3x - 3 > 2x + 4 \;\Longrightarrow\; x > 7. \]
+\step{2} $x > 7$을 만족시키는 가장 작은 정수는 $8$.
+정답은 $\textbf{③}$.
+\solnote{일차부등식의 가장 작은 정수 해는 \emph{경계값 $+1$}이 표준. $x > 7$에서 $7$은 \emph{포함되지 않으므로} 답은 $8$. 학생이 \emph{경계 포함 여부} ($\le$ vs $<$)를 놓치면 $7$로 잘못 답하는 함정.}
+
+\soltitle{3}{연립부등식 — 절댓값 + 이차의 공통 정수해}{3}
+\begin{answerbox}\sffamily\bfseries 정답: ③ $5$\end{answerbox}
+\step{1} 첫 부등식: $|x - 2| \le 3 \Rightarrow -1 \le x \le 5$.
+\step{2} 둘째 부등식: $(x - 1)(x - 4) \ge 0 \Rightarrow x \le 1$ 또는 $x \ge 4$.
+\step{3} 공통 범위: $-1 \le x \le 1$ 또는 $4 \le x \le 5$. 정수 $\{-1, 0, 1, 4, 5\}$로 $5$개.
+정답은 $\textbf{③}$.
+\solnote{연립부등식은 \emph{각 부등식의 해의 공통 범위}로 환원. 절댓값 부등식과 이차부등식이 결합되면 해가 \emph{두 부분 범위로 분리}될 수 있다는 인식이 핵심. 정수해 카운팅 시 \emph{양 끝점 포함 여부}를 정확히 점검해야 함정에 빠지지 않는다.}
+
+\soltitle{4}{미지수 이차부등식 — 정수해 개수와 경우 나누기}{4}
+\begin{answerbox}\sffamily\bfseries 정답: ③ $2$\end{answerbox}
+\step{1} 인수분해 $(x - 1)(x - k) \le 0$.
+\step{2} 정수 $k$와 $1$의 대소에 따라 해 범위 분기.
+\paramcasethree{$k$의 위치}{$k > 1$: 해 $1 \le x \le k$ — 정수 $k$개}{$k = 1$: 해 $x = 1$ — $1$개}{$k < 1$: 해 $k \le x \le 1$ — 정수 $(2 - k)$개}
+\step{3} 정수해 개수 $= 4$가 되는 정수 $k$.
+\begin{itemize}\setlength{\itemsep}{0pt}
+\item $k > 1$: $k = 4$ ✓.
+\item $k < 1$: $2 - k = 4 \Rightarrow k = -2$ ✓.
+\end{itemize}
+\step{4} 합 $4 + (-2) = 2$.
+정답은 $\textbf{③}$.
+\solnote{미지수 $k$가 두 근 $\{1, k\}$ 중 한 쪽이라 \emph{$k$와 $1$의 대소}로 해 범위가 \emph{좌·우} 분기. 학생이 \emph{$k < 1$ 케이스}를 놓치면 답을 $4$로만 답한다. \emph{양방향 분기 점검}이 미지수 부등식의 표준 변별.}
+
+\soltitle{5}{직각삼각형 — 피타고라스와 합·곱 환원}{4}
+\begin{answerbox}\sffamily\bfseries 정답: ③ $7$\end{answerbox}
+\step{1} 피타고라스 정리: $a^2 + b^2 = 13^2 = 169$.
+\step{2} $a + b = 17$에서 $(a + b)^2 = a^2 + 2ab + b^2 = 289$. 따라서
+\[ 2ab = 289 - 169 = 120 \;\Longrightarrow\; ab = 60. \]
+\step{3} $(b - a)^2 = (a + b)^2 - 4ab = 289 - 240 = 49$. $a < b$이므로
+\[ b - a = 7. \]
+정답은 $\textbf{③}$.
+\solnote{도형 문제 (\emph{피타고라스 정리})를 \emph{대수의 합·곱 환원}으로 푸는 표준 도구. $(b - a)^2 = (a+b)^2 - 4ab$ 공식이 \emph{근과 계수의 관계}와 같은 원리. $a$와 $b$를 \emph{직접} 구하지 않고도 \emph{차이만} 결정되는 절약 구조가 결정적.}
+
+\soltitle{6}{미지수 이차부등식 — [보기] 진위와 해의 길이}{4}
+\begin{answerbox}\sffamily\bfseries 정답: ① ㄱ\end{answerbox}
+\step{1} 좌변 환원
+\[ x^2 - 2(a - 1)x + a^2 - 3 = (x - (a - 1))^2 + (a^2 - 3) - (a - 1)^2 = (x - (a - 1))^2 + (2a - 4). \]
+부등식 $\le 0$은 $(x - (a-1))^2 \le 4 - 2a$. 해 존재 $\Leftrightarrow$ $4 - 2a \ge 0 \Leftrightarrow a \le 2$.
+\step{2} \textbf{ㄱ.} 해 존재 X $\Leftrightarrow$ $a > 2$. 그러한 $a$가 존재 ($a = 3$ 등). \textbf{ㄱ은 참}.
+\step{3} \textbf{ㄴ.} $a = 2$이면 $(x - 1)^2 \le 0 \Rightarrow x = 1$. 한 점이지 $0 \le x \le 2$가 아니다. \textbf{ㄴ은 거짓}.
+\step{4} \textbf{ㄷ.} 해의 길이 $= 2\sqrt{4 - 2a}$로 $a$에 \emph{의존}한다. \textbf{ㄷ은 거짓}.
+\step{5} ㄱ만 참이므로 정답은 $\textbf{①}$.
+\solnote{이차부등식의 해가 \emph{완전제곱식 환원}으로 \emph{중심·반폭} 구조로 정리. ㄴ은 \emph{$a = 2$ 경계에서 한 점}으로 압축되는 \emph{단일점 함정}, ㄷ은 \emph{해의 길이가 $a$에 의존}하는 \emph{미지수 의존성} 인식. 학생이 \emph{$\sqrt{4 - 2a}$의 $a$ 의존}을 \emph{무시}하면 ㄷ을 참으로 잘못 답한다.}
+
+\examsection{서답 \#7\textendash{}\#8 풀 답지}
+
+\soltitle{7}{삼차 부등식 — 자연수 미지수와 5 이하 자연수 합}{4}
+\begin{answerbox}\sffamily\bfseries 정답: $45$\end{answerbox}
+\step{1} 세 근 $n, 2n, 3n$. 부호 분석으로 부등식 $\le 0$의 해는
+\[ x \le n \text{ 또는 } 2n \le x \le 3n. \]
+\step{2} 자연수 $n$에 대해 \emph{$5$ 이하 자연수}만 추출.
+\begin{itemize}\setlength{\itemsep}{0pt}
+\item $n = 1$: 해 $x \le 1 또는2 \le x \le 3$ → $5$ 이하 자연수 $\{1, 2, 3\}$. 합 $6 \ne 15$ ✗.
+\item $n = 2$: $x \le 2 또는4 \le x \le 6$ → $\{1, 2, 4, 5\}$. 합 $12 \ne 15$ ✗.
+\item $n = 3$: $x \le 3 또는6 \le x \le 9$ → $\{1, 2, 3\}$. 합 $6$ ✗.
+\item $n = 4$: $x \le 4 또는8 \le x \le 12$ → $\{1, 2, 3, 4\}$. 합 $10$ ✗.
+\item $n = 5$: $x \le 5 또는10 \le x \le 15$ → $\{1, 2, 3, 4, 5\}$. 합 $15$ ✓.
+\item $n \ge 6$: 첫 영역 $x \le n$에 $\{1, 2, 3, 4, 5\}$ \emph{모두} 포함, 둘째 영역은 $5$ 초과. $5$ 이하 자연수 = $\{1, 2, 3, 4, 5\}$. 합 $15$ ✓.
+\end{itemize}
+\step{3} 자연수 $n$이 $n \le 10$이고 만족: $n = 5, 6, 7, 8, 9, 10$. 합은
+\[ 5 + 6 + 7 + 8 + 9 + 10 = 45. \]
+답은 $\textbf{45}$.
+\solnote{삼차 부등식의 \emph{부호에 따라 경우를 나누면} 해 영역이 \emph{좌측 + 우측 두 부분}으로 갈라진다. $n$의 범위가 \emph{$5$ 이하 자연수 한정}으로 \emph{$5$ 미만}과 \emph{$5$ 이상} 두 영역으로 자연스럽게 나뉜다 — $n \ge 5$에서 \emph{좌측 영역만}으로 합 $15$ 도달이 자연 한정. 학생은 \emph{$n = 5$ 경계}와 \emph{$n \ge 6$의 경우}를 모두 점검해야 한다.}
+
+\soltitle{8}{이차함수 추론 — 자연수 근 + 곱 조건 + 최솟값 한정}{4}
+\begin{answerbox}\sffamily\bfseries 정답: $12$\end{answerbox}
+\step{1} (가)에서 두 근을 자연수 $\alpha < \beta$로 놓으면 최고차 계수 $1$이므로
+\[ f(x) = (x - \alpha)(x - \beta). \]
+\step{2} (나) 조건 정리.
+\[ f(1) \cdot f(4) = (1 - \alpha)(1 - \beta)(4 - \alpha)(4 - \beta) = -36. \]
+$\alpha, \beta$가 자연수이고 곱이 음수이므로 한 인수만 음수. $(1-\alpha)(1-\beta) = (\alpha - 1)(\beta - 1) \ge 0$ (자연수 두 인수 모두 $\le 0$). 따라서 $(4 - \alpha)(4 - \beta) < 0$이고 \emph{$\alpha \le 4 < \beta$} 자동 결정.
+\step{3} $(\alpha - 1)(\beta - 1)(4 - \alpha)(\beta - 4) = 36$.
+\paramcase{$\alpha$의 후보 ($1 \le \alpha \le 4$, 자연수)}{$\alpha = 1$ 또는 $\alpha = 4$이면 인수 $0$ 발생 — 곱 $= 0 \ne 36$ ✗}{$\alpha = 2$: $1 \cdot (\beta - 1) \cdot 2 \cdot (\beta - 4) = 36 \Rightarrow (\beta - 1)(\beta - 4) = 18$. $\beta = 7$이면 $6 \cdot 3 = 18$ ✓. $\alpha = 3$: $2 \cdot (\beta - 1) \cdot 1 \cdot (\beta - 4) = 36$ — 같은 식 → $\beta = 7$ ✓}
+\step{4} 후보 두 쌍 $(\alpha, \beta) = (2, 7), (3, 7)$.
+\step{5} (다) $f(x) \ge -9$ 점검. $f$ 최솟값 $= -\left(\dfrac{\beta - \alpha}{2}\right)^2$이므로 $(\beta - \alpha)^2 \le 36$, 곧 $\beta - \alpha \le 6$. 두 쌍 모두 ✓.
+\step{6} $f(6)$ 계산.
+\begin{itemize}\setlength{\itemsep}{0pt}
+\item $(2, 7)$: $f(6) = (6 - 2)(6 - 7) = 4 \cdot (-1) = -4$.
+\item $(3, 7)$: $f(6) = (6 - 3)(6 - 7) = 3 \cdot (-1) = -3$.
+\end{itemize}
+\step{7} 모든 $f(6)$의 값의 곱.
+\[ (-4) \cdot (-3) = 12. \]
+답은 $\textbf{12}$.
+\solnote{이차함수 $f(x) = (x - \alpha)(x - \beta)$로 놓고 \emph{(가)(나)(다) 3조건의 결합}으로 \emph{형태를 추론}하는 함수 추론 슬롯. 학생이 \emph{$\alpha \le 4 < \beta$} 자동 결정을 인식하면 $\alpha$ 후보가 \emph{$\{2, 3\}$}으로 자연 한정 — \emph{네 경우}를 \emph{두 경우}로 압축하는 통찰. 결론식 "모든 $f(6)$의 값의 곱"이 \emph{자기참조 종결}이라, 개수나 합으로 답을 정하는 단순 카운팅 풀이를 피하는 변별 장치.}
+
+\end{document}

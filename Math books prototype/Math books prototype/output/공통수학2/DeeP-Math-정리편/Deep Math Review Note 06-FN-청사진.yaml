@@ -1,0 +1,584 @@
+# CM2-FN 함수 청사진 v1.0 (2026-07-20 · 세션 55 신규)
+# 통합 문제출제 시스템 v1.0 · schema.md v3.0 · Gate 5.0 대상
+# CM2-ST 집합·명제 v1.0 골든 계승 · 정독 파일 5종
+#
+# 학습 결과 요약:
+#   1. CM2-FN 소단원 (2022 개정 성취기준 10수07-01·02):
+#      - 10수07-01 함수의 뜻·그래프 (정의역·공역·치역·일대일함수·일대일대응·항등·상수·서로같은 함수)
+#      - 10수07-02 합성함수·역함수 (정의·성질·그래프 대칭)
+#      ※ 유리함수·무리함수는 별도 단원 (CM2-RF · 본 청사진 스코프 외)
+#   2. 원본 은행 정독 결과:
+#      - 개념원리-CM2-FN 90문 (예제 19 + 유제 47 + 연습 24) star 3~5 · 소단원 4개 (함수·여러함수·합성·역함수)
+#      - RPM-CM2-FN 380+문 (교과서·유형익히기·시험꼭·서술형·실력up) star 1~5
+#      - 고쟁이-CM2-CH07-STEP1 40문 (#477~#516) star 3·4 · 빈출 마킹 다수
+#      - 전국연합 CM2-FN 22문 star_5·premium (2015~2024 학평 4점·서술형)
+#      - EBS 올림포스 CM2 (백업)
+#   3. 합성함수·역함수 CM2-FN 정규 도구 · 산술기하평균은 ST 전용 · FN에서는 사용 안 함
+#   4. 소단원 배분: C1 함수의 뜻·그래프·여러가지 함수 · C2 합성함수 · C3 역함수
+
+series_type: jeongribyeon
+series_name: DeeP Math 정리편
+book_title: 공통수학2 정리편 · CM2-FN 함수
+unit_code: CM2-FN
+target_audience: 상위권
+version: v1.0
+established: 2026-07-20
+
+jeongribyeon_meta:
+  page_count_est: 18            # 세션 55 3문/페이지 통합 규약 · L3 1p·실전 2~3p 유연
+  개념_count: 3
+  대표예제_count: 6
+  확인_count: 12
+  Level1_count: 12
+  Level2_count: 12
+  Level3_count: 3
+  실전_count: 3
+  total_problem_slots: 48
+
+# ── 정독 원본 은행 5종 ─
+source_banks:
+  - bank/mechanism-데이터-개념원리-CM2-FN.md              # 90문 · star 3~5 (예제 19 + 유제 47 + 연습 24)
+  - bank/mechanism-데이터-RPM-CM2-FN.md                   # 380+문 · star 1~5 (교과서·유형익히기·시험꼭나오는·서술형·실력up)
+  - bank/mechanism-데이터-고쟁이-CM2-CH07-함수-STEP1.md   # 40문 · star 3·4 (#477~#516 · 빈출 마킹)
+  - bank/mechanism-데이터-전국연합-CM2-FN.md              # 22문 · 학평 star_5·premium (2015~2024)
+  - bank/mechanism-데이터-ebs-올림포스-CM2.md             # FN 파트 (백업)
+
+# ══════════════════════════════════════════════════════════════
+# §1. 개념 슬롯 (3개 · 원본 pick 아님 · 2022 개정 표준 용어)
+# ══════════════════════════════════════════════════════════════
+concept_slots:
+  - slot_id: C1
+    slot_type: 개념
+    sub_section: 함수의 뜻과 그래프 · 여러 가지 함수
+    page_placement: {page_num: 1, layout: dmconcept_full}
+    contents:
+      - dmsub 1: 함수의 정의 (X→Y 대응 · 정의역·공역·치역 · f:X→Y · y=f(x) · 함숫값 · 치역⊂공역)
+      - dmsub 2: 서로 같은 함수 (정의역·공역 같고 모든 x∈X에 대하여 f(x)=g(x))
+      - dmsub 3: 함수의 그래프 (그래프={(x, f(x)) | x∈X} · 세로직선 시험)
+      - dmsub 4: 여러 가지 함수 (일대일함수 · 일대일대응 · 항등함수 I(x)=x · 상수함수 f(x)=c)
+    signature: {defBox: true, primary_axis: 함수 정의·유형·그래프}
+
+  - slot_id: C2
+    slot_type: 개념
+    sub_section: 합성함수
+    page_placement: {page_num: 4, layout: dmconcept_full}
+    contents:
+      - dmsub 1: 합성함수의 정의 (f:X→Y, g:Y→Z에 대하여 g∘f: X→Z · (g∘f)(x)=g(f(x)))
+      - dmsub 2: 합성함수의 성질 (일반적으로 f∘g ≠ g∘f · 결합법칙 (f∘g)∘h = f∘(g∘h))
+      - dmsub 3: 항등함수와의 합성 (f∘I = I∘f = f)
+      - dmsub 4: 반복 합성 · 미지 성분 결정 (f∘g=h에서 f 또는 g 구하기 · 치환 활용)
+    signature: {defBox: true, primary_axis: 합성 정의·결합·미지 성분}
+
+  - slot_id: C3
+    slot_type: 개념
+    sub_section: 역함수
+    page_placement: {page_num: 8, layout: dmconcept_full}
+    contents:
+      - dmsub 1: 역함수의 정의 (f:X→Y 일대일대응 ⇔ 역함수 f⁻¹:Y→X 존재 · f(x)=y ⇔ f⁻¹(y)=x)
+      - dmsub 2: 역함수의 성질 (f∘f⁻¹ = I_Y · f⁻¹∘f = I_X · (f⁻¹)⁻¹=f · (g∘f)⁻¹ = f⁻¹∘g⁻¹)
+      - dmsub 3: 역함수 구하기 (y=f(x) → x에 대하여 풀고 x·y 교환 → y=f⁻¹(x))
+      - dmsub 4: 역함수의 그래프 (y=f(x)와 y=f⁻¹(x)는 y=x에 대칭 · y=f(x)와 y=x 교점은 y=f⁻¹(x)와 y=x 교점과 같음)
+    signature: {defBox: true, primary_axis: 역함수 정의·성질·그래프 대칭}
+
+# ══════════════════════════════════════════════════════════════
+# §2. 대표예제 슬롯 (6개 · 개념당 2문 · 풀이 포함 · star 3·4)
+# ══════════════════════════════════════════════════════════════
+representative_slots:
+  - slot_id: E1
+    slot_type: 대표예제
+    parent_concept: C1
+    target_star: 3
+    composite_range: [13, 19]
+    source: {source_id: 개념원리-CM2-FN-함수-예제-03, tier: star_3, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 조건별 정의 함수 · 정의역 원소 대입 → 치역 결정, insight_type: 절차형, depth: 1}
+    structure: {constraint_count: 2, unknowns_count: 0, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      집합 X={1, 2, 3, 4, 5, 6}에서 정의된 함수
+      f(x) = 2x-1 (x가 홀수), -x+2 (x가 짝수)
+      의 치역을 구하시오.
+    answer: "치역 = {-4, -2, 0, 1, 5, 9}"
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 2, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 분기 정의 · 치역 계산}
+
+  - slot_id: E2
+    slot_type: 대표예제
+    parent_concept: C1
+    target_star: 4
+    composite_range: [20, 26]
+    source: {source_id: 고쟁이-CM2-CH07-STEP1-#481, tier: star_3·4, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 치역 = 공역 조건 · 일차함수 두 경우 (기울기 부호별) 케이스 분리 · 최적화, insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 2, unknowns_count: 2, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      집합 X={x | -2 ≤ x ≤ 3}에서 X로의 함수 f(x)=ax+b의 공역과
+      치역이 같을 때, a+b의 최솟값을 구하시오.
+    answer: "a+b의 최솟값 = 0"
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 3, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 치역=공역 · 케이스 분리}
+
+  - slot_id: E3
+    slot_type: 대표예제
+    parent_concept: C2
+    target_star: 3
+    composite_range: [13, 19]
+    source: {source_id: 개념원리-CM2-FN-합성-예제-10, tier: star_3, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 교환 조건 f∘g=g∘f → 모든 x에 대한 항등식 → 계수 대응, insight_type: 절차형, depth: 2}
+    structure: {constraint_count: 1, unknowns_count: 1, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      두 함수 f(x)=ax+2, g(x)=x-3에 대하여 f∘g = g∘f가 성립할 때
+      상수 a의 값을 구하시오.
+    answer: "a = 1"
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 5, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 교환조건·계수결정}
+
+  - slot_id: E4
+    slot_type: 대표예제
+    parent_concept: C2
+    target_star: 4
+    composite_range: [20, 26]
+    source: {source_id: 개념원리-CM2-FN-합성-예제-11, tier: star_4, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: f∘h = g에서 h 구하기 · 치환·역대입 활용, insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 2, unknowns_count: 0, subquestion_count: 2, figure_needed: false}
+    problem_summary: |
+      두 함수 f(x)=2x-1, g(x)=x²+3에 대하여 다음 물음에 답하시오.
+      (1) f∘h = g를 만족시키는 함수 h(x).
+      (2) h∘f = g를 만족시키는 함수 h(x).
+    answer: "(1) h(x) = (x²+4)/2    (2) h(x) = ((x+1)²+12)/4 = (x²+2x+13)/4"
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 6, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 미지 성분 결정 · 치환}
+
+  - slot_id: E5
+    slot_type: 대표예제
+    parent_concept: C3
+    target_star: 3
+    composite_range: [13, 19]
+    source: {source_id: 개념원리-CM2-FN-역함수-예제-14, tier: star_3, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 역함수 값 f⁻¹(k)=a ⇔ f(a)=k · 역함수 관계 활용 상수 결정, insight_type: 절차형, depth: 1}
+    structure: {constraint_count: 2, unknowns_count: 2, subquestion_count: 2, figure_needed: false}
+    problem_summary: |
+      함수 f(x)=ax+b (a≠0)에 대하여 f(1)=3, f⁻¹(5)=3일 때
+      상수 a, b의 값을 구하시오.
+    answer: "a = 1, b = 2"
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 9, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 역함수 관계·계수}
+
+  - slot_id: E6
+    slot_type: 대표예제
+    parent_concept: C3
+    target_star: 4
+    composite_range: [20, 26]
+    source: {source_id: 개념원리-CM2-FN-역함수-예제-16, tier: star_4, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: (g∘f)⁻¹ = f⁻¹∘g⁻¹ · 역함수 합성 성질 활용, insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 2, unknowns_count: 0, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      두 함수 f(x)=2x+1, g(x)=x-3에 대하여 (f∘g)⁻¹(5)의 값을 구하시오.
+    answer: "(f∘g)⁻¹(5) = 5"
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 10, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 역함수 합성·값}
+
+# ══════════════════════════════════════════════════════════════
+# §3. 확인 슬롯 (12개 · 대표예제 페이지 하단 · 발문만 · star 3·4)
+# ══════════════════════════════════════════════════════════════
+check_slots:
+  # 페이지 2 (E1 뒤 · 함수 정의·치역)
+  - slot_id: CHK1
+    slot_type: 확인
+    parent_representative: E1
+    target_star: 3
+    source: {source_id: 개념원리-CM2-FN-함수-유제-483, tier: star_3, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      정의역이 X={-1, 0, 1}, 공역이 Y={-2, -1, 0, 1, 2, 3}인 함수
+      f(x)=x²+x+1의 치역을 구하시오.
+    answer: "치역 = {1, 3}"
+    page_placement: {page_num: 2, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK2
+    slot_type: 확인
+    parent_representative: E1
+    target_star: 3
+    source: {source_id: 고쟁이-CM2-CH07-STEP1-#479, tier: star_3, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      집합 X={-1, 0, 1}에서 Y={0, 1, 2}로의 대응 중 함수가
+      아닌 것을 고르시오.
+      ① f(x)=|x|    ② f(x)=x+1    ③ f(x)=x²+1
+      ④ f(x)=2x+1   ⑤ f(x)=x³+1
+    answer: "④"
+    page_placement: {page_num: 2, layout: dmchecktitle+dmcheck}
+
+  # 페이지 3 (E2 뒤 · 여러 가지 함수 · 일대일대응)
+  - slot_id: CHK3
+    slot_type: 확인
+    parent_representative: E2
+    target_star: 4
+    source: {source_id: 고쟁이-CM2-CH07-STEP1-#487, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      실수 전체의 집합에서 정의된 함수 f(x)=(a-2)x+3a-1이
+      일대일대응이 되도록 하는 상수 a의 값의 범위를 구하시오.
+    answer: "a ≠ 2 (즉, a의 값이 2가 아닌 모든 실수)"
+    page_placement: {page_num: 3, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK4
+    slot_type: 확인
+    parent_representative: E2
+    target_star: 4
+    source: {source_id: RPM-CM2-FN-함수-#0815, tier: star_2, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      실수 전체의 집합에서 정의된 세 함수 f, g, h가
+      f는 항등함수, g는 상수함수이고 f(2)=g(2)이다.
+      h(x)=x²-3x+5일 때, h(f(1))+h(g(3))의 값을 구하시오.
+    answer: "6"
+    page_placement: {page_num: 3, layout: dmchecktitle+dmcheck}
+
+  # 페이지 5 (E3 뒤 · 합성함수 기본)
+  - slot_id: CHK5
+    slot_type: 확인
+    parent_representative: E3
+    target_star: 3
+    source: {source_id: 개념원리-CM2-FN-합성-유제-525, tier: star_3, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      두 함수 f(x)=x²+1, g(x)=2x-3에 대하여 (g∘f)(2) + (f∘g)(1)의
+      값을 구하시오.
+    answer: "9"
+    page_placement: {page_num: 5, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK6
+    slot_type: 확인
+    parent_representative: E3
+    target_star: 3
+    source: {source_id: 고쟁이-CM2-CH07-STEP1-#494, tier: star_3, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      두 함수 f(x)=x+2, g(x)=ax+b에 대하여 f∘g = g∘f가
+      모든 실수 x에 대하여 성립할 때, 상수 a의 값을 구하시오. (단, b는 상수)
+    answer: "a = 1"
+    page_placement: {page_num: 5, layout: dmchecktitle+dmcheck}
+
+  # 페이지 6 (E4 뒤 · 합성 응용·반복)
+  - slot_id: CHK7
+    slot_type: 확인
+    parent_representative: E4
+    target_star: 4
+    source: {source_id: 개념원리-CM2-FN-합성-유제-534, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      두 함수 f, g에 대하여 f(x)=3x+1, (f∘g)(x)=6x-5일 때, g(x)를
+      구하시오.
+    answer: "g(x) = 2x - 2"
+    page_placement: {page_num: 6, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK8
+    slot_type: 확인
+    parent_representative: E4
+    target_star: 4
+    source: {source_id: 개념원리-CM2-FN-합성-유제-535, tier: star_3, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      함수 f(x)=x+2에 대하여 f¹=f, f^(n+1) = f∘f^n (n은 자연수)로
+      정의할 때, f¹⁰(1)의 값을 구하시오.
+    answer: "21"
+    page_placement: {page_num: 6, layout: dmchecktitle+dmcheck}
+
+  # 페이지 9 (E5 뒤 · 역함수 값·계수)
+  - slot_id: CHK9
+    slot_type: 확인
+    parent_representative: E5
+    target_star: 3
+    source: {source_id: RPM-CM2-FN-역함수-#0786, tier: star_2, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      함수 f(x)=3x-5에 대하여 f⁻¹(4)의 값을 구하시오.
+    answer: "3"
+    page_placement: {page_num: 9, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK10
+    slot_type: 확인
+    parent_representative: E5
+    target_star: 4
+    source: {source_id: 고쟁이-CM2-CH07-STEP1-#499, tier: star_3·4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      함수 f(x)=ax+b에 대하여 f(2)=5, f⁻¹(-1)=-1일 때,
+      f(4)의 값을 구하시오. (단, a, b는 상수)
+    answer: "9"    # 세션 55 종료 시 정정 (Phase 3 자체 검증: 2a+b=5, -a+b=-1 → a=2, b=1 → f(4)=9)
+    page_placement: {page_num: 9, layout: dmchecktitle+dmcheck}
+
+  # 페이지 10 (E6 뒤 · 역함수 합성·성질)
+  - slot_id: CHK11
+    slot_type: 확인
+    parent_representative: E6
+    target_star: 4
+    source: {source_id: 고쟁이-CM2-CH07-STEP1-#501, tier: star_3·4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      두 함수 f(x)=2x-3, g(x)=-x+4에 대하여 (f⁻¹∘g)(5)의 값을
+      구하시오.
+    answer: "1"
+    page_placement: {page_num: 10, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK12
+    slot_type: 확인
+    parent_representative: E6
+    target_star: 4
+    source: {source_id: 개념원리-CM2-FN-역함수-유제-566, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      두 함수 f(x)=2x+1, g(x)=x+3에 대하여 (g∘f)⁻¹(9)의 값을
+      구하시오.
+    answer: "5/2"
+    page_placement: {page_num: 10, layout: dmchecktitle+dmcheck}
+
+# ══════════════════════════════════════════════════════════════
+# §4. Level 1 슬롯 (12개 · ★ 3·4 · 기초·응용 · 발문만 · 답지 별도)
+# ══════════════════════════════════════════════════════════════
+level1_slots:
+  # 함수 정의·치역·서로같은 함수 (4문)
+  - {slot_id: L1-1, target_star: 3, source: {source_id: 개념원리-CM2-FN-함수-유제-486, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 함수 판정 · 치역 ⊂ 공역, insight_type: 절차형, depth: 1}, problem_summary: "집합 X={-1, 0, 1}에서 X로의 함수가 아닌 것을 고르시오. ① f(x)=x  ② f(x)=|x|+1  ③ f(x)=x²-|x|+1  ④ f(x)=-x²+1  ⑤ f(x)=x³.", answer: "②"}
+  - {slot_id: L1-2, target_star: 3, source: {source_id: 개념원리-CM2-FN-함수-유제-491, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 서로 같은 함수 · 두 상수 결정, insight_type: 절차형, depth: 2}, problem_summary: "집합 X={-1, 2}를 정의역으로 하는 두 함수 f(x)=x²+ax+b, g(x)=2x+3이 서로 같을 때, 상수 a, b에 대하여 a+b의 값을 구하시오.", answer: "2"}  # 세션 55 종료 시 정정 (a=1·b=1 → a+b=2)
+  - {slot_id: L1-3, target_star: 4, source: {source_id: 개념원리-CM2-FN-함수-연습-499, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 함수 조건 만족 상수 결정 · 조건별 케이스, insight_type: 조건통합형, depth: 2}, problem_summary: "실수 전체의 집합에서 정의된 함수 f가 f(x+y)=f(x)+f(y)를 만족시키고 f(1)=2일 때, f(-3)+f(5)의 값을 구하시오.", answer: "4"}
+  - {slot_id: L1-4, target_star: 4, source: {source_id: RPM-CM2-FN-함수-#0800, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 치역=공역 · 일차함수 두 경우 분석, insight_type: 조건통합형, depth: 2}, problem_summary: "집합 X={x | 1 ≤ x ≤ 5}에서 X로의 함수 f(x)=ax+b의 치역이 공역과 같을 때, 두 상수 a, b에 대하여 a²+b²의 최댓값을 구하시오.", answer: "37"}
+  # 여러 가지 함수 (4문)
+  - {slot_id: L1-5, target_star: 3, source: {source_id: 개념원리-CM2-FN-여러-유제-506, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 여러 함수 유형 분류, insight_type: 절차형, depth: 1}, problem_summary: "다음 함수 (ㄱ)~(ㄹ) 4함수 텍스트 나열 중 일대일대응의 개수를 a, 항등함수의 개수를 c라 할 때 a+c의 값을 구하시오. (Phase 2 정정: 원본 4함수 텍스트 · 청사진 5종 그래프 표기는 오기재)", answer: "3"}  # 세션 55 종료 시 정정 (a=2, c=1 → a+c=3)
+  - {slot_id: L1-6, target_star: 3, source: {source_id: 개념원리-CM2-FN-여러-유제-507, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 순감소 이차함수 일대일대응 · 정점 조건, insight_type: 절차형, depth: 2}, problem_summary: "집합 X={x | x ≥ 1}에서 Y={y | y ≤ 1}로의 함수 f(x)=-x²+2x+a가 일대일대응일 때, 상수 a의 값을 구하시오.", answer: "0"}
+  - {slot_id: L1-7, target_star: 4, source: {source_id: 개념원리-CM2-FN-여러-유제-511, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 조건부 함수 개수 · 일대일대응 경우 세기, insight_type: 조건통합형, depth: 2}, problem_summary: "집합 X={1, 2, 3, 4, 5}에서 X로의 함수 f 중에서 f(1)=3인 일대일대응의 개수를 구하시오.", answer: "24"}
+  - {slot_id: L1-8, target_star: 4, source: {source_id: 고쟁이-CM2-CH07-STEP1-#488, tier: star_3·4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 함수 성질 여러 종류 판정 · 그래프·식 종합, insight_type: 조건통합형, depth: 2}, problem_summary: "실수 전체의 집합에서 정의된 함수에 대한 [보기] 중 옳은 것만을 모두 고르시오. ㄱ. f(x)=|x|는 일대일함수이다.  ㄴ. f(x)=x³은 일대일대응이다.  ㄷ. f(x)=x²+1이 실수 전체에서 정의될 때 일대일함수가 아니다.  ㄹ. 정의역·공역이 실수 전체인 상수함수는 일대일대응이다.", answer: "ㄴ, ㄷ"}
+  # 합성함수·역함수 (4문)
+  - {slot_id: L1-9, target_star: 3, source: {source_id: 개념원리-CM2-FN-합성-유제-527, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 합성함수 값 · 역추적, insight_type: 절차형, depth: 2}, problem_summary: "두 함수 f(x)=2x+3, g(x)=x²-1에 대하여 (g∘f)(a)=15를 만족시키는 모든 실수 a의 값의 합을 구하시오.", answer: "-3"}
+  - {slot_id: L1-10, target_star: 3, source: {source_id: 고쟁이-CM2-CH07-STEP1-#492, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 합성함수 결합법칙 · 삼중 합성, insight_type: 절차형, depth: 1}, problem_summary: "세 함수 f(x)=x-1, g(x)=2x, h(x)=x²+1에 대하여 (h∘(g∘f))(3)의 값을 구하시오.", answer: "17"}
+  - {slot_id: L1-11, target_star: 4, source: {source_id: 개념원리-CM2-FN-역함수-유제-563, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 역함수 성질 f∘f⁻¹=I · 반복 대입, insight_type: 조건통합형, depth: 2}, problem_summary: "함수 f(x)=2x-5에 대하여 (f⁻¹∘f⁻¹∘f⁻¹)(a) = -1일 때 상수 a의 값을 구하시오.", answer: "-43"}  # 세션 55 종료 시 정정 (f(f(f(-1))) = -43)
+  - {slot_id: L1-12, target_star: 4, source: {source_id: 고쟁이-CM2-CH07-STEP1-#509, tier: star_3·4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 역함수 그래프 대칭 · y=x 교점, insight_type: 조건통합형, depth: 2}, problem_summary: "함수 f(x)=x²-2x+2 (x ≥ 3/2)의 그래프와 그 역함수 y=f⁻¹(x)의 그래프가 만나는 점의 좌표를 (a, b)라 할 때 a+b의 값을 구하시오. (세션 58 정의역 3/2로 정정: 유일 교점 (2,2))", answer: "4"}
+
+# ══════════════════════════════════════════════════════════════
+# §5. Level 2 슬롯 (12개 · ★ 4·5 · 실전적 심화 · 발문만)
+# ══════════════════════════════════════════════════════════════
+level2_slots:
+  # star 4 (5문)
+  - {slot_id: L2-1, target_star: 4, source: {source_id: 개념원리-CM2-FN-함수-연습-500, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 분기 함수 방정식 f(a)=k의 모든 해 · 케이스, insight_type: 조건통합형, depth: 2}, problem_summary: "실수 전체의 집합에서 정의된 함수 f(x) = x²-2x (x ≥ 1), 3x-4 (x < 1)에 대하여 f(a)=3을 만족시키는 모든 실수 a의 값의 합을 구하시오.", answer: "3"}  # 세션 65 정정: x≥1 식 x²-2x=3 → (x-3)(x+1)=0 → x=3만 (x=-1은 제약 위배). x<1 식 3x-4=3 → x=7/3, 제약 x<1 위배 → 해 없음. 유효 해 x=3만 → 합=3.
+  - {slot_id: L2-2, target_star: 4, source: {source_id: RPM-CM2-FN-함수-#0813, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 두 일차식 정의 일대일대응 · 기울기 부호 일치·정수 개수, insight_type: 조건통합형, depth: 2}, problem_summary: "실수 전체의 집합에서 정의된 함수 f(x) = (3-a)x+a-1 (x ≥ 1), (2+a)x-a (x < 1)이 일대일대응이 되도록 하는 정수 a의 개수를 구하시오. (세션 58 원본 교체: 기존 유제-508 매핑 오류·발문 유일결정 불성립 → RPM #0813 값 구하기 형식 유지)", answer: "4"}
+  - {slot_id: L2-3, target_star: 4, source: {source_id: 개념원리-CM2-FN-합성-유제-529, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 두 일대일대응 · 조건 논리 · 다단계 대응, insight_type: 조건통합형, depth: 2}, problem_summary: "집합 X={1, 2, 3}에서 X로의 두 일대일대응 f, g가 f(2)=g(1)=3, (g∘f)(2)=(f∘g)(1)=1을 만족시킬 때 (f∘f)(3)+(g∘f)(1)의 값을 구하시오. (세션 58 원본 발문으로 복원)", answer: "4"}
+  - {slot_id: L2-4, target_star: 4, source: {source_id: 개념원리-CM2-FN-역함수-유제-571, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 일차·역함수 두 점 조건, insight_type: 조건통합형, depth: 2}, problem_summary: "함수 f(x)=ax+b의 역함수가 존재하고, 그 역함수 g에 대하여 g(3)=1, g(-1)=3일 때 f(0)의 값을 구하시오. (a, b는 상수)", answer: "5"}
+  - {slot_id: L2-5, target_star: 4, source: {source_id: 고쟁이-CM2-CH07-STEP1-#513, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 이차·역함수 교점 거리 · 대칭성 활용, insight_type: 조건통합형, depth: 2}, problem_summary: "함수 f(x)=x²-4x+6 (x ≥ 2)의 그래프와 그 역함수 y=f⁻¹(x)의 그래프의 두 교점 사이의 거리를 구하시오.", answer: "√2"}
+  # star 5 (7문)
+  - {slot_id: L2-6, target_star: 5, source: {source_id: 개념원리-CM2-FN-함수-연습-501, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 함수방정식 (Cauchy형 변형) · 여러 값 결합, insight_type: 통찰형, depth: 3}, problem_summary: "실수 전체의 집합에서 정의된 함수 f가 모든 실수 x, y에 대하여 f(x+y)=f(x)+f(y)+2xy를 만족시키고 f(1)=1일 때, f(5)의 값을 구하시오.", answer: "25"}
+  - {slot_id: L2-7, target_star: 5, source: {source_id: 개념원리-CM2-FN-여러-연습-517, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 함수 개수 · 치역=공역 조건 (전사·일대일 종합), insight_type: 절차형, depth: 2}, problem_summary: "집합 X={1, 2, 3, 4}에서 집합 Y={1, 2, 3}으로의 함수 중 치역이 Y와 같은 함수의 개수를 구하시오.", answer: "36"}
+  - {slot_id: L2-8, target_star: 5, source: {source_id: 개념원리-CM2-FN-여러-연습-518, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 정점 이동·최적화 · a-b 최댓값, insight_type: 절차형, depth: 2}, problem_summary: "집합 X={x | x ≥ a}에서 Y={y | y ≥ b}로의 함수 f(x)=x²-2x+3이 일대일대응일 때, a-b의 최댓값을 구하시오. (세션 58 정정: a=3/2에서 a-b = -a²+3a-3 = -3/4 최댓값)", answer: "-3/4"}
+  - {slot_id: L2-9, target_star: 5, source: {source_id: 개념원리-CM2-FN-합성-연습-541, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 일차 자기합성 · 두 해, insight_type: 조건통합형, depth: 3}, problem_summary: "함수 f(x)=ax+b에 대하여 (f∘f)(x) = 4x-3이 모든 실수 x에 대하여 성립할 때, 상수 a, b에 대하여 ab의 모든 가능한 값의 합을 구하시오.", answer: "-8"}  # 세션 55 종료 시 정정 (a=2·b=-1 → ab=-2 · a=-2·b=3 → ab=-6 · 합=-8 · 독립풀이 재확인)
+  - {slot_id: L2-10, target_star: 5, source: {source_id: 개념원리-CM2-FN-역함수-연습-577, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 일대일대응 · 값 배치 논리 · 조건별 케이스, insight_type: 통찰형, depth: 3}, problem_summary: "집합 X={1, 2, 3, 4, 5}에서 X로의 일대일대응 f가 f(1)+2f(3)=12, f⁻¹(1)-f⁻¹(3)=2를 만족시킬 때, f(4)+f⁻¹(4)의 값을 구하시오. (세션 58 원본 발문으로 복원)", answer: "6"}
+  - {slot_id: L2-11, target_star: 5, source: {source_id: 개념원리-CM2-FN-역함수-연습-582, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 역함수가 자기 자신과 같은 이차함수·교점 판별식, insight_type: 통찰형, depth: 3}, problem_summary: "함수 f(x)=x²-4x+k (x ≥ 2)의 그래프와 그 역함수 y=f⁻¹(x)의 그래프가 접할 때, 상수 k의 값을 구하시오.", answer: "25/4"}  # 세션 55 종료 시 정정 (판별식 25-4k=0 → k=25/4 · 독립풀이 재확인)
+  - {slot_id: L2-12, target_star: 5, source: {source_id: 전국연합-2020-3월-고2-14번, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 이차함수 축 대칭 + 합성 조건 → a 결정, insight_type: 조건통합형, depth: 2}, problem_summary: "함수 f(x)=x²-2x+a가 (f∘f)(2)=(f∘f)(4)를 만족시킬 때 f(6)의 값을 구하시오. (a는 상수)", answer: "21"}
+
+# ══════════════════════════════════════════════════════════════
+# §6. Level 3 슬롯 (3문 · ★ 5 심화 · 통찰 정점 · 세션 55 3문/페이지 통합)
+# ══════════════════════════════════════════════════════════════
+level3_slots:
+  - slot_id: L3-1
+    slot_type: Level3
+    target_star: 5
+    composite_range: [27, 32]
+    source: {source_id: 개념원리-CM2-FN-합성-실력-549, tier: star_5, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: verbatim_original_kept
+    mechanism: {primary: 두 식으로 정의된 함수 반복 합성 · 주기 발견 · 부분합, insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 2, unknowns_count: 0, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      실수 전체의 집합에서 정의된 함수 f에 대하여
+      f(x) = 2x (0 ≤ x < 1/2), 2-2x (1/2 ≤ x ≤ 1)
+      이고 f는 주기가 1인 함수이다. f¹=f, f^(n+1) = f∘f^n일 때
+      f^10(1/3)의 값을 구하시오.
+    answer: "2/3"
+    page_placement: {page_num: 16, layout: level3_triple}
+    signature: {defBox: false, primary_axis: 두 식으로 정의된 함수 반복·주기}
+
+  - slot_id: L3-2
+    slot_type: Level3
+    target_star: 5
+    composite_range: [27, 32]
+    source: {source_id: 개념원리-CM2-FN-여러-연습-520, tier: star_5, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: verbatim_original_kept
+    mechanism: {primary: 세 함수 유형 조합 논리 · 항등·상수·일대일대응, insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 3, unknowns_count: 0, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      집합 X={1, 2, 3, 4}에서 X로의 세 함수 f, g, h가 다음 조건을
+      만족시킨다.
+      (가) f는 항등함수이다.
+      (나) g는 상수함수이고 g(2)=3이다.
+      (다) 모든 x∈X에 대하여 f(x)+g(x)+h(x) = 10이다.
+      h(1)+h(4)의 값을 구하시오.
+    answer: "9"
+    page_placement: {page_num: 16, layout: level3_triple}
+    signature: {defBox: true, primary_axis: 항등·상수 조합 방정식}
+
+  - slot_id: L3-3
+    slot_type: Level3
+    target_star: 5
+    composite_range: [27, 32]
+    source: {source_id: 개념원리-CM2-FN-역함수-실력-585, tier: star_5, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: verbatim_original_kept
+    mechanism: {primary: 이차·역함수 y=x 교점 두 개 · 거리 · 대칭성, insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 2, unknowns_count: 0, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      함수 f(x)=x²-4x+k (x ≥ 2)의 그래프와 그 역함수 y=f⁻¹(x)의
+      그래프가 서로 다른 두 점에서 만나고 두 교점 사이의 거리가 √2일 때
+      상수 k의 값을 구하시오.
+    answer: "k = 6"   # 세션 58 정정 (원본 개념원리-역함수-실력-585 solution_summary 준거)
+    page_placement: {page_num: 16, layout: level3_triple}
+    signature: {defBox: false, primary_axis: 역함수 y=x 교점·거리}
+
+# ══════════════════════════════════════════════════════════════
+# §7. 실전 슬롯 (3문 · 학평 star_5·premium · verbatim_kichul: true)
+# ══════════════════════════════════════════════════════════════
+# 세션 55 실전 배지 순수 형식 : \dmkichul{YYYY학년도 M월 고1 학평 N번}
+# 원문 그림 유무 확인 (feedback_figure_source_original_only 준수)
+practice_slots:
+  - slot_id: R-1
+    slot_type: 실전
+    target_star: 5
+    composite_range: [27, 32]
+    source: {source_id: 전국연합-2021-11월-고1-27번, tier: star_5, variation_type: verbatim, copyright_similarity_target: [0.85, 1.00]}
+    variation_status: verbatim_kichul
+    verbatim_kichul: true
+    kichul_badge: "2021학년도 11월 고1 학평 27번"
+    mechanism: {primary: 합성=항등 → 원소별 등식 → 완전제곱꼴로 유일해, insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 3, unknowns_count: 2, subquestion_count: 0, figure_needed: false}
+    figure_needed: false          # 원문 그림 없음 (순수 문자 발문)
+    problem_summary: |
+      집합 X={2, 3}을 정의역으로 하는 함수 f(x)=ax-3a와
+      함수 f(x)의 치역을 정의역으로 하고 집합 X를 공역으로 하는
+      함수 g(x)=x²+2x+b가 있다. 함수 g∘f: X→X가 항등함수일 때
+      a+b의 값을 구하시오. (a, b는 상수)
+    answer: "4"
+    page_placement: {page_num: 17, layout: practice_solo_or_pair}
+    signature: {defBox: false, primary_axis: 합성=항등·완전제곱 유일해}
+
+  - slot_id: R-2
+    slot_type: 실전
+    target_star: 5
+    composite_range: [27, 32]
+    source: {source_id: 전국연합-2018-11월-고1-28번, tier: star_5, variation_type: verbatim, copyright_similarity_target: [0.85, 1.00]}
+    variation_status: verbatim_kichul
+    verbatim_kichul: true
+    kichul_badge: "2018학년도 11월 고1 학평 28번"
+    mechanism: {primary: 치역 크기 + 합 + 최댓값·최솟값 3중 제약 → 케이스 분리, insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 3, unknowns_count: 1, subquestion_count: 0, figure_needed: false}
+    figure_needed: false          # 원문 그림 없음 (순수 문자 발문)
+    problem_summary: |
+      집합 X={1, 2, 3, 4, 5, 6, 7, 8}에 대하여 함수 f: X → X가
+      다음 조건을 만족시킨다.
+      (가) 함수 f의 치역의 원소의 개수는 7이다.
+      (나) f(1)+f(2)+f(3)+f(4)+f(5)+f(6)+f(7)+f(8) = 42이다.
+      (다) 함수 f의 치역의 원소 중 최댓값과 최솟값의 차는 6이다.
+      집합 X의 서로 다른 두 원소 a, b에 대하여 f(a)=f(b)=n을
+      만족시키는 자연수 n의 값을 구하시오.
+    answer: "7"
+    page_placement: {page_num: 18, layout: practice_solo_or_pair}
+    signature: {defBox: true, primary_axis: 치역 3중 제약·케이스}
+
+  - slot_id: R-3
+    slot_type: 실전
+    target_star: 5_premium
+    composite_range: [30, 34]
+    source: {source_id: 전국연합-2023-11월-고1-29번, tier: star_5, variation_type: verbatim, copyright_similarity_target: [0.85, 1.00]}
+    variation_status: verbatim_kichul
+    verbatim_kichul: true
+    kichul_badge: "2023학년도 11월 고1 학평 29번"
+    mechanism: {primary: 곱=0 → 두 함수 조합 + 일대일 강제 + 부호 조건 다단계 케이스, insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 2, unknowns_count: 0, subquestion_count: 0, figure_needed: false}
+    figure_needed: false          # 원문 그림 없음 (순수 문자 발문)
+    problem_summary: |
+      집합 X={-3, -2, -1, 0, 1, 2}에서 실수 전체의 집합으로의
+      일대일함수 f가 다음 조건을 만족시킨다.
+      (가) 모든 x∈X에 대하여 {f(x)+x²-5}×{f(x)+4x} = 0이다.
+      (나) f(0)×f(1)×f(2) < 0이다.
+      f(-3)+f(-2)+f(-1)+f(0)+f(1)+f(2)의 값을 구하시오.
+    answer: "26"
+    page_placement: {page_num: 18, layout: practice_solo_or_pair}
+    signature: {defBox: true, primary_axis: 두 곡선 조합 일대일·부호}
+
+# ══════════════════════════════════════════════════════════════
+# §8. 페이지 배치 (page_layout · 세션 55 3문/페이지 통합)
+# ══════════════════════════════════════════════════════════════
+page_layout:
+  p1:  {content: [C1], type: 개념, sub_section: "함수의 뜻·그래프·여러 가지 함수"}
+  p2:  {content: [E1, CHK1, CHK2], type: 대표+확인}
+  p3:  {content: [E2, CHK3, CHK4], type: 대표+확인}
+  p4:  {content: [C2], type: 개념, sub_section: "합성함수"}
+  p5:  {content: [E3, CHK5, CHK6], type: 대표+확인}
+  p6:  {content: [E4, CHK7, CHK8], type: 대표+확인}
+  p7:  {content: [L1-1, L1-2, L1-3, L1-4], type: Level1, sub_section: "함수 정의·치역·서로 같은 함수"}
+  p8:  {content: [C3], type: 개념, sub_section: "역함수"}
+  p9:  {content: [E5, CHK9, CHK10], type: 대표+확인}
+  p10: {content: [E6, CHK11, CHK12], type: 대표+확인}
+  p11: {content: [L1-5, L1-6, L1-7, L1-8], type: Level1, sub_section: "여러 가지 함수"}
+  p12: {content: [L1-9, L1-10, L1-11, L1-12], type: Level1, sub_section: "합성·역함수"}
+  p13: {content: [L2-1, L2-2, L2-3, L2-5], type: Level2, sub_section: "함수·일대일대응 + 역함수 거리 √2 (★ 4)", note: "세션 78 : L2-5(이차·역함수 거리 √2)를 L2-4 자리로 스왑 (원함수-역함수 y=x 교점 유형 4슬롯 페이지 분산)"}
+  p14: {content: [L2-4, L2-6, L2-7, L2-8], type: Level2, sub_section: "역함수 두 점·함수방정식 (★ 4·5)", note: "세션 78 : L2-4(일차 역함수 두 점)가 L2-5 자리로 스왑"}
+  p15: {content: [L2-9, L2-10, L2-11, L2-12], type: Level2, sub_section: "합성·역함수 심화 (★ 5)"}
+  p16: {content: [L3-1, L3-2, L3-3], type: Level3, note: "세션 55 3문 통합 · 모두 짧고 그림 없음"}
+  p17: {content: [R-1], type: 실전, note: "학평 star_5 · 단독 배치"}
+  p18: {content: [R-2, R-3], type: 실전, note: "학평 star_5·premium · 페어링"}
+
+# ══════════════════════════════════════════════════════════════
+# §9. 세션 55 신정책 준수 체크리스트
+# ══════════════════════════════════════════════════════════════
+session_55_policy_compliance:
+  원문_그림_있을_때만_조판: true         # R-1·R-2·R-3 모두 원문 그림 없음 (순수 문자 발문 확정)
+                                          # L1-5 원본 5종 그래프 존재 → 확인 후 그림 도입 재검토
+                                          # E1·L2-2 두 식으로 정의된 함수·L3-1 두 식으로 정의된 함수 원문에 그림 없음 (식만)
+  점_크기_표준: {정점: 2.2pt, 보조점: 2.0pt}
+  축_두께: 0.8pt
+  평면도형_여백: ">=20%"
+  L3_3문_한_페이지_통합: true            # p16 · 모두 짧은 발문·그림 없음
+  순차_예제_번호: true                    # E1~E6 (개념당 2문)
+  별점_미노출: true                       # 학생 자료 ★ 표기 금지
+  실전_배지_순수_형식: true               # \dmkichul{YYYY학년도 M월 고1 학평 N번}
+  자기역함수_표현_금지_반영: true         # E6·L2-11·L3-3 "역함수가 자기 자신과 같은" 자연어 (본문 발문)
+  CM2-FN_특별_준수:
+    함수_기호_정규_사용: true             # f, g, h · f⁻¹ · g∘f · I(x)=x
+    유리무리함수_배제: true               # 본 청사진 스코프 외 (CM2-RF 별도)
+    금지_기호: [극한, 미분, 매개변수 (한자식 압축), 벡터, 삼각함수, 시그마, 적분, 트레이스]
+    산술기하평균_사용_안함: true          # CM2-ST 전용 · FN에서는 도구로 사용 안 함
+
+# ══════════════════════════════════════════════════════════════
+# §10. Gate 5.0 준비 필드 요약
+# ══════════════════════════════════════════════════════════════
+gate_5_0_readiness:
+  전체_슬롯: 48
+  source_id_명시: 45                     # 개념 3 제외
+  tier_명시: 45
+  variation_note_명시: 45
+  answer_명시: 45
+  figure_needed_명시: 48
+  verbatim_kichul_명시: 3 (R-1·R-2·R-3)
+  copyright_similarity_target_명시: 9 (E1~E6·L3-1·L3-2·L3-3, 나머지 verbatim_original_kept)
+
+# ══════════════════════════════════════════════════════════════
+# §11. 마스터 검토 필요 항목
+# ══════════════════════════════════════════════════════════════
+review_needed:
+  - L1-5 (개념원리-CM2-FN-여러-유제-506): 원본 5종 그래프 (일차·감소일차·이차·계단·상수) · 그림 도입 여부 확인 요망
+    → 원문에 그래프 있음 · figure_source_original_only 정책상 그림 조판 가능. TikZ 5종 신설 or 텍스트 서술 대체 결정 필요
+  - L2-6 (개념원리-CM2-FN-함수-연습-501): 함수방정식 Cauchy 변형 · f(1)=1, f(x+y)=f(x)+f(y)+2xy → f(x)=x² · f(5)=25 · 자체 검증 완료
+  - L2-8 (개념원리-CM2-FN-여러-연습-518): 원본 정점 이동 · a-b=a-(a²-2a+3)=-a²+3a-3=-(a-3/2)²-3/4 · a≥1 조건에서 최댓값은 a=3/2일 때 -3/4
+    → 세션 58 정정 완료 (본편·답지·quickgrid·청사진 answer 모두 -3/4로 통일)
+  - L2-11·L3-3 (개념원리-CM2-FN-역함수-실력-585·연습-582): 역함수와 원함수 그래프 접함/두 점 교점 조건
+    → x²-4x+k (x ≥ 2) 축 x=2에서 증가 · 역함수 존재 · y=x 교점이 곧 f=f⁻¹ 교점
+    → 두 교점 거리 √2 → 두 점 y=x 위 거리 √2 → x 차이 1 · x²-5x+k=0 두 해 차 1 → 25-4k=1 → k=6
+    → 세션 58 정정 완료 (청사진 answer 4 → 6 · 답지·본편은 이미 6으로 서술됨)
+  # 세션 58 발문 결함 3건 정정 이력
+  - L1-12 정의역 x≥1 → x≥3/2 (교점 2개 (1,1)·(2,2) → 유일 교점 (2,2)만 남기고 a+b=4 유지)
+  - L2-3 발문 원본 개념원리-합성-유제-529로 복원 (X={1,2,3} · f(2)=g(1)=3, (g∘f)(2)=(f∘g)(1)=1 · (f∘f)(3)+(g∘f)(1)=4)
+  - L2-10 발문 원본 개념원리-역함수-연습-577로 복원 (X={1,2,3,4,5} · f(1)+2f(3)=12, f⁻¹(1)-f⁻¹(3)=2 · f(4)+f⁻¹(4)=6)
+  - L2-12 (전국연합-2020-3월-고2-14번): f(6) = 21 · 원본 정답 검증 완료
+  - R-1 (2021-11월-고1-27번): 정답 4 · 원본 정답표 확인 완료
+  - R-2 (2018-11월-고1-28번): 정답 7 · 원본 정답표 확인 완료
+  - R-3 (2023-11월-고1-29번): 정답 26 · 원본 정답표 확인 완료
+  - 페이지 배치 최적화: ST v6 골든 계승 · L2 4문/페이지 3장 · L3 3문/1페이지 (짧은 발문 확인 완료)
+  - **자기역함수 관례 표기**: E6·L2-11·L3-3 발문 및 답지 서술 시 "역함수가 자기 자신과 같은" 자연어로 대체 (feedback_curriculum_terms)

@@ -1,0 +1,647 @@
+% DeeP Math 정리편 · CM2-GM-01 평면좌표 · 답지 v5
+% Phase D7 (2026-07-19 마스터 지시 · 디자인 에이전트):
+%   1. 스타일 전환 : style.sty (vB 블루) → deep-math-answer.sty (dm 퍼플)
+%   2. 섹션 배너 시각 강화 (\dmsection · 확인·L1·L2·L3·실전 명확 구분)
+%   3. 톤 통일 (정리편 본편 · deep-math.sty와 색·매크로 동일)
+%   4. shipout FG 세로 분할선 삭제 · multicols columnseprule로 전환
+% 대상: 확인 12 + Level1 12 + Level2 12 + Level3 3 + 실전 3 = 총 42 슬롯
+% 정답 값·풀이 서술 v4 유지 (변경 없음)
+
+\documentclass[10pt,fleqn]{article}   % fleqn: dmanswersetup의 mathindent 요구
+\usepackage{dm-answer-classic}
+\renewcommand{\dmexamname}{평면좌표}
+
+\begin{document}
+\dmanswersetup
+
+\dmanswerheader{평면좌표 정답 및 해설}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 1 — 확인 문제 (12문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[스스로 풀어보기]{확인 문제}
+
+\renewcommand{\dmquickgridstretch}{2.25}
+\begin{dmquickgrid}
+\dmquick{1}{$a=2$} & \dmquick{2}{$a=11$} & \dmquick{3}{최솟값 $36$} & \dmquick{4}{$\mathrm{P}(2,\,2)$} & \dmquick{5}{$\dfrac{\sqrt{5}}{2}$} \\
+\dmquick{6}{$\sqrt{2}$} & \dmquick{7}{$k=6$} & \dmquick{8}{$ab=4$} & \dmquick{9}{$a+b=7$} & \dmquick{10}{$p+q=10$} \\
+\dmquick{11}{$(1,\,1)$} & \dmquick{12}{$(0,\,3)$} & & & \\
+\end{dmquickgrid}
+
+\begin{multicols*}{2}
+
+% ─────────────── 확인 1 ───────────────
+\dmsoltitle{1}{같은 거리 조건에서 미지수 결정}
+\begin{dmanswerbox}
+정답: $a=2$
+\end{dmanswerbox}
+
+$\overline{\mathrm{AC}}^{\,2}=\overline{\mathrm{BC}}^{\,2}$\ 에서
+\[ (a+1)^2 + 1 = (a-3)^2 + 9. \]
+좌·우 전개는 각각 $a^2+2a+2,\ a^2-6a+18$\ 이므로 $8a = 16$, $\therefore\ a=2$.
+
+% ─────────────── 확인 2 ───────────────
+\dmsoltitle{2}{거리 공식과 대칭식}
+\begin{dmanswerbox}
+정답: $a=11$
+\end{dmanswerbox}
+
+두 점 $\mathrm{A}(4,\,a)$,\ $\mathrm{B}(a,\,4)$ 사이의 거리 제곱은
+\[ \overline{\mathrm{AB}}^{\,2} = (a-4)^2 + (4-a)^2 = 2(a-4)^2. \]
+$\overline{\mathrm{AB}}=7\sqrt{2}$\ 에서 $2(a-4)^2 = 98$, $(a-4)^2 = 49$\ 이므로 $a=11$ 또는 $a=-3$. 양수 조건에서 $\therefore\ a=11$.
+
+% ─────────────── 확인 3 ───────────────
+\dmsoltitle{3}{거리 제곱의 합의 최솟값}
+\begin{dmanswerbox}
+정답: 최솟값 $36$,\ $\mathrm{P}(-1,\,0)$
+\end{dmanswerbox}
+
+$\mathrm{P}(x,\,0)$\ 이라 하면
+\[ \overline{\mathrm{AP}}^{\,2}+\overline{\mathrm{BP}}^{\,2} = (x+4)^2+9 + (x-2)^2+9 = 2(x+1)^2 + 36. \]
+$\therefore\ x=-1$\ 일 때 최솟값 $36$\ 이고, 이때 $\mathrm{P}(-1,\,0)$.
+
+% ─────────────── 확인 4 ───────────────
+\dmsoltitle{4}{직선 위 점에서 거리 제곱의 합}
+\begin{dmanswerbox}
+정답: $\mathrm{P}(2,\,2)$
+\end{dmanswerbox}
+
+$\mathrm{P}(t,\,t)$\ 라 하면 $\overline{\mathrm{AP}}^{\,2}+\overline{\mathrm{BP}}^{\,2}$\ 은
+\[ (t+3)^2+(t-2)^2+(t-4)^2+(t-5)^2 = 4(t-2)^2 + 38 \]
+이므로 $\therefore\ t=2$\ 일 때 최소이고 $\mathrm{P}(2,\,2)$.
+
+% ─────────────── 확인 5 ───────────────
+\dmsoltitle{5}{내분점과 중점 사이의 거리}
+\begin{dmanswerbox}
+정답: $\overline{\mathrm{PM}} = \dfrac{\sqrt{5}}{2}$
+\end{dmanswerbox}
+
+$2 : 3$ 내분점 $\mathrm{P}$\ 의 좌표는
+$$\mathrm{P}_x = \dfrac{-8+18}{5} = 2,\qquad \mathrm{P}_y = \dfrac{4-9}{5} = -1$$
+이므로 $\mathrm{P}(2,\,-1)$. 중점은 $\mathrm{M}\!\left(1,\,-\dfrac{1}{2}\right)$\ 이므로
+\[ \overline{\mathrm{PM}} = \sqrt{1+\dfrac{1}{4}} = \dfrac{\sqrt{5}}{2}. \]
+
+% ─────────────── 확인 6 ───────────────
+\dmsoltitle{6}{$1:3$ 내분점과 중점 사이의 거리}
+\begin{dmanswerbox}
+정답: $\overline{\mathrm{PM}}=\sqrt{2}$
+\end{dmanswerbox}
+
+$1 : 3$ 내분점과 중점의 좌표는 각각
+$$\mathrm{P}\!\left( \dfrac{3-3}{4},\ \dfrac{2+18}{4} \right) = (0,\,5),\qquad \mathrm{M}(1,\,4).$$
+$\therefore\ \overline{\mathrm{PM}} = \sqrt{1+1} = \sqrt{2}$.
+
+% ─────────────── 확인 7 ───────────────
+\dmsoltitle{7}{내분점이 직선 위에 있을 조건}
+\begin{dmanswerbox}
+정답: $k=6$
+\end{dmanswerbox}
+
+$1 : k$ 내분점은
+\[ \mathrm{P}\!\left( \dfrac{10+2k}{1+k},\ \dfrac{4+2k}{1+k} \right). \]
+직선 $y = 2x - 4$ 위 점이라는 조건에서 양변에 $1+k$\ 를 곱하면
+\[ 4+2k = 2(10+2k) - 4(1+k) = 16, \]
+$2k = 12$\ 이므로 $\therefore\ k = 6$.
+
+% ─────────────── 확인 8 ───────────────
+\dmsoltitle{8}{평행사변형과 대각선 중점 일치}
+\begin{dmanswerbox}
+정답: $ab=4$
+\end{dmanswerbox}
+
+평행사변형 $\mathrm{ABCD}$\ 에서 두 대각선 $\overline{\mathrm{AC}}$,\ $\overline{\mathrm{BD}}$\ 의 중점이 서로 같으므로
+$$\dfrac{-1+0}{2} = \dfrac{a-3}{2},\qquad \dfrac{0+3}{2} = \dfrac{1+b}{2}.$$
+$a-3=-1$\ 에서 $a=2$, $1+b=3$\ 에서 $b=2$\ 이므로 $\therefore\ ab = 4$.
+
+% ─────────────── 확인 9 ───────────────
+\dmsoltitle{9}{무게중심 조건에서 두 미지수 결정}
+\begin{dmanswerbox}
+정답: $a+b=7$
+\end{dmanswerbox}
+
+무게중심 공식에서
+$$\dfrac{a-b+3}{3} = 2,\qquad \dfrac{b+2+5}{3} = 3.$$
+둘째 식에서 $b + 7 = 9$\ 이므로 $b = 2$, 첫째 식에서 $a - b + 3 = 6$\ 이므로 $a = 5$. $\therefore\ a + b = 7$.
+
+% ─────────────── 확인 10 ───────────────
+\dmsoltitle{10}{무게중심의 두 좌표 독립 결정}
+\begin{dmanswerbox}
+정답: $p+q=10$
+\end{dmanswerbox}
+
+무게중심 공식에서
+$$\dfrac{-1+p+5}{3} = 4,\qquad \dfrac{2+3+1}{3} = q.$$
+$p+4=12$\ 에서 $p=8$\ 이고 $q=2$\ 이므로 $\therefore\ p + q = 10$.
+
+% ─────────────── 확인 11 ───────────────
+\dmsoltitle{11}{꼭짓점과 대변 중점으로부터 무게중심}
+\begin{dmanswerbox}
+정답: $\mathrm{G}(1,\,1)$
+\end{dmanswerbox}
+
+무게중심 $\mathrm{G}$\ 는 선분 $\overline{\mathrm{AM}}$\ 을 $2 : 1$\ 로 내분하므로
+$$\mathrm{G} = \dfrac{2\mathrm{M} + \mathrm{A}}{3}\,.$$
+좌표별로
+$$\mathrm{G}_x = \dfrac{2\cdot 3 + (-3)}{3} = 1,\qquad \mathrm{G}_y = \dfrac{2\cdot(-1)+5}{3} = 1$$
+이므로 $\therefore\ \mathrm{G}(1,\,1)$.
+
+% ─────────────── 확인 12 ───────────────
+\dmsoltitle{12}{중점 삼각형의 무게중심}
+\begin{dmanswerbox}
+정답: $\mathrm{G}(0,\,3)$
+\end{dmanswerbox}
+
+중점 삼각형과 원 삼각형의 무게중심은 일치하므로 세 중점의 좌표 평균이 곧 $\mathrm{G}$\ 이다.
+\[ \mathrm{G} = \left( \dfrac{-4-1+5}{3},\ \dfrac{5-2+6}{3} \right) = (0,\,3). \]
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 2 — Level 1 (12문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[기초 연습]{Level 1}
+
+\renewcommand{\dmquickgridstretch}{2.25}
+\begin{dmquickgrid}
+\dmquick{1}{$a+b=4$} & \dmquick{2}{$3\sqrt{2}$} & \dmquick{3}{$(0,\,1)$} & \dmquick{4}{이등변삼각형} & \dmquick{5}{$7$} \\
+\dmquick{6}{$15$} & \dmquick{7}{$a=5$} & \dmquick{8}{$k=5$} & \dmquick{9}{$1$} & \dmquick{10}{$2$} \\
+\dmquick{11}{$(5,\,-9)$} & \dmquick{12}{$3x+2y-9=0$} & & & \\
+\end{dmquickgrid}
+
+% dmsoltitlefirst reset (multicols 새로 시작 · 컴팩트 첫 soltitle)
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── L1-1 ───────────────
+\dmsoltitle{1}{같은 거리 조건과 직선 위 점의 결합}
+\begin{dmanswerbox}
+정답: $a+b=4$
+\end{dmanswerbox}
+
+$\overline{\mathrm{PA}}^{\,2} = \overline{\mathrm{PB}}^{\,2}$\ 에서
+\[ (a-1)^2+(b-3)^2 = (a-5)^2+(b+1)^2. \]
+전개·정리하면 $8a - 8b = 16$\ 이므로 $a - b = 2$\ 이다. 여기에 $\mathrm{P}$\ 가 직선 $y=2x-5$ 위 점이라는 조건 $b = 2a - 5$\ 를 대입하면
+\[ a - (2a-5) = 2\ \Longrightarrow\ a = 3,\quad b = 1. \]
+$\therefore\ a + b = 4$.
+
+% ─────────────── L1-2 ───────────────
+\dmsoltitle{2}{좌표축 위 같은 거리 점과 두 점 사이의 거리}
+\begin{dmanswerbox}
+정답: $\overline{\mathrm{PQ}}=3\sqrt{2}$
+\end{dmanswerbox}
+
+$x$\ 축 위 점 $\mathrm{P}(x,\,0)$\ 에서 $\overline{\mathrm{PA}}^{\,2}=\overline{\mathrm{PB}}^{\,2}$\ 이므로
+\[ (x-2)^2 + 1 = (x+2)^2 + 25\ \Longrightarrow\ -8x = 24. \]
+$y$\ 축 위 점 $\mathrm{Q}(0,\,y)$\ 에서도 마찬가지로
+\[ 4 + (y-1)^2 = 4 + (y-5)^2\ \Longrightarrow\ 8y = 24. \]
+두 결과는
+$$\mathrm{P}(-3,\,0),\qquad \mathrm{Q}(0,\,3)$$
+이므로 $\therefore\ \overline{\mathrm{PQ}} = \sqrt{9 + 9} = 3\sqrt{2}$.
+
+% ─────────────── L1-3 ───────────────
+\dmsoltitle{3}{$y$\ 축 위 같은 거리 점}
+\begin{dmanswerbox}
+정답: $(0,\,1)$
+\end{dmanswerbox}
+
+$y$\ 축 위 점 $\mathrm{P}(0,\,y)$\ 에서 $\overline{\mathrm{PA}}^{\,2}=\overline{\mathrm{PB}}^{\,2}$\ 이므로
+\[ 1 + (y-4)^2 = 9 + (y-2)^2. \]
+좌·우 전개는 $-8y+17,\ -4y+13$\ 이므로 $-4y = -4$, $\therefore\ (0,\,1)$.
+
+% ─────────────── L1-4 ───────────────
+\dmsoltitle{4}{세 변 길이로 삼각형 모양 확인}
+\begin{dmanswerbox}
+정답: $\overline{\mathrm{AB}}=\overline{\mathrm{CA}}$\ 인 이등변삼각형
+\end{dmanswerbox}
+
+세 변의 길이의 제곱은
+$$\overline{\mathrm{AB}}^{\,2}=52,\quad \overline{\mathrm{BC}}^{\,2}=8,\quad \overline{\mathrm{CA}}^{\,2}=52.$$
+$\overline{\mathrm{AB}}=\overline{\mathrm{CA}}$\ 이고 어느 두 변 제곱의 합도 나머지 변의 제곱과 같지 않으므로 $\therefore$ 이등변삼각형이다.
+% 세션 55 최소 변형: 항상 지나는 점 좌표 (+1,0) 평행이동 — 세 변 길이 불변
+
+% ─────────────── L1-5 ───────────────
+\dmsoltitle{5}{세 점을 꼭짓점으로 하는 삼각형의 넓이}
+\begin{dmanswerbox}
+정답: $7$
+\end{dmanswerbox}
+
+두 점 $\mathrm{A}(0,\,1)$,\ $\mathrm{B}(2,\,-3)$\ 을 지나는 직선은 $2x+y-1=0$\ 이므로 점 $\mathrm{C}(3,\,2)$\ 에서 이 직선까지의 거리는
+\[ h = \dfrac{|2\cdot 3 + 2 - 1|}{\sqrt{5}} = \dfrac{7}{\sqrt{5}}. \]
+밑변 $\overline{\mathrm{AB}}=\sqrt{4+16}=2\sqrt{5}$\ 이므로 $\therefore\ \dfrac{1}{2}\cdot 2\sqrt{5}\cdot\dfrac{7}{\sqrt{5}} = 7$.
+
+% ─────────────── L1-6 ───────────────
+\dmsoltitle{6}{두 거리의 합의 최솟값}
+\begin{dmanswerbox}
+정답: $15$
+\end{dmanswerbox}
+
+임의의 점 $\mathrm{P}$\ 에 대해 $\overline{\mathrm{AP}}+\overline{\mathrm{PB}}\ge\overline{\mathrm{AB}}$\ 이고 $\mathrm{P}$\ 가 선분 $\overline{\mathrm{AB}}$ 위 점일 때 등호가 성립하므로 최솟값은
+\[ \overline{\mathrm{AB}} = \sqrt{9^2+12^2} = \sqrt{225} = 15. \]
+
+% ─────────────── L1-7 ───────────────
+\dmsoltitle{7}{내분비 $(4-t):t$\ 에서 미지수 결정}
+\begin{dmanswerbox}
+정답: $a=5$
+\end{dmanswerbox}
+
+$(4-t):t$ 내분점의 좌표는
+$$x = \dfrac{4+3t}{4},\qquad y = \dfrac{(4-t)a - t}{4}.$$
+$x=2$\ 에서 $4+3t=8$\ 이므로 $t=\dfrac{4}{3}$\ 이다. 이를 $y=3$\ 인 식에 대입하면
+\[ \dfrac{\dfrac{8}{3}a - \dfrac{4}{3}}{4} = 3\ \Longrightarrow\ \dfrac{8}{3}a = \dfrac{40}{3}, \]
+$\therefore\ a = 5$.
+
+% ─────────────── L1-8 ───────────────
+\dmsoltitle{8}{내분점이 직선 위에 있을 조건}
+\begin{dmanswerbox}
+정답: $k=5$
+\end{dmanswerbox}
+
+$k : 5$ 내분점의 좌표는
+\[ \mathrm{P}\!\left( \dfrac{2k-5}{k+5},\ \dfrac{4k+5}{k+5} \right). \]
+직선 $y = -x + 3$ 위 점 조건에서 양변에 $k+5$\ 를 곱하면
+\[ 4k+5 = -(2k-5)+3(k+5) = k+20, \]
+$3k = 15$\ 이므로 $\therefore\ k = 5$.
+
+% ─────────────── L1-9 ───────────────
+\dmsoltitle{9}{평행사변형 · 세 미지수 결정}
+\begin{dmanswerbox}
+정답: $a+b+c=1$
+\end{dmanswerbox}
+
+평행사변형 $\mathrm{ABCD}$\ 에서 두 대각선 $\overline{\mathrm{AC}}$,\ $\overline{\mathrm{BD}}$\ 의 중점이 서로 같아야 하므로
+$$\dfrac{a+b}{2} = \dfrac{1-3}{2},\qquad \dfrac{4+2}{2} = \dfrac{3+c}{2}.$$
+$a+b=-2$,\ $c=3$\ 이므로 $\therefore\ a+b+c = 1$.
+
+% ─────────────── L1-10 ───────────────
+\dmsoltitle{10}{내분점과 중점의 연속 적용}
+\begin{dmanswerbox}
+정답: $a+b=2$
+\end{dmanswerbox}
+
+선분 $\overline{\mathrm{AB}}$\ 의 $2 : 1$ 내분점의 좌표는
+\[ \mathrm{P}\!\left( \dfrac{16+2}{3},\ \dfrac{4-4}{3} \right) = (6,\,0). \]
+$\mathrm{A}(2,\,-4)$,\ $\mathrm{P}(6,\,0)$\ 의 중점은 $(4,\,-2)$\ 이므로 $\therefore\ a + b = 2$.
+
+% ─────────────── L1-11 ───────────────
+\dmsoltitle{11}{내분·중점 조건에서 제3점 결정}
+\begin{dmanswerbox}
+정답: $(5,\,-9)$
+\end{dmanswerbox}
+
+$\mathrm{P}$\ 는 $\overline{\mathrm{AB}}$\ 의 $2 : 1$ 내분점이므로
+$$\mathrm{P}_x = \dfrac{8+1}{3} = 3,\qquad \mathrm{P}_y = \dfrac{-12+3}{3} = -3$$
+이고 $\mathrm{P}(3,\,-3)$\ 이다. 또 $\mathrm{B}$\ 가 $\overline{\mathrm{AQ}}$\ 의 중점이므로
+$$\mathrm{Q} = 2\mathrm{B} - \mathrm{A} = (7,\,-15)$$
+이고 $\overline{\mathrm{PQ}}$\ 의 중점은 $\therefore\ (5,\,-9)$.
+
+% ─────────────── L1-12 ───────────────
+\dmsoltitle{12}{거리 제곱의 차로 나타나는 자취}
+\begin{dmanswerbox}
+정답: $3x+2y-9=0$
+\end{dmanswerbox}
+
+$\mathrm{P}(x,\,y)$\ 라 하면 $\overline{\mathrm{PA}}^{\,2} - \overline{\mathrm{PB}}^{\,2} = 3$\ 에서
+\[ \{(x+1)^2+(y-2)^2\} - \{(x-2)^2+(y-4)^2\} = 3. \]
+이차항이 소거되어 $(6x-3)+(4y-12) = 3$, 정리하면 $6x+4y-18=0$\ 이고 $\therefore\ 3x+2y-9=0$\ 인 직선이다.
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 3 — Level 2 (12문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[표준 연습]{Level 2}
+
+\renewcommand{\dmquickgridstretch}{2.25}
+\begin{dmquickgrid}
+\dmquick{1}{$3<a<5$} & \dmquick{2}{$\mathrm{D}\!\left(\dfrac{5}{2},\,-\dfrac{3}{2}\right)$} & \dmquick{3}{$\dfrac{4}{7}<k<2$} & \dmquick{4}{$ab=15$ 또는 $3$} & \dmquick{5}{$a-b=0$} \\
+\dmquick{6}{$9$} & \dmquick{7}{$9\sqrt{3}$} & \dmquick{8}{$a+b=\dfrac{31}{5}$} & \dmquick{9}{$m-n=1$} & \dmquick{10}{$10$} \\
+\dmquick{11}{$C<A<B$} & \dmquick{12}{$a+b=12$} & & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── L2-1 ───────────────
+\dmsoltitle{1}{둔각 조건과 부등식}
+\begin{dmanswerbox}
+정답: $3<a<5$
+\end{dmanswerbox}
+
+세 변의 길이의 제곱은
+$$\overline{\mathrm{AB}}^{\,2} = (7-a)^2 + 16,\quad \overline{\mathrm{AC}}^{\,2} = (1-a)^2 + 4,\quad \overline{\mathrm{BC}}^{\,2} = 40.$$
+$\angle\mathrm{A}$\ 가 둔각인 조건은 $\overline{\mathrm{BC}}^{\,2}>\overline{\mathrm{AB}}^{\,2}+\overline{\mathrm{AC}}^{\,2}$\ 이므로
+\[ 40 > (7-a)^2 + 16 + (1-a)^2 + 4. \]
+$2a^2 - 16a + 30 < 0$\ 에서 $(a-3)(a-5) < 0$\ 이므로 $\therefore\ 3 < a < 5$.
+
+% ─────────────── L2-2 ───────────────
+\dmsoltitle{2}{각이등분선과 대변의 내분비}
+\begin{dmanswerbox}
+정답: $\mathrm{D}\!\left(\dfrac{5}{2},\,-\dfrac{3}{2}\right)$
+\end{dmanswerbox}
+
+각이등분선은 대변을 이웃 두 변의 길이 비로 내분한다. 두 변의 길이는
+$$\overline{\mathrm{AB}} = \sqrt{25+144} = 13,\qquad \overline{\mathrm{AC}} = \sqrt{16+9} = 5$$
+이므로 $\mathrm{D}$\ 는 $\overline{\mathrm{BC}}$\ 를 $13:5$\ 로 내분하는 점이다. 좌표별로
+$$\mathrm{D}_x = \dfrac{65-20}{18} = \dfrac{5}{2},\qquad \mathrm{D}_y = \dfrac{13-40}{18} = -\dfrac{3}{2}$$
+이므로 $\therefore\ \mathrm{D}\!\left(\dfrac{5}{2},\,-\dfrac{3}{2}\right)$.
+
+% ─────────────── L2-3 ───────────────
+\dmsoltitle{3}{내분점의 사분면 조건}
+\begin{dmanswerbox}
+정답: $\dfrac{4}{7} < k < 2$
+\end{dmanswerbox}
+
+$k : (2-k)$ 내분점의 좌표는
+$$x = \dfrac{2 - 5k}{2},\qquad y = \dfrac{7k - 4}{2}$$
+이고 내분 조건 $0<k$,\ $0<2-k$\ 에서 $0<k<2$\ 이다.
+
+제 $2$\ 사분면 조건은 $x<0$,\ $y>0$\ 이므로 $2-5k<0$\ 에서 $k>\dfrac{2}{5}$, $7k-4>0$\ 에서 $k>\dfrac{4}{7}$\ 이다. 세 부등식의 공통 범위는 $\therefore\ \dfrac{4}{7}<k<2$.
+
+% ─────────────── L2-4 ───────────────
+\dmsoltitle{4}{마름모 조건 · 두 해 분류}
+\begin{dmanswerbox}
+정답: $ab=15$ 또는 $ab=3$
+\end{dmanswerbox}
+
+마름모는 평행사변형이므로 두 대각선의 중점이 서로 같아야 한다.
+$$\dfrac{a+4}{2} = \dfrac{2+b}{2},\qquad \dfrac{1+4}{2} = \dfrac{3+2}{2}.$$
+첫째 식에서 $b=a+2$\ 이고 둘째 식은 자동으로 성립한다. 또한 이웃한 두 변의 길이가 같아야 하므로 $\overline{\mathrm{AB}}=\overline{\mathrm{BC}}$\ 에서
+\[ (a-2)^2 + 4 = 5,\quad (a-2)^2 = 1. \]
+$a=3$ 또는 $a=1$\ 이고 각각 $b=5$,\ $b=3$\ 이므로 $\therefore\ ab=15$ 또는 $ab=3$.
+
+% ─────────────── L2-5 ───────────────
+\dmsoltitle{5}{세 변의 내분점 삼각형과 무게중심 일치}
+\begin{dmanswerbox}
+정답: $a-b=0$
+\end{dmanswerbox}
+
+세 내분점의 좌표는 각각
+$$\mathrm{P}\!\left(1,\,-\dfrac{5}{3}\right),\quad \mathrm{Q}\!\left(4,\,\dfrac{10}{3}\right),\quad \mathrm{R}\!\left(1,\,\dfrac{13}{3}\right).$$
+삼각형 $\mathrm{PQR}$\ 의 무게중심은
+\[ \left( \dfrac{1+4+1}{3},\ \dfrac{-\dfrac{5}{3}+\dfrac{10}{3}+\dfrac{13}{3}}{3} \right) = (2,\,2), \]
+$a=2$,\ $b=2$\ 이므로 $\therefore\ a - b = 0$.
+% ─────────────── L2-6 ───────────────
+\dmsoltitle{6}{수직선 위 두 거리의 합에 대한 부등식}
+\begin{dmanswerbox}
+정답: $9$
+\end{dmanswerbox}
+
+수직선 위 점 $\mathrm{P}(x)$\ 에 대하여
+\[ \overline{\mathrm{AP}} + \overline{\mathrm{BP}} = |x+2| + |x-3|. \]
+$\overline{\mathrm{AB}}=5$\ 이므로 $-2\le x\le 3$\ 에서 이 합은 $5$\ 로 최소이고 양 끝점 밖에서는 커진다. 경계를 세 경우로 나눈다.
+
+$x\ge 3$\ 이면 $2x-1\le 9$\ 에서 $x\le 5$\ 이고, $x\le -2$\ 이면 $1-2x\le 9$\ 에서 $x\ge -4$\ 이며, $-2\le x\le 3$\ 에서는 항상 $5\le 9$\ 가 성립한다.
+
+세 경우를 합치면 $-4\le x\le 5$\ 이므로 $\therefore$ 나타내는 도형은 길이 $9$\ 인 선분이다.
+% ─────────────── L2-7 ───────────────
+\dmsoltitle{7}{정삼각형의 무게중심과 꼭짓점 사이의 거리}
+\begin{dmanswerbox}
+정답: 둘레 $=9\sqrt{3}$
+\end{dmanswerbox}
+
+$\overline{\mathrm{AG}} = \sqrt{0+9} = 3$\ 이다.
+
+정삼각형에서는 무게중심이 각 꼭짓점에서 대변에 내린 수선의 발까지의 거리를 $2:1$\ 로 내분하므로 무게중심에서 한 꼭짓점까지의 거리는 한 변의 길이의 $\dfrac{\sqrt{3}}{3}$\ 배이다 (한 변이 $s$\ 이면 수선의 길이는 $\dfrac{\sqrt{3}}{2}s$\ 이고 그 $\dfrac{2}{3}$\ 이 무게중심까지). 따라서
+\[ \overline{\mathrm{AG}} = \dfrac{s}{\sqrt{3}} = 3 \ \Longrightarrow\ s = 3\sqrt{3}, \]
+$\therefore$ 둘레는 $3s = 9\sqrt{3}$\ 이다.
+% ─────────────── L2-8 ───────────────
+\dmsoltitle{8}{닮음비와 넓이비로부터 내분점 결정}
+\begin{dmanswerbox}
+정답: $a+b=\dfrac{31}{5}$
+\end{dmanswerbox}
+
+$\mathrm{D}\in\overline{\mathrm{AB}}$\ 이고 $\overline{\mathrm{DE}}\mathbin{/\!/}\overline{\mathrm{BC}}$\ 이므로 $\triangle\mathrm{ADE}\sim\triangle\mathrm{ABC}$\ 이다. 닮음비 $r:1=\overline{\mathrm{AD}}:\overline{\mathrm{AB}}$\ 에서 넓이비는 $r^2:1$\ 이므로
+\[ r^2 = \dfrac{4}{25}\ \Longrightarrow\ r = \dfrac{2}{5}, \]
+$\mathrm{D}$\ 는 $\overline{\mathrm{AB}}$\ 의 $2:3$ 내분점이다. 좌표별로
+$$\mathrm{D}_x = \dfrac{14+6}{5} = 4,\qquad \mathrm{D}_y = \dfrac{2+9}{5} = \dfrac{11}{5}$$
+이고 $\mathrm{D}_x = 4 > 2$\ 가 $\mathrm{A}_x$\ 보다 크다는 조건도 만족한다. $\therefore\ a + b = 4 + \dfrac{11}{5} = \dfrac{31}{5}$.
+% ─────────────── L2-9 ───────────────
+\dmsoltitle{9}{일차원 등속 운동과 내분비}
+\begin{dmanswerbox}
+정답: $m-n=1$
+\end{dmanswerbox}
+
+$\mathrm{A}$\ 의 속력을 $v$, 걸린 시간을 $\mathrm{T}$\ 라 하자. $\mathrm{B}$\ 의 속력은 $1.5v$\ 이고 $\mathrm{B}$\ 가 달린 거리가 $270\,\mathrm{m}$\ 이므로
+\[ \mathrm{T} = \dfrac{270}{1.5v} = \dfrac{180}{v}, \]
+같은 시간 동안 $\mathrm{A}$\ 의 이동 거리는 $v\mathrm{T} = 180\,\mathrm{m}$\ 이다.
+
+수직선에서 $\mathrm{R}$\ 을 원점으로 잡으면 세 지점의 좌표는
+$$\mathrm{B}:30,\qquad \mathrm{Q}:30+270=300,\qquad \mathrm{P}:0+180=180.$$
+따라서 $\mathrm{P}$\ 는 $\overline{\mathrm{RQ}}$\ 를 $\overline{\mathrm{RP}}:\overline{\mathrm{PQ}}=180:120=3:2$\ 로 내분한다. 서로소인 자연수 $m=3$,\ $n=2$\ 이므로 $\therefore\ m - n = 1$.
+% ─────────────── L2-10 ───────────────
+\dmsoltitle{10}{두 거리의 합의 최솟값}
+\begin{dmanswerbox}
+정답: $10$
+\end{dmanswerbox}
+
+각 근호 안이 완전제곱꼴이므로 두 점 $\mathrm{A}(7,\,-2)$,\ $\mathrm{B}(-1,\,4)$\ 와 $\mathrm{P}(x,\,y)$\ 에 대해 주어진 식은 $\overline{\mathrm{PA}}+\overline{\mathrm{PB}}$\ 로 바꿔 쓸 수 있다. 두 거리의 합은 두 고정점 사이의 거리보다 작을 수 없고 $\mathrm{P}\in\overline{\mathrm{AB}}$\ 일 때 등호가 성립하므로
+\[ \overline{\mathrm{PA}} + \overline{\mathrm{PB}} \ge \overline{\mathrm{AB}} = \sqrt{64+36} = 10. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{두 근호의 합은 두 점과 임의 점 사이 거리의 합으로 볼 수 있다}: 대수적 최소화 대신 삼각부등식을 적용하면 $\overline{\mathrm{AB}}$\ 가 곧 최솟값이 된다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-11 ───────────────
+\dmsoltitle{11}{내분비를 이용한 세 수의 대소 비교}
+\begin{dmanswerbox}
+정답: $C<A<B$
+\end{dmanswerbox}
+
+수직선에서 $\mathrm{P}$,\ $\mathrm{Q}$\ 의 좌표를 $p$,\ $q$\ 라 놓으면 세 수는 두 점의 내분점 좌표로 다시 쓸 수 있다.
+$$A = \dfrac{p+q}{2},\quad B = \dfrac{p+2q}{3},\quad C = \dfrac{3p+q}{4}.$$
+각각 $\overline{\mathrm{PQ}}$\ 를 $1:1$,\ $2:1$,\ $1:3$\ 으로 내분한 점이므로 $A$\ 는 중점, $B$\ 는 $\mathrm{Q}$ 쪽으로 더 가까운 점, $C$\ 는 $\mathrm{P}$ 쪽으로 더 가까운 점이다.
+
+$p=\sqrt{2}<\sqrt{3}=q$\ 에서 수직선 위 $\mathrm{P}$\ 는 왼쪽, $\mathrm{Q}$\ 는 오른쪽이므로 $\mathrm{P}$\ 에 가까운 순으로 $C$,\ $A$,\ $B$\ 가 놓인다. $\therefore\ C<A<B$.
+
+\begin{dmcriticalpoint}
+\dmcplabel{세 수를 두 고정점 사이의 내분점 좌표로 다루면 대소 비교가 위치 비교로 옮겨진다}: 근삿값 계산 없이 $1:3$·$1:1$·$2:1$\ 의 세 위치만 비교하면 답이 정해진다.
+\end{dmcriticalpoint}
+
+% ─────────────── L2-12 ───────────────
+\dmsoltitle{12}{두 교점의 합만으로 무게중심 결정}
+\begin{dmanswerbox}
+정답: $a+b=12$
+\end{dmanswerbox}
+
+두 그래프의 교점 $x$\ 좌표는 이차방정식
+\[ x^2 - 6x + 1 = 2x + 6\ \Longrightarrow\ x^2 - 8x - 5 = 0 \]
+의 두 근이다. 근과 계수의 관계에서 두 근의 합은 $8$\ 이므로 두 교점 $\mathrm{A}$,\ $\mathrm{B}$\ 의 $x$\ 좌표 합은 $8$\ 이고, 두 점이 직선 $y=2x+6$ 위 점이므로 $y$\ 좌표 합은 $2\cdot 8 + 2\cdot 6 = 28$\ 이다. 삼각형 $\mathrm{OAB}$\ 의 무게중심은 세 꼭짓점 좌표의 평균이므로
+\[ \left( \dfrac{0 + 8}{3},\ \dfrac{0 + 28}{3} \right) = \left( \dfrac{8}{3},\ \dfrac{28}{3} \right), \]
+$\therefore\ a + b = \dfrac{36}{3} = 12$.
+
+\begin{dmcriticalpoint}
+\dmcplabel{근과 계수의 관계에서 두 근의 합만 뽑으면 이차식을 풀지 않고도 무게중심이 정해진다}: 각 교점의 좌표를 개별로 구하는 계산은 불필요하다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 4 — Level 3 (3문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[심화 연습]{Level 3}
+
+\renewcommand{\dmquickgridstretch}{3.00}
+\begin{dmquickgrid}
+\dmquick{1}{$\dfrac{1}{2}$} & \dmquick{2}{$k=255$} & \dmquick{3}{$a=3$} & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── L3-1 ───────────────
+\dmsoltitle{1}{실수 $t$\ 의 이중 활용과 자기 참조}
+\begin{dmanswerbox}
+정답: $\dfrac{1}{2}$
+\end{dmanswerbox}
+
+$\overline{\mathrm{AB}}$\ 의 $t:(1-t)$ 내분점의 좌표는
+\[ \mathrm{P} = (4t,\ 1 - 4t). \]
+$\mathrm{P}$\ 가 $x$\ 축 위 점이려면 $1-4t=0$\ 이므로 $t=\dfrac{1}{4}$, $\mathrm{P}(1,\,0)$\ 이다.
+
+같은 $t$\ 를 대입하면 $(1-2t):2t=\dfrac{1}{2}:\dfrac{1}{2}=1:1$\ 이므로 이 점은 $\overline{\mathrm{OP}}$\ 의 중점이고 $x$\ 좌표는
+\[ \dfrac{1+0}{2} = \dfrac{1}{2}. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{앞 조건에서 확정된 $t=\dfrac{1}{4}$\ 을 뒤 내분비에도 그대로 대입해야 한다}: $t$\ 를 다시 자유변수로 오해하면 두 내분비가 무관한 것으로 잘못 처리한다.
+\end{dmcriticalpoint}
+
+% ─────────────── L3-2 ───────────────
+\dmsoltitle{2}{반복되는 중점 조작과 등비형 내분비}
+\begin{dmanswerbox}
+정답: $k=255$
+\end{dmanswerbox}
+
+$\mathrm{A}=0$, $\mathrm{B}=1$\ 인 수직선에서 관찰한다. 정의에서 $\mathrm{M}_1$\ 은 $\overline{\mathrm{AB}}$\ 의 중점이므로 좌표가 $\dfrac{1}{2}$, $\mathrm{M}_2$\ 는 $\overline{\mathrm{AM}_1}$\ 의 중점이므로 $\dfrac{1}{4}$, $\mathrm{M}_3=\dfrac{1}{8}$\ 이므로 일반항은
+\[ \mathrm{M}_n = \dfrac{1}{2^n}. \]
+$\mathrm{M}_{8} = \dfrac{1}{256}$\ 이 $\overline{\mathrm{AB}}$\ 를 $1:k$\ 로 내분하므로
+$$\overline{\mathrm{AM}_{8}} : \overline{\mathrm{M}_{8}\mathrm{B}} = \dfrac{1}{256} : \dfrac{255}{256} = 1 : 255$$
+에서 $\therefore\ k = 255$.
+
+\begin{dmcriticalpoint}
+\dmcplabel{각 단계에서 새 점이 이전 점과 $\mathrm{A}$\ 의 중앙이므로 좌표가 항상 절반이 된다}: 이 규칙에서 일반항 $\dfrac{1}{2^n}$\ 이 자연스럽게 나온다.
+\end{dmcriticalpoint}
+
+% ─────────────── L3-3 ───────────────
+\dmsoltitle{3}{거리 제곱의 합의 최솟값에서 미지수 결정}
+\begin{dmanswerbox}
+정답: $a=3$
+\end{dmanswerbox}
+
+세 점의 무게중심은
+\[ \mathrm{G} = \left( 4,\ \dfrac{a}{3} \right). \]
+임의의 점 $\mathrm{P}$\ 에 대해 $\overline{\mathrm{PA}}^{\,2}+\overline{\mathrm{PB}}^{\,2}+\overline{\mathrm{PC}}^{\,2}$\ 은 $\mathrm{P}=\mathrm{G}$\ 일 때 최소이고 그 값은 세 꼭짓점에서 $\mathrm{G}$\ 까지의 거리 제곱의 합이므로
+$$\overline{\mathrm{GA}}^{\,2} = 4 + \dfrac{a^2}{9},\quad \overline{\mathrm{GB}}^{\,2} = 16 + \dfrac{a^2}{9},\quad \overline{\mathrm{GC}}^{\,2} = 4 + \dfrac{4a^2}{9}.$$
+합은 $24 + \dfrac{2a^2}{3}$\ 이고 이것이 $30$\ 이므로
+\[ \dfrac{2a^2}{3} = 6,\quad a^2 = 9. \]
+양수 조건에서 $\therefore\ a = 3$.
+
+\begin{dmcriticalpoint}
+\dmcplabel{$\overline{\mathrm{PA}}^{\,2}+\overline{\mathrm{PB}}^{\,2}+\overline{\mathrm{PC}}^{\,2}$\ 의 최솟값은 세 꼭짓점에서 무게중심까지의 거리 제곱의 합과 같다}: 최솟값이 $a$\ 에 대한 이차식이 되므로 $30$\ 이라는 조건이 곧 $a$\ 에 대한 방정식으로 옮겨진다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+% ══════════════════════════════════════════════════════════════
+% 섹션 5 — 실전 기출 (3문) · 빠른 정답 + 풀이 완결
+% ══════════════════════════════════════════════════════════════
+
+\dmsection[학평 기출 · 변형]{실전 기출}
+
+\renewcommand{\dmquickgridstretch}{3.00}
+\begin{dmquickgrid}
+\dmquick{1}{$8$} & \dmquick{2}{$a=12$} & \dmquick{3}{$96$} & & \\
+\end{dmquickgrid}
+
+\dmsoltitlefirsttrue
+\begin{multicols*}{2}
+
+% ─────────────── 실전 1 ───────────────
+\dmsoltitle{1}{평행선으로 유도한 닮음과 넓이비의 두 경우}
+\begin{dmanswerbox}
+정답: $8$
+\end{dmanswerbox}
+
+직선 $\mathrm{AB}$ 위 점 $\mathrm{D}$\ 가 $\overline{\mathrm{AD}}:\overline{\mathrm{AB}}=t:1$\ 을 만족한다고 두면 두 점 $\mathrm{A}(2,\,3)$,\ $\mathrm{B}(7,\,1)$\ 을 잇는 직선의 매개적 표현에서
+\[ \mathrm{D} = (2 + 5t,\ 3 - 2t). \]
+$\mathrm{D}$\ 를 지나고 $\overline{\mathrm{BC}}$\ 에 평행한 직선이 $\overline{\mathrm{AC}}$\ 와 만나는 점이 $\mathrm{E}$\ 이므로 평행선 닮음에 의해 $\overline{\mathrm{AE}}:\overline{\mathrm{AC}}=t:1$\ 이고 $\mathrm{E}$\ 의 좌표도 같은 비 $t$\ 로 결정된다.
+
+따라서 $\triangle\mathrm{ADE}\sim\triangle\mathrm{ABC}$($\angle\mathrm{A}$ 공통 · 양 변의 비 $|t|$)이고 닮음비는 $|t|:1$\ 이므로 넓이비는 $t^2:1$\ 이다.
+\[ t^2 = \dfrac{1}{4},\quad t = \pm \dfrac{1}{2}. \]
+$\mathrm{D}$\ 의 $y$\ 좌표는 $3-2t$\ 이므로 두 경우
+$$t = \dfrac{1}{2}\ \Rightarrow\ y = 2,\qquad t = -\dfrac{1}{2}\ \Rightarrow\ y = 4$$
+이고 $\therefore$ 곱은 $2\times 4 = 8$.
+
+\begin{dmcriticalpoint}
+\dmcplabel{닮음비 $|t|:1$\ 에서 넓이비는 $t^2:1$\ 이므로 미지수는 $t^2$ 하나로 통합된다}: 좌표 계산 없이 방정식 $t^2=\dfrac{1}{4}$ 하나만 남는다.
+\end{dmcriticalpoint}
+
+% ─────────────── 실전 2 ───────────────
+\dmsoltitle{2}{내분점이 만든 직선이 삼각형 넓이를 정확히 이등분하는 조건}
+\begin{dmanswerbox}
+정답: $a=12$
+\end{dmanswerbox}
+
+$\overline{\mathrm{AB}}$\ 의 $2:1$ 내분점은
+\[ \mathrm{P} = \left( \dfrac{14-8}{3},\ \dfrac{6+a}{3} \right) = \left( 2,\ \dfrac{a+6}{3} \right). \]
+
+직선 $\mathrm{PC}$\ 가 $\overline{\mathrm{OA}}$\ 와 만나는 점을 $\mathrm{Q}$\ 라 하면 이 직선이 $\triangle\mathrm{AOB}$\ 를 $\triangle\mathrm{AQP}$\ 와 사각형 $\mathrm{QOBP}$\ 로 나눈다. 두 삼각형 $\triangle\mathrm{AQP}$,\ $\triangle\mathrm{AOB}$\ 는 꼭짓점 $\mathrm{A}$\ 를 공유하므로 넓이비는 두 변의 비의 곱으로 결정된다. $\mathrm{Q}$\ 가 $\overline{\mathrm{OA}}$\ 를 $s : (1-s)$\ 로 내분한다고 두면 $\overline{\mathrm{AQ}}=(1-s)\,\overline{\mathrm{AO}}$\ 이고, $\mathrm{P}$\ 는 $\overline{\mathrm{AB}}$\ 의 $2:1$ 내분점이므로 $\overline{\mathrm{AP}}=\dfrac{2}{3}\overline{\mathrm{AB}}$\ 이다. 따라서
+\[ \dfrac{\triangle\mathrm{AQP}}{\triangle\mathrm{AOB}} = (1-s)\cdot\dfrac{2}{3}. \]
+이등분 조건 $\triangle\mathrm{AQP}=\dfrac{1}{2}\triangle\mathrm{AOB}$\ 에서 $(1-s)\cdot\dfrac{2}{3}=\dfrac{1}{2}$\ 이므로 $s=\dfrac{1}{4}$\ 이다.
+
+한편 $\mathrm{Q}=(-8s,\,as)$\ 를 두 점 $\mathrm{P}\!\left(2,\,\dfrac{a+6}{3}\right)$,\ $\mathrm{C}(-6,\,0)$\ 을 지나는 직선 $y=\dfrac{a+6}{24}(x+6)$\ 에 대입하면
+\[ as = \dfrac{a+6}{24}\,(6-8s)\ \Longrightarrow\ s = \dfrac{3(a+6)}{8(2a+3)}. \]
+$s=\dfrac{1}{4}$\ 를 대입하면
+\[ \dfrac{1}{4} = \dfrac{3(a+6)}{8(2a+3)}\ \Longrightarrow\ 8(2a+3) = 12(a+6)\ \Longrightarrow\ 4a=48. \]
+$\therefore\ a=12\ (>0\ \text{조건 만족})$.
+
+검산: $a=12$\ 이면 $\mathrm{P}=(2,\,6)$,\ $\mathrm{Q}=(-2,\,3)$\ 이므로 세 꼭짓점 $\mathrm{A}(-8,\,12)$,\ $\mathrm{Q}(-2,\,3)$,\ $\mathrm{P}(2,\,6)$\ 로부터 $\triangle\mathrm{AQP}=27$,\ $\triangle\mathrm{AOB}=\dfrac{7\cdot 12+24}{2}=54$\ 이고 실제로 $\triangle\mathrm{AQP}=\dfrac{1}{2}\triangle\mathrm{AOB}$.
+
+\begin{dmcriticalpoint}
+\dmcplabel{꼭짓점 $\mathrm{A}$\ 를 공유하는 두 삼각형의 넓이비는 두 변의 비의 곱으로 정해진다}: $\overline{\mathrm{AO}}$·$\overline{\mathrm{AB}}$\ 방향의 두 비 $(1-s)$\ 와 $\dfrac{2}{3}$\ 만으로 이등분 조건이 $s$\ 하나의 방정식으로 모아진다.
+\end{dmcriticalpoint}
+
+% ─────────────── 실전 3 ───────────────
+\dmsoltitle{3}{이등변삼각형의 대칭이 만드는 사각형의 둘레}
+\begin{dmanswerbox}
+정답: $a+b=96$
+\end{dmanswerbox}
+
+$\mathrm{B}(-2,\,0)$,\ $\mathrm{C}(2,\,0)$\ 이 $y$\ 축 대칭이고 $\mathrm{A}(0,\,2+2\sqrt{2})$\ 가 $y$\ 축 위 점이므로 $\triangle\mathrm{ABC}$\ 는 $y$\ 축을 대칭축으로 하는 이등변삼각형이다. 두 수선의 발 $\mathrm{D}$,\ $\mathrm{E}$\ 도 $y$\ 축 대칭이고 수심 $\mathrm{F}$\ 는 $y$\ 축 위 점이다.
+
+먼저 $\mathrm{D}$\ 의 좌표를 구한다. 직선 $\mathrm{AC}$ 위의 점을 $\overline{\mathrm{AD}}:\overline{\mathrm{AC}}=t:1$\ 인 $t$\ 에 대해
+\[ \mathrm{D} = \bigl(2t,\ (2 + 2\sqrt{2})(1 - t)\bigr) \]
+로 잡는다. 직선 $\mathrm{AC}$\ 는 $\mathrm{A}(0,\,2+2\sqrt{2})$\ 와 $\mathrm{C}(2,\,0)$\ 을 지나므로 그 기울기는 다음과 같다.
+\[ \dfrac{0-(2+2\sqrt{2})}{2-0}=-(1+\sqrt{2}). \]
+$\overline{\mathrm{BD}}\perp\mathrm{AC}$\ 이므로 그 기울기는 $\dfrac{1}{1+\sqrt{2}}=\sqrt{2}-1$\ 이어야 한다. $\mathrm{B}(-2,\,0)$\ 과 $\mathrm{D}$\ 의 기울기 조건에서
+\[ \dfrac{(2+2\sqrt{2})(1-t)}{2t+2} = \sqrt{2}-1. \]
+양변에 $2t+2$\ 를 곱하고 $(2+2\sqrt{2})^2=12+8\sqrt{2}$\ 를 대입하면
+\[ (16+8\sqrt{2})\,t = 8+8\sqrt{2}\ \Longrightarrow\ t = \dfrac{1+\sqrt{2}}{2+\sqrt{2}} = \dfrac{\sqrt{2}}{2}, \]
+$\therefore\ \mathrm{D}=(\sqrt{2},\,\sqrt{2})$\ 이고 $y$\ 축 대칭에서 $\mathrm{E}=(-\sqrt{2},\,\sqrt{2})$.
+
+네 변의 길이 제곱은
+\[ \overline{\mathrm{AD}}^{\,2} = 2 + (2+\sqrt{2})^2 = 8+4\sqrt{2} = \overline{\mathrm{AE}}^{\,2}. \]
+
+수심 $\mathrm{F}$\ 는 직선 $\mathrm{BD}$\ 와 $y$\ 축의 교점이다. $\mathrm{B}(-2,\,0)$,\ $\mathrm{D}(\sqrt{2},\,\sqrt{2})$\ 를 지나는 직선의 기울기는 $\dfrac{\sqrt{2}}{\sqrt{2}+2}$\ 이고 방정식은
+\[ y = \dfrac{\sqrt{2}}{\sqrt{2}+2}(x+2). \]
+$x=0$\ 을 대입하면 $y = \dfrac{2\sqrt{2}}{\sqrt{2}+2} = 2\sqrt{2}-2$\ 이므로 $\mathrm{F}=(0,\,2\sqrt{2}-2)$\ 이고
+\[ \overline{\mathrm{DF}}^{\,2} = 2 + (2-\sqrt{2})^2 = 8-4\sqrt{2} = \overline{\mathrm{EF}}^{\,2}. \]
+
+사각형 $\mathrm{AEFD}$\ 의 둘레 $l$\ 은 대칭에서 $\overline{\mathrm{AE}}=\overline{\mathrm{DA}}$,\ $\overline{\mathrm{EF}}=\overline{\mathrm{FD}}$\ 이므로
+\[ l^{2} = (2\overline{\mathrm{AE}} + 2\overline{\mathrm{EF}})^2 = 4\overline{\mathrm{AE}}^{\,2} + 4\overline{\mathrm{EF}}^{\,2} + 8\,\overline{\mathrm{AE}}\cdot\overline{\mathrm{EF}}. \]
+합·곱은 각각
+$$\overline{\mathrm{AE}}^{\,2}+\overline{\mathrm{EF}}^{\,2} = 16,\qquad \overline{\mathrm{AE}}^{\,2}\cdot\overline{\mathrm{EF}}^{\,2} = 64-32 = 32$$
+이므로 $\overline{\mathrm{AE}}\cdot\overline{\mathrm{EF}}=\sqrt{32}=4\sqrt{2}$\ 이고
+\[ l^{2} = 4\cdot 16 + 8\cdot 4\sqrt{2} = 64 + 32\sqrt{2}. \]
+$a=64$,\ $b=32$\ 이므로 $\therefore\ a+b = 96$.
+
+\begin{dmcriticalpoint}
+\dmcplabel{$y$\ 축 대칭 관점을 잡으면 한 쪽 수선의 발만 계산해도 반대쪽 좌표가 함께 정해진다}: 사각형의 두 대응변의 길이가 같음도 대칭에서 즉시 확보된다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+\end{document}

@@ -1,0 +1,483 @@
+% DeeP Math 형성평가 · CM2-GM 도형의 방정식 · B형 문제
+% ============================================================================
+% Task #17 · 세션 93 후반 (2026-07-26 · problem-author v2.6)
+% 청사진: DeeP Math 형성평가-도형의방정식-청사진.yaml v0.4 §5 B형 쌍둥이 파생 원칙
+% A형 원본 (골든 v2.8) : DeeP-Math-형성평가-도형의방정식-A형-문제.tex
+% 20문 · 100점 · 50분 · B형
+%
+% v2.8 계승 (A형 100% 스타일 유지 · 수치만 교체) :
+%   (1) 완전 검정 통일  — Q20 포함 예외 없음
+%   (2) 옵션 A 세로 컬럼 — \pagecolumnpair{좌리스트}{우리스트}
+%   (3) 상단 간격 통일   — p1 examheader 종결부 \addvspace{2mm}
+%   (4) DeeP Red 계승 · 시안 A v3 헤더
+%
+% B형 파생 원칙 (청사진 §5 준수) :
+%   - variation_type: number_only (숫자·계수·조건 상수만 변형 · 구조 100% 유지)
+%   - slot_signature_preserved: true (매커니즘·통찰·depth 동일)
+%   - answer_diff_required: true (Q01~Q18 모든 답이 A형과 다름 · mathjs 검증 완료)
+%   - Q19·Q20 verbatim_kichul (학평 원본 훼손 금지 · 답 동일 허용)
+%   - batjeom_identical: true / order_identical: true
+%
+% B형 답 (mathjs 검증 완료) :
+%   Q01=10 · Q02=2 · Q03=-2 · Q04=4 · Q05=3 · Q06=7 · Q07=5 · Q08=5
+%   Q09=-4 · Q10=-4 · Q11=11 · Q12=y=-2x+5 · Q13=2 · Q14=-3 · Q15=4 · Q16=44
+%   Q17=2 · Q18=6√2 · Q19=32 (verbatim) · Q20=12 (verbatim)
+%
+% 배점: 4점 6문 · 5점 9문 · 6점 4문 · 7점 1문 = 100점
+% ============================================================================
+
+\documentclass[10pt]{article}
+\usepackage{style}
+\usepackage{microtype}  % \textls (letter-spacing) 지원 · smoke-header-A-v3 계승
+
+\renewcommand{\examround}{Formative Assessment}
+\renewcommand{\examvol}{}
+
+% ── 완전 검정 통일 팔레트 (안 C · 세션 92·93 마스터 재확정 · 예외 없음) ──
+%   style.sty 원본 그대로 유지 · 이 파일에서만 vB-* HTML 값 재매핑 · 파급 0
+%   Q20 포함 모든 요소 검정 · dm-crimson·problemcrimson·ptscrimson 완전 부재
+\definecolor{vB-ink}{HTML}{000000}
+\definecolor{vB-deep}{HTML}{000000}
+\definecolor{vB-accent}{HTML}{000000}
+\definecolor{vB-rule}{HTML}{000000}
+\definecolor{vB-light}{HTML}{FFFFFF}
+\definecolor{vB-dim}{HTML}{000000}
+\definecolor{vB-frame}{HTML}{000000}
+\definecolor{vB-warn}{HTML}{000000}
+
+% ── 페이지 세로 분할선 · 좌표 노드 기반 픽셀 맞춤 (시안 A v3 이식) ──
+%   원리: 헤더 하단·푸터 상단 룰이 그려질 때 y좌표 기록 → 두 좌표 잇는 세로 룰
+%   2-pass 필수 (첫 xelatex은 좌표 기록만, 둘째부터 실제 draw)
+\usepackage{eso-pic}
+\usepackage{zref-savepos}
+\newcommand{\dmvlinetop}{\zsavepos{dm-vline-top-\thepage}}
+\newcommand{\dmvlinebot}{\zsavepos{dm-vline-bot-\thepage}}
+\AddToShipoutPictureFG{%
+  \begingroup
+  \edef\vlinetopsp{\zposy{dm-vline-top-\thepage}}%
+  \edef\vlinebotsp{\zposy{dm-vline-bot-\thepage}}%
+  \ifnum\vlinetopsp>0 %
+    \ifnum\vlinebotsp>0 %
+      \setlength{\dimen0}{\vlinetopsp sp}%
+      \setlength{\dimen2}{\vlinebotsp sp}%
+      \edef\vlinetoppt{\the\dimen0}%
+      \edef\vlinebotpt{\the\dimen2}%
+      \begin{tikzpicture}[overlay,remember picture]
+        \draw[color=black,line width=0.4pt]
+          ([xshift=1mm,yshift=\vlinetoppt]current page.south)
+          -- ([xshift=1mm,yshift=\vlinebotpt]current page.south);
+      \end{tikzpicture}%
+    \fi
+  \fi
+  \endgroup
+}
+
+% ══════════════════════════════════════════════════════════════════════════
+% examheader v3 · 시안 A v3 (마스터 승인 · smoke-header-A-v3.tex 그대로 이식)
+% 종결부 \addvspace{2mm} (v2.8 · p2 headsep과 실 렌더링 통일)
+% ══════════════════════════════════════════════════════════════════════════
+\makeatletter
+\renewcommand{\examheader}[2]{%
+  \thispagestyle{empty}%
+  \par\noindent
+  % (1) 상단 hairline · 페이지 폭 전체
+  {\color{black}\rule{\linewidth}{0.3pt}}\par
+  \vspace{4pt}
+  % (2) SMALL CAPS 시리즈 라벨 (좌) · 회차 (우)
+  \noindent
+  {\sffamily\scriptsize\color{black}\textls[280]{DEPTH \& INSIGHT}}%
+  \hfill
+  {\sffamily\scriptsize\color{black}\textls[280]{2026 \textperiodcentered\ 2 SEMESTER}}%
+  \par\vspace{5pt}
+  % (3) 대타이틀 · 산세리프 32pt regular · 좌측 정렬
+  \noindent
+  {\fontsize{32pt}{34pt}\selectfont\sffamily\mdseries\color{black}\examround}%
+  \par\vspace{2pt}
+  % (4) subtitle : 대단원명
+  \noindent
+  {\sffamily\normalsize\color{black}#1}%
+  \par\vspace{2pt}
+  % (4.5) 부제 아래 가로선
+  {\color{black}\rule{\linewidth}{0.3pt}}\par
+  \vspace{4pt}
+  % (5) 3-column grid : 범위 · 문항·배점 · 시간
+  \noindent
+  \makebox[\linewidth][s]{%
+    \begin{minipage}[t]{0.32\linewidth}%
+      {\sffamily\scriptsize\color{black}\textls[200]{RANGE}}\par\vspace{2.5pt}
+      {\sffamily\small\color{black}대단원 1}%
+    \end{minipage}%
+    \hfill
+    {\color{black}\vrule width 0.3pt height 7.5mm}%
+    \hfill
+    \begin{minipage}[t]{0.30\linewidth}%
+      \centering
+      {\sffamily\scriptsize\color{black}\textls[200]{ITEMS \textperiodcentered\ POINTS}}\par\vspace{2.5pt}
+      {\sffamily\small\color{black}20문항 \textperiodcentered\ 100점}%
+    \end{minipage}%
+    \hfill
+    {\color{black}\vrule width 0.3pt height 7.5mm}%
+    \hfill
+    \begin{minipage}[t]{0.28\linewidth}%
+      \raggedleft
+      {\sffamily\scriptsize\color{black}\textls[200]{TIME}}\par\vspace{2.5pt}
+      {\sffamily\small\color{black}50분}%
+    \end{minipage}%
+  }%
+  \par\vspace{5pt}
+  % (6) 하단 hairline (3-column과 이름 라인 사이 구분)
+  \noindent{\color{black}\rule{\linewidth}{0.3pt}}\par
+  \vspace{3pt}
+  % (7) 이름 [ 필기 공백 ]
+  \noindent
+  {\sffamily\footnotesize\color{black}\hfill
+    이름\ [\hspace*{55mm}]}%
+  \par\vspace{3pt}
+  % (8) 종결 가로선 (세로 분할선 시작점)
+  \noindent{\color{black}\rule{\linewidth}{0.4pt}}\dmvlinetop\par
+  \addvspace{2mm}   % v2.8 · 0mm 너무 가까워 2mm 조정 (p2와 미세 통일 시도)
+  \thispagestyle{examfooter}%
+}
+\makeatother
+
+% ── 학원 로고·통상 페이지 헤더·푸터 (시안 A v3 이식) ──
+\makeatletter
+\fancyfoot[R]{\raisebox{-0.8mm}{\includegraphics[height=4mm]{학원로고 (깊이와통찰).jpg}}}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{black}\leaders\hrule height \headrulewidth\hfill}\dmvlinetop}
+\renewcommand{\footrule}{\dmvlinebot\hbox to\headwidth{\color{black}\leaders\hrule height \footrulewidth\hfill}\vskip 4pt}
+\fancypagestyle{examfooter}{%
+  \fancyhf{}%
+  \fancyfoot[L]{}%
+  \fancyfoot[C]{\sffamily\bfseries\color{black}-\,\thepage\,-}%
+  \fancyfoot[R]{\raisebox{-0.8mm}{\includegraphics[height=4mm]{학원로고 (깊이와통찰).jpg}}}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0.4pt}%
+  \renewcommand{\footrule}{\dmvlinebot\hbox to\headwidth{\color{black}\leaders\hrule height \footrulewidth\hfill}\vskip 4pt}%
+}
+
+% ── 문항 스타일 (완전 검정 통일 · v2.5 계승) ──
+%   problem 환경 자연 크기 minipage (pagecolumnpair 내부 배치)
+%   번호·배점 뱃지 모두 검정 · Q20 포함 예외 없음
+\renewenvironment{problem}[2]{%
+  \par\setcounter{probnum}{#1}%
+  \noindent
+  \begin{minipage}[t]{\linewidth}%
+  \raggedright%
+  \setlength{\parskip}{4pt plus 1pt}%
+  {\sffamily\bfseries\large\color{black}#1.}\hspace{4pt}\ignorespaces
+}{%
+  \end{minipage}\par%
+}
+\renewcommand{\pointbadge}[1]{}
+\newcommand{\pts}[1]{%
+  \nobreak\hspace*{\fill}%
+  \mbox{\sffamily\small\color{black}[\textbf{#1점}]}%
+  \par%
+}
+\makeatother
+
+\begin{document}
+
+\examheader{도형의 방정식 · 평면좌표 \textperiodcentered\ 직선 \textperiodcentered\ 원 \textperiodcentered\ 이동}{총 20문 \textperiodcentered\ 100점 \textperiodcentered\ 50분}
+
+% ══════════════════════════════════════════════════════════════════════════
+% 페이지 1 (Q01~Q04 · 4점×4 = 16점 · 기본)
+% ══════════════════════════════════════════════════════════════════════════
+\begin{pagepair}
+\pagecolumnpair{%
+\begin{problem}{1}{s}
+두 점 $\mathrm{A}(4,\,a)$, $\mathrm{B}(a,\,4)$에 대하여 $\overline{\mathrm{AB}}=6\sqrt{2}$일 때, 양수 $a$의 값은? \pts{4}
+\begin{choices}
+\choice{$7$}
+\choice{$8$}
+\choice{$9$}
+\choice{$10$}
+\choice{$11$}
+\end{choices}
+\end{problem}
+
+\vfill
+
+\begin{problem}{2}{s}
+두 점 $\mathrm{A}(a,\,-1)$, $\mathrm{B}(5,\,b)$의 중점의 좌표가 $(2,\,1)$일 때, $a+b$의 값은? \pts{4}
+\begin{choices}
+\choice{$0$}
+\choice{$1$}
+\choice{$2$}
+\choice{$3$}
+\choice{$4$}
+\end{choices}
+\end{problem}
+}{%
+\begin{problem}{3}{s}
+두 점 $\mathrm{A}(-3,\,4)$, $\mathrm{B}(2,\,-6)$을 지나는 직선의 $y$절편은? \pts{4}
+\begin{choices}
+\choice{$-4$}
+\choice{$-3$}
+\choice{$-2$}
+\choice{$-1$}
+\choice{$0$}
+\end{choices}
+\end{problem}
+
+\vfill
+
+\begin{problem}{4}{s}
+다음 두 직선이 서로 수직일 때, 상수 $a$의 값은? \pts{4}
+\begin{conditions}
+$l_{1}:\;(a+2)x-2y+5=0$ \\[3pt]
+$l_{2}:\;x+3y-1=0$
+\end{conditions}
+\begin{choices}
+\choice{$2$}
+\choice{$3$}
+\choice{$4$}
+\choice{$5$}
+\choice{$6$}
+\end{choices}
+\end{problem}
+}
+\end{pagepair}
+
+\clearpage
+
+% ══════════════════════════════════════════════════════════════════════════
+% 페이지 2 (Q05~Q08 · 4·4·5·5점 = 18점 · 기본→응용)
+% ══════════════════════════════════════════════════════════════════════════
+\begin{pagepair}
+\pagecolumnpair{%
+\begin{problem}{5}{s}
+원 $x^{2}+y^{2}+6x-4y-3=0$의 중심의 좌표가 $(m,\,n)$, 반지름의 길이가 $r$일 때, $m+n+r$의 값은? \pts{4}
+\begin{choices}
+\choice{$1$}
+\choice{$2$}
+\choice{$3$}
+\choice{$4$}
+\choice{$5$}
+\end{choices}
+\end{problem}
+
+\vfill
+
+\begin{problem}{6}{s}
+평행이동 $(x,\,y)\to(x-3,\,y+a)$에 의하여 점 $(5,\,-2)$가 점 $(b,\,3)$으로 옮겨질 때, $a+b$의 값은? \pts{4}
+\begin{choices}
+\choice{$3$}
+\choice{$4$}
+\choice{$5$}
+\choice{$6$}
+\choice{$7$}
+\end{choices}
+\end{problem}
+}{%
+\begin{problem}{7}{s}
+세 점 $\mathrm{A}(a,\,3)$, $\mathrm{B}(-1,\,b)$, $\mathrm{C}(4,\,-2)$를 꼭짓점으로 하는 삼각형 $\mathrm{ABC}$의 무게중심이 $(2,\,1)$일 때, $a+b$의 값은? \pts{5}
+\begin{choices}
+\choice{$3$}
+\choice{$4$}
+\choice{$5$}
+\choice{$6$}
+\choice{$7$}
+\end{choices}
+\end{problem}
+
+\vfill
+
+\begin{problem}{8}{s}
+직선 $(k+1)x+(k-3)y-5k+3=0$이 실수 $k$의 값에 관계없이 항상 지나는 점의 좌표가 $(a,\,b)$일 때, $a+b$의 값은? \pts{5}
+\begin{choices}
+\choice{$3$}
+\choice{$4$}
+\choice{$5$}
+\choice{$6$}
+\choice{$7$}
+\end{choices}
+\end{problem}
+}
+\end{pagepair}
+
+\clearpage
+
+% ══════════════════════════════════════════════════════════════════════════
+% 페이지 3 (Q09~Q12 · 5점×4 = 20점 · 응용)
+% ══════════════════════════════════════════════════════════════════════════
+\begin{pagepair}
+\pagecolumnpair{%
+\begin{problem}{9}{s}
+점 $(2,\,-1)$과 직선 $3x+4y+k=0$ 사이의 거리가 $3$일 때, 모든 상수 $k$의 값의 합은? \pts{5}
+\begin{choices}
+\choice{$-8$}
+\choice{$-6$}
+\choice{$-4$}
+\choice{$-2$}
+\choice{$0$}
+\end{choices}
+\end{problem}
+
+\vfill
+
+\begin{problem}{10}{s}
+원 $(x-1)^{2}+y^{2}=5$와 직선 $y=2x+k$가 한 점에서 만나도록 하는 모든 상수 $k$의 값의 합은? \pts{5}
+\begin{choices}
+\choice{$-8$}
+\choice{$-4$}
+\choice{$0$}
+\choice{$4$}
+\choice{$8$}
+\end{choices}
+\end{problem}
+}{%
+\begin{problem}{11}{s}
+원 $x^{2}+y^{2}=25$ 위의 점 $(3,\,4)$에서의 접선이 점 $(a,\,-2)$를 지날 때, 상수 $a$의 값은? \pts{5}
+\begin{choices}
+\choice{$9$}
+\choice{$10$}
+\choice{$11$}
+\choice{$12$}
+\choice{$13$}
+\end{choices}
+\end{problem}
+
+\vfill
+
+\begin{problem}{12}{s}
+두 원 $x^{2}+y^{2}=17$, $\ x^{2}+y^{2}-4x-2y-7=0$의 두 교점을 지나는 직선의 방정식은? \pts{5}
+\begin{choices32}
+{$y=2x-5$}
+{$y=2x+5$}
+{$y=-2x+5$}
+{$y=-2x-5$}
+{$y=x+5$}
+\end{choices32}
+\end{problem}
+}
+\end{pagepair}
+
+\clearpage
+
+% ══════════════════════════════════════════════════════════════════════════
+% 페이지 4 (Q13~Q16 · 5·5·5·6점 = 21점 · 응용→심화)
+% ══════════════════════════════════════════════════════════════════════════
+\begin{pagepair}
+\pagecolumnpair{%
+\begin{problem}{13}{s}
+원 $(x-3)^{2}+(y-1)^{2}=4$를 $x$축에 대하여 대칭이동한 후, 다시 직선 $y=x$에 대하여 대칭이동한 원의 중심의 좌표가 $(a,\,b)$일 때, $a+b$의 값은? \pts{5}
+\begin{choices}
+\choice{$0$}
+\choice{$1$}
+\choice{$2$}
+\choice{$3$}
+\choice{$4$}
+\end{choices}
+\end{problem}
+
+\vfill
+
+\begin{problem}{14}{s}
+점 $\mathrm{A}(3,\,2)$를 직선 $x-y+1=0$에 대하여 대칭이동한 점을 $\mathrm{B}(a,\,b)$라 할 때, $a-b$의 값은? \pts{5}
+\begin{choices}
+\choice{$-5$}
+\choice{$-3$}
+\choice{$-1$}
+\choice{$1$}
+\choice{$3$}
+\end{choices}
+\end{problem}
+}{%
+\begin{problem}{15}{s}
+직선 $y=3x-1$을 $x$축의 방향으로 $2$만큼, $y$축의 방향으로 $-1$만큼 평행이동한 후, 직선 $y=x$에 대하여 대칭이동한 직선이 점 $(4,\,a)$를 지날 때, 상수 $a$의 값은? \pts{5}
+\begin{choices}
+\choice{$2$}
+\choice{$3$}
+\choice{$4$}
+\choice{$5$}
+\choice{$6$}
+\end{choices}
+\end{problem}
+
+\vfill
+
+\begin{problem}{16}{s}
+세 점 $\mathrm{A}(0,\,6)$, $\mathrm{B}(-3,\,0)$, $\mathrm{C}(3,\,0)$과 임의의 점 $\mathrm{P}$에 대하여 $\overline{\mathrm{PA}}^{\,2}+\overline{\mathrm{PB}}^{\,2}+\overline{\mathrm{PC}}^{\,2}$의 값이 최소일 때, 점 $\mathrm{P}$의 좌표를 $(a,\,b)$, 최솟값을 $m$이라 하자. $a+b+m$의 값은? \pts{6}
+\begin{choices}
+\choice{$40$}
+\choice{$42$}
+\choice{$44$}
+\choice{$46$}
+\choice{$48$}
+\end{choices}
+\end{problem}
+}
+\end{pagepair}
+
+\clearpage
+
+% ══════════════════════════════════════════════════════════════════════════
+% 페이지 5 (Q17~Q19 · 6·6·6점 = 18점 · 심화 + 일반 정점)
+% Q19 = 학평 verbatim (2024-9월-고1-27번) · 답 동일 (a²=32)
+% ══════════════════════════════════════════════════════════════════════════
+\begin{pagepair}
+\pagecolumnpair{%
+\begin{problem}{17}{s}
+세 직선 $x+y-1=0$, $\ 2x-y+4=0$, $\ ax+y-3=0$이 삼각형을 이루지 않도록 하는 모든 상수 $a$의 값의 곱은? \pts{6}
+\begin{choices}
+\choice{$1$}
+\choice{$2$}
+\choice{$3$}
+\choice{$4$}
+\choice{$5$}
+\end{choices}
+\end{problem}
+
+\vfill
+
+\begin{problem}{18}{s}
+두 점 $\mathrm{A}(1,\,4)$, $\mathrm{B}(7,\,2)$와 $x$축 위의 점 $\mathrm{P}$에 대하여 $\overline{\mathrm{AP}}+\overline{\mathrm{BP}}$의 최솟값은? \pts{6}
+\begin{choices32}
+{$4\sqrt{2}$}
+{$5\sqrt{2}$}
+{$6\sqrt{2}$}
+{$7\sqrt{2}$}
+{$8\sqrt{2}$}
+\end{choices32}
+\end{problem}
+}{%
+\begin{problem}{19}{s}
+좌표평면 위의 점 $\mathrm{A}(a,\,2)$ ($a>2$)를 직선 $y=x$에 대하여 대칭이동한 점을 $\mathrm{B}$, 점 $\mathrm{B}$를 $x$축에 대하여 대칭이동한 점을 $\mathrm{C}$라 하자. 두 삼각형 $\mathrm{ABC}$, $\mathrm{AOC}$의 외접원의 반지름의 길이를 각각 $r_{1}$, $r_{2}$라 할 때, $r_{1}\times r_{2}=18\sqrt{2}$이다. $a^{2}$의 값은? (단, $\mathrm{O}$는 원점이다.) \pts{6}
+\begin{choices}
+\choice{$28$}
+\choice{$30$}
+\choice{$32$}
+\choice{$34$}
+\choice{$36$}
+\end{choices}
+\end{problem}
+}
+\end{pagepair}
+
+\clearpage
+
+% ══════════════════════════════════════════════════════════════════════════
+% 페이지 6 (Q20 단독 · 변별 정점 · 7점 · 완전 검정 통일)
+% Q20 = 학평 verbatim (2021-11월-고1-17번) · 답 동일 (12)
+% ══════════════════════════════════════════════════════════════════════════
+\begin{pagepair}
+\pagecolumnpair{%
+\begin{problem}{20}{s}
+좌표평면 위의 두 점 $\mathrm{A}(0,\,\sqrt{3})$, $\mathrm{B}(1,\,0)$과 원
+$$C:\ (x-1)^{2}+(y-10)^{2}=9$$
+가 있다. 원 $C$ 위의 점 $\mathrm{P}$에 대하여 삼각형 $\mathrm{ABP}$의 넓이가 자연수가 되도록 하는 모든 점 $\mathrm{P}$의 개수는? \pts{7}
+\begin{choices}
+\choice{$8$}
+\choice{$10$}
+\choice{$12$}
+\choice{$14$}
+\choice{$16$}
+\end{choices}
+\end{problem}
+}{%
+% 우측 컬럼 완전 빈공간 (Q20 단독 · 청사진 §8 준수 · 임의 종결 안내 추가 금지)
+}
+\end{pagepair}
+
+\end{document}

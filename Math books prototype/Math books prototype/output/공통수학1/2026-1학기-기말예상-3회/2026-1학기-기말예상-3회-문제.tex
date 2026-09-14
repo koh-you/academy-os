@@ -1,0 +1,479 @@
+\documentclass[10pt]{article}
+\usepackage{style}
+\usepackage{figures-cb}
+\usepackage{figures-eq}
+\renewcommand{\examround}{1학기 기말 예상 — 3회}
+\renewcommand{\examvol}{vol.3}
+
+\usepackage{eso-pic}
+\AddToShipoutPictureFG{%
+  \ifnum\value{page}=1
+    \begin{tikzpicture}[overlay,remember picture]
+      \draw[color=vB-rule,line width=0.4pt]
+        ([xshift=1mm,yshift=-82.5mm]current page.north)
+        -- ([xshift=1mm,yshift=15.8mm]current page.south);
+    \end{tikzpicture}%
+  \else
+    \begin{tikzpicture}[overlay,remember picture]
+      \draw[color=vB-rule,line width=0.4pt]
+        ([xshift=1mm,yshift=-13.6mm]current page.north)
+        -- ([xshift=1mm,yshift=15.8mm]current page.south);
+    \end{tikzpicture}%
+  \fi
+}
+
+\begin{document}
+
+\examheader{}{공통수학1 \textperiodcentered\ 다항식 \textperiodcentered\ 여러 가지 방정식과 부등식 \textperiodcentered\ 순열과 조합 \textperiodcentered\ 행렬 \textperiodcentered\ 23문 / 100점}
+
+\examsection{선택형 (총 23문)}
+
+\setlength{\probboxheight}{65mm}
+
+% ── 페이지 1 (문제 1~4) ───────────────────────────────────
+\begin{pagepair}
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{1}{s}
+\pointbadge{3.5}\par\smallskip
+한 주머니에 노란색 공 $4$개, 파란색 공 $3$개, 빨간색 공 $2$개가 들어 있다. 이 주머니에서 서로 다른 두 색의 공을 하나씩 뽑는 경우의 수는? \cond{같은 색의 공은 서로 구별한다}
+\begin{choices}
+\choice{$22$}
+\choice{$24$}
+\choice{$26$}
+\choice{$28$}
+\choice{$30$}
+\end{choices}
+\end{problem}
+\end{minipage}\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{3}{s}
+\pointbadge{3.7}\par\smallskip
+방정식
+\[ |x - 1| + |x + 2| = 5 \]
+의 두 실근의 곱은?
+\begin{choices}
+\choice{$-8$}
+\choice{$-6$}
+\choice{$-4$}
+\choice{$-2$}
+\choice{$0$}
+\end{choices}
+\end{problem}
+\end{minipage}
+\par\vspace{4mm}
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{2}{s}
+\pointbadge{3.5}\par\smallskip
+$1, 2, 3, 4, 5$의 서로 다른 $3$개를 뽑아 만든 세 자리 자연수 중 $300$ 이상인 자연수의 개수는?
+\begin{choices}
+\choice{$24$}
+\choice{$30$}
+\choice{$36$}
+\choice{$42$}
+\choice{$48$}
+\end{choices}
+\end{problem}
+\end{minipage}\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{4}{s}
+\pointbadge{3.7}\par\smallskip
+두 행렬 $A$, $B$가 다음 두 등식을 만족시킨다.
+\[ A + 2B = \begin{pmatrix} 7 & 5 \\ -3 & 4 \end{pmatrix},\quad 2A - B = \begin{pmatrix} 4 & 5 \\ -1 & 3 \end{pmatrix} \]
+행렬 $B$의 모든 성분의 합은?
+\begin{choices}
+\choice{$1$}
+\choice{$2$}
+\choice{$3$}
+\choice{$4$}
+\choice{$5$}
+\end{choices}
+\end{problem}
+\end{minipage}
+\end{pagepair}
+
+\setlength{\probboxheight}{100mm}
+
+% ── 페이지 2 (문제 5~8) ───────────────────────────────────
+\begin{pagepair}
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{5}{s}
+\pointbadge{3.9}\par\smallskip
+자연수 $n$, $r$가 등식
+\[ {}_n\mathrm{P}_3 = 60,\qquad {}_8\mathrm{C}_r = {}_8\mathrm{C}_3 \]
+을 모두 만족시킬 때 $n - r$의 값은? \cond{$r \ne 3$}
+\begin{choices}
+\choice{$-2$}
+\choice{$-1$}
+\choice{$0$}
+\choice{$1$}
+\choice{$2$}
+\end{choices}
+\end{problem}
+\end{minipage}\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{7}{s}
+\pointbadge{4.1}\par\smallskip
+두 실수 $x$, $y$가 다음 연립방정식을 만족시킨다.
+\[ \begin{cases} x + y = 5 \\ x^3 + y^3 = 65 \end{cases} \]
+$|x - y|$의 값은?
+\begin{choices}
+\choice{$1$}
+\choice{$2$}
+\choice{$3$}
+\choice{$4$}
+\choice{$5$}
+\end{choices}
+\end{problem}
+\end{minipage}
+\par\vspace{4mm}
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{6}{s}
+\pointbadge{3.9}\par\smallskip
+복소수
+\[ z = \dfrac{1 + i}{1 - i} \cdot \dfrac{2 - i}{2 + i} \]
+의 실수부의 값은? \cond{$i = \sqrt{-1}$}
+\begin{choices}
+\choice{$\dfrac{1}{5}$}
+\choice{$\dfrac{2}{5}$}
+\choice{$\dfrac{3}{5}$}
+\choice{$\dfrac{4}{5}$}
+\choice{$1$}
+\end{choices}
+\end{problem}
+\end{minipage}\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{8}{s}
+\pointbadge{4.1}\par\smallskip
+$x$에 대한 방정식
+\[ |x^2 - 4| = k \]
+가 서로 다른 세 실근을 가지도록 하는 실수 $k$의 값은?
+\begin{choices}
+\choice{$2$}
+\choice{$3$}
+\choice{$4$}
+\choice{$5$}
+\choice{$6$}
+\end{choices}
+\end{problem}
+\end{minipage}
+\end{pagepair}
+
+% ── 페이지 3 (문제 9~12) ──────────────────────────────────
+\begin{pagepair}
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{9}{s}
+\pointbadge{4.3}\par\smallskip
+$1$, $2$, $3$, $4$, $5$가 하나씩 적혀 있는 $5$장의 카드를 일렬로 나열할 때, 왼쪽에서 $k$번째 카드에 적힌 수를 $a_k$라 하자. 모든 $k$ $(k = 1, 2, 3, 4, 5)$에 대하여 $a_k \ne k$가 되도록 나열하는 경우의 수는?
+\begin{choices}
+\choice{$36$}
+\choice{$40$}
+\choice{$44$}
+\choice{$48$}
+\choice{$52$}
+\end{choices}
+\end{problem}
+\end{minipage}\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{11}{s}
+\pointbadge{4.5}\par\smallskip
+$x$에 대한 삼차방정식
+\[ x^3 - kx^2 + 3x - k = 0 \]
+의 세 근을 $\alpha$, $\beta$, $\gamma$라 하자. $\alpha^2 + \beta^2 + \gamma^2 = 10$이 되도록 하는 모든 실수 $k$의 값의 합은?
+\begin{choices}
+\choice{$-2$}
+\choice{$-1$}
+\choice{$0$}
+\choice{$1$}
+\choice{$2$}
+\end{choices}
+\end{problem}
+\end{minipage}
+\par\vspace{4mm}
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{10}{s}
+\pointbadge{4.3}\par\smallskip
+서로 다른 $8$개의 의자가 일렬로 놓여 있다. 서로 다른 세 명의 학생이 서로 다른 의자에 앉을 때, 어느 두 학생도 이웃한 의자에 앉지 않도록 하는 경우의 수는?
+\begin{choices}
+\choice{$90$}
+\choice{$120$}
+\choice{$150$}
+\choice{$180$}
+\choice{$210$}
+\end{choices}
+\end{problem}
+\end{minipage}\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{12}{s}
+\pointbadge{4.5}\par\smallskip
+$1$부터 $10$까지의 자연수가 하나씩 적힌 $10$개의 공이 주머니에 들어 있다. 이 중에서 서로 다른 $3$개를 동시에 꺼낼 때, $3$개의 공에 적힌 수의 합이 $3$의 배수인 경우의 수는?
+\begin{choices}
+\choice{$36$}
+\choice{$38$}
+\choice{$40$}
+\choice{$42$}
+\choice{$44$}
+\end{choices}
+\end{problem}
+\end{minipage}
+\end{pagepair}
+
+% ── 페이지 4 (문제 13~16) ─────────────────────────────────
+\begin{pagepair}
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{13}{s}
+\pointbadge{4.5}\par\smallskip
+$x$에 대한 사차방정식
+\[ x^4 - 5x^2 + 4 = 0 \]
+의 모든 실근의 절댓값의 합은?
+\begin{choices}
+\choice{$3$}
+\choice{$4$}
+\choice{$5$}
+\choice{$6$}
+\choice{$7$}
+\end{choices}
+\end{problem}
+\end{minipage}\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{15}{s}
+\pointbadge{4.6}\par\smallskip
+$x$에 대한 부등식
+\[ x^2 - 3x + a \le 0 \]
+을 만족시키는 정수 $x$가 오직 $2$개가 되도록 하는 실수 $a$의 값의 범위는?
+\begin{choices}
+\choice{$0 < a < 2$}
+\choice{$0 \le a < 2$}
+\choice{$0 \le a \le 2$}
+\choice{$0 < a \le 2$}
+\choice{$-2 < a \le 2$}
+\end{choices}
+\end{problem}
+\end{minipage}
+\par\vspace{4mm}
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{14}{s}
+\pointbadge{4.6}\par\smallskip
+이차방정식 $x^2 - 2x + 2 = 0$의 두 근을 $\alpha$, $\beta$라 하자. 행렬
+\[ A = \begin{pmatrix} \alpha + \beta & \alpha \beta \\ 1 & 0 \end{pmatrix} \]
+에 대하여 $A^3$의 $(1, 1)$ 성분은?
+\begin{choices}
+\choice{$12$}
+\choice{$14$}
+\choice{$16$}
+\choice{$18$}
+\choice{$20$}
+\end{choices}
+\end{problem}
+\end{minipage}\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{16}{s}
+\pointbadge{4.6}\par\smallskip
+다항식
+\[ P(x) = x^3 + ax^2 + bx + 6 \]
+이 $x^2 - x - 6$으로 나누어떨어질 때, 실수 $a$, $b$에 대하여 $a - b$의 값은?
+\begin{choices}
+\choice{$-1$}
+\choice{$1$}
+\choice{$3$}
+\choice{$5$}
+\choice{$7$}
+\end{choices}
+\end{problem}
+\end{minipage}
+\end{pagepair}
+
+% ── 페이지 5 (문제 17·18·20) — 좌열 세로 2문 + 우열 통 1문 (여유 확보) ───
+\setlength{\probboxheight}{100mm}
+\begin{pagepair}
+\noindent
+\begin{minipage}[t][210mm][t]{0.46\linewidth}
+\begin{minipage}[t][\probboxheight][t]{\linewidth}
+\begin{problem}{17}{s}
+\pointbadge{4.7}\par\smallskip
+그림과 같이 크기가 같은 $6$개의 정사각형에 $1$부터 $6$까지의 자연수가 하나씩 적혀 있다. 서로 다른 $5$가지 색의 일부 또는 전부를 사용하여 다음 조건을 만족시키도록 $6$개의 정사각형에 색을 칠하는 경우의 수는? \cond{한 정사각형에 한 가지 색만을 칠한다}
+
+\smallskip
+\begin{center}
+\begin{tikzpicture}[line width=0.5pt, font=\small, scale=0.5]
+  \draw (0,0) grid (3,2);
+  \node at (0.5,1.5) {$1$};
+  \node at (1.5,1.5) {$2$};
+  \node at (2.5,1.5) {$3$};
+  \node at (0.5,0.5) {$4$};
+  \node at (1.5,0.5) {$5$};
+  \node at (2.5,0.5) {$6$};
+\end{tikzpicture}
+\end{center}
+
+\smallskip
+\hspace*{0.5em}(가) $1$이 적힌 정사각형과 $6$이 적힌 정사각형에는 같은 색을 칠한다.
+
+\hspace*{0.5em}(나) 변을 공유하는 두 정사각형에는 서로 다른 색을 칠한다.
+\begin{choices}
+\choice{$480$}
+\choice{$510$}
+\choice{$540$}
+\choice{$570$}
+\choice{$600$}
+\end{choices}
+\end{problem}
+\end{minipage}
+\par\vspace{4mm}
+\begin{minipage}[t][\probboxheight][t]{\linewidth}
+\begin{problem}{18}{s}
+\pointbadge{4.7}\par\smallskip
+두 행렬
+\[ A = \begin{pmatrix} 1 & 1 \\ 0 & 1 \end{pmatrix}, \quad B = \begin{pmatrix} 1 & 0 \\ 1 & 1 \end{pmatrix} \]
+에 대하여 $AB + BA$의 모든 성분의 합은?
+\begin{choices}
+\choice{$6$}
+\choice{$8$}
+\choice{$10$}
+\choice{$12$}
+\choice{$14$}
+\end{choices}
+\end{problem}
+\end{minipage}
+\end{minipage}\hfill
+\begin{minipage}[t][210mm][t]{0.46\linewidth}
+\begin{problem}{20}{s}
+\pointbadge{4.8}\par\smallskip
+다음 표는 두 종류의 사탕 $P$, $Q$에 대하여 두 지역 $X$, $Y$에서의 단가와 판매량 정보이다.
+
+\begin{center}
+\small
+\begin{tabular}{c|cc}
+\multicolumn{3}{c}{[표1-단가 (원)]} \\ \hline
+      & $X$ 지역 & $Y$ 지역 \\ \hline
+$P$   & $500$ & $600$ \\
+$Q$   & $800$ & $900$
+\end{tabular}
+\quad
+\begin{tabular}{c|cc}
+\multicolumn{3}{c}{[표2-판매량 (만 개)]} \\ \hline
+        & $P$    & $Q$    \\ \hline
+$X$ 지역 & $30$  & $20$  \\
+$Y$ 지역 & $25$  & $15$
+\end{tabular}
+\end{center}
+
+위의 [표1]과 [표2]를 각각 행렬로 나타내면 다음과 같다.
+\[ A = \begin{pmatrix} 500 & 600 \\ 800 & 900 \end{pmatrix}, \qquad B = \begin{pmatrix} 30 & 20 \\ 25 & 15 \end{pmatrix} \]
+
+$X$ 지역에서의 두 사탕 $P$, $Q$ 판매액의 합계를 나타내는 것은?
+\begin{choices}
+\choice{$BA$의 $(1, 1)$ 성분}
+\choice{$BA$의 $(1, 2)$ 성분}
+\choice{$BA$의 $(2, 1)$ 성분}
+\choice{$AB$의 $(1, 1)$ 성분}
+\choice{$AB$의 $(1, 2)$ 성분}
+\end{choices}
+\end{problem}
+\end{minipage}
+\end{pagepair}
+
+% ── 페이지 6 (문제 19·21) — 좌우 grid 상단만 (여유) ────
+\begin{pagepair}
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{19}{s}
+\pointbadge{4.7}\par\smallskip
+서로 다른 종류의 꽃 $3$송이와 같은 종류의 초콜릿 $3$개를 $5$명의 학생에게 남김없이 나누어 주려고 한다. 아무것도 받지 못하는 학생이 없도록 꽃과 초콜릿을 나누어 주는 경우의 수는?
+\begin{choices}
+\choice{$300$}
+\choice{$330$}
+\choice{$360$}
+\choice{$390$}
+\choice{$420$}
+\end{choices}
+\end{problem}
+\end{minipage}\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{21}{s}
+\pointbadge{4.8}\par\smallskip
+$1$부터 $9$까지의 자연수가 하나씩 적혀 있는 $9$장의 카드가 있다. 이 $9$장의 카드 중에서 $6$장의 카드를 택하여 왼쪽부터 모두 일렬로 나열한다. 이 $6$장의 카드에 적힌 수를 왼쪽부터 순서대로 $a_1$, $a_2$, $a_3$, $a_4$, $a_5$, $a_6$이라 할 때, 세 자연수 $A$, $B$, $C$를
+\begin{align*}
+A &= a_1 \times 100 + a_2 \times 10 + a_3, \\
+B &= a_4 \times 10 + a_5, \\
+C &= a_6
+\end{align*}
+이라 하자. 두 수 $A + B + C$, $A - B - C$가 모두 $5$의 배수가 되도록 하는 $a_1$, $a_2$, $a_3$, $a_4$, $a_5$, $a_6$의 모든 순서쌍 $(a_1, a_2, a_3, a_4, a_5, a_6)$의 개수는?
+\begin{choices}
+\choice{$1680$}
+\choice{$1800$}
+\choice{$1920$}
+\choice{$2040$}
+\choice{$2160$}
+\end{choices}
+\end{problem}
+\end{minipage}
+\end{pagepair}
+
+% ── 페이지 7 (문제 22·23) — 정점 2문 여유 ────
+\begin{pagepair}
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{22}{s}
+\pointbadge{5}\par\smallskip
+그림과 같이 직선 $y = k$가 이차함수 $f(x) = x^2 - 2x + 2$의 그래프와 서로 다른 두 점 A, B에서 만나고, 직선 $y = k$가 이차함수 $g(x) = -x^2 + 10x - 8$의 그래프와 서로 다른 두 점 C, D에서 만난다. $\overline{\mathrm{AB}} = 2\overline{\mathrm{CD}}$를 만족시키는 실수 $k$에 대하여 $10k$의 값은? \cond{$1 < k < 17$}
+
+\smallskip
+\begin{center}
+\begin{tikzpicture}[line width=0.4pt, font=\scriptsize, x=3mm, y=1.4mm]
+  % 좌표축
+  \draw[->] (-4, 0) -- (9.5, 0) node[right] {$x$};
+  \draw[->] (0, -2) -- (0, 20) node[above] {$y$};
+  \node[below left] at (0, 0) {$\mathrm{O}$};
+  % 이차함수 f(x) = x^2 - 2x + 2 (최고차항의 계수 양수)
+  \draw[domain=-3.2:5.3, smooth, samples=80] plot ({\x}, {\x*\x - 2*\x + 2});
+  % 이차함수 g(x) = -x^2 + 10x - 8 (최고차항의 계수 음수)
+  \draw[domain=0.9:9.1, smooth, samples=80] plot ({\x}, {-\x*\x + 10*\x - 8});
+  % y = k 수평선
+  \draw[dashed] (-3.5, 13.8) -- (9.2, 13.8) node[right] {$y=k$};
+  % 네 교점 A, C, B, D
+  \fill (-2.58, 13.8) circle (1.6pt);
+  \fill ( 3.21, 13.8) circle (1.6pt);
+  \fill ( 4.58, 13.8) circle (1.6pt);
+  \fill ( 6.79, 13.8) circle (1.6pt);
+  \node[above] at (-2.58, 13.8) {A};
+  \node[above] at ( 3.21, 13.8) {C};
+  \node[above] at ( 4.58, 13.8) {B};
+  \node[above] at ( 6.79, 13.8) {D};
+  % 곡선 라벨 (오른쪽 leg 끝점 옆)
+  \node[right] at (5.35, 19.0) {$y=f(x)$};
+  \node[right] at (9.15, 3.5) {$y=g(x)$};
+\end{tikzpicture}
+\end{center}
+\begin{choices}
+\choice{$130$}
+\choice{$134$}
+\choice{$138$}
+\choice{$142$}
+\choice{$146$}
+\end{choices}
+\end{problem}
+\end{minipage}\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{23}{s}
+\pointbadge{5}\par\smallskip
+두 함수 $f(x) = x^2 - 5x$, $g(x) = -\tfrac{1}{2}x + \tfrac{5}{2}$가 있다. 실수 $a$에 대하여 직선 $y = x + k$가 $x < a$에서 함수 $y = f(x)$의 그래프와 만나는 서로 다른 점의 개수를 $m$, $x \ge a$에서 함수 $y = g(x)$의 그래프와 만나는 서로 다른 점의 개수를 $n$이라 하자. $m + n = 3$인 실수 $k$가 존재하도록 하는 모든 $a$의 값의 범위가 $p < a < q$이다. $p \times q$의 값은? \cond{$p$, $q$는 상수이다}
+\begin{choices}
+\choice{$19$}
+\choice{$21$}
+\choice{$23$}
+\choice{$25$}
+\choice{$27$}
+\end{choices}
+\end{problem}
+\end{minipage}
+\end{pagepair}
+
+\end{document}

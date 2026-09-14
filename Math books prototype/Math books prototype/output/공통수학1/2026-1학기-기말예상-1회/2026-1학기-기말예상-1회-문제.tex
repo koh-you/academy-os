@@ -1,0 +1,428 @@
+\documentclass[10pt]{article}
+\usepackage{style}
+\usepackage{figures-cb}
+\renewcommand{\examround}{1학기 기말 예상}
+\renewcommand{\examvol}{vol.1}
+
+\usepackage{eso-pic}
+\AddToShipoutPictureFG{%
+  \ifnum\value{page}=1
+    \begin{tikzpicture}[overlay,remember picture]
+      \draw[color=vB-rule,line width=0.4pt]
+        ([xshift=1mm,yshift=-82.5mm]current page.north)
+        -- ([xshift=1mm,yshift=15.8mm]current page.south);
+    \end{tikzpicture}%
+  \else
+    \begin{tikzpicture}[overlay,remember picture]
+      \draw[color=vB-rule,line width=0.4pt]
+        ([xshift=1mm,yshift=-13.6mm]current page.north)
+        -- ([xshift=1mm,yshift=15.8mm]current page.south);
+    \end{tikzpicture}%
+  \fi
+}
+
+\begin{document}
+
+\examheader{}{공통수학1 \textperiodcentered\ 다항식 \textperiodcentered\ 여러 가지 방정식과 부등식 \textperiodcentered\ 순열과 조합 \textperiodcentered\ 행렬 \textperiodcentered\ 23문 / 100점}
+
+\examsection{선택형 (총 23문)}
+
+\setlength{\probboxheight}{65mm}
+
+% ── 페이지 1 (문제 1~4) ───────────────────────────────────
+\begin{pagepair}
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{1}{s}
+\pointbadge{3.5}\par\smallskip
+서로 다른 두 개의 주사위를 동시에 던질 때, 나오는 눈의 수의 차가 $3$ 또는 $4$가 되는 경우의 수는?
+\begin{choices}
+\choice{$6$}
+\choice{$8$}
+\choice{$10$}
+\choice{$12$}
+\choice{$14$}
+\end{choices}
+\end{problem}
+\end{minipage}\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{3}{s}
+\pointbadge{3.7}\par\smallskip
+연립부등식
+\[ -3x + 5 \le 2x + 7 < -x + 15 \]
+을 만족시키는 모든 정수 $x$의 값의 합은?
+\begin{choices}
+\choice{$-1$}
+\choice{$0$}
+\choice{$1$}
+\choice{$2$}
+\choice{$3$}
+\end{choices}
+\end{problem}
+\end{minipage}
+\par\vspace{4mm}
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{2}{s}
+\pointbadge{3.5}\par\smallskip
+$5$개의 문자 B, R, E, A, D를 일렬로 나열할 때, 모음끼리는 이웃하지 않게 나열하는 방법의 수는?
+\begin{choices}
+\choice{$36$}
+\choice{$48$}
+\choice{$60$}
+\choice{$72$}
+\choice{$84$}
+\end{choices}
+\end{problem}
+\end{minipage}\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{4}{s}
+\pointbadge{3.7}\par\smallskip
+두 행렬 $A = \begin{pmatrix} 2 & 3 \\ 4 & 5 \end{pmatrix}$, $B = \begin{pmatrix} a & 1 \\ 0 & b \end{pmatrix}$이다. $AB = \begin{pmatrix} 10 & 8 \\ 20 & 14 \end{pmatrix}$일 때, 실수 $a$, $b$에 대하여 $a + b$의 값은?
+\begin{choices}
+\choice{$3$}
+\choice{$5$}
+\choice{$7$}
+\choice{$9$}
+\choice{$11$}
+\end{choices}
+\end{problem}
+\end{minipage}
+\end{pagepair}
+
+\setlength{\probboxheight}{100mm}
+
+% ── 페이지 2 (문제 5~8) ───────────────────────────────────
+\begin{pagepair}
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{5}{s}
+\pointbadge{3.9}\par\smallskip
+등식 $(n + 1) \times {}_n\mathrm{P}_2 = 210$과 ${}_9\mathrm{C}_r = {}_9\mathrm{C}_4$를 만족시키는 자연수 $n$, $r$에 대하여 $n - r$의 값은? \cond{$n \ge 2$, $r \ne 4$}
+\begin{choices}
+\choice{$-2$}
+\choice{$-1$}
+\choice{$0$}
+\choice{$1$}
+\choice{$2$}
+\end{choices}
+\end{problem}
+\end{minipage}\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{7}{s}
+\pointbadge{4.1}\par\smallskip
+연립방정식
+\[ \begin{cases} x^2 + xy - 2y^2 = 0 \\ x^2 + 2xy + 3y^2 = 24 \end{cases} \]
+의 해를 $x = \alpha$, $y = \beta$라 할 때, $\alpha^2 \beta^2$의 최댓값은?
+\begin{choices}
+\choice{$128$}
+\choice{$192$}
+\choice{$256$}
+\choice{$320$}
+\choice{$384$}
+\end{choices}
+\end{problem}
+\end{minipage}
+\par\vspace{4mm}
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{6}{s}
+\pointbadge{3.9}\par\smallskip
+계수가 실수인 $x$에 대한 삼차방정식
+\[ x^3 + x^2 + ax + b = 0 \]
+의 한 근이 $1 + i$일 때, $a^2 + b^2$의 값은? \cond{$i = \sqrt{-1}$}
+\begin{choices}
+\choice{$30$}
+\choice{$40$}
+\choice{$52$}
+\choice{$64$}
+\choice{$80$}
+\end{choices}
+\end{problem}
+\end{minipage}\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{8}{s}
+\pointbadge{4.1}\par\smallskip
+수직선 위의 두 점 $\mathrm{A}(1)$, $\mathrm{B}(-2)$와 임의의 점 $\mathrm{P}(x)$에 대하여
+\[ 2\overline{\mathrm{AP}} + \overline{\mathrm{BP}} < 7 \]
+을 만족하는 정수 $x$의 개수는?
+\begin{choices}
+\choice{$1$}
+\choice{$2$}
+\choice{$3$}
+\choice{$4$}
+\choice{$5$}
+\end{choices}
+\end{problem}
+\end{minipage}
+\end{pagepair}
+
+% ── 페이지 3 (문제 9~12) ──────────────────────────────────
+\begin{pagepair}
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{9}{s}
+\pointbadge{4.3}\par\smallskip
+다음 그림과 같이 두 개의 직사각형을 이어 붙여 만든 도로망이 있다. 지점 $\mathrm{A}$에서 지점 $\mathrm{B}$까지 도로를 따라 최단 거리로 가는 방법의 수는?
+\begin{center}
+\begin{tikzpicture}[line width=0.5pt, font=\small, scale=0.65]
+  \draw (0, 0) grid (2, 2);
+  \draw (1, 2) grid (3, 4);
+  \node[anchor=north east, inner sep=2pt] at (0, 0) {$\mathrm{A}$};
+  \node[anchor=south west, inner sep=2pt] at (3, 4) {$\mathrm{B}$};
+\end{tikzpicture}
+\end{center}
+\begin{choices}
+\choice{$21$}
+\choice{$24$}
+\choice{$27$}
+\choice{$30$}
+\choice{$33$}
+\end{choices}
+\end{problem}
+\end{minipage}\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{11}{s}
+\pointbadge{4.5}\par\smallskip
+$x$에 대한 삼차방정식
+\[ x^3 + (6 - a)x^2 + (a^2 - 6a)x - a^3 = 0 \]
+이 서로 다른 세 실근을 갖기 위한 정수 $a$를 모두 곱하면?
+\begin{choices}
+\choice{$-4$}
+\choice{$-2$}
+\choice{$2$}
+\choice{$4$}
+\choice{$6$}
+\end{choices}
+\end{problem}
+\end{minipage}
+\par\vspace{4mm}
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{10}{s}
+\pointbadge{4.3}\par\smallskip
+똑같은 $9$개의 의자가 일렬로 놓여있다. 두 명의 학생이 서로 다른 의자에 앉을 때, 두 명 사이에 적어도 하나의 빈 의자가 있도록 앉는 경우의 수는?
+\begin{choices}
+\choice{$42$}
+\choice{$48$}
+\choice{$54$}
+\choice{$56$}
+\choice{$60$}
+\end{choices}
+\end{problem}
+\end{minipage}\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{12}{s}
+\pointbadge{4.5}\par\smallskip
+$1000$원짜리 지폐 $3$장, $5000$원짜리 지폐 $6$장, $10000$원짜리 지폐 $3$장의 일부 또는 전부를 사용하여 지불할 수 있는 방법의 수를 $a$, 지불할 수 있는 금액의 수를 $b$라 할 때, $a + b$의 값은? \cond{$0$원을 지불하는 것은 생각하지 않는다}
+\begin{choices}
+\choice{$158$}
+\choice{$160$}
+\choice{$162$}
+\choice{$164$}
+\choice{$166$}
+\end{choices}
+\end{problem}
+\end{minipage}
+\end{pagepair}
+
+% ── 페이지 4 (문제 13~16) ─────────────────────────────────
+\begin{pagepair}
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{13}{s}
+\pointbadge{4.5}\par\smallskip
+$x$에 대한 사차방정식
+\[ x^4 - x^3 + 2x^2 - x - 4 = 0 \]
+의 네 근을 $a$, $b$, $c$, $d$라고 할 때, $(a + 2)(b + 2)(c + 2)(d + 2)$의 값은?
+\begin{choices}
+\choice{$25$}
+\choice{$28$}
+\choice{$30$}
+\choice{$32$}
+\choice{$35$}
+\end{choices}
+\end{problem}
+\end{minipage}\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{15}{s}
+\pointbadge{4.6}\par\smallskip
+$x$에 대한 연립부등식
+\[ \begin{cases} x^2 - (a + 2)x + 2a \le 0 \\ x^2 + (a + 4)x + 4a \le 0 \end{cases} \]
+의 해가 존재하지 않도록 하는 실수 $a$의 값의 범위는?
+\begin{choices}
+\choice{$a \ge 3$}
+\choice{$a > 1$}
+\choice{$a \ge 1$}
+\choice{$a > 0$}
+\choice{$a \ge 0$}
+\end{choices}
+\end{problem}
+\end{minipage}
+\par\vspace{4mm}
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{14}{s}
+\pointbadge{4.6}\par\smallskip
+$x$에 대한 사차방정식
+\[ x^4 + 2x^3 + 3x^2 - 2x - 4 = 0 \]
+의 두 허근을 $\alpha$, $\beta$라고 할 때, 행렬 $X = \begin{pmatrix} \alpha & 1 \\ 1 & \beta \end{pmatrix}$에 대하여 행렬 $X^2$의 모든 성분의 합은?
+\begin{choices}
+\choice{$-8$}
+\choice{$-6$}
+\choice{$-4$}
+\choice{$-2$}
+\choice{$0$}
+\end{choices}
+\end{problem}
+\end{minipage}\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{16}{s}
+\pointbadge{4.6}\par\smallskip
+다항식 $x^7 - 40x + 3$을 다항식 $x^2 - 2x + 4$로 나누었을 때, 나머지를 $R(x)$라고 하면 $R(1)$의 값은?
+\begin{choices}
+\choice{$20$}
+\choice{$24$}
+\choice{$27$}
+\choice{$30$}
+\choice{$33$}
+\end{choices}
+\end{problem}
+\end{minipage}
+\end{pagepair}
+
+% ── 페이지 5 (문제 17~20) ─────────────────────────────────
+\begin{pagepair}
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{17}{s}
+\pointbadge{4.7}\par\smallskip
+서로 다른 $7$개의 상자 A, B, C, D, E, F, G에 빨간색 공 $2$개와 파란색 공 $3$개를 모두 넣으려고 한다. 각 상자에 같은 색의 공은 $2$개 이상 넣을 수 없을 때, 빨간 공과 파란 공이 모두 들어 있는 상자가 $2$개 미만일 경우의 수는? (단, 같은 색의 공은 서로 구별하지 않으며 빈 상자가 있을 수도 있다.)
+\begin{choices}
+\choice{$500$}
+\choice{$550$}
+\choice{$600$}
+\choice{$630$}
+\choice{$700$}
+\end{choices}
+\end{problem}
+\end{minipage}\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{19}{s}
+\pointbadge{4.7}\par\smallskip
+평면 위에 있는 서로 다른 점 $15$개 중 두 점을 이어 만들 수 있는 서로 다른 직선이 $60$개다. 이 중에서 오직 세 점만 지나는 직선이 $10$개일 때, 오직 네 점만을 지나는 직선의 개수는? (단, $5$개 이상의 점을 지나는 직선은 존재하지 않는다.)
+\begin{choices}
+\choice{$3$}
+\choice{$4$}
+\choice{$5$}
+\choice{$6$}
+\choice{$7$}
+\end{choices}
+\end{problem}
+\end{minipage}
+\par\vspace{4mm}
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{18}{s}
+\pointbadge{4.7}\par\smallskip
+숫자 $2, 3, 4, 5, 6, 7, 8$이 하나씩 적혀 있는 $7$장의 카드가 있다. 이 $7$장의 카드 중에서 $6$장을 택하여 이 $6$장의 카드 모두를 일렬로 나열할 때, 서로 이웃한 $2$장의 카드에 적혀 있는 두 수의 곱 모두가 짝수가 되도록 나열하는 경우의 수는?
+\begin{choices}
+\choice{$1440$}
+\choice{$1728$}
+\choice{$2016$}
+\choice{$2304$}
+\choice{$2592$}
+\end{choices}
+\end{problem}
+\end{minipage}\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{20}{s}
+\pointbadge{4.8}\par\smallskip
+자동차 회사에서 작년과 올해에 수출용과 내수용으로 구분하여 생산한 두 종류의 자동차 $P$, $Q$의 판매가격과 생산량을 나타낸 표가 다음과 같다.
+
+\begin{center}
+\small
+\begin{tabular}{c|cc}
+\multicolumn{3}{c}{[표1-판매가격 (만 원)]} \\ \hline
+      & 작년 & 올해 \\ \hline
+$P$   & $1500$ & $1800$ \\
+$Q$   & $2200$ & $2500$
+\end{tabular}
+\quad
+\begin{tabular}{c|cc}
+\multicolumn{3}{c}{[표2-생산량 (만 대)]} \\ \hline
+       & $P$    & $Q$    \\ \hline
+수출용 & $250$  & $300$  \\
+내수용 & $180$  & $220$
+\end{tabular}
+\end{center}
+
+위의 [표1]과 [표2]를 각각 행렬로 나타내면 $A = \begin{pmatrix} 1500 & 1800 \\ 2200 & 2500 \end{pmatrix}$, $B = \begin{pmatrix} 250 & 300 \\ 180 & 220 \end{pmatrix}$이다. 이 자동차 회사에서 내년 수출용 자동차 $P$, $Q$의 생산량을 올해의 생산량보다 $20\%$씩 증가시키고, 생산한 자동차의 $80\%$씩을 판매한다면, 내년 수출용 자동차의 총 예상 판매 금액을 나타내는 것은? \cond{내년의 판매가격은 올해의 판매가격과 같다}
+\begin{choices}
+\choice{$\tfrac{25}{24}AB$의 $(1, 1)$ 성분}
+\choice{$\tfrac{25}{24}AB$의 $(1, 2)$ 성분}
+\choice{$\tfrac{24}{25}BA$의 $(1, 2)$ 성분}
+\choice{$\tfrac{24}{25}BA$의 $(2, 1)$ 성분}
+\choice{$\tfrac{24}{25}AB$의 $(2, 1)$ 성분}
+\end{choices}
+\end{problem}
+\end{minipage}
+\end{pagepair}
+
+% ── 페이지 6 (문제 21~23) ─────────────────────────────────
+\begin{pagepair}
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{21}{s}
+\pointbadge{4.8}\par\smallskip
+행렬 $A = \begin{pmatrix} 0 & 1 \\ -1 & 1 \end{pmatrix}$에 대하여 $A^m = A^n$을 만족시키는 $42$ 이하의 두 자연수 $m$, $n$ $(m > n)$의 순서쌍 $(m, n)$의 개수는?
+\begin{choices}
+\choice{$108$}
+\choice{$120$}
+\choice{$126$}
+\choice{$132$}
+\choice{$144$}
+\end{choices}
+\end{problem}
+\end{minipage}\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{23}{s}
+\pointbadge{5}\par\smallskip
+이차함수 $f(x)$와 이차항의 계수가 $1$인 이차함수 $g(x)$에 대하여 $x$에 대한 이차방정식
+\[ \{x - f(k)\}\{x - g(k)\} = 0 \]
+이 서로 다른 두 실근 $0$, $6$을 갖도록 하는 모든 실수 $k$의 개수가 $3$이다. $f(3) = 6$일 때, $g(9) - f(9)$의 값은?
+\begin{choices}
+\choice{$60$}
+\choice{$62$}
+\choice{$64$}
+\choice{$66$}
+\choice{$68$}
+\end{choices}
+\end{problem}
+\end{minipage}
+\par\vspace{4mm}
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}
+\begin{problem}{22}{s}
+\pointbadge{5}\par\smallskip
+두 이차함수 $f(x)$, $g(x)$가 다음 조건을 만족시킨다.
+\begin{conditions}
+(가) 모든 실수 $x$에 대하여 $f(x) \le 0 \le g(x)$이다. \\[3pt]
+(나) $k - 2 \le x \le k + 2$에서 함수 $f(x)$의 최댓값과 $k - 2 \le x \le k + 2$에서 함수 $g(x)$의 최솟값이 같게 되도록 하는 실수 $k$의 최솟값은 $0$, 최댓값은 $1$이다. \\[3pt]
+(다) 방정식 $f(x) = f(0)$의 모든 실근의 합은 음수이다.
+\end{conditions}
+
+$f(1) = -2$, $g(1) = 2$일 때, $f(5) + g(11)$의 값은?
+\begin{choices}
+\choice{$128$}
+\choice{$136$}
+\choice{$144$}
+\choice{$152$}
+\choice{$160$}
+\end{choices}
+\end{problem}
+\end{minipage}\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}\end{minipage}
+\end{pagepair}
+
+\end{document}

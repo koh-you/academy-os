@@ -1,0 +1,162 @@
+\documentclass[10pt]{article}
+\usepackage{style}
+\renewcommand{\examround}{미니모의고사}
+\renewcommand{\examvol}{vol.1}
+
+\newcommand{\solnote}[1]{\par\smallskip\noindent
+  \begin{tcolorbox}[enhanced, breakable, colback=vB-light, colframe=vB-light,
+    boxrule=0pt, arc=3pt, left=10pt, right=10pt, top=4pt, bottom=4pt,
+    fontupper=\sffamily\footnotesize\color{vB-ink}]
+    \textbf{\color{vB-deep}통찰}\quad #1
+  \end{tcolorbox}}
+
+\begin{document}
+
+\answerheader{정답·해설}{공통수학1 — 8문 / 20분}
+
+\begin{quickgrid}
+\quick{01}{③ $5$}    & \quick{02}{③ $3$}      & \quick{03}{③ $12$}    & \quick{04}{② $3$}    & \quick{05}{③ $18$}    \\
+\quick{06}{④ ㄱ, ㄴ, ㄷ} & \quick{07}{$72$} & \quick{08}{$12$} & & \\
+\end{quickgrid}
+
+% ─────────────────── 객관식 \#1\textendash{}\#6 ───────────────────
+\examsection{객관식 \#1\textendash{}\#6 풀 답지}
+
+\soltitle{1}{사차방정식 — 정수근 탐색과 인수분해}{3}
+\begin{answerbox}\sffamily\bfseries 정답: ③ $5$\end{answerbox}
+\step{1} 정수근 후보는 상수항 $-6$의 약수, 즉 $\pm 1, \pm 2, \pm 3, \pm 6$이다. 차례로 대입해 본다.
+\step{2} $x = 1$ 대입: $1 - 5 + 5 + 5 - 6 = 0$. 정수근이다.\\
+$x = -1$ 대입: $1 + 5 + 5 - 5 - 6 = 0$. 정수근이다.
+\step{3} 두 인수 $(x - 1)(x + 1) = x^2 - 1$로 나눈다. 다항식 나눗셈으로
+\[ x^4 - 5x^3 + 5x^2 + 5x - 6 = (x^2 - 1)(x^2 - 5x + 6). \]
+\step{4} 둘째 인수 $x^2 - 5x + 6 = (x - 2)(x - 3)$. 두 근 $x = 2$, $x = 3$.
+\step{5} 네 실근은 $-1, 1, 2, 3$. 모든 실근의 합은
+\[ -1 + 1 + 2 + 3 = 5. \]
+정답은 $\textbf{③}$.
+\solnote{정수근 탐색은 \emph{상수항의 약수} 대입이 표준 출발. 두 정수근을 빨리 찾으면 \emph{$(x - \alpha)(x - \beta)$로 나누어} 차수를 한 번에 둘 낮출 수 있어 절약된다. 모든 근이 실수임을 확인한 뒤에는 \emph{근과 계수의 관계}로 합 $= 5$ ($x^3$ 계수의 부호 반대)를 곧장 검증할 수도 있다.}
+
+\soltitle{2}{연립부등식 — 일차·이차의 공통 정수해}{3}
+\begin{answerbox}\sffamily\bfseries 정답: ③ $3$\end{answerbox}
+\step{1} 첫 부등식: $x^2 - 4 \le 0 \Longrightarrow -2 \le x \le 2$.
+\step{2} 둘째 부등식: $x - 1 \ge 0 \Longrightarrow x \ge 1$.
+\step{3} 공통 범위는 $1 \le x \le 2$. 이 범위에 포함되는 정수는 $1$과 $2$이므로 합은
+\[ 1 + 2 = 3. \]
+정답은 $\textbf{③}$.
+\solnote{연립부등식은 \emph{각 부등식의 해의 공통 범위}로 환원되는 표준 도구. 이차부등식의 좌·우 양쪽 경계와 일차부등식의 한 쪽 경계를 \emph{각각 더 좁은 쪽}으로 결합하여 답이 결정된다. 양 끝 정수 포함 여부 ($\le$·$\ge$ 등호)를 정확히 점검해야 합 계산이 어긋나지 않는다.}
+
+\soltitle{3}{사차식 인수분해 — 제곱 차 패턴}{3}
+\begin{answerbox}\sffamily\bfseries 정답: ③ $12$\end{answerbox}
+\step{1} $x^4 + 4x^2 + 16$을 \emph{완전제곱식 - 완전제곱식} 형태로 만든다. $(x^2 + 4)^2 = x^4 + 8x^2 + 16$이므로
+\[ x^4 + 4x^2 + 16 = (x^2 + 4)^2 - 4x^2. \]
+\step{2} 이는 두 완전제곱식의 차이다.
+\[ (x^2 + 4)^2 - (2x)^2 = (x^2 + 4 + 2x)(x^2 + 4 - 2x). \]
+\step{3} 정리하면
+\[ x^4 + 4x^2 + 16 = (x^2 + 2x + 4)(x^2 - 2x + 4). \]
+따라서 $a = 2$, $b = 4$, $c = -2$, $d = 4$.
+\step{4} 절댓값의 합은
+\[ |a| + |b| + |c| + |d| = 2 + 4 + 2 + 4 = 12. \]
+정답은 $\textbf{③}$.
+\solnote{$x^4 + cx^2 + d$ 꼴이 인수분해되려면 \emph{$(x^2+\alpha)^2 - (\beta x)^2$} 형태로 변환되는지 점검. 본 문제는 $(x^2+4)^2 - 4x^2$로 깔끔히 분해된다. 일반적으로 $x^4 + ax^2 + b$가 두 정수 계수 이차식으로 분해되려면 $a^2 - 4b$가 \emph{완전제곱수}여야 한다.}
+
+\soltitle{4}{연립방정식 — 양의 정수해와 미정계수}{4}
+\begin{answerbox}\sffamily\bfseries 정답: ② $3$\end{answerbox}
+\step{1} 두 식을 \emph{합·곱 형태}로 환원한다. $x + y = a$의 양변을 제곱하면 $x^2 + 2xy + y^2 = a^2$이므로
+\[ 2xy = a^2 - (x^2 + y^2) = a^2 - (a^2 - 4) = 4 \;\Longrightarrow\; xy = 2. \]
+\step{2} 곧 $x$, $y$는 $t^2 - at + 2 = 0$의 두 근이다. 두 근의 공식으로
+\[ t = \frac{a \pm \sqrt{a^2 - 8}}{2}. \]
+\step{3} $x$, $y$가 양의 정수이려면 $a^2 - 8$이 \emph{완전제곱수}이고 $a$도 자연수여야 한다. $a^2 - 8 = m^2$로 놓으면
+\[ a^2 - m^2 = 8 \;\Longrightarrow\; (a - m)(a + m) = 8. \]
+\step{4} $a > m \ge 0$인 자연수 해를 찾는다. 두 인수 $a - m$, $a + m$은 같은 홀짝성이어야 하므로 $(a-m, a+m) = (2, 4)$만 가능. 이로부터
+\[ a - m = 2, \quad a + m = 4 \;\Longrightarrow\; a = 3, \; m = 1. \]
+\step{5} 검증한다. $a = 3$일 때 $t^2 - 3t + 2 = 0 \Rightarrow t = 1, 2$. 따라서 $(x, y) = (1, 2)$ 또는 $(2, 1)$로 모두 양의 정수이다.
+\step{6} 따라서 자연수 $a$의 값은 $\textbf{3}$, 정답은 $\textbf{②}$.
+\solnote{연립방정식을 \emph{합·곱 형태}로 환원하면 두 변수가 한 이차방정식의 근이 되어 \emph{미정계수가 한 변수로 축소}된다. 정수해 조건은 \emph{판별식이 완전제곱수}이고 그 인수분해 $(a-m)(a+m) = $ 상수의 \emph{홀짝성 일치}로 단일 해가 결정되는 표준 도구.}
+
+\soltitle{5}{절댓값 부등식 — 두 부등식의 공통 범위}{4}
+\begin{answerbox}\sffamily\bfseries 정답: ③ $18$\end{answerbox}
+\step{1} 절댓값 부등식을 두 부등식의 \emph{동시 만족} 조건으로 풀어쓴다.
+\[ -4 \le x^2 - 6x + 4 \le 4. \]
+\step{2} \textbf{윗쪽 부등식 $x^2 - 6x + 4 \le 4$.} 이항하면 $x^2 - 6x \le 0$, 인수분해하면 $x(x-6) \le 0$. 해는
+\[ 0 \le x \le 6. \]
+\step{3} \textbf{아랫쪽 부등식 $x^2 - 6x + 4 \ge -4$.} 이항하면 $x^2 - 6x + 8 \ge 0$, 인수분해하면 $(x - 2)(x - 4) \ge 0$. 해는
+\[ x \le 2 \text{ 또는 } x \ge 4. \]
+\step{4} 두 조건을 동시에 만족시키는 범위는
+\[ 0 \le x \le 2 \text{ 또는 } 4 \le x \le 6. \]
+\step{5} 이 범위 안의 정수는 $0, 1, 2, 4, 5, 6$의 \emph{여섯 개}. 합은
+\[ 0 + 1 + 2 + 4 + 5 + 6 = 18. \]
+따라서 정답은 $\textbf{③}$.
+\solnote{절댓값 이차부등식은 \emph{두 이차부등식의 공통 범위}로 환원되는 표준 패턴. 두 범위가 \emph{분리}되면 정수해 카운트 시 \emph{각 구간의 끝점}을 정확히 잡아 셈해야 한다. 본 문제는 아랫쪽 부등식이 $x = 3$을 \emph{제외}시키는 함정.}
+
+\soltitle{6}{이차방정식 — 명제 ㄱㄴㄷㄹ 분석 + 반례 검증}{4}
+\begin{answerbox}\sffamily\bfseries 정답: ④ ㄱ, ㄴ, ㄷ\end{answerbox}
+\step{1} \textbf{ㄱ.} 근과 계수의 관계로 $\alpha\beta = b$이다. $\alpha\beta < 0$이면 두 근의 부호가 \emph{반대}이므로 \emph{적어도 하나는 양수}이다. 따라서 \textbf{ㄱ은 참}.
+\step{2} \textbf{ㄴ.} 조건 $\alpha + \beta = 0$에서 $\beta = -\alpha$. 또 $\alpha \ne \beta$이므로 $\alpha \ne -\alpha$, 곧 $\alpha \ne 0$. 따라서
+\[ \alpha\beta = \alpha \cdot (-\alpha) = -\alpha^2 < 0 \quad (\because \alpha \ne 0). \]
+$b = \alpha\beta < 0$이므로 \textbf{ㄴ은 참}.
+\step{3} \textbf{ㄷ.} 판별식 $a^2 - 4b < 0$이면 두 근은 \emph{복소수}이고, 계수가 실수이므로 \emph{켤레쌍}이다. 곧 $\beta = \bar{\alpha}$.
+\step{4} 근의 곱은 $\alpha\beta = \alpha\bar{\alpha} = |\,\alpha\,|^2$이다. 조건 $|\alpha| = 1$에서 $|\alpha|^2 = 1$, 따라서 $b = \alpha\beta = 1$. \textbf{ㄷ은 참}.
+\step{5} \textbf{ㄹ.} 결론 $a + b + 1 > 0$이 \emph{항상} 성립하는지 \emph{반례}로 점검한다. 조건을 식으로 풀어보면
+\[ \alpha\beta = b > 1, \qquad (\alpha + 1)(\beta + 1) = \alpha\beta + (\alpha + \beta) + 1 = b - a + 1 > 0. \]
+즉 $b > 1$과 $b - a + 1 > 0$ (곧 $a < b + 1$)이 주어졌을 때 $a + b + 1 > 0$이 성립하는지가 쟁점.
+\step{6} 후보 \textbf{반례}: $a = -10$, $b = 2$. 두 근의 합 $-a = 10$, 곱 $b = 2$이므로 판별식 $a^2 - 4b = 100 - 8 = 92 > 0$이라 두 근이 모두 실수.
+\begin{itemize}\setlength{\itemsep}{0pt}
+\item $\alpha\beta = 2 > 1$ — 조건 만족.
+\item $b - a + 1 = 2 - (-10) + 1 = 13 > 0$ — 조건 만족.
+\item 그러나 $a + b + 1 = -10 + 2 + 1 = -7 < 0$ — 결론 \emph{위반}.
+\end{itemize}
+따라서 \textbf{ㄹ은 거짓}.
+\step{7} ㄱ, ㄴ, ㄷ만 참이므로 정답은 $\textbf{④}$이다.
+\solnote{근과 계수의 관계로 \emph{부호 분석}(ㄱ)·\emph{대칭 조건}(ㄴ)·\emph{켤레쌍의 절댓값}(ㄷ)을 정리한 후, ㄹ에서 \emph{반례 발견}으로 검증을 강제한다. 결론이 표면상 합리적으로 보일 때 \emph{음수 $a$ 후보}를 찾아 반례를 만드는 게 핵심 통찰. ㄱ·ㄴ·ㄷ·ㄹ 각각이 \emph{근의 부호·대칭·켤레쌍·반례}라는 서로 다른 도구를 요구하는 비교 문제이다.}
+
+% ─────────────────── 서답 \#7\textendash{}\#8 (v0.2 단답·논술 통합) ───────────────────
+\examsection{서답 \#7\textendash{}\#8 풀 답지}
+
+\soltitle{7}{사차방정식 — $X$ 치환 + 네 근 제곱합의 미정계수 추적}{4}
+\begin{answerbox}\sffamily\bfseries 정답: $72$\end{answerbox}
+\step{1} $X = x^2$로 치환하면 주어진 방정식은 이차방정식
+\[ X^2 - 2kX + (k - 1)(k - 3) = 0 \]
+이 된다.
+\step{2} \textbf{판별식 조건} (두 $X$ 실근).
+\[ \frac{D}{4} = k^2 - (k - 1)(k - 3) = k^2 - (k^2 - 4k + 3) = 4k - 3. \]
+자연수 $k \ge 1$이면 $4k - 3 > 0$이 자동 성립한다.
+\step{3} \textbf{두 $X$ 모두 양수} (네 실근의 필요조건).
+\begin{itemize}\setlength{\itemsep}{0pt}
+\item 합 $X_1 + X_2 = 2k > 0$ — 자명.
+\item 곱 $X_1 X_2 = (k - 1)(k - 3) > 0 \;\Longrightarrow\; k < 1 \text{ 또는 } k > 3$.
+\end{itemize}
+자연수이므로 $k \ge 4$.
+\step{4} \textbf{서로 다른 네 실근.} 두 $X$가 서로 다름은 $D > 0$에서 자동. $X \ne 0$ ($x = 0$ 중복 회피)도 $(k - 1)(k - 3) \ne 0$에서 자동 ($k \ne 1, 3$).
+\step{5} 네 근은 $\pm \sqrt{X_1}$, $\pm \sqrt{X_2}$이다. \emph{네 근의 제곱합}을 $X$의 합으로 환원한다.
+\[ (\sqrt{X_1})^2 + (-\sqrt{X_1})^2 + (\sqrt{X_2})^2 + (-\sqrt{X_2})^2 = 2(X_1 + X_2) = 2 \cdot 2k = 4k. \]
+\step{6} 조건 "네 근 제곱합 $\le 50$"은
+\[ 4k \le 50 \;\Longrightarrow\; k \le 12.5. \]
+\step{7} 자연수 $k$의 가능 범위는 $4 \le k \le 12$, 곧 $k \in \{4, 5, 6, 7, 8, 9, 10, 11, 12\}$.
+\step{8} 이들의 합은
+\[ 4 + 5 + 6 + \cdots + 12 = \frac{(4 + 12) \cdot 9}{2} = 72. \]
+답은 $\textbf{72}$.
+\solnote{$X = x^2$ 치환 후 네 실근 조건은 \emph{$X$ 두 근이 서로 다른 양수}로 환원된다. 네 근의 \emph{제곱합} 조건은 각 $\pm\sqrt{X_i}$의 제곱이 그대로 $X_i$임을 이용해 $2(X_1 + X_2) = 4k$로 단순화되는 게 결정적 절약. \emph{판별식·합·곱·제곱합}의 다중 조건이 \emph{$k$의 자연수 범위 $[4, 12]$로 좁혀지는} 표준 미정계수 추적이다.}
+
+\soltitle{8}{사차방정식 — 두 미정계수 인수분해 + 자연수 쌍 카운팅}{4}
+\begin{answerbox}\sffamily\bfseries 정답: $12$\end{answerbox}
+\step{1} $X = x^2$로 치환하면 주어진 방정식은
+\[ X^2 - (a + b)X + ab = (X - a)(X - b) = 0 \]
+이 된다. 곧 $X = a$ 또는 $X = b$.
+\step{2} $x^2 = a$, $x^2 = b$의 해는 각각 $\pm \sqrt{a}$, $\pm \sqrt{b}$이다.
+\step{3} 네 근이 모두 \emph{정수}이려면 $\sqrt{a}$와 $\sqrt{b}$가 모두 자연수여야 한다. 즉 $a$와 $b$가 \emph{완전제곱수}여야 하므로
+\[ a = p^2, \qquad b = q^2 \qquad (p,\, q \text{ 자연수}). \]
+\step{4} \emph{서로 다른} 네 정수근 조건은 $\sqrt{a} \ne \sqrt{b}$, 곧 $p \ne q$. 또 $a < b$이고 둘 다 양수이므로 $p < q$.
+\step{5} 추가 조건 $ab \le 100$을 $p$, $q$ 언어로 옮기면
+\[ ab = p^2 q^2 = (pq)^2 \le 100 \;\Longrightarrow\; pq \le 10. \]
+\step{6} $p < q$인 자연수 순서쌍 중 $pq \le 10$인 경우를 \emph{$p$의 값으로 분기}하여 센다.
+\begin{itemize}\setlength{\itemsep}{0pt}
+\item \textbf{$p = 1$}: $q \ge 2$, $q \le 10$. $q \in \{2, 3, 4, 5, 6, 7, 8, 9, 10\}$ — \emph{$9$개}.
+\item \textbf{$p = 2$}: $q \ge 3$, $2q \le 10$, 곧 $q \le 5$. $q \in \{3, 4, 5\}$ — \emph{$3$개}.
+\item \textbf{$p = 3$}: $q \ge 4$, $3q \le 10$, 곧 $q \le 3.33$. \emph{모순} (해 없음) — $0$개.
+\item \textbf{$p \ge 4$}: $q > p \ge 4$이라 $pq \ge 4 \cdot 5 = 20 > 10$. 모순 — $0$개.
+\end{itemize}
+\step{7} 따라서 순서쌍 $(a, b) = (p^2, q^2)$의 개수는
+\[ 9 + 3 = 12. \]
+답은 $\textbf{12}$.
+\solnote{$X = x^2$ 치환 후 좌변이 \emph{$ab$를 곱으로, $a+b$를 합으로} 하는 표준 인수분해 $(X-a)(X-b)$임을 곧장 발견하는 게 절약 도구. 네 정수근 조건은 \emph{$a$, $b$ 모두 완전제곱수}로 환원되어 자연수 쌍 $(p, q)$ 카운팅 문제로 변환된다. $p$ 값에 따라 \emph{$q$의 범위가 달라지는 분기 구조}가 핵심 미정계수 분석으로, 가장 작은 변수($p$)를 먼저 고정하면 \emph{$q$의 가능 범위가 자연 종료}되어 효율적이다.}
+
+\end{document}

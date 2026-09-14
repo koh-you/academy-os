@@ -1,0 +1,334 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{mathbook-layout}[2026/05/29 v5 Page layout]
+
+% === Graphics search paths ===
+% .tex는 output/<단원>/ 에서 빌드되므로 프로젝트 루트로 두 단계 위로 이동
+\graphicspath{{../../}{./}}
+
+% === B5 Paper ===
+% 상단 파란줄(본문 \stepbanner 마지막 줄)과 하단 파란줄(footer)의 페이지 가장자리 여백을 거의 동일하게 맞춤
+% 상하좌우 여백 축소: top 18→12mm, bottom 28→24mm, left/right 18→13mm
+\geometry{
+  b5paper,
+  top=12mm,
+  bottom=24mm,
+  left=13mm,
+  right=13mm,
+  headheight=14pt,
+  headsep=6pt,
+  footskip=28pt
+}
+
+% === Line spacing ===
+\RequirePackage{setspace}
+\setstretch{1.15}
+
+% === Problem column height ===
+% [t] 내부 정렬 minipage에서는 trailing glue가 strip되므로,
+% column 내부 \vfill 신축 공간(g)과 minipage 외부 body_empty가
+% 거의 같아지도록 probcolheight 설정.
+% 16.8cm → g ≈ 2.6cm (inter-prob 풀이공간), body_empty ≈ 3.7cm (마지막 문제 아래).
+% strut/choices 간격 증가 이후 콘텐츠가 cell을 더 차지 → bottom을 의도적으로 +0.7cm 확보.
+\newlength{\probcolheight}
+\setlength{\probcolheight}{16.8cm}
+
+% === Problem column width ===
+% 좌/우 minipage 너비. 두 컬럼 합 < \textwidth로 두면 \hfill 분배로 가운데 간격이 생김.
+% 0.45 → 가운데 간격 0.10·\textwidth (≈ 15mm)
+\newlength{\probcolwidth}
+\setlength{\probcolwidth}{0.45\textwidth}
+
+% === 컬럼 내부 가변 간격 (vfill 가중치) ===
+% \vfill = \vskip 0pt plus 1fill. 같은 차수(fill)에서 가중치로 분배 비율 조정.
+% 사용 패턴 (열당 3문제):
+%   cell1 \vfill cell2 \vfill cell3 \probendvfill
+% \vfill(1fill) + \vfill(1fill) + \probendvfill(0.7fill) = 2.7fill 합산.
+% → 마지막 문제 길이가 다양해도(2~3줄 평균) gap2(p2↔p3)와 gap3(p3↔하단 파란줄)이
+%   균형을 이루도록 조정. (마지막 cell 잔여가 작아지는 효과를 g3 신축이 보완)
+% 컬럼 minipage가 [s] 내부 정렬을 사용하면 \vfill들이 자연스럽게 stretch.
+% \probendvfill = 마지막 cellab 이후의 분배용 glue (가중치 0.7로 살짝 작게)
+\newcommand{\probendvfill}{\vskip 0pt plus 0.7fill\relax}
+
+% === Default header/footer (chapter intro / concept pages) ===
+% 본문 STEP 페이지와 동일한 footer 디자인 (컬러 라인 + 가운데 페이지 번호 + 우측 로고)
+% 컬러는 개념 페이지 톤에 맞춘 conceptcolor 사용
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[C]{%
+  \textcolor{conceptcolor}{\rule{\textwidth}{1.2pt}}\\[3pt]%
+  \makebox[0.3\textwidth][l]{\strut}%
+  \makebox[0.4\textwidth][c]{\small\textsf{\bfseries\color{conceptcolor}\thepage}}%
+  \makebox[0.3\textwidth][r]{\raisebox{-4pt}{\includegraphics[height=22pt]{logo/학원로고 (깊이와통찰)}}}%
+}
+
+% === STEP 페이지 컬러 상태 ===
+\providecommand{\currentstepcolor}{step1color}
+
+% STEP 페이지 footer 블록: 컬러 라인 + 가운데 페이지 번호 + 우측 로고
+\newcommand{\stepfooterblock}{%
+  \textcolor{\currentstepcolor}{\rule{\textwidth}{1.2pt}}\\[3pt]%
+  \makebox[0.3\textwidth][l]{\strut}%
+  \makebox[0.4\textwidth][c]{\small\textsf{\bfseries\color{\currentstepcolor}\thepage}}%
+  \makebox[0.3\textwidth][r]{\raisebox{-4pt}{\includegraphics[height=22pt]{logo/학원로고 (깊이와통찰)}}}%
+}
+
+% STEP 페이지 공통 스타일 (상단 라인은 본문 매크로가 담당)
+\fancypagestyle{steppage}{%
+  \fancyhf{}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \fancyfoot[C]{\stepfooterblock}%
+}
+
+% === Section Formatting ===
+\titleformat{\section}
+  {\normalfont\LARGE\bfseries\sffamily\color{mbmain}}
+  {\thesection}{1em}{}
+\titlespacing*{\section}{0pt}{20pt}{12pt}
+
+\titleformat{\subsection}
+  {\normalfont\Large\bfseries\sffamily\color{mbmain}}
+  {\thesubsection}{0.8em}{}
+\titlespacing*{\subsection}{0pt}{16pt}{8pt}
+
+% === Chapter Intro Page ===
+\newcommand{\chapterintro}[4]{%
+  % #1: 대단원 로마숫자, #2: 대단원명, #3: unused, #4: 중단원 목록 (\\로 줄바꿈)
+  \clearpage
+  \pagestyle{fancy}% 이전 STEP 스타일에서 리셋
+  \thispagestyle{empty}
+  % === 배경: 사선 분할 + 영역별 vertical shading + 수학 수식 워터마크 ===
+  \begin{tikzpicture}[overlay, remember picture]
+    % 상단 우측 삼각형: 옅은 그레이톤 → 더 깊은 보라 (강한 수직 그라데이션)
+    \shade[top color=gray!10, bottom color=mbmain!32]
+      (current page.north west) --
+      (current page.north east) --
+      (current page.south east) -- cycle;
+    % 하단 좌측 삼각형: 옅은 보라 → 진한 보라 (강한 수직 그라데이션)
+    \shade[top color=mblighttint, bottom color=mbmain!55]
+      (current page.north west) --
+      (current page.south east) --
+      (current page.south west) -- cycle;
+    % 사선을 따라 부드러운 흰색 하이라이트 (접힘 효과)
+    \draw[line width=0.6pt, white, opacity=0.45]
+      (current page.north west) -- (current page.south east);
+    %
+    % --- 수학 수식 워터마크 (30° 기울기, 페이지 전체에 분산 배치) ---
+    % 상단 (y=1~3cm)
+    \node[font=\fontsize{26}{26}\selectfont, mbmain, opacity=0.10, rotate=30]
+      at ($(current page.north west)+(4cm,-2cm)$)
+      {$\displaystyle\int f(x)\,dx = F(x) + C$};
+    \node[font=\fontsize{20}{20}\selectfont, mbmain, opacity=0.12, rotate=30]
+      at ($(current page.north west)+(9.5cm,-2cm)$)
+      {$a^{2}+b^{2}=c^{2}$};
+    \node[font=\fontsize{17}{17}\selectfont, mbmain, opacity=0.13, rotate=30]
+      at ($(current page.north west)+(14cm,-2cm)$)
+      {$\sin^{2}\theta + \cos^{2}\theta = 1$};
+    % 상단 전환 영역 (y=3~5cm)
+    \node[font=\fontsize{14}{14}\selectfont, mbmain, opacity=0.14, rotate=30]
+      at ($(current page.north west)+(2cm,-3.5cm)$)
+      {$|z| = \sqrt{x^{2}+y^{2}}$};
+    \node[font=\fontsize{13}{13}\selectfont, mbmain, opacity=0.15, rotate=30]
+      at ($(current page.north west)+(8cm,-3.8cm)$)
+      {$\cos(A-B) = \cos A\cos B + \sin A\sin B$};
+    % 제목 박스 가장자리 / 일부 박스 뒤로 깔림 (y=5~9cm)
+    \node[font=\fontsize{15}{15}\selectfont, mbmain, opacity=0.13, rotate=30]
+      at ($(current page.north west)+(1cm,-5.5cm)$)
+      {$A = \pi r^{2}$};
+    \node[font=\fontsize{16}{16}\selectfont, mbmain, opacity=0.13, rotate=30]
+      at ($(current page.north west)+(16cm,-5.5cm)$)
+      {$E = mc^{2}$};
+    \node[font=\fontsize{15}{15}\selectfont, mbmain, opacity=0.13, rotate=30]
+      at ($(current page.north west)+(4cm,-8cm)$)
+      {$e^{x} = 1 + x + \tfrac{x^{2}}{2!} + \tfrac{x^{3}}{3!} + \cdots$};
+    \node[font=\fontsize{15}{15}\selectfont, mbmain, opacity=0.14, rotate=30]
+      at ($(current page.north west)+(12cm,-8cm)$)
+      {$\int \sin x\,dx = -\cos x + C$};
+    \node[font=\fontsize{13}{13}\selectfont, mbmain, opacity=0.15, rotate=30]
+      at ($(current page.north west)+(15.5cm,-9.5cm)$)
+      {$\displaystyle\binom{n}{k} = \frac{n!}{k!(n-k)!}$};
+    % 부제목 아래 (y=12~14cm)
+    \node[font=\fontsize{28}{28}\selectfont, mbmain, opacity=0.10, rotate=30]
+      at ($(current page.north west)+(3.5cm,-12.5cm)$)
+      {$\displaystyle\sum_{k=1}^{n} k = \frac{n(n+1)}{2}$};
+    \node[font=\fontsize{20}{20}\selectfont, mbmain, opacity=0.12, rotate=30]
+      at ($(current page.north west)+(12.5cm,-12.5cm)$)
+      {$\displaystyle\lim_{n\to\infty}\!\!\left(1+\tfrac{1}{n}\right)^{\!n}\!\!= e$};
+    % 중간 (y=14~17cm)
+    \node[font=\fontsize{16}{16}\selectfont, mbmain, opacity=0.13, rotate=30]
+      at ($(current page.north west)+(1.5cm,-14cm)$)
+      {$\log_{a}(xy) = \log_{a}x + \log_{a}y$};
+    \node[font=\fontsize{15}{15}\selectfont, mbmain, opacity=0.14, rotate=30]
+      at ($(current page.north west)+(14cm,-14cm)$)
+      {$\det\!\begin{pmatrix}a&b\\c&d\end{pmatrix}\! = ad-bc$};
+    \node[font=\fontsize{20}{20}\selectfont, mbmain, opacity=0.12, rotate=30]
+      at ($(current page.north west)+(3cm,-15.5cm)$)
+      {$\dfrac{d}{dx}\bigl[f(x)\bigr] = f'(x)$};
+    \node[font=\fontsize{15}{15}\selectfont, mbmain, opacity=0.13, rotate=30]
+      at ($(current page.north west)+(11cm,-15.5cm)$)
+      {$c^{2} = a^{2}+b^{2}-2ab\cos C$};
+    \node[font=\fontsize{15}{15}\selectfont, mbmain, opacity=0.13, rotate=30]
+      at ($(current page.north west)+(2cm,-17cm)$)
+      {$\displaystyle f'(x) = \lim_{h\to 0}\frac{f(x+h)-f(x)}{h}$};
+    \node[font=\fontsize{14}{14}\selectfont, mbmain, opacity=0.14, rotate=30]
+      at ($(current page.north west)+(13cm,-17cm)$)
+      {$\tan\theta = \dfrac{\sin\theta}{\cos\theta}$};
+    % 중하단 (y=18~20cm)
+    \node[font=\fontsize{16}{16}\selectfont, mbmain, opacity=0.13, rotate=30]
+      at ($(current page.north west)+(2cm,-18.5cm)$)
+      {$\varphi = \dfrac{1+\sqrt{5}}{2}$};
+    \node[font=\fontsize{14}{14}\selectfont, mbmain, opacity=0.14, rotate=30]
+      at ($(current page.north west)+(8cm,-18.5cm)$)
+      {$\sin(A+B) = \sin A\cos B + \cos A\sin B$};
+    \node[font=\fontsize{14}{14}\selectfont, mbmain, opacity=0.14, rotate=30]
+      at ($(current page.north west)+(14cm,-18.5cm)$)
+      {$\cos 2\theta = \cos^{2}\theta - \sin^{2}\theta$};
+    \node[font=\fontsize{14}{14}\selectfont, mbmain, opacity=0.14, rotate=30]
+      at ($(current page.north west)+(2.5cm,-20.5cm)$)
+      {$\sin 2\theta = 2\sin\theta\cos\theta$};
+    \node[font=\fontsize{15}{15}\selectfont, mbmain, opacity=0.13, rotate=30]
+      at ($(current page.north west)+(11cm,-20.5cm)$)
+      {$1 + \tan^{2}\theta = \sec^{2}\theta$};
+    % 하단 (y=21~23cm)
+    \node[font=\fontsize{22}{22}\selectfont, mbmain, opacity=0.11, rotate=30]
+      at ($(current page.north west)+(3cm,-22cm)$)
+      {$x = \dfrac{-b \pm \sqrt{b^{2}-4ac}}{2a}$};
+    \node[font=\fontsize{14}{14}\selectfont, mbmain, opacity=0.14, rotate=30]
+      at ($(current page.north west)+(12cm,-22cm)$)
+      {$(a+b)^{2} = a^{2}+2ab+b^{2}$};
+    % 최하단 (y=23~25cm)
+    \node[font=\fontsize{13}{13}\selectfont, mbmain, opacity=0.15, rotate=30]
+      at ($(current page.north west)+(2cm,-23.5cm)$)
+      {$\int e^{x}\,dx = e^{x} + C$};
+    \node[font=\fontsize{15}{15}\selectfont, mbmain, opacity=0.14, rotate=30]
+      at ($(current page.north west)+(9cm,-23.5cm)$)
+      {$\displaystyle\sum_{k=1}^{\infty} \frac{1}{k^{2}} = \frac{\pi^{2}}{6}$};
+    \node[font=\fontsize{18}{18}\selectfont, mbmain, opacity=0.13, rotate=30]
+      at ($(current page.north west)+(6cm,-24.5cm)$)
+      {$e^{i\pi} + 1 = 0$};
+    %
+    % --- 그래프 / 도형 (30° 기울기) ---
+    % 우측 상단 — 포물선 y=x²
+    \begin{scope}[shift={($(current page.north east)+(-2cm,-5cm)$)}, rotate=30, scale=0.8]
+      \draw[mbmain, opacity=0.15, line width=0.3pt, -latex]
+        (-1.3,0) -- (1.3,0);
+      \draw[mbmain, opacity=0.15, line width=0.3pt, -latex]
+        (0,-0.3) -- (0,1.8);
+      \draw[mbmain, opacity=0.22, line width=0.7pt]
+        plot[domain=-1.15:1.15, smooth, samples=25] (\x, {\x*\x});
+    \end{scope}
+    % 우측 중하단 — 단위원
+    \begin{scope}[shift={($(current page.south east)+(-2.5cm,4.5cm)$)}, rotate=30, scale=0.85]
+      \draw[mbmain, opacity=0.16, line width=0.4pt] (0,0) circle (1cm);
+      \draw[mbmain, opacity=0.13, line width=0.3pt, -latex]
+        (-1.3,0) -- (1.3,0);
+      \draw[mbmain, opacity=0.13, line width=0.3pt, -latex]
+        (0,-1.3) -- (0,1.3);
+      \draw[mbmain, opacity=0.22, line width=0.5pt] (0,0) -- (45:1cm);
+      \draw[mbmain, opacity=0.20, line width=0.3pt] (0.3,0) arc (0:45:0.3cm);
+    \end{scope}
+    % 좌측 중간 — 사인 곡선 한 주기
+    \begin{scope}[shift={($(current page.south west)+(2cm,11cm)$)}, rotate=30, scale=0.75]
+      \draw[mbmain, opacity=0.12, line width=0.25pt]
+        (-0.2,0) -- (3,0);
+      \draw[mbmain, opacity=0.18, line width=0.5pt]
+        plot[domain=0:6.28, smooth, samples=40] (\x*0.4, {0.5*sin(\x r)});
+    \end{scope}
+  \end{tikzpicture}%
+  \vspace*{4cm}
+  \begin{center}
+    \begin{tcolorbox}[
+      enhanced,
+      colback=mbmain,
+      colframe=mbmain,
+      interior style={%
+        top color=mbmain!72,
+        middle color=mbmain,
+        bottom color=mbmain!70!black,
+      },
+      boxrule=0pt,
+      arc=18pt,
+      width=0.85\textwidth,
+      halign=center,
+      top=38pt, bottom=33pt,
+      left=20pt, right=20pt,
+      drop fuzzy shadow={black!55!mbmain},
+    ]
+      {\fontsize{34}{42}\selectfont\bfseries\sffamily\color{white}#1.\;\;#2}
+    \end{tcolorbox}
+    \vspace{32pt}
+    {\fontsize{16}{24}\selectfont\sffamily\color{mbdarkgray}#4}
+  \end{center}
+  \clearpage
+}
+
+% === STEP Banner (첫페이지: 배너 텍스트 + 컬러 라인) ===
+\newcommand{\stepbanner}[3]{%
+  % #1: STEP number, #2: subtitle, #3: color
+  \noindent
+  {\fontsize{18}{18}\selectfont\bfseries\sffamily\color{#3}STEP\,}%
+  {\fontsize{22}{22}\selectfont\bfseries\sffamily\color{#3}#1\;}%
+  {\sffamily #2\;\;}%
+  \tikz[baseline=-1pt]{\node[fill=#3, text=white, rounded corners=2pt,
+    inner xsep=6pt, inner ysep=2pt, font=\footnotesize\bfseries\sffamily]{%
+    \ifnum#1=1 핵심 유형\fi
+    \ifnum#1=2 심화 유형\fi
+    \ifnum#1=3 최고난도\fi
+  };}%
+  \par\vspace{1pt}
+  \noindent\textcolor{#3}{\rule{\textwidth}{1.2pt}}
+  \par\vspace*{2pt}%
+}
+
+% === STEP 연속 페이지 헤더 (배너 텍스트 자리 비우고 라인만) ===
+% \stepbanner의 라인 Y위치와 일치하도록 동일한 수직 여백을 확보
+\newcommand{\stepcontheader}{%
+  \noindent\rule{0pt}{22pt}% 배너 텍스트 높이(22pt 폰트)에 해당하는 invisible strut
+  \par\vspace{1pt}%
+  \noindent\textcolor{\currentstepcolor}{\rule{\textwidth}{1.2pt}}%
+  \par\vspace*{2pt}%
+}
+
+\newcommand{\stepone}{%
+  \renewcommand{\currentstepcolor}{step1color}%
+  \pagestyle{steppage}%
+  \stepbanner{1}{교과서를 정복하는}{step1color}%
+}
+\newcommand{\steptwo}{%
+  \renewcommand{\currentstepcolor}{step2color}%
+  \pagestyle{steppage}%
+  \stepbanner{2}{내신 실전문제를 위한}{step2color}%
+}
+\newcommand{\stepthree}{%
+  \renewcommand{\currentstepcolor}{step3color}%
+  \pagestyle{steppage}%
+  \stepbanner{3}{최상위권을 위한}{step3color}%
+}
+
+% === Concept Page Banner (개념 페이지 상단 — STEP 배너와 동일 구조) ===
+\newcommand{\conceptbanner}{%
+  \noindent
+  {\fontsize{22}{22}\selectfont\bfseries\sffamily\color{conceptcolor}개념 정리}%
+  \par\vspace{1pt}
+  \noindent\textcolor{conceptcolor}{\rule{\textwidth}{1.2pt}}
+  \par\vspace*{1cm}%
+}
+
+% === Concept Review Header ===
+\newcommand{\conceptheader}[1]{%
+  \vspace{8pt}
+  \noindent
+  \begin{tcolorbox}[
+    colback=conceptbg,
+    colframe=conceptcolor,
+    boxrule=0pt,
+    leftrule=4pt,
+    arc=0pt,
+    left=10pt, right=10pt, top=6pt, bottom=6pt
+  ]
+    {\large\bfseries\sffamily\color{conceptcolor}개념 정리\quad}{\large\sffamily #1}
+  \end{tcolorbox}
+  \vspace{4pt}
+}
+
+\endinput

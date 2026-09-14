@@ -1,0 +1,533 @@
+# CM2-GM-02 직선의 방정식 청사진 v6.1 (2026-07-20 · Phase 1 신규)
+# 통합 문제출제 시스템 v1.0 · schema.md v3.0 · Gate 5.0 대상
+# CM2-GM-01 평면좌표 v2.0 골든 계승 · 정독 파일 8종 확대
+
+series_type: jeongribyeon
+series_name: DeeP Math 정리편
+book_title: 공통수학2 정리편 · CM2-GM-02 직선의 방정식
+unit_code: CM2-GM
+target_audience: 상위권
+version: v1.0
+established: 2026-07-20
+
+jeongribyeon_meta:
+  page_count_est: 19
+  개념_count: 3
+  대표예제_count: 6
+  확인_count: 12
+  Level1_count: 12
+  Level2_count: 12
+  Level3_count: 3
+  실전_count: 3
+  total_problem_slots: 48
+
+# ── 정독 원본 은행 8종 (마스터 지시 · 정독 파일 전체) ─
+source_banks:
+  - bank/mechanism-데이터-개념원리-CM2-GM-직선.md              # 105 항목 · star 3~5
+  - bank/mechanism-데이터-RPM-CM2-GM-직선.md                    # 102 항목 · star 1~5
+  - bank/mechanism-데이터-고쟁이-CM2-CH02-직선-STEP1.md         # 19 항목 · star 3~4
+  - bank/mechanism-데이터-고쟁이-CH02-직선.md                    # STEP2 40 + STEP3 10 · star 5·premium
+  - bank/mechanism-데이터-전국연합-CM2-GM.md                    # 52 항목 · 학평 star_5·premium (직선 파트 12문)
+  - bank/mechanism-데이터-ebs-올림포스-CM2.md                   # CH06 유형 06~11·1등급 · ~30 항목
+  - bank/mechanism-데이터-블랙라벨-CM2-STEP2.md                 # 직선 파트 star_5
+  - bank/mechanism-데이터-블랙라벨-CM2-STEP3.md                 # 직선 파트 star_premium
+
+# ══════════════════════════════════════════════════════════════
+# §1. 개념 슬롯 (3개 · 원본 pick 아님 · 2022 개정 표준 용어)
+# ══════════════════════════════════════════════════════════════
+concept_slots:
+  - slot_id: C1
+    slot_type: 개념
+    sub_section: 직선의 방정식
+    page_placement: {page_num: 1, layout: dmconcept_full}
+    contents:
+      - dmsub 1: 한 점과 기울기가 주어진 직선 (y-y1=m(x-x1))
+      - dmsub 2: 두 점을 지나는 직선 (기울기 (y2-y1)/(x2-x1))
+      - dmsub 3: x·y 절편이 주어진 직선 (절편형 x/a+y/b=1) · 좌표축에 평행한 직선
+      - dmsub 4: 세 점이 한 직선 위에 있을 조건 (기울기 등식 or 공선 조건)
+    signature: {defBox: true, primary_axis: 직선 방정식}
+
+  - slot_id: C2
+    slot_type: 개념
+    sub_section: 두 직선의 위치 관계
+    page_placement: {page_num: 4, layout: dmconcept_full}
+    contents:
+      - dmsub 1: 두 직선의 평행·수직·일치 조건 (기울기 · 일반형 aa'+bb'=0)
+      - dmsub 2: 두 직선의 교점을 지나는 직선 (l1 + k·l2 = 0 꼴)
+      - dmsub 3: 선분의 수직이등분선 (중점 통과 · 수직 기울기)
+      - dmsub 4: 세 직선이 삼각형을 이루지 않을 조건 (두 직선 평행 or 세 직선 공점)
+    signature: {defBox: true, primary_axis: 위치관계}
+
+  - slot_id: C3
+    slot_type: 개념
+    sub_section: 정점을 지나는 직선 · 점과 직선 사이의 거리
+    page_placement: {page_num: 7, layout: dmconcept_full}
+    contents:
+      - dmsub 1: 정점을 지나는 직선 (매개변수 k에 대한 항등식 · 두 방정식 연립)
+      - dmsub 2: 점과 직선 사이의 거리 공식 (|ax1+by1+c|/√(a²+b²))
+      - dmsub 3: 평행한 두 직선 사이의 거리
+      - dmsub 4: 좌표를 이용한 삼각형의 넓이 ((1/2)·밑변·높이 · 특강 원점 삼각형 공식)
+    signature: {defBox: true, primary_axis: 거리}
+
+# ══════════════════════════════════════════════════════════════
+# §2. 대표예제 슬롯 (6개 · 개념당 2문 · 풀이 포함 · star 3·4)
+# ══════════════════════════════════════════════════════════════
+representative_slots:
+  - slot_id: E1a
+    slot_type: 대표예제
+    parent_concept: C1
+    target_star: 3
+    composite_range: [13, 19]
+    source: {source_id: 개념원리-CM2-GM-직선-예제-02, tier: star_3, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 내분점 좌표 · 두 점 지나는 직선, secondary: [내분점 공식 · 두 점 직선 공식], insight_type: 절차형, depth: 1}
+    structure: {constraint_count: 2, unknowns_count: 0, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      두 점 A(7,-3), B(2,-8)을 이은 선분 AB를 3:2로 내분하는 점과 점 (5,2)를 지나는 직선의 방정식.
+    answer: "y=8x-38"   # 세션 55 최종 확정 · 내분점 (4,-6) · (5,2)와 직선 기울기 8·y=8x-38 (본편 대응)
+    variation_status: modified
+    page_placement: {page_num: 2, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 직선 방정식, layout_hint: dmex+problem+approach+solution}
+
+  - slot_id: E1b
+    slot_type: 대표예제
+    parent_concept: C1
+    target_star: 4
+    composite_range: [20, 26]
+    source: {source_id: 개념원리-CM2-GM-직선-예제-05, tier: star_3, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 꼭짓점 통과 넓이 이등분 직선 · 대변 중점, secondary: [삼각형 넓이 이등분 = 중선], insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 2, unknowns_count: 0, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      세 점 A(-2,4), B(-1,2), C(3,4)를 꼭짓점으로 하는 삼각형 ABC. 점 A를 지나고
+      삼각형 ABC의 넓이를 이등분하는 직선의 방정식.
+    answer: "y=-x/3+10/3"   # BC 중점 M(1,3) · A(-2,4)와 M(1,3) 기울기 -1/3 · y=-x/3+10/3 (본편 대응)
+    variation_status: modified
+    page_placement: {page_num: 3, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 직선 방정식, layout_hint: dmex+problem+approach+solution}
+
+  - slot_id: E2a
+    slot_type: 대표예제
+    parent_concept: C2
+    target_star: 3
+    composite_range: [13, 19]
+    source: {source_id: 개념원리-CM2-GM-직선-예제-12, tier: star_3, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 수직이등분선 · 중점 통과 · 수직 기울기, insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 2, unknowns_count: 2, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      두 점 A(-1,3), B(3,-5)를 이은 선분 AB의 수직이등분선의 방정식이 x+ay+b=0일 때,
+      상수 a, b에 대하여 ab의 값.
+    answer: "ab=6"   # 세션 55 최종 확정 · 중점 (1,-1) · AB 기울기 -2 · 수직 기울기 1/2 · x-2y-3=0 → a=-2, b=-3, ab=6 (본편 대응)
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 5, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 위치관계}
+
+  - slot_id: E2b
+    slot_type: 대표예제
+    parent_concept: C2
+    target_star: 4
+    composite_range: [20, 26]
+    source: {source_id: 개념원리-CM2-GM-직선-예제-13, tier: star_4, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 세 직선 삼각형 미형성 (두 평행 or 공점), insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 3, unknowns_count: 1, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      세 직선 x-y=0, x+y=2, 5x-ky=15가 삼각형을 이루지 않도록 하는 상수 k의 값을 모두 구하기.
+    answer: "k=5, k=-5, k=-10"   # 세션 55 최종 · 두 직선 평행 case: k=5, k=-5 · 세 직선 공점 case (x=1,y=1): 5-k=15 → k=-10 (본편 대응)
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 6, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 위치관계}
+
+  - slot_id: E3a
+    slot_type: 대표예제
+    parent_concept: C3
+    target_star: 3
+    composite_range: [13, 19]
+    source: {source_id: 개념원리-CM2-GM-직선-예제-14, tier: star_3, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 점과 직선 거리 공식 · 절댓값 방정식 · 두 근 합, insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 1, unknowns_count: 1, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      점 (2,3)과 직선 y=(3/4)x+k/2 사이의 거리가 2일 때, 모든 상수 k의 값의 합.
+    answer: "k합=6"   # 세션 55 최종 · 일반형 3x-4y+2k=0 · |2k-6|/5=2 → k=8, k=-2 → 합=6 (본편 대응)
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 8, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 거리}
+
+  - slot_id: E3b
+    slot_type: 대표예제
+    parent_concept: C3
+    target_star: 4
+    composite_range: [20, 26]
+    source: {source_id: 개념원리-CM2-GM-직선-예제-16, tier: star_3, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 삼각형 넓이 = (1/2)·BC·h · 점-직선 거리 활용, insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 1, unknowns_count: 0, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      세 점 A(2,5), B(-3,2), C(1,-4)를 꼭짓점으로 하는 삼각형 ABC의 넓이.
+    answer: "S=21"   # 세션 55 최종 · BC=2√13 · BC 직선 3x+2y+5=0 · A(2,5) 거리 21/√13 · S=(1/2)·2√13·21/√13=21 (본편 대응)
+    variation_status: modified
+    page_placement: {page_num: 9, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 거리}
+
+# ══════════════════════════════════════════════════════════════
+# §3. 확인 슬롯 (12개 · 대표예제 페이지 하단 · 발문만 · star 3·4)
+# ══════════════════════════════════════════════════════════════
+check_slots:
+  # 페이지 2 (E1a 뒤 · 직선 방정식 기본)
+  - slot_id: CHK1
+    slot_type: 확인
+    parent_representative: E1a
+    target_star: 3
+    source: {source_id: RPM-CM2-GM-직선-#0106, tier: star_3, variation_type: number_only}
+    variation_status: modified
+    problem_summary: |
+      직선 y=(m-2)x-n-1이 점 (2,-1)을 지나고 x축의 양의 방향과 이루는 각의 크기가 45°일 때 m+n.
+    answer: "m+n=5"   # 최소 변형 · 원본 유지 (자체 검증 · m=3, n=2)
+    page_placement: {page_num: 2, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK2
+    slot_type: 확인
+    parent_representative: E1a
+    target_star: 3
+    source: {source_id: 고쟁이-CM2-CH02-STEP1-#055, tier: star_3, variation_type: number_only}
+    variation_status: modified
+    problem_summary: |
+      세 점 A(-1,3), B(5,0), C(-3,-2)에 대해 선분 AB를 2:1로 내분하는 점 P, BC 중점 Q.
+      두 점 P, Q를 지나는 직선의 x절편.
+    answer: "x절편=2"   # 세션 55 최종 · P(3,1) · Q(1,-1) · 직선 y=x-2 · x절편 2 (본편 대응)
+    page_placement: {page_num: 2, layout: dmchecktitle+dmcheck}
+
+  # 페이지 3 (E1b 뒤 · 넓이 이등분)
+  - slot_id: CHK3
+    slot_type: 확인
+    parent_representative: E1b
+    target_star: 3
+    source: {source_id: RPM-CM2-GM-직선-#0115, tier: star_3, variation_type: number_only}
+    variation_status: modified
+    problem_summary: |
+      A(3,3), B(5,-5), C(-1,1)이 꼭짓점 삼각형 ABC의 넓이를 점 A를 지나는 직선 y=ax+b가
+      이등분할 때 a+b.
+    answer: "a+b=-7"   # BC 중점 (2,-2) · A(3,3)와 (2,-2) 지나는 y=5x-12·a=5, b=-12·a+b=-7 (자체 검증)
+    page_placement: {page_num: 3, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK4
+    slot_type: 확인
+    parent_representative: E1b
+    target_star: 4
+    source: {source_id: 개념원리-CM2-GM-직선-유제-69, tier: star_4, variation_type: number_only}
+    variation_status: modified
+    problem_summary: |
+      점 (6,-4)를 지나는 직선의 x절편이 y절편의 2배일 때, 이 직선의 방정식. (단, y절편 ≠ 0)
+    answer: "y=-x/2-1"   # x/(2b)+y/b=1 · (6,-4) 대입: 3/b - 4/b = 1 → -1/b=1 → b=-1 · x절편 -2 · 직선 x/(-2)+y/(-1)=1 → x+2y+2=0 → y=-x/2-1 (자체 검증)
+    page_placement: {page_num: 3, layout: dmchecktitle+dmcheck}
+
+  # 페이지 5 (E2a 뒤 · 수직·평행)
+  - slot_id: CHK5
+    slot_type: 확인
+    parent_representative: E2a
+    target_star: 3
+    source: {source_id: 고쟁이-CM2-CH02-STEP1-#062, tier: star_3, variation_type: number_only}
+    variation_status: modified
+    problem_summary: |
+      점 (2,1)을 지나고 직선 3x-y+2=0과 수직인 직선의 y절편.
+    answer: "y절편=5/3"   # 수직 기울기 -1/3 · y-1=-(1/3)(x-2) → y=-x/3+5/3 · y절편 5/3 (자체 검증)
+    page_placement: {page_num: 5, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK6
+    slot_type: 확인
+    parent_representative: E2a
+    target_star: 3
+    source: {source_id: 고쟁이-CM2-CH02-STEP1-#065, tier: star_3, variation_type: number_only}
+    variation_status: modified
+    problem_summary: |
+      두 점 A(-1,1), B(3,3)에 대해 선분 AB의 수직이등분선의 방정식.
+    answer: "y=-2x+4"   # 세션 55 최종 · 중점 (1,2) · AB 기울기 1/2 · 수직 기울기 -2 · y-2=-2(x-1) → y=-2x+4 (본편 대응)
+    page_placement: {page_num: 5, layout: dmchecktitle+dmcheck}
+
+  # 페이지 6 (E2b 뒤 · 세 직선)
+  - slot_id: CHK7
+    slot_type: 확인
+    parent_representative: E2b
+    target_star: 4
+    source: {source_id: 개념원리-CM2-GM-직선-유제-108, tier: star_4, variation_type: number_only}
+    variation_status: modified
+    problem_summary: |
+      세 직선 2x+y+1=0, x-y+2=0, ax-y=0이 삼각형을 이루지 않도록 하는 모든 상수 a의 값의 합.
+    answer: "a합=-2"   # 세션 55 최종 · 두 평행 case: a=-2, a=1 · 공점 case (-1,1): a=-1 → 합 -2+1-1=-2 (본편 대응)
+    page_placement: {page_num: 6, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK8
+    slot_type: 확인
+    parent_representative: E2b
+    target_star: 4
+    source: {source_id: RPM-CM2-GM-직선-#0142, tier: star_4, variation_type: number_only}
+    variation_status: modified
+    problem_summary: |
+      세 직선 x+2y-6=0, 4x-3y-12=0, ax+y-1=0으로 둘러싸인 삼각형이 직각삼각형이 되도록
+      하는 모든 상수 a의 값의 합.
+    answer: "a합=-5/4"   # (i) 첫째⊥셋째: 1·a+2·1=0 → a=-2. (ii) 둘째⊥셋째: 4a-3=0 → a=3/4. 합 -2+3/4=-5/4 (자체 검증)
+    page_placement: {page_num: 6, layout: dmchecktitle+dmcheck}
+
+  # 페이지 8 (E3a 뒤 · 점-직선 거리)
+  - slot_id: CHK9
+    slot_type: 확인
+    parent_representative: E3a
+    target_star: 3
+    source: {source_id: RPM-CM2-GM-직선-#0148, tier: star_3, variation_type: number_only}
+    variation_status: modified
+    problem_summary: |
+      평행한 두 직선 x+2y+1=0, x+2y+k=0 사이의 거리가 4√5일 때, 모든 상수 k의 값의 합.
+    answer: "k합=2"   # (-1,0)과 x+2y+k=0 거리 |-1+k|/√5=4√5 → |k-1|=20 → k=21, -19 · 합=2 (자체 검증)
+    page_placement: {page_num: 8, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK10
+    slot_type: 확인
+    parent_representative: E3a
+    target_star: 4
+    source: {source_id: 개념원리-CM2-GM-직선-유제-127, tier: star_4, variation_type: number_only}
+    variation_status: modified
+    problem_summary: |
+      직선 3x+4y+1=0에 수직이고 원점으로부터의 거리가 1인 직선의 방정식을 모두 구하기.
+    answer: "4x-3y+5=0 또는 4x-3y-5=0"   # 수직 기울기 4/3 · 4x-3y+c=0 · |c|/5=1 → c=±5 (자체 검증)
+    page_placement: {page_num: 8, layout: dmchecktitle+dmcheck}
+
+  # 페이지 9 (E3b 뒤 · 삼각형 넓이)
+  - slot_id: CHK11
+    slot_type: 확인
+    parent_representative: E3b
+    target_star: 4
+    source: {source_id: 개념원리-CM2-GM-직선-유제-132, tier: star_4, variation_type: number_only}
+    variation_status: modified
+    problem_summary: |
+      세 점 A(1,2), B(3,-1), C(a,4)를 꼭짓점으로 하는 삼각형 ABC의 넓이가 8이 되도록 하는
+      모든 a의 값.
+    answer: "a=5, a=-17/3"   # 세션 55 최종 · AB=√13 · AB 직선 3x+2y-7=0 · |3a+1|/2=8 → a=5 또는 a=-17/3 (본편 대응)
+    page_placement: {page_num: 9, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK12
+    slot_type: 확인
+    parent_representative: E3b
+    target_star: 4
+    source: {source_id: RPM-CM2-GM-직선-#0135, tier: star_3, variation_type: number_only}
+    variation_status: modified
+    problem_summary: |
+      점 A(6,11)에서 직선 x+3y-9=0에 내린 수선의 발 H(a,b). ab.
+    answer: "ab=6"   # AH 기울기 3 · AH: 3x-y-7=0 · 원 직선과 연립 x+3(3x-7)-9=0 → 10x-30=0 → x=3, y=2 · ab=6 (자체 검증)
+    page_placement: {page_num: 9, layout: dmchecktitle+dmcheck}
+
+# ══════════════════════════════════════════════════════════════
+# §4. Level 1 슬롯 (12개 · ★ 3·4 · 기초·응용 · 발문만 · 답지 별도)
+# ══════════════════════════════════════════════════════════════
+level1_slots:
+  # 직선 방정식 (4문)
+  - {slot_id: L1-1, target_star: 3, source: {source_id: RPM-CM2-GM-직선-#0104, tier: star_3, variation_type: number_only}, variation_status: modified, mechanism: {primary: 중점·기울기 · 직선 · 좌표축 삼각형 넓이, insight_type: 조건통합형, depth: 2}, problem_summary: "두 점 (-4,2), (6,8) 이은 선분의 중점을 지나고 기울기 -3인 직선이 x축, y축과 만나는 점을 P, Q라 할 때 삼각형 OPQ의 넓이", answer: "S=32/3"}   # 세션 77 상향 · 중점 (1,5) · y=-3x+8 · x절편 8/3, y절편 8 · S=(1/2)·(8/3)·8=32/3 (자체 검증)
+  - {slot_id: L1-2, target_star: 3, source: {source_id: RPM-CM2-GM-직선-#0111, tier: star_3, variation_type: number_only}, variation_status: modified, mechanism: {primary: 절편형 · 합 조건 · 좌표축 삼각형 넓이, insight_type: 조건통합형, depth: 2}, problem_summary: "점 (-2,4)를 지나는 직선의 x절편과 y절편의 합이 0일 때 (원점 미지남), 이 직선과 x축·y축으로 둘러싸인 부분의 넓이", answer: "S=18"}   # 세션 77 상향 · x/a+y/(-a)=1 → y=x-a · (-2,4) → a=-6 · x절편 -6, y절편 6 · S=(1/2)·6·6=18 (자체 검증)
+  - {slot_id: L1-3, target_star: 3, source: {source_id: 개념원리-CM2-GM-직선-유제-67, tier: star_3, variation_type: number_only}, variation_status: modified, mechanism: {primary: 무게중심 · 두 점 직선, insight_type: 절차형, depth: 1}, problem_summary: "세 점 A(2,4), B(-3,-1), C(7,-6)의 삼각형 ABC 무게중심 G와 점 C를 지나는 직선의 방정식", answer: "y=-x+1"}   # 세션 55 최종 · G(2,-1) · G와 C(7,-6) 기울기 -1 · y=-x+1 (본편 대응)
+  - {slot_id: L1-4, target_star: 3, source: {source_id: RPM-CM2-GM-직선-#0113, tier: star_3, variation_type: number_only}, variation_status: modified, mechanism: {primary: 세 점 공선 · 이차방정식, insight_type: 조건통합형, depth: 2}, problem_summary: "세 점 A(1,3), B(a,5), C(3, 2a+3)이 한 직선 위 (a>0). 직선의 방정식", answer: "y=2x+1"}   # 2/(a-1)=a → a²-a-2=0 → a=2 · 기울기 2 · y-3=2(x-1) → y=2x+1 (자체 검증)
+  # 두 직선 위치 관계 · 수직이등분선 (4문)
+  - {slot_id: L1-5, target_star: 3, source: {source_id: RPM-CM2-GM-직선-#0132, tier: star_3, variation_type: number_only}, variation_status: modified, mechanism: {primary: 수직 · 내분점, insight_type: 조건통합형, depth: 2}, problem_summary: "두 점 A(-3,1), B(6,4)를 지나는 직선에 수직이고, 선분 AB를 1:2 내분점을 지나는 직선의 방정식", answer: "y=-3x+2"}   # AB 기울기 1/3 · 수직 기울기 -3 · 내분점 (0,2) · y=-3x+2 (자체 검증)
+  - {slot_id: L1-6, target_star: 3, source: {source_id: 개념원리-CM2-GM-직선-유제-102, tier: star_3, variation_type: number_only}, variation_status: modified, mechanism: {primary: 평행+통과+수직 세 조건 · 세 상수 결정, insight_type: 조건통합형, depth: 2}, problem_summary: "직선 ax-4y=c가 직선 x-2y=5와 평행하고 점 (3,1)을 지나며 직선 4x-by+3=0과 수직일 때, a+b+c", answer: "a+b+c=2"}   # 세션 77 상향 · 평행 a=2 · (3,1) 대입 c=2 · 수직 8+4b=0 → b=-2 · a+b+c=2 (자체 검증)
+  - {slot_id: L1-7, target_star: 3, source: {source_id: RPM-CM2-GM-직선-#0138, tier: star_3, variation_type: number_only}, variation_status: redesigned, mechanism: {primary: 수직이등분선 · 두 조건, insight_type: 조건통합형, depth: 2}, problem_summary: "두 점 A(a,2), B(4,b)에 대한 수직이등분선이 x+2y-5=0. a²+b²", answer: "a²+b²=40"}   # 세션 55 재설계 · 정수 답 확보 · 중점 조건 a+2b=2 · 수직 조건 2a+b=10 → a=6, b=-2 · a²+b²=40 (본편 대응)
+  - {slot_id: L1-8, target_star: 4, source: {source_id: 개념원리-CM2-GM-직선-연습-117, tier: star_4, variation_type: number_only}, variation_status: modified, mechanism: {primary: 수직이등분선 · 대칭점, insight_type: 조건통합형, depth: 2}, problem_summary: "두 점 A(1,-4), B에 대해 직선 x+3y+1=0이 선분 AB의 수직이등분선일 때, 점 B의 좌표", answer: "B(3,2)"}   # A(1,-4)에서 x+3y+1=0에 수선 발 H(2,-1) · B는 A의 H에 대한 대칭점 → B=(2·2-1, 2·(-1)-(-4))=(3,2) (세션 57 정정 · 답지·본편 무결)
+  # 정점·거리·삼각형 (4문)
+  - {slot_id: L1-9, target_star: 3, source: {source_id: RPM-CM2-GM-직선-#0121, tier: star_3, variation_type: number_only}, variation_status: modified, mechanism: {primary: 정점 통과 · 후속 조건, insight_type: 조건통합형, depth: 2}, problem_summary: "직선 (2k+1)x-(k-1)y-5k-4=0이 실수 k에 관계없이 항상 지나는 점 P. 기울기가 -2이고 P를 지나는 직선의 방정식", answer: "2x+y-7=0"}   # k 정리: (2x-y-5)k + (x+y-4)=0 · 연립 x=3, y=1 → P(3,1) · y-1=-2(x-3) → 2x+y-7=0 (자체 검증)
+  - {slot_id: L1-10, target_star: 3, source: {source_id: RPM-CM2-GM-직선-#0144, tier: star_3, variation_type: number_only}, variation_status: modified, mechanism: {primary: 두 직선 등거리 조건, insight_type: 조건통합형, depth: 2}, problem_summary: "점 (a,3)에서 두 직선 2x-y+1=0, x+2y-1=0까지의 거리가 같을 때 양수 a", answer: "a=7"}   # |2a-2|/√5=|a+5|/√5 → |2a-2|=|a+5| · 2a-2=a+5 → a=7 (자체 검증)
+  - {slot_id: L1-11, target_star: 3, source: {source_id: RPM-CM2-GM-직선-#0152, tier: star_3, variation_type: number_only}, variation_status: modified, mechanism: {primary: 세 점 삼각형 넓이 (밑변·높이), insight_type: 절차형, depth: 2}, problem_summary: "세 점 A(3,4), B(2,0), C(4,2)를 꼭짓점으로 하는 삼각형 ABC의 넓이", answer: "S=3"}   # BC=2√2 · BC 직선 x-y-2=0 · A와 거리 |3-4-2|/√2=3/√2 · S=(1/2)·2√2·3/√2=3 (자체 검증)
+  - {slot_id: L1-12, target_star: 4, source: {source_id: 개념원리-CM2-GM-직선-연습-113, tier: star_4, variation_type: number_only}, variation_status: modified, mechanism: {primary: 내분점 · 수직 · 좌표축 삼각형 넓이, insight_type: 조건통합형, depth: 2}, problem_summary: "두 점 A(-3,2), B(9,-4)에 대해 선분 AB를 2:1로 내분하는 점 C. 점 C를 지나고 직선 AB에 수직인 직선과 x축·y축으로 둘러싸인 부분의 넓이", answer: "S=36"}   # 세션 55 최종 · C(5,-2) · 수직 기울기 2 · y=2x-12 · x절편 6, y절편 -12 · S=36 (본편 대응)
+
+# ══════════════════════════════════════════════════════════════
+# §5. Level 2 슬롯 (12개 · ★ 4:5 = 5:7 · 실전적 심화 · 발문만)
+#     정점 통과 직선족·수심·외심·마름모·사각형 넓이 이등분 등
+# ══════════════════════════════════════════════════════════════
+level2_slots:
+  # star 4 (5문)
+  - {slot_id: L2-1, target_star: 4, source: {source_id: RPM-CM2-GM-직선-#0134, tier: star_4, variation_type: number_only}, variation_status: modified, mechanism: {primary: 두 직선 교점 · 수직 · 점 지남, insight_type: 조건통합형, depth: 3}, problem_summary: "두 직선 3x+2y-5=0, 3x+y-1=0의 교점을 지나고 직선 2x-y+4=0과 수직인 직선이 점 (a,-1)을 지날 때 a", answer: "a=9"}   # (3x+2y-5)+k(3x+y-1)=0 · 기울기 -(3+3k)/(2+k)=-1/2 → k=-4/5 · 대입 · x+2y-7=0 · (a,-1): a-2-7=0 → a=9 (자체 검증)
+  - {slot_id: L2-2, target_star: 4, source: {source_id: 개념원리-CM2-GM-직선-연습-119, tier: star_4, variation_type: number_only}, variation_status: modified, mechanism: {primary: 세 직선 삼각형 미형성 · 근의 곱, insight_type: 통찰형, depth: 2}, problem_summary: "세 직선 2x-y=4, 3x+2y=-1, x-ay=0이 삼각형을 이루지 않도록 하는 모든 상수 a의 값의 곱", answer: "a곱=1/6"}   # 세션 55 최종 · 평행: a=1/2, a=-2/3 · 공점 (1,-2): a=-1/2 · 곱 (1/2)·(-2/3)·(-1/2)=1/6 (본편 대응)
+  - {slot_id: L2-3, target_star: 4, source: {source_id: RPM-CM2-GM-직선-#0128, tier: star_4, variation_type: number_only}, variation_status: modified, mechanism: {primary: 두 직선 평행 or 수직 · α-β, insight_type: 조건통합형, depth: 2}, problem_summary: "두 직선 2x-ky+1=0, (k+1)x-y+k=0이 평행할 때 k=α, 수직일 때 k=β. α-β", answer: "α-β=-4/3"}   # 평행: -2=-k²-k → k²+k-2=0 → k=-2, 1 · 조건 필터 → α=-2 · 수직: 2(k+1)+k=0 → k=-2/3 → β=-2/3 · α-β=-4/3 (자체 검증)
+  - {slot_id: L2-4, target_star: 4, source: {source_id: 개념원리-CM2-GM-직선-연습-92, tier: star_4, variation_type: number_only}, variation_status: modified, mechanism: {primary: 두 도형 동시 넓이 이등분 · 대각선 교점, insight_type: 통찰형, depth: 2}, problem_summary: "그림의 두 직사각형 (x∈[-3,0]·y∈[2,6], x∈[3,7]·y∈[-4,-1])의 넓이를 동시에 이등분하는 직선의 방정식", answer: "y=-x+5/2"}   # 두 직사각형 중심 (-3/2, 4), (5, -5/2) · 기울기 (-5/2-4)/(5-(-3/2))=-13/13=-1 · y-4=-(x+3/2) → y=-x+5/2 (자체 검증)
+  - {slot_id: L2-5, target_star: 4, source: {source_id: RPM-CM2-GM-직선-#0158, tier: star_4, variation_type: number_only}, variation_status: modified, mechanism: {primary: 정점 · 직사각형 만남 극단 기울기, insight_type: 통찰형, depth: 3}, problem_summary: "직선 kx-y+3k-1=0이 그림의 직사각형(x=2~3, y=1~4)과 만나도록 하는 실수 k의 최댓값", answer: "k최댓값=1"}   # (x+3)k=y+1 → 정점 (-3,-1) · 최대 기울기 = (4+1)/(2+3)=1 (자체 검증)
+  # star 5 (7문)
+  - {slot_id: L2-6, target_star: 5, source: {source_id: 개념원리-CM2-GM-직선-연습-95, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 사각형 넓이 조건 · 기울기 곱 · 두 매개변수, insight_type: 통찰형, depth: 3}, problem_summary: "좌표평면 네 점 O(0,0), A(4,0), B(4,6), C(0,6)에 대해 선분 BA 위 두 점 D, E (양 끝점 아님·D≠E). 직선 OD와 CE의 교점 F. 사각형 OAEF 넓이가 사각형 BCFD 넓이보다 4만큼 크고 직선 OD·CE 기울기 곱 -15/16일 때 직선 CE의 방정식", answer: "y=-(3/4)x+6"}   # D(4,5), E(4,3) · d(6-e)=15 (기울기 곱) + 넓이 차 4 연립 · x_F=3, y_F=15/4 · [OAEF]=9, [BCFD]=5 (검산 통과)
+  - {slot_id: L2-7, target_star: 5, source: {source_id: 개념원리-CM2-GM-직선-연습-118, tier: star_5, variation_type: number_only}, variation_status: modified, mechanism: {primary: 세 직선 · 직각삼각형 조건, insight_type: 통찰형, depth: 3}, problem_summary: "세 직선 x+2y=3, 2x-3y-12=0, ax+y=1로 둘러싸인 삼각형이 직각삼각형이 되도록 하는 모든 상수 a의 값의 합", answer: "a합=-1/2"}   # 세션 55 최종 · l3⊥l1: a=-2 · l3⊥l2: a=3/2 · 합 -2+3/2=-1/2 (본편 대응)
+  - {slot_id: L2-8, target_star: 5, source: {source_id: 고쟁이-CH02-STEP2-#093, tier: star_5, variation_type: number_only}, variation_status: modified, mechanism: {primary: 무게중심 지나는 직선 · 최대 거리 = 수직, insight_type: 통찰형, depth: 3}, problem_summary: "세 점 A(4,3), B(1,5), C(-2,-2)의 삼각형 ABC의 무게중심을 지나는 직선 중 점 A와의 거리가 최대인 직선의 x절편", answer: "x절편=5/3"}   # G(1,2) · AG 기울기 1/3 · 수직 기울기 -3 · y-2=-3(x-1) → y=-3x+5 · x절편 5/3 (자체 검증)
+  - {slot_id: L2-9, target_star: 5, source: {source_id: 고쟁이-CH02-STEP2-#105, tier: star_5, variation_type: number_only}, variation_status: modified, mechanism: {primary: 곡선-직선 최소 거리 = 접선의 평행선 사이 거리 · I-XU (이차함수 CM1 × 직선 CM2), insight_type: 통찰형, depth: 3}, problem_summary: "이차함수 y=x²-4x+6의 그래프 위 점과 직선 y=2x+k 사이 거리 최솟값이 √5이고 직선이 그래프 아래쪽에 있을 때, 상수 k", answer: "k=-8"}   # 세션 77 I-XU 교체 · P(t, t²-4t+6) 거리 |t²-6t+6-k|/√5 · 최솟값 (t=3에서) |-3-k|/√5=√5 · 아래쪽 조건 k<-3 · -3-k=5 → k=-8 (자체 검증)
+  - {slot_id: L2-10, target_star: 5, source: {source_id: 고쟁이-CH02-STEP2-#100, tier: star_5, variation_type: number_only}, variation_status: modified, mechanism: {primary: 자동 수직 · 각 이등분 = 직각이등변 · 넓이, insight_type: 통찰형, depth: 3}, problem_summary: "두 직선 kx-y=0, x+ky=0 (k<0)이 x+2y-10=0과 만나는 점 각각 A, B. ∠AOB를 이등분하는 직선이 선분 AB를 수직이등분할 때 삼각형 OAB의 넓이 S. k+S 값 (O는 원점)", answer: "k+S=17"}   # 자체 수직 · 직각이등변 · 넓이 20, k=-3 → 17 (자체 검증)
+  - {slot_id: L2-11, target_star: 5, source: {source_id: RPM-CM2-GM-직선-#0143, tier: star_4, variation_type: number_only}, variation_status: modified, mechanism: {primary: 세 직선 평행 · 네 부분, insight_type: 통찰형, depth: 3}, problem_summary: "서로 다른 세 직선 ax+y+5=0, 2x+by-4=0, x+2y+3=0에 의해 좌표평면이 네 부분으로 나누어질 때 a+b", answer: "a+b=9/2"}   # 네 부분 → 세 직선 모두 평행 · a=1/2, b=4 → a+b=9/2 (자체 검증)
+  - {slot_id: L2-12, target_star: 5, source: {source_id: 개념원리-CM2-GM-직선-연습-146, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 삼각형 내심 · 세 변 거리 등거리 · OP 거리, insight_type: 통찰형, depth: 3}, problem_summary: "좌표평면 위의 세 점 A(6,0), B(0,-3), C(10,-8)에 대해 삼각형 ABC의 내접원의 중심을 P라 할 때 선분 OP의 길이 (O는 원점)", answer: "OP=√34"}   # 세 변 길이 BC=5√5·CA=4√5·AB=3√5 · 내심 가중평균 P=(5,-3) · OP=√34 (개념원리 연습-146 자체 검증)
+
+# ══════════════════════════════════════════════════════════════
+# §6. Level 3 슬롯 (3문 · ★ 5 심화 · 통찰 정점)
+# ══════════════════════════════════════════════════════════════
+level3_slots:
+  - slot_id: L3-1
+    slot_type: Level3
+    target_star: 5
+    composite_range: [27, 32]
+    source: {source_id: 고쟁이-CH02-STEP3-#113, tier: star_5_premium, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    variation_status: modified
+    mechanism: {primary: 공통부분 제외 원리 · 큰 두 삼각형 등적 · 절편 매개변수, insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 3, unknowns_count: 1, subquestion_count: 0, figure_needed: true, figure_type: 좌표평면대응}
+    problem_summary: |
+      직선 l1이 x축, y축과 만나는 점 A, B. 직선 l2가 x축, y축과 만나는 점 C, D. 두 직선 l1, l2의
+      교점 P에 대해 두 삼각형 ACP와 BDP의 넓이가 서로 같다. OA=2·AC이고 l1의 기울기가 -3일 때
+      l2의 기울기.
+    answer: "l2 기울기=-4/3"   # 공통부분 제외 · A(2a,0), C(3a,0) · B(0,6a) · D(0,4a) · l2 기울기 -4a/3a=-4/3 (자체 검증)
+    signature: {defBox: false, primary_axis: 넓이, layout_hint: dmpnum+figure}
+
+  - slot_id: L3-2
+    slot_type: Level3
+    target_star: 5
+    source: {source_id: 고쟁이-CH02-STEP3-#114, tier: star_5_premium, variation_type: number_only}
+    variation_status: modified
+    mechanism: {primary: 자동 수직 (y=3x·y=-x/3) · 이등변 = 직각이등변 · 넓이, insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 2, unknowns_count: 1, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      세 직선 y=3x, y=-x/3, y=mx+2로 둘러싸인 도형이 이등변삼각형일 때 이 삼각형의 넓이 (m>0).
+    answer: "S=16/5"   # 자동 수직 → 직각이등변 · m=1/2 · A(4/5, 12/5), B(-12/5, 4/5) · S=(1/2)(√10·4/5)²=16/5 (자체 검증)
+
+  - slot_id: L3-3
+    slot_type: Level3
+    target_star: 5
+    source: {source_id: 고쟁이-CH02-STEP3-#115, tier: star_5_premium, variation_type: number_only}
+    variation_status: modified
+    mechanism: {primary: 거리 제곱 차 · 직선 자취 · 직사각형 절단 길이, insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 2, unknowns_count: 0, subquestion_count: 0, figure_needed: true, figure_type: 좌표평면대응}
+    problem_summary: |
+      AB=8, BC=16인 직사각형 ABCD의 내부 및 둘레 위의 점 P가 AP²-CP²=16을 만족시킨다.
+      점 P가 나타내는 도형의 길이.
+    answer: "L=4√5"   # A(0,8),B(0,0),C(16,0),D(16,8) · 직선 2x-y-13=0 · 두 교점 (13/2,0), (21/2,8) · 길이 4√5 (자체 검증)
+
+# ══════════════════════════════════════════════════════════════
+# §7. 실전유형 슬롯 (3문 · **★ 5 premium 진정한 변별력** · 학평 기출 · verbatim_kichul)
+#     R-1: 전국연합-2018-11월-고1-17번 (두 직선 교점 · 넓이 등식)
+#     R-2: 전국연합-2020-3월-고2-18번 (무게중심 BG:GM=2:1 · 점-직선 거리 · 근 선택)
+#     R-3: 전국연합-2017-11월-고1-19번 (이차곡선-직선 거리 이중 최적화 · 1등급 도전)
+# ══════════════════════════════════════════════════════════════
+real_slots:
+  - slot_id: R-1
+    slot_type: 실전
+    target_star: 5
+    target_star_premium: true
+    source: {source_id: 전국연합-2018-11월-고1-17번, tier: star_5, variation_type: verbatim_kichul}
+    verbatim_kichul: true
+    mechanism: {primary: 두 직선 교점 · 좌표축과 만남 · 넓이 좌표공식 · 밑변·높이 넓이 등식, insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 3, unknowns_count: 1, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      직선 y=-x+10과 y축의 교점 A. 직선 y=3x-6과 x축의 교점 B. 두 직선의 교점 C.
+      x축 위의 점 D(a, 0) (a>2)에 대해 삼각형 ABD의 넓이가 삼각형 ABC의 넓이와 같을 때 a 값.
+    answer: "a=26/5"   # A(0,10), B(2,0), C(4,6) · △ABC=16 · △ABD=5(a-2)=16 → a=26/5 (전국연합 자체 검증)
+    peak_qualification: {C_gm02_pure_scope: true, C_area_equation: true}
+
+  - slot_id: R-2
+    slot_type: 실전
+    target_star: 5
+    target_star_premium: true
+    source: {source_id: 전국연합-2020-3월-고2-18번, tier: star_5, variation_type: verbatim_kichul}
+    verbatim_kichul: true
+    mechanism: {primary: 무게중심 중선 성질 (BG:GM=2:1 거리비) · 점과 직선 거리 · 두 근 중 무게중심 위치로 선택, insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 3, unknowns_count: 3, subquestion_count: 0, figure_needed: true, figure_type: 좌표평면대응}
+    problem_summary: |
+      제1사분면 위 두 점 A, B와 원점 O에 대해 △OAB의 무게중심 G(8,4), B와 직선 OA 사이 거리 6√2.
+      직선 OB의 기울기 > 직선 OA의 기울기일 때, 직선 OA의 기울기를 구하는 과정에서 (가)·(나)·(다) 빈칸.
+      (가), (다)의 수를 각각 p, q, (나) 식을 f(m)이라 할 때 f(q)/p²의 값.
+    answer: "f(q)/p²=5/14"   # 세션 55 원문 재로드 확정 · 원문 (가)=2√2=p, (나)=|8m-4|=f(m), (다)=1/7=q · p²=8, f(1/7)=20/7 · f(q)/p²=(20/7)/8=5/14 (본편 대응, 마스터 원문 대조)
+    peak_qualification: {C_gm02_pure_scope: true, C_centroid_selection: true, C_multi_root_case: true}
+
+  - slot_id: R-3
+    slot_type: 실전
+    target_star: 5
+    target_star_premium: true
+    source: {source_id: 전국연합-2017-11월-고1-19번, tier: star_5_premium, variation_type: verbatim_kichul}
+    verbatim_kichul: true
+    mechanism: {primary: 이차곡선과 직선 거리 최솟값 (이차식) · 매개변수 a에 대한 최댓값 (이중 최적화), insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 3, unknowns_count: 1, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      3 < a < 7인 실수 a에 대해 이차함수 y = x² - 2ax - 20의 그래프 위 점 P와 직선 y = 2x - 12a 사이의
+      거리의 최솟값을 f(a)라 할 때, f(a)의 최댓값.
+    answer: "최댓값=4√5/5"   # 거리=|t²-2(a+1)t+(12a-20)|/√5 · g(a+1)=-(a-3)(a-7)>0 · f(a)=(-(a-5)²+4)/√5 · a=5에서 4/√5=4√5/5 (전국연합 자체 검증)
+    peak_qualification: {C_gm02_pure_scope: true, C_double_optimization: true, C_algebraic_depth: true}
+
+# ══════════════════════════════════════════════════════════════
+# §8. 정점 자격 (Level3 + 실전 6문 총합)
+# ══════════════════════════════════════════════════════════════
+peak_qualification_summary:
+  peak_slots: [L2-6, L2-8, L2-10, L2-12, L3-1, L3-2, L3-3, R-1, R-2, R-3]
+  qualified_count: 10
+  criteria_coverage:
+    C1_condition_integration_complex: true            # L2-6·L2-7 (사각형 넓이 조건 · 두 매개변수)
+    C2_common_area_subtraction: true                  # L3-1 (공통부분 제외 원리)
+    C3_hidden_perpendicular: true                     # L2-10·L3-2 (자동 수직 두 직선)
+    C4_locus_from_distance_diff: true                 # L3-3 (거리 제곱 차 → 직선 자취)
+    C5_incircle_geometry: true                        # L2-12 (삼각형 내심 · 세 변 등거리)
+    C6_double_optimization: true                      # R-3 (이차곡선-직선 이중 최적화)
+    C7_visualization_complex: true                    # R-2·L3-1·L3-3 (좌표평면 대응 도해)
+  distribution_target: {star_3: 22, star_4: 20, star_5: 12, star_5_premium: 3}
+
+# ══════════════════════════════════════════════════════════════
+# §9. 페이지 배치 요약 (총 19p 목표)
+# ══════════════════════════════════════════════════════════════
+page_layout:
+  # 개념+대표+확인 (p1~p9)
+  p1: {content: [C1], type: 개념}
+  p2: {content: [E1a, CHK1, CHK2], type: 대표+확인}
+  p3: {content: [E1b, CHK3, CHK4], type: 대표+확인}
+  p4: {content: [C2], type: 개념}
+  p5: {content: [E2a, CHK5, CHK6], type: 대표+확인}
+  p6: {content: [E2b, CHK7, CHK8], type: 대표+확인}
+  p7: {content: [C3], type: 개념}
+  p8: {content: [E3a, CHK9, CHK10], type: 대표+확인}
+  p9: {content: [E3b, CHK11, CHK12], type: 대표+확인}
+  # Level 1 · 12문 · 4문/페이지 · 3페이지 (배지 p10만)
+  p10: {content: [L1-1, L1-2, L1-3, L1-4], type: Level1, banner: true}
+  p11: {content: [L1-5, L1-6, L1-7, L1-8], type: Level1, banner: false, banner_space: true}
+  p12: {content: [L1-9, L1-10, L1-11, L1-12], type: Level1, banner: false, banner_space: true}
+  # Level 2 · 12문 · 4문/페이지 · 3페이지 (배지 p13만)
+  p13: {content: [L2-1, L2-2, L2-3, L2-4], type: Level2, banner: true}
+  p14: {content: [L2-5, L2-6, L2-7, L2-8], type: Level2, banner: false, banner_space: true}
+  p15: {content: [L2-9, L2-10, L2-11, L2-12], type: Level2, banner: false, banner_space: true}
+  # Level 3 · 3문 · 1페이지
+  p16: {content: [L3-1, L3-2, L3-3], type: Level3, banner: true}
+  # 실전 · 3문 · 1문/페이지 · 3페이지 · 학평 기출 출처 배지 · \dmkichul 매크로
+  p17: {content: [R-1], type: 실전, banner: true, figure_reproduction: false, source_badge: true}
+  p18: {content: [R-2], type: 실전, banner: false, banner_space: true, figure_reproduction: true, source_badge: true}
+  p19: {content: [R-3], type: 실전, banner: false, banner_space: true, figure_reproduction: false, source_badge: true}
+  total_pages_est: 19
+
+# ══════════════════════════════════════════════════════════════
+# §10. Gate 5.0 준비 · 검증 대기 항목
+# ══════════════════════════════════════════════════════════════
+gate5_readiness:
+  source_id_all_present: true
+  tier_all_specified: true
+  target_star_all_specified: true
+  answer_verified: false            # concept-author 조판 후 mathjs 자체 검증 의무 (Phase 2)
+  copyright_similarity_pending: true
+  mechanism_all_specified: true
+  peak_qualification_documented: true
+
+# ══════════════════════════════════════════════════════════════
+# §11. 마스터 정책 준수 확인
+# ══════════════════════════════════════════════════════════════
+master_policy_compliance:
+  policy_no_textbook_recap: true            # 개념 슬롯은 표준 정의 (교과 회고 아님)
+  policy_slot_size_uniform: N/A             # 정리편 · 시험지 pair×2 제약 무관
+  cm1_curriculum_scope: N/A                 # CM2 단원
+  star_notation_spacing: true               # 청사진 내부 필드는 star_5 등 YAML 형식 (학생 자료 노출 없음)
+  cm2_calculus_terms_check_pending: true    # Phase 2·3 답지 작성 시 매개변수·극한 등 자연어화 검증
+  no_proof_problems: true                   # 2026-07-19 마스터 지시 · 증명 문제 편입 제외 (모두 값 구하기)
+  verbatim_kichul_R1R2R3: true              # 실전 3문 학평 원본 인용 · \dmkichul 배지
+
+# ══════════════════════════════════════════════════════════════
+# §12. 다음 Phase (본편·답지 작성) 착수 준비
+# ══════════════════════════════════════════════════════════════
+next_phase:
+  phase_2_main_tex:
+    priority_check:
+      - 각 슬롯 mathjs 답 자체 검증 재실행 (특히 CHK7·CHK11·L1-6·L1-8·L1-12·L2-2·L2-6·L2-7 임시 값 확정)
+      - 대표예제 6문 (E1a·E1b·E2a·E2b·E3a·E3b) 풀이 dmapproach + dmsolution + dmanswer 조판
+      - R-1·R-2·R-3 verbatim 발문 원문 확보 (2018-11월·2020-3월·2017-11월 학평 pdf 크롭·읽기)
+      - R-2·L3-1·L3-3 좌표평면 대응 도해 TikZ 조판 (bank/도해-카탈로그.md archive 검색 → 신규)
+    tex_template: templates/deep-math.sty (CM2-GM-01 정리편 골든 계승)
+    build_directory: output/공통수학2/DeeP-Math-정리편/
+  phase_3_answer_sheet:
+    priority_check:
+      - Critical Point 서술 스타일 (feedback_critical_point_style)
+      - CM2 답지 자연어 규정 (매개변수·극한 우회)
+      - 학평 3문 답지 (R-1·R-2·R-3) 그림 재현 (R-2)·풀이 완결
+      - quickgrid 답만 표기 (feedback_answer_display_final_value_only)

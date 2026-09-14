@@ -1,0 +1,108 @@
+"""집합 Venn diagram template · Phase 2 신설 (2026-07-14)
+전체집합 U · 부분집합 A, B (2 집합 겹침) — CM1/CM2 집합 단원
+
+# --- CONFIG ---
+u_elements = [1, 2, 3, 4, 5, 6]
+A_elements = [1, 2, 3]
+B_elements = [2, 4, 6]
+show_elements = True    # 원소 표기 (답 노출 우려 시 False)
+label_A = 'A'
+label_B = 'B'
+label_U = 'U'
+fig_width = 6.5
+fig_height = 4.5
+# ---
+
+의무 검증:
+  node scripts/figure-completeness-check.mjs <name>.py
+  node scripts/figure-label-overlap-check.mjs <name>.py
+  node scripts/figure-answer-leakage-check.mjs <name>.py  (답 노출 감지)
+
+답 노출 주의:
+  - show_elements=True: 원소 표기 (개념 이해용, 답 힌트 아닐 때만)
+  - show_elements=False: 집합 관계만 표시 (일반 개념)
+"""
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle, Circle
+import numpy as np
+
+plt.rcParams['font.family'] = 'Malgun Gothic'
+plt.rcParams['axes.unicode_minus'] = False
+
+# ── CONFIG (수정 지점) ──
+u_elements = [1, 2, 3, 4, 5, 6]
+A_elements = [1, 2, 3]
+B_elements = [2, 4, 6]
+show_elements = True
+label_A = 'A'
+label_B = 'B'
+label_U = 'U'
+fig_width = 6.5
+fig_height = 4.5
+
+# ── 색상 (baked-in) ──
+axis_color = '#1A1A1A'
+primary = '#1959B8'    # A (파랑)
+secondary = '#C05A1A'  # B (오렌지)
+u_color = '#666666'    # U (회색)
+
+fig, ax = plt.subplots(figsize=(fig_width, fig_height), dpi=150)
+ax.set_aspect('equal')
+ax.set_xlim(-4, 4)
+ax.set_ylim(-3, 3)
+
+# ── U 전체집합 (직사각형) ──
+u_rect = Rectangle((-3.6, -2.5), 7.2, 5.0, fill=False, edgecolor=u_color, linewidth=1.6)
+ax.add_patch(u_rect)
+ax.text(-3.4, 2.15, f'${label_U}$', color=u_color, fontsize=14, fontweight='bold',
+        bbox=dict(boxstyle='round,pad=0.15', facecolor='white', edgecolor='none', alpha=0.9))
+
+# ── A, B 원 (2 집합 겹침) ──
+A_center = (-1.0, 0)
+B_center = (1.0, 0)
+radius = 1.7
+
+A_circle = Circle(A_center, radius, fill=False, edgecolor=primary, linewidth=1.8)
+ax.add_patch(A_circle)
+B_circle = Circle(B_center, radius, fill=False, edgecolor=secondary, linewidth=1.8)
+ax.add_patch(B_circle)
+
+# 집합 라벨 (원 상단, bbox white)
+ax.text(A_center[0] - 1.5, A_center[1] + 1.2, f'${label_A}$', color=primary, fontsize=14, fontweight='bold',
+        bbox=dict(boxstyle='round,pad=0.15', facecolor='white', edgecolor='none', alpha=0.9), zorder=10)
+ax.text(B_center[0] + 1.5, B_center[1] + 1.2, f'${label_B}$', color=secondary, fontsize=14, fontweight='bold',
+        bbox=dict(boxstyle='round,pad=0.15', facecolor='white', edgecolor='none', alpha=0.9), zorder=10)
+
+# ── 원소 표기 (show_elements=True 시) ──
+if show_elements:
+    A_only = [e for e in A_elements if e not in B_elements]
+    B_only = [e for e in B_elements if e not in A_elements]
+    AB = [e for e in A_elements if e in B_elements]
+    outside = [e for e in u_elements if e not in A_elements and e not in B_elements]
+
+    # A only (좌측 영역)
+    for i, e in enumerate(A_only):
+        y = 0.4 - i * 0.6
+        ax.text(A_center[0] - 0.8, y, str(e), color=primary, fontsize=11, ha='center', va='center', zorder=8)
+
+    # B only (우측 영역)
+    for i, e in enumerate(B_only):
+        y = 0.4 - i * 0.6
+        ax.text(B_center[0] + 0.8, y, str(e), color=secondary, fontsize=11, ha='center', va='center', zorder=8)
+
+    # A ∩ B (교집합, 중앙)
+    for i, e in enumerate(AB):
+        y = 0.4 - i * 0.6
+        ax.text(0, y, str(e), color='#333', fontsize=11, ha='center', va='center', zorder=8,
+                fontweight='bold')
+
+    # 여집합 (U 안, 원 밖) — 상단 우측 여백
+    for i, e in enumerate(outside):
+        x = 2.7 - i * 0.5
+        ax.text(x, 1.9, str(e), color=u_color, fontsize=11, ha='center', va='center', zorder=8)
+
+ax.set_xticks([]); ax.set_yticks([])
+for spine in ax.spines.values(): spine.set_visible(False)
+
+plt.tight_layout(pad=0.3)
+plt.savefig('venn.pdf', bbox_inches='tight', pad_inches=0.05)

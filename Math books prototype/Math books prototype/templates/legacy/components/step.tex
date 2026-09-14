@@ -1,0 +1,55 @@
+%% step.tex — STEP 1/2/3 환경 + 유형 환경
+
+% STEP 헤더 매크로 (공통)
+\newcommand{\stepheader}[2]{%
+  % #1 = STEP 번호, #2 = 부제
+  \par\addvspace{12pt}%
+  \noindent
+  \begin{tcolorbox}[
+    enhanced, colback=tbk-accent, colframe=tbk-accent,
+    arc=2pt, outer arc=2pt, boxrule=0pt,
+    left=10pt, right=10pt, top=4pt, bottom=4pt,
+    fontupper=\sffamily\bfseries\color{white}
+  ]
+    STEP #1\quad #2
+  \end{tcolorbox}
+  \par\smallskip
+}
+
+\newenvironment{stepone}{%
+  \stepheader{1}{핵심유형 — 반드시 익혀야 할 유형}%
+  \begin{multicols}{2}\small
+}{%
+  \end{multicols}
+}
+
+\newenvironment{steptwo}{%
+  \stepheader{2}{심화유형 — 조건 해석과 결합}%
+  \begin{multicols}{2}\small
+}{%
+  \end{multicols}
+}
+
+\newenvironment{stepthree}{%
+  \stepheader{3}{최고난도 — 내신 상위 \textperiodcentered{} 수능형}%
+  \begin{multicols}{2}\small
+}{%
+  \end{multicols}
+}
+
+% 유형 헤더 — STEP 내부에서 사용
+\newcounter{typecnt}[chapter]
+\renewcommand{\thetypecnt}{\arabic{typecnt}}
+
+% \begin{type}{유형번호}{유형이름}
+\newenvironment{type}[2]{%
+  \par\addvspace{6pt}%
+  \noindent
+  {\sffamily\bfseries\color{tbk-accent}유형\,#1}\quad
+  {\sffamily\bfseries #2}%
+  \par\nobreak\vspace{2pt}%
+  {\color{tbk-rule}\rule{\linewidth}{0.4pt}}%
+  \par\smallskip
+}{%
+  \par\addvspace{8pt}%
+}

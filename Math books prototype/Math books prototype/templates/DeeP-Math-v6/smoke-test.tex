@@ -1,0 +1,161 @@
+% smoke-test.tex — DeeP Math v6.4 · 정리편 3페이지 종합 시연
+% ============================================================================
+% 실제 CM2-GM 평면좌표 콘텐츠 (기존 Deep Math Review Note 01 발췌)
+% 구성:
+%   Page 1: 챕터 배너 + 개념 박스 (dmsub × 3 + dmexample × 2 + dmnote × 1)
+%   Page 2: 대표예제 (dmex + dmproblem + dmapproach + dmsolution + dmanswer)
+%           + 확인 문제 2문 (dmcheck)
+%   Page 3: Level 1 배너 + dmpnum × 3 (학생 풀이 공간)
+% 목적: 마스터에게 실제 시리즈 콘텐츠 구조로 v6.4 디자인 확인
+% ============================================================================
+
+\documentclass[10pt,a4paper]{article}
+\usepackage{dm-editorial}
+
+\begin{document}
+
+% =========================================================================
+% Page 1 — 챕터 + 개념 박스 (실제 콘텐츠)
+% =========================================================================
+\dmchapter{01}{평면좌표}
+
+\begin{dmconcept}{1}{두 점 사이의 거리}
+
+\dmsub{1}{수직선 위의 두 점 사이의 거리}
+
+수직선 위의 두 점 $\mathrm{A}(x_1)$,\ $\mathrm{B}(x_2)$ 사이의 거리는 두 좌표의
+차의 절댓값이다.
+\begin{equation*}
+  \overline{\mathrm{AB}} = |x_2 - x_1|
+\end{equation*}
+원점 $\mathrm{O}$와 점 $\mathrm{P}(x)$ 사이의 거리는 $\overline{\mathrm{OP}} = |x|$이다.
+
+\begin{dmexample}
+두 점 $\mathrm{A}(-3)$,\ $\mathrm{B}(5)$ 사이의 거리는
+$\overline{\mathrm{AB}} = |5 - (-3)| = 8$이다.
+\end{dmexample}
+
+\begin{dmnote}
+$|x_2 - x_1| = |x_1 - x_2|$이므로 두 점의 순서를 바꾸어도 거리는 변하지 않으며,
+값은 항상 $0$ 이상이다.
+\end{dmnote}
+
+\dmsub{2}{좌표평면 위의 두 점 사이의 거리}
+
+좌표평면 위의 두 점 $\mathrm{A}(x_1,\, y_1)$,\ $\mathrm{B}(x_2,\, y_2)$ 사이의 거리는
+\begin{equation*}
+  \overline{\mathrm{AB}} = \sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}
+\end{equation*}
+이다. 두 점을 잇는 선분을 빗변으로 하는 직각삼각형의 두 변의 길이가
+$|x_2 - x_1|$과 $|y_2 - y_1|$이므로 피타고라스 정리에서 위 식을 얻는다.
+
+\begin{dmexample}
+두 점 $\mathrm{A}(1,\, 2)$,\ $\mathrm{B}(4,\, 6)$ 사이의 거리는
+$\overline{\mathrm{AB}} = \sqrt{(4-1)^2 + (6-2)^2} = \sqrt{25} = 5$이다.
+\end{dmexample}
+
+\dmsub{3}{같은 거리 조건과 거리 제곱의 합}
+
+두 점 $\mathrm{A}$,\ $\mathrm{B}$에서 같은 거리에 있는 점의 자취는
+선분 $\overline{\mathrm{AB}}$의 수직이등분선이다. 좌표평면 문제에서는 거리의
+제곱을 등호로 놓아 계산하면 근호가 사라져 편리하다.
+
+\begin{dmnote}
+등거리 조건은 하나의 방정식을 준다. 두 개의 등거리 조건이 있으면 좌표평면에서
+미지수 두 개가 결정된다. 세 점에 대한 등거리 조건은 좌표를 완전히 결정한다.
+\end{dmnote}
+
+\end{dmconcept}
+
+% =========================================================================
+% Page 2 — 대표예제 (dmex + dmproblem + dmapproach + dmsolution) + 확인 문제
+% =========================================================================
+\newpage
+
+\dmex{1}{거리 조건에서 미지수 결정}
+
+\begin{dmproblem}
+네 점 $\mathrm{A}(3,\, a)$,\ $\mathrm{B}(7,\, -5)$,\ $\mathrm{C}(-a,\, 4)$,\
+$\mathrm{D}(-1,\, 2)$에 대하여 $\overline{\mathrm{AB}} = 2\,\overline{\mathrm{CD}}$가
+성립할 때, $a$의 값을 모두 구하시오.
+\end{dmproblem}
+
+\begin{dmapproach}
+거리 관계를 제곱하여 근호를 없앤다. 좌표를 대입해 얻은 등식을 $a$에 대해
+정리하면 $(a+5)^2 = 4(a-1)^2$ 꼴이 되어 부호를 나누어 두 근을 얻는다.
+\end{dmapproach}
+
+\begin{dmsolution}
+두 점 사이의 거리 공식에서
+\begin{equation*}
+  \overline{\mathrm{AB}}^{\,2} = 16 + (a + 5)^2, \qquad
+  \overline{\mathrm{CD}}^{\,2} = (a - 1)^2 + 4
+\end{equation*}
+이다. $\overline{\mathrm{AB}} = 2\,\overline{\mathrm{CD}}$에서
+$\overline{\mathrm{AB}}^{\,2} = 4\,\overline{\mathrm{CD}}^{\,2}$이므로
+\begin{equation*}
+  16 + (a+5)^2 = 4(a-1)^2 + 16
+\end{equation*}
+에서 $(a+5)^2 = 4(a-1)^2$이다. 양변에 제곱근을 취하면 $|a+5| = 2|a-1|$이므로
+$a + 5 = \pm\, 2(a - 1)$이고, 부호에 따라 각각 $a = 7$ 또는 $a = -1$이다.
+\dmanswer{$a = 7$ 또는 $a = -1$}
+\end{dmsolution}
+
+\dmchecktitle
+
+\dmcheck{1}{%
+세 점 $\mathrm{A}(-1,\, 2)$,\ $\mathrm{B}(3,\, 4)$,\ $\mathrm{C}(a,\, 1)$에 대하여
+$\overline{\mathrm{AC}} = \overline{\mathrm{BC}}$일 때, $a$의 값을 구하시오.%
+}
+
+\dmcheck{2}{%
+두 점 $\mathrm{A}(4,\, a)$,\ $\mathrm{B}(a,\, 4)$에 대하여
+$\overline{\mathrm{AB}} = 7\sqrt{2}$일 때, 양수 $a$의 값을 구하시오.%
+}
+
+% =========================================================================
+% Page 3 — Level 1 배너 (v6.43 · 시안 C 슬림 확정)
+% =========================================================================
+\newpage
+
+\dmlevel{1}
+
+\dmpnum{1}{%
+두 점 $\mathrm{A}(1,\, 3)$,\ $\mathrm{B}(5,\, -1)$에서 같은 거리에 있는
+점 $\mathrm{P}(a,\, b)$가 직선 $y = 2x - 5$ 위에 있을 때, $a + b$의 값을 구하시오.%
+}
+
+\dmpnum{2}{%
+두 점 $\mathrm{A}(2,\, 1)$,\ $\mathrm{B}(-2,\, 5)$에서 같은 거리에 있는
+$x$축 위의 점을 $\mathrm{P}$,\ $y$축 위의 점을 $\mathrm{Q}$라 할 때,
+선분 $\overline{\mathrm{PQ}}$의 길이를 구하시오.%
+}
+
+\dmpnum{3}{%
+세 점 $\mathrm{A}(5,\, 2)$,\ $\mathrm{B}(1,\, -4)$,\ $\mathrm{C}(-1,\, -2)$를
+꼭짓점으로 하는 삼각형 $\mathrm{ABC}$는 어떤 삼각형인지 판정하시오.%
+}
+
+% =========================================================================
+% Page 4 — Level 1 이어짐 (dmlevelspace · 시안 A 확정)
+% =========================================================================
+\newpage
+
+\dmlevelspace
+
+\dmpnum{4}{%
+좌표평면 위의 두 점 $\mathrm{A}(3,\, 2)$,\ $\mathrm{B}(-1,\, 5)$에서 같은 거리에 있는
+직선 $y = x + 1$ 위의 점의 좌표를 구하시오.%
+}
+
+\dmpnum{5}{%
+두 점 $\mathrm{A}(0,\, 3)$,\ $\mathrm{B}(4,\, -1)$을 이은 선분 $\overline{\mathrm{AB}}$를
+$3 : 1$로 내분하는 점의 좌표를 구하시오.%
+}
+
+\dmpnum{6}{%
+세 점 $\mathrm{A}(2,\, 4)$,\ $\mathrm{B}(-1,\, 1)$,\ $\mathrm{C}(3,\, -2)$를 꼭짓점으로 하는
+삼각형 $\mathrm{ABC}$의 무게중심의 좌표를 구하시오.%
+}
+
+\end{document}

@@ -1,0 +1,47 @@
+%% concept.tex — 개념 정리 페이지 환경
+
+% 개념 페이지 마커 (시각적 구분용)
+\newenvironment{conceptpage}[1]{%
+  \par
+  \noindent
+  \begin{tcolorbox}[
+    enhanced, colback=tbk-light, colframe=tbk-accent,
+    arc=2pt, boxrule=0pt, leftrule=3pt,
+    left=10pt, right=10pt, top=6pt, bottom=6pt,
+    fontupper=\sffamily\bfseries\Large\color{tbk-accent}
+  ]
+    개념 정리 \quad #1
+  \end{tcolorbox}
+  \par\medskip
+}{%
+  \par\medskip
+}
+
+% 핵심 개념 박스 — 가벼운 박스, 좌측 강조 바
+\newtcolorbox{concept}[1][]{
+  enhanced, breakable,
+  colback=white, colframe=tbk-accent,
+  boxrule=0pt, leftrule=2.5pt, rightrule=0pt, toprule=0pt, bottomrule=0pt,
+  arc=0pt, outer arc=0pt,
+  left=10pt, right=8pt, top=6pt, bottom=6pt,
+  title=#1,
+  fonttitle=\sffamily\bfseries\color{tbk-accent},
+  attach title to upper={\par\smallskip},
+}
+
+% 예제 박스 — 매우 가벼운 박스
+\newtcolorbox{example}[1][예제]{
+  enhanced, breakable,
+  colback=tbk-light, colframe=tbk-light,
+  boxrule=0pt, arc=2pt,
+  left=10pt, right=8pt, top=6pt, bottom=6pt,
+  title=#1,
+  fonttitle=\sffamily\bfseries\color{tbk-tip},
+  attach title to upper={\par\smallskip},
+}
+
+% 보충 설명 (각주 스타일)
+\newcommand{\note}[1]{%
+  \par\smallskip
+  {\small\color{tbk-rule}▸\,}{\small #1}\par
+}

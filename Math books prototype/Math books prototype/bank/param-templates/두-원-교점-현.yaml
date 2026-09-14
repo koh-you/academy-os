@@ -1,0 +1,54 @@
+name: 두-원-교점-현
+source_id: 고쟁이-CH03-STEP3-#193
+tier: star_5_premium
+mechanism_primary: "두 원 교점 현 길이 조건 → 두 case (중심-현 상대 위치)"
+mechanism_secondary:
+  - "중심선 위 현의 수직이등분점"
+  - "피타고라스 (반현·중심-현 거리·반지름)"
+unit_code: CM2-GM
+description: "두 원 (x-a)²+(y-b)²=r1, (x-c)²+(y-d)²=k가 두 점 A, B에서 만나고 AB 길이가 주어졌을 때 k의 두 값을 구하고 합을 계산."
+
+# 매개변수 정의
+parameters:
+  O1_x: {range: [-3, 3], type: integer, exclude: [0]}
+  O1_y: {range: [-3, 3], type: integer, exclude: [0]}
+  r1:  {range: [10, 25], type: integer, note: "r1 = 반지름 제곱"}
+  O2_x: {range: [-3, 3], type: integer, exclude: [0]}
+  O2_y: {range: [-3, 3], type: integer, exclude: [0]}
+  AB_val: {choices: [2, 4, 6, "2*sqrt(2)", "2*sqrt(3)", "2*sqrt(5)"]}
+
+# 유효성 제약 (내부 계산으로 검증)
+constraints:
+  - "O1 != O2"
+  - "d = distance(O1, O2) > 0"
+  - "AM = AB_val/2"
+  - "O1M_squared = r1 - AM^2 > 0"      # 반현의 수직발이 O1 안쪽
+  - "O1M = sqrt(O1M_squared)"
+  - "answer = 2*(AM^2 + d^2 + O1M^2)"  # case i·ii 합 (수식으로 정리)
+  - "answer > 0 and answer is finite"
+
+# 답 계산 (Python-style pseudocode · param-family-gen이 mathjs로 변환)
+answer_formula: |
+  d_squared = (O2_x - O1_x)**2 + (O2_y - O1_y)**2
+  d = sqrt(d_squared)
+  AM_squared = (AB_val/2)**2
+  O1M_squared = r1 - AM_squared
+  O1M = sqrt(O1M_squared)
+  # Case (i) M이 O1O2 사이
+  k1 = (d - O1M)**2 + AM_squared
+  # Case (ii) M이 O1 반대쪽
+  k2 = (d + O1M)**2 + AM_squared
+  answer = k1 + k2   # = 2*(d^2 + O1M^2 + AM_squared)
+
+# 발문 template
+prompt_template: |
+  좌표평면 위의 두 원
+  $$(x-({{O1_x}}))^{2}+(y-({{O1_y}}))^{2}={{r1}},\qquad (x-({{O2_x}}))^{2}+(y-({{O2_y}}))^{2}=k$$
+  가 서로 다른 두 점 $\mathrm{A}$, $\mathrm{B}$에서 만나고, $\overline{\mathrm{AB}}={{AB_val}}$이 되도록 하는 모든 양수 $k$의 값의 합을 구하시오.
+
+variation_notes_template: "두 원 교점 현 · O1({{O1_x}},{{O1_y}}) · r1={{r1}} · O2({{O2_x}},{{O2_y}}) · AB={{AB_val}} → 답 {{answer}}"
+
+# 실 사용 seed 예시
+verified_seeds:
+  - {seed: 1, O1_x: 1, O1_y: -2, r1: 13, O2_x: -2, O2_y: 1, AB_val: "2*sqrt(3)", answer: 62}
+  - {seed: 2, O1_x: -1, O1_y: 2, r1: 10, O2_x: 2, O2_y: -1, AB_val: "2*sqrt(2)", answer: 56, source_ref: "원본 #193"}

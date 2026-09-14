@@ -1,0 +1,408 @@
+\documentclass[10pt,fleqn]{article}
+\usepackage{style}
+\renewcommand{\examround}{내신대비 [공통수학2]}
+\renewcommand{\examvol}{DeeP Red vol.1}
+
+% ── soltitle 로컬 override 제거 (세션 34 v3.3): style.sty의 \answersheetsetup으로 이관 ──
+
+\renewcommand{\solpart}[1]{%
+  \par\addvspace{10pt}\noindent
+  {\sffamily\bfseries\color{black}(#1)}\hspace{3mm}\ignorespaces%
+}
+\renewcommand{\subcase}[1]{%
+  \par\addvspace{6pt}\noindent
+  {\sffamily\bfseries\color{black}(#1)}\hspace{2mm}\ignorespaces%
+}
+
+\renewenvironment{answerbox}{%
+  \par\noindent
+  \textcolor{vB-answer-rule}{\rule[-0.6mm]{2mm}{4.5mm}}\hspace{2mm}%
+  \bfseries\color{black}%
+}{%
+  \par\vspace{7mm}%
+}
+
+\definecolor{noteBg}{HTML}{F5F5F5}
+\definecolor{noteDeep}{HTML}{0F2E5C}
+\definecolor{leftBar}{HTML}{163C75}
+% 통찰카드 폐기 (세션 36 종료 지시) — Critical Point만 사용
+\solnoteoutputfalse
+
+% Tier 1·4·5 defaults는 style.sty의 \answersheetsetup으로 이관 (v3.7, 2026-07-12)
+\setlength{\columnseprule}{0pt}
+
+\renewcommand{\quickgridstretch}{2.25}
+
+\usepackage{eso-pic}
+\AddToShipoutPictureFG{%
+  \ifnum\value{page}=1
+    \begin{tikzpicture}[overlay,remember picture]
+      \draw[color=vB-rule,line width=0.4pt]
+        ([xshift=1mm,yshift=-109.6mm]current page.north)
+        -- ([xshift=1mm,yshift=15.8mm]current page.south);
+    \end{tikzpicture}%
+  \else
+    \begin{tikzpicture}[overlay,remember picture]
+      \draw[color=vB-rule,line width=0.4pt]
+        ([xshift=1mm,yshift=-13.6mm]current page.north)
+        -- ([xshift=1mm,yshift=15.8mm]current page.south);
+    \end{tikzpicture}%
+  \fi
+}
+
+\begin{document}
+
+% ── 답지 전용 defaults 자동 적용 (v3.3, 2026-07-12) ──
+\answersheetsetup
+
+\answerheader{내신대비 [공통수학2] DeeP Red 1회 정답 및 해설}
+
+\begin{quickgrid}
+\quick{1}{④ $8$} & \quick{2}{③ $18\sqrt{6}$} & \quick{3}{① 제1사분면} & \quick{4}{② $4$} & \quick{5}{③ $30$} \\
+\quick{6}{③ $60$} & \quick{7}{③ $4$} & \quick{8}{③ $\tfrac{31}{10}$} & \quick{9}{③ $5$} & \quick{10}{② ㄱ,ㄷ} \\
+\quick{11}{② $48$} & \quick{12}{③ $20$} & \multicolumn{3}{l}{서술형: 13번 $21$, 14번 $32$, 15번 $\tfrac{17}{2}$, 16번 $12$, 17번 $62$}
+\end{quickgrid}
+
+\begin{multicols}{2}
+\raggedcolumns
+
+% ─────────────── #1 ───────────────
+\soltitle{1}{④ $8$}{5}
+
+수직선 위 점 $\mathrm{P}(a)$라 하면 조건은
+\[ |a+2| + |a-3| \le 8. \]
+$a=-2$, $a=3$을 경계로 세 구간으로 나누어 절댓값을 벗긴다.
+
+\solpart{i} $a < -2$: $-(a+2) - (a-3) = -2a + 1 \le 8$ 이므로 $a \ge -\dfrac{7}{2}$. 따라서 $-\dfrac{7}{2} \le a < -2$.
+
+\solpart{ii} $-2 \le a \le 3$: $(a+2) - (a-3) = 5 \le 8$이 항상 성립. 이 구간 전체.
+
+\solpart{iii} $a > 3$: $(a+2) + (a-3) = 2a - 1 \le 8$ 이므로 $a \le \dfrac{9}{2}$. 따라서 $3 < a \le \dfrac{9}{2}$.
+
+세 구간을 합치면 $-\dfrac{7}{2} \le a \le \dfrac{9}{2}$. 도형의 길이는
+\[ \dfrac{9}{2} - \left(-\dfrac{7}{2}\right) = 8. \]
+
+% ─────────────── #2 ───────────────
+\soltitle{2}{③ $18\sqrt{6}$}{5}
+
+무게중심 $\mathrm{G}(-2, -3)$과 꼭짓점 $\mathrm{A}(4, 3)$ 사이의 거리는
+\[ \overline{\mathrm{AG}} = \sqrt{6^{2} + 6^{2}} = 6\sqrt{2}. \]
+
+무게중심의 $2:1$ 성질에서 $\mathrm{A}$로부터 대변 $\mathrm{BC}$의 중점 $\mathrm{M}$까지의 거리는
+\[ \overline{\mathrm{AM}} = \dfrac{3}{2}\,\overline{\mathrm{AG}} = 9\sqrt{2}. \]
+
+정삼각형에서 꼭짓점에서 대변에 내린 수선(= 중선)의 길이가 $\dfrac{\sqrt{3}}{2}\,\overline{\mathrm{AB}}$이므로
+\[ \dfrac{\sqrt{3}}{2}\,\overline{\mathrm{AB}} = 9\sqrt{2} \ \Longrightarrow\ \overline{\mathrm{AB}} = \dfrac{18\sqrt{2}}{\sqrt{3}} = 6\sqrt{6}. \]
+
+둘레는 $3\,\overline{\mathrm{AB}} = 18\sqrt{6}$.
+
+% ─────────────── #3 ───────────────
+\soltitle{3}{① 제1사분면}{5}
+
+직선 $ax + by + c = 0$을 $y$에 대해 정리하면
+\[ y = -\dfrac{a}{b}x - \dfrac{c}{b}. \] 기울기 $-\dfrac{a}{b} > 0$과 $y$절편 $-\dfrac{c}{b} < 0$에서
+\[ \dfrac{a}{b} < 0, \qquad \dfrac{c}{b} > 0. \]
+
+이제 직선 $bx - ay + c = 0$을 $y$에 대해 정리하면
+\[ y = \dfrac{b}{a}x + \dfrac{c}{a}. \]
+기울기 $\dfrac{b}{a} = \dfrac{1}{\,a/b\,}$이므로 $\dfrac{a}{b} < 0$과 부호가 같아 $\dfrac{b}{a} < 0$. $y$절편 $\dfrac{c}{a} = \dfrac{c/b}{a/b} = \dfrac{(+)}{(-)} < 0$.
+
+기울기 음수, $y$절편 음수인 직선은 제 $2$, $3$, $4$ 사분면을 지나고 제 $1$ 사분면은 지나지 않는다.
+
+% ─────────────── #4 ───────────────
+\soltitle{4}{② $4$}{5}
+
+$n = 1, 2, 3$을 각각 $2n^{2} + 1$에 대입하면
+\[ A = \{3,\ 9,\ 19\}. \]
+
+각 원소를 $6$으로 나눈 나머지를 구한다.
+\[ 3 = 6\cdot 0 + 3,\quad 9 = 6\cdot 1 + 3,\quad 19 = 6\cdot 3 + 1. \]
+
+나머지는 각각 $3$, $3$, $1$. 중복을 제거하면 $B = \{1,\ 3\}$이고 원소의 합은 $1 + 3 = 4$.
+
+% ─────────────── #5 ───────────────
+\soltitle{5}{③ $30$}{5}
+
+$-2 < x - a \le 0$을 $x$에 대해 정리하면
+\[ A = \{x \mid a - 2 < x \le a\}. \]
+
+$B$의 부등식 $x^{2} - 11x + 18 < 0$은 $(x-2)(x-9) < 0$이므로
+\[ B = \{x \mid 2 < x < 9\}. \]
+
+$A \subset B$가 되려면 $A$의 왼쪽 경계 $a - 2$가 $2$ 이상이고 오른쪽 경계 $a$가 $9$ 미만이어야 한다. 즉
+\[ a - 2 \ge 2 \quad \text{그리고} \quad a < 9. \]
+
+이로부터 $4 \le a < 9$. 자연수 $a$는 $4, 5, 6, 7, 8$이고 합은
+\[ 4 + 5 + 6 + 7 + 8 = 30. \]
+
+% ─────────────── #6 ───────────────
+\soltitle{6}{③ $60$}{5}
+
+배수집합 $A_{k}$의 포함관계에서 $A_{p} \subset A_{q}$는 $q$가 $p$의 약수인 것과 동치이다. 또한 두 배수집합의 교집합은 최소공배수의 배수집합이다.
+
+첫 조건: $A_{12}$과 $A_{16}$의 최소공배수 $48$의 배수집합이 교집합이므로 $A_{12} \cap A_{16} = A_{48}$. $A_{m} \subset A_{48}$이려면 $m$이 $48$의 배수이므로 $m$의 최솟값은 $48$.
+
+두 번째 조건: $(A_{24} \cup A_{60}) \subset A_{n}$은 $A_{24} \subset A_{n}$과 $A_{60} \subset A_{n}$이 동시에 성립. 즉 $n$이 $24$의 약수이고 $60$의 약수이므로 $n$은 두 수의 최대공약수 $\gcd(24, 60) = 12$의 약수. $n$의 최댓값은 $12$.
+
+따라서 $m$의 최솟값과 $n$의 최댓값의 합은 $48 + 12 = 60$.
+
+% ─────────────── #7 ───────────────
+\soltitle{7}{③ $4$}{5}
+
+원 $x^{2} + y^{2} - 4x + 2y + 1 = 0$의 표준형은
+\[ (x - 2)^{2} + (y + 1)^{2} = 4. \]
+중심은 $(2,\,-1)$.
+
+직사각형 $\{(x,y) \mid 0 \le x \le 6,\ 1 \le y \le 5\}$의 두 대각선 교점(= 중심)은
+\[ \left( \dfrac{0+6}{2},\ \dfrac{1+5}{2} \right) = (3,\,3). \]
+
+원의 넓이를 이등분하는 직선은 반드시 원의 중심을 지나고, 직사각형의 넓이를 이등분하는 직선은 반드시 두 대각선의 교점을 지난다. 두 조건을 동시에 만족하는 직선은 두 점 $(2, -1)$, $(3, 3)$을 지나는 직선.
+
+기울기는 $\dfrac{3 - (-1)}{3 - 2} = 4$.
+
+% ─────────────── #8 ───────────────
+\soltitle{8}{③ $\tfrac{31}{10}$}{6}
+
+주어진 직선의 방정식을 $k$에 대해 정리하면
+\[ k(x - y - 4) + (x + 2y - 1) = 0. \]
+
+$k$의 값에 관계없이 성립하려면 $x - y - 4 = 0$과 $x + 2y - 1 = 0$이 동시에 성립. 연립하면 $x = 3$, $y = -1$이므로 이 직선은 $k$의 값에 관계없이 항상 꼭짓점 $\mathrm{B}(3, -1)$을 지난다.
+
+꼭짓점 $\mathrm{B}$를 지나고 삼각형의 넓이를 $2:1$ 또는 $1:2$로 나누는 직선은 대변 $\mathrm{AC}$를 $1:2$ 또는 $2:1$로 내분하는 점을 지난다.
+
+\solpart{i} 대변 $\mathrm{AC}$를 $1:2$로 내분: $\mathrm{D}_{1} = \left(\dfrac{1\cdot 4 + 2\cdot 1}{3},\ \dfrac{1\cdot 2 + 2\cdot 1}{3}\right) = \left(2,\ \dfrac{4}{3}\right)$. 이 점을 원 직선에 대입.
+\[ (k+1)\cdot 2 + (2-k)\cdot \dfrac{4}{3} - 4k - 1 = 0. \]
+양변에 $3$을 곱해 정리하면
+\[ -10k + 11 = 0 \]
+이므로 $k = \dfrac{11}{10}$.
+
+\solpart{ii} 대변 $\mathrm{AC}$를 $2:1$로 내분: $\mathrm{D}_{2} = \left(\dfrac{2\cdot 4 + 1}{3},\ \dfrac{2\cdot 2 + 1}{3}\right) = \left(3,\ \dfrac{5}{3}\right)$. $\mathrm{D}_{2}$의 $x$좌표가 $\mathrm{B}$와 같으므로 두 점을 지나는 직선은 $x = 3$. 원 직선이 $x = 3$이 되려면 $y$계수 $2 - k = 0$, 즉 $k = 2$이다. (대입하면 $3x - 9 = 0$으로 성립.)
+
+두 경우의 $k$의 합은 $\dfrac{11}{10} + 2 = \dfrac{31}{10}$.
+
+% ─────────────── #9 ───────────────
+\soltitle{9}{③ $5$}{6}
+
+$\overline{\mathrm{AB}}$를 지름으로 하는 원은 중심이 두 끝점의 중점 $(-1, 0)$, 반지름이 $\dfrac{4}{2} = 2$이므로
+\[ (x+1)^{2} + y^{2} = 4,\qquad -3 \le x \le 1. \]
+
+원 위의 점이므로 $y^{2} = 4 - (x+1)^{2}$. 대입하여 $x$의 함수로 정리하면
+\[ y^{2} - 2x = 4 - (x+1)^{2} - 2x = -(x+2)^{2} + 7. \]
+
+정의역 $-3 \le x \le 1$에서 이 이차함수의 최댓값·최솟값을 살핀다. 꼭짓점 $x = -2$가 정의역 내부에 있으므로
+\[ \max = 7\quad(x=-2). \]
+
+경계에서 $f(-3) = -1 + 7 = 6$, $f(1) = -9 + 7 = -2$. 최솟값은 $-2$.
+
+합은 $7 + (-2) = 5$.
+
+% ─────────────── #10 ───────────────
+\soltitle{10}{② ㄱ,ㄷ}{6}
+
+\solpart{ㄱ} $x < y < 0$이면 $xy > 0$. 부등식 $x < y$의 양변을 $xy$로 나누면 부호가 바뀌므로 $\dfrac{1}{y} < \dfrac{1}{x}$, 즉 $\dfrac{1}{x} > \dfrac{1}{y}$. 참.
+
+\solpart{ㄴ} $x^{2} > y^{2}$이라도 $x > y$라 단정할 수 없다. 반례: $x = -3$, $y = 1$이면 $x^{2} = 9 > 1 = y^{2}$이지만 $x = -3 < 1 = y$. 거짓.
+
+\solpart{ㄷ} 실수의 제곱은 $0$ 이상이므로 $x^{2} + y^{2} = 0$이려면 $x = 0$ 그리고 $y = 0$. 이때 $|x| + |y| = 0$. 참.
+
+\solpart{ㄹ} $x^{2} - 5x + 6 = 0$의 해는 $(x-2)(x-3) = 0$, 즉 $x = 2$ 또는 $x = 3$. $x = 2$인 경우가 반례이므로 거짓.
+
+\solpart{ㅁ} $xy = 0$이면 $x = 0$ 또는 $y = 0$ 중 적어도 하나. 반례: $x = 0$, $y = 5$이면 $xy = 0$이지만 $y \ne 0$. 거짓.
+
+참인 것은 ㄱ, ㄷ.
+
+% ─────────────── #11 ───────────────
+\soltitle{11}{② $48$}{6}
+
+조건 (가) $n(A \cap B) = 2$이므로 $A \cap B$는 $B = \{2, 5, 6\}$의 원소 중 $2$개를 갖는다. 세 경우로 나누어 조사한다.
+
+\solpart{i} $A \cap B = \{2, 5\}$: $2$와 $5$가 $k$의 약수이고 $6$은 $k$의 약수가 아님. $k$는 $\mathrm{lcm}(2, 5) = 10$의 배수 중 $6$의 배수가 아닌 값. $30$ 이하에서 $k = 10, 20$.
+\begin{itemize}[leftmargin=1.2em, itemsep=1pt]
+\item $k = 10$: $A = \{1, 2, 5, 10\}$, $A - B = \{1, 10\}$. 합 $11$ (홀수). 조건 (나) 만족.
+\item $k = 20$: $A = \{1, 2, 4, 5, 10, 20\}$, $A - B = \{1, 4, 10, 20\}$. 합 $35$ (홀수). 조건 (나) 만족.
+\end{itemize}
+기여: $10 + 20 = 30$.
+
+\solpart{ii} $A \cap B = \{2, 6\}$: $2$와 $6$이 $k$의 약수이고 $5$는 아님. $k$는 $6$의 배수이면서 $5$의 배수가 아님. $30$ 이하에서 $k = 6, 12, 18, 24$.
+\begin{itemize}[leftmargin=1.2em, itemsep=1pt]
+\item $k = 6$: $A - B = \{1, 3\}$. 합 $4$ (짝수). 실패.
+\item $k = 12$: $A - B = \{1, 3, 4, 12\}$. 합 $20$ (짝수). 실패.
+\item $k = 18$: $A - B = \{1, 3, 9, 18\}$. 합 $31$ (홀수). 조건 (나) 만족.
+\item $k = 24$: $A - B = \{1, 3, 4, 8, 12, 24\}$. 합 $52$ (짝수). 실패.
+\end{itemize}
+기여: $18$.
+
+\solpart{iii} $A \cap B = \{5, 6\}$: $5$와 $6$이 $k$의 약수이고 $2$는 아님. 하지만 $6$이 $k$의 약수이면 $2$도 $k$의 약수. 모순이므로 경우 없음.
+
+세 경우를 모두 합하면 $30 + 18 = 48$.
+
+% ─────────────── #12 ───────────────
+\soltitle{12}{③ $20$}{6}
+
+점 $\mathrm{A}(4, 10)$부터 규칙에 따라 이동한다.
+
+\solpart{i} $(4, 10)$: $10 > 4$이므로 (가)에 의해 $x$축 방향으로 $+3$ → $(7, 10)$.
+
+\solpart{ii} $(7, 10)$: $10 > 7$이므로 (가)에 의해 $x$축 방향으로 $+3$ → $(10, 10)$.
+
+\solpart{iii} $(10, 10)$: $y = x$이므로 (다)에 의해 멈춤.
+
+정지점 $\mathrm{B}(10, 10)$이므로 $p + q = 10 + 10 = 20$.
+
+\end{multicols}
+
+\clearpage
+
+\begin{multicols}{2}
+\raggedcolumns
+
+% ─────────────── #13 ───────────────
+\soltitle{13}{$21$}{6}
+
+세 날짜 $\mathrm{X}$, $\mathrm{Y}$, $\mathrm{Z}$에 참가한 학생의 집합을 각각 $A$, $B$, $C$라 하자. 조건에서 각 날짜 참가자 수는 $n(A) = 17$, $n(B) = 12$, $n(C) = 13$이고 세 날짜 모두 참가자 $n(A \cap B \cap C) = 3$이다. 또한 학생 $30$명 모두 세 날짜 중 하루 이상 참가했으므로 $n(A \cup B \cup C) = 30$.
+
+두 원소 교집합의 합을 $S_{2} = n(A \cap B) + n(B \cap C) + n(C \cap A)$, 세 원소 교집합의 크기를 $S_{3}$이라 하면 포함배제 원리에서
+\[ n(A \cup B \cup C) = n(A)+n(B)+n(C) - S_{2} + S_{3}. \]
+
+수치를 대입하면 $30 = 42 - S_{2} + 3$이므로 $S_{2} = 15$.
+
+정확히 두 날짜에만 참가한 학생 수는 각 두 교집합의 합에서 세 교집합을 세 번 뺀 값이므로
+\[ (\text{두 날짜만}) = S_{2} - 3\cdot n(A \cap B \cap C) = 15 - 9 = 6. \]
+
+정확히 한 날짜에만 참가한 학생 수를 $N_{1}$이라 하면 전체를 세 부분으로 분해하여
+\[ N_{1} + 6 + 3 = 30, \]
+따라서 $N_{1} = 21$.
+
+% ─────────────── #14 ───────────────
+\soltitle{14}{$32$}{7}
+
+원 $x^{2} + y^{2} - 8x - 2y = 0$의 표준형은 $(x - 4)^{2} + (y - 1)^{2} = 17$이므로 중심 $(4, 1)$, 반지름 $\sqrt{17}$.
+
+\solpart{1} $y = 0$을 대입하면 $x^{2} - 8x = 0$, $x = 0$ 또는 $x = 8$. 따라서 $\mathrm{A}(0, 0)$, $\mathrm{B}(8, 0)$이고
+\[ \overline{\mathrm{AB}} = 8. \]
+
+점 $\mathrm{P}$의 $y$좌표를 $k$라 하면 삼각형 $\mathrm{ABP}$의 넓이는
+\[ S = \dfrac{1}{2} \cdot 8 \cdot k = 4k. \]
+
+\solpart{2} 원 위의 점 $\mathrm{P}$가 제 $1$ 사분면 위에 있을 조건을 살핀다. 원 위의 점의 $y$좌표는 $1 - \sqrt{17} \le y \le 1 + \sqrt{17}$이고, 제 $1$ 사분면 조건은 $y > 0$과 $x > 0$이다.
+
+수평선 $y = k$가 원과 만나는 $x$좌표는 $x = 4 \pm \sqrt{17 - (k-1)^{2}}$이다. 두 값 모두 양수일 조건은 작은 값 $4 - \sqrt{17 - (k-1)^{2}} > 0$이므로 $\sqrt{17 - (k-1)^{2}} < 4$. 양변을 제곱하면 $17 - (k-1)^{2} < 16$이 되어 $(k-1)^{2} > 1$, 즉 $k > 2$ 또는 $k < 0$.
+
+제 $1$ 사분면 조건 $y > 0$과 합치면 $k > 2$일 때 원 위의 점이 두 개, $0 < k \le 2$일 때 한 개.
+
+\solpart{3} $S = 4k$가 자연수인 $k$를 찾는다. $4k = n$ (자연수) ↔ $k = \dfrac{n}{4}$.
+
+$k$의 범위는 $0 < k \le 1 + \sqrt{17}$. $1 + \sqrt{17} \approx 5.12$이므로 $4k \le 4 + 4\sqrt{17} \approx 20.49$. 자연수 $n = 1, 2, \dots, 20$.
+
+\subcase{i} $0 < k \le 2$: $\mathrm{P}$가 $1$개. $n = 1, 2, \dots, 8$이므로 $k = \dfrac{1}{4}, \dfrac{2}{4}, \dots, 2$. $\mathrm{P}$ 개수 $8$개.
+
+\subcase{ii} $2 < k \le 1 + \sqrt{17}$: $\mathrm{P}$가 $2$개. $n = 9, 10, \dots, 20$이므로 $k = \dfrac{9}{4}, \dfrac{10}{4}, \dots, 5$. 값 $12$개에서 각 $k$당 $\mathrm{P}$ $2$개이므로 $2 \times 12 = 24$개.
+
+두 경우를 합하면
+\[ 8 + 24 = 32. \]
+
+\criticalpoint{%
+① \cplabel{$y$좌표 범위 상한 확인}: $k \le 1 + \sqrt{17}$을 놓치고 $n$의 상한을 $20$이 아닌 $21$ 등으로 잡으면 오답. $4k \le 4 + 4\sqrt{17}$의 정확한 부등식을 이용해 $n$의 상한을 결정한다. \\
+② \cplabel{한 개 · 두 개 경계 $k=2$}: $k = 2$일 때 $\mathrm{P}$의 $x$좌표는 $4 \pm \sqrt{17 - 1} = 4 \pm 4$이므로 $x = 0$ 또는 $x = 8$. 제 $1$ 사분면 조건 $x > 0$에서 $x = 0$은 제외되므로 $\mathrm{P}$가 하나뿐이다. 경계 등호 처리에 주의. \\
+③ \cplabel{연속 조건을 이산 개수로}: 넓이가 자연수라는 이산 조건이 $k$의 이산 후보 $k = n/4$를 낳는다. 각 후보 $k$에 대해 원 위의 점 개수를 구분하여 곱해야 한다.%
+}
+
+% ─────────────── #15 ───────────────
+\soltitle{15}{$\tfrac{17}{2}$}{7}
+
+원 $x^{2} + y^{2} + 4x - 2y - 4 = 0$의 표준형은
+\[ (x + 2)^{2} + (y - 1)^{2} = 9. \]
+중심 $(-2, 1)$, 반지름 $3$.
+
+평행이동 $(x, y) \to (x + k, y - 3)$에 의해 중심은 $(-2 + k, 1 - 3) = (k - 2, -2)$로 옮겨진다. 반지름은 변하지 않으므로 이동 후 원은 중심 $(k - 2, -2)$, 반지름 $3$.
+
+직선 $4x + 3y - 5 = 0$에 접할 조건은 중심에서 직선까지의 거리가 반지름과 같은 것.
+\[ \dfrac{|4(k-2) + 3(-2) - 5|}{\sqrt{4^{2} + 3^{2}}} = 3. \]
+
+분자를 정리하면
+\[ |4k - 8 - 6 - 5| = |4k - 19| \]
+이고 분모 $\sqrt{25} = 5$이므로
+\[ |4k - 19| = 15. \]
+
+두 경우로 나눈다.
+
+\solpart{i} $4k - 19 = 15$: $k = \dfrac{34}{4} = \dfrac{17}{2}$.
+
+\solpart{ii} $4k - 19 = -15$: $k = \dfrac{4}{4} = 1$.
+
+모든 $k$의 값의 곱은
+\[ \dfrac{17}{2} \cdot 1 = \dfrac{17}{2}. \]
+
+% ─────────────── #16 ───────────────
+\soltitle{16}{$12$}{7}
+
+$A \cup C = B \cup C$가 성립하는 조건을 정리한다. $A - B$의 원소는 $B$에 없으므로 $A \cup C$에 남으려면 $C$에 포함되어야 하고, $B - A$의 원소도 마찬가지이다. 반대로 $A \cap B$의 원소는 $C$의 유무에 관계없이 양변에 나타난다.
+
+따라서 조건은 $(A - B) \cup (B - A) \subset C$, 즉
+\[ A \triangle B \subset C. \]
+
+$k = n(A \triangle B)$라 하면 나머지 $8 - k$개의 원소가 $C$에 자유롭게 포함되거나 안 되므로 $C$의 개수는 $2^{8 - k}$. 이 값이 $16 = 2^{4}$이려면
+\[ 8 - k = 4 \ \Longrightarrow\ k = 4. \]
+
+즉 $n(A \triangle B) = 4$가 되는 $(a, b)$를 찾는다. $A = \{1, 2, 4, 6, 8\}$이고 $B = \{1, a, b\}$이며 $1 < a < b \le 8$이다. $1$은 항상 공통. $a$, $b$가 각각 $A$에 속하는지에 따라 나눈다.
+
+\solpart{i} $a, b \in A$ (즉 $a, b \in \{2, 4, 6, 8\}$): $A \cap B = \{1, a, b\}$이므로 $|A \cap B| = 3$이고 $|A \cup B| = 5$. 따라서 $|A \triangle B| = 5 - 3 = 2$. 조건 실패.
+
+\solpart{ii} $a \in A$, $b \notin A$ (즉 $a \in \{2, 4, 6, 8\}$, $b \in \{3, 5, 7\}$, $a < b$): $A \cap B = \{1, a\}$, $|A \cup B| = 6$. $|A \triangle B| = 4$. 조건 성립. $(a, b)$ 개수는 $a = 2$일 때 $b \in \{3, 5, 7\}$ 세 개, $a = 4$일 때 $b \in \{5, 7\}$ 두 개, $a = 6$일 때 $b = 7$ 한 개. 합 $6$쌍.
+
+\solpart{iii} $a \notin A$, $b \in A$ (즉 $a \in \{3, 5, 7\}$, $b \in \{2, 4, 6, 8\}$, $a < b$): $A \cap B = \{1, b\}$, $|A \cup B| = 6$. $|A \triangle B| = 4$. 조건 성립. $(a, b)$ 개수는 $a = 3$일 때 $b \in \{4, 6, 8\}$ 세 개, $a = 5$일 때 $b \in \{6, 8\}$ 두 개, $a = 7$일 때 $b = 8$ 한 개. 합 $6$쌍.
+
+\solpart{iv} $a, b \notin A$ (즉 $a, b \in \{3, 5, 7\}$, $a < b$): $A \cap B = \{1\}$, $|A \cup B| = 7$. $|A \triangle B| = 6$. 조건 실패.
+
+세 경우 성립하는 것은 (ii)와 (iii)의 $6 + 6 = 12$쌍.
+
+\criticalpoint{%
+① \cplabel{$A \cup C = B \cup C \Leftrightarrow A \triangle B \subset C$}: 이 항등이 문제의 핵심. $A - B$와 $B - A$의 원소는 반드시 $C$에 포함되어야 좌우변이 일치한다. $A \cap B$의 원소는 $C$ 유무와 무관. \\
+② \cplabel{나머지 원소는 자유롭게 선택}: $A \triangle B$를 포함하는 조건 아래 나머지 $8 - k$개 원소는 $C$에 속해도 되고 안 속해도 된다. 미결정 원소의 개수가 $8-k$개이므로 부분집합 수 $2^{8-k}$가 얻어진다. \\
+③ \cplabel{$a$, $b$의 $A$ 소속 여부로 나누기}: $|A \triangle B|$는 $a$와 $b$가 $A$에 속하는지 여부에 따라 값이 다르다. $2, 4, 6$ 세 가지 값이 나오므로 필요한 값 $4$가 되는 경우만 골라야 한다.%
+}
+
+% ─────────────── #17 ───────────────
+\soltitle{17}{$62$}{8}
+
+첫 번째 원 $C_{1}: (x - 1)^{2} + (y + 2)^{2} = 13$의 중심 $\mathrm{O}_{1}(1, -2)$, 반지름 $\sqrt{13}$. 두 번째 원 $C_{2}: (x + 2)^{2} + (y - 1)^{2} = k$의 중심 $\mathrm{O}_{2}(-2, 1)$, 반지름 $\sqrt{k}$.
+
+두 중심 사이의 거리는
+\[ \overline{\mathrm{O}_{1}\mathrm{O}_{2}} = \sqrt{3^{2} + 3^{2}} = 3\sqrt{2}. \]
+
+두 교점 $\mathrm{A}$, $\mathrm{B}$의 중점을 $\mathrm{M}$이라 하면 $\overline{\mathrm{AB}} = 2\sqrt{3}$이므로 $\overline{\mathrm{AM}} = \sqrt{3}$이다. 공통현은 두 중심을 잇는 직선에 수직이므로 $\mathrm{M}$은 직선 $\mathrm{O}_{1}\mathrm{O}_{2}$ 위의 점.
+
+첫 번째 원에서 피타고라스 정리로
+\[ \overline{\mathrm{O}_{1}\mathrm{M}} = \sqrt{\overline{\mathrm{O}_{1}\mathrm{A}}^{2} - \overline{\mathrm{AM}}^{2}} = \sqrt{13 - 3} = \sqrt{10}. \]
+
+두 번째 원에서
+\[ \overline{\mathrm{O}_{2}\mathrm{M}} = \sqrt{k - 3}. \]
+
+$\mathrm{M}$의 위치에 따라 두 경우로 나눈다.
+
+\solpart{i} $\mathrm{M}$이 두 중심 $\mathrm{O}_{1}$, $\mathrm{O}_{2}$ 사이: $\overline{\mathrm{O}_{1}\mathrm{M}} + \overline{\mathrm{MO}_{2}} = \overline{\mathrm{O}_{1}\mathrm{O}_{2}}$이므로
+\[ \sqrt{10} + \sqrt{k - 3} = 3\sqrt{2}. \]
+$\sqrt{k - 3} = 3\sqrt{2} - \sqrt{10}$. $3\sqrt{2} = \sqrt{18} > \sqrt{10}$이므로 우변은 양수. 양변 제곱하면
+\[ k - 3 = 18 - 2 \cdot 3\sqrt{2} \cdot \sqrt{10} + 10 = 28 - 12\sqrt{5}. \]
+따라서 $k = 31 - 12\sqrt{5}$.
+
+\solpart{ii} $\mathrm{M}$이 $\mathrm{O}_{1}$을 기준으로 $\mathrm{O}_{2}$ 반대쪽: $\overline{\mathrm{O}_{1}\mathrm{M}} + \overline{\mathrm{O}_{1}\mathrm{O}_{2}} = \overline{\mathrm{MO}_{2}}$이므로
+\[ \sqrt{k - 3} = \sqrt{10} + 3\sqrt{2}. \]
+양변 제곱하면
+\[ k - 3 = 10 + 12\sqrt{5} + 18 = 28 + 12\sqrt{5}, \]
+$k = 31 + 12\sqrt{5}$.
+
+\solpart{iii} $\mathrm{M}$이 $\mathrm{O}_{2}$를 기준으로 $\mathrm{O}_{1}$ 반대쪽: $\overline{\mathrm{O}_{1}\mathrm{M}} = \overline{\mathrm{O}_{1}\mathrm{O}_{2}} + \overline{\mathrm{O}_{2}\mathrm{M}}$이어야 하나 좌변 $\sqrt{10} \approx 3.16$이 우변 $3\sqrt{2} + \sqrt{k-3} \ge 3\sqrt{2} \approx 4.24$보다 작을 수 없으므로 불가.
+
+두 경우 $k$의 값의 합은
+\[ (31 - 12\sqrt{5}) + (31 + 12\sqrt{5}) = 62. \]
+
+\criticalpoint{%
+① \cplabel{공통현의 중점 $\mathrm{M}$은 중심선 위}: 두 원의 공통현은 두 중심을 잇는 직선에 수직이고 그 직선에 의해 이등분된다. 따라서 $\mathrm{M}$은 직선 $\mathrm{O}_{1}\mathrm{O}_{2}$ 위에 있으며 각 반현은 원의 반지름을 빗변으로 하는 직각삼각형을 이룬다. \\
+② \cplabel{$\mathrm{M}$의 위치 두 case}: $\mathrm{M}$이 $\mathrm{O}_{1}$과 $\mathrm{O}_{2}$ 사이에 있거나 $\mathrm{O}_{1}$의 반대쪽에 있을 수 있다. $\overline{\mathrm{O}_{2}\mathrm{M}} = \sqrt{k-3}$이 양수라는 조건에서 두 case를 모두 살펴야 한다. \\
+③ \cplabel{켤레 형태 합의 무리 소거}: $k = 31 \pm 12\sqrt{5}$이므로 두 값의 합은 무리 부분이 상쇄되어 정수 $62$가 된다. 켤레 형태의 합은 근의 계수의 관계와 유사한 구조로 무리 부분이 사라지는 것에 익숙해질 것.%
+}
+
+\end{multicols}
+
+\end{document}

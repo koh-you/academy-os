@@ -1,0 +1,100 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{mathbook-boxes}[2026/05/26 v2 Box environments]
+
+% ============================================================
+%  개념 정리 내부 환경
+% ============================================================
+
+% --- 공식/정의 박스 (가벼운 스타일) ---
+\newtcolorbox{defbox}[1][]{
+  colback=mblightgray,
+  colframe=mbline,
+  boxrule=0.5pt,
+  arc=4pt,
+  left=10pt, right=10pt, top=6pt, bottom=6pt,
+  breakable,
+  #1
+}
+
+% --- 유형 해결 TIP (높이 통일, 폰트 축소) ---
+% TIP 박스 안에서는 \dfrac strut 비활성화 (작은 박스라 행간 보강 불필요)
+% height=1.0cm 고정 — 1줄/2줄 TIP 모두 동일한 높이 박스로 통일
+\newcommand{\typetip}[1]{%
+  \par\vspace{2pt}
+  \begin{tcolorbox}[
+    colback=tipbg,
+    colframe=tipcolor!40,
+    boxrule=0pt,
+    leftrule=3pt,
+    arc=0pt,
+    left=6pt, right=6pt, top=4pt, bottom=4pt,
+    height=1.0cm,
+    valign=center,
+    fontupper=\scriptsize\sffamily
+  ]
+    \ifx\origdfrac\undefined\else\let\dfrac\origdfrac\fi
+    \raggedright
+    {\bfseries\color{tipcolor}유형 해결 TIP}\;\; #1
+  \end{tcolorbox}
+  \vspace{-4pt}
+}
+
+% --- schema (대표문항 풀이 스키마) ---
+\newcommand{\schema}[1]{%
+  \par\vspace{4pt}
+  \begin{tcolorbox}[
+    colback=step2bg,
+    colframe=step2color!30,
+    boxrule=0pt,
+    leftrule=3pt,
+    arc=0pt,
+    left=8pt, right=8pt, top=5pt, bottom=5pt,
+    fontupper=\small\sffamily
+  ]
+    {\bfseries\color{step2color}스키마}\quad #1
+  \end{tcolorbox}
+  \vspace{4pt}
+}
+
+% --- (보기) 즉시 시연 박스 (개념 박스 바로 아래 숫자 예제) ---
+% 좌측 회색 라인, 옅은 회색 배경. defbox보다 가벼운 톤.
+\newtcolorbox{example}{
+  enhanced,
+  colback=mblightgray!40,
+  colframe=mbline,
+  boxrule=0pt,
+  leftrule=2.5pt,
+  arc=0pt,
+  left=8pt, right=8pt, top=3pt, bottom=3pt,
+  fontupper=\small,
+  before upper={\bfseries\color{mbdarkgray}보기.\;\;}
+}
+
+% --- KEY Point 알고리즘 박스 ---
+% 우측 골드 라인, 옅은 골드 배경. 풀이 절차 (i)→(ii)→(iii) 정리용.
+\newtcolorbox{keypoint}{
+  enhanced,
+  colback=mbaccent!10,
+  colframe=mbaccent!40,
+  boxrule=0pt,
+  leftrule=3pt,
+  arc=0pt,
+  left=8pt, right=8pt, top=4pt, bottom=4pt,
+  fontupper=\small,
+  before upper={\bfseries\color{mbaccent!85!black}KEY Point\;\;}
+}
+
+% --- 사고의 확장 ---
+\newtcolorbox{thinkbox}[1][]{
+  colback=step3bg,
+  colframe=step3color!40,
+  boxrule=0.6pt,
+  arc=4pt,
+  left=10pt, right=10pt, top=6pt, bottom=6pt,
+  fonttitle=\small\bfseries\sffamily\color{step3color},
+  title={사고의 확장},
+  breakable,
+  #1
+}
+
+\endinput

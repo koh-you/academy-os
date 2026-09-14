@@ -1,0 +1,172 @@
+% mathbook-solutions-v2.sty — 신규 답지 매크로 라이브러리 (v2.0, 2026-06-30)
+%
+% 단일 출처: bank/풀이-양식-카탈로그.md + bank/그래프-양식-카탈로그.md
+%            + memory/feedback_solution_format_priority.md (고쟁이 양식 우선)
+%            + memory/feedback_step_label_deprecated.md (단계 라벨 폐지)
+%
+% v2.0 정책 (2026-06-30 마스터 확립):
+%   - 🔴 \step{N} 폐지 — 등호 정렬 식 변환 줄 위주
+%   - 🌟 고쟁이 양식 우선 차용
+%   - [다른 풀이]·[TIP] 라벨 (박스 없이 또는 가벼운 박스)
+%   - (i)·(ii)·(iii) 케이스 분기 허용
+%   - 조립제법 점선 격자·다항식 세로 나눗셈 박스 차용
+%
+% 신규 작성 답지에만 사용 (기존 9건 답지는 local style.sty 그대로 유지)
+%
+% 매크로 목록:
+%   \altsol{본문}        — [다른 풀이] 라벨 (박스 없이, 풀이 들여쓰기)
+%   \tipbox{본문}        — [TIP] 빨간 라벨 박스 (고쟁이 양식 차용)
+%   \conclude{본문}      — "따라서 …" 결론 + 자연 한국어 종결
+%   \polydiv{식블록}     — 조립제법 점선 격자 양식
+%   \longdiv{식블록}     — 다항식 세로 나눗셈 박스 양식
+%   \altanswer{N}        — 답 화살표 표기 (>> ⑤ 양식)
+%   \caseitem{i}{본문}   — (i)·(ii)·(iii) 케이스 분기 (enumerate 대안)
+%
+% 의존성: tikz, tcolorbox, enumitem, array
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{mathbook-solutions-v2}[2026/06/30 v2.0 New solution macros — gjaengi style, no step labels]
+
+\RequirePackage{tikz}
+\RequirePackage{tcolorbox}
+\RequirePackage{enumitem}
+\RequirePackage{array}
+
+% ── 색상 정의 ──────────────────────────────────────────────────────────
+% 고쟁이 양식 컬러 (도형 면 구분용)
+\definecolor{gjPurple}{RGB}{192,175,216}    % 보라 음영 (도형 면)
+\definecolor{gjBlue}{RGB}{184,212,240}      % 파랑 음영
+\definecolor{gjTipRed}{RGB}{220,53,69}      % TIP 빨간 라벨
+\definecolor{gjAltGray}{RGB}{120,120,120}   % [다른 풀이] 회색 라벨
+
+% ── \altsol — [다른 풀이] 라벨 (박스 없이) ──────────────────────────────
+% 사용: \altsol{본 풀이와 다른 접근. 자연 단락으로 1-3줄 작성.}
+\newcommand{\altsol}[1]{%
+  \par\vspace{4pt}%
+  \noindent\textcolor{gjAltGray}{\textbf{[다른 풀이]}}\quad #1%
+  \par\vspace{4pt}%
+}
+
+% ── \tipbox — [TIP] 빨간 라벨 박스 (고쟁이 양식) ────────────────────────
+% 사용: \tipbox{보조 설명·변환 트릭. 짧게 1-2줄.}
+\newcommand{\tipbox}[1]{%
+  \par\vspace{4pt}%
+  \begin{tcolorbox}[
+    colback=gjTipRed!8,
+    colframe=gjTipRed,
+    boxrule=0.4pt,
+    arc=2pt,
+    left=4pt,right=4pt,top=3pt,bottom=3pt,
+    fontupper=\small,
+    title={\textcolor{gjTipRed}{\bfseries TIP}},
+    coltitle=gjTipRed,
+    colbacktitle=white,
+    fonttitle=\small\bfseries,
+    attach title to upper={\quad}
+  ]
+  #1
+  \end{tcolorbox}%
+  \par\vspace{4pt}%
+}
+
+% ── \conclude — "따라서 …" 결론 자연 한국어 ──────────────────────────────
+% 사용: \conclude{$x + y = 5$이다}{③}
+%       → "따라서 $x + y = 5$이다. \textbf{정답 ③}"
+\newcommand{\conclude}[2]{%
+  따라서 #1. \textbf{정답 #2}%
+}
+
+% ── \altanswer — 답 화살표 (>> ⑤ 양식, 고쟁이 차용) ──────────────────────
+% 사용: \altanswer{⑤} 또는 \altanswer{12}
+\newcommand{\altanswer}[1]{%
+  \par\hfill\textcolor{gjAltGray}{\Large $\Rightarrow$}\enspace\textbf{#1}%
+}
+
+% ── \polydiv — 조립제법 점선 격자 (synthetic division) ──────────────────
+% 사용:
+%   \polydiv{
+%     1 & 1 & -2 & 3 & 5 \\
+%       &   &  1 & -1 & 2 \\
+%     \hline
+%     1 & 1 & -1 & 2 & 7
+%   }
+\newcommand{\polydiv}[1]{%
+  \par\vspace{4pt}%
+  \begin{center}
+  \renewcommand{\arraystretch}{1.3}
+  \setlength{\arrayrulewidth}{0.4pt}
+  \arrayrulecolor{black!60}
+  \(
+  \begin{array}{r|*{6}{c}}
+    #1
+  \end{array}
+  \)
+  \end{center}
+  \par\vspace{4pt}%
+}
+
+% ── \longdiv — 다항식 세로 나눗셈 (long division) ──────────────────────
+% 사용:
+%   \longdiv{몫}{나눗셈 식 블록}
+\newcommand{\longdiv}[1]{%
+  \par\vspace{4pt}%
+  \begin{center}
+  \fbox{%
+    \begin{minipage}{0.85\linewidth}
+    \[ #1 \]
+    \end{minipage}%
+  }
+  \end{center}
+  \par\vspace{4pt}%
+}
+
+% ── \caseitem — 케이스 분기 (i)·(ii)·(iii) 양식 ─────────────────────────
+% 사용: \caseitem{i}{본문} \caseitem{ii}{본문}
+% 자동으로 들여쓰기 + 라벨 정렬
+\newcommand{\caseitem}[2]{%
+  \par\hangindent=1.5em\hangafter=1%
+  \noindent(\textit{#1})\enspace #2%
+  \par%
+}
+
+% ── 환경: cases (계산용 (i)·(ii)·(iii) 자동 번호) ──────────────────────
+\newcounter{altcasectr}
+\newenvironment{altcases}{%
+  \setcounter{altcasectr}{0}%
+  \par\vspace{2pt}%
+}{%
+  \par\vspace{2pt}%
+}
+\newcommand{\altcase}[1]{%
+  \stepcounter{altcasectr}%
+  \par\hangindent=1.5em\hangafter=1%
+  \noindent(\textit{\roman{altcasectr}})\enspace #1%
+  \par%
+}
+
+% ── 도형 매크로 — 도로망 격자 (경우의 수 답지용) ────────────────────────
+% 사용: \roadgrid{w}{h}{시작점라벨}{끝점라벨}
+% figures-cb.sty의 \gridPath와 호환되도록 별도 ans-prefix 사용
+\newcommand{\ansroadgrid}[4]{%
+  \begin{tikzpicture}[scale=0.6, line width=0.4pt]
+    % 격자 노드
+    \foreach \x in {0,...,#1} {
+      \foreach \y in {0,...,#2} {
+        \fill (\x, \y) circle (2pt);
+      }
+    }
+    % 가로선
+    \foreach \y in {0,...,#2} {
+      \draw (0, \y) -- (#1, \y);
+    }
+    % 세로선
+    \foreach \x in {0,...,#1} {
+      \draw (\x, 0) -- (\x, #2);
+    }
+    % 시작점·끝점 라벨
+    \node[below left] at (0, 0) {\small\textsf{#3}};
+    \node[above right] at (#1, #2) {\small\textsf{#4}};
+  \end{tikzpicture}%
+}
+
+\endinput

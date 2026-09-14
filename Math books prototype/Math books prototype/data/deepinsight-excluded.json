@@ -1,0 +1,6731 @@
+{
+  "summary": {
+    "excluded_total": 293,
+    "unique_excluded_types": 65
+  },
+  "by_typename": [
+    {
+      "name": "모의고사 유형",
+      "count": 48
+    },
+    {
+      "name": "비례식의 활용",
+      "count": 28
+    },
+    {
+      "name": "이중근호",
+      "count": 26
+    },
+    {
+      "name": "부등식의 영역",
+      "count": 26
+    },
+    {
+      "name": "다항식의 최대공약수, 최소공배수",
+      "count": 24
+    },
+    {
+      "name": "항등원과 역원",
+      "count": 24
+    },
+    {
+      "name": "산술평균과 기하평균의 관계(5) 도형에서의 활용",
+      "count": 13
+    },
+    {
+      "name": "부등식의 증명(1) 두 식의 차를 이용한 대소 비교",
+      "count": 9
+    },
+    {
+      "name": "산술평균과 기하평균의 관계(1) 곱이 일정한 경우",
+      "count": 5
+    },
+    {
+      "name": "산술평균과 기하평균의 관계(3) 식의 변형을 이용하는 경우",
+      "count": 4
+    },
+    {
+      "name": "절댓값 기호를 포함한 절대부등식",
+      "count": 4
+    },
+    {
+      "name": "삼각형의 넓이",
+      "count": 3
+    },
+    {
+      "name": "새로운 연산 기호의 계산",
+      "count": 3
+    },
+    {
+      "name": "산술평균과 기하평균의 관계(4) 복잡한 식의 최대·최소",
+      "count": 3
+    },
+    {
+      "name": "삼각비",
+      "count": 3
+    },
+    {
+      "name": "배수",
+      "count": 3
+    },
+    {
+      "name": "등차수열의 합(1)",
+      "count": 3
+    },
+    {
+      "name": "절대부등식",
+      "count": 2
+    },
+    {
+      "name": "기하 관련 모의고사",
+      "count": 2
+    },
+    {
+      "name": "수학적 확률",
+      "count": 2
+    },
+    {
+      "name": "제곱근의 곱셈과 나눗셈의 도형에의 활용 (3) 정삼각형에서 높이와 넓이",
+      "count": 2
+    },
+    {
+      "name": "색칠한 부분의 둘레의 길이",
+      "count": 2
+    },
+    {
+      "name": "좌표를 이용하여 도형의 성질 확인하기",
+      "count": 2
+    },
+    {
+      "name": "일반 추론",
+      "count": 2
+    },
+    {
+      "name": "비율에 대한 문제",
+      "count": 2
+    },
+    {
+      "name": "같은 수가 반복되는 수열",
+      "count": 2
+    },
+    {
+      "name": "무리수의 정수 부분과 소수 부분",
+      "count": 2
+    },
+    {
+      "name": "코시-슈바르츠의 부등식(3) 도형에서의 활용",
+      "count": 2
+    },
+    {
+      "name": "삼각형의 내각의 이등분선",
+      "count": 2
+    },
+    {
+      "name": "등차수열의 일반항",
+      "count": 2
+    },
+    {
+      "name": "등비중항",
+      "count": 2
+    },
+    {
+      "name": "제일코사인법칙",
+      "count": 2
+    },
+    {
+      "name": "실수의 성질을 이용한 절대부등식의 증명",
+      "count": 2
+    },
+    {
+      "name": "삼각형의 변의 길이 구하기(2)",
+      "count": 1
+    },
+    {
+      "name": "코시-슈바르츠의 부등식(2)",
+      "count": 1
+    },
+    {
+      "name": "닮음의 활용(1) 높이의 측정",
+      "count": 1
+    },
+    {
+      "name": "파푸스의 정리(중선정리)",
+      "count": 1
+    },
+    {
+      "name": "누적도수",
+      "count": 1
+    },
+    {
+      "name": "삼각형의 합동 조건(3) ASA합동",
+      "count": 1
+    },
+    {
+      "name": "수열의 귀납적 정의의 도형에의 활용",
+      "count": 1
+    },
+    {
+      "name": "인수분해(5) 순환하는 꼴의 식의 인수분해",
+      "count": 1
+    },
+    {
+      "name": "규칙이 있는 수에 대한 문제",
+      "count": 1
+    },
+    {
+      "name": "무리수를 수직선 위에 나타내기",
+      "count": 1
+    },
+    {
+      "name": "제곱근의 덧셈과 뺄셈을 이용한 두 실수의 대소 관계",
+      "count": 1
+    },
+    {
+      "name": "직각삼각형의 합동 조건의 응용(1) RHA 합동",
+      "count": 1
+    },
+    {
+      "name": "독립 사건의 확률(2) 표, 문장 등으로 확률이 주어진 경우",
+      "count": 1
+    },
+    {
+      "name": "유리수와 무리수의 구별",
+      "count": 1
+    },
+    {
+      "name": "정다면체의 전개도",
+      "count": 1
+    },
+    {
+      "name": "최소공배수의 실생활 문제(2) 동시에 출발하여 다시 만나는 경우",
+      "count": 1
+    },
+    {
+      "name": "평행사변형의 성질의 응용(2) 두 쌍의 대각의 크기가 같다",
+      "count": 1
+    },
+    {
+      "name": "거리, 속력, 시간에 대한 문제(3) 시차가 발생하는 경우",
+      "count": 1
+    },
+    {
+      "name": "등비수열의 합의 활용(1)",
+      "count": 1
+    },
+    {
+      "name": "가격과 개수에 대한 문제(2) - 가격 구하기",
+      "count": 1
+    },
+    {
+      "name": "등비수열의 합(1)",
+      "count": 1
+    },
+    {
+      "name": "귀납적으로 정의된 여러 가지 수열(1)",
+      "count": 1
+    },
+    {
+      "name": "수학적 귀납법(1) 등식의 증명",
+      "count": 1
+    },
+    {
+      "name": "등비수열의 합과 일반항 사이의 관계",
+      "count": 1
+    },
+    {
+      "name": "여러 가지 수열의 합의 활용",
+      "count": 1
+    },
+    {
+      "name": "제곱근의 덧셈과 뺄셈",
+      "count": 1
+    },
+    {
+      "name": "삼각형의 외심",
+      "count": 1
+    },
+    {
+      "name": "부등식의 증명(2) 두 식의 제곱의 차를 이용한 대소 비교",
+      "count": 1
+    },
+    {
+      "name": "삼각형의 닮음 조건의 응용(2) AA 닮음",
+      "count": 1
+    },
+    {
+      "name": "삼각형의 내각의 이등분선과 변의 길이",
+      "count": 1
+    },
+    {
+      "name": "사다리꼴의 두 변의 중점을 연결한 선분의 성질",
+      "count": 1
+    },
+    {
+      "name": "중심각의 크기와 부채꼴의 넓이",
+      "count": 1
+    }
+  ],
+  "excluded_problems": [
+    {
+      "file": "260614_수능&모의 공통(1).pdf",
+      "page": 13,
+      "column": "right",
+      "problem_no": "26",
+      "type_name_raw": "삼각형의 넓이",
+      "correct_rate": 0.64,
+      "similar_sources": [
+        {
+          "book": "EBS 올림포스",
+          "subject": "공통수학2",
+          "page": 15,
+          "no": "3"
+        },
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 30,
+          "no": "179"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(1).pdf",
+      "cohort_mean": 0.7352666666666668,
+      "cohort_std": 0.15805778127704503,
+      "relative_difficulty_z": -0.603,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "중학 또는 다른 단원"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 4,
+      "column": "left",
+      "problem_no": "07",
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.304,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 6,
+      "column": "left",
+      "problem_no": "11",
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.304,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 7,
+      "column": "left",
+      "problem_no": "13",
+      "type_name_raw": "산술평균과 기하평균의 관계(3) 식의 변형을 이용하는 경우",
+      "correct_rate": 0.68,
+      "similar_sources": [
+        {
+          "book": "EBS 올림포스",
+          "subject": "공통수학2",
+          "page": 62,
+          "no": "16"
+        },
+        {
+          "book": "EBS 올림포스",
+          "subject": "공통수학2",
+          "page": 57,
+          "no": "19"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.19,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 10,
+      "column": "left",
+      "problem_no": "19",
+      "type_name_raw": "절댓값 기호를 포함한 절대부등식",
+      "correct_rate": 0.68,
+      "similar_sources": [
+        {
+          "book": "개념원리",
+          "subject": "공통수학2",
+          "page": 197,
+          "no": "461.(2)"
+        },
+        {
+          "book": "개념원리",
+          "subject": "공통수학2",
+          "page": 202,
+          "no": "473"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.19,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 10,
+      "column": "right",
+      "problem_no": "20",
+      "type_name_raw": "절대부등식",
+      "correct_rate": 0.63,
+      "similar_sources": [
+        {
+          "book": "각 GAK",
+          "subject": "공통수학2",
+          "page": 144,
+          "no": "0661"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": -0.094,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 12,
+      "column": "left",
+      "problem_no": "23",
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.304,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 15,
+      "column": "left",
+      "problem_no": "29",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.3,
+      "similar_sources": [
+        {
+          "book": "라이트쎈_부록",
+          "subject": "중등수학3(하)",
+          "page": 11,
+          "no": "16"
+        },
+        {
+          "book": "라이트쎈_부록",
+          "subject": "중등수학3(하)",
+          "page": 1,
+          "no": "06"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": -1.968,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 17,
+      "column": "left",
+      "problem_no": "33",
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.9,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 1.439,
+      "cohort_normalized_star": 1,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 18,
+      "column": "left",
+      "problem_no": "35",
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.304,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 19,
+      "column": "left",
+      "problem_no": "37",
+      "type_name_raw": "부등식의 증명(1) 두 식의 차를 이용한 대소 비교",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "개념루트",
+          "subject": "공통수학2",
+          "page": 245,
+          "no": "546"
+        },
+        {
+          "book": "숨마쿰라우데 스타트업",
+          "subject": "공통수학2",
+          "page": 181,
+          "no": "1201"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": -0.832,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 20,
+      "column": "left",
+      "problem_no": "39",
+      "type_name_raw": "기하 관련 모의고사",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.304,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 21,
+      "column": "left",
+      "problem_no": "41",
+      "type_name_raw": "수학적 확률",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "베이직쎈",
+          "subject": "확률과 통계",
+          "page": 69,
+          "no": "15"
+        },
+        {
+          "book": "EBS 수능 빌드업_워크북",
+          "subject": "확률과 통계",
+          "page": 20,
+          "no": "01"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.304,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "확률통계 — 공통수학 범위 외"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 22,
+      "column": "left",
+      "problem_no": "43",
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "고쟁이",
+          "subject": "공통수학2",
+          "page": 173,
+          "no": "645"
+        },
+        {
+          "book": "수매씽 개념 기본서",
+          "subject": "공통수학2",
+          "page": 390,
+          "no": "2"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.304,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 23,
+      "column": "left",
+      "problem_no": "45",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "개념+유형 유형편 실력향상 파워",
+          "subject": "중등수학3(하)",
+          "page": 108,
+          "no": "24"
+        },
+        {
+          "book": "개념+유형 유형편 실력향상 파워",
+          "subject": "중등수학3(하)",
+          "page": 107,
+          "no": "14"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": -0.832,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 23,
+      "column": "right",
+      "problem_no": "46",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "개념+유형 유형편 실력향상 파워",
+          "subject": "중등수학3(하)",
+          "page": 108,
+          "no": "24"
+        },
+        {
+          "book": "개념+유형 유형편 실력향상 파워",
+          "subject": "중등수학3(하)",
+          "page": 107,
+          "no": "14"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": -0.832,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 24,
+      "column": "left",
+      "problem_no": "47",
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 181,
+          "no": "1196"
+        },
+        {
+          "book": "일품",
+          "subject": "공통수학2",
+          "page": 83,
+          "no": "1"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": -0.832,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 24,
+      "column": "right",
+      "problem_no": "48",
+      "type_name_raw": "삼각형의 변의 길이 구하기(2)",
+      "correct_rate": 0.3,
+      "similar_sources": [
+        {
+          "book": "수학의 단비",
+          "subject": "중등수학2(하)",
+          "page": 14,
+          "no": "20.(3)"
+        },
+        {
+          "book": "수매씽 유형_워크북",
+          "subject": "중등수학2(하)",
+          "page": 56,
+          "no": "334"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": -1.968,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "중학"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 26,
+      "column": "left",
+      "problem_no": "51",
+      "type_name_raw": "제곱근의 곱셈과 나눗셈의 도형에의 활용 (3) 정삼각형에서 높이와 넓이",
+      "correct_rate": 0.31,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": -1.911,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "중학 또는 2007 이전"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 29,
+      "column": "right",
+      "problem_no": "58",
+      "type_name_raw": "색칠한 부분의 둘레의 길이",
+      "correct_rate": 0.46,
+      "similar_sources": [
+        {
+          "book": "블랙라벨",
+          "subject": "중등수학1(하)",
+          "page": 68,
+          "no": "1"
+        },
+        {
+          "book": "최상위 수학 라이트",
+          "subject": "중등수학1(하)",
+          "page": 81,
+          "no": "22"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": -1.059,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "중학 수준"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 30,
+      "column": "left",
+      "problem_no": "59",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": -1.968,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 33,
+      "column": "right",
+      "problem_no": "66",
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.304,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 36,
+      "column": "left",
+      "problem_no": "71",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.8,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "중등수학3(하)",
+          "page": 9,
+          "no": "0001"
+        },
+        {
+          "book": "RPM",
+          "subject": "중등수학3(하)",
+          "page": 94,
+          "no": "0557"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.872,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 37,
+      "column": "left",
+      "problem_no": "73",
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.304,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 39,
+      "column": "right",
+      "problem_no": "78",
+      "type_name_raw": "새로운 연산 기호의 계산",
+      "correct_rate": 0.49,
+      "similar_sources": [
+        {
+          "book": "100발 100중 기출문제집",
+          "subject": "중등수학1(상) 중간",
+          "page": 169,
+          "no": "16"
+        },
+        {
+          "book": "최상위 수학 라이트",
+          "subject": "중등수학1(상)",
+          "page": 51,
+          "no": "25"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": -0.889,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 40,
+      "column": "left",
+      "problem_no": "79",
+      "type_name_raw": "코시-슈바르츠의 부등식(2)",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "일등급 수학",
+          "subject": "공통수학2",
+          "page": 96,
+          "no": "15"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.304,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정 (수1 절대부등식)"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 40,
+      "column": "right",
+      "problem_no": "80",
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": -1.968,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 41,
+      "column": "left",
+      "problem_no": "81",
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": -1.968,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 50,
+      "column": "left",
+      "problem_no": "99",
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.304,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 51,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "개념+유형 유형편 실력향상 파워",
+          "subject": "중등수학3(하)",
+          "page": 108,
+          "no": "24"
+        },
+        {
+          "book": "개념+유형 유형편 실력향상 파워",
+          "subject": "중등수학3(하)",
+          "page": 107,
+          "no": "14"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": -0.832,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 52,
+      "column": "left",
+      "problem_no": "52",
+      "type_name_raw": "좌표를 이용하여 도형의 성질 확인하기",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "개념원리",
+          "subject": "공통수학2",
+          "page": 15,
+          "no": "14"
+        },
+        {
+          "book": "개념원리",
+          "subject": "공통수학2",
+          "page": 15,
+          "no": "13"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.304,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "일반 도형 — 우리 단원 분류 외"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 52,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "절댓값 기호를 포함한 절대부등식",
+      "correct_rate": 0.78,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 107,
+          "no": "718"
+        },
+        {
+          "book": "개념루트",
+          "subject": "공통수학2",
+          "page": 254,
+          "no": "566"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.758,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 53,
+      "column": "left",
+      "problem_no": "53",
+      "type_name_raw": "일반 추론",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": -1.968,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "통합 라벨"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 54,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.69,
+      "similar_sources": [
+        {
+          "book": "고쟁이",
+          "subject": "공통수학2",
+          "page": 173,
+          "no": "645"
+        },
+        {
+          "book": "수매씽 개념 기본서",
+          "subject": "공통수학2",
+          "page": 390,
+          "no": "2"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.247,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 56,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.9,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 1.439,
+      "cohort_normalized_star": 1,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 59,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "개념원리",
+          "subject": "중등수학3(하)",
+          "page": 119,
+          "no": "01"
+        },
+        {
+          "book": "개념원리",
+          "subject": "중등수학3(하)",
+          "page": 70,
+          "no": "02"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.304,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 60,
+      "column": "left",
+      "problem_no": "60",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": -1.968,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 60,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "산술평균과 기하평균의 관계(5) 도형에서의 활용",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 112,
+          "no": "757"
+        },
+        {
+          "book": "개념+유형 개념편",
+          "subject": "공통수학2",
+          "page": 174,
+          "no": "15"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": -0.832,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 62,
+      "column": "left",
+      "problem_no": "62",
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.9,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 1.439,
+      "cohort_normalized_star": 1,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 63,
+      "column": "left",
+      "problem_no": "63",
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.304,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 64,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": -1.968,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 65,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "색칠한 부분의 둘레의 길이",
+      "correct_rate": 0.67,
+      "similar_sources": [
+        {
+          "book": "일품",
+          "subject": "중등수학1(하)",
+          "page": 58,
+          "no": "10"
+        },
+        {
+          "book": "일품",
+          "subject": "중등수학1(하)",
+          "page": 61,
+          "no": "15"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.133,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "중학 수준"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 66,
+      "column": "left",
+      "problem_no": "66",
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.304,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 67,
+      "column": "left",
+      "problem_no": "67",
+      "type_name_raw": "기하 관련 모의고사",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.304,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 67,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.304,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 68,
+      "column": "left",
+      "problem_no": "68",
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "고쟁이",
+          "subject": "공통수학2",
+          "page": 173,
+          "no": "645"
+        },
+        {
+          "book": "수매씽 개념 기본서",
+          "subject": "공통수학2",
+          "page": 390,
+          "no": "2"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.304,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 69,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.3,
+      "similar_sources": [
+        {
+          "book": "라이트쎈_부록",
+          "subject": "중등수학3(하)",
+          "page": 11,
+          "no": "16"
+        },
+        {
+          "book": "라이트쎈_부록",
+          "subject": "중등수학3(하)",
+          "page": 1,
+          "no": "06"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": -1.968,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 71,
+      "column": "left",
+      "problem_no": "71",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.49,
+      "similar_sources": [
+        {
+          "book": "EBS 올림포스 전국연합학력평가 기출문제집",
+          "subject": "고1 (2025)",
+          "page": 17,
+          "no": "59"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": -0.889,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 71,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.8,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "중등수학3(하)",
+          "page": 9,
+          "no": "0001"
+        },
+        {
+          "book": "RPM",
+          "subject": "중등수학3(하)",
+          "page": 94,
+          "no": "0557"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": 0.872,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(10).pdf",
+      "page": 73,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "닮음의 활용(1) 높이의 측정",
+      "correct_rate": 0.64,
+      "similar_sources": [
+        {
+          "book": "개념+유형 유형편 실력향상 파워",
+          "subject": "중등수학2(하)",
+          "page": 75,
+          "no": "15"
+        },
+        {
+          "book": "수매씽 개념_코칭 개념북",
+          "subject": "중등수학2(하)",
+          "page": 88,
+          "no": "11"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(10).pdf",
+      "cohort_mean": 0.6465333333333334,
+      "cohort_std": 0.1760870491799124,
+      "relative_difficulty_z": -0.037,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "중학"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 2,
+      "column": "left",
+      "problem_no": "03",
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.9,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 1.427,
+      "cohort_normalized_star": 1,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 3,
+      "column": "right",
+      "problem_no": "06",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "EBS 올림포스 전국연합학력평가 기출문제집",
+          "subject": "고1 (2025)",
+          "page": 17,
+          "no": "59"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": -0.962,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 5,
+      "column": "left",
+      "problem_no": "09",
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 0.232,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 6,
+      "column": "left",
+      "problem_no": "11",
+      "type_name_raw": "파푸스의 정리(중선정리)",
+      "correct_rate": 0.72,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 13,
+          "no": "38"
+        },
+        {
+          "book": "수학의 바이블 유형on 1권",
+          "subject": "공통수학2",
+          "page": 21,
+          "no": "79"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 0.352,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "중학 또는 외부"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 6,
+      "column": "right",
+      "problem_no": "12",
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 0.232,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 8,
+      "column": "left",
+      "problem_no": "15",
+      "type_name_raw": "산술평균과 기하평균의 관계(4) 복잡한 식의 최대·최소",
+      "correct_rate": 0.51,
+      "similar_sources": [
+        {
+          "book": "수학의 신",
+          "subject": "공통수학2",
+          "page": 67,
+          "no": "25"
+        },
+        {
+          "book": "더 개념 블랙라벨",
+          "subject": "공통수학2",
+          "page": 234,
+          "no": "6"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": -0.903,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 10,
+      "column": "left",
+      "problem_no": "19",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.29,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": -2.216,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 11,
+      "column": "left",
+      "problem_no": "21",
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 0.232,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 12,
+      "column": "right",
+      "problem_no": "24",
+      "type_name_raw": "산술평균과 기하평균의 관계(1) 곱이 일정한 경우",
+      "correct_rate": 0.61,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 113,
+          "no": "761"
+        },
+        {
+          "book": "100발 100중 기출문제집 2학기 기말",
+          "subject": "공통수학2",
+          "page": 33,
+          "no": "19"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": -0.305,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "2007 이전 교육과정 (현행 수1 절대부등식 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 14,
+      "column": "left",
+      "problem_no": "27",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "개념+유형 유형편 실력향상 파워",
+          "subject": "중등수학3(하)",
+          "page": 108,
+          "no": "24"
+        },
+        {
+          "book": "개념+유형 유형편 실력향상 파워",
+          "subject": "중등수학3(하)",
+          "page": 107,
+          "no": "14"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": -0.962,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 15,
+      "column": "left",
+      "problem_no": "29",
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": -2.157,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 16,
+      "column": "left",
+      "problem_no": "31",
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.9,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 1.427,
+      "cohort_normalized_star": 1,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 17,
+      "column": "left",
+      "problem_no": "33",
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.9,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 1.427,
+      "cohort_normalized_star": 1,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 20,
+      "column": "left",
+      "problem_no": "39",
+      "type_name_raw": "산술평균과 기하평균의 관계(1) 곱이 일정한 경우",
+      "correct_rate": 0.71,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 113,
+          "no": "761"
+        },
+        {
+          "book": "100발 100중 기출문제집 2학기 기말",
+          "subject": "공통수학2",
+          "page": 33,
+          "no": "19"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 0.292,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정 (현행 수1 절대부등식 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 21,
+      "column": "left",
+      "problem_no": "41",
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.69,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 0.172,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 22,
+      "column": "right",
+      "problem_no": "44",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": -2.157,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 26,
+      "column": "left",
+      "problem_no": "51",
+      "type_name_raw": "누적도수",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": -2.157,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "통계"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 28,
+      "column": "right",
+      "problem_no": "56",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "개념+유형 유형편 실력향상 파워",
+          "subject": "중등수학3(하)",
+          "page": 108,
+          "no": "24"
+        },
+        {
+          "book": "개념+유형 유형편 실력향상 파워",
+          "subject": "중등수학3(하)",
+          "page": 107,
+          "no": "14"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": -0.962,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 34,
+      "column": "right",
+      "problem_no": "68",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": -2.157,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 35,
+      "column": "right",
+      "problem_no": "70",
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 0.232,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 36,
+      "column": "left",
+      "problem_no": "71",
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.5,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": -0.962,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 36,
+      "column": "right",
+      "problem_no": "72",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "개념+유형 유형편 실력향상 파워",
+          "subject": "중등수학3(하)",
+          "page": 108,
+          "no": "24"
+        },
+        {
+          "book": "개념+유형 유형편 실력향상 파워",
+          "subject": "중등수학3(하)",
+          "page": 107,
+          "no": "14"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": -0.962,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 37,
+      "column": "left",
+      "problem_no": "73",
+      "type_name_raw": "비율에 대한 문제",
+      "correct_rate": 0.44,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "중등수학1(상)",
+          "page": 133,
+          "no": "950.(3)"
+        },
+        {
+          "book": "쎈",
+          "subject": "중등수학1(상)",
+          "page": 133,
+          "no": "950.(2)"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": -1.321,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "통합 라벨"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 37,
+      "column": "right",
+      "problem_no": "74",
+      "type_name_raw": "삼각형의 합동 조건(3) ASA합동",
+      "correct_rate": 0.3,
+      "similar_sources": [
+        {
+          "book": "블랙라벨",
+          "subject": "중등수학1(하)",
+          "page": 41,
+          "no": "8"
+        },
+        {
+          "book": "에이급 수학",
+          "subject": "중등수학1(하)",
+          "page": 73,
+          "no": "23"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": -2.157,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "중학"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 39,
+      "column": "left",
+      "problem_no": "77",
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": -2.157,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 40,
+      "column": "left",
+      "problem_no": "79",
+      "type_name_raw": "같은 수가 반복되는 수열",
+      "correct_rate": 0.69,
+      "similar_sources": [
+        {
+          "book": "고쟁이",
+          "subject": "대수",
+          "page": 204,
+          "no": "765"
+        },
+        {
+          "book": "고쟁이",
+          "subject": "대수",
+          "page": 204,
+          "no": "764"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 0.172,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "수1 수열 — 공통수학 범위 외"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 41,
+      "column": "left",
+      "problem_no": "81",
+      "type_name_raw": "삼각비",
+      "correct_rate": 0.73,
+      "similar_sources": [
+        {
+          "book": "개념+유형 개념편",
+          "subject": "대수",
+          "page": 115,
+          "no": "12"
+        },
+        {
+          "book": "100발 100중 기출문제집",
+          "subject": "대수 (상)",
+          "page": 173,
+          "no": "10"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 0.411,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "중학 또는 현행 미적분 외"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 41,
+      "column": "right",
+      "problem_no": "82",
+      "type_name_raw": "무리수의 정수 부분과 소수 부분",
+      "correct_rate": 0.69,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 0.172,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "중학 또는 2007 이전"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 43,
+      "column": "right",
+      "problem_no": "86",
+      "type_name_raw": "수열의 귀납적 정의의 도형에의 활용",
+      "correct_rate": 0.69,
+      "similar_sources": [
+        {
+          "book": "개념+유형 개념편",
+          "subject": "대수",
+          "page": 232,
+          "no": "11"
+        },
+        {
+          "book": "쎈",
+          "subject": "대수",
+          "page": 172,
+          "no": "1189"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 0.172,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "수1 수열"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 44,
+      "column": "left",
+      "problem_no": "87",
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.69,
+      "similar_sources": [
+        {
+          "book": "우공비Q+Q 표준+발전편_워크북",
+          "subject": "공통수학2",
+          "page": 74,
+          "no": "18"
+        },
+        {
+          "book": "유형 해결의 법칙",
+          "subject": "공통수학2",
+          "page": 167,
+          "no": "1196"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 0.172,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 45,
+      "column": "left",
+      "problem_no": "89",
+      "type_name_raw": "수학적 확률",
+      "correct_rate": 0.69,
+      "similar_sources": [
+        {
+          "book": "일등급 수학",
+          "subject": "확률과 통계",
+          "page": 41,
+          "no": "29"
+        },
+        {
+          "book": "일등급 수학",
+          "subject": "확률과 통계",
+          "page": 39,
+          "no": "19"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 0.172,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "확률통계 — 공통수학 범위 외"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 49,
+      "column": "right",
+      "problem_no": "98",
+      "type_name_raw": "인수분해(5) 순환하는 꼴의 식의 인수분해",
+      "correct_rate": 0.73,
+      "similar_sources": [
+        {
+          "book": "라이트쎈",
+          "subject": "공통수학1",
+          "page": 39,
+          "no": "258"
+        },
+        {
+          "book": "마플시너지",
+          "subject": "공통수학1",
+          "page": 64,
+          "no": "326"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 0.411,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "교육과정 외"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 50,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 0.232,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 51,
+      "column": "left",
+      "problem_no": "51",
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.5,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": -0.962,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 52,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": -2.157,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 53,
+      "column": "left",
+      "problem_no": "53",
+      "type_name_raw": "코시-슈바르츠의 부등식(3) 도형에서의 활용",
+      "correct_rate": 0.3,
+      "similar_sources": [
+        {
+          "book": "풍산자 필수유형",
+          "subject": "공통수학2",
+          "page": 132,
+          "no": "645"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": -2.157,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 59,
+      "column": "left",
+      "problem_no": "59",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.3,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "중등수학3(하)",
+          "page": 35,
+          "no": "0166"
+        },
+        {
+          "book": "쎈",
+          "subject": "중등수학3(하)",
+          "page": 117,
+          "no": "0653"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": -2.157,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 59,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": -2.157,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 61,
+      "column": "left",
+      "problem_no": "61",
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.9,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 1.427,
+      "cohort_normalized_star": 1,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 65,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "중등수학3(하)",
+          "page": 59,
+          "no": "0338"
+        },
+        {
+          "book": "RPM",
+          "subject": "중등수학3(하)",
+          "page": 114,
+          "no": "0666"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 0.232,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 66,
+      "column": "left",
+      "problem_no": "66",
+      "type_name_raw": "산술평균과 기하평균의 관계(3) 식의 변형을 이용하는 경우",
+      "correct_rate": 0.69,
+      "similar_sources": [
+        {
+          "book": "개념+유형 개념편",
+          "subject": "공통수학2",
+          "page": 169,
+          "no": "5"
+        },
+        {
+          "book": "개념+유형 개념편",
+          "subject": "공통수학2",
+          "page": 173,
+          "no": "9"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 0.172,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 66,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.69,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 0.172,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 68,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 181,
+          "no": "1196"
+        },
+        {
+          "book": "일품",
+          "subject": "공통수학2",
+          "page": 83,
+          "no": "1"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": -0.962,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 70,
+      "column": "left",
+      "problem_no": "70",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "개념+유형 유형편 실력향상 파워",
+          "subject": "중등수학3(하)",
+          "page": 108,
+          "no": "24"
+        },
+        {
+          "book": "개념+유형 유형편 실력향상 파워",
+          "subject": "중등수학3(하)",
+          "page": 107,
+          "no": "14"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": -0.962,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 73,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.8,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "중등수학3(하)",
+          "page": 109,
+          "no": "0598"
+        },
+        {
+          "book": "쎈",
+          "subject": "중등수학3(하)",
+          "page": 41,
+          "no": "0206"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 0.829,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 75,
+      "column": "left",
+      "problem_no": "75",
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": -2.157,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(11).pdf",
+      "page": 75,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.69,
+      "similar_sources": [
+        {
+          "book": "우공비Q+Q 표준+발전편_워크북",
+          "subject": "공통수학2",
+          "page": 74,
+          "no": "18"
+        },
+        {
+          "book": "유형 해결의 법칙",
+          "subject": "공통수학2",
+          "page": 167,
+          "no": "1196"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(11).pdf",
+      "cohort_mean": 0.6611333333333329,
+      "cohort_std": 0.167441678071965,
+      "relative_difficulty_z": 0.172,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 2,
+      "column": "right",
+      "problem_no": "04",
+      "type_name_raw": "부등식의 증명(1) 두 식의 차를 이용한 대소 비교",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 106,
+          "no": "715"
+        },
+        {
+          "book": "개념+유형 개념편",
+          "subject": "공통수학2",
+          "page": 173,
+          "no": "5"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": 0.311,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 3,
+      "column": "right",
+      "problem_no": "06",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.9,
+      "similar_sources": [
+        {
+          "book": "개념원리",
+          "subject": "중등수학3(하)",
+          "page": 20,
+          "no": "01"
+        },
+        {
+          "book": "개념원리",
+          "subject": "중등수학3(하)",
+          "page": 28,
+          "no": "02"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": 1.439,
+      "cohort_normalized_star": 1,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 6,
+      "column": "right",
+      "problem_no": "12",
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": 0.311,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 8,
+      "column": "left",
+      "problem_no": "15",
+      "type_name_raw": "규칙이 있는 수에 대한 문제",
+      "correct_rate": 0.58,
+      "similar_sources": [
+        {
+          "book": "급속충전 에이급 수학",
+          "subject": "중등수학1(상)",
+          "page": 87,
+          "no": "05"
+        },
+        {
+          "book": "절대강자 개념",
+          "subject": "중등수학1(상)",
+          "page": 125,
+          "no": "3"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -0.366,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "통합 라벨"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 8,
+      "column": "right",
+      "problem_no": "16",
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -1.944,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 9,
+      "column": "left",
+      "problem_no": "17",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "개념원리",
+          "subject": "중등수학3(하)",
+          "page": 119,
+          "no": "01"
+        },
+        {
+          "book": "개념원리",
+          "subject": "중등수학3(하)",
+          "page": 70,
+          "no": "02"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": 0.311,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 9,
+      "column": "right",
+      "problem_no": "18",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -1.944,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 10,
+      "column": "left",
+      "problem_no": "19",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "중등수학3(하)",
+          "page": 95,
+          "no": "0563.(2)"
+        },
+        {
+          "book": "RPM",
+          "subject": "중등수학3(하)",
+          "page": 107,
+          "no": "0628"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -0.817,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 11,
+      "column": "left",
+      "problem_no": "21",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -1.944,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 12,
+      "column": "right",
+      "problem_no": "24",
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": 0.311,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 15,
+      "column": "left",
+      "problem_no": "29",
+      "type_name_raw": "삼각비",
+      "correct_rate": 0.67,
+      "similar_sources": [
+        {
+          "book": "개념+유형 개념편",
+          "subject": "대수",
+          "page": 115,
+          "no": "12"
+        },
+        {
+          "book": "Hi High",
+          "subject": "대수",
+          "page": 76,
+          "no": "46"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": 0.142,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "중학 또는 현행 미적분 외"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 15,
+      "column": "right",
+      "problem_no": "30",
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -1.944,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 17,
+      "column": "right",
+      "problem_no": "34",
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": 0.311,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 20,
+      "column": "left",
+      "problem_no": "39",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": 0.311,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 25,
+      "column": "left",
+      "problem_no": "49",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.3,
+      "similar_sources": [
+        {
+          "book": "라이트쎈",
+          "subject": "중등수학3(하)",
+          "page": 37,
+          "no": "0206"
+        },
+        {
+          "book": "라이트쎈",
+          "subject": "중등수학3(하)",
+          "page": 76,
+          "no": "0437"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -1.944,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 25,
+      "column": "right",
+      "problem_no": "50",
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -1.944,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 28,
+      "column": "right",
+      "problem_no": "56",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "중등수학3(하)",
+          "page": 95,
+          "no": "0563.(2)"
+        },
+        {
+          "book": "RPM",
+          "subject": "중등수학3(하)",
+          "page": 107,
+          "no": "0628"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -0.817,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 29,
+      "column": "right",
+      "problem_no": "58",
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -1.944,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 30,
+      "column": "left",
+      "problem_no": "59",
+      "type_name_raw": "절댓값 기호를 포함한 절대부등식",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -1.944,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 34,
+      "column": "left",
+      "problem_no": "67",
+      "type_name_raw": "부등식의 증명(1) 두 식의 차를 이용한 대소 비교",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "숨마쿰라우데 스타트업",
+          "subject": "공통수학2",
+          "page": 181,
+          "no": "1201"
+        },
+        {
+          "book": "개념루트",
+          "subject": "공통수학2",
+          "page": 245,
+          "no": "546"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -0.817,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 34,
+      "column": "right",
+      "problem_no": "68",
+      "type_name_raw": "부등식의 증명(1) 두 식의 차를 이용한 대소 비교",
+      "correct_rate": 0.65,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 106,
+          "no": "715"
+        },
+        {
+          "book": "개념+유형 개념편",
+          "subject": "공통수학2",
+          "page": 173,
+          "no": "5"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": 0.029,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 35,
+      "column": "left",
+      "problem_no": "69",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.3,
+      "similar_sources": [
+        {
+          "book": "라이트쎈",
+          "subject": "중등수학3(하)",
+          "page": 37,
+          "no": "0206"
+        },
+        {
+          "book": "라이트쎈",
+          "subject": "중등수학3(하)",
+          "page": 76,
+          "no": "0437"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -1.944,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 35,
+      "column": "right",
+      "problem_no": "70",
+      "type_name_raw": "무리수의 정수 부분과 소수 부분",
+      "correct_rate": 0.69,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": 0.255,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "중학 또는 2007 이전"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 37,
+      "column": "right",
+      "problem_no": "74",
+      "type_name_raw": "무리수를 수직선 위에 나타내기",
+      "correct_rate": 0.33,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "중등수학3(상)",
+          "page": 38,
+          "no": "220"
+        },
+        {
+          "book": "쎈",
+          "subject": "중등수학3(상)",
+          "page": 39,
+          "no": "225"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -1.775,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "중학"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 38,
+      "column": "right",
+      "problem_no": "76",
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "100발 100중 기출문제집 2학기 기말",
+          "subject": "공통수학2",
+          "page": 137,
+          "no": "15"
+        },
+        {
+          "book": "유형 해결의 법칙",
+          "subject": "공통수학2",
+          "page": 167,
+          "no": "1196"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": 0.311,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 39,
+      "column": "left",
+      "problem_no": "77",
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": 0.311,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 40,
+      "column": "right",
+      "problem_no": "80",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "개념원리",
+          "subject": "중등수학3(하)",
+          "page": 119,
+          "no": "01"
+        },
+        {
+          "book": "개념원리",
+          "subject": "중등수학3(하)",
+          "page": 70,
+          "no": "02"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": 0.311,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 43,
+      "column": "left",
+      "problem_no": "85",
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": 0.311,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 44,
+      "column": "right",
+      "problem_no": "88",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.49,
+      "similar_sources": [
+        {
+          "book": "EBS 올림포스 전국연합학력평가 기출문제집",
+          "subject": "고1 (2025)",
+          "page": 17,
+          "no": "59"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -0.873,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 45,
+      "column": "left",
+      "problem_no": "89",
+      "type_name_raw": "산술평균과 기하평균의 관계(5) 도형에서의 활용",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 139,
+          "no": "898"
+        },
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 135,
+          "no": "872"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -0.817,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 47,
+      "column": "left",
+      "problem_no": "93",
+      "type_name_raw": "제곱근의 덧셈과 뺄셈을 이용한 두 실수의 대소 관계",
+      "correct_rate": 0.76,
+      "similar_sources": [
+        {
+          "book": "풍산자 필수유형",
+          "subject": "중등수학3(상)",
+          "page": 43,
+          "no": "210"
+        },
+        {
+          "book": "풍산자 필수유형",
+          "subject": "중등수학3(상)",
+          "page": 28,
+          "no": "120"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": 0.649,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "중학"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 49,
+      "column": "right",
+      "problem_no": "98",
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": 0.311,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 53,
+      "column": "left",
+      "problem_no": "53",
+      "type_name_raw": "배수",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -1.944,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "중학 수준"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 53,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "직각삼각형의 합동 조건의 응용(1) RHA 합동",
+      "correct_rate": 0.8,
+      "similar_sources": [
+        {
+          "book": "개념원리",
+          "subject": "중등수학2(하)",
+          "page": 25,
+          "no": "7"
+        },
+        {
+          "book": "개념원리",
+          "subject": "중등수학2(하)",
+          "page": 30,
+          "no": "2"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": 0.875,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "중학"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 54,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.8,
+      "similar_sources": [
+        {
+          "book": "개념+유형 유형편 실력향상 파워",
+          "subject": "중등수학3(하)",
+          "page": 26,
+          "no": "8"
+        },
+        {
+          "book": "개념+유형 유형편 실력향상 파워",
+          "subject": "중등수학3(하)",
+          "page": 17,
+          "no": "38"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": 0.875,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 55,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "독립 사건의 확률(2) 표, 문장 등으로 확률이 주어진 경우",
+      "correct_rate": 0.71,
+      "similar_sources": [
+        {
+          "book": "교과서_비상교육",
+          "subject": "확률과통계",
+          "page": 65,
+          "no": "9"
+        },
+        {
+          "book": "교과서_비상교육",
+          "subject": "확률과통계",
+          "page": 61,
+          "no": "17"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": 0.367,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "확률통계"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 56,
+      "column": "left",
+      "problem_no": "56",
+      "type_name_raw": "비율에 대한 문제",
+      "correct_rate": 0.45,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "중등수학1(상)",
+          "page": 133,
+          "no": "950.(3)"
+        },
+        {
+          "book": "쎈",
+          "subject": "중등수학1(상)",
+          "page": 133,
+          "no": "950.(2)"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -1.099,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "통합 라벨"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 58,
+      "column": "left",
+      "problem_no": "58",
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.69,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": 0.255,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 59,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "삼각비",
+      "correct_rate": 0.54,
+      "similar_sources": [
+        {
+          "book": "EBS 수학의 왕도",
+          "subject": "대수",
+          "page": 145,
+          "no": "5"
+        },
+        {
+          "book": "Hi High",
+          "subject": "대수",
+          "page": 76,
+          "no": "45"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -0.591,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "중학 또는 현행 미적분 외"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 60,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "삼각형의 넓이",
+      "correct_rate": 0.53,
+      "similar_sources": [
+        {
+          "book": "라이트쎈",
+          "subject": "대수",
+          "page": 116,
+          "no": "869"
+        },
+        {
+          "book": "라이트쎈",
+          "subject": "대수",
+          "page": 119,
+          "no": "891"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -0.647,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "중학 또는 다른 단원"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 65,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "개념원리",
+          "subject": "중등수학3(하)",
+          "page": 119,
+          "no": "01"
+        },
+        {
+          "book": "개념원리",
+          "subject": "중등수학3(하)",
+          "page": 70,
+          "no": "02"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": 0.311,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 66,
+      "column": "left",
+      "problem_no": "66",
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": 0.311,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 67,
+      "column": "left",
+      "problem_no": "67",
+      "type_name_raw": "코시-슈바르츠의 부등식(3) 도형에서의 활용",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 136,
+          "no": "884"
+        },
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 139,
+          "no": "900"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -0.817,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 74,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -1.944,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(12).pdf",
+      "page": 75,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(12).pdf",
+      "cohort_mean": 0.6448322147651007,
+      "cohort_std": 0.1773617394288172,
+      "relative_difficulty_z": -1.944,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(13).pdf",
+      "page": 3,
+      "column": "right",
+      "problem_no": "06",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.8,
+      "similar_sources": [
+        {
+          "book": "개념원리",
+          "subject": "중등수학3(하)",
+          "page": 130,
+          "no": "6"
+        },
+        {
+          "book": "개념원리",
+          "subject": "중등수학3(하)",
+          "page": 119,
+          "no": "04"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(13).pdf",
+      "cohort_mean": 0.6851666666666667,
+      "cohort_std": 0.17019098748823988,
+      "relative_difficulty_z": 0.675,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(13).pdf",
+      "page": 6,
+      "column": "left",
+      "problem_no": "11",
+      "type_name_raw": "같은 수가 반복되는 수열",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "고쟁이",
+          "subject": "대수",
+          "page": 214,
+          "no": "793"
+        },
+        {
+          "book": "고쟁이",
+          "subject": "대수",
+          "page": 217,
+          "no": "800"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(13).pdf",
+      "cohort_mean": 0.6851666666666667,
+      "cohort_std": 0.17019098748823988,
+      "relative_difficulty_z": -1.088,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "수1 수열 — 공통수학 범위 외"
+    },
+    {
+      "file": "260614_수능&모의 공통(13).pdf",
+      "page": 6,
+      "column": "right",
+      "problem_no": "12",
+      "type_name_raw": "배수",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(13).pdf",
+      "cohort_mean": 0.6851666666666667,
+      "cohort_std": 0.17019098748823988,
+      "relative_difficulty_z": 0.087,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "중학 수준"
+    },
+    {
+      "file": "260614_수능&모의 공통(13).pdf",
+      "page": 7,
+      "column": "left",
+      "problem_no": "13",
+      "type_name_raw": "좌표를 이용하여 도형의 성질 확인하기",
+      "correct_rate": 0.68,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 10,
+          "no": "37"
+        },
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 10,
+          "no": "38"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(13).pdf",
+      "cohort_mean": 0.6851666666666667,
+      "cohort_std": 0.17019098748823988,
+      "relative_difficulty_z": -0.03,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "일반 도형 — 우리 단원 분류 외"
+    },
+    {
+      "file": "260614_수능&모의 공통(13).pdf",
+      "page": 10,
+      "column": "left",
+      "problem_no": "19",
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 181,
+          "no": "1196"
+        },
+        {
+          "book": "수학의 바이블 유형on 1권",
+          "subject": "공통수학2",
+          "page": 212,
+          "no": "1192"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(13).pdf",
+      "cohort_mean": 0.6851666666666667,
+      "cohort_std": 0.17019098748823988,
+      "relative_difficulty_z": -1.088,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(13).pdf",
+      "page": 15,
+      "column": "right",
+      "problem_no": "30",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "개념+유형 개념편",
+          "subject": "중등수학3(하)",
+          "page": 98,
+          "no": "1.(2)"
+        },
+        {
+          "book": "개념+유형 개념편",
+          "subject": "중등수학3(하)",
+          "page": 35,
+          "no": "4"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(13).pdf",
+      "cohort_mean": 0.6851666666666667,
+      "cohort_std": 0.17019098748823988,
+      "relative_difficulty_z": -1.088,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(13).pdf",
+      "page": 17,
+      "column": "left",
+      "problem_no": "33",
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.9,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(13).pdf",
+      "cohort_mean": 0.6851666666666667,
+      "cohort_std": 0.17019098748823988,
+      "relative_difficulty_z": 1.262,
+      "cohort_normalized_star": 1,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(13).pdf",
+      "page": 18,
+      "column": "left",
+      "problem_no": "35",
+      "type_name_raw": "유리수와 무리수의 구별",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "수매씽 개념_매칭 워크북",
+          "subject": "중등수학3(상)",
+          "page": 13,
+          "no": "14"
+        },
+        {
+          "book": "절대등급",
+          "subject": "중등수학3(상)",
+          "page": 12,
+          "no": "20"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(13).pdf",
+      "cohort_mean": 0.6851666666666667,
+      "cohort_std": 0.17019098748823988,
+      "relative_difficulty_z": -1.088,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "중학"
+    },
+    {
+      "file": "260614_수능&모의 공통(13).pdf",
+      "page": 19,
+      "column": "right",
+      "problem_no": "38",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "EBS 올림포스 전국연합학력평가 기출문제집",
+          "subject": "고1 (2025)",
+          "page": 17,
+          "no": "59"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(13).pdf",
+      "cohort_mean": 0.6851666666666667,
+      "cohort_std": 0.17019098748823988,
+      "relative_difficulty_z": -1.088,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(13).pdf",
+      "page": 21,
+      "column": "left",
+      "problem_no": "41",
+      "type_name_raw": "일반 추론",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(13).pdf",
+      "cohort_mean": 0.6851666666666667,
+      "cohort_std": 0.17019098748823988,
+      "relative_difficulty_z": 0.087,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "통합 라벨"
+    },
+    {
+      "file": "260614_수능&모의 공통(13).pdf",
+      "page": 22,
+      "column": "left",
+      "problem_no": "43",
+      "type_name_raw": "배수",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(13).pdf",
+      "cohort_mean": 0.6851666666666667,
+      "cohort_std": 0.17019098748823988,
+      "relative_difficulty_z": 0.087,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "중학 수준"
+    },
+    {
+      "file": "260614_수능&모의 공통(13).pdf",
+      "page": 23,
+      "column": "right",
+      "problem_no": "46",
+      "type_name_raw": "제곱근의 곱셈과 나눗셈의 도형에의 활용 (3) 정삼각형에서 높이와 넓이",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(13).pdf",
+      "cohort_mean": 0.6851666666666667,
+      "cohort_std": 0.17019098748823988,
+      "relative_difficulty_z": -2.263,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "중학 또는 2007 이전"
+    },
+    {
+      "file": "260614_수능&모의 공통(13).pdf",
+      "page": 25,
+      "column": "right",
+      "problem_no": "50",
+      "type_name_raw": "정다면체의 전개도",
+      "correct_rate": 0.61,
+      "similar_sources": [
+        {
+          "book": "개념+유형 개념편",
+          "subject": "중등수학1(하)",
+          "page": 108,
+          "no": "10"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(13).pdf",
+      "cohort_mean": 0.6851666666666667,
+      "cohort_std": 0.17019098748823988,
+      "relative_difficulty_z": -0.442,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "중학"
+    },
+    {
+      "file": "260614_수능&모의 공통(13).pdf",
+      "page": 26,
+      "column": "left",
+      "problem_no": "51",
+      "type_name_raw": "최소공배수의 실생활 문제(2) 동시에 출발하여 다시 만나는 경우",
+      "correct_rate": 0.55,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "중등수학1(상)",
+          "page": 33,
+          "no": "209"
+        },
+        {
+          "book": "쎈",
+          "subject": "중등수학1(상)",
+          "page": 33,
+          "no": "211"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(13).pdf",
+      "cohort_mean": 0.6851666666666667,
+      "cohort_std": 0.17019098748823988,
+      "relative_difficulty_z": -0.794,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "중학"
+    },
+    {
+      "file": "260614_수능&모의 공통(13).pdf",
+      "page": 27,
+      "column": "right",
+      "problem_no": "54",
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(13).pdf",
+      "cohort_mean": 0.6851666666666667,
+      "cohort_std": 0.17019098748823988,
+      "relative_difficulty_z": 0.087,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(13).pdf",
+      "page": 28,
+      "column": "right",
+      "problem_no": "56",
+      "type_name_raw": "평행사변형의 성질의 응용(2) 두 쌍의 대각의 크기가 같다",
+      "correct_rate": 0.61,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "중등수학2(하)",
+          "page": 62,
+          "no": "301"
+        },
+        {
+          "book": "쎈",
+          "subject": "중등수학2(하)",
+          "page": 61,
+          "no": "299"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(13).pdf",
+      "cohort_mean": 0.6851666666666667,
+      "cohort_std": 0.17019098748823988,
+      "relative_difficulty_z": -0.442,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "중학"
+    },
+    {
+      "file": "260614_수능&모의 공통(13).pdf",
+      "page": 29,
+      "column": "left",
+      "problem_no": "57",
+      "type_name_raw": "거리, 속력, 시간에 대한 문제(3) 시차가 발생하는 경우",
+      "correct_rate": 0.67,
+      "similar_sources": [
+        {
+          "book": "개념+유형 개념편",
+          "subject": "중등수학1(상)",
+          "page": 105,
+          "no": "4"
+        },
+        {
+          "book": "개념+유형 유형편 실력향상 파워",
+          "subject": "중등수학1(상)",
+          "page": 87,
+          "no": "3"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(13).pdf",
+      "cohort_mean": 0.6851666666666667,
+      "cohort_std": 0.17019098748823988,
+      "relative_difficulty_z": -0.089,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "중학"
+    },
+    {
+      "file": "260614_수능&모의 공통(13).pdf",
+      "page": 30,
+      "column": "left",
+      "problem_no": "59",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "중등수학3(하)",
+          "page": 121,
+          "no": "0666.(2)"
+        },
+        {
+          "book": "쎈",
+          "subject": "중등수학3(하)",
+          "page": 13,
+          "no": "0044"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(13).pdf",
+      "cohort_mean": 0.6851666666666667,
+      "cohort_std": 0.17019098748823988,
+      "relative_difficulty_z": 0.087,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(2).pdf",
+      "page": 13,
+      "column": "left",
+      "problem_no": "25",
+      "type_name_raw": "산술평균과 기하평균의 관계(3) 식의 변형을 이용하는 경우",
+      "correct_rate": 0.75,
+      "similar_sources": [
+        {
+          "book": "라이트쎈",
+          "subject": "공통수학2",
+          "page": 129,
+          "no": "930"
+        },
+        {
+          "book": "라이트쎈",
+          "subject": "공통수학2",
+          "page": 133,
+          "no": "955"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(2).pdf",
+      "cohort_mean": 0.7500000000000001,
+      "cohort_std": 0.15553349049856327,
+      "relative_difficulty_z": 0,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(2).pdf",
+      "page": 52,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "산술평균과 기하평균의 관계(5) 도형에서의 활용",
+      "correct_rate": 0.8,
+      "similar_sources": [
+        {
+          "book": "라이트쎈",
+          "subject": "공통수학2",
+          "page": 133,
+          "no": "954"
+        },
+        {
+          "book": "라이트쎈",
+          "subject": "공통수학2",
+          "page": 128,
+          "no": "926"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(2).pdf",
+      "cohort_mean": 0.7500000000000001,
+      "cohort_std": 0.15553349049856327,
+      "relative_difficulty_z": 0.321,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(3).pdf",
+      "page": 23,
+      "column": "right",
+      "problem_no": "46",
+      "type_name_raw": "산술평균과 기하평균의 관계(5) 도형에서의 활용",
+      "correct_rate": 0.6,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 139,
+          "no": "898"
+        },
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 135,
+          "no": "872"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(3).pdf",
+      "cohort_mean": 0.7390000000000002,
+      "cohort_std": 0.1586642156673436,
+      "relative_difficulty_z": -0.876,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(3).pdf",
+      "page": 36,
+      "column": "right",
+      "problem_no": "72",
+      "type_name_raw": "삼각형의 내각의 이등분선",
+      "correct_rate": 0.78,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 16,
+          "no": "79"
+        },
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 14,
+          "no": "61"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(3).pdf",
+      "cohort_mean": 0.7390000000000002,
+      "cohort_std": 0.1586642156673436,
+      "relative_difficulty_z": 0.258,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "중학 또는 도형의 성질"
+    },
+    {
+      "file": "260614_수능&모의 공통(3).pdf",
+      "page": 68,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "산술평균과 기하평균의 관계(5) 도형에서의 활용",
+      "correct_rate": 0.76,
+      "similar_sources": [
+        {
+          "book": "개념+유형 유형편",
+          "subject": "공통수학2",
+          "page": 66,
+          "no": "25"
+        },
+        {
+          "book": "개념+유형 유형편",
+          "subject": "공통수학2",
+          "page": 66,
+          "no": "26"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(3).pdf",
+      "cohort_mean": 0.7390000000000002,
+      "cohort_std": 0.1586642156673436,
+      "relative_difficulty_z": 0.132,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(4).pdf",
+      "page": 37,
+      "column": "left",
+      "problem_no": "73",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.71,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(4).pdf",
+      "cohort_mean": 0.760066666666667,
+      "cohort_std": 0.15791346434747802,
+      "relative_difficulty_z": -0.317,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(5).pdf",
+      "page": 6,
+      "column": "right",
+      "problem_no": "12",
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.69,
+      "similar_sources": [
+        {
+          "book": "마플시너지",
+          "subject": "공통수학2",
+          "page": 272,
+          "no": "1571"
+        },
+        {
+          "book": "마플시너지",
+          "subject": "공통수학2",
+          "page": 272,
+          "no": "1572"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(5).pdf",
+      "cohort_mean": 0.6985333333333333,
+      "cohort_std": 0.18705217335159616,
+      "relative_difficulty_z": -0.046,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(5).pdf",
+      "page": 8,
+      "column": "left",
+      "problem_no": "15",
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(5).pdf",
+      "cohort_mean": 0.6985333333333333,
+      "cohort_std": 0.18705217335159616,
+      "relative_difficulty_z": -2.131,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(5).pdf",
+      "page": 9,
+      "column": "left",
+      "problem_no": "17",
+      "type_name_raw": "산술평균과 기하평균의 관계(5) 도형에서의 활용",
+      "correct_rate": 0.51,
+      "similar_sources": [
+        {
+          "book": "라이트쎈",
+          "subject": "공통수학2",
+          "page": 129,
+          "no": "927"
+        },
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 112,
+          "no": "757"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(5).pdf",
+      "cohort_mean": 0.6985333333333333,
+      "cohort_std": 0.18705217335159616,
+      "relative_difficulty_z": -1.008,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(5).pdf",
+      "page": 11,
+      "column": "right",
+      "problem_no": "22",
+      "type_name_raw": "등차수열의 일반항",
+      "correct_rate": 0.9,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "대수",
+          "page": 131,
+          "no": "896"
+        },
+        {
+          "book": "쎈",
+          "subject": "대수",
+          "page": 131,
+          "no": "890"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(5).pdf",
+      "cohort_mean": 0.6985333333333333,
+      "cohort_std": 0.18705217335159616,
+      "relative_difficulty_z": 1.077,
+      "cohort_normalized_star": 1,
+      "exclusion_reason": "수1 수열"
+    },
+    {
+      "file": "260614_수능&모의 공통(5).pdf",
+      "page": 12,
+      "column": "right",
+      "problem_no": "24",
+      "type_name_raw": "등차수열의 합(1)",
+      "correct_rate": 0.81,
+      "similar_sources": [
+        {
+          "book": "개념원리",
+          "subject": "대수",
+          "page": 229,
+          "no": "527.(2)"
+        },
+        {
+          "book": "개념원리",
+          "subject": "대수",
+          "page": 230,
+          "no": "530"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(5).pdf",
+      "cohort_mean": 0.6985333333333333,
+      "cohort_std": 0.18705217335159616,
+      "relative_difficulty_z": 0.596,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "수1 수열 — 공통수학 범위 외"
+    },
+    {
+      "file": "260614_수능&모의 공통(5).pdf",
+      "page": 14,
+      "column": "right",
+      "problem_no": "28",
+      "type_name_raw": "산술평균과 기하평균의 관계(4) 복잡한 식의 최대·최소",
+      "correct_rate": 0.32,
+      "similar_sources": [
+        {
+          "book": "블랙라벨",
+          "subject": "공통수학2",
+          "page": 71,
+          "no": "3"
+        },
+        {
+          "book": "Total 짱",
+          "subject": "공통수학2",
+          "page": 249,
+          "no": "1395"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(5).pdf",
+      "cohort_mean": 0.6985333333333333,
+      "cohort_std": 0.18705217335159616,
+      "relative_difficulty_z": -2.024,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(5).pdf",
+      "page": 15,
+      "column": "left",
+      "problem_no": "29",
+      "type_name_raw": "등비수열의 합의 활용(1)",
+      "correct_rate": 0.35,
+      "similar_sources": [
+        {
+          "book": "고쟁이",
+          "subject": "대수",
+          "page": 166,
+          "no": "619"
+        },
+        {
+          "book": "수학의정석 기본",
+          "subject": "대수",
+          "page": 200,
+          "no": "14"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(5).pdf",
+      "cohort_mean": 0.6985333333333333,
+      "cohort_std": 0.18705217335159616,
+      "relative_difficulty_z": -1.863,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "수1 수열"
+    },
+    {
+      "file": "260614_수능&모의 공통(5).pdf",
+      "page": 21,
+      "column": "right",
+      "problem_no": "42",
+      "type_name_raw": "가격과 개수에 대한 문제(2) - 가격 구하기",
+      "correct_rate": 0.3,
+      "similar_sources": [
+        {
+          "book": "100발 100중 기출문제집",
+          "subject": "중등수학2(상) 기말",
+          "page": 14,
+          "no": "1"
+        },
+        {
+          "book": "절대등급",
+          "subject": "중등수학2(상)",
+          "page": 82,
+          "no": "15"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(5).pdf",
+      "cohort_mean": 0.6985333333333333,
+      "cohort_std": 0.18705217335159616,
+      "relative_difficulty_z": -2.131,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "중학"
+    },
+    {
+      "file": "260614_수능&모의 공통(5).pdf",
+      "page": 22,
+      "column": "right",
+      "problem_no": "44",
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.34,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(5).pdf",
+      "cohort_mean": 0.6985333333333333,
+      "cohort_std": 0.18705217335159616,
+      "relative_difficulty_z": -1.917,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(5).pdf",
+      "page": 28,
+      "column": "right",
+      "problem_no": "56",
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(5).pdf",
+      "cohort_mean": 0.6985333333333333,
+      "cohort_std": 0.18705217335159616,
+      "relative_difficulty_z": -2.131,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(5).pdf",
+      "page": 29,
+      "column": "left",
+      "problem_no": "57",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.3,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "중등수학3(하)",
+          "page": 35,
+          "no": "0166"
+        },
+        {
+          "book": "쎈",
+          "subject": "중등수학3(하)",
+          "page": 117,
+          "no": "0653"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(5).pdf",
+      "cohort_mean": 0.6985333333333333,
+      "cohort_std": 0.18705217335159616,
+      "relative_difficulty_z": -2.131,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(5).pdf",
+      "page": 40,
+      "column": "right",
+      "problem_no": "80",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.3,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "중등수학3(하)",
+          "page": 35,
+          "no": "0166"
+        },
+        {
+          "book": "쎈",
+          "subject": "중등수학3(하)",
+          "page": 117,
+          "no": "0653"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(5).pdf",
+      "cohort_mean": 0.6985333333333333,
+      "cohort_std": 0.18705217335159616,
+      "relative_difficulty_z": -2.131,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(5).pdf",
+      "page": 49,
+      "column": "left",
+      "problem_no": "97",
+      "type_name_raw": "등차수열의 합(1)",
+      "correct_rate": 0.89,
+      "similar_sources": [
+        {
+          "book": "고쟁이",
+          "subject": "대수",
+          "page": 152,
+          "no": "550"
+        },
+        {
+          "book": "라이트쎈",
+          "subject": "대수",
+          "page": 124,
+          "no": "926"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(5).pdf",
+      "cohort_mean": 0.6985333333333333,
+      "cohort_std": 0.18705217335159616,
+      "relative_difficulty_z": 1.024,
+      "cohort_normalized_star": 1,
+      "exclusion_reason": "수1 수열 — 공통수학 범위 외"
+    },
+    {
+      "file": "260614_수능&모의 공통(5).pdf",
+      "page": 52,
+      "column": "left",
+      "problem_no": "52",
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "마플시너지",
+          "subject": "공통수학2",
+          "page": 272,
+          "no": "1571"
+        },
+        {
+          "book": "마플시너지",
+          "subject": "공통수학2",
+          "page": 272,
+          "no": "1572"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(5).pdf",
+      "cohort_mean": 0.6985333333333333,
+      "cohort_std": 0.18705217335159616,
+      "relative_difficulty_z": 0.008,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(5).pdf",
+      "page": 53,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(5).pdf",
+      "cohort_mean": 0.6985333333333333,
+      "cohort_std": 0.18705217335159616,
+      "relative_difficulty_z": -2.131,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(5).pdf",
+      "page": 56,
+      "column": "left",
+      "problem_no": "56",
+      "type_name_raw": "등비수열의 합(1)",
+      "correct_rate": 0.48,
+      "similar_sources": [
+        {
+          "book": "라이트쎈",
+          "subject": "대수",
+          "page": 146,
+          "no": "1088"
+        },
+        {
+          "book": "쎈",
+          "subject": "대수",
+          "page": 151,
+          "no": "1041"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(5).pdf",
+      "cohort_mean": 0.6985333333333333,
+      "cohort_std": 0.18705217335159616,
+      "relative_difficulty_z": -1.168,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "수1 수열"
+    },
+    {
+      "file": "260614_수능&모의 공통(5).pdf",
+      "page": 56,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "등차수열의 일반항",
+      "correct_rate": 0.89,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "대수",
+          "page": 131,
+          "no": "896"
+        },
+        {
+          "book": "쎈",
+          "subject": "대수",
+          "page": 131,
+          "no": "890"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(5).pdf",
+      "cohort_mean": 0.6985333333333333,
+      "cohort_std": 0.18705217335159616,
+      "relative_difficulty_z": 1.024,
+      "cohort_normalized_star": 1,
+      "exclusion_reason": "수1 수열"
+    },
+    {
+      "file": "260614_수능&모의 공통(5).pdf",
+      "page": 57,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "산술평균과 기하평균의 관계(1) 곱이 일정한 경우",
+      "correct_rate": 0.85,
+      "similar_sources": [
+        {
+          "book": "라이트쎈",
+          "subject": "공통수학2",
+          "page": 116,
+          "no": "851"
+        },
+        {
+          "book": "라이트쎈",
+          "subject": "공통수학2",
+          "page": 116,
+          "no": "852"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(5).pdf",
+      "cohort_mean": 0.6985333333333333,
+      "cohort_std": 0.18705217335159616,
+      "relative_difficulty_z": 0.81,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정 (현행 수1 절대부등식 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(5).pdf",
+      "page": 59,
+      "column": "left",
+      "problem_no": "59",
+      "type_name_raw": "등비중항",
+      "correct_rate": 0.71,
+      "similar_sources": [
+        {
+          "book": "라이트쎈",
+          "subject": "대수",
+          "page": 141,
+          "no": "1053"
+        },
+        {
+          "book": "라이트쎈",
+          "subject": "대수",
+          "page": 141,
+          "no": "1052"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(5).pdf",
+      "cohort_mean": 0.6985333333333333,
+      "cohort_std": 0.18705217335159616,
+      "relative_difficulty_z": 0.061,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "수1 수열"
+    },
+    {
+      "file": "260614_수능&모의 공통(5).pdf",
+      "page": 66,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "제일코사인법칙",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(5).pdf",
+      "cohort_mean": 0.6985333333333333,
+      "cohort_std": 0.18705217335159616,
+      "relative_difficulty_z": 0.008,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "삼각함수 — 미적분"
+    },
+    {
+      "file": "260614_수능&모의 공통(5).pdf",
+      "page": 69,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(5).pdf",
+      "cohort_mean": 0.6985333333333333,
+      "cohort_std": 0.18705217335159616,
+      "relative_difficulty_z": -2.131,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(6).pdf",
+      "page": 9,
+      "column": "right",
+      "problem_no": "18",
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.74,
+      "similar_sources": [
+        {
+          "book": "개념 해결의 법칙",
+          "subject": "공통수학2",
+          "page": 257,
+          "no": "11"
+        },
+        {
+          "book": "수학의 바이블 유형on 2권",
+          "subject": "공통수학2",
+          "page": 129,
+          "no": "708"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(6).pdf",
+      "cohort_mean": 0.719866666666667,
+      "cohort_std": 0.1700744412178254,
+      "relative_difficulty_z": 0.118,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(6).pdf",
+      "page": 18,
+      "column": "right",
+      "problem_no": "36",
+      "type_name_raw": "등차수열의 합(1)",
+      "correct_rate": 0.83,
+      "similar_sources": [
+        {
+          "book": "개념+유형 유형편",
+          "subject": "대수",
+          "page": 67,
+          "no": "23"
+        },
+        {
+          "book": "개념+유형 유형편",
+          "subject": "대수",
+          "page": 67,
+          "no": "24"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(6).pdf",
+      "cohort_mean": 0.719866666666667,
+      "cohort_std": 0.1700744412178254,
+      "relative_difficulty_z": 0.648,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "수1 수열 — 공통수학 범위 외"
+    },
+    {
+      "file": "260614_수능&모의 공통(6).pdf",
+      "page": 22,
+      "column": "right",
+      "problem_no": "44",
+      "type_name_raw": "산술평균과 기하평균의 관계(5) 도형에서의 활용",
+      "correct_rate": 0.56,
+      "similar_sources": [
+        {
+          "book": "개념원리",
+          "subject": "공통수학2",
+          "page": 203,
+          "no": "481"
+        },
+        {
+          "book": "개념원리",
+          "subject": "공통수학2",
+          "page": 200,
+          "no": "469"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(6).pdf",
+      "cohort_mean": 0.719866666666667,
+      "cohort_std": 0.1700744412178254,
+      "relative_difficulty_z": -0.94,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(6).pdf",
+      "page": 23,
+      "column": "left",
+      "problem_no": "45",
+      "type_name_raw": "귀납적으로 정의된 여러 가지 수열(1)",
+      "correct_rate": 0.8,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "대수",
+          "page": 170,
+          "no": "1178"
+        },
+        {
+          "book": "라이트쎈",
+          "subject": "대수",
+          "page": 170,
+          "no": "1275"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(6).pdf",
+      "cohort_mean": 0.719866666666667,
+      "cohort_std": 0.1700744412178254,
+      "relative_difficulty_z": 0.471,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "수1 수열"
+    },
+    {
+      "file": "260614_수능&모의 공통(6).pdf",
+      "page": 25,
+      "column": "left",
+      "problem_no": "49",
+      "type_name_raw": "수학적 귀납법(1) 등식의 증명",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "개념+유형 개념편",
+          "subject": "대수",
+          "page": 229,
+          "no": "8"
+        },
+        {
+          "book": "RPM",
+          "subject": "대수",
+          "page": 151,
+          "no": "1097"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(6).pdf",
+      "cohort_mean": 0.719866666666667,
+      "cohort_std": 0.1700744412178254,
+      "relative_difficulty_z": -0.117,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "수1 수열"
+    },
+    {
+      "file": "260614_수능&모의 공통(6).pdf",
+      "page": 26,
+      "column": "right",
+      "problem_no": "52",
+      "type_name_raw": "등비중항",
+      "correct_rate": 0.89,
+      "similar_sources": [
+        {
+          "book": "개념+유형 개념편",
+          "subject": "대수",
+          "page": 189,
+          "no": "4"
+        },
+        {
+          "book": "RPM",
+          "subject": "대수",
+          "page": 111,
+          "no": "819"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(6).pdf",
+      "cohort_mean": 0.719866666666667,
+      "cohort_std": 0.1700744412178254,
+      "relative_difficulty_z": 1,
+      "cohort_normalized_star": 1,
+      "exclusion_reason": "수1 수열"
+    },
+    {
+      "file": "260614_수능&모의 공통(6).pdf",
+      "page": 28,
+      "column": "left",
+      "problem_no": "55",
+      "type_name_raw": "등비수열의 합과 일반항 사이의 관계",
+      "correct_rate": 0.82,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "대수",
+          "page": 133,
+          "no": "918"
+        },
+        {
+          "book": "쎈",
+          "subject": "대수",
+          "page": 147,
+          "no": "1019"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(6).pdf",
+      "cohort_mean": 0.719866666666667,
+      "cohort_std": 0.1700744412178254,
+      "relative_difficulty_z": 0.589,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "수1 수열"
+    },
+    {
+      "file": "260614_수능&모의 공통(6).pdf",
+      "page": 30,
+      "column": "left",
+      "problem_no": "59",
+      "type_name_raw": "여러 가지 수열의 합의 활용",
+      "correct_rate": 0.68,
+      "similar_sources": [
+        {
+          "book": "개념+유형 유형편",
+          "subject": "대수",
+          "page": 80,
+          "no": "32"
+        },
+        {
+          "book": "RPM",
+          "subject": "대수",
+          "page": 140,
+          "no": "1030"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(6).pdf",
+      "cohort_mean": 0.719866666666667,
+      "cohort_std": 0.1700744412178254,
+      "relative_difficulty_z": -0.234,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "수1 수열"
+    },
+    {
+      "file": "260614_수능&모의 공통(6).pdf",
+      "page": 30,
+      "column": "right",
+      "problem_no": "60",
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(6).pdf",
+      "cohort_mean": 0.719866666666667,
+      "cohort_std": 0.1700744412178254,
+      "relative_difficulty_z": -2.469,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(6).pdf",
+      "page": 36,
+      "column": "right",
+      "problem_no": "72",
+      "type_name_raw": "제일코사인법칙",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(6).pdf",
+      "cohort_mean": 0.719866666666667,
+      "cohort_std": 0.1700744412178254,
+      "relative_difficulty_z": -0.117,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "삼각함수 — 미적분"
+    },
+    {
+      "file": "260614_수능&모의 공통(6).pdf",
+      "page": 39,
+      "column": "left",
+      "problem_no": "77",
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(6).pdf",
+      "cohort_mean": 0.719866666666667,
+      "cohort_std": 0.1700744412178254,
+      "relative_difficulty_z": -0.117,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(6).pdf",
+      "page": 53,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.75,
+      "similar_sources": [
+        {
+          "book": "개념 해결의 법칙",
+          "subject": "공통수학2",
+          "page": 257,
+          "no": "11"
+        },
+        {
+          "book": "수학의 바이블 유형on 2권",
+          "subject": "공통수학2",
+          "page": 129,
+          "no": "708"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(6).pdf",
+      "cohort_mean": 0.719866666666667,
+      "cohort_std": 0.1700744412178254,
+      "relative_difficulty_z": 0.177,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(6).pdf",
+      "page": 66,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(6).pdf",
+      "cohort_mean": 0.719866666666667,
+      "cohort_std": 0.1700744412178254,
+      "relative_difficulty_z": -0.117,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(7).pdf",
+      "page": 5,
+      "column": "left",
+      "problem_no": "09",
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(7).pdf",
+      "cohort_mean": 0.6755333333333334,
+      "cohort_std": 0.1741552436445394,
+      "relative_difficulty_z": 0.14,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(7).pdf",
+      "page": 13,
+      "column": "right",
+      "problem_no": "26",
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(7).pdf",
+      "cohort_mean": 0.6755333333333334,
+      "cohort_std": 0.1741552436445394,
+      "relative_difficulty_z": -2.156,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(7).pdf",
+      "page": 14,
+      "column": "left",
+      "problem_no": "27",
+      "type_name_raw": "삼각형의 내각의 이등분선",
+      "correct_rate": 0.64,
+      "similar_sources": [
+        {
+          "book": "개념+유형 유형편",
+          "subject": "공통수학2",
+          "page": 9,
+          "no": "17"
+        },
+        {
+          "book": "EBS 올림포스",
+          "subject": "공통수학2",
+          "page": 12,
+          "no": "5"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(7).pdf",
+      "cohort_mean": 0.6755333333333334,
+      "cohort_std": 0.1741552436445394,
+      "relative_difficulty_z": -0.204,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "중학 또는 도형의 성질"
+    },
+    {
+      "file": "260614_수능&모의 공통(7).pdf",
+      "page": 18,
+      "column": "right",
+      "problem_no": "36",
+      "type_name_raw": "제곱근의 덧셈과 뺄셈",
+      "correct_rate": 0.9,
+      "similar_sources": [
+        {
+          "book": "개념+유형 유형편 실력향상 파워",
+          "subject": "중등수학3(상)",
+          "page": 48,
+          "no": "10"
+        },
+        {
+          "book": "개념원리",
+          "subject": "중등수학3(상)",
+          "page": 52,
+          "no": "1.(1)"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(7).pdf",
+      "cohort_mean": 0.6755333333333334,
+      "cohort_std": 0.1741552436445394,
+      "relative_difficulty_z": 1.289,
+      "cohort_normalized_star": 1,
+      "exclusion_reason": "중학"
+    },
+    {
+      "file": "260614_수능&모의 공통(7).pdf",
+      "page": 34,
+      "column": "left",
+      "problem_no": "67",
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "풍산자 필수유형",
+          "subject": "공통수학2",
+          "page": 168,
+          "no": "821"
+        },
+        {
+          "book": "풍산자 필수유형",
+          "subject": "공통수학2",
+          "page": 169,
+          "no": "824"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(7).pdf",
+      "cohort_mean": 0.6755333333333334,
+      "cohort_std": 0.1741552436445394,
+      "relative_difficulty_z": 0.14,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(7).pdf",
+      "page": 38,
+      "column": "left",
+      "problem_no": "75",
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(7).pdf",
+      "cohort_mean": 0.6755333333333334,
+      "cohort_std": 0.1741552436445394,
+      "relative_difficulty_z": -2.156,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(7).pdf",
+      "page": 39,
+      "column": "left",
+      "problem_no": "77",
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(7).pdf",
+      "cohort_mean": 0.6755333333333334,
+      "cohort_std": 0.1741552436445394,
+      "relative_difficulty_z": -2.156,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(7).pdf",
+      "page": 45,
+      "column": "right",
+      "problem_no": "90",
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(7).pdf",
+      "cohort_mean": 0.6755333333333334,
+      "cohort_std": 0.1741552436445394,
+      "relative_difficulty_z": -2.156,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(7).pdf",
+      "page": 48,
+      "column": "right",
+      "problem_no": "96",
+      "type_name_raw": "부등식의 증명(1) 두 식의 차를 이용한 대소 비교",
+      "correct_rate": 0.52,
+      "similar_sources": [
+        {
+          "book": "수매씽 문제 기본서",
+          "subject": "공통수학2",
+          "page": 276,
+          "no": "1311"
+        },
+        {
+          "book": "플래티넘",
+          "subject": "공통수학2",
+          "page": 55,
+          "no": "196"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(7).pdf",
+      "cohort_mean": 0.6755333333333334,
+      "cohort_std": 0.1741552436445394,
+      "relative_difficulty_z": -0.893,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(7).pdf",
+      "page": 53,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "풍산자 필수유형",
+          "subject": "공통수학2",
+          "page": 168,
+          "no": "821"
+        },
+        {
+          "book": "풍산자 필수유형",
+          "subject": "공통수학2",
+          "page": 169,
+          "no": "824"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(7).pdf",
+      "cohort_mean": 0.6755333333333334,
+      "cohort_std": 0.1741552436445394,
+      "relative_difficulty_z": 0.14,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(7).pdf",
+      "page": 55,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(7).pdf",
+      "cohort_mean": 0.6755333333333334,
+      "cohort_std": 0.1741552436445394,
+      "relative_difficulty_z": -2.156,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(7).pdf",
+      "page": 56,
+      "column": "left",
+      "problem_no": "56",
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(7).pdf",
+      "cohort_mean": 0.6755333333333334,
+      "cohort_std": 0.1741552436445394,
+      "relative_difficulty_z": -2.156,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(7).pdf",
+      "page": 56,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(7).pdf",
+      "cohort_mean": 0.6755333333333334,
+      "cohort_std": 0.1741552436445394,
+      "relative_difficulty_z": 0.14,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(7).pdf",
+      "page": 57,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "산술평균과 기하평균의 관계(1) 곱이 일정한 경우",
+      "correct_rate": 0.8,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 113,
+          "no": "761"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(7).pdf",
+      "cohort_mean": 0.6755333333333334,
+      "cohort_std": 0.1741552436445394,
+      "relative_difficulty_z": 0.715,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정 (현행 수1 절대부등식 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(7).pdf",
+      "page": 69,
+      "column": "left",
+      "problem_no": "69",
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(7).pdf",
+      "cohort_mean": 0.6755333333333334,
+      "cohort_std": 0.1741552436445394,
+      "relative_difficulty_z": -2.156,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(7).pdf",
+      "page": 70,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(7).pdf",
+      "cohort_mean": 0.6755333333333334,
+      "cohort_std": 0.1741552436445394,
+      "relative_difficulty_z": -2.156,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(7).pdf",
+      "page": 71,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.9,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(7).pdf",
+      "cohort_mean": 0.6755333333333334,
+      "cohort_std": 0.1741552436445394,
+      "relative_difficulty_z": 1.289,
+      "cohort_normalized_star": 1,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(7).pdf",
+      "page": 72,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(7).pdf",
+      "cohort_mean": 0.6755333333333334,
+      "cohort_std": 0.1741552436445394,
+      "relative_difficulty_z": 0.14,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 3,
+      "column": "left",
+      "problem_no": "05",
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": 0.154,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 8,
+      "column": "right",
+      "problem_no": "16",
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": -2.549,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 12,
+      "column": "left",
+      "problem_no": "23",
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.5,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": -1.198,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 12,
+      "column": "right",
+      "problem_no": "24",
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": 0.154,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 14,
+      "column": "right",
+      "problem_no": "28",
+      "type_name_raw": "산술평균과 기하평균의 관계(5) 도형에서의 활용",
+      "correct_rate": 0.49,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 139,
+          "no": "898"
+        },
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 135,
+          "no": "872"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": -1.266,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 15,
+      "column": "left",
+      "problem_no": "29",
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 181,
+          "no": "1196"
+        },
+        {
+          "book": "100발 100중 기출문제집 2학기 기말",
+          "subject": "공통수학2",
+          "page": 156,
+          "no": "13"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": -1.198,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 20,
+      "column": "right",
+      "problem_no": "40",
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": 0.154,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 22,
+      "column": "right",
+      "problem_no": "44",
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "수학의 바이블 유형on 1권",
+          "subject": "공통수학2",
+          "page": 212,
+          "no": "1193"
+        },
+        {
+          "book": "수학의 바이블 유형on 1권",
+          "subject": "공통수학2",
+          "page": 212,
+          "no": "1191"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": 0.154,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 23,
+      "column": "right",
+      "problem_no": "46",
+      "type_name_raw": "부등식의 증명(1) 두 식의 차를 이용한 대소 비교",
+      "correct_rate": 0.66,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 106,
+          "no": "715"
+        },
+        {
+          "book": "개념+유형 개념편",
+          "subject": "공통수학2",
+          "page": 173,
+          "no": "5"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": -0.117,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 26,
+      "column": "left",
+      "problem_no": "51",
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 181,
+          "no": "1196"
+        },
+        {
+          "book": "100발 100중 기출문제집 2학기 기말",
+          "subject": "공통수학2",
+          "page": 156,
+          "no": "13"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": -1.198,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 26,
+      "column": "right",
+      "problem_no": "52",
+      "type_name_raw": "새로운 연산 기호의 계산",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "일품",
+          "subject": "중등수학1(상)",
+          "page": 30,
+          "no": "23"
+        },
+        {
+          "book": "쎈",
+          "subject": "중등수학1(상)",
+          "page": 75,
+          "no": "531"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": 0.154,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 28,
+      "column": "right",
+      "problem_no": "56",
+      "type_name_raw": "산술평균과 기하평균의 관계(3) 식의 변형을 이용하는 경우",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 112,
+          "no": "756"
+        },
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 108,
+          "no": "730"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": 0.154,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 30,
+      "column": "left",
+      "problem_no": "59",
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": 0.154,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 36,
+      "column": "right",
+      "problem_no": "72",
+      "type_name_raw": "부등식의 증명(1) 두 식의 차를 이용한 대소 비교",
+      "correct_rate": 0.69,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 106,
+          "no": "715"
+        },
+        {
+          "book": "개념+유형 개념편",
+          "subject": "공통수학2",
+          "page": 173,
+          "no": "5"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": 0.086,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 39,
+      "column": "right",
+      "problem_no": "78",
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "수학의 바이블 유형on 1권",
+          "subject": "공통수학2",
+          "page": 212,
+          "no": "1193"
+        },
+        {
+          "book": "수학의 바이블 유형on 1권",
+          "subject": "공통수학2",
+          "page": 212,
+          "no": "1191"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": 0.154,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 40,
+      "column": "left",
+      "problem_no": "79",
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": -2.549,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 44,
+      "column": "right",
+      "problem_no": "88",
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": -2.549,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 45,
+      "column": "left",
+      "problem_no": "89",
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": -2.549,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 46,
+      "column": "left",
+      "problem_no": "91",
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.9,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": 1.505,
+      "cohort_normalized_star": 1,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 46,
+      "column": "right",
+      "problem_no": "92",
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.9,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": 1.505,
+      "cohort_normalized_star": 1,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 52,
+      "column": "left",
+      "problem_no": "52",
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": 0.154,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 54,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": -2.549,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 59,
+      "column": "left",
+      "problem_no": "59",
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "수학의 바이블 유형on 1권",
+          "subject": "공통수학2",
+          "page": 212,
+          "no": "1193"
+        },
+        {
+          "book": "수학의 바이블 유형on 1권",
+          "subject": "공통수학2",
+          "page": 212,
+          "no": "1191"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": 0.154,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 60,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": -2.549,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 64,
+      "column": "left",
+      "problem_no": "64",
+      "type_name_raw": "부등식의 증명(1) 두 식의 차를 이용한 대소 비교",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 106,
+          "no": "715"
+        },
+        {
+          "book": "개념+유형 개념편",
+          "subject": "공통수학2",
+          "page": 173,
+          "no": "5"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": 0.154,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 65,
+      "column": "left",
+      "problem_no": "65",
+      "type_name_raw": "삼각형의 외심",
+      "correct_rate": 0.78,
+      "similar_sources": [
+        {
+          "book": "개념원리",
+          "subject": "공통수학2",
+          "page": 17,
+          "no": "21"
+        },
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 11,
+          "no": "25"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": 0.694,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "중학"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 66,
+      "column": "left",
+      "problem_no": "66",
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": 0.154,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 69,
+      "column": "left",
+      "problem_no": "69",
+      "type_name_raw": "실수의 성질을 이용한 절대부등식의 증명",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 107,
+          "no": "717"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": -1.198,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 69,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "수학의 바이블 유형on 1권",
+          "subject": "공통수학2",
+          "page": 212,
+          "no": "1193"
+        },
+        {
+          "book": "수학의 바이블 유형on 1권",
+          "subject": "공통수학2",
+          "page": 212,
+          "no": "1191"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": 0.154,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 70,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "산술평균과 기하평균의 관계(5) 도형에서의 활용",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 139,
+          "no": "898"
+        },
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 135,
+          "no": "872"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": -1.198,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 71,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "새로운 연산 기호의 계산",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "일품",
+          "subject": "중등수학1(상)",
+          "page": 30,
+          "no": "23"
+        },
+        {
+          "book": "쎈",
+          "subject": "중등수학1(상)",
+          "page": 75,
+          "no": "531"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": 0.154,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 72,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": 0.154,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 75,
+      "column": "left",
+      "problem_no": "75",
+      "type_name_raw": "산술평균과 기하평균의 관계(5) 도형에서의 활용",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 139,
+          "no": "898"
+        },
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 135,
+          "no": "872"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": -1.198,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(8).pdf",
+      "page": 75,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "산술평균과 기하평균의 관계(5) 도형에서의 활용",
+      "correct_rate": 0.38,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 113,
+          "no": "765"
+        },
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 139,
+          "no": "897"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(8).pdf",
+      "cohort_mean": 0.677266666666667,
+      "cohort_std": 0.14797701022643878,
+      "relative_difficulty_z": -2.009,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 3,
+      "column": "right",
+      "problem_no": "06",
+      "type_name_raw": "부등식의 증명(1) 두 식의 차를 이용한 대소 비교",
+      "correct_rate": 0.69,
+      "similar_sources": [
+        {
+          "book": "개념+유형 개념편",
+          "subject": "공통수학2",
+          "page": 173,
+          "no": "5"
+        },
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 106,
+          "no": "715"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": 0.262,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 4,
+      "column": "left",
+      "problem_no": "07",
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.69,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": 0.262,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 5,
+      "column": "right",
+      "problem_no": "10",
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": 0.328,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 7,
+      "column": "right",
+      "problem_no": "14",
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 181,
+          "no": "1196"
+        },
+        {
+          "book": "수학의 바이블 유형on 1권",
+          "subject": "공통수학2",
+          "page": 212,
+          "no": "1192"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": -0.982,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 11,
+      "column": "left",
+      "problem_no": "21",
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": -2.291,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 12,
+      "column": "left",
+      "problem_no": "23",
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": 0.328,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 13,
+      "column": "right",
+      "problem_no": "26",
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "풍산자 필수유형",
+          "subject": "공통수학2",
+          "page": 168,
+          "no": "821"
+        },
+        {
+          "book": "풍산자 필수유형",
+          "subject": "공통수학2",
+          "page": 169,
+          "no": "824"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": 0.328,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 15,
+      "column": "left",
+      "problem_no": "29",
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 181,
+          "no": "1196"
+        },
+        {
+          "book": "수학의 바이블 유형on 1권",
+          "subject": "공통수학2",
+          "page": 212,
+          "no": "1192"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": -0.982,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 16,
+      "column": "right",
+      "problem_no": "32",
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.9,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": 1.637,
+      "cohort_normalized_star": 1,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 20,
+      "column": "left",
+      "problem_no": "39",
+      "type_name_raw": "부등식의 증명(2) 두 식의 제곱의 차를 이용한 대소 비교",
+      "correct_rate": 0.69,
+      "similar_sources": [
+        {
+          "book": "수학의정석 기본",
+          "subject": "공통수학2",
+          "page": 158,
+          "no": "8"
+        },
+        {
+          "book": "수매씽 개념 기본서",
+          "subject": "공통수학2",
+          "page": 286,
+          "no": "12"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": 0.262,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 20,
+      "column": "right",
+      "problem_no": "40",
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.69,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": 0.262,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 23,
+      "column": "right",
+      "problem_no": "46",
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": -2.291,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 24,
+      "column": "left",
+      "problem_no": "47",
+      "type_name_raw": "산술평균과 기하평균의 관계(4) 복잡한 식의 최대·최소",
+      "correct_rate": 0.63,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 139,
+          "no": "896"
+        },
+        {
+          "book": "더 개념 블랙라벨",
+          "subject": "공통수학2",
+          "page": 233,
+          "no": "22"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": -0.13,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 24,
+      "column": "right",
+      "problem_no": "48",
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 181,
+          "no": "1196"
+        },
+        {
+          "book": "수학의 바이블 유형on 1권",
+          "subject": "공통수학2",
+          "page": 212,
+          "no": "1192"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": -0.982,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 26,
+      "column": "left",
+      "problem_no": "51",
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": -2.291,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 32,
+      "column": "right",
+      "problem_no": "64",
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": 0.328,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 34,
+      "column": "left",
+      "problem_no": "67",
+      "type_name_raw": "산술평균과 기하평균의 관계(1) 곱이 일정한 경우",
+      "correct_rate": 0.69,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 113,
+          "no": "761"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": 0.262,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정 (현행 수1 절대부등식 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 35,
+      "column": "right",
+      "problem_no": "70",
+      "type_name_raw": "산술평균과 기하평균의 관계(5) 도형에서의 활용",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "개념원리",
+          "subject": "공통수학2",
+          "page": 203,
+          "no": "481"
+        },
+        {
+          "book": "개념원리",
+          "subject": "공통수학2",
+          "page": 200,
+          "no": "469"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": -0.982,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 36,
+      "column": "left",
+      "problem_no": "71",
+      "type_name_raw": "비례식의 활용",
+      "correct_rate": 0.7,
+      "similar_sources": [
+        {
+          "book": "풍산자 필수유형",
+          "subject": "공통수학2",
+          "page": 168,
+          "no": "821"
+        },
+        {
+          "book": "풍산자 필수유형",
+          "subject": "공통수학2",
+          "page": 169,
+          "no": "824"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": 0.328,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 36,
+      "column": "right",
+      "problem_no": "72",
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": 0.328,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 37,
+      "column": "left",
+      "problem_no": "73",
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": 0.328,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 38,
+      "column": "right",
+      "problem_no": "76",
+      "type_name_raw": "절댓값 기호를 포함한 절대부등식",
+      "correct_rate": 0.68,
+      "similar_sources": [
+        {
+          "book": "EBS 올림포스",
+          "subject": "공통수학2",
+          "page": 57,
+          "no": "18"
+        },
+        {
+          "book": "개념원리",
+          "subject": "공통수학2",
+          "page": 197,
+          "no": "461.(2)"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": 0.197,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 40,
+      "column": "right",
+      "problem_no": "80",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.29,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": -2.356,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 42,
+      "column": "left",
+      "problem_no": "83",
+      "type_name_raw": "절대부등식",
+      "correct_rate": 0.62,
+      "similar_sources": [
+        {
+          "book": "완자 기출PICK",
+          "subject": "공통수학2",
+          "page": 144,
+          "no": "0662"
+        },
+        {
+          "book": "Hi High",
+          "subject": "공통수학2",
+          "page": 90,
+          "no": "28"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": -0.196,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 43,
+      "column": "left",
+      "problem_no": "85",
+      "type_name_raw": "삼각형의 닮음 조건의 응용(2) AA 닮음",
+      "correct_rate": 0.69,
+      "similar_sources": [
+        {
+          "book": "수매씽 개념_코칭 개념북",
+          "subject": "중등수학2(하)",
+          "page": 93,
+          "no": "12"
+        },
+        {
+          "book": "수매씽 개념_코칭 개념북",
+          "subject": "중등수학2(하)",
+          "page": 87,
+          "no": "6"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": 0.262,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "중학"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 45,
+      "column": "right",
+      "problem_no": "90",
+      "type_name_raw": "산술평균과 기하평균의 관계(5) 도형에서의 활용",
+      "correct_rate": 0.42,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 113,
+          "no": "765"
+        },
+        {
+          "book": "쎈",
+          "subject": "공통수학2",
+          "page": 139,
+          "no": "897"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": -1.505,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 47,
+      "column": "right",
+      "problem_no": "94",
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.69,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": 0.262,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 49,
+      "column": "right",
+      "problem_no": "98",
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.69,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": 0.262,
+      "cohort_normalized_star": 3,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 51,
+      "column": "left",
+      "problem_no": "51",
+      "type_name_raw": "삼각형의 내각의 이등분선과 변의 길이",
+      "correct_rate": 0.52,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "중등수학2(하)",
+          "page": 102,
+          "no": "593"
+        },
+        {
+          "book": "개념+유형 유형편 실력향상 파워",
+          "subject": "중등수학2(하)",
+          "page": 99,
+          "no": "1"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": -0.851,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "중학"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 53,
+      "column": "left",
+      "problem_no": "53",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "개념원리",
+          "subject": "중등수학3(하)",
+          "page": 120,
+          "no": "04"
+        },
+        {
+          "book": "개념원리",
+          "subject": "중등수학3(하)",
+          "page": 70,
+          "no": "01"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": -0.982,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 56,
+      "column": "left",
+      "problem_no": "56",
+      "type_name_raw": "사다리꼴의 두 변의 중점을 연결한 선분의 성질",
+      "correct_rate": 0.38,
+      "similar_sources": [
+        {
+          "book": "풍산자 테스트북",
+          "subject": "중등수학2(하)",
+          "page": 45,
+          "no": "40"
+        },
+        {
+          "book": "수학의 힘 유형 베타",
+          "subject": "중학수학2(하)",
+          "page": 122,
+          "no": "0663"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": -1.767,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "중학"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 58,
+      "column": "left",
+      "problem_no": "58",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "개념원리",
+          "subject": "중등수학3(하)",
+          "page": 120,
+          "no": "04"
+        },
+        {
+          "book": "개념원리",
+          "subject": "중등수학3(하)",
+          "page": 70,
+          "no": "01"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": -0.982,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 59,
+      "column": "left",
+      "problem_no": "59",
+      "type_name_raw": "삼각형의 넓이",
+      "correct_rate": 0.58,
+      "similar_sources": [
+        {
+          "book": "쎈",
+          "subject": "대수",
+          "page": 123,
+          "no": "850"
+        },
+        {
+          "book": "쎈",
+          "subject": "대수",
+          "page": 122,
+          "no": "849"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": -0.458,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "중학 또는 다른 단원"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 60,
+      "column": "left",
+      "problem_no": "60",
+      "type_name_raw": "모의고사 유형",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "개념원리",
+          "subject": "중등수학3(하)",
+          "page": 120,
+          "no": "04"
+        },
+        {
+          "book": "개념원리",
+          "subject": "중등수학3(하)",
+          "page": 70,
+          "no": "01"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": -0.982,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "통합 라벨 — 분류 불가"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 60,
+      "column": "right",
+      "problem_no": null,
+      "type_name_raw": "중심각의 크기와 부채꼴의 넓이",
+      "correct_rate": 0.49,
+      "similar_sources": [
+        {
+          "book": "블랙라벨",
+          "subject": "중등수학1(하)",
+          "page": 61,
+          "no": "4"
+        },
+        {
+          "book": "쎈",
+          "subject": "중등수학1(하)",
+          "page": 113,
+          "no": "680"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": -1.047,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "중학"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 61,
+      "column": "left",
+      "problem_no": "61",
+      "type_name_raw": "이중근호",
+      "correct_rate": 0.9,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": 1.637,
+      "cohort_normalized_star": 1,
+      "exclusion_reason": "2007 이전 교육과정 (현행 교육과정 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 62,
+      "column": "left",
+      "problem_no": "62",
+      "type_name_raw": "항등원과 역원",
+      "correct_rate": 0.9,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": 1.637,
+      "cohort_normalized_star": 1,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 65,
+      "column": "left",
+      "problem_no": "65",
+      "type_name_raw": "다항식의 최대공약수, 최소공배수",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": 0.328,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 68,
+      "column": "left",
+      "problem_no": "68",
+      "type_name_raw": "실수의 성질을 이용한 절대부등식의 증명",
+      "correct_rate": 0.5,
+      "similar_sources": [
+        {
+          "book": "RPM",
+          "subject": "공통수학2",
+          "page": 107,
+          "no": "717"
+        },
+        {
+          "book": "EBS 올림포스 전국연합학력평가 기출문제집",
+          "subject": "고1 (2025)",
+          "page": 126,
+          "no": "30"
+        }
+      ],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": -0.982,
+      "cohort_normalized_star": 4,
+      "exclusion_reason": "2007 이전 교육과정"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 69,
+      "column": "left",
+      "problem_no": "69",
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.3,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": -2.291,
+      "cohort_normalized_star": 5,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    },
+    {
+      "file": "260614_수능&모의 공통(9).pdf",
+      "page": 73,
+      "column": "left",
+      "problem_no": "73",
+      "type_name_raw": "부등식의 영역",
+      "correct_rate": 0.7,
+      "similar_sources": [],
+      "cohort_unit": "260614_수능&모의 공통(9).pdf",
+      "cohort_mean": 0.6499333333333336,
+      "cohort_std": 0.15275905501438816,
+      "relative_difficulty_z": 0.328,
+      "cohort_normalized_star": 2,
+      "exclusion_reason": "2007 이전 교육과정 (현행 미적분 외)"
+    }
+  ]
+}
