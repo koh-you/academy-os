@@ -2127,40 +2127,8 @@ summary:focus-visible {
   outline-offset: 2px;
 }
 
-.lessonNotificationPlanSelect {
-  align-items: center;
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--academy-border, #d8e3f8);
-  border-radius: 8px;
-  color: var(--academy-text-strong, #475569);
-  display: inline-flex;
-  flex: 0 0 auto;
-  gap: 6px;
-  min-height: 38px;
-  padding: 0 8px 0 10px;
-}
-
-.lessonNotificationPlanSelect > span {
-  font-size: 12px;
-  font-weight: 950;
-  white-space: nowrap;
-}
-
-.lessonNotificationPlanSelect select {
-  background: var(--academy-surface, #ffffff);
-  border: 0;
-  border-radius: 6px;
-  color: var(--status-closure-text, #3730a3);
-  font-size: 12px;
-  font-weight: 900;
-  height: 28px;
-  max-width: 230px;
-  padding: 0 24px 0 7px;
-}
-
 @media (max-width: 640px) {
-  .lessonNotificationStatusRow,
-  .lessonNotificationActionRow {
+  .lessonNotificationStatusRow {
     overflow-x: auto;
     overscroll-behavior-inline: contain;
     scroll-padding-inline: 8px;
@@ -2396,21 +2364,6 @@ summary:focus-visible {
   font-weight: 900;
   padding: 6px 10px;
   white-space: nowrap;
-}
-
-.lessonNotificationActionRow .ghostButton {
-  font-size: 13px;
-  min-height: 38px;
-}
-
-.lessonNotificationActionRow .ghostButton.check {
-  border-color: var(--academy-primary, #17213d);
-  color: var(--academy-primary, #17213d);
-}
-
-.lessonNotificationActionRow .ghostButton:disabled {
-  cursor: default;
-  opacity: 1;
 }
 
 .reservationStatusModal {

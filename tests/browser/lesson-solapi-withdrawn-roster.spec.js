@@ -66,7 +66,8 @@ test("safe Solapi plan keeps a visible withdrawal-date student without showing a
   await expect(lessonJournal).toBeVisible();
   await expect(lessonJournal.getByText("예약 검증 퇴원생")).toBeVisible();
 
-  await lessonJournal.getByRole("button", { name: /Solapi 예약/ }).click();
+  // 버튼 이름은 "알림톡 예약"(업데이트가 필요하면 "알림톡 예약 업데이트").
+  await lessonJournal.getByRole("button", { name: /^알림톡 예약/ }).click();
 
   const jobs = (await (await request.get(
     `${safeApiBaseUrl}/api/notification-jobs?lessonId=safe-solapi-roster-withdrawn-lesson&limit=50`
@@ -76,8 +77,9 @@ test("safe Solapi plan keeps a visible withdrawal-date student without showing a
   );
   expect(reservedForWithdrawnStudent.length).toBeGreaterThan(0);
   expect(reservedForWithdrawnStudent.every((job) => job.status === "dry_run")).toBe(true);
-  const saveBar = lessonJournal.getByRole("complementary", { name: "수업일지 하단 고정 저장 바" });
-  await expect(saveBar.getByText("Solapi 예약 업데이트 필요")).toBeVisible();
-  await expect(saveBar.getByText(/Solapi (예약|취소) 반영 완료/)).toHaveCount(0);
+  // 저장·예약 상태는 하단바가 아니라 상단 발송 상태 줄에 있다.
+  const statusRow = lessonJournal.getByRole("region", { name: "알림톡 상태" });
+  await expect(statusRow.getByText("Solapi 예약 업데이트 필요")).toBeVisible();
+  await expect(statusRow.getByText(/Solapi (예약|취소) 반영 완료/)).toHaveCount(0);
   expect(pageErrors).toEqual([]);
 });

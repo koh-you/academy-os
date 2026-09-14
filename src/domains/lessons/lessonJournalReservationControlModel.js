@@ -24,14 +24,18 @@ export function createLessonJournalReservationControlModel({
         : notificationPlanMode === "manual"
           ? `수동 예약 · ${notificationPlanScheduledAt ? formatManualScheduledAt(notificationPlanScheduledAt) : "시각 미정"}`
           : defaultScheduleHintText;
+  // 평소에는 "알림톡 예약"으로 조용히 있다가, Solapi 쪽과 어긋나 업데이트가 필요해지면
+  // 이름이 "알림톡 예약 업데이트"로 바뀌고 danger 톤으로 눈에 띈다.
+  const solapiApplyNeedsUpdate = syncStatus.state === "needs" && notificationPlanMode !== "none";
   const solapiApplyButtonLabel =
     reservationApplyState === "applying"
-      ? "Solapi 반영 중"
+      ? "알림톡 반영 중"
       : notificationPlanMode === "none"
-        ? "Solapi 취소 반영"
-        : syncStatus.state === "needs"
-          ? "Solapi 예약 업데이트"
-          : "Solapi 예약 반영";
+        ? "알림톡 취소 반영"
+        : solapiApplyNeedsUpdate
+          ? "알림톡 예약 업데이트"
+          : "알림톡 예약";
+  const solapiApplyButtonTone = solapiApplyNeedsUpdate ? "danger" : "default";
   const canApplySolapiReservation =
     hasApplyHandler &&
     !hasDraftChanges &&
@@ -52,6 +56,7 @@ export function createLessonJournalReservationControlModel({
     canRefreshSolapiResults,
     notificationPlanSummaryText,
     solapiApplyButtonLabel,
+    solapiApplyButtonTone,
     solapiResultRefreshTitle
   };
 }
