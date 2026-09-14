@@ -24,10 +24,7 @@ begin
 end;
 $$;
 
-drop trigger if exists lesson_student_records_realtime_broadcast
-on public.lesson_student_records;
-
-create trigger lesson_student_records_realtime_broadcast
+create or replace trigger lesson_student_records_realtime_broadcast
 after insert or update or delete on public.lesson_student_records
 for each row execute function public.broadcast_lesson_student_record_change();
 
