@@ -1,3 +1,4 @@
+import { OverflowMenu } from "../../shared/components/OverflowMenu.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { createLessonJournalSaveBarModel } from "./lessonJournalSaveBarModel.js";
 import "./lessonJournalSaveBar.css";
@@ -5,12 +6,12 @@ import "./lessonJournalSaveBar.css";
 export function LessonJournalSaveBar({
   hasDraftChanges,
   isEditMode,
-  lessonActions = null,
   manualSaveMessage,
+  menuItems = [],
   message,
-  notificationActions = null,
   onEdit,
   onSave,
+  reservationAction = null,
   reservationSyncStatus,
   saveState
 }) {
@@ -25,6 +26,7 @@ export function LessonJournalSaveBar({
 
   if (!model.shouldShow) return null;
 
+  // 상태 배지는 상단 발송 상태 줄이 그린다. 여기서는 액션만 둔다.
   return (
     <StickySaveBar
       className="lessonJournalStickySaveBar"
@@ -32,16 +34,7 @@ export function LessonJournalSaveBar({
       message={model.message}
       saveState={model.saveState}
     >
-      {lessonActions ? (
-        <div aria-label="수업 작업" className="lessonJournalBarGroup" role="group">
-          {lessonActions}
-        </div>
-      ) : null}
-      {notificationActions ? (
-        <div aria-label="알림톡 작업" className="lessonJournalBarGroup" role="group">
-          {notificationActions}
-        </div>
-      ) : null}
+      {reservationAction}
       <button
         className="primaryButton"
         disabled={model.buttonDisabled}
@@ -50,6 +43,7 @@ export function LessonJournalSaveBar({
       >
         {model.buttonLabel}
       </button>
+      <OverflowMenu icon="⋮" items={menuItems} label="수업일지 추가 작업" placement="top" />
     </StickySaveBar>
   );
 }

@@ -8,6 +8,12 @@
 - 단원은 바닥글 두 자리 코드가 이어질 때만 새로 만들고(정답 쪽·수행평가 바닥글 오염 방지), 단원 시작 쪽 큰 제목(16pt 이상 · conf 70 이상, 다음 개념 쪽으로 덮어쓰지 않음)에 가중치 3 을 준다. 「이치방정식」류 상습 오독만 normalizeUnitTitle 로 고친다.
 - 인쇄 2단: nth-child(odd) 구분선을 JS `assignPrintColumns` 의 `col-left/right/wide` 로 바꿨다. 전폭 판정은 body bbox 폭 > 0.62(RPM 컬럼 문항 0.43 은 영향 없음).
 
+## 2026-09-14 Slack 실제 예약 검증 및 전날 예약 전환
+
+- Slack App `chat:write`, 비공개 채널 Bot 초대, Render Bot/채널/dispatch 환경변수를 설정하고 실제 미래 예약 1건이 지정 채널에 도착하는 것을 사람이 확인했다.
+- GitHub Actions를 KST 09:00 즉시 Webhook 호출에서 KST 22:30 다음 날 09:00 Slack Bot 예약 호출로 변경했다. repository secret `NOTIFICATION_DISPATCH_TOKEN`을 Render와 같은 값으로 갱신했으며, Render 즉시 cron과 동시 활성화하지 않는다. 기본 브랜치 병합 후 정기 실행이 활성화된다.
+- Render 프로젝트를 읽기 전용으로 확인한 결과 운영 resource는 API Web Service 1개뿐이며 Slack 즉시 cron은 생성되어 있지 않다. `render.yaml`에서도 중복 생성 가능성을 제거했다.
+- 실제 검증용 `2099-01-01` notification job 외 운영 데이터 변경은 없었다.
 
 ## 2026-09-13 수업일지 명시적 편집·수업 취소 위치 정리
 

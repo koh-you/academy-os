@@ -50,32 +50,35 @@ const journalSource = appSource.slice(journalStart, journalEnd);
 assert.match(journalSource, /<LessonJournalNotificationBar/);
 assert.doesNotMatch(journalSource, /<section className="panel lessonSaveSummary"/);
 
-// 상단 바는 발송 상태 pill 만 그린다. 조작 버튼과 오케스트레이션은 갖지 않는다.
+// 2026-09-14 · 상단 바는 수업일지 저장 상태 배지 + 발송 상태 pill 만 그린다. "발송 상태" 라벨 텍스트는 없앴다.
+// 조작 버튼과 오케스트레이션은 갖지 않는다.
 for (const contract of [
   'aria-label="발송 상태"',
   'aria-label="알림톡 상태"',
+  '<InlineSaveStatus label="수업일지" saveState={journalSaveState} />',
+  "lessonJournalSaveStatusMessage",
   "lessonNotificationPlanStatus",
   "checkoutMissingSummary",
   "solapiReservationSync"
 ]) {
   assert.ok(componentSource.includes(contract), `missing controlled notification bar contract: ${contract}`);
 }
-for (const removedAction of ["<button", "<select", "수정 시작", "예약 확인", "onStartJournalEditMode", '알림톡 예약 작업']) {
+for (const removedAction of ["<button", "<select", "<strong>발송 상태</strong>", "수정 시작", "예약 확인", "onStartJournalEditMode", '알림톡 예약 작업']) {
   assert.ok(!componentSource.includes(removedAction), `notification bar must not keep ${removedAction}`);
 }
 for (const forbiddenSideEffect of ["fetch(", "postJson", "/api/", "setReservationModalOpen", "setReservationInspectMode", "useState", "useEffect"]) {
   assert.ok(!componentSource.includes(forbiddenSideEffect), `notification bar must not own orchestration: ${forbiddenSideEffect}`);
 }
 
-// 조작은 전부 하단 고정바(LessonJournalDetail 이 조립)로 옮겨졌다.
+// 조작은 전부 하단 고정바(LessonJournalDetail 이 조립). 알림톡 예약은 상시 버튼, 나머지는 ⋮ 메뉴 항목.
 for (const bottomBarContract of [
-  "notificationActions={(",
-  'aria-label="알림톡 예약 설정"',
-  "onUpdateLessonNotificationPlan?.(lesson.lessonId, event.target.value)",
-  "예약 확인",
+  "reservationAction={(",
+  "menuItems={journalMenuItems}",
+  "onSelect: () => onUpdateLessonNotificationPlan?.(lesson.lessonId, option.value)",
+  'label: "예약 확인"',
   'setReservationInspectMode("all")',
   "setReservationModalOpen(true)",
-  "onClick={refreshSolapiSendResults}",
+  "onSelect: refreshSolapiSendResults",
   "onClick={applySolapiReservationPlan}",
   "disabled={!canApplySolapiReservation}"
 ]) {

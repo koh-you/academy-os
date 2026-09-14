@@ -16,11 +16,14 @@ const createModel = (overrides = {}) =>
     ...overrides
   });
 
+// 2026-09-14 · 버튼 이름을 "Solapi …" 에서 "알림톡 …" 으로 바꿨다. 평소엔 "알림톡 예약",
+// Solapi 와 어긋나 업데이트가 필요하면 "알림톡 예약 업데이트" + danger 톤으로 눈에 띈다.
 assert.deepEqual(createModel(), {
   canApplySolapiReservation: false,
   canRefreshSolapiResults: false,
   notificationPlanSummaryText: "기본 예약 · 오늘 22:30",
-  solapiApplyButtonLabel: "Solapi 예약 반영",
+  solapiApplyButtonLabel: "알림톡 예약",
+  solapiApplyButtonTone: "default",
   solapiResultRefreshTitle: "지난 예약의 Solapi 발송결과를 OS 상태에 반영합니다."
 });
 
@@ -77,16 +80,17 @@ assert.equal(
 );
 assert.equal(
   createModel({ notificationPlanMode: "none" }).solapiApplyButtonLabel,
-  "Solapi 취소 반영"
+  "알림톡 취소 반영"
 );
 assert.equal(
   createModel({ reservationApplyState: "applying" }).solapiApplyButtonLabel,
-  "Solapi 반영 중"
+  "알림톡 반영 중"
 );
-assert.equal(
-  createModel({ syncStatus: { state: "needs" } }).solapiApplyButtonLabel,
-  "Solapi 예약 업데이트"
-);
+const needsUpdate = createModel({ syncStatus: { state: "needs" } });
+assert.equal(needsUpdate.solapiApplyButtonLabel, "알림톡 예약 업데이트");
+assert.equal(needsUpdate.solapiApplyButtonTone, "danger");
+// 알림톡 없음으로 바꾼 경우는 "취소 반영"이라 needs 여도 danger 로 강조하지 않는다.
+assert.equal(createModel({ notificationPlanMode: "none", syncStatus: { state: "needs" } }).solapiApplyButtonTone, "default");
 
 assert.equal(
   createModel({
