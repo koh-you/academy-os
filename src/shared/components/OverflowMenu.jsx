@@ -1,6 +1,12 @@
 import { useEffect, useId, useRef, useState } from "react";
 import "./OverflowMenu.css";
 
+// items 원소는 항목 { key, label, onSelect, tone } 이거나 그룹 { group, items } 이다.
+// 그룹은 제목 아래에 항목을 묶어 보여줄 뿐, 키보드 이동은 평탄화된 항목 순서를 따른다.
+function flattenMenuItems(items) {
+  return items.flatMap((entry) => (Array.isArray(entry.items) ? entry.items : [entry]));
+}
+
 export function OverflowMenu({ className = "", icon = "⋯", items = [], label, placement = "bottom", triggerClassName = "" }) {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -8,6 +14,7 @@ export function OverflowMenu({ className = "", icon = "⋯", items = [], label, 
   const triggerRef = useRef(null);
   const itemRefs = useRef([]);
   const menuId = useId();
+  const flatItems = flattenMenuItems(items);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -22,7 +29,7 @@ export function OverflowMenu({ className = "", icon = "⋯", items = [], label, 
     if (open) itemRefs.current[activeIndex]?.focus();
   }, [activeIndex, open]);
 
-  if (items.length === 0) return null;
+  if (flatItems.length === 0) return null;
 
   function openMenu(index) {
     setActiveIndex(index);
@@ -42,7 +49,7 @@ export function OverflowMenu({ className = "", icon = "⋯", items = [], label, 
     }
     if (event.key === "ArrowUp") {
       event.preventDefault();
-      openMenu(items.length - 1);
+      openMenu(flatItems.length - 1);
     }
   }
 
@@ -60,12 +67,12 @@ export function OverflowMenu({ className = "", icon = "⋯", items = [], label, 
     }
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      setActiveIndex((current) => (current + 1) % items.length);
+      setActiveIndex((current) => (current + 1) % flatItems.length);
       return;
     }
     if (event.key === "ArrowUp") {
       event.preventDefault();
-      setActiveIndex((current) => (current - 1 + items.length) % items.length);
+      setActiveIndex((current) => (current - 1 + flatItems.length) % flatItems.length);
       return;
     }
     if (event.key === "Home") {
@@ -75,13 +82,32 @@ export function OverflowMenu({ className = "", icon = "⋯", items = [], label, 
     }
     if (event.key === "End") {
       event.preventDefault();
-      setActiveIndex(items.length - 1);
+      setActiveIndex(flatItems.length - 1);
     }
   }
 
   function selectItem(item) {
     closeMenu();
     item.onSelect?.();
+  }
+
+  function renderItem(item) {
+    const index = flatItems.indexOf(item);
+    return (
+      <button
+        className={["overflowMenuItem", item.tone === "danger" ? "overflowMenuItem-danger" : ""].filter(Boolean).join(" ")}
+        key={item.key ?? item.label}
+        onClick={() => selectItem(item)}
+        ref={(node) => {
+          itemRefs.current[index] = node;
+        }}
+        role="menuitem"
+        tabIndex={index === activeIndex ? 0 : -1}
+        type="button"
+      >
+        {item.label}
+      </button>
+    );
   }
 
   return (
@@ -107,20 +133,13 @@ export function OverflowMenu({ className = "", icon = "⋯", items = [], label, 
           onKeyDown={handleMenuKeyDown}
           role="menu"
         >
-          {items.map((item, index) => (
-            <button
-              className={["overflowMenuItem", item.tone === "danger" ? "overflowMenuItem-danger" : ""].filter(Boolean).join(" ")}
-              key={item.key ?? item.label}
-              onClick={() => selectItem(item)}
-              ref={(node) => {
-                itemRefs.current[index] = node;
-              }}
-              role="menuitem"
-              tabIndex={index === activeIndex ? 0 : -1}
-              type="button"
-            >
-              {item.label}
-            </button>
+          {items.map((entry) => (
+            Array.isArray(entry.items) ? (
+              <div aria-label={entry.group} className="overflowMenuGroup" key={`group:${entry.group}`} role="group">
+                <div aria-hidden="true" className="overflowMenuGroupLabel">{entry.group}</div>
+                {entry.items.map(renderItem)}
+              </div>
+            ) : renderItem(entry)
           ))}
         </div>
       ) : null}

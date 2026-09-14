@@ -27,8 +27,8 @@ for (const keyboardContract of [
   'event.key === "ArrowUp"',
   'event.key === "Home"',
   'event.key === "End"',
-  "(current + 1) % items.length",
-  "(current - 1 + items.length) % items.length",
+  "(current + 1) % flatItems.length",
+  "(current - 1 + flatItems.length) % flatItems.length",
   "itemRefs.current[activeIndex]?.focus()",
   "triggerRef.current?.focus()"
 ]) {
@@ -45,7 +45,21 @@ assert.ok(menuSource.includes("!containerRef.current?.contains(event.target)"));
 
 // 파괴적 항목은 톤으로 구분하고, 빈 목록이면 트리거 자체를 렌더하지 않는다(R1).
 assert.ok(menuSource.includes('item.tone === "danger" ? "overflowMenuItem-danger" : ""'));
-assert.ok(menuSource.includes("if (items.length === 0) return null;"));
+assert.ok(menuSource.includes("if (flatItems.length === 0) return null;"));
+
+// 2026-09-14 · 그룹 { group, items } 를 지원한다. 제목 아래 박스로 묶어 보이고, 키보드 이동은 평탄화된 항목 순서다.
+for (const groupContract of [
+  "function flattenMenuItems(items)",
+  "Array.isArray(entry.items) ? entry.items : [entry]",
+  'role="group"',
+  'className="overflowMenuGroup"',
+  'aria-hidden="true" className="overflowMenuGroupLabel"',
+  "flatItems.indexOf(item)"
+]) {
+  assert.ok(menuSource.includes(groupContract), `overflow menu must keep ${groupContract}`);
+}
+assert.ok(menuCss.includes(".overflowMenuGroup {"));
+assert.ok(menuCss.includes(".overflowMenuGroupLabel {"));
 
 // 트리거는 공용 iconButton 을 재사용해 --academy-touch-target(44px)을 상속한다.
 assert.ok(menuSource.includes('"iconButton", "overflowMenuTrigger"'));

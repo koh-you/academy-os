@@ -1,30 +1,25 @@
-/* 수업일지 하단 고정바. 상태 배지는 상단 발송 상태 줄로 올렸으므로 여기서는 숨기고
-   액션(⋯ 메뉴 · 알림톡 예약 · 편집/변경 저장)만 오른쪽에 둔다.
+/* 수업일지 하단 고정바 하나에 상태와 액션을 모두 둔다.
+   왼쪽: 수업일지 저장 상태 + 발송 상태 pill(예약·하원 미체크·Solapi). 오른쪽: 알림톡 예약 · 편집/변경 저장 · ⋮.
    App.css 가 파일 크기 상한에 걸려 있어 도메인 CSS 로 둔다. */
 
-.stickySaveBar.lessonJournalStickySaveBar {
-  grid-template-columns: minmax(0, 1fr);
+.lessonJournalStickySaveBar .stickySaveBarStatus {
+  flex-wrap: wrap;
+  row-gap: 6px;
 }
 
-.lessonJournalStickySaveBar .stickySaveBarStatus {
-  display: none;
+/* pill 묶음은 상태 영역 안에서 줄바꿈되며 흐른다. 예전 상단 패널의 가로 스크롤은 쓰지 않는다. */
+.lessonJournalStickySaveBar .lessonNotificationStatusRow {
+  display: inline-flex;
+  flex-wrap: wrap;
+  min-height: 0;
+  overflow: visible;
+  row-gap: 6px;
 }
 
 .lessonJournalStickySaveBar .stickySaveBarActions {
   flex-wrap: wrap;
   justify-content: flex-end;
   row-gap: 8px;
-}
-
-/* 상단 발송 상태 줄에 들어간 수업일지 저장 상태. pill 들과 같은 줄에 놓인다. */
-.lessonNotificationStatusRow .lessonJournalSaveStatusMessage {
-  color: var(--academy-text-strong, #475569);
-  font-size: 12px;
-  font-weight: 700;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 @media (max-width: 640px) {

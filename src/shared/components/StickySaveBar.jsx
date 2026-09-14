@@ -5,7 +5,8 @@ export function StickySaveBar({
   className = "",
   label = "",
   message = "",
-  saveState = "idle"
+  saveState = "idle",
+  statusExtras = null
 }) {
   return (
     <aside
@@ -15,6 +16,7 @@ export function StickySaveBar({
       <div className="stickySaveBarStatus" aria-live="polite">
         <InlineSaveStatus label={label} saveState={saveState} />
         {message ? <span title={message}>{message}</span> : null}
+        {statusExtras}
       </div>
       <div className="stickySaveBarActions">{children}</div>
     </aside>

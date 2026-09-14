@@ -77,9 +77,9 @@ test("safe Solapi plan keeps a visible withdrawal-date student without showing a
   );
   expect(reservedForWithdrawnStudent.length).toBeGreaterThan(0);
   expect(reservedForWithdrawnStudent.every((job) => job.status === "dry_run")).toBe(true);
-  // 저장·예약 상태는 하단바가 아니라 상단 발송 상태 줄에 있다.
-  const statusRow = lessonJournal.getByRole("region", { name: "알림톡 상태" });
-  await expect(statusRow.getByText("Solapi 예약 업데이트 필요")).toBeVisible();
-  await expect(statusRow.getByText(/Solapi (예약|취소) 반영 완료/)).toHaveCount(0);
+  // 예약 상태 pill 은 하단 고정바의 상태 영역 안에 있다. 거짓 완료 문구는 어디에도 없어야 한다.
+  const saveBar = lessonJournal.getByRole("complementary", { name: "수업일지 하단 고정 저장 바" });
+  await expect(saveBar.getByRole("region", { name: "알림톡 상태" }).getByText("Solapi 예약 업데이트 필요")).toBeVisible();
+  await expect(saveBar.getByText(/Solapi (예약|취소) 반영 완료/)).toHaveCount(0);
   expect(pageErrors).toEqual([]);
 });

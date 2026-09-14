@@ -112,7 +112,10 @@ for (const contract of [
   'label="수업일지"',
   'className="primaryButton"',
   "disabled={model.buttonDisabled}",
-  "message={model.message}",
+  // 2026-09-14 · 발송 상태 pill 이 같은 바의 상태 영역에 들어오면서, 저장 메시지가 Solapi pill 과 같은 문구면 비운다.
+  'const stickyMessage = model.message === reservationSyncStatus?.label ? "" : model.message',
+  "message={stickyMessage}",
+  "statusExtras={statusPills}",
   "onClick={isEditMode ? onSave : onEdit}",
   "model.buttonLabel",
   "saveState={model.saveState}"
