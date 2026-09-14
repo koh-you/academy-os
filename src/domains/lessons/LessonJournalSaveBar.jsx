@@ -26,7 +26,7 @@ export function LessonJournalSaveBar({
 
   if (!model.shouldShow) return null;
 
-  // 상태 배지는 상단 발송 상태 줄이 그린다. 여기서는 액션만 둔다.
+  // 상태 배지는 헤더 우상단이 그린다. 여기서는 액션(알림톡 예약 · 편집/변경 저장 · ⋮)만 둔다.
   return (
     <StickySaveBar
       className="lessonJournalStickySaveBar"

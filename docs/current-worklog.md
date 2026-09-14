@@ -16,6 +16,25 @@
 - 인쇄 2단: nth-child(odd) 구분선을 JS `assignPrintColumns` 의 `col-left/right/wide` 로 바꿨다. 전폭 판정은 body bbox 폭 > 0.62(RPM 컬럼 문항 0.43 은 영향 없음).
 - 해설 대응: 구역별 01·02 번호는 유일하지 않아 탐욕 대응이 머리글 숫자 하나에 통째로 밀렸다 → 조각 순서 ↔ 문항 순서 편집 거리 정렬(`alignSegmentsToItems`, 오독 2 > 건너뜀 1.5)로 바꾸고, 문항 순번(type_label)은 단원 배정이 끝난 뒤 코드 순으로 다시 센다(앞 단원 번호를 이어받던 기본 유형 문항). 풀이 배지 x 는 잉크 여백 추정(들여쓴 「=…」 줄·거터 점선에 흔들림) 대신 굵은 번호 후보의 최소 x 로 잡고, 컬럼 왼쪽 띠 2배 OCR 을 한 번 더 한다. 「답」 아이콘은 틀 모양 규칙(귀퉁이·속 채움) 뒤에 견본 정규화 상관 0.5 로 확정한다 — 「율」·표 칸·굵은 「0」이 모양 규칙만으로는 계속 새어 들어왔다. 해설 시작은 「정답과 풀이」 머리글(한글 OCR)부터.
 
+## 2026-09-14 Supabase Realtime 운영 활성화
+
+- PR #336 main 병합 → 운영 Broadcast trigger 적용 및 3개 event 등록 확인 → Render 서버 flag/redeploy → Vercel Production browser flag/redeploy 순서로 활성화했다.
+- 두 배포가 Live/Ready인 상태에서 로그인 교사 화면을 새로 열고 수업·운영 알림 원천 재조회가 정상임을 확인했다. 실제 출결 레코드를 수정하는 이벤트 왕복은 운영 데이터 쓰기 승인을 별도로 받아야 한다.
+
+## 2026-09-14 Supabase Realtime 서버 중계 완성
+
+- Academy OS의 자체 교사 세션을 유지하기 위해 브라우저 직접 Supabase 구독 대신 `Supabase private Broadcast → Render → bearer 인증 SSE → 기존 API 재조회` 경로를 구현했다. service-role은 서버 밖으로 나가지 않고 SSE payload도 event/table 신호로 축소된다.
+- Postgres Changes의 DELETE 열 필터 제약을 피하도록 DB trigger가 `old/new.tenant_id`로 테넌트 topic을 정한다. SQL은 파일만 만들었고 운영 적용은 하지 않았다.
+- Supabase 장애, SSE HTTP 오류, 연결 종료, 오프라인에서는 7초 polling이 자동 복원된다. 구독 준비 전에도 polling을 유지한다. 여러 탭은 tenant별 서버 channel 하나를 공유하고 마지막 연결 종료 때 해제한다.
+- 운영 활성화 Gate: SQL Editor에서 준비 파일 실행 → Render `SUPABASE_REALTIME_ENABLED=true` 재배포 → Vercel Production `VITE_ATTENDANCE_REALTIME_ENABLED=true` 재배포 → 두 탭과 재로그인/네트워크 복귀 smoke.
+
+## 2026-09-14 Supabase Realtime 안전 경계 1단계
+
+- 출결 동기화 hook에 선택적 Realtime 구독 어댑터 경계를 연결했다. 어댑터가 없으면 기존 7초 polling 동작은 그대로다.
+- 구독 성공 시 polling 중지, 연결 오류·종료·오프라인 시 polling 복구, 이벤트·탭 복귀·온라인 복귀 시 인증 API 원천 재조회, 중복 이벤트와 cleanup 차단을 테스트했다.
+- 운영 Supabase 설정·RLS·publication·데이터는 변경하지 않았다. 다음 단계는 교사 bearer와 tenant 소유권을 검증하는 구독 인증 경로 확정이다.
+- 교사 bearer와 owner/assistant tenant 범위를 전역 인증에서 확정한 뒤 사용하는 SSE route registry를 추가했다. 날짜 형식 검증, 비교사 차단, payload redaction, 연결 종료 cleanup, provider 미설정 503을 fixture로 확인했다. 다음 단계는 server-only Supabase provider와 브라우저 fetch-stream 어댑터다.
+
 ## 2026-09-14 Slack 실제 예약 검증 및 전날 예약 전환
 
 - Slack App `chat:write`, 비공개 채널 Bot 초대, Render Bot/채널/dispatch 환경변수를 설정하고 실제 미래 예약 1건이 지정 채널에 도착하는 것을 사람이 확인했다.

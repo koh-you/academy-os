@@ -112,6 +112,7 @@ for (const contract of [
   'label="수업일지"',
   'className="primaryButton"',
   "disabled={model.buttonDisabled}",
+  // 2026-09-14 · 상태 배지는 헤더 우상단이 그린다. 하단바는 액션만 두고 상태 영역은 CSS 로 숨긴다.
   "message={model.message}",
   "onClick={isEditMode ? onSave : onEdit}",
   "model.buttonLabel",

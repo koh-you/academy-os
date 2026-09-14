@@ -2081,12 +2081,6 @@ summary:focus-visible {
   width: 100%;
 }
 
-.lessonSaveSummary {
-  display: grid;
-  gap: 8px;
-  padding: 10px 14px;
-}
-
 .lessonNotificationStatusRow {
   align-items: center;
   display: flex;
@@ -2278,17 +2272,6 @@ summary:focus-visible {
 
   .lessonJournalStickySaveBar {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .lessonJournalStickySaveBar .stickySaveBarStatus {
-    align-items: start;
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .lessonJournalStickySaveBar .stickySaveBarStatus > span {
-    overflow-wrap: anywhere;
-    white-space: normal;
   }
 
   .lessonJournalStickySaveBar .stickySaveBarActions,

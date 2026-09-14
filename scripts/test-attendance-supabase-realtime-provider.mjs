@@ -1,0 +1,62 @@
+import assert from "node:assert/strict";
+import { createAttendanceSupabaseRealtimeProvider } from "../src/shared/server/attendanceSupabaseRealtimeProvider.js";
+
+assert.equal(createAttendanceSupabaseRealtimeProvider({ enabled: false }), undefined);
+assert.equal(createAttendanceSupabaseRealtimeProvider({ enabled: true, serviceRoleKey: "", supabaseUrl: "x" }), undefined);
+
+const calls = { channels: [], removed: [] };
+function createSupabaseClient(url, key, options) {
+  assert.equal(url, "https://fixture.supabase.test");
+  assert.equal(key, "fixture-service-role");
+  assert.deepEqual(options.auth, { autoRefreshToken: false, persistSession: false });
+  return {
+    realtime: { setAuth(value) { assert.equal(value, "fixture-service-role"); } },
+    channel(name, channelOptions) {
+      const fixture = {
+        callback: null,
+        filter: null,
+        name,
+        channelOptions,
+        statusCallback: null,
+        on(_type, filter, callback) { this.filter = filter; this.callback = callback; return this; },
+        subscribe(callback) { this.statusCallback = callback; return this; }
+      };
+      calls.channels.push(fixture);
+      return fixture;
+    },
+    removeChannel(channel) { calls.removed.push(channel); return Promise.resolve(); }
+  };
+}
+
+const provider = createAttendanceSupabaseRealtimeProvider({
+  createSupabaseClient,
+  enabled: true,
+  serviceRoleKey: "fixture-service-role",
+  supabaseUrl: "https://fixture.supabase.test"
+});
+const changesA = [];
+const changesB = [];
+const statuses = [];
+const stopA = provider.subscribeToAttendanceChanges({
+  onChange: (change) => changesA.push(change), onStatus: (status) => statuses.push(status), tenantId: "tenant-a"
+});
+const stopB = provider.subscribeToAttendanceChanges({ onChange: (change) => changesB.push(change), tenantId: "tenant-a" });
+assert.equal(calls.channels.length, 1);
+assert.deepEqual(calls.channels[0].filter, {
+  event: "lesson_student_records_changed"
+});
+assert.deepEqual(calls.channels[0].channelOptions, { config: { private: true } });
+calls.channels[0].statusCallback("SUBSCRIBED");
+assert.deepEqual(statuses, ["SUBSCRIBED"]);
+calls.channels[0].callback({ payload: { type: "UPDATE", record: { private_note: "never forward" } } });
+assert.deepEqual(changesA, [{ eventType: "UPDATE", table: "lesson_student_records" }]);
+assert.deepEqual(changesB, changesA);
+assert.doesNotMatch(JSON.stringify(changesA), /private_note|never forward/);
+stopA();
+assert.equal(calls.removed.length, 0);
+stopB();
+assert.equal(calls.removed.length, 1);
+
+provider.subscribeToAttendanceChanges({ onChange() {}, tenantId: "tenant-b" });
+assert.equal(calls.channels.length, 2);
+console.log("attendance Supabase provider scope, fan-out, redaction, status, and cleanup contracts passed");

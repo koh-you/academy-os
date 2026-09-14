@@ -13,6 +13,26 @@
 - 검증: `test:problem-bank-scan-segmenter`(실제 OCR 토큰 픽스처), `check:fast` 828/828·lint·build. **사람 Gate**: 바탕화면 `문제은행-패키지\올림포스-공통수학1` 의 `qa/` 확인 → 교재관리 › 패키지 등록. 정답·해설(책 뒤 「정답과 풀이」)과 나머지 6권은 다음 작업.
 - 정답·해설(`scripts/problem-bank/ingest-scan-answers.mjs`): 책 뒤 「정답과 풀이」에서 풀이 시작 배지를 순서대로 읽어 문항 코드에 편집 거리 정렬로 대응, 「답」 아이콘 줄(견본 상관 확인)을 빠른정답으로 오림. 공통수학1: 해설 265/281(수행평가 32 제외) · 답 줄 236 · 번호 불일치 2(flagged) · 배지 못 읽은 문항 16. 패키지 폴더 하나로 문항·정답·해설이 같이 등록된다(바탕화면 `문제은행-패키지\올림포스-공통수학1` 갱신).
 
+## 2026-09-14 Supabase Realtime 운영 활성화
+
+- PR #336을 main(`69f1e1ba`)에 병합했다. Supabase 운영 DB에 tenant private Broadcast trigger를 적용했고 조회 결과 `INSERT`/`UPDATE`/`DELETE` 3개 이벤트 등록을 확인했다.
+- Render `SUPABASE_REALTIME_ENABLED=true`와 Vercel Production `VITE_ATTENDANCE_REALTIME_ENABLED=true`를 저장하고 재배포했다. Render는 같은 main commit으로 Live, Vercel Production은 Ready 상태를 확인했다.
+- 로그인 교사 화면을 새 배포로 다시 열어 기존 수업·운영 알림 API 원천이 정상 재조회되는 것과 애플리케이션 Realtime 오류가 표시되지 않는 것을 확인했다. 운영 출결값을 바꾸는 두 탭 이벤트 smoke는 별도 사람 Gate로 남긴다.
+
+## 2026-09-14 Supabase Realtime 전환 2단계 — 운영 활성화 대기
+
+- Render 서버가 Supabase의 테넌트 전용 private Broadcast를 구독하고, 인증된 교사 SSE 연결에는 행 내용 없이 `lesson_student_records` 변경 신호만 전달하도록 구현했다. 같은 테넌트의 여러 탭은 서버 구독 하나를 공유한다.
+- 브라우저는 기존 교사 bearer와 원장 view-as 헤더로 SSE를 연결한다. 구독 성공 뒤 7초 polling을 멈추고, 오류·종료·오프라인이면 즉시 polling으로 복귀하며 변경 신호마다 기존 인증 API 원천을 재조회한다. 키오스크는 이번 범위에서 기존 polling을 유지한다.
+- `INSERT`/`UPDATE`/`DELETE`를 모두 테넌트별로 전달하는 trigger SQL을 `supabase/20260914_lesson_student_records_realtime.sql`에 준비했다. 운영 SQL은 아직 적용하지 않았고, Render `SUPABASE_REALTIME_ENABLED`와 Vercel `VITE_ATTENDANCE_REALTIME_ENABLED`도 기본 OFF다.
+- fixture, `check:fast`(828/828·lint·build), `test:production`(308/308)을 통과했다. 활성화 후에는 두 교사 탭·재로그인·네트워크 복귀·API 원천 대조 운영 smoke가 남는다.
+
+## 2026-09-14 Supabase Realtime 전환 1단계 — 안전한 fallback 경계
+
+- 현재 교사 화면과 출결 키오스크는 `lesson_student_records`를 날짜 범위 API로 7초마다 재조회한다. 클라이언트 Supabase SDK와 교사 bearer/RLS 구독 경로는 아직 없어 운영 Realtime은 활성화하지 않았다.
+- `INSERT`/`UPDATE`/`DELETE` 이벤트만 받는 구독 lifecycle을 추가했다. `SUBSCRIBED` 전에는 polling을 유지하고, 연결 성공 뒤 중지하며 `CHANNEL_ERROR`/`TIMED_OUT`/`CLOSED`·오프라인에서 다시 polling으로 복구한다.
+- Realtime payload를 화면 원천으로 직접 채택하지 않고 기존 인증 API를 재조회한다. 중복 이벤트, 탭 복귀, 온라인 복귀, cleanup 뒤 무실행 계약을 fixture로 고정했다.
+- 교사 bearer 인증 뒤에만 열리는 `/api/lesson-records/realtime?date=YYYY-MM-DD` SSE 경계를 추가했다. 서버가 확정한 tenant와 날짜만 구독 어댑터에 전달하고, 브라우저에는 행 내용이나 tenant를 보내지 않고 변경 종류만 알린다. 실제 Supabase provider가 없을 때는 `503 realtime_unavailable`로 닫혀 기존 polling이 계속된다.
+
 ## 2026-09-13 수업일지 명시적 편집·수업 취소 위치 정리
 
 - 수업일지는 읽기 모드로 열리고 하단 주 버튼의 `편집`을 눌러야 학생별 기록 입력이 활성화된다. 같은 자리가 편집 중에는 `변경 저장`으로 바뀌며 저장 성공 또는 변경 없음 확인 뒤 다시 읽기 모드로 돌아간다.

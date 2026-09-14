@@ -47,23 +47,24 @@ const journalStart = appSource.indexOf("function LessonJournalDetail({");
 const journalEnd = appSource.indexOf("function CommentComposerModal({", journalStart);
 const journalSource = appSource.slice(journalStart, journalEnd);
 
-assert.match(journalSource, /<LessonJournalNotificationBar/);
+// 2026-09-14 · 이 컴포넌트는 저장·발송 상태 pill 묶음이고, 헤더 우상단(LessonJournalHeader 의 statusPills)에
+// 들어간다. 별도 패널을 그리지 않고, 조작 버튼도 갖지 않는다.
+assert.match(journalSource, /<LessonJournalHeader[\s\S]*?statusPills=\{\(\s*<LessonJournalNotificationBar/);
 assert.doesNotMatch(journalSource, /<section className="panel lessonSaveSummary"/);
+assert.ok(!componentSource.includes("<section"), "notification bar must not render its own panel");
 
-// 2026-09-14 · 상단 바는 수업일지 저장 상태 배지 + 발송 상태 pill 만 그린다. "발송 상태" 라벨 텍스트는 없앴다.
-// 조작 버튼과 오케스트레이션은 갖지 않는다.
 for (const contract of [
-  'aria-label="발송 상태"',
   'aria-label="알림톡 상태"',
+  'className="lessonNotificationStatusRow"',
   '<InlineSaveStatus label="수업일지" saveState={journalSaveState} />',
-  "lessonJournalSaveStatusMessage",
   "lessonNotificationPlanStatus",
   "checkoutMissingSummary",
   "solapiReservationSync"
 ]) {
   assert.ok(componentSource.includes(contract), `missing controlled notification bar contract: ${contract}`);
 }
-for (const removedAction of ["<button", "<select", "<strong>발송 상태</strong>", "수정 시작", "예약 확인", "onStartJournalEditMode", '알림톡 예약 작업']) {
+// 2026-09-14 · 저장 상태는 InlineSaveStatus pill 하나로만 보여준다. 저장 메시지 텍스트를 옆에 또 쓰면 중복이라 없앴다.
+for (const removedAction of ["<button", "<select", "journalSaveMessage", "lessonJournalSaveStatusMessage", "<strong>발송 상태</strong>", "수정 시작", "예약 확인", "onStartJournalEditMode", '알림톡 예약 작업']) {
   assert.ok(!componentSource.includes(removedAction), `notification bar must not keep ${removedAction}`);
 }
 for (const forbiddenSideEffect of ["fetch(", "postJson", "/api/", "setReservationModalOpen", "setReservationInspectMode", "useState", "useEffect"]) {

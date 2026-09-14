@@ -348,7 +348,7 @@ export function LessonJournalDetail({
     reservationApplyState,
     solapiResultRefreshState
   });
-  // 저장 상태 배지는 상단 발송 상태 줄에 그리므로, 하단바와 같은 모델로 문구·상태를 미리 계산해 둔다.
+  // 저장 상태 배지는 헤더 우상단에 그리므로, 하단바와 같은 모델로 문구·상태를 미리 계산해 둔다.
   const journalSaveBarModel = createLessonJournalSaveBarModel({
     hasDraftChanges: hasJournalDraftChanges,
     isEditMode: journalEditMode,
@@ -381,14 +381,17 @@ export function LessonJournalDetail({
     ...(notificationBarModel.showRefreshAction && canRefreshSolapiResults
       ? [{ key: "refreshResults", label: notificationBarModel.refreshButtonLabel, onSelect: refreshSolapiSendResults }]
       : []),
-    // 예약 설정: 지금 고른 항목은 ✓ 로 표시한다. 휴강이면 예약을 바꿀 수 없어 항목을 넣지 않는다.
+    // 예약 설정은 하나의 그룹으로 묶고, 지금 고른 항목은 ✓ 로 표시한다. 휴강이면 예약을 바꿀 수 없어 그룹을 넣지 않는다.
     ...(isClosureLesson
       ? []
-      : notificationPlanOptions.map((option) => ({
-          key: `plan:${option.value}`,
-          label: `${option.value === notificationPlanMode ? "✓ " : ""}예약 설정 · ${option.label}`,
-          onSelect: () => onUpdateLessonNotificationPlan?.(lesson.lessonId, option.value)
-        })))
+      : [{
+          group: "예약 설정",
+          items: notificationPlanOptions.map((option) => ({
+            key: `plan:${option.value}`,
+            label: `${option.value === notificationPlanMode ? "✓ " : ""}${option.label}`,
+            onSelect: () => onUpdateLessonNotificationPlan?.(lesson.lessonId, option.value)
+          }))
+        }])
   ];
 
   function startJournalEditMode() {
@@ -565,6 +568,15 @@ export function LessonJournalDetail({
         onReturnToExamPrepRoster={isExamPrepDailyJournalEnabled && isExamPrepLesson(lesson) && onToggleExamPrepDailyJournal
           ? () => onToggleExamPrepDailyJournal(lesson.lessonId, false)
           : undefined}
+        statusPills={(
+          <LessonJournalNotificationBar
+            checkoutMissingStudents={checkoutMissingStudents}
+            journalSaveState={journalSaveBarModel.saveState}
+            notificationPlanMode={notificationPlanMode}
+            notificationPlanSummaryText={notificationPlanSummaryText}
+            solapiReservationSyncStatus={solapiReservationSyncStatus}
+          />
+        )}
         studentCount={lessonStudents.length}
       />
 
@@ -588,15 +600,6 @@ export function LessonJournalDetail({
       <LessonJournalReminderPanel reminderCount={lessonAcademyReminders.length}>
         <AcademyReminderList runtime={academyReminder} reminders={lessonAcademyReminders} students={students} templates={templates} />
       </LessonJournalReminderPanel>
-
-      <LessonJournalNotificationBar
-        checkoutMissingStudents={checkoutMissingStudents}
-        journalSaveMessage={journalSaveBarModel.message}
-        journalSaveState={journalSaveBarModel.saveState}
-        notificationPlanMode={notificationPlanMode}
-        notificationPlanSummaryText={notificationPlanSummaryText}
-        solapiReservationSyncStatus={solapiReservationSyncStatus}
-      />
 
       {reservationModalOpen ? (
         <LessonJournalReservationModal

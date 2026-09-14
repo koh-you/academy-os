@@ -1137,7 +1137,7 @@ test("individual comment send button always sends immediately regardless of the 
 
   // 예약 설정은 하단바 ⋮ 메뉴 항목이다.
   await lessonJournal.getByRole("button", { name: "수업일지 추가 작업" }).click();
-  await page.getByRole("menuitem", { name: /^예약 설정 · 다음날 11시/ }).click();
+  await page.getByRole("group", { name: "예약 설정" }).getByRole("menuitem", { name: /^다음날 11시/ }).click();
 
   await lessonJournal.getByRole("button", { name: "학부모 알림톡" }).first().click();
   const alimtalkModal = page.getByRole("dialog", { name: /학부모 알림톡/ });
@@ -1407,17 +1407,24 @@ test("lesson journal bottom bar groups lesson, notification, and save actions wh
   await page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ }).getByRole("button", { name: /월 경계 연동반/ }).click();
   const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
 
-  // 상단: 수업일지 저장 상태 배지 + 발송 상태 pill 만. "발송 상태" 라벨 텍스트와 조작 버튼·select 는 없다.
-  const statusPanel = lessonJournal.getByRole("region", { name: "알림톡 상태" });
-  await expect(statusPanel).toBeVisible();
-  await expect(statusPanel.getByRole("status")).toContainText("수업일지 · 저장 전");
-  await expect(statusPanel.getByText("발송 상태", { exact: true })).toHaveCount(0);
-  await expect(statusPanel.locator("button, select")).toHaveCount(0);
+  // 별도 상태 패널은 없다. 저장·발송 상태 pill 은 헤더 우상단에, 조작은 하단 고정바에 있다.
+  await expect(lessonJournal.locator(".lessonSaveSummary")).toHaveCount(0);
   await expect(lessonJournal.getByRole("button", { name: "수업 취소 처리" })).toHaveCount(0);
+  const header = lessonJournal.locator(".lessonJournalHeader");
+  const statusPanel = header.getByRole("region", { name: "알림톡 상태" });
+  await expect(statusPanel).toBeVisible();
+  await expect(statusPanel.getByRole("status").first()).toContainText("수업일지 · 저장 전");
+  await expect(statusPanel.locator("button, select")).toHaveCount(0);
+  // 저장 상태는 pill 하나뿐이다. 같은 문구를 옆에 텍스트로 다시 쓰지 않는다.
+  await expect(statusPanel.getByText("수업일지 · 저장 전")).toHaveCount(1);
+  await expect(statusPanel.locator(".lessonJournalSaveStatusMessage")).toHaveCount(0);
+  // 헤더에 "수업일지" 자리채움 글씨는 없다(주제가 있으면 그 주제만 보인다).
+  await expect(header.locator(".shortcutHint")).toHaveCount(0);
 
-  // 하단 고정바: [알림톡 예약] [편집] [⋮] 만. 상태 배지는 상단으로 올라가 여기엔 없다.
+  // 하단 고정바: 상태 영역은 숨기고 [알림톡 예약] [편집] [⋮] 만.
   const saveBar = lessonJournal.getByRole("complementary", { name: "수업일지 하단 고정 저장 바" });
   await expect(saveBar.getByRole("status")).toBeHidden();
+  await expect(saveBar.getByText("발송 상태", { exact: true })).toHaveCount(0);
   await expect(saveBar.getByText("편집을 누르면")).toHaveCount(0);
   await expect(saveBar.getByRole("button", { name: /^알림톡 예약/ })).toBeVisible();
   await expect(saveBar.getByRole("button", { name: "편집" })).toBeVisible();
@@ -1436,12 +1443,15 @@ test("lesson journal bottom bar groups lesson, notification, and save actions wh
   ]);
   expect(menuBox?.x).toBeGreaterThan(editBox?.x ?? 0);
 
-  // ⋮ 안: 수업 수정 · 예약 확인 · 예약 설정 옵션들(현재 선택 ✓).
+  // ⋮ 안: 수업 수정 · 예약 확인, 그리고 "예약 설정" 그룹 박스 안에 옵션들(현재 선택 ✓). 그룹 이름을 항목마다 반복하지 않는다.
   await menuTrigger.click();
   await expect(page.getByRole("menuitem", { name: "수업 수정" })).toBeVisible();
   await expect(page.getByRole("menuitem", { name: "예약 확인" })).toBeVisible();
-  await expect(page.getByRole("menuitem", { name: /^✓ 예약 설정 · / })).toHaveCount(1);
-  await expect(page.getByRole("menuitem", { name: /^예약 설정 · 알림톡 없음$/ })).toBeVisible();
+  const planGroup = page.getByRole("group", { name: "예약 설정" });
+  await expect(planGroup).toBeVisible();
+  await expect(planGroup.getByRole("menuitem", { name: /^✓ / })).toHaveCount(1);
+  await expect(planGroup.getByRole("menuitem", { name: "알림톡 없음" })).toBeVisible();
+  await expect(page.getByRole("menuitem", { name: /예약 설정 · / })).toHaveCount(0);
   await page.keyboard.press("Escape");
   await expect(page.getByRole("menuitem")).toHaveCount(0);
   await expect(lessonJournal).toBeVisible();
