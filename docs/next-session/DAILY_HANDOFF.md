@@ -1,5 +1,18 @@
 # Daily Development Handoff
 
+## 2026-09-14 Supabase Realtime 운영 Gate
+
+- 코드 경로는 완성: Supabase tenant private Broadcast → Render 단일 공유 channel → 교사 bearer SSE → 기존 `/api/lesson-records?date=...` 재조회. 행 payload와 service-role은 브라우저에 노출하지 않는다.
+- SQL 적용 전에는 아무 동작도 바뀌지 않는다. `supabase/20260914_lesson_student_records_realtime.sql` 적용 후 Render에 `SUPABASE_REALTIME_ENABLED=true`, Vercel Production에 `VITE_ATTENDANCE_REALTIME_ENABLED=true`를 설정하고 각각 재배포한다.
+- 활성화 smoke: 같은 날짜 수업을 교사 탭 2개에서 열기 → 한쪽 출결 저장 → 다른 쪽 즉시 API 재조회 반영 확인 → 네트워크 끊기/복귀 → 로그아웃/재로그인 → 다른 교사로 보기 범위 확인. 실패해도 7초 polling으로 복귀해야 한다. 키오스크는 계속 polling이다.
+
+## 2026-09-14 Supabase Realtime 전환
+
+- `lesson_student_records` 출결 변경용 Realtime lifecycle과 polling fallback 계약을 추가했다. 실제 구독 어댑터가 없으면 현행 7초 polling만 사용한다.
+- 구독은 `INSERT`/`UPDATE`/`DELETE`로 제한하고 payload 직접 반영 대신 기존 인증 API 재조회를 사용한다. 오류·종료·오프라인·탭 복귀·온라인 복귀·중복·cleanup fixture가 있다.
+- 운영 Realtime은 미활성화다. 다음은 교사 bearer, tenant/teacher 소유권, RLS와 publication SQL을 파일로 준비하고 운영 적용은 사람 Gate로 남긴다.
+- 교사만 접근 가능한 SSE endpoint 경계를 추가했다. 확정된 tenant/date만 provider에 넘기며 행 payload는 브라우저로 전달하지 않는다. provider가 아직 없어 운영에서는 503 후 polling fallback 상태다.
+
 ## 2026-09-14 Slack 예약 전환
 
 - Slack Bot 실제 미래 예약·도착 검증 완료.

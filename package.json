@@ -75,6 +75,10 @@
     "test:notification-solapi-dispatch-service": "node scripts/test-notification-solapi-dispatch-service.mjs",
     "test:slack-scheduling-provider": "node scripts/test-slack-scheduling-provider.mjs",
     "test:slack-daily-workflow": "node scripts/test-slack-daily-workflow.mjs",
+    "test:attendance-realtime-lifecycle": "node scripts/test-attendance-realtime-lifecycle.mjs",
+    "test:attendance-realtime-route-registry": "node scripts/test-attendance-realtime-route-registry.mjs",
+    "test:attendance-supabase-realtime-provider": "node scripts/test-attendance-supabase-realtime-provider.mjs",
+    "test:attendance-realtime-sse-client": "node scripts/test-attendance-realtime-sse-client.mjs",
     "test:notification-provider-route-registry": "node scripts/test-notification-provider-route-registry.mjs",
     "test:resource-material-route-registry": "node scripts/test-resource-material-route-registry.mjs",
     "test:solapi-route-registry": "node scripts/test-solapi-route-registry.mjs",
@@ -348,6 +352,7 @@
     "test:owner-view-as-tenant": "node scripts/test-owner-view-as-tenant.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.116.0",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^4.10.38",
     "pptxgenjs": "^4.0.1",

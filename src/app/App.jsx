@@ -303,7 +303,7 @@ import {
 import {
   useAttendanceDateRollover,
   useAttendanceRecordSync
-} from "../domains/lessons/useAttendanceRecordSync.js";
+} from "../domains/lessons/useAttendanceRecordSync.js"; import { createAttendanceRealtimeSubscriptionFactory } from "../domains/lessons/attendanceRealtimeSseClient.js";
 import { executeLessonJournalDraftPersistence } from "../domains/lessons/lessonJournalDraftPersistenceController.js";
 import { createLessonJournalDraftPersistencePlan } from "../domains/lessons/lessonJournalDraftPersistencePlan.js";
 import {
@@ -3719,7 +3719,7 @@ export function App() {
   }, [attendanceOnlyMode]);
 
   useAttendanceRecordSync({
-    enabled:
+    createRealtimeSubscription: session?.role === "teacher" ? createAttendanceRealtimeSubscriptionFactory({ date: selectedDate }) : undefined, enabled:
       isAppStateReady &&
       (attendanceOnlyMode || (session?.role === "teacher" && activeView === "lessons")),
     recordsRef,

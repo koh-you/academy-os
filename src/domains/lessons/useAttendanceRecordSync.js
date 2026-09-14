@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { syncAttendanceRecordsAction } from "./attendanceSyncController.js";
+import { startAttendanceRealtimeLifecycle } from "./attendanceRealtimeLifecycle.js";
 
 export const attendanceSyncIntervalMs = 7_000;
 export const attendanceDateRolloverIntervalMs = 30_000;
@@ -108,6 +109,7 @@ export function startAttendanceSyncLifecycle({
 }
 
 export function useAttendanceRecordSync({
+  createRealtimeSubscription,
   enabled,
   recordsRef,
   request,
@@ -116,28 +118,40 @@ export function useAttendanceRecordSync({
   setStatus,
   syncDate
 }) {
+  const createRealtimeSubscriptionRef = useRef(createRealtimeSubscription);
+  createRealtimeSubscriptionRef.current = createRealtimeSubscription;
   useEffect(() => {
     if (!enabled) return undefined;
 
-    return startAttendanceSyncLifecycle({
+    const runSync = (isDisposed) =>
+      syncAttendanceRecordsAction({
+        getSaveState: (recordId) => saveStatesRef.current[recordId],
+        isDisposed,
+        onRecords: (updater) => {
+          setRecords((currentRecords) => {
+            const nextRecords = updater(currentRecords);
+            if (nextRecords !== currentRecords) {
+              recordsRef.current = nextRecords;
+            }
+            return nextRecords;
+          });
+        },
+        onStatus: setStatus,
+        request,
+        syncDate
+      });
+    const startPolling = () => startAttendanceSyncLifecycle({
       documentTarget: document,
-      runSync: (isDisposed) =>
-        syncAttendanceRecordsAction({
-          getSaveState: (recordId) => saveStatesRef.current[recordId],
-          isDisposed,
-          onRecords: (updater) => {
-            setRecords((currentRecords) => {
-              const nextRecords = updater(currentRecords);
-              if (nextRecords !== currentRecords) {
-                recordsRef.current = nextRecords;
-              }
-              return nextRecords;
-            });
-          },
-          onStatus: setStatus,
-          request,
-          syncDate
-        }),
+      runSync,
+      windowTarget: window
+    });
+
+    if (typeof createRealtimeSubscriptionRef.current !== "function") return startPolling();
+    return startAttendanceRealtimeLifecycle({
+      createSubscription: (options) => createRealtimeSubscriptionRef.current(options),
+      documentTarget: document,
+      onSourceRefresh: () => runSync(() => false),
+      startPolling,
       windowTarget: window
     });
   }, [
