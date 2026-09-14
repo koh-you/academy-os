@@ -1,5 +1,11 @@
 # Daily Development Handoff
 
+## 2026-09-14 Slack 예약 전환
+
+- Slack Bot 실제 미래 예약·도착 검증 완료.
+- GitHub Actions를 KST 22:30 다음 날 09:00 예약 경로로 변경하고 정적 계약 검사를 추가했다. GitHub 서버 실행이라 개인 컴퓨터 전원과 무관하다.
+- Render 프로젝트에는 API Web Service 1개만 있고 Slack 즉시 cron은 없다. GitHub repository Actions secret `NOTIFICATION_DISPATCH_TOKEN`은 Render와 같은 값으로 갱신됐다. 다음 사람 Gate는 PR 검토와 기본 브랜치 병합이다.
+
 ## 2026-09-13 수업일지 명시적 편집·수업 취소 위치 정리
 
 - 수업일지 초기 상태는 읽기 모드다. 하단 `편집`으로 학생별 입력을 열고 같은 버튼 자리를 `변경 저장`에 사용하며, 저장 성공/변경 없음 뒤 읽기 모드로 돌아간다.

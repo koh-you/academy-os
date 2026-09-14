@@ -593,6 +593,7 @@
 
 ## 개발환경 상태
 
+- Slack Bot 실제 예약 1건과 채널 도착 검증을 완료했다. Render 프로젝트에는 API Web Service 1개만 있고 중복 Slack cron은 없다. GitHub Actions는 전날 KST 22:30에 다음 날 09:00 메시지를 예약하도록 준비했고, repository secret `NOTIFICATION_DISPATCH_TOKEN`도 Render와 같은 값으로 갱신했다. 기본 브랜치 병합 전이라 정기 실행은 아직 활성화되지 않았다.
 - Node 24 기준, `npm ci` 사용.
 - Vercel Hobby 배포를 위해 `api/**/*.js` Serverless Function 후보는 12개 이하로 유지하며 production inventory가 초과를 차단한다.
 - `npm run doctor`가 경로·Git·Node·중복 clone을 점검한다.

@@ -123,7 +123,7 @@ cron: 0 0 * * *
 
 둘이 동시에 호출될 수 있으므로 API는 `notification_jobs`에 `slack_daily_summary_YYYY-MM-DD` 기록을 남겨 같은 날짜 중복 발송을 건너뛴다.
 
-현재 Render cron과 GitHub Actions는 기존 Webhook 즉시발송 경로다. Bot Token과 채널 ID를 설정하고 예약 dry-run/실제 예약을 사람이 확인하기 전에는 이 경로를 자동 교체하지 않는다. 검수 후 기존 09:00 cron 하나를 전날 예약 명령으로 교체하고, GitHub 백업도 같은 예약 API를 호출하도록 바꾼다. 두 방식을 동시에 켜지 않는다.
+Slack Bot 실제 예약·도착 검증을 마친 뒤 GitHub Actions는 KST 22:30에 다음 날 KST 09:00 메시지를 예약하는 경로로 전환한다. 실행은 GitHub 서버에서 이뤄지므로 개인 컴퓨터 전원과 무관하다. 저장소 Actions secret `NOTIFICATION_DISPATCH_TOKEN`은 Render API의 같은 이름 환경변수와 동일한 값이어야 한다. secret이 없으면 workflow는 외부 요청 전에 실패한다. 기존 Render 09:00 즉시 Webhook cron은 동시에 활성화하지 않는다.
 
 ## 문제 해결
 
