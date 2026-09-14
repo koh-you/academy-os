@@ -1407,20 +1407,22 @@ test("lesson journal bottom bar groups lesson, notification, and save actions wh
   await page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ }).getByRole("button", { name: /월 경계 연동반/ }).click();
   const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
 
-  // 상단 상태 패널은 없다. 상태와 액션이 하단 고정바 하나에 있다.
+  // 별도 상태 패널은 없다. 저장·발송 상태 pill 은 헤더 우상단에, 조작은 하단 고정바에 있다.
   await expect(lessonJournal.locator(".lessonSaveSummary")).toHaveCount(0);
   await expect(lessonJournal.getByRole("button", { name: "수업 취소 처리" })).toHaveCount(0);
-
-  // 하단 고정바 왼쪽: 수업일지 저장 상태 + 발송 상태 pill(같은 region 안). 조작 버튼·select 는 없다.
-  const saveBar = lessonJournal.getByRole("complementary", { name: "수업일지 하단 고정 저장 바" });
-  const statusPanel = saveBar.getByRole("region", { name: "알림톡 상태" });
+  const header = lessonJournal.locator(".lessonJournalHeader");
+  const statusPanel = header.getByRole("region", { name: "알림톡 상태" });
   await expect(statusPanel).toBeVisible();
-  await expect(saveBar.getByRole("status").first()).toContainText("수업일지 · 저장 전");
+  await expect(statusPanel.getByRole("status").first()).toContainText("수업일지 · 저장 전");
   await expect(statusPanel.locator("button, select")).toHaveCount(0);
+  // 헤더에 "수업일지" 자리채움 글씨는 없다(주제가 있으면 그 주제만 보인다).
+  await expect(header.locator(".shortcutHint")).toHaveCount(0);
+
+  // 하단 고정바: 상태 영역은 숨기고 [알림톡 예약] [편집] [⋮] 만.
+  const saveBar = lessonJournal.getByRole("complementary", { name: "수업일지 하단 고정 저장 바" });
+  await expect(saveBar.getByRole("status")).toBeHidden();
   await expect(saveBar.getByText("발송 상태", { exact: true })).toHaveCount(0);
   await expect(saveBar.getByText("편집을 누르면")).toHaveCount(0);
-
-  // 오른쪽: [알림톡 예약] [편집] [⋮].
   await expect(saveBar.getByRole("button", { name: /^알림톡 예약/ })).toBeVisible();
   await expect(saveBar.getByRole("button", { name: "편집" })).toBeVisible();
   const menuTrigger = saveBar.getByRole("button", { name: "수업일지 추가 작업" });
