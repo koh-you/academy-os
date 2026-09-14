@@ -51,12 +51,19 @@ import {
 } from "./scanTools.mjs";
 
 const INGEST_VERSION = "scan-answers-1.0";
+
+// 책마다 다른 것만 프로파일로 둔다. olympos: 책 뒤 해설(2단·점선·검정 「답」 상자). ssen: 별책 답지(양쪽 컬럼 + 가운데 BOX 띠 ·
+// 회색 「답」 상자 · 문항 번호가 「쪽-번호」).
+const LAYOUTS = {
+  olympos: { template: "olympos-answer-icon.png", iconDark: 130, bodyTop: 0.07, columns: null, skipCodePages: true, waitForHeader: true, excludeTags: ["수행평가"], local: "type_label", badgeMinH: 9.5 },
+  ssen: { template: "ssen-answer-icon.png", iconDark: 205, bodyTop: 0.11, columns: [[0.03, 0.44], [0.56, 0.97]], skipCodePages: false, waitForHeader: false, excludeTags: [], local: "number_label", badgeMinH: 7.5 }
+};
 /**
  * 「답」 아이콘 — 5~10pt 검정 정사각 틀 안에 흰 글자가 든 모양. 위 테두리(검정 런)와 같은 x·같은 폭의 아래 테두리가
  * 5~10pt 아래에 있고, 왼쪽·오른쪽 세로 테두리가 60% 이상 검고, 안쪽 검정 비율이 40% 이상이면 아이콘이다.
  * 글자·분수 가로줄·표 선은 네 변이 동시에 닫히지 않는다.
  */
-function findAnswerIcons(imageData, width, scale, box, template = null) {
+function findAnswerIcons(imageData, width, scale, box, template = null, darkThreshold = 130) {
   const x0 = Math.max(0, Math.floor(box.x0 * scale));
   const x1 = Math.ceil(box.x1 * scale);
   const y0 = Math.max(0, Math.floor(box.y0 * scale));
@@ -64,7 +71,7 @@ function findAnswerIcons(imageData, width, scale, box, template = null) {
   const minSize = Math.round(5 * scale);
   const maxSize = Math.round(10 * scale);
   // 초록 「참고」 라벨처럼 색 있는 상자는 아이콘이 아니다 — 검정(무채색)만 센다.
-  const dark = (x, y) => y >= 0 && y < y1 && x >= 0 && x < x1 && gray(imageData, (y * width + x) * 4) < 130 && !isColored(imageData, (y * width + x) * 4);
+  const dark = (x, y) => y >= 0 && y < y1 && x >= 0 && x < x1 && gray(imageData, (y * width + x) * 4) < darkThreshold && !isColored(imageData, (y * width + x) * 4);
   const runsAt = (y) => {
     const runs = [];
     let run = 0;
@@ -115,19 +122,82 @@ function findAnswerIcons(imageData, width, scale, box, template = null) {
           if (dark(xx, yy)) innerDark += 1;
         }
         // 표 칸의 회색 채움처럼 속이 통째로 검은 것(흰 글자 없음)도 아이콘이 아니다.
-        if (innerTotal === 0 || innerDark < innerTotal * 0.3 || innerDark > innerTotal * 0.95) continue;
+        // 회색 상자(쎈 답지)는 임계를 낮춰 보므로 속이 통째로 「어둡게」 잡힌다 — 그때는 위 한계를 두지 않는다.
+        if (innerTotal === 0 || innerDark < innerTotal * 0.3 || (darkThreshold <= 150 && innerDark > innerTotal * 0.95)) continue;
         const inset = Math.max(1, Math.round(scale * 0.6));
         const corners = [[top.x0 + inset, y + inset], [top.x1 - 1 - inset, y + inset], [top.x0 + inset, y + h - inset], [top.x1 - 1 - inset, y + h - inset]];
         if (corners.filter(([cx, cy]) => dark(cx, cy)).length < 3) continue;
         // 마지막으로 「답」 아이콘 견본(templates/olympos-answer-icon.png)과 정규화 상관이 0.5 이상이어야 한다 —
         // 검정 틀에 흰 글자라는 모양 규칙만으로는 「율」 같은 네모난 글자·표 칸을 다 못 거른다.
-        if (template && templateMatch(imageData, width, top.x0, y, w, h + 1, template) < 0.5) continue;
+        if (template && templateMatch(imageData, width, top.x0, y, w, h + 1, template) < (Number(process.env.ICON_NCC) || 0.5)) continue;
         icons.push({ x: top.x0 / scale, y: (y + h / 2) / scale, w: w / scale, h: h / scale, px0: top.x0, px1: top.x1, py0: y, py1: y + h });
         break;
       }
     }
   }
   return icons.map(({ px0, px1, py0, py1, ...icon }) => icon);
+}
+
+/**
+ * 회색 「답」 상자(쎈 답지) — 회색(90~215) 세로 테두리 두 줄이 5~10pt 떨어져 같은 높이(5~10pt)로 서 있고, 그 사이 위·아래
+ * 행도 회색이며 바깥 고리는 희다. 속의 흰 「답」 글자 때문에 가로 런으로는 안 잡히므로 세로 테두리로 찾는다.
+ */
+function findGrayIcons(imageData, width, scale, box) {
+  const x0 = Math.max(0, Math.floor(box.x0 * scale));
+  const x1 = Math.ceil(box.x1 * scale);
+  const y0 = Math.max(0, Math.floor(box.y0 * scale));
+  const y1 = Math.ceil(box.y1 * scale);
+  const minSize = Math.round(5 * scale);
+  const maxSize = Math.round(10 * scale);
+  const value = (x, y) => (x < 0 || y < 0 || x >= x1 || y >= y1 ? 255 : gray(imageData, (y * width + x) * 4));
+  const grayish = (x, y) => { const v = value(x, y); return v >= 90 && v <= 215; };
+  const searchX0 = x0 + Math.round((x1 - x0) * 0.3);
+  // 세로 회색 런(2px 폭 허용)의 시작 y·길이
+  const verticalRuns = [];
+  for (let x = searchX0; x < x1; x += 1) {
+    let run = 0;
+    for (let y = y0; y <= y1; y += 1) {
+      if (y < y1 && (grayish(x, y) || grayish(x + 1, y))) {
+        run += 1;
+        continue;
+      }
+      if (run >= minSize && run <= maxSize) verticalRuns.push({ x, y0: y - run, y1: y });
+      run = 0;
+    }
+  }
+  const icons = [];
+  for (const left of verticalRuns) {
+    if (icons.some((icon) => Math.abs(icon.px0 - left.x) < minSize && Math.abs(icon.py0 - left.y0) < minSize)) continue;
+    const right = verticalRuns.find((run) => run.x - left.x >= minSize && run.x - left.x <= maxSize && Math.abs(run.y0 - left.y0) <= 2 && Math.abs(run.y1 - left.y1) <= 2);
+    if (!right) continue;
+    const w = right.x - left.x + 1;
+    const h = left.y1 - left.y0;
+    if (Math.abs(w - h) > Math.round(3 * scale)) continue;
+    // 위·아래 테두리 행이 회색(70% 이상)
+    let topGray = 0;
+    let bottomGray = 0;
+    for (let xx = left.x; xx <= right.x; xx += 1) {
+      if (grayish(xx, left.y0) || grayish(xx, left.y0 + 1)) topGray += 1;
+      if (grayish(xx, left.y1 - 1) || grayish(xx, left.y1 - 2)) bottomGray += 1;
+    }
+    if (topGray < w * 0.7 || bottomGray < w * 0.7) continue;
+    // 바깥 고리(3px)는 희다
+    let ringWhite = 0;
+    let ringTotal = 0;
+    for (let yy = left.y0 - 3; yy < left.y1 + 3; yy += 1) {
+      ringTotal += 2;
+      if (value(left.x - 3, yy) > 225) ringWhite += 1;
+      if (value(right.x + 3, yy) > 225) ringWhite += 1;
+    }
+    for (let xx = left.x; xx <= right.x; xx += 1) {
+      ringTotal += 2;
+      if (value(xx, left.y0 - 3) > 225) ringWhite += 1;
+      if (value(xx, left.y1 + 2) > 225) ringWhite += 1;
+    }
+    if (ringWhite < ringTotal * 0.75) continue;
+    icons.push({ x: left.x / scale, y: (left.y0 + h / 2) / scale, w: w / scale, h: h / scale, px0: left.x, py0: left.y0 });
+  }
+  return icons.map(({ px0, py0, ...icon }) => icon);
 }
 
 /** 사람이 먼저 볼 것만 추린 검수 목록(마크다운). 패키지 폴더에 「검수-필요.md」로 남긴다. */
@@ -137,7 +207,7 @@ function buildReviewList({ itemManifest, items, solutions, answers, manifest, it
   const unitTitle = (item) => itemManifest.units[item.unit_index]?.title ?? "";
   const solutionByNumber = new Map(solutions.map((entry) => [entry.number_label, entry]));
   const sortedSolved = [...solutionByNumber.keys()].sort();
-  const assess = all.filter((item) => (item.tags ?? []).includes("수행평가"));
+  const assess = all.filter((item) => !items.some((entry) => entry.number === item.number_label));
   const { missing, mismatches, unmatched_segments: unmatched } = manifest.validation.solutions;
   const noAnswer = manifest.validation.answers.missing;
   const lines = [];
@@ -190,30 +260,33 @@ function buildReviewList({ itemManifest, items, solutions, answers, manifest, it
   return `${lines.join("\n")}\n`;
 }
 
-function localNumberOf(item) {
-  const match = String(item.type_label ?? "").match(/(\d{1,2})\s*$/);
+function localNumberOf(item, source = "type_label") {
+  const text = source === "number_label" ? String(item.number_label ?? "").split("-").pop() : String(item.type_label ?? "");
+  const match = text.match(/(\d{1,2})\s*$/);
   return match ? Number(match[1]) : null;
 }
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (!args.pdf || !args.out) {
-    console.error("사용: --pdf <교재.pdf> --out <문항 패키지 폴더> [--pages a-b] [--dpi 220]");
+    console.error("사용: --pdf <교재.pdf 또는 답지.pdf> --out <문항 패키지 폴더> [--layout olympos|ssen] [--pages a-b] [--dpi 220]");
     process.exit(2);
   }
   const outDir = path.resolve(args.out);
   const itemManifest = JSON.parse(await readFile(path.join(outDir, "manifest.json"), "utf8"));
   const bookId = String(itemManifest.book.book_id);
   // 수행평가는 책 뒤 해설에 없다(빠른정답만). 본문 순서 = 해설 순서인 문항만 대응 대상이다.
+  const layout = LAYOUTS[String(args.layout ?? "olympos")];
+  if (!layout) throw new Error(`--layout 은 ${Object.keys(LAYOUTS).join("|")} 가운데 하나입니다.`);
   const items = itemManifest.items
-    .filter((item) => !(item.tags ?? []).includes("수행평가"))
+    .filter((item) => !(item.tags ?? []).some((tag) => layout.excludeTags.includes(tag)))
     .sort((a, b) => a.number_sort - b.number_sort)
-    .map((item) => ({ number: item.number_label, local: localNumberOf(item), section: (item.tags ?? [])[0] ?? "", unit: item.unit_index }));
+    .map((item) => ({ number: item.number_label, local: localNumberOf(item, layout.local), section: (item.tags ?? [])[0] ?? "", unit: item.unit_index }));
   const dpi = Number(args.dpi) || 220;
   const renderScale = dpi / 72;
   const tesseract = await findTesseract();
   const koreanTessdata = await findKoreanTessdata();
-  const answerTemplate = await loadTemplate(new URL("./templates/olympos-answer-icon.png", import.meta.url));
+  const answerTemplate = await loadTemplate(new URL(`./templates/${layout.template}`, import.meta.url));
   if (!answerTemplate) console.log("「답」 아이콘 견본이 없어 모양 규칙만으로 답 줄을 찾습니다.");
   // 지난 실행의 파일이 남아 있으면 이번에 대응이 안 된 번호에 옛 이미지가 붙는다 — 정답·해설 출력은 매번 비우고 시작한다.
   await rm(path.join(outDir, "answers"), { recursive: true, force: true });
@@ -232,12 +305,15 @@ async function main() {
   // 1) 쪽마다 풀이 조각을 모은다(아직 문항에 대응시키지 않는다).
   const segments = [];
   let pending = null;
-  let started = false;
+  let started = !layout.waitForHeader;
   const encode = (crop) => crop.encode("jpeg", 88);
 
   const answerCrops = (canvas, imageData, box, qaBoxes) => {
     const crops = [];
-    for (const icon of findAnswerIcons(imageData, canvas.width, renderScale, box, answerTemplate)) {
+    const icons = layout.iconDark > 150
+      ? findGrayIcons(imageData, canvas.width, renderScale, box)
+      : findAnswerIcons(imageData, canvas.width, renderScale, box, answerTemplate, layout.iconDark);
+    for (const icon of icons) {
       // 답 줄 띠: 아이콘 중심에서 위아래 9pt 안(분수 한 층)만. 윗줄(빈 틈 1.2pt 이상)로 번지지 않는다.
       const band = inkBand(imageData, canvas.width, renderScale, { x0: icon.x - 1.5, x1: box.x1 }, icon.y, { maxUp: 9, maxDown: 9, gapPt: 1.2 });
       const figure = band && (band.clippedTop || band.clippedBottom);
@@ -292,21 +368,23 @@ async function main() {
     }
 
     // 문항 코드(25445-0017)가 있는 쪽은 본문(수행평가 등)이다 — 해설이 아니므로 건너뛴다.
-    if (tokens.some((token) => /^\d{5}-\d{4}$/.test(token.text) && token.conf >= 60)) {
+    if (layout.skipCodePages && tokens.some((token) => /^\d{5}-\d{4}$/.test(token.text) && token.conf >= 60)) {
       console.log(`p${pageNumber}: 본문 쪽(문항 코드 있음) — 건너뜀`);
       page.cleanup();
       continue;
     }
     // 해설 쪽은 늘 가운데 2단이다. 점선이 연해 못 찾으면 쪽 가운데를 쓴다. 빠른정답표(3단)·MEMO 는 컬럼 안 번호 줄
     // 모양(한 줄에 번호 여럿)·배지 없음으로 걸러진다.
-    const dotted = findDottedGutter(imageData, canvas.width, canvas.height, renderScale, pageWidth, pageHeight);
+    const dotted = layout.columns ? -1 : findDottedGutter(imageData, canvas.width, canvas.height, renderScale, pageWidth, pageHeight);
     const gutterX = dotted > 0 ? dotted : pageWidth * 0.5;
-    const bodyTop = pageHeight * 0.07;
+    const bodyTop = pageHeight * layout.bodyTop;
     const bodyBottom = pageHeight * 0.935;
-    const columns = [
-      { index: 0, x0: pageWidth * 0.05, x1: gutterX - 3 },
-      { index: 1, x0: gutterX + 3, x1: pageWidth * 0.95 }
-    ];
+    const columns = layout.columns
+      ? layout.columns.map(([from, to], index) => ({ index, x0: pageWidth * from, x1: pageWidth * to }))
+      : [
+        { index: 0, x0: pageWidth * 0.05, x1: gutterX - 3 },
+        { index: 1, x0: gutterX + 3, x1: pageWidth * 0.95 }
+      ];
     const qaBoxes = [];
     let pageCount = 0;
 
@@ -346,7 +424,7 @@ async function main() {
       // 배지 x 는 잉크 여백 추정 대신 굵은 번호 후보 자체의 가장 왼쪽 x 로 잡는다(들여쓴 「=…」 줄이 많은 쪽에서
       // 여백 추정이 어긋나던 것). 후보가 컬럼 안쪽 6~60pt 에 있어야 한다.
       const candidates = numberTokens
-        .filter((token) => token.h >= 9.5 && token.x >= column.x0 + 6 && token.x <= column.x0 + 60 && token.y > bodyTop && token.y + token.h < bodyBottom)
+        .filter((token) => token.h >= layout.badgeMinH && token.x >= column.x0 + 6 && token.x <= column.x0 + 60 && token.y > bodyTop && token.y + token.h < bodyBottom)
         .filter((token) => !insideBox(token.y + token.h / 2) && !insideBand(token.y + token.h / 2) && !sharesLine(token) && hasTextRight(token));
       const badgeLeft = candidates.length ? Math.min(...candidates.map((token) => token.x)) : left;
       const badges = candidates
