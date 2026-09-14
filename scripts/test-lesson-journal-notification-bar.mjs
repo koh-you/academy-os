@@ -57,14 +57,14 @@ for (const contract of [
   'aria-label="알림톡 상태"',
   'className="lessonNotificationStatusRow"',
   '<InlineSaveStatus label="수업일지" saveState={journalSaveState} />',
-  "journalSaveMessage !== solapiReservationSyncStatus.label",
   "lessonNotificationPlanStatus",
   "checkoutMissingSummary",
   "solapiReservationSync"
 ]) {
   assert.ok(componentSource.includes(contract), `missing controlled notification bar contract: ${contract}`);
 }
-for (const removedAction of ["<button", "<select", "<strong>발송 상태</strong>", "수정 시작", "예약 확인", "onStartJournalEditMode", '알림톡 예약 작업']) {
+// 2026-09-14 · 저장 상태는 InlineSaveStatus pill 하나로만 보여준다. 저장 메시지 텍스트를 옆에 또 쓰면 중복이라 없앴다.
+for (const removedAction of ["<button", "<select", "journalSaveMessage", "lessonJournalSaveStatusMessage", "<strong>발송 상태</strong>", "수정 시작", "예약 확인", "onStartJournalEditMode", '알림톡 예약 작업']) {
   assert.ok(!componentSource.includes(removedAction), `notification bar must not keep ${removedAction}`);
 }
 for (const forbiddenSideEffect of ["fetch(", "postJson", "/api/", "setReservationModalOpen", "setReservationInspectMode", "useState", "useEffect"]) {
