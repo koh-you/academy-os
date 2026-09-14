@@ -13,7 +13,8 @@ export function LessonJournalSaveBar({
   onSave,
   reservationAction = null,
   reservationSyncStatus,
-  saveState
+  saveState,
+  statusPills = null
 }) {
   const model = createLessonJournalSaveBarModel({
     hasDraftChanges,
@@ -26,13 +27,17 @@ export function LessonJournalSaveBar({
 
   if (!model.shouldShow) return null;
 
-  // 상태 배지는 상단 발송 상태 줄이 그린다. 여기서는 액션만 둔다.
+  // 저장 메시지가 Solapi 상태 pill 과 같은 문구면(라이브 예약 상태를 대신 보여주는 경우) 한 줄에 두 번 쓰지 않는다.
+  const stickyMessage = model.message === reservationSyncStatus?.label ? "" : model.message;
+
+  // 왼쪽: 수업일지 저장 상태 + 발송 상태 pill 들. 오른쪽: 알림톡 예약 · 편집/변경 저장 · ⋮.
   return (
     <StickySaveBar
       className="lessonJournalStickySaveBar"
       label="수업일지"
-      message={model.message}
+      message={stickyMessage}
       saveState={model.saveState}
+      statusExtras={statusPills}
     >
       {reservationAction}
       <button

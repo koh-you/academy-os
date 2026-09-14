@@ -2081,12 +2081,6 @@ summary:focus-visible {
   width: 100%;
 }
 
-.lessonSaveSummary {
-  display: grid;
-  gap: 8px;
-  padding: 10px 14px;
-}
-
 .lessonNotificationStatusRow {
   align-items: center;
   display: flex;
