@@ -1,5 +1,10 @@
 # Daily Development Handoff
 
+## 2026-09-14 Supabase Realtime 활성화 뒤 최종 smoke
+
+- main `69f1e1ba`, Supabase tenant Broadcast trigger(INSERT/UPDATE/DELETE), Render/Vercel 양쪽 feature flag 및 재배포까지 완료했다. 로그인 교사 화면의 기존 API 원천 로드는 정상이다.
+- 남은 마지막 사람 Gate는 운영 출결값 1건을 안전하게 바꿔 두 번째 탭의 즉시 반영을 확인한 뒤 원래 값으로 복구하는 smoke다. 승인 없이 운영 레코드를 수정하지 않는다. 실패하면 기존 7초 polling으로 복귀하는지도 함께 확인한다.
+
 ## 2026-09-14 Supabase Realtime 운영 Gate
 
 - 코드 경로는 완성: Supabase tenant private Broadcast → Render 단일 공유 channel → 교사 bearer SSE → 기존 `/api/lesson-records?date=...` 재조회. 행 payload와 service-role은 브라우저에 노출하지 않는다.

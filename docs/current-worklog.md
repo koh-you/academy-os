@@ -1,5 +1,10 @@
 # Academy OS Current Worklog
 
+## 2026-09-14 Supabase Realtime 운영 활성화
+
+- PR #336 main 병합 → 운영 Broadcast trigger 적용 및 3개 event 등록 확인 → Render 서버 flag/redeploy → Vercel Production browser flag/redeploy 순서로 활성화했다.
+- 두 배포가 Live/Ready인 상태에서 로그인 교사 화면을 새로 열고 수업·운영 알림 원천 재조회가 정상임을 확인했다. 실제 출결 레코드를 수정하는 이벤트 왕복은 운영 데이터 쓰기 승인을 별도로 받아야 한다.
+
 ## 2026-09-14 Supabase Realtime 서버 중계 완성
 
 - Academy OS의 자체 교사 세션을 유지하기 위해 브라우저 직접 Supabase 구독 대신 `Supabase private Broadcast → Render → bearer 인증 SSE → 기존 API 재조회` 경로를 구현했다. service-role은 서버 밖으로 나가지 않고 SSE payload도 event/table 신호로 축소된다.
