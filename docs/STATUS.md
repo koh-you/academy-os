@@ -1,5 +1,11 @@
 # Academy OS Current Status
 
+## 2026-09-14 Supabase Realtime 운영 활성화
+
+- PR #336을 main(`69f1e1ba`)에 병합했다. Supabase 운영 DB에 tenant private Broadcast trigger를 적용했고 조회 결과 `INSERT`/`UPDATE`/`DELETE` 3개 이벤트 등록을 확인했다.
+- Render `SUPABASE_REALTIME_ENABLED=true`와 Vercel Production `VITE_ATTENDANCE_REALTIME_ENABLED=true`를 저장하고 재배포했다. Render는 같은 main commit으로 Live, Vercel Production은 Ready 상태를 확인했다.
+- 로그인 교사 화면을 새 배포로 다시 열어 기존 수업·운영 알림 API 원천이 정상 재조회되는 것과 애플리케이션 Realtime 오류가 표시되지 않는 것을 확인했다. 운영 출결값을 바꾸는 두 탭 이벤트 smoke는 별도 사람 Gate로 남긴다.
+
 ## 2026-09-14 Supabase Realtime 전환 2단계 — 운영 활성화 대기
 
 - Render 서버가 Supabase의 테넌트 전용 private Broadcast를 구독하고, 인증된 교사 SSE 연결에는 행 내용 없이 `lesson_student_records` 변경 신호만 전달하도록 구현했다. 같은 테넌트의 여러 탭은 서버 구독 하나를 공유한다.
