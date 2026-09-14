@@ -317,10 +317,12 @@
   position: relative;
   z-index: 1;
 }
-/* 왼쪽 열 항목 오른쪽에 세로 구분선. 열 간격의 절반 자리에 놓는다. */
-.problemBankPrintColumns > .problemBankPrintItem:nth-child(odd) { border-right: 0.4pt solid #000; margin-right: -4mm; padding-right: 4mm; }
+/* 왼쪽 열 항목 오른쪽에 세로 구분선. 열 간격의 절반 자리에 놓는다. 열은 JS(assignPrintColumns)가 정한다 —
+   전폭 항목(가로로 긴 문항)이 두 열을 차지하면 그 뒤 항목의 홀짝이 어긋나므로 nth-child 를 쓰지 않는다. */
+.problemBankPrintColumns > .problemBankPrintItem.col-left { border-right: 0.4pt solid #000; margin-right: -4mm; padding-right: 4mm; }
+.problemBankPrintColumns > .problemBankPrintItem.col-wide { grid-column: 1 / -1; }
 .problemBankPrintSheet.cols-1 .problemBankPrintColumns { grid-template-columns: minmax(0, 1fr); }
-.problemBankPrintSheet.cols-1 .problemBankPrintColumns > .problemBankPrintItem:nth-child(odd) { border-right: 0; margin-right: 0; padding-right: 0; }
+.problemBankPrintSheet.cols-1 .problemBankPrintColumns > .problemBankPrintItem.col-left { border-right: 0; margin-right: 0; padding-right: 0; }
 .problemBankPrintItem { break-inside: avoid; display: block; margin-bottom: 6mm; min-width: 0; padding-bottom: 2mm; }
 .problemBankPrintSource { color: #000; display: flex; flex-wrap: wrap; font-size: 7.5pt; gap: 8px; justify-content: space-between; }
 .problemBankPrintType { color: #000; }

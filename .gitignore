@@ -19,6 +19,8 @@ tmp-video-frames/
 .codex-temp/
 .codex_deps/
 output/ssen/
+# 문제은행 패키지 출력(문항 이미지 · 교재 저작물) — 바탕화면/output 에만 둔다
+output/problem-bank/
 playwright-report/
 test-results/
 

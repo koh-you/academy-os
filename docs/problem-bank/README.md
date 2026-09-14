@@ -32,6 +32,21 @@ node scripts/problem-bank/ingest-text-pdf.mjs --pdf "C:\Users\PC\Desktop\rpm 중
 - 스캔 PDF(글자 레이어 없음)는 이 도구가 거부한다. 2단계에서 「로컬 후보 + 비전 검증 1회」로 붙인다(docs 2부 §3 토큰 구조).
 - RPM 의 「중단원 마무리」처럼 2자리 번호 체계는 아직 안 잡는다(별도 번호 계열).
 
+### 1-1. 스캔 PDF 원천화 (로컬 · EBS 올림포스)
+
+```powershell
+node scripts/problem-bank/ingest-scan-pdf.mjs --pdf "C:\Users\PC\Downloads\2025년 EBS 올림포스 공통수학1 (46591)Marked.pdf" `
+  --out output\problem-bank\olympos-cm1 --title "올림포스 공통수학1" --folder "고1 / 올림포스" --grade 고1 --subject 수학
+```
+
+- 글자 레이어가 없는 스캔(쪽마다 이미지 1장 · `/Rotate` 90/180/270 · 살짝 기울어짐)을 위한 CLI. 출력 형식은 텍스트 PDF 와 같아 「패키지 등록」이 그대로 받는다. 비전 AI 호출 0, 로컬 tesseract(무료)만 쓴다.
+- **번호 배지 대신 EBS 문항 코드**(`▶ 25445-0017`)를 쓴다. 코드는 책 전체에서 연속·유일해 `number_label`(4자리)이 되고, 풀이가 딸린 예제·예시는 코드가 없어 자동으로 빠진다. 구역 이름(기본 유형 익히기·유형 확인·서술형 연습장·내신·수능 고난도·대단원 종합문제·수행평가)과 구역 안 순번은 `type_label`(「서술형 연습장 02」)로 들어간다.
+- 쪽 처리: 원본 렌더(220dpi)에서 tesseract 두 모드(흩어진 글자 11 · 블록 6)를 합쳐 코드 토큰을 찾고 → 기울기 보정(투영 분산) → 코드 줄의 색 배지(01·유제 3) 왼쪽 ~ 코드 오른쪽이 문항 폭, 같은 컬럼 다음 코드·22pt 빈 줄이 아래. 2단·전폭이 섞인 쪽도 문항마다 폭이 정해져 쪽 단위 규칙이 없다. 전폭 문항은 `layout: "wide"` 로 표시된다(인쇄 2단에서 두 열 차지).
+- 검사: 접두 오독(26445)은 같은 책으로 받고, 책 순서 밖 번호(0805)는 `validation.dropped_codes` 로 버리며, 번호 연속성·flagged(`left_fallback`·`low_ocr_conf`·`too_short`)를 남긴다. 단원은 단원 시작 쪽 큰 제목 + 홀수 쪽 바닥글(번호가 이어질 때만 새 단원) 투표로 정하고, 대단원 종합문제는 `R01~03` 같은 묶음 단원으로 따로 둔다.
+- 필요: `winget install UB-Mannheim.TesseractOCR`(+ `%LOCALAPPDATA%\tessdata\kor.traineddata` — tessdata_fast. 없으면 구역·단원 이름 없이 코드만으로 진행). 공통수학1 178쪽 ≈ 8분.
+- 실측(공통수학1): 313문항 · 8소단원 + 종합문제 4 · 번호 연속 · 버린 코드 0 · flagged 1. 경계 규칙은 `src/domains/problems/scanPdfSegmenter.js`(`npm run test:problem-bank-scan-segmenter` 가 실제 OCR 토큰 픽스처로 검증).
+- 아직 안 되는 것: 정답·해설(책 뒤 「정답과 풀이」는 코드가 없고 구역별 01·02 로 번호가 다시 시작해 순서 대응이 필요), 유형편·고난도 판 레이아웃 확인.
+
 ### 1-2. 정답·해설 원천화 (로컬)
 
 ```powershell
@@ -63,7 +78,7 @@ Supabase SQL: `supabase/20260912_problem_bank.sql` (SQL Editor 에서 1회 적�
 - **교재별 오답** (`mode="class"`): 학생 선택이 없다. 학생별 오답에서 쌓인 기록을 반 전체(학년 필터)로 집계해 오답률 띠로 보여 주고, 번호를 누르면 인쇄·PPT 대상으로 고른다. 「오답률 N% 이상 선택」(30/50/70)으로 많이 틀린 문항을 한 번에 고른다. 선생님이 재량으로 문항을 뽑아 반 전체에 나눠 줄 때 쓴다.
 - **학생 앱** › 오답 탭: `GET /api/portal-problem-bank`(학생 세션)로 자기 기록이 있는 교재·문항(틀림 / 재풀이 정답)을 보고, 번호를 누르면 `POST /api/portal-problem-bank/item-images` 로 자기 문항 이미지만 받는다. 읽기 전용.
 - 미리보기 패널은 넓어졌고 이미지를 누르면 확대 레이어로 본다. 이미지 파일이 Storage 에 없으면 그 자리에 안내가 뜬다(교재관리 › 이미지 누락 검사).
-- 「인쇄 · PPT」 → A4 세로 1단/2단(2단은 실제 2열 grid 라 화면·인쇄 모두 양쪽에 문항이 놓인다), 문항마다 출처 줄(교재 · 단원 · 번호) + 원문 이미지 + 풀이 공간. 워터마크는 시험지 워터마크와 같은 로고·불투명도 0.1·폭 50%이며 이미지 위에 multiply 로 얹는다. 빠른정답·해설은 등록된 것이 있을 때만 켤 수 있다: 빠른정답은 새 쪽에 「번호 · 답 줄 이미지(원본 크기) · 교재 번호」 격자, 해설은 새 쪽에 문항과 같은 번호로 해설 이미지. 공통 지시문 그룹도 구성 문항마다 자기 답·해설이 나온다. 미리보기 패널에서도 정답과 해설(펼치기)을 볼 수 있다.
+- 「인쇄 · PPT」 → A4 세로 1단/2단(2단은 실제 2열 grid 라 화면·인쇄 모두 양쪽에 문항이 놓인다. 쪽 폭의 62% 를 넘는 전폭 문항은 두 열을 차지하고 그 다음 문항은 왼쪽 열에서 다시 시작한다 — `assignPrintColumns`), 문항마다 출처 줄(교재 · 단원 · 번호) + 원문 이미지 + 풀이 공간. 워터마크는 시험지 워터마크와 같은 로고·불투명도 0.1·폭 50%이며 이미지 위에 multiply 로 얹는다. 빠른정답·해설은 등록된 것이 있을 때만 켤 수 있다: 빠른정답은 새 쪽에 「번호 · 답 줄 이미지(원본 크기) · 교재 번호」 격자, 해설은 새 쪽에 문항과 같은 번호로 해설 이미지. 공통 지시문 그룹도 구성 문항마다 자기 답·해설이 나온다. 미리보기 패널에서도 정답과 해설(펼치기)을 볼 수 있다.
 - 「PPT 저장」: 표지 + 문항마다 16:9 슬라이드(출처 줄 · 번호 · 문항 이미지 · 공통 지시문은 강조 상자 · 학원 로고 워터마크), 「해설」을 켜 두면 문항 뒤에 해설 슬라이드(답 줄 이미지 포함). 반에서 많이 틀린 문항만 뽑아 설명할 때 쓴다. pptxgenjs 는 버튼을 누를 때만 내려받는 별도 청크다.
 - 공통 지시문 문항(「[0001~0006] 오른쪽 그림의 직각삼각형 ABC에서 …」)은 지시문·그림·형제 문항이 든 블록을 한 번 싣고, 고른 번호 자리에 검정 강조 상자를 얹는다. 같은 블록의 문항을 여러 개 고르면 한 항목으로 묶인다. 비전 토큰은 들지 않는다(좌표만 쓴다).
 
@@ -71,8 +86,8 @@ Supabase SQL: `supabase/20260912_problem_bank.sql` (SQL Editor 에서 1회 적�
 
 | 역할 | 파일 |
 |---|---|
-| 경계 규칙(순수) | `src/domains/problems/textPdfSegmenter.js` |
-| 원천화 CLI | `scripts/problem-bank/ingest-text-pdf.mjs`(문항) · `ingest-answers.mjs`(정답·해설) · `pdfTools.mjs`(공용 렌더·잉크 헬퍼) |
+| 경계 규칙(순수) | `src/domains/problems/textPdfSegmenter.js`(텍스트) · `scanPdfSegmenter.js`(스캔·OCR 토큰) |
+| 원천화 CLI | `scripts/problem-bank/ingest-text-pdf.mjs`(문항) · `ingest-scan-pdf.mjs`(스캔 문항 · tesseract) · `ingest-answers.mjs`(정답·해설) · `pdfTools.mjs`(공용 렌더·잉크 헬퍼) |
 | DB 표 | `supabase/20260912_problem_bank.sql` · `20260913_problem_bank_answers.sql` · `src/shared/server/tenantScope.js` |
 | 서버 저장소·라우트 | `src/shared/server/problemBankStore.js` · `src/shared/server/problemBankRouteRegistry.js` (api/server.js 에서 주입) |
 | 화면 | `src/domains/problems/BookWrongAnswerBoard.jsx`(교재별·학생별 보드) · `ProblemBankCenter.jsx`(교재관리) · `WrongAnswerPrintSheet.jsx`(오답지) · `problemBankPptx.js`(PPT) · `problemBankModel.js` · `problemBankApi.js` · `problemBank.css` · 학생 앱 `src/domains/portals/StudentWrongAnswersTab.jsx` |
@@ -83,7 +98,7 @@ Supabase SQL: `supabase/20260912_problem_bank.sql` (SQL Editor 에서 1회 적�
 
 1. 운영 Supabase 에 SQL 적용 → RPM 패키지 등록 → 첫 인쇄본 확인 (사람 gate).
 2. 정답·해설은 됐다(RPM 644/644). 다른 교재는 해설 PDF 의 「답」 글리프·배너 문구가 다를 수 있어 `ANSWER_ICON`·`SOLUTION_BANNER_PATTERN` 을 교재별 프로파일로 뺄 것.
-3. 스캔 PDF 경로: EBS 올림포스(공통수학1·2 / 유형편 / 고난도, 6권)는 쪽마다 이미지 1장·글자 레이어 없음·/Rotate 90/180/270 과 살짝 기울어진 스캔이다. 렌더 → 기울기 보정(투영 프로파일 각도 탐색) → 잉크 기반 컬럼·번호 후보 → 번호 인식(로컬 OCR 또는 비전 1회) 순으로 붙인다. 쎈도 같은 경로.
+3. 스캔 PDF 경로: 올림포스 공통수학1 문항은 됐다(1-1). 남은 것 — ① 공통수학2·유형편·고난도 6권을 같은 CLI 로 돌려 qa 확인 ② 책 뒤 「정답과 풀이」 연결(구역별 01·02 번호를 문항 코드 순서에 대응 + 「답」 상자 줄 오려 빠른정답) ③ 쎈(다른 코드 체계)은 별도 프로파일.
 4. HWPX(EBS) 경로: 한글 → PDF(글자 레이어 유지)로 변환해 같은 CLI 로 처리.
 5. 경계 검수 화면에서 bbox 를 직접 고치는 편집기(지금은 CLI 재실행).
 6. 자료함 화면은 사이드바에서 빠졌고(`resources` 뷰 계약·포털 자료 공유 저장 계약은 유지) 필요하면 코드째 제거한다.
