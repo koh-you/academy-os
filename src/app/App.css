@@ -2274,17 +2274,6 @@ summary:focus-visible {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .lessonJournalStickySaveBar .stickySaveBarStatus {
-    align-items: start;
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .lessonJournalStickySaveBar .stickySaveBarStatus > span {
-    overflow-wrap: anywhere;
-    white-space: normal;
-  }
-
   .lessonJournalStickySaveBar .stickySaveBarActions,
   .lessonJournalStickySaveBar .stickySaveBarActions button {
     width: 100%;

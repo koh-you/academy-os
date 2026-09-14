@@ -1,16 +1,25 @@
+import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { createLessonJournalNotificationBarModel } from "./lessonJournalNotificationBarModel.js";
 
-// 발송 상태 pill 묶음. 별도 상단 패널이 아니라 하단 고정바의 상태 영역 안에 들어간다.
+// 저장·발송 상태 pill 묶음. 헤더 우상단에 들어간다. 조작 버튼은 갖지 않는다.
 export function LessonJournalNotificationBar({
   checkoutMissingStudents,
+  journalSaveMessage = "",
+  journalSaveState = "idle",
   notificationPlanMode,
   notificationPlanSummaryText,
   solapiReservationSyncStatus
 }) {
   const model = createLessonJournalNotificationBarModel({ checkoutMissingStudents });
+  // 저장 메시지가 Solapi 상태 pill 과 같은 문구면(라이브 예약 상태를 대신 보여주는 경우) 두 번 쓰지 않는다.
+  const showJournalSaveMessage = Boolean(journalSaveMessage) && journalSaveMessage !== solapiReservationSyncStatus.label;
 
   return (
     <div aria-label="알림톡 상태" className="lessonNotificationStatusRow" role="region" tabIndex={0}>
+      <InlineSaveStatus label="수업일지" saveState={journalSaveState} />
+      {showJournalSaveMessage ? (
+        <span className="lessonJournalSaveStatusMessage" title={journalSaveMessage}>{journalSaveMessage}</span>
+      ) : null}
       <span className={`lessonNotificationPlanStatus ${notificationPlanMode}`} title={notificationPlanSummaryText}>
         {notificationPlanSummaryText}
       </span>

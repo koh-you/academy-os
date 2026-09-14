@@ -13,6 +13,7 @@ import { LessonJournalAbsenceSourceNotice } from "./LessonJournalAbsenceSourceNo
 import { LessonJournalHeader } from "./LessonJournalHeader.jsx";
 import { LessonJournalNotificationBar } from "./LessonJournalNotificationBar.jsx";
 import { createLessonJournalNotificationBarModel } from "./lessonJournalNotificationBarModel.js";
+import { createLessonJournalSaveBarModel } from "./lessonJournalSaveBarModel.js";
 import { LessonJournalReminderPanel } from "./LessonJournalReminderPanel.jsx";
 import { LessonJournalReservationModal } from "./LessonJournalReservationModal.jsx";
 import { LessonJournalSaveBar } from "./LessonJournalSaveBar.jsx";
@@ -347,6 +348,15 @@ export function LessonJournalDetail({
     reservationApplyState,
     solapiResultRefreshState
   });
+  // 저장 상태 배지는 헤더 우상단에 그리므로, 하단바와 같은 모델로 문구·상태를 미리 계산해 둔다.
+  const journalSaveBarModel = createLessonJournalSaveBarModel({
+    hasDraftChanges: hasJournalDraftChanges,
+    isEditMode: journalEditMode,
+    manualSaveMessage: journalManualSaveMessage,
+    message: journalStickySaveMessage,
+    reservationSyncStatus: solapiReservationSyncStatus,
+    saveState: journalStickySaveState
+  });
   // 시간이 지난 예약은 새로 고를 수 없어 목록에서 빼되, 지금 선택된 것이면 남겨 현재 상태(✓)는 보이게 한다.
   const isPlanOptionOffered = (value, expired) => !expired || value === notificationPlanMode;
   const notificationPlanOptions = [
@@ -558,6 +568,16 @@ export function LessonJournalDetail({
         onReturnToExamPrepRoster={isExamPrepDailyJournalEnabled && isExamPrepLesson(lesson) && onToggleExamPrepDailyJournal
           ? () => onToggleExamPrepDailyJournal(lesson.lessonId, false)
           : undefined}
+        statusPills={(
+          <LessonJournalNotificationBar
+            checkoutMissingStudents={checkoutMissingStudents}
+            journalSaveMessage={journalSaveBarModel.message}
+            journalSaveState={journalSaveBarModel.saveState}
+            notificationPlanMode={notificationPlanMode}
+            notificationPlanSummaryText={notificationPlanSummaryText}
+            solapiReservationSyncStatus={solapiReservationSyncStatus}
+          />
+        )}
         studentCount={lessonStudents.length}
       />
 
@@ -813,14 +833,6 @@ export function LessonJournalDetail({
         )}
         reservationSyncStatus={solapiReservationSyncStatus}
         saveState={journalStickySaveState}
-        statusPills={(
-          <LessonJournalNotificationBar
-            checkoutMissingStudents={checkoutMissingStudents}
-            notificationPlanMode={notificationPlanMode}
-            notificationPlanSummaryText={notificationPlanSummaryText}
-            solapiReservationSyncStatus={solapiReservationSyncStatus}
-          />
-        )}
       />
 
       {commentModal ? (
