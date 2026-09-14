@@ -2,6 +2,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import {
+  alignSegmentsToItems,
   buildItemBoxes,
   checkCodeContinuity,
   estimateSkewDegrees,
@@ -130,5 +131,22 @@ const entries = buildPrintEntries({ book: wideBook, units: [], items: wideItems,
 assert.deepEqual(entries.map((entry) => entry.wide), [true, false, false]);
 assert.deepEqual(assignPrintColumns(entries), ["wide", "left", "right"]);
 assert.deepEqual(assignPrintColumns([{ wide: false }, { wide: true }, { wide: false }, { wide: false }]), ["left", "wide", "left", "right"]);
+
+// 해설 조각 ↔ 문항 정렬: 구역마다 번호가 1 부터 다시 시작하고, 못 읽은 번호(null)·오독·빠진 풀이·군더더기 조각이 섞여도 순서로 맞춘다.
+const locals = [1, 2, 3, 4, 1, 2, 3, 4, 5, 6, 1, 2, 3];
+const aligned = alignSegmentsToItems([1, 2, 3, 4, 1, null, 3, 4, 5, 6, 1, 2, 3], locals);
+assert.deepEqual(aligned.pairs.map(([, item]) => item), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+assert.equal(aligned.cost, 0.3);
+// 풀이 하나가 빠졌다(유형 확인 3 없음) → 그 문항만 비고 나머지는 제자리.
+const skipped = alignSegmentsToItems([1, 2, 3, 4, 1, 2, 4, 5, 6, 1, 2, 3], locals);
+assert.deepEqual(skipped.pairs.map(([, item]) => item), [0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12]);
+// 머리글의 외딴 숫자(72)가 조각으로 잡혔다 → 그 조각만 버린다.
+const spurious = alignSegmentsToItems([72, 1, 2, 3, 4, 1, 2, 3, 4, 5, 6, 1, 2, 3], locals);
+assert.deepEqual(spurious.pairs[0], [0, null]);
+assert.deepEqual(spurious.pairs.slice(1).map(([, item]) => item), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+// 해설 쪽 일부만 돌렸을 때 뒤쪽 문항은 비용 없이 남는다.
+const partial = alignSegmentsToItems([1, 2, 3, 4, 1, 2], locals);
+assert.deepEqual(partial.pairs.map(([, item]) => item), [0, 1, 2, 3, 4, 5]);
+assert.equal(partial.cost, 0);
 
 console.log("problem-bank scan segmenter: ok");

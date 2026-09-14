@@ -45,7 +45,18 @@ node scripts/problem-bank/ingest-scan-pdf.mjs --pdf "C:\Users\PC\Downloads\2025�
 - 검사: 접두 오독(26445)은 같은 책으로 받고, 책 순서 밖 번호(0805)는 `validation.dropped_codes` 로 버리며, 번호 연속성·flagged(`left_fallback`·`low_ocr_conf`·`too_short`)를 남긴다. 단원은 단원 시작 쪽 큰 제목 + 홀수 쪽 바닥글(번호가 이어질 때만 새 단원) 투표로 정하고, 대단원 종합문제는 `R01~03` 같은 묶음 단원으로 따로 둔다.
 - 필요: `winget install UB-Mannheim.TesseractOCR`(+ `%LOCALAPPDATA%\tessdata\kor.traineddata` — tessdata_fast. 없으면 구역·단원 이름 없이 코드만으로 진행). 공통수학1 178쪽 ≈ 8분.
 - 실측(공통수학1): 313문항 · 8소단원 + 종합문제 4 · 번호 연속 · 버린 코드 0 · flagged 1. 경계 규칙은 `src/domains/problems/scanPdfSegmenter.js`(`npm run test:problem-bank-scan-segmenter` 가 실제 OCR 토큰 픽스처로 검증).
-- 아직 안 되는 것: 정답·해설(책 뒤 「정답과 풀이」는 코드가 없고 구역별 01·02 로 번호가 다시 시작해 순서 대응이 필요), 유형편·고난도 판 레이아웃 확인.
+- 아직 안 되는 것: 유형편·고난도 판 레이아웃 확인.
+
+#### 스캔 교재의 정답·해설 (책 뒤 「정답과 풀이」)
+
+```powershell
+node scripts/problem-bank/ingest-scan-answers.mjs --pdf "C:\Users\PC\Downloads\2025년 EBS 올림포스 공통수학1 (46591)Marked.pdf" --out output\problem-bank\olympos-cm1
+```
+
+- `--out` 은 위 문항 패키지 폴더(manifest.json 필요). 해설 쪽은 문항 뒤 쪽(`pdf_page` 최댓값 + 1)부터 자동으로 잡고, 문항 코드가 있는 쪽·빠른정답표(한 줄에 번호 셋 이상)·MEMO 는 건너뛴다. 출력은 RPM 과 같은 `manifest-answers.json` + `answers/` + `solutions/` + `qa/solution-pNNN.jpg`.
+- 해설에는 문항 코드가 없고 구역마다 번호가 01 부터 다시 시작한다. 그래서 풀이 시작 배지(컬럼 왼쪽 여백의 굵은 9.5pt 이상 숫자)를 읽는 순서대로 모은 뒤 **문항 순서와 편집 거리 정렬**(`alignSegmentsToItems`: 번호 일치 0 · 못 읽음 0.3 · 오독 2 · 조각/문항 건너뜀 1.5)로 대응시킨다. 머리글의 외딴 숫자 같은 조각은 버려지고(`unmatched_segments`), 배지를 못 읽은 문항은 `missing` 에 남는다. 수행평가는 해설이 없어 대상에서 뺀다.
+- 풀이 상자는 배지 위 −3pt 부터 같은 컬럼 다음 배지·다음 색 띠(구역 상자·단원 머리)·컬럼 바닥 가운데 먼저 오는 것까지, 잉크로 조인다. 컬럼·쪽 맨 위에 배지 없이 이어지는 글은 직전 풀이에 이어 붙인다. 빠른정답은 각 풀이의 「답」 아이콘(5~10pt 검정 틀 안 흰 글자 · 네 귀퉁이 검정 — 채점 기준표의 ❶❷❸ 은 귀퉁이가 희어 제외)이 있는 줄을 오린다.
+- 실측(공통수학1): 아래 STATUS 참고. 못 읽은 배지는 `qa/solution-pNNN.jpg` 에서 상자가 없는 풀이로 보인다 — 그 문항은 해설 없이 등록되고, 다음 실행에서 OCR 규칙을 고친다.
 
 ### 1-2. 정답·해설 원천화 (로컬)
 
@@ -87,7 +98,7 @@ Supabase SQL: `supabase/20260912_problem_bank.sql` (SQL Editor 에서 1회 적�
 | 역할 | 파일 |
 |---|---|
 | 경계 규칙(순수) | `src/domains/problems/textPdfSegmenter.js`(텍스트) · `scanPdfSegmenter.js`(스캔·OCR 토큰) |
-| 원천화 CLI | `scripts/problem-bank/ingest-text-pdf.mjs`(문항) · `ingest-scan-pdf.mjs`(스캔 문항 · tesseract) · `ingest-answers.mjs`(정답·해설) · `pdfTools.mjs`(공용 렌더·잉크 헬퍼) |
+| 원천화 CLI | `scripts/problem-bank/ingest-text-pdf.mjs`(문항) · `ingest-scan-pdf.mjs`(스캔 문항 · tesseract) · `ingest-answers.mjs`(텍스트 정답·해설) · `ingest-scan-answers.mjs`(스캔 정답·해설) · `pdfTools.mjs`(공용 렌더·잉크·크롭·qa 헬퍼) |
 | DB 표 | `supabase/20260912_problem_bank.sql` · `20260913_problem_bank_answers.sql` · `src/shared/server/tenantScope.js` |
 | 서버 저장소·라우트 | `src/shared/server/problemBankStore.js` · `src/shared/server/problemBankRouteRegistry.js` (api/server.js 에서 주입) |
 | 화면 | `src/domains/problems/BookWrongAnswerBoard.jsx`(교재별·학생별 보드) · `ProblemBankCenter.jsx`(교재관리) · `WrongAnswerPrintSheet.jsx`(오답지) · `problemBankPptx.js`(PPT) · `problemBankModel.js` · `problemBankApi.js` · `problemBank.css` · 학생 앱 `src/domains/portals/StudentWrongAnswersTab.jsx` |
@@ -98,7 +109,7 @@ Supabase SQL: `supabase/20260912_problem_bank.sql` (SQL Editor 에서 1회 적�
 
 1. 운영 Supabase 에 SQL 적용 → RPM 패키지 등록 → 첫 인쇄본 확인 (사람 gate).
 2. 정답·해설은 됐다(RPM 644/644). 다른 교재는 해설 PDF 의 「답」 글리프·배너 문구가 다를 수 있어 `ANSWER_ICON`·`SOLUTION_BANNER_PATTERN` 을 교재별 프로파일로 뺄 것.
-3. 스캔 PDF 경로: 올림포스 공통수학1 문항은 됐다(1-1). 남은 것 — ① 공통수학2·유형편·고난도 6권을 같은 CLI 로 돌려 qa 확인 ② 책 뒤 「정답과 풀이」 연결(구역별 01·02 번호를 문항 코드 순서에 대응 + 「답」 상자 줄 오려 빠른정답) ③ 쎈(다른 코드 체계)은 별도 프로파일.
+3. 스캔 PDF 경로: 올림포스 공통수학1 문항·정답·해설은 됐다(1-1). 남은 것 — ① 공통수학2·유형편·고난도 6권을 같은 CLI 로 돌려 qa 확인 ② 해설 배지 OCR 누락(missing) 줄이기 ③ 쎈(다른 코드 체계)은 별도 프로파일.
 4. HWPX(EBS) 경로: 한글 → PDF(글자 레이어 유지)로 변환해 같은 CLI 로 처리.
 5. 경계 검수 화면에서 bbox 를 직접 고치는 편집기(지금은 CLI 재실행).
 6. 자료함 화면은 사이드바에서 빠졌고(`resources` 뷰 계약·포털 자료 공유 저장 계약은 유지) 필요하면 코드째 제거한다.

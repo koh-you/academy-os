@@ -344,3 +344,56 @@ export function checkCodeContinuity(numbers) {
   }
   return { gaps, duplicates, first: sorted[0] ?? null, last: sorted[sorted.length - 1] ?? null };
 }
+
+/**
+ * 풀이 조각(읽은 번호 목록) ↔ 문항(순번 목록) 편집 거리 정렬.
+ * @returns {{ cost: number, pairs: Array<[number, number|null]> }} 조각 index → 문항 index(건너뛴 조각은 null)
+ */
+export function alignSegmentsToItems(readNumbers, localNumbers, { unreadCost = 0.3, mismatchCost = 1, skipCost = 1.5 } = {}) {
+  const n = readNumbers.length;
+  const m = localNumbers.length;
+  const cost = Array.from({ length: n + 1 }, () => new Float64Array(m + 1));
+  const move = Array.from({ length: n + 1 }, () => new Uint8Array(m + 1));
+  for (let i = 1; i <= n; i += 1) {
+    cost[i][0] = i * skipCost;
+    move[i][0] = 1;
+  }
+  for (let j = 1; j <= m; j += 1) {
+    cost[0][j] = j * skipCost;
+    move[0][j] = 2;
+  }
+  for (let i = 1; i <= n; i += 1) {
+    for (let j = 1; j <= m; j += 1) {
+      const read = readNumbers[i - 1];
+      const matchCost = read === null ? unreadCost : read === localNumbers[j - 1] ? 0 : mismatchCost;
+      const options = [cost[i - 1][j - 1] + matchCost, cost[i - 1][j] + skipCost, cost[i][j - 1] + skipCost];
+      let best = 0;
+      if (options[1] < options[best]) best = 1;
+      if (options[2] < options[best]) best = 2;
+      cost[i][j] = options[best];
+      move[i][j] = best;
+    }
+  }
+  // 뒤쪽 문항이 남는 것(해설 쪽 일부만 돌렸을 때)은 비용 없이 둔다 — 마지막 조각까지의 최소 비용 열에서 되짚는다.
+  let endJ = m;
+  for (let j = 0; j <= m; j += 1) if (cost[n][j] < cost[n][endJ]) endJ = j;
+  const pairs = [];
+  let i = n;
+  let j = endJ;
+  while (i > 0 || j > 0) {
+    const step = move[i][j];
+    if (i > 0 && j > 0 && step === 0) {
+      pairs.push([i - 1, j - 1]);
+      i -= 1;
+      j -= 1;
+    } else if (i > 0 && (j === 0 || step === 1)) {
+      pairs.push([i - 1, null]);
+      i -= 1;
+    } else {
+      j -= 1;
+    }
+  }
+  pairs.reverse();
+  return { cost: Number(cost[n][endJ].toFixed(2)), pairs };
+}
+

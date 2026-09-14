@@ -561,7 +561,8 @@ async function main() {
       return { width: sw, height: sh };
     }
 
-    for (const box of boxes) {
+    // 구역 내 순번은 코드 순서로 센다(상자 목록은 y 순이라 2단 쪽에서 왼쪽·오른쪽이 섞인다).
+    for (const box of [...boxes].sort((a, b) => a.number.localeCompare(b.number))) {
       const itemId = `${bookId}-${box.number}`;
       const file = `items/${itemId}.jpg`;
       const { width, height } = await cropToFile(box, file);
@@ -627,6 +628,17 @@ async function main() {
     unit.item_number_to = own[blockEnd]?.number_label ?? "";
     unit.item_count = own.length;
   });
+  // 구역 내 순번은 단원 배정이 끝난 뒤 코드 순서로 다시 센다(단원 시작 쪽의 기본 유형 문항은 단원이 나중에 만들어져
+  // 앞 단원 번호를 이어받았을 수 있다).
+  const counters = new Map();
+  for (const item of [...items].sort((a, b) => a.number_sort - b.number_sort)) {
+    const section = item.tags.find((tag) => !["서술형"].includes(tag)) ?? "";
+    if (!section) continue;
+    const key = `${item.unit_index ?? -1}|${section}`;
+    const localNumber = (counters.get(key) || 0) + 1;
+    counters.set(key, localNumber);
+    item.type_label = `${section} ${String(localNumber).padStart(2, "0")}`;
+  }
   const continuity = checkCodeContinuity(items.map((item) => item.number_label));
   const validation = {
     count: items.length,

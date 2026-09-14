@@ -21,9 +21,20 @@
 
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { createCanvas } from "@napi-rs/canvas";
 import { checkNumberContinuity, detectBadgeHeight, segmentPage } from "../../src/domains/problems/textPdfSegmenter.js";
-import { findGutterX, inkBand, inkExtent, inkRightEdge, parseArgs, pdfjs, renderPage, toViewportTokens } from "./pdfTools.mjs";
+import {
+  cropToCanvas,
+  drawQa,
+  findGutterX,
+  inkBand,
+  inkExtent,
+  inkRightEdge,
+  parseArgs,
+  pdfjs,
+  renderPage,
+  toViewportTokens,
+  writeStacked
+} from "./pdfTools.mjs";
 
 const INGEST_VERSION = "answers-1.0";
 const SOLUTION_BANNER_PATTERN = /^본문\s*(?:p\.|\d)/;
@@ -42,49 +53,6 @@ async function loadPages(pdfPath) {
     page.cleanup();
   }
   return { doc, pages };
-}
-
-async function drawQa(canvas, pageWidth, pageHeight, boxes, filePath) {
-  const scale = 100 / 72;
-  const preview = createCanvas(Math.ceil(pageWidth * scale), Math.ceil(pageHeight * scale));
-  const context = preview.getContext("2d");
-  context.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, preview.width, preview.height);
-  context.lineWidth = 1.5;
-  context.font = "bold 11px sans-serif";
-  for (const { label, box, color = "#176e59" } of boxes) {
-    context.strokeStyle = color;
-    context.fillStyle = color;
-    context.strokeRect(box.x0 * scale, box.y0 * scale, (box.x1 - box.x0) * scale, (box.y1 - box.y0) * scale);
-    if (label) context.fillText(label, box.x0 * scale + 2, box.y0 * scale - 2);
-  }
-  await writeFile(filePath, await preview.encode("jpeg", 82));
-}
-
-function cropToCanvas(canvas, renderScale, box) {
-  const sx = Math.round(box.x0 * renderScale);
-  const sy = Math.round(box.y0 * renderScale);
-  const sw = Math.max(1, Math.round((box.x1 - box.x0) * renderScale));
-  const sh = Math.max(1, Math.round((box.y1 - box.y0) * renderScale));
-  const crop = createCanvas(sw, sh);
-  crop.getContext("2d").drawImage(canvas, sx, sy, sw, sh, 0, 0, sw, sh);
-  return crop;
-}
-
-/** 여러 조각을 세로로 이어 한 장으로 만든다(컬럼·쪽을 넘어가는 풀이). */
-async function writeStacked(parts, filePath, gapPx) {
-  const width = Math.max(...parts.map((part) => part.width));
-  const height = parts.reduce((sum, part) => sum + part.height, 0) + gapPx * (parts.length - 1);
-  const sheet = createCanvas(width, height);
-  const context = sheet.getContext("2d");
-  context.fillStyle = "#fff";
-  context.fillRect(0, 0, width, height);
-  let y = 0;
-  for (const part of parts) {
-    context.drawImage(part, 0, y);
-    y += part.height + gapPx;
-  }
-  await writeFile(filePath, await sheet.encode("jpeg", 88));
-  return { width, height };
 }
 
 /**
