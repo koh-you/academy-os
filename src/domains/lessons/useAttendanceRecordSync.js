@@ -118,6 +118,8 @@ export function useAttendanceRecordSync({
   setStatus,
   syncDate
 }) {
+  const createRealtimeSubscriptionRef = useRef(createRealtimeSubscription);
+  createRealtimeSubscriptionRef.current = createRealtimeSubscription;
   useEffect(() => {
     if (!enabled) return undefined;
 
@@ -144,16 +146,15 @@ export function useAttendanceRecordSync({
       windowTarget: window
     });
 
-    if (typeof createRealtimeSubscription !== "function") return startPolling();
+    if (typeof createRealtimeSubscriptionRef.current !== "function") return startPolling();
     return startAttendanceRealtimeLifecycle({
-      createSubscription: createRealtimeSubscription,
+      createSubscription: (options) => createRealtimeSubscriptionRef.current(options),
       documentTarget: document,
       onSourceRefresh: () => runSync(() => false),
       startPolling,
       windowTarget: window
     });
   }, [
-    createRealtimeSubscription,
     enabled,
     recordsRef,
     request,

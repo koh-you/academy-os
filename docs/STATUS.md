@@ -1,5 +1,12 @@
 # Academy OS Current Status
 
+## 2026-09-14 Supabase Realtime 전환 2단계 — 운영 활성화 대기
+
+- Render 서버가 Supabase의 테넌트 전용 private Broadcast를 구독하고, 인증된 교사 SSE 연결에는 행 내용 없이 `lesson_student_records` 변경 신호만 전달하도록 구현했다. 같은 테넌트의 여러 탭은 서버 구독 하나를 공유한다.
+- 브라우저는 기존 교사 bearer와 원장 view-as 헤더로 SSE를 연결한다. 구독 성공 뒤 7초 polling을 멈추고, 오류·종료·오프라인이면 즉시 polling으로 복귀하며 변경 신호마다 기존 인증 API 원천을 재조회한다. 키오스크는 이번 범위에서 기존 polling을 유지한다.
+- `INSERT`/`UPDATE`/`DELETE`를 모두 테넌트별로 전달하는 trigger SQL을 `supabase/20260914_lesson_student_records_realtime.sql`에 준비했다. 운영 SQL은 아직 적용하지 않았고, Render `SUPABASE_REALTIME_ENABLED`와 Vercel `VITE_ATTENDANCE_REALTIME_ENABLED`도 기본 OFF다.
+- fixture, `check:fast`(828/828·lint·build), `test:production`(308/308)을 통과했다. 활성화 후에는 두 교사 탭·재로그인·네트워크 복귀·API 원천 대조 운영 smoke가 남는다.
+
 ## 2026-09-14 Supabase Realtime 전환 1단계 — 안전한 fallback 경계
 
 - 현재 교사 화면과 출결 키오스크는 `lesson_student_records`를 날짜 범위 API로 7초마다 재조회한다. 클라이언트 Supabase SDK와 교사 bearer/RLS 구독 경로는 아직 없어 운영 Realtime은 활성화하지 않았다.

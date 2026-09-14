@@ -182,6 +182,7 @@ import { createExamAnalysisQuestionCountRouteRegistry } from "../src/shared/serv
 import { createExamAnalysisAiRouteRegistry } from "../src/shared/server/examAnalysisAiRouteRegistry.js";
 import { createAdminAiRouteRegistry } from "../src/shared/server/adminAiRouteRegistry.js";
 import { createAttendanceRouteRegistry } from "../src/shared/server/attendanceRouteRegistry.js"; import { createAttendanceRealtimeRouteRegistry } from "../src/shared/server/attendanceRealtimeRouteRegistry.js";
+import { createAttendanceSupabaseRealtimeProvider } from "../src/shared/server/attendanceSupabaseRealtimeProvider.js";
 import { createClassTemplateRouteRegistry } from "../src/shared/server/classTemplateRouteRegistry.js";
 import { createHomeworkRouteRegistry } from "../src/shared/server/homeworkRouteRegistry.js";
 import { createLessonRecordRouteRegistry } from "../src/shared/server/lessonRecordRouteRegistry.js";
@@ -459,7 +460,7 @@ const { dispatch: dispatchAttendanceRoute } = createAttendanceRouteRegistry({
   parseVersionedWriteRequest,
   readJsonBody,
   sendJson
-}); const { dispatch: dispatchAttendanceRealtimeRoute } = createAttendanceRealtimeRouteRegistry();
+}); const attendanceRealtimeProvider = createAttendanceSupabaseRealtimeProvider(); const { dispatch: dispatchAttendanceRealtimeRoute } = createAttendanceRealtimeRouteRegistry({ resolveCorsOrigin: (request) => getCorsOrigin(request, allowedOrigins), subscribeToAttendanceChanges: attendanceRealtimeProvider?.subscribeToAttendanceChanges });
 const { dispatch: dispatchClassTemplateRoute } = createClassTemplateRouteRegistry({
   listClassTemplates,
   sendJson

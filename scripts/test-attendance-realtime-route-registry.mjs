@@ -26,11 +26,13 @@ function createFixture({ auth = { kind: "teacher", tenantId: "tenant-a" }, date 
 
 let receivedScope;
 let onChange;
+let onStatus;
 let unsubscribeCount = 0;
 const fixture = createFixture({
   subscribe(scope) {
     receivedScope = scope;
     onChange = scope.onChange;
+    onStatus = scope.onStatus;
     return () => { unsubscribeCount += 1; };
   }
 });
@@ -41,10 +43,15 @@ assert.deepEqual(
   { date: receivedScope.date, tenantId: receivedScope.tenantId },
   { date: "2026-09-14", tenantId: "tenant-a" }
 );
+assert.doesNotMatch(fixture.response.body, /event: ready/);
+onStatus("SUBSCRIBED");
 assert.match(fixture.response.body, /event: ready/);
 onChange({ eventType: "UPDATE", record: { private_note: "must not leak" } });
 assert.match(fixture.response.body, /event: change/);
 assert.doesNotMatch(fixture.response.body, /private_note|must not leak|tenant-a/);
+onStatus("CHANNEL_ERROR");
+assert.match(fixture.response.body, /event: status/);
+assert.match(fixture.response.body, /CHANNEL_ERROR/);
 fixture.request.emit("close");
 assert.equal(unsubscribeCount, 1);
 

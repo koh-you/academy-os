@@ -7,6 +7,7 @@ function writeEvent(response, event, payload) {
 
 export function createAttendanceRealtimeRouteRegistry({
   heartbeatMs = 25_000,
+  resolveCorsOrigin = () => "*",
   subscribeToAttendanceChanges
 } = {}) {
   async function dispatch({ request, response, requestUrl }) {
@@ -31,11 +32,11 @@ export function createAttendanceRealtimeRouteRegistry({
 
     response.writeHead(200, {
       "Cache-Control": "no-cache, no-transform",
+      "Access-Control-Allow-Origin": resolveCorsOrigin(request),
       Connection: "keep-alive",
       "Content-Type": "text/event-stream; charset=utf-8",
       "X-Accel-Buffering": "no"
     });
-    writeEvent(response, "ready", { date, ok: true });
     const unsubscribe = await subscribeToAttendanceChanges({
       date,
       onChange(change = {}) {
@@ -43,6 +44,12 @@ export function createAttendanceRealtimeRouteRegistry({
           eventType: change.eventType,
           table: "lesson_student_records"
         });
+      },
+      onStatus(status) {
+        if (status === "SUBSCRIBED") writeEvent(response, "ready", { date, ok: true });
+        if (["CHANNEL_ERROR", "TIMED_OUT", "CLOSED"].includes(status)) {
+          writeEvent(response, "status", { status });
+        }
       },
       tenantId
     });

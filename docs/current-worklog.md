@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-09-14 Supabase Realtime 서버 중계 완성
+
+- Academy OS의 자체 교사 세션을 유지하기 위해 브라우저 직접 Supabase 구독 대신 `Supabase private Broadcast → Render → bearer 인증 SSE → 기존 API 재조회` 경로를 구현했다. service-role은 서버 밖으로 나가지 않고 SSE payload도 event/table 신호로 축소된다.
+- Postgres Changes의 DELETE 열 필터 제약을 피하도록 DB trigger가 `old/new.tenant_id`로 테넌트 topic을 정한다. SQL은 파일만 만들었고 운영 적용은 하지 않았다.
+- Supabase 장애, SSE HTTP 오류, 연결 종료, 오프라인에서는 7초 polling이 자동 복원된다. 구독 준비 전에도 polling을 유지한다. 여러 탭은 tenant별 서버 channel 하나를 공유하고 마지막 연결 종료 때 해제한다.
+- 운영 활성화 Gate: SQL Editor에서 준비 파일 실행 → Render `SUPABASE_REALTIME_ENABLED=true` 재배포 → Vercel Production `VITE_ATTENDANCE_REALTIME_ENABLED=true` 재배포 → 두 탭과 재로그인/네트워크 복귀 smoke.
+
 ## 2026-09-14 Supabase Realtime 안전 경계 1단계
 
 - 출결 동기화 hook에 선택적 Realtime 구독 어댑터 경계를 연결했다. 어댑터가 없으면 기존 7초 polling 동작은 그대로다.
