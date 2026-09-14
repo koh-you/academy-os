@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-09-14 Slack 실제 예약 검증 및 전날 예약 전환
+
+- Slack App `chat:write`, 비공개 채널 Bot 초대, Render Bot/채널/dispatch 환경변수를 설정하고 실제 미래 예약 1건이 지정 채널에 도착하는 것을 사람이 확인했다.
+- GitHub Actions를 KST 09:00 즉시 Webhook 호출에서 KST 22:30 다음 날 09:00 Slack Bot 예약 호출로 변경했다. repository secret `NOTIFICATION_DISPATCH_TOKEN`을 Render와 같은 값으로 갱신했으며, Render 즉시 cron과 동시 활성화하지 않는다. 기본 브랜치 병합 후 정기 실행이 활성화된다.
+- Render 프로젝트를 읽기 전용으로 확인한 결과 운영 resource는 API Web Service 1개뿐이며 Slack 즉시 cron은 생성되어 있지 않다. `render.yaml`에서도 중복 생성 가능성을 제거했다.
+- 실제 검증용 `2099-01-01` notification job 외 운영 데이터 변경은 없었다.
+
 ## 2026-09-13 수업일지 명시적 편집·수업 취소 위치 정리
 
 - 수업일지는 초기 읽기 모드와 항상 보이는 하단 바를 사용한다. 주 버튼은 `편집` → `변경 저장`으로 전환되고, 변경 없음/저장 성공 뒤 읽기 모드로 복귀하며 별도 “편집 중” 메시지는 표시하지 않는다.

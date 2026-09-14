@@ -1,8 +1,10 @@
-name: Send daily Slack schedule
+name: Reserve next-day Slack schedule
 
 on:
   schedule:
-    - cron: "0 0 * * *"
+    # KST 22:30. GitHub schedule delays are harmless because Slack still receives
+    # the reservation roughly 10.5 hours before the requested KST 09:00 delivery.
+    - cron: "30 13 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -10,18 +12,28 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  send:
+  reserve:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - name: Send today schedule summary
+      - name: Reserve tomorrow schedule summary
         env:
           ACADEMY_API_URL: https://koh-you-math-academy-os-api.onrender.com
+          NOTIFICATION_DISPATCH_TOKEN: ${{ secrets.NOTIFICATION_DISPATCH_TOKEN }}
         run: |
           set -euo pipefail
+
+          if [[ -z "${NOTIFICATION_DISPATCH_TOKEN}" ]]; then
+            echo "NOTIFICATION_DISPATCH_TOKEN repository secret is required." >&2
+            exit 1
+          fi
+
+          target_date="$(TZ=Asia/Seoul date -d tomorrow +%F)"
+          scheduled_at="${target_date}T00:00:00.000Z"
 
           curl --fail-with-body \
             -X POST \
             -H "Content-Type: application/json" \
-            -d '{"notifyEmpty":true}' \
-            "${ACADEMY_API_URL%/}/api/notifications/slack-today-schedule"
+            -H "X-Dispatch-Token: ${NOTIFICATION_DISPATCH_TOKEN}" \
+            --data "{\"date\":\"${target_date}\",\"scheduledAt\":\"${scheduled_at}\",\"notifyEmpty\":true}" \
+            "${ACADEMY_API_URL%/}/api/notifications/slack-today-schedule/reserve"

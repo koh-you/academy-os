@@ -33,12 +33,3 @@ services:
         value: "false"
       - key: NOTIFICATION_DISPATCH_LIMIT
         value: "50"
-  - type: cron
-    name: koh-you-math-academy-os-slack-daily-schedule
-    env: node
-    schedule: "0 0 * * *"
-    buildCommand: npm install
-    startCommand: npm run slack:daily-schedule
-    envVars:
-      - key: ACADEMY_API_URL
-        value: https://koh-you-math-academy-os-api.onrender.com
