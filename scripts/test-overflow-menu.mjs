@@ -51,6 +51,14 @@ assert.ok(menuSource.includes("if (items.length === 0) return null;"));
 assert.ok(menuSource.includes('"iconButton", "overflowMenuTrigger"'));
 assert.ok(menuCss.includes("min-height: var(--academy-touch-target, 44px)"));
 
+// 2026-09-14 · 트리거 글리프(기본 ⋯, 세로 ⋮ 가능)와 여는 방향(기본 아래, 화면 아래 고정바에서는 위)을 prop 으로 받는다.
+assert.ok(menuSource.includes('icon = "⋯"'));
+assert.ok(menuSource.includes('<span aria-hidden="true">{icon}</span>'));
+assert.ok(menuSource.includes('placement = "bottom"'));
+assert.ok(menuSource.includes('placement === "top" ? "overflowMenuList-top" : ""'));
+assert.ok(menuCss.includes(".overflowMenuList-top"));
+assert.ok(menuCss.includes("bottom: calc(100% + 4px)"));
+
 // 헤드리스 계약: 상태·ARIA 는 컴포넌트가 소유하고 스타일은 className 으로 주입한다.
 for (const banned of ["fetch(", "postJson", "/api/", "localStorage"]) {
   assert.equal(menuSource.includes(banned), false, `overflow menu must not own ${banned}`);

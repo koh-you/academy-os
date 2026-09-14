@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import "./OverflowMenu.css";
 
-export function OverflowMenu({ className = "", items = [], label, triggerClassName = "" }) {
+export function OverflowMenu({ className = "", icon = "⋯", items = [], label, placement = "bottom", triggerClassName = "" }) {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const containerRef = useRef(null);
@@ -97,10 +97,16 @@ export function OverflowMenu({ className = "", items = [], label, triggerClassNa
         ref={triggerRef}
         type="button"
       >
-        <span aria-hidden="true">⋯</span>
+        <span aria-hidden="true">{icon}</span>
       </button>
       {open ? (
-        <div aria-label={label} className="overflowMenuList" id={menuId} onKeyDown={handleMenuKeyDown} role="menu">
+        <div
+          aria-label={label}
+          className={["overflowMenuList", placement === "top" ? "overflowMenuList-top" : ""].filter(Boolean).join(" ")}
+          id={menuId}
+          onKeyDown={handleMenuKeyDown}
+          role="menu"
+        >
           {items.map((item, index) => (
             <button
               className={["overflowMenuItem", item.tone === "danger" ? "overflowMenuItem-danger" : ""].filter(Boolean).join(" ")}

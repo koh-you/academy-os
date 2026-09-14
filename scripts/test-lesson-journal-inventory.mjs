@@ -419,11 +419,11 @@ for (const extractedHeaderContract of [
     `missing extracted 17B-1 contract: ${extractedHeaderContract}`
   );
 }
-// 2026-09-12 · 하단바의 수업 작업은 "수업 수정"만 담당하고, 파괴적 취소는 수정 모달로 옮겼다.
-// 일반 수업은 기존 중첩 확인 모달, 자동 생성 수업은 즉시 제거 전에 native confirm을 거친다.
+// 2026-09-14 · 하단바에는 알림톡 예약·편집(주 액션)·⋮ 메뉴만 남긴다. "수업 수정"은 ⋮ 메뉴 항목이다.
+// 파괴적 취소는 수정 모달 안에 있다(일반 수업은 중첩 확인 모달, 자동 생성 수업은 native confirm).
 for (const bottomBarLessonContract of [
-  "lessonActions={(",
-  "onClick={() => onEditLesson(lesson)}"
+  "menuItems={journalMenuItems}",
+  'label: "수업 수정", onSelect: () => onEditLesson(lesson)'
 ]) {
   assert.ok(journalSource.includes(bottomBarLessonContract), `missing bottom bar lesson contract: ${bottomBarLessonContract}`);
 }
@@ -505,17 +505,23 @@ for (const removedNotificationBarAction of ["<button", "<select", "수정 시작
     `notification bar must not keep ${removedNotificationBarAction}`
   );
 }
+// 2026-09-14 · 알림톡 예약 버튼은 하단바에 상시 노출(업데이트 필요 시 danger 톤 + "알림톡 예약 업데이트").
+// 예약 설정·예약 확인·발송 결과는 ⋮ 메뉴 항목으로 접었다. 예약 설정은 select 대신 옵션마다 항목이고 현재 선택은 ✓.
 for (const bottomBarNotificationContract of [
-  "notificationActions={(",
-  "onUpdateLessonNotificationPlan?.(lesson.lessonId, event.target.value)",
-  "onClick={refreshSolapiSendResults}",
+  "reservationAction={(",
+  'className={solapiApplyButtonTone === "danger" ? "dangerSoftButton" : "softButton"}',
   "onClick={applySolapiReservationPlan}",
   "disabled={!canApplySolapiReservation}",
-  "notificationBarModel.showRefreshAction",
-  "notificationBarModel.showApplyAction"
+  "const notificationPlanOptions = [",
+  "onSelect: () => onUpdateLessonNotificationPlan?.(lesson.lessonId, option.value)",
+  'option.value === notificationPlanMode ? "✓ " : ""',
+  "notificationBarModel.showRefreshAction && canRefreshSolapiResults",
+  "onSelect: refreshSolapiSendResults",
+  'label: "예약 확인"'
 ]) {
   assert.ok(journalSource.includes(bottomBarNotificationContract), `missing bottom bar notification contract: ${bottomBarNotificationContract}`);
 }
+assert.ok(!journalSource.includes('<select'), "lesson journal bottom bar must not keep the plan select");
 assert.ok(
   journalSource.includes("<LessonJournalReservationModal"),
   "LessonJournalDetail must compose the extracted reservation modal"

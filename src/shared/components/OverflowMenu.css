@@ -22,6 +22,12 @@
   z-index: 30;
 }
 
+/* 화면 아래에 붙은 고정바에서는 위로 연다. 아래로 열면 모달·뷰포트 밖으로 잘린다. */
+.overflowMenuList-top {
+  bottom: calc(100% + 4px);
+  top: auto;
+}
+
 .overflowMenuItem {
   background: transparent;
   border: 0;

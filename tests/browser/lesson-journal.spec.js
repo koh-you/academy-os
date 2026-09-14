@@ -1135,7 +1135,9 @@ test("individual comment send button always sends immediately regardless of the 
   const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
   await expect(lessonJournal).toBeVisible();
 
-  await lessonJournal.getByLabel("알림톡 예약 설정").selectOption("nextDay11am");
+  // 예약 설정은 하단바 ⋮ 메뉴 항목이다.
+  await lessonJournal.getByRole("button", { name: "수업일지 추가 작업" }).click();
+  await page.getByRole("menuitem", { name: /^예약 설정 · 다음날 11시/ }).click();
 
   await lessonJournal.getByRole("button", { name: "학부모 알림톡" }).first().click();
   const alimtalkModal = page.getByRole("dialog", { name: /학부모 알림톡/ });
@@ -1405,27 +1407,51 @@ test("lesson journal bottom bar groups lesson, notification, and save actions wh
   await page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ }).getByRole("button", { name: /월 경계 연동반/ }).click();
   const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
 
-  // 상단: 발송 상태 pill 만 있고 조작 버튼·select 는 없다.
+  // 상단: 수업일지 저장 상태 배지 + 발송 상태 pill 만. "발송 상태" 라벨 텍스트와 조작 버튼·select 는 없다.
   const statusPanel = lessonJournal.getByRole("region", { name: "알림톡 상태" });
   await expect(statusPanel).toBeVisible();
+  await expect(statusPanel.getByRole("status")).toContainText("수업일지 · 저장 전");
+  await expect(statusPanel.getByText("발송 상태", { exact: true })).toHaveCount(0);
   await expect(statusPanel.locator("button, select")).toHaveCount(0);
   await expect(lessonJournal.getByRole("button", { name: "수업 취소 처리" })).toHaveCount(0);
 
-  // 하단 고정바: 수업 수정 / 알림톡 작업 / 편집 세 덩어리. 수업 취소는 이곳에 없다.
+  // 하단 고정바: [알림톡 예약] [편집] [⋮] 만. 상태 배지는 상단으로 올라가 여기엔 없다.
   const saveBar = lessonJournal.getByRole("complementary", { name: "수업일지 하단 고정 저장 바" });
-  const lessonGroup = saveBar.getByRole("group", { name: "수업 작업" });
-  const notificationGroup = saveBar.getByRole("group", { name: "알림톡 작업" });
-  await expect(lessonGroup.getByRole("button", { name: "수업 수정" })).toBeVisible();
-  await expect(saveBar.getByRole("button", { name: "수업 취소", exact: true })).toHaveCount(0);
-  await expect(notificationGroup.getByLabel("알림톡 예약 설정")).toBeVisible();
-  await expect(notificationGroup.getByRole("button", { name: "예약 확인" })).toBeVisible();
+  await expect(saveBar.getByRole("status")).toBeHidden();
+  await expect(saveBar.getByText("편집을 누르면")).toHaveCount(0);
+  await expect(saveBar.getByRole("button", { name: /^알림톡 예약/ })).toBeVisible();
   await expect(saveBar.getByRole("button", { name: "편집" })).toBeVisible();
+  const menuTrigger = saveBar.getByRole("button", { name: "수업일지 추가 작업" });
+  await expect(menuTrigger).toBeVisible();
+  await expect(menuTrigger).toHaveText("⋮");
+  for (const removed of ["수업 수정", "예약 확인", "수업 취소"]) {
+    await expect(saveBar.getByRole("button", { name: removed, exact: true })).toHaveCount(0);
+  }
+  await expect(saveBar.locator("select")).toHaveCount(0);
+
+  // ⋮ 는 가장 오른쪽이다.
+  const [editBox, menuBox] = await Promise.all([
+    saveBar.getByRole("button", { name: "편집" }).boundingBox(),
+    menuTrigger.boundingBox()
+  ]);
+  expect(menuBox?.x).toBeGreaterThan(editBox?.x ?? 0);
+
+  // ⋮ 안: 수업 수정 · 예약 확인 · 예약 설정 옵션들(현재 선택 ✓).
+  await menuTrigger.click();
+  await expect(page.getByRole("menuitem", { name: "수업 수정" })).toBeVisible();
+  await expect(page.getByRole("menuitem", { name: "예약 확인" })).toBeVisible();
+  await expect(page.getByRole("menuitem", { name: /^✓ 예약 설정 · / })).toHaveCount(1);
+  await expect(page.getByRole("menuitem", { name: /^예약 설정 · 알림톡 없음$/ })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("menuitem")).toHaveCount(0);
+  await expect(lessonJournal).toBeVisible();
 
   // 읽기 모드에서는 입력칸이 없고, 편집을 누르면 같은 주 액션 자리가 변경 저장으로 바뀐다.
   await expect(lessonJournal.getByLabel(/강의 교재$/).first()).toHaveCount(0);
 
   // 수업 취소는 수업 수정 모달 안에 있고, 일반 수업은 기존 확인 모달을 그 위에 띄운다.
-  await lessonGroup.getByRole("button", { name: "수업 수정" }).click();
+  await menuTrigger.click();
+  await page.getByRole("menuitem", { name: "수업 수정" }).click();
   const editModal = page.getByRole("dialog", { name: "수업 수정" });
   await expect(editModal.getByRole("button", { name: "수업 취소", exact: true })).toBeVisible();
   await editModal.getByRole("button", { name: "수업 취소", exact: true }).click();
@@ -1442,7 +1468,8 @@ test("lesson journal bottom bar groups lesson, notification, and save actions wh
   await expect(lessonJournal.getByLabel(/강의 교재$/).first()).toBeEnabled();
 
   // 취소 확정 뒤에는 수업 수정 창뿐 아니라 그 아래 수업일지도 함께 닫힌다.
-  await lessonGroup.getByRole("button", { name: "수업 수정" }).click();
+  await menuTrigger.click();
+  await page.getByRole("menuitem", { name: "수업 수정" }).click();
   const reopenedEditModal = page.getByRole("dialog", { name: "수업 수정" });
   await reopenedEditModal.getByRole("button", { name: "수업 취소", exact: true }).click();
   const reopenedConfirmDialog = page.getByRole("dialog", { name: "수업 취소 확인" });

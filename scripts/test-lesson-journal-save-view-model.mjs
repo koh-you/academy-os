@@ -10,7 +10,8 @@ assert.deepEqual(createLessonJournalSaveViewModel(), {
   lessonJournalSaveStatus: { label: "", tone: "idle" },
   makeupTaskDraftCount: 0,
   recordDraftCount: 0,
-  stickySaveMessage: "편집을 누르면 학생별 기록을 고칠 수 있습니다.",
+  // 2026-09-14 · 읽기 모드 안내 문구는 없앴다. 상태 배지("저장 전")만으로 충분하다.
+  stickySaveMessage: "",
   stickySaveState: "idle"
 });
 

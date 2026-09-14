@@ -1,6 +1,14 @@
-/* 수업일지 하단 고정바의 액션 그룹. 성격이 다른 버튼(수업 자체 / 알림톡 / 저장)을
-   한 덩어리로 붙이지 않고 옅은 세로 구분선으로 나눈다. App.css 가 파일 크기 상한에
-   걸려 있어 도메인 CSS 로 둔다. */
+/* 수업일지 하단 고정바. 상태 배지는 상단 발송 상태 줄로 올렸으므로 여기서는 숨기고
+   액션(⋯ 메뉴 · 알림톡 예약 · 편집/변경 저장)만 오른쪽에 둔다.
+   App.css 가 파일 크기 상한에 걸려 있어 도메인 CSS 로 둔다. */
+
+.stickySaveBar.lessonJournalStickySaveBar {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.lessonJournalStickySaveBar .stickySaveBarStatus {
+  display: none;
+}
 
 .lessonJournalStickySaveBar .stickySaveBarActions {
   flex-wrap: wrap;
@@ -8,18 +16,23 @@
   row-gap: 8px;
 }
 
-.lessonJournalBarGroup {
-  align-items: center;
-  border-right: 1px solid var(--status-neutral-border, #e2e8f0);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding-right: 12px;
+/* 상단 발송 상태 줄에 들어간 수업일지 저장 상태. pill 들과 같은 줄에 놓인다. */
+.lessonNotificationStatusRow .lessonJournalSaveStatusMessage {
+  color: var(--academy-text-strong, #475569);
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-@media (max-width: 720px) {
-  .lessonJournalBarGroup {
-    border-right: 0;
-    padding-right: 0;
+@media (max-width: 640px) {
+  .lessonJournalStickySaveBar .stickySaveBarActions {
+    width: auto;
+  }
+
+  .lessonJournalStickySaveBar .stickySaveBarActions button {
+    width: auto;
   }
 }
