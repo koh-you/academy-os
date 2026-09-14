@@ -571,7 +571,6 @@ export function LessonJournalDetail({
         statusPills={(
           <LessonJournalNotificationBar
             checkoutMissingStudents={checkoutMissingStudents}
-            journalSaveMessage={journalSaveBarModel.message}
             journalSaveState={journalSaveBarModel.saveState}
             notificationPlanMode={notificationPlanMode}
             notificationPlanSummaryText={notificationPlanSummaryText}

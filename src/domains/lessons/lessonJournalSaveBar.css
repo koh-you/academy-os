@@ -26,16 +26,6 @@
   row-gap: 6px;
 }
 
-.lessonJournalHeader .lessonJournalSaveStatusMessage {
-  color: var(--academy-text-strong, #475569);
-  font-size: 12px;
-  font-weight: 700;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 @media (max-width: 640px) {
   .lessonJournalStickySaveBar .stickySaveBarActions {
     width: auto;
