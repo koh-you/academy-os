@@ -17,6 +17,15 @@ latex-bank/
   <책>/정독/*.md            정독 자산(프로토타입 스키마 v2.0). 프로토타입 폴더가 저장소에 들어오면 bank/ 로 옮긴다
 ```
 
+## 여러 단원 한 책 (2026-09-15)
+
+`items.json` 은 `units: [{ code, title, pages, groups }]` 로 단원을 여러 개 둔다(1단원 형식 `unit` + `groups` 도 그대로 읽힌다). `build.mjs` 는 단원마다 새 쪽에서 `\dmchapter` 로 시작하고 정답 쪽도 단원별로 나눈다. 문항 크롭 패키지는 `ingest-scan-badges.mjs --pages 2-54 --unit-pages "2-15,16-32,33-54"` 처럼 한 번에 만들어 두 번째 단원부터 id·크롭이 그대로 이어진다(문항 id 는 결정적이라 1단원 104문 id·상자가 그대로 유지된다).
+
+- 전사 규약: `ssen-basic-cm2/전사-가이드.md` (필드·표기·그림·그룹 id `U<단원>-P/T/R`).
+- 배치 검사: `node scripts/latex-bank/check-batch.mjs <batch.json>` — 그룹+문항 일부만 임시 책(`latex-bank/_batch-*/`)으로 조판해 오류·Overfull 을 본다(병합 전 확인용).
+- 그림 크롭: `node scripts/latex-bank/crop-figure.mjs --pdf … --page N --item x0,y0,x1,y1 --rel x0,y0,x1,y1 --out figures/fig-<id>.jpg`.
+- `--export` 는 `type_label` 을 전사본 그룹 section 으로 덮어쓴다(스캔 OCR 라벨은 회색 유형 쪽에서 어긋난다).
+
 ## 흐름
 
 ```

@@ -249,6 +249,8 @@ ${group.passage ? `\\dmpassage{${group.passage}}` : ""}${group.figure ? `\\begin
           exported.push({
             ...source,
             regions: [{ kind: "body", position: 0, pdf_page: body?.pdf_page ?? null, bbox_normalized: body?.bbox_normalized ?? null, file, width: typeset.width, height: typeset.height }],
+            // 구역·유형 라벨은 사람이 확정한 전사본(그룹 section)이 원천이다. 스캔 OCR 이 읽은 라벨은 회색 유형 쪽에서 자주 어긋난다.
+            type_label: group.section,
             has_shared_passage: false,
             review_note: [source.review_note, `latex 조판본(latex-bank/${path.basename(dir)}/items/${id}.tex)`].filter(Boolean).join(" · ")
           });
