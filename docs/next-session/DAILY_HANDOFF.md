@@ -15,6 +15,18 @@
 - 다음: ① 「정답과 풀이」(PDF 112쪽~) 연결 — 코드가 없고 구역별 01·02 로 번호가 다시 시작하므로 풀이 시작 배지를 순서대로 문항 코드에 대응 + 「답」 상자 줄을 빠른정답으로 오림 ② 공통수학2·유형편·고난도 6권 일괄 실행(권당 8~12분) 후 qa 확인.
 - 정답·해설도 같은 폴더에 들어 있다(해설 265/281 · 답 236). 등록 뒤 오답지에서 빠른정답·해설을 켜 확인. 해설이 빠진 16문항(0076·0082·0083·0113·0119·0142·0145·0146·0149·0153·0154·0229·0234·0235·0260·0006)은 `qa/solution-pNNN.jpg` 에서 상자 없는 풀이로 보인다 — 배지 OCR 누락이라 다음 실행에서 규칙을 보강한다.
 
+## 2026-09-15 Realtime 운영 transport 진단
+
+- 새 테스트 학생·수업의 두 탭 smoke에서 API 저장과 8초 polling 반영은 성공했지만 즉시 반영은 실패했다. 따라서 Realtime 완료가 아니며 polling 안전망만 운영 검증됐다.
+- Vercel Realtime flag는 실제 배포 bundle에서 ON이다. Render provider에 개인정보 없는 연결·수신 진단 로그를 추가했으므로 배포 후 같은 smoke를 반복하고 `[attendance-realtime]`의 `listener_added → channel_status → broadcast_received` 순서를 확인한다.
+- 검증용 수업·학생은 활성 목록에서 정리됐다. fixture·lint·build·production 308/308 통과.
+
+## 2026-09-15 Realtime fallback 보강
+
+- 운영 두 탭 smoke에서 DB/API 저장은 확인됐으나 `SUBSCRIBED` 뒤 event가 오지 않으면서 polling도 멈추는 결함을 재현했다. 구독 상태와 무관하게 7초 polling을 유지하도록 수정했고 Realtime event가 오면 즉시 API 재조회하는 경로는 그대로다.
+- 관련 fixture·runtime lint·build·production 308/308 통과. 운영 테스트 수업은 7일 복구 가능 취소 완료. 테스트 학생은 영구 삭제 UI가 없어 활성 목록에 남아 있으며, `퇴원 처리`로 대신하지 않았다.
+- 배포 뒤 확인 기준: 두 탭에서 출결 저장 시 event가 정상이라면 즉시, event가 실패해도 7초 이내 두 번째 탭이 API 원천과 일치해야 한다.
+
 ## 2026-09-14 Supabase Realtime 활성화 뒤 최종 smoke
 
 - main `69f1e1ba`, Supabase tenant Broadcast trigger(INSERT/UPDATE/DELETE), Render/Vercel 양쪽 feature flag 및 재배포까지 완료했다. 로그인 교사 화면의 기존 API 원천 로드는 정상이다.

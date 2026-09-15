@@ -15,6 +15,18 @@ eview` 로 전사 확정, `answer_source` 「계산」 15문의 답을 답지와
 - 검증: `test:problem-bank-scan-segmenter`(실제 OCR 토큰 픽스처), `check:fast` 828/828·lint·build. **사람 Gate**: 바탕화면 `문제은행-패키지\올림포스-공통수학1` 의 `qa/` 확인 → 교재관리 › 패키지 등록. 정답·해설(책 뒤 「정답과 풀이」)과 나머지 6권은 다음 작업.
 - 정답·해설(`scripts/problem-bank/ingest-scan-answers.mjs`): 책 뒤 「정답과 풀이」에서 풀이 시작 배지를 순서대로 읽어 문항 코드에 편집 거리 정렬로 대응, 「답」 아이콘 줄(견본 상관 확인)을 빠른정답으로 오림. 공통수학1: 해설 265/281(수행평가 32 제외) · 답 줄 236 · 번호 불일치 2(flagged) · 배지 못 읽은 문항 16. 패키지 폴더 하나로 문항·정답·해설이 같이 등록된다(바탕화면 `문제은행-패키지\올림포스-공통수학1` 갱신).
 
+## 2026-09-15 Supabase Realtime 운영 이벤트 진단
+
+- 새 테스트 학생·수업의 출결을 한 탭에서 `저장만` 실행했다. Supabase/API 저장과 다른 탭의 약 8초 polling 반영은 성공했지만 즉시 반영은 실패해, Realtime 전환은 아직 완료로 판정하지 않는다.
+- 배포 프론트 bundle의 Realtime flag 활성화는 확인했다. 다음 왕복에서 Supabase channel 연결 상태와 Broadcast 수신 여부를 분리할 수 있도록 서버에 tenant·행 payload 없는 구조화 진단 로그를 추가했다.
+- provider fixture, runtime lint, build, `test:production`(308/308)을 통과했다. 검증용 수업과 학생은 운영 활성 목록에서 정리된 것을 확인했다.
+
+## 2026-09-15 Supabase Realtime polling 안전망 보강
+
+- 운영 두 탭 smoke에서 출결 저장은 Supabase/API 원천에 정상 반영됐지만, 두 번째 탭은 새로고침 전까지 갱신되지 않았다. Realtime transport가 `SUBSCRIBED`만 보고 7초 polling을 중지해 event 전달 실패까지 함께 가린 것이 원인이었다.
+- Realtime 즉시 갱신 경로는 유지하면서 교사 화면의 7초 polling을 상시 안전망으로 남겼다. 구독 연결·event 전달이 조용히 실패해도 다음 polling에서 API 원천을 다시 읽는다.
+- 가상 lifecycle·SSE·provider 테스트, runtime lint, build, `test:production`(308/308)을 통과했다. 운영 검증용 수업은 7일 복구 가능한 취소 상태로 정리했다. 테스트 학생은 UI가 영구 삭제 대신 `퇴원 처리`만 제공해 의미를 임의로 바꾸지 않고 활성 상태로 남겼다.
+
 ## 2026-09-14 Supabase Realtime 운영 활성화
 
 - PR #336을 main(`69f1e1ba`)에 병합했다. Supabase 운영 DB에 tenant private Broadcast trigger를 적용했고 조회 결과 `INSERT`/`UPDATE`/`DELETE` 3개 이벤트 등록을 확인했다.
