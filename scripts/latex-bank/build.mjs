@@ -37,6 +37,22 @@ async function findXelatex() {
 
 const CIRCLED = ["①", "②", "③", "④", "⑤"];
 
+/**
+ * items.json 의 단원 목록. 여러 단원을 한 책으로 둘 때는 `units: [{ code, title, groups }]`,
+ * 단원 하나짜리(1단원 시범 형식)는 `unit: "01 평면좌표"` + `groups` 를 그대로 받는다.
+ * @returns {{ code: string, title: string, label: string, groups: object[] }[]}
+ */
+function bankUnits(bank) {
+  const parse = (label) => {
+    const match = String(label).match(/^(\d{2})\s*(.*)$/);
+    return { code: match ? match[1] : "", title: match ? match[2] : String(label), label: String(label) };
+  };
+  if (Array.isArray(bank.units)) {
+    return bank.units.map((unit) => ({ ...parse(unit.code && unit.title ? `${unit.code} ${unit.title}` : unit.unit ?? unit.title), groups: unit.groups ?? [] }));
+  }
+  return [{ ...parse(bank.unit), groups: bank.groups ?? [] }];
+}
+
 /** id 「12-13」 → 책에 찍힌 문항 번호 13. */
 const bookNumber = (id) => Number(id.split("-")[1]);
 
@@ -115,14 +131,16 @@ async function main() {
   await mkdir(path.join(dir, "build"), { recursive: true });
 
   // 1) items/*.tex (원천 items.json 에서)
-  const orderedIds = bank.groups.flatMap((group) => group.items);
-  for (const group of bank.groups) {
+  const units = bankUnits(bank);
+  const unitGroups = units.flatMap((unit) => unit.groups.map((group) => ({ unit, group })));
+  const orderedIds = unitGroups.flatMap(({ group }) => group.items);
+  for (const { unit, group } of unitGroups) {
     for (const id of group.items) {
       const item = bank.items[id];
       if (!item) throw new Error(`items.json 에 ${id} 가 없습니다.`);
       const header = [
         `% id: ${id}`,
-        `% book: ${bank.book} · ${bank.unit}`,
+        `% book: ${bank.book} · ${unit.label}`,
         `% section: ${group.section}`,
         group.passage ? `% passage: ${group.passage}` : null,
         `% figure: ${item.figure ?? group.figure ?? "none"}`,
@@ -142,36 +160,44 @@ async function main() {
 % 문항 전사용 보조 매크로(dm-editorial 매크로를 덮어쓰지 않는다)
 \\newcommand{\\pt}[1]{\\mathrm{#1}}
 \\newcommand{\\seg}[1]{\\overline{\\mathrm{#1}}}
-\\newcommand{\\blank}[1][1.5em]{\\framebox[#1]{\\rule{0pt}{1.4ex}}}
+\\newcommand{\\blank}[1][1.5em]{\\raisebox{-0.15ex}{\\framebox[#1]{\\rule{0pt}{1.4ex}}}}
 \\newcommand{\\dmhint}[1]{\\par\\smallskip\\begin{tcolorbox}[enhanced,colback=dm-navylight!60,colframe=dm-navy!40,boxrule=0.3pt,sharp corners,left=3mm,right=3mm,top=2mm,bottom=2mm,boxsep=0mm]\\small\\setlength{\\parskip}{1mm}#1\\end{tcolorbox}}
 % 구역 제목·공통 지시문은 뒤에 문항 한 개는 붙을 자리가 있어야 찍는다(쪽 끝 고아 방지).
-\\newcommand{\\dmsection}[1]{\\par\\needspace{7\\baselineskip}\\vspace{3mm}\\noindent{\\color{dm-navy}\\hrule height 0.6pt}\\vspace{1.2mm}\\noindent{\\dmheadingfont\\bfseries\\fontsize{11}{13}\\selectfont\\color{dm-navy}#1}\\par\\vspace{2mm}}
-\\newcommand{\\dmpassage}[1]{\\par\\needspace{6\\baselineskip}\\medskip\\noindent{\\dmheadingfont\\bfseries\\color{dm-navy}#1}\\par\\smallskip}
+\\newcommand{\\dmsection}[1]{\\par\\needspace{10\\baselineskip}\\vspace{3mm}\\noindent{\\color{dm-navy}\\hrule height 0.6pt}\\vspace{1.2mm}\\noindent{\\dmheadingfont\\bfseries\\fontsize{11}{13}\\selectfont\\color{dm-navy}#1}\\par\\vspace{2mm}}
+% 지시문 뒤 4mm: 다음 문항의 출처 배지가 5mm 위로 올라오므로 긴 지시문 줄과 겹치지 않게 한다.
+\\newcommand{\\dmpassage}[1]{\\par\\needspace{8\\baselineskip}\\medskip\\noindent{\\dmheadingfont\\bfseries\\color{dm-navy}#1}\\par\\vspace{4mm}}
 % 줄바꿈 규약(프로토타입 mathbook-problems.sty · style.sty 와 같음): 수식 안에서는 줄을 바꾸지 않고, 「(단, …)」·「x축」은 한 덩어리.
 \\binoppenalty=10000 \\relpenalty=10000
 \\newcommand{\\nob}[1]{\\mbox{#1}}
 \\newcommand{\\cond}[1]{\\mbox{(단, #1)}}
 \\raggedbottom
-\\renewcommand{\\dmchapunit}{${bank.unit}}
 `;
-  const lines = [preamble, "\\begin{document}", `\\dmchapter{${bank.unit.split(" ")[0]}}{${bank.unit.split(" ").slice(1).join(" ")}}`, "\\setcounter{dmproblemcount}{0}"];
-  let lastSection = "";
-  for (const group of bank.groups) {
-    if (group.section !== lastSection) {
-      lines.push(`\\dmsection{${group.section}}`);
-      lastSection = group.section;
+  const lines = [preamble, "\\begin{document}"];
+  // 단원마다 새 쪽에서 장 머리(\\dmchapter)로 시작하고 마스트헤드 문구(\\dmchapunit)도 단원별로 바꾼다.
+  for (const [unitIndex, unit] of units.entries()) {
+    if (unitIndex > 0) lines.push("\\vspace*{0pt plus 1filll}", "\\clearpage");
+    lines.push(`\\renewcommand{\\dmchapunit}{${unit.label}}`, `\\dmchapter{${unit.code}}{${unit.title}}`, "\\setcounter{dmproblemcount}{0}");
+    let lastSection = "";
+    for (const group of unit.groups) {
+      if (group.section !== lastSection) {
+        lines.push(`\\dmsection{${group.section}}`);
+        lastSection = group.section;
+      }
+      if (group.passage) lines.push(`\\dmpassage{${group.passage}}`);
+      if (group.figure) lines.push(`\\begin{center}${renderFigure(group.figure)}\\end{center}`);
+      // 문항 사이 최소 4mm(출처 배지가 위 문항 그림에 닿지 않게). dmpnum 의 fill 은 그 위에 더해진다.
+      // 문항 번호는 책에 찍힌 번호(id 의 뒤 두 자리 · 쪽마다 다시 시작)와 같게 카운터를 맞춘다.
+      for (const id of group.items) lines.push(`\\setcounter{dmproblemcount}{${bookNumber(id) - 1}}\\dmpnum{${id}}{\\input{items/${id}}}\\vspace{4mm}`);
     }
-    if (group.passage) lines.push(`\\dmpassage{${group.passage}}`);
-    if (group.figure) lines.push(`\\begin{center}${renderFigure(group.figure)}\\end{center}`);
-    // 문항 사이 최소 4mm(출처 배지가 위 문항 그림에 닿지 않게). dmpnum 의 fill 은 그 위에 더해진다.
-    // 문항 번호는 책에 찍힌 번호(id 의 뒤 두 자리 · 쪽마다 다시 시작)와 같게 카운터를 맞춘다.
-    for (const id of group.items) lines.push(`\\setcounter{dmproblemcount}{${bookNumber(id) - 1}}\\dmpnum{${id}}{\\input{items/${id}}}\\vspace{4mm}`);
   }
   // 답
   // dmpnum 은 문항마다 `plus 1fill` 을 넣어 쪽 안에서 고르게 벌린다(프로토타입 디자인). 마지막 쪽만은 남는 공간을
   // 한 단계 높은 filll 로 흡수해 문항이 늘어지지 않게 한다(sty 는 수정 금지).
   lines.push("\\vspace*{0pt plus 1filll}", "\\clearpage", "\\dmsection{정답}", "\\begin{multicols}{2}\\small");
-  for (const id of orderedIds) lines.push(`\\noindent\\textbf{${id}}\\ ${bank.items[id].answer}\\par`);
+  for (const unit of units) {
+    if (units.length > 1) lines.push(`\\noindent\\textbf{${unit.label}}\\par\\smallskip`);
+    for (const id of unit.groups.flatMap((group) => group.items)) lines.push(`\\noindent\\textbf{${id}}\\ ${bank.items[id].answer}\\par`);
+  }
   lines.push("\\end{multicols}", "\\end{document}");
   await writeFile(path.join(dir, "book.tex"), lines.join("\n").replace("\\usepackage{fontspec}", "\\usepackage{fontspec}\n\\usepackage{multicol}"), "utf8");
   await compile(xelatex, dir, "book.tex");
@@ -206,7 +232,7 @@ ${group.passage ? `\\dmpassage{${group.passage}}` : ""}${group.figure ? `\\begin
       return trimmed;
     };
 
-    for (const group of bank.groups) {
+    for (const { group } of unitGroups) {
       for (const id of group.items) {
         let typeset;
         try {
@@ -224,6 +250,8 @@ ${group.passage ? `\\dmpassage{${group.passage}}` : ""}${group.figure ? `\\begin
           exported.push({
             ...source,
             regions: [{ kind: "body", position: 0, pdf_page: body?.pdf_page ?? null, bbox_normalized: body?.bbox_normalized ?? null, file, width: typeset.width, height: typeset.height }],
+            // 구역·유형 라벨은 사람이 확정한 전사본(그룹 section)이 원천이다. 스캔 OCR 이 읽은 라벨은 회색 유형 쪽에서 자주 어긋난다.
+            type_label: group.section,
             has_shared_passage: false,
             review_note: [source.review_note, `latex 조판본(latex-bank/${path.basename(dir)}/items/${id}.tex)`].filter(Boolean).join(" · ")
           });

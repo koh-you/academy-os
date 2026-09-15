@@ -36,3 +36,4 @@ Thumbs.db
 # LaTeX 오답은행 빌드 산출물
 latex-bank/**/build/
 latex-bank/**/review/
+latex-bank/_batch-*/

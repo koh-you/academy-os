@@ -115,7 +115,8 @@ function WrongProblemBoard({ students, wrongProblems, onAddWrongProblem, onUpdat
       <WorkspaceTabs className="wrongBoardTabs" label="오답관리 작업 구분" variant="secondary">
         {[
           ["bookWrong", "교재별 오답"],
-          ["studentWrong", "학생별 오답"]
+          ["studentWrong", "학생별 오답"],
+          ["examPaper", "시험지 제작"]
         ].map(([tab, label]) => (
           <button
             aria-selected={activeTab === tab}
@@ -132,6 +133,9 @@ function WrongProblemBoard({ students, wrongProblems, onAddWrongProblem, onUpdat
 
       {activeTab === "bookWrong" ? (
         <BookWrongAnswerBoard mode="class" students={activeStudents} />
+      ) : activeTab === "examPaper" ? (
+        // 시험지 제작: 등록된 교재(조판본 포함)의 문항을 바구니에 담아 제목·배점·수험자 칸이 있는 시험지로 인쇄한다.
+        <BookWrongAnswerBoard mode="exam" students={activeStudents} />
       ) : (
         <>
           <FilterBar

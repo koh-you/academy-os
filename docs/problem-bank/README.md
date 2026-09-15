@@ -108,6 +108,10 @@ Supabase SQL: `supabase/20260912_problem_bank.sql` (SQL Editor 에서 1회 적�
 - 「PPT 저장」: 표지 + 문항마다 16:9 슬라이드(출처 줄 · 번호 · 문항 이미지 · 공통 지시문은 강조 상자 · 학원 로고 워터마크), 「해설」을 켜 두면 문항 뒤에 해설 슬라이드(답 줄 이미지 포함). 반에서 많이 틀린 문항만 뽑아 설명할 때 쓴다. pptxgenjs 는 버튼을 누를 때만 내려받는 별도 청크다.
 - 공통 지시문 문항(「[0001~0006] 오른쪽 그림의 직각삼각형 ABC에서 …」)은 지시문·그림·형제 문항이 든 블록을 한 번 싣고, 고른 번호 자리에 검정 강조 상자를 얹는다. 같은 블록의 문항을 여러 개 고르면 한 항목으로 묶인다. 비전 토큰은 들지 않는다(좌표만 쓴다).
 
+### 4. 시험지 제작 (오답관리 › 시험지 제작)
+
+같은 보드를 `mode="exam"` 으로 쓴다. 오답 기록·학생 선택 없이 번호를 누르면 **시험지 바구니**에 담기고, 바구니는 교재를 바꿔도 남아 여러 교재·단원의 문항을 한 시험지에 섞을 수 있다. 「구역·유형」 드롭다운(문항의 type_label)으로 번호를 걸러 보고 「단원 전체 담기」는 걸러진 것만 담는다. 「시험지 만들기」는 오답지와 같은 인쇄 레이어(`WrongAnswerPrintSheet variant="exam"`)를 열되 제목 입력 · 문항 순서(교재순·담은순·섞기 — 섞기는 seed 로 재현) · 총점(정수 배점 분배 `distributeExamPoints`, 문항마다 고침) · 출처 표시 on/off · 학교/학년/반/이름/점수 칸 · 정답표를 갖는다. 바구니는 화면 안에서만 유지한다(서버 저장 없음 · 저장 목록은 다음 작업). 검사: `test:problem-bank-exam-model` · `tests/browser/problem-bank.spec.js`(시험지 제작).
+
 ## 코드 위치
 
 | 역할 | 파일 |
@@ -116,7 +120,7 @@ Supabase SQL: `supabase/20260912_problem_bank.sql` (SQL Editor 에서 1회 적�
 | 원천화 CLI | `scripts/problem-bank/ingest-text-pdf.mjs`(문항) · `ingest-scan-pdf.mjs`(코드형 스캔 · 올림포스) · `ingest-scan-badges.mjs`(배지형 스캔 · 쎈) · `ingest-answers.mjs`(텍스트 정답·해설) · `ingest-scan-answers.mjs`(스캔 정답·해설 · `--layout olympos|ssen`) · `scanTools.mjs`(tesseract·기울기·색/잉크 공용) · `pdfTools.mjs`(공용 렌더·잉크·크롭·qa 헬퍼) |
 | DB 표 | `supabase/20260912_problem_bank.sql` · `20260913_problem_bank_answers.sql` · `src/shared/server/tenantScope.js` |
 | 서버 저장소·라우트 | `src/shared/server/problemBankStore.js` · `src/shared/server/problemBankRouteRegistry.js` (api/server.js 에서 주입) |
-| 화면 | `src/domains/problems/BookWrongAnswerBoard.jsx`(교재별·학생별 보드) · `ProblemBankCenter.jsx`(교재관리) · `WrongAnswerPrintSheet.jsx`(오답지) · `problemBankPptx.js`(PPT) · `problemBankModel.js` · `problemBankApi.js` · `problemBank.css` · 학생 앱 `src/domains/portals/StudentWrongAnswersTab.jsx` |
+| 화면 | `src/domains/problems/BookWrongAnswerBoard.jsx`(교재별·학생별·시험지 제작 보드) · `ProblemBankCenter.jsx`(교재관리) · `WrongAnswerPrintSheet.jsx`(오답지·시험지) · `problemBankPptx.js`(PPT) · `problemBankModel.js` · `problemBankApi.js` · `problemBank.css` · 학생 앱 `src/domains/portals/StudentWrongAnswersTab.jsx` |
 | 가상 데이터 | `scripts/safe-fixtures/problemBankFixture.mjs` (`npm run dev:safe`) |
 | 검사 | `npm run test:problem-bank-segmenter` · `test:problem-bank-route-registry` · `test:problem-bank-store` · `tests/browser/problem-bank.spec.js` · `problem-bank-package.spec.js`(폴더 하나 등록) |
 

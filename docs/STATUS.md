@@ -1,5 +1,15 @@
 # Academy OS Current Status
 
+## 2026-09-15 베이직쎈 2·3단원 LaTeX 전사 완료 + 시험지 제작 탭
+
+- PR #332 병합(`41823fb1`) 뒤 branch `codex/latex-bank-ssen-cm2-u2u3-20260915`. 스캔 원천화 `--unit-pages "2-15,16-32,33-54"` 로 1~3단원 420문(01:104 · 02:143 · 03:173), 번호 빠짐 0(배지 띠 재판독·라벨 「O18」 제외·배지 x 창 선택). 답지 2~37쪽 → 해설 372/420.
+- **LaTeX 전사 316문(2·3단원) 완료** — 배치 8개(A~H · 쪽 4~7장)로 나눠 `latex-transcriber` 에이전트에 맡김. 5배치는 에이전트가, A·F는 본 세션이 직접, G는 H 를 마친 에이전트에 이어 맡겨 전사. 병합 결과 1~3단원 **420문 · book.pdf 50쪽 · Overfull 0**, TikZ 그림 25. 사용자 결정(2026-09-15): 학원 내부용·학생 소지 교재·이후 숫자/창의 변형 원본으로 쓰며 원문 전사를 진행한다.
+- 검수 4축(`latex-bank/ssen-basic-cm2/검수/2026-09-16/`): 수학 검증 2단원 143/143 · 3단원 173/173 통과(🔴 0). 조판·그림·구조 🔴 2(fig-36-10 C 라벨 · fig-50-22 직선 라벨) → 반영, 🟡 중 기계적인 것(`점~`·`직선~`·`원~` 규약 145곳 · section 문구 3 · `\blank` 높이 · 고아 제목 needspace) 반영. 원본↔조판 대조(2·3단원)는 review 420장 기준으로 실행 → 결과는 worklog.
+- 정독 자산: `정독/mechanism-데이터-베이직쎈-CM2-GM-직선의방정식.md`(143문 · ★1 71/★2 55/★3 17 · 분류 이슈 31건 기록) · `…-원의방정식.md`(173문 · ★1 76/★2 71/★3 26 · 분류 이슈 16행 기록). 난이도 분류 문제는 **기록만**(사용자 결정).
+- 도구: `items.json` 다단원(`units[]`) · `scripts/latex-bank/make-batches.mjs`·`merge-batches.mjs`·`check-batch.mjs`·`crop-figure.mjs` · `.claude/agents/latex-transcriber.md` · 지시문 템플릿 `latex-bank/agents/`. export 는 `type_label` 을 전사본 section 으로 덮어씀.
+- 시험지 제작: 오답관리 › 「시험지 제작」 탭(`BookWrongAnswerBoard mode="exam"`) — 바구니(교재 바꿔도 유지·여러 교재 혼합) · 구역·유형 필터 · 제목·문항 순서(교재순/담은순/섞기)·총점 배점 분배·문항별 배점·출처 on/off·수험자 칸·정답표. `test:problem-bank-exam-model`, browser `시험지 제작` smoke, `check:fast` 통과. 바구니 서버 저장은 다음 작업.
+- **사람 Gate**: `output/problem-bank/ssen-basic-cm2-latex`(바탕화면 `문제은행-패키지\베이직쎈-공통수학2-1~3단원-라텍스-패키지`)를 교재관리 › 패키지 등록에 올려 오답지·시험지에 조판본이 나오는지 확인. 검수 보고의 🟡(수식 뒤 조사 분리 5문 · `\cond` 긴 조건 1문 · 그림 배치 「다음 그림」 1문)은 사람 판단 항목.
+
 ## 2026-09-14 베이직쎈 공통수학2 1단원 — 스캔 문항·정답·LaTeX 조판·정독 자산
 
 - `scripts/problem-bank/ingest-scan-badges.mjs`(번호 배지형 스캔 책 · 「인쇄쪽-번호」 id) + `ingest-scan-answers.mjs --layout ssen`(별책 답지). 1단원(본책 2~15쪽): 문항 104 · 해설 95/104 · 답 줄 81 · 번호 불일치 3. 패키지마다 `검수-필요.md` 가 생겨 문항 = 해설 = 답 개수 차이와 사람이 먼저 볼 쪽·번호를 정리한다(올림포스 공통수학1: 해설 못 찾음 16 · 불일치 2, 베이직쎈: 못 찾음 9 · 불일치 3).

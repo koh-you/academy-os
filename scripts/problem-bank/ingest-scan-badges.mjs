@@ -4,6 +4,7 @@
 // 사용:
 //   node scripts/problem-bank/ingest-scan-badges.mjs --pdf "C:/…/베이직쎈-공통수학2.pdf" --out output/problem-bank/ssen-basic-cm2 \
 //     --title "베이직쎈 공통수학2" --folder "고1 / 쎈" --grade 고1 --subject 수학 [--pages 2-15] [--units "01 평면좌표,02 직선의 방정식"]
+//     [--unit-pages "2-15,16-32,33-54"]   ← 단원 경계를 PDF 쪽 범위로 못 박는다(--units 와 같은 순서). 없으면 「실전 → 개념」 전환으로 나눈다.
 //
 // 올림포스와 달리 문항 코드가 없고 번호(01·02…)가 구역(개념 쪽·기본&핵심 유형·실전 감각 UP)마다 다시 시작한다.
 // 그래서 문항 번호는 「인쇄 쪽-번호」(12-13)로 두고 쪽 안의 굵은 번호 배지를 앵커로 자른다. 개념 쪽의 공통 지시문
@@ -33,7 +34,32 @@ import {
   sampleDarkPoints
 } from "./scanTools.mjs";
 
-const INGEST_VERSION = "scan-badges-1.0";
+const INGEST_VERSION = "scan-badges-1.1";
+
+/**
+ * 배지 띠(배지 x 좌우 좁은 세로 띠)를 2배로 키워 숫자만 다시 읽는다. 쪽 전체 OCR 이 놓친 굵은 두 자리 배지를 되찾는 보조 판독.
+ * 돌려주는 토큰 좌표는 쪽(pt) 기준이다. 세 자리(유형 라벨)·한 자리는 버린다.
+ */
+async function ocrBadgeStrip(tesseract, canvas, renderScale, box, imagePath) {
+  const crop = cropToCanvas(canvas, renderScale, box);
+  const zoom = 2;
+  const scaled = createCanvas(crop.width * zoom, crop.height * zoom);
+  const context = scaled.getContext("2d");
+  context.imageSmoothingEnabled = true;
+  context.drawImage(crop, 0, 0, scaled.width, scaled.height);
+  await writeFile(imagePath, await scaled.encode("png"));
+  // 두 psm(흩어진 글 11 · 단일 블록 6)으로 읽어 합친다 — 한쪽이 놓친 배지(주황 「44」)를 다른 쪽이 잡는다.
+  const found = [];
+  for (const psm of [11, 6]) {
+    const tsv = await runTesseract(tesseract, imagePath, { lang: "eng", psm, output: "tsv" }).catch(() => "");
+    found.push(...parseTesseractTsv(tsv, renderScale * zoom)
+      .filter((token) => /^\d{2}$/.test(token.text) && token.conf >= 30 && token.h >= 9 && token.h <= 14)
+      .map((token) => ({ ...token, x: token.x + box.x0, y: token.y + box.y0, strip: true })));
+  }
+  return found
+    .sort((a, b) => a.y - b.y || b.conf - a.conf)
+    .filter((token, index, list) => !list.slice(0, index).some((other) => Math.abs(other.y - token.y) <= 6));
+}
 
 /**
  * 머리글(위 3~16%) 한글 OCR → 구역 종류와 개념 제목.
@@ -137,6 +163,12 @@ async function main() {
   const unitNames = String(args.units ?? "").split(",").map((value) => value.trim()).filter(Boolean);
   // 개념 제목은 차례에서 받는 것이 OCR(장식 서체)보다 확실하다: --concepts "01 두 점 사이의 거리,02 …". 없으면 머리글 OCR.
   const conceptNames = String(args.concepts ?? "").split(",").map((value) => value.trim()).filter(Boolean);
+  // 단원 경계를 쪽 범위로 받으면(--unit-pages "2-15,16-32") 머리글 전환 규칙 대신 그 범위로 단원을 정한다.
+  const unitPageRanges = String(args["unit-pages"] ?? "").split(",").map((value) => value.trim()).filter(Boolean).map((range) => {
+    const match = range.match(/^(\d+)\s*-\s*(\d+)$/);
+    if (!match) throw new Error(`--unit-pages 형식: "2-15,16-32" (받은 값 ${range})`);
+    return [Number(match[1]), Number(match[2])];
+  });
   const tesseract = await findTesseract();
   const koreanTessdata = await findKoreanTessdata();
   if (!koreanTessdata) throw new Error("한글 모델(kor.traineddata)이 필요합니다 — 구역·제목을 머리글에서 읽습니다.");
@@ -167,13 +199,19 @@ async function main() {
   let typeCounter = 0;
   let lastBlockOfPreviousPage = "";
 
-  const ensureUnit = () => {
-    if (units.length === 0 || (currentBlock === "개념" && previousBlock === "실전")) {
-      const index = units.length;
-      const name = unitNames[index] || `중단원 ${String(index + 1).padStart(2, "0")}`;
-      const match = name.match(/^(\d{2})\s*(.*)$/);
-      units.push({ position: index, code: match ? match[1] : String(index + 1).padStart(2, "0"), title: match ? match[2] || name : name, chapter: "" });
+  const pushUnit = (index) => {
+    const name = unitNames[index] || `중단원 ${String(index + 1).padStart(2, "0")}`;
+    const match = name.match(/^(\d{2})\s*(.*)$/);
+    units.push({ position: index, code: match ? match[1] : String(index + 1).padStart(2, "0"), title: match ? match[2] || name : name, chapter: "" });
+  };
+  const ensureUnit = (pageNumber) => {
+    if (unitPageRanges.length) {
+      const index = unitPageRanges.findIndex(([from, to]) => pageNumber >= from && pageNumber <= to);
+      if (index < 0) throw new Error(`p${pageNumber} 이 --unit-pages 범위 밖입니다.`);
+      while (units.length <= index) pushUnit(units.length);
+      return index;
     }
+    if (units.length === 0 || (currentBlock === "개념" && previousBlock === "실전")) pushUnit(units.length);
     return units.length - 1;
   };
 
@@ -271,7 +309,7 @@ async function main() {
     // 유형 라벨 = 연한 초록 글자(평균 밝기 150 이상). 유형 쪽 배지도 초록이지만 진하다(≈128,153,98).
     const isGreenGlyph = (token) => {
       const color = glyphColor(token);
-      return Boolean(color) && color[1] > color[0] + 10 && color[1] >= color[2] && (color[0] + color[1] + color[2]) / 3 >= 150;
+      return Boolean(color) && color[1] > color[0] + 10 && color[1] >= color[2] && (color[0] + color[1] + color[2]) / 3 >= 140;
     };
     // 유형 라벨 왼쪽에는 「유형」 꼬리표 상자가 붙어 있다(흑백 스캔 쪽에서는 색 대신 이것으로 안다). 배지 왼쪽은 비어 있다.
     const hasTagLeft = (token) => {
@@ -291,7 +329,8 @@ async function main() {
       return total > 0 && dark / total >= 0.35;
     };
     // 3자리는 유형 라벨뿐이다(문항 배지는 두 자리까지). 앞의 0 이 떨어져 두 자리로 읽힌 라벨은 연한 초록 글자로 안다.
-    const isTypeLabelToken = (token) => /^\d{3}$/.test(token.text) || isGreenGlyph(token);
+    // 「018」을 「O18」로 읽은 것(앞 0 이 알파벳 O)도 세 글자라 라벨이다 — 회색 유형 쪽에서 배지로 잘못 잡혀 뒤 번호가 밀렸다(32쪽).
+    const isTypeLabelToken = (token) => /^[0O]?\d{3}$/.test(token.text) || /^O\d{2}$/.test(token.text) || isGreenGlyph(token);
     const ringColored = isTypeLabelToken;
     let typeProbe = typeCounter;
     // 유형 라벨: 본문(위 14% 아래)의 색 상자 위 굵은 숫자. OCR 이 「001」을 「01」「1」로 읽어도 라벨이다.
@@ -328,7 +367,7 @@ async function main() {
       const given = conceptNames.find((name) => name.startsWith(String(conceptCounter).padStart(2, "0")));
       currentConcept = given ? `개념 ${given}` : `개념 ${String(conceptCounter).padStart(2, "0")}${header.conceptTitle ? ` ${header.conceptTitle}` : ""}`;
     }
-    const unitIndex = ensureUnit();
+    const unitIndex = ensureUnit(pageNumber);
 
     const boxes = [];
     const passages = [];
@@ -336,24 +375,35 @@ async function main() {
       const left = columnLeftMargin(imageData, canvas.width, renderScale, column, pageHeight);
       const candidates = tokens
         // 배지는 늘 두 자리(01·13)다. 한 자리는 선택지 「①」 오독이다.
-        .filter((token) => /^[0O]?\d{2}$/.test(token.text) && token.conf >= 40 && token.h >= 9.5 && token.h <= 13)
+        .filter((token) => /^\d{2}$/.test(token.text) && token.conf >= 40 && token.h >= 9.5 && token.h <= 13)
         .filter((token) => token.x >= column.x0 + 2 && token.x <= column.x0 + 80 && token.y > bodyTop && token.y + token.h < bodyBottom)
         .filter((token) => !ringColored(token))
-      // 배지 x: 후보 x 를 4pt 칸으로 묶어 가장 많은 칸(두 OCR 모드가 같은 배지를 조금 다른 x 로 읽어도 흔들리지 않게).
+      // 배지 x: 후보마다 [x, x+8pt] 창에 드는 후보 수를 세어 가장 많은 창의 왼쪽 끝(두 OCR 모드가 같은 배지를 조금 다른 x 로
+      // 읽어도, 기울어진 쪽에서 한 배지만 왼쪽으로 튀어도 흔들리지 않게 — 4pt 칸 묶기는 동률일 때 튄 값을 고르기도 했다).
       let badgeLeft = left;
       if (candidates.length) {
-        const bins = new Map();
-        for (const token of candidates) {
-          const bin = Math.floor(token.x / 4);
-          bins.set(bin, (bins.get(bin) || 0) + 1);
-        }
-        const [bestBin] = [...bins.entries()].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0];
-        badgeLeft = Math.min(...candidates.filter((token) => Math.abs(Math.floor(token.x / 4) - bestBin) <= 1).map((token) => token.x));
+        const windows = candidates.map((token) => ({ x: token.x, count: candidates.filter((other) => other.x >= token.x && other.x <= token.x + 8).length }));
+        badgeLeft = windows.sort((a, b) => b.count - a.count || a.x - b.x)[0].x;
       }
-      const badges = candidates
-        .filter((token) => token.x <= badgeLeft + 8)
-        .sort((a, b) => a.y - b.y)
-        .filter((token, index, list) => index === 0 || token.y - list[index - 1].y > 6);
+      // 배지 띠 재판독: 쪽 전체 OCR 이 굵은 두 자리 배지를 놓치면(「11」 신뢰도 0 등) 그 문항이 앞 문항 크롭에 붙는다.
+      // 배지 x 좌우 좁은 띠만 2배로 키워 숫자만 다시 읽어 빠진 배지를 보탠다(같은 y 의 배지는 한 번만).
+      const stripTokens = candidates.length
+        ? await ocrBadgeStrip(tesseract, canvas, renderScale, { x0: Math.max(column.x0, badgeLeft - 5), x1: badgeLeft + 22, y0: bodyTop, y1: bodyBottom }, path.join(tmpDir, `p${pageNumber}-badges-${column.index}.png`))
+        : [];
+      // 띠에서 읽은 두 자리가 유형 라벨(「032」)의 앞 두 글자일 수 있다 — 라벨 왼쪽에는 「유형」 꼬리표 상자가 붙어 있고
+      // 배지 왼쪽은 빈 여백이므로 꼬리표로 가른다(색은 회색 쪽에서 못 쓴다). 선택지 「④ 1」이 「41」로 읽히는 것은 신뢰도(≥75)로 거른다.
+      // 신뢰도 낮은(30~75) 띠 토큰은 위·아래 배지와 번호가 이어질 때만(43 ↔ 44 ↔ 45) 받는다 — 주황 배지 「44」는 48 로 읽힌다.
+      const stripFit = stripTokens.filter((token) => Math.abs(token.x - badgeLeft) <= 4 && !ringColored(token) && !hasTagLeft(token));
+      const sure = [...candidates.filter((token) => token.x <= badgeLeft + 8), ...stripFit.filter((token) => token.conf >= 75)];
+      const sequential = stripFit.filter((token) => token.conf < 75).filter((token) => {
+        const value = Number(token.text);
+        const above = sure.filter((other) => other.y < token.y - 6).sort((a, b) => b.y - a.y)[0];
+        const below = sure.filter((other) => other.y > token.y + 6).sort((a, b) => a.y - b.y)[0];
+        return (above && Number(above.text) + 1 === value) || (below && Number(below.text) - 1 === value);
+      });
+      const badges = [...sure, ...sequential]
+        .sort((a, b) => a.y - b.y || b.conf - a.conf)
+        .filter((token, index, list) => !list.slice(0, index).some((other) => Math.abs(other.y - token.y) <= 6));
       const columnTypes = typeLabels.filter((token) => token.x >= column.x0 && token.x < column.x0 + 80).sort((a, b) => a.y - b.y);
       // 지시문 말풍선은 배지와 같은 x(+5pt 안)에 온다. 그보다 들여쓴 색 아이콘(「◎」 풀이 힌트)은 위 문항의 일부라 무시한다.
       const markers = currentBlock !== "개념" ? [] : findInstructionMarkers(imageData, canvas.width, renderScale, { x0: badgeLeft - 2, x1: badgeLeft + 14, y0: bodyTop, y1: bodyBottom })
@@ -368,7 +418,8 @@ async function main() {
         bodyBottom
       ].sort((a, b) => a - b);
       const nextStop = (y) => stops.find((stop) => stop > y + 4) ?? bodyBottom;
-      if (process.env.DEBUG_SSEN === String(pageNumber)) console.log(`  col${column.index} badgeLeft=${badgeLeft.toFixed(0)} badges=${badges.map((b) => `${b.text}@${b.y.toFixed(0)}`).join(",")} types=${columnTypes.map((t) => `${t.text}@${t.y.toFixed(0)}`).join(",")} markers=${markers.map((m) => m.y.toFixed(0)).join(",")}`);
+      if (process.env.DEBUG_SSEN === String(pageNumber)) console.log(`  strip-check ${stripTokens.map((t) => `${t.text}@${t.y.toFixed(0)} ring=${ringColored(t)} tag=${hasTagLeft(t)} color=${JSON.stringify((glyphColor(t) ?? []).map(Math.round))}`).join(" | ")}`);
+      if (process.env.DEBUG_SSEN === String(pageNumber)) console.log(`  col${column.index} badgeLeft=${badgeLeft.toFixed(0)} cand=${candidates.map((b) => `${b.text}@${b.x.toFixed(0)},${b.y.toFixed(0)}`).join(",")} strip=${stripTokens.map((b) => `${b.text}@${b.x.toFixed(0)},${b.y.toFixed(0)}c${Math.round(b.conf)}h${b.h.toFixed(1)}`).join(",")} badges=${badges.map((b) => `${b.text}@${b.y.toFixed(0)}`).join(",")} types=${columnTypes.map((t) => `${t.text}@${t.y.toFixed(0)}`).join(",")} markers=${markers.map((m) => m.y.toFixed(0)).join(",")}`);
 
       // 공통 지시문: 아이콘 줄부터 다음 정지선까지
       for (const marker of markers) {

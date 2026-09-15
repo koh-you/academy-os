@@ -1,0 +1,8 @@
+% 실전 37-04(본책 37쪽) — 직선 y=-(a/b)x-c/b 의 그래프(기울기 양수 · y절편 양수 · x절편 음수). 원문 그림을 TikZ 로 다시 그림(스캔 화질).
+% 원문에는 수치가 없고 축과 O 뿐이다. 그대로 둔다.
+\begin{tikzpicture}[scale=0.5, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-4.2,0) -- (2.2,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.6) -- (0,4.4) node[left] {$y$};
+  \node[below right=-1pt and 0pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt] (-3.6,-1.2) -- (1.6,4.0);
+\end{tikzpicture}

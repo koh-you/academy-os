@@ -332,6 +332,22 @@
 .problemBankPrintSpace { height: 40mm; }
 .problemBankPrintSheet.space-compact .problemBankPrintSpace { height: 20mm; }
 .problemBankPrintSheet.space-wide .problemBankPrintSpace { height: 70mm; }
+/* 시험지(variant-exam): 수험자 정보 칸 · 번호 옆 배점. 배점 입력 칸은 화면에서만 보이고 인쇄에는 숫자만 남는다. */
+.problemBankNumber.exam-plain { background: #fff; border-color: var(--academy-border, #e2e6ec); color: var(--academy-text, #1f2937); }
+.problemBankNumber.exam-picked,
+.problemBankBand.exam-picked { background: var(--academy-primary, #1e4a8f); border-color: var(--academy-primary, #1e4a8f); color: #fff; }
+.problemBankExamToolbar { align-items: center; }
+.problemBankExamTitleInput { border: 1px solid var(--academy-border, #e2e6ec); border-radius: 6px; font-size: 13px; min-width: 200px; padding: 4px 8px; }
+.problemBankExamPointsInput { border: 1px solid var(--academy-border, #e2e6ec); border-radius: 6px; font-size: 13px; padding: 4px 6px; width: 64px; }
+.problemBankExamHead { align-items: baseline; }
+.problemBankExamFields { display: flex; flex-basis: 100%; flex-wrap: wrap; font-size: 10pt; gap: 4px 14px; margin-top: 1.5mm; }
+.problemBankExamScore { margin-left: auto; }
+.problemBankExamPoints { font-size: 10pt; font-weight: 400; margin-left: 6px; }
+.problemBankExamPoints input { border: 1px solid #999; border-radius: 3px; font-size: 10pt; padding: 0 2px; width: 34px; }
+.problemBankExamPoints .printOnly { display: none; }
+@media print {
+  .problemBankExamPoints .printOnly { display: inline; font-weight: 400; }
+}
 .problemBankPrintAnswers,
 .problemBankPrintSolutions { break-before: page; margin-top: 8mm; position: relative; z-index: 1; }
 .problemBankPrintAnswers h3,

@@ -231,7 +231,20 @@ export function assignPrintColumns(entries) {
 export function buildPrintEntries({ book, units, items, selectedItemIds, imagesByItem }) {
   const unitTitleById = new Map(units.map((unit) => [unit.unitId, unit.title]));
   const selected = new Set(selectedItemIds);
-  const sourceLine = (item) => [book.title, unitTitleById.get(item.unitId) ?? "", `${item.numberLabel}번`].filter(Boolean).join(" · ");
+  const rows = [...items]
+    .filter((entry) => selected.has(entry.itemId))
+    .sort((a, b) => a.numberSort - b.numberSort)
+    .map((item) => ({ item, bookTitle: book.title, unitTitle: unitTitleById.get(item.unitId) ?? "" }));
+  return buildPrintEntriesFromRows(rows, imagesByItem);
+}
+
+/**
+ * 인쇄 항목을 「문항 + 출처(교재·단원)」 행 목록에서 만든다. 오답지는 한 교재의 선택 문항을 교재 순서로 넘기고,
+ * 시험지는 여러 교재에서 담은 문항을 시험지 순서 그대로 넘긴다(순서를 바꾸지 않는다).
+ * @param {Array<{ item: object, bookTitle: string, unitTitle: string }>} rows
+ */
+export function buildPrintEntriesFromRows(rows, imagesByItem) {
+  const sourceLine = (row) => [row.bookTitle, row.unitTitle, `${row.item.numberLabel}번`].filter(Boolean).join(" · ");
   const regionOf = (item, kind) => (imagesByItem.get(item.itemId) ?? []).find((region) => region.kind === kind) ?? null;
   const urlOf = (item, kind) => regionOf(item, kind)?.url ?? "";
   const bboxOf = (item, kind) => (item.regions ?? []).find((region) => region.kind === kind)?.bboxNormalized ?? null;
@@ -242,7 +255,8 @@ export function buildPrintEntries({ book, units, items, selectedItemIds, imagesB
 
   const entries = [];
   const groupsByKey = new Map();
-  for (const item of [...items].filter((entry) => selected.has(entry.itemId)).sort((a, b) => a.numberSort - b.numberSort)) {
+  for (const row of rows) {
+    const { item } = row;
     const passageBbox = bboxOf(item, "passage");
     const passageUrl = urlOf(item, "passage");
     if (passageBbox && passageUrl) {
@@ -266,7 +280,7 @@ export function buildPrintEntries({ book, units, items, selectedItemIds, imagesB
       const group = groupsByKey.get(key);
       const bodyBbox = bboxOf(item, "body");
       group.members.push({ item, highlight: bodyBbox ? rectWithin(passageBbox, bodyBbox) : null, ...answerOf(item) });
-      group.sourceLine = [book.title, unitTitleById.get(item.unitId) ?? "", `${group.members.map((member) => member.item.numberLabel).join(" · ")}번`]
+      group.sourceLine = [row.bookTitle, row.unitTitle, `${group.members.map((member) => member.item.numberLabel).join(" · ")}번`]
         .filter(Boolean)
         .join(" · ");
       continue;
@@ -275,7 +289,7 @@ export function buildPrintEntries({ book, units, items, selectedItemIds, imagesB
       kind: "item",
       key: item.itemId,
       item,
-      sourceLine: sourceLine(item),
+      sourceLine: sourceLine(row),
       typeLabel: item.typeLabel,
       bodyUrl: urlOf(item, "body"),
       wide: isWide(bboxOf(item, "body")),
@@ -309,4 +323,57 @@ export function printWidthMm(region, dpi = 220) {
   const width = Number(region?.imageWidth) || 0;
   if (!width) return null;
   return Math.round((width / dpi) * 25.4 * 10) / 10;
+}
+
+/**
+ * 시험지 배점: 총점을 문항 수로 나눠 정수 배점을 만들고 나머지는 앞 문항부터 1점씩 더한다(25문항 100점 → 4점씩).
+ * @returns {number[]}
+ */
+export function distributeExamPoints(count, total = 100) {
+  if (!(count > 0)) return [];
+  const base = Math.floor(total / count);
+  const remainder = total - base * count;
+  return Array.from({ length: count }, (_, index) => base + (index < remainder ? 1 : 0));
+}
+
+/**
+ * 시험지 문항 순서. 「교재 순서」는 담은 교재·단원·번호 순, 「담은 순서」는 그대로, 「섞기」는 seed 로 재현 가능한 순서.
+ * @param {Array<{ item: object, bookTitle: string, unitTitle: string, addedAt?: number }>} rows
+ * @param {"book" | "added" | "shuffle"} order
+ */
+export function orderExamRows(rows, order, seed = 1) {
+  const list = [...rows];
+  if (order === "book") {
+    return list.sort((a, b) => a.bookTitle.localeCompare(b.bookTitle, "ko") || (a.unitPosition ?? 0) - (b.unitPosition ?? 0) || a.item.numberSort - b.item.numberSort);
+  }
+  if (order === "shuffle") {
+    // mulberry32 — 같은 seed 면 같은 순서라 미리보기와 인쇄가 어긋나지 않는다.
+    let state = seed >>> 0;
+    const random = () => {
+      state = (state + 0x6d2b79f5) >>> 0;
+      let t = state;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    for (let index = list.length - 1; index > 0; index -= 1) {
+      const swap = Math.floor(random() * (index + 1));
+      [list[index], list[swap]] = [list[swap], list[index]];
+    }
+    return list;
+  }
+  return list.sort((a, b) => (a.addedAt ?? 0) - (b.addedAt ?? 0));
+}
+
+/** 교재 문항 목록에서 구역·유형 라벨 목록(등장 순서 · 중복 없음). 시험지 제작의 유형 필터에 쓴다. */
+export function listTypeLabels(items) {
+  const seen = new Set();
+  const labels = [];
+  for (const item of items) {
+    const label = String(item.typeLabel ?? "").trim();
+    if (!label || seen.has(label)) continue;
+    seen.add(label);
+    labels.push(label);
+  }
+  return labels;
 }
