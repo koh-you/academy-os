@@ -1,0 +1,20 @@
+% 개념 18 50-22(본책 50쪽) — 원 x²+y²=16 과 직선 y=x−4 의 교점 A·B, 원의 중심 O 에서 직선에 내린 수선의 발 H. 힌트(빈칸 풀이)에 딸린 좌표평면 그림을 TikZ 로 다시 그림(스캔 화질).
+% 원문에 적힌 라벨만 둔다: 원·직선의 식, O·A·B·H, 직각 표시. 길이 값(답 4√2 등)은 그림에 나타내지 않는다.
+% 점 크기: 정점 2.2pt · 파생점 2pt. 축 0.7pt · 원/직선 0.6pt · 수선 OH 는 파선.
+\begin{tikzpicture}[scale=0.42, line width=0.5pt]
+  \coordinate (O) at (0,0); \coordinate (A) at (0,-4); \coordinate (B) at (4,0); \coordinate (H) at (2,-2);
+  \draw[->, >=stealth, line width=0.7pt] (-5.6,0) -- (6.2,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-5.8) -- (0,5.6) node[left] {$y$};
+  \draw[line width=0.6pt] (O) circle (4);
+  \draw[line width=0.6pt] (-1.6,-5.6) -- (5.6,1.6);
+  \draw[dashed, line width=0.5pt] (O) -- (H);
+  % H 에서의 직각 표시(직선 방향 (1,1)/√2 · 수선 방향 (−1,1)/√2)
+  \draw[line width=0.4pt] ($(H)+(-0.32,-0.32)$) -- ($(H)+(-0.64,0)$) -- ($(H)+(-0.32,0.32)$);
+  \fill (A) circle (2.2pt); \fill (B) circle (2.2pt); \fill (H) circle (2pt);
+  \node[above left=-1pt and -1pt, font=\small] at (O) {$\mathrm{O}$};
+  \node[below right=0pt and -1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[below right=-1pt and -1pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[below right=0pt and 0pt, font=\small] at (H) {$\mathrm{H}$};
+  \node[left, font=\small] at (-2.4,3.6) {$x^2+y^2=16$};
+  \node[right, font=\small] at (2.9,3.4) {$y=x-4$};
+\end{tikzpicture}

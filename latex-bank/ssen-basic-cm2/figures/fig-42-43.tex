@@ -1,0 +1,11 @@
+% 개념 15 42-43(본책 42쪽) — 중심 (3, -3), x축·y축에 동시에 접하는 원. 원문 그림을 TikZ 로 다시 그림(스캔 화질). 라벨 3·−3 은 원문 그대로.
+\begin{tikzpicture}[scale=0.42, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.5,0) -- (7.2,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-6.8) -- (0,1.5) node[left] {$y$};
+  \node[below left, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt] (3,-3) circle (3);
+  \draw[dashed, line width=0.4pt] (3,0) -- (3,-3) -- (0,-3);
+  \fill (3,-3) circle (2pt);
+  \node[above, font=\small] at (3,0) {$3$};
+  \node[left, font=\small] at (0,-3) {$-3$};
+\end{tikzpicture}

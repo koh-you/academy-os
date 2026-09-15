@@ -164,7 +164,8 @@ async function main() {
 \\newcommand{\\dmhint}[1]{\\par\\smallskip\\begin{tcolorbox}[enhanced,colback=dm-navylight!60,colframe=dm-navy!40,boxrule=0.3pt,sharp corners,left=3mm,right=3mm,top=2mm,bottom=2mm,boxsep=0mm]\\small\\setlength{\\parskip}{1mm}#1\\end{tcolorbox}}
 % 구역 제목·공통 지시문은 뒤에 문항 한 개는 붙을 자리가 있어야 찍는다(쪽 끝 고아 방지).
 \\newcommand{\\dmsection}[1]{\\par\\needspace{7\\baselineskip}\\vspace{3mm}\\noindent{\\color{dm-navy}\\hrule height 0.6pt}\\vspace{1.2mm}\\noindent{\\dmheadingfont\\bfseries\\fontsize{11}{13}\\selectfont\\color{dm-navy}#1}\\par\\vspace{2mm}}
-\\newcommand{\\dmpassage}[1]{\\par\\needspace{6\\baselineskip}\\medskip\\noindent{\\dmheadingfont\\bfseries\\color{dm-navy}#1}\\par\\smallskip}
+% 지시문 뒤 4mm: 다음 문항의 출처 배지가 5mm 위로 올라오므로 긴 지시문 줄과 겹치지 않게 한다.
+\\newcommand{\\dmpassage}[1]{\\par\\needspace{6\\baselineskip}\\medskip\\noindent{\\dmheadingfont\\bfseries\\color{dm-navy}#1}\\par\\vspace{4mm}}
 % 줄바꿈 규약(프로토타입 mathbook-problems.sty · style.sty 와 같음): 수식 안에서는 줄을 바꾸지 않고, 「(단, …)」·「x축」은 한 덩어리.
 \\binoppenalty=10000 \\relpenalty=10000
 \\newcommand{\\nob}[1]{\\mbox{#1}}

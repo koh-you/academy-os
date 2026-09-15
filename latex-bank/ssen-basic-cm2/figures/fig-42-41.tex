@@ -1,0 +1,11 @@
+% 개념 15 42-41(본책 42쪽) — 중심 (-1, -2), y축에 접하는 원. 원문 그림을 TikZ 로 다시 그림(스캔 화질). 라벨 −1·−2 는 원문 그대로.
+\begin{tikzpicture}[scale=0.42, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.6,0) -- (1.8,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.8) -- (0,1.5) node[left] {$y$};
+  \node[below right, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt] (-1,-2) circle (1);
+  \draw[dashed, line width=0.4pt] (-1,0) -- (-1,-2) -- (0,-2);
+  \fill (-1,-2) circle (2pt);
+  \node[above, font=\small] at (-1,0) {$-1$};
+  \node[right, font=\small] at (0,-2) {$-2$};
+\end{tikzpicture}

@@ -1,0 +1,11 @@
+% 개념 08 24-25~28(본책 24쪽) — 직선을 그려 넣는 빈 모눈 좌표평면(−3~3 · 눈금 −2·2). 원문 그림을 TikZ 로 다시 그림(스캔 화질). 답(직선)은 넣지 않는다.
+\begin{tikzpicture}[scale=0.42, line width=0.5pt]
+  \draw[gray!45, line width=0.3pt] (-3,-3) grid (3,3);
+  \draw[->, >=stealth, line width=0.7pt] (-3.4,0) -- (3.6,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.4) -- (0,3.6) node[left] {$y$};
+  \node[below left, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[below, font=\small] at (2,0) {$2$};
+  \node[below, font=\small] at (-2,0) {$-2$};
+  \node[left, font=\small] at (0,2) {$2$};
+  \node[left, font=\small] at (0,-2) {$-2$};
+\end{tikzpicture}

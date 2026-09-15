@@ -1,0 +1,18 @@
+% 유형 013 27-15(본책 27쪽) — 직사각형 ABCD(A(2,3)·B(2,1)·C(5,1)·D(5,3))와 좌표 안내 파선. 원문 그림을 TikZ 로 다시 그림(스캔 화질).
+% 원문 라벨만 넣음(3·1·2·5). 넓이 이등분선(답)은 그리지 않는다.
+\begin{tikzpicture}[scale=0.5, line width=0.5pt]
+  \fill[yellow!45] (2,1) rectangle (5,3);
+  \draw[->, >=stealth, line width=0.7pt] (-0.8,0) -- (6.4,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.8) -- (0,4.2) node[left] {$y$};
+  \node[below left, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt] (2,1) rectangle (5,3);
+  \draw[dashed, line width=0.4pt] (0,3) -- (2,3) (0,1) -- (2,1) (2,0) -- (2,1) (5,0) -- (5,1);
+  \node[above, font=\small] at (2,3) {$\mathrm{A}$};
+  \node[above, font=\small] at (5,3) {$\mathrm{D}$};
+  \node[below left=1pt and -2pt, font=\small] at (2,1) {$\mathrm{B}$};
+  \node[right, font=\small] at (5,1) {$\mathrm{C}$};
+  \node[left, font=\small] at (0,3) {$3$};
+  \node[left, font=\small] at (0,1) {$1$};
+  \node[below, font=\small] at (2,0) {$2$};
+  \node[below, font=\small] at (5,0) {$5$};
+\end{tikzpicture}
