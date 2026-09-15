@@ -4,20 +4,21 @@ const table = "lesson_student_records";
 const databaseChangeEventTypes = new Set(["INSERT", "UPDATE", "DELETE"]);
 
 function getDatabaseChangeEventType(message = {}) {
-  const candidates = [
-    message?.eventType,
-    message?.event_type,
-    message?.type,
-    message?.payload?.eventType,
-    message?.payload?.event_type,
-    message?.payload?.type,
-    message?.payload?.payload?.eventType,
-    message?.payload?.payload?.event_type,
-    message?.payload?.payload?.type
-  ];
-  return candidates
-    .map((value) => String(value ?? "").toUpperCase())
-    .find((value) => databaseChangeEventTypes.has(value));
+  const queue = [{ depth: 0, value: message }];
+  while (queue.length) {
+    const { depth, value } = queue.shift();
+    if (!value || typeof value !== "object" || depth > 4) continue;
+    for (const [key, nestedValue] of Object.entries(value)) {
+      if (["eventType", "event_type", "type"].includes(key)) {
+        const candidate = String(nestedValue ?? "").toUpperCase();
+        if (databaseChangeEventTypes.has(candidate)) return candidate;
+      }
+      if (nestedValue && typeof nestedValue === "object") {
+        queue.push({ depth: depth + 1, value: nestedValue });
+      }
+    }
+  }
+  return undefined;
 }
 
 export function createAttendanceSupabaseRealtimeProvider({
