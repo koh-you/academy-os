@@ -17,10 +17,10 @@ eview` 로 전사 확정, `answer_source` 「계산」 15문의 답을 답지와
 
 ## 2026-09-15 Supabase Realtime 운영 이벤트 진단
 
-- 진단 배포 뒤 `listener_added → channel_status: SUBSCRIBED → broadcast_received`를 운영에서 확인했다. 그러나 `broadcast_received`의 `eventType`이 비어 있어 브라우저 lifecycle이 이벤트를 거르고 7초 polling만 반영하는 원인을 특정했다. `broadcast_changes`의 중첩 payload와 일반 Broadcast payload를 모두 정규화하도록 수정했으며 운영 재검증 대기 중이다.
-- 새 테스트 학생·수업의 출결을 한 탭에서 `저장만` 실행했다. Supabase/API 저장과 다른 탭의 약 8초 polling 반영은 성공했지만 즉시 반영은 실패해, Realtime 전환은 아직 완료로 판정하지 않는다.
-- 배포 프론트 bundle의 Realtime flag 활성화는 확인했다. 다음 왕복에서 Supabase channel 연결 상태와 Broadcast 수신 여부를 분리할 수 있도록 서버에 tenant·행 payload 없는 구조화 진단 로그를 추가했다.
-- provider fixture, runtime lint, build, `test:production`(308/308)을 통과했다. 검증용 수업과 학생은 운영 활성 목록에서 정리된 것을 확인했다.
+- 운영 Broadcast envelope의 operation metadata를 중첩 위치와 `event`/`operation`/`op` 이름에서도 읽도록 보강해 main `af7e3e88`에 배포했다. 허용 값은 `INSERT`/`UPDATE`/`DELETE`뿐이며 브라우저에는 행 payload를 보내지 않는다.
+- 로그인 교사 탭 2개에서 테스트 수업의 강의 교재를 저장했다. 첫 탭은 `저장 완료`, 둘째 탭은 새로고침 없이 2.506초 만에 같은 API 원천값으로 바뀌었고 Render 로그에 `channel_status: SUBSCRIBED` 뒤 `broadcast_received`의 `eventType:"UPDATE"`가 기록됐다. 7초 polling 이전의 반영이므로 Realtime 운영 왕복을 성공으로 판정한다.
+- Realtime 실패 시에도 7초 polling은 계속되는 안전망을 유지한다. 실제 Slack/알림톡 발송·예약·취소는 실행하지 않았다. 테스트 수업 `Realtime 검증 0915`와 학생 `리얼타임검증0915`는 운영 활성 상태로 남아 있다.
+- provider·route·SSE·lifecycle fixture, runtime lint와 build를 통과한 변경만 #341~#344로 순차 병합했다.
 
 ## 2026-09-15 Supabase Realtime polling 안전망 보강
 
