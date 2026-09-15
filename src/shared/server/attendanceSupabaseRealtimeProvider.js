@@ -1,6 +1,24 @@
 import { createClient } from "@supabase/supabase-js";
 
 const table = "lesson_student_records";
+const databaseChangeEventTypes = new Set(["INSERT", "UPDATE", "DELETE"]);
+
+function getDatabaseChangeEventType(message = {}) {
+  const candidates = [
+    message?.eventType,
+    message?.event_type,
+    message?.type,
+    message?.payload?.eventType,
+    message?.payload?.event_type,
+    message?.payload?.type,
+    message?.payload?.payload?.eventType,
+    message?.payload?.payload?.event_type,
+    message?.payload?.payload?.type
+  ];
+  return candidates
+    .map((value) => String(value ?? "").toUpperCase())
+    .find((value) => databaseChangeEventTypes.has(value));
+}
 
 export function createAttendanceSupabaseRealtimeProvider({
   enabled = globalThis.process?.env?.SUPABASE_REALTIME_ENABLED === "true",
@@ -32,14 +50,13 @@ export function createAttendanceSupabaseRealtimeProvider({
       .on(
         "broadcast",
         { event: "lesson_student_records_changed" },
-        ({ payload = {} } = {}) => {
-          // `realtime.broadcast_changes` payloads can arrive one level deeper
-          // than client-originated broadcasts, depending on the Realtime
-          // protocol/SDK version. Normalize both shapes before the SSE layer
-          // forwards the privacy-safe event metadata to browsers.
-          const changePayload = payload?.payload ?? payload;
+        (message = {}) => {
+          // Supabase SDK versions expose database Broadcast metadata at
+          // different envelope depths. Search the known shallow envelopes and
+          // accept only database operation names, never the generic
+          // protocol-level `broadcast` type or any row payload.
           const change = {
-            eventType: changePayload?.eventType ?? changePayload?.type,
+            eventType: getDatabaseChangeEventType(message),
             table
           };
           logger.info?.("[attendance-realtime]", JSON.stringify({
