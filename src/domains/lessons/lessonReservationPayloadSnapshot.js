@@ -11,6 +11,7 @@ export function createLessonReservationPayloadSnapshot({
   notificationTemplates = {},
   previousHomework,
   record,
+  records = [],
   scheduledDate,
   student,
   supplementSchedules = [],
@@ -19,7 +20,8 @@ export function createLessonReservationPayloadSnapshot({
   const sourceField =
     audience === "student" ? "studentComment" : "teacherComment";
   const commentBody = compactMessage(record?.[sourceField] ?? "");
-  const assignmentStatus = getAssignmentStatus(record, previousHomework);
+  // records 를 함께 넘겨야 서버 예약 경로와 같은 과제상태가 나온다(App.jsx 주석 참고).
+  const assignmentStatus = getAssignmentStatus(record, previousHomework, records);
   const omitPreviousHomework =
     isAssignmentStatusUnrecorded(assignmentStatus);
   const homeworkFollowupNotice = omitPreviousHomework

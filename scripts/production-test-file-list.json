@@ -15,6 +15,7 @@
   "scripts/test-notification-provider-reference.mjs",
   "scripts/test-lesson-reservation-payload-fingerprint.mjs",
   "scripts/test-lesson-reservation-payload-snapshot.mjs",
+  "scripts/test-lesson-reservation-assignment-status-parity.mjs",
   "scripts/test-lesson-notification-job-selectors.mjs",
   "scripts/test-lesson-notification-pure-boundary-closeout.mjs",
   "scripts/test-lesson-notification-job-builder-inventory.mjs",
