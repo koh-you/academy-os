@@ -1,5 +1,11 @@
 # Daily Development Handoff
 
+## 2026-09-15 Realtime 운영 transport 진단
+
+- 새 테스트 학생·수업의 두 탭 smoke에서 API 저장과 8초 polling 반영은 성공했지만 즉시 반영은 실패했다. 따라서 Realtime 완료가 아니며 polling 안전망만 운영 검증됐다.
+- Vercel Realtime flag는 실제 배포 bundle에서 ON이다. Render provider에 개인정보 없는 연결·수신 진단 로그를 추가했으므로 배포 후 같은 smoke를 반복하고 `[attendance-realtime]`의 `listener_added → channel_status → broadcast_received` 순서를 확인한다.
+- 검증용 수업·학생은 활성 목록에서 정리됐다. fixture·lint·build·production 308/308 통과.
+
 ## 2026-09-15 Realtime fallback 보강
 
 - 운영 두 탭 smoke에서 DB/API 저장은 확인됐으나 `SUBSCRIBED` 뒤 event가 오지 않으면서 polling도 멈추는 결함을 재현했다. 구독 상태와 무관하게 7초 polling을 유지하도록 수정했고 Realtime event가 오면 즉시 API 재조회하는 경로는 그대로다.

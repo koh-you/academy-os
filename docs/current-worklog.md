@@ -1,5 +1,11 @@
 # Academy OS Current Worklog
 
+## 2026-09-15 Realtime 즉시 반영 실패 진단
+
+- `리얼타임검증0915`/`Realtime 검증 0915`로 두 탭 smoke를 반복했다. 한 탭의 출결 저장은 API 원천에 반영됐고 다른 탭은 약 1초에는 변화가 없었으나 8초 뒤 `등원 16:25`를 읽어 polling 안전망은 확인됐다. 외부 알림은 발송하지 않았다.
+- 배포된 Vercel bundle은 Realtime 구독을 켠 상태였다. Render에서 channel 연결·Broadcast 수신을 구분할 로그가 없어 provider에 `listener_added/removed`, `channel_status`, `broadcast_received`만 기록하고 tenant ID·학생 행·payload는 기록하지 않도록 보강했다.
+- 검증용 수업과 학생은 활성 목록에서 정리됐다. 전용 provider fixture, `npm run lint:runtime`, `npm run build`, `npm run test:production`(308/308)을 통과했다.
+
 ## 2026-09-15 Realtime 운영 smoke 후 fallback 수정
 
 - 전용 테스트 학생과 수업으로 두 로그인 교사 탭을 열고 한 탭에서 출결을 저장했다. 저장 탭과 새로고침 뒤 다른 탭의 API 원천 값은 일치했지만, 다른 탭은 Realtime 즉시 반영도 기존 7초 polling 반영도 되지 않았다.

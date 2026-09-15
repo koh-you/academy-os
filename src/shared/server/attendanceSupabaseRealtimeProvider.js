@@ -4,6 +4,7 @@ const table = "lesson_student_records";
 
 export function createAttendanceSupabaseRealtimeProvider({
   enabled = globalThis.process?.env?.SUPABASE_REALTIME_ENABLED === "true",
+  logger = console,
   serviceRoleKey = globalThis.process?.env?.SUPABASE_SERVICE_ROLE_KEY,
   supabaseUrl = globalThis.process?.env?.SUPABASE_URL,
   createSupabaseClient = createClient
@@ -33,6 +34,11 @@ export function createAttendanceSupabaseRealtimeProvider({
         { event: "lesson_student_records_changed" },
         ({ payload = {} } = {}) => {
           const change = { eventType: payload.eventType ?? payload.type, table };
+          logger.info?.("[attendance-realtime]", JSON.stringify({
+            eventType: change.eventType ?? null,
+            listeners: listeners.size,
+            stage: "broadcast_received"
+          }));
           for (const listener of listeners) listener.onChange(change);
         }
       );
@@ -40,6 +46,11 @@ export function createAttendanceSupabaseRealtimeProvider({
     tenantChannels.set(tenantId, entry);
     channel.subscribe((status) => {
       entry.status = status;
+      logger.info?.("[attendance-realtime]", JSON.stringify({
+        listeners: listeners.size,
+        stage: "channel_status",
+        status
+      }));
       for (const listener of listeners) listener.onStatus?.(status);
     });
     return entry;
@@ -49,9 +60,17 @@ export function createAttendanceSupabaseRealtimeProvider({
     const entry = getTenantChannel(tenantId);
     const listener = { onChange, onStatus };
     entry.listeners.add(listener);
+    logger.info?.("[attendance-realtime]", JSON.stringify({
+      listeners: entry.listeners.size,
+      stage: "listener_added"
+    }));
     if (entry.status) onStatus?.(entry.status);
     return () => {
       entry.listeners.delete(listener);
+      logger.info?.("[attendance-realtime]", JSON.stringify({
+        listeners: entry.listeners.size,
+        stage: "listener_removed"
+      }));
       removeTenantChannel(tenantId, entry);
     };
   }

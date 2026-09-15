@@ -1,5 +1,11 @@
 # Academy OS Current Status
 
+## 2026-09-15 Supabase Realtime 운영 이벤트 진단
+
+- 새 테스트 학생·수업의 출결을 한 탭에서 `저장만` 실행했다. Supabase/API 저장과 다른 탭의 약 8초 polling 반영은 성공했지만 즉시 반영은 실패해, Realtime 전환은 아직 완료로 판정하지 않는다.
+- 배포 프론트 bundle의 Realtime flag 활성화는 확인했다. 다음 왕복에서 Supabase channel 연결 상태와 Broadcast 수신 여부를 분리할 수 있도록 서버에 tenant·행 payload 없는 구조화 진단 로그를 추가했다.
+- provider fixture, runtime lint, build, `test:production`(308/308)을 통과했다. 검증용 수업과 학생은 운영 활성 목록에서 정리된 것을 확인했다.
+
 ## 2026-09-15 Supabase Realtime polling 안전망 보강
 
 - 운영 두 탭 smoke에서 출결 저장은 Supabase/API 원천에 정상 반영됐지만, 두 번째 탭은 새로고침 전까지 갱신되지 않았다. Realtime transport가 `SUBSCRIBED`만 보고 7초 polling을 중지해 event 전달 실패까지 함께 가린 것이 원인이었다.

@@ -5,6 +5,7 @@ assert.equal(createAttendanceSupabaseRealtimeProvider({ enabled: false }), undef
 assert.equal(createAttendanceSupabaseRealtimeProvider({ enabled: true, serviceRoleKey: "", supabaseUrl: "x" }), undefined);
 
 const calls = { channels: [], removed: [] };
+const logEntries = [];
 function createSupabaseClient(url, key, options) {
   assert.equal(url, "https://fixture.supabase.test");
   assert.equal(key, "fixture-service-role");
@@ -31,6 +32,7 @@ function createSupabaseClient(url, key, options) {
 const provider = createAttendanceSupabaseRealtimeProvider({
   createSupabaseClient,
   enabled: true,
+  logger: { info: (...args) => logEntries.push(args) },
   serviceRoleKey: "fixture-service-role",
   supabaseUrl: "https://fixture.supabase.test"
 });
@@ -52,10 +54,15 @@ calls.channels[0].callback({ payload: { type: "UPDATE", record: { private_note: 
 assert.deepEqual(changesA, [{ eventType: "UPDATE", table: "lesson_student_records" }]);
 assert.deepEqual(changesB, changesA);
 assert.doesNotMatch(JSON.stringify(changesA), /private_note|never forward/);
+assert.equal(logEntries.some(([, payload]) => payload.includes('"stage":"listener_added"')), true);
+assert.equal(logEntries.some(([, payload]) => payload.includes('"stage":"channel_status"')), true);
+assert.equal(logEntries.some(([, payload]) => payload.includes('"stage":"broadcast_received"')), true);
+assert.equal(logEntries.some(([, payload]) => payload.includes("tenant")), false, "diagnostics redact tenant identity");
 stopA();
 assert.equal(calls.removed.length, 0);
 stopB();
 assert.equal(calls.removed.length, 1);
+assert.equal(logEntries.some(([, payload]) => payload.includes('"stage":"listener_removed"')), true);
 
 provider.subscribeToAttendanceChanges({ onChange() {}, tenantId: "tenant-b" });
 assert.equal(calls.channels.length, 2);
