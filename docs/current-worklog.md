@@ -20,7 +20,7 @@
 
 - 진단 배포 후 SSE listener, Supabase private channel `SUBSCRIBED`, DB Broadcast 수신은 정상이지만 `eventType:null`이라 브라우저가 신호를 버리는 것을 찾았다. 중첩 envelope를 제한 깊이로 훑되 `eventType`/`event_type`/`type`/`event`/`operation`/`op`의 값이 `INSERT`/`UPDATE`/`DELETE`일 때만 전달하도록 #341~#344에서 보강했다.
 - main `af7e3e88` 운영 배포 뒤 테스트 수업의 강의 교재를 한 탭에서 저장했다. 저장 탭의 `저장 완료`, 다른 탭의 새로고침 없는 2.506초 반영, Render의 `broadcast_received {eventType:"UPDATE", listeners:2}`를 함께 확인했다. 7초 polling 이전이므로 Realtime event → 인증 API 재조회 경로의 운영 성공이다.
-- payload 행과 tenant는 로그·브라우저로 보내지 않았고 실제 알림은 실행하지 않았다. polling은 Realtime 장애 시 안전망으로 계속 유지한다. 검증용 수업·학생은 정리 승인을 다시 받기 전까지 활성 상태로 남긴다.
+- payload 행과 tenant는 로그·브라우저로 보내지 않았고 실제 알림은 실행하지 않았다. polling은 Realtime 장애 시 안전망으로 계속 유지한다. 사용자 승인 뒤 검증용 수업은 취소 저장·달력 제외, 학생은 퇴원 저장·활성 목록 제외·퇴원생 목록 포함을 재조회로 확인했다.
 - `리얼타임검증0915`/`Realtime 검증 0915`로 두 탭 smoke를 반복했다. 한 탭의 출결 저장은 API 원천에 반영됐고 다른 탭은 약 1초에는 변화가 없었으나 8초 뒤 `등원 16:25`를 읽어 polling 안전망은 확인됐다. 외부 알림은 발송하지 않았다.
 - 배포된 Vercel bundle은 Realtime 구독을 켠 상태였다. Render에서 channel 연결·Broadcast 수신을 구분할 로그가 없어 provider에 `listener_added/removed`, `channel_status`, `broadcast_received`만 기록하고 tenant ID·학생 행·payload는 기록하지 않도록 보강했다.
 - 검증용 수업과 학생은 활성 목록에서 정리됐다. 전용 provider fixture, `npm run lint:runtime`, `npm run build`, `npm run test:production`(308/308)을 통과했다.
