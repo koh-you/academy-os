@@ -47,6 +47,11 @@ latex-bank/
 | 19-17 | 좌표평면 삼각형 ABC · 이등분선 발 D · 좌표 안내 파선 | TikZ | `figures/fig-19-17.tex` | 좌표가 모두 주어져 정밀 재현 가능 |
 | 21-10 | 지도 삽화(도로·윤희·지민·50 m) | TikZ 도식 | `figures/fig-21-10.tex` | 원문은 컬러 삽화인데 크롭이 319×283px 로 흐림 · 도로 두 개와 거리만 있으면 됨 |
 
+## 검수 (검수 에이전트)
+
+- `<책>/검수/<날짜>/00-검수-요약.md` + 상세 4편. 프로토타입 `problem-review` v2.0 을 원본 전사 단계에 맞게 4축으로 나눠 돌린다: ① 발문↔정답 강검증(답 안 보고 직접 풀이·되대입) ②③ 원본 크롭↔조판본 눈 비교(review/*.png) ④ 정독 자산 스키마·v3.8 ★ 재산정(유형카탈로그 base★)·앵커 비교 + 조판 정책 자동 도구(permanent-policy·connector·align·figure-tikz-label·pdf-label-overlap)·용어·그림 규칙.
+- 원칙: 발견 사항은 자동 수정하지 않고 보고만 한다(사용자 결정). 2026-09-15 베이직쎈 1단원: 수학·전사 104/104 통과, RED 는 fig-19-17 라벨 겹침 1 + 정독 자산 기록 형식(YAML escape·type_id/base_star) 2.
+
 ## 정독 자산
 
 - `latex-bank/ssen-basic-cm2/정독/mechanism-데이터-베이직쎈-CM2-GM-평면좌표.md`: 104문 전수. 스키마 v2.0 필드(M·insights·depth_score·star·tier·mechanism_primary·target_cohort·rationale) + 이 프로젝트 추가 필드(answer·answer_source·figure·latex). 판정표는 `scripts/latex-bank/`가 아니라 생성 스크립트 안에 두었으므로, 판정을 고칠 때는 md 를 직접 고친다(자산이 원천).
