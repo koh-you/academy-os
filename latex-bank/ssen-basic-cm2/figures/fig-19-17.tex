@@ -1,4 +1,5 @@
 % 유형 009 19-17(본책 19쪽) — 삼각형 ABC 와 ∠A 의 이등분선의 발 D. 원문 그림을 TikZ 로 다시 그림(스캔 화질).
+% 2026-09-15 검수: C 라벨·y축 2 라벨 겹침 → C 는 위오른쪽, 축 라벨 2 는 아래오른쪽. ∠A 이등분 표시(호 2개) 추가.
 % 점 크기: 정점 2.2pt · 파생점 2pt (프로토타입 feedback_figure_point_size_rule). 좌표 안내는 파선.
 \begin{tikzpicture}[scale=0.55, line width=0.5pt]
   \draw[->, >=stealth, line width=0.7pt] (-5.2,0) -- (1.6,0) node[below] {$x$};
@@ -8,13 +9,16 @@
   \draw[line width=0.6pt] (A) -- (B) -- (C) -- cycle;
   \draw[line width=0.6pt] (A) -- (D);
   \draw[dashed, line width=0.4pt] (A) -- (-2,0) (A) -- (0,3) (B) -- (-4,0) (B) -- (0,-1);
+  % ∠A 이등분 표시(원문): AD 양쪽에 작은 호 하나씩 (AB 방향 −116.6° · AD −71.6° · AC −26.6°)
+  \draw[line width=0.4pt] ([shift=(A)]-116.6:0.5) arc (-116.6:-71.6:0.5);
+  \draw[line width=0.4pt] ([shift=(A)]-71.6:0.62) arc (-71.6:-26.6:0.62);
   \fill (A) circle (2.2pt); \fill (B) circle (2.2pt); \fill (C) circle (2.2pt); \fill (D) circle (2pt);
   \node[above, font=\small] at (A) {$\mathrm{A}$};
   \node[below left, font=\small] at (B) {$\mathrm{B}$};
-  \node[right, font=\small] at (C) {$\mathrm{C}$};
+  \node[above right=1pt and 1pt, font=\small] at (C) {$\mathrm{C}$};
   \node[below right=1pt and -1pt, font=\small] at (D) {$\mathrm{D}$};
   \node[right, font=\small] at (0,3) {$3$};
-  \node[right, font=\small] at (0,2) {$2$};
+  \node[below right=1pt and 1pt, font=\small] at (0,2) {$2$};
   \node[right, font=\small] at (0,-1) {$-1$};
   \node[below, font=\small] at (-2,0) {$-2$};
   \node[above left=-1pt and -2pt, font=\small] at (-4,0) {$-4$};

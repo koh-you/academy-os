@@ -4,7 +4,9 @@
 
 - `scripts/problem-bank/ingest-scan-badges.mjs`(번호 배지형 스캔 책 · 「인쇄쪽-번호」 id) + `ingest-scan-answers.mjs --layout ssen`(별책 답지). 1단원(본책 2~15쪽): 문항 104 · 해설 95/104 · 답 줄 81 · 번호 불일치 3. 패키지마다 `검수-필요.md` 가 생겨 문항 = 해설 = 답 개수 차이와 사람이 먼저 볼 쪽·번호를 정리한다(올림포스 공통수학1: 해설 못 찾음 16 · 불일치 2, 베이직쎈: 못 찾음 9 · 불일치 3).
 - LaTeX 오답은행(`latex-bank/`, `scripts/latex-bank/build.mjs`): 스캔 화질이 낮은 책을 문항 단위로 다시 조판. 프로토타입 `dm-editorial.sty` 그대로, MiKTeX xelatex(무료·비전 API 0). 베이직쎈 1단원 104문 전사 → `items.json`(원천) → book.pdf 11쪽(Overfull 0) + review/ 104장(원본 크롭 ↔ 조판본). 그림 4개는 전부 TikZ(까닭 `latex-bank/README.md` 표에 기록 · 크롭 사용 0).
-- 정독 자산 `latex-bank/ssen-basic-cm2/정독/…평면좌표.md`(스키마 v2.0 · 104문 · ★1 46/★2 46/★3 12). **사람 Gate**: 바탕화면 `문제은행-패키지\베이직쎈-공통수학2-1단원-라텍스eview` 로 전사 확정, `answer_source` 「계산」 15문의 답을 답지와 대조, 두 패키지의 `검수-필요.md`. 풀이 전사·숫자 변형·2단원 이후·전권 단원 경계(`--unit-pages`)는 다음 작업.
+- 검수 에이전트(2026-09-15, 프로토타입 problem-review 4축): 수학·전사 104/104 통과. 반영: fig-19-17 라벨 겹침·이등분 호, 21-10 은 원문 삽화 600 dpi 크롭(사용자 결정), 줄바꿈 규약(`\cond`·`~`·수식 내 줄바꿈 금지 · 프로토타입 style.sty 와 동일), 그림 오른쪽 배치, 고아 제목 방지, review 번호 = 책 순서. 정독 자산: YAML 인용 보정 · `type_id`/카탈로그 `base_star`/`effective_star` 기록 · M_a 17문 · 통찰 라벨 9문 · ★ 5문(쎈 앵커 정합, ★1 46/★2 41/★3 17). 보고서 `latex-bank/ssen-basic-cm2/검수/2026-09-15/`.
+- 정독 자산 `latex-bank/ssen-basic-cm2/정독/…평면좌표.md`(스키마 v2.0 · 104문). **사람 Gate**: 바탕화면 `문제은행-패키지\베이직쎈-공통수학2-1단원-라텍스
+eview` 로 전사 확정, `answer_source` 「계산」 15문의 답을 답지와 대조, 두 패키지의 `검수-필요.md`. 풀이 전사·숫자 변형·2단원 이후·전권 단원 경계(`--unit-pages`)는 다음 작업.
 
 ## 2026-09-14 문제은행 스캔 PDF 경로 (올림포스 공통수학1)
 

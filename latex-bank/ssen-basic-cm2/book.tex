@@ -5,10 +5,16 @@
 % 문항 전사용 보조 매크로(dm-editorial 매크로를 덮어쓰지 않는다)
 \newcommand{\pt}[1]{\mathrm{#1}}
 \newcommand{\seg}[1]{\overline{\mathrm{#1}}}
-\newcommand{\blank}{\framebox[1.5em]{\rule{0pt}{1.4ex}}}
+\newcommand{\blank}[1][1.5em]{\framebox[#1]{\rule{0pt}{1.4ex}}}
 \newcommand{\dmhint}[1]{\par\smallskip\begin{tcolorbox}[enhanced,colback=dm-navylight!60,colframe=dm-navy!40,boxrule=0.3pt,sharp corners,left=3mm,right=3mm,top=2mm,bottom=2mm,boxsep=0mm]\small\setlength{\parskip}{1mm}#1\end{tcolorbox}}
-\newcommand{\dmsection}[1]{\par\vspace{3mm}\noindent{\color{dm-navy}\hrule height 0.6pt}\vspace{1.2mm}\noindent{\dmheadingfont\bfseries\fontsize{11}{13}\selectfont\color{dm-navy}#1}\par\vspace{2mm}}
-\newcommand{\dmpassage}[1]{\par\medskip\noindent{\dmheadingfont\bfseries\color{dm-navy}#1}\par\smallskip}
+% 구역 제목·공통 지시문은 뒤에 문항 한 개는 붙을 자리가 있어야 찍는다(쪽 끝 고아 방지).
+\newcommand{\dmsection}[1]{\par\needspace{7\baselineskip}\vspace{3mm}\noindent{\color{dm-navy}\hrule height 0.6pt}\vspace{1.2mm}\noindent{\dmheadingfont\bfseries\fontsize{11}{13}\selectfont\color{dm-navy}#1}\par\vspace{2mm}}
+\newcommand{\dmpassage}[1]{\par\needspace{6\baselineskip}\medskip\noindent{\dmheadingfont\bfseries\color{dm-navy}#1}\par\smallskip}
+% 줄바꿈 규약(프로토타입 mathbook-problems.sty · style.sty 와 같음): 수식 안에서는 줄을 바꾸지 않고, 「(단, …)」·「x축」은 한 덩어리.
+\binoppenalty=10000 \relpenalty=10000
+\newcommand{\nob}[1]{\mbox{#1}}
+\newcommand{\cond}[1]{\mbox{(단, #1)}}
+\raggedbottom
 \renewcommand{\dmchapunit}{01 평면좌표}
 
 \begin{document}
@@ -16,136 +22,137 @@
 \setcounter{dmproblemcount}{0}
 \dmsection{개념 01 두 점 사이의 거리}
 \dmpassage{다음 두 점 사이의 거리를 구하시오.}
-\dmpnum{8-01}{\input{items/8-01}}
-\dmpnum{8-02}{\input{items/8-02}}
-\dmpnum{8-03}{\input{items/8-03}}
-\dmpnum{8-04}{\input{items/8-04}}
-\dmpnum{8-05}{\input{items/8-05}}
-\dmpnum{8-06}{\input{items/8-06}}
-\dmpnum{8-07}{\input{items/8-07}}
-\dmpnum{8-08}{\input{items/8-08}}
-\dmpnum{8-09}{\input{items/8-09}}
-\dmpnum{8-10}{\input{items/8-10}}
-\dmpassage{두 점 $\pt{A}$, $\pt{B}$의 좌표와 선분 $\pt{AB}$의 길이가 다음과 같을 때, 실수 $a$의 값을 모두 구하시오.}
-\dmpnum{9-11}{\input{items/9-11}}
-\dmpnum{9-12}{\input{items/9-12}}
-\dmpnum{9-13}{\input{items/9-13}}
-\dmpnum{9-14}{\input{items/9-14}}
-\dmpnum{9-15}{\input{items/9-15}}
-\dmpnum{9-16}{\input{items/9-16}}
-\dmpnum{9-17}{\input{items/9-17}}
-\dmpassage{다음 두 점 $\pt{A}$, $\pt{B}$에서 같은 거리에 있는 $x$축 위의 점의 좌표를 구하시오.}
-\dmpnum{9-18}{\input{items/9-18}}
-\dmpnum{9-19}{\input{items/9-19}}
-\dmpnum{9-20}{\input{items/9-20}}
-\dmpassage{다음 두 점 $\pt{A}$, $\pt{B}$에서 같은 거리에 있는 $y$축 위의 점의 좌표를 구하시오.}
-\dmpnum{9-21}{\input{items/9-21}}
-\dmpnum{9-22}{\input{items/9-22}}
-\dmpnum{9-23}{\input{items/9-23}}
+\dmpnum{8-01}{\input{items/8-01}}\vspace{4mm}
+\dmpnum{8-02}{\input{items/8-02}}\vspace{4mm}
+\dmpnum{8-03}{\input{items/8-03}}\vspace{4mm}
+\dmpnum{8-04}{\input{items/8-04}}\vspace{4mm}
+\dmpnum{8-05}{\input{items/8-05}}\vspace{4mm}
+\dmpnum{8-06}{\input{items/8-06}}\vspace{4mm}
+\dmpnum{8-07}{\input{items/8-07}}\vspace{4mm}
+\dmpnum{8-08}{\input{items/8-08}}\vspace{4mm}
+\dmpnum{8-09}{\input{items/8-09}}\vspace{4mm}
+\dmpnum{8-10}{\input{items/8-10}}\vspace{4mm}
+\dmpassage{두 점~$\pt{A}$, $\pt{B}$의 좌표와 선분~$\pt{AB}$의 길이가 다음과 같을 때, 실수 $a$의 값을 모두 구하시오.}
+\dmpnum{9-11}{\input{items/9-11}}\vspace{4mm}
+\dmpnum{9-12}{\input{items/9-12}}\vspace{4mm}
+\dmpnum{9-13}{\input{items/9-13}}\vspace{4mm}
+\dmpnum{9-14}{\input{items/9-14}}\vspace{4mm}
+\dmpnum{9-15}{\input{items/9-15}}\vspace{4mm}
+\dmpnum{9-16}{\input{items/9-16}}\vspace{4mm}
+\dmpnum{9-17}{\input{items/9-17}}\vspace{4mm}
+\dmpassage{다음 두 점~$\pt{A}$, $\pt{B}$에서 같은 거리에 있는 $x$축 위의 점의 좌표를 구하시오.}
+\dmpnum{9-18}{\input{items/9-18}}\vspace{4mm}
+\dmpnum{9-19}{\input{items/9-19}}\vspace{4mm}
+\dmpnum{9-20}{\input{items/9-20}}\vspace{4mm}
+\dmpassage{다음 두 점~$\pt{A}$, $\pt{B}$에서 같은 거리에 있는 $y$축 위의 점의 좌표를 구하시오.}
+\dmpnum{9-21}{\input{items/9-21}}\vspace{4mm}
+\dmpnum{9-22}{\input{items/9-22}}\vspace{4mm}
+\dmpnum{9-23}{\input{items/9-23}}\vspace{4mm}
 \dmsection{유형 001 두 점 사이의 거리}
-\dmpnum{10-01}{\input{items/10-01}}
-\dmpnum{10-02}{\input{items/10-02}}
-\dmpnum{10-03}{\input{items/10-03}}
-\dmpnum{10-04}{\input{items/10-04}}
-\dmpnum{10-05}{\input{items/10-05}}
+\dmpnum{10-01}{\input{items/10-01}}\vspace{4mm}
+\dmpnum{10-02}{\input{items/10-02}}\vspace{4mm}
+\dmpnum{10-03}{\input{items/10-03}}\vspace{4mm}
+\dmpnum{10-04}{\input{items/10-04}}\vspace{4mm}
+\dmpnum{10-05}{\input{items/10-05}}\vspace{4mm}
 \dmsection{유형 002 같은 거리에 있는 점}
-\dmpnum{10-06}{\input{items/10-06}}
-\dmpnum{11-07}{\input{items/11-07}}
-\dmpnum{11-08}{\input{items/11-08}}
-\dmpnum{11-09}{\input{items/11-09}}
-\dmpnum{11-10}{\input{items/11-10}}
-\dmpnum{11-11}{\input{items/11-11}}
+\dmpnum{10-06}{\input{items/10-06}}\vspace{4mm}
+\dmpnum{11-07}{\input{items/11-07}}\vspace{4mm}
+\dmpnum{11-08}{\input{items/11-08}}\vspace{4mm}
+\dmpnum{11-09}{\input{items/11-09}}\vspace{4mm}
+\dmpnum{11-10}{\input{items/11-10}}\vspace{4mm}
+\dmpnum{11-11}{\input{items/11-11}}\vspace{4mm}
 \dmsection{유형 003 두 점 사이의 거리와 삼각형}
-\dmpnum{11-12}{\input{items/11-12}}
-\dmpnum{12-13}{\input{items/12-13}}
-\dmpnum{12-14}{\input{items/12-14}}
-\dmpnum{12-15}{\input{items/12-15}}
+\dmpnum{11-12}{\input{items/11-12}}\vspace{4mm}
+\dmpnum{12-13}{\input{items/12-13}}\vspace{4mm}
+\dmpnum{12-14}{\input{items/12-14}}\vspace{4mm}
+\dmpnum{12-15}{\input{items/12-15}}\vspace{4mm}
 \dmsection{유형 004 선분의 길이의 제곱의 합의 최솟값}
-\dmpnum{12-16}{\input{items/12-16}}
-\dmpnum{12-17}{\input{items/12-17}}
-\dmpnum{12-18}{\input{items/12-18}}
+\dmpnum{12-16}{\input{items/12-16}}\vspace{4mm}
+\dmpnum{12-17}{\input{items/12-17}}\vspace{4mm}
+\dmpnum{12-18}{\input{items/12-18}}\vspace{4mm}
 \dmsection{개념 02 수직선 위의 선분의 내분점}
 \dmpassage{다음 수직선 위의 점에 대하여 $\blank$ 안에 알맞은 것을 써넣으시오.}
 \begin{center}\input{figures/fig-numberline-13}\end{center}
-\dmpnum{13-01}{\input{items/13-01}}
-\dmpnum{13-02}{\input{items/13-02}}
-\dmpnum{13-03}{\input{items/13-03}}
-\dmpnum{13-04}{\input{items/13-04}}
-\dmpassage{두 점 $\pt{A}$, $\pt{B}$를 잇는 선분 $\pt{AB}$를 주어진 비로 내분하는 점 $\pt{P}$의 좌표를 구하시오.}
-\dmpnum{13-05}{\input{items/13-05}}
-\dmpnum{13-06}{\input{items/13-06}}
-\dmpnum{13-07}{\input{items/13-07}}
-\dmpnum{13-08}{\input{items/13-08}}
-\dmpnum{13-09}{\input{items/13-09}}
+\dmpnum{13-01}{\input{items/13-01}}\vspace{4mm}
+\dmpnum{13-02}{\input{items/13-02}}\vspace{4mm}
+\dmpnum{13-03}{\input{items/13-03}}\vspace{4mm}
+\dmpnum{13-04}{\input{items/13-04}}\vspace{4mm}
+\dmpassage{두 점~$\pt{A}$, $\pt{B}$를 잇는 선분~$\pt{AB}$를 주어진 비로 내분하는 점~$\pt{P}$의 좌표를 구하시오.}
+\dmpnum{13-05}{\input{items/13-05}}\vspace{4mm}
+\dmpnum{13-06}{\input{items/13-06}}\vspace{4mm}
+\dmpnum{13-07}{\input{items/13-07}}\vspace{4mm}
+\dmpnum{13-08}{\input{items/13-08}}\vspace{4mm}
+\dmpnum{13-09}{\input{items/13-09}}\vspace{4mm}
 \dmsection{개념 03 좌표평면 위의 선분의 내분점}
-\dmpassage{두 점 $\pt{A}$, $\pt{B}$를 잇는 선분 $\pt{AB}$를 주어진 비로 내분하는 점 $\pt{P}$의 좌표를 구하시오.}
-\dmpnum{14-10}{\input{items/14-10}}
-\dmpnum{14-11}{\input{items/14-11}}
-\dmpnum{14-12}{\input{items/14-12}}
-\dmpnum{14-13}{\input{items/14-13}}
-\dmpnum{14-14}{\input{items/14-14}}
+\dmpassage{두 점~$\pt{A}$, $\pt{B}$를 잇는 선분~$\pt{AB}$를 주어진 비로 내분하는 점~$\pt{P}$의 좌표를 구하시오.}
+\dmpnum{14-10}{\input{items/14-10}}\vspace{4mm}
+\dmpnum{14-11}{\input{items/14-11}}\vspace{4mm}
+\dmpnum{14-12}{\input{items/14-12}}\vspace{4mm}
+\dmpnum{14-13}{\input{items/14-13}}\vspace{4mm}
+\dmpnum{14-14}{\input{items/14-14}}\vspace{4mm}
 \dmpassage{다음을 만족시키는 $a$, $b$의 값을 구하시오.}
-\dmpnum{14-15}{\input{items/14-15}}
-\dmpnum{14-16}{\input{items/14-16}}
-\dmpnum{14-17}{\input{items/14-17}}
+\dmpnum{14-15}{\input{items/14-15}}\vspace{4mm}
+\dmpnum{14-16}{\input{items/14-16}}\vspace{4mm}
+\dmpnum{14-17}{\input{items/14-17}}\vspace{4mm}
 \dmsection{개념 04 삼각형의 무게중심}
-\dmpassage{다음 세 점 $\pt{A}$, $\pt{B}$, $\pt{C}$를 꼭짓점으로 하는 삼각형 $\pt{ABC}$의 무게중심 $\pt{G}$의 좌표를 구하시오.}
-\dmpnum{15-18}{\input{items/15-18}}
-\dmpnum{15-19}{\input{items/15-19}}
-\dmpnum{15-20}{\input{items/15-20}}
-\dmpnum{15-21}{\input{items/15-21}}
-\dmpnum{15-22}{\input{items/15-22}}
-\dmpassage{다음 세 점 $\pt{A}$, $\pt{B}$, $\pt{C}$를 꼭짓점으로 하는 삼각형 $\pt{ABC}$의 무게중심이 $\pt{G}$일 때, $a$, $b$의 값을 구하시오.}
-\dmpnum{15-23}{\input{items/15-23}}
-\dmpnum{15-24}{\input{items/15-24}}
-\dmpnum{15-25}{\input{items/15-25}}
+\dmpassage{다음 세 점~$\pt{A}$, $\pt{B}$, $\pt{C}$를 꼭짓점으로 하는 삼각형~$\pt{ABC}$의 무게중심 $\pt{G}$의 좌표를 구하시오.}
+\dmpnum{15-18}{\input{items/15-18}}\vspace{4mm}
+\dmpnum{15-19}{\input{items/15-19}}\vspace{4mm}
+\dmpnum{15-20}{\input{items/15-20}}\vspace{4mm}
+\dmpnum{15-21}{\input{items/15-21}}\vspace{4mm}
+\dmpnum{15-22}{\input{items/15-22}}\vspace{4mm}
+\dmpassage{다음 세 점~$\pt{A}$, $\pt{B}$, $\pt{C}$를 꼭짓점으로 하는 삼각형~$\pt{ABC}$의 무게중심이 $\pt{G}$일 때, $a$, $b$의 값을 구하시오.}
+\dmpnum{15-23}{\input{items/15-23}}\vspace{4mm}
+\dmpnum{15-24}{\input{items/15-24}}\vspace{4mm}
+\dmpnum{15-25}{\input{items/15-25}}\vspace{4mm}
 \dmsection{개념 05 중점의 사각형에의 활용}
-\dmpassage{다음 네 점 $\pt{A}$, $\pt{B}$, $\pt{C}$, $\pt{D}$를 꼭짓점으로 하는 사각형 $\pt{ABCD}$가 평행사변형일 때, $a$, $b$의 값을 구하시오.}
-\dmpnum{16-26}{\input{items/16-26}}
-\dmpnum{16-27}{\input{items/16-27}}
-\dmpnum{16-28}{\input{items/16-28}}
-\dmpassage{다음 네 점 $\pt{A}$, $\pt{B}$, $\pt{C}$, $\pt{D}$를 꼭짓점으로 하는 사각형 $\pt{ABCD}$가 마름모일 때, $a$, $b$의 값을 구하시오.}
-\dmpnum{16-29}{\input{items/16-29}}
-\dmpnum{16-30}{\input{items/16-30}}
-\dmpnum{16-31}{\input{items/16-31}}
+\dmpassage{다음 네 점~$\pt{A}$, $\pt{B}$, $\pt{C}$, $\pt{D}$를 꼭짓점으로 하는 사각형~$\pt{ABCD}$가 평행사변형일 때, $a$, $b$의 값을 구하시오.}
+\dmpnum{16-26}{\input{items/16-26}}\vspace{4mm}
+\dmpnum{16-27}{\input{items/16-27}}\vspace{4mm}
+\dmpnum{16-28}{\input{items/16-28}}\vspace{4mm}
+\dmpassage{다음 네 점~$\pt{A}$, $\pt{B}$, $\pt{C}$, $\pt{D}$를 꼭짓점으로 하는 사각형~$\pt{ABCD}$가 마름모일 때, $a$, $b$의 값을 구하시오.}
+\dmpnum{16-29}{\input{items/16-29}}\vspace{4mm}
+\dmpnum{16-30}{\input{items/16-30}}\vspace{4mm}
+\dmpnum{16-31}{\input{items/16-31}}\vspace{4mm}
 \dmsection{유형 005 수직선 위의 선분의 내분점}
-\dmpnum{17-01}{\input{items/17-01}}
-\dmpnum{17-02}{\input{items/17-02}}
-\dmpnum{17-03}{\input{items/17-03}}
+\dmpnum{17-01}{\input{items/17-01}}\vspace{4mm}
+\dmpnum{17-02}{\input{items/17-02}}\vspace{4mm}
+\dmpnum{17-03}{\input{items/17-03}}\vspace{4mm}
 \dmsection{유형 006 좌표평면 위의 선분의 내분점}
-\dmpnum{17-04}{\input{items/17-04}}
-\dmpnum{17-05}{\input{items/17-05}}
-\dmpnum{17-06}{\input{items/17-06}}
-\dmpnum{18-07}{\input{items/18-07}}
-\dmpnum{18-08}{\input{items/18-08}}
-\dmpnum{18-09}{\input{items/18-09}}
+\dmpnum{17-04}{\input{items/17-04}}\vspace{4mm}
+\dmpnum{17-05}{\input{items/17-05}}\vspace{4mm}
+\dmpnum{17-06}{\input{items/17-06}}\vspace{4mm}
+\dmpnum{18-07}{\input{items/18-07}}\vspace{4mm}
+\dmpnum{18-08}{\input{items/18-08}}\vspace{4mm}
+\dmpnum{18-09}{\input{items/18-09}}\vspace{4mm}
 \dmsection{유형 007 삼각형의 무게중심}
-\dmpnum{18-10}{\input{items/18-10}}
-\dmpnum{18-11}{\input{items/18-11}}
-\dmpnum{18-12}{\input{items/18-12}}
-\dmpnum{19-13}{\input{items/19-13}}
+\dmpnum{18-10}{\input{items/18-10}}\vspace{4mm}
+\dmpnum{18-11}{\input{items/18-11}}\vspace{4mm}
+\dmpnum{18-12}{\input{items/18-12}}\vspace{4mm}
+\dmpnum{19-13}{\input{items/19-13}}\vspace{4mm}
 \dmsection{유형 008 중점의 사각형에의 활용}
-\dmpnum{19-14}{\input{items/19-14}}
-\dmpnum{19-15}{\input{items/19-15}}
-\dmpnum{19-16}{\input{items/19-16}}
+\dmpnum{19-14}{\input{items/19-14}}\vspace{4mm}
+\dmpnum{19-15}{\input{items/19-15}}\vspace{4mm}
+\dmpnum{19-16}{\input{items/19-16}}\vspace{4mm}
 \dmsection{유형 009 각의 이등분선의 성질}
-\dmpnum{19-17}{\input{items/19-17}}
-\dmpnum{19-18}{\input{items/19-18}}
+\dmpnum{19-17}{\input{items/19-17}}\vspace{4mm}
+\dmpnum{19-18}{\input{items/19-18}}\vspace{4mm}
 \dmsection{실전 감각 UP}
-\dmpnum{20-01}{\input{items/20-01}}
-\dmpnum{20-02}{\input{items/20-02}}
-\dmpnum{20-03}{\input{items/20-03}}
-\dmpnum{20-04}{\input{items/20-04}}
-\dmpnum{20-05}{\input{items/20-05}}
-\dmpnum{20-06}{\input{items/20-06}}
-\dmpnum{20-07}{\input{items/20-07}}
-\dmpnum{21-08}{\input{items/21-08}}
-\dmpnum{21-09}{\input{items/21-09}}
-\dmpnum{21-10}{\input{items/21-10}}
-\dmpnum{21-11}{\input{items/21-11}}
-\dmpnum{21-12}{\input{items/21-12}}
-\dmpnum{21-13}{\input{items/21-13}}
-\dmpnum{21-14}{\input{items/21-14}}
+\dmpnum{20-01}{\input{items/20-01}}\vspace{4mm}
+\dmpnum{20-02}{\input{items/20-02}}\vspace{4mm}
+\dmpnum{20-03}{\input{items/20-03}}\vspace{4mm}
+\dmpnum{20-04}{\input{items/20-04}}\vspace{4mm}
+\dmpnum{20-05}{\input{items/20-05}}\vspace{4mm}
+\dmpnum{20-06}{\input{items/20-06}}\vspace{4mm}
+\dmpnum{20-07}{\input{items/20-07}}\vspace{4mm}
+\dmpnum{21-08}{\input{items/21-08}}\vspace{4mm}
+\dmpnum{21-09}{\input{items/21-09}}\vspace{4mm}
+\dmpnum{21-10}{\input{items/21-10}}\vspace{4mm}
+\dmpnum{21-11}{\input{items/21-11}}\vspace{4mm}
+\dmpnum{21-12}{\input{items/21-12}}\vspace{4mm}
+\dmpnum{21-13}{\input{items/21-13}}\vspace{4mm}
+\dmpnum{21-14}{\input{items/21-14}}\vspace{4mm}
+\vspace*{0pt plus 1filll}
 \clearpage
 \dmsection{정답}
 \begin{multicols}{2}\small
@@ -165,7 +172,7 @@
 \noindent\textbf{9-14}\ 0, 6 (힌트 $6$, $0$, $6$)\par
 \noindent\textbf{9-15}\ 2\par
 \noindent\textbf{9-16}\ 0, 4\par
-\noindent\textbf{9-17}\ $-2$, 2\par
+\noindent\textbf{9-17}\ $-2$, $2$\par
 \noindent\textbf{9-18}\ $(14,\,0)$ (힌트 $-5$, $25$, $28$, $14$, $14$)\par
 \noindent\textbf{9-19}\ $(-1,\,0)$\par
 \noindent\textbf{9-20}\ $\left(-\dfrac{10}{3},\,0\right)$\par
@@ -215,7 +222,7 @@
 \noindent\textbf{15-23}\ $a=-2$, $b=13$ (힌트 $3$, $3$, $3$, $3$, $4$, $-2$, $13$)\par
 \noindent\textbf{15-24}\ $a=-8$, $b=-1$\par
 \noindent\textbf{15-25}\ $a=2$, $b=5$\par
-\noindent\textbf{16-26}\ $a=4$, $b=5$ (힌트 $\frac{5}{2}$, $-1$, $-1$, $\frac{5}{2}$, $4$, $5$)\par
+\noindent\textbf{16-26}\ $a=4$, $b=5$ (힌트 $\dfrac{5}{2}$, $-1$, $-1$, $\dfrac{5}{2}$, $4$, $5$)\par
 \noindent\textbf{16-27}\ $a=0$, $b=11$\par
 \noindent\textbf{16-28}\ $a=-8$, $b=3$\par
 \noindent\textbf{16-29}\ $a=6$, $b=4$ (힌트 $2$, $2$, $2$, $2$, $12$, $6$, $6$, $4$)\par

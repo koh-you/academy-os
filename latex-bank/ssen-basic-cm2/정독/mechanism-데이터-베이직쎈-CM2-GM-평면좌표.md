@@ -1,6 +1,6 @@
 ---
 name: mechanism-데이터-베이직쎈-CM2-GM-평면좌표
-description: 베이직쎈 공통수학2(2022 개정) 01 평면좌표 정독 데이터 v1.0. 본책 8~21쪽 104문(개념 60 · 기본&핵심 유형 30 · 실전 감각 UP 14) 전수. 스키마 v2.0 준거. 저작권 준수(발문 요약 · 원문 전사는 latex-bank 에 별도).
+description: 베이직쎈 공통수학2(2022 개정) 01 평면좌표 정독 데이터 v1.0. 본책 8~21쪽 104문(개념 쪽 54 · 기본&핵심 유형 36 · 실전 감각 UP 14) 전수. 스키마 v2.0 준거. 저작권 준수(발문 요약 · 원문 전사는 latex-bank 에 별도).
 metadata:
   type: reference
   version: v1.0
@@ -15,7 +15,8 @@ metadata:
   total_problems: 104
   sample_problems: 104
   predicted_problems: 0
-  judgment_protocol: schema.md v3.8 3층 모델 (M·I·X) · 기초 교재라 저노출 게이트는 적용 대상 없음
+  judgment_protocol: schema.md v3.8 3층 모델 (M·I·X) · type_id 는 bank/유형카탈로그/CM2-GM.md C01~C07 · base_star 는 카탈로그 값, star 는 라벨(차이는 rationale 에 기록) · 기초 교재라 저노출 게이트는 적용 대상 없음
+  review: 2026-09-15 검수 에이전트 4축(수학 정합·전사 정합·정독 스키마/앵커·조판 정책) 반영 — latex-bank/ssen-basic-cm2/검수/2026-09-15/
   parent_pilot: academy-os 문제은행 스캔 원천화(ingest-scan-badges) + latex-bank/ssen-basic-cm2 전사
   latex_source: latex-bank/ssen-basic-cm2/items.json (variant_level 0 · 원본 전사)
   image_source: output/problem-bank/ssen-basic-cm2 (문항 크롭 · 번호 = 인쇄 쪽-번호)
@@ -43,7 +44,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
+  type_id: CM2-GM-C01
   base_star: 1
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -73,7 +76,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
+  type_id: CM2-GM-C01
   base_star: 1
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -103,7 +108,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
+  type_id: CM2-GM-C01
   base_star: 1
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -133,7 +140,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
+  type_id: CM2-GM-C01
   base_star: 1
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -163,7 +172,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
+  type_id: CM2-GM-C01
   base_star: 1
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -193,7 +204,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
+  type_id: CM2-GM-C01
   base_star: 1
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -223,7 +236,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
+  type_id: CM2-GM-C01
   base_star: 1
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -232,7 +247,7 @@ metadata:
   mechanism_primary: "거리 공식 √((x₂−x₁)²+(y₂−y₁)²)"
   insight_type: 절차형
   target_cohort: 하위권
-  answer: "$2\sqrt{13}$"
+  answer: '$2\sqrt{13}$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/8-07.tex
@@ -253,7 +268,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
+  type_id: CM2-GM-C01
   base_star: 1
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -262,7 +279,7 @@ metadata:
   mechanism_primary: "거리 공식 √((x₂−x₁)²+(y₂−y₁)²)"
   insight_type: 절차형
   target_cohort: 하위권
-  answer: "$\sqrt{26}$"
+  answer: '$\sqrt{26}$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/8-08.tex
@@ -283,7 +300,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
+  type_id: CM2-GM-C01
   base_star: 1
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -292,7 +311,7 @@ metadata:
   mechanism_primary: "거리 공식 √((x₂−x₁)²+(y₂−y₁)²)"
   insight_type: 절차형
   target_cohort: 하위권
-  answer: "$\sqrt{13}$"
+  answer: '$\sqrt{13}$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/8-09.tex
@@ -313,7 +332,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
+  type_id: CM2-GM-C01
   base_star: 1
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -346,7 +367,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
+  type_id: CM2-GM-C01
   base_star: 1
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -376,7 +399,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
+  type_id: CM2-GM-C01
   base_star: 1
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -406,7 +431,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
+  type_id: CM2-GM-C01
   base_star: 1
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -436,11 +463,14 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C01
+  base_star: 1
+  effective_star: 1
   star: 2
   premium: false
   rationale: |
     제곱해서 이차방정식, 해 둘. 절차형이지만 단계가 3개.
+    [검수 2026-09-15] 카탈로그 base ★1(CM2-GM-C01) → effective ★1 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "거리 공식 제곱 → a 의 이차방정식"
   insight_type: 절차형
@@ -466,11 +496,14 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C01
+  base_star: 1
+  effective_star: 1
   star: 2
   premium: false
   rationale: |
     제곱해서 이차방정식, 해 둘. 절차형이지만 단계가 3개.
+    [검수 2026-09-15] 카탈로그 base ★1(CM2-GM-C01) → effective ★1 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "거리 공식 제곱 → a 의 이차방정식"
   insight_type: 절차형
@@ -496,11 +529,14 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C01
+  base_star: 1
+  effective_star: 1
   star: 2
   premium: false
   rationale: |
     제곱해서 이차방정식, 해 둘. 절차형이지만 단계가 3개.
+    [검수 2026-09-15] 카탈로그 base ★1(CM2-GM-C01) → effective ★1 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "거리 공식 제곱 → a 의 이차방정식"
   insight_type: 절차형
@@ -526,11 +562,14 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C01
+  base_star: 1
+  effective_star: 1
   star: 2
   premium: false
   rationale: |
     제곱해서 이차방정식, 해 둘. 절차형이지만 단계가 3개.
+    [검수 2026-09-15] 카탈로그 base ★1(CM2-GM-C01) → effective ★1 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "거리 공식 제곱 → a 의 이차방정식"
   insight_type: 절차형
@@ -559,16 +598,19 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C02
+  base_star: 3
+  effective_star: 3
   star: 2
   premium: false
   rationale: |
     미지수 설정 → 제곱 등식 → 일차식. 표준 절차.
+    [검수 2026-09-15] 카탈로그 base ★3(CM2-GM-C02) → effective ★3 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "P(a,0) 두고 AP²=BP² → 일차방정식"
   insight_type: 절차형
   target_cohort: 중하위권
-  answer: "$(14,\,0)$ (힌트 $-5$, $25$, $28$, $14$, $14$)"
+  answer: '$(14,\,0)$ (힌트 $-5$, $25$, $28$, $14$, $14$)'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/9-18.tex
@@ -589,16 +631,19 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C02
+  base_star: 3
+  effective_star: 3
   star: 2
   premium: false
   rationale: |
     미지수 설정 → 제곱 등식 → 일차식. 표준 절차.
+    [검수 2026-09-15] 카탈로그 base ★3(CM2-GM-C02) → effective ★3 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "P(a,0) 두고 AP²=BP² → 일차방정식"
   insight_type: 절차형
   target_cohort: 중하위권
-  answer: "$(-1,\,0)$"
+  answer: '$(-1,\,0)$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/9-19.tex
@@ -619,16 +664,19 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C02
+  base_star: 3
+  effective_star: 3
   star: 2
   premium: false
   rationale: |
     미지수 설정 → 제곱 등식 → 일차식. 표준 절차.
+    [검수 2026-09-15] 카탈로그 base ★3(CM2-GM-C02) → effective ★3 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "P(a,0) 두고 AP²=BP² → 일차방정식"
   insight_type: 절차형
   target_cohort: 중하위권
-  answer: "$\left(-\dfrac{10}{3},\,0\right)$"
+  answer: '$\left(-\dfrac{10}{3},\,0\right)$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/9-20.tex
@@ -652,16 +700,19 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C02
+  base_star: 3
+  effective_star: 3
   star: 2
   premium: false
   rationale: |
     위와 같은 절차(y축).
+    [검수 2026-09-15] 카탈로그 base ★3(CM2-GM-C02) → effective ★3 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "P(0,a) 두고 AP²=BP² → 일차방정식"
   insight_type: 절차형
   target_cohort: 중하위권
-  answer: "$(0,\,9)$ (힌트 $2$, $2$, $18$, $9$, $9$)"
+  answer: '$(0,\,9)$ (힌트 $2$, $2$, $18$, $9$, $9$)'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/9-21.tex
@@ -682,16 +733,19 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C02
+  base_star: 3
+  effective_star: 3
   star: 2
   premium: false
   rationale: |
     위와 같은 절차(y축).
+    [검수 2026-09-15] 카탈로그 base ★3(CM2-GM-C02) → effective ★3 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "P(0,a) 두고 AP²=BP² → 일차방정식"
   insight_type: 절차형
   target_cohort: 중하위권
-  answer: "$(0,\,-2)$"
+  answer: '$(0,\,-2)$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/9-22.tex
@@ -712,16 +766,19 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C02
+  base_star: 3
+  effective_star: 3
   star: 2
   premium: false
   rationale: |
     위와 같은 절차(y축).
+    [검수 2026-09-15] 카탈로그 base ★3(CM2-GM-C02) → effective ★3 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "P(0,a) 두고 AP²=BP² → 일차방정식"
   insight_type: 절차형
   target_cohort: 중하위권
-  answer: "$(0,\,-6)$"
+  answer: '$(0,\,-6)$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/9-23.tex
@@ -745,11 +802,14 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C01
+  base_star: 1
+  effective_star: 1
   star: 2
   premium: false
   rationale: |
     절댓값 두 해 중 조건으로 하나 고름(t=1).
+    [검수 2026-09-15] 카탈로그 base ★1(CM2-GM-C01) → effective ★1 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "|x−3|=5 와 x<0 로 한 해 선택"
   insight_type: 절차형
@@ -775,11 +835,14 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C01
+  base_star: 1
+  effective_star: 1
   star: 2
   premium: false
   rationale: |
     합이 9 라는 조건을 BC 로 환산. 해 둘의 합.
+    [검수 2026-09-15] 카탈로그 base ★1(CM2-GM-C01) → effective ★1 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "AB 고정 → BC=4 → x 두 값의 합"
   insight_type: 절차형
@@ -802,17 +865,26 @@ metadata:
   category: "거리 조건 → 미지수"
   M: {s: 2, k: 2, a: 2, t: 1}
   M_total: 7
-  insights: []
-  insight_count: 0
-  depth_score: 0.00
-  base_star: 2
+  insights:
+    - step: 1
+      type: I-EQV
+      depth: 1
+      effective_depth: 1
+      signal_ref: []
+      description: "거리 조건 → 제곱하여 이차방정식으로 (쎈 0016 과 같은 EQV)"
+  insight_count: 1
+  depth_score: 3.00
+  type_id: CM2-GM-C01
+  base_star: 1
+  effective_star: 1
   star: 2
   premium: false
   rationale: |
     표준 절차 + 양수/음수 선택.
+    [검수 2026-09-15] I-EQV d1 추가(쎈 앵커와 같은 단계 라벨) / 카탈로그 base ★1(CM2-GM-C01) → effective ★1 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "거리 공식 제곱 → 이차방정식 + 부호 조건"
-  insight_type: 절차형
+  insight_type: 통찰형
   target_cohort: 중하위권
   answer: "①"
   answer_source: "답지"
@@ -835,11 +907,14 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C01
+  base_star: 1
+  effective_star: 1
   star: 2
   premium: false
   rationale: |
     표준 절차 + 양수/음수 선택.
+    [검수 2026-09-15] 카탈로그 base ★1(CM2-GM-C01) → effective ★1 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "거리 공식 제곱 → 이차방정식 + 부호 조건"
   insight_type: 절차형
@@ -871,11 +946,14 @@ metadata:
       description: "거리의 제곱을 a 의 이차함수로 본다"
   insight_count: 1
   depth_score: 3.00
-  base_star: 2
+  type_id: CM2-GM-C01
+  base_star: 1
+  effective_star: 1
   star: 2
   premium: false
   rationale: |
     거리를 이차함수로 보고 최솟값(꼭짓점). 표현 전환이 얕게 들어감.
+    [검수 2026-09-15] 카탈로그 base ★1(CM2-GM-C01) → effective ★1 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "AB²을 a 의 이차식으로 → 꼭짓점"
   insight_type: 통찰형
@@ -904,11 +982,14 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C02
+  base_star: 3
+  effective_star: 3
   star: 2
   premium: false
   rationale: |
     개념 쪽 절차 그대로. 11-08 은 OP 길이까지 한 단계.
+    [검수 2026-09-15] 카탈로그 base ★3(CM2-GM-C02) → effective ★3 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "P 를 미지수로 두고 AP²=BP²"
   insight_type: 절차형
@@ -931,19 +1012,28 @@ metadata:
   category: "축 위의 등거리점"
   M: {s: 2, k: 2, a: 2, t: 0}
   M_total: 6
-  insights: []
-  insight_count: 0
-  depth_score: 0.00
-  base_star: 2
+  insights:
+    - step: 1
+      type: I-EQV
+      depth: 1
+      effective_depth: 1
+      signal_ref: []
+      description: "AP=BP → 제곱 등식으로 (쎈 0021 과 같은 EQV)"
+  insight_count: 1
+  depth_score: 3.00
+  type_id: CM2-GM-C02
+  base_star: 3
+  effective_star: 3
   star: 2
   premium: false
   rationale: |
     개념 쪽 절차 그대로. 11-08 은 OP 길이까지 한 단계.
+    [검수 2026-09-15] I-EQV d1 추가(쎈 앵커와 같은 단계 라벨) / 카탈로그 base ★3(CM2-GM-C02) → effective ★3 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "P 를 미지수로 두고 AP²=BP²"
-  insight_type: 절차형
+  insight_type: 통찰형
   target_cohort: 중하위권
-  answer: "$(-5,\,0)$"
+  answer: '$(-5,\,0)$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/11-07.tex
@@ -964,11 +1054,14 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C02
+  base_star: 3
+  effective_star: 3
   star: 2
   premium: false
   rationale: |
     개념 쪽 절차 그대로. 11-08 은 OP 길이까지 한 단계.
+    [검수 2026-09-15] 카탈로그 base ★3(CM2-GM-C02) → effective ★3 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "P 를 미지수로 두고 AP²=BP²"
   insight_type: 절차형
@@ -994,11 +1087,14 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C01
+  base_star: 1
+  effective_star: 1
   star: 2
   premium: false
   rationale: |
     이차방정식 두 해가 대칭임을 보고 거리로 환산.
+    [검수 2026-09-15] 카탈로그 base ★1(CM2-GM-C01) → effective ★1 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "(x−3)²+4=20 두 해의 차"
   insight_type: 절차형
@@ -1021,19 +1117,28 @@ metadata:
   category: "직선 위의 등거리점"
   M: {s: 2, k: 2, a: 2, t: 0}
   M_total: 6
-  insights: []
-  insight_count: 0
-  depth_score: 0.00
-  base_star: 2
-  star: 2
+  insights:
+    - step: 1
+      type: I-EQV
+      depth: 1
+      effective_depth: 1
+      signal_ref: []
+      description: "AP=BP → 제곱 등식 + 직선 위 매개변수 (쎈 0021 과 같은 EQV)"
+  insight_count: 1
+  depth_score: 3.00
+  type_id: CM2-GM-C02
+  base_star: 3
+  effective_star: 3
+  star: 3
   premium: false
   rationale: |
     직선 위 점의 매개화 후 표준 절차.
-  tier: star_2
+    [검수 2026-09-15] I-EQV d1 추가(쎈 앵커와 같은 단계 라벨) / ★2→★3(쎈 0021 B단계 대표문제 · 같은 메커니즘 시스템 판정 ★3 과 정합)
+  tier: star_3
   mechanism_primary: "P(t,t) 매개화 → AP²=BP²"
-  insight_type: 절차형
+  insight_type: 통찰형
   target_cohort: 중위권
-  answer: "$(1,\,1)$"
+  answer: '$(1,\,1)$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/11-10.tex
@@ -1049,8 +1154,8 @@ metadata:
   summary: |
     세 점 A(-3, 3), B(1, -1), C(1, 3)에서 같은 거리에 있는 점이 P(a, b)일 때, ab의 값은?
   category: "세 점에서 같은 거리(외심)"
-  M: {s: 3, k: 2, a: 3, t: 1}
-  M_total: 9
+  M: {s: 3, k: 2, a: 2, t: 1}
+  M_total: 8
   insights:
     - step: 1
       type: I-CON
@@ -1060,11 +1165,14 @@ metadata:
       description: "두 등거리 조건을 연립 일차식으로 통합"
   insight_count: 1
   depth_score: 3.00
+  type_id: CM2-GM-C02
   base_star: 3
+  effective_star: 3
   star: 3
   premium: false
   rationale: |
     등식 둘을 연립. 외심 개념과 연결되면 절차가 줄어든다(I-CON 깊이 1).
+    [검수 2026-09-15] M_a 3→2(구체 수치·미지수 ≤2 · §2.1 가이드)
   tier: star_3
   mechanism_primary: "PA²=PB²=PC² 연립"
   insight_type: 통찰형
@@ -1093,16 +1201,19 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C01
+  base_star: 1
+  effective_star: 1
   star: 2
   premium: false
   rationale: |
     세 거리 계산 후 판별 기준 적용. 계산량은 있으나 절차형.
+    [검수 2026-09-15] 카탈로그 base ★1(CM2-GM-C01) → effective ★1 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "세 변 길이 → 피타고라스/등변 판별"
   insight_type: 절차형
   target_cohort: 중하위권
-  answer: "(1) $\seg{AB}=5\sqrt{2}$, $\seg{BC}=\sqrt{5}$, $\seg{CA}=3\sqrt{5}$ (2) $\angle\pt{C}=90^\circ$인 직각삼각형"
+  answer: '(1) $\seg{AB}=5\sqrt{2}$, $\seg{BC}=\sqrt{5}$, $\seg{CA}=3\sqrt{5}$ (2) $\angle\pt{C}=90^\circ$인 직각삼각형'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/11-12.tex
@@ -1123,16 +1234,19 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C01
+  base_star: 1
+  effective_star: 1
   star: 2
   premium: false
   rationale: |
     세 거리 계산 후 판별 기준 적용. 계산량은 있으나 절차형.
+    [검수 2026-09-15] 카탈로그 base ★1(CM2-GM-C01) → effective ★1 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "세 변 길이 → 피타고라스/등변 판별"
   insight_type: 절차형
   target_cohort: 중하위권
-  answer: "(1) 정삼각형 (2) $4\sqrt{3}$"
+  answer: '(1) 정삼각형 (2) $4\sqrt{3}$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/12-13.tex
@@ -1150,17 +1264,26 @@ metadata:
   category: "세 변의 길이로 삼각형 모양 판별"
   M: {s: 3, k: 2, a: 2, t: 1}
   M_total: 8
-  insights: []
-  insight_count: 0
-  depth_score: 0.00
-  base_star: 2
+  insights:
+    - step: 1
+      type: I-EQV
+      depth: 1
+      effective_depth: 1
+      signal_ref: []
+      description: "세 변 길이 제곱 비교 → 삼각형 모양 결정 (쎈 0032·라이트쎈 0037 과 같은 EQV)"
+  insight_count: 1
+  depth_score: 3.00
+  type_id: CM2-GM-C01
+  base_star: 1
+  effective_star: 1
   star: 2
   premium: false
   rationale: |
     세 거리 계산 후 판별 기준 적용. 계산량은 있으나 절차형.
+    [검수 2026-09-15] I-EQV d1 추가(쎈 앵커와 같은 단계 라벨) / 카탈로그 base ★1(CM2-GM-C01) → effective ★1 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "세 변 길이 → 피타고라스/등변 판별"
-  insight_type: 절차형
+  insight_type: 통찰형
   target_cohort: 중하위권
   answer: "②"
   answer_source: "답지"
@@ -1178,8 +1301,8 @@ metadata:
   summary: |
     세 점 A(-2, 1), B(1, 6), C(2, a)를 꼭짓점으로 하는 삼각형 ABC가 angleC=90^circ인 직각삼각형이 되도록 하는 모든 a의 값의 합은?
   category: "직각 조건 → 미지수"
-  M: {s: 3, k: 2, a: 3, t: 1}
-  M_total: 9
+  M: {s: 3, k: 2, a: 2, t: 1}
+  M_total: 8
   insights:
     - step: 1
       type: I-EQV
@@ -1189,11 +1312,14 @@ metadata:
       description: "직각삼각형 조건을 피타고라스 등식으로 변환"
   insight_count: 1
   depth_score: 3.00
-  base_star: 3
+  type_id: CM2-GM-C01
+  base_star: 1
+  effective_star: 1
   star: 3
   premium: false
   rationale: |
     직각 조건을 등식으로 바꾸는 동치 변환 + 이차방정식 두 해의 합.
+    [검수 2026-09-15] M_a 3→2(구체 수치·미지수 ≤2 · §2.1 가이드) / 카탈로그 base ★1(CM2-GM-C01) → effective ★1 인데 라벨 ★3: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_3
   mechanism_primary: "∠C=90° ↔ CA²+CB²=AB²"
   insight_type: 통찰형
@@ -1217,8 +1343,8 @@ metadata:
   summary: |
     두 점 A(-5, 1), B(-3, 6)과 x축 위의 점 P에 대하여 선분AP^2+선분BP^2의 최솟값은?
   category: "거리 제곱의 합의 최솟값"
-  M: {s: 2, k: 2, a: 3, t: 1}
-  M_total: 8
+  M: {s: 2, k: 2, a: 2, t: 1}
+  M_total: 7
   insights:
     - step: 1
       type: I-RT
@@ -1228,11 +1354,14 @@ metadata:
       description: "길이 제곱의 합을 매개변수의 이차함수로 본다"
   insight_count: 1
   depth_score: 3.00
-  base_star: 2
+  type_id: CM2-GM-C03
+  base_star: 4
+  effective_star: 4
   star: 2
   premium: false
   rationale: |
     표현 전환(이차함수)으로 최솟값. 12-18 은 직선 매개화가 한 단계 더.
+    [검수 2026-09-15] M_a 3→2(구체 수치·미지수 ≤2 · §2.1 가이드) / 카탈로그 base ★4(CM2-GM-C03) → effective ★4 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "P 매개화 → t 의 이차식 최솟값"
   insight_type: 통찰형
@@ -1253,8 +1382,8 @@ metadata:
   summary: |
     두 점 A(-1, 4), B(5, 2)와 y축 위의 점 P에 대하여 선분AP^2+선분BP^2의 값이 최소가 되는 점 P의 좌표를 구하시오.
   category: "거리 제곱의 합의 최솟값"
-  M: {s: 2, k: 2, a: 3, t: 1}
-  M_total: 8
+  M: {s: 2, k: 2, a: 2, t: 1}
+  M_total: 7
   insights:
     - step: 1
       type: I-RT
@@ -1264,16 +1393,19 @@ metadata:
       description: "길이 제곱의 합을 매개변수의 이차함수로 본다"
   insight_count: 1
   depth_score: 3.00
-  base_star: 2
+  type_id: CM2-GM-C03
+  base_star: 4
+  effective_star: 4
   star: 2
   premium: false
   rationale: |
     표현 전환(이차함수)으로 최솟값. 12-18 은 직선 매개화가 한 단계 더.
+    [검수 2026-09-15] M_a 3→2(구체 수치·미지수 ≤2 · §2.1 가이드) / 카탈로그 base ★4(CM2-GM-C03) → effective ★4 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "P 매개화 → t 의 이차식 최솟값"
   insight_type: 통찰형
   target_cohort: 중위권
-  answer: "$(0,\,3)$"
+  answer: '$(0,\,3)$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/12-17.tex
@@ -1289,8 +1421,8 @@ metadata:
   summary: |
     두 점 A(1, 0), B(4, 0)과 직선 y=x+1 위의 점 P에 대하여 선분AP^2+선분BP^2의 값이 최소가 되는 점 P의 좌표를 구하시오.
   category: "거리 제곱의 합의 최솟값"
-  M: {s: 2, k: 2, a: 3, t: 1}
-  M_total: 8
+  M: {s: 2, k: 2, a: 2, t: 1}
+  M_total: 7
   insights:
     - step: 1
       type: I-RT
@@ -1300,16 +1432,19 @@ metadata:
       description: "길이 제곱의 합을 매개변수의 이차함수로 본다"
   insight_count: 1
   depth_score: 3.00
-  base_star: 2
+  type_id: CM2-GM-C03
+  base_star: 4
+  effective_star: 4
   star: 2
   premium: false
   rationale: |
     표현 전환(이차함수)으로 최솟값. 12-18 은 직선 매개화가 한 단계 더.
+    [검수 2026-09-15] M_a 3→2(구체 수치·미지수 ≤2 · §2.1 가이드) / 카탈로그 base ★4(CM2-GM-C03) → effective ★4 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "P 매개화 → t 의 이차식 최솟값"
   insight_type: 통찰형
   target_cohort: 중위권
-  answer: "$\left(\dfrac{3}{4},\,\dfrac{7}{4}\right)$"
+  answer: '$\left(\dfrac{3}{4},\,\dfrac{7}{4}\right)$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/12-18.tex
@@ -1333,7 +1468,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -1363,7 +1500,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -1393,7 +1532,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -1423,7 +1564,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -1432,7 +1575,7 @@ metadata:
   mechanism_primary: "수직선 위 점의 위치에서 내분 비"
   insight_type: 절차형
   target_cohort: 하위권
-  answer: "$\pt{AQ}$"
+  answer: '$\pt{AQ}$'
   answer_source: "답지(18번 크롭에 섞임)"
   figure: tikz:fig-numberline-13
   latex: latex-bank/ssen-basic-cm2/items/13-04.tex
@@ -1456,7 +1599,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -1486,7 +1631,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -1516,7 +1663,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -1546,7 +1695,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -1576,7 +1727,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -1585,7 +1738,7 @@ metadata:
   mechanism_primary: "내분점 공식(수직선)"
   insight_type: 절차형
   target_cohort: 하위권
-  answer: "$-\dfrac{17}{5}$"
+  answer: '$-\dfrac{17}{5}$'
   answer_source: "답지(크롭 한 칸 밀림) · 계산 확인"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/13-09.tex
@@ -1609,7 +1762,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -1618,7 +1773,7 @@ metadata:
   mechanism_primary: "내분점 공식(좌표평면)"
   insight_type: 절차형
   target_cohort: 하위권
-  answer: "$\left(\dfrac{7}{2},\,4\right)$"
+  answer: '$\left(\dfrac{7}{2},\,4\right)$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/14-10.tex
@@ -1639,7 +1794,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -1648,7 +1805,7 @@ metadata:
   mechanism_primary: "내분점 공식(좌표평면)"
   insight_type: 절차형
   target_cohort: 하위권
-  answer: "$(4,\,1)$"
+  answer: '$(4,\,1)$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/14-11.tex
@@ -1669,7 +1826,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -1678,7 +1837,7 @@ metadata:
   mechanism_primary: "내분점 공식(좌표평면)"
   insight_type: 절차형
   target_cohort: 하위권
-  answer: "$\left(3,\,-\dfrac{3}{2}\right)$"
+  answer: '$\left(3,\,-\dfrac{3}{2}\right)$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/14-12.tex
@@ -1699,7 +1858,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -1708,7 +1869,7 @@ metadata:
   mechanism_primary: "내분점 공식(좌표평면)"
   insight_type: 절차형
   target_cohort: 하위권
-  answer: "$(4,\,1)$"
+  answer: '$(4,\,1)$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/14-13.tex
@@ -1729,7 +1890,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -1738,7 +1901,7 @@ metadata:
   mechanism_primary: "내분점 공식(좌표평면)"
   insight_type: 절차형
   target_cohort: 하위권
-  answer: "$(3,\,-2)$"
+  answer: '$(3,\,-2)$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/14-14.tex
@@ -1762,7 +1925,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -1792,7 +1957,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -1822,7 +1989,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -1831,7 +2000,7 @@ metadata:
   mechanism_primary: "내분점 공식 = 주어진 좌표 → 일차방정식 둘"
   insight_type: 절차형
   target_cohort: 중하위권
-  answer: "$a=1$, $b=\dfrac{7}{2}$"
+  answer: '$a=1$, $b=\dfrac{7}{2}$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/14-17.tex
@@ -1855,16 +2024,19 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C05
+  base_star: 3
+  effective_star: 2
   star: 1
   premium: false
   rationale: |
     공식 대입.
+    [검수 2026-09-15] 카탈로그 base ★3(CM2-GM-C05) → effective ★2 인데 라벨 ★1: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_1
   mechanism_primary: "무게중심 공식"
   insight_type: 절차형
   target_cohort: 하위권
-  answer: "$(1,\,2)$"
+  answer: '$(1,\,2)$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/15-18.tex
@@ -1885,16 +2057,19 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C05
+  base_star: 3
+  effective_star: 2
   star: 1
   premium: false
   rationale: |
     공식 대입.
+    [검수 2026-09-15] 카탈로그 base ★3(CM2-GM-C05) → effective ★2 인데 라벨 ★1: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_1
   mechanism_primary: "무게중심 공식"
   insight_type: 절차형
   target_cohort: 하위권
-  answer: "$(2,\,2)$"
+  answer: '$(2,\,2)$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/15-19.tex
@@ -1915,16 +2090,19 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C05
+  base_star: 3
+  effective_star: 2
   star: 1
   premium: false
   rationale: |
     공식 대입.
+    [검수 2026-09-15] 카탈로그 base ★3(CM2-GM-C05) → effective ★2 인데 라벨 ★1: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_1
   mechanism_primary: "무게중심 공식"
   insight_type: 절차형
   target_cohort: 하위권
-  answer: "$(4,\,-2)$"
+  answer: '$(4,\,-2)$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/15-20.tex
@@ -1945,16 +2123,19 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C05
+  base_star: 3
+  effective_star: 2
   star: 1
   premium: false
   rationale: |
     공식 대입.
+    [검수 2026-09-15] 카탈로그 base ★3(CM2-GM-C05) → effective ★2 인데 라벨 ★1: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_1
   mechanism_primary: "무게중심 공식"
   insight_type: 절차형
   target_cohort: 하위권
-  answer: "$(-3,\,1)$"
+  answer: '$(-3,\,1)$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/15-21.tex
@@ -1975,16 +2156,19 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C05
+  base_star: 3
+  effective_star: 2
   star: 1
   premium: false
   rationale: |
     공식 대입.
+    [검수 2026-09-15] 카탈로그 base ★3(CM2-GM-C05) → effective ★2 인데 라벨 ★1: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_1
   mechanism_primary: "무게중심 공식"
   insight_type: 절차형
   target_cohort: 하위권
-  answer: "$\left(\dfrac{4}{3},\,4\right)$"
+  answer: '$\left(\dfrac{4}{3},\,4\right)$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/15-22.tex
@@ -2008,11 +2192,14 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C05
+  base_star: 3
+  effective_star: 2
   star: 1
   premium: false
   rationale: |
     공식 역대입.
+    [검수 2026-09-15] 카탈로그 base ★3(CM2-GM-C05) → effective ★2 인데 라벨 ★1: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_1
   mechanism_primary: "무게중심 공식 = 주어진 G → 일차방정식"
   insight_type: 절차형
@@ -2038,11 +2225,14 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C05
+  base_star: 3
+  effective_star: 2
   star: 1
   premium: false
   rationale: |
     공식 역대입.
+    [검수 2026-09-15] 카탈로그 base ★3(CM2-GM-C05) → effective ★2 인데 라벨 ★1: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_1
   mechanism_primary: "무게중심 공식 = 주어진 G → 일차방정식"
   insight_type: 절차형
@@ -2068,11 +2258,14 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C05
+  base_star: 3
+  effective_star: 2
   star: 1
   premium: false
   rationale: |
     공식 역대입.
+    [검수 2026-09-15] 카탈로그 base ★3(CM2-GM-C05) → effective ★2 인데 라벨 ★1: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_1
   mechanism_primary: "무게중심 공식 = 주어진 G → 일차방정식"
   insight_type: 절차형
@@ -2101,16 +2294,19 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C07
+  base_star: 4
+  effective_star: 4
   star: 2
   premium: false
   rationale: |
     평행사변형 성질을 중점 등식으로. 힌트 빈칸형.
+    [검수 2026-09-15] 카탈로그 base ★4(CM2-GM-C07) → effective ★4 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "두 대각선의 중점이 같다"
   insight_type: 절차형
   target_cohort: 중하위권
-  answer: "$a=4$, $b=5$ (힌트 $\frac{5}{2}$, $-1$, $-1$, $\frac{5}{2}$, $4$, $5$)"
+  answer: '$a=4$, $b=5$ (힌트 $\frac{5}{2}$, $-1$, $-1$, $\frac{5}{2}$, $4$, $5$)'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/16-26.tex
@@ -2131,11 +2327,14 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C07
+  base_star: 4
+  effective_star: 4
   star: 2
   premium: false
   rationale: |
     평행사변형 성질을 중점 등식으로. 힌트 빈칸형.
+    [검수 2026-09-15] 카탈로그 base ★4(CM2-GM-C07) → effective ★4 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "두 대각선의 중점이 같다"
   insight_type: 절차형
@@ -2161,11 +2360,14 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C07
+  base_star: 4
+  effective_star: 4
   star: 2
   premium: false
   rationale: |
     평행사변형 성질을 중점 등식으로. 힌트 빈칸형.
+    [검수 2026-09-15] 카탈로그 base ★4(CM2-GM-C07) → effective ★4 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "두 대각선의 중점이 같다"
   insight_type: 절차형
@@ -2189,16 +2391,19 @@ metadata:
   summary: |
     [지시문] 다음 네 점 A, B, C, D를 꼭짓점으로 하는 사각형 ABCD가 마름모일 때, a, b의 값을 구하시오. — A(0, 1), B(2, 5), C(a, 3), D(b, -1) (단, a>0)
   category: "마름모 → 중점 일치 + 이웃변 길이 같음"
-  M: {s: 3, k: 2, a: 3, t: 1}
-  M_total: 9
+  M: {s: 3, k: 2, a: 2, t: 1}
+  M_total: 8
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C07
+  base_star: 4
+  effective_star: 4
   star: 2
   premium: false
   rationale: |
     조건 둘(중점·변 길이)을 순서대로 써야 한다. 부호 조건으로 해 선택.
+    [검수 2026-09-15] M_a 3→2(구체 수치·미지수 ≤2 · §2.1 가이드) / 카탈로그 base ★4(CM2-GM-C07) → effective ★4 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "중점 일치 + AB=BC 제곱 등식 연립"
   insight_type: 절차형
@@ -2219,16 +2424,19 @@ metadata:
   summary: |
     [지시문] 다음 네 점 A, B, C, D를 꼭짓점으로 하는 사각형 ABCD가 마름모일 때, a, b의 값을 구하시오. — A(-1, -1), B(0, a), C(2, b), D(1, 0) (단, a<0)
   category: "마름모 → 중점 일치 + 이웃변 길이 같음"
-  M: {s: 3, k: 2, a: 3, t: 1}
-  M_total: 9
+  M: {s: 3, k: 2, a: 2, t: 1}
+  M_total: 8
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C07
+  base_star: 4
+  effective_star: 4
   star: 2
   premium: false
   rationale: |
     조건 둘(중점·변 길이)을 순서대로 써야 한다. 부호 조건으로 해 선택.
+    [검수 2026-09-15] M_a 3→2(구체 수치·미지수 ≤2 · §2.1 가이드) / 카탈로그 base ★4(CM2-GM-C07) → effective ★4 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "중점 일치 + AB=BC 제곱 등식 연립"
   insight_type: 절차형
@@ -2249,16 +2457,19 @@ metadata:
   summary: |
     [지시문] 다음 네 점 A, B, C, D를 꼭짓점으로 하는 사각형 ABCD가 마름모일 때, a, b의 값을 구하시오. — A(-2, a), B(-6, b), C(-10, -3), D(-6, 0) (단, a<0)
   category: "마름모 → 중점 일치 + 이웃변 길이 같음"
-  M: {s: 3, k: 2, a: 3, t: 1}
-  M_total: 9
+  M: {s: 3, k: 2, a: 2, t: 1}
+  M_total: 8
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C07
+  base_star: 4
+  effective_star: 4
   star: 2
   premium: false
   rationale: |
     조건 둘(중점·변 길이)을 순서대로 써야 한다. 부호 조건으로 해 선택.
+    [검수 2026-09-15] M_a 3→2(구체 수치·미지수 ≤2 · §2.1 가이드) / 카탈로그 base ★4(CM2-GM-C07) → effective ★4 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "중점 일치 + AB=BC 제곱 등식 연립"
   insight_type: 절차형
@@ -2287,7 +2498,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -2296,7 +2509,7 @@ metadata:
   mechanism_primary: "등간격 점에서 내분 비로 위치 세기"
   insight_type: 절차형
   target_cohort: 하위권
-  answer: "㈎ $\pt{E}$ \ ㈏ $\pt{D}$"
+  answer: '㈎ $\pt{E}$ \ ㈏ $\pt{D}$'
   answer_source: "답지"
   figure: tikz:fig-numberline-17-01
   latex: latex-bank/ssen-basic-cm2/items/17-01.tex
@@ -2317,7 +2530,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -2347,7 +2562,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -2380,7 +2597,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -2410,7 +2629,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -2419,7 +2640,7 @@ metadata:
   mechanism_primary: "내분점 공식 → 미지수/거리"
   insight_type: 절차형
   target_cohort: 중하위권
-  answer: "$\sqrt{17}$"
+  answer: '$\sqrt{17}$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/17-05.tex
@@ -2440,7 +2661,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
+  type_id: CM2-GM-C04
   base_star: 2
+  effective_star: 2
   star: 2
   premium: false
   rationale: |
@@ -2470,7 +2693,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
+  type_id: CM2-GM-C04
   base_star: 2
+  effective_star: 2
   star: 2
   premium: false
   rationale: |
@@ -2506,7 +2731,9 @@ metadata:
       description: "점 C 의 위치를 두 경우로 해석"
   insight_count: 1
   depth_score: 3.00
+  type_id: CM2-GM-C04
   base_star: 2
+  effective_star: 2
   star: 2
   premium: false
   rationale: |
@@ -2515,7 +2742,7 @@ metadata:
   mechanism_primary: "선분 위/밖 두 경우로 나눠 중점 관계"
   insight_type: 통찰형
   target_cohort: 중위권
-  answer: "(1) $(-1,\,1)$ (2) $(7,\,-1)$"
+  answer: '(1) $(-1,\,1)$ (2) $(7,\,-1)$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/18-08.tex
@@ -2531,8 +2758,8 @@ metadata:
   summary: |
     두 점 A(4, -2), B(9, 5)를 잇는 선분 AB의 연장선 위의 점 P에 대하여 삼각형 BOP의 넓이가 삼각형 AOP의 넓이의 2배일 때, 점 P의 좌표를 구하시오. (단, O는 원점이다.)
   category: "넓이비 → 선분비"
-  M: {s: 3, k: 2, a: 3, t: 2}
-  M_total: 10
+  M: {s: 3, k: 2, a: 2, t: 2}
+  M_total: 9
   insights:
     - step: 1
       type: I-RT
@@ -2548,16 +2775,19 @@ metadata:
       description: "AP:BP=1:2 에서 A 가 PB 의 중점"
   insight_count: 2
   depth_score: 5.50
-  base_star: 3
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 2
   star: 3
   premium: false
   rationale: |
     넓이비를 선분비로 바꾸는 표현 전환 + 연장선(외분)에서 A 가 PB 의 중점임을 봄. 함정: P 의 위치(t=2).
+    [검수 2026-09-15] M_a 3→2(구체 수치·미지수 ≤2 · §2.1 가이드) / 카탈로그 base ★2(CM2-GM-C04) → effective ★2 인데 라벨 ★3: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_3
   mechanism_primary: "높이 공통 → 넓이비 = 밑변비 → 연장선 위 외분 관계"
   insight_type: 통찰형
   target_cohort: 중위권
-  answer: "$(-1,\,-9)$"
+  answer: '$(-1,\,-9)$'
   answer_source: "계산(답지 크롭은 풀이 앞부분만) · 확인 필요"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/18-09.tex
@@ -2581,11 +2811,14 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C05
+  base_star: 3
+  effective_star: 2
   star: 1
   premium: false
   rationale: |
     공식 역대입.
+    [검수 2026-09-15] 카탈로그 base ★3(CM2-GM-C05) → effective ★2 인데 라벨 ★1: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_1
   mechanism_primary: "무게중심 공식 → 미지수 → 거리"
   insight_type: 절차형
@@ -2611,11 +2844,14 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C05
+  base_star: 3
+  effective_star: 3
   star: 2
   premium: false
   rationale: |
     무게중심을 내분점으로 보는 개념 연결.
+    [검수 2026-09-15] 카탈로그 base ★3(CM2-GM-C05) → effective ★3 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "G 는 A 와 BC 중점을 2:1 로 내분"
   insight_type: 절차형
@@ -2641,11 +2877,14 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C05
+  base_star: 3
+  effective_star: 3
   star: 2
   premium: false
   rationale: |
     연립 계산.
+    [검수 2026-09-15] 카탈로그 base ★3(CM2-GM-C05) → effective ★3 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "좌표별 합=0 → 연립일차방정식"
   insight_type: 절차형
@@ -2671,11 +2910,14 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C05
+  base_star: 3
+  effective_star: 2
   star: 1
   premium: false
   rationale: |
     공식 역대입.
+    [검수 2026-09-15] 카탈로그 base ★3(CM2-GM-C05) → effective ★2 인데 라벨 ★1: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_1
   mechanism_primary: "무게중심 공식 → 미지수 → 거리"
   insight_type: 절차형
@@ -2704,11 +2946,14 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C07
+  base_star: 4
+  effective_star: 4
   star: 2
   premium: false
   rationale: |
     성질 한 번 적용. 21-09 는 OD² 계산이 추가.
+    [검수 2026-09-15] 카탈로그 base ★4(CM2-GM-C07) → effective ★4 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "대각선 중점 일치 → 미지수"
   insight_type: 절차형
@@ -2734,12 +2979,15 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
-  star: 2
+  type_id: CM2-GM-C07
+  base_star: 4
+  effective_star: 4
+  star: 3
   premium: false
   rationale: |
     성질 한 번 적용. 21-09 는 OD² 계산이 추가.
-  tier: star_2
+    [검수 2026-09-15] ★2→★3(쎈 0058 B단계 대표문제 · 같은 메커니즘 시스템 판정 ★3 과 정합) / 카탈로그 base ★4(CM2-GM-C07) → effective ★4 인데 라벨 ★3: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
+  tier: star_3
   mechanism_primary: "대각선 중점 일치 → 미지수"
   insight_type: 절차형
   target_cohort: 중하위권
@@ -2759,16 +3007,19 @@ metadata:
   summary: |
     네 점 A(a, 2), B(3, 0), C(5, 1), D(b, 3)을 꼭짓점으로 하는 사각형 ABCD가 마름모일 때, a+b의 최댓값을 구하시오.
   category: "마름모 조건 → 최댓값"
-  M: {s: 3, k: 2, a: 3, t: 1}
-  M_total: 9
+  M: {s: 3, k: 2, a: 2, t: 1}
+  M_total: 8
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 3
+  type_id: CM2-GM-C07
+  base_star: 4
+  effective_star: 4
   star: 3
   premium: false
   rationale: |
     조건 둘 연립 후 두 해 가운데 큰 값 선택(t=1).
+    [검수 2026-09-15] M_a 3→2(구체 수치·미지수 ≤2 · §2.1 가이드) / 카탈로그 base ★4(CM2-GM-C07) → effective ★4 인데 라벨 ★3: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_3
   mechanism_primary: "중점 일치 + 이웃변 같음 → a 두 값 → 합의 최댓값"
   insight_type: 절차형
@@ -2796,23 +3047,26 @@ metadata:
   M_total: 7
   insights:
     - step: 1
-      type: I-XU
+      type: I-EQV
       depth: 1
       effective_depth: 1
       signal_ref: []
-      description: "각의 이등분선 정리(도형)와 내분점 공식(좌표) 결합"
+      description: "각의 이등분선 정리 BD:CD=AB:AC 를 내분 비로 바꿔 내분점 공식에 넣음 (같은 소단원 표준 절차 · 쎈 0063 EQV 와 정합)"
   insight_count: 1
   depth_score: 3.00
-  base_star: 2
+  type_id: CM2-GM-C06
+  base_star: 4
+  effective_star: 4
   star: 2
   premium: false
   rationale: |
     이등분선 정리(단원 밖 성질)와 내분점 결합.
+    [검수 2026-09-15] I-XU→I-EQV(같은 소단원 표준 절차 · 단원 경계 아님) / 카탈로그 base ★4(CM2-GM-C06) → effective ★4 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "BD:CD=AB:AC → 내분점 공식"
   insight_type: 통찰형
   target_cohort: 중위권
-  answer: "(1) $2:1$ (2) $\left(-\dfrac{4}{3},\,1\right)$"
+  answer: '(1) $2:1$ (2) $\left(-\dfrac{4}{3},\,1\right)$'
   answer_source: "답지"
   figure: tikz:fig-19-17
   latex: latex-bank/ssen-basic-cm2/items/19-17.tex
@@ -2832,23 +3086,26 @@ metadata:
   M_total: 7
   insights:
     - step: 1
-      type: I-XU
+      type: I-EQV
       depth: 1
       effective_depth: 1
       signal_ref: []
-      description: "각의 이등분선 정리(도형)와 내분점 공식(좌표) 결합"
+      description: "각의 이등분선 정리 BD:CD=AB:AC 를 내분 비로 바꿔 내분점 공식에 넣음 (같은 소단원 표준 절차 · 쎈 0063 EQV 와 정합)"
   insight_count: 1
   depth_score: 3.00
-  base_star: 2
-  star: 2
+  type_id: CM2-GM-C06
+  base_star: 4
+  effective_star: 4
+  star: 3
   premium: false
   rationale: |
     이등분선 정리(단원 밖 성질)와 내분점 결합.
-  tier: star_2
+    [검수 2026-09-15] I-XU→I-EQV(같은 소단원 표준 절차 · 단원 경계 아님) / ★2→★3(쎈 0063 B단계 대표문제 · 같은 메커니즘 시스템 판정 ★3 과 정합) / 카탈로그 base ★4(CM2-GM-C06) → effective ★4 인데 라벨 ★3: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
+  tier: star_3
   mechanism_primary: "BD:CD=AB:AC → 내분점 공식"
   insight_type: 통찰형
   target_cohort: 중위권
-  answer: "$\left(\dfrac{9}{2},\,-\dfrac{1}{2}\right)$"
+  answer: '$\left(\dfrac{9}{2},\,-\dfrac{1}{2}\right)$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/19-18.tex
@@ -2872,11 +3129,14 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C01
+  base_star: 1
+  effective_star: 1
   star: 2
   premium: false
   rationale: |
     표준 절차.
+    [검수 2026-09-15] 카탈로그 base ★1(CM2-GM-C01) → effective ★1 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "거리 공식 제곱 → 이차방정식 두 해의 합"
   insight_type: 절차형
@@ -2902,12 +3162,15 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
-  star: 2
+  type_id: CM2-GM-C02
+  base_star: 3
+  effective_star: 3
+  star: 3
   premium: false
   rationale: |
     매개화 + 표준 절차.
-  tier: star_2
+    [검수 2026-09-15] ★2→★3(쎈 0021 B단계 대표문제 · 같은 메커니즘 시스템 판정 ★3 과 정합)
+  tier: star_3
   mechanism_primary: "P(t,−t+2) 매개화 → AP²=BP²"
   insight_type: 절차형
   target_cohort: 중위권
@@ -2927,25 +3190,22 @@ metadata:
   summary: |
     세 점 A(0, 1), B(5, -2), C(5, 1)을 꼭짓점으로 하는 삼각형 ABC의 외심을 P(a, b)라 할 때, a+b의 값은?
   category: "외심 좌표"
-  M: {s: 3, k: 2, a: 3, t: 1}
-  M_total: 9
-  insights:
-    - step: 1
-      type: I-SYM
-      depth: 1
-      effective_depth: 1
-      signal_ref: []
-      description: "B, C 가 x=5 위에 있으므로 외심의 y 는 그 중점"
-  insight_count: 1
-  depth_score: 3.00
+  M: {s: 3, k: 2, a: 2, t: 1}
+  M_total: 8
+  insights: []
+  insight_count: 0
+  depth_score: 0.00
+  type_id: CM2-GM-C02
   base_star: 3
+  effective_star: 3
   star: 3
   premium: false
   rationale: |
     외심 = 등거리점. B,C 의 대칭을 보면 b 가 즉시 나온다(I-SYM 깊이 1).
+    [검수 2026-09-15] M_a 3→2(구체 수치·미지수 ≤2 · §2.1 가이드) / SYM 라벨 제거 — B, C 의 x 가 같아 식이 바로 풀리는 것은 대칭성 통찰이 아니라 계산 단축(검수 2026-09-15)
   tier: star_3
   mechanism_primary: "PA²=PB²=PC² 연립(B,C 가 같은 x 라 한 조건이 바로 풀림)"
-  insight_type: 통찰형
+  insight_type: 절차형
   target_cohort: 중위권
   answer: "①"
   answer_source: "답지"
@@ -2963,8 +3223,8 @@ metadata:
   summary: |
     세 점 A(-1, 2), B(1, -2), C를 꼭짓점으로 하는 삼각형 ABC가 정삼각형일 때, 점 C의 x좌표는? (단, 점 C는 제1사분면 위의 점이다.)
   category: "정삼각형 조건"
-  M: {s: 3, k: 3, a: 3, t: 2}
-  M_total: 11
+  M: {s: 3, k: 3, a: 2, t: 2}
+  M_total: 10
   insights:
     - step: 1
       type: I-CON
@@ -2974,11 +3234,14 @@ metadata:
       description: "CA²=CB² 를 정리해 x=2y 라는 일차 관계로"
   insight_count: 1
   depth_score: 3.00
-  base_star: 3
+  type_id: CM2-GM-C07
+  base_star: 4
+  effective_star: 4
   star: 3
   premium: false
   rationale: |
     등식 둘 연립(한 식은 일차로 정리됨) + 제1사분면 조건. 계산 부담(k=3).
+    [검수 2026-09-15] M_a 3→2(구체 수치·미지수 ≤2 · §2.1 가이드) / 카탈로그 base ★4(CM2-GM-C07) → effective ★4 인데 라벨 ★3: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_3
   mechanism_primary: "CA=CB=AB → 연립 → 사분면 조건"
   insight_type: 통찰형
@@ -2999,8 +3262,8 @@ metadata:
   summary: |
     두 점 A(-2, 5), B(k, 1)과 y축 위의 점 P에 대하여 선분AP^2+선분BP^2의 최솟값이 16일 때, 양수 k의 값은?
   category: "거리 제곱 합 최솟값 → 역산"
-  M: {s: 3, k: 2, a: 3, t: 1}
-  M_total: 9
+  M: {s: 3, k: 2, a: 2, t: 1}
+  M_total: 8
   insights:
     - step: 1
       type: I-RT
@@ -3016,11 +3279,14 @@ metadata:
       description: "최솟값 조건에서 k 를 역으로 구함"
   insight_count: 2
   depth_score: 3.00
-  base_star: 3
+  type_id: CM2-GM-C03
+  base_star: 4
+  effective_star: 4
   star: 3
   premium: false
   rationale: |
     최솟값을 먼저 식으로 만들고 조건으로 역산(I-BW 깊이 1).
+    [검수 2026-09-15] M_a 3→2(구체 수치·미지수 ≤2 · §2.1 가이드) / 카탈로그 base ★4(CM2-GM-C03) → effective ★4 인데 라벨 ★3: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_3
   mechanism_primary: "이차식 최솟값=16 → k"
   insight_type: 통찰형
@@ -3046,7 +3312,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 1
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 1
   star: 1
   premium: false
   rationale: |
@@ -3076,7 +3344,9 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
+  type_id: CM2-GM-C04
   base_star: 2
+  effective_star: 2
   star: 2
   premium: false
   rationale: |
@@ -3112,7 +3382,9 @@ metadata:
       description: "중점삼각형의 무게중심 = 원 삼각형의 무게중심"
   insight_count: 1
   depth_score: 6.00
+  type_id: CM2-GM-C05
   base_star: 3
+  effective_star: 3
   star: 3
   premium: false
   rationale: |
@@ -3139,17 +3411,26 @@ metadata:
   category: "평행사변형 → 중점 일치"
   M: {s: 2, k: 2, a: 2, t: 0}
   M_total: 6
-  insights: []
-  insight_count: 0
-  depth_score: 0.00
-  base_star: 2
-  star: 2
+  insights:
+    - step: 1
+      type: I-EQV
+      depth: 1
+      effective_depth: 1
+      signal_ref: []
+      description: "평행사변형 → 대각선 중점 일치 등식 (쎈 0058 과 같은 EQV)"
+  insight_count: 1
+  depth_score: 3.00
+  type_id: CM2-GM-C07
+  base_star: 4
+  effective_star: 4
+  star: 3
   premium: false
   rationale: |
     성질 한 번 적용. 21-09 는 OD² 계산이 추가.
-  tier: star_2
+    [검수 2026-09-15] I-EQV d1 추가(쎈 앵커와 같은 단계 라벨) / ★2→★3(쎈 0058 B단계 대표문제 · 같은 메커니즘 시스템 판정 ★3 과 정합) / 카탈로그 base ★4(CM2-GM-C07) → effective ★4 인데 라벨 ★3: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
+  tier: star_3
   mechanism_primary: "대각선 중점 일치 → 미지수"
-  insight_type: 절차형
+  insight_type: 통찰형
   target_cohort: 중하위권
   answer: "②"
   answer_source: "답지"
@@ -3167,8 +3448,8 @@ metadata:
   summary: |
     오른쪽 그림과 같이 지점 O에서 수직으로 만나는 직선 도로가 있다. 서로 다른 도로에 있는 윤희와 지민이가 지점 O에서 각각 50 \mathrm{m}씩 떨어진 곳에서 동시에 출발하여 분속 10 \mathrm{m}, 분속 20 \mathrm{m}의 속력으로 남쪽, 동쪽으로 직진하였다. 이
   category: "실생활 거리 최솟값"
-  M: {s: 3, k: 2, a: 3, t: 1}
-  M_total: 9
+  M: {s: 3, k: 2, a: 2, t: 1}
+  M_total: 8
   insights:
     - step: 1
       type: I-RT
@@ -3178,18 +3459,21 @@ metadata:
       description: "실생활 상황을 좌표·시간 매개변수로 표현"
   insight_count: 1
   depth_score: 6.00
-  base_star: 3
+  type_id: CM2-GM-C03
+  base_star: 4
+  effective_star: 4
   star: 3
   premium: false
   rationale: |
     상황을 좌표로 옮기고(I-RT) 이차함수 최솟값.
+    [검수 2026-09-15] M_a 3→2(구체 수치·미지수 ≤2 · §2.1 가이드) / 카탈로그 base ★4(CM2-GM-C03) → effective ★4 인데 라벨 ★3: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_3
   mechanism_primary: "위치를 시간 t 로 매개화 → 거리² 이차함수 최솟값"
   insight_type: 통찰형
   target_cohort: 중위권
   answer: "3분"
   answer_source: "답지"
-  figure: tikz:fig-21-10
+  figure: crop:fig-21-10.jpg
   latex: latex-bank/ssen-basic-cm2/items/21-10.tex
   anchor_status: null
   usage_ref: []
@@ -3203,19 +3487,28 @@ metadata:
   summary: |
     두 점 A(2, -5), B(1, 3)에 대하여 선분 AB를 m:3으로 내분하는 점이 제4사분면 위에 있을 때, 자연수 m의 최댓값을 구하시오.
   category: "내분점의 사분면 조건"
-  M: {s: 3, k: 2, a: 3, t: 1}
-  M_total: 9
-  insights: []
-  insight_count: 0
-  depth_score: 0.00
-  base_star: 3
+  M: {s: 3, k: 2, a: 2, t: 1}
+  M_total: 8
+  insights:
+    - step: 1
+      type: I-EQV
+      depth: 1
+      effective_depth: 1
+      signal_ref: []
+      description: "내분점 좌표 부호 조건 → m 의 부등식 (쎈 0046 과 같은 EQV)"
+  insight_count: 1
+  depth_score: 3.00
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 2
   star: 3
   premium: false
   rationale: |
     x>0 은 항상 성립, y<0 만 조건 — 두 부등식을 다 확인해야 함(t=1).
+    [검수 2026-09-15] M_a 3→2(구체 수치·미지수 ≤2 · §2.1 가이드) / I-EQV d1 추가(쎈 앵커와 같은 단계 라벨) / 카탈로그 base ★2(CM2-GM-C04) → effective ★2 인데 라벨 ★3: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_3
   mechanism_primary: "내분점 좌표 부호 조건 → m 의 범위"
-  insight_type: 절차형
+  insight_type: 통찰형
   target_cohort: 중위권
   answer: "4"
   answer_source: "답지"
@@ -3233,8 +3526,8 @@ metadata:
   summary: |
     두 점 A(3, -4), B(6, -4)에 대하여 선분 AB 위의 점 P(a, b)에 대하여 삼각형 OAP의 넓이가 삼각형 OPB의 넓이의 4배일 때, a+b의 값을 구하시오. (단, O는 원점이다.)
   category: "넓이비 → 내분 비"
-  M: {s: 3, k: 2, a: 3, t: 1}
-  M_total: 9
+  M: {s: 3, k: 2, a: 2, t: 1}
+  M_total: 8
   insights:
     - step: 1
       type: I-RT
@@ -3244,16 +3537,19 @@ metadata:
       description: "넓이비 → 밑변 길이비"
   insight_count: 1
   depth_score: 3.00
-  base_star: 3
+  type_id: CM2-GM-C04
+  base_star: 2
+  effective_star: 2
   star: 3
   premium: false
   rationale: |
     넓이비를 선분비로(I-RT 깊이 1) 후 내분점.
+    [검수 2026-09-15] M_a 3→2(구체 수치·미지수 ≤2 · §2.1 가이드) / 카탈로그 base ★2(CM2-GM-C04) → effective ★2 인데 라벨 ★3: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_3
   mechanism_primary: "높이 공통 → AP:PB=4:1 → 내분점"
   insight_type: 통찰형
   target_cohort: 중위권
-  answer: "$\dfrac{7}{5}$"
+  answer: '$\dfrac{7}{5}$'
   answer_source: "답지"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/21-12.tex
@@ -3274,16 +3570,19 @@ metadata:
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 2
+  type_id: CM2-GM-C05
+  base_star: 3
+  effective_star: 3
   star: 2
   premium: false
   rationale: |
     두 단계 절차.
+    [검수 2026-09-15] 카탈로그 base ★3(CM2-GM-C05) → effective ★3 인데 라벨 ★2: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_2
   mechanism_primary: "무게중심 공식 역대입 → BC 길이"
   insight_type: 절차형
   target_cohort: 중하위권
-  answer: "$\sqrt{73}$"
+  answer: '$\sqrt{73}$'
   answer_source: "계산(답지 크롭은 전략 줄만) · 확인 필요"
   figure: none
   latex: latex-bank/ssen-basic-cm2/items/21-13.tex
@@ -3299,16 +3598,19 @@ metadata:
   summary: |
     네 점 A(a, 1), B(b, -2), C(3, 1), D(1, 4)를 꼭짓점으로 하는 사각형 ABCD가 마름모일 때, 사각형 ABCD의 넓이를 구하시오. (단, a<0)
   category: "마름모 조건 → 넓이"
-  M: {s: 3, k: 2, a: 3, t: 1}
-  M_total: 9
+  M: {s: 3, k: 2, a: 2, t: 1}
+  M_total: 8
   insights: []
   insight_count: 0
   depth_score: 0.00
-  base_star: 3
+  type_id: CM2-GM-C07
+  base_star: 4
+  effective_star: 4
   star: 3
   premium: false
   rationale: |
     조건 연립 후 마름모 넓이 공식(대각선). 단계 4.
+    [검수 2026-09-15] M_a 3→2(구체 수치·미지수 ≤2 · §2.1 가이드) / 카탈로그 base ★4(CM2-GM-C07) → effective ★4 인데 라벨 ★3: 기초 교재의 최소형(공식 1회 대입·조건 하나)이라 낮춤 · 쎈 앵커 정합. 카탈로그에 기초 변형 하위 base 가 없어 드리프트로 기록
   tier: star_3
   mechanism_primary: "중점 일치 + AB=AD → a,b → 대각선 길이 곱의 절반"
   insight_type: 절차형
@@ -3327,9 +3629,9 @@ metadata:
 | ★ | 문항 수 | 비고 |
 |---|---|---|
 | ★ 1 | 46 | 개념 쪽 공식 대입 |
-| ★ 2 | 46 | 유형 쪽 표준 절차 |
-| ★ 3 | 12 | 조건 둘 결합·성질 결합·실전 |
+| ★ 2 | 41 | 유형 쪽 표준 절차 |
+| ★ 3 | 17 | 조건 둘 결합·성질 결합·실전 |
 
-- 통찰형(insight_count ≥ 1): 16문 · 절차형: 88문
+- 통찰형(insight_count ≥ 1): 21문 · 절차형: 83문
 - 앵커 후보: 없음(★ 4 이상 없음). 이 자산은 하위·중위권 유형편/연습편 원본 은행용.
 - 답 출처: 답지 크롭(ingest-scan-answers)이 있으면 그 값, 크롭이 밀리거나 없으면 계산값(`answer_source` 에 표기 · 사람 확인 필요).

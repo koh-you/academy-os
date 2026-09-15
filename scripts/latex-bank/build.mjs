@@ -34,13 +34,24 @@ async function findXelatex() {
 
 const CIRCLED = ["①", "②", "③", "④", "⑤"];
 
+/** 그림 참조 → LaTeX. `tikz:이름` 은 figures/이름.tex 를 \input, `crop:이름.jpg` 는 스캔 크롭을 \includegraphics. */
+function renderFigure(figure, width = "0.38\\linewidth") {
+  if (figure.startsWith("crop:")) return `\\includegraphics[width=${width}]{figures/${figure.slice(5)}}`;
+  return `\\input{figures/${figure.replace(/^tikz:/, "")}}`;
+}
+
 /** 문항 하나의 본문 LaTeX(번호·출처 배지 포함 · dmpnum 두 번째 인자). */
 function renderItemBody(id, item, group, bank) {
   const [page, number] = id.split("-");
   const badge = `\\dmkichul{${bank.book} ${page}쪽 ${number}번${item.tag ? ` · ${item.tag}` : ""}}`;
-  const parts = [badge, item.body];
+  const parts = [badge];
+  if (item.figure) {
+    // 원문처럼 「오른쪽 그림」이 본문 오른쪽에 오도록 본문 0.58 · 그림 0.4 폭으로 나란히 둔다.
+    parts.push(`\\noindent\\begin{minipage}[t]{0.58\\linewidth}\\vspace{0pt}${item.body}\\end{minipage}\\hfill\\begin{minipage}[t]{0.4\\linewidth}\\vspace{0pt}\\centering ${renderFigure(item.figure, "0.92\\linewidth")}\\end{minipage}\\par`);
+  } else {
+    parts.push(item.body);
+  }
   if (item.subs) parts.push(item.subs.map((sub, index) => `\\dmsubprob{${index + 1}} ${sub}`).join("\n"));
-  if (item.figure) parts.push(`\\par\\begin{center}\\input{figures/${item.figure.replace(/^tikz:/, "")}}\\end{center}`);
   if (item.choices) {
     const env = item.choices_layout === "v" ? "choicesv" : item.choices_layout === "ii" ? "choicesii" : "choices32";
     parts.push(`\\begin{${env}}${item.choices.map((choice) => `{${choice}}`).join("")}\\end{${env}}`);
@@ -101,10 +112,16 @@ async function main() {
 % 문항 전사용 보조 매크로(dm-editorial 매크로를 덮어쓰지 않는다)
 \\newcommand{\\pt}[1]{\\mathrm{#1}}
 \\newcommand{\\seg}[1]{\\overline{\\mathrm{#1}}}
-\\newcommand{\\blank}{\\framebox[1.5em]{\\rule{0pt}{1.4ex}}}
+\\newcommand{\\blank}[1][1.5em]{\\framebox[#1]{\\rule{0pt}{1.4ex}}}
 \\newcommand{\\dmhint}[1]{\\par\\smallskip\\begin{tcolorbox}[enhanced,colback=dm-navylight!60,colframe=dm-navy!40,boxrule=0.3pt,sharp corners,left=3mm,right=3mm,top=2mm,bottom=2mm,boxsep=0mm]\\small\\setlength{\\parskip}{1mm}#1\\end{tcolorbox}}
-\\newcommand{\\dmsection}[1]{\\par\\vspace{3mm}\\noindent{\\color{dm-navy}\\hrule height 0.6pt}\\vspace{1.2mm}\\noindent{\\dmheadingfont\\bfseries\\fontsize{11}{13}\\selectfont\\color{dm-navy}#1}\\par\\vspace{2mm}}
-\\newcommand{\\dmpassage}[1]{\\par\\medskip\\noindent{\\dmheadingfont\\bfseries\\color{dm-navy}#1}\\par\\smallskip}
+% 구역 제목·공통 지시문은 뒤에 문항 한 개는 붙을 자리가 있어야 찍는다(쪽 끝 고아 방지).
+\\newcommand{\\dmsection}[1]{\\par\\needspace{7\\baselineskip}\\vspace{3mm}\\noindent{\\color{dm-navy}\\hrule height 0.6pt}\\vspace{1.2mm}\\noindent{\\dmheadingfont\\bfseries\\fontsize{11}{13}\\selectfont\\color{dm-navy}#1}\\par\\vspace{2mm}}
+\\newcommand{\\dmpassage}[1]{\\par\\needspace{6\\baselineskip}\\medskip\\noindent{\\dmheadingfont\\bfseries\\color{dm-navy}#1}\\par\\smallskip}
+% 줄바꿈 규약(프로토타입 mathbook-problems.sty · style.sty 와 같음): 수식 안에서는 줄을 바꾸지 않고, 「(단, …)」·「x축」은 한 덩어리.
+\\binoppenalty=10000 \\relpenalty=10000
+\\newcommand{\\nob}[1]{\\mbox{#1}}
+\\newcommand{\\cond}[1]{\\mbox{(단, #1)}}
+\\raggedbottom
 \\renewcommand{\\dmchapunit}{${bank.unit}}
 `;
   const lines = [preamble, "\\begin{document}", `\\dmchapter{${bank.unit.split(" ")[0]}}{${bank.unit.split(" ").slice(1).join(" ")}}`, "\\setcounter{dmproblemcount}{0}"];
@@ -115,11 +132,14 @@ async function main() {
       lastSection = group.section;
     }
     if (group.passage) lines.push(`\\dmpassage{${group.passage}}`);
-    if (group.figure) lines.push(`\\begin{center}\\input{figures/${group.figure.replace(/^tikz:/, "")}}\\end{center}`);
-    for (const id of group.items) lines.push(`\\dmpnum{${id}}{\\input{items/${id}}}`);
+    if (group.figure) lines.push(`\\begin{center}${renderFigure(group.figure)}\\end{center}`);
+    // 문항 사이 최소 4mm(출처 배지가 위 문항 그림에 닿지 않게). dmpnum 의 fill 은 그 위에 더해진다.
+    for (const id of group.items) lines.push(`\\dmpnum{${id}}{\\input{items/${id}}}\\vspace{4mm}`);
   }
   // 답
-  lines.push("\\clearpage", "\\dmsection{정답}", "\\begin{multicols}{2}\\small");
+  // dmpnum 은 문항마다 `plus 1fill` 을 넣어 쪽 안에서 고르게 벌린다(프로토타입 디자인). 마지막 쪽만은 남는 공간을
+  // 한 단계 높은 filll 로 흡수해 문항이 늘어지지 않게 한다(sty 는 수정 금지).
+  lines.push("\\vspace*{0pt plus 1filll}", "\\clearpage", "\\dmsection{정답}", "\\begin{multicols}{2}\\small");
   for (const id of orderedIds) lines.push(`\\noindent\\textbf{${id}}\\ ${bank.items[id].answer}\\par`);
   lines.push("\\end{multicols}", "\\end{document}");
   await writeFile(path.join(dir, "book.tex"), lines.join("\n").replace("\\usepackage{fontspec}", "\\usepackage{fontspec}\n\\usepackage{multicol}"), "utf8");
@@ -134,8 +154,9 @@ async function main() {
     await mkdir(path.join(dir, "review"), { recursive: true });
     for (const group of bank.groups) {
       for (const id of group.items) {
-        const single = `${preamble}\\usepackage{multicol}\\geometry{paperwidth=110mm,paperheight=200mm,margin=6mm,headheight=0pt,headsep=0pt,footskip=0pt}\\pagestyle{empty}\\begin{document}\\setcounter{dmproblemcount}{0}
-${group.passage ? `\\dmpassage{${group.passage}}` : ""}${group.figure ? `\\begin{center}\\input{figures/${group.figure.replace(/^tikz:/, "")}}\\end{center}` : ""}
+        // 문항 번호는 book.pdf 와 같게(책 순서 카운터) — 낱장 조판이라도 「01.」로만 보이지 않게 한다.
+        const single = `${preamble}\\usepackage{multicol}\\geometry{paperwidth=110mm,paperheight=200mm,margin=6mm,headheight=0pt,headsep=0pt,footskip=0pt}\\pagestyle{empty}\\begin{document}\\setcounter{dmproblemcount}{${orderedIds.indexOf(id)}}
+${group.passage ? `\\dmpassage{${group.passage}}` : ""}${group.figure ? `\\begin{center}${renderFigure(group.figure)}\\end{center}` : ""}
 \\dmpnum{${id}}{\\input{items/${id}}}\\end{document}`;
         await writeFile(path.join(dir, "_single.tex"), single, "utf8");
         try {
