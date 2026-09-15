@@ -1,5 +1,11 @@
 # Academy OS Current Status
 
+## 2026-09-15 Supabase Realtime polling 안전망 보강
+
+- 운영 두 탭 smoke에서 출결 저장은 Supabase/API 원천에 정상 반영됐지만, 두 번째 탭은 새로고침 전까지 갱신되지 않았다. Realtime transport가 `SUBSCRIBED`만 보고 7초 polling을 중지해 event 전달 실패까지 함께 가린 것이 원인이었다.
+- Realtime 즉시 갱신 경로는 유지하면서 교사 화면의 7초 polling을 상시 안전망으로 남겼다. 구독 연결·event 전달이 조용히 실패해도 다음 polling에서 API 원천을 다시 읽는다.
+- 가상 lifecycle·SSE·provider 테스트, runtime lint, build, `test:production`(308/308)을 통과했다. 운영 검증용 수업은 7일 복구 가능한 취소 상태로 정리했다. 테스트 학생은 UI가 영구 삭제 대신 `퇴원 처리`만 제공해 의미를 임의로 바꾸지 않고 활성 상태로 남겼다.
+
 ## 2026-09-14 Supabase Realtime 운영 활성화
 
 - PR #336을 main(`69f1e1ba`)에 병합했다. Supabase 운영 DB에 tenant private Broadcast trigger를 적용했고 조회 결과 `INSERT`/`UPDATE`/`DELETE` 3개 이벤트 등록을 확인했다.
