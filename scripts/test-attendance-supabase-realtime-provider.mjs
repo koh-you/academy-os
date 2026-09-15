@@ -54,6 +54,12 @@ calls.channels[0].callback({ payload: { type: "UPDATE", record: { private_note: 
 assert.deepEqual(changesA, [{ eventType: "UPDATE", table: "lesson_student_records" }]);
 assert.deepEqual(changesB, changesA);
 assert.doesNotMatch(JSON.stringify(changesA), /private_note|never forward/);
+calls.channels[0].callback({
+  payload: { payload: { eventType: "DELETE", old: { private_note: "still never forward" } } }
+});
+assert.deepEqual(changesA.at(-1), { eventType: "DELETE", table: "lesson_student_records" });
+assert.deepEqual(changesB, changesA);
+assert.doesNotMatch(JSON.stringify(changesA), /private_note|never forward/);
 assert.equal(logEntries.some(([, payload]) => payload.includes('"stage":"listener_added"')), true);
 assert.equal(logEntries.some(([, payload]) => payload.includes('"stage":"channel_status"')), true);
 assert.equal(logEntries.some(([, payload]) => payload.includes('"stage":"broadcast_received"')), true);

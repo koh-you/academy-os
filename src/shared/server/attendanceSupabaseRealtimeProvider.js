@@ -33,7 +33,15 @@ export function createAttendanceSupabaseRealtimeProvider({
         "broadcast",
         { event: "lesson_student_records_changed" },
         ({ payload = {} } = {}) => {
-          const change = { eventType: payload.eventType ?? payload.type, table };
+          // `realtime.broadcast_changes` payloads can arrive one level deeper
+          // than client-originated broadcasts, depending on the Realtime
+          // protocol/SDK version. Normalize both shapes before the SSE layer
+          // forwards the privacy-safe event metadata to browsers.
+          const changePayload = payload?.payload ?? payload;
+          const change = {
+            eventType: changePayload?.eventType ?? changePayload?.type,
+            table
+          };
           logger.info?.("[attendance-realtime]", JSON.stringify({
             eventType: change.eventType ?? null,
             listeners: listeners.size,

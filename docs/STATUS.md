@@ -17,6 +17,7 @@ eview` 로 전사 확정, `answer_source` 「계산」 15문의 답을 답지와
 
 ## 2026-09-15 Supabase Realtime 운영 이벤트 진단
 
+- 진단 배포 뒤 `listener_added → channel_status: SUBSCRIBED → broadcast_received`를 운영에서 확인했다. 그러나 `broadcast_received`의 `eventType`이 비어 있어 브라우저 lifecycle이 이벤트를 거르고 7초 polling만 반영하는 원인을 특정했다. `broadcast_changes`의 중첩 payload와 일반 Broadcast payload를 모두 정규화하도록 수정했으며 운영 재검증 대기 중이다.
 - 새 테스트 학생·수업의 출결을 한 탭에서 `저장만` 실행했다. Supabase/API 저장과 다른 탭의 약 8초 polling 반영은 성공했지만 즉시 반영은 실패해, Realtime 전환은 아직 완료로 판정하지 않는다.
 - 배포 프론트 bundle의 Realtime flag 활성화는 확인했다. 다음 왕복에서 Supabase channel 연결 상태와 Broadcast 수신 여부를 분리할 수 있도록 서버에 tenant·행 payload 없는 구조화 진단 로그를 추가했다.
 - provider fixture, runtime lint, build, `test:production`(308/308)을 통과했다. 검증용 수업과 학생은 운영 활성 목록에서 정리된 것을 확인했다.

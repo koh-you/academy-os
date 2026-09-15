@@ -18,6 +18,8 @@
 
 ## 2026-09-15 Realtime 즉시 반영 실패 진단
 
+- 진단 배포 후 운영 로그에서 브라우저 SSE listener, Supabase private channel `SUBSCRIBED`, DB Broadcast 수신까지 모두 확인했다. 실제 수업 기록 변경 Broadcast의 `eventType`만 `null`이어서 클라이언트의 INSERT/UPDATE/DELETE 필터가 신호를 버리고 있었다. SDK/프로토콜별 중첩 payload를 정규화하고 fixture에 중첩형 DELETE 회귀 계약을 추가했다.
+- 같은 두 탭에서 강의 교재를 바꾼 재시험은 5초 내 즉시 반영 실패, 이후 polling 반영으로 재현됐다. 수정 배포 후 같은 수업으로 즉시 반영을 다시 측정한다.
 - `리얼타임검증0915`/`Realtime 검증 0915`로 두 탭 smoke를 반복했다. 한 탭의 출결 저장은 API 원천에 반영됐고 다른 탭은 약 1초에는 변화가 없었으나 8초 뒤 `등원 16:25`를 읽어 polling 안전망은 확인됐다. 외부 알림은 발송하지 않았다.
 - 배포된 Vercel bundle은 Realtime 구독을 켠 상태였다. Render에서 channel 연결·Broadcast 수신을 구분할 로그가 없어 provider에 `listener_added/removed`, `channel_status`, `broadcast_received`만 기록하고 tenant ID·학생 행·payload는 기록하지 않도록 보강했다.
 - 검증용 수업과 학생은 활성 목록에서 정리됐다. 전용 provider fixture, `npm run lint:runtime`, `npm run build`, `npm run test:production`(308/308)을 통과했다.
