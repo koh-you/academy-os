@@ -17,6 +17,7 @@ import {
   computeItemStats,
   findFolderNode,
   groupItemsByUnit,
+  listTypeLabels,
   rectWithin,
   studentItemState,
   studentResultMap,
@@ -40,10 +41,14 @@ const classPickThresholds = [30, 50, 70];
  * - "student"(학생별 오답): 고른 학생 기준 색 — 기록 없음(회색) / 오답(빨강) / 정답(초록) / 재풀이 정답(점선 초록 · 재).
  *   번호를 누를 때마다 기록 없음 → 오답 → 정답 → 기록 없음 순으로 돌고, 화면이 먼저 바뀐 뒤 서버 저장을 맞춘다.
  *   학생은 부모(FilterBar)가 studentId 로 넘기거나, 없으면 보드 안 드롭다운으로 고른다.
+ * - "exam"(시험지 제작): 오답 기록과 무관하게 문항을 「시험지 바구니」에 담는다. 바구니는 교재를 바꿔도 남아 여러 교재·단원의
+ *   문항을 한 시험지에 섞을 수 있다. 구역·유형 라벨로 번호를 걸러 보고, 「시험지 만들기」가 제목·배점·수험자 칸이 있는
+ *   시험지 미리보기(WrongAnswerPrintSheet variant="exam")를 연다. 바구니는 화면 안에서만 유지한다(서버 저장 없음).
  * 문항 본문은 서버 서명 URL 로 그때그때 받는다.
  */
 export function BookWrongAnswerBoard({ students = [], mode = "student", studentId: controlledStudentId = "" }) {
   const isClassMode = mode === "class";
+  const isExamMode = mode === "exam";
   const [books, setBooks] = useState([]);
   const [booksError, setBooksError] = useState("");
   const [folderPath, setFolderPath] = useState([]);
@@ -65,6 +70,9 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
   const [showSolutionPreview, setShowSolutionPreview] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
   const [isPrintOpen, setIsPrintOpen] = useState(false);
+  // 시험지 바구니: itemId → { item, bookTitle, unitTitle, unitPosition, addedAt }. 교재를 바꿔도 남는다.
+  const [examCart, setExamCart] = useState(() => new Map());
+  const [typeFilter, setTypeFilter] = useState("");
   const imageRequestsRef = useRef(new Set());
 
   useEffect(() => {
@@ -94,6 +102,7 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
     setBookLoading(true);
     setSelectedItemIds(new Set());
     setPreviewItemId("");
+    setTypeFilter("");
     Promise.all([fetchProblemBankBook(selectedBookId), fetchProblemBankAttempts({ bookId: selectedBookId })])
       .then(([detail, attemptRows]) => {
         if (cancelled) return;
@@ -141,6 +150,9 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
   }, [attempts, selectedStudentId, items]);
   const itemById = useMemo(() => new Map(items.map((item) => [item.itemId, item])), [items]);
   const unitTitleById = useMemo(() => new Map(units.map((unit) => [unit.unitId, unit.title])), [units]);
+  const unitPositionById = useMemo(() => new Map(units.map((unit) => [unit.unitId, unit.position ?? 0])), [units]);
+  const typeLabels = useMemo(() => listTypeLabels(items), [items]);
+  const matchesTypeFilter = (item) => !typeFilter || item.typeLabel === typeFilter;
 
   const ensureImages = useCallback(async (itemIds) => {
     const missing = itemIds.filter((itemId) => !imagesByItem.has(itemId) && !imageRequestsRef.current.has(itemId));
@@ -208,8 +220,30 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
     });
   }
 
+  /** 시험지 바구니 넣기/빼기. 출처(교재·단원)를 같이 담아 교재를 바꿔도 시험지 출처 줄을 만들 수 있게 한다. */
+  function toggleExamCart(item) {
+    setExamCart((current) => {
+      const next = new Map(current);
+      if (next.has(item.itemId)) next.delete(item.itemId);
+      else if (bookDetail) {
+        next.set(item.itemId, {
+          item,
+          bookTitle: bookDetail.book.title,
+          unitTitle: unitTitleById.get(item.unitId) ?? "",
+          unitPosition: unitPositionById.get(item.unitId) ?? 0,
+          addedAt: Date.now() + next.size / 1000
+        });
+      }
+      return next;
+    });
+  }
+
   function handleItemClick(item, event) {
     setPreviewItemId(item.itemId);
+    if (isExamMode) {
+      toggleExamCart(item);
+      return;
+    }
     const wantsSelection = isClassMode || clickMode === "select" || event.ctrlKey || event.metaKey || event.shiftKey;
     if (wantsSelection) {
       toggleSelection(item.itemId);
@@ -239,6 +273,12 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
   }
 
   function selectUnitItems(group) {
+    if (isExamMode) {
+      group.items.filter(matchesTypeFilter).forEach((item) => {
+        if (!examCart.has(item.itemId)) toggleExamCart(item);
+      });
+      return;
+    }
     setSelectedItemIds((current) => {
       const next = new Set(current);
       group.items.forEach((item) => next.add(item.itemId));
@@ -247,10 +287,13 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
   }
 
   async function openPrint() {
-    if (selectedItemIds.size === 0) return;
-    await ensureImages([...selectedItemIds]);
+    const targetIds = isExamMode ? [...examCart.keys()] : [...selectedItemIds];
+    if (targetIds.length === 0) return;
+    await ensureImages(targetIds);
     setIsPrintOpen(true);
   }
+
+  const examRows = useMemo(() => [...examCart.values()], [examCart]);
 
   const previewItem = previewItemId ? itemById.get(previewItemId) : null;
   const previewRegions = previewItem ? imagesByItem.get(previewItem.itemId) ?? [] : [];
@@ -327,10 +370,12 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
       <div className="problemBankMain">
         <header className="problemBankHeader">
           <div>
-            <h2>{isClassMode ? "교재별 오답 · 반 전체" : "학생별 오답 · 유형분석"}</h2>
+            <h2>{isExamMode ? "시험지 제작 · 문항 담기" : isClassMode ? "교재별 오답 · 반 전체" : "학생별 오답 · 유형분석"}</h2>
             <small>{bookDetail ? [bookDetail.book.folderPath, bookDetail.book.title].filter(Boolean).join(" / ") : "교재를 선택하세요"}</small>
           </div>
-          {isClassMode ? (
+          {isExamMode ? (
+            <small className="problemBankModeHint">번호를 누르면 시험지 바구니에 담깁니다. 교재를 바꿔도 바구니는 남으므로 여러 단원·교재를 한 시험지에 섞을 수 있습니다.</small>
+          ) : isClassMode ? (
             <small className="problemBankModeHint">학생별 오답에서 쌓인 기록을 반 전체로 집계합니다. 번호를 누르면 인쇄·PPT 대상으로 고릅니다.</small>
           ) : (
             <div className="problemBankModeSwitch" role="group" aria-label="클릭 동작">
@@ -340,6 +385,7 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
           )}
         </header>
 
+        {isExamMode ? null : (
         <div className="problemBankMetrics">
           <MetricCard density="compact" label="대상 학생" value={`${metrics.studentCount}명`} />
           <MetricCard density="compact" label="분석 교재" value={bookDetail ? "1개" : "0개"} />
@@ -348,7 +394,24 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
           <MetricCard density="compact" label="현재 오답률" tone="danger" value={`${metrics.currentWrongRate}%`} />
           <MetricCard density="compact" label="회복률" tone="success" value={`${metrics.recoveryRate}%`} />
         </div>
+        )}
 
+        {isExamMode ? (
+          <div className="problemBankToolbar problemBankExamToolbar">
+            <label className="problemBankRoundPick">
+              구역·유형
+              <select aria-label="구역·유형 필터" value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}>
+                <option value="">전체</option>
+                {typeLabels.map((label) => <option key={label} value={label}>{label}</option>)}
+              </select>
+            </label>
+            <div className="problemBankSelectionActions">
+              <span className="problemBankSelectionCount">바구니 {examCart.size}문항</span>
+              <button onClick={() => setExamCart(new Map())} type="button">바구니 비우기</button>
+              <button className="primaryButton" disabled={examCart.size === 0} onClick={openPrint} type="button">시험지 만들기</button>
+            </div>
+          </div>
+        ) : (
         <div className="problemBankToolbar">
           {isClassMode || !controlledStudentId ? (
             <div className="problemBankGradeChips" role="group" aria-label="학년 필터">
@@ -400,7 +463,15 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
             <button className="primaryButton" disabled={selectedItemIds.size === 0} onClick={openPrint} type="button">인쇄 · PPT</button>
           </div>
         </div>
+        )}
 
+        {isExamMode ? (
+          <div className="problemBankLegend" aria-label="번호 표시 뜻">
+            <strong>시험지 바구니</strong>
+            <span><i className="problemBankBand exam-picked" />담은 문항</span>
+            <span className="problemBankLegendHint">번호를 누르면 담기/빼기 · 「단원 전체 담기」는 지금 보이는 구역·유형만 담습니다</span>
+          </div>
+        ) : (
         <div className="problemBankLegend" aria-label="번호 색 뜻">
           {selectedStudent ? (
             <>
@@ -420,6 +491,7 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
             </>
           )}
         </div>
+        )}
         {saveMessage ? <p aria-live="polite" className="problemBankSaveMessage">{saveMessage}</p> : null}
 
         <div className="problemBankBody">
@@ -440,22 +512,28 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
                       <small>{[bookDetail.book.folderPath, bookDetail.book.title, group.unit.title].filter(Boolean).join(" / ")}</small>
                     </div>
                     <div className="problemBankUnitStats">
-                      {selectedStudent ? <span className="problemBankPill mine">{selectedStudent.name} 오답 {myWrongInUnit}</span> : null}
-                      <span className="problemBankPill">{recordedInUnit}/{group.items.length}</span>
-                      <span className="problemBankPill warn">풀이오답 {percent(unitWrong, unitAttempted)}%</span>
-                      <span className="problemBankPill danger">현재 {percent(unitCurrentWrong, unitAttempted)}%</span>
-                      <button className="problemBankUnitSelect" onClick={() => selectUnitItems(group)} type="button">단원 전체 선택</button>
+                      {isExamMode ? (
+                        <span className="problemBankPill mine">담음 {group.items.filter((item) => examCart.has(item.itemId)).length}/{group.items.length}</span>
+                      ) : (
+                        <>
+                          {selectedStudent ? <span className="problemBankPill mine">{selectedStudent.name} 오답 {myWrongInUnit}</span> : null}
+                          <span className="problemBankPill">{recordedInUnit}/{group.items.length}</span>
+                          <span className="problemBankPill warn">풀이오답 {percent(unitWrong, unitAttempted)}%</span>
+                          <span className="problemBankPill danger">현재 {percent(unitCurrentWrong, unitAttempted)}%</span>
+                        </>
+                      )}
+                      <button className="problemBankUnitSelect" onClick={() => selectUnitItems(group)} type="button">{isExamMode ? "단원 전체 담기" : "단원 전체 선택"}</button>
                     </div>
                   </header>
                   <div className="problemBankNumberGrid">
-                    {group.items.map((item) => {
+                    {group.items.filter(matchesTypeFilter).map((item) => {
                       const band = wrongRateBand(itemStats.get(item.itemId));
                       const studentState = studentStates.get(item.itemId) ?? "none";
                       const studentResult = studentResults.get(item.itemId);
                       const classes = [
                         "problemBankNumber",
-                        selectedStudent ? `mine-${studentState}` : `band-${band.key}`,
-                        selectedItemIds.has(item.itemId) ? "selected" : "",
+                        isExamMode ? (examCart.has(item.itemId) ? "exam-picked" : "exam-plain") : selectedStudent ? `mine-${studentState}` : `band-${band.key}`,
+                        (isExamMode ? examCart.has(item.itemId) : selectedItemIds.has(item.itemId)) ? "selected" : "",
                         previewItemId === item.itemId ? "previewing" : "",
                         studentResult?.pending ? "pending" : "",
                         item.reviewStatus === "flagged" ? "flagged" : ""
@@ -466,7 +544,7 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
                       return (
                         <button
                           aria-label={`${item.numberLabel}번 · ${stateLabel}`}
-                          aria-pressed={selectedItemIds.has(item.itemId)}
+                          aria-pressed={isExamMode ? examCart.has(item.itemId) : selectedItemIds.has(item.itemId)}
                           className={classes}
                           key={item.itemId}
                           onClick={(event) => handleItemClick(item, event)}
@@ -580,7 +658,15 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
         </div>
       ) : null}
 
-      {isPrintOpen && bookDetail ? (
+      {isPrintOpen && isExamMode ? (
+        <WrongAnswerPrintSheet
+          imagesByItem={imagesByItem}
+          rows={examRows}
+          variant="exam"
+          onClose={() => setIsPrintOpen(false)}
+        />
+      ) : null}
+      {isPrintOpen && !isExamMode && bookDetail ? (
         <WrongAnswerPrintSheet
           book={bookDetail.book}
           imagesByItem={imagesByItem}

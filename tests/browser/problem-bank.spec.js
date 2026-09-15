@@ -166,6 +166,56 @@ test("학생별 오답: 학생 기준 색으로 바로 바뀌고, 서버 재조�
   expect(pageErrors).toEqual([]);
 });
 
+test("시험지 제작: 유형으로 걸러 바구니에 담고 제목·배점·순서를 정해 시험지 미리보기를 연다", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+  const navigation = page.getByRole("navigation", { name: "주요 화면" });
+  await navigation.getByRole("button", { name: /오답관리/ }).click();
+  await page.getByRole("tab", { name: "시험지 제작" }).click();
+  const board = page.locator(".problemBankBoard");
+  await expect(board.getByRole("heading", { name: "시험지 제작 · 문항 담기" })).toBeVisible();
+  // 오답 통계·학생 선택은 없고, 번호는 색 띠 없이 담김 여부만 보인다.
+  await expect(board.locator(".problemBankMetrics")).toHaveCount(0);
+  await expect(board.locator(".problemBankNumber")).toHaveCount(20);
+  await expect(board.locator(".problemBankNumber.exam-plain")).toHaveCount(20);
+  // 유형 필터로 걸러 보고 단원 전체 담기는 보이는 것만 담는다.
+  await board.getByLabel("구역·유형 필터").selectOption("삼각비의 활용");
+  await expect(board.locator(".problemBankNumber")).toHaveCount(8);
+  // 단원마다 「단원 전체 담기」가 있다(가상 교재는 2단원). 걸러진 문항이 없는 단원은 담을 것이 없다.
+  for (const button of await board.getByRole("button", { name: "단원 전체 담기" }).all()) await button.click();
+  await expect(board.locator(".problemBankSelectionCount")).toContainText("바구니 8문항");
+  await board.getByLabel("구역·유형 필터").selectOption("");
+  await expect(board.locator(".problemBankNumber.exam-picked")).toHaveCount(8);
+  // 번호를 누르면 담기/빼기.
+  await board.getByRole("button", { name: /^0001번 ·/ }).click();
+  await expect(board.locator(".problemBankSelectionCount")).toContainText("바구니 9문항");
+  await board.getByRole("button", { name: /^0001번 ·/ }).click();
+  await expect(board.locator(".problemBankSelectionCount")).toContainText("바구니 8문항");
+  await board.getByRole("button", { name: "시험지 만들기" }).click();
+  const sheet = page.locator(".problemBankPrintSheet.variant-exam");
+  await expect(sheet).toBeVisible();
+  // 제목·배점·수험자 칸. 8문항 100점 → 13·13·13·13·12·12·12·12.
+  await page.getByLabel("시험지 제목").fill("중3 삼각비 단원평가");
+  await expect(sheet.locator(".problemBankExamHead strong")).toHaveText("중3 삼각비 단원평가");
+  await expect(sheet.locator(".problemBankExamFields")).toContainText("점수");
+  await expect(sheet.locator(".problemBankPrintItem")).toHaveCount(8);
+  await expect(sheet.locator(".problemBankExamPoints input").first()).toHaveValue("13");
+  await expect(sheet.locator(".problemBankExamPoints input").last()).toHaveValue("12");
+  await page.getByLabel("1번 배점").fill("20");
+  await expect(sheet.locator(".problemBankExamScore")).toContainText("/ 107");
+  // 출처 표시를 끄면 출처 줄이 사라지고, 순서를 섞어도 문항 수는 같다.
+  await expect(sheet.locator(".problemBankPrintSource")).toHaveCount(0);
+  await page.getByLabel("출처 표시").check();
+  await expect(sheet.locator(".problemBankPrintSource")).toHaveCount(8);
+  await page.getByLabel("문항 순서").selectOption("shuffle");
+  await expect(sheet.locator(".problemBankPrintItem")).toHaveCount(8);
+  await page.getByRole("button", { name: "닫기" }).click();
+  await expect(sheet).toHaveCount(0);
+  // 바구니는 미리보기를 닫아도 남는다.
+  await expect(board.locator(".problemBankSelectionCount")).toContainText("바구니 8문항");
+  expect(pageErrors).toEqual([]);
+});
+
 test("교재관리: 교재 정보를 고치고 서버 재조회로 확인한 뒤 삭제한다", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);
