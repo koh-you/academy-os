@@ -26,6 +26,20 @@ latex-bank/
 - 그림 크롭: `node scripts/latex-bank/crop-figure.mjs --pdf … --page N --item x0,y0,x1,y1 --rel x0,y0,x1,y1 --out figures/fig-<id>.jpg`.
 - `--export` 는 `type_label` 을 전사본 그룹 section 으로 덮어쓴다(스캔 OCR 라벨은 회색 유형 쪽에서 어긋난다).
 
+## 배치 전사 절차 (2·3단원에서 확립 · 2026-09-15)
+
+```
+node scripts/latex-bank/make-batches.mjs --package output/problem-bank/<책> --out <작업폴더> --batches "A:16-19:02 직선의 방정식,…" --page-offset 6
+  → 배치마다 latex-transcriber 에이전트(.claude/agents/latex-transcriber.md · 지시문 latex-bank/agents/transcriber-prompt.md)에 batch-<이름>.md 를 넘김
+  → 에이전트가 out-<이름>.json 을 쓰고 node scripts/latex-bank/check-batch.mjs out-<이름>.json 으로 컴파일 확인
+node scripts/latex-bank/merge-batches.mjs --work <작업폴더> --bank latex-bank/<책> --map "A:02:직선의 방정식:22~38,…"
+node scripts/latex-bank/build.mjs --bank latex-bank/<책> --review
+  → 검수 에이전트(latex-bank/agents/reviewer-prompt.md + reviewer-methods.txt · 수학/전사/정책 축) → 정독 에이전트(dokdu-prompt.md) → --export
+```
+
+- 배치는 40문항 안팎(쪽 4~7장)이 적당했다. 에이전트마다 판단이 달라 일부 배치가 거부될 수 있다 — 그때는 이미 전사한 에이전트에게 SendMessage 로 이어 맡기거나 직접 전사한다(2026-09-15: 8배치 중 5 완료 · 3 거부 → 2 직접 · 1 이어 맡김).
+- 이번 실측: 2단원 143문 · 3단원 173문(합 316) · 그림 TikZ 23 · 1~3단원 420문 book.pdf 50쪽 · Overfull 0.
+
 ## 흐름
 
 ```
