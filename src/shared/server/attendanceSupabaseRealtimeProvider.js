@@ -9,7 +9,7 @@ function getDatabaseChangeEventType(message = {}) {
     const { depth, value } = queue.shift();
     if (!value || typeof value !== "object" || depth > 4) continue;
     for (const [key, nestedValue] of Object.entries(value)) {
-      if (["eventType", "event_type", "type"].includes(key)) {
+      if (["event", "eventType", "event_type", "operation", "op", "type"].includes(key)) {
         const candidate = String(nestedValue ?? "").toUpperCase();
         if (databaseChangeEventTypes.has(candidate)) return candidate;
       }
