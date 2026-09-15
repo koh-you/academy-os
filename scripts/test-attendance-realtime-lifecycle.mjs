@@ -48,12 +48,16 @@ const cleanup = startAttendanceRealtimeLifecycle({
   windowTarget
 });
 
-assert.equal(pollingStarts, 1, "polling remains active until subscription is confirmed");
+assert.equal(pollingStarts, 1, "polling starts alongside the realtime subscription");
 assert.equal(subscriptionOptions.table, "lesson_student_records");
 assert.deepEqual(subscriptionOptions.events, ["INSERT", "UPDATE", "DELETE"]);
 subscriptionOptions.onStatus("SUBSCRIBED");
 await Promise.resolve();
-assert.equal(pollingStops, 1, "confirmed realtime replaces polling");
+assert.equal(
+  pollingStops,
+  0,
+  "a subscribed transport cannot disable polling before event delivery is proven"
+);
 assert.deepEqual(refreshReasons, ["realtime-subscribed"]);
 
 const event = {
@@ -68,7 +72,7 @@ await Promise.resolve();
 assert.deepEqual(refreshReasons, ["realtime-subscribed", "realtime-event"], "duplicate events refresh once");
 
 subscriptionOptions.onStatus("CHANNEL_ERROR");
-assert.equal(pollingStarts, 2, "channel errors restore polling");
+assert.equal(pollingStarts, 1, "channel errors keep the existing polling fallback active");
 documentTarget.visibilityState = "hidden";
 documentTarget.dispatch("visibilitychange");
 assert.equal(refreshReasons.length, 2, "hidden tabs do not refresh");
@@ -85,6 +89,7 @@ await Promise.resolve();
 assert.equal(refreshReasons.at(-1), "online", "online recovery re-reads the API source");
 
 cleanup();
+assert.equal(pollingStops, 1, "cleanup stops the polling fallback");
 const refreshCountAfterCleanup = refreshReasons.length;
 windowTarget.dispatch("focus");
 subscriptionOptions.onEvent({ ...event, new: { id: "record-2" } });

@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-09-15 Realtime 운영 smoke 후 fallback 수정
+
+- 전용 테스트 학생과 수업으로 두 로그인 교사 탭을 열고 한 탭에서 출결을 저장했다. 저장 탭과 새로고침 뒤 다른 탭의 API 원천 값은 일치했지만, 다른 탭은 Realtime 즉시 반영도 기존 7초 polling 반영도 되지 않았다.
+- lifecycle이 `SUBSCRIBED` 상태만으로 polling을 중지하던 경계를 제거했다. 이제 Realtime event는 즉시 API 재조회를 유도하고 polling은 독립적인 안전망으로 계속 동작한다.
+- 테스트 수업 `Realtime 검증용 수업`은 취소 저장 및 원천 재조회까지 완료했다. 학생 `리얼타임테스트0914`는 화면에 삭제가 없고 `퇴원 처리`만 있어 그대로 두었다. 실제 알림 발송·예약·취소는 하지 않았다.
+- lifecycle·SSE·Supabase provider fixture, `npm run lint:runtime`, `npm run build`, `npm run test:production`(308/308)이 통과했다.
+
 ## 2026-09-14 Supabase Realtime 운영 활성화
 
 - PR #336 main 병합 → 운영 Broadcast trigger 적용 및 3개 event 등록 확인 → Render 서버 flag/redeploy → Vercel Production browser flag/redeploy 순서로 활성화했다.

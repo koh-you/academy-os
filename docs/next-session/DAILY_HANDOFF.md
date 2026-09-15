@@ -1,5 +1,11 @@
 # Daily Development Handoff
 
+## 2026-09-15 Realtime fallback 보강
+
+- 운영 두 탭 smoke에서 DB/API 저장은 확인됐으나 `SUBSCRIBED` 뒤 event가 오지 않으면서 polling도 멈추는 결함을 재현했다. 구독 상태와 무관하게 7초 polling을 유지하도록 수정했고 Realtime event가 오면 즉시 API 재조회하는 경로는 그대로다.
+- 관련 fixture·runtime lint·build·production 308/308 통과. 운영 테스트 수업은 7일 복구 가능 취소 완료. 테스트 학생은 영구 삭제 UI가 없어 활성 목록에 남아 있으며, `퇴원 처리`로 대신하지 않았다.
+- 배포 뒤 확인 기준: 두 탭에서 출결 저장 시 event가 정상이라면 즉시, event가 실패해도 7초 이내 두 번째 탭이 API 원천과 일치해야 한다.
+
 ## 2026-09-14 Supabase Realtime 활성화 뒤 최종 smoke
 
 - main `69f1e1ba`, Supabase tenant Broadcast trigger(INSERT/UPDATE/DELETE), Render/Vercel 양쪽 feature flag 및 재배포까지 완료했다. 로그인 교사 화면의 기존 API 원천 로드는 정상이다.

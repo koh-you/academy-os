@@ -61,7 +61,6 @@ export function startAttendanceRealtimeLifecycle({
 
   function handleStatus(status) {
     if (status === "SUBSCRIBED") {
-      stopPolling();
       void refreshSource("realtime-subscribed");
       return;
     }
