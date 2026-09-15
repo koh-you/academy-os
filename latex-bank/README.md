@@ -24,6 +24,8 @@ latex-bank/
   → AI 가 크롭을 읽고 items.json 전사(세션 안 비전 · 별도 API 비용 없음)
   → node scripts/latex-bank/build.mjs --bank latex-bank/<책> --review   (xelatex 2회 · review/*.png)
   → 사람이 review/ 를 보고 items.json 을 고쳐 확정 (variant_level 0 확정본)
+  → node scripts/latex-bank/build.mjs --bank latex-bank/<책> --export   (output/problem-bank/<책>-latex = 등록용 패키지)
+  → 교재관리 › 패키지 등록에 그 폴더를 올리면 오답지·오답은행에 조판본 문항이 나온다(정답·해설은 원본 패키지 것을 그대로 이어받음)
   → 숫자 변형(level 1) · 자유 변형(level 2)은 확정본을 원본으로 별도 항목으로 추가(id 에 -v1·-v2)
 ```
 
@@ -32,7 +34,7 @@ latex-bank/
 - 공통 지시문(개념 쪽 말풍선 줄)은 `groups[].passage` 로 한 번만 두고 그 묶음 위에 굵게 찍는다. 힌트 빈칸형(◎ 줄)은 `hint` 로 문항 아래 연한 상자에 넣는다. 빈칸은 `\blank`.
 - 선택지는 dm-editorial 의 `choices32`(3-2) · `choicesii`(2-2-1) · `choicesv`(세로) 를 쓴다(`choices_layout`). 분수 좌표처럼 키 큰 보기는 `ii`.
 - 줄바꿈 규약(프로토타입 `mathbook-problems.sty`·`style.sty` 와 같음 · build.mjs 머리말에 정의): 수식 안에서는 줄을 안 바꾼다(`\binoppenalty=\relpenalty=10000`), 「(단, …)」은 `\cond{…}`, 「점 P」처럼 명사와 기호 사이는 `점~$\pt{P}$`(`~` = 안 끊는 공백), 그 밖의 덩어리는 `\nob{…}`. 그림이 있는 문항은 원문처럼 본문 오른쪽에 그림을 둔다(`figure` 가 있으면 본문 0.58 · 그림 0.4 폭).
-- review/ 의 문항 번호는 book.pdf 와 같다(책 순서 카운터). 출처 배지의 「12쪽 13번」이 책 번호다.
+- 문항 번호는 책에 찍힌 번호 그대로다(id 의 뒤 두 자리 · 쪽마다 다시 시작 · 예 19-17 → 「17.」). book.pdf·review·export 모두 같다.
 
 ## 그림 규칙 (사용자 결정 2026-09-14)
 
@@ -47,7 +49,7 @@ latex-bank/
 | 13-01~13-04 (공통 지시문) | 수직선 −4~4 · A P B Q C | TikZ | `figures/fig-numberline-13.tex` | 스캔 화질 낮음 · 단순 수직선 |
 | 17-01 | 등간격 8점 A~H 수직선 | TikZ | `figures/fig-numberline-17-01.tex` | 위와 같음 |
 | 19-17 | 좌표평면 삼각형 ABC · 이등분선 발 D · 좌표 안내 파선 | TikZ | `figures/fig-19-17.tex` | 좌표가 모두 주어져 정밀 재현 가능 |
-| 21-10 | 지도 삽화(도로·윤희·지민·50 m) | **크롭**(600 dpi · 731×579px) | `figures/fig-21-10.jpg` | 실생활 삽화라 원문 그림을 그대로 쓰기로 함(사용자 결정 2026-09-15). TikZ 도식 `fig-21-10.tex` 는 대체본으로 남김 · 크롭 스크립트 `검수/2026-09-15/scripts/crop-2110.mjs` |
+| 21-10 | 지도 삽화(도로·윤희·지민·50 m) | **크롭**(600 dpi · 731×629px · 아래 띠 포함) | `figures/fig-21-10.jpg` | 실생활 삽화라 원문 그림을 그대로 쓰기로 함(사용자 결정 2026-09-15). TikZ 도식 `fig-21-10.tex` 는 대체본으로 남김 · 크롭 스크립트 `검수/2026-09-15/scripts/crop-2110.mjs` |
 
 ## 검수 (검수 에이전트)
 
