@@ -511,11 +511,17 @@ const {
   previewAttendanceRequest
 } = createAttendanceRequestBindings({ request: postJsonWithTimeout });
 
-function getAssignmentStatusForMessage(record, previousHomework) {
+// records 는 지난 숙제가 찍힌 record 를 찾는 용도다. 그 record 는 대개 지난 수업의 것이라,
+// 현재 학생 record 하나만 넘기면 못 찾아 빈 값이 나온다. 서버 예약 경로
+// (getAssignmentStatusForNotification)는 전체 records 를 넘기므로, 여기서 빈 값으로 갈리면
+// 예약 지문이 서버와 영구히 어긋나 "내용 변경" 빨간불이 재예약해도 안 풀렸다(2026-09-15 보고).
+// 예약 지문 경로는 전체 records 를 넘겨 서버와 동일하게 계산한다. 안 넘긴 호출부는 종전대로.
+function getAssignmentStatusForMessage(record, previousHomework, records = null) {
   const recordStatus = normalizeAssignmentStatusValue(record?.assignmentStatus ?? record?.incompleteHomework ?? "");
   if (recordStatus) return recordStatus;
 
-  const homeworkStatus = normalizeAssignmentStatusValue(getHomeworkAssignmentStatus(previousHomework, record ? [record] : []));
+  const homeworkLookupRecords = Array.isArray(records) && records.length ? records : record ? [record] : [];
+  const homeworkStatus = normalizeAssignmentStatusValue(getHomeworkAssignmentStatus(previousHomework, homeworkLookupRecords));
   if (homeworkStatus) return homeworkStatus;
 
   if (previousHomework?.teacherStatus === "verified" || previousHomework?.status === "verified") return "complete_thorough";
@@ -955,6 +961,7 @@ function buildLessonReservationPayloadSnapshot({
   notificationTemplates = {},
   previousHomework,
   record,
+  records = [],
   scheduledDate,
   student,
   supplementSchedules = [],
@@ -974,6 +981,7 @@ function buildLessonReservationPayloadSnapshot({
     notificationTemplates,
     previousHomework,
     record,
+    records,
     scheduledDate,
     student,
     supplementSchedules,

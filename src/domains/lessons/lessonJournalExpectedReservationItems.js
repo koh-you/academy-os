@@ -51,6 +51,9 @@ export function createLessonJournalExpectedReservationItems({
         notificationTemplates,
         previousHomework,
         record,
+        // 전체 records 를 넘겨야 지난 숙제가 찍힌 record 를 찾아 서버와 같은 과제상태가 나온다.
+        // 안 넘기면 유추된 과제상태가 빈 값이 되어 예약 지문이 영구히 어긋난다(2026-09-15 보고).
+        records,
         scheduledDate,
         student,
         supplementSchedules,

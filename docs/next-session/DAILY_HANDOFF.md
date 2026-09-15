@@ -23,9 +23,9 @@
 
 ## 2026-09-15 Realtime 운영 transport 진단
 
-- 새 테스트 학생·수업의 두 탭 smoke에서 API 저장과 8초 polling 반영은 성공했지만 즉시 반영은 실패했다. 따라서 Realtime 완료가 아니며 polling 안전망만 운영 검증됐다.
-- Vercel Realtime flag는 실제 배포 bundle에서 ON이다. Render provider에 개인정보 없는 연결·수신 진단 로그를 추가했으므로 배포 후 같은 smoke를 반복하고 `[attendance-realtime]`의 `listener_added → channel_status → broadcast_received` 순서를 확인한다.
-- 검증용 수업·학생은 활성 목록에서 정리됐다. fixture·lint·build·production 308/308 통과.
+- main `af7e3e88`에서 Broadcast operation metadata 정규화를 완료했다. 운영 탭 2개가 `SUBSCRIBED`된 상태에서 강의 교재 저장 → 다른 탭 새로고침 없는 반영 2.506초 → Render `broadcast_received eventType:"UPDATE"`를 확인해 Realtime 왕복을 성공으로 판정했다.
+- 화면은 Broadcast payload를 직접 쓰지 않고 기존 인증 API를 다시 읽는다. Realtime이 끊겨도 7초 polling은 계속되는 안전망이다. 실제 알림 발송·예약·취소는 없었다.
+- 사용자 승인 뒤 검증용 `Realtime 검증 0915` 수업은 7일 복구 가능한 취소 상태로, `리얼타임검증0915` 학생은 과거 기록을 보존하는 퇴원 상태로 정리했다. 달력 3→2개 수업, 활성 학생 23→22명, 퇴원생 25→26명과 대상 이름을 재조회 확인했다.
 
 ## 2026-09-15 Realtime fallback 보강
 
