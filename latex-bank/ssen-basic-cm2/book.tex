@@ -5,12 +5,12 @@
 % 문항 전사용 보조 매크로(dm-editorial 매크로를 덮어쓰지 않는다)
 \newcommand{\pt}[1]{\mathrm{#1}}
 \newcommand{\seg}[1]{\overline{\mathrm{#1}}}
-\newcommand{\blank}[1][1.5em]{\framebox[#1]{\rule{0pt}{1.4ex}}}
+\newcommand{\blank}[1][1.5em]{\raisebox{-0.15ex}{\framebox[#1]{\rule{0pt}{1.4ex}}}}
 \newcommand{\dmhint}[1]{\par\smallskip\begin{tcolorbox}[enhanced,colback=dm-navylight!60,colframe=dm-navy!40,boxrule=0.3pt,sharp corners,left=3mm,right=3mm,top=2mm,bottom=2mm,boxsep=0mm]\small\setlength{\parskip}{1mm}#1\end{tcolorbox}}
 % 구역 제목·공통 지시문은 뒤에 문항 한 개는 붙을 자리가 있어야 찍는다(쪽 끝 고아 방지).
-\newcommand{\dmsection}[1]{\par\needspace{7\baselineskip}\vspace{3mm}\noindent{\color{dm-navy}\hrule height 0.6pt}\vspace{1.2mm}\noindent{\dmheadingfont\bfseries\fontsize{11}{13}\selectfont\color{dm-navy}#1}\par\vspace{2mm}}
+\newcommand{\dmsection}[1]{\par\needspace{10\baselineskip}\vspace{3mm}\noindent{\color{dm-navy}\hrule height 0.6pt}\vspace{1.2mm}\noindent{\dmheadingfont\bfseries\fontsize{11}{13}\selectfont\color{dm-navy}#1}\par\vspace{2mm}}
 % 지시문 뒤 4mm: 다음 문항의 출처 배지가 5mm 위로 올라오므로 긴 지시문 줄과 겹치지 않게 한다.
-\newcommand{\dmpassage}[1]{\par\needspace{6\baselineskip}\medskip\noindent{\dmheadingfont\bfseries\color{dm-navy}#1}\par\vspace{4mm}}
+\newcommand{\dmpassage}[1]{\par\needspace{8\baselineskip}\medskip\noindent{\dmheadingfont\bfseries\color{dm-navy}#1}\par\vspace{4mm}}
 % 줄바꿈 규약(프로토타입 mathbook-problems.sty · style.sty 와 같음): 수식 안에서는 줄을 바꾸지 않고, 「(단, …)」·「x축」은 한 덩어리.
 \binoppenalty=10000 \relpenalty=10000
 \newcommand{\nob}[1]{\mbox{#1}}
@@ -187,13 +187,13 @@
 \setcounter{dmproblemcount}{21}\dmpnum{23-22}{\input{items/23-22}}\vspace{4mm}
 \setcounter{dmproblemcount}{22}\dmpnum{23-23}{\input{items/23-23}}\vspace{4mm}
 \setcounter{dmproblemcount}{23}\dmpnum{23-24}{\input{items/23-24}}\vspace{4mm}
-\dmsection{개념 08 일차방정식 ax+by+c=0이 나타내는 도형}
+\dmsection{개념 08 일차방정식 $ax+by+c=0$이 나타내는 도형}
 \dmpassage{다음 일차방정식이 나타내는 도형을 주어진 좌표평면 위에 그리시오.}
 \setcounter{dmproblemcount}{24}\dmpnum{24-25}{\input{items/24-25}}\vspace{4mm}
 \setcounter{dmproblemcount}{25}\dmpnum{24-26}{\input{items/24-26}}\vspace{4mm}
 \setcounter{dmproblemcount}{26}\dmpnum{24-27}{\input{items/24-27}}\vspace{4mm}
 \setcounter{dmproblemcount}{27}\dmpnum{24-28}{\input{items/24-28}}\vspace{4mm}
-\dmpassage{세 수 $a$, $b$, $c$가 다음 조건을 만족시킬 때, 직선 $ax+by+c=0$의 개형을 주어진 좌표평면 위에 그리시오.}
+\dmpassage{세 수 $a$, $b$, $c$가 다음 조건을 만족시킬 때, 직선~$ax+by+c=0$의 개형을 주어진 좌표평면 위에 그리시오.}
 \setcounter{dmproblemcount}{28}\dmpnum{24-29}{\input{items/24-29}}\vspace{4mm}
 \setcounter{dmproblemcount}{29}\dmpnum{24-30}{\input{items/24-30}}\vspace{4mm}
 \setcounter{dmproblemcount}{30}\dmpnum{24-31}{\input{items/24-31}}\vspace{4mm}
@@ -460,17 +460,17 @@
 \setcounter{dmproblemcount}{9}\dmpnum{49-10}{\input{items/49-10}}\vspace{4mm}
 \setcounter{dmproblemcount}{10}\dmpnum{49-11}{\input{items/49-11}}\vspace{4mm}
 \setcounter{dmproblemcount}{11}\dmpnum{49-12}{\input{items/49-12}}\vspace{4mm}
-\dmpassage{원 $x^2+y^2=8$과 직선 $2x-y+k=0$의 위치 관계가 다음과 같도록 하는 실수 $k$의 값 또는 $k$의 값의 범위를 구하시오.}
+\dmpassage{원~$x^2+y^2=8$과 직선~$2x-y+k=0$의 위치 관계가 다음과 같도록 하는 실수 $k$의 값 또는 $k$의 값의 범위를 구하시오.}
 \setcounter{dmproblemcount}{12}\dmpnum{49-13}{\input{items/49-13}}\vspace{4mm}
 \setcounter{dmproblemcount}{13}\dmpnum{49-14}{\input{items/49-14}}\vspace{4mm}
 \setcounter{dmproblemcount}{14}\dmpnum{49-15}{\input{items/49-15}}\vspace{4mm}
-\dmpassage{원 $C$와 직선 $l$이 서로 다른 두 점에서 만나도록 하는 실수 $k$의 값의 범위를 구하시오.}
+\dmpassage{원~$C$와 직선~$l$이 서로 다른 두 점에서 만나도록 하는 실수 $k$의 값의 범위를 구하시오.}
 \setcounter{dmproblemcount}{15}\dmpnum{49-16}{\input{items/49-16}}\vspace{4mm}
 \setcounter{dmproblemcount}{16}\dmpnum{49-17}{\input{items/49-17}}\vspace{4mm}
-\dmpassage{원 $C$와 직선 $l$이 서로 접하도록 하는 실수 $k$의 값을 모두 구하시오.}
+\dmpassage{원~$C$와 직선~$l$이 서로 접하도록 하는 실수 $k$의 값을 모두 구하시오.}
 \setcounter{dmproblemcount}{17}\dmpnum{49-18}{\input{items/49-18}}\vspace{4mm}
 \setcounter{dmproblemcount}{18}\dmpnum{49-19}{\input{items/49-19}}\vspace{4mm}
-\dmpassage{원 $C$와 직선 $l$이 서로 만나지 않도록 하는 실수 $k$의 값의 범위를 구하시오.}
+\dmpassage{원~$C$와 직선~$l$이 서로 만나지 않도록 하는 실수 $k$의 값의 범위를 구하시오.}
 \setcounter{dmproblemcount}{19}\dmpnum{49-20}{\input{items/49-20}}\vspace{4mm}
 \setcounter{dmproblemcount}{20}\dmpnum{49-21}{\input{items/49-21}}\vspace{4mm}
 \dmsection{개념 18 원과 직선의 위치 관계의 응용}
@@ -538,7 +538,7 @@
 \setcounter{dmproblemcount}{6}\dmpnum{57-07}{\input{items/57-07}}\vspace{4mm}
 \setcounter{dmproblemcount}{7}\dmpnum{57-08}{\input{items/57-08}}\vspace{4mm}
 \setcounter{dmproblemcount}{8}\dmpnum{57-09}{\input{items/57-09}}\vspace{4mm}
-\dmsection{유형 039 원 밖의 한 점에서 원 $(x-a)^2+(y-b)^2=r^2$에 그은 접선의 방정식}
+\dmsection{유형 039 원 밖의 한 점에서 원 $(x-\alpha)^2+(y-\beta)^2=r^2$에 그은 접선의 방정식}
 \setcounter{dmproblemcount}{9}\dmpnum{57-10}{\input{items/57-10}}\vspace{4mm}
 \setcounter{dmproblemcount}{10}\dmpnum{57-11}{\input{items/57-11}}\vspace{4mm}
 \setcounter{dmproblemcount}{11}\dmpnum{57-12}{\input{items/57-12}}\vspace{4mm}
