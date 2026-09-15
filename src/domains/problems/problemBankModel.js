@@ -209,6 +209,25 @@ export function rectWithin(outer, inner) {
  * 지시문 이미지를 한 번만 싣고, 고른 문항 자리에 강조 상자를 얹는다.
  * @returns {Array<{ kind: "item" | "group", ... }>}
  */
+/**
+ * 2단 인쇄에서 각 항목이 왼쪽 열인지 정한다. 전폭 항목은 두 열을 차지하므로 그 다음 항목은 다시 왼쪽에서 시작한다
+ * (CSS nth-child 로는 전폭 항목 뒤의 열을 알 수 없다).
+ * @param {Array<{ wide?: boolean }>} entries
+ * @returns {Array<"left" | "right" | "wide">}
+ */
+export function assignPrintColumns(entries) {
+  let slot = 0;
+  return entries.map((entry) => {
+    if (entry.wide) {
+      slot = 0;
+      return "wide";
+    }
+    const side = slot % 2 === 0 ? "left" : "right";
+    slot += 1;
+    return side;
+  });
+}
+
 export function buildPrintEntries({ book, units, items, selectedItemIds, imagesByItem }) {
   const unitTitleById = new Map(units.map((unit) => [unit.unitId, unit.title]));
   const selected = new Set(selectedItemIds);
@@ -216,6 +235,8 @@ export function buildPrintEntries({ book, units, items, selectedItemIds, imagesB
   const regionOf = (item, kind) => (imagesByItem.get(item.itemId) ?? []).find((region) => region.kind === kind) ?? null;
   const urlOf = (item, kind) => regionOf(item, kind)?.url ?? "";
   const bboxOf = (item, kind) => (item.regions ?? []).find((region) => region.kind === kind)?.bboxNormalized ?? null;
+  // 쪽 폭의 62% 를 넘는 영역(올림포스 기본 유형·고난도처럼 가로로 긴 문항)은 2단 인쇄에서 두 열을 차지한다.
+  const isWide = (bbox) => Array.isArray(bbox) && bbox.length === 4 && bbox[2] - bbox[0] > 0.62;
   // 정답·해설 이미지는 문항마다 하나씩. 그룹 항목도 구성 문항별로 갖는다.
   const answerOf = (item) => ({ answerUrl: urlOf(item, "answer"), answerRegion: regionOf(item, "answer"), solutionUrl: urlOf(item, "solution") });
 
@@ -233,6 +254,7 @@ export function buildPrintEntries({ book, units, items, selectedItemIds, imagesB
           item,
           passageUrl,
           passageBbox,
+          wide: isWide(passageBbox),
           members: [],
           sourceLine: "",
           typeLabel: item.typeLabel,
@@ -256,6 +278,7 @@ export function buildPrintEntries({ book, units, items, selectedItemIds, imagesB
       sourceLine: sourceLine(item),
       typeLabel: item.typeLabel,
       bodyUrl: urlOf(item, "body"),
+      wide: isWide(bboxOf(item, "body")),
       ...answerOf(item)
     });
   }

@@ -1,0 +1,7 @@
+% 개념 02 공통 지시문 그림(본책 13쪽) — 수직선 위 A(-4)·P(-1)·B(0)·Q(2)·C(4). 원문 그림을 TikZ 로 다시 그림(스캔 화질).
+\begin{tikzpicture}[scale=0.62, line width=0.7pt]
+  \draw[->, >=stealth] (-5.2,0) -- (5.2,0);
+  \foreach \x in {-4,...,4} \draw (\x,0.12) -- (\x,-0.12);
+  \foreach \x in {-4,...,4} \node[below=3pt, font=\small] at (\x,0) {$\x$};
+  \foreach \x/\l in {-4/A, -1/P, 0/B, 2/Q, 4/C} {\fill (\x,0) circle (2.2pt); \node[above=4pt, font=\small] at (\x,0) {$\mathrm{\l}$};}
+\end{tikzpicture}

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import academyMark from "../../../assets/branding/academy-mark.png";
-import { buildPrintEntries, flattenPrintItems, printWidthMm } from "./problemBankModel.js";
+import { assignPrintColumns, buildPrintEntries, flattenPrintItems, printWidthMm } from "./problemBankModel.js";
 import { exportWrongAnswerPptx } from "./problemBankPptx.js";
 
 // 인쇄 워터마크는 서버 시험지 워터마크(src/shared/server/testPaperWatermark.js)와 같은 로고·같은 값이다:
@@ -25,6 +25,7 @@ export function WrongAnswerPrintSheet({ book, units, items, selectedItemIds, ima
     [book, units, items, selectedItemIds, imagesByItem]
   );
   const printRows = useMemo(() => flattenPrintItems(entries), [entries]);
+  const printColumnSides = useMemo(() => assignPrintColumns(entries), [entries]);
   const answerEntries = printRows.filter((row) => row.answerUrl);
   const solutionEntries = printRows.filter((row) => row.solutionUrl);
   const missingImages = entries.filter((entry) => entry.kind === "item" && !entry.bodyUrl).length;
@@ -98,7 +99,7 @@ export function WrongAnswerPrintSheet({ book, units, items, selectedItemIds, ima
         </header>
         <div className="problemBankPrintColumns">
           {entries.map((entry, index) => (
-            <article className="problemBankPrintItem" key={entry.key}>
+            <article className={`problemBankPrintItem col-${printColumnSides[index]}`} key={entry.key}>
               <div className="problemBankPrintSource">
                 <span>{entry.sourceLine}</span>
                 {entry.typeLabel ? <span className="problemBankPrintType">{entry.typeLabel}</span> : null}
