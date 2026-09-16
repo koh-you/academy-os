@@ -127,7 +127,9 @@ export function findFigureClusters(paths, region, textBoxes, { gap = 8, minSize 
     for (let pass = 0; pass < 2; pass += 1) {
       for (const token of textBoxes) {
         if (!inside(token, region, 12)) continue;
-        if (token.h >= 9.5 ? inside(token, cluster, 1.5) : overlaps(token, box, 5)) box = union(box, token);
+        // 보기 번호 ①~⑤ 가 그림 보기 왼쪽에 붙어 있으면(그림이 보기인 문항) 함께 넣는다.
+        const circled = /^[①②③④⑤]$/.test(token.str.trim()) && overlaps(token, box, 14);
+        if (circled || (token.h >= 9.5 ? inside(token, cluster, 1.5) : overlaps(token, box, 5))) box = union(box, token);
       }
     }
     results.push({ x0: box.x0 - 2, y0: box.y0 - 2, x1: box.x1 + 2, y1: box.y1 + 2, paths: members.length });

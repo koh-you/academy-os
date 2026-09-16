@@ -51,6 +51,9 @@ function textHint(tokens, region, figureBoxes) {
 
 // 자동 크롭은 매번 새로 만든다(규칙이 바뀌면 옛 크롭·크기 기록이 남지 않게). figures/ 의 사람이 둔 파일(fig-*.tex 등)은 건드리지 않는다.
 const crops = {};
+// 사람 지정 그림 상자(latex-bank/<책>/figure-overrides.json): { "0438": { "union": true, "pad": [왼,위,오,아래] } | { "box": [x0,y0,x1,y1] (쪽 pt) } }
+const overridesPath = path.join(bankDir, "figure-overrides.json");
+const figureOverrides = existsSync(overridesPath) ? JSON.parse(await readFile(overridesPath, "utf8")) : {};
 for (const file of await readdir(path.join(bankDir, "figures")).catch(() => [])) if (/^fig-.*\.png$/.test(file)) await rm(path.join(bankDir, "figures", file), { force: true });
 const draft = { book: args.book, dpi, items: {}, groups: {} };
 let figureCount = 0;
@@ -139,7 +142,33 @@ for (const pageNumber of pages) {
       hint: textHint(tokens, region, clusters),
       hidden: textHint(hiddenTokens, region, [])
     };
-    if (clusters.length) {
+    const override = figureOverrides[item.number_label];
+    if (override?.box) {
+      const [x0, y0, x1, y1] = override.box;
+      const file = `fig-${item.number_label}.png`;
+      await cropTo({ x0, y0, x1, y1 }, file);
+      entry.figure = `crop:${file}`;
+      entry.note = "사람 지정 상자(figure-overrides.json)";
+      // extra: [[x0,y0,x1,y1], …] → fig-<id>-2.png … (둘째 그림 · figure_extra 용)
+      for (const [index, extraBox] of (override.extra ?? []).entries()) {
+        const [ex0, ey0, ex1, ey1] = extraBox;
+        const extraFile = `fig-${item.number_label}-${index + 2}.png`;
+        await cropTo({ x0: ex0, y0: ey0, x1: ex1, y1: ey1 }, extraFile);
+        (entry.figure_parts ??= []).push(`crop:${extraFile}`);
+      }
+      qaContext.strokeStyle = "#1d4ed8";
+      qaContext.strokeRect(x0 * 1.5, y0 * 1.5, (x1 - x0) * 1.5, (y1 - y0) * 1.5);
+    } else if (clusters.length && override?.union) {
+      const [pl = 0, pt = 0, pr = 0, pb = 0] = override.pad ?? [];
+      const union = clusters.reduce(unionBox);
+      const box = { x0: union.x0 - pl, y0: union.y0 - pt, x1: union.x1 + pr, y1: union.y1 + pb };
+      const file = `fig-${item.number_label}.png`;
+      await cropTo(box, file);
+      entry.figure = `crop:${file}`;
+      entry.note = `그림 덩어리 ${clusters.length}개를 사람 지정으로 합침(figure-overrides.json)`;
+      qaContext.strokeStyle = "#1d4ed8";
+      qaContext.strokeRect(box.x0 * 1.5, box.y0 * 1.5, (box.x1 - box.x0) * 1.5, (box.y1 - box.y0) * 1.5);
+    } else if (clusters.length) {
       // 덩어리가 여럿이면(보기 ①~⑤ 가 그림인 문항 · 표 + 도형) 한 상자로 합친다. 다만 합친 상자가 본문 글줄을 삼키면
       // (그림 사이에 발문이 있는 경우) 합치지 않고 큰 덩어리를 대표 그림으로, 나머지는 fig-<id>-2.png … 로 따로 둔다.
       const union = clusters.reduce(unionBox);
