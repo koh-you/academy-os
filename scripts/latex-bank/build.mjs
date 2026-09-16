@@ -119,6 +119,8 @@ function renderItemBody(id, item, group, bank) {
   } else {
     parts.push(item.body);
   }
+  // 둘째 그림(풀이 과정 상자·자료 표처럼 본문 아래 오는 것)은 항상 본문 아래 가운데.
+  if (item.figure_extra) parts.push(`\\par\\smallskip\\begin{center}${renderFigure(item.figure_extra, "\\linewidth")}\\end{center}`);
   if (item.subs) parts.push(item.subs.map((sub, index) => `\\dmsubprob{${index + 1}} ${sub}`).join("\n"));
   if (item.choices) {
     const env = item.choices_layout === "v" ? "choicesv" : item.choices_layout === "ii" ? "choicesii" : "choices32";

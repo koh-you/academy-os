@@ -138,13 +138,29 @@ for (const pageNumber of pages) {
       hidden: textHint(hiddenTokens, region, [])
     };
     if (clusters.length) {
-      const box = clusters.reduce(unionBox);
+      // 덩어리가 여럿이면(보기 ①~⑤ 가 그림인 문항 · 표 + 도형) 한 상자로 합친다. 다만 합친 상자가 본문 글줄을 삼키면
+      // (그림 사이에 발문이 있는 경우) 합치지 않고 큰 덩어리를 대표 그림으로, 나머지는 fig-<id>-2.png … 로 따로 둔다.
+      const union = clusters.reduce(unionBox);
+      const swallows = tokens.some((token) => token.h >= 9.5 && token.str.trim().length >= 4 && insideRegion(token, union, 1) && !clusters.some((cluster) => insideRegion(token, cluster, 1)));
+      const area = (box) => (box.x1 - box.x0) * (box.y1 - box.y0);
+      const ordered = [...clusters].sort((a, b) => area(b) - area(a));
+      const main = clusters.length > 1 && swallows ? ordered[0] : union;
       const file = `fig-${item.number_label}.png`;
-      await cropTo(box, file);
+      await cropTo(main, file);
       entry.figure = `crop:${file}`;
-      if (clusters.length > 1) entry.note = `그림 덩어리 ${clusters.length}개를 한 상자로 합침 — 크롭 확인`;
+      if (clusters.length > 1 && swallows) {
+        entry.figure_parts = [];
+        for (const [index, extra] of ordered.slice(1).entries()) {
+          const extraFile = `fig-${item.number_label}-${index + 2}.png`;
+          await cropTo(extra, extraFile);
+          entry.figure_parts.push(`crop:${extraFile}`);
+        }
+        entry.note = `그림 덩어리 ${clusters.length}개 사이에 본문이 있어 따로 크롭(대표 = 가장 큰 것 · 나머지 fig-<id>-2…) — 어느 것이 문항 그림인지 확인`;
+      } else if (clusters.length > 1) {
+        entry.note = `그림 덩어리 ${clusters.length}개를 한 상자로 합침 — 크롭 확인`;
+      }
       qaContext.strokeStyle = clusters.length > 1 ? "#ea580c" : "#c026d3";
-      qaContext.strokeRect(box.x0 * 1.5, box.y0 * 1.5, (box.x1 - box.x0) * 1.5, (box.y1 - box.y0) * 1.5);
+      for (const box of clusters.length > 1 && swallows ? clusters : [union]) qaContext.strokeRect(box.x0 * 1.5, box.y0 * 1.5, (box.x1 - box.x0) * 1.5, (box.y1 - box.y0) * 1.5);
     }
     draft.items[item.number_label] = entry;
   }

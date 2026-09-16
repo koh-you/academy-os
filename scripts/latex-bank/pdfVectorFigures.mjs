@@ -85,8 +85,10 @@ export function findFigureClusters(paths, region, textBoxes, { gap = 8, minSize 
   // 굵기 있는 path 가 그림의 뼈대다. 분수 가로줄·밑줄·문항 구분선처럼 얇은 선은 뼈대(또는 뼈대에 이미 붙은 선)에 닿을 때만
   // 넣는다(도형의 한 변·축·표의 칸 선). 번호 배지·빈칸 상자 같은 작은 색 채움은 뺀다.
   // 낮고 좁은 색 채움(h ≤ 14pt · w ≤ 80pt)은 번호 배지·빈칸·「대표문제」 같은 태그 라벨의 바탕이다.
-  const candidates = inRegion.filter((box) => !isThin(box) && !(box.kind === "fill" && box.h <= 14 && box.w <= 80));
-  const thin = inRegion.filter(isThin);
+  // 작은 네모(w ≤ 30 · h ≤ 18 · 채움·테두리 모두)는 빈칸 상자·직각 표시·체크 박스라 뼈대가 못 된다(뼈대에 붙으면 함께 들어간다).
+  const candidates = inRegion.filter((box) => !isThin(box) && !(box.kind === "fill" && box.h <= 14 && box.w <= 80) && !(box.w <= 30 && box.h <= 18));
+  const small = inRegion.filter((box) => !isThin(box) && box.w <= 30 && box.h <= 18 && !candidates.includes(box));
+  const thin = [...inRegion.filter(isThin), ...small];
   let grew = true;
   while (grew) {
     grew = false;

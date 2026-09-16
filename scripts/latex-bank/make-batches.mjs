@@ -37,6 +37,7 @@ const describeItem = (item) => {
     line += ` · 인쇄 ${entry.printed_page}쪽`;
     if (entry.tags?.length) line += ` · 태그 ${entry.tags.join("/")}`;
     line += entry.figure ? ` · 그림 ${entry.figure} (${path.join(figuresDir, entry.figure.slice(5))})${entry.note ? ` ⚠ ${entry.note}` : ""}` : " · 그림 없음";
+    if (entry.figure_parts?.length) line += ` · 둘째 크롭 ${entry.figure_parts.map((part) => `${part} (${path.join(figuresDir, part.slice(5))})`).join(", ")}`;
     if (entry.hint?.length) line += `\n  힌트(글자 레이어 · 기호는 원문 글꼴 코드라 어긋날 수 있음): ${quote(entry.hint)}`;
     if (entry.hidden?.length) line += `\n  숨은 글자(교사용 답 · 참고만): ${quote(entry.hidden)}`;
   }
