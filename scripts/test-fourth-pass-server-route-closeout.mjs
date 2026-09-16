@@ -79,8 +79,9 @@ const registrySignatures = [
 ].map(signatureOf).sort();
 
 // 102 -> 103: POST /api/auth/refresh 추가(세션 연장, 2026-09-08 만료 장애 대응).
-assert.equal(registrySignatures.length, 103);
-assert.equal(new Set(registrySignatures).size, 103);
+// 103 -> 104: POST /api/classes 추가(반관리에서 반 개설·수정, 2026-09-16).
+assert.equal(registrySignatures.length, 104);
+assert.equal(new Set(registrySignatures).size, 104);
 assert.deepEqual(registrySignatures, [
   "DELETE /api/academy-reminders",
   "DELETE /api/exam-prep-rows",
@@ -131,6 +132,7 @@ assert.deepEqual(registrySignatures, [
   "POST /api/auth/login",
   "POST /api/auth/refresh",
   "POST /api/auth/teacher-account",
+  "POST /api/classes",
   "POST /api/client-errors",
   "POST /api/exam-analysis-runs",
   "POST /api/exam-analysis-runs/confirm-question-count",
@@ -237,7 +239,7 @@ assert.equal(
     + externalReadSignatures.length
     + domainSourceActionSignatures.length
     + externalWriteSignatures.length,
-  123
+  124
 );
 
 for (const [createToken, dispatchToken] of [
@@ -289,5 +291,5 @@ assert.ok(
 );
 
 console.log(
-  "fourth-pass server route closeout passed · registry 103 · source read 0 · external read 2 · source action 10 · external write 8"
+  "fourth-pass server route closeout passed · registry 104 · source read 0 · external read 2 · source action 10 · external write 8"
 );

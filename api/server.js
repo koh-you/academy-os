@@ -184,6 +184,8 @@ import { createAdminAiRouteRegistry } from "../src/shared/server/adminAiRouteReg
 import { createAttendanceRouteRegistry } from "../src/shared/server/attendanceRouteRegistry.js"; import { createAttendanceRealtimeRouteRegistry } from "../src/shared/server/attendanceRealtimeRouteRegistry.js";
 import { createAttendanceSupabaseRealtimeProvider } from "../src/shared/server/attendanceSupabaseRealtimeProvider.js";
 import { createClassTemplateRouteRegistry } from "../src/shared/server/classTemplateRouteRegistry.js";
+import { createClassTemplateStore } from "../src/shared/server/classTemplateStore.js";
+import { formatTeacherBrandName } from "../src/shared/utils/academyBrand.js";
 import { createHomeworkRouteRegistry } from "../src/shared/server/homeworkRouteRegistry.js";
 import { createLessonRecordRouteRegistry } from "../src/shared/server/lessonRecordRouteRegistry.js";
 import { createLessonRouteRegistry } from "../src/shared/server/lessonRouteRegistry.js";
@@ -299,6 +301,7 @@ import {
   sendAttendanceAlimtalk,
   sendDailyReportAlimtalk,
   sendLessonCommentAlimtalk,
+  setTenantAcademyNameResolver,
   sendSlackDailyScheduleSummary,
   sendStudentScheduleReminderAlimtalk
 } from "./routes/notifications.js";
@@ -461,10 +464,8 @@ const { dispatch: dispatchAttendanceRoute } = createAttendanceRouteRegistry({
   readJsonBody,
   sendJson
 }); const attendanceRealtimeProvider = createAttendanceSupabaseRealtimeProvider(); const { dispatch: dispatchAttendanceRealtimeRoute } = createAttendanceRealtimeRouteRegistry({ resolveCorsOrigin: (request) => getCorsOrigin(request, allowedOrigins), subscribeToAttendanceChanges: attendanceRealtimeProvider?.subscribeToAttendanceChanges });
-const { dispatch: dispatchClassTemplateRoute } = createClassTemplateRouteRegistry({
-  listClassTemplates,
-  sendJson
-});
+const { saveClassTemplate } = createClassTemplateStore({ insertRows, isSupabaseConfigured, patchRows });
+const { dispatch: dispatchClassTemplateRoute } = createClassTemplateRouteRegistry({ listClassTemplates, readJsonBody, saveClassTemplate, sendJson });
 function logExamPrepRowAudit(tag, audit, { isError = false } = {}) {
   (isError ? console.error : console.info)(tag, JSON.stringify(audit));
 }
@@ -663,7 +664,12 @@ const teacherAccountAdminStore = createTeacherAccountAdminStore({
   patchRows,
   teacherAccountTable
 });
-const { listKnownTeacherTenantIds } = teacherAccountAdminStore;
+const { listKnownTeacherTenantIds, resolveTenantTeacherName } = teacherAccountAdminStore;
+// 알림톡 #{학원명}: 요청 tenant 의 선생님 이름(협력 교사 학생이면 "으뜸수학 최경석T").
+setTenantAcademyNameResolver(async () => {
+  const teacherName = await resolveTenantTeacherName(getCurrentTenantId());
+  return teacherName ? formatTeacherBrandName(teacherName) : "";
+});
 const { dispatch: dispatchTeacherAccountAdminRoute } = createTeacherAccountAdminRouteRegistry({
   createTeacherAccount: teacherAccountAdminStore.createTeacherAccountWithTenant,
   findTeacherAccountByLoginId: teacherAccountAdminStore.findTeacherAccountByLoginId,

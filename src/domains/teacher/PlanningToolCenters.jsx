@@ -36,6 +36,7 @@ import { SelectableCard } from "../../shared/components/SelectableCard.jsx";
 import { SelectionToolbar } from "../../shared/components/SelectionToolbar.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 import { safeIdPart } from "../../shared/utils/id.js";
+import { ClassTemplateEditorModal } from "./ClassTemplateEditorModal.jsx";
 import {
   lessonResearchCategories,
   lessonResearchStatuses,
@@ -698,10 +699,12 @@ export function SchoolCalendarCenter({
   );
 }
 
-export function ClassManager({ runtime, students, templates, onUpdateClassRoster }) {
+export function ClassManager({ runtime, students, templates, onSaveClassTemplate, onUpdateClassRoster }) {
   const { isActiveStudent } = runtime;
   const [selectedTemplateId, setSelectedTemplateId] = useState(templates[1]?.classTemplateId ?? templates[0]?.classTemplateId ?? "");
   const [isRosterModalOpen, setIsRosterModalOpen] = useState(false);
+  // null = 닫힘, "new" = 반 개설, 객체 = 그 반 수정
+  const [templateEditorTarget, setTemplateEditorTarget] = useState(null);
   const [draftStudentIds, setDraftStudentIds] = useState([]);
   const [rosterSaveError, setRosterSaveError] = useState("");
   const [rosterSaveState, setRosterSaveState] = useState("idle");
@@ -737,15 +740,25 @@ export function ClassManager({ runtime, students, templates, onUpdateClassRoster
     }
   }
 
+  async function saveClassTemplate(draft) {
+    const saved = await onSaveClassTemplate(draft);
+    if (saved?.classTemplateId) setSelectedTemplateId(saved.classTemplateId);
+    return saved;
+  }
+
   return (
     <section className="classManagerPage">
       <PageHeader
+        actions={<button className="primaryButton" onClick={() => setTemplateEditorTarget("new")} type="button">+ 반 개설</button>}
         className="classManagerTop"
-        description="4개 기본 반을 기준으로 학생 배정과 수업 흐름을 관리합니다."
+        description="기본 반을 기준으로 학생 배정과 수업 흐름을 관리합니다."
         title="반관리"
       />
 
       <div className="classBoardGrid">
+        {templates.length === 0 ? (
+          <EmptyState className="emptyState">아직 개설된 반이 없습니다. 오른쪽 위 "반 개설" 로 첫 반을 만들어 주세요.</EmptyState>
+        ) : null}
         {templates.map((template) => {
           const count = activeStudents.filter((student) => student.defaultClassTemplateId === template.classTemplateId).length;
           return (
@@ -758,19 +771,25 @@ export function ClassManager({ runtime, students, templates, onUpdateClassRoster
             >
               <span className="classColor" style={{ background: template.color }} />
               <strong>{template.name}</strong>
-              <small>{template.track} · {template.timeLabel}</small>
+              <small>{[template.track, template.timeLabel].filter(Boolean).join(" · ")}</small>
               <b>{count}명</b>
             </SelectableCard>
           );
         })}
       </div>
 
+      {selectedTemplate ? (
       <section className="panel classDetailPanel">
         <SectionHeader
-          actions={<button className="softButton" onClick={openRosterModal} type="button">명단 수정</button>}
-          description={`${selectedTemplate?.timeLabel} · 현재 배정 ${classStudents.length}명`}
+          actions={
+            <>
+              <button className="softButton" onClick={() => setTemplateEditorTarget(selectedTemplate)} type="button">반 수정</button>
+              <button className="softButton" onClick={openRosterModal} type="button">명단 수정</button>
+            </>
+          }
+          description={`${selectedTemplate.timeLabel || ""} · 현재 배정 ${classStudents.length}명`}
           eyebrow="CLASS DETAIL"
-          title={selectedTemplate?.name}
+          title={selectedTemplate.name}
         />
         <div className="classStudentGrid">
           {classStudents.length === 0 ? (
@@ -786,6 +805,15 @@ export function ClassManager({ runtime, students, templates, onUpdateClassRoster
           )}
         </div>
       </section>
+      ) : null}
+
+      {templateEditorTarget ? (
+        <ClassTemplateEditorModal
+          onClose={() => setTemplateEditorTarget(null)}
+          onSave={saveClassTemplate}
+          template={templateEditorTarget === "new" ? null : templateEditorTarget}
+        />
+      ) : null}
 
       {isRosterModalOpen ? (
         <Modal

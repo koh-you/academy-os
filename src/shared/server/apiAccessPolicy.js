@@ -68,6 +68,8 @@ const ASSISTANT_ALLOW_EXACT = new Set([
   // 반관리 · 시험관리 · 학사일정 화면(2026-09-09 협력 교사에게 개방).
   // 전부 tenant 스코핑 대상이라 각자 자기 것만 보고 쓴다.
   "POST /api/class-rosters/save",
+  // 반 개설·수정(2026-09-16). 협력 교사 tenant 는 반이 0개로 시작하므로 직접 만들어야 한다.
+  "POST /api/classes",
   "GET /api/exam-prep-rows",
   "POST /api/exam-prep-rows",
   "POST /api/exam-prep-rows/bulk",

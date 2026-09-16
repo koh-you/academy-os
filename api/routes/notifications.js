@@ -16,6 +16,25 @@ const require = createRequire(import.meta.url);
 const { SolapiMessageService } = require("solapi");
 
 const ACADEMY_NAME = "으뜸수학 고태영T";
+
+// #{학원명} 은 요청 tenant 의 선생님 이름으로 정한다(2026-09-16).
+// 협력 교사(최경석T) 학생의 출결 알림톡이 "으뜸수학 고태영T" 로 나갔다 — 화면이 보내는
+// academyName 도, 서버 기본값도 전부 원장 이름이었기 때문이다. 서버가 tenant 에서
+// 이름을 찾아 우선 적용하고, 못 찾으면(컨텍스트 없음·계정 없음) 화면 값 → 기본값 순.
+// 원장 tenant 는 "고태영T" → "으뜸수학 고태영T" 로 기존 문구와 같다.
+let tenantAcademyNameResolver = async () => "";
+export function setTenantAcademyNameResolver(resolver) {
+  tenantAcademyNameResolver = typeof resolver === "function" ? resolver : async () => "";
+}
+export async function resolveAcademyName(payload = {}) {
+  let tenantName = "";
+  try {
+    tenantName = String((await tenantAcademyNameResolver()) ?? "").trim();
+  } catch (error) {
+    console.warn("[alimtalk] tenant academy name lookup failed; falling back", error?.message ?? error);
+  }
+  return tenantName || String(payload.academyName ?? "").trim() || ACADEMY_NAME;
+}
 const DEFAULT_TEST_RECIPIENT = "01057882748";
 
 const REQUIRED_SOLAPI_ENV = [
@@ -462,7 +481,7 @@ export async function sendAttendanceAlimtalk(payload) {
     recipientType: "parent",
     templateEnvName: TEMPLATE_ENV.attendance,
     variables: {
-      "#{학원명}": String(payload.academyName ?? ACADEMY_NAME),
+      "#{학원명}": await resolveAcademyName(payload),
       "#{학생명}": String(payload.studentName ?? ""),
       "#{출결본문}": attendanceBody
     }
@@ -496,7 +515,7 @@ export async function sendDailyReportAlimtalk(payload) {
     recipientType: "parent",
     templateEnvName: TEMPLATE_ENV.dailyReport,
     variables: {
-      "#{학원명}": String(payload.academyName ?? ACADEMY_NAME),
+      "#{학원명}": await resolveAcademyName(payload),
       "#{학생명}": String(payload.studentName ?? ""),
       "#{수업일}": String(payload.lessonDate ?? ""),
       "#{리포트본문}": reportBody
@@ -530,7 +549,7 @@ export async function sendLessonCommentAlimtalk(payload) {
     recipientType: audience,
     templateEnvName,
     variables: {
-      "#{학원명}": String(payload.academyName ?? ACADEMY_NAME),
+      "#{학원명}": await resolveAcademyName(payload),
       "#{학생명}": String(payload.studentName ?? ""),
       "#{수업명}": String(payload.lessonName ?? ""),
       "#{수업일}": String(payload.lessonDate ?? ""),
@@ -563,7 +582,7 @@ export async function sendStudentScheduleReminderAlimtalk(payload) {
     recipientType: "student",
     templateEnvName: TEMPLATE_ENV.studentComment,
     variables: {
-      "#{학원명}": String(payload.academyName ?? ACADEMY_NAME),
+      "#{학원명}": await resolveAcademyName(payload),
       "#{학생명}": String(payload.studentName ?? ""),
       "#{수업명}": String(payload.lessonName ?? payload.scheduleTitle ?? ""),
       "#{수업일}": String(payload.scheduleDate ?? ""),

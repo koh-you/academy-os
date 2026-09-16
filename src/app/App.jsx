@@ -8,6 +8,7 @@ import { RoleLoginScreen } from "./RoleLoginScreen.jsx";
 import { Sidebar } from "./Sidebar.jsx";
 import { isViewAllowedForRole } from "./sidebarMenuModel.js";
 import { EvaluationCenter } from "../domains/teacher/EvaluationCenter.jsx";
+import { mergeClassTemplate, saveClassTemplateRequest } from "../domains/teacher/classTemplateApi.js";
 
 const lessonJournalRowsSaveActionModulePromise = import(
   "../domains/lessons/lessonJournalRowsSaveAction.js"
@@ -5166,6 +5167,13 @@ export function App() {
     return result;
   }
 
+  // 반 개설·수정(반관리). 서버가 확인한 반만 목록에 반영한다.
+  async function handleSaveClassTemplate(draft) {
+    const saved = normalizeClassTemplateSchedule(await saveClassTemplateRequest(draft));
+    setClassTemplates((current) => mergeClassTemplate(current, saved));
+    return saved;
+  }
+
   async function handleUpdateClassRoster(classTemplateId, nextStudentIds) {
     const nextStudentIdSet = new Set(nextStudentIds);
     const previousStudents = students;
@@ -6563,6 +6571,7 @@ export function App() {
       handleUndoLessonAction,
       handleUndoPassSupplementTask,
       handleUpdateClassRoster,
+      handleSaveClassTemplate,
       handleSaveExamPrepRowDraft,
       handleUpdateExamPrepRow,
       handleUpdateHomework,

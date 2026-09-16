@@ -35,7 +35,8 @@ const rawDialogEntries = sourceEntries.filter((entry) => (
 ));
 
 // 41 -> 40: 오답관리 옛 「뽑은 문제」 인쇄 모달(PickedProblemModal)을 2026-09-13 에 뺐다.
-assert.equal(directModalCount, 40, "unexpected direct common Modal surface count");
+// 40 -> 41: 반관리 반 개설·수정 모달(ClassTemplateEditorModal) 2026-09-16 추가.
+assert.equal(directModalCount, 41, "unexpected direct common Modal surface count");
 assert.equal(injectedModalCount, 14, "unexpected injected common Modal surface count");
 assert.equal(modalFooterCount, 20, "unexpected common ModalFooter count");
 assert.equal(modalActionCount, 2, "unexpected legacy modalActions wrapper count");
