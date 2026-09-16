@@ -7,6 +7,8 @@
 //     --batches "A:16-19:02 직선의 방정식,B:20-24:02 직선의 방정식,E:33-36:03 원의 방정식" [--page-offset 6]
 //
 // --batches 는 「이름:pdf쪽범위:단원」 을 쉼표로 잇는다. --page-offset 은 인쇄 쪽 = pdf 쪽 + offset (기본 0 · 베이직쎈 6).
+// --draft <latex-bank/<책>/draft/draft.json> (prepare-text-pdf-bank.mjs 산출)을 주면 문항마다 자동 크롭 그림·글자 레이어 힌트·
+// 숨은 답 글자를 함께 적고, 공통 지시문 그룹([0001~0006])은 지시문 크롭·그룹 그림과 함께 한 묶음으로 나열한다(텍스트 PDF · RPM).
 import fs from "node:fs";
 import path from "node:path";
 import { parseArgs } from "../problem-bank/pdfTools.mjs";
@@ -21,6 +23,26 @@ const offset = Number(args["page-offset"] ?? 0);
 const manifest = JSON.parse(fs.readFileSync(path.join(root, "manifest.json"), "utf8"));
 fs.mkdirSync(path.resolve(args.out), { recursive: true });
 const win = (file) => path.join(root, file);
+const draft = args.draft ? JSON.parse(fs.readFileSync(path.resolve(args.draft), "utf8")) : null;
+const figuresDir = draft ? path.resolve(path.dirname(path.resolve(args.draft)), "..", "figures") : null;
+const quote = (lines) => (lines ?? []).map((line) => `「${line}」`).join(" ");
+const describeItem = (item) => {
+  const passage = item.regions.find((region) => region.kind === "passage");
+  let line = `- ${item.number_label} · 크롭 ${win(item.regions[0].file)}`;
+  if (passage && !draft) line += ` · 지시문 크롭 ${win(passage.file)}`;
+  line += ` · 답 ${win(`answers/${item.item_id}.jpg`)} · 해설 ${win(`solutions/${item.item_id}.jpg`)}`;
+  if (item.review_status === "flagged") line += ` · ⚠ ${item.review_note}`;
+  const entry = draft?.items?.[item.number_label];
+  if (entry) {
+    line += ` · 인쇄 ${entry.printed_page}쪽`;
+    if (entry.tags?.length) line += ` · 태그 ${entry.tags.join("/")}`;
+    line += entry.figure ? ` · 그림 ${entry.figure} (${path.join(figuresDir, entry.figure.slice(5))})${entry.note ? ` ⚠ ${entry.note}` : ""}` : " · 그림 없음";
+    if (entry.figure_parts?.length) line += ` · 둘째 크롭 ${entry.figure_parts.map((part) => `${part} (${path.join(figuresDir, part.slice(5))})`).join(", ")}`;
+    if (entry.hint?.length) line += `\n  힌트(글자 레이어 · 기호는 원문 글꼴 코드라 어긋날 수 있음): ${quote(entry.hint)}`;
+    if (entry.hidden?.length) line += `\n  숨은 글자(교사용 답 · 참고만): ${quote(entry.hidden)}`;
+  }
+  return line + "\n";
+};
 for (const spec of String(args.batches).split(",").map((value) => value.trim()).filter(Boolean)) {
   const [name, range, unit] = spec.split(":").map((value) => value.trim());
   const [from, to] = range.split("-").map(Number);
@@ -30,13 +52,23 @@ for (const spec of String(args.batches).split(",").map((value) => value.trim()).
     const items = manifest.items.filter((item) => item.pdf_page === page);
     const summary = manifest.pages.find((entry) => entry.pdf_page === page);
     body += `## pdf ${page}쪽 = 인쇄 ${page + offset}쪽 · 구역(자동 추정): ${summary?.block || "?"} · 쪽 이미지: ${win(`qa/p${String(page).padStart(3, "0")}.jpg`)}\n\n`;
+    let lastGroup = null;
     for (const item of items) {
-      const passage = item.regions.find((region) => region.kind === "passage");
-      body += `- ${item.number_label} · 크롭 ${win(item.regions[0].file)}`;
-      if (passage) body += ` · 지시문 크롭 ${win(passage.file)}`;
-      body += ` · 답 ${win(`answers/${item.item_id}.jpg`)} · 해설 ${win(`solutions/${item.item_id}.jpg`)}`;
-      if (item.review_status === "flagged") body += ` · ⚠ ${item.review_note}`;
-      body += "\n";
+      const groupKey = draft && item.group_key ? item.group_key : null;
+      if (groupKey && groupKey !== lastGroup) {
+        const group = draft.groups?.[groupKey];
+        const passage = item.regions.find((region) => region.kind === "passage");
+        body += `\n### 공통 지시문 그룹 [${groupKey}] · 유형 ${item.type_label}`;
+        if (passage) body += ` · 지시문 크롭 ${win(passage.file)}`;
+        if (group?.figure) body += ` · 그룹 그림 ${group.figure} (${path.join(figuresDir, group.figure.slice(5))})`;
+        if (group?.hint?.length) body += `\n  지시문 힌트: ${quote(group.hint)}`;
+        body += "\n\n";
+      } else if (!groupKey && lastGroup) {
+        body += "\n";
+      }
+      lastGroup = groupKey;
+      if (draft && !groupKey) body += `- (유형 ${item.type_label})\n`;
+      body += describeItem(item);
       count += 1;
     }
     body += "\n";

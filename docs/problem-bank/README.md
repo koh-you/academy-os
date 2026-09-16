@@ -127,7 +127,7 @@ Supabase SQL: `supabase/20260912_problem_bank.sql` (SQL Editor 에서 1회 적�
 
 ## LaTeX 조판 오답은행
 
-스캔 화질이 낮아 크롭을 그대로 쓰기 어려운 책은 문항을 LaTeX 로 다시 조판한다(`latex-bank/README.md`, `scripts/latex-bank/build.mjs`). 베이직쎈 공통수학2 1단원 104문항이 시범(원본 전사 · TikZ 그림 4 · xelatex 빌드 · 정독 자산).
+스캔 화질이 낮아 크롭을 그대로 쓰기 어려운 책은 문항을 LaTeX 로 다시 조판한다(`latex-bank/README.md`, `scripts/latex-bank/build.mjs`). 베이직쎈 공통수학2 1~3단원 420문항(TikZ 그림), RPM 중3-2 644문항(텍스트 PDF · 벡터 그림 크롭 · 2026-09-16)이 조판본이며, 등록용 패키지는 `build.mjs --export` 가 원본 패키지의 정답·해설을 이어받아 만든다.
 
 ## 남은 일
 

@@ -53,8 +53,12 @@ function bankUnits(bank) {
   return [{ ...parse(bank.unit), groups: bank.groups ?? [] }];
 }
 
-/** id 「12-13」 → 책에 찍힌 문항 번호 13. */
-const bookNumber = (id) => Number(id.split("-")[1]);
+/** id 「12-13」(쪽-번호) → 책에 찍힌 문항 번호 13. 「0013」(id_style number · RPM) → 13. */
+const bookNumber = (id) => (id.includes("-") ? Number(id.split("-")[1]) : Number(id));
+
+/** figures/crops.json — 벡터 PDF 에서 크롭한 그림의 원문 크기(pt). 있으면 원문 크기 그대로 넣고 폭이 넓으면 본문 아래에 둔다. */
+let cropSizes = {};
+const SIDE_FIGURE_MAX_PT = 170;
 
 /** 렌더 캔버스에서 잉크 범위(회색 200 미만)를 찾아 여백 pad 픽셀만 남기고 자른다. */
 function trimToInk(rendered, context, pad = 12) {
@@ -82,25 +86,53 @@ function trimToInk(rendered, context, pad = 12) {
 
 /** 그림 참조 → LaTeX. `tikz:이름` 은 figures/이름.tex 를 \input, `crop:이름.jpg` 는 스캔 크롭을 \includegraphics. */
 function renderFigure(figure, width = "0.38\\linewidth") {
-  if (figure.startsWith("crop:")) return `\\includegraphics[width=${width}]{figures/${figure.slice(5)}}`;
+  if (figure.startsWith("crop:")) {
+    const size = cropSizes[figure.slice(5)];
+    // 원문 크기(pt)를 알면 그대로(본문 폭 440pt 넘지 않게), 모르면 상대 폭.
+    const w = size ? `${Math.min(size.width_pt, 440).toFixed(1)}pt` : width;
+    return `\\includegraphics[width=${w}]{figures/${figure.slice(5)}}`;
+  }
   return `\\input{figures/${figure.replace(/^tikz:/, "")}}`;
+}
+
+/** 그림을 본문 오른쪽에 둘지(원문 「오른쪽 그림」) 아래에 둘지(표·자료 상자처럼 넓은 크롭). */
+function figurePlacement(item) {
+  if (item.figure_layout) return item.figure_layout;
+  const size = item.figure?.startsWith("crop:") ? cropSizes[item.figure.slice(5)] : null;
+  return size && size.width_pt > SIDE_FIGURE_MAX_PT ? "below" : "side";
 }
 
 /** 문항 하나의 본문 LaTeX(번호·출처 배지 포함 · dmpnum 두 번째 인자). */
 function renderItemBody(id, item, group, bank) {
-  const [page, number] = id.split("-");
-  const badge = `\\dmkichul{${bank.book} ${page}쪽 ${number}번${item.tag ? ` · ${item.tag}` : ""}}`;
+  // 출처 배지: 쪽-번호 id 는 「책 12쪽 13번」, 책 전체 번호 id(RPM)는 「책 0013번 · 9쪽」.
+  const badgeText = bank.id_style === "number"
+    ? `${bank.book} ${id}번${item.page ? ` · ${item.page}쪽` : ""}`
+    : `${bank.book} ${id.split("-")[0]}쪽 ${id.split("-")[1]}번`;
+  const badge = `\\dmkichul{${badgeText}${item.tag ? ` · ${item.tag}` : ""}}`;
   const parts = [badge];
-  if (item.figure) {
+  if (item.figure && figurePlacement(item) === "side") {
     // 원문처럼 「오른쪽 그림」이 본문 오른쪽에 오도록 본문 0.58 · 그림 0.4 폭으로 나란히 둔다.
-    parts.push(`\\noindent\\begin{minipage}[t]{0.58\\linewidth}\\vspace{0pt}${item.body}\\end{minipage}\\hfill\\begin{minipage}[t]{0.4\\linewidth}\\vspace{0pt}\\centering ${renderFigure(item.figure, "0.92\\linewidth")}\\end{minipage}\\par`);
+    // 좁은 폭에서 한글 양쪽 정렬은 어간이 크게 벌어지므로 왼쪽 정렬(\raggedright).
+    parts.push(`\\noindent\\begin{minipage}[t]{0.58\\linewidth}\\vspace{0pt}\\raggedright ${item.body}\\end{minipage}\\hfill\\begin{minipage}[t]{0.4\\linewidth}\\vspace{0pt}\\centering ${renderFigure(item.figure, "0.92\\linewidth")}\\end{minipage}\\par`);
+  } else if (item.figure) {
+    // 표·자료 상자처럼 넓은 그림은 본문 아래 가운데.
+    parts.push(item.body, `\\par\\smallskip\\begin{center}${renderFigure(item.figure, "\\linewidth")}\\end{center}`);
   } else {
     parts.push(item.body);
   }
+  // 둘째 그림(풀이 과정 상자·자료 표처럼 본문 아래 오는 것)은 항상 본문 아래 가운데.
+  if (item.figure_extra) parts.push(`\\par\\smallskip\\begin{center}${renderFigure(item.figure_extra, "\\linewidth")}\\end{center}`);
   if (item.subs) parts.push(item.subs.map((sub, index) => `\\dmsubprob{${index + 1}} ${sub}`).join("\n"));
   if (item.choices) {
     const env = item.choices_layout === "v" ? "choicesv" : item.choices_layout === "ii" ? "choicesii" : "choices32";
-    parts.push(`\\begin{${env}}${item.choices.map((choice) => `{${choice}}`).join("")}\\end{${env}}`);
+    // 분수(dfrac)·근호 보기는 키가 커 두 줄 배치에서 위아래 행이 맞닿는다 — 보이지 않는 지주(strut)로 행 높이를 벌린다(sty 수정 없이).
+    const strut = item.choices.some((choice) => /\\dfrac|\\sqrt/.test(choice)) ? "\\rule[-3ex]{0pt}{8ex}" : "";
+    if (env === "choicesv" && item.choices.some((choice) => choice.replace(/\$[^$]*\$/g, "M").length > 26)) {
+      // 긴 한글 보기(문장형)는 choicesv 의 \mbox 안에서 줄이 안 바뀌어 잘린다 — 문단으로 하나씩 놓는다.
+      parts.push(`\\par\\medskip${item.choices.map((choice, index) => `\\par\\noindent\\hangindent=1.4em\\hangafter=1 {\\small ${CIRCLED[index]}}\\ ${choice}`).join("")}\\par\\medskip`);
+    } else {
+      parts.push(`\\begin{${env}}${item.choices.map((choice) => `{${strut}${choice}}`).join("")}\\end{${env}}`);
+    }
   }
   if (item.hint) parts.push(`\\dmhint{${item.hint}}`);
   return parts.join("\n");
@@ -126,6 +158,7 @@ async function main() {
   }
   const dir = path.resolve(args.bank);
   const bank = JSON.parse(await readFile(path.join(dir, "items.json"), "utf8"));
+  cropSizes = JSON.parse(await readFile(path.join(dir, "figures", "crops.json"), "utf8").catch(() => "{}"));
   const xelatex = await findXelatex();
   await mkdir(path.join(dir, "items"), { recursive: true });
   await mkdir(path.join(dir, "build"), { recursive: true });
@@ -160,6 +193,8 @@ async function main() {
 % 문항 전사용 보조 매크로(dm-editorial 매크로를 덮어쓰지 않는다)
 \\newcommand{\\pt}[1]{\\mathrm{#1}}
 \\newcommand{\\seg}[1]{\\overline{\\mathrm{#1}}}
+\\newcommand{\\arc}[1]{\\overset{\\frown}{\\mathrm{#1}}}
+\\newcommand{\\exprbox}[1]{\\par\\smallskip\\noindent\\begin{center}\\fbox{\\begin{minipage}{0.9\\linewidth}\\centering\\vspace{1.5mm}#1\\vspace{1.5mm}\\end{minipage}}\\end{center}}
 \\newcommand{\\blank}[1][1.5em]{\\raisebox{-0.15ex}{\\framebox[#1]{\\rule{0pt}{1.4ex}}}}
 \\newcommand{\\dmhint}[1]{\\par\\smallskip\\begin{tcolorbox}[enhanced,colback=dm-navylight!60,colframe=dm-navy!40,boxrule=0.3pt,sharp corners,left=3mm,right=3mm,top=2mm,bottom=2mm,boxsep=0mm]\\small\\setlength{\\parskip}{1mm}#1\\end{tcolorbox}}
 % 구역 제목·공통 지시문은 뒤에 문항 한 개는 붙을 자리가 있어야 찍는다(쪽 끝 고아 방지).

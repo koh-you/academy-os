@@ -26,6 +26,23 @@ latex-bank/
 - 그림 크롭: `node scripts/latex-bank/crop-figure.mjs --pdf … --page N --item x0,y0,x1,y1 --rel x0,y0,x1,y1 --out figures/fig-<id>.jpg`.
 - `--export` 는 `type_label` 을 전사본 그룹 section 으로 덮어쓴다(스캔 OCR 라벨은 회색 유형 쪽에서 어긋난다).
 
+## 텍스트 PDF 교재(RPM 중3-2 · 2026-09-16)
+
+글자 레이어가 있는 교재는 스캔과 다르게 준비한다 — 그림은 벡터라 TikZ 로 다시 그리지 않고 **원문에서 그대로 크롭**하고, 글자 레이어를 전사 힌트로 준다.
+
+```
+node scripts/latex-bank/prepare-text-pdf-bank.mjs --pdf "C:/…/rpm 중3-2 수학.pdf" --package <문항 패키지> --bank latex-bank/rpm-m3-2 --book "RPM 중3-2 수학"
+  → figures/fig-<id>.png(300dpi · 그룹 그림 fig-g<시작>-<끝>.png · 원문 크기 crops.json) · draft/draft.json(문항별 글자 레이어 힌트 · 숨은 답 글자 분리) · draft/figures-qa/pNNN.png(검출 상자) · items.json 뼈대(id_style number)
+node scripts/latex-bank/make-batches.mjs --package <문항 패키지> --out latex-bank/rpm-m3-2/work --draft latex-bank/rpm-m3-2/draft/draft.json --batches "A:9-11:01 삼각비,…"
+  → 배치마다 전사 에이전트(지시문 latex-bank/agents/transcriber-prompt-rpm.md · 규약 latex-bank/rpm-m3-2/전사-가이드.md)
+node scripts/latex-bank/merge-batches.mjs … → build.mjs --review --package <문항 패키지> → --export
+```
+
+- 그림 검출(`scripts/latex-bank/pdfVectorFigures.mjs`): 쪽 operator list 의 path bbox 를 CTM 으로 쪽 좌표에 놓고, 문항 영역 안에서 굵기 있는 path 를 뼈대로 8pt 안에 있는 것끼리 묶는다. 분수 가로줄·문항 구분선(얇은 선)은 뼈대에 닿을 때만, 번호 배지·태그 라벨 바탕(낮은 색 채움)·빈칸 상자(작은 네모)는 제외, 외딴 네모 하나(큼직한 빈칸)도 제외. 덩어리에 겹치는 작은 글자(정점 라벨·길이)와 보기 번호 ①~⑤ 를 더해 상자를 넓힌다. 여러 덩어리는 한 상자로 합치되 사이에 본문 줄이 끼면(그림 사이 발문) 큰 것을 대표로, 나머지를 `fig-<id>-2.png`… 로 따로 둔다(`figure_extra`). 숨은 글자(교사용 답 · 렌더에 잉크 없음)는 상자 확장·힌트에서 빼고 `hidden` 으로 따로 준다.
+- 자동 검출이 틀린 것은 `latex-bank/<책>/figure-overrides.json` 에 쪽 pt 상자로 지정한다(`{"0545": {"box": [x0,y0,x1,y1], "extra": [[…]]}}` 또는 `{"union": true, "pad": […]}`). RPM: 4건(배지 위로 올라간 그림 · 표 아래 보기 글자 · 축 조각 · 회전 라벨).
+- `id_style: "number"`: id 가 책 전체 번호(`0013`)이고 출처 배지는 「책 0013번 · 9쪽」(문항 `page`). 크롭 그림은 crops.json 의 원문 폭으로 넣고 170pt 를 넘으면 본문 아래에 둔다(`figure_layout` 로 강제 가능). 수식만 든 상자는 `\exprbox{…}` 로 전사한다.
+- 실측(RPM 중3-2 · 644문항 · 83쪽): 그림 크롭 520장(문항 500 + 그룹 10 + 둘째 크롭), 배치 16개(22~53문항)를 에이전트 16개가 전사 — 거부 0, 배치마다 12~20분 · 12~19만 토큰, 답 644/644 답지 크롭 일치. book.pdf 126쪽 · Overfull 1.
+
 ## 배치 전사 절차 (2·3단원에서 확립 · 2026-09-15)
 
 ```

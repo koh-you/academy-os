@@ -30,7 +30,7 @@ const unitLabel = batch.unit ?? "00 배치";
 const [, code = "00", title = unitLabel] = unitLabel.match(/^(\d{2})\s*(.*)$/) ?? [];
 const missing = (batch.groups ?? []).flatMap((group) => group.items).filter((id) => !batch.items?.[id]);
 if (missing.length) console.log(`items 에 없는 id: ${missing.join(", ")}`);
-const bank = { book: base.book, variant_level: 0, units: [{ code, title, groups: batch.groups ?? [] }], items: batch.items ?? {} };
+const bank = { book: base.book, id_style: base.id_style, variant_level: 0, units: [{ code, title, groups: batch.groups ?? [] }], items: batch.items ?? {} };
 await writeFile(path.join(tempDir, "items.json"), JSON.stringify(bank, null, 1), "utf8");
 try {
   const { stdout } = await execFileAsync(process.execPath, [path.resolve("scripts/latex-bank/build.mjs"), "--bank", tempDir], { maxBuffer: 16 * 1024 * 1024 });
