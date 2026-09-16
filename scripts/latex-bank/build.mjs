@@ -116,7 +116,11 @@ function renderItemBody(id, rawItem, group, bank) {
   if (item.figure && figurePlacement(item) === "side") {
     // 원문처럼 「오른쪽 그림」이 본문 오른쪽에 오도록 본문 0.58 · 그림 0.4 폭으로 나란히 둔다.
     // 좁은 폭에서 한글 양쪽 정렬은 어간이 크게 벌어지므로 왼쪽 정렬(\raggedright).
-    parts.push(`\\noindent\\begin{minipage}[t]{0.58\\linewidth}\\vspace{0pt}\\raggedright ${item.body}\\end{minipage}\\hfill\\begin{minipage}[t]{0.4\\linewidth}\\vspace{0pt}\\centering ${renderFigure(item.figure, "0.92\\linewidth")}\\end{minipage}\\par`);
+    // 발문 뒤에 붙인 전폭 블록(보기 그래프 ①~⑤ · 보기 상자 · 조건 상자)은 좁은 본문 minipage 안이 아니라 그림 아래 전폭에 둔다.
+    const cut = item.body.search(/\\par\\(medskip|smallskip)\\noindent\\includegraphics|\\bogi\{|\\exprbox\{|\\dispeq\{/);
+    const [bodyMain, bodyWide] = cut >= 0 ? [item.body.slice(0, cut), item.body.slice(cut)] : [item.body, ""];
+    parts.push(`\\noindent\\begin{minipage}[t]{0.58\\linewidth}\\vspace{0pt}\\raggedright ${bodyMain}\\end{minipage}\\hfill\\begin{minipage}[t]{0.4\\linewidth}\\vspace{0pt}\\centering ${renderFigure(item.figure, "0.92\\linewidth")}\\end{minipage}\\par`);
+    if (bodyWide) parts.push(`\\noindent ${bodyWide}`);
   } else if (item.figure) {
     // 표·자료 상자처럼 넓은 그림은 본문 아래 가운데.
     parts.push(item.body, `\\par\\smallskip\\begin{center}${renderFigure(item.figure, "\\linewidth")}\\end{center}`);
