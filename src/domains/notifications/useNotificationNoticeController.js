@@ -22,6 +22,7 @@ import { useNotificationHistoryState } from "./useNotificationHistoryState.js";
 import { useNotificationRecipientState } from "./useNotificationRecipientState.js";
 
 export function useNotificationNoticeController({
+  academyName = academyBrandName,
   activeNoticeWorkspace,
   aiSettings,
   classTemplates = [],
@@ -55,7 +56,7 @@ export function useNotificationNoticeController({
     today
   } = runtime;
   const resolvedAiSettings = aiSettings ?? defaultAiSettings;
-  const noticeMessageTemplates = getNoticeMessageTemplates(resolvedAiSettings.notificationTemplates);
+  const noticeMessageTemplates = getNoticeMessageTemplates(resolvedAiSettings.notificationTemplates, academyName);
   const commentAiProvider = resolvedAiSettings.commentProvider ?? defaultAiSettings.commentProvider;
   const commentAiModel = resolvedAiSettings.commentModel ?? defaultAiSettings.commentModel;
   const isNotificationJobsLoading = notificationJobsStatus?.state === "loading";
@@ -161,7 +162,7 @@ export function useNotificationNoticeController({
     solapiResultLastCheckedLabel,
     solapiResultSyncTargetIds
   } = useNotificationComposerState({
-    academyName: academyBrandName,
+    academyName,
     aiModel: commentAiModel,
     aiPrompt: getAiPrompt(resolvedAiSettings, "noticeMessage"),
     aiProvider: commentAiProvider,

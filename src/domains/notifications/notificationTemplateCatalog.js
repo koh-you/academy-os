@@ -56,7 +56,7 @@ export const defaultNotificationTemplates = {
     "변경 후 일정: #{변경후일정}"
   ].join("\n"),
   noticeMaterialPreset: [
-    "안녕하세요. 으뜸수학 고태영T입니다.",
+    "안녕하세요. #{학원명}입니다.",
     "",
     "다음 수업부터 사용할 교재를 안내드립니다.",
     "학생이 수업에 필요한 교재와 필기구를 준비할 수 있도록 확인 부탁드립니다.",
@@ -64,7 +64,7 @@ export const defaultNotificationTemplates = {
     "감사합니다."
   ].join("\n"),
   noticeMakeupPreset: [
-    "안녕하세요. 으뜸수학 고태영T입니다.",
+    "안녕하세요. #{학원명}입니다.",
     "",
     "보강 수업 일정을 안내드립니다.",
     "가능한 시간 확인 후 회신 부탁드립니다.",
@@ -72,7 +72,7 @@ export const defaultNotificationTemplates = {
     "감사합니다."
   ].join("\n"),
   noticeAnnouncementPreset: [
-    "안녕하세요. 으뜸수학 고태영T입니다.",
+    "안녕하세요. #{학원명}입니다.",
     "",
     "학원 공지사항을 안내드립니다.",
     "내용 확인 부탁드립니다.",

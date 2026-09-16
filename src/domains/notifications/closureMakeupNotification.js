@@ -1,3 +1,4 @@
+import { academyBrandName } from "../../shared/utils/academyBrand.js";
 import { safeIdPart } from "../../shared/utils/id.js";
 import {
   closureMakeupClassName,
@@ -18,14 +19,14 @@ export function buildClosureMakeupNoticeBody({ academyName = "", lesson = {}, st
   if (target === "student") {
     return `${student.name || "학생"} 학생 휴강 보충 안내입니다.\n\n일정: ${schedule}\n시간에 맞춰 등원해 주세요.`;
   }
-  return `안녕하세요. ${academyName || "으뜸수학 고태영T"}입니다.\n\n${student.name || "학생"} 학생의 휴강 보충 일정을 안내드립니다.\n일정: ${schedule}\n확인 부탁드립니다.`;
+  return `안녕하세요. ${academyName || academyBrandName}입니다.\n\n${student.name || "학생"} 학생의 휴강 보충 일정을 안내드립니다.\n일정: ${schedule}\n확인 부탁드립니다.`;
 }
 
 export function createClosureMakeupNotificationDrafts({ academyName = "", lesson = {} } = {}) {
   const schedule = formatClosureMakeupSchedule(lesson);
   return {
     studentScheduleNotificationDraft: `{{학생명}} 학생 휴강 보충 안내입니다.\n\n일정: ${schedule}\n시간에 맞춰 등원해 주세요.`,
-    parentScheduleNotificationDraft: `안녕하세요. ${academyName || "으뜸수학 고태영T"}입니다.\n\n{{학생명}} 학생의 휴강 보충 일정을 안내드립니다.\n일정: ${schedule}\n확인 부탁드립니다.`,
+    parentScheduleNotificationDraft: `안녕하세요. ${academyName || academyBrandName}입니다.\n\n{{학생명}} 학생의 휴강 보충 일정을 안내드립니다.\n일정: ${schedule}\n확인 부탁드립니다.`,
     studentReminderNotificationDraft: `{{학생명}} 학생, 오늘 ${lesson.startTime || ""} 휴강 보충 수업이 있습니다. 시간에 맞춰 등원해 주세요.`
   };
 }

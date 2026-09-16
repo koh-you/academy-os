@@ -1,25 +1,30 @@
-import { normalizeNotificationTemplates } from "./notificationTemplateCatalog.js";
+import { academyBrandName } from "../../shared/utils/academyBrand.js";
+import { normalizeNotificationTemplates, renderNotificationTemplate } from "./notificationTemplateCatalog.js";
 
-export function getNoticeMessageTemplates(notificationTemplates = {}) {
+// academyName: 로그인한 선생님 기준 브랜드("으뜸수학 최경석T"). 교재·보강·공지 preset 의
+// "#{학원명}" 은 선택 즉시 채운다(변수 없이 그대로 발송되는 초안이라서). 특강 preset 은
+// 발송 시점에 변수를 채우므로 placeholder 를 남긴다.
+export function getNoticeMessageTemplates(notificationTemplates = {}, academyName = academyBrandName) {
   const templates = normalizeNotificationTemplates(notificationTemplates);
+  const fill = (body) => renderNotificationTemplate(body, { 학원명: academyName });
   return [
     {
       id: "material",
       label: "교재문자",
       title: "교재 안내",
-      body: templates.noticeMaterialPreset
+      body: fill(templates.noticeMaterialPreset)
     },
     {
       id: "makeup",
       label: "보강문자",
       title: "보강 안내",
-      body: templates.noticeMakeupPreset
+      body: fill(templates.noticeMakeupPreset)
     },
     {
       id: "notice",
       label: "공지문자",
       title: "공지 안내",
-      body: templates.noticeAnnouncementPreset
+      body: fill(templates.noticeAnnouncementPreset)
     },
     {
       id: "specialLecture",

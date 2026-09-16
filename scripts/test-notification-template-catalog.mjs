@@ -13,9 +13,9 @@ const expectedDefaults = {
   homeworkMakeupStudentReminder: "#{학생명} 학생 숙제 보충 안내입니다.\n\n#{보강일정}\n#{밀린숙제}\n#{보충메모}",
   supplementScheduleConfirmNotice: "#{안내제목}\n\n#{보강일정}\n#{보강대상}\n#{결석사유줄}\n#{확인숙제줄}\n#{보충메모}",
   supplementScheduleChangeNotice: "#{안내제목}\n\n#{보강일정}\n#{보강대상}\n#{결석사유줄}\n#{확인숙제줄}\n#{보충메모}\n#{변경사유}\n#{변경전}\n변경 후 일정: #{변경후일정}",
-  noticeMaterialPreset: "안녕하세요. 으뜸수학 고태영T입니다.\n\n다음 수업부터 사용할 교재를 안내드립니다.\n학생이 수업에 필요한 교재와 필기구를 준비할 수 있도록 확인 부탁드립니다.\n\n감사합니다.",
-  noticeMakeupPreset: "안녕하세요. 으뜸수학 고태영T입니다.\n\n보강 수업 일정을 안내드립니다.\n가능한 시간 확인 후 회신 부탁드립니다.\n\n감사합니다.",
-  noticeAnnouncementPreset: "안녕하세요. 으뜸수학 고태영T입니다.\n\n학원 공지사항을 안내드립니다.\n내용 확인 부탁드립니다.\n\n감사합니다.",
+  noticeMaterialPreset: "안녕하세요. #{학원명}입니다.\n\n다음 수업부터 사용할 교재를 안내드립니다.\n학생이 수업에 필요한 교재와 필기구를 준비할 수 있도록 확인 부탁드립니다.\n\n감사합니다.",
+  noticeMakeupPreset: "안녕하세요. #{학원명}입니다.\n\n보강 수업 일정을 안내드립니다.\n가능한 시간 확인 후 회신 부탁드립니다.\n\n감사합니다.",
+  noticeAnnouncementPreset: "안녕하세요. #{학원명}입니다.\n\n학원 공지사항을 안내드립니다.\n내용 확인 부탁드립니다.\n\n감사합니다.",
   specialLectureGuideNotice: "안녕하세요. #{학원명}입니다.\n#{특강명} 안내드립니다.\n\n대상: #{대상}\n요일: #{요일}\n시간: #{시간}\n\n#{특이사항블록}\n\n#{안내메모}\n\n#{안내문링크}"
 };
 

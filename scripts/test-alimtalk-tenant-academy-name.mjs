@@ -53,3 +53,25 @@ setTenantAcademyNameResolver(null);
 assert.equal(await resolveAcademyName({}), "으뜸수학 고태영T");
 
 console.log("alimtalk tenant academy name: brand format + tenant lookup cache + #{학원명} precedence passed");
+
+// 본문에 직접 들어가는 인사말도 선생님 이름을 따른다(2026-09-16 2차).
+// 교재·보강·공지 preset 은 선택 즉시 "#{학원명}" 이 채워지고, 특강 preset 은 발송 시점에
+// 변수를 채우므로 placeholder 가 남아야 한다.
+const { getNoticeMessageTemplates } = await import("../src/domains/notifications/notificationCenterConfig.js");
+const { defaultNotificationTemplates } = await import("../src/domains/notifications/notificationTemplateCatalog.js");
+assert.equal(defaultNotificationTemplates.noticeMaterialPreset.includes("고태영"), false, "기본 preset 에 원장 이름이 박혀 있으면 안 된다");
+const forAssistant = getNoticeMessageTemplates({}, "으뜸수학 최경석T");
+assert.ok(forAssistant.find((t) => t.id === "material").body.startsWith("안녕하세요. 으뜸수학 최경석T입니다."));
+assert.ok(forAssistant.find((t) => t.id === "makeup").body.startsWith("안녕하세요. 으뜸수학 최경석T입니다."));
+assert.ok(forAssistant.find((t) => t.id === "notice").body.startsWith("안녕하세요. 으뜸수학 최경석T입니다."));
+assert.ok(forAssistant.find((t) => t.id === "specialLecture").body.includes("#{학원명}"), "특강 preset 은 발송 시 변수로 채운다");
+const forOwner = getNoticeMessageTemplates({});
+assert.ok(forOwner.find((t) => t.id === "material").body.startsWith("안녕하세요. 으뜸수학 고태영T입니다."), "원장 기본값은 기존 문구 그대로");
+
+const { buildClosureMakeupNoticeBody } = await import("../src/domains/notifications/closureMakeupNotification.js");
+const { buildNewStudentMakeupNoticeBody } = await import("../src/domains/lessons/newStudentMakeupNotification.js");
+assert.ok(buildClosureMakeupNoticeBody({ academyName: "으뜸수학 최경석T", student: { name: "함지윤" } }).startsWith("안녕하세요. 으뜸수학 최경석T입니다."));
+assert.ok(buildNewStudentMakeupNoticeBody({ academyName: "으뜸수학 최경석T", student: { name: "함지윤" } }).startsWith("안녕하세요. 으뜸수학 최경석T입니다."));
+assert.ok(buildClosureMakeupNoticeBody({ student: { name: "함지윤" } }).startsWith("안녕하세요. 으뜸수학 고태영T입니다."), "이름이 없으면 학원 대표 문구");
+
+console.log("notice body teacher name: presets + closure/new-student bodies follow the signed-in teacher");

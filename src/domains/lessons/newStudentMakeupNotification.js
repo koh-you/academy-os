@@ -1,3 +1,4 @@
+import { academyBrandName } from "../../shared/utils/academyBrand.js";
 import { safeIdPart } from "../../shared/utils/id.js";
 import {
   buildSupplementScheduleNoticeJob,
@@ -17,7 +18,7 @@ export function buildNewStudentMakeupNoticeBody({ academyName = "", lesson = {},
   if (target === "student") {
     return `${student.name || "학생"} 학생 신입생 보강 안내입니다.\n\n일정: ${schedule}\n확인 후 시간에 맞춰 등원해 주세요.`;
   }
-  return `안녕하세요. ${academyName || "으뜸수학 고태영T"}입니다.\n\n${student.name || "학생"} 학생의 신입생 보강 일정을 안내드립니다.\n일정: ${schedule}\n확인 부탁드립니다.`;
+  return `안녕하세요. ${academyName || academyBrandName}입니다.\n\n${student.name || "학생"} 학생의 신입생 보강 일정을 안내드립니다.\n일정: ${schedule}\n확인 부탁드립니다.`;
 }
 
 export function formatNewStudentMakeupReservationSummary(reservedJobs = []) {

@@ -9,6 +9,7 @@ import { useNotificationNoticeController } from "./useNotificationNoticeControll
 
 export function NotificationCenter({
   runtime,
+  academyName,
   SpecialLectureNoticePanel,
   aiSettings,
   classTemplates = [],
@@ -72,6 +73,7 @@ export function NotificationCenter({
     noticeWorkspaceTabsProps,
     refreshHistoryForDate
   } = useNotificationNoticeController({
+    academyName,
     activeNoticeWorkspace,
     aiSettings,
     notificationJobs,

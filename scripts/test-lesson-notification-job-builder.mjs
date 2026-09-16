@@ -276,7 +276,7 @@ for (const wrapperBinding of [
   "getStudentSupplementSchedules(makeupTasks, student.studentId",
   "getLessonTestResultLines(testSessions, testAttempts, lesson, student)",
   "return createLessonNotificationJob({",
-  "academyName: academyBrandName",
+  "academyName: sessionBrandName",
   "buildCommentPreview: buildCommentPreviewText",
   "buildPayloadSnapshot: buildLessonReservationPayloadSnapshot",
   "getPayloadFingerprint: getLessonReservationPayloadFingerprint",
