@@ -88,4 +88,5 @@ node scripts/latex-bank/build.mjs --bank latex-bank/<책> --review
 
 - 104문항 전사 · xelatex 컴파일 통과(Overfull 0) · book.pdf 13쪽(본문 12 + 정답) · review 104장.
 - 답: 답지 크롭 89 + 계산값 15(`answer_source` 에 「계산」 표기 — 답지 크롭이 한 칸 밀리거나 누락된 것·풀이 앞부분만 잡힌 것). 계산값은 사람이 답지와 대조한다.
+- 정답·해설(2026-09-16): 답지 OCR 이 놓친 48문항과 잘못 이어 붙은 풀이를 `ssen-basic-cm2/answer-overrides.json`(사람 지정 상자 122개)으로 채워 해설 420/420 · 답 줄 334. `ingest-scan-answers.mjs --overrides` 로 다시 만들면 재현되고, export 패키지에는 그대로 복사된다.
 - 아직 안 한 것: 풀이(해설) 전사, 숫자 변형(level 1), 자유 변형(level 2), 2단원 이후.
