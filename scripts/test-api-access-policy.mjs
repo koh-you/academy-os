@@ -81,9 +81,8 @@ assert.equal(A("POST", "/api/admin/seed-core-data", { kind: "teacher", teacherRo
 assert.equal(A("POST", "/api/attendance/check", { kind: "teacher", teacherRole: "assistant" }).ok, true);
 assert.equal(A("GET", "/api/lessons", { kind: "teacher", teacherRole: "assistant" }).ok, true);
 assert.equal(A("GET", "/api/students", { kind: "teacher", teacherRole: "assistant" }).ok, true);
-// 알림톡 발송·예약은 협력 교사에게 닫혀 있다(2026-09-10 원장 요청).
-// 솔라피 설정을 모든 계정이 공유하므로, 협력 교사가 보내도 원장님 계정에서 실제
-// 학부모에게 나가고 요금도 원장님 앞으로 달린다.
+// 알림톡 발송·예약은 협력 교사에게 열려 있다(2026-09-10 닫음 → 2026-09-16 원장 요청으로 개방).
+// 솔라피 계정은 공유하지만 #{학원명} 은 서버가 tenant 선생님 이름으로 바꾼다(#349).
 for (const path of [
   "/api/notifications/attendance-alimtalk",
   "/api/notifications/comment-alimtalk",
@@ -93,15 +92,15 @@ for (const path of [
   "/api/notification-jobs/reserve",
   "/api/notification-jobs/reserve-bulk",
   "/api/notification-jobs/cancel",
+  "/api/notification-jobs/readiness-check",
   "/api/notification-jobs/reconcile-solapi"
 ]) {
-  const verdict = A("POST", path, { kind: "teacher", teacherRole: "assistant" });
-  assert.equal(verdict.ok, false, `assistant 는 ${path} 를 못 불러야 한다`);
-  assert.equal(verdict.code, "role_forbidden");
+  assert.equal(A("POST", path, { kind: "teacher", teacherRole: "assistant" }).ok, true, `assistant 는 ${path} 를 부를 수 있어야 한다`);
 }
-assert.equal(A("DELETE", "/api/notification-jobs", { kind: "teacher", teacherRole: "assistant" }).ok, false);
-// 발송 기록 조회는 남겨둔다 — 자기 테넌트의 기록이고 부트스트랩이 부른다.
+assert.equal(A("DELETE", "/api/notification-jobs", { kind: "teacher", teacherRole: "assistant" }).ok, true);
 assert.equal(A("GET", "/api/notification-jobs", { kind: "teacher", teacherRole: "assistant" }).ok, true);
+// 여전히 닫힌 것: 교사 일정 Slack, 솔라피 그룹 직접 취소(운영자 전용).
+assert.equal(A("POST", "/api/solapi/groups/cancel", { kind: "teacher", teacherRole: "assistant" }).status, 403);
 // 원장은 그대로 보낼 수 있다.
 assert.equal(A("POST", "/api/notifications/attendance-alimtalk", { kind: "teacher", teacherRole: "owner" }).ok, true);
 assert.equal(A("POST", "/api/students", { kind: "teacher", teacherRole: "assistant" }).ok, true);
