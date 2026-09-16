@@ -3,6 +3,10 @@
 //
 // 사용:
 //   node scripts/problem-bank/ingest-scan-answers.mjs --pdf "C:/…/올림포스 공통수학1.pdf" --out output/problem-bank/olympos-cm1 [--pages 118-176]
+//     [--overrides latex-bank/<책>/answer-overrides.json]
+//
+// --overrides 는 OCR 이 놓친 풀이를 사람이 쪽·정규화 좌표로 지정한 파일이다(형식은 아래 applyOverrides 참고). 정렬 결과 위에
+// 덧씌우므로 「해설을 못 찾은 문항」·「앞 문항에 잘못 이어 붙은 풀이」를 규칙을 안 바꾸고 고친다. 상자 위·아래는 잉크에 맞춰 조인다.
 //
 // --out 은 ingest-scan-pdf.mjs 의 출력 폴더(manifest.json 이 있어야 한다). 결과는 RPM 의 ingest-answers 와 같은
 // manifest-answers.json + answers/ + solutions/ 라 교재관리 「패키지 등록」이 한 폴더로 받는다.
@@ -215,7 +219,12 @@ function buildReviewList({ itemManifest, items, solutions, answers, manifest, it
   lines.push("## 개수", "");
   lines.push(`- 문항 ${all.length}개 (본문 ${all.length - assess.length} + 수행평가 ${assess.length})`);
   lines.push(`- 해설 대상 ${items.length}개 = 본문 문항. 수행평가 ${assess.length}문항은 책 뒤 「정답과 풀이」에 해설이 없다(빠른정답표에만 답이 있음 — 아직 안 오림).`);
-  lines.push(`- 해설 찾음 ${solutions.length}개 · 답 줄 찾음 ${answers.length}개 · 번호 불일치 ${mismatches.length}건 · 버린 조각 ${unmatched.length}개`, "");
+  const overridden = manifest.validation.solutions.overrides ?? [];
+  const verified = manifest.validation.solutions.verified_mismatches ?? [];
+  lines.push(`- 해설 찾음 ${solutions.length}개 · 답 줄 찾음 ${answers.length}개 · 번호 불일치 ${mismatches.length}건 · 버린 조각 ${unmatched.length}개`);
+  if (overridden.length) lines.push(`- 사람이 좌표로 지정한 풀이 ${overridden.length}개(\`qa/override-pNNN.jpg\` 파랑 상자): ${overridden.map((entry) => entry.number).sort().join(" ")}`);
+  if (verified.length) lines.push(`- 번호 오독이지만 내용이 맞다고 확인한 해설 ${verified.length}개: ${verified.join(" ")}`);
+  lines.push("");
   lines.push(`## ① 해설을 못 찾은 문항 ${missing.length}개 — 우선 확인`, "");
   lines.push("해설 쪽에서 풀이 시작 번호(굵은 숫자)를 OCR 이 못 읽은 경우다. `qa/solution-pNNN.jpg` 에서 상자 없는 풀이가 이 문항이다. 해설 없이 등록되며, 오답지 인쇄의 해설 쪽에서 빠진다.", "");
   lines.push("| 문항 코드 | 단원 | 구역 | 본문 위치 | 해설 쪽(짐작) |", "|---|---|---|---|---|");
@@ -260,6 +269,97 @@ function buildReviewList({ itemManifest, items, solutions, answers, manifest, it
   return `${lines.join("\n")}\n`;
 }
 
+/**
+ * 사람이 지정한 풀이 상자(answer-overrides.json)를 정렬 결과 위에 덧씌운다.
+ *
+ *   { "solutions": { "13-01": [{ "page": 4, "box": [x0, y0, x1, y1], "answer_line": true }, …여러 조각이면 순서대로], … },
+ *     "verified_mismatches": ["12-14", …]   // 번호 오독이지만 내용은 맞다고 사람이 확인한 것 }
+ *
+ * box 는 쪽 크기 기준 정규화 좌표. 위·아래는 상자 안 잉크에 맞춰 조이고(위 −3pt · 아래 +4pt) 좌우는 그대로 둔다.
+ * answer_line: 「01 답 3」처럼 풀이 없이 답만 한 줄인 조각. 「답」 아이콘을 못 찾으면 그 조각 전체를 빠른정답으로도 쓴다.
+ * 지정된 문항은 기존 해설·답 줄을 버리고 새 조각으로 바꾼다(앞 문항에 잘못 이어 붙은 풀이도 이 방법으로 자른다).
+ */
+async function applyOverrides({ overrides, doc, renderScale, outDir, bookId, items, solutions, answers, answerCrops, encode, log }) {
+  const spec = overrides.solutions ?? {};
+  const numbers = Object.keys(spec);
+  if (!numbers.length) return { applied: [], unknown: [] };
+  const known = new Set(items.map((item) => item.number));
+  const unknown = numbers.filter((number) => !known.has(number));
+  // 쪽마다 한 번만 렌더한다(220dpi 캔버스가 커서 전부 들고 있지 않는다).
+  const byPage = new Map();
+  for (const number of numbers) {
+    if (!known.has(number)) continue;
+    const parts = Array.isArray(spec[number]) ? spec[number] : [spec[number]];
+    parts.forEach((part, index) => {
+      if (!byPage.has(part.page)) byPage.set(part.page, []);
+      byPage.get(part.page).push({ number, index, part });
+    });
+  }
+  const collected = new Map();
+  for (const pageNumber of [...byPage.keys()].sort((a, b) => a - b)) {
+    const page = await doc.getPage(pageNumber);
+    const viewport = page.getViewport({ scale: 1 });
+    const { canvas, context } = await renderPage(page, renderScale);
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height).data;
+    const qaBoxes = [];
+    for (const { number, index, part } of byPage.get(pageNumber)) {
+      const [nx0, ny0, nx1, ny1] = part.box;
+      const rough = { x0: nx0 * viewport.width, y0: ny0 * viewport.height, x1: nx1 * viewport.width, y1: ny1 * viewport.height };
+      const ink = inkRange(imageData, canvas.width, renderScale, rough, []);
+      const box = ink
+        ? { ...rough, y0: Math.max(rough.y0, ink.top - 3), y1: Math.min(rough.y1, ink.bottom + 4) }
+        : rough;
+      if (!collected.has(number)) collected.set(number, { parts: [], answerParts: [], pages: [], boxes: [], flags: [] });
+      const entry = collected.get(number);
+      entry.parts.push({ index, buffer: encode(cropToCanvas(canvas, renderScale, box)) });
+      const answerBuffers = answerCrops(canvas, imageData, box, qaBoxes);
+      if (!answerBuffers.length && part.answer_line) answerBuffers.push(encode(cropToCanvas(canvas, renderScale, box)));
+      entry.answerParts.push({ index, buffers: answerBuffers });
+      entry.pages.push(pageNumber);
+      entry.boxes.push([box.x0 / viewport.width, box.y0 / viewport.height, box.x1 / viewport.width, box.y1 / viewport.height].map((value) => Number(value.toFixed(5))));
+      if (!ink) entry.flags.push("no_ink");
+      qaBoxes.push({ label: number, box, color: "#1d4ed8" });
+    }
+    await drawQa(canvas, viewport.width, viewport.height, qaBoxes, path.join(outDir, "qa", `override-p${String(pageNumber).padStart(3, "0")}.jpg`));
+    log(`override p${pageNumber}: ${byPage.get(pageNumber).length}조각`);
+    page.cleanup();
+  }
+  const applied = [];
+  for (const [number, entry] of collected) {
+    entry.parts.sort((a, b) => a.index - b.index);
+    entry.answerParts.sort((a, b) => a.index - b.index);
+    const oldSolution = solutions.findIndex((solution) => solution.number_label === number);
+    if (oldSolution >= 0) solutions.splice(oldSolution, 1);
+    const oldAnswer = answers.findIndex((answer) => answer.number_label === number);
+    // 정렬 단계가 남긴 답 줄 파일은 지운다 — 새 조각에서 「답」 아이콘을 못 찾으면 옛 파일이 고아로 남는다.
+    if (oldAnswer >= 0) await rm(path.join(outDir, answers.splice(oldAnswer, 1)[0].file), { force: true });
+    const parts = await Promise.all(entry.parts.map(async ({ buffer }) => loadImage(await buffer)));
+    const file = `solutions/${bookId}-${number}.jpg`;
+    const size = await writeStacked(parts, path.join(outDir, file), Math.round(4 * renderScale));
+    const pages = [...new Set(entry.pages)];
+    solutions.push({
+      number_label: number,
+      file,
+      parts: parts.length,
+      pdf_page: pages[0],
+      bbox_normalized: entry.boxes[0],
+      continued_on: pages.length > 1 ? pages[pages.length - 1] : undefined,
+      local_number_read: null,
+      flags: ["manual_override", ...new Set(entry.flags)],
+      ...size
+    });
+    const answerBuffers = entry.answerParts.flatMap((part) => part.buffers);
+    if (answerBuffers.length) {
+      const answerParts = await Promise.all(answerBuffers.map(async (buffer) => loadImage(await buffer)));
+      const answerFile = `answers/${bookId}-${number}.jpg`;
+      const answerSize = await writeStacked(answerParts, path.join(outDir, answerFile), Math.round(3 * renderScale));
+      answers.push({ number_label: number, file: answerFile, parts: answerParts.length, pdf_page: pages[0], ...answerSize });
+    }
+    applied.push({ number, parts: parts.length, pages, answer: answerBuffers.length > 0 });
+  }
+  return { applied, unknown };
+}
+
 function localNumberOf(item, source = "type_label") {
   const text = source === "number_label" ? String(item.number_label ?? "").split("-").pop() : String(item.type_label ?? "");
   const match = text.match(/(\d{1,2})\s*$/);
@@ -269,7 +369,7 @@ function localNumberOf(item, source = "type_label") {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (!args.pdf || !args.out) {
-    console.error("사용: --pdf <교재.pdf 또는 답지.pdf> --out <문항 패키지 폴더> [--layout olympos|ssen] [--pages a-b] [--dpi 220]");
+    console.error("사용: --pdf <교재.pdf 또는 답지.pdf> --out <문항 패키지 폴더> [--layout olympos|ssen] [--pages a-b] [--dpi 220] [--overrides <json>]");
     process.exit(2);
   }
   const outDir = path.resolve(args.out);
@@ -292,7 +392,7 @@ async function main() {
   await rm(path.join(outDir, "answers"), { recursive: true, force: true });
   await rm(path.join(outDir, "solutions"), { recursive: true, force: true });
   await Promise.all(["answers", "solutions", "qa"].map((dir) => mkdir(path.join(outDir, dir), { recursive: true })));
-  for (const file of await readdir(path.join(outDir, "qa"))) if (file.startsWith("solution-")) await rm(path.join(outDir, "qa", file), { force: true });
+  for (const file of await readdir(path.join(outDir, "qa"))) if (file.startsWith("solution-") || file.startsWith("override-")) await rm(path.join(outDir, "qa", file), { force: true });
   const tmpDir = path.join(os.tmpdir(), `problem-bank-scan-answers-${bookId}`);
   await mkdir(tmpDir, { recursive: true });
 
@@ -516,6 +616,18 @@ async function main() {
       answers.push({ number_label: item.number, file: answerFile, parts: answerParts.length, pdf_page: segment.pdf_page, ...answerSize });
     }
   }
+  // 3) 사람이 지정한 상자(--overrides)로 놓친 풀이를 채우고 잘못 이어 붙은 풀이를 자른다.
+  const overrides = args.overrides ? JSON.parse(await readFile(path.resolve(String(args.overrides)), "utf8")) : null;
+  const overrideResult = overrides
+    ? await applyOverrides({ overrides, doc, renderScale, outDir, bookId, items, solutions, answers, answerCrops, encode, log: (line) => console.log(line) })
+    : { applied: [], unknown: [] };
+  if (overrideResult.unknown.length) console.warn(`overrides 에 없는 문항 번호(무시): ${overrideResult.unknown.join(" ")}`);
+  const verifiedMismatches = new Set(overrides?.verified_mismatches ?? []);
+  for (const solution of solutions) {
+    if (verifiedMismatches.has(solution.number_label)) solution.flags = solution.flags.filter((flag) => flag !== "number_mismatch");
+  }
+  const overridden = new Set(overrideResult.applied.map((entry) => entry.number));
+  const remainingMismatches = mismatches.filter((entry) => !overridden.has(entry.number) && !verifiedMismatches.has(entry.number));
   solutions.sort((a, b) => a.number_label.localeCompare(b.number_label));
   answers.sort((a, b) => a.number_label.localeCompare(b.number_label));
 
@@ -538,7 +650,9 @@ async function main() {
         missing,
         flagged: solutions.filter((entry) => entry.flags.length).map((entry) => entry.number_label),
         continued: solutions.filter((entry) => entry.parts > 1).map((entry) => entry.number_label),
-        mismatches,
+        mismatches: remainingMismatches,
+        verified_mismatches: [...verifiedMismatches].filter((number) => mismatches.some((entry) => entry.number === number)),
+        overrides: overrideResult.applied,
         unmatched_segments: unmatchedSegments
       },
       answers: { count: answers.length, missing: withoutAnswer }
@@ -546,7 +660,7 @@ async function main() {
   };
   await writeFile(path.join(outDir, "manifest-answers.json"), JSON.stringify(manifest, null, 2), "utf8");
   await writeFile(path.join(outDir, "검수-필요.md"), buildReviewList({ itemManifest, items, solutions, answers, manifest, itemValidation: await readFile(path.join(outDir, "validation.json"), "utf8").then(JSON.parse).catch(() => ({})) }), "utf8");
-  console.log(`\n해설 ${solutions.length}/${items.length}개 · 답 줄 ${answers.length}개 · 이어 붙인 풀이 ${manifest.validation.solutions.continued.length}개 · 번호 불일치 ${mismatches.length}건 · 대응 안 된 조각 ${unmatchedSegments.length}개 · 빠진 문항 ${missing.length}개`);
+  console.log(`\n해설 ${solutions.length}/${items.length}개 · 답 줄 ${answers.length}개 · 이어 붙인 풀이 ${manifest.validation.solutions.continued.length}개 · 번호 불일치 ${remainingMismatches.length}건 · 사람 지정 ${overrideResult.applied.length}개 · 대응 안 된 조각 ${unmatchedSegments.length}개 · 빠진 문항 ${missing.length}개`);
   if (missing.length) console.log(`빠진 문항: ${missing.slice(0, 30).join(" ")}${missing.length > 30 ? " …" : ""}`);
   console.log(`출력: ${outDir}`);
 }
