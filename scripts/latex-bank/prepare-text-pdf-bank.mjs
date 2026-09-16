@@ -23,6 +23,8 @@ if (!args.pdf || !args.package || !args.bank || !args.book) {
   process.exit(2);
 }
 const dpi = Number(args.dpi) || 300;
+// --whiten-gray: 쪽에 연회색 워터마크가 깔린 판(22개정 RPM 학생용)에서 크롭의 무채색 밝은 픽셀을 흰색으로 만든다.
+const whitenGray = Boolean(args["whiten-gray"]);
 const bankDir = path.resolve(args.bank);
 const packageDir = path.resolve(args.package);
 const manifest = JSON.parse(await readFile(path.join(packageDir, "manifest.json"), "utf8"));
@@ -90,7 +92,19 @@ for (const pageNumber of pages) {
     const w = Math.min(canvas.width - x, Math.ceil((box.x1 - box.x0) * renderScale));
     const h = Math.min(canvas.height - y, Math.ceil((box.y1 - box.y0) * renderScale));
     const out = createCanvas(w, h);
-    out.getContext("2d").drawImage(canvas, x, y, w, h, 0, 0, w, h);
+    const outContext = out.getContext("2d");
+    outContext.drawImage(canvas, x, y, w, h, 0, 0, w, h);
+    if (whitenGray) {
+      // 연회색 워터마크(로고 · 무채색 · 밝음)를 흰색으로. 색이 있는 채움(분홍 삼각형·파란 표 머리)은 채도가 있어 남는다.
+      const image = outContext.getImageData(0, 0, w, h);
+      const px = image.data;
+      for (let i = 0; i < px.length; i += 4) {
+        const max = Math.max(px[i], px[i + 1], px[i + 2]);
+        const min = Math.min(px[i], px[i + 1], px[i + 2]);
+        if (max - min < 14 && min > 200) { px[i] = 255; px[i + 1] = 255; px[i + 2] = 255; }
+      }
+      outContext.putImageData(image, 0, 0);
+    }
     await writeFile(path.join(bankDir, "figures", file), await out.encode("png"));
     crops[file] = { width_pt: Number((box.x1 - box.x0).toFixed(1)), height_pt: Number((box.y1 - box.y0).toFixed(1)), pdf_page: pageNumber, bbox_pt: [box.x0, box.y0, box.x1, box.y1].map((v) => Number(v.toFixed(1))) };
     figureCount += 1;

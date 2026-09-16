@@ -89,7 +89,16 @@ export function findFigureClusters(paths, region, textBoxes, { gap = 8, minSize 
   // 작은 네모(w ≤ 30 · h ≤ 18 · 채움·테두리 모두)는 빈칸 상자·직각 표시·체크 박스라 뼈대가 못 된다(뼈대에 붙으면 함께 들어간다).
   const candidates = inRegion.filter((box) => !isThin(box) && !(box.kind === "fill" && box.h <= 14 && box.w <= 80) && !(box.w <= 30 && box.h <= 18));
   const small = inRegion.filter((box) => !isThin(box) && box.w <= 30 && box.h <= 18 && !candidates.includes(box));
-  const thin = [...inRegion.filter(isThin), ...small];
+  const thinLines = inRegion.filter(isThin);
+  // 얇은 선끼리 직각으로 만나면(좌표축 십자·지도 축·표의 칸선) 굵은 뼈대가 없어도 그림이다. 분수 가로줄·밑줄은 가로선끼리만 있어
+  // 여기 걸리지 않는다. 짧은 두 선(둘 다 15pt 미만 · 근호 기호 획)은 뺀다.
+  for (const line of thinLines) {
+    if (candidates.includes(line)) continue;
+    const horizontal = line.h < 1.6;
+    const cross = thinLines.find((other) => other !== line && (other.h < 1.6) !== horizontal && overlaps(line, other, 2) && Math.max(line.w, line.h, other.w, other.h) >= 15);
+    if (cross) candidates.push(line);
+  }
+  const thin = [...thinLines, ...small];
   let grew = true;
   while (grew) {
     grew = false;
@@ -118,7 +127,8 @@ export function findFigureClusters(paths, region, textBoxes, { gap = 8, minSize 
     // 덩어리 안에 폭·높이 모두 8pt 이상인 도형이 하나는 있어야 그림이다. 직각 표시 같은 5pt 네모에 밑줄·작은 글자만 붙은
     // 것(구역 머리띠의 아이콘 줄)은 그림이 아니다.
     const members = candidates.filter((c) => inside(c, cluster, 0.5));
-    if (!members.some((c) => Math.min(c.w, c.h) >= 8)) continue;
+    const crossOnly = members.some((c) => c.h < 1.6 && c.w >= 15) && members.some((c) => c.w < 1.6 && c.h >= 15);
+    if (!members.some((c) => Math.min(c.w, c.h) >= 8) && !crossOnly) continue;
     // 외딴 네모 하나(큼직한 빈칸)는 그림이 아니다. path 둘 이상이거나 한 변이 36pt 이상인 도형(원·자료 상자)이어야 한다.
     if (members.length < 2 && !members.some((c) => Math.min(c.w, c.h) >= 36)) continue;
     // 그림 안·가까이의 작은 글자(정점 라벨·길이 · 9pt 미만)를 넣어 넓힌다. 본문 크기 글자는 덩어리 안에 완전히 들어 있을 때만
