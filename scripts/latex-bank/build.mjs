@@ -135,6 +135,8 @@ function renderItemBody(id, item, group, bank) {
     }
   }
   if (item.hint) parts.push(`\\dmhint{${item.hint}}`);
+  // dm-editorial 의 번호 칸(9mm)은 세 자리까지다. 1000번 이상은 「1013.」 이 2.6pt 넘치므로 본문을 그만큼 오른쪽으로 민다(sty 수정 없이).
+  if (bookNumber(id) >= 1000) return `\\hspace*{2mm}\\begin{minipage}[t]{\\dimexpr\\linewidth-2mm\\relax}\\vspace{0pt}${parts.join("\n")}\\end{minipage}`;
   return parts.join("\n");
 }
 

@@ -1769,7 +1769,8 @@
     "a",
     "✔"
    ],
-   "figure": "crop:fig-1090.png"
+   "figure": "crop:fig-1090.png",
+   "note": "사람 지정 상자(figure-overrides.json)"
   },
   "1091": {
    "pdf_page": 160,
@@ -9629,14 +9630,14 @@
     "✔"
    ],
    "figure": "crop:fig-0394.png",
+   "note": "사람 지정 상자(figure-overrides.json)",
    "figure_parts": [
     "crop:fig-0394-2.png",
     "crop:fig-0394-3.png",
     "crop:fig-0394-4.png",
     "crop:fig-0394-5.png",
     "crop:fig-0394-6.png"
-   ],
-   "note": "그림 덩어리 6개 사이에 본문이 있어 따로 크롭(대표 = 가장 큰 것 · 나머지 fig-<id>-2…) — 어느 것이 문항 그림인지 확인"
+   ]
   },
   "0395": {
    "pdf_page": 58,
@@ -9655,14 +9656,14 @@
     "✔"
    ],
    "figure": "crop:fig-0395.png",
+   "note": "사람 지정 상자(figure-overrides.json)",
    "figure_parts": [
     "crop:fig-0395-2.png",
     "crop:fig-0395-3.png",
     "crop:fig-0395-4.png",
     "crop:fig-0395-5.png",
     "crop:fig-0395-6.png"
-   ],
-   "note": "그림 덩어리 6개 사이에 본문이 있어 따로 크롭(대표 = 가장 큰 것 · 나머지 fig-<id>-2…) — 어느 것이 문항 그림인지 확인"
+   ]
   },
   "0396": {
    "pdf_page": 58,
@@ -9946,13 +9947,14 @@
     "✔"
    ],
    "figure": "crop:fig-0409.png",
+   "note": "사람 지정 상자(figure-overrides.json)",
    "figure_parts": [
     "crop:fig-0409-2.png",
     "crop:fig-0409-3.png",
     "crop:fig-0409-4.png",
-    "crop:fig-0409-5.png"
-   ],
-   "note": "그림 덩어리 5개 사이에 본문이 있어 따로 크롭(대표 = 가장 큰 것 · 나머지 fig-<id>-2…) — 어느 것이 문항 그림인지 확인"
+    "crop:fig-0409-5.png",
+    "crop:fig-0409-6.png"
+   ]
   },
   "0410": {
    "pdf_page": 61,
