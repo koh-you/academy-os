@@ -128,7 +128,8 @@ export function findFigureClusters(paths, region, textBoxes, { gap = 8, minSize 
       for (const token of textBoxes) {
         if (!inside(token, region, 12)) continue;
         // 보기 번호 ①~⑤ 가 그림 보기 왼쪽에 붙어 있으면(그림이 보기인 문항) 함께 넣는다.
-        const circled = /^[①②③④⑤]$/.test(token.str.trim()) && overlaps(token, box, 14);
+        // 세로로는 덩어리 안, 가로로는 왼쪽에 붙은 것만(그림 아래 보기 「③ 25」의 번호는 넣지 않는다).
+        const circled = /^[①②③④⑤]$/.test(token.str.trim()) && token.y0 >= box.y0 - 4 && token.y1 <= box.y1 + 4 && token.x1 <= box.x0 + 6 && token.x1 >= box.x0 - 16;
         if (circled || (token.h >= 9.5 ? inside(token, cluster, 1.5) : overlaps(token, box, 5))) box = union(box, token);
       }
     }
