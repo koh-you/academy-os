@@ -10,7 +10,7 @@
 //     --bank latex-bank/rpm-m3-2 --book "RPM 중3-2 수학" [--dpi 300]
 //
 // 그림 규칙(latex-bank/README.md): 원본 화질이 좋으면 크롭을 그대로 쓴다. 텍스트 PDF 는 벡터라 어느 해상도로도 선명하므로 크롭이다.
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { createCanvas } from "@napi-rs/canvas";
@@ -49,7 +49,9 @@ function textHint(tokens, region, figureBoxes) {
     .filter(Boolean);
 }
 
-const crops = existsSync(path.join(bankDir, "figures", "crops.json")) ? JSON.parse(await readFile(path.join(bankDir, "figures", "crops.json"), "utf8")) : {};
+// 자동 크롭은 매번 새로 만든다(규칙이 바뀌면 옛 크롭·크기 기록이 남지 않게). figures/ 의 사람이 둔 파일(fig-*.tex 등)은 건드리지 않는다.
+const crops = {};
+for (const file of await readdir(path.join(bankDir, "figures")).catch(() => [])) if (/^fig-.*\.png$/.test(file)) await rm(path.join(bankDir, "figures", file), { force: true });
 const draft = { book: args.book, dpi, items: {}, groups: {} };
 let figureCount = 0;
 const pages = [...new Set(manifest.items.map((item) => item.pdf_page))].sort((a, b) => a - b);

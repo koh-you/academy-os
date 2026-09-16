@@ -80,7 +80,8 @@ const union = (a, b) => ({ x0: Math.min(a.x0, b.x0), y0: Math.min(a.y0, b.y0), x
  */
 export function findFigureClusters(paths, region, textBoxes, { gap = 8, minSize = 12, topLimit = -Infinity } = {}) {
   // topLimit: 문항 번호 배지 윗변. 그 위에서 시작하는 path(구역 머리띠 장식)는 문항 그림이 아니다.
-  const inRegion = paths.filter((box) => inside(box, region, 2) && box.y0 >= topLimit - 4);
+  // 문항 영역 경계에 걸친 그림(정점 라벨이 영역 밖으로 살짝 나간 것)을 놓치지 않게 여유 6pt.
+  const inRegion = paths.filter((box) => inside(box, region, 6) && box.y0 >= topLimit - 4);
   const isThin = (box) => box.h < 1.6 || box.w < 1.6;
   // 굵기 있는 path 가 그림의 뼈대다. 분수 가로줄·밑줄·문항 구분선처럼 얇은 선은 뼈대(또는 뼈대에 이미 붙은 선)에 닿을 때만
   // 넣는다(도형의 한 변·축·표의 칸 선). 번호 배지·빈칸 상자 같은 작은 색 채움은 뺀다.
@@ -118,12 +119,14 @@ export function findFigureClusters(paths, region, textBoxes, { gap = 8, minSize 
     // 것(구역 머리띠의 아이콘 줄)은 그림이 아니다.
     const members = candidates.filter((c) => inside(c, cluster, 0.5));
     if (!members.some((c) => Math.min(c.w, c.h) >= 8)) continue;
+    // 외딴 네모 하나(큼직한 빈칸)는 그림이 아니다. path 둘 이상이거나 한 변이 36pt 이상인 도형(원·자료 상자)이어야 한다.
+    if (members.length < 2 && !members.some((c) => Math.min(c.w, c.h) >= 36)) continue;
     // 그림 안·가까이의 작은 글자(정점 라벨·길이 · 9pt 미만)를 넣어 넓힌다. 본문 크기 글자는 덩어리 안에 완전히 들어 있을 때만
     // (표의 칸 글) 넣는다 — 표 바로 위 본문 줄이 딸려 오지 않게.
     let box = { ...cluster };
     for (let pass = 0; pass < 2; pass += 1) {
       for (const token of textBoxes) {
-        if (!inside(token, region, 2)) continue;
+        if (!inside(token, region, 12)) continue;
         if (token.h >= 9.5 ? inside(token, cluster, 1.5) : overlaps(token, box, 5)) box = union(box, token);
       }
     }
