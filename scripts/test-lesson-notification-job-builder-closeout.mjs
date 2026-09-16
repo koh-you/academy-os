@@ -47,7 +47,7 @@ assert.equal(
 );
 
 for (const pureBuilderBinding of [
-  "academyName: academyBrandName",
+  "academyName: sessionBrandName",
   "buildCommentPreview: buildCommentPreviewText",
   "buildPayloadSnapshot: buildLessonReservationPayloadSnapshot",
   "getAssignmentStatus: getAssignmentStatusForMessage",

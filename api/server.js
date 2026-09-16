@@ -185,7 +185,7 @@ import { createAttendanceRouteRegistry } from "../src/shared/server/attendanceRo
 import { createAttendanceSupabaseRealtimeProvider } from "../src/shared/server/attendanceSupabaseRealtimeProvider.js";
 import { createClassTemplateRouteRegistry } from "../src/shared/server/classTemplateRouteRegistry.js";
 import { createClassTemplateStore } from "../src/shared/server/classTemplateStore.js";
-import { formatTeacherBrandName } from "../src/shared/utils/academyBrand.js";
+import { academyBrandName, formatTeacherBrandName } from "../src/shared/utils/academyBrand.js";
 import { createHomeworkRouteRegistry } from "../src/shared/server/homeworkRouteRegistry.js";
 import { createLessonRecordRouteRegistry } from "../src/shared/server/lessonRecordRouteRegistry.js";
 import { createLessonRouteRegistry } from "../src/shared/server/lessonRouteRegistry.js";
@@ -2771,7 +2771,7 @@ function refreshLessonCommentJobBeforeSend(job = {}, context = null) {
   const omitPreviousHomework = isAssignmentStatusUnrecorded(assignmentStatus);
   const payload = {
     ...(job.payload ?? {}),
-    academyName: (job.payload ?? {}).academyName || "으뜸수학 고태영T",
+    academyName: (job.payload ?? {}).academyName || academyBrandName,
     assignmentStatus,
     assignmentStatusMessage: getAssignmentStatusMessage(audience, assignmentStatus),
     assignmentStatusParentMessage: getAssignmentStatusParentMessage(assignmentStatus),

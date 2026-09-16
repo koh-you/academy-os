@@ -1232,9 +1232,9 @@ function getAlimtalkAudienceStatus(notificationStatus, audience = "parent") {
   return { ...(notificationStatus ?? {}), allowRealRecipients };
 }
 
-function buildNotificationTemplatePreview(type) {
+function buildNotificationTemplatePreview(type, academyName = academyBrandName) {
   const base = {
-    academyName: academyBrandName,
+    academyName,
     assignmentStatus: "complete_thorough",
     attendanceStatus: "present",
     checkedAt: "19:00",
@@ -2159,6 +2159,10 @@ export function App() {
     windowTarget: typeof window === "undefined" ? null : window
   });
   const teacherRole = session?.teacherRole;
+  // 알림톡·공지 본문의 "으뜸수학 ○○T". 로그인한 선생님 이름을 쓴다(협력 교사는 자기 이름).
+  // #{학원명} 변수는 서버가 tenant 기준으로 한 번 더 바로잡지만, 본문에 직접 들어가는
+  // 인사말("안녕하세요. ○○T입니다")은 화면에서 만들어지므로 여기서 정해야 한다.
+  const sessionBrandName = formatTeacherBrandName(session?.name);
   // 원장이 지금 보고 있는 선생님의 테넌트. 빈 값이면 자기 자료를 본다.
   // 협력 교사는 이 값을 쓰지 않는다(서버도 owner 가 아니면 무시한다).
   const [viewTenantId, setViewTenantId] = useStoredState(storageKeys.viewTenantId, "");
@@ -4108,7 +4112,7 @@ export function App() {
       "../domains/lessons/newStudentMakeupNotification.js"
     );
     const notificationJobsToReserve = buildNewStudentMakeupNotificationJobs({
-      academyName: academyBrandName,
+      academyName: sessionBrandName,
       audiences: formValues.notificationAudiences,
       lesson,
       students
@@ -4127,7 +4131,7 @@ export function App() {
       "../domains/notifications/closureMakeupNotification.js"
     );
     return reserveClosureMakeupNoticesAction({
-      academyName: academyBrandName,
+      academyName: sessionBrandName,
       formValues,
       lesson,
       reserveJobs: (jobs) => reserveLessonNotificationJobs(jobs, "휴강 보충 알림 예약"),
@@ -5466,7 +5470,7 @@ export function App() {
     const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId, { lesson, mode: "lesson_comment" });
     const testResultLines = getLessonTestResultLines(testSessions, testAttempts, lesson, student);
     return createLessonNotificationJob({
-      academyName: academyBrandName,
+      academyName: sessionBrandName,
       audience,
       buildCommentPreview: buildCommentPreviewText,
       buildPayloadSnapshot: buildLessonReservationPayloadSnapshot,
@@ -5570,7 +5574,7 @@ export function App() {
   async function reserveSupplementStudentReminder(task) {
     const student = students.find((item) => item.studentId === task.studentId);
     return reserveSupplementStudentReminderJobRequest({
-      academyName: academyBrandName,
+      academyName: sessionBrandName,
       formatScheduledAt: formatKoreaTimeLabel,
       getScheduleTitle: getSupplementStudentReminderTitle,
       isSchedulePast: isNotificationSchedulePast,
@@ -5605,7 +5609,7 @@ export function App() {
 
   async function reserveSupplementScheduleNotices(task, student, previousScheduleText = "") {
     return reserveSupplementScheduleNoticesRequest({
-      academyName: academyBrandName,
+      academyName: sessionBrandName,
       cancelActiveNotices: cancelActiveSupplementScheduleNoticeJobs,
       getNoticeDraft: getSupplementScheduleNoticeDraft,
       getScheduleTitle: getSupplementStudentReminderTitle,
@@ -5620,7 +5624,7 @@ export function App() {
   async function handleReserveSupplementNotificationControl(task, controlType) {
     const student = students.find((item) => item.studentId === task.studentId);
     return reserveSupplementNotificationControlRequest({
-      academyName: academyBrandName,
+      academyName: sessionBrandName,
       cancelNotificationJob: handleCancelNotificationJob,
       cancelNotificationJobs: cancelNotificationJobsRequest,
       controlType,
@@ -6404,6 +6408,7 @@ export function App() {
     },
     models: {
       teacherRole,
+      sessionBrandName,
       academyReminders,
       academyTests,
       academyTestSaveState,
@@ -6601,7 +6606,7 @@ export function App() {
         <SessionExpiredOverlay onDismiss={() => setIsSessionExpired(false)} onRelogin={handleLogout} />
       ) : null}
       <Sidebar
-        academyBrandName={formatTeacherBrandName(session?.name)}
+        academyBrandName={sessionBrandName}
         teacherViewSwitcher={teacherRole === "owner" ? (
           <TeacherViewSwitcher
             onChangeViewTenant={setViewTenantId}
@@ -6973,7 +6978,7 @@ export function App() {
       const supplementSchedules = getStudentSupplementSchedules(makeupTasks, student.studentId, { lesson, mode: "lesson_comment" });
       const testResultLines = getLessonTestResultLines(testSessions, testAttempts, lesson, student);
       const notificationPayload = {
-        academyName: academyBrandName,
+        academyName: sessionBrandName,
         assignmentStatus,
         assignmentStatusMessage: getAssignmentStatusMessage(target === "student" ? "student" : "parent", assignmentStatus),
         assignmentStatusParentMessage: getAssignmentStatusParentMessage(assignmentStatus),

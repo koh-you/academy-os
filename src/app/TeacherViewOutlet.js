@@ -60,6 +60,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
     specialLectureManagement: {
       Component: components.NotificationCenter,
       props: {
+        academyName: models.sessionBrandName,
         aiSettings: models.aiSettings,
         classTemplates: models.classTemplates,
         compactPageHeader: true,
@@ -291,6 +292,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
     notifications: {
       Component: components.NotificationCenter,
       props: {
+        academyName: models.sessionBrandName,
         aiSettings: models.aiSettings,
         classTemplates: models.classTemplates,
         effects: notificationEffects,
