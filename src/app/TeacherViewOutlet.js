@@ -206,6 +206,7 @@ export function createTeacherViewAdapters({ actions, components, models, runtime
         runtime: runtimeBindings.planningTools,
         students: models.students,
         templates: models.classTemplates,
+        onSaveClassTemplate: actions.handleSaveClassTemplate,
         onUpdateClassRoster: actions.handleUpdateClassRoster
       }
     },

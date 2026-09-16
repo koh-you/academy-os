@@ -130,8 +130,23 @@ export function createTeacherAccountAdminStore({
     return value;
   }
 
+  // 알림톡 #{학원명} 에 넣을 이 tenant 의 선생님 이름. owner 역할을 우선하고, 없으면
+  // 가장 먼저 만든 활성 계정. tenant 를 모르거나 계정이 없으면 "" — 호출부가 학원
+  // 대표 문구로 돌아간다. listKnownTeacherTenantIds 와 같은 60초 캐시를 쓴다.
+  let accountsCache = { expiresAt: 0, value: [] };
+  async function resolveTenantTeacherName(tenantId = "", { now = Date.now, ttlMs = 60_000 } = {}) {
+    if (!tenantId) return "";
+    if (accountsCache.expiresAt <= now()) {
+      accountsCache = { expiresAt: now() + ttlMs, value: await listTeacherAccounts() };
+    }
+    const candidates = accountsCache.value.filter((account) => account.tenantId === tenantId && account.isActive);
+    const picked = candidates.find((account) => account.teacherRole === "owner") ?? candidates[0];
+    return picked?.name ?? "";
+  }
+
   return Object.freeze({
     listKnownTeacherTenantIds,
+    resolveTenantTeacherName,
     createTeacherAccountWithTenant,
     findTeacherAccountByLoginId,
     listTeacherAccounts,

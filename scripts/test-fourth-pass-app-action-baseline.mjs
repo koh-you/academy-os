@@ -65,8 +65,10 @@ const expectedDirectCallHandlers = [];
 // and handleToggleExamPrepDailyJournal (시험대비 수업의 데일리 알림톡 사용 여부).
 // 둘 다 postAppState 만 호출하고 fetch/postJson* 은 쓰지 않으므로 direct-call
 // 후보도, direct request call 도 늘리지 않는다.
+// 119: 2026-09-16 handleSaveClassTemplate(반관리 반 개설·수정). 요청은
+// domains/teacher/classTemplateApi.js 의 얇은 래퍼가 보내므로 direct request call 은 그대로.
 assert.deepEqual(directCallHandlers, expectedDirectCallHandlers);
-assert.equal(handlers.length, 118, `handle* count drifted from the baseline (118), now ${handlers.length}`);
+assert.equal(handlers.length, 119, `handle* count drifted from the baseline (119), now ${handlers.length}`);
 
 const directRequestCallCount = (appSource.match(/\bfetch\(|\bpostJson[A-Za-z]*\(/g) || []).length;
 assert.equal(directRequestCallCount, 19, `direct fetch/postJson call count drifted from the 4-4 closeout (19), now ${directRequestCallCount}`);

@@ -1,0 +1,11 @@
+/* 반 개설·수정 모달 — 요일 7개를 한 줄에 놓는다(typeTabs 기본은 3열). */
+.classTemplateDayTabs.typeTabs {
+  gap: 6px;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+@media (max-width: 720px) {
+  .classTemplateDayTabs.typeTabs {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

@@ -52,6 +52,7 @@ import {
   normalizeExamAnalysisPromptStudioDraft
 } from "../src/domains/exams/examAnalysisPromptStudioDraft.js";
 import { parseVersionedWriteRequest } from "../src/shared/contracts/versionedWriteRouteContracts.js";
+import { createClassTemplateId, normalizeClassTemplateInput } from "../src/shared/server/classTemplateStore.js";
 
 const host = "127.0.0.1";
 const port = Number(process.env.ACADEMY_SAFE_API_PORT || 8787);
@@ -1739,6 +1740,25 @@ function handleMutation(pathname, payload) {
     };
     state.students = upsertById(state.students, savedStudent, ["studentId"]);
     return { ok: true, student: savedStudent, verified: true };
+  }
+  if (pathname === "/api/classes") {
+    // 반 개설·수정(반관리). 운영 서버의 classTemplateStore 와 같은 검증을 쓴다.
+    let template;
+    try {
+      template = normalizeClassTemplateInput(payload.classTemplate ?? payload);
+    } catch (error) {
+      return { ok: false, error: error.message, code: error.code, statusCode: error.statusCode ?? 400 };
+    }
+    if (!template.classTemplateId) {
+      const created = { ...template, classTemplateId: createClassTemplateId() };
+      state.classTemplates = [...state.classTemplates, created];
+      return { ok: true, classTemplate: created, verified: true, created: true };
+    }
+    const existing = state.classTemplates.find((item) => item.classTemplateId === template.classTemplateId);
+    if (!existing) return { ok: false, error: "수정할 반을 찾지 못했습니다.", code: "class_template_not_found", statusCode: 404 };
+    const updated = { ...existing, ...template };
+    state.classTemplates = state.classTemplates.map((item) => (item.classTemplateId === updated.classTemplateId ? updated : item));
+    return { ok: true, classTemplate: updated, verified: true, created: false };
   }
   if (pathname === "/api/school-events") {
     const schoolEvent = payload.schoolEvent || payload.event || payload || {};
