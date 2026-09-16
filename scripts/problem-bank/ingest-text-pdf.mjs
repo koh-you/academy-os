@@ -85,10 +85,15 @@ async function main() {
   for (let pageNumber = fromPage; pageNumber <= toPage; pageNumber += 1) {
     const tokens = pageTokens.get(pageNumber);
     const { width: pageWidth, height: pageHeight } = pageSizes.get(pageNumber);
-    const footerUnit = readFooterUnit(tokens, pageHeight, badgeHeight);
-    const printedPageToken = tokens
-      .filter((token) => token.y > pageHeight * 0.94 && /^\d{1,3}$/.test(token.str.trim()) && token.h >= badgeHeight - 1)
-      .sort((a, b) => a.x - b.x)
+    // 바닥글은 쪽의 맨 아랫줄(가장 큰 y 에서 6pt 안)만 본다. 22개정 RPM 처럼 본문·숨은 풀이 글자가 바닥글 바로 위(0.94 이상)까지
+    // 내려오는 판에서 「=40」 같은 본문 숫자가 단원 코드로 읽히지 않게 한다.
+    const lowest = Math.max(...tokens.filter((token) => token.str.trim()).map((token) => token.y));
+    const footerRow = tokens.filter((token) => token.y >= lowest - 6);
+    const footerUnit = readFooterUnit(footerRow, pageHeight, badgeHeight);
+    // 쪽번호: 바닥글 줄에서 가장 큰 숫자 글자(판마다 배지보다 작을 수 있다 · 22개정 11pt vs 배지 13pt).
+    const printedPageToken = footerRow
+      .filter((token) => /^\d{1,3}$/.test(token.str.trim()) && token.h >= 9)
+      .sort((a, b) => a.h - b.h || a.x - b.x)
       .pop();
     const printedPage = printedPageToken ? Number(printedPageToken.str.trim()) : pageNumber;
 

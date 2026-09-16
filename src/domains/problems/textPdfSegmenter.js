@@ -100,7 +100,16 @@ export function findBadges(tokens, { badgeHeight, pageWidth, pageHeight = Infini
 export function inferColumns(badges, pageWidth) {
   if (badges.length === 0) return [];
   const xs = [...new Set(badges.map((badge) => roundTo(badge.x, 0)))].sort((a, b) => a - b);
-  const gapIndex = xs.findIndex((x, index) => index > 0 && x - xs[index - 1] > pageWidth * 0.2);
+  // 컬럼 경계는 배지 x 사이의 「가장 큰」 틈이다. 개념 쪽처럼 한 컬럼 안에 배지가 두 열(0311 | 0312)로 놓인 판(22개정 RPM)에서는
+  // 첫 틈이 열 간격이라 컬럼으로 오인되므로, 첫 틈이 아니라 최대 틈을 고른다.
+  let gapIndex = -1;
+  let widest = pageWidth * 0.2;
+  xs.forEach((x, index) => {
+    if (index > 0 && x - xs[index - 1] > widest) {
+      widest = x - xs[index - 1];
+      gapIndex = index;
+    }
+  });
   if (gapIndex === -1) {
     return [{ left: xs[0], right: pageWidth }];
   }
@@ -218,15 +227,18 @@ export function findSubHeaders(tokens, { badgeHeight, columns }) {
     if (SUB_HEADER_PATTERN.test(text) && token.h < badgeHeight) {
       code = text;
     } else if (/^\d{2}$/.test(text)) {
-      // 「01」(큰 글자) + 「-3」(작은 글자) 로 쪼개진 형태.
-      const suffix = sorted.find((candidate) =>
-        candidate !== token
-        && /^-\d{1,2}$/.test(candidate.str.trim())
+      // 「01」(큰 글자) + 「-3」(작은 글자) 로 쪼개진 형태, 또는 22개정 RPM 의 「04」「|」「2」(세로 막대로 나눈 형태).
+      const bar = sorted.find((candidate) =>
+        candidate.str.trim() === "|"
         && Math.abs(candidate.y - token.y) <= 4
         && candidate.x >= token.x + token.w - 2
         && candidate.x <= token.x + token.w + 8);
+      const suffix = sorted.find((candidate) =>
+        candidate !== token
+        && (bar ? /^\d{1,2}$/.test(candidate.str.trim()) && candidate.x >= bar.x + bar.w - 2 && candidate.x <= bar.x + bar.w + 8 : /^-\d{1,2}$/.test(candidate.str.trim()) && candidate.x >= token.x + token.w - 2 && candidate.x <= token.x + token.w + 8)
+        && Math.abs(candidate.y - token.y) <= 4);
       if (!suffix) continue;
-      code = `${text}${suffix.str.trim()}`;
+      code = bar ? `${text}-${suffix.str.trim()}` : `${text}${suffix.str.trim()}`;
       end = suffix.x + suffix.w;
     } else {
       continue;
