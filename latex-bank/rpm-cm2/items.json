@@ -1,0 +1,69 @@
+{
+ "book": "RPM 공통수학2",
+ "source_package": "rpm-cm2",
+ "id_style": "number",
+ "variant_level": 0,
+ "units": [
+  {
+   "code": "01",
+   "title": "평면좌표",
+   "pages": "7~17",
+   "groups": []
+  },
+  {
+   "code": "02",
+   "title": "직선의 방정식",
+   "pages": "19~31",
+   "groups": []
+  },
+  {
+   "code": "03",
+   "title": "원의 방정식",
+   "pages": "33~47",
+   "groups": []
+  },
+  {
+   "code": "04",
+   "title": "도형의 이동",
+   "pages": "49~61",
+   "groups": []
+  },
+  {
+   "code": "05",
+   "title": "집합의 뜻과 포함 관계",
+   "pages": "65~75",
+   "groups": []
+  },
+  {
+   "code": "06",
+   "title": "집합의 연산",
+   "pages": "77~93",
+   "groups": []
+  },
+  {
+   "code": "07",
+   "title": "명제",
+   "pages": "95~113",
+   "groups": []
+  },
+  {
+   "code": "08",
+   "title": "함수",
+   "pages": "117~135",
+   "groups": []
+  },
+  {
+   "code": "09",
+   "title": "유리함수",
+   "pages": "137~153",
+   "groups": []
+  },
+  {
+   "code": "10",
+   "title": "무리함수",
+   "pages": "155~165",
+   "groups": []
+  }
+ ],
+ "items": {}
+}

@@ -35,6 +35,7 @@ import {
   toViewportTokens,
   writeStacked
 } from "./pdfTools.mjs";
+import { pagePathBoxes } from "../latex-bank/pdfVectorFigures.mjs";
 
 const INGEST_VERSION = "answers-1.0";
 const SOLUTION_BANNER_PATTERN = /^본문\s*(?:p\.|\d)/;
@@ -116,6 +117,12 @@ async function ingestSolutions({ pdfPath, outDir, bookId, dpi }) {
     if (segmentation.segments.length === 0) continue;
     const page = await doc.getPage(info.pageNumber);
     const { canvas, context } = await renderPage(page, renderScale);
+    // 「답」 아이콘이 글자(U+E34C)가 아니라 벡터(22개정 RPM 의 초록 네모)인 판: 4~9pt 정사각 채움을 아이콘 자리로 쓴다.
+    const iconTokens = tokens.some((token) => token.str === ANSWER_ICON)
+      ? tokens.filter((token) => token.str === ANSWER_ICON)
+      : (await pagePathBoxes(page))
+        .filter((box) => box.kind === "fill" && box.w >= 4 && box.w <= 9 && box.h >= 4 && box.h <= 9 && Math.abs(box.w - box.h) < 2)
+        .map((box) => ({ str: ANSWER_ICON, x: box.x0, y: box.y1, h: box.h, w: box.w }));
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height).data;
     const columns = segmentation.columns;
     if (columns.length === 2 && !gutterProfile) {
@@ -129,8 +136,8 @@ async function ingestSolutions({ pdfPath, outDir, bookId, dpi }) {
       return { x0: column.left - 8, x1: column.right - (columnIndex === columns.length - 1 ? 0 : 6) };
     };
     // 상자 안의 「답」 아이콘마다 그 줄(분수 위아래 포함)의 띠를 돌려준다.
-    const answerBandsFor = (box) => tokens
-      .filter((token) => token.str === ANSWER_ICON && token.x >= box.x0 && token.x < box.x1 && token.y > box.y0 && token.y <= box.y1)
+    const answerBandsFor = (box) => iconTokens
+      .filter((token) => token.x >= box.x0 && token.x < box.x1 && token.y > box.y0 && token.y <= box.y1)
       .map((icon) => {
         const band = inkBand(imageData, canvas.width, renderScale, { x0: icon.x - 1.5, x1: box.x1 }, icon.y - icon.h / 2, { maxUp: 15, maxDown: 16, gapPt: 1.6 });
         // 답이 그래프·표처럼 한 글줄보다 크면(잉크가 띠 한계까지 이어지면) 문항 상자 끝까지 넓힌다.

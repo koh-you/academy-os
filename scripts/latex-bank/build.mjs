@@ -195,6 +195,9 @@ async function main() {
 \\newcommand{\\seg}[1]{\\overline{\\mathrm{#1}}}
 \\newcommand{\\arc}[1]{\\overset{\\frown}{\\mathrm{#1}}}
 \\newcommand{\\exprbox}[1]{\\par\\smallskip\\noindent\\begin{center}\\fbox{\\begin{minipage}{0.9\\linewidth}\\centering\\vspace{1.5mm}#1\\vspace{1.5mm}\\end{minipage}}\\end{center}}
+% 여집합 · 「보기」 상자(ㄱ·ㄴ·ㄷ 참거짓 문항 — 줄바꿈은 \\\\)
+\\newcommand{\\comp}[1]{{#1}^{\\mathrm{c}}}
+\\newcommand{\\bogi}[1]{\\par\\smallskip\\noindent\\begin{center}\\fbox{\\begin{minipage}{0.9\\linewidth}\\vspace{1mm}{\\small\\bfseries 보기}\\par\\smallskip\\setlength{\\parskip}{0.6mm}#1\\vspace{1mm}\\end{minipage}}\\end{center}}
 \\newcommand{\\blank}[1][1.5em]{\\raisebox{-0.15ex}{\\framebox[#1]{\\rule{0pt}{1.4ex}}}}
 \\newcommand{\\dmhint}[1]{\\par\\smallskip\\begin{tcolorbox}[enhanced,colback=dm-navylight!60,colframe=dm-navy!40,boxrule=0.3pt,sharp corners,left=3mm,right=3mm,top=2mm,bottom=2mm,boxsep=0mm]\\small\\setlength{\\parskip}{1mm}#1\\end{tcolorbox}}
 % 구역 제목·공통 지시문은 뒤에 문항 한 개는 붙을 자리가 있어야 찍는다(쪽 끝 고아 방지).
