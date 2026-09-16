@@ -65,7 +65,7 @@ assert.ok(
 // 알림톡 잠금은 서버 정책에서 파생한다.
 // 화면에 별도 목록을 두면 "서버는 열렸는데 버튼은 잠긴" 상태가 남는다.
 setCurrentTeacherRole("assistant");
-assert.equal(canCurrentRoleSendAlimtalk(), false, "협력 교사는 알림톡 버튼이 잠겨야 한다");
+assert.equal(canCurrentRoleSendAlimtalk(), true, "협력 교사 알림톡은 2026-09-16 에 열렸다 — 정책이 바뀌면 여기가 따라간다");
 setCurrentTeacherRole("owner");
 assert.equal(canCurrentRoleSendAlimtalk(), true, "원장은 알림톡을 보낼 수 있어야 한다");
 setCurrentTeacherRole("");
