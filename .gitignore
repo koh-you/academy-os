@@ -37,3 +37,5 @@ Thumbs.db
 latex-bank/**/build/
 latex-bank/**/review/
 latex-bank/_batch-*/
+latex-bank/**/work/
+latex-bank/**/draft/figures-qa/
