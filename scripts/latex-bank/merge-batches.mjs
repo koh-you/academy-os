@@ -62,7 +62,7 @@ bank.units.sort((a, b) => a.code.localeCompare(b.code));
 
 // 사람이 diff 를 볼 수 있게 그룹 한 줄·문항 한 줄로 쓴다.
 const groupsText = (groups) => groups.map((group) => "      " + JSON.stringify(group)).join(",\n");
-let text = `{\n  "book": ${JSON.stringify(bank.book)},\n  "source_package": ${JSON.stringify(bank.source_package ?? "")},\n  "variant_level": ${bank.variant_level ?? 0},\n  "units": [\n`;
+let text = `{\n  "book": ${JSON.stringify(bank.book)},\n  "source_package": ${JSON.stringify(bank.source_package ?? "")},${bank.id_style ? `\n  "id_style": ${JSON.stringify(bank.id_style)},` : ""}\n  "variant_level": ${bank.variant_level ?? 0},\n  "units": [\n`;
 text += bank.units.map((unit) => `    { "code": ${JSON.stringify(unit.code)}, "title": ${JSON.stringify(unit.title)}, "pages": ${JSON.stringify(unit.pages ?? "")}, "groups": [\n${groupsText(unit.groups)}\n    ] }`).join(",\n");
 text += "\n  ],\n  \"items\": {\n";
 const order = bank.units.flatMap((unit) => unit.groups.flatMap((group) => group.items));
