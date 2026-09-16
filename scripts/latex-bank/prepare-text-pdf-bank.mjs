@@ -101,7 +101,7 @@ for (const pageNumber of pages) {
       for (let i = 0; i < px.length; i += 4) {
         const max = Math.max(px[i], px[i + 1], px[i + 2]);
         const min = Math.min(px[i], px[i + 1], px[i + 2]);
-        if (max - min < 14 && min > 200) { px[i] = 255; px[i + 1] = 255; px[i + 2] = 255; }
+        if (max - min < 10 && min > 232) { px[i] = 255; px[i + 1] = 255; px[i + 2] = 255; }
       }
       outContext.putImageData(image, 0, 0);
     }

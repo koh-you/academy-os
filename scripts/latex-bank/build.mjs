@@ -103,12 +103,15 @@ function figurePlacement(item) {
 }
 
 /** 문항 하나의 본문 LaTeX(번호·출처 배지 포함 · dmpnum 두 번째 인자). */
-function renderItemBody(id, item, group, bank) {
+function renderItemBody(id, rawItem, group, bank) {
+  // 전사본의 별도 줄 수식(\centerline)은 좁은 낱장 폭에서 넘치므로 폭에 맞춰 줄이는 \dispeq 로 바꾼다.
+  const item = { ...rawItem, body: String(rawItem.body ?? "").replace(/\\centerline\{/g, "\\dispeq{") };
   // 출처 배지: 쪽-번호 id 는 「책 12쪽 13번」, 책 전체 번호 id(RPM)는 「책 0013번 · 9쪽」.
   const badgeText = bank.id_style === "number"
     ? `${bank.book} ${id}번${item.page ? ` · ${item.page}쪽` : ""}`
     : `${bank.book} ${id.split("-")[0]}쪽 ${id.split("-")[1]}번`;
-  const badge = `\\dmkichul{${badgeText}${item.tag ? ` · ${item.tag}` : ""}}`;
+  // 배지는 sty 가 첫 줄 위 5mm 에 띄우는데 첫 줄에 분수·cases 가 오면 닿는다 — 1.5mm 더 올린다(sty 수정 없이).
+  const badge = `\\smash{\\raisebox{1.5mm}{\\dmkichul{${badgeText}${item.tag ? ` · ${item.tag}` : ""}}}}`;
   const parts = [badge];
   if (item.figure && figurePlacement(item) === "side") {
     // 원문처럼 「오른쪽 그림」이 본문 오른쪽에 오도록 본문 0.58 · 그림 0.4 폭으로 나란히 둔다.
@@ -199,6 +202,8 @@ async function main() {
 \\newcommand{\\exprbox}[1]{\\par\\smallskip\\noindent\\begin{center}\\fbox{\\begin{minipage}{0.9\\linewidth}\\centering\\vspace{1.5mm}#1\\vspace{1.5mm}\\end{minipage}}\\end{center}}
 % 여집합 · 「보기」 상자(ㄱ·ㄴ·ㄷ 참거짓 문항 — 줄바꿈은 \\\\)
 \\newcommand{\\comp}[1]{{#1}^{\\mathrm{c}}}
+% 별도 줄 수식(원문의 가운데 줄): 좁은 낱장 폭보다 넓으면 폭에 맞게 줄인다(전사본의 \\centerline 을 build 가 이것으로 바꾼다).
+\\newcommand{\\dispeq}[1]{\\centerline{\\resizebox{\\ifdim\\width>\\linewidth\\linewidth\\else\\width\\fi}{!}{#1}}}
 \\newcommand{\\bogi}[1]{\\par\\smallskip\\noindent\\begin{center}\\fbox{\\begin{minipage}{0.9\\linewidth}\\vspace{1mm}{\\small\\bfseries 보기}\\par\\smallskip\\setlength{\\parskip}{0.6mm}#1\\vspace{1mm}\\end{minipage}}\\end{center}}
 \\newcommand{\\blank}[1][1.5em]{\\raisebox{-0.15ex}{\\framebox[#1]{\\rule{0pt}{1.4ex}}}}
 \\newcommand{\\dmhint}[1]{\\par\\smallskip\\begin{tcolorbox}[enhanced,colback=dm-navylight!60,colframe=dm-navy!40,boxrule=0.3pt,sharp corners,left=3mm,right=3mm,top=2mm,bottom=2mm,boxsep=0mm]\\small\\setlength{\\parskip}{1mm}#1\\end{tcolorbox}}
@@ -209,7 +214,9 @@ async function main() {
 % 줄바꿈 규약(프로토타입 mathbook-problems.sty · style.sty 와 같음): 수식 안에서는 줄을 바꾸지 않고, 「(단, …)」·「x축」은 한 덩어리.
 \\binoppenalty=10000 \\relpenalty=10000
 \\newcommand{\\nob}[1]{\\mbox{#1}}
-\\newcommand{\\cond}[1]{\\mbox{(단, #1)}}
+% 「(단, …)」 은 한 덩어리가 원칙이지만 그림 옆 좁은 폭(0.58)에서 긴 조건이 그림 뒤로 넘어가 잘리므로(RPM 공통수학2 0151),
+% 「(단,」 만 첫 낱말에 붙이고 안쪽 낱말 사이에서는 줄을 바꿀 수 있게 둔다(수식 안은 여전히 안 끊긴다).
+\\newcommand{\\cond}[1]{\\mbox{(단,}\\nobreakspace#1)}
 \\raggedbottom
 `;
   const lines = [preamble, "\\begin{document}"];

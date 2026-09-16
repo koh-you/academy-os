@@ -18335,7 +18335,8 @@
     "B",
     "✔"
    ],
-   "figure": "crop:fig-0867.png"
+   "figure": "crop:fig-0867.png",
+   "note": "사람 지정 상자(figure-overrides.json)"
   },
   "0868": {
    "pdf_page": 129,
@@ -19039,7 +19040,8 @@
     "유형20",
     "✔"
    ],
-   "figure": "crop:fig-0902.png"
+   "figure": "crop:fig-0902.png",
+   "note": "사람 지정 상자(figure-overrides.json)"
   },
   "0903": {
    "pdf_page": 134,
