@@ -3,7 +3,18 @@
 
 import { writeFile } from "node:fs/promises";
 import { createCanvas } from "@napi-rs/canvas";
-import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
+import * as pdfjsCore from "pdfjs-dist/legacy/build/pdf.mjs";
+import { createRequire } from "node:module";
+
+// CID 글꼴(한글 교재 PDF 의 Adobe-Korea1 · UniKS 계열)은 pdfjs 에 CMap·표준 글꼴 경로를 줘야 렌더·글자 추출이 된다. 없으면 한글이
+// 통째로 빠진 채(「translateFont failed: cMapUrl」) 수식만 남아 스캔본처럼 보인다(22개정 RPM 공통수학1 · 답지에서 확인, 2026-09-17).
+const pdfjsDistDir = createRequire(import.meta.url).resolve("pdfjs-dist/package.json").replace(/package\.json$/, "");
+const PDFJS_DEFAULTS = {
+  cMapUrl: `${pdfjsDistDir}cmaps/`,
+  cMapPacked: true,
+  standardFontDataUrl: `${pdfjsDistDir}standard_fonts/`
+};
+const pdfjs = { ...pdfjsCore, getDocument: (params) => pdfjsCore.getDocument({ ...PDFJS_DEFAULTS, ...params }) };
 
 export { pdfjs };
 
