@@ -846,15 +846,17 @@ test("student class move preserves today's journal row when applying from tomorr
 
   await loginAsTeacher(page);
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
-  const classSelect = page.getByLabel("정산 미리보기 학생 반");
-  const studentRow = classSelect.locator("xpath=ancestor::div[contains(@class, 'studentListRow')]");
-  await classSelect.selectOption("safe-cross-month-class");
-  // 반 변경은 부작용(미래 명단)이 있어 적용 시점 선택은 행에 남고, 저장만 하단 저장 바로 모였다(docs/ui-row-actions.md R2).
-  await expect(page.getByLabel("정산 미리보기 학생 반 변경 적용 시점")).toHaveValue("tomorrow");
-  await expect(studentRow).toHaveClass(/dirtyStudentRow/);
-  const saveBar = page.getByRole("complementary", { name: "학생 목록 하단 고정 저장 바" });
-  await saveBar.getByRole("button", { name: "변경 저장", exact: true }).click();
-  await expect(saveBar).toContainText("저장 완료");
+  // 2026-09-18 · 목록은 보기 전용이라 반 이동도 행을 눌러 여는 프로필 모달에서 한다.
+  await page.getByRole("button", { name: "정산 미리보기 학생 정보 수정" }).click();
+  const profile = page.getByRole("dialog", { name: /정산 미리보기 학생 학생 프로파일/ });
+  await profile.getByRole("button", { name: "수정", exact: true }).click();
+  await profile.getByRole("button", { name: /^기본정보/ }).click();
+  const basicModal = page.getByRole("dialog", { name: /기본정보/ });
+  await basicModal.getByLabel("정산 미리보기 학생 반", { exact: true }).selectOption("safe-cross-month-class");
+  // 반 변경은 부작용(미래 명단)이 있어 적용 시점을 먼저 고른다. 기본값은 오늘 명단 보존이다.
+  await expect(basicModal.getByLabel("정산 미리보기 학생 반 변경 적용 시점")).toHaveValue("tomorrow");
+  await basicModal.getByRole("button", { name: "기본정보만 저장", exact: true }).click();
+  await expect.poll(() => rosterRequests.length).toBe(1);
 
   expect(rosterRequests).toHaveLength(1);
   const changedLessonIds = rosterRequests[0].lessonChanges.map((change) => change.lessonId);
@@ -875,7 +877,7 @@ test("student profile schedule asks whether today's journal should change before
 
   await loginAsTeacher(page);
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
-  await page.getByRole("button", { name: /정산 미리보기 학생$/ }).click();
+  await page.getByRole("button", { name: "정산 미리보기 학생 정보 수정" }).click();
   const profile = page.getByRole("dialog", { name: /정산 미리보기 학생 학생 프로파일/ });
   await profile.getByRole("button", { name: "수정", exact: true }).click();
   await profile.getByRole("button", { name: /^기본정보/ }).click();
@@ -1809,7 +1811,7 @@ test("student lesson schedule previews calendar table and selectable PDF section
   await loginAsTeacher(page);
 
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
-  await page.getByRole("button", { name: /정산 미리보기 학생$/ }).click();
+  await page.getByRole("button", { name: "정산 미리보기 학생 정보 수정" }).click();
   const profile = page.getByRole("dialog", { name: /정산 미리보기 학생 학생 프로파일/ });
   await profile.getByRole("button", { name: /^월별 출결/ }).click();
   const attendanceModal = page.getByRole("dialog", { name: /월별 출결/ });
@@ -1915,7 +1917,7 @@ test("student lesson schedule keeps a Friday makeup lesson's own time", async ({
   await loginAsTeacher(page);
 
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
-  await page.getByRole("button", { name: /정산 미리보기 학생$/ }).click();
+  await page.getByRole("button", { name: "정산 미리보기 학생 정보 수정" }).click();
   const profile = page.getByRole("dialog", { name: /정산 미리보기 학생 학생 프로파일/ });
   await profile.getByRole("button", { name: /^월별 출결/ }).click();
   const attendanceModal = page.getByRole("dialog", { name: /월별 출결/ });

@@ -131,7 +131,7 @@ test("settlement exposes special attendance, combined student attendance, and co
   await expect(specialRow).toContainText("수업일지 없음 1회");
 
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
-  await page.getByRole("button", { name: /정산 미리보기 학생$/ }).click();
+  await page.getByRole("button", { name: "정산 미리보기 학생 정보 수정" }).click();
   const profile = page.getByRole("dialog", { name: /정산 미리보기 학생 학생 프로파일/ });
   await profile.getByRole("button", { name: /^월별 출결/ }).click();
   const attendanceModal = page.getByRole("dialog", { name: /월별 출결/ });
