@@ -535,6 +535,7 @@ export function ExamPrepCenter({
       {editingExamPrepRow && editingExamPrepDraft ? (
         <ExamPrepEditModal
           hasChanges={hasEditingExamPrepChanges}
+          isOrphaned={orphanedExamPrepIds.has(editingExamPrepRow.examPrepId)}
           row={editingExamPrepDraft}
           saveState={editingExamPrepSaveState}
           getEditableMathExamEntries={getEditableMathExamEntries}
