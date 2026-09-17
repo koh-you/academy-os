@@ -75,7 +75,7 @@ test("unlinked exam rows stay manageable and excluding a representative removes 
   const orphanedRow = page.locator(".examPrepRow.orphaned").filter({ hasText: "연결없음고" });
   await expect(orphanedRow).toBeVisible();
   await expect(orphanedRow.getByLabel("연결없음고 고1 해당 학생")).toContainText("연결된 활성 학생 없음");
-  await orphanedRow.getByRole("button", { name: /상세 관리/ }).click();
+  await orphanedRow.click();
   const detailDialog = page.getByRole("dialog", { name: "연결없음고 시험정보 수정" });
   await detailDialog.getByRole("button", { name: "이번 고사 내신 준비 제외" }).click();
   await detailDialog.getByRole("button", { name: "변경 저장" }).click();

@@ -356,7 +356,7 @@ export function ExamPrepCenter({
       {activeTab === "info" ? (
         <>
           <p className="examPrepExplicitSaveNotice" role="note">
-            시험정보는 <strong>상세 관리</strong>에서 수정한 뒤 <strong>변경 저장</strong>을 눌러야 Supabase에 반영됩니다.
+            시험정보는 <strong>행을 눌러</strong> 열리는 상세 화면에서 수정한 뒤 <strong>변경 저장</strong>을 눌러야 Supabase에 반영됩니다.
           </p>
           <FilterBar
             className="examCycleBar"
@@ -409,7 +409,6 @@ export function ExamPrepCenter({
               <span>수학 시험 일정</span>
               <span>시험 범위</span>
               <span>부교재</span>
-              <span>상세</span>
             </div>
             {sortedExamPrepRows.map((row) => {
               const specialNote = row.specialNote ?? row.memo ?? "";
@@ -418,8 +417,25 @@ export function ExamPrepCenter({
               const isOrphaned = orphanedExamPrepIds.has(row.examPrepId);
 
               return (
-                <div className={`examPrepRow${row.isExcluded ? " excluded" : ""}${isOrphaned ? " orphaned" : ""}`} key={row.examPrepId}>
-                  <div className="examReadCell strong">{row.schoolName || "-"}</div>
+                <div
+                  aria-label={`${row.schoolName || "학교 미입력"} ${row.grade || ""} 시험정보 상세 관리`}
+                  className={`examPrepRow examPrepRowClickable${row.isExcluded ? " excluded" : ""}${isOrphaned ? " orphaned" : ""}`}
+                  key={row.examPrepId}
+                  onClick={() => openExamPrepEditor(row)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      openExamPrepEditor(row);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <div className="examReadCell strong examPrepSchoolCell">
+                    <span>{row.schoolName || "-"}</span>
+                    {hasReview ? <span className="examPrepReviewTag">총평 있음</span> : null}
+                    {rowSaveStates[row.examPrepId] ? <InlineSaveStatus saveState={rowSaveStates[row.examPrepId]} /> : null}
+                  </div>
                   <div className="examReadCell">{row.grade || "-"}</div>
                   <div
                     aria-label={`${row.schoolName || "학교 미입력"} ${row.grade || "학년 미입력"} 해당 학생`}
@@ -472,13 +488,6 @@ export function ExamPrepCenter({
                   </div>
                   <div className="examReadCell multiline">{row.scope || "미입력"}</div>
                   <div className="examReadCell multiline">{row.subTextbook || "미입력"}</div>
-                  <div className="examPrepRowActions">
-                    {rowSaveStates[row.examPrepId] ? <InlineSaveStatus saveState={rowSaveStates[row.examPrepId]} /> : null}
-                    <button className={hasReview ? "examPrepDetailButton filled" : "examPrepDetailButton"} onClick={() => openExamPrepEditor(row)} type="button">
-                      <strong>상세 관리</strong>
-                      {hasReview ? <span>총평 있음</span> : null}
-                    </button>
-                  </div>
                 </div>
               );
             })}

@@ -14,7 +14,7 @@ test("school calendar shows the full exam period with a stronger math exam date 
   await navigation.getByRole("button", { name: /시험관리/ }).click();
   await page.getByRole("button", { name: "정산 미리보기반" }).click();
   const safeSchoolRow = page.locator(".examPrepRow").filter({ hasText: "안전고" });
-  await safeSchoolRow.getByRole("button", { name: /상세 관리/ }).click();
+  await safeSchoolRow.click();
   const detailDialog = page.getByRole("dialog", { name: "안전고 시험정보 수정" });
   await detailDialog.getByLabel("시험기간 시작일").fill("2026-08-12");
   await detailDialog.getByLabel("시험기간 종료일").fill("2026-08-15");

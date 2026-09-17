@@ -295,8 +295,11 @@ assert.match(centerSource, /학교명 가나다순/);
 assert.match(centerSource, /ensureExamCycleRows\(examCycle, selectedClassTemplateId\)/);
 assert.match(centerSource, /ensureExamCycleRows\(selectedExamCycle, classTemplateId\)/);
 assert.match(centerSource, /ensureExamCycleRows\(selectedExamCycle, selectedClassTemplateId\)/);
-assert.match(centerSource, /<span>상세<\/span>/);
-assert.match(centerSource, /<strong>상세 관리<\/strong>/);
+// 2026-09-17 · 상세 버튼/열을 없애고 행 전체를 눌러 상세 관리 모달을 연다.
+assert.doesNotMatch(centerSource, /<strong>상세 관리<\/strong>/);
+assert.ok(centerSource.includes("examPrepRow examPrepRowClickable"));
+assert.ok(centerSource.includes("onClick={() => openExamPrepEditor(row)}"));
+assert.ok(centerSource.includes('role="button"'));
 assert.match(centerSource, /onSaveRow\(editingExamPrepDraft\)/);
 assert.match(centerSource, /내신 제외 보기/);
 assert.match(centerSource, /연결된 활성 학생 없음/);

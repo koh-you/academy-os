@@ -3065,9 +3065,41 @@ summary:focus-visible {
   border-top: 1px solid var(--status-neutral-border, #e2e8f0);
   display: grid;
   gap: 4px;
-  grid-template-columns: 96px 64px 220px 132px 92px 112px 224px 250px 280px 190px 116px;
-  min-width: 1816px;
+  grid-template-columns: 96px 64px 220px 132px 92px 112px 224px 250px 280px 190px;
+  min-width: 1696px;
   padding: 8px 10px;
+}
+
+/* 행 전체가 상세 관리 모달을 여는 버튼이다(상세 버튼/열 제거, 2026-09-17). */
+.examPrepRowClickable {
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--academy-transition-fast, 150ms ease);
+}
+
+.examPrepRowClickable:hover {
+  background: var(--academy-surface-muted, #f8fafc);
+}
+
+.examPrepRowClickable:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--academy-focus-ring, #2563eb);
+  outline: none;
+}
+
+.examPrepSchoolCell {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.examPrepReviewTag {
+  background: var(--status-info-bg, #eff6ff);
+  border-radius: 999px;
+  color: var(--status-info-text, #1d4ed8);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 1px 7px;
 }
 
 .examPrepRow:first-child {
