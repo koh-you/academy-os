@@ -40,3 +40,4 @@ latex-bank/_batch-*/
 latex-bank/**/work/
 latex-bank/**/draft/figures-qa/
 latex-bank/**/_single.tex
+latex-bank/**/_answers.tex
