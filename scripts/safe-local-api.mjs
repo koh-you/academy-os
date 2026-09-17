@@ -2306,6 +2306,23 @@ const server = http.createServer(async (request, response) => {
       source: result.source ?? "supabase"
     });
   }
+  if (request.method === "DELETE" && requestUrl.pathname === "/api/exam-prep-rows") {
+    // 운영 응답 모양(deletedExamPrepRowIds)을 맞춘다 — 화면 오케스트레이션이 단일 대상
+    // 일치를 검증하므로 generic { ok } 로는 "삭제 응답이 단일 대상과 일치하지 않습니다" 가 난다.
+    const examPrepId = requestUrl.searchParams.get("id") || "";
+    if (!examPrepId || requestUrl.searchParams.get("confirm") !== "true") {
+      return sendJson(response, 400, { ok: false, error: "시험정보 삭제는 confirm=true가 필요합니다.", safeFixture: true });
+    }
+    const existed = state.examPrepRows.some((row) => row.examPrepId === examPrepId);
+    state.examPrepRows = state.examPrepRows.filter((row) => row.examPrepId !== examPrepId);
+    return sendJson(response, 200, {
+      ok: true,
+      safeFixture: true,
+      source: "supabase",
+      deletedExamPrepRowIds: existed ? [examPrepId] : [],
+      audit: { auditId: requestUrl.searchParams.get("auditId") || "", operation: "delete_exam_prep_row", targetExamPrepId: examPrepId, stage: "safe-fixture" }
+    });
+  }
   if (request.method === "DELETE" && requestUrl.pathname === "/api/school-events") {
     const eventId = requestUrl.searchParams.get("id") || "";
     const expectedUpdatedAt = requestUrl.searchParams.get("expectedUpdatedAt") || "";

@@ -1,0 +1,4 @@
+/* 시험관리 목록 — 연결 학생이 끊긴 행의 바로 삭제 버튼. 경고 칩 아래에 붙는다. */
+.examPrepOrphanDeleteButton {
+  justify-self: start;
+}

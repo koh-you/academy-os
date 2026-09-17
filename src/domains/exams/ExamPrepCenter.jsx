@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ExamPrepEditModal } from "./ExamPrepEditModal.jsx";
+import "./examPrepCenter.css";
 import { ExamPrepPastPaperPanel } from "./ExamPrepPastPaperPanel.jsx";
 import { createExamPrepCenterDisplayModel, sortExamPrepRows } from "./examPrepCenterModel.js";
 import { ExamPostSubmissionManager } from "./ExamPostSubmissionManager.jsx";
@@ -434,9 +435,23 @@ export function ExamPrepCenter({
                         </div>
                       </>
                     ) : (
-                      <span className={`examPrepStudentRosterEmpty${isOrphaned ? " warning" : ""}`}>
-                        {isOrphaned ? "연결된 활성 학생 없음" : "이 반의 연결 학생 없음"}
-                      </span>
+                      <>
+                        <span className={`examPrepStudentRosterEmpty${isOrphaned ? " warning" : ""}`}>
+                          {isOrphaned ? "연결된 활성 학생 없음" : "이 반의 연결 학생 없음"}
+                        </span>
+                        {/* 학생의 학교·학년을 고쳐 연결이 끊긴 행. 다시 생기지 않으므로 여기서 바로
+                            지운다 — 상세 관리까지 들어가야만 지울 수 있으면 남는 줄로 안다(2026-09-17). */}
+                        {isOrphaned ? (
+                          <button
+                            className="dangerSoftButton compact examPrepOrphanDeleteButton"
+                            disabled={rowSaveStates[row.examPrepId] === "saving"}
+                            onClick={() => onDeleteRow?.(row.examPrepId)}
+                            type="button"
+                          >
+                            이 행 삭제
+                          </button>
+                        ) : null}
+                      </>
                     )}
                   </div>
                   <div className="examReadCell multiline">{specialNote || "특이사항 없음"}</div>
