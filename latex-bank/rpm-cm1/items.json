@@ -1,0 +1,81 @@
+{
+ "book": "RPM 공통수학1",
+ "source_package": "rpm-cm1",
+ "id_style": "number",
+ "variant_level": 0,
+ "units": [
+  {
+   "code": "01",
+   "title": "다항식의 연산",
+   "pages": "7~19",
+   "groups": []
+  },
+  {
+   "code": "02",
+   "title": "항등식과 나머지정리",
+   "pages": "21~31",
+   "groups": []
+  },
+  {
+   "code": "03",
+   "title": "인수분해",
+   "pages": "33~41",
+   "groups": []
+  },
+  {
+   "code": "04",
+   "title": "복소수",
+   "pages": "45~54",
+   "groups": []
+  },
+  {
+   "code": "05",
+   "title": "이차방정식",
+   "pages": "57~69",
+   "groups": []
+  },
+  {
+   "code": "06",
+   "title": "이차방정식과 이차함수",
+   "pages": "71~80",
+   "groups": []
+  },
+  {
+   "code": "07",
+   "title": "여러 가지 방정식",
+   "pages": "83~99",
+   "groups": []
+  },
+  {
+   "code": "08",
+   "title": "연립일차부등식",
+   "pages": "101~109",
+   "groups": []
+  },
+  {
+   "code": "09",
+   "title": "이차부등식과 연립이차부등식",
+   "pages": "111~127",
+   "groups": []
+  },
+  {
+   "code": "10",
+   "title": "경우의 수와 순열",
+   "pages": "131~141",
+   "groups": []
+  },
+  {
+   "code": "11",
+   "title": "조합",
+   "pages": "143~153",
+   "groups": []
+  },
+  {
+   "code": "12",
+   "title": "행렬",
+   "pages": "157~167",
+   "groups": []
+  }
+ ],
+ "items": {}
+}
