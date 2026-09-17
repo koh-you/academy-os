@@ -1,0 +1,7 @@
+% 유형 104 169-21(본책 169쪽) — 반원 위의 점 8개(호 위 4개 · 지름 위 4개, 지름 양 끝 포함). 스캔 그림을 TikZ 로 다시 그림. 라벨·수치 없음.
+\begin{tikzpicture}[scale=0.62, line width=0.55pt]
+  \draw (-1.7,0) arc (180:0:1.7);
+  \draw (-1.7,0) -- (1.7,0);
+  \foreach \a in {30,70,110,150} { \fill (\a:1.7) circle (2pt); }
+  \foreach \x in {-1.7,-0.57,0.57,1.7} { \fill (\x,0) circle (2pt); }
+\end{tikzpicture}

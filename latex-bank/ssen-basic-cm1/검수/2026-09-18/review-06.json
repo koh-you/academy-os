@@ -1,0 +1,41 @@
+{
+  "range": "49-06~57-72",
+  "checked": 79,
+  "ok": 74,
+  "red": 0,
+  "yellow": 5,
+  "findings": [
+    {
+      "id": "52-07",
+      "severity": "yellow",
+      "where": "passage",
+      "note": "공통 지시문 「…( ) 안에 써넣으시오.」가 단 폭을 살짝 넘어 마지막 「오.」 한 글자만 둘째 줄로 떨어짐(52-07~52-10 공통 · 경미)",
+      "fix": "U4-PJ2 passage 의 (\\hspace*{1.2em}) 를 (\\hspace*{0.8em}) 정도로 줄이거나 「써넣으시오」 앞에서 줄바꿈 허용"
+    },
+    {
+      "id": "52-08",
+      "severity": "yellow",
+      "where": "passage",
+      "note": "52-07 과 같은 공통 지시문 widow(「오.」 홀로 둘째 줄)"
+    },
+    {
+      "id": "52-09",
+      "severity": "yellow",
+      "where": "passage",
+      "note": "52-07 과 같은 공통 지시문 widow(「오.」 홀로 둘째 줄)"
+    },
+    {
+      "id": "52-10",
+      "severity": "yellow",
+      "where": "passage",
+      "note": "52-07 과 같은 공통 지시문 widow(「오.」 홀로 둘째 줄)"
+    },
+    {
+      "id": "56-54",
+      "severity": "yellow",
+      "where": "layout",
+      "note": "출처 배지 「베이직쎈 공통수학1 56쪽 54번」이 첫 줄 우변 「+ i×□ + i×□」 위에 겹쳐 가림(items.json body 자체는 원문과 일치)",
+      "fix": "배지 위치를 번호 줄 오른쪽 위로 올리거나 array 앞에 줄바꿈을 넣어 배지와 첫 줄이 겹치지 않게"
+    }
+  ]
+}

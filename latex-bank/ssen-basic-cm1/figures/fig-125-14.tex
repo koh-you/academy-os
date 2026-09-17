@@ -1,0 +1,12 @@
+% 유형 069 125-14(본책 125쪽) — 오른쪽 그림 수직선: −1(●)에서 오른쪽 화살표(아래), 6(○)에서 오른쪽 화살표(위), 6 오른쪽 색칠. 원문에 있는 수치(−1, 6)만 적음. 스캔 그림을 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=0.62, line width=0.6pt]
+  \fill[yellow!45] (1.6,0) rectangle (2.7,0.55);
+  \draw[<->, >=stealth, line width=0.7pt] (-1.2,0) -- (2.8,0);
+  \node[below=1pt, font=\small] at (2.55,0) {$x$};
+  \draw[->, >=stealth] (0,0) -- (0,0.55) -- (2.75,0.55);
+  \draw[->, >=stealth] (1.6,0) -- (1.6,1.0) -- (2.75,1.0);
+  \fill (0,0) circle (2pt);
+  \fill[white] (1.6,0) circle (2pt); \draw (1.6,0) circle (2pt);
+  \node[below=2pt, font=\small] at (0,0) {$-1$};
+  \node[below=2pt, font=\small] at (1.6,0) {$6$};
+\end{tikzpicture}

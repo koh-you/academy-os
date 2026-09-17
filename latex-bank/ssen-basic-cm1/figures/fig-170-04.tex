@@ -1,0 +1,17 @@
+% 실전 감각 UP 170-04(본책 170쪽) — 세 마을 A(위)·B(왼쪽 아래)·C(오른쪽 아래)를 잇는 도로망. A–B 4개 · A–C 3개 · B–C 2개(답지 풀이 4·2·3 과 일치). 스캔 그림을 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \coordinate (A) at (0,2.6); \coordinate (B) at (-1.9,-0.4); \coordinate (C) at (1.9,-0.4);
+  % A–B 4개
+  \draw (A) to[bend right=38] (B);
+  \draw (A) to[bend right=18] (B);
+  \draw (A) to[bend left=6] (B);
+  \draw (A) to[bend left=28] (B);
+  % A–C 3개
+  \draw (A) to[bend left=34] (C);
+  \draw (A) to[bend left=12] (C);
+  \draw (A) to[bend right=14] (C);
+  % B–C 2개
+  \draw (B) to[bend left=16] (C);
+  \draw (B) to[bend right=22] (C);
+  \foreach \p in {A,B,C} { \fill[white] (\p) circle (7pt); \draw (\p) circle (7pt); \node[font=\small] at (\p) {$\mathrm{\p}$}; }
+\end{tikzpicture}

@@ -1,0 +1,18 @@
+% 개념 36 93-13(본책 93쪽) — 0≤x≤3 에서 f(x)=x²−4x+1=(x−2)²−3 의 그래프(힌트 「오른쪽 그림」). 스캔 그림을 TikZ 로 다시 그림.
+% 원문 라벨(1·2·3·−2·−3·O)만 둔다. 범위 안은 실선, 밖은 점선. 점 크기 2pt · 축 0.7pt · 곡선 0.6pt · 안내선 파선.
+\begin{tikzpicture}[scale=0.45, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.2,0) -- (4.8,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.9) -- (0,2.6) node[left] {$y$};
+  \node[below left=1pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt, domain=0:3, samples=40, smooth] plot (\x, {(\x-2)*(\x-2)-3});
+  \draw[dotted, line width=0.5pt, domain=-0.35:0, samples=10, smooth] plot (\x, {(\x-2)*(\x-2)-3});
+  \draw[dotted, line width=0.5pt, domain=3:4.2, samples=20, smooth] plot (\x, {(\x-2)*(\x-2)-3});
+  \draw[dashed, line width=0.4pt] (2,0) -- (2,-3) -- (0,-3);
+  \draw[dashed, line width=0.4pt] (3,0) -- (3,-2) -- (0,-2);
+  \fill (0,1) circle (2pt); \fill (2,-3) circle (2pt); \fill (3,-2) circle (2pt);
+  \node[left, font=\small] at (0,1) {$1$};
+  \node[above, font=\small] at (2,0) {$2$};
+  \node[above, font=\small] at (3,0) {$3$};
+  \node[left, font=\small] at (0,-2) {$-2$};
+  \node[left, font=\small] at (0,-3) {$-3$};
+\end{tikzpicture}

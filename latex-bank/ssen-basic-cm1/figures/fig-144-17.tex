@@ -1,0 +1,20 @@
+% 개념 56 144-17(본책 144쪽) — 풀이 힌트 옆 수직선: 2(●)·3(○)·5(●)·k(○). ㉠ 은 2 와 5 를 잇는 ㄷ자 선(가운데 ㉠ 표시), 다른 부등식은 3 에서 위로 올라 왼쪽 화살표·k 에서 위로 올라 오른쪽 화살표, 공통부분(2~3) 색칠. 라벨은 원문(2, 3, 5, k, x)만. 스캔 그림을 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=0.62, line width=0.6pt]
+  \fill[green!25] (-1.2,0) rectangle (-0.5,0.7);
+  \draw[<->, >=stealth, line width=0.7pt] (-2.5,0) -- (2.5,0);
+  \node[below=2pt, font=\small] at (2.25,0) {$x$};
+  % ㉠: 2 에서 5 까지 ㄷ자
+  \draw (-1.2,0) -- (-1.2,0.7) -- (1.0,0.7) -- (1.0,0);
+  \node[font=\scriptsize, fill=white, inner sep=0.5pt] at (-0.1,0.7) {㉠};
+  % 다른 부등식: 3 에서 위로, 왼쪽 화살표 · k 에서 위로, 오른쪽 화살표
+  \draw[->, >=stealth] (-0.5,0) -- (-0.5,1.3) -- (-2.3,1.3);
+  \draw[->, >=stealth] (1.5,0) -- (1.5,1.3) -- (2.3,1.3);
+  \fill (-1.2,0) circle (2pt);
+  \fill[white] (-0.5,0) circle (2pt); \draw (-0.5,0) circle (2pt);
+  \fill (1.0,0) circle (2pt);
+  \fill[white] (1.5,0) circle (2pt); \draw (1.5,0) circle (2pt);
+  \node[below=3pt, font=\small] at (-1.2,0) {$2$};
+  \node[below=3pt, font=\small] at (-0.5,0) {$3$};
+  \node[below=3pt, font=\small] at (1.0,0) {$5$};
+  \node[below=3pt, font=\small] at (1.5,0) {$k$};
+\end{tikzpicture}

@@ -1,0 +1,12 @@
+% 실전 감각 UP 116-14(본책 116쪽) — 선분 AB 를 지름으로 하는 반원 위의 점 P 와 색칠된 삼각형 PAB. 스캔 그림이라 TikZ 로 다시 그림.
+% 원문에는 라벨 A·B·P 만 있고 길이 수치는 없다(답이 읽히지 않게 P 의 위치는 임의).
+\begin{tikzpicture}[scale=0.42, line width=0.5pt]
+  \coordinate (A) at (-3,0); \coordinate (B) at (3,0); \coordinate (P) at ({3*cos(72)},{3*sin(72)});
+  \fill[yellow!45] (A) -- (P) -- (B) -- cycle;
+  \draw[line width=0.6pt] (A) -- (B);
+  \draw[line width=0.6pt] (B) arc (0:180:3);
+  \draw[line width=0.6pt] (A) -- (P) -- (B);
+  \node[left, font=\small] at (A) {$\mathrm{A}$};
+  \node[right, font=\small] at (B) {$\mathrm{B}$};
+  \node[above, font=\small] at (P) {$\mathrm{P}$};
+\end{tikzpicture}

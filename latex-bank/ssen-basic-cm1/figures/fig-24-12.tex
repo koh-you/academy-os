@@ -1,0 +1,26 @@
+% 실전 감각 UP 24-12(본책 24쪽) — 밑면 (x+3)×(x+3), 높이 x−1 인 직육면체에 한 모서리 x−1 인 정육면체 구멍을 뚫은 입체. 스캔 삽화를 TikZ 로 다시 그림(스캔 화질).
+% 라벨은 원문 그대로 4개(구멍 위 x−1 · 오른쪽 높이 x−1 · 오른쪽 깊이 x+3 · 앞 밑변 x+3). 숨은 모서리는 파선. 답(부피)은 적지 않는다.
+\begin{tikzpicture}[scale=0.85, line width=0.5pt]
+  % 앞면·윗면·오른쪽면
+  \fill[red!8] (0,0) rectangle (3.6,1.1);
+  \fill[red!4] (0,1.1) -- (3.6,1.1) -- (5,2) -- (1.4,2) -- cycle;
+  \fill[red!16] (3.6,0) -- (5,0.9) -- (5,2) -- (3.6,1.1) -- cycle;
+  \draw (0,0) rectangle (3.6,1.1);
+  \draw (0,1.1) -- (1.4,2) -- (5,2) -- (3.6,1.1);
+  \draw (3.6,0) -- (5,0.9) -- (5,2);
+  \draw[dashed, line width=0.4pt] (0,0) -- (1.4,0.9) -- (5,0.9) (1.4,0.9) -- (1.4,2);
+  % 정육면체 구멍(윗면의 정사각형 · 아래로 뚫린 모서리는 파선)
+  \coordinate (T1) at (1.49,1.415); \coordinate (T2) at (2.49,1.415);
+  \coordinate (T3) at (2.882,1.667); \coordinate (T4) at (1.882,1.667);
+  \coordinate (B1) at (1.49,0.315); \coordinate (B2) at (2.49,0.315);
+  \coordinate (B3) at (2.882,0.567); \coordinate (B4) at (1.882,0.567);
+  \fill[white] (T1) -- (T2) -- (T3) -- (T4) -- cycle;
+  \draw (T1) -- (T2) -- (T3) -- (T4) -- cycle;
+  \draw[dashed, line width=0.4pt] (T1) -- (B1) (T2) -- (B2) (T3) -- (B3) (T4) -- (B4);
+  \draw[dashed, line width=0.4pt] (B1) -- (B2) -- (B3) -- (B4) -- cycle;
+  % 라벨(원문 4개)
+  \node[above, font=\small] at (2.382,1.667) {$x-1$};
+  \node[right, font=\small] at (5,1.5) {$x-1$};
+  \node[below right, font=\small] at (4.35,0.45) {$x+3$};
+  \node[below, font=\small] at (1.8,0) {$x+3$};
+\end{tikzpicture}

@@ -1,0 +1,27 @@
+% 유형 060 105-18(본책 105쪽) — 가로 16 cm · 세로 14 cm 직사각형 종이의 네 귀퉁이에서 한 변 x cm 인 정사각형을 잘라 낸 그림(접는 선은 파선). 스캔 삽화를 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 3개(16 cm · 14 cm · x cm). 상자의 높이·밑면 치수 등 답의 근거는 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.5pt]
+  \def\W{3.2}\def\H{2.8}\def\c{0.5}
+  % 종이(귀퉁이 잘라 낸 부분은 흰색)
+  \fill[orange!25] (0,0) rectangle (\W,\H);
+  \fill[white] (0,0) rectangle (\c,\c);
+  \fill[white] (\W-\c,0) rectangle (\W,\c);
+  \fill[white] (0,\H-\c) rectangle (\c,\H);
+  \fill[white] (\W-\c,\H-\c) rectangle (\W,\H);
+  \draw (0,0) rectangle (\W,\H);
+  % 귀퉁이 정사각형 경계
+  \draw (0,\c) -- (\c,\c) -- (\c,0);
+  \draw (\W-\c,0) -- (\W-\c,\c) -- (\W,\c);
+  \draw (0,\H-\c) -- (\c,\H-\c) -- (\c,\H);
+  \draw (\W-\c,\H) -- (\W-\c,\H-\c) -- (\W,\H-\c);
+  % 접는 선(파선)
+  \draw[dashed, line width=0.4pt] (\c,\c) -- (\W-\c,\c) (\c,\H-\c) -- (\W-\c,\H-\c) (\c,\c) -- (\c,\H-\c) (\W-\c,\c) -- (\W-\c,\H-\c);
+  % 치수(원문: 위 16 cm · 오른쪽 14 cm)
+  \draw[<->, >=stealth, line width=0.4pt] (0,\H+0.28) -- (\W,\H+0.28);
+  \node[font=\small, fill=white, inner sep=1pt] at (\W/2,\H+0.28) {$16\,\mathrm{cm}$};
+  \draw[<->, >=stealth, line width=0.4pt] (\W+0.28,0) -- (\W+0.28,\H);
+  \node[font=\small, fill=white, inner sep=1pt, rotate=0] at (\W+0.28,\H/2) {$14\,\mathrm{cm}$};
+  % 귀퉁이 정사각형 한 변 x cm
+  \draw[<->, >=stealth, line width=0.4pt] (0.02,\H-\c-0.14) -- (\c-0.02,\H-\c-0.14);
+  \node[font=\small, anchor=west, inner sep=1pt] at (\c+0.04,\H-\c-0.14) {$x\,\mathrm{cm}$};
+\end{tikzpicture}

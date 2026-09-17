@@ -1,0 +1,9 @@
+% 개념 33 86-09(본책 86쪽) — 아래로 볼록한 이차함수 그래프, x축과 −1·4 에서 만남. 스캔 그림을 TikZ 로 다시 그림(원문 라벨 −1·O·4 만).
+\begin{tikzpicture}[scale=0.5, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.8,0) -- (5.6,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.8) -- (0,3.4) node[left] {$y$};
+  \node[below right, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt, domain=-2.2:5.2, samples=60, smooth] plot (\x, {0.35*(\x+1)*(\x-4)});
+  \node[below left=1pt and -2pt, font=\small] at (-1,0) {$-1$};
+  \node[below left=1pt and -2pt, font=\small] at (4,0) {$4$};
+\end{tikzpicture}

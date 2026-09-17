@@ -1,0 +1,30 @@
+{
+  "range": "75-13~86-13",
+  "checked": 79,
+  "ok": 76,
+  "red": 0,
+  "yellow": 3,
+  "findings": [
+    {
+      "id": "86-09",
+      "severity": "yellow",
+      "where": "figure",
+      "note": "본문이 비어 있는데 그림이 오른쪽 0.4\\linewidth 미니페이지에 들어가 x축 화살표와 라벨 $x$ 가 오른쪽 여백 밖으로 잘림(x축 길이 8.4단위×scale 0.5≈4.2cm > 미니페이지 폭). 그림 내용(−1·O·4, 아래로 볼록)은 원문과 일치",
+      "fix": "fig-86-09 의 scale 을 0.5→0.35 로 줄이거나, body 가 빈 문항은 그림을 전체 폭 minipage 에 두도록 build 규칙 조정"
+    },
+    {
+      "id": "86-10",
+      "severity": "yellow",
+      "where": "figure",
+      "note": "86-09 와 같은 원인으로 x축 오른쪽 끝과 라벨 $x$ 가 잘림. 그림 내용(O·5, 위로 볼록)은 원문과 일치",
+      "fix": "fig-86-10 의 scale 을 0.5→0.35 로 줄이거나 그림을 전체 폭 minipage 에 배치"
+    },
+    {
+      "id": "86-12",
+      "severity": "yellow",
+      "where": "figure",
+      "note": "86-09 와 같은 원인으로 x축 오른쪽 끝과 라벨 $x$ 가 잘림. 그림 내용(O·3·6, 위로 볼록, y축과 떨어짐)은 원문과 일치",
+      "fix": "fig-86-12 의 scale 을 0.5→0.35 로 줄이거나 그림을 전체 폭 minipage 에 배치"
+    }
+  ]
+}

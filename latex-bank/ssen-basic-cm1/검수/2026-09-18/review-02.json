@@ -1,0 +1,4 @@
+{ "range": "14-49~23-03", "checked": 79, "ok": 78,
+  "findings": [
+    { "id": "18-04", "severity": "yellow", "where": "figure", "note": "조판본 그림이 오른쪽 여백을 넘어 잘림 — 라벨 x−y, 2x−1 이 렌더 오른쪽 끝에서 끊김. TikZ 좌표는 0~3.2cm 인데 왼쪽 라벨 3x+4y+1 이 bbox 를 왼쪽으로 넓혀 0.4\\linewidth minipage 를 초과하고 centering 으로 오른쪽으로 밀린 것으로 보임(내용·라벨 4개·직각 표시는 원문과 일치)", "fix": "fig-18-04.tex 의 scale 을 0.8 정도로 줄이거나 18-04 의 그림 minipage 폭을 0.45\\linewidth 로 넓히고 본문 minipage 를 0.52 로 줄임" }
+  ] }

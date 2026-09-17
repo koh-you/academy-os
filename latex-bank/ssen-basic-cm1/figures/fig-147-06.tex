@@ -1,0 +1,19 @@
+% 실전 감각 UP 147-06(본책 147쪽) — 위로 볼록한 이차함수 y=f(x)(x절편 −2, 5)와 직선 y=g(x)(x절편 1)가 x=−3, x=4 에서 만나는 그림. 교점에서 x축까지 파선. 라벨은 원문(−3, −2, O, 1, 4, 5, y=f(x), y=g(x))만. 스캔 그림을 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=0.42, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-4.6,0) -- (6.6,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-5.6) -- (0,7.2) node[left] {$y$};
+  \node[above right=0pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  % 포물선 y=-(x+2)(x-5)/2, 직선 y=x-1 : 교점 (-3,-4), (4,3)
+  \draw[line width=0.6pt, domain=-3.35:5.65, samples=70, smooth] plot (\x, {-(\x+2)*(\x-5)/2});
+  \draw[line width=0.6pt] (-4.2,-5.2) -- (6.0,5.0);
+  \draw[dashed, line width=0.4pt] (-3,0) -- (-3,-4);
+  \draw[dashed, line width=0.4pt] (4,0) -- (4,3);
+  \fill (-3,-4) circle (2pt); \fill (4,3) circle (2pt);
+  \node[above left=-1pt and -3pt, font=\small] at (-3,0) {$-3$};
+  \node[below right=1pt and -4pt, font=\small] at (-2,0) {$-2$};
+  \node[below right=1pt and -2pt, font=\small] at (1,0) {$1$};
+  \node[below left=1pt and -2pt, font=\small] at (4,0) {$4$};
+  \node[above right=-1pt and -2pt, font=\small] at (5,0) {$5$};
+  \node[right, font=\small] at (4.6,5.4) {$y=g(x)$};
+  \node[right, font=\small] at (2.6,-4.4) {$y=f(x)$};
+\end{tikzpicture}

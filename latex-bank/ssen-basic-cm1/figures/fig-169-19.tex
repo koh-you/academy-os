@@ -1,0 +1,7 @@
+% 유형 103 169-19(본책 169쪽) — 평행한 두 직선 위의 점 3개·4개. 스캔 그림을 TikZ 로 다시 그림. 라벨·수치 없음.
+\begin{tikzpicture}[scale=0.62, line width=0.55pt]
+  \draw (-2.3,1.1) -- (2.3,1.1);
+  \draw (-2.3,-0.3) -- (2.3,-0.3);
+  \foreach \x in {-1.2,0,1.2} { \fill (\x,1.1) circle (2pt); }
+  \foreach \x in {-1.8,-0.6,0.6,1.8} { \fill (\x,-0.3) circle (2pt); }
+\end{tikzpicture}

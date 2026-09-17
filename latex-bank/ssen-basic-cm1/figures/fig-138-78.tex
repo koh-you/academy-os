@@ -1,0 +1,17 @@
+% 개념 55 138-78~82 그룹 공통 그림(본책 138쪽) — 아래로 볼록한 y=f(x)(x절편 −1, 2)와 위로 볼록한 y=g(x)(x절편 −1, 4)가 x=−1, x=3 에서 만나는 그림. 스캔 그림을 TikZ 로 다시 그림. 라벨은 원문(−1, O, 2, 3, 4)만.
+\begin{tikzpicture}[scale=0.5, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3,0) -- (5.8,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.6) -- (0,4.8) node[left] {$y$};
+  \node[below right, font=\small] at (0,0) {$\mathrm{O}$};
+  % f(x)=0.4(x+1)(x-2), g(x)=-0.4(x+1)(x-4) : 교점 (-1,0), (3,1.6)
+  \draw[line width=0.6pt, domain=-2.5:4.15, samples=70] plot (\x, {0.4*(\x+1)*(\x-2)});
+  \draw[line width=0.6pt, domain=-2.3:5.2, samples=70] plot (\x, {-0.4*(\x+1)*(\x-4)});
+  \draw[dashed, line width=0.4pt] (3,0) -- (3,1.6);
+  \fill (-1,0) circle (2pt); \fill (3,1.6) circle (2pt);
+  \node[font=\small] at (-1.75,-0.38) {$-1$};
+  \node[above left=0pt and -2pt, font=\small] at (2,0) {$2$};
+  \node[below, font=\small] at (3,0) {$3$};
+  \node[above right=-1pt and -2pt, font=\small] at (4,0) {$4$};
+  \node[right, font=\small] at (4.25,4.3) {$y=f(x)$};
+  \node[right, font=\small] at (4.3,-3.25) {$y=g(x)$};
+\end{tikzpicture}
