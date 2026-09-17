@@ -67,12 +67,13 @@ test("exam prep rows consolidate review and management actions into the detail m
   await page.getByRole("button", { name: "정산 미리보기반" }).click();
 
   const tableHeader = page.locator(".examPrepHead");
-  await expect(tableHeader).toContainText("상세");
+  // 2026-09-17 · 상세 관리 버튼과 상세 열을 없애고 행 전체를 눌러 모달을 연다.
+  await expect(tableHeader).not.toContainText("상세");
   await expect(tableHeader).not.toContainText("시험 후 총평");
   await expect(tableHeader).not.toContainText("관리");
   const safeSchoolRow = page.locator(".examPrepRow").filter({ hasText: "안전고" });
-  await expect(safeSchoolRow.getByRole("button", { name: /상세 관리/ })).toHaveCount(1);
-  await safeSchoolRow.getByRole("button", { name: /상세 관리/ }).click();
+  await expect(safeSchoolRow).toHaveAttribute("role", "button");
+  await safeSchoolRow.click();
 
   const detailDialog = page.getByRole("dialog", { name: "안전고 시험정보 수정" });
   await expect(detailDialog.getByRole("button", { name: "시험 후 총평 작성" })).toBeVisible();
@@ -96,7 +97,7 @@ test("exam prep date inputs save once on explicit action and show the full compl
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /시험관리/ }).click();
   await page.getByRole("button", { name: "정산 미리보기반" }).click();
   const safeSchoolRow = page.locator(".examPrepRow").filter({ hasText: "안전고" });
-  await safeSchoolRow.getByRole("button", { name: /상세 관리/ }).click();
+  await safeSchoolRow.click();
 
   const detailDialog = page.getByRole("dialog", { name: "안전고 시험정보 수정" });
   const startDateInput = detailDialog.getByLabel("시험기간 시작일");
@@ -146,7 +147,7 @@ test("exam prep closes an unsaved draft without changing the server source", asy
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /시험관리/ }).click();
   await page.getByRole("button", { name: "정산 미리보기반" }).click();
   const safeSchoolRow = page.locator(".examPrepRow").filter({ hasText: "안전고" });
-  await safeSchoolRow.getByRole("button", { name: /상세 관리/ }).click();
+  await safeSchoolRow.click();
   const detailDialog = page.getByRole("dialog", { name: "안전고 시험정보 수정" });
   const scopeInput = detailDialog.getByLabel("시험 범위");
   await page.waitForLoadState("networkidle");
@@ -160,7 +161,7 @@ test("exam prep closes an unsaved draft without changing the server source", asy
   const persistedResult = await persistedResponse.json();
   expect(persistedResult.examPrepRows.find((row) => row.examPrepId === "safe-exam-prep-row")?.scope ?? "").toBe(initialScope);
 
-  await safeSchoolRow.getByRole("button", { name: /상세 관리/ }).click();
+  await safeSchoolRow.click();
   await expect(page.getByRole("dialog", { name: "안전고 시험정보 수정" }).getByLabel("시험 범위")).toHaveValue(initialScope);
   expect(pageErrors).toEqual([]);
 });
@@ -185,7 +186,7 @@ test("exam prep rapid edits stay local until one explicit verified save", async 
   await navigation.getByRole("button", { name: /시험관리/ }).click();
   await page.getByRole("button", { name: "정산 미리보기반" }).click();
   const safeSchoolRow = page.locator(".examPrepRow").filter({ hasText: "안전고" });
-  await safeSchoolRow.getByRole("button", { name: /상세 관리/ }).click();
+  await safeSchoolRow.click();
   const detailDialog = page.getByRole("dialog", { name: "안전고 시험정보 수정" });
   const scopeInput = detailDialog.getByLabel("시험 범위");
   await expect(scopeInput).toBeVisible();
@@ -237,7 +238,7 @@ test("exam prep CAS conflict keeps the current screen input and shows failure", 
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /시험관리/ }).click();
   await page.getByRole("button", { name: "정산 미리보기반" }).click();
   const safeSchoolRow = page.locator(".examPrepRow").filter({ hasText: "안전고" });
-  await safeSchoolRow.getByRole("button", { name: /상세 관리/ }).click();
+  await safeSchoolRow.click();
   const detailDialog = page.getByRole("dialog", { name: "안전고 시험정보 수정" });
   const scopeInput = detailDialog.getByLabel("시험 범위");
   await page.waitForLoadState("networkidle");
@@ -257,7 +258,7 @@ test("exam prep exclusion survives reread and can be restored without deleting t
   await page.getByRole("button", { name: "정산 미리보기반" }).click();
 
   let safeSchoolRow = page.locator(".examPrepRow").filter({ hasText: "안전고" });
-  await safeSchoolRow.getByRole("button", { name: /상세 관리/ }).click();
+  await safeSchoolRow.click();
   let detailDialog = page.getByRole("dialog", { name: "안전고 시험정보 수정" });
   const scopeActions = detailDialog.getByRole("group", { name: "이 시험정보에 대한 작업" });
   const mainActions = detailDialog.getByRole("group", { name: "모달 처리" });
@@ -287,7 +288,7 @@ test("exam prep exclusion survives reread and can be restored without deleting t
   await page.getByRole("button", { name: "내신 제외 보기 (1)" }).click();
   safeSchoolRow = page.locator(".examPrepRow.excluded").filter({ hasText: "안전고" });
   await expect(safeSchoolRow).toBeVisible();
-  await safeSchoolRow.getByRole("button", { name: /상세 관리/ }).click();
+  await safeSchoolRow.click();
   detailDialog = page.getByRole("dialog", { name: "안전고 시험정보 수정" });
   await detailDialog.getByRole("button", { name: "시험관리 다시 포함" }).click();
   await detailDialog.getByRole("button", { name: "변경 저장" }).click();
