@@ -1,0 +1,13 @@
+{
+  "range": "0317~0395",
+  "checked": 79,
+  "ok": 73,
+  "findings": [
+    { "id": "0321", "severity": "yellow", "where": "layout", "note": "단서 「(단, z̄는 z의 켤레복소수이다.)」가 z̄ 뒤에서 줄바꿈되어 「z̄ / 는」으로 갈라짐" },
+    { "id": "0343", "severity": "yellow", "where": "layout", "note": "두 번째 괄호의 지수 2051이 출처 배지(RPM 공통수학1 0343번)와 겹침" },
+    { "id": "0346", "severity": "yellow", "where": "layout", "note": "본문 끝 「의 값 / 은?」이 어색하게 줄바꿈됨" },
+    { "id": "0360", "severity": "yellow", "where": "layout", "note": "둘째 줄 분수 1/z + 1/w 의 분자가 첫째 줄(z, w에 대하여) 글자와 겹치고 분모가 셋째 줄과 닿음 — 행간 부족" },
+    { "id": "0375", "severity": "yellow", "where": "layout", "note": "두 번째 괄호의 지수 n이 출처 배지(RPM 공통수학1 0375번)와 겹침" },
+    { "id": "0385", "severity": "yellow", "where": "subs", "note": "원본은 (1)(2)/(3)(4) 2열 배치인데 조판본은 4행 세로 배치" }
+  ]
+}

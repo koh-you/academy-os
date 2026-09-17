@@ -271,6 +271,38 @@ export function isInk(data, offset) {
   return (data[offset] + data[offset + 1] + data[offset + 2]) / 3 < 200;
 }
 
+/** 상자 안 색 잉크(무채색 아님)의 세로 덩어리 목록(pt · { y0, h, density }). 한 행에 색 픽셀이 2개 이상이면 색 행이고, 1.5pt 안 끊김은 잇는다. */
+export function coloredRuns(imageData, width, scale, box) {
+  const x0 = Math.max(0, Math.floor(box.x0 * scale));
+  const x1 = Math.ceil(box.x1 * scale);
+  const y0 = Math.max(0, Math.floor(box.y0 * scale));
+  const y1 = Math.ceil(box.y1 * scale);
+  const gap = Math.round(1.5 * scale);
+  const runs = [];
+  let start = -1;
+  let last = -1;
+  let filled = 0;
+  for (let y = y0; y <= y1; y += 1) {
+    let colored = 0;
+    if (y < y1) {
+      const rowOffset = y * width * 4;
+      for (let x = x0; x < x1; x += 1) if (isColored(imageData, rowOffset + x * 4)) colored += 1;
+    }
+    if (colored >= 2) {
+      if (start === -1) { start = y; filled = 0; }
+      last = y;
+      filled += colored;
+      continue;
+    }
+    if (start !== -1 && y - last > gap) {
+      // density: 덩어리 상자 안 색 픽셀 비율 — 색 글자(숫자)는 0.2~0.5, 색 바탕 라벨(「풀이」「전략」)은 0.6 이상.
+      runs.push({ y0: start / scale, h: (last + 1 - start) / scale, density: filled / ((last + 1 - start) * (x1 - x0)) });
+      start = -1;
+    }
+  }
+  return runs;
+}
+
 /**
  * 코드 줄 띠 안에서 가장 왼쪽 색 덩어리(번호 배지 「01」·「유제 3」)의 왼쪽 x(pt).
  * 띠 위·아래로 이어지는 세로 색선(예제 풀이 막대·상자 테두리)은 배지가 아니므로 건너뛴다.

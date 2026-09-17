@@ -1,0 +1,26 @@
+{
+  "range": "0396~0474",
+  "checked": 79,
+  "ok": 62,
+  "red": 0,
+  "yellow": 17,
+  "findings": [
+    { "id": "0407", "severity": "yellow", "where": "layout", "note": "그림이 작은데 본문이 그림 아래까지 좁은 폭으로 계속 흘러 12줄로 늘어짐(원문은 그림 아래부터 전체 폭)" },
+    { "id": "0412", "severity": "yellow", "where": "layout", "note": "첫 줄 끝 '= 0' 뒤 조사 '이'가 다음 줄 첫머리로 떨어짐" },
+    { "id": "0414", "severity": "yellow", "where": "layout", "note": "'(단, a' 에서 줄이 끊겨 '는 실수이다.)' 가 다음 줄로 넘어감" },
+    { "id": "0421", "severity": "yellow", "where": "layout", "note": "출처 배지가 첫 줄 분수 β/α 분자와 닿아 겹쳐 보임" },
+    { "id": "0438", "severity": "yellow", "where": "layout", "note": "출처 배지가 첫 줄 분수 1/β 분자와 닿아 겹쳐 보임" },
+    { "id": "0442", "severity": "yellow", "where": "layout", "note": "출처 배지가 첫 줄 분수 1/m 분자와 닿아 겹쳐 보임" },
+    { "id": "0443", "severity": "yellow", "where": "layout", "note": "둘째 줄 분수 1/(1−i) 가 첫째·셋째 줄과 붙어 행간이 좁게 겹쳐 보임" },
+    { "id": "0447", "severity": "yellow", "where": "layout", "note": "첫 줄 'ax^2 + bx + c = 0에서 근의 공식을' 이 양끝맞춤으로 간격이 과도하게 벌어지고, 둘째 줄 근의 공식 분수가 위아래 줄과 붙어 보임" },
+    { "id": "0451", "severity": "yellow", "where": "choices", "note": "①~⑤ 2열 보기 행간이 원문보다 지나치게 넓음" },
+    { "id": "0452", "severity": "yellow", "where": "layout", "note": "둘째 줄 분수 (p±√q i)/2 가 위아래 줄과 붙어 보이고, '(단, a' 에서 줄이 끊겨 '는 상수이다.)' 가 다음 줄로 넘어감" },
+    { "id": "0456", "severity": "yellow", "where": "layout", "note": "분수 1/4 이 줄 끝에 걸리고 조사 '이 되었다' 가 다음 줄로 떨어짐" },
+    { "id": "0460", "severity": "yellow", "where": "layout", "note": "출처 배지가 첫 줄 √a 분자와 닿아 겹쳐 보이고, '고르시' / '오.' 로 한 글자만 셋째 줄에 남음" },
+    { "id": "0463", "severity": "yellow", "where": "layout", "note": "둘째 줄 분수식이 첫째·셋째 줄과 붙어 행간이 좁게 겹쳐 보임" },
+    { "id": "0465", "severity": "yellow", "where": "layout", "note": "'다른 근의 2' / '배일 때' 로 숫자 2 와 '배' 사이에서 줄이 끊김" },
+    { "id": "0466", "severity": "yellow", "where": "layout", "note": "'구하시' / '오.' 로 한 글자만 셋째 줄에 남음" },
+    { "id": "0467", "severity": "yellow", "where": "layout", "note": "출처 배지가 첫 줄 분수 1/α, 1/β 와 닿아 겹쳐 보임" },
+    { "id": "0469", "severity": "yellow", "where": "passage", "note": "보기 ㄷ 첫 줄이 양끝맞춤으로 단어 간격이 과도하게 벌어짐" }
+  ]
+}

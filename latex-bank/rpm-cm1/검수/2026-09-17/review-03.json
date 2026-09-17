@@ -1,0 +1,12 @@
+{
+  "range": "0159~0237",
+  "checked": 79,
+  "ok": 76,
+  "red": 0,
+  "yellow": 3,
+  "findings": [
+    { "id": "0162", "severity": "yellow", "where": "layout", "note": "첫 줄 수식 f(x) = x^3 − ax^2 + x − 3 이 양끝맞춤 때문에 글자 간격이 넓게 벌어짐(경미)" },
+    { "id": "0229", "severity": "yellow", "where": "layout", "note": "첫 줄 (x − 1)(x − 3)(x + 2)(x + 4) + 24 가 양끝맞춤으로 단어 간격이 지나치게 벌어져 어색함" },
+    { "id": "0233", "severity": "yellow", "where": "layout", "note": "첫 줄 「다항식 x^4 − 5x^2 + 4 를 인수분해하면」이 양끝맞춤으로 글자 간격이 심하게 벌어짐(한글 글자 사이까지 벌어짐)" }
+  ]
+}

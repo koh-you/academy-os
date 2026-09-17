@@ -102,6 +102,14 @@ function figurePlacement(item) {
   return size && size.width_pt > SIDE_FIGURE_MAX_PT ? "below" : "side";
 }
 
+/** 출처 배지를 첫 줄 위로 더 올리는 높이(mm). 첫 줄(앞 120자)에 cases·pmatrix 가 있으면 5.5, 분수·근호·큰 괄호가 있으면 3.5, 아니면 1.5. */
+function badgeRaiseMm(item) {
+  const head = String(item.body ?? "").slice(0, 120);
+  if (/\\begin\{(cases|pmatrix)\}/.test(head)) return 5.5;
+  if (/\\dfrac|\\sqrt|\\left\(/.test(head)) return 3.5;
+  return 1.5;
+}
+
 /** 문항 하나의 본문 LaTeX(번호·출처 배지 포함 · dmpnum 두 번째 인자). */
 function renderItemBody(id, rawItem, group, bank) {
   // 전사본의 별도 줄 수식(\centerline)은 좁은 낱장 폭에서 넘치므로 폭에 맞춰 줄이는 \dispeq 로 바꾼다.
@@ -110,8 +118,9 @@ function renderItemBody(id, rawItem, group, bank) {
   const badgeText = bank.id_style === "number"
     ? `${bank.book} ${id}번${item.page ? ` · ${item.page}쪽` : ""}`
     : `${bank.book} ${id.split("-")[0]}쪽 ${id.split("-")[1]}번`;
-  // 배지는 sty 가 첫 줄 위 5mm 에 띄우는데 첫 줄에 분수·cases 가 오면 닿는다 — 1.5mm 더 올린다(sty 수정 없이).
-  const badge = `\\smash{\\raisebox{1.5mm}{\\dmkichul{${badgeText}${item.tag ? ` · ${item.tag}` : ""}}}}`;
+  // 배지는 sty 가 첫 줄 위 5mm 에 띄우는데 첫 줄에 분수·cases 가 오면 닿는다 — 첫 줄 키에 따라 더 올린다(sty 수정 없이).
+  // 올린 만큼 문항 앞 간격도 벌려(book.tex 쪽) 앞 문항과 겹치지 않게 한다.
+  const badge = `\\smash{\\raisebox{${badgeRaiseMm(item)}mm}{\\dmkichul{${badgeText}${item.tag ? ` · ${item.tag}` : ""}}}}`;
   const parts = [badge];
   if (item.figure && figurePlacement(item) === "side") {
     // 원문처럼 「오른쪽 그림」이 본문 오른쪽에 오도록 본문 0.58 · 그림 0.4 폭으로 나란히 둔다.
@@ -238,7 +247,10 @@ async function main() {
       if (group.figure) lines.push(`\\begin{center}${renderFigure(group.figure)}\\end{center}`);
       // 문항 사이 최소 4mm(출처 배지가 위 문항 그림에 닿지 않게). dmpnum 의 fill 은 그 위에 더해진다.
       // 문항 번호는 책에 찍힌 번호(id 의 뒤 두 자리 · 쪽마다 다시 시작)와 같게 카운터를 맞춘다.
-      for (const id of group.items) lines.push(`\\setcounter{dmproblemcount}{${bookNumber(id) - 1}}\\dmpnum{${id}}{\\input{items/${id}}}\\vspace{4mm}`);
+      for (const id of group.items) {
+        const extra = badgeRaiseMm(bank.items[id]) - 1.5;
+        lines.push(`${extra > 0 ? `\\vspace{${extra}mm}` : ""}\\setcounter{dmproblemcount}{${bookNumber(id) - 1}}\\dmpnum{${id}}{\\input{items/${id}}}\\vspace{4mm}`);
+      }
     }
   }
   // 답

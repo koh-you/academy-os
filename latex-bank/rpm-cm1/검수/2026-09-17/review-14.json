@@ -1,0 +1,16 @@
+{
+  "range": "1028~1106",
+  "checked": 79,
+  "ok": 72,
+  "red": 0,
+  "yellow": 7,
+  "findings": [
+    { "id": "1052", "severity": "yellow", "where": "layout", "note": "본문이 두 줄뿐이라 보기(①~⑤)가 그림 아래로 밀려 본문과 보기 사이에 큰 빈 공간이 생김. 내용은 일치" },
+    { "id": "1054", "severity": "yellow", "where": "body", "note": "「구하시오.」의 「오.」 한 글자만 다음 줄로 넘어감(고아 줄). 내용은 일치" },
+    { "id": "1097", "severity": "yellow", "where": "layout", "note": "3×2 행렬 높이 때문에 번호 「1097.」만 첫 줄에 있고 본문(행렬 … 다음을 구하시오)이 다음 줄에서 시작됨. 내용·소문항 3개는 일치" },
+    { "id": "1098", "severity": "yellow", "where": "layout", "note": "출처 배지(RPM 공통수학1 1098번)가 우변 행렬의 오른쪽 괄호와 겹침. 내용은 일치" },
+    { "id": "1103", "severity": "yellow", "where": "layout", "note": "출처 배지가 우변 2×3 행렬의 오른쪽 괄호 상단과 겹침. 내용은 일치" },
+    { "id": "1104", "severity": "yellow", "where": "passage", "note": "공통 지시문 「…다음을 구하시오.」의 「오.」만 다음 줄로 넘어감(고아 줄). 행렬 A, B 값은 일치" },
+    { "id": "1105", "severity": "yellow", "where": "passage", "note": "1104 와 같은 공통 지시문 「오.」 고아 줄. 내용은 일치" }
+  ]
+}

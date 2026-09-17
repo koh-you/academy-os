@@ -1,0 +1,9 @@
+{ "range": "0870~0948", "checked": 79, "ok": 73,
+  "findings": [
+    { "id": "0875", "severity": "yellow", "where": "layout", "note": "출처 배지(RPM 공통수학1 0875번)가 연립부등식 첫 줄 x²−7x+10<0 의 윗부분과 겹침 — 배지를 cases 위로 띄우거나 본문을 한 줄 내릴 것" },
+    { "id": "0895", "severity": "yellow", "where": "layout", "note": "출처 배지가 연립부등식 첫 줄 |x+2|≤a 와 겹침" },
+    { "id": "0896", "severity": "yellow", "where": "layout", "note": "출처 배지가 연립부등식 첫 줄 x²+ax+b≥0 의 오른쪽 끝과 겹침" },
+    { "id": "0898", "severity": "yellow", "where": "layout", "note": "그림이 작고 본문이 그림 폭 기준으로 좁게 감싸져 그림 아래까지 짧은 줄로 이어짐(총 13줄) — 그림 폭·wrapfigure 줄 수 조정" },
+    { "id": "0901", "severity": "yellow", "where": "layout", "note": "출처 배지가 연립부등식 첫 줄 |x−k|≤5 와 겹침" },
+    { "id": "0906", "severity": "yellow", "where": "layout", "note": "출처 배지가 연립부등식 첫 줄 x²−6x+8>0 의 오른쪽 끝과 겹침" }
+  ] }

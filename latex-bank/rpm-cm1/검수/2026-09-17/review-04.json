@@ -1,0 +1,14 @@
+{
+  "range": "0238~0316",
+  "checked": 79,
+  "ok": 74,
+  "red": 0,
+  "yellow": 5,
+  "findings": [
+    { "id": "0256", "severity": "yellow", "where": "layout", "note": "첫 줄 'a + b = 3, b + c = 2, c + a = 4 일 때,' 가 양끝맞춤으로 단어·기호 간격이 과도하게 벌어짐" },
+    { "id": "0258", "severity": "yellow", "where": "layout", "note": "출처 배지가 분수 분자 99^3 × 101^3 와 닿아 겹쳐 보임(본문이 한 줄이라 배지 아래 여백 없음)" },
+    { "id": "0284", "severity": "yellow", "where": "subs", "note": "원문은 (1) 실수 (2) 허수 (3) 순허수 가 가로 3열인데 조판본은 세로 3줄" },
+    { "id": "0309", "severity": "yellow", "where": "choices", "note": "①~⑤ 세로 보기 행간이 원문보다 지나치게 넓음" },
+    { "id": "0314", "severity": "yellow", "where": "layout", "note": "출처 배지가 z_2 분수 분자 3+√2 i 와 닿아 겹쳐 보임" }
+  ]
+}
