@@ -2,11 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
-import { getAggregateSaveState, InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
+import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { ListCard, ListCardActions } from "../../shared/components/ListCard.jsx";
-import { OverflowMenu } from "../../shared/components/OverflowMenu.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
-import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 import { buildStudentHandoverPdfModel, openStudentHandoverPdf } from "./studentHandoverPdf.js";
 import { StudentLifecycleOverlays } from "./StudentLifecycleOverlays.jsx";
@@ -89,9 +87,7 @@ export function StudentManager({
   const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("template_mwf_7_10");
   const [dirtyStudentIds, setDirtyStudentIds] = useState(() => new Set());
   const [originalClassTemplateIds, setOriginalClassTemplateIds] = useState({});
-  const [originalStudentFields, setOriginalStudentFields] = useState({});
   const [rosterEffectiveModes, setRosterEffectiveModes] = useState({});
-  const [studentSaveStates, setStudentSaveStates] = useState({});
   const studentSaveRevisionsRef = useRef({});
   const [studentRestoreStates, setStudentRestoreStates] = useState({});
   const [studentRestoreNotice, setStudentRestoreNotice] = useState(null);
@@ -194,20 +190,13 @@ export function StudentManager({
         [studentId]: currentStudent?.defaultClassTemplateId ?? ""
       }));
     }
-    // 되돌리기용 원본: 한 필드를 처음 건드릴 때의 값만 담는다(이후 편집은 덮어쓰지 않는다).
-    setOriginalStudentFields((current) => {
-      if (Object.prototype.hasOwnProperty.call(current[studentId] ?? {}, field)) return current;
-      return { ...current, [studentId]: { ...current[studentId], [field]: currentStudent?.[field] ?? "" } };
-    });
     onUpdateStudent(studentId, field, value, { persist: false });
     studentSaveRevisionsRef.current[studentId] = (studentSaveRevisionsRef.current[studentId] ?? 0) + 1;
     setDirtyStudentIds((current) => new Set(current).add(studentId));
-    setStudentSaveStates((current) => ({ ...current, [studentId]: "dirty" }));
   }
 
   async function saveStudentRow(studentId) {
     const saveRevision = studentSaveRevisionsRef.current[studentId] ?? 0;
-    setStudentSaveStates((current) => ({ ...current, [studentId]: "saving" }));
     try {
       const saveOptions = Object.prototype.hasOwnProperty.call(originalClassTemplateIds, studentId)
         ? {
@@ -217,7 +206,6 @@ export function StudentManager({
         : {};
       await onSaveStudent(studentId, saveOptions);
       if ((studentSaveRevisionsRef.current[studentId] ?? 0) !== saveRevision) {
-        setStudentSaveStates((current) => ({ ...current, [studentId]: "dirty" }));
         return;
       }
       setDirtyStudentIds((current) => {
@@ -235,34 +223,8 @@ export function StudentManager({
         delete next[studentId];
         return next;
       });
-      setOriginalStudentFields((current) => {
-        const next = { ...current };
-        delete next[studentId];
-        return next;
-      });
-      setStudentSaveStates((current) => ({ ...current, [studentId]: "saved" }));
     } catch (error) {
       console.error(error);
-      setStudentSaveStates((current) => ({ ...current, [studentId]: "failed" }));
-    }
-  }
-
-  async function saveDirtyVisibleStudents() {
-    const dirtyIds = visibleStudents
-      .filter((student) => dirtyStudentIds.has(student.studentId))
-      .map((student) => student.studentId);
-    for (const studentId of dirtyIds) await saveStudentRow(studentId);
-  }
-
-  function revertDirtyVisibleStudents() {
-    for (const student of visibleStudents) {
-      const originalFields = originalStudentFields[student.studentId];
-      if (!originalFields) continue;
-      for (const [field, value] of Object.entries(originalFields)) {
-        onUpdateStudent(student.studentId, field, value, { persist: false });
-      }
-      studentSaveRevisionsRef.current[student.studentId] = (studentSaveRevisionsRef.current[student.studentId] ?? 0) + 1;
-      forgetStudentDraft(student.studentId);
     }
   }
 
@@ -272,7 +234,7 @@ export function StudentManager({
       next.delete(studentId);
       return next;
     });
-    for (const clearDraftMap of [setOriginalClassTemplateIds, setRosterEffectiveModes, setOriginalStudentFields, setStudentSaveStates]) {
+    for (const clearDraftMap of [setOriginalClassTemplateIds, setRosterEffectiveModes]) {
       clearDraftMap((current) => {
         const next = { ...current };
         delete next[studentId];
@@ -542,10 +504,6 @@ export function StudentManager({
     }
   }
 
-  const dirtyVisibleStudentCount = visibleStudents.filter((student) => dirtyStudentIds.has(student.studentId)).length;
-  const visibleStudentsSaveState = getAggregateSaveState(visibleStudents.map((student) => studentSaveStates[student.studentId]));
-  const isSavingVisibleStudents = visibleStudentsSaveState === "saving" || visibleStudentsSaveState === "verifying";
-
   return (
     <section className="panel fullPanel">
       <PageHeader
@@ -688,127 +646,39 @@ export function StudentManager({
             <span>학생전화번호</span>
             <span>학부모전화번호</span>
             <span>출생연도</span>
-            <span>작업</span>
           </div>
-          {visibleStudents.map((student, index) => {
-            const saveState = studentSaveStates[student.studentId];
-            const isDirty = dirtyStudentIds.has(student.studentId);
-            const isSaving = saveState === "saving";
-            return (
-              <div className={isDirty ? "studentListRow dirtyStudentRow" : "studentListRow"} key={student.studentId}>
-                <span>{index + 1}</span>
-                <button
-                  className={selectedStudentId === student.studentId ? "studentNameButton active" : "studentNameButton"}
-                  onClick={() => setSelectedStudentId(student.studentId)}
-                  type="button"
-                >
-                  <span className="studentInitial">{student.name?.[0] ?? "학"}</span>
-                  <strong>{student.name}</strong>
-                </button>
-                <div className="studentClassAssignmentCell">
-                  <select
-                    aria-label={`${student.name} 반`}
-                    className="studentClassSelect"
-                    value={student.defaultClassTemplateId ?? ""}
-                    onChange={(event) => {
-                      updateStudentField(student.studentId, "defaultClassTemplateId", event.target.value);
-                      if (!Object.prototype.hasOwnProperty.call(rosterEffectiveModes, student.studentId)) {
-                        const hasTodayLessonRow = hasStudentLessonRowOnDate({
-                          date: today,
-                          lessons,
-                          records,
-                          studentId: student.studentId
-                        });
-                        setRosterEffectiveModes((current) => ({
-                          ...current,
-                          [student.studentId]: hasTodayLessonRow ? "tomorrow" : "today"
-                        }));
-                      }
-                    }}
-                  >
-                    <option value="">미배정</option>
-                    {templates.map((template) => (
-                      <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>
-                    ))}
-                  </select>
-                  {Object.prototype.hasOwnProperty.call(originalClassTemplateIds, student.studentId) && hasStudentLessonRowOnDate({
-                    date: today,
-                    lessons,
-                    records,
-                    studentId: student.studentId
-                  }) ? (
-                    <select
-                      aria-label={`${student.name} 반 변경 적용 시점`}
-                      className="studentRosterEffectiveSelect"
-                      disabled={isSaving}
-                      onChange={(event) => setRosterEffectiveModes((current) => ({
-                        ...current,
-                        [student.studentId]: event.target.value
-                      }))}
-                      value={rosterEffectiveModes[student.studentId] ?? "tomorrow"}
-                    >
-                      <option value="tomorrow">내일부터 반 이동</option>
-                      <option value="today">오늘부터 반 이동</option>
-                    </select>
-                  ) : null}
-                </div>
-                <input
-                  aria-label={`${student.name} 아이디`}
-                  className="editableTextCell monoCell"
-                  value={student.loginId ?? ""}
-                  onChange={(event) => updateStudentField(student.studentId, "loginId", event.target.value)}
-                />
-                <input
-                  aria-label={`${student.name} PIN`}
-                  className="editableTextCell monoCell"
-                  value={student.pin ?? ""}
-                  onChange={(event) => updateStudentField(student.studentId, "pin", event.target.value)}
-                />
-                <input
-                  aria-label={`${student.name} 학년`}
-                  className="editableTextCell gradeBadgeInput"
-                  value={student.grade || ""}
-                  onChange={(event) => updateStudentField(student.studentId, "grade", event.target.value)}
-                />
-                <input
-                  aria-label={`${student.name} 학교`}
-                  className="editableTextCell"
-                  value={student.schoolName || ""}
-                  onChange={(event) => updateStudentField(student.studentId, "schoolName", event.target.value)}
-                />
-                <input
-                  aria-label={`${student.name} 학생 전화번호`}
-                  className="editableTextCell monoCell"
-                  inputMode="tel"
-                  value={student.studentPhone || ""}
-                  onChange={(event) => updateStudentField(student.studentId, "studentPhone", event.target.value)}
-                />
-                <input
-                  aria-label={`${student.name} 학부모 전화번호`}
-                  className="editableTextCell monoCell"
-                  inputMode="tel"
-                  value={student.parentPhone || ""}
-                  onChange={(event) => updateStudentField(student.studentId, "parentPhone", event.target.value)}
-                />
-                <select
-                  aria-label={`${student.name} 출생연도`}
-                  value={student.birthYear ?? ""}
-                  onChange={(event) => updateStudentField(student.studentId, "birthYear", event.target.value)}
-                >
-                  <option value="">-</option>
-                  {["2007", "2008", "2009", "2010", "2011", "2012", "2013"].map((year) => (
-                    <option key={year} value={year}>{year}년</option>
-                  ))}
-                </select>
-                <OverflowMenu
-                  items={[
-                    { key: "withdraw", label: "퇴원 처리", onSelect: () => openWithdrawStudentModal(student), tone: "danger" }
-                  ]}
-                  label={`${student.name} 추가 작업`}
-                />
-              </div>
-            );
-          })}
+          {visibleStudents.map((student, index) => (
+            // 행 전체가 학생 정보 수정 모달을 여는 버튼이다. 목록 칸은 보기 전용이고,
+            // 수정과 퇴원은 모두 모달 안에서 한다(2026-09-17 요청).
+            <div
+              aria-label={`${student.name} 정보 수정`}
+              className="studentListRow studentListRowClickable"
+              key={student.studentId}
+              onClick={() => setSelectedStudentId(student.studentId)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  setSelectedStudentId(student.studentId);
+                }
+              }}
+              role="button"
+              tabIndex={0}
+            >
+              <span>{index + 1}</span>
+              <span className="studentNameCell">
+                <span className="studentInitial">{student.name?.[0] ?? "학"}</span>
+                <strong>{student.name}</strong>
+              </span>
+              <span>{getStudentClassName(student) || "미배정"}</span>
+              <span className="monoCell">{student.loginId || "-"}</span>
+              <span className="monoCell">{student.pin || "-"}</span>
+              <span>{student.grade || "-"}</span>
+              <span>{student.schoolName || "-"}</span>
+              <span className="monoCell">{student.studentPhone || "-"}</span>
+              <span className="monoCell">{student.parentPhone || "-"}</span>
+              <span>{student.birthYear ? `${student.birthYear}년` : "-"}</span>
+            </div>
+          ))}
           {visibleStudents.length === 0 ? (
             <EmptyState
               className="emptyState studentListEmpty"
@@ -817,30 +687,6 @@ export function StudentManager({
             />
           ) : null}
         </DataTableShell>
-        {dirtyVisibleStudentCount > 0 || visibleStudentsSaveState !== "idle" ? (
-          <StickySaveBar
-            label="학생 목록"
-            message={dirtyVisibleStudentCount > 0 ? `${dirtyVisibleStudentCount}개 행 변경됨` : ""}
-            saveState={visibleStudentsSaveState}
-          >
-            <button
-              className="softButton compact"
-              disabled={dirtyVisibleStudentCount === 0 || isSavingVisibleStudents}
-              onClick={revertDirtyVisibleStudents}
-              type="button"
-            >
-              되돌리기
-            </button>
-            <button
-              className="primaryButton compact"
-              disabled={dirtyVisibleStudentCount === 0 || isSavingVisibleStudents}
-              onClick={saveDirtyVisibleStudents}
-              type="button"
-            >
-              변경 저장
-            </button>
-          </StickySaveBar>
-        ) : null}
         </>
       )}
 
@@ -867,6 +713,11 @@ export function StudentManager({
             onSaveStudentProfile={onSaveStudentProfile}
             onSaveTeacherOperatingMemo={onSaveTeacherOperatingMemo}
             onSaveStudentConsultation={onSaveStudentConsultation}
+            onWithdraw={() => {
+              // 프로필을 먼저 닫아야 퇴원 확인 모달이 그 위에 겹치지 않는다.
+              setSelectedStudentId("");
+              openWithdrawStudentModal(selectedStudent);
+            }}
             scores={selectedScores}
             academyTestSaveState={academyTestSaveState}
             scoreRecordSaveState={scoreRecordSaveState}
@@ -879,6 +730,7 @@ export function StudentManager({
             teacherOperatingMemoSaveState={teacherOperatingMemoSaveStates[selectedStudent.studentId] ?? "idle"}
             studentProfileSaveState={studentProfileSaveStates[selectedStudent.studentId] ?? "idle"}
             student={selectedStudent}
+            templates={templates}
             today={today}
           />
         </StudentProfileErrorBoundary>

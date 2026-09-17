@@ -39,6 +39,9 @@ const studentScheduleDayOptions = [
 const studentProfileFields = [
   "schoolName",
   "grade",
+  // 반 이동이 목록 인라인 편집에서 이 모달로 들어왔다(2026-09-18). 이 목록이 draft 초기값과
+  // 변경 판정·저장 payload 를 한꺼번에 만들기 때문에 여기 없으면 반이 draft 에 실리지 않는다.
+  "defaultClassTemplateId",
   "textbook",
   "studentPhone",
   "parentPhone",
@@ -252,6 +255,7 @@ export function StudentProfileModal({
   onSaveScore,
   onSaveStudentProfile,
   onSaveTeacherOperatingMemo,
+  onWithdraw,
   onSaveStudentConsultation,
   records = [],
   scores,
@@ -259,6 +263,7 @@ export function StudentProfileModal({
   studentConsultationSaveState = "idle",
   studentProfileSaveState = "idle",
   student,
+  templates = [],
   today = "",
   teacherOperatingMemo = "",
   teacherOperatingMemoSaveState = "idle",
@@ -606,9 +611,13 @@ export function StudentProfileModal({
   const isProfileSaving = effectiveProfileSaveState === "saving";
   const profileScheduleRows = createStudentScheduleRows(profileDraft.scheduleOverride);
   const hasUnparsedScheduleText = Boolean(String(profileDraft.scheduleOverride ?? "").trim()) && profileScheduleRows.length === 0;
+  // 반 이동은 목록 인라인 편집을 없애면서 이 모달로 들어왔다(2026-09-18). 저장 경로는 이미
+  // defaultClassTemplateId 변경을 명단 재계산으로 처리하고 있어서 UI 만 붙이면 된다.
+  const hasClassTemplateChange =
+    String(student.defaultClassTemplateId ?? "") !== String(profileDraft.defaultClassTemplateId ?? "");
   const hasRosterScheduleChanges = forceRosterReconcile ||
     String(student.scheduleOverride ?? "") !== String(profileDraft.scheduleOverride ?? "") ||
-    String(student.defaultClassTemplateId ?? "") !== String(profileDraft.defaultClassTemplateId ?? "");
+    hasClassTemplateChange;
   const hasTodayLessonRow = hasStudentLessonRowOnDate({
     date: today,
     lessons,
@@ -681,14 +690,21 @@ export function StudentProfileModal({
                 </button>
               </>
             ) : (
-              <button
-                className="softButton"
-                onClick={() => {
-                  setRosterEffectiveMode(hasTodayLessonRow ? "tomorrow" : "today");
-                  setIsEditingProfile(true);
-                }}
-                type="button"
-              >수정</button>
+              <>
+                <button
+                  className="softButton"
+                  onClick={() => {
+                    setRosterEffectiveMode(hasTodayLessonRow ? "tomorrow" : "today");
+                    setIsEditingProfile(true);
+                  }}
+                  type="button"
+                >수정</button>
+                {/* 목록의 ⋯ 메뉴를 없애고 퇴원을 이 모달로 옮겼다(2026-09-17 요청). 드물고
+                    되돌리기 어려운 작업이라 톤을 구분하고, 확인 모달은 종전대로 거친다. */}
+                {onWithdraw ? (
+                  <button className="dangerSoftButton" onClick={onWithdraw} type="button">퇴원 처리</button>
+                ) : null}
+              </>
             )}
             </>
           )}
@@ -805,6 +821,41 @@ export function StudentProfileModal({
             <div className="studentProfileGrid">
               {renderProfileField("학교", "schoolName")}
               {renderProfileField("학년", "grade")}
+              <div>
+                <small>반</small>
+                {isEditingProfile ? (
+                  <>
+                    <select
+                      aria-label={`${student.name} 반`}
+                      className="profileEditInput"
+                      onChange={(event) => updateProfile("defaultClassTemplateId", event.target.value)}
+                      value={profileDraft.defaultClassTemplateId ?? ""}
+                    >
+                      <option value="">미배정</option>
+                      {templates.map((template) => (
+                        <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>
+                      ))}
+                    </select>
+                    {/* 반을 옮기면 미래 수업 명단이 따라 바뀐다. 오늘 수업 행·기록이 이미 있으면
+                        오늘치를 건드릴지 먼저 골라야 한다(예전 목록 인라인 편집과 같은 선택). */}
+                    {hasClassTemplateChange && hasTodayLessonRow ? (
+                      <label className="studentRosterEffectiveChoice">
+                        <strong>오늘 수업일지 명단도 옮길까요?</strong>
+                        <select
+                          aria-label={`${student.name} 반 변경 적용 시점`}
+                          onChange={(event) => setRosterEffectiveMode(event.target.value)}
+                          value={rosterEffectiveMode}
+                        >
+                          <option value="tomorrow">내일부터 반 이동</option>
+                          <option value="today">오늘부터 반 이동</option>
+                        </select>
+                      </label>
+                    ) : null}
+                  </>
+                ) : (
+                  <strong>{className || "미배정"}</strong>
+                )}
+              </div>
               {renderProfileField("교재", "textbook", "미입력")}
               {renderProfileField("학생 전화", "studentPhone", "미입력")}
               {renderProfileField("학부모 전화", "parentPhone", "미입력")}
