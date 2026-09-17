@@ -8284,13 +8284,17 @@ function getRegularLessonColor(lesson = {}) {
   return regularLessonClassColors[colorKey] ?? getFallbackRegularLessonColor(colorKey);
 }
 
+// 원장의 화목토 반 두 개는 토요일 시간이 달라서(DB 행은 시간이 하나뿐) 여기 규칙으로
+// 이름·요일·시간을 덮어쓴다. id 가 있는 반은 **id 로만** 맞춘다 — 이름 부분 일치까지
+// 허용했더니 협력 교사가 만든 "화목4-7,토11-14" 가 "화목 4-7 / 토 10-1반" 으로
+// 바뀌어 저장됐다(2026-09-17). 이름 추정은 id 없는 옛 수업 행에만 쓴다.
 function getClassTemplateScheduleRule(template = {}) {
   const classTemplateId = String(template.classTemplateId ?? template.classId ?? "").trim();
+  if (classTemplateId) return classTemplateScheduleRules[classTemplateId] ?? null;
   const compactName = String(template.name ?? template.className ?? "")
     .replace(/\s+/g, "")
     .replaceAll("/", "");
   if (
-    classTemplateId === "template_tt_sat_front" ||
     compactName.includes("화목토앞") ||
     compactName.includes("화목4-7") ||
     compactName.includes("토10-1")
@@ -8298,7 +8302,6 @@ function getClassTemplateScheduleRule(template = {}) {
     return classTemplateScheduleRules.template_tt_sat_front;
   }
   if (
-    classTemplateId === "template_tt_sat_back" ||
     compactName.includes("화목토뒷") ||
     compactName.includes("화목7-10") ||
     compactName.includes("토1-4")
