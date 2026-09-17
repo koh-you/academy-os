@@ -472,6 +472,12 @@ import { clearCacheOwner, resetCacheForAccount } from "../shared/utils/accountSc
 import { TeacherViewSwitcher } from "./TeacherViewSwitcher.jsx";
 import { safeIdPart } from "../shared/utils/id.js";
 import { getKoreaDateString } from "../shared/utils/koreaDate.js";
+import {
+  deriveClassTemplateScheduleSummary,
+  formatClassTemplateScheduleLabel,
+  getClassTemplateScheduleRules,
+  getClassTemplateTimesForDate
+} from "../shared/utils/classTemplateSchedule.js";
 import { applyStudentScheduleToLesson } from "../shared/utils/studentSchedule.js";
 // 쎈 유형 카탈로그(api/data/ssenTypeIndex.json 284 KB)는 여기서 import 하지 않는다.
 // 수업연구 화면에서만 쓰는 데이터라 lazy 청크(src/domains/tests/ssenTypeCatalog.js)에 둔다.
@@ -483,7 +489,6 @@ import {
   academyReminderPriorityOptions,
   academyReminderStatusLabels,
   academyReminderTypeOptions,
-  classTemplateScheduleRules,
   fallbackRegularLessonColors,
   legacySensitiveStorageKeys,
   lessonCalendarColors,
@@ -8284,58 +8289,18 @@ function getRegularLessonColor(lesson = {}) {
   return regularLessonClassColors[colorKey] ?? getFallbackRegularLessonColor(colorKey);
 }
 
-// 원장의 화목토 반 두 개는 토요일 시간이 달라서(DB 행은 시간이 하나뿐) 여기 규칙으로
-// 이름·요일·시간을 덮어쓴다. id 가 있는 반은 **id 로만** 맞춘다 — 이름 부분 일치까지
-// 허용했더니 협력 교사가 만든 "화목4-7,토11-14" 가 "화목 4-7 / 토 10-1반" 으로
-// 바뀌어 저장됐다(2026-09-17). 이름 추정은 id 없는 옛 수업 행에만 쓴다.
-function getClassTemplateScheduleRule(template = {}) {
-  const classTemplateId = String(template.classTemplateId ?? template.classId ?? "").trim();
-  if (classTemplateId) return classTemplateScheduleRules[classTemplateId] ?? null;
-  const compactName = String(template.name ?? template.className ?? "")
-    .replace(/\s+/g, "")
-    .replaceAll("/", "");
-  if (
-    compactName.includes("화목토앞") ||
-    compactName.includes("화목4-7") ||
-    compactName.includes("토10-1")
-  ) {
-    return classTemplateScheduleRules.template_tt_sat_front;
-  }
-  if (
-    compactName.includes("화목토뒷") ||
-    compactName.includes("화목7-10") ||
-    compactName.includes("토1-4")
-  ) {
-    return classTemplateScheduleRules.template_tt_sat_back;
-  }
-  return null;
-}
-
-function formatClassTemplateTimeLabel(template = {}) {
-  const startTime = normalizeTimeInput(template.startTime);
-  const endTime = normalizeTimeInput(template.endTime);
-  return startTime && endTime ? `${startTime}-${endTime}` : "";
-}
-
+// 반의 요일별 시간은 DB 의 scheduleRules 가 정한다(2026-09-17, shared/utils/classTemplateSchedule).
+// 예전에는 원장의 화목토 반 두 개만 코드 예외로 토요일 시간을 덮어썼다.
 function normalizeClassTemplateSchedule(template = {}) {
-  const rule = getClassTemplateScheduleRule(template);
-  if (!rule) {
-    return {
-      ...template,
-      startTime: normalizeTimeInput(template.startTime) || template.startTime || "",
-      endTime: normalizeTimeInput(template.endTime) || template.endTime || "",
-      timeLabel: template.timeLabel || formatClassTemplateTimeLabel(template)
-    };
-  }
+  const scheduleRules = getClassTemplateScheduleRules(template);
+  const summary = deriveClassTemplateScheduleSummary(scheduleRules);
   return {
     ...template,
-    days: Array.isArray(template.days) && template.days.length > 0 ? template.days : rule.days,
-    endTime: rule.endTime,
-    name: rule.name,
-    saturdayEndTime: rule.saturdayEndTime,
-    saturdayStartTime: rule.saturdayStartTime,
-    startTime: rule.startTime,
-    timeLabel: rule.timeLabel
+    days: Array.isArray(template.days) && template.days.length > 0 ? template.days : summary.days,
+    startTime: normalizeTimeInput(template.startTime) || summary.startTime || template.startTime || "",
+    endTime: normalizeTimeInput(template.endTime) || summary.endTime || template.endTime || "",
+    scheduleRules,
+    timeLabel: formatClassTemplateScheduleLabel(template) || template.timeLabel || ""
   };
 }
 
@@ -8407,13 +8372,10 @@ function normalizeLessonTemplateTimes(lessons = [], classTemplates = []) {
   const templateById = new Map(normalizeClassTemplates(classTemplates).map((template) => [template.classTemplateId, template]));
   return lessons.map((lesson) => {
     if (!lesson || lesson.lessonType !== "class") return lesson;
-    const template = templateById.get(lesson.classTemplateId) ?? normalizeClassTemplateSchedule({
-      classTemplateId: lesson.classTemplateId,
-      endTime: lesson.endTime,
-      name: lesson.className,
-      startTime: lesson.startTime
-    });
-    if (!getClassTemplateScheduleRule(template)) return lesson;
+    // 요일별 시간이 다른 반만 수업 시간을 반 시간표에 맞춘다(예전 화목토 예외와 같은 범위).
+    // 단일 시간 반은 손대지 않는다 — 수업마다 시간을 따로 고쳐 쓰는 경우가 있다.
+    const template = templateById.get(lesson.classTemplateId);
+    if (!template || getClassTemplateScheduleRules(template).length < 2) return lesson;
     const templateTimes = getTemplateLessonTimes(template, lesson.date);
     const sameStartTime = normalizeTimeInput(lesson.startTime) === templateTimes.startTime;
     const sameEndTime = normalizeTimeInput(lesson.endTime) === templateTimes.endTime;
@@ -8706,27 +8668,8 @@ function buildExamPostTargetsForStudent(student, examPrepRows = [], submissions 
     .sort((a, b) => String(a.submission?.submittedAt ? "1" : "0").localeCompare(String(b.submission?.submittedAt ? "1" : "0")) || b.examDate.localeCompare(a.examDate));
 }
 
-function getTemplateStartTime(template, date) {
-  const normalizedTemplate = normalizeClassTemplateSchedule(template);
-  const time = getDayKey(date) === "sat" && normalizedTemplate.saturdayStartTime
-    ? normalizedTemplate.saturdayStartTime
-    : normalizedTemplate.startTime;
-  return normalizeTimeInput(time) || time || "";
-}
-
-function getTemplateEndTime(template, date) {
-  const normalizedTemplate = normalizeClassTemplateSchedule(template);
-  const time = getDayKey(date) === "sat" && normalizedTemplate.saturdayEndTime
-    ? normalizedTemplate.saturdayEndTime
-    : normalizedTemplate.endTime;
-  return normalizeTimeInput(time) || time || "";
-}
-
 function getTemplateLessonTimes(template, date) {
-  return {
-    endTime: getTemplateEndTime(template, date),
-    startTime: getTemplateStartTime(template, date)
-  };
+  return getClassTemplateTimesForDate(template, date);
 }
 
 function calculateLateMinutes(lesson, now = new Date(), graceMinutes = 5) {

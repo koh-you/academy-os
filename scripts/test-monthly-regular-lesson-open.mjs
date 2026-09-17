@@ -3,13 +3,14 @@ import { buildMonthlyRegularLessonOpenPlan } from "../src/domains/lessons/monthl
 
 const templates = [
   { classTemplateId: "mwf", name: "월수금반", days: ["mon", "wed", "fri"], startTime: "19:00", endTime: "22:00" },
-  { classTemplateId: "tts", name: "화목토반", days: ["tue", "thu", "sat"], startTime: "16:00", endTime: "19:00", saturdayStartTime: "10:00", saturdayEndTime: "13:00" }
+  // 요일별 시간은 scheduleRules(2026-09-17). 옛 saturdayStartTime 은 더 이상 읽지 않는다.
+  { classTemplateId: "tts", name: "화목토반", days: ["tue", "thu", "sat"], startTime: "16:00", endTime: "19:00", scheduleRules: [{ days: ["tue", "thu"], startTime: "16:00", endTime: "19:00" }, { days: ["sat"], startTime: "10:00", endTime: "13:00" }] }
 ];
 const students = [{ studentId: "active", status: "active" }, { studentId: "withdrawn", status: "paused", withdrawnAt: "2026-07-27" }];
 const lessons = [
   { lessonId: "jul-mwf", lessonType: "class", classTemplateId: "mwf", className: "월수금반", date: "2026-07-31", dayOfWeek: "fri", startTime: "19:00", endTime: "22:00", studentIds: ["active", "withdrawn"] },
   { lessonId: "jul-tt", lessonType: "class", classTemplateId: "tts", className: "화목토반", date: "2026-07-30", dayOfWeek: "thu", startTime: "16:00", endTime: "19:00", studentIds: ["active"] },
-  { lessonId: "jul-sat", lessonType: "class", classTemplateId: "tts", className: "화목토반", date: "2026-07-25", dayOfWeek: "sat", startTime: "10:00", endTime: "13:00", studentIds: ["active"] },
+  { lessonId: "jul-sat", lessonType: "class", classTemplateId: "tts", className: "화목토반", date: "2026-07-25", dayOfWeek: "sat", startTime: "09:00", endTime: "12:00", studentIds: ["active"] },
   { lessonId: "aug-existing", lessonType: "class", classTemplateId: "mwf", className: "월수금반", date: "2026-08-03", dayOfWeek: "mon", startTime: "19:00", endTime: "22:00", studentIds: ["active"] }
 ];
 

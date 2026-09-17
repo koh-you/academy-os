@@ -14,10 +14,15 @@
 //   내 tenant 로 끌어올 수 있어 일부러 쓰지 않는다.
 
 import { fromClassTemplateRow, toClassTemplateRow } from "../persistence/coreIdentityRowMappers.js";
+import {
+  CLASS_DAY_KEYS,
+  deriveClassTemplateScheduleSummary,
+  normalizeClassTemplateScheduleRules,
+  validateClassTemplateScheduleRules
+} from "../utils/classTemplateSchedule.js";
 
-export const CLASS_TEMPLATE_DAY_KEYS = Object.freeze(["mon", "tue", "wed", "thu", "fri", "sat", "sun"]);
+export const CLASS_TEMPLATE_DAY_KEYS = CLASS_DAY_KEYS;
 
-const clockTimePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
 const colorPattern = /^#[0-9a-fA-F]{6}$/;
 
 function createRequestError(message, statusCode, code) {
@@ -39,16 +44,19 @@ export function createClassTemplateId(now = Date.now()) {
 export function normalizeClassTemplateInput(input = {}) {
   const name = String(input.name ?? "").trim();
   if (!name) throw createRequestError("반 이름을 입력해 주세요.", 400, "invalid_class_template");
-  const days = Array.from(new Set((Array.isArray(input.days) ? input.days : []).map((day) => String(day).toLowerCase())));
-  const unknownDay = days.find((day) => !CLASS_TEMPLATE_DAY_KEYS.includes(day));
-  if (unknownDay) throw createRequestError(`알 수 없는 요일입니다: ${unknownDay}`, 400, "invalid_class_template");
-  if (days.length === 0) throw createRequestError("수업 요일을 하나 이상 선택해 주세요.", 400, "invalid_class_template");
-  const startTime = String(input.startTime ?? "").trim();
-  const endTime = String(input.endTime ?? "").trim();
-  if (!clockTimePattern.test(startTime) || !clockTimePattern.test(endTime)) {
-    throw createRequestError("시작·종료 시간은 HH:MM 형식이어야 합니다.", 400, "invalid_class_template");
-  }
-  if (startTime >= endTime) throw createRequestError("종료 시간은 시작 시간보다 늦어야 합니다.", 400, "invalid_class_template");
+  // 요일 묶음별 시간표. 화면이 scheduleRules 를 안 보내면(옛 화면) days+startTime+endTime 을
+  // 규칙 하나로 본다. 저장되는 days/startTime/endTime 은 규칙에서 파생한다.
+  const rawRules = Array.isArray(input.scheduleRules) && input.scheduleRules.length > 0
+    ? input.scheduleRules
+    : [{ days: input.days, startTime: input.startTime, endTime: input.endTime }];
+  const ruleError = validateClassTemplateScheduleRules(rawRules.map((rule) => ({
+    days: Array.isArray(rule?.days) ? rule.days.map((day) => String(day).toLowerCase()) : [],
+    startTime: String(rule?.startTime ?? "").trim(),
+    endTime: String(rule?.endTime ?? "").trim()
+  })));
+  if (ruleError) throw createRequestError(ruleError, 400, "invalid_class_template");
+  const scheduleRules = normalizeClassTemplateScheduleRules(rawRules);
+  const summary = deriveClassTemplateScheduleSummary(scheduleRules);
   const color = String(input.color ?? "").trim() || "#c7d2fe";
   if (!colorPattern.test(color)) throw createRequestError("색상은 #RRGGBB 형식이어야 합니다.", 400, "invalid_class_template");
   const status = String(input.status ?? "active");
@@ -58,9 +66,10 @@ export function normalizeClassTemplateInput(input = {}) {
   return {
     classTemplateId: String(input.classTemplateId ?? "").trim(),
     name,
-    days: CLASS_TEMPLATE_DAY_KEYS.filter((day) => days.includes(day)),
-    startTime,
-    endTime,
+    days: summary.days,
+    startTime: summary.startTime,
+    endTime: summary.endTime,
+    scheduleRules,
     color,
     status
   };

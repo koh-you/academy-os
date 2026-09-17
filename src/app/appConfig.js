@@ -68,27 +68,6 @@ export const regularLessonClassColors = {
 
 export const fallbackRegularLessonColors = ["#bfdbfe", "#c7d2fe", "#bbf7d0", "#fbcfe8"];
 
-export const classTemplateScheduleRules = {
-  template_tt_sat_front: {
-    days: ["tue", "thu", "sat"],
-    endTime: "19:00",
-    name: "화목 4-7 / 토 10-1반",
-    saturdayEndTime: "13:00",
-    saturdayStartTime: "10:00",
-    startTime: "16:00",
-    timeLabel: "화목 16:00-19:00 / 토 10:00-13:00"
-  },
-  template_tt_sat_back: {
-    days: ["tue", "thu", "sat"],
-    endTime: "22:00",
-    name: "화목 7-10 / 토 1-4반",
-    saturdayEndTime: "16:00",
-    saturdayStartTime: "13:00",
-    startTime: "19:00",
-    timeLabel: "화목 19:00-22:00 / 토 13:00-16:00"
-  }
-};
-
 export const academyReminderTypeOptions = [
   { value: "student_consultation", label: "학생 상담" },
   { value: "class_notice", label: "반 알림" },
