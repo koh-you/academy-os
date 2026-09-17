@@ -86,7 +86,8 @@ for (const pageNumber of pages) {
   qaContext.drawImage(canvas, 0, 0, qa.width, qa.height);
   qaContext.lineWidth = 2;
 
-  const cropTo = async (box, file) => {
+  // whitenMin: 이 크롭에서 흰색으로 볼 밝기 하한(기본 232). figure-overrides 의 `whiten` 으로 문항마다 낮출 수 있다(워터마크가 선 위에 겹친 그림).
+  const cropTo = async (box, file, whitenMin = 232) => {
     const x = Math.max(0, Math.floor(box.x0 * renderScale));
     const y = Math.max(0, Math.floor(box.y0 * renderScale));
     const w = Math.min(canvas.width - x, Math.ceil((box.x1 - box.x0) * renderScale));
@@ -101,7 +102,7 @@ for (const pageNumber of pages) {
       for (let i = 0; i < px.length; i += 4) {
         const max = Math.max(px[i], px[i + 1], px[i + 2]);
         const min = Math.min(px[i], px[i + 1], px[i + 2]);
-        if (max - min < 10 && min > 232) { px[i] = 255; px[i + 1] = 255; px[i + 2] = 255; }
+        if (max - min < 10 && min > whitenMin) { px[i] = 255; px[i + 1] = 255; px[i + 2] = 255; }
       }
       outContext.putImageData(image, 0, 0);
     }
@@ -129,10 +130,14 @@ for (const pageNumber of pages) {
     const clusters = findFigureClusters(paths, group.region, tokens).filter((cluster) => !memberRegions.some((region) => insideRegion(cluster, region, 3)));
     const freeTokens = tokens.filter((token) => !memberRegions.some((region) => insideRegion(token, region, 1)));
     const entry = { members: group.members, pdf_page: pageNumber, hint: textHint(freeTokens, group.region, clusters), clusters: clusters.length };
-    if (clusters.length) {
-      const box = clusters.reduce(unionBox);
+    // 그룹 그림도 사람 지정 상자를 받는다: figure-overrides.json 의 키 "g<시작>-<끝>" (예 "g0775-0776").
+    const groupOverride = figureOverrides[`g${group.key}`];
+    if (clusters.length || groupOverride?.box) {
+      const box = groupOverride?.box
+        ? { x0: groupOverride.box[0], y0: groupOverride.box[1], x1: groupOverride.box[2], y1: groupOverride.box[3] }
+        : clusters.reduce(unionBox);
       const file = `fig-g${group.key}.png`;
-      await cropTo(box, file);
+      await cropTo(box, file, groupOverride?.whiten ?? 232);
       entry.figure = `crop:${file}`;
       qaContext.strokeStyle = "#16a34a";
       qaContext.strokeRect(box.x0 * 1.5, box.y0 * 1.5, (box.x1 - box.x0) * 1.5, (box.y1 - box.y0) * 1.5);
@@ -160,7 +165,7 @@ for (const pageNumber of pages) {
     if (override?.box) {
       const [x0, y0, x1, y1] = override.box;
       const file = `fig-${item.number_label}.png`;
-      await cropTo({ x0, y0, x1, y1 }, file);
+      await cropTo({ x0, y0, x1, y1 }, file, override.whiten ?? 232);
       entry.figure = `crop:${file}`;
       entry.note = "사람 지정 상자(figure-overrides.json)";
       // extra: [[x0,y0,x1,y1], …] → fig-<id>-2.png … (둘째 그림 · figure_extra 용)

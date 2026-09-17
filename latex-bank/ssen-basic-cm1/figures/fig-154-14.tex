@@ -1,0 +1,14 @@
+% 유형 086 154-14(본책 154쪽) — 네 지점 A, B, C, D 를 잇는 도로망(A–B 3개 · A–C 2개 · C–D 2개 · B–D 1개). 스캔 그림을 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.5pt, font=\small]
+  \coordinate (A) at (-1.6,0); \coordinate (B) at (0,1.1); \coordinate (C) at (0,-1.1); \coordinate (D) at (1.6,0);
+  \draw (0,0) ellipse (1.6 and 1.1);
+  \draw (A) to[bend left=12] (B);
+  \draw (A) to[bend left=32] (B);
+  \draw (A) to[bend left=30] (C);
+  \draw (C) to[bend left=30] (D);
+  \fill (A) circle (1.6pt); \fill (B) circle (1.6pt); \fill (C) circle (1.6pt); \fill (D) circle (1.6pt);
+  \node[left] at (A) {$\mathrm{A}$};
+  \node[above] at (B) {$\mathrm{B}$};
+  \node[below] at (C) {$\mathrm{C}$};
+  \node[right] at (D) {$\mathrm{D}$};
+\end{tikzpicture}

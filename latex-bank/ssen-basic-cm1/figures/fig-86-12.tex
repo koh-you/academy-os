@@ -1,0 +1,9 @@
+% 개념 33 86-12(본책 86쪽) — 위로 볼록한 이차함수 그래프, x축과 3·6 에서 만남(y축과 떨어져 있음). 스캔 그림을 TikZ 로 다시 그림(원문 라벨 O·3·6 만).
+\begin{tikzpicture}[scale=0.5, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.8,0) -- (7.6,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.2) -- (0,3.4) node[left] {$y$};
+  \node[below left, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt, domain=2.1:6.9, samples=60, smooth] plot (\x, {-0.8*(\x-3)*(\x-6)});
+  \node[above left=1pt and -2pt, font=\small] at (3,0) {$3$};
+  \node[above right=1pt and -2pt, font=\small] at (6,0) {$6$};
+\end{tikzpicture}

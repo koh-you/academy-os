@@ -1,0 +1,7 @@
+% 개념 52 134-28(본책 134쪽 · 28~31 공통) — 이차함수 y=2(x-1)^2+1 의 그래프, x축 위에 떠 있음(축과 만나지 않음 · y축·눈금 없음). 스캔 그림을 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(x, y=2(x-1)^2+1). 꼭짓점 좌표는 원문에 없으므로 적지 않는다.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.6,0) -- (4.2,0) node[below] {$x$};
+  \draw[line width=0.6pt, domain=0.55:3.25, samples=60, smooth] plot (\x, {0.9*(\x-1.9)*(\x-1.9)+0.55});
+  \node[above, font=\small] at (3.0,2.2) {$y=2(x-1)^2+1$};
+\end{tikzpicture}

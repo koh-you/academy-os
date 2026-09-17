@@ -1,0 +1,11 @@
+% 개념 51 132-06(본책 132쪽 · 06~07 공통) — 아래로 볼록한 이차함수 y=f(x) 그래프, x절편 a·b, 원점 O. 스캔 그림을 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(a, b, O, y=f(x)). 꼭짓점·수치 등 원문에 없는 값은 적지 않는다.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.6,0) -- (3.2,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.9) -- (0,3.2) node[left] {$y$};
+  \node[above right=1pt and 0pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt, domain=-2.15:2.75, samples=60, smooth] plot (\x, {0.75*(\x+1.2)*(\x-1.8)});
+  \node[below left=1pt and -2pt, font=\small] at (-1.2,0) {$a$};
+  \node[below right=1pt and -2pt, font=\small] at (1.8,0) {$b$};
+  \node[right, font=\small] at (2.8,2.55) {$y=f(x)$};
+\end{tikzpicture}

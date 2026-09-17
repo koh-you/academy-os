@@ -1,0 +1,8 @@
+% 개념 33 86-11(본책 86쪽) — 아래로 볼록한 이차함수 그래프, x축과 2 에서 접함. 스캔 그림을 TikZ 로 다시 그림(원문 라벨 O·2 만).
+\begin{tikzpicture}[scale=0.5, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.4,0) -- (5,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.8) -- (0,4) node[left] {$y$};
+  \node[below left, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt, domain=-0.6:4.6, samples=60, smooth] plot (\x, {0.5*(\x-2)*(\x-2)});
+  \node[below, font=\small] at (2,0) {$2$};
+\end{tikzpicture}

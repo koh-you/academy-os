@@ -1,0 +1,21 @@
+% 유형 003 18-04(본책 18쪽) — 모든 변이 꼭짓점에서 수직으로 만나는 도형(직사각형의 오른쪽 위 모서리를 잘라 낸 모양). 스캔 삽화를 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 4개(왼쪽 3x+4y+1 · 잘린 부분 가로 x−y · 잘린 부분 세로 2x−1 · 아래 5x+2). 직각 표시 6곳. 답(넓이)은 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.6pt]
+  \coordinate (A) at (0,0); \coordinate (B) at (3.2,0); \coordinate (C) at (3.2,1.6);
+  \coordinate (D) at (1.8,1.6); \coordinate (E) at (1.8,2.4); \coordinate (F) at (0,2.4);
+  \fill[gray!25] (A) -- (B) -- (C) -- (D) -- (E) -- (F) -- cycle;
+  \draw (A) -- (B) -- (C) -- (D) -- (E) -- (F) -- cycle;
+  % 직각 표시
+  \draw[line width=0.4pt] (0.18,0) -- (0.18,0.18) -- (0,0.18);
+  \draw[line width=0.4pt] (3.02,0) -- (3.02,0.18) -- (3.2,0.18);
+  \draw[line width=0.4pt] (3.02,1.6) -- (3.02,1.42) -- (3.2,1.42);
+  \draw[line width=0.4pt] (1.98,1.6) -- (1.98,1.42) -- (1.8,1.42);
+  \draw[line width=0.4pt] (1.62,2.4) -- (1.62,2.22) -- (1.8,2.22);
+  \draw[line width=0.4pt] (0.18,2.4) -- (0.18,2.22) -- (0,2.22);
+  % 치수 안내(원문의 파선)
+  \draw[dashed, line width=0.4pt] (1.8,2.4) -- (1.8,2.75) (3.2,1.6) -- (3.2,2.75);
+  \node[font=\small] at (2.5,2.6) {$x-y$};
+  \node[font=\small, right] at (1.85,2.0) {$2x-1$};
+  \node[font=\small, left] at (0,1.2) {$3x+4y+1$};
+  \node[font=\small, below] at (1.6,0) {$5x+2$};
+\end{tikzpicture}

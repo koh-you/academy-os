@@ -1,0 +1,16 @@
+% 유형 086 155-15(본책 155쪽) — 집·A·도서관·B 네 지점을 잇는 도로망(집–A 3개 · A–도서관 2개 · A–B 1개 · 집–B 2개 · B–도서관 2개). 원문의 집·도서관 삽화는 글자 라벨로 대신하고 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.5pt, font=\small]
+  \coordinate (H) at (-1.25,0); \coordinate (A) at (0,1.25); \coordinate (L) at (1.25,0); \coordinate (B) at (0,-1.25);
+  \draw (0,0) circle (1.25);
+  \draw (H) -- (A);
+  \draw (H) to[bend right=28] (A);
+  \draw (A) to[bend right=28] (L);
+  \draw (H) to[bend left=28] (B);
+  \draw (B) to[bend left=28] (L);
+  \draw (A) to[bend left=10] (B);
+  \fill (H) circle (1.6pt); \fill (A) circle (1.6pt); \fill (L) circle (1.6pt); \fill (B) circle (1.6pt);
+  \node[below left=1pt and -2pt] at (H) {집};
+  \node[above] at (A) {$\mathrm{A}$};
+  \node[below right=1pt and -2pt] at (L) {도서관};
+  \node[below] at (B) {$\mathrm{B}$};
+\end{tikzpicture}

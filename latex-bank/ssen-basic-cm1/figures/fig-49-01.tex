@@ -1,0 +1,11 @@
+% 실전 감각 UP 49-01(본책 49쪽) — 가로의 길이가 a+3b 인 직사각형(안에 넓이 3b^2+ab+a+3b 표기). 스캔 삽화를 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 2개(직사각형 안 넓이 · 아래 가로 a+3b, 파선 치수 안내). 세로의 길이(답의 근거)는 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.6pt]
+  \fill[green!12] (0,0) rectangle (3.4,1.7);
+  \draw (0,0) rectangle (3.4,1.7);
+  \node[font=\small] at (1.7,0.85) {$3b^2+ab+a+3b$};
+  % 가로 치수 안내(원문의 파선)
+  \draw[dashed, line width=0.4pt] (0,0) -- (0,-0.45) (3.4,0) -- (3.4,-0.45);
+  \draw[dashed, line width=0.4pt] (0,-0.3) -- (1.1,-0.3) (2.3,-0.3) -- (3.4,-0.3);
+  \node[font=\small] at (1.7,-0.3) {$a+3b$};
+\end{tikzpicture}

@@ -92,7 +92,8 @@ function renderFigure(figure, width = "0.38\\linewidth") {
     const w = size ? `${Math.min(size.width_pt, 440).toFixed(1)}pt` : width;
     return `\\includegraphics[width=${w}]{figures/${figure.slice(5)}}`;
   }
-  return `\\input{figures/${figure.replace(/^tikz:/, "")}}`;
+  // TikZ 그림이 놓일 폭(그림 옆 minipage 0.4\linewidth 등)보다 넓으면 폭에 맞춰 줄인다(좁을 때는 원 크기).
+  return `\\resizebox{\\ifdim\\width>\\linewidth\\linewidth\\else\\width\\fi}{!}{\\input{figures/${figure.replace(/^tikz:/, "")}}}`;
 }
 
 /** 그림을 본문 오른쪽에 둘지(원문 「오른쪽 그림」) 아래에 둘지(표·자료 상자처럼 넓은 크롭). */
@@ -100,6 +101,14 @@ function figurePlacement(item) {
   if (item.figure_layout) return item.figure_layout;
   const size = item.figure?.startsWith("crop:") ? cropSizes[item.figure.slice(5)] : null;
   return size && size.width_pt > SIDE_FIGURE_MAX_PT ? "below" : "side";
+}
+
+/** 출처 배지를 첫 줄 위로 더 올리는 높이(mm). 첫 줄(앞 120자)에 cases·pmatrix 가 있으면 5.5, 분수·근호·큰 괄호가 있으면 3.5, 아니면 1.5. */
+function badgeRaiseMm(item) {
+  const head = String(item.body ?? "").slice(0, 120);
+  if (/\\begin\{(cases|pmatrix)\}/.test(head)) return 5.5;
+  if (/\\dfrac|\\sqrt|\\left\(/.test(head)) return 3.5;
+  return 1.5;
 }
 
 /** 문항 하나의 본문 LaTeX(번호·출처 배지 포함 · dmpnum 두 번째 인자). */
@@ -110,8 +119,9 @@ function renderItemBody(id, rawItem, group, bank) {
   const badgeText = bank.id_style === "number"
     ? `${bank.book} ${id}번${item.page ? ` · ${item.page}쪽` : ""}`
     : `${bank.book} ${id.split("-")[0]}쪽 ${id.split("-")[1]}번`;
-  // 배지는 sty 가 첫 줄 위 5mm 에 띄우는데 첫 줄에 분수·cases 가 오면 닿는다 — 1.5mm 더 올린다(sty 수정 없이).
-  const badge = `\\smash{\\raisebox{1.5mm}{\\dmkichul{${badgeText}${item.tag ? ` · ${item.tag}` : ""}}}}`;
+  // 배지는 sty 가 첫 줄 위 5mm 에 띄우는데 첫 줄에 분수·cases 가 오면 닿는다 — 첫 줄 키에 따라 더 올린다(sty 수정 없이).
+  // 올린 만큼 문항 앞 간격도 벌려(book.tex 쪽) 앞 문항과 겹치지 않게 한다.
+  const badge = `\\smash{\\raisebox{${badgeRaiseMm(item)}mm}{\\dmkichul{${badgeText}${item.tag ? ` · ${item.tag}` : ""}}}}`;
   const parts = [badge];
   if (item.figure && figurePlacement(item) === "side") {
     // 원문처럼 「오른쪽 그림」이 본문 오른쪽에 오도록 본문 0.58 · 그림 0.4 폭으로 나란히 둔다.
@@ -191,7 +201,9 @@ async function main() {
         `% variant_level: ${bank.variant_level} (원본 전사)`,
         "% 이 파일은 build.mjs 가 items.json 에서 만든다. 고칠 때는 items.json 을 고친다."
       ].filter(Boolean);
-      await writeFile(path.join(dir, "items", `${id}.tex`), `${header.join("\n")}\n${renderItemBody(id, item, group, bank)}\n`, "utf8");
+      // 첨자·지수 자리의 빈칸 상자(\blank)는 본문 크기로 찍혀 원문(작은 상자)과 어긋난다 — 첨자 안에서는 작은 상자로 바꾼다.
+      const itemTex = renderItemBody(id, item, group, bank).replace(/([_^])\{\\blank(\[[^\]]*\])?\}/g, "$1{\\text{\\scriptsize\\blank[0.8em]}}").replace(/([_^])\\blank(?![\[\w])/g, "$1{\\text{\\scriptsize\\blank[0.8em]}}");
+      await writeFile(path.join(dir, "items", `${id}.tex`), `${header.join("\n")}\n${itemTex}\n`, "utf8");
     }
   }
 
@@ -236,9 +248,12 @@ async function main() {
       }
       if (group.passage) lines.push(`\\dmpassage{${group.passage}}`);
       if (group.figure) lines.push(`\\begin{center}${renderFigure(group.figure)}\\end{center}`);
-      // 문항 사이 최소 4mm(출처 배지가 위 문항 그림에 닿지 않게). dmpnum 의 fill 은 그 위에 더해진다.
+      // 문항 사이 최소 6mm(출처 배지가 1.5mm 올라가 있어 위 문항의 상자·그림 아래변에 닿지 않게). dmpnum 의 fill 은 그 위에 더해진다.
       // 문항 번호는 책에 찍힌 번호(id 의 뒤 두 자리 · 쪽마다 다시 시작)와 같게 카운터를 맞춘다.
-      for (const id of group.items) lines.push(`\\setcounter{dmproblemcount}{${bookNumber(id) - 1}}\\dmpnum{${id}}{\\input{items/${id}}}\\vspace{4mm}`);
+      for (const id of group.items) {
+        const extra = badgeRaiseMm(bank.items[id]) - 1.5;
+        lines.push(`${extra > 0 ? `\\vspace{${extra}mm}` : ""}\\setcounter{dmproblemcount}{${bookNumber(id) - 1}}\\dmpnum{${id}}{\\input{items/${id}}}\\vspace{6mm}`);
+      }
     }
   }
   // 답
@@ -258,8 +273,34 @@ async function main() {
   if (args.review || args.export) {
     const packageDir = path.resolve(args.package ?? path.join("output", "problem-bank", path.basename(dir)));
     const manifest = JSON.parse(await readFile(path.join(packageDir, "manifest.json"), "utf8"));
-    const byLabel = new Map(manifest.items.map((item) => [item.number_label, item]));
     const exportDir = args.export ? path.resolve(typeof args.export === "string" ? args.export : `${packageDir}-latex`) : null;
+    const byLabel = new Map(manifest.items.map((item) => [item.number_label, item]));
+    // --bank-only(스캔 교재): 전사본(items.json)이 문항 목록의 원천이다. 전사 에이전트가 쪽에서 찾아 넣은 문항(스캔 크롭이 놓친 번호)은
+    // 「쪽-번호」 id 로 manifest 항목을 만들어 넣고, 전사본에 없는 manifest 항목(유형 라벨 상자·단원 간지·지시문 조각으로 잘못 잘린 것)은 뺀다.
+    if (args["bank-only"]) {
+      const bankIds = new Set(unitGroups.flatMap(({ group }) => group.items));
+      let added = 0;
+      for (const { unit, group } of unitGroups) {
+        for (const id of group.items) {
+          if (byLabel.has(id)) continue;
+          const [pageText, numberText] = id.split("-");
+          const printedPage = Number(pageText);
+          const unitIndex = manifest.units.findIndex((entry) => entry.code === unit.code);
+          const synthesized = {
+            item_id: `${manifest.book.book_id}-${id}`, number_label: id, number_sort: printedPage * 100 + Number(numberText), printed_page: printedPage, pdf_page: printedPage,
+            column: 0, layout: "column", type_label: group.section, tags: [], unit_index: unitIndex >= 0 ? unitIndex : 0, has_shared_passage: false, group_key: null,
+            review_status: "ai_checked", review_note: "스캔 크롭에 없어 전사본(쪽 렌더)으로 추가한 문항", regions: []
+          };
+          byLabel.set(id, synthesized);
+          manifest.items.push(synthesized);
+          added += 1;
+        }
+      }
+      const before = manifest.items.length;
+      manifest.items = manifest.items.filter((item) => bankIds.has(item.number_label));
+      manifest.items.sort((a, b) => a.number_sort - b.number_sort);
+      console.log(`bank-only: 전사본 기준 문항 ${manifest.items.length}개 (추가 ${added} · 제외 ${before - manifest.items.length})`);
+    }
     if (args.review) await mkdir(path.join(dir, "review"), { recursive: true });
     if (exportDir) {
       await rm(path.join(exportDir, "items"), { recursive: true, force: true });
@@ -367,6 +408,34 @@ ${group.passage ? `\\dmpassage{${group.passage}}` : ""}${group.figure ? `\\begin
         if (!files.length) continue;
         await mkdir(path.join(exportDir, sub), { recursive: true });
         for (const name of files) await writeFile(path.join(exportDir, sub, name), await readFile(path.join(packageDir, sub, name)));
+      }
+      // --answers-from-bank(스캔 교재): 스캔 답지 크롭은 번호가 밀리거나 빠지므로, 전사본의 answer(답지·해설로 확정한 것)를 조판해
+      // answers/<item_id>.jpg 로 둔다. 한 PDF 에 문항마다 한 쪽으로 넣어 한 번만 컴파일한다. 해설(solutions/)은 스캔 크롭 그대로.
+      if (args["answers-from-bank"]) {
+        const answerIds = exported.map((entry) => entry.number_label);
+        const pages = answerIds.map((id) => `\\noindent{\\small\\textbf{${id}}}\\quad ${bank.items[id].answer ?? ""}\\par\\newpage`);
+        const answersTex = `${preamble}\\geometry{paperwidth=110mm,paperheight=120mm,margin=5mm,headheight=0pt,headsep=0pt,footskip=0pt}\\pagestyle{empty}\\begin{document}\n${pages.join("\n")}\\end{document}`;
+        await writeFile(path.join(dir, "_answers.tex"), answersTex, "utf8");
+        await compile(xelatex, dir, "_answers.tex");
+        const answersPdf = await pdfjs.getDocument({ data: new Uint8Array(await readFile(path.join(dir, "build", "_answers.pdf"))), verbosity: 0 }).promise;
+        await mkdir(path.join(exportDir, "answers"), { recursive: true });
+        const answerEntries = [];
+        for (const [index, id] of answerIds.entries()) {
+          const page = await answersPdf.getPage(index + 1);
+          const { canvas: rendered, context } = await renderPage(page, 200 / 72);
+          const trimmed = trimToInk(rendered, context);
+          page.cleanup();
+          const entry = exported[index];
+          const file = `answers/${entry.item_id}.jpg`;
+          await writeFile(path.join(exportDir, file), await trimmed.encode("jpeg", 90));
+          answerEntries.push({ number_label: id, file, parts: 1, pdf_page: null, width: trimmed.width, height: trimmed.height, source: "latex-bank answer" });
+        }
+        const answersManifestPath = path.join(exportDir, "manifest-answers.json");
+        const answersManifest = JSON.parse(await readFile(answersManifestPath, "utf8").catch(() => "{}"));
+        answersManifest.answers = answerEntries;
+        answersManifest.answers_source = `latex-bank/${path.basename(dir)} items.json answer (조판 렌더)`;
+        await writeFile(answersManifestPath, JSON.stringify(answersManifest, null, 2), "utf8");
+        console.log(`answers-from-bank: 답 이미지 ${answerEntries.length}개를 전사본 answer 로 조판`);
       }
       console.log(`export: ${exported.length}문항 조판본 → ${exportDir} (교재관리 › 패키지 등록 폴더)`);
     }

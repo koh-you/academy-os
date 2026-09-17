@@ -38,6 +38,7 @@ import {
 } from "./pdfTools.mjs";
 import { createCanvas, loadImage } from "@napi-rs/canvas";
 import {
+  coloredRuns,
   columnLeftMargin,
   findColorBands,
   findDottedGutter,
@@ -511,9 +512,20 @@ async function main() {
       const numberTokens = tokens.filter((token) => /^[0O]?\d{1,2}$/.test(token.text) && token.conf >= 40 && token.h >= 6.5 && token.h <= 12.5 && token.x >= column.x0 && token.x < column.x1);
       // 빠른정답 표의 줄(「01 ① 02 ② …」)은 한 줄에 번호가 여럿이다. 그런 줄의 번호는 풀이 시작이 아니다.
       // 같은 줄의 다른 번호도 굵은 크기(7.5pt 이상)·신뢰도 70 이상·15~150pt 오른쪽이어야 한다(한글 풀이 글에서 튀는 숫자 오독과 구분).
-      // 빠른정답 줄에는 번호가 셋 이상 늘어선다(「01 ① 02 ② 03 ⑤」). 풀이 첫 줄에 숫자 하나가 튀는 것과 구분한다.
-      const sharesLine = (token) => numberTokens.filter((other) => other !== token && other.h >= 7.5 && other.conf >= 70
-        && Math.abs(other.y + other.h / 2 - (token.y + token.h / 2)) < 4 && other.x - (token.x + token.w) >= 15 && other.x - (token.x + token.w) <= 300).length >= 2;
+      // 빠른정답 줄에는 번호가 넷 이상 늘어선다(「01 ① 02 ② 03 ⑤ 04 ③」). 풀이 첫 줄에 숫자 하나가 튀는 것과 구분한다.
+      // 같은 자리를 두 번 읽은 토큰(전체 OCR + 왼쪽 띠 OCR)은 하나로 세고, 「답」 아이콘 오독(한 자리 「8」)은 세지 않는다 —
+      // 반 컬럼 격자 줄(「14 y²+8y+16 | 15 답 x²-4x-4」)이 빠른정답 줄로 오인돼 왼쪽 배지가 빠지던 것.
+      const sharesLine = (token) => {
+        const seen = [];
+        for (const other of numberTokens) {
+          if (other === token || other.h < 7.5 || other.conf < 70 || other.text.replace(/^O/, "0").length < 2) continue;
+          const gap = other.x - (token.x + token.w);
+          if (Math.abs(other.y + other.h / 2 - (token.y + token.h / 2)) >= 4 || gap < 15 || gap > 300) continue;
+          if (!seen.some((x) => Math.abs(x - other.x) < 4)) seen.push(other.x);
+        }
+        // 빠른정답 줄은 번호가 넷 이상 늘어선다. 반 컬럼 격자(「01 ○ 02 ○ 03 ×」)는 셋이라 배지로 남긴다.
+        return seen.length >= 3;
+      };
       // 풀이 시작 배지 오른쪽에는 같은 줄에 풀이 글이 이어진다(머리글의 외딴 숫자와 구분).
       const hasTextRight = (token) => Boolean(inkRange(imageData, canvas.width, renderScale, { x0: token.x + token.w + 2, x1: Math.min(column.x1, token.x + token.w + 70), y0: token.y - 2, y1: token.y + token.h + 2 }, []));
       if (process.env.DEBUG_BADGES === String(pageNumber)) {
@@ -529,10 +541,26 @@ async function main() {
         .filter((token) => !insideBox(token.y + token.h / 2) && !insideBand(token.y + token.h / 2) && !sharesLine(token) && hasTextRight(token));
       const badgeLeft = candidates.length ? Math.min(...candidates.map((token) => token.x)) : left;
       if (candidates.length) columnBox.x0 = badgeLeft - 3;
-      const badges = candidates
+      const ocrBadges = candidates
         .filter((token) => token.x <= badgeLeft + 8)
         .sort((a, b) => a.y - b.y)
         .filter((token, index, list) => index === 0 || token.y - list[index - 1].y > 6);
+      // OCR 이 놓친 배지 보완(쎈 답지): 배지 번호는 색 글자(주황·초록·빨강)라 배지 x 띠 안의 색 잉크 덩어리(높이 5~13pt)가
+      // 곧 배지 자리다. 읽은 배지와 겹치지 않는 덩어리는 번호 미상(null → 정렬 비용 0.3)으로 넣는다. 색 띠·상자 안은 뺀다.
+      const coloredBadges = candidates.length && layout.template === "ssen-answer-icon.png"
+        ? coloredRuns(imageData, canvas.width, renderScale, { x0: badgeLeft - 2, x1: badgeLeft + 14, y0: bodyTop, y1: bodyBottom })
+          .filter((run) => run.h >= 5 && run.h <= 13 && run.density >= 0.18 && run.density < 0.55 && !insideBox(run.y0 + run.h / 2) && !insideBand(run.y0 + run.h / 2))
+          .filter((run) => !ocrBadges.some((token) => Math.abs(token.y - run.y0) < 8))
+          .filter((run) => hasTextRight({ x: badgeLeft, w: 10, y: run.y0, h: run.h }))
+          .map((run) => ({ text: "?", x: badgeLeft, y: run.y0, w: 10, h: run.h, conf: 0, colored: true, density: run.density }))
+        : [];
+      if (process.env.DEBUG_COLOR === String(pageNumber) && candidates.length) {
+        for (const run of coloredRuns(imageData, canvas.width, renderScale, { x0: badgeLeft - 2, x1: badgeLeft + 14, y0: bodyTop, y1: bodyBottom })) {
+          console.log(`  color [${column.index}] y=${run.y0.toFixed(0)} h=${run.h.toFixed(1)} d=${run.density.toFixed(2)} ocr=${ocrBadges.some((token) => Math.abs(token.y - run.y0) < 8)} box=${insideBox(run.y0 + run.h / 2)} band=${insideBand(run.y0 + run.h / 2)}`);
+        }
+      }
+      if (coloredBadges.length) console.log(`p${pageNumber} 컬럼 ${column.index + 1}: 색 배지 보완 ${coloredBadges.length}개 (y ${coloredBadges.map((token) => `${token.y.toFixed(0)}/${token.density.toFixed(2)}`).join(" ")})`);
+      const badges = [...ocrBadges, ...coloredBadges].sort((a, b) => a.y - b.y);
       for (const box of boxes) qaBoxes.push({ box: { x0: columnBox.x0, x1: columnBox.x1, y0: box.y0, y1: box.y1 }, color: "#9ca3af" });
       if (numberTokens.length >= 12 && numberTokens.filter(sharesLine).length >= numberTokens.length * 0.6) {
         console.log(`p${pageNumber} 컬럼 ${column.index + 1}: 빠른정답표 — 건너뜀`);
@@ -556,14 +584,47 @@ async function main() {
         }
       }
 
-      for (let index = 0; index < badges.length; index += 1) {
-        const badge = badges[index];
-        const next = badges[index + 1];
-        // 아래 한계: 같은 컬럼 다음 배지, 또는 다음 색 띠(새 구역 상자·단원 머리), 또는 컬럼 바닥.
+      // 개념 쪽의 짧은 답은 한 컬럼 안에서 두세 줄(「14 | 15」 「01 ○ 02 ○ 03 ×」)로 나뉘어 실리기도 한다(베이직쎈 공통수학1).
+      // 왼쪽 배지와 같은 줄의 오른쪽에 굵은 번호가 있고 그 x 자리가 둘 이상의 줄에서 겹치면 그 줄들은 반 컬럼 격자다:
+      // 각 배지는 자기 x 부터 다음 격자 열 앞까지 오리고, 순서는 줄(위→아래) 안에서 왼쪽→오른쪽이다(순번 정렬이 어긋나
+      // 오른쪽 열 번호가 통째로 빠지던 것).
+      const gridTokens = numberTokens
+        // 격자 번호는 배지처럼 두 자리(「02」「15」)다 — 풀이 글 속의 한 자리 숫자(「2」)는 세지 않는다.
+        .filter((token) => token.text.replace(/^O/, "0").length >= 2 && token.h >= layout.badgeMinH && token.x >= badgeLeft + 25 && token.x <= column.x1 - 20 && token.y > bodyTop && token.y + token.h < bodyBottom)
+        .filter((token) => !insideBox(token.y + token.h / 2) && !insideBand(token.y + token.h / 2) && hasTextRight(token))
+        .filter((token) => badges.some((badge) => Math.abs(badge.y - token.y) < 5))
+        .sort((a, b) => a.x - b.x || a.y - b.y)
+        .filter((token, index, list) => !list.slice(0, index).some((other) => Math.abs(other.x - token.x) < 4 && Math.abs(other.y - token.y) < 4));
+      const gridClusters = [];
+      for (const token of gridTokens) {
+        const cluster = gridClusters.find((entry) => Math.abs(entry.x - token.x) < 10);
+        if (cluster) cluster.tokens.push(token);
+        else gridClusters.push({ x: token.x, tokens: [token] });
+      }
+      // 격자로 보는 조건: 오른쪽 번호가 둘 이상(같은 열에 두 줄이거나 한 줄에 두 열).
+      const gridColumns = gridTokens.length >= 2 ? gridClusters : [];
+      const gridRows = gridColumns.flatMap((cluster) => cluster.tokens.map((token) => token.y));
+      const inGridRow = (token) => gridRows.some((y) => Math.abs(y - token.y) < 5);
+      const nextColumnX = (x) => Math.min(columnBox.x1, ...gridColumns.filter((cluster) => cluster.x > x + 10).map((cluster) => cluster.x - 4));
+      const placed = [
+        ...badges.map((token) => ({ token, x0: columnBox.x0, x1: inGridRow(token) ? nextColumnX(token.x) : columnBox.x1 })),
+        ...gridColumns.flatMap((cluster) => cluster.tokens.map((token) => ({ token, x0: cluster.x - 4, x1: nextColumnX(cluster.x) })))
+      ].sort((a, b) => (Math.abs(a.token.y - b.token.y) < 5 ? a.token.x - b.token.x : a.token.y - b.token.y));
+      if (gridColumns.length) console.log(`p${pageNumber} 컬럼 ${column.index + 1}: 반 컬럼 격자 열 ${gridColumns.length} · 번호 ${gridColumns.reduce((sum, cluster) => sum + cluster.tokens.length, 0)}`);
+      if (process.env.DEBUG_GRID === String(pageNumber)) {
+        for (const token of numberTokens.filter((token) => token.x >= badgeLeft + 25)) {
+          console.log(`  grid? [${column.index}] ${token.text}@(${token.x.toFixed(0)},${token.y.toFixed(0)} h${token.h.toFixed(1)} c${token.conf}) box=${insideBox(token.y + token.h / 2)} band=${insideBand(token.y + token.h / 2)} textRight=${hasTextRight(token)} row=${badges.some((badge) => Math.abs(badge.y - token.y) < 5)}`);
+        }
+        console.log(`  badges=${badges.map((badge) => `${badge.text}@${badge.y.toFixed(0)}`).join(" ")}`);
+      }
+      for (let index = 0; index < placed.length; index += 1) {
+        const { token: badge, x0: badgeX0, x1: badgeX1 } = placed[index];
+        // 아래 한계: 같은 (반)컬럼의 다음 배지, 또는 다음 색 띠(새 구역 상자·단원 머리), 또는 컬럼 바닥.
+        const next = placed.slice(index + 1).find((entry) => entry.token.y > badge.y + 5 && entry.x0 < badgeX1 && entry.x1 > badgeX0)?.token;
         const nextBand = Math.min(bodyBottom, ...aboveBands.filter((band) => band.y0 > badge.y + badge.h).map((band) => band.y0 - 2));
         const limit = Math.min(next ? next.y - 3 : bodyBottom, nextBand);
-        const ink = inkRange(imageData, canvas.width, renderScale, { ...columnBox, y0: badge.y - 2, y1: limit }, []);
-        const box = { ...columnBox, y0: Math.max(bodyTop, badge.y - 3), y1: ink ? Math.min(limit, ink.bottom + 4) : limit };
+        const ink = inkRange(imageData, canvas.width, renderScale, { x0: badgeX0, x1: badgeX1, y0: badge.y - 2, y1: limit }, []);
+        const box = { x0: badgeX0, x1: badgeX1, y0: Math.max(bodyTop, badge.y - 3), y1: ink ? Math.min(limit, ink.bottom + 4) : limit };
         const ocrNumber = Number(badge.text.replace(/^O/, "0"));
         pending = {
           ocrNumber: Number.isFinite(ocrNumber) ? ocrNumber : null,

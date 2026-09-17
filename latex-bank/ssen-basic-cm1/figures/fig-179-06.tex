@@ -1,0 +1,25 @@
+% 유형 106 179-06(본책 179쪽) — 세 공원 P1·P2·P3 사이의 일방통행로 화살표 그림. 스캔 삽화(색 원)를 TikZ 로 다시 그림.
+% 화살표(원문): P1→P2 1개(바깥 호) · P2→P1 2개(직선·안쪽 호) · P1→P3 1개(안쪽 호) · P3→P1 1개(바깥 호) · P3→P2 1개(직선) · P3→P3 1개(고리).
+% 원 안 라벨 P2·P3 는 스캔에서 흐려 읽히지 않아 원문 배치(왼쪽 아래 P2 · 오른쪽 아래 P3)대로 적음.
+\begin{tikzpicture}[scale=0.9, line width=0.5pt, >=stealth]
+  \coordinate (P1) at (0,2.2);
+  \coordinate (P2) at (-1.5,0);
+  \coordinate (P3) at (1.5,0);
+  % 공원
+  \draw[fill=white] (P1) circle (0.3) node[font=\small] {$\mathrm{P_1}$};
+  \draw[fill=white] (P2) circle (0.3) node[font=\small] {$\mathrm{P_2}$};
+  \draw[fill=white] (P3) circle (0.3) node[font=\small] {$\mathrm{P_3}$};
+  % P1 -> P2 (바깥 호)
+  \draw[->] ([shift=(200:0.3)]P1) to[bend right=35] ([shift=(100:0.3)]P2);
+  % P2 -> P1 (직선 · 안쪽 호)
+  \draw[->] ([shift=(45:0.3)]P2) -- ([shift=(240:0.3)]P1);
+  \draw[->] ([shift=(70:0.3)]P2) to[bend right=30] ([shift=(265:0.3)]P1);
+  % P1 -> P3 (안쪽 호)
+  \draw[->] ([shift=(290:0.3)]P1) to[bend right=30] ([shift=(115:0.3)]P3);
+  % P3 -> P1 (바깥 호)
+  \draw[->] ([shift=(75:0.3)]P3) to[bend right=35] ([shift=(340:0.3)]P1);
+  % P3 -> P2 (직선)
+  \draw[->] ([shift=(180:0.3)]P3) -- ([shift=(0:0.3)]P2);
+  % P3 -> P3 (고리)
+  \draw[->] ([shift={(0.05,-0.29)}]P3) arc (120:-220:0.3);
+\end{tikzpicture}

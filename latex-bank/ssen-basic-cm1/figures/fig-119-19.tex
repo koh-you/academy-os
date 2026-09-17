@@ -1,0 +1,17 @@
+% 개념 47 119-19(본책 119쪽) — 풀이 힌트 옆 수직선: 왼쪽 점(●)에서 오른쪽으로 가는 ㉡ 화살표, 오른쪽 점(○)에서 위로 올라가 왼쪽으로 가는 ㉠ 화살표, 두 점 사이 공통부분 색칠, 두 점 아래 빈칸 상자 2개. 수치는 원문에도 없음(빈칸). 스캔 그림을 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=0.62, line width=0.6pt]
+  \fill[orange!30] (-0.9,0) rectangle (0.9,0.75);
+  \draw[<->, >=stealth, line width=0.7pt] (-2.6,0) -- (2.6,0);
+  \node[below=2pt, font=\small] at (2.3,0) {$x$};
+  % ㉡: 왼쪽 점에서 위로, 오른쪽으로 화살표
+  \draw[->, >=stealth] (-0.9,0) -- (-0.9,0.75) -- (2.4,0.75);
+  \node[font=\scriptsize, fill=white, inner sep=0.5pt] at (1.9,0.75) {㉡};
+  % ㉠: 오른쪽 점에서 더 위로, 왼쪽으로 화살표
+  \draw[->, >=stealth] (0.9,0) -- (0.9,1.35) -- (-2.4,1.35);
+  \node[font=\scriptsize, fill=white, inner sep=0.5pt] at (-1.9,1.35) {㉠};
+  \fill (-0.9,0) circle (2pt);
+  \fill[white] (0.9,0) circle (2pt); \draw (0.9,0) circle (2pt);
+  % 두 점 아래 빈칸 상자
+  \draw (-1.25,-0.95) rectangle (-0.55,-0.35);
+  \draw (0.55,-0.95) rectangle (1.25,-0.35);
+\end{tikzpicture}

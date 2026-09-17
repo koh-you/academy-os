@@ -1,0 +1,18 @@
+% 유형 053 97-11(본책 97쪽) — y=x²−6x+9 의 그래프 위의 점 A 에서 x축·y축에 내린 수선의 발 B·C, 직사각형 OBAC. 스캔 그림을 TikZ 로 다시 그림.
+% 원문 라벨(A·B·C·O·3·식)만 둔다. 세로는 0.3 배로 눌러 그림(형태만). 정점 2.2pt · 파생점 2pt · 축 0.7pt · 곡선 0.6pt.
+\begin{tikzpicture}[scale=0.5, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.8,0) -- (6.8,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.6) -- (0,3.6) node[left] {$y$};
+  \node[below left=1pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt, domain=-0.3:6.3, samples=60, smooth] plot (\x, {0.3*(\x-3)*(\x-3)});
+  \coordinate (A) at (1,1.2); \coordinate (B) at (1,0); \coordinate (C) at (0,1.2);
+  \draw[line width=0.5pt] (C) -- (A) -- (B);
+  \draw[line width=0.4pt] (0.78,0) -- (0.78,0.22) -- (1,0.22);
+  \draw[line width=0.4pt] (0,0.98) -- (0.22,0.98) -- (0.22,1.2);
+  \fill (A) circle (2.2pt); \fill (B) circle (2pt); \fill (C) circle (2pt);
+  \node[above right=-1pt and -1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[below, font=\small] at (B) {$\mathrm{B}$};
+  \node[left, font=\small] at (C) {$\mathrm{C}$};
+  \node[below, font=\small] at (3,0) {$3$};
+  \node[font=\small] at (3.1,3.3) {$y=x^2-6x+9$};
+\end{tikzpicture}

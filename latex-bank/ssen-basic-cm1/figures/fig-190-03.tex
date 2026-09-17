@@ -1,0 +1,16 @@
+% 실전 감각 UP 190-03(본책 190쪽) — 세 도시 P1(왼쪽)·P2(가운데)·P3(오른쪽)을 잇는 도로망. P1–P2 2개 · P2–P3 3개 · P1–P3 1개(아래 긴 호). 스캔 삽화(건물 그림)를 TikZ 로 다시 그림 · 도로 수만 원문대로.
+\begin{tikzpicture}[scale=1.0, line width=0.5pt]
+  \coordinate (A) at (-2.5,0); \coordinate (B) at (0,0); \coordinate (C) at (2.5,0);
+  % P1–P2 2개
+  \draw (A) to[bend left=30] (B);
+  \draw (A) to[bend right=30] (B);
+  % P2–P3 3개
+  \draw (B) to[bend left=32] (C);
+  \draw (B) -- (C);
+  \draw (B) to[bend right=32] (C);
+  % P1–P3 1개(아래 긴 호)
+  \draw (A) to[bend right=42] (C);
+  \fill[white] (A) circle (9pt); \draw (A) circle (9pt); \node[font=\small] at (A) {$\mathrm{P_1}$};
+  \fill[white] (B) circle (9pt); \draw (B) circle (9pt); \node[font=\small] at (B) {$\mathrm{P_2}$};
+  \fill[white] (C) circle (9pt); \draw (C) circle (9pt); \node[font=\small] at (C) {$\mathrm{P_3}$};
+\end{tikzpicture}

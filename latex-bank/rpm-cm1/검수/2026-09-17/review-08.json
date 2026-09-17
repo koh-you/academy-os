@@ -1,0 +1,6 @@
+{ "range": "0554~0632", "checked": 79, "ok": 76,
+  "findings": [
+    { "id": "0590", "severity": "yellow", "where": "subs", "note": "원문 소문항 (1)~(4) 가 2열(2-2) 배치인데 조판본은 세로 4행" },
+    { "id": "0591", "severity": "yellow", "where": "subs", "note": "원문 소문항 (1)~(4) 가 2열(2-2) 배치인데 조판본은 세로 4행" },
+    { "id": "0600", "severity": "yellow", "where": "layout", "note": "본문 인라인 분수 (β±√γ i)/2 가 아래 줄 「의 값을」과 겹칠 정도로 줄간격이 좁음 — 원문처럼 별도 줄 또는 \\dfrac 줄간격 확보 필요" }
+  ] }

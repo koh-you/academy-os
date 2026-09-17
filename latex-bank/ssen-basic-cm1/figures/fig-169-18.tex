@@ -1,0 +1,5 @@
+% 유형 103 169-18(본책 169쪽) — 정팔각형(꼭짓점 8개 점 표시). 스캔 그림을 TikZ 로 다시 그림. 라벨·수치 없음.
+\begin{tikzpicture}[scale=0.62, line width=0.55pt]
+  \draw (22.5:1.6) \foreach \a in {67.5,112.5,...,337.5} { -- (\a:1.6) } -- cycle;
+  \foreach \a in {22.5,67.5,...,337.5} { \fill (\a:1.6) circle (2pt); }
+\end{tikzpicture}

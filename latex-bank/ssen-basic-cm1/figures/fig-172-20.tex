@@ -1,0 +1,11 @@
+% 실전 감각 UP 172-20(본책 172쪽) — 삼각형 위의 점 9개(꼭짓점 3개 + 각 변 위 2개씩). 스캔 그림을 TikZ 로 다시 그림. 라벨·수치 없음.
+\begin{tikzpicture}[scale=0.62, line width=0.55pt]
+  \coordinate (A) at (0,3); \coordinate (B) at (-1.8,0); \coordinate (C) at (1.8,0);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \foreach \p in {A,B,C} { \fill (\p) circle (2pt); }
+  \foreach \t in {0.3333,0.6667} {
+    \fill ($(A)!\t!(B)$) circle (2pt);
+    \fill ($(A)!\t!(C)$) circle (2pt);
+    \fill ($(B)!\t!(C)$) circle (2pt);
+  }
+\end{tikzpicture}
