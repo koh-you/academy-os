@@ -632,8 +632,10 @@ const realClassTemplates = [
     timeLabel: "화목 16:00-19:00 / 토 10:00-13:00",
     startTime: "16:00",
     endTime: "19:00",
-    saturdayStartTime: "10:00",
-    saturdayEndTime: "13:00",
+    scheduleRules: [
+      { days: ["tue", "thu"], startTime: "16:00", endTime: "19:00" },
+      { days: ["sat"], startTime: "10:00", endTime: "13:00" }
+    ],
     color: "#bbf7d0",
     track: "내신",
     notionClassPageUrl: ""
@@ -645,8 +647,10 @@ const realClassTemplates = [
     timeLabel: "화목 19:00-22:00 / 토 13:00-16:00",
     startTime: "19:00",
     endTime: "22:00",
-    saturdayStartTime: "13:00",
-    saturdayEndTime: "16:00",
+    scheduleRules: [
+      { days: ["tue", "thu"], startTime: "19:00", endTime: "22:00" },
+      { days: ["sat"], startTime: "13:00", endTime: "16:00" }
+    ],
     color: "#fbcfe8",
     track: "내신",
     notionClassPageUrl: ""

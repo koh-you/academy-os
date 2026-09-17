@@ -19,7 +19,37 @@ for (const [input, message] of [
 // 요일은 월→일 순으로 정렬하고 중복을 없앤다. 색상은 비우면 기본값.
 assert.deepEqual(
   normalizeClassTemplateInput({ name: " 화목 5-7반 ", days: ["thu", "tue", "tue"], startTime: "17:00", endTime: "19:00" }),
-  { classTemplateId: "", name: "화목 5-7반", days: ["tue", "thu"], startTime: "17:00", endTime: "19:00", color: "#c7d2fe", status: "active" }
+  {
+    classTemplateId: "", name: "화목 5-7반", days: ["tue", "thu"], startTime: "17:00", endTime: "19:00",
+    scheduleRules: [{ days: ["tue", "thu"], startTime: "17:00", endTime: "19:00" }],
+    color: "#c7d2fe", status: "active"
+  }
+);
+
+// 요일 묶음별 시간표(2026-09-17). days/startTime/endTime 은 규칙에서 파생된다 —
+// days 는 전체 요일 합집합, 시간은 가장 이른 요일 규칙의 것.
+const multiRule = normalizeClassTemplateInput({
+  name: "화목 4-7 / 토 11-14",
+  scheduleRules: [
+    { days: ["sat"], startTime: "11:00", endTime: "14:00" },
+    { days: ["tue", "thu"], startTime: "16:00", endTime: "19:00" }
+  ]
+});
+assert.deepEqual(multiRule.days, ["tue", "thu", "sat"]);
+assert.equal(multiRule.startTime, "16:00");
+assert.equal(multiRule.endTime, "19:00");
+assert.deepEqual(multiRule.scheduleRules, [
+  { days: ["sat"], startTime: "11:00", endTime: "14:00" },
+  { days: ["tue", "thu"], startTime: "16:00", endTime: "19:00" }
+]);
+// 같은 요일이 두 시간표에 들어가면 어느 시간을 쓸지 정할 수 없다.
+assert.throws(
+  () => normalizeClassTemplateInput({ name: "X", scheduleRules: [{ days: ["tue"], startTime: "10:00", endTime: "11:00" }, { days: ["tue", "sat"], startTime: "12:00", endTime: "13:00" }] }),
+  (error) => error.message === "화요일이 두 시간표에 겹칩니다. 한 요일은 한 시간표에만 넣어 주세요." && error.statusCode === 400
+);
+assert.throws(
+  () => normalizeClassTemplateInput({ name: "X", scheduleRules: [{ days: ["tue"], startTime: "10:00", endTime: "11:00" }, { days: ["sat"], startTime: "13:00", endTime: "12:00" }] }),
+  (error) => error.message === "2번째 시간표: 종료 시간은 시작 시간보다 늦어야 합니다."
 );
 
 // 개설은 insertRows 로만 — upsert 로 다른 tenant 의 반을 끌어오지 않는다.

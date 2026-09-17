@@ -1,3 +1,5 @@
+import { getClassTemplateScheduleRules, getClassTemplateTimesForDate } from "../../shared/utils/classTemplateSchedule.js";
+
 const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
 function toMonthKey(value = "") {
@@ -82,8 +84,10 @@ export function buildMonthlyRegularLessonOpenPlan({ lessons = [], monthKey = "",
         const dateDayKey = getDayKey(date);
         const daySource = latestByTemplateDay.get(`${classTemplateId}|${dateDayKey}`) || sourceLesson;
         const dayStudentIds = [...new Set((daySource.studentIds || []).filter((studentId) => activeStudents.has(studentId)))];
-        const saturdayTimes = dateDayKey === "sat" && template.saturdayStartTime && template.saturdayEndTime
-          ? { endTime: template.saturdayEndTime, startTime: template.saturdayStartTime }
+        // 요일별 시간이 다른 반은 그 요일 규칙의 시간을 쓴다. 단일 시간 반은 지난달 실제
+        // 수업 시간(daySource)을 그대로 잇는다 — 반 기본값과 다르게 운영 중일 수 있다.
+        const ruleTimes = getClassTemplateScheduleRules(template).length >= 2
+          ? getClassTemplateTimesForDate(template, dateDayKey)
           : null;
         return ({
         className: template.name || sourceLesson.className,
@@ -91,11 +95,11 @@ export function buildMonthlyRegularLessonOpenPlan({ lessons = [], monthKey = "",
         color: template.color || sourceLesson.color || "#bfdbfe",
         date,
         dayOfWeek: dateDayKey,
-        endTime: saturdayTimes?.endTime || daySource.endTime,
+        endTime: ruleTimes?.endTime || daySource.endTime,
         lessonId: stableLessonId(date, classTemplateId),
         lessonType: "class",
         sourceLabel: `월 오픈 · ${sourceMonth} 실제 명단 연장`,
-        startTime: saturdayTimes?.startTime || daySource.startTime,
+        startTime: ruleTimes?.startTime || daySource.startTime,
         status: "scheduled",
         studentIds: dayStudentIds,
         teacherId: sourceLesson.teacherId || "instructor_owner_001"

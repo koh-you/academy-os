@@ -66,6 +66,7 @@ assert.equal(classRow.start_time, "07:05");
 assert.equal(classRow.end_time, "23:59");
 assert.equal(classRow.color, "#17213a");
 assert.equal(classRow.status, "active");
+assert.deepEqual(classRow.schedule_rules, [], "요일별 시간표를 안 주면 빈 배열(단일 시간 반)");
 assertIsoTimestamp(classRow.updated_at);
 assert.deepEqual(fromClassTemplateRow({ ...classRow, extra_column: true }), {
   classTemplateId: "template_mapper",
@@ -73,9 +74,22 @@ assert.deepEqual(fromClassTemplateRow({ ...classRow, extra_column: true }), {
   days: ["월", "수", "금"],
   startTime: "07:05",
   endTime: "23:59",
+  scheduleRules: [],
   color: "#17213a",
   status: "active"
 });
+// 요일별 시간표(2026-09-17)는 jsonb 로 왕복한다. 잘못된 항목은 저장 전에 걸러진다.
+const ruledRow = toClassTemplateRow({
+  classTemplateId: "template_rules",
+  name: "화목토",
+  days: ["tue", "thu", "sat"],
+  startTime: "16:00",
+  endTime: "19:00",
+  scheduleRules: [{ days: ["thu", "tue"], startTime: "16:00", endTime: "19:00" }, { days: ["sat"], startTime: "10:00", endTime: "13:00" }, { days: [], startTime: "1:00", endTime: "2:00" }]
+});
+assert.deepEqual(ruledRow.schedule_rules, [{ days: ["tue", "thu"], startTime: "16:00", endTime: "19:00" }, { days: ["sat"], startTime: "10:00", endTime: "13:00" }]);
+assert.deepEqual(fromClassTemplateRow(ruledRow).scheduleRules, ruledRow.schedule_rules);
+assert.deepEqual(fromClassTemplateRow({ ...ruledRow, schedule_rules: null }).scheduleRules, [], "옛 행(null)도 빈 배열");
 
 const lessonRow = toLessonRow({
   lessonId: "lesson_mapper_1",

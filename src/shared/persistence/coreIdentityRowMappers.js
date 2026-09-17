@@ -82,6 +82,24 @@ export function fromStudentRow(row) {
   };
 }
 
+// 요일 묶음별 시간표 정리. shared/utils/classTemplateSchedule 의 normalize 와 같은 규칙이지만
+// 이 모듈은 import 를 두지 않는 순수 매퍼 계약(test-fourth-pass-row-mapper-baseline)이라 여기
+// 작게 다시 쓴다. 검증 문장은 저장 전에 classTemplateStore 가 이미 냈다.
+const classDayOrder = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+function normalizeClassTemplateScheduleRules(rules) {
+  if (!Array.isArray(rules)) return [];
+  return rules
+    .map((rule) => {
+      const days = new Set((Array.isArray(rule?.days) ? rule.days : []).map((day) => String(day).toLowerCase()));
+      return {
+        days: classDayOrder.filter((day) => days.has(day)),
+        startTime: normalizeClockTime(rule?.startTime),
+        endTime: normalizeClockTime(rule?.endTime)
+      };
+    })
+    .filter((rule) => rule.days.length > 0 && rule.startTime && rule.endTime && rule.startTime < rule.endTime);
+}
+
 export function toClassTemplateRow(classTemplate) {
   return {
     class_template_id: classTemplate.classTemplateId,
@@ -89,6 +107,8 @@ export function toClassTemplateRow(classTemplate) {
     days: classTemplate.days ?? [],
     start_time: compact(normalizeClockTime(classTemplate.startTime)),
     end_time: compact(normalizeClockTime(classTemplate.endTime)),
+    // 요일 묶음별 시간표(2026-09-17). days/start_time/end_time 은 여기서 파생된 요약값.
+    schedule_rules: normalizeClassTemplateScheduleRules(classTemplate.scheduleRules),
     color: classTemplate.color ?? "#17213a",
     status: classTemplate.status ?? "active",
     updated_at: new Date().toISOString()
@@ -102,6 +122,7 @@ export function fromClassTemplateRow(row) {
     days: row.days ?? [],
     startTime: normalizeClockTime(row.start_time),
     endTime: normalizeClockTime(row.end_time),
+    scheduleRules: normalizeClassTemplateScheduleRules(row.schedule_rules),
     color: row.color,
     status: row.status
   };
