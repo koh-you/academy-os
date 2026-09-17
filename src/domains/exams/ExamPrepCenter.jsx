@@ -461,7 +461,12 @@ export function ExamPrepCenter({
                           <button
                             className="dangerSoftButton compact examPrepOrphanDeleteButton"
                             disabled={rowSaveStates[row.examPrepId] === "saving"}
-                            onClick={() => onDeleteRow?.(row.examPrepId)}
+                            // 행 전체가 상세 관리 모달을 여는 버튼이라, 막지 않으면 삭제를 누를 때
+                            // 클릭이 행까지 올라가 모달이 같이 열린다(2026-09-17 두 변경이 맞물린 자리).
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              onDeleteRow?.(row.examPrepId);
+                            }}
                             type="button"
                           >
                             이 행 삭제

@@ -306,6 +306,9 @@ assert.match(centerSource, /연결된 활성 학생 없음/);
 // 연결이 끊긴 행은 목록에서 바로 지울 수 있어야 한다 — 상세 관리 안에서만 지울 수 있으면
 // "남는 줄" 로 보인다(2026-09-17 원장 요청).
 assert.match(centerSource, /isOrphaned \? \(\s+<button[\s\S]*?examPrepOrphanDeleteButton[\s\S]*?onDeleteRow\?\.\(row\.examPrepId\)/);
+// 행 전체가 상세 관리 모달을 여는 버튼이라, 행 안의 삭제 버튼은 클릭 전파를 막아야 한다.
+// 막지 않으면 삭제와 동시에 모달이 열린다(2026-09-17 행 클릭 + 행 내 삭제 버튼이 맞물린 자리).
+assert.match(centerSource, /examPrepOrphanDeleteButton[\s\S]*?event\.stopPropagation\(\)[\s\S]*?onDeleteRow\?\.\(row\.examPrepId\)/);
 assert.doesNotMatch(centerSource, /className="examPrepInlineTextarea"/);
 assert.doesNotMatch(centerSource, /<span>시험 후 총평<\/span>/);
 assert.doesNotMatch(centerSource, /<span>관리<\/span>/);
