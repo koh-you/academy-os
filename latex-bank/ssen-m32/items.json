@@ -1,0 +1,51 @@
+{
+ "book": "쎈 중3-2 수학",
+ "id_style": "number",
+ "source_package": "output/problem-bank/ssen-m32 (ingest-scan-badges --numbering book · 답지 ingest-scan-answers --layout lssen)",
+ "variant_level": 0,
+ "units": [
+  {
+   "code": "01",
+   "title": "삼각비",
+   "pages": "9~30",
+   "groups": []
+  },
+  {
+   "code": "02",
+   "title": "삼각비의 활용",
+   "pages": "32~49",
+   "groups": []
+  },
+  {
+   "code": "03",
+   "title": "원과 직선",
+   "pages": "51~71",
+   "groups": []
+  },
+  {
+   "code": "04",
+   "title": "원주각",
+   "pages": "73~86",
+   "groups": []
+  },
+  {
+   "code": "05",
+   "title": "원주각의 활용",
+   "pages": "88~103",
+   "groups": []
+  },
+  {
+   "code": "06",
+   "title": "대푯값과 산포도",
+   "pages": "105~119",
+   "groups": []
+  },
+  {
+   "code": "07",
+   "title": "상관관계",
+   "pages": "121~131",
+   "groups": []
+  }
+ ],
+ "items": {}
+}

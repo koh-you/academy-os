@@ -1,0 +1,63 @@
+{
+ "book": "라이트쎈 공통수학2",
+ "id_style": "number",
+ "source_package": "output/problem-bank/lssen-cm2 (ingest-scan-badges --numbering book · 답지 ingest-scan-answers --layout lssen)",
+ "variant_level": 0,
+ "units": [
+  {
+   "code": "01",
+   "title": "평면좌표",
+   "pages": "9~21",
+   "groups": []
+  },
+  {
+   "code": "02",
+   "title": "직선의 방정식",
+   "pages": "22~37",
+   "groups": []
+  },
+  {
+   "code": "03",
+   "title": "원의 방정식",
+   "pages": "38~58",
+   "groups": []
+  },
+  {
+   "code": "04",
+   "title": "도형의 이동",
+   "pages": "60~78",
+   "groups": []
+  },
+  {
+   "code": "06",
+   "title": "집합의 연산",
+   "pages": "79~95",
+   "groups": []
+  },
+  {
+   "code": "07",
+   "title": "명제",
+   "pages": "96~117",
+   "groups": []
+  },
+  {
+   "code": "08",
+   "title": "함수",
+   "pages": "120~140",
+   "groups": []
+  },
+  {
+   "code": "09",
+   "title": "유리식과 유리함수",
+   "pages": "142~159",
+   "groups": []
+  },
+  {
+   "code": "10",
+   "title": "무리식과 무리함수",
+   "pages": "160~173",
+   "groups": []
+  }
+ ],
+ "items": {}
+}

@@ -1,0 +1,75 @@
+{
+ "book": "라이트쎈 공통수학1",
+ "id_style": "number",
+ "source_package": "output/problem-bank/lssen-cm1 (ingest-scan-badges --numbering book · 답지 ingest-scan-answers --layout lssen)",
+ "variant_level": 0,
+ "units": [
+  {
+   "code": "01",
+   "title": "다항식의 연산",
+   "pages": "8~23",
+   "groups": []
+  },
+  {
+   "code": "02",
+   "title": "나머지 정리와 인수분해",
+   "pages": "24~45",
+   "groups": []
+  },
+  {
+   "code": "03",
+   "title": "복소수",
+   "pages": "48~63",
+   "groups": []
+  },
+  {
+   "code": "04",
+   "title": "이차방정식",
+   "pages": "64~82",
+   "groups": []
+  },
+  {
+   "code": "05",
+   "title": "이차방정식과 이차함수",
+   "pages": "84~97",
+   "groups": []
+  },
+  {
+   "code": "06",
+   "title": "여러 가지 방정식",
+   "pages": "98~116",
+   "groups": []
+  },
+  {
+   "code": "07",
+   "title": "일차부등식",
+   "pages": "118~131",
+   "groups": []
+  },
+  {
+   "code": "08",
+   "title": "이차부등식",
+   "pages": "132~151",
+   "groups": []
+  },
+  {
+   "code": "09",
+   "title": "순열",
+   "pages": "154~169",
+   "groups": []
+  },
+  {
+   "code": "10",
+   "title": "조합",
+   "pages": "170~181",
+   "groups": []
+  },
+  {
+   "code": "11",
+   "title": "행렬과 그 연산",
+   "pages": "184~200",
+   "groups": []
+  }
+ ],
+ "items": {}
+}

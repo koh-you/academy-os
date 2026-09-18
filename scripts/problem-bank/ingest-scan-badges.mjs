@@ -40,7 +40,42 @@ const INGEST_VERSION = "scan-badges-1.1";
  * 배지 띠(배지 x 좌우 좁은 세로 띠)를 2배로 키워 숫자만 다시 읽는다. 쪽 전체 OCR 이 놓친 굵은 두 자리 배지를 되찾는 보조 판독.
  * 돌려주는 토큰 좌표는 쪽(pt) 기준이다. 세 자리(유형 라벨)·한 자리는 버린다.
  */
-async function ocrBadgeStrip(tesseract, canvas, renderScale, box, imagePath) {
+/** 컬럼 왼쪽 띠에서 색 꼬리표(유형 상자 머리) 줄의 y(pt) 목록 — 띠 폭의 18% 이상이 색(꼬리표 안 흰 글자 때문에 낮다)이고 높이 7~18pt 인 덩어리. 배지 줄은 호출 쪽에서 뺀다. */
+function findTypeTagRows(imageData, width, scale, box) {
+  const x0 = Math.max(0, Math.floor(box.x0 * scale)), x1 = Math.ceil(box.x1 * scale);
+  const y0 = Math.max(0, Math.floor(box.y0 * scale)), y1 = Math.ceil(box.y1 * scale);
+  const rows = [];
+  for (let y = y0; y < y1; y += 1) {
+    let colored = 0;
+    const rowOffset = y * width * 4;
+    for (let x = x0; x < x1; x += 1) {
+      const o = rowOffset + x * 4;
+      const max = Math.max(imageData[o], imageData[o + 1], imageData[o + 2]), min = Math.min(imageData[o], imageData[o + 1], imageData[o + 2]);
+      if (max - min > 50 && max < 235) colored += 1;
+    }
+    rows.push(colored >= (x1 - x0) * 0.18);
+  }
+  const tops = [];
+  const gap = Math.round(2.5 * scale);
+  let start = -1;
+  let last = -1;
+  for (let index = 0; index <= rows.length; index += 1) {
+    const on = index < rows.length && rows[index];
+    if (on) {
+      if (start === -1) start = index;
+      last = index;
+      continue;
+    }
+    if (start !== -1 && (index - last > gap || index === rows.length)) {
+      const h = (last + 1 - start) / scale;
+      if (h >= 5 && h <= 18) tops.push((y0 + start) / scale);
+      start = -1;
+    }
+  }
+  return tops;
+}
+
+async function ocrBadgeStrip(tesseract, canvas, renderScale, box, imagePath, pattern = /^\d{2}$/, minH = 9) {
   const crop = cropToCanvas(canvas, renderScale, box);
   const zoom = 2;
   const scaled = createCanvas(crop.width * zoom, crop.height * zoom);
@@ -53,7 +88,7 @@ async function ocrBadgeStrip(tesseract, canvas, renderScale, box, imagePath) {
   for (const psm of [11, 6]) {
     const tsv = await runTesseract(tesseract, imagePath, { lang: "eng", psm, output: "tsv" }).catch(() => "");
     found.push(...parseTesseractTsv(tsv, renderScale * zoom)
-      .filter((token) => /^\d{2}$/.test(token.text) && token.conf >= 30 && token.h >= 9 && token.h <= 14)
+      .filter((token) => pattern.test(token.text) && token.conf >= 30 && token.h >= minH && token.h <= 14)
       .map((token) => ({ ...token, x: token.x + box.x0, y: token.y + box.y0, strip: true })));
   }
   return found
@@ -158,6 +193,11 @@ async function main() {
     process.exit(2);
   }
   const dpi = Number(args.dpi) || 220;
+  // --numbering book: 문항 번호가 책 전체 4자리(0001~)인 판(라이트쎈·쎈). 배지는 네 자리, id 는 그 번호, 정렬·연속성도 번호 그대로.
+  // 기본(page)은 베이직쎈처럼 쪽마다 01 부터 다시 시작하는 두 자리 배지 — id 「쪽-번호」.
+  const bookNumbering = String(args.numbering ?? "page") === "book";
+  const badgePattern = bookNumbering ? /^\d{4}$/ : /^\d{2}$/;
+  const badgeMinH = bookNumbering ? 8 : 9.5;
   const renderScale = dpi / 72;
   const previewScale = 100 / 72;
   const unitNames = String(args.units ?? "").split(",").map((value) => value.trim()).filter(Boolean);
@@ -272,6 +312,8 @@ async function main() {
       .sort((a, b) => Math.min(a.x, pageWidth - a.x - a.w) - Math.min(b.x, pageWidth - b.x - b.w))[0];
     let printedPage = printedPageToken ? Number(printedPageToken.text) : (lastPrintedPage ?? pageNumber - 1) + 1;
     if (lastPrintedPage !== null && Math.abs(printedPage - (lastPrintedPage + 1)) > 2) printedPage = lastPrintedPage + 1;
+    // --page-offset N: 인쇄 쪽 = pdf 쪽 + N 으로 고정(첫 쪽 바닥글이 없거나 OCR 이 흔들리는 스캔).
+    if (args["page-offset"] !== undefined) printedPage = pageNumber + Number(args["page-offset"]);
     lastPrintedPage = printedPage;
 
     const bodyTop = pageHeight * 0.06;
@@ -330,7 +372,7 @@ async function main() {
     };
     // 3자리는 유형 라벨뿐이다(문항 배지는 두 자리까지). 앞의 0 이 떨어져 두 자리로 읽힌 라벨은 연한 초록 글자로 안다.
     // 「018」을 「O18」로 읽은 것(앞 0 이 알파벳 O)도 세 글자라 라벨이다 — 회색 유형 쪽에서 배지로 잘못 잡혀 뒤 번호가 밀렸다(32쪽).
-    const isTypeLabelToken = (token) => /^[0O]?\d{3}$/.test(token.text) || /^O\d{2}$/.test(token.text) || isGreenGlyph(token);
+    const isTypeLabelToken = (token) => !bookNumbering && (/^[0O]?\d{3}$/.test(token.text) || /^O\d{2}$/.test(token.text) || isGreenGlyph(token));
     const ringColored = isTypeLabelToken;
     let typeProbe = typeCounter;
     // 유형 라벨: 본문(위 14% 아래)의 색 상자 위 굵은 숫자. OCR 이 「001」을 「01」「1」로 읽어도 라벨이다.
@@ -375,7 +417,7 @@ async function main() {
       const left = columnLeftMargin(imageData, canvas.width, renderScale, column, pageHeight);
       const candidates = tokens
         // 배지는 늘 두 자리(01·13)다. 한 자리는 선택지 「①」 오독이다.
-        .filter((token) => /^\d{2}$/.test(token.text) && token.conf >= 40 && token.h >= 9.5 && token.h <= 13)
+        .filter((token) => badgePattern.test(token.text) && token.conf >= 40 && token.h >= badgeMinH && token.h <= 13)
         .filter((token) => token.x >= column.x0 + 2 && token.x <= column.x0 + 80 && token.y > bodyTop && token.y + token.h < bodyBottom)
         .filter((token) => !ringColored(token))
       // 배지 x: 후보마다 [x, x+8pt] 창에 드는 후보 수를 세어 가장 많은 창의 왼쪽 끝(두 OCR 모드가 같은 배지를 조금 다른 x 로
@@ -388,7 +430,7 @@ async function main() {
       // 배지 띠 재판독: 쪽 전체 OCR 이 굵은 두 자리 배지를 놓치면(「11」 신뢰도 0 등) 그 문항이 앞 문항 크롭에 붙는다.
       // 배지 x 좌우 좁은 띠만 2배로 키워 숫자만 다시 읽어 빠진 배지를 보탠다(같은 y 의 배지는 한 번만).
       const stripTokens = candidates.length
-        ? await ocrBadgeStrip(tesseract, canvas, renderScale, { x0: Math.max(column.x0, badgeLeft - 5), x1: badgeLeft + 22, y0: bodyTop, y1: bodyBottom }, path.join(tmpDir, `p${pageNumber}-badges-${column.index}.png`))
+        ? await ocrBadgeStrip(tesseract, canvas, renderScale, { x0: Math.max(column.x0, badgeLeft - 5), x1: badgeLeft + (bookNumbering ? 34 : 22), y0: bodyTop, y1: bodyBottom }, path.join(tmpDir, `p${pageNumber}-badges-${column.index}.png`), badgePattern, badgeMinH - 0.5)
         : [];
       // 띠에서 읽은 두 자리가 유형 라벨(「032」)의 앞 두 글자일 수 있다 — 라벨 왼쪽에는 「유형」 꼬리표 상자가 붙어 있고
       // 배지 왼쪽은 빈 여백이므로 꼬리표로 가른다(색은 회색 쪽에서 못 쓴다). 선택지 「④ 1」이 「41」로 읽히는 것은 신뢰도(≥75)로 거른다.
@@ -411,9 +453,14 @@ async function main() {
         .filter((marker) => !badges.some((badge) => Math.abs(badge.y + badge.h / 2 - marker.y) < 8) && !columnTypes.some((label) => Math.abs(label.y + label.h / 2 - marker.y) < 8));
       const columnBox = { x0: badgeLeft - 4, x1: column.x1 };
       // 아래 한계 후보: 다음 배지·유형 라벨·지시문 아이콘·컬럼 바닥
+      // 책 전체 번호 판(라이트쎈·쎈)의 유형 상자: 컬럼 왼쪽 끝 진한 색 꼬리표(「유형 03」 ≈ 40×12pt)가 줄 폭의 절반을 넘게 색으로 채운다.
+      // 그 위·아래 3pt 안이 흰 줄이면 상자 머리다 — 여기서 앞 문항을 자른다(안 자르면 다음 유형 상자가 앞 문항 크롭에 붙는다).
+      const typeTagStops = bookNumbering ? findTypeTagRows(imageData, canvas.width, renderScale, { x0: Math.max(column.x0, badgeLeft - 10), x1: badgeLeft + 60, y0: bodyTop, y1: bodyBottom }).filter((y) => !badges.some((badge) => Math.abs(badge.y - y) < 10)) : [];
+      if (process.env.DEBUG_SSEN === String(pageNumber)) console.log(`  col${column.index} typeTagStops=${typeTagStops.map((y) => y.toFixed(0)).join(",")} badgeLeft=${badgeLeft.toFixed(0)} column.x0=${column.x0.toFixed(0)}`);
       const stops = [
         ...badges.map((badge) => badge.y - 3),
         ...columnTypes.map((label) => label.y - 8),
+        ...typeTagStops.map((y) => y - 6),
         ...markers.map((marker) => marker.y - marker.h / 2 - 3),
         bodyBottom
       ].sort((a, b) => a - b);
@@ -429,10 +476,28 @@ async function main() {
         if (!ink) continue;
         passages.push({ column: column.index, box: { ...columnBox, y0: Math.max(bodyTop, ink.top - 3), y1: Math.min(limit, ink.bottom + 4) }, members: [] });
       }
-      for (const badge of badges) {
+      // 반 컬럼 격자(쎈 중등·라이트쎈 개념 쪽): 한 줄에 「0261 | 0262」 처럼 문항 둘이 나란히 온다. 왼쪽 배지와 같은 줄, 컬럼 가운데
+      // (배지에서 컬럼 폭의 35~70%)에 있는 배지가 오른쪽 문항이다 — 왼쫓 문항은 그 배지 앞에서, 오른쪽 문항은 거기서 컬럼 끝까지 자른다.
+      const columnWidth = column.x1 - badgeLeft;
+      const rightBadges = bookNumbering
+        ? tokens
+          .filter((token) => badgePattern.test(token.text) && token.conf >= 40 && token.h >= badgeMinH - 1 && token.h <= 13)
+          .filter((token) => token.x >= badgeLeft + columnWidth * 0.35 && token.x <= badgeLeft + columnWidth * 0.7 && token.y > bodyTop && token.y + token.h < bodyBottom)
+          .filter((token) => badges.some((badge) => Math.abs(badge.y - token.y) < 6))
+          .filter((token, index, list) => !list.slice(0, index).some((other) => Math.abs(other.y - token.y) <= 6))
+        : [];
+      const placed = [
+        ...badges.map((badge) => {
+          const pair = rightBadges.find((token) => Math.abs(token.y - badge.y) < 6);
+          return { badge, x0: columnBox.x0, x1: pair ? pair.x - 4 : columnBox.x1, half: pair ? "left" : null };
+        }),
+        ...rightBadges.map((token) => ({ badge: token, x0: token.x - 4, x1: columnBox.x1, half: "right" }))
+      ].sort((a, b) => (Math.abs(a.badge.y - b.badge.y) < 6 ? a.badge.x - b.badge.x : a.badge.y - b.badge.y));
+      for (const { badge, x0: bx0, x1: bx1, half } of placed) {
         const limit = nextStop(badge.y + badge.h);
-        const ink = inkRange(imageData, canvas.width, renderScale, { ...columnBox, y0: badge.y - 2, y1: limit }, []);
-        const box = { ...columnBox, y0: Math.max(bodyTop, badge.y - 3), y1: ink ? Math.min(limit, ink.bottom + 4) : limit };
+        const cell = { x0: bx0, x1: bx1 };
+        const ink = inkRange(imageData, canvas.width, renderScale, { ...cell, y0: badge.y - 2, y1: limit }, []);
+        const box = { ...cell, y0: Math.max(bodyTop, badge.y - 3), y1: ink ? Math.min(limit, ink.bottom + 4) : limit };
         const number = Number(badge.text.replace(/^O/, "0"));
         const typeAbove = columnTypes.filter((label) => label.y < badge.y).pop();
         const passage = passages.filter((entry) => entry.column === column.index && entry.box.y1 <= badge.y + 2).pop();
@@ -441,21 +506,29 @@ async function main() {
         const flags = [];
         if (!ink) flags.push("no_ink");
         if (box.y1 - box.y0 < 10) flags.push("too_short");
+        if (half) flags.push(`half_${half}`);
         boxes.push({ column: column.index, number, box, typeLabel: typeAbove ? typeAbove.text : null, passage: passageStillActive ? passage : null, conf: badge.conf, flags });
         if (passageStillActive) passage.members.push(number);
       }
     }
-    boxes.sort((a, b) => a.column - b.column || a.box.y0 - b.box.y0);
+    // 같은 줄(6pt 안)의 반 컬럼 짝은 왼쪽 → 오른쪽.
+    boxes.sort((a, b) => a.column - b.column || (Math.abs(a.box.y0 - b.box.y0) < 6 ? a.box.x0 - b.box.x0 : a.box.y0 - b.box.y0));
     // 번호는 쪽 안에서 읽는 순서대로 1씩 는다. OCR 오독(14→24·06 중복)은 순서로 바로잡고 표시한다.
     // 앞 쪽과 같은 구역이면 첫 번호도 앞 쪽 마지막 번호 + 1 이어야 한다.
-    let expected = currentBlock === lastBlockOfPreviousPage && lastNumber !== null ? lastNumber + 1 : null;
+    let expected = (bookNumbering || currentBlock === lastBlockOfPreviousPage) && lastNumber !== null ? lastNumber + 1 : null;
     const seen = new Set();
-    for (const entry of boxes) {
+    for (const [index, entry] of boxes.entries()) {
       if (expected !== null && entry.number !== expected) {
         const diff = Math.abs(entry.number - expected);
-        // 오독으로 볼 만한 것만 고친다: 중복·0·큰 수, 앞자리 오독(±10·±20), 한두 개 차이. 그 밖은 읽은 값을 믿고 표시만 한다.
-        // 한두 개 차이는 문항을 못 찾은 것일 수 있으니 읽은 값을 믿는다(number_gap 으로만 표시).
-        if (seen.has(entry.number) || entry.number === 0 || entry.number > 60 || [10, 20].includes(diff)) {
+        // 책 전체 번호 판: 읽은 값이 다음 배지와 이어지면(읽은 값 + 1 = 다음 읽은 값) 오독이 아니라 책이 건너뛴 것(스캔에 없는 단원)이다 —
+        // 읽은 값을 믿고 표시만 한다. 다음 배지와도 안 이어지고 기대값과 한 자리만 다르면 오독으로 고친다.
+        const nextRead = boxes[index + 1]?.number ?? null;
+        const runsOn = nextRead !== null && nextRead === entry.number + 1;
+        const oneDigitOff = String(entry.number).padStart(4, "0").split("").filter((ch, k) => ch !== String(expected).padStart(4, "0")[k]).length === 1;
+        const bookMisread = bookNumbering && !runsOn && (seen.has(entry.number) || entry.number === 0 || oneDigitOff || diff >= 300);
+        // 쪽 번호 판: 오독으로 볼 만한 것만 고친다: 중복·0·큰 수, 앞자리 오독(±10·±20), 한두 개 차이. 그 밖은 읽은 값을 믿고 표시만 한다.
+        const pageMisread = !bookNumbering && (seen.has(entry.number) || entry.number === 0 || entry.number > 60 || [10, 20].includes(diff));
+        if (bookMisread || pageMisread) {
           entry.flags.push(`number_corrected(${entry.number})`);
           entry.number = expected;
         } else {
@@ -496,7 +569,7 @@ async function main() {
     }
     let pageCount = 0;
     for (const entry of boxes) {
-      const numberLabel = `${printedPage}-${String(entry.number).padStart(2, "0")}`;
+      const numberLabel = bookNumbering ? String(entry.number).padStart(4, "0") : `${printedPage}-${String(entry.number).padStart(2, "0")}`;
       const itemId = `${bookId}-${numberLabel}`;
       if (items.some((item) => item.item_id === itemId)) {
         flagged.push({ item_id: itemId, flags: ["duplicate_number"] });
@@ -519,12 +592,12 @@ async function main() {
       const regions = [{ kind: "body", position: 0, pdf_page: pageNumber, bbox_normalized: toBbox(entry.box), file, ...size }];
       const passageRegion = entry.passage ? passageFiles.get(entry.passage) : null;
       if (passageRegion) regions.push(passageRegion);
-      const reviewFlags = [...entry.flags];
+      const reviewFlags = entry.flags.filter((flag) => !flag.startsWith("half_"));
       if (entry.conf < 50 && !reviewFlags.some((flag) => flag.startsWith("number_corrected"))) reviewFlags.push("low_ocr_conf");
       items.push({
         item_id: itemId,
         number_label: numberLabel,
-        number_sort: printedPage * 100 + entry.number,
+        number_sort: bookNumbering ? entry.number : printedPage * 100 + entry.number,
         printed_page: printedPage,
         pdf_page: pageNumber,
         column: entry.column,
@@ -586,7 +659,7 @@ async function main() {
       page_count: doc.numPages,
       pages_ingested: [fromPage, toPage],
       item_count: items.length,
-      layout_profile: { numbering: "printed_page-badge", render_dpi: dpi, ocr: "tesseract" },
+      layout_profile: { numbering: bookNumbering ? "book-badge" : "printed_page-badge", render_dpi: dpi, ocr: "tesseract" },
       ingest_version: INGEST_VERSION
     },
     units,
