@@ -248,7 +248,9 @@ test("student withdrawal rebases a stale student row before saving future roster
   await page.getByRole("dialog", { name: /정산 미리보기 학생 학생 프로파일/ })
     .getByRole("button", { name: "퇴원 처리" }).click();
   const withdrawalModal = page.getByRole("dialog", { name: "학생 퇴원 처리 확인" });
-  await expect(withdrawalModal.getByLabel("정산 미리보기 학생 퇴원 적용 시점")).toHaveValue("tomorrow");
+  // 2026-09-18 · 적용 시점은 라디오 두 줄. 오늘(08-01) 행에 출결이 찍혀 있으므로 기본값은 "오늘 행 유지".
+  await expect(withdrawalModal.getByRole("radio", { name: /오늘 행 유지 · 내일부터 제외/ })).toBeChecked();
+  await expect(withdrawalModal.getByRole("radio", { name: /오늘부터 행 제외/ })).not.toBeChecked();
   await withdrawalModal.getByLabel("코멘트").fill("특강수강생");
   await withdrawalModal.getByRole("button", { name: "퇴원 처리", exact: true }).click();
   await expect(withdrawalModal).toBeHidden();

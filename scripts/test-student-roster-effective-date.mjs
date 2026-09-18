@@ -2,7 +2,9 @@ import assert from "node:assert/strict";
 import {
   getNextKoreaDateKey,
   getRosterEffectiveFromDate,
-  hasStudentLessonRowOnDate
+  hasStudentLessonRowOnDate,
+  getDefaultRosterEffectiveMode,
+  hasStudentSavedLessonDataOnDate
 } from "../src/domains/students/rosterEffectiveDate.js";
 import { createClassRosterSavePlan } from "../src/domains/students/classRosterPersistence.js";
 
@@ -33,6 +35,18 @@ assert.equal(hasStudentLessonRowOnDate({
   records: [{ lessonId: "old-today", studentId: student.studentId }],
   studentId: student.studentId
 }), true, "명단에서 빠졌어도 오늘 저장 기록이 있으면 적용 시점을 선택해야 합니다.");
+
+// 퇴원 창 기본값(2026-09-18). 오늘 행이 없으면 today, 오늘 행이 비어 있으면 today(잘못 등록한
+// 학생을 그날 퇴원시키면 빈 행이 남지 않게), 출결·기록이 있으면 tomorrow(오늘 기록 보존).
+const todayArgs = { date: "2026-08-10", lessons, studentId: student.studentId };
+assert.equal(getDefaultRosterEffectiveMode({ ...todayArgs, lessons: [] }), "today", "오늘 행 없음");
+assert.equal(getDefaultRosterEffectiveMode({ ...todayArgs, records: [] }), "today", "오늘 행은 있지만 비어 있음");
+assert.equal(getDefaultRosterEffectiveMode({ ...todayArgs, records: [{ lessonId: "old-today", studentId: student.studentId, attendanceStatus: "pending", assignmentStatus: "" }] }), "today", "대기 상태 빈 기록도 비어 있음");
+assert.equal(getDefaultRosterEffectiveMode({ ...todayArgs, records: [{ lessonId: "old-today", studentId: student.studentId, attendanceStatus: "present" }] }), "tomorrow", "출결 찍힘");
+assert.equal(getDefaultRosterEffectiveMode({ ...todayArgs, records: [{ lessonId: "old-today", studentId: student.studentId, checkInAt: "2026-08-10T16:05:00+09:00" }] }), "tomorrow", "등원 시각");
+assert.equal(getDefaultRosterEffectiveMode({ ...todayArgs, records: [{ lessonId: "old-today", studentId: student.studentId, lessonProgress: "12단원" }] }), "tomorrow", "진도 적힘");
+assert.equal(getDefaultRosterEffectiveMode({ ...todayArgs, records: [{ lessonId: "old-today", studentId: student.studentId, assignmentStatus: "complete_thorough" }] }), "tomorrow", "과제 상태 고름");
+assert.equal(hasStudentSavedLessonDataOnDate({ ...todayArgs, records: [{ lessonId: "old-future", studentId: student.studentId, attendanceStatus: "present" }] }), false, "다른 날 기록은 오늘 것이 아니다");
 
 const tomorrowPlan = createClassRosterSavePlan({
   fromDate: "2026-08-11",
