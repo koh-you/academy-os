@@ -119,6 +119,19 @@ function reviewSeverity(note) {
 }
 const reviewSeverityLabels = { red: "🔴 내용 확인", yellow: "🟡 조판", memo: "📝 전사 메모", boundary: "✂ 경계" };
 
+/** 상태 한 줄: 배지(완료 · 확인 필요 · 실패 · 진행 중) + 짧은 설명. 사용자는 됐는지·확인할 게 있는지만 보면 된다. */
+const statusBadgeLabels = { done: "완료", error: "확인 필요", importing: "진행 중", running: "진행 중", ready: "준비됨", idle: "" };
+function StatusLine({ stage, message, className = "" }) {
+  if (!message) return null;
+  const label = statusBadgeLabels[stage] ?? "";
+  return (
+    <p aria-live="polite" className={`problemBankStatus stage-${stage} ${className}`.trim()}>
+      {label ? <span className="problemBankStatusBadge">{label}</span> : null}
+      <span>{message}</span>
+    </p>
+  );
+}
+
 export function ProblemBankCenter() {
   const [books, setBooks] = useState([]);
   const [listError, setListError] = useState("");
@@ -226,11 +239,11 @@ export function ProblemBankCenter() {
       return;
     }
     const answerSummary = answerPackage.manifest
-      ? ` · 해설 ${answerPackage.manifest.solutions?.length ?? 0}개 · 답 ${answerPackage.manifest.answers?.length ?? 0}개`
+      ? ` · 해설 ${answerPackage.manifest.solutions?.length ?? 0} · 답 ${answerPackage.manifest.answers?.length ?? 0}`
       : "";
     setUpload({
       stage: "ready",
-      message: `${manifest.book?.title ?? "교재"} · 문항 ${manifest.items?.length ?? 0}개 · 이미지 ${matched.length}개${answerSummary}. 등록을 누르면 서버에 올립니다.`,
+      message: `${manifest.book?.title ?? "교재"} · 문항 ${manifest.items?.length ?? 0}${answerSummary} — 등록을 누르면 올라갑니다`,
       progress: 0,
       total: matched.length + answerPackage.imageFiles.length,
       manifest,
@@ -275,21 +288,22 @@ export function ProblemBankCenter() {
         const solvedCount = refreshed.items.filter((item) => item.hasSolution).length;
         answerMatches = solvedCount === answerResult.solutionCount;
         answerNote = answerMatches
-          ? ` · 해설 ${answerResult.solutionCount}개 · 답 ${answerResult.answerCount}개`
-          : ` · 해설 수 불일치 (서버 ${solvedCount} / 패키지 ${answerResult.solutionCount})`;
+          ? ` · 해설 ${answerResult.solutionCount} · 답 ${answerResult.answerCount}`
+          : ` · 해설이 서버 ${solvedCount} / 패키지 ${answerResult.solutionCount}로 다릅니다 — 같은 폴더를 다시 등록하세요`;
       }
+      const reviewCount = (manifest.items ?? []).filter((item) => item.review_status === "flagged").length;
       setUpload({
         ...emptyUpload,
         stage: countMatches && answerMatches ? "done" : "error",
         message: countMatches
-          ? `등록 완료 · ${saved.title} · 문항 ${saved.itemCount}개 · 이미지 ${plan.pending.length}개 올림${plan.skipped ? ` · ${plan.skipped}개 그대로` : ""}${answerNote} (서버 재조회 ${answerMatches ? "일치" : "확인 필요"})`
-          : `등록 뒤 재조회한 문항 수가 다릅니다 (서버 ${saved?.itemCount ?? "없음"} / 패키지 ${manifest.items?.length ?? 0}).`,
+          ? `${saved.title} · 문항 ${saved.itemCount}${answerNote}${reviewCount ? ` · 검토 필요 ${reviewCount}건은 아래 목록에서` : ""}`
+          : `${manifest.book?.title ?? "교재"} · 서버 문항 ${saved?.itemCount ?? "없음"} / 패키지 ${manifest.items?.length ?? 0} — 같은 폴더를 다시 등록하세요`,
         progress: imageFiles.length + answerImageFiles.length,
         total: imageFiles.length + answerImageFiles.length
       });
       setSelectedBookId(result.bookId);
     } catch (error) {
-      setUpload((current) => ({ ...current, stage: "error", message: error.message || "패키지 등록에 실패했습니다." }));
+      setUpload((current) => ({ ...current, stage: "error", message: `등록이 끊겼습니다 — ${error.message || "원인 미상"}. 같은 폴더를 다시 등록하면 이어서 올라갑니다.` }));
     }
   }
 
@@ -307,7 +321,7 @@ export function ProblemBankCenter() {
     const unmatched = (manifest.solutions ?? []).filter((entry) => !numbers.has(entry.number_label)).length;
     setAnswerUpload({
       stage: "ready",
-      message: `해설 ${manifest.solutions?.length ?? 0}개 · 답 ${manifest.answers?.length ?? 0}개 · 이미지 ${imageFiles.length}개${unmatched ? ` · 교재에 없는 번호 ${unmatched}개는 건너뜁니다` : ""}. 등록을 누르면 서버에 올립니다.`,
+      message: `해설 ${manifest.solutions?.length ?? 0} · 답 ${manifest.answers?.length ?? 0}${unmatched ? ` · 교재에 없는 번호 ${unmatched}개는 건너뜀` : ""} — 등록을 누르면 올라갑니다`,
       progress: 0,
       total: imageFiles.length,
       manifest,
@@ -332,25 +346,25 @@ export function ProblemBankCenter() {
         ...emptyAnswerUpload,
         stage: countMatches ? "done" : "error",
         message: countMatches
-          ? `등록 완료 · 해설 ${result.solutionCount}개 · 답 ${result.answerCount}개 (서버 재조회 일치)${result.unmatched?.length ? ` · 건너뜀 ${result.unmatched.length}개` : ""}`
-          : `등록 뒤 재조회한 해설 수가 다릅니다 (서버 ${solvedCount} / 패키지 ${result.solutionCount}).`
+          ? `해설 ${result.solutionCount} · 답 ${result.answerCount}${result.unmatched?.length ? ` · 교재에 없는 번호 ${result.unmatched.length}개는 건너뜀` : ""}`
+          : `해설이 서버 ${solvedCount} / 패키지 ${result.solutionCount}로 다릅니다 — 같은 폴더를 다시 올리세요`
       });
     } catch (error) {
-      setAnswerUpload((current) => ({ ...current, stage: "error", message: error.message || "정답·해설 패키지 등록에 실패했습니다." }));
+      setAnswerUpload((current) => ({ ...current, stage: "error", message: `올리다 끊겼습니다 — ${error.message || "원인 미상"}. 같은 폴더를 다시 올리면 이어서 올라갑니다.` }));
     }
   }
 
   async function runAudit() {
     if (!detail) return;
-    setAudit({ stage: "running", message: "Storage 파일 목록과 영역 표를 대조하는 중…", missing: [] });
+    setAudit({ stage: "running", message: "서버 파일을 대조하는 중…", missing: [] });
     try {
       const result = await auditProblemBankBook(detail.book.bookId);
       const missing = result.missing ?? [];
       setAudit({
-        stage: "done",
+        stage: missing.length ? "error" : "done",
         message: missing.length
-          ? `이미지 ${missing.length}개가 Storage 에 없습니다 (영역 ${result.regionCount}개 · 파일 ${result.storedCount}개). 패키지 폴더를 다시 등록하면 채워집니다.`
-          : `이미지 누락 없음 · 영역 ${result.regionCount}개 · 파일 ${result.storedCount}개${result.orphanCount ? ` · 참조 없는 파일 ${result.orphanCount}개` : ""}`,
+          ? `이미지 ${missing.length}개가 서버에 없습니다 — 같은 폴더를 다시 등록하면 채워집니다`
+          : `이미지 ${result.storedCount}개 모두 있음`,
         missing
       });
     } catch (error) {
@@ -401,9 +415,7 @@ export function ProblemBankCenter() {
             type="file"
             webkitdirectory=""
           />
-          {upload.message ? (
-            <p aria-live="polite" className={`problemBankUploadMessage stage-${upload.stage}`}>{upload.message}</p>
-          ) : null}
+          <StatusLine message={upload.message} stage={upload.stage} />
           {upload.stage === "importing" && upload.total ? (
             <progress max={upload.total} value={upload.progress} />
           ) : null}
@@ -469,7 +481,7 @@ export function ProblemBankCenter() {
               </div>
               {editMessage ? <p aria-live="polite" className="problemBankUploadMessage">{editMessage}</p> : null}
               <div className="problemBankAnswerImport">
-                {audit.message ? <p aria-live="polite" className={`problemBankUploadMessage stage-${audit.stage === "error" ? "error" : audit.missing.length ? "error" : "done"}`}>{audit.message}</p> : null}
+                <StatusLine message={audit.message} stage={audit.stage} />
                 {audit.missing.length ? (
                   <ul className="problemBankAuditList">
                     {audit.missing.slice(0, 20).map((entry) => (
@@ -478,9 +490,7 @@ export function ProblemBankCenter() {
                     {audit.missing.length > 20 ? <li>… 외 {audit.missing.length - 20}개</li> : null}
                   </ul>
                 ) : null}
-                {answerUpload.message ? (
-                  <p aria-live="polite" className={`problemBankUploadMessage stage-${answerUpload.stage}`}>{answerUpload.message}</p>
-                ) : null}
+                <StatusLine message={answerUpload.message} stage={answerUpload.stage} />
                 {answerUpload.stage === "importing" && answerUpload.total ? (
                   <progress max={answerUpload.total} value={answerUpload.progress} />
                 ) : null}

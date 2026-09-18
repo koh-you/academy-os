@@ -70,11 +70,13 @@ test("교재관리: 문항과 정답·해설이 든 폴더 하나로 한 번에 
   await loginAsTeacher(page);
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /교재관리/ }).click();
   await page.getByLabel("패키지 폴더 선택").setInputFiles(packageDir);
-  const message = page.locator(".problemBankImportPanel .problemBankUploadMessage");
-  await expect(message).toContainText("문항 2개 · 이미지 2개 · 해설 2개 · 답 2개");
+  const message = page.locator(".problemBankImportPanel .problemBankStatus");
+  await expect(message).toContainText("준비됨");
+  await expect(message).toContainText("문항 2 · 해설 2 · 답 2");
   await page.getByRole("button", { name: "등록", exact: true }).click();
   // 가상 서버의 교재는 문항 20개라 「문항 수 불일치」로 끝나지만, 요청 순서와 파일 이름은 그대로 검증된다.
-  await expect(message).toContainText(/서버 20 \/ 패키지 2/);
+  await expect(message).toContainText("확인 필요");
+  await expect(message).toContainText(/서버 문항 20 \/ 패키지 2/);
   expect(posts.map((post) => post.path)).toEqual(["import", "images", "import-answers", "images"]);
   expect([...posts[1].files].sort()).toEqual(["items/pbk_safefixture1-0001.jpg", "items/pbk_safefixture1-0002.jpg"]);
   expect([...posts[3].files].sort()).toEqual([
