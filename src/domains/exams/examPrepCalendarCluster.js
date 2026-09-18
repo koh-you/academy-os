@@ -1,4 +1,5 @@
 import { createStudentExamPrepRow } from "./studentExamPrepRow.js";
+import { createStudentExamPrepRowId } from "./examPrepRowIdScope.js";
 import { normalizeExamPrepRowReviewDraft } from "./examReviewDraft.js";
 import { safeIdPart } from "../../shared/utils/id.js";
 import {
@@ -253,7 +254,8 @@ export function createExamPrepCalendarCluster(today) {
     );
   }
 
-  function buildExamPrepRowsFromStudents(students, examCycle, classTemplateId = "", existingRows = []) {
+  // idScope: tenant 조각(examPrepRowIdScope). 원장 tenant 는 "" 라 기존 id 그대로.
+  function buildExamPrepRowsFromStudents(students, examCycle, classTemplateId = "", existingRows = [], idScope = "") {
     const classStudents = classTemplateId
       ? students.filter((student) => (student.status ?? "active") === "active" && student.defaultClassTemplateId === classTemplateId)
       : students.filter((student) => (student.status ?? "active") === "active");
@@ -270,7 +272,7 @@ export function createExamPrepCalendarCluster(today) {
         seen.add(key);
 
         return createStudentExamPrepRow({
-          examPrepId: `exam_prep_${safeIdPart(examCycle)}_${safeIdPart(schoolName)}_${safeIdPart(grade)}_${safeIdPart(subject)}`,
+          examPrepId: createStudentExamPrepRowId({ examCycle, grade, idScope, safeIdPart, schoolName, subject }),
           examCycle,
           schoolName,
           grade,
