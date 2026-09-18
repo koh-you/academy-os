@@ -343,7 +343,6 @@ export function ProblemBankCenter() {
     <section className="problemBankCenter">
       <PageHeader
         actions={<span className="countBadge">{books.length}권</span>}
-        description="교재 PDF를 문항 단위 원천으로 등록합니다. 텍스트 PDF는 로컬 도구가 비전 AI 없이 문항을 자르고, 여기서 패키지를 올립니다."
         eyebrow="PROBLEM BANK"
         title="교재관리"
       />
@@ -351,12 +350,7 @@ export function ProblemBankCenter() {
       <div className="problemBankCenterLayout">
         <div className="panel problemBankImportPanel">
           <h2>패키지 등록</h2>
-          <ol className="problemBankSteps">
-            <li>PC에서 <code>node scripts/problem-bank/ingest-text-pdf.mjs --pdf "교재.pdf" --out 출력폴더 --title "교재명" --folder "중3 / RPM"</code> 실행</li>
-            <li>정답·해설이 있으면 같은 폴더에 <code>node scripts/problem-bank/ingest-answers.mjs --solutions "정답과풀이.pdf" --out 출력폴더</code> 실행 (book-id 는 폴더의 manifest.json 에서 읽음)</li>
-            <li>출력 폴더의 <code>qa/</code> 이미지로 경계를 확인 (<code>validation.json</code> 의 flagged 가 0인지)</li>
-            <li>아래에서 출력 폴더를 통째로 선택 → 등록 (문항과 정답·해설이 한 번에 올라간다)</li>
-          </ol>
+          <p className="muted">패키지 폴더(문항·정답·해설)를 선택하면 한 번에 올라갑니다.</p>
           <button className="softButton" onClick={() => folderInputRef.current?.click()} type="button">패키지 폴더 선택</button>
           <input
             aria-label="패키지 폴더 선택"
@@ -434,7 +428,7 @@ export function ProblemBankCenter() {
               </dl>
               <div className="problemBankAnswerImport">
                 <h3>이미지 누락 검사</h3>
-                <p className="muted">문항·정답·해설 이미지가 화면에 안 보이면 여기서 Storage 와 대조합니다. 등록이 중간에 끊긴 경우 빠진 파일이 나옵니다.</p>
+                <p className="muted">등록이 중간에 끊겨 이미지가 안 보일 때 빠진 파일을 찾습니다.</p>
                 <button className="softButton" disabled={audit.stage === "running"} onClick={runAudit} type="button">이미지 누락 검사</button>
                 {audit.message ? <p aria-live="polite" className={`problemBankUploadMessage stage-${audit.stage === "error" ? "error" : audit.missing.length ? "error" : "done"}`}>{audit.message}</p> : null}
                 {audit.missing.length ? (
@@ -448,10 +442,7 @@ export function ProblemBankCenter() {
               </div>
               <div className="problemBankAnswerImport">
                 <h3>정답·해설 패키지 등록</h3>
-                <p className="muted">
-                  정답·해설만 따로 올릴 때 씁니다. PC에서 <code>node scripts/problem-bank/ingest-answers.mjs --book-id {detail.book.bookId} --solutions "정답과풀이.pdf" --out 출력폴더</code> 실행 뒤 그 폴더를 선택합니다.
-                  문항 패키지 폴더에 같이 넣었다면 왼쪽 「패키지 등록」에서 한 번에 올라갑니다. 해설 PDF 는 교재와 같은 판이어야 합니다(번호와 답이 맞는지 <code>qa/</code> 로 확인).
-                </p>
+                <p className="muted">문항은 그대로 두고 정답·해설만 다시 올릴 때 씁니다(같은 패키지 폴더를 선택).</p>
                 <button className="softButton" onClick={() => answerFolderInputRef.current?.click()} type="button">정답·해설 폴더 선택</button>
                 <input
                   aria-label="정답·해설 폴더 선택"
