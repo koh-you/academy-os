@@ -43,6 +43,7 @@ node scripts/latex-bank/merge-batches.mjs … → build.mjs --review --package <
 - `id_style: "number"`: id 가 책 전체 번호(`0013`)이고 출처 배지는 「책 0013번 · 9쪽」(문항 `page`). 크롭 그림은 crops.json 의 원문 폭으로 넣고 170pt 를 넘으면 본문 아래에 둔다(`figure_layout` 로 강제 가능). 수식만 든 상자는 `\exprbox{…}` 로 전사한다.
 - 22개정 RPM 공통수학2(학생용 웹 PDF · 2026-09-17): 배지 두 열 개념 쪽(컬럼 = 배지 x 최대 틈) · 바닥글 줄 단원 · 「04|2」 헤더 · 벡터 「답」 아이콘. 워터마크는 `--whiten-gray`. 1132문 · 그림 208 · 배치 27 · 검수 14(내용 불일치 0). (9-17 에 「한글 글꼴이 빠진 판」이라 적은 것은 pdfjs CMap 미설정이 원인이었다 — `pdfTools.mjs` 가 기본으로 넘긴 뒤 한글 온전.)
 - 22개정 RPM 공통수학1(2026-09-17): 같은 경로. 1184문 · 그림 114(사람 지정 11 · 그룹 그림 키 `g<시작>-<끝>` · 문항별 `whiten`) · 배치 26 · 검수 15(내용 불일치 0). 출처 배지는 첫 줄 내용별로 올린다(cases·pmatrix 5.5mm · 분수 3.5mm · `badgeRaiseMm`).
+- export 뒤 `annotate-package.mjs`(export 가 자동 실행)가 manifest 에 파일 md5 와 검수 메모(🔴·📝, `--include-yellow` 로 🟡)를 적는다 — 교재관리가 다시 등록할 때 바뀐 파일만 올리고, 「검토 필요」 목록에 문항 이미지와 함께 보인다. 이미 고친 finding 은 `--resolved id,id` 로 뺀다.
 - 베이직쎈 공통수학1(스캔 · 2026-09-18): 스캔 경로(TikZ·표·삽화 크롭). 스캔 크롭 1520 → 전사본 1570(놓친 76 추가 · 라벨 상자 26 제외). 스캔 교재는 export 를 `--bank-only --answers-from-bank` 로(전사본 기준 manifest · 답 이미지는 answer 조판) 하고, 답지 ingest 전에 `sync-manifest-to-bank.mjs` 로 manifest 를 전사본에 맞춘다. 검수 20(내용 불일치 0 · 원문 오식 의심 1).
 - 실측(RPM 중3-2 · 644문항 · 83쪽): 그림 크롭 520장(문항 500 + 그룹 10 + 둘째 크롭), 배치 16개(22~53문항)를 에이전트 16개가 전사 — 거부 0, 배치마다 12~20분 · 12~19만 토큰, 답 644/644 답지 크롭 일치. book.pdf 126쪽 · Overfull 1.
 
