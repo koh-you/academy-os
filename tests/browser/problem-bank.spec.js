@@ -227,7 +227,7 @@ test("교재관리: 교재 정보를 고치고 서버 재조회로 확인한 뒤
   await expect(page.locator(".problemBankUnitRow:not(.head)")).toHaveCount(2);
   await expect(page.locator(".problemBankFlagged")).toContainText("경계 확인 필요 (1)");
   await expect(page.locator(".problemBankDetailMeta")).toContainText("해설 10개 · 빠른정답 10개");
-  await expect(page.locator(".problemBankAnswerImport").last()).toContainText("--book-id pbk_safefixture1");
+  await expect(page.locator(".problemBankAnswerImport").last()).toContainText("정답·해설만 다시 올릴 때");
   // 이미지 누락 검사: 가상 데이터는 7번 문항 파일이 빠진 것으로 답한다.
   await page.getByRole("button", { name: "이미지 누락 검사" }).click();
   await expect(page.locator(".problemBankAuditList")).toContainText("0007번 · body");
