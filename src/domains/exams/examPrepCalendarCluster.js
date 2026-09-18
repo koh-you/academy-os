@@ -1,5 +1,4 @@
 import { createStudentExamPrepRow } from "./studentExamPrepRow.js";
-import { createStudentExamPrepRowId } from "./examPrepRowIdScope.js";
 import { normalizeExamPrepRowReviewDraft } from "./examReviewDraft.js";
 import { safeIdPart } from "../../shared/utils/id.js";
 import {
@@ -254,12 +253,22 @@ export function createExamPrepCalendarCluster(today) {
     );
   }
 
-  // idScope: tenant 조각(examPrepRowIdScope). 원장 tenant 는 "" 라 기존 id 그대로.
-  function buildExamPrepRowsFromStudents(students, examCycle, classTemplateId = "", existingRows = [], idScope = "") {
+  // 자동 생성 대상인지 판정하는 키: 고사 학기 + 학교 + 학년. 과목·id 는 보지 않는다 —
+  // 선생님이 과목을 "미적분1" 로 고쳤거나 id 형식이 달라도 학교·학년당 한 줄이어야 한다
+  // (2026-09-18: 과목까지 보던 판정이 창일중 두 줄, id 만 보던 판정이 전 학교 두 줄을 만들었다).
+  function examPrepAutoRowKey(row = {}) {
+    return [examCycleTermKey(row.examCycle), getSchoolGradeKey(row.schoolName, row.grade) || "학교미입력_학년미입력"].join("_");
+  }
+
+  function buildExamPrepRowsFromStudents(students, examCycle, classTemplateId = "", existingRows = []) {
     const classStudents = classTemplateId
       ? students.filter((student) => (student.status ?? "active") === "active" && student.defaultClassTemplateId === classTemplateId)
       : students.filter((student) => (student.status ?? "active") === "active");
-    const seen = new Set();
+    const seen = new Set(
+      existingRows
+        .filter((row) => examCycleTermKey(row.examCycle ?? examCycle) === examCycleTermKey(examCycle))
+        .map((row) => examPrepAutoRowKey(row))
+    );
 
     return classStudents
       .map((student) => {
@@ -267,12 +276,12 @@ export function createExamPrepCalendarCluster(today) {
         const grade = student.grade || "학년 미입력";
         const subject = "공통수학1";
         const draftRow = { examCycle, schoolName, grade, subject };
-        const key = examPublisherLinkKey(draftRow);
+        const key = examPrepAutoRowKey(draftRow);
         if (seen.has(key)) return null;
         seen.add(key);
 
         return createStudentExamPrepRow({
-          examPrepId: createStudentExamPrepRowId({ examCycle, grade, idScope, safeIdPart, schoolName, subject }),
+          examPrepId: `exam_prep_${safeIdPart(examCycle)}_${safeIdPart(schoolName)}_${safeIdPart(grade)}_${safeIdPart(subject)}`,
           examCycle,
           schoolName,
           grade,
