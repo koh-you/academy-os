@@ -33,6 +33,7 @@ function createStatusError(message, statusCode = 400, code = "") {
  * @param {(table: string, query: string, options?: *) => Promise<*[]>} deps.deleteRows
  * @param {(table: string, query: string, values: *, options?: *) => Promise<*[]>} deps.patchRows
  * @param {(bucketId: string, prefix: string) => Promise<string[]>} [deps.listStorageObjectPaths]
+ * @param {(bucketId: string, prefix: string) => Promise<{ path: string, size: number, md5: string }[]>} [deps.listStorageObjectEntries] 누락 검사·바뀐 파일 대조용(없으면 listStorageObjectPaths 로 대신)
  * @param {(bucketId: string, paths: string[]) => Promise<number>} [deps.deleteStorageObjects]
  * @param {(bucketId: string, storagePath: string, expiresIn?: number) => Promise<string>} deps.createSignedStorageUrl
  * @param {(bucketId: string, storagePath: string, options: *) => Promise<*>} deps.uploadStorageObjectWithBucketRetry
@@ -46,6 +47,7 @@ export function createProblemBankStore({
   uploadStorageObjectWithBucketRetry,
   patchRows,
   listStorageObjectPaths = async () => [],
+  listStorageObjectEntries = null,
   deleteStorageObjects = async () => 0
 }) {
   function requireDatabase() {
@@ -425,8 +427,8 @@ export function createProblemBankStore({
     if (!/^pbk_[a-f0-9]{6,32}$/.test(safeBookId)) throw createStatusError("교재 ID 형식이 올바르지 않습니다.", 400);
     const list = Array.isArray(files) ? files : [];
     if (list.length === 0 || list.length > 40) throw createStatusError("이미지는 한 번에 1~40개씩 올립니다.", 400);
-    const uploaded = [];
-    for (const entry of list) {
+    // 먼저 전부 검사하고, Storage 업로드는 8개씩 동시에 한다(한 장씩 차례로 올리면 교재 한 권 4천 장에 십여 분이 걸렸다).
+    const checked = list.map((entry) => {
       const file = textOf(entry?.file);
       if (!packageFilePattern.test(file)) throw createStatusError(`파일 이름이 올바르지 않습니다: ${file}`, 400);
       const buffer = entry?.buffer;
@@ -434,12 +436,20 @@ export function createProblemBankStore({
       if (!buffer || !buffer.length) throw createStatusError(`파일 내용이 비어 있습니다: ${file}`, 400);
       if (buffer.length > problemBankStorageMaxBytes) throw createStatusError(`파일이 너무 큽니다: ${file}`, 413);
       if (!problemBankStorageAllowedMimeTypes.includes(mimeType)) throw createStatusError(`지원하지 않는 이미지 형식입니다: ${mimeType}`, 415);
-      await uploadStorageObjectWithBucketRetry(problemBankStorageBucket, `${safeBookId}/${file}`, {
-        contentType: mimeType,
-        body: buffer,
-        bucketOptions: { allowedMimeTypes: problemBankStorageAllowedMimeTypes, fileSizeLimit: problemBankStorageMaxBytes }
-      });
-      uploaded.push(file);
+      return { file, buffer, mimeType };
+    });
+    const uploaded = [];
+    const concurrency = 8;
+    for (let offset = 0; offset < checked.length; offset += concurrency) {
+      const batch = checked.slice(offset, offset + concurrency);
+      await Promise.all(batch.map(async ({ file, buffer, mimeType }) => {
+        await uploadStorageObjectWithBucketRetry(problemBankStorageBucket, `${safeBookId}/${file}`, {
+          contentType: mimeType,
+          body: buffer,
+          bucketOptions: { allowedMimeTypes: problemBankStorageAllowedMimeTypes, fileSizeLimit: problemBankStorageMaxBytes }
+        });
+        uploaded.push(file);
+      }));
     }
     return { bookId: safeBookId, uploaded };
   }
@@ -514,13 +524,18 @@ export function createProblemBankStore({
       `select=item_id,kind,storage_path&item_id=like.${encodeURIComponent(`${safeBookId}-%`)}`,
       { requireServiceRole: true }
     );
-    const storedPaths = new Set(await listStorageObjectPaths(problemBankStorageBucket, `${safeBookId}/`));
+    const storedEntries = listStorageObjectEntries
+      ? await listStorageObjectEntries(problemBankStorageBucket, `${safeBookId}/`)
+      : (await listStorageObjectPaths(problemBankStorageBucket, `${safeBookId}/`)).map((storagePath) => ({ path: storagePath, size: 0, md5: "" }));
+    const storedPaths = new Set(storedEntries.map((entry) => entry.path));
     const missing = regionRows
       .filter((row) => textOf(row.storage_path) && !storedPaths.has(textOf(row.storage_path)))
       .map((row) => ({ itemId: row.item_id, kind: row.kind, storagePath: row.storage_path }));
     const referenced = new Set(regionRows.map((row) => textOf(row.storage_path)));
     const orphanCount = [...storedPaths].filter((storagePath) => !referenced.has(storagePath)).length;
-    return { bookId: safeBookId, regionCount: regionRows.length, storedCount: storedPaths.size, missing, orphanCount };
+    // stored: 교재관리가 다시 등록할 때 패키지의 md5·크기와 대조해 바뀐 파일만 올린다(경로는 book_id/ 뒤 상대 경로).
+    const stored = Object.fromEntries(storedEntries.map((entry) => [entry.path.slice(safeBookId.length + 1), { size: entry.size, md5: entry.md5 }]));
+    return { bookId: safeBookId, regionCount: regionRows.length, storedCount: storedPaths.size, missing, orphanCount, stored };
   }
 
   /** 학생별 정오답 기록. bookId 만 주면 그 교재의 전 학생 기록(오답률 계산용). */

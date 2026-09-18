@@ -437,6 +437,8 @@ ${group.passage ? `\\dmpassage{${group.passage}}` : ""}${group.figure ? `\\begin
         await writeFile(answersManifestPath, JSON.stringify(answersManifest, null, 2), "utf8");
         console.log(`answers-from-bank: 답 이미지 ${answerEntries.length}개를 전사본 answer 로 조판`);
       }
+      // 파일 md5(다시 등록 때 바뀐 파일만 올리기)·검수 메모(교재관리 「검토 필요」)를 manifest 에 적는다.
+      await execFileAsync(process.execPath, [path.resolve("scripts/latex-bank/annotate-package.mjs"), "--package", exportDir, "--bank", dir], { maxBuffer: 4 * 1024 * 1024 }).then(({ stdout }) => process.stdout.write(stdout));
       console.log(`export: ${exported.length}문항 조판본 → ${exportDir} (교재관리 › 패키지 등록 폴더)`);
     }
   }

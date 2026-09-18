@@ -343,9 +343,12 @@ export async function downloadStorageObject(bucketId, storagePath) {
   return (await downloadStorageObjectWithMetadata(bucketId, storagePath)).buffer;
 }
 
-/** 접두사 아래 객체 이름 목록(최대 1000개씩 · 하위 폴더는 재귀). 교재 삭제 때 이미지 정리에 쓴다. */
-export async function listStorageObjectPaths(bucketId, prefix) {
-  const paths = [];
+/**
+ * 접두사 아래 객체 목록(최대 1000개씩 · 하위 폴더는 재귀) — { path, size, md5 }. md5 는 Storage 의 eTag(한 번에 올린 객체는
+ * 내용의 MD5)에서 따옴표를 뗀 것. 교재 다시 등록 때 「바뀐 파일만 올리기」의 대조 기준이다(eTag 가 MD5 꼴이 아니면 빈 문자열).
+ */
+export async function listStorageObjectEntries(bucketId, prefix) {
+  const entries = [];
   const folders = [String(prefix ?? "").replace(/^\/+|\/+$/g, "")];
   while (folders.length) {
     const folder = folders.pop();
@@ -356,18 +359,27 @@ export async function listStorageObjectPaths(bucketId, prefix) {
         contentType: "application/json",
         body: JSON.stringify({ prefix: folder, limit: 1000, offset, sortBy: { column: "name", order: "asc" } })
       });
-      const entries = Array.isArray(page) ? page : [];
-      for (const entry of entries) {
+      const list = Array.isArray(page) ? page : [];
+      for (const entry of list) {
         const name = `${folder ? `${folder}/` : ""}${entry.name}`;
         // 폴더 항목은 id 가 없다.
-        if (entry.id) paths.push(name);
-        else folders.push(name);
+        if (!entry.id) {
+          folders.push(name);
+          continue;
+        }
+        const etag = String(entry.metadata?.eTag ?? entry.metadata?.etag ?? "").replace(/^"+|"+$/g, "");
+        entries.push({ path: name, size: Number(entry.metadata?.size ?? 0) || 0, md5: /^[a-f0-9]{32}$/i.test(etag) ? etag.toLowerCase() : "" });
       }
-      if (entries.length < 1000) break;
+      if (list.length < 1000) break;
       offset += 1000;
     }
   }
-  return paths;
+  return entries;
+}
+
+/** 접두사 아래 객체 이름 목록. 교재 삭제 때 이미지 정리에 쓴다. */
+export async function listStorageObjectPaths(bucketId, prefix) {
+  return (await listStorageObjectEntries(bucketId, prefix)).map((entry) => entry.path);
 }
 
 /** 여러 객체를 한 번에 지운다(100개씩). */

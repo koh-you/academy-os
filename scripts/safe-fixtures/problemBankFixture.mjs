@@ -174,7 +174,10 @@ export async function handleProblemBankFixtureRoute({ request, requestUrl, state
     const regionCount = bank.items.reduce((sum, item) => sum + item.regions.length, 0);
     // 가상 데이터는 7번 문항 이미지가 빠진 것으로 둔다(누락 검사 화면 확인용).
     const missing = bank.items.filter((item) => item.numberLabel === "0007").flatMap((item) => item.regions.map((region) => ({ itemId: item.itemId, kind: region.kind, storagePath: region.storagePath })));
-    sendJson(response, 200, { ok: true, safeFixture: true, bookId: requested, regionCount, storedCount: regionCount - missing.length, missing, orphanCount: 0 });
+    // stored: 다시 등록 때 바뀐 파일만 올리는 대조표. 가상 데이터는 7번을 뺀 나머지를 「그대로 있음」(md5 는 fixture 가 모르니 크기만)으로 둔다.
+    const missingPaths = new Set(missing.map((entry) => entry.storagePath));
+    const stored = Object.fromEntries(bank.items.flatMap((item) => item.regions).filter((region) => !missingPaths.has(region.storagePath)).map((region) => [region.storagePath.replace(/^[^/]+\//, ""), { size: 0, md5: "" }]));
+    sendJson(response, 200, { ok: true, safeFixture: true, bookId: requested, regionCount, storedCount: regionCount - missing.length, missing, orphanCount: 0, stored });
     return true;
   }
   if (request.method === "GET" && pathname === "/api/problem-bank/books") {

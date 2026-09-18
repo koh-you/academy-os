@@ -215,16 +215,9 @@
 .problemBankListPanel { grid-column: 1; }
 .problemBankDetailPanel { grid-column: 2; grid-row: 1 / span 2; }
 .problemBankBookList { display: grid; gap: 6px; list-style: none; margin: 0; padding: 0; }
-.problemBankEditForm { display: grid; gap: 8px; grid-template-columns: 1fr 1fr; margin-bottom: 12px; }
-.problemBankEditForm label { display: grid; font-size: 12.5px; gap: 3px; }
-.problemBankEditForm input { border: 1px solid var(--academy-border, #e2e6ec); border-radius: 8px; padding: 6px 8px; }
-.problemBankEditActions { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; grid-column: 1 / -1; }
-.problemBankEditActions button { border-radius: 8px; cursor: pointer; font-size: 13px; padding: 6px 12px; }
-.problemBankEditActions .primaryButton { background: var(--academy-text-strong, #111827); border: 1px solid var(--academy-text-strong, #111827); color: #fff; }
-.problemBankEditActions .softButton { background: var(--academy-surface, #fff); border: 1px solid var(--academy-border, #e2e6ec); }
+.problemBankTools .problemBankDangerButton { border-radius: 8px; cursor: pointer; font-size: 13px; padding: 6px 12px; }
 .problemBankDangerButton { background: #b91c1c; border: 1px solid #b91c1c; color: #fff; }
 .problemBankDeleteWarn { color: #b91c1c; font-size: 12px; }
-.problemBankEditForm .problemBankUploadMessage { grid-column: 1 / -1; }
 .problemBankAnswerImport { border: 1px dashed var(--academy-border, #e2e6ec); border-radius: 10px; display: grid; gap: 8px; margin-bottom: 12px; padding: 10px 12px; }
 .problemBankAnswerImport h3 { font-size: 14px; margin: 0; }
 .problemBankAnswerImport .softButton, .problemBankAnswerImport .primaryButton { border-radius: 8px; cursor: pointer; font-size: 13px; justify-self: start; padding: 6px 12px; }
@@ -232,13 +225,21 @@
 .problemBankAnswerImport .primaryButton { background: var(--academy-text-strong, #111827); border: 1px solid var(--academy-text-strong, #111827); color: #fff; }
 .problemBankAuditList { font-size: 12px; margin: 0; padding-left: 18px; }
 .problemBankAuditList code { font-size: 11px; }
-.problemBankDetailMeta { display: grid; font-size: 13px; gap: 4px 12px; grid-template-columns: 60px 1fr; margin: 0 0 12px; }
-.problemBankDetailMeta dt { color: var(--academy-text-muted, #6b7280); }
-.problemBankDetailMeta dd { margin: 0; }
 .problemBankUnitList { display: grid; font-size: 13px; gap: 0; list-style: none; margin: 0; padding: 0; }
 .problemBankUnitRow { border-bottom: 1px solid var(--academy-border, #e2e6ec); display: grid; gap: 8px; grid-template-columns: minmax(0, 1fr) 120px 48px; padding: 5px 6px; }
 .problemBankUnitRow.head { border-bottom-color: var(--academy-border-strong, #cbd5e1); color: var(--academy-text-muted, #6b7280); }
 .problemBankUnitRow span:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+.problemBankInfo { display: grid; font-size: 13px; gap: 6px 18px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin: 0 0 12px; }
+.problemBankInfo div { display: grid; gap: 2px; }
+.problemBankInfo dt { color: var(--academy-text-muted, #6b7280); font-size: 12px; }
+.problemBankInfo dd { margin: 0; }
+.problemBankTools { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.problemBankTools .softButton { background: var(--academy-surface, #fff); border: 1px solid var(--academy-border, #e2e6ec); border-radius: 8px; cursor: pointer; font-size: 13px; padding: 6px 12px; }
+.problemBankAnswerImport:empty { display: none; }
+.problemBankReviewFilters { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 4px; }
+.problemBankReviewFilters .softButton { background: var(--academy-surface, #fff); border: 1px solid var(--academy-border, #e2e6ec); border-radius: 999px; cursor: pointer; font-size: 12.5px; padding: 3px 10px; }
+.problemBankReviewFilters .softButton[aria-pressed="true"] { background: var(--academy-text-strong, #111827); border-color: var(--academy-text-strong, #111827); color: #fff; }
+.problemBankReviewNote { font-size: 12.5px; margin: 2px 0 0; white-space: pre-wrap; }
 .problemBankFlagged { margin-top: 14px; }
 .problemBankFlagged h3 { font-size: 14px; margin: 0 0 4px; }
 .problemBankFlagged ul { display: grid; gap: 10px; list-style: none; margin: 8px 0 0; padding: 0; }

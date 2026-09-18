@@ -216,7 +216,7 @@ test("시험지 제작: 유형으로 걸러 바구니에 담고 제목·배점·
   expect(pageErrors).toEqual([]);
 });
 
-test("교재관리: 교재 정보를 고치고 서버 재조회로 확인한 뒤 삭제한다", async ({ page }) => {
+test("교재관리: 교재 상세·검토 목록·누락 검사를 보고 교재를 삭제한다", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   await loginAsTeacher(page);
   const navigation = page.getByRole("navigation", { name: "주요 화면" });
@@ -225,22 +225,22 @@ test("교재관리: 교재 정보를 고치고 서버 재조회로 확인한 뒤
   await expect(page.getByRole("heading", { name: "교재관리" })).toBeVisible();
   await page.locator(".problemBankBookList .problemBankBookItem").first().click();
   await expect(page.locator(".problemBankUnitRow:not(.head)")).toHaveCount(2);
-  await expect(page.locator(".problemBankFlagged")).toContainText("경계 확인 필요 (1)");
-  await expect(page.locator(".problemBankDetailMeta")).toContainText("해설 10개 · 빠른정답 10개");
-  await expect(page.locator(".problemBankAnswerImport").last()).toContainText("정답·해설만 다시 올릴 때");
+  // 교재 상세는 정보 표시(수정 폼 없음), 도구는 한 줄.
+  await expect(page.locator(".problemBankInfo")).toContainText("해설 10개 · 빠른정답 10개");
+  await expect(page.locator(".problemBankEditForm")).toHaveCount(0);
+  const tools = page.locator(".problemBankTools");
+  await expect(tools.getByRole("button", { name: "정답·해설만 다시 올리기" })).toBeVisible();
+  // 검토 목록: 가상 데이터는 7번이 경계 확인(flagged)이다.
+  await expect(page.locator(".problemBankFlagged")).toContainText("검토 필요 (1)");
+  await expect(page.locator(".problemBankReviewFilters")).toContainText("✂ 경계 1");
+  await expect(page.locator(".problemBankFlagged li").first()).toContainText("0007번");
   // 이미지 누락 검사: 가상 데이터는 7번 문항 파일이 빠진 것으로 답한다.
-  await page.getByRole("button", { name: "이미지 누락 검사" }).click();
+  await tools.getByRole("button", { name: "이미지 누락 검사" }).click();
   await expect(page.locator(".problemBankAuditList")).toContainText("0007번 · body");
 
-  const form = page.locator(".problemBankEditForm");
-  await form.getByLabel("제목").fill("RPM 중3-2 수학 (이름 변경)");
-  await form.getByRole("button", { name: "교재 정보 저장" }).click();
-  await expect(form.locator(".problemBankUploadMessage")).toContainText("서버 재조회 일치");
-  await expect(page.locator(".problemBankBookList")).toContainText("RPM 중3-2 수학 (이름 변경)");
-
-  await form.getByRole("button", { name: "교재 삭제" }).click();
-  await expect(form.locator(".problemBankDeleteWarn")).toContainText("되돌릴 수 없습니다");
-  await form.getByRole("button", { name: "삭제 확정" }).click();
+  await tools.getByRole("button", { name: "교재 삭제" }).click();
+  await expect(tools.locator(".problemBankDeleteWarn")).toContainText("되돌릴 수 없습니다");
+  await tools.getByRole("button", { name: "삭제 확정" }).click();
   await expect(page.locator(".problemBankBookList .problemBankBookItem")).toHaveCount(0);
   expect(pageErrors).toEqual([]);
 });

@@ -1,5 +1,11 @@
 # Academy OS Current Worklog
 
+## 2026-09-18 교재관리 화면·재등록 속도
+
+- 등록 중 화면을 벗어나면 업로드 루프가 그 자리에서 멈춘다(문항 목록은 먼저 들어가 문항 수는 맞아 보임). 「이미지 누락 검사」로 세 권이 끊긴 것을 확인했다. 재등록이 전부 다시 올리는 구조라 md5 대조를 넣었다: Supabase Storage list 의 metadata.eTag 는 한 번에 올린 객체의 MD5 라 그대로 지문으로 쓴다(꼴이 MD5 가 아니면 크기 대조로 후퇴). 패키지 쪽 md5 는 export 뒤 annotate-package 가 적는다.
+- 업로드 속도: 클라이언트 20장 묶음 순차 + 서버 한 장씩 순차 → 40장 묶음 3개 동시 + 서버 8장 동시. 요청 본문 한도 28MB 안(40장 × ~150KB × 1.37).
+- 검수 결과를 화면에서 보려면 원천이 manifest 뿐이라 review_note 에 기호 접두(🔴🟡📝)로 실었다 — 스키마 변경 없음. 🟡(조판)은 build 규칙으로 대부분 해결된 뒤라 기본은 빼고 `--include-yellow` 로만 넣는다. 전사 메모 372건 중 절차 기록은 빼고 「확인 필요·오식·추정·판독 불가」 류만 📝 로 남긴다.
+
 ## 2026-09-18 RPM 공통수학1 · 베이직쎈 공통수학1 조판
 
 - **pdfjs CMap**: 「한글 글꼴이 빠졌다」는 판단이 틀렸다. pdfjs 는 CID 글꼴에 `cMapUrl`·`cMapPacked`·`standardFontDataUrl` 이 없으면 `translateFont failed` 로 글리프를 비우는데, 우리 렌더·글자 레이어 추출 둘 다 그 상태였다. `pdfTools.mjs` 의 `getDocument` 래퍼가 `pdfjs-dist/cmaps/`·`standard_fonts/` 를 기본으로 넘긴다. 사용자가 뷰어에서 한글이 보인다고 했을 때 바로 우리 쪽 설정을 의심했어야 했다.
