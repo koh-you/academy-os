@@ -63,6 +63,11 @@ for (const contract of [
 ]) {
   assert.ok(componentSource.includes(contract), `missing controlled notification bar contract: ${contract}`);
 }
+// 2026-09-18 · pill 순서는 기본 예약 → 하원 미체크 → 수업일지 저장 상태 → Solapi 반영 상태.
+assert.match(
+  componentSource,
+  /lessonNotificationPlanStatus[\s\S]*checkoutMissingSummary[\s\S]*<InlineSaveStatus label="수업일지"[\s\S]*solapiReservationSync/
+);
 // 2026-09-14 · 저장 상태는 InlineSaveStatus pill 하나로만 보여준다. 저장 메시지 텍스트를 옆에 또 쓰면 중복이라 없앴다.
 for (const removedAction of ["<button", "<select", "journalSaveMessage", "lessonJournalSaveStatusMessage", "<strong>발송 상태</strong>", "수정 시작", "예약 확인", "onStartJournalEditMode", '알림톡 예약 작업']) {
   assert.ok(!componentSource.includes(removedAction), `notification bar must not keep ${removedAction}`);

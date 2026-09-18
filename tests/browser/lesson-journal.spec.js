@@ -1420,6 +1420,11 @@ test("lesson journal bottom bar groups lesson, notification, and save actions wh
   // 저장 상태는 pill 하나뿐이다. 같은 문구를 옆에 텍스트로 다시 쓰지 않는다.
   await expect(statusPanel.getByText("수업일지 · 저장 전")).toHaveCount(1);
   await expect(statusPanel.locator(".lessonJournalSaveStatusMessage")).toHaveCount(0);
+  // pill 순서: 기본 예약 → (하원 미체크) → 수업일지 저장 상태 → Solapi 반영 상태.
+  const pills = statusPanel.locator(":scope > *");
+  await expect(pills.first()).toHaveClass(/lessonNotificationPlanStatus/);
+  await expect(pills.nth(-2)).toContainText("수업일지 · 저장 전");
+  await expect(pills.last()).toHaveClass(/solapiReservationSync/);
   // 헤더에 "수업일지" 자리채움 글씨는 없다(주제가 있으면 그 주제만 보인다).
   await expect(header.locator(".shortcutHint")).toHaveCount(0);
 
