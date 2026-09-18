@@ -75,6 +75,20 @@ export function createExamPrepCenterDisplayModel({
     return rowCycle === selectedExamCycle && !activeSchoolGradeKeys.has(getRowSchoolGradeKey(row));
   });
   const orphanedExamPrepIds = new Set(orphanedRows.map((row) => row.examPrepId));
+  // 같은 고사에 같은 학교·학년 행이 둘 이상이면 중복. 자동 생성이 과목·id 만 보고 한 줄 더
+  // 만들던 시절의 잔재라, 사람이 골라 지울 수 있게 표시한다(2026-09-18).
+  const rowCountBySchoolGradeKey = new Map();
+  displayRows.forEach((row) => {
+    if ((row.examCycle ?? currentExamCycle) !== selectedExamCycle || row.isExcluded) return;
+    const key = getRowSchoolGradeKey(row);
+    if (!key) return;
+    rowCountBySchoolGradeKey.set(key, (rowCountBySchoolGradeKey.get(key) ?? 0) + 1);
+  });
+  const duplicateExamPrepIds = new Set(
+    displayRows
+      .filter((row) => (row.examCycle ?? currentExamCycle) === selectedExamCycle && !row.isExcluded && (rowCountBySchoolGradeKey.get(getRowSchoolGradeKey(row)) ?? 0) > 1)
+      .map((row) => row.examPrepId)
+  );
   const matchingRows = displayRows.filter((row) => {
     const rowCycle = row.examCycle ?? currentExamCycle;
     const matchesCycle = rowCycle === selectedExamCycle;
@@ -107,6 +121,7 @@ export function createExamPrepCenterDisplayModel({
     displayRows,
     editingExamPrepRow: visibleRows.find((row) => row.examPrepId === editingExamPrepId) ?? null,
     examPrepSaveState: getAggregateSaveState(filteredRows.map((row) => rowSaveStates[row.examPrepId])),
+    duplicateExamPrepIds,
     filteredRows,
     orphanedExamPrepIds,
     orphanedRows,

@@ -86,6 +86,7 @@ export function ExamPrepCenter({
     examPrepSaveState,
     excludedRows,
     filteredRows,
+    duplicateExamPrepIds,
     orphanedExamPrepIds,
     orphanedRows,
     reviewModalRow,
@@ -415,6 +416,7 @@ export function ExamPrepCenter({
               const hasReview = Boolean(row.review || row.revisedReview);
               const matchingStudents = studentRosterByExamPrepId[row.examPrepId] ?? [];
               const isOrphaned = orphanedExamPrepIds.has(row.examPrepId);
+              const isDuplicate = duplicateExamPrepIds.has(row.examPrepId);
 
               return (
                 <div
@@ -449,6 +451,19 @@ export function ExamPrepCenter({
                             <span key={student.studentId || student.name}>{student.name || "이름 미입력"}</span>
                           ))}
                         </div>
+                        {isDuplicate ? (
+                          <>
+                            <span className="examPrepStudentRosterEmpty warning">같은 학교·학년 행이 또 있음</span>
+                            <button
+                              className="dangerSoftButton compact examPrepOrphanDeleteButton"
+                              disabled={rowSaveStates[row.examPrepId] === "saving"}
+                              onClick={() => onDeleteRow?.(row.examPrepId)}
+                              type="button"
+                            >
+                              이 행 삭제
+                            </button>
+                          </>
+                        ) : null}
                       </>
                     ) : (
                       <>
@@ -564,7 +579,7 @@ export function ExamPrepCenter({
       {editingExamPrepRow && editingExamPrepDraft ? (
         <ExamPrepEditModal
           hasChanges={hasEditingExamPrepChanges}
-          isOrphaned={orphanedExamPrepIds.has(editingExamPrepRow.examPrepId)}
+          isOrphaned={orphanedExamPrepIds.has(editingExamPrepRow.examPrepId) || duplicateExamPrepIds.has(editingExamPrepRow.examPrepId)}
           row={editingExamPrepDraft}
           saveState={editingExamPrepSaveState}
           getEditableMathExamEntries={getEditableMathExamEntries}
