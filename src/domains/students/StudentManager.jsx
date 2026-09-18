@@ -11,7 +11,7 @@ import { StudentLifecycleOverlays } from "./StudentLifecycleOverlays.jsx";
 import { StudentProfileErrorBoundary, StudentProfileModal } from "./StudentProfileModal.jsx";
 import { StudentWithdrawnList } from "./StudentWithdrawnList.jsx";
 import { sortWithdrawnStudents } from "./studentListSort.js";
-import { hasStudentLessonRowOnDate } from "./rosterEffectiveDate.js";
+import { getDefaultRosterEffectiveMode, hasStudentLessonRowOnDate } from "./rosterEffectiveDate.js";
 import { isWithdrawnStudent } from "./lessonRosterSelectors.js";
 
 const withdrawalReasonOptions = [
@@ -254,7 +254,7 @@ export function StudentManager({
       comment: student.withdrawalComment ?? "",
       hasTodayLessonRow,
       reason: student.withdrawalReason || "other",
-      rosterEffectiveMode: hasTodayLessonRow ? "tomorrow" : "today"
+      rosterEffectiveMode: getDefaultRosterEffectiveMode({ date: today, lessons, records, studentId: student.studentId })
     });
     setWithdrawalError("");
     setWithdrawalSaveState("idle");

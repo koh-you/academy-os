@@ -1,0 +1,51 @@
+/* 퇴원 창 — 오늘 수업일지 반영 선택(라디오 두 줄). */
+.withdrawalRosterChoices {
+  border: 0;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.withdrawalRosterChoices legend {
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  padding: 0;
+}
+
+.withdrawalRosterChoice {
+  align-items: flex-start;
+  border: 1px solid var(--academy-border, #d8e3f8);
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+.withdrawalRosterChoice + .withdrawalRosterChoice {
+  margin-top: 6px;
+}
+
+.withdrawalRosterChoice.selected {
+  background: var(--status-info-bg, #eff6ff);
+  border-color: var(--status-info-border, #bfdbfe);
+}
+
+/* App.css 의 공통 input 규칙(width:100%·min-height)이 라디오를 키워 버리므로 되돌린다. */
+.withdrawalRosterChoice input[type="radio"] {
+  flex: 0 0 auto;
+  height: 16px;
+  margin: 3px 0 0;
+  min-height: 0;
+  width: 16px;
+}
+
+.withdrawalRosterChoice > span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.withdrawalRosterChoice small {
+  color: var(--academy-text-muted, #64748b);
+}

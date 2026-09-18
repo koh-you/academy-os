@@ -1,6 +1,7 @@
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { ModalFooter } from "../../shared/components/Modal.jsx";
 import { getStudentHandoverTitle } from "./studentHandoverPdf.js";
+import "./studentWithdrawalChoices.css";
 
 export function StudentLifecycleOverlays({
   batchForceDeleteWithReferences,
@@ -91,21 +92,29 @@ export function StudentLifecycleOverlays({
               </label>
             </div>
             {withdrawalDraft.hasTodayLessonRow ? (
-              <label className="studentRosterEffectiveField">
-                오늘 수업일지 반영
-                <select
-                  aria-label={`${deleteStudent.name} 퇴원 적용 시점`}
-                  disabled={withdrawalSaveState === "saving"}
-                  onChange={(event) => setWithdrawalDraft((current) => ({
-                    ...current,
-                    rosterEffectiveMode: event.target.value
-                  }))}
-                  value={withdrawalDraft.rosterEffectiveMode ?? "tomorrow"}
-                >
-                  <option value="tomorrow">오늘 행 유지 · 내일부터 제외</option>
-                  <option value="today">오늘부터 행 제외</option>
-                </select>
-              </label>
+              <fieldset className="withdrawalRosterChoices" disabled={withdrawalSaveState === "saving"}>
+                <legend>오늘 수업일지 반영</legend>
+                {/* 드롭다운 한 줄이라 눈에 안 띄어 기본값대로 넘어가곤 했다(2026-09-18). 두 선택지를
+                    다 보여주고, 기본값은 오늘 행에 저장된 게 있는지에 따라 정한다(rosterEffectiveDate). */}
+                {[
+                  ["today", "오늘부터 행 제외", "오늘 수업일지에서 바로 사라집니다. 잘못 등록했거나 오늘 수업이 없는 경우."],
+                  ["tomorrow", "오늘 행 유지 · 내일부터 제외", "오늘 출결·수업기록은 남기고 내일 수업부터 명단에서 뺍니다."]
+                ].map(([mode, label, hint]) => (
+                  <label className={`withdrawalRosterChoice${(withdrawalDraft.rosterEffectiveMode ?? "tomorrow") === mode ? " selected" : ""}`} key={mode}>
+                    <input
+                      checked={(withdrawalDraft.rosterEffectiveMode ?? "tomorrow") === mode}
+                      name={`withdrawal-roster-mode-${deleteStudent.studentId}`}
+                      onChange={() => setWithdrawalDraft((current) => ({ ...current, rosterEffectiveMode: mode }))}
+                      type="radio"
+                      value={mode}
+                    />
+                    <span>
+                      <strong>{label}</strong>
+                      <small>{hint}</small>
+                    </span>
+                  </label>
+                ))}
+              </fieldset>
             ) : null}
             {withdrawalSaveState === "saving" ? <InlineSaveStatus label="학생 상태·미래 수업 명단" saveState="saving" /> : null}
             {withdrawalSaveState === "failed" ? <p className="errorText" role="alert">{withdrawalError || "퇴원 처리에 실패했습니다. 입력을 유지했으니 다시 시도해 주세요."}</p> : null}
