@@ -236,6 +236,7 @@ test("교재관리: 교재 상세·검토 목록·누락 검사를 보고 교재
   await expect(page.locator(".problemBankFlagged li").first()).toContainText("0007번");
   // 이미지 누락 검사: 가상 데이터는 7번 문항 파일이 빠진 것으로 답한다.
   await tools.getByRole("button", { name: "이미지 누락 검사" }).click();
+  await expect(page.locator(".problemBankAnswerImport .problemBankStatus")).toContainText("확인 필요");
   await expect(page.locator(".problemBankAuditList")).toContainText("0007번 · body");
 
   await tools.getByRole("button", { name: "교재 삭제" }).click();
