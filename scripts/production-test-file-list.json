@@ -1,4 +1,5 @@
 [
+  "scripts/test-app-state-keyed-read.mjs",
   "scripts/test-exam-analysis-phrase-library.mjs",
   "scripts/test-exam-analysis-prompt-input-mapping.mjs",
   "scripts/test-exam-analysis-prompt-studio-draft.mjs",

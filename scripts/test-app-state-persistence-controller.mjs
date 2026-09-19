@@ -41,15 +41,20 @@ const persisted = [];
 const states = [];
 let serverValue = { value: "initial" };
 let serverUpdatedAt = "version-1";
+const readRequests = [];
 const controller = createAppStatePersistenceController({
   onPersisted: (result) => persisted.push(result),
   onState: (state) => states.push(state),
-  read: async () => ({
-    ok: true,
-    source: "supabase",
-    stateRows: [{ key: "aiSettings", updatedAt: serverUpdatedAt }],
-    states: { aiSettings: serverValue }
-  }),
+  // 재조회는 저장한 키만 읽는다 — read 가 { key } 를 받아 ?keys= 로 좁힐 수 있어야 한다.
+  read: async (options) => {
+    readRequests.push(options);
+    return {
+      ok: true,
+      source: "supabase",
+      stateRows: [{ key: "aiSettings", updatedAt: serverUpdatedAt }],
+      states: { aiSettings: serverValue }
+    };
+  },
   write: ({ expectedUpdatedAt, states: nextStates }) => {
     const deferred = createDeferred();
     writes.push({ deferred, expectedUpdatedAt, nextStates });
@@ -140,6 +145,7 @@ for (const expected of [
   "parseVersionedWriteResponse",
   "postAppStateWithTimeout",
   "/api/app-state?includeRows=true",
+  "&keys=${encodeURIComponent(key)}",
   "getAppStatePersistenceController().save(changedStates)",
   "expectedUpdatedAt"
 ]) {
@@ -170,5 +176,8 @@ assert.equal(
   "node scripts/test-app-state-persistence-controller.mjs"
 );
 assert.ok(workflowSource.includes("npm run test:app-state-persistence-controller"));
+
+assert.ok(readRequests.length > 0, "every save must re-read from the source");
+assert.ok(readRequests.every((options) => options?.key === "aiSettings"), "the re-read must name the saved key so the read can be scoped");
 
 console.log("app_state serialized CAS and read-after-write persistence fixtures passed");

@@ -17,7 +17,9 @@ import { apiFetch } from "../../shared/utils/apiClient.js";
  */
 export async function saveMonthlySettlementMonthAction(month, { postAppState }) {
   const monthKey = String(month?.monthKey ?? "").slice(0, 7);
-  const currentResponse = await apiFetch("/api/app-state", { cache: "no-store" });
+  // 이 저장이 읽고 대조하는 키는 월별 정산 하나다 — 표 전체 대신 그 키만 받는다.
+  const appStateKeyQuery = `/api/app-state?keys=${encodeURIComponent(monthlySettlementStateKey)}`;
+  const currentResponse = await apiFetch(appStateKeyQuery, { cache: "no-store" });
   const currentResult = await currentResponse.json();
   if (!currentResponse.ok || !currentResult.ok || currentResult.source !== "supabase") {
     throw new Error(currentResult.error || "Supabase의 현재 월별 정산 원천을 불러오지 못했습니다.");
@@ -30,7 +32,7 @@ export async function saveMonthlySettlementMonthAction(month, { postAppState }) 
     throw new Error(saveResult.error || "월별 정산이 Supabase에 저장되지 않았습니다.");
   }
 
-  const verifyResponse = await apiFetch("/api/app-state", { cache: "no-store" });
+  const verifyResponse = await apiFetch(appStateKeyQuery, { cache: "no-store" });
   const verifyResult = await verifyResponse.json();
   if (!verifyResponse.ok || !verifyResult.ok || verifyResult.source !== "supabase") {
     throw new Error(verifyResult.error || "월별 정산 저장 결과를 다시 확인하지 못했습니다.");
