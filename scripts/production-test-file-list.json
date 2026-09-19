@@ -424,6 +424,7 @@
   "scripts/scenario-tests-production.cjs",
   "scripts/test-overflow-menu.mjs",
   "scripts/test-lesson-comment-source-lines.mjs",
+  "scripts/test-lesson-nested-panels-css-domain-split.mjs",
   "scripts/test-fourth-pass-app-action-baseline.mjs",
   "scripts/test-fourth-pass-provider-boundary-baseline.mjs",
   "scripts/test-exam-analysis-ssen-catalog.mjs",
