@@ -1,0 +1,5 @@
+/* 2026-09-19 · 퇴원생 행의 이름 링크(ghostButton link): 이니셜 원과 이름 사이 간격.
+   App.css 의 `.studentNameButton` 을 걷어내면서 레이아웃 값만 남겼다(색·밑줄·active 는 공용 modifier). */
+.withdrawnStudentRow .ghostButton.link {
+  gap: 10px;
+}

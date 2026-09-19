@@ -648,7 +648,7 @@ export function SettingsCenter({
               <span className="muted">학생이 휴대폰 번호 뒤 4자리만 입력하는 출결 화면입니다.</span>
             </div>
             <input aria-label="태블릿 출결 화면 주소" readOnly value={attendanceUrl} />
-            <a className="softButton linkButton" href={attendanceUrl} target="_blank" rel="noreferrer">
+            <a className="ghostButton link" href={attendanceUrl} target="_blank" rel="noreferrer">
               새 창 열기
             </a>
           </div>

@@ -1516,39 +1516,6 @@ summary:focus-visible {
   margin: 0 0 4px;
 }
 
-.linkTitleButton {
-  background: transparent;
-  border: 0;
-  color: var(--academy-text, #0f172a);
-  cursor: pointer;
-  font-size: 24px;
-  font-weight: 900;
-  letter-spacing: 0;
-  min-height: 0;
-  padding: 0;
-  text-align: left;
-}
-
-.linkTitleButton:hover {
-  color: var(--academy-focus-ring, #2563eb);
-}
-
-.textLinkButton {
-  background: transparent;
-  border: 0;
-  color: var(--academy-text, #0f172a);
-  cursor: pointer;
-  font: inherit;
-  font-weight: 900;
-  padding: 0;
-  text-align: left;
-}
-
-.textLinkButton:hover {
-  color: var(--academy-accent-text, #4f46e5);
-  text-decoration: underline;
-}
-
 .lessonJournalHeader p {
   margin: 0;
 }
@@ -3315,38 +3282,6 @@ summary:focus-visible {
   padding: 7px 10px;
 }
 
-.examPrepDetailButton {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--academy-border, #d8e3f8);
-  border-radius: 8px;
-  color: var(--academy-text-strong, #475569);
-  display: grid;
-  gap: 4px;
-  min-height: 58px;
-  padding: 9px 10px;
-  text-align: left;
-}
-
-.examPrepDetailButton.filled {
-  background: var(--status-info-bg, #eff6ff);
-  border-color: var(--status-info-border, #bfdbfe);
-  color: var(--status-info-text, #1d4ed8);
-}
-
-.examPrepDetailButton strong {
-  font-size: 14px;
-}
-
-.examPrepDetailButton span {
-  color: inherit;
-  display: -webkit-box;
-  font-size: 12px;
-  line-height: 1.35;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
-
 .examPrepEditForm {
   display: grid;
   gap: 18px;
@@ -3560,20 +3495,6 @@ summary:focus-visible {
 .tallySummaryPanel {
   display: grid;
   gap: 12px;
-}
-
-.fileImportButton {
-  cursor: pointer;
-  display: inline-flex;
-  position: relative;
-}
-
-.fileImportButton input {
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
-  position: absolute;
-  width: 1px;
 }
 
 .tallyDropZone {
@@ -8894,16 +8815,6 @@ textarea {
   color: var(--academy-muted, #64748b);
 }
 
-.greenButton {
-  background: var(--status-success-border, #86efac);
-  border: 1px solid var(--status-success-border, #86efac);
-  border-radius: 8px;
-  color: var(--academy-surface, #ffffff);
-  font-weight: 900;
-  min-height: 40px;
-  padding: 0 14px;
-}
-
 .studentManagerTabs {
   background: var(--academy-surface-muted, #f8fafc);
   border-radius: 8px;
@@ -9520,20 +9431,6 @@ textarea {
   background: var(--academy-surface, #ffffff);
 }
 
-.studentNameButton {
-  align-items: center;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  color: var(--academy-text, #0f172a);
-  display: inline-flex;
-  gap: 10px;
-  font-weight: 900;
-  min-height: 38px;
-  padding: 2px 8px 2px 2px;
-  text-align: left;
-}
-
 .studentInitial {
   align-items: center;
   background: var(--academy-surface-muted, #f8fafc);
@@ -9546,20 +9443,6 @@ textarea {
   width: 34px;
 }
 
-.studentNameButton:hover {
-  background: var(--academy-surface-muted, #f8fafc);
-  border-color: var(--academy-border, #d8e3f8);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--academy-focus-ring, #2563eb) 6%, transparent);
-  color: var(--academy-focus-ring, #2563eb);
-}
-
-.studentNameButton.active {
-  background: var(--status-info-bg, #eff6ff);
-  border-color: var(--status-info-border, #bfdbfe);
-  color: var(--academy-focus-ring, #2563eb);
-  text-decoration: underline;
-}
-
 .gradeBadge {
   background: var(--academy-surface-muted, #f8fafc);
   border-radius: 999px;
@@ -9567,19 +9450,6 @@ textarea {
   font-weight: 900;
   justify-self: start;
   padding: 5px 12px;
-}
-
-.withdrawButton {
-  background: transparent;
-  border: 0;
-  color: var(--status-pending-text, #c2410c);
-  font-weight: 900;
-  min-height: 32px;
-  padding: 0;
-}
-
-.withdrawButton::before {
-  content: "🔓 ";
 }
 
 .studentProfilePanel {
@@ -10744,8 +10614,6 @@ textarea {
   font-weight: 900;
 }
 
-.resourceBulkActions button,
-.resourceGroupActions button,
 .resourceStudentButtons button {
   background: var(--academy-surface-muted, #f8fafc);
   border: 1px solid var(--academy-border, #d8e3f8);
@@ -10754,13 +10622,6 @@ textarea {
   cursor: pointer;
   font-weight: 900;
   padding: 8px 12px;
-}
-
-.resourceBulkActions button,
-.resourceGroupActions button {
-  color: var(--academy-focus-ring, #2563eb);
-  font-size: 13px;
-  padding: 7px 10px;
 }
 
 .resourceClassGroups {
@@ -11206,13 +11067,6 @@ textarea.profileEditInput {
 .aiVariantHero,
 .settingsHero {
   justify-content: space-between;
-}
-
-.linkButton {
-  align-items: center;
-  display: inline-flex;
-  justify-content: center;
-  text-decoration: none;
 }
 
 .classBoardGrid {
@@ -14278,33 +14132,6 @@ textarea.profileEditInput {
   font-weight: 900;
 }
 
-.supplementNotificationControlButton {
-  align-items: center;
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  color: var(--academy-text-strong, #475569);
-  cursor: pointer;
-  display: grid;
-  font-size: 12px;
-  font-weight: 900;
-  gap: 8px;
-  grid-template-columns: auto 1fr auto;
-  min-height: 38px;
-  padding: 8px 10px;
-  text-align: left;
-}
-
-.supplementNotificationControlButton:hover {
-  border-color: var(--academy-focus-ring, #2563eb);
-  box-shadow: 0 3px 10px color-mix(in srgb, var(--academy-focus-ring, #2563eb) 9%, transparent);
-}
-
-.supplementNotificationControlButton b {
-  color: var(--academy-primary, #17213d);
-  font-weight: 900;
-}
-
 .supplementNotificationControlLight,
 .supplementNotificationControlState i {
   background: var(--academy-border-strong, #cbd8ee);
@@ -14316,40 +14143,17 @@ textarea.profileEditInput {
   width: 10px;
 }
 
-.supplementNotificationControlButton.on,
-.supplementNotificationControlButton.done {
-  background: var(--status-success-bg, #ecfdf5);
-  border-color: var(--status-success-border, #86efac);
-  color: var(--status-success-text, #047857);
-}
-
-.supplementNotificationControlButton.on .supplementNotificationControlLight,
-.supplementNotificationControlButton.done .supplementNotificationControlLight,
 .supplementNotificationControlState.on i,
 .supplementNotificationControlState.done i {
   background: var(--status-success-border, #86efac);
   box-shadow: 0 0 0 1px var(--status-success-text, #047857), 0 0 8px color-mix(in srgb, var(--status-success-border, #86efac) 65%, transparent);
 }
 
-.supplementNotificationControlButton.warning {
-  background: var(--status-pending-bg, #fff7ed);
-  border-color: var(--status-pending-border, #fed7aa);
-  color: var(--status-pending-text, #c2410c);
-}
-
-.supplementNotificationControlButton.warning .supplementNotificationControlLight,
 .supplementNotificationControlState.warning i {
   background: var(--status-pending-strong, #d8860b);
   box-shadow: 0 0 0 1px var(--status-pending-strong, #d8860b), 0 0 8px color-mix(in srgb, var(--status-pending-strong, #d8860b) 55%, transparent);
 }
 
-.supplementNotificationControlButton.failed {
-  background: var(--status-danger-bg, #fef2f2);
-  border-color: var(--status-danger-border, #fecaca);
-  color: var(--status-danger-text, #b91c1c);
-}
-
-.supplementNotificationControlButton.failed .supplementNotificationControlLight,
 .supplementNotificationControlState.failed i {
   background: var(--status-danger-text, #b91c1c);
   box-shadow: 0 0 0 1px var(--status-destructive-text, #dc2626);
@@ -14787,16 +14591,6 @@ textarea.profileEditInput {
 
 .homeworkDeleteModal {
   max-width: 520px;
-}
-
-.orangeButton {
-  background: var(--status-pending-strong, #d8860b);
-  border: 1px solid var(--status-pending-strong, #d8860b);
-  border-radius: 8px;
-  color: var(--academy-surface, #ffffff);
-  font-weight: 900;
-  min-height: 44px;
-  padding: 0 18px;
 }
 
 .progressRail {
@@ -15251,14 +15045,6 @@ textarea.profileEditInput {
   align-content: center;
   gap: 6px;
   min-width: 0;
-}
-
-.supplementRowItem .textLinkButton {
-  color: var(--academy-text, #0f172a);
-  font-size: 17px;
-  justify-self: start;
-  line-height: 1.2;
-  padding: 0;
 }
 
 .supplementRowItem > div > span:not(.supplementProgressBadge) {
@@ -15780,24 +15566,6 @@ textarea.profileEditInput {
   min-width: 190px;
 }
 
-.pdfUploadButton {
-  align-items: center;
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  color: var(--academy-focus-ring, #2563eb);
-  cursor: pointer;
-  display: inline-flex;
-  font-weight: 900;
-  justify-content: center;
-  min-height: 40px;
-  padding: 0 14px;
-}
-
-.pdfUploadButton input {
-  display: none;
-}
-
 .wrongProblemToolbar {
   align-items: center;
   display: flex;
@@ -15907,44 +15675,36 @@ textarea.profileEditInput {
   width: 18px;
 }
 
-.legendDot.first,
-.problemNumberButton.first {
+.legendDot.first {
   background: var(--academy-focus-ring, #2563eb);
 }
 
-.legendDot.retry,
-.problemNumberButton.retry {
+.legendDot.retry {
   background: var(--status-pending-strong, #d8860b);
 }
 
-.legendDot.second,
-.problemNumberButton.second {
+.legendDot.second {
   background: var(--status-success-border, #86efac);
 }
 
-.legendDot.wrong,
-.problemNumberButton.wrong {
+.legendDot.wrong {
   background: var(--status-danger-text, #b91c1c);
 }
 
-.legendDot.mistake,
-.problemNumberButton.mistake {
+.legendDot.mistake {
   background: var(--status-pending-strong, #d8860b);
   color: var(--academy-primary, #17213d);
 }
 
-.legendDot.question,
-.problemNumberButton.question {
+.legendDot.question {
   background: var(--status-closure-border, #6366f1);
 }
 
-.legendDot.outOfScope,
-.problemNumberButton.outOfScope {
+.legendDot.outOfScope {
   background: var(--academy-muted, #64748b);
 }
 
-.legendDot.unchecked,
-.problemNumberButton.unchecked {
+.legendDot.unchecked {
   background: var(--academy-surface-muted, #f8fafc);
 }
 
@@ -15968,38 +15728,6 @@ textarea.profileEditInput {
   display: flex;
   flex-wrap: wrap;
   gap: 7px;
-}
-
-.problemNumberButton {
-  border: 2px solid transparent;
-  border-radius: 6px;
-  color: var(--academy-surface, #ffffff);
-  font-size: 13px;
-  font-weight: 900;
-  height: 38px;
-  min-width: 38px;
-  padding: 0 8px;
-}
-
-.problemNumberButton.unchecked {
-  color: var(--academy-muted, #64748b);
-}
-
-.problemNumberButton.selected {
-  background: var(--academy-focus-ring, #2563eb);
-  border-color: var(--academy-surface, #ffffff);
-  box-shadow: 0 0 0 2px var(--academy-accent-text, #4f46e5);
-  color: var(--academy-surface, #ffffff);
-}
-
-.problemNumberButton.active {
-  border-color: var(--academy-surface, #ffffff);
-  box-shadow: 0 0 0 2px var(--academy-accent-text, #4f46e5);
-}
-
-.problemNumberButton.picked {
-  border-color: var(--academy-text, #0f172a);
-  box-shadow: 0 0 0 3px var(--status-closure-border, #6366f1);
 }
 
 .problemPreviewBox {
@@ -16862,16 +16590,6 @@ textarea.profileEditInput {
   color: var(--status-destructive-text, #dc2626);
 }
 
-.dangerTextButton {
-  background: var(--status-pending-bg, #fff7ed);
-  border: 1px solid var(--status-danger-border, #fecaca);
-  border-radius: 8px;
-  color: var(--status-destructive-text, #dc2626);
-  font-weight: 900;
-  min-height: 36px;
-  padding: 0 10px;
-}
-
 .modalActionRow {
   align-items: center;
   display: flex;
@@ -17241,11 +16959,6 @@ body.attendanceOnlyBody {
     align-items: stretch;
     min-width: 0;
     text-align: left;
-  }
-
-  .sourceAnalysisButton {
-    min-width: 0;
-    width: 100%;
   }
 
   .supplementDraftDiff li {

@@ -459,7 +459,7 @@ export function TestPaperLibraryPanel({
             {copiedPath === selectedRow.folderPath ? <span className="testAttemptRetestHint">복사됨</span> : null}
           </div>
           <div className="testAttemptActions">
-            <button className="saveDraftButton" disabled={savingDisabled} onClick={handleSave} type="button">
+            <button className="primaryButton" disabled={savingDisabled} onClick={handleSave} type="button">
               {saveState === "saving" ? "저장 중" : "시험지 정보 저장"}
             </button>
           </div>

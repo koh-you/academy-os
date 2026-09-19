@@ -1,6 +1,7 @@
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { SelectionToolbar } from "../../shared/components/SelectionToolbar.jsx";
+import "./studentWithdrawnList.css";
 
 function formatShortDate(date = "") {
   return date ? date.slice(5).replace("-", ".") : "날짜 미입력";
@@ -59,7 +60,7 @@ export function StudentWithdrawnList({
               <div className={["studentListRow", "withdrawnStudentRow", isDirty ? "dirtyStudentRow" : ""].filter(Boolean).join(" ")} key={student.studentId}>
                 <label className="withdrawnStudentSelect"><input checked={selectedWithdrawnStudentIds.has(student.studentId)} onChange={() => toggleWithdrawnStudentSelection(student.studentId)} type="checkbox" /></label>
                 <button
-                  className={selectedStudentId === student.studentId ? "studentNameButton active" : "studentNameButton"}
+                  className={selectedStudentId === student.studentId ? "ghostButton link active" : "ghostButton link"}
                   onClick={() => setSelectedStudentId(student.studentId)}
                   type="button"
                 >
@@ -109,7 +110,7 @@ export function StudentWithdrawnList({
             )}
             className="withdrawnStudentBulkActions"
             dangerActions={(
-              <button className="dangerButton" disabled={selectedWithdrawnStudents.length === 0} onClick={() => {
+              <button className="dangerSoftButton" disabled={selectedWithdrawnStudents.length === 0} onClick={() => {
                 if (selectedWithdrawnStudents.length === 1) openPermanentDeleteModal(selectedWithdrawnStudents[0]);
                 else openBatchPermanentDeleteModal(selectedWithdrawnStudents);
               }} type="button">영구 삭제</button>

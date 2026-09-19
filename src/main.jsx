@@ -9,6 +9,7 @@ import { accountScopedCacheKeys, storageKeys } from "./app/appConfig.js";
 import { readStoredTeacherSession } from "./app/useAppSession.js";
 import "./app/App.tokens.css";
 import "./app/App.css";
+import "./shared/components/buttonModifiers.css";
 
 installGlobalClientErrorHandlers();
 

@@ -118,7 +118,7 @@ export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSet
               <button className="ghostButton" onClick={() => setIsScheduleEditorOpen(true)} type="button">
                 일정 수정
               </button>
-              <button className="dangerButton" onClick={() => onDeleteLesson(lesson.lessonId)} type="button">
+              <button className="dangerSoftButton" onClick={() => onDeleteLesson(lesson.lessonId)} type="button">
                 일정 삭제
               </button>
             </>

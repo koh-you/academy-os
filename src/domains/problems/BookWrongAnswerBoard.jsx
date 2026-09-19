@@ -407,8 +407,8 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
             </label>
             <div className="problemBankSelectionActions">
               <span className="problemBankSelectionCount">바구니 {examCart.size}문항</span>
-              <button onClick={() => setExamCart(new Map())} type="button">바구니 비우기</button>
-              <button className="primaryButton" disabled={examCart.size === 0} onClick={openPrint} type="button">시험지 만들기</button>
+              <button className="softButton compact subtle" onClick={() => setExamCart(new Map())} type="button">바구니 비우기</button>
+              <button className="primaryButton compact" disabled={examCart.size === 0} onClick={openPrint} type="button">시험지 만들기</button>
             </div>
           </div>
         ) : (
@@ -455,12 +455,12 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
           <div className="problemBankSelectionActions">
             <span className="problemBankSelectionCount">선택 {selectedItemIds.size}개</span>
             {isClassMode ? (
-              <button onClick={selectFrequentlyWrongItems} type="button">많이 틀린 문항 선택</button>
+              <button className="softButton compact" onClick={selectFrequentlyWrongItems} type="button">많이 틀린 문항 선택</button>
             ) : (
-              <button onClick={selectStudentWrongItems} type="button">오답 전체 선택</button>
+              <button className="softButton compact" onClick={selectStudentWrongItems} type="button">오답 전체 선택</button>
             )}
-            <button onClick={() => setSelectedItemIds(new Set())} type="button">선택 해제</button>
-            <button className="primaryButton" disabled={selectedItemIds.size === 0} onClick={openPrint} type="button">인쇄 · PPT</button>
+            <button className="softButton compact subtle" onClick={() => setSelectedItemIds(new Set())} type="button">선택 해제</button>
+            <button className="primaryButton compact" disabled={selectedItemIds.size === 0} onClick={openPrint} type="button">인쇄 · PPT</button>
           </div>
         </div>
         )}
@@ -621,7 +621,7 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
                 ) : null}
                 {previewSolution ? (
                   <div className="problemBankPreviewAnswer">
-                    <button aria-pressed={showSolutionPreview} className="problemBankLinkButton" onClick={() => setShowSolutionPreview((current) => !current)} type="button">
+                    <button aria-pressed={showSolutionPreview} className="ghostButton link" onClick={() => setShowSolutionPreview((current) => !current)} type="button">
                       {showSolutionPreview ? "해설 접기" : "해설 보기"}
                     </button>
                     {showSolutionPreview ? <img alt={`${previewItem.numberLabel}번 해설`} src={previewSolution.url} /> : null}
