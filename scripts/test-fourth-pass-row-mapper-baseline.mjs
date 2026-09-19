@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { isNpmScriptCoveredByProductionTests } from "./productionTestMembership.mjs";
 import { readFile } from "node:fs/promises";
 
 const [
@@ -438,31 +439,31 @@ for (const helperName of [
 }
 
 assert.ok(
-  packageJson.scripts["test:production"].includes("npm run test:fourth-pass-row-mapper-baseline"),
+  isNpmScriptCoveredByProductionTests("test:fourth-pass-row-mapper-baseline"),
   "production gate is missing the mapper baseline"
 );
 assert.ok(
-  packageJson.scripts["test:production"].includes("npm run test:core-identity-row-mappers"),
+  isNpmScriptCoveredByProductionTests("test:core-identity-row-mappers"),
   "production gate is missing the extracted mapper behavior contract"
 );
 assert.ok(
-  packageJson.scripts["test:production"].includes("npm run test:intake-special-row-mappers"),
+  isNpmScriptCoveredByProductionTests("test:intake-special-row-mappers"),
   "production gate is missing the intake/special mapper behavior contract"
 );
 assert.ok(
-  packageJson.scripts["test:production"].includes("npm run test:lesson-activity-row-mappers"),
+  isNpmScriptCoveredByProductionTests("test:lesson-activity-row-mappers"),
   "production gate is missing the lesson activity mapper behavior contract"
 );
 assert.ok(
-  packageJson.scripts["test:production"].includes("npm run test:learning-calendar-row-mappers"),
+  isNpmScriptCoveredByProductionTests("test:learning-calendar-row-mappers"),
   "production gate is missing the learning/calendar mapper behavior contract"
 );
 assert.ok(
-  packageJson.scripts["test:production"].includes("npm run test:platform-source-row-mappers"),
+  isNpmScriptCoveredByProductionTests("test:platform-source-row-mappers"),
   "production gate is missing the platform source mapper behavior contract"
 );
 assert.ok(
-  packageJson.scripts["test:production"].includes("npm run test:exam-analysis-pipeline-row-mappers"),
+  isNpmScriptCoveredByProductionTests("test:exam-analysis-pipeline-row-mappers"),
   "production gate is missing the exam pipeline mapper behavior contract"
 );
 

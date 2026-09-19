@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { isNpmScriptCoveredByProductionTests } from "./productionTestMembership.mjs";
 import { readFile } from "node:fs/promises";
 
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
@@ -74,7 +75,7 @@ const directRequestCallCount = (appSource.match(/\bfetch\(|\bpostJson[A-Za-z]*\(
 assert.equal(directRequestCallCount, 19, `direct fetch/postJson call count drifted from the 4-4 closeout (19), now ${directRequestCallCount}`);
 
 assert.ok(
-  packageJson.scripts["test:production"].includes("npm run test:fourth-pass-app-action-baseline")
+  isNpmScriptCoveredByProductionTests("test:fourth-pass-app-action-baseline")
 );
 
 console.log(
