@@ -106,6 +106,14 @@ import { createLessonNotificationJob } from "../domains/lessons/lessonNotificati
 import { createLessonNotificationJobBatch } from "../domains/lessons/lessonNotificationJobBatch.js";
 import { createLessonNotificationRecordStatusPayload } from "../domains/lessons/lessonNotificationRecordStatusPayload.js";
 import { createLessonNotificationRecordStatusRows } from "../domains/lessons/lessonNotificationRecordStatusRows.js";
+import {
+  activeLessonIdSet,
+  filterActiveLessons,
+  filterRecordsForLessons,
+  isActiveLesson,
+  upsertById,
+  upsertLessonStudentRecord
+} from "../domains/lessons/lessonRecordCollections.js";
 import { createLessonRetestStatusPayload } from "../domains/lessons/lessonRetestStatusPayload.js";
 import { getExamPrepIdFromDerivedMathEvent } from "../domains/lessons/derivedMathEventExamPrepIdSelector.js";
 import { createExamPeriodSundayDateSelector } from "../domains/lessons/examPeriodSundayDateSelector.js";
@@ -368,7 +376,6 @@ import {
 import { TEST_ATTEMPT_SUBJECTS } from "../domains/tests/testPaperLibraryModel.js";
 import {
   academyBrandName,
-  academyOperationalStartDate,
   academyReminderPriorityOptions,
   academyReminderStatusLabels,
   academyReminderTypeOptions,
@@ -8082,26 +8089,6 @@ function sortByTime(a, b) {
   return a.startTime.localeCompare(b.startTime);
 }
 
-function isActiveLesson(lesson) {
-  return (
-    lesson?.date >= academyOperationalStartDate &&
-    !["canceled", "deleted"].includes(lesson?.status ?? "scheduled")
-  );
-}
-
-function activeLessonIdSet(lessons = []) {
-  return new Set(lessons.filter(isActiveLesson).map((lesson) => lesson.lessonId));
-}
-
-function filterActiveLessons(lessons = []) {
-  return lessons.filter(isActiveLesson);
-}
-
-function filterRecordsForLessons(records = [], lessons = []) {
-  const lessonIds = activeLessonIdSet(lessons);
-  return records.filter((record) => lessonIds.has(record.lessonId));
-}
-
 function filterHomeworksForLessons(homeworks = [], lessons = []) {
   const lessonIds = activeLessonIdSet(lessons);
   return homeworks.filter((homework) => homework.lessonId && lessonIds.has(homework.lessonId));
@@ -8559,28 +8546,6 @@ function findMatchingLessonStudentRecord(records = [], record = {}) {
   );
 }
 
-function upsertLessonStudentRecord(records = [], nextRecord = {}) {
-  if (!nextRecord?.lessonStudentRecordId && (!nextRecord?.lessonId || !nextRecord?.studentId)) {
-    return upsertById(records, nextRecord, "lessonStudentRecordId");
-  }
-  let didReplace = false;
-  const nextRecords = [];
-  records.forEach((record) => {
-    const isSameRecord =
-      (nextRecord.lessonStudentRecordId && record.lessonStudentRecordId === nextRecord.lessonStudentRecordId) ||
-      (record.lessonId === nextRecord.lessonId && record.studentId === nextRecord.studentId);
-    if (!isSameRecord) {
-      nextRecords.push(record);
-      return;
-    }
-    if (!didReplace) {
-      nextRecords.push(nextRecord);
-      didReplace = true;
-    }
-  });
-  return didReplace ? nextRecords : [...records, nextRecord];
-}
-
 function createEmptyRecord(lesson, student) {
   return {
     lessonStudentRecordId: createLessonStudentRecordId(lesson.lessonId, student.studentId),
@@ -8615,12 +8580,6 @@ function createEmptyRecord(lesson, student) {
     needsMakeup: false,
     needsRetest: false
   };
-}
-
-function upsertById(items, nextItem, idKey) {
-  return items.some((item) => item[idKey] === nextItem[idKey])
-    ? items.map((item) => (item[idKey] === nextItem[idKey] ? nextItem : item))
-    : [...items, nextItem];
 }
 
 function getLessonHomework(homeworks, lesson, student, homeworkType, lessons = [], records = null, { onlyRegularLessons = false } = {}) {
