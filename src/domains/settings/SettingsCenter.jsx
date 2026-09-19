@@ -303,6 +303,19 @@ export function SettingsCenter({
     }));
   }, [account.loginId]);
 
+  // 지각 유예시간은 키 입력마다 최소 5분으로 클램프하면 '10'을 칠 수 없다('1' → 5 → '50').
+  // 입력 중에는 로컬 draft 만 바꾸고, 포커스가 빠지거나 Enter 를 눌렀을 때 정규화해 저장한다(2026-09-19).
+  const [graceDraft, setGraceDraft] = useState(String(attendance.lateGraceMinutes));
+  useEffect(() => {
+    setGraceDraft(String(attendance.lateGraceMinutes));
+  }, [attendance.lateGraceMinutes]);
+
+  function commitGraceDraft() {
+    const normalized = Math.max(5, Number(graceDraft) || 5);
+    setGraceDraft(String(normalized));
+    if (normalized !== attendance.lateGraceMinutes) updateAttendanceSetting("lateGraceMinutes", normalized);
+  }
+
   function updateProvider(row, provider) {
     const models = row.modelOptions?.[provider] ?? aiProviderModels[provider] ?? aiProviderModels.auto;
     const defaultModel = row.preferredModels?.[provider] && models.includes(row.preferredModels[provider])
@@ -435,7 +448,7 @@ export function SettingsCenter({
 
       <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...appStateAutosaveRisk} />
 
-      <WorkspaceTabs className="settingsSectionTabs" label="설정 항목 선택" variant="secondary">
+      <WorkspaceTabs className="settingsSectionTabs" label="설정 항목 선택">
         {settingsSections.map((section) => (
           <button
             aria-selected={activeSettingsSection === section.id}
@@ -680,10 +693,15 @@ export function SettingsCenter({
               inputMode="numeric"
               min="5"
               type="number"
-              value={attendance.lateGraceMinutes}
-              onChange={(event) =>
-                updateAttendanceSetting("lateGraceMinutes", Math.max(5, Number(event.target.value) || 5))
-              }
+              value={graceDraft}
+              onBlur={commitGraceDraft}
+              onChange={(event) => setGraceDraft(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  commitGraceDraft();
+                }
+              }}
             />
             <span className="aiSettingBadge fieldBadge">분 단위</span>
           </div>

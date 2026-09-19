@@ -4,7 +4,7 @@ import { ListCard, ListCardActions, ListCardBody } from "../../shared/components
 export function PortalMaterialsTab({ emptyMessage, materials = [], openMaterial }) {
   return (
     <div className="portalMaterialsList">
-      {materials.length === 0 ? <EmptyState className="emptyPortalPanel" title={emptyMessage} /> : null}
+      {materials.length === 0 ? <EmptyState title={emptyMessage} /> : null}
       {materials.map((material) => (
         <ListCard className="portalMaterialCard" key={material.materialId}>
           <ListCardBody>

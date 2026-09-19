@@ -9,7 +9,7 @@ import "./testManagerPanels.css";
 
 export function TestManagerTabs({ activeTab = "attempts", onChange }) {
   return (
-    <WorkspaceTabs className="localTabs materialTabs" label="테스트 관리 항목" variant="secondary">
+    <WorkspaceTabs label="테스트 관리 항목">
       <button
         aria-selected={activeTab === "attempts"}
         className={activeTab === "attempts" ? "active" : ""}
@@ -179,7 +179,6 @@ export function TestAttemptTable({
   if (!students.length) {
     return (
       <EmptyState
-        className="examPrepEmptyState"
         description="반 선택 또는 학생관리의 기본 반 배정을 확인해 주세요."
         title="대상 학생이 없습니다."
       />
@@ -338,7 +337,6 @@ export function StudentTestHistoryPanel({
         ))}
         {!rows.length ? (
           <EmptyState
-            className="examPrepEmptyState"
             description="응시 기록 탭에서 학생별 결과를 저장하면 여기에 누적됩니다."
             title="테스트 이력이 없습니다."
           />

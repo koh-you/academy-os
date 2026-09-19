@@ -2,12 +2,26 @@
   min-width: 0;
 }
 
+/* 2026-09-19 · 상자 모양(점선 테두리·반경·여백)은 호출자 className 이 아니라 컴포넌트가 소유한다.
+   화면마다 점선/실선·반경 8/12·패딩 14/18/28 로 갈리던 빈 상태를 한 모양으로 맞춘다. */
 .emptyStateShell.structured {
   align-content: center;
+  border: 1px dashed var(--academy-border-strong, #cbd8ee);
+  border-radius: var(--academy-radius, 8px);
   display: grid;
   gap: var(--academy-space-2, 12px);
+  /* 여러 열 그리드(학생 카드 격자 등) 안에서는 한 칸이 아니라 전체 폭을 차지한다. 그리드 밖에서는 무시된다. */
+  grid-column: 1 / -1;
   justify-items: center;
+  min-height: 88px;
+  padding: 18px;
   text-align: center;
+}
+
+.emptyStateShell.structured[data-density="compact"] {
+  gap: var(--academy-space-1, 8px);
+  min-height: 56px;
+  padding: 12px 14px;
 }
 
 .emptyStateCopy {
@@ -24,6 +38,10 @@
   line-height: 1.45;
 }
 
+.emptyStateShell[data-density="compact"] .emptyStateTitle {
+  font-size: 13px;
+}
+
 .emptyStateDescription,
 .emptyStateContent {
   color: var(--academy-muted, #64748b);
@@ -38,14 +56,17 @@
   justify-content: center;
 }
 
+/* 불러오는 중·오류는 "비어 있음"이 아니라 상태 알림이라 실선으로 구분한다. */
 .emptyStateShell[data-tone="loading"] {
   background: var(--status-info-bg, #eff6ff);
   border-color: var(--status-info-border, #bfdbfe);
+  border-style: solid;
 }
 
 .emptyStateShell[data-tone="error"] {
   background: var(--status-danger-bg, #fef2f2);
   border-color: var(--status-danger-border, #fecaca);
+  border-style: solid;
 }
 
 .emptyStateShell[data-tone="error"] .emptyStateTitle {

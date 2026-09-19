@@ -121,7 +121,7 @@ export function StudentLessonHistoryCalendar({
               </ListCardBody>
             </>
           ) : (
-            <EmptyState className="emptyHomeworkBox" title="아직 확인할 수업 기록이 없습니다." />
+            <EmptyState title="아직 확인할 수업 기록이 없습니다." />
           )}
         </ListCard>
       </div>

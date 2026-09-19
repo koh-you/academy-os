@@ -52,8 +52,8 @@ export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSet
             <p className="muted">개별 시간이 있으면 그 시간을, 없으면 시험대비 수업의 공통 시간을 표시합니다.</p>
           </div>
           <WorkspaceTabs label="시험대비 명단 정렬" variant="compact">
-            <button aria-pressed={rosterView === "time"} className={rosterView === "time" ? "active" : ""} onClick={() => setRosterView("time")} type="button">시간순</button>
-            <button aria-pressed={rosterView === "school"} className={rosterView === "school" ? "active" : ""} onClick={() => setRosterView("school")} type="button">학교별</button>
+            <button aria-selected={rosterView === "time"} className={rosterView === "time" ? "active" : ""} onClick={() => setRosterView("time")} role="tab" type="button">시간순</button>
+            <button aria-selected={rosterView === "school"} className={rosterView === "school" ? "active" : ""} onClick={() => setRosterView("school")} role="tab" type="button">학교별</button>
           </WorkspaceTabs>
         </div>
 
@@ -97,7 +97,7 @@ export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSet
             ))}
           </div>
         ) : (
-          <EmptyState as="p" className="examPrepEmptyState">참여 학생이 없습니다. 일정 수정에서 학생 명단을 먼저 지정해 주세요.</EmptyState>
+          <EmptyState description="일정 수정에서 학생 명단을 먼저 지정해 주세요." title="참여 학생이 없습니다." />
         )}
       </section>
 
@@ -142,7 +142,7 @@ export function ExamPrepLessonDetail({ attendanceSettings = defaultAttendanceSet
             ))}
           </div>
         ) : (
-          <EmptyState as="p" className="examPrepEmptyState">연결된 시험정보가 없습니다. 필요한 경우 일정 수정에서 수업명과 학생 명단을 직접 정리하세요.</EmptyState>
+          <EmptyState description="필요한 경우 일정 수정에서 수업명과 학생 명단을 직접 정리하세요." title="연결된 시험정보가 없습니다." />
         )}
 
         <Suspense fallback={<p className="inlineNotice">진행 내용 입력을 준비하는 중입니다.</p>}>

@@ -91,7 +91,7 @@ export function SchoolAcademicOverviewPanel({
         <MetricCard density="compact" label="방학/개학·학교행사" value={monthAcademicEvents.length} />
       </div>
       {examPeriodCards.length === 0 ? (
-        <div className="emptyHomeworkBox">이 달에 표시할 시험기간 카드가 없습니다.</div>
+        <EmptyState title="이 달에 표시할 시험기간 카드가 없습니다." />
       ) : (
         <div className="examPeriodGallery">
           {examPeriodCards.map((event) => (

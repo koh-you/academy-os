@@ -302,16 +302,6 @@
   margin-top: 2px;
 }
 
-.noticeStudentEmpty {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px dashed var(--academy-border-strong, #cbd8ee);
-  border-radius: 8px;
-  color: var(--academy-muted, #64748b);
-  font-size: 13px;
-  font-weight: 900;
-  padding: 14px;
-}
-
 .noticeWorkspaceTabs {
   margin: 0;
   overscroll-behavior-inline: contain;
@@ -380,6 +370,8 @@
 }
 
 .noticeTargetPanel .noticeStudentPicker {
+  /* 넓은 화면에서 남는 높이를 채울 때 빈 상태 상자가 세로로 늘어나지 않게 위로 모은다. */
+  align-content: start;
   gap: 5px;
   max-height: 430px;
   padding: 7px;

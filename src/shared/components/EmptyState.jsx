@@ -9,6 +9,7 @@ export function EmptyState({
   as: Component = "div",
   children,
   className = "emptyState",
+  density = "regular",
   description = "",
   title = "",
   tone = "neutral",
@@ -19,6 +20,7 @@ export function EmptyState({
   return (
     <Component
       className={joinClassNames("emptyStateShell", hasStructuredContent && "structured", className)}
+      data-density={density === "compact" ? "compact" : undefined}
       data-tone={tone}
       {...props}
     >

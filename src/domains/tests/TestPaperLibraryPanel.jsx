@@ -352,7 +352,6 @@ export function TestPaperLibraryPanel({
         </div>
       ) : (
         <EmptyState
-          className="examPrepEmptyState"
           description="필터를 바꿔 다른 과목·종류·난이도를 확인해 주세요."
           title="표시할 시험지가 없습니다."
         />

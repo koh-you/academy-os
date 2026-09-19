@@ -158,13 +158,16 @@ export function SpecialLectureHighlightEditor({
               value={highlight}
               onChange={(event) => onUpdateHighlight?.(index, event.target.value)}
             />
-            <button
-              className="dangerSoftButton compact"
-              onClick={() => onRemoveHighlight?.(index)}
-              type="button"
-            >
-              삭제
-            </button>
+            {highlights.length > 1 ? (
+              <button
+                aria-label={`${index + 1}번째 수업 방향 카드 제거`}
+                className="iconButton"
+                onClick={() => onRemoveHighlight?.(index)}
+                type="button"
+              >
+                ×
+              </button>
+            ) : null}
           </div>
         ))}
       </div>

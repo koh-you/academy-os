@@ -70,7 +70,7 @@ export function StudentPortalShell({
 
       <section className="panel">
         <h2>최근 리포트</h2>
-        {reports.length === 0 ? <EmptyState className="emptyPortalPanel" title="아직 공개된 리포트 초안이 없습니다." /> : null}
+        {reports.length === 0 ? <EmptyState title="아직 공개된 리포트 초안이 없습니다." /> : null}
         <PortalReportCards reports={reports.slice(0, 3)} />
       </section>
     </section>

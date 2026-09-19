@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { ListCard, ListCardActions, ListCardBody } from "../../shared/components/ListCard.jsx";
 import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
@@ -78,7 +79,7 @@ export function StudentQuestionPanel({
       ) : null}
       <QuestionSaveFeedback saveState={createFeedbackState} targetId="create" />
       <div className="studentQuestionList">
-        {questions.length === 0 ? <div className="emptyHomeworkBox compact">아직 정리한 질문이 없습니다.</div> : null}
+        {questions.length === 0 ? <EmptyState density="compact" title="아직 정리한 질문이 없습니다." /> : null}
         {questions.slice(0, 6).map((question) => (
           <ListCard className={`studentQuestionItem ${question.status === "resolved" ? "resolved" : ""}`} density="compact" key={question.questionId}>
             <ListCardBody>

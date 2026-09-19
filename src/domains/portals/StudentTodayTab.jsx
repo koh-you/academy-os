@@ -82,7 +82,7 @@ export function StudentTodayTab({
         title="오늘 해야 할 숙제"
       />
       <div className="homeworkStack">
-        {todayHomeworks.length === 0 ? <EmptyState className="emptyHomeworkBox" title="오늘 배정된 숙제가 없습니다." /> : null}
+        {todayHomeworks.length === 0 ? <EmptyState title="오늘 배정된 숙제가 없습니다." /> : null}
         {todayHomeworks.map((homework) => (
           <StudentHomeworkActionCard
             completed={isHomeworkCompleted(homework)}
