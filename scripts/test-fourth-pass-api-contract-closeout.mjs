@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { doesProductionListStartWithNpmScript } from "./productionTestMembership.mjs";
 import { readFile } from "node:fs/promises";
 import { versionedWriteRouteContracts } from "../src/shared/contracts/versionedWriteRouteContracts.js";
 import { academyReminderRouteSignatures } from "../src/shared/server/academyReminderRouteRegistry.js";
@@ -307,7 +308,8 @@ assert.ok(
   packageJson.scripts["test:contract:versioned-write"].includes("npm run test:fourth-pass-api-contract-closeout")
 );
 assert.equal(
-  packageJson.scripts["test:production"].startsWith("npm run test:contract:versioned-write"),
+  // 계약 검사는 test:production 평면 목록의 맨 앞에서 돈다(체인 시절의 startsWith 계약 유지).
+  doesProductionListStartWithNpmScript("test:contract:versioned-write"),
   true
 );
 

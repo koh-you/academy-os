@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { isTestFileInProductionList } from "./productionTestMembership.mjs";
 import { readFile } from "node:fs/promises";
 
 const [appSource, outletSource, screenSource, autosaveSource, packageSource] = await Promise.all([
@@ -83,6 +84,6 @@ assert.equal(
   packageJson.scripts["test:lesson-research-explicit-save"],
   "node scripts/test-lesson-research-explicit-save.mjs"
 );
-assert.ok(packageJson.scripts["test:production"].includes("test-lesson-research-explicit-save.mjs"));
+assert.ok(isTestFileInProductionList("scripts/test-lesson-research-explicit-save.mjs"));
 
 console.log("lesson-research explicit save boundary passed");

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { isNpmScriptCoveredByProductionTests } from "./productionTestMembership.mjs";
 import { readFile } from "node:fs/promises";
 import { academyReminderRouteSignatures } from "../src/shared/server/academyReminderRouteRegistry.js";
 import { appCoreReadRouteSignatures } from "../src/shared/server/appCoreReadRouteRegistry.js";
@@ -287,7 +288,7 @@ assert.equal(
   "node scripts/test-fourth-pass-server-route-closeout.mjs"
 );
 assert.ok(
-  packageJson.scripts["test:production"].includes("npm run test:fourth-pass-server-route-closeout")
+  isNpmScriptCoveredByProductionTests("test:fourth-pass-server-route-closeout")
 );
 
 console.log(
