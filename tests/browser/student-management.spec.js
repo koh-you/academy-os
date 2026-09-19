@@ -338,12 +338,68 @@ test("withdrawn student list keeps its table and selection toolbar boundary", as
   const withdrawnList = page.getByRole("region", { name: "퇴원생 목록" });
   await expect(withdrawnList).toContainText("미리보기 퇴원생");
   await expect(withdrawnList.getByLabel("미리보기 퇴원생 퇴원 사유")).toBeVisible();
-  await withdrawnList.getByRole("checkbox").check();
-
+  // 2026-09-19 · UI U8: 선택 0명이면 하단 툴바가 없다. 전체 선택은 표 헤더 체크박스다.
   const selectionToolbar = page.getByRole("group", { name: "퇴원생 선택" });
+  await expect(selectionToolbar).toHaveCount(0);
+  await withdrawnList.getByRole("checkbox", { name: "미리보기 퇴원생 선택" }).check();
+
   await expect(selectionToolbar).toContainText("선택 1명");
+  // 1명 선택: 지금 누를 수 있는 버튼만 있고 비활성 버튼은 없다(변경 없음 → '선택 저장' 없음).
   await expect(selectionToolbar.getByRole("button", { name: "퇴원 취소" })).toBeEnabled();
+  await expect(selectionToolbar.getByRole("button", { name: "인수인계서 PDF" })).toBeEnabled();
   await expect(selectionToolbar.getByRole("button", { name: "영구 삭제" })).toBeEnabled();
+  await expect(selectionToolbar.getByRole("button", { name: "선택 저장" })).toHaveCount(0);
+  await expect(selectionToolbar.getByRole("button", { name: "전체 선택" })).toHaveCount(0);
+  await expect(selectionToolbar.locator("button[disabled]")).toHaveCount(0);
+
+  // 사유를 바꾸면 변경된 선택이 생겨 '선택 저장' 이 나타난다(저장은 누르지 않는다).
+  await withdrawnList.getByLabel("미리보기 퇴원생 퇴원 사유").selectOption("graduation");
+  await expect(selectionToolbar.getByRole("button", { name: "선택 저장" })).toBeEnabled();
+
+  // 헤더 전체 선택 → 해제 → 툴바가 사라진다.
+  const selectAll = withdrawnList.getByRole("checkbox", { name: "전체 선택" });
+  await selectAll.check();
+  await expect(selectAll).toBeChecked();
+  await selectionToolbar.getByRole("button", { name: "선택 해제" }).click();
+  await expect(selectionToolbar).toHaveCount(0);
+  await expect(selectAll).not.toBeChecked();
+  expect(pageErrors).toEqual([]);
+});
+
+// 2026-09-19 · UI U8: 재원생 목록 검색(이름·학교·전화)·정렬은 클라이언트 표시 전용이고 탭을 오가도 유지된다.
+test("active student list filters by search and sorts without touching the withdrawn tab", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
+
+  const studentList = page.getByRole("region", { name: "학생 목록" });
+  const searchBar = page.getByRole("group", { name: "재원생 검색·정렬" });
+  const searchInput = searchBar.getByRole("searchbox", { name: "학생 검색" });
+  // 목록이 2행 이상 로드된 뒤에 검색한다(로드 전 0행에서 바로 세면 안 된다).
+  await expect(studentList.locator(".studentListRow:not(.studentListHead)").nth(1)).toBeVisible();
+
+  await searchInput.fill("월경계");
+  await expect(studentList.getByRole("button", { name: "월경계 학생 정보 수정" })).toBeVisible();
+  await expect(studentList.locator(".studentListRow:not(.studentListHead)")).toHaveCount(1);
+  await expect(searchBar).toContainText("1명");
+
+  // 검색어는 탭을 바꿔도 유지된다.
+  await page.getByRole("tab", { name: "반별 학생 목록" }).click();
+  await expect(searchInput).toHaveValue("월경계");
+  await page.getByRole("tab", { name: "전체 학생 목록" }).click();
+
+  await searchInput.fill("존재하지않는학생");
+  await expect(studentList.getByText("검색 결과가 없습니다.")).toBeVisible();
+  await studentList.getByRole("button", { name: "검색어 지우기" }).click();
+  await expect(searchInput).toHaveValue("");
+  await expect(studentList.getByText("검색 결과가 없습니다.")).toHaveCount(0);
+
+  // 정렬은 select 하나로 바꾸고, 퇴원생 탭에는 이 바가 없다(퇴원생 탭은 자체 정렬).
+  await searchBar.getByRole("combobox", { name: "재원생 정렬" }).selectOption("grade");
+  await expect(searchBar.getByRole("combobox", { name: "재원생 정렬" })).toHaveValue("grade");
+  await page.getByRole("tab", { name: "퇴원생 목록" }).click();
+  await expect(searchBar).toHaveCount(0);
+  await expect(page.getByRole("combobox", { name: "퇴원생 정렬" })).toBeVisible();
   expect(pageErrors).toEqual([]);
 });
 

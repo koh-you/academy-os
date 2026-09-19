@@ -41,7 +41,8 @@ assert.equal(directModalCount, 42, "unexpected direct common Modal surface count
 assert.equal(injectedModalCount, 14, "unexpected injected common Modal surface count");
 // 20 -> 21: 발송 확인 모달의 [취소][N건 발송] 푸터 2026-09-19.
 // 21 -> 22: 출결 체크 모달 1단계 [출결 저장] 이 attendanceModalActions div 대신 ModalFooter 를 쓴다(2026-09-19 U5).
-assert.equal(modalFooterCount, 22, "unexpected common ModalFooter count");
+// 22 -> 23: 학생 추가 모달 '한 명씩' 탭이 primaryButton full 대신 ModalFooter [취소][학생 저장] 을 쓴다(2026-09-19 U8).
+assert.equal(modalFooterCount, 23, "unexpected common ModalFooter count");
 assert.equal(modalActionCount, 2, "unexpected legacy modalActions wrapper count");
 assert.deepEqual(
   rawDialogEntries.map((entry) => entry.path),

@@ -15,6 +15,13 @@
   font-size: 26px;
 }
 
+/* 2026-09-19 · UI U8: Tally 탭처럼 본문이 모달 높이를 넘으면 grid 의 auto 행이 스크롤 컨테이너(WorkspaceTabs 는
+   overflow-x: auto)의 자동 최소 높이 0 까지 눌려 탭 줄이 14px 로 찌그러졌다(main 에서도 동일). 행을 내용 높이로
+   고정해 본문(.modalScrollBody)만 스크롤한다. */
+.studentAddModal .modalScrollBody {
+  grid-auto-rows: max-content;
+}
+
 
 .studentAddGrid {
   display: grid;
@@ -62,15 +69,21 @@
   padding: 8px 12px;
 }
 
-.primaryButton.studentAddSubmit {
-  border-radius: 16px;
-  font-size: 18px;
-  min-height: 48px;
-}
-
 .studentIntakePanel {
   display: grid;
   gap: 14px;
+}
+
+/* 2026-09-19 · UI U8: Tally 탭 첫 줄 — 후보 정보는 자동 저장, 정식 등록만 버튼이라는 경계 안내. */
+.studentIntakePanel .studentIntakeAutosaveNote {
+  background: var(--status-info-bg, #eff6ff);
+  border: 1px solid var(--status-info-border, #bfdbfe);
+  border-radius: 8px;
+  color: var(--status-info-text, #1d4ed8);
+  font-size: 13px;
+  font-weight: 800;
+  margin: 0;
+  padding: 10px 12px;
 }
 
 .intakeEndpointBox {
