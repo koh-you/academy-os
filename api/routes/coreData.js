@@ -831,7 +831,8 @@ export async function listLessons({ date, includeCanceled = false } = {}) {
     return { source: fallbackSource, lessons };
   }
 
-  await deleteExpiredCanceledLessons();
+  // 만료된 취소 수업 정리(deleteExpiredCanceledLessons)는 여기가 아니라 서버 주기 작업이 한다
+  // (canceledLessonRetentionSweep.js) — 조회마다 돌리면 폴링마다 SELECT 가 늘고 삭제로 조회가 멈춘다.
   const statusFilter = includeCanceled ? "" : "&status=neq.canceled";
   const query = date
     ? `select=*${statusFilter}&lesson_date=eq.${encodeURIComponent(date)}&order=lesson_date.asc,start_time.asc`
