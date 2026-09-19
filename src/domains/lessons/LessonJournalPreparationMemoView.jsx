@@ -38,6 +38,7 @@ export function LessonJournalPreparationMemoView({
   return (
     <Modal
       className="preparationMemoModal"
+      closeDisabled={isClosingAfterSave || saveState === "saving"}
       title={`${student.name} 수업메모`}
       subtitle={`${lesson.date} · ${lesson.className}`}
       onClose={onClose}

@@ -7,6 +7,7 @@ export function SupplementPassConfirmModal({ errorMessage = "", getTypeLabel, is
   return (
     <Modal
       className="supplementPassConfirmModal"
+      closeDisabled={isBusy}
       title="보충 완료 처리 확인"
       subtitle="완료 처리하면 보충관리 후보에서 제외되고, 최근 보충내역에서 다시 복귀할 수 있습니다."
       onClose={onCancel}

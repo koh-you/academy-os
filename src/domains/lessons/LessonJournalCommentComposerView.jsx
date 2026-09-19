@@ -34,6 +34,7 @@ export function LessonJournalCommentComposerView({
   return (
     <Modal
       className="commentComposerModal"
+      closeDisabled={draftSaveState === "saving"}
       title={title}
       subtitle={`${lesson.date} · ${lesson.className}`}
       onClose={onClose}

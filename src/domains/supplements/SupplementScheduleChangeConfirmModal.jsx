@@ -23,6 +23,7 @@ export function SupplementScheduleChangeConfirmModal({
   return (
     <Modal
       className="supplementPassConfirmModal supplementScheduleConfirmModal"
+      closeDisabled={isBusy}
       title="보충 일정 변경 저장"
       subtitle="기존 보충 일정을 바꾸면 다음 정각 안내 예약과 당일 11시 예약 갱신을 함께 선택합니다."
       onClose={onCancel}
