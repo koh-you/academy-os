@@ -1,5 +1,5 @@
 import { canCurrentRoleSendAlimtalk } from "../../shared/utils/apiClient.js";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { applyStudentScheduleToLesson } from "../../shared/utils/studentSchedule.js";
 import {
   assignmentStatusOptions,
@@ -21,6 +21,7 @@ import { LessonJournalStudentPreviewModal } from "./LessonJournalStudentPreviewM
 import { LessonJournalStudentRow } from "./LessonJournalStudentRow.jsx";
 import { LessonJournalTable } from "./LessonJournalTable.jsx";
 import { getLessonJournalEffectiveCommentSendStatus } from "./lessonJournalCommentSendStatus.js";
+import { createStudentAttendanceIndex } from "./lessonHomeworkContinuity.js";
 import { createLessonJournalExpectedReservationItems } from "./lessonJournalExpectedReservationItems.js";
 import { selectPreviousLessonMemoContext } from "./lessonJournalPreviousMemoSelector.js";
 import { createLessonJournalReservationAuditModel } from "./lessonJournalReservationAuditModel.js";
@@ -183,7 +184,62 @@ export function LessonJournalDetail({
   const auditedLessonNotificationJobs = Array.isArray(reservationAudit.osJobs) ? reservationAudit.osJobs : lessonNotificationJobs;
   const todayTwoPmIso = new Date(`${today}T14:00:00+09:00`).toISOString();
   const canScheduleTodayTwoPm = lesson.date < today && Boolean(onScheduleLessonNotificationsAt);
-  const lessonStudents = getLessonJournalStudents(lesson, students);
+  const lessonStudents = useMemo(() => getLessonJournalStudents(lesson, students), [getLessonJournalStudents, lesson, students]);
+  // 학생별 "직전 수업" 파생값. 수업·명단·기록·숙제가 바뀔 때만 다시 계산한다.
+  // 예전에는 렌더마다(편집 중 매 타자, 7초 출결 폴링) 학생마다 직전 수업 탐색을 5~6번 하고
+  // 그때마다 기록 전체를 다시 훑었다 — 수업 154·기록 1,155 에서 12 ms, 925·7,708 에서 114 ms.
+  // 초안(journalRecordDrafts)은 여기 들어가지 않는다: 초안이 있을 때 되채우지 않는 규칙은
+  // 아래 getLessonRecordWithPreviousDefaults 호출이 그대로 지킨다.
+  const previousLessonContextByStudent = useMemo(() => {
+    const attendanceIndex = createStudentAttendanceIndex(allRecords);
+    return new Map(lessonStudents.map((student) => {
+      const previousLessonSourceMode = previousLessonSourceByStudent[student.studentId] || "nearest";
+      const onlyRegularLessons = previousLessonSourceMode === "regular";
+      const nearestPreviousLesson = findPreviousLessonsForStudent(lessons, lesson, student.studentId, { attendanceIndex, records: allRecords })[0] ?? null;
+      const regularPreviousLesson = findPreviousLessonsForStudent(lessons, lesson, student.studentId, { attendanceIndex, onlyRegularLessons: true, records: allRecords })[0] ?? null;
+      const hasAlternatePreviousLessonSource = Boolean(
+        nearestPreviousLesson &&
+        regularPreviousLesson &&
+        nearestPreviousLesson.lessonId !== regularPreviousLesson.lessonId
+      );
+      const nearestPreviousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons, allRecords, { onlyRegularLessons: false });
+      const regularPreviousHomework = hasAlternatePreviousLessonSource
+        ? getLessonHomework(homeworks, lesson, student, "previous", lessons, allRecords, { onlyRegularLessons: true })
+        : nearestPreviousHomework;
+      const previousMemoContext = selectPreviousLessonMemoContext({
+        allRecords,
+        currentLesson: lesson,
+        findPreviousLessonsForStudent: (candidateLessons, currentLesson, studentId, options = {}) =>
+          findPreviousLessonsForStudent(candidateLessons, currentLesson, studentId, { ...options, attendanceIndex }),
+        isSpecialLectureLesson,
+        lessons,
+        onlyRegularLessons,
+        records,
+        student
+      });
+      return [student.studentId, {
+        hasAlternatePreviousLessonSource,
+        nearestPreviousHomework,
+        nearestPreviousLesson,
+        nextHomework: getLessonHomework(homeworks, lesson, student, "next"),
+        onlyRegularLessons,
+        previousMemoContext,
+        regularPreviousHomework,
+        regularPreviousLesson
+      }];
+    }));
+  }, [
+    allRecords,
+    findPreviousLessonsForStudent,
+    getLessonHomework,
+    homeworks,
+    isSpecialLectureLesson,
+    lesson,
+    lessonStudents,
+    lessons,
+    previousLessonSourceByStudent,
+    records
+  ]);
   const isClosureMakeupLesson = lesson.lessonType === "makeup" && lesson.lessonTopic === "휴강 보충";
   const linkedClosureMakeupLesson = isClosureLesson
     ? (Array.isArray(lessons) ? lessons : []).find((item) => item.sourceLabel === `원 휴강 수업 · ${lesson.lessonId}`)
@@ -644,21 +700,18 @@ export function LessonJournalDetail({
             const persistedRecord = findLessonStudentRecord(records, lesson, student) ?? createEmptyRecord(lesson, student);
             const editableRecord = getEditableRecord(recordId, persistedRecord);
             const attendanceLesson = applyStudentScheduleToLesson(lesson, student);
-            const previousLessonSourceMode = previousLessonSourceByStudent[student.studentId] || "nearest";
-            const onlyRegularLessons = previousLessonSourceMode === "regular";
-            const nearestPreviousLesson = findPreviousLessonsForStudent(lessons, lesson, student.studentId, { records: allRecords })[0] ?? null;
-            const regularPreviousLesson = findPreviousLessonsForStudent(lessons, lesson, student.studentId, { onlyRegularLessons: true, records: allRecords })[0] ?? null;
-            const hasAlternatePreviousLessonSource = Boolean(
-              nearestPreviousLesson &&
-              regularPreviousLesson &&
-              nearestPreviousLesson.lessonId !== regularPreviousLesson.lessonId
-            );
-            const nearestPreviousHomework = getLessonHomework(homeworks, lesson, student, "previous", lessons, allRecords, { onlyRegularLessons: false });
-            const regularPreviousHomework = hasAlternatePreviousLessonSource
-              ? getLessonHomework(homeworks, lesson, student, "previous", lessons, allRecords, { onlyRegularLessons: true })
-              : nearestPreviousHomework;
+            const {
+              hasAlternatePreviousLessonSource,
+              nearestPreviousHomework,
+              nearestPreviousLesson,
+              nextHomework,
+              onlyRegularLessons,
+              previousMemoContext,
+              regularPreviousHomework,
+              regularPreviousLesson
+            } = previousLessonContextByStudent.get(student.studentId);
+            const previousLessonSourceMode = onlyRegularLessons ? "regular" : "nearest";
             const previousHomework = onlyRegularLessons ? regularPreviousHomework : nearestPreviousHomework;
-            const nextHomework = getLessonHomework(homeworks, lesson, student, "next");
             const previousHomeworkTitle = getHomeworkDraftTitle(student, "previous", previousHomework);
             const nextHomeworkTitle = getHomeworkDraftTitle(student, "next", nextHomework);
             const effectivePreviousHomework = previousHomeworkTitle !== (previousHomework?.title ?? "")
@@ -667,16 +720,6 @@ export function LessonJournalDetail({
             const effectiveNextHomework = nextHomeworkTitle !== (nextHomework?.title ?? "")
               ? { ...(nextHomework ?? {}), title: nextHomeworkTitle }
               : nextHomework;
-            const previousMemoContext = selectPreviousLessonMemoContext({
-              allRecords,
-              currentLesson: lesson,
-              findPreviousLessonsForStudent,
-              isSpecialLectureLesson,
-              lessons,
-              onlyRegularLessons,
-              records,
-              student
-            });
             const previousRecord = previousMemoContext.previousRecord;
             const previousEditableRecord = previousMemoContext.previousEditableRecord ?? previousRecord;
             // 초안이 있으면 선생님이 편집 중이다. 그때는 비워둔 칸을 지난 내용으로 되채우지 않는다.
