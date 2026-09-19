@@ -39,7 +39,8 @@ for (const unit of bank.units) {
       const [pageText, numberText] = id.split("-");
       const bookNumbered = bank.id_style === "number";
       const printedPage = bookNumbered ? Number(bank.items[id]?.page ?? 0) : Number(pageText);
-      const numberSort = bookNumbered ? Number(id) : printedPage * 100 + Number(numberText);
+      // 「30-e1」(쪽-예제 번호)은 숫자 부분만 번호로(예제는 같은 번호 문항보다 앞).
+      const numberSort = bookNumbered ? Number(id) : printedPage * 100 + Number(String(numberText).replace(/\D/g, "")) - (String(numberText).startsWith("e") ? 0.5 : 0);
       items.push({
         item_id: `${bookId}-${id}`, number_label: id, number_sort: numberSort, printed_page: printedPage, pdf_page: printedPage,
         column: 0, layout: "column", type_label: group.section, tags: [], unit_index: unitIndex >= 0 ? unitIndex : 0, has_shared_passage: Boolean(group.passage),

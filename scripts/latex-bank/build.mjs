@@ -54,7 +54,8 @@ function bankUnits(bank) {
 }
 
 /** id 「12-13」(쪽-번호) → 책에 찍힌 문항 번호 13. 「0013」(id_style number · RPM) → 13. */
-const bookNumber = (id) => (id.includes("-") ? Number(id.split("-")[1]) : Number(id));
+// 「12-e1」(쪽-예제 번호 · 100발100중 집중공략·서술형 예제)은 숫자 부분만 번호로 쓴다.
+const bookNumber = (id) => Number((id.includes("-") ? id.split("-")[1] : id).replace(/\D/g, ""));
 
 /** figures/crops.json — 벡터 PDF 에서 크롭한 그림의 원문 크기(pt). 있으면 원문 크기 그대로 넣고 폭이 넓으면 본문 아래에 둔다. */
 let cropSizes = {};
@@ -118,7 +119,7 @@ function renderItemBody(id, rawItem, group, bank) {
   // 출처 배지: 쪽-번호 id 는 「책 12쪽 13번」, 책 전체 번호 id(RPM)는 「책 0013번 · 9쪽」.
   const badgeText = bank.id_style === "number"
     ? `${bank.book} ${id}번${item.page ? ` · ${item.page}쪽` : ""}`
-    : `${bank.book} ${id.split("-")[0]}쪽 ${id.split("-")[1]}번`;
+    : `${bank.book} ${id.split("-")[0]}쪽 ${id.split("-")[1].startsWith("e") ? `예제 ${id.split("-")[1].slice(1)}` : `${id.split("-")[1]}번`}`;
   // 배지는 sty 가 첫 줄 위 5mm 에 띄우는데 첫 줄에 분수·cases 가 오면 닿는다 — 첫 줄 키에 따라 더 올린다(sty 수정 없이).
   // 올린 만큼 문항 앞 간격도 벌려(book.tex 쪽) 앞 문항과 겹치지 않게 한다.
   const badge = `\\smash{\\raisebox{${badgeRaiseMm(item)}mm}{\\dmkichul{${badgeText}${item.tag ? ` · ${item.tag}` : ""}}}}`;
@@ -182,7 +183,12 @@ async function main() {
   // 같은 폭의 kern(`\mkern3mu`)으로 바꿔 수식 안에서 줄이 안 바뀌게 한다(binoppenalty 규약과 같은 취지). 원천 items.json 은 그대로 둔다.
   const bank = JSON.parse(await readFile(path.join(dir, "items.json"), "utf8"), (key, value) =>
     // 쉼표(mathpunct) 뒤에도 TeX 이 자동으로 glue 를 넣어 줄이 바뀔 수 있으므로 `,\,` 는 `{,}`(Ord) + kern 으로 바꾼다.
-    typeof value === "string" && value.includes("\\,") ? value.replace(/\$([^$]*)\$/g, (math) => math.replace(/,\\,/g, "{,}\\mkern3mu ").replace(/\\,/g, "\\mkern3mu ")) : value
+    typeof value === "string"
+      ? value
+          .replace(/\$([^$]*)\$/g, (math) => math.replace(/,\\,/g, "{,}\\mkern3mu ").replace(/\\,/g, "\\mkern3mu "))
+          // 배점 「[5점]」 이 줄 끝에서 「[5」「점]」 로 갈라지지 않게(100발100중 서술형).
+          .replace(/\[(\d+)점\]/g, "\\mbox{[$1점]}")
+      : value
   );
   cropSizes =JSON.parse(await readFile(path.join(dir, "figures", "crops.json"), "utf8").catch(() => "{}"));
   const xelatex = await findXelatex();
@@ -294,7 +300,8 @@ async function main() {
           const [pageText, numberText] = id.split("-");
           const bookNumbered = bank.id_style === "number";
           const printedPage = bookNumbered ? Number(bank.items[id]?.page ?? 0) : Number(pageText);
-          const numberSort = bookNumbered ? Number(id) : printedPage * 100 + Number(numberText);
+          // 「30-e1」(쪽-예제 번호)은 숫자 부분만 번호로(예제는 같은 번호 문항보다 앞).
+          const numberSort = bookNumbered ? Number(id) : printedPage * 100 + Number(String(numberText).replace(/\D/g, "")) - (String(numberText).startsWith("e") ? 0.5 : 0);
           const unitIndex = manifest.units.findIndex((entry) => entry.code === unit.code);
           const synthesized = {
             item_id: `${manifest.book.book_id}-${id}`, number_label: id, number_sort: numberSort, printed_page: printedPage, pdf_page: printedPage,
@@ -321,7 +328,7 @@ async function main() {
     /** 문항 하나를 낱장(110mm 폭)으로 조판해 잉크 범위만 남긴 캔버스로 돌려준다. 번호는 책 번호. */
     // 낱장 조판은 worker 마다 다른 임시 파일(_single-<k>.tex)을 써서 동시에 돌린다(문항 1400개 × xelatex 2회 · 순차 4.5초/문항 → 16코어에서 수 분).
     const renderSingle = async (id, group, dpi, slot = 0) => {
-      const single = `${preamble}\\usepackage{multicol}\\geometry{paperwidth=110mm,paperheight=200mm,margin=6mm,headheight=0pt,headsep=0pt,footskip=0pt}\\pagestyle{empty}\\begin{document}\\setcounter{dmproblemcount}{${bookNumber(id) - 1}}
+      const single = `${preamble}\\usepackage{multicol}\\geometry{paperwidth=110mm,paperheight=200mm,margin=6mm,headheight=0pt,headsep=0pt,footskip=0pt}\\pagestyle{empty}\\begin{document}\\setcounter{dmproblemcount}{${bookNumber(id) - 1}}\\vspace*{${badgeRaiseMm(bank.items[id]) + 1}mm}
 ${group.passage ? `\\dmpassage{${group.passage}}${badgeRaiseMm(bank.items[id]) > 1.5 ? `\\vspace{${badgeRaiseMm(bank.items[id]) - 1.5}mm}` : ""}` : ""}${group.figure ? `\\begin{center}${renderFigure(group.figure)}\\end{center}\\vspace{4mm}` : ""}
 \\dmpnum{${id}}{\\input{items/${id}}}\\end{document}`;
       const texName = `_single-${slot}.tex`;

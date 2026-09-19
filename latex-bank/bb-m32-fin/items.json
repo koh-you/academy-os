@@ -1,0 +1,15 @@
+{
+ "book": "100발100중 3-2 기말",
+ "source_package": "bb-m32-fin",
+ "id_style": "page-number",
+ "variant_level": 0,
+ "units": [
+  {
+   "code": "01",
+   "title": "3-2 기말(원의 성질·통계·부록)",
+   "pages": "8~124",
+   "groups": []
+  }
+ ],
+ "items": {}
+}

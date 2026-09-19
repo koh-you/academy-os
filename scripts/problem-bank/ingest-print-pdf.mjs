@@ -21,6 +21,10 @@ if (!args.pdf || !args.out || !args.title) {
   process.exit(2);
 }
 const dpi = Number(args.dpi) || 200;
+// --mode book: 구역마다 번호가 다시 시작하는 기출 모음 교재(100발100중). 번호 배지는 큰 글꼴 1~2자리 숫자(마침표 없음), id 는 「인쇄 쪽-번호」,
+// 인쇄 쪽 = pdf 쪽 + --page-offset. 번호 줄의 작은 글씨(유형 제목)를 type_label 로, 쪽 머리의 구역 표시는 없으므로 배지 글꼴 크기로 구역을 짐작한다.
+const bookMode = args.mode === "book";
+const pageOffset = Number(args["page-offset"] ?? 0);
 const scale = dpi / 72;
 const parseRange = (text, fallback) => {
   if (!text) return fallback;
@@ -74,10 +78,12 @@ for (let pageNumber = itemFrom; pageNumber <= itemTo; pageNumber += 1) {
   const lines = linesOf(tokens, gutter);
   // 번호 줄: 「N.」 한 토큰, 큰 글꼴(13pt 이상). 본문 시작 「N)」 은 번호가 아니다.
   const numberLines = tokens
-    .filter((token) => /^\d{1,3}\.$/.test(token.str.trim()) && token.h >= 13)
+    .filter((token) => (bookMode ? /^\d{1,2}$/.test(token.str.trim()) && token.h >= 17 : /^\d{1,3}\.$/.test(token.str.trim()) && token.h >= 13))
     .map((token) => ({ x: token.x, y: token.y, h: token.h, text: token.str.trim() }));
+  // book 모드: 번호가 모두 쪽 가운데 왼쪽(x 150~220 · 집중공략·서술형 쪽의 예제/연습문제)이면 한 단 · 아니면 두 단.
+  const singleColumn = bookMode && numberLines.length > 0 && numberLines.every((line) => line.x > 120 && line.x < 230);
   const columns = [[], []];
-  for (const line of numberLines) columns[line.x < gutter ? 0 : 1].push(line);
+  for (const line of numberLines) columns[singleColumn ? 0 : line.x < gutter ? 0 : 1].push(line);
   // 머리글(「수학영역」 큰 제목)·바닥글(쪽 번호) 사이가 본문 영역.
   const headerBottom = Math.max(0, ...lines.filter((line) => line.h >= 20 && line.y < viewport.height * 0.15).map((line) => line.y + 4));
   const footerTop = Math.min(viewport.height, ...lines.filter((line) => line.y > viewport.height * 0.9 && /^\d+$/.test(line.text)).map((line) => line.y - line.h - 6));
@@ -86,44 +92,59 @@ for (let pageNumber = itemFrom; pageNumber <= itemTo; pageNumber += 1) {
   const qaBoxes = [];
   const pageItems = [];
   for (const [columnIndex, column] of columns.entries()) {
-    const x0 = columnIndex === 0 ? 40 : gutter + 8;
-    const x1 = columnIndex === 0 ? gutter - 8 : viewport.width - 40;
+    const x0 = singleColumn ? Math.min(...column.map((line) => line.x)) - 6 : columnIndex === 0 ? 40 : gutter + 8;
+    const x1 = singleColumn ? viewport.width - 40 : columnIndex === 0 ? gutter - 8 : viewport.width - 40;
+    const colGutter = singleColumn ? -Infinity : gutter;
     for (const [index, line] of column.entries()) {
       const numberTop = line.y - line.h;
       // 번호 위 70pt 안의 작은 글꼴 줄(출처 태그·난이도)을 문항에 포함한다.
-      const metaLines = lines.filter((entry) => entry.y < numberTop && entry.y > numberTop - 70 && entry.h < 10 && (columnIndex === 0 ? entry.x < gutter : entry.x >= gutter));
+      const metaLines = bookMode ? [] : lines.filter((entry) => entry.y < numberTop && entry.y > numberTop - 70 && entry.h < 10 && (columnIndex === 0 ? entry.x < colGutter : entry.x >= colGutter));
       // 크롭은 번호 줄부터. 출처 태그·난이도 줄(머리띠 상자)은 텍스트로만 적는다 — 크롭에 넣으면 벡터 그림 검출이 상자 선을 그림으로 잡는다.
       const top = numberTop - 3;
       const next = column[index + 1];
       let bottom;
       if (next) {
-        const nextMeta = lines.filter((entry) => entry.y < next.y - next.h && entry.y > next.y - next.h - 70 && entry.h < 10 && (columnIndex === 0 ? entry.x < gutter : entry.x >= gutter));
+        const nextMeta = bookMode ? [] : lines.filter((entry) => entry.y < next.y - next.h && entry.y > next.y - next.h - 70 && entry.h < 10 && (columnIndex === 0 ? entry.x < colGutter : entry.x >= colGutter));
         bottom = (nextMeta.length ? Math.min(...nextMeta.map((entry) => entry.y - entry.h)) : next.y - next.h) - 6;
       } else {
         // 마지막 문항: 이 컬럼의 마지막 글자 줄까지(빈 공간은 뺀다).
-        const columnLines = lines.filter((entry) => entry.y > line.y && entry.y < footerTop && (columnIndex === 0 ? entry.x < gutter : entry.x >= gutter));
-        const columnImages = imageBoxes.filter((box) => box.y0 > numberTop && box.y1 < footerTop && (columnIndex === 0 ? box.x0 < gutter : box.x0 >= gutter));
+        const columnLines = lines.filter((entry) => entry.y > line.y && entry.y < footerTop && entry.x >= x0 - 2 && (columnIndex === 0 ? entry.x < colGutter : entry.x >= colGutter));
+        const columnImages = imageBoxes.filter((box) => box.y0 > numberTop && box.y1 < footerTop && box.x0 >= x0 - 2 && (columnIndex === 0 ? box.x0 < colGutter : box.x0 >= colGutter));
         bottom = Math.min(footerTop, Math.max(columnLines.length ? Math.max(...columnLines.map((entry) => entry.y)) : line.y, ...columnImages.map((box) => box.y1)) + 14);
       }
       const number = Number(line.text.replace(".", ""));
-      const label = String(number).padStart(2, "0");
+      const printedPage = pageNumber + pageOffset;
+      // 예제(큰 번호)는 같은 쪽 연습문제와 번호가 겹치므로 「쪽-e번호」 로 구분한다(출처 배지 「N쪽 예제 1」).
+      const isExample = bookMode && line.h >= 40;
+      const label = bookMode ? `${printedPage}-${isExample ? "e" : ""}${String(number).padStart(isExample ? 1 : 2, "0")}` : String(number).padStart(2, "0");
+      // book 모드: 번호 줄의 작은 글씨(유형 번호·제목)가 유형 라벨. 예제(51pt 번호)는 제목이 큰 글씨라 따로 잡는다.
+      const titleTokens = bookMode ? tokens.filter((token) => Math.abs(token.y - line.y) < line.h && token.x > line.x + line.h * 0.8 && token.x < x1 && token.h < 9 && token.str.trim()) : [];
+      const bookTypeLabel = titleTokens.map((token) => token.str.trim()).join(" ").replace(/^\d{1,2}\s*/, "").trim();
+      const kind = !bookMode ? "" : line.h >= 40 ? "예제" : singleColumn ? "연습문제" : "문항";
       const box = { x0, y0: Math.max(headerBottom, top), x1, y1: bottom };
       const file = `items/${bookId}-${label}.jpg`;
       const size = await cropCanvasToFile(canvas, scale, box, path.join(outDir, file));
       const sourceTag = metaLines.find((entry) => /\d{4}년|\[\d점\]/.test(entry.text))?.text ?? "";
       const level = metaLines.find((entry) => /^Lv\s*\d/.test(entry.text))?.text.replace(/\s+/g, " ") ?? "";
       const item = {
-        item_id: `${bookId}-${label}`, number_label: label, number_sort: number, printed_page: pageNumber, pdf_page: pageNumber,
-        column: columnIndex, layout: "column", type_label: sourceTag, tags: level ? [level] : [], unit_index: 0, has_shared_passage: false, group_key: null,
-        review_status: "ai_checked", review_note: "", source_tag: sourceTag, level,
+        item_id: `${bookId}-${label}`, number_label: label, number_sort: bookMode ? printedPage * 100 + number - (isExample ? 0.5 : 0) : number, printed_page: printedPage, pdf_page: pageNumber,
+        column: columnIndex, layout: singleColumn ? "full" : "column", type_label: bookMode ? bookTypeLabel : sourceTag, tags: bookMode ? [kind] : level ? [level] : [], unit_index: 0, has_shared_passage: false, group_key: null,
+        review_status: "ai_checked", review_note: "", source_tag: sourceTag, level, kind,
         regions: [{ kind: "body", position: 0, pdf_page: pageNumber, bbox_normalized: [box.x0 / viewport.width, box.y0 / viewport.height, box.x1 / viewport.width, box.y1 / viewport.height], file, width: size.width, height: size.height }]
       };
       pageItems.push(item);
       qaBoxes.push({ label, box, color: columnIndex === 0 ? "#176e59" : "#1d4ed8" });
     }
   }
+  if (bookMode) {
+    const ordered = pageItems.filter((item) => item.kind === "문항").sort((a, b) => a.number_sort - b.number_sort);
+    for (let i = 1; i < ordered.length; i += 1) {
+      const prev = ordered[i - 1].number_sort % 100, cur = ordered[i].number_sort % 100;
+      if (cur > prev + 1) { ordered[i].review_status = "flagged"; ordered[i].review_note = `number_gap(expected ${prev + 1})`; }
+    }
+  }
   items.push(...pageItems);
-  pageSummaries.push({ pdf_page: pageNumber, printed_page: pageNumber, item_count: pageItems.length, layout: "column" });
+  pageSummaries.push({ pdf_page: pageNumber, printed_page: pageNumber + pageOffset, item_count: pageItems.length, layout: singleColumn ? "full" : "column" });
   await drawQa(canvas, viewport.width, viewport.height, qaBoxes, path.join(outDir, "qa", `p${String(pageNumber).padStart(3, "0")}.jpg`));
   console.log(`p${pageNumber}: 문항 ${pageItems.length} (${pageItems.map((item) => item.number_label).join(" ")})`);
   page.cleanup();
