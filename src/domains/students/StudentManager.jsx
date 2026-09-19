@@ -725,8 +725,10 @@ export function StudentManager({
             onSaveStudentProfile={onSaveStudentProfile}
             onSaveTeacherOperatingMemo={onSaveTeacherOperatingMemo}
             onSaveStudentConsultation={onSaveStudentConsultation}
-            onWithdraw={() => {
+            onWithdraw={isWithdrawnStudent(selectedStudent) ? undefined : () => {
               // 프로필을 먼저 닫아야 퇴원 확인 모달이 그 위에 겹치지 않는다.
+              // 이미 퇴원한 학생은 handleDeleteStudent 의 alreadyWithdrawn 분기가 저장된 퇴원 원천을 그대로
+              // 돌려주므로(재시도 수렴) '퇴원 처리' 를 다시 내보내지 않는다. 사유·코멘트 수정은 퇴원생 목록에서 한다(2026-09-19).
               setSelectedStudentId("");
               openWithdrawStudentModal(selectedStudent);
             }}

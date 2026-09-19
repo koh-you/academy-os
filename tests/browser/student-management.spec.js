@@ -308,7 +308,9 @@ test("student profile save keeps an in-flight follow-up draft for a second CAS s
   await schoolInput.fill("프로필 A 저장");
   await basicModal.getByRole("button", { name: "기본정보만 저장", exact: true }).click();
   await expect.poll(() => requests.length).toBe(1);
-  await expect(profileSaveButton).toHaveText("저장 중");
+  // 2026-09-19 · 버튼 라벨은 고정이고 저장 상태는 하단 바의 InlineSaveStatus 하나가 보여준다(R6, UI U6).
+  await expect(profileSaveButton).toHaveText("기본정보만 저장");
+  await expect(basicModal.locator(".studentProfileStickySaveBar").getByRole("status")).toContainText("기본정보 · 저장 중");
   await expect(profileSaveButton).toHaveCSS("cursor", "wait");
   await schoolInput.fill("프로필 B 후속");
   releaseFirstRequest();
@@ -342,5 +344,84 @@ test("withdrawn student list keeps its table and selection toolbar boundary", as
   await expect(selectionToolbar).toContainText("선택 1명");
   await expect(selectionToolbar.getByRole("button", { name: "퇴원 취소" })).toBeEnabled();
   await expect(selectionToolbar.getByRole("button", { name: "영구 삭제" })).toBeEnabled();
+  expect(pageErrors).toEqual([]);
+});
+
+// 2026-09-19 · UI U6: 섹션 모달 안 [수정] 토글, 행 끝 ⋯(삭제), 변경된 행에만 [변경 저장], 저장 안 한 초안 닫기 confirm.
+test("student profile section modal toggles edit inside, folds row delete into an overflow menu, and guards dirty close", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
+  await page.getByRole("button", { name: "월경계 학생 정보 수정" }).click();
+  const profile = page.getByRole("dialog", { name: /월경계 학생 학생 프로파일/ });
+  await expect(profile).toBeVisible();
+  // 허브 타일은 idle 상태('저장 전')를 그리지 않는다.
+  await expect(profile.getByRole("group", { name: "월경계 학생 프로필 섹션" })).not.toContainText("저장 전");
+
+  // 읽기 모드로 섹션을 먼저 열어도 그 안에서 바로 [수정] 할 수 있다(허브의 수정 버튼과 같은 상태).
+  await profile.getByRole("button", { name: /^상담기록/ }).click();
+  const consultationModal = page.getByRole("dialog", { name: "월경계 학생 · 상담 기록" });
+  await expect(consultationModal).toBeVisible();
+  await expect(consultationModal.getByText(/수정 버튼을 누르면/)).toHaveCount(0);
+  await expect(consultationModal.getByLabel("월경계 학생 새 상담 내용")).toHaveCount(0);
+  await consultationModal.getByRole("button", { name: "수정", exact: true }).click();
+  await expect(consultationModal.getByRole("button", { name: "수정 종료" })).toBeVisible();
+  await consultationModal.getByLabel("월경계 학생 새 상담 내용").fill("첫 상담 · 숙제 습관 점검");
+  await consultationModal.getByRole("button", { name: "상담 저장", exact: true }).click();
+  const consultationRow = consultationModal.locator(".studentConsultationItem").first();
+  await expect(consultationRow).toContainText("첫 상담 · 숙제 습관 점검");
+  await expect(consultationModal.getByRole("status")).toContainText("상담기록 · 저장 완료");
+
+  // 저장된 행: 빨간 삭제·비활성 '저장됨' 대신 ⋯ 메뉴만 있고, 변경 저장 버튼은 변경이 있을 때만 나타난다.
+  await expect(consultationRow.getByRole("button", { name: "삭제", exact: true })).toHaveCount(0);
+  await expect(consultationRow.getByRole("button", { name: "변경 저장" })).toHaveCount(0);
+  await expect(consultationRow.getByText("저장됨")).toHaveCount(0);
+  await consultationRow.getByRole("button", { name: /상담 추가 작업$/ }).click();
+  const deleteItem = page.getByRole("menuitem", { name: "삭제" });
+  await expect(deleteItem).toBeVisible();
+  await expect(deleteItem).toHaveClass(/overflowMenuItem-danger/);
+  await page.keyboard.press("Escape");
+  await expect(deleteItem).toHaveCount(0);
+  await expect(consultationModal).toBeVisible();
+  await consultationRow.getByRole("textbox", { name: /내용$/ }).fill("첫 상담 · 숙제 습관 점검 (수정)");
+  await expect(consultationRow.getByRole("button", { name: "변경 저장" })).toBeVisible();
+  await expect(consultationModal.getByRole("status")).toContainText("상담기록 · 변경됨");
+
+  // 섹션 모달을 Esc 로 닫는 것은 초안을 버리지 않으므로 묻지 않는다. 허브를 닫으면 한 번 묻고, 취소하면 그대로 남는다.
+  const confirmMessages = [];
+  let acceptClose = false;
+  page.on("dialog", async (dialog) => {
+    confirmMessages.push(dialog.message());
+    if (acceptClose) await dialog.accept();
+    else await dialog.dismiss();
+  });
+  await page.keyboard.press("Escape");
+  await expect(consultationModal).toHaveCount(0);
+  expect(confirmMessages).toEqual([]);
+  await expect(profile.getByRole("button", { name: "취소", exact: true })).toBeVisible();
+  await profile.getByRole("button", { name: "창 닫기" }).click();
+  expect(confirmMessages).toEqual(["저장하지 않은 변경이 있습니다. 닫을까요?"]);
+  await expect(profile).toBeVisible();
+  await profile.getByRole("button", { name: /^상담기록/ }).click();
+  await expect(page.getByRole("dialog", { name: "월경계 학생 · 상담 기록" }).locator(".studentConsultationItem").first().getByRole("textbox", { name: /내용$/ })).toHaveValue("첫 상담 · 숙제 습관 점검 (수정)");
+  await page.keyboard.press("Escape");
+  acceptClose = true;
+  await profile.getByRole("button", { name: "취소", exact: true }).click();
+  expect(confirmMessages).toHaveLength(2);
+  await expect(profile.getByRole("button", { name: "수정", exact: true })).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
+test("withdrawn student profile does not offer withdrawal again", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
+  await page.getByRole("tab", { name: "퇴원생 목록" }).click();
+  await page.getByRole("region", { name: "퇴원생 목록" }).getByRole("button", { name: "미리보기 퇴원생" }).click();
+  const profile = page.getByRole("dialog", { name: /미리보기 퇴원생 학생 프로파일/ });
+  await expect(profile).toBeVisible();
+  // 이미 퇴원한 학생의 퇴원 처리는 저장 원천을 바꾸지 않는 재시도 수렴이라 진입점을 두지 않는다. 사유·코멘트는 퇴원생 목록에서 수정한다.
+  await expect(profile.getByRole("button", { name: "퇴원 처리" })).toHaveCount(0);
+  await expect(profile.getByRole("button", { name: "수정", exact: true })).toBeVisible();
   expect(pageErrors).toEqual([]);
 });
