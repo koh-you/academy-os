@@ -178,8 +178,10 @@ function formatStudentReminderDateTime(reminder = {}) {
 // 섹션 헤더·허브 타일에 보여줄 저장 상태. 버튼 라벨에 상태를 섞지 않고(R6) 이 값 하나를
 // InlineSaveStatus 로 그린다. 진행 중·실패는 그대로, 아니면 초안 유무로 '변경됨' 을 판단한다.
 function getSectionSaveState(saveState, hasDraftChanges) {
-  if (saveState === "saving" || saveState === "failed") return saveState;
-  return hasDraftChanges ? "dirty" : saveState;
+  if (saveState === "saving" || saveState === "verifying" || saveState === "failed") return saveState;
+  if (hasDraftChanges) return "dirty";
+  // 저장 직후는 '저장 완료', 그 밖(초기·알 수 없는 값)은 '저장 전' 으로 6종 어휘 안에 둔다.
+  return saveState === "saved" ? "saved" : "idle";
 }
 
 export class StudentProfileErrorBoundary extends Component {
