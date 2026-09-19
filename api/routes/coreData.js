@@ -1,5 +1,5 @@
 import { sampleData } from "../../src/shared/data/sampleData.js";
-import { normalizeSchoolName } from "../../src/domains/schoolCalendar/schoolCalendarUtils.js";
+import { createExamPrepCalendarCluster } from "../../src/domains/exams/examPrepCalendarCluster.js";
 import { getKoreaDateString } from "../../src/shared/utils/koreaDate.js";
 import {
   getSpecialLectureStudentSyncOperation,
@@ -128,7 +128,6 @@ import {
   fromSchoolEventRow,
   fromTestAttemptRow,
   fromTestSessionRow,
-  getDefaultExamCycleForDate,
   normalizeAcademyReminderStatus,
   toAcademyReminderRow,
   toExamPrepRow,
@@ -209,10 +208,6 @@ function hasMeaningfulValue(value) {
   return Boolean(String(value ?? "").trim());
 }
 
-function compactExamPrepKeyPart(value = "") {
-  return String(value || "").replace(/\s+/g, "");
-}
-
 function normalizeExamEntries(row = {}) {
   return Array.isArray(row.mathExamDates) ? row.mathExamDates : [];
 }
@@ -253,52 +248,15 @@ async function getExistingExamPrepRowMap(examPrepIds = []) {
   );
 }
 
-function getExamPrepLogicalKey(row = {}) {
-  return [
-    row.examCycle || getDefaultExamCycleForDate(),
-    normalizeSchoolName(row.schoolName || "") || compactExamPrepKeyPart(row.schoolName || "학교 미입력"),
-    compactExamPrepKeyPart(row.grade || "학년 미입력"),
-    compactExamPrepKeyPart(row.subject || "공통수학1")
-  ].join("|");
-}
-
-function getExamPrepRowCompleteness(row = {}) {
-  return [
-    row.publisher,
-    row.examPeriod,
-    row.mathExamDate,
-    row.scope,
-    row.subTextbook,
-    row.review,
-    row.revisedReview,
-    row.specialNote,
-    row.memo,
-    ...normalizeExamEntries(row).flatMap((entry) => [entry.date, entry.subject, entry.label])
-  ].filter((value) => String(value ?? "").trim()).length;
-}
-
-function isPlaceholderExamPrepRow(row = {}) {
-  return String(row.examPrepId || "").endsWith("_textbook") || !String(row.publisher || "").trim();
-}
-
-function chooseRepresentativeExamPrepRow(currentRow, candidateRow) {
-  const currentScore = getExamPrepRowCompleteness(currentRow);
-  const candidateScore = getExamPrepRowCompleteness(candidateRow);
-  if (candidateScore !== currentScore) return candidateScore > currentScore ? candidateRow : currentRow;
-  const currentPlaceholder = isPlaceholderExamPrepRow(currentRow);
-  const candidatePlaceholder = isPlaceholderExamPrepRow(candidateRow);
-  if (currentPlaceholder !== candidatePlaceholder) return candidatePlaceholder ? currentRow : candidateRow;
-  return String(candidateRow.updatedAt || "") > String(currentRow.updatedAt || "") ? candidateRow : currentRow;
-}
-
-function findDuplicateExamPrepRows(rows = []) {
-  const grouped = new Map();
-  rows.forEach((row) => {
-    const key = getExamPrepLogicalKey(row);
-    const previous = grouped.get(key);
-    grouped.set(key, previous ? chooseRepresentativeExamPrepRow(previous, row) : row);
-  });
-  const representativeIds = new Set([...grouped.values()].map((row) => row.examPrepId));
+// 중복 정리의 대표 행 선택은 화면(examPrepCenterModel → dedupeExamPrepRowsForDisplay, includeExcluded)과 같은
+// 규칙을 써야 한다(docs 계약: "서버가 화면 표시와 같은 대표 행 선택 기준으로 삭제 후보를 계산"). 예전에는
+// 논리 키·완성도·대표 행 선택 함수의 사본이 여기 있었고, 2026-08-11 화면 쪽에만 isExcluded 우선 규칙이 붙어
+// 서버 정리가 사용자가 제외한 행을 지우고 보이는 행을 남길 수 있었다. 사본을 지우고 같은 모듈을 쓴다(2026-09-19).
+export function findDuplicateExamPrepRows(rows = [], today = getKoreaDateString()) {
+  const { dedupeExamPrepRowsForDisplay } = createExamPrepCalendarCluster(today);
+  const representativeIds = new Set(
+    dedupeExamPrepRowsForDisplay(rows, { includeExcluded: true }).map((row) => row.examPrepId)
+  );
   return rows.filter((row) => !representativeIds.has(row.examPrepId));
 }
 
