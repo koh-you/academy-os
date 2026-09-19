@@ -110,10 +110,18 @@ for (const contract of [
   "onSaveLessonJournalDrafts,",
   "saveJournalDrafts: saveJournalDraftChanges",
   "const saved = await saveJournalDraftChanges()",
-  'if (saved?.ok) setReservationApplyState("idle")'
+  'if (saved?.ok) setReservationApplyState("idle")',
+  // 2026-09-19 · 편집 취소 출구. 저장 전 변경이 있으면 window.confirm 으로만 묻는다(별도 확인 모달 없음).
+  "discardJournalDrafts: discardJournalDraftChanges",
+  "function cancelJournalEditMode()",
+  "journalDraftChangeCount > 0 &&",
+  "window.confirm(`저장하지 않은 변경 ${journalDraftChangeCount}건을 버릴까요?`)",
+  "discardJournalDraftChanges();",
+  'setEditingMemoKey("");'
 ]) {
   assert.ok(detailSource.includes(contract), `missing detail/controller contract: ${contract}`);
 }
+assert.ok(!detailSource.includes("<Modal title=\"편집 취소"), "편집 취소는 confirm 만 쓰고 확인 모달을 새로 두지 않는다");
 for (const contract of [
   "export function useLessonJournalDraftController({",
   "useLessonJournalDraftLifecycle(lesson.lessonId)",
@@ -127,9 +135,27 @@ for (const contract of [
   "if (!resolution.shouldClearDrafts)",
   "setJournalRecordDrafts({})",
   "setJournalHomeworkDrafts({})",
-  "setJournalMakeupTaskDrafts({})"
+  "setJournalMakeupTaskDrafts({})",
+  // 2026-09-19 · discardJournalDrafts: 로컬 draft 3종 초기화 + 편집 모드 종료 + 수동 메시지. 저장 중이면 무시.
+  "function discardJournalDrafts()",
+  'setJournalManualSaveMessage("수업일지 · 변경 취소")'
 ]) {
   assert.ok(controllerSource.includes(contract), `missing draft controller contract: ${contract}`);
+}
+{
+  const discardStart = controllerSource.indexOf("function discardJournalDrafts()");
+  const discardEnd = controllerSource.indexOf("async function saveJournalDrafts()", discardStart);
+  const discardSource = controllerSource.slice(discardStart, discardEnd);
+  for (const step of [
+    "if (saveInFlightRef.current) return;",
+    "setJournalRecordDrafts({});",
+    "setJournalHomeworkDrafts({});",
+    "setJournalMakeupTaskDrafts({});",
+    "setJournalEditMode(false);"
+  ]) {
+    assert.ok(discardSource.includes(step), `discardJournalDrafts must ${step}`);
+  }
+  assert.ok(!discardSource.includes("onSaveLessonJournalDrafts"), "편집 취소는 저장을 호출하지 않는다");
 }
 assert.ok(appSource.includes("async function handleSaveLessonJournalDrafts("));
 assert.ok(appSource.includes("executeLessonJournalDraftPersistence({"));

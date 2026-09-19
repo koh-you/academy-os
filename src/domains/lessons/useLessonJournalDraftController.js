@@ -251,6 +251,17 @@ export function useLessonJournalDraftController({
     setJournalManualSaveMessage("수업일지 · 저장 필요");
   }
 
+  // 편집 취소 출구. 로컬 draft(기록·숙제·보충과제)를 버리고 서버값으로 돌아간다.
+  // 저장 함수·revision 비교·onSaveLessonJournalDrafts 계약은 건드리지 않는다. 저장 중에는 무시한다.
+  function discardJournalDrafts() {
+    if (saveInFlightRef.current) return;
+    setJournalRecordDrafts({});
+    setJournalHomeworkDrafts({});
+    setJournalMakeupTaskDrafts({});
+    setJournalEditMode(false);
+    setJournalManualSaveMessage("수업일지 · 변경 취소");
+  }
+
   async function saveJournalDrafts() {
     if (saveInFlightRef.current) return saveInFlightRef.current;
     if (!journalDraftSaveRequest.hasDraftChanges) {
@@ -301,6 +312,7 @@ export function useLessonJournalDraftController({
 
   return {
     applyHomeworkFollowupMethod,
+    discardJournalDrafts,
     getEditableRecord,
     getHomeworkDraftTitle,
     handleAssignmentStatusChange,

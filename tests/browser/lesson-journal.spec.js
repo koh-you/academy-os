@@ -8,6 +8,11 @@ import {
   safeApiBaseUrl
 } from "./safeSmokeSupport.js";
 
+// 2026-09-19 · 수업일지 저장 상태 pill 은 헤더 우상단에 있다. 하단바에는 failed/dirty 메시지 텍스트만 보인다.
+function journalSavePill(lessonJournal) {
+  return lessonJournal.locator(".lessonJournalHeader").getByRole("status").filter({ hasText: "수업일지 ·" });
+}
+
 test.beforeEach(async ({ request }) => {
   await resetSafeFixture(request);
 });
@@ -964,7 +969,8 @@ test("lesson journal skips an unused intermediate lesson but stops at an attende
   };
 
   // Field render order is fixed: lessonMaterial, lessonProgress, previousHomework, nextHomework.
-  const previousHomeworkButton = (row) => row.locator("button.journalMemoCardRead").nth(2);
+  // 2026-09-19 · 읽기 모드 카드는 button 이 아니라 값만 보여주는 div 다(docs/ui-row-actions.md R1).
+  const previousHomeworkButton = (row) => row.locator(".journalMemoCardRead").nth(2);
 
   let journal = await openCurrentJournal();
   let studentRow = journal.getByRole("region", { name: "수업일지 학생 기록" }).locator(".journalRow:not(.journalHead)").first();
@@ -1044,9 +1050,10 @@ test("lesson journal follows a student's immediately previous attended lesson ac
   const currentDateCell = page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ });
   await currentDateCell.getByRole("button", { name: /월 경계 연동반/ }).click();
   const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
-  await expect(lessonJournal.getByRole("button", { name: "목요일 개인 시간표 교재" })).toBeVisible();
-  await expect(lessonJournal.getByRole("button", { name: "목요일 개인 시간표 진도" })).toBeVisible();
-  await expect(lessonJournal.getByRole("button", { name: "안전 이전 숙제" })).toBeVisible();
+  // 2026-09-19 · 읽기 모드 카드는 button 이 아니다. 값은 텍스트로만 확인한다.
+  await expect(lessonJournal.getByText("목요일 개인 시간표 교재", { exact: true })).toBeVisible();
+  await expect(lessonJournal.getByText("목요일 개인 시간표 진도", { exact: true })).toBeVisible();
+  await expect(lessonJournal.getByText("안전 이전 숙제", { exact: true })).toBeVisible();
   await expect(lessonJournal).not.toContainText("7월 최신 교재");
   expect(pageErrors).toEqual([]);
 });
@@ -1100,20 +1107,28 @@ test("previous-lesson-source toggle requires edit mode and persists the selected
   await currentDateCell.getByRole("button", { name: /정산 미리보기반/ }).click();
   const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
 
+  // 2026-09-19 · 직전/정규 토글은 편집 모드에서만 그린다. 읽기 모드에 비활성 토글을 행마다 깔지 않는다(R1).
   const toggle = lessonJournal.getByRole("group", { name: "지난 숙제 참고 수업 선택" });
   const regularButton = toggle.getByRole("button", { name: "정규 07.22" });
-  await expect(toggle.getByRole("button", { name: "직전 07.28" })).toBeVisible();
-  await expect(regularButton).toBeDisabled();
+  await expect(lessonJournal.getByRole("button", { name: "편집" })).toBeVisible();
+  await expect(toggle).toHaveCount(0);
 
   await lessonJournal.getByRole("button", { name: "편집" }).click();
+  await expect(toggle.getByRole("button", { name: "직전 07.28" })).toBeVisible();
   await expect(regularButton).toBeEnabled();
   await regularButton.click();
-  await expect(lessonJournal).toContainText("저장 전 변경 1건");
+  const saveBar = lessonJournal.getByRole("complementary", { name: "수업일지 하단 고정 저장 바" });
+  await expect(saveBar.getByText("저장 전 변경 1건")).toBeVisible();
 
   await lessonJournal.getByRole("button", { name: "변경 저장" }).click();
-  await expect(lessonJournal).toContainText("수업일지 · 저장 완료");
-  await expect(regularButton).toBeDisabled();
+  await expect(journalSavePill(lessonJournal)).toContainText("수업일지 · 저장 완료");
+  await expect(toggle).toHaveCount(0);
+  // 고른 참고 수업은 다시 편집 모드로 들어가면 그대로 선택돼 있다. 변경 없이 [편집 취소] 로 읽기 모드로 돌아간다.
+  await lessonJournal.getByRole("button", { name: "편집" }).click();
   await expect(regularButton).toHaveAttribute("aria-pressed", "true");
+  await saveBar.getByRole("button", { name: "편집 취소" }).click();
+  await expect(toggle).toHaveCount(0);
+  await expect(saveBar.getByRole("button", { name: "편집" })).toBeVisible();
 
   const homeworksAfter = (await (await request.get(`${safeApiBaseUrl}/api/homeworks`)).json()).homeworks;
   const savedPrevious = homeworksAfter.find((homework) => (
@@ -1428,9 +1443,12 @@ test("lesson journal bottom bar groups lesson, notification, and save actions wh
   // 헤더에 "수업일지" 자리채움 글씨는 없다(주제가 있으면 그 주제만 보인다).
   await expect(header.locator(".shortcutHint")).toHaveCount(0);
 
-  // 하단 고정바: 상태 영역은 숨기고 [알림톡 예약] [편집] [⋮] 만.
+  // 하단 고정바: 상태 pill 은 없고(헤더가 그린다) [알림톡 예약] [편집] [⋮] 만. 저장 전에는 메시지 텍스트도 없다.
+  // 2026-09-19 · 상태 pill 은 CSS 로 숨기는 게 아니라 아예 그리지 않는다(StickySaveBar hideStatusPill).
   const saveBar = lessonJournal.getByRole("complementary", { name: "수업일지 하단 고정 저장 바" });
-  await expect(saveBar.getByRole("status")).toBeHidden();
+  await expect(saveBar.getByRole("status")).toHaveCount(0);
+  await expect(saveBar.locator(".stickySaveBarStatus span")).toHaveCount(0);
+  await expect(saveBar.getByRole("button", { name: "편집 취소" })).toHaveCount(0);
   await expect(saveBar.getByText("발송 상태", { exact: true })).toHaveCount(0);
   await expect(saveBar.getByText("편집을 누르면")).toHaveCount(0);
   await expect(saveBar.getByRole("button", { name: /^알림톡 예약/ })).toBeVisible();
@@ -1464,7 +1482,15 @@ test("lesson journal bottom bar groups lesson, notification, and save actions wh
   await expect(lessonJournal).toBeVisible();
 
   // 읽기 모드에서는 입력칸이 없고, 편집을 누르면 같은 주 액션 자리가 변경 저장으로 바뀐다.
-  await expect(lessonJournal.getByLabel(/강의 교재$/).first()).toHaveCount(0);
+  await expect(lessonJournal.getByRole("textbox", { name: /강의 교재$/ })).toHaveCount(0);
+  // 2026-09-19 · 읽기 모드의 학생 행에는 눌러도 아무 일도 없는 메모 카드 button·비활성 숙제 상태 select·
+  // 비활성 직전/정규 토글을 깔지 않는다(docs/ui-row-actions.md R1). 값은 텍스트로만 보인다.
+  const studentRows = lessonJournal.getByRole("region", { name: "수업일지 학생 기록" }).locator(".journalRow:not(.journalHead)");
+  await expect(studentRows.locator("button.journalMemoCardRead")).toHaveCount(0);
+  await expect(studentRows.locator(".journalMemoCardRead")).toHaveCount(4);
+  await expect(lessonJournal.getByRole("combobox", { name: /숙제 상태$/ })).toHaveCount(0);
+  await expect(lessonJournal.getByLabel("월경계 학생 숙제 상태")).toHaveText("선택 전");
+  await expect(studentRows.locator("button:disabled")).toHaveCount(0);
 
   // 수업 취소는 수업 수정 모달 안에 있고, 일반 수업은 기존 확인 모달을 그 위에 띄운다.
   await menuTrigger.click();
@@ -1483,6 +1509,45 @@ test("lesson journal bottom bar groups lesson, notification, and save actions wh
   await saveBar.getByRole("button", { name: "편집" }).click();
   await expect(saveBar.getByRole("button", { name: "변경 저장" })).toBeVisible();
   await expect(lessonJournal.getByLabel(/강의 교재$/).first()).toBeEnabled();
+  await expect(lessonJournal.getByRole("combobox", { name: "월경계 학생 숙제 상태" })).toBeEnabled();
+  // 2026-09-19 · 편집 모드 순서: [알림톡 예약][편집 취소][변경 저장][⋮]. 변경이 없으면 확인 없이 읽기 모드로 돌아간다.
+  const cancelEditButton = saveBar.getByRole("button", { name: "편집 취소" });
+  await expect(cancelEditButton).toBeVisible();
+  await expect(cancelEditButton).toHaveClass(/softButton/);
+  await expect(saveBar.getByRole("button", { name: "변경 저장" })).toBeDisabled();
+  const [reservationBox, cancelBox, saveBox] = await Promise.all([
+    saveBar.getByRole("button", { name: /^알림톡 예약/ }).boundingBox(),
+    cancelEditButton.boundingBox(),
+    saveBar.getByRole("button", { name: "변경 저장" }).boundingBox()
+  ]);
+  expect(cancelBox?.x).toBeGreaterThan(reservationBox?.x ?? 0);
+  expect(saveBox?.x).toBeGreaterThan(cancelBox?.x ?? 0);
+  const confirmMessages = [];
+  page.on("dialog", async (dialog) => {
+    confirmMessages.push(dialog.message());
+    await dialog.accept();
+  });
+  await cancelEditButton.click();
+  await expect(saveBar.getByRole("button", { name: "편집" })).toBeVisible();
+  await expect(cancelEditButton).toHaveCount(0);
+  await expect(lessonJournal.getByRole("textbox", { name: /강의 교재$/ })).toHaveCount(0);
+  expect(confirmMessages).toEqual([]);
+  // 변경이 있으면 confirm 으로 한 번 묻고, 수락하면 초안을 버리고 읽기 모드로 돌아간다. 저장 요청은 나가지 않는다.
+  let saveRequests = 0;
+  page.on("request", (browserRequest) => {
+    if (browserRequest.url().includes("/api/lesson-journal/rows/save")) saveRequests += 1;
+  });
+  await saveBar.getByRole("button", { name: "편집" }).click();
+  await lessonJournal.getByRole("textbox", { name: "월경계 학생 강의 교재" }).fill("버릴 초안");
+  await expect(saveBar.getByText("저장 전 변경 1건")).toBeVisible();
+  await cancelEditButton.click();
+  expect(confirmMessages).toEqual(["저장하지 않은 변경 1건을 버릴까요?"]);
+  await expect(saveBar.getByRole("button", { name: "편집" })).toBeVisible();
+  await expect(lessonJournal.getByText("버릴 초안", { exact: true })).toHaveCount(0);
+  await expect(saveBar.getByText("저장 전 변경 1건")).toHaveCount(0);
+  expect(saveRequests).toBe(0);
+  await saveBar.getByRole("button", { name: "편집" }).click();
+  await expect(lessonJournal.getByRole("textbox", { name: "월경계 학생 강의 교재" })).toHaveValue("");
 
   // 취소 확정 뒤에는 수업 수정 창뿐 아니라 그 아래 수업일지도 함께 닫힌다.
   await menuTrigger.click();
@@ -1521,17 +1586,20 @@ test("lesson journal keeps an in-flight edit and verifies the retried record fro
   await expect(materialDraft).toHaveValue("");
   await materialDraft.fill("8월 저장 요청 A");
   const saveBar = lessonJournal.getByRole("complementary", { name: "수업일지 하단 고정 저장 바" });
-  await expect(saveBar).toContainText("저장 전 변경 1건");
+  // 2026-09-19 · 저장 전 변경 건수는 하단바에 실제로 보여야 한다(display:none 회귀를 잡도록 toBeVisible).
+  await expect(saveBar.getByText("저장 전 변경 1건")).toBeVisible();
   const saveButton = saveBar.getByRole("button", { name: "변경 저장" });
   await saveButton.click();
   await expect(saveBar.getByRole("button", { name: "저장 중" })).toBeDisabled();
+  // 저장 중 문구는 헤더 pill 만 보여준다(#338 중복 금지). 하단바 상태 영역에는 텍스트가 없다.
+  await expect(saveBar.locator(".stickySaveBarStatus span")).toHaveCount(0);
   await materialDraft.fill("8월 후속 수정 B");
   await expect(materialDraft).toHaveValue("8월 후속 수정 B");
-  await expect(saveBar).toContainText("저장 완료 · 이후 변경 저장 필요 · 저장 전 변경 1건");
+  await expect(saveBar.getByText("저장 완료 · 이후 변경 저장 필요 · 저장 전 변경 1건")).toBeVisible();
   await expect(saveButton).toBeEnabled();
   await saveButton.click();
-  await expect(saveBar).toContainText("저장 완료");
-  await expect(lessonJournal.getByRole("button", { name: "8월 후속 수정 B" })).toBeVisible();
+  await expect(journalSavePill(lessonJournal)).toContainText("수업일지 · 저장 완료");
+  await expect(lessonJournal.getByText("8월 후속 수정 B", { exact: true })).toBeVisible();
   const savedRecords = (await (await request.get(`${safeApiBaseUrl}/api/lesson-records`)).json()).records;
   expect(savedRecords.find((record) => record.lessonId === "safe-cross-month-current-lesson")?.lessonMaterial)
     .toBe("8월 후속 수정 B");
@@ -1565,12 +1633,15 @@ test("lesson journal keeps drafts after a version conflict and saves them on a v
   const saveBar = lessonJournal.getByRole("complementary", { name: "수업일지 하단 고정 저장 바" });
   const saveButton = saveBar.getByRole("button", { name: "변경 저장" });
   await saveButton.click();
-  await expect(saveBar).toContainText("저장 실패");
+  // 2026-09-19 · 실패 사유는 하단바에 실제로 보여야 한다(헤더 pill 은 '저장 실패' 라벨만).
+  await expect(saveBar.getByText("저장 실패 · 다른 화면에서 먼저 변경되었습니다.")).toBeVisible();
+  await expect(journalSavePill(lessonJournal)).toContainText("수업일지 · 저장 실패");
   await expect(materialDraft).toHaveValue("충돌 뒤 보존할 수정본");
   await expect(saveButton).toBeEnabled();
 
   await saveButton.click();
-  await expect(saveBar).toContainText("저장 완료");
+  await expect(journalSavePill(lessonJournal)).toContainText("수업일지 · 저장 완료");
+  await expect(saveBar.getByText("저장 실패")).toHaveCount(0);
   const savedRecords = (await (await request.get(`${safeApiBaseUrl}/api/lesson-records`)).json()).records;
   expect(savedRecords.find((record) => record.lessonId === "safe-cross-month-current-lesson")?.lessonMaterial)
     .toBe("충돌 뒤 보존할 수정본");
@@ -1637,13 +1708,13 @@ test("lesson journal rebases a newly created homework conflict before a verified
   const saveBar = lessonJournal.getByRole("complementary", { name: "수업일지 하단 고정 저장 바" });
   const saveButton = saveBar.getByRole("button", { name: "변경 저장" });
   await saveButton.click();
-  await expect(saveBar).toContainText("최신 원천을 불러왔습니다");
-  await expect(saveBar).toContainText("변경 저장을 다시 눌러 주세요");
+  await expect(saveBar.getByText("최신 원천을 불러왔습니다")).toBeVisible();
+  await expect(saveBar.getByText("변경 저장을 다시 눌러 주세요")).toBeVisible();
   await expect(nextHomeworkDraft).toHaveValue("수업일지에서 저장할 숙제");
 
   await saveButton.click();
-  await expect(saveBar).toContainText("저장 완료");
-  await expect(lessonJournal.getByRole("button", { name: "수업일지에서 저장할 숙제" })).toBeVisible();
+  await expect(journalSavePill(lessonJournal)).toContainText("수업일지 · 저장 완료");
+  await expect(lessonJournal.getByText("수업일지에서 저장할 숙제", { exact: true })).toBeVisible();
   expect(saveAttempt).toBe(2);
   expect(pageErrors).toEqual([]);
 });
@@ -1708,12 +1779,12 @@ test("lesson journal rebases an updated homework conflict before a verified retr
   const saveBar = lessonJournal.getByRole("complementary", { name: "수업일지 하단 고정 저장 바" });
   const saveButton = saveBar.getByRole("button", { name: "변경 저장" });
   await saveButton.click();
-  await expect(saveBar).toContainText("최신 원천을 불러왔습니다");
-  await expect(saveBar).toContainText("변경 저장을 다시 눌러 주세요");
+  await expect(saveBar.getByText("최신 원천을 불러왔습니다")).toBeVisible();
+  await expect(saveBar.getByText("변경 저장을 다시 눌러 주세요")).toBeVisible();
   await expect(assignmentStatus).toHaveValue("partial_50");
 
   await saveButton.click();
-  await expect(saveBar).toContainText("저장 완료");
+  await expect(journalSavePill(lessonJournal)).toContainText("수업일지 · 저장 완료");
   expect(saveAttempt).toBe(2);
   expect(pageErrors).toEqual([]);
 });
@@ -1747,14 +1818,14 @@ test("lesson journal reuses one stable makeup task after an unknown save respons
   const saveBar = lessonJournal.getByRole("complementary", { name: "수업일지 하단 고정 저장 바" });
   const saveButton = saveBar.getByRole("button", { name: "변경 저장" });
   await saveButton.click();
-  await expect(saveBar).toContainText(/부분 저장|저장 실패/);
+  await expect(saveBar.getByText(/부분 저장|저장 실패/)).toBeVisible();
   expect(interceptedTaskId).toMatch(/^makeup_lesson_journal_/);
   let savedTasks = (await (await request.get(`${safeApiBaseUrl}/api/makeup-tasks`)).json()).makeupTasks;
   expect(savedTasks).toHaveLength(1);
   expect(savedTasks[0].makeupTaskId).toBe(interceptedTaskId);
 
   await saveButton.click();
-  await expect(saveBar).toContainText("저장 완료");
+  await expect(journalSavePill(lessonJournal)).toContainText("수업일지 · 저장 완료");
   savedTasks = (await (await request.get(`${safeApiBaseUrl}/api/makeup-tasks`)).json()).makeupTasks;
   expect(savedTasks).toHaveLength(1);
   expect(savedTasks[0].makeupTaskId).toBe(interceptedTaskId);

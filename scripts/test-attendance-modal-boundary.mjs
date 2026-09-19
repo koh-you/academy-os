@@ -20,9 +20,31 @@ for (const required of [
   "await onSave(lesson, student, nextSave.values",
   "결석 출결은 저장됐지만",
   "저장 후 다음 정각 알림톡 예약",
-  "저장 후 출결 알림톡 즉시 발송"
+  "저장 후 출결 알림톡 즉시 발송",
+  // 2026-09-19 · 확인 단계 동안 상태 탭·등원/하원/사유 입력을 잠그고, 저장될 값 요약을 한 줄로 보여준다.
+  // pendingSave 는 [출결 저장] 시점 값을 캡처하므로 화면과 저장값이 어긋나지 않게 한다.
+  "const isConfirming = Boolean(confirmStep)",
+  "disabled={isConfirming}",
+  "attendanceConfirmSummary",
+  "저장될 값 · {confirmSummaryText}",
+  // 2026-09-19 · 2단계는 [취소][저장만(primary)][저장 후 발송(soft)]. 1단계 [출결 저장] 은 ModalFooter.
+  'onClick={() => setConfirmStep("")}',
+  'title="학부모에게 실제 발송"',
+  "<ModalFooter>"
 ]) {
   assert.ok(modalSource.includes(required), `attendance modal must preserve ${required}`);
+}
+assert.equal((modalSource.match(/disabled=\{isConfirming\}/g) ?? []).length, 4, "상태 탭 1곳 + 입력 3개가 확인 단계에 잠긴다");
+assert.equal((modalSource.match(/className="primaryButton full"/g) ?? []).length, 0, "데스크톱 모달에서 primaryButton full 을 쓰지 않는다");
+{
+  const saveModeStart = modalSource.indexOf('confirmStep === "saveMode"');
+  const saveModeSource = modalSource.slice(saveModeStart, modalSource.indexOf("<ModalFooter>", saveModeStart));
+  assert.match(
+    saveModeSource,
+    /className="softButton"[^>]*onClick=\{\(\) => setConfirmStep\(""\)\}[\s\S]*className="primaryButton"[^>]*onClick=\{\(\) => finishConfirmedSave\(false\)\}[\s\S]*className="softButton"[\s\S]*onClick=\{\(\) => finishConfirmedSave\(true\)\}/,
+    "2단계 순서와 톤: [취소 soft][저장만 primary][저장 후 발송 soft]"
+  );
+  assert.equal((saveModeSource.match(/className="primaryButton"/g) ?? []).length, 1);
 }
 
 for (const forbidden of [

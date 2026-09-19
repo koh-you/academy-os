@@ -17,7 +17,8 @@ const modalSource = await readFile(
 for (const requiredSource of [
   "export function LessonModalActions({",
   "InlineSaveStatus",
-  'label="수업일지"',
+  // 2026-09-19 · 이 모달은 수업 일정(lessons)을 저장하므로 라벨을 '수업 일정' 으로 바꿨다(수업일지=학생 기록과 구분).
+  'label="수업 일정"',
   "saveState={saveState}",
   "{saveMessage}",
   '"저장 중..."',

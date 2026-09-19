@@ -4183,7 +4183,7 @@ export function App() {
             ? `신입생 보강 수업일지 저장 완료${notificationResult}`
             : formValues.lessonType === "closureMakeup"
               ? `휴강 보충 수업일지 저장 완료${closureMakeupNotificationResult}`
-            : "수업일지 저장 완료"
+            : "수업 일정 저장 완료"
     };
   }
 
@@ -4262,7 +4262,7 @@ export function App() {
             ? `신입생 보강 수정 저장 완료${notificationResult}`
             : formValues.lessonType === "closureMakeup"
               ? `휴강 보충 수정 저장 완료${closureMakeupNotificationResult}`
-            : "수업일지 수정 저장 완료"
+            : "수업 일정 수정 저장 완료"
     };
   }
   function handleDeleteLesson(lessonId) {

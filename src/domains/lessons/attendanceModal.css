@@ -1,0 +1,22 @@
+/* 출결 체크 모달의 확인 단계. App.css 가 파일 크기 상한에 걸려 있어 도메인 CSS 로 둔다. */
+
+/* 저장될 값 요약 한 줄(상태 · 등원 · 하원 · 사유). 확인 단계 동안 위 입력은 잠기므로 여기서 값을 읽는다. */
+.attendanceConfirmPanel .attendanceConfirmSummary {
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+/* 2단계는 [취소][저장만][저장 후 발송] 세 버튼이라 공용 2열 그리드 대신 한 줄로 두고, 좁으면 줄바꿈한다. */
+.attendanceConfirmPanel .attendanceConfirmActions.saveMode {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.attendanceConfirmPanel .attendanceConfirmActions.saveMode > button {
+  flex: 1 1 auto;
+}
+
+.attendanceConfirmPanel .attendanceConfirmActions.saveMode > .softButton:first-child {
+  flex: 0 0 auto;
+}

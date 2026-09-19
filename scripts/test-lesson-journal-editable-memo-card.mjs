@@ -71,5 +71,10 @@ for (const contract of [
 for (const forbiddenSideEffect of ["fetch(", "postJson", "/api/"]) {
   assert.ok(!componentSource.includes(forbiddenSideEffect), `editable memo card must stay local-only: ${forbiddenSideEffect}`);
 }
+// 2026-09-19 · 읽기 모드 카드는 button 이 아니라 값만 보여주는 div 다(docs/ui-row-actions.md R1).
+// 눌러도 아무 일도 없는 버튼을 학생 수만큼 Tab 순서에 넣지 않는다.
+assert.match(componentSource, /<div aria-label=\{ariaLabel\} className=\{model\.readClassName\}>/);
+assert.ok(!componentSource.includes("<button"), "read-mode memo card must not render a button");
+assert.equal((componentSource.match(/<textarea/g) ?? []).length, 1);
 
 console.log("lesson journal editable memo card TARGET/CONTROL fixtures passed");

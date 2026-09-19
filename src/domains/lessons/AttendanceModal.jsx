@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal } from "../../shared/components/Modal.jsx";
+import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
 import {
   clearAttendanceFields,
   formatKoreaTimeFromIso,
@@ -12,6 +12,8 @@ import {
   hasAttendanceModalChanges,
   hasTabletAttendanceRecord
 } from "./attendanceModalModel.js";
+import { attendanceLabels } from "./labels.js";
+import "./attendanceModal.css";
 
 export function AttendanceModal({ item, lateGraceMinutes = 5, onClose, onSave }) {
   const { lesson, record, student } = item;
@@ -44,6 +46,15 @@ export function AttendanceModal({ item, lateGraceMinutes = 5, onClose, onSave })
   };
   const hasKioskRecord = !attendanceDateMismatch && hasTabletAttendanceRecord(record);
   const hasChanged = hasAttendanceModalChanges(editableRecord, values);
+  // 확인 단계가 열려 있는 동안은 위 입력을 잠근다. pendingSave 는 [출결 저장] 시점 값을 캡처하므로,
+  // 잠그지 않으면 화면에 보이는 값과 실제 저장·발송되는 값이 어긋날 수 있다.
+  const isConfirming = Boolean(confirmStep);
+  const confirmSummaryText = [
+    `상태 ${attendanceLabels[values.attendanceStatus] ?? values.attendanceStatus}${values.lateMinutes !== "" ? ` ${values.lateMinutes}분` : ""}`,
+    `등원 ${values.checkInTime || "—"}`,
+    `하원 ${values.checkOutTime || "—"}`,
+    `사유 ${values.attendanceReason || "—"}`
+  ].join(" · ");
 
   function requestSave() {
     setSaveError("");
@@ -91,7 +102,13 @@ export function AttendanceModal({ item, lateGraceMinutes = 5, onClose, onSave })
           ["checkout", "하원"],
           ["absent", "결석"]
         ].map(([value, label]) => (
-          <button className={attendanceStatus === value ? "active" : ""} key={value} onClick={() => setAttendanceStatus(value)} type="button">
+          <button
+            className={attendanceStatus === value ? "active" : ""}
+            disabled={isConfirming}
+            key={value}
+            onClick={() => setAttendanceStatus(value)}
+            type="button"
+          >
             {label}
           </button>
         ))}
@@ -100,6 +117,7 @@ export function AttendanceModal({ item, lateGraceMinutes = 5, onClose, onSave })
         <label>
           등원 시각
           <input
+            disabled={isConfirming}
             type="time"
             value={checkInTime}
             onChange={(event) => setCheckInTime(event.target.value)}
@@ -109,6 +127,7 @@ export function AttendanceModal({ item, lateGraceMinutes = 5, onClose, onSave })
         <label>
           하원 시각
           <input
+            disabled={isConfirming}
             type="time"
             value={checkOutTime}
             onChange={(event) => setCheckOutTime(event.target.value)}
@@ -117,7 +136,12 @@ export function AttendanceModal({ item, lateGraceMinutes = 5, onClose, onSave })
         </label>
         <label>
           사유
-          <input value={attendanceReason} onChange={(event) => setAttendanceReason(event.target.value)} placeholder="예: 학교 동아리" />
+          <input
+            disabled={isConfirming}
+            value={attendanceReason}
+            onChange={(event) => setAttendanceReason(event.target.value)}
+            placeholder="예: 학교 동아리"
+          />
         </label>
       </div>
       {isWithinLateGrace ? (
@@ -139,6 +163,7 @@ export function AttendanceModal({ item, lateGraceMinutes = 5, onClose, onSave })
         <div className="attendanceConfirmPanel">
           <strong>태블릿 출결 기록을 변경하시겠습니까?</strong>
           <p>실수 방지를 위해 한 번 더 확인합니다. 저장하면 현재 화면의 출결 상태와 사유로 덮어씁니다.</p>
+          <p className="attendanceConfirmSummary">저장될 값 · {confirmSummaryText}</p>
           <div className="attendanceConfirmActions">
             <button className="softButton" onClick={() => setConfirmStep("")} type="button">
               취소
@@ -157,12 +182,24 @@ export function AttendanceModal({ item, lateGraceMinutes = 5, onClose, onSave })
               ? "결석 기록만 저장하거나, 저장 후 학부모 결석 알림톡을 다음 예약 가능한 정각에 예약할 수 있습니다."
               : "출결 기록만 저장하거나, 저장 후 학부모에게 출결 알림톡까지 즉시 발송할 수 있습니다."}
           </p>
+          <p className="attendanceConfirmSummary">저장될 값 · {confirmSummaryText}</p>
           {saveError ? <p className="apiErrorBox">{saveError}</p> : null}
-          <div className="attendanceConfirmActions">
-            <button className="softButton" disabled={isSaving} onClick={() => finishConfirmedSave(false)} type="button">
+          {/* 2026-09-19 · [취소][저장만(primary)][저장 후 발송(soft)]. 학부모에게 실제로 나가는 발송 쪽에
+              강조를 주지 않고, 1단계와 같이 취소 출구를 둔다. onClick·문구·disabled 조건은 그대로다. */}
+          <div className="attendanceConfirmActions saveMode">
+            <button className="softButton" disabled={isSaving} onClick={() => setConfirmStep("")} type="button">
+              취소
+            </button>
+            <button className="primaryButton" disabled={isSaving} onClick={() => finishConfirmedSave(false)} type="button">
               {isSaving ? "저장 중..." : "저장만"}
             </button>
-            <button className="primaryButton" disabled={isSaving} onClick={() => finishConfirmedSave(true)} type="button">
+            <button
+              className="softButton"
+              disabled={isSaving}
+              onClick={() => finishConfirmedSave(true)}
+              title="학부모에게 실제 발송"
+              type="button"
+            >
               {isSaving
                 ? "저장 중..."
                 : values.attendanceStatus === "absent"
@@ -173,11 +210,11 @@ export function AttendanceModal({ item, lateGraceMinutes = 5, onClose, onSave })
         </div>
       ) : null}
       {!confirmStep ? (
-        <div className="attendanceModalActions">
-          <button className="primaryButton full" onClick={() => requestSave()} type="button">
+        <ModalFooter>
+          <button className="primaryButton" onClick={() => requestSave()} type="button">
             출결 저장
           </button>
-        </div>
+        </ModalFooter>
       ) : null}
     </Modal>
   );

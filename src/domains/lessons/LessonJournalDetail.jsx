@@ -286,6 +286,7 @@ export function LessonJournalDetail({
 
   const {
     applyHomeworkFollowupMethod,
+    discardJournalDrafts: discardJournalDraftChanges,
     getEditableRecord,
     getHomeworkDraftTitle,
     handleAssignmentStatusChange,
@@ -455,6 +456,19 @@ export function LessonJournalDetail({
     if (firstRecordId) {
       setEditingMemoKey(`${firstRecordId}:lessonMaterial`);
     }
+  }
+
+  // 편집 취소. 저장 전 변경이 있으면 브라우저 confirm 으로 한 번 묻는다(별도 확인 모달은 두지 않는다).
+  function cancelJournalEditMode() {
+    if (
+      journalDraftChangeCount > 0 &&
+      typeof window !== "undefined" &&
+      !window.confirm(`저장하지 않은 변경 ${journalDraftChangeCount}건을 버릴까요?`)
+    ) {
+      return;
+    }
+    discardJournalDraftChanges();
+    setEditingMemoKey("");
   }
 
   async function refreshReservationAudit() {
@@ -786,8 +800,8 @@ export function LessonJournalDetail({
                   previousHomeworkTitle,
                   previousLessonContent,
                   previousLessonMaterial,
-                  previousLessonSourceToggleProps: hasAlternatePreviousLessonSource ? {
-                    disabled: !journalEditMode,
+                  // 읽기 모드에는 비활성 토글을 깔지 않는다(docs/ui-row-actions.md R1). 편집 모드에서만 고른다.
+                  previousLessonSourceToggleProps: hasAlternatePreviousLessonSource && journalEditMode ? {
                     nearestLessonDateLabel: formatShortDateLabel(nearestPreviousLesson?.date),
                     onSelect: (mode) => {
                       setPreviousLessonSourceForStudent(student.studentId, mode);
@@ -861,6 +875,7 @@ export function LessonJournalDetail({
         manualSaveMessage={journalManualSaveMessage}
         menuItems={journalMenuItems}
         message={journalStickySaveMessage}
+        onCancelEdit={cancelJournalEditMode}
         onEdit={startJournalEditMode}
         onSave={saveJournalDrafts}
         reservationAction={(
