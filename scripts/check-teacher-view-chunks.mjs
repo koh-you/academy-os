@@ -68,14 +68,15 @@ assert.ok(
 
 // 교사 첫 로딩의 차단 CSS(main-*.css). JS 처럼 예산을 둔다 — 4-6 의 "initial main CSS 예산 고정" 은
 // 지금까지 지켜지지 않아 338 KB → 414 KB → 352 KB 를 오갔다. 2026-09-19 LessonNestedPanels 셀렉터
-// 12 KB 를 lazy 청크로 옮겨 334,613 B, 같은 날 죽은 import 가 끌어오던 lazy 화면 CSS 6개를 떼어 324,778 B. 실측 + 10 KB 여유. 화면 전용 셀렉터를 새로 App.css 에
+// 12 KB 를 lazy 청크로 옮겨 334,613 B, 같은 날 죽은 import 가 끌어오던 lazy 화면 CSS 6개를 떼어 324,778 B,
+// StudentManager 셀렉터 23 KB 를 옮겨 301,787 B. 실측 + 10 KB 여유. 화면 전용 셀렉터를 새로 App.css 에
 // 넣기 전에 그 화면의 CSS 파일로 갈 수 있는지 먼저 본다(scripts/test-*-css-domain-split.mjs 패턴).
 const mainStylesheet = assetNames.find((name) => /^main-[^.]+\.css$/.test(name));
 assert.ok(mainStylesheet, "production build must emit one hashed main stylesheet");
 const mainStyleBytes = (await stat(resolve(assetsDirectory, mainStylesheet))).size;
 assert.ok(
-  mainStyleBytes <= 335_000,
-  `initial main CSS exceeded the 335 KB budget: ${mainStyleBytes.toLocaleString()} bytes`
+  mainStyleBytes <= 312_000,
+  `initial main CSS exceeded the 312 KB budget: ${mainStyleBytes.toLocaleString()} bytes`
 );
 
 const expectedLazyChunks = [
