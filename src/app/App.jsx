@@ -195,7 +195,13 @@ import {
   parseHomeworkFollowupMemoLine,
   removeHomeworkFollowupMemoLines
 } from "../domains/notifications/lessonPreparationNotice.js";
-import { isSupplementScheduleForLessonComment } from "../domains/notifications/supplementSchedule.js";
+import {
+  getLessonContent,
+  getLessonMaterial,
+  getLessonTestResultLines,
+  getStudentSupplementScheduleTasks,
+  getStudentSupplementSchedules
+} from "../domains/notifications/lessonCommentSourceLines.js";
 import { saveLessonRecordAction } from "../domains/lessons/lessonRecordSaveApi.js";
 import { findSupplementTaskForCandidate } from "../domains/supplements/supplementCenterSelectionModel.js";
 import {
@@ -208,7 +214,6 @@ import {
 } from "../domains/supplements/supplementTaskDraft.js";
 import {
   followUpTypeLabel,
-  formatSupplementHomeworkCheckSentence,
   getAbsenceMakeupHomeworkText,
   getSupplementTaskSourceLabel,
   normalizeSupplementMethodForTask,
@@ -221,8 +226,7 @@ import { getSupplementNotificationControlDisplay } from "../domains/supplements/
 import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
   createTestAttemptId,
-  createTestSessionIdForPaper,
-  getTestPaperKindLabel
+  createTestSessionIdForPaper
 } from "../domains/tests/testManagerUtils.js";
 import {
   SpecialLectureGuideBasicFields,
@@ -547,14 +551,6 @@ function getAssignmentStatusForMessage(record, previousHomework, records = null)
   return "";
 }
 
-function getLessonMaterial(record, student) {
-  return record?.lessonMaterial?.trim() || student?.textbook?.trim() || student?.currentTextbook?.trim() || "";
-}
-
-function getLessonContent(record) {
-  return record?.lessonProgress?.trim() || record?.progress?.trim() || record?.lessonContent?.trim() || "";
-}
-
 // 강의 교재·내용이 비어 있으면 지난 수업 것을 **시작값**으로 채운다. 그래야 매번 처음부터
 // 안 쳐도 된다. 단, 선생님이 편집 중(초안 있음)이면 채우지 않는다 — 다 지우고 새로 쓰려는
 // 순간 지난 내용이 다시 들어와 지울 수 없었다(2026-09-12 보고). 편집 중에는 빈 값도 뜻이 있다.
@@ -760,81 +756,6 @@ function buildCommentSourceText({ academyName = getSessionBrandName(), audience 
     homeworkFollowupNotice || supplementText ? createMessageBlock("보충/확인 안내", [homeworkFollowupNotice, supplementText].filter(Boolean).join("\n")) : "",
     createMessageBlock("수업메모", record?.preparationMemo)
   ]) || "알림톡에 참고할 원본 정보가 아직 없습니다.";
-}
-
-function formatSupplementScheduleLine(task = {}) {
-  const schedule = [task.scheduledDate, task.scheduledTime].filter(Boolean).join(" ");
-  const method = supplementMethodLabel(task);
-  const source = getSupplementTaskSourceLabel(task) || followUpTypeLabel(task.taskType);
-  const homeworkCheckSentence = formatSupplementHomeworkCheckSentence(task);
-  const schedulePrefix = schedule ? `${schedule}에 ` : "";
-
-  if (task.taskType === "homework_makeup") {
-    if ((task.supplementMethod || supplementDefaultMethod(task.taskType)) === "next_lesson") {
-      return `다음 수업 때 ${source}를 함께 확인하겠습니다.`;
-    }
-    return `${schedulePrefix}${method}으로 ${source} 보충을 진행하겠습니다.`;
-  }
-
-  if (task.taskType === "absence_makeup") {
-    return `${schedulePrefix}${method}으로 ${source} 결석 보강을 진행하겠습니다.${homeworkCheckSentence ? ` ${homeworkCheckSentence}` : ""}`;
-  }
-
-  if (task.taskType === "retest") {
-    return `${schedulePrefix}${source} 재시험을 진행하겠습니다.`;
-  }
-
-  return `${schedulePrefix}${source} 일정을 진행하겠습니다.`;
-}
-
-function getStudentSupplementScheduleTasks(makeupTasks = [], studentId = "", options = {}) {
-  const { lesson = null, mode = "all" } = options;
-  return makeupTasks
-    .filter((task) => task.studentId === studentId && task.status !== "done")
-    .filter((task) => (mode === "lesson_comment" ? isSupplementScheduleForLessonComment(task, lesson) : true))
-    .filter((task) => task.scheduledDate || task.scheduledTime || task.notificationDraft || task.supplementHomeworkNote || task.sourceLabel)
-    .sort((a, b) => `${a.scheduledDate || "9999-99-99"} ${a.scheduledTime || ""}`.localeCompare(`${b.scheduledDate || "9999-99-99"} ${b.scheduledTime || ""}`));
-}
-
-function getStudentSupplementSchedules(makeupTasks = [], studentId = "", options = {}) {
-  return getStudentSupplementScheduleTasks(makeupTasks, studentId, options).map(formatSupplementScheduleLine);
-}
-
-function formatTestAttemptMessageLine(session = {}, attempt = {}) {
-  const title = normalizeMessageText(session.testTitle) || getTestPaperKindLabel(session.testKind);
-  if (attempt.status === "not_taken") {
-    const reason = normalizeMessageText(attempt.notTakenReason);
-    return `${title} · 미응시${reason ? ` (사유: ${reason})` : ""}`;
-  }
-
-  const hasCorrect = attempt.correctCount !== "" && attempt.correctCount !== null && attempt.correctCount !== undefined;
-  const total = session.totalQuestions !== "" && session.totalQuestions !== null && session.totalQuestions !== undefined
-    ? `${session.totalQuestions}문항 중 `
-    : "";
-  const passSuffix = attempt.passStatus === "failed"
-    ? " · 재시험"
-    : attempt.passStatus === "passed"
-      ? " · 통과"
-      : "";
-  return `${title} · ${hasCorrect ? `${total}${attempt.correctCount}문항 정답` : "응시"}${passSuffix}`;
-}
-
-function getLessonTestResultLines(testSessions = [], testAttempts = [], lesson = {}, student = {}) {
-  const sessionById = new Map(testSessions.map((session) => [session.testSessionId, session]));
-  return testAttempts
-    .filter((attempt) => attempt.studentId === student.studentId)
-    .map((attempt) => ({ attempt, session: sessionById.get(attempt.testSessionId) }))
-    .filter(({ session }) => session && session.testDate === lesson.date)
-    // 시험대비 수업은 반이 지정돼 있지 않다. 그런 수업에서는 반이 정해진
-    // 응시 기록도 그날 그 학생의 결과이므로 명단 기준으로 붙인다. 반이 있는 수업은
-    // 같은 날 두 수업에 중복 발송되지 않도록 기존처럼 반이 일치할 때만 붙인다.
-    .filter(({ session }) => {
-      if (!session.classTemplateId) return true;
-      if (!lesson.classTemplateId) return (lesson.studentIds ?? []).includes(student.studentId);
-      return session.classTemplateId === lesson.classTemplateId;
-    })
-    .sort((a, b) => String(a.session.updatedAt || a.session.createdAt || "").localeCompare(String(b.session.updatedAt || b.session.createdAt || "")))
-    .map(({ session, attempt }) => formatTestAttemptMessageLine(session, attempt));
 }
 
 function hasIncompleteLessonTestAttempt(testSessions = [], testAttempts = [], lesson = {}, student = {}) {
