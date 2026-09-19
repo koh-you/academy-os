@@ -401,6 +401,16 @@
   padding: 3px 6px;
 }
 
+/* 2026-09-19 · App.css 의 같은 980px 규칙은 이 파일(지연 로드)의 기본 규칙에 로드 순서로 덮여
+   죽어 있었다(390px 에서 2열 280px/420px 유지). 기본 규칙과 같은 파일에 두어 캐스케이드를 맞춘다. */
+@media (max-width: 980px) {
+  .noticeComposerGrid,
+  .noticeFilterGrid,
+  .noticeScheduleGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (min-width: 981px) {
   .noticeComposerGrid {
     align-items: stretch;
