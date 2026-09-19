@@ -4093,12 +4093,24 @@ export async function deleteAcademyReminder(reminderId) {
   return { source: databaseSource, academyReminderId: reminderId };
 }
 
-export async function listAppState() {
+// keys 를 주면 그 키만 읽는다(저장 뒤 재조회용). app_state 는 알림 기록·성적·보고서 스냅샷 같은
+// 큰 값을 여러 키에 들고 있어, 한 키를 저장하고 표 전체를 다시 받는 것이 저장 시간의 대부분이었다.
+// 재조회 자체(Supabase 원천 대조)는 그대로다 — 범위만 좁힌다. 숨은 키는 어느 경우에도 돌려주지 않는다.
+export async function listAppState({ keys = null } = {}) {
   if (!isSupabaseConfigured()) {
     return { source: fallbackSource, states: {} };
   }
 
-  const rows = (await listRows("app_state", "select=*&order=state_key.asc", { requireServiceRole: true }))
+  const requestedKeys = Array.isArray(keys)
+    ? [...new Set(keys.map((key) => String(key ?? "").trim()).filter((key) => key && !hiddenAppStateKeys.has(key)))]
+    : null;
+  if (requestedKeys && requestedKeys.length === 0) {
+    return { source: databaseSource, states: {}, stateRows: [] };
+  }
+  const keyFilter = requestedKeys
+    ? `&state_key=in.(${requestedKeys.map((key) => `"${encodeURIComponent(key)}"`).join(",")})`
+    : "";
+  const rows = (await listRows("app_state", `select=*${keyFilter}&order=state_key.asc`, { requireServiceRole: true }))
     .filter((row) => !hiddenAppStateKeys.has(row.state_key));
   return {
     source: databaseSource,

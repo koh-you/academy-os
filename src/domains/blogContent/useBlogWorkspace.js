@@ -13,7 +13,8 @@ export function useBlogWorkspace(postAppState) {
   const busy = status === "saving" || status === "verifying";
   useEffect(() => {
     let active = true;
-    const read = () => getJsonWithTimeout(`/api/app-state?includeRows=true&verify=blog-${Date.now()}`, 15000);
+    // 이 화면이 읽고 대조하는 키는 BLOG_KEY 하나다 — 처음 읽을 때도, 저장 뒤 재조회도 그 키만 받는다.
+    const read = ({ key = BLOG_KEY } = {}) => getJsonWithTimeout(`/api/app-state?includeRows=true&verify=blog-${Date.now()}&keys=${encodeURIComponent(key)}`, 15000);
     const instance = createAppStatePersistenceController({ read, write: ({ states, expectedUpdatedAt }) => postAppState(states, { expectedUpdatedAt }), onState: s => { if (active) setStatus(s); }, onError: e => { if (active) setError(e.message); } });
     controller.current = instance;
     read().then(snapshot => {

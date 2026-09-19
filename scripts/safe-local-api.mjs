@@ -2012,12 +2012,16 @@ const server = http.createServer(async (request, response) => {
     });
   }
   if (request.method === "GET" && requestUrl.pathname === "/api/app-state") {
+    // 운영과 같이 ?keys=a,b 면 그 키만 돌려준다(저장 뒤 재조회가 좁혀서 읽는 경로).
+    const keysParam = requestUrl.searchParams.get("keys");
+    const requestedKeys = keysParam === null ? null : new Set(keysParam.split(",").map((key) => key.trim()).filter(Boolean));
+    const includesKey = (key) => !requestedKeys || requestedKeys.has(key);
     return sendJson(response, 200, {
       ok: true,
       safeFixture: true,
       source: "supabase",
-      stateRows: Object.entries(state.appStateUpdatedAt).map(([key, updatedAt]) => ({ key, updatedAt })),
-      states: state.appStates
+      stateRows: Object.entries(state.appStateUpdatedAt).filter(([key]) => includesKey(key)).map(([key, updatedAt]) => ({ key, updatedAt })),
+      states: Object.fromEntries(Object.entries(state.appStates).filter(([key]) => includesKey(key)))
     });
   }
   if (request.method === "POST" && requestUrl.pathname === "/api/report-snapshots") {

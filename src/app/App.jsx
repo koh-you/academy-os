@@ -2498,8 +2498,8 @@ export function App() {
           };
         },
         onState: setAppStateSaveState,
-        read: () => getJsonWithTimeout(
-          `/api/app-state?includeRows=true&verify=autosave-${Date.now()}`,
+        read: ({ key }) => getJsonWithTimeout(
+          `/api/app-state?includeRows=true&verify=autosave-${Date.now()}&keys=${encodeURIComponent(key)}`,
           15000,
           "공통 설정 저장 확인이 15초를 넘었습니다. 현재 입력을 유지한 채 잠시 뒤 다시 확인해 주세요."
         ),
@@ -2514,8 +2514,8 @@ export function App() {
       wrongProblemPersistenceControllerRef.current = createAppStatePersistenceController({
         onError: (error) => console.error(error),
         onState: setWrongProblemSaveState,
-        read: () => getJsonWithTimeout(
-          `/api/app-state?includeRows=true&verify=wrong-problems-${Date.now()}`,
+        read: ({ key }) => getJsonWithTimeout(
+          `/api/app-state?includeRows=true&verify=wrong-problems-${Date.now()}&keys=${encodeURIComponent(key)}`,
           15000,
           "학생별 오답 저장 확인이 15초를 넘었습니다. 현재 입력을 유지한 채 잠시 뒤 다시 확인해 주세요."
         ),
@@ -2530,8 +2530,8 @@ export function App() {
       lessonResearchPersistenceControllerRef.current = createAppStatePersistenceController({
         onError: (error) => console.error(error),
         onState: setLessonResearchSaveState,
-        read: () => getJsonWithTimeout(
-          `/api/app-state?includeRows=true&verify=lesson-research-${Date.now()}`,
+        read: ({ key }) => getJsonWithTimeout(
+          `/api/app-state?includeRows=true&verify=lesson-research-${Date.now()}&keys=${encodeURIComponent(key)}`,
           15000,
           "수업연구 저장 확인이 15초를 넘었습니다. 현재 입력을 유지한 채 잠시 뒤 다시 확인해 주세요."
         ),

@@ -30,7 +30,9 @@ async function readJsonResponse(response) {
  * logic, not app_state's own contract.
  */
 export async function saveSpecialLectureSettlementStateAction(draftState, { postAppState }) {
-  const currentResult = await readJsonResponse(await apiFetch("/api/app-state", { cache: "no-store" }));
+  // 이 저장이 읽고 대조하는 키는 특강 정산 하나다 — 표 전체 대신 그 키만 받는다.
+  const appStateKeyQuery = `/api/app-state?keys=${encodeURIComponent(specialLectureSettlementStateKey)}`;
+  const currentResult = await readJsonResponse(await apiFetch(appStateKeyQuery, { cache: "no-store" }));
   if (!currentResult.ok || currentResult.source !== "supabase") {
     throw new Error(currentResult.error || "Supabase의 현재 특강 정산 원천을 불러오지 못했습니다.");
   }
@@ -40,7 +42,7 @@ export async function saveSpecialLectureSettlementStateAction(draftState, { post
   if (!saveResult.ok || saveResult.source !== "supabase") {
     throw new Error(saveResult.error || "특강 정산이 Supabase에 저장되지 않았습니다.");
   }
-  const verifyResult = await readJsonResponse(await apiFetch("/api/app-state", { cache: "no-store" }));
+  const verifyResult = await readJsonResponse(await apiFetch(appStateKeyQuery, { cache: "no-store" }));
   if (!verifyResult.ok || verifyResult.source !== "supabase") {
     throw new Error(verifyResult.error || "특강 정산 저장 결과를 다시 확인하지 못했습니다.");
   }
