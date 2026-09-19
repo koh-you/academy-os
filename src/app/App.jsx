@@ -32,20 +32,15 @@ import {
 } from "../domains/exams/examPrepRowsApi.js";
 import { createExamPrepRowSaveController } from "../domains/exams/examPrepRowSaveController.js";
 import { applyExamPrepDraftToLogicalGroup } from "../domains/exams/examPrepDraft.js";
-import { normalizeExamPrepRowReviewDraft } from "../domains/exams/examReviewDraft.js";
-import { createStudentExamPrepRow } from "../domains/exams/studentExamPrepRow.js";
 import { createExamPrepCalendarCluster } from "../domains/exams/examPrepCalendarCluster.js";
 import { createWithdrawalStudentMutation } from "../domains/students/withdrawalLessonBoundary.js";
 import { getRosterEffectiveFromDate } from "../domains/students/rosterEffectiveDate.js";
 import {
-  compareStudentsByName,
   getActiveLessonStudents,
   getActiveStudentIdsFromSelection,
   getLessonJournalStudents,
   getLessonStudentIds,
-  isActiveStudent,
-  isWithdrawnStudent,
-  sortStudentsByName
+  isActiveStudent
 } from "../domains/students/lessonRosterSelectors.js";
 import {
   getTallyStudentReplacementChanges,
@@ -170,7 +165,6 @@ import {
   reserveNotificationJobRequest
 } from "../domains/notifications/notificationJobApi.js";
 import {
-  getNotificationJobLabel,
   resolveNotificationJobStatusClass
 } from "../domains/notifications/notificationCenterConfig.js";
 import {
@@ -185,7 +179,6 @@ import {
   createNotificationMessageBlock as createMessageBlock,
   createNotificationMessageLine as createMessageLine,
   formatLessonNotificationAttendance as formatAttendanceForMessage,
-  getNotificationTextKey,
   joinNotificationMessageBlocks as joinMessageBlocks,
   normalizeNotificationText as normalizeMessageText,
   notificationTextIncludesBlock
@@ -219,65 +212,19 @@ import {
   normalizeSupplementMethodForTask,
   supplementDefaultMethod,
   supplementMethodLabel,
-  supplementMethodOptions,
-  supplementMethodsByType
+  supplementMethodOptions
 } from "../domains/supplements/supplementMethodLabel.js";
 import { getSupplementNotificationControlDisplay } from "../domains/supplements/supplementStatus.js";
-import { SpecialLectureApplicationPanel } from "../domains/specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
-  createTestAttemptId,
-  createTestSessionIdForPaper
-} from "../domains/tests/testManagerUtils.js";
-import {
-  SpecialLectureGuideBasicFields,
-  SpecialLectureGuideLinkFields,
-  SpecialLectureGuideSelector,
-  SpecialLectureGuideTextFields,
-  SpecialLectureHighlightEditor,
-  SpecialLectureNoSelection,
-  SpecialLectureNoticeMemoField,
-  SpecialLectureScheduleCalculator,
-  SpecialLectureSessionPlanEditor,
-  SpecialLectureSpecialNotesField,
-  SpecialLectureManagementBar
-} from "../domains/specialLectures/SpecialLectureManagementPanel.jsx";
-import {
-  SpecialLectureNoticeActionPanel,
-  SpecialLecturePreviewColumn,
   SpecialLecturePublicPage
 } from "../domains/specialLectures/SpecialLecturePublicPage.jsx";
 import {
-  SchoolAcademicOverviewPanel,
-  SchoolCalendarFilterBar,
-  SchoolCalendarHeader,
-  SchoolCalendarSaveNotice,
-  SchoolDateScheduleModal,
-  SchoolEventFormModal,
-  SchoolMonthGrid,
-  SchoolMonthHeader
-} from "../domains/schoolCalendar/SchoolCalendarComponents.jsx";
-import {
-  compactCalendarLabel,
-  formatCalendarEventLabel,
-  formatCalendarSummaryLabel,
-  formatDateRangeText,
-  formatPeriodSummaryLabel,
-  getSchoolCalendarEventColor,
-  getSchoolCalendarFilterGroup,
-  getSchoolCalendarSchoolColor,
-  isDateWithinEvent,
-  joinCalendarLabel,
   normalizeGradeLabel,
-  normalizeSchoolName,
   parseDateRangeText,
-  schoolNamesMatch,
-  updateDateRangeField
+  schoolNamesMatch
 } from "../domains/schoolCalendar/schoolCalendarUtils.js";
 import {
   assignmentStatusLabels,
-  assignmentStatusOptions,
-  assignmentStatusParentMessages,
-  assignmentStatusStudentMessages,
   getAssignmentStatusMessage,
   getAssignmentStatusParentMessage,
   getAssignmentStatusStudentMessage,
@@ -291,8 +238,6 @@ import { buildMonthlyRegularLessonOpenPlan } from "../domains/lessons/monthlyReg
 import { openMonthlyRegularLessonsAction } from "../domains/lessons/monthlyRegularLessonOpenApi.js";
 import {
   clearAttendanceFields,
-  formatKoreaTimeFromIso,
-  formatShortDateLabel,
   getAttendanceDateMismatch,
   normalizeTimeInput
 } from "../domains/lessons/attendance.js";
@@ -321,28 +266,13 @@ import {
   mergeVerifiedLessonJournalRecords
 } from "../domains/lessons/lessonJournalDraftPersistenceState.js";
 import { createLessonJournalRecordFieldPatch } from "../domains/lessons/lessonJournalRecordDraft.js";
-import { createLessonJournalDraftSaveRequest } from "../domains/lessons/lessonJournalDraftSaveRequest.js";
-import {
-  createLessonJournalHomeworkDraft,
-  createLessonJournalHomeworkDraftKey,
-  getLessonJournalHomeworkDraftTitle
-} from "../domains/lessons/lessonJournalHomeworkDraft.js";
-import { createLessonJournalHomeworkFollowupPlan } from "../domains/lessons/lessonJournalHomeworkFollowupPlan.js";
 import {
   createLinkedPreviousHomework,
-  findNextLessonForStudent,
   findPreviousLessonsForStudent,
-  getLessonSortValue,
   isSpecialLectureLesson,
   selectLinkedPreviousHomework
 } from "../domains/lessons/lessonHomeworkContinuity.js";
-import { createLessonJournalAssignmentStatusPlan } from "../domains/lessons/lessonJournalAssignmentStatusPlan.js";
 import { resolveLessonJournalEditableText } from "../domains/lessons/lessonJournalEditableFieldsModel.js";
-import {
-  getLessonJournalEditableRecord,
-  removeLessonJournalMakeupTaskDraft
-} from "../domains/lessons/lessonJournalDraftMap.js";
-import { getLessonJournalEffectiveCommentSendStatus } from "../domains/lessons/lessonJournalCommentSendStatus.js";
 import {
   getLessonJournalCommentButtonState,
   getLessonJournalCommentSendState,
@@ -350,26 +280,6 @@ import {
   getLessonJournalDisplayCommentSendStatus
 } from "../domains/lessons/lessonJournalCommentStatusModel.js";
 import { createLessonJournalMakeupTaskRequests } from "../domains/lessons/lessonJournalMakeupTaskRequest.js";
-import { createLessonJournalSaveViewModel } from "../domains/lessons/lessonJournalSaveViewModel.js";
-import { createLessonJournalReservationAuditModel } from "../domains/lessons/lessonJournalReservationAuditModel.js";
-import { createLessonJournalReservationAuditResult } from "../domains/lessons/lessonJournalReservationAuditResult.js";
-import { applyCanceledLessonJournalReservationJob } from "../domains/lessons/lessonJournalReservationAuditTransitions.js";
-import { createLessonJournalReservationControlModel } from "../domains/lessons/lessonJournalReservationControlModel.js";
-import { createLessonJournalReservationSyncStatus } from "../domains/lessons/lessonJournalReservationSyncModel.js";
-import { createLessonJournalExpectedReservationItems } from "../domains/lessons/lessonJournalExpectedReservationItems.js";
-import { selectPreviousLessonMemoContext } from "../domains/lessons/lessonJournalPreviousMemoSelector.js";
-import { useLessonJournalDraftLifecycle } from "../domains/lessons/useLessonJournalDraftLifecycle.js";
-import { useLessonJournalOverlayState } from "../domains/lessons/useLessonJournalOverlayState.js";
-import { useLessonJournalReservationState } from "../domains/lessons/useLessonJournalReservationState.js";
-import { LessonJournalHeader } from "../domains/lessons/LessonJournalHeader.jsx";
-import { LessonJournalClosureNotice } from "../domains/lessons/LessonJournalClosureNotice.jsx";
-import { LessonJournalReminderPanel } from "../domains/lessons/LessonJournalReminderPanel.jsx";
-import { LessonJournalNotificationBar } from "../domains/lessons/LessonJournalNotificationBar.jsx";
-import { LessonJournalReservationModal } from "../domains/lessons/LessonJournalReservationModal.jsx";
-import { LessonJournalStudentRow } from "../domains/lessons/LessonJournalStudentRow.jsx";
-import { LessonJournalSaveBar } from "../domains/lessons/LessonJournalSaveBar.jsx";
-import { LessonJournalTable } from "../domains/lessons/LessonJournalTable.jsx";
-import { LessonJournalStudentPreviewModal } from "../domains/lessons/LessonJournalStudentPreviewModal.jsx";
 import { LessonJournalCommentComposer } from "../domains/lessons/LessonJournalCommentComposer.jsx";
 import { createManualAttendanceRequestPayload } from "../domains/lessons/manualAttendancePayload.js";
 import { saveManualAttendanceAction } from "../domains/lessons/manualAttendanceSaveController.js";
@@ -387,43 +297,15 @@ import {
 } from "../domains/lessons/lessonModalPayloadBuilders.js";
 import { saveLessonModalLessonsWithVerification } from "../domains/lessons/lessonModalSaveController.js";
 const LessonModal = lazy(() => import("../domains/lessons/LessonModal.jsx").then((module) => ({ default: module.LessonModal })));
-import { attendanceLabels, dayLabels, homeworkLabels } from "../domains/lessons/labels.js";
+import { attendanceLabels, homeworkLabels } from "../domains/lessons/labels.js";
 import {
-  buildSpecialLectureNoticeText,
-  calculateSpecialLectureTuition,
-  createDateFromKey,
-  createNextSpecialLectureSession,
-  createSpecialLectureGuideFromTemplate,
   defaultSpecialLectureGuides,
-  formatCurrencyWon,
-  formatSpecialLectureDateLabel,
-  formatSpecialLectureDaysFromRules,
-  formatSpecialLectureHours,
-  formatSpecialLectureLessonCount,
-  formatSpecialLectureTimeFromRules,
-  generateSpecialLectureSessions,
-  getDefaultSpecialLectureGuideId,
-  getSpecialLectureCalculatedFields,
-  getSpecialLectureGuideSlug,
-  getSpecialLecturePublicUrl,
-  getSpecialLectureSeasonShortLabel,
-  getSpecialLectureTotalHours,
-  getSpecialLectureWeekdayCounts,
-  getWeekdayLabel,
-  isSpecialLecturePrimaryGuide,
   isSpecialLectureRoute,
   normalizeSpecialLectureApplication,
   normalizeSpecialLectureApplications,
   normalizeSpecialLectureEnrollment,
   normalizeSpecialLectureEnrollments,
-  normalizeSpecialLectureGuide,
-  normalizeSpecialLectureGuides,
-  normalizeSpecialLectureScheduleRule,
-  normalizeSpecialLectureScheduleRules,
-  normalizeSpecialLectureSession,
-  replaceSpecialLectureToken,
-  replaceSpecialLectureYearInDateKey,
-  replaceSpecialLectureYearToken,
+  normalizeSpecialLectureGuides
 } from "../domains/specialLectures/specialLectureGuideUtils.js";
 import {
   cancelAbsenceMakeupKeepSourceAction,
@@ -433,7 +315,6 @@ import {
   requestCommentAlimtalk,
   requestCommentPolish
 } from "../domains/lessons/lessonCommentApi.js";
-import { copyTextToClipboard } from "../domains/exams/outputPreview.js";
 import {
   createDefaultMonthlySettlementState,
   monthlySettlementStateKey,
@@ -445,19 +326,10 @@ import {
   normalizeSpecialLectureSettlementState,
   specialLectureSettlementStateKey
 } from "../domains/settlements/specialLectureSettlement.js";
-import { AsyncOperationStatus } from "../shared/components/AsyncOperationStatus.jsx";
-import { AutosaveRiskNotice } from "../shared/components/AutosaveRiskNotice.jsx";
-import { DataTableShell } from "../shared/components/DataTableShell.jsx";
-import { FilterBar } from "../shared/components/FilterBar.jsx";
 import {
-  getAggregateSaveState,
   normalizeSaveState
 } from "../shared/components/InlineSaveStatus.jsx";
 import { Modal, ModalFooter } from "../shared/components/Modal.jsx";
-import { PageHeader } from "../shared/components/PageHeader.jsx";
-import { SearchField } from "../shared/components/SearchField.jsx";
-import { SelectionToolbar } from "../shared/components/SelectionToolbar.jsx";
-import { StickySaveBar } from "../shared/components/StickySaveBar.jsx";
 import { SessionExpiredOverlay } from "../shared/components/SessionExpiredOverlay.jsx";
 import {
   apiFetch,
@@ -468,7 +340,6 @@ import {
   getJsonWithTimeout,
   onApiUnauthorized,
   postJson,
-  postJsonWithHeaders,
   postJsonWithTimeout,
   setApiAuthToken,
   setCurrentTeacherRole,
@@ -491,7 +362,6 @@ import {
   getClassTemplateScheduleRules,
   getClassTemplateTimesForDate
 } from "../shared/utils/classTemplateSchedule.js";
-import { applyStudentScheduleToLesson } from "../shared/utils/studentSchedule.js";
 // 쎈 유형 카탈로그(api/data/ssenTypeIndex.json 284 KB)는 여기서 import 하지 않는다.
 // 수업연구 화면에서만 쓰는 데이터라 lazy 청크(src/domains/tests/ssenTypeCatalog.js)에 둔다.
 // 과목 목록만 필요하므로 작은 상수를 가져다 쓴다.
@@ -507,18 +377,10 @@ import {
   legacySensitiveStorageKeys,
   lessonCalendarColors,
   lessonDeleteRetentionMs,
-  lessonResearchCategories,
-  lessonResearchStatuses,
   lessonResearchSubjects,
   regularLessonClassColors,
-  schoolCalendarGradeOptions,
-  schoolCalendarMathSubjectOptions,
-  schoolCalendarSchoolColorPalette,
   storageKeys,
-  testAttemptStatusOptions,
   testPaperKindOptions,
-  testPaperPreparationOptions,
-  testPaperProgressOptions,
   formatTeacherBrandName
 } from "./appConfig.js";
 import { getSessionTeacherId, setSessionActor } from "../shared/utils/sessionActor.js";

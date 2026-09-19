@@ -199,7 +199,7 @@ const actionEnd = detailSource.indexOf("\n  function getHomeworkDraftKey(", acti
 const actionSource = detailSource.slice(actionStart, actionEnd);
 
 for (const binding of [
-  'import { createLessonJournalHomeworkFollowupPlan } from "../domains/lessons/lessonJournalHomeworkFollowupPlan.js"',
+  'import { createLessonJournalHomeworkFollowupPlan } from "./lessonJournalHomeworkFollowupPlan.js"',
   "if (!journalEditMode || !previousHomework) return",
   "const plan = createLessonJournalHomeworkFollowupPlan({",
   "getFollowupPatch: getHomeworkFollowupPatch,",

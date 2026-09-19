@@ -40,7 +40,7 @@ const localStateBoundaryEnd = detailSource.indexOf("const commentAiProvider");
 const localStateBoundary = detailSource.slice(0, localStateBoundaryEnd);
 
 for (const binding of [
-  'import { useLessonJournalOverlayState } from "../domains/lessons/useLessonJournalOverlayState.js"',
+  'import { useLessonJournalOverlayState } from "./useLessonJournalOverlayState.js"',
   "} = useLessonJournalOverlayState();",
   "commentModal,",
   "editingMemoKey,",

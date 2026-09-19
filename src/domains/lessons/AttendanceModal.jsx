@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
 import {
   clearAttendanceFields,

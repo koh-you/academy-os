@@ -3,7 +3,6 @@ import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
-import { ListCard, ListCardActions } from "../../shared/components/ListCard.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 import { buildStudentHandoverPdfModel, openStudentHandoverPdf } from "./studentHandoverPdf.js";

@@ -58,7 +58,7 @@ const localStateBoundaryEnd = detailSource.indexOf("const commentAiProvider");
 const localStateBoundary = detailSource.slice(0, localStateBoundaryEnd);
 
 for (const binding of [
-  'import { useLessonJournalDraftLifecycle } from "../domains/lessons/useLessonJournalDraftLifecycle.js"',
+  'import { useLessonJournalDraftLifecycle } from "./useLessonJournalDraftLifecycle.js"',
   "} = useLessonJournalDraftLifecycle(lesson.lessonId);",
   "journalEditMode,",
   "journalHomeworkDrafts,",

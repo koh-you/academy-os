@@ -197,7 +197,7 @@ const detailEnd = appSource.indexOf("\nfunction PreparationMemoModal(", detailSt
 const detailSource = appSource.slice(detailStart, detailEnd);
 
 for (const binding of [
-  'import { createLessonJournalReservationSyncStatus } from "../domains/lessons/lessonJournalReservationSyncModel.js"',
+  'import { createLessonJournalReservationSyncStatus } from "./lessonJournalReservationSyncModel.js"',
   "const solapiReservationSyncStatus = createLessonJournalReservationSyncStatus({",
   "activeJobs: activeLessonReservationJobs,",
   "applyState: reservationApplyState,",

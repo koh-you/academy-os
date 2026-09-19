@@ -48,7 +48,7 @@ const localStateBoundaryEnd = detailSource.indexOf("const [editingMemoKey");
 const localStateBoundary = detailSource.slice(0, localStateBoundaryEnd);
 
 for (const binding of [
-  'import { useLessonJournalReservationState } from "../domains/lessons/useLessonJournalReservationState.js"',
+  'import { useLessonJournalReservationState } from "./useLessonJournalReservationState.js"',
   "} = useLessonJournalReservationState({",
   "lessonId: lesson.lessonId,",
   "notificationPlanMode: lessonNotificationPlan?.mode,",
