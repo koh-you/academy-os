@@ -8,49 +8,9 @@ import {
   formatSpecialLectureHours,
   getSpecialLectureStatusBadge,
   getWeekdayLabel,
-  isSpecialLectureArchived,
   specialLectureSeasonOptions,
   specialLectureWeekdayOptions
 } from "./specialLectureGuideUtils.js";
-
-export function SpecialLectureManagementBar({
-  guide,
-  isManaging = false,
-  onArchive,
-  onDelete,
-  onRestore
-}) {
-  if (!guide) {
-    return null;
-  }
-
-  const status = getSpecialLectureStatusBadge(guide);
-  const archived = isSpecialLectureArchived(guide);
-
-  return (
-    <div className="specialLectureManagementBar">
-      <div>
-        <span>선택 안내문</span>
-        <strong>{guide.title || "제목 미입력"}</strong>
-        {status ? <small>{status.label} · {guide.periodStart || "시작일 미입력"} ~ {guide.periodEnd || "종료일 미입력"}</small> : null}
-      </div>
-      <div>
-        {archived ? (
-          <button className="softButton compact" disabled={isManaging} onClick={onRestore} type="button">
-            {isManaging ? "저장 중" : "보관 해제"}
-          </button>
-        ) : (
-          <button className="softButton compact" disabled={isManaging} onClick={onArchive} type="button">
-            {isManaging ? "저장 중" : "보관"}
-          </button>
-        )}
-        <button className="dangerSoftButton compact" disabled={isManaging} onClick={onDelete} type="button">
-          {isManaging ? "삭제 중" : "삭제"}
-        </button>
-      </div>
-    </div>
-  );
-}
 
 export function SpecialLectureGuideBasicFields({
   guide,
