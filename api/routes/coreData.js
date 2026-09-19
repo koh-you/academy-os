@@ -1,5 +1,4 @@
 import { sampleData } from "../../src/shared/data/sampleData.js";
-import { normalizeSchoolName } from "../../src/domains/schoolCalendar/schoolCalendarUtils.js";
 import { createExamPrepCalendarCluster } from "../../src/domains/exams/examPrepCalendarCluster.js";
 import { getKoreaDateString } from "../../src/shared/utils/koreaDate.js";
 import {

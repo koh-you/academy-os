@@ -3,7 +3,7 @@
   "files": {
     "src/app/App.jsx": 9104,
     "api/server.js": 5445,
-    "api/routes/coreData.js": 4934,
+    "api/routes/coreData.js": 4933,
     "src/app/App.css": 17383
   }
 }
