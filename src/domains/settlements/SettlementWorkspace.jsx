@@ -30,7 +30,6 @@ export function SettlementWorkspace({
     <section className="settlementWorkspace">
       <PageHeader
         description="정규 수업은 월별로, 특강은 전체 과정 단위로 계산하고 저장 상태를 확인합니다."
-        eyebrow="OPERATIONS"
         title="정산"
       />
 

@@ -440,7 +440,10 @@ test("student wrong problems require explicit verified save and preserve in-flig
   const studentFilter = page.getByRole("group", { name: "오답관리 학년과 학생 필터" }).getByRole("combobox");
   await studentFilter.selectOption("safe-active-student");
 
-  const saveStatus = page.getByRole("status").filter({ hasText: "학생별 오답" });
+  // 2026-09-19 · U10: 저장 버튼·상태·안내문은 페이지 헤더에서 학생별 오답 탭 하단의 StickySaveBar(교재 외 오답 메모)로 옮겼다.
+  const saveBar = page.getByRole("complementary", { name: "교재 외 오답 메모 하단 고정 저장 바" });
+  const saveStatus = saveBar.getByRole("status").filter({ hasText: "교재 외 오답 메모" });
+  const saveButton = saveBar.getByRole("button", { name: "변경 저장" });
   await expect(saveStatus).toContainText("저장 완료");
   await page.getByRole("button", { name: "+ 오답 추가" }).click();
   const sourceInput = page.getByLabel(/월경계 학생 새 오답 교재 또는 출처/);
@@ -449,18 +452,18 @@ test("student wrong problems require explicit verified save and preserve in-flig
   await page.waitForTimeout(1_000);
   expect(explicitSaves).toHaveLength(0);
 
-  await page.getByRole("button", { name: "학생별 오답 저장" }).click();
+  await saveButton.click();
   await expect.poll(() => explicitSaves.length).toBe(1);
   const rangeInput = page.getByLabel(/월경계 학생 안전 명시 저장 교재 문항 또는 범위/);
   await rangeInput.fill("10-12");
   await expect(saveStatus).toContainText("변경됨", { timeout: 10_000 });
-  await expect(page.getByText("아직 저장되지 않은 입력이 있습니다. 저장 중 수정했다면 한 번 더 저장해 주세요.")).toBeVisible();
-  await expect(page.getByRole("button", { name: "학생별 오답 저장" })).toBeEnabled();
+  await expect(saveBar.getByText("아직 저장되지 않은 입력이 있습니다. 저장 중 수정했다면 한 번 더 저장해 주세요.")).toBeVisible();
+  await expect(saveButton).toBeEnabled();
 
   let reread = await (await request.get(`${safeApiBaseUrl}/api/app-state?includeRows=true`)).json();
   expect(reread.states.wrongProblems.find((item) => item.source === "안전 명시 저장 교재")?.problemRange).toBe("");
 
-  await page.getByRole("button", { name: "학생별 오답 저장" }).click();
+  await saveButton.click();
   await expect.poll(() => explicitSaves.length).toBe(2);
   await expect(saveStatus).toContainText("저장 완료");
   reread = await (await request.get(`${safeApiBaseUrl}/api/app-state?includeRows=true`)).json();

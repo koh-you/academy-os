@@ -430,7 +430,6 @@ export function SettingsCenter({
         actions={<InlineSaveStatus label="설정 자동저장" saveState={appStateSaveState} />}
         className="settingsHero"
         description="AI 사용 모드는 이곳에서 한 번 정해두고 각 기능에서 그대로 사용합니다."
-        eyebrow="SETTINGS"
         title="설정"
       />
 

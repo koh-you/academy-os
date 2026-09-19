@@ -267,7 +267,6 @@ export function TestPaperLibraryPanel({
         description="미리 만든 단원별 평가 시험지를 등록·관리합니다. 시험지는 한 번 만들면 여러 학생·시점에 재사용합니다."
         meta={<InlineSaveStatus label="시험지 목록" saveState={saveState} />}
         title="시험지 목록"
-        titleAs="h1"
       />
 
       <div className="testPaperCoverage">

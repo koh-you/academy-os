@@ -77,6 +77,9 @@ export function ExamPrepCenter({
   const [pastPaperFrameKey, setPastPaperFrameKey] = useState(0);
   const [pastPaperLoadState, setPastPaperLoadState] = useState("loading");
   const ensuredExamCycleScopesRef = useRef(new Set());
+  // 시험정보 탭에서 '전체 반' 을 보다가 다른 탭(첫 반으로 자동 선택)에 갔다 돌아오면 이전 선택을 되돌린다.
+  // 다른 탭에서 반을 직접 고르면(changeClassTemplate) 그 선택을 존중하고 복원하지 않는다(2026-09-19 U10 · exams-06).
+  const infoTabClassTemplateIdRef = useRef(null);
   const setTallySubmissions = onSetTallySubmissions ?? (() => {});
   const setTallySummaries = onSetTallySummaries ?? (() => {});
   const pastPaperArchiveUrl =
@@ -156,7 +159,11 @@ export function ExamPrepCenter({
 
   function setActiveTab(tabId) {
     if (tabId !== "info" && !selectedClassTemplateId) {
+      if (activeTab === "info") infoTabClassTemplateIdRef.current = selectedClassTemplateId;
       setSelectedClassTemplateId(templates[0]?.classTemplateId ?? "");
+    } else if (tabId === "info" && infoTabClassTemplateIdRef.current !== null) {
+      setSelectedClassTemplateId(infoTabClassTemplateIdRef.current);
+      infoTabClassTemplateIdRef.current = null;
     }
     setActiveTabState(tabId);
   }
@@ -167,6 +174,7 @@ export function ExamPrepCenter({
   }
 
   function changeClassTemplate(classTemplateId) {
+    infoTabClassTemplateIdRef.current = null;
     setSelectedClassTemplateId(classTemplateId);
     ensureExamCycleRows(selectedExamCycle, classTemplateId);
   }

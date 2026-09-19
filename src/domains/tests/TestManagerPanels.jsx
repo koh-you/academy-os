@@ -56,7 +56,6 @@ export function TestAttemptPanelHeader({ testResultSaveState = "idle" }) {
       description="오늘 본 데일리/단원/누적 테스트와 학생별 결과만 기록합니다. 저장된 결과는 같은 날짜 수업 알림톡에 반영됩니다."
       meta={<InlineSaveStatus label="응시 기록" saveState={testResultSaveState} />}
       title="응시 기록"
-      titleAs="h1"
     />
   );
 }
@@ -318,7 +317,6 @@ export function StudentTestHistoryPanel({
         )}
         description="학생이 지금까지 본 데일리/단원/누적 테스트 결과를 한곳에서 확인합니다."
         title="학생별 테스트 이력"
-        titleAs="h1"
       />
       <div className="testHistoryList">
         {rows.map(({ session, attempt }) => (
