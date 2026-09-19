@@ -189,7 +189,7 @@ function StudentWrongProblemBoard({ selectedStudent, wrongProblems, onAddWrongPr
     <section className="panel studentWrongBoard">
       <SectionHeader
         actions={(
-          <button className="primaryButton" onClick={() => onAddWrongProblem(selectedStudent.studentId)} type="button">
+          <button className="softButton compact" onClick={() => onAddWrongProblem(selectedStudent.studentId)} type="button">
             + 오답 추가
           </button>
         )}

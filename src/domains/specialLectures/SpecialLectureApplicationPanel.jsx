@@ -34,6 +34,7 @@ import {
   normalizeSpecialLectureGuides,
   specialLectureApplicationStatusOptions
 } from "./specialLectureGuideUtils.js";
+import "./specialLectureApplicationPanel.css";
 
 function normalizePhoneNumber(value = "") {
   return String(value ?? "").replaceAll(/\D/g, "");
@@ -1332,6 +1333,9 @@ export function SpecialLectureApplicationPanel({
             <strong>특강 상태 알림</strong>
             <span>Tally 신청, 학생 연결, 회차 설정과 수업일지 반영 상태를 먼저 확인해 주세요.</span>
           </div>
+          {!isGuideSaved ? (
+            <small className="specialLectureAttentionGuideHint">학생 연결·회차 설정은 안내문이 저장된 특강에서만 진행할 수 있습니다. `안내문 저장` 후 버튼이 표시됩니다.</small>
+          ) : null}
           {panelMessage ? (
             <div className="specialLectureDismissibleNotice">
               <p className={panelMessage.includes("실패") ? "inlineNotice danger" : "inlineNotice"}>{panelMessage}</p>
@@ -1347,24 +1351,31 @@ export function SpecialLectureApplicationPanel({
                     <span>{[row.application.schoolName, row.application.grade, row.reason, row.application.source === "tally" ? "Tally 신청" : "신청 원본"].filter(Boolean).join(" · ")}</span>
                   </div>
                   <div className="specialLectureAttentionActions">
-                    {row.attentionType === "student_match" ? (
+                    {row.attentionType === "student_match" && isGuideSaved ? (
                       <button
-                        className="primaryButton compact"
-                        disabled={!isGuideSaved || updatingApplicationId === row.application.applicationId || deletingApplicationId === row.application.applicationId}
+                        className="softButton compact"
+                        disabled={updatingApplicationId === row.application.applicationId || deletingApplicationId === row.application.applicationId}
                         onClick={() => confirmApplicationAndOpenPlan(row.application)}
                         type="button"
                       >
                         학생 연결
                       </button>
                     ) : null}
-                    <button
-                      className="dangerSoftButton compact"
-                      disabled={!onDeleteApplication || updatingApplicationId === row.application.applicationId || deletingApplicationId === row.application.applicationId}
-                      onClick={() => deleteErrorApplication(row.application)}
-                      type="button"
-                    >
-                      {deletingApplicationId === row.application.applicationId ? "삭제 확인 중" : "오류 신청 삭제"}
-                    </button>
+                    {deletingApplicationId === row.application.applicationId ? (
+                      <small>삭제 확인 중</small>
+                    ) : (
+                      <OverflowMenu
+                        items={onDeleteApplication && updatingApplicationId !== row.application.applicationId
+                          ? [{
+                              key: "deleteErrorApplication",
+                              label: `${row.application.studentName || "이름 미입력 신청자"} 오류 신청 삭제`,
+                              onSelect: () => deleteErrorApplication(row.application),
+                              tone: "danger"
+                            }]
+                          : []}
+                        label={`${row.application.studentName || "이름 미입력 신청자"} 추가 작업`}
+                      />
+                    )}
                   </div>
                 </div>
               ))}
@@ -1378,7 +1389,9 @@ export function SpecialLectureApplicationPanel({
                   <strong>{student?.name || enrollment.studentId || "학생 미확인"}</strong>
                   <span>회차 미확정 · 수업일지 명단 반영 대상에서 제외됨</span>
                 </div>
-                <button className="primaryButton compact" disabled={!isGuideSaved} onClick={() => openPlanModal(enrollment)} type="button">회차 설정</button>
+                {isGuideSaved ? (
+                  <button className="softButton compact" onClick={() => openPlanModal(enrollment)} type="button">회차 설정</button>
+                ) : null}
               </div>
             );
           })}
@@ -1449,7 +1462,7 @@ export function SpecialLectureApplicationPanel({
           <div className="specialLectureEnrollmentSync">
             <span>기존 학생과 매칭된 확정 신청자 {missingEnrollmentRows.length}명을 아직 수강명단에 저장하지 않았습니다.</span>
             <button
-              className="primaryButton compact"
+              className="softButton compact"
               disabled={!onSaveEnrollments || !isGuideSaved || savingEnrollmentId === "bulk" || !guideSessionIds.length}
               onClick={addMatchedRowsToEnrollmentSource}
               type="button"
@@ -1501,14 +1514,15 @@ export function SpecialLectureApplicationPanel({
                       || (enrollment.applicationId && updatingApplicationId === enrollment.applicationId) ? (
                       <InlineSaveStatus label={student?.name || "수강생"} saveState="saving" />
                     ) : null}
-                    <button
-                      className="primaryButton compact"
-                      disabled={!isGuideSaved}
-                      onClick={() => openPlanModal(enrollment)}
-                      type="button"
-                    >
-                      {enrollment.planReviewedAt ? "회차·진행 관리" : "회차 설정"}
-                    </button>
+                    {isGuideSaved ? (
+                      <button
+                        className="softButton compact"
+                        onClick={() => openPlanModal(enrollment)}
+                        type="button"
+                      >
+                        {enrollment.planReviewedAt ? "회차·진행 관리" : "회차 설정"}
+                      </button>
+                    ) : null}
                     <OverflowMenu
                       items={[
                         ...(enrollment.applicationId

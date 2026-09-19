@@ -5,3 +5,11 @@
   font-weight: 900;
   line-height: 1.2;
 }
+
+/* 2026-09-19 · 행 액션이 [상세 검토][보충 완료 처리] 두 개일 때 App.css 의 120px 고정 열을 넘쳐 서로 겹치지 않도록
+   데스크톱에서 액션 열을 내용 폭에 맞춘다. 980px 이하는 App.css 미디어 쿼리(auto auto → 1fr)가 그대로 담당한다. */
+@media (min-width: 981px) {
+  .candidateItem.supplementRowItem {
+    grid-template-columns: minmax(280px, 1fr) auto auto;
+  }
+}

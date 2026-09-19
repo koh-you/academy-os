@@ -15109,11 +15109,6 @@ textarea.profileEditInput {
   white-space: nowrap;
 }
 
-.supplementRowItem .primaryButton {
-  justify-self: end;
-  white-space: nowrap;
-}
-
 .supplementRowItem:last-child {
   border-bottom: 0;
 }

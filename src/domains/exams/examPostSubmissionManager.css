@@ -1,0 +1,16 @@
+/* 2026-09-19 · 시험 후 제출 카드의 교사 확인 상태 배지. 카드 버튼은 항상 softButton compact(확인 처리 / 확인 취소)이고
+   "확인 완료" 는 상태로만 읽히도록 헤더 배지로 분리한다. App.css 의 `.examPostItem span { display: block }` 을 덮어쓴다. */
+.examPostItem .examPostConfirmedBadge {
+  align-items: center;
+  background: var(--status-success-bg, #ecfdf5);
+  border: 1px solid var(--status-success-border, #86efac);
+  border-radius: 999px;
+  color: var(--status-success-text, #047857);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.3;
+  margin-top: 4px;
+  padding: 2px 9px;
+  width: fit-content;
+}
