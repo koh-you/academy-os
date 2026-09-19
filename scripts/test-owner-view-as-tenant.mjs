@@ -63,9 +63,18 @@ assert.ok(
   "협력 교사에게는 보기 대상 테넌트를 적용하지 않아야 한다"
 );
 // 보고 있는 선생님이 바뀌면 화면 캐시도 갈라져야 한다(이전 선생님 자료가 남으면 안 된다).
+// 조합 규칙 자체는 createCacheOwnerId 가 갖고 test-account-scoped-cache 가 동작으로 검사한다;
+// 여기서는 App 이 보는 선생님을 그 함수에 실제로 넘기는지만 본다(2026-09-19 부터).
+const cacheOwnerCall = appSource.slice(appSource.indexOf("createCacheOwnerId({"), appSource.indexOf("resetCacheForAccount(window.localStorage"));
 assert.ok(
-  appSource.includes("`${session.teacherId}:${activeViewTenantId}`"),
+  cacheOwnerCall.includes("viewTenantId: activeViewTenantId"),
   "화면 캐시는 계정 + 보고 있는 선생님 조합으로 갈라져야 한다"
+);
+// 보는 선생님이 바뀌면 그 선생님 자료를 새로 받아야 한다 — 헤더만 바꾸고 화면은 원장 자료
+// 그대로였던 것이 2026-09-19 까지의 실제 동작이다(tests/browser/session-identity.spec.js).
+assert.ok(
+  appSource.includes("createSessionDataIdentity(session, activeViewTenantId)"),
+  "부트스트랩 정체성에 보고 있는 선생님이 들어가야 전환 때 다시 받아온다"
 );
 
 console.log("owner view-as tenant: 원장만 전환 가능 · 미등록 테넌트 거부 · 캐시 분리 계약 통과");
