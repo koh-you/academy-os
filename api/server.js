@@ -5,6 +5,7 @@ import {
   cancelNotificationJob,
   deleteLesson,
   deleteExamPrepLessonForReconcile,
+  deleteExpiredCanceledLessons,
   deleteLessonsBefore,
   deleteDuplicateExamPrepRows,
   deleteExamPrepRow,
@@ -110,7 +111,8 @@ import {
   upsertRows,
   uploadStorageObjectWithBucketRetry
 } from "./lib/supabaseRest.js";
-import { enterTenantContext, getCurrentTenantId, runWithTenant, setWriteTenant } from "../src/shared/server/tenantScope.js";
+import { DEFAULT_TENANT_ID, enterTenantContext, getCurrentTenantId, isTenantScopingEnabled, runWithTenant, setWriteTenant } from "../src/shared/server/tenantScope.js";
+import { createCanceledLessonRetentionSweep } from "../src/shared/server/canceledLessonRetentionSweep.js";
 import { createKioskDeviceRegistry } from "../src/shared/server/kioskDeviceRegistry.js";
 import { evaluateApiAccess, mayAuthenticateAsKiosk, resolveViewAsTenantId } from "../src/shared/server/apiAccessPolicy.js";
 import {
@@ -4782,6 +4784,16 @@ async function runInternalNotificationDispatch(reason = "interval") {
   }
 }
 
+// 취소 수업 7일 보존 뒤 삭제는 조회(listLessons)가 아니라 이 주기 작업이 한다(2026-09-19).
+const canceledLessonRetentionSweep = createCanceledLessonRetentionSweep({
+  defaultTenantId: DEFAULT_TENANT_ID,
+  deleteExpiredCanceledLessons,
+  isSupabaseConfigured: () => isSupabaseConfigured({ requireServiceRole: true }),
+  isTenantScopingEnabled,
+  listKnownTeacherTenantIds,
+  runWithTenant
+});
+
 function isSupplementLesson(lesson = {}) {
   return (
     lesson.lessonType === "makeup" ||
@@ -5475,5 +5487,6 @@ server.listen(port, host, () => {
     runInternalNotificationDispatch("startup");
     setInterval(() => runInternalNotificationDispatch("interval"), 60 * 1000).unref?.();
   }
+  canceledLessonRetentionSweep.start();
 });
 

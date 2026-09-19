@@ -231,6 +231,7 @@
   "scripts/test-lesson-modal-save-verification.mjs",
   "scripts/test-lesson-modal-save-controller.mjs",
   "scripts/test-lesson-roster-cleanup-virtual-gate.mjs",
+  "scripts/test-canceled-lesson-retention-sweep.mjs",
   "scripts/test-lesson-hub-closeout-boundary.mjs",
   "scripts/test-attendance-refactor-inventory.mjs",
   "scripts/test-attendance-settings.mjs",
