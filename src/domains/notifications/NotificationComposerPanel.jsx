@@ -1,27 +1,42 @@
+import { AsyncOperationStatus } from "../../shared/components/AsyncOperationStatus.jsx";
 import { KakaoAlimtalkPreview } from "../../shared/components/KakaoAlimtalkPreview.jsx";
+import { NotificationSendConfirmModal } from "./NotificationSendConfirmModal.jsx";
 
 export function NotificationComposerPanel({
   dispatchMessage,
+  dispatchState = "idle",
   isPolishingNotice,
   isSendingNotice,
   noticeBody,
   noticeMessageTemplates,
   noticeRecipientCount,
+  noticeSendConfirmMode = "",
   noticeTemplateId,
   noticeText,
   noticeTitle,
   onApplyTemplate,
   onBodyChange,
+  onCloseSendConfirm,
+  onOpenSendConfirm,
   onPolishNotice,
   onScheduleDateChange,
   onScheduleNotice,
   onScheduleTimeChange,
   onSendNoticeNow,
   onTitleChange,
+  parentRecipientCount = 0,
   scheduleDate,
   scheduledAt,
-  scheduleTime
+  scheduledAtLabel = "",
+  scheduleTime,
+  studentRecipientCount = 0
 }) {
+  // 확정 버튼은 기존 발송·예약 함수를 그대로 호출하고, 그 처리가 끝난 뒤에만 확인 모달을 닫는다.
+  function confirmSendNotice() {
+    const run = noticeSendConfirmMode === "scheduled" ? onScheduleNotice : onSendNoticeNow;
+    return Promise.resolve(run()).finally(() => onCloseSendConfirm());
+  }
+
   return (
     <div className="noticeWritePanel">
       <label>
@@ -55,28 +70,51 @@ export function NotificationComposerPanel({
         <strong>미리보기</strong>
         <KakaoAlimtalkPreview text={noticeText || "제목과 본문을 입력하면 이곳에 발송 문구가 표시됩니다."} />
       </div>
-      <div className="noticeSendActions">
-        <button className="softButton" disabled={!noticeBody.trim() || isPolishingNotice} onClick={onPolishNotice} type="button">
-          {isPolishingNotice ? "AI 수정 중" : "AI 수정"}
-        </button>
-        <button
-          className="softButton"
-          disabled={!noticeText || !noticeRecipientCount || !scheduledAt || isSendingNotice}
-          onClick={onScheduleNotice}
-          type="button"
-        >
-          예약 발송
-        </button>
-        <button
-          className="primaryButton"
-          disabled={!noticeText || !noticeRecipientCount || isSendingNotice}
-          onClick={onSendNoticeNow}
-          type="button"
-        >
-          {isSendingNotice ? "처리 중..." : "즉시 발송"}
-        </button>
+      <div className="noticeSendFooter">
+        {dispatchMessage ? (
+          <AsyncOperationStatus
+            className="noticeDispatchMessage"
+            description={dispatchMessage}
+            label="공지 발송"
+            state={dispatchState}
+          />
+        ) : null}
+        <div className="noticeSendActions">
+          <button className="softButton" disabled={!noticeBody.trim() || isPolishingNotice} onClick={onPolishNotice} type="button">
+            {isPolishingNotice ? "AI 수정 중" : "AI 수정"}
+          </button>
+          <button
+            className="softButton"
+            disabled={!noticeText || !noticeRecipientCount || !scheduledAt || isSendingNotice}
+            onClick={() => onOpenSendConfirm("scheduled")}
+            type="button"
+          >
+            예약 발송
+          </button>
+          <button
+            className="primaryButton"
+            disabled={!noticeText || !noticeRecipientCount || isSendingNotice}
+            onClick={() => onOpenSendConfirm("immediate")}
+            type="button"
+          >
+            {isSendingNotice ? "처리 중..." : "즉시 발송"}
+          </button>
+        </div>
       </div>
-      {dispatchMessage ? <p className="inlineNotice noticeDispatchMessage">{dispatchMessage}</p> : null}
+      {noticeSendConfirmMode ? (
+        <NotificationSendConfirmModal
+          dispatchMessage={dispatchMessage}
+          isSending={isSendingNotice}
+          mode={noticeSendConfirmMode}
+          noticeText={noticeText}
+          onClose={onCloseSendConfirm}
+          onConfirm={confirmSendNotice}
+          parentRecipientCount={parentRecipientCount}
+          recipientCount={noticeRecipientCount}
+          scheduledAtLabel={scheduledAtLabel}
+          studentRecipientCount={studentRecipientCount}
+        />
+      ) : null}
     </div>
   );
 }

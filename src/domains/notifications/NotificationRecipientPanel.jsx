@@ -5,11 +5,12 @@ import { SearchField } from "../../shared/components/SearchField.jsx";
 import { SelectionToolbar } from "../../shared/components/SelectionToolbar.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 
+// 수신 대상 축은 학부모/학생/둘 다 하나뿐이다. 모델 기본값 "selected" 는 대상 파생이 "all" 과 같으므로
+// 같은 탭("학부모+학생")으로 표시한다(모델 값·targetAudiences 파생은 그대로).
 const noticeRecipientModes = [
-  { id: "selected", label: "선택" },
-  { id: "all", label: "전체" },
-  { id: "parent", label: "학부모" },
-  { id: "student", label: "학생" }
+  { id: "all", label: "학부모+학생", matches: ["all", "selected"] },
+  { id: "parent", label: "학부모", matches: ["parent"] },
+  { id: "student", label: "학생", matches: ["student"] }
 ];
 
 const noticeAudienceLabels = {
@@ -43,18 +44,21 @@ export function NotificationRecipientPanel({
   return (
     <div className="noticeTargetPanel">
       <WorkspaceTabs label="알림 수신 대상 범위" variant="secondary">
-        {noticeRecipientModes.map((mode) => (
-          <button
-            aria-selected={noticeRecipientMode === mode.id}
-            className={noticeRecipientMode === mode.id ? "active" : ""}
-            key={mode.id}
-            onClick={() => onNoticeRecipientModeChange(mode.id)}
-            role="tab"
-            type="button"
-          >
-            <strong>{mode.label}</strong>
-          </button>
-        ))}
+        {noticeRecipientModes.map((mode) => {
+          const isActive = mode.matches.includes(noticeRecipientMode);
+          return (
+            <button
+              aria-selected={isActive}
+              className={isActive ? "active" : ""}
+              key={mode.id}
+              onClick={() => onNoticeRecipientModeChange(mode.id)}
+              role="tab"
+              type="button"
+            >
+              <strong>{mode.label}</strong>
+            </button>
+          );
+        })}
       </WorkspaceTabs>
       <FilterBar className="noticeFilterGrid" label="알림 대상 반과 학생 검색">
         <label className="filterBarField">

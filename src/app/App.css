@@ -692,24 +692,11 @@ summary:focus-visible {
   margin: 0;
 }
 
-.inlineNotice.analysisRunNotice,
-.inlineNotice.noticeDispatchMessage {
+.inlineNotice.analysisRunNotice {
   display: flex;
   flex-direction: column;
   gap: 4px;
   margin-top: 8px;
-}
-
-.inlineNotice.noticeDispatchMessage {
-  background: var(--status-info-bg, #eff6ff);
-  border-color: var(--status-info-border, #bfdbfe);
-  border-left: 4px solid var(--academy-focus-ring, #2563eb);
-  color: var(--status-info-text, #1d4ed8);
-  font-size: 14px;
-  font-weight: 900;
-  line-height: 1.45;
-  margin-top: 12px;
-  padding: 12px 14px;
 }
 
 .inlineNotice.analysisRunNotice small {

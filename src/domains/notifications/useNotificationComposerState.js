@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { createNotificationComposerViewModel } from "./notificationCenterModel.js";
+import {
+  createNotificationComposerViewModel,
+  resolveNoticeDispatchState
+} from "./notificationCenterModel.js";
 import {
   applyNoticeTemplateAction,
   polishNoticeMessageAction,
@@ -37,6 +40,8 @@ export function useNotificationComposerState({
   const [isSendingNotice, setIsSendingNotice] = useState(false);
   const [noticeBody, setNoticeBody] = useState("");
   const [noticeKind, setNoticeKind] = useState("general");
+  // 즉시/예약 발송 확인 모달 표시 상태("" | "immediate" | "scheduled"). 발송 함수 본체는 건드리지 않는다.
+  const [noticeSendConfirmMode, setNoticeSendConfirmMode] = useState("");
   const [noticeSpecialLectureMeta, setNoticeSpecialLectureMeta] = useState(null);
   const [noticeTemplateId, setNoticeTemplateId] = useState("notice");
   const [noticeTitle, setNoticeTitle] = useState("");
@@ -50,6 +55,10 @@ export function useNotificationComposerState({
     scheduleTime,
     solapiResultSyncCheckedAt,
     solapiResultTargets
+  });
+  const dispatchState = resolveNoticeDispatchState({
+    dispatchMessage,
+    isSending: isSendingNotice
   });
 
   function applyNoticeTemplate(templateId) {
@@ -152,10 +161,12 @@ export function useNotificationComposerState({
     applyNoticeTemplate,
     buildNoticeJob,
     dispatchMessage,
+    dispatchState,
     isPolishingNotice,
     isSendingNotice,
     noticeBody,
     noticeKind,
+    noticeSendConfirmMode,
     noticeSpecialLectureMeta,
     noticeTemplateId,
     noticeTitle,
@@ -170,6 +181,7 @@ export function useNotificationComposerState({
     setIsSendingNotice,
     setNoticeBody,
     setNoticeKind,
+    setNoticeSendConfirmMode,
     setNoticeSpecialLectureMeta,
     setNoticeTemplateId,
     setNoticeTitle,
