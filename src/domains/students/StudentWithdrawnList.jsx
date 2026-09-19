@@ -29,6 +29,14 @@ export function StudentWithdrawnList({
   withdrawalReasonOptions,
   withdrawnStudentSort
 }) {
+  // 2026-09-19 · 선택 툴바는 선택이 있을 때만 뜬다(UI U8). 전체 선택은 표 헤더 체크박스가 맡고,
+  // 툴바에는 지금 누를 수 있는 버튼만 그린다(비활성 버튼 없음). onClick 계약은 그대로다.
+  const hasSelection = selectedWithdrawnStudents.length > 0;
+  const hasSingleSelection = selectedWithdrawnStudents.length === 1;
+  const hasDirtySelection = selectedWithdrawnStudents.some((student) => dirtyStudentIds.has(student.studentId));
+  const allVisibleSelected = visibleStudents.length > 0 &&
+    visibleStudents.every((student) => selectedWithdrawnStudentIds.has(student.studentId));
+  const someVisibleSelected = visibleStudents.some((student) => selectedWithdrawnStudentIds.has(student.studentId));
   return (
     <>
           <div className="studentListToolbar withdrawnStudentSort">
@@ -40,9 +48,24 @@ export function StudentWithdrawnList({
               </select>
             </label>
           </div>
-          <DataTableShell className="studentListTable" label="퇴원생 목록">
+          <DataTableShell className={["studentListTable", hasSelection ? "withdrawnStudentTableWithToolbar" : ""].filter(Boolean).join(" ")} label="퇴원생 목록">
           <div className="studentListRow studentListHead withdrawnStudentRow">
-            <span>선택</span>
+            <span className="withdrawnStudentSelect">
+              {visibleStudents.length > 0 ? (
+                <input
+                  aria-label="전체 선택"
+                  checked={allVisibleSelected}
+                  onChange={() => {
+                    if (allVisibleSelected) setSelectedWithdrawnStudentIds(new Set());
+                    else selectAllVisibleWithdrawnStudents();
+                  }}
+                  ref={(element) => {
+                    if (element) element.indeterminate = someVisibleSelected && !allVisibleSelected;
+                  }}
+                  type="checkbox"
+                />
+              ) : "선택"}
+            </span>
             <span>이름</span>
             <span>반</span>
             <span>학년</span>
@@ -58,7 +81,7 @@ export function StudentWithdrawnList({
             const isDirty = dirtyStudentIds.has(student.studentId);
             return (
               <div className={["studentListRow", "withdrawnStudentRow", isDirty ? "dirtyStudentRow" : ""].filter(Boolean).join(" ")} key={student.studentId}>
-                <label className="withdrawnStudentSelect"><input checked={selectedWithdrawnStudentIds.has(student.studentId)} onChange={() => toggleWithdrawnStudentSelection(student.studentId)} type="checkbox" /></label>
+                <label className="withdrawnStudentSelect"><input aria-label={`${student.name} 선택`} checked={selectedWithdrawnStudentIds.has(student.studentId)} onChange={() => toggleWithdrawnStudentSelection(student.studentId)} type="checkbox" /></label>
                 <button
                   className={selectedStudentId === student.studentId ? "ghostButton link active" : "ghostButton link"}
                   onClick={() => setSelectedStudentId(student.studentId)}
@@ -98,27 +121,34 @@ export function StudentWithdrawnList({
             <EmptyState className="emptyState studentListEmpty" title="퇴원생이 없습니다." />
           ) : null}
           </DataTableShell>
-          <SelectionToolbar
-            actions={(
-              <>
-                <button className="softButton compact" onClick={selectAllVisibleWithdrawnStudents} type="button">전체 선택</button>
-                <button className="softButton compact" onClick={() => setSelectedWithdrawnStudentIds(new Set())} type="button">선택 해제</button>
-                <button className="softButton compact" disabled={selectedWithdrawnStudents.length !== 1} onClick={() => { const student = getSingleSelectedWithdrawnStudent("퇴원 취소"); if (student) restoreStudent(student); }} type="button">퇴원 취소</button>
-                <button className="softButton compact" disabled={selectedWithdrawnStudents.length !== 1} onClick={() => { const student = getSingleSelectedWithdrawnStudent("인수인계서 PDF"); if (student) openHandoverModal(student); }} type="button">인수인계서 PDF</button>
-                <button className="primaryButton compact" disabled={!selectedWithdrawnStudents.some((student) => dirtyStudentIds.has(student.studentId))} onClick={saveSelectedWithdrawnStudents} type="button">선택 저장</button>
-              </>
-            )}
-            className="withdrawnStudentBulkActions"
-            dangerActions={(
-              <button className="dangerSoftButton" disabled={selectedWithdrawnStudents.length === 0} onClick={() => {
-                if (selectedWithdrawnStudents.length === 1) openPermanentDeleteModal(selectedWithdrawnStudents[0]);
-                else openBatchPermanentDeleteModal(selectedWithdrawnStudents);
-              }} type="button">영구 삭제</button>
-            )}
-            label="퇴원생 선택"
-            selectedCount={selectedWithdrawnStudents.length}
-            totalCount={visibleStudents.length}
-          />
+          {selectedWithdrawnStudents.length > 0 ? (
+            <SelectionToolbar
+              actions={(
+                <>
+                  <button className="softButton compact" onClick={() => setSelectedWithdrawnStudentIds(new Set())} type="button">선택 해제</button>
+                  {hasSingleSelection ? (
+                    <>
+                      <button className="softButton compact" onClick={() => { const student = getSingleSelectedWithdrawnStudent("퇴원 취소"); if (student) restoreStudent(student); }} type="button">퇴원 취소</button>
+                      <button className="softButton compact" onClick={() => { const student = getSingleSelectedWithdrawnStudent("인수인계서 PDF"); if (student) openHandoverModal(student); }} type="button">인수인계서 PDF</button>
+                    </>
+                  ) : null}
+                  {hasDirtySelection ? (
+                    <button className="primaryButton compact" onClick={saveSelectedWithdrawnStudents} type="button">선택 저장</button>
+                  ) : null}
+                </>
+              )}
+              className="withdrawnStudentBulkActions"
+              dangerActions={(
+                <button className="dangerSoftButton" onClick={() => {
+                  if (selectedWithdrawnStudents.length === 1) openPermanentDeleteModal(selectedWithdrawnStudents[0]);
+                  else openBatchPermanentDeleteModal(selectedWithdrawnStudents);
+                }} type="button">영구 삭제</button>
+              )}
+              label="퇴원생 선택"
+              selectedCount={selectedWithdrawnStudents.length}
+              totalCount={visibleStudents.length}
+            />
+          ) : null}
     </>
   );
 }

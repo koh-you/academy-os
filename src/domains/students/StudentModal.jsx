@@ -7,7 +7,7 @@ import {
 } from "./tallyStudentMerge.js";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
-import { Modal } from "../../shared/components/Modal.jsx";
+import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
 import { OverflowMenu } from "../../shared/components/OverflowMenu.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 import "./studentModal.css";
@@ -276,9 +276,13 @@ export function StudentModal({
           </div>
           {singleSaveState !== "idle" ? <InlineSaveStatus label="신규 학생" saveState={singleSaveState} /> : null}
           {singleSaveError ? <p className="profileSaveError" role="alert">학생 저장 실패 · {singleSaveError}</p> : null}
-          <button className="primaryButton full studentAddSubmit" disabled={singleSaveState === "saving"} onClick={saveSingleStudent} type="button">
-            {singleSaveState === "saving" ? "학생 저장 중" : "학생 저장"}
-          </button>
+          {/* 2026-09-19 · UI U8: 데스크톱 모달이라 전체 너비 primary 대신 공용 푸터 [취소][학생 저장]. 저장 함수·라벨은 그대로. */}
+          <ModalFooter>
+            <button className="softButton" disabled={singleSaveState === "saving"} onClick={onClose} type="button">취소</button>
+            <button className="primaryButton" disabled={singleSaveState === "saving"} onClick={saveSingleStudent} type="button">
+              {singleSaveState === "saving" ? "학생 저장 중" : "학생 저장"}
+            </button>
+          </ModalFooter>
         </>
       ) : mode === "bulk" ? (
         <div className="studentBulkPlaceholder">
@@ -289,6 +293,8 @@ export function StudentModal({
         </div>
       ) : (
         <div className="studentIntakePanel">
+          {/* 2026-09-19 · UI U8: 이 탭은 입력마다 후보(접수정보)가 자동 저장되고, 정식 등록만 버튼이다 — 그 경계를 한 줄로 알린다. */}
+          <p className="studentIntakeAutosaveNote" role="note">후보 정보는 입력 즉시 저장됩니다 · 정식 등록은 버튼으로</p>
           <div className="intakeEndpointBox">
             <strong>Tally 웹훅 연결 주소</strong>
             <code>https://koh-you-math-academy-os-api.onrender.com/api/intake/tally</code>
