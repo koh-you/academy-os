@@ -461,7 +461,7 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
               <button className="softButton compact" onClick={selectStudentWrongItems} type="button">오답 전체 선택</button>
             )}
             <button className="softButton compact subtle" onClick={() => setSelectedItemIds(new Set())} type="button">선택 해제</button>
-            {/* 학생별 오답 탭에서는 헤더의 '학생별 오답 저장' 이 화면의 primary 이므로 인쇄는 softButton, 교재별 탭(저장 없음)에서는 primary 유지. */}
+            {/* 학생별 오답 탭에서는 아래 교재 외 오답 메모 저장 바의 '변경 저장' 이 화면의 primary 이므로 인쇄는 softButton, 교재별 탭(저장 없음)에서는 primary 유지(2026-09-19 U10). */}
             <button className={isStudentMode ? "softButton compact" : "primaryButton compact"} disabled={selectedItemIds.size === 0} onClick={openPrint} type="button">인쇄 · PPT</button>
           </div>
         </div>
@@ -481,7 +481,8 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
               {studentStateLegend.map((state) => (
                 <span key={state.key}><i className={`problemBankBand mine-${state.key}`} />{state.label}</span>
               ))}
-              <span className="problemBankLegendHint">테두리 = 인쇄 선택 · Ctrl+클릭으로 고르기</span>
+              {/* 아래 교재 외 오답 메모 표는 명시 저장이라, 그리드가 즉시 저장이라는 점을 범례 옆에 적어 둔다(2026-09-19 U10 · support-04). */}
+              <span className="problemBankLegendHint">번호 클릭은 바로 저장됩니다 · 테두리 = 인쇄 선택 · Ctrl+클릭으로 고르기</span>
             </>
           ) : (
             <>

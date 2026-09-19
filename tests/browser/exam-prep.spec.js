@@ -159,7 +159,15 @@ test("exam prep closes an unsaved draft without changing the server source", asy
   captureRequests = true;
   await scopeInput.fill("저장하지 않고 닫을 초안");
   await expect(detailDialog.getByText("시험정보 · 변경됨")).toBeVisible();
+  // 2026-09-19 · U10: 초안이 있는 채로 닫으면 window.confirm 이 한 번 뜬다. 수락해야 초안을 버리고 닫힌다.
+  const dialogMessages = [];
+  page.once("dialog", (dialog) => {
+    dialogMessages.push(dialog.message());
+    dialog.accept();
+  });
   await detailDialog.getByRole("button", { name: "닫기", exact: true }).click();
+  await expect(detailDialog).toBeHidden();
+  expect(dialogMessages).toEqual(["저장하지 않은 변경이 있습니다. 닫을까요?"]);
   expect(requests).toHaveLength(0);
 
   const persistedResponse = await request.get(`${safeApiBaseUrl}/api/exam-prep-rows`);

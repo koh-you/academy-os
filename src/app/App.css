@@ -12948,14 +12948,6 @@ textarea {
   justify-content: flex-end;
 }
 
-.wrongProblemExplicitSaveActions {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: flex-end;
-}
-
 .wrongProblemSaveMessage {
   background: var(--status-info-bg);
   border: 1px solid var(--status-info-border);

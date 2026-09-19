@@ -34,6 +34,7 @@ import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { SelectableCard } from "../../shared/components/SelectableCard.jsx";
 import { SelectionToolbar } from "../../shared/components/SelectionToolbar.jsx";
+import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 import {
   testAttemptStatusOptions,
@@ -64,37 +65,25 @@ export function FollowUpCenter({
 }) {
   const canSaveWrongProblems = ["dirty", "failed"].includes(wrongProblemSaveState) && !wrongProblemSaveBusy;
   const wrongProblemSaveMessage = wrongProblemSaveMessages[wrongProblemSaveState] ?? wrongProblemSaveMessages.idle;
+  // 저장 버튼·저장 상태·안내문은 실제 저장 대상(학생별 오답 탭의 교재 외 오답 메모 표) 바로 아래 StickySaveBar 로 옮겼다.
+  // 헤더에는 보충관리 task 개수 배지만 남긴다(2026-09-19 U10 · support-04/shots-06/support-06).
   return (
     <section aria-busy={wrongProblemSaveBusy ? "true" : undefined} className="followUpPage">
       <PageHeader
-        actions={(
-          <div className="wrongProblemExplicitSaveActions">
-            <InlineSaveStatus label="학생별 오답" saveState={wrongProblemSaveState} />
-            <button
-              className="primaryButton"
-              disabled={!canSaveWrongProblems}
-              onClick={onSaveWrongProblems}
-              type="button"
-            >
-              학생별 오답 저장
-            </button>
-            <span className="countBadge">{tasks.length}개 진행</span>
-          </div>
-        )}
+        actions={<span className="countBadge">보충 진행 {tasks.length}건</span>}
         actionsClassName="followUpTopActions"
         description="교재별로 학생의 오답을 기록하고 개별 오답지를 인쇄합니다. 교재 등록은 교재관리에서 합니다."
         title="오답관리"
       />
-      {wrongProblemSaveMessage ? (
-        <p aria-live={wrongProblemSaveState === "failed" ? "assertive" : "polite"} className="wrongProblemSaveMessage">
-          {wrongProblemSaveMessage}
-        </p>
-      ) : null}
 
       <WrongProblemBoard
+        canSaveWrongProblems={canSaveWrongProblems}
         students={students}
         wrongProblems={wrongProblems}
+        wrongProblemSaveMessage={wrongProblemSaveMessage}
+        wrongProblemSaveState={wrongProblemSaveState}
         onAddWrongProblem={onAddWrongProblem}
+        onSaveWrongProblems={onSaveWrongProblems}
         onUpdateWrongProblem={onUpdateWrongProblem}
       />
     </section>
@@ -103,7 +92,16 @@ export function FollowUpCenter({
 
 // 현행·추가1·추가2 탭(PDF 파일명만 받아 빈 문항 30개를 만들던 자리)은 2026-09-13 에 뺐다.
 // 문항 원천은 교재관리 › 패키지 등록으로만 들어온다.
-function WrongProblemBoard({ students, wrongProblems, onAddWrongProblem, onUpdateWrongProblem }) {
+function WrongProblemBoard({
+  canSaveWrongProblems = false,
+  students,
+  wrongProblems,
+  wrongProblemSaveMessage = "",
+  wrongProblemSaveState = "idle",
+  onAddWrongProblem,
+  onSaveWrongProblems,
+  onUpdateWrongProblem
+}) {
   const [activeTab, setActiveTab] = useState("bookWrong");
   const [gradeFilter, setGradeFilter] = useState("전체");
   const activeStudents = students.filter((student) => isActiveStudent(student));
@@ -174,6 +172,16 @@ function WrongProblemBoard({ students, wrongProblems, onAddWrongProblem, onUpdat
             onAddWrongProblem={onAddWrongProblem}
             onUpdateWrongProblem={onUpdateWrongProblem}
           />
+          {/* 위 번호 그리드는 클릭 즉시 저장되고, 이 메모 표만 명시적으로 저장한다. 저장 바는 학생별 오답 탭에서만 렌더된다. */}
+          <StickySaveBar
+            label="교재 외 오답 메모"
+            message={wrongProblemSaveMessage}
+            saveState={wrongProblemSaveState}
+          >
+            <button className="primaryButton" disabled={!canSaveWrongProblems} onClick={onSaveWrongProblems} type="button">
+              변경 저장
+            </button>
+          </StickySaveBar>
         </>
       )}
     </section>
@@ -367,7 +375,6 @@ export function ResourceLibraryCenter({
       <PageHeader
         actions={<span className="countBadge">{materials.length}건</span>}
         description="학생별 자료, 반별 자료, 학부모 공개 자료를 한 곳에서 관리합니다."
-        eyebrow="RESOURCE LIBRARY"
         title="자료함"
       />
 
@@ -845,6 +852,11 @@ export function MaterialManager({
 
   return (
     <section className="materialManagerPage">
+      {/* 형제 화면(오답관리·보충관리)과 같은 공용 PageHeader 로 시작한다. 탭 패널 제목은 h2 다(2026-09-19 U10 · support-01/shots-14). */}
+      <PageHeader
+        description="응시 기록을 남기고 학생별 테스트 이력·시험지 목록·워터마크 도구를 한 곳에서 씁니다."
+        title="시험지관리"
+      />
       <TestManagerTabs activeTab={activeTab} onChange={setActiveTab} />
 
       {activeTab === "attempts" ? (
@@ -1141,6 +1153,11 @@ export function OverdueHomework({
 
   return (
     <section className="homeworkStatusDashboard">
+      {/* 형제 화면과 같은 공용 PageHeader 로 시작한다. 메트릭 카드 클릭 필터는 그대로다(2026-09-19 U10 · support-01/shots-14). */}
+      <PageHeader
+        description="수업일지 검사 결과 보충이 필요한 숙제를 학생별로 확인합니다."
+        title="숙제현황"
+      />
       <div className="homeworkStatusMetrics">
         <MetricCard active={activeMetric === "all"} icon="👥" label="보충 대상 전체" value={`${registeredStudentCount}명`} hint="보충관리 기준" onClick={() => handleMetricClick("all")} />
         <MetricCard active={activeMetric === "registered"} icon="📖" label="보충 대상 학생" value={`${registeredStudentCount}명`} hint="검사 결과 기준" onClick={() => handleMetricClick("registered")} />
