@@ -5,6 +5,7 @@ import { createTeacherViewAdapters, TeacherViewOutlet } from "./TeacherViewOutle
 import { lazyTeacherViewComponents } from "./lazyTeacherViewComponents.js";
 import { createSessionDataIdentity, useAppSession } from "./useAppSession.js";
 import { useSessionActivityRefresh } from "./useSessionActivityRefresh.js";
+import { useIntegrationStatus } from "./useIntegrationStatus.js";
 import { RoleLoginScreen } from "./RoleLoginScreen.jsx";
 import { Sidebar } from "./Sidebar.jsx";
 import { isViewAllowedForRole } from "./sidebarMenuModel.js";
@@ -2307,7 +2308,11 @@ export function App() {
     message: "",
     state: "idle"
   });
-  const [integrationStatus, setIntegrationStatus] = useState(null);
+  // 발송 설정(실번호 허용·dry-run). 교사 세션이 있을 때 읽고, 로그인·로그아웃·토큰 갱신에 따라간다.
+  const integrationStatus = useIntegrationStatus({
+    enabled: session?.role === "teacher",
+    sessionToken: session?.sessionToken
+  });
   const [isAppStateReady, setIsAppStateReady] = useState(false);
   const [isPortalDataReady, setIsPortalDataReady] = useState(false);
   const [attendanceSyncStatus, setAttendanceSyncStatus] = useState({
@@ -3557,28 +3562,6 @@ export function App() {
       request: postJson
     });
   }
-
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadIntegrationStatus() {
-      try {
-        const response = await apiFetch("/api/integrations/status");
-        const result = await response.json();
-        if (isMounted && result.ok) {
-          setIntegrationStatus(result.result);
-        }
-      } catch (error) {
-        if (isMounted) setIntegrationStatus(null);
-        console.info("academy-os integration status skipped:", error.message);
-      }
-    }
-
-    loadIntegrationStatus();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   useEffect(() => {
     if (session?.role !== "teacher" || !isAppStateReady || attendanceOnlyMode) return;
