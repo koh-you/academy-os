@@ -640,6 +640,7 @@ export function SchoolCalendarCenter({
             onUpdateEventDraft={setNewEvent}
             onUpdateMathExamItem={updateMathExamItem}
             safeExamCycleOptions={safeExamCycleOptions}
+            saveState={schoolCalendarSaveState}
             schools={schools}
           />
         ) : null}
@@ -690,6 +691,7 @@ export function SchoolCalendarCenter({
           onDeleteEvent={deleteAcademicEvent}
           onCreateEvent={openEventForm}
           onSaveEvent={saveAcademicEventDraft}
+          saveMessage={schoolCalendarSaveState.message}
           saveState={schoolCalendarSaveState.state}
           schools={schools}
           selectedDate={selectedDate}

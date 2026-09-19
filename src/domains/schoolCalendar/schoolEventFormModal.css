@@ -1,0 +1,77 @@
+/* 학사일정 등록/수정 모달 전용 규칙 · 2026-09-19 UI U9.
+   App.css 와 같은 셀렉터를 두지 않는다(scripts/test-ui-css-hygiene.cjs) — 리피터 행 기본 규칙
+   (.mathExamItemRow 등)은 App.css 에 남아 있고, 여기에는 모달 안 배치만 .schoolEventFormModal 로 한정해 둔다. */
+
+/* 푸터 위 저장 상태: 왼쪽 InlineSaveStatus, 실패 사유는 그 아래 한 줄(모달 안에서 보이게). */
+.schoolEventFormModal .schoolEventFormStatus {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+
+.schoolEventFormModal .schoolEventFormSaveError {
+  background: var(--status-danger-bg, #fef2f2);
+  border: 1px solid var(--status-danger-border, #fecaca);
+  border-radius: 8px;
+  color: var(--status-danger-text, #b91c1c);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+  margin: 0;
+  overflow-wrap: anywhere;
+  padding: 8px 12px;
+  width: 100%;
+}
+
+/* 공용 ModalFooter: 왼쪽 [일정 삭제](수정일 때만), 오른쪽 [취소][등록/저장]. 왼쪽이 비어도 오른쪽 묶음은 끝에 붙는다. */
+.schoolEventFormModal .schoolEventFormFooterActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-inline-start: auto;
+}
+
+.schoolEventFormModal .schoolEventFormFooter .primaryButton,
+.schoolEventFormModal .schoolEventFormFooter .softButton,
+.schoolEventFormModal .schoolEventFormFooter .dangerSoftButton {
+  min-height: 42px;
+  min-width: 108px;
+}
+
+/* 필수값(시작일) 누락 안내는 버튼 줄 아래 오른쪽에 한 줄로. */
+.schoolEventFormModal .schoolEventFormRequiredHint {
+  color: var(--status-danger-text, #b91c1c);
+  flex: 0 0 100%;
+  font-weight: 700;
+  text-align: right;
+}
+
+.schoolEventFormModal .schoolEventRequiredMark {
+  color: var(--status-danger-text, #b91c1c);
+}
+
+/* 수학시험 리피터 행: 날짜 → 학년 → 과목 → 메모 → × (시험정보 수정 모달과 같은 순서, exams-22 1단계). */
+.schoolEventFormModal .mathExamItemRow {
+  grid-template-columns: minmax(140px, 1fr) minmax(82px, 0.6fr) minmax(120px, 0.9fr) minmax(150px, 1.2fr) 36px;
+}
+
+.schoolEventFormModal .mathExamItemRow .mathExamItemMemo {
+  grid-column: auto;
+}
+
+@media (max-width: 1100px) {
+  .schoolEventFormModal .mathExamItemRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .schoolEventFormModal .schoolEventFormFooterActions {
+    width: 100%;
+  }
+
+  .schoolEventFormModal .schoolEventFormFooterActions > button {
+    flex: 1 1 120px;
+  }
+}
