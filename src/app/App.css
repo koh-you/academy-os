@@ -948,8 +948,7 @@ summary:focus-visible {
   width: 100%;
 }
 
-.academyReminderSlackToggle,
-.studentReminderSlackToggle {
+.academyReminderSlackToggle {
   align-items: center;
   background: var(--academy-surface-muted, #f8fafc);
   border: 1px solid var(--academy-border-strong, #cbd8ee);
@@ -965,8 +964,7 @@ summary:focus-visible {
   white-space: nowrap;
 }
 
-.academyReminderSlackToggle input,
-.studentReminderSlackToggle input {
+.academyReminderSlackToggle input {
   flex: 0 0 16px;
   height: 16px;
   margin: 0;
@@ -994,8 +992,7 @@ summary:focus-visible {
   font-weight: 800;
 }
 
-.academyReminderList,
-.studentReminderList {
+.academyReminderList {
   display: grid;
   gap: 8px;
 }
@@ -1010,8 +1007,7 @@ summary:focus-visible {
   padding: 10px 12px;
 }
 
-.academyReminderItem,
-.studentReminderItem {
+.academyReminderItem {
   background: var(--academy-surface, #ffffff);
   border: 1px solid var(--status-info-bg, #eff6ff);
   border-left: 4px solid var(--status-success-text, #047857);
@@ -1022,13 +1018,11 @@ summary:focus-visible {
   padding: 12px;
 }
 
-.academyReminderItem.priority-high,
-.studentReminderItem.priority-high {
+.academyReminderItem.priority-high {
   border-left-color: var(--status-destructive-text, #dc2626);
 }
 
-.academyReminderItem.status-done,
-.studentReminderItem.status-done {
+.academyReminderItem.status-done {
   opacity: 0.72;
 }
 
@@ -1040,8 +1034,7 @@ summary:focus-visible {
   gap: 8px;
 }
 
-.academyReminderItemTop strong,
-.studentReminderItem strong {
+.academyReminderItemTop strong {
   color: var(--academy-text, #0f172a);
 }
 
@@ -1061,15 +1054,13 @@ summary:focus-visible {
   font-weight: 800;
 }
 
-.academyReminderItem p,
-.studentReminderItem p {
+.academyReminderItem p {
   color: var(--academy-text-strong, #475569);
   margin: 4px 0 0;
   white-space: pre-wrap;
 }
 
-.academyReminderActions,
-.studentProfileRowActions {
+.academyReminderActions {
   align-items: center;
   display: flex;
   gap: 6px;
@@ -1082,26 +1073,6 @@ summary:focus-visible {
 
 .lessonReminderPanel .academyReminderItem {
   grid-template-columns: minmax(0, 1fr);
-}
-
-.studentReminderComposer {
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-bg, #eff6ff);
-  border-radius: 8px;
-  display: grid;
-  gap: 10px;
-  padding: 12px;
-}
-
-.studentReminderControls {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: 160px 150px 110px 95px 140px 130px;
-}
-
-.studentReminderComposer textarea {
-  min-height: 90px;
-  resize: vertical;
 }
 
 .schoolEventPill.event-reminder {
@@ -1782,10 +1753,6 @@ summary:focus-visible {
 }
 
 .lessonJournalStickySaveBar {
-  margin-inline: 2px;
-}
-
-.studentProfileStickySaveBar {
   margin-inline: 2px;
 }
 
@@ -2570,11 +2537,6 @@ summary:focus-visible {
   color: var(--academy-muted, #64748b);
   font-size: 13px;
   font-weight: 900;
-}
-
-.managementRow.scoreRow {
-  grid-template-columns: 160px 130px 150px 140px 100px 100px minmax(220px, 1fr);
-  min-width: 1040px;
 }
 
 .managementRow.testRow {
@@ -4679,8 +4641,7 @@ summary:focus-visible {
   padding: 8px 10px;
 }
 
-.studentTable,
-.studentListTable {
+.studentTable {
   border: 1px solid var(--status-neutral-border, #e2e8f0);
   border-radius: 8px;
   overflow: auto;
@@ -4696,13 +4657,11 @@ summary:focus-visible {
   padding: 12px 14px;
 }
 
-.tableRow:first-child,
-.studentListRow:first-child {
+.tableRow:first-child {
   border-top: 0;
 }
 
-.tableHead,
-.studentListHead {
+.tableHead {
   background: var(--academy-surface-muted, #f8fafc);
   color: var(--academy-muted, #64748b);
   font-size: 15px;
@@ -5199,10 +5158,6 @@ button:disabled {
 
 .modalFooter.tone-danger {
   border-top-color: var(--status-danger-border, #fecaca);
-}
-
-.modalCard.wideModal {
-  max-width: 1040px;
 }
 
 .modalCard.commentComposerModal {
@@ -7857,21 +7812,6 @@ button:disabled {
   font-size: 18px;
 }
 
-.deleteWarningBox {
-  background: var(--status-pending-bg, #fff7ed);
-  border: 1px solid var(--status-pending-border, #fed7aa);
-  border-radius: 8px;
-  display: grid;
-  gap: 8px 12px;
-  grid-template-columns: 72px 1fr;
-  padding: 14px;
-}
-
-.deleteWarningBox span {
-  color: var(--status-pending-text, #c2410c);
-  font-weight: 800;
-}
-
 .dangerCopy {
   color: var(--status-danger-text, #b91c1c);
   font-weight: 800;
@@ -8333,10 +8273,6 @@ textarea {
   width: auto;
 }
 
-.studentListTable {
-  margin-top: 16px;
-}
-
 .studentListToolbar {
   align-items: center;
   display: flex;
@@ -8348,23 +8284,6 @@ textarea {
 .studentListToolbar select {
   min-height: 40px;
   min-width: 132px;
-}
-
-.studentStatusPill {
-  align-items: center;
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--academy-border, #d8e3f8);
-  border-radius: 8px;
-  color: var(--academy-text, #0f172a);
-  display: inline-flex;
-  font-weight: 900;
-  min-height: 40px;
-  padding: 0 14px;
-}
-
-.mutedPill {
-  background: var(--academy-surface-muted, #f8fafc);
-  color: var(--academy-muted, #64748b);
 }
 
 .studentManagerTabs {
@@ -8426,58 +8345,7 @@ textarea {
   padding: 3px 8px;
 }
 
-.studentListRow {
-  align-items: center;
-  border-top: 1px solid var(--status-neutral-border, #e2e8f0);
-  display: grid;
-  gap: 10px;
-  grid-template-columns: 34px 190px 180px 120px 70px 80px 150px 150px 150px 104px; /* ⋯ 열 제거 — 행 전체가 수정 모달을 연다. docs/ui-row-actions.md R2·R3 */
-  min-width: 1244px;
-  padding: 10px 12px;
-}
-
 /* 행 전체가 학생 정보 수정 모달을 여는 버튼이다(칸 인라인 편집·⋯ 메뉴 제거, 2026-09-17). */
-.studentListRowClickable {
-  cursor: pointer;
-  text-align: left;
-  transition: background var(--academy-transition-fast, 150ms ease);
-}
-
-.studentListRowClickable:hover {
-  background: var(--academy-surface-muted, #f8fafc);
-}
-
-.studentListRowClickable:focus-visible {
-  box-shadow: inset 0 0 0 2px var(--academy-focus-ring, #2563eb);
-  outline: none;
-}
-
-.studentNameCell {
-  align-items: center;
-  display: flex;
-  gap: 8px;
-  min-width: 0;
-}
-
-.studentListRow.withdrawnStudentRow {
-  grid-template-columns: 48px 190px 160px 80px 150px 150px 150px 104px 110px 130px minmax(260px, 1fr);
-  min-width: 1510px;
-}
-
-.studentListRow:not(.studentListHead):hover {
-  background: var(--status-info-bg, #eff6ff);
-}
-
-.studentListRow.dirtyStudentRow {
-  background: var(--status-pending-bg, #fff7ed);
-}
-
-.studentListRow select {
-  border-radius: 999px;
-  font-size: 14px;
-  min-height: 34px;
-  padding: 0 12px;
-}
 
 .examPrepRow.excluded {
   background: var(--academy-surface-muted, #f8fafc);
@@ -8719,254 +8587,6 @@ textarea {
   width: 100%;
 }
 
-.withdrawalReasonSelect {
-  width: 100%;
-}
-
-.withdrawalCommentInput {
-  width: 100%;
-}
-
-.withdrawnStudentBulkActions {
-  align-items: center;
-  background: rgba(248, 251, 255, 0.98);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 10px;
-  bottom: 16px;
-  box-shadow: 0 10px 24px color-mix(in srgb, var(--status-info-text, #1d4ed8) 16%, transparent);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  left: calc(var(--academy-sidebar-width) + 16px);
-  padding: 10px 12px;
-  position: fixed;
-  right: 24px;
-  z-index: 80;
-}
-
-.withdrawnStudentBulkActions > span {
-  color: var(--status-info-text, #1d4ed8);
-  font-size: 13px;
-  font-weight: 900;
-  margin-right: 4px;
-}
-
-@media (max-width: 640px) {
-  .withdrawnStudentBulkActions {
-    bottom: max(8px, env(safe-area-inset-bottom));
-    left: max(8px, env(safe-area-inset-left));
-    max-height: min(56dvh, 420px);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding-bottom: max(10px, env(safe-area-inset-bottom));
-    right: max(8px, env(safe-area-inset-right));
-    scrollbar-gutter: stable;
-    -webkit-overflow-scrolling: touch;
-  }
-}
-
-.withdrawnStudentSelect {
-  align-items: center;
-  display: flex;
-  justify-content: center;
-}
-
-.withdrawnStudentSelect input {
-  accent-color: var(--academy-focus-ring, #2563eb);
-  height: 18px;
-  width: 18px;
-}
-
-.studentRestoreNotice {
-  align-items: center;
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  color: var(--status-info-text, #1d4ed8);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 12px;
-  padding: 10px 12px;
-}
-
-.studentRestoreNotice.failed {
-  background: var(--status-destructive-bg, #fff1f2);
-  border-color: var(--status-destructive-border, #fecdd3);
-  color: var(--status-destructive-text, #dc2626);
-}
-
-.modalCard.studentPermanentDeleteModal {
-  gap: 18px;
-  max-width: 620px;
-}
-
-.permanentDeleteStudentSummary {
-  align-items: center;
-  display: flex;
-  gap: 12px;
-}
-
-.permanentDeleteStudentSummary p {
-  margin: 4px 0 0;
-}
-
-.permanentDeleteAuditStatus,
-.permanentDeleteSafeBox,
-.permanentDeleteBlockedBox,
-.batchPermanentDeleteTargetList,
-.permanentDeleteError {
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 12px;
-  padding: 14px 16px;
-}
-
-.permanentDeleteAuditStatus {
-  background: var(--academy-surface-muted, #f8fafc);
-}
-
-.permanentDeleteAuditStatus p,
-.permanentDeleteSafeBox p,
-.permanentDeleteBlockedBox p {
-  margin: 8px 0 0;
-}
-
-.permanentDeleteSafeBox {
-  background: var(--status-success-bg, #ecfdf5);
-  border-color: var(--status-success-border, #86efac);
-  color: var(--status-success-text, #047857);
-}
-
-.permanentDeleteBlockedBox,
-.permanentDeleteError {
-  background: var(--status-destructive-bg, #fff1f2);
-  border-color: var(--status-destructive-border, #fecdd3);
-  color: var(--status-destructive-text, #dc2626);
-}
-
-.permanentDeleteBlockedBox ul {
-  margin: 10px 0 0;
-  padding-left: 20px;
-}
-
-.batchPermanentDeleteTargetList {
-  background: var(--status-info-bg, #eff6ff);
-  border-color: var(--status-info-border, #bfdbfe);
-  color: var(--academy-primary, #17213d);
-}
-
-.batchPermanentDeleteTargetList > ul {
-  display: grid;
-  gap: 8px;
-  list-style: none;
-  margin: 10px 0 0;
-  max-height: min(42vh, 360px);
-  overflow: auto;
-  padding: 0;
-}
-
-.batchPermanentDeleteTargetList li {
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--status-info-bg, #eff6ff);
-  border-radius: 8px;
-  padding: 9px 10px;
-}
-
-.batchPermanentDeleteTargetList li > div {
-  align-items: baseline;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  justify-content: space-between;
-}
-
-.batchPermanentDeleteTargetList li > div > span {
-  color: var(--status-destructive-text, #dc2626);
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.batchPermanentDeleteTargetList li > p {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  line-height: 1.5;
-  margin: 5px 0 0;
-}
-
-.permanentDeleteConfirmationField {
-  display: grid;
-  font-weight: 800;
-  gap: 8px;
-}
-
-.permanentDeleteForceField {
-  align-items: start;
-  background: var(--status-pending-bg, #fff7ed);
-  border: 1px solid var(--status-pending-border, #fed7aa);
-  border-radius: 12px;
-  color: var(--status-pending-text, #c2410c);
-  display: flex;
-  font-weight: 800;
-  gap: 10px;
-  padding: 12px 14px;
-}
-
-.permanentDeleteForceField input {
-  flex: 0 0 18px;
-  height: 18px;
-  margin-top: 3px;
-  min-height: 18px;
-  padding: 0;
-  width: 18px;
-}
-
-.permanentDeleteConfirmationField input {
-  border: 1px solid var(--status-destructive-border, #fecdd3);
-  border-radius: 10px;
-  min-height: 42px;
-  padding: 0 12px;
-}
-
-.studentListEmpty {
-  border-top: 1px solid var(--status-neutral-border, #e2e8f0);
-  min-width: 860px;
-  padding: 28px 16px;
-}
-
-.monoCell {
-  color: var(--academy-text-strong, #475569);
-  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-  font-size: 13px;
-}
-
-.editableTextCell {
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  color: var(--academy-text-strong, #475569);
-  font-size: 15px;
-  min-height: 34px;
-  padding: 0 10px;
-  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.editableTextCell:hover {
-  background: var(--academy-surface-muted, #f8fafc);
-  border-color: var(--academy-border, #d8e3f8);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--academy-focus-ring, #2563eb) 6%, transparent);
-}
-
-.editableTextCell:focus {
-  background: var(--academy-surface, #ffffff);
-  border-color: var(--status-info-border, #bfdbfe);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--academy-focus-ring, #2563eb) 14%, transparent);
-  outline: 0;
-}
-
-.editableTextCell.monoCell {
-  font-size: 13px;
-}
-
 .gradeBadgeInput {
   background: var(--academy-surface-muted, #f8fafc);
   border-radius: 999px;
@@ -8995,33 +8615,10 @@ textarea {
   width: 34px;
 }
 
-.gradeBadge {
-  background: var(--academy-surface-muted, #f8fafc);
-  border-radius: 999px;
-  color: var(--academy-text-strong, #475569);
-  font-weight: 900;
-  justify-self: start;
-  padding: 5px 12px;
-}
-
 .studentProfilePanel {
   display: grid;
   gap: 14px;
   margin-top: 16px;
-}
-
-.withdrawalReasonGrid {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: minmax(150px, 0.5fr) minmax(260px, 1fr);
-}
-
-.withdrawalReasonGrid label {
-  color: var(--academy-primary, #17213d);
-  display: grid;
-  font-size: 13px;
-  font-weight: 900;
-  gap: 6px;
 }
 
 .emptyProfilePanel {
@@ -9032,151 +8629,6 @@ textarea {
   text-align: center;
 }
 
-.studentProfileModalWrap {
-  display: grid;
-  gap: 16px;
-}
-
-.studentProfileTileGrid {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.studentProfileTile {
-  aspect-ratio: 1;
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 12px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-height: 96px;
-  padding: 14px;
-  text-align: left;
-}
-
-.studentProfileTile:hover,
-.studentProfileTile:focus-visible {
-  background: var(--status-info-bg, #eff6ff);
-}
-
-.studentProfileTile strong {
-  color: var(--academy-primary, #17213d);
-  font-size: 15px;
-  font-weight: 950;
-}
-
-.studentProfileTile p {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  font-weight: 800;
-  line-height: 1.4;
-  margin: 4px 0 0;
-}
-
-.studentProfileTileMeta {
-  color: var(--academy-text-strong, #475569);
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.studentReminderSourceNote {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  margin: 0;
-}
-
-.studentProfileSectionModal {
-  max-width: 720px;
-}
-
-.studentProfileSectionBody {
-  display: grid;
-  gap: 14px;
-  padding: 14px;
-}
-
-@media (max-width: 640px) {
-  .studentProfileTileGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.studentAttendanceMonthInput {
-  background: var(--academy-surface, #fff);
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 8px;
-  color: var(--academy-text-strong, #475569);
-  min-height: 36px;
-  padding: 6px 8px;
-}
-
-.studentAttendanceSectionActions {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-.studentAttendanceSummaryGrid {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.studentAttendanceSummaryCard {
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 12px;
-  padding: 14px;
-}
-
-.studentAttendanceSummaryCard > div {
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
-}
-
-.studentAttendanceSummaryCard b {
-  color: var(--status-info-text, #1d4ed8);
-  font-size: 18px;
-}
-
-.studentAttendanceSummaryCard p {
-  color: var(--academy-text-muted, #52647c);
-  font-size: 12px;
-  margin: 8px 0 0;
-}
-
-.modalCard.studentMonthlyReportModal {
-  max-width: 1180px;
-}
-
-.studentMonthlyReportControls {
-  align-items: center;
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 10px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 18px;
-  padding: 10px 12px;
-}
-
-.studentMonthlyReportControls label {
-  align-items: center;
-  color: var(--academy-text-strong, #475569);
-  cursor: pointer;
-  display: inline-flex;
-  font-size: 12px;
-  font-weight: 900;
-  gap: 6px;
-}
-
-.studentMonthlyReportControls input[type="checkbox"],
 .lessonModalNewStudentMakeupPanel input[type="checkbox"] {
   appearance: auto;
   accent-color: var(--academy-focus-ring, #2563eb);
@@ -9189,366 +8641,11 @@ textarea {
   width: 16px;
 }
 
-.studentMonthlyReportControls fieldset {
-  align-items: center;
-  border: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-}
-
-.studentMonthlyReportControls legend {
-  color: var(--status-info-text, #1d4ed8);
-  float: left;
-  font-size: 12px;
-  font-weight: 900;
-  margin-right: 4px;
-}
-
-.studentMonthlyReportPreview {
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 12px;
-  display: grid;
-  gap: 16px;
-  padding: 20px;
-}
-
-.studentMonthlyReportPreview > header {
-  align-items: flex-start;
-  border-bottom: 1px solid var(--status-info-border, #bfdbfe);
-  display: flex;
-  gap: 12px;
-  justify-content: space-between;
-  padding-bottom: 14px;
-}
-
-.studentMonthlyReportPreview > header small {
-  color: var(--academy-focus-ring, #2563eb);
-  font-size: 11px;
-  font-weight: 900;
-}
-
-.studentMonthlyReportPreview h3 {
-  color: var(--academy-primary, #17213d);
-  font-size: 21px;
-  margin: 3px 0;
-}
-
-.studentMonthlyReportPreview header p {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  margin: 0;
-}
-
-.studentMonthlyReportAttendanceCounts {
-  background: var(--academy-surface-muted, #f8fafc);
-  border-radius: 8px;
-  color: var(--academy-text-muted, #52647c);
-  font-size: 12px;
-  font-weight: 800;
-  margin: -6px 0 0;
-  padding: 9px 12px;
-  text-align: center;
-}
-
-.studentMonthlyReportPreview > section {
-  display: grid;
-  gap: 8px;
-  overflow-x: auto;
-}
-
-.studentMonthlyReportPreview h4 {
-  color: var(--academy-primary, #17213d);
-  font-size: 14px;
-  margin: 0;
-}
-
-.studentMonthlyReportRows {
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 9px;
-  display: grid;
-  overflow: hidden;
-}
-
-.studentMonthlyReportRow {
-  align-items: center;
-  display: grid;
-  gap: 10px;
-  grid-template-columns: 150px minmax(0, 1fr) auto;
-  min-height: 54px;
-  padding: 8px 11px;
-}
-
-.studentMonthlyReportRow + .studentMonthlyReportRow {
-  border-top: 1px solid var(--academy-border-strong, #cbd8ee);
-}
-
-.studentMonthlyReportRow > div {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-}
-
-.studentMonthlyReportRow strong {
-  color: var(--academy-text-strong, #475569);
-  font-size: 13px;
-}
-
-.studentMonthlyReportRow span {
-  color: var(--academy-muted, #64748b);
-  font-size: 11px;
-  overflow-wrap: anywhere;
-}
-
-.studentMonthlyReportCalendar {
-  border-left: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 9px;
-  border-top: 1px solid var(--status-info-border, #bfdbfe);
-  display: grid;
-  grid-template-columns: repeat(7, minmax(100px, 1fr));
-  min-width: 760px;
-  overflow: hidden;
-}
-
-.studentMonthlyReportCalendarWeekday,
-.studentMonthlyReportCalendarDay {
-  border-bottom: 1px solid var(--status-info-border, #bfdbfe);
-  border-right: 1px solid var(--status-info-border, #bfdbfe);
-}
-
-.studentMonthlyReportCalendarWeekday {
-  background: var(--status-info-bg, #eff6ff);
-  color: var(--academy-text-strong, #475569);
-  font-size: 11px;
-  padding: 7px;
-  text-align: center;
-}
-
-.studentMonthlyReportCalendarDay {
-  background: var(--academy-surface, #ffffff);
-  min-height: 116px;
-  padding: 7px;
-}
-
-.studentMonthlyReportCalendarDay.outside {
-  background: var(--academy-surface-muted, #f8fafc);
-}
-
-.studentMonthlyReportCalendarDay > strong {
-  color: var(--academy-text-strong, #475569);
-  display: block;
-  font-size: 12px;
-  margin-bottom: 5px;
-}
-
-.studentMonthlyReportCalendarLesson {
-  background: var(--status-info-bg, #eff6ff);
-  border-radius: 5px;
-  color: var(--academy-text-strong, #475569);
-  display: grid;
-  font-size: 10px;
-  gap: 1px;
-  margin-top: 4px;
-  padding: 4px 5px;
-}
-
-.studentMonthlyReportCalendarLesson small {
-  color: var(--academy-muted, #64748b);
-  font-size: 9px;
-}
-
-.studentMonthlyReportCalendarLesson.canceled {
-  background: var(--academy-surface-muted, #f8fafc);
-  opacity: 0.78;
-  text-decoration: line-through;
-}
-
-.studentMonthlyReportTableWrap {
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 9px;
-  overflow-x: auto;
-}
-
-.studentMonthlyReportTable {
-  border-collapse: collapse;
-  min-width: 720px;
-  width: 100%;
-}
-
-.studentMonthlyReportTable th,
-.studentMonthlyReportTable td {
-  border-bottom: 1px solid var(--academy-border-strong, #cbd8ee);
-  color: var(--academy-text-strong, #475569);
-  font-size: 11px;
-  padding: 8px 10px;
-  text-align: left;
-  vertical-align: middle;
-}
-
-.studentMonthlyReportTable th {
-  background: var(--status-info-bg, #eff6ff);
-  color: var(--academy-text-strong, #475569);
-  font-weight: 900;
-}
-
-.studentMonthlyReportTable td small {
-  color: var(--academy-muted, #64748b);
-  display: block;
-  margin-top: 2px;
-}
-
-.studentMonthlyReportStatus,
-.studentMonthlyReportChangeReason {
-  border-radius: 999px;
-  font-size: 11px;
-  padding: 5px 8px;
-  white-space: nowrap;
-}
-
-.studentMonthlyReportStatus.status-present {
-  background: var(--status-success-bg, #ecfdf5);
-  color: var(--status-success-text, #047857);
-}
-
-.studentMonthlyReportStatus.status-pending {
-  background: var(--status-neutral-border, #e2e8f0);
-  color: var(--academy-text-strong, #475569);
-}
-
-.studentMonthlyReportStatus.status-attention,
-.studentMonthlyReportChangeReason {
-  background: var(--status-pending-bg, #fff7ed);
-  color: var(--status-pending-text, #c2410c);
-}
-
-.studentMonthlyReportEmpty {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px dashed var(--academy-border-strong, #cbd8ee);
-  border-radius: 8px;
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  margin: 0;
-  padding: 12px;
-  text-align: center;
-}
-
-.studentMonthlyReportNote {
-  display: grid;
-  gap: 7px;
-}
-
-.studentMonthlyReportNote > span {
-  color: var(--academy-primary, #17213d);
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.studentMonthlyReportNote small {
-  color: var(--academy-muted, #64748b);
-  font-weight: 700;
-}
-
-.studentMonthlyReportNote textarea {
-  min-height: 92px;
-  resize: vertical;
-}
-
-.studentMonthlyReportActionStatus {
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  color: var(--status-info-text, #1d4ed8);
-  font-size: 12px;
-  font-weight: 850;
-  margin: 0;
-  padding: 10px 12px;
-}
-
 @media (max-width: 720px) {
   .studentAttendanceSectionHeader {
     align-items: stretch;
     flex-direction: column;
   }
-
-  .studentAttendanceSectionActions {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .studentMonthlyReportPreview {
-    padding: 14px;
-  }
-
-  .studentMonthlyReportPreview > header {
-    display: grid;
-  }
-
-  .studentMonthlyReportRow {
-    grid-template-columns: 110px minmax(0, 1fr);
-  }
-
-  .studentMonthlyReportStatus,
-  .studentMonthlyReportChangeReason {
-    grid-column: 1 / -1;
-    justify-self: start;
-  }
-}
-
-.studentTallySubmissionPanel {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  padding: 0 12px;
-}
-
-.studentTallySubmissionPanel > .disclosureTrigger {
-  min-height: 52px;
-}
-
-.studentTallySubmissionPanel .disclosureTriggerLabel {
-  align-items: center;
-  display: flex;
-  flex: 1 1 auto;
-  justify-content: space-between;
-}
-
-.studentTallySubmissionPanel .disclosureTriggerLabel span,
-.studentTallySubmissionCard > p {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-}
-
-.studentTallySubmissionCard {
-  border-top: 1px solid var(--status-info-border, #bfdbfe);
-  padding: 12px 0;
-}
-
-.studentTallySubmissionCard > p {
-  margin: 0 0 10px;
-}
-
-.studentTallySubmissionCard dl {
-  display: grid;
-  gap: 8px;
-  margin: 0;
-}
-
-.studentTallySubmissionCard dl > div {
-  display: grid;
-  gap: 2px;
-}
-
-.studentTallySubmissionCard dt {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-}
-
-.studentTallySubmissionCard dd {
-  margin: 0;
-  white-space: pre-wrap;
 }
 
 .studentProfileMemo {
@@ -10044,26 +9141,9 @@ textarea {
   overflow-wrap: anywhere;
 }
 
-.studentScoreModalTable {
-  overflow-x: auto;
-}
-
-.studentScoreModalTable .studentScoreRow {
-  min-width: 1080px;
-}
-
-.studentProfileDataTable {
-  overflow-x: auto;
-}
-
 .wrongProblemProfileRow {
   grid-template-columns: 170px 170px 130px minmax(240px, 1fr);
   min-width: 760px;
-}
-
-.academyTestProfileRow {
-  grid-template-columns: 140px 170px 170px 100px 100px minmax(220px, 1fr) 150px;
-  min-width: 1050px;
 }
 
 .reportDataSummaryGrid {
@@ -10095,43 +9175,12 @@ textarea {
   margin: 0;
 }
 
-.studentProfileGrid {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.studentProfileGrid > div {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--status-neutral-border, #e2e8f0);
-  border-radius: 8px;
-  display: grid;
-  gap: 6px;
-  min-height: 74px;
-  padding: 12px;
-}
-
-.studentProfileGrid small {
-  color: var(--academy-muted, #64748b);
-  font-weight: 900;
-}
-
 .profileHeaderActions {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   justify-content: flex-end;
-}
-
-.profileEditHint {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px dashed var(--academy-border-strong, #cbd8ee);
-  border-radius: 8px;
-  color: var(--academy-muted, #64748b);
-  font-size: 13px;
-  font-weight: 800;
-  padding: 10px 12px;
 }
 
 .profileSaveError {
@@ -10145,246 +9194,15 @@ textarea {
   padding: 10px 12px;
 }
 
-.studentScheduleEditor {
-  display: grid;
-  gap: 10px;
-}
-
-.studentScheduleRow {
-  align-items: end;
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  display: grid;
-  gap: 10px;
-  grid-template-columns: minmax(260px, 1fr) 112px 112px auto;
-  padding: 10px;
-}
-
-
-.studentScheduleRow label {
-  color: var(--academy-muted, #64748b);
-  display: grid;
-  font-size: 12px;
-  font-weight: 900;
-  gap: 4px;
-}
-
-.studentScheduleRow input {
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 8px;
-  color: var(--academy-text, #0f172a);
-  font: inherit;
-  min-height: 36px;
-  padding: 0 8px;
-}
-
-.studentSchedulePreview,
-.studentScheduleEmpty,
-.studentScheduleLegacyText {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--status-neutral-border, #e2e8f0);
-  border-radius: 8px;
-  color: var(--academy-text-strong, #475569);
-  font-size: 13px;
-  font-weight: 800;
-  line-height: 1.45;
-  padding: 10px 12px;
-}
-
-.studentSchedulePreview strong {
-  color: var(--status-info-text, #1d4ed8);
-}
-
-.studentScheduleLegacyText {
-  border-color: var(--status-pending-border, #fed7aa);
-  color: var(--status-pending-text, #c2410c);
-  display: grid;
-  gap: 8px;
-}
-
-.studentScheduleLegacyText span {
-  overflow-wrap: anywhere;
-}
-
-.studentScheduleActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.profileSavedText {
-  color: var(--status-success-text, #047857);
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.studentConsultationComposer,
-.studentConsultationItem {
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  display: grid;
-  gap: 10px;
-  padding: 12px;
-}
-
-.studentConsultationControls,
-.studentConsultationMeta,
-.studentProfileRowActions {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.studentConsultationControls select,
-.studentConsultationControls input,
-.studentConsultationMeta select,
-.studentConsultationMeta input {
-  min-height: 38px;
-}
-
-.studentConsultationComposer textarea,
-.studentConsultationItem textarea {
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 8px;
-  line-height: 1.5;
-  min-height: 92px;
-  padding: 10px;
-  resize: vertical;
-  width: 100%;
-}
-
-.studentConsultationList {
-  display: grid;
-  gap: 10px;
-}
-
-.studentConsultationItem.dirty,
 .managementRow.dirty,
 .managementRow.draftRow {
   background: var(--status-pending-bg, #fff7ed);
-}
-
-.studentConsultationType {
-  background: var(--academy-accent-bg, #eef2ff);
-  border-radius: 999px;
-  color: var(--status-closure-text, #3730a3);
-  font-size: 12px;
-  font-weight: 900;
-  padding: 6px 9px;
-}
-
-.studentConsultationDate {
-  color: var(--academy-text-strong, #475569);
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.studentConsultationContent {
-  color: var(--academy-text, #0f172a);
-  font-size: 14px;
-  font-weight: 750;
-  line-height: 1.55;
-  margin: 0;
-  white-space: pre-wrap;
-}
-
-.studentProfileRowActions .softButton,
-.studentProfileRowActions .dangerSoftButton {
-  min-height: 36px;
-  padding-inline: 10px;
-}
-
-.profileEditInput {
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--academy-border-strong, #cbd8ee);
-  border-radius: 8px;
-  color: var(--academy-text, #0f172a);
-  font-size: 16px;
-  font-weight: 800;
-  min-height: 42px;
-  padding: 8px 10px;
-  width: 100%;
-}
-
-textarea.profileEditInput {
-  line-height: 1.5;
-  resize: vertical;
-}
-
-.teacherOperatingMemoPanel {
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 12px;
-  display: grid;
-  gap: 10px;
-  margin-bottom: 14px;
-  padding: 14px;
-}
-
-.teacherOperatingMemoHeader,
-.teacherOperatingMemoActions,
-.teacherOperatingMemoSaveRow {
-  align-items: center;
-  display: flex;
-  gap: 10px;
-  justify-content: space-between;
-}
-
-.teacherOperatingMemoHeader strong {
-  color: var(--academy-primary, #17213d);
-}
-
-.teacherOperatingMemoHeader p,
-.teacherOperatingMemoSaveRow span {
-  color: var(--academy-muted, #64748b);
-  font-size: 13px;
-  margin: 3px 0 0;
-}
-
-.teacherOperatingMemoContent,
-.teacherOperatingMemoEmpty {
-  color: var(--academy-text, #0f172a);
-  line-height: 1.6;
-  margin: 0;
-  white-space: pre-wrap;
-}
-
-.teacherOperatingMemoEmpty {
-  color: var(--academy-muted, #64748b);
-}
-
-.teacherOperatingMemoInput {
-  min-height: 132px;
-}
-
-.profileLoginEdit {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: minmax(0, 1fr) 110px;
-}
-
-.wideProfileItem {
-  grid-column: span 3;
-}
-
-.wideProfileItem > .muted {
-  display: block;
-  margin-top: 6px;
 }
 
 .studentScorePanel {
   display: grid;
   gap: 14px;
   margin-top: 18px;
-}
-
-.managementRow.studentScoreRow {
-  grid-template-columns: 130px 150px 150px 110px 110px minmax(260px, 1fr) 150px;
-  min-width: 1080px;
 }
 
 .classManagerPage,
@@ -12730,10 +11548,6 @@ textarea.profileEditInput {
   width: 12px;
 }
 
-.dateDot.included {
-  background: var(--academy-primary, #17213d);
-}
-
 .dateDot.excluded {
   background: var(--academy-border-strong, #cbd8ee);
 }
@@ -12782,12 +11596,6 @@ textarea.profileEditInput {
   gap: 3px;
   min-height: 54px;
   padding: 6px;
-}
-
-.studentDateGrid button.included {
-  background: var(--academy-accent-bg, #eef2ff);
-  border-color: var(--academy-primary, #17213d);
-  color: var(--academy-primary, #17213d);
 }
 
 .studentDateGrid button.excluded {
@@ -14240,55 +13048,6 @@ textarea.profileEditInput {
   flex: 0 0 auto;
   gap: 8px;
   white-space: nowrap;
-}
-
-.studentRosterEffectiveChoice {
-  background: var(--status-pending-bg, #fff7ed);
-  border: 1px solid var(--status-pending-border, #fed7aa);
-  border-radius: 8px;
-  color: var(--status-pending-text, #c2410c);
-  display: grid;
-  gap: 6px;
-  padding: 12px;
-}
-
-.studentRosterEffectiveChoice span {
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.studentRosterEffectiveChoice select {
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--status-pending-strong, #d8860b);
-  min-height: 42px;
-}
-
-.studentPartialOverlapList {
-  display: grid;
-  gap: 8px;
-}
-
-.studentPartialOverlapList > div {
-  align-items: center;
-  background: var(--status-pending-bg, #fff7ed);
-  border: 1px solid var(--status-pending-border, #fed7aa);
-  border-radius: 8px;
-  display: grid;
-  gap: 4px;
-  grid-template-columns: minmax(140px, 1fr) auto auto;
-  padding: 12px;
-}
-
-.studentPartialOverlapList span,
-.studentPartialOverlapNotice {
-  color: var(--status-pending-text, #c2410c);
-  font-size: 13px;
-}
-
-@media (max-width: 640px) {
-  .studentPartialOverlapList > div {
-    grid-template-columns: 1fr;
-  }
 }
 
 .supplementSortControl > span {
@@ -16317,8 +15076,6 @@ body.attendanceOnlyBody {
   .closureJournalNotice,
   .accountSettingsGrid,
   .settingsRow,
-  .studentProfileGrid,
-  .studentScheduleRow,
   .editableEvent,
   .calendarDateGrid,
   .examSubjectRow,
@@ -16342,10 +15099,6 @@ body.attendanceOnlyBody {
   }
 
   .researchWideTextarea {
-    grid-column: auto;
-  }
-
-  .wideProfileItem {
     grid-column: auto;
   }
 
@@ -16611,17 +15364,6 @@ body.attendanceOnlyBody {
 
   .sidebar.collapsed .sideStatus .ghostButton::before {
     content: none;
-  }
-
-  .teacherOperatingMemoHeader,
-  .teacherOperatingMemoSaveRow {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .teacherOperatingMemoActions {
-    align-items: center;
-    justify-content: flex-end;
   }
 
   .mainPanel {
@@ -17259,8 +16001,7 @@ body.attendanceOnlyBody {
 
 @media (max-width: 900px) {
   .academyReminderForm,
-  .academyReminderColumns,
-  .studentReminderControls {
+  .academyReminderColumns {
     grid-template-columns: 1fr;
   }
 
@@ -17273,8 +16014,7 @@ body.attendanceOnlyBody {
     display: grid;
   }
 
-  .academyReminderItem,
-  .studentReminderItem {
+  .academyReminderItem {
     grid-template-columns: 1fr;
   }
 }
