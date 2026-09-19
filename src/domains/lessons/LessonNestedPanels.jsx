@@ -3,6 +3,7 @@ import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { getAttendanceDisplay, hasMissingCheckOut } from "./attendance.js";
 import { defaultAttendanceSettings } from "./attendanceSettings.js";
+import "./lessonNestedPanels.css";
 import { createLessonJournalPreparationMemoModel } from "./lessonJournalPreparationMemoModel.js";
 import { LessonJournalPreparationMemoView } from "./LessonJournalPreparationMemoView.jsx";
 

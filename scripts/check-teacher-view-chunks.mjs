@@ -66,6 +66,18 @@ assert.ok(
   `출결 태블릿 CSS 가 예산을 넘었다: ${attendanceStyleBytes.toLocaleString()} bytes (${attendanceStyles.join(", ")})`
 );
 
+// 교사 첫 로딩의 차단 CSS(main-*.css). JS 처럼 예산을 둔다 — 4-6 의 "initial main CSS 예산 고정" 은
+// 지금까지 지켜지지 않아 338 KB → 414 KB → 352 KB 를 오갔다. 2026-09-19 LessonNestedPanels 셀렉터
+// 12 KB 를 lazy 청크로 옮겨 334,613 B. 실측 + 10 KB 여유. 화면 전용 셀렉터를 새로 App.css 에
+// 넣기 전에 그 화면의 CSS 파일로 갈 수 있는지 먼저 본다(scripts/test-*-css-domain-split.mjs 패턴).
+const mainStylesheet = assetNames.find((name) => /^main-[^.]+\.css$/.test(name));
+assert.ok(mainStylesheet, "production build must emit one hashed main stylesheet");
+const mainStyleBytes = (await stat(resolve(assetsDirectory, mainStylesheet))).size;
+assert.ok(
+  mainStyleBytes <= 345_000,
+  `initial main CSS exceeded the 345 KB budget: ${mainStyleBytes.toLocaleString()} bytes`
+);
+
 const expectedLazyChunks = [
   "BlogContentStudio",
   "DashboardAuxiliaryPanels",
@@ -109,7 +121,7 @@ for (const [label, html] of [["index.html", teacherHtml], ["attendance.html", at
 }
 
 console.log(
-  `teacher view chunk budget passed · main ${(mainBytes / 1000).toFixed(2)} kB · vendor-react ${(vendorReactBytes / 1000).toFixed(1)} kB · ` +
+  `teacher view chunk budget passed · main ${(mainBytes / 1000).toFixed(2)} kB · main CSS ${(mainStyleBytes / 1000).toFixed(1)} kB · vendor-react ${(vendorReactBytes / 1000).toFixed(1)} kB · ` +
   `lazy ${expectedLazyChunks.length} · ` +
   `태블릿 JS ${(attendanceBytes / 1000).toFixed(1)} kB + CSS ${(attendanceStyleBytes / 1000).toFixed(1)} kB`
 );
