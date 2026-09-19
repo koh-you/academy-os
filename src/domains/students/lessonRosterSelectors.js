@@ -39,6 +39,20 @@ export function getLessonJournalStudents(lesson = {}, students = []) {
     .filter((student) => student && isStudentVisibleInLessonJournal(student, lesson.date)));
 }
 
+/**
+ * getLessonJournalStudents 와 같은 명단(퇴원 경계 동일)의 ID 만, 정렬 없이.
+ * 달력 pill 의 "(N명)" 처럼 인원수만 필요한 곳용 — 달력은 렌더마다 그 달의 모든 수업에 이걸
+ * 부르는데, 이름 정렬(Intl ko collation)과 students.find 가 그 비용의 대부분이었다
+ * (60명·308수업에서 4.4 ms → 0.4 ms).
+ */
+export function getLessonJournalStudentIds(lesson = {}, students = []) {
+  const studentById = new Map(students.map((student) => [student.studentId, student]));
+  return getLessonStudentIds(lesson, students).filter((studentId) => {
+    const student = studentById.get(studentId);
+    return Boolean(student) && isStudentVisibleInLessonJournal(student, lesson.date);
+  });
+}
+
 export function getActiveStudentIdsFromSelection(studentIds = [], students = []) {
   const selectedStudentIds = new Set(studentIds);
   return sortStudentsByName(students
