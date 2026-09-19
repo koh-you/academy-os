@@ -1,3 +1,4 @@
+import { canCurrentRoleUseAi } from "../../shared/utils/apiClient.js";
 import { createLessonJournalCommentSendPayload } from "./lessonJournalCommentSendPayload.js";
 import { polishLessonJournalCommentDraft } from "./lessonJournalCommentPolishController.js";
 import { saveLessonJournalCommentDraft } from "./lessonJournalCommentSaveController.js";
@@ -195,6 +196,7 @@ export function LessonJournalCommentComposer({
       draftSaveState={draftSaveState}
       generatedPreviewText={generatedPreviewText}
       hasUnsavedDraft={hasUnsavedDraft}
+      isAiLocked={!canCurrentRoleUseAi()}
       isSourceOpen={isSourceOpen}
       lesson={lesson}
       localAiStatus={localAiStatus}

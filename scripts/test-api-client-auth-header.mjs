@@ -8,6 +8,7 @@ globalThis.window = globalThis.window || { location: { hostname: "localhost" }, 
 
 const {
   canCurrentRoleSendAlimtalk,
+  canCurrentRoleUseAi,
   isSessionExpiredError,
   onApiUnauthorized,
   postJson,
@@ -68,6 +69,11 @@ setCurrentTeacherRole("assistant");
 assert.equal(canCurrentRoleSendAlimtalk(), true, "협력 교사 알림톡은 2026-09-16 에 열렸다 — 정책이 바뀌면 여기가 따라간다");
 setCurrentTeacherRole("owner");
 assert.equal(canCurrentRoleSendAlimtalk(), true, "원장은 알림톡을 보낼 수 있어야 한다");
+// AI 다듬기(/api/ai/*)는 협력 교사에게 닫혀 있다 — 버튼은 숨기지 않고 잠근다(2026-09-19).
+setCurrentTeacherRole("assistant");
+assert.equal(canCurrentRoleUseAi(), false, "협력 교사는 AI 버튼이 잠겨야 한다");
+setCurrentTeacherRole("owner");
+assert.equal(canCurrentRoleUseAi(), true);
 setCurrentTeacherRole("");
 assert.equal(canCurrentRoleSendAlimtalk(), true, "역할을 모르면 원장으로 본다(기존 동작 유지)");
 
@@ -157,6 +163,13 @@ assert.equal(isSessionExpiredError(conflictError), false);
 assert.equal(conflictError.message, "수업기록이 다른 화면에서 먼저 변경되었습니다.");
 assert.equal(unauthorizedEvents.length, 1);
 
+// 서버 403 은 code 를 같이 보낸다 — 화면은 code 로 문장을 고른다. error 만 보내던 동안
+// 아래 안내 문장은 죽은 코드였다(2026-09-19 감사).
+const serverSource = await readFile(new URL("../api/server.js", import.meta.url), "utf8");
+assert.ok(
+  serverSource.includes('{ ok: false, error: verdict.code || "forbidden", code: verdict.code || "forbidden" }'),
+  "게이트의 403 응답에 code 가 있어야 한다"
+);
 // 권한 없음(role_forbidden)은 영문 코드가 아니라 읽을 수 있는 문장으로 보여준다.
 // 협력 교사에게 닫아둔 알림톡 등을 눌렀을 때 "role_forbidden" 이 그대로 뜨면 안 된다.
 stubFetch(403, { ok: false, code: "role_forbidden", error: "role_forbidden" });

@@ -303,6 +303,7 @@ import {
   scheduleSlackDailyScheduleSummary,
   sendAttendanceAlimtalk,
   sendDailyReportAlimtalk,
+  resolveAcademyName,
   sendLessonCommentAlimtalk,
   setTenantAcademyNameResolver,
   sendSlackDailyScheduleSummary,
@@ -1885,6 +1886,8 @@ async function getPortalData(session) {
   const states = appStateResult.states ?? {};
   return {
     source: studentsResult.source,
+    // 포털 상단 학원명. 학생이 속한 tenant 의 선생님 이름("으뜸수학 최경석T").
+    academyName: await resolveAcademyName({}),
     students: [student],
     lessons,
     records: (recordsResult.records ?? []).filter((record) => record.studentId === session.studentId && lessonIds.has(record.lessonId)),
@@ -4947,6 +4950,17 @@ async function reserveTodayTeacherScheduleSlack({
   return { ...schedulePayload, notificationJob: saved.notificationJob, result };
 }
 
+// 옛 공용 키오스크 토큰의 읽기 범위: 등록된 교사 tenant 전부. 계정 표를 못 읽으면(로컬·
+// 미설정) 원장 tenant 하나로 돌아간다 — 빈 목록이면 학생을 아무도 못 찾는다.
+async function resolveLegacyKioskReadTenantIds() {
+  try {
+    const known = await listKnownTeacherTenantIds();
+    return known.size > 0 ? [...known] : ["tenant_default"];
+  } catch {
+    return ["tenant_default"];
+  }
+}
+
 const server = http.createServer(async (request, response) => {
   const requestUrl = new URL(request.url, "http://127.0.0.1");
 
@@ -4984,11 +4998,14 @@ const server = http.createServer(async (request, response) => {
             readTenantIds: kioskDevice.tenantIds
           }
         : legacyKioskOk
+          // 옛 공용 토큰 태블릿도 등록된 모든 선생님의 학생을 받는다. 쓰기 tenant 는 학생을
+          // 고른 뒤 handleAttendanceCheck 가 setWriteTenant 로 정한다(기기 등록 태블릿과 같은 길).
+          // 원장 tenant 로 고정돼 있던 동안 협력 교사 학생은 "전화번호를 찾지 못했습니다" 였다.
           ? {
               kind: "kiosk",
               kioskId: "legacy_shared_token",
-              tenantId: "tenant_default",
-              readTenantIds: ["tenant_default"]
+              tenantId: null,
+              readTenantIds: await resolveLegacyKioskReadTenantIds()
             }
           : dispatchOk
             ? { kind: "dispatch" }
@@ -5034,7 +5051,9 @@ const server = http.createServer(async (request, response) => {
       })
     );
     if (enforcing) {
-      sendJson(request, response, verdict.status, { ok: false, error: verdict.code || "forbidden" });
+      // code 를 같이 보낸다 — 화면(apiClient.createApiError)이 code 로 "권한 없음" 문장을 고른다.
+      // error 만 보내던 동안 협력 교사는 영문 "role_forbidden" 을 그대로 봤다(2026-09-19 감사).
+      sendJson(request, response, verdict.status, { ok: false, error: verdict.code || "forbidden", code: verdict.code || "forbidden" });
       return;
     }
   }

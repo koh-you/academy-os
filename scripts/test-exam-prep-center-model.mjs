@@ -341,9 +341,9 @@ assert.equal(generatedStudentRow.mathExamDate, "");
 assert.deepEqual(generatedStudentRow.mathExamDates, []);
 assert.equal(generatedStudentRow.source, "학생DB 자동생성");
 const appSource = await readFile(new URL("../src/app/App.jsx", import.meta.url), "utf8");
-// 자동 생성 대상 반: 원장 tenant 는 월수금 7-10 만, 그 반이 없는 tenant 는 활성 학생 전체.
+// 자동 생성 대상 반은 tenant 설정(운영 설정)이 정한다 — 원장 반 id 는 코드에 없다(2026-09-19).
 // 반 목록이 비어 있을 때(첫 로딩) 돌리면 원장 학생 전원의 행이 생기므로 기다린다.
-assert.match(appSource, /const examPrepAutoRowClassTemplateId = classTemplates\.some/);
+assert.match(appSource, /const examPrepAutoRowClassTemplateId = resolveExamPrepAutoRowClassTemplateIds\(tenantSettings, classTemplates\)/);
 assert.match(appSource, /if \(classTemplates\.length === 0\) return;\s+setExamPrepRows/);
 assert.doesNotMatch(appSource, /buildExamPrepRowsFromStudents\(students, currentExamCycle, "template_mwf_7_10"/);
 assert.doesNotMatch(appSource, /return \{ \.\.\.row, examPeriod: getDefaultExamPeriodText\(row\.examCycle\) \}/);

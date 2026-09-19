@@ -108,6 +108,11 @@ assert.equal(A("GET", "/api/notification-jobs", { kind: "teacher", teacherRole: 
 assert.equal(A("POST", "/api/solapi/groups/cancel", { kind: "teacher", teacherRole: "assistant" }).status, 403);
 // 원장은 그대로 보낼 수 있다.
 assert.equal(A("POST", "/api/notifications/attendance-alimtalk", { kind: "teacher", teacherRole: "owner" }).ok, true);
+// 2026-09-19: app_state 저장과 운영 알림 쓰기를 연다. 닫혀 있던 동안 메모·성적·상담 "저장
+// 실패", 예약 설정 되돌아감, 빈 tenant 의 초기 저장 403 → isAppStateReady 영영 false.
+assert.equal(A("POST", "/api/app-state", { kind: "teacher", teacherRole: "assistant" }).ok, true);
+assert.equal(A("POST", "/api/academy-reminders", { kind: "teacher", teacherRole: "assistant" }).ok, true);
+assert.equal(A("DELETE", "/api/academy-reminders", { kind: "teacher", teacherRole: "assistant" }).ok, true);
 assert.equal(A("POST", "/api/students", { kind: "teacher", teacherRole: "assistant" }).ok, true);
 assert.equal(A("POST", "/api/students/bulk", { kind: "teacher", teacherRole: "assistant" }).ok, true);
 assert.equal(A("DELETE", "/api/students", { kind: "teacher", teacherRole: "assistant" }).ok, true);

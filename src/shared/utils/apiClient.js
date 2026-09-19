@@ -164,6 +164,13 @@ export function canCurrentRoleSendAlimtalk() {
   return canTeacherRoleCallRoute(currentTeacherRole, "POST", "/api/notifications/comment-alimtalk");
 }
 
+// AI 문장 다듬기(유료)는 협력 교사에게 닫혀 있다(/api/ai/*). 버튼을 숨기지 않고 잠근다 —
+// 열면 그대로 동작해야 한다. 잠그지 않았더니 "실패 · role_forbidden" 이 화면에 떴고,
+// 시험 총평은 그 실패가 review_ai_status 로 저장돼 다시 열 때마다 보였다(2026-09-19 감사).
+export function canCurrentRoleUseAi() {
+  return canTeacherRoleCallRoute(currentTeacherRole, "POST", "/api/ai/comment-polish");
+}
+
 export function roleAwareApiFetch(path, teacherRole, options = {}) {
   const pathname = String(path).split("?")[0];
   if (!canTeacherRoleCallRoute(teacherRole, "GET", pathname)) {
