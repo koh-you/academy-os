@@ -43,7 +43,8 @@ const exclusiveClasses = new Set([
   "studentConsultationComposer", "studentConsultationContent", "studentConsultationControls",
   "studentConsultationDate", "studentConsultationItem", "studentConsultationList", "studentConsultationMeta",
   "studentConsultationType", "studentListEmpty", "studentListHead", "studentListRow",
-  "studentListRowClickable", "studentListTable", "studentMonthlyReportActionStatus",
+  // 2026-09-19 · studentListSearchBar 는 UI 정돈(U8)의 재원생 검색·정렬 FilterBar.
+  "studentListRowClickable", "studentListSearchBar", "studentListTable", "studentMonthlyReportActionStatus",
   "studentMonthlyReportAttendanceCounts", "studentMonthlyReportCalendar", "studentMonthlyReportCalendarDay",
   "studentMonthlyReportCalendarLesson", "studentMonthlyReportCalendarWeekday",
   "studentMonthlyReportChangeReason", "studentMonthlyReportControls", "studentMonthlyReportEmpty",
@@ -112,7 +113,8 @@ domainRoot.walkRules((rule) => {
   }
 });
 // 2026-09-19 · UI 정돈(U6): .profileEditHint · .profileSavedText · .studentProfileRowActions .dangerSoftButton 셀렉터 3개 삭제 → 229.
-assert.equal(domainSelectors.length, 229, `expected 229 moved selectors, found ${domainSelectors.length}`);
+// 2026-09-19 · UI 정돈(U8): .studentListSearchBar .sharedSearchField 추가 → 230.
+assert.equal(domainSelectors.length, 230, `expected 230 moved selectors, found ${domainSelectors.length}`);
 const appRoot = postcss.parse(appCss);
 const appSelectors = new Set();
 appRoot.walkRules((rule) => {

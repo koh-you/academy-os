@@ -107,6 +107,12 @@
   min-width: 1040px;
 }
 
+/* 2026-09-19 · UI U8: 재원생 목록(전체/반별 탭) 검색·정렬 바 — 검색창이 남는 폭을 차지하되 너무 길어지지 않게. */
+.studentListSearchBar .sharedSearchField {
+  flex: 1 1 240px;
+  max-width: 420px;
+}
+
 .studentListTable {
   border: 1px solid var(--status-neutral-border, #e2e8f0);
   border-radius: 8px;

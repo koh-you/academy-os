@@ -4,12 +4,13 @@ import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
+import { SearchField } from "../../shared/components/SearchField.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 import { buildStudentHandoverPdfModel, openStudentHandoverPdf } from "./studentHandoverPdf.js";
 import { StudentLifecycleOverlays } from "./StudentLifecycleOverlays.jsx";
 import { StudentProfileErrorBoundary, StudentProfileModal } from "./StudentProfileModal.jsx";
 import { StudentWithdrawnList } from "./StudentWithdrawnList.jsx";
-import { sortWithdrawnStudents } from "./studentListSort.js";
+import { filterStudentsBySearch, sortActiveStudents, sortWithdrawnStudents } from "./studentListSort.js";
 import { getDefaultRosterEffectiveMode, hasStudentLessonRowOnDate } from "./rosterEffectiveDate.js";
 import { resolveDefaultClassTemplateId } from "../settings/tenantSettings.js";
 import { isWithdrawnStudent } from "./lessonRosterSelectors.js";
@@ -114,6 +115,9 @@ export function StudentManager({
   const [handoverComment, setHandoverComment] = useState("");
   const [selectedWithdrawnStudentIds, setSelectedWithdrawnStudentIds] = useState(() => new Set());
   const [withdrawnStudentSort, setWithdrawnStudentSort] = useState("name");
+  // 2026-09-19 · UI U8: 재원생 목록(전체/반별 탭)의 검색·정렬. 화면 로컬 상태라 탭을 오가도 유지되고 저장 원천과 무관하다.
+  const [studentSearch, setStudentSearch] = useState("");
+  const [activeStudentSort, setActiveStudentSort] = useState("name");
   const selectedClassTemplate = templates.find(
     (template) => template.classTemplateId === selectedClassTemplateId
   );
@@ -139,14 +143,17 @@ export function StudentManager({
   const withdrawnStudents = students.filter(isWithdrawnStudent);
   const sortedWithdrawnStudents = sortWithdrawnStudents(withdrawnStudents, withdrawnStudentSort);
   const selectedWithdrawnStudents = withdrawnStudents.filter((student) => selectedWithdrawnStudentIds.has(student.studentId));
+  const classTabStudents =
+    activeTab === "class"
+      ? selectedClassTemplateId === "unassigned"
+        ? activeStudents.filter((student) => !student.defaultClassTemplateId)
+        : activeStudents.filter((student) => student.defaultClassTemplateId === selectedClassTemplateId)
+      : activeStudents;
+  const isStudentSearchActive = Boolean(studentSearch.trim());
   const visibleStudents =
     activeTab === "withdrawn"
       ? sortedWithdrawnStudents
-      : activeTab === "class"
-        ? selectedClassTemplateId === "unassigned"
-          ? activeStudents.filter((student) => !student.defaultClassTemplateId)
-          : activeStudents.filter((student) => student.defaultClassTemplateId === selectedClassTemplateId)
-        : activeStudents;
+      : sortActiveStudents(filterStudentsBySearch(classTabStudents, studentSearch), activeStudentSort, templates);
   const title =
     activeTab === "withdrawn"
       ? "퇴원생 목록"
@@ -163,6 +170,14 @@ export function StudentManager({
       setSelectedStudentId("");
     }
   }, [selectedStudentId, visibleStudents]);
+
+  // 반이 삭제되거나(반관리) templates 가 나중에 로드돼 선택 반이 더 이상 없으면 설정 기본 반 → 첫 반 → 미배정 순으로
+  // 보정한다. '미배정' 은 항상 있는 선택지라 그대로 둔다(2026-09-19 UI U8).
+  useEffect(() => {
+    if (selectedClassTemplateId === "unassigned") return;
+    if (templates.some((template) => template.classTemplateId === selectedClassTemplateId)) return;
+    setSelectedClassTemplateId(resolveDefaultClassTemplateId(tenantSettings, templates) || "unassigned");
+  }, [selectedClassTemplateId, templates, tenantSettings]);
 
   // withdrawnStudents 는 렌더마다 새 배열이라 이 effect 가 매번 돌고, 매번 새 Set 을 넣으면
   // 다시 렌더 → "Maximum update depth exceeded" 무한 루프(학생관리 화면 CPU 100%, 2026-09-19
@@ -621,6 +636,25 @@ export function StudentManager({
         </FilterBar>
       ) : null}
 
+      {activeTab !== "withdrawn" ? (
+        <FilterBar className="studentListSearchBar" label="재원생 검색·정렬" result={<span>{visibleStudents.length}명</span>}>
+          <SearchField
+            label="학생 검색"
+            onChange={setStudentSearch}
+            placeholder="이름, 학교, 전화번호"
+            value={studentSearch}
+          />
+          <label className="filterBarField">
+            <span>정렬</span>
+            <select aria-label="재원생 정렬" onChange={(event) => setActiveStudentSort(event.target.value)} value={activeStudentSort}>
+              <option value="name">이름순</option>
+              <option value="grade">학년순</option>
+              <option value="class">반순</option>
+            </select>
+          </label>
+        </FilterBar>
+      ) : null}
+
       {activeTab === "withdrawn" ? (
         <StudentWithdrawnList
           dirtyStudentIds={dirtyStudentIds}
@@ -693,9 +727,16 @@ export function StudentManager({
           ))}
           {visibleStudents.length === 0 ? (
             <EmptyState
+              action={isStudentSearchActive ? (
+                <button className="softButton compact" onClick={() => setStudentSearch("")} type="button">검색어 지우기</button>
+              ) : null}
               className="emptyState studentListEmpty"
-              description={activeTab === "class" ? "다른 반 또는 전체 학생 탭을 확인하세요." : "학생 추가 후 목록에 표시됩니다."}
-              title={activeTab === "class" ? "이 반에 배정된 학생이 없습니다." : "등록된 재원생이 없습니다."}
+              description={isStudentSearchActive
+                ? "이름·학교·전화번호를 다시 확인하세요."
+                : activeTab === "class" ? "다른 반 또는 전체 학생 탭을 확인하세요." : "학생 추가 후 목록에 표시됩니다."}
+              title={isStudentSearchActive
+                ? "검색 결과가 없습니다."
+                : activeTab === "class" ? "이 반에 배정된 학생이 없습니다." : "등록된 재원생이 없습니다."}
             />
           ) : null}
         </DataTableShell>
