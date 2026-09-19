@@ -266,7 +266,8 @@
 .problemBankPrintToolbar small { color: var(--academy-text-muted, #6b7280); }
 .problemBankPrintToolbar label { align-items: center; display: inline-flex; font-size: 13px; gap: 6px; }
 .problemBankPrintToolbar button { border-radius: 8px; cursor: pointer; font-size: 13px; padding: 6px 14px; }
-.problemBankPrintToolbar .primaryButton { background: #111; border: 1px solid #111; color: #fff; margin-left: auto; }
+/* 툴바 오른쪽 끝 액션 묶음: [닫기][PPT 저장][🖨 인쇄] — 취소 왼쪽·확정 오른쪽(2026-09-19). primary 색은 표준 토큰을 그대로 쓴다. */
+.problemBankPrintToolbarActions { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
 .problemBankPrintToolbar .softButton { background: #fff; border: 1px solid var(--academy-border, #e2e6ec); }
 
 /* 종이: A4 세로. 화면에서도 종이 크기로 보여 인쇄와 같게 한다. */

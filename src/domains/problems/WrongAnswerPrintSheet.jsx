@@ -73,6 +73,17 @@ export function WrongAnswerPrintSheet({ variant = "wrong", book, units, items, s
     return () => document.body.classList.remove("problemBankPrinting");
   }, []);
 
+  // 전체 화면 레이어라 공용 Modal 의 Esc 처리를 못 받는다 — 열려 있는 동안만 Esc 로 닫는다(2026-09-19).
+  useEffect(() => {
+    function handleEscapeKey(event) {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      onClose?.();
+    }
+    window.addEventListener("keydown", handleEscapeKey);
+    return () => window.removeEventListener("keydown", handleEscapeKey);
+  }, [onClose]);
+
   function setPoints(entry, value) {
     const points = Number(value);
     setPointOverrides((current) => {
@@ -149,9 +160,11 @@ export function WrongAnswerPrintSheet({ variant = "wrong", book, units, items, s
         </label>
         <label><input checked={includeAnswers} disabled={answerEntries.length === 0} onChange={(event) => setIncludeAnswers(event.target.checked)} type="checkbox" /> 빠른정답 {answerEntries.length === 0 ? "(등록된 정답 없음)" : `(${answerEntries.length}/${printRows.length})`}</label>
         <label><input checked={includeSolutions} disabled={solutionEntries.length === 0} onChange={(event) => setIncludeSolutions(event.target.checked)} type="checkbox" /> 해설 {solutionEntries.length === 0 ? "(등록된 해설 없음)" : `(${solutionEntries.length}/${printRows.length})`}</label>
-        <button className="primaryButton" onClick={() => window.print()} type="button">🖨 인쇄</button>
-        <button className="softButton" disabled={pptxState.stage === "running"} onClick={savePptx} type="button">PPT 저장</button>
-        <button className="softButton" onClick={onClose} type="button">닫기</button>
+        <div className="problemBankPrintToolbarActions">
+          <button className="softButton" onClick={onClose} type="button">닫기</button>
+          <button className="softButton" disabled={pptxState.stage === "running"} onClick={savePptx} type="button">PPT 저장</button>
+          <button className="primaryButton" onClick={() => window.print()} type="button">🖨 인쇄</button>
+        </div>
         {pptxState.message ? <small aria-live="polite" className={`problemBankPptxMessage stage-${pptxState.stage}`}>{pptxState.message}</small> : null}
         {isExam ? <small className="problemBankPptxMessage">배점은 번호 옆 칸에서 문항마다 고칠 수 있습니다 (합계 {pointsTotal}점).</small> : null}
       </div>

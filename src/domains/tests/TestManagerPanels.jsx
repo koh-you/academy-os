@@ -1,9 +1,11 @@
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
+import { OverflowMenu } from "../../shared/components/OverflowMenu.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { SelectableCard } from "../../shared/components/SelectableCard.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
+import "./testManagerPanels.css";
 
 export function TestManagerTabs({ activeTab = "attempts", onChange }) {
   return (
@@ -251,13 +253,16 @@ export function TestAttemptActions({
 }) {
   return (
     <div className="testAttemptActions">
+      {/* 파괴적 액션(회차 삭제)은 왼쪽 끝 ⋯ 메뉴로, 확인은 App.jsx 의 onDeleteTestSession 이 그대로 맡는다(2026-09-19). */}
+      {currentTestSession ? (
+        <OverflowMenu
+          className="overflowMenu-start testAttemptSessionMenu"
+          items={[{ key: "delete", label: "이 회차 삭제", onSelect: () => onDeleteTestSession?.(currentTestSession.testSessionId), tone: "danger" }]}
+          label="응시 회차 추가 작업"
+        />
+      ) : null}
       {attemptError ? <span className="saveState save-failed">{attemptError}</span> : null}
       <button className="softButton" onClick={onResetAttemptForm} type="button">새 회차 입력</button>
-      {currentTestSession ? (
-        <button className="dangerSoftButton" onClick={() => onDeleteTestSession?.(currentTestSession.testSessionId)} type="button">
-          이 회차 삭제
-        </button>
-      ) : null}
       <button className="primaryButton" disabled={!canSave || isSaving} onClick={onSaveAttemptSession} type="button">
         {isSaving ? "저장 중" : "응시 기록 저장"}
       </button>

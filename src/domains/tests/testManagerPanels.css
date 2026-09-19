@@ -1,0 +1,4 @@
+/* 응시 기록 액션 바: 파괴적 ⋯ 메뉴(회차 삭제)는 왼쪽 끝, [새 회차 입력][응시 기록 저장]은 오른쪽(2026-09-19). */
+.testAttemptActions .testAttemptSessionMenu {
+  margin-right: auto;
+}
