@@ -77,7 +77,12 @@ test("exam prep rows consolidate review and management actions into the detail m
 
   const detailDialog = page.getByRole("dialog", { name: "안전고 시험정보 수정" });
   await expect(detailDialog.getByRole("button", { name: "시험 후 총평 작성" })).toBeVisible();
-  await expect(detailDialog.getByRole("button", { name: "시험정보 삭제" })).toBeVisible();
+  // 2026-09-19 · 시험정보 삭제는 푸터 왼쪽 끝 ⋯ 메뉴(… 추가 작업)로 접었다. 항목만 확인하고 Esc 로 메뉴만 닫는다.
+  await detailDialog.getByRole("button", { name: "안전고 추가 작업" }).click();
+  await expect(detailDialog.getByRole("menuitem", { name: "시험정보 삭제" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(detailDialog.getByRole("menuitem", { name: "시험정보 삭제" })).toBeHidden();
+  await expect(detailDialog).toBeVisible();
   await detailDialog.getByRole("button", { name: "시험 후 총평 작성" }).click();
   await expect(page.getByRole("dialog", { name: "안전고 시험 후 총평" })).toBeVisible();
   expect(pageErrors).toEqual([]);

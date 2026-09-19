@@ -2,3 +2,19 @@
 .examPrepOrphanDeleteButton {
   justify-self: start;
 }
+
+/* 시험정보 수정 모달 푸터 — 자동생성 행에서 삭제 ⋯ 대신 보여주는 안내. 왼쪽 묶음 폭을 제한해 안내는
+   버튼 줄 위에서 줄바꿈되고, 오른쪽 [닫기][변경 저장] 묶음은 세로로 무너지지 않는다(2026-09-19). */
+.examPrepEditRowActions {
+  max-width: 560px;
+  min-width: 0;
+}
+
+.examPrepEditRowActions .examPrepEditDeleteNote {
+  flex: 0 0 100%;
+  line-height: 1.4;
+}
+
+.examPrepEditActionRow .examPrepEditModalActions {
+  flex-shrink: 0;
+}

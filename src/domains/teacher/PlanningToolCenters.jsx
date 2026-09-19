@@ -953,8 +953,8 @@ export function LessonResearchCenter({
         actions={(
           <>
           <InlineSaveStatus label="수업연구 교안" saveState={lessonResearchSaveState} />
-          <button className="primaryButton" disabled={!canSaveItems} onClick={onSaveItems} type="button">수업연구 저장</button>
           <button className="softButton" onClick={handleAddItem} type="button">+ 교안 항목 추가</button>
+          <button className="primaryButton" disabled={!canSaveItems} onClick={onSaveItems} type="button">수업연구 저장</button>
           </>
         )}
         actionsClassName="researchTopActions"
@@ -1486,6 +1486,7 @@ export function AIVariantProblemCenter({ runtime, aiSettings = runtime.defaultAi
                 <SelectionToolbar
                   actions={(
                     <>
+                      <button className="softButton" onClick={handleGenerateVariant} type="button">다시 생성</button>
                       <button
                         className="primaryButton compact"
                         disabled={selectedVariantCount === 0}
@@ -1494,7 +1495,6 @@ export function AIVariantProblemCenter({ runtime, aiSettings = runtime.defaultAi
                       >
                         HWPX 내보내기 ({selectedVariantCount})
                       </button>
-                      <button className="softButton" onClick={handleGenerateVariant} type="button">다시 생성</button>
                     </>
                   )}
                   className="variantResultToolbar"
