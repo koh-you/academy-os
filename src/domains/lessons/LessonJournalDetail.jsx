@@ -8,6 +8,7 @@ import {
 } from "./assignmentStatus.js";
 import { formatShortDateLabel, getAttendanceDisplay, hasMissingCheckOut } from "./attendance.js";
 import { defaultAttendanceSettings } from "./attendanceSettings.js";
+import { ConfirmDialog } from "../../shared/components/ConfirmDialog.jsx";
 import { LessonJournalClosureNotice } from "./LessonJournalClosureNotice.jsx";
 import { LessonJournalAbsenceSourceNotice } from "./LessonJournalAbsenceSourceNotice.jsx";
 import { LessonJournalHeader } from "./LessonJournalHeader.jsx";
@@ -153,11 +154,13 @@ export function LessonJournalDetail({
   } = useLessonJournalOverlayState();
   const {
     cancelingReservationJobId,
+    pendingCancelReservationJob,
     reservationApplyState,
     reservationAudit,
     reservationInspectMode,
     reservationModalOpen,
     setCancelingReservationJobId,
+    setPendingCancelReservationJob,
     setReservationApplyState,
     setReservationAudit,
     setReservationInspectMode,
@@ -498,9 +501,21 @@ export function LessonJournalDetail({
     });
   }, [lesson.date, lesson.lessonId, reservationModalOpen]);
 
+  // 2026-09-19 · U11(lessons-10): 예약 1건 취소는 브라우저 confirm 대신 ConfirmDialog 로 묻는다.
+  // 예약 확인 모달의 [취소] → requestCancelReservationJob(대화상자 열기) → [예약 취소] 확정 → cancelReservationJob(실행 함수는 그대로).
+  function requestCancelReservationJob(job) {
+    if (!job?.notificationJobId || cancelingReservationJobId) return;
+    setPendingCancelReservationJob(job);
+  }
+
+  function confirmCancelReservationJob() {
+    const job = pendingCancelReservationJob;
+    setPendingCancelReservationJob(null);
+    if (job) cancelReservationJob(job);
+  }
+
   async function cancelReservationJob(job) {
     if (!job?.notificationJobId || cancelingReservationJobId) return;
-    if (typeof window !== "undefined" && !window.confirm("이 알림톡 예약 1건을 취소할까요? 취소한 기록은 이력에 남습니다.")) return;
     setCancelingReservationJobId(job.notificationJobId);
     try {
       const result = await onCancelNotificationJob?.(job, "수업일지 예약 확인에서 취소");
@@ -687,7 +702,7 @@ export function LessonJournalDetail({
           hasSolapiResultRefreshTarget={hasSolapiResultRefreshTarget}
           issueReservationJobs={issueReservationJobs}
           lesson={lesson}
-          onCancelReservationJob={cancelReservationJob}
+          onCancelReservationJob={requestCancelReservationJob}
           onClose={() => setReservationModalOpen(false)}
           onRefreshReservationAudit={refreshReservationAudit}
           onRefreshSolapiSendResults={refreshSolapiSendResults}
@@ -707,6 +722,15 @@ export function LessonJournalDetail({
           visibleReservationStudents={visibleReservationStudents}
         />
       ) : null}
+      <ConfirmDialog
+        confirmLabel="예약 취소"
+        description="이 알림톡 예약 1건을 취소할까요? 취소한 기록은 이력에 남습니다."
+        onCancel={() => setPendingCancelReservationJob(null)}
+        onConfirm={confirmCancelReservationJob}
+        open={Boolean(pendingCancelReservationJob)}
+        title="알림톡 예약 취소"
+        tone="danger"
+      />
 
       <LessonJournalTable isEditMode={journalEditMode}>
           {lessonStudents.map((student) => {

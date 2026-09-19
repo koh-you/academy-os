@@ -36,6 +36,7 @@
 3. 위 두 경우 중 어디에 해당하는지 애매한 기존 화면(예: 학생 영구 삭제처럼 파급이 큰 액션)은 그 화면을 다루는 단위에서 실제 파급 범위를 다시 판단하고, 파급이 크면 1번(확인 모달 + `dangerSoftButton`)로 정리한다. 이 판단은 화면마다 사람 확인을 권장한다.
 4. 하나의 화면에 `dangerButton`과 `dangerSoftButton`을 섞어 쓰지 않는다 — 그 화면 안에서는 위 1/2 규칙에 따라 통일한다.
 5. 여러 수신자에게 실제로 나가는 외부 발송(알림관리 공지 즉시/예약 발송 등)도 확인 모달을 거친다(2026-09-19). 파괴적 액션은 아니므로 확정 버튼은 `primaryButton`이고, 라벨에 실제 범위를 붙인다(`N건 지금 발송` / `N건 예약`). 모달은 진입점만 추가하며 확정 버튼이 기존 발송 함수를 그대로 호출한다.
+6. 확인 대화상자는 공용 `src/shared/components/ConfirmDialog.jsx`(`ConfirmDialog`: 공용 Modal + ModalFooter 위의 `[취소][확정]`, `tone="danger"`면 확정이 `dangerSoftButton`, 초기 포커스는 취소, `busy`면 닫기 잠금 + '처리 중...')를 쓴다(2026-09-19 U11). `window.confirm`은 신규 사용 금지이고, 기존 것은 화면 단위에서 순차 교체한다(남은 목록은 `scripts/scenario-tests-production.cjs`의 77j-5d-4 개수 잠금이 추적).
 
 ## 크기 규칙
 

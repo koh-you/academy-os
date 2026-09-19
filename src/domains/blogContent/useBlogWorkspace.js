@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createAppStatePersistenceController } from "../appState/appStatePersistenceController.js";
 import { getJsonWithTimeout } from "../../shared/utils/apiClient.js";
+import { useUnsavedChangesGuard } from "../../shared/runtime/useUnsavedChangesGuard.js";
 import { BLOG_KEY } from "./blogHybridModel.js";
 
 export function useBlogWorkspace(postAppState) {
@@ -27,17 +28,8 @@ export function useBlogWorkspace(postAppState) {
     }).catch(e => { if (active) setError(e.message); });
     return () => { active = false; instance.dispose(); };
   }, [postAppState]);
-  useEffect(() => {
-    if (!dirty && !busy) return;
-    const unload = e => { e.preventDefault(); e.returnValue = ""; };
-    const navigate = e => {
-      if (!e.target.closest?.('#academy-primary-navigation button')) return;
-      if (busy || !window.confirm("저장하지 않은 SNS 콘텐츠 편집 내용이 있습니다. 이 화면을 나갈까요?")) { e.preventDefault(); e.stopPropagation(); }
-    };
-    window.addEventListener("beforeunload", unload);
-    document.addEventListener("click", navigate, true);
-    return () => { window.removeEventListener("beforeunload", unload); document.removeEventListener("click", navigate, true); };
-  }, [dirty, busy]);
+  // 2026-09-19 · U11: beforeunload + 사이드바 클릭 confirm 가드를 공용 훅으로 옮겼다(동작·문구 동일).
+  useUnsavedChangesGuard(dirty, "저장하지 않은 SNS 콘텐츠 편집 내용이 있습니다. 이 화면을 나갈까요?", { busy });
   function change(next) { setItems(next); setDirty(true); setStatus("dirty"); }
   async function save(next = items) {
     if (!ready || busy) return false;
