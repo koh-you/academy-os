@@ -1,0 +1,58 @@
+%% problem.tex — 문제 환경 + 객관식 보기
+%% 가벼운 디자인: 번호 + 난이도점 + 뱃지만. 박스 X.
+
+\newcounter{probnum}[chapter]
+\renewcommand{\theprobnum}{\arabic{probnum}}
+
+% \begin{problem}{문항ID}{난이도}
+% 본문...
+% \end{problem}
+%
+% 문항ID는 메타용(주석 활용), 표시는 번호카운터로
+\newenvironment{problem}[2]{%
+  \refstepcounter{probnum}%
+  \par\addvspace{8pt}%
+  \noindent
+  {\sffamily\bfseries\color{tbk-accent}\large\theprobnum}\quad
+  \diffdot{#2}\quad
+  \ignorespaces
+}{%
+  \par\addvspace{4pt}%
+}
+
+% 정답이 있는 문항 (해설지용 — 기본 빌드에서는 출력 X)
+\newif\ifshowanswers
+\showanswersfalse
+
+\newcommand{\answer}[1]{%
+  \ifshowanswers
+    \par\smallskip{\small\color{tbk-tip}\textbf{정답.} #1}\par
+  \fi
+}
+
+%% ── 객관식 보기 ──
+%% 작은 ①~⑤ 아이콘. 보기들이 본문 폭(\linewidth)에 맞춰 균등 분포.
+\newcommand{\circnum}[1]{%
+  \tikz[baseline=(c.base)]\node[draw,circle,inner sep=0.5pt,minimum size=8pt,
+    line width=0.3pt,font=\tiny] (c) {#1};%
+}
+
+% 위 tikz가 없어도 동작하도록 폴백
+\providecommand{\circnum}[1]{\textcircled{\scriptsize #1}}
+
+\newcounter{choicecnt}
+\newenvironment{choices}{%
+  \par\smallskip
+  \setcounter{choicecnt}{0}%
+  \noindent\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lllll}%
+}{%
+  \end{tabular*}\par
+}
+
+\newcommand{\choice}[1]{%
+  \stepcounter{choicecnt}%
+  \ifcase\value{choicecnt}\or
+    \circnum{1}\,#1 &\or \circnum{2}\,#1 &\or \circnum{3}\,#1 &\or
+    \circnum{4}\,#1 &\or \circnum{5}\,#1
+  \fi
+}

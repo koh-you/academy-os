@@ -1,0 +1,251 @@
+% figures-cb.sty — CM1 경우의 수(CB) 단원 그림 매크로 라이브러리 (v2.0, 2026-06-25)
+%
+% 단일 출처: bank/유형카탈로그/그림가이드.md + bank/v3.5-발문시그니처-카탈로그.md
+% 사용 의무: T05(도로망)·T06(색칠)·T08(수형도, 권장)·T21(직선·대각선)·T22(다각형) 슬롯
+%
+% 의존성: tikz (mathbook.cls·동화고 style.sty 로드). calc·shapes.geometric·positioning 라이브러리.
+%
+% v2.0 변경 (2026-06-25 v3.5 시스템 개선):
+%   - \colorRegionsCycle 정정: 중심에서 꼭짓점까지 분할선 + 영역 라벨 정렬
+%   - \colorRegionsSquareGrid 신규: 정사각형 +자형 4분할
+%   - \colorRegionsCross 신규: 정사각형 ×자형 4분할 (대각선)
+%   - \colorRegionsMapStar 신규: 중심+주변 star 인접 구조
+%   - \colorRegionsLinear 라벨 정합 보강
+%
+% 매크로 목록:
+%   \colorRegionsLinear{n}{labels}     — T06: n개 영역 일렬 인접 (사각형 가로 배열)
+%   \colorRegionsCycle{n}{labels}      — T06: 정n각형 부채꼴 분할 (cycle 인접)
+%   \colorRegionsSquareGrid{labels}    — T06: 정사각형 +자형 4분할 (cross 형)
+%   \colorRegionsCross{labels}         — T06: 정사각형 ×자형 4분할 (대각선)
+%   \colorRegionsMapStar{n}{labels}    — T06: 중심+주변 n개 영역 star 인접
+%   \regularPolygon{n}                 — T21: 정n각형 + 모든 대각선
+%   \regularPolygonNoDiag{n}           — T22: 정n각형 (꼭짓점 표시만, 대각선 없음)
+%   \gridPath{w}{h}                    — T05: w×h 격자 도로망 (시작점 A·끝점 B)
+%   \gridPathVia{w}{h}{vx}{vy}         — T05: w×h 격자 + 경유점 P(vx,vy)
+%   \treeDiagram{root}{children}       — T08: 수형도 (간단형)
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{figures-cb}[2026/06/25 v2.0 CM1 CB unit figure macros]
+
+\RequirePackage{tikz}
+\usetikzlibrary{calc, shapes.geometric, positioning, arrows.meta}
+
+% ---------------------------------------------------------------------------
+% 1. 색칠 (T06) — 일렬 인접
+% ---------------------------------------------------------------------------
+% \colorRegionsLinear{n}{labels}
+%   n      : 영역 개수 (정수)
+%   labels : 쉼표 분리 영역 이름 (예: A,B,C,D,E)
+% 효과: 가로 일렬로 n개 정사각형 셀, 각 셀 안에 라벨, 인접 셀끼리만 맞닿음
+\newcommand{\colorRegionsLinear}[2]{%
+  \begin{center}
+  \begin{tikzpicture}[every node/.style={font=\small}]
+    \foreach \lab [count=\i from 0] in {#2} {%
+      \draw[line width=0.6pt] (\i*0.85,0) rectangle ++(0.85,0.85);
+      \node at (\i*0.85+0.425, 0.425) {\lab};
+    }
+  \end{tikzpicture}
+  \end{center}
+}
+
+% ---------------------------------------------------------------------------
+% 2. 색칠 (T06) — 정n각형 부채꼴 분할 (cycle 인접) — v2.0 정정
+% ---------------------------------------------------------------------------
+% \colorRegionsCycle{n}{labels}
+%   n      : 정n각형의 변 수 (= 영역 수, cycle 인접 그래프)
+%   labels : 쉼표 분리 영역 이름
+% v2.0 정정: 중심에서 각 꼭짓점까지 분할선 + 영역 라벨을 부채꼴 중심에 배치
+\newcommand{\colorRegionsCycle}[2]{%
+  \begin{center}
+  \begin{tikzpicture}[every node/.style={font=\small}]
+    \node[regular polygon, regular polygon sides=#1, draw, minimum size=3cm, line width=0.6pt] (P) at (0,0) {};
+    % 중심에서 각 꼭짓점까지 분할선 (영역 분할 시각화)
+    \foreach \i in {1,...,#1} {%
+      \draw[line width=0.5pt] (P.center) -- (P.corner \i);
+    }
+    % 영역 라벨: 인접한 두 꼭짓점 중점 + 중심의 평균 위치 (부채꼴 중심)
+    \foreach \lab [count=\i from 1] in {#2} {%
+      \pgfmathtruncatemacro{\nextI}{ifthenelse(\i==#1, 1, \i+1)}
+      \path (P.corner \i) -- (P.corner \nextI) coordinate[midway] (edgemid\i);
+      \path (P.center) -- (edgemid\i) coordinate[pos=0.65] (lab\i);
+      \node at (lab\i) {\lab};
+    }
+  \end{tikzpicture}
+  \end{center}
+}
+
+% ---------------------------------------------------------------------------
+% 3. 색칠 (T06) — 정사각형 +자형 4분할 (cross 형) — v2.0 신규
+% ---------------------------------------------------------------------------
+% \colorRegionsSquareGrid{labels}
+%   labels : 쉼표 분리 4개 영역 이름 (좌상·우상·우하·좌하 순)
+% 효과: 정사각형 내부에 가로·세로 중심선 → 4분할
+\newcommand{\colorRegionsSquareGrid}[1]{%
+  \begin{center}
+  \begin{tikzpicture}[every node/.style={font=\small}]
+    \draw[line width=0.6pt] (0,0) rectangle (3,3);
+    \draw[line width=0.6pt] (1.5,0) -- (1.5,3);
+    \draw[line width=0.6pt] (0,1.5) -- (3,1.5);
+    \foreach \lab [count=\i from 1] in {#1} {%
+      \ifnum\i=1 \node at (0.75,2.25) {\lab};\fi
+      \ifnum\i=2 \node at (2.25,2.25) {\lab};\fi
+      \ifnum\i=3 \node at (2.25,0.75) {\lab};\fi
+      \ifnum\i=4 \node at (0.75,0.75) {\lab};\fi
+    }
+  \end{tikzpicture}
+  \end{center}
+}
+
+% ---------------------------------------------------------------------------
+% 4. 색칠 (T06) — 정사각형 ×자형 4분할 (대각선) — v2.0 신규
+% ---------------------------------------------------------------------------
+% \colorRegionsCross{labels}
+%   labels : 쉼표 분리 4개 영역 이름 (상·우·하·좌 순, 12시 방향부터 시계방향)
+% 효과: 정사각형 내부에 대각선 2개 → 4개의 삼각형 영역
+\newcommand{\colorRegionsCross}[1]{%
+  \begin{center}
+  \begin{tikzpicture}[every node/.style={font=\small}]
+    \draw[line width=0.6pt] (0,0) rectangle (3,3);
+    \draw[line width=0.6pt] (0,0) -- (3,3);
+    \draw[line width=0.6pt] (0,3) -- (3,0);
+    \foreach \lab [count=\i from 1] in {#1} {%
+      \ifnum\i=1 \node at (1.5,2.3) {\lab};\fi    % 상
+      \ifnum\i=2 \node at (2.3,1.5) {\lab};\fi    % 우
+      \ifnum\i=3 \node at (1.5,0.7) {\lab};\fi    % 하
+      \ifnum\i=4 \node at (0.7,1.5) {\lab};\fi    % 좌
+    }
+  \end{tikzpicture}
+  \end{center}
+}
+
+% ---------------------------------------------------------------------------
+% 5. 색칠 (T06) — 중심+주변 star 인접 — v2.0 신규
+% ---------------------------------------------------------------------------
+% \colorRegionsMapStar{n}{labels}
+%   n      : 주변 영역 개수
+%   labels : 쉼표 분리 영역 이름 (첫 번째는 중심, 나머지 n개는 주변 시계방향)
+% 효과: 정n각형 내부 중심 영역 + n개 주변 영역 (중심은 주변 모두와 인접)
+\newcommand{\colorRegionsMapStar}[2]{%
+  \begin{center}
+  \begin{tikzpicture}[every node/.style={font=\small}]
+    \node[regular polygon, regular polygon sides=#1, draw, minimum size=3.4cm, line width=0.6pt] (P) at (0,0) {};
+    \foreach \i in {1,...,#1} {%
+      \draw[line width=0.5pt] (P.center) -- (P.corner \i);
+    }
+    % 중심 영역 라벨
+    \foreach \lab [count=\i from 0] in {#2} {%
+      \ifnum\i=0 \node at (0,0) {\lab};\fi
+    }
+    % 주변 영역 라벨 (i=1..n)
+    \foreach \lab [count=\i from 0] in {#2} {%
+      \ifnum\i>0
+        \pgfmathtruncatemacro{\nextI}{ifthenelse(\i==#1, 1, \i+1)}
+        \path (P.corner \i) -- (P.corner \nextI) coordinate[midway] (em\i);
+        \path (P.center) -- (em\i) coordinate[pos=0.72] (la\i);
+        \node at (la\i) {\lab};
+      \fi
+    }
+  \end{tikzpicture}
+  \end{center}
+}
+
+% ---------------------------------------------------------------------------
+% 6. 직선·대각선 (T21) — 정n각형 + 모든 대각선
+% ---------------------------------------------------------------------------
+% \regularPolygon{n}
+\newcommand{\regularPolygon}[1]{%
+  \begin{center}
+  \begin{tikzpicture}[every node/.style={font=\footnotesize}]
+    \node[regular polygon, regular polygon sides=#1, draw, minimum size=3cm, line width=0.6pt] (P) at (0,0) {};
+    \foreach \i in {1,...,#1} {%
+      \foreach \j in {1,...,#1} {%
+        \ifnum\j>\i
+          \draw[line width=0.3pt] (P.corner \i) -- (P.corner \j);
+        \fi
+      }
+    }
+    \foreach \i in {1,...,#1} {%
+      \fill (P.corner \i) circle (1.4pt);
+    }
+  \end{tikzpicture}
+  \end{center}
+}
+
+% ---------------------------------------------------------------------------
+% 7. 다각형 카운트 (T22) — 정n각형 꼭짓점 (대각선 없음)
+% ---------------------------------------------------------------------------
+% \regularPolygonNoDiag{n}
+\newcommand{\regularPolygonNoDiag}[1]{%
+  \begin{center}
+  \begin{tikzpicture}[every node/.style={font=\footnotesize}]
+    \node[regular polygon, regular polygon sides=#1, draw, minimum size=3cm, line width=0.6pt] (P) at (0,0) {};
+    \foreach \i in {1,...,#1} {%
+      \fill (P.corner \i) circle (1.4pt);
+    }
+  \end{tikzpicture}
+  \end{center}
+}
+
+% ---------------------------------------------------------------------------
+% 8. 도로망 (T05) — w×h 격자
+% ---------------------------------------------------------------------------
+% \gridPath{w}{h}
+%   w : 가로 칸 수
+%   h : 세로 칸 수
+% A: 좌하단 (0,0) · B: 우상단 (w,h)
+\newcommand{\gridPath}[2]{%
+  \begin{center}
+  \begin{tikzpicture}[every node/.style={font=\footnotesize}]
+    \foreach \x in {0,...,#1} {%
+      \draw[line width=0.4pt] (\x,0) -- (\x,#2);
+    }
+    \foreach \y in {0,...,#2} {%
+      \draw[line width=0.4pt] (0,\y) -- (#1,\y);
+    }
+    \node[below left, font=\small] at (0,0) {A};
+    \node[above right, font=\small] at (#1,#2) {B};
+    \fill (0,0) circle (1.6pt);
+    \fill (#1,#2) circle (1.6pt);
+  \end{tikzpicture}
+  \end{center}
+}
+
+% \gridPathVia{w}{h}{vx}{vy} — w×h 격자 + 경유점 P(vx,vy)
+\newcommand{\gridPathVia}[4]{%
+  \begin{center}
+  \begin{tikzpicture}[every node/.style={font=\footnotesize}]
+    \foreach \x in {0,...,#1} {%
+      \draw[line width=0.4pt] (\x,0) -- (\x,#2);
+    }
+    \foreach \y in {0,...,#2} {%
+      \draw[line width=0.4pt] (0,\y) -- (#1,\y);
+    }
+    \node[below left, font=\small] at (0,0) {A};
+    \node[above right, font=\small] at (#1,#2) {B};
+    \node[above right, font=\small] at (#3,#4) {P};
+    \fill (0,0) circle (1.6pt);
+    \fill (#1,#2) circle (1.6pt);
+    \fill (#3,#4) circle (1.6pt);
+  \end{tikzpicture}
+  \end{center}
+}
+
+% ---------------------------------------------------------------------------
+% 9. 수형도 (T08) — 간단형
+% ---------------------------------------------------------------------------
+% \treeDiagram{root}{children}
+%   root     : 루트 노드 텍스트
+%   children : 콤마 분리 자식 노드 텍스트 (1차 자식만)
+\newcommand{\treeDiagram}[2]{%
+  \begin{center}
+  \begin{tikzpicture}[every node/.style={font=\small, draw, rectangle, rounded corners=2pt, inner sep=3pt}]
+    \node (root) at (0,0) {#1};
+    \foreach \c [count=\i from 0] in {#2} {%
+      \node (n\i) at (\i*1.5-1.5, -1.2) {\c};
+      \draw[->, >=Stealth, line width=0.4pt] (root.south) -- (n\i.north);
+    }
+  \end{tikzpicture}
+  \end{center}
+}
+
+\endinput

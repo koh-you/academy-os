@@ -1,0 +1,130 @@
+% figures-palette.sty — 그림·그래프 표준 색 팔레트 및 라벨 매크로
+% v1.0 (2026-07-11 세션 33): 와부고 typed SVG 실측 근거
+% v1.1 (2026-07-17 세션 48): 학평 답지 정독 반영 — 축·곡선 굵기 축소·흑백 기본화·함수 라벨 매크로 신설
+%   근거: bank/그래프-학평-정독-2026-07-17.md v1.0
+%   변경: 축 1.3pt → 0.4pt · 곡선 1.8pt → 0.5pt · 도형 1.4pt → 0.5pt · 흑백 기본 (색은 옵션)
+%   신규 매크로: \fpfunclabel · \fpxvalue · \fpyvalue · \fpaxesplain (표준 학평 축)
+%
+% 사용:
+%   \usepackage{figures-palette}
+%   \begin{tikzpicture}[xscale=0.6, yscale=0.5, line width=0.4pt, font=\small]
+%     \fpaxesplain{-1}{7}{-2}{5}{$x$}{$y$}
+%     \draw[fp-curve] plot ...;
+%     \fpfunclabel{6.5}{3.2}{$y=f(x)$}{south west}
+%   \end{tikzpicture}
+%
+% 원칙:
+%   ① 축·곡선·점선 모두 얇은 굵기 (0.4~0.5pt) — 학평 답지 표준
+%   ② 색상은 옵션 — 기본 흑백 · 필요 시만 색
+%   ③ 라벨 위치 규약 표준화 — x축 아래 · y축 왼쪽 · 함수 라벨 곡선 오른쪽 leg 끝
+%   ④ x/y축 개별 스케일 — 정비율 강제 없음
+%   ⑤ 축 길이 = 곡선 domain × 1.2~1.4 · 화살표 여유
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{figures-palette}[2026/07/17 v1.1 Figure standard palette (학평 준수)]
+
+\RequirePackage{tikz}
+\RequirePackage{xcolor}
+
+% ── 표준 색 정의 (학평 흑백 기본 + 옵션 색) ──
+\definecolor{fp-axis}{HTML}{000000}       % 축·화살표 (검정) · v1.1 #222 → #000
+\definecolor{fp-grid}{HTML}{CFD6E4}       % 격자 (옅은 회청)
+\definecolor{fp-main}{HTML}{000000}       % 주 도형·곡선 (검정) · v1.1 #1D4ED8 → #000
+\definecolor{fp-fill}{HTML}{EEEEEE}       % 채움 (연한 회색) · v1.1 #EAF0FB → #EEE
+\definecolor{fp-aux}{HTML}{555555}        % 보조선 (진한 회색) · v1.1 #999 → #555
+\definecolor{fp-label}{HTML}{000000}      % 라벨 텍스트 (검정) · v1.1 #222 → #000
+\definecolor{fp-accent}{HTML}{000000}     % 강조 (검정 기본 · 색이 필요하면 로컬 재정의)
+
+% 하위 호환: 색이 필요한 경우 로컬 override 가능
+% \definecolor{fp-color}{HTML}{1D4ED8} % (필요 시 답지 preamble에 로컬 재정의)
+
+% ── 표준 스타일 (tikz style) — v1.1 굵기 학평 준수 ──
+\tikzset{
+  % 축·화살표 (0.4pt · stealth 얇게)
+  fp-axis/.style={draw=fp-axis, line width=0.4pt, ->, >=stealth},
+  fp-axis-plain/.style={draw=fp-axis, line width=0.4pt},
+  % 격자 (매우 얇음)
+  fp-grid/.style={draw=fp-grid, line width=0.3pt},
+  % 주 도형/곡선 (0.5pt · v1.0 1.8pt → 축소)
+  fp-curve/.style={draw=fp-main, line width=0.5pt},
+  fp-shape/.style={draw=fp-main, line width=0.5pt},
+  % 채움 (연한 회색)
+  fp-region/.style={fill=fp-fill, opacity=0.6},
+  % 보조선 (점선 · 0.4pt · 촘촘한 마디)
+  fp-dashed/.style={draw=fp-aux, line width=0.4pt, dash pattern=on 1.5pt off 1.5pt},
+  % 점 (교점·꼭짓점) — 작게
+  fp-dot/.style={fill=fp-main, circle, inner sep=1.1pt},
+  % 라벨 (축 이름·좌표점 이름) — \small · 검정 · fill 없음 (그래프 훼손 금지 · 2026-07-17 마스터 재지적)
+  fp-name/.style={font=\small, text=fp-label},
+  % 라벨 (눈금·수치) — \footnotesize
+  fp-tick/.style={font=\footnotesize, text=fp-label, inner sep=1.5pt, fill=white},
+}
+
+% ── 매크로: 표준 학평 축 (fill=white 라벨 · 화살표 여유) ──
+% v1.1 신설. 학평 답지 형식 준수.
+% 사용: \fpaxesplain{xmin}{xmax}{ymin}{ymax}{xlabel}{ylabel}
+% 예: \fpaxesplain{-1}{7}{-2}{5}{$x$}{$y$}
+% 특징: 축 얇은 화살표 · 라벨 축 끝 근처 · fill=white 로 축과 안 겹침
+\newcommand{\fpaxesplain}[6]{%
+  \draw[fp-axis] (#1, 0) -- (#2, 0) node[below, fp-tick, pos=1] {#5};
+  \draw[fp-axis] (0, #3) -- (0, #4) node[left, fp-tick, pos=1] {#6};
+}
+
+% ── 매크로 (하위 호환): 좌표축 그리기 ──
+% v1.0 유지 · 굵기·화살표는 v1.1 tikzset 기준으로 자동 축소됨
+% 사용: \fpaxes{xmin}{xmax}{ymin}{ymax}{xlabel}{ylabel}
+\newcommand{\fpaxes}[6]{%
+  \draw[fp-axis] (#1,0) -- (#2,0) node[fp-name, right=2pt] {#5};
+  \draw[fp-axis] (0,#3) -- (0,#4) node[fp-name, above=2pt] {#6};
+}
+
+% ── 매크로: 격자 그리기 ──
+% 사용: \fpgrid{xmin}{ymin}{xmax}{ymax}{step}
+\newcommand{\fpgrid}[5]{%
+  \draw[fp-grid, step=#5] (#1,#2) grid (#3,#4);
+}
+
+% ── 매크로: 점 표시 + 라벨 ──
+% 사용: \fppoint{x}{y}{label}{anchor}
+% 예: \fppoint{2}{3}{$\mathrm{A}$}{above right}
+\newcommand{\fppoint}[4]{%
+  \node[fp-dot] at (#1,#2) {};
+  \node[fp-name, #4=3pt] at (#1,#2) {#3};
+}
+
+% ── 매크로: 원점 표시 ──
+\newcommand{\fporigin}{%
+  \node[fp-name, below left=1pt] at (0,0) {$\mathrm{O}$};
+}
+
+% ── v1.1 신규: 함수 라벨 (곡선 오른쪽 leg 끝 옆) ──
+% 학평 표준: y=f(x) 등 함수 라벨을 곡선의 자연스러운 leg 끝에 배치
+% 사용: \fpfunclabel{x_end}{y_end}{$y=f(x)$}{anchor}
+% 예: \fpfunclabel{6.65}{3.99}{$y=f(x)$}{south west}
+%   → 곡선이 (6.65, 3.99)에서 위쪽 leg 끝일 때, 남서 anchor로 라벨 배치
+\newcommand{\fpfunclabel}[4]{%
+  \node[fp-name, anchor=#4, inner sep=2pt] at (#1, #2) {#3};
+}
+
+% ── v1.1 신규: x축 위 값 라벨 (below · fill=white) ──
+% 사용: \fpxvalue{x}{$value$}
+% 예: \fpxvalue{6}{$6$}
+\newcommand{\fpxvalue}[2]{%
+  \node[fp-tick, below, inner sep=2pt] at (#1, 0) {#2};
+}
+
+% ── v1.1 신규: y축 위 값 라벨 (left · fill=white) ──
+% 사용: \fpyvalue{y}{$value$}
+\newcommand{\fpyvalue}[2]{%
+  \node[fp-tick, left, inner sep=2pt, anchor=east] at (0, #1) {#2};
+}
+
+% ── v1.1 신규: 점선 좌표 낙하선 (점 → x축·y축) ──
+% 사용: \fpdrop{x}{y}
+%   → (x, y)에서 x축·y축으로 점선 낙하선
+\newcommand{\fpdrop}[2]{%
+  \draw[fp-dashed] (#1, #2) -- (#1, 0);
+  \draw[fp-dashed] (#1, #2) -- (0, #2);
+}
+
+\endinput

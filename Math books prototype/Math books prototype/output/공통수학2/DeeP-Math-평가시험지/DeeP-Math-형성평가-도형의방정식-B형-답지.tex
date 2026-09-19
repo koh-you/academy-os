@@ -1,0 +1,375 @@
+% DeeP Math 형성평가 · CM2-GM 도형의 방정식 · B형 답지
+% ============================================================================
+% v1.1 B형 답지 (2026-07-27 · 세션 94)
+% 시험지 : DeeP-Math-형성평가-도형의방정식-B형-문제.tex v1.1
+% 스타일 : dm-answer-classic.sty v8.12 (정리편 답지 계승)
+% 20문 · 100점 · 6페이지 시험지 대응
+%
+% CP 정책 v2.0 준수 (feedback_solution_cp_count.md) :
+%   - 하한 조건 만족 슬롯만 CP 부여
+%   - 상한 : 슬롯당 CP 1개 · 예외 없음
+%   - 언어 : F1~F7 부자연 표현 금지 · 자연 한국어
+%
+% CP 대상 슬롯 (4건 · 정점 문항 한정) :
+%   Q17 : 세 직선 직각삼각형 두 경우 분류
+%   Q18 : 두 원 평행이동 후 공통접선 (학평)
+%   Q19 : 대칭 삼각형 외접원 반지름 곱 (학평)
+%   Q20 : 원 위 점 · 삼각형 넓이가 홀수 자연수 (학평 변형)
+%
+% B형 답 요약 :
+%   Q01 a=9 · Q02 ab=-16 · Q03 x절편=1 · Q04 ab=-3 · Q05 정수 a=3
+%   Q06 ab=-6 · Q07 a합=12 · Q08 a합=24 · Q09 ab=6 · Q10 k합=16
+%   Q11 a+b=-7 · Q12 AB=5 · Q13 k합=-4 · Q14 p+q=7 · Q15 3√5
+%   Q16 pq=6 · Q17 a합=-5/4 · Q18 abr=60 · Q19 OA²=36 · Q20 P=6
+% ============================================================================
+
+\documentclass[10pt,fleqn]{article}
+\usepackage{dm-answer-classic}
+\renewcommand{\dmexamname}{도형의 방정식 · B형}
+
+\begin{document}
+\dmanswersetup
+
+\dmanswerheader{도형의 방정식 · B형 정답 및 해설}
+
+% ══════════════════════════════════════════════════════════════
+% 빠른 정답표 (20문 · 5×4 그리드)
+% ══════════════════════════════════════════════════════════════
+
+\renewcommand{\dmquickgridstretch}{1.70}
+\begin{dmquickgrid}
+\dmquick{1}{⑤ $a=9$} & \dmquick{2}{② $ab=-16$} & \dmquick{3}{③ $x$\ 절편 $=1$} & \dmquick{4}{② $ab=-3$} & \dmquick{5}{③ 최댓값 $=3$} \\
+\dmquick{6}{② $ab=-6$} & \dmquick{7}{③ 합 $=12$} & \dmquick{8}{③ 합 $=24$} & \dmquick{9}{③ $ab=6$} & \dmquick{10}{③ 합 $=16$} \\
+\dmquick{11}{② $a+b=-7$} & \dmquick{12}{③ $\overline{\mathrm{AB}}=5$} & \dmquick{13}{③ 합 $=-4$} & \dmquick{14}{③ $p+q=7$} & \dmquick{15}{③ $3\sqrt{5}$} \\
+\dmquick{16}{③ $pq=6$} & \dmquick{17}{② $-\dfrac{5}{4}$} & \dmquick{18}{③ $abr=60$} & \dmquick{19}{③ $\overline{\mathrm{OA}}^{\,2}=36$} & \dmquick{20}{③ $6$} \\
+\end{dmquickgrid}
+
+\begin{multicols*}{2}
+
+% ─────────────── Q01 ───────────────
+\dmsoltitle{1}{좌표 대칭형 두 점 사이의 거리 조건}
+\begin{dmanswerbox}
+정답: ⑤ $a=9$
+\end{dmanswerbox}
+
+두 점 $\mathrm{A}(4,\, a)$,\ $\mathrm{B}(a,\, 4)$\ 사이의 거리를 구하면
+\[ \overline{\mathrm{AB}}^{\,2} = (a-4)^2 + (4-a)^2 = 2(a-4)^2 \]
+이다. 조건 $\overline{\mathrm{AB}}=5\sqrt{2}$\ 에서 $\overline{\mathrm{AB}}^{\,2}=50$\ 이므로
+\[ 2(a-4)^2 = 50,\quad (a-4)^2 = 25 \]
+가 성립한다. 따라서 $a-4=\pm 5$\ 에서 $a=9$\ 또는 $a=-1$\ 이고, 양수 조건에 의하여 $a=9$\ 이다.
+
+% ─────────────── Q02 ───────────────
+\dmsoltitle{2}{중점 좌표에서 두 미지수 결정}
+\begin{dmanswerbox}
+정답: ② $ab=-16$
+\end{dmanswerbox}
+
+선분 $\mathrm{AB}$\ 의 중점의 좌표가 $(3,\,1)$\ 이므로 중점 공식에 의하여
+\[ \dfrac{a+(-2)}{2}=3,\quad \dfrac{4+b}{2}=1 \]
+이다. 각각을 풀면 $a=8$,\ $b=-2$\ 이다. 따라서 $ab=8\cdot(-2)=-16$\ 이다.
+
+% ─────────────── Q03 ───────────────
+\dmsoltitle{3}{두 점을 지나는 직선의 $x$\ 절편}
+\begin{dmanswerbox}
+정답: ③ $x$\ 절편 $=1$
+\end{dmanswerbox}
+
+두 점 $\mathrm{A}(-2,\,3)$,\ $\mathrm{B}(4,\,-3)$\ 을 지나는 직선의 기울기는
+\[ \dfrac{-3-3}{4-(-2)} = \dfrac{-6}{6} = -1 \]
+이다. 점 $\mathrm{A}(-2,\,3)$\ 을 지나는 방정식은 $y-3=-(x+2)$, 즉 $y=-x+1$\ 이다. $x$\ 절편은 $y=0$\ 을 대입하여
+\[ 0 = -x+1,\quad x=1 \]
+이다.
+
+% ─────────────── Q04 ───────────────
+\dmsoltitle{4}{수직·평행 조건에서 계수 결정}
+\begin{dmanswerbox}
+정답: ② $ab=-3$
+\end{dmanswerbox}
+
+직선 $3x-by+2=0$\ 을 $y$\ 에 대하여 정리하면 $y=\dfrac{3}{b}x+\dfrac{2}{b}$\ 이므로 기울기는 $\dfrac{3}{b}$\ 이다. 직선 $y=ax+2$\ 와 수직이려면 두 기울기의 곱이 $-1$\ 이어야 하므로
+\[ a\cdot\dfrac{3}{b} = -1,\quad 3a=-b. \]
+직선 $(b+2)x+y+1=0$\ 을 정리하면 $y=-(b+2)x-1$\ 이므로 기울기는 $-(b+2)$\ 이다. $y=ax+2$\ 와 평행이려면 기울기가 같아야 하므로
+\[ a = -(b+2). \]
+두 식을 연립하여 $b=-3a$\ 를 $a=-(b+2)$\ 에 대입하면 $a=3a-2$\ 에서 $a=1$\ 이고 $b=-3$\ 이다. 따라서 $ab=-3$\ 이다.
+
+% ─────────────── Q05 ───────────────
+\dmsoltitle{5}{원이 되기 위한 조건에서 정수의 최댓값}
+\begin{dmanswerbox}
+정답: ③ 최댓값 $=3$
+\end{dmanswerbox}
+
+주어진 방정식을 완전제곱꼴로 정리하면
+\[ (x+a)^2+(y-2)^2 = a^2+4-(a^2+2a-3) = 7-2a \]
+이다. 원이 되기 위해서는 우변이 양수이어야 하므로
+\[ 7-2a>0,\quad a<\dfrac{7}{2}=3.5 \]
+이다. 이 범위의 정수 중 최댓값은 $a=3$\ 이다.
+
+% ─────────────── Q06 ───────────────
+\dmsoltitle{6}{평행이동 규칙으로 대응점 결정}
+\begin{dmanswerbox}
+정답: ② $ab=-6$
+\end{dmanswerbox}
+
+점 $(2,\,-3)$\ 을 점 $(4,\,0)$\ 으로 옮기는 평행이동은 $x$\ 축 방향으로 $2$,\ $y$\ 축 방향으로 $3$\ 만큼 이동한다. 이 평행이동에 의하여 점 $(a,\,b)$\ 가 점 $(-1,\,5)$\ 로 옮겨지므로
+\[ a+2=-1,\quad b+3=5 \]
+이다. 따라서 $a=-3$,\ $b=2$\ 이고 $ab=-6$\ 이다.
+
+% ─────────────── Q07 ───────────────
+\dmsoltitle{7}{거리 비율 조건에서 두 해의 합}
+\begin{dmanswerbox}
+정답: ③ 합 $=12$
+\end{dmanswerbox}
+
+두 거리의 제곱을 구하면
+\begin{align*}
+\overline{\mathrm{AC}}^{\,2} &= (3-(-5))^2+(6-a)^2 = 64+(6-a)^2, \\
+\overline{\mathrm{BC}}^{\,2} &= (3-1)^2+(6-2)^2 = 20
+\end{align*}
+이다. 조건 $\overline{\mathrm{AC}}=2\overline{\mathrm{BC}}$\ 에서 $\overline{\mathrm{AC}}^{\,2}=4\overline{\mathrm{BC}}^{\,2}$\ 이므로
+\[ 64+(6-a)^2 = 80,\quad (6-a)^2=16 \]
+이 성립한다. 따라서 $6-a=\pm 4$\ 에서 $a=2$\ 또는 $a=10$\ 이고, 두 값의 합은 $12$\ 이다.
+
+% ─────────────── Q08 ───────────────
+\dmsoltitle{8}{$k$\ 에 관계없이 항상 지나는 점과 거리 조건}
+\begin{dmanswerbox}
+정답: ③ 합 $=24$
+\end{dmanswerbox}
+
+직선 $x+ky-3(k-1)=0$\ 을 $k$\ 에 대하여 정리하면
+\[ (x+3)+k(y-3) = 0 \]
+이다. 이 식이 실수 $k$\ 의 값에 관계없이 성립하려면 $x+3=0$\ 이고 $y-3=0$\ 이어야 하므로 항상 지나는 점의 좌표는 $\mathrm{P}(-3,\,3)$\ 이다.
+
+점 $\mathrm{P}$\ 와 직선 $x-3y+a=0$\ 사이의 거리는
+\[ \dfrac{|-3-9+a|}{\sqrt{1^2+(-3)^2}} = \dfrac{|a-12|}{\sqrt{10}} \]
+이다. 이 값이 $\sqrt{10}$\ 이므로
+\[ |a-12| = 10 \]
+이 성립하고 $a=22$\ 또는 $a=2$\ 이다. 두 값의 합은 $24$\ 이다.
+
+% ─────────────── Q09 ───────────────
+\dmsoltitle{9}{점에서 직선에 내린 수선의 발}
+\begin{dmanswerbox}
+정답: ③ $ab=6$
+\end{dmanswerbox}
+
+직선 $x+3y-9=0$\ 의 기울기는 $-\dfrac{1}{3}$\ 이므로 이 직선에 수직인 직선의 기울기는 $3$\ 이다. 점 $\mathrm{A}(6,\,11)$\ 을 지나고 기울기가 $3$\ 인 직선의 방정식은
+\[ y-11 = 3(x-6),\quad y=3x-7 \]
+이다. 이 직선과 주어진 직선의 교점이 수선의 발 $\mathrm{H}$\ 이다. $y=3x-7$\ 을 $x+3y-9=0$\ 에 대입하면
+\[ x+3(3x-7)-9 = 0,\quad 10x=30,\quad x=3 \]
+이고 $y=3\cdot 3-7=2$\ 이다. 따라서 $\mathrm{H}(3,\,2)$\ 이고 $ab=3\cdot 2=6$\ 이다.
+
+% ─────────────── Q10 ───────────────
+\dmsoltitle{10}{원과 직선이 접할 조건에서 두 값의 합}
+\begin{dmanswerbox}
+정답: ③ 합 $=16$
+\end{dmanswerbox}
+
+원의 넓이가 $5\pi$\ 이므로 반지름의 제곱은 $5$\ 이고 반지름의 길이는 $\sqrt{5}$\ 이다. 중심 $(-2,\,3)$\ 과 직선 $x-2y+k=0$\ 사이의 거리는
+\[ \dfrac{|-2-6+k|}{\sqrt{1^2+(-2)^2}} = \dfrac{|k-8|}{\sqrt{5}} \]
+이다. 접할 조건은 이 거리가 반지름 $\sqrt{5}$\ 와 같아야 하므로
+\[ \dfrac{|k-8|}{\sqrt{5}} = \sqrt{5},\quad |k-8|=5 \]
+가 성립한다. 따라서 $k=13$\ 또는 $k=3$\ 이고, 두 값의 합은 $16$\ 이다.
+
+% ─────────────── Q11 ───────────────
+\dmsoltitle{11}{원 위 점에서의 접선이 다른 점을 지나는 조건}
+\begin{dmanswerbox}
+정답: ② $a+b=-7$
+\end{dmanswerbox}
+
+점 $(-4,\,a)$\ 가 원 $x^2+y^2=25$ 위에 있으므로
+\[ 16+a^2=25,\quad a^2=9,\quad a=3 \]
+이다 (양수 조건). 원 위의 점 $(-4,\,3)$\ 에서의 접선의 방정식은
+\[ -4x+3y = 25 \]
+이다. 이 접선이 점 $(b,\,-5)$\ 를 지나므로
+\[ -4b + 3\cdot(-5) = 25,\quad -4b = 40,\quad b=-10. \]
+따라서 $a+b=3+(-10)=-7$\ 이다.
+
+% ─────────────── Q12 ───────────────
+\dmsoltitle{12}{원 밖의 점에서 그은 접선의 길이}
+\begin{dmanswerbox}
+정답: ③ $\overline{\mathrm{AB}}=5$
+\end{dmanswerbox}
+
+원의 방정식을 표준형으로 정리하면
+\[ x^2+y^2-2x+4y-4=0 \quad\Longleftrightarrow\quad (x-1)^2+(y+2)^2 = 9 \]
+이므로 중심은 $\mathrm{C}(1,\,-2)$\ 이고 반지름의 길이는 $3$\ 이다. 점 $\mathrm{A}(-2,\,3)$\ 에서 중심까지의 거리는
+\[ \overline{\mathrm{CA}} = \sqrt{(1-(-2))^2+(-2-3)^2} = \sqrt{9+25} = \sqrt{34} \]
+이다. 접점 $\mathrm{B}$\ 에서 반지름 $\overline{\mathrm{CB}}$\ 와 접선 $\overline{\mathrm{AB}}$\ 가 서로 수직이므로 직각삼각형 $\mathrm{CBA}$\ 에서
+\[ \overline{\mathrm{AB}}^{\,2} = \overline{\mathrm{CA}}^{\,2} - r^2 = 34 - 9 = 25 \]
+가 성립한다. 따라서 $\overline{\mathrm{AB}} = 5$\ 이다.
+
+% ─────────────── Q13 ───────────────
+\dmsoltitle{13}{평행이동한 원이 직선에 접할 조건}
+\begin{dmanswerbox}
+정답: ③ 합 $=-4$
+\end{dmanswerbox}
+
+원 $x^2+y^2+4x-4y-1=0$\ 을 표준형으로 정리하면
+\[ (x+2)^2+(y-2)^2 = 9 \]
+이므로 중심은 $(-2,\,2)$\ 이고 반지름의 길이는 $3$\ 이다. 평행이동 $(x,\,y)\to(x+k,\,y-1)$\ 에 의하여 중심은 $(-2+k,\,1)$\ 로 옮겨진다.
+
+이 원이 직선 $3x+4y+8=0$\ 과 접할 조건은 새 중심에서 직선까지의 거리가 반지름 $3$\ 과 같아야 하므로
+\[ \dfrac{|3(-2+k)+4\cdot 1+8|}{\sqrt{3^2+4^2}} = 3,\quad \dfrac{|3k+6|}{5} = 3 \]
+이 성립한다. 따라서 $|3k+6|=15$\ 에서 $3k+6=\pm 15$\ 이므로 $k=3$\ 또는 $k=-7$\ 이고, 두 값의 합은 $-4$\ 이다.
+
+% ─────────────── Q14 ───────────────
+\dmsoltitle{14}{$y=x-1$\ 에 대한 대칭이동}
+\begin{dmanswerbox}
+정답: ③ $p+q=7$
+\end{dmanswerbox}
+
+두 점 $(2,\,5)$\ 와 $(p,\,q)$\ 는 직선 $y=x-1$\ 에 대하여 대칭이다. 대칭의 정의에 의하여 두 점을 잇는 선분의 중점이 직선 위에 있고, 두 점을 잇는 선분이 직선에 수직이다.
+
+중점 $\left(\dfrac{2+p}{2},\ \dfrac{5+q}{2}\right)$\ 가 $y=x-1$\ 위에 있으므로
+\[ \dfrac{5+q}{2} = \dfrac{2+p}{2}-1,\quad 5+q = p,\quad p-q=5. \]
+두 점 $(2,\,5)$,\ $(p,\,q)$\ 를 잇는 선분의 기울기가 직선 $y=x-1$\ 의 기울기 $1$\ 과 곱하여 $-1$\ 이 되어야 하므로
+\[ \dfrac{q-5}{p-2}\cdot 1 = -1,\quad p+q=7. \]
+따라서 $p+q=7$\ 이다.
+
+% ─────────────── Q15 ───────────────
+\dmsoltitle{15}{$y=x$\ 대칭을 이용한 최단거리}
+\begin{dmanswerbox}
+정답: ③ $3\sqrt{5}$
+\end{dmanswerbox}
+
+두 점 $\mathrm{A}(9,\,2)$,\ $\mathrm{B}(8,\,6)$\ 이 직선 $y=x$\ 를 기준으로 모두 아래쪽 (즉, $x>y$\ 쪽)에 있는지 확인한다. $\mathrm{A}$\ 는 $9>2$,\ $\mathrm{B}$\ 는 $8>6$\ 이므로 같은 쪽에 있다. 점 $\mathrm{A}$\ 의 직선 $y=x$\ 에 대한 대칭점은 좌표를 서로 바꾼 $\mathrm{A}'(2,\,9)$\ 이다.
+
+$\mathrm{P}$\ 가 직선 $y=x$\ 위의 점이므로 $\overline{\mathrm{PA}}=\overline{\mathrm{PA}}'$\ 이다. 따라서
+\[ \overline{\mathrm{PA}}+\overline{\mathrm{PB}} = \overline{\mathrm{PA}}'+\overline{\mathrm{PB}} \ge \overline{\mathrm{A}'\mathrm{B}} \]
+이고, 등호는 $\mathrm{P}$\ 가 선분 $\overline{\mathrm{A}'\mathrm{B}}$\ 위에 있을 때 성립한다. 두 점 사이의 거리를 계산하면
+\[ \overline{\mathrm{A}'\mathrm{B}} = \sqrt{(8-2)^2+(6-9)^2} = \sqrt{36+9} = \sqrt{45} = 3\sqrt{5} \]
+이다. 최솟값은 $3\sqrt{5}$\ 이다.
+
+% ─────────────── Q16 ───────────────
+\dmsoltitle{16}{삼각형의 무게중심 좌표}
+\begin{dmanswerbox}
+정답: ③ $pq=6$
+\end{dmanswerbox}
+
+무게중심의 $x$\ 좌표가 $5$\ 이므로
+\[ \dfrac{2+p+7}{3} = 5,\quad 2+p+7=15,\quad p=6 \]
+이다. 무게중심의 $y$\ 좌표가 $q$\ 이므로
+\[ q = \dfrac{1+(-3)+5}{3} = \dfrac{3}{3} = 1 \]
+이다. 따라서 $pq = 6\cdot 1 = 6$\ 이다.
+
+% ─────────────── Q17 ───────────────
+\dmsoltitle{17}{세 직선으로 둘러싸인 도형이 직각삼각형인 조건}
+\begin{dmanswerbox}
+정답: ② $-\dfrac{5}{4}$
+\end{dmanswerbox}
+
+세 직선을 각각 $\ell_1:\ x+2y-6=0$,\ $\ell_2:\ 4x-3y-12=0$,\ $\ell_3:\ ax+y-1=0$\ 이라 하자. 세 직선의 기울기는 각각 $m_1=-\dfrac{1}{2}$,\ $m_2=\dfrac{4}{3}$,\ $m_3=-a$\ 이다.
+
+먼저 $\ell_1$\ 과 $\ell_2$\ 가 서로 수직인지 확인하면
+\[ m_1 m_2 = \left(-\dfrac{1}{2}\right)\cdot\dfrac{4}{3} = -\dfrac{2}{3} \ne -1 \]
+이므로 수직이 아니다. 따라서 직각은 $\ell_3$\ 이 $\ell_1$\ 또는 $\ell_2$\ 와 수직일 때 생긴다.
+
+$\ell_1 \perp \ell_3$\ 인 경우: $m_1 m_3 = -1$\ 에서
+\[ \left(-\dfrac{1}{2}\right)(-a) = -1,\quad a = -2. \]
+$\ell_2 \perp \ell_3$\ 인 경우: $m_2 m_3 = -1$\ 에서
+\[ \dfrac{4}{3}\cdot(-a) = -1,\quad a = \dfrac{3}{4}. \]
+두 값의 합은
+\[ -2+\dfrac{3}{4} = -\dfrac{5}{4}. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{세 직선 중 어느 두 직선이 이루는 각이 직각인지에 따라 경우를 나눈다}: 두 고정된 직선의 기울기 곱이 $-1$\ 이 아니라면 나머지 한 직선이 다른 두 직선과 각각 수직인 두 경우로 나뉘며, 두 경우 모두 유효한 직각삼각형을 만든다.
+\end{dmcriticalpoint}
+
+% ─────────────── Q18 ───────────────
+\dmsoltitle{18}{두 원의 평행이동과 공통접선}
+\begin{dmanswerbox}
+정답: ③ $abr=60$
+\end{dmanswerbox}
+
+원 $C$\ 의 중심을 $\mathrm{P}(1,\,0)$\ 이라 하면 평행이동한 원 $C'$\ 의 중심은 $\mathrm{Q}(1+a,\,b)$\ 이다.
+
+조건 (나)에서 직선 $4x-3y+21=0$\ 이 두 원에 모두 접하므로 두 중심에서 이 직선까지의 거리가 모두 반지름 $r$\ 와 같다. 원 $C$\ 의 중심에서 직선까지의 거리는
+\[ r = \dfrac{|4\cdot 1-3\cdot 0+21|}{\sqrt{4^2+(-3)^2}} = \dfrac{25}{5} = 5 \]
+이므로 $r=5$\ 이다.
+
+원 $C'$\ 의 중심 $\mathrm{Q}(1+a,\,b)$\ 에서 직선까지의 거리도 $5$\ 이므로
+\[ \dfrac{|4(1+a)-3b+21|}{5} = 5,\quad |4a-3b+25| = 25 \]
+이다. 두 원의 중심이 직선의 같은 쪽에 있어야 하므로 (반대쪽이면 두 원이 직선을 사이에 두고 반대편에 놓여 공통접선 조건과 어긋난다) 부호는 원 $C$\ 의 중심 부호와 같아 $4a-3b+25=25$, 즉
+\[ 4a=3b,\quad b=\dfrac{4a}{3} \]
+이다.
+
+조건 (가)에서 원 $C'$\ 이 원 $C$\ 의 중심 $\mathrm{P}(1,\,0)$\ 을 지나므로 $\mathrm{P}$\ 와 $\mathrm{Q}$\ 사이의 거리가 반지름 $r=5$\ 와 같다.
+\[ \overline{\mathrm{PQ}}^{\,2} = a^2+b^2 = 25 \]
+에 $b=\dfrac{4a}{3}$\ 를 대입하면
+\[ a^2 + \dfrac{16a^2}{9} = 25,\quad \dfrac{25a^2}{9} = 25,\quad a^2=9 \]
+이다. $a$\ 가 양수이므로 $a=3$\ 이고 $b=4$\ 이다. 따라서
+\[ abr = 3\cdot 4\cdot 5 = 60. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{한 직선이 두 원의 공통접선이려면 두 중심에서 그 직선까지의 거리가 모두 반지름과 같다}: 원 $C$\ 의 중심에서 직선까지의 거리가 곧 반지름 $r$\ 를 정하고, 원 $C'$\ 의 중심에서 직선까지의 거리 조건이 평행이동 성분 $(a,\,b)$\ 사이의 관계식을 준다.
+\end{dmcriticalpoint}
+
+% ─────────────── Q19 ───────────────
+\dmsoltitle{19}{대칭이동으로 얻은 두 삼각형의 외접원 반지름 곱}
+\begin{dmanswerbox}
+정답: ③ $\overline{\mathrm{OA}}^{\,2}=36$
+\end{dmanswerbox}
+
+점 $\mathrm{A}(a,\,2)$\ 를 직선 $y=x$\ 에 대하여 대칭이동한 점은 좌표를 바꾼 $\mathrm{B}(2,\,a)$\ 이고, 점 $\mathrm{B}$\ 를 $x$\ 축에 대하여 대칭이동한 점은 $y$\ 좌표의 부호를 바꾼 $\mathrm{C}(2,\,-a)$\ 이다.
+
+세 점에서 원점까지의 거리의 제곱을 계산하면
+\begin{align*}
+\overline{\mathrm{OA}}^{\,2} &= a^2+2^2 = a^2+4, \\
+\overline{\mathrm{OB}}^{\,2} &= 2^2+a^2 = a^2+4, \\
+\overline{\mathrm{OC}}^{\,2} &= 2^2+(-a)^2 = a^2+4
+\end{align*}
+이므로 세 거리가 모두 같다. 즉, 원점은 세 점 $\mathrm{A}$,\ $\mathrm{B}$,\ $\mathrm{C}$\ 를 지나는 원의 중심 (외심)이고 삼각형 $\mathrm{ABC}$\ 의 외접원 반지름은
+\[ r_1 = \sqrt{a^2+4}. \]
+
+한편 삼각형 $\mathrm{AOC}$\ 에서 세 변의 길이의 제곱은
+\begin{align*}
+\overline{\mathrm{OA}}^{\,2} &= a^2+4,\quad \overline{\mathrm{OC}}^{\,2} = a^2+4, \\
+\overline{\mathrm{AC}}^{\,2} &= (a-2)^2+(2+a)^2 = 2a^2+8
+\end{align*}
+이고
+\[ \overline{\mathrm{OA}}^{\,2}+\overline{\mathrm{OC}}^{\,2} = 2(a^2+4) = 2a^2+8 = \overline{\mathrm{AC}}^{\,2} \]
+가 성립하므로 삼각형 $\mathrm{AOC}$\ 는 $\angle \mathrm{O}=90^{\circ}$\ 인 직각삼각형이다. 빗변이 외접원의 지름이므로 외접원 반지름은
+\[ r_2 = \dfrac{\overline{\mathrm{AC}}}{2} = \dfrac{\sqrt{2a^2+8}}{2} = \dfrac{\sqrt{2}\sqrt{a^2+4}}{2}. \]
+
+두 반지름의 곱은
+\[ r_1 r_2 = \sqrt{a^2+4}\cdot \dfrac{\sqrt{2}\sqrt{a^2+4}}{2} = \dfrac{\sqrt{2}\,(a^2+4)}{2} \]
+이므로 조건 $r_1 r_2 = 18\sqrt{2}$\ 에서
+\[ \dfrac{\sqrt{2}\,(a^2+4)}{2} = 18\sqrt{2},\quad a^2+4 = 36 \]
+을 얻는다. 따라서 $a^2 = 32$\ 이고
+\[ \overline{\mathrm{OA}}^{\,2} = a^2+4 = 36. \]
+
+\begin{dmcriticalpoint}
+\dmcplabel{원점에서 세 점 $\mathrm{A}$,\ $\mathrm{B}$,\ $\mathrm{C}$\ 까지의 거리가 모두 같으므로 원점이 삼각형 $\mathrm{ABC}$\ 의 외심이다}: 대칭이동은 원점으로부터의 거리를 보존하므로 원점이 세 점을 지나는 원의 중심이 되고 외접원 반지름이 $\sqrt{a^2+4}$\ 로 곧바로 나온다. 삼각형 $\mathrm{AOC}$\ 의 외접원은 빗변이 지름인 직각삼각형의 성질로 반지름이 정해진다.
+\end{dmcriticalpoint}
+
+% ─────────────── Q20 ───────────────
+\dmsoltitle{20}{원 위 점에 대한 삼각형 넓이가 홀수 자연수인 조건}
+\begin{dmanswerbox}
+정답: ③ $6$
+\end{dmanswerbox}
+
+두 점 $\mathrm{A}(0,\,\sqrt{3})$,\ $\mathrm{B}(1,\,0)$\ 을 지나는 직선의 방정식을 구한다. 기울기는 $\dfrac{0-\sqrt{3}}{1-0} = -\sqrt{3}$\ 이므로 방정식은
+\[ y-0 = -\sqrt{3}(x-1),\quad \sqrt{3}x+y-\sqrt{3} = 0 \]
+이다. 선분 $\overline{\mathrm{AB}}$\ 의 길이는 $\overline{\mathrm{AB}}^{\,2} = 1^2+(\sqrt{3})^2 = 4$\ 에서 $\overline{\mathrm{AB}}=2$\ 이다. 직선의 계수의 제곱의 합은 $(\sqrt{3})^2+1^2=4$\ 이므로 이 값의 제곱근은 $2$\ 이다. 원 $C$\ 의 중심 $\mathrm{Q}(1,\,10)$\ 에서 이 직선까지의 거리는 점과 직선 사이의 거리 공식에서
+\[ d_0 = \dfrac{|\sqrt{3}\cdot 1+10-\sqrt{3}|}{2} = \dfrac{10}{2} = 5 \]
+이다.
+
+원 $C$\ 의 반지름의 길이는 $3$\ 이므로 원 위의 점 $\mathrm{P}$\ 에서 직선 $\mathrm{AB}$\ 까지의 거리 $d$\ 의 범위는
+\[ d_0-3 \le d \le d_0+3,\quad 2 \le d \le 8 \]
+이다. 삼각형 $\mathrm{ABP}$\ 의 넓이는
+\[ S = \dfrac{1}{2}\cdot \overline{\mathrm{AB}}\cdot d = \dfrac{1}{2}\cdot 2\cdot d = d \]
+이므로 $S$\ 는 $d$\ 와 같은 값을 가진다.
+
+$S$\ 가 홀수 자연수이려면 $d$\ 가 홀수 자연수이어야 하므로 $d\in\{3,\,5,\,7\}$\ 이다. 중심 $\mathrm{Q}$\ 에서 직선까지 거리가 $d_0=5$\ 이므로 원 위의 점에서 직선까지 거리가 $d$\ 인 점의 개수는 다음과 같다.
+\begin{itemize}[leftmargin=1.4em,itemsep=1pt,topsep=2pt]
+\item $d=d_0$\ (즉, $d=5$)일 때 중심을 지나면서 직선에 수직인 직선이 원과 만나는 두 점이 조건을 만족시키므로 $2$\ 개.
+\item $d_0-3 < d < d_0+3$\ 이면서 $d\ne d_0$\ 인 $d$\ (즉, $d=3$\ 또는 $d=7$)일 때 원과 직선이 서로 다른 두 점에서 만나 각각 $2$\ 개.
+\end{itemize}
+따라서 $d=3,\,5,\,7$\ 각각에서 $\mathrm{P}$\ 는 $2$\ 개씩 있고, 총합은 $2\cdot 3 = 6$\ 이다.
+
+\begin{dmcriticalpoint}
+\dmcplabel{원 위 점과 정해진 직선 사이 거리 값은 중심에서 직선까지 거리를 중심으로 반지름만큼 위아래로 흔들린다}: 이 거리 범위 안의 각 값 $d$\ 에 대응하는 원 위의 점은 정확히 $2$\ 개씩 존재하므로, 홀수 자연수 값의 개수에 $2$\ 를 곱한 값이 답이 된다.
+\end{dmcriticalpoint}
+
+\end{multicols*}
+
+\end{document}

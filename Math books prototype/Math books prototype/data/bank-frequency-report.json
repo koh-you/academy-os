@@ -1,0 +1,4301 @@
+{
+  "summary": {
+    "total_files_scanned": 4545,
+    "files_with_valid_frontmatter": 4470,
+    "total_groups": 664,
+    "frequency_distribution": {
+      "1": 376,
+      "2": 86,
+      "3": 202
+    },
+    "files_updated": 0
+  },
+  "top_50_groups": [
+    {
+      "unit": "CM1-EQ",
+      "type": "SRC-1GM",
+      "count": 96,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "SRC-IL",
+      "count": 82,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "SRC-IL",
+      "count": 70,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T11",
+      "count": 68,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-RF",
+      "type": "SRC-IL",
+      "count": 61,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "SRC-BL",
+      "count": 58,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "SRC-GJ",
+      "count": 57,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T08",
+      "count": 55,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "M04",
+      "count": 52,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T23",
+      "count": 51,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "C05",
+      "count": 48,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "SRC-1GM",
+      "count": 48,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T01",
+      "count": 44,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EX-MT",
+      "count": 44,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T20",
+      "count": 43,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "SRC-GJ",
+      "count": 42,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-FN",
+      "type": "SRC-IL",
+      "count": 42,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T13",
+      "count": 41,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "SRC-1SM",
+      "count": 40,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "C03",
+      "count": 37,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T20",
+      "count": 36,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "SRC-IL",
+      "count": 36,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "SRC-IL",
+      "count": 36,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "T05",
+      "count": 35,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T56",
+      "count": 33,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "SRC-AB",
+      "count": 33,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T48",
+      "count": 32,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T22",
+      "count": 32,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T03",
+      "count": 32,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T02",
+      "count": 31,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "M06",
+      "count": 31,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "SRC-1GM",
+      "count": 31,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T12",
+      "count": 30,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T17",
+      "count": 30,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T24",
+      "count": 29,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "T02",
+      "count": 29,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "C02",
+      "count": 29,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T21",
+      "count": 28,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "C04",
+      "count": 28,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "C01",
+      "count": 28,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T09",
+      "count": 27,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T07",
+      "count": 27,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T16",
+      "count": 26,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T15",
+      "count": 26,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T10",
+      "count": 26,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "M03",
+      "count": 26,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-RF",
+      "type": "?(★4)",
+      "count": 26,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T39",
+      "count": 25,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "EX-MT",
+      "count": 25,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T30",
+      "count": 24,
+      "frequency": 3
+    }
+  ],
+  "all_groups": [
+    {
+      "unit": "CM1-EQ",
+      "type": "SRC-1GM",
+      "count": 96,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "SRC-IL",
+      "count": 82,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "SRC-IL",
+      "count": 70,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T11",
+      "count": 68,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-RF",
+      "type": "SRC-IL",
+      "count": 61,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "SRC-BL",
+      "count": 58,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "SRC-GJ",
+      "count": 57,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T08",
+      "count": 55,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "M04",
+      "count": 52,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T23",
+      "count": 51,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "C05",
+      "count": 48,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "SRC-1GM",
+      "count": 48,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T01",
+      "count": 44,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EX-MT",
+      "count": 44,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T20",
+      "count": 43,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "SRC-GJ",
+      "count": 42,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-FN",
+      "type": "SRC-IL",
+      "count": 42,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T13",
+      "count": 41,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "SRC-1SM",
+      "count": 40,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "C03",
+      "count": 37,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T20",
+      "count": 36,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "SRC-IL",
+      "count": 36,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "SRC-IL",
+      "count": 36,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "T05",
+      "count": 35,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T56",
+      "count": 33,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "SRC-AB",
+      "count": 33,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T48",
+      "count": 32,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T22",
+      "count": 32,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T03",
+      "count": 32,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T02",
+      "count": 31,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "M06",
+      "count": 31,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "SRC-1GM",
+      "count": 31,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T12",
+      "count": 30,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T17",
+      "count": 30,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T24",
+      "count": 29,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "T02",
+      "count": 29,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "C02",
+      "count": 29,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T21",
+      "count": 28,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "C04",
+      "count": 28,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "C01",
+      "count": 28,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T09",
+      "count": 27,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T07",
+      "count": 27,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T16",
+      "count": 26,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T15",
+      "count": 26,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T10",
+      "count": 26,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "M03",
+      "count": 26,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-RF",
+      "type": "?(★4)",
+      "count": 26,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T39",
+      "count": 25,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "EX-MT",
+      "count": 25,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T30",
+      "count": 24,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "SRC-GJ",
+      "count": 24,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "SRC-IL",
+      "count": 24,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T19",
+      "count": 23,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T05",
+      "count": 23,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T23",
+      "count": 23,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EX-EAR",
+      "count": 23,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "T01",
+      "count": 23,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "SRC-PT",
+      "count": 23,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T57",
+      "count": 22,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T07",
+      "count": 22,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T13",
+      "count": 22,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "T06",
+      "count": 22,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T18",
+      "count": 22,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "SRC-IL",
+      "count": 22,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T17",
+      "count": 21,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T14",
+      "count": 21,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "M08",
+      "count": 21,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "C06",
+      "count": 21,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "SRC-AB",
+      "count": 21,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T26",
+      "count": 20,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T26",
+      "count": 20,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T31",
+      "count": 20,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-RF",
+      "type": "M03",
+      "count": 20,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "T03",
+      "count": 20,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T22",
+      "count": 19,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T13",
+      "count": 19,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T04",
+      "count": 19,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T21",
+      "count": 18,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T31",
+      "count": 18,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "G06",
+      "count": 18,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T16",
+      "count": 18,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "SRC-BL",
+      "count": 18,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T15",
+      "count": 17,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T03",
+      "count": 17,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T19",
+      "count": 17,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "SRC-1GM",
+      "count": 17,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T27",
+      "count": 16,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T34",
+      "count": 16,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T09",
+      "count": 16,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T03",
+      "count": 16,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T40",
+      "count": 16,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T11",
+      "count": 16,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T29",
+      "count": 16,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T28",
+      "count": 16,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "SRC-PT",
+      "count": 16,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T51",
+      "count": 15,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T08",
+      "count": 15,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T30",
+      "count": 15,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T26",
+      "count": 15,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T23",
+      "count": 15,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T03",
+      "count": 15,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T27",
+      "count": 15,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "T04",
+      "count": 15,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "EX-MT",
+      "count": 15,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T32",
+      "count": 14,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-RF",
+      "type": "?(★3)",
+      "count": 14,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T34",
+      "count": 13,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T06",
+      "count": 13,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T38",
+      "count": 13,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-RF",
+      "type": "R03",
+      "count": 13,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T49",
+      "count": 13,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T14",
+      "count": 13,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T16",
+      "count": 12,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T02",
+      "count": 12,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T35",
+      "count": 12,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T01",
+      "count": 12,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T04",
+      "count": 12,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "EX-EAR",
+      "count": 12,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EX-EBS",
+      "count": 12,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "SRC-BL",
+      "count": 12,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T50",
+      "count": 11,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T23",
+      "count": 11,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T27",
+      "count": 11,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T10",
+      "count": 11,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T06",
+      "count": 11,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-FN",
+      "type": "T10",
+      "count": 11,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T05",
+      "count": 11,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T04",
+      "count": 11,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T02",
+      "count": 11,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T09",
+      "count": 11,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T15",
+      "count": 11,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "M01",
+      "count": 11,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "SRC-BL",
+      "count": 11,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T25",
+      "count": 10,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T14",
+      "count": 10,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T37",
+      "count": 10,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T20",
+      "count": 10,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-RF",
+      "type": "R02",
+      "count": 10,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T42",
+      "count": 10,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T41",
+      "count": 10,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T12",
+      "count": 10,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T02",
+      "count": 10,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T10",
+      "count": 10,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T01",
+      "count": 10,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T06",
+      "count": 10,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "M02",
+      "count": 10,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T18",
+      "count": 9,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T02",
+      "count": 9,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T01",
+      "count": 9,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T10",
+      "count": 9,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T14",
+      "count": 9,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T28",
+      "count": 9,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T09",
+      "count": 9,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T05",
+      "count": 9,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "M07",
+      "count": 9,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "EX-EBS",
+      "count": 9,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T05",
+      "count": 9,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T11",
+      "count": 8,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T18",
+      "count": 8,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T36",
+      "count": 8,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T08",
+      "count": 8,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-RF",
+      "type": "?(★5)",
+      "count": 8,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T44",
+      "count": 8,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "SRC-1MK",
+      "count": 8,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "SRC-1SM",
+      "count": 8,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "SRC-1SM",
+      "count": 8,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "SRC-1SM",
+      "count": 8,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "SRC-AB",
+      "count": 8,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T-INEQ",
+      "count": 8,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "SRC-GJ",
+      "count": 8,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T19",
+      "count": 7,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T44",
+      "count": 7,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T13",
+      "count": 7,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T07",
+      "count": 7,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-RF",
+      "type": "R01",
+      "count": 7,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T09",
+      "count": 7,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "EX-EAR",
+      "count": 7,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "T07",
+      "count": 7,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T25",
+      "count": 6,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T07",
+      "count": 6,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T54",
+      "count": 6,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-RF",
+      "type": "M06",
+      "count": 6,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T37",
+      "count": 6,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T05",
+      "count": 6,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "EX-EAR",
+      "count": 6,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "G02",
+      "count": 6,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "T08",
+      "count": 6,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "T09",
+      "count": 6,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "T01",
+      "count": 6,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T-CUBIC",
+      "count": 6,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T15",
+      "count": 5,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T07",
+      "count": 5,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T55",
+      "count": 5,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-FN",
+      "type": "T15",
+      "count": 5,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-FN",
+      "type": "T03",
+      "count": 5,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T52",
+      "count": 5,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T34",
+      "count": 5,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T32",
+      "count": 5,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-FN",
+      "type": "T18",
+      "count": 5,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T29",
+      "count": 5,
+      "frequency": 3
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T12",
+      "count": 5,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "SRC-1MK",
+      "count": 5,
+      "frequency": 3
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "T06",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "T13",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T36",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T29",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T24",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-FN",
+      "type": "T06",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T26",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T43",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-RF",
+      "type": "M01",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T24",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T01",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T32",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T31",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-RF",
+      "type": "M04",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "T07",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-RF",
+      "type": "EX-EAR",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "EX-EBS",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "EX-EBS",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "G01",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "T10",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "EX-MT",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T-OMEGA",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T-SYSTEM",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T-QUARTIC",
+      "count": 4,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "T02",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MX-T04",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T47",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T38",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T22",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T25",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-RF",
+      "type": "R05",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T19",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "CB-T04",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T58",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-FN",
+      "type": "T02",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "CB-T08",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T20",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-FN",
+      "type": "T07",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T12",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-RF",
+      "type": "R04",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "T05",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "G07",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "G05",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "S03",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "S02",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "T02",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "SRC-1MK",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "SRC-PT",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "SRC-PT",
+      "count": 3,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MX-T03",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "CB-T01",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "CB-T09",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MX-T02",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T06",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T33",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T59",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T17",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T18",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T46",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T12",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T53",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T29",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-RF",
+      "type": "R07",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T17",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-RF",
+      "type": "M07",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-FN",
+      "type": "T21",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-FN",
+      "type": "T04",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-FN",
+      "type": "T13",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-FN",
+      "type": "T17",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "E10",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "S01",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-FN",
+      "type": "T01",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-FN",
+      "type": "T05",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T20",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T21",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T22",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T03",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T04",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T13",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "T03",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "T03",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "T05",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T45",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "?",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "T-ADJACENT",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "T-PARITY",
+      "count": 2,
+      "frequency": 2
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "CB-T20",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "CB-T13",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MX-T05",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MX-T10",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "CB-T18",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "CB-T02",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "CB-T15",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T11",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "CB-T06",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "CB-T03",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-RF",
+      "type": "M02",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T08",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "PL-T04",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-FN",
+      "type": "T14",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-RF",
+      "type": "R06",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T28",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "EQ-T60",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T27",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "E13",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "E12",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "I07",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "T20",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "E11",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "T19",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "I05",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "I09",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "P03",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "T15",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "T21",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "I12",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "I08",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-FN",
+      "type": "F01",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-FN",
+      "type": "F03",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-FN",
+      "type": "F04",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "G03",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "G04",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-RF",
+      "type": "T01",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "T15",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "T06",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "T11",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T23",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "T08",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "T01",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "T04",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "ST-functional-condition",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-FN",
+      "type": "FN-max-parametric",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-FN",
+      "type": "FN-multiCondition-decision",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "ST-multiples-gcd",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "ST-powerset-closure",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-FN",
+      "type": "FN-piecewise-composition",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "ST-necessary-sufficient-doubleOpt",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "GM-lattice-circle-set",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "GM-similarity-circleTransform",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "GM-threeCircle-tangent",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "GM-centroid-parameter",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "GM-internal-division-axis",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "GM-fixed-point-tangent",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "ST-nested-set-membership",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "ST-set-op-simplify",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "ST-three-set-max-min",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "GM-line-two-circles-count",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "ST-subset-count-conditional",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "GM-two-circles-intersection",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "GM-parabola-isoceles-count",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "GM-triangle-perimeter-min-fixed-point",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "GM-area-bisect-x-intercept",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "GM-polar-line-fixed-point",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "GM-optics-mirror-locus",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "ST-lattice-shifted-set",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-GM",
+      "type": "GM-robot-arm-kinematics-locus",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM2-ST",
+      "type": "ST-kepler-subset-proposition",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-01-01",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-01-02",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-01-03",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-01-04",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-01-05",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-01-06",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-01-07",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-01-08",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-01-09",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-01-10",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-01-11",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-01-12",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-01-13",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-01-14",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-01-15",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-01-16",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-01-17",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-01",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-02",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-03",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-04",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-05",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-06",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-07",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-08",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-09",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-10",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-11",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-12",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-13",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-14",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-15",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-16",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-17",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-18",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-19",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-20",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-21",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-22",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-23",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-02-24",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-03-01",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-03-02",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-03-03",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-03-04",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-03-05",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-03-06",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-03-07",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-03-08",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-03-09",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-03-10",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-03-11",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-03-12",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-03-13",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-03-14",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-PL",
+      "type": "MS-03-15",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-04-01",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-04-02",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-04-03",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-04-04",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-04-05",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-04-06",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-04-07",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-04-08",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-04-09",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-04-10",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-04-11",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-04-12",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-04-13",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-04-14",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-04-15",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-04-16",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-04-17",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-04-18",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-01",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-02",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-03",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-04",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-05",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-06",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-07",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-08",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-09",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-10",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-11",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-12",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-13",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-14",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-15",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-16",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-17",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-18",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-19",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-20",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-21",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-22",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-23",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-24",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-25",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-26",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-27",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-05-28",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-01",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-02",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-03",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-04",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-05",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-06",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-07",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-08",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-09",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-10",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-11",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-12",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-13",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-14",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-15",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-16",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-17",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-18",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-19",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-20",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-21",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-22",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-23",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-24",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-25",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-26",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-27",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-28",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-29",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-06-30",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-01",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-02",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-03",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-04",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-05",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-06",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-07",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-08",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-09",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-10",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-11",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-12",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-13",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-14",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-15",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-16",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-17",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-18",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-19",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-20",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-21",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-22",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-23",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-24",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-25",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-26",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-27",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II04-28",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II05-01",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II05-02",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II05-03",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II05-04",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II05-05",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II05-06",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II05-07",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II05-08",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II05-09",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II05-10",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II05-11",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II05-12",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II05-13",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II05-14",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-01",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-02",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-03",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-04",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-05",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-06",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-07",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-08",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-09",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-10",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-11",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-12",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-13",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-14",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-15",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-16",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-17",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-18",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-19",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-20",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-21",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-22",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-23",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-24",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-25",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-26",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-27",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-28",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-29",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-30",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-31",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-32",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-33",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-34",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-35",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "MS-II06-36",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III01-01",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III01-02",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III01-03",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III01-04",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III01-05",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III01-06",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III01-07",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III01-08",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III01-09",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III01-10",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III01-11",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III01-12",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III02-01",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III02-02",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III02-03",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III02-04",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III02-05",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III02-06",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III02-07",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III02-08",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III02-09",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III02-10",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III02-11",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III03-01",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III03-02",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III03-03",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III03-04",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III03-05",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III03-06",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III03-07",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III03-08",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III03-09",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III03-10",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III03-11",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III03-12",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III03-13",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "MS-III03-14",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-01",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-02",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-03",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-04",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-05",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-06",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-07",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-08",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-09",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-10",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-11",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-12",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-13",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-14",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-15",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-16",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-17",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-18",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-19",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-20",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-21",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-22",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-23",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-24",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "MS-IV01-25",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "이차부등식-미정계수",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "절댓값-정수해",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "연립부등식-기본",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "이차부등식-항상성립",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "절댓값-분기",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "이차부등식-제한범위",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "연립이차-정수해",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "절댓값-미정계수",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "이차부등식-해갖는조건",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "이차부등식-해→새부등식",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "항상성립-일차이차분기",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "해→정수해카운트",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "매개이차-해포함조건",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "절댓값합-매개기하",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "두함수-항상성립",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "매개이차-정수해카운트",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "도형활용-두변수부등식",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "매개연립-단일점해",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "절댓값이차-정수해합",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "두조건-대칭부호",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "?",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "T-PATH",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "T-COPRIME",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "T-CARD",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "T-EVENT",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "T-DIGIT",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "T-CARD-COND",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-CB",
+      "type": "T-DICE",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T-DISCRIMINANT",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T-GRAPH-INEQ",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-EQ",
+      "type": "T-ABS-INEQ",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "T08",
+      "count": 1,
+      "frequency": 1
+    },
+    {
+      "unit": "CM1-MX",
+      "type": "M05",
+      "count": 1,
+      "frequency": 1
+    }
+  ]
+}

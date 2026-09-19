@@ -1,0 +1,1037 @@
+%% 시안 B (블루) — "고쟁이 STEP 중심" + 블루 톤
+%% 변경: 오렌지 → 블루, 페이지당 유형 1~2개 제한, 유형 단위 multicols
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{style}[2026/06/11 Variant B (Blue): Gojaengi-Blue]
+
+\RequirePackage{kotex}
+\RequirePackage[paperwidth=188mm,paperheight=257mm,
+  inner=15mm,outer=13mm,top=18mm,bottom=20mm,
+  headheight=10mm,headsep=5mm,footskip=14mm]{geometry}
+\RequirePackage{multicol}
+\RequirePackage{amsmath,amssymb,mathtools}
+\RequirePackage{graphicx}
+\graphicspath{{sources/}{../../../logo/}{../../../figures/commons/}{../../../figures/reference/}{../../../figures/typed/}}
+
+% ── Commons/참고자료 이미지 출처 표기 매크로 (v3.1, 2026-07-14 세션 36 신설) ──
+% 저작권 정책 · bank/이미지-저작권-정책.md §5
+\newcommand{\commonsCite}[2]{%
+  \par\vspace{-1mm}\noindent
+  {\footnotesize\itshape\color{gray}
+    \hspace*{\fill}출처: Wikimedia Commons — #1 · #2%
+  }%
+  \par\vspace{1mm}%
+}
+\newcommand{\referenceCite}[3]{%
+  \par\vspace{-1mm}\noindent
+  {\footnotesize\itshape\color{gray}
+    \hspace*{\fill}출처: #1, p.#2 · #3%
+  }%
+  \par\vspace{1mm}%
+}
+\RequirePackage{xcolor}
+\RequirePackage[most]{tcolorbox}
+\RequirePackage{enumitem}
+\RequirePackage{titlesec}
+\RequirePackage{fancyhdr}
+\RequirePackage{etoolbox}
+\RequirePackage{pifont}
+\RequirePackage{tikz}
+\RequirePackage{needspace}
+\RequirePackage{xparse}
+% ── 그림 매크로 라이브러리 (단원별) ──
+% CB (경우의 수) — figures-cb.sty (2026-07-07 v2.1)
+% EQ (방정식·부등식) — figures-eq.sty (2026-06-27 v1.0)
+% GM (도형의 방정식) — figures-gm.sty (2026-07-11 v1.0)
+% ST (집합과 명제) — figures-st.sty (2026-07-11 v1.0)
+% 빌드 시 TEXINPUTS에 ../../../templates/ 추가 필요
+\RequirePackage{figures-cb}
+\IfFileExists{figures-gm.sty}{\RequirePackage{figures-gm}}{}
+\IfFileExists{figures-st.sty}{\RequirePackage{figures-st}}{}
+
+% ── 인라인 수식 줄바꿈 방지 ──
+% 이항 연산자(+, -, ×, /)와 관계 연산자(=, <, >, ≤, ≥)에서 LaTeX이 줄바꿈하지 않도록
+% 페널티를 최대로 설정. 하나의 인라인 수식이 중간에서 끊기지 않음.
+\binoppenalty=10000
+\relpenalty=10000
+
+% ── 좁은 컬럼 어절 간격 stretch 완화 ──
+% probpair 0.46\linewidth (~76mm) 좁은 컬럼 + 인라인 수식 많은 한글 문장에서
+% LaTeX 기본 justified 정렬이 어절 사이 공백을 극단적으로 stretch → 부자연.
+% \emergencystretch 확대로 badness 감내폭 늘려 stretch 폭 축소.
+% \tolerance = 2000 (기본 200)으로 라인 재배열 여유 부여.
+\emergencystretch=4em
+\tolerance=2000
+\hbadness=2000
+
+% ═══ 답지 전용 프리셋 매크로 (v3.3, 2026-07-12 세션 34 신설) ═══
+% 사용: \answersheetsetup — 답지 preamble 또는 \begin{document} 직후 한 번 호출
+%
+% 세션 34 진단: 답지 multicols 좁은 컬럼에서
+%   ① 인라인 \tfrac 사용 시 매우 작게 렌더 → 시각 불균일
+%   ② multicols의 justified 정렬로 어절 stretch·낱말 mid-word break
+%   ③ 세션 32 4-Layer fix가 style.sty problem env에만 적용 · 답지 multicols에는 미적용
+%
+% 대응: 답지 전용 defaults 한 번에 적용
+%   1. \tfrac → \dfrac 재정의 (인라인이라도 큰 분수)
+%   2. 문서 전역 \raggedright (multicols·컬럼 좁아도 자연 정렬)
+%   3. \emergencystretch 답지용 확대 (6em)
+% \solprefixwd: soltitle "13. hspace" prefix 폭 저장용 전용 dimen (\@tempdima 충돌 회피)
+\newdimen\solprefixwd
+
+% 시험지 답지용 soltitle: 파일 상위 레벨에서 정의 (\newcommand 중첩 회피)
+\newcommand{\soltitleexam}[3]{%
+  \par\leftskip=0pt%
+  \stepcounter{solcount}%
+  \ifsoltitlefirst
+    \par\addvspace{12pt}%
+    \soltitlefirstfalse
+  \else
+    \par\addvspace{20pt}%
+  \fi
+  \needspace{2\baselineskip}%
+  % ── 소문항 (1)(2)(3) 정답 세로 정렬 (v3.7.3, 2026-07-13 세션 35 확립) ──
+  % 요구: (1)은 문항번호 옆 시작 · (2)(3)은 다음 줄, (1)과 동일 열 정렬
+  % 사용: \soltitle{13}{(1) 답 \\ (2) 답 \\ (3) 답}{6}
+  %
+  % 시행착오 이력:
+  %   • \parbox/minipage: 첫 줄(=(1))이 강제 새 줄로 밀림 → 실패
+  %   • \hangindent+\hangafter=1: multicols + answersheetsetup 환경에서
+  %     \raggedright·\parskip·\@normalcr 상호작용으로 무효화 → 실패
+  %   • \parshape: 동일한 이유로 무효화 → 실패
+  %   • (성공) \\ 재정의: 로컬 begingroup 안에서 \\를 \hfil\break+\hspace*로
+  %     재정의해 각 새 줄 시작에 solprefixwd 폭의 hspace 자동 주입
+  \settowidth{\solprefixwd}{\sffamily\bfseries\large #1.\hspace{10pt}}%
+  \begingroup
+  \def\\{\hfil\break\hspace*{\solprefixwd}\ignorespaces}%
+  \noindent{\sffamily\bfseries\large\color{vB-ink} #1.}\hspace{10pt}%
+  {\bfseries\color{black}#2}%
+  \par
+  \endgroup
+  \nobreak\vspace{-4pt}\noindent%
+  \tikz{\draw[vB-deep, line width=1.2pt, line cap=butt] (0,0) -- (\linewidth,0);}%
+  \par\vspace{14pt}%
+}
+
+% 시험지 답지용 tfrac: 인라인에서도 dfrac 크기
+% (\let 대신 \newcommand로 정의 · 사용 시 \tfrac 유지)
+\newcommand{\tfracdisplay}[2]{\dfrac{#1}{#2}}
+
+% \answersheetsetup — 답지 전용 defaults 일괄 적용
+% 사용: \begin{document} 직후 한 번 호출
+\newcommand{\answersheetsetup}{%
+  % ── raggedright + emergencystretch (좁은 컬럼 어절 stretch·mid-word break 방지) ──
+  \raggedright%
+  \emergencystretch=6em%
+  \hfuzz=2pt% soltitle leftskip·hangindent 미세 오차 1.2pt 무시
+  % ── 분수·soltitle alias (v3.6) ──
+  \let\tfrac\tfracdisplay%           % \tfrac을 dfrac 크기로 alias
+  \let\frac\dfrac%                   % \frac도 강제 displaystyle (인라인/디스플레이 크기 통일)
+  \let\soltitle\soltitleexam%        % \soltitle을 시험지 답지용으로 alias
+  % ── Tier 1·4·5 답지 가독성 defaults 편입 (v3.7, 2026-07-12) ──
+  % 세션 19 (2026-07-08) 확립 · 세션 34 시스템화 · 원인: 로컬 반복 → 시스템 매크로 이관
+  \linespread{1.18}\selectfont%      % Tier 1 라인 여유 (분수 tall inline math 수용)
+  \setlength{\parskip}{10pt plus 3pt minus 2pt}%  % Tier 1 확대 (6pt → 10pt · dfrac 상단 여유 · 페이지 확대 최소화)
+  % \lineskiplimit·\lineskip 조정: dfrac 라인이 인접 문장에 딱 붙지 않도록
+  \lineskiplimit=4pt
+  \lineskip=6pt
+  \thinmuskip=3mu plus 1mu%           % Tier 1 인라인 수식 얇은 공백 확대
+  \medmuskip=4.5mu plus 2mu minus 4mu%
+  \thickmuskip=5.5mu plus 5mu%
+  \setlength{\mathindent}{0pt}%       % Tier 4 fleqn 좌측 정렬 (documentclass에서 fleqn 옵션 필요)
+  \setlength{\abovedisplayskip}{12pt}%     % Tier 4 디스플레이 위 여유
+  \setlength{\belowdisplayskip}{12pt}%     % Tier 4 디스플레이 아래 여유
+  \setlength{\abovedisplayshortskip}{10pt}%
+  \setlength{\belowdisplayshortskip}{10pt}%
+  \setlength{\columnsep}{14mm}%       % Tier 5 컬럼 간격 확대 (multicols)
+}
+
+% ── 블루 팔레트 ──
+\definecolor{vB-ink}{HTML}{1A2333}        % 본문 글자
+\definecolor{vB-deep}{HTML}{1E4A8F}       % 딥 네이비 (큰 제목)
+\definecolor{vB-accent}{HTML}{3A78D8}     % 밝은 블루 (STEP 블록·유형 바·TIP 바)
+\definecolor{vB-rule}{HTML}{BDD0E5}       % 옅은 회청 (구분선)
+\definecolor{vB-light}{HTML}{E8EFF8}      % 옅은 블루 (TIP 배경)
+\definecolor{vB-dim}{HTML}{6B7A8E}        % 회청 (희미한 텍스트)
+\definecolor{vB-frame}{HTML}{8AA5C5}      % 옅은 청 (조건 박스 실선, 흐리게 v1.2)
+
+% ── 본문 여백 / 행간 ──
+\setlength{\columnsep}{7mm}
+\setlength{\columnseprule}{0pt}  % native 분할선 사용 안 함 — type 환경에서 TikZ로 일괄 그림
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt plus 1pt}
+\linespread{1.35}
+% multicols 환경 진입/종료 시 추가되는 수직 여백 — 기본 ~12pt 너무 큼
+\setlength{\multicolsep}{6pt plus 2pt minus 1pt}
+
+% ── 회차 표시 매크로 (각 회차의 .tex에서 \renewcommand로 갱신) ──
+\providecommand{\examround}{미니모의고사}
+\providecommand{\examvol}{vol.1}
+
+% ── 헤더/푸터 (수능 표준 풍 — 가운데 회차명, 외측 페이지 번호) ──
+%
+% \examrunhead — 2페이지부터의 러닝헤드 내용 훅 (2026-07-30 세션 105 신설).
+%   기본값은 종전 동작(`\examround\ \examvol` 전체 중앙 정렬)을 그대로 보존한다.
+%   시리즈별로 중앙 정렬 기준을 바꿔야 할 때 회차 .tex 에서 \renewcommand 한다.
+%   예) SIMULATOR [와부] — 교재명 SIMULATOR 만 정확히 중앙에 두고 종속표기
+%       `[와부] NO.N` 은 \makebox[0pt][l] 로 폭 0 을 주어 정렬에서 제외한다.
+%       (단일 출처: templates/SIMULATOR-와부-디자인-v1.md §1)
+%   🔴 이 훅을 만든 이유: style.sty 는 전 시리즈 공용 단일 출처이므로
+%      [C] 를 직접 고치면 딥매쓰 등 다른 시리즈의 러닝헤드가 함께 바뀐다.
+\providecommand{\examrunhead}{\examround\ \examvol}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{}
+\fancyhead[C]{\sffamily\large\bfseries\color{vB-ink}\examrunhead}
+\fancyhead[R]{}
+\fancyfoot[L]{}
+\fancyfoot[C]{\sffamily\bfseries\color{black}-\,\thepage\,-}
+\fancyfoot[R]{\raisebox{-2.5mm}{\includegraphics[height=9mm]{학원로고 (깊이와통찰).jpg}}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{vB-rule}\leaders\hrule height \headrulewidth\hfill}}
+\renewcommand{\footrule}{\hbox to\headwidth{\color{vB-rule}\leaders\hrule height \footrulewidth\hfill}\vskip 4pt}
+
+% ── 첫 페이지(표지)용 footer만 표시 스타일 — 헤더는 examheader가 그림 ──
+\fancypagestyle{examfooter}{%
+  \fancyhf{}%
+  \fancyfoot[L]{}%
+  \fancyfoot[C]{\sffamily\bfseries\color{black}-\,\thepage\,-}%
+  \fancyfoot[R]{\raisebox{-2.5mm}{\includegraphics[height=9mm]{학원로고 (깊이와통찰).jpg}}}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0.4pt}%
+  \renewcommand{\footrule}{\hbox to\headwidth{\color{vB-rule}\leaders\hrule height \footrulewidth\hfill}\vskip 4pt}%
+}
+
+\titleformat{\section}{\sffamily\huge\bfseries\color{vB-deep}}{}{0pt}{}
+\titlespacing*{\section}{0pt}{0pt}{12pt}
+
+% ── 난이도 점 ──
+\newcommand{\diffdot}[1]{%
+  \ifstrequal{#1}{h}{\color{vB-accent}\ding{108}\color{vB-rule}\ding{108}\ding{108}}{%
+  \ifstrequal{#1}{m}{\color{vB-accent}\ding{108}\ding{108}\color{vB-rule}\ding{108}}{%
+  \ifstrequal{#1}{s}{\color{vB-accent}\ding{108}\ding{108}\ding{108}}{}}}\color{vB-ink}}
+
+% ── 페이지당 유형 수 제어 ──
+% 페이지당 1 유형.
+\newcounter{maxtypeperpage}
+\setcounter{maxtypeperpage}{1}
+\newcounter{typesonpage}
+\setcounter{typesonpage}{0}
+
+% ── STEP 헤더 — 1단으로 띄움, multicols는 type 내부에서 ──
+\newenvironment{stepthree}{%
+  \par\noindent
+  \begin{tikzpicture}[baseline=0pt]
+    \fill[vB-accent] (0,0) rectangle (8mm,16mm);
+    \node[anchor=west,font=\sffamily\bfseries] at (10mm,12mm)
+      {\color{vB-deep}\Large STEP\,3};
+    \node[anchor=west,font=\sffamily] at (10mm,6mm)
+      {\color{vB-dim}\large 행복한 일등급 문제};
+  \end{tikzpicture}
+  \par\medskip
+  {\color{vB-rule}\rule{\linewidth}{0.6pt}}\par\medskip
+  \setcounter{typesonpage}{0}%
+}{%
+  % stepthree 종료 시 잔여 유형 페이지 정리
+}
+
+% ── 유형 헤더 + 풀폭 TIP ──
+% 시그니처: \begin{type}{유형번호}{유형이름}[TIP 텍스트(선택)]
+% multicols/페이지 분리는 \begin{pagepair}...\end{pagepair} 환경이 담당.
+\NewDocumentEnvironment{type}{m m +O{}}{%
+  \par\addvspace{14pt}%
+  \needspace{6\baselineskip}%
+  \noindent
+  \begin{minipage}{\linewidth}
+  \tikz[baseline=0pt]\fill[vB-accent] (0,-2pt) rectangle (3pt,18pt);\hspace{6pt}%
+  {\sffamily\small\color{vB-accent}\textbf{유형 #1}}\hspace{8pt}%
+  {\sffamily\bfseries\large\color{vB-deep} #2}
+  \end{minipage}
+  \par\vspace{2pt}%
+  {\color{vB-rule}\rule{\linewidth}{0.3pt}}\par\smallskip
+  \ifblank{#3}{}{%
+    \par\vspace{2pt}%
+    \begin{tipbox}
+      \sffamily\bfseries\color{vB-accent}TIP\quad\normalfont\color{vB-ink}#3
+    \end{tipbox}%
+    \par\vspace{-2pt}%
+  }%
+}{%
+}
+
+% ── 페이지 페어 — 2문제씩 묶어 한 페이지에 (좌1+우1) ──
+% v1.2 (2026-06-28): 페이지 번호 노드 제거 (fancyfoot이 이미 출력). 좌·우 분할선만 유지.
+% 분할선 + 2단 multicols + 자동 \clearpage.
+% pagepair: 4 minipage 2×2 grid (multicols 대신 수동 grid)
+% 본문 양식: \begin{pagepair}\probA{...}\probB{...}\probC{...}\probD{...}\end{pagepair}
+\newenvironment{pagepair}{%
+  \par\noindent%
+  \small
+}{%
+  \clearpage
+}
+% 4문 grid 배치 매크로 — 좌상, 우상, 좌하, 우하
+\newcommand{\probgridfour}[4]{%
+  \noindent
+  \begin{minipage}[t][\probboxheight][t]{0.46\linewidth}#1\end{minipage}\hfill
+  \begin{minipage}[t][\probboxheight][t]{0.46\linewidth}#2\end{minipage}
+  \par\vspace{4mm}
+  \noindent
+  \begin{minipage}[t][\probboxheight][t]{0.46\linewidth}#3\end{minipage}\hfill
+  \begin{minipage}[t][\probboxheight][t]{0.46\linewidth}#4\end{minipage}
+  \par
+}
+
+% ── \probpair — 자동 크기 통일 매크로 (2026-07-11 신설) ──
+% 사용: \probpair{좌 문항 코드}{우 문항 코드}
+% 원리: savebox로 두 문항 크기 자동 측정 → max+\probvpadding으로 좌우 minipage 크기 통일
+%       → 좌우 하단 baseline 정렬, 페이지 빈 공간 최소화
+% 각 minipage 안 문항 뒤 자연스러운 여백 확보 (남는 공간 표시)
+\newsavebox{\probleftbox}
+\newsavebox{\probrightbox}
+\newlength{\probunifiedheight}
+\newlength{\probvpadding}
+\setlength{\probvpadding}{20mm}  % 문항 아래 최소 여백 목표값
+\newcommand{\probpair}[2]{%
+  % Step 1: 두 문항 실제 크기 측정 (raggedright로 stretch·중간 break 방지)
+  \sbox{\probleftbox}{\begin{minipage}{0.46\linewidth}\raggedright #1\end{minipage}}%
+  \sbox{\probrightbox}{\begin{minipage}{0.46\linewidth}\raggedright #2\end{minipage}}%
+  % Step 2: max(좌,우) 크기 계산
+  \setlength{\probunifiedheight}{\dimexpr\ht\probleftbox+\dp\probleftbox\relax}%
+  \ifdim\dimexpr\ht\probrightbox+\dp\probrightbox\relax>\probunifiedheight
+    \setlength{\probunifiedheight}{\dimexpr\ht\probrightbox+\dp\probrightbox\relax}%
+  \fi
+  % Step 3: 여백 padding 추가
+  \addtolength{\probunifiedheight}{\probvpadding}%
+  % Step 4: 좌우 통일 크기로 배치 — 좁은 컬럼(0.46) raggedright 적용
+  %   근본 이유: 좁은 컬럼 + 인라인 수식 많은 한글 문장에서 justified 정렬은
+  %   ① 어절 사이 공백을 극단 stretch → 부자연 간격
+  %   ② 한글 낱말(순서쌍·서술하시오 등)을 중간에서 끊음
+  %   raggedright는 justify를 폐기하여 두 문제 동시 해결.
+  \noindent
+  \begin{minipage}[t][\probunifiedheight][t]{0.46\linewidth}\raggedright #1\end{minipage}%
+  \hfill
+  \begin{minipage}[t][\probunifiedheight][t]{0.46\linewidth}\raggedright #2\end{minipage}%
+  \par
+}
+
+% ── \pagecolumnpair — 옵션 A 세로 컬럼 우선 균등 분배 매크로 (2026-07-26 세션 93 후반 신설) ──
+% 배경: probpair(좌우 max 균등) + pagepair(상하 3-vfill)는 좌측 컬럼 안 상하 문항 균등 보장 불가.
+%       마스터 확정 (2026-07-26): "좌측과 우측이 문제풀이공간 배분을 할 때 독립적으로 움직여야 함"
+% 원리: 좌측 컬럼·우측 컬럼 각각 minipage(자연 크기 아닌 페이지 남은 공간 stretch)
+%       각 컬럼 안 \vfill 이 문항 사이 남은 공간을 균등 분배
+%       두 컬럼 완전 독립 · 좌측 컬럼의 문항 크기가 우측에 영향 없음
+% 사용법:
+%   \begin{pagepair}
+%   \pagecolumnpair{%
+%     \begin{problem}{1}{s}...\end{problem}     % Q1 좌상
+%     \vfill
+%     \begin{problem}{2}{s}...\end{problem}     % Q2 좌하
+%   }{%
+%     \begin{problem}{3}{s}...\end{problem}     % Q3 우상
+%     \vfill
+%     \begin{problem}{4}{s}...\end{problem}     % Q4 우하
+%   }
+%   \end{pagepair}
+%
+% 3문 페이지 (Q17·Q18·Q19): 우측 컬럼에 Q19 하나만 · 하단 빈
+% 단독 페이지 (Q20): 좌측 컬럼에 Q20 하나만 · 나머지 빈
+\newlength{\pagecolumnheight}
+\newlength{\pagecolumnfullheight}   % p2~ 통상 페이지 남은 공간
+\newlength{\pagecolumnfirstheight}  % p1 examheader 이후 남은 공간
+\setlength{\pagecolumnfullheight}{175mm}
+\setlength{\pagecolumnfirstheight}{60mm}   % v1.9 : 80→60mm · p1 fit 시도
+\newcommand{\pagecolumnpair}[2]{%
+  % v2.2 (2026-07-26 후반) : 상단 시작 + 균등 분배 (마스터 지적 "5번 페이지 한참 아래서 시작" 계기)
+  %   결함 v2.1 : 앞 자동 \vspace*{\fill} 삽입 → 첫 문항이 컬럼 중앙으로 밀림
+  %   정정 v2.2 : 앞 vfill 삭제 · 뒤 vfill만 자동 삽입
+  %              → 첫 문항 컬럼 최상단 자연 시작 · 사용자 명시 vfill + 자동 뒤 vfill = 균등 분배
+  %              (Q5 최상단 · Q5·Q6 사이·Q6 아래 균등)
+  % 🔴🔴 2026-08-02 세션 109 — `-2\baselineskip` 은 **안전 여유다. 빼지 마라.**
+  %    빼 봤더니 컬럼이 남은 자리보다 커져 재현-1회가 7쪽 → **10쪽**,
+  %    딥매쓰 A·B형이 각각 **12쪽**으로 늘었다. 즉시 되돌렸다.
+  %
+  %    🔴 다만 마스터 지적은 살아 있다 — 이 2줄이 **마지막 문항 아래에만 남아**
+  %    실측으로 늘 약 14mm 더 넓다 (2쪽 62.1→76.0 · 3쪽 63.2→77.2).
+  %    고칠 곳은 높이가 아니라 **마지막 여백을 그만큼 줄이는 것**이다 — 아래 \pagecolumntail 참조.
+  %    잴 때는 `python scripts/풀이공간-실측.py <문제.pdf>` 를 쓴다. 눈대중 금지.
+  \setlength{\pagecolumnheight}{\dimexpr\vsize-\pagetotal-2\baselineskip\relax}%
+  % 🔴 2026-08-02 세션 109 — 마지막 채움에서 `2\baselineskip` 을 뺀다.
+  %    까닭: 컬럼 높이가 아래에서 `2\baselineskip` 만큼 짧다(안전 여유).
+  %    그 자리는 어느 문항에도 안 나뉘고 **마지막 문항 아래에만 남아** 실측 약 14mm 더 넓었다.
+  %    마지막 채움을 그만큼 줄이면 [안 여백 + 아래 여유] 가 앞 문항의 여백과 같아진다.
+  %    셈: 채움 하나를 f 라 하면 마지막은 f−2bl 이고, 보이는 것은 (f−2bl)+2bl = f 다.
+  %    🔴 확인은 `python scripts/풀이공간-실측.py <문제.pdf>` — 눈대중 금지.
+  \noindent
+  \begin{minipage}[t][\pagecolumnheight][s]{0.46\linewidth}%
+    \raggedright #1\vspace*{\fill}\vspace*{-2\baselineskip}%
+  \end{minipage}%
+  \hfill
+  \begin{minipage}[t][\pagecolumnheight][s]{0.46\linewidth}%
+    \raggedright #2\vspace*{\fill}\vspace*{-2\baselineskip}%
+  \end{minipage}%
+  \par
+}
+
+% ── \probpairstretch — 서답형 split 문항 균등 배분 매크로 (2026-07-14 세션 36 v2 신설) ──
+% \probpair의 [t] top-align은 excess가 마지막 sub 뒤에 붙어 (3)이 다른 sub보다 커 보임.
+% [s] stretch-align + \vfill로 excess를 컬럼 최하단에 위치, sub 답안 공간 명확히 X mm 경계.
+% 사용: body 마지막에 반드시 \vfill 삽입 (좌·우 모두).
+\newcommand{\probpairstretch}[2]{%
+  \sbox{\probleftbox}{\begin{minipage}{0.46\linewidth}\raggedright #1\end{minipage}}%
+  \sbox{\probrightbox}{\begin{minipage}{0.46\linewidth}\raggedright #2\end{minipage}}%
+  \setlength{\probunifiedheight}{\dimexpr\ht\probleftbox+\dp\probleftbox\relax}%
+  \ifdim\dimexpr\ht\probrightbox+\dp\probrightbox\relax>\probunifiedheight
+    \setlength{\probunifiedheight}{\dimexpr\ht\probrightbox+\dp\probrightbox\relax}%
+  \fi
+  % No padding — column excess flows to \vfill at bottom
+  \noindent
+  \begin{minipage}[t][\probunifiedheight][s]{0.46\linewidth}\raggedright #1\end{minipage}%
+  \hfill
+  \begin{minipage}[t][\probunifiedheight][s]{0.46\linewidth}\raggedright #2\end{minipage}%
+  \par
+}
+
+% ── \probpairbalance — 서답형 split 문항 여유공간 균등 분배 매크로 (2026-07-14 세션 36 신설) ──
+% 사용:
+%   \probpairbalance{좌 body}{좌 sub 개수}{우 body}{우 sub 개수}{총 sub 개수}
+% 원리:
+%   1. 좌·우 body (sub 답안 공간 제외한 순수 문항 콘텐츠) 자연 높이 측정
+%   2. 좌우 컬럼을 위해 필요한 통일 높이 계산: unified = max(좌_body + N_L·X, 우_body + N_R·X)
+%      + 여유공간을 총 sub 개수 (N_total)로 균등 분할 → 각 sub 답안 공간 X 자동 계산
+%   3. 각 sub 답안 공간에 정확히 X mm 삽입 (elastic 아님)
+%   4. 좌우 컬럼 하단 padding 0 → 두 컬럼 시각적으로 완전 일치
+% 마스터 지시 (2026-07-14): "분할공간 내 문제자체 공간 제외한 여유공간을 각 문항에 균등분배".
+%
+% 실제 사용: 저자가 답안 vspace를 명시적으로 계산해서 \vspace*{X mm} 배치.
+%           본 매크로는 padding 0으로 만든 wrapper.
+\newcommand{\probpairtight}[2]{%
+  \begingroup
+  \setlength{\probvpadding}{0mm}%
+  \probpair{#1}{#2}%
+  \endgroup
+}
+
+% ── \probpairequal — 우측 컬럼 elastic (2)(3) 균등 분배 (2026-07-14 세션 36 v4 신설) ──
+% 마스터 명시 (2026-07-14): "좌측분할공간은 그대로 놓고 우측 분할 공간만 두문제에 대해 균등 분배"
+% 좌: [t][H][t] 그대로 · 우: [t][H][s] stretch-align → `plus 1fill` elastic 확장
+% 우측 sub vspaces에 `plus 1fill` 붙이면 우측 컬럼 안 균등 분배
+\newcommand{\probpairequal}[2]{%
+  \sbox{\probleftbox}{\begin{minipage}{0.46\linewidth}\raggedright #1\end{minipage}}%
+  \sbox{\probrightbox}{\begin{minipage}{0.46\linewidth}\raggedright #2\end{minipage}}%
+  \setlength{\probunifiedheight}{\dimexpr\ht\probleftbox+\dp\probleftbox\relax}%
+  \ifdim\dimexpr\ht\probrightbox+\dp\probrightbox\relax>\probunifiedheight
+    \setlength{\probunifiedheight}{\dimexpr\ht\probrightbox+\dp\probrightbox\relax}%
+  \fi
+  \noindent
+  \begin{minipage}[t][\probunifiedheight][t]{0.46\linewidth}\raggedright #1\end{minipage}%
+  \hfill
+  \begin{minipage}[t][\probunifiedheight][s]{0.46\linewidth}\raggedright #2\end{minipage}%
+  \par
+}
+
+% ── \probpairfillpage — 페이지 하단까지 우 컬럼 확장 (2026-07-14 세션 36 v5 신설) ──
+% 마스터 명시 (2026-07-14): "페이지 하단 여백이라는게 존재 하면 안됨"
+% 좌·우 minipage 모두 고정 height = 페이지 usable · 우 [s] stretch로 elastic 분배
+% 좌 minipage은 top-align이라 콘텐츠 위 배치, 아래 blank는 시각적으로 divider까지 자연 연속
+\newlength{\probpairfullheight}
+\setlength{\probpairfullheight}{215mm}   % 페이지 usable 기본값 (B5 essay page) — 페이지 하단 여백 제거
+\newcommand{\probpairfillpage}[2]{%
+  \noindent
+  \begin{minipage}[t][\probpairfullheight][t]{0.46\linewidth}%
+    \raggedright\emergencystretch=6em\tolerance=3000\hbadness=3000
+    \XeTeXlinebreakskip=0pt plus 0pt minus 0pt
+    \XeTeXlinebreakpenalty=0
+    #1%
+  \end{minipage}%
+  \hfill
+  \begin{minipage}[t][\probpairfullheight][s]{0.46\linewidth}%
+    \raggedright\emergencystretch=6em\tolerance=3000\hbadness=3000
+    \XeTeXlinebreakskip=0pt plus 0pt minus 0pt
+    \XeTeXlinebreakpenalty=0
+    #2%
+  \end{minipage}%
+  \par
+}
+
+% ── \probpairfulll — 서답형 essay 문항용 (2026-07-14 세션 36 v3 신설) ──
+% 컬럼 하단 alignment로 (3) sub answer가 col-bottom과 일치 → 명확한 시각 bound.
+% [t][H][b] = 좌우 minipage 크기 통일 · 콘텐츠 하단 정렬 · 남는 공간은 각 컬럼 top에 blank.
+\newcommand{\probpairfull}[2]{%
+  \sbox{\probleftbox}{\begin{minipage}{0.46\linewidth}\raggedright #1\end{minipage}}%
+  \sbox{\probrightbox}{\begin{minipage}{0.46\linewidth}\raggedright #2\end{minipage}}%
+  \setlength{\probunifiedheight}{\dimexpr\ht\probleftbox+\dp\probleftbox\relax}%
+  \ifdim\dimexpr\ht\probrightbox+\dp\probrightbox\relax>\probunifiedheight
+    \setlength{\probunifiedheight}{\dimexpr\ht\probrightbox+\dp\probrightbox\relax}%
+  \fi
+  \noindent
+  \begin{minipage}[t][\probunifiedheight][t]{0.46\linewidth}\raggedright #1\end{minipage}%
+  \hfill
+  \begin{minipage}[t][\probunifiedheight][b]{0.46\linewidth}\raggedright #2\end{minipage}%
+  \par
+}
+
+% \nob (mid-word break 방지)는 아래 line 636에 정의됨.
+
+% ── TIP — 옅은 블루 배경 + 좌측 블루 바 ──
+\newtcolorbox{tipbox}{enhanced,breakable,
+  colback=vB-light,colframe=vB-accent,
+  boxrule=0pt,leftrule=2.5pt,rightrule=0pt,toprule=0pt,bottomrule=0pt,
+  arc=0pt,outer arc=0pt,left=10pt,right=8pt,top=4pt,bottom=3pt,fontupper=\small}
+\newcommand{\tip}[1]{\par\smallskip\begin{tipbox}
+  \sffamily\bfseries\color{vB-accent}TIP\quad\normalfont\color{vB-ink}#1
+\end{tipbox}\par\smallskip}
+
+% ── 제시 조건 박스 — (가)(나) 같은 문제 조건 묶음 ──
+% v1.3 (2026-06-28, 마스터 명시): 테두리 블랙 (배경 흰색 + 검은 실선).
+% 통합 박스 디자인 (2026-07-11 통일): 각진 사각형·얇은 프레임·일관된 padding.
+% 조건 박스(condbox)·본문 내 [정의]·[보기]·[법칙] 박스 모두 같은 스타일 적용.
+\newtcolorbox{condbox}{enhanced,breakable,
+  colback=white,colframe=black,
+  boxrule=0.4pt,arc=0pt,outer arc=0pt,
+  left=4pt,right=4pt,top=3pt,bottom=3pt,
+  fontupper=\small}
+\newenvironment{conditions}{%
+  \par\smallskip
+  \begin{condbox}
+  \setlength{\parskip}{2pt}%
+}{%
+  \end{condbox}
+  \par\smallskip
+}
+
+% ── 문제 — 수능 표준 풍 (큰 번호 inline + 본문 자연 흐름) ──
+% minipage로 감싸 한 문항이 한 컬럼 안에서 하나의 덩어리로 묶이게 함.
+% 둘째 인자 #2는 호환성을 위해 받기만 하고 사용하지 않음.
+% problem 환경: 고정 높이 minipage (페이지 안 4문 등간격 시작)
+\newlength{\probboxheight}
+\setlength{\probboxheight}{100mm}
+\newcounter{probnum}
+% ── problem 환경 (2026-07-11 v2): 자연 크기 minipage
+%   이전 [t][\probboxheight][t] 고정 크기 → [t] 자연 크기로 변경.
+%   외부 pagepair minipage 또는 \probpair가 크기 결정. 문항 자체는 자기 크기.
+%   \probboxheight 매개변수는 유지 (외부 minipage 크기 지정용, 하위 호환).
+\newenvironment{problem}[2]{%
+  \par%
+  \setcounter{probnum}{#1}%
+  \noindent
+  \begin{minipage}[t]{\linewidth}%
+  \raggedright%  좁은 컬럼 justify 폐기 (한글 어절 stretch·낱말 중간 break 방지)
+  \setlength{\parskip}{4pt plus 1pt}%
+  {\sffamily\bfseries\large\color{vB-ink}#1.}\hspace{4pt}\ignorespaces
+}{%
+  \end{minipage}\par%
+}
+
+% ── 보기 ──
+\newcounter{choicecnt}
+% ── 한 줄 균등 배치 보기 환경 ──
+% \hbox to \linewidth로 정확히 minipage 폭 채움.
+% ① 왼쪽 끝, ⑤ 오른쪽 끝, ③ 자동 중앙, 사이 4 hfill 균등 분할.
+\newenvironment{choices}{\par\medskip\setcounter{choicecnt}{0}%
+  \noindent\hbox to \linewidth\bgroup\small\ignorespaces}{%
+  \egroup\par\medskip}
+\newcommand{\circmark}{\ifcase\value{choicecnt}\or①\or②\or③\or④\or⑤\fi}
+\newcommand{\choice}[1]{\stepcounter{choicecnt}%
+  \ifnum\value{choicecnt}=1\relax\else\hfill\fi
+  \mbox{\circmark\ #1}}
+\newif\ifshowanswers\showanswersfalse
+\newcommand{\answer}[1]{\ifshowanswers{\small\color{vB-dim}[정답: #1]}\fi}
+
+% ── 긴 보기 환경: 5개 보기를 2-2-1 행으로 분배 ──
+% 사용: \begin{choicesii}{①본문}{②본문}{③본문}{④본문}{⑤본문}\end{choicesii}
+\newenvironment{choicesii}[5]{%
+  \par\medskip\noindent
+  \begin{tabular}{@{}p{0.49\linewidth}@{\hskip 0.02\linewidth}p{0.49\linewidth}@{}}
+    \mbox{\small ①\ #1} & \mbox{\small ②\ #2} \\[2pt]
+    \mbox{\small ③\ #3} & \mbox{\small ④\ #4} \\[2pt]
+    \mbox{\small ⑤\ #5} & \\
+  \end{tabular}%
+}{\par\medskip}
+
+% ── 세로 나열 보기 환경 (긴 부등식·긴 수식 보기용) ──
+% 사용: \begin{choicesv}{①본문}{②본문}{③본문}{④본문}{⑤본문}\end{choicesv}
+% 각 보기가 한 줄씩 아래로 왼쪽 정렬 (긴 부등식 자연 배치).
+\newenvironment{choicesv}[5]{%
+  \par\medskip\noindent
+  \begin{tabular}{@{}l@{}}
+    \mbox{\small ①\ #1} \\[2pt]
+    \mbox{\small ②\ #2} \\[2pt]
+    \mbox{\small ③\ #3} \\[2pt]
+    \mbox{\small ④\ #4} \\[2pt]
+    \mbox{\small ⑤\ #5} \\
+  \end{tabular}%
+}{\par\medskip}
+
+% ── 3-2 두 줄 보기 환경 (짧은 좌표·분수 5개 보기용) ──
+% 사용: \begin{choices32}{①본문}{②본문}{③본문}{④본문}{⑤본문}\end{choices32}
+% 3개(위) + 2개(아래) 두 줄. tabular*로 minipage 전체 폭 균등 배치.
+% 두 줄 사이 12pt 간격.
+\newenvironment{choices32}[5]{%
+  \par\medskip\noindent
+  \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lll@{}}
+    \mbox{\small ①\ #1} & \mbox{\small ②\ #2} & \mbox{\small ③\ #3} \\[12pt]
+    \mbox{\small ④\ #4} & \mbox{\small ⑤\ #5} & \\
+  \end{tabular*}%
+}{\par\medskip}
+
+% ── 출처 인용 매크로 (공개 기출용) ──
+\newcommand{\examcite}[1]{\quad{\footnotesize\sffamily\color{vB-dim}#1}}
+
+% ── [출제의도] 라벨 (답지 풀이 도입부 표시, 학평 표준 스타일 v2.6 §22.1) ──
+% 사용: \examintent{이차방정식의 근과 계수의 관계를 활용하여 문제 해결하기}
+% → 출력: [출제의도] 이차방정식의 근과 계수의 관계를 활용하여 문제 해결하기
+% 단일 인자: 단원명 + 동사 결합 문자열. 학평 동사 4단계 (계산/이해/문제 해결/추론) 의무.
+\newcommand{\examintent}[1]{%
+  \par\noindent
+  {\footnotesize\sffamily\bfseries\color{vB-deep}[출제의도]}\,%
+  {\footnotesize\sffamily\color{vB-ink}#1}%
+  \par\smallskip
+}
+
+% ── \solnote (통찰 박스) — RPM 비법노트 양식 표준 (v1.0, 2026-06-28 마스터 정책) ──
+% 사용: \solnote{한 문장 핵심 통찰. 공식 박스 또는 다른 풀이 안내.}
+% 단일 출처: bank/비표준-어구-사전.md §3.
+%
+% 🔴 금지 양식 (RED — 검출 시 즉시 정정):
+%   • 메타 코멘트: "학생이 ~ 놓치면 함정"
+%   • 내부 코드명: "(P-FG1)" "★ 5" "I-XU"
+%   • 압축 신조어: "대칭식 환원" "부호로 환원" "표준 마무리" "자동 제거"
+%   • 외래어: "케이스" "분기" "단서"
+%   • 본 시스템 신조어: "켤레허근" "미정 이차함수" "살아남는 케이스"
+%
+% ✅ 권장 양식:
+%   • 한 문장 RPM 비법노트형 공식 박스
+%   • 자연 한국어 풀이 통찰 (RPM 톤)
+%   • "다른 풀이:" 안내
+%
+% 모드:
+%   • \solnotemodestudent — 학생용 (출력)
+%   • \solnotemodeteacher — 교사용 (별도 PDF, 메타 가능)
+%   • \solnotemodenone    — 출력 안 함
+%
+% 기본은 student.
+\newif\ifsolnoteoutput \solnoteoutputtrue
+\newcommand{\solnotemodestudent}{\solnoteoutputtrue}
+\newcommand{\solnotemodeteacher}{\solnoteoutputtrue}
+\newcommand{\solnotemodenone}{\solnoteoutputfalse}
+
+% v1.3 (2026-07-07 · T1-3 가독성 개선): 통찰 라벨 폰트 확대 + 좌측 세로 바 추가
+% 통찰 박스 위 여백 조정 (22pt → 14pt). 풀이가 페이지에 들어가도록.
+\newcommand{\solnote}[1]{%
+  \par\leftskip=0pt% reset from prior \step
+  \ifsolnoteoutput
+    \par\addvspace{14pt}\noindent
+    \begin{tcolorbox}[enhanced, breakable, colback=vB-light, colframe=vB-light,
+      boxrule=0pt, arc=3pt,
+      leftrule=3pt, colframe=vB-accent,% 좌측 세로 강조 바 3pt
+      left=12pt, right=10pt, top=7pt, bottom=7pt,
+      fontupper=\sffamily\footnotesize\color{vB-ink}]
+      {\sffamily\bfseries\small\color{vB-deep}통찰}\quad #1
+    \end{tcolorbox}%
+    \par\addvspace{12pt}%
+  \fi
+}
+
+% ─── 보기 박스 상단 라벨 걸치기 (2026-07-11 세션 33 신설) ───
+% 와부고 기출 분석 프로젝트 CSS `.bogi` + `.bogi-title` 차용 (position:absolute + translateY(-50%)).
+% `〈보기〉` 라벨이 박스 상단 선 중앙 왼쪽에 걸치는 스타일.
+% 사용:
+%   \begin{bogibox}
+%   ㄱ. $\{\varnothing\}\in A$ \qquad ㄴ. $\{\varnothing\}\subset A$
+%   \end{bogibox}
+\newtcolorbox{bogibox}{
+  enhanced, breakable,
+  colback=white, colframe=black,
+  boxrule=0.4pt, arc=0pt,
+  left=4pt, right=4pt, top=6pt, bottom=4pt,
+  fontupper=\small,
+  overlay={%
+    \node[fill=white, inner sep=2pt, anchor=west, font=\sffamily\bfseries\small]
+      at ([xshift=8pt, yshift=0pt]frame.north west) {〈보기〉};
+  }
+}
+
+% ─── Critical Point 매크로 (2026-07-11 세션 33 신설) ───
+% 와부고 기출 분석 프로젝트 차용. ★ 4·5 문항 답지에서 학생 함정 3선을 명시.
+% 사용: \criticalpoint{① 실수 케이스 놓침 ② 조건 (다) 누락 ③ 부등호 방향 오류}
+% 시각: solnote와 유사 (leftrule 3pt 강조 바) 하지만 오렌지·빨강 계열로 경고 신호.
+\definecolor{vB-warn}{HTML}{9A3412}       % 짙은 갈오렌지 (라벨·강조 바 · v3.7.5 페이지 대비 강화)
+\definecolor{vB-warn-light}{HTML}{FED7AA} % 옅은 피치 배경 (흰 페이지와 뚜렷한 대비, 라벨과도 5:1 대비 · v3.7.5)
+% Critical Point 내부 함정 라벨 (v1.1, 2026-07-11 신규):
+% \textbf 금지 정책 대신 오렌지 sans-serif bold로 학생 주의 유도.
+% 사용: \criticalpoint{① \cplabel{라벨}: 설명 \quad ② \cplabel{...}: ... \quad ③ ...}
+\newcommand{\cplabel}[1]{{\sffamily\bfseries\color{vB-warn}#1}}
+\newcommand{\criticalpoint}[1]{%
+  \par\leftskip=0pt%
+  \par\addvspace{14pt}\noindent
+  \begin{tcolorbox}[enhanced, breakable, colback=vB-warn-light, colframe=vB-warn-light,
+    boxrule=0pt, arc=0pt,
+    leftrule=3pt, colframe=vB-warn,%
+    left=12pt, right=10pt, top=7pt, bottom=7pt,
+    fontupper=\sffamily\footnotesize\color{vB-ink}]
+    % v1.2 (2026-07-13 세션 35): 헤더 별도 줄 · 본문은 아래에 · 항목 간 \\ 로 줄바꿈 권장
+    {\sffamily\bfseries\small\color{vB-warn}\raisebox{-0.1ex}{$\bigtriangleup$}\ Critical Point}%
+    \par\smallskip
+    #1
+  \end{tcolorbox}%
+  \par\addvspace{12pt}%
+}
+
+% ─── T1-1 소분할 라벨 매크로 (2026-07-07 가독성 개선 v1.0) ───
+% 서답형 (1)(2)(3) 소분할 라벨을 파랑 굵게 + 자동 여백으로 시각화.
+% 사용: \subitem{1} 위 공식을 적용하면 ~
+% 이전: (1)\quad 위 공식을 적용하면 ~ (텍스트만)
+\newcommand{\solpart}[1]{%
+  \par\addvspace{6pt}\noindent
+  {\sffamily\bfseries\color{vB-accent}(#1)}\hspace{3mm}\ignorespaces%
+}
+
+% ─── T1-2 케이스 라벨 매크로 ───
+% 내부 케이스 (i)(ii)(iii) or 텍스트 라벨 [분석] 등을 컬러 강조.
+% 사용: \subcase{i} $2$의 지수: ~
+%       \subcasetext{분석} $P = 2^A$의 원소는 ~
+\newcommand{\subcase}[1]{%
+  \par\addvspace{4pt}\noindent
+  {\sffamily\bfseries\color{vB-accent}(#1)}\hspace{2mm}\ignorespaces%
+}
+\newcommand{\subcasetext}[1]{%
+  \par\addvspace{4pt}\noindent
+  {\sffamily\bfseries\color{vB-accent}[#1]}\hspace{2mm}\ignorespaces%
+}
+
+% ── 문항 번호 옆 출처 표기 (작게, 회청색, 이탤릭) ──
+% 사용: \textbf{[4번]}\probsource{2026 6월 고2 4번}\quad\pointbadge{3}
+% 문항 번호 바로 옆에 붙여 작은 회청색 텍스트로 출처를 표기.
+\newcommand{\probsource}[1]{\,{\footnotesize\sffamily\color{vB-dim}\textit{#1}}}
+
+% ═══════════════════════════════════════════════════════
+% 수택고 기말 — 시험지/답지 전용 매크로 (행렬 베이스 위에 추가)
+% ═══════════════════════════════════════════════════════
+
+% ── 답지 전용 톤 ──
+\definecolor{vB-answer}{HTML}{FFF8DC}
+\definecolor{vB-answer-rule}{HTML}{D4A017}
+
+% ── 시험지 상단 헤더 (수능 표준 풍 — 좌·우 박스 + 가운데 큰 제목) ──
+% 사용: \examheader{메인 제목}{부제}
+\newcommand{\examheader}[2]{%
+  \thispagestyle{empty}%
+  \par\noindent
+  \begin{tikzpicture}[remember picture]
+    \node[draw=vB-deep, fill=white, line width=0.8pt, rounded corners=4pt,
+          font=\sffamily\bfseries\color{vB-deep},
+          inner xsep=10pt, inner ysep=4pt, anchor=south west] (Lbox) at (0,0) {\,기말대비\,};
+    \node[font=\sffamily\Huge\bfseries\color{vB-ink}, anchor=base] at (\linewidth/2, 4pt) {\examround};
+    \node[draw=vB-deep, fill=white, line width=0.8pt, rounded corners=4pt,
+          font=\sffamily\bfseries\color{vB-deep},
+          inner xsep=10pt, inner ysep=4pt, anchor=south east] (Rbox) at (\linewidth,0) {\,\examvol\,};
+  \end{tikzpicture}%
+  \par\vspace{6pt}
+  \noindent{\color{vB-deep}\rule{\linewidth}{0.8pt}}\par
+  \vspace{6pt}
+  \noindent
+  {\sffamily\small\color{vB-dim} #1}\par\vspace{1pt}
+  {\sffamily\scriptsize\color{vB-dim} #2}\par\vspace{6pt}
+  {\sffamily\footnotesize\color{vB-ink}
+    학년·반·번호: \rule{42mm}{0.3pt}\hfill 이름: \rule{42mm}{0.3pt}}%
+  \par\addvspace{10pt}
+  \thispagestyle{examfooter}%
+}
+
+% ── 답지 상단 헤더 박스 (수능 표준 풍) ──
+% 2026-07-07 마스터 명시: 큰 타이틀 한 줄만. 작은 부제·소부제 제거.
+% 사용: \answerheader{2학기 중간 예상 1회 정답 및 해설}
+% 좌상단 vol.n 박스는 유지 (별도 소형 stamp). 큰 tcolorbox 안은 오직 #1 타이틀.
+\newcommand{\answerheader}[1]{%
+  \thispagestyle{examfooter}%
+  \par\noindent
+  \begin{tikzpicture}[baseline=0pt]
+    \node[draw=vB-deep, fill=white, line width=0.8pt, rounded corners=4pt,
+          font=\sffamily\bfseries\color{vB-deep},
+          inner xsep=10pt, inner ysep=4pt, anchor=south west] (Lbox) at (0,0) {\,\examvol\,};
+  \end{tikzpicture}%
+  \par\vspace{6pt}
+  \begin{tcolorbox}[enhanced, colback=white, colframe=vB-answer-rule,
+    boxrule=1.1pt, arc=10pt, left=18pt, right=18pt, top=13pt, bottom=13pt,
+    halign=center]
+    {\sffamily\LARGE\bfseries\color{vB-deep} #1}
+  \end{tcolorbox}\par\addvspace{10pt}
+}
+
+% ── 빠른 정답표 그리드 (수능 표준 풍) ──
+% 사용:
+%   \begin{quickgrid}
+%   \quick{1}{⑤ $...$} & \quick{2}{④ $...$} & \quick{3}{⑤ $6$} & \quick{4}{① $...$} & \quick{5}{④ $8$} \\
+%   \quick{6}{...} & ...
+%   \end{quickgrid}
+% 5칸 tabular* + 둥근 박스.
+%
+% ── 박스 높이 = arraystretch × 행수. quickgrid 박스 높이를 CM1 골든 (5행 × 1.35 = 6.75) 기준으로
+% 일정하게 유지하기 위해 \quickgridstretch 변수를 도입:
+%   • 5행 (23문 시험지 기준):        \renewcommand{\quickgridstretch}{1.35}  (기본)
+%   • 4행 (16~20문):                \renewcommand{\quickgridstretch}{1.70}  (= 1.35 × 5/4)
+%   • 3행 (12~15문 중간고사 스타일): \renewcommand{\quickgridstretch}{2.25}  (= 1.35 × 5/3)
+% preamble이나 \begin{quickgrid} 직전에 override. 세로 분할선 yshift (-125.6mm) 그대로 유지 가능.
+% Why: 박스 크기를 일정하게 하면 답지 페이지 1의 답지헤더+quickgrid+examsection 스택 높이가
+%      과목·회차 무관하게 동일 → yshift 하드코딩 값이 모든 답지에 유효 (재조정 불요).
+\newcommand{\quickgridstretch}{1.35}
+\newcommand{\quick}[2]{\textbf{\sffamily\color{vB-ink} #1.}\,\,{\sffamily\color{vB-ink} #2}}
+\newenvironment{quickgrid}[1][빠른 정답표]{%
+  \par\noindent
+  \begin{tcolorbox}[enhanced, colback=white, colframe=vB-answer-rule,
+    boxrule=0.8pt, arc=6pt, left=8pt, right=8pt, top=6pt, bottom=6pt,
+    title={■\,\,#1}, fonttitle=\sffamily\bfseries,
+    coltitle=white, colbacktitle=vB-answer-rule,
+    attach boxed title to top center={yshift=-3pt},
+    boxed title style={colback=vB-answer-rule, sharp corners=downhill, boxrule=0pt,
+      left=10pt, right=10pt, top=2pt, bottom=2pt}]
+    \renewcommand{\arraystretch}{\quickgridstretch}\sffamily\small
+    \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lllll}
+}{%
+    \end{tabular*}\par
+  \end{tcolorbox}\par\addvspace{25pt}% v2 (2026-07-07): 10pt → 25pt (박스-풀이 간격 +5mm 확보)
+}
+
+% ── 풀이 간 큰 간격 플래그 (true=다음 soltitle 컴팩트, false=2cm) ──
+\newif\ifsoltitlefirst\soltitlefirsttrue
+
+% ── 시험 출처 라벨 (슬림 — 좌측 굵은 바 + 작은 글씨) ──
+% 사용: \examsection{2026 6월 고2 전국연합학력평가}
+\newcommand{\examsection}[1]{%
+  \par\addvspace{12pt}\needspace{4\baselineskip}%
+  \noindent\textcolor{vB-deep}{\rule[-3pt]{3pt}{14pt}}\,\,%
+  {\sffamily\bfseries\color{vB-deep}#1}%
+  \par\vspace{2pt}%
+  \noindent\textcolor{vB-rule}{\rule{\linewidth}{0.3pt}}%
+  \par\addvspace{4pt}%
+  \soltitlefirsttrue% examsection 직후 첫 soltitle은 컴팩트
+}
+
+% ── 배점 뱃지 — 점수에 따라 색이 달라짐 (5단 변별) ──
+%   2.5점 (★1 객관식·도입):  회색 테두리·회색 글자
+%   3점   (★1 단답·★2):      회색 테두리·회색 글자
+%   4점   (★3 객관·단답):    블루 테두리·블루 배경·블루 글자 (표준)
+%   5점   (★4 객관):         골드 테두리·골드 글자 굵게 (변별)
+%   5.5점 (★4 논술):         골드 테두리·옅은 골드 배경·골드 글자 굵게 (최고난도)
+\newcommand{\pointbadge}[1]{%
+  \ifstrequal{#1}{2}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-rule, fill=white, line width=0.4pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\color{vB-dim}] (b) {2점};%
+  }{}%
+  \ifstrequal{#1}{2.5}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-rule, fill=white, line width=0.4pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\color{vB-dim}] (b) {2.5점};%
+  }{}%
+  \ifstrequal{#1}{3}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-rule, fill=white, line width=0.4pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\color{vB-dim}] (b) {3점};%
+  }{}%
+  \ifstrequal{#1}{3.5}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-rule, fill=white, line width=0.5pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\color{vB-dim}] (b) {3.5점};%
+  }{}%
+  \ifstrequal{#1}{3.7}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-rule, fill=white, line width=0.5pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\color{vB-dim}] (b) {3.7점};%
+  }{}%
+  \ifstrequal{#1}{3.9}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-rule, fill=white, line width=0.5pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\color{vB-dim}] (b) {3.9점};%
+  }{}%
+  \ifstrequal{#1}{4}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-accent, fill=vB-light, line width=0.5pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{vB-accent}] (b) {4점};%
+  }{}%
+  \ifstrequal{#1}{4.1}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-accent, fill=vB-light, line width=0.5pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{vB-accent}] (b) {4.1점};%
+  }{}%
+  \ifstrequal{#1}{4.3}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-accent, fill=vB-light, line width=0.5pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{vB-accent}] (b) {4.3점};%
+  }{}%
+  \ifstrequal{#1}{4.5}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-accent, fill=vB-light, line width=0.6pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{vB-accent}] (b) {4.5점};%
+  }{}%
+  \ifstrequal{#1}{4.6}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-accent, fill=vB-light, line width=0.6pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{vB-accent}] (b) {4.6점};%
+  }{}%
+  \ifstrequal{#1}{4.7}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-accent, fill=vB-light, line width=0.6pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{vB-accent}] (b) {4.7점};%
+  }{}%
+  \ifstrequal{#1}{4.8}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-accent, fill=vB-light, line width=0.6pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{vB-accent}] (b) {4.8점};%
+  }{}%
+  \ifstrequal{#1}{5}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-answer-rule, fill=white, line width=0.6pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{vB-answer-rule}] (b) {5점};%
+  }{}%
+  \ifstrequal{#1}{5.5}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-answer-rule, fill=vB-answer, line width=0.7pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{vB-answer-rule}] (b) {5.5점};%
+  }{}%
+  % v3.4 상대 배점 정책 (2026-06-25 마스터 명시) — 변별 정점용 6·6.5·6.7·7점
+  \ifstrequal{#1}{6}{%
+    \tikz[baseline=(b.base)]\node[draw=vB-answer-rule, fill=vB-answer, line width=0.8pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{vB-answer-rule}] (b) {6점};%
+  }{}%
+  \ifstrequal{#1}{6.5}{%
+    \tikz[baseline=(b.base)]\node[draw=red!70!black, fill=vB-answer, line width=0.9pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{red!70!black}] (b) {6.5점};%
+  }{}%
+  \ifstrequal{#1}{6.7}{%
+    \tikz[baseline=(b.base)]\node[draw=red!75!black, fill=red!10, line width=0.9pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{red!75!black}] (b) {6.7점};%
+  }{}%
+  \ifstrequal{#1}{7}{%
+    \tikz[baseline=(b.base)]\node[draw=red!80!black, fill=red!15, line width=1.0pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{red!80!black}] (b) {7점};%
+  }{}%
+  \ifstrequal{#1}{8}{%
+    \tikz[baseline=(b.base)]\node[draw=red!85!black, fill=red!20, line width=1.2pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{red!85!black}] (b) {8점};%
+  }{}%
+  \ifstrequal{#1}{9}{%
+    \tikz[baseline=(b.base)]\node[draw=red!85!black, fill=red!20, line width=1.2pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{red!85!black}] (b) {9점};%
+  }{}%
+  \ifstrequal{#1}{10}{%
+    \tikz[baseline=(b.base)]\node[draw=red!85!black, fill=red!20, line width=1.2pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{red!85!black}] (b) {10점};%
+  }{}%
+  \ifstrequal{#1}{13}{%
+    \tikz[baseline=(b.base)]\node[draw=red!85!black, fill=red!20, line width=1.2pt,
+      rounded corners=2pt, inner xsep=4pt, inner ysep=2pt,
+      font=\sffamily\scriptsize\bfseries\color{red!85!black}] (b) {13점};%
+  }{}%
+}
+
+% ── 빈칸 (가)(나)(다) ──
+\newcommand{\blank}[1]{\,\fbox{\,#1\,}\,}
+
+% ── 한국 교과서식 기울어진 평행 기호 (∥ 대체) ──
+% \parallel 은 두 수직 막대, 한국 교과서는 기울어진 // 형태가 표준
+\newcommand{\para}{\mathbin{/\mskip-5mu/}}
+
+% ── (단, ...) 단서 조건 — 줄바꿈 방지 + 작은 글씨 ──
+\newcommand{\cond}[1]{\mbox{\small (단, #1)}}
+
+% ── 줄바꿈 방지 wrapper (한 단위 수식/조건을 한 줄에 묶음) ──
+\newcommand{\nob}[1]{\mbox{#1}}
+
+% ── 그림 import 매크로 (출처 PDF의 페이지에서 trim 크롭) ──
+% 사용: \examfig[width=0.95\linewidth]{path/to.pdf}{페이지번호}{trim L B R T (bp 단위)}
+% 예: \examfig{2026 6월 고2.pdf}{3}{0 350 0 200}
+\newcommand{\examfig}[4][width=0.95\linewidth]{%
+  \par\smallskip\centering
+  \includegraphics[#1, page=#3, trim=#4, clip]{#2}\par\smallskip\noindent\ignorespaces}
+
+% viewport 좌표(L B R T) 버전 — trim보다 PDF 절대좌표 지정이 직관적인 케이스용
+\newcommand{\examfigvp}[4][width=0.95\linewidth]{%
+  \par\smallskip\centering
+  \includegraphics[#1, page=#3, viewport=#4, clip]{#2}\par\smallskip\noindent\ignorespaces}
+
+% ── 그림 placeholder (출처 PDF 없을 때) ──
+\newcommand{\figureph}[2]{%
+  \par\smallskip\begin{center}
+  \fcolorbox{vB-rule}{white}{\parbox{0.85\linewidth}{\centering\sffamily\footnotesize\color{vB-dim}
+    [그림] #1\\\vspace{#2}}}\end{center}\par\smallskip\noindent\ignorespaces}
+
+% ═══════════════════════════════════════════════════════
+% 답지 매크로
+% ═══════════════════════════════════════════════════════
+
+% ── 정답 표기 — 박스·골드 좌측 바 모두 제거, 굵은 검정 텍스트만 ──
+% (마스터 지시 2026-07-01: 학생용 답지 정합 — 박스·황금색 일체 제거)
+% 2026-07-01 마스터 명시: 박스·골드 좌측 바는 제거, 정답 글씨 앞 *황금색 직사각형 마커* (세로로 긴 직사각형) 유지.
+% v1.3 (2026-07-07 · T1-4 가독성 개선): 정답박스 → 풀이 간격 확대 (medskip 3.5mm → 5mm)
+\newenvironment{answerbox}{%
+  \par\noindent
+  \textcolor{vB-answer-rule}{\rule[-0.6mm]{2mm}{4.5mm}}\hspace{2mm}%
+  \bfseries\color{black}%
+}{%
+  \par\vspace{5mm}%
+}
+
+% ── 풀이 단계 마커 — 둥근 네이비 박스 + 본문은 옆에서 흐름 + 줄바꿈 시 박스 옆 본문 시작 열에 정렬 ──
+% v1.2 (2026-06-28, 마스터 명시): \leftskip 방식으로 변경 — 한 \step 안에서 단락이 새로
+% 시작되어도(빈 줄에 의한 \par) 텍스트 시작 열에 정렬. 박스는 \llap으로 왼쪽 마진에 배치.
+% \soltitle·\solnote가 \leftskip=0pt로 reset.
+\newsavebox{\stepboxsave}
+\newcommand{\step}[1]{%
+  \par\leftskip=0pt%
+  \addvspace{10pt}\needspace{2\baselineskip}%
+  \sbox{\stepboxsave}{\tikz[baseline=-0.6ex]\node[fill=vB-deep, text=white, rounded corners=2.5pt,
+    inner xsep=6pt, inner ysep=2pt,
+    font=\sffamily\bfseries\footnotesize]{\,단계\,#1\,};}%
+  \leftskip=\dimexpr\wd\stepboxsave + 6pt\relax%
+  \noindent\llap{\usebox{\stepboxsave}\hspace*{6pt}}%
+  \ignorespaces
+}
+
+% ── 풀이 헤더 — 자연 흐름. 같은 examsection 내에서 풀이 사이 2cm 간격 ──
+% v2.0 (2026-06-28): 둘째 인자 = [출제의도] 라벨 (단원명+동사). 문항 번호 오른쪽에 출력.
+% v2.1 (2026-06-28, 마스터 명시):
+%   • 언더라인을 문항 번호와 붙임 (rule 직전 음수 vspace)
+%   • 정답(answerbox)과 언더라인 사이 여유간격 확대 (rule 직후 vspace 2pt → 12pt)
+%   • 점수 표기 [N점] 제거 (셋째 인자는 호환성 위해 받기만 함)
+% 사용: \soltitle{1}{삼차방정식 이해하기}{3}
+%        → 1. [출제의도] 삼차방정식 이해하기
+\newcounter{solcount}\setcounter{solcount}{0}
+\newcommand{\soltitle}[3]{%
+  \par\leftskip=0pt% reset from prior \step
+  \stepcounter{solcount}%
+  \ifsoltitlefirst
+    \par\addvspace{12pt}%
+    \soltitlefirstfalse
+  \else
+    \par\addvspace{1.5cm}%
+  \fi
+  \needspace{5\baselineskip}\noindent
+  {\sffamily\bfseries\large\color{vB-ink} #1.}\hspace{6pt}%
+  {\footnotesize\sffamily\bfseries\color{vB-deep}[출제의도]}\,%
+  {\footnotesize\sffamily\color{vB-ink} #2}%
+  \par\nobreak\vspace{-4pt}\noindent%
+  \tikz{\draw[vB-deep, line width=1.2pt, line cap=butt] (0,0) -- (\linewidth,0);}% v1.3 T1-5: 1pt → 1.2pt
+  \par\vspace{12pt}
+}
+
+% ── 최종 정답 (우측 정렬, 박스 없음) ──
+% 사용: \finalans{⑤}{$\frac{4}{3}\pi$} (선택지/단답형 둘 다)
+\newcommand{\finalans}[2]{%
+  \par\vspace{4pt}\hfill%
+  \fbox{\sffamily\bfseries\color{vB-answer-rule}\,정답 #1\ifx&#2&\else\,#2\fi\,}%
+  \par\vspace{2pt}
+}
+
+% ── 답지용 정답표 columntype ──
+\RequirePackage{array}
+\newcolumntype{Y}[1]{>{\centering\arraybackslash}p{#1}}

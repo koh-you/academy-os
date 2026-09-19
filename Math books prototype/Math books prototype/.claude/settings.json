@@ -1,0 +1,77 @@
+{
+  "env": {
+    "PROJECT_TYPE": "math-textbook",
+    "SUBJECT": "공통수학2",
+    "CURRICULUM": "2022-개정교육과정"
+  },
+  "permissions": {
+    "allow": [
+      "Read(참고자료/**)",
+      "Read(output/**)",
+      "Read(templates/**)",
+      "Read(data/**)",
+      "Read(bank/**)",
+      "Read(scripts/**)",
+      "Glob(**/*)",
+      "Grep(**/*)",
+      "Write(output/**)",
+      "Write(templates/**)",
+      "Write(data/**)",
+      "Write(bank/**)",
+      "Write(scripts/**)",
+      "Write(.claude/agents/**)",
+      "Edit(output/**)",
+      "Edit(templates/**)",
+      "Edit(data/**)",
+      "Edit(bank/**)",
+      "Edit(scripts/**)",
+      "Edit(.claude/agents/**)",
+      "Write(참고자료/학교기출/**)",
+      "Edit(참고자료/학교기출/**)",
+      "Bash(node scripts/master-feedback-check.mjs*)",
+      "Bash(node scripts/auto-fill-slots.mjs*)",
+      "Bash(node scripts/hooks/post-tool-check.mjs*)"
+    ],
+    "deny": [
+      "Edit(참고자료/*)",
+      "Write(참고자료/*)",
+      "Edit(참고자료/2026_마더텅_전국연합_학력평가_기출_20분_미니모의고사_24회_고1_공통수학1/**)",
+      "Write(참고자료/2026_마더텅_전국연합_학력평가_기출_20분_미니모의고사_24회_고1_공통수학1/**)",
+      "Edit(참고자료/screen shots/**)",
+      "Write(참고자료/screen shots/**)",
+      "Edit(참고자료/고1 모의고사 기출 모음/**)",
+      "Write(참고자료/고1 모의고사 기출 모음/**)",
+      "Edit(참고자료/고1 모의고사 변형 모음/**)",
+      "Write(참고자료/고1 모의고사 변형 모음/**)",
+      "Edit(참고자료/고2 모의고사 변형 모음/**)",
+      "Write(참고자료/고2 모의고사 변형 모음/**)",
+      "Edit(참고자료/공통수학 1/**)",
+      "Write(참고자료/공통수학 1/**)",
+      "Edit(참고자료/공통수학2/**)",
+      "Write(참고자료/공통수학2/**)",
+      "Edit(참고자료/대수/**)",
+      "Write(참고자료/대수/**)",
+      "Edit(참고자료/수능특강/**)",
+      "Write(참고자료/수능특강/**)",
+      "Read(.antigravity/**)",
+      "Read(logs/**)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node scripts/hooks/post-tool-check.mjs"
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "feature-dev@claude-plugins-official": true,
+    "honeycomb@claude-plugins-official": true
+  }
+}

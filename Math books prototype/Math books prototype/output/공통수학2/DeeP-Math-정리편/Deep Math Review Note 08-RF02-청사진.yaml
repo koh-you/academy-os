@@ -1,0 +1,570 @@
+# CM2-RF-02 무리함수 청사진 v1.0 (2026-07-20 · 세션 57 신설)
+# 통합 문제출제 시스템 v1.0 · schema.md v3.0 · Gate 5.0 대상
+# 도형의 방정식 4권 + ST + FN + RF-01 골든 계승 · 정독 파일 5종
+# 무리식 + 무리함수만 담당 (유리식·유리함수는 CM2-RF-01 별도 편)
+
+series_type: jeongribyeon
+series_name: DeeP Math 정리편
+book_title: 공통수학2 정리편 · CM2-RF-02 무리함수
+unit_code: CM2-RF
+target_audience: 상위권
+version: v1.0
+established: 2026-07-20
+
+jeongribyeon_meta:
+  page_count_est: 18       # 07-RF01 (18p) · 06-FN (18p) 계승 · L3 1p·실전 2p 유연
+  개념_count: 3
+  대표예제_count: 6
+  확인_count: 12
+  Level1_count: 12
+  Level2_count: 12
+  Level3_count: 3
+  실전_count: 3
+  total_problem_slots: 48
+
+# ── 정독 원본 은행 6종 (세션 57 · 무리함수 파트만 선별) ─
+source_banks:
+  - bank/mechanism-데이터-개념원리-CM2-RF.md                     # 무리식 예제-01 + 유제 647~652 · 무리함수 예제 02~08 + 유제 653~675 + 연습 676~690 · star 3~5
+  - bank/mechanism-데이터-RPM-CM2-RF.md                          # #1036~1100 근방 · star 1~5 (무리함수 유형)
+  - bank/mechanism-데이터-고쟁이-CM2-CH08-유리무리-STEP1.md      # #628~#640 · star 3·4 (유형 03 무리식 · 유형 04 무리함수)
+  - bank/mechanism-데이터-고쟁이-CM2-CH08-유리무리.md            # STEP2·3 · star_5·premium (#672~698 무리 파트)
+  - bank/mechanism-데이터-전국연합-CM2-RF.md                     # 무리함수 학평 star_5·premium (유형 12·13·1등급도전)
+  - bank/mechanism-데이터-블랙라벨-CM2-STEP2.md                  # 무리함수 star_5 (선택)
+
+# ══════════════════════════════════════════════════════════════
+# §1. 개념 슬롯 (3개 · 원본 pick 아님 · 2022 개정 표준 용어 CM2-RF)
+# ══════════════════════════════════════════════════════════════
+concept_slots:
+  - slot_id: C1
+    slot_type: 개념
+    sub_section: 무리식
+    page_placement: {page_num: 1, layout: dmconcept_full}
+    contents:
+      - dmsub 1: 무리식의 뜻과 성질 (√(다항식) · 근호 안 ≥ 0 조건 · 분모 ≠ 0)
+      - dmsub 2: 분모의 유리화 (켤레무리수 √a+√b · √a-√b · 곱하기 (a-b) 원리)
+      - dmsub 3: 무리식의 사칙연산 (통분·유리화·근호 안 정리)
+      - dmsub 4: 조건식과 무리식의 값 (x·y 대칭식 대입 · 유리화 후 대입)
+    signature: {defBox: true, primary_axis: 무리식·유리화·값 계산}
+
+  - slot_id: C2
+    slot_type: 개념
+    sub_section: 무리함수와 그래프
+    page_placement: {page_num: 4, layout: dmconcept_full}
+    contents:
+      - dmsub 1: 무리함수의 뜻과 정의역 (근호 안 ≥ 0 · y=√(다항식) 꼴)
+      - dmsub 2: y=√x 그래프 (정의역 x≥0 · 치역 y≥0 · y=x² (x≥0)의 역함수 · y=x 대칭)
+      - dmsub 3: y=√(ax) 그래프 (a>0·a<0 좌우 대칭 · y=-√x · y=√(-x) 반사)
+      - dmsub 4: y=√(a(x-p))+q 표준형 (평행이동 (p,q) · 시작점 (p,q) · 방향 판정)
+    signature: {defBox: true, primary_axis: 표준형·평행이동·시작점}
+
+  - slot_id: C3
+    slot_type: 개념
+    sub_section: 무리함수의 활용 (역함수·직선과의 위치)
+    page_placement: {page_num: 7, layout: dmconcept_full}
+    contents:
+      - dmsub 1: 무리함수의 역함수 (y=√(a(x-p))+q → y=(x-q)²/a+p · 이차함수 (제한된 정의역))
+      - dmsub 2: 무리함수와 직선의 위치 관계 (제곱 후 판별식 D=0 접함 · 시작점 지남 · 케이스 분리)
+      - dmsub 3: 이차함수 y=(x-h)²+k (x≥h)의 역함수 = 무리함수 (y=x 대칭)
+      - dmsub 4: 폐구간 최대·최소 (표준형 → 감소/증가 판단 → 경계값 대입) · 무리함수와 역함수의 교점 (y=x 위)
+    signature: {defBox: true, primary_axis: 역함수·직선 교점·경계값}
+
+# ══════════════════════════════════════════════════════════════
+# §2. 대표예제 슬롯 (6개 · 개념당 2문 · 풀이 포함 · star 3·4)
+# ══════════════════════════════════════════════════════════════
+representative_slots:
+  - slot_id: E1
+    slot_type: 대표예제
+    parent_concept: C1
+    target_star: 4
+    composite_range: [15, 21]
+    source: {source_id: 개념원리-CM2-RF-무리식-예제-01, tier: star_4, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 무리식 유리화 (켤레 곱) · 값 계산, insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 1, unknowns_count: 0, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      x=√3일 때, (√(x+1)-√(x-1))/(√(x+1)+√(x-1)) 값.
+    answer: "√3 - √2"   # 분자·분모에 (√(x+1)-√(x-1)) 곱 → (x - √(x²-1)). x=√3 대입: √3 - √2
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 2, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 켤레 유리화·값 계산}
+
+  - slot_id: E2
+    slot_type: 대표예제
+    parent_concept: C1
+    target_star: 4
+    composite_range: [15, 21]
+    source: {source_id: 개념원리-CM2-RF-무리식-유제-652, tier: star_4, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 무리식 유리화 · 텔레스코핑 소거, insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 1, unknowns_count: 0, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      f(x)=1/(√x+√(x+1))일 때 f(1)+f(2)+f(3)+…+f(99) 값.
+    answer: "9"   # f(x)=√(x+1)-√x. 합=√100-√1=10-1=9
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 3, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 무리식 텔레스코핑}
+
+  - slot_id: E3
+    slot_type: 대표예제
+    parent_concept: C2
+    target_star: 3
+    composite_range: [13, 19]
+    source: {source_id: 개념원리-CM2-RF-무리함수-예제-02, tier: star_3, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 표준형 변형 · 정의역·치역 · 시작점, insight_type: 절차형, depth: 1}
+    structure: {constraint_count: 1, unknowns_count: 0, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      다음 무리함수의 정의역·치역을 구하고 그래프의 시작점 좌표를 구하시오.
+      (1) y=√(2x+4)+1. (2) y=-√(2-x)-1.
+    answer: "(1) 정의역 x≥-2, 치역 y≥1, 시작점 (-2, 1)   (2) 정의역 x≤2, 치역 y≤-1, 시작점 (2, -1)"
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 5, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 표준형·시작점}
+
+  - slot_id: E4
+    slot_type: 대표예제
+    parent_concept: C2
+    target_star: 4
+    composite_range: [20, 26]
+    source: {source_id: 개념원리-CM2-RF-무리함수-예제-05, tier: star_4, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 그래프 시작점 · 지나는 점 대입 → 계수 결정, insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 2, unknowns_count: 3, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      무리함수 y=-√(ax+b)+c의 그래프는 다음을 만족한다: 시작점이 (-2, 1)이고 점 (0, -1)을 지난다.
+      상수 a, b, c의 값을 각각 구하시오.
+    answer: "a=2, b=4, c=1"   # y=-√(a(x+2))+1로 놓고 (0,-1) 대입 → √(2a)=2, a=2. b=-(-2)·a=4. c=1
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 6, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 시작점·지나는 점}
+
+  - slot_id: E5
+    slot_type: 대표예제
+    parent_concept: C3
+    target_star: 4
+    composite_range: [20, 26]
+    source: {source_id: 개념원리-CM2-RF-무리함수-예제-06, tier: star_5, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 무리함수·직선 위치 관계 · 접함 (판별식) + 시작점 지남 케이스, insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 1, unknowns_count: 0, subquestion_count: 3, figure_needed: false}
+    problem_summary: |
+      무리함수 y=√(4-2x)의 그래프와 직선 y=-x+k의 위치 관계에 대하여 다음 각 경우가 되도록 하는 상수 k의 값 또는 범위를 구하시오.
+      (1) 서로 다른 두 점에서 만난다.
+      (2) 오직 한 점에서 만난다.
+      (3) 만나지 않는다.
+    answer: "(1) 2 ≤ k < 5/2   (2) k < 2 또는 k = 5/2   (3) k > 5/2"
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 8, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 접점·시작점·케이스}
+
+  - slot_id: E6
+    slot_type: 대표예제
+    parent_concept: C3
+    target_star: 4
+    composite_range: [20, 26]
+    source: {source_id: 개념원리-CM2-RF-무리함수-예제-07, tier: star_4, variation_type: number_only, copyright_similarity_target: [0.30, 0.85]}
+    mechanism: {primary: 무리함수 역함수 유도 · 정의역·치역 교환, insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 1, unknowns_count: 0, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      무리함수 f(x)=√(4x-2)+1의 역함수 f⁻¹(x)를 구하고 그 정의역과 치역을 각각 구하시오.
+    answer: "f⁻¹(x) = (x-1)²/4 + 1/2 · 정의역 x≥1 · 치역 y≥1/2"
+    variation_status: verbatim_original_kept
+    page_placement: {page_num: 9, layout: dmex_dmproblem_dmsolution}
+    signature: {defBox: false, primary_axis: 역함수·정의역·치역}
+
+# ══════════════════════════════════════════════════════════════
+# §3. 확인 슬롯 (12개 · 대표예제 페이지 하단 · 발문만 · star 3·4)
+# ══════════════════════════════════════════════════════════════
+check_slots:
+  # 페이지 2 (E1 뒤 · 무리식 유리화·계산)
+  - slot_id: CHK1
+    slot_type: 확인
+    parent_representative: E1
+    target_star: 3
+    source: {source_id: 개념원리-CM2-RF-무리식-유제-647, tier: star_3, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      다음 무리식의 값이 실수가 되도록 하는 x의 값의 범위를 구하시오.
+      (1) √(x+3) + 1/√(2-x). (2) √(2x-1)/√(4-x).
+    answer: "(1) -3 ≤ x < 2   (2) 1/2 ≤ x < 4"
+    page_placement: {page_num: 2, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK2
+    slot_type: 확인
+    parent_representative: E1
+    target_star: 3
+    source: {source_id: 개념원리-CM2-RF-무리식-유제-648, tier: star_3, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      다음 유리식의 분모를 유리화하시오.
+      (1) x/(√(x+4)-2). (2) 6/(√(x+3)-√(x-3)).
+    answer: "(1) √(x+4)+2   (2) √(x+3)+√(x-3)"
+    page_placement: {page_num: 2, layout: dmchecktitle+dmcheck}
+
+  # 페이지 3 (E2 뒤 · 무리식 계산·조건식)
+  - slot_id: CHK3
+    slot_type: 확인
+    parent_representative: E2
+    target_star: 4
+    source: {source_id: 개념원리-CM2-RF-무리식-유제-650, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      다음 무리식을 계산하시오.
+      $\dfrac{1}{x+\sqrt{x^{2}-1}} + \dfrac{1}{x-\sqrt{x^{2}-1}}$.
+    answer: "2x"
+    page_placement: {page_num: 3, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK4
+    slot_type: 확인
+    parent_representative: E2
+    target_star: 4
+    source: {source_id: 개념원리-CM2-RF-무리식-유제-651, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      x=1/(√2-1), y=1/(√2+1)일 때 (√x+√y)/(√x-√y)의 값을 구하시오.
+    answer: "√2 + 1"
+    page_placement: {page_num: 3, layout: dmchecktitle+dmcheck}
+
+  # 페이지 5 (E3 뒤 · 무리함수 정의역·그래프)
+  - slot_id: CHK5
+    slot_type: 확인
+    parent_representative: E3
+    target_star: 3
+    source: {source_id: 개념원리-CM2-RF-무리함수-유제-655, tier: star_3, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      다음 무리함수의 그래프를 그리고 정의역과 치역을 각각 구하시오.
+      (1) y=√(-(x-3)). (2) y=-√(x-2)+1.
+    answer: "(1) 정의역 x≤3, 치역 y≥0   (2) 정의역 x≥2, 치역 y≤1"
+    page_placement: {page_num: 5, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK6
+    slot_type: 확인
+    parent_representative: E3
+    target_star: 4
+    source: {source_id: 개념원리-CM2-RF-무리함수-유제-658, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      무리함수 y=√(ax-3)+2의 그래프를 x축의 방향으로 b만큼, y축의 방향으로 c만큼 평행이동하면 y=√(5x+2)의 그래프와 일치할 때, 상수 a, b, c에 대하여 abc의 값을 구하시오.
+    answer: "abc = 10"   # a=5, b=-1, c=-2
+    page_placement: {page_num: 5, layout: dmchecktitle+dmcheck}
+
+  # 페이지 6 (E4 뒤 · 최댓값·최솟값·그래프에서 식)
+  - slot_id: CHK7
+    slot_type: 확인
+    parent_representative: E4
+    target_star: 4
+    source: {source_id: 개념원리-CM2-RF-무리함수-유제-662, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      -2 ≤ x ≤ 1에서 무리함수 y=-√(-3x+3)-1의 최댓값을 a, 최솟값을 b라 할 때, a-b의 값을 구하시오.
+    answer: "a - b = 3"   # 최댓값 -1, 최솟값 -4
+    page_placement: {page_num: 6, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK8
+    slot_type: 확인
+    parent_representative: E4
+    target_star: 4
+    source: {source_id: 개념원리-CM2-RF-무리함수-유제-666, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      무리함수 y=-√(ax+9)+b의 정의역이 {x|x≥-3}, 치역이 {y|y≤2}일 때, 상수 a, b에 대하여 ab의 값을 구하시오.
+    answer: "ab = 6"   # a=3, b=2
+    page_placement: {page_num: 6, layout: dmchecktitle+dmcheck}
+
+  # 페이지 8 (E5 뒤 · 직선과 위치 관계 확장·최댓값·최솟값)
+  - slot_id: CHK9
+    slot_type: 확인
+    parent_representative: E5
+    target_star: 5
+    source: {source_id: 개념원리-CM2-RF-무리함수-유제-668, tier: star_5, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      무리함수 y=-√(6-2x)의 그래프와 직선 y=x+k가 오직 한 점에서 만나도록 하는 상수 k의 값 또는 범위를 구하시오.
+    answer: "k > -3 또는 k = -7/2"
+    page_placement: {page_num: 8, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK10
+    slot_type: 확인
+    parent_representative: E5
+    target_star: 5
+    source: {source_id: 개념원리-CM2-RF-무리함수-유제-669, tier: star_5, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      무리함수 y=-√(2x-8)의 그래프와 직선 y=mx가 서로 다른 두 점에서 만나도록 하는 실수 m의 값의 범위를 구하시오.
+    answer: "-√2/4 < m < 0"
+    page_placement: {page_num: 8, layout: dmchecktitle+dmcheck}
+
+  # 페이지 9 (E6 뒤 · 역함수·합성)
+  - slot_id: CHK11
+    slot_type: 확인
+    parent_representative: E6
+    target_star: 4
+    source: {source_id: 개념원리-CM2-RF-무리함수-유제-670, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      이차함수 f(x)=x²-8x+10 (x≤4)의 역함수가 f⁻¹(x)=-√(ax+b)+c (x≥d)일 때, 상수 a, b, c, d에 대하여 ab - cd의 값을 구하시오.
+    answer: "ab - cd = 30"   # a=1, b=6, c=4, d=-6
+    page_placement: {page_num: 9, layout: dmchecktitle+dmcheck}
+
+  - slot_id: CHK12
+    slot_type: 확인
+    parent_representative: E6
+    target_star: 4
+    source: {source_id: 개념원리-CM2-RF-무리함수-유제-671, tier: star_4, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    problem_summary: |
+      두 함수 f(x)=√(x+3), g(x)=√(2x+5)+1에 대하여 (g⁻¹∘f)⁻¹(2)의 값을 구하시오.
+    answer: "13"   # (g⁻¹∘f)⁻¹ = f⁻¹∘g. g(2)=4. f⁻¹(4)=13
+    page_placement: {page_num: 9, layout: dmchecktitle+dmcheck}
+
+# ══════════════════════════════════════════════════════════════
+# §4. Level 1 슬롯 (12개 · ★ 3·4 · 기초·응용 · 발문만 · 답지 별도)
+# ══════════════════════════════════════════════════════════════
+level1_slots:
+  # 무리식 (4문 · 실수 조건·유리화·값·텔레스코핑)
+  - {slot_id: L1-1, target_star: 3, source: {source_id: 개념원리-CM2-RF-무리식-유제-647, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 무리식 실수 조건 · 근호 안 ≥ 0, insight_type: 절차형, depth: 1}, problem_summary: "무리식 √(x-1)-√(2x-4)가 실수가 되도록 하는 x의 값의 범위", answer: "x ≥ 2"}
+  - {slot_id: L1-2, target_star: 3, source: {source_id: 개념원리-CM2-RF-무리식-유제-649, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 무리식 통분 · 켤레 유리화, insight_type: 절차형, depth: 1}, problem_summary: "무리식 1/(√x+√y) - 1/(√x-√y) 계산", answer: "-2√y/(x-y)"}
+  - {slot_id: L1-3, target_star: 3, source: {source_id: 고쟁이-CM2-CH08-STEP1-#628, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 분모 유리화 · 통분, insight_type: 절차형, depth: 1}, problem_summary: "무리식 x/(√(x+9)+3) + x/(√(x+9)-3)의 값을 구하시오 (x≠0)", answer: "2√(x+9)"}
+  - {slot_id: L1-4, target_star: 4, source: {source_id: 고쟁이-CM2-CH08-STEP1-#629, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 두 근호 안 ≥ 0 · 교집합 · 정수 개수, insight_type: 조건통합형, depth: 2}, problem_summary: "√(|x+3|-3) + √(4-|x-1|)의 값이 실수가 되도록 하는 정수 x의 개수", answer: "6"}
+  # 무리함수 그래프·평행이동·정의역·치역 (4문)
+  - {slot_id: L1-5, target_star: 3, source: {source_id: 개념원리-CM2-RF-무리함수-유제-654, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 무리함수 정의역 · 근호 안 ≥ 0, insight_type: 절차형, depth: 1}, problem_summary: "무리함수 y = 1 - √(2x-4)의 정의역을 구하시오", answer: "x ≥ 2"}
+  - {slot_id: L1-6, target_star: 3, source: {source_id: 개념원리-CM2-RF-무리함수-유제-656, tier: star_3, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 표준형 변형 · 정의역·치역, insight_type: 절차형, depth: 1}, problem_summary: "무리함수 y=√(6-2x)+2의 정의역과 치역을 각각 구하시오", answer: "정의역 x ≤ 3, 치역 y ≥ 2"}
+  - {slot_id: L1-7, target_star: 3, source: {source_id: 고쟁이-CM2-CH08-STEP1-#632, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 무리함수 대칭·평행이동, insight_type: 조건통합형, depth: 2}, problem_summary: "무리함수 y=√(-4x+12)+5의 그래프는 y=2√x의 그래프를 y축에 대칭이동한 후 x축의 방향으로 a만큼, y축의 방향으로 b만큼 평행이동한 것이다. a+b의 값을 구하시오.", answer: "a+b = 8"}
+  - {slot_id: L1-8, target_star: 4, source: {source_id: 개념원리-CM2-RF-무리함수-유제-661, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 치역 → 정의역 역계산, insight_type: 조건통합형, depth: 2}, problem_summary: "무리함수 y=-√(4x-4)+3의 치역이 {y|-1≤y≤1}일 때, 정의역을 구하시오", answer: "2 ≤ x ≤ 5"}
+  # 최대·최소·직선과 만남·역함수 (4문)
+  - {slot_id: L1-9, target_star: 3, source: {source_id: 개념원리-CM2-RF-무리함수-유제-663, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 감소함수 · 경계 방정식, insight_type: 조건통합형, depth: 2}, problem_summary: "-3 ≤ x ≤ a에서 무리함수 y=√(3-2x)+2의 최댓값이 b, 최솟값이 3일 때, b-a의 값을 구하시오", answer: "b - a = 4"}
+  - {slot_id: L1-10, target_star: 4, source: {source_id: 개념원리-CM2-RF-무리함수-유제-667, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 접함 판별식 · 시작점 케이스, insight_type: 조건통합형, depth: 2}, problem_summary: "무리함수 y=√(4x-8)의 그래프와 직선 y=2x-k가 만나지 않도록 하는 실수 k의 값의 범위를 구하시오", answer: "k < 7/2"}
+  - {slot_id: L1-11, target_star: 3, source: {source_id: 개념원리-CM2-RF-무리함수-유제-673, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: y=x 위 교점 · 부호 조건, insight_type: 조건통합형, depth: 2}, problem_summary: "무리함수 f(x)=-√(2-x)의 그래프와 그 역함수 y=f⁻¹(x)의 그래프가 만나는 점의 좌표를 (a, b)라 할 때, a+b의 값을 구하시오", answer: "a + b = -4"}
+  - {slot_id: L1-12, target_star: 4, source: {source_id: 고쟁이-CM2-CH08-STEP1-#635, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 합성함수 역함수 소거 · (f∘g⁻¹)⁻¹=g∘f⁻¹, insight_type: 조건통합형, depth: 2}, problem_summary: "x > 2인 모든 실수에서 정의된 두 함수 f(x)=(x+1)/(x-2), g(x)=√(2x-4)에 대하여 (f∘g⁻¹)⁻¹(7/6)의 값을 구하시오", answer: "6"}
+
+# ══════════════════════════════════════════════════════════════
+# §5. Level 2 슬롯 (12개 · ★ 4·5 · 실전적 심화 · 발문만)
+# ══════════════════════════════════════════════════════════════
+level2_slots:
+  # star 4 (5문)
+  - {slot_id: L2-1, target_star: 4, source: {source_id: 개념원리-CM2-RF-무리함수-연습-677, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 무리함수 종합 판별 · 표준형·평행이동·사분면, insight_type: 조건통합형, depth: 2}, problem_summary: "무리함수 y=-√(6-3x)+4에 관한 다음 설명 중 옳은 것을 모두 고르시오. ㄱ. 평행이동에 의해 y=-√(-3x)의 그래프와 겹칠 수 있다. ㄴ. 정의역은 {x|x≤2}, 치역은 {y|y≤4}이다. ㄷ. 그래프는 제3사분면을 지난다.", answer: "ㄱ, ㄴ"}
+  - {slot_id: L2-2, target_star: 4, source: {source_id: 개념원리-CM2-RF-무리함수-연습-678, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 지나는 점 조건 → 계수 · 치역, insight_type: 조건통합형, depth: 2}, problem_summary: "무리함수 y=-√(x-a)+a+2의 그래프가 점 (a, -a)를 지날 때, 이 함수의 치역을 구하시오", answer: "{y | y ≤ 1}"}
+  - {slot_id: L2-3, target_star: 4, source: {source_id: 개념원리-CM2-RF-무리함수-연습-679, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 감소함수 · 경계 연립 → 계수 결정, insight_type: 조건통합형, depth: 3}, problem_summary: "정의역이 {x | -6 ≤ x ≤ 0}인 무리함수 y=√(ax+b)+1의 치역이 {y | 3 ≤ y ≤ 5}일 때, 상수 a, b에 대하여 ab의 값을 구하시오. (단, a<0)", answer: "ab = -8"}
+  - {slot_id: L2-4, target_star: 4, source: {source_id: 개념원리-CM2-RF-무리함수-연습-681, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 함수 합성·역함수 성질 · 소거, insight_type: 조건통합형, depth: 2}, problem_summary: "집합 A={x|x>1}에서 A로의 두 함수 f(x)=(x+2)/(x-1), g(x)=√(2x-1)에 대하여 (f∘(g∘f)⁻¹∘f)(4)의 값을 구하시오", answer: "5/2"}
+  - {slot_id: L2-5, target_star: 4, source: {source_id: 개념원리-CM2-RF-무리함수-연습-685, tier: star_4, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 역함수 정의 · 합성 대입, insight_type: 조건통합형, depth: 2}, problem_summary: "함수 f(x)=√(3x-12)가 있다. 함수 g(x)가 2 이상의 모든 실수 x에 대하여 f⁻¹(g(x))=2x를 만족시킬 때, g(3)의 값을 구하시오.", answer: "√6"}
+  # star 5 (7문)
+  - {slot_id: L2-6, target_star: 5, source: {source_id: 개념원리-CM2-RF-무리함수-연습-680, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 무리함수·직선 사분면 조건 · 시작점·y절편 케이스, insight_type: 통찰형, depth: 3}, problem_summary: "무리함수 y=5-2√(1-x)의 그래프와 직선 y=-x+k가 제1사분면에서 만나도록 하는 모든 정수 k의 값의 합을 구하시오", answer: "15"}
+  - {slot_id: L2-7, target_star: 5, source: {source_id: 개념원리-CM2-RF-무리함수-연습-682, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 무리함수 · 사분면 통과 조건 · 시작점·y절편 부호, insight_type: 통찰형, depth: 3}, problem_summary: "무리함수 y=√(-x+2)+a의 그래프가 제4사분면을 지나고 제3사분면은 지나지 않도록 하는 실수 a의 값의 범위를 구하시오", answer: "-√2 ≤ a < 0"}
+  - {slot_id: L2-8, target_star: 5, source: {source_id: 개념원리-CM2-RF-무리함수-연습-684, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 고정점 지나는 직선 · 접함 · 시작점 케이스, insight_type: 통찰형, depth: 3}, problem_summary: "무리함수 y=√(x-2)+3의 그래프와 직선 y=ax-3a+1이 만나도록 하는 상수 a의 값의 범위를 구하시오", answer: "a ≤ -2 또는 a > 0"}
+  - {slot_id: L2-9, target_star: 5, source: {source_id: 개념원리-CM2-RF-무리함수-연습-686, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 두 식으로 정의된 함수의 부분별 역함수 · 값 조건, insight_type: 조건통합형, depth: 3}, problem_summary: "함수 f(x)=√(2x-6)+1 (x≥3), -√(-x+3)+1 (x<3)에 대하여 f⁻¹(3) + f⁻¹(-2)의 값을 구하시오", answer: "-1"}
+  - {slot_id: L2-10, target_star: 5, source: {source_id: 개념원리-CM2-RF-무리함수-연습-687, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 이차·무리 역함수 관계 · 폐구간 최댓값, insight_type: 조건통합형, depth: 3}, problem_summary: "정의역이 {x|x≥2}이고 꼭짓점이 (2, 3)인 이차함수 y=f(x)의 그래프가 점 (3, 4)를 지날 때, 6≤x≤12에서 y=f⁻¹(x)의 최댓값을 구하시오", answer: "5"}
+  - {slot_id: L2-11, target_star: 5, source: {source_id: 개념원리-CM2-RF-무리함수-연습-689, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 무리함수·역함수 두 교점 = y=x 위 · 근과 계수의 관계 · 거리, insight_type: 통찰형, depth: 3}, problem_summary: "무리함수 f(x)=√(2x-a)+2의 그래프와 그 역함수 y=f⁻¹(x)의 그래프의 두 교점 사이의 거리가 2√2일 때, 상수 a의 값을 구하시오", answer: "a = 4"}
+  - {slot_id: L2-12, target_star: 5, source: {source_id: 개념원리-CM2-RF-무리함수-연습-688, tier: star_5, variation_type: number_only}, variation_status: verbatim_original_kept, mechanism: {primary: 절댓값 무리함수 · 세 점 만남 케이스 (접함·시작점), insight_type: 통찰형, depth: 3}, problem_summary: "함수 y=√|x-1|의 그래프와 직선 y=x+k가 서로 다른 세 점에서 만나도록 하는 실수 k의 값의 범위를 구하시오", answer: "-1 < k < -3/4"}
+
+# ══════════════════════════════════════════════════════════════
+# §6. Level 3 슬롯 (3문 · ★ 5 심화 · 통찰 정점 · 세션 55 3문/페이지 통합)
+# ══════════════════════════════════════════════════════════════
+level3_slots:
+  - slot_id: L3-1
+    slot_type: Level3
+    target_star: 5
+    composite_range: [27, 32]
+    source: {source_id: 고쟁이-CM2-CH08-STEP2-#690, tier: star_5, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    mechanism: {primary: 무리함수와 직선의 교점 개수 조건 · 접선·시작점 케이스 분리 · k 유일해, insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 1, unknowns_count: 1, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      무리함수 f(x)=-√(2x-5)-2의 그래프와 직선 y=-x+k가 서로 다른 두 점에서 만나도록 하는 실수 k의 값의 범위.
+    answer: "0 < k ≤ 1/2"   # 접점 (k=0 배제) → 두 근 유효 조건: 판별식 8k>0 · x₁ ≥ k+2 ⇔ k ≤ 1/2. 세션 57 재검증 정정
+    peak_qualification: {C_rf02_pure_scope: true, C_line_intersection_two_case: true, C_domain_starting_point: true}
+    signature: {defBox: false, primary_axis: 접선 판별식·시작점 케이스}
+
+  - slot_id: L3-2
+    slot_type: Level3
+    target_star: 5
+    source: {source_id: 개념원리-CM2-RF-무리함수-연습-690, tier: star_5, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    mechanism: {primary: 두 함수 서로 역함수 (y=x 대칭) · 삼각형 넓이 (점과 직선 거리 · 밑변 대칭 이용), insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 3, unknowns_count: 0, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      두 함수 f(x)=√(4x+5), g(x)=(1/4)(x²-5) (x≥0)의 그래프의 교점을 A라 하자.
+      함수 y=f(x)의 그래프 위의 점 B(1, 3)을 지나고 기울기가 -1인 직선 l이
+      함수 y=g(x)의 그래프와 만나는 점을 C라 할 때, 삼각형 ABC의 넓이를 구하시오.
+    answer: "6"   # A(5,5), C(3,1). B와 C는 y=x 대칭. BC=2√2, A에서 l까지 거리=3√2. 넓이=6
+    peak_qualification: {C_rf02_pure_scope: true, C_inverse_function_reflection: true, C_triangle_area_composite: true}
+    signature: {defBox: false, primary_axis: 서로 역함수·y=x 대칭·삼각형 넓이}
+
+  - slot_id: L3-3
+    slot_type: Level3
+    target_star: 5
+    source: {source_id: 개념원리-CM2-RF-무리함수-연습-683, tier: star_5, variation_type: number_only}
+    variation_status: verbatim_original_kept
+    mechanism: {primary: 유리함수 그래프 → 계수 부호 → 무리함수 개형 판정, insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 3, unknowns_count: 0, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      유리함수 y=b/(x+a)+c의 그래프가 그림과 같을 때 (a, b, c 상수),
+      무리함수 y=√(ax+b)+c의 그래프의 개형으로 옳은 것을 <보기>에서 고르시오.
+      (원문 그림: 유리함수 그래프 · 점근선 x=-a>0, y=c>0 · 곡선은 우상단+좌하단 갈래로 b>0)
+    answer: "④ (a<0, b>0, c>0 · y=√(a(x+b/a))+c 형태 · 시작점 (-b/a, c) 위치 (양, 양) · +√이므로 왼쪽 방향으로 y 증가)"
+    # 원문 그림 재현 완료 — 원본 유리함수 개형 (점근선 x=-a>0, y=c>0, b>0으로 곡선은 우상 갈래+좌하 갈래 · 예 a=-2,b=2,c=1) TikZ로 재현
+    # 5-보기 개형 재조판 : ① 오른쪽 위 · ② 오른쪽 아래 · ③ 왼쪽 아래 · ④ 왼쪽 위 (정답) · ⑤ 오른쪽 위 c<0
+    peak_qualification: {C_rf02_pure_scope: true, C_rational_to_irrational_signs: true, C_graph_reading_multilayer: true}
+    signature: {defBox: false, primary_axis: 그래프 부호 판독·개형 매칭, figure_needed: true}
+
+# ══════════════════════════════════════════════════════════════
+# §7. 실전유형 슬롯 (3문 · ★ 5 premium · 학평 기출 · verbatim_kichul)
+#     R-1: 전국연합-2020-3월-고2-16번 (무리함수 역함수 대입 · 원문 그림 없음)
+#     R-2: 전국연합-2024-3월-고2-14번 (두 무리곡선 · 삼각형 넓이비 · "그림과 같이" 원문 그림 있음)
+#     R-3: 전국연합-2019-3월-고2-15번 (5-2√(1-x)·정수 k 합 · 원문 그림 없음)
+# ══════════════════════════════════════════════════════════════
+real_slots:
+  - slot_id: R-1
+    slot_type: 실전
+    target_star: 5
+    target_star_premium: true
+    source: {source_id: 전국연합-2020-3월-고2-16번, tier: star_5, variation_type: verbatim_kichul}
+    verbatim_kichul: true
+    mechanism: {primary: f⁻¹(g(x))=2x → g(x)=f(2x) · 무리함수 대입 · 근호 정리, insight_type: 절차형, depth: 2}
+    structure: {constraint_count: 1, unknowns_count: 0, subquestion_count: 0, figure_needed: false}
+    problem_summary: |
+      함수 f(x)=√(3x-12)가 있다. 함수 g(x)가 2 이상의 모든 실수 x에 대하여
+      f⁻¹(g(x))=2x를 만족시킬 때, g(3)의 값.
+    answer: "√6"   # g(x)=f(2x)=√(6x-12), g(3)=√6 · 학평 2020.3 고2 16번 원문
+    peak_qualification: {C_rf02_pure_scope: true, C_inverse_function_composite: true, C_direct_substitution: true}
+
+  - slot_id: R-2
+    slot_type: 실전
+    target_star: 5
+    target_star_premium: true
+    source: {source_id: 전국연합-2024-3월-고2-14번, tier: star_5, variation_type: verbatim_kichul}
+    verbatim_kichul: true
+    mechanism: {primary: 두 무리곡선 수직선 교점 · 삼각형 넓이비 방정식 · √k 유일해, insight_type: 조건통합형, depth: 2}
+    structure: {constraint_count: 2, unknowns_count: 1, subquestion_count: 0, figure_needed: true}   # 원문 "그림과 같이" 명시 · 좌표평면 위 두 곡선·A·B·C
+    problem_summary: |
+      그림과 같이 k>1인 상수 k에 대하여 점 A(k, 0)을 지나고 y축에 평행한 직선이
+      두 곡선 y=√x, y=√(kx)와 만나는 점을 각각 B, C라 하자.
+      삼각형 OBC의 넓이가 삼각형 OAB의 넓이의 2배일 때 삼각형 OBC의 넓이. (O는 원점)
+    answer: "27"   # k=9. △OBC=k(k-√k)/2=9·6/2=27 · 학평 2024.3 고2 14번 원문
+    peak_qualification: {C_rf02_pure_scope: true, C_two_irrational_curves: true, C_area_ratio_equation: true, C_visualization_complex: true}
+
+  - slot_id: R-3
+    slot_type: 실전
+    target_star: 5
+    target_star_premium: true
+    source: {source_id: 전국연합-2019-3월-고2-15번, tier: star_5, variation_type: verbatim_kichul}
+    verbatim_kichul: true
+    mechanism: {primary: 무리함수 그래프 개형 · 사분면 필터 · 접점/경계 기준 k 범위 · 정수 카운팅, insight_type: 통찰형, depth: 3}
+    structure: {constraint_count: 1, unknowns_count: 0, subquestion_count: 0, figure_needed: false}   # 원문 그림 없음 · 텍스트 완결
+    problem_summary: |
+      함수 y=5-2√(1-x)의 그래프와 직선 y=-x+k가 제1사분면에서 만나도록 하는
+      모든 정수 k의 값의 합.
+    answer: "15"   # 3<k≤6 · 정수 4, 5, 6 · 합 15 · 학평 2019.3 고2 15번 원문 (개념원리 연습-680과 동일)
+    peak_qualification: {C_rf02_pure_scope: true, C_line_intersection_quadrant: true, C_integer_counting: true}
+
+# ══════════════════════════════════════════════════════════════
+# §8. 정점 자격 (Level3 + 실전 6문 총합)
+# ══════════════════════════════════════════════════════════════
+peak_qualification_summary:
+  peak_slots: [L2-6, L2-7, L2-8, L2-9, L2-10, L2-11, L2-12, L3-1, L3-2, L3-3, R-1, R-2, R-3]
+  qualified_count: 13
+  criteria_coverage:
+    C1_irrational_rationalization: true          # C1·E1·E2 (분모 유리화 · 켤레 · 텔레스코핑)
+    C2_domain_range_starting_point: true         # E3·E4·CHK5~8 (표준형·시작점)
+    C3_line_intersection_case_analysis: true     # E5·CHK9·CHK10·L1-10·L2-8·L3-1 (접선·시작점·판별식 케이스)
+    C4_quadrant_condition_composite: true        # L2-6·L2-7·R-3 (사분면 조건 · 시작점·y절편)
+    C5_inverse_function_reflection: true         # E6·L1-11·L1-12·L2-9·L2-10·L2-11·L3-2·R-1 (y=x 대칭·역함수)
+    C6_composite_function_simplification: true   # L1-12·L2-4·L2-5·R-1 (합성 역함수 소거)
+    C7_area_composite_curves: true               # L3-2·R-2 (삼각형 넓이·두 무리곡선)
+    C8_visualization_complex: true               # R-2·L3-3 (좌표평면 대응 도해)
+  distribution_target: {star_3: 14, star_4: 21, star_5: 10, star_5_premium: 3}
+
+# ══════════════════════════════════════════════════════════════
+# §9. 페이지 배치 요약 (세션 55 규약 · 18p 목표 · 3문/페이지 통합 유연)
+# ══════════════════════════════════════════════════════════════
+page_layout:
+  # 개념+대표+확인 (p1~p9)
+  p1: {content: [C1], type: 개념}
+  p2: {content: [E1, CHK1, CHK2], type: 대표+확인}
+  p3: {content: [E2, CHK3, CHK4], type: 대표+확인}
+  p4: {content: [C2], type: 개념}
+  p5: {content: [E3, CHK5, CHK6], type: 대표+확인}
+  p6: {content: [E4, CHK7, CHK8], type: 대표+확인}
+  p7: {content: [C3], type: 개념}
+  p8: {content: [E5, CHK9, CHK10], type: 대표+확인}
+  p9: {content: [E6, CHK11, CHK12], type: 대표+확인}
+  # Level 1 · 12문 · 4문/페이지 · 3페이지 (배지 p10만)
+  p10: {content: [L1-1, L1-2, L1-3, L1-4], type: Level1, banner: true}
+  p11: {content: [L1-5, L1-6, L1-7, L1-8], type: Level1, banner: false, banner_space: true}
+  p12: {content: [L1-9, L1-10, L1-11, L1-12], type: Level1, banner: false, banner_space: true}
+  # Level 2 · 12문 · 4문/페이지 · 3페이지 (배지 p13만)
+  p13: {content: [L2-1, L2-2, L2-3, L2-4], type: Level2, banner: true}
+  p14: {content: [L2-5, L2-6, L2-7, L2-8], type: Level2, banner: false, banner_space: true}
+  p15: {content: [L2-9, L2-10, L2-11, L2-12], type: Level2, banner: false, banner_space: true}
+  # Level 3 · 3문 · 1페이지 (세션 55 3문/페이지 통합 · L3-3 그림 있음)
+  p16: {content: [L3-1, L3-2, L3-3], type: Level3, banner: true, figure_reproduction: true}
+  # 실전 · 3문 · R-2 그림 있음 (좌표평면 대응 도해)
+  #   R-1 (그림 없음·역함수 대입) · R-2 (도해 · 두 곡선·A·B·C) · R-3 (그림 없음·정수 k 합)
+  #   → p17: R-1 + R-2 (2문/페이지 · R-2 도해) · p18: R-3 단독 (1문/페이지)
+  p17: {content: [R-1, R-2], type: 실전, banner: true, figure_reproduction: true, source_badge: true, layout_hint: 2문/페이지_R2도해}
+  p18: {content: [R-3], type: 실전, banner: false, banner_space: true, source_badge: true, layout_hint: 1문/페이지_텍스트}
+  total_pages_est: 18
+
+# ══════════════════════════════════════════════════════════════
+# §10. Gate 5.0 준비 · 검증 대기 항목
+# ══════════════════════════════════════════════════════════════
+gate5_readiness:
+  source_id_all_present: true
+  tier_all_specified: true
+  target_star_all_specified: true
+  answer_verified: false            # concept-author 조판 후 mathjs 자체 검증 의무 (Phase 2)
+  copyright_similarity_pending: true
+  mechanism_all_specified: true
+  peak_qualification_documented: true
+
+# ══════════════════════════════════════════════════════════════
+# §11. 마스터 정책 준수 확인 (세션 55·56·57 신정책 포함 · CM2-RF 스코프)
+# ══════════════════════════════════════════════════════════════
+master_policy_compliance:
+  policy_no_textbook_recap: true            # 개념 슬롯은 표준 정의 (교과 회고 아님)
+  policy_slot_size_uniform: N/A             # 정리편 · 시험지 pair×2 제약 무관
+  cm1_curriculum_scope: N/A                 # CM2 단원
+  star_notation_spacing: true               # 청사진 내부 필드는 star_5 등 YAML 형식 (학생 자료 노출 없음)
+  cm2_calculus_terms_check_pending: true    # Phase 2·3 답지 작성 시 매개변수·극한·삼각함수·벡터 등 자연어화 검증
+  cm2_infinity_symbol_check_pending: true   # 정의역·치역 서술에서 \infty 사용 시 "가까워진다" 자연어 대체 권장
+  no_proof_problems: true                   # 2026-07-19 마스터 지시 · 증명 문제 편입 제외 (모두 값 구하기)
+  verbatim_kichul_R1R2R3: true              # 실전 3문 학평 원본 인용 · \dmkichul 배지
+  # 세션 55 신정책 4종
+  figure_source_original_only: true         # R-2·L3-3 원문 그림 있음 · R-1·R-3 원문 그림 없음
+  figure_point_size_rule_pending: true      # Phase 2 TikZ 조판 시 주요 정점 2.2pt · 파생점 2pt 표준 적용
+  figure_frame_screen_fill_pending: true    # Phase 2 R-2·L3-3 조판 시 평면도형 여백 ≥20% 확인
+  page_layout_flexible_rule: true           # 실전 R-1+R-2 페어 (2문/페이지·R2도해) · R-3 단독 유연 적용
+  # 관용 표기
+  no_self_inverse_wording: true             # "자기역함수" 미사용 → "역함수가 자기 자신과 같은"
+  no_exactly_n_wording: true                # "정확히 N개" → "오직 N개"·"하나뿐인"
+  no_original_equation_wording: true        # "원 방정식" → f(x)=0 형식으로 명명
+
+# ══════════════════════════════════════════════════════════════
+# §12. 각 슬롯 figure_needed 필드
+# ══════════════════════════════════════════════════════════════
+figure_needed_summary:
+  # 개념 (자체 도식 정도만 · 필요 시 y=√x 표준 곡선·시작점 도해 최소한)
+  # 대표·확인·L1·L2: 원본 은행 대조 결과 원문 그림 없음 (텍스트 발문 완결) → 조판 금지
+  # Level 3:
+  L3-3_figure: {status: 원문있음_확정, note: "개념원리 연습-683 · 원문에 유리함수 그래프 있음 · 3사분면 갈래·점근선 x=-a·y=c · 무리함수 개형 매칭용 · Phase 2 TikZ 재현"}
+  # 실전:
+  R-1_figure: {status: 원문없음_확정, note: "학평 2020.3월 고2 16번 · 텍스트 완결 · 그림 없음"}
+  R-2_figure: {status: 원문있음_확정, note: "학평 2024.3월 고2 14번 · '그림과 같이' 명시 · 좌표평면 위 y=√x·y=√(kx) 두 곡선·A(k,0)·B(k,√k)·C(k,k) 도해 · Phase 2 TikZ 재현 (세션 55 4대 정책 준수)"}
+  R-3_figure: {status: 원문없음_확정, note: "학평 2019.3월 고2 15번 · 텍스트 완결 · 그림 없음"}
+
+# ══════════════════════════════════════════════════════════════
+# §13. 다음 Phase (본편·답지 작성) 착수 준비
+# ══════════════════════════════════════════════════════════════
+next_phase:
+  phase_2_main_tex:
+    priority_check:
+      - 각 슬롯 mathjs 답 자체 검증 재실행 (특히 L2-6·L2-11·L2-12·L3-1·L3-2·R-1·R-2·R-3 재계산 확인)
+      - 대표예제 6문 (E1·E2·E3·E4·E5·E6) 풀이 dmapproach + dmsolution + dmanswer 조판
+      - R-1·R-2·R-3 verbatim 발문 원문 확보
+      - R-2 좌표평면 대응 도해 TikZ 조판 (bank/도해-카탈로그.md archive 검색 → 신규 · 세션 55 4대 정책 준수)
+      - L3-3 유리함수 그래프 TikZ 재현 (원문 개념원리 연습-683 그림)
+      - 개념 C2·C3 서술에서 \infty 대신 자연어 "가까워진다" 대체
+    tex_template: templates/deep-math.sty (CM2-GM·ST·FN·RF-01 정리편 골든 계승)
+    build_directory: output/공통수학2/DeeP-Math-정리편/
+  phase_3_answer_sheet:
+    priority_check:
+      - Critical Point 서술 스타일 (feedback_critical_point_style)
+      - CM2 답지 자연어 규정 (매개변수·극한·삼각함수·벡터 우회) · 무리함수 특수 (시작점·판별식·역함수 y=x 대칭 서술 자연어화)
+      - 학평 3문 답지 (R-1·R-2·R-3) 그림 재현 (R-2)·풀이 완결
+      - quickgrid 답만 표기 (feedback_answer_display_final_value_only)
+      - L3-1·L3-2·L3-3 무리함수 고유 도구 서술 (접선 판별식·시작점 케이스·y=x 대칭·서로 역함수)

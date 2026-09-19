@@ -1,0 +1,532 @@
+% 와부고 재현 2학기 중간고사 1회 · 문제지 (DeeP-Math 디자인 재조판)
+% ============================================================================
+% 내용 확정본 (17문 · 100점 · 선택형 12 / 서술형 5) — 콘텐츠 변경 없음.
+% 디자인만 DeeP-Math 형성평가 A형 프리앰블을 verbatim 이식.
+%   원본 디자인: output/공통수학2/DeeP-Math-평가시험지/
+%                DeeP-Math-형성평가-도형의방정식-A형-문제.tex (v0.8 · 세션 93 후반)
+%   스타일 백업(골든 와부고 버전): 재현-1회-문제.tex.style-backup
+%
+% 이식한 DeeP 디자인 요소:
+%   (1) 완전 검정 팔레트 (vB-* 8색 HTML 000000 재매핑 · style.sty 무수정)
+%   (2) examheader v3 (시안 A v3 · SIMULATOR 32pt bold + 회차 우측 · 세로줄 헤더)
+%       — 헤더 값만 우리 시험지에 맞게 조정 (RANGE 1·2단원 · 17문항·100점 · 시간 생략)
+%   (3) 세로 분할선 zref-savepos 좌표 기반 (2-pass 필수)
+%   (4) headrule/footrule + dmvlinetop/dmvlinebot + examfooter (학원로고 우하단)
+%   (5) problem 환경 (번호 inline · 검정) · \pts · \pointbadge 빈 정의 · \probsource
+%   (6) 본문 배치 : 선택형 페이지 \pagecolumnpair 세로 컬럼 우선 (A형 관례)
+%
+% 배점: 선택형 52 (Q1~Q12) + 서술형 48 (Q13~Q17) = 100점 만점
+%
+% 시리즈명 (마스터 확정 2026-07-30 세션 105): 시뮬레이터 [와부]
+%   표기 = 영문 SIMULATOR + 한글 [와부]. 헤더 대타이틀 \examround 로 렌더링.
+%   종전 값 "Formative Assessment" 는 딥매쓰 형성평가 A형 디자인 이식 시 따라온
+%   기본값이었고 중간고사 재현과 어긋난다는 검수 지적(INFO)이 있었다 → 해소.
+%   대타이틀 위계 (마스터 확정): SIMULATOR = 32pt bold (최강조) · [와부] = 종속표기
+%   (현재 크기의 0.6배 · mdseries) · 회차 NO.1 = 우측 정렬 (0.55배 · mdseries).
+%   회차는 새 매크로를 만들지 않고 style.sty 기존 \examvol 을 채워 쓴다.
+%   🔴 크기를 절대값(pt)으로 박지 않고 \f@size 비례로 둔 이유: \examround·\examvol 은
+%      style.sty:174 의 p2 이후 러닝헤드(\large)에서도 쓰인다. 절대 19pt 로 박으면
+%      러닝헤드에서 종속표기가 교재명보다 커진다.
+%
+% 세션 105 콘텐츠 변경 (마스터 확정):
+%   · #4  재출제 — 예상 2회 #4 와 5축 일치(세 조건 p·q·r / 절댓값 / 이차부등식 구간
+%          포함관계 / 보기 충분·필요 조합)로 자기복제 판정 → 조건의 소재를 좌표평면의
+%          자취로 교체. S10·S11·I-EQV·정답 ③ 유지.
+%   · #8  재출제 — 「전체집합 U · 두 부분집합 A,B · 조건박스 · U의 부분집합 X의 개수」
+%          프레임이 12회차 중 3회 재사용(11회 Q8 = 53.3% 전 슬롯 최대)으로 포화 →
+%          프레임 폐기. 합집합이 지정된 두 집합의 순서쌍 개수로 교체. S7·I-BW·③ 유지.
+%   · 소문항 발문 60자 초과 5건 정리 (#15(1)·#16(1)(2)(3)·#17(2)) — 데이터를
+%          대발문으로 올리고 군더더기 제거. 수학·요구사항·정답 불변.
+%          #16(1) 말미 공선 조건 서술 요구절은 삭제 (사유는 draft rev10 참조).
+% ============================================================================
+
+\documentclass[10pt]{article}
+\usepackage{style}
+\usepackage{microtype}  % \textls (letter-spacing) 지원 · smoke-header-A-v3 계승
+
+% ── 대타이틀 (교재명 + 종속표기) · 회차 ──
+%   크기는 현재 폰트 크기(\f@size)에 비례. p1 대타이틀 32pt / p2~ 러닝헤드 \large 양쪽 대응.
+\makeatletter
+\renewcommand{\examround}{SIMULATOR\,{\fontsize{\the\dimexpr\f@size pt*3/5\relax}{\the\dimexpr\f@size pt*3/5\relax}\selectfont\mdseries[와부]}}
+\renewcommand{\examvol}{{\fontsize{\the\dimexpr\f@size pt*11/20\relax}{\the\dimexpr\f@size pt*11/20\relax}\selectfont\mdseries NO.1}}
+% p2~ 러닝헤드: 교재명 SIMULATOR 만 정확히 중앙에 두고, 종속표기 `[와부] NO.1` 은
+%   \makebox[0pt][l] 로 폭 0 을 주어 중앙 정렬 계산에서 제외한다 (마스터 확정 2026-07-30:
+%   "[와부] NO.1 는 주석 같은 느낌이니까 중앙위치를 고려할 필요는 없어").
+%   \examrunhead 는 style.sty 의 훅 — [C] 를 직접 고치면 딥매쓰 등 타 시리즈가 함께 바뀐다.
+%   단일 출처: templates/SIMULATOR-와부-디자인-v1.md §(3b)
+\renewcommand{\examrunhead}{%
+  SIMULATOR\makebox[0pt][l]{\,{\fontsize{\the\dimexpr\f@size pt*3/5\relax}{\the\dimexpr\f@size pt*3/5\relax}\selectfont\mdseries [와부]\ NO.1}}}
+\makeatother
+
+% ── 완전 검정 통일 팔레트 (안 C · 예외 없음) ──
+%   style.sty 원본 그대로 유지 · 이 파일에서만 vB-* HTML 값 재매핑 · 파급 0
+\definecolor{vB-ink}{HTML}{000000}
+\definecolor{vB-deep}{HTML}{000000}
+\definecolor{vB-accent}{HTML}{000000}
+\definecolor{vB-rule}{HTML}{000000}
+\definecolor{vB-light}{HTML}{FFFFFF}
+\definecolor{vB-dim}{HTML}{000000}
+\definecolor{vB-frame}{HTML}{000000}
+\definecolor{vB-warn}{HTML}{000000}
+
+% ── 페이지 세로 분할선 · 좌표 노드 기반 픽셀 맞춤 (시안 A v3 이식) ──
+%   원리: 헤더 하단·푸터 상단 룰이 그려질 때 y좌표 기록 → 두 좌표 잇는 세로 룰
+%   2-pass 필수 (첫 xelatex은 좌표 기록만, 둘째부터 실제 draw)
+\usepackage{eso-pic}
+\usepackage{zref-savepos}
+\newcommand{\dmvlinetop}{\zsavepos{dm-vline-top-\thepage}}
+\newcommand{\dmvlinebot}{\zsavepos{dm-vline-bot-\thepage}}
+\AddToShipoutPictureFG{%
+  \begingroup
+  \edef\vlinetopsp{\zposy{dm-vline-top-\thepage}}%
+  \edef\vlinebotsp{\zposy{dm-vline-bot-\thepage}}%
+  \ifnum\vlinetopsp>0 %
+    \ifnum\vlinebotsp>0 %
+      \setlength{\dimen0}{\vlinetopsp sp}%
+      \setlength{\dimen2}{\vlinebotsp sp}%
+      \edef\vlinetoppt{\the\dimen0}%
+      \edef\vlinebotpt{\the\dimen2}%
+      \begin{tikzpicture}[overlay,remember picture]
+        \draw[color=black,line width=0.4pt]
+          ([xshift=1mm,yshift=\vlinetoppt]current page.south)
+          -- ([xshift=1mm,yshift=\vlinebotpt]current page.south);
+      \end{tikzpicture}%
+    \fi
+  \fi
+  \endgroup
+}
+
+% ══════════════════════════════════════════════════════════════════════════
+% examheader v3 · 시안 A v3 (smoke-header-A-v3.tex 이식)
+%   헤더 값만 우리 시험지에 맞게 조정 : RANGE = 1·2단원 · 17문항·100점 · 50분 (A형 3-col verbatim)
+% ══════════════════════════════════════════════════════════════════════════
+\makeatletter
+\renewcommand{\examheader}[2]{%
+  \thispagestyle{empty}%
+  \par\noindent
+  % (1) 상단 hairline · 페이지 폭 전체
+  {\color{black}\rule{\linewidth}{0.3pt}}\par
+  \vspace{4pt}
+  % (2) SMALL CAPS 시리즈 라벨 (좌) · 회차 (우)
+  \noindent
+  {\sffamily\scriptsize\color{black}\textls[280]{DEPTH \& INSIGHT}}%
+  \hfill
+  {\sffamily\scriptsize\color{black}\textls[280]{2026 \textperiodcentered\ 2 SEMESTER}}%
+  \par\vspace{5pt}
+  % (3) 대타이틀 (교재명 · 좌) + 회차 (우) · 산세리프 32pt bold
+  \noindent
+  {\fontsize{32pt}{34pt}\selectfont\sffamily\bfseries\color{black}%
+    \examround\hfill\examvol}%
+  \par\vspace{2pt}
+  % (4) subtitle : 대단원명
+  \noindent
+  {\sffamily\normalsize\color{black}#1}%
+  \par\vspace{2pt}
+  % (4.5) 부제 아래 가로선
+  {\color{black}\rule{\linewidth}{0.3pt}}\par
+  \vspace{4pt}
+  % (5) 3-column grid : 범위 · 문항·배점 · 시간 (A형 골든 verbatim · 값만 조정)
+  \noindent
+  \makebox[\linewidth][s]{%
+    \begin{minipage}[t]{0.32\linewidth}%
+      {\sffamily\scriptsize\color{black}\textls[200]{RANGE}}\par\vspace{2.5pt}
+      {\sffamily\small\color{black}대단원 1 \textperiodcentered\ 2}%
+    \end{minipage}%
+    \hfill
+    {\color{black}\vrule width 0.3pt height 7.5mm}%
+    \hfill
+    \begin{minipage}[t]{0.30\linewidth}%
+      \centering
+      {\sffamily\scriptsize\color{black}\textls[200]{ITEMS \textperiodcentered\ POINTS}}\par\vspace{2.5pt}
+      {\sffamily\small\color{black}17문항 \textperiodcentered\ 100점}%
+    \end{minipage}%
+    \hfill
+    {\color{black}\vrule width 0.3pt height 7.5mm}%
+    \hfill
+    \begin{minipage}[t]{0.28\linewidth}%
+      \raggedleft
+      {\sffamily\scriptsize\color{black}\textls[200]{TIME}}\par\vspace{2.5pt}
+      {\sffamily\small\color{black}50분}%
+    \end{minipage}%
+  }%
+  \par\vspace{5pt}
+  % (6) 하단 hairline (grid와 이름 라인 사이 구분)
+  \noindent{\color{black}\rule{\linewidth}{0.3pt}}\par
+  \vspace{3pt}
+  % (7) 구성 (좌) + 이름 [ 필기 공백 ] (우)
+  %     마스터 확정 (2026-07-30): 구간 정보를 이름 줄에 통합.
+  %     종전 \examsection 배지 2개(p1 선택형 · p4 서술형)를 이 한 줄로 대체 —
+  %     p4 배지가 페이지 세로 분할선을 관통하던 문제(검수 D8 감점)가 함께 해소된다.
+  %     배점 분해(52/48)는 상단 그리드 "17문항 · 100점"과 각 문항 [N점]에 이미 있어 생략.
+  \noindent
+  {\sffamily\footnotesize\color{black}%
+    선택형 12문 \textperiodcentered\ 서술형 5문%
+    \hfill
+    이름\ [\hspace*{55mm}]}%
+  \par\vspace{3pt}
+  % (8) 종결 가로선 (세로 분할선 시작점)
+  \noindent{\color{black}\rule{\linewidth}{0.4pt}}\dmvlinetop\par
+  \addvspace{2mm}   % v2.8 · 실 렌더링 통일
+  \thispagestyle{examfooter}%
+}
+\makeatother
+
+% ── 학원 로고·통상 페이지 헤더·푸터 (시안 A v3 이식) ──
+\makeatletter
+\fancyfoot[R]{\raisebox{-0.8mm}{\includegraphics[height=4mm]{학원로고 (깊이와통찰).jpg}}}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{black}\leaders\hrule height \headrulewidth\hfill}\dmvlinetop}
+\renewcommand{\footrule}{\dmvlinebot\hbox to\headwidth{\color{black}\leaders\hrule height \footrulewidth\hfill}\vskip 4pt}
+\fancypagestyle{examfooter}{%
+  \fancyhf{}%
+  \fancyfoot[L]{}%
+  \fancyfoot[C]{\sffamily\bfseries\color{black}-\,\thepage\,-}%
+  \fancyfoot[R]{\raisebox{-0.8mm}{\includegraphics[height=4mm]{학원로고 (깊이와통찰).jpg}}}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0.4pt}%
+  \renewcommand{\footrule}{\dmvlinebot\hbox to\headwidth{\color{black}\leaders\hrule height \footrulewidth\hfill}\vskip 4pt}%
+}
+
+% ── 문항 스타일 (완전 검정 통일 · DeeP 계승) ──
+%   problem 환경 자연 크기 minipage (pagecolumnpair·probpair 내부 배치)
+%   번호·배점 뱃지 모두 검정
+\renewenvironment{problem}[2]{%
+  \par\setcounter{probnum}{#1}%
+  \noindent
+  \begin{minipage}[t]{\linewidth}%
+  \raggedright%
+  \setlength{\parskip}{4pt plus 1pt}%
+  {\sffamily\bfseries\large\color{black}#1.}\hspace{4pt}\ignorespaces
+}{%
+  \end{minipage}\par%
+}
+\renewcommand{\pointbadge}[1]{}
+\newcommand{\pts}[1]{%
+  \nobreak\hspace*{\fill}%
+  \mbox{\sffamily\small\color{black}[\textbf{#1점}]}%
+  \par%
+}
+\makeatother
+
+% ── 학평 배지 로컬 재정의 (크기 축소 · 한글 폴백 경고 해소) ──
+\renewcommand{\probsource}[1]{{\scriptsize\sffamily\color{black}#1}}
+
+\begin{document}
+
+\examheader{도형의 방정식 \textperiodcentered\ 집합과 명제}{총 17문 \textperiodcentered\ 100점}
+
+% 구간 표시는 examheader (7)행에 통합 — \examsection 배지 폐기 (마스터 확정 2026-07-30)
+
+% ══════════════════════════════════════════════════════════════════════════
+% 페이지 1 (선택형 Q1~Q4) · examheader 동반 페이지
+% 옵션 A 세로 컬럼 (\pagecolumnpair): 좌 {1,2} · 우 {3,4} · 각 컬럼 \vfill 균등 분배
+% ══════════════════════════════════════════════════════════════════════════
+\begin{pagepair}
+\pagecolumnpair{%
+\begin{problem}{1}{s}
+세 점 $\mathrm{A}(2,\,-1)$, $\mathrm{B}(8,\,5)$, $\mathrm{C}(5,\,8)$에 대하여 삼각형 $\mathrm{ABC}$의 무게중심을 $\mathrm{G}$라 하고, 선분 $\mathrm{AB}$를 $2:1$로 내분하는 점을 $\mathrm{P}$라 하자. 두 점 $\mathrm{G}$, $\mathrm{P}$를 지나는 직선의 $x$절편은? \pts{3.5}
+\begin{choices}
+\choice{$1$}
+\choice{$3$}
+\choice{$5$}
+\choice{$6$}
+\choice{$9$}
+\end{choices}
+\end{problem}
+
+\vfill
+
+\begin{problem}{2}{s}
+$x$, $y$에 대한 방정식 $x^{2}+y^{2}-2ax-2ay+3a^{2}-a-6=0$이 원을 나타내도록 하는 정수 $a$의 개수는? \pts{4}
+\begin{choices}
+\choice{$3$}
+\choice{$4$}
+\choice{$5$}
+\choice{$6$}
+\choice{$7$}
+\end{choices}
+\end{problem}
+}{%
+\begin{problem}{3}{s}
+전체집합 $U$의 세 부분집합 $A$, $B$, $C$에 대하여 $(A\cup B)\subset C$가 성립할 때, 집합 $\{(C-A)\cup(C-B)\}^{c}\cap C$와 항상 같은 집합은? \pts{4}
+\begin{choices}
+\choice{$A\cap B$}
+\choice{$A\cup B$}
+\choice{$B-A$}
+\choice{$C-B$}
+\choice{$\varnothing$}
+\end{choices}
+\end{problem}
+
+\vfill
+
+\begin{problem}{4}{s}
+좌표평면 위의 두 점 $\mathrm{A}(0,\,4)$, $\mathrm{B}(4,\,0)$과 점 $\mathrm{P}(x,\,y)$에 대하여 다음 〈보기〉에서 옳은 것을 모두 고른 것은? \pts{4}
+\vspace{2mm}
+
+\begin{bogibox}
+ㄱ. $x^{2}+y^{2}=2xy$는 $x=y$이기 위한\\[1pt]
+\hphantom{ㄱ. }\nob{필요충분조건이다.}\\[2pt]
+ㄴ. $\overline{\mathrm{AP}}=\overline{\mathrm{BP}}$는 $x=y$이기 위한 \nob{충분조건이다.}\\[2pt]
+ㄷ. $x+y=4$는 $\overline{\mathrm{AP}}=\overline{\mathrm{BP}}$이기 위한 \nob{필요조건이다.}
+\end{bogibox}
+\begin{choices32}{ㄱ}{ㄷ}{ㄱ,ㄴ}{ㄴ,ㄷ}{ㄱ,ㄴ,ㄷ}\end{choices32}
+\end{problem}
+}
+\end{pagepair}
+
+% ══════════════════════════════════════════════════════════════════════════
+% 페이지 2 (선택형 Q5~Q8) · 좌 {5,6} · 우 {7,8}
+% ══════════════════════════════════════════════════════════════════════════
+\begin{pagepair}
+\pagecolumnpair{%
+\begin{problem}{5}{s}
+방정식 $f(x,\,y)=0$이 나타내는 도형을, 방정식 $f(y,\,x-2)=0$이 나타내는 도형으로 옮기는 이동이 있다. 이 이동에 의하여 점 $(4,\,7)$이 옮겨지는 점을 $\mathrm{A}$라 할 때, 점 $\mathrm{A}$의 좌표는? \pts{4}
+\begin{choices32}{$(5,\,4)$}{$(9,\,4)$}{$(6,\,9)$}{$(9,\,6)$}{$(7,\,5)$}\end{choices32}
+\end{problem}
+
+\vfill
+
+\begin{problem}{6}{s}
+전체집합 $U$의 두 부분집합 $A$, $B$가 다음 조건을 모두 만족시킨다.
+\begin{conditions}
+(가) $n(A\cup B)=17$이고 $n(A\cap B)=3$이다.\\
+(나) $n(A)$는 $n(B)$의 배수이다.
+\end{conditions}
+$n(A)$의 최댓값을 $M$, 순서쌍 $(n(A),\,n(B))$의 개수를 $N$이라 할 때, $M+N$의 값은? \pts{4.5}
+\begin{choices}
+\choice{$19$}
+\choice{$20$}
+\choice{$22$}
+\choice{$24$}
+\choice{$26$}
+\end{choices}
+\end{problem}
+}{%
+\begin{problem}{7}{s}
+두 원 $C_{1}:x^{2}+y^{2}=9$, $C_{2}:x^{2}+y^{2}-2kx+k^{2}-4=0$에 대하여 두 원 $C_{1}$, $C_{2}$의 공통현이 존재하도록 하는 정수 $k$의 개수는? \pts{4.5}
+\begin{choices}
+\choice{$3$}
+\choice{$4$}
+\choice{$6$}
+\choice{$8$}
+\choice{$10$}
+\end{choices}
+\end{problem}
+
+\vfill
+
+\begin{problem}{8}{s}
+두 집합 $A$, $B$가 $A\cup B=\{1,\,2,\,3,\,4,\,5\}$를 만족시킨다. $n(A-B)=1$ 또는 $n(B-A)=1$이 되도록 하는 순서쌍 $(A,\,B)$의 개수는? \pts{4.5}
+\begin{choices}
+\choice{$32$}
+\choice{$70$}
+\choice{$140$}
+\choice{$160$}
+\choice{$243$}
+\end{choices}
+\end{problem}
+}
+\end{pagepair}
+
+% ══════════════════════════════════════════════════════════════════════════
+% 페이지 3 (선택형 Q9~Q12) · 좌 {9,10} · 우 {11,12}
+% ══════════════════════════════════════════════════════════════════════════
+\begin{pagepair}
+\pagecolumnpair{%
+\begin{problem}{9}{s}
+실수 $x$에 대한 명제 ``$x^{2}-4x+3<0$이면 $x^{2}-4x<0$이다''와 그 역, 이, 대우 중에서 참인 것의 개수는? \pts{4.5}
+\begin{choices}
+\choice{$1$}
+\choice{$2$}
+\choice{$3$}
+\choice{$4$}
+\choice{$0$}
+\end{choices}
+\end{problem}
+
+\vfill
+
+\begin{problem}{10}{s}
+좌표평면 위에 두 직선 $l_{1}:3x-4y+5=0$, $l_{2}:4x+3y-10=0$이 있다. 점 $\mathrm{P}$와 두 직선 $l_{1}$, $l_{2}$ 사이의 거리를 각각 $d_{1}$, $d_{2}$라 하자. $d_{1}+d_{2}=4$를 만족시키는 점 $\mathrm{P}$ 전체가 나타내는 도형으로 둘러싸인 부분의 넓이는? \pts{4.5}
+\begin{choices}
+\choice{$8$}
+\choice{$16$}
+\choice{$24$}
+\choice{$32$}
+\choice{$64$}
+\end{choices}
+\end{problem}
+}{%
+\begin{problem}{11}{s}
+$0<t<4$인 실수 $t$에 대하여 좌표평면 위의 두 점 $\mathrm{A}(t,\,0)$, $\mathrm{B}(0,\,4-t)$가 있다. 선분 $\mathrm{AB}$를 $1:3$으로 내분하는 점을 $\mathrm{P}$, 점 $\mathrm{P}$를 직선 $y=x$에 대하여 대칭이동한 점을 $\mathrm{Q}$라 하자. 원점을 $\mathrm{O}$라 할 때, 다음 〈보기〉에서 옳은 것을 모두 고른 것은? \pts{5}
+\vspace{2mm}
+
+\begin{bogibox}
+ㄱ. $t=2$일 때, $\overline{\mathrm{PQ}}=\sqrt{2}$이다.\\[2pt]
+ㄴ. 점 $\mathrm{Q}$는 $t$의 값에 관계없이 항상 직선 $3x+y=3$ 위에 있다.\\[2pt]
+ㄷ. 세 점 $\mathrm{O}$, $\mathrm{P}$, $\mathrm{Q}$가 삼각형을 이루지 않도록 하는 $t$의 값은 오직 하나이다.
+\end{bogibox}
+\begin{choices32}{ㄱ}{ㄷ}{ㄱ,ㄴ}{ㄴ,ㄷ}{ㄱ,ㄴ,ㄷ}\end{choices32}
+\end{problem}
+
+\vfill
+
+\begin{problem}{12}{s}
+직선 $l$이 다음 조건을 모두 만족시킨다.
+\begin{conditions}
+(가) 직선 $l$의 기울기는 음수이다.\\
+(나) 직선 $l$은 점 $\mathrm{P}(2,\,3)$을 지난다.
+\end{conditions}
+직선 $l$이 $x$축, $y$축과 만나는 점을 각각 $\mathrm{A}$, $\mathrm{B}$라 하고 원점을 $\mathrm{O}$라 하자. 삼각형 $\mathrm{OAB}$의 넓이가 최소일 때, $\overline{\mathrm{PA}}\cdot\overline{\mathrm{PB}}$의 값은? \pts{5}
+\begin{choices}
+\choice{$6$}
+\choice{$10$}
+\choice{$12$}
+\choice{$13$}
+\choice{$26$}
+\end{choices}
+\end{problem}
+}
+\end{pagepair}
+
+% ══════════════════════════════════════════════════════════════════════════
+% 페이지 4 (서술형 Q13, Q14) — 좌우 minipage, 논술 공간
+% ══════════════════════════════════════════════════════════════════════════
+% 구간 표시는 examheader (7)행에 통합 — 배지 방식은 세로 분할선 관통 문제로 폐기
+
+\setlength{\probboxheight}{195mm}
+
+\noindent
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}\raggedright
+\begin{problem}{13}{s}
+원점 $\mathrm{O}$와 두 점 $\mathrm{A}(4,\,2)$, $\mathrm{B}(-2,\,6)$을 꼭짓점으로 하는 삼각형 $\mathrm{OAB}$가 있다. 점 $\mathrm{B}$에서 직선 $\mathrm{OA}$에 내린 수선의 발을 $\mathrm{H}$라 할 때, 점 $\mathrm{H}$의 좌표와 삼각형 $\mathrm{OAB}$의 넓이를 구하시오. (각 과정을 논술할 것) \pts{6}
+\end{problem}
+\end{minipage}%
+\hfill
+\begin{minipage}[t][\probboxheight][t]{0.46\linewidth}\raggedright
+\begin{problem}{14}{s}
+점 $\mathrm{P}$가 원 $x^{2}+y^{2}-4x+2y-4=0$ 위를 움직인다. 점 $\mathrm{P}$를 직선 $y=x$에 대하여 대칭이동한 점을 $\mathrm{P}'$, 점 $\mathrm{P}'$을 $x$축의 방향으로 $-3$만큼 평행이동한 점을 $\mathrm{Q}$라 하자. 점 $\mathrm{Q}$가 나타내는 도형의 방정식을 구하시오. (각 과정을 논술할 것) \pts{8}
+\end{problem}
+\end{minipage}
+
+\clearpage
+
+% ══════════════════════════════════════════════════════════════════════════
+% 페이지 5 (서술형 Q15) — 좌우 분할, (1) | (2)(3)
+% ══════════════════════════════════════════════════════════════════════════
+\begin{pagepair}
+\vfill
+\probpair{%
+\begin{problem}{15}{s}
+집합 $U=\{1,\,2,\,3,\,4,\,5,\,6\}$의 부분집합 $X$에 대하여 $X$의 모든 원소의 합을 $S(X)$라 하고, 좌표평면 위의 점 $\mathrm{P}_{X}$를
+$$\mathrm{P}_{X}=\big(n(X),\ S(X)\big)$$
+로 정한다. (단, $S(\varnothing)=0$이다.) 좌표평면 위의 원
+$$C:\ (x-6)^{2}+(y-6)^{2}=25$$
+와 $U$의 두 부분집합 $X_{1}=\{1,\,3,\,6\}$, $X_{2}=\{2,\,4,\,5\}$에 대하여 다음 물음에 답하시오. (각 과정을 논술할 것) \pts{10}
+\end{problem}
+
+\vspace*{6mm}
+\textbf{(1)} 두 점 $\mathrm{P}_{X_{1}}$, $\mathrm{P}_{X_{2}}$의 좌표를 구하고, 각각 원 $C$와의 위치 관계를 밝히시오.
+\vspace{46mm}
+}{%
+\textbf{(2)} 점 $\mathrm{P}_{X}$가 원 $C$ 위에 있도록 하는 $U$의 부분집합 $X$의 개수를 구하시오.
+\vspace{72mm}
+
+\textbf{(3)} 점 $\mathrm{P}_{X}$가 원 $C$의 내부에 있도록 하는 $U$의 부분집합 $X$의 개수를 구하시오.
+\vspace{58mm}
+}
+\vfill
+\end{pagepair}
+
+% ══════════════════════════════════════════════════════════════════════════
+% 페이지 6 (서술형 Q16) — 좌우 분할, (1) | (2)(3)
+% ══════════════════════════════════════════════════════════════════════════
+\begin{pagepair}
+\vfill
+\probpair{%
+\begin{problem}{16}{s}
+\begin{condbox}
+{\small\sffamily\bfseries [상황]}\\[2pt]
+{\small
+원본 그림을 일정한 비율로 줄여 다시 그리는 \textbf{축소 제도기}가 있다. 이 장치는 같은 간격으로 구멍을 뚫은 네 개의 막대를 이어 만든 것으로, 막대와 막대가 이어지는 두 이음점을 각각 $\mathrm{P}$, $\mathrm{R}$라 하면 막대는 $\mathrm{A}$--$\mathrm{P}$, $\mathrm{P}$--$\mathrm{B}$, $\mathrm{B}$--$\mathrm{R}$, $\mathrm{R}$--$\mathrm{C}$의 순서로 연결된다. 이때 고정점 $\mathrm{A}$, 연필 $\mathrm{B}$, 추적점 $\mathrm{C}$의 세 점은 항상 한 직선 위에 있고, 추적점 $\mathrm{C}$로 원본 그림의 테두리를 따라가면 연필 $\mathrm{B}$가 축소된 그림을 그린다. (단, 링크 구조에 의해 $\overline{\mathrm{AP}}\para\overline{\mathrm{BR}}$, $\overline{\mathrm{PB}}\para\overline{\mathrm{RC}}$이고, 막대의 구멍 간격에 의해 $\overline{\mathrm{AP}}:\overline{\mathrm{BR}}=1:2$이다.)
+}
+% ── 링크 장치 원리 도식 (도해-카탈로그 M-01 팬터그래프 [원리 도식] 계승) ──
+%   좌표축·눈금·좌표값·길이 수치 없음 (소문항 (2)(3) 답 노출 방지) · 조건 5개 오차 0 검증
+\par\vspace{1.5mm}
+\centerline{%
+\begin{tikzpicture}
+  % 세 점 A·B·C 가 한 직선 위에 있음을 나타내는 안내선
+  \draw[line width=0.35pt,dash pattern=on 2.4pt off 1.8pt] (-0.065,0.194) -- (4.697,1.582);
+  % 막대 네 개 : A--P, P--B, B--R, R--C
+  \draw[line width=0.5pt] (0.3,0.3) -- (0.692,1.456) -- (1.644,0.692) -- (2.428,3.004) -- (4.332,1.476);
+  % 평행 표시 · 같은 표시끼리 평행 (한 줄 : AP·BR / 두 줄 : PB·RC)
+  \draw[line width=0.7pt,->] (0.454,0.755) -- (0.538,1.001);
+  \draw[line width=0.7pt,->] (1.994,1.725) -- (2.078,1.971);
+  \draw[line width=0.7pt,->] (0.989,1.218) -- (1.145,1.093);
+  \draw[line width=0.7pt,->] (1.191,1.055) -- (1.347,0.930);
+  \draw[line width=0.7pt,->] (3.201,2.384) -- (3.357,2.259);
+  \draw[line width=0.7pt,->] (3.403,2.221) -- (3.559,2.096);
+  % 다섯 점
+  \fill (0.3,0.3) circle (1.6pt);
+  \fill (0.692,1.456) circle (1.6pt);
+  \fill (1.644,0.692) circle (1.6pt);
+  \fill (2.428,3.004) circle (1.6pt);
+  \fill (4.332,1.476) circle (1.6pt);
+  % 점 이름 (실선·파선과 겹치지 않는 방향에 밀착)
+  \node[font=\scriptsize,anchor=north,inner sep=1pt] at (0.300,0.170) {$\mathrm{A}$};
+  \node[font=\scriptsize,anchor=south,inner sep=1pt] at (0.692,1.586) {$\mathrm{P}$};
+  \node[font=\scriptsize,anchor=north,inner sep=1pt] at (1.644,0.562) {$\mathrm{B}$};
+  \node[font=\scriptsize,anchor=south,inner sep=1pt] at (2.428,3.134) {$\mathrm{R}$};
+  \node[font=\scriptsize,anchor=north,inner sep=1pt] at (4.332,1.346) {$\mathrm{C}$};
+\end{tikzpicture}}
+\end{condbox}
+\vspace{2mm}
+
+원본 그림의 테두리가 원 $C_{2}:(x-6)^{2}+(y-3)^{2}=9$이고, 이때 연필 $\mathrm{B}$가 그린 도형을 $C_{2}{}'$이라 하자. 다음 물음에 답하시오. (각 과정을 논술할 것) \pts{12}
+\end{problem}
+
+\vspace*{5mm}
+\textbf{(1)} 대응각을 밝혀 두 삼각형 $\mathrm{APB}$, $\mathrm{BRC}$의 닮음을 보이고, $\overline{\mathrm{AB}}:\overline{\mathrm{BC}}$를 구하시오.
+\vspace{45mm}
+}{%
+\textbf{(2)} $\mathrm{A}(a,\,b)$, $\mathrm{C}(x,\,y)$일 때 연필 $\mathrm{B}$의 좌표를 $a,\,b,\,x,\,y$로 나타내시오.
+\vspace{52mm}
+
+\textbf{(3)} $C_{2}{}'$이 원 $C_{2}$에 내접할 때, 점 $\mathrm{A}$가 나타내는 도형의 방정식을 구하시오.
+\vspace{62mm}
+}
+\vfill
+\end{pagepair}
+
+% ══════════════════════════════════════════════════════════════════════════
+% 페이지 7 (서술형 Q17 · 위성 중계 지문형) — 좌우 분할
+% ══════════════════════════════════════════════════════════════════════════
+\begin{pagepair}
+\vfill
+\probpair{%
+\begin{problem}{17}{s}
+\begin{condbox}
+{\small\sffamily\bfseries [상황]}\\[2pt]
+{\small
+좌표평면에서 대형 탐조등의 광원을 중심이 원점 $\mathrm{O}$이고 반지름의 길이가 $7$인 원 $C_{1}$로, 그 앞을 지나는 구형 물체를 중심이 $x$축 위에서 원점으로부터 양의 방향으로 $11$만큼 떨어진 점이고 반지름의 길이가 $1$인 원 $C_{2}$로 나타낸다. 물체 뒤쪽에는 광원의 빛이 완전히 가려지는 \textbf{본그림자} 영역이 생기며, 그 경계는 두 원 $C_{1}$, $C_{2}$의 \textbf{공통외접선}으로 이루어진다. (공통접선의 뜻: 두 원에 공통으로 접하는 직선을 공통접선이라 하고, 그 접선으로 나뉜 두 영역 중 한 영역에 두 원이 모두 있으면 공통외접선이라 한다.)
+}
+\end{condbox}
+\vspace{2mm}
+
+다음 물음에 답하시오. (각 과정을 논술할 것) \pts{12}
+\end{problem}
+
+\vspace*{5mm}
+\textbf{(1)} 두 원 $C_{1}$, $C_{2}$의 방정식을 각각 구하시오.
+\vspace{40mm}
+}{%
+\textbf{(2)} 두 원 $C_{1}$, $C_{2}$의 공통외접선 중 기울기가 음수인 것을 $l_{1}$이라 할 때, $l_{1}$의 방정식을 구하시오.
+\vspace{60mm}
+
+\textbf{(3)} 공통외접선 $l_{1}$이 원 $C_{1}$, $C_{2}$에 접하는 접점을 각각 $\mathrm{P}$, $\mathrm{Q}$라 할 때, 선분 $\mathrm{PQ}$의 길이를 구하시오.
+\vspace{55mm}
+}
+\vfill
+\end{pagepair}
+
+\end{document}

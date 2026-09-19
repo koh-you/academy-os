@@ -1,0 +1,154 @@
+# 와부고 예상 2학기 중간고사 1회 (공통수학2, 2022 개정) — v5.1 재출제
+# 청사진 v5.1 (2026-07-11 · schema.md §2.16 8축 정밀 스코어 반영)
+#
+# 이전: v3.0 (2026-07-10 · 사도기 지문형) → 반려
+# 현재: v5.1 (2026-07-11 · 로봇 팔·케플러·광학 반사 mechanism-driven)
+
+meta:
+  school: 와부고
+  grade: 고1
+  semester: 2학기
+  test_type: 중간고사
+  round: 1
+  curriculum: 2022 개정 공통수학2
+  date_prepared: 2026-07-11
+  target_audience: 최상위권 정점 훈련
+  scoring_version: v5.1 8축 (schema §2.16)
+
+range:
+  units: [CM2-GM, CM2-ST]
+  sub_units_included:
+    CM2-GM:
+      - G01 평면좌표 (거리·내분점·외분점·무게중심)
+      - G02 직선의 방정식 (기울기·정점·매개변수)
+      - G03 원의 방정식 (표준형·접선·공통현·극선)
+      - G04 도형의 이동 (평행이동·대칭이동)
+    CM2-ST:
+      - S01 집합의 뜻과 표현 (원소·부분집합)
+      - S02 집합의 연산 (합·교·차·여집합·드모르간)
+
+structure:
+  total_slots: 17
+  total_points: 100
+  layout:
+    - {section: 선택형, slots: 12, points_range: [5, 6], total: 65}
+    - {section: 서술형, slots: 5, points_range: [6, 8], total: 35}
+
+# ★ 분포 (v5.1)
+star_distribution:
+  ★ 5 최상위 (composite ≥ 30): 4  # #14, #15, #16, #17 (수동 채점 예상)
+  ★ 5 (composite 24~29): 1  # #11
+  ★ 4 (composite 18~23): 5  # #6, #8, #10, #12, #13
+  ★ 3 (composite 12~17): 4  # #2, #3, #4, #7
+  ★ 2 (composite 6~11): 3   # #1, #5, #9
+  avg_composite_target: 19.5
+
+# 지문형 slot 3개
+narrative_slots:
+  - {slot: 14, theme: 광학 반사 (Focus-Directrix mechanism), N_target: 3}
+  - {slot: 16, theme: 2관절 로봇 팔 (Forward/Inverse Kinematics), N_target: 3}
+  - {slot: 17, theme: 케플러 3법칙 (원 궤도 근사), N_target: 3}
+
+# v5.1 8축 스코어링 (수동 예상, 도구 자동 검증과 병행)
+slots:
+  # ─── 선택형 12문 ───
+  - {n: 1, points: 5, unit: CM2-GM, primary_tool: GM-01, standard: 10수05-01, cm2_scope: in, type: "무게중심 매개변수 결정 (I-CON)",
+     answer: "④ ab=4",
+     v5_scores: {N: 0, L: 0, T: 0, H: 0, R: 1, F: 0, E: 2, P: 0, composite: 8, star: 2, premium: false}}
+  - {n: 2, points: 5, unit: CM2-GM, primary_tool: GM-01, standard: 10수05-01, cm2_scope: in, type: "내분점 좌표 조건 (I-CON+I-BW)",
+     answer: "③ AB²=117",
+     v5_scores: {N: 0, L: 0, T: 1, H: 0, R: 1, F: 0, E: 3, P: 1, composite: 12, star: 3, premium: false}}
+  - {n: 3, points: 5, unit: CM2-GM, primary_tool: GM-03, standard: 10수05-03, related_standards: [10수05-02], cm2_scope: in, type: "정점 통과 직선·접선 (I-BW)",
+     answer: "③ m₁m₂=-3/5",
+     v5_scores: {N: 0, L: 0, T: 1, H: 0, R: 1, F: 0, E: 2, P: 1, composite: 11, star: 3, premium: false}}
+  - {n: 4, points: 5, unit: CM2-ST, primary_tool: ST-01, standard: 10수06-01, cm2_scope: in, type: "중첩 집합 원소·부분집합 (I-EQV+I-CON)",
+     answer: "④ ㄴ,ㅁ",
+     v5_scores: {N: 0, L: 0, T: 2, H: 0, R: 1, F: 0, E: 2, P: 2, composite: 15, star: 3, premium: false}}
+  - {n: 5, points: 5, unit: CM2-ST, primary_tool: ST-02, standard: 10수06-01, cm2_scope: in, type: "집합 연산 간소화 (I-EQV)",
+     answer: "③ C-A",
+     v5_scores: {N: 0, L: 0, T: 1, H: 0, R: 1, F: 0, E: 1, P: 0, composite: 9, star: 2, premium: false}}
+  - {n: 6, points: 5, unit: CM2-ST, primary_tool: ST-03, standard: 10수06-01, cm2_scope: in, type: "세 집합 통합 최대·최소 (I-CON)",
+     answer: "③ M+m=17",
+     v5_scores: {N: 1, L: 0, T: 1, H: 0, R: 2, F: 0, E: 3, P: 2, composite: 19, star: 4, premium: false}}
+  - {n: 7, points: 5, unit: CM2-GM, primary_tool: GM-03, standard: 10수05-03, cm2_scope: in, type: "두 원+직선 정수 카운트 (I-CON)",
+     answer: "④ 4",
+     v5_scores: {N: 0, L: 0, T: 1, H: 0, R: 2, F: 0, E: 2, P: 1, composite: 14, star: 3, premium: false}}
+  - {n: 8, points: 6, unit: CM2-ST, primary_tool: ST-01, standard: 10수06-01, cm2_scope: in, type: "부분집합 X 조건 카운트 (I-CON+I-BW)",
+     answer: "⑤ 65",
+     v5_scores: {N: 0, L: 0, T: 2, H: 0, R: 2, F: 0, E: 3, P: 2, composite: 20, star: 4, premium: false}}
+  - {n: 9, points: 6, unit: CM2-GM, primary_tool: GM-04, standard: 10수05-03, cm2_scope: boundary, boundary_note: "두 원의 공통현(교점 지나는 직선) 유도 필요 · 2022 개정 신규 출제 지양 요소 (기출 그대로 보관 · 변형 금지)", type: "두 원 교점 좌표 (I-EQV)",
+     answer: "② 2",
+     v5_scores: {N: 0, L: 0, T: 0, H: 0, R: 1, F: 0, E: 2, P: 0, composite: 9, star: 2, premium: false}}
+  - {n: 10, points: 6, unit: CM2-GM, primary_tool: GM-01, standard: 10수05-01, related_standards: [10수02-02], cm2_scope: in, migration: "이차함수 그래프는 CM1-EQ이나 본 문항 핵심은 두 점 사이 거리·이등변 조건 (CM2-GM 10수05-01)", type: "이차함수+이등변삼각형 (I-CON+I-SYM)",
+     answer: "① 0",
+     v5_scores: {N: 0, L: 0, T: 2, H: 0, R: 2, F: 0, E: 3, P: 2, composite: 20, star: 4, premium: false}}
+  - {n: 11, points: 6, unit: CM2-GM, primary_tool: GM-05, standard: 10수05-04, related_standards: [10수05-01, 10수05-02], cm2_scope: in, type: "삼각형 둘레 최소+무게중심 정점 (I-CON+I-SYM+I-PD)",
+     answer: "⑤ ㄱ,ㄴ,ㄷ",
+     v5_scores: {N: 1, L: 0, T: 3, H: 0, R: 2, F: 1, E: 3, P: 3, composite: 25, star: 5, premium: false}}
+  - {n: 12, points: 6, unit: CM2-GM, primary_tool: GM-02, standard: 10수05-02, related_standards: [10수05-01], cm2_scope: in, type: "넓이 이등분+x절편 (I-CON+I-BW)",
+     answer: "① -6",
+     v5_scores: {N: 1, L: 0, T: 2, H: 0, R: 1, F: 0, E: 3, P: 2, composite: 20, star: 4, premium: false}}
+
+  # ─── 서술형 5문 ───
+  - {n: 13, points: 6, unit: CM2-GM, primary_tool: GM-03, standard: 10수05-03, cm2_scope: in, type: "원 극선·정점 (I-CON+I-BW+I-PD)",
+     answer: "(1) k<1 또는 k>2  (2) 극선 (k-1)(x-1)+(2-k)(y-1)=1  (3) 정점 (2, 2)",
+     v5_scores: {N: 1, L: 3, T: 2, H: 0, R: 3, F: 1, E: 3, P: 2, composite: 25, star: 5, premium: false}}
+  - {n: 14, points: 7, unit: CM2-GM, primary_tool: GM-06, secondary_tools: [GM-05], standard: 10수05-04, related_standards: [10수05-03], cm2_scope: in, type: "광학 반사 지문형·초점-준선 (I-CON+I-BW+I-XU)",
+     answer: "(1) P(4a, -2)  (2) y=-2 직선  (3) min PQ = 2",
+     narrative_theme: "광학 반사 원리 (평면거울·입사각·반사각·대칭점)",
+     v5_scores: {N: 3, L: 3, T: 3, H: 0, R: 3, F: 3, E: 3, P: 3, composite: 38, star: 5, premium: true}}
+  - {n: 15, points: 7, unit: CM2-ST, primary_tool: ST-02, secondary_tools: [GM-05], standard: 10수06-01, related_standards: [10수05-04], cm2_scope: in, type: "격자점 정의형·A_(a,b) (I-XU+I-CON+I-MI)",
+     answer: "(1) 0<a²+b²<16  (2) n(X)=8, n(Y)=4  (3) 8",
+     narrative_theme: "정수 격자점·평행이동 집합 정의",
+     v5_scores: {N: 2, L: 3, T: 2, H: 0, R: 3, F: 2, E: 3, P: 2, composite: 32, star: 5, premium: true}}
+  - {n: 16, points: 7, unit: CM2-GM, primary_tool: GM-04, secondary_tools: [GM-06], standard: 10수05-03, related_standards: [10수05-01], cm2_scope: in, type: "2관절 로봇 팔 지문형·Forward/Inverse Kinematics (I-XU+I-CON+I-BW+I-PD)",
+     answer: "(1) 2 ≤ OP ≤ 8  (2) E(3,0) 또는 (-3,0)  (3) 자취 x²+y²=9",
+     narrative_theme: "2관절 로봇 팔·작업 공간·Kinematics",
+     v5_scores: {N: 3, L: 3, T: 3, H: 0, R: 4, F: 3, E: 3, P: 3, composite: 39, star: 5, premium: true}}
+  - {n: 17, points: 8, unit: CM2-ST, primary_tool: ST-05, secondary_tools: [ST-01, ST-06], standard: 10수06-03, related_standards: [10수06-01, 10수06-04], cm2_scope: in, type: "케플러 3법칙 지문형·집합 부분·명제 필충·역대우 (I-XU+I-CON+I-BW+I-MI) — 세션 32 재구성",
+     answer: "(1) 0<r_A≤2, 0<r_B≤4  (2) 필요충분조건 (조건 (1) 아래에서 |r_A-r_B|<5 자동)  (3) R 거짓, 반례 r_A=r_B=1, 대우 '동시 관측 불가 → A⊄S 또는 B⊄S' (거짓)",
+     narrative_theme: "케플러 3법칙·행성 궤도 원 근사·관측 영역·집합 정의",
+     v5_scores: {N: 3, L: 3, T: 3, H: 0, R: 4, F: 3, E: 3, P: 3, composite: 39, star: 5, premium: true}}
+
+# star_premium 슬롯 (composite ≥ 30 AND base_star_gate ≥ 4)
+star_premium_slots: [14, 15, 16, 17]  # 4문
+star_premium_count: 4
+star_premium_target: 3
+
+# 그림 정보
+figures:
+  - {slot: 16, name: "로봇 팔 개념 도해",
+     content: "어깨·위팔·팔꿈치·아래팔·손끝 개념 illustration",
+     h_penalty: 0,
+     note: "좌표·자취 값 노출 없음"}
+  # 케플러 그림은 지문 내 미포함 (여백 부족). 필요 시 별도 추가
+  # 광학 반사 그림은 지문 내 미포함 (여백 부족). 필요 시 별도 추가
+
+# 참고 자원
+references:
+  schema: bank/schema.md §2.16 (v5.3)
+  # 🔴 anchor 를 비워 둔 것은 누락이 아니다 (2026-07-31 세션 105)
+  #   종전 값 `bank/anchors/v51-anchor-WBG-2025M.md` 는 무효 판정되었다:
+  #     (a) 삭제된 「와부고 기출 분석」 파생 폴더에서 파생 = 1차 소스 위반
+  #     (b) 마스터 미승인
+  #   🔴 이 파일은 **신규 회차의 시작점**이므로, 여기에 무효 앵커가 남아 있으면
+  #      다음 회차가 그것을 그대로 물려받는다. 전파 경로라서 최우선으로 끊었다.
+  #
+  #   🔴 v53-anchor-WBG-*.md (2025M · 2022/2023 크로스이어 6종) 로 갈아끼우지도 마라.
+  #      그것들도 전부 「마스터 승인 대기」이고, 무엇보다 **와부고 단독 앵커로 척도를 잡는 것**
+  #      자체가 3층 구조 확정(2026-07-31)으로 폐기됐다 — 척도가 한 학교에 종속되면
+  #      다른 학교로 확장되지 않는다. 와부고 문항은 척도를 만드는 근거가 아니라 척도로 재는 대상이다.
+  #
+  #   채울 시점: ②(학평 공통 앵커)가 마스터 승인을 받은 뒤.
+  #   단일 출처: bank/학평-공통앵커-규약-v1.md · bank/풀이실행-측정축-v1.md §6
+  anchor: null   # ← ② 완료 시 학평 공통 앵커 경로로 채운다
+  auto_tool: scripts/v51-composite-check.mjs   # BANDS_PROVISIONAL=true (밴드 미확정)
+  plan: 재출제-계획-v5.1.md
+
+# 검수 상태
+review_status:
+  problem_review_v51: pending  # 다음 세션
+  solution_review: pending
+  exam_review: pending
+  independent_solve: pending
+  gate_4_5: pending

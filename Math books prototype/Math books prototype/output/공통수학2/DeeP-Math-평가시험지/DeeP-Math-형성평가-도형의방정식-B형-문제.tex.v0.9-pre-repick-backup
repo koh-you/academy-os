@@ -1,0 +1,587 @@
+% DeeP Math 형성평가 · CM2-GM 도형의 방정식 · B형 문제
+% ============================================================================
+% v0.9 B형 재재파생 (A형 v0.9 골든 100% 계승 · 세션 93 후반 Task #17-2 · 2026-07-26)
+% 청사진: DeeP Math 형성평가-도형의방정식-청사진.yaml v0.8
+% 20문 · 100점 · 50분 · B형 · 6페이지
+%
+% v0.9 A형 (마스터 "완벽" 승인) 계승 항목 100% 유지:
+%   (1) \pagecolumnpair v2.2 좌우 독립 컬럼 균등
+%   (2) 완전 검정 통일 — Q20 포함 예외 없음
+%   (3) 옵션 A 세로 컬럼 — p1~p4 각 4문 (\pagecolumnpair)
+%   (4) 최고난도 페이지 배치 — p5·p6 각 컬럼 1문 (풀이 공간 확대)
+%   (5) 학평 배지 overlay 방식 — Q18·Q19·Q20 \raisebox{4pt}[0pt][0pt]{\probsource{...}} + \vspace*{-14pt}
+%   (6) \probsource 로컬 재정의 (scriptsize·italic 제거·완전 검정)
+%   (7) 시안 A v3 헤더 (Formative Assessment 32pt regular)
+%   (8) p1 \addvspace{2mm}
+%
+% B형 파생 원칙 (청사진 §5) :
+%   - Q01~Q17 (17문) number_only 변형 : 수치·계수·조건 상수 교체
+%   - Q18·Q19·Q20 verbatim_kichul 유지 : 학평 원본 훼손 금지 (A/B 답 동일)
+%   - 매커니즘·통찰 유형·정답 절차 100% 동일
+%   - A형·B형 답 모두 다름 확인 (mathjs 자체 검증 완료)
+%   - 5지 선택지 새 정답에 맞게 재조정
+%
+% B형 변형 요약 (A형 답 → B형 답):
+%   Q01 : a=7 → a=8       (A(2,a), B(a,2), AB=6√2)
+%   Q02 : a+b=7 → a+b=11  (A(a,5), B(-6,b) 중점 (2,3))
+%   Q03 : y절편=1 → y절편=4  (A(-1,6), B(4,-4))
+%   Q04 : a²+b²=5 → a²+b²=10  (y=ax+2, 3x-by+2=0 수직, (b+2)x+y+1=0 평행)
+%   Q05 : a=4 → a=2         (x²+y²+2ax-6y+a²+3a+1=0)
+%   Q06 : a+b=-2 → a+b=-1   ((2,-3)→(4,0), (a,b)→(-1,5))
+%   Q07 : a합=2 → a합=-2    (A(4,1), B(0,-1), C(1,a))
+%   Q08 : a곱=-36 → a곱=44  (x+ky-3(k-1)=0, P와 x-3y+a=0 거리 √10)
+%   Q09 : a+b=3 → a+b=7     (A(6,0), 직선 2x-3y+1=0)
+%   Q10 : k합=-14 → k합=-8  (원 (x-1)²+(y+2)²=5, y=2x+k)
+%   Q11 : a=8 → a=6         (원 x²+y²=20 위 (4,2), 접선이 (a,-2) 지남)
+%   Q12 : AB=2√14 → AB=4√2  (A(5,-3), 원 (x-1)²+(y-2)²=9)
+%   Q13 : k곱=-31 → k곱=-21 (이동 (x+k, y-1), x²+y²+4x-4y-1=0, 3x+4y+8=0)
+%   Q14 : p²+q²=5 → p²+q²=37 ((2,5), y=x-1 대칭)
+%   Q15 : min=√29 → min=2√10 (A(1,3), B(5,7), y=x 위 P)
+%   Q16 : p+q=10 → p+q=7    (A(2,1), B(p,-3), C(7,5), 무게중심 (5,q))
+%   Q17 : a합=1/2 → a합=2/3 (3x-y=0, x+y-2=0, ax-y+4=0)
+%   Q18~Q20 : verbatim_kichul 유지 (a+b+r=12, a²=32, P=12)
+%
+% 배점 확인: 4점×3 + 5점×14 + 6점×3 = 12 + 70 + 18 = 100 확정
+% ============================================================================
+
+\documentclass[10pt]{article}
+\usepackage{style}
+\usepackage{microtype}  % \textls (letter-spacing) 지원 · smoke-header-A-v3 계승
+
+\renewcommand{\examround}{Formative Assessment}
+\renewcommand{\examvol}{}
+
+% ── 완전 검정 통일 팔레트 (안 C · 세션 92·93 마스터 재확정 · 예외 없음) ──
+%   style.sty 원본 그대로 유지 · 이 파일에서만 vB-* HTML 값 재매핑 · 파급 0
+%   Q20 포함 모든 요소 검정 · dm-crimson·problemcrimson·ptscrimson 완전 부재
+\definecolor{vB-ink}{HTML}{000000}
+\definecolor{vB-deep}{HTML}{000000}
+\definecolor{vB-accent}{HTML}{000000}
+\definecolor{vB-rule}{HTML}{000000}
+\definecolor{vB-light}{HTML}{FFFFFF}
+\definecolor{vB-dim}{HTML}{000000}
+\definecolor{vB-frame}{HTML}{000000}
+\definecolor{vB-warn}{HTML}{000000}
+
+% ── 페이지 세로 분할선 · 좌표 노드 기반 픽셀 맞춤 (시안 A v3 이식) ──
+%   원리: 헤더 하단·푸터 상단 룰이 그려질 때 y좌표 기록 → 두 좌표 잇는 세로 룰
+%   2-pass 필수 (첫 xelatex은 좌표 기록만, 둘째부터 실제 draw)
+\usepackage{eso-pic}
+\usepackage{zref-savepos}
+\newcommand{\dmvlinetop}{\zsavepos{dm-vline-top-\thepage}}
+\newcommand{\dmvlinebot}{\zsavepos{dm-vline-bot-\thepage}}
+\AddToShipoutPictureFG{%
+  \begingroup
+  \edef\vlinetopsp{\zposy{dm-vline-top-\thepage}}%
+  \edef\vlinebotsp{\zposy{dm-vline-bot-\thepage}}%
+  \ifnum\vlinetopsp>0 %
+    \ifnum\vlinebotsp>0 %
+      \setlength{\dimen0}{\vlinetopsp sp}%
+      \setlength{\dimen2}{\vlinebotsp sp}%
+      \edef\vlinetoppt{\the\dimen0}%
+      \edef\vlinebotpt{\the\dimen2}%
+      \begin{tikzpicture}[overlay,remember picture]
+        \draw[color=black,line width=0.4pt]
+          ([xshift=1mm,yshift=\vlinetoppt]current page.south)
+          -- ([xshift=1mm,yshift=\vlinebotpt]current page.south);
+      \end{tikzpicture}%
+    \fi
+  \fi
+  \endgroup
+}
+
+% ══════════════════════════════════════════════════════════════════════════
+% examheader v3 · 시안 A v3 (마스터 승인 · smoke-header-A-v3.tex 그대로 이식)
+% 종결부 \addvspace{2mm} (v2.8 · 실 렌더링 통일 · 마스터 실측 승인)
+% ══════════════════════════════════════════════════════════════════════════
+\makeatletter
+\renewcommand{\examheader}[2]{%
+  \thispagestyle{empty}%
+  \par\noindent
+  % (1) 상단 hairline · 페이지 폭 전체
+  {\color{black}\rule{\linewidth}{0.3pt}}\par
+  \vspace{4pt}
+  % (2) SMALL CAPS 시리즈 라벨 (좌) · 회차 (우)
+  \noindent
+  {\sffamily\scriptsize\color{black}\textls[280]{DEPTH \& INSIGHT}}%
+  \hfill
+  {\sffamily\scriptsize\color{black}\textls[280]{2026 \textperiodcentered\ 2 SEMESTER}}%
+  \par\vspace{5pt}
+  % (3) 대타이틀 · 산세리프 32pt regular · 좌측 정렬
+  \noindent
+  {\fontsize{32pt}{34pt}\selectfont\sffamily\mdseries\color{black}\examround}%
+  \par\vspace{2pt}
+  % (4) subtitle : 대단원명
+  \noindent
+  {\sffamily\normalsize\color{black}#1}%
+  \par\vspace{2pt}
+  % (4.5) 부제 아래 가로선
+  {\color{black}\rule{\linewidth}{0.3pt}}\par
+  \vspace{4pt}
+  % (5) 3-column grid : 범위 · 문항·배점 · 시간
+  \noindent
+  \makebox[\linewidth][s]{%
+    \begin{minipage}[t]{0.32\linewidth}%
+      {\sffamily\scriptsize\color{black}\textls[200]{RANGE}}\par\vspace{2.5pt}
+      {\sffamily\small\color{black}대단원 1}%
+    \end{minipage}%
+    \hfill
+    {\color{black}\vrule width 0.3pt height 7.5mm}%
+    \hfill
+    \begin{minipage}[t]{0.30\linewidth}%
+      \centering
+      {\sffamily\scriptsize\color{black}\textls[200]{ITEMS \textperiodcentered\ POINTS}}\par\vspace{2.5pt}
+      {\sffamily\small\color{black}20문항 \textperiodcentered\ 100점}%
+    \end{minipage}%
+    \hfill
+    {\color{black}\vrule width 0.3pt height 7.5mm}%
+    \hfill
+    \begin{minipage}[t]{0.28\linewidth}%
+      \raggedleft
+      {\sffamily\scriptsize\color{black}\textls[200]{TIME}}\par\vspace{2.5pt}
+      {\sffamily\small\color{black}50분}%
+    \end{minipage}%
+  }%
+  \par\vspace{5pt}
+  % (6) 하단 hairline (3-column과 이름 라인 사이 구분)
+  \noindent{\color{black}\rule{\linewidth}{0.3pt}}\par
+  \vspace{3pt}
+  % (7) 이름 [ 필기 공백 ]
+  \noindent
+  {\sffamily\footnotesize\color{black}\hfill
+    이름\ [\hspace*{55mm}]}%
+  \par\vspace{3pt}
+  % (8) 종결 가로선 (세로 분할선 시작점)
+  \noindent{\color{black}\rule{\linewidth}{0.4pt}}\dmvlinetop\par
+  \addvspace{2mm}   % v2.8 · 실 렌더링 통일 · 마스터 실측 승인
+  \thispagestyle{examfooter}%
+}
+\makeatother
+
+% ── 학원 로고·통상 페이지 헤더·푸터 (시안 A v3 이식) ──
+\makeatletter
+\fancyfoot[R]{\raisebox{-0.8mm}{\includegraphics[height=4mm]{학원로고 (깊이와통찰).jpg}}}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{black}\leaders\hrule height \headrulewidth\hfill}\dmvlinetop}
+\renewcommand{\footrule}{\dmvlinebot\hbox to\headwidth{\color{black}\leaders\hrule height \footrulewidth\hfill}\vskip 4pt}
+\fancypagestyle{examfooter}{%
+  \fancyhf{}%
+  \fancyfoot[L]{}%
+  \fancyfoot[C]{\sffamily\bfseries\color{black}-\,\thepage\,-}%
+  \fancyfoot[R]{\raisebox{-0.8mm}{\includegraphics[height=4mm]{학원로고 (깊이와통찰).jpg}}}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0.4pt}%
+  \renewcommand{\footrule}{\dmvlinebot\hbox to\headwidth{\color{black}\leaders\hrule height \footrulewidth\hfill}\vskip 4pt}%
+}
+
+% ── 문항 스타일 (완전 검정 통일 · v2.5 계승) ──
+%   problem 환경 자연 크기 minipage (pagecolumnpair 내부 배치)
+%   번호·배점 뱃지 모두 검정 · Q20 포함 예외 없음
+\renewenvironment{problem}[2]{%
+  \par\setcounter{probnum}{#1}%
+  \noindent
+  \begin{minipage}[t]{\linewidth}%
+  \raggedright%
+  \setlength{\parskip}{4pt plus 1pt}%
+  {\sffamily\bfseries\large\color{black}#1.}\hspace{4pt}\ignorespaces
+}{%
+  \end{minipage}\par%
+}
+\renewcommand{\pointbadge}[1]{}
+\newcommand{\pts}[1]{%
+  \nobreak\hspace*{\fill}%
+  \mbox{\sffamily\small\color{black}[\textbf{#1점}]}%
+  \par%
+}
+\makeatother
+
+% ── 학평 배지 로컬 재정의 (2026-07-26 세션 93 후반 · 마스터 지시 "배지 크기 살짝 축소") ──
+% style.sty 원본 \probsource : \footnotesize·\textit (UnDotum italic 폴백 경고 발생)
+% 로컬 재정의    : \scriptsize·italic 제거 (한글 폴백 경고 해소·크기 축소)
+\renewcommand{\probsource}[1]{{\scriptsize\sffamily\color{black}#1}}
+
+\begin{document}
+
+\examheader{도형의 방정식 · 평면좌표 \textperiodcentered\ 직선 \textperiodcentered\ 원 \textperiodcentered\ 이동}{총 20문 \textperiodcentered\ 100점 \textperiodcentered\ 50분}
+
+% ══════════════════════════════════════════════════════════════════════════
+% 페이지 1 (Q01~Q04 · 4·4·4·5점 = 17점 · 기본)
+% 옵션 A 세로 컬럼 (\pagecolumnpair) — A형 v0.9 100% 계승
+% ══════════════════════════════════════════════════════════════════════════
+\begin{pagepair}
+\pagecolumnpair{%
+% Q01 (B형 변형 · number_only · 답 a=8)
+% A형: 두 점 A(3,a), B(a,3), AB=4√2 · 답 a=7
+% B형: 두 점 A(2,a), B(a,2), AB=6√2 · 답 a=8
+% 자체 검증: (2-a)²+(a-2)²=72 → 2(a-2)²=72 → (a-2)²=36 → a-2=±6 → a=8 (양수)
+\begin{problem}{1}{s}
+두 점 $\mathrm{A}(2,\,a)$, $\mathrm{B}(a,\,2)$에 대하여 $\overline{\mathrm{AB}}=6\sqrt{2}$일 때, 양수 $a$의 값은? \pts{4}
+\begin{choices}
+\choice{$6$}
+\choice{$7$}
+\choice{$8$}
+\choice{$9$}
+\choice{$10$}
+\end{choices}
+\end{problem}
+
+\vfill
+
+% Q02 (B형 변형 · number_only · 답 a+b=11)
+% A형: A(a,3), B(-4,b) 중점 (1,2) → a+b=7
+% B형: A(a,5), B(-6,b) 중점 (2,3) → a+b=11
+% 자체 검증: (a-6)/2=2 → a=10, (5+b)/2=3 → b=1 · a+b=11
+\begin{problem}{2}{s}
+두 점 $\mathrm{A}(a,\,5)$, $\mathrm{B}(-6,\,b)$의 중점의 좌표가 $(2,\,3)$일 때, $a+b$의 값은? \pts{4}
+\begin{choices}
+\choice{$9$}
+\choice{$10$}
+\choice{$11$}
+\choice{$12$}
+\choice{$13$}
+\end{choices}
+\end{problem}
+}{%
+% Q03 (B형 변형 · number_only · 답 y절편=4)
+% A형: A(-2,5), B(3,-5) · y절편=1
+% B형: A(-1,6), B(4,-4) · 기울기=(-4-6)/(4-(-1))=-2 · y-6=-2(x+1) → y=-2x+4 · y절편=4
+\begin{problem}{3}{s}
+두 점 $\mathrm{A}(-1,\,6)$, $\mathrm{B}(4,\,-4)$를 지나는 직선의 $y$절편은? \pts{4}
+\begin{choices}
+\choice{$1$}
+\choice{$2$}
+\choice{$3$}
+\choice{$4$}
+\choice{$5$}
+\end{choices}
+\end{problem}
+
+\vfill
+
+% Q04 (B형 변형 · number_only · 답 a²+b²=10)
+% A형: y=ax+3, bx-2y-1=0 수직, (b-1)x+y-3=0 평행 · a²+b²=5
+% B형: y=ax+2, 3x-by+2=0 수직, (b+2)x+y+1=0 평행 · a²+b²=10
+% 자체 검증: 평행 y=-(b+2)x-1 → a=-(b+2) · 수직 3x-by+2=0 → y=(3/b)x+2/b, 기울기 3/b · a·(3/b)=-1 → 3a=-b
+% 연립: b=-3a, a=-(-3a+2) → a=3a-2 → -2a=-2 → a=1, b=-3 · a²+b²=1+9=10
+\begin{problem}{4}{s}
+직선 $y=ax+2$가 직선 $3x-by+2=0$과 서로 수직이고, 직선 $(b+2)x+y+1=0$과 서로 평행할 때, $a^{2}+b^{2}$의 값은? (단, $a$, $b$는 상수) \pts{5}
+\begin{choices}
+\choice{$5$}
+\choice{$7$}
+\choice{$10$}
+\choice{$13$}
+\choice{$17$}
+\end{choices}
+\end{problem}
+}
+\end{pagepair}
+
+\clearpage
+
+% ══════════════════════════════════════════════════════════════════════════
+% 페이지 2 (Q05~Q08 · 5점×4 = 20점 · 응용)
+% ══════════════════════════════════════════════════════════════════════════
+\begin{pagepair}
+\pagecolumnpair{%
+% Q05 (B형 변형 · number_only · 답 a=2)
+% A형: x²+y²+2ax-6y+a²+3a-4=0 · 자연수 a의 최댓값 = 4
+% B형: x²+y²+2ax-6y+a²+3a+1=0 · 자연수 a의 최댓값 = 2
+% 자체 검증: (x+a)²+(y-3)²=a²+9-a²-3a-1=8-3a>0 → 3a<8 → a<8/3≈2.67 → 자연수 최댓값 2
+\begin{problem}{5}{s}
+방정식 $x^{2}+y^{2}+2ax-6y+a^{2}+3a+1=0$이 나타내는 도형이 원이 되도록 하는 자연수 $a$의 최댓값은? \pts{5}
+\begin{choices}
+\choice{$1$}
+\choice{$2$}
+\choice{$3$}
+\choice{$4$}
+\choice{$5$}
+\end{choices}
+\end{problem}
+
+\vfill
+
+% Q06 (B형 변형 · number_only · 답 a+b=-1)
+% A형: 점 (1,-2)→(3,1) 이동 · (a,b)→(-1,4) · a+b=-2
+% B형: 점 (2,-3)→(4,0) 이동 · 벡터 (2,3) · (a,b)→(-1,5) · (a+2, b+3)=(-1,5) → a=-3, b=2 · a+b=-1
+\begin{problem}{6}{s}
+점 $(2,\,-3)$을 점 $(4,\,0)$으로 옮기는 평행이동에 의하여 점 $(a,\,b)$가 점 $(-1,\,5)$로 옮겨질 때, $a+b$의 값은? \pts{5}
+\begin{choices}
+\choice{$-3$}
+\choice{$-2$}
+\choice{$-1$}
+\choice{$0$}
+\choice{$1$}
+\end{choices}
+\end{problem}
+}{%
+% Q07 (B형 변형 · number_only · 답 a합=-2)
+% A형: A(4,-1), B(0,1), C(1,a), AB=2·BC · 답 a합=2
+% B형: A(4,1), B(0,-1), C(1,a), AB=2·BC · 답 a합=-2
+% 자체 검증: AB²=16+4=20 · BC²=1+(a+1)² · 20=4(1+(a+1)²) → (a+1)²=4 → a=1 or -3 · 합=-2
+\begin{problem}{7}{s}
+세 점 $\mathrm{A}(4,\,1)$, $\mathrm{B}(0,\,-1)$, $\mathrm{C}(1,\,a)$에 대하여 $\overline{\mathrm{AB}}=2\overline{\mathrm{BC}}$를 만족시키는 모든 실수 $a$의 값의 합은? \pts{5}
+\begin{choices}
+\choice{$-4$}
+\choice{$-2$}
+\choice{$0$}
+\choice{$2$}
+\choice{$4$}
+\end{choices}
+\end{problem}
+
+\vfill
+
+% Q08 (B형 변형 · number_only · 답 a곱=44)
+% A형: x+ky-2(k-1)=0 정점 P(-2,2), x-3y+a=0 거리 √10 · a곱=-36
+% B형: x+ky-3(k-1)=0 정점 P(-3,3), x-3y+a=0 거리 √10 · a곱=44
+% 자체 검증: k 정리 (y-3)k+(x+3)=0 → y=3, x=-3 → P(-3,3)
+%           |-3-9+a|/√10=|a-12|/√10=√10 → |a-12|=10 → a=22 or 2 · 곱=44
+\begin{problem}{8}{s}
+직선 $x+ky-3(k-1)=0$이 실수 $k$의 값에 관계없이 항상 지나는 점을 $\mathrm{P}$라 하자. 점 $\mathrm{P}$와 직선 $x-3y+a=0$ 사이의 거리가 $\sqrt{10}$이 되도록 하는 모든 상수 $a$의 값의 곱은? \pts{5}
+\begin{choices}
+\choice{$20$}
+\choice{$36$}
+\choice{$44$}
+\choice{$52$}
+\choice{$66$}
+\end{choices}
+\end{problem}
+}
+\end{pagepair}
+
+\clearpage
+
+% ══════════════════════════════════════════════════════════════════════════
+% 페이지 3 (Q09~Q12 · 5점×4 = 20점 · 응용)
+% ══════════════════════════════════════════════════════════════════════════
+\begin{pagepair}
+\pagecolumnpair{%
+% Q09 (B형 변형 · number_only · 답 a+b=7)
+% A형: A(0,4), 직선 2x-3y-1=0 · 수선의 발 (2,1) · a+b=3
+% B형: A(6,0), 직선 2x-3y+1=0 · 수선의 발 (4,3) · a+b=7
+% 자체 검증: 수선 기울기 -3/2 · 수선 방정식 y-0=-3/2(x-6) → 3x+2y-18=0
+%           연립 2x-3y+1=0 & 3x+2y-18=0 : 4x-6y+2=0, 9x+6y-54=0 → 13x=52 → x=4
+%           2·4-3y+1=0 → y=3 · a+b=4+3=7
+\begin{problem}{9}{s}
+좌표평면 위의 점 $\mathrm{A}(6,\,0)$에서 직선 $2x-3y+1=0$에 내린 수선의 발이 점 $(a,\,b)$일 때, $a+b$의 값은? \pts{5}
+\begin{choices}
+\choice{$5$}
+\choice{$6$}
+\choice{$7$}
+\choice{$8$}
+\choice{$9$}
+\end{choices}
+\end{problem}
+
+\vfill
+
+% Q10 (B형 변형 · number_only · 답 k합=-8)
+% A형: 원 (x-2)²+(y+1)²=10, y=3x+k · 한 점에서 만남 · k합=-14
+% B형: 원 (x-1)²+(y+2)²=5, y=2x+k · 한 점에서 만남 · k합=-8
+% 자체 검증: 2x-y+k=0 · 중심 (1,-2)까지 거리 |2·1-(-2)+k|/√5 = |k+4|/√5 = √5 · |k+4|=5 → k=1 or -9 · 합=-8
+\begin{problem}{10}{s}
+원 $(x-1)^{2}+(y+2)^{2}=5$와 직선 $y=2x+k$가 한 점에서 만나도록 하는 모든 실수 $k$의 값의 합은? \pts{5}
+\begin{choices}
+\choice{$-12$}
+\choice{$-10$}
+\choice{$-8$}
+\choice{$-6$}
+\choice{$-4$}
+\end{choices}
+\end{problem}
+}{%
+% Q11 (B형 변형 · number_only · 답 a=6)
+% A형: 원 x²+y²=13 위 (2,3) 접선이 (a,-1) 지남 · 답 a=8
+% B형: 원 x²+y²=20 위 (4,2) 접선이 (a,-2) 지남 · 답 a=6
+% 자체 검증: 원 위 점 접선 4x+2y=20 → 2x+y=10 · (a,-2) 대입 → 2a-2=10 → a=6
+\begin{problem}{11}{s}
+원 $x^{2}+y^{2}=20$ 위의 점 $(4,\,2)$에서의 접선이 점 $(a,\,-2)$를 지날 때, 상수 $a$의 값은? \pts{5}
+\begin{choices}
+\choice{$4$}
+\choice{$5$}
+\choice{$6$}
+\choice{$7$}
+\choice{$8$}
+\end{choices}
+\end{problem}
+
+\vfill
+
+% Q12 (B형 변형 · number_only · 답 AB=4√2)
+% A형: A(6,-1), 원 (x+1)²+(y-3)²=9 접선 · AB=2√14
+% B형: A(5,-3), 원 (x-1)²+(y-2)²=9 접선 · AB=4√2
+% 자체 검증: 중심 (1,2)까지 A(5,-3) 거리²=(5-1)²+(-3-2)²=16+25=41 · AB²=41-9=32 · AB=√32=4√2
+\begin{problem}{12}{s}
+점 $\mathrm{A}(5,\,-3)$에서 원 $(x-1)^{2}+(y-2)^{2}=9$에 그은 접선의 한 접점을 $\mathrm{B}$라 할 때, 선분 $\mathrm{AB}$의 길이는? \pts{5}
+\begin{choices32}
+{$2\sqrt{6}$}
+{$3\sqrt{3}$}
+{$\sqrt{30}$}
+{$4\sqrt{2}$}
+{$\sqrt{34}$}
+\end{choices32}
+\end{problem}
+}
+\end{pagepair}
+
+\clearpage
+
+% ══════════════════════════════════════════════════════════════════════════
+% 페이지 4 (Q13~Q16 · 5점×4 = 20점 · 응용)
+% ══════════════════════════════════════════════════════════════════════════
+\begin{pagepair}
+\pagecolumnpair{%
+% Q13 (B형 변형 · number_only · 답 k곱=-21)
+% A형: 이동 (x,y)→(x+k, y-2), 원 x²+y²+2x-6y-6=0, 3x+4y+10=0 접함 · k곱=-31
+% B형: 이동 (x,y)→(x+k, y-1), 원 x²+y²+4x-4y-1=0, 3x+4y+8=0 접함 · k곱=-21
+% 자체 검증: 원 (x+2)²+(y-2)²=9 → 이동 후 중심 (k-2, 1), 반지름 3
+%           거리 |3(k-2)+4+8|/5 = |3k+6|/5 = 3 → |3k+6|=15 → k=3 or -7 · 곱=-21
+\begin{problem}{13}{s}
+평행이동 $(x,\,y)\to(x+k,\,y-1)$에 의하여 원 $x^{2}+y^{2}+4x-4y-1=0$이 직선 $3x+4y+8=0$과 접하도록 하는 모든 상수 $k$의 값의 곱은? \pts{5}
+\begin{choices}
+\choice{$-25$}
+\choice{$-23$}
+\choice{$-21$}
+\choice{$-19$}
+\choice{$-17$}
+\end{choices}
+\end{problem}
+
+\vfill
+
+% Q14 (B형 변형 · number_only · 답 p²+q²=37)
+% A형: 점 (3,4), 직선 y=-x+2 대칭 · p²+q²=5
+% B형: 점 (2,5), 직선 y=x-1 대칭 · p²+q²=37
+% 자체 검증: 직선 x-y-1=0 · 중점 ((2+p)/2, (5+q)/2) 위 → p-q=5
+%           수직: 벡터 (p-2, q-5), 직선 방향 (1,1) · (p-2)+(q-5)=0 → p+q=7
+%           연립 p=6, q=1 · p²+q²=36+1=37
+\begin{problem}{14}{s}
+점 $(2,\,5)$를 직선 $y=x-1$에 대하여 대칭이동한 점의 좌표가 $(p,\,q)$일 때, $p^{2}+q^{2}$의 값은? \pts{5}
+\begin{choices}
+\choice{$17$}
+\choice{$25$}
+\choice{$29$}
+\choice{$37$}
+\choice{$41$}
+\end{choices}
+\end{problem}
+}{%
+% Q15 (B형 변형 · number_only · 답 최솟값=2√10)
+% A형: A(2,1), B(6,4), y=x 위 P · AP+BP 최솟값 √29
+% B형: A(1,3), B(5,7), y=x 위 P · AP+BP 최솟값 2√10
+% 자체 검증: A(1,3)의 y=x 대칭 A'(3,1) · A'B=√((5-3)²+(7-1)²)=√(4+36)=√40=2√10
+\begin{problem}{15}{s}
+두 점 $\mathrm{A}(1,\,3)$, $\mathrm{B}(5,\,7)$과 직선 $y=x$ 위를 움직이는 점 $\mathrm{P}$에 대하여 $\overline{\mathrm{AP}}+\overline{\mathrm{BP}}$의 최솟값은? \pts{5}
+\begin{choices32}
+{$3\sqrt{5}$}
+{$2\sqrt{10}$}
+{$\sqrt{41}$}
+{$\sqrt{45}$}
+{$\sqrt{50}$}
+\end{choices32}
+\end{problem}
+
+\vfill
+
+% Q16 (B형 변형 · number_only · 답 p+q=7)
+% A형: A(-1,2), B(p,3), C(5,1) 무게중심 (4,q) · p+q=10
+% B형: A(2,1), B(p,-3), C(7,5) 무게중심 (5,q) · p+q=7
+% 자체 검증: (2+p+7)/3=5 → p+9=15 → p=6 · (1-3+5)/3=q=1 · p+q=6+1=7
+\begin{problem}{16}{s}
+세 점 $\mathrm{A}(2,\,1)$, $\mathrm{B}(p,\,-3)$, $\mathrm{C}(7,\,5)$를 꼭짓점으로 하는 삼각형 $\mathrm{ABC}$의 무게중심의 좌표가 $(5,\,q)$일 때, 상수 $p$, $q$에 대하여 $p+q$의 값은? \pts{5}
+\begin{choices}
+\choice{$5$}
+\choice{$6$}
+\choice{$7$}
+\choice{$8$}
+\choice{$9$}
+\end{choices}
+\end{problem}
+}
+\end{pagepair}
+
+\clearpage
+
+% ══════════════════════════════════════════════════════════════════════════
+% 페이지 5 · v0.9 재편 (2026-07-26 세션 93 후반 마스터 지시 · 최고난도 풀이 공간 확대)
+%   각 컬럼 1문 · Q17 좌 전체 · Q18 우 전체 · 문항 아래 대량 풀이 공간
+% ══════════════════════════════════════════════════════════════════════════
+\begin{pagepair}
+\pagecolumnpair{%
+% Q17 좌측 컬럼 전체 (풀이 공간 확대)
+% B형 변형 · number_only · 답 a합=2/3
+% A형: 2x-y=0, x+y-1=0, ax-y+3=0 · 직각삼각형 · a합=1/2
+% B형: 3x-y=0, x+y-2=0, ax-y+4=0 · 직각삼각형 · a합=2/3
+% 자체 검증: l1 기울기 3, l2 기울기 -1, l1·l2=-3 (수직 아님)
+%           (i) l1 ⊥ l3: 3a=-1 → a=-1/3
+%           (ii) l2 ⊥ l3: -a=-1 → a=1
+%           합 = -1/3 + 1 = 2/3
+\begin{problem}{17}{s}
+세 직선 $3x-y=0$, $x+y-2=0$, $ax-y+4=0$으로 둘러싸인 도형이 직각삼각형이 되도록 하는 모든 상수 $a$의 값의 합은? \pts{5}
+\begin{choices32}
+{$-\dfrac{2}{3}$}
+{$-\dfrac{1}{3}$}
+{$\dfrac{1}{3}$}
+{$\dfrac{2}{3}$}
+{$1$}
+\end{choices32}
+\end{problem}
+}{%
+% Q18 우측 컬럼 전체 (학평 배지 · 풀이 공간 확대)
+% verbatim_kichul (A/B 동일 · 학평 원본 훼손 금지)
+\noindent\hbox to \linewidth{\hfill\raisebox{4pt}[0pt][0pt]{\probsource{2022학년도 3월 학평 고2 27번}}}\vspace*{-14pt}%
+\begin{problem}{18}{s}
+두 양수 $a$, $b$에 대하여 원
+$$C:\ (x-1)^{2}+y^{2}=r^{2}$$
+을 $x$축의 방향으로 $a$만큼, $y$축의 방향으로 $b$만큼 평행이동한 원을 $C'$이라 하자. 두 원 $C$, $C'$이 다음 조건을 만족시킬 때, $a+b+r$의 값은? (단, $r$는 양수) \pts{6}
+\begin{conditions}
+(가) 원 $C'$은 원 $C$의 중심을 지난다. \\[3pt]
+(나) 직선 $4x-3y+21=0$은 두 원 $C$, $C'$에 모두 접한다.
+\end{conditions}
+\begin{choices}
+\choice{$10$}
+\choice{$11$}
+\choice{$12$}
+\choice{$13$}
+\choice{$14$}
+\end{choices}
+\end{problem}
+}
+\end{pagepair}
+
+% ══════════════════════════════════════════════════════════════════════════
+% 페이지 6 · v0.9 재편 · 최고난도 학평 2문 · 각 컬럼 1문 · 풀이 공간 대폭 확대
+%   Q19 · Q20 verbatim_kichul (A/B 동일 · 학평 원본 훼손 금지)
+% ══════════════════════════════════════════════════════════════════════════
+\begin{pagepair}
+\pagecolumnpair{%
+% Q19 좌측 컬럼 전체 (학평 배지 · 풀이 공간 확대)
+\noindent\hbox to \linewidth{\hfill\raisebox{4pt}[0pt][0pt]{\probsource{2024학년도 9월 학평 고1 27번}}}\vspace*{-14pt}%
+\begin{problem}{19}{s}
+좌표평면 위의 점 $\mathrm{A}(a,\,2)$ ($a>2$)를 직선 $y=x$에 대하여 대칭이동한 점을 $\mathrm{B}$, 점 $\mathrm{B}$를 $x$축에 대하여 대칭이동한 점을 $\mathrm{C}$라 하자. 두 삼각형 $\mathrm{ABC}$, $\mathrm{AOC}$의 외접원의 반지름의 길이를 각각 $r_{1}$, $r_{2}$라 할 때, $r_{1}\times r_{2}=18\sqrt{2}$이다. $a^{2}$의 값은? (단, $\mathrm{O}$는 원점이다.) \pts{6}
+\begin{choices}
+\choice{$28$}
+\choice{$30$}
+\choice{$32$}
+\choice{$34$}
+\choice{$36$}
+\end{choices}
+\end{problem}
+}{%
+% Q20 우측 컬럼 전체 (학평 배지 · 완전 검정 예외 없음 · 풀이 공간 확대)
+\noindent\hbox to \linewidth{\hfill\raisebox{4pt}[0pt][0pt]{\probsource{2021학년도 11월 학평 고1 17번}}}\vspace*{-14pt}%
+\begin{problem}{20}{s}
+좌표평면 위의 두 점 $\mathrm{A}(0,\,\sqrt{3})$, $\mathrm{B}(1,\,0)$과 원
+$$C:\ (x-1)^{2}+(y-10)^{2}=9$$
+가 있다. 원 $C$ 위의 점 $\mathrm{P}$에 대하여 삼각형 $\mathrm{ABP}$의 넓이가 자연수가 되도록 하는 모든 점 $\mathrm{P}$의 개수는? \pts{6}
+\begin{choices}
+\choice{$8$}
+\choice{$10$}
+\choice{$12$}
+\choice{$14$}
+\choice{$16$}
+\end{choices}
+\end{problem}
+}
+\end{pagepair}
+
+\end{document}

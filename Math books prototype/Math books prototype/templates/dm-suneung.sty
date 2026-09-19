@@ -1,0 +1,278 @@
+% dm-suneung.sty — 수능특강 2027 예제 페이지 스타일 (딥매쓰 확장)
+% v1.1 (2026-07-21 세션 65 · 5 개선사항 반영)
+% ─────────────────────────────────────────────────────────────
+% v1.0 → v1.1 변경 (마스터 지적 반영):
+%   1) 예제·유제 배지가 박스 상단 라인 관통 (overlay unbroken and first)
+%   2) 박스 스케일 확대 (padding left/right 6→8mm, top 5→10mm)
+%   3) 좌측 dot line 유제까지 완전 연결 (자동 길이 · 유제 시작 전 종료)
+%   4) 길잡이·풀이 tail LEFT-pointing pentagon (뾰족 tip 좌측 dot line 방향)
+%   5) 답 배지 책 아이콘형 (회색 사각 + 상하 흰 가로줄 2본)
+%
+% API 재편:
+%   \begin{dmssexbox}[URL]{N}{title} ... \end{dmssexbox}
+%   \begin{dmssyujaebox}{정답과 풀이 N쪽} ... \end{dmssyujaebox}
+%   \dmssyujaenum{N}{code}     — 유제 번호
+%   \dmssdotline{H}            — 좌측 dot line (mm 단위)
+%   \begin{dmssguide} ... \end{dmssguide}   — 길잡이 zone
+%   \begin{dmsssolve} ... \dmssanswer{④} \end{dmsssolve}
+%
+% 색 팔레트 (원본 실측 유지):
+%   ss-light  = #9AAA62  — 밝은 올리브 그린
+%   ss-dark   = #304010  — 짙은 올리브 그린
+%   ss-gray   = #787878  — 회색 (답 배지·소스 코드)
+%   ss-ink    = #231F20  — 짙은 검정
+% ─────────────────────────────────────────────────────────────
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{dm-suneung}[2026/07/21 v1.1 DeeP Math suneung-tukgang style]
+
+\RequirePackage{tikz}
+\RequirePackage[most]{tcolorbox}
+\tcbuselibrary{skins}
+\usetikzlibrary{shapes,shapes.geometric,positioning,calc,decorations.pathmorphing,shadows.blur}
+
+% ── 색 팔레트 ─────────────────────────────────────────────
+\definecolor{ss-light}{HTML}{9AAA62}
+\definecolor{ss-dark}{HTML}{304010}
+\definecolor{ss-gray}{HTML}{787878}
+\definecolor{ss-ink}{HTML}{231F20}
+\definecolor{ss-graybg}{HTML}{E8E8E8}
+
+% ── 예제 박스 · dmssexbox ─────────────────────────────────
+% v1.1: 배지가 box 상단 라인 관통 (overlay 로 top edge 위에 걸침)
+% 사용: \begin{dmssexbox}[www.ebsi.co.kr]{1}{거듭제곱근} ... \end{dmssexbox}
+%       \begin{dmssexbox}{1}{거듭제곱근} ... \end{dmssexbox}  (URL 생략)
+\newenvironment{dmssexbox}[3][]{%
+  \par\vspace{6mm}\noindent
+  \begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=ss-light,
+    boxrule=0.7pt,
+    arc=3mm,
+    left=6mm, right=6mm, top=10mm, bottom=6mm,
+    width=\linewidth,
+    overlay unbroken and first={%
+      % 사각 "예제" 배지 (배지 중심을 top edge 에 걸치도록 y=0mm)
+      \node[
+        rectangle,
+        fill=ss-light,
+        inner sep=0pt,
+        minimum width=19mm, minimum height=8mm,
+        anchor=west
+      ] (ssex) at ([xshift=4mm, yshift=0mm]frame.north west) {%
+        {\sffamily\bfseries\large\color{white}예제}};
+      % 원형 배지 · 흰 배경 + ss-ink 프레임 + N
+      \node[
+        circle,
+        draw=ss-ink, line width=0.8pt,
+        fill=white,
+        inner sep=0pt,
+        minimum size=9.5mm,
+        anchor=west
+      ] (sscir) at ([xshift=1mm]ssex.east) {%
+        {\sffamily\bfseries\large\color{ss-ink}#2}};
+      % 우측 소제목 (크고 진한 검정)
+      \node[right=3mm of sscir.east, anchor=west, inner sep=0pt] {%
+        {\sffamily\bfseries\large\color{ss-ink}#3}};
+      % 우상단 URL (italic olive · optional)
+      \ifx\relax#1\relax\else
+        \node[anchor=east, inner sep=0pt]
+          at ([xshift=-6mm, yshift=0mm]frame.north east) {%
+          {\sffamily\itshape\footnotesize\color{ss-gray}#1}};
+      \fi
+    },
+  ]
+  \ignorespaces
+}{%
+  \end{tcolorbox}\par\vspace{2mm}%
+}
+
+% ── 길잡이 · 풀이 라벨 (LEFT-pointing pentagon · v1.1) ────────
+% v1.0: 우측 삼각 tail (asymmetric)
+% v1.1: 좌측 뾰족 pentagon (◁ shape · dot line 방향으로 tip)
+%   Body: rectangle 12mm × 5mm (west 에 tail 부착)
+%   Tail: 좌측 middle 에서 2.5mm 왼쪽으로 뾰족한 점
+\newlength{\ssguidew}\setlength{\ssguidew}{12mm}
+\newlength{\ssguideh}\setlength{\ssguideh}{5.5mm}
+\newlength{\ssleftmargin}\setlength{\ssleftmargin}{5mm}
+\newlength{\sslabelblock}\setlength{\sslabelblock}{17mm}
+\newlength{\sstaillen}\setlength{\sstaillen}{2.5mm}
+
+\newcommand{\dmssguidelabel}{%
+  \begin{tikzpicture}[baseline=-0.5ex]
+    % Pentagon: 상단 좌우, 우측 하단, 좌측 하단, 좌측 middle (tip)
+    \fill[ss-light]
+      (0, 0.5\ssguideh)                                   % top-left corner
+      -- (\ssguidew, 0.5\ssguideh)                        % top-right
+      -- (\ssguidew, -0.5\ssguideh)                       % bottom-right
+      -- (0, -0.5\ssguideh)                               % bottom-left
+      -- (-\sstaillen, 0)                                 % LEFT tip (tail)
+      -- cycle;
+    \node[anchor=center, inner sep=0pt] at (0.5\ssguidew, 0) {%
+      {\sffamily\bfseries\footnotesize\color{white}길잡이}};
+  \end{tikzpicture}%
+}
+
+\newcommand{\dmsssolvelabel}{%
+  \begin{tikzpicture}[baseline=-0.5ex]
+    \fill[ss-gray]                                        % 풀이는 회색 (원본 실측)
+      (0, 0.5\ssguideh)
+      -- (\ssguidew, 0.5\ssguideh)
+      -- (\ssguidew, -0.5\ssguideh)
+      -- (0, -0.5\ssguideh)
+      -- (-\sstaillen, 0)
+      -- cycle;
+    \node[anchor=center, inner sep=0pt] at (0.5\ssguidew, 0) {%
+      {\sffamily\bfseries\footnotesize\color{white}풀이}};
+  \end{tikzpicture}%
+}
+
+% ── 길잡이 환경 · dmssguide (list 기반) ──────────────────
+\newenvironment{dmssguide}{%
+  \par\vspace{3mm}%
+  \begin{list}{}{%
+    \setlength{\leftmargin}{\dimexpr\ssleftmargin+\sslabelblock\relax}%
+    \setlength{\rightmargin}{0pt}%
+    \setlength{\labelwidth}{\sslabelblock}%
+    \setlength{\labelsep}{0mm}%
+    \setlength{\itemindent}{0pt}%
+    \setlength{\listparindent}{0pt}%
+    \setlength{\topsep}{0pt}%
+    \setlength{\parsep}{3pt plus 1pt}%
+    \setlength{\itemsep}{0pt}%
+    \setlength{\partopsep}{0pt}%
+    \renewcommand{\makelabel}[1]{\hspace{\ssleftmargin}##1\hfil}%
+  }%
+  \item[\dmssguidelabel]\ignorespaces
+}{%
+  \end{list}\vspace{2mm}%
+}
+
+% ── 풀이 환경 · dmsssolve ───────────────────────────────
+\newenvironment{dmsssolve}{%
+  \par\vspace{2mm}%
+  \begin{list}{}{%
+    \setlength{\leftmargin}{\dimexpr\ssleftmargin+\sslabelblock\relax}%
+    \setlength{\rightmargin}{0pt}%
+    \setlength{\labelwidth}{\sslabelblock}%
+    \setlength{\labelsep}{0mm}%
+    \setlength{\itemindent}{0pt}%
+    \setlength{\listparindent}{0pt}%
+    \setlength{\topsep}{0pt}%
+    \setlength{\parsep}{3pt plus 1pt}%
+    \setlength{\itemsep}{0pt}%
+    \setlength{\partopsep}{0pt}%
+    \renewcommand{\makelabel}[1]{\hspace{\ssleftmargin}##1\hfil}%
+  }%
+  \item[\dmsssolvelabel]\ignorespaces
+}{%
+  \end{list}\vspace{2mm}%
+}
+
+% ── 답 표시 · \dmssanswer{N} — v1.1 책 아이콘형 ─────────
+% 회색 사각 (5.5×5.5mm · 살짝 둥근 코너) + 상하 흰 가로줄 2본 (책 페이지 표현)
+% + "답" 흰 텍스트 중앙 · 우측에 원문자
+\newcommand{\dmssanswer}[1]{%
+  \par\vspace{2mm}\hfill%
+  \begin{tikzpicture}[baseline=(sa.base)]
+    % 회색 책 아이콘 배경 (rounded corners 0.4mm)
+    \node[
+      rectangle,
+      fill=ss-gray,
+      inner sep=0pt,
+      minimum width=6mm, minimum height=6mm,
+      rounded corners=0.5mm,
+      anchor=east
+    ] (sa) at (0,0) {};
+    % 상단 흰 가로줄 (책 상단 페이지 선)
+    \draw[white, line width=0.5pt]
+      ([xshift=1mm, yshift=-1.2mm]sa.north west) --
+      ([xshift=-1mm, yshift=-1.2mm]sa.north east);
+    % 하단 흰 가로줄 (책 하단 페이지 선)
+    \draw[white, line width=0.5pt]
+      ([xshift=1mm, yshift=1.2mm]sa.south west) --
+      ([xshift=-1mm, yshift=1.2mm]sa.south east);
+    % 중앙 "답" 텍스트
+    \node[anchor=center, inner sep=0pt] at (sa.center) {%
+      {\sffamily\bfseries\footnotesize\color{white}답}};
+    % 우측 원문자 정답
+    \node[right=1.5mm of sa.east, anchor=west, inner sep=0pt] {%
+      {\normalsize\color{ss-ink}#1}};
+  \end{tikzpicture}%
+  \par%
+}
+
+% ── 좌측 세로 dot line · \dmssdotline{height} ────────────
+% v1.1: 유제 시작 전까지 완전 연결 (길이 파라미터 확대 지원)
+% 상단 · 하단에 작은 삼각형 marker (원본 실측)
+% x=1mm 위치 (라벨 leftmargin 5mm 안쪽 · 라벨과 3mm 간격)
+\newcommand{\dmssdotline}[1]{%
+  \begin{tikzpicture}[overlay, remember picture=false, baseline=0pt]
+    % Top triangle marker
+    \fill[ss-light] (1mm, 1mm) -- ++(-1mm, 1.5mm) -- ++(2mm, 0) -- cycle;
+    % Vertical dot line
+    \draw[ss-light, line width=1.8pt, dotted]
+      (1mm, 0mm) -- (1mm, -#1);
+    % Bottom triangle marker
+    \fill[ss-light] (1mm, -#1) -- ++(-1mm, -1.5mm) -- ++(2mm, 0) -- cycle;
+  \end{tikzpicture}%
+}
+
+\newcommand{\dmsssolvebegin}[1]{\dmssdotline{#1}}
+
+% ── 유제 박스 · dmssyujaebox ─────────────────────────────
+% v1.1: 유제 배지가 box 상단 라인 관통 (overlay unbroken and first)
+%       상단 title band (light olive fill · rounded top) 에 "정답과 풀이 N쪽"
+%       유제 배지 (dark olive rounded rect) title band 좌측을 관통
+% 사용: \begin{dmssyujaebox}{2} ... \end{dmssyujaebox}  (N = 정답과 풀이 N쪽)
+\newenvironment{dmssyujaebox}[1]{%
+  \par\vspace{8mm}\noindent
+  \begin{tcolorbox}[
+    enhanced, breakable,
+    colback=white, colframe=ss-light, colbacktitle=ss-light,
+    boxrule=0.7pt, titlerule=0pt, coltitle=white,
+    arc=3mm,
+    title={\hfill{\sffamily\small\color{white}정답과 풀이 #1쪽}\hspace{1mm}},
+    toptitle=1.5mm, bottomtitle=1.5mm,
+    left=6mm, right=6mm, top=6mm, bottom=6mm,
+    width=\linewidth,
+    overlay unbroken and first={%
+      % 유제 배지 (dark olive rounded rect · title band 위쪽 관통)
+      \node[
+        rectangle,
+        fill=ss-dark,
+        rounded corners=1.5mm,
+        inner sep=0pt,
+        minimum width=20mm, minimum height=9mm,
+        anchor=west
+      ] at ([xshift=4mm, yshift=0mm]frame.north west) {%
+        {\sffamily\bfseries\large\color{white}유제}};
+    },
+  ]
+  \ignorespaces
+}{%
+  \end{tcolorbox}\par\vspace{2mm}%
+}
+
+% ── 유제 문항 번호 · \dmssyujaenum{N}{code} ────────────
+% 굵은 짙은 숫자 (Large · ss-ink) + 아래 회색 소스 코드
+% hangindent 로 본문 오른쪽 이어짐
+\newlength{\ssyjw}\setlength{\ssyjw}{18mm}
+
+\newcommand{\dmssyujaenum}[2]{%
+  \par\vspace{4mm}\noindent
+  \hangindent=\ssyjw\hangafter=1
+  \makebox[\ssyjw][l]{%
+    \begin{tabular}{@{}c@{}}
+      {\sffamily\bfseries\Large\color{ss-ink}#1}\\[0.5mm]
+      {\sffamily\footnotesize\color{ss-gray}[#2]}
+    \end{tabular}%
+  }%
+}
+
+% ── deprecated 매크로 (v1.0 호환 · 신규 문서는 사용 금지) ─
+% \dmssex, \dmssurl, \dmssyujaeheader 는 v1.1 에서 dmssexbox/dmssyujaebox 옵션 인자로 통합
+% 아래는 v1.0 문서 재빌드 방어용 no-op stub
+\newcommand{\dmssex}[2]{}
+\newcommand{\dmssurl}[1]{}
+\newcommand{\dmssyujaeheader}[1]{}

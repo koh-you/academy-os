@@ -1,0 +1,2 @@
+# AGENTS.md 규칙: PDF 는 commit 하지 않는다. 완성본 PDF 는 같은 폴더의 .tex 에서 재빌드한다.
+*.pdf

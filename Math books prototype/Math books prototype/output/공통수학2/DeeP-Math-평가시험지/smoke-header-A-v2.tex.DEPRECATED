@@ -1,0 +1,270 @@
+% smoke-header-A-v2.tex · 시안 A 업그레이드 · 미니멀 Swiss Grid · 짜임새 강화
+% ============================================================================
+% 원본 : smoke-header-A.tex (Swiss editorial · IB HL Paper · MIT OCW · Bauhaus)
+%
+% 업그레이드 방향 (마스터 지시 · 세션 92 · 2026-07-26)
+% ─────────────────────────────────────────────────
+% (a) 정보 밀도 강화
+%     · NO. 01 (회차 인덱스) · A형 (유형 라벨) 신규 추가
+%     · 소단원 코드 (GM · CM2) 부제 우측 배지
+% (b) 시각 위계 4단 (원본 2단 대비 강화)
+%     ┌──────────────────────────────────────────
+%     │ L1 · MICRO LABEL   7pt   SMALL CAPS letter-spacing 340
+%     │ L2 · SECTION INDEX 9pt   SMALL CAPS letter-spacing 260
+%     │ L3 · 대타이틀      38pt  Serif Bold (원본 34 → 38 증대 · Swiss 8-baseline)
+%     │ L4 · 부제          11pt  Serif Italic
+%     └──────────────────────────────────────────
+% (c) Swiss 그리드 강화
+%     · 3-column subtitle grid : Range · Items×Points · Time
+%     · 세로 vertical rule 8mm 정합 · SMALL CAPS 라벨 위 · 값 아래
+%     · column gutter 정교 (\hfill + 고정 vrule)
+% (d) 이중 룰 정교
+%     · 상단 : hairline (0.4pt) · 페이지 폭
+%     · 대타이틀 아래 : 굵은 룰 (1.4pt) + gap 1.8mm + 얇은 룰 (0.3pt) (이중 accent)
+%     · 종결 룰 : 학년·이름 아래 (0.4pt) · **세로 분할선 시작점**
+% (e) 통합 헤더 원칙 (마스터 지시 3건 · 세션 92)
+%     · 상단부터 학년·이름 종결 룰까지 = 하나의 통합 시각 단위
+%     · dmvlinetop 위치 = 종결 룰 = 세로 분할선 시작점 (픽셀 gap 0)
+%     · 상단 hairline·이중 룰·3-column vrule 모두 세로 분할선과 미접촉
+%
+% 벤치마킹 : IB HL Paper (SMALL CAPS 라벨 + 대타이틀) · MIT OCW Problem Sets
+%           (좌측 정렬 그리드) · Bauhaus (여백 = 정보) · NYT "T" magazine
+% ============================================================================
+
+\documentclass[10pt]{article}
+\usepackage{style}
+\usepackage{microtype}
+\microtypesetup{protrusion=true,expansion=false}
+
+\renewcommand{\examround}{형성평가}
+\renewcommand{\examvol}{}
+
+% ── 검정 통일 팔레트 (마스터 지시) ─────────────────────────────────
+\definecolor{vB-ink}{HTML}{000000}
+\definecolor{vB-deep}{HTML}{000000}
+\definecolor{vB-accent}{HTML}{000000}
+\definecolor{vB-rule}{HTML}{000000}
+\definecolor{vB-light}{HTML}{FFFFFF}
+\definecolor{vB-dim}{HTML}{000000}
+\definecolor{vB-frame}{HTML}{000000}
+
+% ── pagepair 좌우 분할선 · **좌표 노드 기반 픽셀 정합** (세션 92 · 방안 1)
+% smoke-test.tex 계승 · 2-pass 필수
+\usepackage{eso-pic}
+\usepackage{zref-savepos}
+\newcommand{\dmvlinetop}{\zsavepos{dm-vline-top-\thepage}}
+\newcommand{\dmvlinebot}{\zsavepos{dm-vline-bot-\thepage}}
+\AddToShipoutPictureFG{%
+  \begingroup
+  \edef\vlinetopsp{\zposy{dm-vline-top-\thepage}}%
+  \edef\vlinebotsp{\zposy{dm-vline-bot-\thepage}}%
+  \ifnum\vlinetopsp>0 %
+    \ifnum\vlinebotsp>0 %
+      \setlength{\dimen0}{\vlinetopsp sp}%
+      \setlength{\dimen2}{\vlinebotsp sp}%
+      \edef\vlinetoppt{\the\dimen0}%
+      \edef\vlinebotpt{\the\dimen2}%
+      \begin{tikzpicture}[overlay,remember picture]
+        \draw[color=black,line width=0.4pt]
+          ([xshift=1mm,yshift=\vlinetoppt]current page.south)
+          -- ([xshift=1mm,yshift=\vlinebotpt]current page.south);
+      \end{tikzpicture}%
+    \fi
+  \fi
+  \endgroup
+}
+
+% ══════════════════════════════════════════════════════════════════════════
+% examheader v2 · 통합 헤더 카드 · Swiss 4단 위계
+% ══════════════════════════════════════════════════════════════════════════
+\makeatletter
+\renewcommand{\examheader}[2]{%
+  \thispagestyle{empty}%
+  \par\noindent
+  %
+  % ── (A) 상단 hairline · 페이지 폭 전체 ────────────────────────────
+  {\color{black}\rule{\linewidth}{0.4pt}}\par
+  \vspace{5pt}
+  %
+  % ── (B) L1 MICRO LABEL 라인 (7pt · letter-spacing 340) ────────────
+  %       좌 : 시리즈명 · 우 : 학년·학기 (원본 계승 · 위계 축소)
+  \noindent
+  {\sffamily\fontsize{7pt}{9pt}\selectfont\color{black}%
+    \textls[340]{DEPTH \& INSIGHT}}%
+  \hfill
+  {\sffamily\fontsize{7pt}{9pt}\selectfont\color{black}%
+    \textls[340]{2026 \textperiodcentered\ 2ND SEMESTER}}%
+  \par\vspace{3pt}
+  %
+  % ── (C) L2 SECTION INDEX 라인 (9pt · letter-spacing 260) ──────────
+  %       좌 : NO. 01 (회차) · 우 : SERIES A (유형)
+  %       신규 · 정보 밀도 강화
+  \noindent
+  {\sffamily\fontsize{9pt}{11pt}\selectfont\bfseries\color{black}%
+    \textls[260]{NO.\ 01}}%
+  \hfill
+  {\sffamily\fontsize{9pt}{11pt}\selectfont\bfseries\color{black}%
+    \textls[260]{SERIES A}}%
+  \par\vspace{14pt}
+  %
+  % ── (D) L3 대타이틀 (38pt · Serif Bold · 좌측 정렬) ────────────────
+  %       원본 34pt → 38pt (Swiss 8-baseline · 존재감 강화)
+  \noindent
+  {\fontsize{38pt}{40pt}\selectfont\bfseries\color{black}\examround}%
+  \par\vspace{7pt}
+  %
+  % ── (E) L4 부제 (11pt · Serif Italic) + 우측 소단원 배지 ─────────
+  \noindent
+  \begin{minipage}[b]{0.72\linewidth}%
+    {\itshape\fontsize{11pt}{13pt}\selectfont\color{black}#1}%
+  \end{minipage}%
+  \hfill
+  \begin{minipage}[b]{0.24\linewidth}%
+    \raggedleft
+    {\sffamily\fontsize{7.5pt}{9pt}\selectfont\color{black}%
+      \textls[240]{UNIT CODE}}\\[1pt]
+    {\sffamily\fontsize{10pt}{12pt}\selectfont\bfseries\color{black}%
+      CM2\,\textperiodcentered\,GM}%
+  \end{minipage}%
+  \par\vspace{12pt}
+  %
+  % ── (F) 이중 룰 · 굵은 (1.4pt) + 얇은 (0.3pt) · gap 1.8mm ────────
+  %       대타이틀 하단 accent · 위계 강조
+  \noindent{\color{black}\rule{\linewidth}{1.4pt}}\par
+  \vspace{1.8mm}
+  \noindent{\color{black}\rule{\linewidth}{0.3pt}}\par
+  \vspace{11pt}
+  %
+  % ── (G) 3-column grid (Swiss 강화 · SMALL CAPS 라벨 위 · 값 아래) ─
+  %       세로 vrule 8mm 정합 · column gutter 정교
+  \noindent
+  \makebox[\linewidth][s]{%
+    \begin{minipage}[t]{0.29\linewidth}%
+      {\sffamily\fontsize{7pt}{9pt}\selectfont\color{black}%
+        \textls[300]{RANGE}}\par\vspace{3pt}
+      {\sffamily\fontsize{9.5pt}{12pt}\selectfont\bfseries\color{black}%
+        도형의 방정식}\par\vspace{1pt}
+      {\sffamily\fontsize{8pt}{10pt}\selectfont\color{black}%
+        평면좌표 \textperiodcentered\ 직선 \textperiodcentered\ 원 \textperiodcentered\ 이동}%
+    \end{minipage}%
+    \hfill
+    {\color{black}\vrule width 0.3pt height 11mm}%
+    \hfill
+    \begin{minipage}[t]{0.24\linewidth}%
+      \centering
+      {\sffamily\fontsize{7pt}{9pt}\selectfont\color{black}%
+        \textls[300]{ITEMS \textperiodcentered\ POINTS}}\par\vspace{3pt}
+      {\sffamily\fontsize{9.5pt}{12pt}\selectfont\bfseries\color{black}%
+        20문항}\par\vspace{1pt}
+      {\sffamily\fontsize{8pt}{10pt}\selectfont\color{black}%
+        100점 만점}%
+    \end{minipage}%
+    \hfill
+    {\color{black}\vrule width 0.3pt height 11mm}%
+    \hfill
+    \begin{minipage}[t]{0.18\linewidth}%
+      \raggedleft
+      {\sffamily\fontsize{7pt}{9pt}\selectfont\color{black}%
+        \textls[300]{TIME}}\par\vspace{3pt}
+      {\sffamily\fontsize{9.5pt}{12pt}\selectfont\bfseries\color{black}%
+        50분}\par\vspace{1pt}
+      {\sffamily\fontsize{8pt}{10pt}\selectfont\color{black}%
+        NON-STOP}%
+    \end{minipage}%
+  }%
+  \par\vspace{14pt}
+  %
+  % ── (H) 학년·이름 라인 (footnotesize · 얇은 서명 라인) ────────────
+  \noindent
+  {\sffamily\footnotesize\color{black}%
+    \textls[80]{학년\,/\,반}\ \rule{40mm}{0.2pt}\hfill
+    \textls[80]{이름}\ \rule{55mm}{0.2pt}}%
+  \par\vspace{6pt}
+  %
+  % ── (I) 종결 룰 · 세로 분할선 시작점 (마스터 지시) ────────────────
+  %       상단 타이틀 영역 (A~H) 전체를 하나의 통합 단위로 마감
+  %       dmvlinetop 위치 = 종결 룰 (픽셀 gap 0)
+  \noindent{\color{black}\rule{\linewidth}{0.4pt}}\dmvlinetop\par
+  \addvspace{4pt}
+  \thispagestyle{examfooter}%
+}
+\makeatother
+
+% ── 학원 로고 축소 · pts · 문제 스타일 (smoke-test 계승) ───────────
+\makeatletter
+\fancyfoot[R]{\raisebox{-0.8mm}{\includegraphics[height=4mm]{학원로고 (깊이와통찰).jpg}}}
+% 통상 페이지 headrule/footrule에 세로선 top·bot 좌표 기록
+\renewcommand{\headrule}{\hbox to\headwidth{\color{black}\leaders\hrule height \headrulewidth\hfill}\dmvlinetop}
+\renewcommand{\footrule}{\dmvlinebot\hbox to\headwidth{\color{black}\leaders\hrule height \footrulewidth\hfill}\vskip 4pt}
+\fancypagestyle{examfooter}{%
+  \fancyhf{}%
+  \fancyfoot[L]{}%
+  \fancyfoot[C]{\sffamily\bfseries\color{black}-\,\thepage\,-}%
+  \fancyfoot[R]{\raisebox{-0.8mm}{\includegraphics[height=4mm]{학원로고 (깊이와통찰).jpg}}}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0.4pt}%
+  \renewcommand{\footrule}{\dmvlinebot\hbox to\headwidth{\color{black}\leaders\hrule height \footrulewidth\hfill}\vskip 4pt}%
+}
+
+\renewenvironment{problem}[2]{%
+  \par\setcounter{probnum}{#1}%
+  \noindent
+  \begin{minipage}[t]{\linewidth}%
+  \raggedright%
+  \setlength{\parskip}{4pt plus 1pt}%
+  {\sffamily\bfseries\large\color{black}#1.}\par\smallskip\ignorespaces
+}{%
+  \end{minipage}\par%
+}
+\renewcommand{\pointbadge}[1]{}
+\newcommand{\pts}[1]{%
+  \nobreak\hspace*{\fill}%
+  \mbox{\sffamily\small\color{black}[\textbf{#1점}]}%
+  \par%
+}
+
+\renewenvironment{choices}{\par\vspace{5mm}\setcounter{choicecnt}{0}%
+  \noindent\hbox to \linewidth\bgroup\small\ignorespaces}{%
+  \egroup\par\medskip}
+\makeatother
+
+\begin{document}
+
+\examheader{도형의 방정식 · 평면좌표 \textperiodcentered\ 직선 \textperiodcentered\ 원 \textperiodcentered\ 이동}{총 20문 \textperiodcentered\ 100점 \textperiodcentered\ 50분}
+
+% ── 페이지 1 · probpair × 2 + 3-vfill ─────────────────────────────
+\begin{pagepair}
+\vfill
+\probpair{%
+\begin{problem}{1}{s}
+좌표평면 위의 두 점 $\mathrm{A}(2,\, 3)$,\ $\mathrm{B}(-1,\, 7)$ 사이의 거리를 구하시오. \pts{4}
+\begin{choicesii}{$3$}{$4$}{$5$}{$6$}{$7$}
+\end{choicesii}
+\end{problem}
+}{%
+\begin{problem}{2}{s}
+두 점 $\mathrm{A}(4,\, 3)$,\ $\mathrm{B}(-2,\, -6)$에 대하여 선분 $\overline{\mathrm{AB}}$를 $2:1$로 내분하는 점의 좌표를 구하시오. \pts{4}
+\begin{choicesii}{$(0,\, -3)$}{$(1,\, -2)$}{$(2,\, -3)$}{$(0,\, 0)$}{$(2,\, 0)$}
+\end{choicesii}
+\end{problem}
+}
+
+\vfill
+
+\probpair{%
+\begin{problem}{3}{s}
+두 점 $(1,\, 2)$,\ $(3,\, -4)$를 지나는 직선의 방정식이 $y = ax + b$일 때, 상수 $a$,\ $b$에 대하여 $a + b$의 값을 구하시오. \pts{5}
+\begin{choicesii}{$1$}{$2$}{$3$}{$4$}{$5$}
+\end{choicesii}
+\end{problem}
+}{%
+\begin{problem}{4}{s}
+두 직선 $y = 2x + 1$과 $y = ax - 3$이 서로 수직일 때, 상수 $a$의 값을 구하시오. \pts{5}
+\begin{choicesii}{$-\dfrac{1}{2}$}{$-\dfrac{1}{3}$}{$\dfrac{1}{3}$}{$\dfrac{1}{2}$}{$2$}
+\end{choicesii}
+\end{problem}
+}
+\vfill
+\end{pagepair}
+
+\end{document}

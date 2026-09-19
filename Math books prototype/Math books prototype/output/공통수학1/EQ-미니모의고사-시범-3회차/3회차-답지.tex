@@ -1,0 +1,153 @@
+\documentclass[10pt]{article}
+\usepackage{style}
+\usepackage{figures-eq}
+\renewcommand{\examround}{미니모의고사}
+\renewcommand{\examvol}{vol.3}
+
+\newcommand{\solnote}[1]{\par\smallskip\noindent
+  \begin{tcolorbox}[enhanced, breakable, colback=vB-light, colframe=vB-light,
+    boxrule=0pt, arc=3pt, left=10pt, right=10pt, top=4pt, bottom=4pt,
+    fontupper=\sffamily\footnotesize\color{vB-ink}]
+    \textbf{\color{vB-deep}통찰}\quad #1
+  \end{tcolorbox}}
+
+\begin{document}
+
+\answerheader{정답·해설}{공통수학1 — 고차방정식·연립방정식·부등식 — 8문 / 20분}
+
+\begin{quickgrid}
+\quick{01}{③ $-2$}    & \quick{02}{③ $5$}     & \quick{03}{③ ㄱ, ㄴ}    & \quick{04}{② $2 \le a < 6$}   & \quick{05}{③ $-2 + 2\sqrt{7}$}     \\
+\quick{06}{④ ㄱ, ㄴ}  & \quick{07}{$30$} & \quick{08}{$17$} & & \\
+\end{quickgrid}
+
+% ─────────────────── 객관식 \#1\textendash{}\#6 ───────────────────
+\examsection{객관식 \#1\textendash{}\#6 풀 답지}
+
+\soltitle{1}{사차방정식 — 인수정리와 중근 카운팅}{3}
+\begin{answerbox}\sffamily\bfseries 정답: ③ $-2$\end{answerbox}
+\step{1} 상수항 $-2$의 약수 $\pm 1, \pm 2$ 중 정수근을 찾는다.
+\[ x = 1 \text{ 대입}: 1 - 3 + 1 + 3 - 2 = 0. \quad \text{정수근이다.} \]
+\step{2} $(x - 1)$로 나누어 차수를 낮춘다.
+\[ x^4 - 3x^3 + x^2 + 3x - 2 = (x - 1)(x^3 - 2x^2 - x + 2). \]
+\step{3} 셋째 인수를 \emph{묶어서 인수분해}한다.
+\[ x^3 - 2x^2 - x + 2 = x^2(x - 2) - (x - 2) = (x - 2)(x^2 - 1) = (x - 2)(x - 1)(x + 1). \]
+\step{4} 따라서
+\[ x^4 - 3x^3 + x^2 + 3x - 2 = (x - 1)^2 (x - 2)(x + 1). \]
+네 실근은 $1, 1, -1, 2$ (중복 포함).
+\step{5} 모든 실근의 곱은
+\[ 1 \cdot 1 \cdot (-1) \cdot 2 = -2. \]
+정답은 $\textbf{③}$.
+\solnote{사차방정식의 \emph{중근 포함 카운팅}은 \emph{근과 계수의 관계}로 한 줄에 검증할 수 있다 — 상수항 $-2$이고 사차항 계수 $1$이므로 \emph{네 근의 곱} $= -2/1 = -2$. 인수분해 후 \emph{중근 $x = 1$}을 발견하는 것이 핵심 함정 — \emph{서로 다른 실근의 곱}($1 \cdot (-1) \cdot 2 = -2$)과 우연히 같지만, 일반적으로 다르다.}
+
+\soltitle{2}{사차방정식 — $X = x^2$ 치환과 양의 실근}{3}
+\begin{answerbox}\sffamily\bfseries 정답: ③ $5$\end{answerbox}
+\step{1} $X = x^2 \ge 0$으로 치환하면 이차방정식
+\[ X^2 - 13X + 36 = 0 \;\Longrightarrow\; (X - 4)(X - 9) = 0. \]
+\step{2} $X = 4$ 또는 $X = 9$. 두 값 모두 양수이므로 $x^2 = 4 \Rightarrow x = \pm 2$, $x^2 = 9 \Rightarrow x = \pm 3$.
+\step{3} 네 실근 $\pm 2, \pm 3$ 중 \emph{양의 실근}은 $2$와 $3$. 합은
+\[ 2 + 3 = 5. \]
+정답은 $\textbf{③}$.
+\solnote{사차방정식의 \emph{$X = x^2$ 치환}은 짝수 차수 항만 가지는 사차식의 표준 환원 도구. 본 문제는 두 $X$ 모두 \emph{완전제곱수}로 정수해가 깔끔히 결정된다. 학생은 \emph{모든 실근}이 아닌 \emph{양의 실근만} 합산해야 하는 \emph{대칭 함정}에 주의.}
+
+\soltitle{3}{미지수 부등식 — 이차계수 부호별 분기}{3}
+\begin{answerbox}\sffamily\bfseries 정답: ③ ㄱ, ㄴ\end{answerbox}
+\step{1} 부등식 $ax > 1$의 해는 \emph{$a$의 부호}에 따라 갈린다.
+\paramcasethree{이차계수 $a$의 부호}{$a > 0$: 양변을 $a$로 나누면 부등호 \emph{보존} → $x > \dfrac{1}{a}$}{$a = 0$: $0 > 1$로 \emph{모순} → 해 없음}{$a < 0$: 양변을 $a$로 나누면 부등호 \emph{뒤집힘} → $x < \dfrac{1}{a}$}
+\step{2} \textbf{ㄱ.} $a > 0$일 때 해 $x > 1/a$. \emph{참}.
+\step{3} \textbf{ㄴ.} $a = 0$일 때 $0 \cdot x = 0 > 1$은 \emph{거짓}이므로 해가 없다. \emph{참}.
+\step{4} \textbf{ㄷ.} $a < 0$일 때 해는 \emph{$x < 1/a$}이지 $x > 1/a$가 아니다. \emph{거짓}.
+\step{5} ㄱ, ㄴ만 참이므로 정답은 $\textbf{③}$.
+\solnote{미지수 부등식의 \emph{이차계수 부호 분기}는 부등식 단원의 표준 도구. 학생은 \emph{$a < 0$에서 부등호 방향이 뒤집히는 함정}에 빠지기 쉬워 ㄷ 명제가 함정 후보. \emph{$a = 0$ 경계 분기}도 잊지 말아야 한다 — 이 경우 \emph{좌변 항등식 $0$}이 되어 *해의 존재 자체*가 부정된다.}
+
+\soltitle{4}{미지수 이차부등식 — 이차계수의 세 경우 나누기}{4}
+\begin{answerbox}\sffamily\bfseries 정답: ② $2 \le a < 6$\end{answerbox}
+\step{1} 좌변이 \emph{이차식이 아닐 수도} 있으므로 \emph{이차계수 $a - 2$의 부호}로 분기한다.
+\paramcasethree{이차계수 $a - 2$의 부호}{$a = 2$: 좌변 = $4 > 0$로 모든 $x$에서 성립 ✓}{$a > 2$: 최고차항 계수가 음수인 이차식, \emph{판별식 $< 0$ 의무}}{$a < 2$: 최고차항 계수가 양수인 이차식, 모든 $x$에서 양수 \emph{불가능}}
+\step{2} \textbf{경우 ② $a > 2$.} 판별식
+\[ D/4 = (a - 2)^2 - 4(a - 2) = (a - 2)(a - 2 - 4) = (a - 2)(a - 6) < 0. \]
+$a > 2$이므로 $a - 2 > 0$이고, 부등식은 $a - 6 < 0$, 곧 $a < 6$. 종합 $2 < a < 6$.
+\step{3} \textbf{경우 ① $a = 2$.} 자동 성립.
+\step{4} \textbf{경우 ③ $a < 2$.} 최고차항 계수가 음수이므로 $x \to \pm\infty$에서 음수 → 모든 $x$ 양수 불가능. \emph{불가}.
+\step{5} 세 경우 종합하면 $2 \le a < 6$. 정답은 $\textbf{②}$.
+\solnote{미지수가 \emph{이차계수}에 등장하면 \emph{이차계수 $= 0$ 분기}부터 점검해야 한다. 본 문제는 $a = 2$에서 \emph{상수식}으로 환원되어 자동 성립하는 \emph{경계 함정}. \emph{닫힌 부등호 $\le$}와 \emph{열린 부등호 $<$}를 구분해야 답 보기 ① $2 < a < 6$ 함정에 빠지지 않는다.}
+
+\soltitle{5}{도형 결합 — 두 정사각형의 겹침 영역}{4}
+\begin{answerbox}\sffamily\bfseries 정답: ③ $-2 + 2\sqrt{7}$\end{answerbox}
+\step{1} 그림에서 점들은 직선 위에 $\mathrm{A, E, B, F}$ 순서로 놓이고 $\overline{\mathrm{AB}} = a$, $\overline{\mathrm{EF}} = b$, $\overline{\mathrm{EB}} = 1$, $\overline{\mathrm{AF}} = 5$.
+\step{2} 거리 분석으로
+\[ \overline{\mathrm{AF}} = \overline{\mathrm{AE}} + \overline{\mathrm{EF}} = (a - 1) + b = 5 \;\Longrightarrow\; a + b = 6. \]
+\step{3} 겹침 영역 사각형 $\mathrm{EBCI}$는 \emph{가로 $\overline{\mathrm{EB}} = 1$, 세로 $\overline{\mathrm{BC}} = a$} (정사각형 $\mathrm{ABCD}$의 변)이므로 그 넓이는
+\[ S_{\mathrm{EBCI}} = 1 \cdot a = a. \]
+\step{4} 정사각형 $\mathrm{EFGH}$의 넓이는 $b^2$. 조건
+\[ a = \frac{b^2}{4}. \]
+\step{5} $a + b = 6$과 $a = b^2/4$를 연립한다.
+\[ \frac{b^2}{4} + b = 6 \;\Longrightarrow\; b^2 + 4b - 24 = 0 \;\Longrightarrow\; b = \frac{-4 + \sqrt{16 + 96}}{2} = -2 + 2\sqrt{7}. \]
+($b > 0$이므로 양의 근만.)
+\step{6} 검증: $b = -2 + 2\sqrt{7} \approx 3.29$이고 $a = 6 - b = 8 - 2\sqrt{7} \approx 2.71$. 조건 $1 < a < b < 5$ ✓.
+정답은 $\textbf{③}$.
+\solnote{도형·방정식 결합 문제의 핵심은 \emph{거리 관계}를 \emph{대수 등식}으로 환원하는 것. 본 문제는 \emph{$\overline{\mathrm{AF}}$ 한 식}이 $a + b$를 결정하고 \emph{겹침 넓이 조건}이 $a$와 $b$의 \emph{이차 관계}를 부여하는 \emph{이중 미정계수 압축} 구조. 사각형 $\mathrm{EBCI}$의 가로·세로를 \emph{시각적으로 정확히} 식별하는 것이 변별 핵심.}
+
+\soltitle{6}{사차방정식 — $X = x^2$ 치환과 [보기] 진위 판별}{4}
+\begin{answerbox}\sffamily\bfseries 정답: ④ ㄱ, ㄴ\end{answerbox}
+\step{1} $X = x^2 \ge 0$ 치환으로 $X^2 + kX + 4 = 0$. 두 근의 곱 $X_1 X_2 = 4 > 0$ (항상).
+\step{2} \textbf{ㄱ.} $k = -5$ 대입: $X^2 - 5X + 4 = (X - 1)(X - 4) = 0$. $X = 1, 4$ — 둘 다 양수. $x = \pm 1, \pm 2$. 서로 다른 네 실근 ✓. \textbf{ㄱ은 참}.
+\step{3} \textbf{ㄴ.} $k > 0$일 때, 두 $X$의 합 $-k < 0$, 곱 $= 4 > 0$.
+\paramcase{판별식 $k^2 - 16$의 부호}{$k \ge 4$: 두 $X$ 실수 (합 $< 0$, 곱 $> 0$이라 둘 다 음수) → $x^2 = $ 음수 → 모두 허근}{$0 < k < 4$: 두 $X$ 자체가 켤레인 두 허근 → $x^2 = $ 허근 → 모두 허근}
+어느 경우에도 실근 없음. \textbf{ㄴ은 참}.
+\step{4} \textbf{ㄷ.} 두 실근 + 두 허근 = 두 $X$ 중 하나 양수, 다른 음수 → \emph{곱 $X_1 X_2 < 0$}이어야 한다. 그러나 본 사차방정식은 \emph{항상} $X_1 X_2 = 4 > 0$. 따라서 \emph{두 실근 + 두 허근 조합은 불가능}. \textbf{ㄷ은 거짓}.
+\step{5} ㄱ, ㄴ만 참이므로 정답은 $\textbf{④}$.
+\solnote{$X = x^2$ 치환 후 \emph{$X_1 X_2 = $ 상수항}으로 두 $X$의 부호가 \emph{한 식에} 결정되는 게 핵심 도구. 본 사차식은 상수항이 $4$로 고정되어 \emph{두 X의 곱이 양수}로 \emph{어떤 $k$에서도} 강제된다. 학생은 ㄷ에서 \emph{표면적으로 가능해 보이는} "두 실근 + 두 허근" 조합이 \emph{상수항 부호로 절대 불가능}함을 \emph{역방향 사고}로 발견해야 한다 — \emph{표면 모순} 함정.}
+
+% ─────────────────── 서답 \#7\textendash{}\#8 ───────────────────
+\examsection{서답 \#7\textendash{}\#8 풀 답지}
+
+\soltitle{7}{연립부등식 — 미지수 분기와 정수해 카운팅}{4}
+\begin{answerbox}\sffamily\bfseries 정답: $30$\end{answerbox}
+\step{1} \textbf{첫 부등식.} $(x - 3)(x - 7) \le 0$이므로 해는
+\[ 3 \le x \le 7. \]
+정수해는 $\{3, 4, 5, 6, 7\}$로 $5$개.
+\step{2} \textbf{둘째 부등식.} 좌변을 \emph{완전제곱식 환원}한다.
+\[ x^2 - 2(n - 1)x + (n - 1)^2 - 1 = (x - (n - 1))^2 - 1 \ge 0. \]
+곧 $|x - (n - 1)| \ge 1$, 해 $x \le n - 2$ 또는 $x \ge n$.
+\step{3} 첫 부등식 정수 $\{3, 4, 5, 6, 7\}$ 중 둘째 부등식을 만족하는 정수는 \emph{$\{n - 1\}$을 제외한} 정수.
+\step{4} 자연수 $n$의 값에 따른 분기를 점검한다.
+\begin{itemize}\setlength{\itemsep}{0pt}
+\item $n \le 3$ 또는 $n \ge 9$: $n - 1$이 $3, 4, 5, 6, 7$ 중 어느 값도 아니므로 첫 정수 $5$개 모두 둘째 부등식을 만족 → \emph{$5$개}. ✗ ($\ne 4$)
+\item $n = 4$: 제외 정수 $\{3\}$ → 남은 $\{4, 5, 6, 7\}$ → \emph{$4$개} ✓
+\item $n = 5$: 제외 $\{4\}$ → $\{3, 5, 6, 7\}$ → \emph{$4$개} ✓
+\item $n = 6$: 제외 $\{5\}$ → $\{3, 4, 6, 7\}$ → \emph{$4$개} ✓
+\item $n = 7$: 제외 $\{6\}$ → $\{3, 4, 5, 7\}$ → \emph{$4$개} ✓
+\item $n = 8$: 제외 $\{7\}$ → $\{3, 4, 5, 6\}$ → \emph{$4$개} ✓
+\end{itemize}
+\step{5} 조건을 만족시키는 자연수 $n = 4, 5, 6, 7, 8$. 합은
+\[ 4 + 5 + 6 + 7 + 8 = 30. \]
+답은 $\textbf{30}$.
+\solnote{둘째 부등식이 \emph{완전제곱식 환원}으로 $(x - (n - 1))^2 \ge 1$, 곧 \emph{$x \ne n - 1$의 $\pm 1$ 외부}로 정리되는 게 결정적 절약 도구. 미지수 $n$의 변화는 \emph{제외되는 한 정수}만 이동시켜 \emph{$\{3, 4, 5, 6, 7\}$ 중 하나만} 제외되는 \emph{단순 분기 구조}로 압축. $n - 1$이 \emph{이 집합 밖일 때} 자동으로 5개 → \emph{4가 되지 않음}이 자연 차단.}
+
+\soltitle{8}{연립부등식 — 미지수 자기참조와 정수해 합}{4}
+\begin{answerbox}\sffamily\bfseries 정답: $17$\end{answerbox}
+\step{1} 첫 부등식 $|x - n| \le n - 1$의 해는 $1 \le x \le 2n - 1$ ($n \ge 1$이므로 좌변 자연수).
+\step{2} 둘째 부등식 $x^2 \le 2n^2 + 2n = 2n(n + 1)$의 해는 $|x| \le \sqrt{2n(n + 1)}$.
+\step{3} 공통 정수해의 우측 경계는 $\min(2n - 1, \sqrt{2n(n + 1)})$. 두 값 비교는 $(2n - 1)^2$ vs $2n(n + 1)$.
+\[ (2n - 1)^2 - 2n(n + 1) = 2n^2 - 6n + 1. \]
+$n \le 2$일 때 음수 → $2n - 1 < \sqrt{2n(n+1)}$, $n \ge 3$일 때 양수.
+\step{4} 각 자연수 $n$에 대해 공통 정수해 범위와 합 $S$, $n$의 배수 여부.
+\begin{itemize}\setlength{\itemsep}{0pt}
+\item $n = 1$: 공통 $\{1\}$. $S = 1$. $1 \mid 1$ ✓.
+\item $n = 2$: 공통 $\{1, 2, 3\}$. $S = 6$. $2 \mid 6$ ✓.
+\item $n = 3$: $\sqrt{24} \approx 4.9$, 공통 $\{1, 2, 3, 4\}$. $S = 10$. $3 \mid 10$ ✗.
+\item $n = 4$: $\sqrt{40} \approx 6.3$, 공통 $\{1, \ldots, 6\}$. $S = 21$. $4 \mid 21$ ✗.
+\item $n = 5$: $\sqrt{60} \approx 7.7$. 공통 $\{1, \ldots, 7\}$. $S = 28$. $5 \mid 28$ ✗.
+\item $n = 6$: $\sqrt{84} \approx 9.2$. 공통 $\{1, \ldots, 9\}$. $S = 45$. $6 \mid 45$ ✗.
+\item $n = 7$: $\sqrt{112} \approx 10.6$. 공통 $\{1, \ldots, 10\}$. $S = 55$. $7 \mid 55$ ✗.
+\item $n = 8$: $\sqrt{144} = 12$. 공통 $\{1, \ldots, 12\}$. $S = 78$. $8 \mid 78$ ✗.
+\item $n = 9, 10, 11, 12, 13$: $S$ 계속 증가, $n$ 배수 ✗.
+\item $n = 14$: $\sqrt{420} \approx 20.5$. 공통 $\{1, \ldots, 20\}$. $S = 210$. $14 \mid 210$ ($= 14 \cdot 15$) ✓.
+\item $n = 15$: $\sqrt{480} \approx 21.9$. 공통 $\{1, \ldots, 21\}$. $S = 231$. $15 \mid 231$ ✗.
+\end{itemize}
+\step{5} 만족 $n = 1, 2, 14$. 합은
+\[ 1 + 2 + 14 = 17. \]
+답은 $\textbf{17}$.
+\solnote{미지수 $n$이 \emph{두 부등식과 결과 조건} 모두에 등장하는 \emph{삼중 자기참조} 구조. 첫 부등식의 우측 경계 ($2n - 1$)와 둘째의 ($\sqrt{2n(n+1)}$)의 \emph{대소 비교}가 $n = 2$에서 \emph{전환}되는 자연 경계. $n = 14$에서 \emph{$210 = 14 \cdot 15$}가 정확히 배수 조건을 만족시키는 \emph{미세 일치}가 변별의 정점 — 학생은 \emph{$n = 1, 2$ 작은 값과 $n = 14$ 큰 값} 모두 누락하지 않도록 \emph{전 자연수 범위}를 점검해야 한다.}
+
+\end{document}

@@ -1,0 +1,31 @@
+---
+id: SRC-IL-EQ-041
+unit: CM1-EQ
+type: SRC-IL
+type_in_source: $\angle$ACP=2$\angle$BCQ 넓이 + P 두 개 → $\overline{\mathrm{P_1P_2}}$
+status: meta_only
+external_labels:
+  - source: 일품 공통수학
+    cohort_type: commercial_textbook
+    book_key: IL
+    item_number: 09 [1]
+    insights_summary: EQV(2)·MI(3)·RT(2)·BW(2)
+    score: 2.17
+    cohort_normalized_star: 5
+    insights_depth:
+      I-EQV: 2
+      I-MI: 3
+      I-RT: 2
+      I-BW: 2
+patterns_1x: []
+homebase_for_1x: []
+frequency: 3
+grade_origin: 고1
+created: '2026-06-24'
+---
+
+*(status: meta_only — 시판 책 일품 공통수학 정점 표본. 본문/풀이 미등록 (저작권 정책). 통찰 라벨링·★ 메타만 등록.)*
+
+**발문 요지**: $\angle$ACP=2$\angle$BCQ 넓이 + P 두 개 → $\overline{\mathrm{P_1P_2}}$
+
+**원 출처**: 일품 공통수학 / 항목 09 [1] / score: 2.17 / 통찰: EQV(2)·MI(3)·RT(2)·BW(2)

@@ -1,0 +1,28 @@
+%% citation.tex — 출처 표기 매크로
+%% 공개 기출 인용 시 \examcite{<출처 문자열>} 사용
+
+% 문항 번호 우측에 인라인 작은 회색 출처 (인쇄 시 변별성 위해 별도 색 사용)
+\providecolor{tbk-cite}{HTML}{8B95A1}
+
+\newcommand{\examcite}[1]{%
+  \quad{\footnotesize\sffamily\color{tbk-cite}#1}%
+}
+
+% 더 강조하고 싶을 때: 우측 정렬 캡션
+\newcommand{\examcitebox}[1]{%
+  \par
+  \hfill{\footnotesize\sffamily\color{tbk-cite}— #1}\par
+}
+
+% 인용 목록 기록용 (단원 말미에 자동 수집 가능하도록 \protected@write 활용)
+\newwrite\citationlog
+\AtBeginDocument{\immediate\openout\citationlog=\jobname.cit\relax}
+\newcommand{\logcite}[1]{%
+  \protected@write\citationlog{}{#1}%
+}
+
+% 권장 사용: \examcite는 기본 호출 시 로깅도 함께
+\renewcommand{\examcite}[1]{%
+  \logcite{#1}%
+  \quad{\footnotesize\sffamily\color{tbk-cite}#1}%
+}

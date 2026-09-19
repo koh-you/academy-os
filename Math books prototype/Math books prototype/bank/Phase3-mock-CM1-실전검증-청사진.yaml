@@ -1,0 +1,68 @@
+# Phase 3 실전 검증 · CM1 mock 시험지 청사진 v0.1
+# 세션 61 · problem-author v2.1 자동 pick 워크플로우 검증 목적
+# 실제 시험지 아님 · Phase 3 정합률 실측 시나리오
+
+round: mock-01
+subject: CM1
+scope: "Phase 3 실전 검증 · CM1 4대단원 통합"
+purpose: "problem-author v2.1 자동 pick + 원형 다양성 + 자기복제 감지 통합 검증"
+series_type: exam
+policies: [star-5-only, no-textbook-recap]
+
+# 5개 슬롯 mock (실제 회차 아님 · 자동화 검증만)
+slots:
+  # 슬롯 1: A단계 계산형 (★ 1~2)
+  - n: 1
+    unit: CM1-PL
+    sub: 나머지정리와인수분해
+    star_target: 2
+    source_auto_pick: true
+    layout_hint: probpair
+    expected_pick: 쎈 A단계 or 마플 BASIC
+
+  # 슬롯 2: B단계 중간 (★ 3)
+  - n: 2
+    unit: CM1-EQ
+    sub: 이차방정식
+    star_target: 3
+    source_auto_pick: true
+    layout_hint: probpair
+    expected_pick: 마플 NORMAL or 쎈 B단계 대표
+
+  # 슬롯 3: 심화 (★ 4)
+  - n: 3
+    unit: CM1-CB
+    sub: 순열과조합
+    star_target: 4
+    source_auto_pick: true
+    origin_pattern: null  # 아직 지정 없음
+    layout_hint: probpair
+    expected_pick: 마플 TOUGH or 쎈 B단계 ● 상
+
+  # 슬롯 4: 정점 (★ 5)
+  - n: 4
+    unit: CM1-EQ
+    sub: 이차방정식
+    star_target: 5
+    source_auto_pick: true
+    origin_pattern: O-08  # 1의 n제곱근+감차 (premium 원형)
+    anchor_neighbors_check: true
+    layout_hint: probpairfillpage
+    expected_pick: 쎈-CM1-EQ-0542 or 0547 or 마플 CM1-EQ 복소수 학평
+
+  # 슬롯 5: premium (★ 5 premium)
+  - n: 5
+    unit: CM1-PL
+    sub: 나머지정리와인수분해
+    star_target: premium
+    source_auto_pick: true
+    anchor_neighbors_check: true
+    layout_hint: probpairfillpage
+    expected_pick: 쎈-CM1-PL-0277 or 0266 (P(x)-f(x) 감차 O-09)
+
+# 검증 목표
+verification_targets:
+  - 각 슬롯 자동 pick 성공 여부
+  - premium 원형 다양성 (원형 코드 중복 회피)
+  - anchor-neighbors 자기복제 감지 (sim >= 0.8 경고 시 대응)
+  - Phase 3 정합률 실측 (자동 pick 정확도 · 원형 정합률)

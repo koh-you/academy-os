@@ -1,0 +1,58 @@
+# CFES Phase A-2 결함군 주입 spec (세션 102)
+# flaw-injection-generator.mjs --spec 로 실행 (간이 파서 · 백슬래시 literal · 단일 \ 사용)
+# 정상군(creation-01·04·05)에 통제 주입 · creation-02는 세션 99 실측 F5 seed
+
+- id: FLAW-02-F5-seed
+  source: bank/creation-archive/phase-a2/creations/creation-02.tex
+  flaw: F5
+  seed: true
+  note: "세션 99 실측 · 대칭중심 case 2개 (a+b = -15/4·-27/4) 답 비유일"
+  out: creation-02-F5.tex
+
+- id: FLAW-04-F5
+  source: bank/creation-archive/phase-a2/creations/creation-04.tex
+  flaw: F5
+  find: "양수 $a$, $b$에 대하여"
+  replace: "$a$, $b$에 대하여"
+  note: "양수 제약 제거 → a·b 다값 (부호·평행 두 경우) 답 비유일"
+  out: creation-04-F5.tex
+
+- id: FLAW-04-F4
+  source: bank/creation-archive/phase-a2/creations/creation-04.tex
+  flaw: F4
+  find: "원의 넓이가 $\pi$일 때"
+  replace: "원의 넓이가 $\displaystyle\lim_{n\to\infty}\frac{\pi n}{n+1}$일 때"
+  note: "극한(미적분) 삽입 → CM 스코프 침투"
+  out: creation-04-F4.tex
+
+- id: FLAW-01-F4
+  source: bank/creation-archive/phase-a2/creations/creation-01.tex
+  flaw: F4
+  find: "삼각형 $\mathrm{ABP}$의 넓이가 자연수인"
+  replace: "벡터 $\overrightarrow{\mathrm{AB}}$와 $\overrightarrow{\mathrm{AP}}$의 외적의 크기가 자연수인"
+  note: "벡터·외적 삽입 → CM 스코프 침투"
+  out: creation-01-F4.tex
+
+- id: FLAW-01-F10
+  source: bank/creation-archive/phase-a2/creations/creation-01.tex
+  flaw: F10
+  find: "제1사분면 위 원 위의 점 $\mathrm{P}$에 대하여 삼각형 $\mathrm{ABP}$의 넓이가 자연수인 $\mathrm{P}$의 개수를 구하시오."
+  replace: "선분 $\mathrm{AB}$의 길이를 구하시오."
+  note: "통찰(넓이 자연수 이산 조건) 제거 → 단순 현 길이 계산 · 난이도 하향"
+  out: creation-01-F10.tex
+
+- id: FLAW-05-F2
+  source: bank/creation-archive/phase-a2/creations/creation-05.tex
+  flaw: F2
+  find: "두 접선이 이루는 각을 이등분하는 직선의 방정식을 모두 구하시오."
+  replace: "그어진 두 개의 접선들에 의해 만들어지게 되는 각도를 반으로 나누는 것을 수행하는 직선의 방정식들을 전부 다 구하는 것을 하시오."
+  note: "직역체·번역투 · 부자연 한국어"
+  out: creation-05-F2.tex
+
+- id: FLAW-05-F9
+  source: bank/creation-archive/phase-a2/creations/creation-05.tex
+  flaw: F9
+  find: "점 $(3, 4)$에서 원 $x^2 + y^2 = 5$에 그은"
+  replace: "점 $(3, 4)$에서 원 $x^2 + y^2 = 5$ (단, 이 반지름 제곱은 $5 = 1+1+1+1+1 = \sqrt{25} = \tfrac{10}{2} = 2.5\times 2 = 4+1 = 3+2 = 6-1$ 등 여러 방식으로 표현되며 조판 시 한 줄을 크게 넘겨 Overfull hbox 를 유발한다) 에 그은"
+  note: "긴 인라인 수식 → Overfull hbox · 조판 결함 (A1 미검출 blindspot 테스트)"
+  out: creation-05-F9.tex

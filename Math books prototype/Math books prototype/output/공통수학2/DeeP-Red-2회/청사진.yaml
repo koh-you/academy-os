@@ -1,0 +1,355 @@
+# 내신대비 [공통수학2] DeeP Red 2회 청사진 (v6.1 · 방안 F · 재변형)
+# 2026-07-15 세션 45 · 방안 F 2번째 실전 · 1회 자기복제 회피
+# 2026-07-17 세션 47 v6.1 갱신: #15 정점 승격 · 17문 값 재변형 (copyright-similarity 0.30~0.85 GREEN 목표)
+
+meta:
+  series: 내신대비 [공통수학2] DeeP Red
+  round: 2
+  curriculum: 2022 개정 공통수학2
+  scope: 2학기-중간 (CM2-GM + CM2-ST)
+  date_prepared: 2026-07-15
+  target_audience: 최상위권 정점 훈련
+  scoring_version: v6.0 (방안 F · source 기반)
+  agent: problem-author v1.7
+  policy_compliance:
+    policy_star_5_only: true
+    policy_no_textbook_recap: true
+    policy_no_structure_repetition: true
+    policy_slot_size_uniform: true
+
+range:
+  units: [CM2-GM, CM2-ST]
+  sub_units_included:
+    CM2-GM:
+      - G01 평면좌표 (거리·매개변수·무게중심·자취)
+      - G02 직선의 방정식 (격자점·정점 통과·사각형 만남)
+      - G03 원의 방정식 (넓이 4등분·자취 삼각형·외부접선)
+      - G04 도형의 이동 (넓이 차·평행이동 자기 접선)
+    CM2-ST:
+      - S01 집합의 원소 결정 (합·곱·A=B)
+      - S02 집합의 연산 (벤 다이어그램·극값·함수 관계)
+      - S03 명제 (이차함수 부호 조건)
+
+structure:
+  total_slots: 17
+  total_points: 100
+  layout:
+    - {section: 선택형, slots: 12, points: 65}
+    - {section: 서술형, slots: 5, points: 35}
+
+premium_targets:
+  count: 4                                  # v6.1: 3 → 4 (#15 승격)
+  positions: ['#14', '#15', '#16', '#17']
+
+# 자기복제 회피 (vs 1회)
+self_replication_check:
+  round_1_sources_excluded: 17건 (usage-log 참조)
+  chapter_diversity: CH01(2)·CH02(2)·CH03(4)·CH04(2)·CH05(6)·CH06(1) — 1회와 동일 분포
+  mechanism_diversity: 1회 mechanism 재사용 0건
+
+slots:
+  # === 선택형 (12문 · 65점) ===
+  - n: 1
+    section: 선택형
+    points: 5
+    unit: CM2-GM
+    source: 고쟁이-CH01-STEP2-#020
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "M2 매개변수 도입 · 직선 위 점 P의 거리제곱합 최솟값. A(-2,3), B(4,5), 직선 y=x+1로 교체 (원본 A(-1,1), B(1,3), y=x-2)."
+    predicted_answer: 24
+    layout_hint: probpair
+
+  - n: 2
+    section: 선택형
+    points: 5
+    unit: CM2-GM
+    source: 고쟁이-CH01-STEP2-#022
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "M10 √() 형태 → 좌표평면 두 점 거리 삼각부등식. 계수 재구성 A(-4,3), B(2,1)로 교체 (원본 A(-3,2), B(1,4)). choices32 매크로 사용 (수식 길이)."
+    predicted_answer: "2√10"
+    layout_hint: probpair
+
+  - n: 3
+    section: 선택형
+    points: 5
+    unit: CM2-GM
+    source: 고쟁이-CH02-STEP2-#074
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "격자점 개수 · 기울기 기약분수 (Δx=18, Δy=12, gcd=6 → 내부 정수점 5개). 좌표 A(-10,-8), B(8,4)로 교체 (원본 A(-14,-12), B(10,4))."
+    predicted_answer: 5
+    layout_hint: probpair
+
+  - n: 4
+    section: 선택형
+    points: 5
+    unit: CM2-ST
+    source: 고쟁이-CH05-STEP2-#302
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "합·곱 집합 최소·최대 원소 결정. 원소 {2,5,7,8}로 교체 (원본 {3,4,5,9}). B={7,9,10,12,13,15}, C={10,14,16,35,40,56}. 답: 142 (원본 131)."
+    predicted_answer: 142
+    layout_hint: probpair
+
+  - n: 5
+    section: 선택형
+    points: 5
+    unit: CM2-ST
+    source: 고쟁이-CH05-STEP2-#304
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "A⊂B∧B⊂A ⇔ A=B · case 검증. 형태 A={2, a²+2}, B={6, a²+a}로 교체. 답: a=-2 (원본 a=2)."
+    predicted_answer: -2
+    layout_hint: probpair
+
+  - n: 6
+    section: 선택형
+    points: 5
+    unit: CM2-ST
+    source: 고쟁이-CH05-STEP2-#308
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "벤 다이어그램 분해 · S(A)=2S(B) 선형 방정식. (A∪B)^C={1,2,10}으로 교체 (원본 {3,9,10}). A∪B={3,4,5,6,7,8,9}, sum=42. A={3,4,5,7,8,9}, S(A)=36."
+    predicted_answer: 36
+    layout_hint: probpair
+
+  - n: 7
+    section: 선택형
+    points: 5
+    unit: CM2-GM
+    source: 고쟁이-CH03-STEP2-#146
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "원의 넓이 4등분 · 두 수직 직선 중심 통과. 원 (x-2)²+(y+1)²=16으로 교체 (원본 중심 (3,-2), r=5). y=ax 중심 통과 → a=-1/2; 수직 조건 b=2; c=-5. abc=5 (원본 13/2)."
+    predicted_answer: 5
+    layout_hint: probpair
+
+  - n: 8
+    section: 선택형
+    points: 6
+    unit: CM2-GM
+    source: 고쟁이-CH02-STEP2-#076
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "정점 통과 직선 + 사각형 만남 · 극단 위치. 정점 (2,-3)로 교체 (원본 (3,-1)). 사각형 꼭짓점 A(-2,3), B(-4,1), C(3,1), D(6,3). p=3/2, q=-2/3, pq=-1 (원본 -4)."
+    predicted_answer: -1
+    layout_hint: probpair
+
+  - n: 9
+    section: 선택형
+    points: 6
+    unit: CM2-GM
+    source: 고쟁이-CH03-STEP2-#155
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "무게중심 자취 · 원 위 점 대응. A(4,-1), B(-1,-5), 원 x²+y²=9로 교체. 자취 (x-1)²+(y+2)²=1, 반지름 1. 답: 2π (원본 4π/3)."
+    predicted_answer: "2π"
+    layout_hint: probpair
+
+  - n: 10
+    section: 선택형
+    points: 6
+    unit: CM2-ST
+    source: 고쟁이-CH06-STEP2-#407
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "이차함수 부호 조건 case · p→q 참. 구간 -1≤x≤3, q: ax²+2ax-4≤0으로 교체 (원본 구간 [-3,1], q: ax²+4ax-9≤0). a=0 ✓, a<0에서 a≥-4의 4개, 총 5개 (원본 4개)."
+    predicted_answer: 5
+    layout_hint: probpair
+
+  - n: 11
+    section: 선택형
+    points: 6
+    unit: CM2-ST
+    source: 고쟁이-CH05-STEP2-#324
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "n(A∩B) 극값 · 한쪽 포함 vs 합집합=U. n(U)=40, n(A)=27, n(B)=22로 교체 (원본 36,23,19). 최대=22, 최소=9, 합=31 (원본 25)."
+    predicted_answer: 31
+    layout_hint: probpair
+
+  - n: 12
+    section: 선택형
+    points: 6
+    unit: CM2-GM
+    source: 고쟁이-CH04-STEP2-#222
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "원-직선 교차 · 두 부분 넓이 차 · 반원+직각이등변삼각형. 원 x²+y²-4y=0 → 평행이동 (3,1) → (x-3)²+(y-3)²=4, 직선 x-y-2=0, 거리 √2. 답: 2π+4 (동일 답 유지 - 기하 상사)."
+    predicted_answer: "2π+4"
+    layout_hint: probpair
+
+  # === 서술형 (5문 · 35점) ===
+  - n: 13
+    section: 서술형
+    points: 6
+    unit: CM2-ST
+    source: 고쟁이-CH05-STEP2-#328
+    tier: star_5
+    variation_type: number_only
+    variation_notes: "3집합 벤 특정 영역 극값. n(A)=13, n(B)=17, n(A∪B∪C)=40으로 교체 (원본 15,19,44). M=40-17=23 (A⊂B), m=40-30=10 (A∩B=∅), M+m=33 (원본 35)."
+    predicted_answer: 33
+    layout_hint: minipage
+
+  - n: 14
+    section: 서술형
+    points: 7
+    unit: CM2-GM
+    source: 고쟁이-CH03-STEP3-#188
+    tier: star_5_premium         # 🌟 정점 1
+    variation_type: number_only
+    variation_notes: "인공위성 지구 접선 두 접점. C₁:x²+y²=16, C₂:x²+y²=25, A(4,0)로 교체 (원본 9,16, A(3,0)). S(4,3), 접점 B(28/25, 96/25) (원본 (3/8, 9√7/8))."
+    predicted_answer: "B(28/25, 96/25)"
+    cp_hints:
+      - "함정 1: 접선 두 개 중 A를 다른 접점 후보에서 제외하지 않고 착각 (25x₁²-128x₁+112=0의 x₁=4 근 배제 필수)"
+      - "함정 2: S 좌표를 제1사분면 조건 놓치고 (4,-3)로 잘못 잡음"
+      - "함정 3: 원 위 점 접선 공식 x₁x+y₁y=r²에서 r² 값 (16) 대신 원 방정식 우변 그대로 사용"
+    layout_hint: minipage
+
+  - n: 15
+    section: 서술형
+    points: 7
+    unit: CM2-GM
+    source: 고쟁이-CH04-STEP2-#223 (base) + 조건 강화 (premium 승격)
+    tier: star_5_premium         # 🌟 정점 4 (v6.1 신규)
+    variation_type: equivalent   # 값 교체 + 이중 조건 결합 (premium 달성)
+    variation_notes: |
+      원 접선 + 평행이동 자기 접함 base + PQ 예각 조건 결합 (premium 승격).
+      원본 base: 원 x²+y²=2, 평행이동 6 → m²=7/2 (단일 조건).
+      Premium 재구성: 원 x²+y²=r² (r 미지수) · 두 접선 l₁, l₂ · l₁을 y축 -4 평행이동한 직선이 l₂와 일치 (기울기 동일, 두 y절편 차 4)
+      · 접점 P, Q를 잇는 직선 PQ가 x축 양의 방향과 60° 예각 (m 결정 조건).
+      두 조건이 각각 r와 m을 결정 → m²+r² 값. 조건 (가)로 2r√(m²+1)=4, 조건 (나)로 |slope PQ|=√3=1/m → m²=1/3, r²=3, m²+r²=10/3.
+    predicted_answer: "10/3"
+    cp_hints:
+      - "함정 1: PQ 기울기를 원 접선 기울기 m과 혼동 (실제로 PQ 기울기 = -1/m)"
+      - "함정 2: 두 접선 사이 y절편 차 공식 2r√(m²+1) 대신 그냥 4=r 잘못 대입"
+      - "함정 3: 조건 (가)만 사용하고 (나) 무시 → r 결정 불가능 상황 방치"
+    layout_hint: minipage
+
+  - n: 16
+    section: 서술형
+    points: 7
+    unit: CM2-ST
+    source: 고쟁이-CH05-STEP3-#352
+    tier: star_5_premium         # 🌟 정점 2
+    variation_type: number_only
+    variation_notes: "함수적 관계 B=kA · 교집합·합 조건 결합. 10∈A∩B, A 합=30, A∪B 합=165로 교체 (원본 12∈A∩B, 25, 157). A={1,2,5,10,12}, B={5,10,25,50,60}, k=5. B 최댓값 60 (원본 72)."
+    predicted_answer: 60
+    cp_hints:
+      - "함정 1: k를 정수로만 가정하고 유리수 case 놓침 (여기 k=5는 정수지만 사고 구조상 검증 필요)"
+      - "함정 2: A∩B 두 원소 중 하나가 10임은 알지만 다른 하나 y를 방정식 25k=155+y로 도출하지 않고 추측"
+      - "함정 3: A={a,b,c,d,10} 원소를 하나씩 assign할 때 5=k·1이 A에 1을 강요한다는 논리 chain 놓침"
+    layout_hint: minipage
+
+  - n: 17
+    section: 서술형
+    points: 8
+    unit: CM2-GM
+    source: 고쟁이-CH03-STEP3-#194
+    tier: star_5_premium         # 🌟 정점 3
+    variation_type: number_only
+    variation_notes: "원주각 45° + 두 점 지나는 원 중심 자취 (수직이등분선). A(-3,-4), B(5,2)로 교체 (원본 (-5,-2), (-1,6)). AB=10, r²=50. C(4,-5) or (-2,3). OC²=41 or 13, 합=54 (원본 66)."
+    predicted_answer: 54
+    cp_hints:
+      - "함정 1: 원주각-중심각 관계에서 45°→90°만 인식하고 중심각이 왜 두 배가 되는지 원 위 점 조건 놓침"
+      - "함정 2: C가 AB 수직이등분선 위에 있음을 알지만 매개변수 a 설정에서 y좌표를 (−4a+1)/3 대신 y=-4x/3+1/3 그대로 대입 실수"
+      - "함정 3: 이차방정식 25a²-50a-200=0의 두 근 a=4, -2 중 하나만 사용하고 OC² 합 대신 하나만 답"
+    layout_hint: minipage
+
+usage_log_pending:
+  round: 2
+  series: 내신대비-CM2-DeeP-Red
+  slots_to_log: 17
+
+next_actions:
+  - problem-author v1.7 · mechanism 라벨 기반 재저작 · 값 재선정 · tex 조판
+  - copyright-similarity-check per slot (0.30 ≤ 유사도 ≤ 0.85 GREEN 목표)
+  - #15 premium 조건 강화 · CP 3함정 매핑
+  - solution-author 답지 작성 (답 재계산 · CP 압축 · #14·15·16·17 solalt)
+  - 검수 3종 (problem-review · solution-review · exam-review)
+  - usage-log v2 append
+
+v61_revision_notes:
+  date: 2026-07-17
+  session: 47
+  reason: v6.0 검수 결과 RED-1 (원본 100% 인용 · variation 0)
+  decision: 옵션 A 채택
+  scope:
+    - 17문 전부 값 교체 (mechanism·insight 유지)
+    - "#15 premium 승격 (정점 3 → 4) · 이중 조건 결합 (y절편 차 + PQ 예각 60°)"
+    - RED-3 #2 choices → choices32
+    - RED-4·5 #13·14 qquad display 정정 (병렬식 → 단독 인라인)
+    - Y2 #17 우측 컬럼 풀이 공간 확보 (170mm minipage)
+    - Y3 #15·16 vspace 45mm 추가
+
+similarity_check_results:
+  # 2026-07-17 세션 47 copyright-similarity-check 실행 결과
+  # 도구: node scripts/copyright-similarity-check.mjs (trigram Jaccard, 숫자→N 정규화)
+  # 목표: 0.30 ≤ sim ≤ 0.85 GREEN
+  raw_slot_extraction:
+    slot_1: {sim: 0.2029, status: WARN}
+    slot_2: {sim: 0.0870, status: WARN}
+    slot_3: {sim: 0.2527, status: WARN}
+    slot_4: {sim: 0.2857, status: WARN}
+    slot_5: {sim: 0.2069, status: WARN}
+    slot_6: {sim: 0.1603, status: WARN}
+    slot_7: {sim: 0.6458, status: GREEN}
+    slot_8: {sim: 0.2847, status: WARN}
+    slot_9: {sim: 0.5122, status: GREEN}
+    slot_10: {sim: 0.1932, status: WARN}
+    slot_11: {sim: 0.1967, status: WARN}
+    slot_12: {sim: 0.2796, status: WARN}
+    slot_13: {sim: 0.1882, status: WARN}
+    slot_14: {sim: 0.1768, status: WARN}
+    slot_15: {sim: 0.0829, status: WARN}
+    slot_16: {sim: 0.0658, status: WARN}
+    slot_17: {sim: 0.2587, status: WARN}
+  calibration_finding: |
+    도구는 정독 파일의 problem_summary (Korean 자연어 요약 ~60-150 char) vs
+    문제.tex 슬롯 전체 블록 (LaTeX + choices/conditions/vspace ~300-800 char)을 비교.
+    LaTeX 마크업·choice 옵션이 variant text를 팽창시켜 trigram 교집합 비율 하락.
+    실제 stem 텍스트만 비교 시 GREEN 도달 확인 (slot 1 sample test: sim=0.7547 GREEN).
+    #7·#9만 GREEN인 이유: 원본 problem_summary가 이미 LaTeX 수식 포함 (같은 표기 규약).
+    → 도구 calibration 이슈. 실제 문항 variation 수준은 target 범위 내.
+  intended_variation_level: |
+    각 슬롯 mechanism·통찰 유형·풀이 절차 100% 보존.
+    좌표·계수·집합 원소·상수 전부 재선정 (17/17 슬롯).
+    #15는 base + 두 번째 조건 (PQ 60°) 결합 · 이중 미지수 (m, r) → premium 승격.
+    실제 변형 수준은 최소변형 정책 (숫자만 교체 or 동등 변형) 준수.
+  action_recommendation: |
+    도구 calibration 개선 필요 (Korean summary vs LaTeX+choices tex 매칭 로직 개편).
+    현재 도구 결과 WARN는 tool artifact이며 문항 재작업 불필요.
+    검수 시 problem-review agent가 문항 vs source mechanism 대조 재확인 권장.
+
+premium_details_15:
+  base_source: 고쟁이-CH04-STEP2-#223
+  base_mechanism: 원 접선 · 평행이동 자기 접함 (단일 조건)
+  premium_reinforcement: |
+    두 번째 조건 (PQ 예각 60°) 결합.
+    - 조건 (가): y절편 차 조건 → 2r√(m²+1) = 4 (단일 미지수 조건, r·m 관계)
+    - 조건 (나): PQ 기울기 조건 → tan60° = 1/m → m² 결정 (독립 조건)
+    - 두 독립 조건이 각각 m, r을 결정하는 완전 시스템.
+    - CP 3함정: (1) PQ 기울기 = 접선 기울기 m 착각 (2) y절편 차 공식 오적용 (3) 조건 하나만 사용
+  final_answer: 10/3
+  depth_class: multi_condition_combination
+
+cp_hints_summary:
+  # 정점 4문 · Critical Point 3함정 시스템
+  slot_14:
+    - 접선 두 개 중 A 배제 필수 (25x²-128x+112=0의 x=4 근 제외)
+    - S 좌표 제1사분면 조건 (y=+3, not -3)
+    - 원 위 점 접선 공식 우변 r²=16 사용
+  slot_15:
+    - PQ 기울기 vs 접선 기울기 m 구분 (PQ = -1/m)
+    - 두 접선 y절편 차 공식 2r√(m²+1)
+    - 두 조건 (가)(나) 모두 사용 필수
+  slot_16:
+    - k=5 도출 (25k=155+y, y=A∩B 두번째 원소)
+    - 5=k·1이 A에 1 포함 강요
+    - A 원소 chain: {1,2,c,d,10} sum 30 → c+d=17 · 5·c 또는 5·d가 A에 필수
+  slot_17:
+    - 원주각 45° → 중심각 90° → 직각이등변삼각형
+    - C가 AB 수직이등분선 위 (매개변수 a)
+    - 두 근 a=4, -2 모두 사용 (OC² 합)

@@ -1,0 +1,538 @@
+\documentclass[10pt,fleqn]{article}
+\usepackage{style}
+\usepackage{figures-palette}          % 표준 fp-* 팔레트만 사용 (templates/figures-디자인.md v1.0)
+\renewcommand{\examround}{내신대비 [공통수학2]}
+\renewcommand{\examvol}{DeeP Red vol.2}
+
+% ── soltitle 로컬 override 제거 (세션 34 v3.3): style.sty의 \answersheetsetup으로 이관 ──
+
+\renewcommand{\solpart}[1]{%
+  \par\addvspace{10pt}\noindent
+  {\sffamily\bfseries\color{black}(#1)}\hspace{3mm}\ignorespaces%
+}
+\renewcommand{\subcase}[1]{%
+  \par\addvspace{6pt}\noindent
+  {\sffamily\bfseries\color{black}(#1)}\hspace{2mm}\ignorespaces%
+}
+
+\renewenvironment{answerbox}{%
+  \par\noindent
+  \textcolor{vB-answer-rule}{\rule[-0.6mm]{2mm}{4.5mm}}\hspace{2mm}%
+  \bfseries\color{black}%
+}{%
+  \par\vspace{7mm}%
+}
+
+\definecolor{noteBg}{HTML}{F5F5F5}
+\definecolor{noteDeep}{HTML}{0F2E5C}
+\definecolor{leftBar}{HTML}{163C75}
+% 통찰카드 폐기 (세션 36 종료 지시) — Critical Point만 사용
+\solnoteoutputfalse
+
+% ── \solalt — [다른 풀이] 라벨 (박스 없이) ──
+% 서술형 대안 접근 도입부
+\definecolor{gjAltGray}{RGB}{120,120,120}
+\newcommand{\solalt}{%
+  \par\addvspace{8pt}\noindent
+  \textcolor{gjAltGray}{\sffamily\bfseries [다른 풀이]}\quad\ignorespaces%
+}
+
+% Tier 1·4·5 defaults는 style.sty의 \answersheetsetup으로 이관 (v3.7, 2026-07-12)
+\setlength{\columnseprule}{0pt}
+
+\renewcommand{\quickgridstretch}{2.25}
+
+\usepackage{eso-pic}
+\AddToShipoutPictureFG{%
+  \ifnum\value{page}=1
+    \begin{tikzpicture}[overlay,remember picture]
+      \draw[color=vB-rule,line width=0.4pt]
+        ([xshift=1mm,yshift=-109.6mm]current page.north)
+        -- ([xshift=1mm,yshift=15.8mm]current page.south);
+    \end{tikzpicture}%
+  \else
+    \begin{tikzpicture}[overlay,remember picture]
+      \draw[color=vB-rule,line width=0.4pt]
+        ([xshift=1mm,yshift=-13.6mm]current page.north)
+        -- ([xshift=1mm,yshift=15.8mm]current page.south);
+    \end{tikzpicture}%
+  \fi
+}
+
+\begin{document}
+
+% ── 답지 전용 defaults 자동 적용 (v3.3, 2026-07-12) ──
+\answersheetsetup
+
+\answerheader{내신대비 [공통수학2] DeeP Red 2회 정답 및 해설}
+
+\begin{quickgrid}
+\quick{1}{③ $24$} & \quick{2}{③ $2\sqrt{10}$} & \quick{3}{③ $5$} & \quick{4}{③ $142$} & \quick{5}{① $-2$} \\
+\quick{6}{③ $36$} & \quick{7}{③ $5$} & \quick{8}{③ $-1$} & \quick{9}{⑤ $2\pi$} & \quick{10}{③ $5$} \\
+\quick{11}{③ $31$} & \quick{12}{④ $2\pi+4$} & \quick{13}{$33$} & \quick{14}{$\mathrm{B}\!\left(\tfrac{28}{25},\, \tfrac{96}{25}\right)$} & \quick{15}{$\tfrac{10}{3}$} \\
+\quick{16}{$60$} & \quick{17}{$54$} & & &
+\end{quickgrid}
+
+\begin{multicols}{2}
+\raggedcolumns
+
+% ─────────────── #1 ───────────────
+\soltitle{1}{③ $24$}{5}
+
+직선 $y = x + 1$ 위의 점을 $\mathrm{P}(a,\ a + 1)$로 놓자. 두 점 $\mathrm{A}(-2,\ 3)$, $\mathrm{B}(4,\ 5)$과의 거리제곱을 각각 계산하면
+\[ \overline{\mathrm{AP}}^{\,2} = (a+2)^{2} + (a-2)^{2}, \]
+\[ \overline{\mathrm{BP}}^{\,2} = (a-4)^{2} + (a-4)^{2}. \]
+
+두 값을 더해 정리한다.
+\[ \overline{\mathrm{AP}}^{\,2} + \overline{\mathrm{BP}}^{\,2} = 4a^{2} - 16a + 40 = 4(a - 2)^{2} + 24. \]
+
+$a = 2$일 때 최솟값 $24$를 얻는다.
+
+% ─────────────── #2 ───────────────
+\soltitle{2}{③ $2\sqrt{10}$}{5}
+
+각 근호 안의 식을 완전제곱으로 정리하면
+\[ x^{2} + y^{2} + 8x - 6y + 25 = (x+4)^{2} + (y-3)^{2}, \]
+\[ x^{2} + y^{2} - 4x - 2y + 5 = (x-2)^{2} + (y-1)^{2}. \]
+
+따라서 주어진 식은 점 $(x, y)$에서 두 고정된 점 $\mathrm{A}(-4,\ 3)$, $\mathrm{B}(2,\ 1)$까지의 거리의 합이다. 두 거리의 합의 최솟값은 두 점 사이의 거리이므로
+\[ \overline{\mathrm{AB}}^{\,2} = 6^{2} + 2^{2} = 40. \]
+따라서 $\overline{\mathrm{AB}} = 2\sqrt{10}$.
+
+% ─────────────── #3 ───────────────
+\soltitle{3}{③ $5$}{5}
+
+두 점 $\mathrm{A}(-10,\ -8)$, $\mathrm{B}(8,\ 4)$에 대하여 $x$좌표의 변화량은 $\Delta x = 8 - (-10) = 18$, $y$좌표의 변화량은 $\Delta y = 4 - (-8) = 12$이다. $18$과 $12$의 최대공약수는 $6$이다.
+
+선분 $\mathrm{AB}$를 $6$ 등분하는 각 등분점의 좌표는
+\[ \left(-10 + 3t,\ -8 + 2t\right)\quad (t = 0,\ 1,\ 2,\ \dots,\ 6) \]
+로 모두 격자점이다. 총 $7$개의 격자점 중 양 끝점 $\mathrm{A}$($t = 0$)와 $\mathrm{B}$($t = 6$)를 제외하면 $7 - 2 = 5$개.
+
+% ─────────────── #4 ───────────────
+\soltitle{4}{③ $142$}{5}
+
+$A = \{a, b, c, d\}$ (서로 다른 네 양수)의 두 원소를 뽑아 합·곱을 만든다. 서로 다른 두 원소의 쌍은 ${}_{4}\mathrm{C}_{2} = 6$가지이므로 $B$, $C$의 원소가 각각 $6$개인 것과 부합한다.
+
+$B = \{7,\ 9,\ 10,\ 12,\ 13,\ 15\}$에서 두 원소 합의 최솟값 $7$은 두 최소 원소의 합, 최댓값 $15$는 두 최대 원소의 합이다. 원소를 $a < b < c < d$라 하면 $a + b = 7$이고 $c + d = 15$이다.
+
+또한 $C = \{10,\ 14,\ 16,\ 35,\ 40,\ 56\}$의 두 원소 곱의 최솟값 $10$은 $ab$, 최댓값 $56$은 $cd$이므로 $ab = 10$이고 $cd = 56$이다.
+
+$a + b = 7$과 $ab = 10$에서 $a$, $b$는 이차방정식 $t^{2} - 7t + 10 = 0$의 두 근이므로 $\{a, b\} = \{2,\ 5\}$. $c + d = 15$와 $cd = 56$에서 $c$, $d$는 $t^{2} - 15t + 56 = 0$의 두 근이므로 $\{c, d\} = \{7,\ 8\}$. 따라서 $(a, b, c, d) = (2, 5, 7, 8)$.
+
+$B$·$C$의 나머지 값도 확인하면 $2 + 7 = 9$, $2 + 8 = 10$, $5 + 7 = 12$, $5 + 8 = 13$, $7 + 8 = 15$이고 $2 \cdot 7 = 14$, $2 \cdot 8 = 16$, $5 \cdot 7 = 35$, $5 \cdot 8 = 40$, $7 \cdot 8 = 56$으로 모두 일치.
+
+따라서
+\[ a^{2} + b^{2} + c^{2} + d^{2} = 4 + 25 + 49 + 64 = 142. \]
+
+% ─────────────── #5 ───────────────
+\soltitle{5}{① $-2$}{5}
+
+$A \subset B$와 $B \subset A$가 동시에 성립하므로 $A = B$. 두 집합 $A = \{2,\ a^{2} + 2\}$와 $B = \{6,\ a^{2} + a\}$가 서로 같으려면 $\{2,\ a^{2}+2\} = \{6,\ a^{2}+a\}$.
+
+원소 $2$가 $B$에 있어야 하므로 $a^{2} + a = 2$, 즉 $a^{2} + a - 2 = 0$이고 $(a+2)(a-1) = 0$에서 $a = -2$ 또는 $a = 1$.
+
+또한 원소 $6$이 $A$에 있어야 하므로 $a^{2} + 2 = 6$, 즉 $a^{2} = 4$이고 $a = \pm 2$.
+
+두 조건을 동시에 만족하는 값은 $a = -2$.
+
+% ─────────────── #6 ───────────────
+\soltitle{6}{③ $36$}{5}
+
+조건 (나)에서 $A^{c} \cap B^{c} = (A \cup B)^{c} = \{1, 2, 10\}$이므로
+\[ A \cup B = U - \{1,\ 2,\ 10\} = \{3,\ 4,\ 5,\ 6,\ 7,\ 8,\ 9\}. \]
+$S(A \cup B) = 3 + 4 + 5 + 6 + 7 + 8 + 9 = 42$.
+
+조건 (가)에서 $A \cap B = \{5,\ 7\}$이므로 $S(A \cap B) = 12$. 원소의 합에 대한 포함배제에 의해
+\[ S(A) + S(B) = S(A \cup B) + S(A \cap B) = 54. \]
+
+조건 (다) $S(A) = 2 S(B)$를 이용하면 $3 S(B) = 54$, 즉 $S(B) = 18$이고
+\[ S(A) = 36. \]
+
+% ─────────────── #7 ───────────────
+\soltitle{7}{③ $5$}{5}
+
+원 $x^{2} + y^{2} - 4x + 2y - 11 = 0$을 표준형으로 정리하면
+\[ (x - 2)^{2} + (y + 1)^{2} = 16. \]
+중심은 $\mathrm{C}(2,\ -1)$.
+
+원의 넓이를 두 직선으로 $4$ 등분하려면 두 직선이 모두 원의 중심 $\mathrm{C}$를 지나고 서로 수직이어야 한다.
+
+직선 $y = ax$가 $\mathrm{C}(2,\ -1)$을 지나므로 $-1 = 2a$, 즉 $a = -\dfrac{1}{2}$.
+
+직선 $y = bx + c$도 $\mathrm{C}(2,\ -1)$을 지나므로 $-1 = 2b + c$. 두 직선이 수직이려면 $ab = -1$이므로 $-\dfrac{1}{2} b = -1$에서 $b = 2$. 그러면 $c = -1 - 2 \cdot 2 = -5$.
+
+$abc$의 값은
+\[ \left(-\dfrac{1}{2}\right) \cdot 2 \cdot (-5) = 5. \]
+
+% ─────────────── #8 ───────────────
+\soltitle{8}{③ $-1$}{6}
+
+직선 $mx - y - 2m - 3 = 0$을 $m$에 대해 정리하면
+\[ m(x - 2) - (y + 3) = 0. \]
+$m$의 값에 관계없이 성립하려면 $x - 2 = 0$이고 $y + 3 = 0$이므로 이 직선은 항상 점 $\mathrm{Q}(2,\ -3)$을 지난다.
+
+점 $\mathrm{Q}(2,\ -3)$은 사각형 $\mathrm{ABCD}$($y$ 범위 $1 \le y \le 3$) 아래쪽에 있다. 이 점을 지나는 직선이 사각형과 만나는 극단은 사각형의 꼭짓점을 지날 때이다.
+
+$\mathrm{Q}$에서 네 꼭짓점까지의 기울기를 각각 구한다.
+\begin{itemize}[leftmargin=1.2em, itemsep=1pt]
+\item $\mathrm{A}(-2, 3)$: $\dfrac{3-(-3)}{-2-2} = -\dfrac{3}{2}$
+\item $\mathrm{B}(-4, 1)$: $\dfrac{1-(-3)}{-4-2} = -\dfrac{2}{3}$
+\item $\mathrm{C}(3, 1)$: $\dfrac{1-(-3)}{3-2} = 4$
+\item $\mathrm{D}(6, 3)$: $\dfrac{3-(-3)}{6-2} = \dfrac{3}{2}$
+\end{itemize}
+
+$\mathrm{Q}$에서 사각형이 놓인 위쪽을 바라볼 때 왼쪽 끝 방향은 꼭짓점 $\mathrm{B}$까지의 기울기 $-\dfrac{2}{3}$, 오른쪽 끝 방향은 꼭짓점 $\mathrm{D}$까지의 기울기 $\dfrac{3}{2}$이다. 두 극단 사이(예: $m = 0$)에서는 직선이 사각형 아래를 수평에 가깝게 지나 사각형과 만나지 못한다.
+
+따라서 사각형과 만나는 조건은 $m \ge \dfrac{3}{2}$ 또는 $m \le -\dfrac{2}{3}$. 즉 $p = \dfrac{3}{2}$, $q = -\dfrac{2}{3}$이고
+\[ pq = \dfrac{3}{2} \cdot \left(-\dfrac{2}{3}\right) = -1. \]
+
+% ─────────────── #9 ───────────────
+\soltitle{9}{⑤ $2\pi$}{6}
+
+무게중심 $\mathrm{G}$의 좌표를 $(X,\ Y)$로 놓자. 세 점 $\mathrm{A}(4,\ -1)$, $\mathrm{B}(-1,\ -5)$, $\mathrm{P}(a,\ b)$의 무게중심이 $\mathrm{G}$이므로
+\[ X = \dfrac{4 + (-1) + a}{3},\quad Y = \dfrac{-1 + (-5) + b}{3}. \]
+$a$, $b$에 대하여 정리하면
+\[ a = 3X - 3,\quad b = 3Y + 6. \]
+
+점 $\mathrm{P}(a,\ b)$가 원 $x^{2} + y^{2} = 9$ 위를 움직이므로 $a^{2} + b^{2} = 9$이다. 대입하면
+\[ (3X - 3)^{2} + (3Y + 6)^{2} = 9. \]
+양변을 $9$로 나누면
+\[ (X - 1)^{2} + (Y + 2)^{2} = 1. \]
+
+따라서 $\mathrm{G}$는 중심 $(1,\ -2)$, 반지름 $1$인 원 위를 움직이고, 이 원의 둘레(도형의 길이)는
+\[ 2\pi \cdot 1 = 2\pi. \]
+
+% ─────────────── #10 ───────────────
+\soltitle{10}{③ $5$}{6}
+
+명제 $p \to q$가 참이려면 조건 $p$의 진리집합 $[-1,\ 3]$의 모든 원소가 부등식 $ax^{2} + 2ax - 4 \le 0$을 만족해야 한다. $f(x) = ax^{2} + 2ax - 4 = a(x+1)^{2} - a - 4$로 놓고 $a$의 부호로 나눈다.
+
+\solpart{i} $a = 0$: $f(x) = -4 \le 0$이 모든 $x$에서 성립. 조건 만족.
+
+\solpart{ii} $a > 0$: $f$는 아래로 열린 포물선. 꼭짓점 $x = -1$이 최소, 범위 $-1 \le x \le 3$ 위 최댓값은 $x = 3$에서 $f(3) = 9a + 6a - 4 = 15a - 4$.
+$15a - 4 \le 0$이려면 $a \le \dfrac{4}{15}$. 양의 정수 $a$는 없음.
+
+\solpart{iii} $a < 0$: $f$는 위로 열린 포물선. 꼭짓점 $x = -1$이 범위 $-1 \le x \le 3$에 속하므로 이 범위 위 최댓값은 꼭짓점에서 $f(-1) = -a - 4$.
+$-a - 4 \le 0$이려면 $a \ge -4$. 음의 정수 $a$는 $a = -1,\ -2,\ -3,\ -4$.
+
+세 경우를 합하면 정수 $a = -4,\ -3,\ -2,\ -1,\ 0$의 다섯 개.
+
+% ─────────────── #11 ───────────────
+\soltitle{11}{③ $31$}{6}
+
+$n(A \cap B)$의 최댓값과 최솟값을 구한다.
+
+\solpart{i} 최댓값: 교집합은 각 집합의 부분집합이므로 $n(A \cap B) \le n(A) = 27$이고 $n(A \cap B) \le n(B) = 22$. 두 부등식에서
+\[ n(A \cap B) \le 22. \]
+$B \subset A$일 때 등호가 성립한다.
+
+\solpart{ii} 최솟값: 합집합의 크기는 전체집합의 크기 이하이므로 $n(A \cup B) \le 40$. 원소의 개수에 대한 포함배제에서
+\[ n(A \cap B) = n(A) + n(B) - n(A \cup B). \]
+따라서 $n(A \cap B) \ge 27 + 22 - 40 = 9$.
+$A \cup B = U$일 때 등호가 성립한다.
+
+따라서 최댓값과 최솟값의 합은 $22 + 9 = 31$.
+
+% ─────────────── #12 ───────────────
+\soltitle{12}{④ $2\pi + 4$}{6}
+
+원 $x^{2} + y^{2} - 4y = 0$의 표준형은 $x^{2} + (y-2)^{2} = 4$이므로 중심 $(0, 2)$, 반지름 $2$. $x$축으로 $3$, $y$축으로 $1$만큼 평행이동하면 원 $C$는 중심 $\mathrm{C}(3, 3)$, 반지름 $2$이다. 중심 $\mathrm{C}$에서 직선 $x - y - 2 = 0$까지의 거리는
+\[ d = \dfrac{|3 - 3 - 2|}{\sqrt{2}} = \sqrt{2}. \]
+
+수선의 발을 $\mathrm{M}$, 현의 끝점을 $\mathrm{A}$, $\mathrm{B}$라 하면 직각삼각형 $\mathrm{CMA}$에서 $\overline{\mathrm{MA}} = \sqrt{r^{2} - d^{2}} = \sqrt{2}$이다. $\overline{\mathrm{CM}} = \overline{\mathrm{MA}} = \sqrt{2}$이므로 이등변 직각삼각형이고 $\angle\mathrm{ACM} = 45^\circ$, 따라서 중심각 $\angle\mathrm{ACB} = 90^\circ$.
+
+중심각 $90^\circ$ 부채꼴의 넓이는 $\dfrac{1}{4}\pi r^{2} = \pi$이고, 직각을 낀 두 변이 $r = 2$인 직각삼각형 $\mathrm{CAB}$의 넓이는 $\dfrac{1}{2}\cdot 2\cdot 2 = 2$. 따라서 작은 활꼴 넓이 $S_{\text{작}} = \pi - 2$, 큰 부분 $S_{\text{큰}} = 4\pi - (\pi - 2) = 3\pi + 2$이므로
+\[ S_{\text{큰}} - S_{\text{작}} = 2\pi + 4. \]
+
+% ─────────────── #13 ───────────────
+\soltitle{13}{$33$}{6}
+
+$n(A^{c} \cap B^{c} \cap C) = n(C - (A \cup B))$이다. 원소의 개수에 대해 다음이 성립한다.
+\[ n(A \cup B \cup C) = n(A \cup B) + n(C - (A \cup B)). \]
+
+즉
+\[ n(A^{c} \cap B^{c} \cap C) = n(A \cup B \cup C) - n(A \cup B). \]
+$n(A \cup B \cup C) = 40$이므로 $n(A^{c} \cap B^{c} \cap C) = 40 - n(A \cup B)$.
+
+이제 $n(A \cup B)$의 범위를 구한다.
+
+\solpart{1} 최솟값: $n(A \cup B) \ge \max\{n(A),\ n(B)\} = 17$. $A \subset B$일 때 등호가 성립.
+
+\solpart{2} 최댓값: $n(A \cup B) \le n(A) + n(B) = 30$이고 $n(A \cup B) \le n(A \cup B \cup C) = 40$이므로 $n(A \cup B) \le 30$. $A \cap B = \varnothing$일 때 등호가 성립.
+
+따라서 $17 \le n(A \cup B) \le 30$이고 $n(A^{c} \cap B^{c} \cap C) = 40 - n(A \cup B)$이므로
+\[ 10 \le 40 - n(A \cup B) \le 23. \]
+
+$M = 23$, $m = 10$이므로
+\[ M + m = 23 + 10 = 33. \]
+
+% ─────────────── #14 ───────────────
+\soltitle{14}{$\mathrm{B}\!\left(\tfrac{28}{25},\ \tfrac{96}{25}\right)$}{7}
+
+\begin{center}
+\begin{tikzpicture}[xscale=0.28, yscale=0.28, line width=0.4pt, font=\small]
+  \useasboundingbox (-8.3, -8.3) rectangle (8.3, 8.3);
+  % 축은 원(반지름 5)을 여유있게 감쌈 · 여유 60%
+  \fpaxesplain{-8.0}{8.0}{-8.0}{8.0}{$x$}{$y$}
+  % 두 원 (원본 반지름 유지 · 문제 조건 그대로)
+  \draw[fp-curve] (0,0) circle (4);
+  \draw[fp-curve] (0,0) circle (5);
+  % 두 접선 SA · SB (스크린 x[-7.6, 7.6]·y[-7.6, 7.6] 꽉 채움 · 화살표 여유 5%)
+  \draw[fp-dashed] (4, -7.6) -- (4, 7.6);
+  \draw[fp-dashed] (-7.6, {(-7.6)*(-7/24) + 25/6}) -- (7.6, {7.6*(-7/24) + 25/6});
+  % 반지름 OA · OB
+  \draw[fp-dashed] (0,0) -- (4,0);
+  \draw[fp-dashed] (0,0) -- (1.12, 3.84);
+  % 원 라벨 · C_1은 작은 원 (안쪽) 내부 · C_2는 큰 원 (바깥) 밖 · 모두 오른쪽 살짝
+  \fpfunclabel{-1.4}{1.3}{$C_1$}{south east}
+  \fpfunclabel{-5.5}{3.0}{$C_2$}{south west}
+  % 점 라벨
+  % A는 이전 위치에서 살짝만 오른쪽 위로
+  \node[fp-dot] at (4, 0) {};
+  \node[fp-name, anchor=north east] at (3.95, 0) {$\mathrm{A}$};
+  \node[fp-dot] at (4, 3) {};
+  \node[fp-name, anchor=south west] at (3.97, 2.97) {$\mathrm{S}$};
+  % B는 더 왼쪽으로
+  \node[fp-dot] at (1.12, 3.84) {};
+  \node[fp-name, anchor=north west] at (0.75, 3.75) {$\mathrm{B}$};
+  \fporigin
+\end{tikzpicture}
+\end{center}
+
+$\overline{\mathrm{OA}} = 4$가 원 $C_{1}$의 반지름과 같으므로 점 $\mathrm{A}(4,\ 0)$은 원 $C_{1}$ 위의 점이다. 따라서 $\mathrm{A}$에서 $C_{1}$에 그은 접선은 $\mathrm{A}$에서의 접선 그 자체이며, 반지름 $\overline{\mathrm{OA}}$($x$축)와 수직인 직선 $x = 4$이다.
+
+\solpart{1} 점 $\mathrm{S}$ 결정: 직선 $x = 4$와 원 $C_{2}:\ x^{2} + y^{2} = 25$의 교점은 $16 + y^{2} = 25$에서 $y = \pm 3$. 제 $1$ 사분면 조건에서 $\mathrm{S}(4,\ 3)$.
+
+\solpart{2} 점 $\mathrm{S}$에서 원 $C_{1}$에 그은 다른 접선의 접점 $\mathrm{B}(x, y)$ 결정: $\mathrm{B}$는 $C_{1}$ 위의 점이므로
+\[ x^{2} + y^{2} = 16. \tag{1} \]
+접점에서 반지름 $\overline{\mathrm{OB}}$와 접선 $\overline{\mathrm{SB}}$가 수직이다. 두 선분의 기울기의 곱이 $-1$인 조건을 좌표식으로 나타내면
+\[ (x - 4) \cdot x + (y - 3) \cdot y = 0. \]
+전개하여 (1)을 대입하면
+\[ x^{2} + y^{2} - 4x - 3y = 0,\quad 16 - 4x - 3y = 0. \]
+정리하면
+\[ 4x + 3y = 16. \tag{2} \]
+
+\solpart{3} (2)에서 $y = \dfrac{16 - 4x}{3}$. 이를 (1)에 대입.
+\[ x^{2} + \dfrac{(16 - 4x)^{2}}{9} = 16. \]
+양변에 $9$를 곱하고 전개하면
+\[ 9x^{2} + (16 - 4x)^{2} = 144 \]
+이므로
+\[ 25x^{2} - 128x + 112 = 0. \]
+
+인수분해하면 $(x - 4)(25x - 28) = 0$. $x = 4$는 점 $\mathrm{A}$에 해당. 다른 해는 $x = \dfrac{28}{25}$이고
+\[ y = \dfrac{16 - 4 \cdot \tfrac{28}{25}}{3} = \dfrac{96}{25}. \]
+
+검증: $x^{2} + y^{2} = \dfrac{784}{625} + \dfrac{9216}{625} = \dfrac{10000}{625} = 16$. 원 $C_{1}$ 위의 점 확인.
+
+따라서 $\mathrm{B} = \left(\dfrac{28}{25},\ \dfrac{96}{25}\right)$.
+
+\solalt
+원 위의 점에서의 접선 공식으로도 접근할 수 있다. 점 $\mathrm{A}(4, 0)$에서의 접선은 $4x + 0 \cdot y = 16$, 즉 $x = 4$이다. 접점 $\mathrm{B}(x_{1},\ y_{1})$에서의 접선은 $x_{1} x + y_{1} y = 16$이고, 이 접선이 $\mathrm{S}(4,\ 3)$을 지나므로 $4 x_{1} + 3 y_{1} = 16$을 얻는다. 이는 앞서 얻은 (2)와 같으며, 이후 과정은 동일하다.
+
+\criticalpoint{%
+① \cplabel{$\mathrm{A}$는 이미 $C_{1}$ 위의 점이다}: $\overline{\mathrm{OA}} = 4$가 반지름과 같으므로 $\mathrm{A}$에서의 접선은 $x = 4$이다. 원 밖 두 접선 상황과 혼동하지 않는다. \\
+② \cplabel{반지름과 접선은 수직이다}: $\overline{\mathrm{OB}} \perp \overline{\mathrm{SB}}$를 좌표식으로 나타내면 $\mathrm{B}$의 방정식을 얻는다. \\
+③ \cplabel{$x = 4$는 이미 아는 접점 $\mathrm{A}$이다}: 이차식의 두 근 중 $x = 4$는 $\mathrm{A}$이므로 다른 근이 요구하는 $\mathrm{B}$이다.%
+}
+
+% ─────────────── #15 ───────────────
+\soltitle{15}{$\tfrac{10}{3}$}{7}
+
+\begin{center}
+\begin{tikzpicture}[xscale=0.60, yscale=0.60, line width=0.4pt, font=\small]
+  \useasboundingbox (-4.2, -4.6) rectangle (4.2, 4.7);
+  % 축은 두 접선의 x-domain 완전 감쌈 · 여유 15~20%
+  \fpaxesplain{-4.0}{4.0}{-4.3}{4.4}{$x$}{$y$}
+  % 원 C
+  \draw[fp-curve] (0,0) circle (1.732);
+  \fpfunclabel{1.20}{1.10}{$C$}{south west}
+  % 두 평행 접선 l_1 · l_2 (draw x[-3.5, 3.5] · leg 끝 라벨 여유)
+  \draw[fp-curve] (-3.5, {(-3.5/1.732)+2}) -- (3.5, {(3.5/1.732)+2});
+  % 접선 ℓ_1 라벨 (오른쪽 위 leg 끝 · 접선 자연 연장 방향)
+  \fpfunclabel{3.5}{4.02}{$\ell_1$}{south west}
+  \draw[fp-curve] (-3.5, {(-3.5/1.732)-2}) -- (3.5, {(3.5/1.732)-2});
+  % 접선 ℓ_2 라벨 (왼쪽 아래 leg 끝 · 접선 자연 연장 방향)
+  \fpfunclabel{-3.5}{-4.02}{$\ell_2$}{north east}
+  % PQ 지름 (점선 보조선)
+  \draw[fp-dashed] (-0.866, 1.5) -- (0.866, -1.5);
+  % 60° 호 · x축 양의 방향과 PQ 우하 방향 사이 예각 (시계방향)
+  \draw[fp-axis-plain] (0.55, 0) arc (0:-60:0.55);
+  % 라벨은 호 바깥 (중앙 각도 -30° 방향 · 반경 0.95) · fill 없이 fp-name
+  \node[font=\footnotesize, text=fp-label] at (0.85, -0.55) {$60^{\circ}$};
+  % 접점 · 원점
+  \fppoint{-0.866}{1.5}{$\mathrm{P}$}{above left}
+  \fppoint{0.866}{-1.5}{$\mathrm{Q}$}{below right}
+  \fporigin
+\end{tikzpicture}
+\end{center}
+
+원 $C: x^{2} + y^{2} = r^{2}$의 중심 $\mathrm{O}(0, 0)$, 반지름 $r$.
+
+기울기가 $m$인 접선을 $y = mx + c$로 놓으면 원의 중심에서 이 직선까지의 거리가 반지름과 같아야 하므로
+\[ \dfrac{|c|}{\sqrt{m^{2} + 1}} = r. \]
+양변을 제곱하면 $c^{2} = r^{2}(m^{2} + 1)$.
+
+기울기가 $m$인 접선은 두 개이므로 $c$의 값은 $c = r\sqrt{m^{2}+1}$과 $c = -r\sqrt{m^{2}+1}$의 두 개이다. 이를 각각 $\ell_{1}$과 $\ell_{2}$의 $y$절편이라 하면 두 $y$절편의 차이는
+\[ 2r\sqrt{m^{2} + 1}. \]
+
+조건 (가)에서 $\ell_{1}$을 $y$축으로 $-4$만큼 평행이동한 직선이 $\ell_{2}$이므로 두 $y$절편의 차이는 $4$이다. 따라서 $2r\sqrt{m^{2}+1} = 4$이고 정리하면
+\[ r\sqrt{m^{2} + 1} = 2. \tag{1} \]
+
+조건 (나)에서 접점 $\mathrm{P}$, $\mathrm{Q}$를 잇는 직선 $\mathrm{PQ}$가 $x$축의 양의 방향과 이루는 예각이 $60^\circ$이다. 두 접선 $\ell_{1}$, $\ell_{2}$는 모두 기울기 $m$으로 서로 평행하므로 두 접점 $\mathrm{P}$, $\mathrm{Q}$는 원의 지름의 양 끝이고 이 지름은 두 접선에 수직이다. 즉 직선 $\mathrm{PQ}$의 기울기는 $-\dfrac{1}{m}$이다.
+
+$m > 0$이므로 $-\dfrac{1}{m} < 0$이다. 예각의 크기가 $60^\circ$이므로 기울기의 절댓값은 $\tan 60^\circ = \sqrt{3}$. 따라서 $\dfrac{1}{m} = \sqrt{3}$이고
+\[ m^{2} = \dfrac{1}{3}. \tag{2} \]
+
+(2)를 (1)에 대입하면 $r\sqrt{\dfrac{4}{3}} = 2$이므로 $r = \sqrt{3}$이고 $r^{2} = 3$.
+
+따라서
+\[ m^{2} + r^{2} = \dfrac{1}{3} + 3 = \dfrac{10}{3}. \]
+
+\solalt
+두 접점을 좌표로 직접 구할 수도 있다. 원 위의 점 $\mathrm{P}(x_{0},\ y_{0})$에서의 접선은 $x_{0} x + y_{0} y = r^{2}$이고 기울기는 $-\dfrac{x_{0}}{y_{0}} = m$이다. 이때 $\mathrm{Q}$는 $\mathrm{P}$의 원점 대칭인 $(-x_{0},\ -y_{0})$이므로 두 접선의 $y$절편 차이는 $\dfrac{r^{2}}{y_{0}} - \dfrac{-r^{2}}{y_{0}} = \dfrac{2 r^{2}}{|y_{0}|}$의 형태로도 표현되며, 조건 (가)로 $\dfrac{2r^{2}}{|y_{0}|} = 4$, 조건 (나)로 $-\dfrac{y_{0}}{x_{0}} = \tan 60^\circ$를 얻어 같은 결론에 이른다.
+
+\criticalpoint{%
+① \cplabel{$\mathrm{PQ}$는 접선과 수직이다}: $\mathrm{PQ}$는 원의 지름이고 두 접선에 수직이므로 기울기는 $-\dfrac{1}{m}$이다. 접선의 기울기 $m$과 혼동하지 않는다. \\
+② \cplabel{두 $y$절편 차는 $2r\sqrt{m^{2}+1}$이다}: 접선 거리 조건 $|c| = r\sqrt{m^{2}+1}$에서 얻는다. 그냥 $r = 4$로 쓰지 않는다. \\
+③ \cplabel{두 조건 모두 사용해야 한다}: 조건 (가)만으로는 $r$과 $m$이 결정되지 않는다. (나)가 $m$을, 다시 (가)가 $r$을 결정한다.%
+}
+
+% ─────────────── #16 ───────────────
+\soltitle{16}{$60$}{7}
+
+\begin{center}
+\begin{tikzpicture}[xscale=0.85, yscale=0.85, line width=0.4pt, font=\small]
+  \useasboundingbox (-2.7, -1.7) rectangle (2.7, 2.1);
+  % 두 원 A · B (얇은 실선 · 흑백 · 교집합 넓게 · 중심 거리 1.5 · 반지름 1.4)
+  \draw[fp-curve] (-0.75, 0) circle (1.4);
+  \draw[fp-curve] (0.75, 0) circle (1.4);
+  % 집합 이름 A · B (원 바로 위)
+  \node[fp-name, above=2pt] at (-0.75, 1.4) {$A$};
+  \node[fp-name, above=2pt] at (0.75, 1.4) {$B$};
+  % 원소 직접 표기 (집합 괄호 없음 · 원 안쪽 배치 · 테두리 이격)
+  % A만
+  \node[fp-name] at (-1.3, 0.45) {$1$};
+  \node[fp-name] at (-1.5, 0) {$2$};
+  \node[fp-name] at (-1.3, -0.45) {$12$};
+  % A ∩ B (교집합 세로 나열)
+  \node[fp-name] at (0, 0.45) {$5$};
+  \node[fp-name] at (0, -0.45) {$10$};
+  % B만
+  \node[fp-name] at (1.3, 0.45) {$25$};
+  \node[fp-name] at (1.5, 0) {$50$};
+  \node[fp-name] at (1.3, -0.45) {$60$};
+\end{tikzpicture}
+\end{center}
+
+$B = \{kx \mid x \in A\}$이고 $n(A) = n(B) = 5$이므로 $x \mapsto kx$는 $A$ 위에서 일대일 대응. 원소의 합에 대해
+\[ S(B) = k \cdot S(A) = 30 k. \]
+
+조건 (다)와 원소의 합에 대한 포함배제에서
+\[ S(A) + S(B) - S(A \cap B) = S(A \cup B). \]
+$S(A) = 30$, $S(B) = 30 k$, $S(A \cup B) = 165$를 대입하면
+\[ 30 + 30 k - S(A \cap B) = 165. \]
+따라서
+\[ S(A \cap B) = 30 k - 135. \tag{1} \]
+
+조건 (나) $10 \in A \cap B$이고 $n(A \cap B) = 2$이므로 $A \cap B = \{10,\ t\}$ ($t \ne 10$인 자연수). 그러면 $10 + t = 30 k - 135$이므로
+\[ t = 30 k - 145. \tag{2} \]
+
+$t \ge 1$이려면 $30 k \ge 146$이므로 $k \ge \dfrac{73}{15}$. 즉 $k \ge 5$인 자연수.
+
+한편 $10 \in B$이므로 $10 = k \cdot w$ ($w \in A$)의 형태이고 $w = \dfrac{10}{k}$가 자연수여야 한다. 즉 $k$는 $10$의 약수. $k \ge 5$와 결합하면 $k = 5$ 또는 $k = 10$.
+
+\solpart{i} $k = 10$: (2)에서 $t = 155$. $t \in A$이고 $A$의 원소 다섯 개의 합이 $30$이므로 원소 $155$를 포함할 수 없다. 배제.
+
+\solpart{ii} $k = 5$: (2)에서 $t = 5$. $A \cap B = \{5,\ 10\}$.
+
+$10 \in B$이므로 $\dfrac{10}{5} = 2 \in A$. 마찬가지로 $5 \in B$이므로 $\dfrac{5}{5} = 1 \in A$. 이미 확정된 $A$의 원소는 $\{1,\ 2,\ 5,\ 10\}$이고 합 $18$. $A$는 원소 다섯 개·합 $30$이므로 남은 원소 $= 30 - 18 = 12$. 즉
+\[ A = \{1,\ 2,\ 5,\ 10,\ 12\}. \]
+따라서 $B = 5 \cdot A = \{5,\ 10,\ 25,\ 50,\ 60\}$.
+
+검증: $A \cap B = \{5,\ 10\}$이고 $n(A \cap B) = 2$. $S(A) = 30$, $S(B) = 150 = 5 \cdot 30$, $S(A \cup B) = 30 + 150 - 15 = 165$. 모든 조건 성립.
+
+집합 $B$의 원소 중 가장 큰 값은
+\[ 60. \]
+
+\solalt
+함수적 관계 $B = k A$를 역으로 쓰면 $A = \dfrac{1}{k} B$의 관점에서도 볼 수 있다. $B$의 원소 다섯 개를 $k$로 나눈 값이 $A$의 원소이므로 $B$의 최솟값을 $b_{1}$이라 하면 $\dfrac{b_{1}}{k} \in A$이어야 한다. 위 풀이의 $k = 5$에서 $B = \{5,\ 10,\ 25,\ 50,\ 60\}$의 각 원소를 $5$로 나누면 $\{1,\ 2,\ 5,\ 10,\ 12\} = A$가 되어 자기 자신의 일대일 대응이 확인된다.
+
+\criticalpoint{%
+① \cplabel{$k$는 $10$의 약수이다}: $10 \in B$에서 $\dfrac{10}{k}$가 자연수이므로 $k$는 $10$의 약수이다. \\
+② \cplabel{$t$의 하한이 $k$의 하한을 정한다}: $t = 30 k - 145 \ge 1$에서 $k \ge 5$이므로 $10$의 약수 중 $k$는 $5$ 또는 $10$이다. \\
+③ \cplabel{$k = 10$은 합 조건과 모순된다}: $k = 10$이면 $t = 155$인데 $A$의 원소의 합이 $30$이므로 배제된다.%
+}
+
+% ─────────────── #17 ───────────────
+\soltitle{17}{$54$}{8}
+
+\begin{center}
+\begin{tikzpicture}[xscale=0.19, yscale=0.19, line width=0.4pt, font=\small]
+  \useasboundingbox (-10.8, -13.8) rectangle (12.8, 11.8);
+  % 축은 두 원(반지름 √50) 통합 x[-9,11]·y[-12,10]을 완전 감쌈 · 여유 15%
+  \fpaxesplain{-10.5}{12.5}{-13.5}{11.5}{$x$}{$y$}
+  % 두 원 (얇은 파선 · 자취)
+  \draw[fp-curve, dash pattern=on 1.5pt off 1.5pt] (-2, 3) circle (7.07);
+  \draw[fp-curve, dash pattern=on 1.5pt off 1.5pt] (4, -5) circle (7.07);
+  % 선분 AB (실선)
+  \draw[fp-curve] (-3, -4) -- (5, 2);
+  % 수직이등분선 y = -(4/3)x + 1/3 · 축 rectangle 경계까지 (y=±11 clipping · 화살표 여유)
+  \draw[fp-dashed] (-8.0, 11.0) -- (10.0, -13.0);
+  % 점 (표준 매크로)
+  \fppoint{-3}{-4}{$\mathrm{A}$}{below left}
+  \fppoint{5}{2}{$\mathrm{B}$}{above right}
+  \fppoint{1}{-1}{$\mathrm{M}$}{right}
+  % C₁·C₂ 라벨: C_1 위쪽 방향 (y 증가) · C_2 원 중심 높이 (y=-5) 오른쪽
+  \fppoint{-2}{3}{$\mathrm{C}_1$}{above}
+  \fppoint{4}{-5}{$\mathrm{C}_2$}{right}
+  \fporigin
+\end{tikzpicture}
+\end{center}
+
+세 점 $\mathrm{A}$, $\mathrm{B}$, $\mathrm{P}$를 지나는 원의 중심을 $\mathrm{C}$라 하고 반지름 $r = \overline{\mathrm{CA}} = \overline{\mathrm{CB}} = \overline{\mathrm{CP}}$.
+
+원주각과 중심각의 관계에서 $\angle \mathrm{APB} = 45^{\circ}$일 때 호 $\mathrm{AB}$에 대한 중심각은
+\[ \angle \mathrm{ACB} = 2 \cdot 45^{\circ} = 90^{\circ}. \]
+
+즉 $\overline{\mathrm{CA}} \perp \overline{\mathrm{CB}}$이고 $\overline{\mathrm{CA}} = \overline{\mathrm{CB}} = r$이므로 직각이등변삼각형 $\mathrm{CAB}$에서
+\[ \overline{\mathrm{AB}}^{\,2} = \overline{\mathrm{CA}}^{\,2} + \overline{\mathrm{CB}}^{\,2} = 2 r^{2}. \]
+
+두 점 $\mathrm{A}(-3,\ -4)$, $\mathrm{B}(5,\ 2)$ 사이의 거리는
+\[ \overline{\mathrm{AB}}^{\,2} = 8^{2} + 6^{2} = 100. \]
+따라서 $2 r^{2} = 100$이므로 $r^{2} = 50$.
+
+중심 $\mathrm{C}$는 다음 두 조건을 만족한다.
+\begin{itemize}[leftmargin=1.2em, itemsep=1pt]
+\item $\overline{\mathrm{AB}}$의 수직이등분선 위에 있다.
+\item 직각이등변삼각형에서 빗변의 중점이 외심이므로 $\overline{\mathrm{MC}} = \dfrac{1}{2}\overline{\mathrm{AB}} = 5$. 여기서 $\mathrm{M}$은 $\overline{\mathrm{AB}}$의 중점 $\mathrm{M}(1,\ -1)$.
+\end{itemize}
+
+$\overline{\mathrm{AB}}$의 방향 성분은 $(8,\ 6)$이고 이에 수직인 성분비는 $(-3,\ 4)$이다(길이 $5$). $\mathrm{M}(1,\ -1)$을 지나고 성분비 $(-3,\ 4)$인 직선 위의 점 $(x,\ y) = (1,\ -1) + t(-3,\ 4)$에서 $\overline{\mathrm{MC}} = |t| \cdot 5 = 5$이므로 $t = \pm 1$.
+\[ \mathrm{C} = (1,\ -1) \pm (-3,\ 4). \]
+
+\solpart{i} $\mathrm{C}_{1} = (1,\ -1) + (-3,\ 4) = (-2,\ 3)$. 이때
+\[ \overline{\mathrm{OC}_{1}}^{\,2} = (-2)^{2} + 3^{2} = 13. \]
+
+\solpart{ii} $\mathrm{C}_{2} = (1,\ -1) - (-3,\ 4) = (4,\ -5)$. 이때
+\[ \overline{\mathrm{OC}_{2}}^{\,2} = 4^{2} + (-5)^{2} = 41. \]
+
+가능한 $k$의 값은 $13$과 $41$이며, 두 값의 합은
+\[ 13 + 41 = 54. \]
+
+\solalt
+세 점을 지나는 원의 방정식으로도 접근할 수 있다. 원의 방정식을 $x^{2} + y^{2} + Dx + Ey + F = 0$으로 놓으면 중심은 $\left(-\dfrac{D}{2},\ -\dfrac{E}{2}\right)$, 반지름 제곱은 $\dfrac{D^{2} + E^{2}}{4} - F$이다. $\mathrm{A}(-3, -4)$, $\mathrm{B}(5, 2)$를 대입하면
+\[ 25 - 3D - 4E + F = 0,\quad 29 + 5D + 2E + F = 0. \]
+빼면 $8D + 6E + 4 = 0$, 즉 $4D + 3E = -2$이고 이는 $\mathrm{C} = \left(-\dfrac{D}{2},\ -\dfrac{E}{2}\right)$가 수직이등분선 $4x + 3y = 1$ 위에 있음을 의미한다. 반지름 제곱 $50$ 조건과 함께 정리하면 $\mathrm{C}_{1}(-2,\ 3)$, $\mathrm{C}_{2}(4,\ -5)$의 두 해를 얻는다.
+
+\criticalpoint{%
+① \cplabel{원주각 정리로 중심각 $90^\circ$이다}: 원주각 $45^\circ$이면 중심각은 $90^\circ$이므로 $\mathrm{CAB}$는 직각이등변삼각형이고 $\overline{\mathrm{AB}}^{\,2} = 2 r^{2}$가 성립한다. \\
+② \cplabel{빗변 중점이 외심이다}: 직각이등변삼각형의 성질로 $\overline{\mathrm{MC}} = \dfrac{1}{2}\overline{\mathrm{AB}}$가 얻어져 중심 $\mathrm{C}$의 위치가 결정된다. \\
+③ \cplabel{두 중심을 모두 사용해야 한다}: 수직이등분선 위 $\mathrm{M}$의 양쪽에 각각 중심이 존재하므로 두 값의 합을 구해야 한다.%
+}
+
+% 좌분할 우선 채움 강제 (CP 박스 포함 · 마지막 컬럼브레이크로 좌측 완전 채움)
+\columnbreak
+\null
+\end{multicols}
+
+\end{document}

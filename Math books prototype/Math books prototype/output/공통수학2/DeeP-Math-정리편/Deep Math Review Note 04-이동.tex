@@ -1,0 +1,659 @@
+% DeeP Math 정리편 · CM2-GM-04 도형의 이동
+% Phase 2 (2026-07-20 세션 55) : 청사진 v1.0 반영 · 정리편 CM2-GM-04 본편
+% 시리즈: jeongribyeon · DeeP Math 정리편 · 상위권
+% 구조: 개념 3 + 대표 6 + 확인 12 + Level1 12 + Level2 12 + Level3 3 + 실전 3 = 총 18p / 48 슬롯
+% 원본 은행: 개념원리·RPM·고쟁이 STEP1·STEP2·STEP3·전국연합 (모든 슬롯 source 명시)
+% 스타일: templates/deep-math.sty v5.1
+% 세션 55 신정책 반영:
+%   - 원문에 그림 있을 때만 조판 (R-1 원문 그림 없음 확정 · Phase 2 PDF 재확인)
+%   - R-2·R-3 원문 그림 있음 → TikZ 재현
+%   - 실전 배지 순수 형식 : \dmkichul{YYYY학년도 M월 고1 학평 N번}
+%   - Level3 3문 한 페이지 통합 (모두 짧고 그림 없음)
+%   - 축 두께 0.8pt · 정점 2.2pt · 여백 ≥ 20%
+\documentclass[10pt]{article}
+\usepackage{dm-editorial}
+\renewcommand{\dmchapunit}{I. 도형의 방정식}
+
+\begin{document}
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 1 · 챕터 배너 + 개념 C1 (평행이동)
+% ══════════════════════════════════════════════════════════════
+\dmchapter{04}{도형의 이동}
+\dmbracket{12}
+
+\begin{dmconcept}{1}{평행이동}
+% 세션 85 (마스터 지시) : dmsub 3·4 응용 침투 삭제 → auto-tune 재조정
+\setlength{\parskip}{2.0mm plus 2.1mm minus 0mm}\linespread{1.30}\selectfont%
+
+\dmsub{1}{점의 평행이동}
+
+좌표평면 위의 점 $\mathrm{P}(x,\, y)$\ 를 $x$축의 방향으로 $a$만큼, $y$축의 방향으로 $b$만큼 옮긴 점을 $\mathrm{P}'$\ 이라 하면
+\begin{equation*}
+  \mathrm{P}'(x + a,\, y + b)
+\end{equation*}
+이다. 이와 같은 이동을 $x$축의 방향으로 $a$만큼, $y$축의 방향으로 $b$만큼의 \dmstrong{평행이동}이라 한다.
+
+\begin{dmexplain}
+$x$축의 방향으로 $a$만큼 옮긴다는 것은 $a > 0$이면 오른쪽, $a < 0$이면 왼쪽으로 $|a|$만큼 옮긴다는 뜻이다. $y$축의 방향으로 $b$만큼 옮기는 것도 부호에 따라 위·아래가 갈린다. 두 방향의 이동은 서로 순서를 바꾸어도 결과가 같으므로, $x$좌표와 $y$좌표에 각각 $a$,\ $b$\ 를 더하기만 하면 된다.
+\end{dmexplain}
+
+\begin{dmexample}
+점 $(2,\, -1)$\ 을 $x$축의 방향으로 $3$만큼, $y$축의 방향으로 $4$만큼 평행이동한 점의 좌표는 $(2 + 3,\, -1 + 4) = (5,\, 3)$이다.
+\end{dmexample}
+
+\begin{dmnote}
+평행이동에서는 이동 전 점과 이동 후 점을 잇는 벡터가 항상 $(a,\, b)$\ 로 같다. 따라서 어떤 두 점의 이동 전후 좌표를 알면 이동량 $a$,\ $b$\ 가 유일하게 결정된다.
+\end{dmnote}
+
+\dmsub{2}{도형의 평행이동}
+
+방정식 $f(x,\, y) = 0$이 나타내는 도형을 $x$축의 방향으로 $a$만큼, $y$축의 방향으로 $b$만큼 평행이동한 도형의 방정식은
+\begin{equation*}
+  f(x - a,\, y - b) = 0
+\end{equation*}
+이다. 즉 원래 방정식의 $x$ 대신 $x - a$\ 를, $y$ 대신 $y - b$\ 를 대입하여 얻는다.
+
+\begin{dmexplain}
+원래 도형 위의 점 $\mathrm{P}(x,\, y)$\ 를 옮긴 점을 $\mathrm{P}'(x',\, y')$\ 이라 하면 $x' = x + a$,\ $y' = y + b$이므로 $x = x' - a$,\ $y = y' - b$이다. $\mathrm{P}$\ 가 원 도형 위에 있으므로 $f(x,\, y) = 0$, 즉 $f(x' - a,\, y' - b) = 0$\ 이 성립한다. 이는 $\mathrm{P}'$\ 이 방정식 $f(x - a,\, y - b) = 0$이 나타내는 도형 위에 있다는 뜻이다.
+\end{dmexplain}
+
+\begin{dmnote}
+점을 이동할 때는 좌표에 $+a$,\ $+b$\ 를 더하지만 도형의 방정식을 이동할 때는 반대로 $-a$,\ $-b$\ 를 대입한다. 이 방향의 차이는 위 유도에서 원 도형의 방정식이 이동 전 좌표 $(x,\, y) = (x' - a,\, y' - b)$\ 로 표현되는 데에서 나온다.
+\end{dmnote}
+
+\end{dmconcept}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 2 · 대표예제 E1 (개념원리-CM2-GM-이동-예제-02) + 확인 CHK1·CHK2
+% ══════════════════════════════════════════════════════════════
+\dmex{1}{두 점의 대응으로 결정되는 평행이동과 직선의 이동}
+
+\begin{dmproblem}
+점 $(-3,\, 4)$\ 를 점 $(-1,\, 1)$\ 로 옮기는 평행이동에 의해 직선 $3x - y + 2 = 0$이 직선 $ax - y + b = 0$으로 옮겨질 때, 상수 $a$,\ $b$\ 에 대하여 $a + b$의 값을 구하시오.
+\end{dmproblem}
+
+\begin{dmapproach}
+두 점 $(-3,\, 4)$\ 와 $(-1,\, 1)$의 대응을 이용하여 이동의 크기 $(p,\, q)$를 구한 다음, 직선의 방정식에서 $x$ 대신 $x - p$,\ $y$ 대신 $y - q$\ 를 대입하여 이동한 직선을 얻는다.
+\end{dmapproach}
+
+\begin{dmsolution}
+$(x,\, y) \to (x + p,\, y + q)$\ 라 하면 $(-3 + p,\, 4 + q) = (-1,\, 1)$에서
+\begin{equation*}
+  p = 2,\qquad q = -3.
+\end{equation*}
+$3x - y + 2 = 0$에 $x \to x - 2$,\ $y \to y + 3$을 대입하면
+\begin{equation*}
+  3(x - 2) - (y + 3) + 2 = 0 \quad\Longrightarrow\quad 3x - y - 7 = 0.
+\end{equation*}
+$a = 3$,\ $b = -7$이므로 $\therefore\ a + b = -4$.
+\dmanswer{$-4$}
+\end{dmsolution}
+
+\dmchecktitle
+
+\dmcheck{1}{%
+점 $(2,\, -4)$\ 를 점 $(1,\, -3)$으로 옮기는 평행이동에 의해 점 $(-3,\, 6)$이 옮겨지는 점의 좌표를 구하시오.%
+}
+
+\dmcheck{2}{%
+평행이동 $(x,\, y) \to (x - 1,\, y + 4)$에 의해 직선 $y = 2x - 1$이 옮겨지는 직선의 방정식이 $y = ax + b$일 때, 상수 $a$,\ $b$\ 에 대하여 $ab$의 값을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 3 · 대표예제 E2 (개념원리-CM2-GM-이동-예제-03) + 확인 CHK3·CHK4
+% ══════════════════════════════════════════════════════════════
+\dmex{2}{원의 평행이동과 계수 결정}
+
+\begin{dmproblem}
+평행이동 $(x,\, y) \to (x + 3,\, y - 4)$에 의해 원 $x^2 + y^2 + 4x - 2y + a = 0$이 원 $(x - 1)^2 + (y + b)^2 = 3$으로 옮겨질 때, 상수 $a$,\ $b$\ 의 값을 각각 구하시오.
+\end{dmproblem}
+
+\begin{dmapproach}
+주어진 원의 방정식을 표준형으로 정리하여 중심과 반지름을 구하고, 평행이동에 의해 중심이 어떻게 옮겨지는지 대응시킨다. 반지름의 길이는 평행이동으로 변하지 않는다.
+\end{dmapproach}
+
+\begin{dmsolution}
+$x^2 + y^2 + 4x - 2y + a = 0$을 표준형으로 정리하면
+\begin{equation*}
+  (x + 2)^2 + (y - 1)^2 = 5 - a\quad(\because\ \text{중심 } (-2,\, 1),\ r^2 = 5 - a).
+\end{equation*}
+중심을 $(3,\, -4)$만큼 이동하면 $(1,\, -3)$이고 $(x - 1)^2 + (y + b)^2 = 3$과 대조하여
+\begin{equation*}
+  -b = -3,\qquad 5 - a = 3.
+\end{equation*}
+$\therefore\ a = 2,\ b = 3$.
+\dmanswer{$a = 2$,\ \ $b = 3$}
+\end{dmsolution}
+
+\dmchecktitle
+
+\dmcheck{3}{%
+원 $x^2 + y^2 + 6x + 2y + 8 = 0$을 $x$축의 방향으로 $a$만큼, $y$축의 방향으로 $b$만큼 평행이동한 원이 원 $x^2 + y^2 - 4x - 4y + 6 = 0$과 일치할 때, 상수 $a$,\ $b$\ 에 대하여 $ab$의 값을 구하시오.%
+}
+
+\dmcheck{4}{%
+직선 $4x + 3y - 5 = 0$을 $y$축의 방향으로 $k$만큼 평행이동한 직선이 원 $(x - 1)^2 + y^2 = 4$\ 에 접할 때, 양수 $k$의 값을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 4 · 개념 C2 (원점·좌표축에 대한 대칭이동)
+% ══════════════════════════════════════════════════════════════
+\dmconcepthead
+\dmbracket{13}
+
+\begin{dmconcept}{2}{원점$\cdot$좌표축$\cdot$직선 $y = x$에 대한 대칭이동}
+% 세션 86 (마스터 지시) : 좀 더 상세한 기술 · 유도·직관·성질 확대
+\setlength{\parskip}{1.2mm plus 1.3mm minus 0mm}\linespread{1.19}\selectfont%
+
+\dmsub{1}{점의 대칭이동}
+
+좌표평면 위의 점 $\mathrm{P}(x,\, y)$\ 를
+\begin{itemize}[leftmargin=8mm, itemsep=0.5mm, topsep=1mm]
+  \item $x$축에 대하여 대칭이동한 점: $(x,\, -y)$
+  \item $y$축에 대하여 대칭이동한 점: $(-x,\, y)$
+  \item 원점에 대하여 대칭이동한 점: $(-x,\, -y)$
+  \item 직선 $y = x$\ 에 대하여 대칭이동한 점: $(y,\, x)$
+  \item 직선 $y = -x$\ 에 대하여 대칭이동한 점: $(-y,\, -x)$
+\end{itemize}
+이다. 어떤 대칭이든 두 번 반복하면 원래 점으로 돌아온다.
+
+\begin{dmexplain}
+$x$축·$y$축 대칭은 대응하는 축 위의 좌표를 그대로 두고 나머지 좌표의 부호만 뒤집는 것이다. 원점 대칭은 두 축에 대한 대칭을 잇달아 적용한 결과와 같으므로 두 좌표가 모두 부호가 바뀐다. 직선 $y = x$\ 대칭은 두 좌표를 맞바꾸는 것이고, $y = -x$\ 대칭은 맞바꾸는 동시에 부호까지 뒤집는 것이다.
+\end{dmexplain}
+
+\dmsub{2}{도형의 대칭이동}
+
+방정식 $f(x,\, y) = 0$이 나타내는 도형을 각각의 방식으로 대칭이동한 도형의 방정식은
+\begin{itemize}[leftmargin=8mm, itemsep=0.5mm, topsep=1mm]
+  \item $x$축 대칭: $f(x,\, -y) = 0$
+  \item $y$축 대칭: $f(-x,\, y) = 0$
+  \item 원점 대칭: $f(-x,\, -y) = 0$
+  \item 직선 $y = x$\ 대칭: $f(y,\, x) = 0$
+  \item 직선 $y = -x$\ 대칭: $f(-y,\, -x) = 0$
+\end{itemize}
+이다. 점의 대칭이동에서 얻은 대응 좌표를 처음 주어진 방정식의 $x$,\ $y$ 자리에 대입하여 얻는다.
+
+\begin{dmexplain}
+원래 도형 위 점 $\mathrm{P}(x,\, y)$\ 의 $x$축 대칭점을 $\mathrm{P}'(x',\, y') = (x,\, -y)$라 하면 $x = x'$,\ $y = -y'$이다. $\mathrm{P}$\ 가 원래 도형 위에 있으므로 $f(x,\, y) = 0$, 즉 $f(x',\, -y') = 0$이 성립한다. 이는 대칭이동된 도형이 $f(x,\, -y) = 0$임을 뜻한다. 다른 대칭에도 같은 방식으로 대응 좌표를 대입하면 나머지 방정식이 얻어진다.
+\end{dmexplain}
+
+\begin{dmnote}
+어떤 도형을 축이나 원점 또는 직선 $y = x$\ 에 대해 대칭이동한 결과가 원래 도형과 일치하면 그 도형은 대응 대상에 대해 \dmstrong{대칭}이라 한다. 예를 들어 $y = x^2$은 $y$축에 대해 대칭이므로 $x \to -x$로 바꾸어도 방정식이 변하지 않는다.
+\end{dmnote}
+
+\end{dmconcept}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 5 · 대표예제 E3 (개념원리-CM2-GM-이동-예제-04) + 확인 CHK5·CHK6
+% ══════════════════════════════════════════════════════════════
+\dmex{3}{두 대칭점을 지나는 직선의 방정식}
+
+\begin{dmproblem}
+점 $(4,\, 6)$\ 을 $x$축에 대하여 대칭이동한 점을 $\mathrm{P}$,\ $y$축에 대하여 대칭이동한 점을 $\mathrm{Q}$\ 라 할 때, 두 점 $\mathrm{P}$,\ $\mathrm{Q}$\ 를 지나는 직선의 방정식을 구하시오.
+\end{dmproblem}
+
+\begin{dmapproach}
+$x$축과 $y$축에 대한 대칭의 정의를 이용하여 두 점 $\mathrm{P}$,\ $\mathrm{Q}$\ 의 좌표를 구하고, 두 점을 지나는 직선의 방정식을 세운다.
+\end{dmapproach}
+
+\begin{dmsolution}
+$x$축 대칭은 $y$부호만, $y$축 대칭은 $x$부호만 바꾸므로
+\begin{equation*}
+  \mathrm{P}(4,\, -6),\qquad \mathrm{Q}(-4,\, 6).
+\end{equation*}
+두 점을 지나는 직선의 기울기는
+\[ \dfrac{6 - (-6)}{-4 - 4} = -\dfrac{3}{2} \]
+이고 $\mathrm{P}(4,\, -6)$을 지나므로
+\begin{equation*}
+  y + 6 = -\tfrac{3}{2}(x - 4) \quad\Longrightarrow\quad y = -\tfrac{3}{2}x.
+\end{equation*}
+\dmanswer{$y = -\dfrac{3}{2}x$}
+\end{dmsolution}
+
+\dmchecktitle
+
+\dmcheck{5}{%
+점 $(k,\, 3)$\ 을 $y$축에 대하여 대칭이동한 점을 $\mathrm{P}$, 직선 $y = x$\ 에 대하여 대칭이동한 점을 $\mathrm{Q}$\ 라 할 때, $\overline{\mathrm{PQ}} = 2\sqrt{5}$\ 인 양수 $k$의 값을 구하시오.%
+}
+
+\dmcheck{6}{%
+직선 $y = -3x + 6$을 $y$축에 대하여 대칭이동한 직선에 수직이고 점 $(-3,\, 4)$\ 를 지나는 직선의 방정식을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 6 · 대표예제 E4 (개념원리-CM2-GM-이동-예제-06) + 확인 CHK7·CHK8
+% ══════════════════════════════════════════════════════════════
+\dmex{4}{평행이동과 대칭이동의 결합}
+
+\begin{dmproblem}
+직선 $y = 3x + 2$\ 를 $x$축의 방향으로 $a$만큼 평행이동한 후 원점에 대하여 대칭이동한 직선이 점 $(2,\, 1)$을 지날 때, 상수 $a$의 값을 구하시오.
+\end{dmproblem}
+
+\begin{dmapproach}
+$x$축의 방향으로 $a$만큼의 평행이동은 주어진 방정식에서 $x$ 대신 $x - a$\ 를 대입하고, 원점에 대한 대칭이동은 그 방정식의 $x$,\ $y$\ 를 각각 $-x$,\ $-y$\ 로 바꾸는 것이다. 순서에 유의하여 이동을 적용한 뒤 점 $(2,\, 1)$을 대입한다.
+\end{dmapproach}
+
+\begin{dmsolution}
+$y = 3x + 2$에 $x \to x - a$\ 를 대입하면
+\begin{equation*}
+  y = 3(x - a) + 2.
+\end{equation*}
+다시 원점 대칭으로 $x \to -x$,\ $y \to -y$\ 를 대입하면
+\begin{equation*}
+  -y = 3(-x - a) + 2 \quad\Longrightarrow\quad y = 3x + 3a - 2.
+\end{equation*}
+$(2,\, 1)$을 대입하면 $1 = 6 + 3a - 2$에서 $3a = -3$.\ $\therefore\ a = -1$.
+\dmanswer{$-1$}
+\end{dmsolution}
+
+\dmchecktitle
+
+\dmcheck{7}{%
+직선 $2x - 3y + 1 = 0$을 $x$축에 대하여 대칭이동한 직선이 원 $(x - 4)^2 + (y + k)^2 = 3$의 넓이를 이등분할 때, 상수 $k$의 값을 구하시오.%
+}
+
+\dmcheck{8}{%
+원 $x^2 + y^2 - 4x = 0$을 $y$축에 대하여 대칭이동한 후 $y$축의 방향으로 $1$만큼 평행이동한 원이 직선 $y = mx - 2$\ 에 접할 때, 상수 $m$의 값을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 7 · 개념 C3 (직선 y=x·y=-x 대칭 · 점·직선 대칭 · 최단거리)
+% ══════════════════════════════════════════════════════════════
+\dmconcepthead
+\dmbracket{14}
+
+\begin{dmconcept}{3}{점과 직선에 대한 대칭이동}
+% 세션 85 (마스터 지시) : 개념원리 §03 구조 정합화 · y=x·y=-x는 c2로 이관
+\setlength{\parskip}{1.4mm plus 1.5mm minus 0mm}\linespread{1.21}\selectfont%
+
+\dmsub{1}{점 $(p,\, q)$에 대한 대칭이동}
+
+점 $\mathrm{P}(x,\, y)$\ 를 점 $(p,\, q)$에 대해 대칭이동한 점을 $\mathrm{P}'(x',\, y')$이라 하면 점 $(p,\, q)$가 선분 $\mathrm{P}\mathrm{P}'$의 중점이므로
+\begin{equation*}
+  x' = 2p - x, \quad y' = 2q - y
+\end{equation*}
+이다. 즉 $\mathrm{P}'(2p - x,\, 2q - y)$이다. 대응하여 방정식 $f(x,\, y) = 0$이 나타내는 도형을 점 $(p,\, q)$에 대해 대칭이동한 도형의 방정식은 $f(2p - x,\, 2q - y) = 0$이다.
+
+\begin{dmexplain}
+중점 조건 $\dfrac{x + x'}{2} = p$,\ $\dfrac{y + y'}{2} = q$를 $x'$,\ $y'$에 대해 풀면 $x' = 2p - x$,\ $y' = 2q - y$가 얻어진다. 특별히 $(p,\, q) = (0,\, 0)$이면 원점에 대한 대칭이 되어 결과 $(-x,\, -y)$와 정확히 일치한다.
+\end{dmexplain}
+
+\begin{dmexample}
+점 $(3,\, -2)$\ 를 점 $(1,\, 2)$에 대하여 대칭이동한 점의 좌표는 $(2 \cdot 1 - 3,\, 2 \cdot 2 - (-2)) = (-1,\, 6)$이다.
+\end{dmexample}
+
+\dmsub{2}{직선 $\ell$에 대한 대칭이동}
+
+점 $\mathrm{P}(x,\, y)$\ 를 직선 $\ell$에 대하여 대칭이동한 점을 $\mathrm{P}'(x',\, y')$이라 하면 다음 두 조건이 성립한다.
+\begin{itemize}[leftmargin=8mm, itemsep=0.5mm, topsep=1mm]
+  \item 선분 $\mathrm{P}\mathrm{P}'$의 중점이 직선 $\ell$ 위에 있다.
+  \item 선분 $\mathrm{P}\mathrm{P}'$이 직선 $\ell$과 수직이다.
+\end{itemize}
+이 두 조건을 미지수 $x'$,\ $y'$에 대한 연립방정식으로 풀어 $\mathrm{P}'$의 좌표를 구한다.
+
+\begin{dmexplain}
+직선 $\ell$의 기울기가 $m$이면 $\overline{\mathrm{P}\mathrm{P}'}$의 기울기는 수직 조건에서 $-\dfrac{1}{m}$이다. 또한 $\mathrm{P}\mathrm{P}'$의 중점 좌표를 $\ell$의 방정식에 대입한 식이 성립한다. 두 식은 $x'$,\ $y'$에 대한 연립일차방정식이 되어 $\mathrm{P}'$의 좌표가 유일하게 결정된다. 특수 직선 $y = x$나 $y = -x$의 경우에는 연립을 거치지 않고 두 좌표의 맞바꿈으로 바로 얻을 수 있다.
+\end{dmexplain}
+
+\begin{dmexample}
+점 $(1,\, 4)$\ 를 직선 $y = x + 1$에 대해 대칭이동한 점을 $\mathrm{P}'(x',\, y')$\ 이라 하면 중점 조건 $\dfrac{4 + y'}{2} = \dfrac{1 + x'}{2} + 1$과 수직 조건 $\dfrac{y' - 4}{x' - 1} = -1$을 연립해 $\mathrm{P}'(3,\, 2)$를 얻는다.
+\end{dmexample}
+
+\begin{dmnote}
+점에 대한 대칭이동은 대응점의 중점이 그 점이 되고, 직선에 대한 대칭이동은 대응점을 잇는 선분이 그 직선을 수직이등분한다. 특별히 대상이 원점 또는 좌표축·직선 $y = \pm x$일 때는 앞선 개념에서 배운 결과가 그대로 얻어져 이 두 공식은 특수 케이스를 자연스럽게 포함한다.
+\end{dmnote}
+
+\end{dmconcept}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 8 · 대표예제 E5 (개념원리-CM2-GM-이동-예제-07) + 확인 CHK9·CHK10
+% ══════════════════════════════════════════════════════════════
+\dmex{5}{대칭이동을 이용한 최단 거리}
+
+\begin{dmproblem}
+두 점 $\mathrm{A}(0,\, 2)$,\ $\mathrm{B}(6,\, 3)$과 $x$축 위의 점 $\mathrm{P}$\ 에 대하여 $\overline{\mathrm{AP}} + \overline{\mathrm{BP}}$의 최솟값을 구하시오.
+\end{dmproblem}
+
+\begin{dmapproach}
+두 점 $\mathrm{A}$,\ $\mathrm{B}$\ 가 모두 $x$축의 위쪽에 있으므로, $\mathrm{B}$\ 를 $x$축에 대하여 대칭이동한 점 $\mathrm{B}'$\ 을 잡으면 $\overline{\mathrm{BP}} = \overline{\mathrm{B}'\mathrm{P}}$\ 이다. 따라서 $\overline{\mathrm{AP}} + \overline{\mathrm{BP}} = \overline{\mathrm{AP}} + \overline{\mathrm{B}'\mathrm{P}}$의 최솟값은 두 점 $\mathrm{A}$,\ $\mathrm{B}'$\ 을 잇는 선분의 길이이다.
+\end{dmapproach}
+
+\begin{dmsolution}
+$\mathrm{B}(6,\, 3)$을 $x$축 대칭이동하면 $\mathrm{B}'(6,\, -3)$이고 $\overline{\mathrm{BP}} = \overline{\mathrm{B}'\mathrm{P}}$\ 이므로
+\begin{equation*}
+  \overline{\mathrm{AP}} + \overline{\mathrm{BP}} = \overline{\mathrm{AP}} + \overline{\mathrm{B}'\mathrm{P}} \ge \overline{\mathrm{AB}'}\quad(\text{등호는 } \mathrm{P} \in \overline{\mathrm{AB}'}).
+\end{equation*}
+$\therefore$ 최솟값은 $\overline{\mathrm{AB}'} = \sqrt{6^2 + (-5)^2} = \sqrt{61}$.
+\dmanswer{$\sqrt{61}$}
+\end{dmsolution}
+
+\dmchecktitle
+
+\dmcheck{9}{%
+두 점 $\mathrm{A}(2,\, 4)$,\ $\mathrm{B}(3,\, -5)$\ 와 $y$축 위의 점 $\mathrm{P}$\ 에 대하여 $\overline{\mathrm{AP}} + \overline{\mathrm{BP}}$의 최솟값을 구하시오.%
+}
+
+\dmcheck{10}{%
+두 점 $\mathrm{A}(2,\, 3)$,\ $\mathrm{B}(6,\, 1)$과 $y$축 위의 점 $\mathrm{P}$,\ $x$축 위의 점 $\mathrm{Q}$\ 에 대하여 $\overline{\mathrm{AP}} + \overline{\mathrm{PQ}} + \overline{\mathrm{QB}}$의 최솟값을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 9 · 대표예제 E6 (개념원리-CM2-GM-이동-예제-09) + 확인 CHK11·CHK12
+% ══════════════════════════════════════════════════════════════
+\dmex{6}{직선에 대한 대칭이동}
+
+\begin{dmproblem}
+점 $\mathrm{P}(1,\, 4)$\ 를 직선 $y = 2x - 3$에 대하여 대칭이동한 점 $\mathrm{P}'$의 좌표를 구하시오.
+\end{dmproblem}
+
+\begin{dmapproach}
+$\mathrm{P}'(a,\, b)$\ 라 하고, 선분 $\overline{\mathrm{P}\mathrm{P}'}$의 중점이 직선 $y = 2x - 3$ 위에 있다는 조건과 두 점을 잇는 선분이 이 직선에 수직이라는 조건을 각각 세워 연립한다.
+\end{dmapproach}
+
+\begin{dmsolution}
+$\mathrm{P}'(a,\, b)$\ 라 하자. 중점 $\left(\dfrac{1 + a}{2},\, \dfrac{4 + b}{2}\right)$이 $y = 2x - 3$ 위에 있으므로
+\begin{equation*}
+  \tfrac{4 + b}{2} = 2 \cdot \tfrac{1 + a}{2} - 3 \quad\Longrightarrow\quad 2a - b = 8.
+\end{equation*}
+$\overline{\mathrm{P}\mathrm{P}'} \perp \ell$에서 기울기의 곱이 $-1$이므로
+\begin{equation*}
+  \tfrac{b - 4}{a - 1} \cdot 2 = -1 \quad\Longrightarrow\quad a + 2b = 9.
+\end{equation*}
+두 식을 연립하면 $a = 5,\ b = 2$.\ $\therefore\ \mathrm{P}'(5,\, 2)$.
+\dmanswer{$\mathrm{P}'(5,\, 2)$}
+\end{dmsolution}
+
+\dmchecktitle
+
+\dmcheck{11}{%
+점 $(a,\, 3)$\ 을 점 $(4,\, 5)$\ 에 대하여 대칭이동한 점의 좌표가 $(-2,\, b)$일 때, 상수 $a$,\ $b$\ 에 대하여 $ab$의 값을 구하시오.%
+}
+
+\dmcheck{12}{%
+두 점 $\mathrm{P}(-3,\, 4)$\ 와 $\mathrm{Q}(1,\, 8)$이 직선 $y = ax + b$\ 에 대하여 서로 대칭일 때, 상수 $a$,\ $b$\ 에 대하여 $a + b$의 값을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 10 · Level 1 1/3 · L1-1 ~ L1-4 · 배지 있음
+% ══════════════════════════════════════════════════════════════
+\dmlevel{1}
+
+\dmpnum{1}{%
+평행이동 $(x,\, y) \to (x - 3,\, y + 2)$에 의해 점 $(a,\, -1)$이 직선 $y = 2x - 3$ 위로 옮겨질 때, 상수 $a$의 값을 구하시오.%
+}
+
+\dmpnum{2}{%
+직선 $2x - 3y + k = 0$을 $x$축의 방향으로 $1$만큼, $y$축의 방향으로 $-2$만큼 평행이동한 직선이 점 $(1,\, -4)$\ 를 지날 때, 상수 $k$의 값을 구하시오.%
+}
+
+\dmpnum{3}{%
+원 $x^2 + y^2 - 2x + 4y - 6 = 0$을 $x$축의 방향으로 $p$,\ $y$축의 방향으로 $q$만큼 평행이동한 도형이 원 $x^2 + y^2 + 6x - 2y - 1 = 0$일 때, 상수 $p$,\ $q$\ 에 대하여 $p \times q$의 값을 구하시오.%
+}
+
+\dmpnum{4}{%
+직선 $2x - y + 4 = 0$을 $x$축의 방향으로 $a$만큼, $y$축의 방향으로 $b$만큼 평행이동한 직선이 원래 직선과 일치할 때, $\dfrac{a}{b}$의 값을 구하시오. (단, $ab \ne 0$)%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 11 · Level 1 2/3 · L1-5 ~ L1-8 · 배지 없음
+% ══════════════════════════════════════════════════════════════
+\dmlevelspace
+
+\dmpnum{5}{%
+직선 $3x - 2y + 1 = 0$을 원점에 대하여 대칭이동한 직선의 방정식을 구하시오.%
+}
+
+\dmpnum{6}{%
+점 $(3,\, -5)$\ 를 원점에 대하여 대칭이동한 점이 직선 $ax - 2y + 1 = 0$ 위에 있을 때, 상수 $a$의 값을 구하시오.%
+}
+
+\dmpnum{7}{%
+포물선 $y = x^2 - 2mx + m^2 - 5$\ 를 원점에 대하여 대칭이동한 포물선의 꼭짓점이 $(-2,\, k)$\ 일 때, 상수 $m$,\ $k$\ 에 대하여 $m + k$의 값을 구하시오.%
+}
+
+\dmpnum{8}{%
+직선 $4x - 2y + 3 = 0$을 직선 $y = x$\ 에 대하여 대칭이동한 후 $x$축의 방향으로 $-1$만큼, $y$축의 방향으로 $2$만큼 평행이동한 직선의 방정식을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 12 · Level 1 3/3 · L1-9 ~ L1-12 · 배지 없음
+% ══════════════════════════════════════════════════════════════
+\dmlevelspace
+
+\dmpnum{9}{%
+원 $(x - 3)^2 + (y + 1)^2 = 4$\ 를 점 $(1,\, 2)$\ 에 대하여 대칭이동한 원의 방정식을 구하시오.%
+}
+
+\dmpnum{10}{%
+점 $(3,\, 4)$\ 를 직선 $y = -x + 2$\ 에 대하여 대칭이동한 점의 좌표가 $(p,\, q)$\ 일 때, $p^2 + q^2$의 값을 구하시오.%
+}
+
+\dmpnum{11}{%
+점 $\mathrm{A}(-3,\, 2)$\ 에서 $y$축 위의 점 $\mathrm{P}$\ 를 거쳐 점 $\mathrm{B}(-1,\, -2)$\ 까지 가는 최단 거리를 구하시오.%
+}
+
+\dmpnum{12}{%
+두 점 $\mathrm{A}(3,\, 1)$,\ $\mathrm{B}(a,\, 4)$\ 와 $y$축 위의 점 $\mathrm{P}$\ 에 대하여 $\overline{\mathrm{AP}} + \overline{\mathrm{BP}}$의 최솟값이 $5$\ 일 때, 양수 $a$의 값을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 13 · Level 2 1/3 · L2-1 ~ L2-4 · 배지 있음
+% ══════════════════════════════════════════════════════════════
+\dmlevel{2}
+
+\dmpnum{1}{%
+원 $x^2 + (y - 1)^2 = 9$\ 를 원 $(x - 1)^2 + y^2 = 9$\ 로 옮기는 평행이동에 의해 직선 $x + 2y - 4 = 0$이 직선 $x + ay + b = 0$으로 옮겨질 때, 상수 $a$,\ $b$\ 에 대하여 $a + b$의 값을 구하시오.%
+}
+
+\dmpnum{2}{%
+포물선 $y = x^2 + 8x + 9$\ 를 포물선 $y = x^2$\ 으로 옮기는 평행이동에 의해 직선 $\ell : 2x - 3y - 2 = 0$이 직선 $\ell'$\ 으로 옮겨질 때, 두 직선 $\ell$과 $\ell'$ 사이의 거리를 구하시오.%
+}
+
+\dmpnum{3}{%
+원 $\mathrm{C}_1 : x^2 + y^2 - 6x + 2y + 2 = 0$을 $x$축의 방향으로 $-2$만큼, $y$축의 방향으로 $p$ ($p > 0$)만큼 평행이동한 원을 $\mathrm{C}_2$\ 라 하자. $\mathrm{C}_1$과 $\mathrm{C}_2$의 중심 사이의 거리가 $3$\ 일 때, $\mathrm{C}_2$의 중심의 좌표를 구하시오.%
+}
+
+\dmpnum{4}{%
+원 $(x - a)^2 + (y - b)^2 = b^2$ ($a > 0$,\ $b > 0$)을 $x$축의 방향으로 $3$만큼, $y$축의 방향으로 $-8$만큼 평행이동한 원이 $x$축과 $y$축에 모두 접할 때, $a + b$의 값을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 14 · Level 2 2/3 · L2-5 ~ L2-8 · 배지 없음
+% ══════════════════════════════════════════════════════════════
+\dmlevelspace
+
+\dmpnum{5}{%
+직선 $y = x + 3$을 직선 $y = x$\ 에 대하여 대칭이동한 후 $x$축의 방향으로 $-1$만큼, $y$축의 방향으로 $1$만큼 평행이동한 직선의 $y$절편을 구하시오.%
+}
+
+\dmpnum{6}{%
+세 점 $\mathrm{O}(0,\, 0)$,\ $\mathrm{A}(3,\, 0)$,\ $\mathrm{B}(0,\, 4)$\ 를 꼭짓점으로 하는 삼각형 $\mathrm{OAB}$의 평행이동에 의한 삼각형 $\mathrm{O}'\mathrm{A}'\mathrm{B}'$\ 에서 $\mathrm{B}'(6,\, 2)$\ 일 때, 삼각형 $\mathrm{O}'\mathrm{A}'\mathrm{B}'$\ 에 내접하는 원의 방정식을 구하시오.%
+}
+
+\dmpnum{7}{%
+평행이동 $(x,\, y) \to (x + k,\, y - 2)$에 의해 원 $x^2 + y^2 + 2x - 6y - 6 = 0$이 직선 $3x + 4y + 10 = 0$과 접하도록 하는 모든 상수 $k$의 값의 곱을 구하시오.%
+}
+
+\dmpnum{8}{%
+좌표평면 위의 점 $\mathrm{P}(x,\, y)$\ 에 다음 이동 규칙을 적용한다. $xy > 0$이면 $x > y$\ 일 때 직선 $y = x$\ 에 대하여 대칭이동하고, $x \le y$\ 일 때 $x$축의 방향으로 $4$만큼, $y$축의 방향으로 $-6$만큼 평행이동한다. $xy < 0$이면 $x$축에 대하여 대칭이동하고, $xy = 0$이면 정지한다. 점 $\mathrm{P}(5,\, 2)$\ 에서 시작하여 $n$번 이동한 후 $(a,\, b)$\ 에서 정지할 때, $a + b + n$의 값을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 15 · Level 2 3/3 · L2-9 ~ L2-12 · 배지 없음
+% ══════════════════════════════════════════════════════════════
+\dmlevelspace
+
+\dmpnum{9}{%
+곡선 $y = x^2 + 3x$\ 를 $x$축의 방향으로 $a$만큼 평행이동하면 직선 $y = -x$\ 와 두 점 $\mathrm{P}$,\ $\mathrm{Q}$\ 에서 만난다. 두 점 $\mathrm{P}$,\ $\mathrm{Q}$\ 가 원점에 대하여 대칭일 때, 두 점 $\mathrm{P}$,\ $\mathrm{Q}$의 $x$좌표의 곱을 구하시오.%
+}
+
+\dmpnum{10}{%
+원 $(x - 1)^2 + (y - a)^2 = 4$\ 를 $x$축의 방향으로 $3$만큼, $y$축의 방향으로 $-2$만큼 평행이동한 후 직선 $y = x$\ 에 대하여 대칭이동한 원이 $y$축에 접할 때, 양수 $a$의 값을 구하시오.%
+}
+
+\dmpnum{11}{%
+점 $\mathrm{A}(3,\, 1)$과 직선 $y = x$ 위의 점 $\mathrm{P}$,\ $x$축 위의 점 $\mathrm{Q}$\ 에 대하여 삼각형 $\mathrm{APQ}$의 둘레의 길이의 최솟값을 구하시오.%
+}
+
+\dmpnum{12}{%
+원 $x^2 + y^2 - 4x - 8y = 0$을 직선 $y = ax + b$\ 에 대하여 대칭이동한 원이 $x^2 + y^2 = c$\ 일 때, 상수 $a$,\ $b$,\ $c$\ 에 대하여 $abc$의 값을 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 16 · Level 3 · L3-1 · L3-2 · L3-3 · 3문 한 페이지 (세션 55 통합)
+% 세 문제 모두 짧고 원문 그림 없음 → 3문 통합 페이지
+% ══════════════════════════════════════════════════════════════
+\dmlevel{3}
+
+\dmpnum{1}{%
+포물선 $y = x^2 + 2ax + 2a^2$\ 을 포물선 $y = x^2 + a^2 - a$\ 로 옮기는 평행이동에 의해 원 $\mathrm{C}_1 : x^2 + (y - 5)^2 = 9$\ 가 옮겨진 원을 $\mathrm{C}_2$\ 라 하자. 두 원 $\mathrm{C}_1$,\ $\mathrm{C}_2$\ 가 서로 다른 두 점 $\mathrm{A}$,\ $\mathrm{B}$\ 에서 만나고 선분 $\overline{\mathrm{AB}}$의 길이가 $2$\ 일 때, 양수 $a$의 값을 구하시오.%
+}
+
+% L3-2 (세션 63 교체) : 원의 점 대칭이동 · 외접 조건 · 궤적 → a²+b² 최댓값 (도형이동 정점)
+% source : 블랙라벨-CM2-03-STEP3-#01 · star_5_premium · CM2-GM 이동 단원 매칭
+\dmpnum{2}{%
+원 $\mathrm{C}_{1} : x^{2} + y^{2} + 2x - 4y + 4 = 0$을 점 $(a,\, b)$\ 에 대하여 대칭이동한 원을 $\mathrm{C}_{2}$\ 라 하자. 두 원 $\mathrm{C}_{1}$과 $\mathrm{C}_{2}$\ 가 외접할 때,\ $a^{2} + b^{2}$의 최댓값을 구하시오.%
+}
+
+\dmpnum{3}{%
+포물선 $y = x^2 - 2x - 2$ 위의 서로 다른 두 점 $\mathrm{A}$,\ $\mathrm{B}$\ 가 직선 $y = x$\ 에 대하여 대칭일 때, 선분 $\overline{\mathrm{AB}}$의 길이를 구하시오.%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 17 · 실전 R-1 + R-2 (2문 한 페이지 · 세션 57 재편)
+% R-1 : 전국연합-2022-3월-고2-27번 (원 평행이동 · 두 원 통과 · 공통 접선) · 그림 없음·짧은 발문
+% R-2 : 전국연합-2024-9월-고1-27번 (y=x·x축 순차 대칭 · 두 외접원 반지름 곱) · 그림 有·짧은 발문
+% ══════════════════════════════════════════════════════════════
+\dmrealtype
+
+\dmpnum{1}{%
+\dmkichul{2022학년도 3월 고2 학평 27번}
+두 양수 $a$,\ $b$\ 에 대하여 원 $\mathrm{C} : (x - 1)^2 + y^2 = r^2$\ 을 $x$축의 방향으로 $a$만큼, $y$축의 방향으로 $b$만큼 평행이동한 원을 $\mathrm{C}'$\ 이라 하자. 두 원 $\mathrm{C}$,\ $\mathrm{C}'$\ 이 다음 조건을 만족시킬 때, $a + b + r$의 값을 구하시오. (단, $r$\ 는 양수이다.)
+
+\begin{dmoptionbox}
+(가) 원 $\mathrm{C}'$\ 은 원 $\mathrm{C}$의 중심을 지난다.
+
+(나) 직선 $4x - 3y + 21 = 0$은 두 원 $\mathrm{C}$,\ $\mathrm{C}'$\ 에 모두 접한다.
+\end{dmoptionbox}%
+}
+
+% ── 실전 R-2 (R-1과 같은 페이지 · 세션 57 재편 · feedback_page_layout_flexible_rule)
+% 그림: 좌표평면 위 O·A·B·C 4점 삼각형 도해
+\dmpnum{2}{%
+\dmkichul{2024학년도 9월 고1 학평 27번}
+좌표평면 위의 점 $\mathrm{A}(a,\, 2)$ ($a > 2$)를 직선 $y = x$\ 에 대하여 대칭이동한 점을 $\mathrm{B}$, 점 $\mathrm{B}$\ 를 $x$축에 대하여 대칭이동한 점을 $\mathrm{C}$\ 라 하자. 두 삼각형 $\mathrm{ABC}$\ 와 $\mathrm{AOC}$의 외접원의 반지름의 길이를 각각 $r_1$,\ $r_2$\ 라 할 때, $r_1 \times r_2 = 18\sqrt{2}$\ 를 만족시키는 $a^2$의 값을 구하시오. (단, $\mathrm{O}$\ 는 원점이다.)
+
+\vspace{3mm}
+
+\begin{center}
+\begin{tikzpicture}
+  % 세션 57 재조판: scale=1.0 · 실효 렌더링 정책 v1.0
+  % 원본 x[-2, 6.5]·y[-7, 7] × 0.55 → 실좌표 (계수 0.55 사전 적용, 단위 cm)
+  % A(2.75, 1.1)·B(1.1, 2.75)·C(1.1, -2.75) · 여백 y 상 28% 하 28% ≥ 20% ✓
+  % 축: 0.8pt · 곡선: 0.5pt · 점선: 0.35pt · 정점: 0.8pt · 파생점: 0.7pt
+  \draw[black, line width=0.8pt] (-1.1, 0) -- (0, 0);
+  \draw[-stealth, black, line width=0.8pt] (0, 0) -- (3.6, 0);
+  \draw[black, line width=0.8pt] (0, -3.85) -- (0, 0);
+  \draw[-stealth, black, line width=0.8pt] (0, 0) -- (0, 3.85);
+  \node[font=\scriptsize] at (3.6, -0.28) {$x$};
+  \node[font=\scriptsize] at (-0.22, 3.85) {$y$};
+  \node[font=\scriptsize] at (-0.22, -0.22) {$\mathrm{O}$};
+  % 직선 y = x (참고선 · 옅게) · 축 프레임 경계까지 확장 (x[-1.1, 3.6]·y[-3.85, 3.85])
+  % v2.4 정정 (세션 76) : 라벨을 sloped 밀착 배치 (자연 배치 · 축 겹침 회피)
+  \draw[dash pattern=on 2pt off 2pt, gray, line width=0.35pt] (-1.1, -1.1) --
+    node[pos=0.85, above=1pt, sloped, font=\scriptsize, gray] {$y = x$}
+    (3.6, 3.6);
+  % 삼각형 ABC (실선)
+  \draw[black, line width=0.5pt] (2.75, 1.1) -- (1.1, 2.75);   % A - B
+  \draw[black, line width=0.5pt] (1.1, 2.75) -- (1.1, -2.75);  % B - C
+  \draw[black, line width=0.5pt] (1.1, -2.75) -- (2.75, 1.1);  % C - A
+  % 삼각형 AOC (보조 실선)
+  \draw[black, line width=0.5pt] (0, 0) -- (2.75, 1.1);
+  \draw[black, line width=0.5pt] (0, 0) -- (1.1, -2.75);
+  % 정점
+  \filldraw[black] (2.75, 1.1) circle (0.8pt) node[right, font=\footnotesize] {$\mathrm{A}$};
+  \filldraw[black] (1.1, 2.75) circle (0.8pt) node[above, font=\footnotesize] {$\mathrm{B}$};
+  \filldraw[black] (1.1, -2.75) circle (0.8pt) node[below, font=\footnotesize] {$\mathrm{C}$};
+\end{tikzpicture}
+\end{center}%
+}
+
+\newpage
+
+% ══════════════════════════════════════════════════════════════
+% 페이지 18 · 실전 R-3 (1문 단독 · 세션 57 재편)
+% R-3 : 전국연합-2023-9월-고1-16번 (두 원·두 축 대칭 최단 경로)
+% 그림: 좌표평면 위 두 원 C1·C2와 직선 y=x 도해
+% ══════════════════════════════════════════════════════════════
+\dmrealtypespace
+
+\dmpnum{3}{%
+\dmkichul{2023학년도 9월 고1 학평 16번}
+좌표평면 위에 두 원 $\mathrm{C}_1 : (x - 8)^2 + (y - 2)^2 = 4$\ 와 $\mathrm{C}_2 : (x - 3)^2 + (y + 4)^2 = 4$, 직선 $y = x$\ 가 있다. 원 $\mathrm{C}_1$ 위의 점 $\mathrm{A}$, 원 $\mathrm{C}_2$ 위의 점 $\mathrm{B}$,\ $x$축 위의 점 $\mathrm{P}$, 직선 $y = x$ 위의 점 $\mathrm{Q}$\ 에 대하여 $\overline{\mathrm{AP}} + \overline{\mathrm{PQ}} + \overline{\mathrm{QB}}$의 최솟값을 구하시오.
+
+\vspace{3mm}
+
+\begin{center}
+\begin{tikzpicture}
+  % 세션 57 재조판: scale=1.0 · 실효 렌더링 정책 v1.0
+  % 원본 x[-2, 12]·y[-8, 6] × 0.42 → 실좌표 (계수 0.42 사전 적용, 단위 cm)
+  % C1 (3.36, 0.84) r=0.84 · C2 (1.26, -1.68) r=0.84 · 여백 ≥ 20% ✓
+  % 축: 0.8pt · 곡선: 0.5pt · 점선: 0.35pt · 파생점: 0.7pt
+  \draw[black, line width=0.8pt] (-0.84, 0) -- (0, 0);
+  \draw[-stealth, black, line width=0.8pt] (0, 0) -- (5.04, 0);
+  \draw[black, line width=0.8pt] (0, -3.36) -- (0, 0);
+  \draw[-stealth, black, line width=0.8pt] (0, 0) -- (0, 2.52);
+  \node[font=\scriptsize] at (5.04, -0.25) {$x$};
+  \node[font=\scriptsize] at (-0.21, 2.52) {$y$};
+  \node[font=\scriptsize] at (-0.21, -0.21) {$\mathrm{O}$};
+  % 직선 y = x (옅은 파선) · 축 프레임 경계까지 확장 (x[-0.84, 5.04]·y[-3.36, 2.52])
+  % v2.4 정정 (세션 76) : 라벨을 sloped 밀착 배치 (자연 배치 · 축 겹침 회피)
+  \draw[dash pattern=on 2pt off 2pt, gray, line width=0.35pt] (-0.84, -0.84) --
+    node[pos=0.85, above=1pt, sloped, font=\scriptsize, gray] {$y = x$}
+    (2.52, 2.52);
+  % 두 원 (실선)
+  \draw[black, line width=0.5pt] (3.36, 0.84) circle (0.84);
+  \draw[black, line width=0.5pt] (1.26, -1.68) circle (0.84);
+  % 원 중심 표시 (라벨은 원 이름만 · 원 안쪽 중심 우측 배치)
+  \filldraw[black] (3.36, 0.84) circle (0.7pt);
+  \node[font=\footnotesize, anchor=west] at (3.5, 1.07) {$\mathrm{C}_1$};
+  \filldraw[black] (1.26, -1.68) circle (0.7pt);
+  \node[font=\footnotesize, anchor=west] at (1.4, -1.45) {$\mathrm{C}_2$};
+\end{tikzpicture}
+\end{center}%
+}
+
+\end{document}
