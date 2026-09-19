@@ -41,6 +41,8 @@ export function createSessionRouteGuard({ getRequestHeader, getSecret, getOpsSec
       role: account.role,
       studentId: account.studentId,
       name: account.name,
+      // 학생이 속한 학원(tenant). 게이트가 이 값으로 tenant 컨텍스트를 잡는다.
+      tenantId: account.tenantId || "tenant_default",
       exp: now() + 1000 * 60 * 60 * 24 * 14
     });
     return `${payload}.${signSessionPayload(payload)}`;

@@ -30,6 +30,8 @@ assert.deepEqual(teacherPayload, {
   tenantId: "tenant_default",
   teacherRole: "owner"
 });
+const tenantPortalToken = guard.createPortalSessionToken({ name: "학생", role: "parent", studentId: "student-2", tenantId: "tenant_b" });
+assert.equal(guard.verifyPortalSessionToken(tenantPortalToken)?.tenantId, "tenant_b");
 assert.deepEqual(guard.verifyTeacherSessionToken(teacherToken), teacherPayload);
 assert.equal(guard.verifyPortalSessionToken(teacherToken), null);
 
@@ -49,11 +51,14 @@ const portalToken = guard.createPortalSessionToken({
   studentId: "student-1"
 });
 const portalPayload = JSON.parse(Buffer.from(portalToken.split(".")[0], "base64url").toString("utf8"));
+// 2026-09-19: 포털 토큰도 학생의 tenant 를 싣는다(없으면 원장 tenant). 게이트가 이 값으로
+// 컨텍스트를 잡아 협력 교사 학생이 원장 자료를 보지 못하게 한다.
 assert.deepEqual(portalPayload, {
   exp: clock + 1000 * 60 * 60 * 24 * 14,
   name: "학생",
   role: "student",
-  studentId: "student-1"
+  studentId: "student-1",
+  tenantId: "tenant_default"
 });
 assert.deepEqual(guard.verifyPortalSessionToken(portalToken), portalPayload);
 assert.equal(guard.verifyTeacherSessionToken(portalToken), null);

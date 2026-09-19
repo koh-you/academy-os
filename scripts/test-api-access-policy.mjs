@@ -70,6 +70,11 @@ assert.deepEqual(A("GET", "/api/students", { kind: "none" }), { ok: false, statu
 // dispatch 토큰
 assert.equal(A("POST", "/api/notification-jobs/dispatch-due", { kind: "dispatch" }).ok, true);
 assert.equal(A("POST", "/api/notification-jobs/dispatch-due", { kind: "none" }).status, 401);
+// 학생·학부모 포털 토큰(2026-09-19): 공개 경로만 통과, 교사 경로는 401. tenant 는 게이트가
+// 토큰의 학생 tenant 로 잡는다(원장 시험정보가 협력 교사 학생에게 보이던 경로 차단).
+assert.equal(A("GET", "/api/portal-data", { kind: "portal", tenantId: "tenant_b" }).ok, true);
+assert.equal(A("GET", "/api/students", { kind: "portal", tenantId: "tenant_b" }).status, 401);
+assert.equal(A("POST", "/api/lesson-records", { kind: "portal", tenantId: "tenant_b" }).status, 401);
 assert.equal(A("POST", "/api/students", { kind: "dispatch" }).status, 403);
 
 // teacher owner → 전부 허용

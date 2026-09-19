@@ -1834,7 +1834,7 @@ async function authenticateStudentOrParent(role, loginId, password) {
   if (!isSupabaseConfigured({ requireServiceRole: true })) return null;
   const rows = await listRows(
     "students",
-    `select=student_id,name,login_id,pin,status&status=eq.active&limit=1000`,
+    `select=student_id,name,login_id,pin,status,tenant_id&status=eq.active&limit=1000`,
     { requireServiceRole: true }
   );
   const student = rows.find((row) => {
@@ -1847,7 +1847,10 @@ async function authenticateStudentOrParent(role, loginId, password) {
     role,
     studentId: student.student_id,
     loginId: student.login_id,
-    name: student.name
+    name: student.name,
+    // 포털 토큰에 실어 두면 이후 요청이 그 학생의 tenant 안에서만 돈다(2026-09-19 감사:
+    // 포털은 tenant 를 몰라 원장 시험정보가 협력 교사 학생에게 보이고 app_state 삭제가 500).
+    tenantId: student.tenant_id || "tenant_default"
   };
 }
 
@@ -4964,6 +4967,9 @@ const server = http.createServer(async (request, response) => {
     Boolean(kioskToken) && timingSafeEqualText(kioskToken, expectedKioskToken);
   const kioskOk = Boolean(kioskDevice) || legacyKioskOk;
   const dispatchOk = !teacherSession && !opsSession && !kioskOk && getDispatchAuthState(request, {}).ok;
+  // 학생·학부모 포털 토큰. 공개 경로(/api/portal-*)라 권한 판정은 그대로 통과하지만,
+  // tenant 컨텍스트는 학생의 tenant 로 잡아야 조회·저장이 그 학원 자료 안에서만 돈다.
+  const portalSession = !teacherSession && !opsSession && !kioskOk && !dispatchOk ? getPortalSession(request) : null;
   const auth = teacherSession
     ? { kind: "teacher", teacherRole: teacherSession.teacherRole || "owner", tenantId: teacherSession.tenantId || "tenant_default" }
     : opsSession
@@ -4986,7 +4992,9 @@ const server = http.createServer(async (request, response) => {
             }
           : dispatchOk
             ? { kind: "dispatch" }
-            : { kind: "none" };
+            : portalSession
+              ? { kind: "portal", studentId: portalSession.studentId, tenantId: portalSession.tenantId || "tenant_default" }
+              : { kind: "none" };
   // 원장이 "다른 선생님으로 보기" 를 켜면 그 선생님 테넌트로 작업한다(조회·수정 모두).
   // 협력 교사가 같은 헤더를 보내도 resolveViewAsTenantId 가 자기 테넌트로 되돌린다.
   const requestedTenantId = String(getRequestHeader(request, "x-view-tenant-id") || "").trim();
