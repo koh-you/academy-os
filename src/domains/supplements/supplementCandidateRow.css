@@ -1,0 +1,7 @@
+/* 2026-09-19 · 보충 후보 행의 학생 이름 링크(ghostButton link) 크기.
+   App.css 의 `.supplementRowItem .textLinkButton` 을 옮겨 왔다(색·밑줄은 공용 modifier 가 그린다). */
+.supplementRowItem .ghostButton.link {
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1.2;
+}

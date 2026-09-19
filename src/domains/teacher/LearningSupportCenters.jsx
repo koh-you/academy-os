@@ -440,8 +440,8 @@ export function ResourceLibraryCenter({
             <SelectionToolbar
               actions={(
                 <>
-                  <button onClick={selectAllResourceStudents} type="button">전체 선택</button>
-                  <button onClick={clearAllResourceStudents} type="button">전체 해제</button>
+                  <button className="softButton compact" onClick={selectAllResourceStudents} type="button">전체 선택</button>
+                  <button className="softButton compact subtle" onClick={clearAllResourceStudents} type="button">선택 해제</button>
                 </>
               )}
               className="resourceStudentPickerTop resourceBulkActions"
@@ -471,8 +471,8 @@ export function ResourceLibraryCenter({
                     )}
                   >
                     <div className="resourceGroupActions">
-                      <button onClick={() => selectResourceGroup(groupStudentIds)} type="button">반 전체 선택</button>
-                      <button onClick={() => clearResourceGroup(groupStudentIds)} type="button">반 선택 해제</button>
+                      <button className="softButton compact" onClick={() => selectResourceGroup(groupStudentIds)} type="button">반 전체 선택</button>
+                      <button className="softButton compact subtle" onClick={() => clearResourceGroup(groupStudentIds)} type="button">반 선택 해제</button>
                     </div>
                     <div className="resourceStudentButtons">
                       {group.students.map((student) => (

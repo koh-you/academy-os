@@ -31,7 +31,7 @@ export function LessonJournalHeader({
       context={model.topic ? <span className="shortcutHint">{model.topic}</span> : null}
       description={model.metaText}
       leading={<button aria-label="수업 목록으로 돌아가기" className="iconButton" onClick={onBack} type="button">‹</button>}
-      titleNode={<button className="linkTitleButton" onClick={onOpenExamPrep} type="button">{model.className}</button>}
+      titleNode={<h1><button className="ghostButton link" onClick={onOpenExamPrep} type="button">{model.className}</button></h1>}
     />
   );
 }

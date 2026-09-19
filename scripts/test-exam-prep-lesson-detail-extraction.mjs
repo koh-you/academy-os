@@ -34,7 +34,8 @@ const preservedContractSnippets = [
   ["rosterView === \"school\"", "time/school roster sort toggle"],
   ["examPrepSourceChip", "connected exam-source info rendering"],
   ["className=\"ghostButton\"", "schedule-edit button class"],
-  ["className=\"dangerButton\"", "delete-schedule button class"]
+  // 2026-09-19 · 일정 삭제는 확인 모달 진입 버튼이라 dangerButton → dangerSoftButton 으로 통일(docs/ui-button-hierarchy.md).
+  ["className=\"dangerSoftButton\"", "delete-schedule button class"]
 ];
 for (const [snippet, label] of preservedContractSnippets) {
   assert.ok(detailSource.includes(snippet), `extracted component must preserve: ${label} (missing "${snippet}")`);

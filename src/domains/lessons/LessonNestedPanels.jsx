@@ -299,7 +299,7 @@ export function SupplementMakeupLessonDetail({
           <button className="ghostButton scheduleEditButton" type="button" onClick={() => setIsScheduleEditOpen((current) => !current)}>
             {isScheduleEditOpen ? "수정 닫기" : "일정 수정"}
           </button>
-          <button className="dangerButton" type="button" onClick={() => onDeleteLesson(lesson.lessonId)}>
+          <button className="dangerSoftButton" type="button" onClick={() => onDeleteLesson(lesson.lessonId)}>
             일정 삭제
           </button>
         </div>

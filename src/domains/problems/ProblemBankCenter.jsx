@@ -463,11 +463,11 @@ export function ProblemBankCenter() {
                 {deleteArmed ? (
                   <>
                     <span className="problemBankDeleteWarn">문항 {detail.items.length}개와 학생 기록·이미지가 모두 지워집니다. 되돌릴 수 없습니다.</span>
-                    <button className="problemBankDangerButton" onClick={deleteBook} type="button">삭제 확정</button>
                     <button className="softButton" onClick={() => setDeleteArmed(false)} type="button">취소</button>
+                    <button className="dangerSoftButton" onClick={deleteBook} type="button">삭제 확정</button>
                   </>
                 ) : (
-                  <button className="softButton" onClick={() => setDeleteArmed(true)} type="button">교재 삭제</button>
+                  <button className="dangerSoftButton" onClick={() => setDeleteArmed(true)} type="button">교재 삭제</button>
                 )}
                 <input
                   aria-label="정답·해설 폴더 선택"

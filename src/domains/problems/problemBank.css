@@ -88,16 +88,6 @@
 .problemBankStudentPick select,
 .problemBankRoundPick select { border: 1px solid var(--academy-border, #e2e6ec); border-radius: 8px; padding: 6px 8px; }
 .problemBankSelectionActions { align-items: center; display: inline-flex; gap: 6px; margin-left: auto; }
-.problemBankSelectionActions button {
-  background: var(--academy-surface, #fff);
-  border: 1px solid var(--academy-border, #e2e6ec);
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 13px;
-  padding: 6px 12px;
-}
-.problemBankSelectionActions button.primaryButton { background: var(--academy-text-strong, #111827); border-color: var(--academy-text-strong, #111827); color: #fff; }
-.problemBankSelectionActions button:disabled { cursor: not-allowed; opacity: 0.5; }
 .problemBankSelectionCount { color: var(--academy-primary, #1e4a8f); font-weight: 600; font-size: 13px; }
 
 .problemBankLegend { align-items: center; display: flex; flex-wrap: wrap; font-size: 12px; gap: 6px 14px; }
@@ -222,8 +212,6 @@
 .problemBankListPanel { grid-column: 1; }
 .problemBankDetailPanel { grid-column: 2; grid-row: 1 / span 2; }
 .problemBankBookList { display: grid; gap: 6px; list-style: none; margin: 0; padding: 0; }
-.problemBankTools .problemBankDangerButton { border-radius: 8px; cursor: pointer; font-size: 13px; padding: 6px 12px; }
-.problemBankDangerButton { background: #b91c1c; border: 1px solid #b91c1c; color: #fff; }
 .problemBankDeleteWarn { color: #b91c1c; font-size: 12px; }
 .problemBankAnswerImport { border: 1px dashed var(--academy-border, #e2e6ec); border-radius: 10px; display: grid; gap: 8px; margin-bottom: 12px; padding: 10px 12px; }
 .problemBankAnswerImport h3 { font-size: 14px; margin: 0; }
@@ -242,6 +230,8 @@
 .problemBankInfo dd { margin: 0; }
 .problemBankTools { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 .problemBankTools .softButton { background: var(--academy-surface, #fff); border: 1px solid var(--academy-border, #e2e6ec); border-radius: 8px; cursor: pointer; font-size: 13px; padding: 6px 12px; }
+/* 2026-09-19 · 교재 삭제 진입·확정은 dangerSoftButton(색은 공용 클래스)이고 크기만 도구줄의 softButton 과 맞춘다. */
+.problemBankTools .dangerSoftButton { border-radius: 8px; cursor: pointer; font-size: 13px; padding: 6px 12px; }
 .problemBankAnswerImport:empty { display: none; }
 .problemBankReviewFilters { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 4px; }
 .problemBankReviewFilters .softButton { background: var(--academy-surface, #fff); border: 1px solid var(--academy-border, #e2e6ec); border-radius: 999px; cursor: pointer; font-size: 12.5px; padding: 3px 10px; }
@@ -364,7 +354,6 @@
 .problemBankPrintAnswerGrid small { color: #000; font-size: 7pt; }
 .problemBankPreviewAnswer { border-top: 1px dashed var(--academy-border, #e2e6ec); margin-top: 8px; padding-top: 6px; }
 .problemBankPreviewAnswer strong { font-size: 12.5px; }
-.problemBankPreviewAnswer .problemBankLinkButton { background: none; border: 0; color: var(--academy-accent, #176e59); cursor: pointer; font-size: 12.5px; font-weight: 600; padding: 0; }
 .problemBankPreviewAnswer img { display: block; margin-top: 6px; max-width: 100%; }
 
 @media print {

@@ -2145,7 +2145,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
                         {checkingSourceId === file.sourceId ? "검증 중" : "원본 AI 검증"}
                       </button>
                       {getExamAnalysisSourceOpenUrl(file) ? (
-                        <a className="ghostButton linkButton" href={getExamAnalysisSourceOpenUrl(file)} rel="noreferrer" target="_blank">열기</a>
+                        <a className="ghostButton link" href={getExamAnalysisSourceOpenUrl(file)} rel="noreferrer" target="_blank">열기</a>
                       ) : null}
                       <button
                         className="dangerSoftButton compact"
