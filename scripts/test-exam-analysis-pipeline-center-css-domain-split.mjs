@@ -44,7 +44,8 @@ domainRoot.walkRules((rule) => {
     assert.ok(isSafeSelector(selector), `domain CSS selector must be examAnalysis/examPrompt-scoped or on the confirmed-exclusive list: ${selector}`);
   }
 });
-assert.equal(domainSelectorCount, 423);
+// 2026-09-19 · 주요문항 카드 헤더의 요소 선택자 button/button:disabled 2개 삭제(iconButton 으로 통일) (423 → 421)
+assert.equal(domainSelectorCount, 421);
 
 // No selector that moved should still have a same-name rule left behind in
 // App.css (the two mega-rules above are the sole, confirmed exceptions).

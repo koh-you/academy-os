@@ -13,7 +13,7 @@ test.beforeEach(async ({ request }) => {
 
 async function loginAsFreshCoTeacher(page) {
   await page.goto("/");
-  await page.getByRole("button", { name: "선생님" }).click();
+  await page.getByRole("tab", { name: "선생님" }).click();
   await page.getByLabel("선생님 아이디").fill("fresh");
   await page.getByLabel("선생님 비밀번호").fill("fresh");
   await page.getByRole("button", { name: "선생님 로그인" }).click();

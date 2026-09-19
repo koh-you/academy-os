@@ -53,7 +53,7 @@ test("Tally candidate rapid edits serialize, rebase CAS, and persist the verifie
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
   await page.getByRole("button", { name: "+ 학생 추가" }).click();
   const studentModal = page.getByRole("dialog", { name: "학생 추가" });
-  await studentModal.getByRole("button", { name: "Tally 접수" }).click();
+  await studentModal.getByRole("tab", { name: "Tally 접수" }).click();
   const candidateList = studentModal.getByRole("region", { name: "Tally 접수·등록 후보 목록" });
   const learningProcessInput = candidateList.getByLabel("현재 학습 과정");
   await candidateList.getByLabel("Tally 반영 대상").selectOption({ index: 1 });
@@ -115,7 +115,7 @@ test("Tally candidate CAS conflict keeps the current input and shows failure", a
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
   await page.getByRole("button", { name: "+ 학생 추가" }).click();
   const studentModal = page.getByRole("dialog", { name: "학생 추가" });
-  await studentModal.getByRole("button", { name: "Tally 접수" }).click();
+  await studentModal.getByRole("tab", { name: "Tally 접수" }).click();
   const candidateList = studentModal.getByRole("region", { name: "Tally 접수·등록 후보 목록" });
   const specialNoteInput = candidateList.getByLabel("특이사항");
 

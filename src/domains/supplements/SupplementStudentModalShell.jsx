@@ -1,4 +1,5 @@
 import { Modal } from "../../shared/components/Modal.jsx";
+import { EmptyState } from "../../shared/components/EmptyState.jsx";
 
 export function SupplementStudentModalShell({
   children,
@@ -39,7 +40,7 @@ export function SupplementStudentModalShell({
       <div className="supplementModalLayout single">
         <section className="supplementModalMain">
           {isEmpty ? (
-            <div className="emptyHomeworkBox">아직 생성된 보충관리 항목이 없습니다.</div>
+            <EmptyState title="아직 생성된 보충관리 항목이 없습니다." />
           ) : null}
           <div className="taskStack">{children}</div>
         </section>

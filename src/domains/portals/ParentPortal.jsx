@@ -49,7 +49,6 @@ export function ParentPortal({
           <div className="homeworkStack">
             {studentReports.length === 0 ? (
               <EmptyState
-                className="emptyPortalPanel"
                 description="수업 후 선생님이 보고서를 발송하면 여기에 표시됩니다."
                 title="아직 발송된 보고서가 없습니다."
               />
@@ -73,14 +72,13 @@ export function ParentPortal({
 
         {activeTab === "attendance" ? (
           <EmptyState
-            className="emptyPortalPanel"
             description="추후 등하원 시간이 표시됩니다."
             title="출결앱 연동 전입니다."
           />
         ) : null}
 
         {activeTab === "curriculum" ? (
-          <EmptyState className="emptyPortalPanel" title="아직 커리큘럼이 설정되지 않았습니다." />
+          <EmptyState title="아직 커리큘럼이 설정되지 않았습니다." />
         ) : null}
       </section>
     </section>

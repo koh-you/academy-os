@@ -1934,25 +1934,6 @@
   padding: 12px;
 }
 
-.examAnalysisKeyQuestionCardHeader button {
-  background: var(--academy-surface, #ffffff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-radius: 8px;
-  color: var(--academy-primary, #17213d);
-  cursor: pointer;
-  flex: 0 0 auto;
-  font-size: 12px;
-  font-weight: 900;
-  min-height: 32px;
-  padding: 6px 10px;
-}
-
-.examAnalysisKeyQuestionCardHeader button:disabled {
-  color: var(--academy-muted, #64748b);
-  cursor: not-allowed;
-  opacity: 0.65;
-}
-
 .examAnalysisKeyQuestionFields {
   display: grid;
   gap: 10px;

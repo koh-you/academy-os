@@ -62,7 +62,7 @@ test("integration status is loaded with the teacher token after an in-page login
   // 로그인 화면(세션 없음)에서는 부르지 않는다 — 토큰 없이 부르면 401 로 끝나고 값이 null 로 남아
   // 수업일지 "즉시 발송" 이 조용히 테스트 번호로 가던 경로다.
   await page.goto("/");
-  await expect(page.getByRole("button", { name: "선생님" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "선생님" })).toBeVisible();
   await page.waitForTimeout(500);
   expect(statusRequests).toEqual([]);
 

@@ -525,7 +525,6 @@ export function ExamPrepCenter({
                 action={query.trim() ? (
                   <button className="softButton compact" onClick={() => setQuery("")} type="button">검색어 지우기</button>
                 ) : null}
-                className="examPrepEmptyState"
                 description={query.trim()
                   ? "학교·과목·출판사를 다시 확인하세요."
                   : "조회 범위 또는 고사를 바꾸면 해당 조건의 시험정보가 표시됩니다."}

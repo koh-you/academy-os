@@ -243,9 +243,9 @@ export function StudentModal({
       scrollable
     >
       <WorkspaceTabs label="학생 추가 방식" variant="primary">
-        <button className={mode === "single" ? "active" : ""} disabled={singleSaveState === "saving"} onClick={() => setMode("single")} type="button">한 명씩</button>
-        <button className={mode === "bulk" ? "active" : ""} disabled={singleSaveState === "saving"} onClick={() => setMode("bulk")} type="button">엑셀 일괄 등록</button>
-        <button className={mode === "intake" ? "active" : ""} disabled={singleSaveState === "saving"} onClick={() => setMode("intake")} type="button">Tally 접수</button>
+        <button aria-selected={mode === "single"} className={mode === "single" ? "active" : ""} disabled={singleSaveState === "saving"} onClick={() => setMode("single")} role="tab" type="button">한 명씩</button>
+        <button aria-selected={mode === "bulk"} className={mode === "bulk" ? "active" : ""} disabled={singleSaveState === "saving"} onClick={() => setMode("bulk")} role="tab" type="button">엑셀 일괄 등록</button>
+        <button aria-selected={mode === "intake"} className={mode === "intake" ? "active" : ""} disabled={singleSaveState === "saving"} onClick={() => setMode("intake")} role="tab" type="button">Tally 접수</button>
       </WorkspaceTabs>
 
       {mode === "single" ? (

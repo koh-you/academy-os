@@ -110,7 +110,7 @@ function WrongProblemBoard({
 
   return (
     <section className="wrongProblemBoard">
-      <WorkspaceTabs className="wrongBoardTabs" label="오답관리 작업 구분" variant="secondary">
+      <WorkspaceTabs label="오답관리 작업 구분">
         {[
           ["bookWrong", "교재별 오답"],
           ["studentWrong", "학생별 오답"],
@@ -190,7 +190,7 @@ function WrongProblemBoard({
 
 function StudentWrongProblemBoard({ selectedStudent, wrongProblems, onAddWrongProblem, onUpdateWrongProblem }) {
   if (!selectedStudent) {
-    return <section className="panel emptyPortalPanel">학생을 선택해 주세요.</section>;
+    return <EmptyState as="section" className="panel" title="학생을 선택해 주세요." />;
   }
 
   return (
@@ -516,7 +516,7 @@ export function ResourceLibraryCenter({
 
         <section className="panel resourceList">
           <h2>등록 자료</h2>
-          {materials.length === 0 ? <div className="emptyPortalPanel">등록된 자료가 없습니다.</div> : null}
+          {materials.length === 0 ? <EmptyState title="등록된 자료가 없습니다." /> : null}
           {materials.map((material) => {
             const deleteState = resourceMaterialDeleteStates[material.materialId] ?? { message: "", state: "idle" };
             return (
@@ -1190,7 +1190,7 @@ export function OverdueHomework({
           </div>
           <div className="homeworkStudentGrid">
             {visibleStudents.length === 0 ? (
-              <div className="emptyHomeworkBox compact">{activeMetricMeta.emptyStudents}</div>
+              <EmptyState density="compact" title={activeMetricMeta.emptyStudents} />
             ) : null}
             {visibleStudents.map((student) => {
               const summary = getStudentHomeworkSummary(student);
@@ -1240,7 +1240,7 @@ export function OverdueHomework({
             title={activeMetricMeta.detailTitle}
           />
           {selectedHomeworks.length === 0 ? (
-            <div className="emptyHomeworkBox">{activeMetricMeta.emptyHomeworks}</div>
+            <EmptyState title={activeMetricMeta.emptyHomeworks} />
           ) : null}
           <div className="homeworkDetailList">
             {selectedHomeworks.map((homework) => {

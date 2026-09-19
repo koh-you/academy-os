@@ -17,7 +17,7 @@ test("new student makeup selects a student and explicitly reserves schedule noti
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error));
   await page.goto("/");
-  await page.getByRole("button", { name: "선생님" }).click();
+  await page.getByRole("tab", { name: "선생님" }).click();
   await page.getByLabel("선생님 아이디").fill("preview");
   await page.getByLabel("선생님 비밀번호").fill("preview");
   await page.getByRole("button", { name: "선생님 로그인" }).click();

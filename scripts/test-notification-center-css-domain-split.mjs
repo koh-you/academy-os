@@ -20,7 +20,8 @@ const safeClasses = new Set([
   "noticePreviewBox", "noticeRecipientBadges", "noticeScheduleGrid", "noticeSendActions",
   // 2026-09-19 · 공지 발송 확인 모달·고정 액션 줄(NotificationSendConfirmModal.jsx, NotificationComposerPanel.jsx 전용)
   "noticeSendConfirmModal", "noticeSendConfirmSummary", "noticeSendFooter",
-  "noticeSolapiResultNotice", "noticeStudentEmpty", "noticeStudentOption", "noticeStudentPicker",
+  // 2026-09-19 · noticeStudentEmpty 는 공용 EmptyState 로 대체되어 제거
+  "noticeSolapiResultNotice", "noticeStudentOption", "noticeStudentPicker",
   "noticeTargetPanel", "noticeTargetSummary", "noticeWorkspaceTabs", "noticeWritePanel",
   "notificationHistoryDateFilter", "notificationJobActionNotice", "notificationJobActions",
   "notificationJobStateCell", "notificationJobTypeCell", "notificationJobsStatusNotice",
@@ -45,7 +46,8 @@ domainRoot.walkRules((rule) => {
 });
 // 2026-09-19 · 발송 확인 모달·요약 카드·고정 액션 줄 selector 6개 추가 (90 → 96)
 // 2026-09-19 · UI U14: 980px 이하 1열 규칙(noticeComposerGrid/noticeFilterGrid/noticeScheduleGrid)을 App.css 에서 이 파일로 이동 (96 → 99)
-assert.equal(domainSelectorCount, 99);
+// 2026-09-19 · UI U15: .noticeStudentEmpty 를 공용 EmptyState 로 대체하며 삭제 (99 → 98)
+assert.equal(domainSelectorCount, 98);
 
 // .notificationLogList, .notificationControlGrid, .notificationLessonItem,
 // .notificationControlActions, .notificationBulkActions, and .specialLectureGuideTabs

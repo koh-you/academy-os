@@ -1,3 +1,4 @@
+import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
 import { ListCard } from "../../shared/components/ListCard.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
@@ -145,7 +146,7 @@ export function NotificationRecipientPanel({
             );
           })
         ) : (
-          <div className="noticeStudentEmpty">조건에 맞는 학생이 없습니다.</div>
+          <EmptyState density="compact" title="조건에 맞는 학생이 없습니다." />
         )}
       </div>
     </div>

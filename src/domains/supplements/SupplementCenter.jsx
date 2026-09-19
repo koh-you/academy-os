@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { attendanceLabels } from "../lessons/labels.js";
 import { Disclosure } from "../../shared/components/Disclosure.jsx";
+import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
@@ -365,7 +366,7 @@ export function SupplementCenter({
           title={activeTabData.title}
         />
 
-        {activeTabData.items.length === 0 ? <div className="emptyHomeworkBox">{activeTabData.emptyText}</div> : null}
+        {activeTabData.items.length === 0 ? <EmptyState title={activeTabData.emptyText} /> : null}
 
         {activeSupplementTab === "absence_makeup" && activeDeferredAbsenceItems.length > 0 ? (
           <Disclosure

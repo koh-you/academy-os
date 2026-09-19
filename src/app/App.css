@@ -2907,66 +2907,16 @@ summary:focus-visible {
 }
 
 .examManagementTabs {
-  align-items: center;
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--academy-border, #d8e3f8);
-  border-radius: 8px;
-  display: inline-flex;
-  gap: 4px;
-  max-width: 100%;
-  overflow-x: auto;
   overscroll-behavior-inline: contain;
-  padding: 4px;
   scroll-padding-inline: 4px;
-  scrollbar-width: thin;
   touch-action: pan-x pan-y;
-  width: fit-content;
   -webkit-overflow-scrolling: touch;
-}
-
-.examManagementTabs button {
-  background: transparent;
-  border: 0;
-  border-radius: 6px;
-  color: var(--academy-text-strong, #475569);
-  cursor: pointer;
-  font-weight: 900;
-  min-height: 38px;
-  padding: 0 18px;
-  text-align: center;
-}
-
-.examManagementTabs button.active {
-  background: var(--academy-primary, #17213d);
-  box-shadow: 0 1px 4px color-mix(in srgb, var(--academy-primary, #17213d) 16%, transparent);
-  color: var(--academy-surface, #fff);
 }
 
 .examTabCaption {
   color: var(--academy-muted, #64748b);
   font-size: 14px;
   margin: -6px 0 2px;
-}
-
-.examPrepEmptyState {
-  background: var(--academy-surface, #fff);
-  border: 1px solid var(--status-info-border, #bfdbfe);
-  border-top: 1px solid var(--status-neutral-border, #e2e8f0);
-  border-radius: 8px;
-  color: var(--academy-muted, #64748b);
-  display: grid;
-  font-size: 14px;
-  font-weight: 800;
-  gap: 6px;
-  line-height: 1.5;
-  margin: 0;
-  padding: 28px;
-  text-align: center;
-}
-
-.examPrepEmptyState strong {
-  color: var(--academy-text, #0f172a);
-  font-size: 18px;
 }
 
 .linkedExamInfoBox {
@@ -5574,8 +5524,7 @@ button:disabled {
   font-size: 14px;
 }
 
-.specialLectureGateHeader span,
-.specialLectureGateEmpty {
+.specialLectureGateHeader span {
   color: var(--academy-text-muted, #52647c);
   font-size: 12px;
   line-height: 1.5;
@@ -8217,29 +8166,7 @@ textarea {
 }
 
 .studentManagerTabs {
-  background: var(--academy-surface-muted, #f8fafc);
-  border-radius: 8px;
-  display: grid;
-  gap: 6px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
   margin-bottom: 14px;
-  padding: 6px;
-  max-width: 720px;
-}
-
-.studentManagerTabs button {
-  background: transparent;
-  border: 0;
-  border-radius: 8px;
-  color: var(--academy-text-strong, #475569);
-  font-weight: 900;
-  min-height: 44px;
-}
-
-.studentManagerTabs button.active {
-  background: var(--academy-surface, #ffffff);
-  box-shadow: 0 1px 8px color-mix(in srgb, var(--academy-text, #0f172a) 8%, transparent);
-  color: var(--academy-text, #0f172a);
 }
 
 .classTabList {
@@ -9507,11 +9434,6 @@ textarea {
   grid-column: 1 / -1;
 }
 
-.aiTabs {
-  max-width: 360px;
-  grid-template-columns: 1fr;
-}
-
 .aiInputPanel {
   display: grid;
   gap: 16px;
@@ -10526,21 +10448,6 @@ textarea {
 .studentQuestionItem.resolved strong {
   color: var(--academy-muted, #64748b);
   text-decoration: line-through;
-}
-
-.emptyHomeworkBox {
-  align-items: center;
-  border: 1px dashed var(--academy-border, #d8e3f8);
-  border-radius: 8px;
-  color: var(--academy-muted, #64748b);
-  display: flex;
-  justify-content: center;
-  min-height: 88px;
-}
-
-.emptyHomeworkBox.compact {
-  grid-column: 1 / -1;
-  min-height: 72px;
 }
 
 .homeworkActionCard {
@@ -11560,26 +11467,13 @@ textarea {
   padding: 7px 10px;
 }
 
-.noticeBox,
-.emptyPortalPanel {
+.noticeBox {
+  background: var(--academy-surface-muted, #f8fafc);
   border: 1px solid var(--academy-border, #d8e3f8);
   border-radius: 8px;
   display: grid;
   gap: 10px;
   padding: 18px;
-}
-
-.noticeBox {
-  background: var(--academy-surface-muted, #f8fafc);
-}
-
-.emptyPortalPanel {
-  align-items: center;
-  border-style: dashed;
-  color: var(--academy-muted, #64748b);
-  justify-content: center;
-  min-height: 110px;
-  text-align: center;
 }
 
 .segmentedControl,
@@ -13497,32 +13391,6 @@ textarea {
   gap: 14px;
 }
 
-.wrongBoardTabs {
-  align-items: center;
-  background: var(--academy-surface-muted, #f8fafc);
-  border-radius: 8px;
-  display: flex;
-  gap: 8px;
-  justify-self: center;
-  padding: 6px;
-}
-
-.wrongBoardTabs button {
-  background: transparent;
-  border: 0;
-  border-radius: 8px;
-  color: var(--academy-muted, #64748b);
-  font-weight: 900;
-  min-height: 40px;
-  padding: 0 22px;
-}
-
-.wrongBoardTabs button.active {
-  background: var(--academy-surface, #ffffff);
-  box-shadow: 0 6px 18px color-mix(in srgb, var(--academy-text, #0f172a) 8%, transparent);
-  color: var(--academy-text, #0f172a);
-}
-
 .wrongBoardFilterPanel,
 .wrongBoardDiagnosis,
 .wrongBoardNotice,
@@ -13908,39 +13776,6 @@ textarea {
 .materialManagerPage {
   display: grid;
   gap: 16px;
-}
-
-.localTabs {
-  background: var(--status-info-bg, #eff6ff);
-  border: 1px solid var(--status-info-bg, #eff6ff);
-  border-radius: 8px;
-  display: inline-flex;
-  gap: 4px;
-  padding: 4px;
-}
-
-.localTabs button {
-  appearance: none;
-  background: transparent;
-  border: 0;
-  border-radius: 6px;
-  color: var(--academy-text-strong, #475569);
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 900;
-  min-height: 36px;
-  padding: 0 14px;
-}
-
-.localTabs button.active {
-  background: var(--academy-primary, #17213d);
-  box-shadow: 0 8px 18px color-mix(in srgb, var(--academy-primary, #17213d) 14%, transparent);
-  color: var(--academy-surface, #ffffff);
-}
-
-.materialTabs {
-  justify-self: start;
-  max-width: 620px;
 }
 
 .materialPanel {
@@ -15027,7 +14862,6 @@ body.attendanceOnlyBody {
     grid-column: auto;
   }
 
-  .examManagementTabs,
   .tallyStats,
   .tallyMetricLine,
   .tallyReviewGrid {

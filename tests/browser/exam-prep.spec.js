@@ -373,10 +373,11 @@ test("exam prep calendar exposes every school and switches the daily roster betw
   await examPrepPill.click();
 
   const dialog = page.getByRole("dialog", { name: "시험대비" });
-  await expect(dialog.getByRole("button", { name: "시간순" })).toHaveAttribute("aria-pressed", "true");
+  // 2026-09-19 · 명단 정렬은 탭(role=tab/aria-selected)이다. aria-pressed 토글 의미를 걷어냈다.
+  await expect(dialog.getByRole("tab", { name: "시간순" })).toHaveAttribute("aria-selected", "true");
   await expect(dialog.locator(".examPrepRosterGroup > header strong")).toHaveText(["13:30-15:00", "15:00-18:00"]);
   await expect(dialog.locator(".examPrepRosterRow > div > strong")).toHaveText(["박나래", "김가람", "이도윤"]);
-  await dialog.getByRole("button", { name: "학교별" }).click();
+  await dialog.getByRole("tab", { name: "학교별" }).click();
   await expect(dialog.locator(".examPrepRosterGroup > header strong")).toHaveText(["상계중", "자운고", "정의여고"]);
 
   await page.setViewportSize({ height: 844, width: 390 });

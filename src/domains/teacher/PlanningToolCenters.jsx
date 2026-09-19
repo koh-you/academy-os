@@ -1369,7 +1369,7 @@ export function AIVariantProblemCenter({ runtime, aiSettings = runtime.defaultAi
         title="AI 도구"
       />
 
-      <WorkspaceTabs className="studentManagerTabs aiTabs" label="AI 도구 작업 구분" variant="secondary">
+      <WorkspaceTabs label="AI 도구 작업 구분">
         {[
           ["variant", "변형문항"]
         ].map(([id, label]) => (

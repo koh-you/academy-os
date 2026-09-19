@@ -5,6 +5,7 @@
 // 통과시킨다(협력 교사에게는 이 탭 자체가 보이지 않는다).
 
 import { useCallback, useEffect, useState } from "react";
+import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { apiFetch, postJson } from "../../shared/utils/apiClient.js";
 import "./teacherAccountAdminPanel.css";
 
@@ -129,9 +130,9 @@ export function TeacherAccountAdminPanel() {
       {message ? <p className="teacherAccountMessage">{message}</p> : null}
 
       <div className="teacherAccountList" aria-label="등록된 교사 계정">
-        {loadState === "loading" ? <p className="muted">불러오는 중입니다.</p> : null}
+        {loadState === "loading" ? <EmptyState aria-busy="true" aria-live="polite" density="compact" role="status" title="불러오는 중입니다." tone="loading" /> : null}
         {loadState === "loaded" && accounts.length === 0 ? (
-          <p className="muted">등록된 계정이 없습니다.</p>
+          <EmptyState density="compact" title="등록된 계정이 없습니다." />
         ) : null}
         {accounts.map((account) => (
           <div className="teacherAccountRow" key={account.teacherId}>

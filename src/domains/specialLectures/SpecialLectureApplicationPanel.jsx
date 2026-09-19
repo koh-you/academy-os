@@ -700,14 +700,16 @@ export function SpecialLectureApplicationPanel({
       setMatchSearchText("");
       setMatchStudentId("");
       setPanelFeedback(
-        `${confirmedStudent.name} 학생${studentReplacementSaved ? "의 기본정보를 Tally 제출값으로 교체하고 기존 특강 회차·수업기록을 유지한 채" : "을"} 확정 명단에 연결했습니다. 모달에서 회차와 시간을 확인해 주세요.`,
+        `${confirmedStudent.name} 학생${studentReplacementSaved ? "의 기본정보를 Tally 제출값으로 교체하고 기존 특강 회차·수업기록을 유지한 채" : "을"} 확정 명단에 연결했습니다. 모달에서 회차와 시간을 확인해 주세요.`
+,
         "success"
       );
     } catch (error) {
       setPanelFeedback(
         studentReplacementSaved
           ? `학생 Tally 기본정보는 교체됐지만 특강 신청 연결 저장에 실패했습니다: ${error.message}`
-          : `특강 확정 준비 실패: ${error.message}`,
+          : `특강 확정 준비 실패: ${error.message}`
+,
         "error"
       );
     } finally {
@@ -1573,7 +1575,7 @@ export function SpecialLectureApplicationPanel({
             })}
           </div>
         ) : (
-          <p className="specialLectureGateEmpty">현재 활성 수강명단이 없습니다. 확정 신청자를 기존 학생과 매칭한 뒤 명단에 추가하세요.</p>
+          <EmptyState density="compact" description="확정 신청자를 기존 학생과 매칭한 뒤 명단에 추가하세요." title="현재 활성 수강명단이 없습니다." />
         )}
         {canceledEnrollments.length ? (
           <Disclosure className="specialLectureCanceledEnrollments" trigger={`취소·오입력 기록 ${canceledEnrollments.length}건`}>
@@ -1652,7 +1654,7 @@ export function SpecialLectureApplicationPanel({
             ))}
           </div>
         ) : (
-          <p className="specialLectureGateEmpty">회차별 계획을 먼저 저장해 주세요.</p>
+          <EmptyState density="compact" title="회차별 계획을 먼저 저장해 주세요." />
         )}
         <div className="specialLectureLessonCreateActions">
           <button
@@ -1731,7 +1733,6 @@ export function SpecialLectureApplicationPanel({
                   action={matchSearchText.trim() ? (
                     <button className="softButton compact" onClick={() => setMatchSearchText("")} type="button">검색어 지우기</button>
                   ) : null}
-                  className="specialLectureGateEmpty"
                   description={matchSearchText.trim()
                     ? "이름·학교·학년·반을 다시 확인하세요."
                     : "신청자를 특강 전용 학생으로 등록할 수 있습니다."}
@@ -1833,7 +1834,6 @@ export function SpecialLectureApplicationPanel({
                   action={manualSearchText.trim() ? (
                     <button className="softButton compact" onClick={() => setManualSearchText("")} type="button">검색어 지우기</button>
                   ) : null}
-                  className="specialLectureGateEmpty"
                   description={manualSearchText.trim() ? "이름·학교·학년·반을 다시 확인하세요." : "이미 등록된 학생은 목록에서 제외됩니다."}
                   title={manualSearchText.trim() ? "검색 결과가 없습니다." : "추가할 수 있는 학생이 없습니다."}
                 />

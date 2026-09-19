@@ -1,5 +1,6 @@
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { Disclosure } from "../../shared/components/Disclosure.jsx";
+import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import {
   formatSettlementHours,
   formatSettlementPercent,
@@ -199,11 +200,11 @@ export function MonthlySettlementRegularTable({
       </DataTableShell>
 
       {!activeRows.length ? (
-        <div className="monthlySettlementEmpty">
-          {rows.length
+        <EmptyState
+          title={rows.length
             ? "이 달의 정규 정산 행이 모두 제외되었습니다."
             : "이 달에 표시할 정규 수업일지 학생이 없습니다."}
-        </div>
+        />
       ) : null}
 
       {excludedRows.length ? (

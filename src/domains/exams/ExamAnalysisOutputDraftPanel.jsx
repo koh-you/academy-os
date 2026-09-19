@@ -438,13 +438,17 @@ export function ExamAnalysisOutputDraftPanel({
                   <strong>주요문항 {index + 1}</strong>
                   <span>주요문항 슬라이드 + 손풀이 슬라이드 + 블로그 설명글</span>
                 </div>
-                <button
-                  disabled={isOutputBusy || keyQuestionBlocks.length <= 1}
-                  onClick={() => onRemoveKeyQuestionBlock(block.blockId)}
-                  type="button"
-                >
-                  삭제
-                </button>
+                {keyQuestionBlocks.length > 1 ? (
+                  <button
+                    aria-label={`주요문항 ${index + 1} 제거`}
+                    className="iconButton"
+                    disabled={isOutputBusy}
+                    onClick={() => onRemoveKeyQuestionBlock(block.blockId)}
+                    type="button"
+                  >
+                    ×
+                  </button>
+                ) : null}
               </div>
               <div className="examAnalysisKeyQuestionFields">
                 {examAnalysisKeyQuestionBlockFields.map((field) => (
