@@ -61,27 +61,55 @@ export function isNonRegularContinuityLesson(lesson = {}) {
 
 const attendedStatuses = new Set(["late", "present"]);
 
+function isAttendedRecord(record) {
+  return Boolean(record) && (
+    attendedStatuses.has(record.attendanceStatus) ||
+    [record.checkInAt, record.checkInTime].some(hasText)
+  );
+}
+
+function attendanceIndexKey(lessonId, studentId) {
+  return `${lessonId} :: ${studentId}`;
+}
+
+/**
+ * "이 학생이 이 수업에 출석했다" 를 O(1) 로 답하는 색인. 기록 전체를 한 번 훑어 만든다.
+ * findPreviousLessonsForStudent 가 후보 수업마다 기록 전체를 다시 훑지 않도록 한 번 만들어
+ * 넘긴다 — 수업일지 한 화면이 학생마다 대여섯 번 직전 수업을 찾으므로, 기록이 수천 건이면
+ * 렌더당 수십~수백 ms 였다(2026-09-19 실측 12~114 ms).
+ */
+export function createStudentAttendanceIndex(records = []) {
+  const index = new Set();
+  for (const record of records) {
+    if (isAttendedRecord(record)) index.add(attendanceIndexKey(record.lessonId, record.studentId));
+  }
+  return index;
+}
+
 export function hasStudentAttendedLesson(records = [], lessonId = "", studentId = "") {
   return records.some((record) => (
     record?.lessonId === lessonId &&
     record?.studentId === studentId &&
-    (
-      attendedStatuses.has(record.attendanceStatus) ||
-      [record.checkInAt, record.checkInTime].some(hasText)
-    )
+    isAttendedRecord(record)
   ));
 }
 
-export function findPreviousLessonsForStudent(lessons, lesson, studentId, { onlyRegularLessons = false, records = null } = {}) {
+export function findPreviousLessonsForStudent(
+  lessons,
+  lesson,
+  studentId,
+  { attendanceIndex = null, onlyRegularLessons = false, records = null } = {}
+) {
   const currentSortValue = getLessonSortValue(lesson);
-  const canVerifyAttendance = Array.isArray(records);
+  // 색인이 오면 그것으로, 아니면 기록 배열로 한 번 만들어 판정한다. 결과는 같다.
+  const index = attendanceIndex ?? (Array.isArray(records) ? createStudentAttendanceIndex(records) : null);
   return [...lessons]
     .filter((candidate) => candidate.lessonId !== lesson.lessonId)
     .filter((candidate) => !shouldIgnoreLessonAttendance(candidate))
     .filter((candidate) => candidate.studentIds?.includes(studentId))
     .filter((candidate) => isSameLessonContinuityForStudent(lesson, candidate))
     .filter((candidate) => !onlyRegularLessons || !isNonRegularContinuityLesson(candidate))
-    .filter((candidate) => !canVerifyAttendance || hasStudentAttendedLesson(records, candidate.lessonId, studentId))
+    .filter((candidate) => !index || index.has(attendanceIndexKey(candidate.lessonId, studentId)))
     .filter((candidate) => getLessonSortValue(candidate) < currentSortValue)
     .sort((a, b) => getLessonSortValue(b).localeCompare(getLessonSortValue(a)));
 }
