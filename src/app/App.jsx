@@ -475,6 +475,12 @@ import { TeacherViewSwitcher } from "./TeacherViewSwitcher.jsx";
 import { safeIdPart } from "../shared/utils/id.js";
 import { getKoreaDateString } from "../shared/utils/koreaDate.js";
 import { setTenantIdScope } from "../shared/utils/tenantIdScope.js";
+import { getSessionBrandName, setSessionBrandName } from "../shared/utils/academyBrand.js";
+import {
+  defaultTenantSettings,
+  normalizeTenantSettings,
+  resolveExamPrepAutoRowClassTemplateIds
+} from "../domains/settings/tenantSettings.js";
 import {
   deriveClassTemplateScheduleSummary,
   formatClassTemplateScheduleLabel,
@@ -705,7 +711,7 @@ function getHomeworkFollowupPatch(record = {}, method = "", homework = null) {
   };
 }
 
-function buildCommentPreviewText({ audience, comment, lesson, nextHomework, notificationTemplates = {}, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
+function buildCommentPreviewText({ academyName = getSessionBrandName(), audience, comment, lesson, nextHomework, notificationTemplates = {}, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
   const isParent = audience === "parent";
   const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
   const omitPreviousHomework = isAssignmentStatusUnrecorded(assignmentStatus);
@@ -728,7 +734,7 @@ function buildCommentPreviewText({ audience, comment, lesson, nextHomework, noti
   });
 
   return joinMessageBlocks([
-    `#{학원명}: ${academyBrandName}`,
+    `#{학원명}: ${academyName}`,
     `#{학생명}: ${student.name}`,
     isParent ? `#{수업일}: ${lesson.date}` : `#{수업명}: ${lesson.className}`,
     isParent ? "#{리포트본문}:" : "#{코멘트}:",
@@ -736,7 +742,7 @@ function buildCommentPreviewText({ audience, comment, lesson, nextHomework, noti
   ]);
 }
 
-function buildCommentSourceText({ audience = "parent", lesson, nextHomework, notificationTemplates = {}, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
+function buildCommentSourceText({ academyName = getSessionBrandName(), audience = "parent", lesson, nextHomework, notificationTemplates = {}, previousHomework, record, student, supplementSchedules = [], testResultLines = [] }) {
   const assignmentStatus = getAssignmentStatusForMessage(record, previousHomework);
   const omitPreviousHomework = isAssignmentStatusUnrecorded(assignmentStatus);
   const homeworkFollowupNotice = omitPreviousHomework ? "" : getHomeworkFollowupNoticeForTarget(record, audience, notificationTemplates);
@@ -2134,6 +2140,7 @@ function createDefaultSharedAppState() {
   return {
     aiSettings: defaultAiSettings,
     attendanceSettings: defaultAttendanceSettings,
+    tenantSettings: defaultTenantSettings,
     deletedLessonBundles: [],
     generatedLessonControls: defaultGeneratedLessonControls,
     lessonNotificationPlans: {},
@@ -2189,6 +2196,11 @@ export function App() {
   // #{학원명} 변수는 서버가 tenant 기준으로 한 번 더 바로잡지만, 본문에 직접 들어가는
   // 인사말("안녕하세요. ○○T입니다")은 화면에서 만들어지므로 여기서 정해야 한다.
   const sessionBrandName = formatTeacherBrandName(session?.name);
+  useEffect(() => {
+    setSessionBrandName(session?.name);
+  }, [session?.name]);
+  // 학생·학부모 포털 상단 학원명 — 서버가 학생의 tenant 선생님 이름으로 준다.
+  const [portalAcademyName, setPortalAcademyName] = useState("");
   // 원장이 지금 보고 있는 선생님의 테넌트. 빈 값이면 자기 자료를 본다.
   // 협력 교사는 이 값을 쓰지 않는다(서버도 owner 가 아니면 무시한다).
   const [viewTenantId, setViewTenantId] = useStoredState(storageKeys.viewTenantId, "");
@@ -2293,6 +2305,8 @@ export function App() {
     storageKeys.attendanceSettings,
     defaultAttendanceSettings
   );
+  // tenant 별 운영 설정(시험대비 자동 생성 대상 반 등). 원장 전용 상수를 대신한다.
+  const [tenantSettings, setTenantSettings] = useStoredState(storageKeys.tenantSettings, defaultTenantSettings);
   const [monthlyInstructorSettlements, setMonthlyInstructorSettlements] = useStoredState(
     storageKeys.monthlyInstructorSettlements,
     createDefaultMonthlySettlementState()
@@ -2424,6 +2438,7 @@ export function App() {
   const sharedAppState = useMemo(() => ({
     aiSettings,
     attendanceSettings,
+    tenantSettings,
     deletedLessonBundles,
     generatedLessonControls,
     lessonNotificationPlans,
@@ -2434,6 +2449,7 @@ export function App() {
   }), [
     aiSettings,
     attendanceSettings,
+    tenantSettings,
     deletedLessonBundles,
     generatedLessonControls,
     lessonNotificationPlans,
@@ -2462,6 +2478,7 @@ export function App() {
     initialWrongProblemsRef.current = [];
     setAiSettings(defaults.aiSettings);
     setAttendanceSettings(defaults.attendanceSettings);
+    setTenantSettings(defaults.tenantSettings);
     setDeletedLessonBundles(defaults.deletedLessonBundles);
     setGeneratedLessonControls(defaults.generatedLessonControls);
     setLessonNotificationPlans(defaults.lessonNotificationPlans);
@@ -2595,6 +2612,7 @@ export function App() {
         }
         if (session && ["student", "parent"].includes(session.role)) {
           const portalData = await fetchPortalData(session.sessionToken);
+          setPortalAcademyName(String(portalData.academyName || ""));
           if (!isMounted) return;
           setStudents(portalData.students ?? []);
           setLessons(portalData.lessons ?? []);
@@ -2783,6 +2801,7 @@ export function App() {
           if (Array.isArray(states.academyTests)) setAcademyTests(states.academyTests);
           if (states.aiSettings) setAiSettings(states.aiSettings);
           if (states.attendanceSettings) setAttendanceSettings(normalizeAttendanceSettings(states.attendanceSettings));
+          if (states.tenantSettings) setTenantSettings(normalizeTenantSettings(states.tenantSettings));
           if (Array.isArray(states.deletedLessonBundles)) setDeletedLessonBundles(states.deletedLessonBundles);
           if (states.generatedLessonControls) setGeneratedLessonControls(normalizeGeneratedLessonControls(states.generatedLessonControls));
           if (states.lessonNotificationPlans && typeof states.lessonNotificationPlans === "object" && !Array.isArray(states.lessonNotificationPlans)) {
@@ -2875,6 +2894,7 @@ export function App() {
     setAcademyTests,
     setAiSettings,
     setAttendanceSettings,
+    setTenantSettings,
     setDeletedLessonBundles,
     setExamPrepRows,
     setGeneratedLessonControls,
@@ -3667,11 +3687,10 @@ export function App() {
     });
   }, [setStudents]);
 
-  // 학생이 바뀌면 학교·학년별 시험정보를 자동으로 만든다. 원장 tenant 는 내신반(월수금 7-10)
-  // 학생만 대상이고, 그 반이 없는 tenant(협력 교사)는 활성 학생 전체가 대상이다.
-  const examPrepAutoRowClassTemplateId = classTemplates.some((template) => template.classTemplateId === "template_mwf_7_10")
-    ? "template_mwf_7_10"
-    : "";
+  // 학생이 바뀌면 학교·학년별 시험정보를 자동으로 만든다. 대상 반은 tenant 설정
+  // (설정 → 운영 설정)이 정한다. 비어 있으면 활성 학생 전체. 원장의 "내신반만" 은 설정값이지
+  // 코드 상수가 아니다(2026-09-19).
+  const examPrepAutoRowClassTemplateId = resolveExamPrepAutoRowClassTemplateIds(tenantSettings, classTemplates).join(",");
   useEffect(() => {
     // 반 목록이 아직 없으면(첫 로딩·캐시 초기화 직후) 기다린다 — 이때 돌리면 원장 학생 전원의
     // 행이 생겨 버린다.
@@ -3873,6 +3892,7 @@ export function App() {
   if (sessionSurface === "student") {
     return (
       <StudentPortalV2
+        academyName={portalAcademyName || academyBrandName}
         examPrepRows={examPrepRows}
         examPostSaveStates={studentExamPostSaveStates}
         examPostSubmissions={examPostSubmissions}
@@ -3906,7 +3926,7 @@ export function App() {
     return (
       <ParentPortal
         homeworks={homeworks}
-        academyName={academyBrandName}
+        academyName={portalAcademyName || academyBrandName}
         filterMaterials={filterVisibleMaterials}
         getHomeworkStatusLabel={getHomeworkStatusLabel}
         getHomeworkStatusTone={getHomeworkStatusTone}
@@ -6471,6 +6491,7 @@ export function App() {
       aiSettings,
       appStateSaveState,
       attendanceSettings,
+      tenantSettings,
       attendanceSyncStatus,
       calendarLessons,
       classTemplates,
@@ -6648,6 +6669,7 @@ export function App() {
       setAiSettings,
       setAttendanceModal,
       setAttendanceSettings,
+      setTenantSettings,
       setExamPostTargetStudentIds,
       setSelectedLessonId,
       setTallySubmissions,
@@ -6688,6 +6710,7 @@ export function App() {
 
         {activeView === "studentPortal" ? (
           <StudentPortalV2
+            academyName={portalAcademyName || academyBrandName}
             examPrepRows={examPrepRows}
             examPostSaveStates={studentExamPostSaveStates}
             examPostSubmissions={examPostSubmissions}
@@ -7977,6 +8000,7 @@ function summarizeTallySubmissions(submissions) {
   ].filter(Boolean).join("\n");
 }
 function StudentPortalV2({
+  academyName = academyBrandName,
   examPrepRows = [],
   examPostSaveStates = {},
   examPostSubmissions = [],
@@ -8054,7 +8078,7 @@ function StudentPortalV2({
 
   return (
     <StudentPortalShell
-      academyName={academyBrandName}
+      academyName={academyName}
       activeTab={activeTab}
       allHomework={{
         getStatusLabel: getHomeworkStatusLabel,

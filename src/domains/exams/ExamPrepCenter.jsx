@@ -17,6 +17,7 @@ import { buildExamPeriodSundayScheduleModel, hasExamPeriodSundaySchedule, openEx
 
 export function ExamPrepCenter({
   runtime,
+  academyName = "",
   aiSettings = runtime.defaultAiSettings,
   examPostConfirmSaveStates = {},
   examPostSubmissions = [],
@@ -155,7 +156,7 @@ export function ExamPrepCenter({
 
   function setActiveTab(tabId) {
     if (tabId !== "info" && !selectedClassTemplateId) {
-      setSelectedClassTemplateId(templates[0]?.classTemplateId ?? "template_mwf_7_10");
+      setSelectedClassTemplateId(templates[0]?.classTemplateId ?? "");
     }
     setActiveTabState(tabId);
   }
@@ -297,7 +298,7 @@ export function ExamPrepCenter({
               className="softButton compact"
               onClick={() => openExamPeriodSundaySchedulePdf(
                 buildExamPeriodSundayScheduleModel({ lessons: sundayScheduleLessons, students }),
-                { title: "고태영T 일요시험대비 일정표" }
+                { title: `${academyName} 일요시험대비 일정표` }
               )}
               type="button"
             >

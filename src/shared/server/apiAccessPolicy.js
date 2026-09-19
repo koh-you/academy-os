@@ -57,14 +57,22 @@ const ASSISTANT_ALLOW_EXACT = new Set([
   "GET /api/classes",
   "GET /api/school-events",
   "GET /api/app-state",
+  // app_state 저장(2026-09-19). tenant 별 행이고 CAS(expectedUpdatedAt)라 안전하다. 닫혀 있던
+  // 동안 협력 교사는 메모·성적·상담·학원테스트 "저장 실패", 예약 설정 되돌아감, 삭제한 자동
+  // 수업 부활을 겪었고, 빈 tenant 의 초기 저장이 403 이라 isAppStateReady 가 영영 안 켜져
+  // 알림 예약 목록·실시간 출결·자동 동기화가 조용히 꺼져 있었다.
+  "POST /api/app-state",
   "GET /api/integrations/status",
   "GET /api/notification-jobs",
   "GET /api/makeup-tasks",
   // 수업일지의 "지난 숙제 / 다음 숙제" 칸이 읽는다. POST 만 열려 있어서 숙제를 만들 수는
   // 있는데 읽지는 못하는 상태였다(2026-09-08 발견).
   "GET /api/homeworks",
-  // 수업일지 상단 "운영 알림 원본" 패널이 읽는다. tenant 스코핑으로 자기 것만 보인다.
+  // 수업일지 상단 "운영 알림 원본" 패널과 학생 프로필이 읽고 **쓴다**(추가·완료·삭제 버튼이
+  // 전부 노출돼 있다). tenant 스코핑으로 자기 것만 보고 쓴다(2026-09-19 POST/DELETE 개방).
   "GET /api/academy-reminders",
+  "POST /api/academy-reminders",
+  "DELETE /api/academy-reminders",
   // 반관리 · 시험관리 · 학사일정 화면(2026-09-09 협력 교사에게 개방).
   // 전부 tenant 스코핑 대상이라 각자 자기 것만 보고 쓴다.
   "POST /api/class-rosters/save",

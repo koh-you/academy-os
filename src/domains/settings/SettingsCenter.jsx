@@ -3,6 +3,8 @@ import "./settingsCenter.css";
 import { useEffect, useState } from "react";
 import { academyBrandName } from "../../app/appConfig.js";
 import { defaultAttendanceSettings } from "../lessons/attendanceSettings.js";
+import { defaultTenantSettings, normalizeTenantSettings } from "./tenantSettings.js";
+import "./tenantSettings.css";
 import { getNotificationJobLabel } from "../notifications/notificationCenterConfig.js";
 import { notificationTemplateRows } from "./notificationTemplateSettingsCatalog.js";
 import { AutosaveRiskNotice } from "../../shared/components/AutosaveRiskNotice.jsx";
@@ -201,6 +203,9 @@ export function SettingsCenter({
   aiSettings,
   appStateSaveState = "idle",
   attendanceSettings = defaultAttendanceSettings,
+  classTemplates = [],
+  onUpdateTenantSettings,
+  tenantSettings = defaultTenantSettings,
   integrationStatus,
   onUpdateAiSettings,
   onUpdateAttendanceSettings,
@@ -285,8 +290,13 @@ export function SettingsCenter({
     { id: "notificationTemplates", label: "알림톡 문구" },
     { id: "ai", label: "AI 모델" },
     { id: "prompts", label: "AI 프롬프트" },
-    { id: "attendance", label: "출결" }
-  ] : [{ id: "account", label: "계정" }];
+    { id: "attendance", label: "출결" },
+    { id: "tenant", label: "운영 설정" }
+  ] : [
+    { id: "account", label: "계정" },
+    // tenant 설정은 자기 tenant 의 app_state 에만 저장되므로 협력 교사도 자기 것을 정한다.
+    { id: "tenant", label: "운영 설정" }
+  ];
 
   useEffect(() => {
     setAccountForm((current) => ({
@@ -353,6 +363,17 @@ export function SettingsCenter({
       ...current,
       [field]: value
     }));
+  }
+
+  const tenant = normalizeTenantSettings(tenantSettings);
+  function updateTenantSetting(field, value) {
+    onUpdateTenantSettings?.((current) => ({ ...normalizeTenantSettings(current), [field]: value }));
+  }
+  function toggleExamPrepAutoRowClass(classTemplateId) {
+    const current = new Set(tenant.examPrepAutoRowClassTemplateIds);
+    if (current.has(classTemplateId)) current.delete(classTemplateId);
+    else current.add(classTemplateId);
+    updateTenantSetting("examPrepAutoRowClassTemplateIds", classTemplates.map((template) => template.classTemplateId).filter((id) => current.has(id)));
   }
 
   function updateAccountForm(field, value) {
@@ -668,6 +689,54 @@ export function SettingsCenter({
               }
             />
             <span className="aiSettingBadge fieldBadge">분 단위</span>
+          </div>
+        </div>
+      </section>
+      ) : null}
+      {activeSettingsSection === "tenant" ? (
+      <section className="panel settingsCard">
+        <div className="sectionTitle">
+          <div>
+            <h2>운영 설정</h2>
+            <p>이 계정(선생님)에만 적용되는 기본값입니다. 예전에는 원장 반이 코드에 고정돼 있었습니다.</p>
+          </div>
+        </div>
+        <div className="settingsRows">
+          <div className="settingsRow">
+            <div>
+              <strong>시험관리 자동 생성 대상 반</strong>
+              <span className="muted">학생을 등록하면 이 반 학생의 학교·학년 시험정보가 자동으로 생깁니다. 하나도 고르지 않으면 모든 반이 대상입니다.</span>
+            </div>
+            <div aria-label="시험관리 자동 생성 대상 반" className="tenantSettingChoices" role="group">
+              {classTemplates.length === 0 ? <span className="muted">아직 개설된 반이 없습니다.</span> : null}
+              {classTemplates.map((template) => (
+                <label className="tenantSettingChoice" key={template.classTemplateId}>
+                  <input
+                    checked={tenant.examPrepAutoRowClassTemplateIds.includes(template.classTemplateId)}
+                    onChange={() => toggleExamPrepAutoRowClass(template.classTemplateId)}
+                    type="checkbox"
+                  />
+                  <span>{template.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          <div className="settingsRow compact">
+            <div>
+              <strong>처음 선택되는 반</strong>
+              <span className="muted">학생관리 "반별" 탭과 시험관리에서 처음 보여줄 반입니다. 비우면 첫 반.</span>
+            </div>
+            <select
+              aria-label="처음 선택되는 반"
+              className="studentClassSelect"
+              onChange={(event) => updateTenantSetting("defaultClassTemplateId", event.target.value)}
+              value={tenant.defaultClassTemplateId}
+            >
+              <option value="">첫 반</option>
+              {classTemplates.map((template) => (
+                <option key={template.classTemplateId} value={template.classTemplateId}>{template.name}</option>
+              ))}
+            </select>
           </div>
         </div>
       </section>

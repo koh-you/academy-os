@@ -468,6 +468,7 @@ function createInitialState() {
 }
 
 let state = createInitialState();
+let resetGeneration = 0;
 let resourceMaterialFiles = new Map();
 let testPaperFiles = new Map();
 
@@ -2296,12 +2297,20 @@ const server = http.createServer(async (request, response) => {
     const payload = await readJson(request);
     if (requestUrl.pathname === "/api/safe-fixture/reset") {
       state = createInitialState();
+      resetGeneration += 1;
       resourceMaterialFiles = new Map();
       testPaperFiles = new Map();
       return sendJson(response, 200, { ok: true, safeFixture: true });
     }
     if (["/api/app-state", "/api/lesson-records/bulk", "/api/lesson-journal/makeup-tasks/save", "/api/lesson-journal/rows/save", "/api/resource-materials", "/api/supplement-schedules/save", "/api/school-events", "/api/school-calendar/derived-save"].includes(requestUrl.pathname)) {
+      // 800ms 지연 뒤 fixture 가 초기화됐으면(다음 테스트가 시작됨) 이 저장은 이전 테스트의
+      // 잔여 요청이다. 적용하면 다음 테스트가 "빈 app_state 에서 시작" 하지 못한다(2026-09-19:
+      // session-identity 스펙이 앞 테스트의 첫 부트스트랩 저장에 밀려 간헐적으로 실패했다).
+      const generationBeforeDelay = resetGeneration;
       await new Promise((resolve) => setTimeout(resolve, 800));
+      if (generationBeforeDelay !== resetGeneration) {
+        return sendJson(response, 200, { ok: true, safeFixture: true, source: "supabase", stale: true, verified: true });
+      }
     }
     const { statusCode = 200, ...result } = handleMutation(requestUrl.pathname, payload);
     return sendJson(response, statusCode, {

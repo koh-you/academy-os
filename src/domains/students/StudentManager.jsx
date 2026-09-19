@@ -12,6 +12,7 @@ import { StudentProfileErrorBoundary, StudentProfileModal } from "./StudentProfi
 import { StudentWithdrawnList } from "./StudentWithdrawnList.jsx";
 import { sortWithdrawnStudents } from "./studentListSort.js";
 import { getDefaultRosterEffectiveMode, hasStudentLessonRowOnDate } from "./rosterEffectiveDate.js";
+import { resolveDefaultClassTemplateId } from "../settings/tenantSettings.js";
 import { isWithdrawnStudent } from "./lessonRosterSelectors.js";
 
 const withdrawalReasonOptions = [
@@ -51,6 +52,7 @@ export function StudentManager({
   students,
   today = "",
   templates,
+  tenantSettings = {},
   ModalComponent,
   onAddStudent
 }) {
@@ -84,7 +86,11 @@ export function StudentManager({
   const [withdrawalDraft, setWithdrawalDraft] = useState({ comment: "", reason: "other", rosterEffectiveMode: "tomorrow" });
   const [withdrawalError, setWithdrawalError] = useState("");
   const [withdrawalSaveState, setWithdrawalSaveState] = useState("idle");
-  const [selectedClassTemplateId, setSelectedClassTemplateId] = useState("template_mwf_7_10");
+  // 처음 선택 반은 tenant 설정(운영 설정) → 첫 반 순. 예전엔 원장 반 id 가 박혀 있어
+  // 다른 tenant 에서는 아무 반도 선택되지 않은 빈 목록이 떴다(2026-09-19).
+  const [selectedClassTemplateId, setSelectedClassTemplateId] = useState(
+    () => resolveDefaultClassTemplateId(tenantSettings, templates) || "unassigned"
+  );
   const [dirtyStudentIds, setDirtyStudentIds] = useState(() => new Set());
   const [originalClassTemplateIds, setOriginalClassTemplateIds] = useState({});
   const [rosterEffectiveModes, setRosterEffectiveModes] = useState({});
@@ -158,9 +164,15 @@ export function StudentManager({
     }
   }, [selectedStudentId, visibleStudents]);
 
+  // withdrawnStudents 는 렌더마다 새 배열이라 이 effect 가 매번 돌고, 매번 새 Set 을 넣으면
+  // 다시 렌더 → "Maximum update depth exceeded" 무한 루프(학생관리 화면 CPU 100%, 2026-09-19
+  // 발견). 실제로 빠지는 id 가 있을 때만 상태를 바꾼다.
   useEffect(() => {
     const validIds = new Set(withdrawnStudents.map((student) => student.studentId));
-    setSelectedWithdrawnStudentIds((current) => new Set([...current].filter((studentId) => validIds.has(studentId))));
+    setSelectedWithdrawnStudentIds((current) => {
+      const kept = [...current].filter((studentId) => validIds.has(studentId));
+      return kept.length === current.size ? current : new Set(kept);
+    });
   }, [withdrawnStudents]);
 
   async function confirmDeleteStudent() {

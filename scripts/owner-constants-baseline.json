@@ -1,0 +1,31 @@
+{
+  "_comment": "원장 전용 상수 사용 개수(파일::패턴). 늘어나면 check:owner-constants 가 실패한다. 줄이면 --update 로 낮춘다.",
+  "counts": {
+    "src/app/App.jsx :: instructor_owner_001": 7,
+    "src/app/App.jsx :: 고태영": 3,
+    "src/app/appConfig.js :: template_mwf_7_10": 1,
+    "src/app/appConfig.js :: template_tt_sat": 2,
+    "src/app/useAppSession.js :: instructor_owner_001": 1,
+    "src/app/useAppSession.js :: tenant_default": 2,
+    "src/domains/blogContent/BlogContentStudio.jsx :: 고태영": 1,
+    "src/domains/blogContent/blogHybridModel.js :: 고태영": 2,
+    "src/domains/exams/ExamAnalysisPipelineCenter.jsx :: 고태영": 1,
+    "src/domains/exams/examAnalysisChartSvg.js :: 고태영": 1,
+    "src/domains/exams/examAnalysisOutputPackageBuilder.js :: 고태영": 2,
+    "src/domains/lessons/LessonNestedPanels.jsx :: instructor_owner_001": 3,
+    "src/domains/lessons/examPrepLessonCandidateBuilder.js :: instructor_owner_001": 1,
+    "src/domains/lessons/generatedPreExamLessonBuilder.js :: instructor_owner_001": 1,
+    "src/domains/lessons/lessonJournalCommentSaveController.js :: instructor_owner_001": 1,
+    "src/domains/lessons/lessonJournalDraftPersistencePlan.js :: instructor_owner_001": 1,
+    "src/domains/lessons/lessonJournalRecordDraft.js :: instructor_owner_001": 1,
+    "src/domains/lessons/lessonModalPayloadBuilders.js :: instructor_owner_001": 2,
+    "src/domains/lessons/lessonNotificationRecordStatusRows.js :: instructor_owner_001": 1,
+    "src/domains/lessons/manualAttendancePayload.js :: instructor_owner_001": 1,
+    "src/domains/lessons/monthlyRegularLessonOpen.js :: instructor_owner_001": 1,
+    "src/domains/specialLectures/specialLectureGuideUtils.js :: 고태영": 4,
+    "src/domains/supplements/supplementSchedulePlan.js :: instructor_owner_001": 1,
+    "src/shared/server/authLoginRouteRegistry.js :: tenant_default": 2,
+    "src/shared/server/kioskDeviceRegistry.js :: tenant_default": 1,
+    "src/shared/server/sessionRouteGuard.js :: tenant_default": 3
+  }
+}

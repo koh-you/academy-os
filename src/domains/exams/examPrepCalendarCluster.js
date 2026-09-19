@@ -261,9 +261,15 @@ export function createExamPrepCalendarCluster(today) {
     return [examCycleTermKey(row.examCycle), getSchoolGradeKey(row.schoolName, row.grade) || "학교미입력_학년미입력"].join("_");
   }
 
-  function buildExamPrepRowsFromStudents(students, examCycle, classTemplateId = "", existingRows = []) {
-    const classStudents = classTemplateId
-      ? students.filter((student) => (student.status ?? "active") === "active" && student.defaultClassTemplateId === classTemplateId)
+  // classTemplateIds: 대상 반 id (문자열 하나, 쉼표로 이은 여러 개, 또는 배열). 비면 전체.
+  function buildExamPrepRowsFromStudents(students, examCycle, classTemplateIds = "", existingRows = []) {
+    const targetClassIds = new Set(
+      (Array.isArray(classTemplateIds) ? classTemplateIds : String(classTemplateIds ?? "").split(","))
+        .map((id) => String(id ?? "").trim())
+        .filter(Boolean)
+    );
+    const classStudents = targetClassIds.size > 0
+      ? students.filter((student) => (student.status ?? "active") === "active" && targetClassIds.has(student.defaultClassTemplateId))
       : students.filter((student) => (student.status ?? "active") === "active");
     const seen = new Set(
       existingRows

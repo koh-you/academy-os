@@ -1,4 +1,5 @@
 import { AutosaveRiskNotice } from "../../shared/components/AutosaveRiskNotice.jsx";
+import { canCurrentRoleUseAi } from "../../shared/utils/apiClient.js";
 import "./examReviewComposerModal.css";
 import { Disclosure } from "../../shared/components/Disclosure.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
@@ -29,6 +30,7 @@ export function ExamReviewComposerModal({
     updateReviewDraft,
     updateReviewSection
   } = useExamReviewDraftState({ onUpdateRow, row });
+  const isAiLocked = !canCurrentRoleUseAi();
   const {
     copyRevisedReview,
     polishReview,
@@ -65,7 +67,7 @@ export function ExamReviewComposerModal({
       <div className="commentComposerGrid">
         <section className="commentDraftPanel">
           <SectionHeader
-            actions={<button className="softButton" onClick={polishReview} type="button">AI 수정</button>}
+            actions={<button className="softButton" disabled={isAiLocked} onClick={polishReview} title={isAiLocked ? "AI 수정은 이 계정에 열려 있지 않습니다. 원장님께 문의해 주세요." : undefined} type="button">AI 수정</button>}
             density="slim"
             eyebrow="ORIGINAL"
             title="시험 후 기록지"
