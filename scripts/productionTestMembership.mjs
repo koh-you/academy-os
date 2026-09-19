@@ -49,6 +49,31 @@ export function resolveNpmScriptTestFiles(scriptName, scripts = readPackageScrip
   return files;
 }
 
+/**
+ * CI 워크플로(.github/workflows/production-checks.yml)의 `npm run …` 단계가 실제로 실행하는
+ * `node scripts/…` 파일들. lint·build 같은 비-스크립트 단계는 건너뛴다. 도달 가능성 검사용.
+ * @returns {Set<string>}
+ */
+export function resolveCiWorkflowTestFiles({ scripts = readPackageScripts(), workflowSource } = {}) {
+  const source = workflowSource ?? readFileSync(resolve(repositoryRoot, ".github", "workflows", "production-checks.yml"), "utf8");
+  const files = new Set();
+  for (const match of source.matchAll(/npm run (\S+)/g)) {
+    const command = scripts[match[1]];
+    if (!command) continue;
+    const queue = [command];
+    while (queue.length) {
+      for (const part of queue.shift().split("&&").map((segment) => segment.trim())) {
+        const nested = part.match(/^npm run (\S+)$/);
+        if (nested && scripts[nested[1]]) queue.push(scripts[nested[1]]);
+        const direct = part.match(/^node (scripts\/\S+)/);
+        if (direct) files.add(direct[1]);
+      }
+    }
+  }
+  for (const file of readProductionTestFileList()) files.add(file);
+  return files;
+}
+
 /** npm 스크립트가 도는 모든 파일이 test:production 평면 목록에 있으면 true. */
 export function isNpmScriptCoveredByProductionTests(scriptName, { fileList = readProductionTestFileList(), scripts } = {}) {
   const listed = new Set(fileList);

@@ -7,7 +7,7 @@
 // 가리키고, 중복이 없고, 계약 검사가 맨 앞에 오며, 가드가 쓰는 membership 헬퍼가 체인 전개를
 // 올바르게 하는지 고정한다.
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -15,6 +15,7 @@ import {
   isNpmScriptCoveredByProductionTests,
   isTestFileInProductionList,
   readProductionTestFileList,
+  resolveCiWorkflowTestFiles,
   resolveNpmScriptTestFiles
 } from "./productionTestMembership.mjs";
 
@@ -71,4 +72,29 @@ assert.ok(isTestFileInProductionList("scripts/scenario-tests-production.cjs"));
   assert.throws(() => resolveNpmScriptTestFiles("test:missing", scripts), /스크립트가 없습니다/);
 }
 
-console.log(`production test file list: ${fileList.length} files · no duplicates · contracts first · membership helper contract passed`);
+// 6. 도달 가능성: scripts/test-*.{mjs,cjs} 는 전부 CI 가 실행해야 한다(평면 목록, 또는 워크플로의
+//    fast-checks 단계가 도는 npm 스크립트). 2026-09-19 감사에서 29개가 CI 어디서도 실행되지 않고
+//    있었다(그중 4개는 이미 깨진 죽은 검사, 1개는 2026-09-05 401 장애 뒤에 만든 인증 헤더 가드).
+//    빼려면 아래 allowlist 에 이유와 함께 적는다 — 조용히 빠지는 일이 다시 없게.
+const reachabilityAllowlist = new Map([
+  // Windows checkout 에서 CRLF 가 baseline 키를 깨고, 140개 미추적 색 리터럴이 남아 있어 아직 gate 로
+  // 못 쓴다(css:5 후속). 로컬 `npm run test:ui-color-token-hygiene` 로만 본다.
+  ["scripts/test-ui-color-token-hygiene.cjs", "CRLF baseline · 미추적 리터럴 140 — 별도 정리 뒤 편입"]
+]);
+const scriptsDirectory = resolve(repositoryRoot, "scripts");
+const listed = resolveCiWorkflowTestFiles();
+const unreachable = readdirSync(scriptsDirectory)
+  .filter((name) => /^test-.*\.(mjs|cjs)$/.test(name))
+  .map((name) => `scripts/${name}`)
+  .filter((file) => !listed.has(file) && !reachabilityAllowlist.has(file));
+assert.deepEqual(
+  unreachable,
+  [],
+  ["test scripts that CI never runs (add to production-test-file-list.json or to the allowlist with a reason):", ...unreachable].join(" | ")
+);
+for (const file of reachabilityAllowlist.keys()) {
+  assert.ok(existsSync(resolve(repositoryRoot, file)), `allowlisted script no longer exists, remove it: ${file}`);
+  assert.ok(!listed.has(file), `allowlisted script is also reachable from CI, drop one: ${file}`);
+}
+
+console.log(`production test file list: ${fileList.length} files · no duplicates · contracts first · every scripts/test-* reachable (allowlist ${reachabilityAllowlist.size}) · membership helper contract passed`);

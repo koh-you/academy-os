@@ -119,7 +119,12 @@ for (const filePath of await collectSourceFiles(srcRoot)) {
   if (filePath === apiClientPath) continue;
   const source = await readFile(filePath, "utf8");
   const relativePath = relative(srcRoot, filePath).replace(/\\/g, "/");
-  if (source.includes("fetch(apiUrl(")) bypassOffenders.push(`${relativePath}: fetch(apiUrl(...))`);
+  // /health 는 인증 없는 깨우기 probe 라 유일하게 허용한다(problemBankApi.wakeProblemBankApi).
+  // 그 외의 fetch(apiUrl(...)) 는 Authorization 을 직접 넘기더라도 apiFetch 로 바꾼다 — apiFetch 는
+  // 호출부의 Authorization 을 존중하면서 키오스크·보는 선생님 헤더까지 함께 붙인다.
+  const directCalls = source.split("fetch(apiUrl(").length - 1;
+  const healthProbes = source.split('fetch(apiUrl("/health")').length - 1;
+  if (directCalls > healthProbes) bypassOffenders.push(`${relativePath}: fetch(apiUrl(...))`);
   if (/\bfetchImpl:\s*fetch\b/.test(source)) bypassOffenders.push(`${relativePath}: fetchImpl: fetch`);
 }
 assert.deepEqual(
