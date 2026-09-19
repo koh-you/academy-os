@@ -45,14 +45,18 @@ domainRoot.walkRules((rule) => {
   }
 });
 // 2026-09-19 · 발송 확인 모달·요약 카드·고정 액션 줄 selector 6개 추가 (90 → 96)
-// 2026-09-19 · .noticeStudentEmpty 를 공용 EmptyState 로 대체하며 삭제 (96 → 95)
-assert.equal(domainSelectorCount, 95);
+// 2026-09-19 · UI U14: 980px 이하 1열 규칙(noticeComposerGrid/noticeFilterGrid/noticeScheduleGrid)을 App.css 에서 이 파일로 이동 (96 → 99)
+// 2026-09-19 · UI U15: .noticeStudentEmpty 를 공용 EmptyState 로 대체하며 삭제 (99 → 98)
+assert.equal(domainSelectorCount, 98);
 
 // .notificationLogList, .notificationControlGrid, .notificationLessonItem,
 // .notificationControlActions, .notificationBulkActions, and .specialLectureGuideTabs
 // are shared with DashboardAuxiliaryPanels.jsx (a different lazy chunk) via mixed
 // rules with these safe classes -- confirm the mixed rules stayed in App.css.
-for (const cls of [".notificationTableRow", ".specialLectureTopTabs", ".noticeComposerGrid", ".noticePickerActions"]) {
+// 2026-09-19 · UI U14: .noticeComposerGrid 는 App.css 980px 혼합 규칙에서 빠져 이 도메인 파일로
+// 완전히 이동했다(로드 순서 때문에 App.css 쪽이 죽어 있었음). 남은 혼합 규칙은 notificationControlGrid/
+// notificationLessonItem 뿐이라 목록에서 제외한다.
+for (const cls of [".notificationTableRow", ".specialLectureTopTabs", ".noticePickerActions"]) {
   assert.ok(appCss.includes(cls), `App.css must still declare the shared side of a mixed rule involving: ${cls}`);
 }
 
@@ -65,8 +69,8 @@ appRoot.walkRules((rule) => {
 // mixed rule (shared with DashboardAuxiliaryPanels.jsx / SpecialLectureNoticePanel-
 // adjacent selectors) that correctly stayed in App.css -- legitimate dual ownership,
 // not a duplication bug.
+// 2026-09-19 · UI U14: noticeComposerGrid/noticeFilterGrid/noticeScheduleGrid 는 이제 App.css 에 남아 있지 않다.
 const knownDualOwnershipSelectors = new Set([
-  ".noticeComposerGrid", ".noticeFilterGrid", ".noticeScheduleGrid",
   ".noticePickerActions", ".noticeSendActions", ".specialLectureTopTabs"
 ]);
 const overlap = [...domainSelectors].filter((sel) => appSelectors.has(sel) && !knownDualOwnershipSelectors.has(sel));
