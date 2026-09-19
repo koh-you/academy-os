@@ -467,6 +467,17 @@ function createInitialState() {
   return snapshot;
 }
 
+// 빈 tenant: 목록은 전부 비우고 app_state 도 없다. 문제은행 fixture 는 협력 교사 메뉴에 없어 그대로.
+function createEmptyTenantState() {
+  const snapshot = createInitialState();
+  for (const [key, value] of Object.entries(snapshot)) {
+    if (Array.isArray(value)) snapshot[key] = [];
+  }
+  snapshot.appStates = {};
+  snapshot.appStateUpdatedAt = {};
+  return snapshot;
+}
+
 let state = createInitialState();
 let resetGeneration = 0;
 let resourceMaterialFiles = new Map();
@@ -1998,6 +2009,27 @@ const server = http.createServer(async (request, response) => {
   if (request.method === "POST" && requestUrl.pathname === "/api/auth/login") {
     const payload = await readJson(request);
     if (!payload.loginId || !payload.password) return sendJson(response, 400, { ok: false, error: "미리보기 아이디와 비밀번호를 입력하세요." });
+    // "fresh" 로 로그인하면 빈 tenant 의 협력 교사가 된다 — 반·학생·수업·시험정보·app_state 전부 0.
+    // 새 선생님의 첫날을 재현하는 브라우저 시나리오(fresh-tenant.spec.js)가 쓴다(2026-09-19).
+    if (String(payload.loginId) === "fresh") {
+      state = createEmptyTenantState();
+      resetGeneration += 1;
+      return sendJson(response, 200, {
+        account: {
+          actorId: "safe-fresh-teacher",
+          loginId: "fresh",
+          name: "새 선생님",
+          role: "teacher",
+          sessionToken: "safe-fixture-session-fresh",
+          teacherId: "safe-fresh-teacher",
+          teacherRole: "assistant",
+          tenantId: "tenant_safe_fresh"
+        },
+        authenticated: true,
+        ok: true,
+        safeFixture: true
+      });
+    }
     return sendJson(response, 200, {
       account: {
         actorId: "safe-preview-teacher",
