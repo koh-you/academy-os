@@ -13,7 +13,10 @@ for (const contract of [
   "rows.filter((row) => row.notification_job_id && !allowedStudentIds.has(row.student_id))",
   "rows.filter((row) => row.lesson_student_record_id && !allowedStudentIds.has(row.student_id))",
   'cancelPendingNotificationJobsForRemovedLessonStudents(savedLesson, "수업 명단에서 제외됨")',
-  "deleteLessonStudentRecordsForRemovedLessonStudents(savedLesson)"
+  "deleteLessonStudentRecordsForRemovedLessonStudents(savedLesson)",
+  // 묶음 저장(POST /api/lessons/bulk)은 같은 규칙을 한 번에 적용한다(2026-09-19).
+  'cleanupRemovedLessonStudentsForLessons(savedLessons, "수업 명단에서 제외됨")',
+  "!allowedStudentIdsByLesson.get(row.lesson_id)?.has(row.student_id)"
 ]) {
   assert.equal(coreDataSource.includes(contract), true, `server cleanup contract missing: ${contract}`);
 }

@@ -74,8 +74,9 @@ assertOrdered(serverBulkBoundary, [
   "await assertLessonClosureConversionAllowed(lesson)",
   'upsertRows("lessons"',
   '{ onConflict: "lesson_id" }',
-  'cancelPendingNotificationJobsForRemovedLessonStudents(savedLesson, "수업 명단에서 제외됨")',
-  "deleteLessonStudentRecordsForRemovedLessonStudents(savedLesson)",
+  // 2026-09-19: 수업별 순차 정리(2N 왕복) 대신 묶음 정리 한 번. 규칙은 upsertLesson 의 수업별
+  // 정리와 같고 test-lesson-bulk-roster-cleanup 이 동작으로 검사한다.
+  'cleanupRemovedLessonStudentsForLessons(savedLessons, "수업 명단에서 제외됨")',
   "return { source: databaseSource, lessons: savedLessons }"
 ]);
 
