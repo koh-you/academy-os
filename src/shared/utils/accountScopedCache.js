@@ -14,6 +14,24 @@
 const CACHE_OWNER_KEY = "academyOs.cacheOwner.v1";
 
 /**
+ * 캐시 주인 식별자. "누구의 어느 자료를 보고 있나" 를 한 문자열로 만든다.
+ *
+ * 진입점(main.jsx, React 마운트 전)과 App 의 계정 전환 effect 가 **같은 식**으로 만들어야
+ * 한다. 두 곳이 다른 식을 쓰면 서로의 표시를 못 알아봐 매 로드마다 캐시를 지운다 —
+ * 2026-09-19 까지 실제로 그랬다(main 은 teacherId, App 은 `teacherId:viewTenantId`).
+ * 원장이 다른 선생님 자료를 보는 동안만 보는 테넌트가 식별자에 들어간다.
+ *
+ * @param {{ teacherId?: string, teacherRole?: string, viewTenantId?: string }} identity
+ * @returns {string} 로그인 정보가 없으면 빈 문자열
+ */
+export function createCacheOwnerId({ teacherId, teacherRole, viewTenantId } = {}) {
+  const ownerId = String(teacherId ?? "").trim();
+  if (!ownerId) return "";
+  const viewedTenantId = teacherRole === "owner" ? String(viewTenantId ?? "").trim() : "";
+  return viewedTenantId ? `${ownerId}:${viewedTenantId}` : ownerId;
+}
+
+/**
  * @param {Storage} storage
  * @param {string} accountId 지금 로그인한 계정 식별자(teacherId 등)
  * @param {string[]} cacheKeys 계정별로 갈라져야 하는 캐시 키

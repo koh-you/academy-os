@@ -3,7 +3,8 @@ import { createAppViewChangePlan } from "./appViewChangePlan.js";
 import { selectAppSessionSurface } from "./appSessionSurfaceSelector.js";
 import { createTeacherViewAdapters, TeacherViewOutlet } from "./TeacherViewOutlet.js";
 import { lazyTeacherViewComponents } from "./lazyTeacherViewComponents.js";
-import { useAppSession } from "./useAppSession.js";
+import { createSessionDataIdentity, useAppSession } from "./useAppSession.js";
+import { useSessionActivityRefresh } from "./useSessionActivityRefresh.js";
 import { RoleLoginScreen } from "./RoleLoginScreen.jsx";
 import { Sidebar } from "./Sidebar.jsx";
 import { isViewAllowedForRole } from "./sidebarMenuModel.js";
@@ -468,7 +469,7 @@ import {
   setCurrentTeacherRole,
   setViewTenantId as setApiViewTenantId
 } from "../shared/utils/apiClient.js";
-import { clearCacheOwner, resetCacheForAccount } from "../shared/utils/accountScopedCache.js";
+import { clearCacheOwner, createCacheOwnerId, resetCacheForAccount } from "../shared/utils/accountScopedCache.js";
 import { TeacherViewSwitcher } from "./TeacherViewSwitcher.jsx";
 import { safeIdPart } from "../shared/utils/id.js";
 import { getKoreaDateString } from "../shared/utils/koreaDate.js";
@@ -489,6 +490,7 @@ import {
   academyReminderPriorityOptions,
   academyReminderStatusLabels,
   academyReminderTypeOptions,
+  accountScopedCacheKeys,
   fallbackRegularLessonColors,
   legacySensitiveStorageKeys,
   lessonCalendarColors,
@@ -2123,6 +2125,23 @@ const defaultGeneratedLessonControls = {
   suppressedKeys: []
 };
 
+// 자동저장되는 app_state 키의 기본값. useStoredState 의 fallback 과 같아야 한다 —
+// 서버에 없는 키를 이 값으로 간주하므로, 여기와 fallback 이 다르면 저장할 것이 없는데도
+// 자동저장이 diff 를 만든다.
+function createDefaultSharedAppState() {
+  return {
+    aiSettings: defaultAiSettings,
+    attendanceSettings: defaultAttendanceSettings,
+    deletedLessonBundles: [],
+    generatedLessonControls: defaultGeneratedLessonControls,
+    lessonNotificationPlans: {},
+    notificationLogs: [],
+    examPostTargetStudentIds: {},
+    tallySubmissions: [],
+    tallySummaries: {}
+  };
+}
+
 function getAiPrompt(settings = {}, promptKey) {
   const prompts = normalizeAiPrompts(settings?.prompts);
   return prompts[promptKey] ?? defaultAiPrompts[promptKey] ?? "";
@@ -2172,6 +2191,8 @@ export function App() {
   // 협력 교사는 이 값을 쓰지 않는다(서버도 owner 가 아니면 무시한다).
   const [viewTenantId, setViewTenantId] = useStoredState(storageKeys.viewTenantId, "");
   const activeViewTenantId = teacherRole === "owner" ? viewTenantId : "";
+  // 부트스트랩이 다시 돌아야 하는 경계. 토큰만 바뀌는 활동 중 갱신은 여기 안 들어간다.
+  const sessionDataIdentity = createSessionDataIdentity(session, activeViewTenantId);
   // 로그인 세션 토큰을 모든 API 요청 헤더에 싣는다(로그인·복원·로그아웃 모두 반영).
   useEffect(() => {
     setApiAuthToken(session?.sessionToken || "");
@@ -2188,35 +2209,26 @@ export function App() {
   // 여기서 새로고침하지 않는다 — 첫 로그인에도 항상 걸려서 매번 페이지가 두 번 로드된다.
   // 저장소만 비우면 되고, 화면은 이어지는 부트스트랩이 새 계정 데이터로 덮어쓴다
   // (빈 응답도 그대로 반영하므로 이전 계정 데이터가 남지 않는다).
+  // 주인 식별자는 진입점(main.jsx)과 같은 함수로 만든다 — 다르면 매 로드마다 서로 지운다.
   useEffect(() => {
     if (typeof window === "undefined" || !session?.teacherId) return;
-    const cachedStateKeys = Object.entries(storageKeys)
-      .filter(([name]) => name !== "teacherSession")
-      .map(([, key]) => key);
-    resetCacheForAccount(window.localStorage, `${session.teacherId}:${activeViewTenantId}`, cachedStateKeys);
-  }, [session?.teacherId, activeViewTenantId]);
+    const cacheOwnerId = createCacheOwnerId({
+      teacherId: session.teacherId,
+      teacherRole,
+      viewTenantId: activeViewTenantId
+    });
+    resetCacheForAccount(window.localStorage, cacheOwnerId, accountScopedCacheKeys);
+  }, [session?.teacherId, teacherRole, activeViewTenantId]);
   // 어느 요청이든 401 이 오면 화면 전체에 재로그인을 안내한다. 이게 없으면 만료가
   // "저장 실패" 로만 보이고, 새로고침해도 같은 만료 토큰을 다시 보내 원인을 알 수 없다
   // (2026-09-08 수업일지·출결 장애).
   useEffect(() => onApiUnauthorized(() => setIsSessionExpired(true)), []);
-  // 교사 토큰은 8시간짜리인데 학원 하루는 그보다 길다. 화면을 실제로 쓰는 동안에만
-  // 연장한다 — 켜두기만 한 탭이 세션을 무한정 늘리면 만료 자체가 의미를 잃는다.
-  useEffect(() => {
-    if (session?.role !== "teacher" || !session?.sessionToken || isSessionExpired) return undefined;
-    const minimumIntervalMs = 30 * 60 * 1000;
-    let lastRefreshAt = Date.now();
-    function refreshIfStale() {
-      if (document.visibilityState === "hidden") return;
-      if (Date.now() - lastRefreshAt < minimumIntervalMs) return;
-      lastRefreshAt = Date.now();
-      refreshSession();
-    }
-    const events = ["visibilitychange", "focus", "pointerdown", "keydown"];
-    for (const eventName of events) document.addEventListener(eventName, refreshIfStale, { passive: true });
-    return () => {
-      for (const eventName of events) document.removeEventListener(eventName, refreshIfStale);
-    };
-  }, [isSessionExpired, refreshSession, session?.role, session?.sessionToken]);
+  // 교사 토큰(8시간)을 화면을 실제로 쓰는 동안에만 30분마다 연장한다.
+  useSessionActivityRefresh({
+    enabled: session?.role === "teacher" && !isSessionExpired,
+    refreshSession,
+    sessionToken: session?.sessionToken
+  });
   const [selectedDate, setSelectedDate] = useState(today);
   const [selectedLessonId, setSelectedLessonId] = useState("");
   const [lessonClipboard, setLessonClipboard] = useState(null);
@@ -2426,6 +2438,49 @@ export function App() {
   const initialLessonResearchItemsRef = useRef(lessonResearchItems);
   const initialWrongProblemsRef = useRef(wrongProblems);
   const persistedSharedAppStateRef = useRef({});
+  // 보는 자료가 바뀌면(원장의 선생님 전환, 재로그인) 이전 자료가 메모리에 남지 않게 한다.
+  // 부트스트랩은 서버에 있는 키만 덮어쓰므로, 새 테넌트에 없는 키는 이전 테넌트 값이
+  // 그대로 남아 (1) 화면에 섞여 보이고 (2) 자동저장 diff 에 잡혀 그 테넌트로 저장된다 —
+  // 그래서 app_state 계열은 전부 기본값으로 되돌리고 "없는 키의 기본값" 기준도 함께 바꾼다.
+  // 알림 예약 목록은 새로고침이 합치기만 해서 비우고, 선택·복사·되돌리기의 수업 ID 도
+  // 이전 테넌트 것이라 그대로 두면 엉뚱한 자료에 붙여넣는다.
+  const previousSessionDataIdentityRef = useRef(sessionDataIdentity);
+  useEffect(() => {
+    if (previousSessionDataIdentityRef.current === sessionDataIdentity) return;
+    previousSessionDataIdentityRef.current = sessionDataIdentity;
+    const defaults = createDefaultSharedAppState();
+    initialSharedAppStateRef.current = defaults;
+    initialLessonResearchItemsRef.current = createDefaultLessonResearchItems();
+    initialWrongProblemsRef.current = [];
+    setAiSettings(defaults.aiSettings);
+    setAttendanceSettings(defaults.attendanceSettings);
+    setDeletedLessonBundles(defaults.deletedLessonBundles);
+    setGeneratedLessonControls(defaults.generatedLessonControls);
+    setLessonNotificationPlans(defaults.lessonNotificationPlans);
+    setNotificationLogs(defaults.notificationLogs);
+    setExamPostTargetStudentIds(defaults.examPostTargetStudentIds);
+    setTallySubmissions(defaults.tallySubmissions);
+    setTallySummaries(defaults.tallySummaries);
+    setLessonResearchItems(initialLessonResearchItemsRef.current);
+    setWrongProblems([]);
+    setReportSnapshots([]);
+    setAcademyTests([]);
+    setProblemBooks(createDefaultProblemBooks());
+    setTestPaperLibrary([]);
+    setScoreRecords([]);
+    setExamPostSubmissions([]);
+    setStudentQuestions([]);
+    setStudentConsultations([]);
+    setTeacherOperatingMemos({});
+    setSpecialLectureGuides(defaultSpecialLectureGuides);
+    setMonthlyInstructorSettlements(createDefaultMonthlySettlementState());
+    setSpecialLectureInstructorSettlements(createDefaultSpecialLectureSettlementState());
+    setNotificationJobs([]);
+    setSelectedLessonId("");
+    setLessonClipboard(null);
+    setLessonUndoStack([]);
+    setIsLessonJournalOpen(false);
+  }, [sessionDataIdentity]);
 
   function getAppStatePersistenceController() {
     if (!appStatePersistenceControllerRef.current) {
@@ -2495,7 +2550,9 @@ export function App() {
         setIsPortalDataReady(false);
         return;
       }
-      if (attendanceOnlyMode) setIsAppStateReady(false);
+      // 다시 도는 부트스트랩(원장이 보는 선생님 전환, 재로그인)은 새 자료가 올 때까지
+      // 자동저장·폴링·알림 갱신을 멈춘다. 첫 로드는 이미 false 라 달라지는 게 없다.
+      setIsAppStateReady(false);
       try {
         if (attendanceOnlyMode) {
           const attendanceDate = getKoreaDateString();
@@ -2835,7 +2892,7 @@ export function App() {
     setTallySubmissions,
     setTallySummaries,
     setWrongProblems,
-    session,
+    sessionDataIdentity,
     attendanceOnlyMode,
     specialLectureOnlyMode,
     attendanceReloadKey
