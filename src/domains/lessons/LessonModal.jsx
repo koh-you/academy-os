@@ -372,8 +372,10 @@ export function LessonModal({
     onDeleteLesson(initialLesson.lessonId);
   }
 
+  // 2026-09-19 · U13(modals-12): 저장 중 닫기 차단은 빈 함수 onClose 대신 공용 closeDisabled(× 비활성·Esc 무시·aria-busy)로 통일.
+  // isSaving 계산·onClose 계약은 그대로.
   return (
-    <Modal className="lessonModal" title={initialLesson ? "수업 수정" : "수업 등록"} onClose={isSaving ? () => {} : onClose}>
+    <Modal className="lessonModal" closeDisabled={isSaving} title={initialLesson ? "수업 수정" : "수업 등록"} onClose={onClose}>
       <LessonModalBasics
         classTemplateId={classTemplateId}
         color={color}

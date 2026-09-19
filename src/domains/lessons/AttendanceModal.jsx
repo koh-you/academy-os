@@ -94,7 +94,7 @@ export function AttendanceModal({ item, lateGraceMinutes = 5, onClose, onSave })
   }
 
   return (
-    <Modal title={`${student.name} 출결 체크`} subtitle="지각/결석이면 시간과 사유를 남깁니다." onClose={onClose}>
+    <Modal closeDisabled={isSaving} title={`${student.name} 출결 체크`} subtitle="지각/결석이면 시간과 사유를 남깁니다." onClose={onClose}>
       <div className="typeTabs">
         {[
           ["present", "등원"],

@@ -45,7 +45,8 @@ assert.equal(injectedModalCount, 14, "unexpected injected common Modal surface c
 // 22 -> 23: 학생 추가 모달 '한 명씩' 탭이 primaryButton full 대신 ModalFooter [취소][학생 저장] 을 쓴다(2026-09-19 U8).
 // 23 -> 24: 학사일정 등록/수정 모달 푸터 [일정 삭제][취소][등록] 이 schoolEventFormActions div 대신 ModalFooter 를 쓴다(2026-09-19 U9).
 // 24 -> 25: 공용 ConfirmDialog 의 [취소][확정] 푸터(2026-09-19 U11).
-assert.equal(modalFooterCount, 25, "unexpected common ModalFooter count");
+// 25 -> 26: SNS 스튜디오 Chat 결과 가져오기 모달의 [가져오기 취소][가져오기 미리보기][반영] 푸터(2026-09-19 U13).
+assert.equal(modalFooterCount, 26, "unexpected common ModalFooter count");
 assert.equal(modalActionCount, 2, "unexpected legacy modalActions wrapper count");
 assert.deepEqual(
   rawDialogEntries.map((entry) => entry.path),

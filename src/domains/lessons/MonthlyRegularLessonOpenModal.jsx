@@ -4,12 +4,14 @@ import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
 export function MonthlyRegularLessonOpenModal({ plan, saveStatus, onClose, onOpen }) {
   const isSaving = ["saving", "verifying"].includes(saveStatus?.state);
   const canOpen = !plan.errors?.length && plan.lessonsToCreate?.length > 0 && !isSaving;
+  // 2026-09-19 · U13(modals-12): 저장 중 닫기 차단을 빈 함수 onClose 대신 공용 closeDisabled 로 통일.
   return (
     <Modal
       className="monthlyRegularLessonOpenModal"
       title={`${plan.monthKey || "대상 월"} 정규수업 열기`}
       subtitle={`${plan.sourceMonth || "이전 달"}의 마지막 실제 정규수업 명단과 반 시간을 기준으로, 비어 있는 회차만 추가합니다.`}
-      onClose={isSaving ? () => {} : onClose}
+      closeDisabled={isSaving}
+      onClose={onClose}
     >
       <div className="monthlyRegularLessonOpenBody">
         {plan.errors?.length ? <p className="inlineNotice danger">{plan.errors.join(" ")}</p> : null}

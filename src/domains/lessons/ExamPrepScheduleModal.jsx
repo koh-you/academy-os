@@ -53,7 +53,7 @@ export function ExamPrepScheduleModal({ lessons, onClose, onSave, persistedLesso
   }
 
   return (
-    <Modal className="examPrepScheduleEditModal" title="시험대비 일정 수정" subtitle={`${sourceLesson.date}부터 이후 시험대비에 적용합니다.`} onClose={onClose}>
+    <Modal className="examPrepScheduleEditModal" closeDisabled={saveState.state === "saving"} title="시험대비 일정 수정" subtitle={`${sourceLesson.date}부터 이후 시험대비에 적용합니다.`} onClose={onClose}>
       <div className="examPrepScheduleEditor">
         <div className="examPrepScheduleMode" role="tablist" aria-label="일정 대상 선택 방식">
           {modes.map((item) => (

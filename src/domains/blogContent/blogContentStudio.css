@@ -3,16 +3,15 @@
 .blogHero h1{font-size:28px;margin:10px 0}
 .blogHero p,.blogEditor p{line-height:1.7;color:#5c6d7c}
 .blogEyebrow{font-size:11px;letter-spacing:2px;color:#337773}
-.blogStudio button{border:1px solid #c8d7d6;background:#fff;border-radius:9px;padding:10px 15px;cursor:pointer;color:#264b48}
-.blogStudio button:disabled{opacity:.5;cursor:default}
-.blogStudio button:focus-visible,.blogStudio a:focus-visible{outline:3px solid #4ba79b;outline-offset:3px}
-.blogHero>button,.blogSave button{background:#21645e;color:white;border-color:#21645e;white-space:nowrap}
+/* 2026-09-19 · U13(buttons-08): 전역 `.blogStudio button` 오버라이드를 지웠다. 버튼은 표준 클래스(primary/soft/ghost)를 쓰고,
+   클래스 없는 목록 항목(콘텐츠 목록·성적 후보)만 컨테이너 범위 셀렉터로 꾸민다. 색은 토큰만 쓴다. */
 .blogStatus{padding:15px 0;font-size:13px}
 .blogLayout{display:grid;grid-template-columns:245px minmax(0,1fr);gap:24px}
 .blogHistory{padding:18px;background:#f2f6f5;border-radius:14px}
 .blogHistory h2{font-size:16px}
-.blogHistory button{display:flex;flex-direction:column;gap:7px;width:100%;text-align:left;margin:10px 0;overflow-wrap:anywhere}
-.blogHistory button[aria-pressed=true]{border-color:#21645e;background:#e4f0ec}
+.blogHistory button,.blogCandidates button{border:1px solid var(--academy-border-strong,#cbd8ee);background:var(--academy-surface,#fff);border-radius:9px;padding:10px 15px;cursor:pointer;color:var(--academy-text-strong,#475569);font:inherit;text-align:left}
+.blogHistory button{display:flex;flex-direction:column;gap:7px;width:100%;margin:10px 0;overflow-wrap:anywhere}
+.blogHistory button[aria-pressed=true]{border-color:var(--academy-primary,#17213d);background:var(--status-info-bg,#eff6ff)}
 .blogHistory span,.blogHistory small{color:#63776f}
 .blogEditor{min-width:0;border:1px solid #dce3ea;border-radius:14px;padding:24px;background:white}
 .blogSteps{display:flex;gap:8px;margin-bottom:25px}
@@ -32,9 +31,7 @@
 .blogEditor .disclosureTrigger{cursor:pointer;font-weight:600}
 .blogEditor pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line-height:1.7;max-height:380px;overflow:auto}
 .blogCandidates{display:grid;gap:7px;max-height:250px;overflow:auto}
-.blogCandidates button{text-align:left}
 .blogSave{display:flex;align-items:center;gap:15px;border-top:1px solid #e2e8ed;margin-top:28px;padding-top:20px;font-size:12px}
-.blogCopy{font-size:12px}
 .blogStorageHint{display:block;font-size:12px;color:#6d7d8a;margin-top:15px}
 @media(max-width:760px){.blogStudio{padding:12px}
 .blogLayout{grid-template-columns:1fr}
@@ -49,6 +46,22 @@
 
 
 .blogSteps button[aria-selected=true]{background:var(--academy-primary,#17213d);color:white}
-.blogStudio .primaryButton{background:var(--academy-primary,#17213d);color:white;border-color:var(--academy-primary,#17213d)}
-.blogStudio .stickySaveBar{position:sticky;bottom:12px;z-index:3;background:var(--academy-surface,#fff);margin-top:20px}
+/* 2026-09-19 · U13(research-11/16): 하단 저장 바를 dock 으로 감싸 확정 오류(role=alert)를 바 바로 위에 붙여 같이 고정한다. */
+.blogStudio .blogSaveDock{position:sticky;bottom:12px;z-index:3;display:grid;gap:8px;margin-top:20px}
+.blogStudio .blogSaveDock .stickySaveBar{position:static;margin-top:0;background:var(--academy-surface,#fff)}
+.blogStudio .blogStepAlert{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin:10px 0 0;padding:10px 13px;border:1px solid var(--status-danger-border,#fecaca);border-radius:8px;background:var(--status-danger-bg,#fef2f2);color:var(--status-danger-text,#b91c1c);font-size:13px;line-height:1.6}
+.blogStudio .blogSaveDock>.blogStepAlert{margin:0}
+.blogStudio .blogStepActions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px}
+.blogStudio .blogChannelField{display:grid;justify-items:start}
+.blogStudio .blogChannelField .blogField{justify-self:stretch;margin-bottom:6px}
+.blogStudio .blogChannelField .ghostButton{margin-bottom:14px}
+.blogStudio .blogPublishActions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.blogStudio .blogPublishActions small{color:var(--academy-muted,#64748b);font-size:12px}
+.blogImportPreview{margin-top:14px}
+.blogImportPreview h3{margin:0 0 6px;font-size:15px}
+.blogImportPreview h4{margin:12px 0 4px;font-size:13px;color:var(--academy-text-strong,#475569)}
+.blogImportPreview p{margin:0;padding:8px 10px;border:1px solid var(--academy-border,#d8e3f8);border-radius:8px;background:var(--academy-surface-muted,#f8fafc);white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.7}
+/* 모바일(≤760px) 편집/미리보기 전환 버튼은 공용 StudioEditor 의 클래스 없는 버튼이라 시험분석 화면과 같은 범위 셀렉터로 꾸민다. */
+.blogStudio .studioViewSwitch button{padding:10px 16px;border-radius:8px;border:1px solid var(--academy-border-strong,#cbd8ee);background:var(--academy-surface,#fff);color:var(--academy-text-strong,#475569);font:inherit;cursor:pointer}
+.blogStudio .studioViewSwitch button[aria-pressed=true]{background:var(--academy-primary,#17213d);color:var(--academy-surface,#fff)}
 .blogStudio .pageHeader{margin-bottom:16px}
