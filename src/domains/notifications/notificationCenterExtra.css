@@ -192,6 +192,38 @@
   justify-content: space-between;
 }
 
+.noticeWritePanel .noticeSendFooter {
+  background: var(--academy-surface, #ffffff);
+  border-top: 1px solid var(--status-neutral-border, #e2e8f0);
+  display: grid;
+  gap: 10px;
+  padding-top: 10px;
+}
+
+.noticeSendConfirmModal.modalCard {
+  max-width: 600px;
+}
+
+.noticeSendConfirmSummary {
+  background: var(--academy-surface-muted, #f8fafc);
+  border: 1px solid var(--status-neutral-border, #e2e8f0);
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+}
+
+.noticeSendConfirmSummary strong {
+  color: var(--academy-text, #0f172a);
+  font-size: 15px;
+}
+
+.noticeSendConfirmSummary span {
+  color: var(--academy-muted, #64748b);
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .noticeListHeader > div {
   align-items: center;
   display: flex;
@@ -407,6 +439,13 @@
     overflow-y: auto;
     padding-right: 4px;
     scrollbar-gutter: stable;
+  }
+
+  /* 작성 패널 내부 스크롤에서도 발송 액션 줄이 항상 보이도록 패널 하단에 고정 */
+  .noticeWritePanel .noticeSendFooter {
+    bottom: 0;
+    position: sticky;
+    z-index: 1;
   }
 }
 

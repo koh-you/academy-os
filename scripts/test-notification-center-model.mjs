@@ -5,6 +5,7 @@ import {
   createNotificationRecipientViewModel,
   filterNoticeSelectedStudentIds,
   resolveNotificationAudiencePhone,
+  resolveNoticeDispatchState,
   resolveNotificationCenterActiveTab,
   resolveNotificationStudentName,
   selectAllNoticeStudentIds,
@@ -396,5 +397,20 @@ assert.deepEqual(
 );
 assert.equal(withdrawnRecipientModel.parentRecipientCount, 0);
 assert.equal(withdrawnRecipientModel.studentRecipientCount, 1);
+
+// 2026-09-19 · 발송 진행/결과 문구는 액션이 그대로 조립하고, 표시 상태만 문자열에서 파생한다.
+assert.equal(resolveNoticeDispatchState({ dispatchMessage: "", isSending: false }), "idle");
+assert.equal(resolveNoticeDispatchState({ dispatchMessage: "공지 즉시 발송 중: 1/3건 · 학생 학부모", isSending: true }), "loading");
+assert.equal(resolveNoticeDispatchState({ dispatchMessage: "공지 발송 처리 완료: 성공 3건", isSending: false }), "success");
+assert.equal(resolveNoticeDispatchState({ dispatchMessage: "공지 발송 처리 완료: 성공 2건, 확인 필요 1건", isSending: false }), "partial");
+assert.equal(resolveNoticeDispatchState({ dispatchMessage: "공지 발송 처리 완료: 성공 2건, 실패 1건, 기록 저장 실패 1건", isSending: false }), "partial");
+assert.equal(resolveNoticeDispatchState({ dispatchMessage: "공지 발송 처리 완료: 성공 0건, 실패 3건", isSending: false }), "error");
+assert.equal(resolveNoticeDispatchState({ dispatchMessage: "2026-09-19 18:00 Solapi 공지 예약 완료: 성공 2건, 실패 1건", isSending: false }), "partial");
+assert.equal(resolveNoticeDispatchState({ dispatchMessage: "예약 시각이 이미 지났습니다. 새 예약 시각을 선택하거나 즉시 발송을 사용해 주세요.", isSending: false }), "error");
+assert.equal(resolveNoticeDispatchState({ dispatchMessage: "AI 수정 실패: 네트워크 오류", isSending: false }), "error");
+assert.equal(resolveNoticeDispatchState({ dispatchMessage: "공지 문구를 AI로 다듬었습니다.", isSending: false }), "success");
+assert.equal(resolveNoticeDispatchState({ dispatchMessage: "처리는 완료됐습니다. 발송 기록 새로고침 실패: timeout", isSending: false }), "partial");
+assert.equal(resolveNoticeDispatchState({ dispatchMessage: "알림 기록 새로고침 실패: timeout", isSending: false }), "error");
+assert.equal(resolveNoticeDispatchState(), "idle");
 
 console.log("notification center history and recipient model fixtures passed");

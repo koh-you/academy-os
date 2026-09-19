@@ -1,5 +1,5 @@
 import { expect, test } from "./fixtures.js";
-import { collectPageErrors, loginAsTeacher, resetSafeFixture } from "./safeSmokeSupport.js";
+import { collectPageErrors, getKoreaDateAfterDays, loginAsTeacher, resetSafeFixture, safeApiBaseUrl } from "./safeSmokeSupport.js";
 
 test.beforeEach(async ({ request }) => {
   await resetSafeFixture(request);
@@ -26,6 +26,73 @@ test("notification and special lecture screens render through the extracted boun
   await navigation.getByRole("button", { name: /특강관리/ }).click();
   await expect(page.getByRole("heading", { name: "특강관리" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "특강 안내문" })).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
+// 2026-09-19 · 즉시/예약 발송은 확인 모달을 거친 뒤에만 기존 발송·예약 함수를 호출한다(ui-u2).
+test("notice immediate and scheduled send open a confirm modal before the injected send handler runs", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+  const navigation = page.getByRole("navigation", { name: "주요 화면" });
+
+  await navigation.getByRole("button", { name: /알림관리/ }).click();
+  await expect(page.getByRole("heading", { name: "알림관리" })).toBeVisible();
+
+  // 수신 범위 축은 학부모/학생/둘 다 하나뿐이다: '선택' 탭은 없고 기본 탭은 '학부모+학생'.
+  const recipientScope = page.getByRole("tablist", { name: "알림 수신 대상 범위" });
+  await expect(recipientScope.getByRole("tab")).toHaveText(["학부모+학생", "학부모", "학생"]);
+  await expect(recipientScope.getByRole("tab", { name: "학부모+학생" })).toHaveAttribute("aria-selected", "true");
+
+  const noticeTitle = page.getByPlaceholder("예: 휴원 안내, 보강 안내");
+  const noticeBody = page.getByPlaceholder("보낼 공지 내용을 입력하세요.");
+  await noticeTitle.fill("확인 모달 경계");
+  await noticeBody.fill("확인 모달을 거쳐야만 안전 fixture 발송 함수가 호출됩니다.");
+  const sendNowButton = page.getByRole("button", { name: "즉시 발송" });
+  const scheduleButton = page.getByRole("button", { name: "예약 발송" });
+  await expect(sendNowButton).toBeDisabled();
+
+  await page.getByRole("button", { name: "보이는 학생 전체" }).click();
+  const recipientBadge = page.locator(".noticeComposerPanel .countBadge");
+  await expect(recipientBadge).toHaveText(/수신 [1-9]\d*건/);
+  const recipientCount = Number((await recipientBadge.textContent()).match(/수신 (\d+)건/)[1]);
+  await expect(sendNowButton).toBeEnabled();
+
+  // 예약 발송 확인 모달: 예약 시각을 보여주고, 취소하면 아무 것도 호출하지 않는다.
+  await page.getByLabel("예약일").fill(getKoreaDateAfterDays(1));
+  await scheduleButton.click();
+  const scheduleDialog = page.getByRole("dialog", { name: "예약 발송 확인" });
+  await expect(scheduleDialog).toBeVisible();
+  await expect(scheduleDialog.getByText(`수신 ${recipientCount}건`)).toBeVisible();
+  await expect(scheduleDialog.getByText(/예약 시각 /)).toBeVisible();
+  await expect(scheduleDialog.getByRole("button", { name: `${recipientCount}건 예약` })).toBeVisible();
+  await scheduleDialog.getByRole("button", { name: "취소" }).click();
+  await expect(scheduleDialog).toBeHidden();
+
+  // 즉시 발송 확인 모달: 취소하면 초안이 유지되고 발송 기록도 남지 않는다.
+  await sendNowButton.click();
+  const sendDialog = page.getByRole("dialog", { name: "즉시 발송 확인" });
+  await expect(sendDialog).toBeVisible();
+  await expect(sendDialog.getByText(`수신 ${recipientCount}건`)).toBeVisible();
+  await expect(sendDialog.getByText("[확인 모달 경계]")).toBeVisible();
+  await sendDialog.getByRole("button", { name: "취소" }).click();
+  await expect(sendDialog).toBeHidden();
+  await expect(noticeTitle).toHaveValue("확인 모달 경계");
+  const jobsBeforeConfirm = await (await request.get(`${safeApiBaseUrl}/api/notification-jobs?limit=300`)).json();
+  expect((jobsBeforeConfirm.notificationJobs ?? []).filter((job) => job.notificationType?.startsWith("notice_"))).toEqual([]);
+
+  // 확정하면 기존 sendNoticeNow 가 그대로 실행되고, 결과가 AsyncOperationStatus 로 표시된다.
+  await sendNowButton.click();
+  await expect(sendDialog).toBeVisible();
+  await sendDialog.getByRole("button", { name: `${recipientCount}건 지금 발송` }).click();
+  await expect(sendDialog).toBeHidden({ timeout: 20_000 });
+  const dispatchStatus = page.locator(".noticeDispatchMessage");
+  await expect(dispatchStatus).toHaveAttribute("data-state", "success");
+  await expect(dispatchStatus).toContainText(`공지 발송 처리 완료: 성공 ${recipientCount}건`);
+  await expect(noticeTitle).toHaveValue("확인 모달 경계");
+  await expect.poll(async () => {
+    const jobs = await (await request.get(`${safeApiBaseUrl}/api/notification-jobs?limit=300`)).json();
+    return (jobs.notificationJobs ?? []).filter((job) => job.notificationType?.startsWith("notice_") && job.status === "sent").length;
+  }, { timeout: 10_000 }).toBe(recipientCount);
   expect(pageErrors).toEqual([]);
 });
 

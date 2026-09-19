@@ -18,6 +18,8 @@ const safeClasses = new Set([
   "noticeComposerGrid", "noticeComposerPanel", "noticeDispatchMessage", "noticeFilterGrid",
   "noticeHistoryTable", "noticeListHeader", "noticeModeTabs", "noticePickerActions",
   "noticePreviewBox", "noticeRecipientBadges", "noticeScheduleGrid", "noticeSendActions",
+  // 2026-09-19 · 공지 발송 확인 모달·고정 액션 줄(NotificationSendConfirmModal.jsx, NotificationComposerPanel.jsx 전용)
+  "noticeSendConfirmModal", "noticeSendConfirmSummary", "noticeSendFooter",
   "noticeSolapiResultNotice", "noticeStudentEmpty", "noticeStudentOption", "noticeStudentPicker",
   "noticeTargetPanel", "noticeTargetSummary", "noticeWorkspaceTabs", "noticeWritePanel",
   "notificationHistoryDateFilter", "notificationJobActionNotice", "notificationJobActions",
@@ -41,7 +43,8 @@ domainRoot.walkRules((rule) => {
     assert.ok(isSafeSelector(selector), `domain CSS selector must be on the confirmed-exclusive list: ${selector}`);
   }
 });
-assert.equal(domainSelectorCount, 90);
+// 2026-09-19 · 발송 확인 모달·요약 카드·고정 액션 줄 selector 6개 추가 (90 → 96)
+assert.equal(domainSelectorCount, 96);
 
 // .notificationLogList, .notificationControlGrid, .notificationLessonItem,
 // .notificationControlActions, .notificationBulkActions, and .specialLectureGuideTabs
