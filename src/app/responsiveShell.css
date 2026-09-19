@@ -1,0 +1,357 @@
+/* 반응형 셸 보정 (2026-09-19 · UI U14)
+ *
+ * App.css 는 파일 크기 상한에 걸려 있고 다른 세션이 도메인 css 로 이관 중이라, 태블릿·모바일
+ * 구간의 셸(사이드바·본문 그리드)과 도메인 css 가 없는 화면의 반응형 보정만 여기에 모은다.
+ * main.jsx 에서 App.css 바로 다음에 import 되므로 같은 특이도면 이 파일이 이긴다.
+ * 여기 규칙은 전부 레이아웃 전용이며 상태·핸들러는 손대지 않는다.
+ */
+
+/* 1) 641~1100px(iPad 가로·소형 노트북) — 사이드바를 접힌 아이콘 레일로 기본 표시.
+ *    App.css 의 1100px 규칙은 사이드바를 본문 위 전폭 3열 메뉴 블록(높이 865px)으로 펼쳐
+ *    모든 화면 내용이 첫 화면 밖으로 밀렸다. 여기서는 데스크톱 `.sidebar.collapsed` 레일 규칙을
+ *    기본 상태(.sidebar)에 그대로 적용하고, ‹ 토글로 펼친 상태(.sidebar.collapsed 클래스)는
+ *    본문을 밀지 않는 오버레이 드로어로 바꾼다. 상태값·토글 핸들러는 그대로다. */
+@media (min-width: 641px) and (max-width: 1100px) {
+  .appFrame {
+    --academy-sidebar-width: 86px;
+    grid-template-columns: var(--academy-sidebar-width) minmax(0, 1fr);
+  }
+
+  .sidebar {
+    align-items: center;
+    max-height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: max(18px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    position: sticky;
+    top: 0;
+  }
+
+  .sidebar .brandBlock {
+    justify-items: center;
+    padding-inline: 0;
+  }
+
+  .sidebar .brandHeader {
+    display: grid;
+    gap: 10px;
+    justify-items: center;
+  }
+
+  .sidebar .brandBlock strong,
+  .sidebar .brandBlock > span,
+  .sidebar .sideGroup p {
+    display: none;
+  }
+
+  /* 라벨은 시각적으로만 숨긴다 — display:none 이면 레일 버튼의 접근성 이름이 아이콘만 남는다. */
+  .sidebar .sideNav button b {
+    clip: rect(0 0 0 0);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+
+  .sidebar .sideNav {
+    gap: 7px;
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar .sideGroup {
+    align-content: start;
+    gap: 5px;
+    justify-items: center;
+  }
+
+  .sidebar .sideNav button {
+    height: 44px;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0;
+    width: 48px;
+  }
+
+  .sidebar .sideNav button span {
+    background: transparent;
+  }
+
+  .sidebar .sideNav button:hover {
+    transform: none;
+  }
+
+  .sidebar .navBadge {
+    border: 2px solid var(--academy-surface);
+    font-size: 10px;
+    padding: 4px 5px;
+    position: absolute;
+    right: 4px;
+    top: 2px;
+  }
+
+  .sidebar .sideStatus span,
+  .sidebar .sideStatus strong,
+  .sidebar .sideStatus .ghostButton {
+    font-size: 0;
+    padding: 12px 0;
+  }
+
+  .sidebar .sideStatus span::before {
+    color: var(--status-success-border);
+    content: "●";
+    font-size: 16px;
+  }
+
+  .sidebar .sideStatus strong::before {
+    content: "📅";
+    font-size: 16px;
+  }
+
+  .sidebar .sideStatus .ghostButton::before {
+    content: "⏻";
+    font-size: 16px;
+  }
+
+  /* ‹ 토글로 펼친 상태 — 본문 그리드는 86px 레일 폭을 유지하고 사이드바만 위에 띄운다.
+     position:fixed 로 흐름에서 빼면 .mainPanel 이 1열(86px)로 자동 배치되므로, 그리드 흐름에 남는
+     sticky 상태에서 폭만 넓혀 자기 칸(86px) 밖으로 넘치게 하고 z-index 로 본문 위에 그린다. */
+  .sidebar.collapsed {
+    align-items: stretch;
+    box-shadow: var(--academy-sidebar-shadow), 0 24px 48px color-mix(in srgb, var(--academy-primary) 22%, transparent);
+    justify-self: start;
+    padding: max(18px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+    width: min(294px, 84vw);
+    z-index: 40;
+  }
+
+  .sidebar.collapsed .brandBlock {
+    justify-items: stretch;
+    padding: 6px 4px 18px;
+  }
+
+  .sidebar.collapsed .brandHeader {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .sidebar.collapsed .brandBlock strong,
+  .sidebar.collapsed .sideGroup p {
+    display: block;
+  }
+
+  .sidebar.collapsed .sideNav button b {
+    clip: auto;
+    display: block;
+    height: auto;
+    position: static;
+    width: auto;
+  }
+
+  .sidebar.collapsed .sideNav {
+    gap: var(--academy-space-1);
+  }
+
+  .sidebar.collapsed .sideGroup {
+    gap: 4px;
+    justify-items: stretch;
+  }
+
+  .sidebar.collapsed .sideNav button {
+    height: auto;
+    justify-content: flex-start;
+    padding: 0 12px;
+    width: 100%;
+  }
+
+  .sidebar.collapsed .sideNav button span {
+    background: var(--academy-accent-bg);
+  }
+
+  .sidebar.collapsed .sideNav button.active span {
+    background: color-mix(in srgb, var(--academy-surface) 14%, transparent);
+  }
+
+  .sidebar.collapsed .sideNav button:hover {
+    transform: translateX(2px);
+  }
+
+  .sidebar.collapsed .navBadge {
+    border: 0;
+    font-size: 11px;
+    padding: 5px 7px;
+    position: static;
+  }
+
+  .sidebar.collapsed .sideStatus span,
+  .sidebar.collapsed .sideStatus strong,
+  .sidebar.collapsed .sideStatus .ghostButton {
+    font-size: inherit;
+    padding: 12px;
+  }
+
+  .sidebar.collapsed .sideStatus span::before,
+  .sidebar.collapsed .sideStatus strong::before,
+  .sidebar.collapsed .sideStatus .ghostButton::before {
+    content: none;
+  }
+
+  /* 원장용 선생님 전환기 — 레일에서는 라벨·경고문을 숨기고 활성 칩만 남긴다. */
+  .sidebar .teacherViewSwitcher {
+    justify-items: center;
+    padding: 8px 0;
+    width: 100%;
+  }
+
+  .sidebar .teacherViewSwitcherLabel,
+  .sidebar .teacherViewSwitcherNotice,
+  .sidebar .teacherViewSwitcherItem:not(.active) {
+    display: none;
+  }
+
+  .sidebar .teacherViewSwitcherList {
+    justify-content: center;
+  }
+
+  .sidebar .teacherViewSwitcherItem.active {
+    max-width: 48px;
+    overflow: hidden;
+    padding: 4px 6px;
+    text-overflow: clip;
+    white-space: nowrap;
+  }
+
+  .sidebar.collapsed .teacherViewSwitcher {
+    justify-items: stretch;
+    padding: 10px 12px;
+  }
+
+  .sidebar.collapsed .teacherViewSwitcherLabel,
+  .sidebar.collapsed .teacherViewSwitcherNotice,
+  .sidebar.collapsed .teacherViewSwitcherItem:not(.active) {
+    display: block;
+  }
+
+  .sidebar.collapsed .teacherViewSwitcherList {
+    justify-content: flex-start;
+  }
+
+  .sidebar.collapsed .teacherViewSwitcherItem.active {
+    max-width: none;
+    overflow: visible;
+    padding: 4px 10px;
+    white-space: normal;
+  }
+}
+
+/* 2) 데스크톱에서 접힌 사이드바(86px) — 선생님 전환기 칩·경고문이 41px 폭으로 찌그러지던 것.
+ *    (shell-09) 라벨·경고문은 숨기고 활성 칩만 이름으로 남긴다(title=이름). 641px 이하는 App.css 의
+ *    모바일 규칙이 접힘 상태를 펼침으로 되돌리므로 제외한다. */
+@media (min-width: 1101px) {
+  .sidebar.collapsed .teacherViewSwitcher {
+    justify-items: center;
+    padding: 8px 0;
+    width: 100%;
+  }
+
+  .sidebar.collapsed .teacherViewSwitcherLabel,
+  .sidebar.collapsed .teacherViewSwitcherNotice,
+  .sidebar.collapsed .teacherViewSwitcherItem:not(.active) {
+    display: none;
+  }
+
+  .sidebar.collapsed .teacherViewSwitcherList {
+    justify-content: center;
+  }
+
+  .sidebar.collapsed .teacherViewSwitcherItem.active {
+    max-width: 48px;
+    overflow: hidden;
+    padding: 4px 6px;
+    text-overflow: clip;
+    white-space: nowrap;
+  }
+}
+
+/* 3) AI 도구 2열 작업 영역 — 최소 폭 합(640+480+18)이 1440 본문(1106px)보다 커서 항상 8px 넘쳤다.
+ *    (shots-11 / research-04) 최소 폭을 없애고 1280px 이하는 1열. App.css 의 1100px 규칙은 그대로 둔다. */
+.aiVariantPage .aiVariantWorkspace {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+}
+
+@media (max-width: 1280px) {
+  .aiVariantPage .aiVariantWorkspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 4) 숙제현황·시험지관리 응시기록 (shots-10).
+ *    숙제현황의 실제 원인은 메트릭 4열이 아니라 `.homeworkStatusContent` 2열의 최소 폭 합
+ *    (430+520+22 = 972px)이었다 — 메트릭 4열은 minmax(0,1fr) 라 스스로는 넘치지 않는다.
+ *    레일(86px)을 뺀 1024 본문(≈900px)에서도 넘치므로 1100px 부터 1열로 접고, 메트릭은 720px 부터 2열.
+ *    응시기록 폼은 열 최소 폭이 160px 이라 세로 태블릿 본문(≈600px)에서도 넘치므로 900px 부터 2열. */
+@media (max-width: 1100px) {
+  .homeworkStatusDashboard .homeworkStatusContent {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .testAttemptPanel .testAttemptFormGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .homeworkStatusMetrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .testAttemptPanel .testAttemptFormGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 5) 학생·학부모 포털 390px — 포털 탭(WorkspaceTabs, flex nowrap)의 min-content 가 `.studentPortal`
+ *    그리드의 1fr 트랙을 키워 문서 폭이 547px(학생)·396px(학부모)로 늘어났다(shots-17).
+ *    그리드 자식의 자동 최소 폭을 없애고 탭을 줄바꿈해 뷰포트 안에 넣는다. */
+@media (max-width: 767px) {
+  .studentPortalTabletFirst > *,
+  .parentPortalMobileFirst > * {
+    min-width: 0;
+  }
+
+  .studentPortal .portalHeader h1 {
+    overflow-wrap: anywhere;
+  }
+
+  .studentPortalTabletFirst .portalTabs.workspaceTabs,
+  .parentPortalMobileFirst .portalTabs.workspaceTabs {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .studentPortalTabletFirst .portalTabs.workspaceTabs > button,
+  .parentPortalMobileFirst .portalTabs.workspaceTabs > button {
+    flex: 1 1 auto;
+  }
+}
+
+/* 6) 학생 포털(태블릿 1순위) 터치 요소 44px (portals-09).
+ *    교사 미리보기(teacherPreviewPortal)는 데스크톱 밀도를 유지한다. */
+.studentPortalTabletFirst:not(.teacherPreviewPortal) button,
+.studentPortalTabletFirst:not(.teacherPreviewPortal) .examPostChoiceGroup label {
+  min-height: var(--academy-touch-target);
+}
+
+.studentPortalTabletFirst:not(.teacherPreviewPortal) .portalTabs.workspaceTabs > button {
+  min-height: var(--academy-touch-target);
+}
+
+.studentPortalTabletFirst:not(.teacherPreviewPortal) .examPostChoiceGroup input[type="checkbox"] {
+  flex-basis: 18px;
+  height: 18px;
+  width: 18px;
+}

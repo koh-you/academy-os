@@ -51,6 +51,7 @@ export function TeacherViewSwitcher({ ownTenantId, viewTenantId, onChangeViewTen
               className={isActive ? "teacherViewSwitcherItem active" : "teacherViewSwitcherItem"}
               key={account.teacherId}
               onClick={() => onChangeViewTenant(account.tenantId === ownTenantId ? "" : account.tenantId)}
+              title={account.name}
               type="button"
             >
               {account.name}
