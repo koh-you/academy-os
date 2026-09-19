@@ -113,6 +113,76 @@ export async function supabaseRestRequest(path, options = {}) {
 const listRowsDefaultPageSize = 1000;
 const listRowsExplicitLimitPattern = /(^|&)limit=/;
 
+// 표별 기본키. 페이지를 나눠 읽을 때 정렬 맨 뒤에 붙여 페이지 경계를 고정한다.
+// offset 페이지네이션은 두 요청 사이에 같은 정렬 값(같은 날짜·같은 수업)인 행들의
+// 순서가 보장되지 않아서, 그 사이에 한 행이 갱신되면(키오스크 체크인, 수업일지 저장)
+// 행이 빠지거나 두 번 나온다 — 2026-08-25 "저장했는데 새로고침 뒤 사라짐" 과 같은
+// 모양의 조용한 오독이다. 기본키가 정렬 끝에 있으면 전체 순서가 유일해진다.
+// supabase/schema.sql·migrations 와 test-supabase-rest-list-rows-pagination 이 대조한다.
+export const primaryKeyColumnsByTable = Object.freeze({
+  academy_reminders: "reminder_id",
+  app_state: "tenant_id,state_key",
+  attendance_events: "attendance_event_id",
+  class_templates: "class_template_id",
+  exam_analysis_ai_jobs: "ai_job_id",
+  exam_analysis_events: "event_id",
+  exam_analysis_questions: "question_row_id",
+  exam_analysis_runs: "analysis_run_id",
+  exam_analysis_sources: "source_id",
+  exam_post_submissions: "submission_id",
+  exam_prep_rows: "tenant_id,exam_prep_id",
+  exam_submission_files: "file_id",
+  homeworks: "homework_id",
+  kiosk_devices: "kiosk_id",
+  lesson_student_records: "lesson_student_record_id",
+  lessons: "lesson_id",
+  makeup_tasks: "makeup_task_id",
+  notification_jobs: "notification_job_id",
+  notification_logs: "notification_log_id",
+  problem_bank_attempts: "attempt_id",
+  problem_bank_books: "book_id",
+  problem_bank_items: "item_id",
+  problem_bank_regions: "region_id",
+  problem_bank_units: "unit_id",
+  problem_books: "problem_book_id",
+  resource_materials: "resource_material_id",
+  school_events: "school_event_id",
+  score_records: "score_record_id",
+  special_lecture_applications: "application_id",
+  special_lecture_enrollments: "enrollment_id",
+  student_intake_applicants: "applicant_id",
+  students: "student_id",
+  teacher_accounts: "teacher_id",
+  test_attempts: "test_attempt_id",
+  test_sessions: "test_session_id",
+  wrong_problem_statuses: "wrong_problem_status_id"
+});
+
+function orderColumnName(orderTerm) {
+  return orderTerm.split(".")[0];
+}
+
+/**
+ * 페이지 읽기의 정렬을 결정적으로 만든다: `order=` 가 없으면 기본키 정렬을 넣고, 있으면
+ * 이미 들어 있지 않은 기본키 열을 뒤에 덧붙인다. 호출자가 보는 순서는 동률 안에서만 바뀐다.
+ * 기본키를 모르는 표는 그대로 둔다(정렬을 잘못 붙여 요청이 실패하는 것보다 낫다).
+ */
+export function withStablePaginationOrder(table, query) {
+  const primaryKey = primaryKeyColumnsByTable[table];
+  if (!primaryKey) return query;
+  const params = query ? query.split("&") : [];
+  const orderIndex = params.findIndex((param) => param.startsWith("order="));
+  const existingColumns = orderIndex === -1
+    ? []
+    : params[orderIndex].slice("order=".length).split(",").map(orderColumnName);
+  const missing = primaryKey.split(",").filter((column) => !existingColumns.includes(column));
+  if (missing.length === 0) return query;
+  const tiebreaker = missing.map((column) => `${column}.asc`).join(",");
+  if (orderIndex === -1) return params.length ? `${query}&order=${tiebreaker}` : `order=${tiebreaker}`;
+  params[orderIndex] = `${params[orderIndex]},${tiebreaker}`;
+  return params.join("&");
+}
+
 export async function listRows(table, query = "select=*", options = {}) {
   const requireServiceRole = options.requireServiceRole ?? false;
   query = applyTenantFilterToQuery(table, query, resolveReadTenantIds(options.tenantId));
@@ -120,6 +190,7 @@ export async function listRows(table, query = "select=*", options = {}) {
     return supabaseRestRequest(`${table}?${query}`, { requireServiceRole });
   }
 
+  query = withStablePaginationOrder(table, query);
   const pageSize = options.pageSize ?? listRowsDefaultPageSize;
   const rows = [];
   let offset = 0;
