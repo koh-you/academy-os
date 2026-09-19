@@ -36,8 +36,9 @@ const exclusiveClasses = new Set([
   "academyTestProfileRow", "batchPermanentDeleteTargetList", "deleteWarningBox", "dirtyStudentRow",
   "editableTextCell", "gradeBadge", "included", "monoCell", "mutedPill", "permanentDeleteAuditStatus",
   "permanentDeleteBlockedBox", "permanentDeleteConfirmationField", "permanentDeleteError",
-  "permanentDeleteForceField", "permanentDeleteSafeBox", "permanentDeleteStudentSummary", "profileEditHint",
-  "profileEditInput", "profileLoginEdit", "profileSavedText", "scoreRow", "studentAttendanceMonthInput",
+  "permanentDeleteForceField", "permanentDeleteSafeBox", "permanentDeleteStudentSummary",
+  // 2026-09-19 · profileEditHint·profileSavedText 는 UI 정돈(U6)에서 JSX 와 CSS 를 함께 없앴다.
+  "profileEditInput", "profileLoginEdit", "scoreRow", "studentAttendanceMonthInput",
   "studentAttendanceSectionActions", "studentAttendanceSummaryCard", "studentAttendanceSummaryGrid",
   "studentConsultationComposer", "studentConsultationContent", "studentConsultationControls",
   "studentConsultationDate", "studentConsultationItem", "studentConsultationList", "studentConsultationMeta",
@@ -110,7 +111,8 @@ domainRoot.walkRules((rule) => {
     domainSelectors.push(selector);
   }
 });
-assert.equal(domainSelectors.length, 232, `expected 232 moved selectors, found ${domainSelectors.length}`);
+// 2026-09-19 · UI 정돈(U6): .profileEditHint · .profileSavedText · .studentProfileRowActions .dangerSoftButton 셀렉터 3개 삭제 → 229.
+assert.equal(domainSelectors.length, 229, `expected 229 moved selectors, found ${domainSelectors.length}`);
 const appRoot = postcss.parse(appCss);
 const appSelectors = new Set();
 appRoot.walkRules((rule) => {

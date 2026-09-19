@@ -495,7 +495,6 @@
 }
 
 .studentProfileTile {
-  aspect-ratio: 1;
   background: var(--academy-surface, #ffffff);
   border: 1px solid var(--status-info-border, #bfdbfe);
   border-radius: 12px;
@@ -1035,16 +1034,6 @@
   font-weight: 900;
 }
 
-.profileEditHint {
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px dashed var(--academy-border-strong, #cbd8ee);
-  border-radius: 8px;
-  color: var(--academy-muted, #64748b);
-  font-size: 13px;
-  font-weight: 800;
-  padding: 10px 12px;
-}
-
 .studentScheduleEditor {
   display: grid;
   gap: 10px;
@@ -1112,12 +1101,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-}
-
-.profileSavedText {
-  color: var(--status-success-text, #047857);
-  font-size: 13px;
-  font-weight: 900;
 }
 
 .studentConsultationComposer,
@@ -1190,8 +1173,7 @@
   white-space: pre-wrap;
 }
 
-.studentProfileRowActions .softButton,
-.studentProfileRowActions .dangerSoftButton {
+.studentProfileRowActions .softButton {
   min-height: 36px;
   padding-inline: 10px;
 }
