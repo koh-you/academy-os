@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { isNpmScriptCoveredByProductionTests } from "./productionTestMembership.mjs";
 import { readFile } from "node:fs/promises";
 
 const [serverSource, notificationsRouteSource, commentPolishRouteSource, ssenCatalogSource, resourceStorageOperationSource, supabaseRestSource, packageJson] = await Promise.all([
@@ -130,7 +131,7 @@ assert.equal(
 );
 
 assert.ok(
-  packageJson.scripts["test:production"].includes("npm run test:fourth-pass-provider-boundary-baseline")
+  isNpmScriptCoveredByProductionTests("test:fourth-pass-provider-boundary-baseline")
 );
 
 console.log("fourth-pass provider boundary baseline passed · 4-5g row-fill/output wrappers and Ssen catalog isolated");

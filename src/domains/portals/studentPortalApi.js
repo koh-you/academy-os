@@ -1,9 +1,10 @@
-import { apiUrl, postJsonWithHeaders } from "../../shared/utils/apiClient.js";
+import { apiFetch, postJsonWithHeaders } from "../../shared/utils/apiClient.js";
 
 /** 학생 포털 › 오답: 선생님이 기록한 문항 요약(교재·단원·문항·기록). 읽기 전용. */
 export async function fetchStudentWrongAnswers(sessionToken) {
   if (!sessionToken) throw new Error("학생 로그인 정보가 필요합니다.");
-  const response = await fetch(apiUrl("/api/portal-problem-bank"), { headers: { Authorization: `Bearer ${sessionToken}` } });
+  // apiFetch 는 호출부가 넘긴 Authorization(학생 세션)을 그대로 존중한다.
+  const response = await apiFetch("/api/portal-problem-bank", { headers: { Authorization: `Bearer ${sessionToken}` } });
   const result = await response.json().catch(() => ({}));
   if (!response.ok || !result.ok) throw new Error(result?.error || `오답 목록을 불러오지 못했습니다 (${response.status})`);
   return result;

@@ -95,7 +95,7 @@ npm run test:domain:settlement
 
 - `scripts/scenario-tests-production.cjs`의 `hasAll(app, [...])` 체크뿐 아니라, `test-*-closeout*.mjs`, `test-modal-save-state-audit.mjs`, `test-monthly-settlement-controller.mjs` 같은 독립 standalone 스크립트들도 같은 리터럴을 App.jsx 소스에서 개별적으로 검사하고 있을 수 있다. 이동 전에 옮길 리터럴을 `scripts/` 전체에서 grep해 관련 체크를 먼저 파악한다.
 - 깨진 체크는 항상 새 파일의 source를 함께 읽어 검사하도록 고친다(예: `hasAll(\`${app}\n${newModuleSource}\`, [...])` 또는 해당 스크립트에 새 파일 `readFile`을 추가). 체크를 느슨하게 하거나 지우지 않는다 — 검사 대상이 옮겨간 것이지 계약이 사라진 게 아니다.
-- `test:production`의 npm script 문자열 자체를 참조하는 self-referential 체크(`packageJson.scripts["test:production"].includes(...)`)가 다수 존재한다. `test:production`의 값은 직접 편집하지 않고, 체인의 마지막 단계가 내부적으로 하는 일만 바꾼다.
+- `test:production`은 `node scripts/run-production-tests-summary.mjs` 하나이며, 무엇을 돌릴지는 `scripts/production-test-file-list.json`(평면 목록, 계약 검사가 맨 앞)이 정한다(2026-09-19, 이전의 105구간 npm 체인을 전개해 합쳤다). 새 검사는 이 목록에 넣는다. "이 검사가 production gate 에 있다"를 고정하는 가드는 npm 문자열 대신 `scripts/productionTestMembership.mjs`의 `isNpmScriptCoveredByProductionTests`/`isTestFileInProductionList`를 쓴다. 로컬에서 환경 문제로 부팅 자체가 안 되는 검사만 `ACADEMY_SKIP_TEST_FILES=scripts/…` 로 건너뛸 수 있고, 요약에 건너뛴 파일이 그대로 찍힌다(CI 는 쓰지 않는다).
 - 4-4a식 baseline-lock fixture(예: `test-fourth-pass-app-action-baseline.mjs`)는 리팩터링 시작 시점의 상태를 고정해 이후 단위가 대조할 기준으로 쓴다. 대상 단위를 모두 완료했으면 fixture의 기대값을 종료 상태로 갱신한다 — fixture를 지우거나 무시하지 않는다.
 - 하나의 안전 단위를 "완료"로 표시하기 전에 `npm run test:production` 전체를 한 번 통과시켜, 개별적으로 찾지 못한 다른 자기참조 체크가 없는지 확인한다.
 

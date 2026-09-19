@@ -264,14 +264,14 @@ import {
   normalizeNotificationText
 } from "../src/domains/notifications/notificationMessageRenderer.js";
 import { parseHomeworkFollowupMemoLine } from "../src/domains/notifications/lessonPreparationNotice.js";
+// 알림톡 원천 줄(교재·진도·보충 일정·테스트 결과)은 화면 미리보기와 같은 모듈을 쓴다 — 두 사본이
+// 갈라져 미리보기와 발송 문구가 달랐던 2026-09-19 이전 상태로 돌아가지 않게, 여기에 사본을 두지 않는다.
 import {
-  followUpTypeLabel,
-  formatSupplementHomeworkCheckSentence,
-  getSupplementTaskSourceLabel,
-  supplementMethodLabel
-} from "../src/domains/supplements/supplementMethodLabel.js";
-import { getTestPaperKindLabel } from "../src/domains/tests/testManagerUtils.js";
-import { isSupplementScheduleForLessonComment } from "../src/domains/notifications/supplementSchedule.js";
+  getLessonContent,
+  getLessonMaterial,
+  getLessonTestResultLines,
+  getStudentSupplementSchedules
+} from "../src/domains/notifications/lessonCommentSourceLines.js";
 import { normalizeSpecialLectureTallySessionRequests } from "../src/domains/specialLectures/tallySessionRequests.js";
 import { normalizeGradeLabel, normalizeSchoolName, schoolNamesMatch } from "../src/domains/schoolCalendar/schoolCalendarUtils.js";
 import {
@@ -2478,14 +2478,6 @@ function getLatestNotificationRecord(context, lesson = {}, student = {}) {
   );
 }
 
-function getNotificationLessonMaterial(record = {}, student = {}) {
-  return compactText(record.lessonMaterial) || compactText(student.textbook) || compactText(student.currentTextbook);
-}
-
-function getNotificationLessonContent(record = {}) {
-  return compactText(record.lessonProgress) || compactText(record.progress) || compactText(record.lessonContent);
-}
-
 function getAssignmentStatusForNotification(record = {}, previousHomework = null, records = []) {
   const recordStatus = normalizeAssignmentStatusValue(record.assignmentStatus ?? record.incompleteHomework ?? "");
   if (recordStatus) return recordStatus;
@@ -2526,72 +2518,6 @@ function getLessonHomeworkForNotification(homeworks = [], lessons = [], lesson =
     records,
     studentId: student.studentId
   });
-}
-
-function formatSupplementScheduleLineForNotification(task = {}) {
-  const schedule = [task.scheduledDate, task.scheduledTime].filter(Boolean).join(" ");
-  const method = supplementMethodLabel(task);
-  const source = getSupplementTaskSourceLabel(task) || followUpTypeLabel(task.taskType);
-  const homeworkCheckSentence = formatSupplementHomeworkCheckSentence(task);
-  const schedulePrefix = schedule ? `${schedule}에 ` : "";
-
-  if (task.taskType === "homework_makeup") {
-    const methodId = task.supplementMethod || "arrival_makeup";
-    if (methodId === "next_lesson") {
-      return `다음 수업 때 ${source}를 함께 확인하겠습니다.`;
-    }
-    return `${schedulePrefix}${method}으로 ${source} 보충을 진행하겠습니다.`;
-  }
-
-  if (task.taskType === "absence_makeup") {
-    return `${schedulePrefix}${method}으로 ${source} 결석 보강을 진행하겠습니다.${homeworkCheckSentence ? ` ${homeworkCheckSentence}` : ""}`;
-  }
-
-  if (task.taskType === "retest") {
-    return `${schedulePrefix}${source} 재시험을 진행하겠습니다.`;
-  }
-
-  return `${schedulePrefix}${source} 일정을 진행하겠습니다.`;
-}
-
-function getStudentSupplementSchedulesForNotification(makeupTasks = [], studentId = "", options = {}) {
-  const { lesson = null, mode = "all" } = options;
-  return makeupTasks
-    .filter((task) => task.studentId === studentId && task.status !== "done")
-    .filter((task) => (mode === "lesson_comment" ? isSupplementScheduleForLessonComment(task, lesson) : true))
-    .filter((task) => task.scheduledDate || task.scheduledTime || task.notificationDraft || task.supplementHomeworkNote || task.sourceLabel)
-    .sort((a, b) => `${a.scheduledDate || "9999-99-99"} ${a.scheduledTime || ""}`.localeCompare(`${b.scheduledDate || "9999-99-99"} ${b.scheduledTime || ""}`))
-    .map(formatSupplementScheduleLineForNotification);
-}
-
-function formatTestAttemptLineForNotification(session = {}, attempt = {}) {
-  const title = compactText(session.testTitle) || getTestPaperKindLabel(session.testKind);
-  if (attempt.status === "not_taken") {
-    const reason = compactText(attempt.notTakenReason);
-    return `${title} · 미응시${reason ? ` (사유: ${reason})` : ""}`;
-  }
-
-  const correct = attempt.correctCount === "" || attempt.correctCount === null || attempt.correctCount === undefined
-    ? ""
-    : `${attempt.correctCount}문항 정답`;
-  const total = session.totalQuestions === "" || session.totalQuestions === null || session.totalQuestions === undefined
-    ? ""
-    : `${session.totalQuestions}문항 중 `;
-  return `${title} · ${correct ? `${total}${correct}` : "응시"}`;
-}
-
-function getStudentTestResultLinesForNotification(testSessions = [], testAttempts = [], lesson = {}, student = {}) {
-  const sessionById = new Map(testSessions.map((session) => [session.testSessionId, session]));
-  return testAttempts
-    .filter((attempt) => attempt.studentId === student.studentId)
-    .map((attempt) => ({ attempt, session: sessionById.get(attempt.testSessionId) }))
-    .filter(({ session }) => session && session.testDate === lesson.date)
-    .filter(({ session }) => {
-      if (!session.classTemplateId) return true;
-      return session.classTemplateId === lesson.classTemplateId;
-    })
-    .sort((a, b) => String(a.session.updatedAt || a.session.createdAt || "").localeCompare(String(b.session.updatedAt || b.session.createdAt || "")))
-    .map(({ session, attempt }) => formatTestAttemptLineForNotification(session, attempt));
 }
 
 function getHomeworkFollowupNoticeForNotification(record = {}, target = "parent", notificationTemplates = {}) {
@@ -2638,8 +2564,8 @@ function buildLatestLessonCommentPreview({ audience, commentBody, homeworkFollow
     assignmentStatus: getAssignmentStatusMessage(audience, assignmentStatus),
     audience,
     homeworkFollowupNotice: omitPreviousHomework ? "" : homeworkFollowupNotice,
-    lessonContent: getNotificationLessonContent(record),
-    lessonMaterial: getNotificationLessonMaterial(record, student),
+    lessonContent: getLessonContent(record),
+    lessonMaterial: getLessonMaterial(record, student),
     nextHomework: nextHomework?.title ?? "",
     omitPreviousHomework,
     previousHomework: omitPreviousHomework ? "" : previousHomework?.title ?? "",
@@ -2766,11 +2692,11 @@ function refreshLessonCommentJobBeforeSend(job = {}, context = null) {
 
   const previousHomework = getLessonHomeworkForNotification(context.homeworks, context.lessons, lesson, student, "previous", context.records);
   const nextHomework = getLessonHomeworkForNotification(context.homeworks, context.lessons, lesson, student, "next", context.records);
-  const supplementSchedules = getStudentSupplementSchedulesForNotification(context.makeupTasks, student.studentId, {
+  const supplementSchedules = getStudentSupplementSchedules(context.makeupTasks, student.studentId, {
     lesson,
     mode: "lesson_comment"
   });
-  const testResultLines = getStudentTestResultLinesForNotification(context.testSessions, context.testAttempts, lesson, student);
+  const testResultLines = getLessonTestResultLines(context.testSessions, context.testAttempts, lesson, student);
   const sourceField = audience === "student" ? "studentComment" : "teacherComment";
   const commentBody = buildInitialNotificationComment({
     existingComment: record[sourceField] ?? ""
@@ -2794,10 +2720,10 @@ function refreshLessonCommentJobBeforeSend(job = {}, context = null) {
     commentBodyOverride: commentBody,
     homeworkFollowupNotice: omitPreviousHomework ? "" : homeworkFollowupNotice,
     lateMinutes: record.lateMinutes ?? "",
-    lessonContent: getNotificationLessonContent(record),
+    lessonContent: getLessonContent(record),
     lessonDate: lesson.date,
     lessonId: lesson.lessonId,
-    lessonMaterial: getNotificationLessonMaterial(record, student),
+    lessonMaterial: getLessonMaterial(record, student),
     lessonName: lesson.className,
     message: commentBody,
     nextHomework: nextHomework?.title ?? "",
