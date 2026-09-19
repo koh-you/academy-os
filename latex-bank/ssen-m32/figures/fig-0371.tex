@@ -1,0 +1,23 @@
+% 0371(본책 69쪽) — 직사각형 ABCD 의 세 변에 접하는 원 O(접점 E, F, G, H), 접선 DI, AB=12, BF=6, AD=15. 답(DI)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,1.560) -- (0.000,0.000) -- (1.950,0.000) -- (1.950,1.560) -- cycle;
+  \draw (0.780,0.780) circle (0.780);
+  \fill (0.780,0.780) circle (1.2pt);
+  \draw (1.950,1.560) -- (1.300,0.000);
+  \draw[dashed, line width=0.4pt] (0.000,1.560) to[bend left=15] (1.950,1.560);
+  \node[font=\small, inner sep=1.5pt] at (0.975,1.810) {$15$};
+  \draw[dashed, line width=0.4pt] (0.000,1.560) to[bend right=20] (0.000,0.000);
+  \node[font=\small, inner sep=1.5pt] at (-0.350,0.780) {$12$};
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend right=25] (0.780,0.000);
+  \node[font=\small, inner sep=1.5pt] at (0.390,-0.250) {$6$};
+  \node[font=\small, inner sep=1.5pt] at (-0.156,1.650) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.120,-0.120) {B};
+  \node[font=\small, inner sep=1.5pt] at (2.097,-0.085) {C};
+  \node[font=\small, inner sep=1.5pt] at (2.097,1.645) {D};
+  \node[font=\small, inner sep=1.5pt] at (0.150,0.780) {E};
+  \node[font=\small, inner sep=1.5pt] at (0.780,-0.160) {F};
+  \node[font=\small, inner sep=1.5pt] at (1.660,0.480) {G};
+  \node[font=\small, inner sep=1.5pt] at (0.780,1.410) {H};
+  \node[font=\small, inner sep=1.5pt] at (1.300,-0.160) {I};
+  \node[font=\small, inner sep=1.5pt] at (0.780,0.580) {O};
+\end{tikzpicture}

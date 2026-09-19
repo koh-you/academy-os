@@ -1,0 +1,17 @@
+% 0404(본책 75쪽) — 원 위 네 점 A(위), B, C(아래), D(오른쪽), 현 AB·AC·BD·CD, ∠BDC=33°, ∠BAC=x. 답(x)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.191,1.083) -- (-0.843,-0.707);
+  \draw (-0.191,1.083) -- (0.376,-1.034);
+  \draw (-0.843,-0.707) -- (1.034,0.376);
+  \draw (0.376,-1.034) -- (1.034,0.376);
+  \fill[green!15] (-0.191,1.083) -- (-0.300,0.783) arc (250.0:285.0:0.320) -- cycle;
+  \draw[line width=0.4pt] (-0.300,0.783) arc (250.0:285.0:0.320);
+  \draw[line width=0.4pt] (0.731,0.201) arc (210.0:245.0:0.350);
+  \node[font=\small, inner sep=0.5pt] at (-0.215,0.534) {$x$};
+  \node[font=\small, inner sep=0.5pt] at (0.547,-0.155) {$33^\circ$};
+  \node[font=\small, inner sep=1.5pt] at (-0.226,1.280) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.996,-0.836) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.445,-1.222) {C};
+  \node[font=\small, inner sep=1.5pt] at (1.222,0.445) {D};
+\end{tikzpicture}

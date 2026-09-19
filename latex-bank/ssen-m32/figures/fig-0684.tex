@@ -1,0 +1,16 @@
+% 0684(본책 122쪽) — A 팀·B 팀 최근 5경기 안타 수 표(A: 13 13 8 a 10 · B: 9 5 b 18 12 · 단위: 개). 스캔 표를 tabular 로 옮김(대각선 머리 칸은 tikz). 본문 중간에 \input 으로 넣는다.
+{\renewcommand{\arraystretch}{1.35}\small
+\begin{tabular}{@{}r@{}}
+{\footnotesize (단위: 개)} \\[1pt]
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\begin{tikzpicture}[baseline=(c.base)]
+  \node[inner sep=0pt, minimum width=2.1cm, minimum height=0.85cm] (c) {};
+  \draw[line width=0.3pt] (c.north west) -- (c.south east);
+  \node[font=\small, anchor=north east, inner sep=1.5pt] at (c.north east) {경기(차전)};
+  \node[font=\small, anchor=south west, inner sep=1.5pt] at (c.south west) {팀};
+\end{tikzpicture} & $1$ & $2$ & $3$ & $4$ & $5$ \\ \hline
+A & $13$ & $13$ & $8$ & $a$ & $10$ \\ \hline
+B & $9$ & $5$ & $b$ & $18$ & $12$ \\ \hline
+\end{tabular}
+\end{tabular}}

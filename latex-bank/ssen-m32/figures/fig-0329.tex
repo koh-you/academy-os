@@ -1,0 +1,17 @@
+% 0329(본책 62쪽) — 점 P 에서 원 O 에 그은 두 접선의 접점 A, B, ∠APB=52°. 답(∠ABO)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-2.281,0.000) -- (-0.124,1.052);
+  \draw (-2.281,0.000) -- (-0.124,-1.052);
+  \draw (-0.438,0.899) -- (-0.438,-0.899);
+  \draw (0.000,0.000) -- (-0.438,0.899);
+  \draw (0.000,0.000) -- (-0.438,-0.899);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-2.012,-0.132) arc (-26.000:26.000:0.300);
+  \node[font=\small, inner sep=1.5pt] at (-1.450,0.000) {$52^\circ$};
+  \fill[green!30] (-0.438,-0.899) -- (-0.438,-0.739) arc (90.000:64.000:0.160) -- cycle;
+  \node[font=\small, inner sep=1.5pt] at (-2.441,0.000) {P};
+  \node[font=\small, inner sep=1.5pt] at (-0.458,1.069) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.458,-1.079) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.170,0.000) {O};
+\end{tikzpicture}

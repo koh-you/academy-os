@@ -1,0 +1,13 @@
+% 0091(본책 18쪽) — 반지름 8 인 사분원(중심이 왼쪽 아래)에 내접하는 직사각형(노란색 채움). 한 꼭짓점은 중심, 마주보는 꼭짓점은 호 위. 스캔 삽화라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 「8」(밑변 아래 파선 치수) 하나. 가로·세로 길이는 적지 않는다(답 근거).
+\begin{tikzpicture}[scale=0.32, line width=0.5pt]
+  \def\R{8}
+  \coordinate (O) at (0,0);
+  \coordinate (P) at ({\R*cos(35)},{\R*sin(35)});
+  \fill[yellow!60] (O) rectangle (P);
+  \draw[line width=0.6pt] (0,0) -- (\R,0) arc (0:90:\R) -- cycle;
+  \draw[line width=0.5pt] (O) rectangle (P);
+  \draw[line width=0.4pt] (0,0.55) -- (0.55,0.55) -- (0.55,0);
+  \draw[dashed, line width=0.4pt] (0,-0.7) -- (\R,-0.7);
+  \node[font=\small, below, inner sep=1pt] at (\R/2,-0.7) {$8$};
+\end{tikzpicture}

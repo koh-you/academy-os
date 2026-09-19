@@ -1,0 +1,13 @@
+% 0239(본책 39쪽) — x축·y축에 동시에 접하는 원(중심 (2,2)) 그림. 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 O·x·y 와 눈금 2·2 만. 원의 방정식(답)은 적지 않는다.
+\begin{tikzpicture}[scale=0.55, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.8,0) -- (5.6,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.8) -- (0,5.2) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (2,2) circle (2);
+  \fill (2,2) circle (2.2pt);
+  \draw[dashed, line width=0.4pt] (0,2) -- (2,2);
+  \draw[dashed, line width=0.4pt] (2,0) -- (2,2);
+  \node[below left=-1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[left=1pt, font=\small] at (0,2) {$2$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+\end{tikzpicture}

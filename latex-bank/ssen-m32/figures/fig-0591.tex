@@ -1,0 +1,25 @@
+% 0591(본책 106쪽) — □ABCD, AD·BC 연장선의 교점 P, AC·BD 의 교점 E, ∠APB=32°, ∠PAB=80°, ∠ADB=22°, ∠BDC=46°, ∠DEC 표시. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=0.65, line width=0.6pt]
+  \draw (0.000,0.000) -- (5.494,3.433);
+  \draw (0.000,0.000) -- (6.100,0.000);
+  \draw (2.395,1.497) -- (3.000,0.000);
+  \draw (5.494,3.433) -- (6.100,0.000);
+  \draw (2.395,1.497) -- (6.100,0.000);
+  \draw (3.000,0.000) -- (5.494,3.433);
+  \draw[line width=0.4pt] (0.400,0.000) arc[start angle=0.000, end angle=32.000, radius=0.400];
+  \node[font=\small, inner sep=1pt] at (0.596,0.171) {$32^\circ$};
+  \draw[line width=0.4pt] (2.141,1.338) arc[start angle=-148.000, end angle=-68.000, radius=0.300];
+  \node[font=\small, inner sep=1pt] at (2.241,1.021) {$80^\circ$};
+  \draw[line width=0.4pt] (5.113,3.195) arc[start angle=-148.000, end angle=-126.000, radius=0.450];
+  \node[font=\small, inner sep=1pt] at (4.968,2.942) {$22^\circ$};
+  \draw[line width=0.4pt] (5.054,2.827) arc[start angle=-126.000, end angle=-80.000, radius=0.750];
+  \node[font=\small, inner sep=1pt] at (5.265,2.439) {$46^\circ$};
+  \fill[yellow!35] (3.703,0.968) -- ++(-22.000:0.180) arc[start angle=-22.000, end angle=54.000, radius=0.180] -- cycle;
+  \draw[line width=0.4pt] (3.870,0.901) arc[start angle=-22.000, end angle=54.000, radius=0.180];
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (0.000,0.000) {P};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (3.000,-0.050) {B};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (6.100,-0.050) {C};
+  \node[font=\small, anchor=south east, inner sep=1.5pt] at (2.375,1.527) {A};
+  \node[font=\small, anchor=south west, inner sep=1.5pt] at (5.494,3.463) {D};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (3.753,0.888) {E};
+\end{tikzpicture}

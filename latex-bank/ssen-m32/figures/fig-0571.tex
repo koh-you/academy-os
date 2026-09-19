@@ -1,0 +1,18 @@
+% 0571(본책 102쪽) — 원, 점 P 에서 그은 두 접선(접점 A·B), ∠P=30°, 호 AQ:QB=3:2, ∠x(∠QBA). 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.0, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (3.864,0.000) -- (-0.224,1.095);
+  \draw (3.864,0.000) -- (-0.224,-1.095);
+  \draw (0.259,0.966) -- (-0.934,-0.358);
+  \draw (-0.934,-0.358) -- (0.259,-0.966);
+  \draw (0.259,0.966) -- (0.259,-0.966);
+  \draw[line width=0.4pt] (3.429,0.116) arc[start angle=165.000, end angle=195.000, radius=0.450];
+  \node[font=\small, inner sep=1pt] at (2.964,0.000) {$30^\circ$};
+  \fill[yellow!35] (0.259,-0.966) -- ++(90.000:0.250) arc[start angle=90.000, end angle=153.000, radius=0.250] -- cycle;
+  \draw[line width=0.4pt] (0.259,-0.716) arc[start angle=90.000, end angle=153.000, radius=0.250];
+  \node[font=\small, inner sep=1pt] at (0.024,-0.582) {$x$};
+  \node[font=\small, anchor=south, inner sep=1.5pt] at (0.259,1.016) {A};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (0.259,-1.016) {B};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-0.934,-0.358) {Q};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (3.864,0.000) {P};
+\end{tikzpicture}

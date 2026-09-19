@@ -1,0 +1,25 @@
+% 0130(본책 27쪽) — 한 모서리 12 정사면체 ABCD, AD 의 중점 M, BM·CM, 각 x(∠BMC). 라벨: A·B·C·D·M, 12(AB) 파선 호, 같은 길이 표시(AM=MD). 숨은 모서리 BD 는 파선. 스캔 삽화를 TikZ 로 다시 그림. 답(sin x)은 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.6pt]
+  \coordinate (B) at (0,1.0); \coordinate (C) at (1.1,0); \coordinate (D) at (2.8,1.0); \coordinate (A) at (1.35,3.0); \coordinate (M) at (2.075,2.0);
+  \fill[yellow!35] (A) -- (B) -- (C) -- cycle;
+  \fill[yellow!60] (A) -- (C) -- (D) -- cycle;
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (A) -- (C);
+  \draw[dashed, line width=0.4pt] (B) -- (D);
+  \draw (B) -- (M);
+  \draw (C) -- (M);
+  % 같은 길이 표시(AM=MD)
+  \draw[line width=0.4pt] (1.63,2.45) -- (1.79,2.55) (1.72,2.36) -- (1.88,2.46);
+  \draw[line width=0.4pt] (2.35,1.45) -- (2.51,1.55) (2.44,1.36) -- (2.60,1.46);
+  % 각 x(∠BMC)
+  \draw[line width=0.4pt] ($(M)+(206:0.4)$) arc[start angle=206, end angle=244, radius=0.4cm];
+  \node[font=\small] at (1.72,1.62) {$x$};
+  % 12(AB 파선 호)
+  \draw[dashed, line width=0.4pt] (B) to[bend left=30] (A);
+  \node[font=\small] at (0.3,2.3) {$12$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, below] at (C) {C};
+  \node[font=\small, right] at (D) {D};
+  \node[font=\small, above right] at (M) {M};
+\end{tikzpicture}

@@ -1,0 +1,15 @@
+% 0308(본책 59쪽) — 원 모양의 종이를 원주 위의 한 점이 중심 O 와 겹치도록 AB 를 접는 선으로 접은 모양, AB=16√3 cm. 답(호 AB)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \fill[yellow!35] (0.550,0.953) arc[start angle=60.0, end angle=300.0, radius=1.100] -- cycle;
+  \fill[yellow!70] (0.550,0.953) arc[start angle=120.0, end angle=240.0, radius=1.100] -- cycle;
+  \draw (0.550,0.953) arc[start angle=60.0, end angle=300.0, radius=1.100];
+  \draw[dashed, line width=0.4pt] (0.550,-0.953) arc[start angle=-60.0, end angle=60.0, radius=1.100];
+  \draw (0.550,0.953) -- (0.550,-0.953);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw (0.550,0.953) arc[start angle=120.0, end angle=240.0, radius=1.100];
+  \draw[dashed, line width=0.4pt] (0.550,0.953) to[bend left=25] (0.550,-0.953);
+  \node[font=\small, fill=white, inner sep=1pt] at (1.350,0.500) {$16\sqrt{3}\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-0.180,0.000) {O};
+  \node[font=\small, inner sep=1.5pt] at (0.600,1.133) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.600,-1.133) {B};
+\end{tikzpicture}

@@ -1,0 +1,34 @@
+% 0071(본책 17쪽) — 직육면체 ABCD-EFGH(가로 FG=3 cm·세로 GH=4 cm·높이 DH=5 cm), 대각선 AG 와 EG, 각 x(∠AGE). 라벨: A~H, 3 cm·4 cm·5 cm 파선 호, 직각 표시 E. 숨은 모서리·EG 는 파선. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1, line width=0.6pt]
+  \coordinate (B) at (0,2.5); \coordinate (C) at (1.8,2.5); \coordinate (F) at (0,0); \coordinate (G) at (1.8,0);
+  \coordinate (A) at (0.9,3.05); \coordinate (D) at (2.7,3.05); \coordinate (E) at (0.9,0.55); \coordinate (H) at (2.7,0.55);
+  \fill[orange!12] (B) -- (C) -- (G) -- (F) -- cycle;
+  \fill[orange!22] (C) -- (D) -- (H) -- (G) -- cycle;
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (B) -- (F) -- (G) -- (C);
+  \draw (D) -- (H) -- (G);
+  \draw[dashed, line width=0.4pt] (A) -- (E) -- (F);
+  \draw[dashed, line width=0.4pt] (E) -- (H);
+  \draw[dashed, line width=0.4pt] (E) -- (G);
+  \draw (A) -- (G);
+  % 직각 표시(E)
+  \draw[line width=0.4pt] (0.9,0.69) -- (1.019,0.617) -- (1.019,0.477);
+  % 각 x(∠AGE)
+  \draw[line width=0.4pt] (1.673,0.432) arc[start angle=106.4, end angle=148.6, radius=0.45cm];
+  \node[font=\small] at (1.36,0.5) {$x$};
+  % 길이(파선 호)
+  \draw[dashed, line width=0.4pt] (D) to[bend left=25] (H);
+  \draw[dashed, line width=0.4pt] (G) to[bend right=25] (H);
+  \draw[dashed, line width=0.4pt] (F) to[bend right=25] (G);
+  \node[font=\small] at (3.2,1.8) {$5\,\mathrm{cm}$};
+  \node[font=\small] at (2.62,0.02) {$4\,\mathrm{cm}$};
+  \node[font=\small] at (0.9,-0.42) {$3\,\mathrm{cm}$};
+  \node[font=\small, above left] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (1.8,2.4) {C};
+  \node[font=\small, above right] at (D) {D};
+  \node[font=\small, left] at (E) {E};
+  \node[font=\small, below left] at (F) {F};
+  \node[font=\small, below] at (1.85,-0.02) {G};
+  \node[font=\small, right] at (H) {H};
+\end{tikzpicture}

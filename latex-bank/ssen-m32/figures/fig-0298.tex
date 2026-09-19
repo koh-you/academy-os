@@ -1,0 +1,18 @@
+% 0298(본책 57쪽) — 지름 CD 인 원 O, AB⊥CD(교점 P), CP=6 cm, DP=12 cm. 답(AB)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.037,0.367) -- (1.037,0.367);
+  \draw (0.000,1.100) -- (0.000,-1.100);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (0.120,0.367) -- (0.120,0.487) -- (0.000,0.487);
+  \draw[dashed, line width=0.4pt] (0.000,1.100) to[bend left=30] (0.000,0.367);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.350,0.720) {$6\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.000,0.367) to[bend left=30] (0.000,-1.100);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.420,-0.400) {$12\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-0.160,0.000) {O};
+  \node[font=\small, inner sep=1.5pt] at (-1.226,0.433) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.226,0.433) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.000,1.300) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.000,-1.300) {D};
+  \node[font=\small, inner sep=1.5pt] at (-0.140,0.500) {P};
+\end{tikzpicture}

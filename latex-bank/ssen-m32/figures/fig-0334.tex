@@ -1,0 +1,21 @@
+% 0334(본책 63쪽) — PA, PB 가 A, B 에서 원 O 에 접함, 원 위의 점 C 에 대해 AC=BC, ∠PAC=35°, ∠ACB=110°. 답(∠APB)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-2.924,0.000) -- (-0.060,1.042);
+  \draw (-2.924,0.000) -- (-0.060,-1.042);
+  \draw (-0.342,0.940) -- (-1.000,0.000);
+  \draw (-0.342,-0.940) -- (-1.000,0.000);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.720,0.504) -- (-0.622,0.435);
+  \draw[line width=0.4pt] (-0.622,-0.435) -- (-0.720,-0.504);
+  \draw[line width=0.4pt] (-0.624,0.837) arc (-160.000:-125.000:0.300);
+  \node[font=\small, inner sep=1.5pt] at (-0.720,1.100) {$35^\circ$};
+  \draw[line width=0.4pt] (-0.885,0.164) arc (55.000:-55.000:0.200);
+  \node[font=\small, inner sep=1.5pt] at (-0.550,0.000) {$110^\circ$};
+  \fill[yellow!60] (-2.924,0.000) -- (-2.736,-0.068) arc (-20.000:20.000:0.200) -- cycle;
+  \node[font=\small, inner sep=1.5pt] at (-3.084,0.000) {P};
+  \node[font=\small, inner sep=1.5pt] at (-0.292,1.110) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.322,-1.120) {B};
+  \node[font=\small, inner sep=1.5pt] at (-1.150,0.020) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.170,0.000) {O};
+\end{tikzpicture}

@@ -1,0 +1,20 @@
+% 0348(본책 65쪽) — 지름 AB(세로) 인 반원 O, A·B 에서의 접선과 호 위의 점 E 에서의 접선의 교점 C, D. 답(∠COD)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,1.000) arc (90:-90:1.000);
+  \draw (0.000,1.000) -- (0.000,-1.000);
+  \draw (-0.450,1.000) -- (1.750,1.000);
+  \draw (-0.450,-1.000) -- (1.750,-1.000);
+  \draw (0.615,1.235) -- (1.514,-1.235);
+  \draw (0.000,0.000) -- (0.700,1.000);
+  \draw (0.000,0.000) -- (1.428,-1.000);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (0.000,0.900) -- (0.100,0.900) -- (0.100,1.000);
+  \draw[line width=0.4pt] (0.000,-0.900) -- (0.100,-0.900) -- (0.100,-1.000);
+  \fill[green!30] (0.000,0.000) -- (0.131,-0.092) arc (-35.000:55.000:0.160) -- cycle;
+  \node[font=\small, inner sep=1.5pt] at (-0.020,1.170) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.020,-1.180) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.700,1.170) {C};
+  \node[font=\small, inner sep=1.5pt] at (1.428,-1.180) {D};
+  \node[font=\small, inner sep=1.5pt] at (1.100,0.402) {E};
+  \node[font=\small, inner sep=1.5pt] at (-0.170,0.000) {O};
+\end{tikzpicture}

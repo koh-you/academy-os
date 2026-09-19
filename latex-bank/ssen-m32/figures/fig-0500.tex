@@ -1,0 +1,20 @@
+% 0500(본책 91쪽) — 원에 내접하는 □ABCD 와 대각선 AC, BC 의 연장선 위의 점 E, ∠DAC=x(색칠), ∠CAB=35°, ∠DCE=102°. 다시 그림.
+\begin{tikzpicture}[scale=1.38, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.034,0.376) -- (-0.631,-0.901) -- (0.631,-0.901) -- (0.210,1.080) -- cycle;
+  \draw (-1.034,0.376) -- (0.631,-0.901);
+  \draw (0.631,-0.901) -- (1.181,-0.901);
+  \fill (1.181,-0.901) circle (1.2pt);
+  \fill[green!15] (-1.034,0.376) -- (-0.812,0.206) arc[start angle=-37.500, end angle=29.500, radius=0.280] -- cycle;
+  \draw[line width=0.4pt] (-0.812,0.206) arc[start angle=-37.500, end angle=29.500, radius=0.280];
+  \node[font=\small, inner sep=0.5pt] at (-0.575,0.344) {$x$};
+  \draw[line width=0.4pt] (-0.907,-0.024) arc[start angle=-72.500, end angle=-37.500, radius=0.420];
+  \node[font=\small, inner sep=0.5pt] at (-0.603,-0.238) {$35^\circ$};
+  \draw[line width=0.4pt] (0.871,-0.901) arc[start angle=-0.000, end angle=102.000, radius=0.240];
+  \node[font=\small, inner sep=0.5pt] at (0.977,-0.474) {$102^\circ$};
+  \node[font=\small, inner sep=1.5pt] at (-1.222,0.445) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.746,-1.065) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.666,-1.098) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.248,1.276) {D};
+  \node[font=\small, inner sep=1.5pt] at (1.216,-1.098) {E};
+\end{tikzpicture}

@@ -1,0 +1,13 @@
+% 0327(본책 62쪽) — 점 O 중심의 두 원, 작은 원의 접선이 큰 원과 만나는 점 A, B, AB=8 cm, 고리 부분 색칠(원문 노랑). 답(넓이)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \fill[even odd rule, yellow!50] (0.000,0.000) circle (1.100) (0.000,0.000) circle (0.600);
+  \draw (0.000,0.000) circle (1.100);
+  \draw (0.000,0.000) circle (0.600);
+  \draw (-0.922,-0.600) -- (0.922,-0.600);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (-0.922,-0.600) to[bend right=20] (0.922,-0.600);
+  \node[font=\small, inner sep=1.5pt] at (0.000,-0.800) {$8\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.000,0.170) {O};
+  \node[font=\small, inner sep=1.5pt] at (-1.082,-0.600) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.082,-0.600) {B};
+\end{tikzpicture}

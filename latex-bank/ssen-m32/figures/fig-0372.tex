@@ -1,0 +1,16 @@
+% 0372(본책 69쪽) — 직사각형 ABCD(AB=4 cm, BC=5 cm), B 중심·A 지나는 원의 호, C 에서 그은 접선(접점 E)이 AD 와 만나는 점 F. 답(AF)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,1.600) -- (0.000,0.000) -- (2.000,0.000) -- (2.000,1.600) -- cycle;
+  \draw[line width=0.6pt] (0.000,1.600) arc[start angle=90.00, end angle=0.00, radius=1.600cm];
+  \draw (2.000,0.000) -- (0.800,1.600);
+  \draw[dashed, line width=0.4pt] (0.000,1.600) to[bend right=20] (0.000,0.000);
+  \node[font=\small, inner sep=1.5pt] at (-0.450,0.800) {$4\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend right=15] (2.000,0.000);
+  \node[font=\small, inner sep=1.5pt] at (1.000,-0.300) {$5\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-0.120,1.720) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.120,-0.120) {B};
+  \node[font=\small, inner sep=1.5pt] at (2.147,-0.085) {C};
+  \node[font=\small, inner sep=1.5pt] at (2.120,1.720) {D};
+  \node[font=\small, inner sep=1.5pt] at (1.400,1.080) {E};
+  \node[font=\small, inner sep=1.5pt] at (0.800,1.760) {F};
+\end{tikzpicture}

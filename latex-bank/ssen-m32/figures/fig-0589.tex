@@ -1,0 +1,18 @@
+% 0589(본책 106쪽) — AB=AC 인 △ABC 가 원에 내접, 현 CD(∠BCD=86°), 연장선 위 BD=CE 인 점 E, ∠CAE 표시. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (0.000,1.000) -- (-0.743,-0.669) -- (0.743,-0.669) -- cycle;
+  \draw (0.743,-0.669) -- (0.401,1.271);
+  \draw (-0.743,-0.669) -- (0.469,0.883);
+  \draw (0.000,1.000) -- (0.469,0.883);
+  \draw (0.000,1.000) -- (0.401,1.271);
+  \draw[line width=0.4pt] (0.695,-0.393) arc[start angle=100.000, end angle=180.000, radius=0.280];
+  \node[font=\small, inner sep=1pt] at (0.360,-0.348) {$86^\circ$};
+  \fill[yellow!35] (0.000,1.000) -- ++(-66.000:0.200) arc[start angle=-66.000, end angle=34.000, radius=0.200] -- cycle;
+  \draw[line width=0.4pt] (0.081,0.817) arc[start angle=-66.000, end angle=34.000, radius=0.200];
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-0.030,1.030) {A};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-0.763,-0.669) {B};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.743,-0.669) {C};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.489,0.903) {D};
+  \node[font=\small, anchor=south, inner sep=1.5pt] at (0.401,1.301) {E};
+\end{tikzpicture}

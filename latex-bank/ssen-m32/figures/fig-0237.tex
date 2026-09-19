@@ -1,0 +1,21 @@
+% 0237(본책 47쪽) — 평행사변형 ABCD(AB=10, AD=12, ∠ABC=60°), CD 의 중점 M(같은 변 표시), △BMD 색칠. 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (0.65,1.13); \coordinate (B) at (0,0); \coordinate (C) at (1.56,0); \coordinate (D) at (2.21,1.13); \coordinate (M) at (1.885,0.565);
+  \fill[green!25] (B) -- (M) -- (D) -- cycle;
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (B) -- (D);
+  \draw (B) -- (M);
+  \draw[line width=0.4pt] ($(C)!0.5!(M)+(-0.05,-0.03)$) -- ($(C)!0.5!(M)+(0.05,0.03)$);
+  \draw[line width=0.4pt] ($(M)!0.5!(D)+(-0.05,-0.03)$) -- ($(M)!0.5!(D)+(0.05,0.03)$);
+  \draw[line width=0.4pt] (0.3,0) arc[start angle=0, end angle=60, radius=0.3];
+  \node[font=\small] at (0.52,0.2) {$60^\circ$};
+  \draw[dashed, line width=0.4pt] (B) to[bend left=25] (A);
+  \node[font=\small] at (0.05,0.7) {$10$};
+  \draw[dashed, line width=0.4pt] (A) to[bend left=15] (D);
+  \node[font=\small] at (1.43,1.4) {$12$};
+  \node[font=\small, above left] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, right] at (D) {D};
+  \node[font=\small, right] at (M) {M};
+\end{tikzpicture}

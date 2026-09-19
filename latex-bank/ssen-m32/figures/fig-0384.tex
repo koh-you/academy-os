@@ -1,0 +1,26 @@
+% 0384(본책 71쪽) — △ABC(AB=11, BC=8, CA=7 cm)의 내접원 O(접점 P, Q, R), AB·BC 의 연장선과 S, T 에서, AC 와 M 에서 접하는 원 O′. 답(PT)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (1.320,0.473) circle (0.473);
+  \fill (1.320,0.473) circle (1.2pt);
+  \draw (2.860,1.024) circle (1.024);
+  \fill (2.860,1.024) circle (1.2pt);
+  \draw (0.000,0.000) -- (2.596,2.133);
+  \draw (0.000,0.000) -- (3.260,0.000);
+  \draw (1.870,1.536) -- (1.760,0.000);
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend left=15] (1.870,1.536);
+  \node[font=\small, inner sep=1.5pt] at (0.618,1.154) {$11\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend right=20] (1.760,0.000);
+  \node[font=\small, inner sep=1.5pt] at (0.880,-0.300) {$8\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (2.315,0.368) {$7\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (1.802,1.724) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.160,0.000) {B};
+  \node[font=\small, inner sep=1.5pt] at (1.760,-0.160) {C};
+  \node[font=\small, inner sep=1.5pt] at (1.320,-0.160) {P};
+  \node[font=\small, inner sep=1.5pt] at (1.650,0.388) {Q};
+  \node[font=\small, inner sep=1.5pt] at (0.962,0.998) {R};
+  \node[font=\small, inner sep=1.5pt] at (2.125,1.963) {S};
+  \node[font=\small, inner sep=1.5pt] at (2.860,-0.160) {T};
+  \node[font=\small, inner sep=1.5pt] at (1.999,1.097) {M};
+  \node[font=\small, inner sep=1.5pt] at (1.320,0.273) {O};
+  \node[font=\small, inner sep=1.5pt] at (3.080,1.024) {$\mathrm{O'}$};
+\end{tikzpicture}

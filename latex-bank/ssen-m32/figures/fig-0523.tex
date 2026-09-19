@@ -1,0 +1,24 @@
+% 0523(본책 94쪽) — 원에 내접하는 □ABCD 와 두 대각선, CB 의 연장선, ∠BAC=x·B 의 외각 y(색칠), ∠CAD=34°, ∠ADB=25°, ∠BCD=96°. 다시 그림.
+\begin{tikzpicture}[scale=1.40, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.083,0.191) -- (-0.843,-0.707) -- (0.843,-0.707) -- (0.971,0.516) -- cycle;
+  \draw (-1.083,0.191) -- (0.843,-0.707);
+  \draw (-0.843,-0.707) -- (0.971,0.516);
+  \draw (-0.843,-0.707) -- (-1.343,-0.707);
+  \fill[green!15] (-1.083,0.191) -- (-1.016,-0.060) arc[start angle=-75.000, end angle=-25.000, radius=0.260] -- cycle;
+  \draw[line width=0.4pt] (-1.016,-0.060) arc[start angle=-75.000, end angle=-25.000, radius=0.260];
+  \node[font=\small, inner sep=0.5pt] at (-0.800,-0.146) {$x$};
+  \draw[line width=0.4pt] (-0.703,0.014) arc[start angle=-25.000, end angle=9.000, radius=0.420];
+  \node[font=\small, inner sep=0.5pt] at (-0.390,0.094) {$34^\circ$};
+  \draw[line width=0.4pt] (0.655,0.466) arc[start angle=-171.000, end angle=-146.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (0.394,0.289) {$25^\circ$};
+  \draw[line width=0.4pt] (0.876,-0.389) arc[start angle=84.000, end angle=180.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (0.441,-0.261) {$96^\circ$};
+  \fill[yellow!30] (-0.843,-0.707) -- (-0.905,-0.475) arc[start angle=105.000, end angle=180.000, radius=0.240] -- cycle;
+  \draw[line width=0.4pt] (-0.905,-0.475) arc[start angle=105.000, end angle=180.000, radius=0.240];
+  \node[font=\small, inner sep=0.5pt] at (-1.176,-0.451) {$y$};
+  \node[font=\small, inner sep=1.5pt] at (-1.271,0.259) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.877,-0.904) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.911,-0.895) {C};
+  \node[font=\small, inner sep=1.5pt] at (1.159,0.585) {D};
+\end{tikzpicture}

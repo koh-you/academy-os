@@ -1,0 +1,21 @@
+% 0271(본책 53쪽) — 원 O, 평행한 두 현 AD=BC=10 cm, 중심에서 AD 까지 2 cm, BC 까지 x cm. 답(x)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.004,0.450) -- (1.004,0.450);
+  \draw (-1.004,-0.450) -- (1.004,-0.450);
+  \draw (0.000,0.450) -- (0.000,-0.450);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (0.120,0.450) -- (0.120,0.330) -- (0.000,0.330);
+  \draw[line width=0.4pt] (0.120,-0.450) -- (0.120,-0.330) -- (0.000,-0.330);
+  \draw[dashed, line width=0.4pt] (-1.004,0.450) to[bend left=15] (1.004,0.450);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.000,0.680) {$10\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (-1.004,-0.450) to[bend right=15] (1.004,-0.450);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.000,-0.680) {$10\,\mathrm{cm}$};
+  \node[font=\small, fill=white, inner sep=1pt] at (0.220,0.220) {$2\,\mathrm{cm}$};
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.380,-0.220) {$x\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-0.140,0.020) {O};
+  \node[font=\small, inner sep=1.5pt] at (-1.186,0.532) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.186,-0.532) {B};
+  \node[font=\small, inner sep=1.5pt] at (1.186,-0.532) {C};
+  \node[font=\small, inner sep=1.5pt] at (1.186,0.532) {D};
+\end{tikzpicture}

@@ -1,0 +1,13 @@
+% 0172(본책 36쪽) — 직각삼각형 ABC(∠A=90°, ∠B=52°), BC=9. 스캔 삽화를 TikZ 로 다시 그림. 답(AC)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (3.2,0); \coordinate (A) at (1.21,1.55);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] ($(A)!0.22cm!(B)$) -- ($(A)!0.22cm!(B)+($(A)!0.22cm!(C)$)-(A)$) -- ($(A)!0.22cm!(C)$);
+  \draw[line width=0.4pt] (0.5,0) arc[start angle=0, end angle=52, radius=0.5];
+  \node[font=\small] at (0.95,0.3) {$52^\circ$};
+  \draw[dashed, line width=0.4pt] (B) to[bend right=15] (C);
+  \node[font=\small] at (1.6,-0.45) {$9$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+\end{tikzpicture}

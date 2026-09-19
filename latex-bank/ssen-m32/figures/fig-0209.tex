@@ -1,0 +1,22 @@
+% 0209(본책 42쪽) — 100 m 떨어진 두 지점 A·B 에서 건물 꼭대기 D 를 올려다본 각 30°·45°, 건물 밑 C. 스캔 삽화(건물)를 TikZ 로 다시 그림. 답(높이)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (0,0); \coordinate (B) at (1.1,0); \coordinate (C) at (2.6,0); \coordinate (D) at (2.6,1.5);
+  % 지면
+  \fill[gray!25] (-0.2,0) rectangle (3.1,-0.14);
+  \draw (-0.2,0) -- (3.1,0);
+  % 건물
+  \fill[gray!45] (2.6,0) rectangle (2.9,1.5);
+  \draw (2.6,0) rectangle (2.9,1.5);
+  \foreach \y in {0.2,0.4,...,1.4} { \draw[line width=0.3pt, white] (2.63,\y) -- (2.87,\y); }
+  \draw (D) -- (A);
+  \draw (D) -- (B);
+  \draw[line width=0.4pt] (0.45,0) arc[start angle=0, end angle=30, radius=0.45];
+  \node[font=\small] at (0.72,0.16) {$30^\circ$};
+  \draw[line width=0.4pt] (1.42,0) arc[start angle=0, end angle=45, radius=0.32];
+  \node[font=\small] at (1.62,0.2) {$45^\circ$};
+  \node[font=\small] at (0.55,-0.32) {$100\,\mathrm{m}$};
+  \node[font=\small, below left] at (0.02,-0.12) {A};
+  \node[font=\small, below right] at (1.08,-0.12) {B};
+  \node[font=\small, below] at (2.6,-0.14) {C};
+  \node[font=\small, above] at (D) {D};
+\end{tikzpicture}

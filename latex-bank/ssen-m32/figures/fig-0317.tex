@@ -1,0 +1,22 @@
+% 0317(본책 60쪽) — 원 O, AB⊥OM, AC⊥ON, OM=ON, AM=5 cm, MN=6 cm. 답(둘레)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (0.000,1.100) -- (-1.056,-0.308) -- (1.056,-0.308) -- (0.000,1.100);
+  \draw (-0.528,0.396) -- (0.528,0.396);
+  \draw (0.000,0.000) -- (-0.528,0.396);
+  \draw (0.000,0.000) -- (0.528,0.396);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.456,0.492) -- (-0.360,0.420) -- (-0.432,0.324);
+  \draw[line width=0.4pt] (0.456,0.492) -- (0.360,0.420) -- (0.432,0.324);
+  \draw[line width=0.4pt] (-0.228,0.246) -- (-0.300,0.150);
+  \draw[line width=0.4pt] (0.300,0.150) -- (0.228,0.246);
+  \node[font=\small, inner sep=1.5pt] at (0.000,0.520) {$6\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.000,1.100) to[bend right=25] (-0.528,0.396);
+  \node[font=\small, inner sep=1.5pt] at (-0.850,1.000) {$5\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.000,1.260) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.196,-0.388) {B};
+  \node[font=\small, inner sep=1.5pt] at (1.196,-0.388) {C};
+  \node[font=\small, inner sep=1.5pt] at (-0.688,0.396) {M};
+  \node[font=\small, inner sep=1.5pt] at (0.688,0.396) {N};
+  \node[font=\small, inner sep=1.5pt] at (0.000,-0.200) {O};
+\end{tikzpicture}

@@ -1,0 +1,22 @@
+% 0386(본책 72쪽) — 원 O 에 외접하고 두 대각선이 직교하는 □ABCD, AB=x, AD=y, BC=4, CD=2. 답(xy)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,0.640) -- (-1.466,0.000) -- (0.000,-0.640) -- (0.480,0.000) -- cycle;
+  \draw (0.000,0.640) -- (0.000,-0.640);
+  \draw (-1.466,0.000) -- (0.480,0.000);
+  \draw (-1.466,0.000) circle (0.000);
+  \fill (-1.466,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (0.100,0.000) -- (0.100,0.100) -- (0.000,0.100);
+  \draw[dashed, line width=0.4pt] (-1.466,0.000) to[bend left=15] (0.000,0.640);
+  \node[font=\small, inner sep=1.5pt] at (-0.853,0.595) {$x$};
+  \draw[dashed, line width=0.4pt] (0.000,0.640) to[bend left=25] (0.480,0.000);
+  \node[font=\small, inner sep=1.5pt] at (0.464,0.488) {$y$};
+  \draw[dashed, line width=0.4pt] (0.480,0.000) to[bend left=25] (0.000,-0.640);
+  \node[font=\small, inner sep=1.5pt] at (0.440,-0.470) {$2$};
+  \draw[dashed, line width=0.4pt] (0.000,-0.640) to[bend left=15] (-1.466,0.000);
+  \node[font=\small, inner sep=1.5pt] at (-0.845,-0.577) {$4$};
+  \node[font=\small, inner sep=1.5pt] at (0.000,0.800) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.626,0.000) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.000,-0.800) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.640,0.000) {D};
+  \node[font=\small, inner sep=1.5pt] at (-1.316,-0.180) {O};
+\end{tikzpicture}

@@ -1,0 +1,17 @@
+% 0696(본책 97쪽) — 한 변 2 인 정삼각형 ABC, 변 BC 의 중점 P, 선분 AP 위의 점 Q 와 선분 BQ·CQ. 라벨은 원문의 A·B·C·P·Q 뿐. 스캔 그림이라 TikZ 로 다시 그림.
+% Q 의 위치는 답이 읽히지 않게 임의로 둠.
+\begin{tikzpicture}[scale=1, line width=0.5pt]
+  \coordinate (A) at (1.2,2.078);
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (2.4,0);
+  \coordinate (P) at (1.2,0);
+  \coordinate (Q) at (1.2,1.25);
+  \draw[line width=0.6pt] (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (P);
+  \draw (B) -- (Q) -- (C);
+  \node[above, font=\small, inner sep=2pt] at (A) {$\mathrm{A}$};
+  \node[left, font=\small, inner sep=2pt] at (B) {$\mathrm{B}$};
+  \node[right, font=\small, inner sep=2pt] at (C) {$\mathrm{C}$};
+  \node[below, font=\small, inner sep=2pt] at (P) {$\mathrm{P}$};
+  \node[right, font=\small, inner sep=2pt] at (Q) {$\mathrm{Q}$};
+\end{tikzpicture}

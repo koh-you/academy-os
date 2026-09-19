@@ -1,0 +1,11 @@
+% 0097(본책 22쪽) — 좌표평면에 x절편 −4, x축 양의 방향과 60° 를 이루는 직선. 라벨: x·y·O·−4·60°. 스캔 삽화를 TikZ 로 다시 그림. 답(직선의 방정식)은 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.0,0) -- (0.7,0) node[below, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.6) -- (0,2.5) node[left, font=\small] {$y$};
+  \node[font=\small, below right] at (0,0) {O};
+  \draw[line width=0.6pt] (-1.7,-0.52) -- (-0.02,2.39);
+  % 60°
+  \draw[line width=0.4pt] (-1.1,0) arc[start angle=0, end angle=60, radius=0.3cm];
+  \node[font=\small, anchor=west, inner sep=1pt] at (-1.08,0.24) {$60^\circ$};
+  \node[font=\small, anchor=east, inner sep=1pt] at (-1.42,0.17) {$-4$};
+\end{tikzpicture}

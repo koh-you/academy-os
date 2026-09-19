@@ -1,0 +1,21 @@
+% 0355(본책 67쪽) — △ABC(∠A=50°, ∠B=70°) 의 내접원 O(접점 D, E, F), EF 를 그어 ∠FEC=x. 답(x)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \fill[yellow!30] (1.175,0.000) -- (1.395,0.000) arc[start angle=0.00, end angle=60.00, radius=0.220cm] -- cycle;
+  \draw (1.005,2.762) -- (0.000,0.000) -- (2.600,0.000) -- cycle;
+  \draw (1.175,0.823) circle (0.823);
+  \fill (1.175,0.823) circle (1.2pt);
+  \draw (1.175,0.000) -- (1.887,1.234);
+  \draw[line width=0.4pt] (0.886,2.433) arc[start angle=-110.00, end angle=-60.00, radius=0.350cm];
+  \node[font=\small, inner sep=1.5pt] at (0.901,2.171) {$50^\circ$};
+  \draw[line width=0.4pt] (0.300,0.000) arc[start angle=0.00, end angle=70.00, radius=0.300cm];
+  \node[font=\small, inner sep=1.5pt] at (0.451,0.315) {$70^\circ$};
+  \draw[line width=0.4pt] (1.395,0.000) arc[start angle=0.00, end angle=60.00, radius=0.220cm];
+  \node[font=\small, inner sep=1.5pt] at (1.487,0.180) {$x$};
+  \node[font=\small, inner sep=1.5pt] at (1.005,2.932) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.160,-0.058) {B};
+  \node[font=\small, inner sep=1.5pt] at (2.760,-0.058) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.242,1.162) {D};
+  \node[font=\small, inner sep=1.5pt] at (1.175,-0.170) {E};
+  \node[font=\small, inner sep=1.5pt] at (2.035,1.319) {F};
+  \node[font=\small, inner sep=1.5pt] at (1.175,0.623) {O};
+\end{tikzpicture}

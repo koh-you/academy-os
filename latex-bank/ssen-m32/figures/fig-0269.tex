@@ -1,0 +1,20 @@
+% 0269(본책 53쪽) — 원 O, 현 AB 에 내린 수선의 발 H(OH=x cm), 반지름 OC=5 cm, AB=8 cm. 답(x)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.089,-0.156) -- (0.156,1.089);
+  \draw (0.000,0.000) -- (-0.467,0.467);
+  \draw (0.000,0.000) -- (0.550,-0.953);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.382,0.552) -- (-0.297,0.467) -- (-0.382,0.382);
+  \draw[dashed, line width=0.4pt] (-1.089,-0.156) to[bend left=22] (0.156,1.089);
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.880,0.780) {$8\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (-0.467,0.467) to[bend left=30] (0.000,0.000);
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.020,0.400) {$x\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend right=25] (0.550,-0.953);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.550,-0.350) {$5\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-0.220,-0.140) {O};
+  \node[font=\small, inner sep=1.5pt] at (-1.287,-0.184) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.184,1.287) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.650,-1.126) {C};
+  \node[font=\small, inner sep=1.5pt] at (-0.617,0.617) {H};
+\end{tikzpicture}

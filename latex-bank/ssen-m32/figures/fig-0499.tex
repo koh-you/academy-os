@@ -1,0 +1,17 @@
+% 0499(본책 91쪽) — 원에 내접하는 □ABCD, BC 의 연장선, ∠A=93°, ∠B=70°, C 의 외각 x(색칠). 다시 그림.
+\begin{tikzpicture}[scale=1.40, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.285,1.063) -- (-0.901,-0.631) -- (0.901,-0.631) -- (0.830,0.722) -- cycle;
+  \draw (0.901,-0.631) -- (1.401,-0.631);
+  \draw[line width=0.4pt] (-0.394,0.762) arc[start angle=-110.000, end angle=-17.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (-0.017,0.526) {$93^\circ$};
+  \draw[line width=0.4pt] (-0.581,-0.631) arc[start angle=-0.000, end angle=70.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (-0.410,-0.287) {$70^\circ$};
+  \fill[green!15] (0.901,-0.631) -- (1.221,-0.631) arc[start angle=-0.000, end angle=93.000, radius=0.320] -- cycle;
+  \draw[line width=0.4pt] (1.221,-0.631) arc[start angle=-0.000, end angle=93.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (1.231,-0.283) {$x$};
+  \node[font=\small, inner sep=1.5pt] at (-0.336,1.256) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.065,-0.746) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.936,-0.828) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.981,0.853) {D};
+\end{tikzpicture}

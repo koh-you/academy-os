@@ -1,0 +1,7 @@
+% 0961(본책 133쪽 · 0961~0962 공통) — 이차함수 y=2x^2+2x+1 의 그래프, x축보다 항상 위(x축과 만나지 않음 · y축 없음). 스캔 그림을 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(x, y=2x^2+2x+1).
+\begin{tikzpicture}[scale=0.55, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.4,0) -- (4.6,0) node[below] {$x$};
+  \draw[line width=0.6pt, domain=0.7:3.3, samples=60, smooth] plot (\x, {1.2*(\x-2)*(\x-2)+0.55});
+  \node[above, font=\small] at (2.2,2.5) {$y=2x^2+2x+1$};
+\end{tikzpicture}

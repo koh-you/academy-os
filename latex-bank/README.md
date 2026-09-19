@@ -45,6 +45,9 @@ node scripts/latex-bank/merge-batches.mjs … → build.mjs --review --package <
 - 22개정 RPM 공통수학1(2026-09-17): 같은 경로. 1184문 · 그림 114(사람 지정 11 · 그룹 그림 키 `g<시작>-<끝>` · 문항별 `whiten`) · 배치 26 · 검수 15(내용 불일치 0). 출처 배지는 첫 줄 내용별로 올린다(cases·pmatrix 5.5mm · 분수 3.5mm · `badgeRaiseMm`).
 - export 뒤 `annotate-package.mjs`(export 가 자동 실행)가 manifest 에 파일 md5 와 검수 메모(🔴·📝, `--include-yellow` 로 🟡)를 적는다 — 교재관리가 다시 등록할 때 바뀐 파일만 올리고, 「검토 필요」 목록에 문항 이미지와 함께 보인다. 이미 고친 finding 은 `--resolved id,id` 로 뺀다.
 - 베이직쎈 공통수학1(스캔 · 2026-09-18): 스캔 경로(TikZ·표·삽화 크롭). 스캔 크롭 1520 → 전사본 1570(놓친 76 추가 · 라벨 상자 26 제외). 스캔 교재는 export 를 `--bank-only --answers-from-bank` 로(전사본 기준 manifest · 답 이미지는 answer 조판) 하고, 답지 ingest 전에 `sync-manifest-to-bank.mjs` 로 manifest 를 전사본에 맞춘다. 검수 20(내용 불일치 0 · 원문 오식 의심 1).
+- 책 전체 번호 스캔 판(쎈 중3-2 · 라이트쎈 공통수학1·2 · 2026-09-19): `--numbering book` 크롭 + `id_style: "number"`. **인쇄 쪽은 전사본 `page` 가 원천**이다 — 스캔 manifest 의 `printed_page` 는 pdf 쪽 + 고정 offset 이라 단원 간지가 빠진 스캔(쎈 중3-2 는 33쪽부터 1~10쪽 · 라이트쎈 공통수학2 는 05 집합 단원이 없어 0635번부터 16쪽)에서 어긋난다. `sync-manifest-to-bank.mjs` 와 `build.mjs --export` 가 manifest 의 `printed_page` 를 전사본 page 로 덮어쓰고, 4자리 id 의 합성 항목은 `number_sort = 번호`. 별도 답지 PDF 는 `ingest-scan-answers.mjs --layout lssen --pages 1-<끝>` 처럼 쪽 범위를 꼭 준다(없으면 본책 마지막 문항 쪽 뒤부터로 잡아 0건).
+- `build.mjs --review/--export` 의 낱장 조판은 worker 8개(`--jobs N` · 기본 CPU 절반)가 `_single-<k>.tex` 로 동시에 돌린다 — 1414문 순차 1시간 45분 → 수 분. 그룹 그림(공통 표) 뒤에는 4mm 를 둬 첫 문항 배지가 표에 겹치지 않게 한다.
+- 검수 에이전트용 id 목록(「id<TAB>qa/pNNN.jpg」)은 manifest 의 `pdf_page`(스캔에 없는 문항은 이웃 것)로 만든다. 고정 offset 으로 만들면 뒤 배치에서 다른 쪽을 가리킨다. 지시문: `latex-bank/agents/reviewer-prompt-scan-book.md`(책·bank·id 목록·출력 파일을 자리표시자로).
 - 실측(RPM 중3-2 · 644문항 · 83쪽): 그림 크롭 520장(문항 500 + 그룹 10 + 둘째 크롭), 배치 16개(22~53문항)를 에이전트 16개가 전사 — 거부 0, 배치마다 12~20분 · 12~19만 토큰, 답 644/644 답지 크롭 일치. book.pdf 126쪽 · Overfull 1.
 
 ## 배치 전사 절차 (2·3단원에서 확립 · 2026-09-15)

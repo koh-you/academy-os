@@ -1,0 +1,15 @@
+% 1002(본책 137쪽) — 아래로 볼록한 y=f(x)(x절편 -1, 2)와 위로 볼록한 y=g(x)(x절편 -3, 1)의 그래프. 라벨은 원문(-3, -1, O, 1, 2, x, y, y=f(x), y=g(x))만. 스캔 그림을 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=0.6, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-4.2,0) -- (3.4,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.4) -- (0,3.4) node[left] {$y$};
+  \node[above left=1pt and 0pt, font=\small] at (0,0) {$\mathrm{O}$};
+  % f(x)=0.9(x+1)(x-2), g(x)=-0.55(x+3)(x-1)
+  \draw[line width=0.6pt, domain=-1.95:2.95, samples=70, smooth] plot (\x, {0.9*(\x+1)*(\x-2)});
+  \draw[line width=0.6pt, domain=-3.85:1.85, samples=70, smooth] plot (\x, {-0.55*(\x+3)*(\x-1)});
+  \node[below, font=\small] at (-3,0) {$-3$};
+  \node[below, font=\small] at (-1,0) {$-1$};
+  \node[below, font=\small] at (1,0) {$1$};
+  \node[below, font=\small] at (2,0) {$2$};
+  \node[left, font=\small] at (-1.9,2.5) {$y=f(x)$};
+  \node[below, font=\small] at (-3.5,-2.3) {$y=g(x)$};
+\end{tikzpicture}

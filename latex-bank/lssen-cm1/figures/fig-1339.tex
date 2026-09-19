@@ -1,0 +1,13 @@
+% 1339(본책 188쪽) — 세 지점 P1·P2·P3 사이 길의 방향을 화살표로 나타낸 그림(P1→P2 1, P2→P1 1, P1→P3 2, P3→P1 1, P2→P3 1, P2 자기 자신 1). 스캔 삽화라 TikZ 로 다시 그림.
+\begin{tikzpicture}[x=1cm, y=1cm, line width=0.6pt, >=stealth]
+  \node[circle, draw, fill=gray!15, inner sep=1pt, font=\small, minimum size=6.5mm] (P1) at (1.1,1.75) {$\mathrm{P}_1$};
+  \node[circle, draw, fill=gray!15, inner sep=1pt, font=\small, minimum size=6.5mm] (P2) at (0,0) {$\mathrm{P}_2$};
+  \node[circle, draw, fill=gray!15, inner sep=1pt, font=\small, minimum size=6.5mm] (P3) at (2.2,0) {$\mathrm{P}_3$};
+  \draw[->] (P1) to[bend right=40] (P2);
+  \draw[->] (P2) to[bend right=15] (P1);
+  \draw[->] (P1) to[bend left=40] (P3);
+  \draw[->] (P1) to[bend left=12] (P3);
+  \draw[->] (P3) to[bend left=12] (P1);
+  \draw[->] (P2) -- (P3);
+  \draw[->] (P2.south west) .. controls (-0.75,-0.95) and (0.55,-0.95) .. (P2.south);
+\end{tikzpicture}

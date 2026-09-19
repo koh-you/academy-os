@@ -1,0 +1,29 @@
+% 0177(본책 37쪽) — 직육면체 ABCD-EFGH, FG=GH=4cm, ∠CEG=60°(밑면 대각선 EG 와 CE). 스캔 삽화를 TikZ 로 다시 그림. 답(부피)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (F) at (0,0); \coordinate (G) at (1.6,0); \coordinate (C) at (1.6,2.8); \coordinate (B) at (0,2.8);
+  \coordinate (E) at (0.7,0.5); \coordinate (H) at (2.3,0.5); \coordinate (D) at (2.3,3.3); \coordinate (A) at (0.7,3.3);
+  \fill[yellow!30] (F) -- (G) -- (C) -- (B) -- cycle;
+  \fill[yellow!45] (B) -- (C) -- (D) -- (A) -- cycle;
+  \fill[yellow!20] (C) -- (G) -- (H) -- (D) -- cycle;
+  \draw (F) -- (G) -- (C) -- (B) -- cycle;
+  \draw (B) -- (A) -- (D) -- (C);
+  \draw (G) -- (H) -- (D);
+  \draw[dashed, line width=0.5pt] (A) -- (E) -- (F);
+  \draw[dashed, line width=0.5pt] (E) -- (H);
+  \draw[dashed, line width=0.5pt] (E) -- (G);
+  \draw[line width=0.5pt] (E) -- (C);
+  \draw[line width=0.4pt] ($(E)!0.4cm!(G)$) arc[start angle=-29.1, end angle=68.6, radius=0.4];
+  \node[font=\small] at (1.35,1.35) {$60^\circ$};
+  \draw[dashed, line width=0.4pt] (F) to[bend right=25] (G);
+  \draw[dashed, line width=0.4pt] (G) to[bend right=25] (H);
+  \node[font=\small] at (0.8,-0.45) {$4\,\mathrm{cm}$};
+  \node[font=\small] at (2.45,-0.05) {$4\,\mathrm{cm}$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, above] at (D) {D};
+  \node[font=\small, left] at (E) {E};
+  \node[font=\small, below left] at (F) {F};
+  \node[font=\small, below] at (G) {G};
+  \node[font=\small, right] at (H) {H};
+\end{tikzpicture}

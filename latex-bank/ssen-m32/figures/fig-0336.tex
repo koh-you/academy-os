@@ -1,0 +1,16 @@
+% 0336(본책 63쪽) — 점 P 에서 원 O 에 그은 두 접선의 접점 A, B, ∠AOB=90°, PB=3. 답(옳지 않은 것)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (0.000,-1.414) -- (-1.131,-0.283);
+  \draw (0.000,-1.414) -- (1.131,-0.283);
+  \draw (0.000,0.000) -- (-0.707,-0.707);
+  \draw (0.000,0.000) -- (0.707,-0.707);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.085,-0.085) -- (-0.000,-0.170) -- (0.085,-0.085);
+  \draw[dashed, line width=0.4pt] (0.000,-1.414) to[bend right=25] (0.707,-0.707);
+  \node[font=\small, inner sep=1.5pt] at (0.550,-1.050) {$3$};
+  \node[font=\small, inner sep=1.5pt] at (0.000,0.170) {O};
+  \node[font=\small, inner sep=1.5pt] at (-0.867,-0.767) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.867,-0.767) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.000,-1.594) {P};
+\end{tikzpicture}

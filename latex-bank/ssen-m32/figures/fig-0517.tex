@@ -1,0 +1,15 @@
+% 0517(본책 93쪽) — 원 O 에 내접하는 □ABCD, OB·OD, ∠BOD(A 쪽, 색칠). 답은 적지 않는다. 다시 그림.
+\begin{tikzpicture}[scale=1.40, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.953,0.550) -- (-0.997,-0.465) -- (0.631,-0.901) -- (0.533,0.962) -- cycle;
+  \draw (0.000,0.000) -- (-0.997,-0.465);
+  \draw (0.000,0.000) -- (0.533,0.962);
+  \fill (0.000,0.000) circle (1.2pt);
+  \fill[green!15] (0.000,0.000) -- (-0.181,-0.085) arc[start angle=-155.000, end angle=61.000, radius=0.200] -- cycle;
+  \draw[line width=0.4pt] (-0.181,-0.085) arc[start angle=-155.000, end angle=61.000, radius=0.200];
+  \node[font=\small, inner sep=1.5pt] at (-1.126,0.650) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.178,-0.549) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.746,-1.065) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.630,1.137) {D};
+  \node[font=\small, inner sep=1.5pt] at (0.169,-0.141) {O};
+\end{tikzpicture}

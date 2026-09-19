@@ -1,0 +1,17 @@
+% 0377(본책 70쪽) — 점 P 에서 원 O 에 그은 접선(접점 A), OP 와 원의 교점 B, ∠OPA=30°, BP=6 cm, △AOB 색칠. 답(넓이)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \fill[red!20] (0.525,0.909) -- (0.000,0.000) -- (1.050,0.000) -- cycle;
+  \draw (0.000,0.000) circle (1.050);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw (0.525,0.909) -- (0.000,0.000) -- (1.050,0.000) -- cycle;
+  \draw (0.000,0.000) -- (2.100,0.000);
+  \draw (2.100,0.000) -- (0.135,1.134);
+  \draw[line width=0.4pt] (1.650,0.000) arc[start angle=180.00, end angle=150.00, radius=0.450cm];
+  \node[font=\small, inner sep=1.5pt] at (1.750,0.300) {$30^\circ$};
+  \draw[dashed, line width=0.4pt] (1.050,0.000) to[bend right=25] (2.100,0.000);
+  \node[font=\small, inner sep=1.5pt] at (1.575,-0.280) {$6\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.525,1.079) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.050,-0.160) {B};
+  \node[font=\small, inner sep=1.5pt] at (2.270,0.000) {P};
+  \node[font=\small, inner sep=1.5pt] at (-0.200,0.000) {O};
+\end{tikzpicture}

@@ -1,0 +1,22 @@
+% 0564(본책 101쪽) — 원 O, 지름 AB 연장선 위의 점 P, 접선 PT(접점 C), PC=BC, ∠x(∠BCT). 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-1.832,-1.000) -- (1.100,-1.000);
+  \draw (-1.732,-1.000) -- (0.866,0.500);
+  \draw (0.866,0.500) -- (-0.000,-1.000);
+  \fill (0.000,0.000) circle (1.2pt);
+  \fill (0.900,-1.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.891,-1.070) -- (-0.891,-0.930);
+  \draw[line width=0.4pt] (-0.841,-1.070) -- (-0.841,-0.930);
+  \draw[line width=0.4pt] (0.385,-0.193) -- (0.506,-0.263);
+  \draw[line width=0.4pt] (0.360,-0.237) -- (0.481,-0.307);
+  \fill[yellow!35] (-0.000,-1.000) -- ++(0.000:0.250) arc[start angle=0.000, end angle=60.000, radius=0.250] -- cycle;
+  \draw[line width=0.4pt] (0.250,-1.000) arc[start angle=0.000, end angle=60.000, radius=0.250];
+  \node[font=\small, inner sep=1pt] at (0.364,-0.790) {$x$};
+  \node[font=\small, anchor=south, inner sep=1.5pt] at (0.000,0.050) {O};
+  \node[font=\small, anchor=south west, inner sep=1.5pt] at (0.886,0.500) {B};
+  \node[font=\small, anchor=south, inner sep=1.5pt] at (-0.836,-0.520) {A};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-1.732,-1.000) {P};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (-0.000,-1.060) {C};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (0.900,-1.060) {T};
+\end{tikzpicture}

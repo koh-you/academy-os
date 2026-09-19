@@ -1,0 +1,18 @@
+% 0453(본책 82쪽) — 원, 현 AB 와 CD 의 교점 P, AC=BD(호 표시), ∠ABC=32°, 현 BC. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.100,0.000) -- (1.100,0.000);
+  \draw (-0.482,-0.989) -- (0.482,0.989);
+  \draw (1.100,0.000) -- (-0.482,-0.989);
+  \fill[yellow!40] (-0.000,0.000) -- (0.240,0.000) arc (-0.0:64.0:0.240) -- cycle;
+  \draw[line width=0.4pt] (0.240,0.000) arc (-0.0:64.0:0.240);
+  \draw[line width=0.4pt] (0.650,0.000) arc (180.0:212.0:0.450);
+  \node[font=\small, inner sep=0.5pt] at (0.408,-0.198) {$32^\circ$};
+  \draw[line width=0.4pt] (-0.873,-0.546) -- (-0.992,-0.620);
+  \draw[line width=0.4pt] (0.873,0.546) -- (0.992,0.620);
+  \node[font=\small, inner sep=1pt] at (-1.300,0.000) {A};
+  \node[font=\small, inner sep=1pt] at (1.300,0.000) {B};
+  \node[font=\small, inner sep=1pt] at (-0.570,-1.168) {C};
+  \node[font=\small, inner sep=1pt] at (0.570,1.168) {D};
+  \node[font=\small, inner sep=1pt] at (-0.110,0.191) {P};
+\end{tikzpicture}

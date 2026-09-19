@@ -1,0 +1,25 @@
+% 0310(본책 59쪽) — 원 O, AB⊥OM, CD⊥ON, OM=ON 같은 변 표시, AM=x cm, BM=4 cm, CD=y cm. 답(x+y)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.600,0.922) -- (-0.600,-0.922);
+  \draw (0.600,-0.922) -- (0.600,0.922);
+  \draw (-0.600,0.000) -- (0.600,0.000);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.600,0.120) -- (-0.480,0.120) -- (-0.480,0.000);
+  \draw[line width=0.4pt] (0.600,0.120) -- (0.480,0.120) -- (0.480,0.000);
+  \draw[line width=0.4pt] (-0.300,-0.060) -- (-0.300,0.060);
+  \draw[line width=0.4pt] (0.300,0.060) -- (0.300,-0.060);
+  \draw[dashed, line width=0.4pt] (-0.600,0.922) to[bend right=30] (-0.600,0.000);
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.260,0.500) {$x\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (-0.600,0.000) to[bend right=30] (-0.600,-0.922);
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.260,-0.500) {$4\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.600,0.922) to[bend left=25] (0.600,-0.922);
+  \node[font=\small, fill=white, inner sep=1pt] at (1.150,0.550) {$y\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.000,-0.200) {O};
+  \node[font=\small, inner sep=1.5pt] at (-0.709,1.090) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.709,-1.090) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.709,-1.090) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.709,1.090) {D};
+  \node[font=\small, inner sep=1.5pt] at (-0.760,0.160) {M};
+  \node[font=\small, inner sep=1.5pt] at (0.760,0.160) {N};
+\end{tikzpicture}

@@ -1,0 +1,18 @@
+% 0017(본책 9쪽) — 직각삼각형 ABC(∠C=90°), ∠B=30°, AB=8, AC=x, BC=y. 스캔 삽화를 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(8 · 30° · x · y · 꼭짓점 · 직각 표시). x, y 의 값(답)은 적지 않는다.
+\begin{tikzpicture}[scale=0.5, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (6.93,0); \coordinate (A) at (6.93,4);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] (6.33,0) -- (6.33,0.6) -- (6.93,0.6);
+  \draw[line width=0.4pt] (1.3,0) arc (0:30:1.3);
+  \draw[dashed, line width=0.3pt] (B) to[bend left=20] (A);
+  \draw[dashed, line width=0.3pt] (A) to[bend left=40] (C);
+  \draw[dashed, line width=0.3pt] (B) to[bend right=15] (C);
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small] at (2.9,2.35) {$8$};
+  \node[font=\small] at (2.0,0.5) {$30^\circ$};
+  \node[font=\small] at (7.5,2.1) {$x$};
+  \node[font=\small] at (3.5,-0.85) {$y$};
+\end{tikzpicture}

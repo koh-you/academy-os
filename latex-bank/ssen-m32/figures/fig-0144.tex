@@ -1,0 +1,32 @@
+% 0144(본책 30쪽) — 한 모서리 3 정육면체 ABCD-EFGH, 대각선 BH 와 D 에서 내린 수선의 발 N, 각 x(∠NDH), 직각 표시(N), 3(BF 파선 호). 라벨 A~H·N. 숨은 모서리는 파선. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.6pt]
+  \coordinate (B) at (0,2); \coordinate (C) at (2,2); \coordinate (F) at (0,0); \coordinate (G) at (2,0);
+  \coordinate (A) at (0.8,2.6); \coordinate (D) at (2.8,2.6); \coordinate (E) at (0.8,0.6); \coordinate (H) at (2.8,0.6);
+  \coordinate (N) at (1.867,1.067);
+  \fill[green!10] (B) -- (C) -- (G) -- (F) -- cycle;
+  \fill[green!20] (C) -- (D) -- (H) -- (G) -- cycle;
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (B) -- (F) -- (G) -- (C);
+  \draw (D) -- (H) -- (G);
+  \draw[dashed, line width=0.4pt] (A) -- (E) -- (F);
+  \draw[dashed, line width=0.4pt] (E) -- (H);
+  \draw (B) -- (H);
+  \draw (D) -- (N);
+  % 직각 표시(N)
+  \draw[line width=0.4pt] ($(N)+(153.4:0.18)$) -- ($(N)+(153.4:0.18)+(58.7:0.18)$) -- ($(N)+(58.7:0.18)$);
+  % 각 x(∠NDH)
+  \draw[line width=0.4pt] ($(D)+(-90:0.4)$) arc[start angle=-90, end angle=-121.3, radius=0.4];
+  \node[font=\small] at (3.05,2.0) {$x$};
+  % 3(BF 파선 호)
+  \draw[dashed, line width=0.4pt] (B) to[bend right=30] (F);
+  \node[font=\small] at (-0.42,1.0) {$3$};
+  \node[font=\small, above left] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, above right] at (2.0,1.95) {C};
+  \node[font=\small, above right] at (D) {D};
+  \node[font=\small, left] at (E) {E};
+  \node[font=\small, below left] at (F) {F};
+  \node[font=\small, below right] at (G) {G};
+  \node[font=\small, right] at (H) {H};
+  \node[font=\small, below] at (1.9,1.0) {N};
+\end{tikzpicture}

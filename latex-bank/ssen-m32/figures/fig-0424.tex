@@ -1,0 +1,17 @@
+% 0424(본책 77쪽) — 반지름 8 cm 인 원 O, OA·OB, 현 PA·PB, ∠APB=110°. 답(호의 길이)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (0.000,0.000) -- (-0.997,-0.465);
+  \draw (0.000,0.000) -- (1.063,-0.285);
+  \draw (0.096,-1.096) -- (-0.997,-0.465);
+  \draw (0.096,-1.096) -- (1.063,-0.285);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (0.310,-0.916) arc (40.0:150.0:0.280);
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend left=15] (1.063,-0.285);
+  \node[font=\small, inner sep=0.5pt] at (0.051,-0.578) {$110^\circ$};
+  \node[font=\small, fill=white, inner sep=1pt] at (0.596,0.099) {$8\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-1.178,-0.549) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.256,-0.336) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.113,-1.295) {P};
+  \node[font=\small, inner sep=1.5pt] at (-0.173,0.100) {O};
+\end{tikzpicture}

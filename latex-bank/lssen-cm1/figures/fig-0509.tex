@@ -1,0 +1,14 @@
+% 0509(본책 70쪽) — 지름 18 cm 인 큰 반원 안에 작은 반원 두 개가 지름 위에 나란히 붙어 있고 그 사이(초승달 모양)가 색칠된 도형. 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문의 「18 cm」 하나뿐. 작은 두 반원의 반지름은 답이 읽히지 않게 임의 비율(6.4 : 2.6)로 둠.
+\begin{tikzpicture}[scale=0.2, line width=0.5pt]
+  \fill[red!25] (9,0) arc (0:180:9) -- cycle;
+  \fill[white] (3.8,0) arc (0:180:6.4) -- cycle;
+  \fill[white] (9,0) arc (0:180:2.6) -- cycle;
+  \draw[line width=0.6pt] (9,0) arc (0:180:9);
+  \draw[line width=0.6pt] (3.8,0) arc (0:180:6.4);
+  \draw[line width=0.6pt] (9,0) arc (0:180:2.6);
+  \draw[line width=0.6pt] (-9,0) -- (9,0);
+  \draw[dashed] (-9,-1.6) -- (9,-1.6);
+  \draw (-9,-1) -- (-9,-2.2) (9,-1) -- (9,-2.2);
+  \node[below, font=\small, inner sep=1pt] at (0,-1.6) {$18\,\mathrm{cm}$};
+\end{tikzpicture}

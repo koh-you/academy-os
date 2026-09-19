@@ -1,0 +1,12 @@
+% 0220(본책 44쪽) — △ABC(AB=6 cm, ∠B=150°). 스캔 삽화를 TikZ 로 다시 그림. 답(BC)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (0,0.55); \coordinate (B) at (0.95,0); \coordinate (C) at (2.4,0);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] (1.25,0) arc[start angle=0, end angle=150, radius=0.3];
+  \node[font=\small] at (1.2,0.42) {$150^\circ$};
+  \draw[dashed, line width=0.4pt] (A) to[bend right=25] (B);
+  \node[font=\small] at (0.3,-0.02) {$6\,\mathrm{cm}$};
+  \node[font=\small, left] at (A) {A};
+  \node[font=\small, below] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+\end{tikzpicture}

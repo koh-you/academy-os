@@ -1,0 +1,29 @@
+% 1091(본책 152쪽) — 두 함수 f, g: X→X 대응 그림. X={1,2,3}, f: 1→2, 2→1, 3→3, g: 1→3, 2→1, 3→2. 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 X·X·X·f·g·원소만. 합성값(답)은 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt, every node/.style={font=\small}]
+  \draw[line width=0.6pt] (0.00,0.00) ellipse (0.5 and 1.05);
+  \draw[line width=0.6pt] (1.90,0.00) ellipse (0.5 and 1.05);
+  \draw[line width=0.6pt] (3.80,0.00) ellipse (0.5 and 1.05);
+  \node at (0.00,1.28) {$X$};
+  \node at (1.90,1.28) {$X$};
+  \node at (3.80,1.28) {$X$};
+  \draw[->, >=stealth] (0.30,1.28) -- (1.60,1.28);
+  \node at (0.95,1.54) {$f$};
+  \draw[->, >=stealth] (2.20,1.28) -- (3.50,1.28);
+  \node at (2.85,1.54) {$g$};
+  \node[inner sep=1.5pt] (x0) at (0.00,0.55) {$1$};
+  \node[inner sep=1.5pt] (x1) at (0.00,0.00) {$2$};
+  \node[inner sep=1.5pt] (x2) at (0.00,-0.55) {$3$};
+  \node[inner sep=1.5pt] (y0) at (1.90,0.55) {$1$};
+  \node[inner sep=1.5pt] (y1) at (1.90,0.00) {$2$};
+  \node[inner sep=1.5pt] (y2) at (1.90,-0.55) {$3$};
+  \node[inner sep=1.5pt] (z0) at (3.80,0.55) {$1$};
+  \node[inner sep=1.5pt] (z1) at (3.80,0.00) {$2$};
+  \node[inner sep=1.5pt] (z2) at (3.80,-0.55) {$3$};
+  \draw[->, >=stealth] (x0.east) -- (y1.west);
+  \draw[->, >=stealth] (x1.east) -- (y0.west);
+  \draw[->, >=stealth] (x2.east) -- (y2.west);
+  \draw[->, >=stealth] (y0.east) -- (z2.west);
+  \draw[->, >=stealth] (y1.east) -- (z0.west);
+  \draw[->, >=stealth] (y2.east) -- (z1.west);
+\end{tikzpicture}

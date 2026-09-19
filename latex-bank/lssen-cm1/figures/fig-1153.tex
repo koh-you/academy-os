@@ -1,0 +1,26 @@
+% 1153(본책 159쪽) — 네 지점 A(왼쪽)·B(위)·C(오른쪽)·D(아래) 를 잇는 도로망. A–B 2개, B–C 4개, A–D 3개, D–C 2개(마름모 꼴 · 바깥 둘레는 큰 원 호). 라벨은 원문(A, B, C, D)만. 스캔 그림을 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \coordinate (A) at (-2.2,0);
+  \coordinate (B) at (0,1.7);
+  \coordinate (C) at (2.2,0);
+  \coordinate (D) at (0,-1.7);
+  % A–B : 2개 (바깥 호 · 안쪽 호)
+  \draw (A) to[bend left=38] (B);
+  \draw (A) to[bend right=22] (B);
+  % B–C : 4개 (바깥 호 · 직선 2 · 안쪽 호)
+  \draw (B) to[bend left=38] (C);
+  \draw (B) to[bend left=14] (C);
+  \draw (B) to[bend right=4] (C);
+  \draw (B) to[bend right=24] (C);
+  % A–D : 3개 (바깥 호 · 가운데 · 안쪽 호)
+  \draw (A) to[bend right=38] (D);
+  \draw (A) to[bend right=12] (D);
+  \draw (A) to[bend left=16] (D);
+  % D–C : 2개 (바깥 호 · 직선)
+  \draw (D) to[bend right=38] (C);
+  \draw (D) -- (C);
+  % 지점
+  \foreach \p/\n in {A/A, B/B, C/C, D/D} {
+    \node[circle, draw, fill=green!15, inner sep=1pt, minimum size=13pt, font=\small] at (\p) {$\mathrm{\n}$};
+  }
+\end{tikzpicture}

@@ -1,0 +1,18 @@
+% 0378(본책 70쪽) — 반지름 5 cm 인 세 원 O1, O2, O3 이 한 직선 위에서 차례로 접함, A 에서 원 O3 에 그은 접선(접점 B)이 원 O2 와 P, Q 에서 만남. 답(PQ)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,0.000) circle (0.650);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw (1.300,0.000) circle (0.650);
+  \fill (1.300,0.000) circle (1.2pt);
+  \draw (2.600,0.000) circle (0.650);
+  \fill (2.600,0.000) circle (1.2pt);
+  \draw (-0.650,0.000) -- (3.250,0.000);
+  \draw (-0.650,0.000) -- (2.960,0.737);
+  \node[font=\small, inner sep=1.5pt] at (-0.810,0.000) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.633,0.417) {P};
+  \node[font=\small, inner sep=1.5pt] at (1.677,0.636) {Q};
+  \node[font=\small, inner sep=1.5pt] at (2.440,0.804) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.000,-0.220) {$\mathrm{O_1}$};
+  \node[font=\small, inner sep=1.5pt] at (1.300,-0.220) {$\mathrm{O_2}$};
+  \node[font=\small, inner sep=1.5pt] at (2.600,-0.220) {$\mathrm{O_3}$};
+\end{tikzpicture}

@@ -1,0 +1,24 @@
+% 0091(본책 21쪽) — 겹쳐진 두 직각삼각형: ABC(∠B=90°·∠C=60°)와 ADE(∠ADE=90°·∠E=45°), A·D·B 가 한 직선 위, AE=8 cm 파선 호, F=AC∩DE, △ADF 색. 라벨: A~F·45°·60°·8 cm, 직각 표시 D·B. 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)은 적지 않는다.
+\begin{tikzpicture}[scale=1.8, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (D) at (0,0.4); \coordinate (A) at (0,1.814); \coordinate (E) at (1.414,0.4); \coordinate (C) at (1.047,0); \coordinate (F) at (0.816,0.4);
+  \fill[cyan!25] (A) -- (D) -- (F) -- cycle;
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (E) -- (D);
+  % 직각 표시
+  \draw[line width=0.4pt] (0.09,0.4) -- (0.09,0.49) -- (0,0.49);
+  \draw[line width=0.4pt] (0.09,0) -- (0.09,0.09) -- (0,0.09);
+  % 각
+  \draw[line width=0.4pt] ($(E)+(135:0.25)$) arc[start angle=135, end angle=180, radius=0.25cm];
+  \node[font=\small, anchor=east, inner sep=1pt] at (1.3,0.54) {$45^\circ$};
+  \draw[line width=0.4pt] ($(C)+(120:0.22)$) arc[start angle=120, end angle=180, radius=0.22cm];
+  \node[font=\small, anchor=east, inner sep=1pt] at (0.8,0.12) {$60^\circ$};
+  % 8 cm(AE 파선 호)
+  \draw[dashed, line width=0.4pt] (A) to[bend left=35] (E);
+  \node[font=\small] at (1.4,1.25) {$8\,\mathrm{cm}$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, left] at (D) {D};
+  \node[font=\small, right] at (E) {E};
+  \node[font=\small, above, inner sep=1.5pt] at (0.72,0.4) {F};
+\end{tikzpicture}

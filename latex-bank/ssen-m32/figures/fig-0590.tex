@@ -1,0 +1,18 @@
+% 0590(본책 106쪽) — 원 O 에 내접하는 △ABC, 반지름 OD⊥AB, ∠BAD=33°, ∠C 표시. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-0.914,-0.407) -- (0.914,-0.407) -- (-0.174,0.985) -- cycle;
+  \draw (0.000,0.000) -- (-0.000,-1.000);
+  \draw (-0.914,-0.407) -- (-0.000,-1.000);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (0.000,-0.277) -- (0.130,-0.277) -- (0.130,-0.407);
+  \draw[line width=0.4pt] (-0.662,-0.570) arc[start angle=-33.000, end angle=0.000, radius=0.300];
+  \node[font=\small, inner sep=1pt] at (-0.415,-0.554) {$33^\circ$};
+  \fill[yellow!35] (-0.174,0.985) -- ++(-118.000:0.220) arc[start angle=-118.000, end angle=-52.000, radius=0.220] -- cycle;
+  \draw[line width=0.4pt] (-0.277,0.791) arc[start angle=-118.000, end angle=-52.000, radius=0.220];
+  \node[font=\small, anchor=south, inner sep=1.5pt] at (0.000,0.050) {O};
+  \node[font=\small, anchor=south, inner sep=1.5pt] at (-0.174,0.985) {C};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-0.914,-0.407) {A};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.914,-0.407) {B};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (-0.000,-1.060) {D};
+\end{tikzpicture}

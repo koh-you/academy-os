@@ -1,0 +1,4 @@
+{ "range": "0165~0241", "checked": 77, "ok": 76,
+  "findings": [
+    { "id": "0189", "severity": "yellow", "where": "figure", "note": "조판본 그림에 원본에 없는 'M' 라벨과 작은 x 표시가 C점 근처에 추가됨(중점 표시로 보임)" }
+  ] }

@@ -1,0 +1,15 @@
+% 0700(본책 97쪽) — 가로 12 cm·세로 8 cm 직사각형(윤곽)과, 가로를 x cm 줄이고 세로를 x cm 늘인 새 직사각형(연녹 채움). 라벨은 원문의 12 cm·8 cm·x cm·x cm 뿐. 스캔 그림이라 TikZ 로 다시 그림.
+% x 의 크기는 답이 읽히지 않게 임의로 둠.
+\begin{tikzpicture}[scale=1, line width=0.5pt]
+  \fill[green!25!lime!30] (0,-0.6) rectangle (2.4,2);
+  \draw[line width=0.6pt] (0,0) rectangle (3,2);
+  \draw[line width=0.6pt] (0,-0.6) rectangle (2.4,2);
+  \draw[dotted, line width=0.4pt] (0,2.15) -- (3,2.15);
+  \draw[dotted, line width=0.4pt] (-0.15,0) -- (-0.15,2);
+  \draw[dotted, line width=0.4pt] (-0.15,-0.6) -- (-0.15,0);
+  \draw[dotted, line width=0.4pt] (2.4,2.15) -- (3,2.15);
+  \node[above, font=\small, inner sep=1.5pt] at (1.5,2.15) {$12\,\mathrm{cm}$};
+  \node[left, font=\small, inner sep=2pt] at (-0.15,1) {$8\,\mathrm{cm}$};
+  \node[left, font=\small, inner sep=2pt] at (-0.15,-0.3) {$x\,\mathrm{cm}$};
+  \node[right, font=\small, inner sep=2pt] at (3,1.85) {$x\,\mathrm{cm}$};
+\end{tikzpicture}

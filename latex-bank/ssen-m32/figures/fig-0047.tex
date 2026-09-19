@@ -1,0 +1,12 @@
+% 유형 02 0047(본책 13쪽) — 직각삼각형 ABC(∠B=90°), BC=1. 스캔 삽화를 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(1 · 꼭짓점 · 직각 표시). AB · AC 의 길이(답의 근거)는 적지 않는다.
+\begin{tikzpicture}[scale=1.1, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (1,0); \coordinate (A) at (0,2.236);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] (0,0.16) -- (0.16,0.16) -- (0.16,0);
+  \draw[dashed, line width=0.3pt] (B) to[bend right=30] (C);
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small] at (0.5,-0.33) {$1$};
+\end{tikzpicture}

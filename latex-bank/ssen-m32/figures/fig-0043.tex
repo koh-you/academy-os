@@ -1,0 +1,19 @@
+% 유형 01 0043(본책 12쪽) — 직사각형 ABCD(AB=6 · BC=8)와 대각선 BD, ∠ABD=x. 스캔 삽화를 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(6 · 8 · x · 꼭짓점 A~D · 직각 표시 2곳). BD 의 길이(답의 근거)는 적지 않는다.
+\begin{tikzpicture}[scale=0.32, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (8,0); \coordinate (D) at (8,6); \coordinate (A) at (0,6);
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (B) -- (D);
+  \draw[line width=0.4pt] (0,5.3) -- (0.7,5.3) -- (0.7,6);
+  \draw[line width=0.4pt] (7.3,0) -- (7.3,0.7) -- (8,0.7);
+  \draw[line width=0.4pt] (0,1.3) arc (90:36.87:1.3);
+  \draw[dashed, line width=0.3pt] (B) to[bend left=25] (A);
+  \draw[dashed, line width=0.3pt] (B) to[bend right=15] (C);
+  \node[font=\small, above left] at (A) {A};
+  \node[font=\small, below left] at (B) {B};
+  \node[font=\small, below right] at (C) {C};
+  \node[font=\small, above right] at (D) {D};
+  \node[font=\small] at (-1.0,3.2) {$6$};
+  \node[font=\small] at (4.2,-1.3) {$8$};
+  \node[font=\small] at (0.85,2.0) {$x$};
+\end{tikzpicture}

@@ -1,0 +1,19 @@
+% 0470(본책 85쪽) — 원(반지름 6 cm), 원 위의 점 P·A·B·C·D, 현 PA·PB·PC·PD, ∠APB=40°, ∠BPC=45°, ∠CPD=15°. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (0.191,1.083) -- (-1.083,0.191);
+  \draw (0.191,1.083) -- (-0.376,-1.034);
+  \draw (0.191,1.083) -- (1.034,-0.376);
+  \draw (0.191,1.083) -- (1.083,0.191);
+  \draw[line width=0.4pt] (-0.219,0.797) arc (-145.0:-105.0:0.500);
+  \node[font=\small, inner sep=0.5pt] at (-0.210,0.510) {$40^\circ$};
+  \draw[line width=0.4pt] (0.062,0.600) arc (-105.0:-60.0:0.500);
+  \node[font=\small, inner sep=0.5pt] at (0.282,0.389) {$45^\circ$};
+  \draw[line width=0.4pt] (0.541,0.477) arc (-60.0:-45.0:0.700);
+  \node[font=\small, inner sep=0.5pt] at (0.800,0.290) {$15^\circ$};
+  \node[font=\small, inner sep=1pt] at (0.226,1.280) {P};
+  \node[font=\small, inner sep=1pt] at (-1.280,0.226) {A};
+  \node[font=\small, inner sep=1pt] at (-0.445,-1.222) {B};
+  \node[font=\small, inner sep=1pt] at (1.222,-0.445) {C};
+  \node[font=\small, inner sep=1pt] at (1.280,0.226) {D};
+\end{tikzpicture}

@@ -1,0 +1,11 @@
+% 1266(본책 176쪽) — 원에 내접하는 정팔각형(꼭짓점 8개)과 원의 중심, 중심에서 각 꼭짓점을 잇는 선분. 스캔 그림을 TikZ 로 다시 그림. 라벨 없음.
+\begin{tikzpicture}[line width=0.6pt]
+  \def\r{1.35}
+  \draw (0,0) circle (\r);
+  \draw (22.5:\r) \foreach \a in {67.5,112.5,...,337.5} { -- (\a:\r) } -- cycle;
+  \foreach \a in {22.5,67.5,...,337.5} {
+    \draw (0,0) -- (\a:\r);
+    \fill (\a:\r) circle (2.2pt);
+  }
+  \fill (0,0) circle (2.2pt);
+\end{tikzpicture}

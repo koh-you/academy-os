@@ -1,0 +1,17 @@
+% 0256(본책 50쪽) — 이등변삼각형 ABC(AB=AC=6, ∠B=30°, 같은 변 표시)와 내접원 I. 스캔 삽화를 TikZ 로 다시 그림. 답(반지름)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (1.04,0.6); \coordinate (B) at (0,0); \coordinate (C) at (2.08,0); \coordinate (I) at (1.04,0.28);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (I) circle (0.28);
+  \fill (I) circle (1.2pt);
+  \node[font=\small, right] at (I) {I};
+  \draw[line width=0.4pt] (0.35,0) arc[start angle=0, end angle=30, radius=0.35];
+  \node[font=\small] at (0.55,0.15) {$30^\circ$};
+  \draw[line width=0.4pt] ($(A)!0.5!(B)+(-0.03,0.05)$) -- ($(A)!0.5!(B)+(0.03,-0.05)$);
+  \draw[line width=0.4pt] ($(A)!0.5!(C)+(0.03,0.05)$) -- ($(A)!0.5!(C)+(-0.03,-0.05)$);
+  \draw[dashed, line width=0.4pt] (B) to[bend left=25] (A);
+  \node[font=\small] at (0.38,0.55) {$6$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+\end{tikzpicture}

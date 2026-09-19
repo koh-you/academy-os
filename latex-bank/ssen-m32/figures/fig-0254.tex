@@ -1,0 +1,11 @@
+% 0254(본책 49쪽) — 평행사변형 ABCD(∠B=45°). 스캔 삽화를 TikZ 로 다시 그림. 답(둘레)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (0.7,0.7); \coordinate (B) at (0,0); \coordinate (C) at (1.5,0); \coordinate (D) at (2.2,0.7);
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[line width=0.4pt] (0.3,0) arc[start angle=0, end angle=45, radius=0.3];
+  \node[font=\small] at (0.55,0.2) {$45^\circ$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, below] at (C) {C};
+  \node[font=\small, above] at (D) {D};
+\end{tikzpicture}

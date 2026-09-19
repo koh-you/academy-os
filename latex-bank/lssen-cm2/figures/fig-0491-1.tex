@@ -1,0 +1,14 @@
+% 실전 Training 0491 ① (본책 75쪽) — 보기 그래프: 꼭짓점 (0,0)·(1,0)·(1,-3)·(-1,-3)·(-1,-2)·(0,-2) 인 도형, (-1,0)~(-1,-2) 파선. 스캔 그림을 TikZ 로 다시 그림(그림 자체가 보기).
+% 라벨은 원문 그대로 O·x·y·-1·1·-2·-3 만.
+\begin{tikzpicture}[scale=0.6, line width=0.5pt, baseline=(current bounding box.center)]
+  \path (-2.6,-4.4) rectangle (2.8,1.6); % 보기 행 사이 여백
+  \draw[->, >=stealth, line width=0.7pt] (-2.2,0) -- (2.2,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.8) -- (0,1.2) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (0,0) -- (1,0) -- (1,-3) -- (-1,-3) -- (-1,-2) -- (0,-2) -- cycle;
+  \draw[dashed, line width=0.4pt] (-1,0) -- (-1,-2);
+  \node[below left=-2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[above left=-1pt, font=\small] at (-1,0) {$-1$};
+  \node[above right=-1pt, font=\small] at (1,0) {$1$};
+  \node[right=1pt, font=\small] at (0,-2) {$-2$};
+  \node[below=1pt, font=\small] at (-0.5,-3) {$-3$};
+\end{tikzpicture}

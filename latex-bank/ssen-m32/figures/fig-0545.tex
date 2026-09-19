@@ -1,0 +1,21 @@
+% 0545(본책 98쪽) — □ABCD 와 두 대각선(원 없음), AB=AD 표시, ∠BAC=x(색칠), ∠CAD=30°, ∠CBD=30°, ∠ACB=25°. 다시 그림.
+\begin{tikzpicture}[scale=1.40, line width=0.6pt]
+  \draw (-0.550,0.953) -- (-1.083,0.191) -- (1.083,0.191) -- (0.376,1.034) -- cycle;
+  \draw (-0.550,0.953) -- (1.083,0.191);
+  \draw (-1.083,0.191) -- (0.376,1.034);
+  \draw[line width=0.4pt] (-0.759,0.532) -- (-0.874,0.612);
+  \draw[line width=0.4pt] (-0.093,1.063) -- (-0.081,0.923);
+  \fill[green!15] (-0.550,0.953) -- (-0.688,0.756) arc[start angle=-125.000, end angle=-25.000, radius=0.240] -- cycle;
+  \draw[line width=0.4pt] (-0.688,0.756) arc[start angle=-125.000, end angle=-25.000, radius=0.240];
+  \node[font=\small, inner sep=0.5pt] at (-0.436,0.528) {$x$};
+  \draw[line width=0.4pt] (-0.278,0.826) arc[start angle=-25.000, end angle=5.000, radius=0.300];
+  \node[font=\small, inner sep=0.5pt] at (-0.300,1.386) {$30^\circ$};
+  \draw[line width=0.4pt] (-0.683,0.191) arc[start angle=0.000, end angle=30.000, radius=0.400];
+  \node[font=\small, inner sep=0.5pt] at (-0.426,0.367) {$30^\circ$};
+  \draw[line width=0.4pt] (0.721,0.360) arc[start angle=155.000, end angle=180.000, radius=0.400];
+  \node[font=\small, inner sep=0.5pt] at (0.419,0.338) {$25^\circ$};
+  \node[font=\small, inner sep=1.5pt] at (-0.723,1.053) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.518,1.175) {D};
+  \node[font=\small, inner sep=1.5pt] at (-1.271,0.123) {B};
+  \node[font=\small, inner sep=1.5pt] at (1.271,0.123) {C};
+\end{tikzpicture}

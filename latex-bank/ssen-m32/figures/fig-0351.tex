@@ -1,0 +1,15 @@
+% 0351(본책 66쪽) — 한 변 16 cm 인 정사각형 ABCD, BC 를 지름으로 하는 반원에 A 에서 그은 접선이 CD 와 만나는 점 E. 답(CE)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,2.000) -- (0.000,0.000) -- (2.000,0.000) -- (2.000,2.000) -- (0.000,2.000);
+  \draw (2.000,0.000) arc (0:180:1.000);
+  \draw (0.000,2.000) -- (2.000,0.500);
+  \draw[dashed, line width=0.4pt] (0.000,2.000) to[bend right=20] (0.000,0.000);
+  \node[font=\small, inner sep=1.5pt] at (-0.450,1.000) {$16\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend right=20] (2.000,0.000);
+  \node[font=\small, inner sep=1.5pt] at (1.000,-0.300) {$16\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-0.140,2.120) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.140,-0.120) {B};
+  \node[font=\small, inner sep=1.5pt] at (2.140,-0.120) {C};
+  \node[font=\small, inner sep=1.5pt] at (2.140,2.120) {D};
+  \node[font=\small, inner sep=1.5pt] at (2.160,0.520) {E};
+\end{tikzpicture}

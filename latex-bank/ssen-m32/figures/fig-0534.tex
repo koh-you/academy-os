@@ -1,0 +1,20 @@
+% 0534(본책 96쪽) — 원에 내접하는 육각형 ABCDEF, ∠A=x·∠C=y·∠E=z(색칠). 다시 그림.
+\begin{tikzpicture}[scale=1.27, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.953,0.550) -- (-0.953,-0.550) -- (-0.000,-1.100) -- (0.953,-0.550) -- (0.953,0.550) -- (0.000,1.100) -- cycle;
+  \fill[green!15] (-0.953,0.550) -- (-0.953,0.330) arc[start angle=-90.000, end angle=30.000, radius=0.220] -- cycle;
+  \draw[line width=0.4pt] (-0.953,0.330) arc[start angle=-90.000, end angle=30.000, radius=0.220];
+  \node[font=\small, inner sep=0.5pt] at (-0.589,0.340) {$x$};
+  \fill[yellow!30] (-0.000,-1.100) -- (0.191,-0.990) arc[start angle=30.000, end angle=150.000, radius=0.220] -- cycle;
+  \draw[line width=0.4pt] (0.191,-0.990) arc[start angle=30.000, end angle=150.000, radius=0.220];
+  \node[font=\small, inner sep=0.5pt] at (-0.000,-0.680) {$y$};
+  \fill[green!15] (0.953,0.550) -- (0.762,0.660) arc[start angle=150.000, end angle=270.000, radius=0.220] -- cycle;
+  \draw[line width=0.4pt] (0.762,0.660) arc[start angle=150.000, end angle=270.000, radius=0.220];
+  \node[font=\small, inner sep=0.5pt] at (0.589,0.340) {$z$};
+  \node[font=\small, inner sep=1.5pt] at (-1.126,0.650) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.126,-0.650) {B};
+  \node[font=\small, inner sep=1.5pt] at (-0.000,-1.300) {C};
+  \node[font=\small, inner sep=1.5pt] at (1.126,-0.650) {D};
+  \node[font=\small, inner sep=1.5pt] at (1.126,0.650) {E};
+  \node[font=\small, inner sep=1.5pt] at (0.000,1.300) {F};
+\end{tikzpicture}

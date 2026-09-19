@@ -1,0 +1,21 @@
+% 0227(본책 45쪽) — □ABCD(AB=6, BC=8, ∠A=90°, ∠ADB=45°, ∠DBC=30°), 대각선 BD. 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (0.34,1.28); \coordinate (B) at (0,0); \coordinate (C) at (1.76,0); \coordinate (D) at (1.62,0.94);
+  \fill[yellow!45] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (B) -- (D);
+  % 직각 표시(A)
+  \draw[line width=0.4pt] ($(A)+(255:0.14)$) -- ($(A)+(255:0.14)+(345:0.14)$) -- ($(A)+(345:0.14)$);
+  \draw[line width=0.4pt] ($(D)+(165:0.26)$) arc[start angle=165, end angle=210, radius=0.26];
+  \node[font=\small] at (1.22,0.82) {$45^\circ$};
+  \draw[line width=0.4pt] (0.38,0) arc[start angle=0, end angle=30, radius=0.38];
+  \node[font=\small] at (0.62,0.13) {$30^\circ$};
+  \draw[dashed, line width=0.4pt] (B) to[bend left=25] (A);
+  \node[font=\small] at (-0.02,0.72) {$6$};
+  \draw[dashed, line width=0.4pt] (B) to[bend right=20] (C);
+  \node[font=\small] at (0.88,-0.3) {$8$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, right] at (D) {D};
+\end{tikzpicture}

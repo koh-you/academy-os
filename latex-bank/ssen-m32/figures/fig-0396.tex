@@ -1,0 +1,20 @@
+% 0396(본책 73쪽) — 직사각형 ABCD 의 세 변에 접하는 원 O 와 BC, CD 에 접하는 원 O′ 이 한 점에서 만남, 접선 DP, AB=8 cm, CP=6 cm. 답(O′ 반지름)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,1.200) -- (0.000,0.000) -- (1.800,0.000) -- (1.800,1.200) -- cycle;
+  \draw (1.800,1.200) -- (0.900,0.000);
+  \draw (0.600,0.600) circle (0.600);
+  \fill (0.600,0.600) circle (1.2pt);
+  \draw (1.478,0.322) circle (0.322);
+  \fill (1.478,0.322) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (0.000,1.200) to[bend right=20] (0.000,0.000);
+  \node[font=\small, inner sep=1.5pt] at (-0.450,0.600) {$8\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.900,0.000) to[bend right=25] (1.800,0.000);
+  \node[font=\small, inner sep=1.5pt] at (1.350,-0.300) {$6\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-0.120,1.320) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.120,-0.120) {B};
+  \node[font=\small, inner sep=1.5pt] at (1.947,-0.085) {C};
+  \node[font=\small, inner sep=1.5pt] at (1.920,1.320) {D};
+  \node[font=\small, inner sep=1.5pt] at (0.900,-0.160) {P};
+  \node[font=\small, inner sep=1.5pt] at (0.600,0.400) {O};
+  \node[font=\small, inner sep=1.5pt] at (1.478,0.122) {$\mathrm{O'}$};
+\end{tikzpicture}

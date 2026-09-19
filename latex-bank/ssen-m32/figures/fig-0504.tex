@@ -1,0 +1,19 @@
+% 0504(본책 91쪽) — □ABCD, BA 의 연장선 위의 점 E 와 BC 의 연장선 위의 점 F, ∠EAD=112°, ∠DCF=x(색칠). 다시 그림.
+\begin{tikzpicture}[scale=1.25, line width=0.6pt]
+  \draw (0.232,1.886) -- (0.000,0.000) -- (2.000,0.000) -- (2.300,0.740) -- cycle;
+  \draw (0.232,1.886) -- (0.299,2.432);
+  \draw (2.000,0.000) -- (2.550,0.000);
+  \fill (0.299,2.432) circle (1.2pt);
+  \fill (2.550,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (0.459,1.760) arc[start angle=-28.993, end angle=82.987, radius=0.260];
+  \node[font=\small, inner sep=0.5pt] at (0.767,2.158) {$112^\circ$};
+  \fill[green!15] (2.000,0.000) -- (2.320,0.000) arc[start angle=0.000, end angle=67.932, radius=0.320] -- cycle;
+  \draw[line width=0.4pt] (2.320,0.000) arc[start angle=0.000, end angle=67.932, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (2.398,0.268) {$x$};
+  \node[font=\small, inner sep=1.5pt] at (0.032,1.886) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.115,-0.164) {B};
+  \node[font=\small, inner sep=1.5pt] at (2.000,-0.200) {C};
+  \node[font=\small, inner sep=1.5pt] at (2.473,0.840) {D};
+  \node[font=\small, inner sep=1.5pt] at (0.099,2.432) {E};
+  \node[font=\small, inner sep=1.5pt] at (2.618,-0.188) {F};
+\end{tikzpicture}

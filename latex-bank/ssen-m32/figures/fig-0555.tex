@@ -1,0 +1,20 @@
+% 0555(본책 100쪽) — 원에 내접하는 □ABCD, 접선 CE(접점 C), ∠BDC=25°, ∠DCE=60°, ∠x(∠BAD). 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-0.700,-1.000) -- (1.200,-1.000);
+  \draw (-0.174,0.985) -- (-0.766,-0.643) -- (-0.000,-1.000) -- (0.866,0.500) -- cycle;
+  \draw (-0.766,-0.643) -- (0.866,0.500);
+  \fill (1.000,-1.000) circle (1.2pt);
+  \draw[line width=0.4pt] (0.620,0.328) arc[start angle=-145.000, end angle=-120.000, radius=0.300];
+  \node[font=\small, inner sep=1pt] at (0.528,0.131) {$25^\circ$};
+  \draw[line width=0.4pt] (0.300,-1.000) arc[start angle=0.000, end angle=60.000, radius=0.300];
+  \node[font=\small, inner sep=1pt] at (0.433,-0.750) {$60^\circ$};
+  \fill[yellow!35] (-0.174,0.985) -- ++(-110.000:0.220) arc[start angle=-110.000, end angle=-25.000, radius=0.220] -- cycle;
+  \draw[line width=0.4pt] (-0.249,0.778) arc[start angle=-110.000, end angle=-25.000, radius=0.220];
+  \node[font=\small, inner sep=1pt] at (-0.021,0.615) {$x$};
+  \node[font=\small, anchor=south, inner sep=1.5pt] at (-0.174,0.985) {A};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-0.766,-0.643) {B};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (-0.000,-1.060) {C};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.866,0.500) {D};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (1.000,-1.060) {E};
+\end{tikzpicture}

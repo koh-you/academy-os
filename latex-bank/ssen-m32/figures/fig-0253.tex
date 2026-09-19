@@ -1,0 +1,23 @@
+% 0253(본책 49쪽) — 폭이 각각 3√3 cm 로 같은 두 직사각형 테이프를 60° 로 겹친 모양, 겹친 부분 □ABCD(변은 파선). 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt, >=stealth]
+  \coordinate (A) at (0,0.8); \coordinate (B) at (-0.462,0); \coordinate (C) at (0.462,0); \coordinate (D) at (0.923,0.8);
+  % 가로 테이프
+  \fill[yellow!40] (-1.2,0) rectangle (1.6,0.8);
+  % 기울어진 테이프
+  \fill[yellow!40] (-0.154,-1.066) -- (1.096,1.099) -- (0.404,1.499) -- (-0.846,-0.666) -- cycle;
+  % 겹친 부분
+  \fill[orange!50] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (-1.2,0) rectangle (1.6,0.8);
+  \draw (-0.154,-1.066) -- (1.096,1.099) -- (0.404,1.499) -- (-0.846,-0.666) -- cycle;
+  \draw[dashed, line width=0.4pt] (A) -- (B) -- (C) -- (D) -- cycle;
+  % 60°(C)
+  \draw[line width=0.4pt] (0.72,0) arc[start angle=0, end angle=60, radius=0.26];
+  \node[font=\small] at (1.05,0.28) {$60^\circ$};
+  % 폭 3√3 cm
+  \draw[<->, line width=0.4pt] (-1.02,0) -- (-1.02,0.8);
+  \node[font=\small, fill=yellow!40, inner sep=1pt] at (-1.02,0.4) {$3\sqrt{3}\,\mathrm{cm}$};
+  \node[font=\small, above left] at (0.02,0.8) {A};
+  \node[font=\small, below left] at (-0.44,0.0) {B};
+  \node[font=\small, below right] at (0.44,0.0) {C};
+  \node[font=\small, above right] at (0.9,0.8) {D};
+\end{tikzpicture}

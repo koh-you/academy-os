@@ -1,0 +1,14 @@
+% 0583(본책 105쪽) — ∠C=90° 인 △ABC, BC 는 원의 접선(접점 B), 호 AD=호 BD, AB=4 cm, 둘레를 구함. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=0.55, line width=0.6pt]
+  \draw (-2.309,-2.000) circle (2.309);
+  \draw (-3.464,0.000) -- (0.000,0.000) -- (0.000,-2.000) -- cycle;
+  \draw[line width=0.4pt] (-0.250,0.000) -- (-0.250,-0.250) -- (0.000,-0.250);
+  \draw[dashed, line width=0.4pt] (-3.464,0.000) to[bend left=15] (0.000,-2.000);
+  \node[font=\small, fill=white, inner sep=1pt] at (-1.432,-0.900) {$4\,\mathrm{cm}$};
+  \draw[line width=0.4pt] (-2.309,0.189) -- (-2.309,0.429);
+  \draw[line width=0.4pt] (-0.413,-0.905) -- (-0.205,-0.785);
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-3.514,0.050) {A};
+  \node[font=\small, anchor=south, inner sep=1.5pt] at (-1.155,0.100) {D};
+  \node[font=\small, anchor=south west, inner sep=1.5pt] at (0.050,0.050) {C};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.050,-2.050) {B};
+\end{tikzpicture}

@@ -1,0 +1,19 @@
+% 0574(본책 103쪽) 보기 ② — 점 T 에서 외접하는 두 원, 공통 접선 PQ, 직선 ATC·BTD, 현 AB·CD. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=0.9, line width=0.6pt]
+  \draw (-0.850,0.000) circle (0.850);
+  \draw (0.850,0.000) circle (0.850);
+  \draw (0.000,1.100) -- (0.000,-1.100);
+  \fill (0.000,1.100) circle (1.2pt);
+  \fill (0.000,-1.100) circle (1.2pt);
+  \draw (-1.141,0.799) -- (1.141,-0.799);
+  \draw (-1.141,-0.799) -- (1.141,0.799);
+  \draw (-1.141,0.799) -- (-1.141,-0.799);
+  \draw (1.141,-0.799) -- (1.141,0.799);
+  \node[font=\small, anchor=south east, inner sep=1.5pt] at (-1.141,0.819) {A};
+  \node[font=\small, anchor=north east, inner sep=1.5pt] at (-1.141,-0.819) {B};
+  \node[font=\small, anchor=north west, inner sep=1.5pt] at (1.141,-0.819) {C};
+  \node[font=\small, anchor=south west, inner sep=1.5pt] at (1.141,0.819) {D};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.020,0.000) {T};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.000,1.100) {P};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.000,-1.100) {Q};
+\end{tikzpicture}

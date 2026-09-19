@@ -1,0 +1,15 @@
+% 0237(본책 36쪽) — 조립제법을 두 번 이어 쓴 표($x^3-2x^2+4x-7$ 을 $x-3$ 으로, 그 몫을 $x+2$ 로). 스캔 표라 TikZ 로 다시 그림.
+% 칸 글자·빈칸 상자는 원문 그대로(3 · 1 −2 4 −7 / 3 3 21 / □ 1 □ □ 14 / −2 2 / □ □ 9). 빈칸 5개.
+\begin{tikzpicture}[x=0.85cm, y=0.55cm, line width=0.45pt, every node/.style={font=\small, inner sep=1pt}]
+  \node at (0,0) {$3$};
+  \node at (1,0) {$1$}; \node at (2,0) {$-2$}; \node at (3,0) {$4$}; \node at (4,0) {$-7$};
+  \node at (2,-1) {$3$}; \node at (3,-1) {$3$}; \node at (4,-1) {$21$};
+  \draw (0.5,0.5) -- (0.5,-3.5) -- (3.5,-3.5);
+  \draw (0.5,-1.5) -- (4.5,-1.5);
+  \node at (0,-2) {\blank[1.1em]};
+  \node at (1,-2) {$1$}; \node at (2,-2) {\blank[1.1em]}; \node at (3,-2) {\blank[1.1em]}; \node at (4,-2) {$14$};
+  \draw (3.5,-1.5) -- (3.5,-2.5) -- (4.5,-2.5);
+  \node at (2,-3) {$-2$}; \node at (3,-3) {$2$};
+  \node at (1,-4) {\blank[1.1em]}; \node at (2,-4) {\blank[1.1em]}; \node at (3,-4) {$9$};
+  \draw (2.5,-3.5) -- (2.5,-4.5) -- (3.5,-4.5);
+\end{tikzpicture}

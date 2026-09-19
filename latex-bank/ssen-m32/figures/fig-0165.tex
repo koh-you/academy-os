@@ -1,0 +1,17 @@
+% 0165(본책 35쪽) — 평행사변형 ABCD(AB=a, BC=b, ∠B=x 둔각), 대각선 AC 색칠. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (2.4,0); \coordinate (A) at (-0.5,1.4); \coordinate (D) at (1.9,1.4);
+  \fill[cyan!20] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[line width=0.5pt] (A) -- (C);
+  \draw[line width=0.4pt] (0.4,0) arc[start angle=0, end angle=109.7, radius=0.4];
+  \node[font=\small] at (0.3,0.6) {$x$};
+  \draw[dashed, line width=0.4pt] (A) to[bend right=25] (B);
+  \draw[dashed, line width=0.4pt] (B) to[bend right=20] (C);
+  \node[font=\small] at (-0.55,0.6) {$a$};
+  \node[font=\small] at (1.2,-0.45) {$b$};
+  \node[font=\small, above left] at (A) {A};
+  \node[font=\small, below] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, above] at (D) {D};
+\end{tikzpicture}

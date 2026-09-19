@@ -1,0 +1,28 @@
+% 0275(본책 53쪽) — 원 O, 현 AB(수선의 발 M)·현 CD(수선의 발 N), OA=6 cm, OM=ON=4 cm, DN=x cm. 답(x)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.660,0.880) -- (-0.660,-0.880);
+  \draw (0.631,0.901) -- (0.285,-1.063);
+  \draw (0.000,0.000) -- (-0.660,0.000);
+  \draw (0.000,0.000) -- (0.458,-0.081);
+  \draw (0.000,0.000) -- (-0.660,0.880);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.660,0.120) -- (-0.540,0.120) -- (-0.540,0.000);
+  \draw[line width=0.4pt] (0.437,-0.199) -- (0.319,-0.178) -- (0.340,-0.060);
+  \draw[line width=0.4pt] (-0.330,-0.060) -- (-0.330,0.060);
+  \draw[line width=0.4pt] (0.239,0.019) -- (0.218,-0.099);
+  \draw[dashed, line width=0.4pt] (-0.660,0.880) to[bend left=25] (0.000,0.000);
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.200,0.620) {$6\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (-0.660,0.000) to[bend right=30] (0.000,0.000);
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend right=30] (0.458,-0.081);
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.050,-0.500) {$4\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.458,-0.081) to[bend left=30] (0.285,-1.063);
+  \node[font=\small, fill=white, inner sep=1pt] at (1.000,-0.850) {$x\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.180,0.120) {O};
+  \node[font=\small, inner sep=1.5pt] at (-0.780,1.040) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.780,-1.040) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.746,1.065) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.336,-1.256) {D};
+  \node[font=\small, inner sep=1.5pt] at (-0.850,0.000) {M};
+  \node[font=\small, inner sep=1.5pt] at (0.638,0.019) {N};
+\end{tikzpicture}

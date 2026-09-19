@@ -1,0 +1,24 @@
+% 0360(본책 67쪽) — 직사각형 ABCD(AB=8 cm, BC=17 cm)를 FC 로 접어 B 가 AD 위 E 에 옴, △CDE 의 내접원 O(접점 G, H, I), 접힌 △EFC 색칠. 답(반지름)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \fill[yellow!25] (0.320,1.280) -- (2.720,0.000) -- (2.720,1.280) -- cycle;
+  \fill[yellow!60] (0.320,1.280) -- (0.000,0.680) -- (2.720,0.000) -- cycle;
+  \draw (0.000,1.280) -- (0.000,0.000) -- (2.720,0.000) -- (2.720,1.280) -- cycle;
+  \draw (0.320,1.280) -- (0.000,0.680) -- (2.720,0.000) -- cycle;
+  \draw (0.320,1.280) -- (2.720,0.000);
+  \draw (2.240,0.800) circle (0.480);
+  \fill (2.240,0.800) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (0.000,1.280) to[bend right=20] (0.000,0.000);
+  \node[font=\small, inner sep=1.5pt] at (-0.420,0.640) {$8\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend right=12] (2.720,0.000);
+  \node[font=\small, inner sep=1.5pt] at (1.360,-0.300) {$17\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-0.120,1.400) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.120,-0.120) {B};
+  \node[font=\small, inner sep=1.5pt] at (2.880,-0.058) {C};
+  \node[font=\small, inner sep=1.5pt] at (2.840,1.400) {D};
+  \node[font=\small, inner sep=1.5pt] at (0.320,1.430) {E};
+  \node[font=\small, inner sep=1.5pt] at (0.150,0.625) {F};
+  \node[font=\small, inner sep=1.5pt] at (2.240,1.430) {G};
+  \node[font=\small, inner sep=1.5pt] at (1.841,0.276) {H};
+  \node[font=\small, inner sep=1.5pt] at (2.870,0.800) {I};
+  \node[font=\small, inner sep=1.5pt] at (2.240,0.620) {O};
+\end{tikzpicture}

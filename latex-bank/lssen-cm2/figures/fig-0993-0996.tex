@@ -1,0 +1,40 @@
+% 0993~0996(본책 139쪽) 공통 지시문 그림 — 두 함수 f: X→Y (1→b, 2→b, 3→a, 4→d), g: Y→X (a→3, b→4, c→1, d→3). 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 X·Y·f·g·원소만.
+\begin{tikzpicture}[line width=0.5pt, every node/.style={font=\small}]
+  \draw[line width=0.6pt] (0.00,0.00) ellipse (0.5 and 1.38);
+  \draw[line width=0.6pt] (1.90,0.00) ellipse (0.5 and 1.38);
+  \node at (0.00,1.59) {$X$};
+  \node at (1.90,1.59) {$Y$};
+  \draw[->, >=stealth] (0.30,1.59) -- (1.60,1.59);
+  \node at (0.95,1.85) {$f$};
+  \node[inner sep=1.5pt] (fx0) at (0.00,0.83) {$1$};
+  \node[inner sep=1.5pt] (fx1) at (0.00,0.28) {$2$};
+  \node[inner sep=1.5pt] (fx2) at (0.00,-0.28) {$3$};
+  \node[inner sep=1.5pt] (fx3) at (0.00,-0.83) {$4$};
+  \node[inner sep=1.5pt] (fy0) at (1.90,0.83) {$a$};
+  \node[inner sep=1.5pt] (fy1) at (1.90,0.28) {$b$};
+  \node[inner sep=1.5pt] (fy2) at (1.90,-0.28) {$c$};
+  \node[inner sep=1.5pt] (fy3) at (1.90,-0.83) {$d$};
+  \draw[->, >=stealth] (fx0.east) -- (fy1.west);
+  \draw[->, >=stealth] (fx1.east) -- (fy1.west);
+  \draw[->, >=stealth] (fx2.east) -- (fy0.west);
+  \draw[->, >=stealth] (fx3.east) -- (fy3.west);
+  \draw[line width=0.6pt] (3.60,0.00) ellipse (0.5 and 1.38);
+  \draw[line width=0.6pt] (5.50,0.00) ellipse (0.5 and 1.38);
+  \node at (3.60,1.59) {$Y$};
+  \node at (5.50,1.59) {$X$};
+  \draw[->, >=stealth] (3.90,1.59) -- (5.20,1.59);
+  \node at (4.55,1.85) {$g$};
+  \node[inner sep=1.5pt] (gx0) at (3.60,0.83) {$a$};
+  \node[inner sep=1.5pt] (gx1) at (3.60,0.28) {$b$};
+  \node[inner sep=1.5pt] (gx2) at (3.60,-0.28) {$c$};
+  \node[inner sep=1.5pt] (gx3) at (3.60,-0.83) {$d$};
+  \node[inner sep=1.5pt] (gy0) at (5.50,0.83) {$1$};
+  \node[inner sep=1.5pt] (gy1) at (5.50,0.28) {$2$};
+  \node[inner sep=1.5pt] (gy2) at (5.50,-0.28) {$3$};
+  \node[inner sep=1.5pt] (gy3) at (5.50,-0.83) {$4$};
+  \draw[->, >=stealth] (gx0.east) -- (gy2.west);
+  \draw[->, >=stealth] (gx1.east) -- (gy3.west);
+  \draw[->, >=stealth] (gx2.east) -- (gy0.west);
+  \draw[->, >=stealth] (gx3.east) -- (gy2.west);
+\end{tikzpicture}

@@ -1,0 +1,12 @@
+% 0464(본책 71쪽) — 방정식 f(x,y)=0 이 나타내는 도형: 꼭짓점 (-1,0)·(1,0)·(0,1) 인 삼각형. 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 O·x·y·-1·1·1·f(x,y)=0 만.
+\begin{tikzpicture}[scale=0.6, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.0,0) -- (2.0,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.7) -- (0,2.0) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (-1,0) -- (1,0) -- (0,1) -- cycle;
+  \node[below left=-2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[below=1pt, font=\small] at (-1,0) {$-1$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[left=1pt, font=\small] at (0,1) {$1$};
+  \node[right=0pt, font=\small] at (0.15,1.15) {$f(x,\,y)=0$};
+\end{tikzpicture}

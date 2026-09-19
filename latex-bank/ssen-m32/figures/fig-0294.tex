@@ -1,0 +1,22 @@
+% 0294(본책 56쪽) — 원 O, AB⊥OM, CD⊥ON, OM=3, ON=2, CD=8. 답(AB)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.414,1.019) -- (-0.972,-0.514);
+  \draw (0.799,-0.756) -- (0.126,1.093);
+  \draw (0.000,0.000) -- (-0.693,0.252);
+  \draw (0.000,0.000) -- (0.462,0.168);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.652,0.365) -- (-0.540,0.324) -- (-0.581,0.211);
+  \draw[line width=0.4pt] (0.421,0.281) -- (0.308,0.240) -- (0.350,0.127);
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.297,-0.054) {$3$};
+  \node[font=\small, fill=white, inner sep=1pt] at (0.231,-0.096) {$2$};
+  \draw[dashed, line width=0.4pt] (0.126,1.093) to[bend left=22] (0.799,-0.756);
+  \node[font=\small, fill=white, inner sep=1pt] at (1.150,0.200) {$8$};
+  \node[font=\small, inner sep=1.5pt] at (0.050,-0.320) {O};
+  \node[font=\small, inner sep=1.5pt] at (-0.490,1.204) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.149,-0.608) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.944,-0.894) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.149,1.291) {D};
+  \node[font=\small, inner sep=1.5pt] at (-0.873,0.302) {M};
+  \node[font=\small, inner sep=1.5pt] at (0.482,0.368) {N};
+\end{tikzpicture}

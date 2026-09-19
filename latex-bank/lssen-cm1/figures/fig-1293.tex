@@ -1,0 +1,15 @@
+% 1293(본책 180쪽) — 5개의 직선으로 만든 별 모양(오각별) 위의 10개의 점(바깥 꼭짓점 5 · 안쪽 교점 5). 직선은 꼭짓점 밖으로 조금 나간다. 스캔 그림을 TikZ 로 다시 그림. 라벨 없음.
+\begin{tikzpicture}[line width=0.6pt]
+  \def\r{1.4}
+  % 5개의 직선: 꼭짓점 P_k 와 P_{k+2} 를 잇는 직선을 양쪽으로 연장
+  \foreach \k in {0,1,2,3,4} {
+    \pgfmathsetmacro{\a}{90+72*\k}
+    \pgfmathsetmacro{\b}{90+72*(\k+2)}
+    \draw ($(\a:\r)!-0.18!(\b:\r)$) -- ($(\a:\r)!1.18!(\b:\r)$);
+  }
+  % 바깥 꼭짓점 5개
+  \foreach \k in {0,1,2,3,4} { \fill (90+72*\k:\r) circle (2.2pt); }
+  % 안쪽 교점 5개 (반지름 r·cos72°/cos36°)
+  \pgfmathsetmacro{\ri}{\r*cos(72)/cos(36)}
+  \foreach \k in {0,1,2,3,4} { \fill (126+72*\k:\ri) circle (2.2pt); }
+\end{tikzpicture}

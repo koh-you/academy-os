@@ -1,0 +1,16 @@
+% 0370(본책 69쪽) — 직사각형 ABCD 의 세 변 AB, BC, AD 에 접하는 원 O, 접선 DE, CD=4 cm, DE=5 cm. 답(BE)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,1.400) -- (0.000,0.000) -- (2.100,0.000) -- (2.100,1.400) -- cycle;
+  \draw (0.700,0.700) circle (0.700);
+  \fill (0.700,0.700) circle (1.2pt);
+  \draw (2.100,1.400) -- (1.050,0.000);
+  \draw[dashed, line width=0.4pt] (2.100,1.400) to[bend left=25] (2.100,0.000);
+  \node[font=\small, inner sep=1.5pt] at (2.550,0.700) {$4\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (1.995,0.520) {$5\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-0.120,1.520) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.120,-0.120) {B};
+  \node[font=\small, inner sep=1.5pt] at (2.247,-0.085) {C};
+  \node[font=\small, inner sep=1.5pt] at (2.220,1.520) {D};
+  \node[font=\small, inner sep=1.5pt] at (1.050,-0.160) {E};
+  \node[font=\small, inner sep=1.5pt] at (0.700,0.500) {O};
+\end{tikzpicture}

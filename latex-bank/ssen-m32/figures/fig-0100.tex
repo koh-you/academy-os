@@ -1,0 +1,28 @@
+% 0100(본책 22쪽) — 반지름 1 인 사분원(중심 A, 호 F~D), 호 위의 C, C 에서 AD 에 내린 수선의 발 B, D 에서 세운 접선과 AC 의 연장선의 교점 E. 각 x(∠CAB)·y(∠ACB)·z(∠AED), 직각 표시 A·B·D, 1(AF) 파선 호. 라벨: A~F·x·y·z·1. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1, line width=0.6pt]
+  \coordinate (A) at (0,0); \coordinate (D) at (2.2,0); \coordinate (F) at (0,2.2); \coordinate (C) at (1.414,1.685); \coordinate (B) at (1.414,0); \coordinate (E) at (2.2,2.622);
+  \draw (F) -- (A) -- (D) -- (E);
+  \draw (D) arc[start angle=0, end angle=90, radius=2.2cm];
+  \draw (A) -- (E);
+  \draw (C) -- (B);
+  % 직각 표시
+  \draw[line width=0.4pt] (0.16,0) -- (0.16,0.16) -- (0,0.16);
+  \draw[line width=0.4pt] (1.254,0) -- (1.254,0.16) -- (1.414,0.16);
+  \draw[line width=0.4pt] (2.04,0) -- (2.04,0.16) -- (2.2,0.16);
+  % 각
+  \draw[line width=0.4pt] (0.45,0) arc[start angle=0, end angle=50, radius=0.45cm];
+  \node[font=\small, anchor=west, inner sep=1pt] at (0.48,0.2) {$x$};
+  \draw[line width=0.4pt] ($(C)+(230:0.4)$) arc[start angle=230, end angle=270, radius=0.4cm];
+  \node[font=\small] at (1.2,1.1) {$y$};
+  \draw[line width=0.4pt] ($(E)+(230:0.4)$) arc[start angle=230, end angle=270, radius=0.4cm];
+  \node[font=\small] at (1.98,2.03) {$z$};
+  % 1(AF 파선 호)
+  \draw[dashed, line width=0.4pt] (A) to[bend left=20] (F);
+  \node[font=\small] at (-0.33,1.1) {$1$};
+  \node[font=\small, below] at (A) {A};
+  \node[font=\small, below] at (B) {B};
+  \node[font=\small, above left, inner sep=1pt] at (C) {C};
+  \node[font=\small, below] at (D) {D};
+  \node[font=\small, above] at (E) {E};
+  \node[font=\small, above] at (F) {F};
+\end{tikzpicture}

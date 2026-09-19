@@ -1,0 +1,18 @@
+% 0466(본책 71쪽) — 두 방정식 f(x,y)=0(꼭짓점 (-1,0)·(-1,-1)·(0,-1) 인 직각삼각형)·g(x,y)=0(꼭짓점 (0,1)·(1,1)·(1,2) 인 직각삼각형). 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 O·x·y·-1·-1·1·1·2·f(x,y)=0·g(x,y)=0 만. 대응하는 이동(답)은 적지 않는다.
+\begin{tikzpicture}[scale=0.6, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.2,0) -- (2.2,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.7) -- (0,2.9) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (-1,0) -- (-1,-1) -- (0,-1) -- cycle;
+  \draw[line width=0.6pt] (0,1) -- (1,1) -- (1,2) -- cycle;
+  \draw[dashed, line width=0.4pt] (0,2) -- (1,2);
+  \draw[dashed, line width=0.4pt] (1,1) -- (1,0);
+  \node[above right=-2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[above=1pt, font=\small] at (-1,0) {$-1$};
+  \node[right=1pt, font=\small] at (0,-1) {$-1$};
+  \node[below right=-2pt, font=\small] at (1,0) {$1$};
+  \node[left=1pt, font=\small] at (0,1) {$1$};
+  \node[left=1pt, font=\small] at (0,2) {$2$};
+  \node[below left=-2pt, font=\small] at (-0.7,-1.15) {$f(x,\,y)=0$};
+  \node[above right=-2pt, font=\small] at (0.25,2.05) {$g(x,\,y)=0$};
+\end{tikzpicture}

@@ -1,0 +1,20 @@
+% 0513(본책 92쪽) — P 에서 두 직선 PAD·PBC, AC·BD 의 교점 Q, ∠P=45°, ∠ACB=20°, ∠DQC=x(색칠)(원 없음). 다시 그림.
+\begin{tikzpicture}[scale=0.94, line width=0.6pt]
+  \draw (0.000,0.000) -- (2.828,2.828);
+  \draw (0.000,0.000) -- (4.000,0.000);
+  \draw (1.131,1.131) -- (4.000,0.000);
+  \draw (1.600,0.000) -- (2.828,2.828);
+  \draw[line width=0.4pt] (0.400,0.000) arc[start angle=0.000, end angle=45.000, radius=0.400];
+  \node[font=\small, inner sep=0.5pt] at (0.630,0.255) {$45^\circ$};
+  \draw[line width=0.4pt] (3.535,0.183) arc[start angle=158.485, end angle=180.000, radius=0.500];
+  \node[font=\small, inner sep=0.5pt] at (3.264,0.425) {$20^\circ$};
+  \fill[green!15] (1.951,0.808) -- (2.155,0.727) arc[start angle=-21.515, end angle=66.528, radius=0.220] -- cycle;
+  \draw[line width=0.4pt] (2.155,0.727) arc[start angle=-21.515, end angle=66.528, radius=0.220];
+  \node[font=\small, inner sep=0.5pt] at (2.339,0.969) {$x$};
+  \node[font=\small, inner sep=1.5pt] at (-0.200,0.000) {P};
+  \node[font=\small, inner sep=1.5pt] at (0.990,1.272) {A};
+  \node[font=\small, inner sep=1.5pt] at (2.828,3.028) {D};
+  \node[font=\small, inner sep=1.5pt] at (1.600,-0.200) {B};
+  \node[font=\small, inner sep=1.5pt] at (4.200,0.000) {C};
+  \node[font=\small, inner sep=1.5pt] at (1.809,0.666) {Q};
+\end{tikzpicture}

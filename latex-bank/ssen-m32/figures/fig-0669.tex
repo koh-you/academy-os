@@ -1,0 +1,12 @@
+% 0669(본책 119쪽) — A·B·C 세 사람의 줄넘기 2단 뛰기 3회 기록 수직선(0~10 눈금 · A: 7, 8, 9 · B: 8, 9, 10 · C: 6, 8, 10). 스캔 삽화를 TikZ 로 다시 그림. 답(대소 관계)은 적지 않는다.
+\begin{tikzpicture}[scale=0.55, line width=0.6pt]
+  \foreach \name/\y/\pts in {A/0/{7,8,9}, B/-2.2/{8,9,10}, C/-4.4/{6,8,10}} {
+    \draw[<->, >=stealth] (-0.9,\y) -- (10.9,\y);
+    \foreach \x in {0,1,...,10} {
+      \draw[line width=0.4pt] (\x,\y+0.14) -- (\x,\y-0.14);
+      \node[font=\footnotesize, below=1pt] at (\x,\y-0.14) {$\x$};
+    }
+    \node[font=\small] at (-1.5,\y) {\name};
+    \foreach \p in \pts { \fill (\p,\y) circle (2.6pt); }
+  }
+\end{tikzpicture}

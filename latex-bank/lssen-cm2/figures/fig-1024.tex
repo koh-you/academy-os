@@ -1,0 +1,49 @@
+% 1024(본책 142쪽) 「보기」 상자 — 그래프 ㄱ(y축에 평행한 직선)·ㄴ(꼭짓점이 y축 위에 있는 ∧ 꼴)·ㄷ(왼쪽은 수평, 오른쪽은 증가하는 반직선)·ㄹ(계단 함수 · 열린 점·닫힌 점). 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 x·y·O 만. 함수 여부(답)는 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt, every node/.style={font=\small}]
+  \draw[line width=0.4pt, rounded corners=4pt] (-1.2,-5.0) rectangle (7.2,2.25);
+  \node[anchor=west, font=\small\bfseries] at (-1.05,2.0) {보기};
+  % ㄱ: y축에 평행한 직선
+  \node[anchor=east] at (-0.55,1.5) {ㄱ.};
+  \begin{scope}[shift={(1.1,0.3)}, scale=0.55]
+    \draw[->, >=stealth, line width=0.7pt] (-1.8,0) -- (2.2,0) node[below left=-1pt] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-1.6) -- (0,2.0) node[left=-1pt] {$y$};
+    \node[below left=-2pt] at (0,0) {$\mathrm{O}$};
+    \draw[line width=0.6pt] (1.0,-1.6) -- (1.0,2.0);
+  \end{scope}
+  % ㄴ: ∧ 꼴
+  \node[anchor=east] at (3.55,1.5) {ㄴ.};
+  \begin{scope}[shift={(5.2,0.3)}, scale=0.55]
+    \draw[->, >=stealth, line width=0.7pt] (-2.0,0) -- (2.2,0) node[below left=-1pt] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-1.6) -- (0,2.0) node[left=-1pt] {$y$};
+    \node[below left=-2pt] at (0,0) {$\mathrm{O}$};
+    \draw[line width=0.6pt] (-1.9,-1.4) -- (0,1.4) -- (1.9,-1.4);
+  \end{scope}
+  % ㄷ: 수평 반직선 + 증가 반직선
+  \node[anchor=east] at (-0.55,-2.0) {ㄷ.};
+  \begin{scope}[shift={(1.1,-3.3)}, scale=0.55]
+    \draw[->, >=stealth, line width=0.7pt] (-2.0,0) -- (2.2,0) node[below left=-1pt] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-1.6) -- (0,2.4) node[left=-1pt] {$y$};
+    \node[below left=-2pt] at (0,0) {$\mathrm{O}$};
+    \draw[line width=0.6pt] (-2.0,0.7) -- (0,0.7) -- (1.9,2.3);
+  \end{scope}
+  % ㄹ: 계단 함수
+  \node[anchor=east] at (3.55,-2.0) {ㄹ.};
+  \begin{scope}[shift={(5.2,-3.3)}, scale=0.55]
+    \draw[->, >=stealth, line width=0.7pt] (-2.2,0) -- (2.4,0) node[below left=-1pt] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-1.8) -- (0,2.6) node[left=-1pt] {$y$};
+    \node[below right=-2pt] at (0,0) {$\mathrm{O}$};
+    \draw[line width=0.6pt] (-2.2,-1) -- (-1,-1);
+    \draw[line width=0.6pt] (-1,0) -- (0,0);
+    \draw[line width=0.6pt] (0,1) -- (1,1);
+    \draw[line width=0.6pt] (1,2) -- (2.3,2);
+    \draw[densely dashed, line width=0.4pt] (-1,-1) -- (-1,0);
+    \draw[densely dashed, line width=0.4pt] (1,0) -- (1,2);
+    \fill (-1,0) circle (2pt);
+    \fill (0,1) circle (2pt);
+    \fill (1,2) circle (2pt);
+    \fill[white] (-1,-1) circle (2pt); \draw (-1,-1) circle (2pt);
+    \fill[white] (0,0) circle (2pt); \draw (0,0) circle (2pt);
+    \fill[white] (1,1) circle (2pt); \draw (1,1) circle (2pt);
+  \end{scope}
+\end{tikzpicture}

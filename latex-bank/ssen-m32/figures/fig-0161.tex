@@ -1,0 +1,19 @@
+% 0161(본책 35쪽) — △ABC(∠B=30°, ∠C=45°, BC=10), AH⊥BC, AH=h. 스캔 삽화를 TikZ 로 다시 그림. 답(h)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (3.5,0); \coordinate (H) at (2.22,0); \coordinate (A) at (2.22,1.28);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (H);
+  \draw[line width=0.4pt] (2.0,0) -- (2.0,0.22) -- (2.22,0.22);
+  \draw[line width=0.4pt] (0.55,0) arc[start angle=0, end angle=30, radius=0.55];
+  \node[font=\small] at (0.95,0.25) {$30^\circ$};
+  \draw[line width=0.4pt] (3.05,0) arc[start angle=180, end angle=135, radius=0.45];
+  \node[font=\small] at (2.75,0.25) {$45^\circ$};
+  \draw[dashed, line width=0.4pt] (A) to[bend right=25] (H);
+  \draw[dashed, line width=0.4pt] (B) to[bend right=15] (C);
+  \node[font=\small] at (1.9,0.7) {$h$};
+  \node[font=\small] at (1.75,-0.45) {$10$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, below] at (H) {H};
+\end{tikzpicture}

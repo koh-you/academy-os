@@ -1,0 +1,17 @@
+% 0092(본책 19쪽) — 직육면체(연한 노란녹색 채움)와 대각선 하나. 보이지 않는 모서리는 파선. 스캔 삽화라 TikZ 로 다시 그림.
+% 원문에 라벨 없음. 모서리 길이는 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.5pt]
+  \def\a{2.2}\def\b{1.6}\def\dx{0.8}\def\dy{0.55}
+  % 앞면·윗면·오른면
+  \fill[olive!20] (0,0) rectangle (\a,\b);
+  \fill[olive!30] (0,\b) -- (\a,\b) -- (\a+\dx,\b+\dy) -- (\dx,\b+\dy) -- cycle;
+  \fill[olive!35] (\a,0) -- (\a+\dx,\dy) -- (\a+\dx,\b+\dy) -- (\a,\b) -- cycle;
+  \draw[line width=0.6pt] (0,0) rectangle (\a,\b);
+  \draw[line width=0.6pt] (0,\b) -- (\dx,\b+\dy) -- (\a+\dx,\b+\dy) -- (\a,\b);
+  \draw[line width=0.6pt] (\a,0) -- (\a+\dx,\dy) -- (\a+\dx,\b+\dy);
+  % 숨은 모서리
+  \draw[dashed, line width=0.4pt] (0,0) -- (\dx,\dy) -- (\a+\dx,\dy);
+  \draw[dashed, line width=0.4pt] (\dx,\dy) -- (\dx,\b+\dy);
+  % 대각선(앞 왼쪽 아래 → 뒤 오른쪽 위)
+  \draw[line width=0.6pt] (0,0) -- (\a+\dx,\b+\dy);
+\end{tikzpicture}

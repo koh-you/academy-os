@@ -1,0 +1,18 @@
+% 0264(본책 53쪽) — 원, 현 AB 가 현 CD 를 수직이등분(M, CM=MD 같은 변 표시), AM=7 cm, MB=21 cm. 답(반지름)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.631,0.901) -- (0.631,-0.901);
+  \draw (-1.096,-0.096) -- (0.465,0.997);
+  \draw[line width=0.4pt] (-0.247,0.352) -- (-0.148,0.421) -- (-0.217,0.519);
+  \draw[line width=0.4pt] (-0.740,0.226) -- (-0.671,0.128);
+  \draw[line width=0.4pt] (0.040,0.773) -- (0.109,0.675);
+  \draw[dashed, line width=0.4pt] (-0.631,0.901) to[bend left=25] (-0.315,0.451);
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.200,1.050) {$7\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (-0.315,0.451) to[bend left=25] (0.631,-0.901);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.750,-0.200) {$21\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-0.746,1.065) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.746,-1.065) {B};
+  \node[font=\small, inner sep=1.5pt] at (-1.295,-0.113) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.549,1.178) {D};
+  \node[font=\small, inner sep=1.5pt] at (-0.575,0.271) {M};
+\end{tikzpicture}

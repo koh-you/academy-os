@@ -1,0 +1,15 @@
+% 0208(본책 42쪽) — ∠C=90° 인 직각삼각형 ABC, 변 BC 위의 점 D(BD=14 cm, ∠ADB=135°). 스캔 삽화를 TikZ 로 다시 그림. 답(AC)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (D) at (2.1,0); \coordinate (C) at (3.15,0); \coordinate (A) at (3.15,1.05);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (D);
+  \draw[line width=0.4pt] (3.15,0.16) -- (2.99,0.16) -- (2.99,0);
+  \draw[line width=0.4pt] (1.8,0) arc[start angle=180, end angle=45, radius=0.3];
+  \node[font=\small] at (1.85,0.42) {$135^\circ$};
+  \draw[dashed, line width=0.4pt] (B) to[bend right=15] (D);
+  \node[font=\small] at (1.05,-0.32) {$14\,\mathrm{cm}$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, below] at (2.15,-0.02) {D};
+\end{tikzpicture}

@@ -1,0 +1,25 @@
+% 0346(본책 65쪽) — PA, PB, CD, GH 가 A, B, E, F 에서 원 O 에 접함, PC=10, CD=7, PD=15. 답(△CHG 둘레)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림(발문 아래 가로 그림).
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-3.353,0.000) -- (-0.107,1.014);
+  \draw (-3.353,0.000) -- (-0.107,-1.014);
+  \draw (-2.044,0.409) -- (-0.489,-0.895);
+  \draw (-0.671,0.838) -- (-1.286,-0.227);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (-3.353,0.000) to[bend left=18] (-2.044,0.409);
+  \node[font=\small, inner sep=1.5pt] at (-2.200,0.620) {$10$};
+  \draw[dashed, line width=0.4pt] (-2.044,0.409) to[bend right=25] (-0.489,-0.895);
+  \node[font=\small, inner sep=1.5pt] at (-1.050,-0.560) {$7$};
+  \draw[dashed, line width=0.4pt] (-3.353,0.000) to[bend right=18] (-0.489,-0.895);
+  \node[font=\small, inner sep=1.5pt] at (-1.900,-0.750) {$15$};
+  \node[font=\small, inner sep=1.5pt] at (-3.513,0.000) {P};
+  \node[font=\small, inner sep=1.5pt] at (-0.248,1.124) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.198,-1.114) {B};
+  \node[font=\small, inner sep=1.5pt] at (-2.094,0.579) {C};
+  \node[font=\small, inner sep=1.5pt] at (-0.609,-1.045) {D};
+  \node[font=\small, inner sep=1.5pt] at (-0.482,-0.786) {E};
+  \node[font=\small, inner sep=1.5pt] at (-0.696,0.480) {F};
+  \node[font=\small, inner sep=1.5pt] at (-0.731,1.008) {G};
+  \node[font=\small, inner sep=1.5pt] at (-1.446,-0.227) {H};
+  \node[font=\small, inner sep=1.5pt] at (0.170,0.000) {O};
+\end{tikzpicture}

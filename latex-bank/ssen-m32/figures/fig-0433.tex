@@ -1,0 +1,23 @@
+% 0433(본책 79쪽) — 원에 내접하는 □ABCD, 대각선 AC·BD, ∠ACD=25°, ∠ADB=35°, ∠BAC=65°, ∠ABD=x. 답(x)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.953,0.550) -- (-0.707,-0.843);
+  \draw (-0.707,-0.843) -- (1.083,-0.191);
+  \draw (1.083,-0.191) -- (0.285,1.063);
+  \draw (0.285,1.063) -- (-0.953,0.550);
+  \draw (-0.953,0.550) -- (1.083,-0.191);
+  \draw (-0.707,-0.843) -- (0.285,1.063);
+  \draw[line width=0.4pt] (-0.039,0.929) arc (202.5:242.5:0.350);
+  \draw[line width=0.4pt] (0.842,0.189) arc (122.5:160.0:0.450);
+  \draw[line width=0.4pt] (-0.897,0.235) arc (280.0:340.0:0.320);
+  \fill[green!15] (-0.707,-0.843) -- (-0.569,-0.577) arc (62.5:100.0:0.300) -- cycle;
+  \draw[line width=0.4pt] (-0.569,-0.577) arc (62.5:100.0:0.300);
+  \node[font=\small, inner sep=0.5pt] at (-0.195,0.623) {$35^\circ$};
+  \node[font=\small, inner sep=0.5pt] at (0.475,0.297) {$25^\circ$};
+  \node[font=\small, inner sep=0.5pt] at (-0.567,0.090) {$65^\circ$};
+  \node[font=\small, inner sep=0.5pt] at (-0.631,-0.348) {$x$};
+  \node[font=\small, inner sep=1.5pt] at (0.336,1.256) {D};
+  \node[font=\small, inner sep=1.5pt] at (-1.126,0.650) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.836,-0.996) {B};
+  \node[font=\small, inner sep=1.5pt] at (1.280,-0.226) {C};
+\end{tikzpicture}

@@ -1,0 +1,9 @@
+% 0090(본책 18쪽) — 대각선의 길이가 15 인 직사각형(연한 붉은색 채움, 대각선 하나). 스캔 삽화라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 「15」 하나. 가로·세로 길이는 적지 않는다(답 근거).
+\begin{tikzpicture}[scale=1, line width=0.5pt]
+  \def\W{3.0}\def\H{2.0}
+  \fill[red!20] (0,0) rectangle (\W,\H);
+  \draw[line width=0.6pt] (0,0) rectangle (\W,\H);
+  \draw[line width=0.6pt] (0,0) -- (\W,\H);
+  \node[font=\small, above left, inner sep=1pt] at (\W/2,\H/2) {$15$};
+\end{tikzpicture}

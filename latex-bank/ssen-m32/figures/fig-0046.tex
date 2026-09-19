@@ -1,0 +1,13 @@
+% 유형 02 0046(본책 13쪽) — 직각삼각형 ABC(∠B=90°), 빗변 AC=15(색칠된 삼각형). 스캔 삽화를 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(15 · 꼭짓점 · 직각 표시). AB · BC 의 길이(답의 근거)는 적지 않는다.
+\begin{tikzpicture}[scale=0.26, line width=0.6pt]
+  \coordinate (A) at (0,0); \coordinate (B) at (12,0); \coordinate (C) at (12,9);
+  \fill[orange!22] (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] (11,0) -- (11,1) -- (12,1);
+  \draw[dashed, line width=0.3pt] (A) to[bend left=20] (C);
+  \node[font=\small, left] at (A) {A};
+  \node[font=\small, right] at (B) {B};
+  \node[font=\small, above] at (C) {C};
+  \node[font=\small] at (5.0,5.2) {$15$};
+\end{tikzpicture}

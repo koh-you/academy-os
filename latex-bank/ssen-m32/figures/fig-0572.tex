@@ -1,0 +1,25 @@
+% 0572(본책 103쪽) — 점 T 에서 접하는 두 원, 공통 접선 PQ, 직선 ATC·BTD, ∠TAB=40°, ∠TDC=60°, ∠DTC 표시. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.1, line width=0.6pt]
+  \draw (-1.000,0.000) circle (1.000);
+  \draw (1.000,0.000) circle (1.000);
+  \draw (0.000,1.300) -- (0.000,-1.300);
+  \fill (0.000,1.300) circle (1.2pt);
+  \fill (0.000,-1.300) circle (1.2pt);
+  \draw (-1.500,0.866) -- (1.500,-0.866);
+  \draw (-0.826,-0.985) -- (0.826,0.985);
+  \draw (-1.500,0.866) -- (-0.826,-0.985);
+  \draw (1.500,-0.866) -- (0.826,0.985);
+  \draw[line width=0.4pt] (-1.397,0.584) arc[start angle=-70.000, end angle=-30.000, radius=0.300];
+  \node[font=\small, inner sep=1pt] at (-1.146,0.445) {$40^\circ$};
+  \draw[line width=0.4pt] (0.634,0.755) arc[start angle=-130.000, end angle=-70.000, radius=0.300];
+  \node[font=\small, inner sep=1pt] at (0.736,0.473) {$60^\circ$};
+  \fill[yellow!35] (0.000,0.000) -- ++(-30.000:0.220) arc[start angle=-30.000, end angle=50.000, radius=0.220] -- cycle;
+  \draw[line width=0.4pt] (0.191,-0.110) arc[start angle=-30.000, end angle=50.000, radius=0.220];
+  \node[font=\small, anchor=south east, inner sep=1.5pt] at (-1.500,0.886) {A};
+  \node[font=\small, anchor=north east, inner sep=1.5pt] at (-0.826,-1.005) {B};
+  \node[font=\small, anchor=north west, inner sep=1.5pt] at (1.500,-0.886) {C};
+  \node[font=\small, anchor=south west, inner sep=1.5pt] at (0.826,1.005) {D};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-0.020,0.000) {T};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.000,1.300) {P};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.000,-1.300) {Q};
+\end{tikzpicture}

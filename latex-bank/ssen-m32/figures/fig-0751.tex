@@ -1,0 +1,93 @@
+% 0751(본책 135쪽) — 남학생·여학생 각 20명의 운동량(가로 40~160분, 격자 10분)·체질량 지수(세로 18~30, 격자 1) 산점도 두 개([남학생]·[여학생]). 스캔 산점도를 TikZ 로 다시 그림(점 각 20개 원문 위치).
+\begin{tabular}{@{}c@{\hspace{4mm}}c@{}}
+\begin{tikzpicture}[line width=0.5pt]
+  \draw[gray!55, line width=0.25pt] (0,0) grid[xstep=0.2cm, ystep=0.2cm] (3,3);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (3.15,0);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (0,3.15);
+  \draw[line width=0.5pt] (0.15,-0.06) -- (0.21,0.06) (0.22,-0.06) -- (0.28,0.06);
+  \draw[line width=0.5pt] (-0.06,0.05) -- (0.06,0.11) (-0.06,0.12) -- (0.06,0.18);
+  \node[font=\tiny, below left=0pt, inner sep=1.5pt] at (0,0) {$0$};
+  \node[font=\tiny, below=1pt, inner sep=1pt] at (0.4,0) {$40$};
+  \node[font=\tiny, below=1pt, inner sep=1pt] at (0.8,0) {$60$};
+  \node[font=\tiny, below=1pt, inner sep=1pt] at (1.2,0) {$80$};
+  \node[font=\tiny, below=1pt, inner sep=1pt] at (1.6,0) {$100$};
+  \node[font=\tiny, below=1pt, inner sep=1pt] at (2,0) {$120$};
+  \node[font=\tiny, below=1pt, inner sep=1pt] at (2.4,0) {$140$};
+  \node[font=\tiny, below=1pt, inner sep=1pt] at (2.8,0) {$160$};
+  \node[font=\tiny, left=1pt, inner sep=1pt] at (0,0.2) {$18$};
+  \node[font=\tiny, left=1pt, inner sep=1pt] at (0,0.6) {$20$};
+  \node[font=\tiny, left=1pt, inner sep=1pt] at (0,1) {$22$};
+  \node[font=\tiny, left=1pt, inner sep=1pt] at (0,1.4) {$24$};
+  \node[font=\tiny, left=1pt, inner sep=1pt] at (0,1.8) {$26$};
+  \node[font=\tiny, left=1pt, inner sep=1pt] at (0,2.2) {$28$};
+  \node[font=\tiny, left=1pt, inner sep=1pt] at (0,2.6) {$30$};
+  \node[font=\tiny, anchor=north east, inner sep=1pt] at (3.15,-0.38) {운동량(분)};
+  \node[font=\tiny, align=center, anchor=north east, inner sep=1pt] at (-0.42,3.15) {체\\질\\량\\지\\수};
+  \fill (0.2,2.8) circle (1.3pt);
+  \fill (0.4,2.2) circle (1.3pt);
+  \fill (0.6,1.2) circle (1.3pt);
+  \fill (0.8,2.4) circle (1.3pt);
+  \fill (0.8,2) circle (1.3pt);
+  \fill (0.8,1.8) circle (1.3pt);
+  \fill (1,0.8) circle (1.3pt);
+  \fill (1.2,1.6) circle (1.3pt);
+  \fill (1.2,1.2) circle (1.3pt);
+  \fill (1.4,2) circle (1.3pt);
+  \fill (1.6,1.6) circle (1.3pt);
+  \fill (1.6,1.2) circle (1.3pt);
+  \fill (1.8,1.4) circle (1.3pt);
+  \fill (2,1.2) circle (1.3pt);
+  \fill (2,0.8) circle (1.3pt);
+  \fill (2.2,1.4) circle (1.3pt);
+  \fill (2.4,0.8) circle (1.3pt);
+  \fill (2.4,0.2) circle (1.3pt);
+  \fill (2.6,1) circle (1.3pt);
+  \fill (2.8,0.4) circle (1.3pt);
+\end{tikzpicture}
+&
+\begin{tikzpicture}[line width=0.5pt]
+  \draw[gray!55, line width=0.25pt] (0,0) grid[xstep=0.2cm, ystep=0.2cm] (3,3);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (3.15,0);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (0,3.15);
+  \draw[line width=0.5pt] (0.15,-0.06) -- (0.21,0.06) (0.22,-0.06) -- (0.28,0.06);
+  \draw[line width=0.5pt] (-0.06,0.05) -- (0.06,0.11) (-0.06,0.12) -- (0.06,0.18);
+  \node[font=\tiny, below left=0pt, inner sep=1.5pt] at (0,0) {$0$};
+  \node[font=\tiny, below=1pt, inner sep=1pt] at (0.4,0) {$40$};
+  \node[font=\tiny, below=1pt, inner sep=1pt] at (0.8,0) {$60$};
+  \node[font=\tiny, below=1pt, inner sep=1pt] at (1.2,0) {$80$};
+  \node[font=\tiny, below=1pt, inner sep=1pt] at (1.6,0) {$100$};
+  \node[font=\tiny, below=1pt, inner sep=1pt] at (2,0) {$120$};
+  \node[font=\tiny, below=1pt, inner sep=1pt] at (2.4,0) {$140$};
+  \node[font=\tiny, below=1pt, inner sep=1pt] at (2.8,0) {$160$};
+  \node[font=\tiny, left=1pt, inner sep=1pt] at (0,0.2) {$18$};
+  \node[font=\tiny, left=1pt, inner sep=1pt] at (0,0.6) {$20$};
+  \node[font=\tiny, left=1pt, inner sep=1pt] at (0,1) {$22$};
+  \node[font=\tiny, left=1pt, inner sep=1pt] at (0,1.4) {$24$};
+  \node[font=\tiny, left=1pt, inner sep=1pt] at (0,1.8) {$26$};
+  \node[font=\tiny, left=1pt, inner sep=1pt] at (0,2.2) {$28$};
+  \node[font=\tiny, left=1pt, inner sep=1pt] at (0,2.6) {$30$};
+  \node[font=\tiny, anchor=north east, inner sep=1pt] at (3.15,-0.38) {운동량(분)};
+  \node[font=\tiny, align=center, anchor=north east, inner sep=1pt] at (-0.42,3.15) {체\\질\\량\\지\\수};
+  \fill (0.4,2) circle (1.3pt);
+  \fill (0.4,1.4) circle (1.3pt);
+  \fill (0.4,0.8) circle (1.3pt);
+  \fill (0.6,2.2) circle (1.3pt);
+  \fill (0.6,1.2) circle (1.3pt);
+  \fill (0.8,1.6) circle (1.3pt);
+  \fill (0.8,1.2) circle (1.3pt);
+  \fill (1,1.2) circle (1.3pt);
+  \fill (1.2,1.6) circle (1.3pt);
+  \fill (1.2,0.8) circle (1.3pt);
+  \fill (1.4,1.6) circle (1.3pt);
+  \fill (1.4,1) circle (1.3pt);
+  \fill (1.4,0.6) circle (1.3pt);
+  \fill (1.6,1.2) circle (1.3pt);
+  \fill (1.6,0.8) circle (1.3pt);
+  \fill (1.8,1) circle (1.3pt);
+  \fill (1.8,0.4) circle (1.3pt);
+  \fill (1.8,0.2) circle (1.3pt);
+  \fill (2,0.8) circle (1.3pt);
+  \fill (2.2,0.2) circle (1.3pt);
+\end{tikzpicture} \\[1pt]
+{\small [남학생]} & {\small [여학생]}
+\end{tabular}

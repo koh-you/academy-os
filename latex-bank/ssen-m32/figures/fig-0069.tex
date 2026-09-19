@@ -1,0 +1,21 @@
+% 0069(본책 17쪽) — 좌표평면에 직선 y=mx+n(x축·y축과 만나는 점 A·B), 원점 O 에서 AB 에 내린 수선의 발 H, OH=1. 라벨: x·y·O·A·B·H·1·a·식, 직각 표시 H. 스캔 삽화를 TikZ 로 다시 그림. 절편 값(답의 근거)은 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.5pt]
+  \coordinate (A) at (-1.125,0); \coordinate (B) at (0,1.5); \coordinate (H) at (-0.72,0.54); \coordinate (O) at (0,0);
+  \draw[->, >=stealth, line width=0.7pt] (-1.8,0) -- (0.75,0) node[below, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.55) -- (0,2.1) node[left, font=\small] {$y$};
+  \node[font=\small, below right] at (O) {O};
+  \draw[line width=0.6pt] (-1.5,-0.5) -- (0.35,1.967);
+  \draw (O) -- (H);
+  % 직각 표시(H)
+  \draw[line width=0.4pt] (-0.804,0.428) -- (-0.692,0.344) -- (-0.608,0.456);
+  % OH=1(파선 호)
+  \draw[dashed, line width=0.4pt] (H) to[bend left=35] (O);
+  \node[font=\small] at (-0.28,0.5) {$1$};
+  % 각 a(∠BAO)
+  \draw[line width=0.4pt] (-0.825,0) arc[start angle=0, end angle=53.13, radius=0.3cm];
+  \node[font=\small] at (-0.7,0.17) {$a$};
+  \node[font=\small, below] at (-1.05,-0.03) {A};
+  \node[font=\small, right] at (B) {B};
+  \node[font=\small, above left] at (H) {H};
+  \node[font=\small, below] at (-1.2,-0.4) {$y=mx+n$};
+\end{tikzpicture}

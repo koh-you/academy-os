@@ -1,0 +1,4 @@
+{ "range": "0305~0380", "checked": 76, "ok": 75,
+  "findings": [
+    { "id": "0332", "severity": "yellow", "where": "figure", "note": "원본은 위쪽 접점이 A(4cm 표시 선분의 끝), 아래쪽이 B인데 조판본은 위쪽이 B, 아래쪽이 A로 라벨이 뒤바뀜. PA=PB(접선 길이)라 정답 수치에는 영향 없음.", "fix": "TikZ에서 위쪽 접점 라벨을 A, 아래쪽을 B로 교체" }
+  ] }

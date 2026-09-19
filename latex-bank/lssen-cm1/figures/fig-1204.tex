@@ -1,0 +1,24 @@
+% 1204(본책 167쪽) — 세 도시 A, B, C 를 잇는 도로 그림(A–B 5개, B–C 2개, A–C 2개). 스캔 삽화라 TikZ 로 다시 그림.
+% 라벨은 원문의 A, B, C 만. 도로 개수는 원문 그대로이며 답(경우의 수)은 그림에서 읽히지 않는다.
+\begin{tikzpicture}[x=1cm, y=1cm, line width=0.55pt]
+  \coordinate (A) at (0,0);
+  \coordinate (B) at (1.9,0);
+  \coordinate (C) at (3.8,0);
+  % A–B 5개
+  \draw (A) -- (B);
+  \draw (A) to[bend left=25] (B);
+  \draw (A) to[bend left=50] (B);
+  \draw (A) to[bend right=25] (B);
+  \draw (A) to[bend right=50] (B);
+  % B–C 2개
+  \draw (B) to[bend left=30] (C);
+  \draw (B) to[bend right=30] (C);
+  % A–C 2개(바깥 큰 호)
+  \draw (A) to[bend left=55] (C);
+  \draw (A) to[bend right=55] (C);
+  \foreach \p/\t in {A/A, B/B, C/C} {
+    \fill[fill=white] (\p) circle (0.22);
+    \draw (\p) circle (0.22);
+    \node[font=\small] at (\p) {$\mathrm{\t}$};
+  }
+\end{tikzpicture}

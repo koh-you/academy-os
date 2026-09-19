@@ -1,0 +1,15 @@
+% 1376(본책 188쪽) — 오른쪽 끝점 (3,-4) 에서 시작해 왼쪽 위로 뻗는 무리함수 y=sqrt(ax+b)+c 의 그래프(y절편 -1). 끝점에서 두 축으로 점선. 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 x·y·O·3·-1·-4 만. a·b·c 의 값(답)은 적지 않는다.
+\begin{tikzpicture}[scale=0.5, line width=0.5pt, every node/.style={font=\small}]
+  \draw[->, >=stealth, line width=0.7pt] (-5.2,0) -- (4.6,0) node[below left=-1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-5) -- (0,2.2) node[left=-1pt] {$y$};
+  \node[above left=-2pt] at (0,0) {$\mathrm{O}$};
+  % y = sqrt(9-3x) - 4  (x <= 3)
+  \draw[line width=0.6pt] plot[domain=-5.2:3, samples=90] (\x, {sqrt(9-3*\x)-4});
+  \draw[densely dashed, line width=0.4pt] (3,0) -- (3,-4);
+  \draw[densely dashed, line width=0.4pt] (0,-4) -- (3,-4);
+  \fill (3,-4) circle (1.4pt);
+  \node[above=1pt] at (3,0) {$3$};
+  \node[left=-1pt] at (0,-1) {$-1$};
+  \node[left=-1pt] at (0,-4) {$-4$};
+\end{tikzpicture}

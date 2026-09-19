@@ -1,0 +1,17 @@
+% 0494(본책 91쪽) — □ABCD 와 두 대각선 AC·BD, ∠CAD=42°, ∠ACB=35°, 교점에서 ∠AXB=x(색칠). 다시 그림.
+\begin{tikzpicture}[scale=1.40, line width=0.6pt]
+  \draw (-0.550,0.953) -- (-1.083,-0.191) -- (0.550,-0.953) -- (1.005,0.447) -- cycle;
+  \draw (-0.550,0.953) -- (0.550,-0.953);
+  \draw (-1.083,-0.191) -- (1.005,0.447);
+  \draw[line width=0.4pt] (-0.390,0.675) arc[start angle=-60.000, end angle=-18.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (-0.068,0.562) {$42^\circ$};
+  \draw[line width=0.4pt] (0.390,-0.675) arc[start angle=120.000, end angle=155.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (0.093,-0.534) {$35^\circ$};
+  \fill[green!15] (-0.069,0.119) -- (-0.179,0.310) arc[start angle=120.000, end angle=197.000, radius=0.220] -- cycle;
+  \draw[line width=0.4pt] (-0.179,0.310) arc[start angle=120.000, end angle=197.000, radius=0.220];
+  \node[font=\small, inner sep=0.5pt] at (-0.460,0.273) {$x$};
+  \node[font=\small, inner sep=1.5pt] at (-0.691,1.094) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.105,0.621) {D};
+  \node[font=\small, inner sep=1.5pt] at (-1.225,-0.332) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.650,-1.126) {C};
+\end{tikzpicture}

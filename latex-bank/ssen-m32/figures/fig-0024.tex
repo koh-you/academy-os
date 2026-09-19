@@ -1,0 +1,16 @@
+% 0024(본책 11쪽) — 0°·30°·45°·60°·90° 의 sin·cos·tan 표(빈칸 채우기). 원문에 주어진 세 값(sin 45°=√2/2 · cos 60°=1/2 · tan 30°=√3/3)과 tan 90° 칸의 × 표시만 적는다.
+% 빈칸(답)은 비워 둔다. 표는 tabular 로 옮김.
+{\renewcommand{\arraystretch}{2.1}\small
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\begin{tikzpicture}[baseline=(cur.base)]
+  \node[inner sep=0pt, minimum width=1.55cm, minimum height=0.8cm] (cur) {};
+  \draw[line width=0.4pt] (cur.north west) -- (cur.south east);
+  \node[font=\small, anchor=north east, inner sep=1pt] at (cur.north east) {$A$};
+  \node[font=\small, anchor=south west, inner sep=1pt] at (cur.south west) {삼각비};
+\end{tikzpicture}
+& $0^\circ$ & $30^\circ$ & $45^\circ$ & $60^\circ$ & $90^\circ$ \\ \hline
+$\sin A$ & \hspace{7mm} & \hspace{7mm} & $\dfrac{\sqrt{2}}{2}$ & \hspace{7mm} & \hspace{7mm} \\ \hline
+$\cos A$ & & & & $\dfrac{1}{2}$ & \\ \hline
+$\tan A$ & & $\dfrac{\sqrt{3}}{3}$ & & & \tikz[baseline=-0.5ex]{\draw[line width=0.4pt] (-0.35,-0.3) -- (0.35,0.3) (-0.35,0.3) -- (0.35,-0.3);} \\ \hline
+\end{tabular}}

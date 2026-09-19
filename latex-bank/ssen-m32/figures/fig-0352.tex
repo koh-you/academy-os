@@ -1,0 +1,23 @@
+% 0352(본책 66쪽) — 지름 AB 인 반원 O 에 AD, BC, CD 가 접함, AD=3 cm, BC=8 cm, △DOC 색칠(원문 하늘색). 답(넓이)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \fill[blue!20] (-1.000,0.612) -- (0.000,0.000) -- (1.000,1.633) -- cycle;
+  \draw (-1.000,0.000) arc (180:0:1.000);
+  \draw (-1.000,0.000) -- (1.000,0.000);
+  \draw (-1.000,0.000) -- (-1.000,0.612);
+  \draw (1.000,0.000) -- (1.000,1.633);
+  \draw (-1.000,0.612) -- (1.000,1.633);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw (-1.000,0.612) -- (0.000,0.000);
+  \draw (0.000,0.000) -- (1.000,1.633);
+  \draw[line width=0.4pt] (-0.900,0.000) -- (-0.900,0.100) -- (-1.000,0.100);
+  \draw[line width=0.4pt] (0.900,0.000) -- (0.900,0.100) -- (1.000,0.100);
+  \draw[dashed, line width=0.4pt] (-1.000,0.000) to[bend left=20] (-1.000,0.612);
+  \node[font=\small, inner sep=1.5pt] at (-1.500,0.306) {$3\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (1.000,0.000) to[bend right=20] (1.000,1.633);
+  \node[font=\small, inner sep=1.5pt] at (1.500,0.816) {$8\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-1.020,-0.170) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.020,-0.170) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.000,-0.170) {O};
+  \node[font=\small, inner sep=1.5pt] at (-1.140,0.692) {D};
+  \node[font=\small, inner sep=1.5pt] at (1.020,1.803) {C};
+\end{tikzpicture}

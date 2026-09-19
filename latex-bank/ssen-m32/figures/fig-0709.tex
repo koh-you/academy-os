@@ -1,0 +1,34 @@
+% 0709(본책 126쪽) — 손님 15명의 맛 평점(가로 1~5)·가격 평점(세로 1~5) 산점도. 스캔 산점도를 TikZ 로 다시 그림(점 15개 원문 위치).
+\begin{tikzpicture}[line width=0.5pt]
+  \draw[gray!55, line width=0.25pt] (0,0) grid[xstep=0.38cm, ystep=0.38cm] (2.28,2.28);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (2.43,0);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (0,2.43);
+  \node[font=\scriptsize, below left=0pt, inner sep=1.5pt] at (0,0) {$0$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (0.38,0) {$1$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (0.76,0) {$2$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (1.14,0) {$3$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (1.52,0) {$4$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (1.9,0) {$5$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,0.38) {$1$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,0.76) {$2$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,1.14) {$3$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,1.52) {$4$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,1.9) {$5$};
+  \node[font=\scriptsize, anchor=north east, inner sep=1pt] at (2.43,-0.38) {맛(점)};
+  \node[font=\scriptsize, align=center, anchor=north east, inner sep=1pt] at (-0.27,2.43) {가\\격\\(점)};
+  \fill (0.38,1.14) circle (1.5pt);
+  \fill (0.38,0.76) circle (1.5pt);
+  \fill (0.76,1.52) circle (1.5pt);
+  \fill (0.76,0.76) circle (1.5pt);
+  \fill (0.76,0.38) circle (1.5pt);
+  \fill (1.14,1.9) circle (1.5pt);
+  \fill (1.14,1.52) circle (1.5pt);
+  \fill (1.14,1.14) circle (1.5pt);
+  \fill (1.14,0.76) circle (1.5pt);
+  \fill (1.52,1.14) circle (1.5pt);
+  \fill (1.52,0.76) circle (1.5pt);
+  \fill (1.9,1.9) circle (1.5pt);
+  \fill (1.9,1.52) circle (1.5pt);
+  \fill (1.9,1.14) circle (1.5pt);
+  \fill (1.9,0.76) circle (1.5pt);
+\end{tikzpicture}

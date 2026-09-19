@@ -1,0 +1,16 @@
+% 0502(본책 91쪽) — □ABCD 와 대각선 BD, ∠ADB=39°, ∠DBC=31°, ∠C=x(색칠). 다시 그림.
+\begin{tikzpicture}[scale=1.40, line width=0.6pt]
+  \draw (0.722,1.359) -- (0.000,0.000) -- (2.400,0.000) -- (1.970,1.184) -- cycle;
+  \draw (0.000,0.000) -- (1.970,1.184);
+  \draw[line width=0.4pt] (1.653,1.228) arc[start angle=172.018, end angle=211.007, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (1.362,1.060) {$39^\circ$};
+  \draw[line width=0.4pt] (0.320,0.000) arc[start angle=0.000, end angle=31.007, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (0.636,0.176) {$31^\circ$};
+  \fill[green!15] (2.400,0.000) -- (2.291,0.301) arc[start angle=109.960, end angle=180.000, radius=0.320] -- cycle;
+  \draw[line width=0.4pt] (2.291,0.301) arc[start angle=109.960, end angle=180.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (1.991,0.287) {$x$};
+  \node[font=\small, inner sep=1.5pt] at (0.581,1.500) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.115,-0.164) {B};
+  \node[font=\small, inner sep=1.5pt] at (2.500,-0.173) {C};
+  \node[font=\small, inner sep=1.5pt] at (2.070,1.357) {D};
+\end{tikzpicture}

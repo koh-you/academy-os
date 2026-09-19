@@ -1,0 +1,21 @@
+% 0288(본책 55쪽) — 원 O 에 외접하는 □ABCD, AD=3 cm, AB=7 cm, DC=11 cm, BC 위의 접점을 기준으로 B 쪽 x cm, C 쪽 10 cm. 답(x)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (-0.505,0.658) -- (-1.000,-0.700) -- (1.345,-0.700) -- (0.342,0.733) -- cycle;
+  \draw (0.000,0.000) circle (0.700);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (-0.505,0.658) to[bend left=25] (0.342,0.733);
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.082,0.916) {$3\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (-0.505,0.658) to[bend right=22] (-1.000,-0.700);
+  \node[font=\small, fill=white, inner sep=1pt] at (-1.092,-0.021) {$7\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.342,0.733) to[bend left=20] (1.345,-0.700);
+  \node[font=\small, fill=white, inner sep=1pt] at (1.203,0.116) {$11\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (-1.000,-0.700) to[bend right=22] (-0.000,-0.700);
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.500,-0.960) {$x\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (-0.000,-0.700) to[bend right=22] (1.345,-0.700);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.672,-0.960) {$10\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.000,-0.200) {O};
+  \node[font=\small, inner sep=1.5pt] at (-0.645,0.778) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.150,-0.800) {B};
+  \node[font=\small, inner sep=1.5pt] at (1.505,-0.800) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.462,0.873) {D};
+\end{tikzpicture}

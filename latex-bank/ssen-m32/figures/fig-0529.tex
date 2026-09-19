@@ -1,0 +1,24 @@
+% 0529(본책 95쪽) — 원 O, P 에서 두 직선 PDA·PCB, AB(6cm 파선 호)·CD·OA·OD, 부채꼴 AOD(색칠) ∠AOD=160°, ∠DCP=70°. 원문 축척이 대략적이라 P 를 가깝게 둠. 다시 그림.
+\begin{tikzpicture}[scale=1.03, line width=0.6pt]
+  \fill[yellow!40] (0.000,0.000) -- (0.953,-0.550) arc[start angle=-30, end angle=165, radius=1.100] -- cycle;
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.063,0.285) -- (2.451,-1.171);
+  \draw (-0.631,-0.901) -- (2.451,-1.171);
+  \draw (-1.063,0.285) -- (-0.631,-0.901);
+  \draw (0.465,-0.997) -- (0.953,-0.550);
+  \draw (0.000,0.000) -- (-1.063,0.285);
+  \draw (0.000,0.000) -- (0.953,-0.550);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.193,0.052) arc[start angle=165.000, end angle=330.000, radius=0.200];
+  \node[font=\small, inner sep=0.5pt] at (-0.087,0.492) {$160^\circ$};
+  \draw[line width=0.4pt] (0.784,-1.025) arc[start angle=-5.000, end angle=42.500, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (1.033,-0.804) {$70^\circ$};
+  \draw[dashed, line width=0.35pt] (-1.063,0.285) to[bend left=25] (-0.631,-0.901);
+  \node[font=\small, inner sep=0.5pt] at (-1.120,-0.450) {$6\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-1.250,0.353) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.731,-1.074) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.465,-1.197) {C};
+  \node[font=\small, inner sep=1.5pt] at (1.126,-0.450) {D};
+  \node[font=\small, inner sep=1.5pt] at (0.100,-0.173) {O};
+  \node[font=\small, inner sep=1.5pt] at (2.701,-1.171) {P};
+\end{tikzpicture}

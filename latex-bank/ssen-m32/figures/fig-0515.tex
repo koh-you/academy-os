@@ -1,0 +1,24 @@
+% 0515(본책 93쪽) — △ABC, M 은 BC 의 중점, E·D 는 C·B 에서 내린 수선의 발(직각 표시), ME·MD, ∠A=65°, ∠EMD(색칠), BM=MC 표시. 다시 그림.
+\begin{tikzpicture}[scale=1.27, line width=0.6pt]
+  \draw (0.000,2.200) -- (-1.400,0.000) -- (1.400,0.000) -- cycle;
+  \draw (1.400,0.000) -- (-0.593,1.268);
+  \draw (-1.400,0.000) -- (0.593,1.268);
+  \draw (0.000,0.000) -- (-0.593,1.268);
+  \draw (0.000,0.000) -- (0.593,1.268);
+  \draw[line width=0.4pt] (-0.523,1.378) -- (-0.413,1.308) -- (-0.483,1.198);
+  \draw[line width=0.4pt] (0.523,1.378) -- (0.413,1.308) -- (0.483,1.198);
+  \draw[line width=0.4pt] (-0.172,1.930) arc[start angle=-122.471, end angle=-57.529, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (0.000,1.600) {$65^\circ$};
+  \fill[green!15] (0.000,0.000) -- (0.119,0.254) arc[start angle=64.942, end angle=115.058, radius=0.280] -- cycle;
+  \draw[line width=0.4pt] (0.119,0.254) arc[start angle=64.942, end angle=115.058, radius=0.280];
+  \draw[line width=0.4pt] (-0.735,0.070) -- (-0.735,-0.070);
+  \draw[line width=0.4pt] (-0.665,0.070) -- (-0.665,-0.070);
+  \draw[line width=0.4pt] (0.665,0.070) -- (0.665,-0.070);
+  \draw[line width=0.4pt] (0.735,0.070) -- (0.735,-0.070);
+  \node[font=\small, inner sep=1.5pt] at (0.000,2.400) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.588,-0.068) {B};
+  \node[font=\small, inner sep=1.5pt] at (1.588,-0.068) {C};
+  \node[font=\small, inner sep=1.5pt] at (-0.000,-0.200) {M};
+  \node[font=\small, inner sep=1.5pt] at (-0.781,1.337) {E};
+  \node[font=\small, inner sep=1.5pt] at (0.781,1.337) {D};
+\end{tikzpicture}

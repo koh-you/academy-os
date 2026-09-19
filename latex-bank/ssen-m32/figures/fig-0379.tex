@@ -1,0 +1,21 @@
+% 0379(본책 71쪽) — 중심 O 가 같은 두 원(반지름 6 cm, 4 cm), 지름 AB ⊥ 현 CD(교점 E), 큰 원의 현 AD 가 작은 원과 F 에서 접함. 답(CD)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,0.000) circle (1.200);
+  \draw (0.000,0.000) circle (0.800);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw (-1.200,0.000) -- (1.200,0.000);
+  \draw (0.133,1.193) -- (0.133,-1.193);
+  \draw (-1.200,0.000) -- (0.133,-1.193);
+  \draw[line width=0.4pt] (0.233,0.000) -- (0.233,0.100) -- (0.133,0.100);
+  \draw[dashed, line width=0.4pt] (0.000,0.000) -- (1.128,0.410);
+  \node[font=\small, inner sep=1.5pt] at (1.548,0.530) {$6\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.000,0.000) -- (0.725,-0.338);
+  \node[font=\small, inner sep=1.5pt] at (1.475,-0.538) {$4\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-1.360,0.000) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.360,0.000) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.133,1.353) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.133,-1.353) {D};
+  \node[font=\small, inner sep=1.5pt] at (-0.646,-0.709) {F};
+  \node[font=\small, inner sep=1.5pt] at (-0.067,0.170) {E};
+  \node[font=\small, inner sep=1.5pt] at (0.050,-0.200) {O};
+\end{tikzpicture}

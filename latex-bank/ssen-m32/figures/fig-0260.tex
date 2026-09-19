@@ -1,0 +1,17 @@
+% 0260(본책 50쪽) — □ABCD, 두 대각선의 교점 O(∠COD=120°, OC=OD=6). 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)·AO·BD 는 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (O) at (0,0); \coordinate (D) at (0.24,0.42); \coordinate (C) at (0.24,-0.42); \coordinate (A) at (-0.48,0.83); \coordinate (B) at (-0.88,-1.52);
+  \fill[green!20] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (A) -- (C);
+  \draw (B) -- (D);
+  \draw[line width=0.4pt] ($(O)+(60:0.16)$) arc[start angle=60, end angle=-60, radius=0.16];
+  \node[font=\small] at (0.6,0.05) {$120^\circ$};
+  \node[font=\small] at (0.02,0.28) {$6$};
+  \node[font=\small] at (0.02,-0.28) {$6$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, below] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, right] at (D) {D};
+  \node[font=\small, left] at (O) {O};
+\end{tikzpicture}

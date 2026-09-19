@@ -1,0 +1,19 @@
+% 0452(본책 82쪽) — 반원 O(지름 AB, 반지름 6 cm), 원 위의 점 C, C 에서 AB 에 내린 수선의 발 D, ∠CAB=60°. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (1.100,0.000) arc (0.0:180.0:1.100);
+  \draw (-1.100,0.000) -- (1.100,0.000);
+  \draw (-1.100,0.000) -- (-0.550,0.953);
+  \draw (-0.550,0.953) -- (1.100,0.000);
+  \draw (-0.550,0.953) -- (-0.550,0.000);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.410,0.000) -- (-0.410,0.140) -- (-0.550,0.140);
+  \draw[line width=0.4pt] (-0.800,0.000) arc (-0.0:60.0:0.300);
+  \node[font=\small, inner sep=0.5pt] at (-0.667,0.250) {$60^\circ$};
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend right=15] (1.100,0.000);
+  \node[font=\small, inner sep=0.5pt] at (0.550,-0.180) {$6\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1pt] at (-1.300,0.000) {A};
+  \node[font=\small, inner sep=1pt] at (1.300,0.000) {B};
+  \node[font=\small, inner sep=1pt] at (-0.585,1.150) {C};
+  \node[font=\small, inner sep=1pt] at (-0.550,-0.200) {D};
+  \node[font=\small, inner sep=1pt] at (0.000,0.180) {O};
+\end{tikzpicture}

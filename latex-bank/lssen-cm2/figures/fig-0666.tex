@@ -1,0 +1,12 @@
+% 0666(본책 96쪽) — 전체집합 U 안의 두 집합 A·B 벤 다이어그램, B 에서 A 를 뺀 부분(B−A)을 색칠. 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 U·A·B 만. 색칠 부분의 집합(답)은 적지 않는다.
+\begin{tikzpicture}[scale=0.8, line width=0.5pt, every node/.style={font=\small}]
+  \fill[green!12] (0.55,0) circle (1.05);
+  \fill[white] (-0.55,0) circle (1.05);
+  \draw[line width=0.6pt, rounded corners=3pt] (-2.2,-1.5) rectangle (2.2,1.5);
+  \node[fill=white, inner sep=1.5pt] at (-1.75,1.5) {$U$};
+  \draw[line width=0.6pt] (-0.55,0) circle (1.05);
+  \draw[line width=0.6pt] (0.55,0) circle (1.05);
+  \node at (-0.75,1.25) {$A$};
+  \node at (0.75,1.25) {$B$};
+\end{tikzpicture}

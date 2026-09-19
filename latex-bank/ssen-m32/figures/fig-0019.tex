@@ -1,0 +1,22 @@
+% 0019~0023 공통 그림(본책 11쪽) — 원점 O 중심 · 반지름 1 인 사분원과 35° 직각삼각형(높이 0.5736 · 밑변 0.8192 · tan 쪽 높이 0.7002). 스캔 삽화를 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(y · x · O · 1 · 0.7002 · 0.5736 · 0.8192 · 35° · 직각 표시 2곳). 원문에 찍힌 좌표 눈금 외의 값은 적지 않는다.
+\begin{tikzpicture}[scale=3.0, line width=0.5pt]
+  \draw[->, line width=0.7pt] (-0.12,0) -- (1.22,0) node[font=\small, below] {$x$};
+  \draw[->, line width=0.7pt] (0,-0.12) -- (0,1.2) node[font=\small, left] {$y$};
+  \draw[line width=0.55pt] (1,0) arc (0:90:1);
+  \draw[line width=0.7pt] (0,0) -- (1,0.7002);
+  \draw[line width=0.6pt] (0.8192,0) -- (0.8192,0.5736);
+  \draw[line width=0.6pt] (1,0) -- (1,0.7002);
+  \draw[dashed, line width=0.35pt] (0,0.5736) -- (0.8192,0.5736);
+  \draw[dashed, line width=0.35pt] (0,0.7002) -- (1,0.7002);
+  \draw[line width=0.35pt] (0.8192,0.05) -- (0.8692,0.05) -- (0.8692,0);
+  \draw[line width=0.35pt] (1,0.05) -- (1.05,0.05) -- (1.05,0);
+  \draw[line width=0.4pt] (0.2,0) arc (0:35:0.2);
+  \node[font=\small] at (0.3,0.075) {$35^\circ$};
+  \node[font=\small, below left] at (0,0) {O};
+  \node[font=\small, left] at (0,1) {$1$};
+  \node[font=\small, left] at (0,0.7002) {$0.7002$};
+  \node[font=\small, left] at (0,0.5736) {$0.5736$};
+  \node[font=\small, below] at (0.72,-0.005) {$0.8192$};
+  \node[font=\small, below] at (1.04,-0.005) {$1$};
+\end{tikzpicture}

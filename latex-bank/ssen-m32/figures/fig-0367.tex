@@ -1,0 +1,20 @@
+% 0367(본책 69쪽) — 반지름 6 cm 인 원 O 에 외접하는 □ABCD(∠B=90°, 접점 E, F, G, H), BC=15 cm, CD=14 cm. 답(DH)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,1.734) -- (0.000,0.000) -- (2.400,0.000) -- (1.538,2.068) -- cycle;
+  \draw (0.960,0.960) circle (0.960);
+  \fill (0.960,0.960) circle (1.2pt);
+  \draw[line width=0.4pt] (0.130,0.000) -- (0.130,0.130) -- (0.000,0.130);
+  \draw[dashed, line width=0.4pt] (2.400,0.000) to[bend right=25] (1.538,2.068);
+  \node[font=\small, inner sep=1.5pt] at (2.569,1.284) {$14\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend right=15] (2.400,0.000);
+  \node[font=\small, inner sep=1.5pt] at (1.200,-0.300) {$15\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-0.170,1.734) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.120,-0.120) {B};
+  \node[font=\small, inner sep=1.5pt] at (2.560,-0.058) {C};
+  \node[font=\small, inner sep=1.5pt] at (1.659,2.188) {D};
+  \node[font=\small, inner sep=1.5pt] at (-0.150,0.960) {E};
+  \node[font=\small, inner sep=1.5pt] at (0.960,-0.160) {F};
+  \node[font=\small, inner sep=1.5pt] at (1.976,1.404) {G};
+  \node[font=\small, inner sep=1.5pt] at (0.757,2.058) {H};
+  \node[font=\small, inner sep=1.5pt] at (0.960,1.160) {O};
+\end{tikzpicture}

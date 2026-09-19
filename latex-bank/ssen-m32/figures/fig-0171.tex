@@ -1,0 +1,13 @@
+% 0171(본책 36쪽) — 직각삼각형 ABC(∠C=90°, ∠B=42°), BC=2. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (2.6,0); \coordinate (A) at (2.6,2.34);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] (2.38,0) -- (2.38,0.22) -- (2.6,0.22);
+  \draw[line width=0.4pt] (0.5,0) arc[start angle=0, end angle=42, radius=0.5];
+  \node[font=\small] at (0.95,0.27) {$42^\circ$};
+  \draw[dashed, line width=0.4pt] (B) to[bend right=20] (C);
+  \node[font=\small] at (1.3,-0.45) {$2$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+\end{tikzpicture}

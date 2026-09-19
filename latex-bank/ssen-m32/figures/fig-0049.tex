@@ -1,0 +1,20 @@
+% 유형 02 0049(본책 13쪽) — 직각삼각형 ABC(∠C=90°), BC 위의 점 D, AB=17 · AD=10, ∠ADC=x · ∠ABC=y. 스캔 삽화를 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(17 · 10 · x · y · 꼭짓점 A~D · 직각 표시). AC · BC · CD 의 길이(답의 근거)는 적지 않는다.
+\begin{tikzpicture}[scale=0.3, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (D) at (9,0); \coordinate (C) at (15,0); \coordinate (A) at (15,8);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.5pt] (A) -- (D);
+  \draw[line width=0.4pt] (14.1,0) -- (14.1,0.9) -- (15,0.9);
+  \draw[line width=0.4pt] (1.8,0) arc (0:28.07:1.8);
+  \draw[line width=0.4pt] (10.6,0) arc (0:53.13:1.6);
+  \draw[dashed, line width=0.3pt] (B) to[bend left=18] (A);
+  \draw[dashed, line width=0.3pt] (D) to[bend left=18] (A);
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, below] at (D) {D};
+  \node[font=\small] at (6.2,4.6) {$17$};
+  \node[font=\small] at (11.0,4.6) {$10$};
+  \node[font=\small] at (2.9,0.7) {$y$};
+  \node[font=\small] at (11.4,1.0) {$x$};
+\end{tikzpicture}

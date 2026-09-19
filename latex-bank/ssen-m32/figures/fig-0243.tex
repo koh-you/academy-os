@@ -1,0 +1,18 @@
+% 0243(본책 48쪽) — 직선 AB 를 회전축으로 하는 삼각형 ABC(∠A=45°, ∠B=60°, AC=3√2), 회전축은 위아래로 연장·위쪽에 회전 화살표. 스캔 삽화를 TikZ 로 다시 그림. 답(부피)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt, >=stealth]
+  \coordinate (A) at (0,2.16); \coordinate (B) at (0,0); \coordinate (C) at (1.37,0.79);
+  \fill[red!20] (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.5pt] (0,-0.35) -- (0,2.6);
+  \draw (A) -- (B) -- (C) -- cycle;
+  % 회전 화살표
+  \draw[line width=0.4pt, ->] (0.14,2.5) arc[start angle=0, end angle=300, x radius=0.14, y radius=0.06];
+  \draw[line width=0.4pt] (0,1.78) arc[start angle=270, end angle=315, radius=0.38];
+  \node[font=\small] at (0.28,1.5) {$45^\circ$};
+  \draw[line width=0.4pt] (0,0.38) arc[start angle=90, end angle=30, radius=0.38];
+  \node[font=\small] at (0.36,0.58) {$60^\circ$};
+  \draw[dashed, line width=0.4pt] (A) to[bend left=25] (C);
+  \node[font=\small] at (1.1,1.8) {$3\sqrt{2}$};
+  \node[font=\small, left] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+\end{tikzpicture}

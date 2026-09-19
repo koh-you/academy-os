@@ -1,0 +1,19 @@
+% 0059(본책 15쪽) — ∠ACB=90° 직각삼각형 ABC(B 왼쪽·C 오른쪽 아래·A 오른쪽 위), CD⊥AB. 라벨: A·B·C·D, 6(AC) 파선 호, 각 x(∠BCD), 직각 표시 C·D. 스캔 삽화를 TikZ 로 다시 그림. 답(AB)은 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (3.5,0); \coordinate (A) at (3.5,2.2); \coordinate (D) at (2.51,1.577);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (C) -- (D);
+  % 직각 표시
+  \draw[line width=0.4pt] (3.34,0) -- (3.34,0.16) -- (3.5,0.16);
+  \draw[line width=0.4pt] (2.595,1.4415) -- (2.4595,1.3565) -- (2.3745,1.492);
+  % 각 x(∠BCD)
+  \draw[line width=0.4pt] (3.2875,0.339) arc[start angle=122.1, end angle=180, radius=0.4cm];
+  \node[font=\small] at (2.93,0.28) {$x$};
+  % 길이(파선 호)
+  \draw[dashed, line width=0.4pt] (A) to[bend left=30] (C);
+  \node[font=\small] at (3.82,1.1) {$6$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, above left] at (D) {D};
+\end{tikzpicture}

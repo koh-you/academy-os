@@ -1,0 +1,18 @@
+% 0169(본책 35쪽) — □ABCD(대각선 AC=11cm, BD=12cm, 대각선이 이루는 각 60°) 색칠. 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (0.3,1.7); \coordinate (B) at (0,0); \coordinate (C) at (3.3,0.05); \coordinate (D) at (2.75,1.55);
+  \fill[gray!20] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[line width=0.5pt] (A) -- (C); \draw[line width=0.5pt] (B) -- (D);
+  \coordinate (X) at (intersection of A--C and B--D);
+  \draw[line width=0.4pt] ($(X)!0.35cm!(A)$) arc[start angle=151.2, end angle=210.6, radius=0.35];
+  \node[font=\small] at (0.95,0.85) {$60^\circ$};
+  \draw[dashed, line width=0.4pt] (A) to[bend left=15] (C);
+  \draw[dashed, line width=0.4pt] (B) to[bend right=15] (D);
+  \node[font=\small] at (1.7,1.35) {$12\,\mathrm{cm}$};
+  \node[font=\small] at (1.75,0.4) {$11\,\mathrm{cm}$};
+  \node[font=\small, above left] at (A) {A};
+  \node[font=\small, below left] at (B) {B};
+  \node[font=\small, below right] at (C) {C};
+  \node[font=\small, above right] at (D) {D};
+\end{tikzpicture}

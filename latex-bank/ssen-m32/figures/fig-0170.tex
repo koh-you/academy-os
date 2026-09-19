@@ -1,0 +1,19 @@
+% 0170(본책 35쪽 · 배치 목록 빈틈, 쪽 이미지에서 전사) — □ABCD(두 대각선 모두 8cm, 대각선이 이루는 각 150°) 색칠. 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (0.45,0.95); \coordinate (B) at (0,0); \coordinate (C) at (3.6,0); \coordinate (D) at (3.15,0.95);
+  \fill[gray!20] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[line width=0.5pt] (A) -- (C); \draw[line width=0.5pt] (B) -- (D);
+  \coordinate (X) at (intersection of A--C and B--D);
+  \draw[line width=0.4pt] ($(X)!0.3cm!(A)$) arc[start angle=164.4, end angle=15.6, radius=0.3];
+  \node[font=\small] at (1.8,1.35) {$150^\circ$};
+  \draw[line width=0.3pt] (1.8,1.2) -- ($(X)+(0,0.4)$);
+  \draw[dashed, line width=0.4pt] (A) to[bend right=15] (C);
+  \draw[dashed, line width=0.4pt] (B) to[bend right=15] (D);
+  \node[font=\small] at (0.95,-0.4) {$8\,\mathrm{cm}$};
+  \node[font=\small] at (2.65,-0.4) {$8\,\mathrm{cm}$};
+  \node[font=\small, above left] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, above right] at (D) {D};
+\end{tikzpicture}

@@ -1,0 +1,21 @@
+% 1115(본책 155쪽) — 0≤x≤2 에서 정의된 함수 y=f(x) 의 그래프: 0≤x<1 에서 y=1(왼쪽 닫힌점·오른쪽 열린점), x=1 에서 y=2(닫힌점), 1<x≤2 에서 y=0(왼쪽 열린점·오른쪽 닫힌점). 점선 (0,2)-(1,2), (1,0)-(1,2). 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 x·y·O·1·2·y=f(x) 만. 함숫값(답)은 적지 않는다.
+\begin{tikzpicture}[scale=0.85, line width=0.5pt, every node/.style={font=\small}]
+  \draw[->, >=stealth, line width=0.7pt] (-0.4,0) -- (2.9,0) node[below left=-1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.4) -- (0,2.8) node[left=-1pt] {$y$};
+  \node[below left=-2pt] at (0,0) {$\mathrm{O}$};
+  \node[below=-1pt] at (1,0) {$1$};
+  \node[below=-1pt] at (2,0) {$2$};
+  \node[left=-1pt] at (0,1) {$1$};
+  \node[left=-1pt] at (0,2) {$2$};
+  \draw[densely dashed, line width=0.4pt] (0,2) -- (1,2);
+  \draw[densely dashed, line width=0.4pt] (1,0) -- (1,2);
+  \draw[line width=0.6pt] (0,1) -- (1,1);
+  \draw[line width=0.6pt] (1,0) -- (2,0);
+  \fill (0,1) circle (1.6pt);
+  \fill[white] (1,1) circle (1.6pt); \draw (1,1) circle (1.6pt);
+  \fill (1,2) circle (1.6pt);
+  \fill[white] (1,0) circle (1.6pt); \draw (1,0) circle (1.6pt);
+  \fill (2,0) circle (1.6pt);
+  \node[above right=-2pt] at (0.55,2.05) {$y=f(x)$};
+\end{tikzpicture}

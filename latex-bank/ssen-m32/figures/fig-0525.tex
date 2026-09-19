@@ -1,0 +1,22 @@
+% 0525(본책 94쪽) — 원 O 에 내접하는 □ABCD·□BCDE, BE·BD, CB 의 연장선, ∠ADE=30°, ∠EBC=80°, B 의 외각 x(색칠). 다시 그림.
+\begin{tikzpicture}[scale=1.40, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.083,0.191) -- (-0.707,-0.843) -- (0.707,-0.843) -- (0.707,0.843) -- (-0.376,1.034) -- cycle;
+  \draw (-0.707,-0.843) -- (-0.376,1.034);
+  \draw (-0.707,-0.843) -- (0.707,0.843);
+  \draw (-0.707,-0.843) -- (-1.207,-0.843);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (0.392,0.898) arc[start angle=170.000, end angle=200.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (0.089,0.789) {$30^\circ$};
+  \draw[line width=0.4pt] (-0.387,-0.843) arc[start angle=-0.000, end angle=80.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (-0.247,-0.457) {$80^\circ$};
+  \fill[green!15] (-0.707,-0.843) -- (-0.789,-0.617) arc[start angle=110.000, end angle=180.000, radius=0.240] -- cycle;
+  \draw[line width=0.4pt] (-0.789,-0.617) arc[start angle=110.000, end angle=180.000, radius=0.240];
+  \node[font=\small, inner sep=0.5pt] at (-1.067,-0.590) {$x$};
+  \node[font=\small, inner sep=1.5pt] at (-1.280,0.226) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.775,-1.031) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.836,-0.996) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.836,0.996) {D};
+  \node[font=\small, inner sep=1.5pt] at (-0.445,1.222) {E};
+  \node[font=\small, inner sep=1.5pt] at (-0.000,-0.200) {O};
+\end{tikzpicture}
