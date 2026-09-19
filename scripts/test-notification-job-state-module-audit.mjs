@@ -102,7 +102,9 @@ for (const helperName of [
   );
 }
 assert.equal((helperSource.match(/export function /g) ?? []).length, 5);
-assert.equal(appSource.split("setNotificationJobs(").length - 1, 11);
+// 12번째는 2026-09-19 자료 정체성(계정·보는 선생님) 변경 시 목록을 비우는 호출이다 —
+// 새로고침이 합치기만 해서 이전 테넌트 예약이 남는 것을 막는다(session-identity.spec.js).
+assert.equal(appSource.split("setNotificationJobs(").length - 1, 12);
 assert.equal(
   appSource.split("setNotificationJobs(nextJobs)").length - 1,
   1
