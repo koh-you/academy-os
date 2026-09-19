@@ -65,6 +65,19 @@ assert.ok(
   kioskApp.includes("lessonRecordCollections.js"),
   "수업·기록 목록 헬퍼는 공용 모듈(lessonRecordCollections.js)에서 가져와야 한다"
 );
+// 2026-09-19 까지 App.jsx 가 같은 6개 헬퍼의 바이트 동일 사본을 들고 있었다(PR #286 이 꺼내면서
+// "App.jsx 도 여기서 가져다 쓴다"고 적었지만 실제로는 남아 있었다). 교사 화면도 같은 모듈을 써야 한다.
+const teacherApp = await readFile(join(repoRoot, "src", "app", "App.jsx"), "utf8");
+assert.ok(
+  teacherApp.includes('from "../domains/lessons/lessonRecordCollections.js"'),
+  "App.jsx 도 수업·기록 목록 헬퍼를 lessonRecordCollections.js 에서 가져와야 한다"
+);
+for (const helper of ["isActiveLesson", "activeLessonIdSet", "filterActiveLessons", "filterRecordsForLessons", "upsertById", "upsertLessonStudentRecord"]) {
+  assert.ok(
+    !teacherApp.includes(`function ${helper}(`),
+    `App.jsx 에 ${helper} 사본이 다시 생겼습니다 — lessonRecordCollections.js 를 import 하세요`
+  );
+}
 
 // attendanceApi 의 원본 checkAttendanceRequest / previewAttendanceRequest 는
 // { payload, request } 를 받는다. 컨트롤러는 payload 하나만 넘기므로, 원본을 그대로
