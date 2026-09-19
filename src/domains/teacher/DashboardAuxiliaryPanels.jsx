@@ -10,8 +10,7 @@ import {
   SpecialLectureNoticeMemoField,
   SpecialLectureScheduleCalculator,
   SpecialLectureSessionPlanEditor,
-  SpecialLectureSpecialNotesField,
-  SpecialLectureManagementBar
+  SpecialLectureSpecialNotesField
 } from "../specialLectures/SpecialLectureManagementPanel.jsx";
 import {
   SpecialLectureNoticeActionPanel,
@@ -39,6 +38,7 @@ import {
   getSpecialLectureTotalHours,
   getSpecialLectureWeekdayCounts,
   getWeekdayLabel,
+  isSpecialLectureArchived,
   isSpecialLecturePrimaryGuide,
   normalizeSpecialLectureGuide,
   normalizeSpecialLectureGuides,
@@ -50,12 +50,16 @@ import {
   replaceSpecialLectureYearToken
 } from "../specialLectures/specialLectureGuideUtils.js";
 import { copyTextToClipboard } from "../exams/outputPreview.js";
+import { AsyncOperationStatus } from "../../shared/components/AsyncOperationStatus.jsx";
+import { ConfirmDialog } from "../../shared/components/ConfirmDialog.jsx";
 import { Disclosure, DisclosureChevron } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { OverflowMenu } from "../../shared/components/OverflowMenu.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
+import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
+import "../specialLectures/specialLectureGuideWorkspace.css";
 import {
   academyReminderPriorityOptions,
   academyReminderStatusLabels,
@@ -86,12 +90,16 @@ export function SpecialLectureNoticePanel({
   students = []
 }) {
   const normalizedGuides = useMemo(() => normalizeSpecialLectureGuides(guides), [guides]);
-  const [copyMessage, setCopyMessage] = useState("");
+  const [copyFeedback, setCopyFeedbackState] = useState({ message: "", state: "idle" });
   const [draftGuides, setDraftGuides] = useState(normalizedGuides);
-  const [panelMessage, setPanelMessage] = useState("");
+  // 2026-09-19 · U12(ops-08/15): 안내문 작업 결과는 {message, state} 로 들고 AsyncOperationStatus 가 그린다.
+  // 문자열에 '실패' 가 들었는지로 색을 정하지 않고, 메시지를 만든 자리에서 state 를 함께 정한다.
+  const [panelFeedback, setPanelFeedbackState] = useState({ message: "", state: "idle" });
   const [selectedGuideId, setSelectedGuideId] = useState(getDefaultSpecialLectureGuideId(normalizedGuides));
   const [showStoredGuides, setShowStoredGuides] = useState(false);
   const [managementGuideId, setManagementGuideId] = useState("");
+  // 2026-09-19 · U12(ops-10): ⋯ 메뉴에서 고른 보관/보관 해제/삭제는 ConfirmDialog 를 거친다. { type, guideTitle } | null.
+  const [pendingGuideAction, setPendingGuideAction] = useState(null);
   const [activeGuideEditorTab, setActiveGuideEditorTab] = useState("content");
   const [manualIntakeRequest, setManualIntakeRequest] = useState(0);
   const primaryGuides = draftGuides.filter(isSpecialLecturePrimaryGuide);
@@ -101,6 +109,14 @@ export function SpecialLectureNoticePanel({
   const isSelectedGuideSaved = Boolean(
     selectedGuide && savedSelectedGuide && JSON.stringify(selectedGuide) === JSON.stringify(savedSelectedGuide)
   );
+  // 2026-09-19 · U12(ops-09): 헤더 상태와 하단 저장 바가 같은 값을 쓴다. 저장 중이 아니고 초안이 저장본과 다르면 '변경됨'.
+  const guideSaveState = saveState === "saving" ? "saving" : selectedGuide && !isSelectedGuideSaved ? "dirty" : saveState;
+  // 2026-09-19 · U12(ops-10): 보관/삭제는 초안 배열 전체를 저장하므로, 다른 안내문의 저장하지 않은 변경 수를 확인 대화상자에 보여 준다.
+  const unsavedOtherGuideCount = draftGuides.filter((guide) => {
+    if (guide.specialLectureGuideId === selectedGuideId) return false;
+    const savedGuide = normalizedGuides.find((item) => item.specialLectureGuideId === guide.specialLectureGuideId);
+    return !savedGuide || JSON.stringify(guide) !== JSON.stringify(savedGuide);
+  }).length;
   const selectedGuideUrl = selectedGuide ? getSpecialLecturePublicUrl(selectedGuide) : "";
   const noticeText = selectedGuide
     ? buildSpecialLectureNoticeText(selectedGuide, selectedGuideUrl, { notificationTemplates })
@@ -121,7 +137,6 @@ export function SpecialLectureNoticePanel({
   const calculatedWeekdaySummaryText = calculatedWeekdayCounts.length
     ? calculatedWeekdayCounts.map((item) => `${item.label} ${item.count}회`).join(" · ")
     : "기간과 요일을 선택하면 표시됩니다.";
-  const isManagingSelectedGuide = Boolean(selectedGuide && managementGuideId === selectedGuide.specialLectureGuideId);
   const selectedGuideHighlights = selectedGuide
     ? (Array.isArray(selectedGuide.highlights) && selectedGuide.highlights.length ? selectedGuide.highlights : [""])
     : [];
@@ -139,19 +154,29 @@ export function SpecialLectureNoticePanel({
   }, [normalizedGuides]);
 
   useEffect(() => {
-    setCopyMessage("");
+    // 이미 비어 있으면 같은 객체를 돌려줘 불필요한 재렌더를 만들지 않는다(입력마다 draftGuides 가 바뀐다).
+    setCopyFeedbackState((current) => (current.message ? { message: "", state: "idle" } : current));
   }, [draftGuides, selectedGuideId]);
 
   useEffect(() => {
     if (selectedGuide && !isSpecialLecturePrimaryGuide(selectedGuide)) setShowStoredGuides(true);
   }, [selectedGuide]);
 
+  // state: AsyncOperationStatus 의 idle/loading/success/partial/error. 빈 메시지는 항상 idle 로 지운다.
+  function setPanelFeedback(message, state = "idle") {
+    setPanelFeedbackState({ message: String(message ?? ""), state: message ? state : "idle" });
+  }
+
+  function setCopyFeedback(message, state = "idle") {
+    setCopyFeedbackState({ message: String(message ?? ""), state: message ? state : "idle" });
+  }
+
   function selectSpecialLectureGuide(guideId) {
     const nextGuideId = String(guideId ?? "").trim();
     if (!nextGuideId || !draftGuides.some((guide) => guide.specialLectureGuideId === nextGuideId)) return;
     setSelectedGuideId(nextGuideId);
-    setPanelMessage("");
-    setCopyMessage("");
+    setPanelFeedback("");
+    setCopyFeedback("");
   }
 
   function updateSelectedGuide(field, value) {
@@ -257,12 +282,12 @@ export function SpecialLectureNoticePanel({
     const nextGuide = createSpecialLectureGuideFromTemplate(selectedGuide ?? defaultSpecialLectureGuides[0]);
     setDraftGuides((current) => [nextGuide, ...current]);
     setSelectedGuideId(nextGuide.specialLectureGuideId);
-    setPanelMessage("새 특강 초안을 만들었습니다. 일정 계산 후 저장하면 공개 링크가 유지됩니다.");
+    setPanelFeedback("새 특강 초안을 만들었습니다. 일정 계산 후 저장하면 공개 링크가 유지됩니다.", "success");
   }
 
   async function persistGuideManagement(nextGuides, nextSelectedGuideId, successMessage) {
     const normalizedNextGuides = normalizeSpecialLectureGuides(nextGuides);
-    setPanelMessage("");
+    setPanelFeedback("");
     setManagementGuideId(selectedGuide?.specialLectureGuideId || "all");
     try {
       const saved = onSaveGuides ? await onSaveGuides(normalizedNextGuides) : normalizedNextGuides;
@@ -270,9 +295,9 @@ export function SpecialLectureNoticePanel({
       setSelectedGuideId(nextSelectedGuideId && saved.some((guide) => guide.specialLectureGuideId === nextSelectedGuideId)
         ? nextSelectedGuideId
         : getDefaultSpecialLectureGuideId(saved));
-      setPanelMessage(successMessage);
+      setPanelFeedback(successMessage, "success");
     } catch (error) {
-      setPanelMessage(`특강 관리 저장 실패: ${error.message}`);
+      setPanelFeedback(`특강 관리 저장 실패: ${error.message}`, "error");
     } finally {
       setManagementGuideId("");
     }
@@ -290,7 +315,7 @@ export function SpecialLectureNoticePanel({
           }, guide)
         : guide
     );
-    persistGuideManagement(nextGuides, getDefaultSpecialLectureGuideId(nextGuides), "특강을 보관했습니다. 진행/예정 카드 목록에서는 숨겨집니다.");
+    return persistGuideManagement(nextGuides, getDefaultSpecialLectureGuideId(nextGuides), "특강을 보관했습니다. 진행/예정 카드 목록에서는 숨겨집니다.");
   }
 
   function restoreSelectedGuide() {
@@ -305,15 +330,30 @@ export function SpecialLectureNoticePanel({
           }, guide)
         : guide
     );
-    persistGuideManagement(nextGuides, selectedGuide.specialLectureGuideId, "보관된 특강을 복원했습니다.");
+    return persistGuideManagement(nextGuides, selectedGuide.specialLectureGuideId, "보관된 특강을 복원했습니다.");
   }
 
+  // 2026-09-19 · U12(ops-10): 삭제 확인은 브라우저 confirm 대신 ConfirmDialog(requestGuideAction → confirmPendingGuideAction)가 맡는다.
   function deleteSelectedGuide() {
     if (!selectedGuide) return;
-    const title = selectedGuide.title || "이 특강";
-    if (typeof window !== "undefined" && !window.confirm(`${title} 안내문을 삭제할까요?\n삭제하면 공개 링크도 더 이상 이 안내문을 찾을 수 없습니다.`)) return;
     const nextGuides = draftGuides.filter((guide) => guide.specialLectureGuideId !== selectedGuide.specialLectureGuideId);
-    persistGuideManagement(nextGuides, getDefaultSpecialLectureGuideId(nextGuides), "특강 안내문을 삭제했습니다.");
+    return persistGuideManagement(nextGuides, getDefaultSpecialLectureGuideId(nextGuides), "특강 안내문을 삭제했습니다.");
+  }
+
+  function requestGuideAction(type) {
+    if (!selectedGuide) return;
+    setPendingGuideAction({ guideTitle: selectedGuide.title || "이 특강", type });
+  }
+
+  async function confirmPendingGuideAction() {
+    const actionType = pendingGuideAction?.type;
+    try {
+      if (actionType === "delete") await deleteSelectedGuide();
+      else if (actionType === "archive") await archiveSelectedGuide();
+      else if (actionType === "restore") await restoreSelectedGuide();
+    } finally {
+      setPendingGuideAction(null);
+    }
   }
 
   function updateScheduleRule(ruleIndex, patch) {
@@ -352,7 +392,7 @@ export function SpecialLectureNoticePanel({
     if (!selectedGuide) return;
     const generatedSessions = generateSpecialLectureSessions(selectedGuide);
     if (!generatedSessions.length) {
-      setPanelMessage("일정 계산 실패: 기간, 요일, 시작/종료 시간을 확인해 주세요.");
+      setPanelFeedback("일정 계산 실패: 기간, 요일, 시작/종료 시간을 확인해 주세요.", "error");
       return;
     }
     const existingSessions = selectedGuide.sessions ?? [];
@@ -391,14 +431,14 @@ export function SpecialLectureNoticePanel({
         guide.specialLectureGuideId === selectedGuide.specialLectureGuideId ? nextGuide : guide
       )
     );
-    setPanelMessage(`일정 계산 완료: ${sessions.length}회, ${formatSpecialLectureHours(totalHours)}, ${formatCurrencyWon(tuition)}`);
+    setPanelFeedback(`일정 계산 완료: ${sessions.length}회, ${formatSpecialLectureHours(totalHours)}, ${formatCurrencyWon(tuition)}`, "success");
   }
 
   async function copyGuideUrl() {
     if (!selectedGuideUrl) return;
-    setCopyMessage("");
+    setCopyFeedback("");
     const copied = await copyTextToClipboard(selectedGuideUrl);
-    setCopyMessage(copied ? "안내문 링크를 복사했습니다." : "링크 복사에 실패했습니다. 화면의 URL을 직접 복사해 주세요.");
+    setCopyFeedback(copied ? "안내문 링크를 복사했습니다." : "링크 복사에 실패했습니다. 화면의 URL을 직접 복사해 주세요.", copied ? "success" : "error");
   }
 
   function buildGuidesSavePayload() {
@@ -411,10 +451,10 @@ export function SpecialLectureNoticePanel({
   async function persistDraftGuides(successMessage = "특강 안내문을 저장했습니다. 공개 링크는 저장본을 읽습니다.") {
     const payload = buildGuidesSavePayload();
     if (!onSaveGuides) return payload;
-    setPanelMessage("");
+    setPanelFeedback("");
     const saved = await onSaveGuides(payload);
     setDraftGuides(saved);
-    if (successMessage) setPanelMessage(successMessage);
+    if (successMessage) setPanelFeedback(successMessage, "success");
     return saved;
   }
 
@@ -422,13 +462,13 @@ export function SpecialLectureNoticePanel({
     try {
       await persistDraftGuides();
     } catch (error) {
-      setPanelMessage(`특강 안내문 저장 실패: ${error.message}`);
+      setPanelFeedback(`특강 안내문 저장 실패: ${error.message}`, "error");
     }
   }
 
   async function prepareSpecialLectureNotice() {
     if (!selectedGuide || !onApplyToNotice) return;
-    setPanelMessage("");
+    setPanelFeedback("");
     try {
       const savedGuides = await persistDraftGuides("특강 안내문 저장 완료 후 알림톡 준비 화면으로 이동했습니다.");
       const savedGuide = savedGuides.find((guide) => guide.specialLectureGuideId === selectedGuide.specialLectureGuideId) ?? selectedGuide;
@@ -439,7 +479,7 @@ export function SpecialLectureNoticePanel({
         savedGuideUrl
       );
     } catch (error) {
-      setPanelMessage(`알림톡 발송 준비 실패: ${error.message}`);
+      setPanelFeedback(`알림톡 발송 준비 실패: ${error.message}`, "error");
     }
   }
 
@@ -451,7 +491,19 @@ export function SpecialLectureNoticePanel({
           {activeWorkspaceTab === "guide" ? (
             <>
               <button className="softButton compact" onClick={createNewGuide} type="button">새 특강 만들기</button>
-              <InlineSaveStatus label="특강 안내문" saveState={saveState} />
+              <InlineSaveStatus label="특강 안내문" saveState={guideSaveState} />
+              {/* 2026-09-19 · U12(ops-10): 보관/보관 해제·삭제 진입은 헤더 ⋯ 메뉴, 확인은 아래 ConfirmDialog. 상시 노출 관리 바는 뺐다. */}
+              {selectedGuide ? (
+                <OverflowMenu
+                  items={[
+                    isSpecialLectureArchived(selectedGuide)
+                      ? { key: "restore", label: "보관 해제", onSelect: () => requestGuideAction("restore") }
+                      : { key: "archive", label: "보관", onSelect: () => requestGuideAction("archive") },
+                    { key: "delete", label: "삭제", onSelect: () => requestGuideAction("delete"), tone: "danger" }
+                  ]}
+                  label={`${selectedGuide.title || "이 특강"} 안내문 작업`}
+                />
+              ) : null}
             </>
           ) : (
             <>
@@ -533,13 +585,23 @@ export function SpecialLectureNoticePanel({
           ))}
         </WorkspaceTabs>
 
-        <SpecialLectureManagementBar
-          guide={selectedGuide}
-          isManaging={isManagingSelectedGuide}
-          onArchive={archiveSelectedGuide}
-          onDelete={deleteSelectedGuide}
-          onRestore={restoreSelectedGuide}
-        />
+        {/* 2026-09-19 · U12(ops-08): 저장·일정 계산·보관/삭제·링크 복사 결과는 탭 분기 밖에 두어 어느 탭에서든 보인다. */}
+        {panelFeedback.message ? (
+          <AsyncOperationStatus
+            className="specialLectureGuideFeedback"
+            description={panelFeedback.message}
+            label="특강 안내문"
+            state={panelFeedback.state}
+          />
+        ) : null}
+        {copyFeedback.message ? (
+          <AsyncOperationStatus
+            className="specialLectureGuideFeedback"
+            description={copyFeedback.message}
+            label="링크 복사"
+            state={copyFeedback.state}
+          />
+        ) : null}
 
         {activeGuideEditorTab === "content" ? (
         <div className="specialLectureEditorGrid">
@@ -621,21 +683,64 @@ export function SpecialLectureNoticePanel({
             onUpdateGuide={updateSelectedGuide}
           />
 
-          <SpecialLectureNoticeActionPanel
-            copyMessage={copyMessage}
-            noticeText={noticeText}
-            onCopyGuideUrl={copyGuideUrl}
-            onPrepareNotice={prepareSpecialLectureNotice}
-            onSaveGuides={saveGuides}
-            panelMessage={panelMessage}
-            saveState={saveState}
-          />
+          <SpecialLectureNoticeActionPanel noticeText={noticeText} />
           </div>
         ) : null}
+
+        {/* 2026-09-19 · U12(ops-08): 편집 탭 5개 공통 하단 저장 바. 콜백·인자는 미리보기 탭 버튼 시절 그대로다. */}
+        <StickySaveBar
+          className="specialLectureGuideSaveBar"
+          label="특강 안내문"
+          message={guideSaveState === "dirty" ? "공개 링크와 특강 수업 탭은 저장본을 읽습니다." : ""}
+          saveState={guideSaveState}
+        >
+          <button className="softButton" onClick={copyGuideUrl} type="button">링크 복사</button>
+          <button
+            className="softButton"
+            disabled={saveState === "saving"}
+            onClick={prepareSpecialLectureNotice}
+            type="button"
+          >
+            알림톡 발송 준비
+          </button>
+          <button className="primaryButton" disabled={saveState === "saving"} onClick={saveGuides} type="button">
+            {saveState === "saving" ? "저장 중" : "안내문 저장"}
+          </button>
+        </StickySaveBar>
       </div>
       ) : activeWorkspaceTab === "guide" ? (
         <SpecialLectureNoSelection />
       ) : null}
+
+      {/* 2026-09-19 · U12(ops-10): 보관/보관 해제/삭제 확인. 실행은 draft 배열 전체 저장(persistGuideManagement)이라 다른 안내문의 미저장 변경 수를 같이 알린다. */}
+      <ConfirmDialog
+        busy={Boolean(managementGuideId)}
+        confirmLabel={{ archive: "보관", delete: "삭제", restore: "보관 해제" }[pendingGuideAction?.type] ?? "확인"}
+        description={(
+          <>
+            <p>
+              {pendingGuideAction?.type === "delete"
+                ? "삭제하면 공개 링크도 더 이상 이 안내문을 찾을 수 없습니다."
+                : pendingGuideAction?.type === "archive"
+                  ? "진행/예정 카드 목록에서는 숨겨지고, 지난/보관 특강에서 다시 복원할 수 있습니다."
+                  : "진행/예정 카드 목록에 다시 표시됩니다."}
+            </p>
+            {pendingGuideAction?.type !== "delete" && !isSelectedGuideSaved ? (
+              <p>이 안내문의 저장하지 않은 변경도 함께 저장됩니다.</p>
+            ) : null}
+            {unsavedOtherGuideCount > 0 ? (
+              <p>저장하지 않은 다른 안내문 변경 {unsavedOtherGuideCount}건도 함께 저장됩니다.</p>
+            ) : null}
+          </>
+        )}
+        onCancel={() => setPendingGuideAction(null)}
+        onConfirm={confirmPendingGuideAction}
+        open={Boolean(pendingGuideAction)}
+        title={`${pendingGuideAction?.guideTitle ?? "이 특강"} 안내문을 ${
+          { archive: "보관할까요?", delete: "삭제할까요?", restore: "보관 해제할까요?" }[pendingGuideAction?.type] ?? "변경할까요?"
+        }`}
+        tone={pendingGuideAction?.type === "delete" ? "danger" : "default"}
+      />
     </section>
   );
 }

@@ -1,0 +1,33 @@
+/* 2026-09-19 · U12(ops-08): 특강 안내문 작업공간(DashboardAuxiliaryPanels · SpecialLectureNoticePanel)의
+   편집 탭 공통 하단 저장 바. App.css 의 .specialLectureGuideWorkspace(grid · gap 14px)와 .stickySaveBar 기본 규칙은
+   그대로 두고 여기서는 부모 클래스를 붙인 새 셀렉터만 더한다(정확 중복 금지 · test-ui-css-hygiene). */
+.specialLectureGuideWorkspace .specialLectureGuideSaveBar {
+  margin-inline: 2px;
+}
+
+@media (max-width: 640px) {
+  .specialLectureGuideWorkspace .specialLectureGuideSaveBar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .specialLectureGuideWorkspace .specialLectureGuideSaveBar .stickySaveBarActions {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  /* 좁은 폭에서 '알림톡 발송 준비'가 반 칸(≈160px)에 들어가도록 좌우 여백을 줄이고, 넘치면 어절 단위로만 줄바꿈한다. */
+  .specialLectureGuideWorkspace .specialLectureGuideSaveBar .stickySaveBarActions button {
+    min-width: 0;
+    padding-inline: 10px;
+    white-space: normal;
+    width: 100%;
+    word-break: keep-all;
+  }
+
+  /* 확정(안내문 저장)은 한 줄 전체를 써서 손가락 목표가 가장 크다. */
+  .specialLectureGuideWorkspace .specialLectureGuideSaveBar .stickySaveBarActions .primaryButton {
+    grid-column: 1 / -1;
+  }
+}
