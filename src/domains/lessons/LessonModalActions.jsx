@@ -31,7 +31,8 @@ export function LessonModalActions({
   return (
     <>
       <div className="lessonModalSaveStatus" aria-live="polite">
-        <InlineSaveStatus label="수업일지" saveState={saveState} />
+        {/* 2026-09-19 · 이 모달이 저장하는 건 수업 일정(lessons)이다. 수업일지(학생 기록)와 용어를 구분한다. */}
+        <InlineSaveStatus label="수업 일정" saveState={saveState} />
         <span>{saveMessage}</span>
       </div>
 

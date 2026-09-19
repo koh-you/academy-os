@@ -81,6 +81,9 @@ assert.match(rowSource, /<LessonJournalEditableFields/);
 assert.match(journalSource, /updateJournalRecordDraft\(student, record, field, value\)/);
 assert.match(journalSource, /updateJournalHomeworkDraft\(student, homeworkType, value\)/);
 assert.equal((journalSource.match(/<LessonJournalEditableMemoCard/g) ?? []).length, 0);
+// 2026-09-19 · 직전/정규 토글은 편집 모드에서만 넘긴다. 읽기 모드에 비활성 토글 2개를 행마다 깔지 않는다.
+assert.match(journalSource, /previousLessonSourceToggleProps: hasAlternatePreviousLessonSource && journalEditMode \? \{/);
+assert.ok(!journalSource.includes("disabled: !journalEditMode"), "toggle must not be rendered disabled in read mode");
 assert.match(componentSource, /field\.source === "record"/);
 assert.match(componentSource, /onUpdateRecordDraft\(field\.field, value\)/);
 assert.match(componentSource, /onUpdateHomeworkDraft\(field\.field, value\)/);

@@ -8134,11 +8134,6 @@ button:disabled {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.attendanceModalActions {
-  display: grid;
-  gap: 10px;
-}
-
 .attendanceSourceNotice {
   background: var(--status-info-bg);
   border: 1px solid var(--status-info-border);

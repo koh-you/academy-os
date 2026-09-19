@@ -54,7 +54,8 @@ assert.deepEqual(
     lessonType: "class"
   }),
   {
-    message: "수업일지 저장 중",
+    // 2026-09-19 · 수업 일정 저장이라 '수업일지' 대신 '수업 일정' 으로 표기.
+    message: "수업 일정 저장 중",
     state: "saving"
   }
 );
@@ -63,7 +64,7 @@ assert.deepEqual(createLessonModalSavedSaveState({ message: "서버 재조회 �
   state: "saved"
 });
 assert.deepEqual(createLessonModalSavedSaveState(null), {
-  message: "수업일지 저장 완료",
+  message: "수업 일정 저장 완료",
   state: "saved"
 });
 assert.deepEqual(createLessonModalFailedSaveState(new Error("네트워크 오류")), {
