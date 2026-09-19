@@ -1,0 +1,16 @@
+% 창의 변형 03 — 삼각형 AOB(A(-2,6) · B(6,2)), y축 위 점 C(0,8 · 답), AB 를 1:2 로 내분하는 P(2/3,14/3), 직선 CP(변 OB 와 Q(3/2,1/2)에서 만남). 원본 크롭(설정 다름)을 쓰지 않고 TikZ 로 새로 그림.
+% 2026-09-19 검수 반영: 이전 좌표(A(-6,6)·C(0,6))는 A 와 C 가 같은 높이라 답 c 가 그림에서 읽혔다 → A·B 재설계(c≠A 의 y좌표). 축척도 x·y 를 다르게 두어 실척이 아니다.
+% 라벨은 A·B·C·O·P·x·y 만. 좌표·Q 의 위치는 적지 않는다.
+\begin{tikzpicture}[xscale=0.5, yscale=0.4, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.6,0) -- (7.6,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.2) -- (0,10) node[left] {$y$};
+  \node[below left, font=\small] at (0,0) {$\mathrm{O}$};
+  \coordinate (A) at (-2,6); \coordinate (B) at (6,2); \coordinate (C) at (0,8); \coordinate (P) at (0.6667,4.6667);
+  \draw[line width=0.6pt] (A) -- (0,0) -- (B) -- cycle;
+  \draw[line width=0.6pt] (-0.3,9.5) -- (2,-2);
+  \fill (A) circle (2.2pt); \fill (B) circle (2.2pt); \fill (C) circle (2.2pt); \fill (P) circle (2pt);
+  \node[above left=1pt and -1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[right, font=\small] at (B) {$\mathrm{B}$};
+  \node[left=1pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[right=2pt, font=\small] at (P) {$\mathrm{P}$};
+\end{tikzpicture}

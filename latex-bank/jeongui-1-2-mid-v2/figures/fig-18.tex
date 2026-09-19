@@ -1,0 +1,19 @@
+% 창의 변형 18 — 원 C: (x-4)²+(y-2)²=4 (x축에 접함), 직선 y=mx (m=1/7 · 답), 중심 A, 수선의 발 H(4.2,0.6), 원점에 가까운 교점 B(2.8,0.4).
+% 라벨은 O·A·B·H·C·x·y 와 직선식 y=mx 만. m 의 값·좌표는 적지 않는다.
+\begin{tikzpicture}[scale=0.6, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.2,0) -- (9,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.2) -- (0,5) node[left] {$y$};
+  \node[below left, font=\small] at (0,0) {$\mathrm{O}$};
+  \coordinate (A) at (4,2); \coordinate (H) at (4.2,0.6); \coordinate (B) at (2.8,0.4);
+  \draw[line width=0.6pt] (A) circle (2);
+  \node[above right=6pt and 8pt, font=\small] at (A) {$C$};
+  % 직선 y = mx (m = 1/7)
+  \draw[line width=0.6pt] (-1,-0.1429) -- (8.6,1.2286) node[right, font=\small] {$y=mx$};
+  \draw[line width=0.5pt] (A) -- (H);
+  % H 의 직각 표시(직선 방향 (7,1)/√50 · 수선 방향 (-1,7)/√50)
+  \draw[line width=0.4pt] (3.9525,0.5646) -- (3.9172,0.8121) -- (4.1647,0.8475);
+  \fill (A) circle (2.2pt); \fill (H) circle (2pt); \fill (B) circle (2.2pt);
+  \node[above, font=\small] at (A) {$\mathrm{A}$};
+  \node[below right=1pt and -1pt, font=\small] at (H) {$\mathrm{H}$};
+  \node[above left=1pt and -2pt, font=\small] at (B) {$\mathrm{B}$};
+\end{tikzpicture}
