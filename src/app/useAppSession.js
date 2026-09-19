@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { DEFAULT_TEACHER_ID } from "../shared/utils/sessionActor.js";
+import { DEFAULT_TENANT_ID } from "../shared/utils/tenantIdScope.js";
 
 function safeDecodeURIComponent(value) {
   try {
@@ -64,7 +66,7 @@ function normalizeTeacherSessionForStorage(session) {
     role,
     sessionToken,
     teacherId,
-    tenantId: tenantId || "tenant_default",
+    tenantId: tenantId || DEFAULT_TENANT_ID,
     teacherRole: teacherRole || "owner"
   };
 }
@@ -144,10 +146,10 @@ export async function authenticateAppSession({
         ok: true,
         session: {
           role: "teacher",
-          actorId: "instructor_owner_001",
+          actorId: result.account?.teacherId || DEFAULT_TEACHER_ID,
           name: result.account?.name || teacherAccount.name,
           teacherId: result.account?.teacherId || "",
-          tenantId: result.account?.tenantId || "tenant_default",
+          tenantId: result.account?.tenantId || DEFAULT_TENANT_ID,
           teacherRole: result.account?.teacherRole || "owner",
           sessionToken: result.account?.sessionToken || ""
         }

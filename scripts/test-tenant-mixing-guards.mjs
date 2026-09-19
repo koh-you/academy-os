@@ -12,7 +12,7 @@ const main = await read("src/main.jsx");
 const migration = await read("supabase/20260919_tenant_id_immutable.sql");
 
 // (1) 포털 토큰이 학생 tenant 를 싣고, 게이트가 그 tenant 로 컨텍스트를 잡는다.
-assert.ok(guard.includes('tenantId: account.tenantId || "tenant_default"'), "포털 토큰에 tenantId 가 있어야 한다");
+assert.ok(guard.includes("tenantId: account.tenantId || DEFAULT_TENANT_ID"), "포털 토큰에 tenantId 가 있어야 한다");
 assert.ok(server.includes("select=student_id,name,login_id,pin,status,tenant_id&status=eq.active"), "학생 로그인 조회가 tenant_id 를 읽어야 한다");
 assert.ok(server.includes('tenantId: student.tenant_id || "tenant_default"'), "학생 인증 결과에 tenantId 가 있어야 한다");
 assert.ok(server.includes('{ kind: "portal", studentId: portalSession.studentId, tenantId: portalSession.tenantId || "tenant_default" }'), "게이트가 포털 세션을 tenant 와 함께 판정해야 한다");

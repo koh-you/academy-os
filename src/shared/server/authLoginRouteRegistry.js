@@ -1,3 +1,4 @@
+import { DEFAULT_TENANT_ID } from "./tenantScope.js";
 // @ts-check
 
 /** @typedef {import("./routeRegistryTypes.js").RouteDispatchContext} RouteDispatchContext */
@@ -56,7 +57,7 @@ export function createAuthLoginRouteRegistry({
       account: {
         name: teacherSession.name,
         teacherId: teacherSession.teacherId,
-        tenantId: teacherSession.tenantId || "tenant_default",
+        tenantId: teacherSession.tenantId || DEFAULT_TENANT_ID,
         teacherRole: teacherSession.teacherRole || "owner",
         sessionToken: createTeacherSessionToken(teacherSession)
       }
@@ -105,7 +106,7 @@ export function createAuthLoginRouteRegistry({
               loginId: account.loginId,
               name: account.name,
               teacherId: account.teacherId,
-              tenantId: account.tenantId || "tenant_default",
+              tenantId: account.tenantId || DEFAULT_TENANT_ID,
               teacherRole: account.teacherRole || "owner",
               sessionToken: createTeacherSessionToken(account)
             }

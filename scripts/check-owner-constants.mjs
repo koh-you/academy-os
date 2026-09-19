@@ -26,6 +26,7 @@ const ALLOWED_FILES = new Set([
   "src/shared/data/sampleData.js",
   "src/shared/utils/academyBrand.js",
   "src/shared/utils/tenantIdScope.js",
+  "src/shared/utils/sessionActor.js",
   "src/shared/server/tenantScope.js"
 ]);
 

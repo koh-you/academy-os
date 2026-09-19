@@ -1,4 +1,5 @@
 import { getClassTemplateScheduleRules, getClassTemplateTimesForDate } from "../../shared/utils/classTemplateSchedule.js";
+import { getSessionTeacherId } from "../../shared/utils/sessionActor.js";
 
 const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
@@ -102,7 +103,7 @@ export function buildMonthlyRegularLessonOpenPlan({ lessons = [], monthKey = "",
         startTime: ruleTimes?.startTime || daySource.startTime,
         status: "scheduled",
         studentIds: dayStudentIds,
-        teacherId: sourceLesson.teacherId || "instructor_owner_001"
+        teacherId: sourceLesson.teacherId || getSessionTeacherId()
         });
       });
     const studentCount = new Set(lessonRows.flatMap((row) => row.studentIds)).size;
