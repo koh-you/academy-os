@@ -77,7 +77,9 @@ for (const key of managedTemplateKeys.slice(0, 2)) {
   assert.ok(serverSource.includes(`templates.${key}`), `server dispatch must load configured lesson follow-up: ${key}`);
 }
 assert.ok(serverSource.includes("states?.aiSettings?.notificationTemplates"));
-assert.ok(serverSource.includes("formatSupplementScheduleLineForNotification"));
+// 2026-09-19: 보충 일정 문장은 서버 사본이 아니라 화면과 같은 모듈에서 온다.
+assert.ok(serverSource.includes('from "../src/domains/notifications/lessonCommentSourceLines.js"'));
+assert.ok(!serverSource.includes("formatSupplementScheduleLineForNotification"), "server must not keep its own copy of the supplement schedule sentence");
 assert.ok(serverSource.includes('from "../src/domains/notifications/notificationTemplateCatalog.js"'));
 assert.ok(serverSource.includes('from "../src/domains/notifications/notificationMessageRenderer.js"'));
 
