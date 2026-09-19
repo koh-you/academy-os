@@ -1,0 +1,22 @@
+/* 2026-09-19 · 특강 상태 알림 패널에서 안내문 미저장 때 행 버튼(학생 연결·회차 설정)을 숨기는 대신
+   그 이유를 한 줄로 알려 주는 문구. 색은 토큰만 쓴다. */
+.specialLectureAttentionPanel .specialLectureAttentionGuideHint {
+  color: var(--academy-muted, #64748b);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.specialLectureAttentionActions > small {
+  align-self: center;
+  color: var(--academy-muted, #64748b);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+@media (max-width: 980px) {
+  /* App.css 가 이 폭에서 `.specialLectureAttentionActions button` 을 100% 로 늘리는데,
+     ⋯ 트리거(iconButton)까지 늘어나면 안 되므로 원래 크기로 되돌린다. */
+  .specialLectureAttentionActions .overflowMenuTrigger {
+    width: auto;
+  }
+}

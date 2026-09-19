@@ -49,6 +49,7 @@ const classPickThresholds = [30, 50, 70];
 export function BookWrongAnswerBoard({ students = [], mode = "student", studentId: controlledStudentId = "" }) {
   const isClassMode = mode === "class";
   const isExamMode = mode === "exam";
+  const isStudentMode = mode === "student";
   const [books, setBooks] = useState([]);
   const [booksError, setBooksError] = useState("");
   const [folderPath, setFolderPath] = useState([]);
@@ -460,7 +461,8 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
               <button className="softButton compact" onClick={selectStudentWrongItems} type="button">오답 전체 선택</button>
             )}
             <button className="softButton compact subtle" onClick={() => setSelectedItemIds(new Set())} type="button">선택 해제</button>
-            <button className="primaryButton compact" disabled={selectedItemIds.size === 0} onClick={openPrint} type="button">인쇄 · PPT</button>
+            {/* 학생별 오답 탭에서는 헤더의 '학생별 오답 저장' 이 화면의 primary 이므로 인쇄는 softButton, 교재별 탭(저장 없음)에서는 primary 유지. */}
+            <button className={isStudentMode ? "softButton compact" : "primaryButton compact"} disabled={selectedItemIds.size === 0} onClick={openPrint} type="button">인쇄 · PPT</button>
           </div>
         </div>
         )}

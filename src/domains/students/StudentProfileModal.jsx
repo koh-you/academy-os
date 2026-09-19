@@ -811,7 +811,7 @@ export function StudentProfileModal({
                 <>
                   <textarea aria-label={`${student.name} 강사 운영 메모`} className="profileEditInput teacherOperatingMemoInput" rows="5" value={teacherOperatingMemoDraft} onChange={(event) => { setTeacherOperatingMemoDraft(event.target.value); setTeacherOperatingMemoError(""); }} placeholder="예) 3-2 진도: 개념플러스유형, 쎈 완료. 다음 수업은 RPM 진행." />
                   <div className="teacherOperatingMemoSaveRow">
-                    <button className="primaryButton compact" disabled={teacherOperatingMemoSaveState === "saving"} onClick={saveTeacherOperatingMemo} type="button">강사 운영 메모 저장</button>
+                    <button className="softButton compact" disabled={teacherOperatingMemoSaveState === "saving"} onClick={saveTeacherOperatingMemo} type="button">강사 운영 메모 저장</button>
                     <span>학생·학부모 포털과 알림톡에는 노출되지 않습니다.</span>
                   </div>
                 </>

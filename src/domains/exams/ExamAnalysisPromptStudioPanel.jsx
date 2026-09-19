@@ -470,7 +470,9 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
                   <em>필수</em>
                 </div>
                 <pre>{slide.prompt}</pre>
-                <button className="primaryButton" disabled={!slide.generationAllowed} onClick={() => copyPrompt(`${slide.slideNumber}번 생성`, `${promptPack.masterPrompt}\n\n${slide.prompt}`)} type="button">처음 만들기 프롬프트 복사</button>
+                {slide.generationAllowed ? (
+                  <button className="softButton compact" onClick={() => copyPrompt(`${slide.slideNumber}번 생성`, `${promptPack.masterPrompt}\n\n${slide.prompt}`)} type="button">처음 만들기 프롬프트 복사</button>
+                ) : null}
               </section>
               <Disclosure bodyClassName="examPromptWorkflowStepBody" className="examPromptWorkflowStep" trigger={(
                 <>
@@ -500,7 +502,9 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
                   />
                 </label>
                 <pre>{getRevisionPrompt(slide)}</pre>
-                <button className="ghostButton" disabled={!String(revisionRequests[slide.roleId] || "").trim()} onClick={() => copyPrompt(`${slide.slideNumber}번 수정`, getRevisionPrompt(slide))} type="button">수정 프롬프트 복사</button>
+                {String(revisionRequests[slide.roleId] || "").trim() ? (
+                  <button className="ghostButton" onClick={() => copyPrompt(`${slide.slideNumber}번 수정`, getRevisionPrompt(slide))} type="button">수정 프롬프트 복사</button>
+                ) : null}
               </Disclosure>
             </div>
           </Disclosure>
