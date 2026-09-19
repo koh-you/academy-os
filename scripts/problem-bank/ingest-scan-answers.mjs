@@ -61,7 +61,9 @@ const INGEST_VERSION = "scan-answers-1.0";
 // 회색 「답」 상자 · 문항 번호가 「쪽-번호」).
 const LAYOUTS = {
   olympos: { template: "olympos-answer-icon.png", iconDark: 130, bodyTop: 0.07, columns: null, skipCodePages: true, waitForHeader: true, excludeTags: ["수행평가"], local: "type_label", badgeMinH: 9.5 },
-  ssen: { template: "ssen-answer-icon.png", iconDark: 205, bodyTop: 0.11, columns: [[0.03, 0.44], [0.56, 0.97]], skipCodePages: false, waitForHeader: false, excludeTags: [], local: "number_label", badgeMinH: 7.5 }
+  ssen: { template: "ssen-answer-icon.png", iconDark: 205, bodyTop: 0.11, columns: [[0.03, 0.44], [0.56, 0.97]], skipCodePages: false, waitForHeader: false, excludeTags: [], local: "number_label", badgeMinH: 7.5 },
+  // lssen: 라이트쎈·쎈(중등) 별책 답지 — 두 컬럼(가운데 BOX 띠 없음) · 초록 4자리 책 전체 번호 배지 · 회색 「답」 상자.
+  lssen: { template: "ssen-answer-icon.png", iconDark: 205, bodyTop: 0.08, columns: [[0.03, 0.49], [0.51, 0.97]], skipCodePages: false, waitForHeader: false, excludeTags: [], local: "book_number", badgeMinH: 7.5, badgeDigits: 4 }
 };
 /**
  * 「답」 아이콘 — 5~10pt 검정 정사각 틀 안에 흰 글자가 든 모양. 위 테두리(검정 런)와 같은 x·같은 폭의 아래 테두리가
@@ -362,6 +364,11 @@ async function applyOverrides({ overrides, doc, renderScale, outDir, bookId, ite
 }
 
 function localNumberOf(item, source = "type_label") {
+  // book_number: 「0259」 처럼 책 전체 번호 그대로(라이트쎈·쎈).
+  if (source === "book_number") {
+    const match = String(item.number_label ?? "").match(/(\d{1,4})\s*$/);
+    return match ? Number(match[1]) : null;
+  }
   const text = source === "number_label" ? String(item.number_label ?? "").split("-").pop() : String(item.type_label ?? "");
   const match = text.match(/(\d{1,2})\s*$/);
   return match ? Number(match[1]) : null;
@@ -378,6 +385,9 @@ async function main() {
   const bookId = String(itemManifest.book.book_id);
   // 수행평가는 책 뒤 해설에 없다(빠른정답만). 본문 순서 = 해설 순서인 문항만 대응 대상이다.
   const layout = LAYOUTS[String(args.layout ?? "olympos")];
+  // 배지 숫자 자릿수(기본 1~2 · 라이트쎈 4). 이 정규식으로 풀이 시작 번호 후보를 고른다.
+  const badgeDigits = layout.badgeDigits ?? 2;
+  const badgeRe = badgeDigits === 4 ? /^\d{4}$/ : /^[0O]?\d{1,2}$/;
   if (!layout) throw new Error(`--layout 은 ${Object.keys(LAYOUTS).join("|")} 가운데 하나입니다.`);
   const items = itemManifest.items
     .filter((item) => !(item.tags ?? []).some((tag) => layout.excludeTags.includes(tag)))
@@ -500,8 +510,8 @@ async function main() {
       await writeFile(stripPng, await strip.encode("png"));
       const stripTokens = (await ocrTokens(tesseract, stripPng, renderScale * 2)).map((token) => ({ ...token, x: token.x + stripX0, y: token.y + bodyTop, fromStrip: true }));
       for (const token of stripTokens) {
-        if (!/^[0O]?\d{1,2}$/.test(token.text) || token.conf < 40) continue;
-        const known = tokens.find((other) => /^[0O]?\d{1,2}$/.test(other.text) && Math.abs(other.x - token.x) < 4 && Math.abs(other.y - token.y) < 4);
+        if (!badgeRe.test(token.text) || token.conf < 40) continue;
+        const known = tokens.find((other) => badgeRe.test(other.text) && Math.abs(other.x - token.x) < 4 && Math.abs(other.y - token.y) < 4);
         if (!known) tokens.push(token);
       }
       // 상자 왼쪽은 배지 x 로 정한다(아래에서 후보를 찾은 뒤 갱신). 잉크 여백 추정이 어긋나는 컬럼(답지 BOX 띠 옆)에 대비.
@@ -509,7 +519,7 @@ async function main() {
       const { bands, boxes } = findColorBands(imageData, canvas.width, renderScale, { x0: left, x1: column.x1 }, pageHeight);
       const insideBox = (y) => boxes.some((box) => y >= box.y0 - 1 && y <= box.y1 + 1);
       const insideBand = (y) => bands.some((band) => y >= band.y0 - 1 && y <= band.y1 + 1);
-      const numberTokens = tokens.filter((token) => /^[0O]?\d{1,2}$/.test(token.text) && token.conf >= 40 && token.h >= 6.5 && token.h <= 12.5 && token.x >= column.x0 && token.x < column.x1);
+      const numberTokens = tokens.filter((token) => badgeRe.test(token.text) && token.conf >= 40 && token.h >= 6.5 && token.h <= 12.5 && token.x >= column.x0 && token.x < column.x1);
       // 빠른정답 표의 줄(「01 ① 02 ② …」)은 한 줄에 번호가 여럿이다. 그런 줄의 번호는 풀이 시작이 아니다.
       // 같은 줄의 다른 번호도 굵은 크기(7.5pt 이상)·신뢰도 70 이상·15~150pt 오른쪽이어야 한다(한글 풀이 글에서 튀는 숫자 오독과 구분).
       // 빠른정답 줄에는 번호가 넷 이상 늘어선다(「01 ① 02 ② 03 ⑤ 04 ③」). 풀이 첫 줄에 숫자 하나가 튀는 것과 구분한다.
@@ -537,9 +547,11 @@ async function main() {
       // 배지 x 는 잉크 여백 추정 대신 굵은 번호 후보 자체의 가장 왼쪽 x 로 잡는다(들여쓴 「=…」 줄이 많은 쪽에서
       // 여백 추정이 어긋나던 것). 후보가 컬럼 안쪽 6~60pt 에 있어야 한다.
       const candidates = numberTokens
-        .filter((token) => token.h >= layout.badgeMinH && token.x >= column.x0 + 6 && token.x <= column.x0 + 60 && token.y > bodyTop && token.y + token.h < bodyBottom)
+        // 배지 x: 컬럼 안쪽 6~60pt(쎈 별책 답지는 컬럼 경계에 바싹 붙어 1pt 부터). 첫 줄 배지는 bodyTop 바로 위에 걸릴 수 있어 4pt 여유.
+        .filter((token) => token.h >= layout.badgeMinH && token.x >= column.x0 + (layout.badgeDigits === 4 ? 1 : 6) && token.x <= column.x0 + 60 && token.y > bodyTop - 4 && token.y + token.h < bodyBottom)
         .filter((token) => !insideBox(token.y + token.h / 2) && !insideBand(token.y + token.h / 2) && !sharesLine(token) && hasTextRight(token));
       const badgeLeft = candidates.length ? Math.min(...candidates.map((token) => token.x)) : left;
+      if (process.env.DEBUG_BADGES === String(pageNumber)) console.log(`  [${column.index}] numberTokens=${numberTokens.map((t) => `${t.text}@${t.x.toFixed(0)},${t.y.toFixed(0)}h${t.h.toFixed(1)}c${Math.round(t.conf)}`).join(" ")} candidates=${candidates.map((t) => t.text).join(",")} bodyTop=${bodyTop.toFixed(0)} colx0=${column.x0.toFixed(0)}`);
       if (candidates.length) columnBox.x0 = badgeLeft - 3;
       const ocrBadges = candidates
         .filter((token) => token.x <= badgeLeft + 8)

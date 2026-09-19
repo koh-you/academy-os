@@ -1,0 +1,21 @@
+% 0395(본책 73쪽) — 원에 외접하는 육각형 ABCDEF, AF=4, FE=2, ED=4, DC=5, CB=3. 답(AB)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (-0.082,0.560) -- (-0.660,0.296) -- (-0.450,-0.388) -- (-0.091,-0.559) -- (0.540,-0.481) -- (0.548,0.472) -- cycle;
+  \draw (0.000,0.000) circle (0.544);
+  \draw[dashed, line width=0.4pt] (-0.082,0.560) to[bend left=20] (0.548,0.472);
+  \node[font=\small, inner sep=1.5pt] at (0.268,0.764) {$4$};
+  \draw[dashed, line width=0.4pt] (0.548,0.472) to[bend left=25] (0.540,-0.481);
+  \node[font=\small, inner sep=1.5pt] at (0.764,-0.007) {$2$};
+  \draw[dashed, line width=0.4pt] (0.540,-0.481) to[bend left=20] (-0.091,-0.559);
+  \node[font=\small, inner sep=1.5pt] at (0.255,-0.768) {$4$};
+  \draw[dashed, line width=0.4pt] (-0.091,-0.559) to[bend left=15] (-0.450,-0.388);
+  \node[font=\small, inner sep=1.5pt] at (-0.378,-0.699) {$5$};
+  \draw[dashed, line width=0.4pt] (-0.450,-0.388) to[bend left=20] (-0.660,0.296);
+  \node[font=\small, inner sep=1.5pt] at (-0.794,-0.119) {$3$};
+  \node[font=\small, inner sep=1.5pt] at (-0.108,0.739) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.824,0.370) {B};
+  \node[font=\small, inner sep=1.5pt] at (-0.586,-0.505) {C};
+  \node[font=\small, inner sep=1.5pt] at (-0.120,-0.737) {D};
+  \node[font=\small, inner sep=1.5pt] at (0.674,-0.601) {E};
+  \node[font=\small, inner sep=1.5pt] at (0.684,0.590) {F};
+\end{tikzpicture}

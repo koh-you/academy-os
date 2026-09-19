@@ -1,0 +1,20 @@
+% 0459(본책 83쪽) — 원, AB=BC=DA(호 표시), 현 AB·BD, AD·BC 의 연장선의 교점 P, ∠P=40°, ∠ADB 표시. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.191,1.083) -- (-0.953,-0.550);
+  \draw (-0.953,-0.550) -- (1.083,-0.191);
+  \draw (-0.191,1.083) -- (1.672,-0.780);
+  \draw (-0.953,-0.550) -- (1.672,-0.780);
+  \fill[yellow!40] (1.083,-0.191) -- (0.899,-0.007) arc (135.0:190.0:0.260) -- cycle;
+  \draw[line width=0.4pt] (0.899,-0.007) arc (135.0:190.0:0.260);
+  \draw[line width=0.4pt] (1.389,-0.497) arc (135.0:175.0:0.400);
+  \node[font=\small, inner sep=0.5pt] at (0.856,-0.399) {$40^\circ$};
+  \draw[line width=0.4pt] (-0.933,0.435) -- (-1.060,0.494);
+  \draw[line width=0.4pt] (-0.090,-1.026) -- (-0.102,-1.166);
+  \draw[line width=0.4pt] (0.728,0.728) -- (0.827,0.827);
+  \node[font=\small, inner sep=1pt] at (-0.226,1.280) {A};
+  \node[font=\small, inner sep=1pt] at (-1.141,-0.618) {B};
+  \node[font=\small, inner sep=1pt] at (0.918,-0.914) {C};
+  \node[font=\small, inner sep=1pt] at (1.274,-0.081) {D};
+  \node[font=\small, inner sep=1pt] at (1.892,-0.780) {P};
+\end{tikzpicture}

@@ -1,0 +1,23 @@
+% 0142(본책 29쪽) — 직각삼각형 ABC(∠C=90°), BC 위의 D(AD=BD 같음 표시), AC=12(파선 호), 각 x(∠B)·y(∠ADC), 직각 표시(C). 라벨 A~D. 스캔 삽화를 TikZ 로 다시 그림. 답(cos y)은 적지 않는다.
+\begin{tikzpicture}[scale=0.2, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (18,0); \coordinate (A) at (18,12); \coordinate (D) at (5,0);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (D);
+  % 직각 표시(C)
+  \draw[line width=0.4pt] (16.8,0) -- (16.8,1.2) -- (18,1.2);
+  % 같음 표시(BD=AD)
+  \draw[line width=0.4pt] (2.2,-0.5) -- (2.2,0.5) (2.8,-0.5) -- (2.8,0.5);
+  \draw[line width=0.4pt] (11.05,6.55) -- (11.95,5.45) (11.55,6.95) -- (12.45,5.85);
+  % 각 x(B)·y(D)
+  \draw[line width=0.4pt] (2.2,0) arc[start angle=0, end angle=33.7, radius=2.2];
+  \node[font=\small] at (3.2,1.0) {$x$};
+  \draw[line width=0.4pt] (7,0) arc[start angle=0, end angle=42.7, radius=2];
+  \node[font=\small] at (7.9,1.1) {$y$};
+  % AC=12(파선 호)
+  \draw[dashed, line width=0.4pt] (A) to[bend left=30] (C);
+  \node[font=\small] at (20.6,6) {$12$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, below right] at (C) {C};
+  \node[font=\small, below] at (D) {D};
+\end{tikzpicture}

@@ -1,0 +1,21 @@
+% 0058(본책 15쪽) — ∠BAC=90° 직각삼각형 ABC(B 가 멀리 왼쪽·A 위·C 오른쪽 아래), AD⊥BC. 라벨: A·B·C·D, 7(AC)·25(BC) 파선 호, 각 x(∠BAD), 직각 표시 A·D. 스캔 삽화를 TikZ 로 다시 그림. 답(sin x)은 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (3.75,0); \coordinate (A) at (3.456,1.008); \coordinate (D) at (3.456,0);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (D);
+  % 직각 표시
+  \draw[line width=0.4pt] (3.3024,0.9632) -- (3.3472,0.8096) -- (3.5008,0.8544);
+  \draw[line width=0.4pt] (3.296,0) -- (3.296,0.16) -- (3.456,0.16);
+  % 각 x(∠BAD)
+  \draw[line width=0.4pt] ($(A)!0.4cm!(B)$) arc[start angle=-163.74, end angle=-90, radius=0.4cm];
+  \node[font=\small] at (3.13,0.6) {$x$};
+  % 길이(파선 호)
+  \draw[dashed, line width=0.4pt] (B) to[bend right=18] (C);
+  \draw[dashed, line width=0.4pt] (A) to[bend left=40] (C);
+  \node[font=\small] at (1.9,-0.38) {$25$};
+  \node[font=\small] at (3.92,0.6) {$7$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, below] at (3.35,-0.02) {D};
+\end{tikzpicture}

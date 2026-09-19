@@ -1,0 +1,19 @@
+% 0441(본책 80쪽) — 원 O, 지름 AD, 현 AC·DB, OB·OC, ∠ADB=30°, ∠CAD=25°. 답은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.100,0.000) -- (1.100,0.000);
+  \draw (-1.100,0.000) -- (0.707,-0.843);
+  \draw (1.100,0.000) -- (-0.550,-0.953);
+  \draw (0.000,0.000) -- (-0.550,-0.953);
+  \draw (0.000,0.000) -- (0.707,-0.843);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.692,-0.190) arc (335.0:360.0:0.450);
+  \draw[line width=0.4pt] (0.650,0.000) arc (180.0:210.0:0.450);
+  \node[font=\small, inner sep=0.5pt] at (-0.338,-0.169) {$25^\circ$};
+  \node[font=\small, inner sep=0.5pt] at (0.347,-0.202) {$30^\circ$};
+  \node[font=\small, inner sep=1.5pt] at (-1.300,0.000) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.300,0.000) {D};
+  \node[font=\small, inner sep=1.5pt] at (-0.650,-1.126) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.836,-0.996) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.000,0.200) {O};
+\end{tikzpicture}

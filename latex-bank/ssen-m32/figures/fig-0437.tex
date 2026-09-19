@@ -1,0 +1,28 @@
+% 0437(본책 79쪽) — 원, AD∥CF(화살표 표시), 현 AD·DB·AE·EC·FB·FC, ∠ADB=25°, ∠BFC=21°, ∠AEC=x, ∠DBF=y. 답은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.076,-0.229) -- (-0.340,1.046);
+  \draw (-0.340,1.046) -- (-0.340,-1.046);
+  \draw (-1.076,-0.229) -- (0.516,0.971);
+  \draw (0.516,0.971) -- (0.340,-1.046);
+  \draw (1.076,0.229) -- (-0.340,-1.046);
+  \draw (1.076,0.229) -- (0.340,-1.046);
+  \draw[-stealth, line width=0.6pt] (-0.733,0.365) -- (-0.683,0.452);
+  \draw[-stealth, line width=0.6pt] (0.683,-0.452) -- (0.733,-0.365);
+  \draw[line width=0.4pt] (-0.515,0.743) arc (240.0:270.0:0.350);
+  \draw[line width=0.4pt] (0.779,-0.039) arc (222.0:240.0:0.400);
+  \fill[green!15] (0.516,0.971) -- (0.277,0.791) arc (217.0:265.0:0.300) -- cycle;
+  \draw[line width=0.4pt] (0.277,0.791) arc (217.0:265.0:0.300);
+  \fill[green!15] (-0.340,-1.046) -- (-0.117,-0.845) arc (42.0:90.0:0.300) -- cycle;
+  \draw[line width=0.4pt] (-0.117,-0.845) arc (42.0:90.0:0.300);
+  \node[font=\small, inner sep=0.5pt] at (-0.500,0.447) {$25^\circ$};
+  \node[font=\small, inner sep=0.5pt] at (0.635,-0.315) {$21^\circ$};
+  \node[font=\small, inner sep=0.5pt] at (0.274,0.534) {$x$};
+  \node[font=\small, inner sep=0.5pt] at (-0.137,-0.589) {$y$};
+  \node[font=\small, inner sep=1.5pt] at (-0.402,1.236) {D};
+  \node[font=\small, inner sep=1.5pt] at (0.610,1.148) {E};
+  \node[font=\small, inner sep=1.5pt] at (1.272,0.270) {F};
+  \node[font=\small, inner sep=1.5pt] at (-1.272,-0.270) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.402,-1.236) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.402,-1.236) {C};
+\end{tikzpicture}

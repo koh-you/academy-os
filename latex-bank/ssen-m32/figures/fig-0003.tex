@@ -1,0 +1,14 @@
+% 0003~0004 공통 그림(본책 9쪽) — 직각삼각형 ABC(∠A=90°), AB=2 · AC=4, 빗변 BC 가 아래. 스캔 삽화를 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(2 · 4 · 꼭짓점 · 직각 표시). BC 의 길이(답)는 적지 않는다.
+\begin{tikzpicture}[scale=0.62, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (A) at (0.894,1.789); \coordinate (C) at (4.472,0);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] ($(A)!0.16!(B)$) -- ($(A)!0.16!(B)+(0.286,-0.143)$) -- ($(A)!0.08!(C)$);
+  \draw[dashed, line width=0.3pt] (B) to[bend left=30] (A);
+  \draw[dashed, line width=0.3pt] (A) to[bend left=18] (C);
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small] at (0.05,1.2) {$2$};
+  \node[font=\small] at (2.9,1.5) {$4$};
+\end{tikzpicture}

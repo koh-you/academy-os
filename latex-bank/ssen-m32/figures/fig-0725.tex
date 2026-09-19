@@ -1,0 +1,40 @@
+% 0725(본책 129쪽) — 학생 20명의 윗몸 일으키기(가로 10~50, 격자 5회)·턱걸이(세로 4~12, 격자 1회) 횟수 산점도. 스캔 산점도를 TikZ 로 다시 그림(점 20개 원문 위치).
+\begin{tikzpicture}[line width=0.5pt]
+  \draw[gray!55, line width=0.25pt] (0,0) grid[xstep=0.25cm, ystep=0.25cm] (2.75,2.5);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (2.9,0);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (0,2.65);
+  \draw[line width=0.5pt] (-0.06,0.075) -- (0.06,0.135) (-0.06,0.145) -- (0.06,0.205);
+  \node[font=\scriptsize, below left=0pt, inner sep=1.5pt] at (0,0) {$0$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (0.5,0) {$10$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (1,0) {$20$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (1.5,0) {$30$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (2,0) {$40$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (2.5,0) {$50$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,0.25) {$4$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,0.75) {$6$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,1.25) {$8$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,1.75) {$10$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,2.25) {$12$};
+  \node[font=\scriptsize, anchor=north east, inner sep=1pt] at (2.9,-0.38) {윗몸 일으키기(회)};
+  \node[font=\scriptsize, align=center, anchor=north east, inner sep=1pt] at (-0.42,2.65) {턱\\걸\\이\\(회)};
+  \fill (0.5,0.75) circle (1.5pt);
+  \fill (0.75,1) circle (1.5pt);
+  \fill (0.75,0.25) circle (1.5pt);
+  \fill (1,1.5) circle (1.5pt);
+  \fill (1,0.75) circle (1.5pt);
+  \fill (1.25,1.5) circle (1.5pt);
+  \fill (1.25,1.25) circle (1.5pt);
+  \fill (1.25,0.75) circle (1.5pt);
+  \fill (1.25,0.5) circle (1.5pt);
+  \fill (1.5,1.25) circle (1.5pt);
+  \fill (1.5,0.75) circle (1.5pt);
+  \fill (1.75,2.25) circle (1.5pt);
+  \fill (1.75,1.75) circle (1.5pt);
+  \fill (1.75,1.5) circle (1.5pt);
+  \fill (1.75,1.25) circle (1.5pt);
+  \fill (2,2) circle (1.5pt);
+  \fill (2,1) circle (1.5pt);
+  \fill (2.25,2) circle (1.5pt);
+  \fill (2.25,1.5) circle (1.5pt);
+  \fill (2.5,2.25) circle (1.5pt);
+\end{tikzpicture}

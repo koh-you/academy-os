@@ -1,0 +1,12 @@
+% 0250(본책 49쪽) — △ABC(∠B=60°, BC=5 cm). 스캔 삽화를 TikZ 로 다시 그림. 답(AC)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (1.2,0); \coordinate (A) at (0.96,1.66);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] (0.3,0) arc[start angle=0, end angle=60, radius=0.3];
+  \node[font=\small] at (0.52,0.22) {$60^\circ$};
+  \draw[dashed, line width=0.4pt] (B) to[bend right=25] (C);
+  \node[font=\small] at (0.6,-0.32) {$5\,\mathrm{cm}$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+\end{tikzpicture}

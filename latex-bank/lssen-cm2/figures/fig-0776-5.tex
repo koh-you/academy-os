@@ -1,0 +1,10 @@
+% 0776 ⑤ 원 A 하나와 바깥의 B 라벨(본책 110쪽) — 보기 벤 다이어그램: 전체집합 U 안에 원 A, 그 오른쪽 바깥에 B 글자만(원 없음, 원문 그대로). 스캔 그림을 TikZ 로 다시 그림(그림 자체가 보기).
+% 라벨은 원문 그대로 U·A·B 만.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt, every node/.style={font=\small}, baseline=(current bounding box.center)]
+  \path (-2.2,-1.6) rectangle (2.2,1.7); % 보기 행 사이 여백
+  \draw[line width=0.6pt, rounded corners=3pt] (-2.0,-1.35) rectangle (2.0,1.35);
+  \node[fill=white, inner sep=1.5pt] at (-1.55,1.35) {$U$};
+  \draw[line width=0.6pt] (-0.7,-0.15) circle (0.75);
+  \node[fill=white, inner sep=1pt] at (-0.7,0.6) {$A$};
+  \node at (1.1,-0.15) {$B$};
+\end{tikzpicture}

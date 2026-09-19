@@ -1,0 +1,20 @@
+% 0162(본책 35쪽) — △ABC(∠B=30°, ∠ACB=120°, BC=2), A 에서 직선 BC 에 내린 수선의 발 H(BC 연장선 위), AH=h. 스캔 삽화를 TikZ 로 다시 그림. 답(h)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (1.6,0); \coordinate (H) at (2.4,0); \coordinate (A) at (2.4,1.386);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[dashed, line width=0.5pt] (C) -- (H);
+  \draw (A) -- (H);
+  \draw[line width=0.4pt] (2.18,0) -- (2.18,0.22) -- (2.4,0.22);
+  \draw[line width=0.4pt] (0.6,0) arc[start angle=0, end angle=30, radius=0.6];
+  \node[font=\small] at (0.95,0.32) {$30^\circ$};
+  \draw[line width=0.4pt] (1.2,0) arc[start angle=180, end angle=60, radius=0.4];
+  \node[font=\small] at (1.05,0.62) {$120^\circ$};
+  \draw[dashed, line width=0.4pt] (A) to[bend left=25] (H);
+  \draw[dashed, line width=0.4pt] (B) to[bend right=25] (C);
+  \node[font=\small] at (2.75,0.7) {$h$};
+  \node[font=\small] at (0.8,-0.45) {$2$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, below] at (C) {C};
+  \node[font=\small, below] at (H) {H};
+\end{tikzpicture}

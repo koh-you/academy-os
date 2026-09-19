@@ -1,0 +1,18 @@
+% 0297(본책 57쪽) — 반지름 16 cm 인 원 O, AB⊥OC, OM=CM 같은 변 표시, OB=16 cm. 답(AB)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.953,-0.550) -- (0.953,-0.550);
+  \draw (0.000,0.000) -- (0.000,-1.100);
+  \draw (0.000,0.000) -- (0.953,-0.550);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (0.120,-0.550) -- (0.120,-0.430) -- (0.000,-0.430);
+  \draw[line width=0.4pt] (0.060,-0.275) -- (-0.060,-0.275);
+  \draw[line width=0.4pt] (0.060,-0.825) -- (-0.060,-0.825);
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend left=25] (0.953,-0.550);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.750,-0.050) {$16\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-0.140,0.140) {O};
+  \node[font=\small, inner sep=1.5pt] at (-1.126,-0.650) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.126,-0.650) {B};
+  \node[font=\small, inner sep=1.5pt] at (-0.160,-0.400) {M};
+  \node[font=\small, inner sep=1.5pt] at (0.000,-1.300) {C};
+\end{tikzpicture}

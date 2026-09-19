@@ -1,0 +1,19 @@
+% 0573(본책 103쪽) — 점 P 에서 접하는 두 원(큰 원·작은 원), 공통 접선 EF, 직선 APC·BPD, 현 AB·CD. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.1, line width=0.6pt]
+  \draw (-1.000,0.000) circle (1.000);
+  \draw (0.550,0.000) circle (0.550);
+  \draw (0.000,1.200) -- (0.000,-1.200);
+  \fill (0.000,1.200) circle (1.2pt);
+  \fill (0.000,-1.200) circle (1.2pt);
+  \draw (-1.342,0.940) -- (0.738,-0.517);
+  \draw (-1.500,-0.866) -- (0.825,0.476);
+  \draw (-1.342,0.940) -- (-1.500,-0.866);
+  \draw (0.738,-0.517) -- (0.825,0.476);
+  \node[font=\small, anchor=south east, inner sep=1.5pt] at (-1.342,0.960) {A};
+  \node[font=\small, anchor=north east, inner sep=1.5pt] at (-1.500,-0.886) {B};
+  \node[font=\small, anchor=north west, inner sep=1.5pt] at (0.738,-0.537) {C};
+  \node[font=\small, anchor=south west, inner sep=1.5pt] at (0.825,0.496) {D};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-0.020,0.020) {P};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.000,1.200) {E};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.000,-1.200) {F};
+\end{tikzpicture}

@@ -1,0 +1,18 @@
+% 0548(본책 99쪽) — 원, 접선 TA(접점 A, 아래), BA=BC, ∠CAT=70°, ∠x(∠BAT'). 스캔 삽화를 TikZ 로 다시 그림. 답(x)은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-1.050,-1.000) -- (1.050,-1.000);
+  \draw (-0.000,-1.000) -- (-0.643,0.766) -- (0.940,0.342) -- (-0.000,-1.000);
+  \draw[line width=0.4pt] (0.130,0.486) -- (0.167,0.622);
+  \draw[line width=0.4pt] (0.413,-0.289) -- (0.527,-0.369);
+  \draw[line width=0.4pt] (-0.103,-0.718) arc[start angle=110.000, end angle=180.000, radius=0.300];
+  \node[font=\small, inner sep=1pt] at (-0.410,-0.713) {$70^\circ$};
+  \fill[yellow!35] (-0.000,-1.000) -- ++(0.000:0.240) arc[start angle=0.000, end angle=55.000, radius=0.240] -- cycle;
+  \draw[line width=0.4pt] (0.240,-1.000) arc[start angle=0.000, end angle=55.000, radius=0.240];
+  \node[font=\small, inner sep=1pt] at (0.355,-0.815) {$x$};
+  \fill (-0.850,-1.000) circle (1.2pt);
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (-0.000,-1.050) {A};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (-0.850,-1.050) {T};
+  \node[font=\small, anchor=south east, inner sep=1.5pt] at (-0.643,0.766) {C};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.940,0.342) {B};
+\end{tikzpicture}

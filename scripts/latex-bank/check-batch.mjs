@@ -21,7 +21,8 @@ if (!file) {
 const bankDir = path.resolve(args.bank ?? "latex-bank/ssen-basic-cm2");
 const batch = JSON.parse(await readFile(file, "utf8"));
 const name = path.basename(file, path.extname(file)).replace(/[^\w-]/g, "_");
-const tempDir = path.join(path.dirname(bankDir), `_batch-${name}`);
+// 책마다 임시 폴더를 분리한다 — 다른 책의 같은 글자 배치를 동시에 검사할 때 EBUSY 충돌 방지.
+const tempDir = path.join(path.dirname(bankDir), `_batch-${path.basename(bankDir)}-${name}`);
 await rm(tempDir, { recursive: true, force: true });
 await mkdir(tempDir, { recursive: true });
 await cp(path.join(bankDir, "figures"), path.join(tempDir, "figures"), { recursive: true });

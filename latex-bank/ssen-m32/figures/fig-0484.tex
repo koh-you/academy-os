@@ -1,0 +1,19 @@
+% 0484(본책 87쪽) — 원 O, 두 현 AB·CD 의 교점 P, ∠APD=80°, 호 AD=3π, 호 BC=5π. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.550,0.953) -- (0.953,-0.550);
+  \draw (-0.707,-0.843) -- (0.550,0.953);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (0.258,0.535) arc (55.0:135.0:0.280);
+  \node[font=\small, inner sep=0.5pt] at (0.053,0.804) {$80^\circ$};
+  \draw[line width=0.4pt, <->] (-0.615,1.065) arc (120.0:60.0:1.230);
+  \node[font=\small, inner sep=0.5pt] at (0.000,1.520) {$3\pi$};
+  \draw[line width=0.4pt, <->] (-0.791,-0.942) arc (230.0:330.0:1.230);
+  \node[font=\small, inner sep=0.5pt] at (0.264,-1.497) {$5\pi$};
+  \node[font=\small, inner sep=1pt] at (-0.650,1.126) {A};
+  \node[font=\small, inner sep=1pt] at (0.650,1.126) {D};
+  \node[font=\small, inner sep=1pt] at (1.126,-0.650) {B};
+  \node[font=\small, inner sep=1pt] at (-0.836,-0.996) {C};
+  \node[font=\small, inner sep=1pt] at (0.297,0.306) {P};
+  \node[font=\small, inner sep=1pt] at (0.000,-0.200) {O};
+\end{tikzpicture}

@@ -1,0 +1,17 @@
+% 0056(본책 14쪽) — 모든 변이 꼭짓점에서 수직으로 만나는 도형(윗 직사각형 가로 3x-1 · x · 3x-1, 세로 x+2 · 아래 가운데 x×x 돌출). 스캔 삽화라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 5개(x+2 · 3x-1 · x · 3x-1 · x). 넓이 등 답의 근거는 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.5pt]
+  \def\a{1.5}\def\b{0.5}\def\h{1.1}
+  \fill[red!20!orange!25] (0,0) -- (\a,0) -- (\a,-\b) -- (\a+\b,-\b) -- (\a+\b,0) -- (2*\a+\b,0) -- (2*\a+\b,\h) -- (0,\h) -- cycle;
+  \draw[line width=0.6pt] (0,0) -- (\a,0) -- (\a,-\b) -- (\a+\b,-\b) -- (\a+\b,0) -- (2*\a+\b,0) -- (2*\a+\b,\h) -- (0,\h) -- cycle;
+  % 치수 안내 점선(원문의 점선 호)
+  \draw[densely dotted, line width=0.4pt] (2*\a+\b,\h) .. controls (2*\a+\b+0.3,\h*0.75) and (2*\a+\b+0.3,\h*0.25) .. (2*\a+\b,0);
+  \draw[densely dotted, line width=0.4pt] (0,0) .. controls (0.2,-0.28) and (\a-0.2,-0.28) .. (\a,0);
+  \draw[densely dotted, line width=0.4pt] (\a+\b,0) .. controls (\a+\b+0.2,-0.28) and (2*\a+\b-0.2,-0.28) .. (2*\a+\b,0);
+  % 라벨(원문 그대로)
+  \node[right, font=\small, inner sep=1pt] at (2*\a+\b+0.3,\h/2) {$x+2$};
+  \node[below, font=\small, inner sep=1pt] at (\a/2,-0.22) {$3x-1$};
+  \node[font=\small, inner sep=0.5pt] at (\a+\b/2,-\b/2) {$x$};
+  \node[below, font=\small, inner sep=1pt] at (\a+\b+\a/2,-0.22) {$3x-1$};
+  \node[below, font=\small, inner sep=1pt] at (\a+\b/2,-\b-0.02) {$x$};
+\end{tikzpicture}

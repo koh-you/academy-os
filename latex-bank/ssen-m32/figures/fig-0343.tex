@@ -1,0 +1,21 @@
+% 0343(본책 65쪽) — PX, PY, AB 가 X, Y, C 에서 원 O 에 접함, PA=3 cm, PB=4 cm, PX=5 cm. 답(AB)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (2.100,-1.000) -- (0.587,0.863);
+  \draw (-0.300,-1.000) -- (2.100,-1.000);
+  \draw (1.339,-0.063) -- (0.420,-1.000);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (0.776,0.630) to[bend left=25] (2.100,-1.000);
+  \node[font=\small, inner sep=1.5pt] at (1.960,0.280) {$5\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (1.339,-0.063) to[bend left=25] (2.100,-1.000);
+  \node[font=\small, inner sep=1.5pt] at (1.300,-0.500) {$3\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.420,-1.000) to[bend right=20] (2.100,-1.000);
+  \node[font=\small, inner sep=1.5pt] at (1.250,-1.200) {$4\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-0.160,0.000) {O};
+  \node[font=\small, inner sep=1.5pt] at (0.776,0.800) {X};
+  \node[font=\small, inner sep=1.5pt] at (-0.140,-1.140) {Y};
+  \node[font=\small, inner sep=1.5pt] at (1.319,0.107) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.440,-1.170) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.564,-0.700) {C};
+  \node[font=\small, inner sep=1.5pt] at (2.260,-1.000) {P};
+\end{tikzpicture}

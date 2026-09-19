@@ -1,0 +1,40 @@
+% 0292(본책 44쪽) — 세 모서리 x, x, x+3 인 직육면체 나무 블록(붉은색 채움)의 윗면에 한 모서리 1 인 정육면체 구멍 두 개. 숨은 모서리·구멍 아래쪽은 파선. 스캔 삽화라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 셋(윗면 왼쪽 깊이 「x」 · 왼쪽 세로 「x」 · 아래 가로 「x+3」). 구멍 크기 1 은 발문에만 있고 그림에 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.5pt]
+  \def\a{3.3}\def\b{1.35}\def\dx{1.0}\def\dy{0.62}
+  % 겉면 채움
+  \fill[red!22] (0,0) rectangle (\a,\b);
+  \fill[red!14] (0,\b) -- (\a,\b) -- (\a+\dx,\b+\dy) -- (\dx,\b+\dy) -- cycle;
+  \fill[red!32] (\a,0) -- (\a+\dx,\dy) -- (\a+\dx,\b+\dy) -- (\a,\b) -- cycle;
+  % 겉모서리
+  \draw[line width=0.6pt] (0,0) rectangle (\a,\b);
+  \draw[line width=0.6pt] (0,\b) -- (\dx,\b+\dy) -- (\a+\dx,\b+\dy) -- (\a,\b);
+  \draw[line width=0.6pt] (\a,0) -- (\a+\dx,\dy) -- (\a+\dx,\b+\dy);
+  \draw[dashed, line width=0.4pt] (0,0) -- (\dx,\dy) -- (\a+\dx,\dy);
+  \draw[dashed, line width=0.4pt] (\dx,\dy) -- (\dx,\b+\dy);
+  % 정육면체 구멍 두 개 (윗면 위치 u, 깊이 비율 w · 한 변 s)
+  \foreach \u in {0.55, 2.05} {
+    \pgfmathsetmacro{\s}{0.46}
+    \pgfmathsetmacro{\w}{0.36}
+    \pgfmathsetmacro{\wd}{\s/\b}
+    \pgfmathsetmacro{\px}{\u+\w*\dx}\pgfmathsetmacro{\py}{\b+\w*\dy}
+    \pgfmathsetmacro{\qx}{\u+\s+\w*\dx}
+    \pgfmathsetmacro{\rx}{\u+\s+(\w+\wd)*\dx}\pgfmathsetmacro{\ry}{\b+(\w+\wd)*\dy}
+    \pgfmathsetmacro{\tx}{\u+(\w+\wd)*\dx}
+    % 윗면 구멍 입구(안쪽이 보이도록 진하게) 와 숨은 모서리(파선)
+    \fill[red!40] (\px,\py) -- (\qx,\py) -- (\rx,\ry) -- (\tx,\ry) -- cycle;
+    \draw[line width=0.55pt] (\px,\py) -- (\qx,\py) -- (\rx,\ry) -- (\tx,\ry) -- cycle;
+    \draw[dashed, line width=0.4pt] (\px,\py-\s) -- (\qx,\py-\s) -- (\rx,\ry-\s) -- (\tx,\ry-\s) -- cycle;
+    \draw[dashed, line width=0.4pt] (\px,\py) -- (\px,\py-\s);
+    \draw[dashed, line width=0.4pt] (\qx,\py) -- (\qx,\py-\s);
+    \draw[dashed, line width=0.4pt] (\rx,\ry) -- (\rx,\ry-\s);
+    \draw[dashed, line width=0.4pt] (\tx,\ry) -- (\tx,\ry-\s);
+  }
+  % 치수 안내선(점선) 과 라벨
+  \draw[dotted, line width=0.4pt] (-0.12,\b+0.08) to[bend left=25] (\dx-0.1,\b+\dy+0.12);
+  \node[font=\small, above left, inner sep=1pt] at (\dx/2-0.15,\b+\dy/2+0.12) {$x$};
+  \draw[dotted, line width=0.4pt] (-0.1,-0.05) to[bend left=25] (-0.12,\b+0.05);
+  \node[font=\small, left, inner sep=1pt] at (-0.28,\b/2) {$x$};
+  \draw[dotted, line width=0.4pt] (-0.05,-0.1) to[bend right=12] (\a+0.05,-0.1);
+  \node[font=\small, below, inner sep=1pt] at (\a/2,-0.32) {$x+3$};
+\end{tikzpicture}

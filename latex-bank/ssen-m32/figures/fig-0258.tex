@@ -1,0 +1,17 @@
+% 0258(본책 50쪽) — □ABCD(AD=6 cm, CD=12 cm, ∠B=90°, ∠D=120°). 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)·AB·BC 는 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (0,1.03); \coordinate (B) at (0,0); \coordinate (C) at (1.78,0); \coordinate (D) at (0.77,1.18);
+  \fill[yellow!45] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[line width=0.4pt] (0,0.14) -- (0.14,0.14) -- (0.14,0);
+  \draw[line width=0.4pt] ($(D)+(191:0.22)$) arc[start angle=191, end angle=311, radius=0.22];
+  \node[font=\small] at (0.72,0.85) {$120^\circ$};
+  \draw[dashed, line width=0.4pt] (A) to[bend left=25] (D);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.3,1.32) {$6\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (D) to[bend left=25] (C);
+  \node[font=\small, fill=white, inner sep=1pt] at (1.62,0.62) {$12\,\mathrm{cm}$};
+  \node[font=\small, left] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, above] at (D) {D};
+\end{tikzpicture}

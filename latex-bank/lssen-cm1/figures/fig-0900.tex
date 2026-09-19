@@ -1,0 +1,14 @@
+% 0900(본책 125쪽) — 연립부등식의 해를 나타낸 수직선: -1 에서 열린 점(○)으로 시작해 오른쪽으로 가는 선, 3 에서 닫힌 점(●)으로 시작해 오른쪽으로 가는 선, 공통부분(3 이상)은 연노랑 채움. 라벨은 원문의 -1·3·x 뿐. 스캔 그림이라 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=0.9, line width=0.5pt]
+  \fill[yellow!35!green!20] (2.6,0) rectangle (4.4,0.75);
+  \draw[->, line width=0.7pt] (-1.2,0) -- (4.8,0);
+  \node[below right, font=\small, inner sep=1pt] at (4.4,0) {$x$};
+  \draw[line width=0.5pt] (0,0) -- (0,0.5);
+  \draw[->, line width=0.5pt] (0,0.5) -- (4.4,0.5);
+  \draw[line width=0.5pt] (2.6,0) -- (2.6,0.75);
+  \draw[->, line width=0.5pt] (2.6,0.75) -- (4.4,0.75);
+  \draw[fill=white, line width=0.5pt] (0,0) circle (2.2pt);
+  \fill (2.6,0) circle (2.2pt);
+  \node[below, font=\small, inner sep=2pt] at (0,0) {$-1$};
+  \node[below, font=\small, inner sep=2pt] at (2.6,0) {$3$};
+\end{tikzpicture}

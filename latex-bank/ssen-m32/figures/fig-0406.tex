@@ -1,0 +1,24 @@
+% 0406(본책 75쪽) — 원 O, 지름 AC, 현 BD·AB·DC, ∠BAC=55°, ∠ABD=42°, ∠BDC=x, ∠ACD=y. 답(x, y)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.843,0.707) -- (0.843,-0.707);
+  \draw (-1.034,-0.376) -- (0.631,0.901);
+  \draw (-0.843,0.707) -- (-1.034,-0.376);
+  \draw (0.631,0.901) -- (0.843,-0.707);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.895,0.412) arc (260.0:320.0:0.300);
+  \draw[line width=0.4pt] (-0.780,-0.181) arc (37.5:80.0:0.320);
+  \fill[green!15] (0.631,0.901) -- (0.393,0.718) arc (217.5:277.5:0.300) -- cycle;
+  \draw[line width=0.4pt] (0.393,0.718) arc (217.5:277.5:0.300);
+  \fill[green!15] (0.843,-0.707) -- (0.803,-0.410) arc (97.5:140.0:0.300) -- cycle;
+  \draw[line width=0.4pt] (0.803,-0.410) arc (97.5:140.0:0.300);
+  \node[font=\footnotesize, inner sep=0.5pt] at (-0.640,0.340) {$55^\circ$};
+  \node[font=\footnotesize, inner sep=0.5pt] at (-0.760,0.000) {$42^\circ$};
+  \node[font=\small, inner sep=0.5pt] at (0.440,0.439) {$x$};
+  \node[font=\small, inner sep=0.5pt] at (0.602,-0.269) {$y$};
+  \node[font=\small, inner sep=1.5pt] at (-0.996,0.836) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.222,-0.445) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.996,-0.836) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.746,1.065) {D};
+  \node[font=\small, inner sep=1.5pt] at (0.200,0.000) {O};
+\end{tikzpicture}

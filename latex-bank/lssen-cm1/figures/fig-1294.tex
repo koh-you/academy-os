@@ -1,0 +1,14 @@
+% 1294(본책 180쪽) — 삼각형 ABC 에서 꼭짓점 A 와 선분 BC 위의 네 점을 잇는 선분 4개, 선분 AB 위의 세 점과 선분 AC 위의 세 점을 잇는(BC 에 평행한) 선분 3개. 라벨은 원문의 A, B, C 만. 스캔 그림을 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (1.75,2.1);
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (2.7,0);
+  \draw (A) -- (B) -- (C) -- cycle;
+  % A 와 BC 위의 네 점
+  \foreach \t in {0.2,0.4,0.6,0.8} { \draw (A) -- ($(B)!\t!(C)$); }
+  % AB 위의 세 점과 AC 위의 세 점을 잇는 선분
+  \foreach \t in {0.25,0.5,0.75} { \draw ($(A)!\t!(B)$) -- ($(A)!\t!(C)$); }
+  \node[above, font=\small, inner sep=1pt] at (A) {$\mathrm{A}$};
+  \node[below left, font=\small, inner sep=1pt] at (B) {$\mathrm{B}$};
+  \node[below right, font=\small, inner sep=1pt] at (C) {$\mathrm{C}$};
+\end{tikzpicture}

@@ -1,0 +1,16 @@
+% 0666(본책 119쪽) — 1반·2반의 5회 단체 줄넘기 횟수 표(1반 4 5 6 4 5 · 2반 0 8 5 10 2 · 단위: 회). 스캔 표를 tabular 로 옮김(대각선 머리 칸은 tikz).
+{\renewcommand{\arraystretch}{1.35}\small
+\begin{tabular}{@{}r@{}}
+{\footnotesize (단위: 회)} \\[1pt]
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\begin{tikzpicture}[baseline=(c.base)]
+  \node[inner sep=0pt, minimum width=1.4cm, minimum height=0.8cm] (c) {};
+  \draw[line width=0.3pt] (c.north west) -- (c.south east);
+  \node[font=\small, anchor=north east, inner sep=1.5pt] at (c.north east) {회};
+  \node[font=\small, anchor=south west, inner sep=1.5pt] at (c.south west) {반};
+\end{tikzpicture} & $1$ & $2$ & $3$ & $4$ & $5$ \\ \hline
+$1$반 & $4$ & $5$ & $6$ & $4$ & $5$ \\ \hline
+$2$반 & $0$ & $8$ & $5$ & $10$ & $2$ \\ \hline
+\end{tabular}
+\end{tabular}}

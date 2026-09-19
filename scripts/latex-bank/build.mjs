@@ -144,7 +144,9 @@ function renderItemBody(id, rawItem, group, bank) {
     const env = item.choices_layout === "v" ? "choicesv" : item.choices_layout === "ii" ? "choicesii" : "choices32";
     // 분수(dfrac)·근호 보기는 키가 커 두 줄 배치에서 위아래 행이 맞닿는다 — 보이지 않는 지주(strut)로 행 높이를 벌린다(sty 수정 없이).
     const strut = item.choices.some((choice) => /\\dfrac|\\sqrt/.test(choice)) ? "\\rule[-3ex]{0pt}{8ex}" : "";
-    if (env === "choicesv" && item.choices.some((choice) => choice.replace(/\$[^$]*\$/g, "M").length > 26)) {
+    // 수식은 글자 수보다 넓게 찍히므로 수식 길이의 절반을 더해 잰다(라이트쎈 공통수학2 1381 ④ 처럼 한글 24자 + 긴 수식이 잘리던 것).
+    const visualLength = (choice) => choice.replace(/\$[^$]*\$/g, (math) => "M".repeat(Math.max(1, Math.round((math.length - 2) / 2)))).length;
+    if (env === "choicesv" && item.choices.some((choice) => visualLength(choice) > 26)) {
       // 긴 한글 보기(문장형)는 choicesv 의 \mbox 안에서 줄이 안 바뀌어 잘린다 — 문단으로 하나씩 놓는다.
       parts.push(`\\par\\medskip${item.choices.map((choice, index) => `\\par\\noindent\\hangindent=1.4em\\hangafter=1 {\\small ${CIRCLED[index]}}\\ ${choice}`).join("")}\\par\\medskip`);
     } else {
@@ -176,8 +178,13 @@ async function main() {
     process.exit(2);
   }
   const dir = path.resolve(args.bank);
-  const bank = JSON.parse(await readFile(path.join(dir, "items.json"), "utf8"));
-  cropSizes = JSON.parse(await readFile(path.join(dir, "figures", "crops.json"), "utf8").catch(() => "{}"));
+  // 수식 안의 `\,`(원소 나열 `\{1,\,2,\,5\}`)는 math glue 라 줄바꿈 지점이 된다 — 좁은 낱장에서 `5}` 가 다음 줄로 밀려 잘린다(라이트쎈 공통수학2 0678).
+  // 같은 폭의 kern(`\mkern3mu`)으로 바꿔 수식 안에서 줄이 안 바뀌게 한다(binoppenalty 규약과 같은 취지). 원천 items.json 은 그대로 둔다.
+  const bank = JSON.parse(await readFile(path.join(dir, "items.json"), "utf8"), (key, value) =>
+    // 쉼표(mathpunct) 뒤에도 TeX 이 자동으로 glue 를 넣어 줄이 바뀔 수 있으므로 `,\,` 는 `{,}`(Ord) + kern 으로 바꾼다.
+    typeof value === "string" && value.includes("\\,") ? value.replace(/\$([^$]*)\$/g, (math) => math.replace(/,\\,/g, "{,}\\mkern3mu ").replace(/\\,/g, "\\mkern3mu ")) : value
+  );
+  cropSizes =JSON.parse(await readFile(path.join(dir, "figures", "crops.json"), "utf8").catch(() => "{}"));
   const xelatex = await findXelatex();
   await mkdir(path.join(dir, "items"), { recursive: true });
   await mkdir(path.join(dir, "build"), { recursive: true });
@@ -247,7 +254,8 @@ async function main() {
         lastSection = group.section;
       }
       if (group.passage) lines.push(`\\dmpassage{${group.passage}}`);
-      if (group.figure) lines.push(`\\begin{center}${renderFigure(group.figure)}\\end{center}`);
+      // 그룹 그림(공통 표·그림) 뒤 4mm: 첫 문항의 출처 배지가 5mm 위로 올라가 표 아래 행에 겹치지 않게 한다(쎈 중3-2 0124).
+      if (group.figure) lines.push(`\\begin{center}${renderFigure(group.figure)}\\end{center}\\vspace{4mm}`);
       // 문항 사이 최소 6mm(출처 배지가 1.5mm 올라가 있어 위 문항의 상자·그림 아래변에 닿지 않게). dmpnum 의 fill 은 그 위에 더해진다.
       // 문항 번호는 책에 찍힌 번호(id 의 뒤 두 자리 · 쪽마다 다시 시작)와 같게 카운터를 맞춘다.
       for (const id of group.items) {
@@ -284,10 +292,12 @@ async function main() {
         for (const id of group.items) {
           if (byLabel.has(id)) continue;
           const [pageText, numberText] = id.split("-");
-          const printedPage = Number(pageText);
+          const bookNumbered = bank.id_style === "number";
+          const printedPage = bookNumbered ? Number(bank.items[id]?.page ?? 0) : Number(pageText);
+          const numberSort = bookNumbered ? Number(id) : printedPage * 100 + Number(numberText);
           const unitIndex = manifest.units.findIndex((entry) => entry.code === unit.code);
           const synthesized = {
-            item_id: `${manifest.book.book_id}-${id}`, number_label: id, number_sort: printedPage * 100 + Number(numberText), printed_page: printedPage, pdf_page: printedPage,
+            item_id: `${manifest.book.book_id}-${id}`, number_label: id, number_sort: numberSort, printed_page: printedPage, pdf_page: printedPage,
             column: 0, layout: "column", type_label: group.section, tags: [], unit_index: unitIndex >= 0 ? unitIndex : 0, has_shared_passage: false, group_key: null,
             review_status: "ai_checked", review_note: "스캔 크롭에 없어 전사본(쪽 렌더)으로 추가한 문항", regions: []
           };
@@ -309,13 +319,15 @@ async function main() {
     const exported = [];
 
     /** 문항 하나를 낱장(110mm 폭)으로 조판해 잉크 범위만 남긴 캔버스로 돌려준다. 번호는 책 번호. */
-    const renderSingle = async (id, group, dpi) => {
+    // 낱장 조판은 worker 마다 다른 임시 파일(_single-<k>.tex)을 써서 동시에 돌린다(문항 1400개 × xelatex 2회 · 순차 4.5초/문항 → 16코어에서 수 분).
+    const renderSingle = async (id, group, dpi, slot = 0) => {
       const single = `${preamble}\\usepackage{multicol}\\geometry{paperwidth=110mm,paperheight=200mm,margin=6mm,headheight=0pt,headsep=0pt,footskip=0pt}\\pagestyle{empty}\\begin{document}\\setcounter{dmproblemcount}{${bookNumber(id) - 1}}
-${group.passage ? `\\dmpassage{${group.passage}}` : ""}${group.figure ? `\\begin{center}${renderFigure(group.figure)}\\end{center}` : ""}
+${group.passage ? `\\dmpassage{${group.passage}}${badgeRaiseMm(bank.items[id]) > 1.5 ? `\\vspace{${badgeRaiseMm(bank.items[id]) - 1.5}mm}` : ""}` : ""}${group.figure ? `\\begin{center}${renderFigure(group.figure)}\\end{center}\\vspace{4mm}` : ""}
 \\dmpnum{${id}}{\\input{items/${id}}}\\end{document}`;
-      await writeFile(path.join(dir, "_single.tex"), single, "utf8");
-      await compile(xelatex, dir, "_single.tex");
-      const pdfBytes = await readFile(path.join(dir, "build", "_single.pdf"));
+      const texName = `_single-${slot}.tex`;
+      await writeFile(path.join(dir, texName), single, "utf8");
+      await compile(xelatex, dir, texName);
+      const pdfBytes = await readFile(path.join(dir, "build", texName.replace(/\.tex$/, ".pdf")));
       const doc = await pdfjs.getDocument({ data: new Uint8Array(pdfBytes), verbosity: 0 }).promise;
       const page = await doc.getPage(1);
       const { canvas: rendered, context } = await renderPage(page, dpi / 72);
@@ -324,14 +336,14 @@ ${group.passage ? `\\dmpassage{${group.passage}}` : ""}${group.figure ? `\\begin
       return trimmed;
     };
 
-    for (const { group } of unitGroups) {
-      for (const id of group.items) {
+    const jobs = unitGroups.flatMap(({ group }) => group.items.map((id) => ({ id, group })));
+    const renderOne = async ({ id, group }, slot) => {
         let typeset;
         try {
-          typeset = await renderSingle(id, group, 200);
+          typeset = await renderSingle(id, group, 200, slot);
         } catch (error) {
           console.log(`  ${id}: ${error.message}`);
-          continue;
+          return;
         }
         const source = byLabel.get(id);
         if (exportDir && source) {
@@ -344,11 +356,13 @@ ${group.passage ? `\\dmpassage{${group.passage}}` : ""}${group.figure ? `\\begin
             regions: [{ kind: "body", position: 0, pdf_page: body?.pdf_page ?? null, bbox_normalized: body?.bbox_normalized ?? null, file, width: typeset.width, height: typeset.height }],
             // 구역·유형 라벨은 사람이 확정한 전사본(그룹 section)이 원천이다. 스캔 OCR 이 읽은 라벨은 회색 유형 쪽에서 자주 어긋난다.
             type_label: group.section,
+            // 인쇄 쪽도 전사본이 원천이다 — 스캔 manifest 는 pdf 쪽 + 고정 offset 이라 간지가 빠진 스캔에서는 뒤로 갈수록 어긋난다(쎈 중3-2: 33쪽부터 1~4쪽 차이).
+            ...(Number.isInteger(bank.items[id]?.page) ? { printed_page: bank.items[id].page } : {}),
             has_shared_passage: false,
             review_note: [source.review_note, `latex 조판본(latex-bank/${path.basename(dir)}/items/${id}.tex)`].filter(Boolean).join(" · ")
           });
         }
-        if (!args.review) continue;
+        if (!args.review) return;
         // review 시트: 왼쪽 원본 크롭(들), 오른쪽 조판본
         const crops = [];
         for (const region of source?.regions ?? []) {
@@ -376,9 +390,17 @@ ${group.passage ? `\\dmpassage{${group.passage}}` : ""}${group.figure ? `\\begin
         }
         context.drawImage(shown, cropWidth + 20, 34);
         await writeFile(path.join(dir, "review", `${id}.png`), await sheet.encode("png"));
+    };
+    // 동시 실행: --jobs N(기본 CPU 절반 · 최대 8). 순서는 결과에 영향이 없다(exported 는 item_id 로 찾는다).
+    const workers = Math.max(1, Math.min(8, Number(args.jobs) || Math.floor(os.cpus().length / 2)));
+    let cursor = 0;
+    await Promise.all(Array.from({ length: workers }, async (_, slot) => {
+      while (cursor < jobs.length) {
+        const job = jobs[cursor++];
+        await renderOne(job, slot);
       }
-    }
-    await rm(path.join(dir, "_single.tex"), { force: true });
+    }));
+    for (let slot = 0; slot < workers; slot++) await rm(path.join(dir, `_single-${slot}.tex`), { force: true });
     if (args.review) console.log(`review/: ${(await readdir(path.join(dir, "review"))).length}장`);
 
     if (exportDir) {

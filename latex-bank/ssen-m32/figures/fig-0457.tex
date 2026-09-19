@@ -1,0 +1,14 @@
+% 0457(본책 83쪽) — 원에 내접하는 정오각형 ABCDE, 대각선 AC·AD, ∠CAD 표시. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (0.000,1.100) -- (-1.046,0.340) -- (-0.647,-0.890) -- (0.647,-0.890) -- (1.046,0.340) -- cycle;
+  \draw (0.000,1.100) -- (-0.647,-0.890);
+  \draw (0.000,1.100) -- (0.647,-0.890);
+  \fill[green!15] (0.000,1.100) -- (-0.093,0.815) arc (-108.0:-72.0:0.300) -- cycle;
+  \draw[line width=0.4pt] (-0.093,0.815) arc (-108.0:-72.0:0.300);
+  \node[font=\small, inner sep=1pt] at (0.000,1.300) {A};
+  \node[font=\small, inner sep=1pt] at (-1.236,0.402) {B};
+  \node[font=\small, inner sep=1pt] at (-0.764,-1.052) {C};
+  \node[font=\small, inner sep=1pt] at (0.764,-1.052) {D};
+  \node[font=\small, inner sep=1pt] at (1.236,0.402) {E};
+\end{tikzpicture}

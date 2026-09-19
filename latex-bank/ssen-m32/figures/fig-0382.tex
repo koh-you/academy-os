@@ -1,0 +1,22 @@
+% 0382(본책 71쪽) — 원 O 의 지름 AB 의 양 끝에서 그은 접선과 점 P 의 접선이 만나는 C, D, AD 와 BC 의 교점 Q, AC=3, BD=7. 답(PQ)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw (-1.000,0.000) -- (1.000,0.000);
+  \draw (-1.000,-1.150) -- (-1.000,1.878);
+  \draw (1.000,-1.150) -- (1.000,1.878);
+  \draw (-1.000,0.655) -- (1.000,1.528);
+  \draw (-1.000,0.000) -- (1.000,1.528);
+  \draw (1.000,0.000) -- (-1.000,0.655);
+  \draw (-0.400,0.917) -- (-0.400,0.458);
+  \node[font=\small, inner sep=1.5pt] at (-1.160,0.327) {$3$};
+  \draw[dashed, line width=0.4pt] (1.000,0.000) to[bend right=20] (1.000,1.528);
+  \node[font=\small, inner sep=1.5pt] at (1.280,0.764) {$7$};
+  \node[font=\small, inner sep=1.5pt] at (-1.160,0.000) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.160,0.000) {B};
+  \node[font=\small, inner sep=1.5pt] at (-1.160,0.655) {C};
+  \node[font=\small, inner sep=1.5pt] at (1.160,1.528) {D};
+  \node[font=\small, inner sep=1.5pt] at (-0.400,1.077) {P};
+  \node[font=\small, inner sep=1.5pt] at (-0.315,0.311) {Q};
+  \node[font=\small, inner sep=1.5pt] at (0.000,-0.200) {O};
+\end{tikzpicture}

@@ -1,0 +1,24 @@
+% 0106(본책 23쪽) — 중심 O·반지름 1 사분원, ∠AOB=45° 인 반직선 OD(A 는 원 위·C 는 A 의 수선의 발), B 에서 세운 접선 위의 D. □ACBD 색칠. 라벨 O·A·B·C·D·45°·1(파선 호), 직각 표시(C·B). 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)은 적지 않는다.
+\begin{tikzpicture}[scale=2.6, line width=0.6pt]
+  \coordinate (O) at (0,0); \coordinate (B) at (1,0); \coordinate (A) at (0.7071,0.7071); \coordinate (C) at (0.7071,0); \coordinate (D) at (1,1);
+  \fill[gray!25] (A) -- (C) -- (B) -- (D) -- cycle;
+  \draw (O) -- (B);
+  \draw (O) -- (D);
+  \draw (A) -- (C);
+  \draw (B) -- (D);
+  \draw (B) arc[start angle=0, end angle=90, radius=1];
+  % 직각 표시
+  \draw[line width=0.4pt] (0.7071,0.06) -- (0.6471,0.06) -- (0.6471,0);
+  \draw[line width=0.4pt] (1,0.06) -- (0.94,0.06) -- (0.94,0);
+  % 각 45°
+  \draw[line width=0.4pt] (0.2,0) arc[start angle=0, end angle=45, radius=0.2];
+  \node[font=\small] at (0.36,0.1) {$45^\circ$};
+  % 반지름 1(파선 호)
+  \draw[dashed, line width=0.4pt] (O) to[bend left=22] (0,1);
+  \node[font=\small] at (-0.14,0.5) {$1$};
+  \node[font=\small, below left] at (O) {O};
+  \node[font=\small, above left] at (A) {A};
+  \node[font=\small, below right] at (B) {B};
+  \node[font=\small, below] at (C) {C};
+  \node[font=\small, above] at (D) {D};
+\end{tikzpicture}

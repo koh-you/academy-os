@@ -1,0 +1,21 @@
+% 0230(본책 45쪽) — 반지름 2 cm 인 반원 O(지름 AB), 호 위의 점 D·C(∠DAB=30°, BC=CD 같은 변 표시), □ABCD 색칠. 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (O) at (0,0); \coordinate (A) at (-1.1,0); \coordinate (B) at (1.1,0); \coordinate (D) at (0.55,0.953); \coordinate (C) at (0.953,0.55);
+  \fill[gray!25] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (B) arc[start angle=0, end angle=180, radius=1.1];
+  \draw (A) -- (B);
+  \draw (A) -- (D) -- (C) -- (B);
+  \fill (O) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.7,0) arc[start angle=0, end angle=30, radius=0.4];
+  \node[font=\small] at (-0.42,0.17) {$30^\circ$};
+  % 같은 변 표시
+  \draw[line width=0.4pt] ($(D)!0.5!(C)+(-0.05,-0.05)$) -- ($(D)!0.5!(C)+(0.05,0.05)$);
+  \draw[line width=0.4pt] ($(C)!0.5!(B)+(-0.06,0.03)$) -- ($(C)!0.5!(B)+(0.06,-0.03)$);
+  \draw[dashed, line width=0.4pt] (A) to[bend right=25] (O);
+  \node[font=\small] at (-0.55,-0.3) {$2\,\mathrm{cm}$};
+  \node[font=\small, left] at (A) {A};
+  \node[font=\small, right] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, above] at (D) {D};
+  \node[font=\small, below] at (0.05,-0.02) {O};
+\end{tikzpicture}

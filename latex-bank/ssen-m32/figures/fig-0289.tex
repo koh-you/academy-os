@@ -1,0 +1,16 @@
+% 0289(본책 56쪽) — 원 O, AB⊥OH, OH=5 cm, AB=10 cm. 답(둘레)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.776,-0.780) -- (0.776,-0.780);
+  \draw (0.000,0.000) -- (0.000,-0.780);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (0.120,-0.780) -- (0.120,-0.660) -- (0.000,-0.660);
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend left=25] (0.000,-0.780);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.300,-0.380) {$5\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (-0.776,-0.780) to[bend right=15] (0.776,-0.780);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.550,-1.120) {$10\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.000,0.200) {O};
+  \node[font=\small, inner sep=1.5pt] at (-0.917,-0.922) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.917,-0.922) {B};
+  \node[font=\small, inner sep=1.5pt] at (-0.140,-0.620) {H};
+\end{tikzpicture}

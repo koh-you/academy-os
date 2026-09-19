@@ -1,0 +1,23 @@
+% 0677(본책 94쪽) — 두 포물선 y=2x^2+3, y=-(x-3)^2+3 과 직선 x=t 의 교점 P·Q, 두 점 A(0,3)·B(3,3) 으로 만든 사각형 PAQB(연보라 채움). 라벨은 원문의 O·P·Q·A·B·x·y 와 세 식뿐. 스캔 그림이라 TikZ 로 다시 그림.
+% t 의 위치는 답(넓이 최소)이 읽히지 않게 임의로 둠.
+\begin{tikzpicture}[x=0.5cm, y=0.36cm, line width=0.5pt]
+  \fill[violet!20] (0.8,4.28) -- (0,3) -- (0.8,-1.84) -- (3,3) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-1.6,0) -- (5.9,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.6) -- (0,7.2) node[below right=-1pt, font=\small] {$y$};
+  \node[below left, font=\small, inner sep=1pt] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt, domain=-1.3:1.3, samples=50] plot (\x, {2*\x*\x+3});
+  \draw[line width=0.6pt, domain=0.55:5.45, samples=60] plot (\x, {-(\x-3)*(\x-3)+3});
+  \draw[line width=0.6pt] (0.8,-3.2) -- (0.8,6.6);
+  \draw[line width=0.6pt] (0.8,4.28) -- (0,3) -- (0.8,-1.84) -- (3,3) -- cycle;
+  \fill (0.8,4.28) circle (2.2pt);
+  \fill (0.8,-1.84) circle (2.2pt);
+  \fill (0,3) circle (2.2pt);
+  \fill (3,3) circle (2.2pt);
+  \node[left, font=\small, inner sep=1.5pt] at (0.8,4.6) {$\mathrm{P}$};
+  \node[right, font=\small, inner sep=1.5pt] at (0.85,-2.2) {$\mathrm{Q}$};
+  \node[left, font=\small, inner sep=1.5pt] at (0,2.8) {$\mathrm{A}$};
+  \node[above right, font=\small, inner sep=1pt] at (3,3) {$\mathrm{B}$};
+  \node[right, font=\small, inner sep=1pt] at (1.1,7.0) {$y=2x^2+3$};
+  \node[below, font=\small, inner sep=1pt] at (0.5,-3.3) {$x=t$};
+  \node[below, font=\small, inner sep=1pt] at (4.3,-3.3) {$y=-(x-3)^2+3$};
+\end{tikzpicture}

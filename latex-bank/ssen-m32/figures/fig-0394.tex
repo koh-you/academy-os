@@ -1,0 +1,15 @@
+% 0394(본책 73쪽) — 직선 x/9-y/12=-1 이 x축, y축과 만나는 A, B, △AOB 의 내접원 I(접점 D, E, F). 답(반지름)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw[line width=0.7pt, ->] (-1.5,0) -- (0.45,0) node[right, font=\small, inner sep=1pt] {$x$};
+  \draw[line width=0.7pt, ->] (0,-0.35) -- (0,1.85) node[above, font=\small, inner sep=1pt] {$y$};
+  \draw (-1.350,-0.360) -- (0.210,1.720);
+  \draw (-0.360,0.360) circle (0.360);
+  \fill (-0.360,0.360) circle (1.2pt);
+  \node[font=\small, inner sep=1.5pt] at (-0.980,-0.173) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.188,1.372) {B};
+  \node[font=\small, inner sep=1.5pt] at (-0.360,-0.160) {D};
+  \node[font=\small, inner sep=1.5pt] at (0.160,0.360) {E};
+  \node[font=\small, inner sep=1.5pt] at (-0.795,0.661) {F};
+  \node[font=\small, inner sep=1.5pt] at (-0.360,0.160) {I};
+  \node[font=\small, inner sep=1.5pt] at (0.160,-0.160) {O};
+\end{tikzpicture}

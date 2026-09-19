@@ -1,0 +1,20 @@
+% 0569(본책 102쪽) — △ABC(∠C=54°) 의 내접원 O, 접점 D·E·F, △DEF, ∠DEF=48°, ∠DFE 표시. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (1.814,1.633) -- (0.000,0.000) -- (3.000,0.000) -- cycle;
+  \draw (1.711,0.657) circle (0.657);
+  \draw (1.272,1.145) -- (1.711,0.000) -- (2.242,1.043) -- cycle;
+  \fill (1.711,0.657) circle (1.2pt);
+  \draw[line width=0.4pt] (2.765,0.324) arc[start angle=126.000, end angle=180.000, radius=0.400];
+  \node[font=\small, inner sep=1pt] at (2.448,0.281) {$54^\circ$};
+  \draw[line width=0.4pt] (1.847,0.267) arc[start angle=63.000, end angle=111.000, radius=0.300];
+  \node[font=\small, inner sep=1pt] at (1.737,0.499) {$48^\circ$};
+  \fill[yellow!35] (2.242,1.043) -- ++(174.000:0.220) arc[start angle=174.000, end angle=243.000, radius=0.220] -- cycle;
+  \draw[line width=0.4pt] (2.024,1.066) arc[start angle=174.000, end angle=243.000, radius=0.220];
+  \node[font=\small, anchor=south, inner sep=1.5pt] at (1.814,1.633) {A};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (0.000,0.000) {B};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (3.000,0.000) {C};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (1.252,1.165) {D};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (1.711,-0.050) {E};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (2.262,1.063) {F};
+  \node[font=\small, anchor=south east, inner sep=1.5pt] at (1.651,0.697) {O};
+\end{tikzpicture}

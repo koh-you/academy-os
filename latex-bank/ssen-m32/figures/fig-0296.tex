@@ -1,0 +1,17 @@
+% 0296(본책 57쪽) — 원 O, AB⊥OC(M 은 AB 와 OC 의 교점), AB=12 cm, CM=3 cm. 답(반지름)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.880,-0.660) -- (0.880,-0.660);
+  \draw (0.000,0.000) -- (0.000,-1.100);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (0.120,-0.660) -- (0.120,-0.540) -- (0.000,-0.540);
+  \draw[dashed, line width=0.4pt] (-0.880,-0.660) to[bend left=15] (0.880,-0.660);
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.320,-0.460) {$12\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.000,-0.660) to[bend left=30] (0.000,-1.100);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.420,-1.000) {$3\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.000,0.200) {O};
+  \node[font=\small, inner sep=1.5pt] at (-1.040,-0.780) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.040,-0.780) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.170,-0.800) {M};
+  \node[font=\small, inner sep=1.5pt] at (-0.140,-1.200) {C};
+\end{tikzpicture}

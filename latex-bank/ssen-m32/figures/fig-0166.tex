@@ -1,0 +1,16 @@
+% 0166(본책 35쪽) — 평행사변형 ABCD(AB=7cm, BC=6cm, ∠B=45°) 색칠. 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (1.7,0); \coordinate (A) at (1.4,1.4); \coordinate (D) at (3.1,1.4);
+  \fill[green!15] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[line width=0.4pt] (0.45,0) arc[start angle=0, end angle=45, radius=0.45];
+  \node[font=\small] at (0.8,0.25) {$45^\circ$};
+  \draw[dashed, line width=0.4pt] (B) to[bend left=25] (A);
+  \draw[dashed, line width=0.4pt] (B) to[bend right=25] (C);
+  \node[font=\small] at (0.25,1.0) {$7\,\mathrm{cm}$};
+  \node[font=\small] at (0.85,-0.5) {$6\,\mathrm{cm}$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, above] at (D) {D};
+\end{tikzpicture}

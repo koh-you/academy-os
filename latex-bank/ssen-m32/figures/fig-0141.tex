@@ -1,0 +1,19 @@
+% 0141(본책 29쪽) — AB=AC 인 이등변삼각형 ABC(∠A=36°), ∠B 의 이등분선이 AC 와 만나는 점 D, BC=4(파선 호). 라벨 A~D·36°·이등분 표시(점 2개). 스캔 삽화를 TikZ 로 다시 그림. 답(CD·cos 36°)은 적지 않는다.
+\begin{tikzpicture}[scale=0.5, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (4,0); \coordinate (A) at (2,6.155); \coordinate (D) at (3.236,2.351);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (B) -- (D);
+  % 각 36°(A)
+  \draw[line width=0.4pt] ($(A)+(-108:0.7)$) arc[start angle=-108, end angle=-72, radius=0.7];
+  \node[font=\small] at (3.1,5.3) {$36^\circ$};
+  % ∠B 이등분 표시(점)
+  \fill (0.55,0.2) circle (0.8pt);
+  \fill (0.4,0.5) circle (0.8pt);
+  % BC=4(파선 호)
+  \draw[dashed, line width=0.4pt] (B) to[bend right=25] (C);
+  \node[font=\small] at (2,-0.85) {$4$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, right] at (D) {D};
+\end{tikzpicture}

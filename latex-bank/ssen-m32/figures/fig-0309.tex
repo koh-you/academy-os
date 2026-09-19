@@ -1,0 +1,23 @@
+% 0309(본책 59쪽) — 원 O, AB·CD 에 내린 수선의 발 M, N, OA=3√2 cm, OM=ON=3 cm. 답(CD)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.465,0.997) -- (-0.997,-0.465);
+  \draw (0.465,0.997) -- (0.997,-0.465);
+  \draw (0.000,0.000) -- (-0.731,0.266);
+  \draw (0.000,0.000) -- (0.731,0.266);
+  \draw (0.000,0.000) -- (-0.465,0.997);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.690,0.379) -- (-0.577,0.338) -- (-0.618,0.225);
+  \draw[line width=0.4pt] (0.772,0.153) -- (0.659,0.112) -- (0.618,0.225);
+  \draw[dashed, line width=0.4pt] (-0.465,0.997) to[bend left=25] (0.000,0.000);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.050,0.620) {$3\sqrt{2}\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (-0.731,0.266) to[bend right=35] (0.731,0.266);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.000,-0.550) {$3\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.050,-0.220) {O};
+  \node[font=\small, inner sep=1.5pt] at (-0.549,1.178) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.178,-0.549) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.549,1.178) {C};
+  \node[font=\small, inner sep=1.5pt] at (1.178,-0.549) {D};
+  \node[font=\small, inner sep=1.5pt] at (-0.931,0.316) {M};
+  \node[font=\small, inner sep=1.5pt] at (0.931,0.316) {N};
+\end{tikzpicture}

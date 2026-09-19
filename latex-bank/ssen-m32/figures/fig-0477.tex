@@ -1,0 +1,18 @@
+% 0477(본책 86쪽) — △ABC 의 내심 I, AI 의 연장선과 외접원의 교점 D, 현 BD·CD, AI=8 cm, DI=13 cm. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (0.191,1.083) -- (-1.083,-0.191) -- (1.083,-0.191) -- cycle;
+  \draw (0.191,1.083) -- (-0.000,-1.100);
+  \draw (-1.083,-0.191) -- (-0.000,-1.100);
+  \draw (1.083,-0.191) -- (-0.000,-1.100);
+  \fill (0.123,0.309) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (0.191,1.083) to[bend left=35] (0.123,0.309);
+  \node[font=\small, inner sep=0.5pt] at (0.655,0.652) {$8\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.123,0.309) to[bend left=35] (-0.000,-1.100);
+  \node[font=\small, inner sep=0.5pt] at (0.619,-0.444) {$13\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1pt] at (0.226,1.280) {A};
+  \node[font=\small, inner sep=1pt] at (-1.280,-0.226) {B};
+  \node[font=\small, inner sep=1pt] at (1.280,-0.226) {C};
+  \node[font=\small, inner sep=1pt] at (-0.000,-1.300) {D};
+  \node[font=\small, inner sep=1pt] at (0.303,0.309) {I};
+\end{tikzpicture}

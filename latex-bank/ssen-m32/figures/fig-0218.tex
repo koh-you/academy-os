@@ -1,0 +1,42 @@
+% 0218(본책 43쪽) — 세 삼각형 A(변 c·a, 끼인각 60°), B(변 b·c, 끼인각 45°), C(변 a·b, 끼인각 30°). 스캔 삽화를 TikZ 로 다시 그림. 답(a:b:c)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  % 삼각형 A
+  \begin{scope}
+    \coordinate (P) at (0,0); \coordinate (Q) at (1.6,0); \coordinate (R) at (0.5,0.87);
+    \fill[orange!25] (P) -- (Q) -- (R) -- cycle;
+    \draw (P) -- (Q) -- (R) -- cycle;
+    \draw[line width=0.4pt] (0.3,0) arc[start angle=0, end angle=60, radius=0.3];
+    \node[font=\small] at (0.45,0.2) {$60^\circ$};
+    \draw[dashed, line width=0.4pt] (P) to[bend left=25] (R);
+    \node[font=\small] at (0.02,0.6) {$c$};
+    \draw[dashed, line width=0.4pt] (P) to[bend right=15] (Q);
+    \node[font=\small] at (0.8,-0.28) {$a$};
+    \node[font=\small] at (0.8,-0.68) {$A$};
+  \end{scope}
+  % 삼각형 B
+  \begin{scope}[xshift=2.3cm]
+    \coordinate (P) at (0,0); \coordinate (Q) at (1.2,0); \coordinate (R) at (1.1,1.1);
+    \fill[cyan!25] (P) -- (Q) -- (R) -- cycle;
+    \draw (P) -- (Q) -- (R) -- cycle;
+    \draw[line width=0.4pt] (0.3,0) arc[start angle=0, end angle=45, radius=0.3];
+    \node[font=\small] at (0.5,0.18) {$45^\circ$};
+    \draw[dashed, line width=0.4pt] (P) to[bend left=20] (R);
+    \node[font=\small] at (0.38,0.85) {$b$};
+    \draw[dashed, line width=0.4pt] (P) to[bend right=15] (Q);
+    \node[font=\small] at (0.6,-0.28) {$c$};
+    \node[font=\small] at (0.6,-0.68) {$B$};
+  \end{scope}
+  % 삼각형 C
+  \begin{scope}[xshift=4.2cm]
+    \coordinate (P) at (0,0); \coordinate (Q) at (1.9,0); \coordinate (R) at (1.3,0.75);
+    \fill[gray!20] (P) -- (Q) -- (R) -- cycle;
+    \draw (P) -- (Q) -- (R) -- cycle;
+    \draw[line width=0.4pt] (0.4,0) arc[start angle=0, end angle=30, radius=0.4];
+    \node[font=\small] at (0.65,0.15) {$30^\circ$};
+    \draw[dashed, line width=0.4pt] (P) to[bend left=18] (R);
+    \node[font=\small] at (0.55,0.62) {$a$};
+    \draw[dashed, line width=0.4pt] (P) to[bend right=15] (Q);
+    \node[font=\small] at (0.95,-0.28) {$b$};
+    \node[font=\small] at (0.95,-0.68) {$C$};
+  \end{scope}
+\end{tikzpicture}

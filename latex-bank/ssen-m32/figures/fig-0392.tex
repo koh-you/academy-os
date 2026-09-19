@@ -1,0 +1,24 @@
+% 0392(본책 73쪽) — △ABC(AB=16, BC=12, CA=10 cm)의 내접원 O(접점 D, E, F), 점 R 에서 접하는 PQ. 답(△PQC 둘레)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (3.125,2.497) -- (0.000,0.000) -- (3.000,0.000) -- cycle;
+  \draw (2.250,0.788) circle (0.788);
+  \fill (2.250,0.788) circle (1.2pt);
+  \draw (0.000,0.000) -- (2.521,-0.000);
+  \draw (3.138,0.481) -- (2.403,-0.092);
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend left=15] (3.125,2.497);
+  \node[font=\small, inner sep=1.5pt] at (1.313,1.561) {$16\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (3.125,2.497) to[bend left=20] (3.000,0.000);
+  \node[font=\small, inner sep=1.5pt] at (3.512,1.226) {$10\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend right=15] (3.000,0.000);
+  \node[font=\small, inner sep=1.5pt] at (1.500,-0.300) {$12\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (3.125,2.667) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.160,0.000) {B};
+  \node[font=\small, inner sep=1.5pt] at (3.160,0.000) {C};
+  \node[font=\small, inner sep=1.5pt] at (2.195,-0.150) {D};
+  \node[font=\small, inner sep=1.5pt] at (3.185,0.834) {E};
+  \node[font=\small, inner sep=1.5pt] at (1.678,1.543) {F};
+  \node[font=\small, inner sep=1.5pt] at (3.187,0.360) {P};
+  \node[font=\small, inner sep=1.5pt] at (2.606,-0.147) {Q};
+  \node[font=\small, inner sep=1.5pt] at (2.575,0.167) {R};
+  \node[font=\small, inner sep=1.5pt] at (2.250,0.988) {O};
+\end{tikzpicture}

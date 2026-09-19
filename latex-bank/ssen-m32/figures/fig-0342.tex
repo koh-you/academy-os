@@ -1,0 +1,19 @@
+% 0342(본책 64쪽) — PA, PB, CD 가 A, B, E 에서 원 O 에 접함, PD=4 cm, DB=2 cm. 답(△CPD 둘레)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-2.100,-1.000) -- (-0.587,0.863);
+  \draw (-2.100,-1.000) -- (0.300,-1.000);
+  \draw (-1.134,0.190) -- (-0.700,-1.000);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (-2.100,-1.000) to[bend right=20] (-0.700,-1.000);
+  \node[font=\small, inner sep=1.5pt] at (-1.400,-1.200) {$4\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (-0.700,-1.000) to[bend right=25] (0.000,-1.000);
+  \node[font=\small, inner sep=1.5pt] at (-0.300,-1.250) {$2\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-2.260,-1.000) {P};
+  \node[font=\small, inner sep=1.5pt] at (-0.726,0.800) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.140,-1.100) {B};
+  \node[font=\small, inner sep=1.5pt] at (-1.294,0.230) {C};
+  \node[font=\small, inner sep=1.5pt] at (-0.720,-1.170) {D};
+  \node[font=\small, inner sep=1.5pt] at (-0.780,-0.342) {E};
+  \node[font=\small, inner sep=1.5pt] at (0.170,0.000) {O};
+\end{tikzpicture}

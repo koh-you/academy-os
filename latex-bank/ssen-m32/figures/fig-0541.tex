@@ -1,0 +1,34 @@
+% 0541(본책 97쪽) — 세 원 O1·O2·O3, P·Q=O1∩O2, R·S=O2∩O3, 직선 APRD·BQSC, AB·CD, ∠A=x·∠B=y(색칠), ∠D=86°, ∠C=80°. 다시 그림.
+\begin{tikzpicture}[scale=1.20, line width=0.6pt]
+  \draw (0.000,0.850) circle (0.850);
+  \draw (1.550,1.000) circle (1.000);
+  \draw (3.350,1.200) circle (1.200);
+  \fill (0.000,0.850) circle (1.2pt);
+  \fill (1.550,1.000) circle (1.2pt);
+  \fill (3.350,1.200) circle (1.2pt);
+  \draw (-0.794,1.153) -- (4.195,2.052);
+  \draw (-0.708,0.380) -- (4.343,0.526);
+  \draw (-0.794,1.153) -- (-0.708,0.380);
+  \draw (4.343,0.526) -- (4.195,2.052);
+  \fill[green!15] (-0.794,1.153) -- (-0.770,0.934) arc[start angle=-83.660, end angle=10.214, radius=0.220] -- cycle;
+  \draw[line width=0.4pt] (-0.770,0.934) arc[start angle=-83.660, end angle=10.214, radius=0.220];
+  \node[font=\small, inner sep=0.5pt] at (-0.458,0.902) {$x$};
+  \fill[yellow!30] (-0.708,0.380) -- (-0.488,0.386) arc[start angle=1.654, end angle=96.340, radius=0.220] -- cycle;
+  \draw[line width=0.4pt] (-0.488,0.386) arc[start angle=1.654, end angle=96.340, radius=0.220];
+  \node[font=\small, inner sep=0.5pt] at (-0.433,0.697) {$y$};
+  \draw[line width=0.4pt] (3.959,2.009) arc[start angle=-169.786, end angle=-84.472, radius=0.240];
+  \node[font=\small, inner sep=0.5pt] at (3.845,1.590) {$86^\circ$};
+  \draw[line width=0.4pt] (4.320,0.765) arc[start angle=95.528, end angle=181.654, radius=0.240];
+  \node[font=\small, inner sep=0.5pt] at (3.908,0.909) {$80^\circ$};
+  \node[font=\small, inner sep=1.5pt] at (-0.982,1.221) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.777,0.192) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.638,1.611) {P};
+  \node[font=\small, inner sep=1.5pt] at (0.734,0.222) {Q};
+  \node[font=\small, inner sep=1.5pt] at (2.261,1.903) {R};
+  \node[font=\small, inner sep=1.5pt] at (2.398,0.270) {S};
+  \node[font=\small, inner sep=1.5pt] at (4.295,2.225) {D};
+  \node[font=\small, inner sep=1.5pt] at (4.496,0.397) {C};
+  \node[font=\small, inner sep=1.5pt] at (-0.000,0.630) {O$_1$};
+  \node[font=\small, inner sep=1.5pt] at (1.550,0.780) {O$_2$};
+  \node[font=\small, inner sep=1.5pt] at (3.350,0.980) {O$_3$};
+\end{tikzpicture}

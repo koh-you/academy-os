@@ -1,0 +1,9 @@
+% 0983(본책 137쪽) — 원점을 꼭짓점으로 하고 위로 볼록하지 않은(아래로 볼록) 포물선의 그래프와 아래 답란 ( ). 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 x·y·O 만. 함수 여부(답)는 적지 않는다.
+\begin{tikzpicture}[scale=0.8, line width=0.5pt, every node/.style={font=\small}]
+  \draw[->, >=stealth, line width=0.7pt] (-1.5,0) -- (1.6,0) node[below left=-1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.5) -- (0,1.7) node[left=-1pt] {$y$};
+  \draw[line width=0.6pt, domain=-1.25:1.25, samples=40] plot (\x, {\x*\x});
+  \node[below left=-2pt] at (0,0) {$\mathrm{O}$};
+  \node at (0,-1.1) {(\hspace{3em})};
+\end{tikzpicture}

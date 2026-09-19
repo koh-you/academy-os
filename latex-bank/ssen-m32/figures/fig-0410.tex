@@ -1,0 +1,26 @@
+% 0410(본책 75쪽) — 원, 현 AB·AC·FD·FE, ∠BAC=35°, ∠DFE=x°, 호 BC=4 cm, 호 DE=4 cm. 답(x)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.134,1.092) -- (-1.034,0.376);
+  \draw (-0.134,1.092) -- (-0.153,-1.089);
+  \draw (0.134,1.092) -- (0.153,-1.089);
+  \draw (0.134,1.092) -- (1.034,0.376);
+  \draw[line width=0.4pt] (-0.447,0.843) arc (218.5:269.5:0.400);
+  \draw[line width=0.4pt] (0.138,0.692) arc (270.5:321.5:0.400);
+  \draw[dashed, line width=0.4pt] (-1.203,0.438) arc (160.0:262.0:1.280);
+  \draw[line width=0.4pt] (-1.090,0.397) -- (-1.259,0.458);
+  \draw[line width=0.4pt] (-0.161,-1.149) -- (-0.186,-1.327);
+  \draw[dashed, line width=0.4pt] (0.178,-1.268) arc (278.0:380.0:1.280);
+  \draw[line width=0.4pt] (0.161,-1.149) -- (0.186,-1.327);
+  \draw[line width=0.4pt] (1.090,0.397) -- (1.259,0.458);
+  \node[font=\small, inner sep=0.5pt] at (-0.450,0.445) {$35^\circ$};
+  \node[font=\small, inner sep=0.5pt] at (0.450,0.445) {$x^\circ$};
+  \node[font=\small, inner sep=0.5pt] at (-1.389,-0.834) {$4\,\mathrm{cm}$};
+  \node[font=\small, inner sep=0.5pt] at (1.389,-0.834) {$4\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-0.169,1.289) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.169,1.289) {F};
+  \node[font=\small, inner sep=1.5pt] at (-1.222,0.445) {B};
+  \node[font=\small, inner sep=1.5pt] at (1.222,0.445) {E};
+  \node[font=\small, inner sep=1.5pt] at (-0.181,-1.287) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.181,-1.287) {D};
+\end{tikzpicture}

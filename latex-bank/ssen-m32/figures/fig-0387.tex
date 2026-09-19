@@ -1,0 +1,20 @@
+% 0387(본책 72쪽) — 직사각형 ABCD 의 세 변에 접하는 원 O, 접선 CE, △CDE 의 내접원 O′, BC=3 cm, DE=2 cm. 답(반지름의 합)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,1.050) -- (0.000,0.000) -- (2.100,0.000) -- (2.100,1.050) -- cycle;
+  \draw (2.100,0.000) -- (0.700,1.050);
+  \draw (0.525,0.525) circle (0.525);
+  \fill (0.525,0.525) circle (1.2pt);
+  \draw (1.750,0.700) circle (0.350);
+  \fill (1.750,0.700) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (0.700,1.050) to[bend left=20] (2.100,1.050);
+  \node[font=\small, inner sep=1.5pt] at (1.400,1.330) {$2\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend right=12] (2.100,0.000);
+  \node[font=\small, inner sep=1.5pt] at (1.050,-0.300) {$3\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-0.120,1.170) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.120,-0.120) {B};
+  \node[font=\small, inner sep=1.5pt] at (2.247,-0.085) {C};
+  \node[font=\small, inner sep=1.5pt] at (2.220,1.170) {D};
+  \node[font=\small, inner sep=1.5pt] at (0.700,1.210) {E};
+  \node[font=\small, inner sep=1.5pt] at (0.525,0.325) {O};
+  \node[font=\small, inner sep=1.5pt] at (1.750,0.500) {$\mathrm{O'}$};
+\end{tikzpicture}

@@ -1,0 +1,25 @@
+% 0061(본책 15쪽) — 직사각형 종이 ABCD 를 AF 로 접어 D 가 BC 위의 점 E 에 오게 한 그림(접혀 없어진 AD·DF 는 파선, △AEF 진하게·△ABE 연하게). 라벨: A·B·C·D·E·F, 8 cm(AD)·5 cm(AB) 파선 호, 각 x(∠EFC), 직각 표시 E. 스캔 삽화를 TikZ 로 다시 그림. 답(cos x/sin x)은 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.6pt]
+  \coordinate (A) at (0,2); \coordinate (B) at (0,0); \coordinate (C) at (3.2,0); \coordinate (D) at (3.2,2); \coordinate (E) at (2.498,0); \coordinate (F) at (3.2,0.877);
+  \fill[orange!12] (A) -- (B) -- (E) -- cycle;
+  \fill[orange!40] (A) -- (E) -- (F) -- cycle;
+  \draw (A) -- (B) -- (C) -- (F);
+  \draw (A) -- (E) -- (F) -- cycle;
+  \draw[dashed, line width=0.4pt] (A) -- (D) -- (F);
+  % 직각 표시(E)
+  \draw[line width=0.4pt] (2.373,0.1) -- (2.473,0.225) -- (2.598,0.125);
+  % 각 x(∠EFC)
+  \draw[line width=0.4pt] (2.981,0.604) arc[start angle=-128.7, end angle=-90, radius=0.35cm];
+  \node[font=\small] at (3.03,0.38) {$x$};
+  % 길이(파선 호)
+  \draw[dashed, line width=0.4pt] (A) to[bend left=20] (D);
+  \draw[dashed, line width=0.4pt] (A) to[bend right=30] (B);
+  \node[font=\small, fill=white, inner sep=1pt] at (1.6,2.32) {$8\,\mathrm{cm}$};
+  \node[font=\small] at (-0.62,1.0) {$5\,\mathrm{cm}$};
+  \node[font=\small, above left] at (A) {A};
+  \node[font=\small, below left] at (B) {B};
+  \node[font=\small, below right] at (C) {C};
+  \node[font=\small, above right] at (D) {D};
+  \node[font=\small, below] at (E) {E};
+  \node[font=\small, right] at (F) {F};
+\end{tikzpicture}

@@ -1,0 +1,19 @@
+% 0985(본책 135쪽) — 풀이 힌트 안 수직선: 왼쪽 빈칸점(○)·-1(○)·오른쪽 빈칸점(○). ㉡ 은 두 빈칸점을 잇는 ㄷ자 선, ㉠ 은 -1 에서 위로 올라 오른쪽 화살표, -1 과 오른쪽 빈칸점 사이 공통부분 색칠, 두 빈칸점 아래 빈칸 상자. 수치는 원문의 -1 만. 스캔 그림을 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=0.62, line width=0.6pt]
+  \fill[cyan!30] (0,0) rectangle (1.5,0.75);
+  \draw[<->, >=stealth, line width=0.7pt] (-2.6,0) -- (2.8,0);
+  \node[below=2pt, font=\small] at (2.5,0) {$x$};
+  % ㉠: -1 에서 위로, 오른쪽으로 화살표
+  \draw[->, >=stealth] (0,0) -- (0,0.75) -- (2.6,0.75);
+  \node[font=\scriptsize, fill=white, inner sep=0.5pt] at (0.75,0.75) {㉠};
+  % ㉡: 왼쪽 빈칸점에서 위로, 오른쪽 빈칸점까지 ㄷ자
+  \draw (-1.5,0) -- (-1.5,1.35) -- (1.5,1.35) -- (1.5,0);
+  \node[font=\scriptsize, fill=white, inner sep=0.5pt] at (0,1.35) {㉡};
+  \fill[white] (-1.5,0) circle (2pt); \draw (-1.5,0) circle (2pt);
+  \fill[white] (0,0) circle (2pt); \draw (0,0) circle (2pt);
+  \fill[white] (1.5,0) circle (2pt); \draw (1.5,0) circle (2pt);
+  \node[below=3pt, font=\small] at (0,0) {$-1$};
+  % 두 빈칸점 아래 빈칸 상자
+  \draw (-1.85,-0.95) rectangle (-1.15,-0.35);
+  \draw (1.15,-0.95) rectangle (1.85,-0.35);
+\end{tikzpicture}

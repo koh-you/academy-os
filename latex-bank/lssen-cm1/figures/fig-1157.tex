@@ -1,0 +1,10 @@
+% 1157(본책 160쪽) — 직각삼각형(직각이 오른쪽 아래)을 세 영역으로 나눈 그림: 빗변 쪽 위 A, 오른쪽 아래 직사각형 B, 왼쪽 아래 작은 삼각형 C. 라벨은 원문(A, B, C)만. 스캔 그림을 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \draw (0,0) -- (4,0) -- (4,2.6) -- cycle;
+  % 빗변 위 점 (2,1.3) 에서 수평·수직선
+  \draw (2,1.3) -- (4,1.3);
+  \draw (2,0) -- (2,1.3);
+  \node[font=\small] at (3.25,1.75) {$\mathrm{A}$};
+  \node[font=\small] at (3,0.65) {$\mathrm{B}$};
+  \node[font=\small] at (1.5,0.42) {$\mathrm{C}$};
+\end{tikzpicture}

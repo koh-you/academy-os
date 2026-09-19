@@ -1,0 +1,19 @@
+% 0358(본책 67쪽) — ∠B=90° 인 직각삼각형 ABC 의 내접원 O(접점 D, E, F), AB=9 cm, AC=15 cm, 선분 AO. 답(AO)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,1.800) -- (0.000,0.000) -- (2.400,0.000) -- cycle;
+  \draw (0.600,0.600) circle (0.600);
+  \fill (0.600,0.600) circle (1.2pt);
+  \draw (0.000,1.800) -- (0.600,0.600);
+  \draw[line width=0.4pt] (0.130,0.000) -- (0.130,0.130) -- (0.000,0.130);
+  \draw[dashed, line width=0.4pt] (0.000,1.800) to[bend right=20] (0.000,0.000);
+  \node[font=\small, inner sep=1.5pt] at (-0.500,0.900) {$9\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.000,1.800) to[bend left=15] (2.400,0.000);
+  \node[font=\small, inner sep=1.5pt] at (1.560,1.380) {$15\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.000,1.970) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.120,-0.120) {B};
+  \node[font=\small, inner sep=1.5pt] at (2.560,-0.058) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.150,0.600) {D};
+  \node[font=\small, inner sep=1.5pt] at (0.600,-0.170) {E};
+  \node[font=\small, inner sep=1.5pt] at (1.045,1.227) {F};
+  \node[font=\small, inner sep=1.5pt] at (0.650,0.400) {O};
+\end{tikzpicture}

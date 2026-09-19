@@ -1,0 +1,22 @@
+% 0226(본책 45쪽) — □ABCD(AB=10 cm, BC=8 cm, AD=CD=2√7 cm, ∠B=60°, ∠D=120°). 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (1,1.73); \coordinate (B) at (0,0); \coordinate (C) at (1.6,0); \coordinate (D) at (1.8,1.04);
+  \fill[orange!20] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[line width=0.4pt] (0.32,0) arc[start angle=0, end angle=60, radius=0.32];
+  \node[font=\small] at (0.55,0.22) {$60^\circ$};
+  \draw[line width=0.4pt] ($(D)+(199:0.22)$) arc[start angle=199, end angle=319, radius=0.22];
+  \node[font=\small] at (1.45,1.05) {$120^\circ$};
+  \draw[dashed, line width=0.4pt] (B) to[bend left=25] (A);
+  \node[font=\small] at (0.1,1.1) {$10\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (A) to[bend left=25] (D);
+  \node[font=\small] at (1.75,1.68) {$2\sqrt{7}\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (D) to[bend left=25] (C);
+  \node[font=\small] at (2.15,0.5) {$2\sqrt{7}\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (B) to[bend right=20] (C);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.8,-0.28) {$8\,\mathrm{cm}$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, below right] at (C) {C};
+  \node[font=\small, right] at (D) {D};
+\end{tikzpicture}

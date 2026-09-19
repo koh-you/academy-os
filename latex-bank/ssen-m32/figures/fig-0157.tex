@@ -1,0 +1,16 @@
+% 0157(본책 33쪽) — △ABC(AC=2√3, BC=4, ∠C=30°), AB=x. 스캔 삽화를 TikZ 로 다시 그림. 답(x)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (3.2,0); \coordinate (A) at (0.8,1.39);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] (2.6,0) arc[start angle=180, end angle=150, radius=0.6];
+  \node[font=\small] at (2.25,0.28) {$30^\circ$};
+  \draw[dashed, line width=0.4pt] (B) to[bend left=25] (A);
+  \draw[dashed, line width=0.4pt] (A) to[bend left=20] (C);
+  \draw[dashed, line width=0.4pt] (B) to[bend right=15] (C);
+  \node[font=\small] at (0.1,0.85) {$x$};
+  \node[font=\small] at (2.2,1.05) {$2\sqrt{3}$};
+  \node[font=\small] at (1.6,-0.45) {$4$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+\end{tikzpicture}

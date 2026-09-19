@@ -1,0 +1,24 @@
+% 변형 32(원본 32 · 2022 교육청 고1 9월 26번) — 원 x^2+y^2=36 위의 A1(제1사분면)·A2(0,6)·B(-6,0), B 를 지나고 A1B·A2B 에 수직인 두 직선이 원과 다시 만나는 C1·C2.
+% 설정이 바뀌어 TikZ 로 새로 그림. 좌표 수치는 발문에 있는 것만 있고 그림에는 적지 않는다.
+\begin{tikzpicture}[scale=0.3, line width=0.5pt]
+  \coordinate (O) at (0,0);
+  \coordinate (A1) at (3,{3*sqrt(3)});
+  \coordinate (A2) at (0,6);
+  \coordinate (B) at (-6,0);
+  \coordinate (C1) at (-3,{-3*sqrt(3)});
+  \coordinate (C2) at (0,-6);
+  \draw[->, >=stealth] (-8.5,0) -- (8.5,0) node[below, font=\small] {$x$};
+  \draw[->, >=stealth] (0,-8.5) -- (0,8.5) node[left, font=\small] {$y$};
+  \draw[line width=0.8pt] (O) circle (6);
+  \draw (B) -- (A1);
+  \draw (B) -- (C1);
+  \draw (B) -- (A2);
+  \draw (B) -- (C2);
+  \foreach \p in {A1,A2,B,C1,C2} \fill (\p) circle (0.18);
+  \node[below right=1pt, font=\small] at (O) {$\mathrm{O}$};
+  \node[above right, font=\small] at (A1) {$\mathrm{A_1}$};
+  \node[above right, font=\small] at (A2) {$\mathrm{A_2}$};
+  \node[above left, font=\small] at (B) {$\mathrm{B}$};
+  \node[below left, font=\small] at (C1) {$\mathrm{C_1}$};
+  \node[below right, font=\small] at (C2) {$\mathrm{C_2}$};
+\end{tikzpicture}

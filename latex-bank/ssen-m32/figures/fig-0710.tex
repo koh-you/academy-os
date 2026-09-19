@@ -1,0 +1,19 @@
+% 0710(본책 126쪽) — 산점도를 그릴 빈 격자(가로 1차(점) 0~10 · 세로 2차(점) 0~10 · 격자 1점 · 눈금 2점 간격). 스캔 격자를 TikZ 로 다시 그림. 답(점)은 찍지 않는다.
+\begin{tikzpicture}[line width=0.5pt]
+  \draw[gray!55, line width=0.25pt] (0,0) grid[xstep=0.27cm, ystep=0.27cm] (2.97,2.97);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (3.12,0);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (0,3.12);
+  \node[font=\scriptsize, below left=0pt, inner sep=1.5pt] at (0,0) {$0$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (0.54,0) {$2$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (1.08,0) {$4$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (1.62,0) {$6$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (2.16,0) {$8$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (2.7,0) {$10$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,0.54) {$2$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,1.08) {$4$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,1.62) {$6$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,2.16) {$8$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,2.7) {$10$};
+  \node[font=\scriptsize, anchor=north east, inner sep=1pt] at (3.12,-0.38) {1차(점)};
+  \node[font=\scriptsize, align=center, anchor=north east, inner sep=1pt] at (-0.42,3.12) {2\\차\\(점)};
+\end{tikzpicture}

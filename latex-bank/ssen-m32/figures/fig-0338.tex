@@ -1,0 +1,17 @@
+% 0338(본책 64쪽) — 점 P 에서 원 O 에 그은 두 접선의 접점 A, B, PA=10 cm, AO=5 cm. 답(AB)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-2.236,0.000) -- (-0.134,1.051);
+  \draw (-2.236,0.000) -- (-0.134,-1.051);
+  \draw (-0.447,0.894) -- (-0.447,-0.894);
+  \draw (-0.447,0.894) -- (0.000,0.000);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (-2.236,0.000) to[bend left=25] (-0.447,0.894);
+  \node[font=\small, inner sep=1.5pt] at (-1.550,0.800) {$10\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (-0.447,0.894) to[bend left=30] (0.000,0.000);
+  \node[font=\small, inner sep=1.5pt] at (0.200,0.700) {$5\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-2.396,0.000) {P};
+  \node[font=\small, inner sep=1.5pt] at (-0.467,1.064) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.467,-1.074) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.170,0.000) {O};
+\end{tikzpicture}

@@ -1,0 +1,27 @@
+% 0077(본책 18쪽) — 좌표평면 위의 삼각형 ABC(A(2,6)·B(-3,-6)·C(6,3))와 ∠A 의 이등분선이 BC 와 만나는 점 D. 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C·D·O·x·y 와 눈금 6·3·2·−3·6·−6 만. D 의 좌표(답)는 적지 않는다.
+\begin{tikzpicture}[scale=0.26, line width=0.5pt]
+  \coordinate (A) at (2,6); \coordinate (B) at (-3,-6); \coordinate (C) at (6,3); \coordinate (D) at (3.5,0.5);
+  \draw[->, >=stealth, line width=0.7pt] (-4.5,0) -- (8,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-7.5) -- (0,7.8) node[left=-1pt, font=\small] {$y$};
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (D);
+  \draw[dashed, line width=0.4pt] (A) -- (2,0);
+  \draw[dashed, line width=0.4pt] (A) -- (0,6);
+  \draw[dashed, line width=0.4pt] (C) -- (6,0);
+  \draw[dashed, line width=0.4pt] (C) -- (0,3);
+  \draw[dashed, line width=0.4pt] (B) -- (-3,0);
+  \draw[dashed, line width=0.4pt] (B) -- (0,-6);
+  \fill ($(A)+(-0.35,-1.1)$) circle (1.6pt); \fill ($(A)+(0.35,-1.05)$) circle (1.6pt);
+  \node[above=1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[below left=-1pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[right=1pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[below right=-1pt, font=\small] at (D) {$\mathrm{D}$};
+  \node[below left=-1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[left=1pt, font=\small] at (0,6) {$6$};
+  \node[left=1pt, font=\small] at (0,3) {$3$};
+  \node[below left=-1pt, font=\small] at (2,0) {$2$};
+  \node[above=1pt, font=\small] at (-3,0) {$-3$};
+  \node[below=1pt, font=\small] at (6,0) {$6$};
+  \node[right=1pt, font=\small] at (0,-6) {$-6$};
+\end{tikzpicture}

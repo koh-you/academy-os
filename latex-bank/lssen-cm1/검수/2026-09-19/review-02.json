@@ -1,0 +1,4 @@
+{ "range": "0080~0158", "checked": 79, "ok": 78,
+  "findings": [
+    { "id": "0154", "severity": "red", "where": "body", "note": "원본 P(x)=2x^3+ax^2-1, 조판본 P(x)=2x^2+ax-1 (차수가 다름)", "fix": "body 의 2x^2+ax-1 을 2x^3+ax^2-1 로" }
+  ] }

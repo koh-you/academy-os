@@ -1,0 +1,16 @@
+% 0505(본책 91쪽) — 원, 접점 P 의 접선 PT(수평), 현 PA·PB·AB, ∠PAB=x(색칠), ∠BPT=72°. 다시 그림.
+\begin{tikzpicture}[scale=1.39, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.350,-1.100) -- (1.500,-1.100);
+  \fill (1.300,-1.100) circle (1.2pt);
+  \draw (-0.000,-1.100) -- (-0.953,0.550) -- (0.647,0.890) -- cycle;
+  \fill[green!15] (-0.953,0.550) -- (-0.793,0.273) arc[start angle=-60.000, end angle=12.000, radius=0.320] -- cycle;
+  \draw[line width=0.4pt] (-0.793,0.273) arc[start angle=-60.000, end angle=12.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (-0.496,0.347) {$x$};
+  \draw[line width=0.4pt] (0.320,-1.100) arc[start angle=0.000, end angle=72.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (0.502,-0.736) {$72^\circ$};
+  \node[font=\small, inner sep=1.5pt] at (-1.141,0.618) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.761,1.054) {B};
+  \node[font=\small, inner sep=1.5pt] at (-0.000,-1.300) {P};
+  \node[font=\small, inner sep=1.5pt] at (1.300,-1.300) {T};
+\end{tikzpicture}

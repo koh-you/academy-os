@@ -1,0 +1,10 @@
+% 유형 01 0041(본책 12쪽) — 직각삼각형 ABC(∠C=90°), 길이 표시 없음. 스캔 삽화를 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(꼭짓점 A, B, C · 직각 표시).
+\begin{tikzpicture}[scale=0.6, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (2.2,0); \coordinate (A) at (2.2,4);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] (1.9,0) -- (1.9,0.3) -- (2.2,0.3);
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+\end{tikzpicture}

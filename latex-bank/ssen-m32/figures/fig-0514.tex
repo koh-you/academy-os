@@ -1,0 +1,23 @@
+% 0514(본책 93쪽) — A·E·D 가 한 직선 위, AB·AC·BE·BD·EC·DC·BC, P=BD∩EC, 파선 호 14cm(BE)·6cm(EP)·8cm(PC). 답(ED)은 적지 않는다. 다시 그림.
+\begin{tikzpicture}[scale=1.28, line width=0.6pt]
+  \draw (-1.470,0.000) -- (1.470,0.000);
+  \draw (-0.735,-1.273) -- (0.735,-1.273);
+  \draw (-1.470,0.000) -- (-0.735,-1.273);
+  \draw (-1.470,0.000) -- (0.735,-1.273);
+  \draw (-0.735,-1.273) -- (0.000,0.000);
+  \draw (-0.735,-1.273) -- (1.470,0.000);
+  \draw (0.000,0.000) -- (0.735,-1.273);
+  \draw (1.470,0.000) -- (0.735,-1.273);
+  \draw[dashed, line width=0.35pt] (-0.735,-1.273) to[bend left=25] (0.000,0.000);
+  \node[font=\small, inner sep=0.5pt] at (-0.980,-0.500) {$14\,\mathrm{cm}$};
+  \draw[dashed, line width=0.35pt] (0.000,0.000) to[bend left=30] (0.368,-0.636);
+  \node[font=\small, inner sep=0.5pt] at (0.550,-0.220) {$6\,\mathrm{cm}$};
+  \draw[dashed, line width=0.35pt] (0.368,-0.636) to[bend left=30] (0.735,-1.273);
+  \node[font=\small, inner sep=0.5pt] at (0.950,-0.850) {$8\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-1.570,0.173) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.000,0.200) {E};
+  \node[font=\small, inner sep=1.5pt] at (1.570,0.173) {D};
+  \node[font=\small, inner sep=1.5pt] at (-0.850,-1.436) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.835,-1.446) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.505,-0.752) {P};
+\end{tikzpicture}

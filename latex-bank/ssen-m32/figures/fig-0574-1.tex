@@ -1,0 +1,15 @@
+% 0574(본책 103쪽) 보기 ① — 원에 내접하는 □ABCD, 접선(접점 B), ∠DCA=42°, ∠CBT=48°. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=0.9, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-1.100,-1.000) -- (1.100,-1.000);
+  \draw (-0.985,-0.174) -- (-0.000,-1.000) -- (0.995,0.105) -- (-0.276,0.961) -- cycle;
+  \draw (-0.985,-0.174) -- (0.995,0.105);
+  \draw[line width=0.4pt] (0.746,0.272) arc[start angle=146.000, end angle=188.000, radius=0.300];
+  \node[font=\small, inner sep=1pt] at (0.459,0.228) {$42^\circ$};
+  \draw[line width=0.4pt] (0.300,-1.000) arc[start angle=0.000, end angle=48.000, radius=0.300];
+  \node[font=\small, inner sep=1pt] at (0.475,-0.788) {$48^\circ$};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-0.985,-0.174) {A};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (-0.000,-1.060) {B};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.995,0.105) {C};
+  \node[font=\small, anchor=south, inner sep=1.5pt] at (-0.276,0.961) {D};
+\end{tikzpicture}

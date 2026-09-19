@@ -1,0 +1,22 @@
+% 0291(본책 56쪽) — 원 O, 현 AB=16 cm 위의 점 M 과 현 AC=12 cm 위의 점 N, □AMON 은 직사각형. 답(넓이)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \fill[yellow!45] (0.191,1.083) -- (-0.451,0.482) -- (0.000,0.000) -- (0.642,0.602) -- cycle;
+  \draw (0.000,0.000) circle (1.100);
+  \draw (0.191,1.083) -- (-1.093,-0.120);
+  \draw (0.191,1.083) -- (1.093,0.120);
+  \draw (0.000,0.000) -- (-0.451,0.482);
+  \draw (0.000,0.000) -- (0.642,0.602);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.364,0.564) -- (-0.282,0.476) -- (-0.369,0.394);
+  \draw[line width=0.4pt] (0.560,0.689) -- (0.473,0.607) -- (0.555,0.520);
+  \draw[dashed, line width=0.4pt] (-1.093,-0.120) to[bend left=22] (0.191,1.083);
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.620,1.020) {$16\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.191,1.083) to[bend left=22] (1.093,0.120);
+  \node[font=\small, fill=white, inner sep=1pt] at (1.050,0.800) {$12\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.000,-0.200) {O};
+  \node[font=\small, inner sep=1.5pt] at (0.226,1.280) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.292,-0.142) {B};
+  \node[font=\small, inner sep=1.5pt] at (1.292,0.142) {C};
+  \node[font=\small, inner sep=1.5pt] at (-0.571,0.322) {M};
+  \node[font=\small, inner sep=1.5pt] at (0.722,0.382) {N};
+\end{tikzpicture}

@@ -1,0 +1,20 @@
+% 0239(본책 47쪽) — □ABCD(대각선 AC=7 cm, BD=8 cm, ∠DBC=50°, ∠ACB=70°). 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (0.95,2.34); \coordinate (B) at (0,0); \coordinate (C) at (1.8,0); \coordinate (D) at (1.83,2.19);
+  \fill[yellow!45] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (A) -- (C);
+  \draw (B) -- (D);
+  \draw[line width=0.4pt] (0.4,0) arc[start angle=0, end angle=50, radius=0.4];
+  \node[font=\small] at (0.6,0.2) {$50^\circ$};
+  \draw[line width=0.4pt] (1.42,0) arc[start angle=180, end angle=110, radius=0.38];
+  \node[font=\small] at (1.2,0.22) {$70^\circ$};
+  \draw[dashed, line width=0.4pt] (A) to[bend right=18] (C);
+  \node[font=\small, fill=yellow!45, inner sep=1pt] at (0.9,1.05) {$7\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (B) to[bend right=18] (D);
+  \node[font=\small] at (2.15,1.2) {$8\,\mathrm{cm}$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, right] at (D) {D};
+\end{tikzpicture}

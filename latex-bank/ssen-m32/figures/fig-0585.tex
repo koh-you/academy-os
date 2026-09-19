@@ -1,0 +1,23 @@
+% 0585(본책 105쪽) — 원, 점 P 에서 그은 접선의 접점 T, PA 연장선과 원의 교점 B, ∠BPT=44°, ∠BTC=32°, 호 TC=호 CB, ∠ABT 표시. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-0.985,-1.000) -- (1.100,-1.000);
+  \draw (-0.885,-1.000) -- (0.788,0.616);
+  \draw (-0.643,-0.766) -- (-0.000,-1.000);
+  \draw (0.788,0.616) -- (-0.000,-1.000);
+  \draw (-0.000,-1.000) -- (0.899,-0.438);
+  \draw (0.899,-0.438) -- (0.788,0.616);
+  \draw[line width=0.4pt] (0.486,-0.779) -- (0.412,-0.660);
+  \draw[line width=0.4pt] (0.913,0.096) -- (0.774,0.081);
+  \draw[line width=0.4pt] (-0.585,-1.000) arc[start angle=-0.000, end angle=44.000, radius=0.300];
+  \node[font=\small, inner sep=1pt] at (-0.403,-0.805) {$44^\circ$};
+  \draw[line width=0.4pt] (0.297,-0.815) arc[start angle=32.000, end angle=64.000, radius=0.350];
+  \node[font=\small, inner sep=1pt] at (0.368,-0.591) {$32^\circ$};
+  \fill[yellow!35] (0.788,0.616) -- ++(-136.000:0.220) arc[start angle=-136.000, end angle=-116.000, radius=0.220] -- cycle;
+  \draw[line width=0.4pt] (0.630,0.463) arc[start angle=-136.000, end angle=-116.000, radius=0.220];
+  \node[font=\small, anchor=south east, inner sep=1.5pt] at (-0.703,-0.706) {A};
+  \node[font=\small, anchor=south west, inner sep=1.5pt] at (0.808,0.616) {B};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.899,-0.438) {C};
+  \node[font=\small, anchor=north east, inner sep=1.5pt] at (-0.985,-1.020) {P};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (0.030,-1.060) {T};
+\end{tikzpicture}

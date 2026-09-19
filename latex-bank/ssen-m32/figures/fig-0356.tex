@@ -1,0 +1,17 @@
+% 0356(본책 67쪽) — △ABC 의 내접원 O(접점 D, E, F), BD=4 cm, CF=7 cm 파선 호. 답(AB)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.950,1.550) -- (0.000,0.000) -- (3.100,0.000) -- cycle;
+  \draw (1.134,0.635) circle (0.635);
+  \fill (1.134,0.635) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend left=20] (0.592,0.967);
+  \node[font=\small, inner sep=1.5pt] at (-0.062,0.703) {$4\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (3.100,0.000) to[bend right=20] (1.505,1.150);
+  \node[font=\small, inner sep=1.5pt] at (2.548,0.916) {$7\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.950,1.720) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.160,-0.058) {B};
+  \node[font=\small, inner sep=1.5pt] at (3.260,-0.058) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.445,1.052) {D};
+  \node[font=\small, inner sep=1.5pt] at (1.134,-0.170) {E};
+  \node[font=\small, inner sep=1.5pt] at (1.590,1.297) {F};
+  \node[font=\small, inner sep=1.5pt] at (1.134,0.435) {O};
+\end{tikzpicture}

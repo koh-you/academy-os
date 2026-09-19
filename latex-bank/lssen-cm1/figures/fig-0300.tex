@@ -1,0 +1,25 @@
+% 0300(본책 45쪽) — 가로 n^3+4n^2+5n+2, 세로 4n+4 인 직사각형을 한 변 n+1 인 정사각형(연두 채움)으로 채우는 그림. 네 모서리 정사각형(왼쪽 아래는 둘)과 「…」「⋮」 표시. 스캔 삽화라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 셋(왼쪽 아래 「n+1」 · 오른쪽 「4n+4」 · 아래 「n^3+4n^2+5n+2」). 정사각형 개수는 적지 않는다(답).
+\begin{tikzpicture}[scale=1, line width=0.5pt]
+  \def\W{4.4}\def\H{1.7}\def\s{0.5}
+  \fill[green!25!olive!30] (0,\H-\s) rectangle (\s,\H);
+  \fill[green!25!olive!30] (\W-\s,\H-\s) rectangle (\W,\H);
+  \fill[green!25!olive!30] (0,0) rectangle (\s,\s);
+  \fill[green!25!olive!30] (\s,0) rectangle (2*\s,\s);
+  \fill[green!25!olive!30] (\W-\s,0) rectangle (\W,\s);
+  \draw[line width=0.45pt] (0,\H-\s) rectangle (\s,\H);
+  \draw[line width=0.45pt] (\W-\s,\H-\s) rectangle (\W,\H);
+  \draw[line width=0.45pt] (0,0) rectangle (\s,\s);
+  \draw[line width=0.45pt] (\s,0) rectangle (2*\s,\s);
+  \draw[line width=0.45pt] (\W-\s,0) rectangle (\W,\s);
+  \draw[line width=0.6pt] (0,0) rectangle (\W,\H);
+  \node[font=\small] at (\W/2,\H-\s/2) {$\cdots$};
+  \node[font=\small] at (\W/2,\s/2) {$\cdots$};
+  \node[font=\small] at (\s/2,\H/2) {$\vdots$};
+  \node[font=\small] at (\W-\s/2,\H/2) {$\vdots$};
+  \node[font=\small, left, inner sep=1pt] at (-0.05,\s/2) {$n+1$};
+  \draw[dotted, line width=0.4pt] (\W+0.08,-0.05) to[bend right=20] (\W+0.08,\H+0.05);
+  \node[font=\small, right, inner sep=1pt] at (\W+0.25,\H/2) {$4n+4$};
+  \draw[dotted, line width=0.4pt] (-0.05,-0.1) to[bend right=8] (\W+0.05,-0.1);
+  \node[font=\small, below, inner sep=1pt] at (\W/2,-0.28) {$n^3+4n^2+5n+2$};
+\end{tikzpicture}

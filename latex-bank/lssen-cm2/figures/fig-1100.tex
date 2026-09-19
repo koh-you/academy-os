@@ -1,0 +1,30 @@
+% 1100(본책 153쪽) — 원점과 점 (e,e) 를 지나는 두 곡선(위: 위로 볼록한 y=f(x), 아래: 아래로 볼록한 y=g(x), 서로 y=x 대칭)과 직선 y=x. x축 위 a·b·c·d·e 점선(f(a)=b, f(b)=c, f(c)=d · g(b)=a, g(c)=b, g(d)=c 를 읽는 구조). 스캔 그림이라 TikZ 로 다시 그림(f(x)=E(x/E)^0.6, g=f^{-1}, E=e=2.6, a~d 는 이 구조에 맞춰 잡은 임의 좌표).
+% 라벨은 원문 그대로 x·y·O·a·b·c·d·e·y=x·y=f(x)·y=g(x) 만. 함숫값(답)은 적지 않는다.
+\begin{tikzpicture}[scale=0.85, line width=0.5pt, every node/.style={font=\small}]
+  \draw[->, >=stealth, line width=0.7pt] (-0.5,0) -- (3.8,0) node[below left=-1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.6) -- (0,3.8) node[left=-1pt] {$y$};
+  \node[below right=-2pt] at (0,0) {$\mathrm{O}$};
+  % 직선 y=x
+  \draw[line width=0.5pt] (-0.4,-0.4) -- (3.35,3.35);
+  \node[right=-1pt] at (3.3,3.2) {$y=x$};
+  % 위 곡선 y=f(x)
+  \draw[line width=0.6pt] plot[domain=0:3.5, samples=70] (\x, {2.6*(\x/2.6)^0.6});
+  \draw[line width=0.6pt] (0,0) -- (-0.45,-0.18);
+  \node[right=-1pt] at (3.3,2.65) {$y=f(x)$};
+  % 아래 곡선 y=g(x)=f^{-1}(x)
+  \draw[line width=0.6pt] plot[domain=0:3.0, samples=70] (\x, {2.6*(\x/2.6)^(1/0.6)});
+  \draw[line width=0.6pt] (0,0) -- (-0.18,-0.45);
+  \node[left=-1pt] at (2.55,3.55) {$y=g(x)$};
+  % 점선 (a=0.68, b=1.16, c=1.6, d=1.94, e=2.6 · f(d)=2.27)
+  \draw[densely dashed, line width=0.4pt] (0.68,0) -- (0.68,1.16) -- (0,1.16);
+  \draw[densely dashed, line width=0.4pt] (0,0.68) -- (1.16,0.68);
+  \draw[densely dashed, line width=0.4pt] (1.16,0) -- (1.16,1.6) -- (0,1.6);
+  \draw[densely dashed, line width=0.4pt] (1.6,0) -- (1.6,1.94) -- (0,1.94);
+  \draw[densely dashed, line width=0.4pt] (1.94,0) -- (1.94,2.27);
+  \draw[densely dashed, line width=0.4pt] (2.6,0) -- (2.6,2.6) -- (0,2.6);
+  \node[below=-1pt] at (0.68,0) {$a$};
+  \node[below=-1pt] at (1.16,0) {$b$};
+  \node[below=-1pt] at (1.6,0) {$c$};
+  \node[below=-1pt] at (1.94,0) {$d$};
+  \node[below=-1pt] at (2.6,0) {$e$};
+\end{tikzpicture}

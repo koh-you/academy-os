@@ -1,0 +1,20 @@
+% 0222(본책 44쪽) — 한 변 8 인 정사각형 BDEC 위에 △ABC(∠ABC=60°, ∠BAC 직각 표시), △AEC 색칠. 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (D) at (0,0); \coordinate (E) at (1.6,0); \coordinate (C) at (1.6,1.6); \coordinate (B) at (0,1.6); \coordinate (A) at (0.4,2.29);
+  \fill[green!25] (A) -- (E) -- (C) -- cycle;
+  \draw (B) -- (D) -- (E) -- (C) -- cycle;
+  \draw (A) -- (B);
+  \draw (A) -- (C);
+  \draw (A) -- (E);
+  % 직각 표시(A)
+  \draw[line width=0.4pt] ($(A)+(-0.07,-0.12)$) -- ($(A)+(0.07,-0.2)$) -- ($(A)+(0.14,-0.08)$);
+  \draw[line width=0.4pt] (0.32,1.6) arc[start angle=0, end angle=60, radius=0.32];
+  \node[font=\small] at (0.6,1.82) {$60^\circ$};
+  \draw[dashed, line width=0.4pt] (D) to[bend right=15] (E);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.8,-0.24) {$8$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, left] at (D) {D};
+  \node[font=\small, right] at (E) {E};
+\end{tikzpicture}

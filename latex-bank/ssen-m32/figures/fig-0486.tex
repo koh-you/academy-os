@@ -1,0 +1,20 @@
+% 0486(본책 88쪽) — 원 모양 종이를 원주 위의 한 점이 중심 O 와 겹치도록 현 AB 로 접음(접힌 호는 O 를 지남), 원 위의 점 P, AP=8, BP=7. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \fill[red!8] (0.953,-0.550) arc (-30:210:1.100) -- cycle;
+  \fill[red!25] (-0.953,-0.550) arc (150:30:1.100) -- cycle;
+  \draw (0.953,-0.550) arc (-30:210:1.100);
+  \draw[dashed, line width=0.4pt] (-0.953,-0.550) arc (210:330:1.100);
+  \draw (-0.953,-0.550) arc (150:30:1.100);
+  \draw (-0.953,-0.550) -- (0.953,-0.550);
+  \draw (0.191,1.083) -- (-0.953,-0.550);
+  \draw (0.191,1.083) -- (0.953,-0.550);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (-0.953,-0.550) to[bend left=20] (0.191,1.083);
+  \node[font=\small, inner sep=0.5pt] at (-0.545,0.381) {$8$};
+  \draw[dashed, line width=0.4pt] (0.191,1.083) to[bend left=20] (0.953,-0.550);
+  \node[font=\small, inner sep=0.5pt] at (0.753,0.351) {$7$};
+  \node[font=\small, inner sep=1pt] at (-1.141,-0.618) {A};
+  \node[font=\small, inner sep=1pt] at (1.141,-0.618) {B};
+  \node[font=\small, inner sep=1pt] at (0.226,1.280) {P};
+  \node[font=\small, inner sep=1pt] at (0.000,0.180) {O};
+\end{tikzpicture}

@@ -1,0 +1,21 @@
+% 0311(본책 59쪽) — 원 O, AB⊥OM, AB=CD, OD=10 cm, OM=8 cm, △OCD 색칠. 답(넓이)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \fill[orange!25] (0.000,0.000) -- (0.819,-0.734) -- (0.934,0.581) -- cycle;
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.432,1.012) -- (-1.092,-0.132);
+  \draw (0.819,-0.734) -- (0.934,0.581);
+  \draw (0.000,0.000) -- (-0.762,0.440);
+  \draw (0.000,0.000) -- (0.819,-0.734);
+  \draw (0.000,0.000) -- (0.934,0.581);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.702,0.544) -- (-0.598,0.484) -- (-0.658,0.380);
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend left=25] (0.934,0.581);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.220,0.500) {$10\,\mathrm{cm}$};
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.400,-0.050) {$8\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-0.050,-0.220) {O};
+  \node[font=\small, inner sep=1.5pt] at (-0.511,1.195) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.291,-0.155) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.968,-0.868) {C};
+  \node[font=\small, inner sep=1.5pt] at (1.104,0.686) {D};
+  \node[font=\small, inner sep=1.5pt] at (-0.912,0.590) {M};
+\end{tikzpicture}

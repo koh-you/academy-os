@@ -1,0 +1,22 @@
+% 0389(본책 72쪽) — 이등변삼각형 ABC(AB=AC=10, BC=12 cm)의 외접원 O, O 에서 AB, AC 에 내린 수선의 발 D, E. 답(OD+OE)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,0.350) circle (1.250);
+  \fill (0.000,0.350) circle (1.2pt);
+  \draw (0.000,1.600) -- (-1.200,0.000) -- (1.200,0.000) -- cycle;
+  \draw (0.000,0.350) -- (-0.600,0.800);
+  \draw (0.000,0.350) -- (0.600,0.800);
+  \draw[line width=0.4pt] (-0.540,0.880) -- (-0.460,0.820) -- (-0.520,0.740);
+  \draw[line width=0.4pt] (0.540,0.880) -- (0.460,0.820) -- (0.520,0.740);
+  \draw[dashed, line width=0.4pt] (-1.200,0.000) to[bend left=20] (0.000,1.600);
+  \node[font=\small, inner sep=1.5pt] at (-0.960,1.070) {$10\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.000,1.600) to[bend left=20] (1.200,0.000);
+  \node[font=\small, inner sep=1.5pt] at (0.960,1.070) {$10\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (-1.200,0.000) to[bend right=15] (1.200,0.000);
+  \node[font=\small, inner sep=1.5pt] at (0.000,-0.280) {$12\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.000,1.770) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.370,0.000) {B};
+  \node[font=\small, inner sep=1.5pt] at (1.370,0.000) {C};
+  \node[font=\small, inner sep=1.5pt] at (-0.444,0.710) {D};
+  \node[font=\small, inner sep=1.5pt] at (0.444,0.710) {E};
+  \node[font=\small, inner sep=1.5pt] at (0.200,0.350) {O};
+\end{tikzpicture}

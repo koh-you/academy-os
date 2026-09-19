@@ -1,0 +1,8 @@
+{ "range": "1302~1388(1342~1353 제외)", "checked": 75, "ok": 70,
+  "findings": [
+    { "id": "1330", "severity": "yellow", "where": "layout", "note": "본문 justify로 'f(x) = 1/(√x+√x+1) 일 때,'와 다음 줄 'f(1) + f(2) + ... ' 사이 글자 간격이 다른 문항보다 크게 벌어짐" },
+    { "id": "1361", "severity": "yellow", "where": "layout", "note": "첫 줄 '실수 x, y에 대하여 두 집합 A, B가' justify 간격이 과도하게 벌어짐" },
+    { "id": "1372", "severity": "yellow", "where": "layout", "note": "첫 줄 'x = 3 - 2√2, y = 3 + 2√2일 때,' justify 간격이 과도하게 벌어짐" },
+    { "id": "1376", "severity": "yellow", "where": "layout", "note": "우측 상단 출처 배지('라이트쎈 공통수학2 1376번 · 188쪽')에 흐린 잔상 텍스트가 겹쳐 보임(렌더 겹침으로 추정)" },
+    { "id": "1381", "severity": "yellow", "where": "choices", "note": "④ 보기 '그래프는 y=-√(5x+10)-1의 그래프와 x축에 대하여 대칭이다'가 줄바꿈 없이 이미지 우측 끝까지 이어져 잘려 보임" }
+  ] }

@@ -1,0 +1,14 @@
+% 유형 01 0040(본책 12쪽) — 직각삼각형 ABC(∠C=90°), AB=4√6 · AC=8. 스캔 삽화를 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(4√6 · 8 · 꼭짓점 · 직각 표시). BC 의 길이(답의 근거)는 적지 않는다.
+\begin{tikzpicture}[scale=0.3, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (5.657,0); \coordinate (A) at (5.657,8);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] (4.9,0) -- (4.9,0.75) -- (5.657,0.75);
+  \draw[dashed, line width=0.3pt] (B) to[bend left=20] (A);
+  \draw[dashed, line width=0.3pt] (A) to[bend left=20] (C);
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small] at (1.6,4.6) {$4\sqrt{6}$};
+  \node[font=\small] at (6.9,4.0) {$8$};
+\end{tikzpicture}

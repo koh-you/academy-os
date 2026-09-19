@@ -1,0 +1,19 @@
+% 0326(본책 62쪽) — 중심 O 가 같은 두 원, 큰 원의 현 AB 가 작은 원에 Q 에서 접함, BQ=4√5 cm, PQ=4 cm(OP 는 큰 원의 반지름). 답(OA)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (0.000,0.000) circle (0.733);
+  \draw (-0.820,-0.733) -- (0.820,-0.733);
+  \draw (0.000,0.000) -- (-0.820,-0.733);
+  \draw (0.000,0.000) -- (0.000,-1.100);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (0.120,-0.733) -- (0.120,-0.613) -- (0.000,-0.613);
+  \draw[dashed, line width=0.4pt] (0.000,-0.733) to[bend right=30] (0.000,-1.100);
+  \node[font=\small, inner sep=1.5pt] at (-0.400,-1.050) {$4\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.000,-0.733) to[bend right=25] (0.820,-0.733);
+  \node[font=\small, inner sep=1.5pt] at (0.550,-1.050) {$4\sqrt{5}\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.000,0.170) {O};
+  \node[font=\small, inner sep=1.5pt] at (0.140,-0.613) {Q};
+  \node[font=\small, inner sep=1.5pt] at (0.000,-1.270) {P};
+  \node[font=\small, inner sep=1.5pt] at (-0.980,-0.753) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.980,-0.753) {B};
+\end{tikzpicture}

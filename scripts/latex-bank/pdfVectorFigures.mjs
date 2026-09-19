@@ -35,7 +35,12 @@ export async function pagePathBoxes(page) {
       stack.push(ctm);
       if (args[0]) ctm = mul(ctm, args[0]);
     } else if (fn === OP.paintFormXObjectEnd) ctm = stack.pop() ?? base;
-    else if (fn === OP.constructPath) {
+    else if (fn === OP.paintImageXObject || fn === OP.paintInlineImageXObject || fn === OP.paintImageMaskXObject) {
+      // 래스터 그림(HWP 출력 프린트는 좌표평면·도형을 이미지로 넣는다): 단위 정사각형이 CTM 으로 놓인 자리가 상자다. 굵은 뼈대로 취급한다.
+      const corners = [apply(ctm, 0, 0), apply(ctm, 1, 0), apply(ctm, 0, 1), apply(ctm, 1, 1)];
+      const box = { x0: Math.min(...corners.map((c) => c[0])), y0: Math.min(...corners.map((c) => c[1])), x1: Math.max(...corners.map((c) => c[0])), y1: Math.max(...corners.map((c) => c[1])) };
+      if (box.x1 - box.x0 >= 12 && box.y1 - box.y0 >= 12) boxes.push({ ...box, kind: "image", w: box.x1 - box.x0, h: box.y1 - box.y0 });
+    } else if (fn === OP.constructPath) {
       const [codes, coords] = args;
       let k = 0;
       let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;

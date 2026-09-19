@@ -1,0 +1,22 @@
+% 0481(본책 87쪽) — 원 O, 두 현 AD·BE 의 교점 P, AB=CD(호 표시), OE·OC, ∠APB=40°, ∠EOC 표시. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.063,0.285) -- (1.063,0.285);
+  \draw (-1.063,-0.285) -- (0.465,0.997);
+  \draw (0.000,0.000) -- (0.465,0.997);
+  \draw (0.000,0.000) -- (1.063,-0.285);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.684,0.285) arc (180.0:220.0:0.300);
+  \node[font=\small, inner sep=0.5pt] at (-0.854,0.114) {$40^\circ$};
+  \fill[green!15] (0.000,0.000) -- (0.270,-0.072) arc (-15.0:65.0:0.280) -- cycle;
+  \draw[line width=0.4pt] (0.270,-0.072) arc (-15.0:65.0:0.280);
+  \draw[line width=0.4pt] (-1.030,0.000) -- (-1.170,0.000);
+  \draw[line width=0.4pt] (1.030,0.000) -- (1.170,0.000);
+  \node[font=\small, inner sep=1pt] at (-1.256,0.336) {A};
+  \node[font=\small, inner sep=1pt] at (-1.256,-0.336) {B};
+  \node[font=\small, inner sep=1pt] at (1.256,-0.336) {C};
+  \node[font=\small, inner sep=1pt] at (1.256,0.336) {D};
+  \node[font=\small, inner sep=1pt] at (0.549,1.178) {E};
+  \node[font=\small, inner sep=1pt] at (-0.384,0.465) {P};
+  \node[font=\small, inner sep=1pt] at (0.000,-0.200) {O};
+\end{tikzpicture}

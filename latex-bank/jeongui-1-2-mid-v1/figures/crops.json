@@ -1,0 +1,156 @@
+{
+ "fig-03.png": {
+  "width_pt": 184.5,
+  "height_pt": 182.1,
+  "pdf_page": 1,
+  "bbox_pt": [
+   433.9,
+   285.2,
+   618.4,
+   467.3
+  ]
+ },
+ "fig-09.png": {
+  "width_pt": 243.2,
+  "height_pt": 160.5,
+  "pdf_page": 3,
+  "bbox_pt": [
+   404.5,
+   276.4,
+   647.7,
+   436.9
+  ]
+ },
+ "fig-10.png": {
+  "width_pt": 155.7,
+  "height_pt": 148.6,
+  "pdf_page": 4,
+  "bbox_pt": [
+   123.9,
+   265.8,
+   279.6,
+   414.4
+  ]
+ },
+ "fig-11.png": {
+  "width_pt": 172,
+  "height_pt": 97.9,
+  "pdf_page": 4,
+  "bbox_pt": [
+   440.1,
+   232.5,
+   612.1,
+   330.4
+  ]
+ },
+ "fig-13.png": {
+  "width_pt": 145.1,
+  "height_pt": 143.6,
+  "pdf_page": 5,
+  "bbox_pt": [
+   129.2,
+   234.1,
+   274.3,
+   377.7
+  ]
+ },
+ "fig-17.png": {
+  "width_pt": 164,
+  "height_pt": 163,
+  "pdf_page": 6,
+  "bbox_pt": [
+   119.8,
+   272.5,
+   283.8,
+   435.5
+  ]
+ },
+ "fig-18.png": {
+  "width_pt": 180.5,
+  "height_pt": 158.6,
+  "pdf_page": 6,
+  "bbox_pt": [
+   435.9,
+   274,
+   616.4,
+   432.6
+  ]
+ },
+ "fig-19.png": {
+  "width_pt": 291.9,
+  "height_pt": 76.1,
+  "pdf_page": 7,
+  "bbox_pt": [
+   53.9,
+   251.5,
+   345.8,
+   327.6
+  ]
+ },
+ "fig-24.png": {
+  "width_pt": 158.6,
+  "height_pt": 153.7,
+  "pdf_page": 8,
+  "bbox_pt": [
+   446.8,
+   235.4,
+   605.4,
+   389.1
+  ]
+ },
+ "fig-25.png": {
+  "width_pt": 215.3,
+  "height_pt": 155.3,
+  "pdf_page": 9,
+  "bbox_pt": [
+   94.2,
+   372.2,
+   309.5,
+   527.6
+  ]
+ },
+ "fig-31.png": {
+  "width_pt": 158.6,
+  "height_pt": 161.4,
+  "pdf_page": 11,
+  "bbox_pt": [
+   122.5,
+   276.1,
+   281,
+   437.5
+  ]
+ },
+ "fig-32.png": {
+  "width_pt": 152.8,
+  "height_pt": 155.1,
+  "pdf_page": 11,
+  "bbox_pt": [
+   449.7,
+   279.8,
+   602.5,
+   434.9
+  ]
+ },
+ "fig-37.png": {
+  "width_pt": 181.5,
+  "height_pt": 147.8,
+  "pdf_page": 13,
+  "bbox_pt": [
+   111.1,
+   215.5,
+   292.6,
+   363.3
+  ]
+ },
+ "fig-41.png": {
+  "width_pt": 161.6,
+  "height_pt": 162.5,
+  "pdf_page": 14,
+  "bbox_pt": [
+   445.4,
+   302.7,
+   607,
+   465.2
+  ]
+ }
+}

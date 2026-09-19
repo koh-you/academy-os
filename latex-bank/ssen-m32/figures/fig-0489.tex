@@ -1,0 +1,18 @@
+% 0489(본책 88쪽) — 반원 O(지름 AB), A 에서 그은 접선과 호 위의 점 P 에서 그은 접선의 교점 Q, ∠BAP=30°, AQ=6 cm. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (1.100,0.000) arc (0.0:180.0:1.100);
+  \draw (-1.100,0.000) -- (1.100,0.000);
+  \draw (-1.100,0.000) -- (-1.100,1.905);
+  \draw (-1.100,1.905) -- (0.550,0.953);
+  \draw (-1.100,0.000) -- (0.550,0.953);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.760,0.000) arc (-0.0:30.0:0.340);
+  \node[font=\small, inner sep=0.5pt] at (-0.559,0.145) {$30^\circ$};
+  \draw[dashed, line width=0.4pt] (-1.100,0.000) to[bend left=25] (-1.100,1.905);
+  \node[font=\small, inner sep=0.5pt] at (-1.500,0.953) {$6\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1pt] at (-1.210,-0.191) {A};
+  \node[font=\small, inner sep=1pt] at (1.291,-0.110) {B};
+  \node[font=\small, inner sep=1pt] at (0.719,1.094) {P};
+  \node[font=\small, inner sep=1pt] at (-1.100,2.105) {Q};
+  \node[font=\small, inner sep=1pt] at (0.000,-0.200) {O};
+\end{tikzpicture}

@@ -1,0 +1,33 @@
+% 변형 25(원본 25 · 2025 교육청 고2 3월 28번) — 직선 y=x 위의 점 A 를 중심으로 하는 원 C, 원점에서 그은 두 접선 중 기울기가 작은 l,
+% C 와 y=x 의 교점 P1·P2, P1·P2 에서의 접선과 l 의 교점 Q1·Q2. 설정(OP1=8 · 넓이비 9/4)이 바뀌어 TikZ 로 새로 그림.
+% 답의 근거가 되는 수치(반지름·기울기·좌표)는 적지 않는다.
+\begin{tikzpicture}[scale=0.24, line width=0.5pt]
+  \coordinate (O) at (0,0);
+  \coordinate (A) at ({13/sqrt(2)},{13/sqrt(2)});
+  \coordinate (P1) at ({8/sqrt(2)},{8/sqrt(2)});
+  \coordinate (P2) at ({18/sqrt(2)},{18/sqrt(2)});
+  \coordinate (Q1) at ({8*sqrt(2)*17/24},{8*sqrt(2)*7/24});
+  \coordinate (Q2) at ({18*sqrt(2)*17/24},{18*sqrt(2)*7/24});
+  % 축
+  \draw[->, >=stealth] (-3,0) -- (24,0) node[below, font=\small] {$x$};
+  \draw[->, >=stealth] (0,-4) -- (0,18) node[left, font=\small] {$y$};
+  % 직선 y=x, 접선 l
+  \draw (-2.5,-2.5) -- (16.5,16.5) node[above right, font=\small] {$y=x$};
+  \draw (-3,{-3*7/17}) -- (24,{24*7/17}) node[right, font=\small] {$l$};
+  % 원 C
+  \draw[line width=0.8pt] (A) circle (5);
+  % P1·P2 에서의 접선(y=x 에 수직)과 A-Q1, A-Q2
+  \draw ($(P1)+(-3,3)$) -- ($(P1)+(5,-5)$);
+  \draw ($(P2)+(-3.5,3.5)$) -- ($(P2)+(8.5,-8.5)$);
+  \draw (A) -- (Q1);
+  \draw (A) -- (Q2);
+  % 점
+  \foreach \p in {A,P1,P2,Q1,Q2} \fill (\p) circle (0.22);
+  \node[below left, font=\small] at (O) {$\mathrm{O}$};
+  \node[above left, font=\small] at (A) {$\mathrm{A}$};
+  \node[font=\small] at (4.2,13.2) {$C$};
+  \node[left=4pt, font=\small] at (P1) {$\mathrm{P_1}$};
+  \node[above=5pt, font=\small] at (P2) {$\mathrm{P_2}$};
+  \node[below=4pt, font=\small] at (Q1) {$\mathrm{Q_1}$};
+  \node[below=4pt, font=\small] at (Q2) {$\mathrm{Q_2}$};
+\end{tikzpicture}

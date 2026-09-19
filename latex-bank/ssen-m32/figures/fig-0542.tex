@@ -1,0 +1,22 @@
+% 0542(본책 97쪽) — 두 원이 P·Q 에서 만남, R 에서 두 직선 RAPC·RBQD, AB·CD, ∠BAP=110°, ∠D=94°, ∠R(색칠). 다시 그림.
+\begin{tikzpicture}[scale=1.19, line width=0.6pt]
+  \draw (0.000,0.000) circle (0.750);
+  \draw (0.950,0.020) circle (0.850);
+  \draw (-3.732,0.278) -- (1.401,0.740);
+  \draw (-3.732,0.278) -- (1.172,-0.801);
+  \draw (-0.487,0.570) -- (-0.632,-0.404);
+  \draw (1.401,0.740) -- (1.172,-0.801);
+  \draw[line width=0.4pt] (-0.516,0.373) arc[start angle=-98.471, end angle=5.143, radius=0.200];
+  \node[font=\small, inner sep=0.5pt] at (-0.957,0.399) {$110^\circ$};
+  \draw[line width=0.4pt] (1.201,-0.603) arc[start angle=81.529, end angle=167.593, radius=0.200];
+  \node[font=\small, inner sep=0.5pt] at (0.888,-0.389) {$94^\circ$};
+  \fill[green!15] (-3.732,0.278) -- (-3.293,0.182) arc[start angle=-12.407, end angle=5.143, radius=0.450] -- cycle;
+  \draw[line width=0.4pt] (-3.293,0.182) arc[start angle=-12.407, end angle=5.143, radius=0.450];
+  \node[font=\small, inner sep=1.5pt] at (-3.932,0.278) {R};
+  \node[font=\small, inner sep=1.5pt] at (-0.522,0.767) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.761,-0.557) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.377,0.848) {P};
+  \node[font=\small, inner sep=1.5pt] at (0.329,-0.838) {Q};
+  \node[font=\small, inner sep=1.5pt] at (1.501,0.914) {C};
+  \node[font=\small, inner sep=1.5pt] at (1.240,-0.988) {D};
+\end{tikzpicture}

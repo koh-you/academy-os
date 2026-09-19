@@ -1,0 +1,14 @@
+% 0307(본책 59쪽) — 반지름 10 cm 인 원 모양의 종이를 원주 위의 한 점이 중심 O 와 겹치도록 AB 를 접는 선으로 접은 모양, △ABO 색칠. 답(넓이)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \fill[gray!30] (-0.953,-0.550) -- (0.000,0.000) -- (0.953,-0.550) -- cycle;
+  \draw (0.953,-0.550) arc[start angle=-30.0, end angle=210.0, radius=1.100];
+  \draw[dashed, line width=0.4pt] (-0.953,-0.550) arc[start angle=-150.0, end angle=-30.0, radius=1.100];
+  \draw (-0.953,-0.550) -- (0.953,-0.550);
+  \draw (-0.953,-0.550) -- (0.000,0.000);
+  \draw (0.953,-0.550) -- (0.000,0.000);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw (-0.953,-0.550) arc[start angle=150.0, end angle=30.0, radius=1.100];
+  \node[font=\small, inner sep=1.5pt] at (0.000,0.200) {O};
+  \node[font=\small, inner sep=1.5pt] at (-1.126,-0.650) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.126,-0.650) {B};
+\end{tikzpicture}

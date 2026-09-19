@@ -1,0 +1,16 @@
+% 0263(본책 53쪽) — 원, 지름 AB=36 cm, 현 CD⊥AB(M 은 CD 의 중점, DM=MC 같은 변 표시). 답(반지름)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.100,0.000) -- (1.100,0.000);
+  \draw (0.350,1.043) -- (0.350,-1.043);
+  \draw[line width=0.4pt] (0.470,0.000) -- (0.470,0.120) -- (0.350,0.120);
+  \draw[line width=0.4pt] (0.410,0.521) -- (0.290,0.521);
+  \draw[line width=0.4pt] (0.410,-0.521) -- (0.290,-0.521);
+  \draw[dashed, line width=0.4pt] (-1.100,0.000) to[bend right=15] (1.100,0.000);
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.050,-0.280) {$36\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-1.300,0.000) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.300,0.000) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.414,-1.232) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.414,1.232) {D};
+  \node[font=\small, inner sep=1.5pt] at (0.180,0.150) {M};
+\end{tikzpicture}

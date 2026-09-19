@@ -1,0 +1,20 @@
+% 0552(본책 99쪽) — 원, AB 연장선과 접점 T 의 접선의 교점 P, TC 는 ∠ATB 의 이등분선, ∠TCB=70°, ∠CTP 표시. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-0.866,-0.500) -- (2.152,-0.500);
+  \draw (0.260,1.087) -- (2.152,-0.500);
+  \draw (0.643,0.766) -- (-0.866,-0.500);
+  \draw (0.643,0.766) -- (0.866,-0.500);
+  \draw (0.643,0.766) -- (0.182,-0.500);
+  \draw[line width=0.4pt] (0.482,-0.500) arc[start angle=-0.000, end angle=70.000, radius=0.300];
+  \node[font=\small, inner sep=1pt] at (0.592,-0.213) {$70^\circ$};
+  \fill[yellow!35] (0.643,0.766) -- ++(-110.000:0.220) arc[start angle=-110.000, end angle=-40.000, radius=0.220] -- cycle;
+  \draw[line width=0.4pt] (0.568,0.559) arc[start angle=-110.000, end angle=-40.000, radius=0.220];
+  \fill (0.471,0.520) circle (0.6pt);
+  \fill (0.617,0.467) circle (0.6pt);
+  \node[font=\small, anchor=south west, inner sep=1.5pt] at (0.663,0.766) {T};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-0.866,-0.500) {A};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (0.182,-0.500) {C};
+  \node[font=\small, anchor=north west, inner sep=1.5pt] at (0.886,-0.500) {B};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (2.152,-0.500) {P};
+\end{tikzpicture}

@@ -1,0 +1,26 @@
+% 1259(본책 174쪽) — y=4/(x-2)+1 (x>2) 의 그래프(점근선 x=2, y=1 점선)와 그 위의 점 P 에서 두 점근선에 내린 수선의 발 Q(y=1 위), R(x=2 위). 스캔 그림이라 TikZ 로 다시 그림(P 의 위치는 임의).
+% 라벨은 원문 그대로 x·y·O·1·2·P·Q·R·y=4/(x-2)+1 만. 최솟값(답)은 적지 않는다.
+\begin{tikzpicture}[scale=0.55, line width=0.5pt, every node/.style={font=\small}]
+  \draw[->, >=stealth, line width=0.7pt] (-0.6,0) -- (7.6,0) node[below left=-1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.6) -- (0,6.3) node[left=-1pt] {$y$};
+  \node[below left=-2pt] at (0,0) {$\mathrm{O}$};
+  % 점근선
+  \draw[densely dashed, line width=0.4pt] (2,-0.6) -- (2,6.1);
+  \draw[densely dashed, line width=0.4pt] (-0.6,1) -- (7.5,1);
+  % y = 4/(x-2) + 1 (x>2)
+  \draw[line width=0.6pt] plot[domain=2.85:7.4, samples=80] (\x, {4/(\x-2)+1});
+  \node[right=-1pt] at (3.7,5.3) {$y=\dfrac{4}{x-2}+1$};
+  % P(4.5, 2.6), Q(4.5, 1), R(2, 2.6)
+  \draw[line width=0.5pt] (4.5,2.6) -- (4.5,1);
+  \draw[line width=0.5pt] (4.5,2.6) -- (2,2.6);
+  \draw[line width=0.4pt] (4.5,1.35) -- (4.15,1.35) -- (4.15,1);
+  \draw[line width=0.4pt] (2.35,2.6) -- (2.35,2.25) -- (2,2.25);
+  \fill (4.5,2.6) circle (1.4pt);
+  \fill (4.5,1) circle (1.4pt);
+  \fill (2,2.6) circle (1.4pt);
+  \node[above right=-2pt] at (4.5,2.6) {$\mathrm{P}$};
+  \node[below=-1pt] at (4.5,1) {$\mathrm{Q}$};
+  \node[left=-1pt] at (2,2.6) {$\mathrm{R}$};
+  \node[left=1.5pt] at (0,1) {$1$};
+  \node[below right=-2pt] at (2,0) {$2$};
+\end{tikzpicture}

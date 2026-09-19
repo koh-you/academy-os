@@ -1,0 +1,16 @@
+% 0282(본책 55쪽) — 원 O 밖의 점 P 에서 그은 두 접선(접점 A, B), 현 AB, ∠PAB=55°, ∠P=x. 답(x)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (-0.900,0.000) circle (0.850);
+  \fill (-0.900,0.000) circle (1.2pt);
+  \draw (0.582,0.000) -- (-0.699,0.897);
+  \draw (0.582,0.000) -- (-0.699,-0.897);
+  \draw (-0.412,0.696) -- (-0.412,-0.696);
+  \draw[line width=0.4pt] (-0.183,0.536) arc[start angle=-35.0, end angle=-90.0, radius=0.280];
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.122,0.289) {$55^\circ$};
+  \draw[line width=0.4pt] (0.377,0.143) arc[start angle=145.0, end angle=215.0, radius=0.250];
+  \node[font=\small, fill=white, inner sep=1pt] at (0.132,0.000) {$x$};
+  \node[font=\small, inner sep=1.5pt] at (-0.900,-0.200) {O};
+  \node[font=\small, inner sep=1.5pt] at (0.762,0.000) {P};
+  \node[font=\small, inner sep=1.5pt] at (-0.412,0.896) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.412,-0.896) {B};
+\end{tikzpicture}

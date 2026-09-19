@@ -1,0 +1,17 @@
+% 0568(본책 102쪽) — 지름 AB(10 cm) 인 원 O, 접선 HT(접점 T), AH⊥HT, AH=4 cm. 스캔 삽화를 TikZ 로 다시 그림. 답(HT)은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-1.380,-1.000) -- (1.100,-1.000);
+  \draw (-0.980,-0.200) -- (0.980,0.200);
+  \draw (-0.980,-0.200) -- (-0.980,-1.000);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.980,-0.870) -- (-0.850,-0.870) -- (-0.850,-1.000);
+  \draw[dashed, line width=0.4pt] (-0.980,-0.200) to[bend left=18] (0.980,0.200);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.000,0.200) {$10\,\mathrm{cm}$};
+  \node[font=\small, fill=white, inner sep=1pt] at (-1.280,-0.600) {$4\,\mathrm{cm}$};
+  \node[font=\small, anchor=south, inner sep=1.5pt] at (0.000,0.050) {O};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-1.010,-0.180) {A};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.980,0.200) {B};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (-0.980,-1.060) {H};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (-0.000,-1.060) {T};
+\end{tikzpicture}

@@ -1,0 +1,16 @@
+% 0449(본책 81쪽) — △ABC 의 외접원 O, ∠BAC=45°, BC=7. 답(반지름)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.285,1.063) -- (-0.778,-0.778);
+  \draw (-0.285,1.063) -- (0.778,-0.778);
+  \draw (-0.778,-0.778) -- (0.778,-0.778);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.375,0.724) arc (255.0:300.0:0.350);
+  \draw[dashed, line width=0.4pt] (-0.778,-0.778) to[bend right=18] (0.778,-0.778);
+  \node[font=\small, inner sep=0.5pt] at (-0.204,0.448) {$45^\circ$};
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.000,-0.998) {$7$};
+  \node[font=\small, inner sep=1.5pt] at (-0.336,1.256) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.919,-0.919) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.919,-0.919) {C};
+  \node[font=\small, inner sep=1.5pt] at (-0.000,-0.200) {O};
+\end{tikzpicture}

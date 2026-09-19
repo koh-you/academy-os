@@ -1,0 +1,19 @@
+% 0205(본책 41쪽) — △ABC(∠B=30°, ∠C=45°, BC=4), AD⊥BC, M 은 BC 의 중점, △AMD 색칠. 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (3.2,0); \coordinate (D) at (2.03,0); \coordinate (M) at (1.6,0); \coordinate (A) at (2.03,1.17);
+  \fill[cyan!25] (A) -- (M) -- (D) -- cycle;
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (M); \draw (A) -- (D);
+  \draw[line width=0.4pt] (1.85,0) -- (1.85,0.18) -- (2.03,0.18);
+  \draw[line width=0.4pt] (0.55,0) arc[start angle=0, end angle=30, radius=0.55];
+  \node[font=\small] at (0.9,0.28) {$30^\circ$};
+  \draw[line width=0.4pt] (2.7,0) arc[start angle=180, end angle=135, radius=0.5];
+  \node[font=\small] at (2.4,0.27) {$45^\circ$};
+  \draw[dashed, line width=0.4pt] (B) to[bend right=15] (C);
+  \node[font=\small] at (1.6,-0.5) {$4$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, below left] at (M) {M};
+  \node[font=\small, below right] at (D) {D};
+\end{tikzpicture}

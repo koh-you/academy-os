@@ -1,0 +1,17 @@
+% 0366(본책 68쪽) — 반지름 4 cm 인 원 O 에 외접하는 □ABCD, AB=10 cm, CD=7 cm, 원 밖 □ 안 색칠. 답(넓이)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \fill[orange!30] (0.613,2.038) -- (-0.078,0.139) -- (1.658,0.078) -- (1.987,1.308) -- cycle;
+  \fill[white] (1.050,0.900) circle (0.800);
+  \draw (0.613,2.038) -- (-0.078,0.139) -- (1.658,0.078) -- (1.987,1.308) -- cycle;
+  \draw (1.050,0.900) circle (0.800);
+  \fill (1.050,0.900) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (0.613,2.038) to[bend right=20] (-0.078,0.139);
+  \node[font=\small, inner sep=1.5pt] at (-0.203,1.260) {$10\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (1.658,0.078) to[bend right=20] (1.987,1.308);
+  \node[font=\small, inner sep=1.5pt] at (2.228,0.584) {$7\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.583,2.206) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.199,0.019) {B};
+  \node[font=\small, inner sep=1.5pt] at (1.805,-0.007) {C};
+  \node[font=\small, inner sep=1.5pt] at (2.135,1.393) {D};
+  \node[font=\small, inner sep=1.5pt] at (1.050,0.700) {O};
+\end{tikzpicture}

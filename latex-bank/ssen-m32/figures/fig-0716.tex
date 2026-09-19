@@ -1,0 +1,40 @@
+% 0716(본책 127쪽) — 은영이네 반 20명의 수면 시간(가로 5~9, 격자 0.5)·TV 시청 시간(세로 1~5, 격자 0.5) 산점도. 스캔 산점도를 TikZ 로 다시 그림(점 20개 원문 위치).
+\begin{tikzpicture}[line width=0.5pt]
+  \draw[gray!55, line width=0.25pt] (0,0) grid[xstep=0.24cm, ystep=0.24cm] (2.64,2.64);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (2.79,0);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (0,2.79);
+  \draw[line width=0.5pt] (0.19,-0.06) -- (0.25,0.06) (0.26,-0.06) -- (0.32,0.06);
+  \node[font=\scriptsize, below left=0pt, inner sep=1.5pt] at (0,0) {$0$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (0.48,0) {$5$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (0.96,0) {$6$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (1.44,0) {$7$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (1.92,0) {$8$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (2.4,0) {$9$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,0.48) {$1$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,0.96) {$2$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,1.44) {$3$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,1.92) {$4$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,2.4) {$5$};
+  \node[font=\scriptsize, anchor=north east, inner sep=1pt] at (2.79,-0.38) {수면 시간(시간)};
+  \node[font=\scriptsize, align=center, anchor=north east, inner sep=1pt] at (-0.27,2.79) {TV\\시\\청\\시\\간\\(시간)};
+  \fill (0.24,2.4) circle (1.5pt);
+  \fill (0.24,1.92) circle (1.5pt);
+  \fill (0.48,2.16) circle (1.5pt);
+  \fill (0.48,1.44) circle (1.5pt);
+  \fill (0.72,1.92) circle (1.5pt);
+  \fill (0.72,1.2) circle (1.5pt);
+  \fill (0.96,1.68) circle (1.5pt);
+  \fill (1.2,1.92) circle (1.5pt);
+  \fill (1.2,1.44) circle (1.5pt);
+  \fill (1.2,1.2) circle (1.5pt);
+  \fill (1.44,1.44) circle (1.5pt);
+  \fill (1.44,0.96) circle (1.5pt);
+  \fill (1.68,1.2) circle (1.5pt);
+  \fill (1.68,0.72) circle (1.5pt);
+  \fill (1.92,1.92) circle (1.5pt);
+  \fill (1.92,1.44) circle (1.5pt);
+  \fill (1.92,0.96) circle (1.5pt);
+  \fill (2.16,0.96) circle (1.5pt);
+  \fill (2.16,0.48) circle (1.5pt);
+  \fill (2.4,0.48) circle (1.5pt);
+\end{tikzpicture}

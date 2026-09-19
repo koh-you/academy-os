@@ -1,0 +1,12 @@
+% 유형 02 0048(본책 13쪽) — 직각삼각형 ABC(∠A=90°), AB=4, 빗변 BC 가 아래. 스캔 삽화를 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(4 · 꼭짓점 · 직각 표시). BC · AC 의 길이(답의 근거)는 적지 않는다.
+\begin{tikzpicture}[scale=0.42, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (8.485,0); \coordinate (A) at (1.886,3.528);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] ($(A)!0.14!(B)$) -- ($(A)!0.14!(B)+(0.528,-0.282)$) -- ($(A)!0.075!(C)$);
+  \draw[dashed, line width=0.3pt] (B) to[bend left=28] (A);
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small] at (0.35,2.1) {$4$};
+\end{tikzpicture}

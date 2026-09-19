@@ -1,0 +1,15 @@
+% 0151(본책 27쪽) — 좌표평면 위의 정사각형 ABCD(A(0,2)·B(4,0), C·D 는 제1사분면). 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C·D·O·x·y 와 눈금 2·4 만. C·D 의 좌표와 직선 CD 의 식(답)은 적지 않는다.
+\begin{tikzpicture}[scale=0.34, line width=0.5pt]
+  \coordinate (A) at (0,2); \coordinate (B) at (4,0); \coordinate (C) at (6,4); \coordinate (D) at (2,6);
+  \draw[->, >=stealth, line width=0.7pt] (-1.2,0) -- (7.6,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.2) -- (0,7.4) node[left=-1pt, font=\small] {$y$};
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \node[right=1pt, font=\small] at (0.05,2.35) {$\mathrm{A}$};
+  \node[above right=-2pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[right=1pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[above=1pt, font=\small] at (D) {$\mathrm{D}$};
+  \node[below left=-1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[left=1pt, font=\small] at (0,2) {$2$};
+  \node[below=1pt, font=\small] at (4,0) {$4$};
+\end{tikzpicture}

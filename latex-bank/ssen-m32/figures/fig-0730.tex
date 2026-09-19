@@ -1,0 +1,39 @@
+% 0730(본책 130쪽) — 재훈이네 반 20명의 왼쪽 눈(가로 0.8~1.4)·오른쪽 눈(세로 0.8~1.4) 시력 산점도(격자 0.1 · 눈금 0.2 간격). 스캔 산점도를 TikZ 로 다시 그림(점 20개 원문 위치).
+\begin{tikzpicture}[line width=0.5pt]
+  \draw[gray!55, line width=0.25pt] (0,0) grid[xstep=0.3cm, ystep=0.3cm] (2.4,2.4);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (2.55,0);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (0,2.55);
+  \draw[line width=0.5pt] (0.1,-0.06) -- (0.16,0.06) (0.17,-0.06) -- (0.23,0.06);
+  \draw[line width=0.5pt] (-0.06,0.1) -- (0.06,0.16) (-0.06,0.17) -- (0.06,0.23);
+  \node[font=\scriptsize, below left=0pt, inner sep=1.5pt] at (0,0) {$0$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (0.3,0) {$0.8$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (0.9,0) {$1.0$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (1.5,0) {$1.2$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (2.1,0) {$1.4$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,0.3) {$0.8$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,0.9) {$1.0$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,1.5) {$1.2$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,2.1) {$1.4$};
+  \node[font=\scriptsize, anchor=north east, inner sep=1pt] at (2.55,-0.38) {왼쪽 눈의 시력};
+  \node[font=\scriptsize, align=center, anchor=north east, inner sep=1pt] at (-0.57,2.55) {오\\른\\쪽\\눈\\의\\시\\력};
+  \fill (0.3,0.3) circle (1.5pt);
+  \fill (0.6,1.8) circle (1.5pt);
+  \fill (0.6,0.9) circle (1.5pt);
+  \fill (0.6,0.6) circle (1.5pt);
+  \fill (0.9,1.5) circle (1.5pt);
+  \fill (0.9,1.2) circle (1.5pt);
+  \fill (0.9,0.6) circle (1.5pt);
+  \fill (1.2,1.8) circle (1.5pt);
+  \fill (1.2,1.5) circle (1.5pt);
+  \fill (1.2,0.9) circle (1.5pt);
+  \fill (1.2,0.6) circle (1.5pt);
+  \fill (1.5,1.5) circle (1.5pt);
+  \fill (1.5,0.9) circle (1.5pt);
+  \fill (1.8,1.8) circle (1.5pt);
+  \fill (1.8,1.2) circle (1.5pt);
+  \fill (1.8,0.9) circle (1.5pt);
+  \fill (1.8,0.6) circle (1.5pt);
+  \fill (2.1,2.1) circle (1.5pt);
+  \fill (2.1,1.5) circle (1.5pt);
+  \fill (2.1,0.9) circle (1.5pt);
+\end{tikzpicture}

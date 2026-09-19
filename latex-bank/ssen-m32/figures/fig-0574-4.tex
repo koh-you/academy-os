@@ -1,0 +1,17 @@
+% 0574(본책 103쪽) 보기 ④ — 두 점 P·Q 에서 만나는 두 원, 직선 APD·BQC, 현 AB·CD, PC·QD. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=0.9, line width=0.6pt]
+  \draw (-0.800,0.000) circle (1.000);
+  \draw (0.550,0.000) circle (0.750);
+  \draw (-1.454,0.757) -- (1.194,0.385);
+  \draw (-1.454,-0.757) -- (1.194,-0.385);
+  \draw (-1.454,0.757) -- (-1.454,-0.757);
+  \draw (1.194,-0.385) -- (1.194,0.385);
+  \draw (0.037,0.547) -- (1.194,-0.385);
+  \draw (0.037,-0.547) -- (1.194,0.385);
+  \node[font=\small, anchor=south, inner sep=1.5pt] at (-1.454,0.787) {A};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (-1.454,-0.787) {B};
+  \node[font=\small, anchor=north west, inner sep=1.5pt] at (1.194,-0.405) {C};
+  \node[font=\small, anchor=south west, inner sep=1.5pt] at (1.194,0.405) {D};
+  \node[font=\small, anchor=south west, inner sep=1.5pt] at (0.057,0.547) {P};
+  \node[font=\small, anchor=north west, inner sep=1.5pt] at (0.057,-0.547) {Q};
+\end{tikzpicture}

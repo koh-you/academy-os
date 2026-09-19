@@ -1,0 +1,18 @@
+% 0122(본책 26쪽) — 직각삼각형 ABC(∠B=90°), AB=30·BC=13.5(파선 호), ∠A 표시(색 호). 스캔 삽화를 TikZ 로 다시 그림. 답(∠A 의 크기)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (0,0); \coordinate (B) at (3.3,0); \coordinate (C) at (3.3,1.485);
+  \draw (A) -- (B) -- (C) -- cycle;
+  % 직각 표시
+  \draw[line width=0.4pt] (3.03,0) -- (3.03,0.27) -- (3.3,0.27);
+  % ∠A
+  \fill[gray!35] (A) -- (0.55,0) arc[start angle=0, end angle=24.2, radius=0.55] -- cycle;
+  \draw[line width=0.4pt] (0.55,0) arc[start angle=0, end angle=24.2, radius=0.55];
+  % 길이(파선 호)
+  \draw[dashed, line width=0.4pt] (A) to[bend right=15] (B);
+  \draw[dashed, line width=0.4pt] (B) to[bend right=25] (C);
+  \node[font=\small] at (1.65,-0.4) {$30$};
+  \node[font=\small] at (3.8,0.74) {$13.5$};
+  \node[font=\small, left] at (A) {A};
+  \node[font=\small, below right] at (B) {B};
+  \node[font=\small, above] at (C) {C};
+\end{tikzpicture}

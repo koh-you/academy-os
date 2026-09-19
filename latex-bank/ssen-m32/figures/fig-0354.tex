@@ -1,0 +1,19 @@
+% 0354(본책 66쪽) — △ABC 의 내접원 O(접점 D, E, F), AD=2, BE=4, CF=2. 답(둘레)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (1.789,1.446) -- (0.000,0.000) -- (2.300,0.000) -- (1.789,1.446);
+  \draw (1.533,0.542) circle (0.542);
+  \fill (1.533,0.542) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (1.789,1.446) to[bend right=25] (1.193,0.964);
+  \node[font=\small, inner sep=1.5pt] at (1.191,1.325) {$2$};
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend right=20] (1.533,0.000);
+  \node[font=\small, inner sep=1.5pt] at (0.767,-0.300) {$4$};
+  \draw[dashed, line width=0.4pt] (2.300,0.000) to[bend right=25] (2.044,0.723);
+  \node[font=\small, inner sep=1.5pt] at (2.472,0.411) {$2$};
+  \node[font=\small, inner sep=1.5pt] at (1.809,1.616) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.160,-0.020) {B};
+  \node[font=\small, inner sep=1.5pt] at (2.460,-0.020) {C};
+  \node[font=\small, inner sep=1.5pt] at (1.043,1.014) {D};
+  \node[font=\small, inner sep=1.5pt] at (1.553,-0.170) {E};
+  \node[font=\small, inner sep=1.5pt] at (2.194,0.773) {F};
+  \node[font=\small, inner sep=1.5pt] at (1.533,0.362) {O};
+\end{tikzpicture}

@@ -1,0 +1,25 @@
+% 0075(본책 18쪽) — 한 모서리 6 cm 정사면체 ABCD, CD 의 중점 M, BM·AM, 각 x(∠ABM). 라벨: A·B·C·D·M, 6 cm(BC) 파선 호, 같은 길이 표시(CM=MD). 숨은 모서리 BD 는 파선. 스캔 삽화를 TikZ 로 다시 그림. 답(tan x)은 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.6pt]
+  \coordinate (B) at (0,1.0); \coordinate (C) at (1.1,0); \coordinate (D) at (2.8,1.0); \coordinate (A) at (1.35,3.0); \coordinate (M) at (1.95,0.5);
+  \fill[yellow!35] (A) -- (B) -- (C) -- cycle;
+  \fill[yellow!60] (A) -- (C) -- (D) -- cycle;
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (A) -- (C);
+  \draw[dashed, line width=0.4pt] (B) -- (D);
+  \draw (B) -- (M);
+  \draw (A) -- (M);
+  % 같은 길이 표시(CM=MD)
+  \draw[line width=0.4pt] (1.484,0.319) -- (1.566,0.181) (1.564,0.366) -- (1.646,0.228);
+  \draw[line width=0.4pt] (2.334,0.819) -- (2.416,0.681) (2.414,0.866) -- (2.496,0.728);
+  % 각 x(∠ABM)
+  \draw[line width=0.4pt] ($(B)+(-14.4:0.35)$) arc[start angle=-14.4, end angle=56, radius=0.35cm];
+  \node[font=\small] at (0.5,1.2) {$x$};
+  % 6 cm(BC 파선 호)
+  \draw[dashed, line width=0.4pt] (B) to[bend right=35] (C);
+  \node[font=\small] at (0.22,0.22) {$6\,\mathrm{cm}$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, below] at (C) {C};
+  \node[font=\small, right] at (D) {D};
+  \node[font=\small, below right] at (M) {M};
+\end{tikzpicture}

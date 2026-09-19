@@ -1,0 +1,13 @@
+% 0093(본책 19쪽) — 서로 외접하는 두 구(큰 구 보라색 · 작은 구 주황색), 각각 적도선(앞은 실선·뒤는 파선). 스캔 삽화라 TikZ 로 다시 그림.
+% 원문에 라벨 없음. 반지름 비는 임의(답이 읽히지 않게).
+\begin{tikzpicture}[scale=1, line width=0.5pt]
+  \def\R{1.1}\def\r{0.45}
+  \shade[ball color=violet!35] (0,0) circle (\R);
+  \draw[line width=0.5pt] (0,0) circle (\R);
+  \draw[line width=0.5pt] (-\R,0) arc (180:360:\R cm and 0.3cm);
+  \draw[dashed, line width=0.4pt] (\R,0) arc (0:180:\R cm and 0.3cm);
+  \shade[ball color=orange!45] (\R+\r,0) circle (\r);
+  \draw[line width=0.5pt] (\R+\r,0) circle (\r);
+  \draw[line width=0.5pt] (\R,0) arc (180:360:\r cm and 0.13cm);
+  \draw[dashed, line width=0.4pt] (\R+2*\r,0) arc (0:180:\r cm and 0.13cm);
+\end{tikzpicture}

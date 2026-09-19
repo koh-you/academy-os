@@ -1,0 +1,26 @@
+% 0127(본책 27쪽) — 점 B 가 AE 와 CD 의 교점, ∠C=∠E=90°, DB=BC=3(같음 표시·파선 호 3). 라벨 A·B·C·D·E·x(∠BAC)·y(∠DAE)·직각 표시(C·E). 스캔 삽화를 TikZ 로 다시 그림. 답(cos y)은 적지 않는다.
+\begin{tikzpicture}[scale=0.42, line width=0.6pt]
+  \coordinate (D) at (0,0); \coordinate (A) at (10.392,0); \coordinate (C) at (3.464,-4.899); \coordinate (B) at (1.732,-2.449); \coordinate (E) at (0.769,-2.722);
+  \draw (D) -- (A) -- (C) -- cycle;
+  \draw (A) -- (E);
+  \draw (D) -- (E);
+  % 직각 표시
+  \draw[line width=0.4pt] (3.06,-4.33) -- (3.63,-3.93) -- (4.03,-4.5);
+  \draw[line width=0.4pt] (0.93,-2.13) -- (1.51,-2.3) -- (1.35,-2.88);
+  % 같음 표시(DB·BC)
+  \draw[line width=0.4pt] (0.7,-1.4) -- (1.03,-1.05);
+  \draw[line width=0.4pt] (2.43,-3.85) -- (2.76,-3.5);
+  % BC=3(파선 호)
+  \draw[dashed, line width=0.4pt] (B) to[bend right=35] (C);
+  \node[font=\small] at (1.9,-4.15) {$3$};
+  % 각 x·y(A)
+  \draw[line width=0.4pt] (8.9,0) arc[start angle=180, end angle=195.8, radius=1.5];
+  \draw[line width=0.4pt] (8.3,-0.58) arc[start angle=195.8, end angle=210, radius=2.2];
+  \node[font=\small] at (8.0,-0.3) {$y$};
+  \node[font=\small] at (8.0,-1.05) {$x$};
+  \node[font=\small, left] at (D) {D};
+  \node[font=\small, right] at (A) {A};
+  \node[font=\small, below] at (C) {C};
+  \node[font=\small, above right] at (B) {B};
+  \node[font=\small, left] at (E) {E};
+\end{tikzpicture}

@@ -1,0 +1,26 @@
+% 0575(본책 103쪽) — 점 P 에서 내접하는 두 원, 공통 접선 TT', 직선 PBA·PDC, AC·BD, ∠CAP=45°, ∠BDC=110°, ∠x(∠APC). 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.2, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (0.550,0.000) circle (0.450);
+  \draw (1.000,1.250) -- (1.000,-1.250);
+  \fill (1.000,1.250) circle (1.2pt);
+  \fill (1.000,-1.250) circle (1.2pt);
+  \draw (1.000,0.000) -- (-0.866,0.500);
+  \draw (1.000,0.000) -- (-0.087,-0.996);
+  \draw (-0.866,0.500) -- (-0.087,-0.996);
+  \draw (0.160,0.225) -- (0.511,-0.448);
+  \draw[line width=0.4pt] (-0.737,0.252) arc[start angle=-62.500, end angle=-15.000, radius=0.280];
+  \node[font=\small, inner sep=1pt] at (-0.476,0.187) {$45^\circ$};
+  \draw[line width=0.4pt] (0.418,-0.271) arc[start angle=-242.500, end angle=-137.500, radius=0.200];
+  \node[font=\small, inner sep=1pt] at (0.097,-0.375) {$110^\circ$};
+  \fill[yellow!35] (1.000,0.000) -- ++(-195.000:0.200) arc[start angle=-195.000, end angle=-137.500, radius=0.200] -- cycle;
+  \draw[line width=0.4pt] (0.807,0.052) arc[start angle=-195.000, end angle=-137.500, radius=0.200];
+  \node[font=\small, inner sep=1pt] at (0.631,-0.090) {$x$};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-0.866,0.500) {A};
+  \node[font=\small, anchor=south west, inner sep=1.5pt] at (0.180,0.225) {B};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (-0.087,-1.056) {C};
+  \node[font=\small, anchor=north west, inner sep=1.5pt] at (0.511,-0.468) {D};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (1.030,0.000) {P};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (1.000,1.250) {T};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (1.000,-1.250) {T$'$};
+\end{tikzpicture}

@@ -1,0 +1,21 @@
+% 유형 01 0044(본책 13쪽) — 직각삼각형 ABC(∠B=90°), AB=4 · AC=2√13, BC 의 중점 D, ∠BAD=x. 스캔 삽화를 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(4 · 2√13 · x · 꼭짓점 A~D · 직각 표시 · BD=DC 같은 길이 표시). BC · AD 의 길이(답의 근거)는 적지 않는다.
+\begin{tikzpicture}[scale=0.45, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (A) at (0,4); \coordinate (C) at (6,0); \coordinate (D) at (3,0);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.5pt] (A) -- (D);
+  \draw[line width=0.4pt] (0,0.5) -- (0.5,0.5) -- (0.5,0);
+  \draw[line width=0.4pt] (0,2.9) arc (270:323.13:1.1);
+  % BD = DC 표시(이중 눈금)
+  \draw[line width=0.4pt] (1.4,-0.22) -- (1.4,0.22) (1.6,-0.22) -- (1.6,0.22);
+  \draw[line width=0.4pt] (4.4,-0.22) -- (4.4,0.22) (4.6,-0.22) -- (4.6,0.22);
+  \draw[dashed, line width=0.3pt] (B) to[bend left=25] (A);
+  \draw[dashed, line width=0.3pt] (A) to[bend left=18] (C);
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, below] at (D) {D};
+  \node[font=\small] at (-0.55,2.0) {$4$};
+  \node[font=\small] at (3.9,2.7) {$2\sqrt{13}$};
+  \node[font=\small] at (0.55,2.55) {$x$};
+\end{tikzpicture}

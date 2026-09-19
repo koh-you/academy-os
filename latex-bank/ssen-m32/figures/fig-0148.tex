@@ -1,0 +1,23 @@
+% 0148(본책 30쪽) — ∠ABC=90°·∠CAB=30° 인 △ABC(BC=4 파선 호), AE=BE, 직사각형 DEBF(C·F·D 한 직선), AB 와 DF 의 교점 G. 라벨 A~G·30°·4·직각 표시(B). 스캔 삽화를 TikZ 로 다시 그림. 답(sin 75°)은 적지 않는다.
+\begin{tikzpicture}[scale=0.42, line width=0.6pt]
+  \coordinate (A) at (0,0); \coordinate (E) at (4.899,0); \coordinate (B) at (4.899,4.899); \coordinate (C) at (2.07,7.727); \coordinate (D) at (2.07,0); \coordinate (F) at (2.07,4.899); \coordinate (G) at (2.07,2.07);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (E) -- (B);
+  \draw (C) -- (D);
+  \draw (F) -- (B);
+  % 직각 표시(B)
+  \draw[line width=0.4pt] ($(B)+(225:0.5)$) -- ($(B)+(225:0.5)+(135:0.5)$) -- ($(B)+(135:0.5)$);
+  % 각 30°(A)
+  \draw[line width=0.4pt] (1.6,0) arc[start angle=0, end angle=30, radius=1.6];
+  \node[font=\small] at (2.3,0.55) {$30^\circ$};
+  % BC=4(파선 호)
+  \draw[dashed, line width=0.4pt] (C) to[bend left=30] (B);
+  \node[font=\small] at (4.5,7.0) {$4$};
+  \node[font=\small, below] at (A) {A};
+  \node[font=\small, right] at (B) {B};
+  \node[font=\small, above] at (C) {C};
+  \node[font=\small, below] at (D) {D};
+  \node[font=\small, below] at (E) {E};
+  \node[font=\small, left] at (F) {F};
+  \node[font=\small, right] at (G) {G};
+\end{tikzpicture}

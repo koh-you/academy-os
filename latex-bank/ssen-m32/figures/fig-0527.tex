@@ -1,0 +1,24 @@
+% 0527(본책 95쪽) — 원 O 의 지름 AD, 내접 □ABCD, BD, CB 의 연장선 위의 점 E, ∠ABE=62°, ∠ADB=34°, ∠BDC=x, ∠BCD=y(색칠). 다시 그림.
+\begin{tikzpicture}[scale=1.40, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.100,0.000) -- (-0.412,-1.020) -- (0.615,-0.912) -- (1.100,0.000) -- cycle;
+  \draw (1.100,0.000) -- (-0.412,-1.020);
+  \draw (-0.412,-1.020) -- (-0.909,-1.072);
+  \fill (-0.909,-1.072) circle (1.2pt);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.546,-0.821) arc[start angle=124.000, end angle=186.000, radius=0.240];
+  \node[font=\small, inner sep=0.5pt] at (-0.932,-0.720) {$62^\circ$};
+  \draw[line width=0.4pt] (0.780,0.000) arc[start angle=180.000, end angle=214.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (0.507,-0.181) {$34^\circ$};
+  \draw[line width=0.4pt] (0.685,-0.280) arc[start angle=-146.000, end angle=-118.000, radius=0.500];
+  \node[font=\small, inner sep=0.5pt] at (0.632,-0.520) {$x$};
+  \fill[yellow!30] (0.615,-0.912) -- (0.718,-0.718) arc[start angle=62.000, end angle=186.000, radius=0.220] -- cycle;
+  \draw[line width=0.4pt] (0.718,-0.718) arc[start angle=62.000, end angle=186.000, radius=0.220];
+  \node[font=\small, inner sep=0.5pt] at (0.380,-0.564) {$y$};
+  \node[font=\small, inner sep=1.5pt] at (-1.300,0.000) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.300,0.000) {D};
+  \node[font=\small, inner sep=1.5pt] at (-0.412,-1.220) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.715,-1.085) {C};
+  \node[font=\small, inner sep=1.5pt] at (-0.944,-1.269) {E};
+  \node[font=\small, inner sep=1.5pt] at (0.000,0.200) {O};
+\end{tikzpicture}

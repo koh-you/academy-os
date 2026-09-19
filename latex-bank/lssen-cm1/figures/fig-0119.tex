@@ -1,0 +1,25 @@
+% 0119(본책 22쪽) — 직육면체 ABCD-EFGH(붉은색 채움)와 세 대각선 BG(앞면)·GD(오른면)·DB(윗면). 숨은 모서리 AE·EF·EH 는 파선. 스캔 삽화라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A~H 여덟 꼭짓점. 길이 수치는 없다.
+\begin{tikzpicture}[scale=1, line width=0.5pt]
+  \def\a{2.6}\def\b{1.6}\def\dx{0.9}\def\dy{0.6}
+  \coordinate (F) at (0,0); \coordinate (G) at (\a,0); \coordinate (C) at (\a,\b); \coordinate (B) at (0,\b);
+  \coordinate (E) at (\dx,\dy); \coordinate (H) at (\a+\dx,\dy); \coordinate (D) at (\a+\dx,\b+\dy); \coordinate (A) at (\dx,\b+\dy);
+  \fill[red!25] (F) -- (G) -- (C) -- (B) -- cycle;
+  \fill[red!15] (B) -- (C) -- (D) -- (A) -- cycle;
+  \fill[red!35] (G) -- (H) -- (D) -- (C) -- cycle;
+  \draw[line width=0.6pt] (F) -- (G) -- (C) -- (B) -- cycle;
+  \draw[line width=0.6pt] (B) -- (A) -- (D) -- (C);
+  \draw[line width=0.6pt] (G) -- (H) -- (D);
+  \draw[dashed, line width=0.4pt] (F) -- (E) -- (H);
+  \draw[dashed, line width=0.4pt] (E) -- (A);
+  % 대각선 BG · GD · DB
+  \draw[line width=0.6pt] (B) -- (G) -- (D) -- cycle;
+  \node[font=\small, above, inner sep=1pt] at (A) {$\mathrm{A}$};
+  \node[font=\small, left, inner sep=1pt] at (B) {$\mathrm{B}$};
+  \node[font=\small, below right, inner sep=0.5pt] at (C) {$\mathrm{C}$};
+  \node[font=\small, above, inner sep=1pt] at (D) {$\mathrm{D}$};
+  \node[font=\small, left, inner sep=1pt] at (E) {$\mathrm{E}$};
+  \node[font=\small, below, inner sep=1pt] at (F) {$\mathrm{F}$};
+  \node[font=\small, below, inner sep=1pt] at (G) {$\mathrm{G}$};
+  \node[font=\small, right, inner sep=1pt] at (H) {$\mathrm{H}$};
+\end{tikzpicture}

@@ -1,0 +1,20 @@
+% 0180(본책 37쪽) — 삼각뿔(OA, OB, OC 서로 직교), ∠ABO=30°, ∠OCB=45°, OB=2√3cm. 스캔 삽화를 TikZ 로 다시 그림. 답(부피)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (O) at (0.45,1.0); \coordinate (A) at (0.45,2.5); \coordinate (B) at (-0.75,0); \coordinate (C) at (2.6,1.0);
+  \fill[yellow!35] (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[dashed, line width=0.5pt] (O) -- (A); \draw[dashed, line width=0.5pt] (O) -- (B); \draw[dashed, line width=0.5pt] (O) -- (C);
+  \draw[line width=0.4pt] (0.45,1.22) -- (0.67,1.22) -- (0.67,1.0);
+  \draw[line width=0.4pt] ($(B)!0.45cm!(O)$) arc[start angle=39.8, end angle=16.4, radius=0.45];
+  \node[font=\small] at (-0.85,0.55) {$30^\circ$};
+  \draw[line width=0.3pt] (-0.62,0.5) -- (-0.32,0.3);
+  \draw[line width=0.4pt] ($(C)!0.45cm!(O)$) arc[start angle=180, end angle=196.6, radius=0.45];
+  \node[font=\small] at (2.0,0.4) {$45^\circ$};
+  \draw[line width=0.3pt] (2.05,0.55) -- (2.15,0.82);
+  \node[font=\small] at (0.3,-0.25) {$2\sqrt{3}\,\mathrm{cm}$};
+  \draw[line width=0.3pt] (0.15,-0.05) -- ($(B)!0.5!(O)$);
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, left] at (O) {O};
+\end{tikzpicture}

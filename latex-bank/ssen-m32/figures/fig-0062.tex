@@ -1,0 +1,18 @@
+% 0062(본책 16쪽) — ∠BAC=90° 직각삼각형 ABC, A 에서 BC 에 내린 수선의 발 D, D 에서 AC 에 내린 수선의 발 E. 라벨: A·B·C·D·E, 각 x(∠DAC), 직각 표시 A·D·E. 스캔 삽화를 TikZ 로 다시 그림. 길이는 원문에 없다.
+\begin{tikzpicture}[scale=1, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (3.6,0); \coordinate (A) at (2.4,1.697); \coordinate (D) at (2.4,0); \coordinate (E) at (3.2,0.566);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (D) -- (E);
+  % 직각 표시
+  \draw[line width=0.4pt] (2.2694,1.6046) -- (2.3618,1.474) -- (2.4924,1.5664);
+  \draw[line width=0.4pt] (2.56,0) -- (2.56,0.16) -- (2.4,0.16);
+  \draw[line width=0.4pt] (3.1076,0.6966) -- (2.977,0.6042) -- (3.0694,0.4736);
+  % 각 x(∠DAC)
+  \draw[line width=0.4pt] (2.4,1.297) arc[start angle=-90, end angle=-54.74, radius=0.4cm];
+  \node[font=\small] at (2.6,1.1) {$x$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, below] at (D) {D};
+  \node[font=\small, above right] at (E) {E};
+\end{tikzpicture}

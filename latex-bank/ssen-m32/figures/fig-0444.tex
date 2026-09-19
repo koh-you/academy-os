@@ -1,0 +1,25 @@
+% 0444(본책 81쪽) — 원 O, 지름 AB, AC=BC(같은 변 표시), 현 CD, B 를 지나 CD 에 평행한 직선과 AD 의 연장선의 교점 E, DE=3 cm. 답(BE)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.100,0.000) -- (1.100,0.000);
+  \draw (-1.100,0.000) -- (-0.000,-1.100);
+  \draw (1.100,0.000) -- (-0.000,-1.100);
+  \draw (-0.000,-1.100) -- (0.550,0.953);
+  \draw (-1.100,0.000) -- (1.503,1.503);
+  \draw (1.100,0.000) -- (1.503,1.503);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.621,-0.578) -- (-0.522,-0.479);
+  \draw[line width=0.4pt] (-0.578,-0.621) -- (-0.479,-0.522);
+  \draw[line width=0.4pt] (0.522,-0.479) -- (0.621,-0.578);
+  \draw[line width=0.4pt] (0.479,-0.522) -- (0.578,-0.621);
+  \draw[-stealth, line width=0.6pt] (0.290,-0.019) -- (0.315,0.077);
+  \draw[-stealth, line width=0.6pt] (1.288,0.703) -- (1.314,0.800);
+  \draw[dashed, line width=0.4pt] (0.550,0.953) to[bend left=18] (1.503,1.503);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.916,1.418) {$3\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-1.300,0.000) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.200,-0.173) {B};
+  \node[font=\small, inner sep=1.5pt] at (-0.000,-1.300) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.377,1.053) {D};
+  \node[font=\small, inner sep=1.5pt] at (1.703,1.503) {E};
+  \node[font=\small, inner sep=1.5pt] at (-0.000,-0.200) {O};
+\end{tikzpicture}

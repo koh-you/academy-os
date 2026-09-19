@@ -1,0 +1,18 @@
+% 1125(본책 156쪽) — 0≤x≤4 에서 정의된 함수 y=f(x) 의 그래프: 선분 (0,4)-(4,0)(양 끝 닫힌점), 점선 (1,3)·(2,2)·(3,1) 에서 두 축으로. 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 x·y·O·1~4·y=f(x) 만. 함숫값(답)은 적지 않는다.
+\begin{tikzpicture}[scale=0.6, line width=0.5pt, every node/.style={font=\small}]
+  \draw[->, >=stealth, line width=0.7pt] (-0.5,0) -- (5.0,0) node[below left=-1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.5) -- (0,5.0) node[left=-1pt] {$y$};
+  \node[below left=-2pt] at (0,0) {$\mathrm{O}$};
+  \foreach \i in {1,2,3,4} {
+    \node[below=-1pt] at (\i,0) {$\i$};
+    \node[left=-1pt] at (0,\i) {$\i$};
+  }
+  \draw[densely dashed, line width=0.4pt] (1,0) -- (1,3) -- (0,3);
+  \draw[densely dashed, line width=0.4pt] (2,0) -- (2,2) -- (0,2);
+  \draw[densely dashed, line width=0.4pt] (3,0) -- (3,1) -- (0,1);
+  \draw[line width=0.6pt] (0,4) -- (4,0);
+  \fill (0,4) circle (1.8pt);
+  \fill (4,0) circle (1.8pt);
+  \node[right=-1pt] at (2.3,2.0) {$y=f(x)$};
+\end{tikzpicture}

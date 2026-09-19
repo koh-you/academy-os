@@ -1,0 +1,25 @@
+% 0207(본책 42쪽) — 지면 위 높이 h m 인 카메라(C), 지면의 두 지점 A·B(AB=4 m), 올려다본 각 60°(A)·15°(B), 수선의 발 H(직각 표시). 스캔 삽화를 TikZ 로 다시 그림. 답(h)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (H) at (0,0); \coordinate (C) at (0,0.78); \coordinate (A) at (0.45,0); \coordinate (B) at (2.85,0);
+  % 지면
+  \fill[orange!30] (-0.35,0) rectangle (3.15,-0.16);
+  \draw (-0.35,0) -- (3.15,0);
+  % 카메라
+  \fill[gray!70] (-0.22,0.78) rectangle (0.06,0.98);
+  \fill[gray!50] (-0.05,0.94) -- (0.12,1.02) -- (0.12,0.86) -- cycle;
+  \draw (C) -- (H);
+  \draw (C) -- (A);
+  \draw (C) -- (B);
+  \draw[line width=0.4pt] (0,0.14) -- (0.14,0.14) -- (0.14,0);
+  % 60°(A)
+  \draw[line width=0.4pt] (0.75,0) arc[start angle=0, end angle=112, radius=0.3];
+  \node[font=\small] at (0.95,0.32) {$60^\circ$};
+  % 15°(B)
+  \draw[line width=0.4pt] (2.35,0) arc[start angle=180, end angle=165, radius=0.5];
+  \node[font=\small] at (2.55,0.28) {$15^\circ$};
+  \node[font=\small, left] at (-0.02,0.42) {$h\,\mathrm{m}$};
+  \draw[dashed, line width=0.4pt] (A) to[bend right=18] (B);
+  \node[font=\small, fill=orange!30, inner sep=1pt] at (1.65,-0.2) {$4\,\mathrm{m}$};
+  \node[font=\small, below] at (0.45,-0.16) {A};
+  \node[font=\small, below] at (2.85,-0.16) {B};
+\end{tikzpicture}

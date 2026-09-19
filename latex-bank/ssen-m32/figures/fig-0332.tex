@@ -1,0 +1,17 @@
+% 0332(본책 63쪽) — 점 P 에서 원 O 에 그은 두 접선의 접점 A, B, PA=4 cm, ∠APB=45°, △APB 색칠(원문 노랑). 답(넓이)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \fill[yellow!45] (-2.613,0.000) -- (-0.383,-0.924) -- (-0.383,0.924) -- cycle;
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-2.613,0.000) -- (-0.106,-1.039);
+  \draw (-2.613,0.000) -- (-0.106,1.039);
+  \draw (-0.383,-0.924) -- (-0.383,0.924);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-2.336,0.115) arc (22.500:-22.500:0.300);
+  \node[font=\small, inner sep=1.5pt] at (-2.050,0.000) {$45^\circ$};
+  \draw[dashed, line width=0.4pt] (-2.613,0.000) to[bend left=25] (-0.383,0.924);
+  \node[font=\small, inner sep=1.5pt] at (-1.700,0.720) {$4\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-2.773,0.000) {P};
+  \node[font=\small, inner sep=1.5pt] at (-0.403,-0.754) {B};
+  \node[font=\small, inner sep=1.5pt] at (-0.403,0.744) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.170,0.000) {O};
+\end{tikzpicture}

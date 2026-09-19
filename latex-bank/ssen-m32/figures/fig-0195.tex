@@ -1,0 +1,14 @@
+% 0195(본책 40쪽) — △ABC(∠A=75°, ∠C=45°, AC=6cm). 스캔 삽화를 TikZ 로 다시 그림. 답(AB)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (3.2,0); \coordinate (A) at (1.17,2.03);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] ($(A)!0.4cm!(B)$) arc[start angle=240, end angle=315, radius=0.4];
+  \node[font=\small] at (1.2,1.4) {$75^\circ$};
+  \draw[line width=0.4pt] (2.7,0) arc[start angle=180, end angle=135, radius=0.5];
+  \node[font=\small] at (2.4,0.27) {$45^\circ$};
+  \draw[dashed, line width=0.4pt] (A) to[bend left=25] (C);
+  \node[font=\small] at (2.75,1.35) {$6\,\mathrm{cm}$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+\end{tikzpicture}

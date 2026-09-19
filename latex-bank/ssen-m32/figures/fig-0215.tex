@@ -1,0 +1,18 @@
+% 0215(본책 43쪽) — △ABC(AB=8 cm, BC=9 cm, ∠B=45°), 무게중심 G, △AGC 색칠. 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (1.98,0); \coordinate (A) at (1.24,1.24); \coordinate (G) at (1.07,0.41);
+  \fill[yellow!45] (A) -- (G) -- (C) -- cycle;
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (G) -- (C);
+  \fill (G) circle (1.2pt);
+  \node[font=\small, above] at (1.05,0.44) {G};
+  \draw[line width=0.4pt] (0.35,0) arc[start angle=0, end angle=45, radius=0.35];
+  \node[font=\small] at (0.55,0.17) {$45^\circ$};
+  \draw[dashed, line width=0.4pt] (B) to[bend left=22] (A);
+  \node[font=\small] at (0.28,0.88) {$8\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (B) to[bend right=15] (C);
+  \node[font=\small, fill=white, inner sep=1pt] at (1.05,-0.24) {$9\,\mathrm{cm}$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+\end{tikzpicture}

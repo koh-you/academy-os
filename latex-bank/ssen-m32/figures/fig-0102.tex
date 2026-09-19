@@ -1,0 +1,20 @@
+% 0102(본책 23쪽) — 반지름 1·중심각 55° 부채꼴 AOB, A 에서 OB 에 내린 수선의 발 H. 라벨 A·O·H·B·1(파선 호)·55°·직각 표시. 스캔 삽화를 TikZ 로 다시 그림. 답(BH=1−cos55°)은 적지 않는다.
+\begin{tikzpicture}[scale=2.6, line width=0.6pt]
+  \coordinate (O) at (0,0); \coordinate (B) at (1,0); \coordinate (A) at (0.5736,0.8192); \coordinate (H) at (0.5736,0);
+  \draw (O) -- (B);
+  \draw (O) -- (A);
+  \draw (A) -- (H);
+  \draw (B) arc[start angle=0, end angle=55, radius=1];
+  % 직각 표시
+  \draw[line width=0.4pt] (0.5736,0.06) -- (0.5136,0.06) -- (0.5136,0);
+  % 중심각 55°
+  \draw[line width=0.4pt] (0.18,0) arc[start angle=0, end angle=55, radius=0.18];
+  \node[font=\small] at (0.34,0.13) {$55^\circ$};
+  % 반지름 1(파선 호)
+  \draw[dashed, line width=0.4pt] (O) to[bend left=22] (A);
+  \node[font=\small] at (0.16,0.5) {$1$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, below left] at (O) {O};
+  \node[font=\small, below] at (H) {H};
+  \node[font=\small, below right] at (B) {B};
+\end{tikzpicture}

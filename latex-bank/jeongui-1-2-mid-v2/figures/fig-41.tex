@@ -1,0 +1,25 @@
+% 변형 41(원본 41 · 2023 교육청 고1 9월 16번) — 두 원 C1: 중심 (-5,9) r=3, C2: 중심 (3,4) r=2, 직선 y=-x, y축 위의 점 P, y=-x 위의 점 Q,
+% C1 위의 점 A, C2 위의 점 B 와 꺾인 경로 A-P-Q-B. 축이 x축·y=x 에서 y축·y=-x 로 바뀌어 TikZ 로 새로 그림. A·B·P·Q 는 임의 위치(최소 위치가 아님).
+\begin{tikzpicture}[scale=0.34, line width=0.5pt]
+  \coordinate (O) at (0,0);
+  \coordinate (O1) at (-5,9);
+  \coordinate (O2) at (3,4);
+  \coordinate (A) at ($(O1)+(-35:3)$);
+  \coordinate (B) at ($(O2)+(250:2)$);
+  \coordinate (P) at (0,5.2);
+  \coordinate (Q) at (-1.1,1.1);
+  \draw[->, >=stealth] (-10,0) -- (7.5,0) node[below, font=\small] {$x$};
+  \draw[->, >=stealth] (0,-4) -- (0,13.5) node[left, font=\small] {$y$};
+  \draw (-4,4) -- (4,-4) node[below right, font=\small] {$y=-x$};
+  \draw[line width=0.8pt] (O1) circle (3);
+  \draw[line width=0.8pt] (O2) circle (2);
+  \draw (A) -- (P) -- (Q) -- (B);
+  \foreach \p in {A,B,P,Q} \fill (\p) circle (0.14);
+  \node[below left=1pt, font=\small] at (O) {$\mathrm{O}$};
+  \node[below=3pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[left=3pt, font=\small] at (P) {$\mathrm{P}$};
+  \node[below left=1pt, font=\small] at (Q) {$\mathrm{Q}$};
+  \node[below=3pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[left, font=\small] at ($(O1)+(-3.1,0)$) {$C_1$};
+  \node[right, font=\small] at ($(O2)+(2.1,0)$) {$C_2$};
+\end{tikzpicture}

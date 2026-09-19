@@ -1,0 +1,21 @@
+% 0626(본책 87쪽) — -1≤x≤2 에서 y=f(x)=x^2-2x+2 의 그래프(범위 안 실선 · 밖 점선). 점 (-1,5)·(1,1)·(2,2) 와 축 눈금 -1·1·2, 5·2·1 은 원문 라벨 그대로. 스캔 그림이라 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=0.42, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.4,0) -- (3.4,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.8) -- (0,6.2) node[below right=-1pt, font=\small] {$y$};
+  \node[below left, font=\small, inner sep=1pt] at (0,0) {$\mathrm{O}$};
+  \draw[dotted, line width=0.6pt, domain=-1.35:-1, samples=20] plot (\x, {(\x-1)*(\x-1)+1});
+  \draw[line width=0.6pt, domain=-1:2, samples=40] plot (\x, {(\x-1)*(\x-1)+1});
+  \draw[dotted, line width=0.6pt, domain=2:3.1, samples=20] plot (\x, {(\x-1)*(\x-1)+1});
+  \draw[dashed, line width=0.4pt] (-1,5) -- (0,5);
+  \draw[dashed, line width=0.4pt] (0,2) -- (2,2) -- (2,0);
+  \draw[dashed, line width=0.4pt] (0,1) -- (1,1) -- (1,0);
+  \fill (-1,5) circle (2.2pt);
+  \fill (1,1) circle (2.2pt);
+  \fill (2,2) circle (2.2pt);
+  \node[right, font=\small, inner sep=1.5pt] at (0,5) {$5$};
+  \node[left, font=\small, inner sep=1.5pt] at (0,2) {$2$};
+  \node[left, font=\small, inner sep=1.5pt] at (0,1) {$1$};
+  \node[below, font=\small, inner sep=2pt] at (-1.45,0) {$-1$};
+  \node[below, font=\small, inner sep=2pt] at (1,0) {$1$};
+  \node[below, font=\small, inner sep=2pt] at (2,0) {$2$};
+\end{tikzpicture}

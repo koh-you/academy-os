@@ -1,0 +1,21 @@
+% 0536(본책 96쪽) — 원에 내접하는 □ABCD, P=AB∩CD(위), Q=AD∩BC(오른쪽), ∠B=65°, ∠P=30°, ∠Q=x(색칠). 다시 그림.
+\begin{tikzpicture}[scale=0.76, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.119,2.961) -- (-0.778,-0.778);
+  \draw (-0.119,2.961) -- (1.063,-0.285);
+  \draw (-0.465,0.997) -- (4.292,0.581);
+  \draw (-0.778,-0.778) -- (4.292,0.581);
+  \draw[line width=0.4pt] (-0.188,2.567) arc[start angle=-100.000, end angle=-70.000, radius=0.400];
+  \node[font=\small, inner sep=0.5pt] at (0.520,2.728) {$30^\circ$};
+  \draw[line width=0.4pt] (-0.469,-0.695) arc[start angle=15.000, end angle=80.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (-0.372,-0.335) {$65^\circ$};
+  \fill[green!15] (4.292,0.581) -- (3.794,0.624) arc[start angle=175.000, end angle=195.000, radius=0.500] -- cycle;
+  \draw[line width=0.4pt] (3.794,0.624) arc[start angle=175.000, end angle=195.000, radius=0.500];
+  \node[font=\small, inner sep=0.5pt] at (3.545,0.515) {$x$};
+  \node[font=\small, inner sep=1.5pt] at (-0.119,3.161) {P};
+  \node[font=\small, inner sep=1.5pt] at (4.492,0.581) {Q};
+  \node[font=\small, inner sep=1.5pt] at (-0.653,1.065) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.966,-0.846) {B};
+  \node[font=\small, inner sep=1.5pt] at (1.097,-0.482) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.731,1.074) {D};
+\end{tikzpicture}

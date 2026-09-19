@@ -1,0 +1,14 @@
+% 0642(본책 89쪽) — 위로 볼록한 포물선 y=-x^2+ax+b 와 직선 y=x+2 가 x=-2, x=2 인 두 점에서 만나는 그림. 라벨은 원문의 -2·2·O·x·y 와 두 식뿐. 스캔 그림이라 TikZ 로 다시 그림.
+% 포물선은 답(a, b)이 읽히지 않게 두 교점만 지나는 임의 모양(y=-x^2+x+6 의 세로 비율을 줄임).
+\begin{tikzpicture}[scale=0.42, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.6,0) -- (4.6,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.6) -- (0,5.2) node[below right=-1pt, font=\small] {$y$};
+  \node[below right, font=\small, inner sep=1pt] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt, domain=-2.75:3.35, samples=60] plot (\x, {0.62*(-\x*\x+\x+6)});
+  \draw[line width=0.6pt] (-3.4,-0.87) -- (3.6,3.47);
+  \draw[dashed, line width=0.4pt] (2,0) -- (2,2.48);
+  \node[above left, font=\small, inner sep=1pt] at (-2,0) {$-2$};
+  \node[below, font=\small, inner sep=2pt] at (2,0) {$2$};
+  \node[right, font=\small, inner sep=1pt] at (2.2,4.2) {$y=x+2$};
+  \node[below, font=\small, inner sep=1pt] at (3.2,-1.0) {$y=-x^2+ax+b$};
+\end{tikzpicture}

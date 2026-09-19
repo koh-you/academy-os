@@ -1,0 +1,21 @@
+% 0584(본책 105쪽) — 두 원의 공통 접선 AB(접점 A·B), 두 원의 교점 P·Q, ∠PAQ=35°, ∠PBQ=25°, ∠APB 를 구함. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.1, line width=0.6pt]
+  \draw (-0.800,0.800) circle (0.800);
+  \draw (0.700,1.100) circle (1.100);
+  \draw (-1.900,0.000) -- (2.000,0.000);
+  \draw (-0.800,0.000) -- (-0.341,1.455);
+  \draw (-0.800,0.000) -- (-0.124,0.372);
+  \draw (0.700,0.000) -- (-0.341,1.455);
+  \draw (0.700,0.000) -- (-0.124,0.372);
+  \draw (-0.341,1.455) -- (-0.124,0.372);
+  \draw[line width=0.4pt] (-0.450,0.193) arc[start angle=28.814, end angle=72.496, radius=0.400];
+  \node[font=\small, inner sep=1pt] at (-0.407,0.479) {$35^\circ$};
+  \draw[line width=0.4pt] (0.467,0.325) arc[start angle=125.579, end angle=155.731, radius=0.400];
+  \node[font=\small, inner sep=1pt] at (0.221,0.393) {$25^\circ$};
+  \fill[yellow!35] (-0.341,1.455) -- ++(-107.504:0.200) arc[start angle=-107.504, end angle=-54.421, radius=0.200] -- cycle;
+  \draw[line width=0.4pt] (-0.401,1.265) arc[start angle=-107.504, end angle=-54.421, radius=0.200];
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (-0.800,-0.050) {A};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (0.700,-0.050) {B};
+  \node[font=\small, anchor=south, inner sep=1.5pt] at (-0.341,1.505) {P};
+  \node[font=\small, anchor=north west, inner sep=1.5pt] at (-0.104,0.332) {Q};
+\end{tikzpicture}

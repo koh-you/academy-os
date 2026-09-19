@@ -1,0 +1,14 @@
+% 0193(본책 39쪽) — △ABC(AC=6, BC=5, ∠C=120°). 스캔 삽화를 TikZ 로 다시 그림. 답(AB)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (1.8,0); \coordinate (A) at (2.88,1.87);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] (1.4,0) arc[start angle=180, end angle=60, radius=0.4];
+  \node[font=\small] at (1.45,0.6) {$120^\circ$};
+  \draw[dashed, line width=0.4pt] (B) to[bend right=25] (C);
+  \draw[dashed, line width=0.4pt] (C) to[bend right=25] (A);
+  \node[font=\small] at (0.9,-0.45) {$5$};
+  \node[font=\small] at (2.75,0.85) {$6$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, below] at (C) {C};
+\end{tikzpicture}

@@ -1,0 +1,32 @@
+% 1019~1020(본책 141쪽) 공통 지시문 그림 — 두 함수 y=f(x)(증가·위로 볼록), y=x 의 그래프와 점선 계단(x축 눈금 a·□·c·d, y축 눈금 a·b·c·□). 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 x·y·O·a·b·c·d·y=f(x)·y=x·빈칸 상자만. 빈칸(답)은 채우지 않는다. 곡선은 y=√(5x) 로 대신 그려 눈금 위치(a=1, b=f(a), c=f(b), d=f(c))를 맞춤.
+\begin{tikzpicture}[scale=0.55, line width=0.5pt, every node/.style={font=\small}]
+  \draw[->, >=stealth, line width=0.7pt] (-0.8,0) -- (6.4,0) node[below left=-1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.0) -- (0,6.3) node[left=-1pt] {$y$};
+  \node[below right=-2pt] at (0,0) {$\mathrm{O}$};
+  % y=x
+  \draw[line width=0.5pt] (-0.8,-0.8) -- (5.8,5.8);
+  \node[above=-1pt] at (5.6,5.8) {$y=x$};
+  % y=f(x)
+  \draw[line width=0.6pt] plot[domain=0:5.7, samples=60] (\x, {sqrt(5*\x)});
+  \node[above=-1pt] at (2.7,4.25) {$y=f(x)$};
+  % 점선 계단: 가로 (0,k)→(k,k), 세로 (k,0)→(k,f(k))
+  \draw[densely dashed, line width=0.4pt] (0,1) -- (1,1);
+  \draw[densely dashed, line width=0.4pt] (1,0) -- (1,2.236);
+  \draw[densely dashed, line width=0.4pt] (0,2.236) -- (2.236,2.236);
+  \draw[densely dashed, line width=0.4pt] (2.236,0) -- (2.236,3.344);
+  \draw[densely dashed, line width=0.4pt] (0,3.344) -- (3.344,3.344);
+  \draw[densely dashed, line width=0.4pt] (3.344,0) -- (3.344,4.089);
+  \draw[densely dashed, line width=0.4pt] (0,4.089) -- (4.089,4.089);
+  \draw[densely dashed, line width=0.4pt] (4.089,0) -- (4.089,4.089);
+  % x축 눈금
+  \node[below=-1pt] at (1,0) {$a$};
+  \draw[line width=0.4pt] (1.886,-0.95) rectangle (2.586,-0.25);
+  \node[below=-1pt] at (3.344,0) {$c$};
+  \node[below=-1pt] at (4.089,0) {$d$};
+  % y축 눈금
+  \node[left=-1pt] at (0,1) {$a$};
+  \node[left=-1pt] at (0,2.236) {$b$};
+  \node[left=-1pt] at (0,3.344) {$c$};
+  \draw[line width=0.4pt] (-0.95,3.74) rectangle (-0.25,4.44);
+\end{tikzpicture}

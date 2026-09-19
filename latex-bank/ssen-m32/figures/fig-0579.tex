@@ -1,0 +1,26 @@
+% 0579(본책 104쪽) — 원 O 에 내접하는 칠각형 ABCDEFG, AB=BC=CD, ∠E=110°, ∠G=145°, ∠x(∠COD). 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (0.000,1.000) -- (-0.766,0.643) -- (-0.985,-0.174) -- (-0.500,-0.866) -- (0.500,-0.866) -- (0.940,0.342) -- (0.574,0.819) -- cycle;
+  \draw (0.000,0.000) -- (-0.985,-0.174);
+  \draw (0.000,0.000) -- (-0.500,-0.866);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.413,0.885) -- (-0.353,0.758);
+  \draw[line width=0.4pt] (-0.943,0.253) -- (-0.808,0.216);
+  \draw[line width=0.4pt] (-0.800,-0.560) -- (-0.685,-0.480);
+  \fill[yellow!35] (0.000,0.000) -- ++(-170.000:0.250) arc[start angle=-170.000, end angle=-120.000, radius=0.250] -- cycle;
+  \draw[line width=0.4pt] (-0.246,-0.043) arc[start angle=-170.000, end angle=-120.000, radius=0.250];
+  \node[font=\small, inner sep=1pt] at (-0.369,-0.258) {$x$};
+  \draw[line width=0.4pt] (0.568,-0.678) arc[start angle=70.000, end angle=180.000, radius=0.200];
+  \node[font=\small, inner sep=1pt] at (0.259,-0.522) {$110^\circ$};
+  \draw[line width=0.4pt] (0.383,0.879) arc[start angle=162.500, end angle=307.500, radius=0.200];
+  \node[font=\small, inner sep=1pt] at (0.333,0.475) {$145^\circ$};
+  \node[font=\small, anchor=south, inner sep=1.5pt] at (0.000,1.000) {A};
+  \node[font=\small, anchor=south east, inner sep=1.5pt] at (-0.766,0.643) {B};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-0.985,-0.174) {C};
+  \node[font=\small, anchor=north east, inner sep=1.5pt] at (-0.500,-0.886) {D};
+  \node[font=\small, anchor=north west, inner sep=1.5pt] at (0.500,-0.886) {E};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.940,0.342) {F};
+  \node[font=\small, anchor=south west, inner sep=1.5pt] at (0.574,0.819) {G};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.050,0.060) {O};
+\end{tikzpicture}

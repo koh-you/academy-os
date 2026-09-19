@@ -1,0 +1,19 @@
+% 0825(본책 114쪽) — 가로 40 cm·세로 30 cm 직사각형 종이(분홍 채움)의 네 귀퉁이에서 정사각형(흰색)을 잘라 내고 접는 선(점선). 라벨은 원문의 40 cm·30 cm 뿐. 스캔 그림이라 TikZ 로 다시 그림(귀퉁이 정사각형 크기는 답이 읽히지 않게 임의).
+\begin{tikzpicture}[scale=0.85, line width=0.5pt]
+  \def\cx{0.62}
+  \fill[red!25!orange!30] (0,0) rectangle (4,3);
+  \fill[white] (0,0) rectangle (\cx,\cx);
+  \fill[white] (4-\cx,0) rectangle (4,\cx);
+  \fill[white] (0,3-\cx) rectangle (\cx,3);
+  \fill[white] (4-\cx,3-\cx) rectangle (4,3);
+  \draw[line width=0.6pt] (0,0) rectangle (4,3);
+  \draw[line width=0.5pt] (0,\cx) -- (\cx,\cx) -- (\cx,0);
+  \draw[line width=0.5pt] (4,\cx) -- (4-\cx,\cx) -- (4-\cx,0);
+  \draw[line width=0.5pt] (0,3-\cx) -- (\cx,3-\cx) -- (\cx,3);
+  \draw[line width=0.5pt] (4,3-\cx) -- (4-\cx,3-\cx) -- (4-\cx,3);
+  \draw[dashed, line width=0.4pt] (\cx,\cx) -- (4-\cx,\cx) -- (4-\cx,3-\cx) -- (\cx,3-\cx) -- cycle;
+  \draw[dotted, line width=0.4pt] (0,3) .. controls (1.2,3.45) and (2.8,3.45) .. (4,3);
+  \draw[dotted, line width=0.4pt] (4,3) .. controls (4.45,2.2) and (4.45,0.8) .. (4,0);
+  \node[above, font=\small, fill=white, inner sep=1pt] at (2,3.3) {$40\,\mathrm{cm}$};
+  \node[right, font=\small, inner sep=1.5pt] at (4.3,1.5) {$30\,\mathrm{cm}$};
+\end{tikzpicture}

@@ -1,0 +1,17 @@
+% 1001(본책 137쪽) — 아래로 볼록한 이차함수 y=px²+qx+r 의 그래프(x절편 a, c · 모두 O 왼쪽)와 오른쪽 위로 올라가는 직선 y=mx+n, 두 교점의 x좌표 b(a와 c 사이, x축 아래)·d(O 오른쪽, x축 위)에 x축까지 점선. 라벨은 원문(a, b, c, d, O, x, y, 두 식)만 · 좌표 수치는 임의. 스캔 그림을 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=0.58, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-5.3,0) -- (2.1,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.5) -- (0,4.5) node[left] {$y$};
+  \node[below right=1pt and 0pt, font=\small] at (0,0) {$\mathrm{O}$};
+  % 포물선 y=0.5(x+3)(x+1), 직선 y=1.25x+2.75 : 교점 x=-2.5, 1
+  \draw[line width=0.6pt, domain=-5.05:1.08, samples=70, smooth] plot (\x, {0.5*(\x+3)*(\x+1)});
+  \draw[line width=0.6pt] (-4.2,-2.5) -- (1.28,4.35);
+  \draw[dashed, line width=0.4pt] (-2.5,0) -- (-2.5,-0.375);
+  \draw[dashed, line width=0.4pt] (1,0) -- (1,4);
+  \node[below left=1pt and -2pt, font=\small] at (-3,0) {$a$};
+  \node[above, font=\small] at (-2.5,0.02) {$b$};
+  \node[below right=1pt and -2pt, font=\small] at (-1,0) {$c$};
+  \node[below, font=\small] at (1,0) {$d$};
+  \node[above, font=\small] at (-3.6,3.9) {$y=px^2+qx+r$};
+  \node[below, font=\small] at (-3.2,-2.1) {$y=mx+n$};
+\end{tikzpicture}

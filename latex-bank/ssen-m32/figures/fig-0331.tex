@@ -1,0 +1,17 @@
+% 0331(본책 63쪽) — 점 P 에서 원 O 에 그은 두 접선의 접점 A, B, C 는 PO 와 원의 교점, OB=5 cm, PC=8 cm. 답(PA)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-2.600,0.000) -- (-0.108,1.038);
+  \draw (-2.600,0.000) -- (-0.108,-1.038);
+  \draw (-2.600,0.000) -- (0.000,0.000);
+  \draw (0.000,0.000) -- (-0.385,-0.923);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (-2.600,0.000) to[bend right=20] (-1.000,0.000);
+  \node[font=\small, inner sep=1.5pt] at (-1.900,-0.420) {$8\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.100,-0.550) {$5\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-2.760,0.000) {P};
+  \node[font=\small, inner sep=1.5pt] at (-0.435,1.093) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.435,-1.103) {B};
+  \node[font=\small, inner sep=1.5pt] at (-1.050,0.160) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.170,0.000) {O};
+\end{tikzpicture}

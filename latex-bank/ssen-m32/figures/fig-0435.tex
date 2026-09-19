@@ -1,0 +1,24 @@
+% 0435(본책 79쪽) — 원 위 다섯 점 A·B·C·D·E 를 잇는 별 모양(AC·AD·BE·BD·CE), 각 꼭짓점의 각 a~e. 답은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (0.000,1.100) -- (-0.647,-0.890);
+  \draw (0.000,1.100) -- (0.647,-0.890);
+  \draw (-1.046,0.340) -- (1.046,0.340);
+  \draw (-1.046,0.340) -- (0.647,-0.890);
+  \draw (-0.647,-0.890) -- (1.046,0.340);
+  \draw[line width=0.4pt] (-0.099,0.796) arc (252.0:288.0:0.320);
+  \draw[line width=0.4pt] (-0.787,0.152) arc (324.0:360.0:0.320);
+  \draw[line width=0.4pt] (-0.388,-0.702) arc (36.0:72.0:0.320);
+  \draw[line width=0.4pt] (0.548,-0.586) arc (108.0:144.0:0.320);
+  \draw[line width=0.4pt] (0.726,0.340) arc (180.0:216.0:0.320);
+  \node[font=\small, inner sep=0.5pt] at (-0.000,0.550) {$a$};
+  \node[font=\small, inner sep=0.5pt] at (-0.523,0.170) {$b$};
+  \node[font=\small, inner sep=0.5pt] at (-0.323,-0.445) {$c$};
+  \node[font=\small, inner sep=0.5pt] at (0.323,-0.445) {$d$};
+  \node[font=\small, inner sep=0.5pt] at (0.523,0.170) {$e$};
+  \node[font=\small, inner sep=1.5pt] at (0.000,1.300) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.236,0.402) {B};
+  \node[font=\small, inner sep=1.5pt] at (1.236,0.402) {E};
+  \node[font=\small, inner sep=1.5pt] at (-0.764,-1.052) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.764,-1.052) {D};
+\end{tikzpicture}

@@ -1,0 +1,16 @@
+% 0248(본책 48쪽) — 꼭지각 30° 인 이등변삼각형 ABC, 변 AC 위의 점 D(BC=BD=4√2, 같은 변 표시). 스캔 삽화를 TikZ 로 다시 그림. 답(AB)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (0.55,2.47); \coordinate (B) at (0.00,0.00); \coordinate (C) at (1.09,0.00); \coordinate (D) at (0.95,0.65);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (B) -- (D);
+  \draw[line width=0.4pt] ($(A)+(255:0.3)$) arc[start angle=255, end angle=285, radius=0.3];
+  \node[font=\small] at (0.16,1.89) {$30^\circ$};
+  \draw[line width=0.4pt] ($(B)!0.5!(D)+(-0.03,0.05)$) -- ($(B)!0.5!(D)+(0.03,-0.05)$);
+  \draw[line width=0.4pt] ($(B)!0.5!(C)+(0,0.05)$) -- ($(B)!0.5!(C)+(0,-0.05)$);
+  \draw[dashed, line width=0.4pt] (B) to[bend right=30] (C);
+  \node[font=\small] at (0.55,-0.47) {$4\sqrt{2}$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, right] at (D) {D};
+\end{tikzpicture}

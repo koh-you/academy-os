@@ -1,0 +1,18 @@
+% 0018(본책 9쪽) — 직각삼각형 ABC(∠A=90°), ∠B=45°, AB=2√2, AC=x, BC=y. 스캔 삽화를 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(2√2 · 45° · x · y · 꼭짓점 · 직각 표시). x, y 의 값(답)은 적지 않는다.
+\begin{tikzpicture}[scale=0.5, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (6.4,0); \coordinate (A) at (3.2,3.2);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] ($(A)!0.16!(B)$) -- ($(A)!0.16!(B)+(0.362,-0.362)$) -- ($(A)!0.16!(C)$);
+  \draw[line width=0.4pt] (1.1,0) arc (0:45:1.1);
+  \draw[dashed, line width=0.3pt] (B) to[bend left=25] (A);
+  \draw[dashed, line width=0.3pt] (A) to[bend left=25] (C);
+  \draw[dashed, line width=0.3pt] (B) to[bend right=15] (C);
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small] at (0.95,2.05) {$2\sqrt{2}$};
+  \node[font=\small] at (1.8,0.4) {$45^\circ$};
+  \node[font=\small] at (5.2,1.95) {$x$};
+  \node[font=\small] at (3.2,-0.85) {$y$};
+\end{tikzpicture}

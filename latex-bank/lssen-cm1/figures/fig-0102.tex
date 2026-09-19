@@ -1,0 +1,15 @@
+% 0102(본책 20쪽) — 밑면의 세로 x-3, 높이 x+1 인 직육면체(연한 파랑보라 채움). 숨은 모서리는 파선. 스캔 삽화라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 둘(오른쪽 세로 모서리 「x+1」 · 오른쪽 아래 깊이 모서리 「x-3」). 가로 길이는 적지 않는다(답).
+\begin{tikzpicture}[scale=1, line width=0.5pt]
+  \def\a{2.2}\def\b{1.3}\def\dx{0.75}\def\dy{0.5}
+  \fill[blue!15!violet!20] (0,0) rectangle (\a,\b);
+  \fill[blue!20!violet!30] (0,\b) -- (\a,\b) -- (\a+\dx,\b+\dy) -- (\dx,\b+\dy) -- cycle;
+  \fill[blue!25!violet!35] (\a,0) -- (\a+\dx,\dy) -- (\a+\dx,\b+\dy) -- (\a,\b) -- cycle;
+  \draw[line width=0.6pt] (0,0) rectangle (\a,\b);
+  \draw[line width=0.6pt] (0,\b) -- (\dx,\b+\dy) -- (\a+\dx,\b+\dy) -- (\a,\b);
+  \draw[line width=0.6pt] (\a,0) -- (\a+\dx,\dy) -- (\a+\dx,\b+\dy);
+  \draw[dashed, line width=0.4pt] (0,0) -- (\dx,\dy) -- (\a+\dx,\dy);
+  \draw[dashed, line width=0.4pt] (\dx,\dy) -- (\dx,\b+\dy);
+  \node[font=\small, right, inner sep=1pt] at (\a+\dx+0.05,\dy+\b/2+0.1) {$x+1$};
+  \node[font=\small, right, inner sep=1pt] at (\a+\dx/2+0.05,\dy/2-0.2) {$x-3$};
+\end{tikzpicture}

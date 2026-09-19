@@ -1,0 +1,24 @@
+% 0131(본책 27쪽) — 직각삼각형 ABC(∠B=90°), BC 위의 점 D·E, AB=BD=DE=CE(같음 표시), AD·AE, 각 x(∠ACB)·y(∠AEB), 직각 표시(B). 라벨 A~E. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.6pt]
+  \coordinate (A) at (0,1.5); \coordinate (B) at (0,0); \coordinate (D) at (1.5,0); \coordinate (E) at (3.0,0); \coordinate (C) at (4.5,0);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (D);
+  \draw (A) -- (E);
+  % 직각 표시
+  \draw[line width=0.4pt] (0,0.2) -- (0.2,0.2) -- (0.2,0);
+  % 같음 표시(AB·BD·DE·CE)
+  \draw[line width=0.4pt] (-0.09,0.75) -- (0.09,0.75);
+  \draw[line width=0.4pt] (0.75,-0.09) -- (0.75,0.09);
+  \draw[line width=0.4pt] (2.25,-0.09) -- (2.25,0.09);
+  \draw[line width=0.4pt] (3.75,-0.09) -- (3.75,0.09);
+  % 각 y(∠AEB)·x(∠ACB)
+  \draw[line width=0.4pt] (2.6,0) arc[start angle=180, end angle=153.4, radius=0.4];
+  \node[font=\small] at (2.35,0.22) {$y$};
+  \draw[line width=0.4pt] (4.0,0) arc[start angle=180, end angle=161.6, radius=0.5];
+  \node[font=\small] at (3.75,0.42) {$x$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, below left] at (B) {B};
+  \node[font=\small, below] at (D) {D};
+  \node[font=\small, below] at (E) {E};
+  \node[font=\small, right] at (C) {C};
+\end{tikzpicture}

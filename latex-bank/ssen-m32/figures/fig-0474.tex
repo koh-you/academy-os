@@ -1,0 +1,18 @@
+% 0474(본책 86쪽) — 반지름 2 인 세 원 O·O'·O'' 이 서로 다른 원의 중심을 지남, A·B=원 O 와 O' 의 교점, C·D=O''A·O''B 와 원 O'' 의 교점. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=0.75, line width=0.6pt]
+  \draw (0.000,0.000) circle (2.000);
+  \fill (0.000,0.000) circle (1.4pt);
+  \draw (2.000,0.000) circle (2.000);
+  \fill (2.000,0.000) circle (1.4pt);
+  \draw (4.000,0.000) circle (2.000);
+  \fill (4.000,0.000) circle (1.4pt);
+  \draw (4.000,0.000) -- (1.000,1.732);
+  \draw (4.000,0.000) -- (1.000,-1.732);
+  \node[font=\small, inner sep=1pt] at (-0.300,0.000) {O};
+  \node[font=\small, inner sep=1pt] at (2.320,0.000) {O$'$};
+  \node[font=\small, inner sep=1pt] at (4.360,0.000) {O$''$};
+  \node[font=\small, inner sep=1pt] at (1.000,2.012) {A};
+  \node[font=\small, inner sep=1pt] at (1.000,-2.012) {B};
+  \node[font=\small, inner sep=1pt] at (2.408,1.242) {C};
+  \node[font=\small, inner sep=1pt] at (2.408,-1.242) {D};
+\end{tikzpicture}

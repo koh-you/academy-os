@@ -1,0 +1,22 @@
+% 0136(본책 28쪽) — 직사각형 ABCD, BC 위의 E·CD 위의 F, ∠AEF=90°, ∠BAE=30°, ∠EAF=45°, AB=2√3 cm(파선 호). 라벨 A~F·30°·45°·직각 표시(E). 스캔 삽화를 TikZ 로 다시 그림. 답(sin 15°)은 적지 않는다.
+\begin{tikzpicture}[scale=0.75, line width=0.6pt]
+  \coordinate (A) at (0,3.464); \coordinate (B) at (0,0); \coordinate (C) at (5.464,0); \coordinate (D) at (5.464,3.464); \coordinate (E) at (2,0); \coordinate (F) at (5.464,2);
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (A) -- (E) -- (F) -- cycle;
+  % 직각 표시(E)
+  \draw[line width=0.4pt] (1.87,0.22) -- (2.09,0.35) -- (2.22,0.13);
+  % 각 30°(∠BAE)·45°(∠EAF)
+  \draw[line width=0.4pt] (0,2.6) arc[start angle=-90, end angle=-60, radius=0.86];
+  \node[font=\small] at (0.5,2.5) {$30^\circ$};
+  \draw[line width=0.4pt] (0.55,2.51) arc[start angle=-60, end angle=-15, radius=1.1];
+  \node[font=\small] at (1.35,2.95) {$45^\circ$};
+  % AB=2√3 cm(파선 호)
+  \draw[dashed, line width=0.4pt] (A) to[bend right=30] (B);
+  \node[font=\small] at (-0.85,1.5) {$2\sqrt{3}\,\mathrm{cm}$};
+  \node[font=\small, above left] at (A) {A};
+  \node[font=\small, below left] at (B) {B};
+  \node[font=\small, below right] at (C) {C};
+  \node[font=\small, above right] at (D) {D};
+  \node[font=\small, below] at (E) {E};
+  \node[font=\small, right] at (F) {F};
+\end{tikzpicture}

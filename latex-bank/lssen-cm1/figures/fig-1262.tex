@@ -1,0 +1,7 @@
+% 1262(본책 175쪽) — 평행한 두 세로 선분 위에 점이 각각 5개(양 끝 포함 · 같은 간격). 라벨 없음. 스캔 그림을 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=0.55, line width=0.5pt]
+  \foreach \x in {0, 2.2} {
+    \draw (\x,0) -- (\x,3.6);
+    \foreach \k in {0,...,4} { \fill (\x,0.9*\k) circle (2.2pt); }
+  }
+\end{tikzpicture}

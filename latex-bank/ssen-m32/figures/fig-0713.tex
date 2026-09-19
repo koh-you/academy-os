@@ -1,0 +1,45 @@
+% 0713(본책 127쪽) — 수정이네 반 25명의 지난달(가로)·이번 달(세로) 봉사 활동 시간 산점도(격자 0.5시간 · 눈금 1~5), (2.5,3.5)에 「수정」 표시. 스캔 산점도를 TikZ 로 다시 그림(점 25개 원문 위치).
+\begin{tikzpicture}[line width=0.5pt]
+  \draw[gray!55, line width=0.25pt] (0,0) grid[xstep=0.24cm, ystep=0.24cm] (2.64,2.64);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (2.79,0);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (0,2.79);
+  \node[font=\scriptsize, below left=0pt, inner sep=1.5pt] at (0,0) {$0$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (0.48,0) {$1$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (0.96,0) {$2$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (1.44,0) {$3$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (1.92,0) {$4$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (2.4,0) {$5$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,0.48) {$1$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,0.96) {$2$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,1.44) {$3$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,1.92) {$4$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,2.4) {$5$};
+  \node[font=\scriptsize, anchor=north east, inner sep=1pt] at (2.79,-0.38) {지난달(시간)};
+  \node[font=\scriptsize, align=center, anchor=north east, inner sep=1pt] at (-0.27,2.79) {이\\번\\달\\(시간)};
+  \fill (0.48,1.44) circle (1.5pt);
+  \fill (0.48,0.72) circle (1.5pt);
+  \fill (0.48,0.48) circle (1.5pt);
+  \fill (0.72,1.2) circle (1.5pt);
+  \fill (0.72,0.72) circle (1.5pt);
+  \fill (0.96,1.2) circle (1.5pt);
+  \fill (0.96,0.48) circle (1.5pt);
+  \fill (1.2,1.68) circle (1.5pt);
+  \fill (1.2,1.44) circle (1.5pt);
+  \fill (1.2,0.72) circle (1.5pt);
+  \fill (1.44,2.16) circle (1.5pt);
+  \fill (1.44,1.92) circle (1.5pt);
+  \fill (1.44,1.44) circle (1.5pt);
+  \fill (1.44,1.2) circle (1.5pt);
+  \fill (1.44,0.96) circle (1.5pt);
+  \fill (1.68,2.16) circle (1.5pt);
+  \fill (1.68,1.44) circle (1.5pt);
+  \fill (1.68,0.96) circle (1.5pt);
+  \fill (1.92,1.92) circle (1.5pt);
+  \fill (1.92,1.68) circle (1.5pt);
+  \fill (1.92,1.2) circle (1.5pt);
+  \fill (2.16,2.4) circle (1.5pt);
+  \fill (2.16,2.16) circle (1.5pt);
+  \fill (2.16,1.44) circle (1.5pt);
+  \fill (2.4,1.92) circle (1.5pt);
+  \node[font=\scriptsize, above left=0pt, inner sep=1pt] at (1.2,1.68) {수정};
+\end{tikzpicture}

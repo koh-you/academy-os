@@ -1,0 +1,24 @@
+% 0473(본책 85쪽) — 원, AB=BC(호 표시), AE=ED(호 표시 2개), 현 AD·AC·BE, P=AD∩BE, Q=AC∩BE, ∠DAC=38°, ∠APQ 표시. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.100,0.000) -- (0.843,0.707);
+  \draw (-1.100,0.000) -- (0.890,-0.647);
+  \draw (-0.340,-1.046) -- (-0.376,1.034);
+  \draw[line width=0.4pt] (-0.720,-0.124) arc (-18.0:20.0:0.400);
+  \node[font=\small, inner sep=0.5pt] at (-0.480,0.011) {$38^\circ$};
+  \fill[yellow!40] (-0.363,0.268) -- (-0.551,0.200) arc (-160.0:-89.0:0.200) -- cycle;
+  \draw[line width=0.4pt] (-0.551,0.200) arc (-160.0:-89.0:0.200);
+  \draw[line width=0.4pt] (-0.833,-0.605) -- (-0.947,-0.688);
+  \draw[line width=0.4pt] (0.318,-0.980) -- (0.362,-1.113);
+  \draw[line width=0.4pt] (-0.832,0.607) -- (-0.945,0.689);
+  \draw[line width=0.4pt] (-0.855,0.574) -- (-0.971,0.653);
+  \draw[line width=0.4pt] (0.286,0.990) -- (0.324,1.124);
+  \draw[line width=0.4pt] (0.247,1.000) -- (0.281,1.136);
+  \node[font=\small, inner sep=1pt] at (-1.300,0.000) {A};
+  \node[font=\small, inner sep=1pt] at (-0.402,-1.236) {B};
+  \node[font=\small, inner sep=1pt] at (1.052,-0.764) {C};
+  \node[font=\small, inner sep=1pt] at (0.996,0.836) {D};
+  \node[font=\small, inner sep=1pt] at (-0.445,1.222) {E};
+  \node[font=\small, inner sep=1pt] at (-0.536,0.368) {P};
+  \node[font=\small, inner sep=1pt] at (-0.181,-0.342) {Q};
+\end{tikzpicture}

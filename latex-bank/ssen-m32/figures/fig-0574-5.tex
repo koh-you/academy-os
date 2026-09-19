@@ -1,0 +1,19 @@
+% 0574(본책 103쪽) 보기 ⑤ — 점 T 에서 내접하는 두 원, 공통 접선 PQ, 직선 TDA·TCB, 현 AB·DC. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=0.9, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (0.500,0.000) circle (0.500);
+  \draw (1.000,1.150) -- (1.000,-1.150);
+  \fill (1.000,1.150) circle (1.2pt);
+  \fill (1.000,-1.150) circle (1.2pt);
+  \draw (1.000,0.000) -- (-0.643,0.766);
+  \draw (1.000,0.000) -- (-0.342,-0.940);
+  \draw (-0.643,0.766) -- (-0.342,-0.940);
+  \draw (0.329,-0.470) -- (0.179,0.383);
+  \node[font=\small, anchor=south east, inner sep=1.5pt] at (-0.643,0.786) {A};
+  \node[font=\small, anchor=north east, inner sep=1.5pt] at (-0.342,-0.960) {B};
+  \node[font=\small, anchor=north west, inner sep=1.5pt] at (0.349,-0.490) {C};
+  \node[font=\small, anchor=south west, inner sep=1.5pt] at (0.199,0.403) {D};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (1.030,0.000) {T};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (1.000,1.150) {P};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (1.000,-1.150) {Q};
+\end{tikzpicture}

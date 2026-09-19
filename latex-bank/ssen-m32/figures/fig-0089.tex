@@ -1,0 +1,21 @@
+% 0089(본책 20쪽) — ∠C=90° 직각삼각형 ABC(B 왼쪽 멀리·C 오른쪽 아래·A 위), BC 위의 D, ∠B=30°·∠ADC=45°, AC=4 파선 호, △ABD 색. 라벨: A·B·C·D·30°·45°·4, 직각 표시 C. 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)은 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (2.078,0); \coordinate (A) at (2.078,1.2); \coordinate (D) at (0.878,0);
+  \fill[orange!35] (A) -- (B) -- (D) -- cycle;
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (D);
+  % 직각 표시(C)
+  \draw[line width=0.4pt] (1.918,0) -- (1.918,0.16) -- (2.078,0.16);
+  % 각
+  \draw[line width=0.4pt] (0.45,0) arc[start angle=0, end angle=30, radius=0.45cm];
+  \node[font=\small, anchor=west, inner sep=1pt] at (0.42,0.15) {$30^\circ$};
+  \draw[line width=0.4pt] (1.228,0) arc[start angle=0, end angle=45, radius=0.35cm];
+  \node[font=\small, anchor=west, inner sep=1pt] at (1.25,0.2) {$45^\circ$};
+  % 4(AC 파선 호)
+  \draw[dashed, line width=0.4pt] (A) to[bend left=30] (C);
+  \node[font=\small] at (2.4,0.6) {$4$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, below right] at (C) {C};
+  \node[font=\small, below] at (D) {D};
+\end{tikzpicture}
