@@ -1,0 +1,1069 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage{../sty/dm-editorial}
+\usepackage{fontspec}
+\usepackage{multicol}
+% 문항 전사용 보조 매크로(dm-editorial 매크로를 덮어쓰지 않는다)
+\newcommand{\pt}[1]{\mathrm{#1}}
+\newcommand{\seg}[1]{\overline{\mathrm{#1}}}
+\newcommand{\arc}[1]{\overset{\frown}{\mathrm{#1}}}
+\newcommand{\exprbox}[1]{\par\smallskip\noindent\begin{center}\fbox{\begin{minipage}{0.9\linewidth}\centering\vspace{1.5mm}#1\vspace{1.5mm}\end{minipage}}\end{center}}
+% 여집합 · 「보기」 상자(ㄱ·ㄴ·ㄷ 참거짓 문항 — 줄바꿈은 \\)
+\newcommand{\comp}[1]{{#1}^{\mathrm{c}}}
+% 별도 줄 수식(원문의 가운데 줄): 좁은 낱장 폭보다 넓으면 폭에 맞게 줄인다(전사본의 \centerline 을 build 가 이것으로 바꾼다).
+\newcommand{\dispeq}[1]{\centerline{\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{#1}}}
+\newcommand{\bogi}[1]{\par\smallskip\noindent\begin{center}\fbox{\begin{minipage}{0.9\linewidth}\vspace{1mm}{\small\bfseries 보기}\par\smallskip\setlength{\parskip}{0.6mm}#1\vspace{1mm}\end{minipage}}\end{center}}
+\newcommand{\blank}[1][1.5em]{\raisebox{-0.15ex}{\framebox[#1]{\rule{0pt}{1.4ex}}}}
+\newcommand{\dmhint}[1]{\par\smallskip\begin{tcolorbox}[enhanced,colback=dm-navylight!60,colframe=dm-navy!40,boxrule=0.3pt,sharp corners,left=3mm,right=3mm,top=2mm,bottom=2mm,boxsep=0mm]\small\setlength{\parskip}{1mm}#1\end{tcolorbox}}
+% 구역 제목·공통 지시문은 뒤에 문항 한 개는 붙을 자리가 있어야 찍는다(쪽 끝 고아 방지).
+\newcommand{\dmsection}[1]{\par\needspace{10\baselineskip}\vspace{3mm}\noindent{\color{dm-navy}\hrule height 0.6pt}\vspace{1.2mm}\noindent{\dmheadingfont\bfseries\fontsize{11}{13}\selectfont\color{dm-navy}#1}\par\vspace{2mm}}
+% 지시문 뒤 4mm: 다음 문항의 출처 배지가 5mm 위로 올라오므로 긴 지시문 줄과 겹치지 않게 한다.
+\newcommand{\dmpassage}[1]{\par\needspace{8\baselineskip}\medskip\noindent{\dmheadingfont\bfseries\color{dm-navy}#1}\par\vspace{4mm}}
+% 줄바꿈 규약(프로토타입 mathbook-problems.sty · style.sty 와 같음): 수식 안에서는 줄을 바꾸지 않고, 「(단, …)」·「x축」은 한 덩어리.
+\binoppenalty=10000 \relpenalty=10000
+\newcommand{\nob}[1]{\mbox{#1}}
+% 「(단, …)」 은 한 덩어리가 원칙이지만 그림 옆 좁은 폭(0.58)에서 긴 조건이 그림 뒤로 넘어가 잘리므로(RPM 공통수학2 0151),
+% 「(단,」 만 첫 낱말에 붙이고 안쪽 낱말 사이에서는 줄을 바꿀 수 있게 둔다(수식 안은 여전히 안 끊긴다).
+\newcommand{\cond}[1]{\mbox{(단,}\nobreakspace#1)}
+\raggedbottom
+
+\begin{document}
+\renewcommand{\dmchapunit}{01 3-2 기말(원의 성질·통계·부록)}
+\dmchapter{01}{3-2 기말(원의 성질·통계·부록)}
+\setcounter{dmproblemcount}{0}
+\dmsection{기출 Best}
+\setcounter{dmproblemcount}{0}\dmpnum{8-01}{\input{items/8-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{8-02}{\input{items/8-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{8-03}{\input{items/8-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{8-04}{\input{items/8-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{8-05}{\input{items/8-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{8-06}{\input{items/8-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{9-07}{\input{items/9-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{9-08}{\input{items/9-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{9-09}{\input{items/9-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{9-10}{\input{items/9-10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{9-11}{\input{items/9-11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{9-12}{\input{items/9-12}}\vspace{6mm}
+\dmsection{기출 Best 쌍둥이}
+\setcounter{dmproblemcount}{0}\dmpnum{10-01}{\input{items/10-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{10-02}{\input{items/10-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{10-03}{\input{items/10-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{10-04}{\input{items/10-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{10-05}{\input{items/10-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{10-06}{\input{items/10-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{11-07}{\input{items/11-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{11-08}{\input{items/11-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{11-09}{\input{items/11-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{11-10}{\input{items/11-10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{11-11}{\input{items/11-11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{11-12}{\input{items/11-12}}\vspace{6mm}
+\dmsection{집중공략}
+\setcounter{dmproblemcount}{0}\dmpnum{12-e1}{\input{items/12-e1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{12-01}{\input{items/12-01}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{13-e2}{\input{items/13-e2}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{13-02}{\input{items/13-02}}\vspace{6mm}
+\dmsection{서술형 문제}
+\setcounter{dmproblemcount}{0}\dmpnum{14-e1}{\input{items/14-e1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{14-01}{\input{items/14-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{15-e2}{\input{items/15-e2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{15-02}{\input{items/15-02}}\vspace{6mm}
+\dmsection{실전 문제 1회}
+\setcounter{dmproblemcount}{0}\dmpnum{16-01}{\input{items/16-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{16-02}{\input{items/16-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{16-03}{\input{items/16-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{16-04}{\input{items/16-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{16-05}{\input{items/16-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{16-06}{\input{items/16-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{17-07}{\input{items/17-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{17-08}{\input{items/17-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{17-09}{\input{items/17-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{17-10}{\input{items/17-10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{17-11}{\input{items/17-11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{17-12}{\input{items/17-12}}\vspace{6mm}
+\dmsection{서술형 문제}
+\setcounter{dmproblemcount}{12}\dmpnum{18-13}{\input{items/18-13}}\vspace{6mm}
+\setcounter{dmproblemcount}{13}\dmpnum{18-14}{\input{items/18-14}}\vspace{6mm}
+\setcounter{dmproblemcount}{14}\dmpnum{18-15}{\input{items/18-15}}\vspace{6mm}
+\setcounter{dmproblemcount}{15}\dmpnum{18-16}{\input{items/18-16}}\vspace{6mm}
+\dmsection{실전 문제 2회}
+\setcounter{dmproblemcount}{0}\dmpnum{19-01}{\input{items/19-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{19-02}{\input{items/19-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{19-03}{\input{items/19-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{19-04}{\input{items/19-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{19-05}{\input{items/19-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{19-06}{\input{items/19-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{20-07}{\input{items/20-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{20-08}{\input{items/20-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{20-09}{\input{items/20-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{20-10}{\input{items/20-10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{20-11}{\input{items/20-11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{20-12}{\input{items/20-12}}\vspace{6mm}
+\dmsection{서술형 문제}
+\setcounter{dmproblemcount}{12}\dmpnum{21-13}{\input{items/21-13}}\vspace{6mm}
+\setcounter{dmproblemcount}{13}\dmpnum{21-14}{\input{items/21-14}}\vspace{6mm}
+\setcounter{dmproblemcount}{14}\dmpnum{21-15}{\input{items/21-15}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{15}\dmpnum{21-16}{\input{items/21-16}}\vspace{6mm}
+\dmsection{최다 오답문제}
+\setcounter{dmproblemcount}{0}\dmpnum{22-e1}{\input{items/22-e1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{22-01}{\input{items/22-01}}\vspace{6mm}
+\dmsection{기출 Best}
+\setcounter{dmproblemcount}{0}\dmpnum{26-01}{\input{items/26-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{26-02}{\input{items/26-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{26-03}{\input{items/26-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{26-04}{\input{items/26-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{26-05}{\input{items/26-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{26-06}{\input{items/26-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{27-07}{\input{items/27-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{27-08}{\input{items/27-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{27-09}{\input{items/27-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{27-10}{\input{items/27-10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{27-11}{\input{items/27-11}}\vspace{6mm}
+\dmsection{기출 Best 쌍둥이}
+\setcounter{dmproblemcount}{0}\dmpnum{28-01}{\input{items/28-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{28-02}{\input{items/28-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{28-03}{\input{items/28-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{28-04}{\input{items/28-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{28-05}{\input{items/28-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{28-06}{\input{items/28-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{29-07}{\input{items/29-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{29-08}{\input{items/29-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{29-09}{\input{items/29-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{29-10}{\input{items/29-10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{29-11}{\input{items/29-11}}\vspace{6mm}
+\dmsection{집중공략}
+\setcounter{dmproblemcount}{0}\dmpnum{30-e1}{\input{items/30-e1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{30-01}{\input{items/30-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{31-e2}{\input{items/31-e2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{31-02}{\input{items/31-02}}\vspace{6mm}
+\dmsection{서술형 문제}
+\setcounter{dmproblemcount}{0}\dmpnum{32-e1}{\input{items/32-e1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{32-01}{\input{items/32-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{33-e2}{\input{items/33-e2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{33-02}{\input{items/33-02}}\vspace{6mm}
+\dmsection{실전 문제 1회}
+\setcounter{dmproblemcount}{0}\dmpnum{34-01}{\input{items/34-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{34-02}{\input{items/34-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{34-03}{\input{items/34-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{34-04}{\input{items/34-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{34-05}{\input{items/34-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{35-06}{\input{items/35-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{35-07}{\input{items/35-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{35-08}{\input{items/35-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{35-09}{\input{items/35-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{35-10}{\input{items/35-10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{35-11}{\input{items/35-11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{36-12}{\input{items/36-12}}\vspace{6mm}
+\setcounter{dmproblemcount}{12}\dmpnum{36-13}{\input{items/36-13}}\vspace{6mm}
+\setcounter{dmproblemcount}{13}\dmpnum{36-14}{\input{items/36-14}}\vspace{6mm}
+\setcounter{dmproblemcount}{14}\dmpnum{36-15}{\input{items/36-15}}\vspace{6mm}
+\dmsection{실전 문제 2회}
+\setcounter{dmproblemcount}{0}\dmpnum{37-01}{\input{items/37-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{37-02}{\input{items/37-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{37-03}{\input{items/37-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{37-04}{\input{items/37-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{37-05}{\input{items/37-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{37-06}{\input{items/37-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{38-07}{\input{items/38-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{38-08}{\input{items/38-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{38-09}{\input{items/38-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{38-10}{\input{items/38-10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{38-11}{\input{items/38-11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{39-12}{\input{items/39-12}}\vspace{6mm}
+\setcounter{dmproblemcount}{12}\dmpnum{39-13}{\input{items/39-13}}\vspace{6mm}
+\setcounter{dmproblemcount}{13}\dmpnum{39-14}{\input{items/39-14}}\vspace{6mm}
+\setcounter{dmproblemcount}{14}\dmpnum{39-15}{\input{items/39-15}}\vspace{6mm}
+\dmsection{기출 Best}
+\setcounter{dmproblemcount}{0}\dmpnum{44-01}{\input{items/44-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{44-02}{\input{items/44-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{44-03}{\input{items/44-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{44-04}{\input{items/44-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{44-05}{\input{items/44-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{44-06}{\input{items/44-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{45-07}{\input{items/45-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{45-08}{\input{items/45-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{45-09}{\input{items/45-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{45-10}{\input{items/45-10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{45-11}{\input{items/45-11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{45-12}{\input{items/45-12}}\vspace{6mm}
+\setcounter{dmproblemcount}{12}\dmpnum{46-13}{\input{items/46-13}}\vspace{6mm}
+\setcounter{dmproblemcount}{13}\dmpnum{46-14}{\input{items/46-14}}\vspace{6mm}
+\setcounter{dmproblemcount}{14}\dmpnum{46-15}{\input{items/46-15}}\vspace{6mm}
+\setcounter{dmproblemcount}{15}\dmpnum{46-16}{\input{items/46-16}}\vspace{6mm}
+\setcounter{dmproblemcount}{16}\dmpnum{46-17}{\input{items/46-17}}\vspace{6mm}
+\setcounter{dmproblemcount}{17}\dmpnum{46-18}{\input{items/46-18}}\vspace{6mm}
+\setcounter{dmproblemcount}{18}\dmpnum{47-19}{\input{items/47-19}}\vspace{6mm}
+\setcounter{dmproblemcount}{19}\dmpnum{47-20}{\input{items/47-20}}\vspace{6mm}
+\setcounter{dmproblemcount}{20}\dmpnum{47-21}{\input{items/47-21}}\vspace{6mm}
+\setcounter{dmproblemcount}{21}\dmpnum{47-22}{\input{items/47-22}}\vspace{6mm}
+\setcounter{dmproblemcount}{22}\dmpnum{47-23}{\input{items/47-23}}\vspace{6mm}
+\setcounter{dmproblemcount}{23}\dmpnum{47-24}{\input{items/47-24}}\vspace{6mm}
+\dmsection{기출 Best 쌍둥이}
+\setcounter{dmproblemcount}{0}\dmpnum{48-01}{\input{items/48-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{48-02}{\input{items/48-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{48-03}{\input{items/48-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{48-04}{\input{items/48-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{48-05}{\input{items/48-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{48-06}{\input{items/48-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{49-07}{\input{items/49-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{49-08}{\input{items/49-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{49-09}{\input{items/49-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{49-10}{\input{items/49-10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{49-11}{\input{items/49-11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{49-12}{\input{items/49-12}}\vspace{6mm}
+\setcounter{dmproblemcount}{12}\dmpnum{50-13}{\input{items/50-13}}\vspace{6mm}
+\setcounter{dmproblemcount}{13}\dmpnum{50-14}{\input{items/50-14}}\vspace{6mm}
+\setcounter{dmproblemcount}{14}\dmpnum{50-15}{\input{items/50-15}}\vspace{6mm}
+\setcounter{dmproblemcount}{15}\dmpnum{50-16}{\input{items/50-16}}\vspace{6mm}
+\setcounter{dmproblemcount}{16}\dmpnum{50-17}{\input{items/50-17}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{17}\dmpnum{50-18}{\input{items/50-18}}\vspace{6mm}
+\setcounter{dmproblemcount}{18}\dmpnum{51-19}{\input{items/51-19}}\vspace{6mm}
+\setcounter{dmproblemcount}{19}\dmpnum{51-20}{\input{items/51-20}}\vspace{6mm}
+\setcounter{dmproblemcount}{20}\dmpnum{51-21}{\input{items/51-21}}\vspace{6mm}
+\setcounter{dmproblemcount}{21}\dmpnum{51-22}{\input{items/51-22}}\vspace{6mm}
+\setcounter{dmproblemcount}{22}\dmpnum{51-23}{\input{items/51-23}}\vspace{6mm}
+\setcounter{dmproblemcount}{23}\dmpnum{51-24}{\input{items/51-24}}\vspace{6mm}
+\dmsection{집중공략}
+\setcounter{dmproblemcount}{0}\dmpnum{52-e1}{\input{items/52-e1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{52-01}{\input{items/52-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{53-e2}{\input{items/53-e2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{53-02}{\input{items/53-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{54-e3}{\input{items/54-e3}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{54-03}{\input{items/54-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{55-e4}{\input{items/55-e4}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{55-04}{\input{items/55-04}}\vspace{6mm}
+\dmsection{서술형 문제}
+\setcounter{dmproblemcount}{0}\dmpnum{56-e1}{\input{items/56-e1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{56-01}{\input{items/56-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{57-e2}{\input{items/57-e2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{57-02}{\input{items/57-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{58-e3}{\input{items/58-e3}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{58-03}{\input{items/58-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{59-e4}{\input{items/59-e4}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{59-04}{\input{items/59-04}}\vspace{6mm}
+\dmsection{실전 문제 1회}
+\setcounter{dmproblemcount}{0}\dmpnum{60-01}{\input{items/60-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{60-02}{\input{items/60-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{60-03}{\input{items/60-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{60-04}{\input{items/60-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{60-05}{\input{items/60-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{61-06}{\input{items/61-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{61-07}{\input{items/61-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{61-08}{\input{items/61-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{61-09}{\input{items/61-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{61-10}{\input{items/61-10}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{10}\dmpnum{61-11}{\input{items/61-11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{62-12}{\input{items/62-12}}\vspace{6mm}
+\setcounter{dmproblemcount}{12}\dmpnum{62-13}{\input{items/62-13}}\vspace{6mm}
+\setcounter{dmproblemcount}{13}\dmpnum{62-14}{\input{items/62-14}}\vspace{6mm}
+\setcounter{dmproblemcount}{14}\dmpnum{62-15}{\input{items/62-15}}\vspace{6mm}
+\setcounter{dmproblemcount}{15}\dmpnum{62-16}{\input{items/62-16}}\vspace{6mm}
+\setcounter{dmproblemcount}{16}\dmpnum{62-17}{\input{items/62-17}}\vspace{6mm}
+\dmsection{실전 문제 1회 · 서술형 문제}
+\setcounter{dmproblemcount}{17}\dmpnum{63-18}{\input{items/63-18}}\vspace{6mm}
+\setcounter{dmproblemcount}{18}\dmpnum{63-19}{\input{items/63-19}}\vspace{6mm}
+\setcounter{dmproblemcount}{19}\dmpnum{63-20}{\input{items/63-20}}\vspace{6mm}
+\setcounter{dmproblemcount}{20}\dmpnum{63-21}{\input{items/63-21}}\vspace{6mm}
+\dmsection{실전 문제 2회}
+\setcounter{dmproblemcount}{0}\dmpnum{64-01}{\input{items/64-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{64-02}{\input{items/64-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{64-03}{\input{items/64-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{64-04}{\input{items/64-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{64-05}{\input{items/64-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{64-06}{\input{items/64-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{65-07}{\input{items/65-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{65-08}{\input{items/65-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{65-09}{\input{items/65-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{65-10}{\input{items/65-10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{65-11}{\input{items/65-11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{65-12}{\input{items/65-12}}\vspace{6mm}
+\setcounter{dmproblemcount}{12}\dmpnum{66-13}{\input{items/66-13}}\vspace{6mm}
+\setcounter{dmproblemcount}{13}\dmpnum{66-14}{\input{items/66-14}}\vspace{6mm}
+\setcounter{dmproblemcount}{14}\dmpnum{66-15}{\input{items/66-15}}\vspace{6mm}
+\setcounter{dmproblemcount}{15}\dmpnum{66-16}{\input{items/66-16}}\vspace{6mm}
+\setcounter{dmproblemcount}{16}\dmpnum{66-17}{\input{items/66-17}}\vspace{6mm}
+\setcounter{dmproblemcount}{17}\dmpnum{66-18}{\input{items/66-18}}\vspace{6mm}
+\dmsection{실전 문제 2회 · 서술형 문제}
+\setcounter{dmproblemcount}{18}\dmpnum{67-19}{\input{items/67-19}}\vspace{6mm}
+\setcounter{dmproblemcount}{19}\dmpnum{67-20}{\input{items/67-20}}\vspace{6mm}
+\setcounter{dmproblemcount}{20}\dmpnum{67-21}{\input{items/67-21}}\vspace{6mm}
+\setcounter{dmproblemcount}{21}\dmpnum{67-22}{\input{items/67-22}}\vspace{6mm}
+\dmsection{최다 오답문제}
+\vspace{2mm}\setcounter{dmproblemcount}{0}\dmpnum{68-e1}{\input{items/68-e1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{68-01}{\input{items/68-01}}\vspace{6mm}
+\dmsection{기출 Best}
+\setcounter{dmproblemcount}{0}\dmpnum{72-01}{\input{items/72-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{72-02}{\input{items/72-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{72-03}{\input{items/72-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{72-04}{\input{items/72-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{72-05}{\input{items/72-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{73-06}{\input{items/73-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{73-07}{\input{items/73-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{73-08}{\input{items/73-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{73-09}{\input{items/73-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{73-10}{\input{items/73-10}}\vspace{6mm}
+\dmsection{기출 Best 쌍둥이}
+\setcounter{dmproblemcount}{0}\dmpnum{74-01}{\input{items/74-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{74-02}{\input{items/74-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{74-03}{\input{items/74-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{74-04}{\input{items/74-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{74-05}{\input{items/74-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{75-06}{\input{items/75-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{75-07}{\input{items/75-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{75-08}{\input{items/75-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{75-09}{\input{items/75-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{75-10}{\input{items/75-10}}\vspace{6mm}
+\dmsection{집중공략}
+\setcounter{dmproblemcount}{0}\dmpnum{76-e1}{\input{items/76-e1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{76-01}{\input{items/76-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{77-e2}{\input{items/77-e2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{77-02}{\input{items/77-02}}\vspace{6mm}
+\dmsection{서술형 문제}
+\setcounter{dmproblemcount}{0}\dmpnum{78-e1}{\input{items/78-e1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{78-01}{\input{items/78-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{79-e2}{\input{items/79-e2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{79-02}{\input{items/79-02}}\vspace{6mm}
+\dmsection{실전 문제 1회}
+\setcounter{dmproblemcount}{0}\dmpnum{80-01}{\input{items/80-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{80-02}{\input{items/80-02}}\vspace{6mm}
+\dmpassage{그림은 진영이네 반 학생 20명의 지난 주말 동안의 수면 시간을 조사하여 나타낸 산점도이다. 다음 물음에 답하시오.}
+\begin{center}\includegraphics[width=129.6pt]{figures/fig-g80-03-04.png}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{2}\dmpnum{80-03}{\input{items/80-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{80-04}{\input{items/80-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{80-05}{\input{items/80-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{81-06}{\input{items/81-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{81-07}{\input{items/81-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{81-08}{\input{items/81-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{81-09}{\input{items/81-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{81-10}{\input{items/81-10}}\vspace{6mm}
+\dmsection{실전 문제 1회 · 서술형 문제}
+\setcounter{dmproblemcount}{10}\dmpnum{82-11}{\input{items/82-11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{82-12}{\input{items/82-12}}\vspace{6mm}
+\setcounter{dmproblemcount}{12}\dmpnum{82-13}{\input{items/82-13}}\vspace{6mm}
+\setcounter{dmproblemcount}{13}\dmpnum{82-14}{\input{items/82-14}}\vspace{6mm}
+\dmsection{실전 문제 2회}
+\setcounter{dmproblemcount}{0}\dmpnum{83-01}{\input{items/83-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{83-02}{\input{items/83-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{83-03}{\input{items/83-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{83-04}{\input{items/83-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{83-05}{\input{items/83-05}}\vspace{6mm}
+\dmpassage{그림은 기범이네 반 학생 25명의 두 차례에 걸친 수학 경시대회의 성적을 조사하여 나타낸 산점도이다. 다음 물음에 답하시오.}
+\begin{center}\includegraphics[width=115.7pt]{figures/fig-84-02.png}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{5}\dmpnum{84-06}{\input{items/84-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{84-07}{\input{items/84-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{84-08}{\input{items/84-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{84-09}{\input{items/84-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{84-10}{\input{items/84-10}}\vspace{6mm}
+\dmsection{실전 문제 2회 · 서술형 문제}
+\setcounter{dmproblemcount}{10}\dmpnum{85-11}{\input{items/85-11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{85-12}{\input{items/85-12}}\vspace{6mm}
+\setcounter{dmproblemcount}{12}\dmpnum{85-13}{\input{items/85-13}}\vspace{6mm}
+\setcounter{dmproblemcount}{13}\dmpnum{85-14}{\input{items/85-14}}\vspace{6mm}
+\dmsection{실전 모의고사 1회}
+\setcounter{dmproblemcount}{0}\dmpnum{88-01}{\input{items/88-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{88-02}{\input{items/88-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{88-03}{\input{items/88-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{88-04}{\input{items/88-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{88-05}{\input{items/88-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{89-06}{\input{items/89-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{89-07}{\input{items/89-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{89-08}{\input{items/89-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{89-09}{\input{items/89-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{89-10}{\input{items/89-10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{89-11}{\input{items/89-11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{89-12}{\input{items/89-12}}\vspace{6mm}
+\setcounter{dmproblemcount}{12}\dmpnum{90-13}{\input{items/90-13}}\vspace{6mm}
+\setcounter{dmproblemcount}{13}\dmpnum{90-14}{\input{items/90-14}}\vspace{6mm}
+\setcounter{dmproblemcount}{14}\dmpnum{90-15}{\input{items/90-15}}\vspace{6mm}
+\setcounter{dmproblemcount}{15}\dmpnum{90-16}{\input{items/90-16}}\vspace{6mm}
+\dmpassage{그림은 소현이네 반 학생 $20$명의 수학 성적과 국어 성적을 조사하여 나타낸 산점도이다. 다음 물음에 답하시오.}
+\begin{center}\includegraphics[width=123.1pt]{figures/fig-g90-17-18.png}\end{center}\vspace{4mm}
+\setcounter{dmproblemcount}{16}\dmpnum{90-17}{\input{items/90-17}}\vspace{6mm}
+\setcounter{dmproblemcount}{17}\dmpnum{90-18}{\input{items/90-18}}\vspace{6mm}
+\setcounter{dmproblemcount}{18}\dmpnum{90-19}{\input{items/90-19}}\vspace{6mm}
+\setcounter{dmproblemcount}{19}\dmpnum{91-20}{\input{items/91-20}}\vspace{6mm}
+\setcounter{dmproblemcount}{20}\dmpnum{91-21}{\input{items/91-21}}\vspace{6mm}
+\setcounter{dmproblemcount}{21}\dmpnum{91-22}{\input{items/91-22}}\vspace{6mm}
+\setcounter{dmproblemcount}{22}\dmpnum{91-23}{\input{items/91-23}}\vspace{6mm}
+\setcounter{dmproblemcount}{23}\dmpnum{91-24}{\input{items/91-24}}\vspace{6mm}
+\setcounter{dmproblemcount}{24}\dmpnum{91-25}{\input{items/91-25}}\vspace{6mm}
+\dmsection{실전 모의고사 2회}
+\setcounter{dmproblemcount}{0}\dmpnum{92-01}{\input{items/92-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{92-02}{\input{items/92-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{92-03}{\input{items/92-03}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{92-04}{\input{items/92-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{92-05}{\input{items/92-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{92-06}{\input{items/92-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{93-07}{\input{items/93-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{93-08}{\input{items/93-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{93-09}{\input{items/93-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{93-10}{\input{items/93-10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{93-11}{\input{items/93-11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{93-12}{\input{items/93-12}}\vspace{6mm}
+\setcounter{dmproblemcount}{12}\dmpnum{93-13}{\input{items/93-13}}\vspace{6mm}
+\setcounter{dmproblemcount}{13}\dmpnum{93-14}{\input{items/93-14}}\vspace{6mm}
+\setcounter{dmproblemcount}{14}\dmpnum{94-15}{\input{items/94-15}}\vspace{6mm}
+\setcounter{dmproblemcount}{15}\dmpnum{94-16}{\input{items/94-16}}\vspace{6mm}
+\setcounter{dmproblemcount}{16}\dmpnum{94-17}{\input{items/94-17}}\vspace{6mm}
+\setcounter{dmproblemcount}{17}\dmpnum{94-18}{\input{items/94-18}}\vspace{6mm}
+\setcounter{dmproblemcount}{18}\dmpnum{94-19}{\input{items/94-19}}\vspace{6mm}
+\setcounter{dmproblemcount}{19}\dmpnum{94-20}{\input{items/94-20}}\vspace{6mm}
+\setcounter{dmproblemcount}{20}\dmpnum{95-21}{\input{items/95-21}}\vspace{6mm}
+\setcounter{dmproblemcount}{21}\dmpnum{95-22}{\input{items/95-22}}\vspace{6mm}
+\setcounter{dmproblemcount}{22}\dmpnum{95-23}{\input{items/95-23}}\vspace{6mm}
+\setcounter{dmproblemcount}{23}\dmpnum{95-24}{\input{items/95-24}}\vspace{6mm}
+\setcounter{dmproblemcount}{24}\dmpnum{95-25}{\input{items/95-25}}\vspace{6mm}
+\dmsection{실전 모의고사 3회}
+\setcounter{dmproblemcount}{0}\dmpnum{96-01}{\input{items/96-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{96-02}{\input{items/96-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{96-03}{\input{items/96-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{96-04}{\input{items/96-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{96-05}{\input{items/96-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{96-06}{\input{items/96-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{97-07}{\input{items/97-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{97-08}{\input{items/97-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{97-09}{\input{items/97-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{97-10}{\input{items/97-10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{97-11}{\input{items/97-11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{97-12}{\input{items/97-12}}\vspace{6mm}
+\setcounter{dmproblemcount}{12}\dmpnum{97-13}{\input{items/97-13}}\vspace{6mm}
+\setcounter{dmproblemcount}{13}\dmpnum{98-14}{\input{items/98-14}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{14}\dmpnum{98-15}{\input{items/98-15}}\vspace{6mm}
+\setcounter{dmproblemcount}{15}\dmpnum{98-16}{\input{items/98-16}}\vspace{6mm}
+\setcounter{dmproblemcount}{16}\dmpnum{98-17}{\input{items/98-17}}\vspace{6mm}
+\setcounter{dmproblemcount}{17}\dmpnum{98-18}{\input{items/98-18}}\vspace{6mm}
+\setcounter{dmproblemcount}{18}\dmpnum{98-19}{\input{items/98-19}}\vspace{6mm}
+\setcounter{dmproblemcount}{19}\dmpnum{99-20}{\input{items/99-20}}\vspace{6mm}
+\setcounter{dmproblemcount}{20}\dmpnum{99-21}{\input{items/99-21}}\vspace{6mm}
+\setcounter{dmproblemcount}{21}\dmpnum{99-22}{\input{items/99-22}}\vspace{6mm}
+\setcounter{dmproblemcount}{22}\dmpnum{99-23}{\input{items/99-23}}\vspace{6mm}
+\setcounter{dmproblemcount}{23}\dmpnum{99-24}{\input{items/99-24}}\vspace{6mm}
+\setcounter{dmproblemcount}{24}\dmpnum{99-25}{\input{items/99-25}}\vspace{6mm}
+\dmsection{족집게 마무리 객관식 80선}
+\setcounter{dmproblemcount}{0}\dmpnum{100-01}{\input{items/100-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{100-02}{\input{items/100-02}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{100-03}{\input{items/100-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{100-04}{\input{items/100-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{100-05}{\input{items/100-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{100-06}{\input{items/100-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{101-07}{\input{items/101-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{101-08}{\input{items/101-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{101-09}{\input{items/101-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{101-10}{\input{items/101-10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{101-11}{\input{items/101-11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{101-12}{\input{items/101-12}}\vspace{6mm}
+\setcounter{dmproblemcount}{12}\dmpnum{102-13}{\input{items/102-13}}\vspace{6mm}
+\setcounter{dmproblemcount}{13}\dmpnum{102-14}{\input{items/102-14}}\vspace{6mm}
+\setcounter{dmproblemcount}{14}\dmpnum{102-15}{\input{items/102-15}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{15}\dmpnum{102-16}{\input{items/102-16}}\vspace{6mm}
+\dmsection{족집게 마무리 객관식 80선 · Ⅵ-3 원주각의 활용}
+\setcounter{dmproblemcount}{16}\dmpnum{102-17}{\input{items/102-17}}\vspace{6mm}
+\dmsection{족집게 마무리 객관식 80선}
+\setcounter{dmproblemcount}{17}\dmpnum{103-18}{\input{items/103-18}}\vspace{6mm}
+\setcounter{dmproblemcount}{18}\dmpnum{103-19}{\input{items/103-19}}\vspace{6mm}
+\setcounter{dmproblemcount}{19}\dmpnum{103-20}{\input{items/103-20}}\vspace{6mm}
+\setcounter{dmproblemcount}{20}\dmpnum{103-21}{\input{items/103-21}}\vspace{6mm}
+\setcounter{dmproblemcount}{21}\dmpnum{103-22}{\input{items/103-22}}\vspace{6mm}
+\setcounter{dmproblemcount}{22}\dmpnum{103-23}{\input{items/103-23}}\vspace{6mm}
+\setcounter{dmproblemcount}{23}\dmpnum{104-24}{\input{items/104-24}}\vspace{6mm}
+\setcounter{dmproblemcount}{24}\dmpnum{104-25}{\input{items/104-25}}\vspace{6mm}
+\setcounter{dmproblemcount}{25}\dmpnum{104-26}{\input{items/104-26}}\vspace{6mm}
+\setcounter{dmproblemcount}{26}\dmpnum{104-27}{\input{items/104-27}}\vspace{6mm}
+\setcounter{dmproblemcount}{27}\dmpnum{104-28}{\input{items/104-28}}\vspace{6mm}
+\setcounter{dmproblemcount}{28}\dmpnum{105-29}{\input{items/105-29}}\vspace{6mm}
+\setcounter{dmproblemcount}{29}\dmpnum{105-30}{\input{items/105-30}}\vspace{6mm}
+\setcounter{dmproblemcount}{30}\dmpnum{105-31}{\input{items/105-31}}\vspace{6mm}
+\setcounter{dmproblemcount}{31}\dmpnum{105-32}{\input{items/105-32}}\vspace{6mm}
+\setcounter{dmproblemcount}{32}\dmpnum{105-33}{\input{items/105-33}}\vspace{6mm}
+\setcounter{dmproblemcount}{33}\dmpnum{105-34}{\input{items/105-34}}\vspace{6mm}
+\dmsection{족집게 마무리 객관식 80선 · Ⅶ-1 대푯값과 산포도}
+\setcounter{dmproblemcount}{34}\dmpnum{106-35}{\input{items/106-35}}\vspace{6mm}
+\setcounter{dmproblemcount}{35}\dmpnum{106-36}{\input{items/106-36}}\vspace{6mm}
+\setcounter{dmproblemcount}{36}\dmpnum{106-37}{\input{items/106-37}}\vspace{6mm}
+\setcounter{dmproblemcount}{37}\dmpnum{106-38}{\input{items/106-38}}\vspace{6mm}
+\setcounter{dmproblemcount}{38}\dmpnum{106-39}{\input{items/106-39}}\vspace{6mm}
+\setcounter{dmproblemcount}{39}\dmpnum{106-40}{\input{items/106-40}}\vspace{6mm}
+\dmsection{족집게 마무리 객관식 80선}
+\setcounter{dmproblemcount}{40}\dmpnum{107-41}{\input{items/107-41}}\vspace{6mm}
+\setcounter{dmproblemcount}{41}\dmpnum{107-42}{\input{items/107-42}}\vspace{6mm}
+\setcounter{dmproblemcount}{42}\dmpnum{107-43}{\input{items/107-43}}\vspace{6mm}
+\setcounter{dmproblemcount}{43}\dmpnum{107-44}{\input{items/107-44}}\vspace{6mm}
+\setcounter{dmproblemcount}{44}\dmpnum{107-45}{\input{items/107-45}}\vspace{6mm}
+\setcounter{dmproblemcount}{45}\dmpnum{107-46}{\input{items/107-46}}\vspace{6mm}
+\setcounter{dmproblemcount}{46}\dmpnum{108-47}{\input{items/108-47}}\vspace{6mm}
+\setcounter{dmproblemcount}{47}\dmpnum{108-48}{\input{items/108-48}}\vspace{6mm}
+\setcounter{dmproblemcount}{48}\dmpnum{108-49}{\input{items/108-49}}\vspace{6mm}
+\setcounter{dmproblemcount}{49}\dmpnum{108-50}{\input{items/108-50}}\vspace{6mm}
+\setcounter{dmproblemcount}{50}\dmpnum{108-51}{\input{items/108-51}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{51}\dmpnum{108-52}{\input{items/108-52}}\vspace{6mm}
+\setcounter{dmproblemcount}{52}\dmpnum{109-53}{\input{items/109-53}}\vspace{6mm}
+\setcounter{dmproblemcount}{53}\dmpnum{109-54}{\input{items/109-54}}\vspace{6mm}
+\setcounter{dmproblemcount}{54}\dmpnum{109-55}{\input{items/109-55}}\vspace{6mm}
+\setcounter{dmproblemcount}{55}\dmpnum{109-56}{\input{items/109-56}}\vspace{6mm}
+\setcounter{dmproblemcount}{56}\dmpnum{109-57}{\input{items/109-57}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{57}\dmpnum{109-58}{\input{items/109-58}}\vspace{6mm}
+\setcounter{dmproblemcount}{58}\dmpnum{110-59}{\input{items/110-59}}\vspace{6mm}
+\setcounter{dmproblemcount}{59}\dmpnum{110-60}{\input{items/110-60}}\vspace{6mm}
+\setcounter{dmproblemcount}{60}\dmpnum{110-61}{\input{items/110-61}}\vspace{6mm}
+\setcounter{dmproblemcount}{61}\dmpnum{110-62}{\input{items/110-62}}\vspace{6mm}
+\setcounter{dmproblemcount}{62}\dmpnum{110-63}{\input{items/110-63}}\vspace{6mm}
+\setcounter{dmproblemcount}{63}\dmpnum{110-64}{\input{items/110-64}}\vspace{6mm}
+\setcounter{dmproblemcount}{64}\dmpnum{111-65}{\input{items/111-65}}\vspace{6mm}
+\setcounter{dmproblemcount}{65}\dmpnum{111-66}{\input{items/111-66}}\vspace{6mm}
+\dmsection{족집게 마무리 객관식 80선 · Ⅶ-2 상관관계}
+\setcounter{dmproblemcount}{66}\dmpnum{111-67}{\input{items/111-67}}\vspace{6mm}
+\setcounter{dmproblemcount}{67}\dmpnum{111-68}{\input{items/111-68}}\vspace{6mm}
+\dmsection{족집게 마무리 객관식 80선}
+\setcounter{dmproblemcount}{68}\dmpnum{112-69}{\input{items/112-69}}\vspace{6mm}
+\setcounter{dmproblemcount}{69}\dmpnum{112-70}{\input{items/112-70}}\vspace{6mm}
+\setcounter{dmproblemcount}{70}\dmpnum{112-71}{\input{items/112-71}}\vspace{6mm}
+\setcounter{dmproblemcount}{71}\dmpnum{112-72}{\input{items/112-72}}\vspace{6mm}
+\setcounter{dmproblemcount}{72}\dmpnum{112-73}{\input{items/112-73}}\vspace{6mm}
+\setcounter{dmproblemcount}{73}\dmpnum{112-74}{\input{items/112-74}}\vspace{6mm}
+\setcounter{dmproblemcount}{74}\dmpnum{113-75}{\input{items/113-75}}\vspace{6mm}
+\setcounter{dmproblemcount}{75}\dmpnum{113-76}{\input{items/113-76}}\vspace{6mm}
+\setcounter{dmproblemcount}{76}\dmpnum{113-77}{\input{items/113-77}}\vspace{6mm}
+\setcounter{dmproblemcount}{77}\dmpnum{113-78}{\input{items/113-78}}\vspace{6mm}
+\setcounter{dmproblemcount}{78}\dmpnum{113-79}{\input{items/113-79}}\vspace{6mm}
+\setcounter{dmproblemcount}{79}\dmpnum{113-80}{\input{items/113-80}}\vspace{6mm}
+\dmsection{족집게 마무리 서술형 20선 · Ⅵ-2 원주각}
+\setcounter{dmproblemcount}{0}\dmpnum{114-01}{\input{items/114-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{114-02}{\input{items/114-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{114-03}{\input{items/114-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{114-04}{\input{items/114-04}}\vspace{6mm}
+\dmsection{족집게 마무리 서술형 20선}
+\setcounter{dmproblemcount}{4}\dmpnum{115-05}{\input{items/115-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{115-06}{\input{items/115-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{115-07}{\input{items/115-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{115-08}{\input{items/115-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{116-09}{\input{items/116-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{116-10}{\input{items/116-10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{116-11}{\input{items/116-11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{116-12}{\input{items/116-12}}\vspace{6mm}
+\setcounter{dmproblemcount}{12}\dmpnum{117-13}{\input{items/117-13}}\vspace{6mm}
+\setcounter{dmproblemcount}{13}\dmpnum{117-14}{\input{items/117-14}}\vspace{6mm}
+\setcounter{dmproblemcount}{14}\dmpnum{117-15}{\input{items/117-15}}\vspace{6mm}
+\setcounter{dmproblemcount}{15}\dmpnum{117-16}{\input{items/117-16}}\vspace{6mm}
+\setcounter{dmproblemcount}{16}\dmpnum{118-17}{\input{items/118-17}}\vspace{6mm}
+\setcounter{dmproblemcount}{17}\dmpnum{118-18}{\input{items/118-18}}\vspace{6mm}
+\setcounter{dmproblemcount}{18}\dmpnum{118-19}{\input{items/118-19}}\vspace{6mm}
+\setcounter{dmproblemcount}{19}\dmpnum{118-20}{\input{items/118-20}}\vspace{6mm}
+\dmsection{고난도 기출문제}
+\setcounter{dmproblemcount}{0}\dmpnum{119-01}{\input{items/119-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{119-02}{\input{items/119-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{119-03}{\input{items/119-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{119-04}{\input{items/119-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{120-05}{\input{items/120-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{120-06}{\input{items/120-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{120-07}{\input{items/120-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{120-08}{\input{items/120-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{121-09}{\input{items/121-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{121-10}{\input{items/121-10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{121-11}{\input{items/121-11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{121-12}{\input{items/121-12}}\vspace{6mm}
+\setcounter{dmproblemcount}{12}\dmpnum{122-13}{\input{items/122-13}}\vspace{6mm}
+\setcounter{dmproblemcount}{13}\dmpnum{122-14}{\input{items/122-14}}\vspace{6mm}
+\setcounter{dmproblemcount}{14}\dmpnum{122-15}{\input{items/122-15}}\vspace{6mm}
+\setcounter{dmproblemcount}{15}\dmpnum{122-16}{\input{items/122-16}}\vspace{6mm}
+\setcounter{dmproblemcount}{16}\dmpnum{123-17}{\input{items/123-17}}\vspace{6mm}
+\setcounter{dmproblemcount}{17}\dmpnum{123-18}{\input{items/123-18}}\vspace{6mm}
+\setcounter{dmproblemcount}{18}\dmpnum{123-19}{\input{items/123-19}}\vspace{6mm}
+\setcounter{dmproblemcount}{19}\dmpnum{123-20}{\input{items/123-20}}\vspace{6mm}
+\setcounter{dmproblemcount}{20}\dmpnum{124-21}{\input{items/124-21}}\vspace{6mm}
+\setcounter{dmproblemcount}{21}\dmpnum{124-22}{\input{items/124-22}}\vspace{6mm}
+\setcounter{dmproblemcount}{22}\dmpnum{124-23}{\input{items/124-23}}\vspace{6mm}
+\setcounter{dmproblemcount}{23}\dmpnum{124-24}{\input{items/124-24}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\dmsection{정답}
+\begin{multicols}{2}\small
+\noindent\textbf{8-01}\ ⑤\par
+\noindent\textbf{8-02}\ ②\par
+\noindent\textbf{8-03}\ ④\par
+\noindent\textbf{8-04}\ ②\par
+\noindent\textbf{8-05}\ ④\par
+\noindent\textbf{8-06}\ ②\par
+\noindent\textbf{9-07}\ ④\par
+\noindent\textbf{9-08}\ ①\par
+\noindent\textbf{9-09}\ ④\par
+\noindent\textbf{9-10}\ ④\par
+\noindent\textbf{9-11}\ ③\par
+\noindent\textbf{9-12}\ ②\par
+\noindent\textbf{10-01}\ ④\par
+\noindent\textbf{10-02}\ ①\par
+\noindent\textbf{10-03}\ ⑤\par
+\noindent\textbf{10-04}\ ④\par
+\noindent\textbf{10-05}\ ②\par
+\noindent\textbf{10-06}\ ④\par
+\noindent\textbf{11-07}\ ③\par
+\noindent\textbf{11-08}\ ④\par
+\noindent\textbf{11-09}\ ④\par
+\noindent\textbf{11-10}\ ⑤\par
+\noindent\textbf{11-11}\ ②\par
+\noindent\textbf{11-12}\ ③\par
+\noindent\textbf{12-e1}\ $32^\circ$\par
+\noindent\textbf{12-01}\ ⑤\par
+\noindent\textbf{13-e2}\ $81^\circ$\par
+\noindent\textbf{13-02}\ ②\par
+\noindent\textbf{14-e1}\ $50^\circ$\par
+\noindent\textbf{14-01}\ $61^\circ$\par
+\noindent\textbf{15-e2}\ (1) $40^\circ$ (2) $6$\par
+\noindent\textbf{15-02}\ $30^\circ$\par
+\noindent\textbf{16-01}\ ③\par
+\noindent\textbf{16-02}\ ①\par
+\noindent\textbf{16-03}\ ③\par
+\noindent\textbf{16-04}\ ①\par
+\noindent\textbf{16-05}\ ④\par
+\noindent\textbf{16-06}\ ③\par
+\noindent\textbf{17-07}\ ③\par
+\noindent\textbf{17-08}\ ①\par
+\noindent\textbf{17-09}\ ③\par
+\noindent\textbf{17-10}\ ④\par
+\noindent\textbf{17-11}\ ③\par
+\noindent\textbf{17-12}\ ④\par
+\noindent\textbf{18-13}\ $36\pi\mkern3mu \mathrm{cm}^2$\par
+\noindent\textbf{18-14}\ $40^\circ$\par
+\noindent\textbf{18-15}\ $56^\circ$\par
+\noindent\textbf{18-16}\ $24\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{19-01}\ ③\par
+\noindent\textbf{19-02}\ ②\par
+\noindent\textbf{19-03}\ ①\par
+\noindent\textbf{19-04}\ ④\par
+\noindent\textbf{19-05}\ ②\par
+\noindent\textbf{19-06}\ ③\par
+\noindent\textbf{20-07}\ ⑤\par
+\noindent\textbf{20-08}\ ②\par
+\noindent\textbf{20-09}\ ④\par
+\noindent\textbf{20-10}\ ②\par
+\noindent\textbf{20-11}\ ④\par
+\noindent\textbf{20-12}\ ①\par
+\noindent\textbf{21-13}\ $94^\circ$\par
+\noindent\textbf{21-14}\ $156^\circ$\par
+\noindent\textbf{21-15}\ (1) $39^\circ$ (2) $6\pi$\par
+\noindent\textbf{21-16}\ $96^\circ$\par
+\noindent\textbf{22-e1}\ ②\par
+\noindent\textbf{22-01}\ ④\par
+\noindent\textbf{26-01}\ ③\par
+\noindent\textbf{26-02}\ ①\par
+\noindent\textbf{26-03}\ ③\par
+\noindent\textbf{26-04}\ ②\par
+\noindent\textbf{26-05}\ ④\par
+\noindent\textbf{26-06}\ ②\par
+\noindent\textbf{27-07}\ ①\par
+\noindent\textbf{27-08}\ ⑤\par
+\noindent\textbf{27-09}\ ⑤\par
+\noindent\textbf{27-10}\ ③\par
+\noindent\textbf{27-11}\ ②\par
+\noindent\textbf{28-01}\ ③\par
+\noindent\textbf{28-02}\ ②\par
+\noindent\textbf{28-03}\ ④\par
+\noindent\textbf{28-04}\ ④\par
+\noindent\textbf{28-05}\ ③\par
+\noindent\textbf{28-06}\ ③\par
+\noindent\textbf{29-07}\ ⑤\par
+\noindent\textbf{29-08}\ ⑤\par
+\noindent\textbf{29-09}\ ⑤\par
+\noindent\textbf{29-10}\ ④\par
+\noindent\textbf{29-11}\ ②\par
+\noindent\textbf{30-e1}\ $\angle x=49^\circ$\par
+\noindent\textbf{30-01}\ ①\par
+\noindent\textbf{31-e2}\ $63^\circ$\par
+\noindent\textbf{31-02}\ ②\par
+\noindent\textbf{32-e1}\ $20^\circ$\par
+\noindent\textbf{32-01}\ $80^\circ$\par
+\noindent\textbf{33-e2}\ $\angle x=60^\circ$, $\angle y=120^\circ$\par
+\noindent\textbf{33-02}\ $\angle x=55^\circ$, $\angle y=110^\circ$\par
+\noindent\textbf{34-01}\ ④\par
+\noindent\textbf{34-02}\ ④\par
+\noindent\textbf{34-03}\ ③\par
+\noindent\textbf{34-04}\ ⑤\par
+\noindent\textbf{34-05}\ ②\par
+\noindent\textbf{35-06}\ ⑤\par
+\noindent\textbf{35-07}\ ④\par
+\noindent\textbf{35-08}\ ③\par
+\noindent\textbf{35-09}\ ③\par
+\noindent\textbf{35-10}\ ①\par
+\noindent\textbf{35-11}\ ⑤\par
+\noindent\textbf{36-12}\ $\angle x=95^\circ$, $\angle y=85^\circ$\par
+\noindent\textbf{36-13}\ (1) $\angle\pt{ACB}=\angle\pt{ADB}=30^\circ$이므로 네 점~$\pt{A}$, $\pt{B}$, $\pt{C}$, $\pt{D}$는 한 원 위에 있다. 즉, $\square\pt{ABCD}$는 원에 내접한다. (2) $170^\circ$\par
+\noindent\textbf{36-14}\ $\angle a=60^\circ$, $\angle b=110^\circ$, $\angle c=50^\circ$\par
+\noindent\textbf{36-15}\ $70^\circ$\par
+\noindent\textbf{37-01}\ ⑤\par
+\noindent\textbf{37-02}\ ②\par
+\noindent\textbf{37-03}\ ③\par
+\noindent\textbf{37-04}\ ③\par
+\noindent\textbf{37-05}\ ②\par
+\noindent\textbf{37-06}\ ④\par
+\noindent\textbf{38-07}\ ③\par
+\noindent\textbf{38-08}\ ⑤\par
+\noindent\textbf{38-09}\ ①\par
+\noindent\textbf{38-10}\ ②\par
+\noindent\textbf{38-11}\ ③\par
+\noindent\textbf{39-12}\ (1) $80^\circ$ (2) $100^\circ$ (3) $180^\circ$\par
+\noindent\textbf{39-13}\ $80^\circ$\par
+\noindent\textbf{39-14}\ $35^\circ$\par
+\noindent\textbf{39-15}\ $70^\circ$\par
+\noindent\textbf{44-01}\ ③\par
+\noindent\textbf{44-02}\ ④\par
+\noindent\textbf{44-03}\ ③\par
+\noindent\textbf{44-04}\ ③\par
+\noindent\textbf{44-05}\ ③\par
+\noindent\textbf{44-06}\ ⑤\par
+\noindent\textbf{45-07}\ ③\par
+\noindent\textbf{45-08}\ ⑤\par
+\noindent\textbf{45-09}\ ④\par
+\noindent\textbf{45-10}\ ②\par
+\noindent\textbf{45-11}\ ④\par
+\noindent\textbf{45-12}\ ②\par
+\noindent\textbf{46-13}\ ②\par
+\noindent\textbf{46-14}\ ④\par
+\noindent\textbf{46-15}\ ①\par
+\noindent\textbf{46-16}\ ⑤\par
+\noindent\textbf{46-17}\ ⑤\par
+\noindent\textbf{46-18}\ ③\par
+\noindent\textbf{47-19}\ ②\par
+\noindent\textbf{47-20}\ ⑤\par
+\noindent\textbf{47-21}\ ③\par
+\noindent\textbf{47-22}\ ①\par
+\noindent\textbf{47-23}\ ②\par
+\noindent\textbf{47-24}\ ④\par
+\noindent\textbf{48-01}\ ①\par
+\noindent\textbf{48-02}\ ②\par
+\noindent\textbf{48-03}\ ④\par
+\noindent\textbf{48-04}\ ③\par
+\noindent\textbf{48-05}\ ③\par
+\noindent\textbf{48-06}\ ⑤\par
+\noindent\textbf{49-07}\ ②\par
+\noindent\textbf{49-08}\ ⑤\par
+\noindent\textbf{49-09}\ ②\par
+\noindent\textbf{49-10}\ ③\par
+\noindent\textbf{49-11}\ ②\par
+\noindent\textbf{49-12}\ ⑤\par
+\noindent\textbf{50-13}\ ①\par
+\noindent\textbf{50-14}\ ③\par
+\noindent\textbf{50-15}\ ①\par
+\noindent\textbf{50-16}\ ①\par
+\noindent\textbf{50-17}\ ①\par
+\noindent\textbf{50-18}\ ②\par
+\noindent\textbf{51-19}\ ②\par
+\noindent\textbf{51-20}\ ④\par
+\noindent\textbf{51-21}\ ①\par
+\noindent\textbf{51-22}\ ②\par
+\noindent\textbf{51-23}\ ③\par
+\noindent\textbf{51-24}\ ⑤\par
+\noindent\textbf{52-e1}\ $a=-1$, $b=2$\par
+\noindent\textbf{52-01}\ ⑤\par
+\noindent\textbf{53-e2}\ $40$\par
+\noindent\textbf{53-02}\ ③\par
+\noindent\textbf{54-e3}\ (평균)$=17$, (분산)$=12$, (표준편차)$=2\sqrt{3}$\par
+\noindent\textbf{54-03}\ ④\par
+\noindent\textbf{55-e4}\ $\pt{C}<\pt{A}<\pt{B}$\par
+\noindent\textbf{55-04}\ ④\par
+\noindent\textbf{56-e1}\ (평균)$=13$, (중앙값)$=12$, (최빈값)$=11$\par
+\noindent\textbf{56-01}\ (평균)$=4.3$, (중앙값)$=4$, (최빈값)$=3$, $4$\par
+\noindent\textbf{57-e2}\ $4$\par
+\noindent\textbf{57-02}\ $14$\par
+\noindent\textbf{58-e3}\ (분산)$=\dfrac{5}{3}$, (표준편차)$=\dfrac{\sqrt{15}}{3}$\par
+\noindent\textbf{58-03}\ (분산)$=2.75$, (표준편차)$=\sqrt{2.75}$\par
+\noindent\textbf{59-e4}\ $\pt{A}$ 선수\par
+\noindent\textbf{59-04}\ 혜진\par
+\noindent\textbf{60-01}\ ⑤\par
+\noindent\textbf{60-02}\ ①\par
+\noindent\textbf{60-03}\ ④\par
+\noindent\textbf{60-04}\ ④\par
+\noindent\textbf{60-05}\ ⑤\par
+\noindent\textbf{61-06}\ ⑤\par
+\noindent\textbf{61-07}\ ③\par
+\noindent\textbf{61-08}\ ④\par
+\noindent\textbf{61-09}\ ①, ⑤\par
+\noindent\textbf{61-10}\ ③\par
+\noindent\textbf{61-11}\ ①\par
+\noindent\textbf{62-12}\ ③\par
+\noindent\textbf{62-13}\ ⑤\par
+\noindent\textbf{62-14}\ ④\par
+\noindent\textbf{62-15}\ ⑤\par
+\noindent\textbf{62-16}\ ⑤\par
+\noindent\textbf{62-17}\ ①\par
+\noindent\textbf{63-18}\ (1) 평균: 18시간, 중앙값: 9시간, 최빈값: 없다. (2) 중앙값이 대푯값으로 적절하다. 그 이유는 75시간과 같이 극단적인 값이 있고, 각 변량이 모두 한 번씩 나타나기 때문이다.\par
+\noindent\textbf{63-19}\ $21$, $22$, $23$, $24$, $25$, $26$\par
+\noindent\textbf{63-20}\ (1) 8점 (2) (분산)$=2.25$, (표준편차)$=1.5$점\par
+\noindent\textbf{63-21}\ $\sqrt{2.2}$점\par
+\noindent\textbf{64-01}\ ③\par
+\noindent\textbf{64-02}\ ②\par
+\noindent\textbf{64-03}\ ③\par
+\noindent\textbf{64-04}\ ⑤\par
+\noindent\textbf{64-05}\ ③\par
+\noindent\textbf{64-06}\ ④\par
+\noindent\textbf{65-07}\ ③\par
+\noindent\textbf{65-08}\ ②\par
+\noindent\textbf{65-09}\ ③\par
+\noindent\textbf{65-10}\ ⑤\par
+\noindent\textbf{65-11}\ ④\par
+\noindent\textbf{65-12}\ ①\par
+\noindent\textbf{66-13}\ ②\par
+\noindent\textbf{66-14}\ ④\par
+\noindent\textbf{66-15}\ ③\par
+\noindent\textbf{66-16}\ ①\par
+\noindent\textbf{66-17}\ ①\par
+\noindent\textbf{66-18}\ ①\par
+\noindent\textbf{67-19}\ (평균)$=20$개, (중앙값)$=18$개, (최빈값)$=18$개\par
+\noindent\textbf{67-20}\ $13$\par
+\noindent\textbf{67-21}\ $\dfrac{32}{3}$\par
+\noindent\textbf{67-22}\ 독도\par
+\noindent\textbf{68-e1}\ ④\par
+\noindent\textbf{68-01}\ ③\par
+\noindent\textbf{72-01}\ ⑤\par
+\noindent\textbf{72-02}\ ④\par
+\noindent\textbf{72-03}\ ④\par
+\noindent\textbf{72-04}\ ③\par
+\noindent\textbf{72-05}\ ③\par
+\noindent\textbf{73-06}\ ⑤\par
+\noindent\textbf{73-07}\ ⑤\par
+\noindent\textbf{73-08}\ ②\par
+\noindent\textbf{73-09}\ ①\par
+\noindent\textbf{73-10}\ ④\par
+\noindent\textbf{74-01}\ ⑤\par
+\noindent\textbf{74-02}\ ⑤\par
+\noindent\textbf{74-03}\ ④\par
+\noindent\textbf{74-04}\ ③\par
+\noindent\textbf{74-05}\ ②\par
+\noindent\textbf{75-06}\ ⑤\par
+\noindent\textbf{75-07}\ ⑤\par
+\noindent\textbf{75-08}\ ①\par
+\noindent\textbf{75-09}\ ②, ④\par
+\noindent\textbf{75-10}\ ③\par
+\noindent\textbf{76-e1}\ $6$\par
+\noindent\textbf{76-01}\ ⑤\par
+\noindent\textbf{77-e2}\ $2$\par
+\noindent\textbf{77-02}\ ③\par
+\noindent\textbf{78-e1}\ $20\mkern3mu \%$\par
+\noindent\textbf{78-01}\ $32\mkern3mu \%$\par
+\noindent\textbf{79-e2}\ $72.5$점\par
+\noindent\textbf{79-02}\ $10.2$시간\par
+\noindent\textbf{80-01}\ ②\par
+\noindent\textbf{80-02}\ ②\par
+\noindent\textbf{80-03}\ ④\par
+\noindent\textbf{80-04}\ ⑤\par
+\noindent\textbf{80-05}\ ①\par
+\noindent\textbf{81-06}\ ③\par
+\noindent\textbf{81-07}\ ②\par
+\noindent\textbf{81-08}\ ⑤\par
+\noindent\textbf{81-09}\ ⑤\par
+\noindent\textbf{81-10}\ ①\par
+\noindent\textbf{82-11}\ $15\mkern3mu \%$\par
+\noindent\textbf{82-12}\ $40\mkern3mu \%$\par
+\noindent\textbf{82-13}\ $7.5$점\par
+\noindent\textbf{82-14}\ (1) 양의 상관관계 (2) $\pt{C}$\par
+\noindent\textbf{83-01}\ ③\par
+\noindent\textbf{83-02}\ ④\par
+\noindent\textbf{83-03}\ ⑤\par
+\noindent\textbf{83-04}\ ④\par
+\noindent\textbf{83-05}\ ⑤\par
+\noindent\textbf{84-06}\ ④\par
+\noindent\textbf{84-07}\ ②, ④\par
+\noindent\textbf{84-08}\ ①\par
+\noindent\textbf{84-09}\ ④\par
+\noindent\textbf{84-10}\ ②\par
+\noindent\textbf{85-11}\ (1) $2$ (2) $22$분\par
+\noindent\textbf{85-12}\ $36$시간\par
+\noindent\textbf{85-13}\ $15\mkern3mu \%$\par
+\noindent\textbf{85-14}\ $38$개\par
+\noindent\textbf{88-01}\ ③\par
+\noindent\textbf{88-02}\ ②\par
+\noindent\textbf{88-03}\ ①\par
+\noindent\textbf{88-04}\ ②\par
+\noindent\textbf{88-05}\ ②\par
+\noindent\textbf{89-06}\ ③\par
+\noindent\textbf{89-07}\ ④\par
+\noindent\textbf{89-08}\ ③\par
+\noindent\textbf{89-09}\ ④\par
+\noindent\textbf{89-10}\ ④\par
+\noindent\textbf{89-11}\ ③\par
+\noindent\textbf{89-12}\ ⑤\par
+\noindent\textbf{90-13}\ ③\par
+\noindent\textbf{90-14}\ ④\par
+\noindent\textbf{90-15}\ ⑤\par
+\noindent\textbf{90-16}\ ③\par
+\noindent\textbf{90-17}\ ③\par
+\noindent\textbf{90-18}\ ④\par
+\noindent\textbf{90-19}\ ②\par
+\noindent\textbf{91-20}\ ⑤\par
+\noindent\textbf{91-21}\ $59^\circ$\par
+\noindent\textbf{91-22}\ $200^\circ$\par
+\noindent\textbf{91-23}\ $3.5$\par
+\noindent\textbf{91-24}\ $65$\par
+\noindent\textbf{91-25}\ $53.5$개\par
+\noindent\textbf{92-01}\ ④\par
+\noindent\textbf{92-02}\ ⑤\par
+\noindent\textbf{92-03}\ ①\par
+\noindent\textbf{92-04}\ ③\par
+\noindent\textbf{92-05}\ ③\par
+\noindent\textbf{92-06}\ ①\par
+\noindent\textbf{93-07}\ ③\par
+\noindent\textbf{93-08}\ ②\par
+\noindent\textbf{93-09}\ ⑤\par
+\noindent\textbf{93-10}\ ②\par
+\noindent\textbf{93-11}\ ③\par
+\noindent\textbf{93-12}\ ④\par
+\noindent\textbf{93-13}\ ③\par
+\noindent\textbf{93-14}\ ④\par
+\noindent\textbf{94-15}\ ②\par
+\noindent\textbf{94-16}\ ④\par
+\noindent\textbf{94-17}\ ④\par
+\noindent\textbf{94-18}\ ④\par
+\noindent\textbf{94-19}\ ②\par
+\noindent\textbf{94-20}\ ③\par
+\noindent\textbf{95-21}\ $90^\circ$\par
+\noindent\textbf{95-22}\ $15^\circ$\par
+\noindent\textbf{95-23}\ (1) (평균)$=16.5$분, (중앙값)$=12$분, (최빈값)$=9$분 (2) 중앙값 — 변량 중에 $43$분과 같이 극단적인 값이 있고, 최빈값인 $9$분은 $6$명 중 $2$명에 해당하기 때문\par
+\noindent\textbf{95-24}\ (1) $49\mkern3mu \mathrm{kg}$ (2) $4.4$\par
+\noindent\textbf{95-25}\ $40\mkern3mu \%$\par
+\noindent\textbf{96-01}\ ③\par
+\noindent\textbf{96-02}\ ①\par
+\noindent\textbf{96-03}\ ④\par
+\noindent\textbf{96-04}\ ⑤\par
+\noindent\textbf{96-05}\ ④\par
+\noindent\textbf{96-06}\ ⑤\par
+\noindent\textbf{97-07}\ ①, ④\par
+\noindent\textbf{97-08}\ ④\par
+\noindent\textbf{97-09}\ ①\par
+\noindent\textbf{97-10}\ ②\par
+\noindent\textbf{97-11}\ ⑤\par
+\noindent\textbf{97-12}\ ①\par
+\noindent\textbf{97-13}\ ③\par
+\noindent\textbf{98-14}\ ③\par
+\noindent\textbf{98-15}\ ③\par
+\noindent\textbf{98-16}\ ②\par
+\noindent\textbf{98-17}\ ⑤\par
+\noindent\textbf{98-18}\ ①\par
+\noindent\textbf{98-19}\ ②, ③\par
+\noindent\textbf{99-20}\ ②\par
+\noindent\textbf{99-21}\ (1) $15^\circ$ (2) $9\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{99-22}\ $130^\circ$\par
+\noindent\textbf{99-23}\ $3$\par
+\noindent\textbf{99-24}\ 예리\par
+\noindent\textbf{99-25}\ $16\mkern3mu \%$\par
+\noindent\textbf{100-01}\ ⑤\par
+\noindent\textbf{100-02}\ ⑤\par
+\noindent\textbf{100-03}\ ⑤\par
+\noindent\textbf{100-04}\ ④\par
+\noindent\textbf{100-05}\ ④\par
+\noindent\textbf{100-06}\ ③\par
+\noindent\textbf{101-07}\ ③\par
+\noindent\textbf{101-08}\ ③\par
+\noindent\textbf{101-09}\ ②\par
+\noindent\textbf{101-10}\ ④\par
+\noindent\textbf{101-11}\ ③\par
+\noindent\textbf{101-12}\ ③\par
+\noindent\textbf{102-13}\ ②\par
+\noindent\textbf{102-14}\ ②\par
+\noindent\textbf{102-15}\ ④\par
+\noindent\textbf{102-16}\ ④\par
+\noindent\textbf{102-17}\ ①, ③\par
+\noindent\textbf{103-18}\ ③\par
+\noindent\textbf{103-19}\ ①\par
+\noindent\textbf{103-20}\ ④\par
+\noindent\textbf{103-21}\ ③\par
+\noindent\textbf{103-22}\ ①\par
+\noindent\textbf{103-23}\ ③\par
+\noindent\textbf{104-24}\ ②\par
+\noindent\textbf{104-25}\ ⑤\par
+\noindent\textbf{104-26}\ ⑤\par
+\noindent\textbf{104-27}\ ①\par
+\noindent\textbf{104-28}\ ③\par
+\noindent\textbf{105-29}\ ④\par
+\noindent\textbf{105-30}\ ②\par
+\noindent\textbf{105-31}\ ②\par
+\noindent\textbf{105-32}\ ③\par
+\noindent\textbf{105-33}\ ③\par
+\noindent\textbf{105-34}\ ②\par
+\noindent\textbf{106-35}\ ③\par
+\noindent\textbf{106-36}\ ②\par
+\noindent\textbf{106-37}\ ⑤\par
+\noindent\textbf{106-38}\ ⑤\par
+\noindent\textbf{106-39}\ ③\par
+\noindent\textbf{106-40}\ ②\par
+\noindent\textbf{107-41}\ ①\par
+\noindent\textbf{107-42}\ ③\par
+\noindent\textbf{107-43}\ ①\par
+\noindent\textbf{107-44}\ ④\par
+\noindent\textbf{107-45}\ ①\par
+\noindent\textbf{107-46}\ ③\par
+\noindent\textbf{108-47}\ ③\par
+\noindent\textbf{108-48}\ ④\par
+\noindent\textbf{108-49}\ ③\par
+\noindent\textbf{108-50}\ ③\par
+\noindent\textbf{108-51}\ ①\par
+\noindent\textbf{108-52}\ ②\par
+\noindent\textbf{109-53}\ ③\par
+\noindent\textbf{109-54}\ ②\par
+\noindent\textbf{109-55}\ ⑤\par
+\noindent\textbf{109-56}\ ①\par
+\noindent\textbf{109-57}\ ⑤\par
+\noindent\textbf{109-58}\ ②\par
+\noindent\textbf{110-59}\ ④\par
+\noindent\textbf{110-60}\ ①\par
+\noindent\textbf{110-61}\ ③\par
+\noindent\textbf{110-62}\ ③\par
+\noindent\textbf{110-63}\ ②\par
+\noindent\textbf{110-64}\ ⑤\par
+\noindent\textbf{111-65}\ ④\par
+\noindent\textbf{111-66}\ ③\par
+\noindent\textbf{111-67}\ ⑤\par
+\noindent\textbf{111-68}\ ⑤\par
+\noindent\textbf{112-69}\ ①\par
+\noindent\textbf{112-70}\ ⑤\par
+\noindent\textbf{112-71}\ ①\par
+\noindent\textbf{112-72}\ ⑤\par
+\noindent\textbf{112-73}\ ③\par
+\noindent\textbf{112-74}\ ③\par
+\noindent\textbf{113-75}\ ⑤\par
+\noindent\textbf{113-76}\ ③\par
+\noindent\textbf{113-77}\ ①\par
+\noindent\textbf{113-78}\ ③\par
+\noindent\textbf{113-79}\ ②\par
+\noindent\textbf{113-80}\ ③\par
+\noindent\textbf{114-01}\ $16\mkern3mu \mathrm{cm}^2$\par
+\noindent\textbf{114-02}\ $16^\circ$\par
+\noindent\textbf{114-03}\ $72^\circ$\par
+\noindent\textbf{114-04}\ (1) $30^\circ$ (2) $60^\circ$\par
+\noindent\textbf{115-05}\ $30^\circ$\par
+\noindent\textbf{115-06}\ $82^\circ$\par
+\noindent\textbf{115-07}\ (1) $50^\circ$ (2) $80^\circ$ (3) $20^\circ$\par
+\noindent\textbf{115-08}\ $43^\circ$\par
+\noindent\textbf{116-09}\ $82.5\mkern3mu \mu\mathrm{g}/\mathrm{m}^3$\par
+\noindent\textbf{116-10}\ (평균)$=24$개, (중앙값)$=21.5$개, (최빈값)$=30$개\par
+\noindent\textbf{116-11}\ $14$\par
+\noindent\textbf{116-12}\ $4$\par
+\noindent\textbf{117-13}\ $x=1$, (수학 성적의 분산)$=8$\par
+\noindent\textbf{117-14}\ (평균)$=6$, (분산)$=6$, (표준편차)$=\sqrt{6}$\par
+\noindent\textbf{117-15}\ $5$\par
+\noindent\textbf{117-16}\ (채진의 분산)$=4$, (성영의 분산)$=6$, 채진\par
+\noindent\textbf{118-17}\ $30\mkern3mu \%$\par
+\noindent\textbf{118-18}\ $63.75$점\par
+\noindent\textbf{118-19}\ $32\mkern3mu \%$\par
+\noindent\textbf{118-20}\ $4$시간\par
+\noindent\textbf{119-01}\ ⑤\par
+\noindent\textbf{119-02}\ ③\par
+\noindent\textbf{119-03}\ ③\par
+\noindent\textbf{119-04}\ ⑤\par
+\noindent\textbf{120-05}\ ②\par
+\noindent\textbf{120-06}\ ②\par
+\noindent\textbf{120-07}\ ④\par
+\noindent\textbf{120-08}\ ②\par
+\noindent\textbf{121-09}\ ④\par
+\noindent\textbf{121-10}\ ①\par
+\noindent\textbf{121-11}\ ④\par
+\noindent\textbf{121-12}\ ④\par
+\noindent\textbf{122-13}\ ②\par
+\noindent\textbf{122-14}\ ②\par
+\noindent\textbf{122-15}\ ②\par
+\noindent\textbf{122-16}\ ⑤\par
+\noindent\textbf{123-17}\ ②\par
+\noindent\textbf{123-18}\ ③\par
+\noindent\textbf{123-19}\ ②\par
+\noindent\textbf{123-20}\ ①\par
+\noindent\textbf{124-21}\ ⑤\par
+\noindent\textbf{124-22}\ ③\par
+\noindent\textbf{124-23}\ ①\par
+\noindent\textbf{124-24}\ ③\par
+\end{multicols}
+\end{document}
