@@ -1,4 +1,3 @@
-import React from "react";
 import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
 
 export function LessonModalClosureMakeupPanel({

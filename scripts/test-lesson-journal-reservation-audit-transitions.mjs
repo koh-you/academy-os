@@ -59,7 +59,7 @@ const detailEnd = appSource.indexOf("\nfunction PreparationMemoModal(", detailSt
 const detailSource = appSource.slice(detailStart, detailEnd);
 
 for (const binding of [
-  'import { applyCanceledLessonJournalReservationJob } from "../domains/lessons/lessonJournalReservationAuditTransitions.js"',
+  'import { applyCanceledLessonJournalReservationJob } from "./lessonJournalReservationAuditTransitions.js"',
   "async function cancelReservationJob(job)",
   "onCancelNotificationJob?.(job,",
   "applyCanceledLessonJournalReservationJob({",

@@ -34,7 +34,7 @@ const detailEnd = appSource.indexOf("\nfunction PreparationMemoModal(", detailSt
 const detailSource = appSource.slice(detailStart, detailEnd);
 
 for (const binding of [
-  'import { createLessonJournalReservationAuditResult } from "../domains/lessons/lessonJournalReservationAuditResult.js"',
+  'import { createLessonJournalReservationAuditResult } from "./lessonJournalReservationAuditResult.js"',
   "async function refreshReservationAudit()",
   "loadLessonJournalReservationAudit({",
   "setReservationAudit(createLessonJournalReservationAuditResult(result))",

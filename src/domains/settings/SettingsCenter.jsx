@@ -9,9 +9,7 @@ import { getNotificationJobLabel } from "../notifications/notificationCenterConf
 import { notificationTemplateRows } from "./notificationTemplateSettingsCatalog.js";
 import { AutosaveRiskNotice } from "../../shared/components/AutosaveRiskNotice.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
-import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
-import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
 
 const aiProviderModels = {

@@ -1,4 +1,3 @@
-import React from "react";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
 import { NavigationHeader } from "../../shared/components/NavigationHeader.jsx";
 

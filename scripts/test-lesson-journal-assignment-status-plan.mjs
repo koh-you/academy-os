@@ -195,7 +195,7 @@ const actionEnd = detailSource.indexOf("\n  function updateJournalRecordDraftPat
 const actionSource = detailSource.slice(actionStart, actionEnd);
 
 for (const binding of [
-  'import { createLessonJournalAssignmentStatusPlan } from "../domains/lessons/lessonJournalAssignmentStatusPlan.js"',
+  'import { createLessonJournalAssignmentStatusPlan } from "./lessonJournalAssignmentStatusPlan.js"',
   "const plan = createLessonJournalAssignmentStatusPlan({",
   "getFollowupOptions: getHomeworkFollowupOptionsForAssignmentStatus,",
   "getFollowupPatch: getHomeworkFollowupPatch,",

@@ -1,4 +1,3 @@
-import React from "react";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { SearchField } from "../../shared/components/SearchField.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
