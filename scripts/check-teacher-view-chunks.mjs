@@ -88,8 +88,28 @@ for (const chunkName of expectedLazyChunks) {
   );
 }
 
+// react·react-dom·scheduler 는 배포 사이에 바뀌지 않으므로 따로 떼어(vite.config.js manualChunks)
+// 해시가 유지되게 한다. 예전에는 자주 바뀌는 공용 app 모듈과 한 청크(224 KB)여서 apiClient 한 줄
+// 고칠 때마다 교사 브라우저와 로비 태블릿이 React 를 다시 받았다. 두 진입점이 같은 파일을 가리켜야
+// 캐시가 공유되고, 크기가 이 범위를 벗어나면 app 코드가 벤더 청크에 섞였거나 React 가 빠진 것이다.
+const vendorReactJavaScript = assetNames.find((name) => /^vendor-react-[^.]+\.js$/.test(name));
+assert.ok(vendorReactJavaScript, "production build must emit one hashed vendor-react chunk");
+const vendorReactBytes = (await stat(resolve(assetsDirectory, vendorReactJavaScript))).size;
+assert.ok(
+  vendorReactBytes >= 150_000 && vendorReactBytes <= 230_000,
+  `vendor-react chunk size is outside the React-only range: ${vendorReactBytes.toLocaleString()} bytes`
+);
+const teacherHtml = await readFile(resolve("dist", "index.html"), "utf8");
+for (const [label, html] of [["index.html", teacherHtml], ["attendance.html", attendanceHtml]]) {
+  assert.ok(html.includes(`/assets/${vendorReactJavaScript}`), `${label} must load the shared vendor-react chunk`);
+  assert.ok(
+    html.includes('rel="preconnect" href="https://koh-you-math-academy-os-api.onrender.com"'),
+    `${label} must preconnect to the API origin so the first request does not wait for JS to finish`
+  );
+}
+
 console.log(
-  `teacher view chunk budget passed · main ${(mainBytes / 1000).toFixed(2)} kB · ` +
+  `teacher view chunk budget passed · main ${(mainBytes / 1000).toFixed(2)} kB · vendor-react ${(vendorReactBytes / 1000).toFixed(1)} kB · ` +
   `lazy ${expectedLazyChunks.length} · ` +
   `태블릿 JS ${(attendanceBytes / 1000).toFixed(1)} kB + CSS ${(attendanceStyleBytes / 1000).toFixed(1)} kB`
 );
