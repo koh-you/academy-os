@@ -41,7 +41,9 @@ for (const binding of [
 for (const appOwnedBoundary of [
   "loadLessonJournalReservationAudit({",
   "OS 예약 기록 조회 실패:",
-  "window.confirm(\"이 알림톡 예약 1건을 취소할까요?",
+  // 2026-09-19 · U11: 예약 1건 취소 확인은 window.confirm 대신 공용 ConfirmDialog(문구 동일)를 거친다.
+  "description=\"이 알림톡 예약 1건을 취소할까요? 취소한 기록은 이력에 남습니다.\"",
+  "function requestCancelReservationJob(job)",
   "onCancelNotificationJob?.(job,",
   "onApplyLessonNotificationPlan(lesson.lessonId)",
   "onReconcileSolapiNotificationResults?.(",

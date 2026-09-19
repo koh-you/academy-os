@@ -24,17 +24,20 @@ import {
 // 원천 JSON(284 KB)이 교사 첫 로딩이 아니라 이 lazy 청크에 담긴다.
 import { ssenTypeCatalog } from "../tests/ssenTypeCatalog.js";
 import { AutosaveRiskNotice } from "../../shared/components/AutosaveRiskNotice.jsx";
+import { ConfirmDialog } from "../../shared/components/ConfirmDialog.jsx";
 import { Disclosure } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
+import { OverflowMenu } from "../../shared/components/OverflowMenu.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { SelectableCard } from "../../shared/components/SelectableCard.jsx";
 import { SelectionToolbar } from "../../shared/components/SelectionToolbar.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
+import { useUnsavedChangesGuard } from "../../shared/runtime/useUnsavedChangesGuard.js";
 import { safeIdPart } from "../../shared/utils/id.js";
 import { ClassTemplateEditorModal } from "./ClassTemplateEditorModal.jsx";
 import {
@@ -897,9 +900,16 @@ export function LessonResearchCenter({
   const [selectedItemId, setSelectedItemId] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("전체");
   const [statusFilter, setStatusFilter] = useState("전체");
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const canSaveItems = ["dirty", "failed"].includes(lessonResearchSaveState) && !lessonResearchSaveBusy;
   const lessonResearchSaveMessage = lessonResearchSaveMessages[lessonResearchSaveState] ?? lessonResearchSaveMessages.idle;
   const catalogUnits = ssenTypeCatalog[selectedSubject] ?? [];
+  // 2026-09-19 · U11(research-07): 저장하지 않은 교안 변경이 새로고침·사이드바 이동으로 조용히 사라지지 않게 묻는다.
+  // 저장 로직·로드 시 서버 우선 규칙은 그대로다(저장 중에는 App 이 요청을 이어가므로 막지 않는다).
+  useUnsavedChangesGuard(
+    ["dirty", "failed"].includes(lessonResearchSaveState),
+    "저장하지 않은 수업연구 교안 변경이 있습니다. 이 화면을 나갈까요?"
+  );
 
   const filteredItems = useMemo(
     () =>
@@ -1094,11 +1104,29 @@ export function LessonResearchCenter({
         <section className="panel researchEditor">
           {selectedItem ? (
             <>
+              {/* 2026-09-19 · U11(research-06): 교안 삭제는 ⋯ 메뉴(tone danger) → ConfirmDialog 를 거쳐 같은 onDeleteItem 을 부른다. */}
               <SectionHeader
-                actions={<button className="ghostButton dangerText" onClick={() => onDeleteItem(selectedItem.researchItemId)} type="button">삭제</button>}
+                actions={(
+                  <OverflowMenu
+                    items={[{ key: "delete", label: "교안 삭제", onSelect: () => setIsDeleteConfirmOpen(true), tone: "danger" }]}
+                    label={`${selectedItem.title || "교안"} 추가 작업`}
+                  />
+                )}
                 description={`마지막 수정일 ${selectedItem.updatedAt || selectedItem.createdAt}`}
                 eyebrow="EDIT"
                 title="강의 교안 정리"
+              />
+              <ConfirmDialog
+                confirmLabel="교안 삭제"
+                description="저장을 누르기 전까지 서버에는 남아 있습니다."
+                onCancel={() => setIsDeleteConfirmOpen(false)}
+                onConfirm={() => {
+                  setIsDeleteConfirmOpen(false);
+                  onDeleteItem(selectedItem.researchItemId);
+                }}
+                open={isDeleteConfirmOpen}
+                title={`${selectedItem.title || "이"} 교안을 삭제할까요?`}
+                tone="danger"
               />
 
               <div className="researchMetaGrid">

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ConfirmDialog } from "../../shared/components/ConfirmDialog.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
 import { createClosureMakeupNotificationDrafts } from "../notifications/closureMakeupNotification.js";
 import {
@@ -124,6 +125,7 @@ export function LessonModal({
   const [notificationAudiences, setNotificationAudiences] = useState(["parent"]);
   const [includeStudentReminder, setIncludeStudentReminder] = useState(true);
   const [isClosureMakeupNotificationModalOpen, setIsClosureMakeupNotificationModalOpen] = useState(false);
+  const [isGeneratedLessonCancelConfirmOpen, setIsGeneratedLessonCancelConfirmOpen] = useState(false);
   const [closureMakeupNotificationDrafts, setClosureMakeupNotificationDrafts] = useState({});
   const [saveState, setSaveState] = useState("idle");
   const [saveMessage, setSaveMessage] = useState(lessonModalInitialSaveMessage);
@@ -352,10 +354,21 @@ export function LessonModal({
     setClosureMakeupNotificationDrafts((current) => ({ ...current, [field]: value }));
   }
 
+  // 2026-09-19 · U11(lessons-10): 자동 생성 수업 취소는 브라우저 confirm 대신 ConfirmDialog 로 묻는다(문구 동일).
+  // 일반 수업은 App 의 '수업 취소 확인' 모달이 맡으므로 여기서는 바로 onDeleteLesson 을 부른다(기존과 같음).
   function requestDeleteLesson() {
     if (!initialLesson?.lessonId || !onDeleteLesson) return;
     const isGeneratedLesson = initialLesson.isVirtualGeneratedLesson || initialLesson.isExamPrepAutoLesson;
-    if (isGeneratedLesson && !window.confirm("이 자동 생성 수업을 취소할까요? 달력에서 바로 사라집니다.")) return;
+    if (isGeneratedLesson) {
+      setIsGeneratedLessonCancelConfirmOpen(true);
+      return;
+    }
+    onDeleteLesson(initialLesson.lessonId);
+  }
+
+  function confirmGeneratedLessonCancel() {
+    setIsGeneratedLessonCancelConfirmOpen(false);
+    if (!initialLesson?.lessonId || !onDeleteLesson) return;
     onDeleteLesson(initialLesson.lessonId);
   }
 
@@ -461,6 +474,15 @@ export function LessonModal({
           selectedStudentCount={studentIds.length}
         />
       ) : null}
+      <ConfirmDialog
+        confirmLabel="수업 취소"
+        description="이 자동 생성 수업을 취소할까요? 달력에서 바로 사라집니다."
+        onCancel={() => setIsGeneratedLessonCancelConfirmOpen(false)}
+        onConfirm={confirmGeneratedLessonCancel}
+        open={isGeneratedLessonCancelConfirmOpen}
+        title="자동 생성 수업 취소"
+        tone="danger"
+      />
     </Modal>
   );
 }
