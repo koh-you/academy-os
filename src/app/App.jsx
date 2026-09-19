@@ -474,6 +474,7 @@ import { clearCacheOwner, createCacheOwnerId, resetCacheForAccount } from "../sh
 import { TeacherViewSwitcher } from "./TeacherViewSwitcher.jsx";
 import { safeIdPart } from "../shared/utils/id.js";
 import { getKoreaDateString } from "../shared/utils/koreaDate.js";
+import { setTenantIdScope } from "../shared/utils/tenantIdScope.js";
 import {
   deriveClassTemplateScheduleSummary,
   formatClassTemplateScheduleLabel,
@@ -2199,9 +2200,11 @@ export function App() {
     setApiAuthToken(session?.sessionToken || "");
   }, [session?.sessionToken]);
   // 고른 선생님을 모든 요청 헤더에 싣는다. 서버가 owner 인지 다시 확인한다.
+  // 결정적 id(시험대비 수업·학사일정·테스트 세션)에 붙는 tenant 조각도 같은 값으로 맞춘다.
   useEffect(() => {
     setApiViewTenantId(activeViewTenantId);
-  }, [activeViewTenantId]);
+    setTenantIdScope(activeViewTenantId || session?.tenantId || "");
+  }, [activeViewTenantId, session?.tenantId]);
   // 화면이 기능 잠금을 판단할 수 있게 역할을 공유한다(알림톡 등).
   useEffect(() => {
     setCurrentTeacherRole(teacherRole);

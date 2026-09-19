@@ -117,10 +117,12 @@ assert.ok(
     "lessonId: createPreExamLessonId(sourceId)"
   )
 );
+// 2026-09-19: id 뒤에 tenant 조각을 붙인다(원장 tenant 는 그대로) — 협력 교사와 같은 id 방지.
 for (const lessonIdBoundary of [
   'from "../../shared/utils/id.js"',
+  'from "../../shared/utils/tenantIdScope.js"',
   'export function createPreExamLessonId(sourceId = "")',
-  "return `lesson_pre_exam_${safeIdPart(sourceId)}_${shortStableHash(sourceId)}`"
+  "return scopeDeterministicId(`lesson_pre_exam_${safeIdPart(sourceId)}_${shortStableHash(sourceId)}`)"
 ]) {
   assert.ok(
     lessonIdBuilderSource.includes(lessonIdBoundary),

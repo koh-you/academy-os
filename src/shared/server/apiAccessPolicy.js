@@ -252,6 +252,8 @@ export function evaluateApiAccess({ method, pathname, auth = { kind: "none" } })
 
   if (auth.kind === "none") return { ok: false, status: 401, code: "auth_required" };
   if (auth.kind === "dispatch") return { ok: false, status: 403, code: "dispatch_scope" };
+  // 포털 토큰은 공개 경로(/api/portal-*)만 부른다. 그 밖의 경로는 교사 세션이 아니므로 401.
+  if (auth.kind === "portal") return { ok: false, status: 401, code: "auth_required" };
 
   if (auth.kind === "kiosk") {
     return isKioskAllowed(method, pathname)
