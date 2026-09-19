@@ -1,3 +1,4 @@
+import { getSessionTeacherId } from "../../shared/utils/sessionActor.js";
 export function createGeneratedPreExamLessonBuilder({
   addDaysInKorea,
   createPreExamGeneratedKey,
@@ -46,7 +47,7 @@ export function createGeneratedPreExamLessonBuilder({
       color: getStandardLessonColor({
         lessonType: "preExam"
       }),
-      teacherId: "instructor_owner_001",
+      teacherId: getSessionTeacherId(),
       studentIds: lessonStudents.map(
         (student) => student.studentId
       ),

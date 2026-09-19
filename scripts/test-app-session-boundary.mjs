@@ -78,8 +78,9 @@ const teacherResult = await authenticateAppSession({
   teacherAccount: { name: "설정 교사" }
 });
 assert.equal(teacherResult.ok, true);
+// actorId 는 로그인한 교사의 id(2026-09-19). 예전엔 원장 id 가 박혀 있어 협력 교사도 원장으로 찍혔다.
 assert.deepEqual(teacherResult.session, {
-  actorId: "instructor_owner_001",
+  actorId: "teacher_server",
   name: "서버 교사",
   role: "teacher",
   sessionToken: "server-token",

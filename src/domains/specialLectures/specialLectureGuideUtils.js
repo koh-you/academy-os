@@ -3,8 +3,10 @@ import {
   renderNotificationTemplate
 } from "../notifications/notificationTemplateCatalog.js";
 import { getKoreaDateString } from "../../shared/utils/koreaDate.js";
+import { academyName, getSessionBrandName } from "../../shared/utils/academyBrand.js";
 
-const defaultSpecialLectureBrandName = "으뜸수학 고태영T";
+const defaultSpecialLectureBrandName = () => getSessionBrandName();
+const defaultSpecialLectureTeacher = () => getSessionBrandName().replace(`${academyName} `, "").trim();
 
 const today = getKoreaDateString();
 
@@ -97,7 +99,7 @@ export const defaultSpecialLectureGuides = [
     pricingMode: "perSession",
     pricePerSession: 37500,
     pricePerHour: 12500,
-    teacher: "고태영T",
+    teacher: defaultSpecialLectureTeacher(),
     textbook: "개별 선정",
     defaultSessionTopic: "개별 클리닉",
     scheduleRules: [
@@ -143,7 +145,7 @@ export const defaultSpecialLectureGuides = [
     pricingMode: "perSession",
     pricePerSession: 37500,
     pricePerHour: 12500,
-    teacher: "고태영T",
+    teacher: defaultSpecialLectureTeacher(),
     textbook: "올림포스 유형편 공통수학2",
     defaultSessionTopic: "공통수학2 유형별 문제풀이",
     scheduleRules: [
@@ -612,7 +614,7 @@ export function normalizeSpecialLectureGuide(guide = {}, fallback = defaultSpeci
     pricingMode: source.pricingMode === "perHour" ? "perHour" : "perSession",
     pricePerSession: Number(source.pricePerSession) || defaultSpecialLecturePricePerSession,
     pricePerHour: Number(source.pricePerHour) || defaultSpecialLecturePricePerHour,
-    teacher: String(source.teacher ?? "고태영T").trim(),
+    teacher: String(source.teacher ?? defaultSpecialLectureTeacher()).trim(),
     textbook: String(source.textbook ?? "").trim(),
     defaultSessionTopic: String(source.defaultSessionTopic ?? source.goal ?? "특강 수업").trim(),
     scheduleRules,
@@ -876,7 +878,7 @@ export function buildSpecialLectureNoticeText(
   const normalizedGuide = normalizeSpecialLectureGuide(guide);
   const specialNotes = normalizedGuide.specialNotes.trim();
   const resolvedOptions = typeof options === "string" ? { brandName: options } : options ?? {};
-  const brandName = resolvedOptions.brandName || defaultSpecialLectureBrandName;
+  const brandName = resolvedOptions.brandName || defaultSpecialLectureBrandName();
   const templates = normalizeNotificationTemplates(resolvedOptions.notificationTemplates);
   return renderNotificationTemplate(templates.specialLectureGuideNotice, {
     "학원명": brandName,

@@ -1,3 +1,4 @@
+import { getSessionTeacherId } from "../../shared/utils/sessionActor.js";
 export function createLessonJournalDraftPersistencePlan({
   currentHomeworks = [],
   homeworkDrafts = [],
@@ -39,7 +40,7 @@ export function createLessonJournalDraftPersistencePlan({
     .filter((record) => record?.lessonStudentRecordId)
     .map((record) => ({
       ...record,
-      updatedBy: "instructor_owner_001",
+      updatedBy: getSessionTeacherId(),
       updatedAt: now()
     }));
 

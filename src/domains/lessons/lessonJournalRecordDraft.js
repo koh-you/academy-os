@@ -1,3 +1,4 @@
+import { getSessionTeacherId } from "../../shared/utils/sessionActor.js";
 export function createLessonJournalRecordDraft({
   baseRecord,
   createEmptyRecord,
@@ -7,7 +8,7 @@ export function createLessonJournalRecordDraft({
   patch = {},
   student,
   updatedAt,
-  updatedBy = "instructor_owner_001"
+  updatedBy = getSessionTeacherId()
 }) {
   const recordId = createRecordId(lesson.lessonId, student.studentId);
   const record = {

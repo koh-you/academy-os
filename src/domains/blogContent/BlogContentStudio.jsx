@@ -1,3 +1,4 @@
+import { getSessionBrandName } from "../../shared/utils/academyBrand.js";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { StudioWorkspace } from "../../shared/components/StudioWorkspace.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
@@ -48,7 +49,7 @@ export function BlogContentStudio({ students = [], scoreRecords = [], postAppSta
   const blocker = draft ? exportBlocker(draft) : "";
   const prompt = draft && !blocker ? buildChatPrompt(draft) : "";
   return <main className="blogStudio studioPage">
-    <PageHeader title="SNS 스튜디오" eyebrow="으뜸수학 고태영T" description="블로그·인스타그램 글과 카드 편집" actions={<button className="primaryButton" onClick={create} disabled={!store.ready || store.busy}>+ 새 콘텐츠</button>} />
+    <PageHeader title="SNS 스튜디오" eyebrow={getSessionBrandName()} description="블로그·인스타그램 글과 카드 편집" actions={<button className="primaryButton" onClick={create} disabled={!store.ready || store.busy}>+ 새 콘텐츠</button>} />
     <div role="status" className="blogStatus">{store.ready ? states[store.status] : "서버 자료 확인 중…"}{store.dirty && " · 화면을 나가기 전에 저장해 주세요."}</div>
     {store.error && <div role="alert" className="blogNotice">{store.error}<p>다른 화면과 충돌했다면 편집 내용을 복사해 보관한 뒤 새로고침해서 최신 자료를 확인하세요.</p></div>}
     {message && <p role="status" className="blogNotice">{message}</p>}

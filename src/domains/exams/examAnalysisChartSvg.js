@@ -1,3 +1,4 @@
+import { academyName, getSessionBrandName } from "../../shared/utils/academyBrand.js";
 import { examAnalysisPreviewPalette } from "./finalPreview.js";
 import { createEmptyExamAnalysisKeyQuestionBlock } from "./examAnalysisOutputModel.js";
 
@@ -15,7 +16,7 @@ export function truncateExamAnalysisChartLabel(value = "", maxLength = 24) {
 }
 
 export const examAnalysisChartPngExportScale = 3;
-const examAnalysisChartFooterLabel = "으뜸수학학원 고태영T 시험분석";
+const examAnalysisChartFooterLabel = () => `${getSessionBrandName().replace(`${academyName} `, `${academyName}학원 `)} 시험분석`;
 const examAnalysisChartDifficultyOrder = ["하", "중하", "중", "중상", "상", "미정"];
 export const examAnalysisCardNewsSlideTypes = [
   { type: "cover", label: "시작 슬라이드" },
@@ -112,7 +113,7 @@ function createExamAnalysisChartSvgShell({ title, subtitle, width = 1200, height
     `<text class="title" x="64" y="78">${escapeExamAnalysisSvgText(title)}</text>`,
     subtitle ? `<text class="subtitle" x="64" y="112">${escapeExamAnalysisSvgText(subtitle)}</text>` : "",
     body,
-    `<text class="small" x="${width - 64}" y="${height - 42}" text-anchor="end">${escapeExamAnalysisSvgText(examAnalysisChartFooterLabel)}</text>`,
+    `<text class="small" x="${width - 64}" y="${height - 42}" text-anchor="end">${escapeExamAnalysisSvgText(examAnalysisChartFooterLabel())}</text>`,
     `</svg>`
   ].filter(Boolean).join("");
 }

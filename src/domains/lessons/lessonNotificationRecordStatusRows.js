@@ -1,3 +1,4 @@
+import { getSessionTeacherId } from "../../shared/utils/sessionActor.js";
 export function createLessonNotificationRecordStatusRows({
   createRecordId,
   getRecord,
@@ -16,7 +17,7 @@ export function createLessonNotificationRecordStatusRows({
       studentId: student.studentId,
       teacherCommentSendStatus: record.notificationMutedParent ? "알림 제외" : statusText,
       studentCommentSendStatus: record.notificationMutedStudent ? "알림 제외" : statusText,
-      updatedBy: "instructor_owner_001",
+      updatedBy: getSessionTeacherId(),
       updatedAt
     };
   });

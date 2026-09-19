@@ -1,4 +1,5 @@
 import { scopeDeterministicId } from "../../shared/utils/tenantIdScope.js";
+import { getSessionTeacherId } from "../../shared/utils/sessionActor.js";
 
 export function createExamPrepLessonCandidateBuilder({
   examCycleLabel,
@@ -110,7 +111,7 @@ export function createExamPrepLessonCandidateBuilder({
                 lessonType: "examPrep"
               }),
             teacherId:
-              "instructor_owner_001",
+              getSessionTeacherId(),
             studentIds,
             status: "scheduled",
             generatedKey: entry.key

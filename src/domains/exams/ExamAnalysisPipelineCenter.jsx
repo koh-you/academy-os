@@ -31,6 +31,7 @@ import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 import { StudioWorkspace } from "../../shared/components/StudioWorkspace.jsx";
 import { apiUrl, getJsonWithTimeout, postJson, postJsonWithTimeout } from "../../shared/utils/apiClient.js";
 import { readFileAsDataUrl } from "../../shared/utils/file.js";
+import { getSessionBrandName } from "../../shared/utils/academyBrand.js";
 
 function getExamAnalysisSourceOpenUrl(file) {
   if (file?.signedUrl) return file.signedUrl;
@@ -1907,7 +1908,7 @@ export function ExamAnalysisPipelineCenter({ examPrepRows = [], runtime }) {
           <button className="primaryButton" onClick={saveRun} type="button">분석 저장</button>
           </>
         )}
-        eyebrow="으뜸수학 고태영T"
+        eyebrow={getSessionBrandName()}
         description="시험지 분석부터 검수·글·카드 제작까지"
         title="시험분석"
       />

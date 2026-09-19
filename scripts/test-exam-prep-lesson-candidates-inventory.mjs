@@ -267,7 +267,7 @@ const helperBoundaries = [
   'startTime: "13:00"',
   'endTime: "18:00"',
   "getStandardLessonColor({",
-  '"instructor_owner_001"',
+  "getSessionTeacherId(),",
   "studentIds,",
   'status: "scheduled"',
   "generatedKey: entry.key"

@@ -6,6 +6,7 @@ import { defaultAttendanceSettings } from "./attendanceSettings.js";
 import "./lessonNestedPanels.css";
 import { createLessonJournalPreparationMemoModel } from "./lessonJournalPreparationMemoModel.js";
 import { LessonJournalPreparationMemoView } from "./LessonJournalPreparationMemoView.jsx";
+import { getSessionTeacherId } from "../../shared/utils/sessionActor.js";
 
 export function SupplementMakeupLessonDetail({
   runtime,
@@ -629,7 +630,7 @@ export function PreparationMemoModal({
       prepMemoCheckedSourceRecordId: localCheckedMemo.sourceRecordId || currentRecord.prepMemoCheckedSourceRecordId || "",
       prepStudentVisible: draftStudentVisible,
       prepParentVisible: draftParentVisible,
-      updatedBy: "instructor_owner_001",
+      updatedBy: getSessionTeacherId(),
       updatedAt: nowIso
     }, { skipRelatedHomeworks: true, skipNotificationRefresh: true }).then((saved) => {
       if (saved !== false) lastSavedSnapshotRef.current = draftSnapshot;
@@ -656,7 +657,7 @@ export function PreparationMemoModal({
       prepMemoCheckedSourceRecordId: checkedMemo.sourceRecordId,
       prepStudentVisible: draftStudentVisible,
       prepParentVisible: draftParentVisible,
-      updatedBy: "instructor_owner_001",
+      updatedBy: getSessionTeacherId(),
       updatedAt: nowIso
     }, { skipRelatedHomeworks: true, skipNotificationRefresh: true }).then((saved) => {
       if (saved === false) {
@@ -688,7 +689,7 @@ export function PreparationMemoModal({
     const saved = await onSaveRecord(sourceRecordId, homeworkFollowupLesson, student, {
       ...homeworkFollowupRecord,
       ...getHomeworkFollowupPatch(homeworkFollowupRecord),
-      updatedBy: "instructor_owner_001",
+      updatedBy: getSessionTeacherId(),
       updatedAt: new Date().toISOString()
     }, {
       skipNotificationRefresh: true,

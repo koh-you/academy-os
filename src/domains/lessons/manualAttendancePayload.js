@@ -1,3 +1,4 @@
+import { getSessionTeacherId } from "../../shared/utils/sessionActor.js";
 const manualAttendanceStatusActions = new Set(["absent", "excused", "pending"]);
 
 export function createManualAttendanceRequestPayload({
@@ -5,7 +6,7 @@ export function createManualAttendanceRequestPayload({
   lesson,
   options = {},
   student,
-  updatedBy = "instructor_owner_001",
+  updatedBy = getSessionTeacherId(),
   values
 }) {
   const hasManualCheckOutTime = Boolean(String(values.checkOutTime ?? "").trim());

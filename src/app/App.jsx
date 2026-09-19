@@ -521,6 +521,7 @@ import {
   testPaperProgressOptions,
   formatTeacherBrandName
 } from "./appConfig.js";
+import { getSessionTeacherId, setSessionActor } from "../shared/utils/sessionActor.js";
 
 const ReportModal = lazy(async () => ({
   default: (await import("../domains/reports/ReportModal.jsx")).ReportModal
@@ -1464,9 +1465,10 @@ async function fetchPortalData(sessionToken) {
   return result;
 }
 
+// 로그인 응답이 이름을 주지 않을 때의 빈 기본값. 브랜드 문구는 academyBrand 가 채운다.
 const teacherAccount = {
   loginId: "teacher",
-  name: "고태영",
+  name: "",
   role: "teacher"
 };
 
@@ -1771,7 +1773,7 @@ function createProblemBookFolder(folderName, testKind = "daily", fallbackSubject
 
 const defaultAiPrompts = {
   commentPolish: [
-    "역할: 으뜸수학 고태영T의 수업 코멘트 편집자",
+    `역할: ${academyBrandName}의 수업 코멘트 편집자`,
     "목표: 강사가 대강 적은 메모를 실제 발송 가능한 자연스러운 문장으로 다듬는다.",
     "작성 원칙:",
     "- 입력된 사실만 사용하고 없는 내용은 만들지 않는다.",
@@ -1793,7 +1795,7 @@ const defaultAiPrompts = {
     "- 최종 교정문만 반환한다."
   ].join("\n"),
   noticeMessage: [
-    "역할: 으뜸수학 고태영T의 알림톡 공지문 편집자",
+    `역할: ${academyBrandName}의 알림톡 공지문 편집자`,
     "목표: 강사가 입력한 교재/보강/공지 초안을 실제 발송 가능한 짧고 명료한 알림톡 문장으로 다듬는다.",
     "작성 원칙:",
     "- 입력된 사실만 사용하고 없는 날짜, 금액, 준비물, 일정은 만들지 않는다.",
@@ -2120,6 +2122,10 @@ export function App() {
   useEffect(() => {
     setSessionBrandName(session?.name);
   }, [session?.name]);
+  // 수업·기록의 updatedBy/teacherId 도장. 예전엔 원장 id 가 22곳에 글자로 박혀 있었다.
+  useEffect(() => {
+    setSessionActor({ teacherId: session?.teacherId });
+  }, [session?.teacherId]);
   // 학생·학부모 포털 상단 학원명 — 서버가 학생의 tenant 선생님 이름으로 준다.
   const [portalAcademyName, setPortalAcademyName] = useState("");
   // 원장이 지금 보고 있는 선생님의 테넌트. 빈 값이면 자기 자료를 본다.
@@ -4809,7 +4815,7 @@ export function App() {
         retestUpdates.push({
           ...(existingRecord ?? createEmptyRecord(lesson, student)),
           needsRetest: desiredNeedsRetest,
-          updatedBy: "instructor_owner_001"
+          updatedBy: getSessionTeacherId()
         });
       }
     }
@@ -5320,7 +5326,7 @@ export function App() {
     setSaveStates((currentStates) => ({ ...currentStates, [recordId]: "dirty" }));
   }
 
-  async function saveAttendanceRecord(lesson, student, values, updatedBy = "instructor_owner_001", options = {}) {
+  async function saveAttendanceRecord(lesson, student, values, updatedBy = getSessionTeacherId(), options = {}) {
     const { nextAttendanceStatus, payload } = createManualAttendanceRequestPayload({
       lateGraceMinutes: attendanceSettings.lateGraceMinutes,
       lesson,
@@ -5365,7 +5371,7 @@ export function App() {
       needsRetest: false,
       ...(safeExistingRecord ?? {}),
       ...createLessonJournalRecordFieldPatch({ field, value }),
-      updatedBy: "instructor_owner_001",
+      updatedBy: getSessionTeacherId(),
       updatedAt: new Date().toISOString()
     };
     const nextRecords = upsertLessonStudentRecord(recordsRef.current, nextRecord);
@@ -5894,7 +5900,7 @@ export function App() {
       [field]: nextMuted,
       notificationMutedReason: nextMuted ? (reason || existingRecord.notificationMutedReason || "개별 알림 제외") : existingRecord.notificationMutedReason,
       [statusField]: nextMuted ? "알림 제외" : "",
-      updatedBy: "instructor_owner_001",
+      updatedBy: getSessionTeacherId(),
       updatedAt: new Date().toISOString()
     };
     const nextRecords = upsertLessonStudentRecord(recordsRef.current, nextRecord);
@@ -6750,7 +6756,7 @@ export function App() {
           lateGraceMinutes={attendanceSettings.lateGraceMinutes}
           onClose={() => setAttendanceModal(null)}
           onSave={async (lesson, student, values, options = {}) => {
-            const { saved } = await saveAttendanceRecord(lesson, student, values, "instructor_owner_001", {
+            const { saved } = await saveAttendanceRecord(lesson, student, values, getSessionTeacherId(), {
               sendAlimtalk: Boolean(options.sendAlimtalk)
             });
             if (!saved) return false;
@@ -6881,7 +6887,7 @@ export function App() {
         studentId: student.studentId,
         [sourceField]: polishResult.polishedText,
         [statusField]: `완료 · ${polishResult.provider}`,
-        updatedBy: "instructor_owner_001",
+        updatedBy: getSessionTeacherId(),
         updatedAt: new Date().toISOString()
       };
       const nextRecords = upsertLessonStudentRecord(recordsRef.current, nextRecord);
@@ -6953,7 +6959,7 @@ export function App() {
           studentId: student.studentId,
           teacherCommentSendStatus: target === "parent" ? statusText : undefined,
           studentCommentSendStatus: target === "student" ? statusText : undefined,
-          updatedBy: "instructor_owner_001"
+          updatedBy: getSessionTeacherId()
         }).catch((error) => console.error(error));
       }
     };

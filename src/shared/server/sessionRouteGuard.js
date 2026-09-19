@@ -4,6 +4,7 @@
 import crypto from "node:crypto";
 // @ts-expect-error -- no @types/node in this project; node: imports are unresolved for type-checking only, runtime is unaffected
 import { Buffer } from "node:buffer";
+import { DEFAULT_TENANT_ID } from "./tenantScope.js";
 
 /** @typedef {import("./routeRegistryTypes.js").MinimalHttpRequest} MinimalHttpRequest */
 
@@ -42,7 +43,7 @@ export function createSessionRouteGuard({ getRequestHeader, getSecret, getOpsSec
       studentId: account.studentId,
       name: account.name,
       // 학생이 속한 학원(tenant). 게이트가 이 값으로 tenant 컨텍스트를 잡는다.
-      tenantId: account.tenantId || "tenant_default",
+      tenantId: account.tenantId || DEFAULT_TENANT_ID,
       exp: now() + 1000 * 60 * 60 * 24 * 14
     });
     return `${payload}.${signSessionPayload(payload)}`;
@@ -53,8 +54,8 @@ export function createSessionRouteGuard({ getRequestHeader, getSecret, getOpsSec
       role: "teacher",
       teacherId: account.teacherId,
       name: account.name,
-      // 멀티테넌트 1단계: 소속 학원 식별자. 단일 교사 데이터는 "tenant_default".
-      tenantId: account.tenantId || "tenant_default",
+      // 멀티테넌트 1단계: 소속 학원 식별자. 단일 교사 데이터는 DEFAULT_TENANT_ID.
+      tenantId: account.tenantId || DEFAULT_TENANT_ID,
       // 화면 범위: "owner"(전체) | "assistant"(출결·수업 캘린더·학생 명단만).
       teacherRole: account.teacherRole || "owner",
       exp: now() + 1000 * 60 * 60 * 8

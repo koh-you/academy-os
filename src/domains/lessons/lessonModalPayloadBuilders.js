@@ -2,6 +2,7 @@ import {
   getNewStudentMakeupLessonTopic,
   getPersistedLessonType
 } from "./newStudentMakeup.js";
+import { getSessionTeacherId } from "../../shared/utils/sessionActor.js";
 
 function buildClosureMakeupLesson({
   classTemplateId,
@@ -45,7 +46,7 @@ export function buildNewLessonModalLessons({
   resolveDayKey,
   resolveLessonColor,
   studentIds,
-  teacherId = "instructor_owner_001"
+  teacherId = getSessionTeacherId()
 }) {
   const persistedLessonType = getPersistedLessonType(formValues.lessonType);
   const lesson = {
@@ -96,7 +97,7 @@ export function buildUpdatedLessonModalLessons({
   resolveDayKey,
   resolveLessonColor,
   studentIds,
-  teacherId = "instructor_owner_001"
+  teacherId = getSessionTeacherId()
 }) {
   const persistedLessonType = getPersistedLessonType(formValues.lessonType);
   const lesson = {
