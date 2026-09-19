@@ -38,6 +38,8 @@ const sharedStateKeys = [...sharedStateObjectSource.matchAll(/^    ([A-Za-z][A-Z
 assert.deepEqual(sharedStateKeys, [
   "aiSettings",
   "attendanceSettings",
+  // tenant 별 운영 설정(2026-09-19 #384). 다른 자동저장 키와 같은 CAS 경로를 탄다.
+  "tenantSettings",
   "deletedLessonBundles",
   "generatedLessonControls",
   "lessonNotificationPlans",
