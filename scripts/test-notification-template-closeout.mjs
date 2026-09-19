@@ -28,6 +28,8 @@ const sources = Object.fromEntries(await Promise.all([
   ["dashboard", "src/domains/teacher/DashboardAuxiliaryPanels.jsx"],
   ["noticeBuilders", "src/domains/notifications/notificationNoticeBuilders.js"],
   ["renderer", "src/domains/notifications/notificationMessageRenderer.js"],
+  // 2026-09-19: 수업 알림톡 원천 줄(보충 일정 문장·테스트 결과 줄)의 단일 원천. App/server 는 import 만 한다.
+  ["sourceLines", "src/domains/notifications/lessonCommentSourceLines.js"],
   ["route", "api/routes/notifications.js"],
   ["server", "api/server.js"],
   ["settingsMetadata", "src/domains/settings/notificationTemplateSettingsCatalog.js"],
@@ -101,7 +103,9 @@ const closeoutPaths = [
     contracts: [
       ["app", 'if (task.taskType === "retest")'],
       ["app", "학생 재시험 안내입니다."],
-      ["app", "재시험을 진행하겠습니다."],
+      ["sourceLines", "재시험을 진행하겠습니다."],
+      ["app", 'from "../domains/notifications/lessonCommentSourceLines.js"'],
+      ["server", 'from "../src/domains/notifications/lessonCommentSourceLines.js"'],
       ["supplementBuilders", '["homework_makeup", "absence_makeup", "manual_makeup"]']
     ]
   },
