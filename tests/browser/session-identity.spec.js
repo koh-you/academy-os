@@ -51,6 +51,27 @@ test("session refresh fires after 30 minutes of activity and a rotated token doe
   expect(pageErrors).toEqual([]);
 });
 
+test("integration status is loaded with the teacher token after an in-page login, not once before it", async ({ page }) => {
+  const pageErrors = collectPageErrors(page);
+  const statusRequests = [];
+  await page.route("**/api/integrations/status", async (route) => {
+    statusRequests.push(route.request().headers().authorization ?? "");
+    await route.fallback();
+  });
+
+  // 로그인 화면(세션 없음)에서는 부르지 않는다 — 토큰 없이 부르면 401 로 끝나고 값이 null 로 남아
+  // 수업일지 "즉시 발송" 이 조용히 테스트 번호로 가던 경로다.
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: "선생님" })).toBeVisible();
+  await page.waitForTimeout(500);
+  expect(statusRequests).toEqual([]);
+
+  await loginAsTeacher(page);
+  await expect.poll(() => statusRequests.length).toBe(1);
+  expect(statusRequests[0]).toBe("Bearer safe-fixture-session");
+  expect(pageErrors).toEqual([]);
+});
+
 test("owner switching the viewed teacher re-fetches that teacher's data without reload and keeps the choice after reload", async ({ page }) => {
   const pageErrors = collectPageErrors(page);
   const tenantBStudents = [
@@ -68,10 +89,14 @@ test("owner switching the viewed teacher re-fetches that teacher's data without 
   const studentsRequestTenants = [];
   const appStateWrites = [];
   await page.route("**/api/app-state*", async (route) => {
-    if (route.request().method() === "POST") {
-      appStateWrites.push(route.request().headers()["x-view-tenant-id"] ?? "");
+    if (route.request().method() !== "POST") {
+      await route.fallback();
+      return;
     }
-    await route.fallback();
+    // 완료된 뒤에 기록한다 — 안전 fixture 는 app_state 저장을 800ms 늦춰 응답한다.
+    const response = await route.fetch();
+    appStateWrites.push(route.request().headers()["x-view-tenant-id"] ?? "");
+    await route.fulfill({ response });
   });
   await page.route("**/api/teacher-accounts", async (route) => {
     await route.fulfill({
@@ -103,6 +128,11 @@ test("owner switching the viewed teacher re-fetches that teacher's data without 
   await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /학생관리/ }).click();
   await expect(page.getByRole("button", { name: "월경계 학생 정보 수정" })).toBeVisible();
   expect(studentsRequestTenants).toEqual([""]);
+  // 안전 fixture 는 app_state 가 비어 있어 첫 부트스트랩이 기본값을 심는다(새 교사의 첫 로그인과 같다).
+  // 그 저장이 끝난 뒤에 전환해야 "그 선생님 테넌트에 app_state 를 쓰지 않는다" 를 볼 수 있다 —
+  // 자료가 이미 있는 테넌트로 전환하는 운영 상황과 같다.
+  await expect.poll(() => appStateWrites.length).toBeGreaterThan(0);
+  const ownTenantWritesBeforeSwitch = appStateWrites.length;
 
   const switcher = page.getByRole("group", { name: "선생님별 자료 보기" });
   await switcher.getByRole("button", { name: "김선생" }).click();
@@ -115,6 +145,7 @@ test("owner switching the viewed teacher re-fetches that teacher's data without 
   // 나가는 app_state 저장이 0건이어야 한다(자기 테넌트 자동저장은 이 검사와 무관하다).
   await page.waitForTimeout(800);
   expect(appStateWrites.filter((tenantId) => tenantId === "tenant_b")).toEqual([]);
+  expect(appStateWrites.length).toBe(ownTenantWritesBeforeSwitch);
 
   // 새로고침해도 선택과 자료가 남는다.
   await page.reload();
