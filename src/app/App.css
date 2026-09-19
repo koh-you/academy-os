@@ -3750,20 +3750,6 @@ summary:focus-visible {
   padding: 0;
 }
 
-.schoolEventFormActions {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: flex-end;
-}
-
-.schoolEventFormActions .primaryButton,
-.schoolEventFormActions .dangerSoftButton {
-  min-height: 42px;
-  min-width: 132px;
-}
-
 .modalCard.schoolEventFormModal {
   max-width: 820px;
 }
@@ -4181,10 +4167,6 @@ summary:focus-visible {
   min-height: 40px;
 }
 
-.mathExamItemRow .iconButton:disabled {
-  opacity: 0.35;
-}
-
 .schoolMonthHeader {
   align-items: center;
   display: flex;
@@ -4207,10 +4189,6 @@ summary:focus-visible {
   font-weight: 900;
   margin: 0;
   text-align: center;
-}
-
-.schoolMonthAddButton {
-  box-shadow: 0 10px 22px color-mix(in srgb, var(--academy-primary, #17213d) 16%, transparent);
 }
 
 .schoolCalendarFilterBar {

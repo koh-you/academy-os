@@ -145,6 +145,9 @@ test("manual school event keeps its draft and stable id across an unknown save r
   await expect(form).toHaveAttribute("aria-busy", "true");
   await expect(form.getByRole("button", { name: "창 닫기" })).toBeDisabled();
   await expect(page.locator(".schoolCalendarSaveNotice")).toHaveClass(/failed/);
+  // 실패 사유는 백드롭 뒤 페이지 알림만이 아니라 모달 안(푸터 위)에도 보인다(2026-09-19 U9 · exams-18).
+  await expect(form.locator(".schoolEventFormStatus")).toContainText("학사일정 · 저장 실패");
+  await expect(form.locator(".schoolEventFormSaveError")).toBeVisible();
   await expect(titleInput).toHaveValue("안전 저장 학사일정");
 
   await form.getByRole("button", { name: "일정 등록" }).click();
@@ -156,7 +159,12 @@ test("manual school event keeps its draft and stable id across an unknown save r
   const dateModal = page.getByRole("dialog", { name: `${eventDate} 일정` });
   await expect(dateModal.locator('.fieldGrid input:not([type="date"])')).toHaveValue("안전 저장 학사일정");
   // 삭제는 카드에 상시 노출되지 않고 ⋯ 메뉴 안에 있다(docs/ui-row-actions.md R3).
+  // 폼 모달의 삭제와 같은 window.confirm 을 거친다(2026-09-19 U9 · exams-19).
   await dateModal.getByRole("button", { name: /추가 작업$/ }).click();
+  page.once("dialog", (dialog) => {
+    expect(dialog.message()).toContain("을 삭제할까요?");
+    dialog.accept();
+  });
   await dateModal.getByRole("menuitem", { name: "일정 삭제" }).click();
   await expect(dateModal).toHaveAttribute("aria-busy", "true");
   await expect(dateModal.getByRole("button", { name: "창 닫기" })).toBeDisabled();
@@ -198,6 +206,8 @@ test("derived math exam saves its exam row and pre-exam lesson as one retry-safe
   await expect(examDateInput).toBeDisabled();
   await expect(form.getByRole("button", { name: "창 닫기" })).toBeDisabled();
   await expect(page.locator(".schoolCalendarSaveNotice")).toHaveClass(/failed/);
+  await expect(form.locator(".schoolEventFormStatus")).toContainText("학사일정 · 저장 실패");
+  await expect(form.locator(".schoolEventFormSaveError")).toBeVisible();
   await expect(form).toBeVisible();
   await expect(examDateInput).toHaveValue(examDate);
 

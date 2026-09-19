@@ -89,8 +89,10 @@ export function ExamPrepEditModal({
               />
             </label>
           </div>
+          {/* 리피터 행 순서·라벨·추가 버튼은 학사일정 등록 모달의 '수학시험 날짜' 리피터와 맞춘다(exams-22 1단계).
+              행이 하나뿐일 때는 × 를 렌더하지 않는다 — 지워도 빈 행이 다시 채워지므로 값 비우기와 같다(2026-09-19 U9). */}
           <div className="mathExamEntryEditor modalMathExamEntryEditor">
-            {getEditableMathExamEntries(row).map((entry, entryIndex) => (
+            {getEditableMathExamEntries(row).map((entry, entryIndex, entries) => (
               <div className="mathExamEntryRow" key={entry.id || entryIndex}>
                 <label>
                   <span>수학시험 날짜</span>
@@ -124,17 +126,19 @@ export function ExamPrepEditModal({
                     onChange={(event) => onUpdateMathExamEntry(row, entryIndex, "label", event.target.value)}
                   />
                 </label>
-                <button
-                  aria-label={`${entryIndex + 1}번째 수학시험 제거`}
-                  className="iconButton"
-                  onClick={() => onRemoveMathExamEntry(row, entryIndex)}
-                  type="button"
-                >
-                  ×
-                </button>
+                {entries.length > 1 ? (
+                  <button
+                    aria-label={`${entryIndex + 1}번째 수학시험 제거`}
+                    className="iconButton"
+                    onClick={() => onRemoveMathExamEntry(row, entryIndex)}
+                    type="button"
+                  >
+                    ×
+                  </button>
+                ) : null}
               </div>
             ))}
-            <button className="softButton" type="button" onClick={() => onAddMathExamEntry(row)}>
+            <button className="softButton compact" type="button" onClick={() => onAddMathExamEntry(row)}>
               + 수학시험 추가
             </button>
           </div>
