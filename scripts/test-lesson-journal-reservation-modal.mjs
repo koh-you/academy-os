@@ -52,7 +52,9 @@ const journalSource = appSource.slice(journalStart, journalEnd);
 
 assert.match(journalSource, /<LessonJournalReservationModal/);
 assert.match(journalSource, /onRefreshReservationAudit=\{refreshReservationAudit\}/);
-assert.match(journalSource, /onCancelReservationJob=\{cancelReservationJob\}/);
+// 2026-09-19 · U11: 모달의 [취소] 는 ConfirmDialog 를 여는 requestCancelReservationJob 을 받고, 확정 시 cancelReservationJob 이 실행된다.
+assert.match(journalSource, /onCancelReservationJob=\{requestCancelReservationJob\}/);
+assert.match(journalSource, /async function cancelReservationJob\(job\)/);
 assert.match(journalSource, /onRefreshSolapiSendResults=\{refreshSolapiSendResults\}/);
 assert.match(journalSource, /solapiReservationSyncStatus=\{solapiReservationSyncStatus\}/);
 assert.doesNotMatch(journalSource, /className="reservationSummaryGrid"/);

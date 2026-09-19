@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { ConfirmDialog } from "../../shared/components/ConfirmDialog.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { OverflowMenu } from "../../shared/components/OverflowMenu.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import {
   auditProblemBankBook,
@@ -142,6 +144,7 @@ export function ProblemBankCenter() {
   const [upload, setUpload] = useState(emptyUpload);
   const [editMessage, setEditMessage] = useState("");
   const [deleteArmed, setDeleteArmed] = useState(false);
+  const [deleteBusy, setDeleteBusy] = useState(false);
   const [answerUpload, setAnswerUpload] = useState(emptyAnswerUpload);
   const [audit, setAudit] = useState({ stage: "idle", message: "", missing: [] });
   const [reviewFilter, setReviewFilter] = useState("all");
@@ -386,6 +389,18 @@ export function ProblemBankCenter() {
     }
   }
 
+  // 확인 대화상자의 [교재 삭제] — deleteBook 본체는 그대로 두고, 처리 중 표시와 닫기만 감싼다.
+  async function confirmDeleteBook() {
+    if (deleteBusy) return;
+    setDeleteBusy(true);
+    try {
+      await deleteBook();
+    } finally {
+      setDeleteBusy(false);
+      setDeleteArmed(false);
+    }
+  }
+
   const flaggedItems = (detail?.items ?? []).filter((item) => item.reviewStatus === "flagged");
   const reviewCounts = flaggedItems.reduce((counts, item) => ({ ...counts, [reviewSeverity(item.reviewNote)]: (counts[reviewSeverity(item.reviewNote)] ?? 0) + 1 }), {});
   const reviewItems = flaggedItems.filter((item) => reviewFilter === "all" || reviewSeverity(item.reviewNote) === reviewFilter);
@@ -460,15 +475,12 @@ export function ProblemBankCenter() {
               <div className="problemBankTools">
                 <button className="softButton" disabled={audit.stage === "running"} onClick={runAudit} title="등록이 중간에 끊겨 이미지가 안 보일 때 빠진 파일을 찾습니다." type="button">이미지 누락 검사</button>
                 <button className="softButton" onClick={() => answerFolderInputRef.current?.click()} title="문항은 그대로 두고 정답·해설만 다시 올립니다(같은 패키지 폴더 선택)." type="button">정답·해설만 다시 올리기</button>
-                {deleteArmed ? (
-                  <>
-                    <span className="problemBankDeleteWarn">문항 {detail.items.length}개와 학생 기록·이미지가 모두 지워집니다. 되돌릴 수 없습니다.</span>
-                    <button className="softButton" onClick={() => setDeleteArmed(false)} type="button">취소</button>
-                    <button className="dangerSoftButton" onClick={deleteBook} type="button">삭제 확정</button>
-                  </>
-                ) : (
-                  <button className="dangerSoftButton" onClick={() => setDeleteArmed(true)} type="button">교재 삭제</button>
-                )}
+                {/* 2026-09-19 · U11: 교재 삭제 진입은 도구 줄 끝 ⋯ 메뉴(tone danger), 확인은 ConfirmDialog. deleteArmed = 확인 대화상자 열림. */}
+                <OverflowMenu
+                  className="problemBankToolsMenu"
+                  items={[{ key: "delete", label: "교재 삭제", onSelect: () => setDeleteArmed(true), tone: "danger" }]}
+                  label={`${detail.book.title} 추가 작업`}
+                />
                 <input
                   aria-label="정답·해설 폴더 선택"
                   hidden
@@ -480,6 +492,16 @@ export function ProblemBankCenter() {
                 />
               </div>
               {editMessage ? <p aria-live="polite" className="problemBankUploadMessage">{editMessage}</p> : null}
+              <ConfirmDialog
+                busy={deleteBusy}
+                confirmLabel="교재 삭제"
+                description={`문항 ${detail.items.length}개와 학생 정오답 기록·이미지가 모두 지워집니다. 되돌릴 수 없습니다.`}
+                onCancel={() => setDeleteArmed(false)}
+                onConfirm={confirmDeleteBook}
+                open={deleteArmed}
+                title="교재를 삭제할까요?"
+                tone="danger"
+              />
               <div className="problemBankAnswerImport">
                 <StatusLine message={audit.message} stage={audit.stage} />
                 {audit.missing.length ? (

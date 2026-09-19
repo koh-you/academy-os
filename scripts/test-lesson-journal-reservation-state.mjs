@@ -21,6 +21,8 @@ const initialState = createLessonJournalReservationInitialState();
 
 assert.deepEqual(initialState, {
   cancelingReservationJobId: "",
+  // 2026-09-19 · U11: 예약 1건 취소 ConfirmDialog 가 기다리는 job(닫힘 = null).
+  pendingCancelReservationJob: null,
   reservationApplyState: "idle",
   reservationAudit: {
     message: "",

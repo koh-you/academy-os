@@ -212,7 +212,6 @@
 .problemBankListPanel { grid-column: 1; }
 .problemBankDetailPanel { grid-column: 2; grid-row: 1 / span 2; }
 .problemBankBookList { display: grid; gap: 6px; list-style: none; margin: 0; padding: 0; }
-.problemBankDeleteWarn { color: #b91c1c; font-size: 12px; }
 .problemBankAnswerImport { border: 1px dashed var(--academy-border, #e2e6ec); border-radius: 10px; display: grid; gap: 8px; margin-bottom: 12px; padding: 10px 12px; }
 .problemBankAnswerImport h3 { font-size: 14px; margin: 0; }
 .problemBankAnswerImport .softButton, .problemBankAnswerImport .primaryButton { border-radius: 8px; cursor: pointer; font-size: 13px; justify-self: start; padding: 6px 12px; }
@@ -230,8 +229,8 @@
 .problemBankInfo dd { margin: 0; }
 .problemBankTools { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 .problemBankTools .softButton { background: var(--academy-surface, #fff); border: 1px solid var(--academy-border, #e2e6ec); border-radius: 8px; cursor: pointer; font-size: 13px; padding: 6px 12px; }
-/* 2026-09-19 · 교재 삭제 진입·확정은 dangerSoftButton(색은 공용 클래스)이고 크기만 도구줄의 softButton 과 맞춘다. */
-.problemBankTools .dangerSoftButton { border-radius: 8px; cursor: pointer; font-size: 13px; padding: 6px 12px; }
+/* 2026-09-19 · U11: 교재 삭제 진입은 도구 줄 끝 ⋯ 메뉴(OverflowMenu tone danger), 확정은 ConfirmDialog 다. 무장 줄 전용 규칙은 뺐다. */
+.problemBankTools .problemBankToolsMenu { margin-left: auto; }
 .problemBankAnswerImport:empty { display: none; }
 .problemBankReviewFilters { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 4px; }
 .problemBankReviewFilters .softButton { background: var(--academy-surface, #fff); border: 1px solid var(--academy-border, #e2e6ec); border-radius: 999px; cursor: pointer; font-size: 12.5px; padding: 3px 10px; }
