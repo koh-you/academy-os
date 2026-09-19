@@ -380,6 +380,50 @@ async function deleteLessonStudentRecordsForRemovedLessonStudents(lesson = {}) {
   return removedRows.map((row) => row.lesson_student_record_id).filter(Boolean);
 }
 
+// 위 두 정리를 여러 수업에 한 번에. POST /api/lessons/bulk 은 수업을 한 번의 upsert 로 저장하고도
+// 수업마다 (예약 조회 + 기록 조회) 를 순차로 돌려 N 수업에 2N 왕복이 들었다(9월 정규수업 52개면
+// 105 왕복). 판정 규칙은 수업별 함수와 같다: 저장된 명단에 없는 학생의 대기 예약만 취소하고,
+// 그 학생의 기록만 지운다. 필터는 in.() 으로 묶되, 취소 사유·상태 집합은 그대로다.
+async function cleanupRemovedLessonStudentsForLessons(lessons = [], reason = "수업 명단에서 제외됨") {
+  const targets = lessons.filter((lesson) => lesson?.lessonId);
+  if (targets.length === 0 || !isSupabaseConfigured({ requireServiceRole: true })) {
+    return { canceledNotificationJobIds: [], deletedLessonStudentRecordIds: [] };
+  }
+  const allowedStudentIdsByLesson = new Map(
+    targets.map((lesson) => [lesson.lessonId, new Set(Array.isArray(lesson.studentIds) ? lesson.studentIds : [])])
+  );
+  const lessonIdFilter = [...allowedStudentIdsByLesson.keys()].map((lessonId) => encodeURIComponent(lessonId)).join(",");
+  const statusFilter = pendingNotificationJobStatuses.join(",");
+  const isRemoved = (row) => Boolean(row.lesson_id) && !allowedStudentIdsByLesson.get(row.lesson_id)?.has(row.student_id);
+  const [jobRows, recordRows] = await Promise.all([
+    listRows(
+      "notification_jobs",
+      `select=notification_job_id,student_id,lesson_id&lesson_id=in.(${lessonIdFilter})&status=in.(${statusFilter})`,
+      { requireServiceRole: true }
+    ),
+    listRows(
+      "lesson_student_records",
+      `select=lesson_student_record_id,student_id,lesson_id&lesson_id=in.(${lessonIdFilter})`,
+      { requireServiceRole: true }
+    )
+  ]);
+  const canceledNotificationJobIds = jobRows.filter((row) => row.notification_job_id && isRemoved(row)).map((row) => row.notification_job_id);
+  const deletedLessonStudentRecordIds = recordRows.filter((row) => row.lesson_student_record_id && isRemoved(row)).map((row) => row.lesson_student_record_id);
+  if (canceledNotificationJobIds.length) {
+    const jobIdFilter = canceledNotificationJobIds.map((id) => encodeURIComponent(id)).join(",");
+    await patchRows(
+      "notification_jobs",
+      `notification_job_id=in.(${jobIdFilter})&status=in.(${statusFilter})`,
+      { error: reason, status: "canceled", updated_at: new Date().toISOString() }
+    );
+  }
+  if (deletedLessonStudentRecordIds.length) {
+    const recordIdFilter = deletedLessonStudentRecordIds.map((id) => encodeURIComponent(id)).join(",");
+    await deleteRows("lesson_student_records", `lesson_student_record_id=in.(${recordIdFilter})`);
+  }
+  return { canceledNotificationJobIds, deletedLessonStudentRecordIds };
+}
+
 function filterLessonRecordsToCurrentRosters(records = [], lessons = []) {
   const allowedStudentIdsByLesson = new Map(
     lessons.map((lesson) => [
@@ -2760,10 +2804,8 @@ export async function upsertLessons(lessons) {
     );
   }
   const savedLessons = rows.map(fromLessonRow);
-  for (const savedLesson of savedLessons) {
-    await cancelPendingNotificationJobsForRemovedLessonStudents(savedLesson, "수업 명단에서 제외됨");
-    await deleteLessonStudentRecordsForRemovedLessonStudents(savedLesson);
-  }
+  // 수업별 순차 정리(2N 왕복)를 한 번의 묶음 정리로. 규칙은 upsertLesson 의 수업별 정리와 같다.
+  await cleanupRemovedLessonStudentsForLessons(savedLessons, "수업 명단에서 제외됨");
   return { source: databaseSource, lessons: savedLessons };
 }
 
