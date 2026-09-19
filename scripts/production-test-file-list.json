@@ -90,6 +90,7 @@
   "scripts/test-notification-center-css-domain-split.mjs",
   "scripts/test-exam-prep-lesson-detail-extraction.mjs",
   "scripts/test-exam-cycle-default-parity.mjs",
+  "scripts/test-exam-prep-duplicate-representative-parity.mjs",
   "scripts/test-lesson-research-explicit-save.mjs",
   "scripts/test-school-event-persistence.mjs",
   "scripts/test-derived-school-calendar-persistence.mjs",
