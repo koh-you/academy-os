@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-09-19 전체 UI 구조 정돈 (감사 → 14 PR)
+
+- 감사는 영역별 병렬 조사(13 에이전트) 뒤 발견별 3-렌즈 검증(831 에이전트)을 붙였다가 세션 한도로 절반이 실패 — 검증 설계가 조사 비용의 몇 배였다. 발견 JSON 을 본 세션이 직접 분류하고, 구현 에이전트가 첫 단계로 근거 file:line 을 확인하는 방식(검증을 구현의 부산물로)으로 바꿔 진행. 근거 불일치 4건은 그 자리에서 건너뛰고 보고서 §9 에 기록.
+- 단위 = PR 1개, 자기 worktree, 공통 지침 파일(`academy-os-ui-audit/agent-common.md`) + 단위 브리프. 처음엔 순차, 파일이 겹치지 않는 단위는 2개씩 병렬(U8/U9, U10/U11, U12/U13, U14/U15).
+- CI 왕복에서만 잡힌 잠금 4종(모달 인벤토리 개수 · css-hygiene 중복 셀렉터 · save-state audit `"saved"` 리터럴 · css-domain-split exclusiveClasses) 은 전부 `test:production` 전용이라 공통 지침에 "PR 전 test:production 1회" 를 넣은 뒤로는 CI 실패 0.
+- 같은 날 다른 세션이 App.css 를 도메인 css 로 대량 이관(#388 #396)해 App.css 삭제 단위마다 충돌 — origin/main 쪽 App.css 를 받고 삭제를 이관된 도메인 css 에 다시 적용, ratchet 은 실제 줄 수로. rebase+force 대신 merge 로 따라잡음(force push 금지).
+- 학생 프로필 저장 상태 헬퍼가 `"saved"` 리터럴을 잃자 `test-modal-save-state-audit` 가 실패 — 6종 어휘를 명시적으로 돌려주도록 고쳤다(패스스루가 아니라 `saved`/`idle` 분기).
+- 근거 불일치 사례: shots-10 숙제현황 가로 넘침은 메트릭 4열이 아니라 `.homeworkStatusContent` 의 `minmax(430px,…) minmax(520px,…)`; shots-17 포털 넘침은 h1 이 아니라 WorkspaceTabs nowrap min-content. 스크린샷 기반 발견은 원인 추정이 틀릴 수 있어 구현 시 실측(`scrollWidth`·`getBoundingClientRect`)으로 재확인하는 것이 맞았다.
+- Vercel 빌드 한도: 오후에 PR 미리보기 배포가 `Deployment rate limited`. GitHub checks 는 정상이라 병합은 계속했다.
+
 ## 2026-09-18 교재관리 화면·재등록 속도
 
 - 등록 중 화면을 벗어나면 업로드 루프가 그 자리에서 멈춘다(문항 목록은 먼저 들어가 문항 수는 맞아 보임). 「이미지 누락 검사」로 세 권이 끊긴 것을 확인했다. 재등록이 전부 다시 올리는 구조라 md5 대조를 넣었다: Supabase Storage list 의 metadata.eTag 는 한 번에 올린 객체의 MD5 라 그대로 지문으로 쓴다(꼴이 MD5 가 아니면 크기 대조로 후퇴). 패키지 쪽 md5 는 export 뒤 annotate-package 가 적는다.
