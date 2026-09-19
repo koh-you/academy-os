@@ -26,7 +26,6 @@ import { createSupplementTaskContentSaveHandler } from "./supplementTaskContentS
 import { createSupplementTaskDraftChangeHandler } from "./supplementTaskDraftChangeController.js";
 import { createSupplementTaskPassHandler } from "./supplementTaskPassController.js";
 import { createSupplementTaskScheduleHandlers } from "./supplementTaskScheduleController.js";
-import { supplementNotificationDraftConfigs } from "./supplementTaskDraft.js";
 import { getSupplementImmediateNoticeSaveStatus } from "./supplementStatus.js";
 import { useSupplementConfirmationState } from "./useSupplementConfirmationState.js";
 import { useSupplementFeedbackState } from "./useSupplementFeedbackState.js";

@@ -104,10 +104,7 @@ import {
   fromSpecialLectureEnrollmentRow,
   fromStudentIntakeApplicantRow,
   normalizeSpecialLectureApplicationStatus,
-  normalizeSpecialLectureEnrollmentSessionIds,
-  normalizeSpecialLectureEnrollmentSessionPlans,
   normalizeSpecialLectureEnrollmentStatus,
-  normalizeSpecialLectureRequestedSessionPlans,
   toSpecialLectureApplicationRow,
   toSpecialLectureEnrollmentRow,
   toStudentIntakeApplicantRow

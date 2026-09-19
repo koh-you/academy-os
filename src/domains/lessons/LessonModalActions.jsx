@@ -1,4 +1,3 @@
-import React from "react";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 
 export function LessonModalActions({

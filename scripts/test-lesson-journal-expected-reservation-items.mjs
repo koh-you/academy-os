@@ -222,7 +222,7 @@ const builderEnd = detailSource.indexOf("\n  const solapiReservationSyncStatus",
 const AppBuilderSource = detailSource.slice(builderStart, builderEnd);
 
 for (const binding of [
-  'import { createLessonJournalExpectedReservationItems } from "../domains/lessons/lessonJournalExpectedReservationItems.js"',
+  'import { createLessonJournalExpectedReservationItems } from "./lessonJournalExpectedReservationItems.js"',
   "return createLessonJournalExpectedReservationItems({",
   "buildPayloadSnapshot: buildLessonReservationPayloadSnapshot,",
   "createNotificationJobId: createLessonNotificationJobId,",

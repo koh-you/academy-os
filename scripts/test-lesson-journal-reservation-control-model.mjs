@@ -166,7 +166,7 @@ const detailEnd = appSource.indexOf("\nfunction PreparationMemoModal(", detailSt
 const detailSource = appSource.slice(detailStart, detailEnd);
 
 for (const binding of [
-  'import { createLessonJournalReservationControlModel } from "../domains/lessons/lessonJournalReservationControlModel.js"',
+  'import { createLessonJournalReservationControlModel } from "./lessonJournalReservationControlModel.js"',
   "createLessonJournalReservationControlModel({",
   "defaultScheduleHintText,",
   "delayedScheduleLabel: delayedAlimtalkTimeLabel,",

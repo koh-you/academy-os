@@ -273,7 +273,7 @@ import {
   getStudentSupplementSchedules
 } from "../src/domains/notifications/lessonCommentSourceLines.js";
 import { normalizeSpecialLectureTallySessionRequests } from "../src/domains/specialLectures/tallySessionRequests.js";
-import { normalizeGradeLabel, normalizeSchoolName, schoolNamesMatch } from "../src/domains/schoolCalendar/schoolCalendarUtils.js";
+import { normalizeGradeLabel, schoolNamesMatch } from "../src/domains/schoolCalendar/schoolCalendarUtils.js";
 import {
   confirmExamAnalysisQuestionCount,
   deleteExamAnalysisRun,
