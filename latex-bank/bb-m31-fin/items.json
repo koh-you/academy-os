@@ -4379,7 +4379,8 @@
     "$y=-\\dfrac{1}{3}(x+1)^2-\\dfrac{17}{3}$"
    ],
    "answer": "②",
-   "answer_source": "답지(빠른정답)"
+   "answer_source": "답지(빠른정답)",
+   "choices_layout": "ii"
   },
   "66-e1": {
    "page": 66,
@@ -8503,7 +8504,7 @@
    "page": 130,
    "type": "이차함수 $y=ax^2+bx+c$의 그래프에서 $a$, $b$, $c$의 부호 판별",
    "level": "중",
-   "body": "일차함수 $y=ax+b$의 그래프가 그림과 같을 때, 다음 중 이차함수 $y=ax^2+bx$의 그래프로 알맞은 것은? \\cond{$a$, $b$는 상수이다.}\\par\\medskip\\noindent\\includegraphics[width=72pt]{figures/fig-130-71-5.png}\\hspace{1em}\\includegraphics[width=72pt]{figures/fig-130-71-3.png}\\par\\medskip\\noindent\\includegraphics[width=72pt]{figures/fig-130-71-2.png}\\hspace{1em}\\includegraphics[width=72pt]{figures/fig-130-71-4.png}",
+   "body": "일차함수 $y=ax+b$의 그래프가 그림과 같을 때, 다음 중 이차함수 $y=ax^2+bx$의 그래프로 알맞은 것은? \\cond{$a$, $b$는 상수이다.}\\par\\medskip\\noindent\\includegraphics[width=72pt]{figures/fig-130-71-5.png}\\hspace{1em}\\includegraphics[width=72pt]{figures/fig-130-71-3.png}\\hspace{1em}\\includegraphics[width=72pt]{figures/fig-130-71-6.png}\\par\\medskip\\noindent\\includegraphics[width=72pt]{figures/fig-130-71-2.png}\\hspace{1em}\\includegraphics[width=72pt]{figures/fig-130-71-4.png}",
    "figure": "crop:fig-130-71.png",
    "answer": "⑤",
    "answer_source": "답지(빠른정답)"
