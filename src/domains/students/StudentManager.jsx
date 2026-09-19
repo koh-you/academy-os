@@ -13,6 +13,7 @@ import { sortWithdrawnStudents } from "./studentListSort.js";
 import { getDefaultRosterEffectiveMode, hasStudentLessonRowOnDate } from "./rosterEffectiveDate.js";
 import { resolveDefaultClassTemplateId } from "../settings/tenantSettings.js";
 import { isWithdrawnStudent } from "./lessonRosterSelectors.js";
+import "./studentManager.css";
 
 const withdrawalReasonOptions = [
   { value: "graduation", label: "졸업" },
