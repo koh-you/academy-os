@@ -113,6 +113,7 @@ import {
 } from "./lib/supabaseRest.js";
 import { DEFAULT_TENANT_ID, enterTenantContext, getCurrentTenantId, isTenantScopingEnabled, runWithTenant, setWriteTenant } from "../src/shared/server/tenantScope.js";
 import { createCanceledLessonRetentionSweep } from "../src/shared/server/canceledLessonRetentionSweep.js";
+import { createNotificationDispatchTenantFanout } from "../src/shared/server/notificationDispatchTenantFanout.js";
 import { createKioskDeviceRegistry } from "../src/shared/server/kioskDeviceRegistry.js";
 import { evaluateApiAccess, mayAuthenticateAsKiosk, resolveViewAsTenantId } from "../src/shared/server/apiAccessPolicy.js";
 import {
@@ -4671,8 +4672,10 @@ async function refineExamAnalysisQuestionRowsWithAi({ analysisRunId, operations,
 // registry wiring and runInternalNotificationDispatch's 60s-interval call
 // both resolve the hoisted name before this line executes; the body only
 // runs once notificationSolapiDispatchService has been constructed below.
+// 2026-09-20: 요청 tenant 가 없는 호출(내부 루프 · dispatch 토큰 cron)은 tenant 마다 한 바퀴씩 —
+// 없이 돌면 claim PATCH 가 스코프 오류로 던져진다(notificationDispatchTenantFanout.js 머리말).
 function dispatchDueNotificationJobs(options) {
-  return notificationSolapiDispatchService.dispatchDueNotificationJobs(options);
+  return notificationDispatchTenantFanout.dispatchDueNotificationJobsAcrossTenants(options);
 }
 
 const notificationSolapiDispatchService = createNotificationSolapiDispatchService({
@@ -4686,6 +4689,11 @@ const notificationSolapiDispatchService = createNotificationSolapiDispatchServic
   refreshLessonCommentJobBeforeSend,
   sendNotificationJob,
   upsertNotificationJob
+});
+
+const notificationDispatchTenantFanout = createNotificationDispatchTenantFanout({
+  defaultTenantId: DEFAULT_TENANT_ID, getCurrentTenantId, isTenantScopingEnabled, listKnownTeacherTenantIds, runWithTenant,
+  dispatchDueNotificationJobs: (options) => notificationSolapiDispatchService.dispatchDueNotificationJobs(options)
 });
 
 const internalDispatchEnabled = process.env.NOTIFICATION_INTERNAL_DISPATCH_LOOP !== "false";
