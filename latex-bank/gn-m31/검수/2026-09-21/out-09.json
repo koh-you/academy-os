@@ -1,0 +1,7 @@
+{ "range": "ids-09 (44-06~59-u6)", "checked": 72, "ok": 68,
+  "findings": [
+    { "id": "51-c8", "severity": "yellow", "where": "choices", "note": "3단 보기 줄(choices32)이 낱장 폭을 넘어 ③ $\\sqrt{2}-1<2-\\sqrt{2}$ 가 「√2−1<2」까지만 보이고 오른쪽 밖으로 잘림(items.json 값 자체는 원본과 일치)", "fix": "choices_layout 을 \"ii\"(2-2-1)로 두어 3단 배치를 피함" },
+    { "id": "51-h8", "severity": "yellow", "where": "choices", "note": "3단 보기 줄이 낱장 폭을 넘어 ③ $3+\\sqrt{3}>7-\\sqrt{3}$ 가 「3+√3>7−√」까지만 보이고 오른쪽 밖으로 잘림(items.json 값 자체는 원본과 일치)", "fix": "choices_layout 을 \"ii\"(2-2-1)로 두어 3단 배치를 피함" },
+    { "id": "55-10", "severity": "yellow", "where": "body", "note": "발문 끝 「구하시오.」가 「구하」/「시오.」로 갈라져 둘째 줄에 「시오.」만 남음(내용은 일치)" },
+    { "id": "57-23", "severity": "yellow", "where": "body", "note": "첫 줄 「f(x) = 1/√x − 1/√(x+1) 일 때,」가 양쪽 정렬로 단어 간격이 크게 벌어지고, 둘째 줄 $f(7)+\\cdots+f(27)=k\\sqrt{7}$ 도 간격이 늘어난 뒤 「만족시키」/「는」으로 갈라짐(원본은 「일 때,」 뒤에서 줄을 바꿈 · 내용은 일치)", "fix": "body 의 「일 때,」 뒤에 \\\\ 를 넣어 원본처럼 둘째 줄에서 $f(7)+\\cdots$ 를 시작" }
+  ] }

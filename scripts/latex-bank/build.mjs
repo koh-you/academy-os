@@ -113,6 +113,14 @@ function badgeRaiseMm(item) {
   return 1.5;
 }
 
+/** 「쪽-번호」 id 의 번호 부분 → 배지 글. 「13」→「13번」 · 「e1」→「예제 1」 · 개념원리 「h1」→「핵심문제 1」·「c1」→「확인 1」·「u1」→「유제 1」. */
+const KIND_LABELS = { e: "예제", h: "핵심문제", c: "확인", u: "유제" };
+function kindLabel(numberText) {
+  const match = String(numberText).match(/^([a-z]+)(\d+)$/);
+  if (!match) return `${numberText}번`;
+  return `${KIND_LABELS[match[1]] ?? match[1]} ${match[2]}`;
+}
+
 /** 문항 하나의 본문 LaTeX(번호·출처 배지 포함 · dmpnum 두 번째 인자). */
 function renderItemBody(id, rawItem, group, bank) {
   // 전사본의 별도 줄 수식(\centerline)은 좁은 낱장 폭에서 넘치므로 폭에 맞춰 줄이는 \dispeq 로 바꾼다.
@@ -120,7 +128,7 @@ function renderItemBody(id, rawItem, group, bank) {
   // 출처 배지: 쪽-번호 id 는 「책 12쪽 13번」, 책 전체 번호 id(RPM)는 「책 0013번 · 9쪽」.
   const badgeText = bank.id_style === "number"
     ? `${bank.book} ${id}번${item.page ? ` · ${item.page}쪽` : ""}`
-    : `${bank.book} ${id.split("-")[0]}쪽 ${id.split("-")[1].startsWith("e") ? `예제 ${id.split("-")[1].slice(1)}` : `${id.split("-")[1]}번`}`;
+    : `${bank.book} ${id.split("-")[0]}쪽 ${kindLabel(id.split("-")[1])}`;
   // 배지는 sty 가 첫 줄 위 5mm 에 띄우는데 첫 줄에 분수·cases 가 오면 닿는다 — 첫 줄 키에 따라 더 올린다(sty 수정 없이).
   // 올린 만큼 문항 앞 간격도 벌려(book.tex 쪽) 앞 문항과 겹치지 않게 한다.
   const badge = `\\smash{\\raisebox{${badgeRaiseMm(item)}mm}{\\dmkichul{${badgeText}${item.tag ? ` · ${item.tag}` : ""}}}}`;
@@ -194,9 +202,13 @@ async function main() {
     // 쉼표(mathpunct) 뒤에도 TeX 이 자동으로 glue 를 넣어 줄이 바뀔 수 있으므로 `,\,` 는 `{,}`(Ord) + kern 으로 바꾼다.
     typeof value === "string"
       ? value
-          .replace(/\$([^$]*)\$/g, (math) => math.replace(/,\\,/g, "{,}\\mkern3mu ").replace(/\\,/g, "\\mkern3mu "))
-          // 배점 「[5점]」 이 줄 끝에서 「[5」「점]」 로 갈라지지 않게(100발100중 서술형).
+          // 쉼표 뒤 `\mathopen{}`: 다음 `-3` 이 이항 연산자로 잡혀 「, − 3」 처럼 벌어지지 않게(Open 뒤의 Bin 은 Ord 가 된다 · 개념원리 219-u4).
+          .replace(/\$([^$]*)\$/g, (math) => math.replace(/,\\,/g, "{,}\\mkern3mu\\mathopen{}").replace(/\\,/g, "\\mkern3mu "))
+          // 배점 「[5점]」 이 줄 끝에서 「[5」「점]」 로 갈라지지 않게(100발100중 서술형). 앞 낱말과도 붙인다(「[6점]」 홀로 둘째 줄).
+          .replace(/ \[(\d+)점\]/g, "~\\mbox{[$1점]}")
           .replace(/\[(\d+)점\]/g, "\\mbox{[$1점]}")
+          // 「(정답 2개)」 가 「(정답」「2개)」 로 갈라지지 않게(RPM 중3-2 0515 · 개념원리 101-02).
+          .replace(/\(정답 (\d+)개\)/g, "\\mbox{(정답 $1개)}")
       : value
   );
   cropSizes =JSON.parse(await readFile(path.join(dir, "figures", "crops.json"), "utf8").catch(() => "{}"));
@@ -224,7 +236,9 @@ async function main() {
         "% 이 파일은 build.mjs 가 items.json 에서 만든다. 고칠 때는 items.json 을 고친다."
       ].filter(Boolean);
       // 첨자·지수 자리의 빈칸 상자(\blank)는 본문 크기로 찍혀 원문(작은 상자)과 어긋난다 — 첨자 안에서는 작은 상자로 바꾼다.
-      const itemTex = renderItemBody(id, item, group, bank).replace(/([_^])\{\\blank(\[[^\]]*\])?\}/g, "$1{\\text{\\scriptsize\\blank[0.8em]}}").replace(/([_^])\\blank(?![\[\w])/g, "$1{\\text{\\scriptsize\\blank[0.8em]}}");
+      // \blank[0.8em] 을 \text 안에 그대로 쓰면 세로로 길고 좁은 상자가 된다(개념원리 78-18) — 첨자용은 fboxsep 을 줄인 작은 정사각형으로 따로 그린다.
+      const supBlank = "$1{\\text{\\scriptsize\\setlength{\\fboxsep}{1.5pt}\\framebox[1.5em]{\\rule{0pt}{1.6ex}}}}";
+      const itemTex = renderItemBody(id, item, group, bank).replace(/([_^])\{\\blank(\[[^\]]*\])?\}/g, supBlank).replace(/([_^])\\blank(?![\[\w])/g, supBlank);
       await writeFile(path.join(dir, "items", `${id}.tex`), `${header.join("\n")}\n${itemTex}\n`, "utf8");
     }
   }
@@ -237,6 +251,7 @@ async function main() {
 \\newcommand{\\pt}[1]{\\mathrm{#1}}
 \\newcommand{\\seg}[1]{\\overline{\\mathrm{#1}}}
 \\newcommand{\\arc}[1]{\\overset{\\frown}{\\mathrm{#1}}}
+\\newcommand{\\vecAB}[1]{\\overrightarrow{\\mathrm{#1}}}
 \\newcommand{\\exprbox}[1]{\\par\\smallskip\\noindent\\begin{center}\\fbox{\\begin{minipage}{0.9\\linewidth}\\centering\\vspace{1.5mm}#1\\vspace{1.5mm}\\end{minipage}}\\end{center}}
 % 여집합 · 「보기」 상자(ㄱ·ㄴ·ㄷ 참거짓 문항 — 줄바꿈은 \\\\)
 \\newcommand{\\comp}[1]{{#1}^{\\mathrm{c}}}

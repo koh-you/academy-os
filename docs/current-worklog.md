@@ -1,5 +1,12 @@
 # Academy OS Current Worklog
 
+## 2026-09-21 개념원리 3-1 마무리 · RPM 5권 전사
+
+- 개념원리 검수 결과는 전부 조판 폭 문제였다(110mm 낱장에서 3단 보기·exprbox 두 식·「∴ 식」·「(정답 2개)」·「[6점]」 줄 갈라짐). 규칙: 3단 보기에서 ③이 잘리면 `choices_layout: "ii"`, 2단에서 ③④가 붙으면 `"v"`; 「∴」는 `$\therefore\ x=\blank$` 한 수식으로; 소문항마다 딸린 표·그림은 `figure_extra` 대신 `subs[k]` 끝에 `\includegraphics` 인라인(171-01 방식).
+- 첨자 자리의 `\blank` 를 `\text{\scriptsize\blank[0.8em]}` 로 두면 상자가 세로로 길고 좁게 찍힌다(framebox 의 fboxsep 3pt 가 그대로) → `\setlength{\fboxsep}{1.5pt}\framebox[1.5em]{\rule{0pt}{1.6ex}}` 로 바꿈(latex-bank/_tmp/blank-test.tex 로 4안 비교).
+- 여백 재크롭(`recrop-margin --dx 6 --dy 4`)은 대수 라벨 잘림 대부분을 해결했지만, 반대쪽을 같이 넓히면 이웃 문항 글자·배지 조각이 딸려 들어온다(0459·0771·0773·0790) → 한쪽만 넓히는 `--dl/--dr/--dt/--db` 추가. 본문 글자가 섞인 크롭은 `crop-figure --item <bbox> --rel …` 로 다시 오린다(격자 오버레이 `gridsheet.py` 로 rel 판독).
+- RPM 윤곽선 판 전사 공통 현상: 답 크롭이 없거나 여러 문항 답이 세로로 겹친 경우가 많아(해설 PDF 좌우 단 구조) 전사 에이전트가 해설 쪽 렌더로 답을 확정 → export 는 `--answers-from-bank`. 배지를 못 읽은 「빠진 번호」는 쪽 렌더로 전사되어 manifest 에 없음 → `--bank-only`.
+
 ## 2026-09-20 RPM 3-2 마무리 · 윤곽선 PDF OCR 경로 · 개념원리 ingest
 
 - 윤곽선 PDF 는 pdffonts 가 글꼴 1개(워터마크)만 보인다. tesseract 는 RPM 기하·미적분·확통의 배지 앞자리 0(연회색)을 통째로 버려 「0001」→「1」 — 렌더를 밝기 225 로 이진화하니 네 자리가 읽힌다. 대수는 네 자리가 같은 색이라 그대로도 됐다.

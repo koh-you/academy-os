@@ -89,7 +89,15 @@ export function findFigureClusters(paths, region, textBoxes, { gap = 8, minSize 
   // glyphPaths(글꼴이 윤곽선으로 바뀐 PDF): 글자도 fill path 라 큰 근호·괄호(h 30pt 까지)가 그림 뼈대로 잡힌다 — OCR 글자 상자와
   // 겹치는 fill 은 글자로 보고 뺀다(그림의 채움(음영·점)은 글자 상자와 안 겹치거나 30pt 보다 크다).
   const isGlyph = (box) => glyphPaths && box.kind === "fill" && box.h <= 30 && box.w <= 120 && textBoxes.some((token) => overlaps(box, token, 0));
-  const inRegion = paths.filter((box) => inside(box, region, 6) && box.y0 >= topLimit - 4 && !isGlyph(box));
+  // 문항 폭의 3/4 넘게 차지하는 큰 상자(개념원리 핵심문제 회색 바탕 · 보기 상자 테두리)는 그림이 아니라 글 상자다 — 안의 그림과
+  // 합쳐져 상자 전체가 크롭되던 것. 표는 칸 path 들이 남아 따로 묶인다.
+  const regionWidth = region.x1 - region.x0;
+  const isPanel = (box) => box.w >= regionWidth * 0.75 && box.h >= 40;
+  // 문항 맨 위의 넓고 낮은 상자(개념원리 핵심문제 제목 띠 「03 무리수를 …」)도 글 상자다.
+  const isHeaderBar = (box) => box.y0 <= region.y0 + 6 && box.w >= regionWidth * 0.6 && box.h <= 40;
+  // 문항 왼쪽 위 모서리의 작은 색 상자(개념원리 「03」「예제 2」 번호 배지)와 오른쪽 위의 작은 이미지(QR)도 그림이 아니다.
+  const isCornerBadge = (box) => box.y0 <= region.y0 + 12 && box.h <= 40 && ((box.x0 <= region.x0 + 12 && box.w <= 90) || (box.kind === "image" && box.x1 >= region.x1 - 12 && box.w <= 45));
+  const inRegion = paths.filter((box) => inside(box, region, 6) && box.y0 >= topLimit - 4 && !isGlyph(box) && !isPanel(box) && !isHeaderBar(box) && !isCornerBadge(box));
   const isThin = (box) => box.h < 1.6 || box.w < 1.6;
   // 굵기 있는 path 가 그림의 뼈대다. 분수 가로줄·밑줄·문항 구분선처럼 얇은 선은 뼈대(또는 뼈대에 이미 붙은 선)에 닿을 때만
   // 넣는다(도형의 한 변·축·표의 칸 선). 번호 배지·빈칸 상자 같은 작은 색 채움은 뺀다.

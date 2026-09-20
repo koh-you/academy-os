@@ -1,0 +1,6 @@
+{ "range": "27-h4~44-05", "checked": 72, "ok": 69,
+  "findings": [
+    { "id": "28-h5", "severity": "yellow", "where": "choices", "note": "choices32(3+2) 배치에서 ③ −√8+1<−2 가 110mm 낱장 오른쪽 끝에서 잘려 「−√8+1」까지만 보임(「<−2」 유실). 전사 내용 자체는 원문과 일치", "fix": "choices_layout 을 \"ii\" 로" },
+    { "id": "29-04", "severity": "yellow", "where": "choices", "note": "choices32 배치에서 ③ −4+√15 □ −1 이 오른쪽 끝에서 잘려 「−4+」까지만 보임. 전사 내용 자체는 원문과 일치", "fix": "choices_layout 을 \"ii\" 로" },
+    { "id": "43-c7", "severity": "yellow", "where": "body", "note": "exprbox 안 두 식(\\qquad 간격)이 0.9\\linewidth minipage 보다 넓어 상자 좌우 테두리에 붙음(잘리진 않음)", "fix": "\\qquad 를 \\quad 로 줄이거나 두 식 사이를 \\\\ 로 줄바꿈" }
+  ] }

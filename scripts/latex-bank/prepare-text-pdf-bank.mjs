@@ -235,7 +235,9 @@ if (!existsSync(itemsPath)) {
     const pagesOf = manifest.items.filter((item) => item.unit_index === index).map((item) => item.printed_page);
     return { code: String(index + 1).padStart(2, "0"), title: unit.title, pages: pagesOf.length ? `${Math.min(...pagesOf)}~${Math.max(...pagesOf)}` : "", groups: [] };
   });
-  await writeFile(itemsPath, JSON.stringify({ book: args.book, source_package: path.basename(packageDir), id_style: "number", variant_level: 0, units, items: {} }, null, 1), "utf8");
+  // id 꼴: RPM 은 책 전체 네 자리(number) · 개념원리·100발100중은 「쪽-번호」(page-number).
+  const idStyle = manifest.items.some((item) => item.number_label.includes("-")) ? "page-number" : "number";
+  await writeFile(itemsPath, JSON.stringify({ book: args.book, source_package: path.basename(packageDir), id_style: idStyle, variant_level: 0, units, items: {} }, null, 1), "utf8");
   console.log(`items.json 뼈대: 단원 ${units.length}`);
 }
 console.log(`그림 크롭 ${figureCount}개 → ${path.join(bankDir, "figures")} · 힌트 ${Object.keys(draft.items).length}문항 → draft/draft.json · 확인 이미지 draft/figures-qa/`);

@@ -105,9 +105,13 @@ async function main() {
     printedPrev = printedPage;
 
     // 소단원 시작(「01 제곱근의 뜻과 표현」 · 제목 h 27 · 번호는 그림): 새 단원 + 개념 이해 구역(문항 없음 · 개념 번호 ①② 원은 배지가 아니다).
-    const unitTitle = visible.find((token) => token.y < H * 0.13 && token.h >= 24 && /[가-힣]/.test(text(token)));
+    const unitTitle = visible.find((token) => token.y < H * 0.13 && token.h >= 24 && /[가-힣]/.test(text(token)) && text(token) !== "차례");
     if (unitTitle) {
-      units.push({ position: units.length, code: String(units.length + 1).padStart(2, "0"), title: text(unitTitle), chapter: "", firstItemIndex: items.length });
+      // 제목 줄의 나머지 토큰(수식 「y=ax²의 그래프」 등)은 사설 글꼴이라 못 읽는다 — 같은 제목이 이어지면 (2), (3) 을 붙여 구분한다.
+      let title = text(unitTitle);
+      const dup = units.filter((unit) => unit.title === title || unit.title.startsWith(title + " (")).length;
+      if (dup) title = `${title} (${dup + 1})`;
+      units.push({ position: units.length, code: String(units.length + 1).padStart(2, "0"), title, chapter: "", firstItemIndex: items.length });
       section = "개념 이해";
     }
     // 구역 머리(쪽 위 8% · 큰 글자).

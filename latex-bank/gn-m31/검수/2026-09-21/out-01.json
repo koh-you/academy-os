@@ -1,0 +1,8 @@
+{ "range": "ids-01 (100-c5~117-c2 · 11-01~11-05)", "checked": 72, "ok": 67,
+  "findings": [
+    { "id": "101-02", "severity": "yellow", "where": "layout", "note": "발문 끝 「(정답 2개)」가 줄 끝에서 「(정답」/「2개)」로 갈라짐", "fix": "body 의 「(정답 2개)」를 「(정답~2개)」로" },
+    { "id": "101-03", "severity": "yellow", "where": "layout", "note": "「계산하시오.」가 「계산하시」/「오.」로 갈라져 둘째 줄에 「오.」 한 글자만 남음(분수가 넓어 생긴 줄바꿈 · 내용은 일치)" },
+    { "id": "107-u6", "severity": "yellow", "where": "layout", "note": "배점 「[6점]」만 둘째 줄에 홀로 떨어짐", "fix": "body 의 「구하시오. [6점]」을 「구하시오.~[6점]」으로" },
+    { "id": "112-h1", "severity": "yellow", "where": "choices", "note": "3-2 배치(choices32)에서 ③ $4x^2-2x+1=x^2-5$ 가 오른쪽 여백을 넘어 「4x²−2x−」까지만 보이고 잘림", "fix": "112-h1 에 \"choices_layout\": \"ii\" 추가(2열 배치)" },
+    { "id": "117-h1", "severity": "yellow", "where": "choices", "note": "3-2 배치에서 ③ $(x-1)(3x+1)=0$ 이 오른쪽 여백을 넘어 「(x−1)(3x+」까지만 보이고 잘림", "fix": "117-h1 에 \"choices_layout\": \"ii\" 추가(2열 배치)" }
+  ] }
