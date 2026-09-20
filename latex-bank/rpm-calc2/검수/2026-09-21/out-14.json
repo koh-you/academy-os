@@ -1,0 +1,10 @@
+{ "range": "0964~1037", "checked": 74, "ok": 67,
+  "findings": [
+    { "id": "0984", "severity": "yellow", "where": "layout", "note": "review 왼쪽 크롭이 문항 왼쪽 세로 띠만 잘려 있음(크롭 파일 문제) — 쪽 이미지 p139로 대조해 본문·보기 5개 일치. items.json 수정 없음" },
+    { "id": "0993", "severity": "yellow", "where": "layout", "note": "첫 줄 끝 「7k의 값」 뒤 「은?」만 둘째 줄에 홀로 남음(값/은? 분리). 내용은 일치" },
+    { "id": "0999", "severity": "yellow", "where": "layout", "note": "첫 줄(∫…dx = 4일 때, 상수 k의 값을 구하시오.)이 양끝 맞춤으로 어간이 크게 벌어지고 (단, k>1)만 둘째 줄로 밀림. 내용은 일치" },
+    { "id": "1011", "severity": "yellow", "where": "layout", "note": "첫 줄(a = ∫…, b = ∫… 일 때,)이 양끝 맞춤으로 = 와 , 주변 어간이 크게 벌어짐. 내용은 일치" },
+    { "id": "1016", "severity": "yellow", "where": "layout", "note": "첫 줄(함수 f(x)가 ∫ f(t)dt = e^{2x}+ae^x 을 만족시킬 때,)이 양끝 맞춤으로 어간이 약간 벌어짐. 내용은 일치" },
+    { "id": "1018", "severity": "yellow", "where": "layout", "note": "review 왼쪽 크롭이 문항 왼쪽 세로 띠만 잘려 있음(크롭 파일 문제) — 쪽 이미지 p143으로 대조해 본문·보기 5개 일치. items.json 수정 없음" },
+    { "id": "1029", "severity": "yellow", "where": "layout", "note": "첫 줄 끝 「최솟값」 뒤 「은?」만 둘째 줄에 홀로 남음(값/은? 분리). 내용은 일치" }
+  ] }

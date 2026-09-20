@@ -1,0 +1,6 @@
+{ "range": "0223~0296", "checked": 74, "ok": 71,
+  "findings": [
+    { "id": "0234", "severity": "yellow", "where": "layout", "note": "첫 줄(수열 {a_n}에 대하여 Σ(a_n/n²−1) = 6일 때,)이 양끝 맞춤으로 어간이 크게 벌어짐(둘째 줄 lim 분수가 안 끊겨서). 내용은 일치" },
+    { "id": "0241", "severity": "yellow", "where": "layout", "note": "보기 ㄱ·ㄷ 줄이 양끝 맞춤으로 어간이 크게 벌어지고, 넘어간 둘째 줄(lim b_n=0이다 / Σa_nb_n=αβ이다)이 ㄱ. 라벨 왼쪽 끝까지 나와 들여쓰기가 안 맞음. 내용은 일치" },
+    { "id": "0256", "severity": "yellow", "where": "figure", "note": "원문 그림에서 R₂ 오른쪽에 있는 「…」(계속 표시) 두 개가 크롭 fig-0256.png 에 빠짐. 본문·보기·그림 구조는 일치" }
+  ] }

@@ -15,6 +15,7 @@ import path from "node:path";
 import { cropCanvasToFile, drawQa, inkExtent, parseArgs, parsePageRange, pdfjs, renderPage, toViewportTokens } from "./pdfTools.mjs";
 import { findKoreanTessdata, findTesseract } from "./scanTools.mjs";
 import { parseTesseractTsv } from "../../src/domains/problems/scanPdfSegmenter.js";
+import { BADGE_COLORS, detectColorBadges } from "./colorBadges.mjs";
 
 const execFileAsync = promisify(execFile);
 const text = (token) => String(token.str ?? "").trim();
@@ -65,11 +66,41 @@ async function main() {
     const page = await doc.getPage(pageNumber);
     const viewport = page.getViewport({ scale: 1 });
     const W = viewport.width, H = viewport.height;
-    const tokens = (useOcr ? await ocrPageTokens(tesseract, tessdataDir, page, ocrDpi, ocrTmp) : toViewportTokens(await page.getTextContent(), viewport)).filter((token) => text(token));
     const bodyTop = H * 0.05, bodyBottom = H * 0.94;
     const halfOf = (token) => (token.x < W * 0.5 ? 0 : 1);
-    // 번호 후보: h 10.3~10.8(답 글자는 10.0) · 1~3자리. 같은 x(±4pt)끼리 묶어 번호 열을 만든다(반쪽마다 1~2열).
-    const candidates = tokens.filter((token) => /^\d{1,3}$/.test(text(token).replace(/\s+/g, "")) && token.h >= numH[0] && token.h <= numH[1] && token.y > bodyTop && token.y < bodyBottom);
+    let tokens, candidates;
+    const rendered = await renderPage(page, scale);
+    if (useOcr) {
+      // OCR 판: 번호는 파랑 굵은 글자(답 글자는 검정)라 색 덩어리로 찾아 숫자만 읽는다. 전체 쪽 OCR 토큰은 중단원 머리(큰 숫자)에만 쓴다.
+      tokens = (await ocrPageTokens(tesseract, tessdataDir, page, ocrDpi, ocrTmp)).filter((token) => text(token));
+      const imageData = rendered.context.getImageData(0, 0, rendered.canvas.width, rendered.canvas.height).data;
+      const found = await detectColorBadges(rendered.canvas, imageData, scale, { x0: W * 0.03, x1: W * 0.97, y0: bodyTop, y1: bodyBottom }, { blue: { ...BADGE_COLORS.blue, h: [6, 10.5], w: [1.5, 26] }, purple: { ...BADGE_COLORS.purple, h: [6, 10.5], w: [1.5, 26] } }, { tesseract, tmpPath: ocrTmp, debug: Boolean(process.env.GNHS_DEBUG) });
+      // 열(x ±6pt) 안에서 번호는 위→아래로 1씩 늘어난다. 읽은 값이 기대값과 한 글자만 다르면(굵은 「5」→「0」) 기대값으로 고친다.
+      const cols = [];
+      for (const b of found.filter((b) => b.n != null).sort((a, b) => a.x - b.x)) {
+        const col = cols.find((c) => Math.abs(c.x - b.x) <= 6);
+        if (col) col.items.push(b); else cols.push({ x: b.x, items: [b] });
+      }
+      const fixed = [];
+      for (const col of cols) {
+        let prev = null;
+        for (const b of col.items.sort((a, b) => a.y - b.y)) {
+          // 열 안에서 번호는 늘어나기만 한다(두 열이 번갈아 쓰이면 +2). 줄거나 6 넘게 뛰면 오독으로 보고, 앞 번호 +1~+3 중 글자가 한 자만 다른 것으로 고친다.
+          if (prev != null && (b.n <= prev || (b.n > prev + 6 && b.conf < 90))) {
+            const r = String(b.raw);
+            const pick = [1, 2, 3].map((d) => prev + d).find((c) => { const e = String(c); return e.length === r.length && [...e].filter((ch, i) => ch !== r[i]).length <= 1; });
+            if (pick) { console.log(`  p${pageNumber}: 번호 OCR 「${b.raw}」(conf ${Math.round(b.conf)}) → 열 순서상 ${pick}`); b.n = pick; b.conf = Math.max(b.conf, 60); }
+            else if (b.conf < 85) { console.log(`  p${pageNumber}: 번호 OCR 「${b.raw}」(conf ${Math.round(b.conf)}) 순서에 안 맞아 버림(앞 ${prev})`); b.conf = 0; }
+          }
+          if (b.conf >= 60) { fixed.push(b); prev = b.n; }
+        }
+      }
+      candidates = fixed.map((b) => ({ str: String(b.n), x: b.x, y: b.y, w: b.w, h: b.h, conf: b.conf }));
+    } else {
+      tokens = toViewportTokens(await page.getTextContent(), viewport).filter((token) => text(token));
+      // 번호 후보: h 10.3~10.8(답 글자는 10.0) · 1~3자리. 같은 x(±4pt)끼리 묶어 번호 열을 만든다(반쪽마다 1~2열).
+      candidates = tokens.filter((token) => /^\d{1,3}$/.test(text(token).replace(/\s+/g, "")) && token.h >= numH[0] && token.h <= numH[1] && token.y > bodyTop && token.y < bodyBottom);
+    }
     const clusters = [];
     for (const token of candidates.sort((a, b) => a.x - b.x)) {
       const cluster = clusters.find((c) => Math.abs(c.x - token.x) <= 4);
@@ -80,7 +111,7 @@ async function main() {
     // 중단원 머리(큰 번호 h ≥ 18)는 항목 경계.
     const heads = tokens.filter((token) => /^\d{1,2}$/.test(text(token)) && token.h >= 18 && token.y > bodyTop && token.y < bodyBottom);
     if (!numbers.length) { page.cleanup(); continue; }
-    const { canvas } = await renderPage(page, scale);
+    const { canvas } = rendered;
     const context = canvas.getContext("2d");
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height).data;
     const qaBoxes = [];
@@ -90,7 +121,8 @@ async function main() {
       const n = Number(text(token).replace(/\s+/g, ""));
       const next = numbers.slice(index + 1).find((other) => other.cluster === cluster);
       const head = heads.filter((h) => halfOf(h) === half && h.y - h.h > token.y).sort((a, b) => a.y - b.y)[0];
-      const top = token.y - token.h - 3;
+      // 위 여백 8pt: 행렬·연립부등식 답처럼 번호보다 위로 뻗는 답은 3pt 로는 첫 행이 잘린다(공통수학1 617·623). 이웃 항목의 끝이 조금 섞여도 전사 에이전트는 자기 번호만 읽는다.
+      const top = token.y - token.h - 8;
       let bottom = next ? next.token.y - next.token.h - 4 : bodyBottom;
       if (head) bottom = Math.min(bottom, head.y - head.h - 6);
       const x0 = Math.max(0, token.x - 3), x1 = half === 0 ? W * 0.5 - 4 : W * 0.95;

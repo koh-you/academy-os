@@ -1,0 +1,7 @@
+{ "range": "1038~1111", "checked": 74, "ok": 70,
+  "findings": [
+    { "id": "1044", "severity": "yellow", "where": "layout", "note": "첫 줄(세 함수 f(x)=∫e^{-x}dx, g(x)=∫xe^{-x²}dx,)이 양끝 맞춤으로 어간이 크게 벌어짐(둘째 줄 h(x)=∫… 이 안 끊겨서). 내용은 일치" },
+    { "id": "1071", "severity": "yellow", "where": "layout", "note": "과정 상자 안 S_n 첫 줄(□×(1/n)²+□×(2/n)²+⋯+□×(n/n)²)이 상자 오른쪽 테두리를 넘어감. 그림은 원문(상자 안 오른쪽)과 달리 상자 위 본문 옆에 놓임(review_needed 기록대로). 빈칸 개수·수식·그림 내용은 일치", "fix": "aligned 첫 행을 +\\cdots 앞에서 두 행으로 나누거나 \\blank[1.6em] 폭을 줄여 상자 안에 들어오게" },
+    { "id": "1101", "severity": "yellow", "where": "layout", "note": "첫 줄(연속함수 f(x)에 대하여 ∫₁⁴f(x)dx=12일 때,)이 양끝 맞춤으로 어간이 크게 벌어짐(둘째 줄 lim Σ 가 안 끊겨서). 내용은 일치" },
+    { "id": "1105", "severity": "yellow", "where": "layout", "note": "첫 줄(함수 f(x)=sin πx에 대하여)이 양끝 맞춤으로 글자 사이까지 크게 벌어짐(「대 하 여」) — 둘째 줄 lim π/n²{…} 이 한 줄을 다 차지해서. 원문도 수식이 별도 줄. 내용은 일치", "fix": "body 를 「함수 $f(x)=\\sin\\pi x$에 대하여 \\par\\smallskip\\centerline{$\\displaystyle\\lim…\\right\\}$}\\par\\smallskip\\noindent 의 값을 구하시오.」 형태(1054·1056 과 같은 패턴)로" }
+  ] }

@@ -1,0 +1,4 @@
+{ "range": "0668~0741", "checked": 74, "ok": 73,
+  "findings": [
+    { "id": "0722", "severity": "yellow", "where": "layout", "note": "review 왼쪽 스캔 크롭이 본문 아래에서 잘려 보기 ①~⑤가 안 보임 — 쪽 이미지 p102 로 대조해 보기(−1, −2, −3, −4, −5)·본문 일치. 크롭 파일만 잘림, items.json 수정 없음" }
+  ] }

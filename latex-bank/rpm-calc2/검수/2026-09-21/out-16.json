@@ -1,0 +1,6 @@
+{ "range": "1112~1178", "checked": 67, "ok": 64,
+  "findings": [
+    { "id": "1125", "severity": "yellow", "where": "layout", "note": "첫 줄(곡선 y = x sin 2x (0≤x≤π/2)와 이 곡선 위의)이 양끝 맞춤으로 어간이 크게 벌어짐(둘째 줄 점 (π/4, π/4)가 안 끊겨서). 내용은 일치" },
+    { "id": "1142", "severity": "yellow", "where": "layout", "note": "첫 줄(수직선 위를 움직이는 점 P의 시각 t에서의 속도가)이 양끝 맞춤으로 어간이 벌어짐(둘째 줄 v(t)=cos 2t−cos t가 안 끊겨서). 내용은 일치" },
+    { "id": "1159", "severity": "yellow", "where": "layout", "note": "둘째 줄 「의 값은?」이 첫 줄 lim 분수·괄호식 바로 밑에 붙어 줄간격이 좁음. review 왼쪽 크롭은 보기 ④⑤가 잘려 있어 쪽 p164로 대조 — 본문·보기 5개(−1~−5) 일치. items.json 수정 없음" }
+  ] }

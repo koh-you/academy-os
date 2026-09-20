@@ -23,6 +23,7 @@ import { promisify } from "node:util";
 import os from "node:os";
 import path from "node:path";
 import { cropCanvasToFile, drawQa, inkExtent, parseArgs, parsePageRange, pdfjs, renderPage, toViewportTokens } from "./pdfTools.mjs";
+import { BADGE_COLORS, detectColorBadges } from "./colorBadges.mjs";
 import { findKoreanTessdata, findTesseract } from "./scanTools.mjs";
 import { parseTesseractTsv } from "../../src/domains/problems/scanPdfSegmenter.js";
 
@@ -30,12 +31,12 @@ const execFileAsync = promisify(execFile);
 const INGEST_VERSION = "gn-hs-1.0";
 const text = (token) => String(token.str ?? "").trim();
 
-async function ocrPageTokens(tesseract, tessdataDir, page, ocrDpi, tmpPath) {
+async function ocrPageTokens(tesseract, tessdataDir, page, ocrDpi, tmpPath, psms = [11, 6]) {
   const scale = ocrDpi / 72;
   const { canvas } = await renderPage(page, scale);
   await writeFile(tmpPath, await canvas.encode("png"));
   const tokens = [];
-  for (const psm of [11, 6]) {
+  for (const psm of psms) {
     const { stdout } = await execFileAsync(tesseract, [tmpPath, "-", "-l", tessdataDir ? "kor+eng" : "eng", "--psm", String(psm), "-c", "tessedit_create_tsv=1", "-c", "tessedit_create_txt=0", ...(tessdataDir ? ["--tessdata-dir", tessdataDir] : [])], { maxBuffer: 64 * 1024 * 1024, windowsHide: true });
     for (const token of parseTesseractTsv(stdout, scale)) {
       if ((token.conf < 30 && !/^\d{1,3}$/.test(token.text)) || token.h < 2) continue;
@@ -74,7 +75,7 @@ async function readToc(doc, range, getTokens, ocrToc = false) {
       const s = text(token);
       // 소단원: 「01」(h 9.5~10.5 · x 35~55%W) + 제목(h 8~9.5 · 수식 토큰 포함) + 쪽
       if (/^\d{2}$/.test(s) && token.h >= (ocrToc ? 6.5 : 9.5) && token.h <= 10.5 && token.x > W * 0.35 && token.x < W * 0.55) {
-        const title = tokens.filter((o) => o !== token && Math.abs(o.y - token.y) <= (ocrToc ? 4 : 2.5) && o.x > token.x && o.x < W * 0.75 && o.h >= (ocrToc ? 5 : 8) && o.h <= (ocrToc ? 11 : 9.5)).sort((a, b) => a.x - b.x).map(text).join(" ").replace(/\s+/g, " ").trim();
+        const title = tokens.filter((o) => o !== token && Math.abs(o.y - token.y) <= (ocrToc ? 4 : 2.5) && o.x > token.x && o.x < W * 0.75 && o.h >= (ocrToc ? 5 : 8) && o.h <= (ocrToc ? 13.5 : 9.5)).sort((a, b) => a.x - b.x).map(text).join(ocrToc ? "" : " ").replace(/\s+/g, " ").trim();
         const p = pageNumberOf(token);
         if (title && p) {
           const chapter = chapterAt(token.y);
@@ -84,8 +85,10 @@ async function readToc(doc, range, getTokens, ocrToc = false) {
         }
         continue;
       }
-      if (s === "연습문제" && token.h >= (ocrToc ? 5 : 8) && token.h <= (ocrToc ? 11 : 9.5) && token.x > W * 0.35) { const p = pageNumberOf(token); if (p) exercises.push(p); continue; }
-      if (/^\[?특강\]?$/.test(s) && token.x > W * 0.35) { const p = pageNumberOf(token); if (p) special.push(p); continue; }
+      // OCR 은 「연습문제」 가 「연」「습」「문제」 로 갈라진다 — 같은 줄의 토큰을 이어 붙여 본다(줄의 첫 토큰에서만 한 번).
+      const lineText = ocrToc ? tokens.filter((o) => Math.abs(o.y - token.y) <= 4 && o.x >= token.x && o.x < W * 0.75).sort((a, b) => a.x - b.x).map(text).join("") : s;
+      if ((s === "연습문제" || (ocrToc && /^연습문제/.test(lineText) && !tokens.some((o) => Math.abs(o.y - token.y) <= 4 && o.x < token.x && o.x > W * 0.35))) && token.h >= (ocrToc ? 5 : 8) && token.h <= (ocrToc ? 12 : 9.5) && token.x > W * 0.35) { const p = pageNumberOf(token); if (p && !exercises.includes(p)) exercises.push(p); continue; }
+      if (/^\[?특강\]?$/.test(s) && token.x > W * 0.35) { const p = pageNumberOf(token); if (p && !special.includes(p)) special.push(p); continue; }
     }
     page.cleanup();
   }
@@ -118,7 +121,7 @@ async function main() {
   // 차례
   let toc;
   if (args["toc-json"]) toc = JSON.parse(await readFile(path.resolve(args["toc-json"]), "utf8"));
-  else if (args.toc) toc = await readToc(doc, parsePageRange(args.toc, doc.numPages), async (page, viewport) => (useOcr ? await ocrPageTokens(tesseract, tessdataDir, page, ocrDpi, ocrTmp) : toViewportTokens(await page.getTextContent(), viewport)), useOcr);
+  else if (args.toc) toc = await readToc(doc, parsePageRange(args.toc, doc.numPages), async (page, viewport) => (useOcr ? await ocrPageTokens(tesseract, tessdataDir, page, ocrDpi, ocrTmp, [6]) : toViewportTokens(await page.getTextContent(), viewport)), useOcr);
   else toc = { units: [], exercises: [], special: [], chapters: [] };
   await writeFile(path.join(outDir, "toc.json"), JSON.stringify(toc, null, 2), "utf8");
   console.log(`차례: 소단원 ${toc.units.length} · 연습문제 ${toc.exercises.length} · 특강 ${toc.special.length} · 중단원 ${toc.chapters.length}`);
@@ -136,6 +139,9 @@ async function main() {
   const answers = {};
   const pageSummaries = [];
   const ocrPages = {};
+  // OCR 판 번호 순서 검증 상태: 통번호 · 중단원별 예제 · 특강 예제(특강마다 01 부터)
+  const chapterPages = [...new Set((toc.chapters ?? []).map((c) => c.page).filter((p) => p != null))].sort((a, b) => a - b);
+  const ocrSeq = { number: 0, example: 0, special: 0, chapterPages, nextChapterPage: chapterPages.find((p) => p > fromPage) ?? Infinity, specialStart: null, specialPages: new Set() };
   let printedPrev = null;
   const seenIds = new Set();
 
@@ -147,32 +153,97 @@ async function main() {
     if (useOcr) ocrPages[pageNumber] = tokens.map(({ str, x, y, w, h }) => ({ str, x, y, w, h }));
     const visible = tokens.filter((token) => text(token));
 
-    // 인쇄 쪽: 바닥글(y > 93%)의 숫자(h 11~13). 못 읽으면 앞 쪽 + 1.
-    const footer = visible.filter((token) => token.y > H * 0.93 && /^\d{1,3}$/.test(text(token)) && token.h >= 9 && token.h <= 14).sort((a, b) => a.h - b.h);
+    // 인쇄 쪽: 바닥글(y > 93%)의 숫자(h 11~13 · OCR 은 8.9). 못 읽으면 앞 쪽 + 1.
+    const footer = visible.filter((token) => token.y > H * 0.93 && /^\d{1,3}$/.test(text(token)) && token.h >= (useOcr ? 7 : 9) && token.h <= 14).sort((a, b) => a.h - b.h);
     const printedPage = footer.length ? Number(text(footer[footer.length - 1])) : printedPrev != null ? printedPrev + 1 : pageNumber;
     printedPrev = printedPage;
 
     const bodyTop = H * 0.05, bodyBottom = H * 0.93;
-    const isSpecial = inRange(toc.special, printedPage);
-    const isExercise = !isSpecial && inRange(toc.exercises, printedPage);
+    // 특강 범위(차례의 특강 쪽 ~ 다음 차례 항목 전)라도 번호 배지가 달린 예제가 있으면 특강이 아니라 보통 예제 쪽이다
+    // (공통수학1 292쪽 특강 뒤 293~295쪽 필수 예제 10~14 — 특강 예제는 번호 없는 「예제 ▸」 라벨뿐이다). 배지 검출 뒤에 확정한다.
+    const inSpecialRange = inRange(toc.special, printedPage);
+    const isExerciseRange = inRange(toc.exercises, printedPage);
 
-    // 배지 후보: 통번호(h 14.5~15.5) · 예제(h 18.5~19.5). OCR 은 상자 높이가 조금 작다.
-    const numH = useOcr ? [11, 16] : [14.4, 15.6];
-    const exH = useOcr ? [16.5, 21] : [18.4, 19.6];
+    const { canvas, context } = await renderPage(page, scale);
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height).data;
+    // 상자 안 어두운 픽셀의 평균색 — OCR 판에서 번호 배지를 색으로 가린다(통번호 파랑 (43,110,171) · 예제 청록 (36,126,149) · 본문·쪽 번호 회색).
+    const inkColor = (box) => {
+      let r = 0, g = 0, b = 0, n = 0;
+      const x0 = Math.max(0, Math.round(box.x0 * scale)), x1 = Math.min(canvas.width, Math.round(box.x1 * scale)), y0 = Math.max(0, Math.round(box.y0 * scale)), y1 = Math.min(canvas.height, Math.round(box.y1 * scale));
+      for (let y = y0; y < y1; y += 1) for (let x = x0; x < x1; x += 1) { const o = (y * canvas.width + x) * 4; if (imageData[o] + imageData[o + 1] + imageData[o + 2] < 500) { r += imageData[o]; g += imageData[o + 1]; b += imageData[o + 2]; n += 1; } }
+      return n >= 15 ? { r: r / n, g: g / n, b: b / n, n, fill: n / Math.max(1, (x1 - x0) * (y1 - y0)) } : null;
+    };
+    // 글자(잉크 비율 0.2~0.5)와 색 채움 상자(개념 머리띠의 흰 숫자 상자 · STEP 띠 · 확인체크 라벨 · 0.8 이상)를 가른다.
+    const isGlyph = (c) => c && c.fill < 0.62;
+    const isBlue = (c) => c && c.b - c.r >= 70 && c.b - c.g >= 35;
+    // 예제 번호 글자색: 필수 청록 (42,130,152) · 발전 자주 (136,64,91) · 특강 초록 (90,120,93). 파랑(통번호)·회색(본문)이 아닌 유채색이면 예제 후보.
+    const isExampleColor = (c) => c && !isBlue(c) && Math.max(c.r, c.g, c.b) - Math.min(c.r, c.g, c.b) >= 25;
+    const exampleKind = (c) => !c ? "필수" : c.r > c.b + 30 ? "발전" : c.g > c.r + 20 && c.g > c.b + 15 ? "특강" : "필수";
+
+    // 배지 후보: 통번호(h 14.5~15.5) · 예제(h 18.5~19.5). OCR 은 글자 상자 높이라 통번호 10.8 · 예제 13.9(배지 그림까지 잡히면 17)이고, 색으로 다른 숫자를 뺀다.
+    const numH = useOcr ? [9, 13] : [14.4, 15.6];
+    const exH = useOcr ? [12.5, 19] : [18.4, 19.6];
     const badges = [];
     for (const token of visible) {
-      const s = text(token);
+      const raw = text(token);
+      // OCR 은 배지 그림이 「$02」「(B06」 처럼 붙는다 — 숫자 앞뒤 기호 두 글자까지 허용하고 숫자만 쓴다.
+      const s = useOcr ? (raw.match(/^[^\d\p{L}]{0,2}(\d{1,3})[^\d\p{L}]{0,2}$/u) ?? [])[1] : raw;
+      if (!s) continue;
       if (token.y < bodyTop || token.y > bodyBottom || token.x > W * 0.2) continue;
       if (!/^\d{1,3}$/.test(s)) continue;
-      if (token.h >= exH[0] && token.h <= exH[1]) badges.push({ kind: "e", n: Number(s), x: token.x, y: token.y, h: token.h, w: token.w });
-      else if (token.h >= numH[0] && token.h <= numH[1]) {
+      const color = useOcr ? inkColor({ x0: token.x, x1: token.x + token.w, y0: token.y - token.h, y1: token.y }) : null;
+      // 예제 번호는 항상 두 자리(「01」). 한 자리 큰 숫자는 특강·개념 머리띠의 「1」이라 예제가 아니다.
+      if (token.h >= exH[0] && token.h <= exH[1] && /^\d{2}$/.test(s) && (!useOcr || (isExampleColor(color) && isGlyph(color)))) {
+        const numberColor = color ?? inkColor({ x0: token.x, x1: token.x + token.w, y0: token.y - token.h, y1: token.y });
+        badges.push({ kind: "e", n: Number(s), x: token.x, y: token.y, h: token.h, w: token.w, exKind: exampleKind(numberColor) });
+      }
+      else if (token.h >= numH[0] && token.h <= numH[1] && (!useOcr || (isBlue(color) && isGlyph(color)))) {
         // STEP 옆 숫자(「STEP」 토큰 왼쪽 인접)는 제외
         if (visible.some((other) => text(other) === "STEP" && Math.abs(other.y - token.y) < 6 && token.x > other.x && token.x - other.x < 40)) continue;
         badges.push({ kind: "", n: Number(s), x: token.x, y: token.y, h: token.h, w: token.w });
       }
     }
+    // OCR 판: 전체 쪽 OCR 토큰 대신 색 덩어리 배지로 바꾼다. 통번호는 책 전체에서 1씩 늘어나므로 읽은 값을 순서로 검증한다
+    // (기대값과 같으면 확정 · 하나 건너뛰면 놓친 배지 경고 · 그 밖에는 오독으로 보고 기대값을 쓴다). 예제 번호는 중단원마다 01 부터.
+    if (useOcr) {
+      badges.length = 0;
+      const badgeClasses = {
+        blue: { ...BADGE_COLORS.blue, h: [8.5, 13] }, purple: { ...BADGE_COLORS.purple, h: [8.5, 13] },
+        teal: { ...BADGE_COLORS.teal, h: [11.5, 17] }, red: { ...BADGE_COLORS.red, h: [11.5, 17] }, green: { ...BADGE_COLORS.green, h: [11.5, 17] }
+      };
+      const found = await detectColorBadges(canvas, imageData, scale, { x0: W * 0.03, x1: W * 0.22, y0: bodyTop, y1: bodyBottom }, badgeClasses, { tesseract, tmpPath: ocrTmp, debug: Boolean(process.env.GNHS_DEBUG) });
+      // 읽은 값이 확실(conf 85↑)하고 기대값 근처(-1~+3)면 읽은 값을 믿고(놓친 배지는 경고), 아니면 기대값을 쓴다. 첫 값은 읽은 대로.
+      const settle = (b, key, label) => {
+        const expected = ocrSeq[key] + 1;
+        const fresh = ocrSeq[key] === 0;
+        const plausible = b.n != null && b.conf >= 85 && (fresh || (b.n >= expected - 1 && b.n <= expected + 3));
+        if (plausible) {
+          if (!fresh && b.n !== expected) console.log(`  p${pageNumber}: ${label} ${expected} 기대 · ${b.n} 읽힘(conf ${Math.round(b.conf)})${b.n > expected ? " — 사이 배지를 놓쳤는지 확인" : ""}`);
+          ocrSeq[key] = Math.max(ocrSeq[key], b.n);
+        } else {
+          console.log(`  p${pageNumber}: ${label} OCR 「${b.raw}」(conf ${Math.round(b.conf)}) → 순서상 ${expected} 로 둠`);
+          b.n = expected; ocrSeq[key] = expected;
+        }
+      };
+      for (const b of found) {
+        if (b.kind === "") settle(b, "number", "통번호");
+        else {
+          const key = b.exKind === "특강" ? "special" : "example";
+          if (key === "example" && printedPage >= ocrSeq.nextChapterPage) { ocrSeq.example = 0; while (printedPage >= ocrSeq.nextChapterPage) ocrSeq.nextChapterPage = ocrSeq.chapterPages.find((p) => p > ocrSeq.nextChapterPage) ?? Infinity; }
+          if (key === "special" && !ocrSeq.specialPages.has(printedPage - 1) && !ocrSeq.specialPages.has(printedPage)) ocrSeq.special = 0;
+          if (key === "special") ocrSeq.specialPages.add(printedPage);
+          settle(b, key, key === "special" ? "특강 예제" : "예제");
+        }
+        badges.push(b);
+      }
+    }
     // 특강 쪽: 예제는 번호 없는 「예제 ▸」 라벨이라 배지가 없고, 아래 확인체크(통번호)만 문항으로 잡는다(111쪽 219번처럼 답지에 답이 있다).
-    const pageBadges = isSpecial ? badges.filter((b) => b.kind === "") : badges.slice();
+    // 특강 쪽의 「특강 01」 예제(초록 번호)는 필수 예제와 같은 구조(발문 + 풀이 + 확인체크)라 문항으로 잡는다. 특강 뒤 293~295쪽처럼
+    // 청록(필수)·자주(발전) 번호가 있으면 특강이 아니다. 번호 없는 「예제 ▸」 특강(111쪽)은 확인체크만 남는다.
+    // 특강 쪽의 통번호는 들여쓴 확인체크(x > 14%W)뿐이다 — 왼쪽 끝에 붙은 개념원리 익히기 번호(공통수학2 21쪽 26~28)가 있으면 특강 범위라도 보통 쪽.
+    const isSpecial = inSpecialRange && badges.filter((b) => b.kind === "e").every((b) => b.exKind === "특강") && badges.filter((b) => b.kind === "").every((b) => b.x > W * 0.14);
+    const isExercise = !isSpecial && isExerciseRange;
+    const pageBadges = badges.slice();
     if (!pageBadges.length) {
       pageSummaries.push({ pdf_page: pageNumber, printed_page: printedPage, item_count: 0, section: isSpecial ? "특강" : "" });
       page.cleanup();
@@ -185,8 +256,6 @@ async function main() {
 
     const pulLabels = visible.filter((token) => /^풀이/.test(text(token)) && token.h <= 9 && token.x < W * 0.6);
     const keyLabels = visible.filter((token) => /^KEY/i.test(text(token)) && token.h <= 10);
-    const { canvas, context } = await renderPage(page, scale);
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height).data;
     await writeFile(path.join(outDir, "pages", `p${String(pageNumber).padStart(3, "0")}.jpg`), await (await renderPage(page, 100 / 72)).canvas.encode("jpeg", 82));
     // 오른쪽 여백 노트(알아둡시다 · 생각해 봅시다 · KEY Point)와 본문 사이의 세로 괘선: 60~85%W 에서 쪽 높이 40% 이상 이어지는 어두운 열.
     // 있으면 그 왼쪽까지가 본문 폭이다(그림이 본문 오른쪽 끝에 붙는 연습문제 296 같은 문항을 크롭에 넣기 위해 글자 폭이 아니라 괘선으로 자른다).
@@ -208,7 +277,8 @@ async function main() {
     const pageItems = [];
     for (const [index, badge] of badges.entries()) {
       const next = badges[index + 1];
-      const top = badge.y - badge.h - 3;
+      // 위 여백 9pt: 첫 줄에 행렬·cases 처럼 배지보다 키 큰 식이 오면 3pt 로는 윗줄이 잘린다(공통수학1 276쪽 609·610 · 286쪽 627).
+      const top = badge.y - badge.h - 9;
       let bottom = next ? next.y - next.h - 4 : bodyBottom;
       // 다음 문항 번호 위의 「교육청 기출」 작은 배지와 「STEP」 띠는 이 문항에 속하지 않는다.
       for (const token of visible) {
@@ -250,14 +320,8 @@ async function main() {
       const isCheck = badge.kind === "" && (hasExample || isSpecial) && badge.x > W * 0.14;
       const kindName = badge.kind === "e" ? "예제" : isCheck ? "확인체크" : "문항";
       const tags = [section, kindName];
-      // 예제 배지 왼쪽 라벨(필수=파랑 · 발전=주황·빨강) 색으로 발전 표시.
-      if (badge.kind === "e") {
-        const sx0 = Math.max(0, Math.round((badge.x - 26) * scale)), sx1 = Math.round((badge.x - 4) * scale);
-        const sy0 = Math.round((badge.y - badge.h) * scale), sy1 = Math.round(badge.y * scale);
-        let r = 0, g = 0, b = 0, n = 0;
-        for (let y = sy0; y < sy1; y += 2) for (let x = sx0; x < sx1; x += 2) { const o = (y * canvas.width + x) * 4; if (imageData[o] + imageData[o + 1] + imageData[o + 2] < 600) { r += imageData[o]; g += imageData[o + 1]; b += imageData[o + 2]; n += 1; } }
-        if (n > 20 && r / n > b / n + 40) tags.push("발전");
-      }
+      // 예제 번호 글자 색으로 발전(자주)·특강(초록) 표시. 필수(청록)는 기본이라 태그를 안 단다.
+      if (badge.kind === "e" && badge.exKind && badge.exKind !== "필수") tags.push(badge.exKind);
       // 교육청 기출 배지(작은 글자 · 번호 위)
       if (visible.some((token) => text(token) === "교육청" && Math.abs(token.x - badge.x) < 40 && token.y < badge.y - badge.h + 2 && token.y > badge.y - badge.h - 24)) tags.push("교육청 기출");
       const item = {
