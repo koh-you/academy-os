@@ -76,6 +76,18 @@ export function resolveTenantId(explicitTenantId) {
   return explicitTenantId ?? getCurrentTenantId() ?? null;
 }
 
+// 기본키가 (tenant_id, <id>) 복합키인 표(2026-09-18 exam_prep_rows, 2026-09-20 나머지 셋).
+// 자동 생성 id(lesson_exam_prep_<날짜> 등)가 tenant 마다 같아도 공존하게 하려는 것이다. PostgREST
+// upsert 의 on_conflict 를 단일 id 로 지정하면 "no unique constraint" 오류가 나므로 반드시
+// tenant_id 를 앞세운다(check-tenant-upsert-conflict-targets.mjs 가 잡는다). 지정을 생략하면
+// PostgREST 가 기본키를 쓰므로 그대로 맞는다.
+export const TENANT_COMPOSITE_KEY_TABLES = Object.freeze({
+  exam_prep_rows: "exam_prep_id",
+  lessons: "lesson_id",
+  school_events: "school_event_id",
+  test_sessions: "test_session_id"
+});
+
 // 실제로 학원(tenant) 단위로 분리돼야 하는 테이블. docs/security/multi-tenant-phase1-plan.md (a) 기준.
 // 새 스코핑 대상 테이블은 반드시 여기에 추가한다(test-tenant-scope.mjs 가 목록 드리프트를 잡는다).
 export const TENANT_SCOPED_TABLES = new Set([

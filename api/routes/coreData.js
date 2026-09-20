@@ -2713,7 +2713,7 @@ export async function upsertLesson(lesson) {
   await assertLessonClosureConversionAllowed(lesson);
   let row;
   try {
-    [row] = await upsertRows("lessons", [toLessonRow(lesson)], { onConflict: "lesson_id" });
+    [row] = await upsertRows("lessons", [toLessonRow(lesson)], { onConflict: "tenant_id,lesson_id" });
   } catch (error) {
     if (
       isSpecialLectureTrackedLesson(lesson) &&
@@ -2722,7 +2722,7 @@ export async function upsertLesson(lesson) {
       throwSpecialLectureLessonTrackSchemaError();
     }
     if (!errorMentionsAnyColumn(error, lessonScheduleMetadataColumns)) throw error;
-    [row] = await upsertRows("lessons", [toLessonRow(lesson, { includeScheduleMetadata: false })], { onConflict: "lesson_id" });
+    [row] = await upsertRows("lessons", [toLessonRow(lesson, { includeScheduleMetadata: false })], { onConflict: "tenant_id,lesson_id" });
   }
   const savedLesson = fromLessonRow(row);
   await cancelPendingNotificationJobsForRemovedLessonStudents(savedLesson, "수업 명단에서 제외됨");
@@ -2743,7 +2743,7 @@ export async function upsertLessons(lessons) {
   }
   let rows;
   try {
-    rows = await upsertRows("lessons", lessons.map((lesson) => toLessonRow(lesson)), { onConflict: "lesson_id" });
+    rows = await upsertRows("lessons", lessons.map((lesson) => toLessonRow(lesson)), { onConflict: "tenant_id,lesson_id" });
   } catch (error) {
     if (
       lessons.some(isSpecialLectureTrackedLesson) &&
@@ -2755,7 +2755,7 @@ export async function upsertLessons(lessons) {
     rows = await upsertRows(
       "lessons",
       lessons.map((lesson) => toLessonRow(lesson, { includeScheduleMetadata: false })),
-      { onConflict: "lesson_id" }
+      { onConflict: "tenant_id,lesson_id" }
     );
   }
   const savedLessons = rows.map(fromLessonRow);
@@ -2992,7 +2992,7 @@ export async function deleteExamPrepLessonForReconcile(lessonId, { auditId = "" 
         audit.rollback.attempted = missingRows.length > 0;
         if (missingRows.length > 0) {
           audit.stage = "rollback-restore";
-          await upsertRows("lessons", missingRows, { onConflict: "lesson_id" });
+          await upsertRows("lessons", missingRows, { onConflict: "tenant_id,lesson_id" });
           audit.rollback.restoredLessonIds = missingRows.map((row) => row.lesson_id);
         }
         audit.stage = "rollback-verify";
@@ -3705,7 +3705,7 @@ export async function deleteExamPrepRow(examPrepId, { auditId = "" } = {}) {
     restoreRows: (rows) => upsertRows(
       "exam_prep_rows",
       rows,
-      { onConflict: "exam_prep_id" }
+      { onConflict: "tenant_id,exam_prep_id" }
     )
   });
   return { source: databaseSource, ...result };
@@ -3888,7 +3888,7 @@ export async function upsertTestSessionWithAttempts(session, attempts = []) {
 
   let savedSessionRows;
   try {
-    savedSessionRows = await upsertRows("test_sessions", [toTestSessionRow(session)], { onConflict: "test_session_id" });
+    savedSessionRows = await upsertRows("test_sessions", [toTestSessionRow(session)], { onConflict: "tenant_id,test_session_id" });
   } catch (error) {
     throw new Error(`Supabase 테스트 응시 기록 SQL이 필요합니다. supabase/20260713_test_sessions.sql을 실행한 뒤 다시 저장하세요. (${error.message})`);
   }
