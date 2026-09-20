@@ -1,0 +1,5 @@
+{ "range": "0451~0525", "checked": 75, "ok": 73,
+  "findings": [
+    { "id": "0481", "severity": "yellow", "where": "layout", "note": "보기 상자 첫 줄에서 「ㄷ. 평행사변형」이 「평행사변/형」으로 줄바꿈됨", "fix": "\\bogi 안 \\qquad 를 \\quad 로 줄이기" },
+    { "id": "0515", "severity": "yellow", "where": "body", "note": "「(정답 2개)」가 「(정답」/「2개)」로 줄바꿈됨", "fix": "body 끝 「(정답 2개)」 를 「(정답~2개)」 로" }
+  ] }

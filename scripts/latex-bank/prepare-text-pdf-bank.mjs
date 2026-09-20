@@ -28,6 +28,10 @@ const whitenGray = Boolean(args["whiten-gray"]);
 const bankDir = path.resolve(args.bank);
 const packageDir = path.resolve(args.package);
 const manifest = JSON.parse(await readFile(path.join(packageDir, "manifest.json"), "utf8"));
+// OCR 판(ingest-text-pdf --ocr · 글꼴 윤곽선화 PDF): 글자 레이어가 없으므로 ingest 가 저장한 tesseract 토큰을 글자 상자로 쓴다.
+const ocrTokensPath = path.join(packageDir, "ocr-tokens.json");
+const ocrPages = existsSync(ocrTokensPath) ? JSON.parse(await readFile(ocrTokensPath, "utf8")).pages : null;
+if (ocrPages) console.log("OCR 토큰 사용(글자 레이어 없음): 윤곽선 글자 path 는 그림 뼈대에서 뺀다");
 await mkdir(path.join(bankDir, "figures"), { recursive: true });
 await mkdir(path.join(bankDir, "draft", "figures-qa"), { recursive: true });
 
@@ -64,7 +68,9 @@ for (const pageNumber of pages) {
   const page = await doc.getPage(pageNumber);
   const viewport = page.getViewport({ scale: 1 });
   const paths = await pagePathBoxes(page);
-  const allTokens = textBoxesOf(await page.getTextContent(), viewport);
+  const allTokens = ocrPages
+    ? (ocrPages[String(pageNumber)] ?? []).map((token) => ({ x0: token.x, x1: token.x + token.w, y0: token.y - token.h, y1: token.y + token.h * 0.25, h: token.h, str: token.str }))
+    : textBoxesOf(await page.getTextContent(), viewport);
   const renderScale = dpi / 72;
   const { canvas, context } = await renderPage(page, renderScale);
   // 숨은 글자(흰색·투명 렌더 — 교사용 답)는 렌더에 잉크가 없다. 그림 상자를 넓히거나 힌트 줄에 섞이지 않게 따로 둔다.
@@ -127,7 +133,7 @@ for (const pageNumber of pages) {
     const memberRegions = pageItems.filter((item) => group.members.includes(item.number_label)).map((item) => toPt(item.regions.find((region) => region.kind === "body").bbox_normalized, viewport));
     // 지시문 영역의 그림 덩어리 가운데 구성 문항 하나의 본문 영역 안에 완전히 든 것은 그 문항의 그림이다. 나머지가 그룹 그림.
     // (문항 본문 영역이 그림 자리까지 넓게 잡혀 있어도 라벨·호가 잘리지 않게 path·글자는 모두 쓴다.)
-    const clusters = findFigureClusters(paths, group.region, tokens).filter((cluster) => !memberRegions.some((region) => insideRegion(cluster, region, 3)));
+    const clusters = findFigureClusters(paths, group.region, tokens, { glyphPaths: Boolean(ocrPages) }).filter((cluster) => !memberRegions.some((region) => insideRegion(cluster, region, 3)));
     const freeTokens = tokens.filter((token) => !memberRegions.some((region) => insideRegion(token, region, 1)));
     const entry = { members: group.members, pdf_page: pageNumber, hint: textHint(freeTokens, group.region, clusters), clusters: clusters.length };
     // 그룹 그림도 사람 지정 상자를 받는다: figure-overrides.json 의 키 "g<시작>-<끝>" (예 "g0775-0776").
@@ -150,7 +156,7 @@ for (const pageNumber of pages) {
     // 번호 배지(13pt 굵은 숫자 · 영역 위쪽)의 윗변 위에서 시작하는 path 는 구역 머리띠 장식이다.
     const badge = tokens.filter((token) => insideRegion(token, region, 2) && token.h >= 12 && token.y0 < region.y0 + 30);
     const topLimit = badge.length ? Math.min(...badge.map((token) => token.y0)) : region.y0;
-    const clusters = findFigureClusters(paths, region, tokens, { topLimit });
+    const clusters = findFigureClusters(paths, region, tokens, { topLimit, glyphPaths: Boolean(ocrPages) });
     const entry = {
       pdf_page: pageNumber,
       printed_page: item.printed_page,

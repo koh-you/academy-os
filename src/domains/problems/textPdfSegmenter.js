@@ -39,7 +39,9 @@ export function mergeNumberRuns(tokens) {
   for (const token of digitTokens) {
     const last = runs[runs.length - 1];
     const sameLine = last && Math.abs(last.y - token.y) < 0.8 && Math.abs(last.h - token.h) < 0.8;
-    const adjacent = sameLine && token.x - (last.x + last.w) < 2.5 && token.x >= last.x;
+    // 글꼴이 다른 숫자는 한 번호가 아니다(OCR 판: 배지 「0012」 뒤에 본문 「34」가 2.5pt 안에 붙어 「001234」 가 되던 것).
+    const sameFont = !last?.fontName || !token.fontName || last.fontName === token.fontName;
+    const adjacent = sameLine && sameFont && token.x - (last.x + last.w) < 2.5 && token.x >= last.x;
     if (adjacent) {
       last.str += token.str.trim();
       last.w = token.x + token.w - last.x;
@@ -83,8 +85,10 @@ export function detectBadgeHeight(pagesTokens) {
  */
 export function findBadges(tokens, { badgeHeight, pageWidth, pageHeight = Infinity, badgeBottom = pageHeight * 0.93 }) {
   if (!badgeHeight) return [];
+  // OCR 판(ingest-text-pdf --ocr)은 색 있는 네 자리 번호에 fontName "ocr-badge" 를 붙인다 — 그때는 그것만 배지다.
+  const badgeFont = tokens.some((token) => token.fontName === "ocr-badge") ? "ocr-badge" : null;
   return mergeNumberRuns(tokens)
-    .filter((run) => NUMBER_RUN_PATTERN.test(run.str) && Math.abs(run.h - badgeHeight) <= 1.0)
+    .filter((run) => NUMBER_RUN_PATTERN.test(run.str) && Math.abs(run.h - badgeHeight) <= 1.0 && (!badgeFont || run.fontName === badgeFont))
     // 페이지 좌우 가장자리(측면 탭)와 바닥글(쪽번호는 배지와 같은 크기다)은 배지가 아니다.
     .filter((run) => run.x > pageWidth * 0.05 && run.x < pageWidth * 0.9 && run.y < badgeBottom)
     .map((run) => ({ number: run.str, x: run.x, y: run.y, w: run.w, h: run.h }))
@@ -212,7 +216,8 @@ export function readFooterUnit(tokens, pageHeight, badgeHeight = Infinity) {
 }
 
 const SUB_HEADER_PATTERN = /^\d{2}-\d{1,2}$/;
-const RANGE_LABEL_PATTERN = /\[\s*(\d{4})\s*~\s*(\d{4})\s*\]/;
+// OCR 판은 「~」를 못 읽거나(「[0008」「0009]」) 「∼」로 읽으므로 물결은 있어도 없어도 된다.
+const RANGE_LABEL_PATTERN = /\[\s*(\d{4})\s*[~∼]*\s*(\d{4})\s*\]/;
 
 /**
  * 「05-1 대푯값」 같은 소단원 헤더(노란 상자). 작은 글자의 "NN-N" 이 컬럼 왼쪽에 있으면 헤더다.
@@ -272,20 +277,28 @@ export function findSubHeaders(tokens, { badgeHeight, columns }) {
 export function findRangeLabels(tokens, { badgeHeight, columns }) {
   // 같은 글줄이라도 baseline 이 0.4pt 쯤 어긋난 토큰이 있다(「[0609~061」 633.13 · 「1]」 633.53).
   // 반올림으로 묶으면 갈라지므로 컬럼별로 y 순서대로 훑으며 1.5pt 안쪽은 같은 줄로 본다.
+  // 물결 토큰은 OCR 상자가 이웃 글자와 합쳐져 배지보다 커질 수 있어 높이와 무관하게 남긴다.
   const sorted = tokens
-    .filter((token) => token.str.trim() && token.h < badgeHeight)
+    .filter((token) => token.str.trim() && (token.h < badgeHeight || /^[~∼]+$/.test(token.str.trim())))
     .map((token) => ({ token, column: columnIndexOf(columns, token.x) }))
     .sort((a, b) => a.column - b.column || a.token.y - b.token.y || a.token.x - b.token.x);
   const lines = [];
   for (const { token, column } of sorted) {
     const line = lines[lines.length - 1];
-    if (line && line.column === column && Math.abs(line.y - token.y) <= 1.5) {
+    // OCR 토큰은 글자마다 상자 높이가 달라 baseline(y)이 2~3pt 흔들린다(「~」 h 2pt · 「의」 h 6pt · 「다음」 h 8pt).
+    // baseline 1.5pt 안이거나, 세로 띠([y−h, y])가 작은 쪽 높이의 절반 넘게 겹치면 같은 줄로 본다.
+    const overlap = line ? Math.min(line.y, token.y) - Math.max(line.top, token.y - token.h) : 0;
+    const bandJoin = line && overlap > Math.min(line.y - line.top, token.h) * 0.5;
+    if (line && line.column === column && (Math.abs(line.y - token.y) <= 1.5 || bandJoin)) {
+      // 줄의 기준선·띠는 키 큰 글자(h ≥ 4)로 갱신한다.
+      if (token.h >= 4 && (line.h < 4 || token.h > line.h)) line.y = token.y;
+      line.top = Math.min(line.top, token.y - token.h);
       line.tokens.push(token);
       line.x = Math.min(line.x, token.x);
       line.h = Math.max(line.h, token.h);
       continue;
     }
-    lines.push({ column, y: token.y, h: token.h, x: token.x, tokens: [token] });
+    lines.push({ column, y: token.y, h: token.h, x: token.x, top: token.y - token.h, tokens: [token] });
   }
   const labels = [];
   for (const line of lines) {

@@ -1,5 +1,12 @@
 # Academy OS Current Status
 
+## 2026-09-20 22개정 RPM 중학 3-2 673문 완료 · RPM 윤곽선 5권 OCR 원천화 · 개념원리 ingest 착수
+
+- RPM 중3-2(22개정): 전사 17배치 → 병합 → section 통일 17 → 상자그림·표 재크롭 12 → 검수 9(**내용 불일치 0** · red 1(표 폭)·yellow 16 전부 조판 배치 → build 수정) → export → 바탕화면 `rpm-중3-2-22개정-라텍스-패키지`(문항·답·해설 673).
+- build.mjs: 크롭 폭을 놓이는 폭(`\linewidth`)으로 clamp(`\dmfigw`) · below 그림을 \bogi/\exprbox 앞에 배치.
+- RPM 대수·기하·미적분Ⅰ·Ⅱ·확통(글꼴 윤곽선화 · 글자 레이어 없음): `ingest-text-pdf.mjs --ocr`(쪽 렌더 이진화 → tesseract kor+eng → 같은 세그먼터 · 색 있는 네 자리만 배지 · `ocr-tokens.json` 저장) + `prepare-text-pdf-bank`(OCR 토큰으로 글자 path 제외) + `ingest-scan-answers --layout lssen`(답지) 경로 확립. 5권 OCR ingest 실행 중(쪽 범위: 대수 7~156 · 기하 7~119 · 미적Ⅰ 7~134 · 미적Ⅱ 7~166 · 확통 7~101).
+- 개념원리: `ingest-gn.mjs`(구역별 번호 재시작 · id 「쪽-NN」·「쪽-hN」핵심문제·「쪽-cN」확인·「쪽-eN」예제·「쪽-uN」유제 · 소단원 = 큰 제목) + `ingest-gn-answers.mjs`(정답 PDF 빠른정답 상자 → 문항별 답 크롭) 작성. 중3-1 시험: 788문항(핵심문제 127·확인 139·예제 16·유제 48) · 답 787/788.
+
 ## 2026-09-20 22개정 RPM 중학 3-1 1133문 완료 · 3-2(673문) 전사·병합까지
 
 - RPM 중3-1: `ingest-text-pdf.mjs`(pdf 12~194 · 「대표문제 다시 풀기」 제외) → `ingest-answers.mjs --solutions`(답 1129·해설 1133) → `prepare-text-pdf-bank.mjs --whiten-gray`(크롭 249) → 전사 27배치(1133/1133 · 답지 1129 · 계산 4 는 해설 쪽으로 재대조) → 누락·잘림 재크롭 15 → 검수 15(Sonnet · **내용 불일치 0** · overfull 6·배지 겹침 3 은 build 수정) → export → 바탕화면 `rpm-중3-1-22개정-라텍스-패키지`(문항 1133·답·해설 1133).

@@ -89,9 +89,10 @@ function trimToInk(rendered, context, pad = 12) {
 function renderFigure(figure, width = "0.38\\linewidth") {
   if (figure.startsWith("crop:")) {
     const size = cropSizes[figure.slice(5)];
-    // 원문 크기(pt)를 알면 그대로(본문 폭 440pt 넘지 않게), 모르면 상대 폭.
-    const w = size ? `${Math.min(size.width_pt, 440).toFixed(1)}pt` : width;
-    return `\\includegraphics[width=${w}]{figures/${figure.slice(5)}}`;
+    // 원문 크기(pt)를 알면 그대로(본문 폭 440pt 넘지 않게), 모르면 상대 폭. 놓이는 폭(\linewidth · 그림 옆 minipage)보다 넓으면
+    // 그 폭으로 줄인다(RPM 중3-2 0579 표 137pt 가 0.4 폭 minipage 를 넘어 오른쪽 열이 잘리던 것).
+    if (size) return `\\setlength{\\dmfigw}{${Math.min(size.width_pt, 440).toFixed(1)}pt}\\ifdim\\dmfigw>\\linewidth\\setlength{\\dmfigw}{\\linewidth}\\fi\\includegraphics[width=\\dmfigw]{figures/${figure.slice(5)}}`;
+    return `\\includegraphics[width=${width}]{figures/${figure.slice(5)}}`;
   }
   // TikZ 그림이 놓일 폭(그림 옆 minipage 0.4\linewidth 등)보다 넓으면 폭에 맞춰 줄인다(좁을 때는 원 크기).
   return `\\resizebox{\\ifdim\\width>\\linewidth\\linewidth\\else\\width\\fi}{!}{\\input{figures/${figure.replace(/^tikz:/, "")}}}`;
@@ -133,8 +134,12 @@ function renderItemBody(id, rawItem, group, bank) {
     parts.push(`\\noindent\\begin{minipage}[t]{0.58\\linewidth}\\vspace{0pt}\\raggedright ${bodyMain}\\end{minipage}\\hfill\\begin{minipage}[t]{0.4\\linewidth}\\vspace{0pt}\\centering ${renderFigure(item.figure, "0.92\\linewidth")}\\end{minipage}\\par`);
     if (bodyWide) parts.push(`\\noindent ${bodyWide}`);
   } else if (item.figure) {
-    // 표·자료 상자처럼 넓은 그림은 본문 아래 가운데.
-    parts.push(item.body, `\\par\\smallskip\\begin{center}${renderFigure(item.figure, "\\linewidth")}\\end{center}`);
+    // 표·자료 상자처럼 넓은 그림은 본문 아래 가운데. 발문 뒤에 보기 상자(\bogi)·조건 상자(\exprbox)가 붙어 있으면 원문 순서대로
+    // 「발문 → 그림 → 보기 상자」(RPM 중3-2 0627 상자그림 문항에서 그림이 보기 뒤로 밀리던 것).
+    const cut = item.body.search(/\\bogi\{|\\exprbox\{/);
+    const [bodyMain, bodyWide] = cut > 0 ? [item.body.slice(0, cut), item.body.slice(cut)] : [item.body, ""];
+    parts.push(bodyMain, `\\par\\smallskip\\begin{center}${renderFigure(item.figure, "\\linewidth")}\\end{center}`);
+    if (bodyWide) parts.push(`\\noindent ${bodyWide}`);
   } else {
     parts.push(item.body);
   }
@@ -246,6 +251,7 @@ async function main() {
 \\newcommand{\\dmpassage}[1]{\\par\\needspace{8\\baselineskip}\\medskip\\noindent{\\dmheadingfont\\bfseries\\color{dm-navy}#1}\\par\\vspace{4mm}}
 % 줄바꿈 규약(프로토타입 mathbook-problems.sty · style.sty 와 같음): 수식 안에서는 줄을 바꾸지 않고, 「(단, …)」·「x축」은 한 덩어리.
 \\binoppenalty=10000 \\relpenalty=10000
+\\newlength{\\dmfigw}
 % 수식을 안 끊는 대신, 긴 수식 앞에서 줄을 바꾸면 앞 줄이 많이 비는 경우(RPM 중3-1 1022 지시문·0979)에 overfull 로 잘리지 않도록
 % 비상 늘임 폭을 준다 — tolerance 안에서 조판되는 문단에는 영향이 없다.
 \\emergencystretch=2em

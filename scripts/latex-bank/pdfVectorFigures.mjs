@@ -83,10 +83,13 @@ const union = (a, b) => ({ x0: Math.min(a.x0, b.x0), y0: Math.min(a.y0, b.y0), x
  * @param {{x0,y0,x1,y1}} region 문항 영역
  * @param {{x0,y0,x1,y1,h,str}[]} textBoxes 쪽 글자 토큰(위가 0 인 좌표)
  */
-export function findFigureClusters(paths, region, textBoxes, { gap = 8, minSize = 12, topLimit = -Infinity } = {}) {
+export function findFigureClusters(paths, region, textBoxes, { gap = 8, minSize = 12, topLimit = -Infinity, glyphPaths = false } = {}) {
   // topLimit: 문항 번호 배지 윗변. 그 위에서 시작하는 path(구역 머리띠 장식)는 문항 그림이 아니다.
   // 문항 영역 경계에 걸친 그림(정점 라벨이 영역 밖으로 살짝 나간 것)을 놓치지 않게 여유 6pt.
-  const inRegion = paths.filter((box) => inside(box, region, 6) && box.y0 >= topLimit - 4);
+  // glyphPaths(글꼴이 윤곽선으로 바뀐 PDF): 글자도 fill path 라 큰 근호·괄호(h 30pt 까지)가 그림 뼈대로 잡힌다 — OCR 글자 상자와
+  // 겹치는 fill 은 글자로 보고 뺀다(그림의 채움(음영·점)은 글자 상자와 안 겹치거나 30pt 보다 크다).
+  const isGlyph = (box) => glyphPaths && box.kind === "fill" && box.h <= 30 && box.w <= 120 && textBoxes.some((token) => overlaps(box, token, 0));
+  const inRegion = paths.filter((box) => inside(box, region, 6) && box.y0 >= topLimit - 4 && !isGlyph(box));
   const isThin = (box) => box.h < 1.6 || box.w < 1.6;
   // 굵기 있는 path 가 그림의 뼈대다. 분수 가로줄·밑줄·문항 구분선처럼 얇은 선은 뼈대(또는 뼈대에 이미 붙은 선)에 닿을 때만
   // 넣는다(도형의 한 변·축·표의 칸 선). 번호 배지·빈칸 상자 같은 작은 색 채움은 뺀다.
