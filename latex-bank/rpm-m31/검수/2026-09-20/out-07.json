@@ -1,0 +1,5 @@
+{ "range": "0457~0532", "checked": 76, "ok": 74,
+  "findings": [
+    { "id": "0526", "severity": "yellow", "where": "layout", "note": "출처 배지(RPM 중학 3-1 0526번 · 75쪽)가 인수분해 과정 상자 첫째 줄 수식 \"(a^2+6a+9)\"과 겹침" },
+    { "id": "0527", "severity": "yellow", "where": "layout", "note": "출처 배지(RPM 중학 3-1 0527번 · 75쪽)가 인수분해 과정 상자 첫째 줄 수식 \"(x^2-2x+1)\"과 겹침" }
+  ] }

@@ -36,7 +36,20 @@ const y0 = Math.round(iy0 + rel[1] * ih);
 const x1 = Math.round(ix0 + rel[2] * iw);
 const y1 = Math.round(iy0 + rel[3] * ih);
 const cut = createCanvas(x1 - x0, y1 - y0);
-cut.getContext("2d").drawImage(canvas, x0, y0, x1 - x0, y1 - y0, 0, 0, x1 - x0, y1 - y0);
+const cutContext = cut.getContext("2d");
+cutContext.drawImage(canvas, x0, y0, x1 - x0, y1 - y0, 0, 0, x1 - x0, y1 - y0);
+if (args["whiten-gray"]) {
+  // prepare-text-pdf-bank 의 --whiten-gray 와 같은 규칙: 연회색 워터마크(무채색·밝음)를 흰색으로. 채도 있는 채움은 남는다.
+  const whitenMin = Number(args["whiten-min"]) || 232;
+  const image = cutContext.getImageData(0, 0, x1 - x0, y1 - y0);
+  const px = image.data;
+  for (let i = 0; i < px.length; i += 4) {
+    const max = Math.max(px[i], px[i + 1], px[i + 2]);
+    const min = Math.min(px[i], px[i + 1], px[i + 2]);
+    if (max - min < 10 && min > whitenMin) { px[i] = 255; px[i + 1] = 255; px[i + 2] = 255; }
+  }
+  cutContext.putImageData(image, 0, 0);
+}
 await writeFile(args.out, await cut.encode(args.out.endsWith(".png") ? "png" : "jpeg", 92));
 console.log(`${path.basename(args.out)} ${x1 - x0}x${y1 - y0}px @${dpi}dpi`);
 

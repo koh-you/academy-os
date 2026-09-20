@@ -104,10 +104,10 @@ function figurePlacement(item) {
   return size && size.width_pt > SIDE_FIGURE_MAX_PT ? "below" : "side";
 }
 
-/** 출처 배지를 첫 줄 위로 더 올리는 높이(mm). 첫 줄(앞 120자)에 cases·pmatrix 가 있으면 5.5, 분수·근호·큰 괄호가 있으면 3.5, 아니면 1.5. */
+/** 출처 배지를 첫 줄 위로 더 올리는 높이(mm). 첫 줄(앞 120자)에 cases·pmatrix·aligned 가 있으면 5.5, 분수·근호·큰 괄호가 있으면 3.5, 아니면 1.5. */
 function badgeRaiseMm(item) {
   const head = String(item.body ?? "").slice(0, 120);
-  if (/\\begin\{(cases|pmatrix)\}/.test(head)) return 5.5;
+  if (/\\begin\{(cases|pmatrix|aligned)\}/.test(head)) return 5.5;
   if (/\\dfrac|\\sqrt|\\left\(/.test(head)) return 3.5;
   return 1.5;
 }
@@ -161,10 +161,14 @@ function renderItemBody(id, rawItem, group, bank) {
 }
 
 async function compile(xelatex, dir, file) {
-  const run = () => execFileAsync(xelatex, ["-interaction=nonstopmode", "-halt-on-error", "-output-directory=build", file], { cwd: dir, maxBuffer: 64 * 1024 * 1024, windowsHide: true });
+  // timeout: 낱장 하나가 2시간 넘게 멈춘 사례(RPM 중3-1 0522 · MiKTeX 프로세스가 응답 없음)가 있어 3분 안에 안 끝나면 죽이고 한 번 더 시도한다.
+  const run = () => execFileAsync(xelatex, ["-interaction=nonstopmode", "-halt-on-error", "-output-directory=build", file], { cwd: dir, maxBuffer: 64 * 1024 * 1024, windowsHide: true, timeout: 180_000, killSignal: "SIGKILL" });
+  const runWithRetry = async () => {
+    try { await run(); } catch (error) { if (error.killed || error.signal) { console.log(`  ${file}: xelatex 응답 없음(3분) → 다시 시도`); await run(); } else throw error; }
+  };
   try {
-    await run();
-    await run();
+    await runWithRetry();
+    await runWithRetry();
   } catch (error) {
     const log = await readFile(path.join(dir, "build", file.replace(/\.tex$/, ".log")), "utf8").catch(() => "");
     const firstError = log.split("\n").find((line) => line.startsWith("!"));
@@ -237,11 +241,14 @@ async function main() {
 \\newcommand{\\blank}[1][1.5em]{\\raisebox{-0.15ex}{\\framebox[#1]{\\rule{0pt}{1.4ex}}}}
 \\newcommand{\\dmhint}[1]{\\par\\smallskip\\begin{tcolorbox}[enhanced,colback=dm-navylight!60,colframe=dm-navy!40,boxrule=0.3pt,sharp corners,left=3mm,right=3mm,top=2mm,bottom=2mm,boxsep=0mm]\\small\\setlength{\\parskip}{1mm}#1\\end{tcolorbox}}
 % 구역 제목·공통 지시문은 뒤에 문항 한 개는 붙을 자리가 있어야 찍는다(쪽 끝 고아 방지).
-\\newcommand{\\dmsection}[1]{\\par\\needspace{10\\baselineskip}\\vspace{3mm}\\noindent{\\color{dm-navy}\\hrule height 0.6pt}\\vspace{1.2mm}\\noindent{\\dmheadingfont\\bfseries\\fontsize{11}{13}\\selectfont\\color{dm-navy}#1}\\par\\vspace{2mm}}
+\\newcommand{\\dmsection}[1]{\\par\\needspace{10\\baselineskip}\\vspace{3mm}\\noindent{\\color{dm-navy}\\hrule height 0.6pt}\\vspace{1.2mm}\\noindent{\\dmheadingfont\\bfseries\\fontsize{11}{13}\\selectfont\\color{dm-navy}#1}\\par\\vspace{4mm}}
 % 지시문 뒤 4mm: 다음 문항의 출처 배지가 5mm 위로 올라오므로 긴 지시문 줄과 겹치지 않게 한다.
 \\newcommand{\\dmpassage}[1]{\\par\\needspace{8\\baselineskip}\\medskip\\noindent{\\dmheadingfont\\bfseries\\color{dm-navy}#1}\\par\\vspace{4mm}}
 % 줄바꿈 규약(프로토타입 mathbook-problems.sty · style.sty 와 같음): 수식 안에서는 줄을 바꾸지 않고, 「(단, …)」·「x축」은 한 덩어리.
 \\binoppenalty=10000 \\relpenalty=10000
+% 수식을 안 끊는 대신, 긴 수식 앞에서 줄을 바꾸면 앞 줄이 많이 비는 경우(RPM 중3-1 1022 지시문·0979)에 overfull 로 잘리지 않도록
+% 비상 늘임 폭을 준다 — tolerance 안에서 조판되는 문단에는 영향이 없다.
+\\emergencystretch=2em
 \\newcommand{\\nob}[1]{\\mbox{#1}}
 % 「(단, …)」 은 한 덩어리가 원칙이지만 그림 옆 좁은 폭(0.58)에서 긴 조건이 그림 뒤로 넘어가 잘리므로(RPM 공통수학2 0151),
 % 「(단,」 만 첫 낱말에 붙이고 안쪽 낱말 사이에서는 줄을 바꿀 수 있게 둔다(수식 안은 여전히 안 끊긴다).
@@ -319,7 +326,11 @@ async function main() {
       console.log(`bank-only: 전사본 기준 문항 ${manifest.items.length}개 (추가 ${added} · 제외 ${before - manifest.items.length})`);
     }
     if (args.review) await mkdir(path.join(dir, "review"), { recursive: true });
-    if (exportDir) {
+    const only = typeof args.only === "string" ? new Set(args.only.split(",").map((s) => s.trim()).filter(Boolean)) : null;
+    // --only + --export = 패치: 이미 export 된 패키지에서 지정 문항의 png·manifest 항목만 바꾼다(나머지 파일은 건드리지 않는다).
+    const patchExport = Boolean(exportDir && only);
+    if (patchExport && !(await readFile(path.join(exportDir, "manifest.json")).catch(() => null))) throw new Error(`--only 패치는 export 된 manifest 가 있어야 한다: ${exportDir}`);
+    if (exportDir && !patchExport) {
       await rm(path.join(exportDir, "items"), { recursive: true, force: true });
       await mkdir(path.join(exportDir, "items"), { recursive: true });
     }
@@ -343,7 +354,8 @@ ${group.passage ? `\\dmpassage{${group.passage}}${badgeRaiseMm(bank.items[id]) >
       return trimmed;
     };
 
-    const jobs = unitGroups.flatMap(({ group }) => group.items.map((id) => ({ id, group })));
+    // --only 0526,1022 : 검수 뒤 고친 문항만 다시 렌더할 때. --review 는 그 id 의 review png 만, --export 는 export 된 패키지의 그 id 만 패치한다.
+    const jobs = unitGroups.flatMap(({ group }) => group.items.filter((id) => !only || only.has(id)).map((id) => ({ id, group })));
     const renderOne = async ({ id, group }, slot) => {
         let typeset;
         try {
@@ -410,7 +422,15 @@ ${group.passage ? `\\dmpassage{${group.passage}}${badgeRaiseMm(bank.items[id]) >
     for (let slot = 0; slot < workers; slot++) await rm(path.join(dir, `_single-${slot}.tex`), { force: true });
     if (args.review) console.log(`review/: ${(await readdir(path.join(dir, "review"))).length}장`);
 
-    if (exportDir) {
+    if (patchExport) {
+      const existing = JSON.parse(await readFile(path.join(exportDir, "manifest.json"), "utf8"));
+      const typesetIds = new Set(existing.items.filter((item) => String(item.review_note ?? "").includes("latex 조판본")).map((item) => item.item_id));
+      for (const entry of exported) typesetIds.add(entry.item_id);
+      existing.items = existing.items.map((item) => exported.find((entry) => entry.item_id === item.item_id) ?? item);
+      existing.typeset = { ...(existing.typeset ?? {}), items: typesetIds.size };
+      await writeFile(path.join(exportDir, "manifest.json"), JSON.stringify(existing, null, 2), "utf8");
+      console.log(`export 패치: ${exported.length}문항 갱신 → ${exportDir} (조판본 ${typesetIds.size}문항)`);
+    } else if (exportDir) {
       // manifest: 문항 목록은 조판본이 있는 것만 바꾸고, 나머지(수행평가 등)는 원본 크롭을 그대로 복사한다.
       const exportedIds = new Set(exported.map((item) => item.item_id));
       const rest = manifest.items.filter((item) => !exportedIds.has(item.item_id));

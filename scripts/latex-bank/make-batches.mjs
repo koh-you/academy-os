@@ -34,7 +34,8 @@ const describeItem = (item) => {
   if (item.review_status === "flagged") line += ` · ⚠ ${item.review_note}`;
   const entry = draft?.items?.[item.number_label];
   if (entry) {
-    line += ` · 인쇄 ${entry.printed_page}쪽`;
+    // draft 의 printed_page 는 ingest 가 offset 을 모른 채 pdf 쪽을 그대로 적은 값(RPM 중3-1 전 배치에서 확인) — 쪽 머리와 같은 규칙으로 계산한다.
+    line += ` · 인쇄 ${item.pdf_page + offset}쪽`;
     if (entry.tags?.length) line += ` · 태그 ${entry.tags.join("/")}`;
     line += entry.figure ? ` · 그림 ${entry.figure} (${path.join(figuresDir, entry.figure.slice(5))})${entry.note ? ` ⚠ ${entry.note}` : ""}` : " · 그림 없음";
     if (entry.figure_parts?.length) line += ` · 둘째 크롭 ${entry.figure_parts.map((part) => `${part} (${path.join(figuresDir, part.slice(5))})`).join(", ")}`;

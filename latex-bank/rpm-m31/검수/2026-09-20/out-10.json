@@ -1,0 +1,5 @@
+{ "range": "0685~0760", "checked": 76, "ok": 76,
+  "findings": [
+    { "id": "0693", "severity": "info", "where": "answer", "note": "계산으로 채운 답 ⑤ 확인 — solution-p049.jpg 0693 해설: 「따라서 옳지 않은 것은 ⑤이다.」로 items.json answer \"⑤\"와 일치. ok" },
+    { "id": "0759", "severity": "info", "where": "answer", "note": "계산으로 채운 답 2 확인 — solution-p057.jpg(이어진 해설, p056 하단 전략만 있고 계산은 p057) 0759 해설: 「따라서 가장 큰 자연수 a의 값은 2이다.」로 items.json answer \"$2$\"와 일치. ok" }
+  ] }

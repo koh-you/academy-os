@@ -1,5 +1,13 @@
 # Academy OS Current Worklog
 
+## 2026-09-20 RPM 중3-1 조판 · 3-2 전사
+
+- 텍스트 PDF ingest 가 단원을 못 잡아(단원 0) 쪽 하단 머리띠로 단원·쪽 범위를 손으로 정했다(3-1 9단원 · 3-2 7단원). pdf 쪽 = 인쇄 쪽 + 3 이라 make-batches `--page-offset -3`.
+- make-batches 의 문항 줄 「인쇄 N쪽」이 draft `printed_page`(= pdf 쪽)를 그대로 써서 27개 배치 에이전트 전부가 "머리와 다르다"고 보고 → `item.pdf_page + offset` 으로 고침.
+- export 중 xelatex 하나(0522)가 2시간 응답 없음(MiKTeX) → 프로세스 kill 뒤 `--only 0522 --export` 패치 모드로 그 문항만 갱신. compile 에 180초 timeout + 1회 재시도 추가.
+- 검수 red 6건은 전부 지시문 `$y=ax^2+bx+c$` overfull(수식 안 줄바꿈 금지 + 앞 줄이 tolerance 밖) → `\emergencystretch=2em`. 원천 items.json 은 정상이었다.
+- 3-2 전사 에이전트 두 개가 세션 scratchpad 의 같은 임시 파일명(part2.json)을 써서 잠시 섞였다 — 최종 out-*.json 은 id 범위·그룹 접두로 전수 검사해 오염 0 확인. 전사 프롬프트에 임시 파일은 배치 접두를 쓰라고 넣을 것.
+
 ## 2026-09-19 쎈 중3-2 · 라이트쎈 공통수학1·2 조판 마무리
 
 - 재부팅으로 끊긴 세션 복원: ssen-m32 는 빌드까지, lssen-cm1 은 병합까지, lssen-cm2 는 배치 AA·AB 까지 돼 있었다. lssen-cm2 는 배치 KK(0635~0648)가 04 단원에 붙어 있던 것을 06 단원 앞으로 재병합.
