@@ -5165,7 +5165,7 @@
   "0333": {
    "page": 54,
    "tag": "수능 기출",
-   "body": "그림과 같이 한 모서리의 길이가 $4$인 정육면체~$\\pt{ABCD}-\\pt{EFGH}$가 있다. 선분~$\\pt{AD}$의 중점을 $\\pt{M}$이라 할 때, 삼각형~$\\pt{MEG}$의 넓이는?",
+   "body": "그림과 같이 한 모서리의 길이가 $4$인 정육면체~$\\pt{ABCD}\\text{-}\\pt{EFGH}$가 있다. 선분~$\\pt{AD}$의 중점을 $\\pt{M}$이라 할 때, 삼각형~$\\pt{MEG}$의 넓이는?",
    "figure": "crop:fig-0333.png",
    "choices": [
     "$\\dfrac{21}{2}$",
@@ -6073,7 +6073,7 @@
   "0427": {
    "page": 66,
    "level": "중",
-   "body": "구 $x^2+y^2+z^2=1$ 위의 점~$\\pt{P}$와 구 $(x-2)^2+(y-1)^2+(z-2)^2=1$ 위의 점~$\\pt{Q}$에 대하여 선분~$\\pt{PQ}$의 길이의 최댓값을 $M$, 최솟값을 $m$이라 할 때, $Mm$의 값을 구하시오.",
+   "body": "구 $x^2+y^2+z^2=1$ 위의 점~$\\pt{P}$와 구 \\par\\smallskip\\centerline{$(x-2)^2+(y-1)^2+(z-2)^2=1$}\\par\\smallskip\\noindent 위의 점~$\\pt{Q}$에 대하여 선분~$\\pt{PQ}$의 길이의 최댓값을 $M$, 최솟값을 $m$이라 할 때, $Mm$의 값을 구하시오.",
    "answer": "$5$",
    "answer_source": "답지(쪽 렌더)"
   },
@@ -6158,7 +6158,8 @@
    ],
    "choices_layout": "ii",
    "answer": "②",
-   "answer_source": "답지(쪽 렌더)"
+   "answer_source": "답지(쪽 렌더)",
+   "figure_layout": "below"
   },
   "0436": {
    "page": 68,
@@ -6233,7 +6234,7 @@
   },
   "0443": {
    "page": 68,
-   "body": "구~$x^2+y^2+z^2=9$ 위를 움직이는 점~$\\pt{P}$와 구~$x^2+y^2+z^2-10x-8y-6z+49=0$ 위를 움직이는 점~$\\pt{Q}$에 대하여 두 점~$\\pt{P}$, $\\pt{Q}$ 사이의 거리의 최솟값을 구하시오.",
+   "body": "구~$x^2+y^2+z^2=9$ 위를 움직이는 점~$\\pt{P}$와 구 \\par\\smallskip\\centerline{$x^2+y^2+z^2-10x-8y-6z+49=0$}\\par\\smallskip\\noindent 위를 움직이는 점~$\\pt{Q}$에 대하여 두 점~$\\pt{P}$, $\\pt{Q}$ 사이의 거리의 최솟값을 구하시오.",
    "answer": "$5\\sqrt{2}-4$",
    "answer_source": "답지(쪽 렌더)"
   },
@@ -6693,7 +6694,7 @@
   "0490": {
    "page": 78,
    "level": "중하",
-   "body": "영벡터가 아닌 두 벡터 $\\vec{a}$, $\\vec{b}$가 서로 평행하지 않을 때, \\par\\smallskip\\centerline{$(2m-n-3)\\vec{a}-(m+4n-6)\\vec{b}=\\vec{0}$}\\par\\smallskip\\noindent 을 만족시키는 실수 $m$, $n$에 대하여 $m^2+n^2$의 값을 구하시오.",
+   "body": "영벡터가 아닌 두 벡터 $\\vec{a}$, $\\vec{b}$가 서로 평행하지 않을 때, \\par\\smallskip\\centerline{$(2m-n-3)\\vec{a}-(m+4n-6)\\vec{b}=\\vec{0}$}\\par\\smallskip\\noindent 를 만족시키는 실수 $m$, $n$에 대하여 $m^2+n^2$의 값을 구하시오.",
    "answer": "$5$",
    "answer_source": "답지(쪽 렌더)"
   },
@@ -6930,7 +6931,8 @@
    ],
    "choices_layout": "v",
    "answer": "③",
-   "answer_source": "답지"
+   "answer_source": "답지",
+   "figure_layout": "below"
   },
   "0514": {
    "page": 81,
@@ -7843,7 +7845,8 @@
     "$3\\sqrt{6}$"
    ],
    "answer": "③",
-   "answer_source": "답지"
+   "answer_source": "답지",
+   "choices_layout": "ii"
   },
   "0620": {
    "page": 94,
@@ -8023,7 +8026,8 @@
     "$4\\sqrt{5}$"
    ],
    "answer": "②",
-   "answer_source": "답지(쪽 렌더)"
+   "answer_source": "답지(쪽 렌더)",
+   "choices_layout": "ii"
   },
   "0637": {
    "page": 96,
@@ -8192,7 +8196,7 @@
   },
   "0653": {
    "page": 99,
-   "body": "세 점~$\\pt{A}(2,\\,0)$, $\\pt{B}(4,\\,5)$, $\\pt{C}(-3,\\,1)$에 대하여 $|\\overrightarrow{\\pt{PA}}+\\overrightarrow{\\pt{PB}}+\\overrightarrow{\\pt{PC}}|=4$를 만족시키는 점~$\\pt{P}$가 나타내는 도형의 둘레의 길이를 구하시오.",
+   "body": "세 점~$\\pt{A}(2,\\,0)$, $\\pt{B}(4,\\,5)$, $\\pt{C}(-3,\\,1)$에 대하여 \\par\\smallskip\\centerline{$|\\overrightarrow{\\pt{PA}}+\\overrightarrow{\\pt{PB}}+\\overrightarrow{\\pt{PC}}|=4$}\\par\\smallskip\\noindent 를 만족시키는 점~$\\pt{P}$가 나타내는 도형의 둘레의 길이를 구하시오.",
    "answer": "$\\dfrac{8}{3}\\pi$",
    "answer_source": "답지(쪽 렌더)"
   },
@@ -8214,7 +8218,8 @@
     "$65$"
    ],
    "answer": "③",
-   "answer_source": "답지(쪽 렌더)"
+   "answer_source": "답지(쪽 렌더)",
+   "choices_layout": "ii"
   },
   "0656": {
    "page": 99,
@@ -8358,7 +8363,7 @@
   },
   "0671": {
    "page": 101,
-   "body": "넓이가 $30$인 삼각형~$\\pt{ABC}$와 점~$\\pt{P}$에 대하여 $\\overrightarrow{\\pt{PA}}+\\overrightarrow{\\pt{PB}}+3\\overrightarrow{\\pt{PC}}=\\overrightarrow{\\pt{AB}}$가 성립할 때, 삼각형~$\\pt{PBC}$의 넓이를 구하시오.",
+   "body": "넓이가 $30$인 삼각형~$\\pt{ABC}$와 점~$\\pt{P}$에 대하여 \\par\\smallskip\\centerline{$\\overrightarrow{\\pt{PA}}+\\overrightarrow{\\pt{PB}}+3\\overrightarrow{\\pt{PC}}=\\overrightarrow{\\pt{AB}}$}\\par\\smallskip\\noindent 가 성립할 때, 삼각형~$\\pt{PBC}$의 넓이를 구하시오.",
    "answer": "$12$",
    "answer_source": "답지"
   },
@@ -8655,7 +8660,7 @@
   "0714": {
    "page": 106,
    "level": "중",
-   "body": "점~$(2,\\,0,\\,-1)$을 지나고 방향벡터가 $\\vec{u}=(1,\\,2,\\,4)$인 직선이 $yz$평면과 만나는 점의 좌표를 구하시오.",
+   "body": "점~$(2,\\,0,\\,-1)$을 지나고 방향벡터가 $\\vec{u}=(1,\\,2,\\,4)$인 직선이 \\mbox{$yz$평면}과 만나는 점의 좌표를 구하시오.",
    "answer": "$(0,\\,-4,\\,-9)$",
    "answer_source": "답지"
   },
@@ -8669,7 +8674,7 @@
   "0716": {
    "page": 107,
    "level": "중하",
-   "body": "두 점~$\\pt{A}(2,\\,2,\\,1)$, $\\pt{B}(3,\\,2,\\,-2)$를 지나는 직선의 방정식이 $x-2=\\dfrac{z-m}{n}$, $y=k$일 때, 상수 $m$, $n$, $k$에 대하여 $mnk$의 값을 구하시오.",
+   "body": "두 점~$\\pt{A}(2,\\,2,\\,1)$, $\\pt{B}(3,\\,2,\\,-2)$를 지나는 직선의 방정식이 \\par\\smallskip\\centerline{$x-2=\\dfrac{z-m}{n}$, $y=k$}\\par\\smallskip\\noindent 일 때, 상수 $m$, $n$, $k$에 대하여 $mnk$의 값을 구하시오.",
    "answer": "$-6$",
    "answer_source": "답지"
   },
@@ -8720,14 +8725,14 @@
    "page": 107,
    "tag": "서술형",
    "level": "중",
-   "body": "두 직선 $\\dfrac{1-x}{5}=y=\\dfrac{z-5}{2}$, $x+3=\\dfrac{y-3}{2}=\\dfrac{2-z}{5}$의 교점과 점~$(2,\\,3,\\,-1)$을 지나는 직선의 방정식을 구하시오.",
+   "body": "두 직선 \\par\\smallskip\\centerline{$\\dfrac{1-x}{5}=y=\\dfrac{z-5}{2}$, $x+3=\\dfrac{y-3}{2}=\\dfrac{2-z}{5}$}\\par\\smallskip\\noindent 의 교점과 점~$(2,\\,3,\\,-1)$을 지나는 직선의 방정식을 구하시오.",
    "answer": "$\\dfrac{x+4}{3}=y-1=\\dfrac{7-z}{4}$",
    "answer_source": "답지"
   },
   "0722": {
    "page": 107,
    "level": "중",
-   "body": "두 직선 $x-2=\\dfrac{y+1}{2}=\\dfrac{3-z}{4}$, $\\dfrac{x+1}{2}=3-y=\\dfrac{z-5}{k}$가 한 점에서 만나도록 하는 상수 $k$의 값은?",
+   "body": "두 직선 \\par\\smallskip\\centerline{$x-2=\\dfrac{y+1}{2}=\\dfrac{3-z}{4}$, $\\dfrac{x+1}{2}=3-y=\\dfrac{z-5}{k}$}\\par\\smallskip\\noindent 가 한 점에서 만나도록 하는 상수 $k$의 값은?",
    "choices": [
     "$-3$",
     "$-2$",
@@ -8783,7 +8788,7 @@
   "0727": {
    "page": 108,
    "tag": "대표문제",
-   "body": "두 직선 $l_1\\colon \\dfrac{x-1}{a}=\\dfrac{y+5}{-b}=\\dfrac{z+2}{4}$, $l_2\\colon \\dfrac{x+4}{3}=\\dfrac{y+1}{2}=\\dfrac{z-1}{2}$이 서로 평행할 때, 상수 $a$, $b$에 대하여 $a+b$의 값을 구하시오.",
+   "body": "두 직선 \\par\\smallskip\\centerline{$l_1\\colon \\dfrac{x-1}{a}=\\dfrac{y+5}{-b}=\\dfrac{z+2}{4}$,}\\par\\smallskip\\centerline{$l_2\\colon \\dfrac{x+4}{3}=\\dfrac{y+1}{2}=\\dfrac{z-1}{2}$}\\par\\smallskip\\noindent 이 서로 평행할 때, 상수 $a$, $b$에 대하여 $a+b$의 값을 구하시오.",
    "answer": "$2$",
    "answer_source": "답지"
   },
@@ -8798,14 +8803,14 @@
    "page": 108,
    "tag": "서술형",
    "level": "중",
-   "body": "세 직선 \\par\\smallskip\\centerline{$l_1\\colon \\dfrac{x-1}{2}=\\dfrac{y+2}{3}=z+3$,}\\centerline{$l_2\\colon \\dfrac{x-4}{6}=\\dfrac{4-y}{p}=\\dfrac{2-z}{q}$,}\\centerline{$l_3\\colon \\dfrac{x}{r}=y-3=\\dfrac{z+1}{3}$}\\par\\smallskip\\noindent 에 대하여 $l_1\\parallel l_2$이고 $l_1\\perp l_3$일 때, $p+q+r$의 값을 구하시오. \\cond{$p$, $q$, $r$는 상수이다.}",
+   "body": "세 직선 \\par\\smallskip\\centerline{$l_1\\colon \\dfrac{x-1}{2}=\\dfrac{y+2}{3}=z+3$,}\\par\\smallskip\\centerline{$l_2\\colon \\dfrac{x-4}{6}=\\dfrac{4-y}{p}=\\dfrac{2-z}{q}$,}\\par\\smallskip\\centerline{$l_3\\colon \\dfrac{x}{r}=y-3=\\dfrac{z+1}{3}$}\\par\\smallskip\\noindent 에 대하여 $l_1\\parallel l_2$이고 $l_1\\perp l_3$일 때, $p+q+r$의 값을 구하시오. \\cond{$p$, $q$, $r$는 상수이다.}",
    "answer": "$-15$",
    "answer_source": "답지"
   },
   "0730": {
    "page": 108,
    "level": "상중",
-   "body": "두 직선 $l_1\\colon \\dfrac{x-1}{2}=\\dfrac{y-1}{3}=\\dfrac{z+1}{4}$, $l_2\\colon x+1=\\dfrac{y-2}{2}=\\dfrac{z-1}{3}$에 모두 수직이고 원점을 지나는 직선의 방정식을 구하시오.",
+   "body": "두 직선 \\par\\smallskip\\centerline{$l_1\\colon \\dfrac{x-1}{2}=\\dfrac{y-1}{3}=\\dfrac{z+1}{4}$,}\\par\\smallskip\\centerline{$l_2\\colon x+1=\\dfrac{y-2}{2}=\\dfrac{z-1}{3}$}\\par\\smallskip\\noindent 에 모두 수직이고 원점을 지나는 직선의 방정식을 구하시오.",
    "answer": "$x=-\\dfrac{y}{2}=z$",
    "answer_source": "답지"
   },
@@ -9372,7 +9377,7 @@
   "0783": {
    "page": 116,
    "tag": "중요",
-   "body": "세 직선 \\par\\smallskip\\centerline{$l_1\\colon \\dfrac{x-3}{a}=1-y=\\dfrac{z+3}{b}$,}\\centerline{$l_2\\colon x=y=-z$,}\\centerline{$l_3\\colon x+2=y-1=\\dfrac{z-1}{c}$}\\par\\smallskip\\noindent 에 대하여 두 직선~$l_1$, $l_2$는 서로 평행하고 두 직선~$l_1$, $l_3$은 서로 수직일 때, 상수 $a$, $b$, $c$에 대하여 $abc$의 값을 구하시오.",
+   "body": "세 직선 \\par\\smallskip\\centerline{$l_1\\colon \\dfrac{x-3}{a}=1-y=\\dfrac{z+3}{b}$,}\\par\\smallskip\\centerline{$l_2\\colon x=y=-z$,}\\par\\smallskip\\centerline{$l_3\\colon x+2=y-1=\\dfrac{z-1}{c}$}\\par\\smallskip\\noindent 에 대하여 두 직선~$l_1$, $l_2$는 서로 평행하고 두 직선~$l_1$, $l_3$은 서로 수직일 때, 상수 $a$, $b$, $c$에 대하여 $abc$의 값을 구하시오.",
    "answer": "$-2$",
    "answer_source": "답지"
   },

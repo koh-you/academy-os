@@ -22,19 +22,23 @@ export async function pagePathBoxes(page) {
   const ops = await page.getOperatorList();
   const base = viewport.transform; // PDF 사용자 좌표 → 위가 0 인 쪽 좌표
   let ctm = base;
+  // clip: 현재 클리핑 사각형(쪽 좌표). 예제 상자 안 그래프처럼 상자로 잘라 그린 path 는 bbox 가 보이는 범위보다 넓게 잡히므로
+  // (개념원리 공통수학1 139쪽 예제 1 · 포물선 path 가 상자 테두리 40pt 너머까지) 클립 사각형으로 bbox 를 자른다.
+  let clip = null;
   const stack = [];
   const boxes = [];
   let pendingBox = null;
+  const intersect = (a, b) => ({ x0: Math.max(a.x0, b.x0), y0: Math.max(a.y0, b.y0), x1: Math.min(a.x1, b.x1), y1: Math.min(a.y1, b.y1) });
   for (let i = 0; i < ops.fnArray.length; i += 1) {
     const fn = ops.fnArray[i];
     const args = ops.argsArray[i];
-    if (fn === OP.save) stack.push(ctm);
-    else if (fn === OP.restore) ctm = stack.pop() ?? base;
+    if (fn === OP.save) stack.push([ctm, clip]);
+    else if (fn === OP.restore) [ctm, clip] = stack.pop() ?? [base, null];
     else if (fn === OP.transform) ctm = mul(ctm, args);
     else if (fn === OP.paintFormXObjectBegin) {
-      stack.push(ctm);
+      stack.push([ctm, clip]);
       if (args[0]) ctm = mul(ctm, args[0]);
-    } else if (fn === OP.paintFormXObjectEnd) ctm = stack.pop() ?? base;
+    } else if (fn === OP.paintFormXObjectEnd) [ctm, clip] = stack.pop() ?? [base, null];
     else if (fn === OP.paintImageXObject || fn === OP.paintInlineImageXObject || fn === OP.paintImageMaskXObject) {
       // 래스터 그림(HWP 출력 프린트는 좌표평면·도형을 이미지로 넣는다): 단위 정사각형이 CTM 으로 놓인 자리가 상자다. 굵은 뼈대로 취급한다.
       const corners = [apply(ctm, 0, 0), apply(ctm, 1, 0), apply(ctm, 0, 1), apply(ctm, 1, 1)];
@@ -62,10 +66,14 @@ export async function pagePathBoxes(page) {
     } else if (fn === OP.fill || fn === OP.eoFill || fn === OP.stroke || fn === OP.closeStroke || fn === OP.fillStroke || fn === OP.closeFillStroke || fn === OP.eoFillStroke || fn === OP.closeEOFillStroke) {
       if (pendingBox) {
         const kind = fn === OP.stroke || fn === OP.closeStroke ? "stroke" : "fill";
-        boxes.push({ ...pendingBox, kind, w: pendingBox.x1 - pendingBox.x0, h: pendingBox.y1 - pendingBox.y0 });
+        const box = clip ? intersect(pendingBox, clip) : pendingBox;
+        if (box.x1 > box.x0 && box.y1 > box.y0) boxes.push({ ...box, kind, w: box.x1 - box.x0, h: box.y1 - box.y0 });
       }
       pendingBox = null;
-    } else if (fn === OP.endPath || fn === OP.clip || fn === OP.eoClip) {
+    } else if (fn === OP.clip || fn === OP.eoClip) {
+      if (pendingBox) clip = clip ? intersect(clip, pendingBox) : pendingBox;
+      pendingBox = null;
+    } else if (fn === OP.endPath) {
       pendingBox = null;
     }
   }
@@ -94,10 +102,12 @@ export function findFigureClusters(paths, region, textBoxes, { gap = 8, minSize 
   const regionWidth = region.x1 - region.x0;
   const isPanel = (box) => box.w >= regionWidth * 0.75 && box.h >= 40;
   // 문항 맨 위의 넓고 낮은 상자(개념원리 핵심문제 제목 띠 「03 무리수를 …」)도 글 상자다.
-  const isHeaderBar = (box) => box.y0 <= region.y0 + 6 && box.w >= regionWidth * 0.6 && box.h <= 40;
+  const isHeaderBar = (box) => box.y0 <= region.y0 + 6 && ((box.w >= regionWidth * 0.6 && box.h <= 40) || (box.w >= 60 && box.h <= 14));
+  // 개념원리 고등 예제 상자는 여러 조각(오른쪽 반 · 아래 띠)으로 그려진다 — 영역 오른쪽 끝(상자 테두리)에 붙은 넓은 사각형은 상자 조각이다.
+  const isBorderPanel = (box) => box.x1 >= region.x1 - 4 && box.w >= regionWidth * 0.45 && box.h >= 30;
   // 문항 왼쪽 위 모서리의 작은 색 상자(개념원리 「03」「예제 2」 번호 배지)와 오른쪽 위의 작은 이미지(QR)도 그림이 아니다.
   const isCornerBadge = (box) => box.y0 <= region.y0 + 12 && box.h <= 40 && ((box.x0 <= region.x0 + 12 && box.w <= 90) || (box.kind === "image" && box.x1 >= region.x1 - 12 && box.w <= 45));
-  const inRegion = paths.filter((box) => inside(box, region, 6) && box.y0 >= topLimit - 4 && !isGlyph(box) && !isPanel(box) && !isHeaderBar(box) && !isCornerBadge(box));
+  const inRegion = paths.filter((box) => inside(box, region, 6) && box.y0 >= topLimit - 4 && !isGlyph(box) && !isPanel(box) && !isHeaderBar(box) && !isBorderPanel(box) && !isCornerBadge(box));
   const isThin = (box) => box.h < 1.6 || box.w < 1.6;
   // 굵기 있는 path 가 그림의 뼈대다. 분수 가로줄·밑줄·문항 구분선처럼 얇은 선은 뼈대(또는 뼈대에 이미 붙은 선)에 닿을 때만
   // 넣는다(도형의 한 변·축·표의 칸 선). 번호 배지·빈칸 상자 같은 작은 색 채움은 뺀다.

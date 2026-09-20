@@ -4000,7 +4000,7 @@
   },
   "1124": {
    "page": 156,
-   "body": "수열 $\\{a_n\\}$이 다음 조건을 만족시킬 때, $\\displaystyle\\sum_{k=1}^{48} a_k$의 값은? \\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright ㈎ $a_1=2$\\\\ ㈏ $a_{k+1}=a_k+3\\ (k=1,\\,2,\\,3)$\\\\ ㈐ $a_{k+4}=3a_k\\ (k=1,\\,2,\\,3,\\,\\cdots)$\\end{minipage}}",
+   "body": "수열 $\\{a_n\\}$이 다음 조건을 만족시킬 때,\\par\\noindent $\\displaystyle\\sum_{k=1}^{48} a_k$의 값은? \\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright ㈎ $a_1=2$\\\\ ㈏ $a_{k+1}=a_k+3\\ (k=1,\\,2,\\,3)$\\\\ ㈐ $a_{k+4}=3a_k\\ (k=1,\\,2,\\,3,\\,\\cdots)$\\end{minipage}}",
    "choices": [
     "$10(3^{12}-1)$",
     "$10(3^{16}-1)$",
@@ -9802,7 +9802,7 @@
   },
   "0673": {
    "page": 90,
-   "body": "오른쪽 그림과 같이 함수 $y=a\\cos bx$의 그래프가 $x$축에 평행한 직선 $l$과 만나는 점의 $x$좌표가 $1$, $5$이다. 직선 $l$과 $x$축 및 두 직선 $x=1$, $x=5$로 둘러싸인 도형의 넓이가 $24$일 때, 상수 $a$, $b$에 대하여 $ab$의 값을 구하시오. \\cond{$a>0$, $b>0$}",
+   "body": "오른쪽 그림과 같이 함수 $y=a\\cos bx$의 그래프가 $x$축에 평행한 직선 $l$과 만나는 점의 \\mbox{$x$좌표}가 $1$, $5$이다. 직선 $l$과 $x$축 및 두 직선 $x=1$, $x=5$로 둘러싸인 도형의 넓이가 $24$일 때, 상수 $a$, $b$에 대하여 $ab$의 값을 구하시오. \\cond{$a>0$, $b>0$}",
    "figure": "crop:fig-0673.png",
    "figure_layout": "side",
    "answer": "$4\\pi$",
@@ -9895,7 +9895,7 @@
   },
   "0685": {
    "page": 92,
-   "body": "삼각형~$\\pt{ABC}$에서 $\\cos A=-\\dfrac{1}{2}$일 때, $\\sin\\dfrac{B+C-2\\pi}{2}$의 값은?",
+   "body": "삼각형~$\\pt{ABC}$에서 $\\cos A=-\\dfrac{1}{2}$일 때, $\\sin\\dfrac{B+C-2\\pi}{2}$의 \\mbox{값은?}",
    "choices": [
     "$-\\dfrac{\\sqrt{3}}{2}$",
     "$-\\dfrac{1}{2}$",
@@ -9938,7 +9938,7 @@
   "0689": {
    "page": 93,
    "tag": "중요",
-   "body": "함수 $f(x)=a\\sin b\\left(x+\\dfrac{\\pi}{2}\\right)+c$의 최댓값이 $1$, 최솟값이 $-3$이고, 모든 실수 $x$에 대하여 $f(x+p)=f(x)$를 만족시키는 양수 $p$의 최솟값이 $4\\pi$일 때, 상수 $a$, $b$, $c$에 대하여 $abc$의 값을 구하시오. \\cond{$a>0$, $b>0$}",
+   "body": "함수 $f(x)=a\\sin b\\left(x+\\dfrac{\\pi}{2}\\right)+c$의 최댓값이 $1$, 최솟값이 \\mbox{$-3$이고}, 모든 실수 $x$에 대하여 $f(x+p)=f(x)$를 만족시키는 양수 $p$의 최솟값이 $4\\pi$일 때, 상수 $a$, $b$, $c$에 대하여 $abc$의 값을 구하시오. \\cond{$a>0$, $b>0$}",
    "answer": "$-1$",
    "answer_source": "답지"
   },
@@ -9962,13 +9962,13 @@
   },
   "0693": {
    "page": 93,
-   "body": "두 수 $A$, $B$가 다음과 같을 때, $A+B$의 값을 구하시오. \\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright $A=\\tan 1^\\circ+\\tan 21^\\circ+\\tan 41^\\circ+\\tan 61^\\circ+\\tan 81^\\circ$\\\\ $B=\\tan 99^\\circ+\\tan 119^\\circ+\\tan 139^\\circ+\\tan 159^\\circ+\\tan 179^\\circ$\\end{minipage}}",
+   "body": "두 수 $A$, $B$가 다음과 같을 때, $A+B$의 값을 구하시오. \\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright $A=\\tan 1^\\circ+\\tan 21^\\circ+\\tan 41^\\circ+\\tan 61^\\circ+\\tan 81^\\circ$\\\\ $B=\\tan 99^\\circ+\\tan 119^\\circ+\\tan 139^\\circ$ $+\\tan 159^\\circ+\\tan 179^\\circ$\\end{minipage}}",
    "answer": "$0$",
    "answer_source": "답지"
   },
   "0694": {
    "page": 93,
-   "body": "$0\\le x\\le 16$에서 정의된 두 함수 \\par\\smallskip\\centerline{$f(x)=\\cos\\dfrac{\\pi x}{8}$, $g(x)=-3\\cos\\dfrac{\\pi x}{8}-\\sqrt{2}$}\\par\\smallskip\\noindent 가 있다. $-1<k<1$인 상수 $k$에 대하여 곡선 $y=f(x)$와 직선 $y=k$가 만나는 두 점의 $x$좌표를 $\\alpha_1$, $\\alpha_2$라 할 때, $|\\alpha_1-\\alpha_2|=12$이다. 곡선 $y=g(x)$와 직선 $y=k$가 만나는 두 점의 $x$좌표를 $\\beta_1$, $\\beta_2$라 할 때, $|\\beta_1-\\beta_2|$의 값을 구하시오.",
+   "body": "$0\\le x\\le 16$에서 정의된 두 함수 \\par\\smallskip\\centerline{$f(x)=\\cos\\dfrac{\\pi x}{8}$, $g(x)=-3\\cos\\dfrac{\\pi x}{8}-\\sqrt{2}$}\\par\\smallskip\\noindent 가 있다. $-1<k<1$인 상수 $k$에 대하여 곡선 \\mbox{$y=f(x)$와} 직선 $y=k$가 만나는 두 점의 $x$좌표를 $\\alpha_1$, $\\alpha_2$라 할 때, $|\\alpha_1-\\alpha_2|=12$이다. 곡선 $y=g(x)$와 직선 $y=k$가 만나는 두 점의 $x$좌표를 $\\beta_1$, $\\beta_2$라 할 때, $|\\beta_1-\\beta_2|$의 값을 구하시오.",
    "answer": "$4$",
    "answer_source": "답지"
   },
@@ -9981,7 +9981,7 @@
   "0696": {
    "page": 93,
    "tag": "교육청 기출",
-   "body": "양수 $a$에 대하여 함수 \\par\\smallskip\\centerline{$f(x)=\\left|4\\sin\\left(ax-\\dfrac{\\pi}{3}\\right)+2\\right|\\ \\left(0\\le x<\\dfrac{4\\pi}{a}\\right)$}\\par\\smallskip\\noindent 의 그래프가 직선 $y=2$와 만나는 서로 다른 점의 개수는 $n$이다. 이 $n$개의 점의 $x$좌표의 합이 $39$일 때, $n\\times a$의 값은?",
+   "body": "양수 $a$에 대하여 함수 \\par\\smallskip\\centerline{$f(x)=\\left|4\\sin\\left(ax-\\dfrac{\\pi}{3}\\right)+2\\right|\\ \\left(0\\le x<\\dfrac{4\\pi}{a}\\right)$}\\par\\smallskip\\noindent 의 그래프가 직선 $y=2$와 만나는 서로 다른 점의 개수는 \\mbox{$n$이다.} 이 $n$개의 점의 $x$좌표의 합이 $39$일 때, $n\\times a$의 값은?",
    "choices": [
     "$\\dfrac{\\pi}{2}$",
     "$\\pi$",
@@ -10096,7 +10096,7 @@
   },
   "0714": {
    "page": 95,
-   "body": "삼각형~$\\pt{ABC}$에서 $a=7$, $b=8$, $c=9$일 때, 다음을 구하시오.",
+   "body": "삼각형~$\\pt{ABC}$에서 $a=7$, $b=8$, $c=9$일 때, 다음을 \\mbox{구하시오.}",
    "subs": [
     "$\\cos A$의 값",
     "$\\sin A$의 값",
@@ -10132,7 +10132,7 @@
   "0719": {
    "page": 96,
    "tag": "대표문제",
-   "body": "삼각형~$\\pt{ABC}$에서 $b=2$, $c=2\\sqrt{3}$, $C=120^\\circ$일 때, $\\cos^2 B$의 값을 구하시오.",
+   "body": "삼각형~$\\pt{ABC}$에서 $b=2$, $c=2\\sqrt{3}$, $C=120^\\circ$일 때, \\mbox{$\\cos^2 B$의} 값을 구하시오.",
    "answer": "$\\dfrac{3}{4}$",
    "answer_source": "답지"
   },
@@ -10539,7 +10539,7 @@
   "0757": {
    "page": 101,
    "level": "중",
-   "body": "다음 조건을 만족시키는 삼각형~$\\pt{ABC}$의 둘레의 길이를 구하시오. \\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright ㈎ $\\sin A:\\sin B:\\sin C=2:3:3$\\\\ ㈏ 삼각형~$\\pt{ABC}$의 넓이는 $8\\sqrt{2}$이다.\\end{minipage}}",
+   "body": "다음 조건을 만족시키는 삼각형~$\\pt{ABC}$의 둘레의 길이를 \\mbox{구하시오.} \\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright ㈎ $\\sin A:\\sin B:\\sin C=2:3:3$\\\\ ㈏ 삼각형~$\\pt{ABC}$의 넓이는 $8\\sqrt{2}$이다.\\end{minipage}}",
    "answer": "$16$",
    "answer_source": "답지"
   },
@@ -10960,7 +10960,7 @@
   },
   "0795": {
    "page": 107,
-   "body": "$x$에 대한 이차방정식 \\par\\smallskip\\centerline{$(\\cos A+\\cos B)x^2+2x\\sin C+(\\cos A-\\cos B)=0$}\\par\\smallskip\\noindent 이 중근을 가질 때, 삼각형~$\\pt{ABC}$는 어떤 삼각형인지 말하시오.",
+   "body": "$x$에 대한 이차방정식 \\par\\smallskip\\centerline{$(\\cos A+\\cos B)x^2+2x\\sin C+(\\cos A-\\cos B)=0$}\\par\\smallskip\\noindent 이 중근을 가질 때, 삼각형~$\\pt{ABC}$는 어떤 삼각형인지 \\mbox{말하시오.}",
    "answer": "$B=90^\\circ$인 직각삼각형",
    "answer_source": "답지"
   },
@@ -10991,7 +10991,7 @@
   },
   "0800": {
    "page": 107,
-   "body": "삼각형~$\\pt{ABC}$에서 $\\seg{AB}=\\seg{AC}$, $\\seg{BC}=8$, $A=120^\\circ$일 때, $\\seg{AC}$ 위를 움직이는 점~$\\pt{P}$에 대하여 $\\seg{BP}^2+\\seg{CP}^2$의 최솟값을 구하시오.",
+   "body": "삼각형~$\\pt{ABC}$에서 $\\seg{AB}=\\seg{AC}$, $\\seg{BC}=8$, $A=120^\\circ$일 때, $\\seg{AC}$ 위를 움직이는 점~$\\pt{P}$에 대하여 $\\seg{BP}^2+\\seg{CP}^2$의 최솟값을 \\mbox{구하시오.}",
    "answer": "$40$",
    "answer_source": "답지"
   },
@@ -11448,7 +11448,7 @@
   "0856": {
    "page": 116,
    "level": "중하",
-   "body": "첫째항이 $10$인 등차수열의 첫째항부터 제$12$항까지의 합이 $252$일 때, 이 수열의 첫째항부터 제$15$항까지의 합을 구하시오.",
+   "body": "첫째항이 $10$인 등차수열의 첫째항부터 제$12$항까지의 합이 $252$일 때, 이 수열의 첫째항부터 제$15$항까지의 합을 \\mbox{구하시오.}",
    "answer": "$360$",
    "answer_source": "답지"
   },
@@ -11716,7 +11716,7 @@
   "0883": {
    "page": 119,
    "level": "상중",
-   "body": "$2$와 $512$ 사이에 $n$개의 수를 넣어서 만든 수열 \\par\\smallskip\\centerline{$2,\\ a_1,\\ a_2,\\ a_3,\\ \\cdots,\\ a_n,\\ 512$}\\par\\smallskip\\noindent 가 공비가 $r$인 등비수열을 이룰 때, $n+r$의 최솟값을 구하시오. \\cond{$r$는 자연수이다.}",
+   "body": "$2$와 $512$ 사이에 $n$개의 수를 넣어서 만든 수열 \\par\\smallskip\\centerline{$2,\\ a_1,\\ a_2,\\ a_3,\\ \\cdots,\\ a_n,\\ 512$}\\par\\smallskip\\noindent 가 공비가 $r$인 등비수열을 이룰 때, $n+r$의 최솟값을 \\mbox{구하시오.} \\cond{$r$는 자연수이다.}",
    "answer": "$7$",
    "answer_source": "답지"
   },

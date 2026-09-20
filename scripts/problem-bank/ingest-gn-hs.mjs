@@ -126,9 +126,11 @@ async function main() {
   console.log(`  연습문제 ${toc.exercises.join(" ")} · 특강 ${toc.special.join(" ")}`);
   const unitStarts = toc.units.map((u) => u.page);
   const unitIndexOf = (printed) => { let idx = -1; for (const [i, p] of unitStarts.entries()) if (printed >= p) idx = i; return Math.max(0, idx); };
-  // 연습문제 구역: 연습문제 시작 쪽부터 다음 소단원 시작 전까지. 특강도 같은 규칙.
-  const nextUnitStartAfter = (printed) => unitStarts.find((p) => p > printed) ?? Infinity;
-  const inRange = (starts, printed) => starts.some((s) => printed >= s && printed < nextUnitStartAfter(s));
+  // 연습문제 구역: 연습문제 시작 쪽부터 다음 차례 항목(소단원·연습문제·특강 중 먼저 오는 것) 전까지. 특강도 같은 규칙.
+  // (특강 뒤에 바로 연습문제가 오는 90→92 같은 경우 소단원 시작만 경계로 삼으면 연습문제 쪽이 특강에 먹힌다.)
+  const boundaries = [...new Set([...unitStarts, ...toc.exercises, ...toc.special])].sort((a, b) => a - b);
+  const nextBoundaryAfter = (printed) => boundaries.find((p) => p > printed) ?? Infinity;
+  const inRange = (starts, printed) => starts.some((s) => printed >= s && printed < nextBoundaryAfter(s));
 
   const items = [];
   const answers = {};
@@ -136,7 +138,6 @@ async function main() {
   const ocrPages = {};
   let printedPrev = null;
   const seenIds = new Set();
-  let specialCounter = 0;
 
   for (let pageNumber = fromPage; pageNumber <= toPage; pageNumber += 1) {
     const page = await doc.getPage(pageNumber);
@@ -154,7 +155,6 @@ async function main() {
     const bodyTop = H * 0.05, bodyBottom = H * 0.93;
     const isSpecial = inRange(toc.special, printedPage);
     const isExercise = !isSpecial && inRange(toc.exercises, printedPage);
-    if (isSpecial) specialCounter = 0;
 
     // 배지 후보: 통번호(h 14.5~15.5) · 예제(h 18.5~19.5). OCR 은 상자 높이가 조금 작다.
     const numH = useOcr ? [11, 16] : [14.4, 15.6];
@@ -171,13 +171,16 @@ async function main() {
         badges.push({ kind: "", n: Number(s), x: token.x, y: token.y, h: token.h, w: token.w });
       }
     }
-    if (isSpecial || !badges.length) {
+    // 특강 쪽: 예제는 번호 없는 「예제 ▸」 라벨이라 배지가 없고, 아래 확인체크(통번호)만 문항으로 잡는다(111쪽 219번처럼 답지에 답이 있다).
+    const pageBadges = isSpecial ? badges.filter((b) => b.kind === "") : badges.slice();
+    if (!pageBadges.length) {
       pageSummaries.push({ pdf_page: pageNumber, printed_page: printedPage, item_count: 0, section: isSpecial ? "특강" : "" });
       page.cleanup();
       continue;
     }
+    badges.length = 0; badges.push(...pageBadges);
     const hasExample = badges.some((b) => b.kind === "e");
-    const section = isExercise ? "연습문제" : hasExample ? "필수·발전 예제" : "개념원리 익히기";
+    const section = isSpecial ? "특강" : isExercise ? "연습문제" : hasExample ? "필수·발전 예제" : "개념원리 익히기";
     const unitIndex = unitIndexOf(printedPage);
 
     const pulLabels = visible.filter((token) => /^풀이/.test(text(token)) && token.h <= 9 && token.x < W * 0.6);
@@ -185,6 +188,20 @@ async function main() {
     const { canvas, context } = await renderPage(page, scale);
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height).data;
     await writeFile(path.join(outDir, "pages", `p${String(pageNumber).padStart(3, "0")}.jpg`), await (await renderPage(page, 100 / 72)).canvas.encode("jpeg", 82));
+    // 오른쪽 여백 노트(알아둡시다 · 생각해 봅시다 · KEY Point)와 본문 사이의 세로 괘선: 60~85%W 에서 쪽 높이 40% 이상 이어지는 어두운 열.
+    // 있으면 그 왼쪽까지가 본문 폭이다(그림이 본문 오른쪽 끝에 붙는 연습문제 296 같은 문항을 크롭에 넣기 위해 글자 폭이 아니라 괘선으로 자른다).
+    let sidebarRule = null;
+    {
+      const y0 = Math.round(H * 0.1 * scale), y1 = Math.round(H * 0.9 * scale);
+      let best = null;
+      for (let x = Math.round(W * 0.6 * scale); x < Math.round(W * 0.85 * scale); x += 1) {
+        let dark = 0;
+        for (let y = y0; y < y1; y += 2) { const o = (y * canvas.width + x) * 4; if (imageData[o] + imageData[o + 1] + imageData[o + 2] < 450) dark += 1; }
+        const ratio = dark / ((y1 - y0) / 2);
+        if (ratio > 0.4 && (!best || ratio > best.ratio)) best = { x: x / scale, ratio };
+      }
+      if (best) sidebarRule = best.x;
+    }
 
     badges.sort((a, b) => a.y - b.y);
     const qaBoxes = [];
@@ -208,11 +225,21 @@ async function main() {
           bottom = Math.min(bottom, pul.y - pul.h - 3);
         }
       }
-      // 본문 오른쪽 끝: 이 띠 안의 본문 크기 글자(h ≥ 9.5)의 최대 x. 오른쪽 여백 노트(h ≤ 9)는 제외된다.
-      const bandTokens = visible.filter((token) => token.y > top && token.y - token.h < bottom && token.h >= 9.5 && token.x < W * 0.92);
-      const rightEdge = bandTokens.length ? Math.max(...bandTokens.map((t) => t.x + t.w)) : W * 0.7;
+      // 본문 오른쪽 끝: 여백 괘선이 있으면 그 왼쪽, 없으면 본문 전체 폭(90%W).
       const x0 = Math.max(0, badge.x - 4);
-      const x1 = Math.min(W * 0.92, Math.max(W * 0.55, rightEdge + 8));
+      let x1 = sidebarRule ? sidebarRule - 6 : W * 0.9;
+      if (badge.kind === "e") {
+        // 예제 상자: 그래프가 상자 오른쪽 테두리 바로 앞까지 그려진다(139쪽 예제 1 · 발문 글줄은 72%W 에서 끝나지만 그림은 88%W 까지).
+        // 발문 구간(배지~풀이)에서 세로로 이어지는 가장 오른쪽 어두운 열(80~91%W)이 테두리다(홀수 쪽 ~89%W · 짝수 쪽 ~87%W). 못 찾으면 87%W.
+        const y0 = Math.round(top * scale), y1 = Math.round(bottom * scale);
+        let border = null;
+        for (let x = Math.round(W * 0.8 * scale); x < Math.round(W * 0.91 * scale); x += 1) {
+          let dark = 0;
+          for (let y = y0; y < y1; y += 1) { const o = (y * canvas.width + x) * 4; if (imageData[o] + imageData[o + 1] + imageData[o + 2] < 600) dark += 1; }
+          if (dark / Math.max(1, y1 - y0) > 0.5) border = x / scale;
+        }
+        x1 = border ? border - 2 : sidebarRule ? sidebarRule - 6 : W * 0.87;
+      }
       const ink = inkExtent(imageData, canvas.width, scale, { x0: x0 + 2, x1: x1 - 2, y0: top, y1: bottom });
       const box = { x0, y0: ink ? Math.max(top, ink.top - 3) : top, x1, y1: ink ? Math.min(bottom, ink.bottom + 3) : bottom };
       const label = `${printedPage}-${badge.kind}${badge.n}`;
@@ -220,7 +247,7 @@ async function main() {
       seenIds.add(label);
       const file = `items/${bookId}-${label}.jpg`;
       const size = await cropCanvasToFile(canvas, scale, box, path.join(outDir, file));
-      const isCheck = badge.kind === "" && hasExample && badge.x > W * 0.14;
+      const isCheck = badge.kind === "" && (hasExample || isSpecial) && badge.x > W * 0.14;
       const kindName = badge.kind === "e" ? "예제" : isCheck ? "확인체크" : "문항";
       const tags = [section, kindName];
       // 예제 배지 왼쪽 라벨(필수=파랑 · 발전=주황·빨강) 색으로 발전 표시.

@@ -1,0 +1,7 @@
+{ "range": "0445~0518", "checked": 74, "ok": 70,
+  "findings": [
+    { "id": "0474", "severity": "yellow", "where": "layout", "note": "긴 벡터식이 본문 첫 줄에 이어져 1~2행 자간이 크게 벌어지고 「대하/여」로 줄이 갈림. 내용은 일치" },
+    { "id": "0490", "severity": "yellow", "where": "body", "note": "원본 「…=0 를 만족시키는」, 조판본 「을 만족시키는」(조사 차이)", "fix": "body 의 \\noindent 을 만족시키는 → \\noindent 를 만족시키는" },
+    { "id": "0505", "severity": "yellow", "where": "layout", "note": "가운데 수식 줄 4(a−b−2c)−3(a−b−3c) 가 오른쪽 그림 아래로 밀려 「…라 할 때,」 뒤에 빈 공간이 생김. 내용은 일치" },
+    { "id": "0513", "severity": "yellow", "where": "layout", "note": "본문 첫 줄 「정팔면체에서」 뒤 가운데 수식 AB=a, AC=b, AD=c 와 나머지 문장이 그림 아래로 밀려 그림 옆이 크게 비어 있음. 내용은 일치", "fix": "figure_layout 을 \"below\" 로 두거나 수식 줄을 본문 인라인으로" }
+  ] }

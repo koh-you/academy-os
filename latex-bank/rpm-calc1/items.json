@@ -3157,7 +3157,7 @@
   },
   "0094": {
    "page": 19,
-   "body": "함수의 극한에 대한 설명으로 옳은 것만을 \\textbf{보기}에서 있는 대로 고른 것은? \\bogi{ㄱ. $\\displaystyle\\lim_{x\\to a} g(x)$와 $\\displaystyle\\lim_{x\\to a} \\dfrac{f(x)}{g(x)}$의 값이 각각 존재하면 $\\displaystyle\\lim_{x\\to a} f(x)$의 값도 존재한다.\\\\ ㄴ. $\\displaystyle\\lim_{x\\to a} f(x)$와 $\\displaystyle\\lim_{x\\to a} \\dfrac{f(x)}{g(x)}$의 값이 각각 존재하면 $\\displaystyle\\lim_{x\\to a} g(x)$의 값도 존재한다.\\\\ ㄷ. $\\displaystyle\\lim_{x\\to a} \\{f(x)-g(x)\\}=0$이면 $\\displaystyle\\lim_{x\\to a} f(x)=\\lim_{x\\to a} g(x)=k$이다. \\cond{$k$는 실수이다.}}",
+   "body": "함수의 극한에 대한 설명으로 옳은 것만을 \\textbf{보기}에서 있는 대로 고른 것은? \\bogi{\\raggedright ㄱ. $\\displaystyle\\lim_{x\\to a} g(x)$와 $\\displaystyle\\lim_{x\\to a} \\dfrac{f(x)}{g(x)}$의 값이 각각 존재하면 $\\displaystyle\\lim_{x\\to a} f(x)$의 값도 존재한다.\\\\ ㄴ. $\\displaystyle\\lim_{x\\to a} f(x)$와 $\\displaystyle\\lim_{x\\to a} \\dfrac{f(x)}{g(x)}$의 값이 각각 존재하면 $\\displaystyle\\lim_{x\\to a} g(x)$의 값도 존재한다.\\\\ ㄷ. $\\displaystyle\\lim_{x\\to a} \\{f(x)-g(x)\\}=0$이면 $\\displaystyle\\lim_{x\\to a} f(x)=\\lim_{x\\to a} g(x)=k$이다. \\cond{$k$는 실수이다.}}",
    "choices": [
     "ㄱ",
     "ㄱ, ㄴ",
@@ -3327,7 +3327,7 @@
    "tag": "교육청 기출",
    "body": "그림과 같이 좌표평면 위의 네 점~$\\pt{O}(0,\\,0)$, $\\pt{A}(0,\\,2)$, $\\pt{B}(-2,\\,2)$, $\\pt{C}(-2,\\,0)$과 점~$\\pt{P}(t,\\,0)\\ (t>0)$에 대하여 직선 $l$이 정사각형~$\\pt{OABC}$의 넓이와 직각삼각형~$\\pt{AOP}$의 넓이를 각각 이등분한다. 양의 실수 $t$에 대하여 직선 $l$의 $y$절편을 $f(t)$라 할 때, $\\displaystyle\\lim_{t\\to 0+} f(t)$의 값은?",
    "figure": "crop:fig-0112.png",
-   "figure_layout": "side",
+   "figure_layout": "below",
    "choices": [
     "$\\dfrac{2-\\sqrt{2}}{2}$",
     "$2-\\sqrt{2}$",
@@ -4301,7 +4301,7 @@
   },
   "0227": {
    "page": 41,
-   "body": "미분가능한 함수 $f(x)$에 대하여 도함수 $f'(x)$와 같은 것만을 \\textbf{보기}에서 있는 대로 고르시오. \\bogi{ㄱ. $\\displaystyle\\lim_{h\\to 0}\\dfrac{f(x+h)-f(x)}{h}$ \\hfill ㄴ. $\\displaystyle\\lim_{\\varDelta x\\to 0}\\dfrac{f(1+\\varDelta x)-f(1)}{\\varDelta x}$ \\hfill\\mbox{}\\\\[2mm] ㄷ. $\\displaystyle\\lim_{t\\to x}\\dfrac{f(t)-f(x)}{t-x}$ \\hfill ㄹ. $\\displaystyle\\lim_{\\varDelta x\\to 0}\\dfrac{f(x)-f(\\varDelta x)}{\\varDelta x}$ \\hfill\\mbox{}}",
+   "body": "미분가능한 함수 $f(x)$에 대하여 도함수 $f'(x)$와 같은 것만을 \\textbf{보기}에서 있는 대로 고르시오. \\bogi{\\mbox{ㄱ. $\\displaystyle\\lim_{h\\to 0}\\dfrac{f(x+h)-f(x)}{h}$}\\hfill\\mbox{ㄴ. $\\displaystyle\\lim_{\\varDelta x\\to 0}\\dfrac{f(1+\\varDelta x)-f(1)}{\\varDelta x}$}\\hfill\\mbox{}\\\\[2mm] \\mbox{ㄷ. $\\displaystyle\\lim_{t\\to x}\\dfrac{f(t)-f(x)}{t-x}$}\\hfill\\mbox{ㄹ. $\\displaystyle\\lim_{\\varDelta x\\to 0}\\dfrac{f(x)-f(\\varDelta x)}{\\varDelta x}$}\\hfill\\mbox{}}",
    "answer": "ㄱ, ㄷ",
    "answer_source": "답지"
   },
@@ -5147,7 +5147,7 @@
   "0319": {
    "page": 52,
    "tag": "중요",
-   "body": "다항함수 $f(x)$가 다음 조건을 만족시킬 때, $f'(-1)$의 값을 구하시오. \\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright ㈎ $\\displaystyle\\lim_{x\\to\\infty}\\dfrac{f(x)}{x^2-3x+2}=-3$ \\quad ㈏ $\\displaystyle\\lim_{x\\to 1}\\dfrac{f(x)-5}{x-1}=-8$\\end{minipage}}",
+   "body": "다항함수 $f(x)$가 다음 조건을 만족시킬 때, $f'(-1)$의 값을 구하시오. \\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright ㈎ $\\displaystyle\\lim_{x\\to\\infty}\\dfrac{f(x)}{x^2-3x+2}=-3$\\\\[1mm] ㈏ $\\displaystyle\\lim_{x\\to 1}\\dfrac{f(x)-5}{x-1}=-8$\\end{minipage}}",
    "answer": "$4$",
    "answer_source": "답지"
   },
@@ -7528,7 +7528,7 @@
   },
   "0589": {
    "page": 91,
-   "body": "수직선 위를 움직이는 점~$\\pt{P}$의 시각 $t$에서의 위치 $x$가 $x=\\dfrac{1}{4}t^3-\\dfrac{3}{2}t^2-t+10$일 때, $0\\le t\\le 6$에서 점~$\\pt{P}$의 속력의 최댓값을 구하시오.",
+   "body": "수직선 위를 움직이는 점~$\\pt{P}$의 시각 $t$에서의 위치 $x$가 \\par\\smallskip\\centerline{$x=\\dfrac{1}{4}t^3-\\dfrac{3}{2}t^2-t+10$}\\par\\smallskip\\noindent 일 때, $0\\le t\\le 6$에서 점~$\\pt{P}$의 속력의 최댓값을 구하시오.",
    "answer": "$8$",
    "answer_source": "답지(쪽 렌더)"
   },
@@ -7855,7 +7855,7 @@
   "0634": {
    "page": 99,
    "level": "중",
-   "body": "두 일차함수 $f(x)$, $g(x)$가 다음 조건을 만족시킬 때, $f(1)-g(2)$의 값을 구하시오. \\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright ㈎ $f(0)=2$, $g(0)=1$\\\\ ㈏ $\\dfrac{d}{dx}\\{f(x)+g(x)\\}=3$\\\\ ㈐ $\\dfrac{d}{dx}\\{f(x)g(x)\\}=4x+5$\\end{minipage}}",
+   "body": "두 일차함수 $f(x)$, $g(x)$가 다음 조건을 만족시킬 때, $f(1)-g(2)$의 값을 구하시오. \\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright ㈎ $f(0)=2$, $g(0)=1$\\\\[2mm] ㈏ $\\dfrac{d}{dx}\\{f(x)+g(x)\\}=3$\\\\[2mm] ㈐ $\\dfrac{d}{dx}\\{f(x)g(x)\\}=4x+5$\\end{minipage}}",
    "answer": "$-2$",
    "answer_source": "답지"
   },
@@ -8032,7 +8032,7 @@
   "0655": {
    "page": 102,
    "tag": "대표문제",
-   "body": "함수 $f(x)=\\displaystyle\\int (x^3-2x+2)\\,dx$에 대하여 $\\displaystyle\\lim_{h\\to 0}\\dfrac{f(-2+h)-f(-2-h)}{h}$의 값을 구하시오.",
+   "body": "함수 $f(x)=\\displaystyle\\int (x^3-2x+2)\\,dx$에 대하여\\par\\noindent $\\displaystyle\\lim_{h\\to 0}\\dfrac{f(-2+h)-f(-2-h)}{h}$의 값을 구하시오.",
    "answer": "$-4$",
    "answer_source": "답지"
   },
@@ -8081,7 +8081,7 @@
   "0660": {
    "page": 102,
    "level": "중",
-   "body": "다항함수 $f(x)$가 다음 조건을 만족시킬 때, $f(x)$를 구하시오. \\exprbox{\\raggedright ㈎ $\\displaystyle\\lim_{h\\to 0}\\dfrac{f(h)+1}{h}=2$\\\\ ㈏ 임의의 실수 $x$, $y$에 대하여\\\\ \\hspace*{1.5em}$f(x+y)=f(x)+f(y)+xy+1$}",
+   "body": "다항함수 $f(x)$가 다음 조건을 만족시킬 때, $f(x)$를 구하시오. \\exprbox{\\raggedright ㈎ $\\displaystyle\\lim_{h\\to 0}\\dfrac{f(h)+1}{h}=2$\\\\[2mm] ㈏ 임의의 실수 $x$, $y$에 대하여\\\\ \\hspace*{1.5em}$f(x+y)=f(x)+f(y)+xy+1$}",
    "answer": "$f(x)=\\dfrac{1}{2}x^2+2x-1$",
    "answer_source": "답지"
   },
@@ -8680,14 +8680,14 @@
    "page": 112,
    "tag": "서술형",
    "level": "상중",
-   "body": "함수 $f(x)=|x+2|+|x|+|x-2|$의 최솟값 $a$에 대하여 정적분 $\\displaystyle\\int_{1}^{a}f(x)\\,dx$의 값을 구하시오.",
+   "body": "함수 $f(x)=|x+2|+|x|+|x-2|$의 최솟값 $a$에 대하여\\par\\noindent 정적분 $\\displaystyle\\int_{1}^{a}f(x)\\,dx$의 값을 구하시오.",
    "answer": "$\\dfrac{47}{2}$",
    "answer_source": "답지"
   },
   "0735": {
    "page": 113,
    "tag": "대표문제",
-   "body": "정적분 $\\displaystyle\\int_{-2}^{4}(5x^4-x^3+3x+1)\\,dx+\\int_{4}^{2}(5x^4-x^3+3x+1)\\,dx$의 값은?",
+   "body": "정적분 \\par\\smallskip\\centerline{$\\displaystyle\\int_{-2}^{4}(5x^4-x^3+3x+1)\\,dx+\\int_{4}^{2}(5x^4-x^3+3x+1)\\,dx$}\\par\\smallskip\\noindent 의 값은?",
    "choices": [
     "$68$",
     "$70$",
@@ -8715,7 +8715,7 @@
   "0738": {
    "page": 113,
    "level": "중",
-   "body": "일차함수 $f(x)=ax+b$가 $\\displaystyle\\int_{-1}^{1}xf(x)\\,dx=1$, $\\displaystyle\\int_{-1}^{1}x^2f(x)\\,dx=-1$을 만족시킬 때, 상수 $a$, $b$에 대하여 $ab$의 값을 구하시오.",
+   "body": "일차함수 $f(x)=ax+b$가 \\par\\smallskip\\centerline{$\\displaystyle\\int_{-1}^{1}xf(x)\\,dx=1$, $\\displaystyle\\int_{-1}^{1}x^2f(x)\\,dx=-1$}\\par\\smallskip\\noindent 을 만족시킬 때, 상수 $a$, $b$에 대하여 $ab$의 값을 구하시오.",
    "answer": "$-\\dfrac{9}{4}$",
    "answer_source": "답지"
   },
@@ -8729,14 +8729,14 @@
   "0740": {
    "page": 113,
    "level": "중",
-   "body": "다항함수 $f(x)$가 모든 실수 $x$에 대하여 $f(-x)=f(x)$를 만족시키고 $\\displaystyle\\int_{0}^{2}f(x)\\,dx=5$, $\\displaystyle\\int_{-4}^{4}f(x)\\,dx=14$일 때, 정적분 $\\displaystyle\\int_{2}^{4}f(x)\\,dx$의 값을 구하시오.",
+   "body": "다항함수 $f(x)$가 모든 실수 $x$에 대하여 $f(-x)=f(x)$를 만족시키고 \\par\\smallskip\\centerline{$\\displaystyle\\int_{0}^{2}f(x)\\,dx=5$, $\\displaystyle\\int_{-4}^{4}f(x)\\,dx=14$}\\par\\smallskip\\noindent 일 때, 정적분 $\\displaystyle\\int_{2}^{4}f(x)\\,dx$의 값을 구하시오.",
    "answer": "$2$",
    "answer_source": "답지"
   },
   "0741": {
    "page": 113,
    "level": "상중",
-   "body": "두 다항함수 $f(x)$, $g(x)$가 모든 실수 $x$에 대하여 $f(-x)=-f(x)$, $g(-x)=g(x)$를 만족시키고 $\\displaystyle\\int_{0}^{3}f(x)\\,dx=3$, $\\displaystyle\\int_{0}^{3}g(x)\\,dx=5$일 때, 정적분 $\\displaystyle\\int_{-3}^{3}\\{f(x)+g(x)+f(x)g(x)\\}\\,dx$의 값을 구하시오.",
+   "body": "두 다항함수 $f(x)$, $g(x)$가 모든 실수 $x$에 대하여 \\par\\smallskip\\noindent\\hspace*{1.5em}$f(-x)=-f(x)$, $g(-x)=g(x)$\\par\\smallskip\\noindent 를 만족시키고 \\par\\smallskip\\centerline{$\\displaystyle\\int_{0}^{3}f(x)\\,dx=3$, $\\displaystyle\\int_{0}^{3}g(x)\\,dx=5$}\\par\\smallskip\\noindent 일 때, 정적분 $\\displaystyle\\int_{-3}^{3}\\{f(x)+g(x)+f(x)g(x)\\}\\,dx$의 값을 구하시오.",
    "answer": "$10$",
    "answer_source": "답지"
   },
@@ -8771,7 +8771,7 @@
   "0744": {
    "page": 114,
    "level": "중",
-   "body": "함수 $f(x)$에 대하여 $f(x)=\\dfrac{75}{7}x^2-6x\\displaystyle\\int_{1}^{2}f(t)\\,dt+\\left\\{\\int_{1}^{2}f(t)\\,dt\\right\\}^2$이 성립할 때, 정적분 $\\displaystyle\\int_{1}^{2}f(x)\\,dx$의 값을 구하시오.",
+   "body": "함수 $f(x)$에 대하여 \\par\\smallskip\\noindent\\hspace*{1.5em}$f(x)=\\dfrac{75}{7}x^2-6x\\displaystyle\\int_{1}^{2}f(t)\\,dt+\\left\\{\\int_{1}^{2}f(t)\\,dt\\right\\}^2$\\par\\smallskip\\noindent 이 성립할 때, 정적분 $\\displaystyle\\int_{1}^{2}f(x)\\,dx$의 값을 구하시오.",
    "answer": "$5$",
    "answer_source": "답지"
   },
@@ -8835,21 +8835,21 @@
   "0751": {
    "page": 115,
    "level": "상중",
-   "body": "다항함수 $f(x)$가 모든 실수 $x$에 대하여 $xf(x)=6x^4-4x^3+12x^2+\\displaystyle\\int_{1}^{x}f(t)\\,dt$를 만족시킬 때, $f(2)$의 값을 구하시오.",
+   "body": "다항함수 $f(x)$가 모든 실수 $x$에 대하여 \\par\\smallskip\\noindent\\hspace*{1.5em}$xf(x)=6x^4-4x^3+12x^2+\\displaystyle\\int_{1}^{x}f(t)\\,dt$\\par\\smallskip\\noindent 를 만족시킬 때, $f(2)$의 값을 구하시오.",
    "answer": "$76$",
    "answer_source": "답지"
   },
   "0752": {
    "page": 115,
    "tag": "대표문제",
-   "body": "함수 $f(x)$가 모든 실수 $x$에 대하여 $\\displaystyle\\int_{a}^{x}(x-t)f(t)\\,dt=x^3-2x^2-4x+8$을 만족시킬 때, $f(2)$의 값을 구하시오. \\cond{$a$는 상수이다.}",
+   "body": "함수 $f(x)$가 모든 실수 $x$에 대하여 \\par\\smallskip\\noindent\\hspace*{1.5em}$\\displaystyle\\int_{a}^{x}(x-t)f(t)\\,dt=x^3-2x^2-4x+8$\\par\\smallskip\\noindent 을 만족시킬 때, $f(2)$의 값을 구하시오. \\cond{$a$는 상수이다.}",
    "answer": "$8$",
    "answer_source": "답지"
   },
   "0753": {
    "page": 115,
    "level": "중하",
-   "body": "함수 $f(x)$가 모든 실수 $x$에 대하여 $\\displaystyle\\int_{0}^{x}(x-t)f(t)\\,dt=2x^4-3x^2$을 만족시킬 때, 정적분 $\\displaystyle\\int_{0}^{2}f(x)\\,dx$의 값을 구하시오.",
+   "body": "함수 $f(x)$가 모든 실수 $x$에 대하여 \\par\\smallskip\\noindent\\hspace*{1.5em}$\\displaystyle\\int_{0}^{x}(x-t)f(t)\\,dt=2x^4-3x^2$\\par\\smallskip\\noindent 을 만족시킬 때, 정적분 $\\displaystyle\\int_{0}^{2}f(x)\\,dx$의 값을 구하시오.",
    "answer": "$52$",
    "answer_source": "답지"
   },
@@ -8863,7 +8863,7 @@
   "0755": {
    "page": 115,
    "level": "중",
-   "body": "함수 $f(x)$가 모든 실수 $x$에 대하여 $\\displaystyle\\int_{2}^{x}(x-t)f(t)\\,dt=-2x^3+ax+b$를 만족시킬 때, 상수 $a$, $b$에 대하여 $f(a+b)$의 값을 구하시오.",
+   "body": "함수 $f(x)$가 모든 실수 $x$에 대하여 \\par\\smallskip\\noindent\\hspace*{1.5em}$\\displaystyle\\int_{2}^{x}(x-t)f(t)\\,dt=-2x^3+ax+b$\\par\\smallskip\\noindent 를 만족시킬 때, 상수 $a$, $b$에 대하여 $f(a+b)$의 값을 구하시오.",
    "answer": "$96$",
    "answer_source": "답지"
   },
@@ -8877,7 +8877,7 @@
   "0757": {
    "page": 116,
    "level": "중",
-   "body": "함수 $f(x)=x^3+5x+a$에 대하여 $\\displaystyle\\lim_{x\\to -1}\\dfrac{1}{x+1}\\int_{-1}^{x}f(t)\\,dt=2$일 때, 상수 $a$의 값을 구하시오.",
+   "body": "함수 $f(x)=x^3+5x+a$에 대하여 \\par\\smallskip\\noindent\\hspace*{1.5em}$\\displaystyle\\lim_{x\\to -1}\\dfrac{1}{x+1}\\int_{-1}^{x}f(t)\\,dt=2$\\par\\smallskip\\noindent 일 때, 상수 $a$의 값을 구하시오.",
    "answer": "$8$",
    "answer_source": "답지"
   },
@@ -8898,7 +8898,7 @@
   "0759": {
    "page": 116,
    "level": "중",
-   "body": "함수 $f(x)=x^3+2x^2-3x+1$에 대하여 $\\displaystyle\\lim_{x\\to 1}\\dfrac{1}{x-1}\\int_{1}^{x^3}f(t)\\,dt$의 값을 구하시오.",
+   "body": "함수 $f(x)=x^3+2x^2-3x+1$에 대하여\\par\\noindent $\\displaystyle\\lim_{x\\to 1}\\dfrac{1}{x-1}\\int_{1}^{x^3}f(t)\\,dt$의 값을 구하시오.",
    "answer": "$3$",
    "answer_source": "답지"
   },
@@ -8990,7 +8990,7 @@
   "0770": {
    "page": 117,
    "level": "상중",
-   "body": "다항함수 $f(x)$가 모든 실수 $x$에 대하여 $\\displaystyle\\int_{1}^{x}(x-t)f'(t)\\,dt=x^4-x^3+ax^2+5x-2$를 만족시킨다. 함수 $f(x)$의 극댓값을 $M$, 극솟값을 $m$이라 할 때, $M-m$의 값을 구하시오. \\cond{$a$는 상수이다.}",
+   "body": "다항함수 $f(x)$가 모든 실수 $x$에 대하여 \\par\\smallskip\\noindent\\hspace*{1.5em}$\\displaystyle\\int_{1}^{x}(x-t)f'(t)\\,dt=x^4-x^3+ax^2+5x-2$\\par\\smallskip\\noindent 를 만족시킨다. 함수 $f(x)$의 극댓값을 $M$, 극솟값을 $m$이라 할 때, $M-m$의 값을 구하시오. \\cond{$a$는 상수이다.}",
    "answer": "$\\dfrac{27}{4}$",
    "answer_source": "답지(쪽 렌더)"
   },
@@ -9004,7 +9004,7 @@
   "0772": {
    "page": 118,
    "level": "중",
-   "body": "함수 $f(x)$가 모든 실수 $x$에 대하여 $f(x)=-6x^2+\\displaystyle\\int_{-1}^{0}xf(t)\\,dt$를 만족시킬 때, $f(x)$의 최댓값은?",
+   "body": "함수 $f(x)$가 모든 실수 $x$에 대하여 \\par\\smallskip\\noindent\\hspace*{1.5em}$f(x)=-6x^2+\\displaystyle\\int_{-1}^{0}xf(t)\\,dt$\\par\\smallskip\\noindent 를 만족시킬 때, $f(x)$의 최댓값은?",
    "choices": [
     "$\\dfrac{1}{27}$",
     "$\\dfrac{2}{27}$",
@@ -9019,7 +9019,7 @@
    "page": 118,
    "tag": "서술형",
    "level": "중",
-   "body": "함수 $f(x)$가 모든 실수 $x$에 대하여 $\\displaystyle\\int_{0}^{x}(x-t)f(t)\\,dt=\\dfrac{3}{4}x^4-x^2$을 만족시킬 때, $f(x)$의 최솟값을 구하시오.",
+   "body": "함수 $f(x)$가 모든 실수 $x$에 대하여 \\par\\smallskip\\noindent\\hspace*{1.5em}$\\displaystyle\\int_{0}^{x}(x-t)f(t)\\,dt=\\dfrac{3}{4}x^4-x^2$\\par\\smallskip\\noindent 을 만족시킬 때, $f(x)$의 최솟값을 구하시오.",
    "answer": "$-2$",
    "answer_source": "답지"
   },
@@ -9547,7 +9547,7 @@
   "0834": {
    "page": 126,
    "level": "중",
-   "body": "곡선 $y=x^2+2$와 이 곡선 위의 점 $(1,\\,3)$에서의 접선 및 $y$축으로 둘러싸인 도형의 넓이를 구하시오.",
+   "body": "곡선 $y=x^2+2$와 이 곡선 위의 점 $(1,\\,3)$에서의 접선 및 \\mbox{$y$축}으로 둘러싸인 도형의 넓이를 구하시오.",
    "answer": "$\\dfrac{1}{3}$",
    "answer_source": "답지"
   },
@@ -9671,7 +9671,7 @@
   "0848": {
    "page": 129,
    "tag": "대표문제",
-   "body": "지상 $90\\,\\mathrm{m}$의 높이에서 속도 $15\\,\\mathrm{m/s}$로 지면과 수직으로 위로 쏘아 올린 물체의 $t$초 후의 속도 $v(t)\\,\\mathrm{m/s}$가 $v(t)=15-10t\\ (0\\le t\\le 6)$일 때, 물체를 쏘아 올린 후 $5$초 동안 움직인 거리를 구하시오.",
+   "body": "지상 $90\\,\\mathrm{m}$의 높이에서 속도 $15\\,\\mathrm{m/s}$로 지면과 수직으로 위로 쏘아 올린 물체의 $t$초 후의 속도 $v(t)\\,\\mathrm{m/s}$가 $v(t)=15-10t\\ (0\\le t\\le 6)$일 때, 물체를 쏘아 올린 후 \\mbox{$5$초} 동안 움직인 거리를 구하시오.",
    "answer": "$\\dfrac{145}{2}\\,\\mathrm{m}$",
    "answer_source": "답지"
   },
@@ -9693,7 +9693,7 @@
    "page": 129,
    "tag": "서술형",
    "level": "중",
-   "body": "지상 $25\\,\\mathrm{m}$의 높이에서 처음 속도 $20\\,\\mathrm{m/s}$로 지면과 수직으로 위로 쏘아 올린 물체의 $t$초 후의 속도를 $v(t)\\,\\mathrm{m/s}$라 하면 $v(t)=20-10t\\ (0\\le t\\le 5)$이다. 물체를 쏘아 올린 지 $3$초 후의 지면으로부터의 높이를 $h_1\\,\\mathrm{m}$, 물체가 최고 높이에 도달했을 때의 지면으로부터의 높이를 $h_2\\,\\mathrm{m}$라 할 때, $h_1+h_2$의 값을 구하시오.",
+   "body": "지상 $25\\,\\mathrm{m}$의 높이에서 처음 속도 $20\\,\\mathrm{m/s}$로 지면과 수직으로 위로 쏘아 올린 물체의 $t$초 후의 속도를 $v(t)\\,\\mathrm{m/s}$라 하면 $v(t)=20-10t\\ (0\\le t\\le 5)$이다. 물체를 쏘아 올린 지 \\mbox{$3$초} 후의 지면으로부터의 높이를 $h_1\\,\\mathrm{m}$, 물체가 최고 높이에 도달했을 때의 지면으로부터의 높이를 $h_2\\,\\mathrm{m}$라 할 때, $h_1+h_2$의 값을 구하시오.",
    "answer": "$85$",
    "answer_source": "답지"
   },
@@ -10008,7 +10008,7 @@
   },
   "0882": {
    "page": 134,
-   "body": "원점을 출발하여 수직선 위를 움직이는 물체의 시각 $t\\ (0\\le t\\le 6)$에서의 속도 $v(t)$의 그래프가 오른쪽 그림과 같다. 시각 $t=4$에서의 물체의 위치가 $6$일 때, 시각 $t=0$에서 $t=6$까지 물체가 움직인 거리를 구하시오.",
+   "body": "원점을 출발하여 수직선 위를 움직이는 물체의 시각 $t\\ (0\\le t\\le 6)$에서의 속도 $v(t)$의 그래프가 오른쪽 그림과 같다. 시각 $t=4$에서의 물체의 위치가 \\mbox{$6$일} 때, 시각 $t=0$에서 $t=6$까지 물체가 움직인 거리를 구하시오.",
    "figure": "crop:fig-0882.png",
    "answer": "$8$",
    "answer_source": "답지"

@@ -1,0 +1,14 @@
+{ "range": "0223~0296", "checked": 74, "ok": 63,
+  "findings": [
+    { "id": "0227", "severity": "yellow", "where": "layout", "note": "「값은?」이 줄 끝에서 「값」/「은?」으로 갈라지고 둘째 줄 자간이 크게 벌어짐" },
+    { "id": "0247", "severity": "yellow", "where": "layout", "note": "공통 지시문 「오른쪽 그림과 같은 직육면체」인데 그룹 그림이 지시문 아래 가운데에 놓임(원문은 지시문 오른쪽). build.mjs 가 그룹 figure 를 항상 center 로 두는 규약이라 0255~0256·0257~0258·0263~0266 그룹도 같음 — items.json 수정 대상 아님" },
+    { "id": "0260", "severity": "yellow", "where": "hint", "note": "㈎㈏ 빈칸 상자(\\fbox{\\scriptsize ㈎})가 글자 폭만큼만 있어 원문(약 3자 폭)보다 작음" },
+    { "id": "0261", "severity": "yellow", "where": "hint", "note": "㈎㈏㈐ 빈칸 상자가 원문보다 작음(0260과 같음)" },
+    { "id": "0262", "severity": "yellow", "where": "hint", "note": "㈎㈏ 빈칸 상자가 원문보다 작음(0260과 같음)" },
+    { "id": "0274", "severity": "yellow", "where": "layout", "note": "세로 보기가 오른쪽 그림 아래까지 밀려 본문과 보기 사이가 크게 벌어짐(원문은 본문 바로 아래)" },
+    { "id": "0278", "severity": "yellow", "where": "layout", "note": "보기(2-2-1)가 오른쪽 그림 아래까지 밀려 본문과 보기 사이가 크게 벌어짐" },
+    { "id": "0284", "severity": "yellow", "where": "layout", "note": "보기(2-2-1)가 오른쪽 그림 아래까지 밀려 본문과 보기 사이가 크게 벌어짐" },
+    { "id": "0286", "severity": "yellow", "where": "layout", "note": "보기(2-2-1)가 오른쪽 그림 아래까지 밀려 본문과 보기 사이가 크게 벌어짐" },
+    { "id": "0287", "severity": "yellow", "where": "layout", "note": "세로 보기가 오른쪽 그림 아래로 밀려 본문과 보기 사이가 벌어짐" },
+    { "id": "0288", "severity": "yellow", "where": "layout", "note": "보기(2-2-1)가 오른쪽 그림 아래까지 밀려 본문과 보기 사이가 크게 벌어짐" }
+  ] }

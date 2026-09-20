@@ -1,0 +1,6 @@
+{ "range": "0297~0370", "checked": 74, "ok": 71,
+  "findings": [
+    { "id": "0317", "severity": "yellow", "where": "figure", "note": "그림 크롭(fig-0317.png) 위 여백이 없어 D 라벨 윗부분이 크롭 경계에 닿음(판독은 가능). 다시 크롭하면 좋음" },
+    { "id": "0333", "severity": "yellow", "where": "body", "note": "원본 「ABCD-EFGH」(붙임표), 조판본은 수식 빼기 기호 「ABCD − EFGH」로 찍힘", "fix": "body 의 $\\pt{ABCD}-\\pt{EFGH}$ 를 $\\pt{ABCD}\\text{-}\\pt{EFGH}$ 로(다른 문항 표기와 통일)" },
+    { "id": "0347", "severity": "yellow", "where": "layout", "note": "본문 끝 「구하시/오.」가 줄 끝에서 끊겨 「오.」만 다음 줄에 남음(0353 「구/하시오.」, 0355·0356·0360·0361 passage 「구하/시오.」 도 같음). 자동 줄바꿈이라 출력 폭에 따라 달라짐 — 확인 필요" }
+  ] }

@@ -1886,7 +1886,7 @@
   },
   "32-u2": {
    "page": 32,
-   "body": "$\\sin(3x-15^\\circ)=\\cos 60^\\circ$일 때, $\\sin(x+45^\\circ)+\\cos(90^\\circ-4x)-\\tan 4x$의 값을 구하시오. \\cond{$5^\\circ<x<35^\\circ$} [6점]",
+   "body": "$\\sin(3x-15^\\circ)=\\cos 60^\\circ$일 때,\\par\\noindent $\\sin(x+45^\\circ)+\\cos(90^\\circ-4x)-\\tan 4x$의 값을 구하시오. \\cond{$5^\\circ<x<35^\\circ$} [6점]",
    "answer": "$0$",
    "answer_source": "답지"
   },
@@ -1942,14 +1942,14 @@
   },
   "38-03": {
    "page": 38,
-   "body": "다음은 오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\seg{AB}=6$, $\\seg{BC}=10$, $\\angle\\pt{B}=60^\\circ$일 때, $\\seg{AC}$의 길이를 구하는 과정이다. \\blank\\ 안에 알맞은 수를 써넣으시오.\\exprbox{\\begin{minipage}{0.95\\linewidth}\\raggedright\\setlength{\\parskip}{1.5mm}오른쪽 그림과 같이 꼭짓점~$\\pt{A}$에서 $\\seg{BC}$에 내린 수선의 발을 $\\pt{H}$라 하면 $\\triangle\\pt{ABH}$에서\\par\\hspace*{2em}$\\seg{AH}=6\\sin 60^\\circ=3\\sqrt{3}$, $\\seg{BH}=6\\cos 60^\\circ=\\blank$\\par $\\seg{CH}=\\seg{BC}-\\seg{BH}=10-\\blank=\\blank$이므로 $\\triangle\\pt{AHC}$에서\\par\\hspace*{2em}$\\seg{AC}=\\sqrt{(3\\sqrt{3})^2+\\blank^2}=\\blank[2.5em]$\\end{minipage}}",
+   "body": "다음은 오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\seg{AB}=6$, $\\seg{BC}=10$, $\\angle\\pt{B}=60^\\circ$일 때, $\\seg{AC}$의 길이를 구하는 과정이다. \\blank\\ 안에 알맞은 수를 써넣으시오.\\exprbox{\\begin{minipage}{0.95\\linewidth}\\noindent\\begin{minipage}[t]{0.63\\linewidth}\\vspace{0pt}\\raggedright\\setlength{\\parskip}{1.5mm}오른쪽 그림과 같이 꼭짓점~$\\pt{A}$에서 $\\seg{BC}$에 내린 수선의 발을 $\\pt{H}$라 하면 $\\triangle\\pt{ABH}$에서\\par\\hspace*{2em}$\\seg{AH}=6\\sin 60^\\circ=3\\sqrt{3}$, $\\seg{BH}=6\\cos 60^\\circ=\\blank$\\par $\\seg{CH}=\\seg{BC}-\\seg{BH}=10-\\blank=\\blank$이므로 $\\triangle\\pt{AHC}$에서\\par\\hspace*{2em}$\\seg{AC}=\\sqrt{(3\\sqrt{3})^2+\\blank^2}=\\blank[2.5em]$\\end{minipage}\\hfill\\begin{minipage}[t]{0.34\\linewidth}\\vspace{0pt}\\centering\\includegraphics[width=\\linewidth]{figures/fig-38-03-2.png}\\end{minipage}\\end{minipage}}",
    "figure": "crop:fig-38-03.png",
    "answer": "$3$, $3$, $7$, $7$, $2\\sqrt{19}$",
    "answer_source": "답지"
   },
   "39-04": {
    "page": 39,
-   "body": "다음은 오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\seg{AB}=10$, $\\angle\\pt{A}=75^\\circ$, $\\angle\\pt{B}=60^\\circ$일 때, $\\seg{AC}$의 길이를 구하는 과정이다. \\blank\\ 안에 알맞은 수를 써넣으시오.\\exprbox{\\begin{minipage}{0.95\\linewidth}\\raggedright\\setlength{\\parskip}{1.5mm}오른쪽 그림과 같이 꼭짓점~$\\pt{A}$에서 $\\seg{BC}$에 내린 수선의 발을 $\\pt{H}$라 하면 $\\triangle\\pt{ABH}$에서\\par\\hspace*{2em}$\\seg{AH}=10\\sin 60^\\circ=\\blank[2.5em]$\\par $\\angle\\pt{C}=45^\\circ$이므로 $\\triangle\\pt{AHC}$에서\\par\\hspace*{2em}$\\seg{AC}=\\dfrac{\\blank[2.5em]}{\\sin 45^\\circ}=\\blank[2.5em]$\\end{minipage}}",
+   "body": "다음은 오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\seg{AB}=10$, $\\angle\\pt{A}=75^\\circ$, $\\angle\\pt{B}=60^\\circ$일 때, $\\seg{AC}$의 길이를 구하는 과정이다. \\blank\\ 안에 알맞은 수를 써넣으시오.\\exprbox{\\begin{minipage}{0.95\\linewidth}\\noindent\\begin{minipage}[t]{0.63\\linewidth}\\vspace{0pt}\\raggedright\\setlength{\\parskip}{1.5mm}오른쪽 그림과 같이 꼭짓점~$\\pt{A}$에서 $\\seg{BC}$에 내린 수선의 발을 $\\pt{H}$라 하면 $\\triangle\\pt{ABH}$에서\\par\\hspace*{2em}$\\seg{AH}=10\\sin 60^\\circ=\\blank[2.5em]$\\par $\\angle\\pt{C}=45^\\circ$이므로 $\\triangle\\pt{AHC}$에서\\par\\hspace*{2em}$\\seg{AC}=\\dfrac{\\blank[2.5em]}{\\sin 45^\\circ}=\\blank[2.5em]$\\end{minipage}\\hfill\\begin{minipage}[t]{0.34\\linewidth}\\vspace{0pt}\\centering\\includegraphics[width=\\linewidth]{figures/fig-39-04-2.png}\\end{minipage}\\end{minipage}}",
    "figure": "crop:fig-39-04.png",
    "answer": "$5\\sqrt{3}$, $5\\sqrt{3}$, $5\\sqrt{6}$",
    "answer_source": "답지"
@@ -2400,7 +2400,6 @@
     "$14\\sqrt{3}\\,\\mathrm{cm}^2$",
     "$14\\sqrt{6}\\,\\mathrm{cm}^2$"
    ],
-   "choices_layout": "v",
    "answer": "④",
    "answer_source": "답지"
   },
@@ -4753,7 +4752,7 @@
   },
   "127-01": {
    "page": 127,
-   "body": "다음은 자료 ‘$8$, $17$, $10$, $21$, $14$, $5$, $15$, $13$, $22$’의 사분위수를 구하는 과정이다. \\blank\\ 안에 알맞은 수를 써넣으시오.\\exprbox{\\raggedright 자료의 변량을 작은 값부터 크기순으로 나열하면\\\\ \\quad $5$, $8$, $10$, $13$, $14$, $15$, $17$, $21$, $22$\\\\ 따라서 이 자료의 중앙값, 즉 제2사분위수는 $\\blank$이다.\\\\ 또 $5$, $8$, $10$, $13$의 중앙값은 $\\dfrac{8+\\blank}{2}=\\blank$이므로 제1사분위수는 $\\blank$이고,\\\\ $15$, $17$, $21$, $22$의 중앙값은 $\\dfrac{\\blank+21}{2}=\\blank$이므로 제3사분위수는 $\\blank$이다.}",
+   "body": "다음은 자료 ‘$8$, $17$, $10$, $21$, $14$, $5$, $15$, $13$, $22$’의 사분위수를 구하는 과정이다. \\blank\\ 안에 알맞은 수를 써넣으시오.\\exprbox{\\raggedright 자료의 변량을 작은 값부터 크기순으로 나열하면\\\\ \\quad $5$, $8$, $10$, $13$, $14$, $15$, $17$, $21$, $22$\\\\ 따라서 이 자료의 중앙값, 즉 제2사분위수는 $\\blank$이다.\\\\ 또 $5$, $8$, $10$, $13$의 중앙값은 $\\dfrac{8+\\blank}{2}=\\blank$이므로 \\mbox{제1사분위수}는 $\\blank$이고,\\\\ $15$, $17$, $21$, $22$의 중앙값은 $\\dfrac{\\blank+21}{2}=\\blank$이므로 \\mbox{제3사분위수}는 $\\blank$이다.}",
    "answer": "$14$, $10$, $9$, $9$, $17$, $19$, $19$",
    "answer_source": "답지"
   },
@@ -4769,7 +4768,7 @@
   },
   "127-03": {
    "page": 127,
-   "body": "아래 자료는 어느 수영 강습반 회원 13명의 나이를 조사하여 작은 값부터 크기순으로 나열한 것이다. 다음 물음에 답하시오.\\par{\\raggedleft\\small (단위: 세)\\par}\\exprbox{$24,\\quad 25,\\quad 25,\\quad 27,\\quad 27,\\quad 27,\\quad 28,\\quad 29,\\quad 30,\\quad 30,\\quad 34,\\quad 35,\\quad 37$}",
+   "body": "아래 자료는 어느 수영 강습반 회원 13명의 나이를 조사하여 작은 값부터 크기순으로 나열한 것이다. 다음 물음에 답하시오.\\par{\\raggedleft\\small (단위: 세)\\par}\\exprbox{$24,\\quad 25,\\quad 25,\\quad 27,\\quad 27,\\quad 27,\\quad 28$\\\\[2pt] $29,\\quad 30,\\quad 30,\\quad 34,\\quad 35,\\quad 37$}",
    "subs": [
     "표를 완성하시오.\\par\\smallskip\\noindent\\setlength{\\dmfigw}{322.4pt}\\ifdim\\dmfigw>\\linewidth\\setlength{\\dmfigw}{\\linewidth}\\fi\\includegraphics[width=\\dmfigw]{figures/fig-127-03.png}",
     "자료를 상자그림으로 나타내시오.\\par\\smallskip\\begin{center}\\setlength{\\dmfigw}{174.1pt}\\ifdim\\dmfigw>\\linewidth\\setlength{\\dmfigw}{\\linewidth}\\fi\\includegraphics[width=\\dmfigw]{figures/fig-127-03-2.png}\\end{center}"
@@ -4792,7 +4791,7 @@
   "128-h1": {
    "page": 128,
    "type": "사분위수",
-   "body": "다음 자료는 현진이네 반 학생 14명의 몸무게를 조사하여 나타낸 것이다. 이 자료의 사분위수를 구하시오.\\par{\\raggedleft\\small (단위: kg)\\par}\\exprbox{$48,\\quad 50,\\quad 40,\\quad 55,\\quad 65,\\quad 51,\\quad 62,\\quad 50,\\quad 40,\\quad 45,\\quad 57,\\quad 54,\\quad 60,\\quad 53$}",
+   "body": "다음 자료는 현진이네 반 학생 14명의 몸무게를 조사하여 나타낸 것이다. 이 자료의 사분위수를 구하시오.\\par{\\raggedleft\\small (단위: kg)\\par}\\exprbox{$48,\\quad 50,\\quad 40,\\quad 55,\\quad 65,\\quad 51,\\quad 62$\\\\[2pt] $50,\\quad 40,\\quad 45,\\quad 57,\\quad 54,\\quad 60,\\quad 53$}",
    "answer": "제1사분위수: $48\\,\\mathrm{kg}$, 제2사분위수: $52\\,\\mathrm{kg}$, 제3사분위수: $57\\,\\mathrm{kg}$",
    "answer_source": "본문 답"
   },
@@ -4811,14 +4810,14 @@
   },
   "128-c2": {
    "page": 128,
-   "body": "다음은 10개의 변량을 작은 값부터 크기순으로 나열한 것이다. 이 자료의 중앙값이 $13$일 때, 제1사분위수와 제3사분위수를 차례대로 구하시오.\\exprbox{$5,\\quad 8,\\quad x-2,\\quad 10,\\quad x,\\quad 15,\\quad 15,\\quad x+5,\\quad 16,\\quad 18$}",
+   "body": "다음은 10개의 변량을 작은 값부터 크기순으로 나열한 것이다. 이 자료의 중앙값이 $13$일 때, 제1사분위수와 제3사분위수를 차례대로 구하시오.\\exprbox{$5,\\quad 8,\\quad x-2,\\quad 10,\\quad x$\\\\[2pt] $15,\\quad 15,\\quad x+5,\\quad 16,\\quad 18$}",
    "answer": "$9$, $16$",
    "answer_source": "답지"
   },
   "129-h3": {
    "page": 129,
    "type": "상자그림으로 나타내기",
-   "body": "다음 자료는 민구네 반 학생 15명의 한 달 동안의 도서관 방문 횟수를 조사하여 나타낸 것이다. 이 자료를 상자그림으로 나타내시오.\\par{\\raggedleft\\small (단위: 회)\\par}\\exprbox{$9,\\quad 10,\\quad 6,\\quad 8,\\quad 8,\\quad 7,\\quad 12,\\quad 11,\\quad 8,\\quad 14,\\quad 15,\\quad 7,\\quad 16,\\quad 18,\\quad 16$}",
+   "body": "다음 자료는 민구네 반 학생 15명의 한 달 동안의 도서관 방문 횟수를 조사하여 나타낸 것이다. 이 자료를 상자그림으로 나타내시오.\\par{\\raggedleft\\small (단위: 회)\\par}\\exprbox{$9,\\quad 10,\\quad 6,\\quad 8,\\quad 8,\\quad 7,\\quad 12,\\quad 11$\\\\[2pt] $8,\\quad 14,\\quad 15,\\quad 7,\\quad 16,\\quad 18,\\quad 16$}",
    "answer": "풀이 참조 (최솟값 6회, 제1사분위수 8회, 중앙값 10회, 제3사분위수 15회, 최댓값 18회)",
    "answer_source": "본문 답(풀이 참조 · 본문 풀이 보충)"
   },
@@ -5177,7 +5176,7 @@
     "턱걸이 기록이 가장 나쁜 학생의 턱걸이 기록은 10회이다.",
     "턱걸이 기록이 10회 이상 16회 이하인 학생은 전체의 약 $75\\,\\%$이다.",
     "기록이 상위 $25\\,\\%$ 이내에 들려면 기록은 최소 14회이어야 한다.",
-    "㉠~㉣ 중 변량이 가장 밀집되어 있는 구간은 ㉢이다."
+    "㉠$\\sim$㉣ 중 변량이 가장 밀집되어 있는 구간은 ㉢이다."
    ],
    "choices_layout": "v",
    "answer": "①, ⑤",
@@ -5339,10 +5338,9 @@
   "142-e1": {
    "page": 142,
    "body": "다음 그림은 주어진 자료를 상자그림으로 나타낸 것이다. 이때 상수 $a$, $b$의 값을 구하시오. [6점]\\exprbox{$19,\\quad 10,\\quad 15,\\quad 23,\\quad 20,\\quad 12,\\quad 8,\\quad 26,\\quad 12,\\quad 20$}",
-   "figure": "crop:fig-142-e1.png",
-   "figure_layout": "below",
    "answer": "$a=17$, $b=20$",
-   "answer_source": "본문 답"
+   "answer_source": "본문 답",
+   "figure_extra": "crop:fig-142-e1.png"
   },
   "142-e2": {
    "page": 142,
@@ -5354,10 +5352,9 @@
   "142-u1": {
    "page": 142,
    "body": "다음 그림은 주어진 자료를 상자그림으로 나타낸 것이다. 이때 상수 $a$, $b$의 값을 구하시오. [6점]\\exprbox{$30,\\quad 41,\\quad 37,\\quad 38,\\quad 39,\\quad 40,\\quad 30,\\quad 48$\\\\ $50,\\quad 32,\\quad 48,\\quad 37,\\quad 42,\\quad 40,\\quad 40,\\quad 51$}",
-   "figure": "crop:fig-142-u1.png",
-   "figure_layout": "below",
    "answer": "$a=37$, $b=45$",
-   "answer_source": "답지"
+   "answer_source": "답지",
+   "figure_extra": "crop:fig-142-u1.png"
   },
   "142-u2": {
    "page": 142,

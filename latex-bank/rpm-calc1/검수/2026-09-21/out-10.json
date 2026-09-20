@@ -1,0 +1,21 @@
+{ "range": "0667~0740", "checked": 74, "ok": 56,
+  "findings": [
+    { "id": "0680", "severity": "yellow", "where": "layout", "note": "첫 줄 단어·수식 간격이 크게 벌어짐(「함수  f(x)  =  ∫(5x³ − x² + 4x + 7)dx에  대하여」) · 내용은 일치" },
+    { "id": "0684", "severity": "yellow", "where": "layout", "note": "마지막 「오.」 한 글자만 줄넘김 · 내용은 일치" },
+    { "id": "0688", "severity": "yellow", "where": "layout", "note": "보기 상자 둘째 줄(ㄷ·ㄹ)이 ㄴ 의 lim 분수 바로 아래에 붙어 줄 간격이 좁고 ㄷ·ㄹ 기준선이 살짝 어긋남 · 내용은 일치" },
+    { "id": "0689", "severity": "yellow", "where": "layout", "note": "조건 상자(\\raggedright) 안 글이 왼쪽 테두리에 거의 붙음(안쪽 여백 없음) · 내용은 일치" },
+    { "id": "0712", "severity": "yellow", "where": "layout", "note": "첫 줄 정적분 위끝(2·3)이 출처 배지와 거의 닿음 · 내용은 일치" },
+    { "id": "0713", "severity": "yellow", "where": "layout", "note": "첫 줄 정적분 위끝 2 가 출처 배지 아래 테두리에 닿음 · 내용은 일치" },
+    { "id": "0716", "severity": "yellow", "where": "layout", "note": "첫 줄 정적분 위끝 2 가 출처 배지와 거의 닿음 · 내용은 일치" },
+    { "id": "0721", "severity": "yellow", "where": "layout", "note": "첫 줄 둘째 정적분 위끝 3 이 출처 배지에 닿음 · 내용은 일치" },
+    { "id": "0723", "severity": "yellow", "where": "layout", "note": "첫 줄 단어 간격이 벌어짐(「연속함수  f(x)가  다음  조건을  만족시킬  때,  정적분」) · 조건 상자·내용은 일치" },
+    { "id": "0724", "severity": "yellow", "where": "layout", "note": "첫 줄 셋째 정적분 위끝 3 이 출처 배지에 닿음 · 내용은 일치" },
+    { "id": "0728", "severity": "yellow", "where": "layout", "note": "cases 블록 때문에 첫 줄 단어 간격 벌어짐(「함수  f(x)  =  … 에  대하여  정적분」) · cases 첫 줄이 출처 배지와 거의 닿음 · 내용은 일치" },
+    { "id": "0730", "severity": "yellow", "where": "layout", "note": "cases 블록 때문에 1·2줄 단어 간격이 크게 벌어짐(「에  대 하 여」 「dx  =  −22 를  만족시키는」) · 「(단, a<−1)」 줄이 정적분 아래끝 a 바로 밑에 붙음 · 보기 ①~⑤는 쪽 이미지(p112)와 일치" },
+    { "id": "0731", "severity": "yellow", "where": "layout", "note": "첫 줄 둘째 정적분 위끝 0 이 출처 배지에 닿음 · 내용은 일치" },
+    { "id": "0734", "severity": "yellow", "where": "layout", "note": "둘째 줄 정적분 위끝 a 가 첫 줄 f(x) 와 겹침(줄 간격 부족) · 내용은 일치" },
+    { "id": "0735", "severity": "yellow", "where": "layout", "note": "두 정적분이 한 줄에 눌려 들어가 간격이 빽빽함(dx+∫ 붙음) · 위끝 2 가 출처 배지에 닿음 · 원문은 정적분을 별도 가운데 줄로 둠", "fix": "body 를 「정적분 \\par\\smallskip\\centerline{$\\displaystyle\\int_{-2}^{4}…\\,dx+\\int_{4}^{2}…\\,dx$}\\par\\smallskip\\noindent 의 값은?」 형태로" },
+    { "id": "0738", "severity": "yellow", "where": "layout", "note": "첫 줄 단어·수식 간격이 크게 벌어짐(「일차함수  f(x)  =  ax  +  b가 … =  1,」) · 첫 정적분 위끝 1 이 출처 배지에 닿음 · 원문은 두 정적분을 별도 가운데 줄로 둠", "fix": "body 를 「일차함수 $f(x)=ax+b$가 \\par\\smallskip\\centerline{$\\displaystyle\\int_{-1}^{1}xf(x)\\,dx=1$, $\\displaystyle\\int_{-1}^{1}x^2f(x)\\,dx=-1$}\\par\\smallskip\\noindent 을 만족시킬 때, …」 형태로" },
+    { "id": "0739", "severity": "yellow", "where": "layout", "note": "둘째 줄 단어 간격이 크게 벌어짐(「를  만족시키고  ∫xf(x)dx   =   2 일  때,  정적분」) · 내용은 일치" },
+    { "id": "0740", "severity": "yellow", "where": "layout", "note": "둘째 줄 정적분 위끝 2 가 첫 줄 f(x) 와 겹침(줄 간격 부족) · 내용은 일치" }
+  ] }

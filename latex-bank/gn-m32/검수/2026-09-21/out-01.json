@@ -1,0 +1,4 @@
+{ "range": "101-01~118-c5 (68건, ids-01.txt)", "checked": 68, "ok": 67,
+  "findings": [
+    { "id": "107-09", "severity": "yellow", "where": "passage", "note": "보기 상자 두 번째 열(ㄴ·ㄹ·ㅂ)이 원본처럼 세로로 정렬되지 않고 들쭉날쭉함 · 경미(내용 동일 · bogi 의 qquad 간격 규약상 허용 가능)" }
+  ] }

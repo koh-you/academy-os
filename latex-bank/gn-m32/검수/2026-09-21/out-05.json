@@ -1,0 +1,4 @@
+{ "range": "43-02~63-c6", "checked": 68, "ok": 67,
+  "findings": [
+    { "id": "51-10", "severity": "yellow", "where": "layout", "note": "choices_layout \"v\" 때문에 짧은 보기 5개(7 cm² …)가 세로로 넓게 벌어지고 본문·그림과 보기 사이 공백이 큼(내용은 일치)", "fix": "51-10 의 choices_layout \"v\" 제거(기본 다열 배치)" }
+  ] }

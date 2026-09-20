@@ -1,0 +1,10 @@
+{ "range": "ids-03 · 136-h3~143-u6, 14-c5~23-07 (68건)", "checked": 68, "ok": 61,
+  "findings": [
+    { "id": "138-05", "severity": "red", "where": "choices", "note": "⑤ 원본 「㉠~㉣ 중」인데 조판본은 물결이 사라져 「㉠ ㉣ 중」으로 찍힘(LaTeX 의 ~ 가 공백으로 처리됨)", "fix": "choices[4] 의 ㉠~㉣ 을 ㉠$\\sim$㉣ 으로(같은 책 다른 상자그림 문항과 같은 표기)" },
+    { "id": "140-14", "severity": "yellow", "where": "layout", "note": "원본은 첫 문단 → 산점도 → 둘째 문단 → 표 순인데 조판본은 두 문단이 이어진 뒤 산점도·표가 옴(내용은 동일 · 「아래 그림」「다음 표」 지시는 여전히 성립)" },
+    { "id": "142-e1", "severity": "yellow", "where": "layout", "note": "원본은 발문 → 자료 상자(19, 10, …) → 상자그림 순인데 조판본은 상자그림이 자료 상자 앞에 옴(build 가 아래 배치 그림을 \\exprbox 앞에 끼움). 내용은 동일", "fix": "확인 필요 — figure 대신 figure_extra 로 두면 자료 상자 → 상자그림 순이 됨" },
+    { "id": "142-u1", "severity": "yellow", "where": "layout", "note": "142-e1 과 같음: 원본 발문 → 자료 상자 → 상자그림, 조판본은 상자그림이 먼저", "fix": "확인 필요 — figure 대신 figure_extra 로" },
+    { "id": "15-03", "severity": "yellow", "where": "layout", "note": "\\cond 조건이 둘째 줄로 넘어가며 첫 줄이 양끝맞춤으로 크게 벌어짐(tan A  =  √2 일 때, …). 내용은 동일" },
+    { "id": "18-c2", "severity": "yellow", "where": "layout", "note": "15-03 과 같은 현상: 첫 줄 어간이 크게 벌어짐. 내용은 동일" },
+    { "id": "20-05", "severity": "yellow", "where": "layout", "note": "세로로 긴 그림 때문에 보기 ①~⑤ 가 본문에서 크게 떨어져 아래에 놓임(빈 공간 큼). 내용은 동일" }
+  ] }

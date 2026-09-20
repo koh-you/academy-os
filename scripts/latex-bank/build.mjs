@@ -360,20 +360,28 @@ async function main() {
 
     /** 문항 하나를 낱장(110mm 폭)으로 조판해 잉크 범위만 남긴 캔버스로 돌려준다. 번호는 책 번호. */
     // 낱장 조판은 worker 마다 다른 임시 파일(_single-<k>.tex)을 써서 동시에 돌린다(문항 1400개 × xelatex 2회 · 순차 4.5초/문항 → 16코어에서 수 분).
+    // 낱장 높이는 200mm 로 시작하고, 증명 상자 + 세로 보기처럼 한 쪽을 넘치는 문항(RPM 대수 1117)은 2쪽이 생기므로 더 긴 낱장으로 다시 조판한다(첫 쪽만 쓰면 보기가 잘린다).
     const renderSingle = async (id, group, dpi, slot = 0) => {
-      const single = `${preamble}\\usepackage{multicol}\\geometry{paperwidth=110mm,paperheight=200mm,margin=6mm,headheight=0pt,headsep=0pt,footskip=0pt}\\pagestyle{empty}\\begin{document}\\setcounter{dmproblemcount}{${bookNumber(id) - 1}}\\vspace*{${badgeRaiseMm(bank.items[id]) + 1}mm}
+      const heights = [200, 300, 420];
+      for (const [attempt, paperHeight] of heights.entries()) {
+        const single = `${preamble}\\usepackage{multicol}\\geometry{paperwidth=110mm,paperheight=${paperHeight}mm,margin=6mm,headheight=0pt,headsep=0pt,footskip=0pt}\\pagestyle{empty}\\begin{document}\\setcounter{dmproblemcount}{${bookNumber(id) - 1}}\\vspace*{${badgeRaiseMm(bank.items[id]) + 1}mm}
 ${group.passage ? `\\dmpassage{${group.passage}}${badgeRaiseMm(bank.items[id]) > 1.5 ? `\\vspace{${badgeRaiseMm(bank.items[id]) - 1.5}mm}` : ""}` : ""}${group.figure ? `\\begin{center}${renderFigure(group.figure)}\\end{center}\\vspace{4mm}` : ""}
 \\dmpnum{${id}}{\\input{items/${id}}}\\end{document}`;
-      const texName = `_single-${slot}.tex`;
-      await writeFile(path.join(dir, texName), single, "utf8");
-      await compile(xelatex, dir, texName);
-      const pdfBytes = await readFile(path.join(dir, "build", texName.replace(/\.tex$/, ".pdf")));
-      const doc = await pdfjs.getDocument({ data: new Uint8Array(pdfBytes), verbosity: 0 }).promise;
-      const page = await doc.getPage(1);
-      const { canvas: rendered, context } = await renderPage(page, dpi / 72);
-      const trimmed = trimToInk(rendered, context);
-      page.cleanup();
-      return trimmed;
+        const texName = `_single-${slot}.tex`;
+        await writeFile(path.join(dir, texName), single, "utf8");
+        await compile(xelatex, dir, texName);
+        const pdfBytes = await readFile(path.join(dir, "build", texName.replace(/\.tex$/, ".pdf")));
+        const doc = await pdfjs.getDocument({ data: new Uint8Array(pdfBytes), verbosity: 0 }).promise;
+        if (doc.numPages > 1 && attempt < heights.length - 1) { await doc.destroy(); continue; }
+        if (doc.numPages > 1) console.log(`  ${id}: 낱장 ${paperHeight}mm 로도 ${doc.numPages}쪽 — 첫 쪽만 사용`);
+        else if (attempt > 0) console.log(`  ${id}: 낱장 ${paperHeight}mm 로 조판(200mm 초과)`);
+        const page = await doc.getPage(1);
+        const { canvas: rendered, context } = await renderPage(page, dpi / 72);
+        const trimmed = trimToInk(rendered, context);
+        page.cleanup();
+        await doc.destroy();
+        return trimmed;
+      }
     };
 
     // --only 0526,1022 : 검수 뒤 고친 문항만 다시 렌더할 때. --review 는 그 id 의 review png 만, --export 는 export 된 패키지의 그 id 만 패치한다.

@@ -1,5 +1,15 @@
-{ "range": "0913~0988", "checked": 34, "ok": 32, "status": "in-progress",
+{ "range": "0913~0988", "checked": 76, "ok": 64,
   "findings": [
     { "id": "0927", "severity": "yellow", "where": "layout", "note": "첫 줄 「수열 {a_n}의 첫째항부터 제n항까지의 합 S_n이」 단어 간격이 크게 벌어짐(S_n=−2n²+8n 수식이 둘째 줄 앞으로 밀리며 발생)" },
-    { "id": "0945", "severity": "yellow", "where": "figure", "note": "원문 그림에서 둘째 도형 오른쪽의 「…」이 크롭 fig-0945.png 에 빠짐(S_1·S_2 두 도형만 있음)" }
+    { "id": "0945", "severity": "yellow", "where": "figure", "note": "원문 그림에서 둘째 도형 오른쪽의 「…」이 크롭 fig-0945.png 에 빠짐(S_1·S_2 두 도형만 있음). 본문·보기·인라인 별 모양은 일치" },
+    { "id": "0972", "severity": "yellow", "where": "layout", "note": "출처 배지 「RPM 대수 0972번 · 132쪽 · 대표문제」가 첫 줄 둘째 합 기호의 위끝 20과 겹침(첫 줄에 displaystyle 합 기호가 오른쪽 끝까지 오는 경우 공통 · 템플릿 배지 위치 문제)" },
+    { "id": "0974", "severity": "yellow", "where": "layout", "note": "첫 줄 「수열 {a_n}에 대하여 a_1 = 5, a_2025 = 105일 때,」 단어 간격이 크게 벌어짐(둘째 줄의 큰 합 수식 때문)" },
+    { "id": "0975", "severity": "yellow", "where": "layout", "note": "출처 배지가 첫 줄 둘째 합 기호의 위끝 19와 겹침" },
+    { "id": "0976", "severity": "yellow", "where": "layout", "note": "출처 배지 「… 대표문제」가 첫 줄 셋째 합 기호의 위끝 n과 겹침" },
+    { "id": "0977", "severity": "yellow", "where": "layout", "note": "출처 배지가 첫 줄 셋째 합 기호의 위끝 9와 겹침" },
+    { "id": "0978", "severity": "yellow", "where": "layout", "note": "출처 배지가 첫 줄 셋째 합 기호의 위끝 20과 겹침" },
+    { "id": "0979", "severity": "yellow", "where": "layout", "note": "출처 배지 「… 서술형」이 첫 줄 셋째 합 기호의 위끝 30과 겹침" },
+    { "id": "0981", "severity": "yellow", "where": "layout", "note": "출처 배지가 첫 줄 합 기호의 위끝 10과 겹침" },
+    { "id": "0983", "severity": "yellow", "where": "layout", "note": "출처 배지 「… 대표문제」가 첫 줄 합 기호의 위끝 10과 겹침" },
+    { "id": "0984", "severity": "yellow", "where": "layout", "note": "첫 두 줄 단어 간격이 크게 벌어짐(a_1a_4 = 8, / a_3a_6 = 128일 때, ∑ = 511 앞뒤)" }
   ] }
