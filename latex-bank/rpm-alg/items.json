@@ -5287,7 +5287,7 @@
   "0157": {
    "page": 21,
    "level": "상중",
-   "body": "$\\log_2\\left(1-\\dfrac{1}{2}\\right)+\\log_2\\left(1-\\dfrac{1}{3}\\right)+\\log_2\\left(1-\\dfrac{1}{4}\\right)+\\cdots+\\log_2\\left(1-\\dfrac{1}{32}\\right)$의 값을 구하시오.",
+   "body": "$\\log_2\\left(1-\\dfrac{1}{2}\\right)+\\log_2\\left(1-\\dfrac{1}{3}\\right)+\\log_2\\left(1-\\dfrac{1}{4}\\right)$ $+\\cdots+\\log_2\\left(1-\\dfrac{1}{32}\\right)$의 값을 구하시오.",
    "answer": "$-5$",
    "answer_source": "답지"
   },
@@ -5844,7 +5844,7 @@
   },
   "0220": {
    "page": 29,
-   "body": "$1$이 아닌 세 양수 $a$, $b$, $c$에 대하여 $a^x=(\\sqrt[3]{b^2})^y=(\\sqrt[5]{c})^z=64$이고 $\\dfrac{ab}{c}=2^{18}$이 성립할 때, $\\dfrac{1}{x}+\\dfrac{3}{2y}-\\dfrac{5}{z}$의 값을 구하시오.",
+   "body": "$1$이 아닌 세 양수 $a$, $b$, $c$에 대하여\\par\\noindent $a^x=(\\sqrt[3]{b^2})^y=(\\sqrt[5]{c})^z=64$이고 $\\dfrac{ab}{c}=2^{18}$이 성립할 때, $\\dfrac{1}{x}+\\dfrac{3}{2y}-\\dfrac{5}{z}$의 값을 구하시오.",
    "answer": "$3$",
    "answer_source": "답지"
   },
@@ -6202,7 +6202,7 @@
   "0261": {
    "page": 35,
    "tag": "대표문제",
-   "body": "정의역이 $\\{x\\,|\\,-1\\le x\\le 2\\}$인 함수 $y=\\left(\\dfrac{1}{2}\\right)^{x^2-2x+3}$의 최댓값을 $M$, 최솟값을 $m$이라 할 때, $\\dfrac{m}{M}$의 값은?",
+   "body": "정의역이 $\\{x\\mid -1\\le x\\le 2\\}$인 함수 $y=\\left(\\dfrac{1}{2}\\right)^{x^2-2x+3}$의 최댓값을 $M$, 최솟값을 $m$이라 할 때, $\\dfrac{m}{M}$의 값은?",
    "choices": [
     "$\\dfrac{1}{32}$",
     "$\\dfrac{1}{16}$",
@@ -6237,14 +6237,14 @@
   "0264": {
    "page": 35,
    "level": "중",
-   "body": "정의역이 $\\{x\\,|\\,0\\le x\\le 3\\}$인 함수 $y=a^{-x^2+4x-3}\\ (0<a<1)$의 치역이 $\\{y\\,|\\,m\\le y\\le 125\\}$일 때, $m$의 값을 구하시오.",
+   "body": "정의역이 $\\{x\\mid 0\\le x\\le 3\\}$인 함수 $y=a^{-x^2+4x-3}$ $(0<a<1)$의 치역이 $\\{y\\mid m\\le y\\le 125\\}$일 때, $m$의 값을 구하시오.",
    "answer": "$\\dfrac{1}{5}$",
    "answer_source": "답지"
   },
   "0265": {
    "page": 35,
    "tag": "대표문제",
-   "body": "정의역이 $\\{x\\,|\\,-1\\le x\\le 1\\}$인 함수 $y=3^{x+1}-9^x$의 최댓값을 $M$, 최솟값을 $m$이라 할 때, $M+m$의 값은?",
+   "body": "정의역이 $\\{x\\mid -1\\le x\\le 1\\}$인 함수 $y=3^{x+1}-9^x$의 최댓값을 $M$, 최솟값을 $m$이라 할 때, $M+m$의 값은?",
    "choices": [
     "$\\dfrac{1}{4}$",
     "$\\dfrac{3}{4}$",
@@ -6265,7 +6265,7 @@
   "0267": {
    "page": 35,
    "level": "중",
-   "body": "정의역이 $\\{x\\,|\\,-2\\le x\\le 1\\}$인 함수 $y=4^{-x}-2^{1-x}+3$은 $x=a$에서 최솟값 $b$, $x=c$에서 최댓값 $d$를 갖는다. 이때 $ab-cd$의 값을 구하시오.",
+   "body": "정의역이 $\\{x\\mid -2\\le x\\le 1\\}$인 함수 $y=4^{-x}-2^{1-x}+3$은 $x=a$에서 최솟값 $b$, $x=c$에서 최댓값 $d$를 갖는다. 이때 $ab-cd$의 값을 구하시오.",
    "answer": "$22$",
    "answer_source": "답지"
   },
@@ -6477,7 +6477,7 @@
   "0291": {
    "page": 38,
    "level": "중",
-   "body": "두 집합 $A=\\left\\{x\\,\\middle|\\,\\left(\\dfrac{1}{2}\\right)^{3x}\\ge\\dfrac{1}{64}\\right\\}$, $B=\\{x\\,|\\,27^{x^2-5x-8}<9^{x^2-5x}\\}$에 대하여 집합 $A\\cap B$의 원소 중 정수인 것의 개수를 구하시오.",
+   "body": "두 집합 $A=\\left\\{x\\,\\middle|\\,\\left(\\dfrac{1}{2}\\right)^{3x}\\ge\\dfrac{1}{64}\\right\\}$,\\par\\noindent $B=\\{x\\mid 27^{x^2-5x-8}<9^{x^2-5x}\\}$에 대하여 집합 $A\\cap B$의 원소 중 정수인 것의 개수를 구하시오.",
    "answer": "$5$",
    "answer_source": "답지"
   },
@@ -7679,7 +7679,7 @@
   },
   "0427": {
    "page": 58,
-   "body": "함수 $f(x)=\\log_{\\sqrt{3}}\\left(1+\\dfrac{1}{x}\\right)$에 대하여 $f(3)+f(4)+f(5)+\\cdots+f(8)$의 값을 구하시오.",
+   "body": "함수 $f(x)=\\log_{\\sqrt{3}}\\left(1+\\dfrac{1}{x}\\right)$에 대하여\\par\\noindent $f(3)+f(4)+f(5)+\\cdots+f(8)$의 값을 구하시오.",
    "answer": "$2$",
    "answer_source": "답지"
   },
@@ -7850,7 +7850,7 @@
   "0445": {
    "page": 60,
    "tag": "평가원 기출",
-   "body": "이차함수 $y=f(x)$의 그래프와 직선 $y=x-1$이 그림과 같을 때, 부등식 \\par\\smallskip\\centerline{$\\log_3 f(x)+\\log_{\\frac{1}{3}} (x-1)\\le 0$}\\par\\smallskip\\noindent 을 만족시키는 모든 자연수 $x$의 값의 합을 구하시오. \\cond{$f(0)=f(7)=0$, $f(4)=3$}",
+   "body": "이차함수 $y=f(x)$의 그래프와 직선 $y=x-1$이 그림과 같을 때, 부등식 $\\log_3 f(x)+\\log_{\\frac{1}{3}} (x-1)\\le 0$을 만족시키는 모든 자연수 $x$의 값의 합을 구하시오. \\cond{$f(0)=f(7)=0$, $f(4)=3$}",
    "figure": "crop:fig-0445.png",
    "figure_layout": "side",
    "answer": "$15$",
@@ -8180,7 +8180,7 @@
   "0490": {
    "page": 67,
    "level": "중",
-   "body": "각 $\\theta$를 나타내는 동경과 각 $4\\theta$를 나타내는 동경이 $x$축에 대하여 대칭일 때, 각 $\\theta$의 크기를 모두 구하시오. \\cond{$180^\\circ<\\theta<360^\\circ$}",
+   "body": "각 $\\theta$를 나타내는 동경과 각 $4\\theta$를 나타내는 동경이 \\mbox{$x$축}에 대하여 대칭일 때, 각 $\\theta$의 크기를 모두 구하시오. \\cond{$180^\\circ<\\theta<360^\\circ$}",
    "answer": "$216^\\circ$, $288^\\circ$",
    "answer_source": "답지"
   },
@@ -8347,7 +8347,7 @@
   "0508": {
    "page": 69,
    "level": "중",
-   "body": "$\\cos\\theta<0$, $\\tan\\theta<0$일 때, \\textbf{보기}에서 옳은 것만을 있는 대로 고른 것은? \\cond{$0<\\theta<2\\pi$} \\bogi{ㄱ. $\\sin\\theta\\cos\\theta>0$\\\\ ㄴ. $\\sin\\theta\\tan\\theta<0$\\\\ ㄷ. $\\tan\\dfrac{\\theta}{2}>0$\\\\ ㄹ. $\\sin 2\\theta>0$}",
+   "body": "$\\cos\\theta<0$, $\\tan\\theta<0$일 때, \\textbf{보기}에서 옳은 것만을 있는 대로 고른 것은? \\cond{$0<\\theta<2\\pi$} \\bogi{ㄱ. $\\sin\\theta\\cos\\theta>0$\\\\[1mm] ㄴ. $\\sin\\theta\\tan\\theta<0$\\\\[1mm] ㄷ. $\\tan\\dfrac{\\theta}{2}>0$\\\\[1mm] ㄹ. $\\sin 2\\theta>0$}",
    "choices": [
     "ㄴ",
     "ㄱ, ㄷ",
@@ -8389,7 +8389,7 @@
   "0512": {
    "page": 70,
    "level": "중",
-   "body": "\\textbf{보기}에서 옳은 것만을 있는 대로 고르시오. \\bogi{ㄱ. $\\dfrac{1-\\cos^2\\theta}{\\tan^2\\theta}+\\sin^2\\theta=0$\\\\ ㄴ. $\\left(1+\\dfrac{1}{\\sin\\theta}\\right)\\left(1+\\dfrac{1}{\\cos\\theta}\\right)\\left(1-\\dfrac{1}{\\sin\\theta}\\right)\\left(1-\\dfrac{1}{\\cos\\theta}\\right)=2$\\\\ ㄷ. $\\left(\\sin\\theta+\\dfrac{1}{\\sin\\theta}\\right)^2+\\left(\\cos\\theta+\\dfrac{1}{\\cos\\theta}\\right)^2-\\left(\\tan\\theta+\\dfrac{1}{\\tan\\theta}\\right)^2=5$}",
+   "body": "\\textbf{보기}에서 옳은 것만을 있는 대로 고르시오. \\bogi{ㄱ. $\\dfrac{1-\\cos^2\\theta}{\\tan^2\\theta}+\\sin^2\\theta=0$\\\\[1mm] ㄴ. $\\left(1+\\dfrac{1}{\\sin\\theta}\\right)\\left(1+\\dfrac{1}{\\cos\\theta}\\right)$\\\\ \\hspace*{1.2em}$\\times\\left(1-\\dfrac{1}{\\sin\\theta}\\right)\\left(1-\\dfrac{1}{\\cos\\theta}\\right)=2$\\\\[1mm] ㄷ. $\\left(\\sin\\theta+\\dfrac{1}{\\sin\\theta}\\right)^2+\\left(\\cos\\theta+\\dfrac{1}{\\cos\\theta}\\right)^2$\\\\ \\hspace*{1.2em}$-\\left(\\tan\\theta+\\dfrac{1}{\\tan\\theta}\\right)^2=5$}",
    "answer": "ㄷ",
    "answer_source": "답지"
   },
@@ -8438,7 +8438,7 @@
   "0518": {
    "page": 71,
    "tag": "대표문제",
-   "body": "$\\theta$는 제$2$사분면의 각이고 $\\sin\\theta+\\cos\\theta=\\dfrac{1}{2}$일 때, $\\sin^2\\theta-\\cos^2\\theta$의 값은?",
+   "body": "$\\theta$는 제$2$사분면의 각이고 $\\sin\\theta+\\cos\\theta=\\dfrac{1}{2}$일 때,\\par\\noindent $\\sin^2\\theta-\\cos^2\\theta$의 값은?",
    "choices": [
     "$\\dfrac{\\sqrt{3}}{4}$",
     "$\\dfrac{\\sqrt{5}}{4}$",

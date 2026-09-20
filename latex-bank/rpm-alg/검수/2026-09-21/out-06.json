@@ -1,0 +1,5 @@
+{ "range": "0381~0456", "checked": 76, "ok": 74,
+  "findings": [
+    { "id": "0427", "severity": "yellow", "where": "layout", "note": "조판본 첫 줄이 늘어짐 — 둘째 줄의 합 수식 $f(3)+f(4)+f(5)+\\cdots+f(8)$이 한 덩어리라 첫 줄(함수 f(x)=log_{√3}(1+1/x)에 대하여)에 글자 사이 큰 공백이 들어감. 내용은 원문과 일치", "fix": "body 의 「에 대하여 」 뒤에 \\par\\noindent 를 넣어 원문처럼 합 수식을 둘째 줄 머리에서 시작" },
+    { "id": "0445", "severity": "yellow", "where": "layout", "note": "옆그림 옆에 「이차함수 … 부등식」 세 줄만 붙고 \\centerline 부등식이 그림 아래로 밀려 그 사이가 비며, 이어지는 「을 만족시키는 … 구하시오.」 줄이 늘어짐. 원문은 부등식이 그림 옆 본문 안에 있음. 내용·그림은 일치", "fix": "body 의 \\par\\smallskip\\centerline{…}\\par\\smallskip\\noindent 를 빼고 부등식을 본문 안 인라인 $\\log_3 f(x)+\\log_{\\frac{1}{3}} (x-1)\\le 0$을 로 두기" }
+  ] }

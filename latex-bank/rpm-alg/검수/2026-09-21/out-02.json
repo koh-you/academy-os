@@ -1,0 +1,4 @@
+{ "range": "0077~0152", "checked": 76, "ok": 75,
+  "findings": [
+    { "id": "0100", "severity": "yellow", "where": "layout", "note": "첫 줄이 양쪽 정렬로 늘어나 「abc = 9,」 주변 단어 간격이 크게 벌어짐(둘째 줄 첫 수식 $a^x=b^y=c^z=27$일 이 끊기지 않아 생긴 것 · 내용은 일치)" }
+  ] }

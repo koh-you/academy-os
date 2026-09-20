@@ -1,0 +1,7 @@
+{ "range": "0297~0370", "checked": 53, "ok": 49,
+  "findings": [
+    { "id": "0311", "severity": "yellow", "where": "layout", "note": "첫 두 줄 단어 간격이 크게 벌어짐(「곡선  y  =  f(x)  위 / 의  점」) · 내용은 일치" },
+    { "id": "0318", "severity": "yellow", "where": "layout", "note": "옆 그림 높이 때문에 보기 상자가 본문 아래로 밀려 본문과 상자 사이 빈 공간 생김 · 내용은 일치" },
+    { "id": "0319", "severity": "yellow", "where": "body", "note": "exprbox 안에서 ㈏ 라벨만 첫 줄 끝에 남고 ㈏ 수식이 다음 줄로 넘어감(원문은 ㈎㈏ 한 줄)", "fix": "body exprbox 의 「\quad ㈏」 를 「\\[1mm] ㈏」 로 바꿔 ㈎·㈏ 를 두 줄로 놓기" },
+    { "id": "0325", "severity": "yellow", "where": "layout", "note": "exprbox ㈏ 문장 끝 「이다.」 한 단어만 다음 줄로 넘어감 · 내용은 일치" }
+  ] }

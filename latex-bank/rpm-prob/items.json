@@ -2910,7 +2910,7 @@
   },
   "0150": {
    "page": 27,
-   "body": "다음은 서로 다른 $3$개의 동전을 동시에 던질 때, 적어도 한 개는 앞면이 나올 확률을 구하는 과정이다. \\blank~안에 알맞은 것을 써넣으시오. \\exprbox{\\raggedright 적어도 한 개는 앞면이 나오는 사건을 $A$라 하면 \\blank[3em]는 모두 뒷면이 나오는 사건이다.\\\\ 이때 모두 뒷면이 나올 확률은\\\\ \\hspace*{2em}$\\mathrm{P}(\\,\\blank[3em]\\,)=\\blank[1.5em]$\\\\ 따라서 적어도 한 개는 앞면이 나올 확률은\\\\ \\hspace*{2em}$\\mathrm{P}(A)=\\blank[1.5em]$}",
+   "body": "다음은 서로 다른 $3$개의 동전을 동시에 던질 때, 적어도 한 개는 앞면이 나올 확률을 구하는 과정이다. \\blank~안에 알맞은 것을 써넣으시오. \\exprbox{\\raggedright 적어도 한 개는 앞면이 나오는 사건을 $A$라 하면 \\blank[3em]는 모두 뒷면이 나오는 사건이다.\\\\ 이때 모두 뒷면이 나올 확률은\\\\ \\hspace*{2em}$\\mathrm{P}(\\,\\blank[3em]\\,)=\\raisebox{-1.2ex}{\\framebox[1.8em]{\\rule{0pt}{3.4ex}}}$\\\\[1ex] 따라서 적어도 한 개는 앞면이 나올 확률은\\\\ \\hspace*{2em}$\\mathrm{P}(A)=\\raisebox{-1.2ex}{\\framebox[1.8em]{\\rule{0pt}{3.4ex}}}$}",
    "answer": "$\\comp{A}$, $\\comp{A}$, $\\dfrac{1}{8}$, $\\dfrac{7}{8}$",
    "answer_source": "답지"
   },
@@ -5947,7 +5947,7 @@
     "ㄴ",
     "ㄷ",
     "ㄱ, ㄴ",
-    "ㄴ, ㄷ"
+    "ㄱ, ㄷ"
    ],
    "answer": "①",
    "answer_source": "답지"

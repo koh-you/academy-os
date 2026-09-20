@@ -108,8 +108,9 @@ function figurePlacement(item) {
 /** 출처 배지를 첫 줄 위로 더 올리는 높이(mm). 첫 줄(앞 120자)에 cases·pmatrix·aligned 가 있으면 5.5, 분수·근호·큰 괄호가 있으면 3.5, 아니면 1.5. */
 function badgeRaiseMm(item) {
   const head = String(item.body ?? "").slice(0, 120);
-  if (/\\begin\{(cases|pmatrix|aligned)\}/.test(head)) return 5.5;
-  if (/\\dfrac|\\sqrt|\\left\(/.test(head)) return 3.5;
+  // 검수(RPM 대수 0610·0613 · 미적분Ⅰ 0040·0147·0199): cases 위 중괄호·첫 줄 분수 분자·displaystyle lim 에 배지가 닿아 한 단계씩 더 올린다.
+  if (/\\begin\{(cases|pmatrix|aligned)\}/.test(head)) return 6.5;
+  if (/\\dfrac|\\sqrt|\\left\(|\\displaystyle|\\lim|\\sum|\\int/.test(head)) return 4.5;
   return 1.5;
 }
 

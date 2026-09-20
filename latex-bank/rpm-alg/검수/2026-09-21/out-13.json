@@ -1,0 +1,5 @@
+{ "range": "0913~0988", "checked": 34, "ok": 32, "status": "in-progress",
+  "findings": [
+    { "id": "0927", "severity": "yellow", "where": "layout", "note": "첫 줄 「수열 {a_n}의 첫째항부터 제n항까지의 합 S_n이」 단어 간격이 크게 벌어짐(S_n=−2n²+8n 수식이 둘째 줄 앞으로 밀리며 발생)" },
+    { "id": "0945", "severity": "yellow", "where": "figure", "note": "원문 그림에서 둘째 도형 오른쪽의 「…」이 크롭 fig-0945.png 에 빠짐(S_1·S_2 두 도형만 있음)" }
+  ] }

@@ -1,0 +1,5 @@
+{ "range": "0153~0228", "checked": 76, "ok": 74,
+  "findings": [
+    { "id": "0157", "severity": "yellow", "where": "layout", "note": "긴 수식이 한 $…$ 로 묶여(book.tex binoppenalty=10000) 줄바꿈이 안 되어 오른쪽 여백 밖으로 잘림 — 「+log₂(1−1/32)」 끝부분이 안 보임. 원문은 두 줄로 나뉨", "fix": "body 수식을 「$\\log_2\\left(1-\\dfrac{1}{2}\\right)+\\log_2\\left(1-\\dfrac{1}{3}\\right)+\\log_2\\left(1-\\dfrac{1}{4}\\right)+\\cdots$ $+\\log_2\\left(1-\\dfrac{1}{32}\\right)$」 처럼 `+\\cdots` 뒤에서 두 $…$ 로 나눠 줄바꿈 허용" },
+    { "id": "0220", "severity": "yellow", "where": "layout", "note": "첫 줄 「1이 아닌 세 양수 a, b, c에 대하여」 가 양쪽 정렬로 글자 간격이 크게 벌어짐 — 뒤따르는 긴 수식 「$a^x=(\\sqrt[3]{b^2})^y=(\\sqrt[5]{c})^z=64$이고」 가 통째로 둘째 줄로 밀린 탓. 내용은 원문과 일치", "fix": "「대하여」 뒤에 \\par\\noindent 를 넣어 원문처럼 수식을 둘째 줄 첫머리에서 시작하거나, 수식을 「$a^x=(\\sqrt[3]{b^2})^y$ $=(\\sqrt[5]{c})^z=64$이고」 로 나눠 줄바꿈 허용" }
+  ] }

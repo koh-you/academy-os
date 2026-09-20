@@ -1,0 +1,8 @@
+{ "range": "0001~0074", "checked": 74, "ok": 69,
+  "findings": [
+    { "id": "0037", "severity": "yellow", "where": "layout", "note": "cases 폭 때문에 첫 줄 단어 간격이 크게 벌어짐(「함수  f(x)  =  … 에  대 하 여」) · 마지막 「오.」 한 글자만 줄넘김" },
+    { "id": "0039", "severity": "yellow", "where": "layout", "note": "옆 그림 높이 때문에 centerline 수식 줄이 그림 아래로 밀려 「그림과 같을 때,」 뒤에 빈 공간 생김" },
+    { "id": "0040", "severity": "yellow", "where": "layout", "note": "cases 블록 첫 줄이 출처 배지와 거의 닿음 · 「에  대 하 여」 단어 간격 벌어짐" },
+    { "id": "0045", "severity": "yellow", "where": "layout", "note": "0039 와 같은 패턴 — centerline 수식 줄이 그림 아래로 밀려 빈 공간" },
+    { "id": "0070", "severity": "yellow", "where": "layout", "note": "첫 줄 단어 간격이 크게 벌어짐(「의  값이  0 이  아닌  실수일  때,」) · 보기·내용은 쪽 이미지(p015)와 일치" }
+  ] }

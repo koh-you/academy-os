@@ -1,0 +1,10 @@
+{ "range": "0837~0912", "checked": 32, "ok": 25, "status": "in-progress",
+  "findings": [
+    { "id": "0848", "severity": "yellow", "where": "layout", "note": "첫 줄 「a_6 = 44, a_18 = 116이고」 단어 간격이 크게 벌어짐(긴 합 수식 a_1+…+a_n=280 이 통째로 다음 줄로 밀림). 내용·보기는 원문과 일치" },
+    { "id": "0851", "severity": "yellow", "where": "layout", "note": "첫 줄 「a_1 = 6, a_10 = −12일 때,」 단어 간격이 크게 벌어짐(절댓값 합 수식이 통째로 다음 줄로 밀림). 내용은 원문과 일치" },
+    { "id": "0856", "severity": "yellow", "where": "layout", "note": "마지막 「구하시오.」 가 줄 끝에서 「구하시」/「오.」 로 끊김(원문도 같은 자리에서 끊김). 내용은 원문과 일치" },
+    { "id": "0859", "severity": "yellow", "where": "layout", "note": "둘째 줄 끝 「n」 과 셋째 줄 첫 「의」 로 「n의」 가 끊김. 내용은 원문과 일치" },
+    { "id": "0865", "severity": "yellow", "where": "layout", "note": "첫 줄 「수열 {a_n}의 첫째항부터 제n항까지의 합 S_n이」 단어 간격이 크게 벌어짐(S_n=−3n²+2n 이 다음 줄로 밀림). 내용·보기는 원문과 일치" },
+    { "id": "0867", "severity": "yellow", "where": "layout", "note": "첫 줄 단어 간격이 크게 벌어짐(S_n=−(n−2)²+k 가 다음 줄로 밀림). 내용은 원문과 일치" },
+    { "id": "0868", "severity": "yellow", "where": "layout", "note": "첫 줄 단어 간격이 크게 벌어짐(S_n=n²+3n+1 이 다음 줄로 밀림). 내용은 원문과 일치" }
+  ] }

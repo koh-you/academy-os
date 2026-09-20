@@ -45,8 +45,8 @@
   ]
  },
  "fig-0105.png": {
-  "width_pt": 214.5,
-  "height_pt": 207.7,
+  "width_pt": 219.1,
+  "height_pt": 190.1,
   "pdf_page": 18,
   "bbox_pt": [
    314.1,
@@ -57,7 +57,8 @@
   "margin": [
    6,
    4
-  ]
+  ],
+  "manual": true
  },
  "fig-0107.png": {
   "width_pt": 107.4,
@@ -285,8 +286,8 @@
   ]
  },
  "fig-0211.png": {
-  "width_pt": 122.5,
-  "height_pt": 104.7,
+  "width_pt": 102,
+  "height_pt": 85.7,
   "pdf_page": 32,
   "bbox_pt": [
    443.9,
@@ -297,7 +298,8 @@
   "margin": [
    6,
    4
-  ]
+  ],
+  "manual": true
  },
  "fig-0212.png": {
   "width_pt": 112.1,
@@ -465,18 +467,20 @@
   ]
  },
  "fig-0224.png": {
-  "width_pt": 97.9,
+  "width_pt": 107.9,
   "height_pt": 84.5,
   "pdf_page": 35,
   "bbox_pt": [
    199.7,
    87.4,
-   297.6,
+   307.6,
    171.9
   ],
   "margin": [
-   6,
-   4
+   0,
+   10,
+   0,
+   0
   ]
  },
  "fig-0225.png": {
@@ -2146,22 +2150,24 @@
  },
  "fig-1152.png": {
   "width_pt": 93.6,
-  "height_pt": 85.5,
+  "height_pt": 93.5,
   "pdf_page": 163,
   "bbox_pt": [
    216.1,
-   377.8,
+   369.8,
    309.7,
    463.3
   ],
   "margin": [
-   6,
-   4
+   0,
+   0,
+   8,
+   0
   ]
  },
  "fig-1153.png": {
-  "width_pt": 232.3,
-  "height_pt": 126.7,
+  "width_pt": 96.7,
+  "height_pt": 105.8,
   "pdf_page": 163,
   "bbox_pt": [
    77.4,
@@ -2172,7 +2178,8 @@
   "margin": [
    6,
    4
-  ]
+  ],
+  "manual": true
  },
  "fig-1157.png": {
   "width_pt": 81.2,

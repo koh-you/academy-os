@@ -1,0 +1,6 @@
+{ "range": "0761~0836", "checked": 41, "ok": 38, "partial": true,
+  "findings": [
+    { "id": "0781", "severity": "yellow", "where": "layout", "note": "본문 둘째 줄 dfrac 7/8 의 분자 7 이 첫 줄 「BC=2,」 와 맞닿음(그림 옆 좁은 컬럼에서 dfrac 줄 간격 부족). 내용·보기·그림은 원문과 일치" },
+    { "id": "0795", "severity": "yellow", "where": "layout", "note": "마지막 「말하시오.」 가 줄 끝에서 「말하시」/「오.」 로 끊김. 내용은 원문과 일치" },
+    { "id": "0801", "severity": "yellow", "where": "layout", "note": "본문 dfrac −5/8 과 2/3π 의 분자·분모가 위아래 줄(「2AB=BC,」·「위의」·「외접원의」)과 맞닿음(0781 과 같은 원인). 내용·보기·그림은 원문과 일치" }
+  ] }

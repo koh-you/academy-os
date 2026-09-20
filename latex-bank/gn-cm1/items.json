@@ -1,0 +1,219 @@
+{
+ "book": "개념원리 공통수학1",
+ "source_package": "gn-cm1",
+ "id_style": "page-number",
+ "variant_level": 0,
+ "units": [
+  {
+   "code": "01",
+   "title": "다항식의 덧셈과 뺄셈",
+   "pages": "12~13",
+   "groups": []
+  },
+  {
+   "code": "02",
+   "title": "다항식의 곱셈",
+   "pages": "15~16",
+   "groups": []
+  },
+  {
+   "code": "03",
+   "title": "곱셈 공식",
+   "pages": "18~21",
+   "groups": []
+  },
+  {
+   "code": "04",
+   "title": "곱셈 공식의 변형",
+   "pages": "23~26",
+   "groups": []
+  },
+  {
+   "code": "05",
+   "title": "다항식의 나눗셈",
+   "pages": "29~35",
+   "groups": []
+  },
+  {
+   "code": "06",
+   "title": "항등식",
+   "pages": "40~46",
+   "groups": []
+  },
+  {
+   "code": "07",
+   "title": "나머지정리와 인수정리",
+   "pages": "49~57",
+   "groups": []
+  },
+  {
+   "code": "08",
+   "title": "인수분해",
+   "pages": "62~64",
+   "groups": []
+  },
+  {
+   "code": "09",
+   "title": "복잡한 식의 인수분해",
+   "pages": "67~75",
+   "groups": []
+  },
+  {
+   "code": "10",
+   "title": "복소수",
+   "pages": "80~81",
+   "groups": []
+  },
+  {
+   "code": "11",
+   "title": "복소수의 연산",
+   "pages": "84~89",
+   "groups": []
+  },
+  {
+   "code": "12",
+   "title": "i 의 거듭제곱, 음수의 제곱근",
+   "pages": "96~101",
+   "groups": []
+  },
+  {
+   "code": "13",
+   "title": "이차방정식",
+   "pages": "106~110",
+   "groups": []
+  },
+  {
+   "code": "14",
+   "title": "이차방정식의 판별식",
+   "pages": "114~118",
+   "groups": []
+  },
+  {
+   "code": "15",
+   "title": "이차방정식의 근과 계수의 관계",
+   "pages": "121~130",
+   "groups": []
+  },
+  {
+   "code": "16",
+   "title": "이차방정식과 이차함수의 관계",
+   "pages": "138~144",
+   "groups": []
+  },
+  {
+   "code": "17",
+   "title": "이차함수의 최대 · 최소",
+   "pages": "147~150",
+   "groups": []
+  },
+  {
+   "code": "18",
+   "title": "삼차방정식과 사차방정식",
+   "pages": "157~163",
+   "groups": []
+  },
+  {
+   "code": "19",
+   "title": "삼차방정식의 근과 계수의 관계",
+   "pages": "169~171",
+   "groups": []
+  },
+  {
+   "code": "20",
+   "title": "방정식 x =1 의 허근",
+   "pages": "173~175",
+   "groups": []
+  },
+  {
+   "code": "21",
+   "title": "미지수가 2 개인 연립이차방정식",
+   "pages": "178~186",
+   "groups": []
+  },
+  {
+   "code": "22",
+   "title": "일차부등식",
+   "pages": "189~189",
+   "groups": []
+  },
+  {
+   "code": "23",
+   "title": "연립일차부등식",
+   "pages": "192~199",
+   "groups": []
+  },
+  {
+   "code": "24",
+   "title": "절댓값 기호를 포함한 일차부등식",
+   "pages": "201~203",
+   "groups": []
+  },
+  {
+   "code": "25",
+   "title": "이차부등식",
+   "pages": "207~210",
+   "groups": []
+  },
+  {
+   "code": "26",
+   "title": "이차부등식의 해의 조건",
+   "pages": "212~218",
+   "groups": []
+  },
+  {
+   "code": "27",
+   "title": "연립이차부등식",
+   "pages": "220~223",
+   "groups": []
+  },
+  {
+   "code": "28",
+   "title": "이차방정식의 실근의 조건",
+   "pages": "226~229",
+   "groups": []
+  },
+  {
+   "code": "29",
+   "title": "경우의 수",
+   "pages": "234~243",
+   "groups": []
+  },
+  {
+   "code": "30",
+   "title": "순열",
+   "pages": "246~255",
+   "groups": []
+  },
+  {
+   "code": "31",
+   "title": "조합",
+   "pages": "260~266",
+   "groups": []
+  },
+  {
+   "code": "32",
+   "title": "행렬",
+   "pages": "276~278",
+   "groups": []
+  },
+  {
+   "code": "33",
+   "title": "행렬의 덧셈, 뺄셈과 실수배",
+   "pages": "282~286",
+   "groups": []
+  },
+  {
+   "code": "34",
+   "title": "행렬의 곱셈",
+   "pages": "288~289",
+   "groups": []
+  },
+  {
+   "code": "35",
+   "title": "행렬의 곱셈의 성질",
+   "pages": "",
+   "groups": []
+  }
+ ],
+ "items": {}
+}
