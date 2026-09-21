@@ -143,6 +143,7 @@ async function main() {
   const chapterPages = [...new Set((toc.chapters ?? []).map((c) => c.page).filter((p) => p != null))].sort((a, b) => a - b);
   const ocrSeq = { number: 0, example: 0, special: 0, chapterPages, nextChapterPage: chapterPages.find((p) => p > fromPage) ?? Infinity, specialStart: null, specialPages: new Set() };
   let printedPrev = null;
+  let pageOffset = null;
   const seenIds = new Set();
 
   for (let pageNumber = fromPage; pageNumber <= toPage; pageNumber += 1) {
@@ -155,7 +156,13 @@ async function main() {
 
     // 인쇄 쪽: 바닥글(y > 93%)의 숫자(h 11~13 · OCR 은 8.9). 못 읽으면 앞 쪽 + 1.
     const footer = visible.filter((token) => token.y > H * 0.93 && /^\d{1,3}$/.test(text(token)) && token.h >= (useOcr ? 7 : 9) && token.h <= 14).sort((a, b) => a.h - b.h);
-    const printedPage = footer.length ? Number(text(footer[footer.length - 1])) : printedPrev != null ? printedPrev + 1 : pageNumber;
+    const footerPage = footer.length ? Number(text(footer[footer.length - 1])) : null;
+    // OCR 판은 바닥글 숫자를 자주 오독한다(「90」→「20」 · 「57」→「527」). 첫 쪽에서 pdf 쪽과의 차(offset)만 정하고 이후는 pdf 쪽 + offset 으로 센다.
+    let printedPage;
+    if (useOcr) {
+      if (pageOffset == null) { pageOffset = footerPage != null && Math.abs(footerPage - pageNumber) <= 20 ? footerPage - pageNumber : 0; console.log(`인쇄 쪽 = pdf 쪽 ${pageOffset >= 0 ? "+" : ""}${pageOffset} (첫 쪽 바닥글 ${footerPage ?? "없음"})`); }
+      printedPage = pageNumber + pageOffset;
+    } else printedPage = footerPage ?? (printedPrev != null ? printedPrev + 1 : pageNumber);
     printedPrev = printedPage;
 
     const bodyTop = H * 0.05, bodyBottom = H * 0.93;
@@ -216,7 +223,7 @@ async function main() {
       const settle = (b, key, label) => {
         const expected = ocrSeq[key] + 1;
         const fresh = ocrSeq[key] === 0;
-        const plausible = b.n != null && b.conf >= 85 && (fresh || (b.n >= expected - 1 && b.n <= expected + 3));
+        const plausible = b.n != null && (fresh ? b.conf >= 60 : (b.conf >= 85 && b.n >= expected - 1 && b.n <= expected + 3));
         if (plausible) {
           if (!fresh && b.n !== expected) console.log(`  p${pageNumber}: ${label} ${expected} 기대 · ${b.n} 읽힘(conf ${Math.round(b.conf)})${b.n > expected ? " — 사이 배지를 놓쳤는지 확인" : ""}`);
           ocrSeq[key] = Math.max(ocrSeq[key], b.n);

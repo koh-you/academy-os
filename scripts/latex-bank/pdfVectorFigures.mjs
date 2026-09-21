@@ -66,6 +66,11 @@ export async function pagePathBoxes(page) {
     } else if (fn === OP.fill || fn === OP.eoFill || fn === OP.stroke || fn === OP.closeStroke || fn === OP.fillStroke || fn === OP.closeFillStroke || fn === OP.eoFillStroke || fn === OP.closeEOFillStroke) {
       if (pendingBox) {
         const kind = fn === OP.stroke || fn === OP.closeStroke ? "stroke" : "fill";
+        // 두 점만 잇는 가로·세로 선(윤곽선 PDF 의 좌표축 · 0.3pt 선폭)은 bbox 높이(폭)가 0 이라 버려지던 것 — 선폭만큼 두께를 준다.
+        if (kind === "stroke") {
+          if (pendingBox.y1 - pendingBox.y0 < 0.6) { pendingBox.y0 -= 0.3; pendingBox.y1 += 0.3; }
+          if (pendingBox.x1 - pendingBox.x0 < 0.6) { pendingBox.x0 -= 0.3; pendingBox.x1 += 0.3; }
+        }
         const box = clip ? intersect(pendingBox, clip) : pendingBox;
         if (box.x1 > box.x0 && box.y1 > box.y0) boxes.push({ ...box, kind, w: box.x1 - box.x0, h: box.y1 - box.y0 });
       }
@@ -107,7 +112,9 @@ export function findFigureClusters(paths, region, textBoxes, { gap = 8, minSize 
   const isBorderPanel = (box) => box.x1 >= region.x1 - 4 && box.w >= regionWidth * 0.45 && box.h >= 30;
   // 문항 왼쪽 위 모서리의 작은 색 상자(개념원리 「03」「예제 2」 번호 배지)와 오른쪽 위의 작은 이미지(QR)도 그림이 아니다.
   const isCornerBadge = (box) => box.y0 <= region.y0 + 12 && box.h <= 40 && ((box.x0 <= region.x0 + 12 && box.w <= 90) || (box.kind === "image" && box.x1 >= region.x1 - 12 && box.w <= 45));
-  const inRegion = paths.filter((box) => inside(box, region, 6) && box.y0 >= topLimit - 4 && !isGlyph(box) && !isPanel(box) && !isHeaderBar(box) && !isBorderPanel(box) && !isCornerBadge(box));
+  // 글자가 셋 이상 든 넓은 상자(보기 ㄱ~ㄷ · 조건 ㈎㈏ 상자 · 폭이 문항의 45% 이상)는 글 상자다 — 옆 그림과 8pt 안에 있으면 한 덩어리로 붙던 것.
+  const isTextPanel = (box) => box.w >= regionWidth * 0.45 && box.h >= 18 && textBoxes.filter((token) => token.h >= 6 && inside(token, box, -1)).length >= 3;
+  const inRegion = paths.filter((box) => inside(box, region, 6) && box.y0 >= topLimit - 4 && !isGlyph(box) && !isPanel(box) && !isHeaderBar(box) && !isBorderPanel(box) && !isCornerBadge(box) && !isTextPanel(box));
   const isThin = (box) => box.h < 1.6 || box.w < 1.6;
   // 굵기 있는 path 가 그림의 뼈대다. 분수 가로줄·밑줄·문항 구분선처럼 얇은 선은 뼈대(또는 뼈대에 이미 붙은 선)에 닿을 때만
   // 넣는다(도형의 한 변·축·표의 칸 선). 번호 배지·빈칸 상자 같은 작은 색 채움은 뺀다.
@@ -125,12 +132,18 @@ export function findFigureClusters(paths, region, textBoxes, { gap = 8, minSize 
     if (cross) candidates.push(line);
   }
   const thin = [...thinLines, ...small];
+  // 윤곽선 PDF: 좌표축 라벨(「y」「x」)은 OCR 이 자주 놓쳐 글자 상자가 없고, 화살표 끝에서 6pt 쯤 떨어져 있다 — 같은 줄에 4pt 안 이웃 글자가
+  // 없는 외딴 작은 조각만 8pt 안이면 붙인다(낱말 속 글자는 3pt — 본문 줄을 따라 사슬처럼 번지지 않게).
+  const sameLine = (a, b) => a.y0 < b.y1 && a.y1 > b.y0;
+  const hGap = (a, b) => (a.x0 > b.x1 ? a.x0 - b.x1 : b.x0 > a.x1 ? b.x0 - a.x1 : -1);
+  const isolated = (box) => !small.some((o) => o !== box && sameLine(o, box) && hGap(o, box) >= 0 && hGap(o, box) <= 4) && !textBoxes.some((t) => sameLine(t, box) && hGap(t, box) >= 0 && hGap(t, box) <= 4);
+  const attachGapOf = (box) => (glyphPaths && !isThin(box) && isolated(box) ? 8 : 3);
   let grew = true;
   while (grew) {
     grew = false;
     for (const box of thin) {
       if (candidates.includes(box)) continue;
-      if (candidates.some((other) => overlaps(box, other, 3))) {
+      if (candidates.some((other) => overlaps(box, other, attachGapOf(box)))) {
         candidates.push(box);
         grew = true;
       }
@@ -166,7 +179,8 @@ export function findFigureClusters(paths, region, textBoxes, { gap = 8, minSize 
         // 보기 번호 ①~⑤ 가 그림 보기 왼쪽에 붙어 있으면(그림이 보기인 문항) 함께 넣는다.
         // 세로로는 덩어리 안, 가로로는 왼쪽에 붙은 것만(그림 아래 보기 「③ 25」의 번호는 넣지 않는다).
         const circled = /^[①②③④⑤]$/.test(token.str.trim()) && token.y0 >= box.y0 - 4 && token.y1 <= box.y1 + 4 && token.x1 <= box.x0 + 6 && token.x1 >= box.x0 - 16;
-        if (circled || (token.h >= 9.5 ? inside(token, cluster, 1.5) : overlaps(token, box, 5))) box = union(box, token);
+        const reach = glyphPaths && !textBoxes.some((t) => t !== token && sameLine(t, token) && hGap(t, token) >= 0 && hGap(t, token) <= 4) ? 8 : 5;
+        if (circled || (token.h >= 9.5 ? inside(token, cluster, 1.5) : overlaps(token, box, reach))) box = union(box, token);
       }
     }
     results.push({ x0: box.x0 - 2, y0: box.y0 - 2, x1: box.x1 + 2, y1: box.y1 + 2, paths: members.length });

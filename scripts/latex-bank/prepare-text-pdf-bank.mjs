@@ -197,7 +197,13 @@ for (const pageNumber of pages) {
       // 덩어리가 여럿이면(보기 ①~⑤ 가 그림인 문항 · 표 + 도형) 한 상자로 합친다. 다만 합친 상자가 본문 글줄을 삼키면
       // (그림 사이에 발문이 있는 경우) 합치지 않고 큰 덩어리를 대표 그림으로, 나머지는 fig-<id>-2.png … 로 따로 둔다.
       const union = clusters.reduce(unionBox);
-      const swallows = tokens.some((token) => token.h >= 9.5 && token.str.trim().length >= 4 && insideRegion(token, union, 1) && !clusters.some((cluster) => insideRegion(token, cluster, 1)));
+      // OCR 판은 글자 토큰이 한두 글자로 잘게 쪼개지므로(「유」「리」「함수」) 덩어리 밖 본문 글자 수를 합쳐 6자 이상이면 본문이 낀 것으로 본다.
+      const between = tokens.filter((token) => insideRegion(token, union, 1) && !clusters.some((cluster) => insideRegion(token, cluster, 2)));
+      // 보기 라벨(ㄱ. ㄴ. · ①~⑤ · ⑴~⑸)은 그림 사이 글자여도 본문이 아니다 — 보기 그래프 넷을 한 상자로 합칠 때 갈라지지 않게.
+      const isLabel = (token) => /^[ㄱ-ㅎ]\.?$|^[①②③④⑤⑴⑵⑶⑷⑸⑹]$|^\(\d\)$/.test(token.str.trim());
+      const swallows = ocrPages
+        ? between.filter((token) => token.h >= 8 && !isLabel(token)).reduce((sum, token) => sum + token.str.trim().length, 0) >= 6
+        : between.some((token) => token.h >= 9.5 && token.str.trim().length >= 4);
       const area = (box) => (box.x1 - box.x0) * (box.y1 - box.y0);
       const ordered = [...clusters].sort((a, b) => area(b) - area(a));
       const main = clusters.length > 1 && swallows ? ordered[0] : union;

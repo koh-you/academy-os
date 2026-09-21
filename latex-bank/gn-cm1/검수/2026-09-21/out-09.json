@@ -1,0 +1,17 @@
+{ "range": "ids-09 (271-604 ~ 297-652, 68문항)", "checked": 68, "ok": 54,
+  "findings": [
+    { "id": "276-609", "severity": "yellow", "where": "layout", "note": "3행 행렬이 첫 줄에 있어 번호 「609.」가 본문 첫 줄 위 별도 줄로 떠 있음(번호 baseline 과 본문 baseline 이 어긋남 · 610·예제1 도 동일 · 템플릿 공통)" },
+    { "id": "276-610", "severity": "yellow", "where": "layout", "note": "3행 행렬로 번호 「610.」가 본문 위 별도 줄에 떠 있음(609 와 동일)" },
+    { "id": "276-e1", "severity": "yellow", "where": "layout", "note": "3행 행렬로 번호 「01.」이 본문 위 별도 줄에 떠 있음(609 와 동일)" },
+    { "id": "286-625", "severity": "yellow", "where": "layout", "note": "둘째 줄 수식 「2(X+B)=3{X+2(X+A)}를」이 끊기지 않아 첫 줄 「두 행 렬 A = (…), B = (…) 에 대 하 여」 어간·글자 간격이 크게 벌어짐" },
+    { "id": "286-627", "severity": "yellow", "where": "layout", "note": "cases 블록이 둘째 줄에서 끊기지 않아 첫 줄 「삼 차 정 사 각 행 렬 A 의 (i,j) 성 분 a_ij 가」 글자 간격까지 크게 늘어남", "fix": "body 를 「…성분 $a_{ij}$가 \\par\\smallskip\\centerline{$a_{ij}=\\begin{cases}…\\end{cases}$}\\par\\smallskip\\noindent 일 때, …」로 나눠 cases 를 별도 줄에 두기" },
+    { "id": "288-630", "severity": "yellow", "where": "subs", "note": "소문항 12개가 원문(2열×6행)과 달리 1열 세로로 길게 늘어섬 · (10)~(12) 번호와 행렬 괄호 사이 간격 없음(빌드 템플릿에 subs 2열 옵션 없음 · items.json 수정 대상 아님)" },
+    { "id": "289-633", "severity": "yellow", "where": "layout", "note": "첫 줄 「이 차 정 사 각 행 렬 A 에 대 하 여 A(2a;0) = (4;−6),」 글자 간격이 크게 벌어짐", "fix": "두 등식을 \\par\\smallskip\\centerline{$A(…)=(…)$, $A(…)=(…)$}\\par\\smallskip\\noindent 로 별도 줄에 두기(285-e6 방식)" },
+    { "id": "289-e9", "severity": "yellow", "where": "layout", "note": "첫 줄 「이 차 정 사 각 행 렬 A 에 대 하 여 A(a;b) = (1;2),」 글자 간격이 크게 벌어짐(633 과 동일)", "fix": "두 등식을 \\centerline 별도 줄로(285-e6 방식)" },
+    { "id": "292-634", "severity": "yellow", "where": "layout", "note": "첫 줄 「두 행 렬 A = (…), E = (…) 에 대 하 여」 어간·글자 간격이 크게 벌어짐" },
+    { "id": "294-637", "severity": "yellow", "where": "layout", "note": "첫 줄 「두 행 렬 A = (…), B = (…) 에 대 하 여」 어간·글자 간격이 크게 벌어짐" },
+    { "id": "294-e12", "severity": "yellow", "where": "layout", "note": "첫 줄 「두 행 렬 A = (…), B = (…) 에 대 하 여」 어간·글자 간격이 크게 벌어짐" },
+    { "id": "296-643", "severity": "yellow", "where": "layout", "note": "첫 줄 「행 렬 A = (…), E = (…) 에 대 하 여」 어간·글자 간격이 크게 벌어짐" },
+    { "id": "296-644", "severity": "yellow", "where": "layout", "note": "첫 줄 「이 차 정 사 각 행 렬 A 에 대 하 여 A(1;0) = (1;3),」 글자 간격이 크게 벌어짐", "fix": "두 등식을 \\centerline 별도 줄로(285-e6 방식)" },
+    { "id": "297-650", "severity": "yellow", "where": "layout", "note": "첫 줄 「이 차 정 사 각 행 렬 A 에 대 하 여 A(2a;b) = (3;15),」 글자 간격이 크게 벌어짐", "fix": "두 등식을 \\centerline 별도 줄로(285-e6 방식)" }
+  ] }

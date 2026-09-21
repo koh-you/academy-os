@@ -7,7 +7,7 @@
 ## 먼저 읽을 것 (순서대로)
 
 1. `latex-bank/{BANK}/전사-가이드.md` — 이 책의 id(통번호 · e예제)·구역·전사 범위·표기·그림 규칙. 그대로 지킨다.
-2. `latex-bank/rpm-cm1/items.json` 의 문항 20개쯤(고등 표기 예) — 읽기만 한다. (대수·미적분·확통이면 `latex-bank/rpm-alg/items.json` · `rpm-calc1` · `rpm-prob` 의 것을 본다.)
+2. `latex-bank/rpm-cm1/items.json` 의 문항 20개쯤(고등 표기 예) — 읽기만 한다. (공통수학2·대수·기하·미적분Ⅰ·Ⅱ·확통이면 같은 과목의 `latex-bank/rpm-cm2` · `rpm-alg` · `rpm-geo` · `rpm-calc1` · `rpm-calc2` · `rpm-prob` 의 items.json 을 본다.)
 3. 이번 배치 목록: `{BATCH_FILE}` — 쪽마다 쪽 이미지, 문항마다 크롭·답 크롭 경로·인쇄 쪽·자동 크롭 그림·글자 레이어 힌트가 있다.
 
 ## 할 일

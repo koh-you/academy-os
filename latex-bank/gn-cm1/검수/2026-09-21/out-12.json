@@ -1,0 +1,11 @@
+{ "range": "ids-12 (80-148~99-e12)", "checked": 62, "ok": 54,
+  "findings": [
+    { "id": "89-163", "severity": "yellow", "where": "layout", "note": "첫 줄이 양끝맞춤으로 크게 벌어짐(α − β = 4 + √5 i 사이 공백 과다) · 가벼움 · 내용은 일치" },
+    { "id": "89-e8", "severity": "yellow", "where": "layout", "note": "첫 줄 자간·어간이 심하게 벌어짐(등식 (1+2i)z̄+3iz=−2+6i 가 통째로 다음 줄로 밀려 첫 줄이 늘어남) · 내용은 일치" },
+    { "id": "91-166", "severity": "yellow", "where": "layout", "note": "보기 ㄷ의 분수 1/4 위쪽이 ㄴ 줄에 바짝 붙음(보기 상자 줄간격 부족) · 내용은 일치" },
+    { "id": "91-e1", "severity": "yellow", "where": "layout", "note": "보기 ㄹ의 분수 분자(z, z̄)가 ㄷ 줄 (z̄−i)와 겹침(보기 상자 줄간격 부족) · 내용은 일치" },
+    { "id": "92-170", "severity": "yellow", "where": "layout", "note": "「구하시오」가 「구하시/오.」로 끊겨 둘째 줄에 「오.」만 남음 · 내용은 일치" },
+    { "id": "92-171", "severity": "yellow", "where": "layout", "note": "첫 줄이 양끝맞춤으로 크게 벌어짐(α + β = 2 − i 사이 공백 과다) · 가벼움 · 내용은 일치" },
+    { "id": "97-190", "severity": "yellow", "where": "layout", "note": "첫 줄 dfrac 분모(i², i³, i⁴, i⁵⁰)와 둘째 줄 「구하시오」가 거의 맞닿음(줄간격 부족) · 내용은 일치" },
+    { "id": "98-193", "severity": "yellow", "where": "layout", "note": "「구하시오」가 「구하시/오.」로 끊겨 둘째 줄에 「오.」만 남음 · 내용은 일치" }
+  ] }

@@ -82,13 +82,23 @@ async function main() {
         if (col) col.items.push(b); else cols.push({ x: b.x, items: [b] });
       }
       const fixed = [];
+      const maxNumber = Math.max(...byNumber.keys());
+      // 굵은 숫자 글꼴에서 자주 헷갈리는 쌍(5↔9 · 0↔8 · 3↔8 · 1↔7 · 6↔8)은 반 글자 차이로 센다. 후보는 차이 1 이하.
+      const confusable = new Set(["59", "95", "08", "80", "38", "83", "17", "71", "68", "86"]);
+      const digitDiff = (a, b) => a.length !== b.length ? 9 : [...a].reduce((d, ch, i) => d + (ch === b[i] ? 0 : confusable.has(ch + b[i]) ? 0.5 : 1), 0);
+      const pickNear = (prev, raw) => prev == null ? null : [1, 2, 3].map((d) => prev + d).find((c) => digitDiff(String(c), String(raw)) <= 1);
       for (const col of cols) {
         let prev = null;
         for (const b of col.items.sort((a, b) => a.y - b.y)) {
+          // 책의 마지막 번호보다 크면 오독(굵은 「5」→「9」: 515→915). 앞 번호 +1~+3 중 한 자만 다른 것으로 고치고, 못 고치면 버린다.
+          if (b.n > maxNumber) {
+            const pick = pickNear(prev, b.raw);
+            if (pick) { console.log(`  p${pageNumber}: 번호 OCR 「${b.raw}」(conf ${Math.round(b.conf)}) > 마지막 번호 ${maxNumber} → 열 순서상 ${pick}`); b.n = pick; b.conf = Math.max(b.conf, 60); }
+            else { console.log(`  p${pageNumber}: 번호 OCR 「${b.raw}」(conf ${Math.round(b.conf)}) > 마지막 번호 ${maxNumber} → 버림`); b.conf = 0; continue; }
+          }
           // 열 안에서 번호는 늘어나기만 한다(두 열이 번갈아 쓰이면 +2). 줄거나 6 넘게 뛰면 오독으로 보고, 앞 번호 +1~+3 중 글자가 한 자만 다른 것으로 고친다.
           if (prev != null && (b.n <= prev || (b.n > prev + 6 && b.conf < 90))) {
-            const r = String(b.raw);
-            const pick = [1, 2, 3].map((d) => prev + d).find((c) => { const e = String(c); return e.length === r.length && [...e].filter((ch, i) => ch !== r[i]).length <= 1; });
+            const pick = pickNear(prev, b.raw);
             if (pick) { console.log(`  p${pageNumber}: 번호 OCR 「${b.raw}」(conf ${Math.round(b.conf)}) → 열 순서상 ${pick}`); b.n = pick; b.conf = Math.max(b.conf, 60); }
             else if (b.conf < 85) { console.log(`  p${pageNumber}: 번호 OCR 「${b.raw}」(conf ${Math.round(b.conf)}) 순서에 안 맞아 버림(앞 ${prev})`); b.conf = 0; }
           }

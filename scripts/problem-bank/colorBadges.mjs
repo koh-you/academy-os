@@ -61,7 +61,22 @@ export async function detectColorBadges(canvas, imageData, scale, region, classe
       }
       for (let i = clusters.length - 2; i >= 0; i -= 1) {
         const [a0, a1] = clusters[i], [b0, b1] = clusters[i + 1];
-        if ((b0 - a1) / scale <= 6 && (a1 - a0) / scale <= 9 && (b1 - b0) / scale <= 9) clusters.splice(i, 2, [a0, b1]);
+        const narrowPair = (b0 - a1) / scale <= 6 && (a1 - a0) / scale <= 9 && (b1 - b0) / scale <= 9;
+        // 통번호(파랑·자주)는 같은 줄에 다른 색 글자가 없으므로 5pt 안쪽 이웃(「21」+「2」)은 붙인다. 예제 색은 라벨 상자가 붙어 있어 좁은 쌍만.
+        const numberPair = cls.kind === "" && (b0 - a1) / scale <= 5 && (b1 - a0) / scale <= wMax;
+        if (narrowPair || numberPair) clusters.splice(i, 2, [a0, b1]);
+      }
+      // 라벨 상자와 번호 사이가 3.5pt 보다 좁아 한 덩어리가 된 것(기하 「필수 02」): 너무 넓으면 안쪽의 가장 넓은 빈 열에서 가른다.
+      for (let i = clusters.length - 1; i >= 0; i -= 1) {
+        const [c0, c1] = clusters[i];
+        if ((c1 - c0) / scale <= wMax) continue;
+        let bestStart = -1, bestLen = 0, gs = -1;
+        for (let x = c0; x <= c1; x += 1) {
+          const empty = x < c1 && cols[x] === 0;
+          if (empty) { if (gs < 0) gs = x; }
+          else if (gs >= 0) { if (x - gs > bestLen) { bestLen = x - gs; bestStart = gs; } gs = -1; }
+        }
+        if (bestStart >= 0 && bestLen >= Math.max(1, Math.round(0.8 * scale))) clusters.splice(i, 1, [c0, bestStart], [bestStart + bestLen, c1]);
       }
       if (debug) console.log(`    [${name}] run y ${((y0 + ra) / scale).toFixed(1)}~${((y0 + rb) / scale).toFixed(1)} clusters ${clusters.map(([a, b]) => `${((x0 + a) / scale).toFixed(0)}-${((x0 + b) / scale).toFixed(0)}`).join(" ")}`);
       for (const [ca, cb] of clusters) {
