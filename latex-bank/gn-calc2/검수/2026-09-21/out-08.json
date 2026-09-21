@@ -1,0 +1,4 @@
+{ "range": "192-386~217-438", "checked": 68, "ok": 67,
+  "findings": [
+    { "id": "216-e6", "severity": "yellow", "where": "layout", "note": "cases 수식이 본문 첫 줄 가운데에 들어가 양끝맞춤으로 단어 간격이 지나치게 벌어짐(「함수  f(x)  =  {…}  에  대하여  정적분」). 내용은 원본과 일치", "fix": "함수 정의 $f(x)=\\begin{cases}…\\end{cases}$ 를 416·419처럼 \\par\\smallskip\\centerline{…}\\par\\smallskip\\noindent 로 별도 줄에 두거나 줄바꿈 위치 조정" }
+  ] }

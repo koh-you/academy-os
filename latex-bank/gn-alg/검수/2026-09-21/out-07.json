@@ -1,0 +1,15 @@
+{ "range": "134-e3~153-379 (ids-07, 68문항)", "checked": 68, "ok": 56,
+  "findings": [
+    { "id": "134-328", "severity": "yellow", "where": "layout", "note": "「$y$축」이 줄 끝 y 와 다음 줄 첫머리 축 으로 갈라짐(327 의 x축은 안 갈라짐)", "fix": "body 의 「$y$축」을 「\\mbox{$y$축}」으로(rpm-alg 의 \\mbox{$y=f(x)$와} 와 같은 방식)" },
+    { "id": "140-340", "severity": "yellow", "where": "layout", "note": "보기 ㄷ 마지막 「다.」 한 글자만 다음 줄로 밀림" },
+    { "id": "145-352", "severity": "yellow", "where": "layout", "note": "발문 끝 「오.」 한 글자만 둘째 줄로 밀림" },
+    { "id": "147-e11", "severity": "yellow", "where": "layout", "note": "첫 줄(π/2<θ<π일 때, |sinθ|+√cos²θ+√tan²θ+cosθ를)이 양끝 정렬로 벌어지고 「간단히 하시오.」만 둘째 줄" },
+    { "id": "147-357", "severity": "yellow", "where": "layout", "note": "긴 근호식이 못 끊겨 첫 줄 「θ가 제3사분면의 각일 때,」가 글자 사이까지 크게 벌어지고, 셋째 줄에 「오.」 한 글자만 남음", "fix": "147-358 과 같이 body 를 「$\\theta$가 제$3$사분면의 각일 때, \\par\\smallskip\\centerline{$\\sqrt{(\\sin\\theta-\\tan\\theta)^2}-|\\sin\\theta|-\\sqrt[3]{\\tan^3\\theta}$}\\par\\smallskip\\noindent 를 간단히 하시오.」 로" },
+    { "id": "148-e13", "severity": "yellow", "where": "layout", "note": "첫 줄(cosθ=3/5일 때, 1/sinθ+1/tanθ의 값을 구하시오.)이 양끝 정렬로 크게 벌어지고 (단, 3/2π<θ<2π)만 둘째 줄" },
+    { "id": "149-362", "severity": "yellow", "where": "layout", "note": "첫 줄(3/2π<θ<2π이고 … =−3일 때,)이 양끝 정렬로 벌어짐" },
+    { "id": "150-e15", "severity": "yellow", "where": "layout", "note": "첫 줄(sinθ+cosθ=1/2일 때, 다음 식의 값을 구하시오.)이 양끝 정렬로 크게 벌어지고 (단, sinθ>cosθ)만 둘째 줄" },
+    { "id": "150-364", "severity": "yellow", "where": "layout", "note": "첫 줄(sinθcosθ=1/8일 때, 1/sinθ+1/cosθ의 값을 구하시오.)이 양끝 정렬로 벌어지고 (단, π<θ<3/2π)만 둘째 줄" },
+    { "id": "151-368", "severity": "yellow", "where": "layout", "note": "둘째 줄 첫머리 1/sinθ, 1/cosθ 분수 윗부분이 첫 줄과 붙어 보임" },
+    { "id": "152-372", "severity": "yellow", "where": "layout", "note": "첫 줄(sinθ=−1/3일 때, tanθ+1/tanθ의 값을 구하시오.)이 양끝 정렬로 크게 벌어지고 (단, π<θ<3/2π)만 둘째 줄 · 둘째 줄 3/2 분수가 첫 줄 −1/3 분모와 닿아 보임" },
+    { "id": "153-379", "severity": "yellow", "where": "layout", "note": "가운데 식 다음 줄(이다. 이때 sinθ+cosθ+tanθ의 값을 구하시오.)이 양끝 정렬로 벌어지고 (단, sinθcosθ≠0)만 마지막 줄" }
+  ] }

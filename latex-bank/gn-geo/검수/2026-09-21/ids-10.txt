@@ -1,0 +1,12 @@
+245-517	qa/p245.jpg
+245-518	qa/p245.jpg
+245-519	qa/p245.jpg
+245-520	qa/p245.jpg
+247-e18	qa/p247.jpg
+247-521	qa/p247.jpg
+247-522	qa/p247.jpg
+248-523	qa/p248.jpg
+248-524	qa/p248.jpg
+248-525	qa/p248.jpg
+248-526	qa/p248.jpg
+248-527	qa/p248.jpg

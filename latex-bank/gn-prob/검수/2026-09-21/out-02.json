@@ -1,0 +1,5 @@
+{ "range": "34-55~56-109 (ids-02 · 68문항)", "checked": 68, "ok": 66,
+  "findings": [
+    { "id": "41-76", "severity": "yellow", "where": "layout", "note": "본문 「3가지」가 줄 끝에서 3 / 가지로 나뉨(경미)", "fix": "body 의 $3$가지 를 \\mbox{$3$가지} 로" },
+    { "id": "45-83", "severity": "yellow", "where": "hint", "note": "과정 상자 안 수식이 상자 오른쪽 경계를 넘침 — 1행 끝 (-b)^3 이 테두리에 걸치고 3행 끝 +b^6 이 잘려 안 보임(내용 전사는 원본과 일치)", "fix": "상자 minipage 안 수식을 \\small 로 감싸고 2·3행 들여쓰기 \\hspace*{4em} 를 2em 으로 줄임" }
+  ] }

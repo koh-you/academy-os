@@ -1,0 +1,7 @@
+{ "range": "74-166~94-221", "checked": 68, "ok": 64,
+  "findings": [
+    { "id": "78-178", "severity": "yellow", "where": "layout", "note": "「$x$축」이 줄 끝에서 x / 축과 로 분리됨(내용은 일치)" },
+    { "id": "86-204", "severity": "yellow", "where": "layout", "note": "그림 옆의 좁은 본문 폭이 그림 아래까지 이어져 문항이 세로로 길어짐(그림 아래 오른쪽 여백 낭비) · 내용·그림은 일치" },
+    { "id": "89-208", "severity": "yellow", "where": "layout", "note": "「$y$축」이 줄 끝에서 y / 축과 로 분리됨(내용은 일치)" },
+    { "id": "91-213", "severity": "yellow", "where": "layout", "note": "둘째 줄의 긴 수식 때문에 첫 줄 단어 간격이 과하게 벌어짐(내용은 일치)" }
+  ] }

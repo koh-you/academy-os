@@ -1,0 +1,19 @@
+{ "range": "32-59~63-e4 (ids-02 · 68문항)", "checked": 68, "ok": 53,
+  "findings": [
+    { "id": "32-59", "severity": "yellow", "where": "layout", "note": "그림 옆 좁은 컬럼에서 dfrac 분모 24·49 가 다음 줄 AP·PF 윗줄에 닿음(내용은 일치 · build 수준)" },
+    { "id": "39-66", "severity": "yellow", "where": "layout", "note": "마지막 줄에 「구/하시오」가 갈라져 「하시오.」만 남음(내용은 일치 · build 수준)" },
+    { "id": "39-67", "severity": "yellow", "where": "layout", "note": "마지막 줄에 「구/하시오」가 갈라져 「하시오.」만 남음(내용은 일치 · build 수준)" },
+    { "id": "41-71", "severity": "yellow", "where": "layout", "note": "「$x$축」이 줄 끝 x 와 다음 줄 「축」으로 갈라짐(내용은 일치)", "fix": "body 의 $x$축 을 \\mbox{$x$축} 으로" },
+    { "id": "42-73", "severity": "yellow", "where": "layout", "note": "그림 옆 좁은 컬럼에서 쌍곡선 dfrac 분모 2·7 이 다음 줄 「위의 점 P에서」에 닿음(내용은 일치 · build 수준)" },
+    { "id": "44-e16", "severity": "yellow", "where": "subs", "note": "(1) 마지막 줄에 「말하시/오.」가 갈라져 「오.」만 남음(내용은 일치 · build 수준)" },
+    { "id": "46-82", "severity": "yellow", "where": "layout", "note": "dfrac 분모 16·9 가 다음 줄 「F′이라 하고」에 닿음 · 「제1/사분면」 갈라짐(내용은 일치 · build 수준)" },
+    { "id": "46-83", "severity": "yellow", "where": "layout", "note": "「$y$축」이 줄 끝 y 와 다음 줄 「축」으로 갈라짐(내용은 일치)", "fix": "body 의 $y$축 을 \\mbox{$y$축} 으로" },
+    { "id": "46-85", "severity": "yellow", "where": "layout", "note": "dfrac 분모 12 가 다음 줄 「위의」에 닿고 2/3 분모가 다음 줄 QF 윗줄에 닿음(내용은 일치 · build 수준)" },
+    { "id": "47-87", "severity": "yellow", "where": "layout", "note": "dfrac 분모 2·3 이 다음 줄 「이라 하고」에 닿음 · 「제2/사분면」 갈라짐(내용은 일치 · build 수준)" },
+    { "id": "47-90", "severity": "yellow", "where": "layout", "note": "dfrac 분모 a²·b² 이 다음 줄 「초점으로」에 닿음(내용은 일치 · build 수준)" },
+    { "id": "53-93", "severity": "yellow", "where": "hint", "note": "과정 상자 「㉠, ㉡에서 …」 줄이 넘쳐 마지막 「y₁=□」만 다음 줄로 밀림(원본은 한 줄 · 빈칸 내용·개수는 일치)", "fix": "53-93 body 의 그 줄 \\blank[2.2em] 세 개를 \\blank[1.6em] 으로 줄이거나 「또는」 앞에 \\par 를 넣어 두 줄로" },
+    { "id": "57-105", "severity": "yellow", "where": "layout", "note": "마지막 줄 「값은?」만 남음 · 첫 줄이 괄호 dfrac 이라 번호 「105.」가 기준선보다 위(내용·보기는 일치 · build 수준)" },
+    { "id": "57-106", "severity": "yellow", "where": "layout", "note": "마지막 줄에 「구하/시오」가 갈라져 「시오.」만 남음(내용은 일치 · build 수준)" },
+    { "id": "62-116", "severity": "yellow", "where": "hint", "note": "과정 상자 첫 식의 분자 \\blank 상자 아래 테두리가 분수선과 겹쳐 이중선처럼 보임 · 「㉠, ㉡에서 …」 줄이 넘쳐 마지막 「y₁=□」만 다음 줄로 밀림(원본은 한 줄 · 빈칸 내용·개수는 일치)", "fix": "62-116 body 의 \\dfrac{\\blank[2.5em]}{2} 분자에 아래 여백(예: \\dfrac{\\blank[2.5em]\\rule[-0.6ex]{0pt}{1ex}}{2}) · ㉠㉡ 줄의 \\blank[2.2em] 을 \\blank[1.6em] 으로 줄이거나 「또는」 앞에 \\par" }
+  ],
+  "notes": "red 없음. 예제(38-e11·39-e12·40-e13·41-e14·42-e15·44-e16·54-e1·55-e2·56-e3·63-e4)는 상자 발문만 대조했고 설명·풀이·KEY Point·RPM 안내 누락은 정상. 연습문제 여백 힌트·QR·배지는 대조 대상에서 제외. 그림 문항(32-59·42-e15·42-73·45-78·46-82·46-85·47-87·47-89·47-90·57-107)은 크롭 그림이 원본과 같음(점·라벨·음영 일치). yellow 는 대부분 build 수준(그림 옆 좁은 컬럼에서 dfrac 줄 다음 행간이 좁아 분모가 다음 줄에 닿음 · 마지막 줄 낱말 갈라짐)이라 items.json 수정 대상 아님 — fix 가 적힌 41-71·46-83·53-93·62-116 만 items.json 에서 손볼 수 있음. 45-78 도 dfrac 두 줄 뒤 행간이 다소 좁으나 닿지 않아 기록하지 않음. 원본 크롭이 잘려 쪽 이미지로 대조한 문항 없음." }

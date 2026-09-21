@@ -1,0 +1,14 @@
+{ "range": "59-112~85-168", "checked": 68, "ok": 57, "red": 0, "yellow": 11,
+  "findings": [
+    { "id": "61-119", "severity": "yellow", "where": "layout", "note": "마지막 「구하시오.」가 「구하시 / 오.」로 끊겨 한 글자만 다음 줄" },
+    { "id": "61-120", "severity": "yellow", "where": "layout", "note": "보기 상자 안 ㄱ·ㄴ·ㄷ 줄 간격이 촘촘해 ∑ 의 n=1 첨자가 아랫줄 ∞ 에 닿고, ㄷ 끝 「수렴한다」가 「수 / 렴한다」로 끊김", "fix": "\\bogi 안 ∑ 를 \\textstyle 로 낮추거나 항목 사이 \\\\[1ex] 로 줄 간격 확보" },
+    { "id": "62-122", "severity": "yellow", "where": "choices", "note": "짧은 분수 보기 5개가 원본처럼 한 줄이 아니라 3+2 두 줄로 벌어짐(전역 보기 배치 템플릿으로 보임 · 내용은 일치)" },
+    { "id": "62-124", "severity": "yellow", "where": "layout", "note": "보기 첫 줄 ㄱ·ㄴ·ㄷ 이 간격 없이 붙고 ㄷ 의 「(단, r≠0)」이 혼자 다음 줄로 떨어짐", "fix": "보기를 두 개씩 세 줄(ㄱ ㄴ / ㄷ(단, r≠0) ㄹ / ㅁ ㅂ)로 배치하거나 \\hfill 대신 고정 간격 사용" },
+    { "id": "63-128", "severity": "yellow", "where": "choices", "note": "보기 5개가 3+2 두 줄로 배치(원본 한 줄) — 62-122 와 같은 템플릿 배치 · 본문·그림·보기 값은 일치" },
+    { "id": "80-151", "severity": "yellow", "where": "layout", "note": "조건 상자 안 A·B·C 세 줄이 가운데 정렬이라 시작 위치가 어긋남(원본은 왼쪽 정렬) — \\exprbox 전역 정렬 문제로 보임" },
+    { "id": "80-153", "severity": "yellow", "where": "layout", "note": "첫 줄 「함수 f(x)=3^x−1의 역함수를 g(x)라 할 때,」가 양쪽 정렬로 단어 간격이 크게 벌어짐(수식 다음 줄로 밀린 탓)" },
+    { "id": "81-155", "severity": "yellow", "where": "layout", "note": "마지막 「구하시오.」가 「구하시 / 오.」로 끊겨 한 글자만 다음 줄" },
+    { "id": "81-156", "severity": "yellow", "where": "body", "note": "수식이 한 줄에 못 들어가 오른쪽 여백 밖으로 넘쳐 끝부분 「(1+1/2n)}^n」이 잘림(review 그림 폭 1272 로 넘침 확인) — 내용 자체는 원본과 일치", "fix": "수식을 \\par\\centerline 별도 줄로 내리고 \\dfrac 을 \\frac 으로 줄이거나 ×⋯× 뒤에서 줄바꿈" },
+    { "id": "81-159", "severity": "yellow", "where": "layout", "note": "조건 상자 안 ㈎·㈏ 두 줄이 가운데 정렬이라 ㈎·㈏ 시작 위치가 어긋남(원본 왼쪽 정렬) — 80-151 과 같은 \\exprbox 정렬" },
+    { "id": "81-160", "severity": "yellow", "where": "layout", "note": "첫 줄 「양의 실수 전체의 집합에서 연속인 함수 f(x)가」가 양쪽 정렬로 단어 간격이 크게 벌어지고 끝 「구하시오」가 「구 / 하시오」로 끊김" }
+  ] }

@@ -1,0 +1,6 @@
+{ "range": "54-110~74-165", "checked": 68, "ok": 65,
+  "findings": [
+    { "id": "54-115", "severity": "yellow", "where": "layout", "note": "「$y$축」이 줄 끝에서 $y$ / 축 으로 갈라짐(preamble 규약은 「x축」 한 덩어리). 내용은 일치", "fix": "body 의 `$y$축에서` 를 `\\nob{$y$축}에서` 로" },
+    { "id": "58-127", "severity": "yellow", "where": "layout", "note": "「거리가 $1$인」이 줄 끝에서 1 / 인 으로 갈라짐(경미). 내용은 일치", "fix": "body 의 `$1$인` 을 `\\nob{$1$인}` 으로" },
+    { "id": "71-158", "severity": "yellow", "where": "layout", "note": "조건 「(단, $a$는 상수이다.)」가 줄 끝에서 (단, a / 는 상수이다.) 로 갈라짐(경미). 내용은 일치", "fix": "`\\cond{$a$는 상수이다.}` 를 `\\cond{\\nob{$a$는} 상수이다.}` 로" }
+  ] }

@@ -1,0 +1,8 @@
+{ "range": "94-218~112-272 (ids-05, 68문항)", "checked": 68, "ok": 63,
+  "findings": [
+    { "id": "95-220", "severity": "yellow", "where": "layout", "note": "첫 줄(두 함수 $f(x)=(1/9)^x$, $g(x)=\\log_3 x^2$에 대하여)이 양끝 정렬로 크게 벌어짐 — 둘째 줄 $(g\\circ f)(-1/2)$ 수식이 못 끊겨서" },
+    { "id": "95-221", "severity": "yellow", "where": "layout", "note": "보기 ㄷ·ㄹ 첫 줄(두 양수 $x_1$, $x_2$에 대하여 $x_1<x_2$이면)이 양끝 정렬로 크게 벌어짐" },
+    { "id": "96-e4", "severity": "yellow", "where": "layout", "note": "첫 줄(함수 $y=\\log_2 x$의 그래프를 $x$축의 방향으로 $m$만)이 양끝 정렬로 벌어짐" },
+    { "id": "102-245", "severity": "yellow", "where": "layout", "note": "그림이 끝난 뒤에도 본문이 좁은 폭으로 8줄쯤 이어짐(원본은 그림 아래부터 전체 폭) — 내용은 일치" },
+    { "id": "110-266", "severity": "yellow", "where": "layout", "note": "첫 줄($\\angle A=90^\\circ$이고 $\\overline{AB}=2\\log_2 x$, $\\overline{AC}=\\log_4 \\frac{16}{x}$인 삼각)이 양끝 정렬로 크게 벌어짐" }
+  ] }

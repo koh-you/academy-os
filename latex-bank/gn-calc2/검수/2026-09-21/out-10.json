@@ -1,0 +1,20 @@
+{ "range": "244-495~269-549 (ids-10, 68문항)", "checked": 68, "ok": 57, "red": 0, "yellow": 11,
+  "findings": [
+    { "id": "247-e12", "severity": "yellow", "where": "layout", "note": "첫 줄 「모 든 실 수 x 에 대 하 여 …」 자간이 크게 벌어짐(긴 적분 등식이 통째로 둘째 줄로 밀림). 내용은 일치", "fix": "적분 등식을 \\par\\smallskip\\centerline{…} 별도 줄로 두기(251-511·252-519 방식)" },
+    { "id": "247-500", "severity": "yellow", "where": "layout", "note": "첫 줄 자간이 크게 벌어짐(긴 적분 등식이 둘째 줄로 밀림). 내용은 일치", "fix": "적분 등식을 별도 centerline 줄로" },
+    { "id": "247-501", "severity": "yellow", "where": "layout", "note": "첫 줄 자간이 크게 벌어짐. 내용은 일치", "fix": "적분 등식을 별도 centerline 줄로" },
+    { "id": "248-e13", "severity": "yellow", "where": "layout", "note": "첫 줄 자간이 크게 벌어짐. 내용은 일치", "fix": "적분 등식을 별도 centerline 줄로" },
+    { "id": "248-502", "severity": "yellow", "where": "layout", "note": "첫 줄 자간이 크게 벌어짐. 내용은 일치", "fix": "적분 등식을 별도 centerline 줄로" },
+    { "id": "251-509", "severity": "yellow", "where": "layout", "note": "첫 줄 자간이 크게 벌어짐. 내용은 일치", "fix": "f(x)=x+∫… 등식을 별도 centerline 줄로" },
+    { "id": "252-515", "severity": "yellow", "where": "layout", "note": "마지막 줄에 「오.」 한 글자만 남음. 내용은 일치", "fix": "확인 필요(줄바꿈 조정)" },
+    { "id": "252-517", "severity": "yellow", "where": "layout", "note": "첫 줄 자간이 크게 벌어짐. 내용은 일치", "fix": "xf(x)=x²sin x+∫… 등식을 별도 centerline 줄로" },
+    { "id": "260-525", "severity": "yellow", "where": "choices", "note": "보기 상자 안 ㄱ·ㄴ·ㄷ 세 항목이 한 줄에 빈틈없이 붙어 간격이 좁음(\\hfill 이 거의 0으로 줄어듦). 내용은 일치", "fix": "마지막 \\hfill\\mbox{} 를 빼거나 ㄷ 을 둘째 줄(\\\\)로 내리기" },
+    { "id": "260-529", "severity": "yellow", "where": "body", "note": "수식이 오른쪽 여백을 넘어 잘림 — 「+ ··· +」 뒤의 마지막 항 n/(2n²) 과 닫는 괄호가 조판본에 보이지 않음(items.json 본문에는 있음). 학생이 보면 문제가 불완전해 보이므로 우선 수정 권장", "fix": "lim 식을 \\par\\smallskip\\centerline{…} 별도 줄로 빼고, 그래도 넘치면 \\dfrac→\\frac 로 줄이기" },
+    { "id": "263-534", "severity": "yellow", "where": "layout", "note": "마지막 줄에 「오.」 한 글자만 남음. 내용은 일치", "fix": "확인 필요(줄바꿈 조정)" }
+  ],
+  "notes": [
+    "예제(e11~e15, e1~e8)는 상자 발문만 대조했고 설명·풀이·KEY Point·RPM 안내는 정상적으로 제외됨.",
+    "개념원리 익히기 530~532 의 과정 상자 빈칸(\\blank)·그림(fig-262-53x) 은 원본 구조와 일치. 그림 문항 256-521·260-528·268-546 도 라벨·구조 일치.",
+    "STEP 띠·확인체크·평가원 기출 태그를 쪽 이미지와 대조: 모두 일치.",
+    "판독이 작은 크롭(244-497·250-506·250-507·251-512·252-519·259-e3)은 원본 크롭을 확대해 적분 상·하한과 지수를 확인함."
+  ] }

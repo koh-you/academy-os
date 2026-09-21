@@ -1,0 +1,18 @@
+{ "range": "188-446~216-500 (ids-09)", "checked": 68, "ok": 53,
+  "findings": [
+    { "id": "188-446", "severity": "yellow", "where": "choices", "note": "①·④ 의 q 부분이 첫 줄 끝에 걸려 「q: x는 18의 양의 / 약수이다.」「q: □ABCD의 두 / 대각선의 …」로 낱말 중간에서 꺾임(내용은 일치)", "fix": "④ 는 원문처럼 \\hspace{3em} 대신 \\\\ 로 q 를 다음 줄에 두고, ① 도 같은 방식 검토" },
+    { "id": "193-460", "severity": "yellow", "where": "subs", "note": "(3) 「b = 0」 뒤 「이다.」만 다음 줄로 넘어가고 그 줄 낱말 간격이 넓음(내용은 일치)" },
+    { "id": "199-e18", "severity": "yellow", "where": "layout", "note": "마지막 낱말이 「구하시 / 오.」로 끊겨 「오.」 한 글자만 둘째 줄에 남음(내용은 일치)" },
+    { "id": "199-466", "severity": "yellow", "where": "layout", "note": "마지막 낱말이 「구하시 / 오.」로 끊겨 「오.」 한 글자만 둘째 줄에 남음(내용은 일치)" },
+    { "id": "202-472", "severity": "yellow", "where": "passage", "note": "증명 상자 안 수식 줄 m²+n²=(2k−1)²+(2l−1)²=2(2k²−2k+2l²−2l+1) 이 상자 오른쪽 테두리를 넘어 닫는 괄호가 테두리에 걸림. 그 위에 빈 줄 한 줄이 생김(\\\\ \\quad 때문). 상자 내용·빈칸 ㈎~㈑ 는 원본과 일치", "fix": "수식 줄을 \\\\ \\quad $…$ 대신 \\par\\centerline{\\small $…$} 또는 두 줄로 나눠 상자 폭 안에 넣기" },
+    { "id": "210-e1", "severity": "yellow", "where": "layout", "note": "보기 ㄷ 「x⟶x²+1」이 보기 상자 오른쪽 테두리에 붙음(\\hfill 배치 · 내용은 일치)" },
+    { "id": "210-485", "severity": "yellow", "where": "layout", "note": "보기 ㄷ 「h(x)=x²」이 보기 상자 오른쪽 테두리에 붙음(\\hfill 배치 · 내용은 일치)" },
+    { "id": "211-e2", "severity": "yellow", "where": "layout", "note": "cases 수식을 인라인으로 두어 첫 줄 「실 수 전 체 의 집 합 에 서 …」 글자 간격이 심하게 벌어짐(내용은 일치)", "fix": "211-e3 처럼 f(x)=cases 를 \\par\\smallskip\\centerline{…}\\par\\smallskip\\noindent 로 따로 두기" },
+    { "id": "211-487", "severity": "yellow", "where": "layout", "note": "cases 수식을 인라인으로 두어 첫 줄 「실 수 전 체 의 집 합 에 서 …」 글자 간격이 심하게 벌어짐(내용은 일치)", "fix": "211-e3 처럼 f(x)=cases 를 \\par\\smallskip\\centerline{…}\\par\\smallskip\\noindent 로 따로 두기" },
+    { "id": "212-490", "severity": "yellow", "where": "layout", "note": "보기 ㄷ 「p(x)=√x²」이 보기 상자 오른쪽 테두리에 붙음(\\hfill 배치 · 내용은 일치)" },
+    { "id": "212-491", "severity": "yellow", "where": "layout", "note": "긴 인라인 수식 f(x)=2x²+ax−3, g(x)=x+b 가 줄 안 끊겨 첫 줄 「집합 X = {0,1}을 정의역으로 하는 두 함수」 낱말 간격이 크게 벌어짐(내용은 일치)", "fix": "212-e4 처럼 두 함수식을 \\par\\smallskip\\centerline{…}\\par\\smallskip\\noindent 로 따로 두기" },
+    { "id": "212-492", "severity": "yellow", "where": "layout", "note": "긴 인라인 수식 f(x)=x³+3x, g(x)=6x²−8x+6 때문에 첫 줄 낱말 간격이 넓음(내용은 일치)", "fix": "두 함수식을 \\par\\smallskip\\centerline{…}\\par\\smallskip\\noindent 로 따로 두기" },
+    { "id": "213-493", "severity": "yellow", "where": "figure", "note": "그림 크롭 아래쪽이 조금 잘려 ㄱ 세로선·ㄴ 왼쪽 아래 선분·각 y축 하단이 끊기고 보기 상자 아래 테두리가 없음. 그래프 4개 판독은 가능(내용은 일치)" },
+    { "id": "215-494", "severity": "yellow", "where": "choices", "note": "3-2 배치에서 ⑤ cases 가 넓어 ③ 「x⟶x³−3x」가 오른쪽 여백을 넘어 조판본에서 「x³ −」까지만 보임. 「(정답 / 2개)」도 줄 끝에서 꺾임. items.json 의 보기 값은 원본과 일치", "fix": "choices_layout 을 \"ii\" 로" },
+    { "id": "216-499", "severity": "yellow", "where": "layout", "note": "인라인 수식 f(x)=ax²+(a+1)x+2 가 줄 안 끊겨 첫 줄 「두 집합 X = {−1,0,1}, Y = {1,2,3}에 대하여」 낱말 간격이 크게 벌어짐(내용은 일치)", "fix": "f(x)=ax^2+(a+1)x+2 를 \\par\\smallskip\\centerline{…}\\par\\smallskip\\noindent 로 따로 두기" }
+  ] }

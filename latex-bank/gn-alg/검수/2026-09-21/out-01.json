@@ -1,0 +1,6 @@
+{ "range": "13-1~35-54 (ids-01 · 68문항)", "checked": 68, "ok": 65,
+  "findings": [
+    { "id": "13-3", "severity": "yellow", "where": "subs", "note": "소문항 (10) 라벨과 수식 사이 간격이 없어 「(10)⁴√…」로 붙어 보임 — 두 자리 소문항 라벨 폭 부족(sty/build 수준, items.json 문제 아님)" },
+    { "id": "14-4", "severity": "yellow", "where": "choices", "note": "보기 2-2-1 배치(choices_layout ii)에서 ④ 「9의 네제곱근 중 실수인 것은 2개이다.」가 오른쪽 여백 밖으로 잘림", "fix": "14-4 의 choices_layout 을 \"ii\" 에서 \"v\"(세로 5줄)로" },
+    { "id": "20-10", "severity": "yellow", "where": "subs", "note": "소문항 (10) 라벨이 수식 첫 글자 5 와 겹쳐 「(10̸5^√3」처럼 보임 — 13-3 과 같은 두 자리 라벨 폭 문제(sty/build 수준)" }
+  ] }

@@ -1,0 +1,6 @@
+{ "range": "216-501~239-558", "checked": 68, "ok": 65,
+  "findings": [
+    {"id":"220-508","severity":"yellow","where":"layout","note":"cases 수식을 인라인으로 두어 첫 줄 「실 수 전 체 의 집 합 에 서 정 의 된 함 수」 글자 간격이 심하게 벌어짐(내용은 일치)","fix":"222-514 처럼 $f(x)=\\begin{cases}…\\end{cases}$ 를 \\par\\smallskip\\centerline{…}\\par\\smallskip\\noindent 이 일대일대응이 … 로 따로 두기"},
+    {"id":"222-512","severity":"yellow","where":"figure","note":"그림 크롭이 「보기」 상자 테두리·라벨 없이 그래프 ㄱㄴㄷ만 담음(219-e6 크롭은 상자 포함). 본문은 「보기에서」를 가리킴. 그래프 3개·ㄱㄴㄷ 라벨·축은 원본과 일치(경미)"},
+    {"id":"237-551","severity":"yellow","where":"figure","note":"그림 크롭이 「보기」 상자 테두리·라벨 없이 대응 그림 ㄱ~ㄹ만 담음(219-e6 크롭은 상자 포함). 본문은 「보기의 함수」를 가리킴. 그림 4개·화살표·원소는 원본과 일치(경미)"}
+  ] }

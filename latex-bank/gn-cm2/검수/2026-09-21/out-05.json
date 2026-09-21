@@ -1,0 +1,14 @@
+{ "range": "94-222~116-280", "checked": 68, "ok": 57,
+  "findings": [
+    { "id": "102-e3", "severity": "yellow", "where": "layout", "note": "subs (2) 첫 줄 「평행이동 (x,y)⟶(x+3,y−4)에 의하여」 자간이 크게 벌어짐(다음 줄의 긴 수식 두 개가 안 끊겨서). 내용은 일치" },
+    { "id": "103-246", "severity": "yellow", "where": "layout", "note": "본문 전체가 그림 옆 좁은 단에 8줄로 세로 배치되어 그림 아래 여백이 큼(원본은 그림 아래부터 전체 폭). 내용·그림 일치" },
+    { "id": "104-249", "severity": "yellow", "where": "layout", "note": "「−2만큼」이 줄 끝 $-2$ / 다음 줄 「만큼」으로 갈라짐(경미)" },
+    { "id": "104-250", "severity": "yellow", "where": "choices", "note": "짧은 수치 보기 5개가 원본 한 줄인데 3+2 로 배치됨(경미)" },
+    { "id": "104-251", "severity": "yellow", "where": "layout", "note": "첫 줄 「평행이동 (x,y)⟶(x+2,y−3)에 의하여」 자간이 크게 벌어짐(다음 줄 긴 수식 때문). 내용은 일치" },
+    { "id": "107-253", "severity": "yellow", "where": "subs", "note": "소문항 4개(x축·y축·원점·직선 y=x)가 원본 2단인데 1단 세로 나열(경미)" },
+    { "id": "107-254", "severity": "yellow", "where": "subs", "note": "소문항 4개가 원본 2단인데 1단 세로 나열(경미)" },
+    { "id": "107-255", "severity": "yellow", "where": "subs", "note": "소문항 3개가 원본 한 줄인데 3줄 세로 나열(경미)" },
+    { "id": "107-256", "severity": "yellow", "where": "subs", "note": "소문항 4개가 원본 2단인데 1단 세로 나열(경미)" },
+    { "id": "108-257", "severity": "yellow", "where": "layout", "note": "첫 줄 자간이 크게 벌어지고 셋째 줄에 「오.」만 남음(경미)" },
+    { "id": "116-276", "severity": "yellow", "where": "choices", "note": "짧은 수치 보기 5개가 원본 한 줄인데 3+2 로 배치됨(경미)" }
+  ] }

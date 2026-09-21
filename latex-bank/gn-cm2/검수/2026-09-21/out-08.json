@@ -1,0 +1,8 @@
+{ "range": "161-391~188-445", "checked": 68, "ok": 63,
+  "findings": [
+    { "id": "170-409", "severity": "yellow", "where": "layout", "note": "보기 두 줄(\\hfill) 배치에서 ㄹ 항목이 「ㄹ. 정사각형은 / 평행사변형이다.」로 중간 줄바꿈됨", "fix": "bogi 를 항목마다 \\\\ 로 한 줄씩(ㄱ\\\\ ㄴ\\\\ ㄷ\\\\ ㄹ) 배치" },
+    { "id": "177-e7", "severity": "yellow", "where": "layout", "note": "보기 두 줄 배치에서 ㄴ·ㄹ 항목이 「ㄴ. 어떤 x에 / 대하여 |x|>2이다.」처럼 중간 줄바꿈됨", "fix": "bogi 를 항목마다 \\\\ 로 한 줄씩 배치" },
+    { "id": "183-e10", "severity": "yellow", "where": "layout", "note": "본문·보기의 「\\longrightarrow \\sim」이 「→∼」로 붙어 찍힘(다른 문항은 「\\longrightarrow\\ \\sim」으로 띄움)", "fix": "body·bogi 의 \\longrightarrow \\sim 을 모두 \\longrightarrow\\ \\sim 으로" },
+    { "id": "183-437", "severity": "yellow", "where": "layout", "note": "본문·보기 ①②④⑤의 「\\longrightarrow \\sim」이 「→∼」로 붙어 찍힘", "fix": "body·choices 의 \\longrightarrow \\sim 을 모두 \\longrightarrow\\ \\sim 으로" },
+    { "id": "185-e11", "severity": "yellow", "where": "subs", "note": "(3) 이 「q: △ABC는 / 정삼각형이다.」로 줄 끝에서 끊김(\\hspace{3em} 간격이 넓어 한 줄에 못 들어감)", "fix": "subs[2] 의 \\hspace{3em} 을 \\quad 로 줄이거나 q 조건 앞에 \\\\ 를 넣어 다음 줄로" }
+  ] }

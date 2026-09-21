@@ -1,0 +1,12 @@
+{ "range": "112-273~133-325 (ids-06)", "checked": 68, "ok": 59,
+  "findings": [
+    { "id": "112-273", "severity": "yellow", "where": "layout", "note": "과정 상자에서 「∴ t=□ 또는」 뒤의 「t=3」이 다음 줄 첫머리로 밀려 「또는 / t=3」으로 끊김", "fix": "exprbox 안 「\\qquad $\\therefore\\ t=\\blank$ 또는 $t=3$」의 \\qquad 를 \\quad 로 줄이거나 ∴ 절을 \\par 로 새 줄에 두기" },
+    { "id": "117-282", "severity": "yellow", "where": "layout", "note": "cases 높이 때문에 번호 「282.」가 본문 첫 줄보다 한 줄 위에 떠 있음" },
+    { "id": "118-291", "severity": "yellow", "where": "layout", "note": "첫 줄이 양쪽 정렬로 과하게 늘어나 「= 0의 해를 구하시오.」 사이 간격이 벌어지고 (단, x>0)만 다음 줄로 밀림" },
+    { "id": "120-296", "severity": "yellow", "where": "hint", "note": "과정 상자 4행의 「······ ㉡」이 다음 줄 첫머리로 밀림. 원본은 x 범위의 왼쪽 빈칸 두 개가 세로로 긴 상자(분수용)인데 조판본은 모두 보통 크기" },
+    { "id": "121-298", "severity": "yellow", "where": "layout", "note": "번호 「298.」이 본문보다 한 줄 위에 뜨고, cases 뒤 「를」만 줄 끝에 남고 「푸시오.」가 다음 줄로 떨어짐", "fix": "body 끝 「를 푸시오.」를 「를~푸시오.」로 묶기" },
+    { "id": "124-e24", "severity": "yellow", "where": "layout", "note": "긴 부등식이 줄 끝에서 못 끊겨 첫 줄 「모 든 양 수 x에 대 하 여 부 등 식」이 글자 간격까지 벌어지게 늘어남", "fix": "부등식을 \\par\\centerline 으로 별도 줄에 두거나 「부등식」 뒤에 \\allowbreak" },
+    { "id": "126-309", "severity": "yellow", "where": "layout", "note": "번호 「309.」가 본문보다 한 줄 위에 뜨고 첫 줄 「연 립 부 등 식 … 의 해 가」가 양쪽 정렬로 늘어남" },
+    { "id": "126-313", "severity": "yellow", "where": "layout", "note": "키 큰 지수 수식 때문에 번호 「313.」이 본문보다 위에 떠 있음" },
+    { "id": "127-318", "severity": "yellow", "where": "layout", "note": "첫 줄 「n ≥ 2인 … y = log_n x,」가 양쪽 정렬로 벌어짐(수식 안에서 줄이 못 끊김)" }
+  ] }
