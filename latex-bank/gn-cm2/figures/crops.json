@@ -1061,14 +1061,15 @@
  },
  "fig-267-621.png": {
   "width_pt": 77.1,
-  "height_pt": 86.6,
+  "height_pt": 71.3,
   "pdf_page": 267,
   "bbox_pt": [
    401.8,
-   466.7,
+   482,
    478.9,
    553.3
-  ]
+  ],
+  "manual": true
  },
  "fig-269-627.png": {
   "width_pt": 73.8,

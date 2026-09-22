@@ -142,6 +142,9 @@ function renderItemBody(id, rawItem, group, bank) {
     const [bodyMain, bodyWide] = cut >= 0 ? [item.body.slice(0, cut), item.body.slice(cut)] : [item.body, ""];
     parts.push(`\\noindent\\begin{minipage}[t]{0.58\\linewidth}\\vspace{0pt}\\raggedright ${bodyMain}\\end{minipage}\\hfill\\begin{minipage}[t]{0.4\\linewidth}\\vspace{0pt}\\centering ${renderFigure(item.figure, "0.92\\linewidth")}\\end{minipage}\\par`);
     if (bodyWide) parts.push(`\\noindent ${bodyWide}`);
+  } else if (item.figure && figurePlacement(item) === "end") {
+    // 「end」: 그림을 문항 맨 아래(소문항·보기·힌트 뒤)에 둔다 — 원문이 시행 상자·보기 다음에 그림을 놓은 문항(개념원리 확통 73-151).
+    parts.push(item.body);
   } else if (item.figure) {
     // 표·자료 상자처럼 넓은 그림은 본문 아래 가운데. 발문 뒤에 보기 상자(\bogi)·조건 상자(\exprbox)가 붙어 있으면 원문 순서대로
     // 「발문 → 그림 → 보기 상자」(RPM 중3-2 0627 상자그림 문항에서 그림이 보기 뒤로 밀리던 것).
@@ -169,6 +172,7 @@ function renderItemBody(id, rawItem, group, bank) {
     }
   }
   if (item.hint) parts.push(`\\dmhint{${item.hint}}`);
+  if (item.figure && figurePlacement(item) === "end") parts.push(`\\par\\smallskip\\begin{center}${renderFigure(item.figure, "\\linewidth")}\\end{center}`);
   // dm-editorial 의 번호 칸(9mm)은 세 자리까지다. 1000번 이상은 「1013.」 이 2.6pt 넘치므로 본문을 그만큼 오른쪽으로 민다(sty 수정 없이).
   if (bookNumber(id) >= 1000) return `\\hspace*{2mm}\\begin{minipage}[t]{\\dimexpr\\linewidth-2mm\\relax}\\vspace{0pt}${parts.join("\n")}\\end{minipage}`;
   return parts.join("\n");
