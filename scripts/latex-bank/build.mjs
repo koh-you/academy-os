@@ -534,7 +534,8 @@ ${group.passage ? `\\dmpassage{${group.passage}}${badgeRaiseMm(bank.items[id]) >
         await renderOne(job, slot);
       }
     }));
-    for (let slot = 0; slot < workers; slot++) await rm(path.join(dir, `_single-${slot}.tex`), { force: true });
+    // 잠긴 임시 파일(백신·색인 · EBUSY)은 지우지 못해도 export 를 멈추지 않는다(RPM 확통 재-export 에서 cleanup 단계 실패).
+    for (let slot = 0; slot < workers; slot++) await rm(path.join(dir, `_single-${slot}.tex`), { force: true }).catch((error) => console.log(`  _single-${slot}.tex 삭제 실패(${error.code}) — 무시`));
     if (args.review) console.log(`review/: ${(await readdir(path.join(dir, "review"))).length}장`);
 
     if (patchExport) {
