@@ -79,7 +79,8 @@ node scripts/latex-bank/build.mjs --bank latex-bank/<책> --review
 - 컴파일: MiKTeX xelatex(`%LOCALAPPDATA%\Programs\MiKTeX\miktex\bin\x64`). 첫 실행 때 kotex·tcolorbox 등이 자동 설치된다. 한글 본문 Noto Serif KR · 제목 Malgun Gothic(둘 다 Windows 기본 설치).
 - 번호: 책의 「인쇄 쪽-번호」(`12-13`)가 id. 조판본에는 `\dmkichul{베이직쎈 공통수학2 12쪽 13번}` 출처 배지가 붙고, 문항 번호는 dm-editorial 의 자동 카운터(01.~)다.
 - 공통 지시문(개념 쪽 말풍선 줄)은 `groups[].passage` 로 한 번만 두고 그 묶음 위에 굵게 찍는다. 힌트 빈칸형(◎ 줄)은 `hint` 로 문항 아래 연한 상자에 넣는다. 빈칸은 `\blank`.
-- 선택지는 dm-editorial 의 `choices32`(3-2) · `choicesii`(2-2-1) · `choicesv`(세로) 를 쓴다(`choices_layout`). 분수 좌표처럼 키 큰 보기는 `ii`.
+- 선택지는 dm-editorial 의 `choices32`(3-2) · `choicesii`(2-2-1) · `choicesv`(세로) 를 쓴다(`choices_layout`). 분수 좌표처럼 키 큰 보기는 `ii`. `choices_layout` 이 없고 보기 5개가 모두 짧으면(시각 길이 ≤ 10) build 가 한 줄 5칸 후보로 두고 TeX 이 실제 폭(칸 사이 최소 1.5em · 낱장 본문 폭 89mm)을 재서 들어가면 한 줄, 아니면 3-2 로 찍는다. `"i"` 는 한 줄 강제.
+- 본문 끝의 `\cond{…}` 는 build 가 「같은 줄에 들어가면 그 줄 오른쪽 끝, 아니면 다음 줄 오른쪽 끝(앞 줄은 벌어지지 않게)」 으로 놓는다(`\dmcondfill`). 뒤따르는 `[4점]`·`(정답 2개)` 도 함께 옮긴다. 보기 상자 안이나 문장 중간의 `\cond` 는 그대로다.
 - 줄바꿈 규약(프로토타입 `mathbook-problems.sty`·`style.sty` 와 같음 · build.mjs 머리말에 정의): 수식 안에서는 줄을 안 바꾼다(`\binoppenalty=\relpenalty=10000`), 「(단, …)」은 `\cond{…}`, 「점 P」처럼 명사와 기호 사이는 `점~$\pt{P}$`(`~` = 안 끊는 공백), 그 밖의 덩어리는 `\nob{…}`. 그림이 있는 문항은 원문처럼 본문 오른쪽에 그림을 둔다(`figure` 가 있으면 본문 0.58 · 그림 0.4 폭).
 - 문항 번호는 책에 찍힌 번호 그대로다(id 의 뒤 두 자리 · 쪽마다 다시 시작 · 예 19-17 → 「17.」). book.pdf·review·export 모두 같다.
 

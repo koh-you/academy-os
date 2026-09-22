@@ -36,6 +36,9 @@ async function findXelatex() {
 }
 
 const CIRCLED = ["①", "②", "③", "④", "⑤"];
+// 5지선다 한 줄 배치 후보의 보기 하나당 최대 시각 길이(visualLength). 실제 폭 판정은 TeX(\dmchoicesauto)이 하므로 여기서는 긴 보기만 거른다.
+// 실측(낱장 110mm · 본문 폭 89mm): 「$-18$」·「$\dfrac{11}{40}$」·「$100\sqrt{2}$」·한글 3자 다섯 개는 한 줄, 「$2\sqrt{2}+1$」 다섯 개는 3+2 로 되돌아간다.
+const ONE_LINE_MAX_VISUAL = 10;
 
 /**
  * items.json 의 단원 목록. 여러 단원을 한 책으로 둘 때는 `units: [{ code, title, groups }]`,
@@ -109,6 +112,8 @@ function figurePlacement(item) {
 function badgeRaiseMm(item) {
   const head = String(item.body ?? "").slice(0, 120);
   // 검수(RPM 대수 0610·0613 · 미적분Ⅰ 0040·0147·0199): cases 위 중괄호·첫 줄 분수 분자·displaystyle lim 에 배지가 닿아 한 단계씩 더 올린다.
+  // 겹분수(분자 안에 다시 \dfrac)는 분자 윗변이 기준선 위 9mm 까지 올라와 4.5 로도 배지 아래변이 닿는다(개념원리 공통수학2 258-604) — 7.5.
+  if (/\\dfrac\{[^{}]*\\dfrac/.test(head)) return 7.5;
   if (/\\begin\{(cases|pmatrix|aligned)\}/.test(head)) return 6.5;
   if (/\\dfrac|\\sqrt|\\left\(|\\displaystyle|\\lim|\\sum|\\int/.test(head)) return 4.5;
   return 1.5;
@@ -122,10 +127,57 @@ function kindLabel(numberText) {
   return `${KIND_LABELS[match[1]] ?? match[1]} ${match[2]}`;
 }
 
+/** text[open] 이 `{` 일 때 짝이 되는 `}` 의 위치(`\{`·`\}` 는 건너뛴다). 없으면 -1. */
+function matchingBrace(text, open) {
+  let depth = 0;
+  for (let index = open; index < text.length; index += 1) {
+    const char = text[index];
+    if (char === "\\") { index += 1; continue; }
+    if (char === "{") depth += 1;
+    else if (char === "}" && (depth -= 1) === 0) return index;
+  }
+  return -1;
+}
+
+/**
+ * 본문 끝의 「(단, …)」 조건 `\cond{X}` — 중괄호 깊이 0 이고 뒤에 본문이 더 없는 것(문자열 끝 · `\\` · `\par` · 보기/조건 상자 · 별도 줄 수식 앞) — 을
+ * `\dmcondfill{X}{배점 상자}` 로 바꾼다. 같은 줄에 들어가면 오른쪽 끝, 안 들어가면 다음 줄 오른쪽 끝에 놓고 앞 줄은 벌어지지 않게 한다(preamble 정의).
+ * 뒤따르는 배점 `~\mbox{[4점]}`·`\mbox{(정답 2개)}` 는 조건과 한 덩어리로 같이 옮긴다. 보기 상자 안·소문항 사이 등 중간에 놓인 \cond 는 그대로 둔다.
+ */
+function placeTrailingConditions(text) {
+  // 배점 상자는 reviver 가 `~\mbox{\mbox{[4점]}}` 처럼 한 겹 더 싸기도 하므로 중괄호 한 단계 중첩까지 허용한다.
+  const MBOX = String.raw`\\mbox\{(?:[^{}]|\{[^{}]*\})*\}`;
+  const END_OF_PARAGRAPH = new RegExp(String.raw`^((?:\s*~?${MBOX})*)\s*(?=$|\\\\|\\par\b|\\bogi\{|\\exprbox\{|\\dispeq\{|\\centerline\{|\\begin\{)`);
+  const TRAILER_UNIT = new RegExp(String.raw`\s*~?(${MBOX})`, "g");
+  let out = "", depth = 0, index = 0;
+  while (index < text.length) {
+    const char = text[index];
+    if (char === "\\") {
+      if (depth === 0 && text.startsWith("\\cond{", index)) {
+        const close = matchingBrace(text, index + 5);
+        const tail = close > 0 ? text.slice(close + 1).match(END_OF_PARAGRAPH) : null;
+        if (tail) {
+          out += `\\dmcondfill{${text.slice(index + 6, close)}}{${tail[1].replace(TRAILER_UNIT, "~$1")}}`;
+          index = close + 1 + tail[1].length;
+          continue;
+        }
+      }
+      out += text.slice(index, index + 2);
+      index += 2;
+      continue;
+    }
+    if (char === "{") depth += 1;
+    else if (char === "}") depth -= 1;
+    out += char;
+    index += 1;
+  }
+  return out;
+}
+
 /** 문항 하나의 본문 LaTeX(번호·출처 배지 포함 · dmpnum 두 번째 인자). */
 function renderItemBody(id, rawItem, group, bank) {
   // 전사본의 별도 줄 수식(\centerline)은 좁은 낱장 폭에서 넘치므로 폭에 맞춰 줄이는 \dispeq 로 바꾼다.
-  const item = { ...rawItem, body: String(rawItem.body ?? "").replace(/\\centerline\{/g, "\\dispeq{") };
+  const item = { ...rawItem, body: placeTrailingConditions(String(rawItem.body ?? "").replace(/\\centerline\{/g, "\\dispeq{")) };
   // 출처 배지: 쪽-번호 id 는 「책 12쪽 13번」, 책 전체 번호 id(RPM)는 「책 0013번 · 9쪽」.
   const badgeText = bank.id_style === "number"
     ? `${bank.book} ${id}번${item.page ? ` · ${item.page}쪽` : ""}`
@@ -157,14 +209,21 @@ function renderItemBody(id, rawItem, group, bank) {
   }
   // 둘째 그림(풀이 과정 상자·자료 표처럼 본문 아래 오는 것)은 항상 본문 아래 가운데.
   if (item.figure_extra) parts.push(`\\par\\smallskip\\begin{center}${renderFigure(item.figure_extra, "\\linewidth")}\\end{center}`);
-  if (item.subs) parts.push(item.subs.map((sub, index) => `\\dmsubprob{${index + 1}} ${sub}`).join("\n"));
+  if (item.subs) parts.push(item.subs.map((sub, index) => `\\dmsubprob{${index + 1}} ${placeTrailingConditions(sub)}`).join("\n"));
   if (item.choices) {
-    const env = item.choices_layout === "v" ? "choicesv" : item.choices_layout === "ii" ? "choicesii" : "choices32";
     // 분수(dfrac)·근호 보기는 키가 커 두 줄 배치에서 위아래 행이 맞닿는다 — 보이지 않는 지주(strut)로 행 높이를 벌린다(sty 수정 없이).
     const strut = item.choices.some((choice) => /\\dfrac|\\sqrt/.test(choice)) ? "\\rule[-3ex]{0pt}{8ex}" : "";
     // 수식은 글자 수보다 넓게 찍히므로 수식 길이의 절반을 더해 잰다(라이트쎈 공통수학2 1381 ④ 처럼 한글 24자 + 긴 수식이 잘리던 것).
     const visualLength = (choice) => choice.replace(/\$[^$]*\$/g, (math) => "M".repeat(Math.max(1, Math.round((math.length - 2) / 2)))).length;
-    if (env === "choicesv" && item.choices.some((choice) => visualLength(choice) > 26)) {
+    // 배치가 지정되지 않은 짧은 보기 5개(시각 길이 ≤ ONE_LINE_MAX_VISUAL · 줄바꿈·환경·그림 없음)는 원본처럼 한 줄 5칸 후보로 두고, 실제 폭은
+    // TeX 이 재서(\dmchoicesauto) 낱장 폭을 넘으면 choices32 로 되돌린다. choices_layout 이 있으면 그 값("i" = 한 줄 강제)을 따른다.
+    const oneLineCandidate = item.choices.length === 5 && item.choices.every((choice) => visualLength(choice) <= ONE_LINE_MAX_VISUAL && !/\\\\|\\begin\{|\\includegraphics|\\par\b/.test(choice));
+    const layout = item.choices_layout ?? (oneLineCandidate ? "auto" : "32");
+    const env = layout === "v" ? "choicesv" : layout === "ii" ? "choicesii" : "choices32";
+    if (layout === "i" || layout === "auto") {
+      const args = item.choices.map((choice) => `{${choice}}`).join("");
+      parts.push(layout === "i" ? `\\dmchoicesi${args}` : `\\dmchoicesauto{${strut}}${args}`);
+    } else if (env === "choicesv" && item.choices.some((choice) => visualLength(choice) > 26)) {
       // 긴 한글 보기(문장형)는 choicesv 의 \mbox 안에서 줄이 안 바뀌어 잘린다 — 문단으로 하나씩 놓는다.
       parts.push(`\\par\\medskip${item.choices.map((choice, index) => `\\par\\noindent\\hangindent=1.4em\\hangafter=1 {\\small ${CIRCLED[index]}}\\ ${choice}`).join("")}\\par\\medskip`);
     } else {
@@ -279,6 +338,26 @@ async function main() {
 % 「(단, …)」 은 한 덩어리가 원칙이지만 그림 옆 좁은 폭(0.58)에서 긴 조건이 그림 뒤로 넘어가 잘리므로(RPM 공통수학2 0151),
 % 「(단,」 만 첫 낱말에 붙이고 안쪽 낱말 사이에서는 줄을 바꿀 수 있게 둔다(수식 안은 여전히 안 끊긴다).
 \\newcommand{\\cond}[1]{\\mbox{(단,}\\nobreakspace#1)}
+% 본문 끝의 「(단, …)」(build 가 \\cond 를 \\dmcondfill{조건}{배점 상자} 로 바꾼 것): 같은 줄에 들어가면 그 줄 오른쪽 끝, 안 들어가면 다음 줄 오른쪽 끝에 두고
+% 앞 줄은 fill 로 채워 어간이 벌어지지 않게 한다(TeXbook 의 증명 끝 기호 배치 · 검수 지적 개념원리 미적분Ⅱ 185-e19·106-e1 ⑴). 조건이 줄 폭(-2em)보다 넓으면
+% (그림 옆 0.58 폭의 긴 조건) 예전처럼 「(단,」 만 앞 낱말에 붙이고 안쪽에서 줄을 바꾼다.
+\\newlength{\\dmcondw}
+\\newcommand{\\dmcondfill}[2]{%
+  \\settowidth{\\dmcondw}{\\mbox{(단,~#1)#2}}%
+  \\ifdim\\dmcondw<\\dimexpr\\linewidth-2em\\relax
+    \\unskip\\nobreak\\hfill\\penalty0\\hskip1.5em\\hbox{}\\nobreak\\hfill\\mbox{(단,~#1)#2}%
+  \\else
+    \\cond{#1}#2%
+  \\fi}
+% 짧은 5지선다 한 줄 배치(원본이 보기 5개를 한 줄에 둔 것 · 검수 지적). \\dmchoicesi 는 한 줄 5칸(칸 사이 fill · choices_layout "i" 강제).
+% \\dmchoicesauto{지주}{①}…{⑤} 는 build 가 시각 길이로 고른 후보를 TeX 이 실제 폭으로 재서, 칸 사이 최소 1.5em 으로 낱장 본문 폭(110mm 낱장 여백 6mm·번호 9mm
+% 를 뺀 89mm · 현재 줄 폭이 더 좁으면 그 폭) 안에 들어가면 한 줄, 아니면 choices32(3+2 · 분수 지주 포함)로 되돌린다. 번호 기호는 sty 환경과 같은 \\small.
+\\newlength{\\dmchoicesw}\\newlength{\\dmchoiceslim}
+\\newcommand{\\dmchoicesi}[5]{\\par\\medskip\\noindent\\mbox{\\small ①\\ #1}\\hfill\\mbox{\\small ②\\ #2}\\hfill\\mbox{\\small ③\\ #3}\\hfill\\mbox{\\small ④\\ #4}\\hfill\\mbox{\\small ⑤\\ #5}\\par\\medskip}
+\\newcommand{\\dmchoicesauto}[6]{%
+  \\settowidth{\\dmchoicesw}{\\mbox{\\small ①\\ #2}\\hskip1.5em\\mbox{\\small ②\\ #3}\\hskip1.5em\\mbox{\\small ③\\ #4}\\hskip1.5em\\mbox{\\small ④\\ #5}\\hskip1.5em\\mbox{\\small ⑤\\ #6}}%
+  \\setlength{\\dmchoiceslim}{\\linewidth}\\ifdim\\dmchoiceslim>89mm \\setlength{\\dmchoiceslim}{89mm}\\fi
+  \\ifdim\\dmchoicesw<\\dmchoiceslim \\dmchoicesi{#2}{#3}{#4}{#5}{#6}\\else\\begin{choices32}{#1#2}{#1#3}{#1#4}{#1#5}{#1#6}\\end{choices32}\\fi}
 \\raggedbottom
 `;
   const lines = [preamble, "\\begin{document}"];
@@ -295,11 +374,13 @@ async function main() {
       if (group.passage) lines.push(`\\dmpassage{${group.passage}}`);
       // 그룹 그림(공통 표·그림) 뒤 4mm: 첫 문항의 출처 배지가 5mm 위로 올라가 표 아래 행에 겹치지 않게 한다(쎈 중3-2 0124).
       if (group.figure) lines.push(`\\begin{center}${renderFigure(group.figure)}\\end{center}\\vspace{4mm}`);
-      // 문항 사이 최소 6mm(출처 배지가 1.5mm 올라가 있어 위 문항의 상자·그림 아래변에 닿지 않게). dmpnum 의 fill 은 그 위에 더해진다.
+      // 문항 사이 최소 8mm(출처 배지가 1.5mm 올라가 있어 위 문항의 상자·그림 아래변에 닿지 않게 6mm + 배지 높이만큼 2mm: 앞 문항의 마지막 줄이
+      // 꽉 차면 다음 문항 배지 윗변이 그 줄 끝에 닿던 것 · 개념원리 공통수학2 45-92·46-94·258-604). dmpnum 의 fill 은 그 위에 더해진다.
+      // 낱장 렌더(review/export)에는 앞 문항이 없으므로 이 간격은 book.pdf 에만 쓰인다.
       // 문항 번호는 책에 찍힌 번호(id 의 뒤 두 자리 · 쪽마다 다시 시작)와 같게 카운터를 맞춘다.
       for (const id of group.items) {
         const extra = badgeRaiseMm(bank.items[id]) - 1.5;
-        lines.push(`${extra > 0 ? `\\vspace{${extra}mm}` : ""}\\setcounter{dmproblemcount}{${bookNumber(id) - 1}}\\dmpnum{${id}}{\\input{items/${id}}}\\vspace{6mm}`);
+        lines.push(`${extra > 0 ? `\\vspace{${extra}mm}` : ""}\\setcounter{dmproblemcount}{${bookNumber(id) - 1}}\\dmpnum{${id}}{\\input{items/${id}}}\\vspace{8mm}`);
       }
     }
   }
