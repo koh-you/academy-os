@@ -1,4 +1,5 @@
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { ListCard, ListCardActions } from "../../shared/components/ListCard.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
 import { SearchField } from "../../shared/components/SearchField.jsx";
@@ -10,7 +11,12 @@ export function SupplementHistoryModal({ getMethodLabel, getTypeLabel, onChangeQ
     <Modal
       className="supplementHistoryModal"
       title="최근 한 달 보충관리 내역"
-      subtitle="보충 완료, 보강 취소, 일정 확정, 진행 중 항목을 학생별로 확인합니다."
+      titleAdornment={(
+        <HelpTip
+          label="최근 한 달 보충관리 내역"
+          text="보충 완료, 보강 취소, 일정 확정, 진행 중 항목을 학생별로 확인합니다."
+        />
+      )}
       onClose={onClose}
       scrollable
     >

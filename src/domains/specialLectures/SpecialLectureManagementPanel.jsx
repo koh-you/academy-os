@@ -1,5 +1,6 @@
 import { Disclosure, DisclosureChevron } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { SpecialLectureCalendarPreview } from "./SpecialLecturePublicPage.jsx";
 import {
@@ -88,11 +89,9 @@ export function SpecialLectureGuideLinkFields({
 
   return (
     <section className="specialLectureLinkSettings">
-      <div className="sectionTitle">
-        <div>
-          <h3>링크 설정</h3>
-          <p>공개 안내문 주소와 Tally 신청 버튼 연결을 관리합니다.</p>
-        </div>
+      <div className="sectionTitle helpTipTitleRow">
+        <h3>링크 설정</h3>
+        <HelpTip label="링크 설정" text="공개 안내문 주소와 Tally 신청 버튼 연결을 관리합니다." />
       </div>
       <div className="specialLectureFormGrid">
         <label>

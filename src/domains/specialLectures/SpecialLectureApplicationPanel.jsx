@@ -3,6 +3,7 @@ import { copyTextToClipboard } from "../exams/outputPreview.js";
 import { AsyncOperationStatus } from "../../shared/components/AsyncOperationStatus.jsx";
 import { Disclosure, DisclosureChevron } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
 import { OverflowMenu } from "../../shared/components/OverflowMenu.jsx";
@@ -1690,10 +1691,15 @@ export function SpecialLectureApplicationPanel({
           scrollable
           subtitle={`${matchApplication.studentName || "신청자"} · ${matchApplication.schoolName || "학교 미입력"} ${matchApplication.grade || ""}`}
           title="특강 신청 학생 연결"
+          titleAdornment={(
+            <HelpTip
+              label="특강 신청 학생 연결"
+              text="정규반 미배정 학생과 다른 반 학생도 연결할 수 있습니다."
+            />
+          )}
         >
           <div className="specialLectureModalBody">
             <div className="noticeBox specialLectureNoticeBox">
-              <strong>정규반 미배정 학생과 다른 반 학생도 연결할 수 있습니다.</strong>
               <p>정규반 배정 여부와 관계없이 Academy OS의 모든 재원 학생에서 선택합니다. 이름만 먼저 등록한 학생이라면 Tally 기본정보를 같은 학생 ID에 덮어쓴 뒤 연결할 수 있습니다.</p>
             </div>
             <div className="specialLectureRosterSearch">

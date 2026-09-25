@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
 
 export function ManualSupplementCreateModal({ onClose, onCreate, students = [], today = "" }) {
@@ -30,7 +31,12 @@ export function ManualSupplementCreateModal({ onClose, onCreate, students = [], 
     <Modal
       className="manualSupplementCreateModal"
       title="수동 보충 작성"
-      subtitle="자동 후보가 아닌 보충을 직접 작성해 수업일지와 알림톡에 연결합니다."
+      titleAdornment={(
+        <HelpTip
+          label="수동 보충 작성"
+          text="자동 후보가 아닌 보충을 직접 작성해 수업일지와 알림톡에 연결합니다."
+        />
+      )}
       onClose={onClose}
     >
       <form className="manualSupplementCreateForm" onSubmit={handleSubmit}>
