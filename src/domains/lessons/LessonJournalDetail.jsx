@@ -702,6 +702,7 @@ export function LessonJournalDetail({
           hasSolapiResultRefreshTarget={hasSolapiResultRefreshTarget}
           issueReservationJobs={issueReservationJobs}
           lesson={lesson}
+          lessonStudents={lessonStudents}
           onCancelReservationJob={requestCancelReservationJob}
           onClose={() => setReservationModalOpen(false)}
           onRefreshReservationAudit={refreshReservationAudit}
