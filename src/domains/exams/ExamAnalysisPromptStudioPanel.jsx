@@ -37,22 +37,20 @@ const roleLabels = {
 
 function PromptField({ hint = "", label, value, onChange, multiline = false, placeholder = "", sourceLabel = "" }) {
   const Control = multiline ? "textarea" : "input";
-  // 2026-09-25 · 작성 안내(hint)는 상시 노출하지 않고 라벨 옆 물음표 뒤에 둔다. 물음표 트리거가
-  // label 안에 들어가므로 입력칸을 htmlFor/id 로 명시 연결하고 aria-label 로 이름을 고정한다.
+  // 2026-09-25 · 작성 안내(hint)는 상시 노출하지 않고 제목 줄 물음표 뒤에 둔다.
+  // 물음표 트리거는 <button> 이고 button 은 HTML 명세상 labelable element 라 <label> 안에 두면
+  // content model 위반이다(labeled control 이 아닌 labelable 자손). 그래서 바깥은 <div> 로 두고
+  // <label htmlFor> 이 제목 텍스트만 감싸 입력칸과 명시 연결한다 — 접근 가능한 이름에
+  // sourceLabel('원천값 기반'·'확정값 기반')까지 그대로 남는다.
   const controlId = useId();
   return (
-    <label className="examPromptField" htmlFor={controlId}>
+    <div className="examPromptField">
       <span>
-        {hint ? (
-          <span className="helpTipTitleRow">
-            <b>{label}</b>
-            <HelpTip label={label} text={hint} />
-          </span>
-        ) : <b>{label}</b>}
-        {sourceLabel && <small>{sourceLabel}</small>}
+        <label htmlFor={controlId}><b>{label}</b>{sourceLabel && <small>{sourceLabel}</small>}</label>
+        {hint ? <HelpTip label={label} text={hint} /> : null}
       </span>
-      <Control aria-label={label} id={controlId} value={value ?? ""} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} rows={multiline ? 2 : undefined} />
-    </label>
+      <Control id={controlId} value={value ?? ""} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} rows={multiline ? 2 : undefined} />
+    </div>
   );
 }
 
@@ -98,16 +96,14 @@ function MissingInputNotice({ readiness }) {
   }, {});
   return (
     <div className="examPromptMissingNotice">
-      <div className="helpTipTitleRow">
-        <strong>자동으로 확정할 수 없는 입력</strong>
-        <HelpTip
-          label="자동으로 확정할 수 없는 입력"
-          text="빈칸은 교사가 확인해 입력합니다. AI 후보나 PDF 페이지 정보로 자동 보정하지 않습니다."
-        />
-      </div>
+      <strong>자동으로 확정할 수 없는 입력</strong>
       {Object.entries(grouped).map(([role, items]) => (
         <span key={role}><b>{roleLabels[role] || role}</b> · {items.map((item) => item.field).join(", ")}</span>
       ))}
+      {/* 2026-09-25 · 제목과 겹치던 '빈칸은 교사가 확인해 입력합니다.' 만 지운다.
+          자동 보정 금지는 시험분석 v2 의 제품 핵심 규칙이고 이 상자는 저장·생성 직전 경고라
+          물음표 뒤로 숨기지 않고 상시로 남긴다. */}
+      <small>AI 후보나 PDF 페이지 정보로 자동 보정하지 않습니다.</small>
     </div>
   );
 }
@@ -480,9 +476,11 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
           {copyStatus ? <small>{copyStatus}</small> : null}
         </div>
         <ol className="examPromptWorkflowGuide" aria-label="프롬프트 사용 순서">
-          <li><b>1</b><span className="helpTipTitleRow"><strong>처음 만들기</strong><HelpTip label="처음 만들기" text="마스터와 상세 프롬프트로 이미지를 생성합니다." /></span></li>
-          <li><b>2</b><span className="helpTipTitleRow"><strong>결과 검사</strong><HelpTip label="결과 검사" text="생성된 이미지를 첨부하고 오류를 검사합니다." /></span></li>
-          <li><b>3</b><span className="helpTipTitleRow"><strong>필요한 부분만 수정</strong><HelpTip label="필요한 부분만 수정" text="문제가 있을 때만 수정 요청을 입력합니다." /></span></li>
+          {/* 2026-09-25 · 이 목록의 존재 이유가 '한눈에 보는 사용 순서' 라 세 줄 설명은 상시 노출로 남긴다.
+              세 단계를 각각 물음표로 바꾸면 한 줄에 물음표 3개가 생기고, 순서를 알려면 3번 눌러야 한다. */}
+          <li><b>1</b><span><strong>처음 만들기</strong><small>마스터와 상세 프롬프트로 이미지를 생성합니다.</small></span></li>
+          <li><b>2</b><span><strong>결과 검사</strong><small>생성된 이미지를 첨부하고 오류를 검사합니다.</small></span></li>
+          <li><b>3</b><span><strong>필요한 부분만 수정</strong><small>문제가 있을 때만 수정 요청을 입력합니다.</small></span></li>
         </ol>
         <Disclosure className="examPromptOutputItem" defaultOpen trigger={(
           <>
