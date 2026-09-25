@@ -82,9 +82,12 @@ export function createSupplementCenterTabViewModel({
     {
       id: "absence_makeup",
       title: "결석보강",
-      subtitle: activeDeferredAbsenceCount
+      // 2026-09-25 · subtitle 은 물음표 뒤로 가는 정적 설명이고, notice 는 숫자가 들어가는 상시 노출이다.
+      // 접어둔 결석 건수는 화면에 보이지 않으면 알 길이 없어 툴팁 뒤로 보내지 않는다.
+      subtitle: "결석 기록을 보강 일정으로 전환합니다.",
+      notice: activeDeferredAbsenceCount
         ? `7일 초과 미래 결석 ${activeDeferredAbsenceCount}건은 접어두었습니다.`
-        : "결석 기록을 보강 일정으로 전환합니다.",
+        : "",
       emptyText: "지금 처리할 결석 보강이 없습니다.",
       items: absenceItems
     },

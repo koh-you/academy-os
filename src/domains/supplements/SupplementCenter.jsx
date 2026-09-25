@@ -360,6 +360,7 @@ export function SupplementCenter({
             </label>
           )}
           density="slim"
+          description={activeTabData.notice || ""}
           meta={<span className="countBadge">{activeTabData.count}건</span>}
           title={activeTabData.title}
           titleAdornment={<HelpTip label={activeTabData.title} text={activeTabData.subtitle} />}

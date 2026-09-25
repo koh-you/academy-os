@@ -54,7 +54,9 @@ assert.deepEqual(withRetest.tabs.map(({ count, id, title }) => ({ count, id, tit
   { count: 1, id: "retest", title: "재시험" },
   { count: 1, id: "manual_makeup", title: "수동 보충" }
 ]);
-assert.equal(withRetest.tabs[1].subtitle, "7일 초과 미래 결석 2건은 접어두었습니다.");
+// 2026-09-25 · 접어둔 결석 건수는 상시 노출(notice)로 남기고, 정적 설명만 물음표(subtitle)로 보낸다.
+assert.equal(withRetest.tabs[1].subtitle, "결석 기록을 보강 일정으로 전환합니다.");
+assert.equal(withRetest.tabs[1].notice, "7일 초과 미래 결석 2건은 접어두었습니다.");
 assert.equal(withRetest.activeTab.id, "retest");
 assert.deepEqual(withRetest.activeTab.items, [retestItem]);
 
@@ -80,6 +82,7 @@ const fallback = createSupplementCenterTabViewModel({
 assert.equal(fallback.activeTab.id, "homework_makeup");
 assert.equal(fallback.activeTab.count, 1);
 assert.equal(fallback.tabs[1].subtitle, "결석 기록을 보강 일정으로 전환합니다.");
+assert.equal(fallback.tabs[1].notice, "");
 
 const sortItems = [
   { id: "sunday", studentId: "student-na", task: { sourceDate: "2026-08-02" } },
