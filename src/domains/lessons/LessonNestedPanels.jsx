@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { getAttendanceDisplay, hasMissingCheckOut } from "./attendance.js";
@@ -380,9 +381,14 @@ export function SupplementMakeupLessonDetail({
           {student && supplementAttendanceRecord ? (
             <div className="supplementAttendanceBox">
               <div>
-                <span>보충 당일 출결</span>
+                <div className="helpTipTitleRow">
+                  <span>보충 당일 출결</span>
+                  <HelpTip
+                    label="보충 당일 출결"
+                    text="출결 저장/알림톡은 이 보충 수업의 lessonId 기준으로 처리됩니다."
+                  />
+                </div>
                 <strong>{lesson.date} {lesson.startTime || ""}</strong>
-                <small>출결 저장/알림톡은 이 보충 수업의 lessonId 기준으로 처리됩니다.</small>
               </div>
               <button
                 className={`attendanceBadge attendance-${supplementAttendanceDisplay?.statusClass ?? supplementAttendanceRecord.attendanceStatus ?? "pending"}`}
@@ -398,8 +404,13 @@ export function SupplementMakeupLessonDetail({
           ) : null}
           {isAbsenceMakeup ? (
             <div className="absenceSourceJournalBox compact">
-              <h4>원 결석 수업 맥락</h4>
-              <p className="muted">오늘 보충 수업의 이전/다음 숙제가 아니라, 결석했던 수업의 저장본입니다.</p>
+              <div className="helpTipTitleRow">
+                <h4>원 결석 수업 맥락</h4>
+                <HelpTip
+                  label="원 결석 수업 맥락"
+                  text="오늘 보충 수업의 이전/다음 숙제가 아니라, 결석했던 수업의 저장본입니다."
+                />
+              </div>
               <div className="absenceSourceJournalGrid compact">
                 <div>
                   <span>그날 수업 교재</span>
@@ -422,9 +433,9 @@ export function SupplementMakeupLessonDetail({
           ) : null}
         </section>
         <section className="panel homeworkMakeupProcess">
+          {/* 2026-09-25 · 제목과 아래 상태 버튼 3종의 설명이 이미 같은 내용을 말해 상시 설명을 지웠다. */}
           <SectionHeader
             density="slim"
-            description="오늘 무엇을 보충했고, 남은 보충이 있는지 기록합니다."
             title="보충 처리"
             titleAs="h3"
           />
@@ -482,6 +493,7 @@ export function SupplementMakeupLessonDetail({
         </section>
       </div>
       {passConfirmMode ? (
+        // 2026-09-26 · 확인 모달은 '지금 누르면 무슨 일이 생기는지' 를 말하는 자리라 부제를 상시 노출로 되돌렸다.
         <Modal
           className="supplementPassConfirmModal"
           closeDisabled={isPassSaving}
