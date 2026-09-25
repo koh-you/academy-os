@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { postJson } from "../../shared/utils/apiClient.js";
 import "./WatermarkToolPanel.css";
@@ -99,8 +100,13 @@ export function WatermarkToolPanel() {
   return (
     <section className="panel watermarkToolPanel">
       <SectionHeader
-        description="시험지 목록에 등록하지 않고, PDF 파일에 학원 워터마크만 찍어 바로 내려받습니다. 파일은 서버에 저장되지 않습니다."
         title="워터마크 도구"
+        titleAdornment={(
+          <HelpTip
+            label="워터마크 도구"
+            text="시험지 목록에 등록하지 않고, PDF 파일에 학원 워터마크만 찍어 바로 내려받습니다. 파일은 서버에 저장되지 않습니다."
+          />
+        )}
       />
       <div className="watermarkToolControls">
         <label>
