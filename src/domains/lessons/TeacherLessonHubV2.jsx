@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
 import { formatKoreaTimeFromIso } from "./attendance.js";
 import { defaultAttendanceSettings } from "./attendanceSettings.js";
@@ -174,7 +175,12 @@ export function TeacherLessonHubV2({
         backdropClassName="homeworkMakeupModalBackdrop"
         className="homeworkMakeupScheduleModal"
         title={`${followUpTypeLabel(selectedMakeupTask?.taskType)} 일정`}
-        subtitle="일반 수업일지가 아니라, 원 수업 참고와 보충 처리를 분리해 확인하는 전용 화면입니다."
+        titleAdornment={(
+          <HelpTip
+            label={`${followUpTypeLabel(selectedMakeupTask?.taskType)} 일정`}
+            text="일반 수업일지가 아니라, 원 수업 참고와 보충 처리를 분리해 확인하는 전용 화면입니다."
+          />
+        )}
         onClose={onBackToCalendar}
       >
         <SupplementMakeupLessonDetail
@@ -199,7 +205,12 @@ export function TeacherLessonHubV2({
         backdropClassName="homeworkMakeupModalBackdrop"
         className="homeworkMakeupScheduleModal examPrepModal"
         title="시험대비"
-        subtitle="시험기간 전후로 별도 개설한 시험대비 수업입니다."
+        titleAdornment={(
+          <HelpTip
+            label="시험대비"
+            text="시험기간 전후로 별도 개설한 시험대비 수업입니다."
+          />
+        )}
         onClose={onBackToCalendar}
       >
         <ExamPrepLessonDetail

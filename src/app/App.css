@@ -3424,13 +3424,6 @@ summary:focus-visible {
   font-size: 15px;
 }
 
-.examPrepStudentContentHeading p {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  line-height: 1.5;
-  margin: 4px 0 0;
-}
-
 .examPrepStudentContentHeading > span {
   background: var(--status-info-bg, #eff6ff);
   border-radius: 999px;
@@ -8261,11 +8254,6 @@ textarea {
 .examPrepRosterHeader h3 {
   margin: 3px 0 4px;
 }
-
-.examPrepRosterHeader p {
-  margin: 0;
-}
-
 
 .examPrepRosterGroups {
   display: grid;

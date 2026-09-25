@@ -251,8 +251,7 @@
   min-width: 0;
 }
 
-.supplementAttendanceBox > div span,
-.supplementAttendanceBox > div small {
+.supplementAttendanceBox > div span {
   color: var(--academy-muted, #64748b);
   font-size: 12px;
   font-weight: 800;
@@ -304,10 +303,6 @@
 .absenceSourceJournalBox.compact h4 {
   color: var(--academy-primary, #17213d);
   font-size: 16px;
-  margin: 0;
-}
-
-.absenceSourceJournalBox.compact p {
   margin: 0;
 }
 
