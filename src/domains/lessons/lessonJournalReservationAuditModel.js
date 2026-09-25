@@ -2,6 +2,13 @@ import {
   canCancelNotificationJob,
   sortNotificationJobsForCurrentStatus
 } from "../notifications/notificationJobSelectors.js";
+import { isManualAbsenceAlimtalkJob } from "./reservedAbsenceAlimtalkModel.js";
+
+// 2026-09-25 · 출결 결석 알림톡(attendance_absence_*)은 예약 확인 모달의 전용 구획에서만 그린다.
+// 학생별 칸은 notificationType 으로 parent_comment/student_comment 만 고르니 원래 겹치지 않지만,
+// '명단 밖 예약' 상자와 '취소/실패' 목록은 notificationType 을 보지 않아 같은 job 을 두 번 그렸다.
+// 카드 개수도 그 목록과 같은 기준으로 세야 "취소/실패 1건" 인데 목록이 비는 일이 없다.
+const isNonAbsenceJob = (job) => !isManualAbsenceAlimtalkJob(job);
 
 export const lessonJournalReservationInspectLabels = {
   all: "전체 예약",
@@ -53,21 +60,24 @@ export function createLessonJournalReservationAuditModel({
     (job) => job.notificationType === "student_comment" && job.status === "sent"
   ).length;
   const canceledJobCount = auditedJobs.filter(
-    (job) => job.status === "canceled"
+    (job) => job.status === "canceled" && isNonAbsenceJob(job)
   ).length;
   const failedJobCount = auditedJobs.filter(
-    (job) => job.status === "failed"
+    (job) => job.status === "failed" && isNonAbsenceJob(job)
   ).length;
   const orphanScheduledJobs = auditedJobs
     .filter(
       (job) =>
         canCancelNotificationJob(job) &&
         job.studentId &&
-        !lessonStudentIdSet.has(job.studentId)
+        !lessonStudentIdSet.has(job.studentId) &&
+        isNonAbsenceJob(job)
     )
     .sort(sortNotificationJobsForCurrentStatus);
   const issueReservationJobs = auditedJobs
-    .filter((job) => job.status === "canceled" || job.status === "failed")
+    .filter(
+      (job) => (job.status === "canceled" || job.status === "failed") && isNonAbsenceJob(job)
+    )
     .sort(sortNotificationJobsForCurrentStatus);
   const visibleReservationStudents =
     reservationInspectMode === "all"

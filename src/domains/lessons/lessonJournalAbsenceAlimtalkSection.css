@@ -1,0 +1,91 @@
+/* 2026-09-25 · 수업일지 예약 확인 모달의 '출결 결석 알림톡' 구획.
+   App.css 의 .reservationIssueList 계열과 같은 시각 언어를 쓰되 셀렉터는 겹치지 않게
+   .reservationAbsenceSection 아래로만 범위를 한정한다(test-ui-css-hygiene). */
+.reservationAbsenceSection {
+  border: 1px solid var(--status-pending-border, #fed7aa);
+  border-radius: 8px;
+  margin-top: 14px;
+  overflow: hidden;
+}
+
+.reservationAbsenceSection .reservationAbsenceHeader {
+  align-items: center;
+  background: var(--status-pending-bg, #fff7ed);
+  border-bottom: 1px solid var(--status-pending-border, #fed7aa);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+  padding: 9px 10px;
+}
+
+.reservationAbsenceSection .reservationAbsenceHeader strong {
+  color: var(--status-pending-text, #c2410c);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.reservationAbsenceSection .reservationAbsenceHeader span {
+  color: var(--academy-muted, #64748b);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.reservationAbsenceSection .reservationAbsenceNote {
+  border-bottom: 1px solid var(--status-neutral-border, #e2e8f0);
+  color: var(--academy-muted, #64748b);
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  margin: 0;
+  padding: 8px 10px;
+}
+
+.reservationAbsenceSection .reservationAbsenceList {
+  display: grid;
+  gap: 0;
+  max-height: 240px;
+  overflow: auto;
+}
+
+.reservationAbsenceSection .reservationAbsenceRow {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+}
+
+.reservationAbsenceSection .reservationAbsenceRow + .reservationAbsenceRow {
+  border-top: 1px solid var(--status-neutral-border, #e2e8f0);
+}
+
+.reservationAbsenceSection .reservationAbsenceRow strong {
+  color: var(--academy-text-strong, #475569);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.reservationAbsenceSection .reservationAbsenceRow span {
+  color: var(--academy-text-strong, #475569);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.reservationAbsenceSection .reservationAbsenceRow small {
+  color: var(--academy-muted, #64748b);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.reservationAbsenceSection .reservationAbsenceRow .reservationAbsenceOutsideRoster {
+  background: var(--status-pending-bg, #fff7ed);
+  border: 1px solid var(--status-pending-border, #fed7aa);
+  border-radius: 999px;
+  color: var(--status-pending-text, #c2410c);
+  padding: 2px 7px;
+}
+
+.reservationAbsenceSection .reservationAbsenceRow button {
+  margin-left: auto;
+}

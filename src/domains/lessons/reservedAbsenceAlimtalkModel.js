@@ -1,7 +1,9 @@
 // 2026-09-25 · 수동 결석 저장이 예약한 학부모 결석 알림톡을 찾아내는 순수 모델.
 // 출결을 '대기'(또는 다른 상태)로 되돌려도 서버는 이미 예약된 알림톡을 취소하지 않으므로,
 // 출결 체크 모달의 저장 확인 단계에서 "예약이 남아 있다"는 사실만 사람에게 알린다.
-// 여기서 취소하지 않는다 — 실제 발송/예약 취소는 사람이 알림관리에서 결정한다(AGENTS.md).
+// 여기서 취소하지 않는다 — 실제 발송/예약 취소는 사람이 결정한다(AGENTS.md).
+// 2026-09-25 · 취소 진입점은 두 곳이다: 수업일지 ⋮ › 예약 확인 모달의 '출결 결석 알림톡' 구획과
+// 알림관리의 알림톡 발송 기록. 경고 문구도 두 경로를 함께 가리킨다.
 //
 // job 모양의 원천은 api/server.js `buildManualAbsenceAttendanceJob`:
 //   notificationJobId: `attendance_absence_${lessonStudentRecordId}_${scheduledHourKey}`
@@ -47,6 +49,15 @@ export function selectReservedAbsenceAlimtalkJobs({
   studentId = ""
 } = {}) {
   return selectAbsenceAlimtalkJobs({ lessonId, matches: isReservedAbsenceAlimtalkJob, notificationJobs, studentId });
+}
+
+// 2026-09-25 · 수업일지 예약 확인 모달의 '출결 결석 알림톡' 구획용. 학생별 요약과 달리 로스터 안/밖을
+// 가리지 않고 이 수업의 출결 결석 알림톡 job 전부를 고른다(취소된 것·나간 것 포함 — 상태를 그대로 보여준다).
+// 호출부는 이미 lessonId 로 좁혀진 목록을 넘긴다(LessonJournalDetail auditedLessonNotificationJobs).
+export function selectLessonManualAbsenceAlimtalkJobs({ notificationJobs = [] } = {}) {
+  return (Array.isArray(notificationJobs) ? notificationJobs : []).filter((job) =>
+    isManualAbsenceAlimtalkJob(job)
+  );
 }
 
 export function selectSentAbsenceAlimtalkJobs({
@@ -109,7 +120,7 @@ export function createReservedAbsenceAlimtalkWarningText({
       ? ` (예약 ${reservedAbsenceAlimtalk.scheduledAtLabels.join(", ")})`
       : "";
     // 2026-09-25 · 예약 시각이 지난 job 은 알림관리의 '예약' 이 아니라 '확인 필요' 탭에 들어가므로 탭 이름을 적지 않는다.
-    parts.push(`예약된 학부모 결석 알림톡 ${reservedAbsenceAlimtalk.count}건이 남아 있습니다${scheduledLabel}. 출결을 바꿔도 이 예약은 자동으로 취소되지 않습니다. 알림관리의 알림톡 발송 기록에서 [예약 취소] 를 눌러 직접 취소하세요.`);
+    parts.push(`예약된 학부모 결석 알림톡 ${reservedAbsenceAlimtalk.count}건이 남아 있습니다${scheduledLabel}. 출결을 바꿔도 이 예약은 자동으로 취소되지 않습니다. 수업일지 ⋮ › 예약 확인 또는 알림관리의 알림톡 발송 기록에서 [예약 취소] 를 눌러 직접 취소하세요.`);
   }
   return parts.join(" ");
 }

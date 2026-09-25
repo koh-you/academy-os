@@ -4,7 +4,11 @@ import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
-import { createLessonJournalReservationModalModel } from "./lessonJournalReservationModalModel.js";
+import {
+  createLessonJournalAbsenceAlimtalkSectionModel,
+  createLessonJournalReservationModalModel
+} from "./lessonJournalReservationModalModel.js";
+import "./lessonJournalAbsenceAlimtalkSection.css";
 
 export function LessonJournalReservationModal({
   auditedLessonNotificationJobs,
@@ -21,6 +25,7 @@ export function LessonJournalReservationModal({
   hasSolapiResultRefreshTarget,
   issueReservationJobs,
   lesson,
+  lessonStudents,
   onCancelReservationJob,
   onClose,
   onRefreshReservationAudit,
@@ -50,6 +55,14 @@ export function LessonJournalReservationModal({
     scheduledParentCount,
     scheduledStudentCount,
     solapiResultRefreshState
+  });
+  // 출결 결석 알림톡은 학생별 학부모/학생 칸(parent_comment·student_comment)에 들어가지 않아
+  // 이 구획이 유일한 수업일지 쪽 확인·취소 자리다.
+  const absenceSection = createLessonJournalAbsenceAlimtalkSectionModel({
+    auditedJobs: auditedLessonNotificationJobs,
+    cancelingReservationJobId,
+    lessonStudents,
+    students
   });
 
   function renderReservationStatusCell(job, isMuted = false) {
@@ -149,6 +162,37 @@ export function LessonJournalReservationModal({
             </button>
           ))}
         </div>
+      ) : null}
+      {absenceSection.visible ? (
+        <section className="reservationAbsenceSection">
+          <div className="reservationAbsenceHeader">
+            <strong>{absenceSection.title}</strong>
+            <span>{absenceSection.countLabel}</span>
+          </div>
+          <small className="reservationAbsenceNote">{absenceSection.description}</small>
+          <div className="reservationAbsenceList">
+            {absenceSection.rows.map((row) => (
+              <div className="reservationAbsenceRow" key={row.key}>
+                <strong>{row.studentName}</strong>
+                {row.outsideRoster ? (
+                  <small className="reservationAbsenceOutsideRoster">명단 밖</small>
+                ) : null}
+                <span>{formatNotificationJobStatus(row.job)}</span>
+                {row.showScheduledAtLabel ? <small>{`예약 ${row.scheduledAtLabel}`}</small> : null}
+                {row.canCancel ? (
+                  <button
+                    className="dangerSoftButton compact"
+                    disabled={row.isCanceling}
+                    onClick={() => onCancelReservationJob(row.job)}
+                    type="button"
+                  >
+                    {row.isCanceling ? "취소 중" : "예약 취소"}
+                  </button>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </section>
       ) : null}
       <div className="reservationInspectHeader">
         <strong>{model.inspectTitle}</strong>
