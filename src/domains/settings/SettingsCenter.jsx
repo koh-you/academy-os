@@ -8,6 +8,7 @@ import "./tenantSettings.css";
 import { getNotificationJobLabel } from "../notifications/notificationCenterConfig.js";
 import { notificationTemplateRows } from "./notificationTemplateSettingsCatalog.js";
 import { AutosaveRiskNotice } from "../../shared/components/AutosaveRiskNotice.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import { WorkspaceTabs } from "../../shared/components/WorkspaceTabs.jsx";
@@ -114,9 +115,9 @@ function NotificationSettingsSection({ integrationStatus, runtime }) {
   return (
     <section className="panel settingsCard">
       <div className="sectionTitle">
-        <div>
+        <div className="helpTipTitleRow">
           <h2>알림톡 설정</h2>
-          <p>솔라피 연결, 실제번호 잠금, 템플릿 테스트를 확인합니다.</p>
+          <HelpTip label="알림톡 설정" text="솔라피 연결, 실제번호 잠금, 템플릿 테스트를 확인합니다." />
         </div>
         <span className={notificationStatus?.missing?.length ? "statusPill status-failed" : "statusPill status-sent"}>
           {notificationStatus?.missing?.length ? "확인 필요" : "준비됨"}
@@ -442,8 +443,8 @@ export function SettingsCenter({
       <PageHeader
         actions={<InlineSaveStatus label="설정 자동저장" saveState={appStateSaveState} />}
         className="settingsHero"
-        description="AI 사용 모드는 이곳에서 한 번 정해두고 각 기능에서 그대로 사용합니다."
         title="설정"
+        titleAdornment={<HelpTip label="설정" text="AI 사용 모드는 이곳에서 한 번 정해두고 각 기능에서 그대로 사용합니다." />}
       />
 
       <AutosaveRiskNotice className="autosaveRiskNoticeInline" {...appStateAutosaveRisk} />
@@ -466,9 +467,9 @@ export function SettingsCenter({
       {activeSettingsSection === "account" ? (
       <section className="panel settingsCard">
         <div className="sectionTitle">
-          <div>
+          <div className="helpTipTitleRow">
             <h2>계정 설정</h2>
-            <p>선생님 로그인 아이디와 비밀번호를 관리합니다.</p>
+            <HelpTip label="계정 설정" text="선생님 로그인 아이디와 비밀번호를 관리합니다." />
           </div>
         </div>
         <form className="accountSettingsGrid" onSubmit={saveTeacherAccount}>
@@ -521,8 +522,12 @@ export function SettingsCenter({
       <section className="panel settingsCard">
         <div className="sectionTitle">
           <div>
-            <h2>알림톡 템플릿 문구</h2>
-            <p>보충 알림톡과 일반 공지·특강 안내 초안이 읽는 문구 원천입니다. 교사가 저장한 기존 최종본은 바꾸지 않습니다.</p>
+            <div className="helpTipTitleRow">
+              <h2>알림톡 템플릿 문구</h2>
+              <HelpTip label="알림톡 템플릿 문구" text="보충 알림톡과 일반 공지·특강 안내 초안이 읽는 문구 원천입니다." />
+            </div>
+            {/* 2026-09-26 · 무엇을 덮어쓰지 않는지는 저장 경계 고지라 고치는 그 자리에 남긴다. */}
+            <p>여기서 문구를 고쳐도 교사가 이미 저장한 최종본은 바뀌지 않습니다.</p>
           </div>
         </div>
         <div className="notificationTemplateSettingsGrid">
@@ -566,9 +571,9 @@ export function SettingsCenter({
       {activeSettingsSection === "ai" ? (
       <section className="panel settingsCard">
         <div className="sectionTitle">
-          <div>
+          <div className="helpTipTitleRow">
             <h2>AI 설정</h2>
-            <p>기능별 기본 AI 제공자와 모델을 관리합니다.</p>
+            <HelpTip label="AI 설정" text="기능별 기본 AI 제공자와 모델을 관리합니다." />
           </div>
         </div>
         <div className="settingsRows">
@@ -579,8 +584,10 @@ export function SettingsCenter({
             return (
               <div className="settingsRow" key={row.providerKey}>
                 <div>
-                  <strong>{row.title}</strong>
-                  <span className="muted">{row.description}</span>
+                  <span className="helpTipTitleRow">
+                    <strong>{row.title}</strong>
+                    <HelpTip label={row.title} text={row.description} />
+                  </span>
                 </div>
                 <select aria-label={`${row.title} AI 제공자`} value={provider} onChange={(event) => updateProvider(row, event.target.value)}>
                   <option value="auto">자동 선택</option>
@@ -603,9 +610,9 @@ export function SettingsCenter({
       {activeSettingsSection === "prompts" ? (
       <section className="panel settingsCard">
         <div className="sectionTitle">
-          <div>
+          <div className="helpTipTitleRow">
             <h2>AI 프롬프트</h2>
-            <p>웹앱에서 AI 호출이 있는 기능의 기본 지시문을 확인하고 수정합니다.</p>
+            <HelpTip label="AI 프롬프트" text="웹앱에서 AI 호출이 있는 기능의 기본 지시문을 확인하고 수정합니다." />
           </div>
           <button className="softButton" onClick={() => resetPrompt(activePrompt.key)} type="button">
             기본값 복원
@@ -667,16 +674,18 @@ export function SettingsCenter({
       {activeSettingsSection === "attendance" ? (
       <section className="panel settingsCard">
         <div className="sectionTitle">
+          {/* 2026-09-26 · 부제는 아래 두 행 제목('태블릿 전용 화면'·'지각 유예시간')을 되풀이할 뿐이라 지웠다. */}
           <div>
             <h2>출결 설정</h2>
-            <p>태블릿 출결 전용 화면과 자동 지각 판정 기준을 관리합니다.</p>
           </div>
         </div>
         <div className="settingsRows">
           <div className="settingsRow">
             <div>
-              <strong>태블릿 전용 화면</strong>
-              <span className="muted">학생이 휴대폰 번호 뒤 4자리만 입력하는 출결 화면입니다.</span>
+              <span className="helpTipTitleRow">
+                <strong>태블릿 전용 화면</strong>
+                <HelpTip label="태블릿 전용 화면" text="학생이 휴대폰 번호 뒤 4자리만 입력하는 출결 화면입니다." />
+              </span>
             </div>
             <input aria-label="태블릿 출결 화면 주소" readOnly value={attendanceUrl} />
             <a className="ghostButton link" href={attendanceUrl} target="_blank" rel="noreferrer">
@@ -685,8 +694,10 @@ export function SettingsCenter({
           </div>
           <div className="settingsRow compact">
             <div>
-              <strong>지각 유예시간</strong>
-              <span className="muted">수업 정각 이후 이 시간까지는 등원으로 처리합니다.</span>
+              <span className="helpTipTitleRow">
+                <strong>지각 유예시간</strong>
+                <HelpTip label="지각 유예시간" text="수업 정각 이후 이 시간까지는 등원으로 처리합니다." />
+              </span>
             </div>
             <input
               aria-label="지각 유예시간 분"

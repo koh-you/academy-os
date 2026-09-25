@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { getJsonWithTimeout, postJson } from "../../shared/utils/apiClient.js";
@@ -264,9 +265,14 @@ export function TestPaperLibraryPanel({
   return (
     <section className="panel materialPanel testPaperLibraryPanel">
       <SectionHeader
-        description="미리 만든 단원별 평가 시험지를 등록·관리합니다. 시험지는 한 번 만들면 여러 학생·시점에 재사용합니다."
         meta={<InlineSaveStatus label="시험지 목록" saveState={saveState} />}
         title="시험지 목록"
+        titleAdornment={(
+          <HelpTip
+            label="시험지 목록"
+            text="미리 만든 단원별 평가 시험지를 등록·관리합니다. 시험지는 한 번 만들면 여러 학생·시점에 재사용합니다."
+          />
+        )}
       />
 
       <div className="testPaperCoverage">
