@@ -67,11 +67,6 @@ assert.ok(
     helpTipSource.includes("if (!ownsEscape) return;"),
   "Escape may only be consumed by the tip that owns focus or is pinned"
 );
-// 잘림 보정은 스크롤바를 뺀 레이아웃 뷰포트를 기준으로 한다.
-assert.ok(
-  helpTipSource.includes("document.documentElement.clientWidth || window.innerWidth"),
-  "overflow clamp must measure the layout viewport"
-);
 assert.ok(
   modalSource.includes('document.querySelector(".overflowMenuList, .helpTipBubble-open")'),
   "common Modal must let an open help tip take Escape first"
@@ -81,30 +76,98 @@ assert.ok(
 assert.ok(helpTipSource.includes('["iconButton", "helpTipTrigger", triggerClassName]'), "trigger must reuse iconButton");
 assert.equal(/class(Name)?="[^"]*\b(primaryButton|softButton|ghostButton|dangerButton|dangerSoftButton)\b/.test(helpTipSource), false);
 
-// 닫혀 있어도 설명은 DOM 에 남는다(display:none) — aria-describedby 가 항상 유효해야 한다.
-assert.ok(helpTipCss.includes(".helpTipBubble {"));
-assert.ok(/\.helpTipBubble \{[^}]*display: none;/s.test(helpTipCss), "closed help tip must stay in the DOM via display:none");
-assert.ok(/\.helpTipBubble-open \{[^}]*display: block;/s.test(helpTipCss), "open help tip must render");
+// ── CSS 규칙을 선택자 단위로 읽어서 계약을 구조로 확인한다(문자열 한 줄 대조가 아니라). ──
+// 주석 안에도 중괄호 예시가 있어서 먼저 지운다.
+const cssWithoutComments = helpTipCss.replace(/\/\*[\s\S]*?\*\//g, "");
+const cssRules = cssWithoutComments
+  .split("{")
+  .slice(0, -1)
+  .map((chunk, index, chunks) => ({
+    selector: chunk.split("}").pop().replace(/\s+/g, " ").trim(),
+    body: (chunks[index + 1] ?? "").split("}")[0]
+  }))
+  .filter((rule) => rule.selector && !rule.selector.startsWith("@"));
+
+function ruleBody(selector) {
+  const rule = cssRules.find((candidate) => candidate.selector === selector);
+  assert.ok(rule, `help tip css must define ${selector}`);
+  return rule.body;
+}
+
+// 2026-09-25 · 특이도 계약. 화면 css 에 흔한 `.someCard span`(0,1,1) 포괄 규칙이 `.helpTipBubble`(0,1,0)
+// 을 이기는 바람에 화면마다 열림/닫힘 상태 기계를 복제하는 되돌리기 패치가 붙었다.
+// 말풍선·트리거 규칙은 전부 `.helpTip > …`(0,2,0) 이상으로 두어 화면별 패치 없이 이긴다.
+const scopedTargets = cssRules.filter((rule) => /helpTipBubble|helpTipTrigger/.test(rule.selector));
+assert.ok(scopedTargets.length >= 4, "help tip css must still style the bubble and the trigger");
+for (const rule of scopedTargets) {
+  assert.ok(
+    rule.selector.startsWith(".helpTip > ."),
+    `help tip rule must stay a direct-child selector so screen css cannot win: ${rule.selector}`
+  );
+}
+
+// 닫혀 있어도 설명은 DOM 에 남는다 — aria-describedby 가 항상 유효해야 한다.
+// 표시/숨김 축은 display 가 아니라 visibility 다. display 로 두면 화면 css 의
+// `display: grid|flex|block` 포괄 규칙 하나로 닫힘 상태가 깨진다.
+const bubbleBody = ruleBody(".helpTip > .helpTipBubble");
+assert.ok(/\bvisibility: hidden;/.test(bubbleBody), "closed help tip must stay in the DOM and hide via visibility");
+assert.ok(
+  /\bvisibility: visible;/.test(ruleBody(".helpTip > .helpTipBubble.helpTipBubble-open")),
+  "open help tip must become visible"
+);
+for (const rule of scopedTargets.filter((candidate) => candidate.selector.includes("helpTipBubble"))) {
+  assert.equal(
+    /\bdisplay:/.test(rule.body),
+    false,
+    `help tip open/closed state must not depend on display: ${rule.selector}`
+  );
+}
+
+// 잘림 계약: 말풍선은 fixed 로 띄워 `overflow: clip|hidden|auto` 조상을 벗어난다.
+// absolute 로 되돌리면 시험분석 프롬프트 카드처럼 좁은 클리핑 조상 안에서 다시 잘린다.
+assert.ok(/\bposition: fixed;/.test(bubbleBody), "help tip bubble must escape clipping ancestors with position: fixed");
+assert.equal(/\bposition: absolute;/.test(bubbleBody), false, "help tip bubble must not go back to absolute");
 
 // 좁은 화면·모달에서 잘리지 않게 폭을 제한하고 줄바꿈을 허용한다.
-// 가로 위치는 추측하지 않고 실제 사각형을 재서 넘치는 만큼만 민다(양쪽 모두).
-assert.ok(helpTipCss.includes("max-width: min(320px, calc(100vw - 32px))"));
-assert.ok(helpTipCss.includes("white-space: normal"));
-for (const clampContract of [
-  "const bounds = bubble.getBoundingClientRect();",
-  "bounds.right > viewportWidth - margin",
-  "bounds.left + nextShift < margin",
-  "setShift(Math.round(nextShift));",
-  "style={shift ? { marginLeft: `${shift}px` } : undefined}"
+assert.ok(bubbleBody.includes("max-width: min(320px, calc(100vw - 32px))"));
+assert.ok(bubbleBody.includes("white-space: normal"));
+
+// 위치는 추측하지 않고 열릴 때마다 트리거 사각형을 재서 좌우·상하 모두 뷰포트 안으로 넣는다.
+for (const placementContract of [
+  // 레이아웃 뷰포트 기준(innerWidth 는 스크롤바를 포함한다).
+  "document.documentElement.clientWidth || window.innerWidth",
+  "document.documentElement.clientHeight || window.innerHeight",
+  "const anchor = trigger.getBoundingClientRect();",
+  // transform·filter 조상이 fixed 의 containing block 이 될 수 있어 원점을 재서 보정한다.
+  "const origin = bubble.getBoundingClientRect();",
+  "left = viewportWidth - VIEWPORT_MARGIN - bubbleWidth",
+  "if (left < VIEWPORT_MARGIN) left = VIEWPORT_MARGIN;",
+  // 아래 공간이 모자라면 트리거 위로 뒤집는다.
+  "const flippedTop = anchor.top - BUBBLE_GAP - bubbleHeight;",
+  "top = flippedTop",
+  "if (top < VIEWPORT_MARGIN) top = VIEWPORT_MARGIN;",
+  "bubble.style.left = `${Math.round(left - origin.left)}px`;",
+  "bubble.style.top = `${Math.round(top - origin.top)}px`;"
 ]) {
-  assert.ok(helpTipSource.includes(clampContract), `help tip must keep ${clampContract}`);
+  assert.ok(helpTipSource.includes(placementContract), `help tip must keep ${placementContract}`);
+}
+
+// fixed 는 스크롤을 따라오지 않으므로 열려 있는 동안 다시 계산한다.
+// 안쪽 스크롤 컨테이너(모달 본문·표)의 scroll 은 버블링하지 않아 capture 로 받아야 한다.
+for (const reflowContract of [
+  'window.addEventListener("scroll", handleReflow, true)',
+  'window.addEventListener("resize", handleReflow)',
+  'window.removeEventListener("scroll", handleReflow, true)',
+  'window.removeEventListener("resize", handleReflow)'
+]) {
+  assert.ok(helpTipSource.includes(reflowContract), `help tip must keep ${reflowContract}`);
 }
 
 // 터치 타깃은 보이는 원(24px)보다 넓게 ::before 로 확보한다.
 assert.ok(helpTipCss.includes("var(--academy-touch-target, 44px)"));
 // 2026-09-25 · App.css 의 640px 이하 전역 min-height 44px !important 가 트리거를 늘리지 않게 되돌린다.
 assert.ok(
-  /@media \(max-width: 640px\)[\s\S]*?\.helpTip \.helpTipTrigger \{[\s\S]*?min-height: 24px !important;/.test(helpTipCss),
+  /@media \(max-width: 640px\)[\s\S]*?\.helpTip > \.helpTipTrigger \{[\s\S]*?min-height: 24px !important;/.test(helpTipCss),
   "mobile must keep the 24px trigger despite the global touch-target rule"
 );
 
