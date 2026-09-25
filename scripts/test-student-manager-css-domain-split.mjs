@@ -118,7 +118,8 @@ domainRoot.walkRules((rule) => {
 // 2026-09-19 · UI 정돈(U8): .studentListSearchBar .sharedSearchField 추가 → 230.
 // 2026-09-25 · 상시 설명 정리(h3-students-portals): 물음표로 옮겨 쓰임이 사라진 셀렉터 3개 삭제 → 227
 // (.teacherOperatingMemoHeader p · .wideProfileItem > .muted · .studentReminderSourceNote).
-assert.equal(domainSelectors.length, 227, `expected 227 moved selectors, found ${domainSelectors.length}`);
+// 2026-09-26 · 227 -> 228: 개별 스케줄의 저장 부작용 문장을 편집 모드 상시 노출로 되돌리며 .studentScheduleSaveEffect 추가.
+assert.equal(domainSelectors.length, 228, `expected 228 moved selectors, found ${domainSelectors.length}`);
 const appRoot = postcss.parse(appCss);
 const appSelectors = new Set();
 appRoot.walkRules((rule) => {

@@ -286,12 +286,10 @@ export function StudentModal({
         </>
       ) : mode === "bulk" ? (
         <div className="studentBulkPlaceholder">
-          <div className="helpTipTitleRow">
-            <strong>엑셀 일괄 등록</strong>
-            <HelpTip label="엑셀 일괄 등록" text="이름, 출생연도, 학교, PIN 순서로 복사한 목록을 붙여넣는 기능으로 확장 예정입니다." />
-          </div>
+          {/* 2026-09-26 · 준비 중 패널에는 물음표를 두지 않는다. 붙여넣기 순서는 빈 상태 설명에 합쳤다. */}
+          <strong>엑셀 일괄 등록</strong>
           <textarea aria-label="학생 엑셀 일괄 등록 원본" placeholder={"홍길동\t2010\t○○고등학교\t1234"} rows="6" />
-          <EmptyState className="emptyState" description="붙여넣은 목록을 한 번에 등록하는 기능은 아직 준비 중입니다. 지금은 한 명씩 탭에서 등록하세요." title="엑셀 일괄 등록 준비 중" />
+          <EmptyState className="emptyState" description="이름, 출생연도, 학교, PIN 순서로 복사한 목록을 한 번에 등록하는 기능은 아직 준비 중입니다. 지금은 한 명씩 탭에서 등록하세요." title="엑셀 일괄 등록 준비 중" />
         </div>
       ) : (
         <div className="studentIntakePanel">

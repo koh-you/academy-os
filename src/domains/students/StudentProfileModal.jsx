@@ -933,8 +933,12 @@ export function StudentProfileModal({
               <div className="wideProfileItem">
                 <div className="helpTipTitleRow">
                   <small>개별 스케줄</small>
-                  <HelpTip label="개별 스케줄" text="선택한 요일과 시간이 기본 반보다 우선합니다. 저장 후 미래 정규수업 명단, 출결 매칭, 지각 판정에 반영됩니다." />
+                  <HelpTip label="개별 스케줄" text="선택한 요일과 시간이 기본 반보다 우선합니다." />
                 </div>
+                {/* 2026-09-26 · 저장하면 무엇이 바뀌는지는 고치는 그 자리에 보여야 한다(물음표 뒤로 보내지 않는다). */}
+                {isEditingProfile ? (
+                  <small className="studentScheduleSaveEffect">저장 후 미래 정규수업 명단, 출결 매칭, 지각 판정에 반영됩니다.</small>
+                ) : null}
                 {isEditingProfile ? (
                   <div className="studentScheduleEditor">
                     {hasUnparsedScheduleText ? (
