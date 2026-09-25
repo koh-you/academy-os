@@ -1,0 +1,91 @@
+.helpTip {
+  display: inline-flex;
+  flex: 0 0 auto;
+  position: relative;
+}
+
+/*
+ * 트리거는 공용 .iconButton 을 그대로 쓴다(배경·테두리·색·전역 focus-visible 링 상속).
+ * 글자 옆에 붙는 표시라 44px 정사각을 그대로 쓰면 줄 높이를 밀어내므로, 보이는 원은 24px 로
+ * 줄이고 ::before 로 히트 영역만 44px 로 넓힌다 — 터치 타깃은 지키면서 레이아웃은 건드리지 않는다.
+ * .iconButton / .iconButton.compact 와 값이 겹치므로 .helpTip 스코프로 특이도를 올려 이긴다.
+ */
+.helpTip .helpTipTrigger {
+  border-radius: var(--academy-radius-pill, 999px);
+  font-size: 13px;
+  font-weight: 900;
+  height: 24px;
+  line-height: 1;
+  padding: 0;
+  position: relative;
+  width: 24px;
+}
+
+/* 2026-09-25 · App.css 의 640px 이하 전역 규칙이 button 에 min-height 44px !important 를 걸어
+   트리거가 세로로 늘어난다. 히트 영역은 아래 ::before 가 44px 로 따로 보장하므로 여기서 되돌린다. */
+@media (max-width: 640px) {
+  .helpTip .helpTipTrigger {
+    min-height: 24px !important;
+  }
+}
+
+.helpTip .helpTipTrigger::before {
+  content: "";
+  inset: 50% auto auto 50%;
+  height: var(--academy-touch-target, 44px);
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: var(--academy-touch-target, 44px);
+}
+
+.helpTipBubble {
+  background: var(--academy-surface, #ffffff);
+  border: 1px solid var(--academy-border-strong, #cbd8ee);
+  border-radius: var(--academy-radius, 8px);
+  box-shadow: var(--academy-shadow, 0 12px 28px rgba(30, 64, 175, 0.06));
+  color: var(--academy-text, #0f172a);
+  display: none;
+  font-size: 13px;
+  font-weight: 600;
+  left: 0;
+  letter-spacing: normal;
+  line-height: 1.6;
+  max-width: min(320px, calc(100vw - 32px));
+  padding: 10px 12px;
+  position: absolute;
+  text-align: left;
+  text-transform: none;
+  top: calc(100% + 6px);
+  white-space: normal;
+  width: max-content;
+  z-index: 40;
+}
+
+.helpTipBubble-open {
+  display: block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .helpTipBubble-open {
+    animation: helpTipBubbleReveal 120ms ease-out;
+  }
+}
+
+@keyframes helpTipBubbleReveal {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* 제목·라벨 옆에 물음표를 한 줄로 붙이는 공용 줄. 좁은 폭에서는 접힌다. */
+.helpTipTitleRow {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}

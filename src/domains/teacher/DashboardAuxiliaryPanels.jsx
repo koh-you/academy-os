@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { SpecialLectureApplicationPanel } from "../specialLectures/SpecialLectureApplicationPanel.jsx";
 import {
   SpecialLectureGuideBasicFields,
@@ -1080,9 +1081,14 @@ export function AcademyReminderPanel({
         )}
         actionsClassName="academyReminderHeaderActions"
         density="slim"
-        description="상담 일정, 신입생 일정, 특이사항 알림을 한 곳에 저장하고 각 화면과 09:00 슬랙 요약에서 읽습니다."
         eyebrow="OPERATIONS SOURCE"
         title="운영 알림 원본"
+        titleAdornment={(
+          <HelpTip
+            label="운영 알림 원본"
+            text="상담 일정, 신입생 일정, 특이사항 알림을 한 곳에 저장하고 각 화면과 09:00 슬랙 요약에서 읽습니다."
+          />
+        )}
       />
       <Disclosure
         hideTrigger
@@ -1112,9 +1118,12 @@ export function AcademyReminderPanel({
       ) : null}
       {isEditingReminder ? (
         <div className="academyReminderEditBanner">
-          <div>
+          <div className="helpTipTitleRow">
             <strong>운영 알림 수정 중</strong>
-            <span>같은 reminderId를 유지해 날짜, 시간, 내용만 수정 저장합니다.</span>
+            <HelpTip
+              label="운영 알림 수정"
+              text="같은 reminderId를 유지해 날짜, 시간, 내용만 수정 저장합니다."
+            />
           </div>
           <button className="softButton compact" disabled={saveState === "saving"} onClick={cancelEditReminder} type="button">
             수정 취소

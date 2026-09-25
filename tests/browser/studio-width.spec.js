@@ -5,6 +5,10 @@ test("both studios use available width with paired editing and no mobile overflo
   test.setTimeout(90000);
   await resetSafeFixture(request);
   await loginAsTeacher(page);
+  // 2026-09-25 · .appFrame 은 grid-template-columns 에 180ms transition 이 걸려 있다(사이드바 ‹ 토글용).
+  // 뷰포트를 바꾼 뒤 재면 전환 시작 전(1024 에서 사이드바 294px 기준 690px)이나 중간값이 잡혀
+  // 두 스튜디오 수치가 달라진다. 폭을 재는 테스트에서는 전환을 꺼서 항상 최종 배치를 잰다.
+  await page.addStyleTag({ content: ".appFrame { transition: none !important; }" });
   const widths = {};
   for (const name of ["시험분석", "SNS 스튜디오"]) {
     await page.setViewportSize({ width: 2844, height: 1038 });

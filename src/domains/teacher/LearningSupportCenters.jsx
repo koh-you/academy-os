@@ -26,6 +26,7 @@ import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { Disclosure } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
@@ -72,8 +73,13 @@ export function FollowUpCenter({
       <PageHeader
         actions={<span className="countBadge">보충 진행 {tasks.length}건</span>}
         actionsClassName="followUpTopActions"
-        description="교재별로 학생의 오답을 기록하고 개별 오답지를 인쇄합니다. 교재 등록은 교재관리에서 합니다."
         title="오답관리"
+        titleAdornment={(
+          <HelpTip
+            label="오답관리"
+            text="교재별로 학생의 오답을 기록하고 개별 오답지를 인쇄합니다. 교재 등록은 교재관리에서 합니다."
+          />
+        )}
       />
 
       <WrongProblemBoard
@@ -201,8 +207,13 @@ function StudentWrongProblemBoard({ selectedStudent, wrongProblems, onAddWrongPr
             + 오답 추가
           </button>
         )}
-        description="등록되지 않은 교재의 오답이나 후속 메모를 적는 곳입니다. 등록된 교재는 위 번호 그리드에서 기록합니다."
         title={`${selectedStudent.name} 교재 외 오답 메모`}
+        titleAdornment={(
+          <HelpTip
+            label="교재 외 오답 메모"
+            text="등록되지 않은 교재의 오답이나 후속 메모를 적는 곳입니다. 등록된 교재는 위 번호 그리드에서 기록합니다."
+          />
+        )}
       />
       <DataTableShell className="managementTable studentWrongTable" label="학생별 오답 목록">
         <div className="managementRow wrongProblemProfileRow managementHead">
@@ -374,7 +385,6 @@ export function ResourceLibraryCenter({
     <section className="resourceLibraryPage">
       <PageHeader
         actions={<span className="countBadge">{materials.length}건</span>}
-        description="학생별 자료, 반별 자료, 학부모 공개 자료를 한 곳에서 관리합니다."
         title="자료함"
       />
 

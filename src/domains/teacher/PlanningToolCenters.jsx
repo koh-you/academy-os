@@ -28,6 +28,7 @@ import { ConfirmDialog } from "../../shared/components/ConfirmDialog.jsx";
 import { Disclosure } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
@@ -756,7 +757,6 @@ export function ClassManager({ runtime, students, templates, onSaveClassTemplate
       <PageHeader
         actions={<button className="primaryButton" onClick={() => setTemplateEditorTarget("new")} type="button">+ 반 개설</button>}
         className="classManagerTop"
-        description="기본 반을 기준으로 학생 배정과 수업 흐름을 관리합니다."
         title="반관리"
       />
 
@@ -971,9 +971,14 @@ export function LessonResearchCenter({
         )}
         actionsClassName="researchTopActions"
         className="lessonResearchHero"
-        description="유형별 강의 교안, 특정문항 설명 틀, 학생이 자주 막히는 지점을 과목별로 정리합니다."
         eyebrow="LESSON RESEARCH"
         title="수업연구"
+        titleAdornment={(
+          <HelpTip
+            label="수업연구"
+            text="유형별 강의 교안, 특정문항 설명 틀, 학생이 자주 막히는 지점을 과목별로 정리합니다."
+          />
+        )}
       />
 
       <p aria-live={lessonResearchSaveState === "failed" ? "assertive" : "polite"} className="wrongProblemSaveMessage">
@@ -1009,7 +1014,6 @@ export function LessonResearchCenter({
           <div className="researchTypeTreePanel">
             <SectionHeader
               density="slim"
-              description="유형을 골라 바로 강의 교안 항목을 만듭니다."
               eyebrow="TYPE TREE"
               title="유형트리"
             />
@@ -1364,9 +1368,14 @@ export function AIVariantProblemCenter({ runtime, aiSettings = runtime.defaultAi
     <section className="aiVariantPage">
       <PageHeader
         className="aiVariantHero"
-        description="학원 수업자료 분석, 문제 변형, 문항 정리 작업을 한 곳에서 관리합니다."
         eyebrow="AI TOOLS"
         title="AI 도구"
+        titleAdornment={(
+          <HelpTip
+            label="AI 도구"
+            text="학원 수업자료 분석, 문제 변형, 문항 정리 작업을 한 곳에서 관리합니다."
+          />
+        )}
       />
 
       <WorkspaceTabs label="AI 도구 작업 구분">
@@ -1391,9 +1400,12 @@ export function AIVariantProblemCenter({ runtime, aiSettings = runtime.defaultAi
           <div className="aiVariantWorkbench">
             <section className="panel aiToolCard aiVariantInputCard">
               <div className="aiToolCardTitle">
-                <div>
+                <div className="helpTipTitleRow">
                   <h2>문항 입력</h2>
-                  <p className="muted">파일, 이미지, 텍스트로 받은 원본을 넣고 바로 변형 조건을 정합니다.</p>
+                  <HelpTip
+                    label="문항 입력"
+                    text="파일, 이미지, 텍스트로 받은 원본을 넣고 바로 변형 조건을 정합니다."
+                  />
                 </div>
                 <span className="readyPill">준비 완료</span>
               </div>
@@ -1558,8 +1570,14 @@ export function AIVariantProblemCenter({ runtime, aiSettings = runtime.defaultAi
                       <strong>AI 생성 후 표시</strong>
                     </div>
                     <div className="variantSolutionBox">
-                      <span>해설</span>
-                      <p>선택한 해설 형식과 풀이 스타일에 맞춰 풀이가 표시됩니다.</p>
+                      <div className="helpTipTitleRow">
+                        <span>해설</span>
+                        <HelpTip
+                          label="해설"
+                          text="선택한 해설 형식과 풀이 스타일에 맞춰 풀이가 표시됩니다."
+                        />
+                      </div>
+                      <strong>AI 생성 후 표시</strong>
                     </div>
                   </article>
                 ))}
@@ -1587,7 +1605,6 @@ export function AIVariantProblemCenter({ runtime, aiSettings = runtime.defaultAi
             <section className="hwpxExportSection">
               <SectionHeader
                 density="slim"
-                description="다운로드 파일에 들어갈 기본 정보를 정합니다."
                 title="시험지 정보"
                 titleAs="h3"
               />
@@ -1612,7 +1629,6 @@ export function AIVariantProblemCenter({ runtime, aiSettings = runtime.defaultAi
             <section className="hwpxExportSection">
               <SectionHeader
                 density="slim"
-                description="수업용, 배부용, 해설용 시험지 형식을 나눠 저장할 수 있게 둡니다."
                 title="정답 · 풀이"
                 titleAs="h3"
               />
