@@ -5,6 +5,10 @@
 // 함께 내려온다. 여기서는 (1) 새 파일의 모든 셀렉터가 두 파일에서만 쓰는 클래스에만 걸리는지,
 // (2) App.css 와 겹치는 셀렉터가 없는지("한 셀렉터, 한 집"), (3) 쪼갠 @media 규칙의 공용 쪽
 // (.examPrepSummaryGrid)이 App.css 에 남았는지, (4) 청크 진입 파일이 import 하는지 고정한다.
+//
+// 2026-09-25 · 상시 설명 문구를 HelpTip 으로 옮기면서 셀렉터 수가 106 → 105 가 됐다. 쓸 곳이 없어진
+// .absenceSourceJournalBox.compact p 와 .supplementAttendanceBox > div small 을 지우고, 라벨 규칙이
+// 설명 풍선까지 잡던 것을 되돌리는 .supplementAttendanceBox > div .helpTipBubble 하나를 더했다.
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
@@ -66,7 +70,7 @@ domainRoot.walkRules((rule) => {
     domainSelectors.push(selector);
   }
 });
-assert.equal(domainSelectors.length, 106, `expected 106 moved selectors, found ${domainSelectors.length}`);
+assert.equal(domainSelectors.length, 105, `expected 105 moved selectors, found ${domainSelectors.length}`);
 const appRoot = postcss.parse(appCss);
 const appSelectors = new Set();
 appRoot.walkRules((rule) => {

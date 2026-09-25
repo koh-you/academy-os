@@ -1,3 +1,4 @@
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 
 export function LessonModalClosurePanel({
   blockingNotificationJobCount,
@@ -22,9 +23,14 @@ export function LessonModalClosurePanel({
         <p className="muted">휴강은 수업일지에 남지만 실제 수업 횟수와 급여 정산에는 포함되지 않습니다.</p>
         {isClosureConversion ? (
           <div className="closureMakeupEditNotice">
-            <strong>날짜와 관계없이 상황에 따라 휴강으로 전환할 수 있습니다.</strong>
+            <div className="helpTipTitleRow">
+              <strong>날짜와 관계없이 상황에 따라 휴강으로 전환할 수 있습니다.</strong>
+              <HelpTip
+                label="휴강 전환 시 보존 처리"
+                text="보존된 출결은 학생 출결 통계와 결석보강 후보에서 제외되고, 저장 직전 Supabase 최신 상태를 다시 확인합니다."
+              />
+            </div>
             <span>기존 명단 {initialStudentCount}명·수업기록 {closureRecordCount}건·특강 회차 연결은 삭제하지 않고 보존합니다.</span>
-            <span>보존된 출결은 학생 출결 통계와 결석보강 후보에서 제외되고, 저장 직전 Supabase 최신 상태를 다시 확인합니다.</span>
             {blockingNotificationJobCount ? (
               <span className="warningText">현재 화면 기준 확인 필요한 알림 {blockingNotificationJobCount}건 · 수업일지의 예약 확인에서 정리 후 저장</span>
             ) : (

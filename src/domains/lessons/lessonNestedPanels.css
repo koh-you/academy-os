@@ -251,11 +251,17 @@
   min-width: 0;
 }
 
-.supplementAttendanceBox > div span,
-.supplementAttendanceBox > div small {
+.supplementAttendanceBox > div span {
   color: var(--academy-muted, #64748b);
   font-size: 12px;
   font-weight: 800;
+}
+
+/* 2026-09-25 · 위 라벨 규칙이 설명 풍선까지 잡아 12px 굵은 muted 글자로 만들던 것을 되돌린다. */
+.supplementAttendanceBox > div .helpTipBubble {
+  color: var(--academy-text, #0f172a);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .supplementAttendanceBox strong {
@@ -304,10 +310,6 @@
 .absenceSourceJournalBox.compact h4 {
   color: var(--academy-primary, #17213d);
   font-size: 16px;
-  margin: 0;
-}
-
-.absenceSourceJournalBox.compact p {
   margin: 0;
 }
 
