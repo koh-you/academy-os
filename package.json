@@ -269,6 +269,7 @@
     "test:attendance-sync-hook": "node scripts/test-attendance-sync-hook.mjs",
     "test:attendance-modal-model": "node scripts/test-attendance-modal-model.mjs",
     "test:attendance-modal-boundary": "node scripts/test-attendance-modal-boundary.mjs",
+    "test:reserved-absence-alimtalk-model": "node scripts/test-reserved-absence-alimtalk-model.mjs",
     "test:attendance-kiosk-model": "node scripts/test-attendance-kiosk-model.mjs",
     "test:attendance-kiosk-boundary": "node scripts/test-attendance-kiosk-boundary.mjs",
     "test:attendance-kiosk-auto-confirm": "node scripts/test-attendance-kiosk-auto-confirm.mjs",

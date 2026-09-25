@@ -355,6 +355,7 @@
   "scripts/test-attendance-sync-hook.mjs",
   "scripts/test-attendance-modal-model.mjs",
   "scripts/test-attendance-modal-boundary.mjs",
+  "scripts/test-reserved-absence-alimtalk-model.mjs",
   "scripts/test-attendance-kiosk-model.mjs",
   "scripts/test-attendance-kiosk-boundary.mjs",
   "scripts/test-attendance-kiosk-auto-confirm.mjs",
