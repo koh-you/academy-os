@@ -55,8 +55,10 @@ const exclusiveClasses = new Set([
   "studentProfileDataTable", "studentProfileGrid", "studentProfileModalWrap", "studentProfileRowActions",
   "studentProfileSectionBody", "studentProfileSectionModal", "studentProfileStickySaveBar",
   "studentProfileTile", "studentProfileTileGrid", "studentProfileTileMeta", "studentReminderComposer",
+  // 2026-09-25 · studentReminderSourceNote 는 상시 설명 정리(h3-students-portals)에서 JSX·CSS 를 함께
+  // 없앴다 — '매일 09:00 슬랙 원본' 안내가 운영 알림 모달 제목 옆 물음표로 들어갔다.
   "studentReminderControls", "studentReminderItem", "studentReminderList", "studentReminderSlackToggle",
-  "studentReminderSourceNote", "studentRestoreNotice", "studentRosterEffectiveChoice",
+  "studentRestoreNotice", "studentRosterEffectiveChoice",
   "studentScheduleActions", "studentScheduleEditor", "studentScheduleEmpty", "studentScheduleLegacyText",
   "studentSchedulePreview", "studentScheduleRow", "studentScoreModalTable", "studentScoreRow",
   "studentStatusPill", "studentTallySubmissionCard", "studentTallySubmissionPanel",
@@ -114,7 +116,9 @@ domainRoot.walkRules((rule) => {
 });
 // 2026-09-19 · UI 정돈(U6): .profileEditHint · .profileSavedText · .studentProfileRowActions .dangerSoftButton 셀렉터 3개 삭제 → 229.
 // 2026-09-19 · UI 정돈(U8): .studentListSearchBar .sharedSearchField 추가 → 230.
-assert.equal(domainSelectors.length, 230, `expected 230 moved selectors, found ${domainSelectors.length}`);
+// 2026-09-25 · 상시 설명 정리(h3-students-portals): 물음표로 옮겨 쓰임이 사라진 셀렉터 3개 삭제 → 227
+// (.teacherOperatingMemoHeader p · .wideProfileItem > .muted · .studentReminderSourceNote).
+assert.equal(domainSelectors.length, 227, `expected 227 moved selectors, found ${domainSelectors.length}`);
 const appRoot = postcss.parse(appCss);
 const appSelectors = new Set();
 appRoot.walkRules((rule) => {

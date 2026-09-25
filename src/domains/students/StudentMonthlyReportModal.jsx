@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { ModalFooter } from "../../shared/components/Modal.jsx";
 import {
   buildStudentMonthlyReportModel,
@@ -124,8 +125,13 @@ export function StudentMonthlyReportModal({
       className="studentMonthlyReportModal"
       onClose={onClose}
       scrollable
-      subtitle="화면에서 내용을 확인한 뒤 복사하거나 PDF로 인쇄합니다. 운영 데이터와 알림은 변경하지 않습니다."
       title={`${student.name} ${model.monthLabel} 수업일정표`}
+      titleAdornment={(
+        <HelpTip
+          label="수업일정표"
+          text="화면에서 내용을 확인한 뒤 복사하거나 PDF로 인쇄합니다. 운영 데이터와 알림은 변경하지 않습니다."
+        />
+      )}
     >
       <div className="studentMonthlyReportControls">
         <label><input checked={detailed} onChange={(event) => { setDetailed(event.target.checked); setActionStatus(""); }} type="checkbox" /> 상세 정보 표시</label>
