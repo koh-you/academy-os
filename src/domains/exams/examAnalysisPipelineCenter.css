@@ -1919,12 +1919,13 @@
   line-height: 1.5;
 }
 
-.examAnalysisBlogBlockCard p {
-  color: var(--academy-text-strong, #475569);
-  font-size: 12px;
-  font-weight: 850;
-  line-height: 1.5;
-  margin: 0;
+/* 2026-09-25 · 이 화면의 포괄적인 span 규칙(14px/950/primary 등)이 공용 HelpTip 말풍선까지
+   덮어써서 설명 글자가 제목처럼 커졌다. 이 패널 안에서만 HelpTip.css 와 같은 값으로 되돌린다. */
+.examAnalysisOutputDraftPanel .helpTipBubble {
+  color: var(--academy-text, #0f172a);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.6;
 }
 
 .examAnalysisKeyQuestionHeader {

@@ -158,11 +158,10 @@ export function ExamAnalysisFinalPreviewPanel({ model }) {
       <div className="panel examAnalysisFinalPreviewPanel">
         <SectionHeader
           density="slim"
-          description="검수 저장 후 표시됩니다."
           title="최종 미리보기"
           titleAs="strong"
         />
-        <EmptyState className="emptyState compact" title="저장된 문항 검수본이 없습니다." />
+        <EmptyState className="emptyState compact" description="검수 저장 후 표시됩니다." title="저장된 문항 검수본이 없습니다." />
       </div>
     );
   }

@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { Disclosure } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { getJsonWithTimeout, postJsonWithTimeout } from "../../shared/utils/apiClient.js";
 import { copyTextToClipboard } from "./outputPreview.js";
@@ -36,11 +37,21 @@ const roleLabels = {
 
 function PromptField({ hint = "", label, value, onChange, multiline = false, placeholder = "", sourceLabel = "" }) {
   const Control = multiline ? "textarea" : "input";
+  // 2026-09-25 · 작성 안내(hint)는 상시 노출하지 않고 라벨 옆 물음표 뒤에 둔다. 물음표 트리거가
+  // label 안에 들어가므로 입력칸을 htmlFor/id 로 명시 연결하고 aria-label 로 이름을 고정한다.
+  const controlId = useId();
   return (
-    <label className="examPromptField">
-      <span><b>{label}</b>{sourceLabel && <small>{sourceLabel}</small>}</span>
-      <Control value={value ?? ""} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} rows={multiline ? 2 : undefined} />
-      {hint ? <small className="examPromptFieldHint">{hint}</small> : null}
+    <label className="examPromptField" htmlFor={controlId}>
+      <span>
+        {hint ? (
+          <span className="helpTipTitleRow">
+            <b>{label}</b>
+            <HelpTip label={label} text={hint} />
+          </span>
+        ) : <b>{label}</b>}
+        {sourceLabel && <small>{sourceLabel}</small>}
+      </span>
+      <Control aria-label={label} id={controlId} value={value ?? ""} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} rows={multiline ? 2 : undefined} />
     </label>
   );
 }
@@ -55,19 +66,24 @@ function PhrasePicker({ field, schoolLevel, targetPath, currentValue, onApply })
         <option value="">벤치마크 문구 사례 선택</option>
         {options.map((option) => <option key={option.id} value={option.id}>{option.draft}</option>)}
       </select>
-      <button
-        className="ghostButton"
-        disabled={!selectedId}
-        onClick={() => {
-          const phraseDraft = createExamAnalysisPhraseDraft(selectedId);
-          const next = currentValue ? `${currentValue}\n${phraseDraft}` : phraseDraft;
-          onApply({ targetPath, phraseId: selectedId, value: next });
-        }}
-        type="button"
-      >
-        {currentValue ? "선택 문구 이어 붙이기" : "선택 문구 적용"}
-      </button>
-      <small>선택만으로는 바뀌지 않습니다. 적용 후 자유롭게 수정하고 저장하세요.</small>
+      <div className="helpTipTitleRow">
+        <button
+          className="ghostButton"
+          disabled={!selectedId}
+          onClick={() => {
+            const phraseDraft = createExamAnalysisPhraseDraft(selectedId);
+            const next = currentValue ? `${currentValue}\n${phraseDraft}` : phraseDraft;
+            onApply({ targetPath, phraseId: selectedId, value: next });
+          }}
+          type="button"
+        >
+          {currentValue ? "선택 문구 이어 붙이기" : "선택 문구 적용"}
+        </button>
+        <HelpTip
+          label="문구 적용"
+          text="선택만으로는 바뀌지 않습니다. 적용 후 자유롭게 수정하고 저장하세요."
+        />
+      </div>
     </div>
   );
 }
@@ -82,11 +98,16 @@ function MissingInputNotice({ readiness }) {
   }, {});
   return (
     <div className="examPromptMissingNotice">
-      <strong>자동으로 확정할 수 없는 입력</strong>
+      <div className="helpTipTitleRow">
+        <strong>자동으로 확정할 수 없는 입력</strong>
+        <HelpTip
+          label="자동으로 확정할 수 없는 입력"
+          text="빈칸은 교사가 확인해 입력합니다. AI 후보나 PDF 페이지 정보로 자동 보정하지 않습니다."
+        />
+      </div>
       {Object.entries(grouped).map(([role, items]) => (
         <span key={role}><b>{roleLabels[role] || role}</b> · {items.map((item) => item.field).join(", ")}</span>
       ))}
-      <small>빈칸은 교사가 확인해 입력합니다. AI 후보나 PDF 페이지 정보로 자동 보정하지 않습니다.</small>
     </div>
   );
 }
@@ -290,7 +311,13 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
 
       <div className="examPromptSequencePanel">
         <div className="examPromptRoleHeading">
-          <div><strong>{sequenceModel.presetLabel}</strong><small>입력 유무에 따라 조건부 역할을 건너뛰고 번호를 다시 계산합니다.</small></div>
+          <div className="helpTipTitleRow">
+            <strong>{sequenceModel.presetLabel}</strong>
+            <HelpTip
+              label={sequenceModel.presetLabel}
+              text="입력 유무에 따라 조건부 역할을 건너뛰고 번호를 다시 계산합니다."
+            />
+          </div>
           <span>총 {sequenceModel.slides.length}장 · 준비 {sequenceModel.readyCount} · 입력 필요 {sequenceModel.needsInputCount}</span>
         </div>
         <div className="examPromptRoleToggles">
@@ -378,8 +405,13 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
           </>
         )}>
             <div className="examPromptRoleHeading">
-              <small>주요문항으로 보여줄 문제만 펼쳐서 보완합니다.</small>
-              <button className="ghostButton" disabled={draft.roleInputs.keyQuestions.length >= 12} onClick={addKeyQuestion} type="button">주요문항 추가</button>
+              <div className="helpTipTitleRow">
+                <button className="ghostButton" disabled={draft.roleInputs.keyQuestions.length >= 12} onClick={addKeyQuestion} type="button">주요문항 추가</button>
+                <HelpTip
+                  label="주요문항 추가"
+                  text="주요문항으로 보여줄 문제만 펼쳐서 보완합니다."
+                />
+              </div>
             </div>
             {draft.roleInputs.keyQuestions.length ? draft.roleInputs.keyQuestions.map((question, index) => (
               <div className="examPromptQuestionCard" key={question.blockId || index}>
@@ -428,7 +460,13 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
 
       <div className="examPromptOutputPanel">
         <div className="examPromptRoleHeading">
-          <div><strong>복붙용 프롬프트</strong><small>프로젝트 공통 지침을 먼저 붙이고, 아래 슬라이드를 1장씩 생성합니다.</small></div>
+          <div className="helpTipTitleRow">
+            <strong>복붙용 프롬프트</strong>
+            <HelpTip
+              label="복붙용 프롬프트"
+              text="프로젝트 공통 지침을 먼저 붙이고, 아래 슬라이드를 1장씩 생성합니다."
+            />
+          </div>
           <div className="examPromptOutputActions">
             <button className="ghostButton" disabled={!promptPack.readyForAllGeneration} onClick={() => copyPrompt("전체 프롬프트", promptPack.text)} type="button">전체 복사</button>
             <button className="ghostButton" onClick={() => downloadPromptFile("txt")} type="button">TXT</button>
@@ -442,9 +480,9 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
           {copyStatus ? <small>{copyStatus}</small> : null}
         </div>
         <ol className="examPromptWorkflowGuide" aria-label="프롬프트 사용 순서">
-          <li><b>1</b><span><strong>처음 만들기</strong><small>마스터와 상세 프롬프트로 이미지를 생성합니다.</small></span></li>
-          <li><b>2</b><span><strong>결과 검사</strong><small>생성된 이미지를 첨부하고 오류를 검사합니다.</small></span></li>
-          <li><b>3</b><span><strong>필요한 부분만 수정</strong><small>문제가 있을 때만 수정 요청을 입력합니다.</small></span></li>
+          <li><b>1</b><span className="helpTipTitleRow"><strong>처음 만들기</strong><HelpTip label="처음 만들기" text="마스터와 상세 프롬프트로 이미지를 생성합니다." /></span></li>
+          <li><b>2</b><span className="helpTipTitleRow"><strong>결과 검사</strong><HelpTip label="결과 검사" text="생성된 이미지를 첨부하고 오류를 검사합니다." /></span></li>
+          <li><b>3</b><span className="helpTipTitleRow"><strong>필요한 부분만 수정</strong><HelpTip label="필요한 부분만 수정" text="문제가 있을 때만 수정 요청을 입력합니다." /></span></li>
         </ol>
         <Disclosure className="examPromptOutputItem" defaultOpen trigger={(
           <>

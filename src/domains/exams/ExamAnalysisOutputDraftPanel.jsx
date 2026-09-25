@@ -22,6 +22,7 @@ import {
   getExamAnalysisGptChecklistAutoItems
 } from "./examAnalysisOutputPackageBuilder.js";
 import { Disclosure, DisclosureChevron } from "../../shared/components/Disclosure.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 import { StickySaveBar } from "../../shared/components/StickySaveBar.jsx";
 
@@ -136,8 +137,13 @@ export function ExamAnalysisOutputDraftPanel({
         )}
         actionsClassName="headerActions"
         density="slim"
-        description="작업을 선택하면 필요한 입력만 표시됩니다."
         title="글·카드 만들기"
+        titleAdornment={(
+          <HelpTip
+            label="글·카드 만들기"
+            text="작업을 선택하면 필요한 입력만 표시됩니다."
+          />
+        )}
         titleAs="strong"
       />
 
@@ -272,8 +278,13 @@ export function ExamAnalysisOutputDraftPanel({
       <Disclosure hideTrigger id="exam-output-gpt-checklist" open={!isOutputSectionCollapsed("gptChecklist")}>
         <div className="examAnalysisGptChecklistPanel">
           <div className="examAnalysisGptChecklistNotice">
-            <strong>반복 제작 기준</strong>
-            <span>자동 입력값은 읽기 전용입니다. 등급컷, 출제 근거, 금지 항목, 주요문항 최종 선택은 선생님 저장본을 원본으로 사용합니다.</span>
+            <div className="helpTipTitleRow">
+              <strong>반복 제작 기준</strong>
+              <HelpTip
+                label="반복 제작 기준"
+                text="자동 입력값은 읽기 전용입니다. 등급컷, 출제 근거, 금지 항목, 주요문항 최종 선택은 선생님 저장본을 원본으로 사용합니다."
+              />
+            </div>
           </div>
           <div className="examAnalysisGptChecklistAutoGrid">
             {gptChecklistAutoItems.map((item) => (
@@ -381,11 +392,13 @@ export function ExamAnalysisOutputDraftPanel({
               <div className="examAnalysisBlogBlockCardHeader">
                 <span>{field.order}</span>
                 <div>
-                  <strong>{field.label}</strong>
+                  <div className="helpTipTitleRow">
+                    <strong>{field.label}</strong>
+                    <HelpTip label={field.label} text={field.guide} />
+                  </div>
                   <small>{field.type}</small>
                 </div>
               </div>
-              <p>{field.guide}</p>
               <span className="examAnalysisBenchmarkHint">{field.benchmark}</span>
               <textarea
                 aria-label={field.label}

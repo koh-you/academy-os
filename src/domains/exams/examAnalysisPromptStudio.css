@@ -1,4 +1,12 @@
 .examPromptStudio { display: grid; gap: 16px; }
+/* 2026-09-25 · 이 화면의 포괄적인 규칙(.examPromptWorkflowGuide span, .examPromptSequencePanel
+   .examPromptRoleHeading > div 의 display:grid)이 공용 HelpTip 의 제목 줄과 말풍선까지 덮어써서
+   닫힌 설명이 보이거나 제목과 물음표가 세로로 쪼개졌다. 이 화면 안에서만 HelpTip.css 값으로 되돌린다. */
+.examPromptStudio .helpTipTitleRow { display: flex; }
+.examPromptStudio .examPromptRoleHeading > .helpTipTitleRow { display: flex; }
+.examPromptStudio .helpTip { display: inline-flex; }
+.examPromptStudio .helpTipBubble { display: none; }
+.examPromptStudio .helpTipBubble-open { display: block; }
 .examPromptStudioHeader { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
 .examPromptStudioHeader > div:first-child { display: grid; gap: 5px; }
 .examPromptStudioHeader strong { font-size: 18px; }
@@ -10,7 +18,6 @@
 .examPromptMissingNotice { border: 1px solid var(--status-pending-border, #fed7aa); background: var(--status-pending-bg, #fff7ed); }
 .examPromptReadyNotice { border: 1px solid var(--status-success-border, #86efac); background: var(--status-success-bg, #ecfdf5); }
 .examPromptMissingNotice > span { color: var(--status-pending-text, #c2410c); }
-.examPromptMissingNotice small { color: var(--status-pending-text, #c2410c); }
 .examPromptLevelSwitch { display: flex; gap: 8px; }
 .examPromptLevelSwitch button { border: 1px solid var(--academy-border-strong, #cbd8ee); border-radius: 999px; background: white; padding: 8px 14px; cursor: pointer; }
 .examPromptLevelSwitch button.active { border-color: var(--academy-focus-ring, #2563eb); color: var(--status-info-text, #1d4ed8); background: var(--status-info-bg, #eff6ff); font-weight: 700; }
@@ -77,11 +84,9 @@
 .examPromptField { display: grid; gap: 6px; }
 .examPromptField > span { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
 .examPromptField small { color: var(--academy-muted, #64748b); font-size: 10px; }
-.examPromptField .examPromptFieldHint { color: var(--academy-muted, #64748b); font-size: 11px; line-height: 1.45; }
 .examPromptField input, .examPromptField textarea, .examPromptPhrasePicker select { width: 100%; border: 1px solid var(--academy-border-strong, #cbd8ee); border-radius: 9px; padding: 9px 10px; background: var(--academy-surface, #fff); color: inherit; box-sizing: border-box; }
 .examPromptField textarea { resize: vertical; min-height: 64px; }
 .examPromptPhrasePicker { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 7px; align-items: center; padding: 8px; border-radius: 10px; background: var(--academy-surface-muted, #f8fafc); }
-.examPromptPhrasePicker small { grid-column: 1 / -1; color: var(--academy-muted, #64748b); }
 .examPromptQuestionCard { border-top: 1px dashed var(--academy-border-strong, #cbd8ee); padding-top: 14px; display: grid; gap: 10px; }
 .examPromptQuestionTitle { display: flex; justify-content: flex-start; gap: 10px; align-items: center; }
 .examPromptQuestionTitle span { font-size: 11px; color: var(--status-pending-text, #c2410c); }
@@ -95,5 +100,4 @@
   .examPromptWorkflowStepHeader, .examPromptWorkflowStep .disclosureTriggerLabel { flex-wrap: wrap; }
   .examPromptRoleCard.wide { grid-column: auto; }
   .examPromptPhrasePicker { grid-template-columns: 1fr; }
-  .examPromptPhrasePicker small { grid-column: auto; }
 }

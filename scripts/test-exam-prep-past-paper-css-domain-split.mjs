@@ -31,7 +31,7 @@ const requiredSelectors = [
   ".pastPaperToolbar",
   ".pastPaperActions",
   ".pastPaperToolbar h2",
-  ".pastPaperToolbar p",
+  // 2026-09-25 · 툴바 설명문이 제목 옆 HelpTip 으로 옮겨가 .pastPaperToolbar p 대상이 사라졌다(10개).
   ".pastPaperFrameWrap",
   ".pastPaperLoading",
   ".pastPaperFrame",
@@ -44,6 +44,7 @@ for (const selector of requiredSelectors) {
 const mobileOverrides = occurrences.filter((entry) => entry.media === "@media (max-width: 1100px)");
 assert.deepEqual(mobileOverrides.map((entry) => entry.selector).sort(), [".pastPaperActions", ".pastPaperToolbar"]);
 
-assert.equal(occurrences.length, 11);
+// 2026-09-25 · 툴바 설명문을 HelpTip 으로 옮기면서 .pastPaperToolbar p 삭제(11 → 10).
+assert.equal(occurrences.length, 10);
 
-console.log("exam prep past paper CSS domain split passed · 11 selectors · App.css overlap 0 · cascade order preserved (verified via computed-style parity, not just source text)");
+console.log("exam prep past paper CSS domain split passed · 10 selectors · App.css overlap 0 · cascade order preserved (verified via computed-style parity, not just source text)");

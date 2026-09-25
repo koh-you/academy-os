@@ -23,8 +23,8 @@
   justify-content: flex-end;
 }
 
-.pastPaperToolbar h2,
-.pastPaperToolbar p {
+/* 2026-09-25 · 툴바 설명문을 제목 옆 HelpTip 으로 옮겨 이 툴바에 p 가 남지 않는다. */
+.pastPaperToolbar h2 {
   margin: 0;
 }
 
