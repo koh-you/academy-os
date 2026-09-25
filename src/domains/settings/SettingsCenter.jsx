@@ -675,9 +675,7 @@ export function SettingsCenter({
       <section className="panel settingsCard">
         <div className="sectionTitle">
           {/* 2026-09-26 · 부제는 아래 두 행 제목('태블릿 전용 화면'·'지각 유예시간')을 되풀이할 뿐이라 지웠다. */}
-          <div>
-            <h2>출결 설정</h2>
-          </div>
+          <h2>출결 설정</h2>
         </div>
         <div className="settingsRows">
           <div className="settingsRow">

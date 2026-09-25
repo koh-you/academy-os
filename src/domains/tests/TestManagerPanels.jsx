@@ -309,7 +309,7 @@ export function StudentTestHistoryPanel({
 }) {
   return (
     <section className="panel materialPanel testHistoryPanel">
-      {/* 2026-09-26 · 부제는 제목 '학생별 테스트 이력' 을 되풀이할 뿐이라 지웠다. */}
+      {/* 2026-09-26 · 부제에서 제목을 되풀이하는 부분은 지우고, 제목에 없는 '데일리·단원·누적' 만 물음표로 남겼다. */}
       <SectionHeader
         actions={(
           <select aria-label="테스트 이력 학생 선택" value={selectedStudentId} onChange={(event) => onStudentChange?.(event.target.value)}>
@@ -319,6 +319,7 @@ export function StudentTestHistoryPanel({
           </select>
         )}
         title="학생별 테스트 이력"
+        titleAdornment={<HelpTip label="학생별 테스트 이력" text="데일리·단원·누적 테스트 결과를 학생별로 모아 봅니다." />}
       />
       <div className="testHistoryList">
         {rows.map(({ session, attempt }) => (
