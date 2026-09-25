@@ -12,7 +12,8 @@ export function Modal({
   onClose,
   scrollable = false,
   subtitle,
-  title
+  title,
+  titleAdornment = null
 }) {
   const backdropRef = useRef(null);
   const titleId = useId();
@@ -20,8 +21,8 @@ export function Modal({
   useEffect(() => {
     function handleEscapeKey(event) {
       if (event.key === "Escape") {
-        // 모달 위에 열려 있는 더 안쪽 레이어(오버플로 메뉴)가 Esc 를 먼저 가져간다.
-        if (document.querySelector(".overflowMenuList")) return;
+        // 모달 위에 열려 있는 더 안쪽 레이어(오버플로 메뉴, 열린 HelpTip)가 Esc 를 먼저 가져간다.
+        if (document.querySelector(".overflowMenuList, .helpTipBubble-open")) return;
         const modalBackdrops = document.querySelectorAll(".modalBackdrop");
         const topmostModalBackdrop = modalBackdrops[modalBackdrops.length - 1];
         if (topmostModalBackdrop !== backdropRef.current) return;
@@ -49,7 +50,12 @@ export function Modal({
         {hideHeader ? null : (
           <div className="modalHeader">
             <div>
-              <h2 id={titleId}>{title}</h2>
+              {titleAdornment ? (
+                <div className="helpTipTitleRow">
+                  <h2 id={titleId}>{title}</h2>
+                  {titleAdornment}
+                </div>
+              ) : <h2 id={titleId}>{title}</h2>}
               {subtitle ? <p className="muted">{subtitle}</p> : null}
             </div>
             {hideCloseButton ? null : <button aria-label={closeAriaLabel} className="iconButton" disabled={closeDisabled} onClick={onClose} type="button">×</button>}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { Modal } from "../../shared/components/Modal.jsx";
 import {
   CLASS_DAY_KEYS,
@@ -100,8 +101,13 @@ export function ClassTemplateEditorModal({ template = null, onClose, onSave }) {
       onClose={() => {
         if (!isSaving) onClose();
       }}
-      subtitle="요일과 시간은 이 반의 정규 수업 기본값입니다. 요일마다 시간이 다르면 시간표를 줄로 나눠 적습니다. 학생 배정은 저장 후 명단 수정에서 합니다."
       title={isEdit ? `${template.name} 반 수정` : "반 개설"}
+      titleAdornment={(
+        <HelpTip
+          label={isEdit ? "반 수정" : "반 개설"}
+          text="요일과 시간은 이 반의 정규 수업 기본값입니다. 요일마다 시간이 다르면 시간표를 줄로 나눠 적습니다. 학생 배정은 저장 후 명단 수정에서 합니다."
+        />
+      )}
     >
       <div className="fieldGrid two lessonModalFields">
         <label>

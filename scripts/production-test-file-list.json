@@ -426,6 +426,7 @@
   "scripts/test-unused-imports.mjs",
   "scripts/scenario-tests-production.cjs",
   "scripts/test-overflow-menu.mjs",
+  "scripts/test-help-tip.mjs",
   "scripts/test-lesson-comment-source-lines.mjs",
   "scripts/test-lesson-nested-panels-css-domain-split.mjs",
   "scripts/test-student-manager-css-domain-split.mjs",

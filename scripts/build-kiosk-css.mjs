@@ -44,7 +44,12 @@ export const allowedClasses = new Set([
   "eyebrow", "muted", "primaryButton", "iconButton",
   "modalBackdrop", "modalCard", "modalScrollable", "modalHeader", "modalScrollBody",
   "modalFooter", "align-end", "align-center", "align-start", "align-between",
-  "tone-default", "tone-danger", "tone-warning"
+  "tone-default", "tone-danger", "tone-warning",
+  // 2026-09-25 · 공용 Modal 이 titleAdornment(제목 옆 HelpTip)를 받을 때만 쓰는 줄이다.
+  // 규칙은 src/shared/components/HelpTip.css 에 있고 App.css 에는 없으므로 여기 추가해도
+  // 추출 결과는 그대로다. 키오스크는 titleAdornment 를 넘기지 않아 이 줄이 렌더되지 않는다 —
+  // 태블릿에서 물음표를 쓰게 되면 그때 HelpTip 규칙을 키오스크 번들로 같이 옮겨야 한다.
+  "helpTipTitleRow"
 ]);
 
 // class 가 없는 base 선택자 중 키오스크에도 적용되어야 하는 element 들.

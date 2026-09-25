@@ -9,6 +9,7 @@ export function SectionHeader({
   eyebrow = "",
   meta = null,
   title,
+  titleAdornment = null,
   titleAs: Title = "h2"
 }) {
   const headerClassName = [
@@ -23,7 +24,12 @@ export function SectionHeader({
     <Component className={headerClassName}>
       <div className="sectionHeaderCopy">
         {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
-        <Title>{title}</Title>
+        {titleAdornment ? (
+          <div className="helpTipTitleRow">
+            <Title>{title}</Title>
+            {titleAdornment}
+          </div>
+        ) : <Title>{title}</Title>}
         {descriptionNode || (description ? <p className="muted">{description}</p> : null)}
       </div>
       {meta || actions ? (

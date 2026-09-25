@@ -1,3 +1,4 @@
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 
@@ -9,8 +10,13 @@ export function EvaluationCenter({
   return (
     <section className="panel fullPanel evaluationCenter">
       <SectionHeader
-        description="보고서에 쓰이는 학생별 데이터 원천을 확인합니다. 입력과 수정은 학생관리의 학생 프로파일에서 진행합니다."
         title="보고서 데이터"
+        titleAdornment={(
+          <HelpTip
+            label="보고서 데이터"
+            text="보고서에 쓰이는 학생별 데이터 원천을 확인합니다. 입력과 수정은 학생관리의 학생 프로파일에서 진행합니다."
+          />
+        )}
         titleAs="h1"
       />
       <div className="reportDataSummaryGrid">
