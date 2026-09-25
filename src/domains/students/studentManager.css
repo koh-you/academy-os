@@ -538,11 +538,8 @@
   font-weight: 800;
 }
 
-.studentReminderSourceNote {
-  color: var(--academy-muted, #64748b);
-  font-size: 12px;
-  margin: 0;
-}
+/* 2026-09-25 · 운영 알림 모달의 '매일 09:00 슬랙 원본' 상시 안내를 제목 옆 물음표로 옮겨
+   .studentReminderSourceNote 를 쓰는 곳이 없어졌다. */
 
 .studentProfileSectionModal {
   max-width: 720px;
@@ -1224,7 +1221,7 @@ textarea.profileEditInput {
   color: var(--academy-primary, #17213d);
 }
 
-.teacherOperatingMemoHeader p,
+/* 2026-09-25 · 헤더 설명문(.teacherOperatingMemoHeader p)은 제목 옆 물음표로 옮겨 규칙에서 뺐다. */
 .teacherOperatingMemoSaveRow span {
   color: var(--academy-muted, #64748b);
   font-size: 13px;
@@ -1253,13 +1250,17 @@ textarea.profileEditInput {
   grid-template-columns: minmax(0, 1fr) 110px;
 }
 
+/* 2026-09-25 · 개별 스케줄 칸의 우선순위 설명은 제목 옆 물음표로 옮겼다.
+   2026-09-26 · 저장 부작용 한 줄은 편집 모드에서 상시 노출로 되돌렸다(고치는 자리에서 보여야 한다). */
 .wideProfileItem {
   grid-column: span 3;
 }
 
-.wideProfileItem > .muted {
+.wideProfileItem > .studentScheduleSaveEffect {
+  color: var(--academy-muted, #64748b);
   display: block;
-  margin-top: 6px;
+  font-size: 12px;
+  margin-bottom: 6px;
 }
 
 .managementRow.studentScoreRow {

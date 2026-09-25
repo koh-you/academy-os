@@ -4,6 +4,7 @@ import { getAttendanceDisplay } from "../lessons/attendance.js";
 import { isClosureLesson } from "../lessons/lessonClosure.js";
 import { applyStudentScheduleToLesson } from "../../shared/utils/studentSchedule.js";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { ListCard, ListCardBody, ListCardHeader } from "../../shared/components/ListCard.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 
@@ -62,8 +63,8 @@ export function StudentLessonHistoryCalendar({
     <section className="studentLessonHistory">
       <SectionHeader
         density="compact"
-        description="날짜를 눌러 그날 수업에서 무엇을 했는지 확인합니다."
         title="수업 기록 캘린더"
+        titleAdornment={<HelpTip label="수업 기록 캘린더" text="날짜를 눌러 그날 수업에서 무엇을 했는지 확인합니다." />}
       />
       <div className="studentLessonHistoryGrid">
         <div

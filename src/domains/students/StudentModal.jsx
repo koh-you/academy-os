@@ -6,6 +6,7 @@ import {
   getTallyStudentReplacementChanges
 } from "./tallyStudentMerge.js";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
 import { OverflowMenu } from "../../shared/components/OverflowMenu.jsx";
@@ -238,7 +239,6 @@ export function StudentModal({
       className="studentAddModal"
       closeDisabled={singleSaveState === "saving"}
       title="학생 추가"
-      subtitle="한 명씩 등록하거나 엑셀에서 복사한 목록을 일괄 등록합니다."
       onClose={onClose}
       scrollable
     >
@@ -286,19 +286,21 @@ export function StudentModal({
         </>
       ) : mode === "bulk" ? (
         <div className="studentBulkPlaceholder">
+          {/* 2026-09-26 · 준비 중 패널에는 물음표를 두지 않는다. 붙여넣기 순서는 빈 상태 설명에 합쳤다. */}
           <strong>엑셀 일괄 등록</strong>
-          <p className="muted">이름, 출생연도, 학교, PIN 순서로 복사한 목록을 붙여넣는 기능으로 확장 예정입니다.</p>
           <textarea aria-label="학생 엑셀 일괄 등록 원본" placeholder={"홍길동\t2010\t○○고등학교\t1234"} rows="6" />
-          <EmptyState className="emptyState" description="붙여넣은 목록을 한 번에 등록하는 기능은 아직 준비 중입니다. 지금은 한 명씩 탭에서 등록하세요." title="엑셀 일괄 등록 준비 중" />
+          <EmptyState className="emptyState" description="이름, 출생연도, 학교, PIN 순서로 복사한 목록을 한 번에 등록하는 기능은 아직 준비 중입니다. 지금은 한 명씩 탭에서 등록하세요." title="엑셀 일괄 등록 준비 중" />
         </div>
       ) : (
         <div className="studentIntakePanel">
           {/* 2026-09-19 · UI U8: 이 탭은 입력마다 후보(접수정보)가 자동 저장되고, 정식 등록만 버튼이다 — 그 경계를 한 줄로 알린다. */}
           <p className="studentIntakeAutosaveNote" role="note">후보 정보는 입력 즉시 저장됩니다 · 정식 등록은 버튼으로</p>
           <div className="intakeEndpointBox">
-            <strong>Tally 웹훅 연결 주소</strong>
+            <div className="helpTipTitleRow">
+              <strong>Tally 웹훅 연결 주소</strong>
+              <HelpTip label="Tally 웹훅 연결 주소" text="Tally 제출은 정식 학생이 아니라 입학 후보로 먼저 저장됩니다. 확인 후 정식 등록하세요." />
+            </div>
             <code>https://koh-you-math-academy-os-api.onrender.com/api/intake/tally</code>
-            <p className="muted">Tally 제출은 정식 학생이 아니라 입학 후보로 먼저 저장됩니다. 확인 후 정식 등록하세요.</p>
           </div>
           <div className="studentIntakeSummary">
             <span>확인 필요 {activeApplicants.length}명</span>

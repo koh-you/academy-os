@@ -2,6 +2,7 @@ import { Component, useEffect, useMemo, useRef, useState } from "react";
 import { DataTableShell } from "../../shared/components/DataTableShell.jsx";
 import { Disclosure } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { ListCard, ListCardActions } from "../../shared/components/ListCard.jsx";
 import { ModalFooter } from "../../shared/components/Modal.jsx";
@@ -742,7 +743,9 @@ export function StudentProfileModal({
       className="wideModal"
       closeDisabled={isProfileSaving}
       title={`${student.name} 학생 프로파일`}
-      subtitle="기본정보를 먼저 보고, 필요한 기록만 펼쳐서 확인합니다."
+      titleAdornment={(
+        <HelpTip label="학생 프로파일" text="기본정보를 먼저 보고, 필요한 기록만 펼쳐서 확인합니다." />
+      )}
       onClose={handleRequestClose}
       scrollable
     >
@@ -779,7 +782,6 @@ export function StudentProfileModal({
           <ModalComponent
             className="studentProfileSectionModal"
             onClose={() => setOpenSectionKey(null)}
-            subtitle="정규 수업과 특강 수업일지 출결을 한곳에서 확인합니다."
             title={`${student.name} · 월별 출결`}
           >
             {renderProfileErrorBanner()}
@@ -819,7 +821,6 @@ export function StudentProfileModal({
             closeDisabled={isProfileSaving}
             onClose={() => setOpenSectionKey(null)}
             scrollable
-            subtitle="연락처, 로그인, 개별 스케줄을 관리합니다."
             title={`${student.name} · 기본정보`}
           >
             {renderProfileErrorBanner()}
@@ -843,9 +844,9 @@ export function StudentProfileModal({
             </Disclosure>
             <section className="teacherOperatingMemoPanel">
               <div className="teacherOperatingMemoHeader">
-                <div>
+                <div className="helpTipTitleRow">
                   <strong>강사 운영 메모</strong>
-                  <p>진도, 교재, 특이사항, 다음 수업 계획을 교사용으로만 기록합니다.</p>
+                  <HelpTip label="강사 운영 메모" text="진도, 교재, 특이사항, 다음 수업 계획을 교사용으로만 기록합니다." />
                 </div>
                 <div className="teacherOperatingMemoActions">
                   {teacherOperatingMemoSaveState !== "idle" ? <InlineSaveStatus label="강사 메모" saveState={teacherOperatingMemoSaveState} /> : null}
@@ -930,7 +931,14 @@ export function StudentProfileModal({
                 )}
               </div>
               <div className="wideProfileItem">
-                <small>개별 스케줄</small>
+                <div className="helpTipTitleRow">
+                  <small>개별 스케줄</small>
+                  <HelpTip label="개별 스케줄" text="선택한 요일과 시간이 기본 반보다 우선합니다." />
+                </div>
+                {/* 2026-09-26 · 저장하면 무엇이 바뀌는지는 고치는 그 자리에 보여야 한다(물음표 뒤로 보내지 않는다). */}
+                {isEditingProfile ? (
+                  <small className="studentScheduleSaveEffect">저장 후 미래 정규수업 명단, 출결 매칭, 지각 판정에 반영됩니다.</small>
+                ) : null}
                 {isEditingProfile ? (
                   <div className="studentScheduleEditor">
                     {hasUnparsedScheduleText ? (
@@ -1011,7 +1019,6 @@ export function StudentProfileModal({
                 ) : (
                   <strong>{student.scheduleOverride || "기본 반 스케줄"}</strong>
                 )}
-                <span className="muted">선택한 요일과 시간이 기본 반보다 우선합니다. 저장 후 미래 정규수업 명단, 출결 매칭, 지각 판정에 반영됩니다.</span>
               </div>
             </div>
             </div>
@@ -1050,13 +1057,16 @@ export function StudentProfileModal({
             className="studentProfileSectionModal"
             onClose={() => setOpenSectionKey(null)}
             scrollable
-            subtitle="상담 일정, 학부모 연락, 특이사항 알림을 대시보드 원본과 같이 봅니다."
             title={`${student.name} · 학생별 운영 알림`}
+            titleAdornment={(
+              <HelpTip
+                label="학생별 운영 알림"
+                text="상담 일정, 학부모 연락, 특이사항 알림을 대시보드 원본과 같이 봅니다. 이 알림은 매일 09:00 슬랙 메시지 원본과 같은 내용입니다."
+              />
+            )}
           >
             {renderProfileErrorBanner()}
-            {renderSectionToolbar(
-              <p className="studentProfileTileMeta studentReminderSourceNote">이 알림은 매일 09:00 슬랙 메시지 원본과 같은 내용입니다.</p>
-            )}
+            {renderSectionToolbar()}
             {isEditingProfile ? (
               <section className="studentReminderComposer">
             <div className="studentReminderControls">
@@ -1177,8 +1187,10 @@ export function StudentProfileModal({
             className="studentProfileSectionModal"
             onClose={() => setOpenSectionKey(null)}
             scrollable
-            subtitle="학생 상담과 학부모 상담을 날짜별로 구분해 남깁니다."
             title={`${student.name} · 상담 기록`}
+            titleAdornment={(
+              <HelpTip label="상담 기록" text="학생 상담과 학부모 상담을 날짜별로 구분해 남깁니다." />
+            )}
           >
             {renderProfileErrorBanner()}
             {renderSectionToolbar(
@@ -1301,8 +1313,10 @@ export function StudentProfileModal({
             className="studentProfileSectionModal"
             onClose={() => setOpenSectionKey(null)}
             scrollable
-            subtitle="학교 내신 시험과 모의고사 성적을 초안으로 입력한 뒤 저장합니다."
             title={`${student.name} · 성적 기록`}
+            titleAdornment={(
+              <HelpTip label="성적 기록" text="학교 내신 시험과 모의고사 성적을 초안으로 입력한 뒤 저장합니다." />
+            )}
           >
             {renderProfileErrorBanner()}
             {renderSectionToolbar(
@@ -1406,8 +1420,10 @@ export function StudentProfileModal({
             className="studentProfileSectionModal"
             onClose={() => setOpenSectionKey(null)}
             scrollable
-            subtitle="학원 데일리/단원/누적 테스트 성적을 초안으로 입력한 뒤 저장합니다."
             title={`${student.name} · 테스트 성적`}
+            titleAdornment={(
+              <HelpTip label="테스트 성적" text="학원 데일리/단원/누적 테스트 성적을 초안으로 입력한 뒤 저장합니다." />
+            )}
           >
             {renderProfileErrorBanner()}
             {renderSectionToolbar(

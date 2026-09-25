@@ -544,7 +544,6 @@ export function StudentManager({
         actionsClassName="studentListToolbar"
         as="div"
         className="domainPanelHeader studentManagerHeader"
-        description={`현재 ${title} ${visibleStudents.length}명 · 학생 기본정보와 운영 기록을 관리합니다.`}
         title="학생관리"
       />
 

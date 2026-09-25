@@ -12,8 +12,9 @@
   min-height: 32px;
 }
 
-.studentProfileSectionModal .studentProfileSectionToolbar > .inlineSaveStatus,
-.studentProfileSectionModal .studentProfileSectionToolbar > .studentReminderSourceNote {
+/* 2026-09-25 · 운영 알림의 '슬랙 원본' 안내(.studentReminderSourceNote)는 제목 옆 물음표로 옮겼다.
+   도구줄 왼쪽에 남는 것은 저장 상태뿐이다. */
+.studentProfileSectionModal .studentProfileSectionToolbar > .inlineSaveStatus {
   margin-inline-end: auto;
 }
 
