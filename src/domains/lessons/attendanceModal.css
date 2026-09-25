@@ -44,3 +44,10 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* 2026-09-25 · 대기로 되돌릴 때 잠기는 입력이 눌러도 되는 칸처럼 보이지 않게 한다. */
+.attendanceModal .fieldGrid input:disabled {
+  background: var(--academy-surface-muted, #f8fafc);
+  color: var(--academy-muted, #64748b);
+  cursor: not-allowed;
+}

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import {
   createReservedAbsenceAlimtalkSummary,
+  isSentAbsenceAlimtalkJob,
   createReservedAbsenceAlimtalkWarningText,
   isManualAbsenceAlimtalkJob,
   isReservedAbsenceAlimtalkJob,
@@ -45,15 +46,16 @@ assert.equal(isManualAbsenceAlimtalkJob({ notificationType: "attendance" }), fal
 assert.equal(isManualAbsenceAlimtalkJob(), false);
 
 // 남아 있는 예약으로 세는 상태.
-for (const status of ["scheduled", "queued", "pending_send", "dry_run"]) {
+for (const status of ["scheduled", "queued", "pending_send"]) {
   assert.equal(
     isReservedAbsenceAlimtalkJob(createScheduledAbsenceJob({ status })),
     true,
     `${status} 는 아직 남아 있는 결석 알림톡 예약이다`
   );
 }
-// 이미 정리된 예약은 경고 대상이 아니다.
-for (const status of ["sent", "canceled", "failed"]) {
+// 2026-09-25 · dry_run 은 발송사에 실제 예약이 걸리지 않고 알림관리에 취소 버튼도 없다 — 취소하라고 하면 안 된다.
+// 이미 정리됐거나 취소할 수 없는 상태는 '남은 예약' 이 아니다.
+for (const status of ["canceled", "failed", "dry_run"]) {
   assert.equal(
     isReservedAbsenceAlimtalkJob(createScheduledAbsenceJob({ result: {}, status })),
     false,
@@ -140,6 +142,28 @@ assert.match(warningText, /결석 알림톡 2건/);
 assert.match(warningText, /21:00, 22:00/);
 assert.match(warningText, /자동으로 취소되지 않습니다/);
 assert.match(warningText, /알림관리/, "취소할 수 있는 위치를 문구에 담는다");
+// 2026-09-25 · 예약 시각이 지난 job 은 알림관리의 '예약' 이 아니라 '확인 필요' 탭에 들어간다 — 탭 이름을 적지 않는다.
+assert.doesNotMatch(warningText, /예약 탭/, "없을 수도 있는 탭으로 보내지 않는다");
+
+// 2026-09-25 · 이미 발송된 결석 알림톡은 취소할 수 없다. 되돌릴 때 그 사실만 따로 알린다.
+for (const status of ["sent", "send_unconfirmed"]) {
+  const sentJob = createScheduledAbsenceJob({ result: {}, status });
+  assert.equal(isSentAbsenceAlimtalkJob(sentJob), true, `${status} 는 이미 나간 결석 알림톡이다`);
+  assert.equal(isReservedAbsenceAlimtalkJob(sentJob), false, `${status} 는 취소할 예약이 아니다`);
+  const sentSummary = createReservedAbsenceAlimtalkSummary({
+    lesson: { lessonId: "lesson-1" },
+    notificationJobs: [sentJob],
+    student: { studentId: "student-1" }
+  });
+  assert.equal(sentSummary.count, 0);
+  assert.equal(sentSummary.sentCount, 1);
+  const sentText = createReservedAbsenceAlimtalkWarningText({
+    nextAttendanceStatus: "pending",
+    reservedAbsenceAlimtalk: sentSummary
+  });
+  assert.match(sentText, /이미 발송/, "이미 나간 사실을 알린다");
+  assert.doesNotMatch(sentText, /예약 취소/, "나간 것을 취소하라고 하지 않는다");
+}
 assert.match(warningText, /예약 취소/);
 assert.equal(
   createReservedAbsenceAlimtalkWarningText({ nextAttendanceStatus: "absent", reservedAbsenceAlimtalk: summary }),

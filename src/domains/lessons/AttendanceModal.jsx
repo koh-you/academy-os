@@ -111,7 +111,7 @@ export function AttendanceModal({ item, lateGraceMinutes = 5, notificationJobs =
   }
 
   return (
-    <Modal closeDisabled={isSaving} title={`${student.name} 출결 체크`} subtitle="지각/결석이면 시간과 사유를 남깁니다." onClose={onClose}>
+    <Modal className="attendanceModal" closeDisabled={isSaving} title={`${student.name} 출결 체크`} subtitle="지각/결석이면 시간과 사유를 남깁니다." onClose={onClose}>
       {/* 2026-09-25 · '대기' 가 맨 앞이다. 잘못 누른 출결을 미체크로 되돌리는 출구가 상태 목록의 첫 칸에 있어야 찾는다. */}
       <div className="typeTabs attendanceStatusTabs">
         {[
