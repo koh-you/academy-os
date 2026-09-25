@@ -421,8 +421,10 @@ export function ProblemBankCenter() {
         <div className="panel problemBankImportPanel">
           <div className="helpTipTitleRow">
             <h2>패키지 등록</h2>
-            <HelpTip label="패키지 등록" text="패키지 폴더(문항·정답·해설)를 선택하면 한 번에 올라갑니다." />
+            <HelpTip label="패키지 등록" text="고른 폴더 안의 파일이 한 번에 올라갑니다." />
           </div>
+          {/* 2026-09-26 · 폴더가 무엇을 담아야 하는지는 고르기 전에 보여야 한다(형식 요구라 물음표 뒤로 보내지 않는다). */}
+          <p className="muted">폴더에 문항·정답·해설이 함께 있어야 합니다.</p>
           <button className="softButton" onClick={() => folderInputRef.current?.click()} type="button">패키지 폴더 선택</button>
           <input
             aria-label="패키지 폴더 선택"

@@ -323,7 +323,8 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
   // 2026-09-26 · 모드별 제목과 그 모드 설명. 설명은 상시 문구 대신 제목 옆 물음표로 연다.
   const boardTitle = isExamMode ? "시험지 제작 · 문항 담기" : isClassMode ? "교재별 오답 · 반 전체" : "학생별 오답 · 유형분석";
   const boardModeHelpText = isExamMode
-    ? "번호를 누르면 시험지 바구니에 담깁니다. 교재를 바꿔도 바구니는 남으므로 여러 단원·교재를 한 시험지에 섞을 수 있습니다."
+    // 2026-09-26 · 바구니 범례 물음표와 내용이 겹쳐 한 섹션에 물음표가 3개였다. 한 문구로 합쳤다.
+    ? "번호를 누르면 시험지 바구니에 담기/빼기. 교재를 바꿔도 바구니는 남아 여러 단원·교재를 한 시험지에 섞을 수 있고, 「단원 전체 담기」는 지금 보이는 구역·유형만 담습니다."
     : isClassMode
       ? "학생별 오답에서 쌓인 기록을 반 전체로 집계합니다. 번호를 누르면 인쇄·PPT 대상으로 고릅니다."
       : "";
@@ -477,10 +478,7 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
 
         {isExamMode ? (
           <div className="problemBankLegend" aria-label="번호 표시 뜻">
-            <span className="helpTipTitleRow">
-              <strong>시험지 바구니</strong>
-              <HelpTip label="시험지 바구니" text="번호를 누르면 담기/빼기 · 「단원 전체 담기」는 지금 보이는 구역·유형만 담습니다" />
-            </span>
+            <strong>시험지 바구니</strong>
             <span><i className="problemBankBand exam-picked" />담은 문항</span>
           </div>
         ) : (
@@ -584,7 +582,10 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
             <header>
               <div className="helpTipTitleRow">
                 <strong>문제 이미지 미리보기</strong>
-                <HelpTip label="문제 이미지 미리보기" text="이미지를 누르면 크게 봅니다." />
+                {/* 2026-09-26 · 원래 이미지가 있을 때만 뜨던 안내다. 빈 상태에서 없는 동작을 알리지 않도록 조건을 유지한다. */}
+                {previewPassage || previewBody ? (
+                  <HelpTip label="문제 이미지 미리보기" text="이미지를 누르면 크게 봅니다." />
+                ) : null}
               </div>
               {previewItem ? (
                 <small>{[bookDetail?.book.title, unitTitleById.get(previewItem.unitId), `${previewItem.numberLabel}번`].filter(Boolean).join(" · ")}</small>
