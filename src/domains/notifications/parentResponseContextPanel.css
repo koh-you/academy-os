@@ -20,13 +20,6 @@
   min-width: min(100%, 320px);
 }
 
-.parentResponseContextTools p {
-  color: var(--academy-muted, #64748b);
-  font-size: 13px;
-  margin: 0;
-  max-width: 560px;
-}
-
 .parentResponseContextList {
   display: grid;
   gap: 12px;

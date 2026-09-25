@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { isActiveStudent } from "../students/lessonRosterSelectors.js";
 import {
@@ -319,12 +320,21 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
     return () => window.removeEventListener("keydown", onKey);
   }, [zoomOpen]);
 
+  // 2026-09-26 · 모드별 제목과 그 모드 설명. 설명은 상시 문구 대신 제목 옆 물음표로 연다.
+  const boardTitle = isExamMode ? "시험지 제작 · 문항 담기" : isClassMode ? "교재별 오답 · 반 전체" : "학생별 오답 · 유형분석";
+  const boardModeHelpText = isExamMode
+    // 2026-09-26 · 바구니 범례 물음표와 내용이 겹쳐 한 섹션에 물음표가 3개였다. 한 문구로 합쳤다.
+    ? "번호를 누르면 시험지 바구니에 담기/빼기. 교재를 바꿔도 바구니는 남아 여러 단원·교재를 한 시험지에 섞을 수 있고, 「단원 전체 담기」는 지금 보이는 구역·유형만 담습니다."
+    : isClassMode
+      ? "학생별 오답에서 쌓인 기록을 반 전체로 집계합니다. 번호를 누르면 인쇄·PPT 대상으로 고릅니다."
+      : "";
+
   return (
     <section className="problemBankBoard">
       <aside className="problemBankSidebar">
-        <div className="problemBankSidebarHead">
+        <div className="problemBankSidebarHead helpTipTitleRow">
           <strong>교재 선택</strong>
-          <small>폴더를 따라 들어가서 교재를 선택하세요.</small>
+          <HelpTip label="교재 선택" text="폴더를 따라 들어가서 교재를 선택하세요." />
         </div>
         <nav aria-label="교재 폴더 경로" className="problemBankBreadcrumb">
           <button onClick={() => setFolderPath([])} type="button">교재 폴더</button>
@@ -371,14 +381,13 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
       <div className="problemBankMain">
         <header className="problemBankHeader">
           <div>
-            <h2>{isExamMode ? "시험지 제작 · 문항 담기" : isClassMode ? "교재별 오답 · 반 전체" : "학생별 오답 · 유형분석"}</h2>
+            <div className="helpTipTitleRow">
+              <h2>{boardTitle}</h2>
+              {boardModeHelpText ? <HelpTip label={boardTitle} text={boardModeHelpText} /> : null}
+            </div>
             <small>{bookDetail ? [bookDetail.book.folderPath, bookDetail.book.title].filter(Boolean).join(" / ") : "교재를 선택하세요"}</small>
           </div>
-          {isExamMode ? (
-            <small className="problemBankModeHint">번호를 누르면 시험지 바구니에 담깁니다. 교재를 바꿔도 바구니는 남으므로 여러 단원·교재를 한 시험지에 섞을 수 있습니다.</small>
-          ) : isClassMode ? (
-            <small className="problemBankModeHint">학생별 오답에서 쌓인 기록을 반 전체로 집계합니다. 번호를 누르면 인쇄·PPT 대상으로 고릅니다.</small>
-          ) : (
+          {isExamMode || isClassMode ? null : (
             <div className="problemBankModeSwitch" role="group" aria-label="클릭 동작">
               <button aria-pressed={clickMode === "record"} className={clickMode === "record" ? "active" : ""} onClick={() => setClickMode("record")} type="button">오답 입력</button>
               <button aria-pressed={clickMode === "select"} className={clickMode === "select" ? "active" : ""} onClick={() => setClickMode("select")} type="button">인쇄 선택</button>
@@ -471,7 +480,6 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
           <div className="problemBankLegend" aria-label="번호 표시 뜻">
             <strong>시험지 바구니</strong>
             <span><i className="problemBankBand exam-picked" />담은 문항</span>
-            <span className="problemBankLegendHint">번호를 누르면 담기/빼기 · 「단원 전체 담기」는 지금 보이는 구역·유형만 담습니다</span>
           </div>
         ) : (
         <div className="problemBankLegend" aria-label="번호 색 뜻">
@@ -572,7 +580,13 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
 
           <aside className="problemBankPreview">
             <header>
-              <strong>문제 이미지 미리보기</strong>
+              <div className="helpTipTitleRow">
+                <strong>문제 이미지 미리보기</strong>
+                {/* 2026-09-26 · 원래 이미지가 있을 때만 뜨던 안내다. 빈 상태에서 없는 동작을 알리지 않도록 조건을 유지한다. */}
+                {previewPassage || previewBody ? (
+                  <HelpTip label="문제 이미지 미리보기" text="이미지를 누르면 크게 봅니다." />
+                ) : null}
+              </div>
               {previewItem ? (
                 <small>{[bookDetail?.book.title, unitTitleById.get(previewItem.unitId), `${previewItem.numberLabel}번`].filter(Boolean).join(" · ")}</small>
               ) : <small>번호를 누르면 문항이 나타납니다.</small>}
@@ -610,7 +624,6 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
                 {[previewPassage, previewBody].some((region) => region && brokenImages.has(region.storagePath)) ? (
                   <p className="problemBankError">이미지 파일을 불러오지 못했습니다 (Storage 에 없음). 교재관리 › 교재 상세 › 「이미지 누락 검사」로 확인한 뒤 패키지를 다시 등록해 주세요.</p>
                 ) : null}
-                {previewPassage || previewBody ? <p className="problemBankZoomHint">이미지를 누르면 크게 봅니다.</p> : null}
                 <p className="problemBankPreviewMeta">
                   원본 {previewItem.printedPage}쪽 · {previewItem.reviewStatus === "flagged" ? "경계 확인 필요" : "경계 자동 확인"}
                   {previewPassage ? " · 공통 지시문 문항 (인쇄 때 지시문과 함께 나가고 이 번호에 강조 상자가 붙습니다)" : ""}
