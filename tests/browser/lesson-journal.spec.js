@@ -2078,3 +2078,62 @@ test("manual absence can be reverted to 대기 while the reserved absence Alimta
   await expect(page.getByRole("dialog", { name: "수업일지" }).locator(".attendanceBadge").first()).toContainText("대기");
   expect(pageErrors).toEqual([]);
 });
+
+// 2026-09-25 · 출결을 되돌려도 예약된 학부모 결석 알림톡은 남는다(#412). 그 예약을 취소할 수 있는 자리가
+// 알림관리뿐이어서, 정작 교사가 실수를 알아차리는 수업일지에서는 손댈 수 없었다. 수업일지 ⋮ › 예약 확인
+// 모달의 '출결 결석 알림톡' 구획에서 그 예약이 보이고 [예약 취소] 로 실제로 취소되는지 확인한다.
+test("reserved absence Alimtalk shows in the lesson journal reservation modal and cancels from there", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, 2026, 8);
+  await page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ }).getByRole("button", { name: /월 경계 연동반/ }).click();
+  const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
+  const attendanceBadge = lessonJournal.locator(".attendanceBadge").first();
+
+  // 1) 결석으로 저장하고 학부모 결석 알림톡을 예약한다(가상 fixture, 실제 발송 없음).
+  await attendanceBadge.click();
+  const absenceModal = page.getByRole("dialog", { name: "월경계 학생 출결 체크" });
+  await absenceModal.getByRole("button", { name: "결석", exact: true }).click();
+  await absenceModal.getByRole("button", { name: "출결 저장" }).click();
+  await absenceModal.getByRole("button", { name: "저장 후 다음 정각 알림톡 예약" }).click();
+  await expect(absenceModal).toHaveCount(0);
+  await expect(attendanceBadge).toContainText("결석");
+
+  const readAbsenceJobs = async () => (
+    (await (await request.get(`${safeApiBaseUrl}/api/notification-jobs`)).json()).notificationJobs
+      .filter((job) => job.notificationJobId.startsWith("attendance_absence_"))
+  );
+  expect((await readAbsenceJobs()).map((job) => job.status)).toEqual(["scheduled"]);
+
+  // 2) 수업일지 ⋮ › 예약 확인. 예약이 학생별 학부모/학생 칸이 아니라 전용 구획에 보인다.
+  const saveBar = lessonJournal.getByRole("complementary", { name: "수업일지 하단 고정 저장 바" });
+  await saveBar.getByRole("button", { name: "수업일지 추가 작업" }).click();
+  await page.getByRole("menuitem", { name: "예약 확인" }).click();
+  const reservationModal = page.getByRole("dialog", { name: "알림톡 예약 확인" });
+  const absenceSection = reservationModal.locator(".reservationAbsenceSection");
+  await expect(absenceSection).toContainText("출결 결석 알림톡");
+  await expect(absenceSection).toContainText("전체 1건 · 취소 가능 1건");
+  const absenceRow = absenceSection.locator(".reservationAbsenceRow");
+  await expect(absenceRow).toHaveCount(1);
+  await expect(absenceRow).toContainText("월경계 학생");
+  await expect(absenceRow).toContainText("예약");
+  // 로스터 안 학생이므로 '명단 밖' 표시는 없고, '명단 밖 예약' 상자에도 중복으로 들어가지 않는다.
+  await expect(absenceRow.locator(".reservationAbsenceOutsideRoster")).toHaveCount(0);
+  await expect(reservationModal.locator(".reservationWarningBox")).toHaveCount(0);
+
+  // 3) [예약 취소] → ConfirmDialog 확정. 취소는 기존 경로(onCancelReservationJob) 그대로다.
+  await absenceRow.getByRole("button", { name: "예약 취소" }).click();
+  const cancelConfirm = page.getByRole("dialog", { name: "알림톡 예약 취소" });
+  await expect(cancelConfirm).toContainText("이 알림톡 예약 1건을 취소할까요?");
+  await cancelConfirm.getByRole("button", { name: "예약 취소" }).click();
+  await expect(cancelConfirm).toHaveCount(0);
+
+  // 4) 구획은 남아 상태를 보여주고, 더는 취소할 수 없으니 버튼을 그리지 않는다.
+  await expect(absenceRow).toContainText("취소");
+  await expect(absenceRow.getByRole("button", { name: "예약 취소" })).toHaveCount(0);
+  await expect(absenceSection).toContainText("전체 1건 · 취소 가능 0건");
+
+  // 5) 서버 원천도 취소로 저장된다(낙관적 UI 가 아니다).
+  expect((await readAbsenceJobs()).map((job) => job.status)).toEqual(["canceled"]);
+  expect(pageErrors).toEqual([]);
+});

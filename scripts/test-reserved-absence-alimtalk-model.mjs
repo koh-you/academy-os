@@ -6,6 +6,7 @@ import {
   createReservedAbsenceAlimtalkWarningText,
   isManualAbsenceAlimtalkJob,
   isReservedAbsenceAlimtalkJob,
+  selectLessonManualAbsenceAlimtalkJobs,
   selectReservedAbsenceAlimtalkJobs,
   shouldWarnAboutReservedAbsenceAlimtalk
 } from "../src/domains/lessons/reservedAbsenceAlimtalkModel.js";
@@ -95,6 +96,23 @@ assert.deepEqual(selectReservedAbsenceAlimtalkJobs({ lessonId: "lesson-1", notif
 assert.deepEqual(selectReservedAbsenceAlimtalkJobs(), []);
 assert.deepEqual(selectReservedAbsenceAlimtalkJobs({ lessonId: "lesson-1", notificationJobs: null, studentId: "student-1" }), []);
 
+// 2026-09-25 · 수업일지 예약 확인 모달의 '출결 결석 알림톡' 구획은 학생·상태를 가리지 않고
+// 이 수업의 출결 결석 알림톡 전부를 보여준다(취소된 것까지 상태 그대로). 댓글 예약은 섞이지 않는다.
+assert.deepEqual(
+  selectLessonManualAbsenceAlimtalkJobs({ notificationJobs })
+    .map((job) => job.notificationJobId),
+  [
+    "attendance_absence_record-1_2026092521",
+    "attendance_absence_record-1_2026092522",
+    "attendance_absence_record-2_2026092521",
+    "attendance_absence_record-3_2026092521",
+    "attendance_absence_record-4_2026092521"
+  ],
+  "로스터 밖·다른 학생·취소된 job 까지 전부 고르고 parent_comment 는 제외한다"
+);
+assert.deepEqual(selectLessonManualAbsenceAlimtalkJobs(), []);
+assert.deepEqual(selectLessonManualAbsenceAlimtalkJobs({ notificationJobs: null }), []);
+
 const summary = createReservedAbsenceAlimtalkSummary({
   lesson: { lessonId: "lesson-1" },
   notificationJobs,
@@ -142,6 +160,8 @@ assert.match(warningText, /결석 알림톡 2건/);
 assert.match(warningText, /21:00, 22:00/);
 assert.match(warningText, /자동으로 취소되지 않습니다/);
 assert.match(warningText, /알림관리/, "취소할 수 있는 위치를 문구에 담는다");
+// 2026-09-25 · 수업일지 ⋮ › 예약 확인 모달에도 출결 결석 알림톡 취소 버튼이 생겼다 — 두 경로를 함께 적는다.
+assert.match(warningText, /수업일지 ⋮ › 예약 확인/, "교사가 실수를 알아차리는 자리의 경로를 먼저 알린다");
 // 2026-09-25 · 예약 시각이 지난 job 은 알림관리의 '예약' 이 아니라 '확인 필요' 탭에 들어간다 — 탭 이름을 적지 않는다.
 assert.doesNotMatch(warningText, /예약 탭/, "없을 수도 있는 탭으로 보내지 않는다");
 
