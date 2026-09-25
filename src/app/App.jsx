@@ -6623,11 +6623,10 @@ export function App() {
         <AttendanceModal
           item={attendanceModal}
           lateGraceMinutes={attendanceSettings.lateGraceMinutes}
+          notificationJobs={notificationJobs}
           onClose={() => setAttendanceModal(null)}
           onSave={async (lesson, student, values, options = {}) => {
-            const { saved } = await saveAttendanceRecord(lesson, student, values, getSessionTeacherId(), {
-              sendAlimtalk: Boolean(options.sendAlimtalk)
-            });
+            const { saved } = await saveAttendanceRecord(lesson, student, values, getSessionTeacherId(), { sendAlimtalk: Boolean(options.sendAlimtalk) });
             if (!saved) return false;
             setAttendanceModal(null);
             return true;

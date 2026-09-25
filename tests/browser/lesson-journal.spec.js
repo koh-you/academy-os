@@ -2008,3 +2008,73 @@ test("student lesson schedule keeps a Friday makeup lesson's own time", async ({
   await expect(makeupRow).toContainText("13:00-14:00");
   await expect(makeupRow).not.toContainText("17:00-19:00");
 });
+
+// 2026-09-25 · 날짜를 착각해 누른 '결석' 을 되돌릴 방법이 없다는 사용자 보고. 출결 체크 모달에서
+// '대기'(미체크)로 되돌리고, 그 사이 예약된 결석 알림톡은 자동 취소되지 않는다는 것까지 확인한다.
+test("manual absence can be reverted to 대기 while the reserved absence Alimtalk stays for a human to cancel", async ({ page, request }) => {
+  const pageErrors = collectPageErrors(page);
+  await loginAsTeacher(page);
+  await navigateCalendarToMonth(page, 2026, 8);
+  await page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ }).getByRole("button", { name: /월 경계 연동반/ }).click();
+  const lessonJournal = page.getByRole("dialog", { name: "수업일지" });
+  const attendanceBadge = lessonJournal.locator(".attendanceBadge").first();
+  await expect(attendanceBadge).toContainText("대기");
+
+  // 1) 결석으로 저장하고 학부모 결석 알림톡까지 예약한다(가상 fixture, 실제 발송 없음).
+  await attendanceBadge.click();
+  const absenceModal = page.getByRole("dialog", { name: "월경계 학생 출결 체크" });
+  // 빈 출결의 기본 제안은 그대로 '등원' 이다. '대기' 는 되돌리기 출구로 맨 앞에 있다.
+  await expect(absenceModal.getByRole("button", { name: "등원", exact: true })).toHaveClass(/active/);
+  await expect(absenceModal.locator(".typeTabs button").first()).toHaveText("대기");
+  await absenceModal.getByRole("button", { name: "결석", exact: true }).click();
+  await absenceModal.getByRole("button", { name: "출결 저장" }).click();
+  await absenceModal.getByRole("button", { name: "저장 후 다음 정각 알림톡 예약" }).click();
+  await expect(absenceModal).toHaveCount(0);
+  await expect(attendanceBadge).toContainText("결석");
+
+  let records = (await (await request.get(`${safeApiBaseUrl}/api/lesson-records`)).json()).records;
+  expect(records.find((record) => record.lessonId === "safe-cross-month-current-lesson")?.attendanceStatus).toBe("absent");
+  let reservedJobs = (await (await request.get(`${safeApiBaseUrl}/api/notification-jobs`)).json()).notificationJobs
+    .filter((job) => job.notificationJobId.startsWith("attendance_absence_"));
+  expect(reservedJobs.map((job) => job.status)).toEqual(["scheduled"]);
+
+  // 2) 같은 행에서 '대기' 로 되돌린다. 저장되지 않는 시각·사유 입력은 잠기고, 발송 선택지는 사라진다.
+  await attendanceBadge.click();
+  const revertModal = page.getByRole("dialog", { name: "월경계 학생 출결 체크" });
+  await expect(revertModal.getByRole("button", { name: "결석", exact: true })).toHaveClass(/active/);
+  await revertModal.getByRole("button", { name: "대기", exact: true }).click();
+  await expect(revertModal).toContainText("대기로 저장하면 등원·하원 시각과 사유가 지워지고");
+  await expect(revertModal.locator('input[type="time"]').first()).toBeDisabled();
+  await expect(revertModal.locator('input[type="time"]').nth(1)).toBeDisabled();
+  await revertModal.getByRole("button", { name: "출결 저장" }).click();
+  await expect(revertModal).toContainText("출결을 대기로 되돌릴까요?");
+  await expect(revertModal).toContainText("상태 대기 · 등원 — · 하원 — · 사유 —");
+  await expect(revertModal.getByRole("button", { name: /알림톡/ })).toHaveCount(0);
+  // 예약된 결석 알림톡은 남는다는 사실과 취소 위치를 확인 단계에서 알려야 한다.
+  await expect(revertModal.locator(".attendanceReservedAbsenceWarning")).toContainText("결석 알림톡 1건이 남아 있습니다");
+  await expect(revertModal.locator(".attendanceReservedAbsenceWarning")).toContainText("알림관리");
+  await revertModal.getByRole("button", { name: "대기로 되돌리기" }).click();
+  await expect(revertModal).toHaveCount(0);
+
+  // 3) 행의 출결 칩은 '대기' 로 돌아가고, 하원 미체크 같은 파생 표시는 남지 않는다.
+  await expect(attendanceBadge).toContainText("대기");
+  await expect(lessonJournal).not.toContainText("하원 미체크");
+
+  // 4) 서버 원천도 대기로 저장되고, 예약된 알림톡은 사람이 취소할 수 있도록 그대로 남아 있다.
+  records = (await (await request.get(`${safeApiBaseUrl}/api/lesson-records`)).json()).records;
+  const revertedRecord = records.find((record) => record.lessonId === "safe-cross-month-current-lesson");
+  expect(revertedRecord?.attendanceStatus).toBe("pending");
+  expect(revertedRecord?.checkInTime || "").toBe("");
+  expect(revertedRecord?.checkOutTime || "").toBe("");
+  expect(revertedRecord?.attendanceReason || "").toBe("");
+  reservedJobs = (await (await request.get(`${safeApiBaseUrl}/api/notification-jobs`)).json()).notificationJobs
+    .filter((job) => job.notificationJobId.startsWith("attendance_absence_"));
+  expect(reservedJobs.map((job) => job.status)).toEqual(["scheduled"]);
+
+  // 5) 새로고침 뒤에도 대기가 유지된다(낙관적 UI 가 아니라 서버 원천이다).
+  await page.reload();
+  await navigateCalendarToMonth(page, 2026, 8);
+  await page.getByRole("gridcell", { name: /2026-08-01 · \d+개 수업/ }).getByRole("button", { name: /월 경계 연동반/ }).click();
+  await expect(page.getByRole("dialog", { name: "수업일지" }).locator(".attendanceBadge").first()).toContainText("대기");
+  expect(pageErrors).toEqual([]);
+});

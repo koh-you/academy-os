@@ -12,10 +12,14 @@ import {
   hasAttendanceModalChanges,
   hasTabletAttendanceRecord
 } from "./attendanceModalModel.js";
+import {
+  createReservedAbsenceAlimtalkSummary,
+  createReservedAbsenceAlimtalkWarningText
+} from "./reservedAbsenceAlimtalkModel.js";
 import { attendanceLabels } from "./labels.js";
 import "./attendanceModal.css";
 
-export function AttendanceModal({ item, lateGraceMinutes = 5, onClose, onSave }) {
+export function AttendanceModal({ item, lateGraceMinutes = 5, notificationJobs = [], onClose, onSave }) {
   const { lesson, record, student } = item;
   const attendanceDateMismatch = getAttendanceDateMismatch(record, lesson);
   const editableRecord = attendanceDateMismatch ? clearAttendanceFields(record) : record;
@@ -37,24 +41,37 @@ export function AttendanceModal({ item, lateGraceMinutes = 5, onClose, onSave })
       : editableRecord.lateMinutes ?? "";
   const isWithinLateGrace = attendanceStatus === "late" && effectiveLateMinutes !== "" && Number(effectiveLateMinutes) <= 0;
   const effectiveAttendanceStatus = isWithinLateGrace ? "present" : attendanceStatus;
+  // 2026-09-25 · '대기' 는 잘못 누른 출결을 미체크로 되돌리는 경로다. 서버 status 분기가 등·하원 시각을
+  // 비우므로(api/server.js pending 분기), 저장값에서도 시각·사유를 비워 화면과 저장 결과를 일치시킨다.
+  // 입력 state 자체는 남겨둬 다른 탭으로 되돌아가면 방금 입력한 값이 살아 있게 한다.
+  const isPendingRevert = effectiveAttendanceStatus === "pending";
   const values = {
     attendanceStatus: effectiveAttendanceStatus,
     lateMinutes: effectiveAttendanceStatus === "late" ? effectiveLateMinutes : "",
-    checkInTime,
-    checkOutTime,
-    attendanceReason
+    checkInTime: isPendingRevert ? "" : checkInTime,
+    checkOutTime: isPendingRevert ? "" : checkOutTime,
+    attendanceReason: isPendingRevert ? "" : attendanceReason
   };
   const hasKioskRecord = !attendanceDateMismatch && hasTabletAttendanceRecord(record);
   const hasChanged = hasAttendanceModalChanges(editableRecord, values);
   // 확인 단계가 열려 있는 동안은 위 입력을 잠근다. pendingSave 는 [출결 저장] 시점 값을 캡처하므로,
   // 잠그지 않으면 화면에 보이는 값과 실제 저장·발송되는 값이 어긋날 수 있다.
+  // 2026-09-25 · 대기(되돌리기)에서도 같은 이유로 잠근다 — 저장되지 않는 값을 입력받지 않는다.
   const isConfirming = Boolean(confirmStep);
+  const isFieldLocked = isConfirming || isPendingRevert;
   const confirmSummaryText = [
     `상태 ${attendanceLabels[values.attendanceStatus] ?? values.attendanceStatus}${values.lateMinutes !== "" ? ` ${values.lateMinutes}분` : ""}`,
     `등원 ${values.checkInTime || "—"}`,
     `하원 ${values.checkOutTime || "—"}`,
     `사유 ${values.attendanceReason || "—"}`
   ].join(" · ");
+  // 2026-09-25 · 서버는 출결을 되돌려도 이미 예약된 결석 알림톡을 취소하지 않는다. 자동 취소는 외부
+  // side effect 라 사람이 결정해야 하므로(AGENTS.md), 남은 예약과 취소 위치만 확인 단계에서 알린다.
+  const reservedAbsenceAlimtalk = createReservedAbsenceAlimtalkSummary({ lesson, notificationJobs, student });
+  const reservedAbsenceAlimtalkWarning = createReservedAbsenceAlimtalkWarningText({
+    nextAttendanceStatus: values.attendanceStatus,
+    reservedAbsenceAlimtalk
+  });
 
   function requestSave() {
     setSaveError("");
@@ -94,9 +111,11 @@ export function AttendanceModal({ item, lateGraceMinutes = 5, onClose, onSave })
   }
 
   return (
-    <Modal closeDisabled={isSaving} title={`${student.name} 출결 체크`} subtitle="지각/결석이면 시간과 사유를 남깁니다." onClose={onClose}>
-      <div className="typeTabs">
+    <Modal className="attendanceModal" closeDisabled={isSaving} title={`${student.name} 출결 체크`} subtitle="지각/결석이면 시간과 사유를 남깁니다." onClose={onClose}>
+      {/* 2026-09-25 · '대기' 가 맨 앞이다. 잘못 누른 출결을 미체크로 되돌리는 출구가 상태 목록의 첫 칸에 있어야 찾는다. */}
+      <div className="typeTabs attendanceStatusTabs">
         {[
+          ["pending", "대기"],
           ["present", "등원"],
           ["late", "지각"],
           ["checkout", "하원"],
@@ -117,7 +136,7 @@ export function AttendanceModal({ item, lateGraceMinutes = 5, onClose, onSave })
         <label>
           등원 시각
           <input
-            disabled={isConfirming}
+            disabled={isFieldLocked}
             type="time"
             value={checkInTime}
             onChange={(event) => setCheckInTime(event.target.value)}
@@ -127,7 +146,7 @@ export function AttendanceModal({ item, lateGraceMinutes = 5, onClose, onSave })
         <label>
           하원 시각
           <input
-            disabled={isConfirming}
+            disabled={isFieldLocked}
             type="time"
             value={checkOutTime}
             onChange={(event) => setCheckOutTime(event.target.value)}
@@ -137,13 +156,18 @@ export function AttendanceModal({ item, lateGraceMinutes = 5, onClose, onSave })
         <label>
           사유
           <input
-            disabled={isConfirming}
+            disabled={isFieldLocked}
             value={attendanceReason}
             onChange={(event) => setAttendanceReason(event.target.value)}
             placeholder="예: 학교 동아리"
           />
         </label>
       </div>
+      {isPendingRevert ? (
+        <div className="attendanceSourceNotice">
+          잘못 누른 출결을 미체크 상태로 되돌립니다. 대기로 저장하면 등원·하원 시각과 사유가 지워지고, 알림톡은 발송·예약되지 않습니다.
+        </div>
+      ) : null}
       {isWithinLateGrace ? (
         <div className="attendanceSourceNotice">
           지각 유예시간 {lateGraceMinutes}분 안의 등원이라 저장 시 정상 등원으로 처리됩니다.
@@ -176,36 +200,44 @@ export function AttendanceModal({ item, lateGraceMinutes = 5, onClose, onSave })
       ) : null}
       {confirmStep === "saveMode" ? (
         <div className="attendanceConfirmPanel">
-          <strong>출결을 어떻게 저장할까요?</strong>
+          <strong>{isPendingRevert ? "출결을 대기로 되돌릴까요?" : "출결을 어떻게 저장할까요?"}</strong>
           <p>
-            {values.attendanceStatus === "absent"
-              ? "결석 기록만 저장하거나, 저장 후 학부모 결석 알림톡을 다음 예약 가능한 정각에 예약할 수 있습니다."
-              : "출결 기록만 저장하거나, 저장 후 학부모에게 출결 알림톡까지 즉시 발송할 수 있습니다."}
+            {isPendingRevert
+              ? "출결 기록을 미체크(대기)로 되돌립니다. 등원·하원 시각과 사유는 지워지고, 이 저장으로 나가는 알림톡은 없습니다."
+              : values.attendanceStatus === "absent"
+                ? "결석 기록만 저장하거나, 저장 후 학부모 결석 알림톡을 다음 예약 가능한 정각에 예약할 수 있습니다."
+                : "출결 기록만 저장하거나, 저장 후 학부모에게 출결 알림톡까지 즉시 발송할 수 있습니다."}
           </p>
           <p className="attendanceConfirmSummary">저장될 값 · {confirmSummaryText}</p>
+          {reservedAbsenceAlimtalkWarning ? (
+            <p className="attendanceReservedAbsenceWarning">{reservedAbsenceAlimtalkWarning}</p>
+          ) : null}
           {saveError ? <p className="apiErrorBox">{saveError}</p> : null}
           {/* 2026-09-19 · [취소][저장만(primary)][저장 후 발송(soft)]. 학부모에게 실제로 나가는 발송 쪽에
-              강조를 주지 않고, 1단계와 같이 취소 출구를 둔다. onClick·문구·disabled 조건은 그대로다. */}
+              강조를 주지 않고, 1단계와 같이 취소 출구를 둔다. onClick·문구·disabled 조건은 그대로다.
+              2026-09-25 · 대기로 되돌릴 때는 보낼 알림이 없으므로 발송 버튼 자체를 그리지 않는다. */}
           <div className="attendanceConfirmActions saveMode">
             <button className="softButton" disabled={isSaving} onClick={() => setConfirmStep("")} type="button">
               취소
             </button>
             <button className="primaryButton" disabled={isSaving} onClick={() => finishConfirmedSave(false)} type="button">
-              {isSaving ? "저장 중..." : "저장만"}
+              {isSaving ? "저장 중..." : isPendingRevert ? "대기로 되돌리기" : "저장만"}
             </button>
-            <button
-              className="softButton"
-              disabled={isSaving}
-              onClick={() => finishConfirmedSave(true)}
-              title="학부모에게 실제 발송"
-              type="button"
-            >
-              {isSaving
-                ? "저장 중..."
-                : values.attendanceStatus === "absent"
-                  ? "저장 후 다음 정각 알림톡 예약"
-                  : "저장 후 출결 알림톡 즉시 발송"}
-            </button>
+            {isPendingRevert ? null : (
+              <button
+                className="softButton"
+                disabled={isSaving}
+                onClick={() => finishConfirmedSave(true)}
+                title="학부모에게 실제 발송"
+                type="button"
+              >
+                {isSaving
+                  ? "저장 중..."
+                  : values.attendanceStatus === "absent"
+                    ? "저장 후 다음 정각 알림톡 예약"
+                    : "저장 후 출결 알림톡 즉시 발송"}
+              </button>
+            )}
           </div>
         </div>
       ) : null}
