@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ConfirmDialog } from "../../shared/components/ConfirmDialog.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { OverflowMenu } from "../../shared/components/OverflowMenu.jsx";
 import { PageHeader } from "../../shared/components/PageHeader.jsx";
 import {
@@ -418,8 +419,10 @@ export function ProblemBankCenter() {
 
       <div className="problemBankCenterLayout">
         <div className="panel problemBankImportPanel">
-          <h2>패키지 등록</h2>
-          <p className="muted">패키지 폴더(문항·정답·해설)를 선택하면 한 번에 올라갑니다.</p>
+          <div className="helpTipTitleRow">
+            <h2>패키지 등록</h2>
+            <HelpTip label="패키지 등록" text="패키지 폴더(문항·정답·해설)를 선택하면 한 번에 올라갑니다." />
+          </div>
           <button className="softButton" onClick={() => folderInputRef.current?.click()} type="button">패키지 폴더 선택</button>
           <input
             aria-label="패키지 폴더 선택"

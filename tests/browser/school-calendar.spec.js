@@ -141,7 +141,8 @@ test("manual school event keeps its draft and stable id across an unknown save r
   await titleInput.fill("안전 저장 학사일정");
   const eventDate = await form.locator('.calendarDateGrid input[type="date"]').first().inputValue();
 
-  await form.getByRole("button", { name: "일정 등록" }).click();
+  // 2026-09-26 · 제목 옆 HelpTip 트리거의 접근 이름이 "일정 등록 설명" 이라 부분일치로는 두 개가 잡힌다 — 확정 버튼만 exact 로 고른다.
+  await form.getByRole("button", { exact: true, name: "일정 등록" }).click();
   await expect(form).toHaveAttribute("aria-busy", "true");
   await expect(form.getByRole("button", { name: "창 닫기" })).toBeDisabled();
   await expect(page.locator(".schoolCalendarSaveNotice")).toHaveClass(/failed/);
@@ -150,7 +151,7 @@ test("manual school event keeps its draft and stable id across an unknown save r
   await expect(form.locator(".schoolEventFormSaveError")).toBeVisible();
   await expect(titleInput).toHaveValue("안전 저장 학사일정");
 
-  await form.getByRole("button", { name: "일정 등록" }).click();
+  await form.getByRole("button", { exact: true, name: "일정 등록" }).click();
   await expect(form).toBeHidden();
   expect(postCount).toBe(2);
   await expect(page.locator(".schoolCalendarSaveNotice")).toContainText("저장 완료");
@@ -201,7 +202,8 @@ test("derived math exam saves its exam row and pre-exam lesson as one retry-safe
   const examDateInput = form.locator('.examSubjectRow input[type="date"]');
   const examDate = await examDateInput.inputValue();
 
-  await form.getByRole("button", { name: "일정 등록" }).click();
+  // 2026-09-26 · 위와 같은 이유로 exact. HelpTip 트리거("일정 등록 설명")와 확정 버튼을 구분한다.
+  await form.getByRole("button", { exact: true, name: "일정 등록" }).click();
   await expect(form).toHaveAttribute("aria-busy", "true");
   await expect(examDateInput).toBeDisabled();
   await expect(form.getByRole("button", { name: "창 닫기" })).toBeDisabled();
@@ -211,7 +213,7 @@ test("derived math exam saves its exam row and pre-exam lesson as one retry-safe
   await expect(form).toBeVisible();
   await expect(examDateInput).toHaveValue(examDate);
 
-  await form.getByRole("button", { name: "일정 등록" }).click();
+  await form.getByRole("button", { exact: true, name: "일정 등록" }).click();
   await expect(form).toBeHidden();
   expect(postCount).toBe(2);
   await expect(page.locator(".schoolCalendarSaveNotice")).toContainText("시험관리 · 직전수업 저장 완료");

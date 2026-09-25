@@ -19,7 +19,6 @@
 }
 
 .problemBankSidebarHead strong { display: block; font-size: 15px; }
-.problemBankSidebarHead small { color: var(--academy-text-muted, #6b7280); }
 
 .problemBankBreadcrumb { display: flex; flex-wrap: wrap; gap: 4px; }
 .problemBankBreadcrumb button {
@@ -124,7 +123,6 @@
 .problemBankUnitSelect { background: transparent; border: 1px solid var(--academy-border, #e2e6ec); border-radius: 999px; cursor: pointer; font-size: 11.5px; padding: 2px 9px; }
 
 .problemBankNumberGrid { display: grid; gap: 6px; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); }
-.problemBankModeHint { color: var(--academy-text-muted, #6b7280); font-size: 12px; max-width: 360px; }
 .problemBankNumber {
   background: var(--academy-surface-muted, #f3f4f6);
   border: 2px solid transparent;
@@ -182,7 +180,6 @@
 .problemBankPreviewBody img { border: 1px solid var(--academy-border, #e2e6ec); border-radius: 6px; max-width: 100%; }
 .problemBankPreviewBody .problemBankZoomButton { background: none; border: 0; cursor: zoom-in; display: block; padding: 0; text-align: left; width: 100%; }
 .problemBankPreviewBody .problemBankZoomButton img { width: 100%; }
-.problemBankZoomHint { color: var(--academy-text-muted, #6b7280); font-size: 11.5px; margin: 4px 0 0; }
 .problemBankZoomLayer { align-items: center; background: rgba(17, 24, 39, 0.72); display: flex; inset: 0; justify-content: center; padding: 24px; position: fixed; z-index: 1300; }
 .problemBankZoomLayer .problemBankZoomCard { background: #fff; border-radius: 12px; max-height: calc(100vh - 48px); max-width: min(1100px, calc(100vw - 48px)); overflow: auto; padding: 14px; }
 .problemBankZoomLayer .problemBankZoomCard img { display: block; max-width: 100%; }
@@ -199,6 +196,8 @@
 .problemBankImportPanel h2,
 .problemBankListPanel h2,
 .problemBankDetailPanel h2 { font-size: 15px; margin: 0 0 6px; }
+/* 2026-09-26 · 제목 옆 물음표와 같은 줄에 맞춘다. 아래 여백은 패널 그리드 gap 이 이미 만든다. */
+.problemBankImportPanel .helpTipTitleRow h2 { margin: 0; }
 .problemBankStatus { align-items: center; display: flex; flex-wrap: wrap; font-size: 12.5px; gap: 8px; margin: 0; }
 .problemBankStatusBadge { border-radius: 999px; font-size: 11.5px; font-weight: 600; padding: 2px 9px; white-space: nowrap; }
 .problemBankStatus.stage-done .problemBankStatusBadge { background: #dcfce7; color: #166534; }

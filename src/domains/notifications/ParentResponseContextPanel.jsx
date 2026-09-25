@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { ListCard, ListCardActions, ListCardHeader } from "../../shared/components/ListCard.jsx";
 import { SearchField } from "../../shared/components/SearchField.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
@@ -37,6 +38,7 @@ export function ParentResponseContextPanel({ formatDateTime, notificationJobs = 
         eyebrow="PARENT RESPONSE CONTEXT"
         meta={<span className="countBadge">발신 {contexts.length}건</span>}
         title="학부모 응대"
+        titleAdornment={<HelpTip label="학부모 응대" text="모바일에서는 아래 확인 정보를 복사한 뒤 카카오비즈니스 파트너센터 앱에서 해당 학부모 상담방을 찾으세요." />}
       />
       <div className="parentResponseContextTools">
         <SearchField
@@ -46,7 +48,6 @@ export function ParentResponseContextPanel({ formatDateTime, notificationJobs = 
           result={`${visibleContexts.length}건`}
           value={searchText}
         />
-        <p>모바일에서는 아래 확인 정보를 복사한 뒤 카카오비즈니스 파트너센터 앱에서 해당 학부모 상담방을 찾으세요.</p>
       </div>
       {copyMessage ? <p className="inlineNotice ok" role="status">{copyMessage}</p> : null}
       {visibleContexts.length ? (

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { FilterBar } from "../../shared/components/FilterBar.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { MetricCard } from "../../shared/components/MetricCard.jsx";
 import { Modal, ModalFooter } from "../../shared/components/Modal.jsx";
@@ -61,8 +62,8 @@ export function SchoolCalendarHeader({
       )}
       actionsClassName="schoolCalendarHeaderActions"
       className="schoolCalendarHeader"
-      description="학교별 시험기간, 수학시험 날짜, 방학/개학 같은 학사 원본 일정을 관리합니다."
       title="학사일정"
+      titleAdornment={<HelpTip label="학사일정" text="학교별 시험기간, 수학시험 날짜, 방학/개학 같은 학사 원본 일정을 관리합니다." />}
     />
   );
 }
@@ -82,8 +83,8 @@ export function SchoolAcademicOverviewPanel({
     <section className="panel schoolAcademicOverviewPanel">
       <SectionHeader
         density="slim"
-        description="학교별 전체 시험기간은 카드와 달력 띠로 보고, 기간 안의 수학시험 날짜는 달력에서 더 진하게 확인합니다."
         title="월간 학사 개요"
+        titleAdornment={<HelpTip label="월간 학사 개요" text="학교별 전체 시험기간은 카드와 달력 띠로 보고, 기간 안의 수학시험 날짜는 달력에서 더 진하게 확인합니다." />}
       />
       <div className="schoolAcademicStatsGrid">
         <MetricCard density="compact" label="시험기간" value={examPeriodCards.length} />
@@ -372,7 +373,14 @@ export function SchoolDateScheduleModal({
   }
 
   return (
-    <Modal className="schoolDateScheduleModal" closeDisabled={busy} title={`${selectedDate} 일정`} subtitle="일정 내용과 색상을 확인하고 수정합니다." onClose={requestClose} scrollable>
+    <Modal
+      className="schoolDateScheduleModal"
+      closeDisabled={busy}
+      onClose={requestClose}
+      scrollable
+      title={`${selectedDate} 일정`}
+      titleAdornment={<HelpTip label={`${selectedDate} 일정`} text="일정 내용과 색상을 확인하고 수정합니다." />}
+    >
       <fieldset aria-busy={busy} className="schoolDateModalContent" disabled={busy}>
       <div className="schoolDateModalToolbar">
         {/* 이 모달의 primary 는 하단 저장 바의 '변경 저장' 하나다. 등록 진입점은 soft 로 둔다(2026-09-19 U9). */}
@@ -578,6 +586,7 @@ export function SchoolEventFormModal({
   const modalSaveStatus = modalSaveState.state || "idle";
   const hasDate = Boolean(newEvent.date);
   const requiredDateHint = newEvent.type === "mathExam" ? "시험 날짜를 입력하세요" : "시작일을 입력하세요";
+  const eventFormTitle = isEditingEvent ? "일정 수정" : "일정 등록";
   // label 은 grid 라 텍스트와 표식을 한 span 에 묶어야 같은 줄에 남는다. 표식은 aria-hidden 이라 접근 가능한 이름은 그대로다.
   const requiredLabel = (text) => (
     <span>{text}<span aria-hidden="true" className="schoolEventRequiredMark"> *</span></span>
@@ -587,10 +596,15 @@ export function SchoolEventFormModal({
     <Modal
       className="schoolEventFormModal"
       closeDisabled={busy}
-      title={isEditingEvent ? "일정 수정" : "일정 등록"}
-      subtitle={isEditingEvent ? "변경할 항목을 확인한 뒤 저장합니다." : "입력 유형을 먼저 고른 뒤 필요한 정보만 입력합니다."}
       onClose={onClose}
       scrollable
+      title={eventFormTitle}
+      titleAdornment={(
+        <HelpTip
+          label={eventFormTitle}
+          text={isEditingEvent ? "변경할 항목을 확인한 뒤 저장합니다." : "입력 유형을 먼저 고른 뒤 필요한 정보만 입력합니다."}
+        />
+      )}
     >
       <fieldset aria-busy={busy} className="schoolEventFormPanel modalForm" disabled={busy}>
         <label className="inputTypeField">
