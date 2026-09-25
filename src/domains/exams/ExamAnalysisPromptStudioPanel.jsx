@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { Disclosure } from "../../shared/components/Disclosure.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
 import { getJsonWithTimeout, postJsonWithTimeout } from "../../shared/utils/apiClient.js";
 import { copyTextToClipboard } from "./outputPreview.js";
@@ -36,12 +37,20 @@ const roleLabels = {
 
 function PromptField({ hint = "", label, value, onChange, multiline = false, placeholder = "", sourceLabel = "" }) {
   const Control = multiline ? "textarea" : "input";
+  // 2026-09-25 · 작성 안내(hint)는 상시 노출하지 않고 제목 줄 물음표 뒤에 둔다.
+  // 물음표 트리거는 <button> 이고 button 은 HTML 명세상 labelable element 라 <label> 안에 두면
+  // content model 위반이다(labeled control 이 아닌 labelable 자손). 그래서 바깥은 <div> 로 두고
+  // <label htmlFor> 이 제목 텍스트만 감싸 입력칸과 명시 연결한다 — 접근 가능한 이름에
+  // sourceLabel('원천값 기반'·'확정값 기반')까지 그대로 남는다.
+  const controlId = useId();
   return (
-    <label className="examPromptField">
-      <span><b>{label}</b>{sourceLabel && <small>{sourceLabel}</small>}</span>
-      <Control value={value ?? ""} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} rows={multiline ? 2 : undefined} />
-      {hint ? <small className="examPromptFieldHint">{hint}</small> : null}
-    </label>
+    <div className="examPromptField">
+      <span>
+        <label htmlFor={controlId}><b>{label}</b>{sourceLabel && <small>{sourceLabel}</small>}</label>
+        {hint ? <HelpTip label={label} text={hint} /> : null}
+      </span>
+      <Control id={controlId} value={value ?? ""} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} rows={multiline ? 2 : undefined} />
+    </div>
   );
 }
 
@@ -55,19 +64,24 @@ function PhrasePicker({ field, schoolLevel, targetPath, currentValue, onApply })
         <option value="">벤치마크 문구 사례 선택</option>
         {options.map((option) => <option key={option.id} value={option.id}>{option.draft}</option>)}
       </select>
-      <button
-        className="ghostButton"
-        disabled={!selectedId}
-        onClick={() => {
-          const phraseDraft = createExamAnalysisPhraseDraft(selectedId);
-          const next = currentValue ? `${currentValue}\n${phraseDraft}` : phraseDraft;
-          onApply({ targetPath, phraseId: selectedId, value: next });
-        }}
-        type="button"
-      >
-        {currentValue ? "선택 문구 이어 붙이기" : "선택 문구 적용"}
-      </button>
-      <small>선택만으로는 바뀌지 않습니다. 적용 후 자유롭게 수정하고 저장하세요.</small>
+      <div className="helpTipTitleRow">
+        <button
+          className="ghostButton"
+          disabled={!selectedId}
+          onClick={() => {
+            const phraseDraft = createExamAnalysisPhraseDraft(selectedId);
+            const next = currentValue ? `${currentValue}\n${phraseDraft}` : phraseDraft;
+            onApply({ targetPath, phraseId: selectedId, value: next });
+          }}
+          type="button"
+        >
+          {currentValue ? "선택 문구 이어 붙이기" : "선택 문구 적용"}
+        </button>
+        <HelpTip
+          label="문구 적용"
+          text="선택만으로는 바뀌지 않습니다. 적용 후 자유롭게 수정하고 저장하세요."
+        />
+      </div>
     </div>
   );
 }
@@ -86,7 +100,10 @@ function MissingInputNotice({ readiness }) {
       {Object.entries(grouped).map(([role, items]) => (
         <span key={role}><b>{roleLabels[role] || role}</b> · {items.map((item) => item.field).join(", ")}</span>
       ))}
-      <small>빈칸은 교사가 확인해 입력합니다. AI 후보나 PDF 페이지 정보로 자동 보정하지 않습니다.</small>
+      {/* 2026-09-25 · 제목과 겹치던 '빈칸은 교사가 확인해 입력합니다.' 만 지운다.
+          자동 보정 금지는 시험분석 v2 의 제품 핵심 규칙이고 이 상자는 저장·생성 직전 경고라
+          물음표 뒤로 숨기지 않고 상시로 남긴다. */}
+      <small>AI 후보나 PDF 페이지 정보로 자동 보정하지 않습니다.</small>
     </div>
   );
 }
@@ -290,7 +307,13 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
 
       <div className="examPromptSequencePanel">
         <div className="examPromptRoleHeading">
-          <div><strong>{sequenceModel.presetLabel}</strong><small>입력 유무에 따라 조건부 역할을 건너뛰고 번호를 다시 계산합니다.</small></div>
+          <div className="helpTipTitleRow">
+            <strong>{sequenceModel.presetLabel}</strong>
+            <HelpTip
+              label={sequenceModel.presetLabel}
+              text="입력 유무에 따라 조건부 역할을 건너뛰고 번호를 다시 계산합니다."
+            />
+          </div>
           <span>총 {sequenceModel.slides.length}장 · 준비 {sequenceModel.readyCount} · 입력 필요 {sequenceModel.needsInputCount}</span>
         </div>
         <div className="examPromptRoleToggles">
@@ -378,8 +401,13 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
           </>
         )}>
             <div className="examPromptRoleHeading">
-              <small>주요문항으로 보여줄 문제만 펼쳐서 보완합니다.</small>
-              <button className="ghostButton" disabled={draft.roleInputs.keyQuestions.length >= 12} onClick={addKeyQuestion} type="button">주요문항 추가</button>
+              <div className="helpTipTitleRow">
+                <button className="ghostButton" disabled={draft.roleInputs.keyQuestions.length >= 12} onClick={addKeyQuestion} type="button">주요문항 추가</button>
+                <HelpTip
+                  label="주요문항 추가"
+                  text="주요문항으로 보여줄 문제만 펼쳐서 보완합니다."
+                />
+              </div>
             </div>
             {draft.roleInputs.keyQuestions.length ? draft.roleInputs.keyQuestions.map((question, index) => (
               <div className="examPromptQuestionCard" key={question.blockId || index}>
@@ -428,7 +456,13 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
 
       <div className="examPromptOutputPanel">
         <div className="examPromptRoleHeading">
-          <div><strong>복붙용 프롬프트</strong><small>프로젝트 공통 지침을 먼저 붙이고, 아래 슬라이드를 1장씩 생성합니다.</small></div>
+          <div className="helpTipTitleRow">
+            <strong>복붙용 프롬프트</strong>
+            <HelpTip
+              label="복붙용 프롬프트"
+              text="프로젝트 공통 지침을 먼저 붙이고, 아래 슬라이드를 1장씩 생성합니다."
+            />
+          </div>
           <div className="examPromptOutputActions">
             <button className="ghostButton" disabled={!promptPack.readyForAllGeneration} onClick={() => copyPrompt("전체 프롬프트", promptPack.text)} type="button">전체 복사</button>
             <button className="ghostButton" onClick={() => downloadPromptFile("txt")} type="button">TXT</button>
@@ -442,6 +476,8 @@ export function ExamAnalysisPromptStudioPanel({ analysisRunId }) {
           {copyStatus ? <small>{copyStatus}</small> : null}
         </div>
         <ol className="examPromptWorkflowGuide" aria-label="프롬프트 사용 순서">
+          {/* 2026-09-25 · 이 목록의 존재 이유가 '한눈에 보는 사용 순서' 라 세 줄 설명은 상시 노출로 남긴다.
+              세 단계를 각각 물음표로 바꾸면 한 줄에 물음표 3개가 생기고, 순서를 알려면 3번 눌러야 한다. */}
           <li><b>1</b><span><strong>처음 만들기</strong><small>마스터와 상세 프롬프트로 이미지를 생성합니다.</small></span></li>
           <li><b>2</b><span><strong>결과 검사</strong><small>생성된 이미지를 첨부하고 오류를 검사합니다.</small></span></li>
           <li><b>3</b><span><strong>필요한 부분만 수정</strong><small>문제가 있을 때만 수정 요청을 입력합니다.</small></span></li>

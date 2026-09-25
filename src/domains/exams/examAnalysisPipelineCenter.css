@@ -1919,13 +1919,9 @@
   line-height: 1.5;
 }
 
-.examAnalysisBlogBlockCard p {
-  color: var(--academy-text-strong, #475569);
-  font-size: 12px;
-  font-weight: 850;
-  line-height: 1.5;
-  margin: 0;
-}
+/* 2026-09-25 · 이 화면의 포괄적인 span 규칙(위 14px/950/primary 등)이 공용 HelpTip 말풍선을
+   덮어쓰던 문제는 HelpTip.css 가 `.helpTip > .helpTipBubble` 로 특이도를 올려(PR #417) 해결됐다.
+   화면별 되돌리기 규칙(.examAnalysisOutputDraftPanel .helpTipBubble)은 그래서 지웠다. */
 
 .examAnalysisKeyQuestionHeader {
   background: var(--status-info-bg, #eff6ff);

@@ -45,7 +45,9 @@ domainRoot.walkRules((rule) => {
   }
 });
 // 2026-09-19 · 주요문항 카드 헤더의 요소 선택자 button/button:disabled 2개 삭제(iconButton 으로 통일) (423 → 421)
-assert.equal(domainSelectorCount, 421);
+// 2026-09-25 · 블로그 블록 카드의 상시 설명 <p> 를 제목 옆 HelpTip 으로 옮겨 `.examAnalysisBlogBlockCard p` 삭제.
+//   화면별 되돌리기 규칙(.examAnalysisOutputDraftPanel .helpTipBubble)은 공용 HelpTip.css 특이도 보강(PR #417)으로 불필요해져 함께 삭제 (421 → 420)
+assert.equal(domainSelectorCount, 420);
 
 // No selector that moved should still have a same-name rule left behind in
 // App.css (the two mega-rules above are the sole, confirmed exceptions).

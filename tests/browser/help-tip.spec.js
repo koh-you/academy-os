@@ -1,5 +1,5 @@
 import { expect, test } from "./fixtures.js";
-import { collectPageErrors, loginAsTeacher, resetSafeFixture } from "./safeSmokeSupport.js";
+import { collectPageErrors, loginAsTeacher, resetSafeFixture, safeApiBaseUrl } from "./safeSmokeSupport.js";
 
 test.beforeEach(async ({ request }) => {
   await resetSafeFixture(request);
@@ -186,6 +186,130 @@ test("open help tip stays inside the viewport and every clipping ancestor", asyn
     await trigger.click();
     await expect(page.locator(".helpTipBubble-open")).toBeVisible();
     expectTipFullyVisible(await measureOpenTip(page, label), `390 · ${label}`);
+    await page.keyboard.press("Escape");
+  }
+
+  expect(pageErrors).toEqual([]);
+});
+
+// 2026-09-25 · 잘림 회귀(구체 사례). 시험분석 프롬프트 제작실의 벤치마크 문구 적용 물음표는
+// `.examPromptRoleCard { overflow: clip }` 안에 있고 말풍선(320px)이 카드 안쪽 폭보다 넓다.
+// 이전에는 말풍선이 absolute 라 '적용 후 ㅈ' 로 카드 경계에서 잘렸고, 소스 문자열 grep 잠금은
+// 그걸 전혀 잡지 못했다. 말풍선이 fixed 인 지금은 카드 rect 를 벗어나는 것이 정상이므로
+// 조상 rect 비교가 아니라 hit test 로 본다 — 잘렸다면 그 지점의 elementFromPoint 가 말풍선이 아니다.
+const promptStudioRunId = "help-tip-prompt-studio-run";
+
+async function seedConfirmedExamAnalysisRun(request) {
+  async function post(path, data) {
+    const response = await request.post(`${safeApiBaseUrl}${path}`, { data });
+    expect(response.ok(), `${path} 시드 실패`).toBeTruthy();
+    return response.json();
+  }
+  await post("/api/exam-analysis-runs", {
+    analysisRun: {
+      analysisRunId: promptStudioRunId,
+      examCycle: "1학기 기말",
+      grade: "고1",
+      schoolName: "상계고",
+      subject: "수학",
+      title: "HelpTip 잘림 회귀용 분석"
+    }
+  });
+  await post("/api/exam-analysis-runs/confirm-question-count", {
+    analysisRunId: promptStudioRunId,
+    confirmedBy: "preview",
+    questionCount: 4
+  });
+  await post("/api/exam-analysis-runs/save-question-reviews", {
+    analysisRunId: promptStudioRunId,
+    reviews: ["다항식", "다항식", "경우의 수", "경우의 수"].map((unitName, index) => ({
+      confirmed: true,
+      difficulty: index % 2 === 0 ? "중" : "상",
+      isImportantQuestion: index === 3,
+      mainType: `${unitName} 대표 유형`,
+      questionNumber: index + 1,
+      subTypes: [`${unitName} 소유형`],
+      unitName
+    }))
+  });
+}
+
+async function measureTipHitTest(page, triggerLabel) {
+  return page.evaluate((label) => {
+    const trigger = [...document.querySelectorAll(".helpTip > .helpTipTrigger")].find(
+      (node) => node.getAttribute("aria-label") === label
+    );
+    if (!trigger) return null;
+    const bubble = trigger.parentElement.querySelector(".helpTipBubble");
+    const rect = bubble.getBoundingClientRect();
+    const hitMisses = [
+      ["가운데", rect.left + rect.width / 2, rect.top + rect.height / 2],
+      ["오른쪽 아래 모서리", rect.right - 3, rect.bottom - 3],
+      ["오른쪽 위 모서리", rect.right - 3, rect.top + 3],
+      ["왼쪽 아래 모서리", rect.left + 3, rect.bottom - 3]
+    ]
+      .filter(([, x, y]) => {
+        const hit = document.elementFromPoint(x, y);
+        return !(hit && (hit === bubble || bubble.contains(hit)));
+      })
+      .map(([name]) => name);
+    const clipper = trigger.closest(".examPromptRoleCard");
+    return {
+      bubble: { bottom: rect.bottom, left: rect.left, right: rect.right, top: rect.top },
+      cardRect: clipper ? clipper.getBoundingClientRect().toJSON() : null,
+      cardOverflow: clipper ? getComputedStyle(clipper).overflowX : "",
+      hitMisses,
+      position: getComputedStyle(bubble).position,
+      text: bubble.textContent.trim(),
+      viewport: { height: document.documentElement.clientHeight, width: document.documentElement.clientWidth }
+    };
+  }, triggerLabel);
+}
+
+test("exam analysis phrase picker tip is fully painted outside its overflow:clip card", async ({ page, request }) => {
+  test.slow();
+  const pageErrors = collectPageErrors(page);
+  await seedConfirmedExamAnalysisRun(request);
+  await loginAsTeacher(page);
+  await page.addStyleTag({ content: ".appFrame { transition: none !important; }" });
+
+  await page.getByRole("navigation", { name: "주요 화면" }).getByRole("button", { name: /시험분석/ }).first().click();
+  const libraryToggle = page.getByRole("button", { name: "자료 목록 열기" });
+  if (await libraryToggle.count()) await libraryToggle.first().click();
+  await page.getByLabel("분석 목록 학교").selectOption("상계고");
+  await page.getByLabel("분석 목록 학년").selectOption("고1");
+  await page.getByLabel("분석 목록 고사").selectOption("1학기 기말");
+  await page.getByText("HelpTip 잘림 회귀용 분석").first().click();
+  await page.getByRole("tab", { name: /최종 미리보기/ }).first().click();
+  await page.getByRole("tab", { name: "카드 제작" }).click();
+  await expect(page.locator(".examPromptStudio")).toBeVisible();
+
+  // 카드 2(시험 분석): PhrasePicker 가 카드의 마지막 자식이라 아래로도 잘리던 자리다.
+  await page.getByRole("button", { name: /2\. 시험 분석/ }).first().click();
+  const trigger = page.getByRole("button", { name: "문구 적용 설명" }).first();
+  await trigger.scrollIntoViewIfNeeded();
+  await trigger.click();
+  await expect(page.locator(".helpTipBubble-open")).toBeVisible();
+
+  for (const [where, width, height] of [["1280", 1280, 720], ["390", 390, 820]]) {
+    if (page.viewportSize()?.width !== width) {
+      await page.setViewportSize({ height, width });
+      await trigger.scrollIntoViewIfNeeded();
+      await trigger.click();
+      await expect(page.locator(".helpTipBubble-open")).toBeVisible();
+    }
+    const measured = await measureTipHitTest(page, "문구 적용 설명");
+    expect(measured, `${where}: 물음표를 찾지 못했다`).not.toBeNull();
+    expect(measured.text, where).toBe("선택만으로는 바뀌지 않습니다. 적용 후 자유롭게 수정하고 저장하세요.");
+    // 이 자리가 회귀 테스트로서 의미가 있으려면 잘라내는 조상이 실제로 있어야 한다.
+    expect(measured.cardOverflow, `${where}: 역할 카드가 더는 잘라내지 않는다`).toBe("clip");
+    // 증상 먼저: 말풍선의 네 지점이 실제로 그려져 있는지. 그 다음이 그 수단(fixed)이다.
+    expect(measured.hitMisses, `${where}: 말풍선이 잘려 안 보이는 지점이 있다`).toEqual([]);
+    expect(measured.position, where).toBe("fixed");
+    expect(measured.bubble.left, `${where}: 뷰포트 왼쪽 잘림`).toBeGreaterThanOrEqual(-1);
+    expect(measured.bubble.top, `${where}: 뷰포트 위쪽 잘림`).toBeGreaterThanOrEqual(-1);
+    expect(measured.bubble.right, `${where}: 뷰포트 오른쪽 잘림`).toBeLessThanOrEqual(measured.viewport.width + 1);
+    expect(measured.bubble.bottom, `${where}: 뷰포트 아래쪽 잘림`).toBeLessThanOrEqual(measured.viewport.height + 1);
     await page.keyboard.press("Escape");
   }
 
