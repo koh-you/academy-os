@@ -493,16 +493,12 @@ export function SupplementMakeupLessonDetail({
         </section>
       </div>
       {passConfirmMode ? (
+        // 2026-09-26 · 확인 모달은 '지금 누르면 무슨 일이 생기는지' 를 말하는 자리라 부제를 상시 노출로 되돌렸다.
         <Modal
           className="supplementPassConfirmModal"
           closeDisabled={isPassSaving}
           title={passConfirmMode === "needs_more" ? "추가 보충 필요 기록" : "보충 완료 처리"}
-          titleAdornment={(
-            <HelpTip
-              label={passConfirmMode === "needs_more" ? "추가 보충 필요 기록" : "보충 완료 처리"}
-              text="처리 내용은 보충관리 이력에 남습니다."
-            />
-          )}
+          subtitle="처리 내용은 보충관리 이력에 남습니다."
           onClose={() => {
             if (!isPassSaving) setPassConfirmMode("");
           }}
