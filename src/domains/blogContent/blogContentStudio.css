@@ -32,7 +32,7 @@
 .blogEditor pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line-height:1.7;max-height:380px;overflow:auto}
 .blogCandidates{display:grid;gap:7px;max-height:250px;overflow:auto}
 .blogSave{display:flex;align-items:center;gap:15px;border-top:1px solid #e2e8ed;margin-top:28px;padding-top:20px;font-size:12px}
-.blogStorageHint{display:block;font-size:12px;color:#6d7d8a;margin-top:15px}
+/* 2026-09-26 · .blogStorageHint 삭제: 저장 계약 한 줄을 제목 옆 물음표(HelpTip)로 옮겨 쓰임이 사라졌다. */
 @media(max-width:760px){.blogStudio{padding:12px}
 .blogLayout{grid-template-columns:1fr}
 .blogHero{align-items:flex-start;flex-direction:column}
