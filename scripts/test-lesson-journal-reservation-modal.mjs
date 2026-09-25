@@ -158,4 +158,37 @@ for (const forbiddenSideEffect of ["fetch(", "postJson", "/api/", "useState", "u
   assert.ok(!componentSource.includes(forbiddenSideEffect), `reservation modal must not own orchestration: ${forbiddenSideEffect}`);
 }
 
+
+// 2026-09-25 · 출결 구획이 실패 건수를 직접 알리고(위 '취소/실패' 카드에서 빠졌으므로),
+// 취소할 수 있는 예약이 없으면 "자동 취소되지 않는다" 경고를 붙이지 않는다.
+{
+  const failedSection = createLessonJournalAbsenceAlimtalkSectionModel({
+    auditedJobs: [
+      { lessonId: "lesson-1", notificationJobId: "attendance_absence_a_1", status: "failed", studentId: "s1" },
+      { lessonId: "lesson-1", notificationJobId: "attendance_absence_b_1", status: "canceled", studentId: "s2" }
+    ],
+    lessonStudents: [{ name: "가학생", studentId: "s1" }, { name: "나학생", studentId: "s2" }]
+  });
+  assert.equal(failedSection.failedCount, 1);
+  assert.equal(failedSection.cancelableCount, 0);
+  assert.match(failedSection.countLabel, /실패 1건/);
+  assert.doesNotMatch(failedSection.description, /자동으로 취소되지 않습니다/);
+
+  const liveSection = createLessonJournalAbsenceAlimtalkSectionModel({
+    auditedJobs: [
+      { lessonId: "lesson-1", notificationJobId: "attendance_absence_a_1", status: "scheduled", studentId: "s1" }
+    ],
+    lessonStudents: [{ name: "가학생", studentId: "s1" }]
+  });
+  assert.equal(liveSection.cancelableCount, 1);
+  assert.doesNotMatch(liveSection.countLabel, /실패/);
+  assert.match(liveSection.description, /자동으로 취소되지 않습니다/);
+}
+
+// 2026-09-25 · 위 요약 카드의 'OS 예약 N건' 도 출결 job 을 빼고 센다(카드와 목록 기준 일치).
+assert.ok(
+  componentSource.includes("auditedLessonNotificationJobs.filter((job) => !isManualAbsenceAlimtalkJob(job)).length"),
+  "summary count must exclude absence alimtalk jobs like the issue lists do"
+);
+
 console.log("lesson journal reservation modal TARGET/CONTROL fixtures passed");

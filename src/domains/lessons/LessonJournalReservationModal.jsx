@@ -8,6 +8,7 @@ import {
   createLessonJournalAbsenceAlimtalkSectionModel,
   createLessonJournalReservationModalModel
 } from "./lessonJournalReservationModalModel.js";
+import { isManualAbsenceAlimtalkJob } from "./reservedAbsenceAlimtalkModel.js";
 import "./lessonJournalAbsenceAlimtalkSection.css";
 
 export function LessonJournalReservationModal({
@@ -46,7 +47,9 @@ export function LessonJournalReservationModal({
   visibleReservationStudents
 }) {
   const model = createLessonJournalReservationModalModel({
-    auditedJobCount: auditedLessonNotificationJobs.length,
+    // 2026-09-25 · 출결 결석 알림톡은 아래 전용 구획이 건수를 따로 세므로 위 카드·요약에서는 뺀다.
+    // 한쪽만 빼면 "취소/실패 1건" 인데 목록이 비는 식으로 카드와 목록이 어긋난다.
+    auditedJobCount: auditedLessonNotificationJobs.filter((job) => !isManualAbsenceAlimtalkJob(job)).length,
     canceledJobCount,
     failedJobCount,
     inspectLabel: reservationInspectLabels[reservationInspectMode] ?? "전체 예약",

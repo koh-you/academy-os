@@ -43,7 +43,7 @@ export function createLessonJournalAbsenceAlimtalkSectionModel({
   students = []
 } = {}) {
   const absenceJobs = selectLessonManualAbsenceAlimtalkJobs({ notificationJobs: auditedJobs });
-  // 로스터 순서를 먼저 따르고, 로스터 밖 학생은 이름순으로 뒤에 붙인다.
+  // 명단(이름순) 순서를 먼저 따르고, 로스터 밖 학생은 이름순으로 뒤에 붙인다.
   const rosterOrderByStudentId = new Map(
     (Array.isArray(lessonStudents) ? lessonStudents : []).map((student, index) => [student?.studentId, index])
   );
@@ -81,12 +81,24 @@ export function createLessonJournalAbsenceAlimtalkSectionModel({
       studentName: resolveStudentName(job)
     }));
   const cancelableCount = rows.filter((row) => row.canCancel).length;
+  // 2026-09-25 · 출결 job 을 위 '취소/실패' 카드에서 뺐으므로, 실패는 이 구획이 직접 알린다.
+  // 그러지 않으면 학부모에게 못 나간 알림톡이 어느 화면에도 숫자로 남지 않는다.
+  const failedCount = rows.filter((row) => row.job?.status === "failed").length;
 
   return {
     cancelableCount,
+    failedCount,
     // 빈 구획은 렌더하지 않는다.
-    countLabel: `전체 ${rows.length}건 · 취소 가능 ${cancelableCount}건`,
-    description: "출결 저장이 예약한 학부모 결석 알림톡입니다. 출결을 바꿔도 이 예약은 자동으로 취소되지 않습니다.",
+    countLabel: [
+      `전체 ${rows.length}건`,
+      `취소 가능 ${cancelableCount}건`,
+      failedCount ? `실패 ${failedCount}건` : ""
+    ].filter(Boolean).join(" · "),
+    // 2026-09-25 · 취소할 수 있는 예약이 남아 있을 때만 "자동으로 취소되지 않는다" 고 경고한다.
+    // 전부 취소·발송 끝난 기록에까지 같은 경고를 붙이면 할 일이 남은 것처럼 읽힌다.
+    description: cancelableCount
+      ? "출결 저장이 예약한 학부모 결석 알림톡입니다. 출결을 바꿔도 이 예약은 자동으로 취소되지 않습니다."
+      : "이 수업의 출결 결석 알림톡 기록입니다.",
     rows,
     title: "출결 결석 알림톡",
     visible: rows.length > 0
