@@ -29,7 +29,8 @@ for (const openContract of [
   "onMouseEnter={revealFromHoverOrFocus}",
   "onMouseLeave={hideFromHoverOrFocus}",
   "onFocus={revealFromHoverOrFocus}",
-  "onBlur={hideFromHoverOrFocus}",
+  // 2026-09-25 · 포커스가 떠나면 클릭으로 고정한 설명도 닫는다(Tab 으로 넘어갔는데 말풍선이 남아 내용을 가리지 않게).
+  "onBlur={hideFromBlur}",
   "onClick={toggleFromClick}"
 ]) {
   assert.ok(helpTipSource.includes(openContract), `help tip must keep ${openContract}`);
@@ -40,6 +41,10 @@ assert.ok(helpTipSource.includes("function hideFromHoverOrFocus() {\r\n    if (p
   helpTipSource.includes("function hideFromHoverOrFocus() {\n    if (pinned) return;"),
 "pinned help tip must ignore hover/blur close");
 assert.ok(helpTipSource.includes("function toggleFromClick()"), "click must toggle the pinned help tip");
+assert.ok(
+  /function hideFromBlur\(\) \{\s*setPinned\(false\);/.test(helpTipSource),
+  "blur must unpin so a click-opened tip closes when focus leaves"
+);
 
 // Esc 와 바깥 클릭으로 닫는다. 리스너는 열렸을 때만 붙였다가 정리한다.
 for (const closeContract of [
@@ -55,6 +60,18 @@ for (const closeContract of [
 
 // 모달 안에서 열린 설명의 Esc 는 설명만 닫아야 한다(모달까지 닫히면 안 된다).
 assert.ok(helpTipSource.includes("event.stopImmediatePropagation()"), "Escape must not reach the surrounding modal");
+// 2026-09-25 · 다만 Esc 를 삼키는 것은 이 설명이 정말 열린 가장 안쪽 레이어일 때뿐이다.
+// hover 로만 떠 있는 설명까지 Esc 를 가로채면 Esc 로 닫는 다른 화면(인쇄 미리보기 등)이 멈춘다.
+assert.ok(
+  helpTipSource.includes("const ownsEscape = pinned || containerRef.current?.contains(document.activeElement);") &&
+    helpTipSource.includes("if (!ownsEscape) return;"),
+  "Escape may only be consumed by the tip that owns focus or is pinned"
+);
+// 잘림 보정은 스크롤바를 뺀 레이아웃 뷰포트를 기준으로 한다.
+assert.ok(
+  helpTipSource.includes("document.documentElement.clientWidth || window.innerWidth"),
+  "overflow clamp must measure the layout viewport"
+);
 assert.ok(
   modalSource.includes('document.querySelector(".overflowMenuList, .helpTipBubble-open")'),
   "common Modal must let an open help tip take Escape first"
@@ -75,7 +92,7 @@ assert.ok(helpTipCss.includes("max-width: min(320px, calc(100vw - 32px))"));
 assert.ok(helpTipCss.includes("white-space: normal"));
 for (const clampContract of [
   "const bounds = bubble.getBoundingClientRect();",
-  "bounds.right > window.innerWidth - margin",
+  "bounds.right > viewportWidth - margin",
   "bounds.left + nextShift < margin",
   "setShift(Math.round(nextShift));",
   "style={shift ? { marginLeft: `${shift}px` } : undefined}"
@@ -85,6 +102,11 @@ for (const clampContract of [
 
 // 터치 타깃은 보이는 원(24px)보다 넓게 ::before 로 확보한다.
 assert.ok(helpTipCss.includes("var(--academy-touch-target, 44px)"));
+// 2026-09-25 · App.css 의 640px 이하 전역 min-height 44px !important 가 트리거를 늘리지 않게 되돌린다.
+assert.ok(
+  /@media \(max-width: 640px\)[\s\S]*?\.helpTip \.helpTipTrigger \{[\s\S]*?min-height: 24px !important;/.test(helpTipCss),
+  "mobile must keep the 24px trigger despite the global touch-target rule"
+);
 
 // 애니메이션은 prefers-reduced-motion 을 존중한다.
 assert.ok(helpTipCss.includes("@media (prefers-reduced-motion: no-preference)"));

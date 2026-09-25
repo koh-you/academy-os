@@ -1297,9 +1297,7 @@ export function OverdueHomework({
           backdropClassName="studentPortalPreviewBackdrop"
           className="studentPortalPreviewModal"
           title="학생 화면 미리보기"
-          titleAdornment={(
-            <HelpTip label="학생 화면 미리보기" text="숙제현황에서 선택한 학생 포털 화면입니다." />
-          )}
+          subtitle="숙제현황에서 선택한 학생 포털 화면입니다."
           onClose={() => setStudentPreviewId("")}
         >
           <StudentPortalV2

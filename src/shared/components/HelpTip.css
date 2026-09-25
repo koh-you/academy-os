@@ -21,6 +21,14 @@
   width: 24px;
 }
 
+/* 2026-09-25 · App.css 의 640px 이하 전역 규칙이 button 에 min-height 44px !important 를 걸어
+   트리거가 세로로 늘어난다. 히트 영역은 아래 ::before 가 44px 로 따로 보장하므로 여기서 되돌린다. */
+@media (max-width: 640px) {
+  .helpTip .helpTipTrigger {
+    min-height: 24px !important;
+  }
+}
+
 .helpTip .helpTipTrigger::before {
   content: "";
   inset: 50% auto auto 50%;
