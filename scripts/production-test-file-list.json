@@ -443,6 +443,7 @@
   "scripts/test-problem-bank-route-registry.mjs",
   "scripts/test-problem-bank-store.mjs",
   "scripts/test-problem-bank-exam-model.mjs",
+  "scripts/test-problem-bank-folder-rules.mjs",
   "scripts/test-api-client-auth-header.mjs",
   "scripts/test-app-session-surface-selector-inventory.mjs",
   "scripts/test-app-view-change-plan-inventory.mjs",
