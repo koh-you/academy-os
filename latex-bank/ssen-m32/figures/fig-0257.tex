@@ -1,0 +1,36 @@
+% 0257(본책 50쪽) — 한 모서리 6 인 정육면체 ABCD-EFGH 를 세 꼭짓점 A·F·C 를 지나는 평면으로 자른 삼각뿔 B-AFC, 점 B 에서 면 AFC 에 내린 수선의 발 I(직각 표시), ∠FBI=x. 스캔 삽화(입체)를 TikZ 로 다시 그림. 답(k)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (F) at (0,0); \coordinate (G) at (1.4,0); \coordinate (C) at (1.4,1.4); \coordinate (B) at (0,1.4);
+  \coordinate (E) at (0.6,0.45); \coordinate (H) at (2.0,0.45); \coordinate (A) at (0.6,1.85); \coordinate (D) at (2.0,1.85);
+  \coordinate (I) at (0.67,1.08);
+  % 정육면체 면
+  \fill[gray!12] (B) -- (C) -- (D) -- (A) -- cycle;
+  \fill[gray!20] (C) -- (G) -- (H) -- (D) -- cycle;
+  % 삼각뿔 B-AFC
+  \fill[orange!35] (A) -- (F) -- (C) -- cycle;
+  \fill[orange!20] (A) -- (B) -- (C) -- cycle;
+  \fill[orange!20] (B) -- (F) -- (C) -- cycle;
+  \draw (F) -- (G) -- (C) -- (B) -- cycle;
+  \draw (B) -- (A) -- (D) -- (C);
+  \draw (G) -- (H) -- (D);
+  \draw[dashed, line width=0.4pt] (F) -- (E) -- (H);
+  \draw[dashed, line width=0.4pt] (E) -- (A);
+  \draw (A) -- (F);
+  \draw (A) -- (C);
+  \draw (F) -- (C);
+  \draw[dashed, line width=0.4pt] (B) -- (I);
+  \draw[line width=0.4pt] ($(I)+(0.1,0.02)$) -- ($(I)+(0.13,0.12)$) -- ($(I)+(0.03,0.15)$);
+  \draw[line width=0.4pt] ($(B)+(-90:0.3)$) arc[start angle=-90, end angle=-25, radius=0.3];
+  \node[font=\small] at (0.18,1.0) {$x$};
+  \draw[dashed, line width=0.4pt] (F) to[bend right=20] (G);
+  \node[font=\small] at (0.7,-0.3) {$6$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, above] at (D) {D};
+  \node[font=\small, below] at (0.62,0.43) {E};
+  \node[font=\small, below left] at (F) {F};
+  \node[font=\small, below right] at (G) {G};
+  \node[font=\small, right] at (H) {H};
+  \node[font=\small, right] at (0.68,1.02) {I};
+\end{tikzpicture}

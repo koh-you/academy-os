@@ -1,0 +1,39 @@
+% 0718(본책 128쪽) — 지수네 반 24명의 음악 실기 1차(가로)·2차(세로) 점수 산점도(격자 5점 · 눈금 10, 20, 30). 스캔 산점도를 TikZ 로 다시 그림(점 24개 원문 위치).
+\begin{tikzpicture}[line width=0.5pt]
+  \draw[gray!55, line width=0.25pt] (0,0) grid[xstep=0.3cm, ystep=0.3cm] (2.4,2.4);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (2.55,0);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (0,2.55);
+  \node[font=\scriptsize, below left=0pt, inner sep=1.5pt] at (0,0) {$0$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (0.6,0) {$10$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (1.2,0) {$20$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (1.8,0) {$30$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,0.6) {$10$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,1.2) {$20$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,1.8) {$30$};
+  \node[font=\scriptsize, anchor=north east, inner sep=1pt] at (2.55,-0.38) {1차(점)};
+  \node[font=\scriptsize, align=center, anchor=north east, inner sep=1pt] at (-0.42,2.55) {2\\차\\(점)};
+  \fill (0.3,1.2) circle (1.5pt);
+  \fill (0.3,0.6) circle (1.5pt);
+  \fill (0.6,1.8) circle (1.5pt);
+  \fill (0.6,1.5) circle (1.5pt);
+  \fill (0.6,0.9) circle (1.5pt);
+  \fill (0.6,0.3) circle (1.5pt);
+  \fill (0.9,1.8) circle (1.5pt);
+  \fill (0.9,1.5) circle (1.5pt);
+  \fill (0.9,0.9) circle (1.5pt);
+  \fill (0.9,0.6) circle (1.5pt);
+  \fill (0.9,0.3) circle (1.5pt);
+  \fill (1.2,1.2) circle (1.5pt);
+  \fill (1.2,0.9) circle (1.5pt);
+  \fill (1.5,2.1) circle (1.5pt);
+  \fill (1.5,1.8) circle (1.5pt);
+  \fill (1.5,1.5) circle (1.5pt);
+  \fill (1.5,0.9) circle (1.5pt);
+  \fill (1.5,0.6) circle (1.5pt);
+  \fill (1.8,2.1) circle (1.5pt);
+  \fill (1.8,1.5) circle (1.5pt);
+  \fill (1.8,1.2) circle (1.5pt);
+  \fill (2.1,2.1) circle (1.5pt);
+  \fill (2.1,1.8) circle (1.5pt);
+  \fill (2.1,0.9) circle (1.5pt);
+\end{tikzpicture}

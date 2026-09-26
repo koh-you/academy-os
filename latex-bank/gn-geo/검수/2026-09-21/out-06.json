@@ -1,0 +1,8 @@
+{ "range": "141-290~171-348", "checked": 68, "ok": 63,
+  "findings": [
+    { "id": "146-293", "severity": "yellow", "where": "figure", "note": "격자 위 벡터 a~i 그림(fig-146-293.png · 631px 폭)이 본문 글자 대비 원본의 절반 정도로 축소되어 격자 칸 수·방향 판독이 어려움(내용은 일치)", "fix": "figure_layout 을 \"below\" 로 두어 원래 크기로 놓기" },
+    { "id": "154-311", "severity": "yellow", "where": "layout", "note": "첫 줄이 「사 각 형 ABCD 와 임 의 의 점 O 에 대 하 여」처럼 글자 사이가 크게 벌어짐 — 긴 벡터 등식이 줄 끝에서 못 끊겨 생긴 늘어짐(내용은 일치)", "fix": "등식 $\\overrightarrow{\\pt{OA}}+\\overrightarrow{\\pt{OC}}=\\overrightarrow{\\pt{OB}}+\\overrightarrow{\\pt{OD}}$ 를 \\par\\smallskip\\centerline{…}\\par\\smallskip\\noindent 로 따로 두기" },
+    { "id": "158-314", "severity": "red", "where": "figure", "note": "원본은 소문항 (1) 2a, (2) 3b, (3) 2a+3b, (4) −2a+3b 아래마다 답을 그릴 빈 격자(5×4, 5×4, 7×5, 7×5)가 있는데 조판본에는 오른쪽 a, b 그림(fig-158-314.png)만 있고 빈 격자 4개가 없음. 기존 fig-158-314-2~-5 는 「(3) 2a+3b」 라벨이 섞이거나 격자 하나만 담겨 그대로 쓰기 어려움", "fix": "빈 격자 4개(라벨 제외)를 다시 크롭해 소문항마다 격자를 놓거나 4개 격자를 한 장으로 figure_extra 에 추가(크롭 필요 · 확인 필요)" },
+    { "id": "166-341", "severity": "yellow", "where": "layout", "note": "\\centerline 등식과 「를 만족시키는 …」 줄이 오른쪽 그림 아래로 밀려 첫 줄 「오른쪽 그림의 정육면체에서」와 세 줄 가까이 떨어짐(내용은 일치)", "fix": "\\par\\smallskip\\centerline{…}\\par\\smallskip\\noindent 를 빼고 등식을 본문에 이어 쓰기, 또는 figure_layout \"below\"" },
+    { "id": "166-342", "severity": "yellow", "where": "layout", "note": "\\centerline 등식과 「이다. 이때 …」 줄이 오른쪽 그림 아래로 밀려 「정오각형 ABCDE에서」와 크게 떨어지고 등식이 그림 폭까지 포함한 전체 폭 기준으로 가운데 정렬됨(내용은 일치)", "fix": "\\par\\smallskip\\centerline{…}\\par\\smallskip\\noindent 를 빼고 등식을 본문에 이어 쓰기, 또는 figure_layout \"below\"" }
+  ] }

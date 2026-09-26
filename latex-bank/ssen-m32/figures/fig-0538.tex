@@ -1,0 +1,16 @@
+% 0538(본책 97쪽) — 원에 내접하는 □ABCD, P=AB∩CD(왼쪽 위), Q=AD∩BC(왼쪽 아래), ∠C(색칠). 다시 그림.
+\begin{tikzpicture}[scale=1.18, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.766,1.830) -- (-0.843,-0.707);
+  \draw (-1.766,1.830) -- (0.890,-0.647);
+  \draw (-1.439,-0.728) -- (-0.707,0.843);
+  \draw (-1.439,-0.728) -- (0.890,-0.647);
+  \fill[green!15] (0.890,-0.647) -- (0.714,-0.483) arc[start angle=137.000, end angle=182.000, radius=0.240] -- cycle;
+  \draw[line width=0.4pt] (0.714,-0.483) arc[start angle=137.000, end angle=182.000, radius=0.240];
+  \node[font=\small, inner sep=1.5pt] at (-1.966,1.830) {P};
+  \node[font=\small, inner sep=1.5pt] at (-1.639,-0.728) {Q};
+  \node[font=\small, inner sep=1.5pt] at (-1.300,0.000) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.843,-0.907) {B};
+  \node[font=\small, inner sep=1.5pt] at (1.043,-0.775) {C};
+  \node[font=\small, inner sep=1.5pt] at (-0.742,1.040) {D};
+\end{tikzpicture}

@@ -1,0 +1,17 @@
+% 0375(본책 70쪽) — 이등변삼각형 ABC(AC=8 cm, AB=BC=2√6 cm)의 외접원 O(색칠). 답(넓이)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \fill[green!12] (0.000,0.000) circle (1.273);
+  \draw (0.000,0.000) circle (1.273);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw (-1.200,-0.424) -- (0.000,-1.273);
+  \draw (0.000,-1.273) -- (1.200,-0.424);
+  \draw[dashed, line width=0.4pt] (-1.200,-0.424) -- (1.200,-0.424);
+  \draw[line width=0.4pt] (-0.640,-0.906) -- (-0.560,-0.791);
+  \draw[line width=0.4pt] (0.640,-0.906) -- (0.560,-0.791);
+  \node[font=\small, inner sep=1.5pt] at (0.000,-0.244) {$8\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-1.020,-0.999) {$2\sqrt{6}\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-1.360,-0.424) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.360,-0.424) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.000,-1.433) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.000,0.200) {O};
+\end{tikzpicture}

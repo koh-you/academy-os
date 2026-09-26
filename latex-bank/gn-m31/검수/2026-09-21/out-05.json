@@ -1,0 +1,5 @@
+{ "range": "ids-05 (17-h2, 18-c3~18-h4, 171-01~186-e2)", "checked": 72, "ok": 70,
+  "findings": [
+    { "id": "177-01", "severity": "yellow", "where": "layout", "note": "표(figure_extra fig-177-01-2)가 소문항 (1) 위에 놓여 「아래 표를 완성하고」와 어긋남 (같은 형식의 171-01·171-03 은 (1) 문장 뒤에 표)", "fix": "figure_extra 를 빼고 171-01 처럼 subs[0] 끝에 \\par\\smallskip\\noindent\\includegraphics[width=…]{figures/fig-177-01-2.png} 를 붙임" },
+    { "id": "177-04", "severity": "yellow", "where": "layout", "note": "exprbox 둘째 줄 「p□0, q□0」이 줄 끝에서 끊겨 q□0 가 다음 줄로 밀림", "fix": "「제4사분면 위에 있으므로」 뒤 \\quad 를 \\; 로 줄이거나 $p\\;\\blank\\;0$, $q\\;\\blank\\;0$ 을 \\mbox{} 로 묶기" }
+  ] }

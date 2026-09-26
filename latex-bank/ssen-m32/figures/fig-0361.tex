@@ -1,0 +1,23 @@
+% 0361(본책 68쪽) — □ABCD(∠A=∠B=90°)의 내접원 O(접점 E, F, G, H), AB=8, BC=12, AD=6, DG=2 cm. 답(CG)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,1.600) -- (0.000,0.000) -- (2.400,0.000) -- (1.200,1.600) -- cycle;
+  \draw (0.800,0.800) circle (0.800);
+  \fill (0.800,0.800) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (0.000,1.600) to[bend left=25] (1.200,1.600);
+  \node[font=\small, inner sep=1.5pt] at (0.600,1.900) {$6\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (1.200,1.600) to[bend left=30] (1.440,1.280);
+  \node[font=\small, inner sep=1.5pt] at (1.750,1.700) {$2\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.000,1.600) to[bend right=20] (0.000,0.000);
+  \node[font=\small, inner sep=1.5pt] at (-0.450,0.800) {$8\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend right=15] (2.400,0.000);
+  \node[font=\small, inner sep=1.5pt] at (1.200,-0.300) {$12\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-0.120,1.720) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.120,-0.120) {B};
+  \node[font=\small, inner sep=1.5pt] at (2.560,-0.058) {C};
+  \node[font=\small, inner sep=1.5pt] at (1.170,1.767) {D};
+  \node[font=\small, inner sep=1.5pt] at (0.160,0.800) {E};
+  \node[font=\small, inner sep=1.5pt] at (0.800,0.160) {F};
+  \node[font=\small, inner sep=1.5pt] at (1.579,1.360) {G};
+  \node[font=\small, inner sep=1.5pt] at (0.800,1.440) {H};
+  \node[font=\small, inner sep=1.5pt] at (0.980,0.800) {O};
+\end{tikzpicture}

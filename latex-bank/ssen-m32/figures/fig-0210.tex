@@ -1,0 +1,18 @@
+% 0210(본책 42쪽) — △ABC(∠B=45°, BC=6 cm), 꼭짓점 A 에서 BC 의 연장선에 내린 수선의 발 H(직각 표시), ∠ACH=60°. 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (0.9,0); \coordinate (H) at (2.13,0); \coordinate (A) at (2.13,2.13);
+  \fill[green!20] (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (B) -- (H) -- cycle;
+  \draw (A) -- (C);
+  \draw[line width=0.4pt] (2.13,0.16) -- (1.97,0.16) -- (1.97,0);
+  \draw[line width=0.4pt] (0.35,0) arc[start angle=0, end angle=45, radius=0.35];
+  \node[font=\small] at (0.55,0.2) {$45^\circ$};
+  \draw[line width=0.4pt] (1.2,0) arc[start angle=0, end angle=60, radius=0.3];
+  \node[font=\small] at (1.5,0.22) {$60^\circ$};
+  \draw[dashed, line width=0.4pt] (B) to[bend right=25] (C);
+  \node[font=\small] at (0.45,-0.34) {$6\,\mathrm{cm}$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, below] at (0.95,-0.02) {C};
+  \node[font=\small, right] at (H) {H};
+\end{tikzpicture}

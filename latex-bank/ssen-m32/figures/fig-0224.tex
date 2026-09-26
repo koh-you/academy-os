@@ -1,0 +1,22 @@
+% 0224(본책 44쪽) — 폭 8 cm 인 직사각형 종이를 AC 를 접는 선으로 접은 모양(접기 전 자리는 파선), ∠ABC=135°. 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (0.6,0.8); \coordinate (B) at (1.4,0); \coordinate (C) at (2.53,0);
+  \coordinate (P) at (2.44,-1.04); \coordinate (Q) at (3.0,-0.47);
+  % 접힌 뒤 남은 부분
+  \fill[cyan!20] (0,0) -- (0,0.8) -- (A) -- (C) -- cycle;
+  % 접힌 부분
+  \fill[cyan!45] (A) -- (P) -- (Q) -- (C) -- cycle;
+  \draw (0,0) -- (0,0.8) -- (A) -- (C) -- cycle;
+  \draw (A) -- (P) -- (Q) -- (C);
+  % 접기 전 자리
+  \draw[dashed, line width=0.4pt] (A) -- (3.2,0.8) -- (3.2,0) -- (C);
+  \draw[dashed, line width=0.4pt] (0,0.8) arc[start angle=90, end angle=270, x radius=0.12, y radius=0.4];
+  % 135°(B)
+  \draw[line width=0.4pt] (1.62,0) arc[start angle=0, end angle=135, radius=0.22];
+  \node[font=\small] at (2.15,0.55) {$135^\circ$};
+  \draw[line width=0.3pt] (1.98,0.45) -- (1.62,0.22);
+  \node[font=\small, left] at (0,0.4) {$8\,\mathrm{cm}$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, below] at (1.36,-0.02) {B};
+  \node[font=\small, above right] at (2.5,0.02) {C};
+\end{tikzpicture}

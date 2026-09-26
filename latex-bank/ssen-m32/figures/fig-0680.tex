@@ -1,0 +1,39 @@
+% 0680(본책 122쪽) — 두 자료 A, B 의 분포 막대그래프(A: a·2a·3a 의 개수 2·1·2, B: b·2b·3b 의 개수 4·2·4 · 세로축 개수(개) · 가로축 변량). 스캔 그래프를 TikZ 로 다시 그림. 답(b/a)은 적지 않는다.
+\begin{tikzpicture}[x=0.55cm, y=0.4cm, line width=0.6pt]
+  % [자료 A]
+  \begin{scope}
+    \draw[->, >=stealth, line width=0.7pt] (0,0) -- (4.6,0);
+    \draw[->, >=stealth, line width=0.7pt] (0,0) -- (0,5.2);
+    \foreach \x/\h/\l in {1/2/{$a$}, 2/1/{$2a$}, 3/2/{$3a$}} {
+      \fill[orange!45] (\x-0.3,0) rectangle (\x+0.3,\h);
+      \draw[line width=0.4pt] (\x-0.3,0) rectangle (\x+0.3,\h);
+      \node[font=\footnotesize, below=1pt] at (\x,0) {\l};
+    }
+    \foreach \y in {1,2} {
+      \draw[dashed, line width=0.3pt] (0,\y) -- (2.7,\y);
+      \node[font=\footnotesize, left=1pt] at (0,\y) {$\y$};
+    }
+    \node[font=\footnotesize, below left=1pt] at (0,0) {$0$};
+    \node[font=\footnotesize, below=1pt] at (4.4,0) {변량};
+    \node[font=\footnotesize, align=center, anchor=south east, inner sep=1pt] at (0.4,5.3) {개\\수\\(개)};
+    \node[font=\small] at (2,-2.2) {[자료 A]};
+  \end{scope}
+  % [자료 B]
+  \begin{scope}[xshift=4.2cm]
+    \draw[->, >=stealth, line width=0.7pt] (0,0) -- (4.6,0);
+    \draw[->, >=stealth, line width=0.7pt] (0,0) -- (0,5.2);
+    \foreach \x/\h/\l in {1/4/{$b$}, 2/2/{$2b$}, 3/4/{$3b$}} {
+      \fill[orange!45] (\x-0.3,0) rectangle (\x+0.3,\h);
+      \draw[line width=0.4pt] (\x-0.3,0) rectangle (\x+0.3,\h);
+      \node[font=\footnotesize, below=1pt] at (\x,0) {\l};
+    }
+    \foreach \y in {2,4} {
+      \draw[dashed, line width=0.3pt] (0,\y) -- (2.7,\y);
+      \node[font=\footnotesize, left=1pt] at (0,\y) {$\y$};
+    }
+    \node[font=\footnotesize, below left=1pt] at (0,0) {$0$};
+    \node[font=\footnotesize, below=1pt] at (4.4,0) {변량};
+    \node[font=\footnotesize, align=center, anchor=south east, inner sep=1pt] at (0.4,5.3) {개\\수\\(개)};
+    \node[font=\small] at (2,-2.2) {[자료 B]};
+  \end{scope}
+\end{tikzpicture}

@@ -1,0 +1,7 @@
+{ "range": "0526~0600", "checked": 75, "ok": 71,
+  "findings": [
+    { "id": "0579", "severity": "red", "where": "figure", "note": "오른쪽 표 크롭(fig-0579-2.png, 137pt)이 side minipage 폭을 넘어 낱장 오른쪽 가장자리에서 3반 열(7.3, 1)이 통째로 잘림. 원문 표는 1반·2반·3반 3열이라 조판본에 3반 값이 없음", "fix": "figure_layout 을 \"below\" 로 (현재 build.mjs 는 below 에서 발문→표→보기 순서로 놓으므로 원문 순서 유지). 또는 build.mjs side 그림 폭을 minipage 폭 이하로 제한" },
+    { "id": "0566", "severity": "yellow", "where": "figure", "note": "오른쪽 표 크롭(128.9pt)이 side 폭을 약간 넘어 B열 오른쪽 여백이 낱장 가장자리에서 잘림(값 240·√5 는 보임)", "fix": "build.mjs side 그림 폭을 minipage 폭 이하로 제한하거나 figure_layout \"below\"" },
+    { "id": "0550", "severity": "yellow", "where": "layout", "note": "원문은 표 → 보기 상자 순서인데 review 조판본은 보기 상자 → 표. 표·보기 값 자체는 일치. 작업 폴더 build.mjs(18:27 수정, below 그림을 발문 뒤·보기 앞에 놓음)로 재렌더하면 해소될 것으로 보임 — 재렌더 확인" },
+    { "id": "0564", "severity": "yellow", "where": "layout", "note": "원문은 표 → 보기 상자 순서인데 review 조판본은 보기 상자 → 표. 표 값(13,13,8,a,10 / 9,5,b,18,12)·보기는 일치. 0550 과 같이 build.mjs 재렌더로 확인" }
+  ] }

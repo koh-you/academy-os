@@ -1,0 +1,17 @@
+% 0362(본책 68쪽) — 원 O 에 외접하는 □ABCD(접점 P, Q, R, S), AD=7 cm. 답(BP+CR)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.634,1.659) -- (-0.020,0.040) -- (1.842,-0.025) -- (2.058,1.509) -- cycle;
+  \draw (1.150,0.800) circle (0.800);
+  \fill (1.150,0.800) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (0.634,1.659) to[bend left=25] (2.058,1.509);
+  \node[font=\small, inner sep=1.5pt] at (1.375,1.862) {$7\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.549,1.806) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.179,-0.018) {B};
+  \node[font=\small, inner sep=1.5pt] at (2.002,-0.083) {C};
+  \node[font=\small, inner sep=1.5pt] at (2.188,1.618) {D};
+  \node[font=\small, inner sep=1.5pt] at (0.248,1.100) {P};
+  \node[font=\small, inner sep=1.5pt] at (1.122,-0.160) {Q};
+  \node[font=\small, inner sep=1.5pt] at (2.102,0.689) {R};
+  \node[font=\small, inner sep=1.5pt] at (1.234,1.436) {S};
+  \node[font=\small, inner sep=1.5pt] at (1.150,0.600) {O};
+\end{tikzpicture}

@@ -1,0 +1,23 @@
+{ "range": "171-349~194-404 (ids-07, 68문항)", "checked": 68, "ok": 49,
+  "findings": [
+    { "id": "173-352", "severity": "yellow", "where": "layout", "note": "그림 옆 좁은 단에서 「삼각형 ABC」/「에서」, 「점 G」/「는」 가 줄 끝에서 갈라짐", "fix": "body 의 $\\pt{ABC}$에서 · $\\pt{G}$는 을 \\mbox{} 로 묶기" },
+    { "id": "174-e4", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 사이가 크게 벌어짐(둘째 줄 수식 2PA+5PB+PC=BC 가 길어 줄 나눔 실패)", "fix": "수식을 \\par\\centerline 로 별도 줄에 두거나 단락에 \\sloppy 적용" },
+    { "id": "176-359", "severity": "yellow", "where": "layout", "note": "그림 옆 단에서 「삼각형 OAB」/「에서」, 「$\\vec{b}$」/「로」 가 줄 끝에서 갈라짐", "fix": "body 의 $\\pt{OAB}$에서 · $\\vec{b}$로 를 \\mbox{} 로 묶기" },
+    { "id": "180-362", "severity": "yellow", "where": "subs", "note": "⑴ 의 (단, e1=(1,0), e2=(0,1)) 조건이 줄 끝에서 갈라지고 앞 줄 간격이 벌어짐", "fix": "subs[0] 의 \\cond 앞에 줄바꿈(\\par 또는 \\\\)을 넣어 조건을 한 줄에" },
+    { "id": "181-367", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 간격이 벌어지고 「벡터 $\\vec{x}$」/「의」 가 줄 끝에서 갈라짐", "fix": "$\\vec{x}$의 를 \\mbox{} 로 묶고 긴 수식은 별도 줄 또는 \\sloppy" },
+    { "id": "181-368", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 간격이 크게 벌어짐(둘째 줄 수식 3(−a+b−2c)+2(2a−2b+c) 가 길어 줄 나눔 실패)", "fix": "「일 때,」 뒤에서 \\par 로 줄을 나누거나 \\sloppy" },
+    { "id": "181-369", "severity": "yellow", "where": "body", "note": "절댓값 안 첫 부호 −가 이항 연산자 간격으로 벌어짐(| − ta⃗ + b⃗|)", "fix": "body 의 $|-t\\vec{a}+\\vec{b}|$ 를 $|{-t}\\vec{a}+\\vec{b}|$ 또는 \\lvert…\\rvert 로" },
+    { "id": "182-370", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 간격이 벌어짐(둘째 줄 c=2a+3b 앞에서 줄 나눔 실패)" },
+    { "id": "184-e9", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 간격이 크게 벌어짐(둘째 줄 |PA+PB+PC|=6 이 길어 줄 나눔 실패)", "fix": "「에 대하여」 뒤에서 \\par 로 줄을 나누거나 \\sloppy" },
+    { "id": "184-375", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 간격이 크게 벌어짐(둘째 줄 |PA+PB+PC|=2 가 길어 줄 나눔 실패)", "fix": "「에 대하여」 뒤에서 \\par 로 줄을 나누거나 \\sloppy" },
+    { "id": "185-381", "severity": "yellow", "where": "layout", "note": "「$x$」/「의」 가 줄 끝에서 갈라짐(x / 의 값을)", "fix": "body 의 $x$의 를 \\mbox{$x$의} 로" },
+    { "id": "186-384", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 간격이 크게 벌어짐(둘째 줄 PA+3PB−PC=2AC 가 길어 줄 나눔 실패)", "fix": "「에 대하여」 뒤에서 \\par 로 줄을 나누거나 \\sloppy" },
+    { "id": "186-387", "severity": "yellow", "where": "layout", "note": "「점 P」/「에 대하여」 가 줄 끝에서 갈라짐", "fix": "body 의 점~$\\pt{P}$에 를 \\mbox{} 로 묶기" },
+    { "id": "191-e10", "severity": "yellow", "where": "subs", "note": "⑴ 첫 줄 글자 간격이 벌어짐(둘째 줄 2a−3x=3b−4x 앞에서 줄 나눔 실패)" },
+    { "id": "191-393", "severity": "yellow", "where": "layout", "note": "「$3\\vec{b}-\\vec{x}$」/「를」 가 줄 끝에서 갈라짐", "fix": "body 의 …$3\\vec{b}-\\vec{x}$를 을 \\mbox{} 로 묶기" },
+    { "id": "192-e11", "severity": "yellow", "where": "layout", "note": "첫·둘째 줄 글자 간격이 벌어짐(네 벡터 성분 나열이 길어 줄 나눔이 어색)" },
+    { "id": "192-395", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 간격이 크게 벌어짐(네 벡터 성분 나열이 길어 줄 나눔 실패)" },
+    { "id": "193-399", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 간격이 크게 벌어짐(둘째 줄 |PA+PB+PC|=6 이 길어 줄 나눔 실패)", "fix": "「에 대하여」 뒤에서 \\par 로 줄을 나누거나 \\sloppy" },
+    { "id": "194-403", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 간격이 크게 벌어짐(둘째 줄 pa+qb+rc=(2,4,−2) 앞에서 줄 나눔 실패)" }
+  ],
+  "note": "red 없음. 그림(171-349·172-e2·172-351·173-e3·173-352·173-353·176-357·176-359·180-362·186-382) 모두 원본과 일치. 연습문제 여백 힌트(176-356 그림 · 358·382·387·400·403·404 문구)와 예제 설명·풀이는 규약대로 미전사. STEP 띠(176: 356~358 STEP 1 · 359~360 STEP 2 · 361 실력 UP / 186: 382~385 STEP 2 · 386~387 실력 UP / 194: 400~404 STEP 1)도 쪽 이미지와 일치. yellow 는 전부 좁은 단에서 긴 인라인 수식이 줄 끝에 걸려 앞 줄이 늘어나거나 수식과 조사가 갈라진 것으로, 개별 수정보다 조판 템플릿에 \\sloppy 또는 \\emergencystretch 를 주는 편이 한 번에 해결됨." }

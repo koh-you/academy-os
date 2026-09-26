@@ -1,0 +1,19 @@
+% 0560(본책 101쪽) — 원에 내접하는 오각형 ABCDE, ∠ABC=128°, ∠AED=100°, 접선 CT(접점 C), ∠DCT 표시. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-0.800,-1.000) -- (1.200,-1.000);
+  \draw (-0.970,0.242) -- (-0.766,-0.643) -- (-0.000,-1.000) -- (0.995,0.105) -- (0.000,1.000) -- cycle;
+  \fill (1.000,-1.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.585,-0.727) arc[start angle=-25.000, end angle=103.000, radius=0.200];
+  \node[font=\small, inner sep=1pt] at (-0.416,-0.360) {$128^\circ$};
+  \draw[line width=0.4pt] (-0.158,0.877) arc[start angle=-142.000, end angle=-42.000, radius=0.200];
+  \node[font=\small, inner sep=1pt] at (-0.015,0.580) {$100^\circ$};
+  \fill[yellow!35] (-0.000,-1.000) -- ++(0.000:0.200) arc[start angle=0.000, end angle=48.000, radius=0.200] -- cycle;
+  \draw[line width=0.4pt] (0.200,-1.000) arc[start angle=0.000, end angle=48.000, radius=0.200];
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-0.970,0.242) {A};
+  \node[font=\small, anchor=north east, inner sep=1.5pt] at (-0.786,-0.663) {B};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (-0.000,-1.060) {C};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.995,0.105) {D};
+  \node[font=\small, anchor=south, inner sep=1.5pt] at (0.000,1.000) {E};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (1.000,-1.060) {T};
+\end{tikzpicture}

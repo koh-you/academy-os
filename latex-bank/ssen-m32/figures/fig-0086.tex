@@ -1,0 +1,20 @@
+% 0086(본책 20쪽) — △ABC(∠B=45°·∠C=60°), AD⊥BC, AB=6√2 파선 호. 라벨: A·B·C·D·45°·60°·6√2, 직각 표시 D. 스캔 삽화를 TikZ 로 다시 그림. 답(AC)은 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (D) at (1.8,0); \coordinate (C) at (2.839,0); \coordinate (A) at (1.8,1.8);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (D);
+  % 직각 표시(D)
+  \draw[line width=0.4pt] (1.8,0.16) -- (1.96,0.16) -- (1.96,0);
+  % 각
+  \draw[line width=0.4pt] (0.4,0) arc[start angle=0, end angle=45, radius=0.4cm];
+  \node[font=\small, anchor=west, inner sep=1pt] at (0.42,0.2) {$45^\circ$};
+  \draw[line width=0.4pt] ($(C)+(120:0.35)$) arc[start angle=120, end angle=180, radius=0.35cm];
+  \node[font=\small, anchor=east, inner sep=1pt] at (2.5,0.3) {$60^\circ$};
+  % 6√2(AB 파선 호)
+  \draw[dashed, line width=0.4pt] (B) to[bend left=25] (A);
+  \node[font=\small] at (0.5,1.2) {$6\sqrt{2}$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, below] at (D) {D};
+\end{tikzpicture}

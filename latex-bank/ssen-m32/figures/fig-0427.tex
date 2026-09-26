@@ -1,0 +1,19 @@
+% 0427(본책 78쪽) — 점 P 에서 원 O 에 그은 두 접선의 접점 A, B, 원 위의 점 C, 현 CA·CB, ∠P=36°, ∠ACB=x. 답(x)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.2, line width=0.6pt]
+  \draw (0.000,0.000) circle (0.900);
+  \draw (-2.912,0.000) -- (0.055,0.964);
+  \draw (-2.912,0.000) -- (0.055,-0.964);
+  \draw (0.900,0.000) -- (-0.278,0.856);
+  \draw (0.900,0.000) -- (-0.278,-0.856);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-2.484,-0.139) arc (342.0:378.0:0.450);
+  \fill[green!15] (0.900,0.000) -- (0.673,0.165) arc (144.0:216.0:0.280) -- cycle;
+  \draw[line width=0.4pt] (0.673,0.165) arc (144.0:216.0:0.280);
+  \node[font=\small, inner sep=0.5pt] at (-2.062,-0.000) {$36^\circ$};
+  \node[font=\small, inner sep=0.5pt] at (0.440,0.000) {$x$};
+  \node[font=\small, inner sep=1.5pt] at (-0.278,1.056) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.278,-1.056) {B};
+  \node[font=\small, inner sep=1.5pt] at (1.100,0.000) {C};
+  \node[font=\small, inner sep=1.5pt] at (-3.112,0.000) {P};
+  \node[font=\small, inner sep=1.5pt] at (-0.200,0.000) {O};
+\end{tikzpicture}

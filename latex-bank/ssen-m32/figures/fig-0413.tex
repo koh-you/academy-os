@@ -1,0 +1,23 @@
+% 0413(본책 75쪽) — 원, 현 BC·AC·AD, ∠CAD=50°, ∠BCA=20°, 호 AB=10 cm, 호 CD=x cm. 답(x)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.901,0.631) -- (-0.191,-1.083);
+  \draw (0.000,1.100) -- (-0.191,-1.083);
+  \draw (0.000,1.100) -- (1.063,0.285);
+  \draw[line width=0.4pt] (-0.035,0.702) arc (265.0:322.5:0.400);
+  \draw[line width=0.4pt] (-0.152,-0.635) arc (85.0:112.5:0.450);
+  \draw[dashed, line width=0.4pt] (0.000,1.280) arc (90.0:145.0:1.280);
+  \draw[line width=0.4pt] (0.000,1.160) -- (0.000,1.340);
+  \draw[line width=0.4pt] (-0.950,0.665) -- (-1.098,0.769);
+  \draw[dashed, line width=0.4pt] (-0.222,-1.261) arc (260.0:375.0:1.280);
+  \draw[line width=0.4pt] (-0.201,-1.142) -- (-0.233,-1.320);
+  \draw[line width=0.4pt] (1.120,0.300) -- (1.294,0.347);
+  \node[font=\small, inner sep=0.5pt] at (0.282,0.459) {$50^\circ$};
+  \node[font=\small, inner sep=0.5pt] at (-0.310,-0.312) {$20^\circ$};
+  \node[font=\small, inner sep=0.5pt] at (-0.776,1.490) {$10\,\mathrm{cm}$};
+  \node[font=\small, inner sep=0.5pt] at (1.194,-1.094) {$x\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.000,1.300) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.065,0.746) {B};
+  \node[font=\small, inner sep=1.5pt] at (-0.226,-1.280) {C};
+  \node[font=\small, inner sep=1.5pt] at (1.256,0.336) {D};
+\end{tikzpicture}

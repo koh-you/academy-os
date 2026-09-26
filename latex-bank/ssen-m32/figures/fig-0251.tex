@@ -1,0 +1,14 @@
+% 0251(본책 49쪽) — 반지름 8 cm 인 원 O 에 내접하는 △ABC(호 AB:BC:CA=3:5:4), OC 파선(8 cm). 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)·중심각은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (O) at (0,0); \coordinate (A) at (0,1.1); \coordinate (B) at (-1.1,0); \coordinate (C) at (0.953,-0.55);
+  \fill[green!25] (A) -- (B) -- (C) -- cycle;
+  \draw (O) circle (1.1);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \fill (O) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (O) -- (C);
+  \node[font=\small] at (0.25,-0.55) {$8\,\mathrm{cm}$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, above] at (O) {O};
+\end{tikzpicture}

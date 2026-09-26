@@ -1,0 +1,19 @@
+% 0549(본책 99쪽) — 원, 점 P 에서 그은 접선의 접점 T, 직선 PAB, ∠P=41°, ∠ATP=33°, ∠x(∠ATB). 스캔 삽화를 TikZ 로 다시 그림. 답(x)은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-1.696,-1.000) -- (1.100,-1.000);
+  \draw (-1.596,-1.000) -- (0.530,0.848);
+  \draw (-0.000,-1.000) -- (-0.914,-0.407);
+  \draw (-0.000,-1.000) -- (0.530,0.848);
+  \draw[line width=0.4pt] (-1.296,-1.000) arc[start angle=0.000, end angle=41.000, radius=0.300];
+  \node[font=\small, inner sep=1pt] at (-1.081,-0.807) {$41^\circ$};
+  \draw[line width=0.4pt] (-0.294,-0.809) arc[start angle=147.000, end angle=180.000, radius=0.350];
+  \node[font=\small, inner sep=1pt] at (-0.527,-0.844) {$33^\circ$};
+  \fill[yellow!35] (-0.000,-1.000) -- ++(74.000:0.220) arc[start angle=74.000, end angle=147.000, radius=0.220] -- cycle;
+  \draw[line width=0.4pt] (0.061,-0.789) arc[start angle=74.000, end angle=147.000, radius=0.220];
+  \node[font=\small, inner sep=1pt] at (-0.140,-0.625) {$x$};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-1.646,-1.000) {P};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (0.050,-1.050) {T};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-0.934,-0.387) {A};
+  \node[font=\small, anchor=south west, inner sep=1.5pt] at (0.530,0.848) {B};
+\end{tikzpicture}

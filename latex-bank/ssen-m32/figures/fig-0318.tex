@@ -1,0 +1,25 @@
+% 0318(본책 60쪽) — △ABC 의 외접원 O(원문 주황 색칠), OD=OE=OF(D∈AB, E∈BC, F∈CA), AB=6 cm. 답(원의 넓이)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \fill[orange!30] (0.000,0.000) circle (1.100);
+  \draw (0.000,0.000) circle (1.100);
+  \draw (0.000,1.100) -- (-0.953,-0.550) -- (0.953,-0.550) -- (0.000,1.100);
+  \draw (0.000,0.000) -- (-0.476,0.275);
+  \draw (0.000,0.000) -- (-0.000,-0.550);
+  \draw (0.000,0.000) -- (0.476,0.275);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.416,0.379) -- (-0.312,0.319) -- (-0.372,0.215);
+  \draw[line width=0.4pt] (0.120,-0.550) -- (0.120,-0.430) -- (-0.000,-0.430);
+  \draw[line width=0.4pt] (0.416,0.379) -- (0.312,0.319) -- (0.372,0.215);
+  \draw[line width=0.4pt] (-0.208,0.189) -- (-0.268,0.086);
+  \draw[line width=0.4pt] (-0.060,-0.275) -- (0.060,-0.275);
+  \draw[line width=0.4pt] (0.268,0.086) -- (0.208,0.189);
+  \draw[dashed, line width=0.4pt] (0.000,1.100) to[bend right=25] (-0.953,-0.550);
+  \node[font=\small, inner sep=1.5pt] at (-1.050,0.750) {$6\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.000,1.260) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.093,-0.630) {B};
+  \node[font=\small, inner sep=1.5pt] at (1.093,-0.630) {C};
+  \node[font=\small, inner sep=1.5pt] at (-0.636,0.295) {D};
+  \node[font=\small, inner sep=1.5pt] at (0.636,0.295) {F};
+  \node[font=\small, inner sep=1.5pt] at (-0.000,-0.730) {E};
+  \node[font=\small, inner sep=1.5pt] at (-0.100,-0.150) {O};
+\end{tikzpicture}

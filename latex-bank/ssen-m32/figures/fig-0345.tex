@@ -1,0 +1,22 @@
+% 0345(본책 65쪽) — 점 A 에서 원 O 에 그은 두 접선의 접점 E, F, BC 가 원 O 에 접함, ∠EAF=60°, AO=8 cm. 답(△ABC 둘레)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-1.732,-1.000) -- (-0.641,0.890);
+  \draw (-1.732,-1.000) -- (0.500,-1.000);
+  \draw (-1.073,0.141) -- (-0.767,-1.000);
+  \draw (0.000,0.000) -- (0.000,-1.000);
+  \draw (0.000,0.000) -- (-0.866,0.500);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (-1.732,-1.000) -- (0.000,0.000);
+  \draw[line width=0.4pt] (-0.100,-1.000) -- (-0.100,-0.900) -- (0.000,-0.900);
+  \draw[line width=0.4pt] (-0.916,0.413) -- (-0.829,0.363) -- (-0.779,0.450);
+  \draw[line width=0.4pt] (-1.382,-1.000) arc (0.000:60.001:0.350);
+  \node[font=\small, inner sep=1.5pt] at (-1.200,-0.820) {$60^\circ$};
+  \node[font=\small, inner sep=1.5pt] at (-0.550,-0.300) {$8\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-1.892,-1.000) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.233,0.141) {B};
+  \node[font=\small, inner sep=1.5pt] at (-0.767,-1.180) {C};
+  \node[font=\small, inner sep=1.5pt] at (-1.006,0.600) {E};
+  \node[font=\small, inner sep=1.5pt] at (0.060,-1.180) {F};
+  \node[font=\small, inner sep=1.5pt] at (0.170,0.000) {O};
+\end{tikzpicture}

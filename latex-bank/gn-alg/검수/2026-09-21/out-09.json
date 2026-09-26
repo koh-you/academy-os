@@ -1,0 +1,7 @@
+{ "range": "186-434~208-486 (ids-09 · 68문항)", "checked": 68, "ok": 64,
+  "findings": [
+    { "id": "191-e19", "severity": "yellow", "where": "subs", "note": "소문항 (2) 첫 줄이 「모 든  실 수  x 에  대 하 여  부 등 식」처럼 글자 사이가 크게 벌어짐 — 긴 수식 $\\sqrt{2}x^2+4x\\sin\\theta-3\\sqrt{2}\\cos\\theta>0$이 줄 끝에서 끊기지 못해 앞 줄이 늘어남(내용은 일치)", "fix": "subs[1] 의 「부등식 」과 수식 사이에 \\allowbreak 를 넣거나 수식 앞에서 줄을 바꿔 첫 줄 늘어짐을 없앰(build 수준 확인 필요)" },
+    { "id": "193-451", "severity": "yellow", "where": "figure", "note": "그래프 크롭(가로로 긴 그림)이 그림 칸 폭에 맞춰 원본의 절반 정도로 작게 렌더되어 라벨 y=sin(π/2)x · y=k · A,B,C · 5 가 매우 작음(크롭 자체는 정상, 내용 일치)" },
+    { "id": "193-452", "severity": "yellow", "where": "layout", "note": "cases 연립부등식 높이 때문에 번호 「452.」가 본문 첫 줄보다 한 줄 위에 떠 있음(번호·본문 세로 정렬 어긋남 · 내용은 일치)" },
+    { "id": "208-484", "severity": "yellow", "where": "layout", "note": "「…한 원에 내접하고」 뒤 \\centerline 조건 두 줄(AB=5, AC=3√5, AD=7 / ∠BAC=∠CAD)이 그림 아래로 밀려 그림 옆에 큰 빈 공간이 생기고 본문이 세 토막으로 끊김(내용은 일치)", "fix": "body 의 \\par\\smallskip\\centerline{…}\\par\\centerline{…}\\par\\smallskip\\noindent 를 그림 옆에서 줄바꿈되는 \\\\ 들여쓰기 형태로 바꾸거나 조건을 본문에 이어 쓰기" }
+  ] }

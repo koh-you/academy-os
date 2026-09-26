@@ -1,0 +1,5 @@
+{ "range": "0076~0150", "checked": 75, "ok": 73,
+  "findings": [
+    { "id": "0126", "severity": "yellow", "where": "body", "note": "\\bogi 상자의 ㄷ 수식(13C2+…+13C12=2^12−1)이 상자 폭에 꽉 차서 연산자 간격이 압축됨(잘리지는 않음 · 경미)" },
+    { "id": "0150", "severity": "yellow", "where": "hint", "note": "원문의 확률값 빈칸 두 개(P(□)=□ 의 둘째 상자, P(A)=□)는 분수가 들어가는 세로로 긴 상자인데 조판본은 한 줄 높이 \\blank[1.5em] 작은 상자", "fix": "body 의 마지막 두 \\blank[1.5em] 을 분수 높이 상자(예: \\raisebox{-1ex}{\\framebox[1.5em]{\\rule{0pt}{3.4ex}}})로" }
+  ] }

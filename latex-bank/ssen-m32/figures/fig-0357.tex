@@ -1,0 +1,15 @@
+% 0357(본책 67쪽) — △ABC 의 내접원 O(접점 D, E, F), 반지름 OE=3 cm. 답(AD+BE+CF)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (1.200,2.000) -- (0.000,0.000) -- (2.400,0.000) -- cycle;
+  \draw (1.200,0.679) circle (0.679);
+  \fill (1.200,0.679) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (1.200,0.679) -- (1.200,0.000);
+  \node[font=\small, inner sep=1.5pt] at (1.750,-0.200) {$3\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (1.200,2.170) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.160,-0.058) {B};
+  \node[font=\small, inner sep=1.5pt] at (2.560,-0.058) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.458,1.087) {D};
+  \node[font=\small, inner sep=1.5pt] at (1.200,-0.170) {E};
+  \node[font=\small, inner sep=1.5pt] at (1.942,1.087) {F};
+  \node[font=\small, inner sep=1.5pt] at (1.200,0.879) {O};
+\end{tikzpicture}

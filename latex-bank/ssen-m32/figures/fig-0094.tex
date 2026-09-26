@@ -1,0 +1,24 @@
+% 0094(본책 21쪽) — 반원 O, 호 위의 A, A 에서 지름에 내린 수선의 발 C(∠ACB=90°), OC=2 파선 호, ∠AOC=45°, ∠ABC=x. 라벨: A·B·C·O·2·45°·x, 직각 표시 C. 스캔 삽화를 TikZ 로 다시 그림. 답(tan x)은 적지 않는다.
+\begin{tikzpicture}[scale=1.1, line width=0.6pt]
+  \coordinate (O) at (0,0); \coordinate (B) at (1.697,0); \coordinate (L) at (-1.697,0); \coordinate (C) at (-1.2,0); \coordinate (A) at (-1.2,1.2);
+  \draw (L) -- (B);
+  \draw (B) arc[start angle=0, end angle=180, radius=1.697cm];
+  \draw (A) -- (C);
+  \draw (A) -- (O);
+  \draw (A) -- (B);
+  \fill (O) circle (1pt);
+  % 직각 표시(C)
+  \draw[line width=0.4pt] (-1.04,0) -- (-1.04,0.16) -- (-1.2,0.16);
+  % 각
+  \draw[line width=0.4pt] (-0.283,0.283) arc[start angle=135, end angle=180, radius=0.4cm];
+  \node[font=\small, anchor=east, inner sep=1pt] at (-0.34,0.32) {$45^\circ$};
+  \draw[line width=0.4pt] ($(B)+(157.5:0.5)$) arc[start angle=157.5, end angle=180, radius=0.5cm];
+  \node[font=\small, anchor=east, inner sep=1pt] at (1.12,0.15) {$x$};
+  % 2(CO 파선 호)
+  \draw[dashed, line width=0.4pt] (C) to[bend right=30] (O);
+  \node[font=\small] at (-0.6,-0.32) {$2$};
+  \node[font=\small, above left, inner sep=1pt] at (A) {A};
+  \node[font=\small, right] at (B) {B};
+  \node[font=\small, below] at (C) {C};
+  \node[font=\small, below right, inner sep=1pt] at (O) {O};
+\end{tikzpicture}

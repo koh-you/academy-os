@@ -1,0 +1,16 @@
+% 0124(본책 26쪽) — 직각삼각형 ABC(∠C=90°), ∠A=54°, BC=50(파선 호). 스캔 삽화를 TikZ 로 다시 그림. 답(AC 의 길이)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (2.75,0); \coordinate (A) at (2.75,2.0);
+  \draw (A) -- (B) -- (C) -- cycle;
+  % 직각 표시
+  \draw[line width=0.4pt] (2.53,0) -- (2.53,0.22) -- (2.75,0.22);
+  % ∠A=54°
+  \draw[line width=0.4pt] (2.75,1.56) arc[start angle=-90, end angle=-144, radius=0.44];
+  \node[font=\small] at (2.5,1.48) {$54^\circ$};
+  % BC=50(파선 호)
+  \draw[dashed, line width=0.4pt] (B) to[bend right=15] (C);
+  \node[font=\small] at (1.375,-0.33) {$50$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+\end{tikzpicture}

@@ -1,0 +1,10 @@
+{ "range": "0520~0593", "checked": 74, "ok": 67,
+  "findings": [
+    { "id": "0524", "severity": "yellow", "where": "layout", "note": "첫 줄(함수 f(x)=cos x/(sin x+cos x)에 대하여)이 양끝 맞춤으로 어간이 크게 벌어짐(둘째 줄 lim 분수가 안 끊겨서). 내용은 일치" },
+    { "id": "0536", "severity": "yellow", "where": "layout", "note": "review 왼쪽 크롭이 문항 왼쪽 가장자리 세로 띠(0536 배지·「두 함수」·「h(x)=」)만 잘려 있음(크롭 오염). 쪽 이미지 p078로 대조해 본문 일치. 크롭 파일만 문제, items.json 수정 없음" },
+    { "id": "0538", "severity": "yellow", "where": "layout", "note": "첫 줄(두 함수 f(x)=2^{3x}, g(x)=sin 2x에 대하여)이 양끝 맞춤으로 어간이 벌어짐. 내용은 일치" },
+    { "id": "0550", "severity": "yellow", "where": "layout", "note": "첫 줄(함수 f(x)=(x+√(1+x²))^10에 대하여 f'(1)=a,)이 양끝 맞춤으로 어간이 벌어짐. 내용은 일치" },
+    { "id": "0552", "severity": "yellow", "where": "layout", "note": "첫 줄(함수 f(x)=1/√(2tan x+3)에 대하여 함수 g(x)가)이 양끝 맞춤으로 어간이 벌어짐. 내용은 일치" },
+    { "id": "0567", "severity": "yellow", "where": "layout", "note": "첫 줄(함수 f(x)=2x³−1의 역함수를 g(x)라 할 때,)이 양끝 맞춤으로 어간이 벌어짐(둘째 줄 lim 분수가 안 끊겨서). 내용은 일치" },
+    { "id": "0591", "severity": "yellow", "where": "figure", "note": "그림(side)은 원문과 일치하나 본문이 그림 옆 좁은 컬럼으로 10줄까지 이어져 그림 아래가 비어 보임(원문은 6줄 뒤 전체 폭). 내용은 일치" }
+  ] }

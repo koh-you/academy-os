@@ -1,0 +1,18 @@
+% 0373(본책 70쪽) — 중심 O 가 같은 두 원, 큰 원의 현 AD 가 작은 원과 B, C 에서 만남(AB=BC=CD 표시). 답(반지름)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (0.000,0.000) circle (0.700);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw (-0.900,-0.632) -- (0.900,-0.632);
+  \draw[line width=0.4pt] (-0.630,-0.702) -- (-0.630,-0.562);
+  \draw[line width=0.4pt] (-0.570,-0.702) -- (-0.570,-0.562);
+  \draw[line width=0.4pt] (-0.030,-0.702) -- (-0.030,-0.562);
+  \draw[line width=0.4pt] (0.030,-0.702) -- (0.030,-0.562);
+  \draw[line width=0.4pt] (0.570,-0.702) -- (0.570,-0.562);
+  \draw[line width=0.4pt] (0.630,-0.702) -- (0.630,-0.562);
+  \node[font=\small, inner sep=1.5pt] at (-1.060,-0.632) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.300,-0.792) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.300,-0.792) {C};
+  \node[font=\small, inner sep=1.5pt] at (1.060,-0.632) {D};
+  \node[font=\small, inner sep=1.5pt] at (0.000,-0.200) {O};
+\end{tikzpicture}

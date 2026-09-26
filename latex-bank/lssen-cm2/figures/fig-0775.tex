@@ -1,0 +1,12 @@
+% 0775(본책 110쪽) — 전체집합 U 안의 두 집합 A·B 벤 다이어그램: A∩B(가운데 렌즈)만 빼고 전부 색칠(원문 노랑). 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 U·A·B 만. 색칠 부분이 나타내는 집합의 식(답)은 적지 않는다.
+\begin{tikzpicture}[scale=0.8, line width=0.5pt, every node/.style={font=\small}]
+  \fill[yellow!35, rounded corners=3pt] (-2.2,-1.5) rectangle (2.2,1.5);
+  \begin{scope}\clip (-0.55,0) circle (1.05); \fill[white] (0.55,0) circle (1.05);\end{scope}
+  \draw[line width=0.6pt, rounded corners=3pt] (-2.2,-1.5) rectangle (2.2,1.5);
+  \node[fill=white, inner sep=1.5pt] at (-1.75,1.5) {$U$};
+  \draw[line width=0.6pt] (-0.55,0) circle (1.05);
+  \draw[line width=0.6pt] (0.55,0) circle (1.05);
+  \node at (-0.75,1.25) {$A$};
+  \node at (0.75,1.25) {$B$};
+\end{tikzpicture}

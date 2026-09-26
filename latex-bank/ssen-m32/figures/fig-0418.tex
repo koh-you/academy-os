@@ -1,0 +1,17 @@
+% 0418(본책 76쪽) — 원 O, 현 AC·CB, OA·OC·OB, ∠COB=90°(직각 표시), ∠ACB 에 각 표시. 답은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.063,0.285) -- (0.997,0.465);
+  \draw (0.997,0.465) -- (0.465,-0.997);
+  \draw (0.000,0.000) -- (-1.063,0.285);
+  \draw (0.000,0.000) -- (0.997,0.465);
+  \draw (0.000,0.000) -- (0.465,-0.997);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (0.127,0.059) -- (0.186,-0.068) -- (0.059,-0.127);
+  \fill[green!15] (0.997,0.465) -- (0.698,0.439) arc (185.0:250.0:0.300) -- cycle;
+  \draw[line width=0.4pt] (0.698,0.439) arc (185.0:250.0:0.300);
+  \node[font=\small, inner sep=1.5pt] at (-1.256,0.336) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.178,0.549) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.549,-1.178) {B};
+  \node[font=\small, inner sep=1.5pt] at (-0.207,-0.075) {O};
+\end{tikzpicture}

@@ -1,0 +1,26 @@
+% 0181(본책 37쪽) — 정사각뿔 O-ABCD(밑면 한 변 12cm), O 에서 밑면에 내린 수선의 발 H, ∠OAC=60°. 스캔 삽화를 TikZ 로 다시 그림. 답(OH·부피)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (0,0); \coordinate (B) at (1.8,0); \coordinate (C) at (2.7,0.8); \coordinate (D) at (0.9,0.8);
+  \coordinate (H) at (1.35,0.4); \coordinate (O) at (1.35,3.1);
+  \fill[green!20] (O) -- (A) -- (B) -- cycle;
+  \fill[green!30] (O) -- (B) -- (C) -- cycle;
+  \draw (A) -- (B) -- (C);
+  \draw[dashed, line width=0.5pt] (C) -- (D) -- (A);
+  \draw (O) -- (A); \draw (O) -- (B); \draw (O) -- (C);
+  \draw[dashed, line width=0.5pt] (O) -- (D);
+  \draw[dashed, line width=0.5pt] (A) -- (C);
+  \draw[dashed, line width=0.5pt] (O) -- (H);
+  \draw[line width=0.4pt] ($(H)!0.18cm!(O)$) -- ($(H)!0.18cm!(O)+($(H)!0.18cm!(C)$)-(H)$) -- ($(H)!0.18cm!(C)$);
+  \draw[line width=0.4pt] ($(A)!0.45cm!(C)$) arc[start angle=16.5, end angle=66.5, radius=0.45];
+  \node[font=\small] at (-0.35,0.65) {$60^\circ$};
+  \draw[dashed, line width=0.4pt] (A) to[bend right=20] (B);
+  \draw[dashed, line width=0.4pt] (B) to[bend right=25] (C);
+  \node[font=\small] at (0.9,-0.4) {$12\,\mathrm{cm}$};
+  \node[font=\small] at (2.85,0.2) {$12\,\mathrm{cm}$};
+  \node[font=\small, above] at (O) {O};
+  \node[font=\small, left] at (A) {A};
+  \node[font=\small, below right] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, above left] at (D) {D};
+  \node[font=\small, below] at (H) {H};
+\end{tikzpicture}

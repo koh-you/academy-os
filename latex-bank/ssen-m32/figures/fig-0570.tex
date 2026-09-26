@@ -1,0 +1,27 @@
+% 0570(본책 102쪽) — △ABC 의 외접원, 접선 PA·PE(접점 A·D), ∠DAE=20°, ∠DEA=28°, ∠x(P)·∠y(C). 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.2, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-1.111,-1.000) -- (0.951,-1.000);
+  \draw (-1.111,-1.000) -- (-0.963,0.403);
+  \draw (-0.995,0.105) -- (0.743,0.669);
+  \draw (0.801,-1.000) -- (0.743,0.669);
+  \draw (-0.995,0.105) -- (0.788,-0.616);
+  \draw (-0.995,0.105) -- (-0.000,-1.000);
+  \draw (-0.995,0.105) -- (0.801,-1.000);
+  \draw[line width=0.4pt] (-0.727,-0.193) arc[start angle=-48.000, end angle=-31.592, radius=0.400];
+  \node[font=\small, inner sep=1pt] at (-0.518,-0.292) {$20^\circ$};
+  \fill[yellow!35] (-1.111,-1.000) -- ++(0.000:0.280) arc[start angle=0.000, end angle=84.000, radius=0.280] -- cycle;
+  \draw[line width=0.4pt] (-0.831,-1.000) arc[start angle=0.000, end angle=84.000, radius=0.280];
+  \node[font=\small, inner sep=1pt] at (-0.754,-0.679) {$x$};
+  \fill[orange!35] (0.743,0.669) -- ++(-162.000:0.220) arc[start angle=-162.000, end angle=-88.000, radius=0.220] -- cycle;
+  \draw[line width=0.4pt] (0.534,0.601) arc[start angle=-162.000, end angle=-88.000, radius=0.220];
+  \node[font=\small, inner sep=1pt] at (0.514,0.341) {$y$};
+  \draw[line width=0.4pt] (0.546,-0.843) arc[start angle=148.408, end angle=180.000, radius=0.300];
+  \node[font=\small, inner sep=1pt] at (0.320,-0.864) {$28^\circ$};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-1.025,0.105) {A};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.743,0.669) {C};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.788,-0.586) {B};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-1.131,-1.000) {P};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (-0.000,-1.060) {D};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.801,-1.000) {E};
+\end{tikzpicture}

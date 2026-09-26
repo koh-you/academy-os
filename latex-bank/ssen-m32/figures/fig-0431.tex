@@ -1,0 +1,19 @@
+% 0431(본책 78쪽) — 원 위 네 점 A·D·B·C, 두 현 AC·BD 의 교점 P, 현 AB·DC, ∠BAC=30°, ∠ACD=40°, ∠BPC 에 각 표시. 답은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.901,0.631) -- (-0.376,-1.034);
+  \draw (-0.901,0.631) -- (0.843,-0.707);
+  \draw (-0.376,-1.034) -- (0.550,0.953);
+  \draw (0.550,0.953) -- (0.843,-0.707);
+  \draw[line width=0.4pt] (-0.781,0.249) arc (287.5:322.5:0.400);
+  \draw[line width=0.4pt] (0.773,-0.313) arc (100.0:142.5:0.400);
+  \fill[green!15] (0.057,-0.104) -- (-0.049,-0.331) arc (245.0:322.5:0.250) -- cycle;
+  \draw[line width=0.4pt] (-0.049,-0.331) arc (245.0:322.5:0.250);
+  \node[font=\small, inner sep=0.5pt] at (-0.500,0.058) {$30^\circ$};
+  \node[font=\small, inner sep=0.5pt] at (0.469,-0.092) {$40^\circ$};
+  \node[font=\small, inner sep=1.5pt] at (-1.065,0.746) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.650,1.126) {D};
+  \node[font=\small, inner sep=1.5pt] at (-0.445,-1.222) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.996,-0.836) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.022,0.093) {P};
+\end{tikzpicture}

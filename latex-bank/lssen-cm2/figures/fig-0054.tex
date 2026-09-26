@@ -1,0 +1,9 @@
+% 0054(본책 15쪽) — 수직선 위의 두 점 P(√2), Q(√3). 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 P(√2)·Q(√3) 만. 세 점 A·B·C 의 위치(답)는 그리지 않는다.
+\begin{tikzpicture}[scale=0.8, line width=0.6pt]
+  \draw[<->, >=stealth] (0,0) -- (7,0);
+  \fill (1.6,0) circle (2.2pt);
+  \fill (4.9,0) circle (2.2pt);
+  \node[below=1pt, font=\small] at (1.6,-0.02) {$\mathrm{P}(\sqrt{2}\,)$};
+  \node[below=1pt, font=\small] at (4.9,-0.02) {$\mathrm{Q}(\sqrt{3}\,)$};
+\end{tikzpicture}

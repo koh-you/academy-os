@@ -1,0 +1,14 @@
+% 0322(본책 61쪽) — 점 P 에서 원 O(원문 회색 칠)에 그은 접선의 접점 T, PT=2√6 cm. 답(원의 넓이)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \fill[gray!25] (0.000,0.000) circle (1.000);
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-1.400,0.000) -- (0.000,0.000);
+  \draw (0.000,0.000) -- (-0.714,-0.700);
+  \draw (-1.400,0.000) -- (-0.365,-1.057);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (-1.400,0.000) to[bend right=30] (-0.714,-0.700);
+  \node[font=\small, inner sep=1.5pt] at (-1.150,-0.500) {$2\sqrt{6}\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-1.560,0.000) {P};
+  \node[font=\small, inner sep=1.5pt] at (0.170,0.000) {O};
+  \node[font=\small, inner sep=1.5pt] at (-0.764,-0.880) {T};
+\end{tikzpicture}

@@ -1,0 +1,16 @@
+% 0526(본책 95쪽) — 원에 내접하는 □ABCD, BC 의 연장선 위의 점 E, ∠B 와 ∠DCE(색칠). 다시 그림.
+\begin{tikzpicture}[scale=1.40, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.631,0.901) -- (-0.901,-0.631) -- (0.901,-0.631) -- (-0.096,1.096) -- cycle;
+  \draw (0.901,-0.631) -- (1.401,-0.631);
+  \fill (1.401,-0.631) circle (1.2pt);
+  \fill[yellow!30] (-0.901,-0.631) -- (-0.661,-0.631) arc[start angle=-0.000, end angle=80.000, radius=0.240] -- cycle;
+  \draw[line width=0.4pt] (-0.661,-0.631) arc[start angle=-0.000, end angle=80.000, radius=0.240];
+  \fill[yellow!30] (0.901,-0.631) -- (1.141,-0.631) arc[start angle=-0.000, end angle=120.000, radius=0.240] -- cycle;
+  \draw[line width=0.4pt] (1.141,-0.631) arc[start angle=-0.000, end angle=120.000, radius=0.240];
+  \node[font=\small, inner sep=1.5pt] at (-0.804,1.001) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.074,-0.731) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.936,-0.828) {C};
+  \node[font=\small, inner sep=1.5pt] at (-0.113,1.295) {D};
+  \node[font=\small, inner sep=1.5pt] at (1.436,-0.828) {E};
+\end{tikzpicture}

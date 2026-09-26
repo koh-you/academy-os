@@ -1,0 +1,4 @@
+{ "range": "0533~0608", "checked": 76, "ok": 75,
+  "findings": [
+    { "id": "0577", "severity": "yellow", "where": "figure", "note": "그림에서 40°/12°/12° 각도 라벨이 P 근처에 서로 붙어 겹쳐 보임(원본은 C쪽·D쪽 12°가 떨어져 있음)" }
+  ] }

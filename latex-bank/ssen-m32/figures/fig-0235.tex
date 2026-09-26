@@ -1,0 +1,9 @@
+% 0235(본책 46쪽) — 합동인 마름모(한 변 5 cm) 8장을 겹치지 않게 이어 붙인 별 모양. 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)·마름모의 각은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \foreach \a in {0,45,...,315} {
+    \fill[yellow!50] (0,0) -- (\a:0.7) -- ({\a+22.5}:1.293) -- ({\a+45}:0.7) -- cycle;
+    \draw (0,0) -- (\a:0.7) -- ({\a+22.5}:1.293) -- ({\a+45}:0.7) -- cycle;
+  }
+  \draw[dashed, line width=0.4pt] (135:0.7) to[bend right=30] (112.5:1.293);
+  \node[font=\small] at (-0.95,0.85) {$5\,\mathrm{cm}$};
+\end{tikzpicture}

@@ -1,0 +1,2105 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage{../sty/dm-editorial}
+\usepackage{fontspec}
+\usepackage{multicol}
+% 문항 전사용 보조 매크로(dm-editorial 매크로를 덮어쓰지 않는다)
+\newcommand{\pt}[1]{\mathrm{#1}}
+\newcommand{\seg}[1]{\overline{\mathrm{#1}}}
+\newcommand{\arc}[1]{\overset{\frown}{\mathrm{#1}}}
+\newcommand{\vecAB}[1]{\overrightarrow{\mathrm{#1}}}
+\newcommand{\exprbox}[1]{\par\smallskip\noindent\begin{center}\fbox{\begin{minipage}{0.9\linewidth}\centering\vspace{1.5mm}#1\vspace{1.5mm}\end{minipage}}\end{center}}
+% 여집합 · 「보기」 상자(ㄱ·ㄴ·ㄷ 참거짓 문항 — 줄바꿈은 \\)
+\newcommand{\comp}[1]{{#1}^{\mathrm{c}}}
+% 별도 줄 수식(원문의 가운데 줄): 좁은 낱장 폭보다 넓으면 폭에 맞게 줄인다(전사본의 \centerline 을 build 가 이것으로 바꾼다).
+\newcommand{\dispeq}[1]{\centerline{\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{#1}}}
+\newcommand{\bogi}[1]{\par\smallskip\noindent\begin{center}\fbox{\begin{minipage}{0.9\linewidth}\vspace{1mm}{\small\bfseries 보기}\par\smallskip\setlength{\parskip}{0.6mm}#1\vspace{1mm}\end{minipage}}\end{center}}
+\newcommand{\blank}[1][1.5em]{\raisebox{-0.15ex}{\framebox[#1]{\rule{0pt}{1.4ex}}}}
+\newcommand{\dmhint}[1]{\par\smallskip\begin{tcolorbox}[enhanced,colback=dm-navylight!60,colframe=dm-navy!40,boxrule=0.3pt,sharp corners,left=3mm,right=3mm,top=2mm,bottom=2mm,boxsep=0mm]\small\setlength{\parskip}{1mm}#1\end{tcolorbox}}
+% 구역 제목·공통 지시문은 뒤에 문항 한 개는 붙을 자리가 있어야 찍는다(쪽 끝 고아 방지).
+\newcommand{\dmsection}[1]{\par\needspace{10\baselineskip}\vspace{3mm}\noindent{\color{dm-navy}\hrule height 0.6pt}\vspace{1.2mm}\noindent{\dmheadingfont\bfseries\fontsize{11}{13}\selectfont\color{dm-navy}#1}\par\vspace{4mm}}
+% 지시문 뒤 4mm: 다음 문항의 출처 배지가 5mm 위로 올라오므로 긴 지시문 줄과 겹치지 않게 한다.
+\newcommand{\dmpassage}[1]{\par\needspace{8\baselineskip}\medskip\noindent{\dmheadingfont\bfseries\color{dm-navy}#1}\par\vspace{4mm}}
+% 줄바꿈 규약(프로토타입 mathbook-problems.sty · style.sty 와 같음): 수식 안에서는 줄을 바꾸지 않고, 「(단, …)」·「x축」은 한 덩어리.
+\binoppenalty=10000 \relpenalty=10000
+\newlength{\dmfigw}
+% 수식을 안 끊는 대신, 긴 수식 앞에서 줄을 바꾸면 앞 줄이 많이 비는 경우(RPM 중3-1 1022 지시문·0979)에 overfull 로 잘리지 않도록
+% 비상 늘임 폭을 준다 — tolerance 안에서 조판되는 문단에는 영향이 없다.
+\emergencystretch=2em
+\newcommand{\nob}[1]{\mbox{#1}}
+% 「(단, …)」 은 한 덩어리가 원칙이지만 그림 옆 좁은 폭(0.58)에서 긴 조건이 그림 뒤로 넘어가 잘리므로(RPM 공통수학2 0151),
+% 「(단,」 만 첫 낱말에 붙이고 안쪽 낱말 사이에서는 줄을 바꿀 수 있게 둔다(수식 안은 여전히 안 끊긴다).
+\newcommand{\cond}[1]{\mbox{(단,}\nobreakspace#1)}
+\raggedbottom
+
+\begin{document}
+\renewcommand{\dmchapunit}{01 함수의 극한}
+\dmchapter{01}{함수의 극한}
+\setcounter{dmproblemcount}{0}
+\dmsection{교과서 01-1 함수의 수렴과 발산}
+\dmpassage{다음 극한값을 함수의 그래프를 이용하여 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{0}\dmpnum{0001}{\input{items/0001}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{1}\dmpnum{0002}{\input{items/0002}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{2}\dmpnum{0003}{\input{items/0003}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{3}\dmpnum{0004}{\input{items/0004}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{4}\dmpnum{0005}{\input{items/0005}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{5}\dmpnum{0006}{\input{items/0006}}\vspace{6mm}
+\dmpassage{다음 극한을 함수의 그래프를 이용하여 조사하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{6}\dmpnum{0007}{\input{items/0007}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{7}\dmpnum{0008}{\input{items/0008}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{8}\dmpnum{0009}{\input{items/0009}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{9}\dmpnum{0010}{\input{items/0010}}\vspace{6mm}
+\dmsection{교과서 01-2 우극한과 좌극한}
+\setcounter{dmproblemcount}{10}\dmpnum{0011}{\input{items/0011}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{11}\dmpnum{0012}{\input{items/0012}}\vspace{6mm}
+\dmsection{교과서 01-3 함수의 극한에 대한 성질}
+\dmpassage{다음 극한값을 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{12}\dmpnum{0013}{\input{items/0013}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{13}\dmpnum{0014}{\input{items/0014}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{14}\dmpnum{0015}{\input{items/0015}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{15}\dmpnum{0016}{\input{items/0016}}\vspace{6mm}
+\dmsection{교과서 01-4 함수의 극한값의 계산}
+\dmpassage{다음 극한값을 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{16}\dmpnum{0017}{\input{items/0017}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{17}\dmpnum{0018}{\input{items/0018}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{18}\dmpnum{0019}{\input{items/0019}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{19}\dmpnum{0020}{\input{items/0020}}\vspace{6mm}
+\dmpassage{다음 극한을 조사하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{20}\dmpnum{0021}{\input{items/0021}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{21}\dmpnum{0022}{\input{items/0022}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{22}\dmpnum{0023}{\input{items/0023}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{23}\dmpnum{0024}{\input{items/0024}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{24}\dmpnum{0025}{\input{items/0025}}\vspace{6mm}
+\dmpassage{다음 극한값을 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{25}\dmpnum{0026}{\input{items/0026}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{26}\dmpnum{0027}{\input{items/0027}}\vspace{6mm}
+\dmsection{교과서 01-5 미정계수의 결정}
+\dmpassage{다음 극한값이 존재하도록 하는 상수 $a$의 값을 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{27}\dmpnum{0028}{\input{items/0028}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{28}\dmpnum{0029}{\input{items/0029}}\vspace{6mm}
+\dmpassage{다음 등식이 성립하도록 하는 상수 $a$, $b$의 값을 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{29}\dmpnum{0030}{\input{items/0030}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{30}\dmpnum{0031}{\input{items/0031}}\vspace{6mm}
+\dmsection{교과서 01-6 함수의 극한의 대소 관계}
+\setcounter{dmproblemcount}{31}\dmpnum{0032}{\input{items/0032}}\vspace{6mm}
+\setcounter{dmproblemcount}{32}\dmpnum{0033}{\input{items/0033}}\vspace{6mm}
+\dmsection{유형 01 극한값의 존재}
+\setcounter{dmproblemcount}{33}\dmpnum{0034}{\input{items/0034}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{34}\dmpnum{0035}{\input{items/0035}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{35}\dmpnum{0036}{\input{items/0036}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{36}\dmpnum{0037}{\input{items/0037}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{37}\dmpnum{0038}{\input{items/0038}}\vspace{6mm}
+\dmsection{유형 02 극한값 구하기}
+\vspace{3mm}\setcounter{dmproblemcount}{38}\dmpnum{0039}{\input{items/0039}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{39}\dmpnum{0040}{\input{items/0040}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{40}\dmpnum{0041}{\input{items/0041}}\vspace{6mm}
+\setcounter{dmproblemcount}{41}\dmpnum{0042}{\input{items/0042}}\vspace{6mm}
+\dmsection{유형 03 극한값 구하기; 치환}
+\vspace{3mm}\setcounter{dmproblemcount}{42}\dmpnum{0043}{\input{items/0043}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{43}\dmpnum{0044}{\input{items/0044}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{44}\dmpnum{0045}{\input{items/0045}}\vspace{6mm}
+\dmsection{유형 04 함수의 극한에 대한 성질}
+\vspace{3mm}\setcounter{dmproblemcount}{45}\dmpnum{0046}{\input{items/0046}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{46}\dmpnum{0047}{\input{items/0047}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{47}\dmpnum{0048}{\input{items/0048}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{48}\dmpnum{0049}{\input{items/0049}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{49}\dmpnum{0050}{\input{items/0050}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{50}\dmpnum{0051}{\input{items/0051}}\vspace{6mm}
+\dmsection{유형 05 $\dfrac{0}{0}$ 꼴의 극한: 유리식}
+\vspace{3mm}\setcounter{dmproblemcount}{51}\dmpnum{0052}{\input{items/0052}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{52}\dmpnum{0053}{\input{items/0053}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{53}\dmpnum{0054}{\input{items/0054}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{54}\dmpnum{0055}{\input{items/0055}}\vspace{6mm}
+\dmsection{유형 06 $\dfrac{0}{0}$ 꼴의 극한: 무리식}
+\vspace{3mm}\setcounter{dmproblemcount}{55}\dmpnum{0056}{\input{items/0056}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{56}\dmpnum{0057}{\input{items/0057}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{57}\dmpnum{0058}{\input{items/0058}}\vspace{6mm}
+\dmsection{유형 07 $\dfrac{\infty}{\infty}$ 꼴의 극한}
+\vspace{3mm}\setcounter{dmproblemcount}{58}\dmpnum{0059}{\input{items/0059}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{59}\dmpnum{0060}{\input{items/0060}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{60}\dmpnum{0061}{\input{items/0061}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{61}\dmpnum{0062}{\input{items/0062}}\vspace{6mm}
+\dmsection{유형 08 $\infty-\infty$, $\infty\times 0$ 꼴의 극한}
+\vspace{3mm}\setcounter{dmproblemcount}{62}\dmpnum{0063}{\input{items/0063}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{63}\dmpnum{0064}{\input{items/0064}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{64}\dmpnum{0065}{\input{items/0065}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{65}\dmpnum{0066}{\input{items/0066}}\vspace{6mm}
+\dmsection{유형 09 미정계수의 결정}
+\vspace{3mm}\setcounter{dmproblemcount}{66}\dmpnum{0067}{\input{items/0067}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{67}\dmpnum{0068}{\input{items/0068}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{68}\dmpnum{0069}{\input{items/0069}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{69}\dmpnum{0070}{\input{items/0070}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{70}\dmpnum{0071}{\input{items/0071}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{71}\dmpnum{0072}{\input{items/0072}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{72}\dmpnum{0073}{\input{items/0073}}\vspace{6mm}
+\dmsection{유형 10 다항함수의 결정}
+\vspace{3mm}\setcounter{dmproblemcount}{73}\dmpnum{0074}{\input{items/0074}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{74}\dmpnum{0075}{\input{items/0075}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{75}\dmpnum{0076}{\input{items/0076}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{76}\dmpnum{0077}{\input{items/0077}}\vspace{6mm}
+\dmsection{유형 11 함수의 극한의 대소 관계}
+\setcounter{dmproblemcount}{77}\dmpnum{0078}{\input{items/0078}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{78}\dmpnum{0079}{\input{items/0079}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{79}\dmpnum{0080}{\input{items/0080}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{80}\dmpnum{0081}{\input{items/0081}}\vspace{6mm}
+\dmsection{유형 UP 12 합성함수의 극한}
+\vspace{3mm}\setcounter{dmproblemcount}{81}\dmpnum{0082}{\input{items/0082}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{82}\dmpnum{0083}{\input{items/0083}}\vspace{6mm}
+\dmsection{유형 UP 13 함수의 극한의 활용}
+\setcounter{dmproblemcount}{83}\dmpnum{0084}{\input{items/0084}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{84}\dmpnum{0085}{\input{items/0085}}\vspace{6mm}
+\setcounter{dmproblemcount}{85}\dmpnum{0086}{\input{items/0086}}\vspace{6mm}
+\dmsection{시험에 꼭 나오는 문제}
+\vspace{5mm}\setcounter{dmproblemcount}{86}\dmpnum{0087}{\input{items/0087}}\vspace{6mm}
+\setcounter{dmproblemcount}{87}\dmpnum{0088}{\input{items/0088}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{88}\dmpnum{0089}{\input{items/0089}}\vspace{6mm}
+\setcounter{dmproblemcount}{89}\dmpnum{0090}{\input{items/0090}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{90}\dmpnum{0091}{\input{items/0091}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{91}\dmpnum{0092}{\input{items/0092}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{92}\dmpnum{0093}{\input{items/0093}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{93}\dmpnum{0094}{\input{items/0094}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{94}\dmpnum{0095}{\input{items/0095}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{95}\dmpnum{0096}{\input{items/0096}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{96}\dmpnum{0097}{\input{items/0097}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{97}\dmpnum{0098}{\input{items/0098}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{98}\dmpnum{0099}{\input{items/0099}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{99}\dmpnum{0100}{\input{items/0100}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{100}\dmpnum{0101}{\input{items/0101}}\vspace{6mm}
+\setcounter{dmproblemcount}{101}\dmpnum{0102}{\input{items/0102}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{102}\dmpnum{0103}{\input{items/0103}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{103}\dmpnum{0104}{\input{items/0104}}\vspace{6mm}
+\setcounter{dmproblemcount}{104}\dmpnum{0105}{\input{items/0105}}\vspace{6mm}
+\dmsection{서술형 주관식}
+\vspace{3mm}\setcounter{dmproblemcount}{105}\dmpnum{0106}{\input{items/0106}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{106}\dmpnum{0107}{\input{items/0107}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{107}\dmpnum{0108}{\input{items/0108}}\vspace{6mm}
+\setcounter{dmproblemcount}{108}\dmpnum{0109}{\input{items/0109}}\vspace{6mm}
+\dmsection{실력 Up}
+\setcounter{dmproblemcount}{109}\dmpnum{0110}{\input{items/0110}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{110}\dmpnum{0111}{\input{items/0111}}\vspace{6mm}
+\setcounter{dmproblemcount}{111}\dmpnum{0112}{\input{items/0112}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{02 함수의 연속}
+\dmchapter{02}{함수의 연속}
+\setcounter{dmproblemcount}{0}
+\dmsection{교과서 02-1 함수의 연속과 불연속}
+\dmpassage{다음 함수 $f(x)$가 $x=0$에서 불연속인 이유를 말하시오.}
+\setcounter{dmproblemcount}{112}\dmpnum{0113}{\input{items/0113}}\vspace{6mm}
+\setcounter{dmproblemcount}{113}\dmpnum{0114}{\input{items/0114}}\vspace{6mm}
+\setcounter{dmproblemcount}{114}\dmpnum{0115}{\input{items/0115}}\vspace{6mm}
+\dmpassage{다음 함수가 $x=1$에서 연속인지 불연속인지 조사하시오.}
+\setcounter{dmproblemcount}{115}\dmpnum{0116}{\input{items/0116}}\vspace{6mm}
+\setcounter{dmproblemcount}{116}\dmpnum{0117}{\input{items/0117}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{117}\dmpnum{0118}{\input{items/0118}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{118}\dmpnum{0119}{\input{items/0119}}\vspace{6mm}
+\dmsection{교과서 02-2 구간}
+\dmpassage{다음 집합을 구간의 기호로 나타내시오.}
+\setcounter{dmproblemcount}{119}\dmpnum{0120}{\input{items/0120}}\vspace{6mm}
+\setcounter{dmproblemcount}{120}\dmpnum{0121}{\input{items/0121}}\vspace{6mm}
+\setcounter{dmproblemcount}{121}\dmpnum{0122}{\input{items/0122}}\vspace{6mm}
+\setcounter{dmproblemcount}{122}\dmpnum{0123}{\input{items/0123}}\vspace{6mm}
+\setcounter{dmproblemcount}{123}\dmpnum{0124}{\input{items/0124}}\vspace{6mm}
+\setcounter{dmproblemcount}{124}\dmpnum{0125}{\input{items/0125}}\vspace{6mm}
+\dmpassage{다음 함수의 정의역을 구간의 기호로 나타내시오.}
+\setcounter{dmproblemcount}{125}\dmpnum{0126}{\input{items/0126}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{126}\dmpnum{0127}{\input{items/0127}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{127}\dmpnum{0128}{\input{items/0128}}\vspace{6mm}
+\dmsection{교과서 02-3 연속함수}
+\dmpassage{다음 함수가 연속인 구간을 구하시오.}
+\setcounter{dmproblemcount}{128}\dmpnum{0129}{\input{items/0129}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{129}\dmpnum{0130}{\input{items/0130}}\vspace{6mm}
+\setcounter{dmproblemcount}{130}\dmpnum{0131}{\input{items/0131}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{131}\dmpnum{0132}{\input{items/0132}}\vspace{6mm}
+\dmsection{교과서 02-4 연속함수의 성질}
+\dmpassage{다음 함수가 연속인 구간을 구하시오.}
+\setcounter{dmproblemcount}{132}\dmpnum{0133}{\input{items/0133}}\vspace{6mm}
+\setcounter{dmproblemcount}{133}\dmpnum{0134}{\input{items/0134}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{134}\dmpnum{0135}{\input{items/0135}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{135}\dmpnum{0136}{\input{items/0136}}\vspace{6mm}
+\setcounter{dmproblemcount}{136}\dmpnum{0137}{\input{items/0137}}\vspace{6mm}
+\dmsection{교과서 02-5 최대·최소 정리}
+\dmpassage{주어진 구간에서 다음 함수 $f(x)$의 최댓값과 최솟값을 구하시오.}
+\setcounter{dmproblemcount}{137}\dmpnum{0138}{\input{items/0138}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{138}\dmpnum{0139}{\input{items/0139}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{139}\dmpnum{0140}{\input{items/0140}}\vspace{6mm}
+\dmsection{교과서 02-6 사잇값 정리}
+\setcounter{dmproblemcount}{140}\dmpnum{0141}{\input{items/0141}}\vspace{6mm}
+\setcounter{dmproblemcount}{141}\dmpnum{0142}{\input{items/0142}}\vspace{6mm}
+\dmpassage{다음 방정식이 열린구간 $(1{,}\mkern3mu\mathopen{}2)$에서 적어도 하나의 실근을 가짐을 보이시오.}
+\setcounter{dmproblemcount}{142}\dmpnum{0143}{\input{items/0143}}\vspace{6mm}
+\setcounter{dmproblemcount}{143}\dmpnum{0144}{\input{items/0144}}\vspace{6mm}
+\dmsection{유형 01 함수의 연속과 불연속}
+\vspace{5mm}\setcounter{dmproblemcount}{144}\dmpnum{0145}{\input{items/0145}}\vspace{6mm}
+\setcounter{dmproblemcount}{145}\dmpnum{0146}{\input{items/0146}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{146}\dmpnum{0147}{\input{items/0147}}\vspace{6mm}
+\dmsection{유형 02 불연속인 $x$의 값}
+\vspace{3mm}\setcounter{dmproblemcount}{147}\dmpnum{0148}{\input{items/0148}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{148}\dmpnum{0149}{\input{items/0149}}\vspace{6mm}
+\setcounter{dmproblemcount}{149}\dmpnum{0150}{\input{items/0150}}\vspace{6mm}
+\setcounter{dmproblemcount}{150}\dmpnum{0151}{\input{items/0151}}\vspace{6mm}
+\dmsection{유형 03 함수의 그래프와 연속}
+\vspace{3mm}\setcounter{dmproblemcount}{151}\dmpnum{0152}{\input{items/0152}}\vspace{6mm}
+\setcounter{dmproblemcount}{152}\dmpnum{0153}{\input{items/0153}}\vspace{6mm}
+\setcounter{dmproblemcount}{153}\dmpnum{0154}{\input{items/0154}}\vspace{6mm}
+\setcounter{dmproblemcount}{154}\dmpnum{0155}{\input{items/0155}}\vspace{6mm}
+\dmsection{유형 04 함수가 연속일 조건}
+\vspace{5mm}\setcounter{dmproblemcount}{155}\dmpnum{0156}{\input{items/0156}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{156}\dmpnum{0157}{\input{items/0157}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{157}\dmpnum{0158}{\input{items/0158}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{158}\dmpnum{0159}{\input{items/0159}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{159}\dmpnum{0160}{\input{items/0160}}\vspace{6mm}
+\setcounter{dmproblemcount}{160}\dmpnum{0161}{\input{items/0161}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{161}\dmpnum{0162}{\input{items/0162}}\vspace{6mm}
+\dmsection{유형 05 $(x-a)f(x)=g(x)$ 꼴의 함수의 연속}
+\setcounter{dmproblemcount}{162}\dmpnum{0163}{\input{items/0163}}\vspace{6mm}
+\setcounter{dmproblemcount}{163}\dmpnum{0164}{\input{items/0164}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{164}\dmpnum{0165}{\input{items/0165}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{165}\dmpnum{0166}{\input{items/0166}}\vspace{6mm}
+\dmsection{유형 06 연속함수의 성질}
+\setcounter{dmproblemcount}{166}\dmpnum{0167}{\input{items/0167}}\vspace{6mm}
+\setcounter{dmproblemcount}{167}\dmpnum{0168}{\input{items/0168}}\vspace{6mm}
+\setcounter{dmproblemcount}{168}\dmpnum{0169}{\input{items/0169}}\vspace{6mm}
+\dmsection{유형 07 $\dfrac{f(x)}{g(x)}$ 꼴의 함수의 연속}
+\vspace{3mm}\setcounter{dmproblemcount}{169}\dmpnum{0170}{\input{items/0170}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{170}\dmpnum{0171}{\input{items/0171}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{171}\dmpnum{0172}{\input{items/0172}}\vspace{6mm}
+\dmsection{유형 08 최대·최소 정리}
+\setcounter{dmproblemcount}{172}\dmpnum{0173}{\input{items/0173}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{173}\dmpnum{0174}{\input{items/0174}}\vspace{6mm}
+\setcounter{dmproblemcount}{174}\dmpnum{0175}{\input{items/0175}}\vspace{6mm}
+\dmsection{유형 09 사잇값 정리의 방정식에의 활용 (1)}
+\setcounter{dmproblemcount}{175}\dmpnum{0176}{\input{items/0176}}\vspace{6mm}
+\setcounter{dmproblemcount}{176}\dmpnum{0177}{\input{items/0177}}\vspace{6mm}
+\setcounter{dmproblemcount}{177}\dmpnum{0178}{\input{items/0178}}\vspace{6mm}
+\setcounter{dmproblemcount}{178}\dmpnum{0179}{\input{items/0179}}\vspace{6mm}
+\dmsection{유형 10 사잇값 정리의 실생활에의 활용}
+\setcounter{dmproblemcount}{179}\dmpnum{0180}{\input{items/0180}}\vspace{6mm}
+\setcounter{dmproblemcount}{180}\dmpnum{0181}{\input{items/0181}}\vspace{6mm}
+\dmsection{유형 UP 11 합성함수의 연속과 불연속}
+\vspace{5mm}\setcounter{dmproblemcount}{181}\dmpnum{0182}{\input{items/0182}}\vspace{6mm}
+\setcounter{dmproblemcount}{182}\dmpnum{0183}{\input{items/0183}}\vspace{6mm}
+\setcounter{dmproblemcount}{183}\dmpnum{0184}{\input{items/0184}}\vspace{6mm}
+\dmsection{유형 UP 12 사잇값 정리의 방정식에의 활용 (2)}
+\setcounter{dmproblemcount}{184}\dmpnum{0185}{\input{items/0185}}\vspace{6mm}
+\setcounter{dmproblemcount}{185}\dmpnum{0186}{\input{items/0186}}\vspace{6mm}
+\dmsection{시험에 꼭 나오는 문제}
+\setcounter{dmproblemcount}{186}\dmpnum{0187}{\input{items/0187}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{187}\dmpnum{0188}{\input{items/0188}}\vspace{6mm}
+\setcounter{dmproblemcount}{188}\dmpnum{0189}{\input{items/0189}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{189}\dmpnum{0190}{\input{items/0190}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{190}\dmpnum{0191}{\input{items/0191}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{191}\dmpnum{0192}{\input{items/0192}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{192}\dmpnum{0193}{\input{items/0193}}\vspace{6mm}
+\setcounter{dmproblemcount}{193}\dmpnum{0194}{\input{items/0194}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{194}\dmpnum{0195}{\input{items/0195}}\vspace{6mm}
+\setcounter{dmproblemcount}{195}\dmpnum{0196}{\input{items/0196}}\vspace{6mm}
+\setcounter{dmproblemcount}{196}\dmpnum{0197}{\input{items/0197}}\vspace{6mm}
+\setcounter{dmproblemcount}{197}\dmpnum{0198}{\input{items/0198}}\vspace{6mm}
+\dmsection{서술형 주관식}
+\vspace{5mm}\setcounter{dmproblemcount}{198}\dmpnum{0199}{\input{items/0199}}\vspace{6mm}
+\setcounter{dmproblemcount}{199}\dmpnum{0200}{\input{items/0200}}\vspace{6mm}
+\setcounter{dmproblemcount}{200}\dmpnum{0201}{\input{items/0201}}\vspace{6mm}
+\dmsection{실력 Up}
+\vspace{3mm}\setcounter{dmproblemcount}{201}\dmpnum{0202}{\input{items/0202}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{202}\dmpnum{0203}{\input{items/0203}}\vspace{6mm}
+\setcounter{dmproblemcount}{203}\dmpnum{0204}{\input{items/0204}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{03 미분계수와 도함수}
+\dmchapter{03}{미분계수와 도함수}
+\setcounter{dmproblemcount}{0}
+\dmsection{교과서 03-1 평균변화율}
+\dmpassage{다음 함수에서 $x$의 값이 $0$에서 $2$까지 변할 때의 평균변화율을 구하시오.}
+\setcounter{dmproblemcount}{204}\dmpnum{0205}{\input{items/0205}}\vspace{6mm}
+\setcounter{dmproblemcount}{205}\dmpnum{0206}{\input{items/0206}}\vspace{6mm}
+\setcounter{dmproblemcount}{206}\dmpnum{0207}{\input{items/0207}}\vspace{6mm}
+\setcounter{dmproblemcount}{207}\dmpnum{0208}{\input{items/0208}}\vspace{6mm}
+\setcounter{dmproblemcount}{208}\dmpnum{0209}{\input{items/0209}}\vspace{6mm}
+\dmsection{교과서 03-2 미분계수}
+\dmpassage{다음 함수의 $x=2$에서의 미분계수를 구하시오.}
+\setcounter{dmproblemcount}{209}\dmpnum{0210}{\input{items/0210}}\vspace{6mm}
+\setcounter{dmproblemcount}{210}\dmpnum{0211}{\input{items/0211}}\vspace{6mm}
+\setcounter{dmproblemcount}{211}\dmpnum{0212}{\input{items/0212}}\vspace{6mm}
+\setcounter{dmproblemcount}{212}\dmpnum{0213}{\input{items/0213}}\vspace{6mm}
+\dmpassage{다음 함수의 $x=a$에서의 미분계수가 $6$일 때, 양수 $a$의 값을 구하시오.}
+\setcounter{dmproblemcount}{213}\dmpnum{0214}{\input{items/0214}}\vspace{6mm}
+\setcounter{dmproblemcount}{214}\dmpnum{0215}{\input{items/0215}}\vspace{6mm}
+\dmpassage{함수 $f(x)$에 대하여 $f'(a)=3$일 때, 다음 극한값을 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{215}\dmpnum{0216}{\input{items/0216}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{216}\dmpnum{0217}{\input{items/0217}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{217}\dmpnum{0218}{\input{items/0218}}\vspace{6mm}
+\dmpassage{다음 함수 $f(x)$에 대하여 곡선 $y=f(x)$ 위의 주어진 점에서의 접선의 기울기를 구하시오.}
+\setcounter{dmproblemcount}{218}\dmpnum{0219}{\input{items/0219}}\vspace{6mm}
+\setcounter{dmproblemcount}{219}\dmpnum{0220}{\input{items/0220}}\vspace{6mm}
+\setcounter{dmproblemcount}{220}\dmpnum{0221}{\input{items/0221}}\vspace{6mm}
+\dmsection{교과서 03-3 미분가능성과 연속성}
+\setcounter{dmproblemcount}{221}\dmpnum{0222}{\input{items/0222}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{222}\dmpnum{0223}{\input{items/0223}}\vspace{6mm}
+\dmsection{교과서 03-4 도함수}
+\dmpassage{도함수의 정의를 이용하여 다음 함수 $f(x)$의 도함수 $f'(x)$를 구하시오.}
+\setcounter{dmproblemcount}{223}\dmpnum{0224}{\input{items/0224}}\vspace{6mm}
+\setcounter{dmproblemcount}{224}\dmpnum{0225}{\input{items/0225}}\vspace{6mm}
+\setcounter{dmproblemcount}{225}\dmpnum{0226}{\input{items/0226}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{226}\dmpnum{0227}{\input{items/0227}}\vspace{6mm}
+\dmsection{교과서 03-5 함수 $y=x^n$과 상수함수의 도함수}
+\dmpassage{다음 함수를 미분하시오.}
+\setcounter{dmproblemcount}{227}\dmpnum{0228}{\input{items/0228}}\vspace{6mm}
+\setcounter{dmproblemcount}{228}\dmpnum{0229}{\input{items/0229}}\vspace{6mm}
+\setcounter{dmproblemcount}{229}\dmpnum{0230}{\input{items/0230}}\vspace{6mm}
+\dmsection{교과서 03-6 함수의 미분법}
+\dmpassage{다음 함수를 미분하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{230}\dmpnum{0231}{\input{items/0231}}\vspace{6mm}
+\setcounter{dmproblemcount}{231}\dmpnum{0232}{\input{items/0232}}\vspace{6mm}
+\setcounter{dmproblemcount}{232}\dmpnum{0233}{\input{items/0233}}\vspace{6mm}
+\setcounter{dmproblemcount}{233}\dmpnum{0234}{\input{items/0234}}\vspace{6mm}
+\dmpassage{다음 함수를 미분하시오.}
+\setcounter{dmproblemcount}{234}\dmpnum{0235}{\input{items/0235}}\vspace{6mm}
+\setcounter{dmproblemcount}{235}\dmpnum{0236}{\input{items/0236}}\vspace{6mm}
+\setcounter{dmproblemcount}{236}\dmpnum{0237}{\input{items/0237}}\vspace{6mm}
+\setcounter{dmproblemcount}{237}\dmpnum{0238}{\input{items/0238}}\vspace{6mm}
+\setcounter{dmproblemcount}{238}\dmpnum{0239}{\input{items/0239}}\vspace{6mm}
+\setcounter{dmproblemcount}{239}\dmpnum{0240}{\input{items/0240}}\vspace{6mm}
+\setcounter{dmproblemcount}{240}\dmpnum{0241}{\input{items/0241}}\vspace{6mm}
+\setcounter{dmproblemcount}{241}\dmpnum{0242}{\input{items/0242}}\vspace{6mm}
+\setcounter{dmproblemcount}{242}\dmpnum{0243}{\input{items/0243}}\vspace{6mm}
+\dmsection{유형 01 평균변화율}
+\setcounter{dmproblemcount}{243}\dmpnum{0244}{\input{items/0244}}\vspace{6mm}
+\setcounter{dmproblemcount}{244}\dmpnum{0245}{\input{items/0245}}\vspace{6mm}
+\setcounter{dmproblemcount}{245}\dmpnum{0246}{\input{items/0246}}\vspace{6mm}
+\setcounter{dmproblemcount}{246}\dmpnum{0247}{\input{items/0247}}\vspace{6mm}
+\dmsection{유형 02 평균변화율과 미분계수}
+\setcounter{dmproblemcount}{247}\dmpnum{0248}{\input{items/0248}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{248}\dmpnum{0249}{\input{items/0249}}\vspace{6mm}
+\setcounter{dmproblemcount}{249}\dmpnum{0250}{\input{items/0250}}\vspace{6mm}
+\setcounter{dmproblemcount}{250}\dmpnum{0251}{\input{items/0251}}\vspace{6mm}
+\dmsection{유형 03 미분계수를 이용한 극한값의 계산; $\lim\limits_{h\to 0}\frac{f(a+h)-f(a)}{h}$의 꼴}
+\vspace{3mm}\setcounter{dmproblemcount}{251}\dmpnum{0252}{\input{items/0252}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{252}\dmpnum{0253}{\input{items/0253}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{253}\dmpnum{0254}{\input{items/0254}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{254}\dmpnum{0255}{\input{items/0255}}\vspace{6mm}
+\dmsection{유형 04 미분계수를 이용한 극한값의 계산; $\lim\limits_{x\to a}\frac{f(x)-f(a)}{x-a}$의 꼴}
+\vspace{3mm}\setcounter{dmproblemcount}{255}\dmpnum{0256}{\input{items/0256}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{256}\dmpnum{0257}{\input{items/0257}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{257}\dmpnum{0258}{\input{items/0258}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{258}\dmpnum{0259}{\input{items/0259}}\vspace{6mm}
+\dmsection{유형 05 관계식이 주어진 경우 미분계수 구하기}
+\setcounter{dmproblemcount}{259}\dmpnum{0260}{\input{items/0260}}\vspace{6mm}
+\setcounter{dmproblemcount}{260}\dmpnum{0261}{\input{items/0261}}\vspace{6mm}
+\setcounter{dmproblemcount}{261}\dmpnum{0262}{\input{items/0262}}\vspace{6mm}
+\dmsection{유형 06 미분계수의 기하적 의미}
+\setcounter{dmproblemcount}{262}\dmpnum{0263}{\input{items/0263}}\vspace{6mm}
+\setcounter{dmproblemcount}{263}\dmpnum{0264}{\input{items/0264}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{264}\dmpnum{0265}{\input{items/0265}}\vspace{6mm}
+\dmsection{유형 07 미분가능성과 연속성}
+\vspace{3mm}\setcounter{dmproblemcount}{265}\dmpnum{0266}{\input{items/0266}}\vspace{6mm}
+\setcounter{dmproblemcount}{266}\dmpnum{0267}{\input{items/0267}}\vspace{6mm}
+\setcounter{dmproblemcount}{267}\dmpnum{0268}{\input{items/0268}}\vspace{6mm}
+\setcounter{dmproblemcount}{268}\dmpnum{0269}{\input{items/0269}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{269}\dmpnum{0270}{\input{items/0270}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{270}\dmpnum{0271}{\input{items/0271}}\vspace{6mm}
+\dmsection{유형 08 미분법의 공식}
+\setcounter{dmproblemcount}{271}\dmpnum{0272}{\input{items/0272}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{272}\dmpnum{0273}{\input{items/0273}}\vspace{6mm}
+\setcounter{dmproblemcount}{273}\dmpnum{0274}{\input{items/0274}}\vspace{6mm}
+\setcounter{dmproblemcount}{274}\dmpnum{0275}{\input{items/0275}}\vspace{6mm}
+\dmsection{유형 09 곱의 미분법}
+\setcounter{dmproblemcount}{275}\dmpnum{0276}{\input{items/0276}}\vspace{6mm}
+\setcounter{dmproblemcount}{276}\dmpnum{0277}{\input{items/0277}}\vspace{6mm}
+\setcounter{dmproblemcount}{277}\dmpnum{0278}{\input{items/0278}}\vspace{6mm}
+\setcounter{dmproblemcount}{278}\dmpnum{0279}{\input{items/0279}}\vspace{6mm}
+\setcounter{dmproblemcount}{279}\dmpnum{0280}{\input{items/0280}}\vspace{6mm}
+\setcounter{dmproblemcount}{280}\dmpnum{0281}{\input{items/0281}}\vspace{6mm}
+\setcounter{dmproblemcount}{281}\dmpnum{0282}{\input{items/0282}}\vspace{6mm}
+\dmsection{유형 10 미분계수를 이용한 극한값의 계산}
+\vspace{3mm}\setcounter{dmproblemcount}{282}\dmpnum{0283}{\input{items/0283}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{283}\dmpnum{0284}{\input{items/0284}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{284}\dmpnum{0285}{\input{items/0285}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{285}\dmpnum{0286}{\input{items/0286}}\vspace{6mm}
+\dmsection{유형 11 미분계수를 이용한 미정계수의 결정}
+\vspace{3mm}\setcounter{dmproblemcount}{286}\dmpnum{0287}{\input{items/0287}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{287}\dmpnum{0288}{\input{items/0288}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{288}\dmpnum{0289}{\input{items/0289}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{289}\dmpnum{0290}{\input{items/0290}}\vspace{6mm}
+\dmsection{유형 12 접선의 기울기를 이용한 미정계수의 결정}
+\setcounter{dmproblemcount}{290}\dmpnum{0291}{\input{items/0291}}\vspace{6mm}
+\setcounter{dmproblemcount}{291}\dmpnum{0292}{\input{items/0292}}\vspace{6mm}
+\setcounter{dmproblemcount}{292}\dmpnum{0293}{\input{items/0293}}\vspace{6mm}
+\setcounter{dmproblemcount}{293}\dmpnum{0294}{\input{items/0294}}\vspace{6mm}
+\dmsection{유형 13 함수의 미분가능성을 이용한 미정계수의 결정}
+\vspace{5mm}\setcounter{dmproblemcount}{294}\dmpnum{0295}{\input{items/0295}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{295}\dmpnum{0296}{\input{items/0296}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{296}\dmpnum{0297}{\input{items/0297}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{297}\dmpnum{0298}{\input{items/0298}}\vspace{6mm}
+\dmsection{유형 14 다항식의 나눗셈에서 미분법의 활용}
+\setcounter{dmproblemcount}{298}\dmpnum{0299}{\input{items/0299}}\vspace{6mm}
+\setcounter{dmproblemcount}{299}\dmpnum{0300}{\input{items/0300}}\vspace{6mm}
+\setcounter{dmproblemcount}{300}\dmpnum{0301}{\input{items/0301}}\vspace{6mm}
+\setcounter{dmproblemcount}{301}\dmpnum{0302}{\input{items/0302}}\vspace{6mm}
+\dmsection{유형 UP 15 치환을 이용한 극한값의 계산}
+\vspace{3mm}\setcounter{dmproblemcount}{302}\dmpnum{0303}{\input{items/0303}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{303}\dmpnum{0304}{\input{items/0304}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{304}\dmpnum{0305}{\input{items/0305}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{305}\dmpnum{0306}{\input{items/0306}}\vspace{6mm}
+\dmsection{유형 UP 16 미분의 항등식에의 활용}
+\setcounter{dmproblemcount}{306}\dmpnum{0307}{\input{items/0307}}\vspace{6mm}
+\setcounter{dmproblemcount}{307}\dmpnum{0308}{\input{items/0308}}\vspace{6mm}
+\setcounter{dmproblemcount}{308}\dmpnum{0309}{\input{items/0309}}\vspace{6mm}
+\dmsection{시험에 꼭 나오는 문제}
+\vspace{3mm}\setcounter{dmproblemcount}{309}\dmpnum{0310}{\input{items/0310}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{310}\dmpnum{0311}{\input{items/0311}}\vspace{6mm}
+\setcounter{dmproblemcount}{311}\dmpnum{0312}{\input{items/0312}}\vspace{6mm}
+\setcounter{dmproblemcount}{312}\dmpnum{0313}{\input{items/0313}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{313}\dmpnum{0314}{\input{items/0314}}\vspace{6mm}
+\setcounter{dmproblemcount}{314}\dmpnum{0315}{\input{items/0315}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{315}\dmpnum{0316}{\input{items/0316}}\vspace{6mm}
+\setcounter{dmproblemcount}{316}\dmpnum{0317}{\input{items/0317}}\vspace{6mm}
+\setcounter{dmproblemcount}{317}\dmpnum{0318}{\input{items/0318}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{318}\dmpnum{0319}{\input{items/0319}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{319}\dmpnum{0320}{\input{items/0320}}\vspace{6mm}
+\setcounter{dmproblemcount}{320}\dmpnum{0321}{\input{items/0321}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{321}\dmpnum{0322}{\input{items/0322}}\vspace{6mm}
+\dmsection{서술형 주관식}
+\vspace{3mm}\setcounter{dmproblemcount}{322}\dmpnum{0323}{\input{items/0323}}\vspace{6mm}
+\setcounter{dmproblemcount}{323}\dmpnum{0324}{\input{items/0324}}\vspace{6mm}
+\setcounter{dmproblemcount}{324}\dmpnum{0325}{\input{items/0325}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{325}\dmpnum{0326}{\input{items/0326}}\vspace{6mm}
+\dmsection{실력 Up}
+\setcounter{dmproblemcount}{326}\dmpnum{0327}{\input{items/0327}}\vspace{6mm}
+\setcounter{dmproblemcount}{327}\dmpnum{0328}{\input{items/0328}}\vspace{6mm}
+\setcounter{dmproblemcount}{328}\dmpnum{0329}{\input{items/0329}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{04 도함수의 활용 (1)}
+\dmchapter{04}{도함수의 활용 (1)}
+\setcounter{dmproblemcount}{0}
+\dmsection{교과서 04-1 접선의 방정식}
+\dmpassage{다음 곡선 위의 주어진 점에서의 접선의 기울기를 구하시오.}
+\setcounter{dmproblemcount}{329}\dmpnum{0330}{\input{items/0330}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{330}\dmpnum{0331}{\input{items/0331}}\vspace{6mm}
+\dmsection{교과서 04-2 접선의 방정식을 구하는 방법}
+\dmpassage{다음 곡선 위의 주어진 점에서의 접선의 방정식을 구하시오.}
+\setcounter{dmproblemcount}{331}\dmpnum{0332}{\input{items/0332}}\vspace{6mm}
+\setcounter{dmproblemcount}{332}\dmpnum{0333}{\input{items/0333}}\vspace{6mm}
+\dmpassage{다음 곡선에 접하고 기울기가 $1$인 직선의 방정식을 구하시오.}
+\setcounter{dmproblemcount}{333}\dmpnum{0334}{\input{items/0334}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{334}\dmpnum{0335}{\input{items/0335}}\vspace{6mm}
+\setcounter{dmproblemcount}{335}\dmpnum{0336}{\input{items/0336}}\vspace{6mm}
+\dmpassage{다음 직선의 방정식을 구하시오.}
+\setcounter{dmproblemcount}{336}\dmpnum{0337}{\input{items/0337}}\vspace{6mm}
+\setcounter{dmproblemcount}{337}\dmpnum{0338}{\input{items/0338}}\vspace{6mm}
+\setcounter{dmproblemcount}{338}\dmpnum{0339}{\input{items/0339}}\vspace{6mm}
+\dmsection{교과서 04-3 롤의 정리}
+\dmpassage{다음 함수에 대하여 주어진 구간에서 롤의 정리를 만족시키는 실수 $c$의 값을 구하시오.}
+\setcounter{dmproblemcount}{339}\dmpnum{0340}{\input{items/0340}}\vspace{6mm}
+\setcounter{dmproblemcount}{340}\dmpnum{0341}{\input{items/0341}}\vspace{6mm}
+\dmsection{교과서 04-4 평균값 정리}
+\dmpassage{다음 함수에 대하여 주어진 구간에서 평균값 정리를 만족시키는 실수 $c$의 값을 구하시오.}
+\setcounter{dmproblemcount}{341}\dmpnum{0342}{\input{items/0342}}\vspace{6mm}
+\setcounter{dmproblemcount}{342}\dmpnum{0343}{\input{items/0343}}\vspace{6mm}
+\setcounter{dmproblemcount}{343}\dmpnum{0344}{\input{items/0344}}\vspace{6mm}
+\dmsection{유형 01 접선의 기울기}
+\setcounter{dmproblemcount}{344}\dmpnum{0345}{\input{items/0345}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{345}\dmpnum{0346}{\input{items/0346}}\vspace{6mm}
+\setcounter{dmproblemcount}{346}\dmpnum{0347}{\input{items/0347}}\vspace{6mm}
+\setcounter{dmproblemcount}{347}\dmpnum{0348}{\input{items/0348}}\vspace{6mm}
+\dmsection{유형 02 접점의 좌표가 주어진 접선의 방정식}
+\setcounter{dmproblemcount}{348}\dmpnum{0349}{\input{items/0349}}\vspace{6mm}
+\setcounter{dmproblemcount}{349}\dmpnum{0350}{\input{items/0350}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{350}\dmpnum{0351}{\input{items/0351}}\vspace{6mm}
+\setcounter{dmproblemcount}{351}\dmpnum{0352}{\input{items/0352}}\vspace{6mm}
+\dmsection{유형 03 접선과 수직인 직선의 방정식}
+\setcounter{dmproblemcount}{352}\dmpnum{0353}{\input{items/0353}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{353}\dmpnum{0354}{\input{items/0354}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{354}\dmpnum{0355}{\input{items/0355}}\vspace{6mm}
+\dmsection{유형 04 곡선과 접선의 교점}
+\setcounter{dmproblemcount}{355}\dmpnum{0356}{\input{items/0356}}\vspace{6mm}
+\setcounter{dmproblemcount}{356}\dmpnum{0357}{\input{items/0357}}\vspace{6mm}
+\setcounter{dmproblemcount}{357}\dmpnum{0358}{\input{items/0358}}\vspace{6mm}
+\dmsection{유형 05 기울기가 주어진 접선의 방정식}
+\setcounter{dmproblemcount}{358}\dmpnum{0359}{\input{items/0359}}\vspace{6mm}
+\setcounter{dmproblemcount}{359}\dmpnum{0360}{\input{items/0360}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{360}\dmpnum{0361}{\input{items/0361}}\vspace{6mm}
+\setcounter{dmproblemcount}{361}\dmpnum{0362}{\input{items/0362}}\vspace{6mm}
+\dmsection{유형 06 곡선과 직선이 접할 때 미정계수 구하기}
+\setcounter{dmproblemcount}{362}\dmpnum{0363}{\input{items/0363}}\vspace{6mm}
+\setcounter{dmproblemcount}{363}\dmpnum{0364}{\input{items/0364}}\vspace{6mm}
+\setcounter{dmproblemcount}{364}\dmpnum{0365}{\input{items/0365}}\vspace{6mm}
+\setcounter{dmproblemcount}{365}\dmpnum{0366}{\input{items/0366}}\vspace{6mm}
+\dmsection{유형 07 곡선 밖의 점에서 그은 접선의 방정식}
+\setcounter{dmproblemcount}{366}\dmpnum{0367}{\input{items/0367}}\vspace{6mm}
+\setcounter{dmproblemcount}{367}\dmpnum{0368}{\input{items/0368}}\vspace{6mm}
+\setcounter{dmproblemcount}{368}\dmpnum{0369}{\input{items/0369}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{369}\dmpnum{0370}{\input{items/0370}}\vspace{6mm}
+\dmsection{유형 08 두 곡선에 동시에 접하는 직선}
+\setcounter{dmproblemcount}{370}\dmpnum{0371}{\input{items/0371}}\vspace{6mm}
+\setcounter{dmproblemcount}{371}\dmpnum{0372}{\input{items/0372}}\vspace{6mm}
+\setcounter{dmproblemcount}{372}\dmpnum{0373}{\input{items/0373}}\vspace{6mm}
+\setcounter{dmproblemcount}{373}\dmpnum{0374}{\input{items/0374}}\vspace{6mm}
+\dmsection{유형 09 접선과 좌표축으로 둘러싸인 도형의 넓이}
+\vspace{3mm}\setcounter{dmproblemcount}{374}\dmpnum{0375}{\input{items/0375}}\vspace{6mm}
+\setcounter{dmproblemcount}{375}\dmpnum{0376}{\input{items/0376}}\vspace{6mm}
+\setcounter{dmproblemcount}{376}\dmpnum{0377}{\input{items/0377}}\vspace{6mm}
+\setcounter{dmproblemcount}{377}\dmpnum{0378}{\input{items/0378}}\vspace{6mm}
+\dmsection{유형 10 롤의 정리}
+\setcounter{dmproblemcount}{378}\dmpnum{0379}{\input{items/0379}}\vspace{6mm}
+\setcounter{dmproblemcount}{379}\dmpnum{0380}{\input{items/0380}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{380}\dmpnum{0381}{\input{items/0381}}\vspace{6mm}
+\dmsection{유형 11 평균값 정리}
+\setcounter{dmproblemcount}{381}\dmpnum{0382}{\input{items/0382}}\vspace{6mm}
+\setcounter{dmproblemcount}{382}\dmpnum{0383}{\input{items/0383}}\vspace{6mm}
+\setcounter{dmproblemcount}{383}\dmpnum{0384}{\input{items/0384}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{384}\dmpnum{0385}{\input{items/0385}}\vspace{6mm}
+\dmsection{유형 UP 12 곡선 밖의 점에서 그은 접선의 방정식의 활용}
+\setcounter{dmproblemcount}{385}\dmpnum{0386}{\input{items/0386}}\vspace{6mm}
+\setcounter{dmproblemcount}{386}\dmpnum{0387}{\input{items/0387}}\vspace{6mm}
+\setcounter{dmproblemcount}{387}\dmpnum{0388}{\input{items/0388}}\vspace{6mm}
+\dmsection{시험에 꼭 나오는 문제}
+\setcounter{dmproblemcount}{388}\dmpnum{0389}{\input{items/0389}}\vspace{6mm}
+\setcounter{dmproblemcount}{389}\dmpnum{0390}{\input{items/0390}}\vspace{6mm}
+\setcounter{dmproblemcount}{390}\dmpnum{0391}{\input{items/0391}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{391}\dmpnum{0392}{\input{items/0392}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{392}\dmpnum{0393}{\input{items/0393}}\vspace{6mm}
+\setcounter{dmproblemcount}{393}\dmpnum{0394}{\input{items/0394}}\vspace{6mm}
+\setcounter{dmproblemcount}{394}\dmpnum{0395}{\input{items/0395}}\vspace{6mm}
+\setcounter{dmproblemcount}{395}\dmpnum{0396}{\input{items/0396}}\vspace{6mm}
+\setcounter{dmproblemcount}{396}\dmpnum{0397}{\input{items/0397}}\vspace{6mm}
+\setcounter{dmproblemcount}{397}\dmpnum{0398}{\input{items/0398}}\vspace{6mm}
+\setcounter{dmproblemcount}{398}\dmpnum{0399}{\input{items/0399}}\vspace{6mm}
+\setcounter{dmproblemcount}{399}\dmpnum{0400}{\input{items/0400}}\vspace{6mm}
+\dmsection{서술형 주관식}
+\setcounter{dmproblemcount}{400}\dmpnum{0401}{\input{items/0401}}\vspace{6mm}
+\setcounter{dmproblemcount}{401}\dmpnum{0402}{\input{items/0402}}\vspace{6mm}
+\dmsection{실력 Up}
+\setcounter{dmproblemcount}{402}\dmpnum{0403}{\input{items/0403}}\vspace{6mm}
+\setcounter{dmproblemcount}{403}\dmpnum{0404}{\input{items/0404}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{05 도함수의 활용 (2)}
+\dmchapter{05}{도함수의 활용 (2)}
+\setcounter{dmproblemcount}{0}
+\dmsection{교과서 05-1 함수의 증가와 감소}
+\dmpassage{다음 함수의 증가와 감소를 조사하시오.}
+\setcounter{dmproblemcount}{404}\dmpnum{0405}{\input{items/0405}}\vspace{6mm}
+\setcounter{dmproblemcount}{405}\dmpnum{0406}{\input{items/0406}}\vspace{6mm}
+\setcounter{dmproblemcount}{406}\dmpnum{0407}{\input{items/0407}}\vspace{6mm}
+\setcounter{dmproblemcount}{407}\dmpnum{0408}{\input{items/0408}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{408}\dmpnum{0409}{\input{items/0409}}\vspace{6mm}
+\dmsection{교과서 05-2 함수의 극대와 극소}
+\setcounter{dmproblemcount}{409}\dmpnum{0410}{\input{items/0410}}\vspace{6mm}
+\setcounter{dmproblemcount}{410}\dmpnum{0411}{\input{items/0411}}\vspace{6mm}
+\dmpassage{다음 함수의 극값을 구하시오.}
+\setcounter{dmproblemcount}{411}\dmpnum{0412}{\input{items/0412}}\vspace{6mm}
+\setcounter{dmproblemcount}{412}\dmpnum{0413}{\input{items/0413}}\vspace{6mm}
+\setcounter{dmproblemcount}{413}\dmpnum{0414}{\input{items/0414}}\vspace{6mm}
+\dmsection{교과서 05-3 함수의 그래프}
+\dmpassage{다음 함수의 그래프를 그리시오.}
+\setcounter{dmproblemcount}{414}\dmpnum{0415}{\input{items/0415}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{415}\dmpnum{0416}{\input{items/0416}}\vspace{6mm}
+\setcounter{dmproblemcount}{416}\dmpnum{0417}{\input{items/0417}}\vspace{6mm}
+\dmsection{교과서 05-4 함수의 최댓값과 최솟값}
+\dmpassage{주어진 구간에서 다음 함수의 최댓값과 최솟값을 구하시오.}
+\setcounter{dmproblemcount}{417}\dmpnum{0418}{\input{items/0418}}\vspace{6mm}
+\setcounter{dmproblemcount}{418}\dmpnum{0419}{\input{items/0419}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{419}\dmpnum{0420}{\input{items/0420}}\vspace{6mm}
+\setcounter{dmproblemcount}{420}\dmpnum{0421}{\input{items/0421}}\vspace{6mm}
+\dmsection{유형 01 함수의 증가와 감소}
+\setcounter{dmproblemcount}{421}\dmpnum{0422}{\input{items/0422}}\vspace{6mm}
+\setcounter{dmproblemcount}{422}\dmpnum{0423}{\input{items/0423}}\vspace{6mm}
+\setcounter{dmproblemcount}{423}\dmpnum{0424}{\input{items/0424}}\vspace{6mm}
+\setcounter{dmproblemcount}{424}\dmpnum{0425}{\input{items/0425}}\vspace{6mm}
+\dmsection{유형 02 실수 전체의 집합에서 함수가 증가(또는 감소)하기 위한 조건}
+\setcounter{dmproblemcount}{425}\dmpnum{0426}{\input{items/0426}}\vspace{6mm}
+\setcounter{dmproblemcount}{426}\dmpnum{0427}{\input{items/0427}}\vspace{6mm}
+\setcounter{dmproblemcount}{427}\dmpnum{0428}{\input{items/0428}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{428}\dmpnum{0429}{\input{items/0429}}\vspace{6mm}
+\dmsection{유형 03 주어진 구간에서 함수가 증가(또는 감소)하기 위한 조건}
+\setcounter{dmproblemcount}{429}\dmpnum{0430}{\input{items/0430}}\vspace{6mm}
+\setcounter{dmproblemcount}{430}\dmpnum{0431}{\input{items/0431}}\vspace{6mm}
+\setcounter{dmproblemcount}{431}\dmpnum{0432}{\input{items/0432}}\vspace{6mm}
+\setcounter{dmproblemcount}{432}\dmpnum{0433}{\input{items/0433}}\vspace{6mm}
+\dmsection{유형 04 함수의 극대와 극소}
+\setcounter{dmproblemcount}{433}\dmpnum{0434}{\input{items/0434}}\vspace{6mm}
+\setcounter{dmproblemcount}{434}\dmpnum{0435}{\input{items/0435}}\vspace{6mm}
+\setcounter{dmproblemcount}{435}\dmpnum{0436}{\input{items/0436}}\vspace{6mm}
+\setcounter{dmproblemcount}{436}\dmpnum{0437}{\input{items/0437}}\vspace{6mm}
+\dmsection{유형 05 함수의 극값을 이용하여 미정계수 구하기}
+\setcounter{dmproblemcount}{437}\dmpnum{0438}{\input{items/0438}}\vspace{6mm}
+\setcounter{dmproblemcount}{438}\dmpnum{0439}{\input{items/0439}}\vspace{6mm}
+\setcounter{dmproblemcount}{439}\dmpnum{0440}{\input{items/0440}}\vspace{6mm}
+\setcounter{dmproblemcount}{440}\dmpnum{0441}{\input{items/0441}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{441}\dmpnum{0442}{\input{items/0442}}\vspace{6mm}
+\setcounter{dmproblemcount}{442}\dmpnum{0443}{\input{items/0443}}\vspace{6mm}
+\setcounter{dmproblemcount}{443}\dmpnum{0444}{\input{items/0444}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{444}\dmpnum{0445}{\input{items/0445}}\vspace{6mm}
+\dmsection{유형 06 $y=f'(x)$의 그래프와 $f(x)$의 극값}
+\vspace{3mm}\setcounter{dmproblemcount}{445}\dmpnum{0446}{\input{items/0446}}\vspace{6mm}
+\setcounter{dmproblemcount}{446}\dmpnum{0447}{\input{items/0447}}\vspace{6mm}
+\setcounter{dmproblemcount}{447}\dmpnum{0448}{\input{items/0448}}\vspace{6mm}
+\dmsection{유형 07 $y=f'(x)$의 그래프를 이용한 $f(x)$의 해석}
+\setcounter{dmproblemcount}{448}\dmpnum{0449}{\input{items/0449}}\vspace{6mm}
+\setcounter{dmproblemcount}{449}\dmpnum{0450}{\input{items/0450}}\vspace{6mm}
+\dmsection{유형 08 삼차함수가 극값을 가질 조건}
+\setcounter{dmproblemcount}{450}\dmpnum{0451}{\input{items/0451}}\vspace{6mm}
+\setcounter{dmproblemcount}{451}\dmpnum{0452}{\input{items/0452}}\vspace{6mm}
+\setcounter{dmproblemcount}{452}\dmpnum{0453}{\input{items/0453}}\vspace{6mm}
+\setcounter{dmproblemcount}{453}\dmpnum{0454}{\input{items/0454}}\vspace{6mm}
+\dmsection{유형 09 삼차함수가 극값을 갖지 않을 조건}
+\setcounter{dmproblemcount}{454}\dmpnum{0455}{\input{items/0455}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{455}\dmpnum{0456}{\input{items/0456}}\vspace{6mm}
+\setcounter{dmproblemcount}{456}\dmpnum{0457}{\input{items/0457}}\vspace{6mm}
+\setcounter{dmproblemcount}{457}\dmpnum{0458}{\input{items/0458}}\vspace{6mm}
+\dmsection{유형 10 주어진 구간에서 삼차함수가 극값을 가질 조건}
+\setcounter{dmproblemcount}{458}\dmpnum{0459}{\input{items/0459}}\vspace{6mm}
+\setcounter{dmproblemcount}{459}\dmpnum{0460}{\input{items/0460}}\vspace{6mm}
+\setcounter{dmproblemcount}{460}\dmpnum{0461}{\input{items/0461}}\vspace{6mm}
+\dmsection{유형 11 사차함수의 극값의 조건}
+\setcounter{dmproblemcount}{461}\dmpnum{0462}{\input{items/0462}}\vspace{6mm}
+\setcounter{dmproblemcount}{462}\dmpnum{0463}{\input{items/0463}}\vspace{6mm}
+\setcounter{dmproblemcount}{463}\dmpnum{0464}{\input{items/0464}}\vspace{6mm}
+\setcounter{dmproblemcount}{464}\dmpnum{0465}{\input{items/0465}}\vspace{6mm}
+\dmsection{유형 12 함수의 최댓값과 최솟값}
+\setcounter{dmproblemcount}{465}\dmpnum{0466}{\input{items/0466}}\vspace{6mm}
+\setcounter{dmproblemcount}{466}\dmpnum{0467}{\input{items/0467}}\vspace{6mm}
+\setcounter{dmproblemcount}{467}\dmpnum{0468}{\input{items/0468}}\vspace{6mm}
+\setcounter{dmproblemcount}{468}\dmpnum{0469}{\input{items/0469}}\vspace{6mm}
+\dmsection{유형 13 함수의 최대·최소를 이용하여 미정계수 구하기}
+\setcounter{dmproblemcount}{469}\dmpnum{0470}{\input{items/0470}}\vspace{6mm}
+\setcounter{dmproblemcount}{470}\dmpnum{0471}{\input{items/0471}}\vspace{6mm}
+\setcounter{dmproblemcount}{471}\dmpnum{0472}{\input{items/0472}}\vspace{6mm}
+\setcounter{dmproblemcount}{472}\dmpnum{0473}{\input{items/0473}}\vspace{6mm}
+\dmsection{유형 14 함수의 최대·최소의 활용}
+\setcounter{dmproblemcount}{473}\dmpnum{0474}{\input{items/0474}}\vspace{6mm}
+\setcounter{dmproblemcount}{474}\dmpnum{0475}{\input{items/0475}}\vspace{6mm}
+\setcounter{dmproblemcount}{475}\dmpnum{0476}{\input{items/0476}}\vspace{6mm}
+\setcounter{dmproblemcount}{476}\dmpnum{0477}{\input{items/0477}}\vspace{6mm}
+\setcounter{dmproblemcount}{477}\dmpnum{0478}{\input{items/0478}}\vspace{6mm}
+\setcounter{dmproblemcount}{478}\dmpnum{0479}{\input{items/0479}}\vspace{6mm}
+\setcounter{dmproblemcount}{479}\dmpnum{0480}{\input{items/0480}}\vspace{6mm}
+\dmsection{유형 UP 15 극값을 이용한 삼차함수의 계수의 부호의 결정}
+\setcounter{dmproblemcount}{480}\dmpnum{0481}{\input{items/0481}}\vspace{6mm}
+\setcounter{dmproblemcount}{481}\dmpnum{0482}{\input{items/0482}}\vspace{6mm}
+\dmsection{유형 UP 16 $y=f'(x)$의 그래프를 이용하여 $f(x)$의 그래프 그리기}
+\setcounter{dmproblemcount}{482}\dmpnum{0483}{\input{items/0483}}\vspace{6mm}
+\setcounter{dmproblemcount}{483}\dmpnum{0484}{\input{items/0484}}\vspace{6mm}
+\dmsection{시험에 꼭 나오는 문제}
+\setcounter{dmproblemcount}{484}\dmpnum{0485}{\input{items/0485}}\vspace{6mm}
+\setcounter{dmproblemcount}{485}\dmpnum{0486}{\input{items/0486}}\vspace{6mm}
+\setcounter{dmproblemcount}{486}\dmpnum{0487}{\input{items/0487}}\vspace{6mm}
+\setcounter{dmproblemcount}{487}\dmpnum{0488}{\input{items/0488}}\vspace{6mm}
+\setcounter{dmproblemcount}{488}\dmpnum{0489}{\input{items/0489}}\vspace{6mm}
+\setcounter{dmproblemcount}{489}\dmpnum{0490}{\input{items/0490}}\vspace{6mm}
+\setcounter{dmproblemcount}{490}\dmpnum{0491}{\input{items/0491}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{491}\dmpnum{0492}{\input{items/0492}}\vspace{6mm}
+\setcounter{dmproblemcount}{492}\dmpnum{0493}{\input{items/0493}}\vspace{6mm}
+\setcounter{dmproblemcount}{493}\dmpnum{0494}{\input{items/0494}}\vspace{6mm}
+\setcounter{dmproblemcount}{494}\dmpnum{0495}{\input{items/0495}}\vspace{6mm}
+\setcounter{dmproblemcount}{495}\dmpnum{0496}{\input{items/0496}}\vspace{6mm}
+\setcounter{dmproblemcount}{496}\dmpnum{0497}{\input{items/0497}}\vspace{6mm}
+\setcounter{dmproblemcount}{497}\dmpnum{0498}{\input{items/0498}}\vspace{6mm}
+\setcounter{dmproblemcount}{498}\dmpnum{0499}{\input{items/0499}}\vspace{6mm}
+\setcounter{dmproblemcount}{499}\dmpnum{0500}{\input{items/0500}}\vspace{6mm}
+\setcounter{dmproblemcount}{500}\dmpnum{0501}{\input{items/0501}}\vspace{6mm}
+\setcounter{dmproblemcount}{501}\dmpnum{0502}{\input{items/0502}}\vspace{6mm}
+\setcounter{dmproblemcount}{502}\dmpnum{0503}{\input{items/0503}}\vspace{6mm}
+\setcounter{dmproblemcount}{503}\dmpnum{0504}{\input{items/0504}}\vspace{6mm}
+\setcounter{dmproblemcount}{504}\dmpnum{0505}{\input{items/0505}}\vspace{6mm}
+\dmsection{서술형 주관식}
+\setcounter{dmproblemcount}{505}\dmpnum{0506}{\input{items/0506}}\vspace{6mm}
+\setcounter{dmproblemcount}{506}\dmpnum{0507}{\input{items/0507}}\vspace{6mm}
+\setcounter{dmproblemcount}{507}\dmpnum{0508}{\input{items/0508}}\vspace{6mm}
+\setcounter{dmproblemcount}{508}\dmpnum{0509}{\input{items/0509}}\vspace{6mm}
+\dmsection{실력 Up}
+\vspace{5mm}\setcounter{dmproblemcount}{509}\dmpnum{0510}{\input{items/0510}}\vspace{6mm}
+\setcounter{dmproblemcount}{510}\dmpnum{0511}{\input{items/0511}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{511}\dmpnum{0512}{\input{items/0512}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{06 도함수의 활용 (3)}
+\dmchapter{06}{도함수의 활용 (3)}
+\setcounter{dmproblemcount}{0}
+\dmsection{교과서 06-1 방정식에의 활용}
+\dmpassage{다음 방정식의 서로 다른 실근의 개수를 구하시오.}
+\setcounter{dmproblemcount}{512}\dmpnum{0513}{\input{items/0513}}\vspace{6mm}
+\setcounter{dmproblemcount}{513}\dmpnum{0514}{\input{items/0514}}\vspace{6mm}
+\setcounter{dmproblemcount}{514}\dmpnum{0515}{\input{items/0515}}\vspace{6mm}
+\setcounter{dmproblemcount}{515}\dmpnum{0516}{\input{items/0516}}\vspace{6mm}
+\setcounter{dmproblemcount}{516}\dmpnum{0517}{\input{items/0517}}\vspace{6mm}
+\dmsection{교과서 06-2 부등식에의 활용}
+\setcounter{dmproblemcount}{517}\dmpnum{0518}{\input{items/0518}}\vspace{6mm}
+\setcounter{dmproblemcount}{518}\dmpnum{0519}{\input{items/0519}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{519}\dmpnum{0520}{\input{items/0520}}\vspace{6mm}
+\dmsection{교과서 06-3 속도와 가속도}
+\dmpassage{수직선 위를 움직이는 점~$\pt{P}$의 시각 $t$에서의 위치 $x$가 다음과 같을 때, 시각 $t=2$에서의 점~$\pt{P}$의 속도와 가속도를 구하시오.}
+\setcounter{dmproblemcount}{520}\dmpnum{0521}{\input{items/0521}}\vspace{6mm}
+\setcounter{dmproblemcount}{521}\dmpnum{0522}{\input{items/0522}}\vspace{6mm}
+\setcounter{dmproblemcount}{522}\dmpnum{0523}{\input{items/0523}}\vspace{6mm}
+\setcounter{dmproblemcount}{523}\dmpnum{0524}{\input{items/0524}}\vspace{6mm}
+\setcounter{dmproblemcount}{524}\dmpnum{0525}{\input{items/0525}}\vspace{6mm}
+\dmsection{유형 01 방정식 $f(x)=k$의 실근의 개수}
+\setcounter{dmproblemcount}{525}\dmpnum{0526}{\input{items/0526}}\vspace{6mm}
+\setcounter{dmproblemcount}{526}\dmpnum{0527}{\input{items/0527}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{527}\dmpnum{0528}{\input{items/0528}}\vspace{6mm}
+\setcounter{dmproblemcount}{528}\dmpnum{0529}{\input{items/0529}}\vspace{6mm}
+\dmsection{유형 02 방정식 $f(x)=k$의 실근의 부호}
+\vspace{3mm}\setcounter{dmproblemcount}{529}\dmpnum{0530}{\input{items/0530}}\vspace{6mm}
+\setcounter{dmproblemcount}{530}\dmpnum{0531}{\input{items/0531}}\vspace{6mm}
+\setcounter{dmproblemcount}{531}\dmpnum{0532}{\input{items/0532}}\vspace{6mm}
+\setcounter{dmproblemcount}{532}\dmpnum{0533}{\input{items/0533}}\vspace{6mm}
+\dmsection{유형 03 극값을 이용한 삼차방정식의 근의 판별}
+\setcounter{dmproblemcount}{533}\dmpnum{0534}{\input{items/0534}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{534}\dmpnum{0535}{\input{items/0535}}\vspace{6mm}
+\setcounter{dmproblemcount}{535}\dmpnum{0536}{\input{items/0536}}\vspace{6mm}
+\setcounter{dmproblemcount}{536}\dmpnum{0537}{\input{items/0537}}\vspace{6mm}
+\dmsection{유형 04 두 곡선의 교점의 개수}
+\setcounter{dmproblemcount}{537}\dmpnum{0538}{\input{items/0538}}\vspace{6mm}
+\setcounter{dmproblemcount}{538}\dmpnum{0539}{\input{items/0539}}\vspace{6mm}
+\setcounter{dmproblemcount}{539}\dmpnum{0540}{\input{items/0540}}\vspace{6mm}
+\setcounter{dmproblemcount}{540}\dmpnum{0541}{\input{items/0541}}\vspace{6mm}
+\dmsection{유형 05 모든 실수에서 부등식이 성립할 조건}
+\setcounter{dmproblemcount}{541}\dmpnum{0542}{\input{items/0542}}\vspace{6mm}
+\setcounter{dmproblemcount}{542}\dmpnum{0543}{\input{items/0543}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{543}\dmpnum{0544}{\input{items/0544}}\vspace{6mm}
+\setcounter{dmproblemcount}{544}\dmpnum{0545}{\input{items/0545}}\vspace{6mm}
+\dmsection{유형 06 주어진 구간에서 부등식이 성립할 조건; 증가·감소의 활용}
+\setcounter{dmproblemcount}{545}\dmpnum{0546}{\input{items/0546}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{546}\dmpnum{0547}{\input{items/0547}}\vspace{6mm}
+\setcounter{dmproblemcount}{547}\dmpnum{0548}{\input{items/0548}}\vspace{6mm}
+\dmsection{유형 07 주어진 구간에서 부등식이 성립할 조건; 최대·최소의 활용}
+\setcounter{dmproblemcount}{548}\dmpnum{0549}{\input{items/0549}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{549}\dmpnum{0550}{\input{items/0550}}\vspace{6mm}
+\setcounter{dmproblemcount}{550}\dmpnum{0551}{\input{items/0551}}\vspace{6mm}
+\dmsection{유형 08 속도와 가속도 (1)}
+\setcounter{dmproblemcount}{551}\dmpnum{0552}{\input{items/0552}}\vspace{6mm}
+\setcounter{dmproblemcount}{552}\dmpnum{0553}{\input{items/0553}}\vspace{6mm}
+\setcounter{dmproblemcount}{553}\dmpnum{0554}{\input{items/0554}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{554}\dmpnum{0555}{\input{items/0555}}\vspace{6mm}
+\dmsection{유형 09 속도와 가속도 (2)}
+\vspace{3mm}\setcounter{dmproblemcount}{555}\dmpnum{0556}{\input{items/0556}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{556}\dmpnum{0557}{\input{items/0557}}\vspace{6mm}
+\setcounter{dmproblemcount}{557}\dmpnum{0558}{\input{items/0558}}\vspace{6mm}
+\dmsection{유형 10 속도와 운동 방향}
+\setcounter{dmproblemcount}{558}\dmpnum{0559}{\input{items/0559}}\vspace{6mm}
+\setcounter{dmproblemcount}{559}\dmpnum{0560}{\input{items/0560}}\vspace{6mm}
+\setcounter{dmproblemcount}{560}\dmpnum{0561}{\input{items/0561}}\vspace{6mm}
+\setcounter{dmproblemcount}{561}\dmpnum{0562}{\input{items/0562}}\vspace{6mm}
+\dmsection{유형 11 속도의 그래프의 해석}
+\setcounter{dmproblemcount}{562}\dmpnum{0563}{\input{items/0563}}\vspace{6mm}
+\setcounter{dmproblemcount}{563}\dmpnum{0564}{\input{items/0564}}\vspace{6mm}
+\dmsection{유형 12 위로 던진 물체의 위치와 속도}
+\setcounter{dmproblemcount}{564}\dmpnum{0565}{\input{items/0565}}\vspace{6mm}
+\setcounter{dmproblemcount}{565}\dmpnum{0566}{\input{items/0566}}\vspace{6mm}
+\setcounter{dmproblemcount}{566}\dmpnum{0567}{\input{items/0567}}\vspace{6mm}
+\dmsection{유형 13 시각에 대한 길이의 변화율}
+\setcounter{dmproblemcount}{567}\dmpnum{0568}{\input{items/0568}}\vspace{6mm}
+\setcounter{dmproblemcount}{568}\dmpnum{0569}{\input{items/0569}}\vspace{6mm}
+\setcounter{dmproblemcount}{569}\dmpnum{0570}{\input{items/0570}}\vspace{6mm}
+\dmsection{유형 14 시각에 대한 넓이의 변화율}
+\setcounter{dmproblemcount}{570}\dmpnum{0571}{\input{items/0571}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{571}\dmpnum{0572}{\input{items/0572}}\vspace{6mm}
+\setcounter{dmproblemcount}{572}\dmpnum{0573}{\input{items/0573}}\vspace{6mm}
+\dmsection{유형 15 시각에 대한 부피의 변화율}
+\setcounter{dmproblemcount}{573}\dmpnum{0574}{\input{items/0574}}\vspace{6mm}
+\setcounter{dmproblemcount}{574}\dmpnum{0575}{\input{items/0575}}\vspace{6mm}
+\setcounter{dmproblemcount}{575}\dmpnum{0576}{\input{items/0576}}\vspace{6mm}
+\dmsection{유형 UP 16 위치의 그래프의 해석}
+\setcounter{dmproblemcount}{576}\dmpnum{0577}{\input{items/0577}}\vspace{6mm}
+\setcounter{dmproblemcount}{577}\dmpnum{0578}{\input{items/0578}}\vspace{6mm}
+\dmsection{시험에 꼭 나오는 문제}
+\setcounter{dmproblemcount}{578}\dmpnum{0579}{\input{items/0579}}\vspace{6mm}
+\setcounter{dmproblemcount}{579}\dmpnum{0580}{\input{items/0580}}\vspace{6mm}
+\setcounter{dmproblemcount}{580}\dmpnum{0581}{\input{items/0581}}\vspace{6mm}
+\setcounter{dmproblemcount}{581}\dmpnum{0582}{\input{items/0582}}\vspace{6mm}
+\setcounter{dmproblemcount}{582}\dmpnum{0583}{\input{items/0583}}\vspace{6mm}
+\setcounter{dmproblemcount}{583}\dmpnum{0584}{\input{items/0584}}\vspace{6mm}
+\setcounter{dmproblemcount}{584}\dmpnum{0585}{\input{items/0585}}\vspace{6mm}
+\setcounter{dmproblemcount}{585}\dmpnum{0586}{\input{items/0586}}\vspace{6mm}
+\setcounter{dmproblemcount}{586}\dmpnum{0587}{\input{items/0587}}\vspace{6mm}
+\setcounter{dmproblemcount}{587}\dmpnum{0588}{\input{items/0588}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{588}\dmpnum{0589}{\input{items/0589}}\vspace{6mm}
+\setcounter{dmproblemcount}{589}\dmpnum{0590}{\input{items/0590}}\vspace{6mm}
+\setcounter{dmproblemcount}{590}\dmpnum{0591}{\input{items/0591}}\vspace{6mm}
+\setcounter{dmproblemcount}{591}\dmpnum{0592}{\input{items/0592}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{592}\dmpnum{0593}{\input{items/0593}}\vspace{6mm}
+\setcounter{dmproblemcount}{593}\dmpnum{0594}{\input{items/0594}}\vspace{6mm}
+\setcounter{dmproblemcount}{594}\dmpnum{0595}{\input{items/0595}}\vspace{6mm}
+\setcounter{dmproblemcount}{595}\dmpnum{0596}{\input{items/0596}}\vspace{6mm}
+\setcounter{dmproblemcount}{596}\dmpnum{0597}{\input{items/0597}}\vspace{6mm}
+\setcounter{dmproblemcount}{597}\dmpnum{0598}{\input{items/0598}}\vspace{6mm}
+\dmsection{서술형 주관식}
+\setcounter{dmproblemcount}{598}\dmpnum{0599}{\input{items/0599}}\vspace{6mm}
+\setcounter{dmproblemcount}{599}\dmpnum{0600}{\input{items/0600}}\vspace{6mm}
+\setcounter{dmproblemcount}{600}\dmpnum{0601}{\input{items/0601}}\vspace{6mm}
+\setcounter{dmproblemcount}{601}\dmpnum{0602}{\input{items/0602}}\vspace{6mm}
+\dmsection{실력 Up}
+\setcounter{dmproblemcount}{602}\dmpnum{0603}{\input{items/0603}}\vspace{6mm}
+\setcounter{dmproblemcount}{603}\dmpnum{0604}{\input{items/0604}}\vspace{6mm}
+\setcounter{dmproblemcount}{604}\dmpnum{0605}{\input{items/0605}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{07 부정적분}
+\dmchapter{07}{부정적분}
+\setcounter{dmproblemcount}{0}
+\dmsection{교과서 07-1 부정적분}
+\vspace{3mm}\setcounter{dmproblemcount}{605}\dmpnum{0606}{\input{items/0606}}\vspace{6mm}
+\dmpassage{다음 등식을 만족시키는 함수 $f(x)$를 구하시오. \cond{$C$는 적분상수이다.}}
+\vspace{3mm}\setcounter{dmproblemcount}{606}\dmpnum{0607}{\input{items/0607}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{607}\dmpnum{0608}{\input{items/0608}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{608}\dmpnum{0609}{\input{items/0609}}\vspace{6mm}
+\dmsection{교과서 07-2 부정적분과 미분의 관계}
+\dmpassage{다음을 계산하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{609}\dmpnum{0610}{\input{items/0610}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{610}\dmpnum{0611}{\input{items/0611}}\vspace{6mm}
+\dmsection{교과서 07-3 함수 $y=x^n$의 부정적분}
+\dmpassage{다음 부정적분을 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{611}\dmpnum{0612}{\input{items/0612}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{612}\dmpnum{0613}{\input{items/0613}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{613}\dmpnum{0614}{\input{items/0614}}\vspace{6mm}
+\dmsection{교과서 07-4 함수의 실수배, 합, 차의 부정적분}
+\dmpassage{다음 부정적분을 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{614}\dmpnum{0615}{\input{items/0615}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{615}\dmpnum{0616}{\input{items/0616}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{616}\dmpnum{0617}{\input{items/0617}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{617}\dmpnum{0618}{\input{items/0618}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{618}\dmpnum{0619}{\input{items/0619}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{619}\dmpnum{0620}{\input{items/0620}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{620}\dmpnum{0621}{\input{items/0621}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{621}\dmpnum{0622}{\input{items/0622}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{622}\dmpnum{0623}{\input{items/0623}}\vspace{6mm}
+\dmsection{유형 01 부정적분의 정의}
+\vspace{3mm}\setcounter{dmproblemcount}{623}\dmpnum{0624}{\input{items/0624}}\vspace{6mm}
+\setcounter{dmproblemcount}{624}\dmpnum{0625}{\input{items/0625}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{625}\dmpnum{0626}{\input{items/0626}}\vspace{6mm}
+\setcounter{dmproblemcount}{626}\dmpnum{0627}{\input{items/0627}}\vspace{6mm}
+\dmsection{유형 02 부정적분과 미분의 관계}
+\vspace{3mm}\setcounter{dmproblemcount}{627}\dmpnum{0628}{\input{items/0628}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{628}\dmpnum{0629}{\input{items/0629}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{629}\dmpnum{0630}{\input{items/0630}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{630}\dmpnum{0631}{\input{items/0631}}\vspace{6mm}
+\dmsection{유형 03 부정적분과 미분의 관계를 이용하여 함수 구하기}
+\vspace{3mm}\setcounter{dmproblemcount}{631}\dmpnum{0632}{\input{items/0632}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{632}\dmpnum{0633}{\input{items/0633}}\vspace{6mm}
+\setcounter{dmproblemcount}{633}\dmpnum{0634}{\input{items/0634}}\vspace{6mm}
+\dmsection{유형 04 부정적분 구하기}
+\vspace{3mm}\setcounter{dmproblemcount}{634}\dmpnum{0635}{\input{items/0635}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{635}\dmpnum{0636}{\input{items/0636}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{636}\dmpnum{0637}{\input{items/0637}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{637}\dmpnum{0638}{\input{items/0638}}\vspace{6mm}
+\dmsection{유형 05 $f'(x)$가 주어질 때 $f(x)$ 구하기}
+\setcounter{dmproblemcount}{638}\dmpnum{0639}{\input{items/0639}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{639}\dmpnum{0640}{\input{items/0640}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{640}\dmpnum{0641}{\input{items/0641}}\vspace{6mm}
+\setcounter{dmproblemcount}{641}\dmpnum{0642}{\input{items/0642}}\vspace{6mm}
+\dmsection{유형 06 접선의 기울기와 부정적분}
+\setcounter{dmproblemcount}{642}\dmpnum{0643}{\input{items/0643}}\vspace{6mm}
+\setcounter{dmproblemcount}{643}\dmpnum{0644}{\input{items/0644}}\vspace{6mm}
+\setcounter{dmproblemcount}{644}\dmpnum{0645}{\input{items/0645}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{645}\dmpnum{0646}{\input{items/0646}}\vspace{6mm}
+\dmsection{유형 07 $f(x)$와 그 부정적분의 관계식이 주어질 때 $f(x)$ 구하기}
+\setcounter{dmproblemcount}{646}\dmpnum{0647}{\input{items/0647}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{647}\dmpnum{0648}{\input{items/0648}}\vspace{6mm}
+\setcounter{dmproblemcount}{648}\dmpnum{0649}{\input{items/0649}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{649}\dmpnum{0650}{\input{items/0650}}\vspace{6mm}
+\dmsection{유형 08 함수의 연속과 부정적분}
+\vspace{5mm}\setcounter{dmproblemcount}{650}\dmpnum{0651}{\input{items/0651}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{651}\dmpnum{0652}{\input{items/0652}}\vspace{6mm}
+\setcounter{dmproblemcount}{652}\dmpnum{0653}{\input{items/0653}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{653}\dmpnum{0654}{\input{items/0654}}\vspace{6mm}
+\dmsection{유형 09 미분계수와 부정적분}
+\vspace{3mm}\setcounter{dmproblemcount}{654}\dmpnum{0655}{\input{items/0655}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{655}\dmpnum{0656}{\input{items/0656}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{656}\dmpnum{0657}{\input{items/0657}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{657}\dmpnum{0658}{\input{items/0658}}\vspace{6mm}
+\dmsection{유형 UP 10 관계식을 만족시키는 함수 구하기}
+\setcounter{dmproblemcount}{658}\dmpnum{0659}{\input{items/0659}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{659}\dmpnum{0660}{\input{items/0660}}\vspace{6mm}
+\setcounter{dmproblemcount}{660}\dmpnum{0661}{\input{items/0661}}\vspace{6mm}
+\dmsection{유형 UP 11 극값과 부정적분}
+\setcounter{dmproblemcount}{661}\dmpnum{0662}{\input{items/0662}}\vspace{6mm}
+\setcounter{dmproblemcount}{662}\dmpnum{0663}{\input{items/0663}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{663}\dmpnum{0664}{\input{items/0664}}\vspace{6mm}
+\setcounter{dmproblemcount}{664}\dmpnum{0665}{\input{items/0665}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{665}\dmpnum{0666}{\input{items/0666}}\vspace{6mm}
+\setcounter{dmproblemcount}{666}\dmpnum{0667}{\input{items/0667}}\vspace{6mm}
+\dmsection{시험에 꼭 나오는 문제}
+\setcounter{dmproblemcount}{667}\dmpnum{0668}{\input{items/0668}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{668}\dmpnum{0669}{\input{items/0669}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{669}\dmpnum{0670}{\input{items/0670}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{670}\dmpnum{0671}{\input{items/0671}}\vspace{6mm}
+\setcounter{dmproblemcount}{671}\dmpnum{0672}{\input{items/0672}}\vspace{6mm}
+\setcounter{dmproblemcount}{672}\dmpnum{0673}{\input{items/0673}}\vspace{6mm}
+\setcounter{dmproblemcount}{673}\dmpnum{0674}{\input{items/0674}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{674}\dmpnum{0675}{\input{items/0675}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{675}\dmpnum{0676}{\input{items/0676}}\vspace{6mm}
+\setcounter{dmproblemcount}{676}\dmpnum{0677}{\input{items/0677}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{677}\dmpnum{0678}{\input{items/0678}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{678}\dmpnum{0679}{\input{items/0679}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{679}\dmpnum{0680}{\input{items/0680}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{680}\dmpnum{0681}{\input{items/0681}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{681}\dmpnum{0682}{\input{items/0682}}\vspace{6mm}
+\dmsection{서술형 주관식}
+\vspace{3mm}\setcounter{dmproblemcount}{682}\dmpnum{0683}{\input{items/0683}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{683}\dmpnum{0684}{\input{items/0684}}\vspace{6mm}
+\setcounter{dmproblemcount}{684}\dmpnum{0685}{\input{items/0685}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{685}\dmpnum{0686}{\input{items/0686}}\vspace{6mm}
+\dmsection{실력 Up}
+\vspace{3mm}\setcounter{dmproblemcount}{686}\dmpnum{0687}{\input{items/0687}}\vspace{6mm}
+\setcounter{dmproblemcount}{687}\dmpnum{0688}{\input{items/0688}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{688}\dmpnum{0689}{\input{items/0689}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{08 정적분}
+\dmchapter{08}{정적분}
+\setcounter{dmproblemcount}{0}
+\dmsection{교과서 08-1 정적분}
+\dmpassage{다음 정적분의 값을 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{689}\dmpnum{0690}{\input{items/0690}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{690}\dmpnum{0691}{\input{items/0691}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{691}\dmpnum{0692}{\input{items/0692}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{692}\dmpnum{0693}{\input{items/0693}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{693}\dmpnum{0694}{\input{items/0694}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{694}\dmpnum{0695}{\input{items/0695}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{695}\dmpnum{0696}{\input{items/0696}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{696}\dmpnum{0697}{\input{items/0697}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{697}\dmpnum{0698}{\input{items/0698}}\vspace{6mm}
+\dmsection{교과서 08-2 정적분의 성질}
+\dmpassage{다음 정적분의 값을 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{698}\dmpnum{0699}{\input{items/0699}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{699}\dmpnum{0700}{\input{items/0700}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{700}\dmpnum{0701}{\input{items/0701}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{701}\dmpnum{0702}{\input{items/0702}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{702}\dmpnum{0703}{\input{items/0703}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{703}\dmpnum{0704}{\input{items/0704}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{704}\dmpnum{0705}{\input{items/0705}}\vspace{6mm}
+\dmsection{교과서 08-3 정적분 $\int_{-a}^{a}x^n\mkern3mu dx$의 계산}
+\dmpassage{다음 정적분의 값을 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{705}\dmpnum{0706}{\input{items/0706}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{706}\dmpnum{0707}{\input{items/0707}}\vspace{6mm}
+\dmsection{교과서 08-4 정적분으로 정의된 함수}
+\dmpassage{모든 실수 $x$에 대하여 다음 등식이 성립할 때, $f(x)$를 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{707}\dmpnum{0708}{\input{items/0708}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{708}\dmpnum{0709}{\input{items/0709}}\vspace{6mm}
+\dmpassage{다음 극한값을 구하시오.}
+\vspace{3mm}\setcounter{dmproblemcount}{709}\dmpnum{0710}{\input{items/0710}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{710}\dmpnum{0711}{\input{items/0711}}\vspace{6mm}
+\dmsection{유형 01 미적분의 기본정리}
+\vspace{3mm}\setcounter{dmproblemcount}{711}\dmpnum{0712}{\input{items/0712}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{712}\dmpnum{0713}{\input{items/0713}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{713}\dmpnum{0714}{\input{items/0714}}\vspace{6mm}
+\setcounter{dmproblemcount}{714}\dmpnum{0715}{\input{items/0715}}\vspace{6mm}
+\dmsection{유형 02 미적분의 기본정리의 활용}
+\vspace{3mm}\setcounter{dmproblemcount}{715}\dmpnum{0716}{\input{items/0716}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{716}\dmpnum{0717}{\input{items/0717}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{717}\dmpnum{0718}{\input{items/0718}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{718}\dmpnum{0719}{\input{items/0719}}\vspace{6mm}
+\dmsection{유형 03 정적분의 계산: 적분 구간이 같은 경우}
+\vspace{3mm}\setcounter{dmproblemcount}{719}\dmpnum{0720}{\input{items/0720}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{720}\dmpnum{0721}{\input{items/0721}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{721}\dmpnum{0722}{\input{items/0722}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{722}\dmpnum{0723}{\input{items/0723}}\vspace{6mm}
+\dmsection{유형 04 정적분의 계산: 피적분함수가 같은 경우}
+\vspace{3mm}\setcounter{dmproblemcount}{723}\dmpnum{0724}{\input{items/0724}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{724}\dmpnum{0725}{\input{items/0725}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{725}\dmpnum{0726}{\input{items/0726}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{726}\dmpnum{0727}{\input{items/0727}}\vspace{6mm}
+\dmsection{유형 05 구간에 따라 다르게 정의된 함수의 정적분}
+\vspace{5mm}\setcounter{dmproblemcount}{727}\dmpnum{0728}{\input{items/0728}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{728}\dmpnum{0729}{\input{items/0729}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{729}\dmpnum{0730}{\input{items/0730}}\vspace{6mm}
+\dmsection{유형 06 절댓값 기호를 포함한 함수의 정적분}
+\vspace{3mm}\setcounter{dmproblemcount}{730}\dmpnum{0731}{\input{items/0731}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{731}\dmpnum{0732}{\input{items/0732}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{732}\dmpnum{0733}{\input{items/0733}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{733}\dmpnum{0734}{\input{items/0734}}\vspace{6mm}
+\dmsection{유형 07 우함수와 기함수의 정적분; 피적분함수가 주어진 경우}
+\vspace{3mm}\setcounter{dmproblemcount}{734}\dmpnum{0735}{\input{items/0735}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{735}\dmpnum{0736}{\input{items/0736}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{736}\dmpnum{0737}{\input{items/0737}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{737}\dmpnum{0738}{\input{items/0738}}\vspace{6mm}
+\dmsection{유형 08 우함수와 기함수의 정적분; 피적분함수가 주어지지 않은 경우}
+\vspace{3mm}\setcounter{dmproblemcount}{738}\dmpnum{0739}{\input{items/0739}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{739}\dmpnum{0740}{\input{items/0740}}\vspace{6mm}
+\setcounter{dmproblemcount}{740}\dmpnum{0741}{\input{items/0741}}\vspace{6mm}
+\dmsection{유형 09 적분 구간이 상수인 등식}
+\vspace{3mm}\setcounter{dmproblemcount}{741}\dmpnum{0742}{\input{items/0742}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{742}\dmpnum{0743}{\input{items/0743}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{743}\dmpnum{0744}{\input{items/0744}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{744}\dmpnum{0745}{\input{items/0745}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{745}\dmpnum{0746}{\input{items/0746}}\vspace{6mm}
+\dmsection{유형 10 적분 구간에 변수가 있는 등식}
+\vspace{3mm}\setcounter{dmproblemcount}{746}\dmpnum{0747}{\input{items/0747}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{747}\dmpnum{0748}{\input{items/0748}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{748}\dmpnum{0749}{\input{items/0749}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{749}\dmpnum{0750}{\input{items/0750}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{750}\dmpnum{0751}{\input{items/0751}}\vspace{6mm}
+\dmsection{유형 11 적분 구간과 피적분함수에 변수가 있는 등식}
+\vspace{3mm}\setcounter{dmproblemcount}{751}\dmpnum{0752}{\input{items/0752}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{752}\dmpnum{0753}{\input{items/0753}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{753}\dmpnum{0754}{\input{items/0754}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{754}\dmpnum{0755}{\input{items/0755}}\vspace{6mm}
+\dmsection{유형 12 정적분으로 정의된 함수의 극한; $\lim\limits_{x\to a}\frac{1}{x-a}\int_{a}^{x}f(t)\mkern3mu dt$의 꼴}
+\vspace{3mm}\setcounter{dmproblemcount}{755}\dmpnum{0756}{\input{items/0756}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{756}\dmpnum{0757}{\input{items/0757}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{757}\dmpnum{0758}{\input{items/0758}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{758}\dmpnum{0759}{\input{items/0759}}\vspace{6mm}
+\dmsection{유형 13 정적분으로 정의된 함수의 극한; $\lim\limits_{x\to 0}\frac{1}{x}\int_{a}^{x+a}f(t)\mkern3mu dt$의 꼴}
+\vspace{3mm}\setcounter{dmproblemcount}{759}\dmpnum{0760}{\input{items/0760}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{760}\dmpnum{0761}{\input{items/0761}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{761}\dmpnum{0762}{\input{items/0762}}\vspace{6mm}
+\setcounter{dmproblemcount}{762}\dmpnum{0763}{\input{items/0763}}\vspace{6mm}
+\dmsection{유형 UP 14 주기함수의 정적분}
+\vspace{3mm}\setcounter{dmproblemcount}{763}\dmpnum{0764}{\input{items/0764}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{764}\dmpnum{0765}{\input{items/0765}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{765}\dmpnum{0766}{\input{items/0766}}\vspace{6mm}
+\dmsection{유형 UP 15 정적분으로 정의된 함수의 극대·극소}
+\vspace{3mm}\setcounter{dmproblemcount}{766}\dmpnum{0767}{\input{items/0767}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{767}\dmpnum{0768}{\input{items/0768}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{768}\dmpnum{0769}{\input{items/0769}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{769}\dmpnum{0770}{\input{items/0770}}\vspace{6mm}
+\dmsection{유형 UP 16 정적분으로 정의된 함수의 최대·최소}
+\vspace{3mm}\setcounter{dmproblemcount}{770}\dmpnum{0771}{\input{items/0771}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{771}\dmpnum{0772}{\input{items/0772}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{772}\dmpnum{0773}{\input{items/0773}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{773}\dmpnum{0774}{\input{items/0774}}\vspace{6mm}
+\dmsection{유형 UP 17 정적분으로 정의된 함수: 그래프}
+\vspace{3mm}\setcounter{dmproblemcount}{774}\dmpnum{0775}{\input{items/0775}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{775}\dmpnum{0776}{\input{items/0776}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{776}\dmpnum{0777}{\input{items/0777}}\vspace{6mm}
+\dmsection{시험에 꼭 나오는 문제}
+\vspace{3mm}\setcounter{dmproblemcount}{777}\dmpnum{0778}{\input{items/0778}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{778}\dmpnum{0779}{\input{items/0779}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{779}\dmpnum{0780}{\input{items/0780}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{780}\dmpnum{0781}{\input{items/0781}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{781}\dmpnum{0782}{\input{items/0782}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{782}\dmpnum{0783}{\input{items/0783}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{783}\dmpnum{0784}{\input{items/0784}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{784}\dmpnum{0785}{\input{items/0785}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{785}\dmpnum{0786}{\input{items/0786}}\vspace{6mm}
+\setcounter{dmproblemcount}{786}\dmpnum{0787}{\input{items/0787}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{787}\dmpnum{0788}{\input{items/0788}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{788}\dmpnum{0789}{\input{items/0789}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{789}\dmpnum{0790}{\input{items/0790}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{790}\dmpnum{0791}{\input{items/0791}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{791}\dmpnum{0792}{\input{items/0792}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{792}\dmpnum{0793}{\input{items/0793}}\vspace{6mm}
+\dmsection{서술형 주관식}
+\vspace{5mm}\setcounter{dmproblemcount}{793}\dmpnum{0794}{\input{items/0794}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{794}\dmpnum{0795}{\input{items/0795}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{795}\dmpnum{0796}{\input{items/0796}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{796}\dmpnum{0797}{\input{items/0797}}\vspace{6mm}
+\dmsection{실력 Up}
+\setcounter{dmproblemcount}{797}\dmpnum{0798}{\input{items/0798}}\vspace{6mm}
+\setcounter{dmproblemcount}{798}\dmpnum{0799}{\input{items/0799}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{799}\dmpnum{0800}{\input{items/0800}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{09 정적분의 활용}
+\dmchapter{09}{정적분의 활용}
+\setcounter{dmproblemcount}{0}
+\dmsection{교과서 09-1 곡선과 $x$축 사이의 넓이}
+\dmpassage{다음 그림과 같이 곡선과 $x$축으로 둘러싸인 도형의 넓이를 구하시오.}
+\setcounter{dmproblemcount}{800}\dmpnum{0801}{\input{items/0801}}\vspace{6mm}
+\setcounter{dmproblemcount}{801}\dmpnum{0802}{\input{items/0802}}\vspace{6mm}
+\dmpassage{다음 곡선과 $x$축으로 둘러싸인 도형의 넓이를 구하시오.}
+\setcounter{dmproblemcount}{802}\dmpnum{0803}{\input{items/0803}}\vspace{6mm}
+\setcounter{dmproblemcount}{803}\dmpnum{0804}{\input{items/0804}}\vspace{6mm}
+\dmpassage{다음 그림과 같이 곡선과 $x$축 및 두 직선으로 둘러싸인 도형의 넓이를 구하시오.}
+\setcounter{dmproblemcount}{804}\dmpnum{0805}{\input{items/0805}}\vspace{6mm}
+\setcounter{dmproblemcount}{805}\dmpnum{0806}{\input{items/0806}}\vspace{6mm}
+\setcounter{dmproblemcount}{806}\dmpnum{0807}{\input{items/0807}}\vspace{6mm}
+\dmsection{교과서 09-2 두 곡선 사이의 넓이}
+\setcounter{dmproblemcount}{807}\dmpnum{0808}{\input{items/0808}}\vspace{6mm}
+\dmpassage{다음 곡선과 직선으로 둘러싸인 도형의 넓이를 구하시오.}
+\setcounter{dmproblemcount}{808}\dmpnum{0809}{\input{items/0809}}\vspace{6mm}
+\setcounter{dmproblemcount}{809}\dmpnum{0810}{\input{items/0810}}\vspace{6mm}
+\setcounter{dmproblemcount}{810}\dmpnum{0811}{\input{items/0811}}\vspace{6mm}
+\dmpassage{다음 두 곡선으로 둘러싸인 도형의 넓이를 구하시오.}
+\setcounter{dmproblemcount}{811}\dmpnum{0812}{\input{items/0812}}\vspace{6mm}
+\setcounter{dmproblemcount}{812}\dmpnum{0813}{\input{items/0813}}\vspace{6mm}
+\dmsection{교과서 09-3 수직선 위를 움직이는 점의 위치와 움직인 거리}
+\setcounter{dmproblemcount}{813}\dmpnum{0814}{\input{items/0814}}\vspace{6mm}
+\dmsection{유형 01 곡선과 $x$축 사이의 넓이}
+\setcounter{dmproblemcount}{814}\dmpnum{0815}{\input{items/0815}}\vspace{6mm}
+\setcounter{dmproblemcount}{815}\dmpnum{0816}{\input{items/0816}}\vspace{6mm}
+\setcounter{dmproblemcount}{816}\dmpnum{0817}{\input{items/0817}}\vspace{6mm}
+\setcounter{dmproblemcount}{817}\dmpnum{0818}{\input{items/0818}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{818}\dmpnum{0819}{\input{items/0819}}\vspace{6mm}
+\setcounter{dmproblemcount}{819}\dmpnum{0820}{\input{items/0820}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{820}\dmpnum{0821}{\input{items/0821}}\vspace{6mm}
+\dmsection{유형 02 곡선과 직선 사이의 넓이}
+\setcounter{dmproblemcount}{821}\dmpnum{0822}{\input{items/0822}}\vspace{6mm}
+\setcounter{dmproblemcount}{822}\dmpnum{0823}{\input{items/0823}}\vspace{6mm}
+\setcounter{dmproblemcount}{823}\dmpnum{0824}{\input{items/0824}}\vspace{6mm}
+\setcounter{dmproblemcount}{824}\dmpnum{0825}{\input{items/0825}}\vspace{6mm}
+\dmsection{유형 03 두 곡선 사이의 넓이}
+\setcounter{dmproblemcount}{825}\dmpnum{0826}{\input{items/0826}}\vspace{6mm}
+\setcounter{dmproblemcount}{826}\dmpnum{0827}{\input{items/0827}}\vspace{6mm}
+\setcounter{dmproblemcount}{827}\dmpnum{0828}{\input{items/0828}}\vspace{6mm}
+\setcounter{dmproblemcount}{828}\dmpnum{0829}{\input{items/0829}}\vspace{6mm}
+\dmsection{유형 04 절댓값 기호를 포함한 함수의 그래프와 넓이}
+\setcounter{dmproblemcount}{829}\dmpnum{0830}{\input{items/0830}}\vspace{6mm}
+\setcounter{dmproblemcount}{830}\dmpnum{0831}{\input{items/0831}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{831}\dmpnum{0832}{\input{items/0832}}\vspace{6mm}
+\dmsection{유형 05 곡선과 접선으로 둘러싸인 도형의 넓이}
+\setcounter{dmproblemcount}{832}\dmpnum{0833}{\input{items/0833}}\vspace{6mm}
+\setcounter{dmproblemcount}{833}\dmpnum{0834}{\input{items/0834}}\vspace{6mm}
+\setcounter{dmproblemcount}{834}\dmpnum{0835}{\input{items/0835}}\vspace{6mm}
+\dmsection{유형 06 두 도형의 넓이가 같은 경우}
+\setcounter{dmproblemcount}{835}\dmpnum{0836}{\input{items/0836}}\vspace{6mm}
+\setcounter{dmproblemcount}{836}\dmpnum{0837}{\input{items/0837}}\vspace{6mm}
+\setcounter{dmproblemcount}{837}\dmpnum{0838}{\input{items/0838}}\vspace{6mm}
+\dmsection{유형 07 넓이를 이등분하는 경우}
+\setcounter{dmproblemcount}{838}\dmpnum{0839}{\input{items/0839}}\vspace{6mm}
+\setcounter{dmproblemcount}{839}\dmpnum{0840}{\input{items/0840}}\vspace{6mm}
+\setcounter{dmproblemcount}{840}\dmpnum{0841}{\input{items/0841}}\vspace{6mm}
+\dmsection{유형 08 넓이의 최솟값}
+\setcounter{dmproblemcount}{841}\dmpnum{0842}{\input{items/0842}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{842}\dmpnum{0843}{\input{items/0843}}\vspace{6mm}
+\setcounter{dmproblemcount}{843}\dmpnum{0844}{\input{items/0844}}\vspace{6mm}
+\dmsection{유형 09 수직선 위의 점의 위치와 움직인 거리}
+\setcounter{dmproblemcount}{844}\dmpnum{0845}{\input{items/0845}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{845}\dmpnum{0846}{\input{items/0846}}\vspace{6mm}
+\setcounter{dmproblemcount}{846}\dmpnum{0847}{\input{items/0847}}\vspace{6mm}
+\dmsection{유형 10 위치와 움직인 거리의 활용}
+\setcounter{dmproblemcount}{847}\dmpnum{0848}{\input{items/0848}}\vspace{6mm}
+\setcounter{dmproblemcount}{848}\dmpnum{0849}{\input{items/0849}}\vspace{6mm}
+\setcounter{dmproblemcount}{849}\dmpnum{0850}{\input{items/0850}}\vspace{6mm}
+\setcounter{dmproblemcount}{850}\dmpnum{0851}{\input{items/0851}}\vspace{6mm}
+\setcounter{dmproblemcount}{851}\dmpnum{0852}{\input{items/0852}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{852}\dmpnum{0853}{\input{items/0853}}\vspace{6mm}
+\dmsection{유형 11 속도의 그래프가 주어진 점의 위치와 움직인 거리}
+\setcounter{dmproblemcount}{853}\dmpnum{0854}{\input{items/0854}}\vspace{6mm}
+\setcounter{dmproblemcount}{854}\dmpnum{0855}{\input{items/0855}}\vspace{6mm}
+\setcounter{dmproblemcount}{855}\dmpnum{0856}{\input{items/0856}}\vspace{6mm}
+\setcounter{dmproblemcount}{856}\dmpnum{0857}{\input{items/0857}}\vspace{6mm}
+\setcounter{dmproblemcount}{857}\dmpnum{0858}{\input{items/0858}}\vspace{6mm}
+\dmsection{유형 UP 12 역함수의 그래프와 넓이}
+\vspace{3mm}\setcounter{dmproblemcount}{858}\dmpnum{0859}{\input{items/0859}}\vspace{6mm}
+\setcounter{dmproblemcount}{859}\dmpnum{0860}{\input{items/0860}}\vspace{6mm}
+\setcounter{dmproblemcount}{860}\dmpnum{0861}{\input{items/0861}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{861}\dmpnum{0862}{\input{items/0862}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{862}\dmpnum{0863}{\input{items/0863}}\vspace{6mm}
+\setcounter{dmproblemcount}{863}\dmpnum{0864}{\input{items/0864}}\vspace{6mm}
+\dmsection{시험에 꼭 나오는 문제}
+\setcounter{dmproblemcount}{864}\dmpnum{0865}{\input{items/0865}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{865}\dmpnum{0866}{\input{items/0866}}\vspace{6mm}
+\setcounter{dmproblemcount}{866}\dmpnum{0867}{\input{items/0867}}\vspace{6mm}
+\setcounter{dmproblemcount}{867}\dmpnum{0868}{\input{items/0868}}\vspace{6mm}
+\setcounter{dmproblemcount}{868}\dmpnum{0869}{\input{items/0869}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{869}\dmpnum{0870}{\input{items/0870}}\vspace{6mm}
+\setcounter{dmproblemcount}{870}\dmpnum{0871}{\input{items/0871}}\vspace{6mm}
+\setcounter{dmproblemcount}{871}\dmpnum{0872}{\input{items/0872}}\vspace{6mm}
+\setcounter{dmproblemcount}{872}\dmpnum{0873}{\input{items/0873}}\vspace{6mm}
+\setcounter{dmproblemcount}{873}\dmpnum{0874}{\input{items/0874}}\vspace{6mm}
+\setcounter{dmproblemcount}{874}\dmpnum{0875}{\input{items/0875}}\vspace{6mm}
+\setcounter{dmproblemcount}{875}\dmpnum{0876}{\input{items/0876}}\vspace{6mm}
+\setcounter{dmproblemcount}{876}\dmpnum{0877}{\input{items/0877}}\vspace{6mm}
+\vspace{3mm}\setcounter{dmproblemcount}{877}\dmpnum{0878}{\input{items/0878}}\vspace{6mm}
+\dmsection{서술형 주관식}
+\setcounter{dmproblemcount}{878}\dmpnum{0879}{\input{items/0879}}\vspace{6mm}
+\setcounter{dmproblemcount}{879}\dmpnum{0880}{\input{items/0880}}\vspace{6mm}
+\setcounter{dmproblemcount}{880}\dmpnum{0881}{\input{items/0881}}\vspace{6mm}
+\setcounter{dmproblemcount}{881}\dmpnum{0882}{\input{items/0882}}\vspace{6mm}
+\dmsection{실력 Up}
+\vspace{3mm}\setcounter{dmproblemcount}{882}\dmpnum{0883}{\input{items/0883}}\vspace{6mm}
+\vspace{5mm}\setcounter{dmproblemcount}{883}\dmpnum{0884}{\input{items/0884}}\vspace{6mm}
+\setcounter{dmproblemcount}{884}\dmpnum{0885}{\input{items/0885}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\dmsection{정답}
+\begin{multicols}{2}\small
+\noindent\textbf{01 함수의 극한}\par\smallskip
+\noindent\textbf{0001}\ $-3$\par
+\noindent\textbf{0002}\ $10$\par
+\noindent\textbf{0003}\ $1$\par
+\noindent\textbf{0004}\ $\dfrac{1}{2}$\par
+\noindent\textbf{0005}\ $\sqrt{3}$\par
+\noindent\textbf{0006}\ $2$\par
+\noindent\textbf{0007}\ $\infty$\par
+\noindent\textbf{0008}\ $-\infty$\par
+\noindent\textbf{0009}\ $\infty$\par
+\noindent\textbf{0010}\ $\infty$\par
+\noindent\textbf{0011}\ (1) $0$ \quad (2) $2$ \quad (3) 존재하지 않는다. \quad (4) $2$ \quad (5) $2$ \quad (6) $2$\par
+\noindent\textbf{0012}\ (1) $1$ \quad (2) $-1$ \quad (3) 존재하지 않는다.\par
+\noindent\textbf{0013}\ $4$\par
+\noindent\textbf{0014}\ $1$\par
+\noindent\textbf{0015}\ $-6$\par
+\noindent\textbf{0016}\ $3$\par
+\noindent\textbf{0017}\ $-2$\par
+\noindent\textbf{0018}\ $-1$\par
+\noindent\textbf{0019}\ $\dfrac{1}{4}$\par
+\noindent\textbf{0020}\ $4$\par
+\noindent\textbf{0021}\ $0$\par
+\noindent\textbf{0022}\ $\dfrac{3}{2}$\par
+\noindent\textbf{0023}\ $\infty$\par
+\noindent\textbf{0024}\ $\infty$\par
+\noindent\textbf{0025}\ $5$\par
+\noindent\textbf{0026}\ $1$\par
+\noindent\textbf{0027}\ $4$\par
+\noindent\textbf{0028}\ $-4$\par
+\noindent\textbf{0029}\ $-\sqrt{3}$\par
+\noindent\textbf{0030}\ $a=3$, $b=-6$\par
+\noindent\textbf{0031}\ $a=-3$, $b=-2$\par
+\noindent\textbf{0032}\ $-2$\par
+\noindent\textbf{0033}\ $4$\par
+\noindent\textbf{0034}\ ④\par
+\noindent\textbf{0035}\ ⑤\par
+\noindent\textbf{0036}\ ㄱ, ㄴ\par
+\noindent\textbf{0037}\ $9$\par
+\noindent\textbf{0038}\ ③\par
+\noindent\textbf{0039}\ $6$\par
+\noindent\textbf{0040}\ $4$\par
+\noindent\textbf{0041}\ $10$\par
+\noindent\textbf{0042}\ ③\par
+\noindent\textbf{0043}\ $-13$\par
+\noindent\textbf{0044}\ $\dfrac{1}{3}$\par
+\noindent\textbf{0045}\ ②\par
+\noindent\textbf{0046}\ $-5$\par
+\noindent\textbf{0047}\ $-2$\par
+\noindent\textbf{0048}\ $-\dfrac{2}{5}$\par
+\noindent\textbf{0049}\ $10$\par
+\noindent\textbf{0050}\ ㄱ, ㄴ, ㄷ\par
+\noindent\textbf{0051}\ ②\par
+\noindent\textbf{0052}\ $-\dfrac{12}{5}$\par
+\noindent\textbf{0053}\ ①\par
+\noindent\textbf{0054}\ $0$\par
+\noindent\textbf{0055}\ $-\dfrac{1}{4}$\par
+\noindent\textbf{0056}\ ④\par
+\noindent\textbf{0057}\ $-2$\par
+\noindent\textbf{0058}\ ②\par
+\noindent\textbf{0059}\ ④\par
+\noindent\textbf{0060}\ $2$\par
+\noindent\textbf{0061}\ $-4$\par
+\noindent\textbf{0062}\ ②\par
+\noindent\textbf{0063}\ ③\par
+\noindent\textbf{0064}\ $-\dfrac{1}{4}$\par
+\noindent\textbf{0065}\ $1$\par
+\noindent\textbf{0066}\ $3$\par
+\noindent\textbf{0067}\ ①\par
+\noindent\textbf{0068}\ $\dfrac{8}{7}$\par
+\noindent\textbf{0069}\ ⑤\par
+\noindent\textbf{0070}\ ①\par
+\noindent\textbf{0071}\ $0$\par
+\noindent\textbf{0072}\ $20$\par
+\noindent\textbf{0073}\ $10$\par
+\noindent\textbf{0074}\ $7$\par
+\noindent\textbf{0075}\ $4$\par
+\noindent\textbf{0076}\ $-4$\par
+\noindent\textbf{0077}\ $6$\par
+\noindent\textbf{0078}\ ③\par
+\noindent\textbf{0079}\ $\dfrac{1}{3}$\par
+\noindent\textbf{0080}\ $9$\par
+\noindent\textbf{0081}\ $2$\par
+\noindent\textbf{0082}\ ④\par
+\noindent\textbf{0083}\ ③\par
+\noindent\textbf{0084}\ $\dfrac{1}{4}$\par
+\noindent\textbf{0085}\ ②\par
+\noindent\textbf{0086}\ $2$\par
+\noindent\textbf{0087}\ ④\par
+\noindent\textbf{0088}\ ⑤\par
+\noindent\textbf{0089}\ $4$\par
+\noindent\textbf{0090}\ ④\par
+\noindent\textbf{0091}\ ③\par
+\noindent\textbf{0092}\ $1$\par
+\noindent\textbf{0093}\ ②\par
+\noindent\textbf{0094}\ ①\par
+\noindent\textbf{0095}\ $-4$\par
+\noindent\textbf{0096}\ $1$\par
+\noindent\textbf{0097}\ ⑤\par
+\noindent\textbf{0098}\ ①\par
+\noindent\textbf{0099}\ ③\par
+\noindent\textbf{0100}\ ②\par
+\noindent\textbf{0101}\ $48$\par
+\noindent\textbf{0102}\ $2$\par
+\noindent\textbf{0103}\ $1$\par
+\noindent\textbf{0104}\ $1$\par
+\noindent\textbf{0105}\ $2$\par
+\noindent\textbf{0106}\ $\dfrac{1}{3}$\par
+\noindent\textbf{0107}\ $\dfrac{5}{2}$\par
+\noindent\textbf{0108}\ $35$\par
+\noindent\textbf{0109}\ $2$\par
+\noindent\textbf{0110}\ ③\par
+\noindent\textbf{0111}\ ③\par
+\noindent\textbf{0112}\ ②\par
+\noindent\textbf{02 함수의 연속}\par\smallskip
+\noindent\textbf{0113}\ 풀이 참조 (함수 $f(x)$가 $x=0$에서 정의되어 있지 않으므로 불연속이다.)\par
+\noindent\textbf{0114}\ 풀이 참조 ($\displaystyle\lim_{x\to 0+}f(x)=2$, $\displaystyle\lim_{x\to 0-}f(x)=1$이므로 $\displaystyle\lim_{x\to 0}f(x)$의 값이 존재하지 않아 불연속이다.)\par
+\noindent\textbf{0115}\ 풀이 참조 ($f(0)=2$이고 $\displaystyle\lim_{x\to 0}f(x)=1$이므로 $\displaystyle\lim_{x\to 0}f(x)\ne f(0)$이어서 불연속이다.)\par
+\noindent\textbf{0116}\ 연속\par
+\noindent\textbf{0117}\ 연속\par
+\noindent\textbf{0118}\ 불연속\par
+\noindent\textbf{0119}\ 불연속\par
+\noindent\textbf{0120}\ $[-2{,}\mkern3mu\mathopen{}3]$\par
+\noindent\textbf{0121}\ $(1{,}\mkern3mu\mathopen{}5)$\par
+\noindent\textbf{0122}\ $[-3{,}\mkern3mu\mathopen{}4)$\par
+\noindent\textbf{0123}\ $(-7{,}\mkern3mu\mathopen{}2]$\par
+\noindent\textbf{0124}\ $(-\infty{,}\mkern3mu\mathopen{}4)$\par
+\noindent\textbf{0125}\ $[3{,}\mkern3mu\mathopen{}\infty)$\par
+\noindent\textbf{0126}\ $(-\infty{,}\mkern3mu\mathopen{}\infty)$\par
+\noindent\textbf{0127}\ $(-\infty{,}\mkern3mu\mathopen{}3]$\par
+\noindent\textbf{0128}\ $(-\infty{,}\mkern3mu\mathopen{}-1)$, $(-1{,}\mkern3mu\mathopen{}\infty)$\par
+\noindent\textbf{0129}\ $(-\infty{,}\mkern3mu\mathopen{}\infty)$\par
+\noindent\textbf{0130}\ $[1{,}\mkern3mu\mathopen{}\infty)$\par
+\noindent\textbf{0131}\ $(-\infty{,}\mkern3mu\mathopen{}\infty)$\par
+\noindent\textbf{0132}\ $(-\infty{,}\mkern3mu\mathopen{}0)$, $(0{,}\mkern3mu\mathopen{}\infty)$\par
+\noindent\textbf{0133}\ $(-\infty{,}\mkern3mu\mathopen{}\infty)$\par
+\noindent\textbf{0134}\ $(-\infty{,}\mkern3mu\mathopen{}\infty)$\par
+\noindent\textbf{0135}\ $(-\infty{,}\mkern3mu\mathopen{}3)$, $(3{,}\mkern3mu\mathopen{}\infty)$\par
+\noindent\textbf{0136}\ $(-\infty{,}\mkern3mu\mathopen{}1)$, $(1{,}\mkern3mu\mathopen{}2)$, $(2{,}\mkern3mu\mathopen{}\infty)$\par
+\noindent\textbf{0137}\ (1) $(-\infty{,}\mkern3mu\mathopen{}\infty)$ \quad (2) $(-\infty{,}\mkern3mu\mathopen{}\infty)$ \quad (3) $(-\infty{,}\mkern3mu\mathopen{}-5)$, $(-5{,}\mkern3mu\mathopen{}1)$, $(1{,}\mkern3mu\mathopen{}\infty)$ \quad (4) $(-\infty{,}\mkern3mu\mathopen{}2)$, $(2{,}\mkern3mu\mathopen{}\infty)$\par
+\noindent\textbf{0138}\ 최댓값: $-1$, 최솟값: $-2$\par
+\noindent\textbf{0139}\ 최댓값: $2$, 최솟값: $\dfrac{2}{3}$\par
+\noindent\textbf{0140}\ 최댓값: $-1$, 최솟값: $-2$\par
+\noindent\textbf{0141}\ ㈎ 연속 \quad ㈏ 사잇값 정리\par
+\noindent\textbf{0142}\ ㈎ $1$ \quad ㈏ $-1$ \quad ㈐ $<$ \quad ㈑ $0$\par
+\noindent\textbf{0143}\ 풀이 참조 ($f(x)=x^3-x^2-2$라 하면 $f(x)$는 닫힌구간 $[1{,}\mkern3mu\mathopen{}2]$에서 연속이고 $f(1)=-2<0$, $f(2)=2>0$이므로 사잇값 정리에 의하여 열린구간 $(1{,}\mkern3mu\mathopen{}2)$에서 적어도 하나의 실근을 갖는다.)\par
+\noindent\textbf{0144}\ 풀이 참조 ($f(x)=x^4+x^3-9x+1$이라 하면 $f(x)$는 닫힌구간 $[1{,}\mkern3mu\mathopen{}2]$에서 연속이고 $f(1)=-6<0$, $f(2)=7>0$이므로 사잇값 정리에 의하여 열린구간 $(1{,}\mkern3mu\mathopen{}2)$에서 적어도 하나의 실근을 갖는다.)\par
+\noindent\textbf{0145}\ ㄱ, ㄹ\par
+\noindent\textbf{0146}\ ④\par
+\noindent\textbf{0147}\ $x\ne 1$인 모든 실수에서 연속\par
+\noindent\textbf{0148}\ $2$\par
+\noindent\textbf{0149}\ $-\dfrac{1}{3}$\par
+\noindent\textbf{0150}\ $8$\par
+\noindent\textbf{0151}\ $11$\par
+\noindent\textbf{0152}\ ④\par
+\noindent\textbf{0153}\ ②\par
+\noindent\textbf{0154}\ ㄷ\par
+\noindent\textbf{0155}\ ①\par
+\noindent\textbf{0156}\ $6$\par
+\noindent\textbf{0157}\ $12$\par
+\noindent\textbf{0158}\ ①\par
+\noindent\textbf{0159}\ $6$\par
+\noindent\textbf{0160}\ $32$\par
+\noindent\textbf{0161}\ $-1$\par
+\noindent\textbf{0162}\ $5$\par
+\noindent\textbf{0163}\ ①\par
+\noindent\textbf{0164}\ $6$\par
+\noindent\textbf{0165}\ ③\par
+\noindent\textbf{0166}\ $24$\par
+\noindent\textbf{0167}\ ④\par
+\noindent\textbf{0168}\ ③, ⑤\par
+\noindent\textbf{0169}\ ④\par
+\noindent\textbf{0170}\ $3$\par
+\noindent\textbf{0171}\ $(2{,}\mkern3mu\mathopen{}\infty)$\par
+\noindent\textbf{0172}\ ①\par
+\noindent\textbf{0173}\ ④\par
+\noindent\textbf{0174}\ $15$\par
+\noindent\textbf{0175}\ ①\par
+\noindent\textbf{0176}\ ③\par
+\noindent\textbf{0177}\ $3$개\par
+\noindent\textbf{0178}\ ㄱ, ㄴ, ㄷ\par
+\noindent\textbf{0179}\ $14$\par
+\noindent\textbf{0180}\ ②\par
+\noindent\textbf{0181}\ ②\par
+\noindent\textbf{0182}\ ①\par
+\noindent\textbf{0183}\ 불연속\par
+\noindent\textbf{0184}\ ㄱ, ㄴ, ㄷ\par
+\noindent\textbf{0185}\ ③\par
+\noindent\textbf{0186}\ $4$\par
+\noindent\textbf{0187}\ ④\par
+\noindent\textbf{0188}\ ④\par
+\noindent\textbf{0189}\ ㄷ, ㄹ\par
+\noindent\textbf{0190}\ $4$\par
+\noindent\textbf{0191}\ $7$\par
+\noindent\textbf{0192}\ ①\par
+\noindent\textbf{0193}\ ②\par
+\noindent\textbf{0194}\ ①\par
+\noindent\textbf{0195}\ ①\par
+\noindent\textbf{0196}\ ④\par
+\noindent\textbf{0197}\ ④\par
+\noindent\textbf{0198}\ $-5$\par
+\noindent\textbf{0199}\ $6$\par
+\noindent\textbf{0200}\ $-2$\par
+\noindent\textbf{0201}\ $2$개\par
+\noindent\textbf{0202}\ $\dfrac{7}{2}$\par
+\noindent\textbf{0203}\ $-2$\par
+\noindent\textbf{0204}\ 풀이 참조\par
+\noindent\textbf{03 미분계수와 도함수}\par\smallskip
+\noindent\textbf{0205}\ $3$\par
+\noindent\textbf{0206}\ $2$\par
+\noindent\textbf{0207}\ $12$\par
+\noindent\textbf{0208}\ $-4$\par
+\noindent\textbf{0209}\ (1) $-5$ \quad (2) $-6-\varDelta x$ \quad (3) $-2a-\varDelta x$\par
+\noindent\textbf{0210}\ $3$\par
+\noindent\textbf{0211}\ $-2$\par
+\noindent\textbf{0212}\ $4$\par
+\noindent\textbf{0213}\ $10$\par
+\noindent\textbf{0214}\ $4$\par
+\noindent\textbf{0215}\ $1$\par
+\noindent\textbf{0216}\ $-3$\par
+\noindent\textbf{0217}\ $2$\par
+\noindent\textbf{0218}\ $\dfrac{3}{2a}$\par
+\noindent\textbf{0219}\ $4$\par
+\noindent\textbf{0220}\ $-2$\par
+\noindent\textbf{0221}\ $-4$\par
+\noindent\textbf{0222}\ (1) 연속이다. \quad (2) 미분가능하지 않다.\par
+\noindent\textbf{0223}\ (1) 연속이다. \quad (2) 미분가능하다.\par
+\noindent\textbf{0224}\ $f'(x)=0$\par
+\noindent\textbf{0225}\ $f'(x)=2$\par
+\noindent\textbf{0226}\ $f'(x)=2x$\par
+\noindent\textbf{0227}\ ㄱ, ㄷ\par
+\noindent\textbf{0228}\ $y'=3x^2$\par
+\noindent\textbf{0229}\ $y'=5x^4$\par
+\noindent\textbf{0230}\ $y'=0$\par
+\noindent\textbf{0231}\ $y'=2x^3+2x$\par
+\noindent\textbf{0232}\ $y'=-6x+9$\par
+\noindent\textbf{0233}\ $y'=6x^2-2x+4$\par
+\noindent\textbf{0234}\ (1) $1$ \quad (2) $8$ \quad (3) $8$ \quad (4) $-6$\par
+\noindent\textbf{0235}\ $y'=6x+2$\par
+\noindent\textbf{0236}\ $y'=6x-13$\par
+\noindent\textbf{0237}\ $y'=-6x^2+6x$\par
+\noindent\textbf{0238}\ $y'=3x^2+8x-3$\par
+\noindent\textbf{0239}\ $y'=3x^2-6x+2$\par
+\noindent\textbf{0240}\ $y'=-6x^2+16x+14$\par
+\noindent\textbf{0241}\ $y'=6(3x+4)$\par
+\noindent\textbf{0242}\ $y'=6(2x-5)^2$\par
+\noindent\textbf{0243}\ $y'=2(2x+1)(4x^2+x+2)$\par
+\noindent\textbf{0244}\ $2$\par
+\noindent\textbf{0245}\ $1$\par
+\noindent\textbf{0246}\ $5$\par
+\noindent\textbf{0247}\ $-2$\par
+\noindent\textbf{0248}\ $\dfrac{3}{2}$\par
+\noindent\textbf{0249}\ $4$\par
+\noindent\textbf{0250}\ $\dfrac{2}{3}$\par
+\noindent\textbf{0251}\ $3$\par
+\noindent\textbf{0252}\ $4$\par
+\noindent\textbf{0253}\ $2$\par
+\noindent\textbf{0254}\ ⑤\par
+\noindent\textbf{0255}\ $-9$\par
+\noindent\textbf{0256}\ $6$\par
+\noindent\textbf{0257}\ $3$\par
+\noindent\textbf{0258}\ ④\par
+\noindent\textbf{0259}\ $2$\par
+\noindent\textbf{0260}\ ①\par
+\noindent\textbf{0261}\ ②\par
+\noindent\textbf{0262}\ $6$\par
+\noindent\textbf{0263}\ ㄴ\par
+\noindent\textbf{0264}\ ⑤\par
+\noindent\textbf{0265}\ ㄱ, ㄴ, ㄷ\par
+\noindent\textbf{0266}\ ㄱ, ㄷ\par
+\noindent\textbf{0267}\ $5$\par
+\noindent\textbf{0268}\ 연속이지만 미분가능하지 않다.\par
+\noindent\textbf{0269}\ ⑤\par
+\noindent\textbf{0270}\ ㄱ, ㄴ\par
+\noindent\textbf{0271}\ ㄱ, ㄷ\par
+\noindent\textbf{0272}\ ⑤\par
+\noindent\textbf{0273}\ $100$\par
+\noindent\textbf{0274}\ ③\par
+\noindent\textbf{0275}\ $10$\par
+\noindent\textbf{0276}\ $23$\par
+\noindent\textbf{0277}\ ①\par
+\noindent\textbf{0278}\ ⑤\par
+\noindent\textbf{0279}\ $11$\par
+\noindent\textbf{0280}\ $12$\par
+\noindent\textbf{0281}\ ①\par
+\noindent\textbf{0282}\ ②\par
+\noindent\textbf{0283}\ ①\par
+\noindent\textbf{0284}\ $56$\par
+\noindent\textbf{0285}\ $82$\par
+\noindent\textbf{0286}\ $10$\par
+\noindent\textbf{0287}\ ③\par
+\noindent\textbf{0288}\ ⑤\par
+\noindent\textbf{0289}\ $10$\par
+\noindent\textbf{0290}\ $\dfrac{7}{3}$\par
+\noindent\textbf{0291}\ ①\par
+\noindent\textbf{0292}\ $a=6$, $b=20$\par
+\noindent\textbf{0293}\ ①\par
+\noindent\textbf{0294}\ ⑤\par
+\noindent\textbf{0295}\ $7$\par
+\noindent\textbf{0296}\ $-3$\par
+\noindent\textbf{0297}\ ②\par
+\noindent\textbf{0298}\ $1$\par
+\noindent\textbf{0299}\ $-12$\par
+\noindent\textbf{0300}\ ②\par
+\noindent\textbf{0301}\ $1$\par
+\noindent\textbf{0302}\ $8$\par
+\noindent\textbf{0303}\ ④\par
+\noindent\textbf{0304}\ $7$\par
+\noindent\textbf{0305}\ $12$\par
+\noindent\textbf{0306}\ $86$\par
+\noindent\textbf{0307}\ ②\par
+\noindent\textbf{0308}\ ⑤\par
+\noindent\textbf{0309}\ $-\dfrac{9}{2}$\par
+\noindent\textbf{0310}\ ②\par
+\noindent\textbf{0311}\ ④\par
+\noindent\textbf{0312}\ $f'(x)=-3x-2$\par
+\noindent\textbf{0313}\ ⑤\par
+\noindent\textbf{0314}\ ㄱ, ㄷ\par
+\noindent\textbf{0315}\ ④\par
+\noindent\textbf{0316}\ $32$\par
+\noindent\textbf{0317}\ $3$\par
+\noindent\textbf{0318}\ ④\par
+\noindent\textbf{0319}\ $4$\par
+\noindent\textbf{0320}\ ④\par
+\noindent\textbf{0321}\ ⑤\par
+\noindent\textbf{0322}\ $-30$\par
+\noindent\textbf{0323}\ $18$\par
+\noindent\textbf{0324}\ $-1$\par
+\noindent\textbf{0325}\ $4$\par
+\noindent\textbf{0326}\ $15$\par
+\noindent\textbf{0327}\ ㄴ\par
+\noindent\textbf{0328}\ $-1$\par
+\noindent\textbf{0329}\ $70$\par
+\noindent\textbf{04 도함수의 활용 (1)}\par\smallskip
+\noindent\textbf{0330}\ $4$\par
+\noindent\textbf{0331}\ $-3$\par
+\noindent\textbf{0332}\ $y=x+5$\par
+\noindent\textbf{0333}\ $y=3x+6$\par
+\noindent\textbf{0334}\ $y=x+6$\par
+\noindent\textbf{0335}\ $y=x-15$\par
+\noindent\textbf{0336}\ $y=x+2$, $y=x-2$\par
+\noindent\textbf{0337}\ $y=\dfrac{1}{8}x-\dfrac{1}{4}$\par
+\noindent\textbf{0338}\ $y=3x+7$, $y=3x+3$\par
+\noindent\textbf{0339}\ (1) $y=(3t^2-2t)x-2t^3+t^2-2$ \quad (2) $-2$ \quad (3) $y=16x+18$\par
+\noindent\textbf{0340}\ $2$\par
+\noindent\textbf{0341}\ $\dfrac{5}{3}$\par
+\noindent\textbf{0342}\ $2$\par
+\noindent\textbf{0343}\ $-\dfrac{2\sqrt{3}}{3}$\par
+\noindent\textbf{0344}\ $3$\par
+\noindent\textbf{0345}\ $1$\par
+\noindent\textbf{0346}\ $-15$\par
+\noindent\textbf{0347}\ $5$\par
+\noindent\textbf{0348}\ $5$\par
+\noindent\textbf{0349}\ ②\par
+\noindent\textbf{0350}\ $(1{,}\mkern3mu\mathopen{}3)$\par
+\noindent\textbf{0351}\ $-1$\par
+\noindent\textbf{0352}\ $y=-4x+7$\par
+\noindent\textbf{0353}\ ③\par
+\noindent\textbf{0354}\ $2$\par
+\noindent\textbf{0355}\ $\dfrac{1}{3}$\par
+\noindent\textbf{0356}\ $5$\par
+\noindent\textbf{0357}\ $y=7x-23$\par
+\noindent\textbf{0358}\ ②\par
+\noindent\textbf{0359}\ $y=-x+\dfrac{1}{4}$\par
+\noindent\textbf{0360}\ $-3$\par
+\noindent\textbf{0361}\ $\dfrac{3\sqrt{5}}{2}$\par
+\noindent\textbf{0362}\ $32$\par
+\noindent\textbf{0363}\ ④\par
+\noindent\textbf{0364}\ $7$\par
+\noindent\textbf{0365}\ ④\par
+\noindent\textbf{0366}\ $18$\par
+\noindent\textbf{0367}\ $-\dfrac{1}{2}$\par
+\noindent\textbf{0368}\ $-3$\par
+\noindent\textbf{0369}\ $2$\par
+\noindent\textbf{0370}\ $0$\par
+\noindent\textbf{0371}\ $y=4x+8$\par
+\noindent\textbf{0372}\ ①\par
+\noindent\textbf{0373}\ $-6$\par
+\noindent\textbf{0374}\ $-1$\par
+\noindent\textbf{0375}\ ①\par
+\noindent\textbf{0376}\ $\dfrac{9}{2}$\par
+\noindent\textbf{0377}\ $2$\par
+\noindent\textbf{0378}\ $1$\par
+\noindent\textbf{0379}\ ①\par
+\noindent\textbf{0380}\ ④\par
+\noindent\textbf{0381}\ $3$\par
+\noindent\textbf{0382}\ $2$\par
+\noindent\textbf{0383}\ ⑤\par
+\noindent\textbf{0384}\ $\dfrac{1}{2}$\par
+\noindent\textbf{0385}\ $-12$\par
+\noindent\textbf{0386}\ ①\par
+\noindent\textbf{0387}\ $3$\par
+\noindent\textbf{0388}\ $16$\par
+\noindent\textbf{0389}\ $-48$\par
+\noindent\textbf{0390}\ $24$\par
+\noindent\textbf{0391}\ $\dfrac{17}{16}\pi$\par
+\noindent\textbf{0392}\ ②\par
+\noindent\textbf{0393}\ $80$\par
+\noindent\textbf{0394}\ $y=-\dfrac{1}{2}x+\dfrac{3}{2}$\par
+\noindent\textbf{0395}\ $\dfrac{16\sqrt{82}}{41}$\par
+\noindent\textbf{0396}\ $2$\par
+\noindent\textbf{0397}\ ④\par
+\noindent\textbf{0398}\ $2$\par
+\noindent\textbf{0399}\ $9$\par
+\noindent\textbf{0400}\ ⑤\par
+\noindent\textbf{0401}\ $-11$\par
+\noindent\textbf{0402}\ $4\sqrt{2}$\par
+\noindent\textbf{0403}\ $6$\par
+\noindent\textbf{0404}\ $9$\par
+\noindent\textbf{05 도함수의 활용 (2)}\par\smallskip
+\noindent\textbf{0405}\ 풀이 참조 (구간 $(-\infty{,}\mkern3mu\mathopen{}0]$에서 감소, 구간 $[0{,}\mkern3mu\mathopen{}\infty)$에서 증가)\par
+\noindent\textbf{0406}\ 풀이 참조 (구간 $(-\infty{,}\mkern3mu\mathopen{}\infty)$에서 감소)\par
+\noindent\textbf{0407}\ 풀이 참조 (구간 $\left(-\infty{,}\mkern3mu\mathopen{}\dfrac{3}{2}\right]$에서 증가, 구간 $\left[\dfrac{3}{2}{,}\mkern3mu\mathopen{}\infty\right)$에서 감소)\par
+\noindent\textbf{0408}\ 풀이 참조 (구간 $\left(-\infty{,}\mkern3mu\mathopen{}\dfrac{1}{2}\right]$에서 감소, 구간 $\left[\dfrac{1}{2}{,}\mkern3mu\mathopen{}\infty\right)$에서 증가)\par
+\noindent\textbf{0409}\ 풀이 참조 (구간 $(-\infty{,}\mkern3mu\mathopen{}-2]$, $[0{,}\mkern3mu\mathopen{}\infty)$에서 증가, 구간 $[-2{,}\mkern3mu\mathopen{}0]$에서 감소)\par
+\noindent\textbf{0410}\ (1) $b$, $d$ \quad (2) $a$, $c$, $f$\par
+\noindent\textbf{0411}\ (1) $-2$, $0$ \quad (2) $-2$, $0$, $-$, $7$, $-1$ \quad (3) 극댓값: $7$, 극솟값: $-1$\par
+\noindent\textbf{0412}\ 극댓값: $3$, 극솟값: $-1$\par
+\noindent\textbf{0413}\ 극댓값: $0$, 극솟값: $-1$\par
+\noindent\textbf{0414}\ 극댓값: $0$\par
+\noindent\textbf{0415}\ 풀이 참조 ($x=-1$에서 극솟값 $0$, $x=1$에서 극댓값 $4$인 그래프)\par
+\noindent\textbf{0416}\ 풀이 참조 ($x=0$에서 극댓값 $0$, $x=2$에서 극솟값 $-\dfrac{4}{3}$인 그래프)\par
+\noindent\textbf{0417}\ 풀이 참조 ($x=0$, $x=2$에서 극솟값 $2$, $x=1$에서 극댓값 $3$인 그래프)\par
+\noindent\textbf{0418}\ 최댓값: $20$, 최솟값: $0$\par
+\noindent\textbf{0419}\ 최댓값: $2$, 최솟값: $-2$\par
+\noindent\textbf{0420}\ 최댓값: $12$, 최솟값: $-\dfrac{27}{4}$\par
+\noindent\textbf{0421}\ 최댓값: $17$, 최솟값: $0$\par
+\noindent\textbf{0422}\ $-2$\par
+\noindent\textbf{0423}\ $-3$\par
+\noindent\textbf{0424}\ $17$\par
+\noindent\textbf{0425}\ $9$\par
+\noindent\textbf{0426}\ ③\par
+\noindent\textbf{0427}\ $-1$\par
+\noindent\textbf{0428}\ $4$\par
+\noindent\textbf{0429}\ $2$\par
+\noindent\textbf{0430}\ $a\le -9$\par
+\noindent\textbf{0431}\ $8$\par
+\noindent\textbf{0432}\ ④\par
+\noindent\textbf{0433}\ $-\dfrac{9}{2}\le a\le -3$\par
+\noindent\textbf{0434}\ ①\par
+\noindent\textbf{0435}\ ②\par
+\noindent\textbf{0436}\ $2$\par
+\noindent\textbf{0437}\ $(1{,}\mkern3mu\mathopen{}-3)$\par
+\noindent\textbf{0438}\ ⑤\par
+\noindent\textbf{0439}\ $5$\par
+\noindent\textbf{0440}\ ③\par
+\noindent\textbf{0441}\ $-2$\par
+\noindent\textbf{0442}\ $2$\par
+\noindent\textbf{0443}\ $5$\par
+\noindent\textbf{0444}\ $-9$\par
+\noindent\textbf{0445}\ $8$\par
+\noindent\textbf{0446}\ ③\par
+\noindent\textbf{0447}\ $-1$\par
+\noindent\textbf{0448}\ $6$\par
+\noindent\textbf{0449}\ ⑤\par
+\noindent\textbf{0450}\ ①\par
+\noindent\textbf{0451}\ $a<0$ 또는 $a>\dfrac{1}{3}$\par
+\noindent\textbf{0452}\ ③\par
+\noindent\textbf{0453}\ ⑤\par
+\noindent\textbf{0454}\ $-\dfrac{1}{2}<k<0$ 또는 $0<k<1$\par
+\noindent\textbf{0455}\ $-3\le a\le 3$\par
+\noindent\textbf{0456}\ ⑤\par
+\noindent\textbf{0457}\ $3$\par
+\noindent\textbf{0458}\ $7$\par
+\noindent\textbf{0459}\ ④\par
+\noindent\textbf{0460}\ $1<a<\dfrac{4}{3}$\par
+\noindent\textbf{0461}\ ②\par
+\noindent\textbf{0462}\ $-\dfrac{9}{8}$\par
+\noindent\textbf{0463}\ $a<0$ 또는 $0<a<1$\par
+\noindent\textbf{0464}\ $10$\par
+\noindent\textbf{0465}\ $4$\par
+\noindent\textbf{0466}\ ②\par
+\noindent\textbf{0467}\ $3$\par
+\noindent\textbf{0468}\ $18$\par
+\noindent\textbf{0469}\ $2$\par
+\noindent\textbf{0470}\ ③\par
+\noindent\textbf{0471}\ ④\par
+\noindent\textbf{0472}\ $\dfrac{9}{2}$\par
+\noindent\textbf{0473}\ $22$\par
+\noindent\textbf{0474}\ $\dfrac{32\sqrt{3}}{9}$\par
+\noindent\textbf{0475}\ $120$\par
+\noindent\textbf{0476}\ ③\par
+\noindent\textbf{0477}\ $2\sqrt{5}$\par
+\noindent\textbf{0478}\ $539$\par
+\noindent\textbf{0479}\ ⑤\par
+\noindent\textbf{0480}\ $96$\par
+\noindent\textbf{0481}\ ④\par
+\noindent\textbf{0482}\ ④\par
+\noindent\textbf{0483}\ ①\par
+\noindent\textbf{0484}\ ③\par
+\noindent\textbf{0485}\ ②\par
+\noindent\textbf{0486}\ ③\par
+\noindent\textbf{0487}\ $-\sqrt{3}\le k\le \sqrt{3}$\par
+\noindent\textbf{0488}\ ②\par
+\noindent\textbf{0489}\ $42$\par
+\noindent\textbf{0490}\ $8$\par
+\noindent\textbf{0491}\ ②\par
+\noindent\textbf{0492}\ $\dfrac{32}{27}$\par
+\noindent\textbf{0493}\ $4$\par
+\noindent\textbf{0494}\ $1$\par
+\noindent\textbf{0495}\ $\dfrac{32}{3}$\par
+\noindent\textbf{0496}\ ㄷ\par
+\noindent\textbf{0497}\ ④\par
+\noindent\textbf{0498}\ $2$\par
+\noindent\textbf{0499}\ ③\par
+\noindent\textbf{0500}\ $-5$\par
+\noindent\textbf{0501}\ ②\par
+\noindent\textbf{0502}\ $26$\par
+\noindent\textbf{0503}\ ③\par
+\noindent\textbf{0504}\ $\dfrac{5}{3}$\par
+\noindent\textbf{0505}\ ②\par
+\noindent\textbf{0506}\ $0\le a\le \dfrac{3}{4}$\par
+\noindent\textbf{0507}\ $16$\par
+\noindent\textbf{0508}\ $k>\dfrac{1}{3}$\par
+\noindent\textbf{0509}\ $2$\par
+\noindent\textbf{0510}\ ③\par
+\noindent\textbf{0511}\ ㄱ\par
+\noindent\textbf{0512}\ $\dfrac{\sqrt{2}}{2}$\par
+\noindent\textbf{06 도함수의 활용 (3)}\par\smallskip
+\noindent\textbf{0513}\ $3$\par
+\noindent\textbf{0514}\ $1$\par
+\noindent\textbf{0515}\ $2$\par
+\noindent\textbf{0516}\ $2$\par
+\noindent\textbf{0517}\ (1) $-8<k<100$ \quad (2) $k=-8$ 또는 $k=100$ \quad (3) $k<-8$ 또는 $k>100$\par
+\noindent\textbf{0518}\ ㈎ $2$ \quad ㈏ $2$ \quad ㈐ $\ge$\par
+\noindent\textbf{0519}\ 풀이 참조 ($f(x)=2x^3-3x^2+3$이라 하면 $f'(x)=6x^2-6x=6x(x-1)$이고, $x>0$일 때 함수 $f(x)$는 $x=1$에서 최솟값 $2$를 가지므로 $f(x)\ge 2$. 따라서 $x>0$일 때 부등식 $f(x)>0$, 즉 $2x^3-3x^2+3>0$이 성립한다.)\par
+\noindent\textbf{0520}\ $k\ge 0$\par
+\noindent\textbf{0521}\ 속도: $-4$, 가속도: $4$\par
+\noindent\textbf{0522}\ 속도: $-2$, 가속도: $-6$\par
+\noindent\textbf{0523}\ 속도: $28$, 가속도: $48$\par
+\noindent\textbf{0524}\ $10$\par
+\noindent\textbf{0525}\ (1) $3.2\pi$ \quad (2) $3.2\pi$\par
+\noindent\textbf{0526}\ $3$\par
+\noindent\textbf{0527}\ $-1<k<2$\par
+\noindent\textbf{0528}\ $\dfrac{5}{4}$\par
+\noindent\textbf{0529}\ $53$\par
+\noindent\textbf{0530}\ $-\dfrac{1}{2}<a<0$\par
+\noindent\textbf{0531}\ $9$\par
+\noindent\textbf{0532}\ ⑤\par
+\noindent\textbf{0533}\ $8$\par
+\noindent\textbf{0534}\ $3$\par
+\noindent\textbf{0535}\ $a<0$ 또는 $a>\dfrac{4}{3}$\par
+\noindent\textbf{0536}\ $44$\par
+\noindent\textbf{0537}\ ⑤\par
+\noindent\textbf{0538}\ $-16<k<16$\par
+\noindent\textbf{0539}\ $4$\par
+\noindent\textbf{0540}\ $8$\par
+\noindent\textbf{0541}\ $-7$\par
+\noindent\textbf{0542}\ ③\par
+\noindent\textbf{0543}\ ④\par
+\noindent\textbf{0544}\ $k>\dfrac{5}{4}$\par
+\noindent\textbf{0545}\ $1$\par
+\noindent\textbf{0546}\ ②\par
+\noindent\textbf{0547}\ $k\ge 10$\par
+\noindent\textbf{0548}\ $5$\par
+\noindent\textbf{0549}\ $1$\par
+\noindent\textbf{0550}\ ②\par
+\noindent\textbf{0551}\ $k>5$\par
+\noindent\textbf{0552}\ $3$\par
+\noindent\textbf{0553}\ ②\par
+\noindent\textbf{0554}\ ①\par
+\noindent\textbf{0555}\ $22$\par
+\noindent\textbf{0556}\ $4$\par
+\noindent\textbf{0557}\ $117$\par
+\noindent\textbf{0558}\ $40$\par
+\noindent\textbf{0559}\ $-8$\par
+\noindent\textbf{0560}\ $\dfrac{3}{8}<t<2$\par
+\noindent\textbf{0561}\ $180\mkern3mu \mathrm{m}$\par
+\noindent\textbf{0562}\ $4$\par
+\noindent\textbf{0563}\ ②\par
+\noindent\textbf{0564}\ ③\par
+\noindent\textbf{0565}\ ②\par
+\noindent\textbf{0566}\ $30$\par
+\noindent\textbf{0567}\ ㄱ, ㄴ, ㄷ\par
+\noindent\textbf{0568}\ $2\sqrt{2}\mkern3mu \mathrm{cm/s}$\par
+\noindent\textbf{0569}\ $\dfrac{\sqrt{5}}{2}$\par
+\noindent\textbf{0570}\ $90\mkern3mu \mathrm{m/min}$\par
+\noindent\textbf{0571}\ ⑤\par
+\noindent\textbf{0572}\ $36\sqrt{3}$\par
+\noindent\textbf{0573}\ $48$\par
+\noindent\textbf{0574}\ $400\pi\mkern3mu \mathrm{cm}^3/\mathrm{s}$\par
+\noindent\textbf{0575}\ $\dfrac{25}{9}\pi$\par
+\noindent\textbf{0576}\ ②\par
+\noindent\textbf{0577}\ ㄴ, ㄷ\par
+\noindent\textbf{0578}\ ④\par
+\noindent\textbf{0579}\ $-9<a<7$\par
+\noindent\textbf{0580}\ ③\par
+\noindent\textbf{0581}\ ㄱ, ㄴ\par
+\noindent\textbf{0582}\ ③\par
+\noindent\textbf{0583}\ ④\par
+\noindent\textbf{0584}\ ①\par
+\noindent\textbf{0585}\ ③\par
+\noindent\textbf{0586}\ ⑤\par
+\noindent\textbf{0587}\ $a>4$\par
+\noindent\textbf{0588}\ $k\ge 1$\par
+\noindent\textbf{0589}\ $8$\par
+\noindent\textbf{0590}\ ①\par
+\noindent\textbf{0591}\ $4$초\par
+\noindent\textbf{0592}\ $28$\par
+\noindent\textbf{0593}\ $6$\par
+\noindent\textbf{0594}\ ㄴ, ㄷ\par
+\noindent\textbf{0595}\ ㄱ, ㄹ\par
+\noindent\textbf{0596}\ ③\par
+\noindent\textbf{0597}\ $12\sqrt{3}\mkern3mu \mathrm{cm}^2/\mathrm{s}$\par
+\noindent\textbf{0598}\ ①\par
+\noindent\textbf{0599}\ $3$\par
+\noindent\textbf{0600}\ $k>-3$\par
+\noindent\textbf{0601}\ $4$\par
+\noindent\textbf{0602}\ $t>3$\par
+\noindent\textbf{0603}\ ①\par
+\noindent\textbf{0604}\ $a<-2$ 또는 $a>-1$\par
+\noindent\textbf{0605}\ $3$\par
+\noindent\textbf{07 부정적분}\par\smallskip
+\noindent\textbf{0606}\ ㄱ, ㄷ\par
+\noindent\textbf{0607}\ $f(x)=6x+4$\par
+\noindent\textbf{0608}\ $f(x)=3x^2-2x$\par
+\noindent\textbf{0609}\ $f(x)=x^3+x^2+x$\par
+\noindent\textbf{0610}\ $x^3+2x$\par
+\noindent\textbf{0611}\ $x^3+2x+C$\par
+\noindent\textbf{0612}\ $\dfrac{1}{4}x^4+C$\par
+\noindent\textbf{0613}\ $\dfrac{1}{15}x^{15}+C$\par
+\noindent\textbf{0614}\ $\dfrac{1}{51}x^{51}+C$\par
+\noindent\textbf{0615}\ $\dfrac{3}{2}x^2-4x+C$\par
+\noindent\textbf{0616}\ $\dfrac{5}{3}x^3-x^2+x+C$\par
+\noindent\textbf{0617}\ $\dfrac{1}{3}x^3+\dfrac{1}{2}x^2-2x+C$\par
+\noindent\textbf{0618}\ $\dfrac{4}{3}x^3-6x^2+9x+C$\par
+\noindent\textbf{0619}\ $\dfrac{1}{4}x^4-27x+C$\par
+\noindent\textbf{0620}\ $\dfrac{1}{2}x^2-2x+C$\par
+\noindent\textbf{0621}\ $\dfrac{1}{3}x^3-\dfrac{1}{2}x^2+x+C$\par
+\noindent\textbf{0622}\ $x^2+2x+C$\par
+\noindent\textbf{0623}\ $\dfrac{1}{3}x^3+x^2+4x+C$\par
+\noindent\textbf{0624}\ $6$\par
+\noindent\textbf{0625}\ ②\par
+\noindent\textbf{0626}\ $-4$\par
+\noindent\textbf{0627}\ $3$\par
+\noindent\textbf{0628}\ $6$\par
+\noindent\textbf{0629}\ $-1$\par
+\noindent\textbf{0630}\ $1$\par
+\noindent\textbf{0631}\ $50$\par
+\noindent\textbf{0632}\ $-1$\par
+\noindent\textbf{0633}\ $5$\par
+\noindent\textbf{0634}\ $-2$\par
+\noindent\textbf{0635}\ $5$\par
+\noindent\textbf{0636}\ $-3$\par
+\noindent\textbf{0637}\ ②\par
+\noindent\textbf{0638}\ $0$\par
+\noindent\textbf{0639}\ $7$\par
+\noindent\textbf{0640}\ $9$\par
+\noindent\textbf{0641}\ $\dfrac{1}{4}x^4-\dfrac{1}{2}x^2+2x+C$\par
+\noindent\textbf{0642}\ ①\par
+\noindent\textbf{0643}\ ⑤\par
+\noindent\textbf{0644}\ $-2$\par
+\noindent\textbf{0645}\ $40$\par
+\noindent\textbf{0646}\ $14$\par
+\noindent\textbf{0647}\ $f(x)=-3x^2+2x+3$\par
+\noindent\textbf{0648}\ $10$\par
+\noindent\textbf{0649}\ $20$\par
+\noindent\textbf{0650}\ ④\par
+\noindent\textbf{0651}\ $-9$\par
+\noindent\textbf{0652}\ $-7$\par
+\noindent\textbf{0653}\ $\dfrac{1}{3}$\par
+\noindent\textbf{0654}\ $3$\par
+\noindent\textbf{0655}\ $-4$\par
+\noindent\textbf{0656}\ ①\par
+\noindent\textbf{0657}\ $5$\par
+\noindent\textbf{0658}\ $9$\par
+\noindent\textbf{0659}\ ③\par
+\noindent\textbf{0660}\ $f(x)=\dfrac{1}{2}x^2+2x-1$\par
+\noindent\textbf{0661}\ ③\par
+\noindent\textbf{0662}\ ④\par
+\noindent\textbf{0663}\ $28$\par
+\noindent\textbf{0664}\ ④\par
+\noindent\textbf{0665}\ ⑤\par
+\noindent\textbf{0666}\ $\dfrac{16}{27}$\par
+\noindent\textbf{0667}\ $-\dfrac{4}{3}<k<\dfrac{4}{3}$\par
+\noindent\textbf{0668}\ $2$\par
+\noindent\textbf{0669}\ ③\par
+\noindent\textbf{0670}\ $x^2y+3xy^2+3y^3+C$\par
+\noindent\textbf{0671}\ ③\par
+\noindent\textbf{0672}\ ④\par
+\noindent\textbf{0673}\ ②\par
+\noindent\textbf{0674}\ $29$\par
+\noindent\textbf{0675}\ ⑤\par
+\noindent\textbf{0676}\ $-\dfrac{1}{2}$\par
+\noindent\textbf{0677}\ $7$\par
+\noindent\textbf{0678}\ $2$\par
+\noindent\textbf{0679}\ $12$\par
+\noindent\textbf{0680}\ ⑤\par
+\noindent\textbf{0681}\ $x=1$ 또는 $x=3$\par
+\noindent\textbf{0682}\ ①\par
+\noindent\textbf{0683}\ $4$\par
+\noindent\textbf{0684}\ $4$\par
+\noindent\textbf{0685}\ $-\dfrac{5}{2}$\par
+\noindent\textbf{0686}\ $2$\par
+\noindent\textbf{0687}\ $8$\par
+\noindent\textbf{0688}\ ㄱ, ㄷ\par
+\noindent\textbf{0689}\ $-15$\par
+\noindent\textbf{08 정적분}\par\smallskip
+\noindent\textbf{0690}\ $0$\par
+\noindent\textbf{0691}\ $1$\par
+\noindent\textbf{0692}\ $6$\par
+\noindent\textbf{0693}\ $\dfrac{16}{3}$\par
+\noindent\textbf{0694}\ $-24$\par
+\noindent\textbf{0695}\ $-\dfrac{21}{4}$\par
+\noindent\textbf{0696}\ $-\dfrac{16}{3}$\par
+\noindent\textbf{0697}\ $-\dfrac{1}{6}$\par
+\noindent\textbf{0698}\ $\dfrac{109}{4}$\par
+\noindent\textbf{0699}\ $\dfrac{16}{3}$\par
+\noindent\textbf{0700}\ $8$\par
+\noindent\textbf{0701}\ $24$\par
+\noindent\textbf{0702}\ $6$\par
+\noindent\textbf{0703}\ $0$\par
+\noindent\textbf{0704}\ $24$\par
+\noindent\textbf{0705}\ $-4$\par
+\noindent\textbf{0706}\ $4$\par
+\noindent\textbf{0707}\ $-52$\par
+\noindent\textbf{0708}\ $f(x)=2x-2$\par
+\noindent\textbf{0709}\ $f(x)=3x^2+2x-1$\par
+\noindent\textbf{0710}\ $5$\par
+\noindent\textbf{0711}\ $-1$\par
+\noindent\textbf{0712}\ ①\par
+\noindent\textbf{0713}\ $8$\par
+\noindent\textbf{0714}\ $-2$\par
+\noindent\textbf{0715}\ $6$\par
+\noindent\textbf{0716}\ $2$\par
+\noindent\textbf{0717}\ $1$\par
+\noindent\textbf{0718}\ $-4$\par
+\noindent\textbf{0719}\ ④\par
+\noindent\textbf{0720}\ $\dfrac{5}{6}$\par
+\noindent\textbf{0721}\ $16$\par
+\noindent\textbf{0722}\ ④\par
+\noindent\textbf{0723}\ $6$\par
+\noindent\textbf{0724}\ $2$\par
+\noindent\textbf{0725}\ $\dfrac{39}{2}$\par
+\noindent\textbf{0726}\ $\dfrac{2}{3}$\par
+\noindent\textbf{0727}\ $-2$\par
+\noindent\textbf{0728}\ $\dfrac{5}{6}$\par
+\noindent\textbf{0729}\ $64$\par
+\noindent\textbf{0730}\ ①\par
+\noindent\textbf{0731}\ $6$\par
+\noindent\textbf{0732}\ $3$\par
+\noindent\textbf{0733}\ ②\par
+\noindent\textbf{0734}\ $\dfrac{47}{2}$\par
+\noindent\textbf{0735}\ ①\par
+\noindent\textbf{0736}\ $2$\par
+\noindent\textbf{0737}\ $100$\par
+\noindent\textbf{0738}\ $-\dfrac{9}{4}$\par
+\noindent\textbf{0739}\ $8$\par
+\noindent\textbf{0740}\ $2$\par
+\noindent\textbf{0741}\ $10$\par
+\noindent\textbf{0742}\ ⑤\par
+\noindent\textbf{0743}\ ②\par
+\noindent\textbf{0744}\ $5$\par
+\noindent\textbf{0745}\ $7$\par
+\noindent\textbf{0746}\ $\dfrac{1}{3}$\par
+\noindent\textbf{0747}\ ④\par
+\noindent\textbf{0748}\ $-2$\par
+\noindent\textbf{0749}\ $10$\par
+\noindent\textbf{0750}\ ④\par
+\noindent\textbf{0751}\ $76$\par
+\noindent\textbf{0752}\ $8$\par
+\noindent\textbf{0753}\ $52$\par
+\noindent\textbf{0754}\ $4$\par
+\noindent\textbf{0755}\ $96$\par
+\noindent\textbf{0756}\ $-12$\par
+\noindent\textbf{0757}\ $8$\par
+\noindent\textbf{0758}\ ③\par
+\noindent\textbf{0759}\ $3$\par
+\noindent\textbf{0760}\ ④\par
+\noindent\textbf{0761}\ $-5$\par
+\noindent\textbf{0762}\ $2$\par
+\noindent\textbf{0763}\ $17$\par
+\noindent\textbf{0764}\ $12$\par
+\noindent\textbf{0765}\ $90$\par
+\noindent\textbf{0766}\ $\dfrac{2}{3}$\par
+\noindent\textbf{0767}\ $130$\par
+\noindent\textbf{0768}\ $4$\par
+\noindent\textbf{0769}\ ②\par
+\noindent\textbf{0770}\ $\dfrac{27}{4}$\par
+\noindent\textbf{0771}\ $2$\par
+\noindent\textbf{0772}\ ②\par
+\noindent\textbf{0773}\ $-2$\par
+\noindent\textbf{0774}\ $1$\par
+\noindent\textbf{0775}\ $\dfrac{32}{3}$\par
+\noindent\textbf{0776}\ ④\par
+\noindent\textbf{0777}\ $4$\par
+\noindent\textbf{0778}\ ⑤\par
+\noindent\textbf{0779}\ $-6$\par
+\noindent\textbf{0780}\ $6$\par
+\noindent\textbf{0781}\ $-2$\par
+\noindent\textbf{0782}\ $\dfrac{11}{3}$\par
+\noindent\textbf{0783}\ $4$\par
+\noindent\textbf{0784}\ ②\par
+\noindent\textbf{0785}\ ③\par
+\noindent\textbf{0786}\ $\dfrac{13}{9}$\par
+\noindent\textbf{0787}\ ③\par
+\noindent\textbf{0788}\ $8$\par
+\noindent\textbf{0789}\ $3$\par
+\noindent\textbf{0790}\ $\dfrac{2}{9}$\par
+\noindent\textbf{0791}\ $13$\par
+\noindent\textbf{0792}\ ①\par
+\noindent\textbf{0793}\ $16$\par
+\noindent\textbf{0794}\ $\dfrac{59}{3}$\par
+\noindent\textbf{0795}\ $-2$\par
+\noindent\textbf{0796}\ $-18$\par
+\noindent\textbf{0797}\ $\dfrac{5}{6}$\par
+\noindent\textbf{0798}\ ⑤\par
+\noindent\textbf{0799}\ $10$\par
+\noindent\textbf{0800}\ $5$\par
+\noindent\textbf{09 정적분의 활용}\par\smallskip
+\noindent\textbf{0801}\ $\dfrac{9}{2}$\par
+\noindent\textbf{0802}\ $\dfrac{4}{3}$\par
+\noindent\textbf{0803}\ $\dfrac{9}{2}$\par
+\noindent\textbf{0804}\ $8$\par
+\noindent\textbf{0805}\ $6$\par
+\noindent\textbf{0806}\ $\dfrac{21}{4}$\par
+\noindent\textbf{0807}\ $\dfrac{34}{3}$\par
+\noindent\textbf{0808}\ $\dfrac{9}{2}$\par
+\noindent\textbf{0809}\ $\dfrac{4}{3}$\par
+\noindent\textbf{0810}\ $\dfrac{1}{2}$\par
+\noindent\textbf{0811}\ $\dfrac{64}{3}$\par
+\noindent\textbf{0812}\ $\dfrac{8}{3}$\par
+\noindent\textbf{0813}\ $\dfrac{4}{3}$\par
+\noindent\textbf{0814}\ (1) $-\dfrac{2}{3}$ (2) $0$ (3) $\dfrac{8}{3}$\par
+\noindent\textbf{0815}\ $\dfrac{64}{3}$\par
+\noindent\textbf{0816}\ ④\par
+\noindent\textbf{0817}\ ③\par
+\noindent\textbf{0818}\ $\dfrac{17}{6}$\par
+\noindent\textbf{0819}\ ②\par
+\noindent\textbf{0820}\ $4$\par
+\noindent\textbf{0821}\ $\dfrac{1}{24}$\par
+\noindent\textbf{0822}\ ④\par
+\noindent\textbf{0823}\ $36$\par
+\noindent\textbf{0824}\ $\dfrac{64}{3}$\par
+\noindent\textbf{0825}\ ③\par
+\noindent\textbf{0826}\ $\dfrac{131}{4}$\par
+\noindent\textbf{0827}\ ①\par
+\noindent\textbf{0828}\ $\dfrac{10}{9}$\par
+\noindent\textbf{0829}\ $9$\par
+\noindent\textbf{0830}\ ④\par
+\noindent\textbf{0831}\ $18$\par
+\noindent\textbf{0832}\ ③\par
+\noindent\textbf{0833}\ ③\par
+\noindent\textbf{0834}\ $\dfrac{1}{3}$\par
+\noindent\textbf{0835}\ ⑤\par
+\noindent\textbf{0836}\ $4$\par
+\noindent\textbf{0837}\ $2$\par
+\noindent\textbf{0838}\ $\dfrac{2}{3}$\par
+\noindent\textbf{0839}\ $16$\par
+\noindent\textbf{0840}\ $\dfrac{27}{2}$\par
+\noindent\textbf{0841}\ ①\par
+\noindent\textbf{0842}\ $0$\par
+\noindent\textbf{0843}\ $\dfrac{3}{2}$\par
+\noindent\textbf{0844}\ $\dfrac{1}{12}$\par
+\noindent\textbf{0845}\ ②\par
+\noindent\textbf{0846}\ $6$\par
+\noindent\textbf{0847}\ $\dfrac{8}{3}$\par
+\noindent\textbf{0848}\ $\dfrac{145}{2}\mkern3mu \mathrm{m}$\par
+\noindent\textbf{0849}\ ②\par
+\noindent\textbf{0850}\ $85$\par
+\noindent\textbf{0851}\ $\dfrac{32}{3}\pi\mkern3mu \mathrm{cm}^3$\par
+\noindent\textbf{0852}\ ③\par
+\noindent\textbf{0853}\ $40\mkern3mu \mathrm{km}$\par
+\noindent\textbf{0854}\ $7$\par
+\noindent\textbf{0855}\ $-5$\par
+\noindent\textbf{0856}\ $4$\par
+\noindent\textbf{0857}\ ①\par
+\noindent\textbf{0858}\ ③\par
+\noindent\textbf{0859}\ ②\par
+\noindent\textbf{0860}\ $2$\par
+\noindent\textbf{0861}\ ⑤\par
+\noindent\textbf{0862}\ ①\par
+\noindent\textbf{0863}\ $26$\par
+\noindent\textbf{0864}\ ④\par
+\noindent\textbf{0865}\ ②\par
+\noindent\textbf{0866}\ $3$\par
+\noindent\textbf{0867}\ $4$\par
+\noindent\textbf{0868}\ ④\par
+\noindent\textbf{0869}\ $\dfrac{13}{24}$\par
+\noindent\textbf{0870}\ ②\par
+\noindent\textbf{0871}\ $\dfrac{2}{3}$\par
+\noindent\textbf{0872}\ $\dfrac{9}{2}$\par
+\noindent\textbf{0873}\ ④\par
+\noindent\textbf{0874}\ $3$\par
+\noindent\textbf{0875}\ ③\par
+\noindent\textbf{0876}\ ①\par
+\noindent\textbf{0877}\ ㄱ, ㄷ, ㄹ\par
+\noindent\textbf{0878}\ $12$\par
+\noindent\textbf{0879}\ $\dfrac{8}{3}$\par
+\noindent\textbf{0880}\ $\dfrac{4}{3}$\par
+\noindent\textbf{0881}\ $22$\par
+\noindent\textbf{0882}\ $8$\par
+\noindent\textbf{0883}\ ⑤\par
+\noindent\textbf{0884}\ $\dfrac{320}{3}$\par
+\noindent\textbf{0885}\ ③\par
+\end{multicols}
+\end{document}

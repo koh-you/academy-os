@@ -1,0 +1,21 @@
+% 0490(본책 88쪽) — 원, 두 현 AB·CD 의 교점 P, 현 AC(12 cm), 호 AD=4π cm, 호 BC=8π cm, ∠BDC=60°, △ACP 색칠. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \fill[yellow!50] (-0.285,1.063) -- (-1.063,0.285) -- (-0.142,0.531) -- cycle;
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.285,1.063) -- (0.285,-1.063);
+  \draw (-1.063,0.285) -- (0.778,0.778);
+  \draw (-0.285,1.063) -- (-1.063,0.285);
+  \draw[line width=0.4pt] (0.469,0.695) arc (-165.0:-105.0:0.320);
+  \node[font=\small, inner sep=0.5pt] at (0.396,0.396) {$60^\circ$};
+  \draw[dashed, line width=0.4pt] (-0.285,1.063) to[bend right=18] (-1.063,0.285);
+  \node[font=\small, inner sep=0.5pt] at (-0.886,0.886) {$12\,\mathrm{cm}$};
+  \draw[line width=0.4pt, <->] (0.870,0.870) arc (45.0:105.0:1.230);
+  \node[font=\small, inner sep=0.5pt] at (0.393,1.468) {$4\pi\,\mathrm{cm}$};
+  \draw[line width=0.4pt, <->] (-1.188,0.318) arc (165.0:285.0:1.230);
+  \node[font=\small, inner sep=0.5pt] at (-1.131,-1.131) {$8\pi\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1pt] at (-0.336,1.256) {A};
+  \node[font=\small, inner sep=1pt] at (0.336,-1.256) {B};
+  \node[font=\small, inner sep=1pt] at (-1.256,0.336) {C};
+  \node[font=\small, inner sep=1pt] at (0.919,0.919) {D};
+  \node[font=\small, inner sep=1pt] at (0.046,0.600) {P};
+\end{tikzpicture}

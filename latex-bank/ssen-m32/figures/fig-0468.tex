@@ -1,0 +1,13 @@
+% 0468(본책 85쪽) — 원, AD·BC 의 연장선의 교점 P(오른쪽), ∠P 표시. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.376,1.034) -- (1.969,-0.609);
+  \draw (-0.707,-0.843) -- (1.969,-0.609);
+  \fill[green!15] (1.969,-0.609) -- (1.723,-0.436) arc (145.0:185.0:0.300) -- cycle;
+  \draw[line width=0.4pt] (1.723,-0.436) arc (145.0:185.0:0.300);
+  \node[font=\small, inner sep=1pt] at (-0.445,1.222) {A};
+  \node[font=\small, inner sep=1pt] at (-0.836,-0.996) {B};
+  \node[font=\small, inner sep=1pt] at (0.918,-0.914) {C};
+  \node[font=\small, inner sep=1pt] at (1.269,0.141) {D};
+  \node[font=\small, inner sep=1pt] at (2.169,-0.609) {P};
+\end{tikzpicture}

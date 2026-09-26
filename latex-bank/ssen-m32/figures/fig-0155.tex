@@ -1,0 +1,17 @@
+% 0155(본책 33쪽) — △ABC(AB=4, BC=6, ∠B=60°), AH⊥BC. 스캔 삽화를 TikZ 로 다시 그림. 답(AH·BH·CH·AC)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (3.3,0); \coordinate (A) at (1.1,1.905); \coordinate (H) at (1.1,0);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (H);
+  \draw[line width=0.4pt] (1.1,0.22) -- (1.32,0.22) -- (1.32,0);
+  \draw[line width=0.4pt] (0.45,0) arc[start angle=0, end angle=60, radius=0.45];
+  \node[font=\small] at (0.75,0.28) {$60^\circ$};
+  \draw[dashed, line width=0.4pt] (B) to[bend left=25] (A);
+  \draw[dashed, line width=0.4pt] (B) to[bend right=15] (C);
+  \node[font=\small] at (0.2,1.15) {$4$};
+  \node[font=\small] at (1.65,-0.45) {$6$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, below] at (H) {H};
+\end{tikzpicture}

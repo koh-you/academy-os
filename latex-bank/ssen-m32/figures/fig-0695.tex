@@ -1,0 +1,33 @@
+% 0695~0697 공통 산점도(본책 125쪽) — 석진이네 반 10명의 1차(가로 5~10)·2차(세로 5~10) 수학 수행 평가 점수 산점도. 스캔 산점도를 TikZ 로 다시 그림(점 10개 원문 위치).
+\begin{tikzpicture}[line width=0.5pt]
+  \draw[gray!55, line width=0.25pt] (0,0) grid[xstep=0.42cm, ystep=0.42cm] (2.94,2.94);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (3.09,0);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (0,3.09);
+  \draw[line width=0.5pt] (0.16,-0.06) -- (0.22,0.06) (0.23,-0.06) -- (0.29,0.06);
+  \draw[line width=0.5pt] (-0.06,0.16) -- (0.06,0.22) (-0.06,0.23) -- (0.06,0.29);
+  \node[font=\scriptsize, below left=0pt, inner sep=1.5pt] at (0,0) {$0$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (0.42,0) {$5$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (0.84,0) {$6$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (1.26,0) {$7$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (1.68,0) {$8$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (2.1,0) {$9$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (2.52,0) {$10$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,0.42) {$5$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,0.84) {$6$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,1.26) {$7$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,1.68) {$8$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,2.1) {$9$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,2.52) {$10$};
+  \node[font=\scriptsize, anchor=north east, inner sep=1pt] at (3.09,-0.38) {1차(점)};
+  \node[font=\scriptsize, align=center, anchor=north east, inner sep=1pt] at (-0.42,3.09) {2\\차\\(점)};
+  \fill (0.42,1.26) circle (1.5pt);
+  \fill (0.84,0.84) circle (1.5pt);
+  \fill (1.26,1.68) circle (1.5pt);
+  \fill (1.26,1.26) circle (1.5pt);
+  \fill (1.68,1.26) circle (1.5pt);
+  \fill (1.68,0.84) circle (1.5pt);
+  \fill (2.1,2.52) circle (1.5pt);
+  \fill (2.1,2.1) circle (1.5pt);
+  \fill (2.1,1.68) circle (1.5pt);
+  \fill (2.52,2.52) circle (1.5pt);
+\end{tikzpicture}

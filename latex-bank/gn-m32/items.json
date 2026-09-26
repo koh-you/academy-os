@@ -1,0 +1,5400 @@
+{
+ "book": "개념원리 중학 3-2",
+ "source_package": "gn-m32",
+ "id_style": "page-number",
+ "variant_level": 0,
+ "units": [
+  {
+   "code": "01",
+   "title": "삼각비",
+   "pages": "11~15",
+   "groups": [
+    {
+     "id": "U1-A1",
+     "section": "개념원리 확인하기",
+     "items": [
+      "11-01",
+      "11-02",
+      "11-03"
+     ]
+    },
+    {
+     "id": "U1-A2",
+     "section": "핵심문제 익히기",
+     "items": [
+      "12-h1",
+      "12-c1",
+      "12-h2",
+      "12-c2",
+      "13-h3",
+      "13-c3",
+      "13-h4",
+      "13-c4",
+      "14-h5",
+      "14-c5",
+      "14-h6",
+      "14-c6"
+     ]
+    },
+    {
+     "id": "U1-A5",
+     "section": "이런 문제가 시험에 나온다",
+     "items": [
+      "15-01",
+      "15-02",
+      "15-03",
+      "15-04",
+      "15-05",
+      "15-06"
+     ]
+    }
+   ]
+  },
+  {
+   "code": "02",
+   "title": "30°·45°·60°의 삼각비의 값",
+   "pages": "17~20",
+   "groups": [
+    {
+     "id": "U2-B1",
+     "section": "개념원리 확인하기",
+     "items": [
+      "17-01",
+      "17-02",
+      "17-03",
+      "17-04"
+     ]
+    },
+    {
+     "id": "U2-B2",
+     "section": "핵심문제 익히기",
+     "items": [
+      "18-h1",
+      "18-c1",
+      "18-h2",
+      "18-c2",
+      "19-h3",
+      "19-c3",
+      "19-h4",
+      "19-c4"
+     ]
+    },
+    {
+     "id": "U2-B4",
+     "section": "이런 문제가 시험에 나온다",
+     "items": [
+      "20-01",
+      "20-02",
+      "20-03",
+      "20-04",
+      "20-05"
+     ]
+    }
+   ]
+  },
+  {
+   "code": "03",
+   "title": "임의의 예각의 삼각비의 값",
+   "pages": "22~33",
+   "groups": [
+    {
+     "id": "U3-C1",
+     "section": "개념원리 확인하기",
+     "items": [
+      "22-01",
+      "22-02",
+      "22-03",
+      "23-04",
+      "23-05",
+      "23-06",
+      "23-07"
+     ]
+    },
+    {
+     "id": "U3-C3",
+     "section": "핵심문제 익히기",
+     "items": [
+      "24-h1",
+      "24-c1",
+      "24-h2",
+      "24-c2",
+      "25-h3",
+      "25-c3",
+      "25-h4",
+      "25-c4",
+      "26-h5",
+      "26-c5",
+      "26-h6",
+      "26-c6"
+     ]
+    },
+    {
+     "id": "U3-C6",
+     "section": "이런 문제가 시험에 나온다",
+     "items": [
+      "27-01",
+      "27-02",
+      "27-03",
+      "27-04",
+      "27-05"
+     ]
+    },
+    {
+     "id": "U3-C7",
+     "section": "중단원 마무리하기 STEP 1 기본 문제",
+     "items": [
+      "28-01",
+      "28-02",
+      "28-03",
+      "28-04",
+      "28-05",
+      "28-06",
+      "29-07",
+      "29-08",
+      "29-09",
+      "29-10",
+      "29-11",
+      "29-12"
+     ]
+    },
+    {
+     "id": "U3-C9",
+     "section": "중단원 마무리하기 STEP 2 발전 문제",
+     "items": [
+      "30-13",
+      "30-14",
+      "30-15",
+      "30-16",
+      "30-17",
+      "30-18",
+      "31-19",
+      "31-20",
+      "31-21"
+     ]
+    },
+    {
+     "id": "U3-C11",
+     "section": "중단원 마무리하기 STEP 3 실력 UP",
+     "items": [
+      "31-22",
+      "31-23",
+      "31-24"
+     ]
+    },
+    {
+     "id": "U3-C12",
+     "section": "서술형 대비 문제",
+     "items": [
+      "32-e1",
+      "32-u1",
+      "32-e2",
+      "32-u2",
+      "33-u3",
+      "33-u4",
+      "33-u5",
+      "33-u6"
+     ]
+    }
+   ]
+  },
+  {
+   "code": "04",
+   "title": "길이 구하기",
+   "pages": "38~43",
+   "groups": [
+    {
+     "id": "U4-D1",
+     "section": "개념원리 확인하기",
+     "items": [
+      "38-01",
+      "38-02",
+      "38-03",
+      "39-04",
+      "39-05",
+      "39-06"
+     ]
+    },
+    {
+     "id": "U4-D3",
+     "section": "핵심문제 익히기",
+     "items": [
+      "40-h1",
+      "40-c1",
+      "40-h2",
+      "40-c2",
+      "41-h3",
+      "41-c3",
+      "41-h4",
+      "41-c4",
+      "42-h5",
+      "42-c5",
+      "42-h6",
+      "42-c6"
+     ]
+    },
+    {
+     "id": "U4-D6",
+     "section": "이런 문제가 시험에 나온다",
+     "items": [
+      "43-01",
+      "43-02",
+      "43-03",
+      "43-04",
+      "43-05",
+      "43-06"
+     ]
+    }
+   ]
+  },
+  {
+   "code": "05",
+   "title": "넓이 구하기",
+   "pages": "46~55",
+   "groups": [
+    {
+     "id": "U5-E1",
+     "section": "개념원리 확인하기",
+     "items": [
+      "46-01",
+      "46-02",
+      "46-03",
+      "46-04"
+     ]
+    },
+    {
+     "id": "U5-E2",
+     "section": "핵심문제 익히기",
+     "items": [
+      "47-h1",
+      "47-c1",
+      "47-h2",
+      "47-c2",
+      "48-h3",
+      "48-c3",
+      "48-h4",
+      "48-c4"
+     ]
+    },
+    {
+     "id": "U5-E4",
+     "section": "이런 문제가 시험에 나온다",
+     "items": [
+      "49-01",
+      "49-02",
+      "49-03",
+      "49-04",
+      "49-05"
+     ]
+    },
+    {
+     "id": "U5-E5",
+     "section": "중단원 마무리하기 STEP 1 기본 문제",
+     "items": [
+      "50-01",
+      "50-02",
+      "50-03",
+      "50-04",
+      "50-05",
+      "50-06",
+      "51-07",
+      "51-08",
+      "51-09",
+      "51-10",
+      "51-11",
+      "51-12"
+     ]
+    },
+    {
+     "id": "U5-E7",
+     "section": "중단원 마무리하기 STEP 2 발전 문제",
+     "items": [
+      "52-13",
+      "52-14",
+      "52-15",
+      "52-16",
+      "52-17",
+      "52-18",
+      "53-19",
+      "53-20",
+      "53-21"
+     ]
+    },
+    {
+     "id": "U5-E9",
+     "section": "중단원 마무리하기 STEP 3 실력 UP",
+     "items": [
+      "53-22",
+      "53-23",
+      "53-24"
+     ]
+    },
+    {
+     "id": "U5-E10",
+     "section": "서술형 대비 문제",
+     "items": [
+      "54-e1",
+      "54-e2",
+      "54-u1",
+      "54-u2",
+      "55-u3",
+      "55-u4",
+      "55-u5",
+      "55-u6"
+     ]
+    }
+   ]
+  },
+  {
+   "code": "06",
+   "title": "원의 현",
+   "pages": "60~64",
+   "groups": [
+    {
+     "id": "U6-F1",
+     "section": "개념원리 확인하기",
+     "items": [
+      "60-01",
+      "60-02",
+      "60-03",
+      "60-04"
+     ]
+    },
+    {
+     "id": "U6-F2",
+     "section": "핵심문제 익히기",
+     "items": [
+      "61-h1",
+      "61-c1",
+      "61-h2",
+      "61-c2",
+      "62-h3",
+      "62-c3",
+      "62-h4",
+      "62-c4",
+      "63-h5",
+      "63-c5",
+      "63-h6",
+      "63-c6"
+     ]
+    },
+    {
+     "id": "U6-F5",
+     "section": "이런 문제가 시험에 나온다",
+     "items": [
+      "64-01",
+      "64-02",
+      "64-03",
+      "64-04",
+      "64-05",
+      "64-06"
+     ]
+    }
+   ]
+  },
+  {
+   "code": "07",
+   "title": "원의 접선",
+   "pages": "66~70",
+   "groups": [
+    {
+     "id": "U7-G1",
+     "section": "개념원리 확인하기",
+     "items": [
+      "66-01",
+      "66-02",
+      "66-03",
+      "66-04"
+     ]
+    },
+    {
+     "id": "U7-G2",
+     "section": "핵심문제 익히기",
+     "items": [
+      "67-h1",
+      "67-c1",
+      "67-h2",
+      "67-c2",
+      "68-h3",
+      "68-c3",
+      "68-c4",
+      "68-c5",
+      "69-h4",
+      "69-c6",
+      "69-h5",
+      "69-c7"
+     ]
+    },
+    {
+     "id": "U7-G5",
+     "section": "이런 문제가 시험에 나온다",
+     "items": [
+      "70-01",
+      "70-02",
+      "70-03",
+      "70-04",
+      "70-05"
+     ]
+    }
+   ]
+  },
+  {
+   "code": "08",
+   "title": "원의 접선 (2)",
+   "pages": "72~81",
+   "groups": [
+    {
+     "id": "U8-H1",
+     "section": "개념원리 확인하기",
+     "items": [
+      "72-01",
+      "72-02",
+      "72-03",
+      "72-04"
+     ]
+    },
+    {
+     "id": "U8-H2",
+     "section": "핵심문제 익히기",
+     "items": [
+      "73-h1",
+      "73-c1",
+      "73-h2",
+      "73-c2",
+      "74-h3",
+      "74-c3",
+      "74-h4",
+      "74-c4"
+     ]
+    },
+    {
+     "id": "U8-H4",
+     "section": "이런 문제가 시험에 나온다",
+     "items": [
+      "75-01",
+      "75-02",
+      "75-03",
+      "75-04",
+      "75-05"
+     ]
+    },
+    {
+     "id": "U8-H5",
+     "section": "중단원 마무리하기 STEP 1 기본 문제",
+     "items": [
+      "76-01",
+      "76-02",
+      "76-03",
+      "76-04",
+      "76-05",
+      "76-06",
+      "77-07",
+      "77-08",
+      "77-09",
+      "77-10",
+      "77-11",
+      "77-12"
+     ]
+    },
+    {
+     "id": "U8-H7",
+     "section": "중단원 마무리하기 STEP 2 발전 문제",
+     "items": [
+      "78-13",
+      "78-14",
+      "78-15",
+      "78-16",
+      "78-17",
+      "78-18",
+      "79-19",
+      "79-20",
+      "79-21"
+     ]
+    },
+    {
+     "id": "U8-H9",
+     "section": "중단원 마무리하기 STEP 3 실력 UP",
+     "items": [
+      "79-22",
+      "79-23",
+      "79-24"
+     ]
+    },
+    {
+     "id": "U8-H10",
+     "section": "서술형 대비 문제",
+     "items": [
+      "80-e1",
+      "80-e2",
+      "80-u1",
+      "80-u2",
+      "81-u3",
+      "81-u4",
+      "81-u5",
+      "81-u6"
+     ]
+    }
+   ]
+  },
+  {
+   "code": "09",
+   "title": "원주각",
+   "pages": "86~92",
+   "groups": [
+    {
+     "id": "U9-I1",
+     "section": "개념원리 확인하기",
+     "items": [
+      "86-01",
+      "86-02",
+      "86-03",
+      "86-04"
+     ]
+    },
+    {
+     "id": "U9-I2",
+     "section": "핵심문제 익히기",
+     "items": [
+      "87-h1",
+      "87-c1",
+      "87-h2",
+      "87-c2",
+      "88-h3",
+      "88-c3",
+      "88-h4",
+      "88-c4",
+      "89-h5",
+      "89-c5",
+      "89-h6",
+      "89-c6",
+      "90-h7",
+      "90-c7",
+      "90-h8",
+      "90-c8"
+     ]
+    },
+    {
+     "id": "U9-I6",
+     "section": "이런 문제가 시험에 나온다",
+     "items": [
+      "91-01",
+      "91-02",
+      "91-03",
+      "91-04",
+      "91-05",
+      "92-06",
+      "92-07",
+      "92-08",
+      "92-09",
+      "92-10"
+     ]
+    }
+   ]
+  },
+  {
+   "code": "10",
+   "title": "원과 사각형",
+   "pages": "94~99",
+   "groups": [
+    {
+     "id": "U10-J1",
+     "section": "개념원리 확인하기",
+     "items": [
+      "94-01",
+      "94-02",
+      "94-03",
+      "94-04"
+     ]
+    },
+    {
+     "id": "U10-J2",
+     "section": "핵심문제 익히기",
+     "items": [
+      "95-h1",
+      "95-c1",
+      "95-c2",
+      "96-h2",
+      "96-c3",
+      "96-h3",
+      "96-c4",
+      "97-h4",
+      "97-c5",
+      "97-h5",
+      "97-c6",
+      "98-h6",
+      "98-c7",
+      "98-h7",
+      "98-c8"
+     ]
+    },
+    {
+     "id": "U10-J6",
+     "section": "이런 문제가 시험에 나온다",
+     "items": [
+      "99-01",
+      "99-02",
+      "99-03",
+      "99-04",
+      "99-05"
+     ]
+    }
+   ]
+  },
+  {
+   "code": "11",
+   "title": "접선과 현이 이루는 각",
+   "pages": "101~111",
+   "groups": [
+    {
+     "id": "U11-K1",
+     "section": "개념원리 확인하기",
+     "items": [
+      "101-01",
+      "101-02",
+      "101-03"
+     ]
+    },
+    {
+     "id": "U11-K2",
+     "section": "핵심문제 익히기",
+     "items": [
+      "102-h1",
+      "102-c1",
+      "102-h2",
+      "102-c2",
+      "103-h3",
+      "103-c3",
+      "103-h4",
+      "103-c4",
+      "104-h5",
+      "104-c5",
+      "104-h6",
+      "104-c6"
+     ]
+    },
+    {
+     "id": "U11-K5",
+     "section": "이런 문제가 시험에 나온다",
+     "items": [
+      "105-01",
+      "105-02",
+      "105-03",
+      "105-04",
+      "105-05"
+     ]
+    },
+    {
+     "id": "U11-K6",
+     "section": "중단원 마무리하기 STEP 1 기본 문제",
+     "items": [
+      "106-01",
+      "106-02",
+      "106-03",
+      "106-04",
+      "106-05",
+      "106-06",
+      "107-07",
+      "107-08",
+      "107-09",
+      "107-10",
+      "107-11",
+      "107-12"
+     ]
+    },
+    {
+     "id": "U11-K8",
+     "section": "중단원 마무리하기 STEP 2 발전 문제",
+     "items": [
+      "108-13",
+      "108-14",
+      "108-15",
+      "108-16",
+      "108-17",
+      "108-18",
+      "109-19",
+      "109-20",
+      "109-21"
+     ]
+    },
+    {
+     "id": "U11-K10",
+     "section": "중단원 마무리하기 STEP 3 실력 UP",
+     "items": [
+      "109-22",
+      "109-23",
+      "109-24"
+     ]
+    },
+    {
+     "id": "U11-K11",
+     "section": "서술형 대비 문제",
+     "items": [
+      "110-e1",
+      "110-u1",
+      "110-e2",
+      "110-u2",
+      "111-u3",
+      "111-u4",
+      "111-u5",
+      "111-u6"
+     ]
+    }
+   ]
+  },
+  {
+   "code": "12",
+   "title": "산포도와 표준편차",
+   "pages": "115~123",
+   "groups": [
+    {
+     "id": "U12-L1",
+     "section": "개념원리 확인하기",
+     "items": [
+      "115-01",
+      "115-02",
+      "115-03",
+      "115-04"
+     ]
+    },
+    {
+     "id": "U12-L2",
+     "section": "핵심문제 익히기",
+     "items": [
+      "116-h1",
+      "116-c1",
+      "116-h2",
+      "116-c2",
+      "117-h3",
+      "117-c3",
+      "117-h4",
+      "117-c4",
+      "118-h5",
+      "118-c5",
+      "118-h6",
+      "118-c6"
+     ]
+    },
+    {
+     "id": "U12-L5",
+     "section": "이런 문제가 시험에 나온다",
+     "items": [
+      "119-01",
+      "119-02",
+      "119-03",
+      "119-04",
+      "119-05"
+     ]
+    },
+    {
+     "id": "U12-L6",
+     "section": "중단원 마무리하기 STEP 1 기본 문제",
+     "items": [
+      "120-01",
+      "120-02",
+      "120-03",
+      "120-04",
+      "120-05",
+      "120-06",
+      "121-07",
+      "121-08",
+      "121-09"
+     ]
+    },
+    {
+     "id": "U12-L8",
+     "section": "중단원 마무리하기 STEP 2 발전 문제",
+     "items": [
+      "121-10",
+      "121-11",
+      "121-12",
+      "122-13",
+      "122-14",
+      "122-15"
+     ]
+    },
+    {
+     "id": "U12-L10",
+     "section": "중단원 마무리하기 STEP 3 실력 UP",
+     "items": [
+      "122-16",
+      "122-17",
+      "122-18"
+     ]
+    },
+    {
+     "id": "U12-L11",
+     "section": "서술형 대비 문제",
+     "items": [
+      "123-e1",
+      "123-u1",
+      "123-u2",
+      "123-u3"
+     ]
+    }
+   ]
+  },
+  {
+   "code": "13",
+   "title": "상자그림",
+   "pages": "127~131",
+   "groups": [
+    {
+     "id": "U13-M1",
+     "section": "개념원리 확인하기",
+     "items": [
+      "127-01",
+      "127-02",
+      "127-03",
+      "127-04"
+     ]
+    },
+    {
+     "id": "U13-M2",
+     "section": "핵심문제 익히기",
+     "items": [
+      "128-h1",
+      "128-c1",
+      "128-h2",
+      "128-c2",
+      "129-h3",
+      "129-c3",
+      "129-h4",
+      "129-c4",
+      "130-h5",
+      "130-c5",
+      "130-c6"
+     ]
+    },
+    {
+     "id": "U13-M5",
+     "section": "이런 문제가 시험에 나온다",
+     "items": [
+      "131-01",
+      "131-02",
+      "131-03",
+      "131-04"
+     ]
+    }
+   ]
+  },
+  {
+   "code": "14",
+   "title": "산점도와 상관관계",
+   "pages": "133~143",
+   "groups": [
+    {
+     "id": "U14-N1",
+     "section": "개념원리 확인하기",
+     "items": [
+      "133-01",
+      "133-02",
+      "133-03"
+     ]
+    },
+    {
+     "id": "U14-N2",
+     "section": "핵심문제 익히기",
+     "items": [
+      "134-h1",
+      "134-c1",
+      "134-c2",
+      "135-h2",
+      "135-c3",
+      "135-c4",
+      "136-h3",
+      "136-c5",
+      "136-h4",
+      "136-c6"
+     ]
+    },
+    {
+     "id": "U14-N5",
+     "section": "이런 문제가 시험에 나온다",
+     "items": [
+      "137-01",
+      "137-02",
+      "137-03",
+      "137-04"
+     ]
+    },
+    {
+     "id": "U14-N6",
+     "section": "중단원 마무리하기 STEP 1 기본 문제",
+     "items": [
+      "138-01",
+      "138-02",
+      "138-03",
+      "138-04",
+      "138-05",
+      "139-06",
+      "139-07",
+      "139-08",
+      "139-09",
+      "139-10"
+     ]
+    },
+    {
+     "id": "U14-N8",
+     "section": "중단원 마무리하기 STEP 2 발전 문제",
+     "items": [
+      "140-11",
+      "140-12",
+      "140-13",
+      "140-14",
+      "141-15",
+      "141-16",
+      "141-17"
+     ]
+    },
+    {
+     "id": "U14-N10",
+     "section": "중단원 마무리하기 STEP 3 실력 UP",
+     "items": [
+      "141-18",
+      "141-19",
+      "141-20"
+     ]
+    },
+    {
+     "id": "U14-N11",
+     "section": "서술형 대비 문제",
+     "items": [
+      "142-e1",
+      "142-e2",
+      "142-u1",
+      "142-u2",
+      "143-u3",
+      "143-u4",
+      "143-u5",
+      "143-u6"
+     ]
+    }
+   ]
+  }
+ ],
+ "items": {
+  "11-01": {
+   "page": 11,
+   "body": "다음 그림과 같은 직각삼각형~$\\pt{ABC}$에 대하여 \\blank\\ 안에 알맞은 수를 써넣으시오.",
+   "figure": "crop:fig-11-01.png",
+   "figure_layout": "below",
+   "subs": [
+    "$\\Rightarrow$ $\\sin\\pt{A}=\\blank[2em]$, $\\cos\\pt{A}=\\blank[2em]$, $\\tan\\pt{A}=\\blank[2em]$",
+    "$\\Rightarrow$ $\\sin\\pt{B}=\\blank[2em]$, $\\cos\\pt{B}=\\blank[2em]$, $\\tan\\pt{B}=\\blank[2em]$"
+   ],
+   "answer": "⑴ $\\dfrac{15}{17}$, $\\dfrac{8}{17}$, $\\dfrac{15}{8}$ ⑵ $\\dfrac{4}{5}$, $\\dfrac{3}{5}$, $\\dfrac{4}{3}$",
+   "answer_source": "답지"
+  },
+  "11-02": {
+   "page": 11,
+   "body": "오른쪽 그림과 같은 직각삼각형~$\\pt{ABC}$에서 다음을 구하시오.",
+   "figure": "crop:fig-11-02.png",
+   "subs": [
+    "$\\seg{AC}$의 길이",
+    "$\\sin\\pt{B}$, $\\cos\\pt{B}$, $\\tan\\pt{B}$의 값",
+    "$\\sin\\pt{C}$, $\\cos\\pt{C}$, $\\tan\\pt{C}$의 값"
+   ],
+   "answer": "⑴ $2\\sqrt{3}$ ⑵ $\\sin\\pt{B}=\\dfrac{\\sqrt{3}}{2}$, $\\cos\\pt{B}=\\dfrac{1}{2}$, $\\tan\\pt{B}=\\sqrt{3}$ ⑶ $\\sin\\pt{C}=\\dfrac{1}{2}$, $\\cos\\pt{C}=\\dfrac{\\sqrt{3}}{2}$, $\\tan\\pt{C}=\\dfrac{\\sqrt{3}}{3}$",
+   "answer_source": "답지"
+  },
+  "11-03": {
+   "page": 11,
+   "body": "오른쪽 그림과 같은 직각삼각형~$\\pt{ABC}$에서 $\\seg{AC}=9$, $\\sin\\pt{C}=\\dfrac{2}{3}$일 때, 다음을 구하시오.",
+   "figure": "crop:fig-11-03.png",
+   "subs": [
+    "$\\seg{AB}$의 길이",
+    "$\\seg{BC}$의 길이"
+   ],
+   "answer": "⑴ $6$ ⑵ $3\\sqrt{5}$",
+   "answer_source": "답지"
+  },
+  "12-h1": {
+   "page": 12,
+   "type": "삼각비의 값",
+   "body": "오른쪽 그림과 같은 직각삼각형~$\\pt{ABC}$에 대하여 다음 중 옳지 \\underline{않은} 것은?",
+   "figure": "crop:fig-12-h1.png",
+   "choices": [
+    "$\\sin\\pt{A}=\\dfrac{3}{4}$",
+    "$\\cos\\pt{A}=\\dfrac{\\sqrt{7}}{4}$",
+    "$\\tan\\pt{A}=\\dfrac{\\sqrt{7}}{3}$",
+    "$\\sin\\pt{C}=\\dfrac{\\sqrt{7}}{4}$",
+    "$\\cos\\pt{C}=\\dfrac{3}{4}$"
+   ],
+   "choices_layout": "ii",
+   "answer": "③",
+   "answer_source": "본문 답"
+  },
+  "12-c1": {
+   "page": 12,
+   "body": "오른쪽 그림과 같은 직각삼각형~$\\pt{ABC}$에서 $\\tan\\pt{A}\\times\\sin\\pt{C}$의 값을 구하시오.",
+   "figure": "crop:fig-12-c1.png",
+   "answer": "$\\dfrac{\\sqrt{5}}{3}$",
+   "answer_source": "답지"
+  },
+  "12-h2": {
+   "page": 12,
+   "type": "삼각비를 이용하여 삼각형의 변의 길이 구하기",
+   "body": "오른쪽 그림과 같은 직각삼각형~$\\pt{ABC}$에서 $\\seg{BC}=8$, $\\tan\\pt{B}=\\dfrac{3}{4}$일 때, $\\seg{AB}$의 길이를 구하시오.",
+   "figure": "crop:fig-12-h2.png",
+   "answer": "$10$",
+   "answer_source": "본문 답"
+  },
+  "12-c2": {
+   "page": 12,
+   "body": "오른쪽 그림과 같은 직각삼각형~$\\pt{ABC}$에서 $\\seg{AB}=12$, $\\cos\\pt{A}=\\dfrac{2\\sqrt{2}}{3}$일 때, $\\seg{BC}$의 길이를 구하시오.",
+   "figure": "crop:fig-12-c2.png",
+   "answer": "$4$",
+   "answer_source": "답지"
+  },
+  "13-h3": {
+   "page": 13,
+   "type": "한 삼각비의 값을 알 때, 다른 삼각비의 값 구하기",
+   "body": "$\\sin\\pt{A}=\\dfrac{12}{13}$일 때, $\\cos\\pt{A}$의 값을 구하시오. \\cond{$0^\\circ<\\pt{A}<90^\\circ$}",
+   "answer": "$\\dfrac{5}{13}$",
+   "answer_source": "본문 답"
+  },
+  "13-c3": {
+   "page": 13,
+   "body": "$\\cos\\pt{A}=\\dfrac{5}{7}$일 때, $\\sin\\pt{A}\\times\\tan\\pt{A}$의 값을 구하시오. \\cond{$0^\\circ<\\pt{A}<90^\\circ$}",
+   "answer": "$\\dfrac{24}{35}$",
+   "answer_source": "답지(쪽 렌더)"
+  },
+  "13-h4": {
+   "page": 13,
+   "type": "직각삼각형의 닮음과 삼각비",
+   "body": "오른쪽 그림과 같이 $\\angle\\pt{BAC}=90^\\circ$인 직각삼각형~$\\pt{ABC}$에서 $\\seg{AH}\\perp\\seg{BC}$이고 $\\angle\\pt{BAH}=x$라 할 때, 다음 삼각비의 값을 구하시오.",
+   "figure": "crop:fig-13-h4.png",
+   "subs": [
+    "$\\sin x$",
+    "$\\tan x$"
+   ],
+   "answer": "⑴ $\\dfrac{15}{17}$ ⑵ $\\dfrac{15}{8}$",
+   "answer_source": "본문 답"
+  },
+  "13-c4": {
+   "page": 13,
+   "body": "오른쪽 그림과 같이 $\\angle\\pt{A}=90^\\circ$인 직각삼각형~$\\pt{ABC}$에서 $\\seg{DE}\\perp\\seg{BC}$이고 $\\angle\\pt{BDE}=x$라 할 때, 다음 삼각비의 값을 구하시오.",
+   "figure": "crop:fig-13-c4.png",
+   "subs": [
+    "$\\cos x$",
+    "$\\tan x$"
+   ],
+   "answer": "⑴ $\\dfrac{4\\sqrt{2}}{9}$ ⑵ $\\dfrac{7\\sqrt{2}}{8}$",
+   "answer_source": "답지(쪽 렌더)"
+  },
+  "14-h5": {
+   "page": 14,
+   "type": "직선의 방정식과 삼각비",
+   "body": "오른쪽 그림과 같이 두 점~$\\pt{A}$, $\\pt{B}$는 각각 직선 $y=2x+4$가 $x$축, $y$축과 만나는 점이다. 직선 $y=2x+4$가 $x$축의 양의 방향과 이루는 각의 크기를 $\\alpha$라 할 때, $\\sin\\alpha$, $\\cos\\alpha$의 값을 구하시오.",
+   "figure": "crop:fig-14-h5.png",
+   "answer": "$\\sin\\alpha=\\dfrac{2\\sqrt{5}}{5}$, $\\cos\\alpha=\\dfrac{\\sqrt{5}}{5}$",
+   "answer_source": "본문 답"
+  },
+  "14-c5": {
+   "page": 14,
+   "body": "일차방정식 $3x-4y+12=0$의 그래프가 $x$축의 양의 방향과 이루는 예각의 크기를 $\\alpha$라 할 때, $\\cos\\alpha-\\sin\\alpha$의 값을 구하시오.",
+   "answer": "$\\dfrac{1}{5}$",
+   "answer_source": "답지"
+  },
+  "14-h6": {
+   "page": 14,
+   "type": "입체도형에서 삼각비의 값 구하기",
+   "tag": "UP",
+   "body": "오른쪽 그림과 같이 한 모서리의 길이가 $6$인 정육면체에서 $\\angle\\pt{BHF}=x$라 할 때, $\\cos x$의 값을 구하시오.",
+   "figure": "crop:fig-14-h6.png",
+   "answer": "$\\dfrac{\\sqrt{6}}{3}$",
+   "answer_source": "본문 답"
+  },
+  "14-c6": {
+   "page": 14,
+   "body": "오른쪽 그림과 같이 밑면의 가로, 세로의 길이가 각각 $4$, $3$이고 높이가 $5$인 직육면체에서 $\\angle\\pt{AGE}=x$라 할 때, $\\sin x+\\cos x$의 값을 구하시오.",
+   "figure": "crop:fig-14-c6.png",
+   "answer": "$\\sqrt{2}$",
+   "answer_source": "답지"
+  },
+  "15-01": {
+   "page": 15,
+   "body": "오른쪽 그림과 같은 직각삼각형~$\\pt{ABC}$에 대하여 다음 중 옳은 것은?",
+   "figure": "crop:fig-15-01.png",
+   "choices": [
+    "$\\sin\\pt{A}=\\dfrac{\\sqrt{5}}{5}$",
+    "$\\tan\\pt{A}=\\sqrt{5}$",
+    "$\\sin\\pt{B}=\\dfrac{2\\sqrt{5}}{5}$",
+    "$\\cos\\pt{B}=\\dfrac{\\sqrt{5}}{5}$",
+    "$\\tan\\pt{B}=\\dfrac{1}{2}$"
+   ],
+   "answer": "⑤",
+   "answer_source": "답지"
+  },
+  "15-02": {
+   "page": 15,
+   "body": "오른쪽 그림과 같은 직각삼각형~$\\pt{ABC}$에서 $\\seg{AC}=15\\,\\mathrm{cm}$, $\\sin\\pt{C}=\\dfrac{3}{5}$일 때, $\\triangle\\pt{ABC}$의 넓이를 구하시오.",
+   "figure": "crop:fig-15-02.png",
+   "answer": "$54\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "15-03": {
+   "page": 15,
+   "body": "$\\tan\\pt{A}=\\sqrt{2}$일 때, $\\sin\\pt{A}\\times\\cos\\pt{A}$의 값을 구하시오. \\cond{$0^\\circ<\\pt{A}<90^\\circ$}",
+   "answer": "$\\dfrac{\\sqrt{2}}{3}$",
+   "answer_source": "답지(쪽 렌더)"
+  },
+  "15-04": {
+   "page": 15,
+   "body": "오른쪽 그림과 같이 $\\angle\\pt{BAC}=90^\\circ$인 직각삼각형~$\\pt{ABC}$에서 $\\seg{AH}\\perp\\seg{BC}$이고 $\\angle\\pt{BAH}=x$, $\\angle\\pt{CAH}=y$라 할 때, $\\cos x\\times\\tan y$의 값을 구하시오.",
+   "figure": "crop:fig-15-04.png",
+   "answer": "$\\dfrac{\\sqrt{3}}{6}$",
+   "answer_source": "답지"
+  },
+  "15-05": {
+   "page": 15,
+   "body": "오른쪽 그림과 같이 두 점~$\\pt{A}$, $\\pt{B}$는 각각 직선 $y=\\dfrac{1}{3}x+2$가 $x$축, $y$축과 만나는 점이다. 직선 $y=\\dfrac{1}{3}x+2$가 $x$축의 양의 방향과 이루는 각의 크기를 $\\alpha$라 할 때, $\\sin\\alpha+\\cos\\alpha$의 값을 구하시오.",
+   "figure": "crop:fig-15-05.png",
+   "answer": "$\\dfrac{2\\sqrt{10}}{5}$",
+   "answer_source": "답지(쪽 렌더)"
+  },
+  "15-06": {
+   "page": 15,
+   "tag": "UP",
+   "body": "오른쪽 그림과 같이 한 모서리의 길이가 $4$인 정육면체에서 $\\angle\\pt{CEG}=x$라 할 때, $\\sin x$의 값을 구하시오.",
+   "figure": "crop:fig-15-06.png",
+   "answer": "$\\dfrac{\\sqrt{3}}{3}$",
+   "answer_source": "답지"
+  },
+  "17-01": {
+   "page": 17,
+   "body": "다음 표를 완성하시오.",
+   "figure": "crop:fig-17-01.png",
+   "figure_layout": "below",
+   "answer": "풀이 참조 ($\\sin A$: $\\dfrac{1}{2}$, $\\dfrac{\\sqrt{2}}{2}$, $\\dfrac{\\sqrt{3}}{2}$ / $\\cos A$: $\\dfrac{\\sqrt{3}}{2}$, $\\dfrac{\\sqrt{2}}{2}$, $\\dfrac{1}{2}$ / $\\tan A$: $\\dfrac{\\sqrt{3}}{3}$, $1$, $\\sqrt{3}$)",
+   "answer_source": "답지(쪽 렌더)"
+  },
+  "17-02": {
+   "page": 17,
+   "body": "다음을 계산하시오.",
+   "subs": [
+    "$\\sin 45^\\circ+\\cos 45^\\circ$",
+    "$\\cos 60^\\circ-\\tan 45^\\circ$",
+    "$\\sin 60^\\circ\\times\\tan 30^\\circ$",
+    "$\\tan 60^\\circ\\div\\cos 30^\\circ$"
+   ],
+   "answer": "⑴ $\\sqrt{2}$ ⑵ $-\\dfrac{1}{2}$ ⑶ $\\dfrac{1}{2}$ ⑷ $2$",
+   "answer_source": "답지"
+  },
+  "17-03": {
+   "page": 17,
+   "body": "$0^\\circ<x<90^\\circ$일 때, 다음을 만족시키는 $x$의 크기를 구하시오.",
+   "subs": [
+    "$\\sin x=\\dfrac{\\sqrt{2}}{2}$",
+    "$\\cos x=\\dfrac{1}{2}$",
+    "$\\tan x=\\dfrac{\\sqrt{3}}{3}$"
+   ],
+   "answer": "⑴ $45^\\circ$ ⑵ $60^\\circ$ ⑶ $30^\\circ$",
+   "answer_source": "답지"
+  },
+  "17-04": {
+   "page": 17,
+   "body": "다음 그림과 같은 직각삼각형~$\\pt{ABC}$에서 $x$, $y$의 값을 구하시오.",
+   "figure": "crop:fig-17-04.png",
+   "figure_layout": "below",
+   "answer": "⑴ $x=2\\sqrt{3}$, $y=2$ ⑵ $x=7$, $y=7\\sqrt{2}$",
+   "answer_source": "답지"
+  },
+  "18-h1": {
+   "page": 18,
+   "type": "$30^\\circ$, $45^\\circ$, $60^\\circ$의 삼각비의 값",
+   "body": "다음을 계산하시오.",
+   "subs": [
+    "$\\sin 60^\\circ+\\cos 30^\\circ-\\tan 30^\\circ$",
+    "$\\tan 60^\\circ\\times\\sin 30^\\circ-\\sin 60^\\circ\\times\\tan 45^\\circ$",
+    "$\\sin^2 45^\\circ+\\cos^2 45^\\circ$"
+   ],
+   "answer": "⑴ $\\dfrac{2\\sqrt{3}}{3}$ ⑵ $0$ ⑶ $1$",
+   "answer_source": "본문 답"
+  },
+  "18-c1": {
+   "page": 18,
+   "body": "다음을 계산하시오.",
+   "subs": [
+    "$\\cos 60^\\circ-\\sin 30^\\circ+\\tan 45^\\circ$",
+    "$\\sin 60^\\circ\\times\\tan 30^\\circ+\\cos 30^\\circ\\times\\tan 60^\\circ$",
+    "$(1+\\sin 45^\\circ+\\sin 30^\\circ)(1-\\cos 45^\\circ+\\cos 60^\\circ)$"
+   ],
+   "answer": "⑴ $1$ ⑵ $2$ ⑶ $\\dfrac{7}{4}$",
+   "answer_source": "답지"
+  },
+  "18-h2": {
+   "page": 18,
+   "type": "$30^\\circ$, $45^\\circ$, $60^\\circ$의 삼각비의 값을 이용하여 각의 크기 구하기",
+   "body": "$\\cos(x-20^\\circ)=\\dfrac{\\sqrt{3}}{2}$을 만족시키는 $x$의 크기를 구하시오. \\cond{$20^\\circ<x<110^\\circ$}",
+   "answer": "$50^\\circ$",
+   "answer_source": "본문 답"
+  },
+  "18-c2": {
+   "page": 18,
+   "body": "$\\tan(2x+30^\\circ)=\\sqrt{3}$일 때, 다음 물음에 답하시오. \\cond{$0^\\circ<x<30^\\circ$}",
+   "subs": [
+    "$x$의 크기를 구하시오.",
+    "$\\sin 3x$의 값을 구하시오."
+   ],
+   "answer": "⑴ $15^\\circ$ ⑵ $\\dfrac{\\sqrt{2}}{2}$",
+   "answer_source": "답지"
+  },
+  "19-h3": {
+   "page": 19,
+   "type": "$30^\\circ$, $45^\\circ$, $60^\\circ$의 삼각비의 값을 이용하여 변의 길이 구하기",
+   "body": "오른쪽 그림과 같은 삼각형~$\\pt{ABC}$에서 $\\seg{AH}\\perp\\seg{BC}$이고 $\\angle\\pt{B}=45^\\circ$, $\\angle\\pt{C}=60^\\circ$, $\\seg{AB}=9\\sqrt{2}\\,\\mathrm{cm}$일 때, 다음을 구하시오.",
+   "figure": "crop:fig-19-h3.png",
+   "subs": [
+    "$\\seg{AH}$의 길이",
+    "$\\seg{AC}$의 길이"
+   ],
+   "answer": "⑴ $9\\,\\mathrm{cm}$ ⑵ $6\\sqrt{3}\\,\\mathrm{cm}$",
+   "answer_source": "본문 답"
+  },
+  "19-c3": {
+   "page": 19,
+   "body": "오른쪽 그림에서 $\\angle\\pt{BAC}=\\angle\\pt{D}=90^\\circ$, $\\angle\\pt{B}=60^\\circ$, $\\angle\\pt{ACD}=30^\\circ$이고 $\\seg{AB}=4\\,\\mathrm{cm}$일 때, $\\seg{CD}$의 길이를 구하시오.",
+   "figure": "crop:fig-19-c3.png",
+   "answer": "$6\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "19-h4": {
+   "page": 19,
+   "type": "직선의 기울기와 삼각비",
+   "body": "직선 $3x-3y+8=0$이 $x$축의 양의 방향과 이루는 예각의 크기를 구하시오.",
+   "answer": "$45^\\circ$",
+   "answer_source": "본문 답"
+  },
+  "19-c4": {
+   "page": 19,
+   "body": "오른쪽 그림과 같이 $x$절편이 $-1$이고 $x$축의 양의 방향과 이루는 각의 크기가 $60^\\circ$인 직선의 방정식을 구하시오.",
+   "figure": "crop:fig-19-c4.png",
+   "answer": "$y=\\sqrt{3}x+\\sqrt{3}$",
+   "answer_source": "답지"
+  },
+  "20-01": {
+   "page": 20,
+   "body": "다음 중 옳지 \\underline{않은} 것은?",
+   "choices": [
+    "$\\sin 30^\\circ+\\cos 60^\\circ=1$",
+    "$\\tan 60^\\circ-\\cos 30^\\circ=\\dfrac{\\sqrt{3}}{2}$",
+    "$\\sin 45^\\circ\\times\\cos 45^\\circ=\\dfrac{1}{2}$",
+    "$\\tan 45^\\circ\\div\\sin 30^\\circ=2$",
+    "$\\sin^2 60^\\circ+\\cos 30^\\circ\\times\\tan 30^\\circ=\\dfrac{9}{4}$"
+   ],
+   "choices_layout": "ii",
+   "answer": "⑤",
+   "answer_source": "답지"
+  },
+  "20-02": {
+   "page": 20,
+   "body": "$\\sin(3x-15^\\circ)=\\dfrac{\\sqrt{2}}{2}$일 때, $\\tan(x+10^\\circ)$의 값을 구하시오. \\cond{$5^\\circ<x<35^\\circ$}",
+   "answer": "$\\dfrac{\\sqrt{3}}{3}$",
+   "answer_source": "답지"
+  },
+  "20-03": {
+   "page": 20,
+   "body": "오른쪽 그림에서 $\\angle\\pt{ABC}=\\angle\\pt{BCD}=90^\\circ$, $\\angle\\pt{A}=60^\\circ$, $\\angle\\pt{D}=45^\\circ$이고 $\\seg{AB}=\\sqrt{2}\\,\\mathrm{cm}$일 때, $\\seg{BD}$의 길이를 구하시오.",
+   "figure": "crop:fig-20-03.png",
+   "answer": "$2\\sqrt{3}\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "20-04": {
+   "page": 20,
+   "body": "오른쪽 그림과 같이 $y$절편이 $-3$이고 $x$축의 양의 방향과 이루는 예각의 크기가 $\\alpha$인 직선이 있다. $\\cos\\alpha=\\dfrac{\\sqrt{3}}{2}$일 때, 이 직선의 방정식을 구하시오.",
+   "figure": "crop:fig-20-04.png",
+   "answer": "$y=\\dfrac{\\sqrt{3}}{3}x-3$",
+   "answer_source": "답지"
+  },
+  "20-05": {
+   "page": 20,
+   "tag": "UP",
+   "body": "오른쪽 그림에서 $\\seg{AB}=1$, $\\angle\\pt{CAB}=60^\\circ$이고 $\\seg{AC}=\\seg{DC}$일 때, $\\tan 75^\\circ$의 값은?",
+   "figure": "crop:fig-20-05.png",
+   "choices": [
+    "$2-\\sqrt{3}$",
+    "$3-\\sqrt{3}$",
+    "$2+\\sqrt{3}$",
+    "$3+\\sqrt{3}$",
+    "$3\\sqrt{3}$"
+   ],
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "22-01": {
+   "page": 22,
+   "body": "오른쪽 그림과 같이 반지름의 길이가 $1$인 사분원을 이용하여 다음 삼각비의 값과 길이가 같은 선분을 구하려고 한다. \\blank\\ 안에 알맞은 선분을 써넣으시오.",
+   "figure": "crop:fig-22-01.png",
+   "subs": [
+    "$\\sin x=\\dfrac{\\blank}{\\seg{OA}}=\\blank$",
+    "$\\cos x=\\dfrac{\\blank}{\\seg{OA}}=\\blank$",
+    "$\\tan x=\\dfrac{\\seg{CD}}{\\blank}=\\blank$",
+    "$\\sin y=\\dfrac{\\blank}{\\seg{OA}}=\\blank$",
+    "$\\cos y=\\dfrac{\\blank}{\\seg{OA}}=\\blank$"
+   ],
+   "answer": "⑴ $\\seg{AB}$, $\\seg{AB}$ ⑵ $\\seg{OB}$, $\\seg{OB}$ ⑶ $\\seg{OD}$, $\\seg{CD}$ ⑷ $\\seg{OB}$, $\\seg{OB}$ ⑸ $\\seg{AB}$, $\\seg{AB}$",
+   "answer_source": "답지"
+  },
+  "22-02": {
+   "page": 22,
+   "body": "오른쪽 그림과 같이 좌표평면 위의 원점~$\\pt{O}$를 중심으로 하고 반지름의 길이가 $1$인 사분원에서 다음 삼각비의 값을 구하시오.",
+   "figure": "crop:fig-22-02.png",
+   "subs": [
+    "$\\sin 40^\\circ$",
+    "$\\cos 40^\\circ$",
+    "$\\tan 40^\\circ$",
+    "$\\sin 50^\\circ$",
+    "$\\cos 50^\\circ$"
+   ],
+   "answer": "⑴ $0.6428$ ⑵ $0.7660$ ⑶ $0.8391$ ⑷ $0.7660$ ⑸ $0.6428$",
+   "answer_source": "답지"
+  },
+  "22-03": {
+   "page": 22,
+   "body": "다음 표를 완성하시오.",
+   "figure": "crop:fig-22-03.png",
+   "figure_layout": "below",
+   "answer": "풀이 참조 ($\\sin\\pt{A}$: $0$, $\\dfrac{1}{2}$, $\\dfrac{\\sqrt{2}}{2}$, $\\dfrac{\\sqrt{3}}{2}$, $1$ / $\\cos\\pt{A}$: $1$, $\\dfrac{\\sqrt{3}}{2}$, $\\dfrac{\\sqrt{2}}{2}$, $\\dfrac{1}{2}$, $0$ / $\\tan\\pt{A}$: $0$, $\\dfrac{\\sqrt{3}}{3}$, $1$, $\\sqrt{3}$, 정할 수 없다)",
+   "answer_source": "답지 · 계산(표 값)"
+  },
+  "23-04": {
+   "page": 23,
+   "body": "다음을 계산하시오.",
+   "subs": [
+    "$\\sin 0^\\circ+\\cos 90^\\circ$",
+    "$\\sin 90^\\circ-\\tan 0^\\circ$",
+    "$\\cos 0^\\circ\\times\\tan 45^\\circ$",
+    "$\\sin 90^\\circ\\div\\cos 60^\\circ$"
+   ],
+   "answer": "⑴ $0$ ⑵ $1$ ⑶ $1$ ⑷ $2$",
+   "answer_source": "답지"
+  },
+  "23-05": {
+   "page": 23,
+   "body": "다음 설명이 옳으면 ○, 옳지 않으면 ×를 (\\quad) 안에 써넣으시오.",
+   "subs": [
+    "$0^\\circ\\le x\\le 90^\\circ$일 때, $x$의 크기가 커지면 $\\sin x$의 값은 증가한다.\\nobreak\\hfill\\mbox{(\\qquad)}",
+    "$0^\\circ\\le x\\le 90^\\circ$일 때, $x$의 크기가 커지면 $\\cos x$의 값은 감소한다.\\nobreak\\hfill\\mbox{(\\qquad)}",
+    "$0^\\circ\\le x<45^\\circ$일 때, $\\sin x>\\cos x$이다.\\nobreak\\hfill\\mbox{(\\qquad)}",
+    "$45^\\circ<x<90^\\circ$일 때, $\\cos x<\\tan x$이다.\\nobreak\\hfill\\mbox{(\\qquad)}"
+   ],
+   "answer": "⑴ ○ ⑵ ○ ⑶ × ⑷ ○",
+   "answer_source": "답지"
+  },
+  "23-06": {
+   "page": 23,
+   "body": "다음 \\blank\\ 안에 $>$, $<$ 중 알맞은 것을 써넣으시오.",
+   "subs": [
+    "$\\sin 25^\\circ\\ \\blank\\ \\sin 40^\\circ$",
+    "$\\cos 50^\\circ\\ \\blank\\ \\cos 70^\\circ$",
+    "$\\tan 40^\\circ\\ \\blank\\ \\tan 65^\\circ$",
+    "$\\sin 85^\\circ\\ \\blank\\ \\cos 85^\\circ$"
+   ],
+   "answer": "⑴ $<$ ⑵ $>$ ⑶ $<$ ⑷ $>$",
+   "answer_source": "답지"
+  },
+  "23-07": {
+   "page": 23,
+   "body": "아래 삼각비의 표를 이용하여 다음 삼각비의 값을 구하시오.",
+   "figure": "crop:fig-23-07.png",
+   "figure_layout": "below",
+   "subs": [
+    "$\\sin 35^\\circ$",
+    "$\\cos 38^\\circ$",
+    "$\\tan 37^\\circ$"
+   ],
+   "answer": "⑴ $0.5736$ ⑵ $0.7880$ ⑶ $0.7536$",
+   "answer_source": "답지"
+  },
+  "24-h1": {
+   "page": 24,
+   "type": "사분원을 이용하여 삼각비의 값 구하기",
+   "body": "오른쪽 그림과 같이 반지름의 길이가 $1$인 사분원에서 다음 중 옳지 \\underline{않은} 것은?",
+   "figure": "crop:fig-24-h1.png",
+   "choices": [
+    "$\\sin x=\\seg{AB}$",
+    "$\\sin y=\\seg{OB}$",
+    "$\\cos x=\\seg{OB}$",
+    "$\\cos z=\\seg{CD}$",
+    "$\\tan x=\\seg{CD}$"
+   ],
+   "choices_layout": "ii",
+   "answer": "④",
+   "answer_source": "본문 답"
+  },
+  "24-c1": {
+   "page": 24,
+   "body": "오른쪽 그림과 같이 좌표평면 위의 원점~$\\pt{O}$를 중심으로 하고 반지름의 길이가 $1$인 사분원에서 다음 중 옳은 것을 모두 고르면? (정답 2개)",
+   "figure": "crop:fig-24-c1.png",
+   "choices": [
+    "$\\sin 47^\\circ=0.68$",
+    "$\\cos 47^\\circ=0.73$",
+    "$\\tan 47^\\circ=1.07$",
+    "$\\sin 43^\\circ=0.68$",
+    "$\\cos 43^\\circ=1.07$"
+   ],
+   "choices_layout": "ii",
+   "answer": "③, ④",
+   "answer_source": "답지"
+  },
+  "24-h2": {
+   "page": 24,
+   "type": "$0^\\circ$, $90^\\circ$의 삼각비의 값",
+   "body": "다음 중 옳은 것은?",
+   "choices": [
+    "$\\sin 0^\\circ+\\tan 0^\\circ=1$",
+    "$\\sin 90^\\circ-\\cos 90^\\circ=0$",
+    "$\\cos 0^\\circ\\times\\sin 90^\\circ=0$",
+    "$\\tan 45^\\circ\\div\\sin 30^\\circ+\\cos 0^\\circ=2$",
+    "$(\\sin 0^\\circ+\\cos 45^\\circ)(\\cos 90^\\circ-\\sin 45^\\circ)=-\\dfrac{1}{2}$"
+   ],
+   "choices_layout": "v",
+   "answer": "⑤",
+   "answer_source": "본문 답"
+  },
+  "24-c2": {
+   "page": 24,
+   "body": "다음을 계산하시오.",
+   "subs": [
+    "$\\sin 90^\\circ\\times\\cos 90^\\circ+\\cos 0^\\circ\\times\\tan 0^\\circ$",
+    "$\\sin 0^\\circ-\\tan 30^\\circ\\times\\tan 60^\\circ+\\cos 90^\\circ$",
+    "$\\dfrac{2\\cos 60^\\circ+\\sin 90^\\circ}{\\tan 45^\\circ}$"
+   ],
+   "answer": "⑴ $0$ ⑵ $-1$ ⑶ $2$",
+   "answer_source": "답지"
+  },
+  "25-h3": {
+   "page": 25,
+   "type": "삼각비의 값의 대소 관계",
+   "body": "다음 중 옳지 \\underline{않은} 것은?",
+   "choices": [
+    "$\\sin 45^\\circ=\\cos 45^\\circ$",
+    "$\\sin 50^\\circ<\\sin 55^\\circ$",
+    "$\\cos 20^\\circ>\\cos 25^\\circ$",
+    "$\\tan 70^\\circ<\\tan 80^\\circ$",
+    "$\\sin 65^\\circ>\\tan 50^\\circ$"
+   ],
+   "choices_layout": "ii",
+   "answer": "⑤",
+   "answer_source": "본문 답"
+  },
+  "25-c3": {
+   "page": 25,
+   "body": "다음 \\textbf{보기} 중 옳은 것을 모두 고르시오.\\bogi{ㄱ. $\\sin 40^\\circ<\\sin 50^\\circ$\\\\ ㄴ. $\\cos 65^\\circ<\\cos 80^\\circ$\\\\ ㄷ. $\\sin 38^\\circ>\\cos 38^\\circ$\\\\ ㄹ. $\\cos 60^\\circ<\\tan 60^\\circ$}",
+   "answer": "ㄱ, ㄹ",
+   "answer_source": "답지"
+  },
+  "25-h4": {
+   "page": 25,
+   "type": "삼각비의 값의 대소 관계를 이용한 식의 계산",
+   "body": "$0^\\circ<\\pt{A}<45^\\circ$일 때, $\\sqrt{\\sin^2\\pt{A}}+\\sqrt{(\\sin\\pt{A}-\\cos\\pt{A})^2}$을 간단히 하시오.",
+   "answer": "$\\cos\\pt{A}$",
+   "answer_source": "본문 답"
+  },
+  "25-c4": {
+   "page": 25,
+   "body": "$0^\\circ<\\pt{A}<90^\\circ$일 때, 다음 식을 간단히 하시오.\\exprbox{$\\sqrt{(\\cos\\pt{A}+1)^2}+\\sqrt{(\\cos\\pt{A}-1)^2}$}",
+   "answer": "$2$",
+   "answer_source": "답지"
+  },
+  "26-h5": {
+   "page": 26,
+   "type": "삼각비의 표를 이용하여 삼각비의 값 구하기",
+   "body": "아래 삼각비의 표를 이용하여 다음 물음에 답하시오.",
+   "figure": "crop:fig-26-h5.png",
+   "figure_layout": "below",
+   "subs": [
+    "$\\sin 68^\\circ+\\cos 66^\\circ$의 값을 구하시오.",
+    "$\\tan x=2.3559$일 때, $x$의 크기를 구하시오."
+   ],
+   "answer": "⑴ $1.3339$ ⑵ $67^\\circ$",
+   "answer_source": "본문 답"
+  },
+  "26-c5": {
+   "page": 26,
+   "body": "다음 삼각비의 표를 이용하여 $\\sin 50^\\circ+\\cos 49^\\circ-\\tan 51^\\circ$의 값을 구하시오.",
+   "figure": "crop:fig-26-c5.png",
+   "figure_layout": "below",
+   "answer": "$0.1872$",
+   "answer_source": "답지"
+  },
+  "26-h6": {
+   "page": 26,
+   "type": "삼각비의 표를 이용하여 변의 길이 구하기",
+   "body": "오른쪽 그림과 같은 직각삼각형~$\\pt{ABC}$에서 다음 삼각비의 표를 이용하여 $x+y$의 값을 구하시오.",
+   "figure": "crop:fig-26-h6-2.png",
+   "figure_layout": "side",
+   "figure_extra": "crop:fig-26-h6.png",
+   "answer": "$13.289$",
+   "answer_source": "본문 답"
+  },
+  "26-c6": {
+   "page": 26,
+   "body": "오른쪽 그림과 같은 직각삼각형~$\\pt{ABC}$에서 다음 삼각비의 표를 이용하여 $\\seg{AC}$의 길이를 구하시오.",
+   "figure": "crop:fig-26-c6-2.png",
+   "figure_layout": "side",
+   "figure_extra": "crop:fig-26-c6.png",
+   "answer": "$4.502$",
+   "answer_source": "답지"
+  },
+  "27-01": {
+   "page": 27,
+   "body": "오른쪽 그림과 같이 반지름의 길이가 $1$인 사분원에서 $\\tan x$, $\\cos y$의 값을 나타내는 선분을 차례대로 나열한 것은?",
+   "figure": "crop:fig-27-01.png",
+   "choices": [
+    "$\\seg{AB}$, $\\seg{OA}$",
+    "$\\seg{AB}$, $\\seg{OB}$",
+    "$\\seg{OC}$, $\\seg{CD}$",
+    "$\\seg{CD}$, $\\seg{AB}$",
+    "$\\seg{CD}$, $\\seg{OB}$"
+   ],
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "27-02": {
+   "page": 27,
+   "body": "다음 중 옳은 것을 모두 고르면? (정답 2개)",
+   "choices": [
+    "$\\sin 30^\\circ+\\sin 60^\\circ=\\sin 90^\\circ$",
+    "$\\cos 45^\\circ=\\tan 45^\\circ$",
+    "$\\sin 60^\\circ=\\cos 30^\\circ$",
+    "$\\sin 0^\\circ+\\cos 90^\\circ-\\tan 0^\\circ=0$",
+    "$\\sin 90^\\circ\\times\\cos 0^\\circ\\times\\tan 45^\\circ=\\sqrt{2}$"
+   ],
+   "choices_layout": "ii",
+   "answer": "③, ④",
+   "answer_source": "답지"
+  },
+  "27-03": {
+   "page": 27,
+   "body": "다음 삼각비의 값을 큰 것부터 차례대로 나열할 때, 세 번째에 해당하는 것은?",
+   "choices": [
+    "$\\sin 0^\\circ$",
+    "$\\cos 0^\\circ$",
+    "$\\sin 80^\\circ$",
+    "$\\cos 80^\\circ$",
+    "$\\tan 80^\\circ$"
+   ],
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "27-04": {
+   "page": 27,
+   "body": "$45^\\circ<\\pt{A}<90^\\circ$일 때, $\\sqrt{(1-\\tan\\pt{A})^2}-\\sqrt{(\\tan\\pt{A}-1)^2}$을 간단히 하시오.",
+   "answer": "$0$",
+   "answer_source": "답지"
+  },
+  "27-05": {
+   "page": 27,
+   "body": "오른쪽 그림과 같은 직각삼각형~$\\pt{ABC}$에서 다음 삼각비의 표를 이용하여 $y-x$의 값을 구하시오.",
+   "figure": "crop:fig-27-05-2.png",
+   "figure_layout": "side",
+   "figure_extra": "crop:fig-27-05.png",
+   "answer": "$2.456$",
+   "answer_source": "답지"
+  },
+  "28-01": {
+   "page": 28,
+   "body": "오른쪽 그림과 같은 직각삼각형~$\\pt{ABC}$에서 $\\seg{AB}:\\seg{BC}=3:2$일 때, $\\cos\\pt{C}$의 값은?",
+   "figure": "crop:fig-28-01.png",
+   "choices": [
+    "$\\dfrac{\\sqrt{13}}{13}$",
+    "$\\dfrac{1}{3}$",
+    "$\\dfrac{2\\sqrt{13}}{13}$",
+    "$\\dfrac{2}{3}$",
+    "$\\dfrac{3\\sqrt{13}}{13}$"
+   ],
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "28-02": {
+   "page": 28,
+   "body": "오른쪽 그림과 같은 직각삼각형~$\\pt{ABC}$에서 $\\seg{AC}=14$, $\\sin\\pt{A}=\\dfrac{3}{7}$일 때, $\\seg{AB}$의 길이를 구하시오.",
+   "figure": "crop:fig-28-02.png",
+   "answer": "$4\\sqrt{10}$",
+   "answer_source": "답지"
+  },
+  "28-03": {
+   "page": 28,
+   "tag": "꼭나와",
+   "body": "$\\angle\\pt{B}=90^\\circ$인 직각삼각형~$\\pt{ABC}$에서 $2\\tan\\pt{A}=1$일 때, $\\sin\\pt{A}\\times\\cos\\pt{A}$의 값은?",
+   "choices": [
+    "$\\dfrac{\\sqrt{5}}{10}$",
+    "$\\dfrac{2}{5}$",
+    "$\\dfrac{3\\sqrt{5}}{10}$",
+    "$\\dfrac{4}{5}$",
+    "$\\dfrac{2\\sqrt{5}}{5}$"
+   ],
+   "answer": "②",
+   "answer_source": "답지"
+  },
+  "28-04": {
+   "page": 28,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림과 같은 직사각형~$\\pt{ABCD}$에서 $\\seg{AH}\\perp\\seg{BD}$이고 $\\angle\\pt{BAH}=x$라 할 때, $\\sin x$의 값은?",
+   "figure": "crop:fig-28-04.png",
+   "choices": [
+    "$\\dfrac{1}{2}$",
+    "$\\dfrac{\\sqrt{5}}{4}$",
+    "$\\dfrac{3}{5}$",
+    "$\\dfrac{3}{4}$",
+    "$\\dfrac{4}{5}$"
+   ],
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "28-05": {
+   "page": 28,
+   "body": "다음 중 계산 결과가 나머지 넷과 \\underline{다른} 하나는?",
+   "choices": [
+    "$\\sin 30^\\circ+\\cos 30^\\circ\\times\\sqrt{3}$",
+    "$2\\tan 60^\\circ\\times\\tan 30^\\circ$",
+    "$4(\\sin^2 30^\\circ+\\cos^2 60^\\circ)$",
+    "$2(1-\\cos 60^\\circ)(1+\\cos 60^\\circ)$",
+    "$\\tan^2 45^\\circ\\times\\tan 60^\\circ\\div\\sin 60^\\circ$"
+   ],
+   "choices_layout": "v",
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "28-06": {
+   "page": 28,
+   "body": "$\\cos(x+15^\\circ)=\\dfrac{1}{2}$일 때, $\\tan x$의 값을 구하시오. \\cond{$0^\\circ<x<75^\\circ$}",
+   "answer": "$1$",
+   "answer_source": "답지"
+  },
+  "29-07": {
+   "page": 29,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림에서 $\\angle\\pt{BAC}=90^\\circ$, $\\angle\\pt{D}=90^\\circ$, $\\angle\\pt{B}=45^\\circ$, $\\angle\\pt{DAC}=60^\\circ$이고 $\\seg{BC}=2\\sqrt{6}\\,\\mathrm{cm}$일 때, $\\seg{CD}$의 길이는?",
+   "figure": "crop:fig-29-07.png",
+   "choices": [
+    "$2\\,\\mathrm{cm}$",
+    "$\\sqrt{6}\\,\\mathrm{cm}$",
+    "$2\\sqrt{2}\\,\\mathrm{cm}$",
+    "$3\\,\\mathrm{cm}$",
+    "$2\\sqrt{3}\\,\\mathrm{cm}$"
+   ],
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "29-08": {
+   "page": 29,
+   "body": "오른쪽 그림과 같이 일차방정식 $3x-5y+15=0$의 그래프가 $x$축의 양의 방향과 이루는 각의 크기를 $\\alpha$라 할 때, $\\tan\\alpha$의 값은?",
+   "figure": "crop:fig-29-08.png",
+   "choices": [
+    "$\\dfrac{2}{5}$",
+    "$\\dfrac{1}{2}$",
+    "$\\dfrac{3}{5}$",
+    "$\\dfrac{7}{10}$",
+    "$\\dfrac{4}{5}$"
+   ],
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "29-09": {
+   "page": 29,
+   "body": "오른쪽 그림과 같이 반지름의 길이가 $1$인 사분원에서 $\\seg{OB}$의 길이와 그 값이 같은 것을 모두 고르면? (정답 2개)",
+   "figure": "crop:fig-29-09.png",
+   "choices": [
+    "$\\sin x$",
+    "$\\cos x$",
+    "$\\tan x$",
+    "$\\sin y$",
+    "$\\cos y$"
+   ],
+   "choices_layout": "ii",
+   "answer": "②, ④",
+   "answer_source": "답지"
+  },
+  "29-10": {
+   "page": 29,
+   "body": "다음을 계산하면?\\exprbox{$\\begin{aligned}&\\cos 0^\\circ+\\sin 90^\\circ-\\sin 45^\\circ\\times\\cos 45^\\circ\\\\ &\\qquad\\qquad+\\tan 0^\\circ-2\\tan 45^\\circ\\end{aligned}$}",
+   "choices": [
+    "$-1$",
+    "$-\\dfrac{1}{2}$",
+    "$0$",
+    "$\\dfrac{1}{2}$",
+    "$1$"
+   ],
+   "answer": "②",
+   "answer_source": "답지"
+  },
+  "29-11": {
+   "page": 29,
+   "tag": "꼭나와",
+   "body": "$x=53^\\circ$일 때, $\\sin x$, $\\cos x$, $\\tan x$의 대소 관계를 바르게 나타낸 식은?",
+   "choices": [
+    "$\\sin x<\\cos x<\\tan x$",
+    "$\\sin x<\\tan x<\\cos x$",
+    "$\\cos x<\\sin x<\\tan x$",
+    "$\\cos x<\\tan x<\\sin x$",
+    "$\\tan x<\\cos x<\\sin x$"
+   ],
+   "choices_layout": "v",
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "29-12": {
+   "page": 29,
+   "body": "$\\sin x=0.8829$, $\\cos y=0.4848$, $\\tan z=1.9626$일 때, 다음 삼각비의 표를 이용하여 $x+y-z$의 크기를 구하시오.",
+   "figure": "crop:fig-29-12.png",
+   "figure_layout": "below",
+   "answer": "$60^\\circ$",
+   "answer_source": "답지"
+  },
+  "30-13": {
+   "page": 30,
+   "body": "오른쪽 그림과 같은 직각삼각형~$\\pt{ABC}$에서 $\\seg{BC}$의 중점을 $\\pt{D}$라 하고 $\\angle\\pt{BAD}=x$라 할 때, $\\cos x$의 값은?",
+   "figure": "crop:fig-30-13.png",
+   "choices": [
+    "$\\dfrac{1}{3}$",
+    "$\\dfrac{\\sqrt{6}}{6}$",
+    "$\\dfrac{\\sqrt{3}}{3}$",
+    "$\\dfrac{\\sqrt{6}}{3}$",
+    "$\\dfrac{\\sqrt{3}}{2}$"
+   ],
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "30-14": {
+   "page": 30,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\cos\\pt{B}=\\dfrac{3}{5}$일 때, $\\sin\\pt{C}$의 값을 구하시오.",
+   "figure": "crop:fig-30-14.png",
+   "answer": "$\\dfrac{2\\sqrt{5}}{5}$",
+   "answer_source": "답지(쪽 렌더)"
+  },
+  "30-15": {
+   "page": 30,
+   "body": "오른쪽 그림과 같이 $\\angle\\pt{A}=90^\\circ$인 직각삼각형~$\\pt{ABC}$에서 $\\seg{DE}\\perp\\seg{BC}$, $\\seg{EF}\\perp\\seg{AC}$일 때, 다음 중 $\\tan\\pt{B}$를 나타내는 것이 \\underline{아닌} 것은?",
+   "figure": "crop:fig-30-15.png",
+   "choices": [
+    "$\\dfrac{\\seg{AC}}{\\seg{AB}}$",
+    "$\\dfrac{\\seg{CE}}{\\seg{DE}}$",
+    "$\\dfrac{\\seg{CF}}{\\seg{EF}}$",
+    "$\\dfrac{\\seg{EF}}{\\seg{DF}}$",
+    "$\\dfrac{\\seg{DF}}{\\seg{EF}}$"
+   ],
+   "answer": "⑤",
+   "answer_source": "답지"
+  },
+  "30-16": {
+   "page": 30,
+   "body": "이차방정식 $2x^2+ax-4=0$의 한 근이 $\\tan 45^\\circ-\\cos 60^\\circ$일 때, 상수 $a$의 값은?",
+   "choices": [
+    "$-8$",
+    "$-3$",
+    "$2$",
+    "$5$",
+    "$7$"
+   ],
+   "answer": "⑤",
+   "answer_source": "답지"
+  },
+  "30-17": {
+   "page": 30,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림과 같이 $\\seg{AD}\\parallel\\seg{BC}$인 등변사다리꼴~$\\pt{ABCD}$에서 $\\seg{AB}=4\\,\\mathrm{cm}$, $\\seg{BC}=10\\,\\mathrm{cm}$이고 $\\angle\\pt{B}=60^\\circ$일 때, $\\square\\pt{ABCD}$의 넓이를 구하시오.",
+   "figure": "crop:fig-30-17.png",
+   "answer": "$16\\sqrt{3}\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "30-18": {
+   "page": 30,
+   "body": "점~$(3,\\,2\\sqrt{3})$을 지나는 직선이 $x$축의 양의 방향과 이루는 각의 크기가 $30^\\circ$일 때, 이 직선과 $x$축 및 $y$축으로 둘러싸인 삼각형의 넓이는?",
+   "choices": [
+    "$\\dfrac{3\\sqrt{3}}{2}$",
+    "$3$",
+    "$2\\sqrt{3}$",
+    "$\\dfrac{5\\sqrt{3}}{2}$",
+    "$6$"
+   ],
+   "answer": "①",
+   "answer_source": "답지"
+  },
+  "31-19": {
+   "page": 31,
+   "body": "오른쪽 그림에서 $\\seg{AD}=\\seg{BD}=2$이고 $\\angle\\pt{ADC}=45^\\circ$일 때, $\\tan 22.5^\\circ$의 값을 구하시오.",
+   "figure": "crop:fig-31-19.png",
+   "answer": "$\\sqrt{2}-1$",
+   "answer_source": "답지"
+  },
+  "31-20": {
+   "page": 31,
+   "tag": "꼭나와",
+   "body": "$45^\\circ<\\pt{A}<90^\\circ$이고\\par\\smallskip\\centerline{$\\sqrt{(\\sin\\pt{A}+\\cos\\pt{A})^2}+\\sqrt{(\\cos\\pt{A}-\\sin\\pt{A})^2}=\\dfrac{24}{13}$}\\par\\smallskip\\noindent 일 때, $\\tan\\pt{A}\\times\\cos\\pt{A}$의 값은?",
+   "choices": [
+    "$\\dfrac{5}{13}$",
+    "$\\dfrac{5}{12}$",
+    "$\\dfrac{12}{13}$",
+    "$\\dfrac{12}{5}$",
+    "$\\dfrac{13}{5}$"
+   ],
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "31-21": {
+   "page": 31,
+   "body": "오른쪽 그림과 같이 반지름의 길이가 $1$인 사분원에서 $\\seg{BC}=0.6744$일 때, 다음 삼각비의 표를 이용하여 $\\seg{CD}$의 길이를 구하시오.",
+   "figure": "crop:fig-31-21-2.png",
+   "figure_layout": "side",
+   "figure_extra": "crop:fig-31-21.png",
+   "answer": "$2.9042$",
+   "answer_source": "답지"
+  },
+  "31-22": {
+   "page": 31,
+   "body": "오른쪽 그림에서 $\\seg{BD}=\\seg{DC}=6$, $\\angle\\pt{B}=\\angle\\pt{E}=90^\\circ$이다. $\\angle\\pt{BAE}=x$, $\\angle\\pt{CAE}=y$라 하고 $\\sin x=\\dfrac{2}{3}$일 때, $\\tan y$의 값을 구하시오.",
+   "figure": "crop:fig-31-22.png",
+   "answer": "$\\dfrac{2\\sqrt{5}}{13}$",
+   "answer_source": "답지(쪽 렌더)"
+  },
+  "31-23": {
+   "page": 31,
+   "body": "오른쪽 그림과 같은 정사면체에서 $\\seg{BM}=\\seg{CM}$이고 $\\angle\\pt{ADM}=x$라 할 때, $\\cos x$의 값을 구하시오.",
+   "figure": "crop:fig-31-23.png",
+   "answer": "$\\dfrac{\\sqrt{3}}{3}$",
+   "answer_source": "답지(쪽 렌더)"
+  },
+  "31-24": {
+   "page": 31,
+   "body": "오른쪽 그림과 같은 직사각형~$\\pt{ABCD}$에서 $\\seg{AB}=3$이고 $\\angle\\pt{AEF}=90^\\circ$, $\\angle\\pt{BAE}=30^\\circ$, $\\angle\\pt{EAF}=45^\\circ$일 때, $\\sin 15^\\circ$의 값을 구하시오.",
+   "figure": "crop:fig-31-24.png",
+   "answer": "$\\dfrac{\\sqrt{6}-\\sqrt{2}}{4}$",
+   "answer_source": "답지(쪽 렌더)"
+  },
+  "32-e1": {
+   "page": 32,
+   "body": "오른쪽 그림과 같은 직각삼각형~$\\pt{ABC}$에서 $\\angle\\pt{B}=x$라 할 때, $\\cos x$의 값을 구하시오. [6점]",
+   "figure": "crop:fig-32-e1.png",
+   "answer": "$\\dfrac{2\\sqrt{5}}{5}$",
+   "answer_source": "본문 답"
+  },
+  "32-u1": {
+   "page": 32,
+   "body": "오른쪽 그림과 같은 직각삼각형~$\\pt{ABC}$에서 $\\angle\\pt{C}=x$라 할 때, $\\tan x$의 값을 구하시오. [6점]",
+   "figure": "crop:fig-32-u1.png",
+   "answer": "$\\dfrac{4}{3}$",
+   "answer_source": "답지"
+  },
+  "32-e2": {
+   "page": 32,
+   "body": "$\\tan(2x+5^\\circ)=\\sin 90^\\circ$일 때, $\\sin(x+10^\\circ)+\\cos 3x$의 값을 구하시오. \\cond{$0^\\circ<x<40^\\circ$} [6점]",
+   "answer": "$1$",
+   "answer_source": "본문 답"
+  },
+  "32-u2": {
+   "page": 32,
+   "body": "$\\sin(3x-15^\\circ)=\\cos 60^\\circ$일 때,\\par\\noindent $\\sin(x+45^\\circ)+\\cos(90^\\circ-4x)-\\tan 4x$의 값을 구하시오. \\cond{$5^\\circ<x<35^\\circ$} [6점]",
+   "answer": "$0$",
+   "answer_source": "답지"
+  },
+  "33-u3": {
+   "page": 33,
+   "body": "오른쪽 그림과 같이 $\\angle\\pt{A}=90^\\circ$인 직각삼각형~$\\pt{ABC}$에서 $\\angle\\pt{ADE}=\\angle\\pt{ACB}$일 때, $\\sin\\pt{B}\\times\\tan\\pt{C}$의 값을 구하시오. [7점]",
+   "figure": "crop:fig-33-u3.png",
+   "answer": "$\\dfrac{1}{2}$",
+   "answer_source": "답지"
+  },
+  "33-u4": {
+   "page": 33,
+   "body": "오른쪽 그림과 같이 밑면의 가로, 세로의 길이가 각각 $8$, $6$이고 높이가 $10$인 직육면체에서 $\\angle\\pt{BHF}=x$라 할 때, $\\sqrt{2}\\cos x+\\tan x$의 값을 구하시오. [7점]",
+   "figure": "crop:fig-33-u4.png",
+   "answer": "$2$",
+   "answer_source": "답지"
+  },
+  "33-u5": {
+   "page": 33,
+   "body": "오른쪽 그림과 같은 직각삼각형~$\\pt{ABC}$에서 $\\seg{AB}=16$, $\\angle\\pt{B}=30^\\circ$이고 $\\seg{CD}\\perp\\seg{AB}$, $\\seg{DE}\\perp\\seg{BC}$일 때, $\\seg{DE}$의 길이를 구하시오. [6점]",
+   "figure": "crop:fig-33-u5.png",
+   "answer": "$6$",
+   "answer_source": "답지"
+  },
+  "33-u6": {
+   "page": 33,
+   "body": "$0^\\circ<x<45^\\circ$이고\\par\\smallskip\\centerline{$\\sqrt{(\\sin x+\\cos x)^2}+\\sqrt{(\\sin x-\\cos x)^2}=\\sqrt{3}$}\\par\\smallskip\\noindent 일 때, $\\sin 3x$의 값을 구하시오. [8점]",
+   "answer": "$1$",
+   "answer_source": "답지"
+  },
+  "38-01": {
+   "page": 38,
+   "body": "오른쪽 그림과 같은 직각삼각형~$\\pt{ABC}$에 대하여 다음 \\blank\\ 안에 알맞은 것을 써넣으시오.",
+   "figure": "crop:fig-38-01.png",
+   "subs": [
+    "$\\sin\\pt{C}=\\dfrac{c}{b}$ $\\Rightarrow$ $b=\\dfrac{c}{\\sin\\pt{C}}$, $c=\\blank[3em]$",
+    "$\\cos\\pt{C}=\\blank[2em]$ $\\Rightarrow$ $a=b\\cos\\pt{C}$, $b=\\blank[3em]$",
+    "$\\tan\\pt{C}=\\blank[2em]$ $\\Rightarrow$ $a=\\blank[3em]$, $c=\\blank[3em]$"
+   ],
+   "answer": "⑴ $b\\sin\\pt{C}$ ⑵ $\\dfrac{a}{b}$, $\\dfrac{a}{\\cos\\pt{C}}$ ⑶ $\\dfrac{c}{a}$, $\\dfrac{c}{\\tan\\pt{C}}$, $a\\tan\\pt{C}$",
+   "answer_source": "답지"
+  },
+  "38-02": {
+   "page": 38,
+   "body": "다음은 오른쪽 그림과 같은 직각삼각형~$\\pt{ABC}$에서 $\\seg{BC}=9$, $\\angle\\pt{B}=30^\\circ$일 때, $\\seg{AB}$, $\\seg{AC}$의 길이를 구하는 과정이다. \\blank\\ 안에 알맞은 수를 써넣으시오.",
+   "figure": "crop:fig-38-02.png",
+   "subs": [
+    "$\\cos 30^\\circ=\\dfrac{9}{\\seg{AB}}$이므로\\\\ \\hspace*{2em}$\\seg{AB}=\\dfrac{\\blank}{\\cos 30^\\circ}=\\blank[2.5em]$",
+    "$\\tan 30^\\circ=\\dfrac{\\seg{AC}}{9}$이므로\\\\ \\hspace*{2em}$\\seg{AC}=\\blank\\tan 30^\\circ=\\blank[2.5em]$"
+   ],
+   "answer": "⑴ $9$, $6\\sqrt{3}$ ⑵ $9$, $3\\sqrt{3}$",
+   "answer_source": "답지"
+  },
+  "38-03": {
+   "page": 38,
+   "body": "다음은 오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\seg{AB}=6$, $\\seg{BC}=10$, $\\angle\\pt{B}=60^\\circ$일 때, $\\seg{AC}$의 길이를 구하는 과정이다. \\blank\\ 안에 알맞은 수를 써넣으시오.\\exprbox{\\begin{minipage}{0.95\\linewidth}\\noindent\\begin{minipage}[t]{0.63\\linewidth}\\vspace{0pt}\\raggedright\\setlength{\\parskip}{1.5mm}오른쪽 그림과 같이 꼭짓점~$\\pt{A}$에서 $\\seg{BC}$에 내린 수선의 발을 $\\pt{H}$라 하면 $\\triangle\\pt{ABH}$에서\\par\\hspace*{2em}$\\seg{AH}=6\\sin 60^\\circ=3\\sqrt{3}$, $\\seg{BH}=6\\cos 60^\\circ=\\blank$\\par $\\seg{CH}=\\seg{BC}-\\seg{BH}=10-\\blank=\\blank$이므로 $\\triangle\\pt{AHC}$에서\\par\\hspace*{2em}$\\seg{AC}=\\sqrt{(3\\sqrt{3})^2+\\blank^2}=\\blank[2.5em]$\\end{minipage}\\hfill\\begin{minipage}[t]{0.34\\linewidth}\\vspace{0pt}\\centering\\includegraphics[width=\\linewidth]{figures/fig-38-03-2.png}\\end{minipage}\\end{minipage}}",
+   "figure": "crop:fig-38-03.png",
+   "answer": "$3$, $3$, $7$, $7$, $2\\sqrt{19}$",
+   "answer_source": "답지"
+  },
+  "39-04": {
+   "page": 39,
+   "body": "다음은 오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\seg{AB}=10$, $\\angle\\pt{A}=75^\\circ$, $\\angle\\pt{B}=60^\\circ$일 때, $\\seg{AC}$의 길이를 구하는 과정이다. \\blank\\ 안에 알맞은 수를 써넣으시오.\\exprbox{\\begin{minipage}{0.95\\linewidth}\\noindent\\begin{minipage}[t]{0.63\\linewidth}\\vspace{0pt}\\raggedright\\setlength{\\parskip}{1.5mm}오른쪽 그림과 같이 꼭짓점~$\\pt{A}$에서 $\\seg{BC}$에 내린 수선의 발을 $\\pt{H}$라 하면 $\\triangle\\pt{ABH}$에서\\par\\hspace*{2em}$\\seg{AH}=10\\sin 60^\\circ=\\blank[2.5em]$\\par $\\angle\\pt{C}=45^\\circ$이므로 $\\triangle\\pt{AHC}$에서\\par\\hspace*{2em}$\\seg{AC}=\\dfrac{\\blank[2.5em]}{\\sin 45^\\circ}=\\blank[2.5em]$\\end{minipage}\\hfill\\begin{minipage}[t]{0.34\\linewidth}\\vspace{0pt}\\centering\\includegraphics[width=\\linewidth]{figures/fig-39-04-2.png}\\end{minipage}\\end{minipage}}",
+   "figure": "crop:fig-39-04.png",
+   "answer": "$5\\sqrt{3}$, $5\\sqrt{3}$, $5\\sqrt{6}$",
+   "answer_source": "답지"
+  },
+  "39-05": {
+   "page": 39,
+   "body": "오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\seg{BC}=18$, $\\angle\\pt{B}=45^\\circ$, $\\angle\\pt{C}=30^\\circ$이다. $\\seg{AH}=h$라 할 때, 다음 물음에 답하시오.",
+   "figure": "crop:fig-39-05.png",
+   "subs": [
+    "$\\angle\\pt{BAH}$, $\\angle\\pt{CAH}$의 크기를 차례대로 구하시오.",
+    "$\\seg{BH}$의 길이를 $h$에 대한 식으로 나타내시오.",
+    "$\\seg{CH}$의 길이를 $h$에 대한 식으로 나타내시오.",
+    "$h$의 값을 구하시오."
+   ],
+   "answer": "⑴ $45^\\circ$, $60^\\circ$ ⑵ $h$ ⑶ $\\sqrt{3}h$ ⑷ $9(\\sqrt{3}-1)$",
+   "answer_source": "답지"
+  },
+  "39-06": {
+   "page": 39,
+   "body": "오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\seg{BC}=4$, $\\angle\\pt{B}=30^\\circ$, $\\angle\\pt{ACB}=120^\\circ$이다. $\\seg{AH}=h$라 할 때, 다음 물음에 답하시오.",
+   "figure": "crop:fig-39-06.png",
+   "subs": [
+    "$\\angle\\pt{BAH}$, $\\angle\\pt{CAH}$의 크기를 차례대로 구하시오.",
+    "$\\seg{BH}$의 길이를 $h$에 대한 식으로 나타내시오.",
+    "$\\seg{CH}$의 길이를 $h$에 대한 식으로 나타내시오.",
+    "$h$의 값을 구하시오."
+   ],
+   "answer": "⑴ $60^\\circ$, $30^\\circ$ ⑵ $\\sqrt{3}h$ ⑶ $\\dfrac{\\sqrt{3}}{3}h$ ⑷ $2\\sqrt{3}$",
+   "answer_source": "답지"
+  },
+  "40-h1": {
+   "page": 40,
+   "type": "직각삼각형의 변의 길이 구하기",
+   "body": "오른쪽 그림과 같은 직각삼각형~$\\pt{ABC}$에서 $\\seg{BC}=10\\,\\mathrm{cm}$, $\\angle\\pt{B}=42^\\circ$일 때, $x-y$의 값을 구하시오. \\cond{$\\sin 42^\\circ=0.6691$, $\\cos 42^\\circ=0.7431$로 계산한다.}",
+   "figure": "crop:fig-40-h1.png",
+   "answer": "$0.74$",
+   "answer_source": "본문 답"
+  },
+  "40-c1": {
+   "page": 40,
+   "body": "오른쪽 그림과 같은 직각삼각형~$\\pt{ABC}$에서 $\\seg{AC}=5$, $\\angle\\pt{C}=35^\\circ$일 때, 다음 중 $\\seg{BC}$의 길이를 나타내는 것을 모두 고르면? (정답 2개)",
+   "figure": "crop:fig-40-c1.png",
+   "choices": [
+    "$5\\sin 35^\\circ$",
+    "$5\\sin 55^\\circ$",
+    "$5\\cos 35^\\circ$",
+    "$5\\cos 55^\\circ$",
+    "$\\dfrac{5}{\\tan 35^\\circ}$"
+   ],
+   "answer": "②, ③",
+   "answer_source": "답지"
+  },
+  "40-h2": {
+   "page": 40,
+   "type": "실생활에서 직각삼각형의 변의 길이의 활용",
+   "body": "오른쪽 그림과 같이 가로등에서 $3\\,\\mathrm{m}$ 떨어진 지점에서 승윤이가 가로등의 꼭대기인 $\\pt{A}$~지점을 올려다본 각의 크기가 $45^\\circ$, 가로등의 밑인 $\\pt{B}$~지점을 내려다본 각의 크기가 $30^\\circ$일 때, 다음을 구하시오.",
+   "figure": "crop:fig-40-h2.png",
+   "subs": [
+    "$\\seg{AH}$의 길이",
+    "$\\seg{BH}$의 길이",
+    "가로등의 높이"
+   ],
+   "answer": "⑴ $3\\,\\mathrm{m}$ ⑵ $\\sqrt{3}\\,\\mathrm{m}$ ⑶ $(3+\\sqrt{3})\\,\\mathrm{m}$",
+   "answer_source": "본문 답"
+  },
+  "40-c2": {
+   "page": 40,
+   "body": "오른쪽 그림과 같이 눈높이가 $1.6\\,\\mathrm{m}$인 시하가 연을 올려다본 각의 크기가 $21^\\circ$이고 시하의 눈에서 연까지의 거리는 $50\\,\\mathrm{m}$일 때, 지면으로부터 연까지의 높이를 구하시오. \\cond{$\\sin 21^\\circ=0.36$으로 계산한다.}",
+   "figure": "crop:fig-40-c2.png",
+   "answer": "$19.6\\,\\mathrm{m}$",
+   "answer_source": "답지"
+  },
+  "41-h3": {
+   "page": 41,
+   "type": "일반 삼각형의 변의 길이 구하기; 두 변의 길이와 그 끼인각의 크기를 아는 경우",
+   "body": "오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\seg{AB}=8\\sqrt{3}\\,\\mathrm{cm}$, $\\seg{BC}=20\\,\\mathrm{cm}$, $\\angle\\pt{B}=30^\\circ$일 때, $\\seg{AC}$의 길이를 구하시오.",
+   "figure": "crop:fig-41-h3.png",
+   "answer": "$4\\sqrt{7}\\,\\mathrm{cm}$",
+   "answer_source": "본문 답"
+  },
+  "41-c3": {
+   "page": 41,
+   "body": "오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\seg{AC}=6\\,\\mathrm{cm}$, $\\seg{BC}=5\\,\\mathrm{cm}$, $\\angle\\pt{C}=60^\\circ$일 때, $\\seg{AB}$의 길이를 구하시오.",
+   "figure": "crop:fig-41-c3.png",
+   "answer": "$\\sqrt{31}\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "41-h4": {
+   "page": 41,
+   "type": "일반 삼각형의 변의 길이 구하기; 한 변의 길이와 그 양 끝 각의 크기를 아는 경우",
+   "body": "오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\seg{AB}=8\\,\\mathrm{cm}$, $\\angle\\pt{B}=75^\\circ$, $\\angle\\pt{C}=45^\\circ$일 때, $\\seg{BC}$의 길이를 구하시오.",
+   "figure": "crop:fig-41-h4.png",
+   "answer": "$4\\sqrt{6}\\,\\mathrm{cm}$",
+   "answer_source": "본문 답"
+  },
+  "41-c4": {
+   "page": 41,
+   "body": "오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\seg{BC}=4\\,\\mathrm{cm}$, $\\angle\\pt{B}=30^\\circ$, $\\angle\\pt{C}=105^\\circ$일 때, $\\seg{AC}$의 길이를 구하시오.",
+   "figure": "crop:fig-41-c4.png",
+   "answer": "$2\\sqrt{2}\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "42-h5": {
+   "page": 42,
+   "type": "삼각형의 높이 구하기; 주어진 각이 모두 예각인 경우",
+   "body": "오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\seg{BC}=20\\,\\mathrm{cm}$, $\\angle\\pt{B}=30^\\circ$, $\\angle\\pt{C}=60^\\circ$일 때, $\\seg{AH}$의 길이를 구하시오.",
+   "figure": "crop:fig-42-h5.png",
+   "answer": "$5\\sqrt{3}\\,\\mathrm{cm}$",
+   "answer_source": "본문 답"
+  },
+  "42-c5": {
+   "page": 42,
+   "body": "오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\seg{BC}=14\\,\\mathrm{cm}$, $\\angle\\pt{B}=45^\\circ$, $\\angle\\pt{C}=30^\\circ$일 때, 다음을 구하시오.",
+   "figure": "crop:fig-42-c5.png",
+   "subs": [
+    "$\\seg{AH}$의 길이",
+    "$\\triangle\\pt{ABC}$의 넓이"
+   ],
+   "answer": "⑴ $7(\\sqrt{3}-1)\\,\\mathrm{cm}$ ⑵ $49(\\sqrt{3}-1)\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "42-h6": {
+   "page": 42,
+   "type": "삼각형의 높이 구하기; 주어진 각 중 한 각이 둔각인 경우",
+   "body": "오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\seg{BC}=8\\,\\mathrm{cm}$, $\\angle\\pt{B}=45^\\circ$, $\\angle\\pt{ACH}=60^\\circ$일 때, $\\seg{AH}$의 길이를 구하시오.",
+   "figure": "crop:fig-42-h6.png",
+   "answer": "$4(3+\\sqrt{3})\\,\\mathrm{cm}$",
+   "answer_source": "본문 답"
+  },
+  "42-c6": {
+   "page": 42,
+   "body": "오른쪽 그림과 같이 $10\\,\\mathrm{km}$ 떨어진 두 관측소~$\\pt{A}$, $\\pt{B}$에서 하늘에 떠 있는 인공위성~$\\pt{C}$를 올려다본 각의 크기가 각각 $30^\\circ$, $45^\\circ$일 때, 지면으로부터 인공위성까지의 높이를 구하시오.",
+   "figure": "crop:fig-42-c6.png",
+   "answer": "$5(\\sqrt{3}+1)\\,\\mathrm{km}$",
+   "answer_source": "답지"
+  },
+  "43-01": {
+   "page": 43,
+   "body": "오른쪽 그림과 같이 밑면의 반지름의 길이가 $3\\,\\mathrm{cm}$인 원뿔에서 $\\angle\\pt{ABO}=60^\\circ$일 때, 이 원뿔의 부피를 구하시오.",
+   "figure": "crop:fig-43-01.png",
+   "answer": "$9\\sqrt{3}\\pi\\,\\mathrm{cm}^3$",
+   "answer_source": "답지"
+  },
+  "43-02": {
+   "page": 43,
+   "body": "오른쪽 그림과 같이 지면에 수직으로 서 있던 나무가 부러져서 지면과 $30^\\circ$의 각을 이루게 되었다. 이때 부러지기 전의 나무의 높이를 구하시오.",
+   "figure": "crop:fig-43-02.png",
+   "answer": "$15\\sqrt{3}\\,\\mathrm{m}$",
+   "answer_source": "답지"
+  },
+  "43-03": {
+   "page": 43,
+   "body": "오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\seg{AB}=4\\sqrt{2}\\,\\mathrm{cm}$, $\\seg{BC}=6\\,\\mathrm{cm}$, $\\angle\\pt{B}=45^\\circ$일 때, $\\seg{AC}$의 길이를 구하시오.",
+   "figure": "crop:fig-43-03.png",
+   "answer": "$2\\sqrt{5}\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "43-04": {
+   "page": 43,
+   "body": "오른쪽 그림과 같이 $120\\,\\mathrm{m}$ 떨어진 해안의 두 지점~$\\pt{B}$, $\\pt{C}$에서 바다 위의 배~$\\pt{A}$를 바라본 각의 크기가 각각 $60^\\circ$, $75^\\circ$일 때, 두 지점~$\\pt{A}$, $\\pt{C}$ 사이의 거리를 구하시오.",
+   "figure": "crop:fig-43-04.png",
+   "answer": "$60\\sqrt{6}\\,\\mathrm{m}$",
+   "answer_source": "답지"
+  },
+  "43-05": {
+   "page": 43,
+   "body": "오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\seg{BC}=5$, $\\angle\\pt{B}=40^\\circ$, $\\angle\\pt{C}=65^\\circ$일 때, 다음 중 $\\seg{AH}$의 길이를 나타내는 식은?",
+   "figure": "crop:fig-43-05.png",
+   "choices": [
+    "$5(\\tan 50^\\circ-\\tan 25^\\circ)$",
+    "$5(\\tan 65^\\circ-\\tan 40^\\circ)$",
+    "$\\dfrac{5}{\\tan 50^\\circ-\\tan 25^\\circ}$",
+    "$\\dfrac{5}{\\tan 50^\\circ+\\tan 25^\\circ}$",
+    "$\\dfrac{5}{\\tan 65^\\circ+\\tan 40^\\circ}$"
+   ],
+   "choices_layout": "ii",
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "43-06": {
+   "page": 43,
+   "body": "오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\seg{BC}=6\\,\\mathrm{cm}$, $\\angle\\pt{B}=30^\\circ$, $\\angle\\pt{ACB}=120^\\circ$일 때, $\\triangle\\pt{ABC}$의 넓이를 구하시오.",
+   "figure": "crop:fig-43-06.png",
+   "answer": "$9\\sqrt{3}\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "46-01": {
+   "page": 46,
+   "body": "다음 그림과 같은 $\\triangle\\pt{ABC}$의 넓이를 구하시오.",
+   "figure": "crop:fig-46-01.png",
+   "answer": "⑴ $15\\sqrt{3}$ ⑵ $6\\sqrt{2}$ ⑶ $10\\sqrt{2}$ ⑷ $30$",
+   "answer_source": "답지"
+  },
+  "46-02": {
+   "page": 46,
+   "body": "오른쪽 그림과 같은 $\\square\\pt{ABCD}$에서 다음을 구하시오.",
+   "figure": "crop:fig-46-02.png",
+   "subs": [
+    "$\\triangle\\pt{ABD}$의 넓이",
+    "$\\triangle\\pt{BCD}$의 넓이",
+    "$\\square\\pt{ABCD}$의 넓이"
+   ],
+   "answer": "⑴ $8$ ⑵ $48$ ⑶ $56$",
+   "answer_source": "답지"
+  },
+  "46-03": {
+   "page": 46,
+   "body": "다음 그림과 같은 평행사변형~$\\pt{ABCD}$의 넓이를 구하시오.",
+   "figure": "crop:fig-46-03.png",
+   "answer": "⑴ $24$ ⑵ $21\\sqrt{3}$",
+   "answer_source": "답지"
+  },
+  "46-04": {
+   "page": 46,
+   "body": "다음 그림과 같은 $\\square\\pt{ABCD}$의 넓이를 구하시오.",
+   "figure": "crop:fig-46-04.png",
+   "answer": "⑴ $18\\sqrt{3}$ ⑵ $48\\sqrt{2}$",
+   "answer_source": "답지"
+  },
+  "47-h1": {
+   "page": 47,
+   "type": "삼각형의 넓이",
+   "body": "오른쪽 그림과 같은 이등변삼각형~$\\pt{ABC}$에서 $\\seg{AB}=\\seg{AC}=4\\sqrt{3}\\,\\mathrm{cm}$, $\\angle\\pt{B}=75^\\circ$일 때, $\\triangle\\pt{ABC}$의 넓이를 구하시오.",
+   "figure": "crop:fig-47-h1.png",
+   "answer": "$12\\,\\mathrm{cm}^2$",
+   "answer_source": "본문 답"
+  },
+  "47-c1": {
+   "page": 47,
+   "body": "오른쪽 그림과 같이 $\\seg{BC}=9\\,\\mathrm{cm}$, $\\angle\\pt{C}=120^\\circ$인 $\\triangle\\pt{ABC}$의 넓이가 $18\\sqrt{3}\\,\\mathrm{cm}^2$일 때, $\\seg{AC}$의 길이를 구하시오.",
+   "figure": "crop:fig-47-c1.png",
+   "answer": "$8\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "47-h2": {
+   "page": 47,
+   "type": "다각형의 넓이",
+   "body": "오른쪽 그림과 같은 $\\square\\pt{ABCD}$의 넓이를 구하시오.",
+   "figure": "crop:fig-47-h2.png",
+   "answer": "$4\\sqrt{3}\\,\\mathrm{cm}^2$",
+   "answer_source": "본문 답"
+  },
+  "47-c2": {
+   "page": 47,
+   "body": "오른쪽 그림과 같은 $\\square\\pt{ABCD}$의 넓이를 구하시오.",
+   "figure": "crop:fig-47-c2.png",
+   "answer": "$33\\sqrt{3}\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "48-h3": {
+   "page": 48,
+   "type": "평행사변형의 넓이",
+   "body": "오른쪽 그림과 같은 평행사변형~$\\pt{ABCD}$에서 두 대각선~$\\pt{AC}$와 $\\pt{BD}$의 교점을 $\\pt{P}$라 하자. $\\seg{BC}=18\\,\\mathrm{cm}$, $\\seg{CD}=14\\,\\mathrm{cm}$, $\\angle\\pt{BAD}=135^\\circ$일 때, 색칠한 부분의 넓이를 구하시오.",
+   "figure": "crop:fig-48-h3.png",
+   "answer": "$63\\sqrt{2}\\,\\mathrm{cm}^2$",
+   "answer_source": "본문 답"
+  },
+  "48-c3": {
+   "page": 48,
+   "body": "오른쪽 그림과 같이 $\\seg{AB}=2\\,\\mathrm{cm}$, $\\seg{AD}=4\\,\\mathrm{cm}$인 평행사변형~$\\pt{ABCD}$의 넓이가 $4\\sqrt{3}\\,\\mathrm{cm}^2$일 때, $\\angle\\pt{B}$의 크기를 구하시오. \\cond{$0^\\circ<\\angle\\pt{B}<90^\\circ$}",
+   "figure": "crop:fig-48-c3.png",
+   "answer": "$60^\\circ$",
+   "answer_source": "답지"
+  },
+  "48-h4": {
+   "page": 48,
+   "type": "사각형의 넓이",
+   "body": "오른쪽 그림과 같은 $\\square\\pt{ABCD}$의 넓이는?",
+   "figure": "crop:fig-48-h4.png",
+   "choices": [
+    "$14\\,\\mathrm{cm}^2$",
+    "$14\\sqrt{3}\\,\\mathrm{cm}^2$",
+    "$28\\,\\mathrm{cm}^2$",
+    "$28\\sqrt{3}\\,\\mathrm{cm}^2$",
+    "$42\\,\\mathrm{cm}^2$"
+   ],
+   "answer": "②",
+   "answer_source": "본문 답"
+  },
+  "48-c4": {
+   "page": 48,
+   "body": "오른쪽 그림과 같이 $\\seg{AC}=12\\,\\mathrm{cm}$이고 두 대각선이 이루는 각의 크기가 $150^\\circ$인 $\\square\\pt{ABCD}$의 넓이가 $27\\,\\mathrm{cm}^2$일 때, $\\seg{BD}$의 길이를 구하시오.",
+   "figure": "crop:fig-48-c4.png",
+   "answer": "$9\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "49-01": {
+   "page": 49,
+   "body": "오른쪽 그림과 같이 $\\seg{AC}=7\\,\\mathrm{cm}$, $\\seg{BC}=12\\,\\mathrm{cm}$인 $\\triangle\\pt{ABC}$의 넓이가 $21\\,\\mathrm{cm}^2$일 때, $\\angle\\pt{C}$의 크기를 구하시오. \\cond{$0^\\circ<\\angle\\pt{C}<90^\\circ$}",
+   "figure": "crop:fig-49-01.png",
+   "answer": "$30^\\circ$",
+   "answer_source": "답지"
+  },
+  "49-02": {
+   "page": 49,
+   "body": "오른쪽 그림에서 $\\triangle\\pt{ABC}$는 $\\angle\\pt{A}=90^\\circ$인 직각삼각형이고 $\\square\\pt{BDEC}$는 $\\seg{BC}$를 한 변으로 하는 정사각형이다. $\\seg{DE}=16\\,\\mathrm{cm}$, $\\angle\\pt{ABC}=45^\\circ$일 때, $\\triangle\\pt{ABD}$의 넓이는?",
+   "figure": "crop:fig-49-02.png",
+   "choices": [
+    "$48\\,\\mathrm{cm}^2$",
+    "$48\\sqrt{2}\\,\\mathrm{cm}^2$",
+    "$48\\sqrt{3}\\,\\mathrm{cm}^2$",
+    "$64\\,\\mathrm{cm}^2$",
+    "$64\\sqrt{2}\\,\\mathrm{cm}^2$"
+   ],
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "49-03": {
+   "page": 49,
+   "body": "오른쪽 그림과 같이 반지름의 길이가 $8\\,\\mathrm{cm}$인 원~$\\pt{O}$에 내접하는 정팔각형의 넓이를 구하시오.",
+   "figure": "crop:fig-49-03.png",
+   "answer": "$128\\sqrt{2}\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "49-04": {
+   "page": 49,
+   "body": "오른쪽 그림과 같이 $\\angle\\pt{B}=60^\\circ$인 마름모~$\\pt{ABCD}$의 넓이가 $8\\sqrt{3}\\,\\mathrm{cm}^2$일 때, 마름모~$\\pt{ABCD}$의 한 변의 길이를 구하시오.",
+   "figure": "crop:fig-49-04.png",
+   "answer": "$4\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "49-05": {
+   "page": 49,
+   "body": "오른쪽 그림과 같이 $\\seg{AD}\\parallel\\seg{BC}$인 등변사다리꼴~$\\pt{ABCD}$의 넓이를 구하시오.",
+   "figure": "crop:fig-49-05.png",
+   "answer": "$25\\sqrt{3}\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "50-01": {
+   "page": 50,
+   "body": "오른쪽 그림과 같은 직각삼각형~$\\pt{ABC}$에 대하여 다음 중 옳지 \\underline{않은} 것은?",
+   "figure": "crop:fig-50-01.png",
+   "choices": [
+    "$a=c\\sin\\pt{A}$",
+    "$b=c\\sin\\pt{B}$",
+    "$b=a\\tan\\pt{B}$",
+    "$a=c\\tan\\pt{A}$",
+    "$c=\\dfrac{a}{\\cos\\pt{B}}$"
+   ],
+   "choices_layout": "ii",
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "50-02": {
+   "page": 50,
+   "body": "오른쪽 그림과 같은 직육면체에서 $\\seg{FG}=4\\,\\mathrm{cm}$, $\\seg{GH}=2\\sqrt{3}\\,\\mathrm{cm}$, $\\angle\\pt{CFG}=60^\\circ$일 때, 이 직육면체의 부피를 구하시오.",
+   "figure": "crop:fig-50-02.png",
+   "answer": "$96\\,\\mathrm{cm}^3$",
+   "answer_source": "답지"
+  },
+  "50-03": {
+   "page": 50,
+   "tag": "꼭나와",
+   "body": "산의 높이를 구하기 위해 오른쪽 그림과 같이 수평면 위에 $\\seg{AB}=200\\,\\mathrm{m}$가 되도록 두 지점~$\\pt{A}$, $\\pt{B}$를 잡고 필요한 부분을 측정하였다. 이때 산의 높이 $\\seg{CH}$의 길이는?",
+   "figure": "crop:fig-50-03.png",
+   "choices": [
+    "$100\\,\\mathrm{m}$",
+    "$100\\sqrt{2}\\,\\mathrm{m}$",
+    "$100\\sqrt{3}\\,\\mathrm{m}$",
+    "$200\\sqrt{2}\\,\\mathrm{m}$",
+    "$200\\sqrt{3}\\,\\mathrm{m}$"
+   ],
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "50-04": {
+   "page": 50,
+   "body": "오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\seg{AB}=9$, $\\seg{BC}=10$, $\\cos\\pt{B}=\\dfrac{1}{3}$일 때, $\\seg{AC}$의 길이는?",
+   "figure": "crop:fig-50-04.png",
+   "choices": [
+    "$3\\sqrt{10}$",
+    "$4\\sqrt{6}$",
+    "$10$",
+    "$4\\sqrt{7}$",
+    "$11$"
+   ],
+   "answer": "⑤",
+   "answer_source": "답지"
+  },
+  "50-05": {
+   "page": 50,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림과 같이 열기구의 아랫부분~$\\pt{A}$를 지면 위의 두 지점~$\\pt{B}$, $\\pt{C}$에서 올려다본 각의 크기가 각각 $30^\\circ$, $60^\\circ$이다. 두 지점~$\\pt{B}$, $\\pt{C}$ 사이의 거리가 $300\\,\\mathrm{m}$일 때, 지면으로부터 열기구까지의 높이 $\\seg{AH}$의 길이를 구하시오.",
+   "figure": "crop:fig-50-05.png",
+   "answer": "$75\\sqrt{3}\\,\\mathrm{m}$",
+   "answer_source": "답지"
+  },
+  "50-06": {
+   "page": 50,
+   "body": "오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\seg{BC}=4$, $\\angle\\pt{B}=40^\\circ$, $\\angle\\pt{ACH}=58^\\circ$일 때, 다음 중 $\\seg{AH}$의 길이를 나타내는 식은?",
+   "figure": "crop:fig-50-06.png",
+   "choices": [
+    "$\\dfrac{4}{\\tan 58^\\circ-\\tan 40^\\circ}$",
+    "$\\dfrac{4}{\\tan 50^\\circ-\\tan 32^\\circ}$",
+    "$\\dfrac{4}{\\tan 58^\\circ+\\tan 40^\\circ}$",
+    "$\\dfrac{4}{\\tan 50^\\circ+\\tan 32^\\circ}$",
+    "$4(\\tan 50^\\circ-\\tan 32^\\circ)$"
+   ],
+   "choices_layout": "v",
+   "answer": "②",
+   "answer_source": "답지"
+  },
+  "51-07": {
+   "page": 51,
+   "body": "오른쪽 그림과 같이 $\\seg{AB}=7\\,\\mathrm{cm}$, $\\angle\\pt{B}=45^\\circ$인 $\\triangle\\pt{ABC}$의 넓이가 $21\\sqrt{2}\\,\\mathrm{cm}^2$일 때, $\\seg{BC}$의 길이를 구하시오.",
+   "figure": "crop:fig-51-07.png",
+   "answer": "$12\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "51-08": {
+   "page": 51,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림에서 $\\seg{AE}\\parallel\\seg{DB}$이고 $\\seg{DC}=5\\,\\mathrm{cm}$, $\\seg{EC}=8\\,\\mathrm{cm}$, $\\angle\\pt{C}=60^\\circ$일 때, $\\square\\pt{ABCD}$의 넓이는?",
+   "figure": "crop:fig-51-08.png",
+   "choices": [
+    "$10\\,\\mathrm{cm}^2$",
+    "$10\\sqrt{2}\\,\\mathrm{cm}^2$",
+    "$10\\sqrt{3}\\,\\mathrm{cm}^2$",
+    "$20\\sqrt{2}\\,\\mathrm{cm}^2$",
+    "$20\\sqrt{3}\\,\\mathrm{cm}^2$"
+   ],
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "51-09": {
+   "page": 51,
+   "body": "오른쪽 그림과 같이 $\\angle\\pt{BAC}=75^\\circ$인 $\\triangle\\pt{ABC}$의 외접원의 반지름의 길이가 $10\\,\\mathrm{cm}$일 때, $\\triangle\\pt{OBC}$의 넓이는?",
+   "figure": "crop:fig-51-09.png",
+   "choices": [
+    "$25\\,\\mathrm{cm}^2$",
+    "$25\\sqrt{3}\\,\\mathrm{cm}^2$",
+    "$50\\,\\mathrm{cm}^2$",
+    "$50\\sqrt{2}\\,\\mathrm{cm}^2$",
+    "$50\\sqrt{3}\\,\\mathrm{cm}^2$"
+   ],
+   "answer": "①",
+   "answer_source": "답지"
+  },
+  "51-10": {
+   "page": 51,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림과 같은 $\\square\\pt{ABCD}$의 넓이는?",
+   "figure": "crop:fig-51-10.png",
+   "choices": [
+    "$7\\,\\mathrm{cm}^2$",
+    "$7\\sqrt{3}\\,\\mathrm{cm}^2$",
+    "$14\\,\\mathrm{cm}^2$",
+    "$14\\sqrt{3}\\,\\mathrm{cm}^2$",
+    "$14\\sqrt{6}\\,\\mathrm{cm}^2$"
+   ],
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "51-11": {
+   "page": 51,
+   "body": "오른쪽 그림과 같은 평행사변형~$\\pt{ABCD}$에서 $\\seg{AB}=8\\,\\mathrm{cm}$, $\\seg{AD}=6\\sqrt{3}\\,\\mathrm{cm}$, $\\angle\\pt{C}=120^\\circ$이고 $\\seg{BE}:\\seg{EC}=2:1$일 때, $\\triangle\\pt{BED}$의 넓이는?",
+   "figure": "crop:fig-51-11.png",
+   "choices": [
+    "$12\\,\\mathrm{cm}^2$",
+    "$18\\,\\mathrm{cm}^2$",
+    "$24\\,\\mathrm{cm}^2$",
+    "$30\\,\\mathrm{cm}^2$",
+    "$36\\,\\mathrm{cm}^2$"
+   ],
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "51-12": {
+   "page": 51,
+   "body": "오른쪽 그림과 같은 $\\square\\pt{ABCD}$의 넓이가 $60\\,\\mathrm{cm}^2$일 때, $x$의 크기를 구하시오. \\cond{$90^\\circ<x<180^\\circ$}",
+   "figure": "crop:fig-51-12.png",
+   "answer": "$135^\\circ$",
+   "answer_source": "답지"
+  },
+  "52-13": {
+   "page": 52,
+   "body": "오른쪽 그림과 같이 길이가 $40\\,\\mathrm{cm}$인 실에 매달린 추가 $\\seg{OA}$를 기준으로 좌우로 $30^\\circ$의 각을 이루며 움직이고 있다. 이때 지점~$\\pt{B}$는 지점~$\\pt{A}$보다 몇 $\\mathrm{cm}$ 더 높은가? \\cond{추의 크기는 생각하지 않는다.}",
+   "figure": "crop:fig-52-13.png",
+   "choices": [
+    "$(20-10\\sqrt{3})\\,\\mathrm{cm}$",
+    "$3\\,\\mathrm{cm}$",
+    "$5\\,\\mathrm{cm}$",
+    "$(40-20\\sqrt{3})\\,\\mathrm{cm}$",
+    "$(10\\sqrt{3}-10)\\,\\mathrm{cm}$"
+   ],
+   "choices_layout": "ii",
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "52-14": {
+   "page": 52,
+   "body": "오른쪽 그림과 같은 평행사변형~$\\pt{ABCD}$에서 $\\seg{AB}=6$, $\\seg{BC}=9$, $\\angle\\pt{A}=120^\\circ$일 때, 대각선~$\\pt{BD}$의 길이는?",
+   "figure": "crop:fig-52-14.png",
+   "choices": [
+    "$12$",
+    "$5\\sqrt{6}$",
+    "$4\\sqrt{10}$",
+    "$13$",
+    "$3\\sqrt{19}$"
+   ],
+   "answer": "⑤",
+   "answer_source": "답지"
+  },
+  "52-15": {
+   "page": 52,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림과 같이 세 지점~$\\pt{A}$, $\\pt{B}$, $\\pt{C}$를 각각 직선으로 연결하는 도로를 건설하려고 한다. $\\seg{BC}=6\\,\\mathrm{km}$, $\\angle\\pt{B}=105^\\circ$, $\\angle\\pt{C}=45^\\circ$일 때, 두 지점~$\\pt{A}$와 $\\pt{C}$ 사이의 거리를 구하시오.",
+   "figure": "crop:fig-52-15.png",
+   "answer": "$(3\\sqrt{2}+3\\sqrt{6})\\,\\mathrm{km}$",
+   "answer_source": "답지"
+  },
+  "52-16": {
+   "page": 52,
+   "body": "오른쪽 그림과 같이 겹쳐진 두 직각삼각형~$\\pt{ABC}$, $\\pt{DBC}$에서 $\\angle\\pt{A}=60^\\circ$, $\\angle\\pt{DBC}=45^\\circ$이고 $\\seg{DC}=4\\sqrt{2}$일 때, $\\triangle\\pt{EBC}$의 넓이를 구하시오.",
+   "figure": "crop:fig-52-16.png",
+   "answer": "$16(\\sqrt{3}-1)$",
+   "answer_source": "답지"
+  },
+  "52-17": {
+   "page": 52,
+   "body": "오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\seg{AB}=6$, $\\seg{BC}=8$이고 $\\tan\\pt{B}=\\sqrt{2}$일 때, $\\triangle\\pt{ABC}$의 넓이는? \\cond{$0^\\circ<\\angle\\pt{B}<90^\\circ$}",
+   "figure": "crop:fig-52-17.png",
+   "choices": [
+    "$8\\sqrt{2}$",
+    "$16$",
+    "$8\\sqrt{6}$",
+    "$16\\sqrt{2}$",
+    "$16\\sqrt{6}$"
+   ],
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "52-18": {
+   "page": 52,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\seg{AB}=15\\,\\mathrm{cm}$, $\\seg{AC}=10\\,\\mathrm{cm}$이고 $\\angle\\pt{BAD}=\\angle\\pt{CAD}=30^\\circ$일 때, $\\seg{AD}$의 길이는?",
+   "figure": "crop:fig-52-18.png",
+   "choices": [
+    "$5\\,\\mathrm{cm}$",
+    "$6\\,\\mathrm{cm}$",
+    "$6\\sqrt{2}\\,\\mathrm{cm}$",
+    "$5\\sqrt{3}\\,\\mathrm{cm}$",
+    "$6\\sqrt{3}\\,\\mathrm{cm}$"
+   ],
+   "answer": "⑤",
+   "answer_source": "답지"
+  },
+  "53-19": {
+   "page": 53,
+   "body": "오른쪽 그림과 같이 반지름의 길이가 $2\\,\\mathrm{cm}$인 반원~$\\pt{O}$에 내접하는 사각형~$\\pt{ABCD}$가 있다. $\\angle\\pt{ABC}=30^\\circ$이고 $\\seg{AD}=\\seg{CD}$일 때, $\\square\\pt{ABCD}$의 넓이를 구하시오.",
+   "figure": "crop:fig-53-19.png",
+   "answer": "$(2+\\sqrt{3})\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "53-20": {
+   "page": 53,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림과 같이 한 변의 길이가 $4\\,\\mathrm{cm}$인 정육각형~$\\pt{ABCDEF}$의 넓이는?",
+   "figure": "crop:fig-53-20.png",
+   "choices": [
+    "$30\\,\\mathrm{cm}^2$",
+    "$18\\sqrt{3}\\,\\mathrm{cm}^2$",
+    "$36\\,\\mathrm{cm}^2$",
+    "$24\\sqrt{3}\\,\\mathrm{cm}^2$",
+    "$42\\,\\mathrm{cm}^2$"
+   ],
+   "choices_layout": "ii",
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "53-21": {
+   "page": 53,
+   "body": "오른쪽 그림과 같이 $\\angle\\pt{B}=60^\\circ$인 평행사변형~$\\pt{ABCD}$의 넓이가 $9\\sqrt{3}\\,\\mathrm{cm}^2$이고 $2\\seg{AB}=\\seg{BC}$일 때, $\\square\\pt{ABCD}$의 둘레의 길이는?",
+   "figure": "crop:fig-53-21.png",
+   "choices": [
+    "$12\\,\\mathrm{cm}$",
+    "$18\\,\\mathrm{cm}$",
+    "$12\\sqrt{3}\\,\\mathrm{cm}$",
+    "$24\\,\\mathrm{cm}$",
+    "$18\\sqrt{3}\\,\\mathrm{cm}$"
+   ],
+   "answer": "②",
+   "answer_source": "답지"
+  },
+  "53-22": {
+   "page": 53,
+   "body": "오른쪽 그림과 같이 지면으로부터 $1700\\,\\mathrm{m}$의 높이에서 날고 있는 비행기가 지면과 $20^\\circ$를 유지하면서 초속 $125\\,\\mathrm{m}$로 착륙하려고 한다. 이때 비행기가 착륙하는 데 걸리는 시간은 몇 초인지 구하시오. \\cond{$\\sin 20^\\circ=0.34$, $\\cos 20^\\circ=0.94$, $\\tan 20^\\circ=0.36$으로 계산한다.}",
+   "figure": "crop:fig-53-22.png",
+   "answer": "$40$초",
+   "answer_source": "답지"
+  },
+  "53-23": {
+   "page": 53,
+   "body": "오른쪽 그림과 같이 한 변의 길이가 $3\\,\\mathrm{cm}$인 정사각형~$\\pt{ABCD}$를 점~$\\pt{A}$를 중심으로 $30^\\circ$만큼 회전시켜 정사각형~$\\pt{AB'C'D'}$을 만들었다. 이때 두 정사각형이 겹치는 부분의 넓이를 구하시오.",
+   "figure": "crop:fig-53-23.png",
+   "answer": "$3\\sqrt{3}\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "53-24": {
+   "page": 53,
+   "body": "오른쪽 그림과 같은 $\\square\\pt{ABCD}$의 넓이를 구하시오.",
+   "figure": "crop:fig-53-24.png",
+   "answer": "$(75+10\\sqrt{15})\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "54-e1": {
+   "page": 54,
+   "body": "오른쪽 그림과 같이 우체국과 백화점이 $24\\,\\mathrm{m}$만큼 떨어져 있다. 우체국의 $\\pt{P}$~지점에서 백화점의 꼭대기 $\\pt{A}$~지점을 올려다본 각의 크기가 $60^\\circ$이고, 백화점의 아랫부분 $\\pt{B}$~지점을 내려다본 각의 크기가 $30^\\circ$일 때, 백화점의 높이 $\\seg{AB}$의 길이를 구하시오. [6점]",
+   "figure": "crop:fig-54-e1.png",
+   "answer": "$32\\sqrt{3}\\,\\mathrm{m}$",
+   "answer_source": "본문 답"
+  },
+  "54-e2": {
+   "page": 54,
+   "body": "오른쪽 그림과 같은 $\\square\\pt{ABCD}$의 넓이를 구하시오. [7점]",
+   "figure": "crop:fig-54-e2.png",
+   "answer": "$60\\,\\mathrm{cm}^2$",
+   "answer_source": "본문 답"
+  },
+  "54-u1": {
+   "page": 54,
+   "body": "오른쪽 그림과 같이 산으로부터 $60\\,\\mathrm{m}$ 떨어진 $\\pt{B}$~지점에서 송신탑의 양 끝 $\\pt{A}$, $\\pt{D}$~지점을 올려다본 각의 크기가 각각 $45^\\circ$, $30^\\circ$일 때, 송신탑의 높이 $\\seg{AD}$의 길이를 구하시오. [6점]",
+   "figure": "crop:fig-54-u1.png",
+   "answer": "$(60-20\\sqrt{3})\\,\\mathrm{m}$",
+   "answer_source": "답지"
+  },
+  "54-u2": {
+   "page": 54,
+   "body": "오른쪽 그림과 같은 $\\square\\pt{ABCD}$의 넓이를 구하시오. [7점]",
+   "figure": "crop:fig-54-u2.png",
+   "answer": "$(72+27\\sqrt{6})\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "55-u3": {
+   "page": 55,
+   "body": "호수의 가장자리의 두 지점~$\\pt{A}$, $\\pt{B}$ 사이의 거리를 구하기 위하여 오른쪽 그림과 같이 측량하였다. 이때 두 지점~$\\pt{A}$, $\\pt{B}$ 사이의 거리를 구하시오. [6점]",
+   "figure": "crop:fig-55-u3.png",
+   "answer": "$8\\sqrt{6}\\,\\mathrm{m}$",
+   "answer_source": "답지"
+  },
+  "55-u4": {
+   "page": 55,
+   "body": "오른쪽 그림과 같은 $\\triangle\\pt{ABC}$에서 $\\seg{AB}=10\\,\\mathrm{cm}$, $\\seg{BC}=12\\,\\mathrm{cm}$, $\\angle\\pt{B}=45^\\circ$이고 점~$\\pt{G}$가 $\\triangle\\pt{ABC}$의 무게중심일 때, $\\triangle\\pt{AGC}$의 넓이를 구하시오. [6점]",
+   "figure": "crop:fig-55-u4.png",
+   "answer": "$10\\sqrt{2}\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "55-u5": {
+   "page": 55,
+   "body": "오른쪽 그림과 같이 반지름의 길이가 $6\\,\\mathrm{cm}$인 반원~$\\pt{O}$에서 $\\angle\\pt{CAB}=30^\\circ$일 때, 색칠한 부분의 넓이를 구하시오. [7점]",
+   "figure": "crop:fig-55-u5.png",
+   "answer": "$(12\\pi-9\\sqrt{3})\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "55-u6": {
+   "page": 55,
+   "body": "오른쪽 그림과 같은 평행사변형~$\\pt{ABCD}$에서 $\\seg{BC}=20\\,\\mathrm{cm}$, $\\seg{CD}=14\\,\\mathrm{cm}$이고 $\\angle\\pt{ABC}:\\angle\\pt{BCD}=1:3$일 때, $\\triangle\\pt{OBC}$의 넓이를 구하시오. \\cond{점~$\\pt{O}$는 두 대각선의 교점이다.} [8점]",
+   "figure": "crop:fig-55-u6.png",
+   "answer": "$35\\sqrt{2}\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "60-01": {
+   "page": 60,
+   "body": "다음 그림의 원~$\\pt{O}$에서 $x$의 값을 구하시오.",
+   "figure": "crop:fig-60-01.png",
+   "figure_layout": "below",
+   "answer": "⑴ $8$ ⑵ $3\\sqrt{2}$",
+   "answer_source": "답지"
+  },
+  "60-02": {
+   "page": 60,
+   "body": "다음 그림의 원의 반지름의 길이를 구하시오.",
+   "figure": "crop:fig-60-02.png",
+   "figure_layout": "below",
+   "answer": "⑴ $7$ ⑵ $8$",
+   "answer_source": "답지"
+  },
+  "60-03": {
+   "page": 60,
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\seg{AB}\\perp\\seg{OM}$, $\\seg{CD}\\perp\\seg{ON}$이고 $\\seg{OM}=\\seg{ON}$일 때, 다음 중 옳은 것은 ○, 옳지 않은 것은 ×를 \\mbox{(\\quad)} 안에 써넣으시오.",
+   "figure": "crop:fig-60-03.png",
+   "subs": [
+    "$\\seg{AB}=\\seg{CD}$\\nobreak\\hfill\\mbox{(\\qquad)}",
+    "$\\seg{AM}=\\seg{DN}$\\nobreak\\hfill\\mbox{(\\qquad)}",
+    "$\\seg{BM}=\\seg{OM}$\\nobreak\\hfill\\mbox{(\\qquad)}",
+    "$\\arc{AB}=\\arc{CD}$\\nobreak\\hfill\\mbox{(\\qquad)}"
+   ],
+   "answer": "⑴ ○ ⑵ ○ ⑶ × ⑷ ○",
+   "answer_source": "답지"
+  },
+  "60-04": {
+   "page": 60,
+   "body": "다음 그림의 원~$\\pt{O}$에서 $x$의 값을 구하시오.",
+   "figure": "crop:fig-60-04.png",
+   "figure_layout": "below",
+   "answer": "⑴ $7$ ⑵ $5$",
+   "answer_source": "답지"
+  },
+  "61-h1": {
+   "page": 61,
+   "type": "현의 수직이등분선 (1)",
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\seg{AB}\\perp\\seg{OM}$이고 $\\seg{OA}=7\\,\\mathrm{cm}$, $\\seg{OM}=5\\,\\mathrm{cm}$일 때, $\\seg{AB}$의 길이를 구하시오.",
+   "figure": "crop:fig-61-h1.png",
+   "answer": "$4\\sqrt{6}\\,\\mathrm{cm}$",
+   "answer_source": "본문 답"
+  },
+  "61-c1": {
+   "page": 61,
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\seg{AB}\\perp\\seg{OC}$이고 $\\seg{OM}=8\\,\\mathrm{cm}$, $\\seg{AB}=30\\,\\mathrm{cm}$일 때, 원~$\\pt{O}$의 반지름의 길이를 구하시오.",
+   "figure": "crop:fig-61-c1.png",
+   "answer": "$17\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "61-h2": {
+   "page": 61,
+   "type": "현의 수직이등분선 (2)",
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\seg{AB}\\perp\\seg{OC}$이고 $\\seg{AC}=4\\sqrt{5}\\,\\mathrm{cm}$, $\\seg{CM}=4\\,\\mathrm{cm}$일 때, $\\seg{OB}$의 길이를 구하시오.",
+   "figure": "crop:fig-61-h2.png",
+   "answer": "$10\\,\\mathrm{cm}$",
+   "answer_source": "본문 답"
+  },
+  "61-c2": {
+   "page": 61,
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\seg{AB}\\perp\\seg{OC}$이고 $\\seg{OB}=6\\,\\mathrm{cm}$, $\\seg{OM}=2\\,\\mathrm{cm}$일 때, $\\seg{AC}$의 길이를 구하시오.",
+   "figure": "crop:fig-61-c2.png",
+   "answer": "$4\\sqrt{3}\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "62-h3": {
+   "page": 62,
+   "type": "현의 수직이등분선; 원의 일부분이 주어진 경우",
+   "body": "오른쪽 그림에서 $\\arc{AB}$는 원의 일부분이다. $\\seg{AB}\\perp\\seg{CM}$이고 $\\seg{AM}=\\seg{BM}=12\\,\\mathrm{cm}$, $\\seg{CM}=6\\,\\mathrm{cm}$일 때, 이 원의 반지름의 길이를 구하시오.",
+   "figure": "crop:fig-62-h3.png",
+   "answer": "$15\\,\\mathrm{cm}$",
+   "answer_source": "본문 답"
+  },
+  "62-c3": {
+   "page": 62,
+   "body": "오른쪽 그림에서 $\\arc{AB}$는 반지름의 길이가 $15\\,\\mathrm{cm}$인 원의 일부분이다. $\\seg{AB}\\perp\\seg{CD}$, $\\seg{AD}=\\seg{BD}$이고 $\\seg{AB}=18\\,\\mathrm{cm}$일 때, $\\seg{CD}$의 길이를 구하시오.",
+   "figure": "crop:fig-62-c3.png",
+   "answer": "$3\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "62-h4": {
+   "page": 62,
+   "type": "현의 수직이등분선; 원이 접힌 경우",
+   "body": "오른쪽 그림과 같이 반지름의 길이가 $6\\,\\mathrm{cm}$인 원 위의 한 점이 원의 중심~$\\pt{O}$에 겹쳐지도록 $\\seg{AB}$를 접는 선으로 하여 접었다. 이때 $\\seg{AB}$의 길이를 구하시오.",
+   "figure": "crop:fig-62-h4.png",
+   "answer": "$6\\sqrt{3}\\,\\mathrm{cm}$",
+   "answer_source": "본문 답"
+  },
+  "62-c4": {
+   "page": 62,
+   "body": "오른쪽 그림과 같이 원 위의 한 점이 원의 중심~$\\pt{O}$에 겹쳐지도록 $\\seg{AB}$를 접는 선으로 하여 접었다. $\\seg{AB}=10\\sqrt{3}\\,\\mathrm{cm}$일 때, 이 원의 반지름의 길이를 구하시오.",
+   "figure": "crop:fig-62-c4.png",
+   "answer": "$10\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "63-h5": {
+   "page": 63,
+   "type": "현의 길이",
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\seg{AB}\\perp\\seg{OM}$, $\\seg{CD}\\perp\\seg{ON}$이고 $\\seg{OM}=\\seg{ON}=4\\,\\mathrm{cm}$, $\\seg{OC}=4\\sqrt{2}\\,\\mathrm{cm}$일 때, $\\seg{AB}$의 길이를 구하시오.",
+   "figure": "crop:fig-63-h5.png",
+   "answer": "$8\\,\\mathrm{cm}$",
+   "answer_source": "본문 답"
+  },
+  "63-c5": {
+   "page": 63,
+   "body": "오른쪽 그림과 같이 반지름의 길이가 $9\\,\\mathrm{cm}$인 원~$\\pt{O}$에서 $\\seg{AB}\\perp\\seg{OM}$, $\\seg{CD}\\perp\\seg{ON}$이고 $\\seg{AB}=\\seg{CD}=12\\,\\mathrm{cm}$일 때, $\\seg{OM}$의 길이를 구하시오.",
+   "figure": "crop:fig-63-c5.png",
+   "answer": "$3\\sqrt{5}\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "63-h6": {
+   "page": 63,
+   "type": "현의 길이; 삼각형이 주어진 경우",
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\seg{AB}\\perp\\seg{OM}$, $\\seg{AC}\\perp\\seg{ON}$이고 $\\seg{OM}=\\seg{ON}$이다. $\\angle\\pt{BAC}=50^\\circ$일 때, $\\angle\\pt{ABC}$의 크기를 구하시오.",
+   "figure": "crop:fig-63-h6.png",
+   "answer": "$65^\\circ$",
+   "answer_source": "본문 답"
+  },
+  "63-c6": {
+   "page": 63,
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\seg{AB}\\perp\\seg{OM}$, $\\seg{AC}\\perp\\seg{ON}$이고 $\\seg{OM}=\\seg{ON}$이다. $\\angle\\pt{ABC}=62^\\circ$일 때, $\\angle\\pt{BAC}$의 크기를 구하시오.",
+   "figure": "crop:fig-63-c6.png",
+   "answer": "$56^\\circ$",
+   "answer_source": "답지"
+  },
+  "64-01": {
+   "page": 64,
+   "body": "오른쪽 그림과 같이 반지름의 길이가 $8\\,\\mathrm{cm}$인 원~$\\pt{O}$에서 $\\seg{AB}\\perp\\seg{OP}$, $\\seg{OM}=\\seg{PM}$일 때, $\\seg{AB}$의 길이를 구하시오.",
+   "figure": "crop:fig-64-01.png",
+   "answer": "$8\\sqrt{3}\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "64-02": {
+   "page": 64,
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\seg{AB}\\perp\\seg{OC}$이고 $\\seg{AM}=8\\,\\mathrm{cm}$, $\\seg{OD}=10\\,\\mathrm{cm}$일 때, $\\seg{AC}$의 길이를 구하시오.",
+   "figure": "crop:fig-64-02.png",
+   "answer": "$4\\sqrt{5}\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "64-03": {
+   "page": 64,
+   "body": "오른쪽 그림은 원 모양의 접시가 깨져서 생긴 조각이다. $\\seg{AB}\\perp\\seg{CM}$이고 $\\seg{AM}=\\seg{BM}=4\\,\\mathrm{cm}$, $\\seg{CM}=2\\,\\mathrm{cm}$일 때, 깨지기 전의 접시의 반지름의 길이를 구하시오.",
+   "figure": "crop:fig-64-03.png",
+   "answer": "$5\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "64-04": {
+   "page": 64,
+   "body": "오른쪽 그림과 같이 원 모양의 종이를 원 위의 한 점이 원의 중심~$\\pt{O}$에 겹쳐지도록 $\\seg{AB}$를 접는 선으로 하여 접었다. $\\seg{OM}=2\\,\\mathrm{cm}$일 때, $\\seg{AB}$의 길이를 구하시오.",
+   "figure": "crop:fig-64-04.png",
+   "answer": "$4\\sqrt{3}\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "64-05": {
+   "page": 64,
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\seg{AB}=\\seg{CD}$이고 $\\seg{CD}\\perp\\seg{OM}$이다. $\\seg{OA}=5\\sqrt{2}\\,\\mathrm{cm}$, $\\seg{OM}=5\\,\\mathrm{cm}$일 때, $\\triangle\\pt{OAB}$의 넓이를 구하시오.",
+   "figure": "crop:fig-64-05.png",
+   "answer": "$25\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "64-06": {
+   "page": 64,
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\seg{AB}\\perp\\seg{OD}$, $\\seg{BC}\\perp\\seg{OE}$, $\\seg{CA}\\perp\\seg{OF}$이고 $\\seg{OD}=\\seg{OE}=\\seg{OF}$이다. $\\seg{AB}=6\\,\\mathrm{cm}$일 때, $\\triangle\\pt{ABC}$의 둘레의 길이를 구하시오.",
+   "figure": "crop:fig-64-06.png",
+   "answer": "$18\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "66-01": {
+   "page": 66,
+   "body": "다음 그림에서 $\\seg{PA}$는 원~$\\pt{O}$의 접선이고 점~$\\pt{A}$는 그 접점일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-66-01.png",
+   "figure_layout": "below",
+   "answer": "⑴ $55^\\circ$ ⑵ $30^\\circ$",
+   "answer_source": "답지"
+  },
+  "66-02": {
+   "page": 66,
+   "body": "다음 그림에서 $\\seg{PA}$, $\\seg{PB}$는 원~$\\pt{O}$의 접선이고 두 점~$\\pt{A}$, $\\pt{B}$는 각각 그 접점일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-66-02.png",
+   "figure_layout": "below",
+   "answer": "⑴ $50^\\circ$ ⑵ $95^\\circ$",
+   "answer_source": "답지"
+  },
+  "66-03": {
+   "page": 66,
+   "body": "다음 그림에서 $\\seg{PA}$, $\\seg{PB}$는 원~$\\pt{O}$의 접선이고 두 점~$\\pt{A}$, $\\pt{B}$는 각각 그 접점일 때, $x$의 값을 구하시오.",
+   "figure": "crop:fig-66-03.png",
+   "figure_layout": "below",
+   "answer": "⑴ $14$ ⑵ $12$",
+   "answer_source": "답지"
+  },
+  "66-04": {
+   "page": 66,
+   "body": "다음 그림에서 $\\seg{PA}$, $\\seg{PB}$는 원~$\\pt{O}$의 접선이고 두 점~$\\pt{A}$, $\\pt{B}$는 각각 그 접점일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-66-04.png",
+   "figure_layout": "below",
+   "answer": "⑴ $62^\\circ$ ⑵ $40^\\circ$",
+   "answer_source": "답지"
+  },
+  "67-h1": {
+   "page": 67,
+   "type": "원의 접선과 반지름",
+   "body": "오른쪽 그림에서 점~$\\pt{A}$는 원~$\\pt{O}$의 접점이고 $\\seg{PA}=15\\,\\mathrm{cm}$, $\\seg{OB}=8\\,\\mathrm{cm}$일 때, $\\seg{PB}$의 길이를 구하시오.",
+   "figure": "crop:fig-67-h1.png",
+   "answer": "$9\\,\\mathrm{cm}$",
+   "answer_source": "본문 답"
+  },
+  "67-c1": {
+   "page": 67,
+   "body": "오른쪽 그림에서 점~$\\pt{T}$는 원~$\\pt{O}$의 접점이고 $\\seg{OA}=3\\,\\mathrm{cm}$, $\\seg{PA}=6\\,\\mathrm{cm}$일 때, $\\triangle\\pt{OTP}$의 넓이를 구하시오.",
+   "figure": "crop:fig-67-c1.png",
+   "answer": "$9\\sqrt{2}\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "67-h2": {
+   "page": 67,
+   "type": "원의 접선과 반지름; 중심이 같은 원이 주어지는 경우",
+   "body": "오른쪽 그림과 같이 중심이 같은 두 원에서 큰 원의 현~$\\pt{AB}$는 작은 원의 접선이고 점~$\\pt{C}$는 그 접점이다. $\\seg{OC}=3\\,\\mathrm{cm}$, $\\seg{OD}=5\\,\\mathrm{cm}$일 때, $\\seg{AB}$의 길이를 구하시오.",
+   "figure": "crop:fig-67-h2.png",
+   "answer": "$8\\,\\mathrm{cm}$",
+   "answer_source": "본문 답"
+  },
+  "67-c2": {
+   "page": 67,
+   "body": "오른쪽 그림과 같이 중심이 같은 두 원에서 큰 원의 현~$\\pt{AB}$는 작은 원의 접선이고 점~$\\pt{Q}$는 그 접점이다. $\\seg{PQ}=6\\,\\mathrm{cm}$, $\\seg{OQ}=3\\,\\mathrm{cm}$일 때, $\\seg{AB}$의 길이를 구하시오.",
+   "figure": "crop:fig-67-c2.png",
+   "answer": "$12\\sqrt{2}\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "68-h3": {
+   "page": 68,
+   "type": "원의 접선의 성질",
+   "body": "다음 그림에서 두 점~$\\pt{A}$, $\\pt{B}$는 점~$\\pt{P}$에서 원~$\\pt{O}$에 그은 두 접선의 접점일 때, $x$의 값을 구하시오.",
+   "figure": "crop:fig-68-h3.png",
+   "figure_layout": "below",
+   "answer": "⑴ $\\sqrt{21}$ ⑵ $68$",
+   "answer_source": "본문 답"
+  },
+  "68-c3": {
+   "page": 68,
+   "body": "오른쪽 그림에서 두 점~$\\pt{A}$, $\\pt{B}$는 점~$\\pt{P}$에서 원~$\\pt{O}$에 그은 두 접선의 접점이다. $\\seg{PA}=12\\,\\mathrm{cm}$, $\\seg{PC}=6\\,\\mathrm{cm}$일 때, $\\seg{OB}$의 길이를 구하시오.",
+   "figure": "crop:fig-68-c3.png",
+   "answer": "$9\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "68-c4": {
+   "page": 68,
+   "body": "오른쪽 그림에서 두 점~$\\pt{A}$, $\\pt{B}$는 점~$\\pt{P}$에서 원~$\\pt{O}$에 그은 두 접선의 접점이다. $\\seg{BC}$는 원~$\\pt{O}$의 지름이고 $\\angle\\pt{ABC}=21^\\circ$일 때, $\\angle\\pt{APB}$의 크기를 구하시오.",
+   "figure": "crop:fig-68-c4.png",
+   "answer": "$42^\\circ$",
+   "answer_source": "답지"
+  },
+  "68-c5": {
+   "page": 68,
+   "body": "오른쪽 그림에서 두 점~$\\pt{A}$, $\\pt{B}$는 점~$\\pt{P}$에서 원~$\\pt{O}$에 그은 두 접선의 접점이다. $\\angle\\pt{APB}=60^\\circ$, $\\seg{OA}=5\\,\\mathrm{cm}$일 때, 다음을 구하시오.",
+   "figure": "crop:fig-68-c5.png",
+   "subs": [
+    "$\\seg{PA}$의 길이",
+    "$\\seg{AB}$의 길이"
+   ],
+   "answer": "⑴ $5\\sqrt{3}\\,\\mathrm{cm}$ ⑵ $5\\sqrt{3}\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "69-h4": {
+   "page": 69,
+   "type": "원의 접선의 성질의 응용",
+   "body": "오른쪽 그림에서 $\\seg{AD}$, $\\seg{AE}$, $\\seg{BC}$는 원~$\\pt{O}$의 접선이고 세 점~$\\pt{D}$, $\\pt{E}$, $\\pt{F}$는 각각 그 접점이다. $\\seg{AB}=7\\,\\mathrm{cm}$, $\\seg{AC}=8\\,\\mathrm{cm}$, $\\seg{BC}=5\\,\\mathrm{cm}$일 때, $\\seg{AE}$의 길이를 구하시오.",
+   "figure": "crop:fig-69-h4.png",
+   "answer": "$10\\,\\mathrm{cm}$",
+   "answer_source": "본문 답"
+  },
+  "69-c6": {
+   "page": 69,
+   "body": "오른쪽 그림에서 $\\seg{AD}$, $\\seg{AE}$, $\\seg{BC}$는 원~$\\pt{O}$의 접선이고 세 점~$\\pt{D}$, $\\pt{E}$, $\\pt{F}$는 각각 그 접점이다. $\\seg{AB}=12\\,\\mathrm{cm}$, $\\seg{AD}=18\\,\\mathrm{cm}$, $\\seg{AC}=14\\,\\mathrm{cm}$일 때, $\\seg{BC}$의 길이를 구하시오.",
+   "figure": "crop:fig-69-c6.png",
+   "answer": "$10\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "69-h5": {
+   "page": 69,
+   "type": "반원에서의 접선",
+   "body": "오른쪽 그림에서 $\\seg{AB}$는 반원~$\\pt{O}$의 지름이고 $\\seg{AD}$, $\\seg{BC}$, $\\seg{CD}$는 반원~$\\pt{O}$의 접선이다. $\\seg{AD}=4\\,\\mathrm{cm}$, $\\seg{BC}=9\\,\\mathrm{cm}$일 때, $\\seg{AB}$의 길이를 구하시오. \\cond{점~$\\pt{E}$는 접점이다.}",
+   "figure": "crop:fig-69-h5.png",
+   "answer": "$12\\,\\mathrm{cm}$",
+   "answer_source": "본문 답"
+  },
+  "69-c7": {
+   "page": 69,
+   "body": "오른쪽 그림에서 $\\seg{AB}$는 반원~$\\pt{O}$의 지름이고 $\\seg{AD}$, $\\seg{BC}$, $\\seg{CD}$는 반원~$\\pt{O}$의 접선이다. $\\seg{AD}=6\\,\\mathrm{cm}$, $\\seg{BC}=3\\,\\mathrm{cm}$일 때, $\\square\\pt{ABCD}$의 넓이를 구하시오. \\cond{점~$\\pt{E}$는 접점이다.}",
+   "figure": "crop:fig-69-c7.png",
+   "answer": "$27\\sqrt{2}\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "70-01": {
+   "page": 70,
+   "body": "오른쪽 그림에서 직선~$\\pt{PT}$는 원~$\\pt{O}$의 접선이고 점~$\\pt{T}$는 접점이다. $\\seg{PT}=8\\,\\mathrm{cm}$, $\\seg{PA}=4\\,\\mathrm{cm}$일 때, 원~$\\pt{O}$의 반지름의 길이를 구하시오.",
+   "figure": "crop:fig-70-01.png",
+   "answer": "$6\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "70-02": {
+   "page": 70,
+   "body": "오른쪽 그림과 같이 중심이 같은 두 원에서 큰 원의 현~$\\pt{AB}$는 작은 원의 접선이다. $\\seg{AB}=20\\,\\mathrm{cm}$일 때, 색칠한 부분의 넓이를 구하시오.",
+   "figure": "crop:fig-70-02.png",
+   "answer": "$100\\pi\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "70-03": {
+   "page": 70,
+   "body": "오른쪽 그림에서 두 점~$\\pt{A}$, $\\pt{B}$는 점~$\\pt{P}$에서 원~$\\pt{O}$에 그은 두 접선의 접점이다. $\\angle\\pt{AOB}=120^\\circ$, $\\seg{AP}=6\\,\\mathrm{cm}$일 때, 다음 중 옳지 \\underline{않은} 것은?",
+   "figure": "crop:fig-70-03.png",
+   "choices": [
+    "$\\seg{PB}=6\\,\\mathrm{cm}$",
+    "$\\angle\\pt{APB}=60^\\circ$",
+    "$\\triangle\\pt{PAO}\\equiv\\triangle\\pt{PBO}$",
+    "$\\seg{OA}=3\\,\\mathrm{cm}$",
+    "$\\seg{OP}=4\\sqrt{3}\\,\\mathrm{cm}$"
+   ],
+   "choices_layout": "ii",
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "70-04": {
+   "page": 70,
+   "body": "오른쪽 그림에서 $\\seg{PA}$, $\\seg{PB}$, $\\seg{DE}$는 원~$\\pt{O}$의 접선이고 세 점~$\\pt{A}$, $\\pt{B}$, $\\pt{C}$는 각각 그 접점이다. $\\seg{OB}=5\\,\\mathrm{cm}$, $\\seg{OP}=13\\,\\mathrm{cm}$일 때, $\\triangle\\pt{PED}$의 둘레의 길이를 구하시오.",
+   "figure": "crop:fig-70-04.png",
+   "answer": "$24\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "70-05": {
+   "page": 70,
+   "body": "오른쪽 그림에서 $\\seg{AD}$, $\\seg{BC}$, $\\seg{CD}$는 $\\seg{AB}$를 지름으로 하는 반원~$\\pt{O}$의 접선이다. $\\seg{AD}=3\\,\\mathrm{cm}$, $\\seg{BC}=4\\,\\mathrm{cm}$일 때, 반원~$\\pt{O}$의 넓이를 구하시오. \\cond{점~$\\pt{E}$는 접점이다.}",
+   "figure": "crop:fig-70-05.png",
+   "answer": "$6\\pi\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "72-01": {
+   "page": 72,
+   "body": "다음 그림에서 원~$\\pt{O}$는 $\\triangle\\pt{ABC}$의 내접원이고 세 점~$\\pt{D}$, $\\pt{E}$, $\\pt{F}$는 접점일 때, $x$의 값을 구하시오.",
+   "figure": "crop:fig-72-01.png",
+   "figure_layout": "below",
+   "answer": "⑴ $12$ ⑵ $7$",
+   "answer_source": "답지"
+  },
+  "72-02": {
+   "page": 72,
+   "body": "오른쪽 그림에서 원~$\\pt{O}$는 직각삼각형~$\\pt{ABC}$의 내접원이고 세 점~$\\pt{D}$, $\\pt{E}$, $\\pt{F}$는 접점이다. 원~$\\pt{O}$의 반지름의 길이를 $r$라 할 때, 다음 물음에 답하시오.",
+   "figure": "crop:fig-72-02.png",
+   "subs": [
+    "$\\seg{AC}$의 길이를 구하시오.",
+    "$\\seg{AF}$, $\\seg{CF}$의 길이를 $r$에 대한 식으로 나타내시오.",
+    "$r$의 값을 구하시오."
+   ],
+   "answer": "⑴ $10$ ⑵ $\\seg{AF}=6-r$, $\\seg{CF}=8-r$ ⑶ $2$",
+   "answer_source": "답지"
+  },
+  "72-03": {
+   "page": 72,
+   "body": "다음 그림에서 $\\square\\pt{ABCD}$가 원~$\\pt{O}$에 외접할 때, $x$의 값을 구하시오.",
+   "figure": "crop:fig-72-03.png",
+   "figure_layout": "below",
+   "answer": "⑴ $9$ ⑵ $19$",
+   "answer_source": "답지"
+  },
+  "72-04": {
+   "page": 72,
+   "body": "다음 그림에서 $\\square\\pt{ABCD}$가 원~$\\pt{O}$에 외접할 때, $x$의 값을 구하시오.",
+   "figure": "crop:fig-72-04.png",
+   "figure_layout": "below",
+   "answer": "⑴ $4$ ⑵ $6$",
+   "answer_source": "답지"
+  },
+  "73-h1": {
+   "page": 73,
+   "type": "삼각형의 내접원",
+   "body": "오른쪽 그림에서 원~$\\pt{O}$는 $\\triangle\\pt{ABC}$의 내접원이고 세 점~$\\pt{D}$, $\\pt{E}$, $\\pt{F}$는 접점이다. $\\seg{AB}=12\\,\\mathrm{cm}$, $\\seg{BC}=14\\,\\mathrm{cm}$, $\\seg{CA}=10\\,\\mathrm{cm}$일 때, $\\seg{AF}$의 길이를 구하시오.",
+   "figure": "crop:fig-73-h1.png",
+   "answer": "$4\\,\\mathrm{cm}$",
+   "answer_source": "본문 답"
+  },
+  "73-c1": {
+   "page": 73,
+   "body": "오른쪽 그림에서 원~$\\pt{O}$는 $\\triangle\\pt{ABC}$의 내접원이고 세 점~$\\pt{D}$, $\\pt{E}$, $\\pt{F}$는 접점이다. $\\seg{AB}=9\\,\\mathrm{cm}$, $\\seg{AC}=10\\,\\mathrm{cm}$, $\\seg{AF}=4\\,\\mathrm{cm}$일 때, $\\seg{BC}$의 길이를 구하시오.",
+   "figure": "crop:fig-73-c1.png",
+   "answer": "$11\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "73-h2": {
+   "page": 73,
+   "type": "직각삼각형의 내접원",
+   "body": "오른쪽 그림에서 원~$\\pt{O}$는 $\\angle\\pt{C}=90^\\circ$인 직각삼각형~$\\pt{ABC}$의 내접원이고 세 점~$\\pt{D}$, $\\pt{E}$, $\\pt{F}$는 접점이다. $\\seg{BC}=12\\,\\mathrm{cm}$, $\\seg{AC}=5\\,\\mathrm{cm}$일 때, 원~$\\pt{O}$의 반지름의 길이를 구하시오.",
+   "figure": "crop:fig-73-h2.png",
+   "answer": "$2\\,\\mathrm{cm}$",
+   "answer_source": "본문 답"
+  },
+  "73-c2": {
+   "page": 73,
+   "body": "오른쪽 그림에서 원~$\\pt{O}$는 $\\angle\\pt{C}=90^\\circ$인 직각삼각형~$\\pt{ABC}$의 내접원이고 세 점~$\\pt{D}$, $\\pt{E}$, $\\pt{F}$는 접점이다. $\\seg{AB}=15\\,\\mathrm{cm}$, $\\seg{BC}=12\\,\\mathrm{cm}$일 때, 원~$\\pt{O}$의 넓이를 구하시오.",
+   "figure": "crop:fig-73-c2.png",
+   "answer": "$9\\pi\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "74-h3": {
+   "page": 74,
+   "type": "원에 외접하는 사각형",
+   "body": "오른쪽 그림과 같이 $\\square\\pt{ABCD}$가 원~$\\pt{O}$에 외접할 때, $x$의 값을 구하시오.",
+   "figure": "crop:fig-74-h3.png",
+   "answer": "$4$",
+   "answer_source": "본문 답"
+  },
+  "74-c3": {
+   "page": 74,
+   "body": "오른쪽 그림과 같이 원~$\\pt{O}$에 외접하는 $\\square\\pt{ABCD}$의 둘레의 길이가 $30\\,\\mathrm{cm}$일 때, $x$, $y$의 값을 구하시오.",
+   "figure": "crop:fig-74-c3.png",
+   "answer": "$x=8$, $y=10$",
+   "answer_source": "답지"
+  },
+  "74-h4": {
+   "page": 74,
+   "type": "원에 외접하는 사각형의 응용",
+   "tag": "UP",
+   "body": "오른쪽 그림에서 원~$\\pt{O}$는 직사각형~$\\pt{ABCD}$의 세 변과 접하고 $\\seg{DE}$는 원~$\\pt{O}$의 접선이다. $\\seg{CE}=6\\,\\mathrm{cm}$, $\\seg{DE}=10\\,\\mathrm{cm}$일 때, $\\seg{BE}$의 길이를 구하시오.",
+   "figure": "crop:fig-74-h4.png",
+   "answer": "$6\\,\\mathrm{cm}$",
+   "answer_source": "본문 답"
+  },
+  "74-c4": {
+   "page": 74,
+   "body": "오른쪽 그림에서 원~$\\pt{O}$는 직사각형~$\\pt{ABCD}$의 세 변과 접하고 $\\seg{AE}$는 원~$\\pt{O}$의 접선이다. $\\seg{AB}=4\\,\\mathrm{cm}$, $\\seg{AD}=6\\,\\mathrm{cm}$일 때, $\\seg{AE}$의 길이를 구하시오.",
+   "figure": "crop:fig-74-c4.png",
+   "answer": "$5\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "75-01": {
+   "page": 75,
+   "body": "오른쪽 그림에서 원~$\\pt{O}$는 $\\triangle\\pt{ABC}$의 내접원이고 세 점~$\\pt{D}$, $\\pt{E}$, $\\pt{F}$는 접점이다. $\\triangle\\pt{ABC}$의 둘레의 길이가 $16\\,\\mathrm{cm}$일 때, $\\seg{AF}$의 길이를 구하시오.",
+   "figure": "crop:fig-75-01.png",
+   "answer": "$1\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "75-02": {
+   "page": 75,
+   "body": "오른쪽 그림에서 원~$\\pt{O}$는 $\\angle\\pt{C}=90^\\circ$인 직각삼각형~$\\pt{ABC}$의 내접원이고 세 점~$\\pt{D}$, $\\pt{E}$, $\\pt{F}$는 접점이다. 원~$\\pt{O}$의 반지름의 길이가 $3\\,\\mathrm{cm}$이고 $\\seg{BE}=6\\,\\mathrm{cm}$일 때, $\\triangle\\pt{ABC}$의 넓이를 구하시오.",
+   "figure": "crop:fig-75-02.png",
+   "answer": "$54\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "75-03": {
+   "page": 75,
+   "body": "오른쪽 그림과 같이 원~$\\pt{O}$에 외접하는 $\\square\\pt{ABCD}$에서 $\\seg{AB}=5\\,\\mathrm{cm}$, $\\seg{CD}=9\\,\\mathrm{cm}$이고 $\\seg{AD}:\\seg{BC}=3:4$일 때, $\\seg{BC}$의 길이를 구하시오.",
+   "figure": "crop:fig-75-03.png",
+   "answer": "$8\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "75-04": {
+   "page": 75,
+   "body": "오른쪽 그림과 같이 원~$\\pt{O}$에 외접하는 $\\square\\pt{ABCD}$에서 $\\angle\\pt{A}=\\angle\\pt{B}=90^\\circ$이고 $\\seg{AD}=10\\,\\mathrm{cm}$, $\\seg{BC}=15\\,\\mathrm{cm}$이다. 이때 원~$\\pt{O}$의 반지름의 길이를 구하시오.",
+   "figure": "crop:fig-75-04.png",
+   "answer": "$6\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "75-05": {
+   "page": 75,
+   "tag": "UP",
+   "body": "오른쪽 그림과 같이 원~$\\pt{O}$가 직사각형~$\\pt{ABCD}$의 세 변과 세 점~$\\pt{E}$, $\\pt{F}$, $\\pt{G}$에서 접하고 $\\seg{DI}$와 점~$\\pt{H}$에서 접한다. $\\seg{AB}=6\\,\\mathrm{cm}$, $\\seg{AD}=8\\,\\mathrm{cm}$일 때, $\\triangle\\pt{CDI}$의 둘레의 길이를 구하시오.",
+   "figure": "crop:fig-75-05.png",
+   "answer": "$16\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "76-01": {
+   "page": 76,
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\seg{AB}\\perp\\seg{CD}$이고 $\\seg{CE}=7\\,\\mathrm{cm}$, $\\seg{ED}=3\\,\\mathrm{cm}$일 때, $\\seg{AB}$의 길이는?",
+   "figure": "crop:fig-76-01.png",
+   "choices": [
+    "$9\\,\\mathrm{cm}$",
+    "$2\\sqrt{21}\\,\\mathrm{cm}$",
+    "$2\\sqrt{22}\\,\\mathrm{cm}$",
+    "$2\\sqrt{23}\\,\\mathrm{cm}$",
+    "$10\\,\\mathrm{cm}$"
+   ],
+   "choices_layout": "ii",
+   "answer": "②",
+   "answer_source": "답지"
+  },
+  "76-02": {
+   "page": 76,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\seg{AB}\\perp\\seg{OC}$이고 $\\seg{AM}=8\\,\\mathrm{cm}$, $\\seg{CM}=4\\,\\mathrm{cm}$일 때, $\\seg{OB}$의 길이는?",
+   "figure": "crop:fig-76-02.png",
+   "choices": [
+    "$9\\,\\mathrm{cm}$",
+    "$10\\,\\mathrm{cm}$",
+    "$11\\,\\mathrm{cm}$",
+    "$12\\,\\mathrm{cm}$",
+    "$13\\,\\mathrm{cm}$"
+   ],
+   "choices_layout": "ii",
+   "answer": "②",
+   "answer_source": "답지"
+  },
+  "76-03": {
+   "page": 76,
+   "body": "오른쪽 그림에서 $\\arc{AB}$는 반지름의 길이가 $15\\,\\mathrm{cm}$인 원의 일부분이다. $\\seg{AB}\\perp\\seg{HP}$, $\\seg{AH}=\\seg{BH}$이고 $\\seg{HP}=6\\,\\mathrm{cm}$일 때, $\\triangle\\pt{APB}$의 넓이는?",
+   "figure": "crop:fig-76-03.png",
+   "choices": [
+    "$48\\,\\mathrm{cm}^2$",
+    "$60\\,\\mathrm{cm}^2$",
+    "$72\\,\\mathrm{cm}^2$",
+    "$84\\,\\mathrm{cm}^2$",
+    "$96\\,\\mathrm{cm}^2$"
+   ],
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "76-04": {
+   "page": 76,
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\seg{AB}\\perp\\seg{OM}$, $\\seg{CD}\\perp\\seg{ON}$, $\\seg{OM}=\\seg{ON}$이고 $\\seg{AM}=9\\,\\mathrm{cm}$일 때, $\\seg{CD}$의 길이를 구하시오.",
+   "figure": "crop:fig-76-04.png",
+   "answer": "$18\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "76-05": {
+   "page": 76,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림과 같이 원~$\\pt{O}$의 중심에서 두 현~$\\pt{AB}$, $\\pt{AC}$에 내린 수선의 발을 각각 $\\pt{M}$, $\\pt{N}$이라 하자. $\\seg{OM}=\\seg{ON}$이고 $\\angle\\pt{ACB}=52^\\circ$일 때, $\\angle\\pt{MON}$의 크기는?",
+   "figure": "crop:fig-76-05.png",
+   "choices": [
+    "$98^\\circ$",
+    "$100^\\circ$",
+    "$102^\\circ$",
+    "$104^\\circ$",
+    "$106^\\circ$"
+   ],
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "76-06": {
+   "page": 76,
+   "body": "오른쪽 그림에서 점~$\\pt{T}$는 원~$\\pt{O}$의 접점이고 $\\seg{OT}=5\\,\\mathrm{cm}$, $\\seg{PT}=5\\sqrt{3}\\,\\mathrm{cm}$일 때, $\\seg{PQ}$의 길이는?",
+   "figure": "crop:fig-76-06.png",
+   "choices": [
+    "$4\\,\\mathrm{cm}$",
+    "$3\\sqrt{2}\\,\\mathrm{cm}$",
+    "$5\\,\\mathrm{cm}$",
+    "$4\\sqrt{2}\\,\\mathrm{cm}$",
+    "$6\\,\\mathrm{cm}$"
+   ],
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "77-07": {
+   "page": 77,
+   "body": "다음 그림에서 $\\seg{PA}$, $\\seg{PB}$, $\\seg{PC}$는 원~$\\pt{O}$ 또는 원~$\\pt{O'}$의 접선이고 세 점~$\\pt{A}$, $\\pt{B}$, $\\pt{C}$는 그 접점일 때, $x$의 값은?",
+   "figure": "crop:fig-77-07.png",
+   "figure_layout": "below",
+   "choices": [
+    "$6$",
+    "$7$",
+    "$8$",
+    "$9$",
+    "$10$"
+   ],
+   "answer": "⑤",
+   "answer_source": "답지"
+  },
+  "77-08": {
+   "page": 77,
+   "body": "오른쪽 그림에서 두 점~$\\pt{A}$, $\\pt{B}$는 점~$\\pt{P}$에서 원~$\\pt{O}$에 그은 두 접선의 접점이고 $\\angle\\pt{P}=48^\\circ$일 때, $\\angle x$의 크기는?",
+   "figure": "crop:fig-77-08.png",
+   "choices": [
+    "$20^\\circ$",
+    "$21^\\circ$",
+    "$22^\\circ$",
+    "$23^\\circ$",
+    "$24^\\circ$"
+   ],
+   "answer": "⑤",
+   "answer_source": "답지"
+  },
+  "77-09": {
+   "page": 77,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림에서 $\\seg{AD}$, $\\seg{BC}$, $\\seg{AF}$는 원~$\\pt{O}$의 접선이고 세 점~$\\pt{D}$, $\\pt{E}$, $\\pt{F}$는 각각 그 접점이다. $\\seg{AB}=7\\,\\mathrm{cm}$, $\\seg{AC}=5\\,\\mathrm{cm}$, $\\seg{BC}=6\\,\\mathrm{cm}$일 때, $\\seg{AD}$의 길이를 구하시오.",
+   "figure": "crop:fig-77-09.png",
+   "answer": "$9\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "77-10": {
+   "page": 77,
+   "body": "오른쪽 그림에서 원~$\\pt{O}$는 $\\triangle\\pt{ABC}$의 내접원이고 세 점~$\\pt{D}$, $\\pt{E}$, $\\pt{F}$는 그 접점이다. $\\seg{AB}=10\\,\\mathrm{cm}$, $\\seg{BC}=11\\,\\mathrm{cm}$, $\\seg{CA}=9\\,\\mathrm{cm}$일 때, $\\seg{CE}$의 길이는?",
+   "figure": "crop:fig-77-10.png",
+   "choices": [
+    "$\\dfrac{9}{2}\\,\\mathrm{cm}$",
+    "$5\\,\\mathrm{cm}$",
+    "$\\dfrac{11}{2}\\,\\mathrm{cm}$",
+    "$6\\,\\mathrm{cm}$",
+    "$\\dfrac{13}{2}\\,\\mathrm{cm}$"
+   ],
+   "answer": "②",
+   "answer_source": "답지"
+  },
+  "77-11": {
+   "page": 77,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림과 같이 $\\seg{AD}\\parallel\\seg{BC}$인 등변사다리꼴~$\\pt{ABCD}$가 원~$\\pt{O}$에 외접한다. $\\seg{AD}=8\\,\\mathrm{cm}$, $\\seg{BC}=18\\,\\mathrm{cm}$일 때, $\\seg{AB}$의 길이를 구하시오.",
+   "figure": "crop:fig-77-11.png",
+   "answer": "$13\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "77-12": {
+   "page": 77,
+   "body": "오른쪽 그림과 같이 $\\square\\pt{ABCD}$는 반지름의 길이가 $4\\,\\mathrm{cm}$인 원~$\\pt{O}$에 외접한다. $\\angle\\pt{B}=90^\\circ$이고 $\\seg{BC}=10\\,\\mathrm{cm}$, $\\seg{CD}=9\\,\\mathrm{cm}$일 때, $\\seg{DP}$의 길이를 구하시오. \\cond{점~$\\pt{P}$는 접점이다.}",
+   "figure": "crop:fig-77-12.png",
+   "answer": "$3\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "78-13": {
+   "page": 78,
+   "body": "오른쪽 그림에서 $\\seg{AB}$는 원~$\\pt{O}$의 지름이다. $\\seg{AB}=12\\,\\mathrm{cm}$, $\\seg{CD}=8\\,\\mathrm{cm}$일 때, $\\triangle\\pt{COD}$의 넓이를 구하시오.",
+   "figure": "crop:fig-78-13.png",
+   "answer": "$8\\sqrt{5}\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "78-14": {
+   "page": 78,
+   "body": "오른쪽 그림과 같이 반지름의 길이가 $7\\,\\mathrm{cm}$인 원~$\\pt{O}$에서 $\\seg{AB}\\parallel\\seg{CD}$이고 $\\seg{AB}=\\seg{CD}=10\\,\\mathrm{cm}$일 때, 두 현~$\\pt{AB}$와 $\\pt{CD}$ 사이의 거리는?",
+   "figure": "crop:fig-78-14.png",
+   "choices": [
+    "$4\\sqrt{3}\\,\\mathrm{cm}$",
+    "$7\\,\\mathrm{cm}$",
+    "$4\\sqrt{5}\\,\\mathrm{cm}$",
+    "$4\\sqrt{6}\\,\\mathrm{cm}$",
+    "$7\\sqrt{2}\\,\\mathrm{cm}$"
+   ],
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "78-15": {
+   "page": 78,
+   "body": "오른쪽 그림과 같이 $\\triangle\\pt{ABC}$의 외접원의 중심~$\\pt{O}$에서 세 변~$\\pt{AB}$, $\\pt{BC}$, $\\pt{CA}$에 내린 수선의 발을 각각 $\\pt{D}$, $\\pt{E}$, $\\pt{F}$라 하자. $\\seg{OD}=\\seg{OE}=\\seg{OF}$이고 $\\seg{AB}=6\\,\\mathrm{cm}$일 때, 원~$\\pt{O}$의 넓이는?",
+   "figure": "crop:fig-78-15.png",
+   "choices": [
+    "$8\\pi\\,\\mathrm{cm}^2$",
+    "$10\\pi\\,\\mathrm{cm}^2$",
+    "$12\\pi\\,\\mathrm{cm}^2$",
+    "$14\\pi\\,\\mathrm{cm}^2$",
+    "$16\\pi\\,\\mathrm{cm}^2$"
+   ],
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "78-16": {
+   "page": 78,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림과 같이 중심이 같은 두 원에서 큰 원의 현~$\\pt{AB}$는 작은 원의 접선이다. 색칠한 부분의 넓이가 $36\\pi\\,\\mathrm{cm}^2$일 때, $\\seg{AB}$의 길이는?",
+   "figure": "crop:fig-78-16.png",
+   "choices": [
+    "$8\\,\\mathrm{cm}$",
+    "$10\\,\\mathrm{cm}$",
+    "$12\\,\\mathrm{cm}$",
+    "$14\\,\\mathrm{cm}$",
+    "$16\\,\\mathrm{cm}$"
+   ],
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "78-17": {
+   "page": 78,
+   "body": "오른쪽 그림에서 두 점~$\\pt{A}$, $\\pt{B}$는 점~$\\pt{P}$에서 원~$\\pt{O}$에 그은 두 접선의 접점이다. $\\angle\\pt{AOB}=120^\\circ$, $\\seg{OA}=12\\,\\mathrm{cm}$일 때, 다음 중 옳지 \\underline{않은} 것은?",
+   "figure": "crop:fig-78-17.png",
+   "choices": [
+    "$\\angle\\pt{APO}=30^\\circ$",
+    "$\\seg{PO}=24\\,\\mathrm{cm}$",
+    "$\\seg{PA}=12\\sqrt{3}\\,\\mathrm{cm}$",
+    "$\\seg{AB}=12\\sqrt{3}\\,\\mathrm{cm}$",
+    "$\\triangle\\pt{OAB}=32\\sqrt{3}\\,\\mathrm{cm}^2$"
+   ],
+   "choices_layout": "ii",
+   "answer": "⑤",
+   "answer_source": "답지"
+  },
+  "78-18": {
+   "page": 78,
+   "body": "오른쪽 그림에서 $\\seg{AC}$, $\\seg{BD}$, $\\seg{CD}$는 반원~$\\pt{O}$의 접선이다. $\\seg{AC}=5\\,\\mathrm{cm}$, $\\seg{BD}=3\\,\\mathrm{cm}$일 때, $\\triangle\\pt{COD}$의 넓이를 구하시오. \\cond{점~$\\pt{P}$는 접점이다.}",
+   "figure": "crop:fig-78-18.png",
+   "answer": "$4\\sqrt{15}\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "79-19": {
+   "page": 79,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림에서 원~$\\pt{O}$는 $\\triangle\\pt{ABC}$의 내접원이고 세 점~$\\pt{P}$, $\\pt{Q}$, $\\pt{R}$는 접점이다. $\\seg{DE}$가 원~$\\pt{O}$의 접선이고 $\\seg{AB}=18\\,\\mathrm{cm}$, $\\seg{BC}=16\\,\\mathrm{cm}$, $\\seg{CA}=12\\,\\mathrm{cm}$일 때, $\\triangle\\pt{DBE}$의 둘레의 길이는?",
+   "figure": "crop:fig-79-19.png",
+   "choices": [
+    "$20\\,\\mathrm{cm}$",
+    "$21\\,\\mathrm{cm}$",
+    "$22\\,\\mathrm{cm}$",
+    "$23\\,\\mathrm{cm}$",
+    "$24\\,\\mathrm{cm}$"
+   ],
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "79-20": {
+   "page": 79,
+   "body": "오른쪽 그림에서 원~$\\pt{O}$는 $\\angle\\pt{A}=90^\\circ$인 직각삼각형~$\\pt{ABC}$의 내접원이고 세 점~$\\pt{D}$, $\\pt{E}$, $\\pt{F}$는 접점이다. $\\seg{BE}=4\\,\\mathrm{cm}$, $\\seg{CE}=6\\,\\mathrm{cm}$일 때, 원~$\\pt{O}$의 반지름의 길이를 구하시오.",
+   "figure": "crop:fig-79-20.png",
+   "answer": "$2\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "79-21": {
+   "page": 79,
+   "body": "오른쪽 그림과 같이 원~$\\pt{O}$가 직사각형~$\\pt{ABCD}$의 세 변과 세 점~$\\pt{E}$, $\\pt{F}$, $\\pt{G}$에서 접하고 $\\seg{DI}$와 점~$\\pt{H}$에서 접한다. $\\seg{AB}=8\\,\\mathrm{cm}$, $\\seg{AD}=10\\,\\mathrm{cm}$일 때, $\\seg{GI}$의 길이는?",
+   "figure": "crop:fig-79-21.png",
+   "choices": [
+    "$2\\,\\mathrm{cm}$",
+    "$\\dfrac{7}{3}\\,\\mathrm{cm}$",
+    "$\\dfrac{8}{3}\\,\\mathrm{cm}$",
+    "$3\\,\\mathrm{cm}$",
+    "$\\dfrac{10}{3}\\,\\mathrm{cm}$"
+   ],
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "79-22": {
+   "page": 79,
+   "body": "오른쪽 그림과 같이 반지름의 길이가 $10\\,\\mathrm{cm}$인 원~$\\pt{O}$를 현~$\\pt{AB}$를 접는 선으로 하여 접었더니 $\\arc{AB}$가 원의 중심~$\\pt{O}$를 지나게 되었다. 이때 색칠한 부분의 넓이를 구하시오.",
+   "figure": "crop:fig-79-22.png",
+   "answer": "$\\left(\\dfrac{100}{3}\\pi-25\\sqrt{3}\\right)\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "79-23": {
+   "page": 79,
+   "body": "오른쪽 그림과 같이 육각형~$\\pt{ABCDEF}$가 원~$\\pt{O}$에 외접할 때, $\\seg{EF}$의 길이를 구하시오.",
+   "figure": "crop:fig-79-23.png",
+   "answer": "$5$",
+   "answer_source": "답지"
+  },
+  "79-24": {
+   "page": 79,
+   "body": "오른쪽 그림과 같이 가로와 세로의 길이가 각각 $25\\,\\mathrm{cm}$, $18\\,\\mathrm{cm}$인 직사각형~$\\pt{ABCD}$의 변에 접하는 두 원~$\\pt{O}$, $\\pt{O'}$이 외접할 때, 원~$\\pt{O'}$의 반지름의 길이를 구하시오.",
+   "figure": "crop:fig-79-24.png",
+   "answer": "$4\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "80-e1": {
+   "page": 80,
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\seg{AB}\\perp\\seg{OE}$이고 $\\seg{AB}=\\seg{CD}$이다. $\\seg{OE}=4\\,\\mathrm{cm}$, $\\seg{BE}=5\\,\\mathrm{cm}$일 때, $\\triangle\\pt{OCD}$의 넓이를 구하시오. [6점]",
+   "figure": "crop:fig-80-e1.png",
+   "answer": "$20\\,\\mathrm{cm}^2$",
+   "answer_source": "본문 답"
+  },
+  "80-e2": {
+   "page": 80,
+   "body": "오른쪽 그림과 같이 $\\square\\pt{ABCD}$가 원에 외접하고 있다. $\\seg{AC}=15\\,\\mathrm{cm}$, $\\seg{BC}=12\\,\\mathrm{cm}$, $\\seg{CD}=13\\,\\mathrm{cm}$, $\\angle\\pt{B}=90^\\circ$일 때, $\\seg{AD}$의 길이를 구하시오. [5점]",
+   "figure": "crop:fig-80-e2.png",
+   "answer": "$10\\,\\mathrm{cm}$",
+   "answer_source": "본문 답"
+  },
+  "80-u1": {
+   "page": 80,
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\seg{AB}=\\seg{CD}$, $\\seg{AB}\\perp\\seg{OE}$이고 $\\seg{OE}=6\\,\\mathrm{cm}$, $\\seg{OC}=9\\,\\mathrm{cm}$일 때, $\\triangle\\pt{OCD}$의 넓이를 구하시오. [6점]",
+   "figure": "crop:fig-80-u1.png",
+   "answer": "$18\\sqrt{5}\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "80-u2": {
+   "page": 80,
+   "body": "오른쪽 그림과 같이 $\\square\\pt{ABCD}$가 원에 외접하고 있다. $\\angle\\pt{B}=90^\\circ$이고 $\\seg{AB}=6\\,\\mathrm{cm}$, $\\seg{AC}=3\\sqrt{13}\\,\\mathrm{cm}$, $\\seg{AD}=5\\,\\mathrm{cm}$일 때, $\\seg{DC}$의 길이를 구하시오. [5점]",
+   "figure": "crop:fig-80-u2.png",
+   "answer": "$8\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "81-u3": {
+   "page": 81,
+   "body": "오른쪽 그림에서 $\\arc{AB}$는 원의 일부분이다. $\\seg{AB}\\perp\\seg{CM}$, $\\seg{AM}=\\seg{BM}$이고 $\\seg{AB}=12\\,\\mathrm{cm}$, $\\seg{CM}=3\\,\\mathrm{cm}$일 때, 이 원의 둘레의 길이를 구하시오. [8점]",
+   "figure": "crop:fig-81-u3.png",
+   "answer": "$15\\pi\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "81-u4": {
+   "page": 81,
+   "body": "오른쪽 그림에서 두 점~$\\pt{A}$, $\\pt{B}$는 점~$\\pt{P}$에서 원~$\\pt{O}$에 그은 두 접선의 접점이다. $\\seg{PA}=20\\,\\mathrm{cm}$, $\\seg{OA}=10\\,\\mathrm{cm}$일 때, $\\seg{AB}$의 길이를 구하시오. [7점]",
+   "figure": "crop:fig-81-u4.png",
+   "answer": "$8\\sqrt{5}\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "81-u5": {
+   "page": 81,
+   "body": "오른쪽 그림에서 $\\seg{AB}$는 반원~$\\pt{O}$의 지름이고 $\\seg{AD}$, $\\seg{BC}$, $\\seg{CD}$는 반원~$\\pt{O}$의 접선이다. $\\seg{AD}=8\\,\\mathrm{cm}$, $\\seg{BC}=4\\,\\mathrm{cm}$일 때, $\\square\\pt{ABCD}$의 둘레의 길이를 구하시오. \\cond{점~$\\pt{E}$는 접점이다.} [7점]",
+   "figure": "crop:fig-81-u5.png",
+   "answer": "$(24+8\\sqrt{2})\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "81-u6": {
+   "page": 81,
+   "body": "오른쪽 그림에서 원~$\\pt{O}$는 직각삼각형~$\\pt{ABC}$의 내접원이고 세 점~$\\pt{D}$, $\\pt{E}$, $\\pt{F}$는 접점이다. $\\seg{AC}=4\\,\\mathrm{cm}$, $\\angle\\pt{C}=30^\\circ$일 때, 원~$\\pt{O}$의 반지름의 길이를 구하시오. [8점]",
+   "figure": "crop:fig-81-u6.png",
+   "answer": "$(\\sqrt{3}-1)\\,\\mathrm{cm}$",
+   "answer_source": "답지(쪽 렌더)"
+  },
+  "86-01": {
+   "page": 86,
+   "body": "다음 그림에서 $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-86-01.png",
+   "figure_layout": "below",
+   "answer": "⑴ $65^\\circ$ ⑵ $80^\\circ$ ⑶ $148^\\circ$",
+   "answer_source": "답지"
+  },
+  "86-02": {
+   "page": 86,
+   "body": "다음 그림에서 $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-86-02.png",
+   "figure_layout": "below",
+   "answer": "⑴ $51^\\circ$ ⑵ $75^\\circ$",
+   "answer_source": "답지"
+  },
+  "86-03": {
+   "page": 86,
+   "body": "다음 그림에서 $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-86-03.png",
+   "figure_layout": "below",
+   "answer": "⑴ $52^\\circ$ ⑵ $35^\\circ$",
+   "answer_source": "답지"
+  },
+  "86-04": {
+   "page": 86,
+   "body": "다음 그림에서 $x$의 값을 구하시오.",
+   "figure": "crop:fig-86-04.png",
+   "figure_layout": "below",
+   "answer": "⑴ $20$ ⑵ $12$ ⑶ $9$",
+   "answer_source": "답지"
+  },
+  "87-h1": {
+   "page": 87,
+   "type": "원주각과 중심각의 크기",
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\angle\\pt{AOB}=140^\\circ$일 때, $\\angle x$, $\\angle y$의 크기를 구하시오.",
+   "figure": "crop:fig-87-h1.png",
+   "answer": "$\\angle x=70^\\circ$, $\\angle y=110^\\circ$",
+   "answer_source": "본문 답"
+  },
+  "87-c1": {
+   "page": 87,
+   "body": "다음 그림에서 $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-87-c1.png",
+   "figure_layout": "below",
+   "answer": "⑴ $40^\\circ$ ⑵ $50^\\circ$",
+   "answer_source": "답지"
+  },
+  "87-h2": {
+   "page": 87,
+   "type": "원주각과 중심각의 크기: 두 접선이 주어진 경우",
+   "body": "오른쪽 그림에서 $\\seg{PA}$, $\\seg{PB}$는 원~$\\pt{O}$의 접선이고 두 점~$\\pt{A}$, $\\pt{B}$는 각각 그 접점이다. $\\angle\\pt{ACB}=55^\\circ$일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-87-h2.png",
+   "answer": "$70^\\circ$",
+   "answer_source": "본문 답"
+  },
+  "87-c2": {
+   "page": 87,
+   "body": "오른쪽 그림에서 $\\seg{PA}$, $\\seg{PB}$는 원~$\\pt{O}$의 접선이고 두 점~$\\pt{A}$, $\\pt{B}$는 각각 그 접점이다. $\\angle\\pt{APB}=50^\\circ$일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-87-c2.png",
+   "answer": "$65^\\circ$",
+   "answer_source": "답지"
+  },
+  "88-h3": {
+   "page": 88,
+   "type": "원주각의 성질",
+   "body": "오른쪽 그림에서 $\\angle\\pt{PAQ}=20^\\circ$, $\\angle\\pt{ARB}=70^\\circ$일 때, $\\angle y-\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-88-h3.png",
+   "answer": "$30^\\circ$",
+   "answer_source": "본문 답"
+  },
+  "88-c3": {
+   "page": 88,
+   "body": "다음 그림에서 $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-88-c3.png",
+   "figure_layout": "below",
+   "answer": "⑴ $56^\\circ$ ⑵ $13^\\circ$",
+   "answer_source": "답지"
+  },
+  "88-h4": {
+   "page": 88,
+   "type": "반원에 대한 원주각의 크기",
+   "body": "오른쪽 그림에서 $\\seg{AB}$는 원~$\\pt{O}$의 지름이고 $\\angle\\pt{ACD}=64^\\circ$일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-88-h4.png",
+   "answer": "$26^\\circ$",
+   "answer_source": "본문 답"
+  },
+  "88-c4": {
+   "page": 88,
+   "body": "다음 그림에서 $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-88-c4.png",
+   "figure_layout": "below",
+   "answer": "⑴ $40^\\circ$ ⑵ $42^\\circ$",
+   "answer_source": "답지"
+  },
+  "89-h5": {
+   "page": 89,
+   "type": "원주각의 성질과 삼각비의 값",
+   "body": "오른쪽 그림과 같이 반지름의 길이가 $6\\,\\mathrm{cm}$인 원~$\\pt{O}$에 내접하는 $\\triangle\\pt{ABC}$에서 $\\seg{BC}=8\\,\\mathrm{cm}$일 때, $\\tan\\pt{A}$의 값을 구하시오.",
+   "figure": "crop:fig-89-h5.png",
+   "answer": "$\\dfrac{2\\sqrt{5}}{5}$",
+   "answer_source": "본문 답"
+  },
+  "89-c5": {
+   "page": 89,
+   "body": "오른쪽 그림과 같이 원~$\\pt{O}$에 내접하는 $\\triangle\\pt{ABC}$에서 $\\angle\\pt{A}=60^\\circ$, $\\seg{BC}=9\\,\\mathrm{cm}$일 때, 원~$\\pt{O}$의 반지름의 길이를 구하시오.",
+   "figure": "crop:fig-89-c5.png",
+   "answer": "$3\\sqrt{3}\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "89-h6": {
+   "page": 89,
+   "type": "원주각의 크기와 호의 길이 (1)",
+   "body": "오른쪽 그림에서 점~$\\pt{P}$는 두 현~$\\pt{AB}$, $\\pt{CD}$의 교점이다. $\\arc{AC}=\\arc{BD}$이고 $\\angle\\pt{ABC}=32^\\circ$일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-89-h6.png",
+   "answer": "$64^\\circ$",
+   "answer_source": "본문 답"
+  },
+  "89-c6": {
+   "page": 89,
+   "body": "오른쪽 그림에서 $\\arc{AB}=\\arc{BC}$이고 $\\angle\\pt{ABD}=56^\\circ$, $\\angle\\pt{DAC}=40^\\circ$일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-89-c6.png",
+   "answer": "$42^\\circ$",
+   "answer_source": "답지"
+  },
+  "90-h7": {
+   "page": 90,
+   "type": "원주각의 크기와 호의 길이 (2)",
+   "body": "오른쪽 그림에서 $\\arc{BC}=6\\,\\mathrm{cm}$, $\\arc{CD}=9\\,\\mathrm{cm}$이고 $\\angle\\pt{BAC}=24^\\circ$일 때, $\\angle\\pt{BED}$의 크기를 구하시오.",
+   "figure": "crop:fig-90-h7.png",
+   "answer": "$60^\\circ$",
+   "answer_source": "본문 답"
+  },
+  "90-c7": {
+   "page": 90,
+   "body": "오른쪽 그림에서 $\\arc{BC}=12\\,\\mathrm{cm}$이고 $\\angle\\pt{BDC}=30^\\circ$, $\\angle\\pt{BPC}=80^\\circ$일 때, $\\arc{AD}$의 길이를 구하시오.",
+   "figure": "crop:fig-90-c7.png",
+   "answer": "$20\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "90-h8": {
+   "page": 90,
+   "type": "원주각의 크기와 호의 길이 (3)",
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\arc{AB}:\\arc{BC}:\\arc{CA}=3:4:5$일 때, $\\angle\\pt{A}$, $\\angle\\pt{B}$, $\\angle\\pt{C}$의 크기를 구하시오.",
+   "figure": "crop:fig-90-h8.png",
+   "answer": "$\\angle\\pt{A}=60^\\circ$, $\\angle\\pt{B}=75^\\circ$, $\\angle\\pt{C}=45^\\circ$",
+   "answer_source": "본문 답"
+  },
+  "90-c8": {
+   "page": 90,
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\arc{AB}:\\arc{BC}:\\arc{CA}=2:3:4$일 때, $\\triangle\\pt{ABC}$의 가장 큰 내각의 크기를 구하시오.",
+   "figure": "crop:fig-90-c8.png",
+   "answer": "$80^\\circ$",
+   "answer_source": "답지"
+  },
+  "91-01": {
+   "page": 91,
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\angle\\pt{OAB}=28^\\circ$일 때, $\\angle x$의 크기는?",
+   "figure": "crop:fig-91-01.png",
+   "choices": [
+    "$56^\\circ$",
+    "$58^\\circ$",
+    "$60^\\circ$",
+    "$62^\\circ$",
+    "$64^\\circ$"
+   ],
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "91-02": {
+   "page": 91,
+   "body": "오른쪽 그림과 같이 반지름의 길이가 $3\\,\\mathrm{cm}$인 원~$\\pt{O}$에서 $\\angle\\pt{ABC}=100^\\circ$일 때, 색칠한 부분의 넓이를 구하시오.",
+   "figure": "crop:fig-91-02.png",
+   "answer": "$5\\pi\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "91-03": {
+   "page": 91,
+   "body": "오른쪽 그림에서 $\\seg{PA}$, $\\seg{PB}$는 원~$\\pt{O}$의 접선이고 두 점~$\\pt{A}$, $\\pt{B}$는 각각 그 접점이다. $\\angle\\pt{APB}=48^\\circ$일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-91-03.png",
+   "answer": "$114^\\circ$",
+   "answer_source": "답지"
+  },
+  "91-04": {
+   "page": 91,
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\angle\\pt{APB}=20^\\circ$, $\\angle\\pt{BOC}=80^\\circ$일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-91-04.png",
+   "answer": "$60^\\circ$",
+   "answer_source": "답지"
+  },
+  "91-05": {
+   "page": 91,
+   "body": "오른쪽 그림에서 $\\seg{AB}$는 반원~$\\pt{O}$의 지름이고 $\\angle\\pt{COD}=36^\\circ$일 때, $\\angle\\pt{APB}$의 크기를 구하시오.",
+   "figure": "crop:fig-91-05.png",
+   "answer": "$72^\\circ$",
+   "answer_source": "답지"
+  },
+  "92-06": {
+   "page": 92,
+   "body": "오른쪽 그림과 같이 원~$\\pt{O}$에 내접하는 $\\triangle\\pt{ABC}$에서 $\\seg{BC}=4\\,\\mathrm{cm}$이고 $\\tan\\pt{A}=\\sqrt{2}$일 때, 원~$\\pt{O}$의 넓이는?",
+   "figure": "crop:fig-92-06.png",
+   "choices": [
+    "$4\\pi\\,\\mathrm{cm}^2$",
+    "$6\\pi\\,\\mathrm{cm}^2$",
+    "$8\\pi\\,\\mathrm{cm}^2$",
+    "$10\\pi\\,\\mathrm{cm}^2$",
+    "$12\\pi\\,\\mathrm{cm}^2$"
+   ],
+   "answer": "②",
+   "answer_source": "답지"
+  },
+  "92-07": {
+   "page": 92,
+   "body": "오른쪽 그림에서 $\\seg{AB}$는 원~$\\pt{O}$의 지름이고 $\\arc{AD}=\\arc{CD}$, $\\angle\\pt{BAC}=26^\\circ$일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-92-07.png",
+   "answer": "$32^\\circ$",
+   "answer_source": "답지"
+  },
+  "92-08": {
+   "page": 92,
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\arc{AB}=\\dfrac{1}{2}\\arc{BC}$이고 $\\angle\\pt{AEB}=25^\\circ$일 때, $\\angle x+\\angle y$의 크기를 구하시오.",
+   "figure": "crop:fig-92-08.png",
+   "answer": "$125^\\circ$",
+   "answer_source": "답지"
+  },
+  "92-09": {
+   "page": 92,
+   "body": "오른쪽 그림에서 $\\seg{AB}$와 $\\seg{CD}$는 원~$\\pt{O}$의 지름이고 $\\angle\\pt{DCB}=30^\\circ$, $\\arc{DB}=6\\,\\mathrm{cm}$일 때, $\\arc{AD}$의 길이는?",
+   "figure": "crop:fig-92-09.png",
+   "choices": [
+    "$8\\,\\mathrm{cm}$",
+    "$10\\,\\mathrm{cm}$",
+    "$12\\,\\mathrm{cm}$",
+    "$14\\,\\mathrm{cm}$",
+    "$16\\,\\mathrm{cm}$"
+   ],
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "92-10": {
+   "page": 92,
+   "body": "오른쪽 그림에서 $\\arc{AB}$, $\\arc{CD}$의 길이가 각각 원의 둘레의 길이의 $\\dfrac{1}{6}$, $\\dfrac{1}{9}$일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-92-10.png",
+   "answer": "$50^\\circ$",
+   "answer_source": "답지"
+  },
+  "94-01": {
+   "page": 94,
+   "body": "다음 \\textbf{보기} 중 네 점~$\\pt{A}$, $\\pt{B}$, $\\pt{C}$, $\\pt{D}$가 한 원 위에 있는 것을 모두 고르시오.",
+   "figure": "crop:fig-94-01.png",
+   "figure_layout": "below",
+   "answer": "ㄱ, ㄴ",
+   "answer_source": "답지"
+  },
+  "94-02": {
+   "page": 94,
+   "body": "다음 그림에서 $\\square\\pt{ABCD}$가 원에 내접할 때, $\\angle x$, $\\angle y$의 크기를 구하시오.",
+   "figure": "crop:fig-94-02.png",
+   "figure_layout": "below",
+   "answer": "⑴ $\\angle x=105^\\circ$, $\\angle y=80^\\circ$ ⑵ $\\angle x=85^\\circ$, $\\angle y=95^\\circ$",
+   "answer_source": "답지"
+  },
+  "94-03": {
+   "page": 94,
+   "body": "다음 그림에서 $\\square\\pt{ABCD}$가 원에 내접할 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-94-03.png",
+   "figure_layout": "below",
+   "answer": "⑴ $130^\\circ$ ⑵ $114^\\circ$",
+   "answer_source": "답지"
+  },
+  "94-04": {
+   "page": 94,
+   "body": "다음 그림에서 $\\square\\pt{ABCD}$가 원에 내접하도록 하는 $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-94-04.png",
+   "figure_layout": "below",
+   "answer": "⑴ $96^\\circ$ ⑵ $70^\\circ$",
+   "answer_source": "답지"
+  },
+  "95-h1": {
+   "page": 95,
+   "type": "네 점이 한 원 위에 있을 조건",
+   "body": "다음 중 네 점~$\\pt{A}$, $\\pt{B}$, $\\pt{C}$, $\\pt{D}$가 한 원 위에 있는 것을 모두 고르면? (정답 2개)",
+   "figure": "crop:fig-95-h1.png",
+   "figure_layout": "below",
+   "answer": "②, ⑤",
+   "answer_source": "본문 답"
+  },
+  "95-c1": {
+   "page": 95,
+   "body": "다음 중 네 점~$\\pt{A}$, $\\pt{B}$, $\\pt{C}$, $\\pt{D}$가 한 원 위에 있지 \\underline{않은} 것은?",
+   "figure": "crop:fig-95-c1.png",
+   "figure_layout": "below",
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "95-c2": {
+   "page": 95,
+   "body": "오른쪽 그림에서 네 점~$\\pt{A}$, $\\pt{B}$, $\\pt{C}$, $\\pt{D}$가 한 원 위에 있을 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-95-c2.png",
+   "answer": "$20^\\circ$",
+   "answer_source": "답지"
+  },
+  "96-h2": {
+   "page": 96,
+   "type": "원에 내접하는 사각형의 성질 (1)",
+   "body": "오른쪽 그림과 같이 $\\square\\pt{ABCD}$가 원~$\\pt{O}$에 내접하고 $\\angle\\pt{ABC}=70^\\circ$일 때, $\\angle x$, $\\angle y$의 크기를 구하시오.",
+   "figure": "crop:fig-96-h2.png",
+   "answer": "$\\angle x=110^\\circ$, $\\angle y=140^\\circ$",
+   "answer_source": "본문 답"
+  },
+  "96-c3": {
+   "page": 96,
+   "body": "오른쪽 그림과 같이 원에 내접하는 $\\square\\pt{ABCD}$에서 $\\seg{AB}=\\seg{AC}$이고 $\\angle\\pt{BAC}=40^\\circ$일 때, $\\angle x$, $\\angle y$의 크기를 구하시오.",
+   "figure": "crop:fig-96-c3.png",
+   "answer": "$\\angle x=70^\\circ$, $\\angle y=110^\\circ$",
+   "answer_source": "답지"
+  },
+  "96-h3": {
+   "page": 96,
+   "type": "원에 내접하는 사각형의 성질 (2)",
+   "body": "오른쪽 그림과 같이 $\\square\\pt{ABCD}$가 원에 내접하고 $\\angle\\pt{BAC}=50^\\circ$, $\\angle\\pt{ADB}=40^\\circ$, $\\angle\\pt{DCE}=96^\\circ$일 때, $\\angle x$, $\\angle y$의 크기를 구하시오.",
+   "figure": "crop:fig-96-h3.png",
+   "answer": "$\\angle x=46^\\circ$, $\\angle y=44^\\circ$",
+   "answer_source": "본문 답"
+  },
+  "96-c4": {
+   "page": 96,
+   "body": "오른쪽 그림과 같이 $\\square\\pt{ABCD}$가 원~$\\pt{O}$에 내접하고 $\\seg{BD}$는 원~$\\pt{O}$의 지름이다. $\\angle\\pt{BAC}=55^\\circ$, $\\angle\\pt{ABE}=100^\\circ$일 때, $\\angle x$, $\\angle y$의 크기를 구하시오.",
+   "figure": "crop:fig-96-c4.png",
+   "answer": "$\\angle x=45^\\circ$, $\\angle y=35^\\circ$",
+   "answer_source": "답지"
+  },
+  "97-h4": {
+   "page": 97,
+   "type": "원에 내접하는 다각형",
+   "body": "오른쪽 그림과 같이 오각형~$\\pt{ABCDE}$가 원~$\\pt{O}$에 내접하고 $\\angle\\pt{BAE}=80^\\circ$, $\\angle\\pt{CDE}=130^\\circ$일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-97-h4.png",
+   "answer": "$60^\\circ$",
+   "answer_source": "본문 답"
+  },
+  "97-c5": {
+   "page": 97,
+   "body": "오른쪽 그림과 같이 오각형~$\\pt{ABCDE}$가 원~$\\pt{O}$에 내접하고 $\\angle\\pt{BCD}=120^\\circ$, $\\angle\\pt{DOE}=70^\\circ$일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-97-c5.png",
+   "answer": "$95^\\circ$",
+   "answer_source": "답지"
+  },
+  "97-h5": {
+   "page": 97,
+   "type": "원에 내접하는 사각형의 성질의 응용",
+   "body": "오른쪽 그림과 같이 원에 내접하는 $\\square\\pt{ABCD}$에서 $\\seg{AB}$와 $\\seg{CD}$의 연장선의 교점을 $\\pt{E}$, $\\seg{AD}$와 $\\seg{BC}$의 연장선의 교점을 $\\pt{F}$라 하자. $\\angle\\pt{AED}=43^\\circ$, $\\angle\\pt{AFB}=37^\\circ$일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-97-h5.png",
+   "answer": "$50^\\circ$",
+   "answer_source": "본문 답"
+  },
+  "97-c6": {
+   "page": 97,
+   "body": "오른쪽 그림과 같이 원에 내접하는 $\\square\\pt{ABCD}$에서 $\\seg{AB}$와 $\\seg{CD}$의 연장선의 교점을 $\\pt{P}$, $\\seg{AD}$와 $\\seg{BC}$의 연장선의 교점을 $\\pt{Q}$라 하자. $\\angle\\pt{ADC}=127^\\circ$, $\\angle\\pt{CQD}=36^\\circ$일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-97-c6.png",
+   "answer": "$38^\\circ$",
+   "answer_source": "답지"
+  },
+  "98-h6": {
+   "page": 98,
+   "type": "두 원에서 내접하는 사각형의 성질의 응용",
+   "body": "오른쪽 그림과 같이 두 원이 두 점~$\\pt{P}$, $\\pt{Q}$에서 만나고 $\\angle\\pt{PAB}=95^\\circ$일 때, $\\angle\\pt{PDC}$의 크기를 구하시오.",
+   "figure": "crop:fig-98-h6.png",
+   "answer": "$85^\\circ$",
+   "answer_source": "본문 답"
+  },
+  "98-c7": {
+   "page": 98,
+   "body": "오른쪽 그림에서 두 점~$\\pt{P}$, $\\pt{Q}$는 두 원~$\\pt{O}$, $\\pt{O'}$의 교점이고 $\\angle\\pt{PAB}=85^\\circ$, $\\angle\\pt{ABE}=70^\\circ$일 때, $\\angle\\pt{DCQ}$의 크기를 구하시오.",
+   "figure": "crop:fig-98-c7.png",
+   "answer": "$70^\\circ$",
+   "answer_source": "답지"
+  },
+  "98-h7": {
+   "page": 98,
+   "type": "사각형이 원에 내접하기 위한 조건",
+   "body": "다음 중 $\\square\\pt{ABCD}$가 원에 내접하지 \\underline{않는} 것을 모두 고르면? (정답 2개)",
+   "figure": "crop:fig-98-h7.png",
+   "figure_layout": "below",
+   "answer": "③, ④",
+   "answer_source": "본문 답"
+  },
+  "98-c8": {
+   "page": 98,
+   "body": "오른쪽 그림의 $\\square\\pt{ABCD}$가 원에 내접하고 $\\angle\\pt{ADB}=30^\\circ$, $\\angle\\pt{BCD}=80^\\circ$일 때, $\\angle\\pt{ABD}$의 크기를 구하시오.",
+   "figure": "crop:fig-98-c8.png",
+   "answer": "$50^\\circ$",
+   "answer_source": "답지"
+  },
+  "99-01": {
+   "page": 99,
+   "body": "오른쪽 그림과 같이 $\\square\\pt{ABCD}$가 원~$\\pt{O}$에 내접하고 $\\seg{AD}$는 원~$\\pt{O}$의 지름이다. $\\angle\\pt{DAC}=20^\\circ$, $\\angle\\pt{DCE}=56^\\circ$일 때, $\\angle x$, $\\angle y$의 크기를 구하시오.",
+   "figure": "crop:fig-99-01.png",
+   "answer": "$\\angle x=36^\\circ$, $\\angle y=110^\\circ$",
+   "answer_source": "답지"
+  },
+  "99-02": {
+   "page": 99,
+   "body": "오른쪽 그림과 같이 육각형~$\\pt{ABCDEF}$가 원에 내접한다. $\\angle\\pt{BAF}=125^\\circ$, $\\angle\\pt{BCD}=110^\\circ$일 때, $\\angle\\pt{DEF}$의 크기를 구하시오.",
+   "figure": "crop:fig-99-02.png",
+   "answer": "$125^\\circ$",
+   "answer_source": "답지"
+  },
+  "99-03": {
+   "page": 99,
+   "body": "오른쪽 그림과 같이 원에 내접하는 $\\square\\pt{ABCD}$에서 $\\seg{AB}$와 $\\seg{CD}$의 연장선의 교점을 $\\pt{E}$, $\\seg{AD}$와 $\\seg{BC}$의 연장선의 교점을 $\\pt{F}$라 하자. $\\angle\\pt{AED}=30^\\circ$, $\\angle\\pt{DFC}=40^\\circ$일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-99-03.png",
+   "answer": "$55^\\circ$",
+   "answer_source": "답지"
+  },
+  "99-04": {
+   "page": 99,
+   "body": "오른쪽 그림과 같이 두 원~$\\pt{O}$, $\\pt{O'}$이 두 점~$\\pt{P}$, $\\pt{Q}$에서 만나고 $\\angle\\pt{PDC}=104^\\circ$일 때, $\\angle x+\\angle y$의 크기를 구하시오.",
+   "figure": "crop:fig-99-04.png",
+   "answer": "$256^\\circ$",
+   "answer_source": "답지"
+  },
+  "99-05": {
+   "page": 99,
+   "body": "다음 중 $\\square\\pt{ABCD}$가 원에 내접하지 \\underline{않는} 것은?",
+   "figure": "crop:fig-99-05.png",
+   "figure_layout": "below",
+   "answer": "⑤",
+   "answer_source": "답지"
+  },
+  "101-01": {
+   "page": 101,
+   "body": "오른쪽 그림에서 직선~$\\pt{TT'}$은 원의 접선이고 점~$\\pt{B}$는 접점일 때, 다음 중 옳은 것은 ○, 옳지 않은 것은 ×를 (\\quad) 안에 써넣으시오.",
+   "figure": "crop:fig-101-01.png",
+   "subs": [
+    "$\\angle\\pt{ABT}=\\angle\\pt{ACB}$\\nobreak\\hfill\\mbox{(\\qquad)}",
+    "$\\angle\\pt{ACB}=\\angle\\pt{CBT'}$\\nobreak\\hfill\\mbox{(\\qquad)}",
+    "$\\angle\\pt{CAB}=\\angle\\pt{ABT}$\\nobreak\\hfill\\mbox{(\\qquad)}",
+    "$\\angle\\pt{CBT'}=\\angle\\pt{CAB}$\\nobreak\\hfill\\mbox{(\\qquad)}"
+   ],
+   "answer": "⑴ ○ ⑵ × ⑶ × ⑷ ○",
+   "answer_source": "답지"
+  },
+  "101-02": {
+   "page": 101,
+   "body": "다음 그림에서 직선~$\\pt{AT}$가 원~$\\pt{O}$의 접선이고 점~$\\pt{A}$가 접점일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-101-02.png",
+   "figure_layout": "below",
+   "answer": "⑴ $100^\\circ$ ⑵ $60^\\circ$ ⑶ $75^\\circ$ ⑷ $70^\\circ$",
+   "answer_source": "답지"
+  },
+  "101-03": {
+   "page": 101,
+   "body": "오른쪽 그림에서 직선~$\\pt{PQ}$가 두 원~$\\pt{O}$, $\\pt{O'}$의 공통인 접선이고 점~$\\pt{T}$가 접점이다. $\\angle\\pt{BAT}=34^\\circ$, $\\angle\\pt{CDT}=72^\\circ$일 때, 다음을 구하시오. \\cond{세 점~$\\pt{A}$, $\\pt{T}$, $\\pt{C}$와 세 점~$\\pt{B}$, $\\pt{T}$, $\\pt{D}$는 각각 한 직선 위에 있다.}",
+   "figure": "crop:fig-101-03.png",
+   "subs": [
+    "$\\angle\\pt{BTQ}$의 크기",
+    "$\\angle\\pt{DTP}$의 크기",
+    "$\\angle\\pt{DCT}$의 크기",
+    "$\\seg{AB}$와 평행한 선분"
+   ],
+   "answer": "⑴ $34^\\circ$ ⑵ $34^\\circ$ ⑶ $34^\\circ$ ⑷ $\\seg{CD}$",
+   "answer_source": "답지"
+  },
+  "102-h1": {
+   "page": 102,
+   "type": "접선과 현이 이루는 각 (1)",
+   "body": "오른쪽 그림에서 직선~$\\pt{AT}$는 원~$\\pt{O}$의 접선이고 점~$\\pt{A}$는 접점이다. $\\angle\\pt{AOB}=112^\\circ$일 때, $\\angle\\pt{BAT}$의 크기를 구하시오.",
+   "figure": "crop:fig-102-h1.png",
+   "answer": "$56^\\circ$",
+   "answer_source": "본문 답"
+  },
+  "102-c1": {
+   "page": 102,
+   "body": "오른쪽 그림에서 직선~$\\pt{AT}$는 원~$\\pt{O}$의 접선이고 점~$\\pt{A}$는 접점이다. $\\seg{AB}$가 원~$\\pt{O}$의 지름이고 $\\angle\\pt{CBA}=25^\\circ$일 때, $\\angle x$, $\\angle y$의 크기를 구하시오.",
+   "figure": "crop:fig-102-c1.png",
+   "answer": "$\\angle x=90^\\circ$, $\\angle y=25^\\circ$",
+   "answer_source": "답지"
+  },
+  "102-h2": {
+   "page": 102,
+   "type": "접선과 현이 이루는 각 (2)",
+   "body": "오른쪽 그림에서 직선~$\\pt{AT}$는 원의 접선이고 점~$\\pt{A}$는 접점이다. $\\angle\\pt{ABD}=50^\\circ$, $\\angle\\pt{BCD}=110^\\circ$일 때, $\\angle\\pt{BAT}$의 크기를 구하시오.",
+   "figure": "crop:fig-102-h2.png",
+   "answer": "$60^\\circ$",
+   "answer_source": "본문 답"
+  },
+  "102-c2": {
+   "page": 102,
+   "body": "오른쪽 그림에서 직선~$\\pt{AT}$는 원의 접선이고 점~$\\pt{A}$는 접점이다. $\\angle\\pt{DCB}=80^\\circ$, $\\angle\\pt{DBA}=35^\\circ$일 때, $\\angle x$, $\\angle y$의 크기를 구하시오.",
+   "figure": "crop:fig-102-c2.png",
+   "answer": "$\\angle x=35^\\circ$, $\\angle y=45^\\circ$",
+   "answer_source": "답지"
+  },
+  "103-h3": {
+   "page": 103,
+   "type": "접선과 현이 이루는 각의 응용 (1)",
+   "body": "오른쪽 그림에서 직선~$\\pt{PT}$는 원~$\\pt{O}$의 접선이고 점~$\\pt{A}$는 접점이다. $\\seg{CP}$가 원~$\\pt{O}$의 중심을 지나고 $\\angle\\pt{CAT}=68^\\circ$일 때, $\\angle x$, $\\angle y$의 크기를 구하시오.",
+   "figure": "crop:fig-103-h3.png",
+   "answer": "$\\angle x=22^\\circ$, $\\angle y=46^\\circ$",
+   "answer_source": "본문 답"
+  },
+  "103-c3": {
+   "page": 103,
+   "body": "오른쪽 그림에서 $\\seg{PT}$는 원~$\\pt{O}$의 접선이고 점~$\\pt{T}$는 접점이다. $\\seg{PB}$가 원~$\\pt{O}$의 중심을 지나고 $\\angle\\pt{PBT}=27^\\circ$일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-103-c3.png",
+   "answer": "$36^\\circ$",
+   "answer_source": "답지"
+  },
+  "103-h4": {
+   "page": 103,
+   "type": "접선과 현이 이루는 각의 응용 (2)",
+   "body": "오른쪽 그림에서 $\\overrightarrow{\\pt{PD}}$, $\\overrightarrow{\\pt{PE}}$는 원의 접선이고 두 점~$\\pt{A}$, $\\pt{B}$는 각각 그 접점이다. $\\angle\\pt{APB}=48^\\circ$, $\\angle\\pt{CAD}=74^\\circ$일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-103-h4.png",
+   "answer": "$40^\\circ$",
+   "answer_source": "본문 답"
+  },
+  "103-c4": {
+   "page": 103,
+   "body": "오른쪽 그림에서 원~$\\pt{O}$는 $\\triangle\\pt{ABC}$의 내접원이면서 $\\triangle\\pt{DEF}$의 외접원이다. 세 점~$\\pt{D}$, $\\pt{E}$, $\\pt{F}$는 접점이고 $\\angle\\pt{BAC}=58^\\circ$, $\\angle\\pt{BCA}=70^\\circ$일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-103-c4.png",
+   "answer": "$64^\\circ$",
+   "answer_source": "답지"
+  },
+  "104-h5": {
+   "page": 104,
+   "type": "두 원에서 접선과 현이 이루는 각 (1)",
+   "body": "오른쪽 그림에서 직선~$\\pt{PQ}$는 두 원의 공통인 접선이고 점~$\\pt{T}$는 접점이다. $\\angle\\pt{BAT}=55^\\circ$, $\\angle\\pt{CDT}=60^\\circ$일 때, $\\angle x$의 크기를 구하시오. \\cond{세 점~$\\pt{A}$, $\\pt{T}$, $\\pt{C}$와 세 점~$\\pt{B}$, $\\pt{T}$, $\\pt{D}$는 각각 한 직선 위에 있다.}",
+   "figure": "crop:fig-104-h5.png",
+   "answer": "$65^\\circ$",
+   "answer_source": "본문 답"
+  },
+  "104-c5": {
+   "page": 104,
+   "body": "오른쪽 그림에서 직선~$\\pt{PQ}$는 두 원의 공통인 접선이고 점~$\\pt{T}$는 접점이다. $\\angle\\pt{BAT}=80^\\circ$, $\\angle\\pt{CTD}=50^\\circ$일 때, $\\angle x$의 크기를 구하시오. \\cond{세 점~$\\pt{A}$, $\\pt{T}$, $\\pt{C}$와 세 점~$\\pt{B}$, $\\pt{T}$, $\\pt{D}$는 각각 한 직선 위에 있다.}",
+   "figure": "crop:fig-104-c5.png",
+   "answer": "$50^\\circ$",
+   "answer_source": "답지"
+  },
+  "104-h6": {
+   "page": 104,
+   "type": "두 원에서 접선과 현이 이루는 각 (2)",
+   "body": "오른쪽 그림에서 직선~$\\pt{PQ}$는 두 원의 공통인 접선이고 점~$\\pt{T}$는 접점이다. $\\angle\\pt{ABT}=76^\\circ$, $\\angle\\pt{CDT}=72^\\circ$일 때, $\\angle x$, $\\angle y$의 크기를 구하시오. \\cond{세 점~$\\pt{A}$, $\\pt{D}$, $\\pt{T}$와 세 점~$\\pt{B}$, $\\pt{C}$, $\\pt{T}$는 각각 한 직선 위에 있다.}",
+   "figure": "crop:fig-104-h6.png",
+   "answer": "$\\angle x=72^\\circ$, $\\angle y=76^\\circ$",
+   "answer_source": "본문 답"
+  },
+  "104-c6": {
+   "page": 104,
+   "body": "오른쪽 그림에서 직선~$\\pt{PQ}$는 두 원의 공통인 접선이고 점~$\\pt{T}$는 접점이다. $\\angle\\pt{BTQ}=68^\\circ$일 때, $\\angle x$, $\\angle y$의 크기를 구하시오. \\cond{세 점~$\\pt{A}$, $\\pt{D}$, $\\pt{T}$와 세 점~$\\pt{B}$, $\\pt{C}$, $\\pt{T}$는 각각 한 직선 위에 있다.}",
+   "figure": "crop:fig-104-c6.png",
+   "answer": "$\\angle x=68^\\circ$, $\\angle y=68^\\circ$",
+   "answer_source": "답지"
+  },
+  "105-01": {
+   "page": 105,
+   "body": "오른쪽 그림에서 직선~$\\pt{AT}$는 원의 접선이고 점~$\\pt{A}$는 접점이다. $\\seg{CA}=\\seg{CB}$이고 $\\angle\\pt{BAT}=38^\\circ$일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-105-01.png",
+   "answer": "$71^\\circ$",
+   "answer_source": "답지"
+  },
+  "105-02": {
+   "page": 105,
+   "body": "오른쪽 그림에서 직선~$\\pt{PT}$는 원의 접선이고 점~$\\pt{A}$는 접점이다. $\\angle\\pt{CPA}=30^\\circ$, $\\angle\\pt{BAT}=48^\\circ$, $\\angle\\pt{ABC}=110^\\circ$일 때, $\\angle x+\\angle y$의 크기를 구하시오.",
+   "figure": "crop:fig-105-02.png",
+   "answer": "$88^\\circ$",
+   "answer_source": "답지"
+  },
+  "105-03": {
+   "page": 105,
+   "body": "오른쪽 그림과 같이 지름의 길이가 $12\\,\\mathrm{cm}$인 원~$\\pt{O}$에서 직선~$\\pt{AT}$는 접선이고 점~$\\pt{A}$는 접점이다. $\\angle\\pt{BAT}=60^\\circ$일 때, $\\triangle\\pt{ABC}$의 넓이를 구하시오.",
+   "figure": "crop:fig-105-03.png",
+   "answer": "$18\\sqrt{3}\\,\\mathrm{cm}^2$",
+   "answer_source": "답지"
+  },
+  "105-04": {
+   "page": 105,
+   "body": "오른쪽 그림에서 $\\overrightarrow{\\pt{PA}}$, $\\overrightarrow{\\pt{PB}}$는 원의 접선이고 두 점~$\\pt{A}$, $\\pt{B}$는 각각 그 접점이다. $\\angle\\pt{APB}=64^\\circ$일 때, $\\angle\\pt{ACB}$의 크기는?",
+   "figure": "crop:fig-105-04.png",
+   "choices": [
+    "$56^\\circ$",
+    "$58^\\circ$",
+    "$60^\\circ$",
+    "$62^\\circ$",
+    "$64^\\circ$"
+   ],
+   "answer": "②",
+   "answer_source": "답지"
+  },
+  "105-05": {
+   "page": 105,
+   "body": "오른쪽 그림에서 직선~$\\pt{PQ}$는 두 원의 공통인 접선이고 점~$\\pt{T}$는 접점이다. 다음 중 옳지 \\underline{않은} 것은? \\cond{세 점~$\\pt{A}$, $\\pt{D}$, $\\pt{T}$와 세 점~$\\pt{B}$, $\\pt{C}$, $\\pt{T}$는 각각 한 직선 위에 있다.}",
+   "figure": "crop:fig-105-05.png",
+   "choices": [
+    "$\\angle\\pt{ABT}=\\angle\\pt{ATP}$",
+    "$\\angle\\pt{BAT}=\\angle\\pt{CDT}$",
+    "$\\seg{AB}\\parallel\\seg{CD}$",
+    "$\\triangle\\pt{ABT}\\sim\\triangle\\pt{DCT}$",
+    "$\\seg{AB}:\\seg{DC}=\\seg{BC}:\\seg{CT}$"
+   ],
+   "choices_layout": "ii",
+   "answer": "⑤",
+   "answer_source": "답지"
+  },
+  "106-01": {
+   "page": 106,
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\angle\\pt{PAO}=25^\\circ$, $\\angle\\pt{PBO}=35^\\circ$일 때, $\\angle x$의 크기는?",
+   "figure": "crop:fig-106-01.png",
+   "choices": [
+    "$100^\\circ$",
+    "$105^\\circ$",
+    "$110^\\circ$",
+    "$115^\\circ$",
+    "$120^\\circ$"
+   ],
+   "choices_layout": "ii",
+   "answer": "⑤",
+   "answer_source": "답지"
+  },
+  "106-02": {
+   "page": 106,
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\angle\\pt{ACD}=60^\\circ$, $\\angle\\pt{EOD}=64^\\circ$일 때, $\\angle x$의 크기는?",
+   "figure": "crop:fig-106-02.png",
+   "choices": [
+    "$24^\\circ$",
+    "$26^\\circ$",
+    "$28^\\circ$",
+    "$30^\\circ$",
+    "$32^\\circ$"
+   ],
+   "choices_layout": "ii",
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "106-03": {
+   "page": 106,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림에서 $\\seg{AB}$는 원~$\\pt{O}$의 지름이고 $\\angle\\pt{DEB}=50^\\circ$일 때, $\\angle\\pt{ACD}$의 크기를 구하시오.",
+   "figure": "crop:fig-106-03.png",
+   "answer": "$40^\\circ$",
+   "answer_source": "답지"
+  },
+  "106-04": {
+   "page": 106,
+   "body": "오른쪽 그림의 원~$\\pt{O}$에서 $\\arc{BC}=\\arc{CD}$이고 $\\angle\\pt{BAC}=32^\\circ$일 때, $\\angle x-\\angle y$의 크기는?",
+   "figure": "crop:fig-106-04.png",
+   "choices": [
+    "$94^\\circ$",
+    "$96^\\circ$",
+    "$98^\\circ$",
+    "$100^\\circ$",
+    "$102^\\circ$"
+   ],
+   "choices_layout": "ii",
+   "answer": "②",
+   "answer_source": "답지"
+  },
+  "106-05": {
+   "page": 106,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림에서 점~$\\pt{P}$는 두 현~$\\pt{AB}$, $\\pt{CD}$의 교점이다. $\\arc{AD}=10\\,\\mathrm{cm}$, $\\arc{BC}=8\\,\\mathrm{cm}$이고 $\\angle\\pt{ACP}=60^\\circ$일 때, $\\angle\\pt{CPB}$의 크기를 구하시오.",
+   "figure": "crop:fig-106-05.png",
+   "answer": "$108^\\circ$",
+   "answer_source": "답지"
+  },
+  "106-06": {
+   "page": 106,
+   "body": "다음 중 네 점~$\\pt{A}$, $\\pt{B}$, $\\pt{C}$, $\\pt{D}$가 한 원 위에 있는 것을 모두 고르면? (정답~2개)",
+   "figure": "crop:fig-106-06.png",
+   "figure_layout": "below",
+   "answer": "①, ④",
+   "answer_source": "답지"
+  },
+  "107-07": {
+   "page": 107,
+   "body": "오른쪽 그림에서 $\\square\\pt{ABCD}$가 원에 내접하고 $\\angle\\pt{ADB}=40^\\circ$, $\\angle\\pt{BAC}=65^\\circ$, $\\angle\\pt{BCD}=100^\\circ$일 때, $\\angle x+\\angle y$의 크기를 구하시오.",
+   "figure": "crop:fig-107-07.png",
+   "answer": "$120^\\circ$",
+   "answer_source": "답지"
+  },
+  "107-08": {
+   "page": 107,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림과 같이 오각형~$\\pt{ABCDE}$가 원~$\\pt{O}$에 내접하고 $\\angle\\pt{AOB}=72^\\circ$, $\\angle\\pt{BCD}=110^\\circ$일 때, $\\angle\\pt{AED}$의 크기는?",
+   "figure": "crop:fig-107-08.png",
+   "choices": [
+    "$98^\\circ$",
+    "$102^\\circ$",
+    "$106^\\circ$",
+    "$110^\\circ$",
+    "$114^\\circ$"
+   ],
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "107-09": {
+   "page": 107,
+   "body": "다음 보기 중 항상 원에 내접하는 사각형을 모두 고른 것은?\\bogi{ㄱ. 평행사변형\\qquad ㄴ. 정사각형\\\\ ㄷ. 등변사다리꼴\\qquad ㄹ. 마름모\\\\ ㅁ. 직사각형\\qquad ㅂ. 사다리꼴}",
+   "choices": [
+    "ㄱ, ㄷ, ㅁ",
+    "ㄱ, ㄹ, ㅁ",
+    "ㄴ, ㄷ, ㄹ",
+    "ㄴ, ㄷ, ㅁ",
+    "ㄷ, ㄹ, ㅂ"
+   ],
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "107-10": {
+   "page": 107,
+   "body": "오른쪽 그림에서 $\\seg{PT}$는 원의 접선이고 점~$\\pt{T}$는 접점이다. $\\seg{BT}=\\seg{BP}$이고 $\\angle\\pt{PAT}=40^\\circ$일 때, $\\angle\\pt{ATB}$의 크기는?",
+   "figure": "crop:fig-107-10.png",
+   "choices": [
+    "$55^\\circ$",
+    "$60^\\circ$",
+    "$65^\\circ$",
+    "$70^\\circ$",
+    "$75^\\circ$"
+   ],
+   "answer": "②",
+   "answer_source": "답지"
+  },
+  "107-11": {
+   "page": 107,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림에서 원~$\\pt{O}$는 $\\triangle\\pt{ABC}$의 내접원이면서 $\\triangle\\pt{DEF}$의 외접원이다. 세 점~$\\pt{D}$, $\\pt{E}$, $\\pt{F}$는 접점이고 $\\angle\\pt{BAC}=46^\\circ$, $\\angle\\pt{DFE}=50^\\circ$일 때, $\\angle\\pt{BCA}$의 크기를 구하시오.",
+   "figure": "crop:fig-107-11.png",
+   "answer": "$54^\\circ$",
+   "answer_source": "답지"
+  },
+  "107-12": {
+   "page": 107,
+   "body": "오른쪽 그림과 같이 두 원~$\\pt{O}$, $\\pt{O'}$이 두 점~$\\pt{C}$, $\\pt{D}$에서 만나고 직선~$\\pt{PQ}$는 원~$\\pt{O'}$의 접선이다. $\\angle\\pt{ABD}=65^\\circ$, $\\angle\\pt{CTP}=70^\\circ$일 때, $\\angle\\pt{CTD}$의 크기는? \\cond{점~$\\pt{T}$는 접점이다.}",
+   "figure": "crop:fig-107-12.png",
+   "choices": [
+    "$35^\\circ$",
+    "$40^\\circ$",
+    "$45^\\circ$",
+    "$50^\\circ$",
+    "$55^\\circ$"
+   ],
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "108-13": {
+   "page": 108,
+   "body": "다음 그림에서 $\\seg{PT}$는 원~$\\pt{O}$의 접선이고 점~$\\pt{T}$는 접점이다. $\\seg{PB}$가 원~$\\pt{O}$의 중심을 지나고 $\\angle\\pt{BPT}=14^\\circ$일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-108-13.png",
+   "figure_layout": "below",
+   "answer": "$52^\\circ$",
+   "answer_source": "답지"
+  },
+  "108-14": {
+   "page": 108,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림과 같이 두 현~$\\pt{AB}$, $\\pt{CD}$의 연장선의 교점을 $\\pt{P}$, 두 현~$\\pt{AD}$, $\\pt{BC}$의 교점을 $\\pt{E}$라 하자. $\\angle\\pt{BPD}=20^\\circ$, $\\angle\\pt{BED}=50^\\circ$일 때, $\\angle x$의 크기는?",
+   "figure": "crop:fig-108-14.png",
+   "choices": [
+    "$10^\\circ$",
+    "$15^\\circ$",
+    "$20^\\circ$",
+    "$25^\\circ$",
+    "$30^\\circ$"
+   ],
+   "answer": "②",
+   "answer_source": "답지"
+  },
+  "108-15": {
+   "page": 108,
+   "body": "오른쪽 그림에서 $\\seg{AB}$는 원~$\\pt{O}$의 지름이고 $\\angle\\pt{APB}=65^\\circ$일 때, $\\angle x$의 크기는?",
+   "figure": "crop:fig-108-15.png",
+   "choices": [
+    "$35^\\circ$",
+    "$40^\\circ$",
+    "$45^\\circ$",
+    "$50^\\circ$",
+    "$55^\\circ$"
+   ],
+   "choices_layout": "ii",
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "108-16": {
+   "page": 108,
+   "body": "오른쪽 그림에서 점~$\\pt{P}$는 두 현~$\\pt{AB}$와 $\\pt{CD}$의 교점이다. 원~$\\pt{O}$의 반지름의 길이가 $9\\,\\mathrm{cm}$이고 $\\angle\\pt{APC}=30^\\circ$일 때, $\\arc{AD}+\\arc{BEC}$의 길이를 구하시오.",
+   "figure": "crop:fig-108-16.png",
+   "answer": "$15\\pi\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "108-17": {
+   "page": 108,
+   "body": "오른쪽 그림에서 $\\arc{AB}=\\arc{AE}$이고 $\\angle\\pt{ADC}=70^\\circ$일 때, $\\angle x$의 크기는?",
+   "figure": "crop:fig-108-17.png",
+   "choices": [
+    "$102^\\circ$",
+    "$104^\\circ$",
+    "$106^\\circ$",
+    "$108^\\circ$",
+    "$110^\\circ$"
+   ],
+   "choices_layout": "ii",
+   "answer": "⑤",
+   "answer_source": "답지"
+  },
+  "108-18": {
+   "page": 108,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림과 같이 원에 내접하는 $\\square\\pt{ABCD}$에서 $\\seg{AB}$와 $\\seg{CD}$의 연장선의 교점을 $\\pt{E}$, $\\seg{AD}$와 $\\seg{BC}$의 연장선의 교점을 $\\pt{F}$라 하자. $\\angle\\pt{AED}=35^\\circ$, $\\angle\\pt{DFC}=25^\\circ$일 때, $\\angle\\pt{ADC}$의 크기는?",
+   "figure": "crop:fig-108-18.png",
+   "choices": [
+    "$100^\\circ$",
+    "$110^\\circ$",
+    "$120^\\circ$",
+    "$130^\\circ$",
+    "$140^\\circ$"
+   ],
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "109-19": {
+   "page": 109,
+   "body": "오른쪽 그림에서 $\\angle\\pt{RDC}=89^\\circ$, $\\angle\\pt{SCD}=92^\\circ$일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-109-19.png",
+   "answer": "$88^\\circ$",
+   "answer_source": "답지"
+  },
+  "109-20": {
+   "page": 109,
+   "body": "오른쪽 그림에서 $\\seg{AD}\\perp\\seg{BC}$, $\\seg{BE}\\perp\\seg{CA}$, $\\seg{CF}\\perp\\seg{AB}$일 때, 다음 중 원에 내접하는 사각형이 \\underline{아닌} 것은?",
+   "figure": "crop:fig-109-20.png",
+   "choices": [
+    "$\\square\\pt{AFOE}$",
+    "$\\square\\pt{FBDO}$",
+    "$\\square\\pt{FBDE}$",
+    "$\\square\\pt{FBCE}$",
+    "$\\square\\pt{AFDC}$"
+   ],
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "109-21": {
+   "page": 109,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림에서 직선~$\\pt{CP}$는 원~$\\pt{O}$의 접선이고 점~$\\pt{C}$는 접점이다. $\\seg{AB}$는 원~$\\pt{O}$의 지름이고 $\\seg{AB}=10$, $\\seg{AP}=8$, $\\angle\\pt{APC}=90^\\circ$일 때, $\\seg{AC}$의 길이는?",
+   "figure": "crop:fig-109-21.png",
+   "choices": [
+    "$2\\sqrt{17}$",
+    "$6\\sqrt{2}$",
+    "$2\\sqrt{19}$",
+    "$4\\sqrt{5}$",
+    "$9$"
+   ],
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "109-22": {
+   "page": 109,
+   "body": "오른쪽 그림과 같이 $\\square\\pt{ABCD}$가 원~$\\pt{O}$에 내접하고 $\\angle\\pt{P}=42^\\circ$, $\\angle\\pt{Q}=38^\\circ$일 때, $\\angle x$의 크기를 구하시오.",
+   "figure": "crop:fig-109-22.png",
+   "answer": "$100^\\circ$",
+   "answer_source": "답지"
+  },
+  "109-23": {
+   "page": 109,
+   "body": "오른쪽 그림에서 $\\seg{PT}$는 원~$\\pt{O}$의 접선이고 점~$\\pt{T}$는 접점이다. $\\angle\\pt{ATP}=\\angle x$라 하면 $\\tan x=\\dfrac{1}{3}$이고 $\\seg{AT}=2$일 때, 원~$\\pt{O}$의 넓이를 구하시오.",
+   "figure": "crop:fig-109-23.png",
+   "answer": "$10\\pi$",
+   "answer_source": "답지"
+  },
+  "109-24": {
+   "page": 109,
+   "body": "오른쪽 그림과 같이 두 원이 점~$\\pt{T}$에서 접하고 $\\angle\\pt{CDB}=50^\\circ$일 때, $\\angle x$의 크기를 구하시오. \\cond{세 점~$\\pt{A}$, $\\pt{T}$, $\\pt{C}$와 세 점~$\\pt{B}$, $\\pt{T}$, $\\pt{D}$는 각각 한 직선 위에 있다.}",
+   "figure": "crop:fig-109-24.png",
+   "answer": "$40^\\circ$",
+   "answer_source": "답지"
+  },
+  "110-e1": {
+   "page": 110,
+   "body": "오른쪽 그림에서 $\\arc{BD}$의 길이는 원의 둘레의 길이의 $\\dfrac{1}{8}$이고 $\\arc{AC}=2\\,\\arc{BD}$일 때, $\\angle\\pt{BPD}$의 크기를 구하시오. [6점]",
+   "figure": "crop:fig-110-e1.png",
+   "answer": "$67.5^\\circ$",
+   "answer_source": "본문 답"
+  },
+  "110-u1": {
+   "page": 110,
+   "body": "오른쪽 그림에서 $\\arc{AC}$, $\\arc{BD}$의 길이가 각각 원의 둘레의 길이의 $\\dfrac{1}{5}$, $\\dfrac{1}{15}$일 때, $\\angle\\pt{APC}$의 크기를 구하시오. [6점]",
+   "figure": "crop:fig-110-u1.png",
+   "answer": "$48^\\circ$",
+   "answer_source": "답지"
+  },
+  "110-e2": {
+   "page": 110,
+   "body": "오른쪽 그림에서 직선~$\\pt{PT}$는 반지름의 길이가 $8\\,\\mathrm{cm}$인 원~$\\pt{O}$의 접선이고 점~$\\pt{T}$는 접점이다. $\\seg{BP}$가 원~$\\pt{O}$의 중심을 지나고 $\\angle\\pt{PTA}=30^\\circ$일 때, $\\seg{PT}$의 길이를 구하시오. [7점]",
+   "figure": "crop:fig-110-e2.png",
+   "answer": "$8\\sqrt{3}\\,\\mathrm{cm}$",
+   "answer_source": "본문 답"
+  },
+  "110-u2": {
+   "page": 110,
+   "body": "오른쪽 그림에서 $\\seg{PT}$는 원~$\\pt{O}$의 접선이고 점~$\\pt{T}$는 접점이다. $\\seg{AP}$가 원~$\\pt{O}$의 중심을 지나고 $\\angle\\pt{BAT}=30^\\circ$, $\\seg{AB}=8\\,\\mathrm{cm}$일 때, $\\seg{BP}$의 길이를 구하시오. [7점]",
+   "figure": "crop:fig-110-u2.png",
+   "answer": "$4\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "111-u3": {
+   "page": 111,
+   "body": "오른쪽 그림에서 $\\arc{AB}=3\\pi\\,\\mathrm{cm}$이고 $\\angle\\pt{DAP}=42^\\circ$, $\\angle\\pt{APB}=78^\\circ$일 때, 이 원의 둘레의 길이를 구하시오. [6점]",
+   "figure": "crop:fig-111-u3.png",
+   "answer": "$15\\pi\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "111-u4": {
+   "page": 111,
+   "body": "오른쪽 그림과 같이 두 원~$\\pt{O}$, $\\pt{O'}$이 두 점~$\\pt{P}$, $\\pt{Q}$에서 만나고 $\\angle\\pt{BAP}=96^\\circ$일 때, $\\angle\\pt{PO'C}$의 크기를 구하시오. [7점]",
+   "figure": "crop:fig-111-u4.png",
+   "answer": "$168^\\circ$",
+   "answer_source": "답지"
+  },
+  "111-u5": {
+   "page": 111,
+   "body": "오른쪽 그림에서 원~$\\pt{O}$는 $\\triangle\\pt{ABC}$의 내접원이면서 $\\triangle\\pt{DEF}$의 외접원이다. 세 점~$\\pt{D}$, $\\pt{E}$, $\\pt{F}$는 접점이고, $\\angle\\pt{BAC}=62^\\circ$, $\\angle\\pt{EFD}=52^\\circ$일 때, $\\angle\\pt{FBD}$의 크기를 구하시오. [7점]",
+   "figure": "crop:fig-111-u5.png",
+   "answer": "$42^\\circ$",
+   "answer_source": "답지"
+  },
+  "111-u6": {
+   "page": 111,
+   "body": "오른쪽 그림에서 직선~$\\pt{CP}$는 원~$\\pt{O}$의 접선이고 점~$\\pt{C}$는 접점이다. $\\seg{AD}$는 원~$\\pt{O}$의 지름이고 $\\angle\\pt{ABC}=115^\\circ$일 때, $\\angle\\pt{DCP}$의 크기를 구하시오. [7점]",
+   "figure": "crop:fig-111-u6.png",
+   "answer": "$25^\\circ$",
+   "answer_source": "답지"
+  },
+  "115-01": {
+   "page": 115,
+   "body": "오른쪽 표는 어느 사격선수의 5회에 걸친 사격 기록을 조사하여 나타낸 것이다. 다음 물음에 답하시오.",
+   "figure": "crop:fig-115-01.png",
+   "subs": [
+    "이 자료의 평균을 구하시오.",
+    "각 변량의 편차를 구하여 오른쪽 표를 완성하시오."
+   ],
+   "answer": "⑴ 8점 ⑵ 풀이 참조(편차: $0$, $-2$, $2$, $-1$, $1$)",
+   "answer_source": "답지 · ⑵ 계산"
+  },
+  "115-02": {
+   "page": 115,
+   "body": "어떤 자료의 편차가 다음과 같을 때, $x$의 값을 구하시오.",
+   "subs": [
+    "$-5$, $0$, $x$, $2$",
+    "$3$, $-7$, $9$, $-1$, $x$"
+   ],
+   "answer": "⑴ $3$ ⑵ $-4$",
+   "answer_source": "답지"
+  },
+  "115-03": {
+   "page": 115,
+   "body": "아래 표는 $\\pt{A}$, $\\pt{B}$, $\\pt{C}$, $\\pt{D}$, $\\pt{E}$, $\\pt{F}$ 6명의 일주일 동안의 독서 시간의 편차를 나타낸 것이다. 다음 물음에 답하시오.",
+   "figure": "crop:fig-115-03.png",
+   "subs": [
+    "$x$의 값을 구하시오.",
+    "6명의 일주일 동안의 독서 시간의 평균이 5시간일 때, $\\pt{C}$의 일주일 동안의 독서 시간을 구하시오."
+   ],
+   "answer": "⑴ $-2$ ⑵ 3시간",
+   "answer_source": "답지"
+  },
+  "115-04": {
+   "page": 115,
+   "body": "오른쪽 자료는 수현이의 5회에 걸친 과학 성적을 조사하여 나타낸 것이다. 다음을 구하시오.\\par\\noindent\\hfill{\\footnotesize (단위: 점)}\\exprbox{$60,\\quad 65,\\quad 70,\\quad 75,\\quad 80$}",
+   "subs": [
+    "평균",
+    "(편차)$^2$의 총합",
+    "분산",
+    "표준편차"
+   ],
+   "answer": "⑴ 70점 ⑵ $250$ ⑶ $50$ ⑷ $5\\sqrt{2}$점",
+   "answer_source": "답지"
+  },
+  "116-h1": {
+   "page": 116,
+   "type": "편차를 이용하여 변량 구하기",
+   "body": "오른쪽 표는 $\\pt{A}$, $\\pt{B}$, $\\pt{C}$, $\\pt{D}$, $\\pt{E}$ 5명의 수학 성적의 편차를 나타낸 것이다. 5명의 수학 성적의 평균이 75점일 때, $\\pt{B}$의 수학 성적을 구하시오.",
+   "figure": "crop:fig-116-h1.png",
+   "answer": "70점",
+   "answer_source": "본문 답"
+  },
+  "116-c1": {
+   "page": 116,
+   "body": "오른쪽 표는 $\\pt{A}$, $\\pt{B}$, $\\pt{C}$, $\\pt{D}$ 4명의 통학 시간의 편차를 나타낸 것이다. $\\pt{D}$의 통학 시간이 20분일 때, 학생 4명의 통학 시간의 평균을 구하시오.",
+   "figure": "crop:fig-116-c1.png",
+   "answer": "29분",
+   "answer_source": "답지"
+  },
+  "116-h2": {
+   "page": 116,
+   "type": "분산과 표준편차 구하기",
+   "body": "다음 자료는 학생 6명의 하루 동안 암기하는 영어 단어의 개수를 조사하여 나타낸 것이다. 이 자료의 분산과 표준편차를 구하시오.\\par\\noindent\\hfill{\\footnotesize (단위: 개)}\\exprbox{$13,\\quad 15,\\quad 9,\\quad 10,\\quad 13,\\quad 12$}",
+   "answer": "분산: $4$, 표준편차: 2개",
+   "answer_source": "본문 답"
+  },
+  "116-c2": {
+   "page": 116,
+   "body": "다음 표는 $\\pt{A}$, $\\pt{B}$, $\\pt{C}$, $\\pt{D}$, $\\pt{E}$, $\\pt{F}$ 6명의 1분당 맥박 수의 편차를 나타낸 것이다. 1분당 맥박 수의 분산과 표준편차를 구하시오.",
+   "figure": "crop:fig-116-c2.png",
+   "answer": "분산: $5$, 표준편차: $\\sqrt{5}$회",
+   "answer_source": "답지"
+  },
+  "117-h3": {
+   "page": 117,
+   "type": "평균과 분산을 이용하여 식의 값 구하기",
+   "body": "5개의 변량 $7$, $x$, $9$, $y$, $11$의 평균이 9이고 분산이 5일 때, $x^2+y^2$의 값을 구하시오.",
+   "answer": "$179$",
+   "answer_source": "본문 답"
+  },
+  "117-c3": {
+   "page": 117,
+   "body": "5개의 변량 $4$, $10$, $x$, $y$, $5$의 평균이 6이고 분산이 4.8일 때, $xy$의 값을 구하시오.",
+   "answer": "$29$",
+   "answer_source": "답지"
+  },
+  "117-h4": {
+   "page": 117,
+   "type": "자료의 이해",
+   "body": "오른쪽 표는 학생 수가 같은 $\\pt{A}$, $\\pt{B}$ 두 반의 국어 성적의 평균과 표준편차를 나타낸 것이다. 다음 \\textbf{보기} 중 옳은 것을 모두 고르시오.\\bogi{ㄱ. 분산은 $\\pt{A}$ 반이 $\\pt{B}$ 반보다 크다.\\\\ ㄴ. $\\pt{B}$ 반의 성적이 $\\pt{A}$ 반의 성적보다 우수하다.\\\\ ㄷ. $\\pt{A}$ 반의 성적이 $\\pt{B}$ 반의 성적보다 평균 가까이에 모여 있다.}",
+   "figure": "crop:fig-117-h4.png",
+   "answer": "ㄱ, ㄴ",
+   "answer_source": "본문 답"
+  },
+  "117-c4": {
+   "page": 117,
+   "body": "다음 표는 $\\pt{A}$, $\\pt{B}$, $\\pt{C}$, $\\pt{D}$, $\\pt{E}$ 5명의 하루 운동 시간의 평균과 표준편차를 나타낸 것이다. 운동 시간이 가장 긴 사람과 운동 시간이 가장 고른 사람을 차례대로 구하시오.",
+   "figure": "crop:fig-117-c4.png",
+   "answer": "$\\pt{E}$, $\\pt{B}$",
+   "answer_source": "답지"
+  },
+  "118-h5": {
+   "page": 118,
+   "type": "두 집단 전체의 평균, 분산, 표준편차",
+   "tag": "UP",
+   "body": "오른쪽 표는 경미네 반 남학생과 여학생의 수학 성적의 평균과 분산을 나타낸 것이다. 경미네 반 전체 학생의 수학 성적의 표준편차를 구하시오.",
+   "figure": "crop:fig-118-h5.png",
+   "answer": "3점",
+   "answer_source": "본문 답"
+  },
+  "118-c5": {
+   "page": 118,
+   "body": "오른쪽 표는 윤희네 반 남학생과 여학생의 과학 성적의 평균과 표준편차를 나타낸 것이다. 윤희네 반 전체 학생의 과학 성적의 표준편차를 구하시오.",
+   "figure": "crop:fig-118-c5.png",
+   "answer": "7점",
+   "answer_source": "답지"
+  },
+  "118-h6": {
+   "page": 118,
+   "type": "변화된 변량에 대한 평균, 분산, 표준편차 구하기",
+   "tag": "UP",
+   "body": "3개의 변량 $a$, $b$, $c$의 평균이 8이고 분산이 14일 때, 3개의 변량 $a-2$, $b-2$, $c-2$의 평균과 분산을 구하시오.",
+   "answer": "평균: $6$, 분산: $14$",
+   "answer_source": "본문 답"
+  },
+  "118-c6": {
+   "page": 118,
+   "body": "4개의 변량 $a$, $b$, $c$, $d$의 평균이 6이고 표준편차가 $\\sqrt{10}$일 때, 4개의 변량 $2a$, $2b$, $2c$, $2d$의 평균과 표준편차를 구하시오.",
+   "answer": "평균: $12$, 표준편차: $2\\sqrt{10}$",
+   "answer_source": "답지"
+  },
+  "119-01": {
+   "page": 119,
+   "body": "오른쪽 표는 어느 날 밤 10시 우리나라 5개 지역의 기온과 편차를 나타낸 것이다. 다음 \\textbf{보기} 중 옳은 것을 모두 고르시오.\\bogi{ㄱ. 서울의 기온은 평균보다 높다.\\\\ ㄴ. 부산의 기온의 편차는 $3\\,{}^\\circ\\mathrm{C}$이다.\\\\ ㄷ. 5개 지역의 기온의 평균은 $11\\,{}^\\circ\\mathrm{C}$이다.\\\\ ㄹ. 대전의 기온은 $7\\,{}^\\circ\\mathrm{C}$이다.}",
+   "figure": "crop:fig-119-01-2.png",
+   "figure_layout": "side",
+   "answer": "ㄴ, ㄹ",
+   "answer_source": "답지"
+  },
+  "119-02": {
+   "page": 119,
+   "body": "다음 표는 어느 프로 야구팀의 지난 6회의 경기에서의 득점을 조사하여 나타낸 것이다. 이 자료의 표준편차를 구하시오.",
+   "figure": "crop:fig-119-02.png",
+   "answer": "$\\sqrt{10}$점",
+   "answer_source": "답지"
+  },
+  "119-03": {
+   "page": 119,
+   "body": "오른쪽 표는 $\\pt{A}$, $\\pt{B}$, $\\pt{C}$, $\\pt{D}$, $\\pt{E}$ 5명의 학생의 지난달 독서량의 편차를 나타낸 것이다. 독서량의 분산이 2일 때, $ab$의 값을 구하시오.",
+   "figure": "crop:fig-119-03.png",
+   "answer": "$-2$",
+   "answer_source": "답지"
+  },
+  "119-04": {
+   "page": 119,
+   "body": "오른쪽 표는 어느 중학교 3학년 3개의 반의 사회 성적의 평균과 표준편차를 나타낸 것이다. 다음 중 옳은 것은?",
+   "figure": "crop:fig-119-04.png",
+   "choices": [
+    "사회 성적이 가장 우수한 반은 3반이다.",
+    "1반에 70점 미만인 학생은 없다.",
+    "성적이 가장 좋은 학생은 2반에 있다.",
+    "90점 이상인 학생은 1반에 가장 많다.",
+    "3반의 성적이 2반의 성적보다 고르다."
+   ],
+   "choices_layout": "v",
+   "answer": "⑤",
+   "answer_source": "답지"
+  },
+  "119-05": {
+   "page": 119,
+   "tag": "UP",
+   "body": "4명인 $\\pt{A}$ 그룹의 몸무게와 6명인 $\\pt{B}$ 그룹의 몸무게는 평균이 같고 표준편차가 각각 $2\\,\\mathrm{kg}$, $a\\,\\mathrm{kg}$이다. $\\pt{A}$, $\\pt{B}$ 두 그룹 전체의 몸무게의 표준편차가 $\\sqrt{7}\\,\\mathrm{kg}$일 때, $a$의 값을 구하시오.",
+   "answer": "$3$",
+   "answer_source": "답지"
+  },
+  "120-01": {
+   "page": 120,
+   "body": "다음 중 옳은 것을 모두 고르면? (정답 2개)",
+   "choices": [
+    "(편차)$=$(평균)$-$(변량)",
+    "편차의 총합은 항상 0이다.",
+    "분산은 편차의 평균이다.",
+    "표준편차는 분산의 음이 아닌 제곱근이다.",
+    "표준편차가 클수록 자료의 분포 상태가 고르다."
+   ],
+   "choices_layout": "v",
+   "answer": "②, ④",
+   "answer_source": "답지"
+  },
+  "120-02": {
+   "page": 120,
+   "body": "아래 자료는 승희의 6회에 걸친 $100\\,\\mathrm{m}$ 달리기 기록을 조사하여 나타낸 것이다. 다음 중 이 자료의 편차가 \\underline{아닌} 것은?\\par\\noindent\\hfill{\\footnotesize (단위: 초)}\\exprbox{$17,\\quad 21,\\quad 22,\\quad 19,\\quad 20,\\quad 21$}",
+   "choices": [
+    "$-3$초",
+    "$-2$초",
+    "$-1$초",
+    "$0$초",
+    "$1$초"
+   ],
+   "answer": "②",
+   "answer_source": "답지"
+  },
+  "120-03": {
+   "page": 120,
+   "body": "어느 수영 강습반 회원들의 나이의 평균은 23세이다. 우찬이의 나이의 편차가 $-7$세일 때, 우찬이의 나이를 구하시오.",
+   "answer": "16세",
+   "answer_source": "답지"
+  },
+  "120-04": {
+   "page": 120,
+   "body": "다음 표는 지우네 모둠 5명이 1분 동안 한 윗몸 일으키기 횟수의 편차를 나타낸 것이다. 지우와 도현이의 윗몸 일으키기 횟수의 차를 구하시오.",
+   "figure": "crop:fig-120-04.png",
+   "figure_layout": "below",
+   "answer": "10회",
+   "answer_source": "답지"
+  },
+  "120-05": {
+   "page": 120,
+   "tag": "꼭나와",
+   "body": "다음 표는 $\\pt{A}$, $\\pt{B}$, $\\pt{C}$, $\\pt{D}$, $\\pt{E}$ 5명의 사회 성적의 편차를 나타낸 것이다. 사회 성적의 표준편차는?",
+   "figure": "crop:fig-120-05.png",
+   "figure_layout": "below",
+   "choices": [
+    "$\\sqrt{3}$점",
+    "$2$점",
+    "$\\sqrt{5}$점",
+    "$\\sqrt{6}$점",
+    "$2\\sqrt{2}$점"
+   ],
+   "answer": "⑤",
+   "answer_source": "답지"
+  },
+  "120-06": {
+   "page": 120,
+   "body": "4개의 변량 $7$, $x$, $8$, $10$의 평균이 9일 때, 분산은?",
+   "choices": [
+    "$1$",
+    "$\\dfrac{3}{2}$",
+    "$2$",
+    "$\\dfrac{5}{2}$",
+    "$3$"
+   ],
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "121-07": {
+   "page": 121,
+   "tag": "꼭나와",
+   "body": "아래 표는 $\\pt{A}$, $\\pt{B}$ 두 반의 수학 성적의 평균과 표준편차를 나타낸 것이다. 다음 중 옳은 것은?",
+   "figure": "crop:fig-121-07.png",
+   "figure_layout": "below",
+   "choices": [
+    "$\\pt{B}$ 반의 성적이 $\\pt{A}$ 반의 성적보다 우수하다.",
+    "$\\pt{A}$ 반의 성적이 $\\pt{B}$ 반의 성적보다 우수하다.",
+    "$\\pt{A}$ 반의 성적이 $\\pt{B}$ 반의 성적보다 고르다.",
+    "$\\pt{B}$ 반의 성적이 $\\pt{A}$ 반의 성적보다 고르다.",
+    "성적이 75점인 학생은 $\\pt{A}$, $\\pt{B}$ 두 반에 모두 있다."
+   ],
+   "choices_layout": "v",
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "121-08": {
+   "page": 121,
+   "body": "아래 꺾은선그래프는 $\\pt{A}$, $\\pt{B}$ 두 농구팀의 자유투 성공 개수를 조사하여 나타낸 것이다. 다음 물음에 답하시오.",
+   "figure": "crop:fig-121-08.png",
+   "figure_layout": "below",
+   "subs": [
+    "자유투 성공 기록이 더 좋은 농구팀을 말하시오.",
+    "어느 농구팀의 기록이 더 고른지 말하시오."
+   ],
+   "answer": "⑴ $\\pt{B}$ 팀 ⑵ $\\pt{A}$ 팀",
+   "answer_source": "답지"
+  },
+  "121-09": {
+   "page": 121,
+   "body": "8명의 학생의 수학 성적이 각각 1점씩 올라갔을 때, 이들의 수학 성적의 평균과 표준편차는 각각 어떻게 변하는가?",
+   "choices": [
+    "평균과 표준편차 모두 1점씩 올라간다.",
+    "평균과 표준편차 모두 변함없다.",
+    "평균은 1점 올라가고 표준편차는 변함없다.",
+    "평균은 변함없고 표준편차는 1점 올라간다.",
+    "평균은 1점 올라가고 표준편차는 3점 올라간다."
+   ],
+   "choices_layout": "v",
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "121-10": {
+   "page": 121,
+   "tag": "꼭나와",
+   "body": "다음 표는 5명의 학생 $\\pt{A}$, $\\pt{B}$, $\\pt{C}$, $\\pt{D}$, $\\pt{E}$의 국어 성적의 편차를 나타낸 것이다. 국어 성적의 평균이 75점일 때, 학생 $\\pt{A}$와 학생 $\\pt{C}$의 국어 성적의 평균은?",
+   "figure": "crop:fig-121-10.png",
+   "figure_layout": "below",
+   "choices": [
+    "$73$점",
+    "$74$점",
+    "$75$점",
+    "$76$점",
+    "$77$점"
+   ],
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "121-11": {
+   "page": 121,
+   "body": "자연수 중 연속하는 세 짝수의 분산은?",
+   "choices": [
+    "$\\dfrac{5}{3}$",
+    "$2$",
+    "$\\dfrac{7}{3}$",
+    "$\\dfrac{8}{3}$",
+    "$3$"
+   ],
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "121-12": {
+   "page": 121,
+   "body": "다음은 5명의 학생 $\\pt{A}$, $\\pt{B}$, $\\pt{C}$, $\\pt{D}$, $\\pt{E}$가 서로의 키에 대해 나눈 대화이다. 이 5명의 학생의 키의 표준편차를 구하시오.\\exprbox{\\raggedright $\\pt{A}$: 내 키는 우리 5명의 키의 평균보다 $3\\,\\mathrm{cm}$만큼 더 커.\\\\ $\\pt{B}$: 나는 $\\pt{A}$보다 키가 $4\\,\\mathrm{cm}$만큼 더 작아.\\\\ $\\pt{C}$: 나는 $\\pt{B}$보다 키가 커.\\\\ $\\pt{D}$: 내 키는 우리 5명의 키의 평균과 같아.\\\\ $\\pt{E}$: 나는 $\\pt{D}$보다 키가 $3\\,\\mathrm{cm}$만큼 더 작아.}",
+   "answer": "$2\\,\\mathrm{cm}$",
+   "answer_source": "답지"
+  },
+  "122-13": {
+   "page": 122,
+   "tag": "꼭나와",
+   "body": "다음 표는 수진이가 지난 3월부터 7월까지 도서관에 간 횟수를 조사하여 나타낸 것이다. 이 자료의 평균이 5회이고 분산이 10일 때, $ab$의 값을 구하시오.",
+   "figure": "crop:fig-122-13.png",
+   "figure_layout": "below",
+   "answer": "$10$",
+   "answer_source": "답지"
+  },
+  "122-14": {
+   "page": 122,
+   "body": "다음 표는 $\\pt{A}$, $\\pt{B}$ 두 반의 학생 수와 체육 성적의 평균, 표준편차를 나타낸 것이다. 두 반 전체 학생의 체육 성적의 표준편차를 구하시오.",
+   "figure": "crop:fig-122-14.png",
+   "figure_layout": "below",
+   "answer": "$\\sqrt{5}$점",
+   "answer_source": "답지"
+  },
+  "122-15": {
+   "page": 122,
+   "body": "3개의 변량 $a$, $b$, $c$의 평균이 4이고 분산이 6일 때, 3개의 변량 $3a-2$, $3b-2$, $3c-2$의 평균은 $m$이고 분산은 $n$이다. 이때 $n-m$의 값은?",
+   "choices": [
+    "$44$",
+    "$45$",
+    "$46$",
+    "$47$",
+    "$48$"
+   ],
+   "answer": "①",
+   "answer_source": "답지"
+  },
+  "122-16": {
+   "page": 122,
+   "body": "오른쪽 그림과 같이 밑면의 가로, 세로의 길이와 높이가 각각 $a$, $b$, $c$인 직육면체가 있다. 모서리 12개의 길이의 평균이 5, 표준편차가 $\\sqrt{10}$일 때, 이 직육면체의 6개의 면의 넓이의 평균을 구하시오.",
+   "figure": "crop:fig-122-16.png",
+   "answer": "$20$",
+   "answer_source": "답지"
+  },
+  "122-17": {
+   "page": 122,
+   "body": "학생 8명의 수학 성적의 평균이 60점이고 분산이 14이다. 8명 중에서 성적이 60점인 학생 한 명이 빠졌을 때, 나머지 7명의 수학 성적의 분산을 구하시오.",
+   "answer": "$16$",
+   "answer_source": "답지"
+  },
+  "122-18": {
+   "page": 122,
+   "body": "다음 그림은 $\\pt{A}$, $\\pt{B}$, $\\pt{C}$ 세 사람이 화살을 10번씩 쏘아 과녁에 맞힌 결과이다. $\\pt{A}$, $\\pt{B}$, $\\pt{C}$ 세 사람의 점수의 표준편차를 각각 $a$점, $b$점, $c$점이라 할 때, $a$, $b$, $c$의 대소 관계는?\\par\\medskip\\begin{center}\\includegraphics[width=60.7pt]{figures/fig-122-18-2.png}\\hspace{2em}\\includegraphics[width=60.7pt]{figures/fig-122-18.png}\\hspace{2em}\\includegraphics[width=60.7pt]{figures/fig-122-18-3.png}\\end{center}",
+   "choices": [
+    "$a<b<c$",
+    "$b<a<c$",
+    "$b<c<a$",
+    "$c<a<b$",
+    "$c<b<a$"
+   ],
+   "answer": "⑤",
+   "answer_source": "답지"
+  },
+  "123-e1": {
+   "page": 123,
+   "body": "5개의 변량에 대하여 그 편차가 각각 $0$, $x$, $-4$, $y$, $2$이고 표준편차가 $\\sqrt{6}$일 때, $xy$의 값을 구하시오. [7점]",
+   "answer": "$-3$",
+   "answer_source": "본문 답"
+  },
+  "123-u1": {
+   "page": 123,
+   "body": "5개의 변량에 대하여 그 편차가 각각 $-2$, $1$, $a$, $b$, $3$이고 분산이 6.8일 때, $ab$의 값을 구하시오. [7점]",
+   "answer": "$-8$",
+   "answer_source": "답지"
+  },
+  "123-u2": {
+   "page": 123,
+   "body": "3개의 변량 $a$, $b$, $c$의 평균이 3이고 표준편차가 2일 때, 3개의 변량 $a^2$, $b^2$, $c^2$의 평균을 구하시오. [7점]",
+   "answer": "$13$",
+   "answer_source": "답지"
+  },
+  "123-u3": {
+   "page": 123,
+   "body": "다음 표는 어느 농구팀의 두 선수 $\\pt{A}$, $\\pt{B}$가 5회에 걸친 농구 경기에서 얻은 점수를 조사하여 나타낸 것이다. 두 선수 $\\pt{A}$, $\\pt{B}$ 중 득점이 더 고른 선수를 대표로 선발하려고 할 때, 어느 선수를 선발해야 하는지 구하시오. [8점]",
+   "figure": "crop:fig-123-u3.png",
+   "figure_layout": "below",
+   "answer": "선수 $\\pt{B}$",
+   "answer_source": "답지"
+  },
+  "127-01": {
+   "page": 127,
+   "body": "다음은 자료 ‘$8$, $17$, $10$, $21$, $14$, $5$, $15$, $13$, $22$’의 사분위수를 구하는 과정이다. \\blank\\ 안에 알맞은 수를 써넣으시오.\\exprbox{\\raggedright 자료의 변량을 작은 값부터 크기순으로 나열하면\\\\ \\quad $5$, $8$, $10$, $13$, $14$, $15$, $17$, $21$, $22$\\\\ 따라서 이 자료의 중앙값, 즉 제2사분위수는 $\\blank$이다.\\\\ 또 $5$, $8$, $10$, $13$의 중앙값은 $\\dfrac{8+\\blank}{2}=\\blank$이므로 \\mbox{제1사분위수}는 $\\blank$이고,\\\\ $15$, $17$, $21$, $22$의 중앙값은 $\\dfrac{\\blank+21}{2}=\\blank$이므로 \\mbox{제3사분위수}는 $\\blank$이다.}",
+   "answer": "$14$, $10$, $9$, $9$, $17$, $19$, $19$",
+   "answer_source": "답지"
+  },
+  "127-02": {
+   "page": 127,
+   "body": "다음 자료의 사분위수를 구하시오.",
+   "subs": [
+    "$5$, $10$, $6$, $3$, $9$, $12$, $8$",
+    "$15$, $13$, $25$, $20$, $21$, $10$, $12$, $18$, $16$, $25$"
+   ],
+   "answer": "⑴ 제1사분위수: $5$, 제2사분위수: $8$, 제3사분위수: $10$ ⑵ 제1사분위수: $13$, 제2사분위수: $17$, 제3사분위수: $21$",
+   "answer_source": "답지"
+  },
+  "127-03": {
+   "page": 127,
+   "body": "아래 자료는 어느 수영 강습반 회원 13명의 나이를 조사하여 작은 값부터 크기순으로 나열한 것이다. 다음 물음에 답하시오.\\par{\\raggedleft\\small (단위: 세)\\par}\\exprbox{$24,\\quad 25,\\quad 25,\\quad 27,\\quad 27,\\quad 27,\\quad 28$\\\\[2pt] $29,\\quad 30,\\quad 30,\\quad 34,\\quad 35,\\quad 37$}",
+   "subs": [
+    "표를 완성하시오.\\par\\smallskip\\noindent\\setlength{\\dmfigw}{322.4pt}\\ifdim\\dmfigw>\\linewidth\\setlength{\\dmfigw}{\\linewidth}\\fi\\includegraphics[width=\\dmfigw]{figures/fig-127-03.png}",
+    "자료를 상자그림으로 나타내시오.\\par\\smallskip\\begin{center}\\setlength{\\dmfigw}{174.1pt}\\ifdim\\dmfigw>\\linewidth\\setlength{\\dmfigw}{\\linewidth}\\fi\\includegraphics[width=\\dmfigw]{figures/fig-127-03-2.png}\\end{center}"
+   ],
+   "answer": "⑴ 풀이 참조 (최솟값 24세, 제1사분위수 26세, 중앙값 28세, 제3사분위수 32세, 최댓값 37세) ⑵ 풀이 참조",
+   "answer_source": "답지(풀이 참조 · 해설 보충)"
+  },
+  "127-04": {
+   "page": 127,
+   "body": "오른쪽 그림은 형우네 반 학생들의 수학 성적을 조사하여 나타낸 상자그림이다. 다음 물음에 답하시오.",
+   "figure": "crop:fig-127-04.png",
+   "subs": [
+    "사분위수를 구하시오.",
+    "수학 성적이 가장 높은 학생의 수학 성적을 구하시오.",
+    "㉠$\\sim$㉣ 중 변량이 가장 흩어져 있는 구간을 구하시오."
+   ],
+   "answer": "⑴ 제1사분위수: 70점, 제2사분위수: 75점, 제3사분위수: 85점 ⑵ 95점 ⑶ ㉠",
+   "answer_source": "답지"
+  },
+  "128-h1": {
+   "page": 128,
+   "type": "사분위수",
+   "body": "다음 자료는 현진이네 반 학생 14명의 몸무게를 조사하여 나타낸 것이다. 이 자료의 사분위수를 구하시오.\\par{\\raggedleft\\small (단위: kg)\\par}\\exprbox{$48,\\quad 50,\\quad 40,\\quad 55,\\quad 65,\\quad 51,\\quad 62$\\\\[2pt] $50,\\quad 40,\\quad 45,\\quad 57,\\quad 54,\\quad 60,\\quad 53$}",
+   "answer": "제1사분위수: $48\\,\\mathrm{kg}$, 제2사분위수: $52\\,\\mathrm{kg}$, 제3사분위수: $57\\,\\mathrm{kg}$",
+   "answer_source": "본문 답"
+  },
+  "128-c1": {
+   "page": 128,
+   "body": "다음 자료는 유림이네 반 학생 16명이 하루 동안 받은 문자메시지 개수를 조사하여 나타낸 것이다. 이 자료의 사분위수를 구하시오.\\par{\\raggedleft\\small (단위: 개)\\par}\\exprbox{$3,\\quad 10,\\quad 7,\\quad 3,\\quad 12,\\quad 7,\\quad 4,\\quad 10$\\\\[2pt] $6,\\quad 13,\\quad 9,\\quad 6,\\quad 15,\\quad 9,\\quad 3,\\quad 11$}",
+   "answer": "제1사분위수: 5개, 제2사분위수: 8개, 제3사분위수: 10.5개",
+   "answer_source": "답지"
+  },
+  "128-h2": {
+   "page": 128,
+   "type": "사분위수가 주어질 때 변량 구하기",
+   "body": "다음은 9개의 변량을 작은 값부터 크기순으로 나열한 것이다. 이 자료의 제1사분위수가 $7$, 제3사분위수가 $16$일 때, $a$, $b$의 값을 구하시오.\\exprbox{$4,\\quad a,\\quad 9,\\quad 10,\\quad 12,\\quad 13,\\quad 13,\\quad b,\\quad 20$}",
+   "answer": "$a=5$, $b=19$",
+   "answer_source": "본문 답"
+  },
+  "128-c2": {
+   "page": 128,
+   "body": "다음은 10개의 변량을 작은 값부터 크기순으로 나열한 것이다. 이 자료의 중앙값이 $13$일 때, 제1사분위수와 제3사분위수를 차례대로 구하시오.\\exprbox{$5,\\quad 8,\\quad x-2,\\quad 10,\\quad x$\\\\[2pt] $15,\\quad 15,\\quad x+5,\\quad 16,\\quad 18$}",
+   "answer": "$9$, $16$",
+   "answer_source": "답지"
+  },
+  "129-h3": {
+   "page": 129,
+   "type": "상자그림으로 나타내기",
+   "body": "다음 자료는 민구네 반 학생 15명의 한 달 동안의 도서관 방문 횟수를 조사하여 나타낸 것이다. 이 자료를 상자그림으로 나타내시오.\\par{\\raggedleft\\small (단위: 회)\\par}\\exprbox{$9,\\quad 10,\\quad 6,\\quad 8,\\quad 8,\\quad 7,\\quad 12,\\quad 11$\\\\[2pt] $8,\\quad 14,\\quad 15,\\quad 7,\\quad 16,\\quad 18,\\quad 16$}",
+   "answer": "풀이 참조 (최솟값 6회, 제1사분위수 8회, 중앙값 10회, 제3사분위수 15회, 최댓값 18회)",
+   "answer_source": "본문 답(풀이 참조 · 본문 풀이 보충)"
+  },
+  "129-c3": {
+   "page": 129,
+   "body": "다음 자료는 가은이네 반 학생 12명의 오래 매달리기 기록을 조사하여 나타낸 것이다. 이 자료를 상자그림으로 나타내시오.",
+   "figure": "crop:fig-129-c3.png",
+   "answer": "풀이 참조 (최솟값 3초, 제1사분위수 7초, 중앙값 11초, 제3사분위수 15초, 최댓값 20초)",
+   "answer_source": "답지(풀이 참조 · 해설 보충)"
+  },
+  "129-h4": {
+   "page": 129,
+   "type": "상자그림의 이해",
+   "body": "오른쪽 그림은 율호네 반 학생들의 일주일 동안의 컴퓨터 사용 시간을 조사하여 나타낸 상자그림이다. 다음 물음에 답하시오.",
+   "figure": "crop:fig-129-h4.png",
+   "subs": [
+    "사분위수 범위를 구하시오.",
+    "컴퓨터 사용 시간이 7시간 이하인 학생은 전체의 약 몇 $\\%$인지 구하시오."
+   ],
+   "answer": "⑴ 7시간 ⑵ $25\\,\\%$",
+   "answer_source": "본문 답"
+  },
+  "129-c4": {
+   "page": 129,
+   "body": "오른쪽 그림은 혜은이네 반 학생들이 방학 동안 읽은 책의 수를 조사하여 나타낸 상자그림이다. 다음 물음에 답하시오.",
+   "figure": "crop:fig-129-c4.png",
+   "subs": [
+    "읽은 책의 수가 6권 이상 10권 이하인 학생은 전체의 약 몇 $\\%$인지 구하시오.",
+    "㉠$\\sim$㉣ 중 변량이 가장 밀집되어 있는 구간을 구하시오."
+   ],
+   "answer": "⑴ $50\\,\\%$ ⑵ ㉡",
+   "answer_source": "답지"
+  },
+  "130-h5": {
+   "page": 130,
+   "type": "상자그림을 이용한 두 자료의 비교",
+   "body": "오른쪽 그림은 $\\pt{A}$, $\\pt{B}$ 두 반 학생들의 영어 성적을 조사하여 나타낸 상자그림이다. 다음 \\textbf{보기} 중 옳은 것을 모두 고르시오.\\bogi{ㄱ. $\\pt{A}$ 반과 $\\pt{B}$ 반의 영어 성적의 중앙값은 같다.\\\\ ㄴ. $\\pt{A}$ 반과 $\\pt{B}$ 반 전체에서 영어 성적이 가장 낮은 학생은 $\\pt{B}$ 반에 있다.\\\\ ㄷ. $\\pt{A}$ 반의 영어 성적이 $\\pt{B}$ 반의 영어 성적보다 대체로 높다고 할 수 있다.}",
+   "figure": "crop:fig-130-h5.png",
+   "figure_layout": "side",
+   "answer": "ㄴ, ㄷ",
+   "answer_source": "본문 답"
+  },
+  "130-c5": {
+   "page": 130,
+   "body": "오른쪽 그림은 같은 기기에서 $\\pt{A}$, $\\pt{B}$ 두 건전지의 수명을 조사하여 나타낸 상자그림이다. 다음 물음에 답하시오.",
+   "figure": "crop:fig-130-c5.png",
+   "subs": [
+    "$\\pt{A}$, $\\pt{B}$ 두 건전지의 수명의 중앙값을 차례대로 구하시오.",
+    "$\\pt{A}$, $\\pt{B}$ 두 건전지 중 어느 건전지를 사용하는 것이 더 유리한지 구하시오."
+   ],
+   "answer": "⑴ 16시간, 18시간 ⑵ $\\pt{B}$ 건전지",
+   "answer_source": "답지"
+  },
+  "130-c6": {
+   "page": 130,
+   "body": "오른쪽 그림은 학생 수가 같은 1반과 2반 학생들의 작년 봉사 활동 시간을 조사하여 나타낸 상자그림이다. 다음 중 옳지 \\underline{않은} 것을 모두 고르면? (정답 2개)",
+   "figure": "crop:fig-130-c6.png",
+   "choices": [
+    "1반에서 봉사 활동 시간이 가장 짧은 학생의 봉사 활동 시간은 4시간이다.",
+    "2반에서 봉사 활동 시간이 18시간인 학생은 1명이다.",
+    "봉사 활동 시간이 14시간 이하인 학생의 비율이 더 높은 반은 2반이다.",
+    "봉사 활동 시간이 14시간 이상인 학생은 1반이 2반보다 많다.",
+    "2반의 봉사 활동 시간이 1반의 봉사 활동 시간보다 대체로 길다고 할 수 있다."
+   ],
+   "choices_layout": "v",
+   "answer": "②, ⑤",
+   "answer_source": "답지"
+  },
+  "131-01": {
+   "page": 131,
+   "body": "다음 자료는 어느 영화 동호회 회원 17명이 1년 동안 관람한 영화의 수를 조사하여 나타낸 것이다. 이 자료의 제1사분위수를 $a$편, 중앙값을 $b$편, 제3사분위수를 $c$편이라 할 때, $a+b-c$의 값을 구하시오.\\par{\\raggedleft\\small (단위: 편)\\par}\\exprbox{$8,\\quad 6,\\quad 10,\\quad 10,\\quad 19,\\quad 20,\\quad 18,\\quad 16,\\quad 15$\\\\[2pt] $11,\\quad 14,\\quad 15,\\quad 20,\\quad 8,\\quad 9,\\quad 15,\\quad 17$}",
+   "answer": "$7$",
+   "answer_source": "답지"
+  },
+  "131-02": {
+   "page": 131,
+   "body": "오른쪽은 6개의 변량을 작은 값부터 크기순으로 나열한 것이다. 이 자료의 제1사분위수가 $18$일 때, 중앙값과 제3사분위수를 차례대로 구하시오.\\exprbox{$15,\\quad 3x,\\quad 21,\\quad 4x+1,\\quad 5x-2,\\quad 30$}",
+   "answer": "$23$, $28$",
+   "answer_source": "답지"
+  },
+  "131-03": {
+   "page": 131,
+   "body": "오른쪽 그림은 연주네 반 학생들의 통학 시간을 조사하여 나타낸 상자그림이다. 다음 중 옳은 것을 모두 고르면? (정답 2개)",
+   "figure": "crop:fig-131-03.png",
+   "choices": [
+    "평균 통학 시간은 25분이다.",
+    "사분위수 범위는 25분이다.",
+    "통학 시간이 가장 긴 학생의 통학 시간은 35분이다.",
+    "통학 시간이 35분 이상인 학생은 전체의 약 $25\\,\\%$이다.",
+    "㉠$\\sim$㉣ 중 변량이 가장 흩어져 있는 구간은 ㉠이다."
+   ],
+   "choices_layout": "v",
+   "answer": "②, ④",
+   "answer_source": "답지"
+  },
+  "131-04": {
+   "page": 131,
+   "body": "오른쪽 그림은 학생 수가 같은 $\\pt{A}$, $\\pt{B}$ 두 반 학생들의 윗몸 일으키기 기록을 조사하여 나타낸 상자그림이다. 다음 중 옳지 \\underline{않은} 것은?",
+   "figure": "crop:fig-131-04.png",
+   "figure_layout": "side",
+   "choices": [
+    "$\\pt{A}$ 반에서 기록이 15회 미만인 학생은 없다.",
+    "$\\pt{B}$ 반에서 기록이 45회 이하인 학생은 $\\pt{B}$ 반 전체의 약 $75\\,\\%$이다.",
+    "기록의 최댓값과 최솟값의 차는 $\\pt{A}$ 반이 $\\pt{B}$ 반보다 크다.",
+    "기록이 30회 이상인 학생은 $\\pt{B}$ 반이 $\\pt{A}$ 반보다 많다.",
+    "$\\pt{A}$ 반의 기록이 $\\pt{B}$ 반의 기록보다 대체로 좋다고 할 수 있다."
+   ],
+   "choices_layout": "v",
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "133-01": {
+   "page": 133,
+   "body": "다음 표는 태우네 반 학생 8명의 하루 동안의 휴대 전화 사용 시간과 학습 시간을 조사하여 나타낸 것이다. 휴대 전화 사용 시간과 학습 시간에 대한 산점도를 좌표평면 위에 그리시오.",
+   "figure": "crop:fig-133-01.png",
+   "figure_layout": "below",
+   "answer": "풀이 참조",
+   "answer_source": "답지"
+  },
+  "133-02": {
+   "page": 133,
+   "body": "오른쪽 그림은 규리네 반 학생 12명의 국어 성적과 영어 성적을 조사하여 나타낸 산점도이다. 다음을 구하시오.",
+   "figure": "crop:fig-133-02.png",
+   "subs": [
+    "국어 성적이 90점 이상인 학생 수",
+    "영어 성적이 60점 이상 80점 이하인 학생 수",
+    "국어 성적과 영어 성적이 같은 학생 수"
+   ],
+   "answer": "⑴ 4명 ⑵ 7명 ⑶ 3명",
+   "answer_source": "답지"
+  },
+  "133-03": {
+   "page": 133,
+   "body": "다음 \\textbf{보기}의 산점도를 보고 물음에 답하시오.",
+   "figure": "crop:fig-133-03.png",
+   "figure_layout": "below",
+   "subs": [
+    "양의 상관관계가 있는 산점도를 모두 고르시오.",
+    "음의 상관관계가 있는 산점도를 모두 고르시오.",
+    "상관관계가 없는 산점도를 모두 고르시오."
+   ],
+   "answer": "⑴ ㄴ, ㅁ ⑵ ㄱ, ㄹ ⑶ ㄷ, ㅂ",
+   "answer_source": "답지"
+  },
+  "134-h1": {
+   "page": 134,
+   "type": "산점도의 이해 (1)",
+   "body": "오른쪽 그림은 지성이네 반 학생 16명의 지난달과 이번 달의 도서관 방문 횟수를 조사하여 나타낸 산점도이다. 다음 물음에 답하시오.",
+   "figure": "crop:fig-134-h1.png",
+   "subs": [
+    "지난달보다 이번 달 도서관 방문 횟수가 많은 학생 수를 구하시오.",
+    "지난달과 이번 달 도서관 방문 횟수가 모두 6회 이상인 학생은 전체의 몇 $\\%$인지 구하시오."
+   ],
+   "answer": "⑴ 6명 ⑵ $25\\,\\%$",
+   "answer_source": "본문 답"
+  },
+  "134-c1": {
+   "page": 134,
+   "body": "오른쪽 그림은 우준이네 반 학생 20명의 1차, 2차에 걸친 수행평가 성적을 조사하여 나타낸 산점도이다. 다음 중 옳지 \\underline{않은} 것은?",
+   "figure": "crop:fig-134-c1.png",
+   "choices": [
+    "1차 성적이 8점 이상인 학생은 10명이다.",
+    "2차 성적이 6점 이하인 학생은 7명이다.",
+    "1차 성적과 2차 성적이 같은 학생은 6명이다.",
+    "1차 성적보다 2차 성적이 떨어진 학생은 6명이다.",
+    "1차 성적과 2차 성적이 모두 7점 이하인 학생은 8명이다."
+   ],
+   "choices_layout": "v",
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "134-c2": {
+   "page": 134,
+   "body": "오른쪽 그림은 민성이네 반 학생 15명의 영어 능력 시험에서 읽기 점수와 듣기 점수를 조사하여 나타낸 산점도이다. 다음 물음에 답하시오.",
+   "figure": "crop:fig-134-c2.png",
+   "subs": [
+    "읽기 점수와 듣기 점수가 같은 학생은 전체의 몇 $\\%$인지 구하시오.",
+    "읽기 점수가 40점 이하인 학생들의 듣기 점수의 평균을 구하시오."
+   ],
+   "answer": "⑴ $40\\,\\%$ ⑵ 35점",
+   "answer_source": "답지"
+  },
+  "135-h2": {
+   "page": 135,
+   "type": "산점도의 이해 (2)",
+   "body": "오른쪽 그림은 어느 학교 농구 동아리 학생 18명이 1학기 동안 연습 경기에서 넣은 2점짜리 슛과 3점짜리 슛의 개수를 조사하여 나타낸 산점도이다. 다음 물음에 답하시오.",
+   "figure": "crop:fig-135-h2.png",
+   "subs": [
+    "2점짜리 슛과 3점짜리 슛의 개수의 합이 50개 이상인 학생 수를 구하시오.",
+    "2점짜리 슛과 3점짜리 슛의 개수의 차가 5개 이하인 학생 수를 구하시오."
+   ],
+   "answer": "⑴ 5명 ⑵ 9명",
+   "answer_source": "본문 답"
+  },
+  "135-c3": {
+   "page": 135,
+   "body": "오른쪽 그림은 재현이네 반 학생 15명의 수학 성적과 과학 성적을 조사하여 나타낸 산점도이다. 다음 물음에 답하시오.",
+   "figure": "crop:fig-135-c3.png",
+   "subs": [
+    "수학 성적과 과학 성적의 차가 30점인 학생 수를 구하시오.",
+    "수학 성적과 과학 성적의 차가 20점 이상인 학생 수를 구하시오."
+   ],
+   "answer": "⑴ 3명 ⑵ 7명",
+   "answer_source": "답지"
+  },
+  "135-c4": {
+   "page": 135,
+   "body": "오른쪽 그림은 민주네 반 학생 20명이 1학기와 2학기에 읽은 책의 수를 조사하여 나타낸 산점도이다. 1학기와 2학기에 읽은 책의 수의 평균이 3권 이하인 학생은 전체의 몇 $\\%$인지 구하시오.",
+   "figure": "crop:fig-135-c4.png",
+   "answer": "$35\\,\\%$",
+   "answer_source": "답지"
+  },
+  "136-h3": {
+   "page": 136,
+   "type": "산점도와 상관관계",
+   "body": "다음 중 두 변량 사이의 산점도가 대체로 오른쪽 그림과 같이 나타나는 것은?",
+   "figure": "crop:fig-136-h3.png",
+   "choices": [
+    "몸무게와 키",
+    "어머니의 나이와 아들의 키",
+    "산의 높이와 기온",
+    "수학 성적과 통학 시간",
+    "여름철 기온과 아이스크림 판매량"
+   ],
+   "choices_layout": "ii",
+   "answer": "③",
+   "answer_source": "본문 답"
+  },
+  "136-c5": {
+   "page": 136,
+   "body": "다음 중 두 변량 사이의 상관관계가 나머지 넷과 \\underline{다른} 하나는?",
+   "choices": [
+    "통화 시간과 휴대 전화 요금",
+    "예금액과 이자",
+    "통학 거리와 통학 시간",
+    "시력과 학력",
+    "도시의 인구수와 학교 수"
+   ],
+   "choices_layout": "ii",
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "136-h4": {
+   "page": 136,
+   "type": "산점도의 분석",
+   "body": "오른쪽 그림은 호영이네 반 학생들의 용돈과 지출액을 조사하여 나타낸 산점도이다. 5명의 학생 $\\pt{A}$, $\\pt{B}$, $\\pt{C}$, $\\pt{D}$, $\\pt{E}$에 대하여 다음 물음에 답하시오.",
+   "figure": "crop:fig-136-h4.png",
+   "subs": [
+    "용돈에 비하여 지출액이 가장 많은 학생을 구하시오.",
+    "용돈에 비하여 지출액이 가장 적은 학생을 구하시오."
+   ],
+   "answer": "⑴ $\\pt{E}$ ⑵ $\\pt{B}$",
+   "answer_source": "본문 답"
+  },
+  "136-c6": {
+   "page": 136,
+   "body": "오른쪽 그림은 지우네 반 학생들의 학습 시간과 기말고사 성적을 조사하여 나타낸 산점도이다. 다음 \\textbf{보기} 중 옳은 것을 모두 고르시오.\\bogi{ㄱ. $\\pt{B}$는 $\\pt{A}$보다 성적이 좋다.\\\\ ㄴ. $\\pt{A}$, $\\pt{B}$, $\\pt{C}$, $\\pt{D}$ 네 학생 중 학습 시간에 비하여 성적이 가장 좋은 학생은 $\\pt{A}$이다.\\\\ ㄷ. 학습 시간이 길수록 성적도 좋은 편이다.}",
+   "figure": "crop:fig-136-c6.png",
+   "answer": "ㄴ, ㄷ",
+   "answer_source": "답지"
+  },
+  "137-01": {
+   "page": 137,
+   "body": "오른쪽 그림은 재희네 반 학생 20명의 달리기 실기 점수와 멀리뛰기 실기 점수를 조사하여 나타낸 산점도이다. 다음 물음에 답하시오.",
+   "figure": "crop:fig-137-01.png",
+   "subs": [
+    "멀리뛰기 실기 점수가 달리기 실기 점수보다 높은 학생은 전체의 몇 $\\%$인지 구하시오.",
+    "달리기 실기 점수와 멀리뛰기 실기 점수가 모두 8점 이상인 학생들의 멀리뛰기 실기 점수의 평균을 구하시오."
+   ],
+   "answer": "⑴ $45\\,\\%$ ⑵ 9점",
+   "answer_source": "답지"
+  },
+  "137-02": {
+   "page": 137,
+   "body": "오른쪽 그림은 야구 선수 15명이 작년과 올해 친 홈런의 개수를 조사하여 나타낸 산점도이다. 다음 물음에 답하시오.",
+   "figure": "crop:fig-137-02.png",
+   "subs": [
+    "작년과 올해 친 홈런의 개수의 차가 가장 큰 선수의 올해 친 홈런의 개수를 구하시오.",
+    "작년과 올해 친 홈런의 개수의 차가 1개 이하인 선수는 전체의 몇 $\\%$인지 구하시오."
+   ],
+   "answer": "⑴ 9개 ⑵ $20\\,\\%$",
+   "answer_source": "답지"
+  },
+  "137-03": {
+   "page": 137,
+   "body": "교통량을 $x$대, 대기 중 이산화질소의 농도를 $y\\,\\mathrm{ppb}$라 할 때, 다음 중 $x$와 $y$ 사이의 상관관계를 나타낸 산점도로 알맞은 것은?",
+   "figure": "crop:fig-137-03.png",
+   "figure_layout": "below",
+   "answer": "⑤",
+   "answer_source": "답지"
+  },
+  "137-04": {
+   "page": 137,
+   "body": "오른쪽 그림은 수호네 반 학생들의 키와 몸무게를 조사하여 나타낸 산점도이다. 다음 중 옳은 것을 모두 고르면? (정답 2개)",
+   "figure": "crop:fig-137-04.png",
+   "choices": [
+    "키와 몸무게 사이에는 양의 상관관계가 있다.",
+    "$\\pt{A}$는 키에 비하여 몸무게가 적게 나간다.",
+    "$\\pt{B}$는 키도 작고 몸무게도 적게 나간다.",
+    "$\\pt{C}$는 키도 크고 몸무게도 많이 나간다.",
+    "$\\pt{D}$는 몸무게에 비하여 키가 크다."
+   ],
+   "choices_layout": "v",
+   "answer": "①, ⑤",
+   "answer_source": "답지"
+  },
+  "138-01": {
+   "page": 138,
+   "body": "다음 자료는 지아네 반 학생 12명의 일주일 동안의 자습 시간을 조사하여 나타낸 것이다. 이 자료의 사분위수를 구하시오.\\par\\noindent\\hfill{\\footnotesize (단위: 시간)}\\exprbox{$5,\\quad 10,\\quad 10,\\quad 8,\\quad 3,\\quad 15$\\\\ $10,\\quad 6,\\quad 8,\\quad 14,\\quad 10,\\quad 20$}",
+   "answer": "제1사분위수: 7시간, 제2사분위수: 10시간, 제3사분위수: 12시간",
+   "answer_source": "답지"
+  },
+  "138-02": {
+   "page": 138,
+   "body": "다음은 7개의 변량을 작은 값부터 크기순으로 나열한 것이다. 이 자료의 중앙값이 21일 때, 사분위수 범위는?\\exprbox{$13,\\quad x+9,\\quad 19,\\quad 3x,\\quad 23,\\quad 25,\\quad 25$}",
+   "choices": [
+    "$6$",
+    "$7$",
+    "$8$",
+    "$9$",
+    "$10$"
+   ],
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "138-03": {
+   "page": 138,
+   "body": "다음 중 상자그림에 대한 설명으로 옳지 \\underline{않은} 것은?",
+   "choices": [
+    "최솟값, 제1사분위수, 중앙값, 제3사분위수, 최댓값을 이용하여 자료를 나타낸 그림이다.",
+    "구간의 길이가 길수록 변량이 넓게 흩어져 있다.",
+    "자료의 개수를 알 수 없다.",
+    "여러 집단의 분포를 한눈에 파악하고 비교할 수 있다.",
+    "상자그림을 이용하여 자료의 평균을 구할 수 있다."
+   ],
+   "choices_layout": "v",
+   "answer": "⑤",
+   "answer_source": "답지"
+  },
+  "138-04": {
+   "page": 138,
+   "body": "아래 표는 어느 도시의 지난달 최저 기온을 조사한 자료에서 구한 값을 나타낸 것이다. 다음 중 자료를 상자그림으로 바르게 나타낸 것은?",
+   "figure": "crop:fig-138-04.png",
+   "figure_layout": "below",
+   "answer": "③",
+   "answer_source": "답지"
+  },
+  "138-05": {
+   "page": 138,
+   "tag": "꼭나와",
+   "body": "아래 그림은 찬우네 반 학생들의 턱걸이 기록을 조사하여 나타낸 상자그림이다. 다음 중 옳은 것을 모두 고르면? (정답 2개)",
+   "figure": "crop:fig-138-05.png",
+   "figure_layout": "below",
+   "choices": [
+    "제3사분위수는 16회이다.",
+    "턱걸이 기록이 가장 나쁜 학생의 턱걸이 기록은 10회이다.",
+    "턱걸이 기록이 10회 이상 16회 이하인 학생은 전체의 약 $75\\,\\%$이다.",
+    "기록이 상위 $25\\,\\%$ 이내에 들려면 기록은 최소 14회이어야 한다.",
+    "㉠$\\sim$㉣ 중 변량이 가장 밀집되어 있는 구간은 ㉢이다."
+   ],
+   "choices_layout": "v",
+   "answer": "①, ⑤",
+   "answer_source": "답지"
+  },
+  "139-06": {
+   "page": 139,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림은 컴퓨터 자격시험에 응시한 학생 14명의 필기 점수와 실기 점수를 조사하여 나타낸 산점도이다. 다음 중 옳은 것은?",
+   "figure": "crop:fig-139-06.png",
+   "choices": [
+    "필기 점수보다 실기 점수가 높은 학생은 5명이다.",
+    "필기 점수보다 실기 점수가 낮은 학생은 4명이다.",
+    "실기 점수의 최빈값은 60점이다.",
+    "실기 점수가 70점인 학생들의 필기 점수의 평균은 75점이다.",
+    "필기 점수와 실기 점수가 모두 70점 이상인 학생은 전체의 $45\\,\\%$이다."
+   ],
+   "choices_layout": "v",
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "139-07": {
+   "page": 139,
+   "body": "다음 그림은 은서네 반 학생 20명의 왼쪽 눈과 오른쪽 눈의 시력을 조사하여 나타낸 산점도이다. \\textbf{보기} 중 옳은 것을 모두 고른 것은?\\bogi{ㄱ. 왼쪽 눈의 시력과 오른쪽 눈의 시력이 같은 학생은 6명이다.\\\\ ㄴ. 왼쪽 눈의 시력과 오른쪽 눈의 시력의 합이 2.0 이상인 학생은 4명이다.\\\\ ㄷ. 왼쪽 눈의 시력이 좋을수록 오른쪽 눈의 시력도 좋은 경향이 있다.\\\\ ㄹ. 왼쪽 눈의 시력과 오른쪽 눈의 시력 사이에는 상관관계가 없다.}",
+   "figure": "crop:fig-139-07.png",
+   "figure_layout": "below",
+   "choices": [
+    "ㄱ, ㄴ",
+    "ㄱ, ㄷ",
+    "ㄴ, ㄷ",
+    "ㄱ, ㄴ, ㄷ",
+    "ㄱ, ㄴ, ㄹ"
+   ],
+   "answer": "②",
+   "answer_source": "답지"
+  },
+  "139-08": {
+   "page": 139,
+   "body": "다음 산점도 중 가장 강한 음의 상관관계를 나타내는 것은?",
+   "figure": "crop:fig-139-08.png",
+   "figure_layout": "below",
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "139-09": {
+   "page": 139,
+   "body": "다음 중 두 변량 사이에 상관관계가 없는 것은?",
+   "choices": [
+    "자동차 수와 연간 석유 소비량",
+    "IQ와 발길이",
+    "공부 시간과 시험 성적",
+    "겨울철 기온과 감기 환자 수",
+    "운동 시간과 열량 소모량"
+   ],
+   "choices_layout": "v",
+   "answer": "②",
+   "answer_source": "답지"
+  },
+  "139-10": {
+   "page": 139,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림은 가족 수와 생활비를 조사하여 나타낸 산점도이다. 다음 중 옳지 \\underline{않은} 것은?",
+   "figure": "crop:fig-139-10.png",
+   "choices": [
+    "가족 수와 생활비 사이에는 양의 상관관계가 있다.",
+    "$\\pt{B}$는 $\\pt{C}$보다 가족 수가 많다.",
+    "$\\pt{A}$는 가족 수에 비하여 생활비가 많이 든다.",
+    "$\\pt{A}$, $\\pt{B}$, $\\pt{C}$, $\\pt{D}$, $\\pt{E}$ 중 가족 수도 많고 생활비도 많이 드는 가구는 $\\pt{B}$이다.",
+    "$\\pt{A}$, $\\pt{B}$, $\\pt{C}$, $\\pt{D}$, $\\pt{E}$ 중 가족 수에 비하여 생활비가 가장 적게 드는 가구는 $\\pt{D}$이다."
+   ],
+   "choices_layout": "v",
+   "answer": "⑤",
+   "answer_source": "답지"
+  },
+  "140-11": {
+   "page": 140,
+   "body": "아래 그림은 유찬이네 반 학생들의 키를 조사하여 나타낸 히스토그램과 상자그림이다. 다음 \\textbf{보기} 중 옳은 것을 모두 고르시오.\\bogi{ㄱ. 전체 학생은 25명이다.\\\\ ㄴ. 키가 가장 작은 학생의 키는 $150\\,\\mathrm{cm}$이다.\\\\ ㄷ. 키가 $165\\,\\mathrm{cm}$ 이상인 학생은 7명이다.\\\\ ㄹ. 키가 $158\\,\\mathrm{cm}$ 이상 $166\\,\\mathrm{cm}$ 이하인 학생 수와 키가 $166\\,\\mathrm{cm}$ 이상인 학생 수는 같다.}",
+   "figure": "crop:fig-140-11.png",
+   "figure_layout": "below",
+   "answer": "ㄱ, ㄷ",
+   "answer_source": "답지"
+  },
+  "140-12": {
+   "page": 140,
+   "tag": "꼭나와",
+   "body": "아래 그림은 학생 수가 각각 20명으로 같은 1반과 2반 학생들이 한 학기 동안 읽은 책의 수를 조사하여 나타낸 상자그림이다. 다음 중 옳지 \\underline{않은} 것은?",
+   "figure": "crop:fig-140-12.png",
+   "figure_layout": "below",
+   "choices": [
+    "1반에서 읽은 책의 수가 가장 많은 학생이 읽은 책의 수는 12권이다.",
+    "2반에서 읽은 책의 수가 12권 이상인 학생은 최소 5명이다.",
+    "2반의 중앙값이 1반의 중앙값보다 크다.",
+    "읽은 책의 수가 6권 이하인 학생은 2반이 1반보다 많다.",
+    "2반이 1반보다 읽은 책의 수가 대체로 많다고 할 수 있다."
+   ],
+   "choices_layout": "v",
+   "answer": "④",
+   "answer_source": "답지"
+  },
+  "140-13": {
+   "page": 140,
+   "body": "다음 그림은 $\\pt{A}$, $\\pt{B}$, $\\pt{C}$ 세 반 학생들의 수학 성적을 조사하여 나타낸 상자그림이다. 수학 성적이 70점 이상인 학생의 비율이 가장 높은 반은 어느 반인지 구하시오.",
+   "figure": "crop:fig-140-13.png",
+   "figure_layout": "below",
+   "answer": "$\\pt{B}$ 반",
+   "answer_source": "답지"
+  },
+  "140-14": {
+   "page": 140,
+   "body": "아래 그림은 하준이가 반 친구들 15명의 휴대 전화 사용 시간과 수면 시간 사이의 상관관계를 알아보기 위해 그린 산점도이다.\\par 그런데 하준이가 $\\pt{A}$, $\\pt{B}$, $\\pt{C}$ 세 명의 휴대 전화 사용 시간을 산점도에 잘못 표시했다고 한다. $\\pt{A}$, $\\pt{B}$, $\\pt{C}$ 세 명의 휴대 전화 사용 시간이 다음 표와 같을 때, 하준이네 반 친구들 15명의 휴대 전화 사용 시간과 수면 시간 사이의 상관관계를 말하시오.",
+   "figure": "crop:fig-140-14.png",
+   "figure_layout": "below",
+   "figure_extra": "crop:fig-140-14-2.png",
+   "answer": "음의 상관관계",
+   "answer_source": "답지"
+  },
+  "141-15": {
+   "page": 141,
+   "body": "오른쪽 그림은 어느 학교 농구부 학생 18명이 한 달 동안 연습 경기에서 넣은 2점짜리 슛과 3점짜리 슛의 개수를 조사하여 나타낸 산점도이다. 2점짜리 슛과 3점짜리 슛 중 적어도 한 종류의 슛을 30개 이상 넣은 학생 수를 구하시오.",
+   "figure": "crop:fig-141-15.png",
+   "answer": "9명",
+   "answer_source": "답지"
+  },
+  "141-16": {
+   "page": 141,
+   "body": "오른쪽 그림은 준우네 반 학생 15명의 중간고사와 기말고사 전과목 성적의 평균을 조사하여 나타낸 산점도이다. 다음 조건에 해당하는 학생에게 ‘발전상’을 수여하려고 할 때, 발전상을 받게 될 학생은 모두 몇 명인지 구하시오.\\exprbox{\\raggedright ㈎ 중간고사 평균이 70점 이하이다.\\\\ ㈏ 기말고사 평균이 중간고사 평균보다 20점 이상 향상되었다.}",
+   "figure": "crop:fig-141-16.png",
+   "answer": "4명",
+   "answer_source": "답지"
+  },
+  "141-17": {
+   "page": 141,
+   "tag": "꼭나와",
+   "body": "오른쪽 그림은 어느 다이어트 프로그램에 참가한 24명이 9월과 10월에 감량한 체중을 조사하여 나타낸 산점도이다. 다음 \\textbf{보기} 중 옳은 것을 모두 고르시오.\\bogi{ㄱ. 두 달 동안 가장 많은 체중을 감량한 참가자가 10월에 감량한 체중은 $7\\,\\mathrm{kg}$이다.\\\\ ㄴ. 두 달 동안 감량한 체중의 차가 $1\\,\\mathrm{kg}$ 이하인 참가자는 12명이다.\\\\ ㄷ. 두 달 동안 감량한 체중이 $5\\,\\mathrm{kg}$ 이하인 참가자는 전체의 $25\\,\\%$이다.}",
+   "figure": "crop:fig-141-17.png",
+   "answer": "ㄴ, ㄷ",
+   "answer_source": "답지"
+  },
+  "141-18": {
+   "page": 141,
+   "body": "다음 자료의 평균이 7이고 제1사분위수가 5일 때, $ab$의 값을 구하시오. \\cond{$a$, $b$는 자연수이고 $a<b$이다.}\\exprbox{$5,\\quad a,\\quad 10,\\quad 4,\\quad b,\\quad 7,\\quad 11,\\quad 6,\\quad 4,\\quad 7,\\quad 12$}",
+   "answer": "$30$",
+   "answer_source": "답지"
+  },
+  "141-19": {
+   "page": 141,
+   "body": "오른쪽 그림은 학생 20명의 가창 실기 점수와 악기 실기 점수를 조사하여 나타낸 산점도이다. 두 실기 점수의 차가 2점 이상이고, 두 실기 점수의 평균이 8점 이상인 학생은 전체의 몇 $\\%$인지 구하시오.",
+   "figure": "crop:fig-141-19.png",
+   "answer": "$15\\,\\%$",
+   "answer_source": "답지"
+  },
+  "141-20": {
+   "page": 141,
+   "body": "오른쪽 그림은 명선이네 반 학생 25명의 국어 성적과 영어 성적을 조사하여 나타낸 산점도이다. 두 과목의 성적의 합이 하위 $20\\,\\%$ 이내에 드는 학생은 재시험을 치러야 한다. 재시험을 치르는 학생들의 영어 성적의 평균을 구하시오.",
+   "figure": "crop:fig-141-20.png",
+   "answer": "64점",
+   "answer_source": "답지"
+  },
+  "142-e1": {
+   "page": 142,
+   "body": "다음 그림은 주어진 자료를 상자그림으로 나타낸 것이다. 이때 상수 $a$, $b$의 값을 구하시오. [6점]\\exprbox{$19,\\quad 10,\\quad 15,\\quad 23,\\quad 20,\\quad 12,\\quad 8,\\quad 26,\\quad 12,\\quad 20$}",
+   "answer": "$a=17$, $b=20$",
+   "answer_source": "본문 답",
+   "figure_extra": "crop:fig-142-e1.png"
+  },
+  "142-e2": {
+   "page": 142,
+   "body": "오른쪽 그림은 어느 영화 동호회 회원들이 올해 상반기와 하반기에 영화를 관람한 횟수를 조사하여 나타낸 산점도이다. 상반기와 하반기에 영화를 관람한 횟수의 차가 3회인 회원은 전체의 몇 $\\%$인지 구하시오. \\cond{중복되는 점은 없다.} [6점]",
+   "figure": "crop:fig-142-e2.png",
+   "answer": "$20\\,\\%$",
+   "answer_source": "본문 답"
+  },
+  "142-u1": {
+   "page": 142,
+   "body": "다음 그림은 주어진 자료를 상자그림으로 나타낸 것이다. 이때 상수 $a$, $b$의 값을 구하시오. [6점]\\exprbox{$30,\\quad 41,\\quad 37,\\quad 38,\\quad 39,\\quad 40,\\quad 30,\\quad 48$\\\\ $50,\\quad 32,\\quad 48,\\quad 37,\\quad 42,\\quad 40,\\quad 40,\\quad 51$}",
+   "answer": "$a=37$, $b=45$",
+   "answer_source": "답지",
+   "figure_extra": "crop:fig-142-u1.png"
+  },
+  "142-u2": {
+   "page": 142,
+   "body": "오른쪽 그림은 현규네 반 학생들이 1학기와 2학기에 서점을 방문한 횟수를 조사하여 나타낸 산점도이다. 1학기와 2학기에 서점을 방문한 횟수의 합이 15회인 학생은 전체의 몇 $\\%$인지 구하시오. \\cond{중복되는 점은 없다.} [6점]",
+   "figure": "crop:fig-142-u2.png",
+   "answer": "$25\\,\\%$",
+   "answer_source": "답지"
+  },
+  "143-u3": {
+   "page": 143,
+   "body": "다음은 14개의 변량을 작은 값부터 크기순으로 나열한 것이다. 이 자료의 제3사분위수가 26일 때, 제1사분위수와 중앙값을 구하시오. [6점]\\exprbox{$10,\\quad 11,\\quad 14,\\quad x+5,\\quad 19,\\quad 20,\\quad 2x+3$\\\\ $23,\\quad 23,\\quad 25,\\quad 3x-1,\\quad 29,\\quad 29,\\quad 30$}",
+   "answer": "제1사분위수: 14, 중앙값: 22",
+   "answer_source": "답지"
+  },
+  "143-u4": {
+   "page": 143,
+   "body": "아래 그림은 $\\pt{A}$, $\\pt{B}$ 두 회사 직원들의 나이를 조사하여 나타낸 상자그림이다. 다음 물음에 답하시오. [8점]",
+   "figure": "crop:fig-143-u4.png",
+   "figure_layout": "below",
+   "subs": [
+    "$\\pt{A}$, $\\pt{B}$ 두 회사 직원들의 나이의 중앙값을 구하시오. [4점]",
+    "$\\pt{A}$, $\\pt{B}$ 두 회사 중 직원들이 대체로 더 젊은 회사는 어디인지 구하고, 그 이유를 설명하시오. [4점]"
+   ],
+   "answer": "⑴ $\\pt{A}$ 회사: 36세, $\\pt{B}$ 회사: 32세 ⑵ $\\pt{B}$ 회사, 풀이 참조",
+   "answer_source": "계산(답지 「풀이 참조」)"
+  },
+  "143-u5": {
+   "page": 143,
+   "body": "다음 그림은 신생아 20명의 키와 머리둘레를 조사하여 나타낸 산점도이다. 키가 $50\\,\\mathrm{cm}$ 이하인 신생아는 $a$명이고, 키가 $51\\,\\mathrm{cm}$인 신생아의 머리둘레의 평균은 $b\\,\\mathrm{cm}$일 때, $a+b$의 값을 구하시오. [7점]",
+   "figure": "crop:fig-143-u5.png",
+   "figure_layout": "below",
+   "answer": "$47$",
+   "answer_source": "답지"
+  },
+  "143-u6": {
+   "page": 143,
+   "body": "오른쪽 그림은 어느 수학, 과학 경시대회에 참가한 학생 20명의 수학 성적과 과학 성적을 조사하여 나타낸 산점도이다. 수학 성적과 과학 성적의 합이 상위 $30\\,\\%$ 이내에 드는 학생에게 상장을 수여한다고 할 때, 상장을 받은 학생의 두 성적의 합은 최소 몇 점인지 구하시오. [7점]",
+   "figure": "crop:fig-143-u6.png",
+   "answer": "160점",
+   "answer_source": "답지"
+  }
+ }
+}

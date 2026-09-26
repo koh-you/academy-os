@@ -1,0 +1,24 @@
+% 0072(본책 17쪽) — 정육면체 ABCD-EFGH, 대각선 AG, 각 x(∠AGF). 라벨: A~H. 숨은 모서리는 파선. 스캔 삽화를 TikZ 로 다시 그림. 길이는 원문에 없다.
+\begin{tikzpicture}[scale=1, line width=0.6pt]
+  \coordinate (B) at (0,2); \coordinate (C) at (2,2); \coordinate (F) at (0,0); \coordinate (G) at (2,0);
+  \coordinate (A) at (0.8,2.6); \coordinate (D) at (2.8,2.6); \coordinate (E) at (0.8,0.6); \coordinate (H) at (2.8,0.6);
+  \fill[green!10] (B) -- (C) -- (G) -- (F) -- cycle;
+  \fill[green!20] (C) -- (D) -- (H) -- (G) -- cycle;
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (B) -- (F) -- (G) -- (C);
+  \draw (D) -- (H) -- (G);
+  \draw[dashed, line width=0.4pt] (A) -- (E) -- (F);
+  \draw[dashed, line width=0.4pt] (E) -- (H);
+  \draw (A) -- (G);
+  % 각 x(∠AGF)
+  \draw[line width=0.4pt] (1.832,0.363) arc[start angle=114.8, end angle=180, radius=0.4cm];
+  \node[font=\small] at (1.45,0.3) {$x$};
+  \node[font=\small, above left] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, above right] at (2.0,1.95) {C};
+  \node[font=\small, above right] at (D) {D};
+  \node[font=\small, left] at (E) {E};
+  \node[font=\small, below left] at (F) {F};
+  \node[font=\small, below right] at (G) {G};
+  \node[font=\small, right] at (H) {H};
+\end{tikzpicture}

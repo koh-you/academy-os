@@ -1,0 +1,15 @@
+{ "range": "139-e29~164-e5", "checked": 68, "ok": 57,
+  "findings": [
+    { "id": "142-285", "severity": "yellow", "where": "choices", "note": "보기 ①~⑤가 3+2 두 줄로 나뉘고 ③ 3이 컬럼 오른쪽 끝에 붙음(원본은 한 줄 5개 · 내용은 일치)" },
+    { "id": "143-290", "severity": "yellow", "where": "layout", "note": "조건 상자 ㈏ 줄 끝 「이다.」 두 글자만 다음 줄로 넘어감(내용은 일치)" },
+    { "id": "146-e32", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 사이가 벌어짐(양쪽 정렬 늘어짐 · 정도 약함)(내용은 일치)" },
+    { "id": "146-293", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 사이가 벌어지고 둘째 줄 dfrac(1/3 t³ − 7/2 t²)이 첫 줄에 바짝 붙어 줄 간격이 좁아 보임(내용은 일치)" },
+    { "id": "151-306", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 사이가 크게 벌어지고 둘째 줄 dfrac(1/3 t³)이 첫 줄에 바짝 붙음(내용은 일치)" },
+    { "id": "156-312", "severity": "yellow", "where": "layout", "note": "본문 마지막 줄 「오.」 한 글자만 남음(내용은 일치)" },
+    { "id": "157-316", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 사이가 크게 벌어짐(양쪽 정렬 늘어짐)(내용은 일치)" },
+    { "id": "157-317", "severity": "yellow", "where": "layout", "note": "첫 줄이 「다 항 함 수  f(x) 에  대 하 여」로 극단적으로 벌어지고 둘째 줄 수식도 늘어짐(내용은 일치)", "fix": "body 의 긴 수식 $\\displaystyle\\int\\left(\\dfrac{1}{2}x-1\\right)f(x)\\,dx=\\dfrac{1}{3}x^3-\\dfrac{1}{4}x^2-3x+C$ 를 \\par\\smallskip\\centerline{…}\\par\\smallskip\\noindent 로 분리(142-285 방식)" },
+    { "id": "157-318", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 사이가 크게 벌어짐 · 마지막 줄 「오.」 한 글자만 남음(내용은 일치)" },
+    { "id": "158-e2", "severity": "yellow", "where": "subs", "note": "⑵ 첫 줄 글자 사이가 벌어짐(양쪽 정렬 늘어짐 · 정도 약함)(내용은 일치)" },
+    { "id": "159-321", "severity": "yellow", "where": "layout", "note": "첫·둘째 줄 글자 사이가 크게 벌어지고 둘째 줄 d/dx 가 첫 줄에 바짝 붙음(내용은 일치)" }
+  ],
+  "notes": "red 없음. 68문항 모두 review 그림으로 대조했고 크롭이 작은 139-274·146-292·157-316·157-317·158-319·159-321·163-327 은 output/problem-bank/gn-calc1/items 원본 크롭으로 재확인. 예제 e29~e37·e1~e5 는 상자 발문만 옮긴 것이 정상. yellow 는 모두 build 단계(한글 양쪽 정렬 + 줄바꿈 안 되는 인라인 수식 · dfrac 줄 간격) 문제이며 157-317 외에는 items.json 수정 대상 아님. 그림 문항(143-287 · 148-e34 · 148-296 · 148-297 · 149-e35 · 149-299 · 151-305 · 152-310 · 152-311)은 원본 크롭 그림과 동일. 예제 첫 줄에 dfrac 이 오는 139-e29 는 번호가 기준선보다 약간 위에 찍히나 경미해 기록하지 않음." }

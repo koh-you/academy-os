@@ -1,0 +1,18 @@
+% 0503(본책 91쪽) — □ABCD, DA 의 연장선 위의 점 E, ∠BAE=55°, ∠B=65°, ∠C=x(색칠). 다시 그림.
+\begin{tikzpicture}[scale=1.40, line width=0.6pt]
+  \draw (0.507,1.088) -- (0.000,0.000) -- (2.400,0.000) -- (1.513,1.266) -- cycle;
+  \draw (0.507,1.088) -- (0.015,1.001);
+  \fill (0.015,1.001) circle (1.2pt);
+  \draw[line width=0.4pt] (0.192,1.032) arc[start angle=-169.966, end angle=-114.985, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (0.031,0.723) {$55^\circ$};
+  \draw[line width=0.4pt] (0.320,0.000) arc[start angle=0.000, end angle=65.015, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (0.506,0.322) {$65^\circ$};
+  \fill[green!15] (2.400,0.000) -- (2.216,0.262) arc[start angle=125.016, end angle=180.000, radius=0.320] -- cycle;
+  \draw[line width=0.4pt] (2.216,0.262) arc[start angle=125.016, end angle=180.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (1.956,0.231) {$x$};
+  \node[font=\small, inner sep=1.5pt] at (0.542,1.285) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.115,-0.164) {B};
+  \node[font=\small, inner sep=1.5pt] at (2.500,-0.173) {C};
+  \node[font=\small, inner sep=1.5pt] at (1.613,1.439) {D};
+  \node[font=\small, inner sep=1.5pt] at (-0.020,1.198) {E};
+\end{tikzpicture}

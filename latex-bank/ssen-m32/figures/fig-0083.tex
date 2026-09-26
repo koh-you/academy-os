@@ -1,0 +1,18 @@
+% 0083(본책 19쪽) — ∠C=90° 직각삼각형 ABC(B 왼쪽 아래·C 오른쪽 아래·A 위), AB=14·AC=7√3 파선 호, 각 A 표시(색 부채꼴·라벨 없음), 직각 표시 C. 스캔 삽화를 TikZ 로 다시 그림. 답(∠A)은 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (1.4,0); \coordinate (A) at (1.4,2.425);
+  % 각 A 표시
+  \fill[yellow!35] (A) -- ($(A)+(-120:0.32)$) arc[start angle=-120, end angle=-90, radius=0.32cm] -- cycle;
+  \draw[line width=0.4pt] ($(A)+(-120:0.32)$) arc[start angle=-120, end angle=-90, radius=0.32cm];
+  \draw (A) -- (B) -- (C) -- cycle;
+  % 직각 표시(C)
+  \draw[line width=0.4pt] (1.24,0) -- (1.24,0.16) -- (1.4,0.16);
+  % 길이(파선 호)
+  \draw[dashed, line width=0.4pt] (B) to[bend left=25] (A);
+  \draw[dashed, line width=0.4pt] (A) to[bend left=25] (C);
+  \node[font=\small] at (0.3,1.4) {$14$};
+  \node[font=\small] at (1.85,1.2) {$7\sqrt{3}$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, below left] at (B) {B};
+  \node[font=\small, below right] at (C) {C};
+\end{tikzpicture}

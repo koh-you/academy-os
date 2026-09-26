@@ -22,20 +22,29 @@ export async function pagePathBoxes(page) {
   const ops = await page.getOperatorList();
   const base = viewport.transform; // PDF 사용자 좌표 → 위가 0 인 쪽 좌표
   let ctm = base;
+  // clip: 현재 클리핑 사각형(쪽 좌표). 예제 상자 안 그래프처럼 상자로 잘라 그린 path 는 bbox 가 보이는 범위보다 넓게 잡히므로
+  // (개념원리 공통수학1 139쪽 예제 1 · 포물선 path 가 상자 테두리 40pt 너머까지) 클립 사각형으로 bbox 를 자른다.
+  let clip = null;
   const stack = [];
   const boxes = [];
   let pendingBox = null;
+  const intersect = (a, b) => ({ x0: Math.max(a.x0, b.x0), y0: Math.max(a.y0, b.y0), x1: Math.min(a.x1, b.x1), y1: Math.min(a.y1, b.y1) });
   for (let i = 0; i < ops.fnArray.length; i += 1) {
     const fn = ops.fnArray[i];
     const args = ops.argsArray[i];
-    if (fn === OP.save) stack.push(ctm);
-    else if (fn === OP.restore) ctm = stack.pop() ?? base;
+    if (fn === OP.save) stack.push([ctm, clip]);
+    else if (fn === OP.restore) [ctm, clip] = stack.pop() ?? [base, null];
     else if (fn === OP.transform) ctm = mul(ctm, args);
     else if (fn === OP.paintFormXObjectBegin) {
-      stack.push(ctm);
+      stack.push([ctm, clip]);
       if (args[0]) ctm = mul(ctm, args[0]);
-    } else if (fn === OP.paintFormXObjectEnd) ctm = stack.pop() ?? base;
-    else if (fn === OP.constructPath) {
+    } else if (fn === OP.paintFormXObjectEnd) [ctm, clip] = stack.pop() ?? [base, null];
+    else if (fn === OP.paintImageXObject || fn === OP.paintInlineImageXObject || fn === OP.paintImageMaskXObject) {
+      // 래스터 그림(HWP 출력 프린트는 좌표평면·도형을 이미지로 넣는다): 단위 정사각형이 CTM 으로 놓인 자리가 상자다. 굵은 뼈대로 취급한다.
+      const corners = [apply(ctm, 0, 0), apply(ctm, 1, 0), apply(ctm, 0, 1), apply(ctm, 1, 1)];
+      const box = { x0: Math.min(...corners.map((c) => c[0])), y0: Math.min(...corners.map((c) => c[1])), x1: Math.max(...corners.map((c) => c[0])), y1: Math.max(...corners.map((c) => c[1])) };
+      if (box.x1 - box.x0 >= 12 && box.y1 - box.y0 >= 12) boxes.push({ ...box, kind: "image", w: box.x1 - box.x0, h: box.y1 - box.y0 });
+    } else if (fn === OP.constructPath) {
       const [codes, coords] = args;
       let k = 0;
       let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
@@ -57,10 +66,19 @@ export async function pagePathBoxes(page) {
     } else if (fn === OP.fill || fn === OP.eoFill || fn === OP.stroke || fn === OP.closeStroke || fn === OP.fillStroke || fn === OP.closeFillStroke || fn === OP.eoFillStroke || fn === OP.closeEOFillStroke) {
       if (pendingBox) {
         const kind = fn === OP.stroke || fn === OP.closeStroke ? "stroke" : "fill";
-        boxes.push({ ...pendingBox, kind, w: pendingBox.x1 - pendingBox.x0, h: pendingBox.y1 - pendingBox.y0 });
+        // 두 점만 잇는 가로·세로 선(윤곽선 PDF 의 좌표축 · 0.3pt 선폭)은 bbox 높이(폭)가 0 이라 버려지던 것 — 선폭만큼 두께를 준다.
+        if (kind === "stroke") {
+          if (pendingBox.y1 - pendingBox.y0 < 0.6) { pendingBox.y0 -= 0.3; pendingBox.y1 += 0.3; }
+          if (pendingBox.x1 - pendingBox.x0 < 0.6) { pendingBox.x0 -= 0.3; pendingBox.x1 += 0.3; }
+        }
+        const box = clip ? intersect(pendingBox, clip) : pendingBox;
+        if (box.x1 > box.x0 && box.y1 > box.y0) boxes.push({ ...box, kind, w: box.x1 - box.x0, h: box.y1 - box.y0 });
       }
       pendingBox = null;
-    } else if (fn === OP.endPath || fn === OP.clip || fn === OP.eoClip) {
+    } else if (fn === OP.clip || fn === OP.eoClip) {
+      if (pendingBox) clip = clip ? intersect(clip, pendingBox) : pendingBox;
+      pendingBox = null;
+    } else if (fn === OP.endPath) {
       pendingBox = null;
     }
   }
@@ -78,10 +96,25 @@ const union = (a, b) => ({ x0: Math.min(a.x0, b.x0), y0: Math.min(a.y0, b.y0), x
  * @param {{x0,y0,x1,y1}} region 문항 영역
  * @param {{x0,y0,x1,y1,h,str}[]} textBoxes 쪽 글자 토큰(위가 0 인 좌표)
  */
-export function findFigureClusters(paths, region, textBoxes, { gap = 8, minSize = 12, topLimit = -Infinity } = {}) {
+export function findFigureClusters(paths, region, textBoxes, { gap = 8, minSize = 12, topLimit = -Infinity, glyphPaths = false } = {}) {
   // topLimit: 문항 번호 배지 윗변. 그 위에서 시작하는 path(구역 머리띠 장식)는 문항 그림이 아니다.
   // 문항 영역 경계에 걸친 그림(정점 라벨이 영역 밖으로 살짝 나간 것)을 놓치지 않게 여유 6pt.
-  const inRegion = paths.filter((box) => inside(box, region, 6) && box.y0 >= topLimit - 4);
+  // glyphPaths(글꼴이 윤곽선으로 바뀐 PDF): 글자도 fill path 라 큰 근호·괄호(h 30pt 까지)가 그림 뼈대로 잡힌다 — OCR 글자 상자와
+  // 겹치는 fill 은 글자로 보고 뺀다(그림의 채움(음영·점)은 글자 상자와 안 겹치거나 30pt 보다 크다).
+  const isGlyph = (box) => glyphPaths && box.kind === "fill" && box.h <= 30 && box.w <= 120 && textBoxes.some((token) => overlaps(box, token, 0));
+  // 문항 폭의 3/4 넘게 차지하는 큰 상자(개념원리 핵심문제 회색 바탕 · 보기 상자 테두리)는 그림이 아니라 글 상자다 — 안의 그림과
+  // 합쳐져 상자 전체가 크롭되던 것. 표는 칸 path 들이 남아 따로 묶인다.
+  const regionWidth = region.x1 - region.x0;
+  const isPanel = (box) => box.w >= regionWidth * 0.75 && box.h >= 40;
+  // 문항 맨 위의 넓고 낮은 상자(개념원리 핵심문제 제목 띠 「03 무리수를 …」)도 글 상자다.
+  const isHeaderBar = (box) => box.y0 <= region.y0 + 6 && ((box.w >= regionWidth * 0.6 && box.h <= 40) || (box.w >= 60 && box.h <= 14));
+  // 개념원리 고등 예제 상자는 여러 조각(오른쪽 반 · 아래 띠)으로 그려진다 — 영역 오른쪽 끝(상자 테두리)에 붙은 넓은 사각형은 상자 조각이다.
+  const isBorderPanel = (box) => box.x1 >= region.x1 - 4 && box.w >= regionWidth * 0.45 && box.h >= 30;
+  // 문항 왼쪽 위 모서리의 작은 색 상자(개념원리 「03」「예제 2」 번호 배지)와 오른쪽 위의 작은 이미지(QR)도 그림이 아니다.
+  const isCornerBadge = (box) => box.y0 <= region.y0 + 12 && box.h <= 40 && ((box.x0 <= region.x0 + 12 && box.w <= 90) || (box.kind === "image" && box.x1 >= region.x1 - 12 && box.w <= 45));
+  // 글자가 셋 이상 든 넓은 상자(보기 ㄱ~ㄷ · 조건 ㈎㈏ 상자 · 폭이 문항의 45% 이상)는 글 상자다 — 옆 그림과 8pt 안에 있으면 한 덩어리로 붙던 것.
+  const isTextPanel = (box) => box.w >= regionWidth * 0.45 && box.h >= 18 && textBoxes.filter((token) => token.h >= 6 && inside(token, box, -1)).length >= 3;
+  const inRegion = paths.filter((box) => inside(box, region, 6) && box.y0 >= topLimit - 4 && !isGlyph(box) && !isPanel(box) && !isHeaderBar(box) && !isBorderPanel(box) && !isCornerBadge(box) && !isTextPanel(box));
   const isThin = (box) => box.h < 1.6 || box.w < 1.6;
   // 굵기 있는 path 가 그림의 뼈대다. 분수 가로줄·밑줄·문항 구분선처럼 얇은 선은 뼈대(또는 뼈대에 이미 붙은 선)에 닿을 때만
   // 넣는다(도형의 한 변·축·표의 칸 선). 번호 배지·빈칸 상자 같은 작은 색 채움은 뺀다.
@@ -99,12 +132,18 @@ export function findFigureClusters(paths, region, textBoxes, { gap = 8, minSize 
     if (cross) candidates.push(line);
   }
   const thin = [...thinLines, ...small];
+  // 윤곽선 PDF: 좌표축 라벨(「y」「x」)은 OCR 이 자주 놓쳐 글자 상자가 없고, 화살표 끝에서 6pt 쯤 떨어져 있다 — 같은 줄에 4pt 안 이웃 글자가
+  // 없는 외딴 작은 조각만 8pt 안이면 붙인다(낱말 속 글자는 3pt — 본문 줄을 따라 사슬처럼 번지지 않게).
+  const sameLine = (a, b) => a.y0 < b.y1 && a.y1 > b.y0;
+  const hGap = (a, b) => (a.x0 > b.x1 ? a.x0 - b.x1 : b.x0 > a.x1 ? b.x0 - a.x1 : -1);
+  const isolated = (box) => !small.some((o) => o !== box && sameLine(o, box) && hGap(o, box) >= 0 && hGap(o, box) <= 4) && !textBoxes.some((t) => sameLine(t, box) && hGap(t, box) >= 0 && hGap(t, box) <= 4);
+  const attachGapOf = (box) => (glyphPaths && !isThin(box) && isolated(box) ? 8 : 3);
   let grew = true;
   while (grew) {
     grew = false;
     for (const box of thin) {
       if (candidates.includes(box)) continue;
-      if (candidates.some((other) => overlaps(box, other, 3))) {
+      if (candidates.some((other) => overlaps(box, other, attachGapOf(box)))) {
         candidates.push(box);
         grew = true;
       }
@@ -140,7 +179,8 @@ export function findFigureClusters(paths, region, textBoxes, { gap = 8, minSize 
         // 보기 번호 ①~⑤ 가 그림 보기 왼쪽에 붙어 있으면(그림이 보기인 문항) 함께 넣는다.
         // 세로로는 덩어리 안, 가로로는 왼쪽에 붙은 것만(그림 아래 보기 「③ 25」의 번호는 넣지 않는다).
         const circled = /^[①②③④⑤]$/.test(token.str.trim()) && token.y0 >= box.y0 - 4 && token.y1 <= box.y1 + 4 && token.x1 <= box.x0 + 6 && token.x1 >= box.x0 - 16;
-        if (circled || (token.h >= 9.5 ? inside(token, cluster, 1.5) : overlaps(token, box, 5))) box = union(box, token);
+        const reach = glyphPaths && !textBoxes.some((t) => t !== token && sameLine(t, token) && hGap(t, token) >= 0 && hGap(t, token) <= 4) ? 8 : 5;
+        if (circled || (token.h >= 9.5 ? inside(token, cluster, 1.5) : overlaps(token, box, reach))) box = union(box, token);
       }
     }
     results.push({ x0: box.x0 - 2, y0: box.y0 - 2, x1: box.x1 + 2, y1: box.y1 + 2, paths: members.length });

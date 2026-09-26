@@ -1,0 +1,6 @@
+{ "range": "31-55~54-109", "checked": 68, "ok": 65, "red": 0, "yellow": 3,
+  "findings": [
+    { "id": "32-57", "severity": "yellow", "where": "layout", "note": "원본은 수직선 그림이 첫 문장과 「세 점 …」 사이에 있으나 조판본은 본문 전체 아래(figure_layout below)에 있음. 내용·그림은 일치" },
+    { "id": "45-88", "severity": "yellow", "where": "choices", "note": "짧은 보기 5개가 3+2 두 줄로 넓게 퍼짐(원본은 한 줄). 값은 일치" },
+    { "id": "46-95", "severity": "yellow", "where": "layout", "note": "긴 본문이 그림 옆 좁은 폭으로 12줄까지 이어지고 그림 아래가 비어 있음. 내용·그림은 일치" }
+  ] }

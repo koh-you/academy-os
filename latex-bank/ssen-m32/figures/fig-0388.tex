@@ -1,0 +1,12 @@
+% 0388(본책 72쪽) — 반지름 6 인 원 O 를 원주 위의 한 점이 중심 O 와 겹치도록 AB 로 접음, 색칠 부분(접힌 활꼴). 답(넓이)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \fill[yellow!45] (-1.039,-0.600) -- (1.039,-0.600) arc[start angle=30.00, end angle=150.00, radius=1.200cm] -- cycle;
+  \draw[dashed, line width=0.4pt] (-1.039,-0.600) arc[start angle=210.00, end angle=330.00, radius=1.200cm];
+  \draw[line width=0.6pt] (1.039,-0.600) arc[start angle=-30.00, end angle=210.00, radius=1.200cm];
+  \draw (1.039,-0.600) arc[start angle=30.00, end angle=150.00, radius=1.200cm];
+  \draw (-1.039,-0.600) -- (1.039,-0.600);
+  \fill (0.000,0.000) circle (1.2pt);
+  \node[font=\small, inner sep=1.5pt] at (-1.199,-0.600) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.199,-0.600) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.000,0.200) {O};
+\end{tikzpicture}

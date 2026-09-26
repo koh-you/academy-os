@@ -1,0 +1,9 @@
+{ "range": "112-e10~141-276", "checked": 68, "ok": 62, "red": 0, "yellow": 6,
+  "findings": [
+    { "id": "117-236", "severity": "yellow", "where": "layout", "note": "첫 줄 「모든 실수 x에서 연속인 함수 f(x)에 대하여」가 양쪽 정렬로 자간이 크게 벌어짐(둘째 줄의 (x−1)f(x)=sin{2(x−1)} 수식이 통째로 넘어가서)", "fix": "body 의 「대하여 」 뒤에 \\par\\smallskip\\centerline{$(x-1)f(x)=\\sin\\{2(x-1)\\}$}\\par\\smallskip\\noindent 로 수식을 가운데 줄로 빼거나(118-240 방식) 「대하여」 뒤 \\\\ 로 ragged 줄바꿈" },
+    { "id": "119-243", "severity": "yellow", "where": "layout", "note": "첫 줄 「양의 정수 n에 대하여」가 극단적으로 벌어짐(긴 f(n)=lim 분수식이 다음 줄로 통째로 넘어감)", "fix": "body 의 「대하여 」 뒤에 \\par\\smallskip\\centerline{$f(n)=\\displaystyle\\lim_{x\\to 0}\\dfrac{2x}{\\sin x+\\sin 2x+\\cdots+\\sin nx}$}\\par\\smallskip\\noindent 로 분리하고 「일 때, …」 이어 쓰기" },
+    { "id": "122-e16", "severity": "yellow", "where": "layout", "note": "첫 줄 「함수 f(x)=cos x−√5 sin x에 대하여」가 극단적으로 벌어짐(lim 분수식이 다음 줄로 통째로 넘어감)", "fix": "body 의 「대하여 」 뒤에 \\par\\smallskip\\centerline{$\\displaystyle\\lim_{h\\to 0}\\dfrac{f(\\pi+h)-f(\\pi-2h)}{h}$}\\par\\smallskip\\noindent 로 분리하고 「의 값을 구하시오.」 이어 쓰기" },
+    { "id": "138-e6", "severity": "yellow", "where": "subs", "note": "⑴ 절댓값 안의 −x² 가 「ln | − x² + 5x|」 처럼 이항 연산자 간격으로 벌어져 찍힘(| 뒤의 - 가 unary 로 안 잡힘)", "fix": "subs[0] 을 $y=\\ln\\lvert -x^2+5x\\rvert$ (또는 $y=\\ln|{-x^2+5x}|$) 로" },
+    { "id": "141-271", "severity": "yellow", "where": "layout", "note": "첫 줄 「함수 f(x)=tan x/x에 대하여 곡선 y=f(x) 위의 점」의 = 주변 간격이 넓게 벌어짐(높은 점 좌표 괄호식이 다음 줄로 넘어가서) — 내용은 일치" },
+    { "id": "141-276", "severity": "yellow", "where": "layout", "note": "첫 줄 「함수 f(x)=√(1+x²), g(x)=sin 2x에 대하여 함수」의 = 주변 간격이 넓게 벌어짐 — 내용은 일치" }
+  ] }

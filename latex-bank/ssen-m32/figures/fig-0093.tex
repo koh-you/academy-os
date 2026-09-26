@@ -1,0 +1,20 @@
+% 0093(본책 21쪽) — ∠C=90° 직각삼각형 ABC(B 왼쪽 멀리·C 오른쪽 아래·A 위), BC 위의 D, ∠B=15°·∠ADC=30°, AC=3 파선 호. 라벨: A~D·15°·30°·3, 직각 표시 C. 스캔 삽화를 TikZ 로 다시 그림. 답(tan 15°)은 적지 않는다.
+\begin{tikzpicture}[scale=1.15, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (3.359,0); \coordinate (A) at (3.359,0.9); \coordinate (D) at (1.8,0);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (D);
+  % 직각 표시(C)
+  \draw[line width=0.4pt] (3.199,0) -- (3.199,0.16) -- (3.359,0.16);
+  % 각
+  \draw[line width=0.4pt] (0.7,0) arc[start angle=0, end angle=15, radius=0.7cm];
+  \node[font=\small, above, inner sep=1pt] at (0.72,0.24) {$15^\circ$};
+  \draw[line width=0.4pt] (2.2,0) arc[start angle=0, end angle=30, radius=0.4cm];
+  \node[font=\small, anchor=west, inner sep=1pt] at (2.22,0.2) {$30^\circ$};
+  % 3(AC 파선 호)
+  \draw[dashed, line width=0.4pt] (A) to[bend left=35] (C);
+  \node[font=\small] at (3.62,0.45) {$3$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, below right] at (C) {C};
+  \node[font=\small, below] at (D) {D};
+\end{tikzpicture}

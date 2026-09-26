@@ -1,0 +1,7 @@
+{ "range": "24-c1~43-01 (ids-04, 68문항)", "checked": 68, "ok": 64,
+  "findings": [
+    { "id": "28-06", "severity": "yellow", "where": "layout", "note": "\\cond 가 다음 줄로 밀리면서 본문 첫 줄이 양쪽 정렬로 늘어나 단어 간격이 크게 벌어짐(내용은 일치)" },
+    { "id": "32-u2", "severity": "yellow", "where": "layout", "note": "첫 줄 「sin(3x−15°)=cos 60°일 때,」가 양쪽 정렬로 심하게 늘어나고 「구하시/오」가 줄 끝에서 끊김(내용은 일치)", "fix": "「일 때,」 뒤에 줄바꿈(\\\\ 또는 \\allowbreak)을 넣어 긴 수식이 새 줄에서 시작하게" },
+    { "id": "38-03", "severity": "red", "where": "figure", "note": "원본 과정 상자 안의 둘째 그림(꼭짓점 A에서 BC에 내린 수선의 발 H · 6, 60°, 10 표시)이 조판본에 없음. 상자 본문은 「오른쪽 그림과 같이 … H라 하면」이라 그림을 전제함. fig-38-03.png 은 본문 그림만 담고 있음(review_needed 에 「둘로 나눠 다시 크롭 필요」로 기록된 건)", "fix": "상자 안 그림을 fig-38-03-2.png 로 따로 크롭해 exprbox 안(또는 figure_extra)에 배치" },
+    { "id": "39-04", "severity": "red", "where": "figure", "note": "원본 과정 상자 안의 둘째 그림(수선의 발 H · 10, 75°, 60°, 45° 표시)이 조판본에 없음. 상자 본문은 「오른쪽 그림과 같이 … H라 하면」이라 그림을 전제함. fig-39-04.png 은 본문 그림만 담고 있음(review_needed 기록 건)", "fix": "상자 안 그림을 fig-39-04-2.png 로 따로 크롭해 exprbox 안(또는 figure_extra)에 배치" }
+  ] }

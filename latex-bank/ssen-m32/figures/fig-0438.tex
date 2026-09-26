@@ -1,0 +1,21 @@
+% 0438(본책 80쪽) — 원 O, 지름 AC, 현 PA·PB·QB·QC, ∠BQC=33°, ∠APB=x. 답(x)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.100,0.000) -- (1.100,0.000);
+  \draw (-0.376,1.034) -- (-1.100,0.000);
+  \draw (-0.376,1.034) -- (0.376,-1.034);
+  \draw (0.465,0.997) -- (0.376,-1.034);
+  \draw (0.465,0.997) -- (1.100,0.000);
+  \fill (0.000,0.000) circle (1.2pt);
+  \fill[green!15] (-0.376,1.034) -- (-0.548,0.788) arc (235.0:290.0:0.300) -- cycle;
+  \draw[line width=0.4pt] (-0.548,0.788) arc (235.0:290.0:0.300);
+  \draw[line width=0.4pt] (0.450,0.647) arc (267.5:302.5:0.350);
+  \node[font=\small, inner sep=0.5pt] at (-0.441,0.538) {$x$};
+  \node[font=\small, inner sep=0.5pt] at (0.633,0.369) {$33^\circ$};
+  \node[font=\small, inner sep=1.5pt] at (-1.300,0.000) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.300,0.000) {C};
+  \node[font=\small, inner sep=1.5pt] at (-0.445,1.222) {P};
+  \node[font=\small, inner sep=1.5pt] at (0.549,1.178) {Q};
+  \node[font=\small, inner sep=1.5pt] at (0.445,-1.222) {B};
+  \node[font=\small, inner sep=1.5pt] at (-0.000,-0.200) {O};
+\end{tikzpicture}

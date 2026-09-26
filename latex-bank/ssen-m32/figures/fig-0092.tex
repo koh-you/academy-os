@@ -1,0 +1,21 @@
+% 0092(본책 21쪽) — ∠ACB=90° 직각삼각형 ABC(B 왼쪽·C 오른쪽 아래·A 위), AB⊥CD·BC⊥DE, AB=16 파선 호, ∠B=30°. 라벨: A~E·16·30°, 직각 표시 C·D·E. 스캔 삽화를 TikZ 로 다시 그림. 답(EC)은 적지 않는다.
+\begin{tikzpicture}[scale=1.5, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (2.078,0); \coordinate (A) at (2.078,1.2); \coordinate (D) at (1.559,0.9); \coordinate (E) at (1.559,0);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (C) -- (D) -- (E);
+  % 직각 표시
+  \draw[line width=0.4pt] (1.918,0) -- (1.918,0.16) -- (2.078,0.16);
+  \draw[line width=0.4pt] (1.559,0.16) -- (1.719,0.16) -- (1.719,0);
+  \draw[line width=0.4pt] (1.6976,0.98) -- (1.7776,0.8414) -- (1.639,0.7614);
+  % 30°
+  \draw[line width=0.4pt] (0.5,0) arc[start angle=0, end angle=30, radius=0.5cm];
+  \node[font=\small, anchor=west, inner sep=1pt] at (0.52,0.17) {$30^\circ$};
+  % 16(AB 파선 호)
+  \draw[dashed, line width=0.4pt] (B) to[bend left=22] (A);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.85,0.82) {$16$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, above left, inner sep=1pt] at (1.6,0.92) {D};
+  \node[font=\small, below] at (E) {E};
+\end{tikzpicture}

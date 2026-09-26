@@ -1,0 +1,21 @@
+% 0007~0008 공통 그림(본책 9쪽) — ∠BAC=90° 인 직각삼각형 ABC, AD⊥BC, AB=8 · AC=6 · BC=10, ∠BAD=x. 스캔 삽화를 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(8 · 6 · 10 · x · 꼭짓점 A~D · 직각 표시 2곳). 답(같은 각·삼각비 값)은 적지 않는다.
+\begin{tikzpicture}[scale=0.42, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (10,0); \coordinate (A) at (6.4,4.8); \coordinate (D) at (6.4,0);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (D);
+  \draw[line width=0.4pt] (5.7,0) -- (5.7,0.7) -- (6.4,0.7);
+  \draw[line width=0.4pt] ($(A)!0.11!(B)$) -- ($(A)!0.11!(B)+(0.528,-0.396)$) -- ($(A)!0.11!(C)$);
+  \draw[line width=0.4pt] ($(A)+(216.9:1.4)$) arc (216.9:270:1.4);
+  \draw[dashed, line width=0.3pt] (B) to[bend left=22] (A);
+  \draw[dashed, line width=0.3pt] (A) to[bend left=25] (C);
+  \draw[dashed, line width=0.3pt] (B) to[bend right=15] (C);
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, below] at (D) {D};
+  \node[font=\small] at (2.6,3.1) {$8$};
+  \node[font=\small] at (8.9,2.9) {$6$};
+  \node[font=\small] at (5.6,-1.4) {$10$};
+  \node[font=\small] at (5.35,3.05) {$x$};
+\end{tikzpicture}

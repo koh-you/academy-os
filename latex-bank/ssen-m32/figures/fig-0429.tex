@@ -1,0 +1,18 @@
+% 0429(본책 78쪽) — 점 P 에서 원 O 에 그은 두 접선의 접점 A, B, 호 위의 점 C, 현 CA·CB, ∠P=54°, ∠ACB 에 각 표시. 답은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.2, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (2.168,-1.283) -- (0.515,0.992);
+  \draw (2.313,-1.000) -- (-0.500,-1.000);
+  \draw (0.914,-0.407) -- (0.809,0.588);
+  \draw (0.914,-0.407) -- (-0.000,-1.000);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (1.727,-0.676) arc (126.0:180.0:0.400);
+  \fill[green!15] (0.914,-0.407) -- (0.891,-0.188) arc (96.0:213.0:0.220) -- cycle;
+  \draw[line width=0.4pt] (0.891,-0.188) arc (96.0:213.0:0.220);
+  \node[font=\small, inner sep=0.5pt] at (1.294,-0.660) {$54^\circ$};
+  \node[font=\small, inner sep=1.5pt] at (0.909,0.761) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.000,-1.200) {B};
+  \node[font=\small, inner sep=1.5pt] at (1.120,-0.331) {C};
+  \node[font=\small, inner sep=1.5pt] at (2.163,-1.000) {P};
+  \node[font=\small, inner sep=1.5pt] at (-0.200,0.000) {O};
+\end{tikzpicture}

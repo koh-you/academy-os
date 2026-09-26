@@ -1,0 +1,9 @@
+{ "range": "0989~1064", "checked": 76, "ok": 70,
+  "findings": [
+    { "id": "1022", "severity": "red", "where": "passage", "note": "공통 지시문이 원본 「y=ax²+bx+c의 꼴로 나타내시오.」인데 조판본은 「y=ax²+b」 뒤에서 끊기고 바로 「의 꼴로 나타내시오.」로 이어짐 — bx+c 부분이 통째로 빠짐(1022~1023 공통 지시문)", "fix": "passage의 y=ax^2+b 를 y=ax^2+bx+c 로" },
+    { "id": "1023", "severity": "red", "where": "passage", "note": "1022와 같은 공통 지시문 — y=ax²+b 뒤 bx+c 빠짐", "fix": "passage의 y=ax^2+b 를 y=ax^2+bx+c 로" },
+    { "id": "1024", "severity": "red", "where": "passage", "note": "지시문 「y=ax²+bx+c의 꼴로」에서 bx+c 빠지고 y=ax²+b로 표기됨", "fix": "passage의 y=ax^2+b 를 y=ax^2+bx+c 로" },
+    { "id": "1025", "severity": "red", "where": "passage", "note": "같은 지시문 반복 오류 — y=ax²+b (bx+c 빠짐)", "fix": "passage의 y=ax^2+b 를 y=ax^2+bx+c 로" },
+    { "id": "1028", "severity": "red", "where": "passage", "note": "1028~1029 공통 지시문에서도 동일하게 bx+c 빠지고 y=ax²+b로 표기됨", "fix": "passage의 y=ax^2+b 를 y=ax^2+bx+c 로" },
+    { "id": "1029", "severity": "red", "where": "passage", "note": "1028과 같은 공통 지시문 — bx+c 빠짐", "fix": "passage의 y=ax^2+b 를 y=ax^2+bx+c 로" }
+  ] }

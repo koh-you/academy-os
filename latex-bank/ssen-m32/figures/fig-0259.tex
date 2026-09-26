@@ -1,0 +1,29 @@
+% 0259(본책 50쪽) — 평행사변형 ABCD(AB=8 cm, BC=12 cm), 네 내각의 이등분선과 그 교점 P·Q·R·S(□PQRS 색칠). ∠DAB:∠ABC=2:1. 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (0.56,0.97); \coordinate (B) at (0,0); \coordinate (C) at (1.68,0); \coordinate (D) at (2.24,0.97);
+  \coordinate (P) at (0.84,0.485); \coordinate (Q) at (0.98,0.243); \coordinate (R) at (1.4,0.485); \coordinate (S) at (1.26,0.727);
+  \fill[red!30] (P) -- (Q) -- (R) -- (S) -- cycle;
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[line width=0.4pt] (A) -- (1.12,0);
+  \draw[line width=0.4pt] (B) -- (1.68,0.97);
+  \draw[line width=0.4pt] (C) -- (1.12,0.97);
+  \draw[line width=0.4pt] (D) -- (0.56,0);
+  % 같은 각 표시
+  \fill (0.68,0.88) circle (0.5pt); \fill (0.74,0.9) circle (0.5pt);
+  \fill (0.7,0.8) circle (0.5pt); \fill (0.78,0.82) circle (0.5pt);
+  \node[font=\scriptsize] at (0.2,0.1) {$\times$}; \node[font=\scriptsize] at (0.15,0.2) {$\times$};
+  \fill (1.5,0.08) circle (0.5pt); \fill (1.56,0.18) circle (0.5pt);
+  \node[font=\scriptsize] at (2.02,0.88) {$\times$}; \node[font=\scriptsize] at (2.08,0.78) {$\times$};
+  \draw[dashed, line width=0.4pt] (B) to[bend left=25] (A);
+  \node[font=\small] at (0.05,0.62) {$8\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (B) to[bend right=18] (C);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.84,-0.26) {$12\,\mathrm{cm}$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, above] at (D) {D};
+  \node[font=\small, left] at (P) {P};
+  \node[font=\small, below] at (Q) {Q};
+  \node[font=\small, right] at (R) {R};
+  \node[font=\small, above] at (S) {S};
+\end{tikzpicture}

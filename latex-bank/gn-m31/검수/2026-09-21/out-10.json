@@ -1,0 +1,5 @@
+{ "range": "ids-10 (64-01~79-21)", "checked": 72, "ok": 70,
+  "findings": [
+    { "id": "65-c2", "severity": "yellow", "where": "choices", "note": "choices_layout ii 에서 ③ 끝 「81y²」 위에 ④ 배지가 겹쳐 인쇄됨(③④ 가 한 줄에 못 들어감)", "fix": "choices_layout 을 v 로 바꾸거나 빼서 한 줄에 하나씩" },
+    { "id": "78-18", "severity": "yellow", "where": "body", "note": "exprbox 의 지수 자리 빈칸 「2^▯」 상자가 세로로 길고 좁게 찍혀 어색함(원본은 작은 정사각형 □) · 확인 필요", "fix": "build.mjs 첨자용 \\blank(\\scriptsize\\blank[0.8em]) 의 fboxsep 를 줄이거나 2^{\\square} 로" }
+  ] }

@@ -1,0 +1,8 @@
+{ "range": "0519~0592", "checked": 74, "ok": 69,
+  "findings": [
+    { "id": "0559", "severity": "yellow", "where": "layout", "note": "첫 줄 단어 간격이 크게 벌어짐(둘째 줄 수식 $x=-t^3+5t^2-3t+2$ 가 못 끊겨 밀림) · 내용은 일치" },
+    { "id": "0567", "severity": "yellow", "where": "layout", "note": "보기 ㄷ 끝 「다.」 한 글자만 다음 줄로 넘어감 · 내용은 일치" },
+    { "id": "0578", "severity": "yellow", "where": "layout", "note": "보기 ㄷ 끝 「인다.」 만 다음 줄로 넘어감 · 내용은 일치" },
+    { "id": "0589", "severity": "yellow", "where": "layout", "note": "첫 줄 단어 간격이 크게 벌어지고 둘째 줄 dfrac 수식이 윗줄에 바짝 붙음(원문은 수식 줄을 따로 둠) · 내용은 일치", "fix": "body 의 「위치 $x$가 $x=\\dfrac{1}{4}t^3-…+10$일 때,」 를 0556 처럼 \\par\\smallskip\\centerline{…}\\par\\smallskip\\noindent 로 수식 줄 분리" },
+    { "id": "0592", "severity": "yellow", "where": "layout", "note": "첫 줄 단어 간격이 벌어짐(둘째 줄 수식 $x=t^3+3t^2-24t+k$ 가 못 끊겨 밀림) · 내용은 일치" }
+  ] }

@@ -1,0 +1,18 @@
+% 0519(본책 93쪽) — 원에 내접하는 □ABCD, 호 AD 위의 점 E, AE·ED, AB=AD 표시, ∠C=76°, ∠AED(색칠). 다시 그림.
+\begin{tikzpicture}[scale=1.35, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.677,0.867) -- (-1.005,-0.447) -- (0.550,-0.953) -- (0.677,0.867) -- cycle;
+  \draw (-0.677,0.867) -- (0.000,1.100);
+  \draw (0.000,1.100) -- (0.677,0.867);
+  \draw[line width=0.4pt] (-0.773,0.193) -- (-0.909,0.227);
+  \draw[line width=0.4pt] (0.000,0.937) -- (0.000,0.797);
+  \draw[line width=0.4pt] (0.572,-0.633) arc[start angle=86.000, end angle=162.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (0.214,-0.455) {$76^\circ$};
+  \fill[green!15] (0.000,1.100) -- (0.189,1.035) arc[start angle=-19.000, end angle=199.000, radius=0.200] -- cycle;
+  \draw[line width=0.4pt] (0.189,1.035) arc[start angle=-19.000, end angle=199.000, radius=0.200];
+  \node[font=\small, inner sep=1.5pt] at (-0.850,0.967) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.188,-0.529) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.650,-1.126) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.850,0.967) {D};
+  \node[font=\small, inner sep=1.5pt] at (0.000,1.300) {E};
+\end{tikzpicture}

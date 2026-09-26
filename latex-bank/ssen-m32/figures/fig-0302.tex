@@ -1,0 +1,15 @@
+% 0302(본책 58쪽) — 반지름 15 cm 인 원의 일부분(호 AB), CM 이 AB 를 수직이등분(AM=MB 같은 변 표시), AB=24 cm. 답(CM)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (1.200,-0.000) arc[start angle=36.9, end angle=143.1, radius=1.500];
+  \draw (-1.200,0.000) -- (1.200,0.000);
+  \draw (0.000,0.600) -- (0.000,0.000);
+  \draw[line width=0.4pt] (0.120,0.000) -- (0.120,0.120) -- (0.000,0.120);
+  \draw[line width=0.4pt] (-0.600,0.060) -- (-0.600,-0.060);
+  \draw[line width=0.4pt] (0.600,0.060) -- (0.600,-0.060);
+  \draw[dashed, line width=0.4pt] (-1.200,0.000) to[bend right=15] (1.200,0.000);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.000,-0.320) {$24\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-1.380,0.000) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.380,0.000) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.000,0.780) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.180,0.120) {M};
+\end{tikzpicture}

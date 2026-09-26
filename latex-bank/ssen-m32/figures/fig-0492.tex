@@ -1,0 +1,16 @@
+% 0492(본책 91쪽) — 네 점 A·B·C·D(원은 그리지 않음), AB·AC·DB·DC, ∠BAC=x(색칠), ∠BDC=38°. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.40, line width=0.6pt]
+  \draw (-0.550,0.953) -- (-0.677,-0.867);
+  \draw (-0.550,0.953) -- (0.677,-0.867);
+  \draw (0.550,0.953) -- (-0.677,-0.867);
+  \draw (0.550,0.953) -- (0.677,-0.867);
+  \fill[green!15] (-0.550,0.953) -- (-0.572,0.633) arc[start angle=-94.000, end angle=-56.000, radius=0.320] -- cycle;
+  \draw[line width=0.4pt] (-0.572,0.633) arc[start angle=-94.000, end angle=-56.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (-0.415,0.450) {$x$};
+  \draw[line width=0.4pt] (0.371,0.687) arc[start angle=-124.000, end angle=-86.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (0.390,0.354) {$38^\circ$};
+  \node[font=\small, inner sep=1.5pt] at (-0.550,1.153) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.550,1.153) {D};
+  \node[font=\small, inner sep=1.5pt] at (-0.677,-1.067) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.677,-1.067) {C};
+\end{tikzpicture}

@@ -1,0 +1,19 @@
+% 0430(본책 78쪽) — 원 O 에 내접한 △ABC, A·B 에서 접하는 접선 PA·PB, OA·OB, ∠P=52°. 답은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.2, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-2.050,-1.000) -- (-0.511,0.970);
+  \draw (-2.050,-1.000) -- (0.450,-1.000);
+  \draw (-0.788,0.616) -- (-0.000,-1.000);
+  \draw (-0.788,0.616) -- (0.643,0.766);
+  \draw (-0.000,-1.000) -- (0.643,0.766);
+  \draw (0.000,0.000) -- (-0.788,0.616);
+  \draw (0.000,0.000) -- (-0.000,-1.000);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-1.650,-1.000) arc (0.0:52.0:0.400);
+  \node[font=\small, inner sep=0.5pt] at (-1.376,-0.671) {$52^\circ$};
+  \node[font=\small, inner sep=1.5pt] at (-0.946,0.739) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.000,-1.200) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.771,0.919) {C};
+  \node[font=\small, inner sep=1.5pt] at (-2.250,-1.000) {P};
+  \node[font=\small, inner sep=1.5pt] at (0.173,0.100) {O};
+\end{tikzpicture}

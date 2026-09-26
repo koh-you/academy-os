@@ -1,0 +1,22 @@
+% 0063(본책 16쪽) — ∠A=90° 직각삼각형 ABC(B 왼쪽 멀리·A 오른쪽 위·C 오른쪽 아래), D 는 AB 위, DE⊥BC(E 는 BC 위). 라벨: A·B·C·D·E, 5(AC)·13(BC) 파선 호, 각 x(∠BDE), 직각 표시 A·E. 스캔 삽화를 TikZ 로 다시 그림. 답(sin x)은 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (3.64,0); \coordinate (A) at (3.1015,1.2923); \coordinate (E) at (1.9,0); \coordinate (D) at (1.9,0.7917);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (D) -- (E);
+  % 직각 표시
+  \draw[line width=0.4pt] (1.9,0.16) -- (2.06,0.16) -- (2.06,0);
+  \draw[line width=0.4pt] (2.9538,1.2308) -- (3.0153,1.0831) -- (3.163,1.1446);
+  % 각 x(∠BDE)
+  \draw[line width=0.4pt] (1.577,0.657) arc[start angle=-157.4, end angle=-90, radius=0.35cm];
+  \node[font=\small] at (1.66,0.4) {$x$};
+  % 길이(파선 호)
+  \draw[dashed, line width=0.4pt] (A) to[bend left=40] (C);
+  \draw[dashed, line width=0.4pt] (B) to[bend right=18] (C);
+  \node[font=\small] at (3.6,0.75) {$5$};
+  \node[font=\small, fill=white, inner sep=1pt] at (1.5,-0.42) {$13$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, above] at (D) {D};
+  \node[font=\small, below right] at (E) {E};
+\end{tikzpicture}

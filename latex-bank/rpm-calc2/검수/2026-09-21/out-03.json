@@ -1,0 +1,10 @@
+{ "range": "0149~0222", "checked": 74, "ok": 67,
+  "findings": [
+    { "id": "0176", "severity": "yellow", "where": "layout", "note": "첫 줄(수열 {a_n}에 대하여 ∑a_n = 3, ∑a_k = S_n일 때,)이 양끝 맞춤으로 어간이 벌어짐(둘째 줄 lim 분수가 안 끊겨서). 내용은 일치" },
+    { "id": "0184", "severity": "yellow", "where": "layout", "note": "첫 줄(두 급수 ∑a_n, ∑b_n에 대하여 ∑b_n = 2,)이 양끝 맞춤으로 어간이 크게 벌어짐. 내용은 일치" },
+    { "id": "0185", "severity": "yellow", "where": "layout", "note": "보기 상자 안 ㄱ·ㄴ 항목이 상자 폭을 넘어 「수렴한다.」「다.」가 들여쓰기 없이 다음 줄 왼쪽 끝으로 밀림. 내용은 일치" },
+    { "id": "0205", "severity": "yellow", "where": "layout", "note": "첫 줄(수열 {a_n}의 첫째항부터 제n항까지의 합 S_n이)이 양끝 맞춤으로 어간이 크게 벌어짐(둘째 줄 S_n=27{…} 식이 안 끊겨서). 내용은 일치" },
+    { "id": "0211", "severity": "yellow", "where": "layout", "note": "원문은 조건식 3줄이 그림 왼쪽에 있으나 조판본은 centerline 식이 그림 아래로 밀려 그림 옆(「점 P_n이」 아래)에 빈 공간 3~4줄이 생김. 내용·그림은 일치" },
+    { "id": "0212", "severity": "yellow", "where": "layout", "note": "0211과 같음 — 조건식이 그림 아래로 밀려 그림 옆에 빈 공간. 내용·그림은 일치" },
+    { "id": "0213", "severity": "yellow", "where": "layout", "note": "0211과 같음 — 조건식 4줄이 그림 아래로 밀려 그림 옆에 빈 공간. 내용·그림은 일치" }
+  ] }

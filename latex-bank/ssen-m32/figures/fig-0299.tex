@@ -1,0 +1,13 @@
+% 0299(본책 57쪽) — 반지름 13 cm 인 원 O, AB⊥OC, AB=24 cm, 선분 BC. 답(BC)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (0.423,1.015) -- (0.423,-1.015);
+  \draw (0.000,0.000) -- (1.100,0.000);
+  \draw (0.423,-1.015) -- (1.100,0.000);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (0.423,0.120) -- (0.543,0.120) -- (0.543,0.000);
+  \node[font=\small, inner sep=1.5pt] at (-0.180,0.000) {O};
+  \node[font=\small, inner sep=1.5pt] at (0.500,1.200) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.500,-1.200) {B};
+  \node[font=\small, inner sep=1.5pt] at (1.300,0.000) {C};
+\end{tikzpicture}

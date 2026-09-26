@@ -1,0 +1,13 @@
+{ "range": "11-e1~34-54", "checked": 68, "ok": 60,
+  "findings": [
+    { "id": "14-e4", "severity": "yellow", "where": "layout", "note": "subs(1) 끝 「여학생 2」와 「명을」이 줄 바뀜으로 분리됨(숫자·단위 분리 · 내용은 일치)" },
+    { "id": "14-10", "severity": "yellow", "where": "layout", "note": "「포함하여 4」와 「개의 문자를」이 줄 바뀜으로 분리됨(숫자·단위 분리 · 내용은 일치)" },
+    { "id": "19-e2", "severity": "yellow", "where": "layout", "note": "「이 기호를 1」과 「개 이상」이 줄 바뀜으로 분리됨(숫자·단위 분리 · 내용은 일치)" },
+    { "id": "24-25", "severity": "yellow", "where": "layout", "note": "「양 끝에 n」과 조사 「을」이 줄 바뀜으로 분리됨(내용은 일치)" },
+    { "id": "26-e8", "severity": "yellow", "where": "layout", "note": "「m, a, t, e」와 조사 「는」이 줄 바뀜으로 분리됨(내용은 일치)" },
+    { "id": "29-40", "severity": "yellow", "where": "layout", "note": "첫 줄이 양끝 맞춤으로 크게 벌어지고 마지막 줄에 「오.」 한 글자만 남음(내용은 일치)" },
+    { "id": "31-50", "severity": "yellow", "where": "layout", "note": "「숫자 0과 1」과 조사 「을」이 줄 바뀜으로 분리됨(내용은 일치)" },
+    { "id": "31-51", "severity": "yellow", "where": "layout", "note": "그림 아래에서도 본문이 그림 폭만큼 좁은 열로 계속 조판되어 11줄로 길어짐(그림·내용은 일치)" }
+  ],
+  "notes": "red 0. 예제(e)는 상자 발문만 대조했고 설명·풀이·KEY Point·RPM 안내·QR·여백 힌트 미전사는 정상으로 처리. 12-5 는 review 크롭에서 + 가 | 처럼 보여 output/problem-bank/gn-prob/items 원본 크롭으로 (a+b+c)(p+q)(x+y) 확인. 숫자·단위/조사 분리 5건은 kotex 가 수식 뒤 한글 앞에서 줄을 바꾸는 패턴이라 개별 수정보다 preamble 단위 처리 검토가 적절할 수 있음."
+}

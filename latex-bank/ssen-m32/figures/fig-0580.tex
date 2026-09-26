@@ -1,0 +1,29 @@
+% 0580(본책 104쪽) — 세 원 O1·O2·O3, O1∩O2={P,Q}, O1∩O3={Q,R}, AP·RQ·PQ·AR 의 연장선과의 교점 B·C·D·E, ∠x(∠BCQ). 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.2, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-0.297,-1.108) circle (1.000);
+  \draw (1.191,-0.052) circle (0.900);
+  \fill (0.000,0.000) circle (1.2pt);
+  \fill (-0.297,-1.108) circle (1.2pt);
+  \fill (1.191,-0.052) circle (1.2pt);
+  \draw (-0.574,0.819) -- (-1.263,-1.367);
+  \draw (-0.574,0.819) -- (1.799,0.612);
+  \draw (0.707,0.707) -- (0.609,-1.531);
+  \draw (-0.940,-0.342) -- (1.308,-0.944);
+  \draw (-1.263,-1.367) -- (0.609,-1.531);
+  \draw (1.308,-0.944) -- (1.799,0.612);
+  \fill[yellow!35] (0.609,-1.531) -- ++(87.500:0.220) arc[start angle=87.500, end angle=175.000, radius=0.220] -- cycle;
+  \draw[line width=0.4pt] (0.619,-1.311) arc[start angle=87.500, end angle=175.000, radius=0.220];
+  \node[font=\small, inner sep=1pt] at (0.346,-1.230) {$x$};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.050,0.000) {O$_1$};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (-0.247,-1.108) {O$_2$};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (1.241,-0.052) {O$_3$};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-0.574,0.819) {A};
+  \node[font=\small, anchor=south, inner sep=1.5pt] at (0.707,0.737) {R};
+  \node[font=\small, anchor=south west, inner sep=1.5pt] at (1.799,0.632) {E};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-0.960,-0.342) {P};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (1.308,-0.944) {D};
+  \node[font=\small, anchor=north west, inner sep=1.5pt] at (0.623,-0.806) {Q};
+  \node[font=\small, anchor=north east, inner sep=1.5pt] at (-1.283,-1.397) {B};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (0.629,-1.581) {C};
+\end{tikzpicture}

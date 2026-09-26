@@ -1,0 +1,22 @@
+% 0587(본책 105쪽) — 지름 AC 인 원 O 와 지름 BC 인 원 O', AD 는 원 O' 의 접선(접점 E), ∠EAB=34°, ∠EBC 표시. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.2, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (0.283,0.000) circle (0.717);
+  \draw (-1.000,0.000) -- (1.000,0.000);
+  \draw (-1.000,0.000) -- (0.285,0.866);
+  \draw (-0.118,0.595) -- (-0.434,0.000);
+  \draw (-0.118,0.595) -- (1.000,0.000);
+  \fill (0.000,0.000) circle (1.2pt);
+  \fill (0.283,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.650,0.000) arc[start angle=0.000, end angle=33.976, radius=0.350];
+  \node[font=\small, inner sep=1pt] at (-0.445,0.169) {$34^\circ$};
+  \fill[yellow!35] (-0.434,0.000) -- ++(0.000:0.200) arc[start angle=0.000, end angle=61.988, radius=0.200] -- cycle;
+  \draw[line width=0.4pt] (-0.234,0.000) arc[start angle=0.000, end angle=61.988, radius=0.200];
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-1.000,0.000) {A};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (1.000,0.000) {C};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (-0.434,-0.050) {B};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (0.000,-0.050) {O};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (0.283,-0.050) {O$'$};
+  \node[font=\small, anchor=south east, inner sep=1.5pt] at (-0.138,0.615) {E};
+  \node[font=\small, anchor=south, inner sep=1.5pt] at (0.285,0.896) {D};
+\end{tikzpicture}

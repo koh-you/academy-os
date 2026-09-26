@@ -1,0 +1,12 @@
+% 0192(본책 39쪽) — △ABC(AC=10, BC=12). 스캔 삽화를 TikZ 로 다시 그림. 답(AB)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (3.2,0); \coordinate (A) at (1.07,1.6);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[dashed, line width=0.4pt] (A) to[bend left=20] (C);
+  \draw[dashed, line width=0.4pt] (B) to[bend right=15] (C);
+  \node[font=\small] at (2.45,1.05) {$10$};
+  \node[font=\small] at (1.6,-0.45) {$12$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+\end{tikzpicture}

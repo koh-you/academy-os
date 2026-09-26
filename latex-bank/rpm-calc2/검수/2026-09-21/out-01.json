@@ -1,0 +1,7 @@
+{ "range": "0001~0074", "checked": 74, "ok": 70,
+  "findings": [
+    { "id": "0003", "severity": "yellow", "where": "layout", "note": "review 왼쪽 크롭이 0063 문항(크롭 파일 items/pbk_82ca5424b9-0003.jpg 내용이 0063) — 쪽 이미지 p007·그룹 크롭(0001~0007)으로 대조해 본문 일치. 크롭 파일만 오염, items.json 수정 없음" },
+    { "id": "0055", "severity": "yellow", "where": "layout", "note": "첫 줄(수열 {a_n}의 첫째항부터 … S_n이)이 양끝 맞춤으로 어간이 넓게 벌어짐(둘째 줄 lim 분수가 안 끊겨서). 내용은 일치" },
+    { "id": "0059", "severity": "yellow", "where": "layout", "note": "첫 줄(수열 {a_n}의 일반항이 a_n = log(n+1)/n 일 때,)이 양끝 맞춤으로 어간이 크게 벌어짐(둘째 줄 lim 분수가 안 끊겨서). 내용은 일치" },
+    { "id": "0068", "severity": "yellow", "where": "layout", "note": "첫 줄(등차수열 … a_2=5, a_4=11일 때,)이 양끝 맞춤으로 어간이 크게 벌어짐(둘째 줄 lim √n(…)이 안 끊겨서). 내용은 일치" }
+  ] }

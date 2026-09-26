@@ -1,0 +1,19 @@
+% 0364(본책 68쪽) — 원 O 에 외접하는 □ABCD(∠C=90°), AD=6, BC=8, BD=8√2 cm, 대각선 BD. 답(AB)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.646,1.354) -- (0.000,0.000) -- (2.000,0.000) -- (2.000,2.000) -- cycle;
+  \draw (0.000,0.000) -- (2.000,2.000);
+  \draw (1.227,0.773) circle (0.773);
+  \fill (1.227,0.773) circle (1.2pt);
+  \draw[line width=0.4pt] (1.870,0.000) -- (1.870,0.130) -- (2.000,0.130);
+  \draw[dashed, line width=0.4pt] (0.646,1.354) to[bend left=20] (2.000,2.000);
+  \node[font=\small, inner sep=1.5pt] at (1.194,1.947) {$6\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend left=25] (2.000,2.000);
+  \node[font=\small, inner sep=1.5pt] at (0.026,1.054) {$8\sqrt{2}\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend right=20] (2.000,0.000);
+  \node[font=\small, inner sep=1.5pt] at (1.000,-0.300) {$8\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.499,1.439) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.160,-0.058) {B};
+  \node[font=\small, inner sep=1.5pt] at (2.160,-0.058) {C};
+  \node[font=\small, inner sep=1.5pt] at (2.120,2.120) {D};
+  \node[font=\small, inner sep=1.5pt] at (1.227,0.573) {O};
+\end{tikzpicture}

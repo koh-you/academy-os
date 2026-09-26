@@ -1,0 +1,15 @@
+% 0154(본책 33쪽) — 직각삼각형 ABC(∠B=90°, ∠C=33°), AB=13·BC=x. 스캔 삽화를 TikZ 로 다시 그림. 답(x)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (3,0); \coordinate (A) at (0,1.95);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] (0,0.22) -- (0.22,0.22) -- (0.22,0);
+  \draw[line width=0.4pt] (2.45,0) arc[start angle=180, end angle=147, radius=0.55];
+  \node[font=\small] at (2.0,0.28) {$33^\circ$};
+  \draw[dashed, line width=0.4pt] (A) to[bend right=20] (B);
+  \draw[dashed, line width=0.4pt] (B) to[bend right=20] (C);
+  \node[font=\small] at (-0.45,1.0) {$13$};
+  \node[font=\small] at (1.5,-0.45) {$x$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, below left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+\end{tikzpicture}

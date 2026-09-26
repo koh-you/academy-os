@@ -1,0 +1,17 @@
+{ "range": "35-56~59-111 (ids-02 · 68문항)", "checked": 68, "ok": 60, "red": 0, "yellow": 8,
+  "findings": [
+    { "id": "36-64", "severity": "yellow", "where": "body", "note": "\\seg{B_nB_{n+1}} 가 \\overline{\\mathrm{…}} 으로 풀려 첨자 n·n+1 이 정체(로만)로 찍힘 — 원본은 이탤릭 n", "fix": "body 의 $\\seg{B_nB_{n+1}}$ → $\\overline{\\pt{B}_n\\pt{B}_{n+1}}$" },
+    { "id": "42-71", "severity": "yellow", "where": "subs", "note": "⑵ 로그 합 수식이 낱장(110mm) 폭을 11.5pt 넘침(xelatex Overfull) — + 주위 간격이 눌리고 끝 +… 가 오른쪽 여백 밖으로 나감", "fix": "⑵ 를 두 수식으로 나눠 줄바꿈 허용: $\\log\\left(1+\\dfrac{4}{1\\times 5}\\right)+\\log\\left(1+\\dfrac{4}{2\\times 6}\\right)$ $+\\log\\left(1+\\dfrac{4}{3\\times 7}\\right)+\\cdots$ (확인 필요: 손 줄바꿈 금지 규약과 절충)" },
+    { "id": "45-e5", "severity": "yellow", "where": "layout", "note": "첫 줄 낱말 간격이 크게 벌어짐(Underfull badness 4441 · ∑ 수식 안 줄바꿈 금지로 늘어남)" },
+    { "id": "46-81", "severity": "yellow", "where": "layout", "note": "첫 줄 낱말 간격이 벌어짐(Underfull badness 1496)" },
+    { "id": "47-88", "severity": "yellow", "where": "layout", "note": "「y축」이 줄 끝에서 y / 축으로 나뉨(규약상 x축·y축은 한 덩어리)", "fix": "body 의 「$y$축으로」 → 「\\nob{$y$축}으로」" },
+    { "id": "47-89", "severity": "yellow", "where": "choices", "note": "보기 상자에서 ㄷ. 라벨만 첫 줄 끝에 남고 수식은 다음 줄로 내려감", "fix": "\\bogi 안 라벨과 수식 사이를 ~ 로 묶기: ㄱ.~$…$ \\hfill ㄴ.~$…$ \\hfill ㄷ.~$…$ (ㄷ 항 전체가 다음 줄로 감)" },
+    { "id": "48-92", "severity": "yellow", "where": "layout", "note": "첫째·둘째 줄 낱말 간격이 크게 벌어짐(Underfull badness 10000)" },
+    { "id": "48-94", "severity": "yellow", "where": "choices", "note": "보기 상자 ㄱ 줄은 간격이 크게 벌어지고(Underfull badness 2762) ㄴ·ㄷ 줄은 displaystyle ∑ 때문에 줄 사이가 빽빽함 — 원본은 작은 ∑", "fix": "확인 필요: 보기 안 \\displaystyle\\sum_{n=1}^{\\infty} 을 \\sum\\limits_{n=1}^{\\infty} 로 줄이는 방안" }
+  ],
+  "notes": [
+    "예제 12건(41-e1·42-e2·43-e3·44-e4·45-e5·52-e6·53-e7·54-e8·56-e9·57-e10·58-e11·59-e12)은 상자 발문만 전사됨 — 설명·풀이·KEY Point·RPM 안내·QR 없음(정상).",
+    "그림 문항 5건(57-e10·57-109·58-e11·58-110·59-111)은 원본 벡터 크롭을 그대로 써서 점·라벨·각 표시가 원문과 같음.",
+    "태그·레벨 배지(교육청 기출 36-64·46-79·48-90, 확인체크, STEP 띠)는 쪽 이미지 띠와 일치.",
+    "낱장 조판 검사: 68문항 전부 xelatex 로 110mm 낱장 재조판 — Overfull 은 42-71 하나, 나머지는 Underfull(느슨한 줄)만 있음."
+  ] }

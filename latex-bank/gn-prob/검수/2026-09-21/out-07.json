@@ -1,0 +1,8 @@
+{ "range": "155-340~183-e8", "checked": 68, "ok": 63,
+  "findings": [
+    { "id": "160-357", "severity": "yellow", "where": "layout", "note": "side 표가 첫 문단(2줄)보다 길어 조건 상자(\\exprbox minipage)가 표 아래로 밀리며 첫 문단과 상자 사이에 큰 빈 공간이 생김. 원본은 표가 마지막 문단 옆에 있음", "fix": "확인 필요 — figure_layout 을 below 로 바꾸거나 표를 마지막 문단 옆에 붙이는 배치 검토" },
+    { "id": "162-359", "severity": "yellow", "where": "layout", "note": "「일 때, P(X≥280)을 구하시오.」 줄이 양쪽 정렬로 과도하게 벌어짐(단서 괄호가 통째로 다음 줄로 밀림)", "fix": "확인 필요 — \\cond 앞 줄바꿈 허용 또는 단서를 \\par 로 분리" },
+    { "id": "164-365", "severity": "yellow", "where": "body", "note": "긴 수식이 한 줄에 못 들어가 오른쪽 여백 밖으로 넘쳐 마지막 항 (1/5)^100 이 잘림", "fix": "수식을 \\par\\smallskip\\centerline{…} 로 빼고 두 줄로 나누거나 \\dfrac→\\frac 로 줄여 한 줄에 맞추기" },
+    { "id": "167-e1", "severity": "yellow", "where": "passage", "note": "보기 2단(\\hfill) 배치에서 「ㄴ. 우리나라의 / 인구주택총조사」, 「ㄹ. 과일의 당도 / 조사」가 어색하게 줄바꿈됨", "fix": "\\bogi 를 ㄱ\\\\ ㄴ\\\\ ㄷ\\\\ ㄹ 한 줄에 하나씩으로 바꾸기" },
+    { "id": "167-368", "severity": "yellow", "where": "passage", "note": "보기 2단 배치에서 「ㄹ. 고등학생의 / 수면 시간 조사」가 어색하게 줄바꿈되고 ㄷ·ㄹ 사이 간격이 좁음", "fix": "\\bogi 를 ㄱ\\\\ ㄴ\\\\ ㄷ\\\\ ㄹ 한 줄에 하나씩으로 바꾸기" }
+  ] }

@@ -1,0 +1,16 @@
+% 0145(본책 30쪽) — △ABC 와 내접원(내심 I), IB·IC, ∠BIC=105°. 라벨 A·B·C·I·105°. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=0.9, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (2,0); \coordinate (A) at (2,3.464); \coordinate (I) at (1.268,0.732);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (I) circle (0.732);
+  \draw (I) -- (B);
+  \draw (I) -- (C);
+  \fill (I) circle (1.2pt);
+  % 각 105°(I)
+  \draw[line width=0.4pt] ($(I)+(210:0.3)$) arc[start angle=210, end angle=315, radius=0.3];
+  \node[font=\small] at (1.268,0.2) {$105^\circ$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, below left] at (B) {B};
+  \node[font=\small, below right] at (C) {C};
+  \node[font=\small, above] at (I) {I};
+\end{tikzpicture}

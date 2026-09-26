@@ -1,0 +1,21 @@
+% 0456(본책 83쪽) — 원, 현 AD∥BE(화살표), AB=BC(호 표시), 현 DC·EC, ∠ADC=58°. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.000,-1.100) -- (-1.096,-0.096);
+  \draw (0.933,-0.583) -- (-0.662,0.878);
+  \draw (-1.096,-0.096) -- (0.989,0.482);
+  \draw (-0.662,0.878) -- (0.989,0.482);
+  \draw[->, line width=0.4pt] (-0.459,-0.679) -- (-0.636,-0.517);
+  \draw[->, line width=0.4pt] (0.224,0.067) -- (0.047,0.229);
+  \fill[green!15] (0.989,0.482) -- (0.697,0.552) arc (166.5:195.5:0.300) -- cycle;
+  \draw[line width=0.4pt] (0.697,0.552) arc (166.5:195.5:0.300);
+  \draw[line width=0.4pt] (-0.875,-0.299) arc (-42.5:15.5:0.300);
+  \node[font=\small, inner sep=0.5pt] at (-0.561,-0.224) {$58^\circ$};
+  \draw[line width=0.4pt] (0.499,-0.901) -- (0.567,-1.023);
+  \draw[line width=0.4pt] (1.029,-0.054) -- (1.168,-0.061);
+  \node[font=\small, inner sep=1pt] at (-0.000,-1.300) {A};
+  \node[font=\small, inner sep=1pt] at (1.102,-0.689) {B};
+  \node[font=\small, inner sep=1pt] at (1.168,0.570) {C};
+  \node[font=\small, inner sep=1pt] at (-1.295,-0.113) {D};
+  \node[font=\small, inner sep=1pt] at (-0.782,1.038) {E};
+\end{tikzpicture}

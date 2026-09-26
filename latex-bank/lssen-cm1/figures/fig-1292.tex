@@ -1,0 +1,7 @@
+% 1292(본책 180쪽) — 평행한 두 세로 직선 l(왼쪽 · 점 6개), m(오른쪽 · 점 5개). 스캔 그림을 TikZ 로 다시 그림. 라벨은 원문의 l, m 만.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0,-0.2) -- (0,2.6) node[above, font=\small] {$l$};
+  \draw (1.5,-0.2) -- (1.5,2.6) node[above, font=\small] {$m$};
+  \foreach \y in {0.1,0.55,1.0,1.45,1.9,2.35} { \fill (0,\y) circle (2.2pt); }
+  \foreach \y in {0.2,0.7,1.2,1.7,2.2} { \fill (1.5,\y) circle (2.2pt); }
+\end{tikzpicture}

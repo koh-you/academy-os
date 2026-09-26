@@ -1,0 +1,26 @@
+% 0129(본책 27쪽) — 직각삼각형 ABC(∠A=90°), AD⊥BC, DE⊥AC. 라벨 A·B·C·D·E·x(∠BAD)·y(∠CAD)·16(AE)·4(EC), 직각 표시(A·D·E). 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=0.09, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (44.72,0); \coordinate (D) at (35.78,0); \coordinate (A) at (35.78,17.89); \coordinate (E) at (42.93,3.58);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (D);
+  \draw (D) -- (E);
+  % 직각 표시(A·D·E)
+  \draw[line width=0.4pt] (33.1,16.55) -- (34.44,13.87) -- (37.12,15.21);
+  \draw[line width=0.4pt] (32.78,0) -- (32.78,3) -- (35.78,3);
+  \draw[line width=0.4pt] (41.59,6.26) -- (40.25,3.58) -- (41.59,2.9);
+  % 각 x·y(A)
+  \draw[line width=0.4pt] (31.3,15.65) arc[start angle=206.6, end angle=270, radius=5];
+  \draw[line width=0.4pt] (35.78,12.89) arc[start angle=270, end angle=296.6, radius=5];
+  \node[font=\small] at (32.6,13.2) {$x$};
+  \node[font=\small] at (37.6,13.4) {$y$};
+  % 길이(파선 호)
+  \draw[dashed, line width=0.4pt] (A) to[bend left=30] (E);
+  \draw[dashed, line width=0.4pt] (E) to[bend left=40] (C);
+  \node[font=\small] at (43.6,12.5) {$16$};
+  \node[font=\small] at (46.4,2.6) {$4$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, below right] at (C) {C};
+  \node[font=\small, below] at (D) {D};
+  \node[font=\small, above right] at (E) {E};
+\end{tikzpicture}

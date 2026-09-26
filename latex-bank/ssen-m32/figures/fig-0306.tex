@@ -1,0 +1,13 @@
+% 0306(본책 58쪽) — 원 모양의 종이를 원주 위의 한 점이 중심 O 와 겹치도록 접은 모양(접힌 호가 O 를 지남), 접힌 현의 길이 12 cm. 답(반지름)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \fill[orange!18] (0.285,1.063) arc[start angle=75.0, end angle=-165.0, radius=1.100] arc[start angle=-105.0, end angle=15.0, radius=1.100] -- cycle;
+  \fill[orange!35] (-1.063,-0.285) arc[start angle=-105.0, end angle=15.0, radius=1.100] -- cycle;
+  \draw (0.285,1.063) arc[start angle=75.0, end angle=-165.0, radius=1.100];
+  \draw[dashed, line width=0.4pt] (0.285,1.063) arc[start angle=75.0, end angle=195.0, radius=1.100];
+  \draw (-1.063,-0.285) -- (0.285,1.063);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw (-1.063,-0.285) arc[start angle=-105.0, end angle=15.0, radius=1.100];
+  \draw[dashed, line width=0.4pt] (-1.063,-0.285) to[bend left=22] (0.285,1.063);
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.750,0.950) {$12\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.200,-0.050) {O};
+\end{tikzpicture}

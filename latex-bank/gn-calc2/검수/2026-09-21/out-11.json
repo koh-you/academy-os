@@ -1,0 +1,5 @@
+{ "range": "269-550~282-582", "checked": 39, "ok": 37,
+  "findings": [
+    { "id": "270-558", "severity": "yellow", "where": "layout", "note": "첫 줄 끝 $x$ 와 다음 줄 첫 「축」이 갈라져 「x / 축」으로 줄바꿈됨(내용은 일치)", "fix": "body 의 「$x$축, $y$축으로」 를 「\\mbox{$x$축}, $y$축으로」 로 (이 문항만)" },
+    { "id": "272-560", "severity": "yellow", "where": "layout", "note": "과정 상자 마지막 수식 줄의 「(cm³)」 가 상자 오른쪽 테두리를 넘어 걸침(내용·빈칸 개수는 일치)", "fix": "exprbox 안 \\blank[4em] 세 개를 3em 으로 줄이거나 마지막 수식을 두 줄로 나눔" }
+  ] }

@@ -1,0 +1,48 @@
+{
+  "range": "218-e9~244-494",
+  "checked": 68,
+  "ok": 62,
+  "red": 0,
+  "yellow": 6,
+  "findings": [
+    {
+      "id": "219-445",
+      "severity": "yellow",
+      "where": "layout",
+      "note": "경미 — cases 블록이 든 첫 줄이 양쪽 정렬로 단어 간격이 크게 벌어짐(「함수  f(x)  =  {…}  에 대하여  정적분」). 내용은 원본과 동일."
+    },
+    {
+      "id": "220-449",
+      "severity": "yellow",
+      "where": "body",
+      "note": "조건 상자 ㈎ 가 줄바꿈되어 「이다.」 한 어절만 가운데 정렬로 홀로 남음. 내용은 원본과 동일.",
+      "fix": "\\exprbox 안 ㈎ 문장을 「…에 대하여\\\\ $g'(x)=f'(-x)$이다.」처럼 명시적으로 두 줄로 나눔"
+    },
+    {
+      "id": "227-458",
+      "severity": "yellow",
+      "where": "body",
+      "note": "과정 상자 마지막 줄 「∫₀²3x²e^{x³}dx=∫_□^□ □ dt=[□]_□^□=□」 이 상자 오른쪽 테두리를 넘어가 끝의 =\\blank[4em] 이 잘려 보임. 내용(빈칸 위치·개수)은 원본과 동일.",
+      "fix": "마지막 등식을 두 줄로 나눔 — 「…\\,dt$\\par \\hspace*{9em}$=\\Bigl[\\blank[3em]\\Bigr]_{\\blank}^{\\blank}=\\blank[4em]$」"
+    },
+    {
+      "id": "238-481",
+      "severity": "yellow",
+      "where": "layout",
+      "note": "경미 — 마지막 줄에 「오.」 한 글자만 남음(구하시/오.). 내용은 원본과 동일."
+    },
+    {
+      "id": "244-491",
+      "severity": "yellow",
+      "where": "layout",
+      "note": "첫 줄 「미분가능한 함수 f(x)의 한 부정적분 F(x)가」가 글자 사이까지 크게 벌어져 조판됨(둘째 줄 수식 F(x)=xf(x)-x²eˣ 이 못 끊겨 밀림). 내용은 원본과 동일.",
+      "fix": "등식을 「\\par\\smallskip\\centerline{$F(x)=xf(x)-x^2e^x$}\\par\\smallskip\\noindent 을 만족시킨다.」 식으로 가운데 줄로 분리하거나 줄바꿈 허용"
+    },
+    {
+      "id": "244-493",
+      "severity": "yellow",
+      "where": "layout",
+      "note": "경미 — 첫 줄 「함수 f(x)=eˣ-1의 역함수 f⁻¹(x)에 대하여」 단어 간격이 크게 벌어짐(둘째 줄 적분식이 밀림). 내용은 원본과 동일."
+    }
+  ]
+}

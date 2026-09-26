@@ -1,0 +1,16 @@
+% 0160(본책 33쪽) — △ABC(BC=8, ∠B=75°, ∠C=60°), AB=x. 스캔 삽화를 TikZ 로 다시 그림. 답(x)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (1.6,0); \coordinate (A) at (0.51,1.89);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] (0.4,0) arc[start angle=0, end angle=75, radius=0.4];
+  \node[font=\small] at (0.55,0.6) {$75^\circ$};
+  \draw[line width=0.4pt] (1.2,0) arc[start angle=180, end angle=120, radius=0.4];
+  \node[font=\small] at (1.2,0.32) {$60^\circ$};
+  \draw[dashed, line width=0.4pt] (B) to[bend left=25] (A);
+  \draw[dashed, line width=0.4pt] (B) to[bend right=25] (C);
+  \node[font=\small] at (-0.2,1.0) {$x$};
+  \node[font=\small] at (0.8,-0.45) {$8$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+\end{tikzpicture}

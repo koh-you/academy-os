@@ -1,0 +1,12 @@
+{ "range": "222-462~245-516", "checked": 68, "ok": 59,
+  "findings": [
+    { "id": "224-e6", "severity": "yellow", "where": "layout", "note": "첫 줄 「세 직선 l: x+4 = (6−y)/2, m: (3−x)/2 = (y−1)/a,」 자간이 크게 늘어남. 내용은 일치" },
+    { "id": "224-469", "severity": "yellow", "where": "layout", "note": "가운데 세 직선 식 줄(centerline)이 본문 폭보다 길어 본문보다 작은 글씨로 축소되어 보임(경미). 내용은 일치" },
+    { "id": "235-496", "severity": "yellow", "where": "layout", "note": "첫 줄 「두 구 (x−1)²+(y−2)²+(z−3)²=1,」 자간이 크게 늘어남. 내용은 일치" },
+    { "id": "235-499", "severity": "yellow", "where": "layout", "note": "첫 줄 「평면 α: x+2y−2z=0에 대하여 같은 쪽에 있는 두」 자간이 늘어남(경미). 내용은 일치" },
+    { "id": "238-501", "severity": "yellow", "where": "layout", "note": "1~2줄(직선 식 · 「2x+y+az+5=0이 이루는 각의 크기가 60°일 때, 정」) 자간이 늘어남. 내용은 일치" },
+    { "id": "239-503", "severity": "yellow", "where": "layout", "note": "첫 줄 「점 (−1,1,−2)를 지나고 두 평면 x−3y+3z=0,」 자간이 크게 늘어남. 내용은 일치" },
+    { "id": "240-e15", "severity": "yellow", "where": "subs", "note": "⑴·⑵ 첫 줄(직선 l 의 식이 든 줄)이 모두 자간이 크게 늘어나 = 앞뒤가 벌어짐. 내용은 일치" },
+    { "id": "244-511", "severity": "yellow", "where": "layout", "note": "첫 줄 「두 점 (−6,−3,7), (2,1,3)을 지나는 직선과 평면」 자간이 크게 늘어남. 내용은 일치" },
+    { "id": "245-516", "severity": "yellow", "where": "layout", "note": "1~2줄(α, β 평면 식) 자간이 크게 늘어나 = 앞뒤가 벌어짐. 내용은 일치" }
+  ] }

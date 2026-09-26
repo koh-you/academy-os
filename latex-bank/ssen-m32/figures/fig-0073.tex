@@ -1,0 +1,27 @@
+% 0073(본책 18쪽) — 원기둥(반지름 5·높이 12는 본문에만), 윗면 둘레의 점 P 에서 아랫면에 내린 수선의 발 H, H 에서 지름 AB 에 내린 수선의 발 Q, 각 x(∠PQH), 직각 표시 H. 라벨: P·A·B·Q·H·x. 스캔 삽화를 TikZ 로 다시 그림(원문처럼 보이는 대로 그린 모식도). 길이는 그림에 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.6pt]
+  \coordinate (P) at (0.6,2.88); \coordinate (H) at (0.6,0.28); \coordinate (Q) at (0.15,-0.042);
+  \coordinate (A) at (-0.9,0.25); \coordinate (B) at (0.9,-0.25);
+  % 몸통
+  \fill[red!14] (-1,0) -- (-1,2.6) arc[start angle=180, end angle=360, x radius=1, y radius=0.35] -- (1,0) arc[start angle=0, end angle=-180, x radius=1, y radius=0.35] -- cycle;
+  \fill[red!24] (0,2.6) ellipse [x radius=1, y radius=0.35];
+  \draw (-1,0) -- (-1,2.6) (1,0) -- (1,2.6);
+  \draw (0,2.6) ellipse [x radius=1, y radius=0.35];
+  \draw (1,0) arc[start angle=0, end angle=-180, x radius=1, y radius=0.35];
+  \draw[dashed, line width=0.4pt] (-1,0) arc[start angle=180, end angle=0, x radius=1, y radius=0.35];
+  % 지름 AB · 수선
+  \draw (A) -- (B);
+  \draw (P) -- (H);
+  \draw (P) -- (Q) -- (H);
+  \fill (H) circle (0.9pt);
+  % 직각 표시(H)
+  \draw[line width=0.4pt] (0.6,0.4) -- (0.502,0.33) -- (0.502,0.21);
+  % 각 x(∠PQH)
+  \draw[line width=0.4pt] ($(Q)+(35.6:0.3)$) arc[start angle=35.6, end angle=81.2, radius=0.3cm];
+  \node[font=\small] at (0.42,0.36) {$x$};
+  \node[font=\small, above] at (P) {P};
+  \node[font=\small, above left] at (-0.82,0.2) {A};
+  \node[font=\small, below right] at (B) {B};
+  \node[font=\small, below left] at (0.2,-0.02) {Q};
+  \node[font=\small, right] at (0.62,0.22) {H};
+\end{tikzpicture}

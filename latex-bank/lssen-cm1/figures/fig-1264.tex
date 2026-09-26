@@ -1,0 +1,7 @@
+% 1264(본책 176쪽) — 직사각형의 변 위에 8개의 점(각 변에 2개씩 · 꼭짓점에는 없음). 스캔 그림을 TikZ 로 다시 그림. 라벨 없음.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0,0) rectangle (3,1.8);
+  \foreach \p in {(1,1.8),(2,1.8),(1,0),(2,0),(0,0.6),(0,1.2),(3,0.6),(3,1.2)} {
+    \fill \p circle (2.2pt);
+  }
+\end{tikzpicture}

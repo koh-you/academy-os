@@ -1,0 +1,17 @@
+% 0096(본책 21쪽) — ∠A=45°, AB=AC=4 인 이등변삼각형 ABC, 4(AB) 파선 호, 같은 길이 표시(AB=AC). 라벨: A·B·C·45°·4. 스캔 삽화를 TikZ 로 다시 그림. 답(tan 67.5°)은 적지 않는다.
+\begin{tikzpicture}[scale=1.3, line width=0.6pt]
+  \coordinate (A) at (0.765,1.848); \coordinate (B) at (0,0); \coordinate (C) at (1.53,0);
+  \draw (A) -- (B) -- (C) -- cycle;
+  % 45°
+  \draw[line width=0.4pt] ($(A)+(-112.5:0.4)$) arc[start angle=-112.5, end angle=-67.5, radius=0.4cm];
+  \node[font=\small] at (0.765,1.2) {$45^\circ$};
+  % 같은 길이 표시(AB=AC)
+  \draw[line width=0.4pt] (0.294,0.929) -- (0.442,0.868) (0.324,1.003) -- (0.472,0.942);
+  \draw[line width=0.4pt] (1.089,0.868) -- (1.237,0.929) (1.059,0.942) -- (1.207,1.003);
+  % 4(AB 파선 호)
+  \draw[dashed, line width=0.4pt] (B) to[bend left=25] (A);
+  \node[font=\small] at (0.12,1.05) {$4$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, below left] at (B) {B};
+  \node[font=\small, below right] at (C) {C};
+\end{tikzpicture}

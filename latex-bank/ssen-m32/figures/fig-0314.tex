@@ -1,0 +1,21 @@
+% 0314(본책 60쪽) — 원 O 에 내접한 △ABC, OM=ON(M∈AB, N∈AC), ∠BAC=50°. 답(∠ABC)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (0.000,1.100) -- (-0.843,-0.707) -- (0.843,-0.707) -- (0.000,1.100);
+  \draw (0.000,0.000) -- (-0.421,0.196);
+  \draw (0.000,0.000) -- (0.421,0.196);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.371,0.305) -- (-0.262,0.255) -- (-0.313,0.146);
+  \draw[line width=0.4pt] (0.371,0.305) -- (0.262,0.255) -- (0.313,0.146);
+  \draw[line width=0.4pt] (-0.185,0.153) -- (-0.236,0.044);
+  \draw[line width=0.4pt] (0.236,0.044) -- (0.185,0.153);
+  \draw[line width=0.4pt] (-0.127,0.828) arc (-115.000:-65.000:0.300);
+  \node[font=\small, inner sep=1.5pt] at (0.000,0.550) {$50^\circ$};
+  \fill[green!30] (-0.843,-0.707) -- (-0.775,-0.562) arc (65.000:-0.000:0.160) -- cycle;
+  \node[font=\small, inner sep=1.5pt] at (0.000,1.260) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.983,-0.807) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.983,-0.807) {C};
+  \node[font=\small, inner sep=1.5pt] at (-0.581,0.216) {M};
+  \node[font=\small, inner sep=1.5pt] at (0.581,0.216) {N};
+  \node[font=\small, inner sep=1.5pt] at (0.000,-0.200) {O};
+\end{tikzpicture}

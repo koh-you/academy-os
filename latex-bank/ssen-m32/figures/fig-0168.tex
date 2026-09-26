@@ -1,0 +1,37 @@
+% 0168(본책 35쪽) — □ABCD(대각선 AC=a, BD=b, 대각선이 이루는 각 x)와 각 꼭짓점을 지나 두 대각선에 평행한 직선으로 만든 □EFGH. 스캔 삽화를 TikZ 로 다시 그림. 빈칸 답(가·나)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt, >=stealth]
+  \coordinate (A) at (0.55,1.55); \coordinate (B) at (0.1,0.15); \coordinate (C) at (2.6,0.2); \coordinate (D) at (2.05,1.85);
+  \coordinate (E) at (1.39,2.28); \coordinate (F) at (-0.56,0.58); \coordinate (G) at (1.49,-0.77); \coordinate (H) at (3.44,0.93);
+  \coordinate (X) at (1.21,1.12);
+  \fill[yellow!45] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[line width=0.5pt] (E) -- (F) -- (G) -- (H) -- cycle;
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[line width=0.5pt] (A) -- (C); \draw[line width=0.5pt] (B) -- (D);
+  % 평행 표시(화살표)
+  \draw[->, line width=0.4pt] ($(E)!0.35!(F)$) -- ($(E)!0.5!(F)$);
+  \draw[->, line width=0.4pt] ($(H)!0.35!(G)$) -- ($(H)!0.5!(G)$);
+  \draw[->, line width=0.4pt] ($(E)!0.4!(H)$) -- ($(E)!0.55!(H)$);
+  \draw[->, line width=0.4pt] ($(F)!0.4!(G)$) -- ($(F)!0.55!(G)$);
+  % 각 x
+  \draw[line width=0.4pt] ($(X)!0.3cm!(A)$) arc[start angle=146.6, end angle=221.1, radius=0.3];
+  \node[font=\small] at (0.78,1.05) {$x$};
+  \draw[line width=0.4pt] ($(F)!0.3cm!(E)$) arc[start angle=41.1, end angle=-33.4, radius=0.3];
+  \node[font=\small] at (-0.15,0.6) {$x$};
+  % 길이(파선 호)
+  \draw[dashed, line width=0.4pt] (A) to[bend right=20] (E);
+  \draw[dashed, line width=0.4pt] (B) to[bend right=20] (G);
+  \draw[dashed, line width=0.4pt] (A) to[bend left=20] (C);
+  \draw[dashed, line width=0.4pt] (B) to[bend right=20] (D);
+  \node[font=\small] at (0.75,2.05) {$b$};
+  \node[font=\small] at (0.65,-0.55) {$a$};
+  \node[font=\small] at (1.95,0.95) {$a$};
+  \node[font=\small] at (1.35,0.55) {$b$};
+  \node[font=\small, left] at (A) {A};
+  \node[font=\small, below left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, right] at (D) {D};
+  \node[font=\small, above] at (E) {E};
+  \node[font=\small, left] at (F) {F};
+  \node[font=\small, below] at (G) {G};
+  \node[font=\small, right] at (H) {H};
+\end{tikzpicture}

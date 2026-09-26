@@ -34,7 +34,8 @@ const describeItem = (item) => {
   if (item.review_status === "flagged") line += ` · ⚠ ${item.review_note}`;
   const entry = draft?.items?.[item.number_label];
   if (entry) {
-    line += ` · 인쇄 ${entry.printed_page}쪽`;
+    // draft 의 printed_page 는 ingest 가 offset 을 모른 채 pdf 쪽을 그대로 적은 값(RPM 중3-1 전 배치에서 확인) — 쪽 머리와 같은 규칙으로 계산한다.
+    line += ` · 인쇄 ${item.pdf_page + offset}쪽`;
     if (entry.tags?.length) line += ` · 태그 ${entry.tags.join("/")}`;
     line += entry.figure ? ` · 그림 ${entry.figure} (${path.join(figuresDir, entry.figure.slice(5))})${entry.note ? ` ⚠ ${entry.note}` : ""}` : " · 그림 없음";
     if (entry.figure_parts?.length) line += ` · 둘째 크롭 ${entry.figure_parts.map((part) => `${part} (${path.join(figuresDir, part.slice(5))})`).join(", ")}`;
@@ -73,7 +74,15 @@ for (const spec of String(args.batches).split(",").map((value) => value.trim()).
     }
     body += "\n";
   }
-  const head = `# 전사 배치 ${name} · ${unit} · pdf ${from}~${to}쪽 (인쇄 ${from + offset}~${to + offset}쪽)\n\n문항 ${count}개. 답·해설 크롭 파일이 없을 수 있다(답지에서 못 찾은 문항) — 그때는 답지 쪽 렌더로 대조하거나 발문을 풀어 「계산」으로 적는다.\n\n`;
+  // 번호 연속 끊김: 이 배치 쪽 범위의 번호 사이에 빠진 번호가 있으면 머리에 적는다(OCR 판에서 배지를 못 읽은 문항 → 쪽 이미지로 전사).
+  const numbers = manifest.items.filter((item) => item.pdf_page >= from && item.pdf_page <= to && /^\d+$/.test(String(item.number_label))).map((item) => Number(item.number_label));
+  const missing = [];
+  if (numbers.length) {
+    const lo = Math.min(...numbers), hi = Math.max(...numbers), have = new Set(numbers);
+    for (let n = lo; n <= hi; n += 1) if (!have.has(n)) missing.push(String(n).padStart(4, "0"));
+  }
+  const missingNote = missing.length ? `**빠진 번호(배지 못 읽음 · 쪽 이미지에서 찾아 전사): ${missing.join(" ")}**\n\n` : "";
+  const head = `# 전사 배치 ${name} · ${unit} · pdf ${from}~${to}쪽 (인쇄 ${from + offset}~${to + offset}쪽)\n\n문항 ${count}개. 답·해설 크롭 파일이 없을 수 있다(답지에서 못 찾은 문항) — 그때는 답지 쪽 렌더로 대조하거나 발문을 풀어 「계산」으로 적는다.\n\n${missingNote}`;
   fs.writeFileSync(path.join(path.resolve(args.out), `batch-${name}.md`), head + body, "utf8");
   console.log(`${name} ${from}-${to} ${unit} · ${count}문항`);
 }

@@ -1,0 +1,15 @@
+% 0173(본책 36쪽) — 직각삼각형 ABC(∠C=90°), BC=a·AC=b·AB=c(파선 호). 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (2.2,0); \coordinate (A) at (2.2,2.3);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] (1.98,0) -- (1.98,0.22) -- (2.2,0.22);
+  \draw[dashed, line width=0.4pt] (B) to[bend left=25] (A);
+  \draw[dashed, line width=0.4pt] (A) to[bend left=25] (C);
+  \draw[dashed, line width=0.4pt] (B) to[bend right=25] (C);
+  \node[font=\small] at (0.7,1.45) {$c$};
+  \node[font=\small] at (2.7,1.15) {$b$};
+  \node[font=\small] at (1.1,-0.45) {$a$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+\end{tikzpicture}

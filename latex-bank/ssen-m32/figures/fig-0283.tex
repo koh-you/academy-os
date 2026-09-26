@@ -1,0 +1,21 @@
+% 0283(본책 55쪽) — △ABC 의 내접원 O(접점 D∈AB, E∈BC, F∈CA), AD=9 cm, BE=4 cm, EC=11 cm, AC=x cm. 답(x)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (-0.031,2.015) -- (0.000,0.000) -- (2.325,0.000) -- cycle;
+  \draw (0.620,0.630) circle (0.630);
+  \fill (0.620,0.630) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (-0.031,2.015) to[bend right=22] (-0.010,0.620);
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.320,1.367) {$9\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend right=25] (0.620,0.000);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.310,-0.220) {$4\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.620,0.000) to[bend right=22] (2.325,0.000);
+  \node[font=\small, fill=white, inner sep=1pt] at (1.523,-0.240) {$11\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (-0.031,2.015) to[bend left=22] (2.325,0.000);
+  \node[font=\small, fill=white, inner sep=1pt] at (1.567,1.307) {$x\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-0.031,2.215) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.150,-0.100) {B};
+  \node[font=\small, inner sep=1.5pt] at (2.505,-0.050) {C};
+  \node[font=\small, inner sep=1.5pt] at (-0.160,0.670) {D};
+  \node[font=\small, inner sep=1.5pt] at (0.720,-0.160) {E};
+  \node[font=\small, inner sep=1.5pt] at (1.129,1.268) {F};
+  \node[font=\small, inner sep=1.5pt] at (0.620,0.410) {O};
+\end{tikzpicture}

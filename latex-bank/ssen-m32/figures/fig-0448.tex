@@ -1,0 +1,21 @@
+% 0448(본책 81쪽) — 지름 AB 인 반원 O 위의 점 C, C 에서 AB 에 내린 수선의 발 D, AB=7, BC=2√7, ∠ACD=x. 답은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (1.100,0.000) arc (0:180:1.100);
+  \draw (-1.100,0.000) -- (1.100,0.000);
+  \draw (-1.100,0.000) -- (-0.157,1.089);
+  \draw (1.100,0.000) -- (-0.157,1.089);
+  \draw (-0.157,1.089) -- (-0.157,0.000);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.157,0.140) -- (-0.297,0.140) -- (-0.297,0.000);
+  \draw[line width=0.4pt] (-0.354,0.862) arc (229.1:270.0:0.300);
+  \draw[dashed, line width=0.4pt] (-0.157,1.089) to[bend left=18] (1.100,0.000);
+  \draw[dashed, line width=0.4pt] (-1.100,0.000) to[bend right=16] (1.100,0.000);
+  \node[font=\small, inner sep=0.5pt] at (-0.332,0.620) {$x$};
+  \node[font=\small, fill=white, inner sep=1pt] at (0.635,0.733) {$2\sqrt{7}$};
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.000,-0.360) {$7$};
+  \node[font=\small, inner sep=1.5pt] at (-1.300,0.000) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.300,0.000) {B};
+  \node[font=\small, inner sep=1.5pt] at (-0.157,1.289) {C};
+  \node[font=\small, inner sep=1.5pt] at (-0.257,-0.173) {D};
+  \node[font=\small, inner sep=1.5pt] at (0.100,-0.173) {O};
+\end{tikzpicture}

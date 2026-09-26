@@ -1,0 +1,15 @@
+% 0673(본책 94쪽) — 포물선 y=-x^2+8x 와 한 변이 x축 위에 있는 내접 직사각형 ABCD(연분홍 채움). 라벨은 원문의 O·A·B·C·D·x·y 와 식뿐. 스캔 그림이라 TikZ 로 다시 그림.
+% 직사각형의 위치는 답(둘레 최대)이 읽히지 않게 임의로 둠.
+\begin{tikzpicture}[x=0.34cm, y=0.19cm, line width=0.5pt]
+  \fill[red!18] (1.5,0) rectangle (6.5,9.75);
+  \draw[->, >=stealth, line width=0.7pt] (-1.2,0) -- (9.8,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.5) -- (0,19.5) node[below right=-1pt, font=\small] {$y$};
+  \node[below left, font=\small, inner sep=1pt] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt, domain=-0.45:8.45, samples=70] plot (\x, {-\x*\x+8*\x});
+  \draw[line width=0.6pt] (1.5,0) rectangle (6.5,9.75);
+  \node[left, font=\small, inner sep=1.5pt] at (1.5,9.75) {$\mathrm{A}$};
+  \node[right, font=\small, inner sep=1.5pt] at (6.5,9.75) {$\mathrm{D}$};
+  \node[below, font=\small, inner sep=2pt] at (1.7,0) {$\mathrm{B}$};
+  \node[below, font=\small, inner sep=2pt] at (6.5,0) {$\mathrm{C}$};
+  \node[right, font=\small, inner sep=1pt] at (3.2,18.6) {$y=-x^2+8x$};
+\end{tikzpicture}

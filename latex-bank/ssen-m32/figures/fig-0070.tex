@@ -1,0 +1,28 @@
+% 0070(본책 17쪽) — 한 모서리 3 cm 정육면체 ABCD-EFGH(A·B·C·D 윗면, E·F·G·H 아랫면), 대각선 BH 와 FH, 각 x(∠BHF). 라벨: A~H, 3 cm(AD) 파선 호. 숨은 모서리·FH 는 파선. 스캔 삽화를 TikZ 로 다시 그림. 답(cos x)은 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.6pt]
+  \coordinate (B) at (0,2); \coordinate (C) at (2,2); \coordinate (F) at (0,0); \coordinate (G) at (2,0);
+  \coordinate (A) at (0.8,2.6); \coordinate (D) at (2.8,2.6); \coordinate (E) at (0.8,0.6); \coordinate (H) at (2.8,0.6);
+  \fill[cyan!12] (B) -- (C) -- (G) -- (F) -- cycle;
+  \fill[cyan!22] (C) -- (D) -- (H) -- (G) -- cycle;
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (B) -- (F) -- (G) -- (C);
+  \draw (D) -- (H) -- (G);
+  \draw[dashed, line width=0.4pt] (A) -- (E) -- (F);
+  \draw[dashed, line width=0.4pt] (E) -- (H);
+  \draw (B) -- (H);
+  \draw[dashed, line width=0.4pt] (F) -- (H);
+  % 각 x(∠BHF)
+  \draw[line width=0.4pt] (2.442,0.779) arc[start angle=153.4, end angle=192.1, radius=0.4cm];
+  \node[font=\small] at (2.15,0.66) {$x$};
+  % 3 cm(AD 파선 호)
+  \draw[dashed, line width=0.4pt] (A) to[bend left=25] (D);
+  \node[font=\small, fill=white, inner sep=1pt] at (1.8,2.93) {$3\,\mathrm{cm}$};
+  \node[font=\small, above left] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, above right] at (2.0,1.95) {C};
+  \node[font=\small, above right] at (D) {D};
+  \node[font=\small, left] at (E) {E};
+  \node[font=\small, below left] at (F) {F};
+  \node[font=\small, below right] at (G) {G};
+  \node[font=\small, right] at (H) {H};
+\end{tikzpicture}

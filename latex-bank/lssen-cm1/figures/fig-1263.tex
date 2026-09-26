@@ -1,0 +1,7 @@
+% 1263(본책 175쪽) — 반원 위의 점 8개: 지름 위 4개(양 끝 포함), 호 위 4개. 라벨 없음. 스캔 그림을 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=0.55, line width=0.5pt]
+  \draw (-2.1,0) -- (2.1,0);
+  \draw (2.1,0) arc (0:180:2.1);
+  \foreach \x in {-2.1, -0.7, 0.7, 2.1} { \fill (\x,0) circle (2.2pt); }
+  \foreach \a in {36, 72, 108, 144} { \fill (\a:2.1) circle (2.2pt); }
+\end{tikzpicture}

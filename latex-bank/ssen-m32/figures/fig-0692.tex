@@ -1,0 +1,37 @@
+% 0692~0694 공통 산점도(본책 125쪽) — 혜진이네 반 15명의 영어(가로 60~100)·국어(세로 60~100) 점수 산점도, (80,100)에 「혜진」 표시. 스캔 산점도를 TikZ 로 다시 그림(점 15개 원문 위치).
+\begin{tikzpicture}[line width=0.5pt]
+  \draw[gray!55, line width=0.25pt] (0,0) grid[xstep=0.42cm, ystep=0.42cm] (2.52,2.52);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (2.67,0);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (0,2.67);
+  \draw[line width=0.5pt] (0.16,-0.06) -- (0.22,0.06) (0.23,-0.06) -- (0.29,0.06);
+  \draw[line width=0.5pt] (-0.06,0.16) -- (0.06,0.22) (-0.06,0.23) -- (0.06,0.29);
+  \node[font=\scriptsize, below left=0pt, inner sep=1.5pt] at (0,0) {$0$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (0.42,0) {$60$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (0.84,0) {$70$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (1.26,0) {$80$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (1.68,0) {$90$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (2.1,0) {$100$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,0.42) {$60$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,0.84) {$70$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,1.26) {$80$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,1.68) {$90$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,2.1) {$100$};
+  \node[font=\scriptsize, anchor=north east, inner sep=1pt] at (2.67,-0.38) {영어(점)};
+  \node[font=\scriptsize, align=center, anchor=north east, inner sep=1pt] at (-0.57,2.67) {국\\어\\(점)};
+  \fill (1.26,2.1) circle (1.5pt);
+  \fill (0.84,1.68) circle (1.5pt);
+  \fill (1.26,1.68) circle (1.5pt);
+  \fill (1.68,1.68) circle (1.5pt);
+  \fill (2.1,1.68) circle (1.5pt);
+  \fill (0.42,1.26) circle (1.5pt);
+  \fill (1.26,1.26) circle (1.5pt);
+  \fill (1.68,1.26) circle (1.5pt);
+  \fill (2.1,1.26) circle (1.5pt);
+  \fill (0.84,0.84) circle (1.5pt);
+  \fill (1.26,0.84) circle (1.5pt);
+  \fill (1.68,0.84) circle (1.5pt);
+  \fill (0.42,0.42) circle (1.5pt);
+  \fill (0.84,0.42) circle (1.5pt);
+  \fill (2.1,0.42) circle (1.5pt);
+  \node[font=\scriptsize, right=1pt, inner sep=1pt] at (1.26,2.1) {혜진};
+\end{tikzpicture}

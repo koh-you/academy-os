@@ -1,0 +1,16 @@
+% 0175(본책 36쪽) — 직각삼각형 ABC(∠ABC=90°, ∠C=75°), AB=8, BH⊥AC. 스캔 삽화를 TikZ 로 다시 그림. 답(BH)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (A) at (0,2.8); \coordinate (C) at (0.75,0); \coordinate (H) at (0.7,0.19);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (B) -- (H);
+  \draw[line width=0.4pt] (0,0.2) -- (0.2,0.2) -- (0.2,0);
+  \draw[line width=0.4pt] ($(H)!0.18cm!(B)$) -- ($(H)!0.18cm!(B)+($(H)!0.18cm!(A)$)-(H)$) -- ($(H)!0.18cm!(A)$);
+  \draw[line width=0.4pt] (0.4,0) arc[start angle=180, end angle=105, radius=0.35];
+  \node[font=\small] at (0.35,-0.4) {$75^\circ$};
+  \draw[dashed, line width=0.4pt] (A) to[bend right=20] (B);
+  \node[font=\small] at (-0.5,1.4) {$8$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, below left] at (B) {B};
+  \node[font=\small, below right] at (C) {C};
+  \node[font=\small, right] at (H) {H};
+\end{tikzpicture}

@@ -1,0 +1,18 @@
+% 0390(본책 72쪽) — 점 P 에서 원 O 에 그은 두 접선(접점 A, B), 호 AB 위의 점 C(호 AC:호 CB=2:1), OC 의 연장선과 PB 의 교점 D, ∠APB=60°. 답(∠ODB)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \fill[green!30] (-0.839,-1.000) -- (-0.639,-1.000) arc[start angle=0.00, end angle=50.00, radius=0.200cm] -- cycle;
+  \draw (0.000,0.000) circle (1.000);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw (-1.732,-1.000) -- (-0.616,0.933);
+  \draw (-1.732,-1.000) -- (0.600,-1.000);
+  \draw (0.000,0.000) -- (-0.839,-1.000);
+  \draw[line width=0.4pt] (-1.332,-1.000) arc[start angle=0.00, end angle=30.00, radius=0.400cm];
+  \node[font=\small, inner sep=1.5pt] at (-1.182,-0.780) {$60^\circ$};
+  \draw[line width=0.4pt] (-0.639,-1.000) arc[start angle=0.00, end angle=50.00, radius=0.200cm];
+  \node[font=\small, inner sep=1.5pt] at (-1.043,0.531) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.000,-1.160) {B};
+  \node[font=\small, inner sep=1.5pt] at (-0.781,-0.686) {C};
+  \node[font=\small, inner sep=1.5pt] at (-0.839,-1.160) {D};
+  \node[font=\small, inner sep=1.5pt] at (-1.892,-1.000) {P};
+  \node[font=\small, inner sep=1.5pt] at (0.200,0.000) {O};
+\end{tikzpicture}

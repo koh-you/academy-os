@@ -1,0 +1,1860 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage{../sty/dm-editorial}
+\usepackage{fontspec}
+\usepackage{multicol}
+% 문항 전사용 보조 매크로(dm-editorial 매크로를 덮어쓰지 않는다)
+\newcommand{\pt}[1]{\mathrm{#1}}
+\newcommand{\seg}[1]{\overline{\mathrm{#1}}}
+\newcommand{\arc}[1]{\overset{\frown}{\mathrm{#1}}}
+\newcommand{\vecAB}[1]{\overrightarrow{\mathrm{#1}}}
+\newcommand{\exprbox}[1]{\par\smallskip\noindent\begin{center}\fbox{\begin{minipage}{0.9\linewidth}\centering\vspace{1.5mm}#1\vspace{1.5mm}\end{minipage}}\end{center}}
+% 여집합 · 「보기」 상자(ㄱ·ㄴ·ㄷ 참거짓 문항 — 줄바꿈은 \\)
+\newcommand{\comp}[1]{{#1}^{\mathrm{c}}}
+% 별도 줄 수식(원문의 가운데 줄): 좁은 낱장 폭보다 넓으면 폭에 맞게 줄인다(전사본의 \centerline 을 build 가 이것으로 바꾼다).
+\newcommand{\dispeq}[1]{\centerline{\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{#1}}}
+\newcommand{\bogi}[1]{\par\smallskip\noindent\begin{center}\fbox{\begin{minipage}{0.9\linewidth}\vspace{1mm}{\small\bfseries 보기}\par\smallskip\setlength{\parskip}{0.6mm}#1\vspace{1mm}\end{minipage}}\end{center}}
+\newcommand{\blank}[1][1.5em]{\raisebox{-0.15ex}{\framebox[#1]{\rule{0pt}{1.4ex}}}}
+\newcommand{\dmhint}[1]{\par\smallskip\begin{tcolorbox}[enhanced,colback=dm-navylight!60,colframe=dm-navy!40,boxrule=0.3pt,sharp corners,left=3mm,right=3mm,top=2mm,bottom=2mm,boxsep=0mm]\small\setlength{\parskip}{1mm}#1\end{tcolorbox}}
+% 구역 제목·공통 지시문은 뒤에 문항 한 개는 붙을 자리가 있어야 찍는다(쪽 끝 고아 방지).
+\newcommand{\dmsection}[1]{\par\needspace{10\baselineskip}\vspace{3mm}\noindent{\color{dm-navy}\hrule height 0.6pt}\vspace{1.2mm}\noindent{\dmheadingfont\bfseries\fontsize{11}{13}\selectfont\color{dm-navy}#1}\par\vspace{4mm}}
+% 지시문 뒤 4mm: 다음 문항의 출처 배지가 5mm 위로 올라오므로 긴 지시문 줄과 겹치지 않게 한다.
+\newcommand{\dmpassage}[1]{\par\needspace{8\baselineskip}\medskip\noindent{\dmheadingfont\bfseries\color{dm-navy}#1}\par\vspace{4mm}}
+% 줄바꿈 규약(프로토타입 mathbook-problems.sty · style.sty 와 같음): 수식 안에서는 줄을 바꾸지 않고, 「(단, …)」·「x축」은 한 덩어리.
+\binoppenalty=10000 \relpenalty=10000
+\newlength{\dmfigw}
+% 수식을 안 끊는 대신, 긴 수식 앞에서 줄을 바꾸면 앞 줄이 많이 비는 경우(RPM 중3-1 1022 지시문·0979)에 overfull 로 잘리지 않도록
+% 비상 늘임 폭을 준다 — tolerance 안에서 조판되는 문단에는 영향이 없다.
+\emergencystretch=2em
+\newcommand{\nob}[1]{\mbox{#1}}
+% 「(단, …)」 은 한 덩어리가 원칙이지만 그림 옆 좁은 폭(0.58)에서 긴 조건이 그림 뒤로 넘어가 잘리므로(RPM 공통수학2 0151),
+% 「(단,」 만 첫 낱말에 붙이고 안쪽 낱말 사이에서는 줄을 바꿀 수 있게 둔다(수식 안은 여전히 안 끊긴다).
+\newcommand{\cond}[1]{\mbox{(단,}\nobreakspace#1)}
+\raggedbottom
+
+\begin{document}
+\renewcommand{\dmchapunit}{01 제곱근의 뜻과 표현}
+\dmchapter{01}{제곱근의 뜻과 표현}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념원리 확인하기}
+\setcounter{dmproblemcount}{0}\dmpnum{11-01}{\input{items/11-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{11-02}{\input{items/11-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{11-03}{\input{items/11-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{11-04}{\input{items/11-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{11-05}{\input{items/11-05}}\vspace{6mm}
+\dmsection{핵심문제 익히기}
+\setcounter{dmproblemcount}{0}\dmpnum{12-h1}{\input{items/12-h1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{12-c1}{\input{items/12-c1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{12-h2}{\input{items/12-h2}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{12-c2}{\input{items/12-c2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{13-h3}{\input{items/13-h3}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{13-c3}{\input{items/13-c3}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{13-h4}{\input{items/13-h4}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{13-c4}{\input{items/13-c4}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{13-c5}{\input{items/13-c5}}\vspace{6mm}
+\dmsection{이런 문제가 시험에 나온다}
+\setcounter{dmproblemcount}{0}\dmpnum{14-01}{\input{items/14-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{14-02}{\input{items/14-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{14-03}{\input{items/14-03}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{14-04}{\input{items/14-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{14-05}{\input{items/14-05}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{02 제곱근의 성질}
+\dmchapter{02}{제곱근의 성질}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념원리 확인하기}
+\setcounter{dmproblemcount}{0}\dmpnum{16-01}{\input{items/16-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{16-02}{\input{items/16-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{16-03}{\input{items/16-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{16-04}{\input{items/16-04}}\vspace{6mm}
+\dmsection{핵심문제 익히기}
+\setcounter{dmproblemcount}{0}\dmpnum{17-h1}{\input{items/17-h1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{17-c1}{\input{items/17-c1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{17-h2}{\input{items/17-h2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{17-c2}{\input{items/17-c2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{18-h3}{\input{items/18-h3}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{18-c3}{\input{items/18-c3}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{18-h4}{\input{items/18-h4}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{18-c4}{\input{items/18-c4}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{19-h5}{\input{items/19-h5}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{19-c5}{\input{items/19-c5}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{5}\dmpnum{19-h6}{\input{items/19-h6}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{5}\dmpnum{19-c6}{\input{items/19-c6}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{20-h7}{\input{items/20-h7}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{20-c7}{\input{items/20-c7}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{20-h8}{\input{items/20-h8}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{20-c8}{\input{items/20-c8}}\vspace{6mm}
+\dmsection{이런 문제가 시험에 나온다}
+\setcounter{dmproblemcount}{0}\dmpnum{21-01}{\input{items/21-01}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{21-02}{\input{items/21-02}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{21-03}{\input{items/21-03}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{21-04}{\input{items/21-04}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{4}\dmpnum{21-05}{\input{items/21-05}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{5}\dmpnum{21-06}{\input{items/21-06}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{03 무리수와 실수}
+\dmchapter{03}{무리수와 실수}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념원리 확인하기}
+\setcounter{dmproblemcount}{0}\dmpnum{24-01}{\input{items/24-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{24-02}{\input{items/24-02}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{24-03}{\input{items/24-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{24-04}{\input{items/24-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{25-05}{\input{items/25-05}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{5}\dmpnum{25-06}{\input{items/25-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{25-07}{\input{items/25-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{25-08}{\input{items/25-08}}\vspace{6mm}
+\dmsection{핵심문제 익히기}
+\setcounter{dmproblemcount}{0}\dmpnum{26-h1}{\input{items/26-h1}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{0}\dmpnum{26-c1}{\input{items/26-c1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{26-h2}{\input{items/26-h2}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{26-c2}{\input{items/26-c2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{27-h3}{\input{items/27-h3}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{27-c3}{\input{items/27-c3}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{27-h4}{\input{items/27-h4}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{27-c4}{\input{items/27-c4}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{28-h5}{\input{items/28-h5}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{4}\dmpnum{28-c5}{\input{items/28-c5}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{5}\dmpnum{28-h6}{\input{items/28-h6}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{5}\dmpnum{28-c6}{\input{items/28-c6}}\vspace{6mm}
+\dmsection{이런 문제가 시험에 나온다}
+\setcounter{dmproblemcount}{0}\dmpnum{29-01}{\input{items/29-01}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{29-02}{\input{items/29-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{29-03}{\input{items/29-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{29-04}{\input{items/29-04}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{4}\dmpnum{29-05}{\input{items/29-05}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 1 기본 문제}
+\setcounter{dmproblemcount}{0}\dmpnum{30-01}{\input{items/30-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{30-02}{\input{items/30-02}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{30-03}{\input{items/30-03}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{30-04}{\input{items/30-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{30-05}{\input{items/30-05}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{5}\dmpnum{30-06}{\input{items/30-06}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{6}\dmpnum{30-07}{\input{items/30-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{30-08}{\input{items/30-08}}\vspace{6mm}
+\vspace{4mm}\setcounter{dmproblemcount}{8}\dmpnum{31-09}{\input{items/31-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{31-10}{\input{items/31-10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{31-11}{\input{items/31-11}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{11}\dmpnum{31-12}{\input{items/31-12}}\vspace{6mm}
+\setcounter{dmproblemcount}{12}\dmpnum{31-13}{\input{items/31-13}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{13}\dmpnum{31-14}{\input{items/31-14}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 2 발전 문제}
+\setcounter{dmproblemcount}{14}\dmpnum{32-15}{\input{items/32-15}}\vspace{6mm}
+\vspace{4mm}\setcounter{dmproblemcount}{15}\dmpnum{32-16}{\input{items/32-16}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{16}\dmpnum{32-17}{\input{items/32-17}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{17}\dmpnum{32-18}{\input{items/32-18}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{18}\dmpnum{32-19}{\input{items/32-19}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{19}\dmpnum{32-20}{\input{items/32-20}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{20}\dmpnum{32-21}{\input{items/32-21}}\vspace{6mm}
+\setcounter{dmproblemcount}{21}\dmpnum{32-22}{\input{items/32-22}}\vspace{6mm}
+\setcounter{dmproblemcount}{22}\dmpnum{33-23}{\input{items/33-23}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{23}\dmpnum{33-24}{\input{items/33-24}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{24}\dmpnum{33-25}{\input{items/33-25}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 3 실력 UP}
+\setcounter{dmproblemcount}{25}\dmpnum{33-26}{\input{items/33-26}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{26}\dmpnum{33-27}{\input{items/33-27}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{27}\dmpnum{33-28}{\input{items/33-28}}\vspace{6mm}
+\dmsection{서술형 대비 문제}
+\vspace{2mm}\setcounter{dmproblemcount}{0}\dmpnum{34-e1}{\input{items/34-e1}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{0}\dmpnum{34-u1}{\input{items/34-u1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{34-e2}{\input{items/34-e2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{34-u2}{\input{items/34-u2}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{35-u3}{\input{items/35-u3}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{35-u4}{\input{items/35-u4}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{4}\dmpnum{35-u5}{\input{items/35-u5}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{5}\dmpnum{35-u6}{\input{items/35-u6}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{04 제곱근의 곱셈과 나눗셈}
+\dmchapter{04}{제곱근의 곱셈과 나눗셈}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념원리 확인하기}
+\setcounter{dmproblemcount}{0}\dmpnum{39-01}{\input{items/39-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{39-02}{\input{items/39-02}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{39-03}{\input{items/39-03}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{39-04}{\input{items/39-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{39-05}{\input{items/39-05}}\vspace{6mm}
+\dmsection{핵심문제 익히기}
+\setcounter{dmproblemcount}{0}\dmpnum{40-h1}{\input{items/40-h1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{40-c1}{\input{items/40-c1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{40-h2}{\input{items/40-h2}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{40-c2}{\input{items/40-c2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{41-h3}{\input{items/41-h3}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{41-c3}{\input{items/41-c3}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{41-h4}{\input{items/41-h4}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{41-c4}{\input{items/41-c4}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{4}\dmpnum{42-h5}{\input{items/42-h5}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{4}\dmpnum{42-c5}{\input{items/42-c5}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{42-h6}{\input{items/42-h6}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{42-c6}{\input{items/42-c6}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{43-h7}{\input{items/43-h7}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{6}\dmpnum{43-c7}{\input{items/43-c7}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{7}\dmpnum{43-h8}{\input{items/43-h8}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{7}\dmpnum{43-c8}{\input{items/43-c8}}\vspace{6mm}
+\dmsection{계산력 강화하기}
+\setcounter{dmproblemcount}{0}\dmpnum{44-01}{\input{items/44-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{44-02}{\input{items/44-02}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{44-03}{\input{items/44-03}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{44-04}{\input{items/44-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{44-05}{\input{items/44-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{44-06}{\input{items/44-06}}\vspace{6mm}
+\dmsection{이런 문제가 시험에 나온다}
+\setcounter{dmproblemcount}{0}\dmpnum{45-01}{\input{items/45-01}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{45-02}{\input{items/45-02}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{45-03}{\input{items/45-03}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{45-04}{\input{items/45-04}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{4}\dmpnum{45-05}{\input{items/45-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{45-06}{\input{items/45-06}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{05 제곱근의 덧셈과 뺄셈}
+\dmchapter{05}{제곱근의 덧셈과 뺄셈}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념원리 확인하기}
+\setcounter{dmproblemcount}{0}\dmpnum{47-01}{\input{items/47-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{47-02}{\input{items/47-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{47-03}{\input{items/47-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{47-04}{\input{items/47-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{47-05}{\input{items/47-05}}\vspace{6mm}
+\dmsection{핵심문제 익히기}
+\setcounter{dmproblemcount}{0}\dmpnum{48-h1}{\input{items/48-h1}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{0}\dmpnum{48-c1}{\input{items/48-c1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{48-h2}{\input{items/48-h2}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{48-c2}{\input{items/48-c2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{49-h3}{\input{items/49-h3}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{49-c3}{\input{items/49-c3}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{49-h4}{\input{items/49-h4}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{49-c4}{\input{items/49-c4}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{50-h5}{\input{items/50-h5}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{50-c5}{\input{items/50-c5}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{5}\dmpnum{50-h6}{\input{items/50-h6}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{5}\dmpnum{50-c6}{\input{items/50-c6}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{51-h7}{\input{items/51-h7}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{51-c7}{\input{items/51-c7}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{51-h8}{\input{items/51-h8}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{51-c8}{\input{items/51-c8}}\vspace{6mm}
+\dmsection{계산력 강화하기}
+\setcounter{dmproblemcount}{0}\dmpnum{52-01}{\input{items/52-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{52-02}{\input{items/52-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{52-03}{\input{items/52-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{52-04}{\input{items/52-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{52-05}{\input{items/52-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{52-06}{\input{items/52-06}}\vspace{6mm}
+\dmsection{이런 문제가 시험에 나온다}
+\setcounter{dmproblemcount}{0}\dmpnum{53-01}{\input{items/53-01}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{53-02}{\input{items/53-02}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{53-03}{\input{items/53-03}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{53-04}{\input{items/53-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{53-05}{\input{items/53-05}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{5}\dmpnum{53-06}{\input{items/53-06}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 1 기본 문제}
+\setcounter{dmproblemcount}{0}\dmpnum{54-01}{\input{items/54-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{54-02}{\input{items/54-02}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{54-03}{\input{items/54-03}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{54-04}{\input{items/54-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{54-05}{\input{items/54-05}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{5}\dmpnum{54-06}{\input{items/54-06}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{6}\dmpnum{55-07}{\input{items/55-07}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{7}\dmpnum{55-08}{\input{items/55-08}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{8}\dmpnum{55-09}{\input{items/55-09}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{9}\dmpnum{55-10}{\input{items/55-10}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{10}\dmpnum{55-11}{\input{items/55-11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{55-12}{\input{items/55-12}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 2 발전 문제}
+\vspace{2mm}\setcounter{dmproblemcount}{12}\dmpnum{56-13}{\input{items/56-13}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{13}\dmpnum{56-14}{\input{items/56-14}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{14}\dmpnum{56-15}{\input{items/56-15}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{15}\dmpnum{56-16}{\input{items/56-16}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{16}\dmpnum{56-17}{\input{items/56-17}}\vspace{6mm}
+\setcounter{dmproblemcount}{17}\dmpnum{56-18}{\input{items/56-18}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{18}\dmpnum{57-19}{\input{items/57-19}}\vspace{6mm}
+\setcounter{dmproblemcount}{19}\dmpnum{57-20}{\input{items/57-20}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{20}\dmpnum{57-21}{\input{items/57-21}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 3 실력 UP}
+\vspace{2mm}\setcounter{dmproblemcount}{21}\dmpnum{57-22}{\input{items/57-22}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{22}\dmpnum{57-23}{\input{items/57-23}}\vspace{6mm}
+\setcounter{dmproblemcount}{23}\dmpnum{57-24}{\input{items/57-24}}\vspace{6mm}
+\dmsection{서술형 대비 문제}
+\vspace{2mm}\setcounter{dmproblemcount}{0}\dmpnum{58-e1}{\input{items/58-e1}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{58-e2}{\input{items/58-e2}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{0}\dmpnum{58-u1}{\input{items/58-u1}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{58-u2}{\input{items/58-u2}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{59-u3}{\input{items/59-u3}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{59-u4}{\input{items/59-u4}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{4}\dmpnum{59-u5}{\input{items/59-u5}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{5}\dmpnum{59-u6}{\input{items/59-u6}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{06 곱셈 공식}
+\dmchapter{06}{곱셈 공식}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념원리 확인하기}
+\setcounter{dmproblemcount}{0}\dmpnum{64-01}{\input{items/64-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{64-02}{\input{items/64-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{64-03}{\input{items/64-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{64-04}{\input{items/64-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{64-05}{\input{items/64-05}}\vspace{6mm}
+\dmsection{핵심문제 익히기}
+\setcounter{dmproblemcount}{0}\dmpnum{65-h1}{\input{items/65-h1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{65-c1}{\input{items/65-c1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{65-h2}{\input{items/65-h2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{65-c2}{\input{items/65-c2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{66-h3}{\input{items/66-h3}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{66-c3}{\input{items/66-c3}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{66-h4}{\input{items/66-h4}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{66-c4}{\input{items/66-c4}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{67-h5}{\input{items/67-h5}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{67-c5}{\input{items/67-c5}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{67-h6}{\input{items/67-h6}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{67-c6}{\input{items/67-c6}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{68-h7}{\input{items/68-h7}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{68-c7}{\input{items/68-c7}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{68-h8}{\input{items/68-h8}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{68-c8}{\input{items/68-c8}}\vspace{6mm}
+\dmsection{계산력 강화하기}
+\setcounter{dmproblemcount}{0}\dmpnum{69-01}{\input{items/69-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{69-02}{\input{items/69-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{69-03}{\input{items/69-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{69-04}{\input{items/69-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{69-05}{\input{items/69-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{69-06}{\input{items/69-06}}\vspace{6mm}
+\dmsection{이런 문제가 시험에 나온다}
+\setcounter{dmproblemcount}{0}\dmpnum{70-01}{\input{items/70-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{70-02}{\input{items/70-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{70-03}{\input{items/70-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{70-04}{\input{items/70-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{70-05}{\input{items/70-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{70-06}{\input{items/70-06}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{07 곱셈 공식의 응용}
+\dmchapter{07}{곱셈 공식의 응용}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념원리 확인하기}
+\setcounter{dmproblemcount}{0}\dmpnum{72-01}{\input{items/72-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{72-02}{\input{items/72-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{72-03}{\input{items/72-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{72-04}{\input{items/72-04}}\vspace{6mm}
+\dmsection{핵심문제 익히기}
+\setcounter{dmproblemcount}{0}\dmpnum{73-h1}{\input{items/73-h1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{73-c1}{\input{items/73-c1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{73-h2}{\input{items/73-h2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{73-c2}{\input{items/73-c2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{74-h3}{\input{items/74-h3}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{74-c3}{\input{items/74-c3}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{74-h4}{\input{items/74-h4}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{74-c4}{\input{items/74-c4}}\vspace{6mm}
+\dmsection{이런 문제가 시험에 나온다}
+\setcounter{dmproblemcount}{0}\dmpnum{75-01}{\input{items/75-01}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{75-02}{\input{items/75-02}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{75-03}{\input{items/75-03}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{75-04}{\input{items/75-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{75-05}{\input{items/75-05}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{5}\dmpnum{75-06}{\input{items/75-06}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 1 기본 문제}
+\setcounter{dmproblemcount}{0}\dmpnum{76-01}{\input{items/76-01}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{76-02}{\input{items/76-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{76-03}{\input{items/76-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{76-04}{\input{items/76-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{76-05}{\input{items/76-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{76-06}{\input{items/76-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{77-07}{\input{items/77-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{77-08}{\input{items/77-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{77-09}{\input{items/77-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{77-10}{\input{items/77-10}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{10}\dmpnum{77-11}{\input{items/77-11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{77-12}{\input{items/77-12}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 2 발전 문제}
+\setcounter{dmproblemcount}{12}\dmpnum{78-13}{\input{items/78-13}}\vspace{6mm}
+\setcounter{dmproblemcount}{13}\dmpnum{78-14}{\input{items/78-14}}\vspace{6mm}
+\setcounter{dmproblemcount}{14}\dmpnum{78-15}{\input{items/78-15}}\vspace{6mm}
+\setcounter{dmproblemcount}{15}\dmpnum{78-16}{\input{items/78-16}}\vspace{6mm}
+\setcounter{dmproblemcount}{16}\dmpnum{78-17}{\input{items/78-17}}\vspace{6mm}
+\vspace{4mm}\setcounter{dmproblemcount}{17}\dmpnum{78-18}{\input{items/78-18}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{18}\dmpnum{78-19}{\input{items/78-19}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{19}\dmpnum{79-20}{\input{items/79-20}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{20}\dmpnum{79-21}{\input{items/79-21}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{21}\dmpnum{79-22}{\input{items/79-22}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 3 실력 UP}
+\setcounter{dmproblemcount}{22}\dmpnum{79-23}{\input{items/79-23}}\vspace{6mm}
+\setcounter{dmproblemcount}{23}\dmpnum{79-24}{\input{items/79-24}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{24}\dmpnum{79-25}{\input{items/79-25}}\vspace{6mm}
+\dmsection{서술형 대비 문제}
+\setcounter{dmproblemcount}{0}\dmpnum{80-e1}{\input{items/80-e1}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{80-e2}{\input{items/80-e2}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{0}\dmpnum{80-u1}{\input{items/80-u1}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{80-u2}{\input{items/80-u2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{81-u3}{\input{items/81-u3}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{81-u4}{\input{items/81-u4}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{4}\dmpnum{81-u5}{\input{items/81-u5}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{5}\dmpnum{81-u6}{\input{items/81-u6}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{08 인수분해 공식}
+\dmchapter{08}{인수분해 공식}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념원리 확인하기}
+\setcounter{dmproblemcount}{0}\dmpnum{85-01}{\input{items/85-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{85-02}{\input{items/85-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{85-03}{\input{items/85-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{85-04}{\input{items/85-04}}\vspace{6mm}
+\dmsection{핵심문제 익히기}
+\setcounter{dmproblemcount}{0}\dmpnum{86-h1}{\input{items/86-h1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{86-c1}{\input{items/86-c1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{86-h2}{\input{items/86-h2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{86-c2}{\input{items/86-c2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{87-h3}{\input{items/87-h3}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{87-c3}{\input{items/87-c3}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{87-h4}{\input{items/87-h4}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{87-c4}{\input{items/87-c4}}\vspace{6mm}
+\dmsection{이런 문제가 시험에 나온다}
+\setcounter{dmproblemcount}{0}\dmpnum{88-01}{\input{items/88-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{88-02}{\input{items/88-02}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{88-03}{\input{items/88-03}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{88-04}{\input{items/88-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{88-05}{\input{items/88-05}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{09 인수분해 공식 (2)}
+\dmchapter{09}{인수분해 공식 (2)}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념원리 확인하기}
+\setcounter{dmproblemcount}{0}\dmpnum{90-01}{\input{items/90-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{90-02}{\input{items/90-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{90-03}{\input{items/90-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{90-04}{\input{items/90-04}}\vspace{6mm}
+\dmsection{핵심문제 익히기}
+\setcounter{dmproblemcount}{0}\dmpnum{91-h1}{\input{items/91-h1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{91-c1}{\input{items/91-c1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{91-h2}{\input{items/91-h2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{91-c2}{\input{items/91-c2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{92-h3}{\input{items/92-h3}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{92-c3}{\input{items/92-c3}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{92-h4}{\input{items/92-h4}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{92-c4}{\input{items/92-c4}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{93-h5}{\input{items/93-h5}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{93-c5}{\input{items/93-c5}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{93-h6}{\input{items/93-h6}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{93-c6}{\input{items/93-c6}}\vspace{6mm}
+\dmsection{계산력 강화하기}
+\setcounter{dmproblemcount}{0}\dmpnum{94-01}{\input{items/94-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{94-02}{\input{items/94-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{94-03}{\input{items/94-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{94-04}{\input{items/94-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{94-05}{\input{items/94-05}}\vspace{6mm}
+\dmsection{이런 문제가 시험에 나온다}
+\setcounter{dmproblemcount}{0}\dmpnum{95-01}{\input{items/95-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{95-02}{\input{items/95-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{95-03}{\input{items/95-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{95-04}{\input{items/95-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{95-05}{\input{items/95-05}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{10 인수분해 공식의 응용}
+\dmchapter{10}{인수분해 공식의 응용}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념원리 확인하기}
+\setcounter{dmproblemcount}{0}\dmpnum{97-01}{\input{items/97-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{97-02}{\input{items/97-02}}\vspace{6mm}
+\vspace{4mm}\setcounter{dmproblemcount}{2}\dmpnum{97-03}{\input{items/97-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{97-04}{\input{items/97-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{97-05}{\input{items/97-05}}\vspace{6mm}
+\dmsection{핵심문제 익히기}
+\setcounter{dmproblemcount}{0}\dmpnum{98-h1}{\input{items/98-h1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{98-c1}{\input{items/98-c1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{98-h2}{\input{items/98-h2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{98-c2}{\input{items/98-c2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{99-h3}{\input{items/99-h3}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{99-c3}{\input{items/99-c3}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{99-h4}{\input{items/99-h4}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{99-c4}{\input{items/99-c4}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{100-h5}{\input{items/100-h5}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{100-c5}{\input{items/100-c5}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{100-h6}{\input{items/100-h6}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{100-c6}{\input{items/100-c6}}\vspace{6mm}
+\dmsection{이런 문제가 시험에 나온다}
+\setcounter{dmproblemcount}{0}\dmpnum{101-01}{\input{items/101-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{101-02}{\input{items/101-02}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{101-03}{\input{items/101-03}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{101-04}{\input{items/101-04}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{4}\dmpnum{101-05}{\input{items/101-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{101-06}{\input{items/101-06}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 1 기본 문제}
+\setcounter{dmproblemcount}{0}\dmpnum{102-01}{\input{items/102-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{102-02}{\input{items/102-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{102-03}{\input{items/102-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{102-04}{\input{items/102-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{102-05}{\input{items/102-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{102-06}{\input{items/102-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{103-07}{\input{items/103-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{103-08}{\input{items/103-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{103-09}{\input{items/103-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{103-10}{\input{items/103-10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{103-11}{\input{items/103-11}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{11}\dmpnum{103-12}{\input{items/103-12}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 2 발전 문제}
+\vspace{2mm}\setcounter{dmproblemcount}{12}\dmpnum{104-13}{\input{items/104-13}}\vspace{6mm}
+\setcounter{dmproblemcount}{13}\dmpnum{104-14}{\input{items/104-14}}\vspace{6mm}
+\setcounter{dmproblemcount}{14}\dmpnum{104-15}{\input{items/104-15}}\vspace{6mm}
+\setcounter{dmproblemcount}{15}\dmpnum{104-16}{\input{items/104-16}}\vspace{6mm}
+\setcounter{dmproblemcount}{16}\dmpnum{104-17}{\input{items/104-17}}\vspace{6mm}
+\setcounter{dmproblemcount}{17}\dmpnum{104-18}{\input{items/104-18}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{18}\dmpnum{105-19}{\input{items/105-19}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{19}\dmpnum{105-20}{\input{items/105-20}}\vspace{6mm}
+\setcounter{dmproblemcount}{20}\dmpnum{105-21}{\input{items/105-21}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 3 실력 UP}
+\vspace{2mm}\setcounter{dmproblemcount}{21}\dmpnum{105-22}{\input{items/105-22}}\vspace{6mm}
+\setcounter{dmproblemcount}{22}\dmpnum{105-23}{\input{items/105-23}}\vspace{6mm}
+\setcounter{dmproblemcount}{23}\dmpnum{105-24}{\input{items/105-24}}\vspace{6mm}
+\dmsection{서술형 대비 문제}
+\setcounter{dmproblemcount}{0}\dmpnum{106-e1}{\input{items/106-e1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{106-e2}{\input{items/106-e2}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{106-u1}{\input{items/106-u1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{106-u2}{\input{items/106-u2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{107-u3}{\input{items/107-u3}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{107-u4}{\input{items/107-u4}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{107-u5}{\input{items/107-u5}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{5}\dmpnum{107-u6}{\input{items/107-u6}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{11 이차방정식과 그 해}
+\dmchapter{11}{이차방정식과 그 해}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념원리 확인하기}
+\setcounter{dmproblemcount}{0}\dmpnum{111-01}{\input{items/111-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{111-02}{\input{items/111-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{111-03}{\input{items/111-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{111-04}{\input{items/111-04}}\vspace{6mm}
+\dmsection{핵심문제 익히기}
+\setcounter{dmproblemcount}{0}\dmpnum{112-h1}{\input{items/112-h1}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{0}\dmpnum{112-c1}{\input{items/112-c1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{112-h2}{\input{items/112-h2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{112-c2}{\input{items/112-c2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{113-h3}{\input{items/113-h3}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{113-c3}{\input{items/113-c3}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{113-h4}{\input{items/113-h4}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{113-c4}{\input{items/113-c4}}\vspace{6mm}
+\dmsection{이런 문제가 시험에 나온다}
+\setcounter{dmproblemcount}{0}\dmpnum{114-01}{\input{items/114-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{114-02}{\input{items/114-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{114-03}{\input{items/114-03}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{114-04}{\input{items/114-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{114-05}{\input{items/114-05}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{12 인수분해를 이용한 이차방정식의 풀이}
+\dmchapter{12}{인수분해를 이용한 이차방정식의 풀이}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념원리 확인하기}
+\setcounter{dmproblemcount}{0}\dmpnum{116-01}{\input{items/116-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{116-02}{\input{items/116-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{116-03}{\input{items/116-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{116-04}{\input{items/116-04}}\vspace{6mm}
+\dmsection{핵심문제 익히기}
+\vspace{2mm}\setcounter{dmproblemcount}{0}\dmpnum{117-h1}{\input{items/117-h1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{117-c1}{\input{items/117-c1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{117-h2}{\input{items/117-h2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{117-c2}{\input{items/117-c2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{118-h3}{\input{items/118-h3}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{118-c3}{\input{items/118-c3}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{118-h4}{\input{items/118-h4}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{118-c4}{\input{items/118-c4}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{119-h5}{\input{items/119-h5}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{119-c5}{\input{items/119-c5}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{119-h6}{\input{items/119-h6}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{119-c6}{\input{items/119-c6}}\vspace{6mm}
+\dmsection{계산력 강화하기}
+\setcounter{dmproblemcount}{0}\dmpnum{120-01}{\input{items/120-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{120-02}{\input{items/120-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{120-03}{\input{items/120-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{120-04}{\input{items/120-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{120-05}{\input{items/120-05}}\vspace{6mm}
+\dmsection{이런 문제가 시험에 나온다}
+\setcounter{dmproblemcount}{0}\dmpnum{121-01}{\input{items/121-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{121-02}{\input{items/121-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{121-03}{\input{items/121-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{121-04}{\input{items/121-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{121-05}{\input{items/121-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{121-06}{\input{items/121-06}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{13 제곱근을 이용한 이차방정식의 풀이}
+\dmchapter{13}{제곱근을 이용한 이차방정식의 풀이}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념원리 확인하기}
+\setcounter{dmproblemcount}{0}\dmpnum{123-01}{\input{items/123-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{123-02}{\input{items/123-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{123-03}{\input{items/123-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{123-04}{\input{items/123-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{123-05}{\input{items/123-05}}\vspace{6mm}
+\dmsection{핵심문제 익히기}
+\vspace{2mm}\setcounter{dmproblemcount}{0}\dmpnum{124-h1}{\input{items/124-h1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{124-c1}{\input{items/124-c1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{124-h2}{\input{items/124-h2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{124-c2}{\input{items/124-c2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{125-h3}{\input{items/125-h3}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{125-c3}{\input{items/125-c3}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{125-h4}{\input{items/125-h4}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{125-c4}{\input{items/125-c4}}\vspace{6mm}
+\dmsection{계산력 강화하기}
+\setcounter{dmproblemcount}{0}\dmpnum{126-01}{\input{items/126-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{126-02}{\input{items/126-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{126-03}{\input{items/126-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{126-04}{\input{items/126-04}}\vspace{6mm}
+\dmsection{이런 문제가 시험에 나온다}
+\setcounter{dmproblemcount}{0}\dmpnum{127-01}{\input{items/127-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{127-02}{\input{items/127-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{127-03}{\input{items/127-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{127-04}{\input{items/127-04}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{4}\dmpnum{127-05}{\input{items/127-05}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 1 기본 문제}
+\setcounter{dmproblemcount}{0}\dmpnum{128-01}{\input{items/128-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{128-02}{\input{items/128-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{128-03}{\input{items/128-03}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{128-04}{\input{items/128-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{128-05}{\input{items/128-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{128-06}{\input{items/128-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{129-07}{\input{items/129-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{129-08}{\input{items/129-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{129-09}{\input{items/129-09}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{9}\dmpnum{129-10}{\input{items/129-10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{129-11}{\input{items/129-11}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{11}\dmpnum{129-12}{\input{items/129-12}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 2 발전 문제}
+\setcounter{dmproblemcount}{12}\dmpnum{130-13}{\input{items/130-13}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{13}\dmpnum{130-14}{\input{items/130-14}}\vspace{6mm}
+\setcounter{dmproblemcount}{14}\dmpnum{130-15}{\input{items/130-15}}\vspace{6mm}
+\setcounter{dmproblemcount}{15}\dmpnum{130-16}{\input{items/130-16}}\vspace{6mm}
+\setcounter{dmproblemcount}{16}\dmpnum{130-17}{\input{items/130-17}}\vspace{6mm}
+\setcounter{dmproblemcount}{17}\dmpnum{130-18}{\input{items/130-18}}\vspace{6mm}
+\setcounter{dmproblemcount}{18}\dmpnum{131-19}{\input{items/131-19}}\vspace{6mm}
+\setcounter{dmproblemcount}{19}\dmpnum{131-20}{\input{items/131-20}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{20}\dmpnum{131-21}{\input{items/131-21}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 3 실력 UP}
+\setcounter{dmproblemcount}{21}\dmpnum{131-22}{\input{items/131-22}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{22}\dmpnum{131-23}{\input{items/131-23}}\vspace{6mm}
+\setcounter{dmproblemcount}{23}\dmpnum{131-24}{\input{items/131-24}}\vspace{6mm}
+\dmsection{서술형 대비 문제}
+\setcounter{dmproblemcount}{0}\dmpnum{132-e1}{\input{items/132-e1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{132-e2}{\input{items/132-e2}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{132-u1}{\input{items/132-u1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{132-u2}{\input{items/132-u2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{133-u3}{\input{items/133-u3}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{133-u4}{\input{items/133-u4}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{133-u5}{\input{items/133-u5}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{133-u6}{\input{items/133-u6}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{14 이차방정식의 근의 공식}
+\dmchapter{14}{이차방정식의 근의 공식}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념원리 확인하기}
+\setcounter{dmproblemcount}{0}\dmpnum{137-01}{\input{items/137-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{137-02}{\input{items/137-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{137-03}{\input{items/137-03}}\vspace{6mm}
+\dmsection{핵심문제 익히기}
+\setcounter{dmproblemcount}{0}\dmpnum{138-h1}{\input{items/138-h1}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{0}\dmpnum{138-c1}{\input{items/138-c1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{138-h2}{\input{items/138-h2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{138-c2}{\input{items/138-c2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{139-h3}{\input{items/139-h3}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{139-c3}{\input{items/139-c3}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{139-h4}{\input{items/139-h4}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{139-c4}{\input{items/139-c4}}\vspace{6mm}
+\dmsection{계산력 강화하기}
+\setcounter{dmproblemcount}{0}\dmpnum{140-01}{\input{items/140-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{140-02}{\input{items/140-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{140-03}{\input{items/140-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{140-04}{\input{items/140-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{140-05}{\input{items/140-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{140-06}{\input{items/140-06}}\vspace{6mm}
+\dmsection{이런 문제가 시험에 나온다}
+\vspace{2mm}\setcounter{dmproblemcount}{0}\dmpnum{141-01}{\input{items/141-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{141-02}{\input{items/141-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{141-03}{\input{items/141-03}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{141-04}{\input{items/141-04}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{4}\dmpnum{141-05}{\input{items/141-05}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{15 이차방정식의 근의 개수}
+\dmchapter{15}{이차방정식의 근의 개수}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념원리 확인하기}
+\setcounter{dmproblemcount}{0}\dmpnum{143-01}{\input{items/143-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{143-02}{\input{items/143-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{143-03}{\input{items/143-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{143-04}{\input{items/143-04}}\vspace{6mm}
+\dmsection{핵심문제 익히기}
+\setcounter{dmproblemcount}{0}\dmpnum{144-h1}{\input{items/144-h1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{144-c1}{\input{items/144-c1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{144-h2}{\input{items/144-h2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{144-c2}{\input{items/144-c2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{145-h3}{\input{items/145-h3}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{145-c3}{\input{items/145-c3}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{145-h4}{\input{items/145-h4}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{145-c4}{\input{items/145-c4}}\vspace{6mm}
+\dmsection{이런 문제가 시험에 나온다}
+\setcounter{dmproblemcount}{0}\dmpnum{146-01}{\input{items/146-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{146-02}{\input{items/146-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{146-03}{\input{items/146-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{146-04}{\input{items/146-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{146-05}{\input{items/146-05}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{16 이차방정식의 활용}
+\dmchapter{16}{이차방정식의 활용}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념원리 확인하기}
+\vspace{2mm}\setcounter{dmproblemcount}{0}\dmpnum{148-01}{\input{items/148-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{148-02}{\input{items/148-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{148-03}{\input{items/148-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{148-04}{\input{items/148-04}}\vspace{6mm}
+\dmsection{핵심문제 익히기}
+\vspace{2mm}\setcounter{dmproblemcount}{0}\dmpnum{149-h1}{\input{items/149-h1}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{0}\dmpnum{149-c1}{\input{items/149-c1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{149-h2}{\input{items/149-h2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{149-c2}{\input{items/149-c2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{149-c3}{\input{items/149-c3}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{150-h3}{\input{items/150-h3}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{150-c4}{\input{items/150-c4}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{150-h4}{\input{items/150-h4}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{150-c5}{\input{items/150-c5}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{151-h5}{\input{items/151-h5}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{151-c6}{\input{items/151-c6}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{151-c7}{\input{items/151-c7}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{151-c8}{\input{items/151-c8}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{152-h6}{\input{items/152-h6}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{152-c9}{\input{items/152-c9}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{152-c10}{\input{items/152-c10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{152-c11}{\input{items/152-c11}}\vspace{6mm}
+\dmsection{이런 문제가 시험에 나온다}
+\setcounter{dmproblemcount}{0}\dmpnum{153-01}{\input{items/153-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{153-02}{\input{items/153-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{153-03}{\input{items/153-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{153-04}{\input{items/153-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{153-05}{\input{items/153-05}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 1 기본 문제}
+\setcounter{dmproblemcount}{0}\dmpnum{154-01}{\input{items/154-01}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{154-02}{\input{items/154-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{154-03}{\input{items/154-03}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{154-04}{\input{items/154-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{154-05}{\input{items/154-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{154-06}{\input{items/154-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{155-07}{\input{items/155-07}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{7}\dmpnum{155-08}{\input{items/155-08}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{8}\dmpnum{155-09}{\input{items/155-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{155-10}{\input{items/155-10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{155-11}{\input{items/155-11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{155-12}{\input{items/155-12}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 2 발전 문제}
+\vspace{2mm}\setcounter{dmproblemcount}{12}\dmpnum{156-13}{\input{items/156-13}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{13}\dmpnum{156-14}{\input{items/156-14}}\vspace{6mm}
+\setcounter{dmproblemcount}{14}\dmpnum{156-15}{\input{items/156-15}}\vspace{6mm}
+\setcounter{dmproblemcount}{15}\dmpnum{156-16}{\input{items/156-16}}\vspace{6mm}
+\setcounter{dmproblemcount}{16}\dmpnum{156-17}{\input{items/156-17}}\vspace{6mm}
+\setcounter{dmproblemcount}{17}\dmpnum{156-18}{\input{items/156-18}}\vspace{6mm}
+\setcounter{dmproblemcount}{18}\dmpnum{157-19}{\input{items/157-19}}\vspace{6mm}
+\setcounter{dmproblemcount}{19}\dmpnum{157-20}{\input{items/157-20}}\vspace{6mm}
+\setcounter{dmproblemcount}{20}\dmpnum{157-21}{\input{items/157-21}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 3 실력 UP}
+\setcounter{dmproblemcount}{21}\dmpnum{157-22}{\input{items/157-22}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{22}\dmpnum{157-23}{\input{items/157-23}}\vspace{6mm}
+\setcounter{dmproblemcount}{23}\dmpnum{157-24}{\input{items/157-24}}\vspace{6mm}
+\dmsection{서술형 대비 문제}
+\vspace{2mm}\setcounter{dmproblemcount}{0}\dmpnum{158-e1}{\input{items/158-e1}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{0}\dmpnum{158-u1}{\input{items/158-u1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{158-e2}{\input{items/158-e2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{158-u2}{\input{items/158-u2}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{159-u3}{\input{items/159-u3}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{159-u4}{\input{items/159-u4}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{159-u5}{\input{items/159-u5}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{159-u6}{\input{items/159-u6}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{17 이차함수}
+\dmchapter{17}{이차함수}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념원리 확인하기}
+\setcounter{dmproblemcount}{0}\dmpnum{164-01}{\input{items/164-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{164-02}{\input{items/164-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{164-03}{\input{items/164-03}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{164-04}{\input{items/164-04}}\vspace{6mm}
+\dmsection{핵심문제 익히기}
+\setcounter{dmproblemcount}{0}\dmpnum{165-h1}{\input{items/165-h1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{165-c1}{\input{items/165-c1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{165-c2}{\input{items/165-c2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{165-c3}{\input{items/165-c3}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{166-h2}{\input{items/166-h2}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{166-c4}{\input{items/166-c4}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{166-h3}{\input{items/166-h3}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{4}\dmpnum{166-c5}{\input{items/166-c5}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{167-h4}{\input{items/167-h4}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{5}\dmpnum{167-c6}{\input{items/167-c6}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{167-h5}{\input{items/167-h5}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{6}\dmpnum{167-c7}{\input{items/167-c7}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{168-h6}{\input{items/168-h6}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{7}\dmpnum{168-c8}{\input{items/168-c8}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{168-h7}{\input{items/168-h7}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{168-c9}{\input{items/168-c9}}\vspace{6mm}
+\dmsection{이런 문제가 시험에 나온다}
+\setcounter{dmproblemcount}{0}\dmpnum{169-01}{\input{items/169-01}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{169-02}{\input{items/169-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{169-03}{\input{items/169-03}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{169-04}{\input{items/169-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{169-05}{\input{items/169-05}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{18 이차함수 (2)}
+\dmchapter{18}{이차함수 (2)}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념원리 확인하기}
+\setcounter{dmproblemcount}{0}\dmpnum{171-01}{\input{items/171-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{171-02}{\input{items/171-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{171-03}{\input{items/171-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{171-04}{\input{items/171-04}}\vspace{6mm}
+\dmsection{핵심문제 익히기}
+\setcounter{dmproblemcount}{0}\dmpnum{172-h1}{\input{items/172-h1}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{0}\dmpnum{172-c1}{\input{items/172-c1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{172-h2}{\input{items/172-h2}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{172-c2}{\input{items/172-c2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{173-h3}{\input{items/173-h3}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{173-c3}{\input{items/173-c3}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{173-h4}{\input{items/173-h4}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{173-c4}{\input{items/173-c4}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{174-h5}{\input{items/174-h5}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{4}\dmpnum{174-c5}{\input{items/174-c5}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{174-h6}{\input{items/174-h6}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{5}\dmpnum{174-c6}{\input{items/174-c6}}\vspace{6mm}
+\dmsection{이런 문제가 시험에 나온다}
+\setcounter{dmproblemcount}{0}\dmpnum{175-01}{\input{items/175-01}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{175-02}{\input{items/175-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{175-03}{\input{items/175-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{175-04}{\input{items/175-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{175-05}{\input{items/175-05}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{19 이차함수 (3)}
+\dmchapter{19}{이차함수 (3)}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념원리 확인하기}
+\setcounter{dmproblemcount}{0}\dmpnum{177-01}{\input{items/177-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{177-02}{\input{items/177-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{177-03}{\input{items/177-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{177-04}{\input{items/177-04}}\vspace{6mm}
+\dmsection{핵심문제 익히기}
+\vspace{2mm}\setcounter{dmproblemcount}{0}\dmpnum{178-h1}{\input{items/178-h1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{178-c1}{\input{items/178-c1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{178-h2}{\input{items/178-h2}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{178-c2}{\input{items/178-c2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{179-h3}{\input{items/179-h3}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{179-c3}{\input{items/179-c3}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{179-h4}{\input{items/179-h4}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{179-c4}{\input{items/179-c4}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{180-h5}{\input{items/180-h5}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{180-c5}{\input{items/180-c5}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{180-c6}{\input{items/180-c6}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{180-c7}{\input{items/180-c7}}\vspace{6mm}
+\dmsection{이런 문제가 시험에 나온다}
+\vspace{2mm}\setcounter{dmproblemcount}{0}\dmpnum{181-01}{\input{items/181-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{181-02}{\input{items/181-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{181-03}{\input{items/181-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{181-04}{\input{items/181-04}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 1 기본 문제}
+\setcounter{dmproblemcount}{0}\dmpnum{182-01}{\input{items/182-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{182-02}{\input{items/182-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{182-03}{\input{items/182-03}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{182-04}{\input{items/182-04}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{4}\dmpnum{182-05}{\input{items/182-05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{182-06}{\input{items/182-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{183-07}{\input{items/183-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{183-08}{\input{items/183-08}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{8}\dmpnum{183-09}{\input{items/183-09}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{9}\dmpnum{183-10}{\input{items/183-10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{183-11}{\input{items/183-11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{183-12}{\input{items/183-12}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 2 발전 문제}
+\setcounter{dmproblemcount}{12}\dmpnum{184-13}{\input{items/184-13}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{13}\dmpnum{184-14}{\input{items/184-14}}\vspace{6mm}
+\setcounter{dmproblemcount}{14}\dmpnum{184-15}{\input{items/184-15}}\vspace{6mm}
+\setcounter{dmproblemcount}{15}\dmpnum{184-16}{\input{items/184-16}}\vspace{6mm}
+\setcounter{dmproblemcount}{16}\dmpnum{184-17}{\input{items/184-17}}\vspace{6mm}
+\setcounter{dmproblemcount}{17}\dmpnum{184-18}{\input{items/184-18}}\vspace{6mm}
+\setcounter{dmproblemcount}{18}\dmpnum{185-19}{\input{items/185-19}}\vspace{6mm}
+\setcounter{dmproblemcount}{19}\dmpnum{185-20}{\input{items/185-20}}\vspace{6mm}
+\setcounter{dmproblemcount}{20}\dmpnum{185-21}{\input{items/185-21}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 3 실력 UP}
+\vspace{2mm}\setcounter{dmproblemcount}{21}\dmpnum{185-22}{\input{items/185-22}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{22}\dmpnum{185-23}{\input{items/185-23}}\vspace{6mm}
+\setcounter{dmproblemcount}{23}\dmpnum{185-24}{\input{items/185-24}}\vspace{6mm}
+\dmsection{서술형 대비 문제}
+\setcounter{dmproblemcount}{0}\dmpnum{186-e1}{\input{items/186-e1}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{0}\dmpnum{186-u1}{\input{items/186-u1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{186-e2}{\input{items/186-e2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{186-u2}{\input{items/186-u2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{187-u3}{\input{items/187-u3}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{187-u4}{\input{items/187-u4}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{187-u5}{\input{items/187-u5}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{187-u6}{\input{items/187-u6}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{20 이차함수 (4)}
+\dmchapter{20}{이차함수 (4)}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념원리 확인하기}
+\setcounter{dmproblemcount}{0}\dmpnum{192-01}{\input{items/192-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{192-02}{\input{items/192-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{192-03}{\input{items/192-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{192-04}{\input{items/192-04}}\vspace{6mm}
+\dmsection{핵심문제 익히기}
+\setcounter{dmproblemcount}{0}\dmpnum{193-h1}{\input{items/193-h1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{193-c1}{\input{items/193-c1}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{193-h2}{\input{items/193-h2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{193-c2}{\input{items/193-c2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{194-h3}{\input{items/194-h3}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{194-c3}{\input{items/194-c3}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{194-h4}{\input{items/194-h4}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{194-c4}{\input{items/194-c4}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{195-h5}{\input{items/195-h5}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{4}\dmpnum{195-c5}{\input{items/195-c5}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{195-h6}{\input{items/195-h6}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{5}\dmpnum{195-c6}{\input{items/195-c6}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{196-h7}{\input{items/196-h7}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{196-c7}{\input{items/196-c7}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{196-h8}{\input{items/196-h8}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{196-c8}{\input{items/196-c8}}\vspace{6mm}
+\dmsection{이런 문제가 시험에 나온다}
+\setcounter{dmproblemcount}{0}\dmpnum{197-01}{\input{items/197-01}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{197-02}{\input{items/197-02}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{197-03}{\input{items/197-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{197-04}{\input{items/197-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{198-05}{\input{items/198-05}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{5}\dmpnum{198-06}{\input{items/198-06}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{6}\dmpnum{198-07}{\input{items/198-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{198-08}{\input{items/198-08}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{21 이차함수의 식 구하기}
+\dmchapter{21}{이차함수의 식 구하기}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념원리 확인하기}
+\setcounter{dmproblemcount}{0}\dmpnum{200-01}{\input{items/200-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{200-02}{\input{items/200-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{200-03}{\input{items/200-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{200-04}{\input{items/200-04}}\vspace{6mm}
+\dmsection{핵심문제 익히기}
+\setcounter{dmproblemcount}{0}\dmpnum{201-h1}{\input{items/201-h1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{201-c1}{\input{items/201-c1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{201-h2}{\input{items/201-h2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{201-c2}{\input{items/201-c2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{202-h3}{\input{items/202-h3}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{202-c3}{\input{items/202-c3}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{202-h4}{\input{items/202-h4}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{202-c4}{\input{items/202-c4}}\vspace{6mm}
+\dmsection{이런 문제가 시험에 나온다}
+\setcounter{dmproblemcount}{0}\dmpnum{203-01}{\input{items/203-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{203-02}{\input{items/203-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{203-03}{\input{items/203-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{203-04}{\input{items/203-04}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{22 이차함수의 최댓값과 최솟값}
+\dmchapter{22}{이차함수의 최댓값과 최솟값}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념원리 확인하기}
+\setcounter{dmproblemcount}{0}\dmpnum{205-01}{\input{items/205-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{205-02}{\input{items/205-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{205-03}{\input{items/205-03}}\vspace{6mm}
+\dmsection{핵심문제 익히기}
+\setcounter{dmproblemcount}{0}\dmpnum{206-h1}{\input{items/206-h1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{206-c1}{\input{items/206-c1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{206-h2}{\input{items/206-h2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{206-c2}{\input{items/206-c2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{207-h3}{\input{items/207-h3}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{207-c3}{\input{items/207-c3}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{207-h4}{\input{items/207-h4}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{207-c4}{\input{items/207-c4}}\vspace{6mm}
+\dmsection{이런 문제가 시험에 나온다}
+\setcounter{dmproblemcount}{0}\dmpnum{208-01}{\input{items/208-01}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{208-02}{\input{items/208-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{208-03}{\input{items/208-03}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{3}\dmpnum{208-04}{\input{items/208-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{208-05}{\input{items/208-05}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\renewcommand{\dmchapunit}{23 이차함수의 활용}
+\dmchapter{23}{이차함수의 활용}
+\setcounter{dmproblemcount}{0}
+\dmsection{개념원리 확인하기}
+\setcounter{dmproblemcount}{0}\dmpnum{210-01}{\input{items/210-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{210-02}{\input{items/210-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{210-03}{\input{items/210-03}}\vspace{6mm}
+\dmsection{핵심문제 익히기}
+\setcounter{dmproblemcount}{0}\dmpnum{211-h1}{\input{items/211-h1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{211-c1}{\input{items/211-c1}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{211-h2}{\input{items/211-h2}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{211-c2}{\input{items/211-c2}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{212-h3}{\input{items/212-h3}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{212-c3}{\input{items/212-c3}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{212-c4}{\input{items/212-c4}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{212-c5}{\input{items/212-c5}}\vspace{6mm}
+\dmsection{이런 문제가 시험에 나온다}
+\setcounter{dmproblemcount}{0}\dmpnum{213-01}{\input{items/213-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{213-02}{\input{items/213-02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{213-03}{\input{items/213-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{213-04}{\input{items/213-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{213-05}{\input{items/213-05}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 1 기본 문제}
+\setcounter{dmproblemcount}{0}\dmpnum{214-01}{\input{items/214-01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{214-02}{\input{items/214-02}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{214-03}{\input{items/214-03}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{214-04}{\input{items/214-04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{214-05}{\input{items/214-05}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{5}\dmpnum{214-06}{\input{items/214-06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{214-07}{\input{items/214-07}}\vspace{6mm}
+\setcounter{dmproblemcount}{7}\dmpnum{215-08}{\input{items/215-08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{215-09}{\input{items/215-09}}\vspace{6mm}
+\setcounter{dmproblemcount}{9}\dmpnum{215-10}{\input{items/215-10}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{10}\dmpnum{215-11}{\input{items/215-11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{215-12}{\input{items/215-12}}\vspace{6mm}
+\setcounter{dmproblemcount}{12}\dmpnum{215-13}{\input{items/215-13}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 2 발전 문제}
+\setcounter{dmproblemcount}{13}\dmpnum{216-14}{\input{items/216-14}}\vspace{6mm}
+\setcounter{dmproblemcount}{14}\dmpnum{216-15}{\input{items/216-15}}\vspace{6mm}
+\setcounter{dmproblemcount}{15}\dmpnum{216-16}{\input{items/216-16}}\vspace{6mm}
+\setcounter{dmproblemcount}{16}\dmpnum{216-17}{\input{items/216-17}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{17}\dmpnum{216-18}{\input{items/216-18}}\vspace{6mm}
+\setcounter{dmproblemcount}{18}\dmpnum{216-19}{\input{items/216-19}}\vspace{6mm}
+\setcounter{dmproblemcount}{19}\dmpnum{217-20}{\input{items/217-20}}\vspace{6mm}
+\setcounter{dmproblemcount}{20}\dmpnum{217-21}{\input{items/217-21}}\vspace{6mm}
+\setcounter{dmproblemcount}{21}\dmpnum{217-22}{\input{items/217-22}}\vspace{6mm}
+\dmsection{중단원 마무리하기 STEP 3 실력 UP}
+\setcounter{dmproblemcount}{22}\dmpnum{217-23}{\input{items/217-23}}\vspace{6mm}
+\setcounter{dmproblemcount}{23}\dmpnum{217-24}{\input{items/217-24}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{24}\dmpnum{217-25}{\input{items/217-25}}\vspace{6mm}
+\dmsection{서술형 대비 문제}
+\setcounter{dmproblemcount}{0}\dmpnum{218-e1}{\input{items/218-e1}}\vspace{6mm}
+\setcounter{dmproblemcount}{0}\dmpnum{218-u1}{\input{items/218-u1}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{218-e2}{\input{items/218-e2}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{1}\dmpnum{218-u2}{\input{items/218-u2}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{2}\dmpnum{219-u3}{\input{items/219-u3}}\vspace{6mm}
+\setcounter{dmproblemcount}{3}\dmpnum{219-u4}{\input{items/219-u4}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{219-u5}{\input{items/219-u5}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{219-u6}{\input{items/219-u6}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\dmsection{정답}
+\begin{multicols}{2}\small
+\noindent\textbf{01 제곱근의 뜻과 표현}\par\smallskip
+\noindent\textbf{11-01}\ ⑴ $7$, $-7$, $7$, $-7$ ⑵ $0$ ⑶ 없다\par
+\noindent\textbf{11-02}\ ⑴ $5$, $-5$ ⑵ $0.1$, $-0.1$ ⑶ $\dfrac{2}{3}$, $-\dfrac{2}{3}$ ⑷ $8$, $-8$\par
+\noindent\textbf{11-03}\ ⑴ $\pm\sqrt{5}$ ⑵ $\pm\sqrt{14}$ ⑶ $\pm\sqrt{0.3}$ ⑷ $\pm\sqrt{\dfrac{3}{2}}$\par
+\noindent\textbf{11-04}\ ⑴ $\pm\sqrt{6}$ ⑵ $\sqrt{10}$ ⑶ $-\sqrt{\dfrac{5}{7}}$ ⑷ $\sqrt{0.2}$\par
+\noindent\textbf{11-05}\ ⑴ $4$ ⑵ $-12$ ⑶ $\pm 0.9$ ⑷ $\dfrac{11}{6}$\par
+\noindent\textbf{12-h1}\ ⑤\par
+\noindent\textbf{12-c1}\ $21$\par
+\noindent\textbf{12-h2}\ ④\par
+\noindent\textbf{12-c2}\ ②\par
+\noindent\textbf{13-h3}\ ②, ⑤\par
+\noindent\textbf{13-c3}\ $3$개\par
+\noindent\textbf{13-h4}\ $10$\par
+\noindent\textbf{13-c4}\ $5$\par
+\noindent\textbf{13-c5}\ $6$\par
+\noindent\textbf{14-01}\ ①, ③\par
+\noindent\textbf{14-02}\ ③\par
+\noindent\textbf{14-03}\ ④\par
+\noindent\textbf{14-04}\ $1$\par
+\noindent\textbf{14-05}\ $\sqrt{65}\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{02 제곱근의 성질}\par\smallskip
+\noindent\textbf{16-01}\ ⑴ $3$ ⑵ $10$ ⑶ $-0.5$ ⑷ $8$ ⑸ $6$ ⑹ $-\dfrac{2}{7}$\par
+\noindent\textbf{16-02}\ ⑴ $12$ ⑵ $5$ ⑶ $16$ ⑷ $5$\par
+\noindent\textbf{16-03}\ ⑴ $2a$ ⑵ $6a$ ⑶ $-7a$ ⑷ $-3a$\par
+\noindent\textbf{16-04}\ ⑴ $<$ ⑵ $<$ ⑶ $>$ ⑷ $>$ ⑸ $<$ ⑹ $>$\par
+\noindent\textbf{17-h1}\ ⑤\par
+\noindent\textbf{17-c1}\ ②\par
+\noindent\textbf{17-h2}\ ⑴ $2$ ⑵ $4$ ⑶ $-8$ ⑷ $7$\par
+\noindent\textbf{17-c2}\ ⑴ $15$ ⑵ $-1$ ⑶ $3$ ⑷ $-17$\par
+\noindent\textbf{18-h3}\ ④\par
+\noindent\textbf{18-c3}\ ㄴ, ㄹ\par
+\noindent\textbf{18-h4}\ ⑴ $5a$ ⑵ $4$\par
+\noindent\textbf{18-c4}\ ⑴ $9a$ ⑵ $-2a$\par
+\noindent\textbf{19-h5}\ ⑴ $5$ ⑵ $6$\par
+\noindent\textbf{19-c5}\ ⑴ $15$ ⑵ $7$\par
+\noindent\textbf{19-h6}\ $10$\par
+\noindent\textbf{19-c6}\ ④\par
+\noindent\textbf{20-h7}\ ①, ⑤\par
+\noindent\textbf{20-c7}\ ⑤\par
+\noindent\textbf{20-h8}\ ⑴ $10$, $11$, $12$, $13$, $14$, $15$ ⑵ $1$, $2$, $3$, $4$\par
+\noindent\textbf{20-c8}\ ⑴ $3$, $4$ ⑵ $4$, $5$, $6$, $7$\par
+\noindent\textbf{21-01}\ ⑤\par
+\noindent\textbf{21-02}\ $2b$\par
+\noindent\textbf{21-03}\ ②\par
+\noindent\textbf{21-04}\ $16$\par
+\noindent\textbf{21-05}\ $\sqrt{5}$, $2$, $\sqrt{2}$, $0$, $-3$, $-\sqrt{10}$\par
+\noindent\textbf{21-06}\ $5$\par
+\noindent\textbf{03 무리수와 실수}\par\smallskip
+\noindent\textbf{24-01}\ ⑴ 유 ⑵ 무 ⑶ 유 ⑷ 유 ⑸ 무 ⑹ 무\par
+\noindent\textbf{24-02}\ ⑴ ○ ⑵ × ⑶ ○ ⑷ ×\par
+\noindent\textbf{24-03}\ ⑴ $-\sqrt{9}$ ⑵ $-\sqrt{9}$, $0.\dot{1}\dot{5}$, $-\dfrac{1}{3}$ ⑶ $\dfrac{\pi}{2}$, $\sqrt{3}-\sqrt{2}$ ⑷ $\dfrac{\pi}{2}$, $-\sqrt{9}$, $\sqrt{3}-\sqrt{2}$, $0.\dot{1}\dot{5}$, $-\dfrac{1}{3}$\par
+\noindent\textbf{24-04}\ ⑴ $\sqrt{10}$ ⑵ P: $-\sqrt{10}$, Q: $\sqrt{10}$\par
+\noindent\textbf{25-05}\ ⑴ ○ ⑵ × ⑶ × ⑷ ○\par
+\noindent\textbf{25-06}\ ⑴ A: $-\sqrt{6}$, B: $3-\sqrt{2}$, C: $1+\sqrt{3}$ ⑵ $-\sqrt{6}<3-\sqrt{2}<1+\sqrt{3}$\par
+\noindent\textbf{25-07}\ ⑴ $>$ ⑵ $<$ ⑶ $>$ ⑷ $<$\par
+\noindent\textbf{25-08}\ ⑴ $2.347$ ⑵ $2.394$ ⑶ $2.412$\par
+\noindent\textbf{26-h1}\ ④\par
+\noindent\textbf{26-c1}\ $4$\par
+\noindent\textbf{26-h2}\ ③, ⑤\par
+\noindent\textbf{26-c2}\ ⑤\par
+\noindent\textbf{27-h3}\ P: $1-\sqrt{13}$, Q: $1+\sqrt{13}$\par
+\noindent\textbf{27-c3}\ P: $2-\sqrt{5}$, Q: $2+\sqrt{5}$\par
+\noindent\textbf{27-h4}\ ④, ⑤\par
+\noindent\textbf{27-c4}\ ㄴ, ㄹ\par
+\noindent\textbf{28-h5}\ ④\par
+\noindent\textbf{28-c5}\ $c<a<b$\par
+\noindent\textbf{28-h6}\ $1686$\par
+\noindent\textbf{28-c6}\ $4752$\par
+\noindent\textbf{29-01}\ ③, ⑤\par
+\noindent\textbf{29-02}\ 점~$\pt{A}$\par
+\noindent\textbf{29-03}\ ④\par
+\noindent\textbf{29-04}\ ③\par
+\noindent\textbf{29-05}\ $7$\par
+\noindent\textbf{30-01}\ ③\par
+\noindent\textbf{30-02}\ ②, ⑤\par
+\noindent\textbf{30-03}\ $1$\par
+\noindent\textbf{30-04}\ $11$\par
+\noindent\textbf{30-05}\ ④\par
+\noindent\textbf{30-06}\ ①\par
+\noindent\textbf{30-07}\ $10$\par
+\noindent\textbf{30-08}\ ④\par
+\noindent\textbf{31-09}\ ④\par
+\noindent\textbf{31-10}\ $\pt{P}(-1-\sqrt{5})$, $\pt{Q}(1+\sqrt{2})$\par
+\noindent\textbf{31-11}\ ①, ⑤\par
+\noindent\textbf{31-12}\ A: $-\sqrt{8}$, B: $-\sqrt{3}$, C: $3-\sqrt{2}$, D: $\sqrt{2}+1$, $-\sqrt{8}<-\sqrt{3}<3-\sqrt{2}<\sqrt{2}+1$\par
+\noindent\textbf{31-13}\ ⑤\par
+\noindent\textbf{31-14}\ $2.474$\par
+\noindent\textbf{32-15}\ ②\par
+\noindent\textbf{32-16}\ $-6$\par
+\noindent\textbf{32-17}\ $0$\par
+\noindent\textbf{32-18}\ $260$\par
+\noindent\textbf{32-19}\ ③\par
+\noindent\textbf{32-20}\ $0$\par
+\noindent\textbf{32-21}\ ④\par
+\noindent\textbf{32-22}\ ③, ⑤\par
+\noindent\textbf{33-23}\ $-3-\sqrt{13}$\par
+\noindent\textbf{33-24}\ $Q$\par
+\noindent\textbf{33-25}\ ③\par
+\noindent\textbf{33-26}\ $36$\par
+\noindent\textbf{33-27}\ $54$\par
+\noindent\textbf{33-28}\ $89$\par
+\noindent\textbf{34-e1}\ $4a+3b$\par
+\noindent\textbf{34-u1}\ $8a$\par
+\noindent\textbf{34-e2}\ $6-\sqrt{2}$\par
+\noindent\textbf{34-u2}\ $-1+\sqrt{8}$\par
+\noindent\textbf{35-u3}\ $-3$\par
+\noindent\textbf{35-u4}\ $21$\par
+\noindent\textbf{35-u5}\ $5$\par
+\noindent\textbf{35-u6}\ $9$\par
+\noindent\textbf{04 제곱근의 곱셈과 나눗셈}\par\smallskip
+\noindent\textbf{39-01}\ ⑴ $\sqrt{21}$ ⑵ $\sqrt{70}$ ⑶ $-\sqrt{2}$ ⑷ $15\sqrt{6}$\par
+\noindent\textbf{39-02}\ ⑴ $\sqrt{5}$ ⑵ $2\sqrt{6}$ ⑶ $4\sqrt{5}$ ⑷ $\sqrt{3}$\par
+\noindent\textbf{39-03}\ ⑴ $2\sqrt{7}$ ⑵ $3\sqrt{5}$ ⑶ $3\sqrt{6}$ ⑷ $-7\sqrt{2}$ ⑸ $\dfrac{\sqrt{7}}{6}$ ⑹ $-\dfrac{\sqrt{11}}{10}$\par
+\noindent\textbf{39-04}\ ⑴ $\sqrt{63}$ ⑵ $-\sqrt{48}$ ⑶ $\sqrt{\dfrac{8}{3}}$ ⑷ $\sqrt{\dfrac{2}{25}}$\par
+\noindent\textbf{39-05}\ ⑴ $\dfrac{2\sqrt{3}}{3}$ ⑵ $\dfrac{\sqrt{10}}{2}$ ⑶ $-\dfrac{\sqrt{15}}{3}$ ⑷ $\dfrac{3\sqrt{6}}{4}$\par
+\noindent\textbf{40-h1}\ ⑴ $20\sqrt{35}$ ⑵ $6\sqrt{10}$\par
+\noindent\textbf{40-c1}\ ④\par
+\noindent\textbf{40-h2}\ ⑴ $2\sqrt{3}$ ⑵ $-3\sqrt{5}$\par
+\noindent\textbf{40-c2}\ ㄱ, ㄷ\par
+\noindent\textbf{41-h3}\ ③\par
+\noindent\textbf{41-c3}\ $2$\par
+\noindent\textbf{41-h4}\ ㄴ, ㄷ\par
+\noindent\textbf{41-c4}\ ⑤\par
+\noindent\textbf{42-h5}\ ④\par
+\noindent\textbf{42-c5}\ ②\par
+\noindent\textbf{42-h6}\ ⑴ $\dfrac{\sqrt{14}}{7}$ ⑵ $-\dfrac{2\sqrt{10}}{15}$ ⑶ $\dfrac{2\sqrt{15}}{5}$ ⑷ $\dfrac{\sqrt{10}}{3}$\par
+\noindent\textbf{42-c6}\ ①, ⑤\par
+\noindent\textbf{43-h7}\ ⑴ $20$ ⑵ $2\sqrt{15}$ ⑶ $\dfrac{3\sqrt{3}}{2}$ ⑷ $-4$\par
+\noindent\textbf{43-c7}\ $8$\par
+\noindent\textbf{43-h8}\ $4\sqrt{3}\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{43-c8}\ $4\sqrt{15}\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{44-01}\ ⑴ $\sqrt{55}$ ⑵ $12\sqrt{21}$ ⑶ $-2\sqrt{6}$ ⑷ $15\sqrt{14}$\par
+\noindent\textbf{44-02}\ ⑴ $\sqrt{13}$ ⑵ $2\sqrt{3}$ ⑶ $-4$ ⑷ $-5\sqrt{35}$\par
+\noindent\textbf{44-03}\ ⑴ $2\sqrt{11}$ ⑵ $5\sqrt{5}$ ⑶ $-8\sqrt{3}$ ⑷ $\dfrac{\sqrt{5}}{8}$ ⑸ $-\dfrac{\sqrt{7}}{4}$ ⑹ $\dfrac{3\sqrt{2}}{10}$\par
+\noindent\textbf{44-04}\ ⑴ $\sqrt{52}$ ⑵ $\sqrt{150}$ ⑶ $-\sqrt{108}$ ⑷ $\sqrt{\dfrac{3}{25}}$ ⑸ $-\sqrt{\dfrac{20}{9}}$ ⑹ $\sqrt{\dfrac{18}{7}}$\par
+\noindent\textbf{44-05}\ ⑴ $\dfrac{5\sqrt{7}}{7}$ ⑵ $\dfrac{\sqrt{22}}{2}$ ⑶ $\dfrac{3\sqrt{5}}{10}$ ⑷ $\dfrac{\sqrt{3}}{5}$\par
+\noindent\textbf{44-06}\ ⑴ $6$ ⑵ $6\sqrt{2}$ ⑶ $-3\sqrt{10}$\par
+\noindent\textbf{45-01}\ ①, ④\par
+\noindent\textbf{45-02}\ $12$\par
+\noindent\textbf{45-03}\ ⑤\par
+\noindent\textbf{45-04}\ $2$\par
+\noindent\textbf{45-05}\ $-8$\par
+\noindent\textbf{45-06}\ $\sqrt{6}\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{05 제곱근의 덧셈과 뺄셈}\par\smallskip
+\noindent\textbf{47-01}\ ⑴ $11\sqrt{2}$ ⑵ $-2\sqrt{5}$ ⑶ $-\sqrt{3}$ ⑷ $6\sqrt{7}-4\sqrt{10}$\par
+\noindent\textbf{47-02}\ ⑴ $5\sqrt{7}$ ⑵ $-3\sqrt{3}$ ⑶ $\sqrt{5}$ ⑷ $-\sqrt{6}+2\sqrt{2}$\par
+\noindent\textbf{47-03}\ ⑴ $\sqrt{10}+\sqrt{15}$ ⑵ $2\sqrt{5}-2$ ⑶ $3\sqrt{2}+3\sqrt{6}$ ⑷ $\sqrt{5}-\sqrt{3}$\par
+\noindent\textbf{47-04}\ ⑴ $\dfrac{\sqrt{6}+\sqrt{30}}{6}$ ⑵ $\dfrac{\sqrt{10}-4}{2}$ ⑶ $\dfrac{1+3\sqrt{6}}{2}$ ⑷ $\dfrac{5\sqrt{2}-3\sqrt{5}}{15}$\par
+\noindent\textbf{47-05}\ ⑴ $3\sqrt{3}-3$ ⑵ $\sqrt{5}$\par
+\noindent\textbf{48-h1}\ ⑴ $-6\sqrt{3}$ ⑵ $13\sqrt{5}-8\sqrt{7}$\par
+\noindent\textbf{48-c1}\ $1$\par
+\noindent\textbf{48-h2}\ ⑴ $-\sqrt{3}-4\sqrt{2}$ ⑵ $2\sqrt{5}-\sqrt{7}$\par
+\noindent\textbf{48-c2}\ $-2$\par
+\noindent\textbf{49-h3}\ ⑴ $-\sqrt{6}-2$ ⑵ $0$\par
+\noindent\textbf{49-c3}\ ⑴ $6$ ⑵ $8\sqrt{3}$\par
+\noindent\textbf{49-h4}\ ⑴ $3$ ⑵ $-\sqrt{5}+\sqrt{2}$\par
+\noindent\textbf{49-c4}\ ⑴ $\sqrt{5}+2$ ⑵ $2\sqrt{6}$\par
+\noindent\textbf{50-h5}\ ⑴ $-7\sqrt{3}+\sqrt{10}$ ⑵ $8-3\sqrt{6}$\par
+\noindent\textbf{50-c5}\ ⑴ $7$ ⑵ $-2+3\sqrt{2}$\par
+\noindent\textbf{50-h6}\ $5$\par
+\noindent\textbf{50-c6}\ $-2$\par
+\noindent\textbf{51-h7}\ $(8+2\sqrt{6}\mkern3mu )\mkern3mu \mathrm{cm}^2$\par
+\noindent\textbf{51-c7}\ $(16+6\sqrt{15}\mkern3mu )\mkern3mu \mathrm{cm}^2$\par
+\noindent\textbf{51-h8}\ ⑤\par
+\noindent\textbf{51-c8}\ ④\par
+\noindent\textbf{52-01}\ ⑴ $2\sqrt{2}$ ⑵ $-4\sqrt{5}$ ⑶ $-5\sqrt{3}+7\sqrt{7}$ ⑷ $3\sqrt{6}-\sqrt{10}$\par
+\noindent\textbf{52-02}\ ⑴ $5\sqrt{3}$ ⑵ $-3\sqrt{2}$ ⑶ $-2\sqrt{2}-\sqrt{6}$ ⑷ $-\sqrt{5}+4\sqrt{10}$\par
+\noindent\textbf{52-03}\ ⑴ $5\sqrt{2}$ ⑵ $-\sqrt{5}$ ⑶ $\sqrt{2}+\sqrt{3}$\par
+\noindent\textbf{52-04}\ ⑴ $5\sqrt{2}-2\sqrt{10}$ ⑵ $5\sqrt{3}-6$ ⑶ $-10$ ⑷ $-2\sqrt{3}+2\sqrt{6}$\par
+\noindent\textbf{52-05}\ ⑴ $\dfrac{\sqrt{14}+\sqrt{35}}{7}$ ⑵ $\dfrac{\sqrt{2}-\sqrt{6}}{4}$ ⑶ $\sqrt{2}$ ⑷ $-\sqrt{3}+4$\par
+\noindent\textbf{52-06}\ ⑴ $\sqrt{14}$ ⑵ $3\sqrt{2}+\sqrt{3}$ ⑶ $8-7\sqrt{3}$ ⑷ $5\sqrt{3}-\sqrt{2}$\par
+\noindent\textbf{53-01}\ ⑤\par
+\noindent\textbf{53-02}\ $4\sqrt{6}+1$\par
+\noindent\textbf{53-03}\ $3$\par
+\noindent\textbf{53-04}\ $k=-4$, $A=11$\par
+\noindent\textbf{53-05}\ $(5+2\sqrt{10}\mkern3mu )\mkern3mu \mathrm{cm}^2$\par
+\noindent\textbf{53-06}\ $a>b>c$\par
+\noindent\textbf{54-01}\ ④\par
+\noindent\textbf{54-02}\ ⑤\par
+\noindent\textbf{54-03}\ $\dfrac{2}{5}$\par
+\noindent\textbf{54-04}\ ②, ③\par
+\noindent\textbf{54-05}\ ④\par
+\noindent\textbf{54-06}\ $-10$\par
+\noindent\textbf{55-07}\ ②\par
+\noindent\textbf{55-08}\ ③\par
+\noindent\textbf{55-09}\ $2$\par
+\noindent\textbf{55-10}\ $9$\par
+\noindent\textbf{55-11}\ ③\par
+\noindent\textbf{55-12}\ ⑤\par
+\noindent\textbf{56-13}\ ⑤\par
+\noindent\textbf{56-14}\ ⑤\par
+\noindent\textbf{56-15}\ ④\par
+\noindent\textbf{56-16}\ $3\sqrt{10}$\par
+\noindent\textbf{56-17}\ ②\par
+\noindent\textbf{56-18}\ ①, ⑤\par
+\noindent\textbf{57-19}\ $20$\par
+\noindent\textbf{57-20}\ $2\sqrt{5}$\par
+\noindent\textbf{57-21}\ ③\par
+\noindent\textbf{57-22}\ $4\sqrt{3}$\par
+\noindent\textbf{57-23}\ $\dfrac{1}{14}$\par
+\noindent\textbf{57-24}\ $26\sqrt{2}\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{58-e1}\ $\sqrt{3}$\par
+\noindent\textbf{58-e2}\ $3\sqrt{2}-4$\par
+\noindent\textbf{58-u1}\ $1$\par
+\noindent\textbf{58-u2}\ $\sqrt{10}-2$\par
+\noindent\textbf{59-u3}\ $20$\par
+\noindent\textbf{59-u4}\ $18$\par
+\noindent\textbf{59-u5}\ $-16$\par
+\noindent\textbf{59-u6}\ $14+\sqrt{2}$\par
+\noindent\textbf{06 곱셈 공식}\par\smallskip
+\noindent\textbf{64-01}\ ⑴ $xy+5x+2y+10$ ⑵ $2ab-3a+12b-18$ ⑶ $4x^2-13xy+3y^2$ ⑷ $a^2-7a-b^2+7b$\par
+\noindent\textbf{64-02}\ ⑴ $x^2+2x+1$ ⑵ $a^2-14a+49$ ⑶ $4x^2+20xy+25y^2$ ⑷ $16a^2-24ab+9b^2$\par
+\noindent\textbf{64-03}\ ⑴ $a^2-1$ ⑵ $x^2-49$ ⑶ $4b^2-9$ ⑷ $25x^2-4y^2$\par
+\noindent\textbf{64-04}\ ⑴ $a^2+8a+15$ ⑵ $x^2-5x-14$ ⑶ $b^2+7b-8$ ⑷ $y^2-10y+24$\par
+\noindent\textbf{64-05}\ ⑴ $4a^2+11a+7$ ⑵ $5x^2+2x-3$ ⑶ $12b^2-b-6$ ⑷ $6y^2-11y+4$\par
+\noindent\textbf{65-h1}\ ⑴ $-6x^2+17xy-7y^2$ ⑵ $x^3+8$\par
+\noindent\textbf{65-c1}\ $5$\par
+\noindent\textbf{65-h2}\ ⑴ $x^2+12x+36$ ⑵ $\dfrac{1}{4}x^2-3x+9$ ⑶ $25x^2-20xy+4y^2$ ⑷ $16x^2+8xy+y^2$\par
+\noindent\textbf{65-c2}\ ③, ④\par
+\noindent\textbf{66-h3}\ ⑴ $4x^2-49$ ⑵ $\dfrac{4}{9}x^2-y^2$ ⑶ $9x^2-16$ ⑷ $\dfrac{1}{4}y^2-\dfrac{1}{25}x^2$\par
+\noindent\textbf{66-c3}\ ㄱ, ㄴ\par
+\noindent\textbf{66-h4}\ ⑴ $x^2-4x-21$ ⑵ $x^2-8x+12$ ⑶ $x^2+\dfrac{17}{2}x+4$ ⑷ $x^2-xy-20y^2$\par
+\noindent\textbf{66-c4}\ $-x^2-23x-25$\par
+\noindent\textbf{67-h5}\ ⑴ $10x^2-11x-6$ ⑵ $12x^2+5x-3$ ⑶ $x^2+4x+\dfrac{15}{4}$ ⑷ $-24x^2+62xy-35y^2$\par
+\noindent\textbf{67-c5}\ $3$\par
+\noindent\textbf{67-h6}\ $40x^2+7x-3$\par
+\noindent\textbf{67-c6}\ $15a^2-16a+4$\par
+\noindent\textbf{68-h7}\ ⑴ $4x^2-12xy+9y^2+4x-6y-24$ ⑵ $9x^2-y^2+8y-16$\par
+\noindent\textbf{68-c7}\ ⑴ $x^2+2xy+y^2-25$ ⑵ $4a^2-4ab+b^2-2a+b-2$\par
+\noindent\textbf{68-h8}\ $x^4+12x^3+37x^2+6x-56$\par
+\noindent\textbf{68-c8}\ $11$\par
+\noindent\textbf{69-01}\ ⑴ $ab-2a+8b-16$ ⑵ $4xy+12x-y-3$ ⑶ $2a^2-9ab+2a-5b^2+b$ ⑷ $-3x^2+5xy-2y^2+12x-8y$\par
+\noindent\textbf{69-02}\ ⑴ $9a^2+12a+4$ ⑵ $25x^2-40x+16$ ⑶ $4a^2+4ab+b^2$ ⑷ $36x^2-4xy+\dfrac{1}{9}y^2$\par
+\noindent\textbf{69-03}\ ⑴ $16a^2-49$ ⑵ $\dfrac{1}{4}-x^2$ ⑶ $9a^2-64b^2$ ⑷ $81x^2-25y^2$\par
+\noindent\textbf{69-04}\ ⑴ $a^2-10a+9$ ⑵ $x^2-2x-35$ ⑶ $a^2+6ab+8b^2$ ⑷ $x^2+\dfrac{7}{6}xy-\dfrac{1}{2}y^2$\par
+\noindent\textbf{69-05}\ ⑴ $6a^2-7a-10$ ⑵ $10x^2+13x-3$ ⑶ $9a^2-18ab+8b^2$ ⑷ $-8x^2+2xy+\dfrac{3}{8}y^2$\par
+\noindent\textbf{69-06}\ ⑴ $2a^2+8a+15$ ⑵ $-x+7$ ⑶ $5a^2-5a-21$ ⑷ $10xy$\par
+\noindent\textbf{70-01}\ $-7$\par
+\noindent\textbf{70-02}\ ⑤\par
+\noindent\textbf{70-03}\ $4$\par
+\noindent\textbf{70-04}\ $-10$\par
+\noindent\textbf{70-05}\ $x^2+2x-15$\par
+\noindent\textbf{70-06}\ $-2$\par
+\noindent\textbf{07 곱셈 공식의 응용}\par\smallskip
+\noindent\textbf{72-01}\ ⑴ $1$, $50$, $1$, $2601$ ⑵ $4$, $100$, $4$, $9216$ ⑶ $3$, $3$, $3$, $891$\par
+\noindent\textbf{72-02}\ ⑴ $8+4\sqrt{3}$ ⑵ $9-4\sqrt{5}$ ⑶ $1$ ⑷ $-1+2\sqrt{7}$\par
+\noindent\textbf{72-03}\ ⑴ $\sqrt{2}-1$ ⑵ $\sqrt{5}+\sqrt{3}$ ⑶ $\dfrac{\sqrt{6}-\sqrt{2}}{2}$ ⑷ $4+\sqrt{15}$\par
+\noindent\textbf{72-04}\ ⑴ $2xy$, $-2$, $40$ ⑵ $4xy$, $-2$, $44$\par
+\noindent\textbf{73-h1}\ ⑴ $10201$ ⑵ $35.96$ ⑶ $1702$\par
+\noindent\textbf{73-c1}\ ⑴ $94.09$ ⑵ $2484$ ⑶ $10506$\par
+\noindent\textbf{73-h2}\ ⑴ $-2$ ⑵ $2\sqrt{5}$\par
+\noindent\textbf{73-c2}\ ⑴ $13-17\sqrt{2}$ ⑵ $-2\sqrt{3}$\par
+\noindent\textbf{74-h3}\ ⑴ $7$ ⑵ $5$ ⑶ $7$\par
+\noindent\textbf{74-c3}\ ⑴ $19$ ⑵ $29$ ⑶ $\dfrac{19}{5}$\par
+\noindent\textbf{74-h4}\ ⑴ $23$ ⑵ $21$\par
+\noindent\textbf{74-c4}\ ⑴ $18$ ⑵ $20$\par
+\noindent\textbf{75-01}\ ⑤\par
+\noindent\textbf{75-02}\ $1009$\par
+\noindent\textbf{75-03}\ $-12$\par
+\noindent\textbf{75-04}\ $38$\par
+\noindent\textbf{75-05}\ $16$\par
+\noindent\textbf{75-06}\ $35$\par
+\noindent\textbf{76-01}\ ④\par
+\noindent\textbf{76-02}\ $-16$\par
+\noindent\textbf{76-03}\ ②\par
+\noindent\textbf{76-04}\ ②\par
+\noindent\textbf{76-05}\ $1$\par
+\noindent\textbf{76-06}\ ②, ⑤\par
+\noindent\textbf{77-07}\ ③\par
+\noindent\textbf{77-08}\ $(15x^2-x-2)\mkern3mu \mathrm{m}^2$\par
+\noindent\textbf{77-09}\ ③\par
+\noindent\textbf{77-10}\ ⑤\par
+\noindent\textbf{77-11}\ ②\par
+\noindent\textbf{77-12}\ $3$\par
+\noindent\textbf{78-13}\ ④\par
+\noindent\textbf{78-14}\ ③\par
+\noindent\textbf{78-15}\ $3$\par
+\noindent\textbf{78-16}\ ②\par
+\noindent\textbf{78-17}\ $x^4+14x^3+41x^2-56x-180$\par
+\noindent\textbf{78-18}\ $32$\par
+\noindent\textbf{78-19}\ $6$\par
+\noindent\textbf{79-20}\ ②\par
+\noindent\textbf{79-21}\ ⑤\par
+\noindent\textbf{79-22}\ ③\par
+\noindent\textbf{79-23}\ $-4$\par
+\noindent\textbf{79-24}\ $-2a^2+7ab-6b^2$\par
+\noindent\textbf{79-25}\ $5$\par
+\noindent\textbf{80-e1}\ $3$\par
+\noindent\textbf{80-e2}\ $9\sqrt{5}$\par
+\noindent\textbf{80-u1}\ $6$\par
+\noindent\textbf{80-u2}\ $-6\sqrt{2}$\par
+\noindent\textbf{81-u3}\ $35$\par
+\noindent\textbf{81-u4}\ $-14$\par
+\noindent\textbf{81-u5}\ ⑴ $x+4$ ⑵ $3004$\par
+\noindent\textbf{81-u6}\ $8$\par
+\noindent\textbf{08 인수분해 공식}\par\smallskip
+\noindent\textbf{85-01}\ ⑴ $a^2+3a$ ⑵ $x^2-2x+1$ ⑶ $b^2+5b-14$ ⑷ $6y^2-13y+5$\par
+\noindent\textbf{85-02}\ ⑴ $a$, $a(x-y)$ ⑵ $3xy^2$, $3xy^2(y+3x)$ ⑶ $ab$, $ab(2a+b-5)$ ⑷ $x+1$, $(x+1)(x-4)$\par
+\noindent\textbf{85-03}\ ⑴ $(x+2)^2$ ⑵ $(a-5)^2$ ⑶ $(4x+y)^2$ ⑷ $(3a-7b)^2$\par
+\noindent\textbf{85-04}\ ⑴ $(x+6)(x-6)$ ⑵ $(a+9)(a-9)$ ⑶ $(5x+7y)(5x-7y)$ ⑷ $(3a+2b)(3a-2b)$\par
+\noindent\textbf{86-h1}\ ⑴ $2a(a+4)$ ⑵ $xy(x-y+5)$ ⑶ $(a+5)(b-3)$ ⑷ $(x-1)(x+1)$\par
+\noindent\textbf{86-c1}\ ③\par
+\noindent\textbf{86-h2}\ ⑴ $(x-6)^2$ ⑵ $(3x+5y)^2$ ⑶ $\left(\dfrac{1}{2}x+2y\right)^2$ ⑷ $xy(2x-3y)^2$\par
+\noindent\textbf{86-c2}\ ⑤\par
+\noindent\textbf{87-h3}\ ⑴ $16$ ⑵ $\pm10$ ⑶ $4$ ⑷ $\pm4$\par
+\noindent\textbf{87-c3}\ ③\par
+\noindent\textbf{87-h4}\ ⑴ $(3a+b)(3a-b)$ ⑵ $(5y+x)(5y-x)$ ⑶ $2(x+4)(x-4)$ ⑷ $3a(b+2c)(b-2c)$\par
+\noindent\textbf{87-c4}\ ㄱ, ㄷ\par
+\noindent\textbf{88-01}\ ③, ④\par
+\noindent\textbf{88-02}\ ⑤\par
+\noindent\textbf{88-03}\ $12$\par
+\noindent\textbf{88-04}\ ④\par
+\noindent\textbf{88-05}\ ③\par
+\noindent\textbf{09 인수분해 공식 (2)}\par\smallskip
+\noindent\textbf{90-01}\ ⑴ $(x-2)(x-5)$, $11$, $-11$, $7$, $-7$ ⑵ $(x-1)(x+6)$, $-5$, $5$, $-1$, $1$\par
+\noindent\textbf{90-02}\ ⑴ $(x+3)(x+6)$ ⑵ $(x-1)(x-3)$ ⑶ $(x-1)(x+2)$ ⑷ $(x+4y)(x-10y)$\par
+\noindent\textbf{90-03}\ ⑴ $(x+1)(2x-3)$, $2$, $-3$, $-3$ ⑵ $(2x-1)(2x-3)$, $-2$, $-3$, $-6$\par
+\noindent\textbf{90-04}\ ⑴ $(x-1)(3x+10)$ ⑵ $(2x+1)(3x+4)$ ⑶ $(2x-1)(5x+1)$ ⑷ $(x-7y)(5x-y)$\par
+\noindent\textbf{91-h1}\ ⑴ $(x+3)(x+4)$ ⑵ $(x-4)(x+5)$ ⑶ $(x+4)(x-6)$ ⑷ $(x-8y)(x-9y)$\par
+\noindent\textbf{91-c1}\ $2x+5$\par
+\noindent\textbf{91-h2}\ ⑴ $(x-2)(3x-4)$ ⑵ $(3x+4)(5x-3)$ ⑶ $(4x-3)(5x+2)$ ⑷ $(x+2y)(9x+2y)$\par
+\noindent\textbf{91-c2}\ $-7$\par
+\noindent\textbf{92-h3}\ ④\par
+\noindent\textbf{92-c3}\ ②\par
+\noindent\textbf{92-h4}\ $13$\par
+\noindent\textbf{92-c4}\ ⑴ $-20$ ⑵ $5x-4$\par
+\noindent\textbf{93-h5}\ ⑴ $-12$ ⑵ $1$ ⑶ $(x-3)(x+4)$\par
+\noindent\textbf{93-c5}\ $(x-4)(x+6)$\par
+\noindent\textbf{93-h6}\ $3x+3$\par
+\noindent\textbf{93-c6}\ $4x+6$\par
+\noindent\textbf{94-01}\ ⑴ $5a(a-2b)$ ⑵ $x(2a+5b-3c)$ ⑶ $(x+2)(a-7)$ ⑷ $-4y(x-3y)$\par
+\noindent\textbf{94-02}\ ⑴ $(x+8)^2$ ⑵ $\left(x-\dfrac{1}{2}\right)^2$ ⑶ $(3x+y)^2$ ⑷ $(5x-2)^2$ ⑸ $3(2x+3)^2$ ⑹ $2y(x-4)^2$\par
+\noindent\textbf{94-03}\ ⑴ $(5x+4y)(5x-4y)$ ⑵ $\left(3a+\dfrac{1}{7}b\right)\left(3a-\dfrac{1}{7}b\right)$ ⑶ $6(3x+2y)(3x-2y)$ ⑷ $(9+x^2)(3+x)(3-x)$\par
+\noindent\textbf{94-04}\ ⑴ $(x+1)(x+4)$ ⑵ $(x-2)(x-7)$ ⑶ $(x-1)(x+7)$ ⑷ $(x+3)(x-5)$ ⑸ $(x-3y)(x+7y)$ ⑹ $(x-2y)(x-8y)$ ⑺ $3(x+2)(x+3)$ ⑻ $2y(x+2)(x-3)$\par
+\noindent\textbf{94-05}\ ⑴ $(x+3)(3x+2)$ ⑵ $(x-1)(5x-3)$ ⑶ $(2x-1)(3x+4)$ ⑷ $(3x+1)(3x-2)$ ⑸ $(3x+4y)(5x+2y)$ ⑹ $(x-2y)(2x+11y)$ ⑺ $5(x-1)(2x-5)$ ⑻ $2(x+y)(3x-5y)$\par
+\noindent\textbf{95-01}\ ②\par
+\noindent\textbf{95-02}\ $4x-10$\par
+\noindent\textbf{95-03}\ $9$\par
+\noindent\textbf{95-04}\ ④\par
+\noindent\textbf{95-05}\ $6x+8$\par
+\noindent\textbf{10 인수분해 공식의 응용}\par\smallskip
+\noindent\textbf{97-01}\ $2$, $2$, $x-1$\par
+\noindent\textbf{97-02}\ ⑴ $4y-1$ ⑵ $x-3$\par
+\noindent\textbf{97-03}\ $a-6$, $a-6$, $a-6$, $a-6$, $b$\par
+\noindent\textbf{97-04}\ ⑴ $36$, $100$, $2700$ ⑵ $5$, $70$, $4900$ ⑶ $38$, $38$, $80$, $320$\par
+\noindent\textbf{97-05}\ ⑴ $10000$ ⑵ $5\sqrt{5}+5$ ⑶ $-8\sqrt{3}$\par
+\noindent\textbf{98-h1}\ ⑴ $(x+1)^2$ ⑵ $(x+y-5)(x+y+7)$\par
+\noindent\textbf{98-c1}\ ⑴ $(3a+3b+1)^2$ ⑵ $(x-y+1)(x-y-6)$ ⑶ $3(x+7)$\par
+\noindent\textbf{98-h2}\ ⑴ $(a-b)(a-c)$ ⑵ $(x-y)(x+y+5)$ ⑶ $(2x+y+1)(2x-y+1)$ ⑷ $(x-y+1)(-x+y+1)$\par
+\noindent\textbf{98-c2}\ ⑴ $(x-3)(y-2)$ ⑵ $(a+b)(a-b+2)$ ⑶ $(x+y-z)(x-y-z)$ ⑷ $(x+3y+8)(-x-3y+8)$\par
+\noindent\textbf{99-h3}\ ⑴ $235$ ⑵ $8100$ ⑶ $10\sqrt{6}$\par
+\noindent\textbf{99-c3}\ ⑴ $105$ ⑵ $10000$ ⑶ $70$\par
+\noindent\textbf{99-h4}\ ⑴ $2\sqrt{2}$ ⑵ $-4\sqrt{2}$\par
+\noindent\textbf{99-c4}\ ⑴ $2\sqrt{2}$ ⑵ $12$\par
+\noindent\textbf{100-h5}\ $(x-2)(x+3)(x^2+x-8)$\par
+\noindent\textbf{100-c5}\ ⑴ $(x^2-2x-4)(x^2-2x-7)$ ⑵ $(a^2-8a+11)^2$\par
+\noindent\textbf{100-h6}\ ⑴ $(x+1)(x-2y+3)$ ⑵ $(x-y-2)(2x+y-3)$\par
+\noindent\textbf{100-c6}\ ⑴ $(x-2)(x+y-3)$ ⑵ $(x-y+2)(x+2y-3)$\par
+\noindent\textbf{101-01}\ ③\par
+\noindent\textbf{101-02}\ ②, ⑤\par
+\noindent\textbf{101-03}\ $1$\par
+\noindent\textbf{101-04}\ $-24\sqrt{2}$\par
+\noindent\textbf{101-05}\ $5+4\sqrt{5}$\par
+\noindent\textbf{101-06}\ $2x+y+5$\par
+\noindent\textbf{102-01}\ ⑤\par
+\noindent\textbf{102-02}\ ②, ⑤\par
+\noindent\textbf{102-03}\ $-60$\par
+\noindent\textbf{102-04}\ ①\par
+\noindent\textbf{102-05}\ $2$\par
+\noindent\textbf{102-06}\ ②\par
+\noindent\textbf{103-07}\ $7$\par
+\noindent\textbf{103-08}\ ③\par
+\noindent\textbf{103-09}\ ③\par
+\noindent\textbf{103-10}\ ①\par
+\noindent\textbf{103-11}\ ④\par
+\noindent\textbf{103-12}\ $24$\par
+\noindent\textbf{104-13}\ ⑤\par
+\noindent\textbf{104-14}\ ④\par
+\noindent\textbf{104-15}\ $21$\par
+\noindent\textbf{104-16}\ $-7$\par
+\noindent\textbf{104-17}\ ④\par
+\noindent\textbf{104-18}\ ③\par
+\noindent\textbf{105-19}\ ④\par
+\noindent\textbf{105-20}\ ①\par
+\noindent\textbf{105-21}\ $(x+3y-2)(2x-y+3)$\par
+\noindent\textbf{105-22}\ $-x$\par
+\noindent\textbf{105-23}\ $64$\par
+\noindent\textbf{105-24}\ $9$\par
+\noindent\textbf{106-e1}\ $(x+4)(x-5)$\par
+\noindent\textbf{106-e2}\ $16$\par
+\noindent\textbf{106-u1}\ $(x-3)(x+8)$\par
+\noindent\textbf{106-u2}\ $1$\par
+\noindent\textbf{107-u3}\ $5$\par
+\noindent\textbf{107-u4}\ $12x+28$\par
+\noindent\textbf{107-u5}\ $y-2$\par
+\noindent\textbf{107-u6}\ $6-\sqrt{6}$\par
+\noindent\textbf{11 이차방정식과 그 해}\par\smallskip
+\noindent\textbf{111-01}\ ⑴ $\bigcirc$ ⑵ $\times$ ⑶ $\bigcirc$ ⑷ $\times$ ⑸ $\times$ ⑹ $\bigcirc$\par
+\noindent\textbf{111-02}\ ⑴ $\bigcirc$ ⑵ $\bigcirc$ ⑶ $\times$ ⑷ $\bigcirc$\par
+\noindent\textbf{111-03}\ ⑴ $x=0$ 또는 $x=2$ ⑵ $x=1$\par
+\noindent\textbf{111-04}\ $9$, $6$, $2$\par
+\noindent\textbf{112-h1}\ ①, ⑤\par
+\noindent\textbf{112-c1}\ ㄱ, ㄷ, ㄹ\par
+\noindent\textbf{112-h2}\ ⑤\par
+\noindent\textbf{112-c2}\ ②, ④\par
+\noindent\textbf{113-h3}\ $-7$\par
+\noindent\textbf{113-c3}\ $-4$\par
+\noindent\textbf{113-h4}\ ⑴ $4$ ⑵ $-2$ ⑶ $-3$ ⑷ $5$\par
+\noindent\textbf{113-c4}\ ⑴ $-4$ ⑵ $7$ ⑶ $2$ ⑷ $-3$\par
+\noindent\textbf{114-01}\ ⑤\par
+\noindent\textbf{114-02}\ ⑤\par
+\noindent\textbf{114-03}\ $x=1$\par
+\noindent\textbf{114-04}\ $2$\par
+\noindent\textbf{114-05}\ $5$\par
+\noindent\textbf{12 인수분해를 이용한 이차방정식의 풀이}\par\smallskip
+\noindent\textbf{116-01}\ ⑴ $x=0$ 또는 $x=5$ ⑵ $x=-3$ 또는 $x=2$ ⑶ $x=1$ 또는 $x=6$ ⑷ $x=-6$ 또는 $x=-\dfrac{2}{3}$\par
+\noindent\textbf{116-02}\ ⑴ $x=0$ 또는 $x=-3$ ⑵ $x=-2$ 또는 $x=2$ ⑶ $x=4$ 또는 $x=7$ ⑷ $x=-4$ 또는 $x=-2$ ⑸ $x=-\dfrac{3}{2}$ 또는 $x=4$ ⑹ $x=-\dfrac{5}{3}$ 또는 $x=\dfrac{1}{2}$\par
+\noindent\textbf{116-03}\ ⑴ $x=-1$ ⑵ $x=7$ ⑶ $x=-5$ ⑷ $x=\dfrac{1}{3}$\par
+\noindent\textbf{116-04}\ ⑴ $9$ ⑵ $1$ ⑶ $-3$ ⑷ $27$\par
+\noindent\textbf{117-h1}\ ④\par
+\noindent\textbf{117-c1}\ $2$\par
+\noindent\textbf{117-h2}\ ⑴ $x=-4$ 또는 $x=-1$ ⑵ $x=\dfrac{3}{4}$ 또는 $x=\dfrac{3}{2}$\par
+\noindent\textbf{117-c2}\ ⑴ $x=-4$ 또는 $x=6$ ⑵ $x=1$ 또는 $x=9$ ⑶ $x=-3$ 또는 $x=2$ ⑷ $x=\dfrac{3}{4}$ 또는 $x=1$\par
+\noindent\textbf{118-h3}\ ⑴ $5$ ⑵ $x=\dfrac{2}{5}$\par
+\noindent\textbf{118-c3}\ $a=4$, $x=-1$\par
+\noindent\textbf{118-h4}\ $x=3$\par
+\noindent\textbf{118-c4}\ $x=-2$\par
+\noindent\textbf{119-h5}\ ㄴ, ㄹ, ㅂ\par
+\noindent\textbf{119-c5}\ ⑤\par
+\noindent\textbf{119-h6}\ ⑴ $1$ ⑵ $\pm 12$\par
+\noindent\textbf{119-c6}\ $10$\par
+\noindent\textbf{120-01}\ ⑴ $x=4$ 또는 $x=7$ ⑵ $x=-5$ 또는 $x=9$ ⑶ $x=-\dfrac{1}{4}$ 또는 $x=3$ ⑷ $x=-\dfrac{7}{2}$ 또는 $x=-\dfrac{2}{3}$\par
+\noindent\textbf{120-02}\ ⑴ $x=0$ 또는 $x=-2$ ⑵ $x=-4$ 또는 $x=5$ ⑶ $x=-9$ 또는 $x=2$ ⑷ $x=1$ 또는 $x=7$ ⑸ $x=-8$ 또는 $x=-2$ ⑹ $x=-5$ 또는 $x=\dfrac{1}{3}$ ⑺ $x=-2$ 또는 $x=-\dfrac{3}{2}$ ⑻ $x=-\dfrac{1}{4}$ 또는 $x=\dfrac{1}{2}$ ⑼ $x=\dfrac{3}{2}$ 또는 $x=\dfrac{5}{3}$ ⑽ $x=-4$ 또는 $x=-\dfrac{1}{5}$\par
+\noindent\textbf{120-03}\ ⑴ $x=-1$ 또는 $x=10$ ⑵ $x=-5$ 또는 $x=-1$ ⑶ $x=-3$ 또는 $x=\dfrac{4}{3}$ ⑷ $x=\dfrac{3}{2}$ 또는 $x=3$\par
+\noindent\textbf{120-04}\ ⑴ $x=-7$ ⑵ $x=\dfrac{1}{2}$ ⑶ $x=-\dfrac{5}{2}$ ⑷ $x=1$\par
+\noindent\textbf{120-05}\ ⑴ $25$ ⑵ $-2$ ⑶ $\dfrac{9}{8}$ ⑷ $\pm 8$\par
+\noindent\textbf{121-01}\ ③\par
+\noindent\textbf{121-02}\ $x=-\dfrac{2}{5}$ 또는 $x=1$\par
+\noindent\textbf{121-03}\ $10$\par
+\noindent\textbf{121-04}\ $12$\par
+\noindent\textbf{121-05}\ ③, ⑤\par
+\noindent\textbf{121-06}\ $-5$\par
+\noindent\textbf{13 제곱근을 이용한 이차방정식의 풀이}\par\smallskip
+\noindent\textbf{123-01}\ ⑴ $x=\pm\sqrt{10}$ ⑵ $x=\pm3$ ⑶ $x=\pm2\sqrt{6}$ ⑷ $x=-2$ 또는 $x=12$ ⑸ $x=-3\pm\sqrt{3}$ ⑹ $x=\dfrac{1\pm\sqrt{7}}{4}$\par
+\noindent\textbf{123-02}\ $16$, $16$, $4$, $13$\par
+\noindent\textbf{123-03}\ ⑴ $(x-2)^2=5$ ⑵ $(x+1)^2=\dfrac{7}{2}$\par
+\noindent\textbf{123-04}\ $4$, $4$, $2$, $\dfrac{5}{3}$, $2$, $\dfrac{\sqrt{15}}{3}$, $\dfrac{-6\pm\sqrt{15}}{3}$\par
+\noindent\textbf{123-05}\ ⑴ $x=-3\pm\sqrt{11}$ ⑵ $x=\dfrac{5\pm2\sqrt{5}}{2}$\par
+\noindent\textbf{124-h1}\ $3$\par
+\noindent\textbf{124-c1}\ ⑤\par
+\noindent\textbf{124-h2}\ ③\par
+\noindent\textbf{124-c2}\ ⑤\par
+\noindent\textbf{125-h3}\ ⑴ $p=-1$, $q=5$ ⑵ $p=\dfrac{3}{2}$, $q=\dfrac{5}{2}$\par
+\noindent\textbf{125-c3}\ $11$\par
+\noindent\textbf{125-h4}\ ⑴ $x=-4\pm\sqrt{3}$ ⑵ $x=\dfrac{2\pm3\sqrt{2}}{2}$\par
+\noindent\textbf{125-c4}\ $3$\par
+\noindent\textbf{126-01}\ ⑴ $x=\pm\sqrt{7}$ ⑵ $x=\pm\sqrt{15}$ ⑶ $x=\pm2$ ⑷ $x=\pm\dfrac{\sqrt{2}}{3}$ ⑸ $x=\pm\sqrt{5}$ ⑹ $x=\pm\dfrac{\sqrt{3}}{5}$\par
+\noindent\textbf{126-02}\ ⑴ $x=-1\pm\sqrt{6}$ ⑵ $x=-\dfrac{3}{2}$ 또는 $x=3$ ⑶ $x=-7\pm2\sqrt{3}$ ⑷ $x=4\pm\sqrt{2}$ ⑸ $x=-6\pm\sqrt{5}$ ⑹ $x=-4$ 또는 $x=3$ ⑺ $x=\dfrac{3\pm\sqrt{10}}{5}$ ⑻ $x=\dfrac{2\pm\sqrt{14}}{3}$\par
+\noindent\textbf{126-03}\ ⑴ $(x+3)^2=6$ ⑵ $(x-2)^2=2$ ⑶ $\left(x+\dfrac{1}{2}\right)^2=\dfrac{21}{4}$ ⑷ $(x-1)^2=\dfrac{3}{2}$ ⑸ $(x+4)^2=\dfrac{40}{3}$ ⑹ $\left(x-\dfrac{3}{2}\right)^2=\dfrac{57}{20}$\par
+\noindent\textbf{126-04}\ ⑴ $x=-1\pm\sqrt{5}$ ⑵ $x=5\pm\sqrt{6}$ ⑶ $x=-4\pm\sqrt{11}$ ⑷ $x=\dfrac{3\pm\sqrt{13}}{2}$ ⑸ $x=\dfrac{-2\pm\sqrt{7}}{2}$ ⑹ $x=\dfrac{6\pm3\sqrt{2}}{2}$ ⑺ $x=\dfrac{-5\pm\sqrt{5}}{10}$ ⑻ $x=\dfrac{2\pm\sqrt{7}}{3}$\par
+\noindent\textbf{127-01}\ ②\par
+\noindent\textbf{127-02}\ $1$\par
+\noindent\textbf{127-03}\ $-22$\par
+\noindent\textbf{127-04}\ $9$\par
+\noindent\textbf{127-05}\ $15$\par
+\noindent\textbf{128-01}\ ①, ④\par
+\noindent\textbf{128-02}\ ④\par
+\noindent\textbf{128-03}\ $7$\par
+\noindent\textbf{128-04}\ ④\par
+\noindent\textbf{128-05}\ ③\par
+\noindent\textbf{128-06}\ $x=-5$\par
+\noindent\textbf{129-07}\ ②, ④\par
+\noindent\textbf{129-08}\ $a=11$, $x=-\dfrac{1}{2}$\par
+\noindent\textbf{129-09}\ ②\par
+\noindent\textbf{129-10}\ ①\par
+\noindent\textbf{129-11}\ ②\par
+\noindent\textbf{129-12}\ $4$\par
+\noindent\textbf{130-13}\ $a\ne4$\par
+\noindent\textbf{130-14}\ ⑤\par
+\noindent\textbf{130-15}\ ③\par
+\noindent\textbf{130-16}\ ③\par
+\noindent\textbf{130-17}\ ④\par
+\noindent\textbf{130-18}\ $x=-1$\par
+\noindent\textbf{131-19}\ ③, ⑤\par
+\noindent\textbf{131-20}\ $64$\par
+\noindent\textbf{131-21}\ ②\par
+\noindent\textbf{131-22}\ $8$\par
+\noindent\textbf{131-23}\ $-2$\par
+\noindent\textbf{131-24}\ $16$\par
+\noindent\textbf{132-e1}\ $-1$\par
+\noindent\textbf{132-e2}\ $29$\par
+\noindent\textbf{132-u1}\ $3$\par
+\noindent\textbf{132-u2}\ $-20$\par
+\noindent\textbf{133-u3}\ $-12$\par
+\noindent\textbf{133-u4}\ $13$\par
+\noindent\textbf{133-u5}\ $x=-3$ 또는 $x=-2$\par
+\noindent\textbf{133-u6}\ $x=\dfrac{6\pm\sqrt{21}}{5}$\par
+\noindent\textbf{14 이차방정식의 근의 공식}\par\smallskip
+\noindent\textbf{137-01}\ ⑴ $7$, $2$, $4$, $\dfrac{-7\pm\sqrt{17}}{4}$ ⑵ $-3$, $-3$, $5$, $-2$, $\dfrac{3\pm\sqrt{19}}{5}$\par
+\noindent\textbf{137-02}\ ⑴ $x=\dfrac{-3\pm\sqrt{37}}{2}$ ⑵ $x=\dfrac{1\pm\sqrt{13}}{6}$ ⑶ $x=-2\pm\sqrt{3}$ ⑷ $x=\dfrac{4\pm\sqrt{6}}{2}$\par
+\noindent\textbf{137-03}\ ⑴ $2$, $4$, $1\pm\sqrt{5}$ ⑵ $10$, $8$, $20$, $10$, $10$ ⑶ $12$, $9$, $8$, $\dfrac{-9\pm\sqrt{17}}{4}$ ⑷ $1$, $1$, $1$, $4$\par
+\noindent\textbf{138-h1}\ ⑴ $x=\dfrac{-1\pm3\sqrt{5}}{2}$ ⑵ $x=\dfrac{7\pm\sqrt{33}}{8}$ ⑶ $x=-3\pm\sqrt{5}$ ⑷ $x=\dfrac{2\pm\sqrt{19}}{3}$\par
+\noindent\textbf{138-c1}\ $-1$\par
+\noindent\textbf{138-h2}\ ⑴ $x=\dfrac{-3\pm\sqrt{5}}{4}$ ⑵ $x=2$ 또는 $x=8$\par
+\noindent\textbf{138-c2}\ ⑴ $x=\dfrac{-3\pm\sqrt{21}}{2}$ ⑵ $x=-1$ 또는 $x=\dfrac{3}{2}$\par
+\noindent\textbf{139-h3}\ ⑴ $x=\dfrac{5\pm\sqrt{65}}{20}$ ⑵ $x=-4$ 또는 $x=\dfrac{2}{3}$\par
+\noindent\textbf{139-c3}\ ⑴ $x=-3$ 또는 $x=-\dfrac{1}{2}$ ⑵ $x=\dfrac{5\pm\sqrt{10}}{3}$ ⑶ $x=\dfrac{-1\pm\sqrt{21}}{4}$ ⑷ $x=-4$ 또는 $x=\dfrac{5}{2}$\par
+\noindent\textbf{139-h4}\ $x=-\dfrac{5}{2}$ 또는 $x=1$\par
+\noindent\textbf{139-c4}\ ⑴ $x=-1\pm\sqrt{7}$ ⑵ $x=-\dfrac{8}{3}$ 또는 $x=2$\par
+\noindent\textbf{140-01}\ ⑴ $x=\dfrac{-1\pm\sqrt{5}}{2}$ ⑵ $x=\dfrac{9\pm\sqrt{13}}{2}$ ⑶ $x=\dfrac{3\pm\sqrt{57}}{6}$ ⑷ $x=\dfrac{-7\pm\sqrt{29}}{10}$ ⑸ $x=\dfrac{-5\pm\sqrt{41}}{4}$\par
+\noindent\textbf{140-02}\ ⑴ $x=1\pm\sqrt{3}$ ⑵ $x=-5\pm2\sqrt{5}$ ⑶ $x=\dfrac{4\pm\sqrt{10}}{2}$ ⑷ $x=\dfrac{-2\pm\sqrt{6}}{3}$ ⑸ $x=\dfrac{3\pm\sqrt{3}}{6}$\par
+\noindent\textbf{140-03}\ ⑴ $x=-2\pm\sqrt{2}$ ⑵ $x=-1$ 또는 $x=5$ ⑶ $x=2\pm2\sqrt{3}$\par
+\noindent\textbf{140-04}\ ⑴ $x=3$ 또는 $x=5$ ⑵ $x=\dfrac{-5\pm\sqrt{29}}{4}$ ⑶ $x=-1$ 또는 $x=\dfrac{10}{3}$ ⑷ $x=\dfrac{-9\pm\sqrt{41}}{20}$\par
+\noindent\textbf{140-05}\ ⑴ $x=-\dfrac{1}{2}$ 또는 $x=\dfrac{5}{4}$ ⑵ $x=\dfrac{-1\pm\sqrt{5}}{3}$ ⑶ $x=-\dfrac{5}{2}$ 또는 $x=2$ ⑷ $x=\dfrac{1\pm\sqrt{61}}{10}$\par
+\noindent\textbf{140-06}\ ⑴ $x=\dfrac{1\pm\sqrt{41}}{10}$ ⑵ $x=\dfrac{-9\pm3\sqrt{13}}{2}$ ⑶ $x=\dfrac{4}{3}$ 또는 $x=2$ ⑷ $x=\dfrac{-2\pm\sqrt{6}}{2}$\par
+\noindent\textbf{141-01}\ ④\par
+\noindent\textbf{141-02}\ $2\sqrt{10}$\par
+\noindent\textbf{141-03}\ ②\par
+\noindent\textbf{141-04}\ $x=-6$\par
+\noindent\textbf{141-05}\ ③\par
+\noindent\textbf{15 이차방정식의 근의 개수}\par\smallskip
+\noindent\textbf{143-01}\ ⑴ $2$ ⑵ $17$, $2$ ⑶ $-16$, $0$ ⑷ $0$, $1$\par
+\noindent\textbf{143-02}\ ⑴ $1$ ⑵ $0$ ⑶ $2$ ⑷ $0$\par
+\noindent\textbf{143-03}\ ⑴ $1$, $3$, $4$ ⑵ $5$, $20$, $50$\par
+\noindent\textbf{143-04}\ ⑴ $x^2-8x+15=0$ ⑵ $3x^2+27x+42=0$ ⑶ $5x^2+10x+5=0$\par
+\noindent\textbf{144-h1}\ ①, ④\par
+\noindent\textbf{144-c1}\ ④\par
+\noindent\textbf{144-h2}\ ⑴ $6$ ⑵ $x=\dfrac{1}{2}$\par
+\noindent\textbf{144-c2}\ $-9$, $4$\par
+\noindent\textbf{145-h3}\ ⑴ $k\le\dfrac{3}{2}$ ⑵ $k>\dfrac{3}{2}$\par
+\noindent\textbf{145-c3}\ ⑤\par
+\noindent\textbf{145-h4}\ $4$\par
+\noindent\textbf{145-c4}\ ②\par
+\noindent\textbf{146-01}\ ③\par
+\noindent\textbf{146-02}\ $4$\par
+\noindent\textbf{146-03}\ $-1$\par
+\noindent\textbf{146-04}\ ④\par
+\noindent\textbf{146-05}\ ②\par
+\noindent\textbf{16 이차방정식의 활용}\par\smallskip
+\noindent\textbf{148-01}\ $210$, $420$, $20$, $20$, $20$, $20$\par
+\noindent\textbf{148-02}\ ⑴ $x^2=5x+36$ ⑵ $-4$, $9$\par
+\noindent\textbf{148-03}\ ⑴ $x(x+1)=110$ ⑵ $10$, $11$\par
+\noindent\textbf{148-04}\ ⑴ $(14-x)\mkern3mu \mathrm{m}$ ⑵ $x(14-x)=48$ ⑶ $8\mkern3mu \mathrm{m}$\par
+\noindent\textbf{149-h1}\ 구각형\par
+\noindent\textbf{149-c1}\ $15$명\par
+\noindent\textbf{149-h2}\ $3$, $4$, $5$\par
+\noindent\textbf{149-c2}\ $8$\par
+\noindent\textbf{149-c3}\ $11$, $13$\par
+\noindent\textbf{150-h3}\ $12$살\par
+\noindent\textbf{150-c4}\ $7$\par
+\noindent\textbf{150-h4}\ ⑴ $2$초, $4$초 ⑵ $6$초\par
+\noindent\textbf{150-c5}\ ⑴ $1$초, $4$초 ⑵ $6$초\par
+\noindent\textbf{151-h5}\ $10\mkern3mu \mathrm{m}$\par
+\noindent\textbf{151-c6}\ $7\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{151-c7}\ $3$\par
+\noindent\textbf{151-c8}\ $3\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{152-h6}\ $2$\par
+\noindent\textbf{152-c9}\ $2$\par
+\noindent\textbf{152-c10}\ $3\mkern3mu \mathrm{m}$\par
+\noindent\textbf{152-c11}\ $1\mkern3mu \mathrm{m}$\par
+\noindent\textbf{153-01}\ $10$\par
+\noindent\textbf{153-02}\ $13$\par
+\noindent\textbf{153-03}\ $8$초\par
+\noindent\textbf{153-04}\ $12$초\par
+\noindent\textbf{153-05}\ $10\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{154-01}\ ③\par
+\noindent\textbf{154-02}\ ②\par
+\noindent\textbf{154-03}\ $-6$\par
+\noindent\textbf{154-04}\ $x=-1$ 또는 $x=5$\par
+\noindent\textbf{154-05}\ ②, ⑤\par
+\noindent\textbf{154-06}\ ④\par
+\noindent\textbf{155-07}\ ⑤\par
+\noindent\textbf{155-08}\ ④\par
+\noindent\textbf{155-09}\ $20$명\par
+\noindent\textbf{155-10}\ ③\par
+\noindent\textbf{155-11}\ ④\par
+\noindent\textbf{155-12}\ $12\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{156-13}\ ③\par
+\noindent\textbf{156-14}\ ④\par
+\noindent\textbf{156-15}\ $8$\par
+\noindent\textbf{156-16}\ $-2\sqrt{3}$\par
+\noindent\textbf{156-17}\ ⑤\par
+\noindent\textbf{156-18}\ ②\par
+\noindent\textbf{157-19}\ $6$일, $13$일\par
+\noindent\textbf{157-20}\ ②\par
+\noindent\textbf{157-21}\ ①\par
+\noindent\textbf{157-22}\ $\dfrac{1}{12}$\par
+\noindent\textbf{157-23}\ $500$\par
+\noindent\textbf{157-24}\ $40\mkern3mu \mathrm{cm}^2$\par
+\noindent\textbf{158-e1}\ $-3$\par
+\noindent\textbf{158-u1}\ $\dfrac{3}{2}$\par
+\noindent\textbf{158-e2}\ $3\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{158-u2}\ $14\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{159-u3}\ $22$\par
+\noindent\textbf{159-u4}\ $-5$\par
+\noindent\textbf{159-u5}\ $3x^2-21x+30=0$\par
+\noindent\textbf{159-u6}\ $21$\par
+\noindent\textbf{17 이차함수}\par\smallskip
+\noindent\textbf{164-01}\ ⑴ $\bigcirc$ ⑵ $\times$ ⑶ $\bigcirc$ ⑷ $\times$\par
+\noindent\textbf{164-02}\ ⑴ $3$ ⑵ $-3$ ⑶ $9$ ⑷ $\dfrac{3}{4}$\par
+\noindent\textbf{164-03}\ ⑴ 풀이 참조 ⑵ 풀이 참조\par
+\noindent\textbf{164-04}\ ⑴ ㄱ, ㄹ ⑵ ㄷ ⑶ ㄴ과 ㄹ\par
+\noindent\textbf{165-h1}\ ④\par
+\noindent\textbf{165-c1}\ ㄴ, ㄷ\par
+\noindent\textbf{165-c2}\ ②, ⑤\par
+\noindent\textbf{165-c3}\ ⑤\par
+\noindent\textbf{166-h2}\ $14$\par
+\noindent\textbf{166-c4}\ $4$\par
+\noindent\textbf{166-h3}\ ③\par
+\noindent\textbf{166-c5}\ ㄹ, ㄱ, ㄷ, ㄴ, ㅁ\par
+\noindent\textbf{167-h4}\ ②\par
+\noindent\textbf{167-c6}\ $-15$\par
+\noindent\textbf{167-h5}\ ⑤\par
+\noindent\textbf{167-c7}\ ㄴ, ㄹ\par
+\noindent\textbf{168-h6}\ $-4$\par
+\noindent\textbf{168-c8}\ $9$\par
+\noindent\textbf{168-h7}\ $y=-3x^2$\par
+\noindent\textbf{168-c9}\ $y=\dfrac{3}{4}x^2$\par
+\noindent\textbf{169-01}\ ㄱ, ㄷ\par
+\noindent\textbf{169-02}\ ②, ③\par
+\noindent\textbf{169-03}\ ⑤\par
+\noindent\textbf{169-04}\ $9$\par
+\noindent\textbf{169-05}\ $24$\par
+\noindent\textbf{18 이차함수 (2)}\par\smallskip
+\noindent\textbf{171-01}\ ⑴ 풀이 참조 ⑵ $(0{,}\mkern3mu\mathopen{}3)$, $x=0$\par
+\noindent\textbf{171-02}\ ⑴ $y=-\dfrac{1}{2}x^2+1$, $(0{,}\mkern3mu\mathopen{}1)$, $x=0$ ⑵ $y=x^2-4$, $(0{,}\mkern3mu\mathopen{}-4)$, $x=0$\par
+\noindent\textbf{171-03}\ ⑴ 풀이 참조 ⑵ $(2{,}\mkern3mu\mathopen{}0)$, $x=2$\par
+\noindent\textbf{171-04}\ ⑴ $y=-4(x-3)^2$, $(3{,}\mkern3mu\mathopen{}0)$, $x=3$ ⑵ $y=\dfrac{2}{3}(x+5)^2$, $(-5{,}\mkern3mu\mathopen{}0)$, $x=-5$\par
+\noindent\textbf{172-h1}\ $9$\par
+\noindent\textbf{172-c1}\ $(0{,}\mkern3mu\mathopen{}-5)$\par
+\noindent\textbf{172-h2}\ ⑤\par
+\noindent\textbf{172-c2}\ ③\par
+\noindent\textbf{173-h3}\ $y=\dfrac{3}{8}x^2+2$\par
+\noindent\textbf{173-c3}\ $y=-\dfrac{1}{3}x^2-2$\par
+\noindent\textbf{173-h4}\ $8$\par
+\noindent\textbf{173-c4}\ $5$\par
+\noindent\textbf{174-h5}\ ③\par
+\noindent\textbf{174-c5}\ ⑤\par
+\noindent\textbf{174-h6}\ $y=-(x+2)^2$\par
+\noindent\textbf{174-c6}\ $y=\dfrac{1}{3}(x-3)^2$\par
+\noindent\textbf{175-01}\ $0$\par
+\noindent\textbf{175-02}\ ①, ④\par
+\noindent\textbf{175-03}\ $-1$, $5$\par
+\noindent\textbf{175-04}\ ④\par
+\noindent\textbf{175-05}\ ③\par
+\noindent\textbf{19 이차함수 (3)}\par\smallskip
+\noindent\textbf{177-01}\ ⑴ 풀이 참조 ⑵ $(2{,}\mkern3mu\mathopen{}1)$, $x=2$\par
+\noindent\textbf{177-02}\ ⑴ $y=-2(x-2)^2-5$, $(2{,}\mkern3mu\mathopen{}-5)$, $x=2$ ⑵ $y=\dfrac{1}{4}(x+1)^2+3$, $(-1{,}\mkern3mu\mathopen{}3)$, $x=-1$\par
+\noindent\textbf{177-03}\ ⑴ $\times$ ⑵ $\times$ ⑶ $\bigcirc$ ⑷ $\bigcirc$\par
+\noindent\textbf{177-04}\ $<$, $>$, $<$\par
+\noindent\textbf{178-h1}\ $9$\par
+\noindent\textbf{178-c1}\ $-6$\par
+\noindent\textbf{178-h2}\ ④\par
+\noindent\textbf{178-c2}\ ③\par
+\noindent\textbf{179-h3}\ $y=3(x+1)^2+2$\par
+\noindent\textbf{179-c3}\ $-5$\par
+\noindent\textbf{179-h4}\ $5$\par
+\noindent\textbf{179-c4}\ $(-4{,}\mkern3mu\mathopen{}-2)$, $x=-4$\par
+\noindent\textbf{180-h5}\ ③\par
+\noindent\textbf{180-c5}\ $a<0$, $q>0$\par
+\noindent\textbf{180-c6}\ $a>0$, $p>0$\par
+\noindent\textbf{180-c7}\ $a<0$, $p<0$, $q>0$\par
+\noindent\textbf{181-01}\ ③, ⑤\par
+\noindent\textbf{181-02}\ $3$\par
+\noindent\textbf{181-03}\ $13$\par
+\noindent\textbf{181-04}\ ③\par
+\noindent\textbf{182-01}\ ③\par
+\noindent\textbf{182-02}\ ②\par
+\noindent\textbf{182-03}\ $20$\par
+\noindent\textbf{182-04}\ ③, ④\par
+\noindent\textbf{182-05}\ ②\par
+\noindent\textbf{182-06}\ ㉱\par
+\noindent\textbf{183-07}\ ③\par
+\noindent\textbf{183-08}\ ⑤\par
+\noindent\textbf{183-09}\ ④\par
+\noindent\textbf{183-10}\ ④\par
+\noindent\textbf{183-11}\ $7$\par
+\noindent\textbf{183-12}\ ⑤\par
+\noindent\textbf{184-13}\ ②\par
+\noindent\textbf{184-14}\ $2$\par
+\noindent\textbf{184-15}\ $9$\par
+\noindent\textbf{184-16}\ ⑤\par
+\noindent\textbf{184-17}\ $27$\par
+\noindent\textbf{184-18}\ ③\par
+\noindent\textbf{185-19}\ ④\par
+\noindent\textbf{185-20}\ $2$\par
+\noindent\textbf{185-21}\ ④\par
+\noindent\textbf{185-22}\ $\dfrac{4}{3}$\par
+\noindent\textbf{185-23}\ $9$\par
+\noindent\textbf{185-24}\ ③\par
+\noindent\textbf{186-e1}\ $-7$\par
+\noindent\textbf{186-u1}\ $3$\par
+\noindent\textbf{186-e2}\ 제$3$사분면, 제$4$사분면\par
+\noindent\textbf{186-u2}\ 제$1$사분면, 제$2$사분면\par
+\noindent\textbf{187-u3}\ $14$\par
+\noindent\textbf{187-u4}\ $-9$\par
+\noindent\textbf{187-u5}\ $3$\par
+\noindent\textbf{187-u6}\ $-2$\par
+\noindent\textbf{20 이차함수 (4)}\par\smallskip
+\noindent\textbf{192-01}\ ⑴ $4$, $4$, $2$, $5$, $(2{,}\mkern3mu\mathopen{}-5)$, $x=2$, $(0{,}\mkern3mu\mathopen{}3)$ ⑵ $9$, $9$, $3$, $4$, $(-3{,}\mkern3mu\mathopen{}4)$, $x=-3$, $(0{,}\mkern3mu\mathopen{}-5)$ (그래프는 풀이 참조)\par
+\noindent\textbf{192-02}\ ⑴ $y=(x-4)^2-6$ ⑵ $y=-3(x-2)^2+11$\par
+\noindent\textbf{192-03}\ ⑴ $(-1{,}\mkern3mu\mathopen{}-8)$, $x=-1$ ⑵ $(4{,}\mkern3mu\mathopen{}9)$, $x=4$\par
+\noindent\textbf{192-04}\ $>$, $>$, $>$, $>$\par
+\noindent\textbf{193-h1}\ $(1{,}\mkern3mu\mathopen{}-3)$, $x=1$\par
+\noindent\textbf{193-c1}\ $13$\par
+\noindent\textbf{193-h2}\ ①\par
+\noindent\textbf{193-c2}\ ②\par
+\noindent\textbf{194-h3}\ ②\par
+\noindent\textbf{194-c3}\ $3$\par
+\noindent\textbf{194-h4}\ $-1$\par
+\noindent\textbf{194-c4}\ $2$\par
+\noindent\textbf{195-h5}\ ⑤\par
+\noindent\textbf{195-c5}\ ③\par
+\noindent\textbf{195-h6}\ $-2$\par
+\noindent\textbf{195-c6}\ $(3{,}\mkern3mu\mathopen{}2)$, $x=3$\par
+\noindent\textbf{196-h7}\ $8$\par
+\noindent\textbf{196-c7}\ $3$\par
+\noindent\textbf{196-h8}\ ④\par
+\noindent\textbf{196-c8}\ $a>0$, $b<0$, $c<0$\par
+\noindent\textbf{197-01}\ ③\par
+\noindent\textbf{197-02}\ $3$\par
+\noindent\textbf{197-03}\ ②\par
+\noindent\textbf{197-04}\ $(-14{,}\mkern3mu\mathopen{}0)$\par
+\noindent\textbf{198-05}\ ⑤\par
+\noindent\textbf{198-06}\ $-5$\par
+\noindent\textbf{198-07}\ $3$\par
+\noindent\textbf{198-08}\ ④\par
+\noindent\textbf{21 이차함수의 식 구하기}\par\smallskip
+\noindent\textbf{200-01}\ $3$, $11$, $3$, $2$, $2x^2+4x+5$\par
+\noindent\textbf{200-02}\ $4$, $16$, $8$, $-1$, $9$, $-x^2+8x-7$\par
+\noindent\textbf{200-03}\ $4$, $4$, $4$, $-2$, $4$, $4$, $-10$, $4x^2-10x+4$\par
+\noindent\textbf{200-04}\ $3$, $6$, $-2$, $-2x^2+10x-12$\par
+\noindent\textbf{201-h1}\ ④\par
+\noindent\textbf{201-c1}\ ⑴ $y=3x^2-12x+5$ ⑵ $y=-2x^2-4x+3$\par
+\noindent\textbf{201-h2}\ ⑤\par
+\noindent\textbf{201-c2}\ ⑴ $y=-x^2+6x-4$ ⑵ $y=\dfrac{1}{2}x^2+4x+7$\par
+\noindent\textbf{202-h3}\ $y=-3x^2+8x-2$\par
+\noindent\textbf{202-c3}\ ⑴ $y=3x^2-2x+1$ ⑵ $y=-x^2+3x-5$\par
+\noindent\textbf{202-h4}\ ②\par
+\noindent\textbf{202-c4}\ ⑴ $y=-5x^2+20x-15$ ⑵ $y=2x^2-4x-16$\par
+\noindent\textbf{203-01}\ ⑤\par
+\noindent\textbf{203-02}\ ②\par
+\noindent\textbf{203-03}\ $(3{,}\mkern3mu\mathopen{}-6)$\par
+\noindent\textbf{203-04}\ ③\par
+\noindent\textbf{22 이차함수의 최댓값과 최솟값}\par\smallskip
+\noindent\textbf{205-01}\ ⑴ $(1{,}\mkern3mu\mathopen{}-5)$, $-5$ ⑵ $(-3{,}\mkern3mu\mathopen{}4)$, $4$\par
+\noindent\textbf{205-02}\ ⑴ 최솟값: $-7$, $x=0$ ⑵ 최댓값: $0$, $x=3$ ⑶ 최솟값: $2$, $x=4$ ⑷ 최댓값: $-3$, $x=-1$\par
+\noindent\textbf{205-03}\ ⑴ $2$, $-2$, $3$ ⑵ $1$, $1$, $-4$\par
+\noindent\textbf{206-h1}\ ⑴ 최솟값: $-3$, $x=2$ ⑵ 최댓값: $5$, $x=-3$\par
+\noindent\textbf{206-c1}\ ⑴ 최솟값: $1$, $x=-1$ ⑵ 최댓값: $-4$, $x=2$\par
+\noindent\textbf{206-h2}\ $-6$\par
+\noindent\textbf{206-c2}\ $10$\par
+\noindent\textbf{207-h3}\ $7$\par
+\noindent\textbf{207-c3}\ $-18$\par
+\noindent\textbf{207-h4}\ ⑴ $M=k^2-4k+1$ ⑵ $-3$\par
+\noindent\textbf{207-c4}\ $1$\par
+\noindent\textbf{208-01}\ ⑤\par
+\noindent\textbf{208-02}\ $16$\par
+\noindent\textbf{208-03}\ $3$\par
+\noindent\textbf{208-04}\ ③\par
+\noindent\textbf{208-05}\ $-14$\par
+\noindent\textbf{23 이차함수의 활용}\par\smallskip
+\noindent\textbf{210-01}\ $16-x$, $16-x$, $16-x$, $8$, $64$, $8$, $64$, $64$, $8$, $8$\par
+\noindent\textbf{210-02}\ ⑴ $y=x(x+4)$ ⑵ $-4$ ⑶ $-2$, $2$\par
+\noindent\textbf{210-03}\ ⑴ $y=x(10-x)$ ⑵ $25\mkern3mu \mathrm{cm}^2$ ⑶ $5\mkern3mu \mathrm{cm}$, $5\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{211-h1}\ $100$, $10$, $10$\par
+\noindent\textbf{211-c1}\ $-4$, $4$\par
+\noindent\textbf{211-h2}\ $5$초, $245\mkern3mu \mathrm{m}$\par
+\noindent\textbf{211-c2}\ $3$초, $45\mkern3mu \mathrm{m}$\par
+\noindent\textbf{212-h3}\ $49\mkern3mu \mathrm{cm}^2$, $2$\par
+\noindent\textbf{212-c3}\ $18\mkern3mu \mathrm{cm}^2$\par
+\noindent\textbf{212-c4}\ $98\mkern3mu \mathrm{m}^2$\par
+\noindent\textbf{212-c5}\ $5\mkern3mu \mathrm{cm}$\par
+\noindent\textbf{213-01}\ ④\par
+\noindent\textbf{213-02}\ $2$초\par
+\noindent\textbf{213-03}\ $10$\par
+\noindent\textbf{213-04}\ $32\mkern3mu \mathrm{cm}^2$\par
+\noindent\textbf{213-05}\ $8$\par
+\noindent\textbf{214-01}\ ⑤\par
+\noindent\textbf{214-02}\ $5$\par
+\noindent\textbf{214-03}\ ⑤\par
+\noindent\textbf{214-04}\ $1$\par
+\noindent\textbf{214-05}\ ①\par
+\noindent\textbf{214-06}\ ②\par
+\noindent\textbf{214-07}\ $-2$\par
+\noindent\textbf{215-08}\ ②\par
+\noindent\textbf{215-09}\ ⑤\par
+\noindent\textbf{215-10}\ $6$\par
+\noindent\textbf{215-11}\ ①\par
+\noindent\textbf{215-12}\ $-9$\par
+\noindent\textbf{215-13}\ ③\par
+\noindent\textbf{216-14}\ $\left(\dfrac{1}{2}{,}\mkern3mu\mathopen{}\dfrac{3}{2}\right)$\par
+\noindent\textbf{216-15}\ ⑤\par
+\noindent\textbf{216-16}\ ①\par
+\noindent\textbf{216-17}\ ③\par
+\noindent\textbf{216-18}\ $-1$\par
+\noindent\textbf{216-19}\ ④\par
+\noindent\textbf{217-20}\ ④\par
+\noindent\textbf{217-21}\ ③\par
+\noindent\textbf{217-22}\ $2$\par
+\noindent\textbf{217-23}\ $12$\par
+\noindent\textbf{217-24}\ $6$\par
+\noindent\textbf{217-25}\ $\dfrac{3}{2}$\par
+\noindent\textbf{218-e1}\ $27$\par
+\noindent\textbf{218-u1}\ $64$\par
+\noindent\textbf{218-e2}\ $1$\par
+\noindent\textbf{218-u2}\ $5$\par
+\noindent\textbf{219-u3}\ $-11$\par
+\noindent\textbf{219-u4}\ $2$\par
+\noindent\textbf{219-u5}\ $-3$\par
+\noindent\textbf{219-u6}\ $250$원\par
+\end{multicols}
+\end{document}

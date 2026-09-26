@@ -1,0 +1,18 @@
+% 0206(본책 41쪽) — △ABC(BC=6, ∠B=30°, ∠ACB=120°), A 에서 BC 의 연장선에 내린 수선의 발 H. 스캔 삽화를 TikZ 로 다시 그림. 답(AH)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (2.2,0); \coordinate (H) at (3.3,0); \coordinate (A) at (3.3,1.905);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[dashed, line width=0.5pt] (C) -- (H);
+  \draw (A) -- (H);
+  \draw[line width=0.4pt] (3.08,0) -- (3.08,0.22) -- (3.3,0.22);
+  \draw[line width=0.4pt] (0.6,0) arc[start angle=0, end angle=30, radius=0.6];
+  \node[font=\small] at (0.95,0.28) {$30^\circ$};
+  \draw[line width=0.4pt] (1.8,0) arc[start angle=180, end angle=60, radius=0.4];
+  \node[font=\small] at (1.7,0.62) {$120^\circ$};
+  \draw[dashed, line width=0.4pt] (B) to[bend right=20] (C);
+  \node[font=\small] at (1.1,-0.45) {$6$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, below] at (C) {C};
+  \node[font=\small, below] at (H) {H};
+\end{tikzpicture}

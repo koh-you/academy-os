@@ -1,0 +1,39 @@
+% 0708(본책 126쪽) — 슬기네 반 20명의 수학(가로)·과학(세로) 점수 산점도(격자 10점 · 눈금 20~100). 스캔 산점도를 TikZ 로 다시 그림(점 20개 원문 위치).
+\begin{tikzpicture}[line width=0.5pt]
+  \draw[gray!55, line width=0.25pt] (0,0) grid[xstep=0.27cm, ystep=0.27cm] (2.97,2.97);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (3.12,0);
+  \draw[->, >=stealth, line width=0.7pt] (0,0) -- (0,3.12);
+  \node[font=\scriptsize, below left=0pt, inner sep=1.5pt] at (0,0) {$0$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (0.54,0) {$20$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (1.08,0) {$40$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (1.62,0) {$60$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (2.16,0) {$80$};
+  \node[font=\scriptsize, below=1pt, inner sep=1pt] at (2.7,0) {$100$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,0.54) {$20$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,1.08) {$40$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,1.62) {$60$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,2.16) {$80$};
+  \node[font=\scriptsize, left=1pt, inner sep=1pt] at (0,2.7) {$100$};
+  \node[font=\scriptsize, anchor=north east, inner sep=1pt] at (3.12,-0.38) {수학(점)};
+  \node[font=\scriptsize, align=center, anchor=north east, inner sep=1pt] at (-0.57,3.12) {과\\학\\(점)};
+  \fill (0.54,1.08) circle (1.5pt);
+  \fill (0.54,0.81) circle (1.5pt);
+  \fill (1.08,1.35) circle (1.5pt);
+  \fill (1.08,1.08) circle (1.5pt);
+  \fill (1.35,1.62) circle (1.5pt);
+  \fill (1.35,1.35) circle (1.5pt);
+  \fill (1.62,2.16) circle (1.5pt);
+  \fill (1.62,1.89) circle (1.5pt);
+  \fill (1.62,1.35) circle (1.5pt);
+  \fill (1.62,1.08) circle (1.5pt);
+  \fill (1.89,1.89) circle (1.5pt);
+  \fill (1.89,1.62) circle (1.5pt);
+  \fill (1.89,1.35) circle (1.5pt);
+  \fill (1.89,1.08) circle (1.5pt);
+  \fill (2.16,2.16) circle (1.5pt);
+  \fill (2.16,1.35) circle (1.5pt);
+  \fill (2.43,2.7) circle (1.5pt);
+  \fill (2.43,2.43) circle (1.5pt);
+  \fill (2.43,1.89) circle (1.5pt);
+  \fill (2.7,2.7) circle (1.5pt);
+\end{tikzpicture}

@@ -1,0 +1,9 @@
+{ "range": "ids-06 (186-u1~208-03 + 19-c5~20-h8, 72문항)", "checked": 72, "ok": 66,
+  "findings": [
+    { "id": "192-01", "severity": "yellow", "where": "layout", "note": "(1)(2) 모두 「y축과의 교점의 좌표:」 뒤의 (□, □) 가 다음 줄로 혼자 밀림 · 두 격자 그림이 (1)(2) 옆이 아니라 오른쪽 위에 몰려 있음(내용은 일치)", "fix": "「y축과의 교점의 좌표:」 앞의 \\hspace*{1.5em} 를 줄이거나 좌표 쌍을 \\mbox{} 로 묶어 줄 안에 들어가게" },
+    { "id": "192-04", "severity": "yellow", "where": "passage", "note": "exprbox 의 tabular 둘째 줄 「ab□0  ∴ b□0」 이 상자 오른쪽 경계를 넘어 잘림(「∴ b□」 뒤가 안 보임)", "fix": "tabular 를 minipage+raggedright 세 줄로 바꾸거나 둘째 줄의 \\quad 를 줄이고 「∴ b□0」 을 다음 줄로 내려 상자 안에 들어가게" },
+    { "id": "200-02", "severity": "yellow", "where": "passage", "note": "「또 이 그래프가 점 (3, 8)을 지나므로 □=a+q」 뒤의 「…… ㉡」 이 다음 줄로 혼자 밀림(㉠ 은 정상)", "fix": "200-03 처럼 식을 \\par \\hspace*{2em}$\\blank=a+q$\\hfill $\\cdots\\cdots$ ㉡ 으로 줄을 나눠 ㉡ 이 같은 줄에 오게" },
+    { "id": "203-01", "severity": "yellow", "where": "choices", "note": "보기 3열 배치에서 ③ y=3x²+6x+3 이 컬럼 오른쪽 끝에서 잘림(「+3」 안 보임)", "fix": "choices_layout 을 \"ii\" 로" },
+    { "id": "205-01", "severity": "yellow", "where": "figure", "note": "그림 크롭에 (1)(2) 표시가 없어 왼쪽·오른쪽 그래프가 어느 소문항인지 라벨로는 구분 안 됨(순서로 추정 가능 · 내용 일치)" },
+    { "id": "205-03", "severity": "yellow", "where": "layout", "note": "원본은 각 소문항 상자 안 오른쪽에 그래프가 있는데 조판본은 그래프 두 개가 (1) 위에 세로로 몰려 있고 상자에는 그림이 없음 — 어느 그래프가 (1)/(2) 인지 붙어 있지 않음(내용은 일치)", "fix": "figure/figure_extra 를 각 소문항 exprbox 안(minipage 오른쪽)에 넣거나, 최소한 (1) 다음에 첫 그림·(2) 다음에 둘째 그림이 오게" }
+  ] }

@@ -1,0 +1,18 @@
+% 0586(본책 105쪽) — 원 O 에 내접하는 △ATB, 점 P 에서 그은 접선의 접점 T, AT=3, ∠ATP=x(tan x=1/2), P·A·B 한 직선. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-1.433,-1.000) -- (1.100,-1.000);
+  \draw (-1.333,-1.000) -- (0.800,0.600);
+  \draw (-0.800,-0.600) -- (-0.000,-1.000);
+  \draw (0.800,0.600) -- (-0.000,-1.000);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (-0.000,-1.000) to[bend left=18] (-0.800,-0.600);
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.450,-0.700) {$3$};
+  \draw[line width=0.4pt] (-0.268,-0.866) arc[start angle=153.435, end angle=180.000, radius=0.300];
+  \node[font=\small, inner sep=1pt] at (-0.487,-0.885) {$x$};
+  \node[font=\small, anchor=south, inner sep=1.5pt] at (0.000,0.050) {O};
+  \node[font=\small, anchor=south west, inner sep=1.5pt] at (0.820,0.600) {B};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-0.820,-0.560) {A};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-1.333,-1.000) {P};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (0.030,-1.060) {T};
+\end{tikzpicture}

@@ -1,0 +1,9 @@
+% 0065(본책 17쪽) — 수직선 위에 같은 간격으로 놓인 8개의 점 A~H. 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C·D·E·F·G·H 만. 점 P 의 위치(답)는 표시하지 않는다.
+\begin{tikzpicture}[scale=0.8, line width=0.6pt]
+  \draw[<->, >=stealth] (-0.5,0) -- (7.5,0);
+  \foreach \x/\l in {0/A,1/B,2/C,3/D,4/E,5/F,6/G,7/H} {
+    \fill (\x,0) circle (2.2pt);
+    \node[below=1pt, font=\small] at (\x,-0.02) {$\mathrm{\l}$};
+  }
+\end{tikzpicture}

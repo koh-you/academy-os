@@ -1,0 +1,22 @@
+% 0087(본책 20쪽) — ∠ABC=∠BCD=90°, ∠A=60°, ∠D=45°, AB=8 파선 호. 대각선 AC·BD. 라벨: A·B·C·D·60°·45°·8, 직각 표시 B·C. 스캔 삽화를 TikZ 로 다시 그림. 답(BD)은 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (A) at (0,1.2); \coordinate (C) at (2.078,0); \coordinate (D) at (2.078,2.078);
+  \draw (A) -- (B) -- (C) -- (D);
+  \draw (A) -- (C);
+  \draw (B) -- (D);
+  % 직각 표시
+  \draw[line width=0.4pt] (0.16,0) -- (0.16,0.16) -- (0,0.16);
+  \draw[line width=0.4pt] (1.918,0) -- (1.918,0.16) -- (2.078,0.16);
+  % 각
+  \draw[line width=0.4pt] (0,0.85) arc[start angle=-90, end angle=-30, radius=0.35cm];
+  \node[font=\small, anchor=west, inner sep=1pt] at (0.22,0.72) {$60^\circ$};
+  \draw[line width=0.4pt] ($(D)+(-135:0.35)$) arc[start angle=-135, end angle=-90, radius=0.35cm];
+  \node[font=\small, anchor=east, inner sep=1pt] at (2.0,1.58) {$45^\circ$};
+  % 8(AB 파선 호)
+  \draw[dashed, line width=0.4pt] (A) to[bend right=30] (B);
+  \node[font=\small] at (-0.35,0.6) {$8$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, below] at (B) {B};
+  \node[font=\small, below] at (C) {C};
+  \node[font=\small, above] at (D) {D};
+\end{tikzpicture}

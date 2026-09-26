@@ -1,0 +1,1295 @@
+{
+ "fig-28-45.png": {
+  "width_pt": 31.2,
+  "height_pt": 41.4,
+  "pdf_page": 28,
+  "bbox_pt": [
+   46.7,
+   598.1,
+   78,
+   639.5
+  ]
+ },
+ "fig-36-60.png": {
+  "width_pt": 97,
+  "height_pt": 24.4,
+  "pdf_page": 36,
+  "bbox_pt": [
+   109.8,
+   658.9,
+   206.8,
+   683.2
+  ]
+ },
+ "fig-53-105.png": {
+  "width_pt": 145.7,
+  "height_pt": 89,
+  "pdf_page": 53,
+  "bbox_pt": [
+   224.8,
+   257,
+   370.5,
+   346.1
+  ]
+ },
+ "fig-64-e5.png": {
+  "width_pt": 63,
+  "height_pt": 82.8,
+  "pdf_page": 64,
+  "bbox_pt": [
+   392.4,
+   84.9,
+   455.4,
+   167.7
+  ]
+ },
+ "fig-64-131.png": {
+  "width_pt": 81,
+  "height_pt": 76.8,
+  "pdf_page": 64,
+  "bbox_pt": [
+   380.7,
+   528.8,
+   461.7,
+   605.6
+  ]
+ },
+ "fig-65-136.png": {
+  "width_pt": 74,
+  "height_pt": 70.1,
+  "pdf_page": 65,
+  "bbox_pt": [
+   296.4,
+   459.7,
+   370.4,
+   529.9
+  ]
+ },
+ "fig-66-138.png": {
+  "width_pt": 57.3,
+  "height_pt": 74,
+  "pdf_page": 66,
+  "bbox_pt": [
+   299,
+   91.6,
+   356.3,
+   165.6
+  ]
+ },
+ "fig-66-139.png": {
+  "width_pt": 77.8,
+  "height_pt": 74.4,
+  "pdf_page": 66,
+  "bbox_pt": [
+   277.4,
+   213.5,
+   355.3,
+   287.9
+  ]
+ },
+ "fig-66-141.png": {
+  "width_pt": 273.3,
+  "height_pt": 104.7,
+  "pdf_page": 66,
+  "bbox_pt": [
+   83,
+   454.5,
+   356.3,
+   559.2
+  ]
+ },
+ "fig-67-146.png": {
+  "width_pt": 87.5,
+  "height_pt": 93.2,
+  "pdf_page": 67,
+  "bbox_pt": [
+   282.9,
+   425.7,
+   370.4,
+   518.8
+  ]
+ },
+ "fig-81-185.png": {
+  "width_pt": 31.3,
+  "height_pt": 41.6,
+  "pdf_page": 81,
+  "bbox_pt": [
+   60.8,
+   610.1,
+   92.1,
+   651.8
+  ]
+ },
+ "fig-82-189.png": {
+  "width_pt": 120,
+  "height_pt": 98,
+  "pdf_page": 82,
+  "bbox_pt": [
+   237,
+   366,
+   357,
+   464
+  ],
+  "manual": true
+ },
+ "fig-98-e7.png": {
+  "width_pt": 94.4,
+  "height_pt": 95.2,
+  "pdf_page": 98,
+  "bbox_pt": [
+   360.9,
+   85.6,
+   455.4,
+   180.8
+  ]
+ },
+ "fig-98-228.png": {
+  "width_pt": 105.7,
+  "height_pt": 63.4,
+  "pdf_page": 98,
+  "bbox_pt": [
+   358.3,
+   492.4,
+   464,
+   555.8
+  ]
+ },
+ "fig-98-229.png": {
+  "width_pt": 95.7,
+  "height_pt": 76.5,
+  "pdf_page": 98,
+  "bbox_pt": [
+   368.3,
+   606.6,
+   464,
+   683.1
+  ]
+ },
+ "fig-99-e8.png": {
+  "width_pt": 140.9,
+  "height_pt": 63,
+  "pdf_page": 99,
+  "bbox_pt": [
+   328.6,
+   85.8,
+   469.5,
+   148.8
+  ]
+ },
+ "fig-99-230.png": {
+  "width_pt": 110,
+  "height_pt": 70.2,
+  "pdf_page": 99,
+  "bbox_pt": [
+   368.2,
+   477.5,
+   478.2,
+   547.7
+  ]
+ },
+ "fig-99-231.png": {
+  "width_pt": 117.8,
+  "height_pt": 82.6,
+  "pdf_page": 99,
+  "bbox_pt": [
+   360.1,
+   600.6,
+   477.9,
+   683.2
+  ]
+ },
+ "fig-100-233.png": {
+  "width_pt": 92.4,
+  "height_pt": 56.6,
+  "pdf_page": 100,
+  "bbox_pt": [
+   263.7,
+   173.7,
+   356.1,
+   230.4
+  ]
+ },
+ "fig-100-235.png": {
+  "width_pt": 92.9,
+  "height_pt": 67.1,
+  "pdf_page": 100,
+  "bbox_pt": [
+   262.4,
+   450.9,
+   355.3,
+   518
+  ]
+ },
+ "fig-100-236.png": {
+  "width_pt": 96.2,
+  "height_pt": 77.8,
+  "pdf_page": 100,
+  "bbox_pt": [
+   260.1,
+   570.4,
+   356.2,
+   648.2
+  ]
+ },
+ "fig-101-237.png": {
+  "width_pt": 106.4,
+  "height_pt": 77,
+  "pdf_page": 101,
+  "bbox_pt": [
+   264,
+   91.8,
+   370.4,
+   168.9
+  ]
+ },
+ "fig-101-240.png": {
+  "width_pt": 31.2,
+  "height_pt": 41.4,
+  "pdf_page": 101,
+  "bbox_pt": [
+   60.9,
+   494.9,
+   92.1,
+   536.3
+  ]
+ },
+ "fig-101-241.png": {
+  "width_pt": 114,
+  "height_pt": 65,
+  "pdf_page": 101,
+  "bbox_pt": [
+   259,
+   553,
+   373,
+   618
+  ],
+  "manual": true
+ },
+ "fig-102-242.png": {
+  "width_pt": 114,
+  "height_pt": 82,
+  "pdf_page": 102,
+  "bbox_pt": [
+   242,
+   90,
+   356,
+   172
+  ],
+  "manual": true
+ },
+ "fig-102-243.png": {
+  "width_pt": 143,
+  "height_pt": 64,
+  "pdf_page": 102,
+  "bbox_pt": [
+   214,
+   226,
+   357,
+   290
+  ],
+  "manual": true
+ },
+ "fig-102-245.png": {
+  "width_pt": 114.6,
+  "height_pt": 83.6,
+  "pdf_page": 102,
+  "bbox_pt": [
+   241.7,
+   533.9,
+   356.2,
+   617.5
+  ]
+ },
+ "fig-116-279.png": {
+  "width_pt": 184.7,
+  "height_pt": 72,
+  "pdf_page": 116,
+  "bbox_pt": [
+   110.1,
+   612.2,
+   294.8,
+   684.2
+  ]
+ },
+ "fig-120-296.png": {
+  "width_pt": 70.6,
+  "height_pt": 90.3,
+  "pdf_page": 120,
+  "bbox_pt": [
+   193.5,
+   536.6,
+   264.1,
+   626.9
+  ]
+ },
+ "fig-126-307.png": {
+  "width_pt": 211.6,
+  "height_pt": 40.8,
+  "pdf_page": 126,
+  "bbox_pt": [
+   114.4,
+   91.3,
+   326,
+   132
+  ]
+ },
+ "fig-132-321.png": {
+  "width_pt": 252.6,
+  "height_pt": 132.9,
+  "pdf_page": 132,
+  "bbox_pt": [
+   83.2,
+   278.3,
+   335.8,
+   411.2
+  ]
+ },
+ "fig-138-333.png": {
+  "width_pt": 353.8,
+  "height_pt": 46.5,
+  "pdf_page": 138,
+  "bbox_pt": [
+   110.1,
+   559.6,
+   463.9,
+   606.1
+  ]
+ },
+ "fig-141-345.png": {
+  "width_pt": 80,
+  "height_pt": 80.3,
+  "pdf_page": 141,
+  "bbox_pt": [
+   290.3,
+   182.6,
+   370.3,
+   262.8
+  ]
+ },
+ "fig-142-349.png": {
+  "width_pt": 103.6,
+  "height_pt": 55.8,
+  "pdf_page": 142,
+  "bbox_pt": [
+   360.2,
+   627.5,
+   463.8,
+   683.3
+  ]
+ },
+ "fig-145-351.png": {
+  "width_pt": 72,
+  "height_pt": 75,
+  "pdf_page": 145,
+  "bbox_pt": [
+   300,
+   203,
+   372,
+   278
+  ],
+  "manual": true
+ },
+ "fig-160-381.png": {
+  "width_pt": 167.2,
+  "height_pt": 88.5,
+  "pdf_page": 160,
+  "bbox_pt": [
+   83.2,
+   281.4,
+   250.4,
+   369.9
+  ]
+ },
+ "fig-165-393.png": {
+  "width_pt": 81.9,
+  "height_pt": 23.3,
+  "pdf_page": 165,
+  "bbox_pt": [
+   356.6,
+   642.1,
+   438.4,
+   665.4
+  ]
+ },
+ "fig-166-e7.png": {
+  "width_pt": 98.7,
+  "height_pt": 78.1,
+  "pdf_page": 166,
+  "bbox_pt": [
+   356.8,
+   86.1,
+   455.5,
+   164.2
+  ]
+ },
+ "fig-166-394.png": {
+  "width_pt": 126,
+  "height_pt": 82,
+  "pdf_page": 166,
+  "bbox_pt": [
+   340,
+   602,
+   466,
+   684
+  ],
+  "manual": true
+ },
+ "fig-168-402.png": {
+  "width_pt": 104,
+  "height_pt": 76,
+  "pdf_page": 168,
+  "bbox_pt": [
+   254,
+   591,
+   358,
+   667
+  ],
+  "manual": true
+ },
+ "fig-169-403.png": {
+  "width_pt": 98.8,
+  "height_pt": 50.9,
+  "pdf_page": 169,
+  "bbox_pt": [
+   271.7,
+   91.5,
+   370.5,
+   142.5
+  ]
+ },
+ "fig-169-405.png": {
+  "width_pt": 120,
+  "height_pt": 76,
+  "pdf_page": 169,
+  "bbox_pt": [
+   252,
+   264,
+   372,
+   340
+  ],
+  "manual": true
+ },
+ "fig-174-408.png": {
+  "width_pt": 59.6,
+  "height_pt": 26.4,
+  "pdf_page": 174,
+  "bbox_pt": [
+   258.3,
+   118.6,
+   317.9,
+   145
+  ]
+ },
+ "fig-174-409.png": {
+  "width_pt": 75.1,
+  "height_pt": 26.4,
+  "pdf_page": 174,
+  "bbox_pt": [
+   127.8,
+   258.5,
+   202.9,
+   284.9
+  ]
+ },
+ "fig-174-410.png": {
+  "width_pt": 59.6,
+  "height_pt": 26.4,
+  "pdf_page": 174,
+  "bbox_pt": [
+   261.3,
+   446.5,
+   320.8,
+   472.9
+  ]
+ },
+ "fig-174-411.png": {
+  "width_pt": 135.5,
+  "height_pt": 73.4,
+  "pdf_page": 174,
+  "bbox_pt": [
+   221.1,
+   564.9,
+   356.6,
+   638.3
+  ]
+ },
+ "fig-175-e11.png": {
+  "width_pt": 110.2,
+  "height_pt": 73.1,
+  "pdf_page": 175,
+  "bbox_pt": [
+   235.8,
+   308.7,
+   346,
+   381.8
+  ]
+ },
+ "fig-178-424.png": {
+  "width_pt": 31.2,
+  "height_pt": 41.4,
+  "pdf_page": 178,
+  "bbox_pt": [
+   46.7,
+   458.4,
+   78,
+   499.8
+  ]
+ },
+ "fig-178-425.png": {
+  "width_pt": 119,
+  "height_pt": 87,
+  "pdf_page": 178,
+  "bbox_pt": [
+   242,
+   571,
+   361,
+   658
+  ],
+  "manual": true
+ },
+ "fig-180-426.png": {
+  "width_pt": 91,
+  "height_pt": 85,
+  "pdf_page": 180,
+  "bbox_pt": [
+   257,
+   211,
+   348,
+   296
+  ],
+  "manual": true
+ },
+ "fig-180-427.png": {
+  "width_pt": 87,
+  "height_pt": 79,
+  "pdf_page": 180,
+  "bbox_pt": [
+   262,
+   519,
+   349,
+   598
+  ],
+  "manual": true
+ },
+ "fig-186-431.png": {
+  "width_pt": 131.6,
+  "height_pt": 68.6,
+  "pdf_page": 186,
+  "bbox_pt": [
+   216.1,
+   143.7,
+   347.7,
+   212.3
+  ]
+ },
+ "fig-186-433.png": {
+  "width_pt": 114.6,
+  "height_pt": 68.9,
+  "pdf_page": 186,
+  "bbox_pt": [
+   232.7,
+   447,
+   347.4,
+   515.9
+  ]
+ },
+ "fig-187-435.png": {
+  "width_pt": 147.9,
+  "height_pt": 23.3,
+  "pdf_page": 187,
+  "bbox_pt": [
+   299.4,
+   542.8,
+   447.3,
+   566
+  ]
+ },
+ "fig-193-451.png": {
+  "width_pt": 145.7,
+  "height_pt": 64.3,
+  "pdf_page": 193,
+  "bbox_pt": [
+   224.7,
+   329,
+   370.4,
+   393.3
+  ]
+ },
+ "fig-199-e2.png": {
+  "width_pt": 64.1,
+  "height_pt": 70.8,
+  "pdf_page": 199,
+  "bbox_pt": [
+   405.2,
+   85.6,
+   469.3,
+   156.4
+  ]
+ },
+ "fig-199-463.png": {
+  "width_pt": 70.5,
+  "height_pt": 65.7,
+  "pdf_page": 199,
+  "bbox_pt": [
+   407.4,
+   578,
+   477.9,
+   643.8
+  ]
+ },
+ "fig-200-e5.png": {
+  "width_pt": 85.6,
+  "height_pt": 70.3,
+  "pdf_page": 200,
+  "bbox_pt": [
+   369.5,
+   314.6,
+   455.1,
+   384.9
+  ]
+ },
+ "fig-200-466.png": {
+  "width_pt": 71.3,
+  "height_pt": 86.1,
+  "pdf_page": 200,
+  "bbox_pt": [
+   392.3,
+   597.5,
+   463.6,
+   683.6
+  ]
+ },
+ "fig-205-e10.png": {
+  "width_pt": 99.1,
+  "height_pt": 60.5,
+  "pdf_page": 205,
+  "bbox_pt": [
+   370.5,
+   293.9,
+   469.6,
+   354.4
+  ]
+ },
+ "fig-205-471.png": {
+  "width_pt": 86,
+  "height_pt": 76,
+  "pdf_page": 205,
+  "bbox_pt": [
+   396,
+   610,
+   482,
+   686
+  ],
+  "manual": true
+ },
+ "fig-206-475.png": {
+  "width_pt": 82,
+  "height_pt": 82,
+  "pdf_page": 206,
+  "bbox_pt": [
+   280,
+   330,
+   362,
+   412
+  ],
+  "manual": true
+ },
+ "fig-207-478.png": {
+  "width_pt": 120.4,
+  "height_pt": 48.3,
+  "pdf_page": 207,
+  "bbox_pt": [
+   249.8,
+   90.9,
+   370.2,
+   139.2
+  ]
+ },
+ "fig-207-479.png": {
+  "width_pt": 114,
+  "height_pt": 48,
+  "pdf_page": 207,
+  "bbox_pt": [
+   262,
+   253,
+   376,
+   301
+  ],
+  "manual": true
+ },
+ "fig-207-480.png": {
+  "width_pt": 92,
+  "height_pt": 84,
+  "pdf_page": 207,
+  "bbox_pt": [
+   280,
+   336,
+   372,
+   420
+  ],
+  "manual": true
+ },
+ "fig-207-481.png": {
+  "width_pt": 93,
+  "height_pt": 62,
+  "pdf_page": 207,
+  "bbox_pt": [
+   285,
+   466,
+   378,
+   528
+  ],
+  "manual": true
+ },
+ "fig-207-482.png": {
+  "width_pt": 84.5,
+  "height_pt": 86.4,
+  "pdf_page": 207,
+  "bbox_pt": [
+   284.1,
+   569.5,
+   368.6,
+   655.9
+  ]
+ },
+ "fig-208-483.png": {
+  "width_pt": 67.9,
+  "height_pt": 71.4,
+  "pdf_page": 208,
+  "bbox_pt": [
+   288.4,
+   92.4,
+   356.3,
+   163.8
+  ]
+ },
+ "fig-208-484.png": {
+  "width_pt": 65,
+  "height_pt": 77,
+  "pdf_page": 208,
+  "bbox_pt": [
+   291,
+   206.3,
+   356,
+   283.3
+  ]
+ },
+ "fig-208-485.png": {
+  "width_pt": 104,
+  "height_pt": 81,
+  "pdf_page": 208,
+  "bbox_pt": [
+   258,
+   397,
+   362,
+   478
+  ],
+  "manual": true
+ },
+ "fig-211-491.png": {
+  "width_pt": 244,
+  "height_pt": 57,
+  "pdf_page": 211,
+  "bbox_pt": [
+   96,
+   576,
+   340,
+   633
+  ],
+  "manual": true
+ },
+ "fig-212-494.png": {
+  "width_pt": 78.4,
+  "height_pt": 62.6,
+  "pdf_page": 212,
+  "bbox_pt": [
+   385.6,
+   620.2,
+   464,
+   682.8
+  ]
+ },
+ "fig-213-497.png": {
+  "width_pt": 101.5,
+  "height_pt": 57.7,
+  "pdf_page": 213,
+  "bbox_pt": [
+   374.3,
+   625.3,
+   475.8,
+   683
+  ]
+ },
+ "fig-214-e14.png": {
+  "width_pt": 97.4,
+  "height_pt": 33.3,
+  "pdf_page": 214,
+  "bbox_pt": [
+   358,
+   264.2,
+   455.4,
+   297.4
+  ]
+ },
+ "fig-214-498.png": {
+  "width_pt": 79.3,
+  "height_pt": 56.3,
+  "pdf_page": 214,
+  "bbox_pt": [
+   383.8,
+   571.1,
+   463,
+   627.4
+  ]
+ },
+ "fig-215-500.png": {
+  "width_pt": 84,
+  "height_pt": 94,
+  "pdf_page": 215,
+  "bbox_pt": [
+   400,
+   592,
+   484,
+   686
+  ],
+  "manual": true
+ },
+ "fig-216-501.png": {
+  "width_pt": 81,
+  "height_pt": 70,
+  "pdf_page": 216,
+  "bbox_pt": [
+   279,
+   88,
+   360,
+   158
+  ],
+  "manual": true
+ },
+ "fig-216-504.png": {
+  "width_pt": 86.6,
+  "height_pt": 48.7,
+  "pdf_page": 216,
+  "bbox_pt": [
+   269.4,
+   387.5,
+   356,
+   436.2
+  ]
+ },
+ "fig-216-505.png": {
+  "width_pt": 87,
+  "height_pt": 78,
+  "pdf_page": 216,
+  "bbox_pt": [
+   273,
+   508,
+   360,
+   586
+  ],
+  "manual": true
+ },
+ "fig-217-507.png": {
+  "width_pt": 111,
+  "height_pt": 63,
+  "pdf_page": 217,
+  "bbox_pt": [
+   263,
+   165,
+   374,
+   228
+  ],
+  "manual": true
+ },
+ "fig-217-508.png": {
+  "width_pt": 106,
+  "height_pt": 58,
+  "pdf_page": 217,
+  "bbox_pt": [
+   264.4,
+   309.8,
+   370.4,
+   367.8
+  ]
+ },
+ "fig-217-509.png": {
+  "width_pt": 88,
+  "height_pt": 69.3,
+  "pdf_page": 217,
+  "bbox_pt": [
+   282.2,
+   440.2,
+   370.2,
+   509.5
+  ]
+ },
+ "fig-217-510.png": {
+  "width_pt": 81.5,
+  "height_pt": 77.1,
+  "pdf_page": 217,
+  "bbox_pt": [
+   288.9,
+   575.9,
+   370.4,
+   653.1
+  ]
+ },
+ "fig-222-513.png": {
+  "width_pt": 97.4,
+  "height_pt": 26.4,
+  "pdf_page": 222,
+  "bbox_pt": [
+   97.6,
+   420.9,
+   195,
+   447.3
+  ]
+ },
+ "fig-233-e14.png": {
+  "width_pt": 101,
+  "height_pt": 93,
+  "pdf_page": 233,
+  "bbox_pt": [
+   371,
+   287,
+   472,
+   380
+  ],
+  "manual": true
+ },
+ "fig-233-535.png": {
+  "width_pt": 88.7,
+  "height_pt": 65.7,
+  "pdf_page": 233,
+  "bbox_pt": [
+   389.2,
+   604.4,
+   477.9,
+   670.1
+  ]
+ },
+ "fig-237-553.png": {
+  "width_pt": 69.2,
+  "height_pt": 69.2,
+  "pdf_page": 237,
+  "bbox_pt": [
+   300.9,
+   231.6,
+   370.1,
+   300.8
+  ]
+ },
+ "fig-237-555.png": {
+  "width_pt": 273.3,
+  "height_pt": 30.1,
+  "pdf_page": 237,
+  "bbox_pt": [
+   97.2,
+   529.1,
+   370.5,
+   559.2
+  ]
+ },
+ "fig-239-557.png": {
+  "width_pt": 84.8,
+  "height_pt": 26.4,
+  "pdf_page": 239,
+  "bbox_pt": [
+   125.5,
+   154.4,
+   210.3,
+   180.8
+  ]
+ },
+ "fig-244-e24.png": {
+  "width_pt": 317,
+  "height_pt": 77,
+  "pdf_page": 244,
+  "bbox_pt": [
+   125,
+   173,
+   442,
+   250
+  ],
+  "manual": true
+ },
+ "fig-244-568.png": {
+  "width_pt": 88.7,
+  "height_pt": 89.4,
+  "pdf_page": 244,
+  "bbox_pt": [
+   375.3,
+   593.2,
+   464,
+   682.6
+  ]
+ },
+ "fig-249-578.png": {
+  "width_pt": 80.9,
+  "height_pt": 73.6,
+  "pdf_page": 249,
+  "bbox_pt": [
+   396.9,
+   604.6,
+   477.8,
+   678.1
+  ]
+ },
+ "fig-256-599.png": {
+  "width_pt": 31.3,
+  "height_pt": 43,
+  "pdf_page": 256,
+  "bbox_pt": [
+   46.6,
+   209.9,
+   78,
+   252.9
+  ]
+ },
+ "fig-256-600.png": {
+  "width_pt": 106,
+  "height_pt": 81,
+  "pdf_page": 256,
+  "bbox_pt": [
+   251,
+   329,
+   357,
+   410
+  ],
+  "manual": true
+ },
+ "fig-269-e9.png": {
+  "width_pt": 44.1,
+  "height_pt": 48.8,
+  "pdf_page": 269,
+  "bbox_pt": [
+   132.9,
+   106.5,
+   177,
+   155.3
+  ]
+ },
+ "fig-271-636.png": {
+  "width_pt": 31.2,
+  "height_pt": 42.8,
+  "pdf_page": 271,
+  "bbox_pt": [
+   60.9,
+   620.6,
+   92.1,
+   663.3
+  ]
+ },
+ "fig-272-639.png": {
+  "width_pt": 31.3,
+  "height_pt": 41.6,
+  "pdf_page": 272,
+  "bbox_pt": [
+   46.6,
+   284.6,
+   78,
+   326.2
+  ]
+ },
+ "fig-272-640.png": {
+  "width_pt": 104.6,
+  "height_pt": 68.4,
+  "pdf_page": 272,
+  "bbox_pt": [
+   251.8,
+   366,
+   356.3,
+   434.4
+  ]
+ },
+ "fig-277-645.png": {
+  "width_pt": 56.3,
+  "height_pt": 23.3,
+  "pdf_page": 277,
+  "bbox_pt": [
+   137.9,
+   612.7,
+   194.2,
+   636
+  ]
+ },
+ "fig-280-657.png": {
+  "width_pt": 72.7,
+  "height_pt": 80.9,
+  "pdf_page": 280,
+  "bbox_pt": [
+   283.6,
+   265.6,
+   356.3,
+   346.5
+  ]
+ },
+ "fig-280-658.png": {
+  "width_pt": 31.3,
+  "height_pt": 41.6,
+  "pdf_page": 280,
+  "bbox_pt": [
+   46.6,
+   418.9,
+   78,
+   460.5
+  ]
+ },
+ "fig-290-684.png": {
+  "width_pt": 31.3,
+  "height_pt": 41.8,
+  "pdf_page": 290,
+  "bbox_pt": [
+   46.6,
+   533.4,
+   78,
+   575.2
+  ]
+ },
+ "fig-291-686.png": {
+  "width_pt": 116,
+  "height_pt": 62,
+  "pdf_page": 291,
+  "bbox_pt": [
+   246,
+   222,
+   362,
+   284
+  ],
+  "manual": true
+ },
+ "fig-291-688.png": {
+  "width_pt": 31.2,
+  "height_pt": 42.7,
+  "pdf_page": 291,
+  "bbox_pt": [
+   60.9,
+   567.2,
+   92.1,
+   609.9
+  ]
+ },
+ "fig-293-690.png": {
+  "width_pt": 354.1,
+  "height_pt": 32.3,
+  "pdf_page": 293,
+  "bbox_pt": [
+   124,
+   544.1,
+   478.1,
+   576.4
+  ]
+ },
+ "fig-296-693.png": {
+  "width_pt": 273.3,
+  "height_pt": 67.5,
+  "pdf_page": 296,
+  "bbox_pt": [
+   83,
+   141.3,
+   356.3,
+   208.8
+  ]
+ },
+ "fig-296-694.png": {
+  "width_pt": 273.3,
+  "height_pt": 45.6,
+  "pdf_page": 296,
+  "bbox_pt": [
+   83,
+   279,
+   356.3,
+   324.6
+  ]
+ },
+ "fig-296-695.png": {
+  "width_pt": 273.3,
+  "height_pt": 183,
+  "pdf_page": 296,
+  "bbox_pt": [
+   83,
+   447.3,
+   356.3,
+   630.3
+  ]
+ },
+ "fig-298-698.png": {
+  "width_pt": 273.3,
+  "height_pt": 210.1,
+  "pdf_page": 298,
+  "bbox_pt": [
+   83,
+   148,
+   356.3,
+   358.1
+  ]
+ },
+ "fig-298-699.png": {
+  "width_pt": 31.3,
+  "height_pt": 41.6,
+  "pdf_page": 298,
+  "bbox_pt": [
+   46.6,
+   440.5,
+   78,
+   482.1
+  ]
+ },
+ "fig-239-557-2.png": {
+  "width_pt": 42.2,
+  "height_pt": 26.4,
+  "pdf_page": 239,
+  "bbox_pt": [
+   198.4,
+   234.7,
+   240.6,
+   261.1
+  ]
+ },
+ "fig-239-557-3.png": {
+  "width_pt": 39.1,
+  "height_pt": 26.4,
+  "pdf_page": 239,
+  "bbox_pt": [
+   146.1,
+   234.7,
+   185.2,
+   261.1
+  ]
+ },
+ "fig-60-121.png": {
+  "width_pt": 148.5,
+  "height_pt": 35.4,
+  "pdf_page": 60,
+  "bbox_pt": [
+   83.2,
+   377.2,
+   231.7,
+   412.6
+  ]
+ },
+ "fig-102-244.png": {
+  "width_pt": 129,
+  "height_pt": 100,
+  "pdf_page": 102,
+  "bbox_pt": [
+   232,
+   372,
+   361,
+   472
+  ],
+  "manual": true
+ },
+ "fig-249-577.png": {
+  "width_pt": 107,
+  "height_pt": 64,
+  "pdf_page": 249,
+  "bbox_pt": [
+   373,
+   409,
+   480,
+   473
+  ],
+  "manual": true
+ }
+}

@@ -1,0 +1,10 @@
+{ "range": "ids-02 (118-c3~131-22, 12-c1~13-h4)", "checked": 72, "ok": 66, "red": 0, "yellow": 6,
+  "findings": [
+    { "id": "120-02", "severity": "yellow", "where": "subs", "note": "소문항 라벨 「(10)」이 뒤 식 「5x²+21x+4=0」의 5와 겹침 — 두 자리 라벨이 \\dmsubprob 의 makebox 폭 1.5em 을 넘침(items.json 문제 아님)", "fix": "latex-bank/sty/dm-editorial.sty 의 \\dmsubprob makebox 폭(1.5em)을 두 자리 라벨에 맞게 넓히거나 build.mjs 에서 10 이상 라벨의 폭을 보정" },
+    { "id": "121-05", "severity": "yellow", "where": "layout", "note": "발문 끝 「(정답 2개)」가 줄 끝에서 「(정답 2」/「개)」로 갈라짐", "fix": "body 의 「(정답 2개)」를 「(정답~2개)」로" },
+    { "id": "123-02", "severity": "yellow", "where": "body", "note": "빈칸 상자 안 「∴」가 줄 끝에 홀로 남고 「(x−□)²=□」가 다음 줄로 밀림", "fix": "body 의 「\\quad $\\therefore$ $(x-\\blank)^2=\\blank$」를 「\\quad $\\therefore\\ (x-\\blank)^2=\\blank$」처럼 한 수식으로 묶어 줄 끝에서 안 끊기게" },
+    { "id": "123-04", "severity": "yellow", "where": "body", "note": "빈칸 상자 안 「∴」가 줄 끝에 홀로 남고 「x=□」가 다음 줄로 밀림", "fix": "body 의 「\\quad $\\therefore$ $x=\\blank[3em]$」를 「\\quad $\\therefore\\ x=\\blank[3em]$」처럼 한 수식으로 묶어 줄 끝에서 안 끊기게" },
+    { "id": "124-c1", "severity": "yellow", "where": "layout", "note": "발문 끝 「것은?」이 「것」/「은?」으로 갈라져 둘째 줄에 「은?」만 남음", "fix": "body 의 「않은} 것은?」을 「않은} \\mbox{것은?}」으로" },
+    { "id": "129-07", "severity": "yellow", "where": "layout", "note": "발문 끝 「(정답 2개)」가 줄 끝에서 「(정답 2」/「개)」로 갈라짐", "fix": "body 의 「(정답 2개)」를 「(정답~2개)」로" }
+  ],
+  "_note": "내용 불일치 없음(72문항 전부 원본 크롭·쪽 이미지와 대조). 첫 줄에 분수가 오는 문항(128-04·129-10·130-14·131-21)은 번호 「N.」이 첫 줄 글자 기준선보다 반 줄쯤 위에 찍힘 — sty 의 번호 칸 정렬 공통 현상이라 개별 finding 으로 넣지 않음. 119-h5 는 원문 보기가 3단 배치, 조판본은 세로 나열이지만 내용 동일." }

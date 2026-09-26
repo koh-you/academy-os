@@ -1,0 +1,23 @@
+% 0133(본책 28쪽) — 두 직각삼각형 ABC(∠A=90°)·DBC(∠C=90°), AC 와 BD 의 교점 E, △EBC 색칠. 라벨 A~E·45°(∠ACB)·60°(∠D)·10(CD 파선 호)·직각 표시(A·C). 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)은 적지 않는다.
+\begin{tikzpicture}[scale=0.2, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (17.32,0); \coordinate (A) at (8.66,8.66); \coordinate (D) at (17.32,10); \coordinate (E) at (10.98,6.34);
+  \fill[green!15] (E) -- (B) -- (C) -- cycle;
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (B) -- (D) -- (C);
+  % 직각 표시(A·C)
+  \draw[line width=0.4pt] (7.81,7.81) -- (8.66,6.96) -- (9.51,7.81);
+  \draw[line width=0.4pt] (16.12,0) -- (16.12,1.2) -- (17.32,1.2);
+  % 각 45°(C)·60°(D)
+  \draw[line width=0.4pt] (14.8,0) arc[start angle=180, end angle=135, radius=2.52];
+  \node[font=\small] at (14.0,1.4) {$45^\circ$};
+  \draw[line width=0.4pt] (17.32,7.8) arc[start angle=270, end angle=210, radius=2.2];
+  \node[font=\small] at (15.2,7.4) {$60^\circ$};
+  % CD=10(파선 호)
+  \draw[dashed, line width=0.4pt] (D) to[bend left=30] (C);
+  \node[font=\small] at (19.6,5) {$10$};
+  \node[font=\small, above left] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, below right] at (C) {C};
+  \node[font=\small, above] at (D) {D};
+  \node[font=\small, above right] at (E) {E};
+\end{tikzpicture}

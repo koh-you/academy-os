@@ -31,13 +31,18 @@ for (const unit of bank.units) {
     for (const id of group.items) {
       const existing = byLabel.get(id);
       if (existing) {
-        items.push({ ...existing, type_label: group.section });
+        const page = bank.id_style === "number" && Number.isInteger(bank.items[id]?.page) ? { printed_page: bank.items[id].page } : {};
+        items.push({ ...existing, ...page, type_label: group.section });
         continue;
       }
+      // 「쪽-번호」 id 는 쪽을 id 에서, 책 전체 번호 id(라이트쎈·쎈)는 전사본의 page 에서 읽는다.
       const [pageText, numberText] = id.split("-");
-      const printedPage = Number(pageText);
+      const bookNumbered = bank.id_style === "number";
+      const printedPage = bookNumbered ? Number(bank.items[id]?.page ?? 0) : Number(pageText);
+      // 「30-e1」(쪽-예제 번호)은 숫자 부분만 번호로(예제는 같은 번호 문항보다 앞).
+      const numberSort = bookNumbered ? Number(id) : printedPage * 100 + Number(String(numberText).replace(/\D/g, "")) - (String(numberText).startsWith("e") ? 0.5 : 0);
       items.push({
-        item_id: `${bookId}-${id}`, number_label: id, number_sort: printedPage * 100 + Number(numberText), printed_page: printedPage, pdf_page: printedPage,
+        item_id: `${bookId}-${id}`, number_label: id, number_sort: numberSort, printed_page: printedPage, pdf_page: printedPage,
         column: 0, layout: "column", type_label: group.section, tags: [], unit_index: unitIndex >= 0 ? unitIndex : 0, has_shared_passage: Boolean(group.passage),
         group_key: null, review_status: "ai_checked", review_note: "스캔 크롭에 없어 전사본(쪽 렌더)으로 추가한 문항", regions: []
       });

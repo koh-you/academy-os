@@ -1,0 +1,15 @@
+% 0391(본책 73쪽) — 점 P 에서 원 O 에 그은 두 접선(접점 A, B), OA=4 cm, ∠APB:∠AOB=1:2, P 와 호 AB 사이 색칠. 답(넓이)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \fill[gray!35] (-2.400,0.000) -- (-0.600,1.039) arc[start angle=120, end angle=240, radius=1.200cm] -- cycle;
+  \draw (0.000,0.000) circle (1.200);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw (-2.400,0.000) -- (-0.167,1.289);
+  \draw (-2.400,0.000) -- (-0.167,-1.289);
+  \draw[dashed, line width=0.4pt] (0.000,0.000) -- (-0.600,1.039);
+  \draw (0.000,0.000) -- (-0.600,-1.039);
+  \node[font=\small, inner sep=1.5pt] at (0.100,0.570) {$4\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-0.685,1.186) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.685,-1.186) {B};
+  \node[font=\small, inner sep=1.5pt] at (-2.560,0.000) {P};
+  \node[font=\small, inner sep=1.5pt] at (0.200,0.000) {O};
+\end{tikzpicture}

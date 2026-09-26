@@ -1,0 +1,9 @@
+% 0934(본책 129쪽) — 반지름 2 cm 인 원에 내접하는 직사각형, 중심에서 꼭짓점까지 점선 반지름과 「2 cm」 라벨. 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 2 cm 만. 직사각형은 원문처럼 가로가 긴 모양(답인 정사각형이 드러나지 않게).
+\begin{tikzpicture}[line width=0.5pt]
+  \draw[line width=0.6pt] (0,0) circle (1.3);
+  \draw[line width=0.6pt] (-1.1,-0.69) rectangle (1.1,0.69);
+  \draw[dashed, line width=0.5pt] (0,0) -- (1.1,0.69);
+  \fill (0,0) circle (1.4pt);
+  \node[right=-1pt, font=\small] at (0.05,0.02) {$2\,\mathrm{cm}$};
+\end{tikzpicture}

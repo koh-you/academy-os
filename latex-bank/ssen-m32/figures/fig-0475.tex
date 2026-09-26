@@ -1,0 +1,21 @@
+% 0475(본책 86쪽) — 원 O, 두 현 AD·BE 의 연장선의 교점 C(위), OA·OB·OD·OE, ∠C=77°, ∠DOE 표시. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.046,0.340) -- (0.000,1.655);
+  \draw (1.046,0.340) -- (0.000,1.655);
+  \draw (0.000,0.000) -- (-1.046,0.340);
+  \draw (0.000,0.000) -- (1.046,0.340);
+  \draw (0.000,0.000) -- (-0.567,0.943);
+  \draw (0.000,0.000) -- (0.567,0.943);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.187,1.420) arc (-128.5:-51.5:0.300);
+  \node[font=\small, inner sep=0.5pt] at (0.000,1.155) {$77^\circ$};
+  \fill[green!15] (0.000,0.000) -- (0.155,0.257) arc (59.0:121.0:0.300) -- cycle;
+  \draw[line width=0.4pt] (0.155,0.257) arc (59.0:121.0:0.300);
+  \node[font=\small, inner sep=1pt] at (-1.236,0.402) {A};
+  \node[font=\small, inner sep=1pt] at (1.236,0.402) {B};
+  \node[font=\small, inner sep=1pt] at (0.000,1.855) {C};
+  \node[font=\small, inner sep=1pt] at (-0.757,1.053) {D};
+  \node[font=\small, inner sep=1pt] at (0.757,1.053) {E};
+  \node[font=\small, inner sep=1pt] at (0.000,-0.200) {O};
+\end{tikzpicture}

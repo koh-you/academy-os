@@ -1,0 +1,18 @@
+% 0507(본책 91쪽) — 원, 접점 P 의 접선 TP(수평), 현 PA·PB·AB, ∠APB=96°, ∠ABP=36°, PB 와 접선이 이루는 각 x(색칠). 다시 그림.
+\begin{tikzpicture}[scale=1.40, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.400,-1.100) -- (1.450,-1.100);
+  \fill (-1.250,-1.100) circle (1.2pt);
+  \draw (-0.000,-1.100) -- (-1.046,-0.340) -- (1.094,0.115) -- cycle;
+  \draw[line width=0.4pt] (0.214,-0.862) arc[start angle=48.000, end angle=144.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (-0.069,-0.444) {$96^\circ$};
+  \draw[line width=0.4pt] (0.781,0.048) arc[start angle=-168.000, end angle=-132.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (0.557,-0.195) {$36^\circ$};
+  \fill[green!15] (-0.000,-1.100) -- (0.320,-1.100) arc[start angle=0.000, end angle=48.000, radius=0.320] -- cycle;
+  \draw[line width=0.4pt] (0.320,-1.100) arc[start angle=0.000, end angle=48.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (0.457,-0.897) {$x$};
+  \node[font=\small, inner sep=1.5pt] at (-1.243,-0.375) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.291,0.150) {B};
+  \node[font=\small, inner sep=1.5pt] at (-0.000,-1.300) {P};
+  \node[font=\small, inner sep=1.5pt] at (-1.250,-1.300) {T};
+\end{tikzpicture}

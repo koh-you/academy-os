@@ -1,0 +1,17 @@
+% 0415(본책 76쪽) — 원 O, 현 PA·PB, OA·OB, ∠APB=42°, ∠OBA 에 각 표시. 답은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (1.034,0.376) -- (-0.901,-0.631);
+  \draw (1.034,0.376) -- (0.550,-0.953);
+  \draw (0.000,0.000) -- (-0.901,-0.631);
+  \draw (0.000,0.000) -- (0.550,-0.953);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (0.679,0.192) arc (207.5:250.0:0.400);
+  \fill[green!15] (0.550,-0.953) -- (0.400,-0.693) arc (120.0:167.5:0.300) -- cycle;
+  \draw[line width=0.4pt] (0.400,-0.693) arc (120.0:167.5:0.300);
+  \node[font=\small, inner sep=0.5pt] at (0.559,-0.165) {$42^\circ$};
+  \node[font=\small, inner sep=1.5pt] at (1.222,0.445) {P};
+  \node[font=\small, inner sep=1.5pt] at (-1.065,-0.746) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.650,-1.126) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.000,0.200) {O};
+\end{tikzpicture}

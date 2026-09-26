@@ -1,0 +1,19 @@
+% 0147(본책 30쪽) — 원 O, 중심을 지나는 AB(A 는 원 밖), 원 위의 점 C, ∠A=30°·∠ABC=45°, BC=6(파선 호). 라벨 A·B·C·O. 스캔 삽화를 TikZ 로 다시 그림. 답(AC×AO)은 적지 않는다.
+\begin{tikzpicture}[scale=0.3, line width=0.6pt]
+  \coordinate (O) at (0,0); \coordinate (B) at (-3,-3); \coordinate (C) at (3,-3); \coordinate (A) at (5.196,5.196);
+  \draw (O) circle (4.243);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \fill (O) circle (1.2pt);
+  % 각 30°(A)·45°(B)
+  \draw[line width=0.4pt] ($(A)+(225:1.8)$) arc[start angle=225, end angle=255, radius=1.8];
+  \node[font=\small] at (6.3,3.1) {$30^\circ$};
+  \draw[line width=0.4pt] ($(B)+(0:1.8)$) arc[start angle=0, end angle=45, radius=1.8];
+  \node[font=\small] at (-0.3,-2.1) {$45^\circ$};
+  % BC=6(파선 호)
+  \draw[dashed, line width=0.4pt] (B) to[bend right=20] (C);
+  \node[font=\small] at (0,-4.05) {$6$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, below left] at (B) {B};
+  \node[font=\small, below right] at (C) {C};
+  \node[font=\small, above left] at (O) {O};
+\end{tikzpicture}

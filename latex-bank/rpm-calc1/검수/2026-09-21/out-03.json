@@ -1,0 +1,6 @@
+{ "range": "0149~0222", "checked": 74, "ok": 71,
+  "findings": [
+    { "id": "0155", "severity": "yellow", "where": "figure", "note": "보기 ㄴ 크롭(fig-0155-3.png) 왼쪽 위에 원문 「ㄴ.」의 점 잔해가 남아 있어 조판본에서 typed 「ㄴ.」 라벨 옆에 점이 하나 더 보임(「ㄴ. .」) · 그래프 내용은 일치", "fix": "fig-0155-3.png 왼쪽 여백을 다시 크롭해 점 잔해 제거" },
+    { "id": "0199", "severity": "yellow", "where": "layout", "note": "3행 cases 블록의 위쪽 중괄호가 출처 배지(「RPM 미적분Ⅰ 0199번 · 35쪽」)와 거의 닿음 · 내용은 일치" },
+    { "id": "0203", "severity": "yellow", "where": "layout", "note": "cases 폭 때문에 첫 줄 단어 간격이 크게 벌어짐(「함수  f(x)  =  {…}  에  대하여  함수」) · 내용은 일치" }
+  ] }

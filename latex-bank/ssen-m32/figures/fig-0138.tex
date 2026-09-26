@@ -1,0 +1,28 @@
+% 0138(본책 29쪽) — 중심 B·반지름 1 사분원(F 위 끝·D 오른 끝), 반직선 BE 위의 원 위 점 A, C 는 A 의 수선의 발, E 는 D 에서 세운 접선 위. 라벨 A~F·x(∠ABC)·y(∠BED)·1(파선 호), 직각 표시(B·C·D). 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=2.6, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (D) at (1,0); \coordinate (F) at (0,1); \coordinate (A) at (0.6428,0.7660); \coordinate (C) at (0.6428,0); \coordinate (E) at (1,1.1918);
+  \draw (B) -- (D);
+  \draw (B) -- (F);
+  \draw (B) -- (E);
+  \draw (A) -- (C);
+  \draw (D) -- (E);
+  \draw (D) arc[start angle=0, end angle=90, radius=1];
+  % 직각 표시(B·C·D)
+  \draw[line width=0.4pt] (0,0.06) -- (0.06,0.06) -- (0.06,0);
+  \draw[line width=0.4pt] (0.6428,0.06) -- (0.5828,0.06) -- (0.5828,0);
+  \draw[line width=0.4pt] (1,0.06) -- (0.94,0.06) -- (0.94,0);
+  % 각 x(B)·y(E)
+  \draw[line width=0.4pt] (0.2,0) arc[start angle=0, end angle=50, radius=0.2];
+  \node[font=\small] at (0.27,0.09) {$x$};
+  \draw[line width=0.4pt] (1,0.99) arc[start angle=-90, end angle=-130, radius=0.2];
+  \node[font=\small] at (0.9,0.93) {$y$};
+  % 반지름 1(파선 호)
+  \draw[dashed, line width=0.4pt] (B) to[bend left=22] (F);
+  \node[font=\small] at (-0.14,0.5) {$1$};
+  \node[font=\small, below left] at (B) {B};
+  \node[font=\small, below] at (C) {C};
+  \node[font=\small, below right] at (D) {D};
+  \node[font=\small, above right] at (A) {A};
+  \node[font=\small, above right] at (E) {E};
+  \node[font=\small, left] at (F) {F};
+\end{tikzpicture}

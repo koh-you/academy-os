@@ -36,6 +36,9 @@ async function findXelatex() {
 }
 
 const CIRCLED = ["①", "②", "③", "④", "⑤"];
+// 5지선다 한 줄 배치 후보의 보기 하나당 최대 시각 길이(visualLength). 실제 폭 판정은 TeX(\dmchoicesauto)이 하므로 여기서는 긴 보기만 거른다.
+// 실측(낱장 110mm · 본문 폭 89mm): 「$-18$」·「$\dfrac{11}{40}$」·「$100\sqrt{2}$」·한글 3자 다섯 개는 한 줄, 「$2\sqrt{2}+1$」 다섯 개는 3+2 로 되돌아간다.
+const ONE_LINE_MAX_VISUAL = 10;
 
 /**
  * items.json 의 단원 목록. 여러 단원을 한 책으로 둘 때는 `units: [{ code, title, groups }]`,
@@ -54,7 +57,8 @@ function bankUnits(bank) {
 }
 
 /** id 「12-13」(쪽-번호) → 책에 찍힌 문항 번호 13. 「0013」(id_style number · RPM) → 13. */
-const bookNumber = (id) => (id.includes("-") ? Number(id.split("-")[1]) : Number(id));
+// 「12-e1」(쪽-예제 번호 · 100발100중 집중공략·서술형 예제)은 숫자 부분만 번호로 쓴다.
+const bookNumber = (id) => Number((id.includes("-") ? id.split("-")[1] : id).replace(/\D/g, ""));
 
 /** figures/crops.json — 벡터 PDF 에서 크롭한 그림의 원문 크기(pt). 있으면 원문 크기 그대로 넣고 폭이 넓으면 본문 아래에 둔다. */
 let cropSizes = {};
@@ -88,9 +92,10 @@ function trimToInk(rendered, context, pad = 12) {
 function renderFigure(figure, width = "0.38\\linewidth") {
   if (figure.startsWith("crop:")) {
     const size = cropSizes[figure.slice(5)];
-    // 원문 크기(pt)를 알면 그대로(본문 폭 440pt 넘지 않게), 모르면 상대 폭.
-    const w = size ? `${Math.min(size.width_pt, 440).toFixed(1)}pt` : width;
-    return `\\includegraphics[width=${w}]{figures/${figure.slice(5)}}`;
+    // 원문 크기(pt)를 알면 그대로(본문 폭 440pt 넘지 않게), 모르면 상대 폭. 놓이는 폭(\linewidth · 그림 옆 minipage)보다 넓으면
+    // 그 폭으로 줄인다(RPM 중3-2 0579 표 137pt 가 0.4 폭 minipage 를 넘어 오른쪽 열이 잘리던 것).
+    if (size) return `\\setlength{\\dmfigw}{${Math.min(size.width_pt, 440).toFixed(1)}pt}\\ifdim\\dmfigw>\\linewidth\\setlength{\\dmfigw}{\\linewidth}\\fi\\includegraphics[width=\\dmfigw]{figures/${figure.slice(5)}}`;
+    return `\\includegraphics[width=${width}]{figures/${figure.slice(5)}}`;
   }
   // TikZ 그림이 놓일 폭(그림 옆 minipage 0.4\linewidth 등)보다 넓으면 폭에 맞춰 줄인다(좁을 때는 원 크기).
   return `\\resizebox{\\ifdim\\width>\\linewidth\\linewidth\\else\\width\\fi}{!}{\\input{figures/${figure.replace(/^tikz:/, "")}}}`;
@@ -103,22 +108,80 @@ function figurePlacement(item) {
   return size && size.width_pt > SIDE_FIGURE_MAX_PT ? "below" : "side";
 }
 
-/** 출처 배지를 첫 줄 위로 더 올리는 높이(mm). 첫 줄(앞 120자)에 cases·pmatrix 가 있으면 5.5, 분수·근호·큰 괄호가 있으면 3.5, 아니면 1.5. */
+/** 출처 배지를 첫 줄 위로 더 올리는 높이(mm). 첫 줄(앞 120자)에 cases·pmatrix·aligned 가 있으면 5.5, 분수·근호·큰 괄호가 있으면 3.5, 아니면 1.5. */
 function badgeRaiseMm(item) {
   const head = String(item.body ?? "").slice(0, 120);
-  if (/\\begin\{(cases|pmatrix)\}/.test(head)) return 5.5;
-  if (/\\dfrac|\\sqrt|\\left\(/.test(head)) return 3.5;
+  // 검수(RPM 대수 0610·0613 · 미적분Ⅰ 0040·0147·0199): cases 위 중괄호·첫 줄 분수 분자·displaystyle lim 에 배지가 닿아 한 단계씩 더 올린다.
+  // 겹분수(분자 안에 다시 \dfrac)는 분자 윗변이 기준선 위 9mm 까지 올라와 4.5 로도 배지 아래변이 닿는다(개념원리 공통수학2 258-604) — 7.5.
+  if (/\\dfrac\{[^{}]*\\dfrac/.test(head)) return 7.5;
+  if (/\\begin\{(cases|pmatrix|aligned)\}/.test(head)) return 6.5;
+  if (/\\dfrac|\\sqrt|\\left\(|\\displaystyle|\\lim|\\sum|\\int/.test(head)) return 4.5;
   return 1.5;
+}
+
+/** 「쪽-번호」 id 의 번호 부분 → 배지 글. 「13」→「13번」 · 「e1」→「예제 1」 · 개념원리 「h1」→「핵심문제 1」·「c1」→「확인 1」·「u1」→「유제 1」. */
+const KIND_LABELS = { e: "예제", h: "핵심문제", c: "확인", u: "유제" };
+function kindLabel(numberText) {
+  const match = String(numberText).match(/^([a-z]+)(\d+)$/);
+  if (!match) return `${numberText}번`;
+  return `${KIND_LABELS[match[1]] ?? match[1]} ${match[2]}`;
+}
+
+/** text[open] 이 `{` 일 때 짝이 되는 `}` 의 위치(`\{`·`\}` 는 건너뛴다). 없으면 -1. */
+function matchingBrace(text, open) {
+  let depth = 0;
+  for (let index = open; index < text.length; index += 1) {
+    const char = text[index];
+    if (char === "\\") { index += 1; continue; }
+    if (char === "{") depth += 1;
+    else if (char === "}" && (depth -= 1) === 0) return index;
+  }
+  return -1;
+}
+
+/**
+ * 본문 끝의 「(단, …)」 조건 `\cond{X}` — 중괄호 깊이 0 이고 뒤에 본문이 더 없는 것(문자열 끝 · `\\` · `\par` · 보기/조건 상자 · 별도 줄 수식 앞) — 을
+ * `\dmcondfill{X}{배점 상자}` 로 바꾼다. 같은 줄에 들어가면 오른쪽 끝, 안 들어가면 다음 줄 오른쪽 끝에 놓고 앞 줄은 벌어지지 않게 한다(preamble 정의).
+ * 뒤따르는 배점 `~\mbox{[4점]}`·`\mbox{(정답 2개)}` 는 조건과 한 덩어리로 같이 옮긴다. 보기 상자 안·소문항 사이 등 중간에 놓인 \cond 는 그대로 둔다.
+ */
+function placeTrailingConditions(text) {
+  // 배점 상자는 reviver 가 `~\mbox{\mbox{[4점]}}` 처럼 한 겹 더 싸기도 하므로 중괄호 한 단계 중첩까지 허용한다.
+  const MBOX = String.raw`\\mbox\{(?:[^{}]|\{[^{}]*\})*\}`;
+  const END_OF_PARAGRAPH = new RegExp(String.raw`^((?:\s*~?${MBOX})*)\s*(?=$|\\\\|\\par\b|\\bogi\{|\\exprbox\{|\\dispeq\{|\\centerline\{|\\begin\{)`);
+  const TRAILER_UNIT = new RegExp(String.raw`\s*~?(${MBOX})`, "g");
+  let out = "", depth = 0, index = 0;
+  while (index < text.length) {
+    const char = text[index];
+    if (char === "\\") {
+      if (depth === 0 && text.startsWith("\\cond{", index)) {
+        const close = matchingBrace(text, index + 5);
+        const tail = close > 0 ? text.slice(close + 1).match(END_OF_PARAGRAPH) : null;
+        if (tail) {
+          out += `\\dmcondfill{${text.slice(index + 6, close)}}{${tail[1].replace(TRAILER_UNIT, "~$1")}}`;
+          index = close + 1 + tail[1].length;
+          continue;
+        }
+      }
+      out += text.slice(index, index + 2);
+      index += 2;
+      continue;
+    }
+    if (char === "{") depth += 1;
+    else if (char === "}") depth -= 1;
+    out += char;
+    index += 1;
+  }
+  return out;
 }
 
 /** 문항 하나의 본문 LaTeX(번호·출처 배지 포함 · dmpnum 두 번째 인자). */
 function renderItemBody(id, rawItem, group, bank) {
   // 전사본의 별도 줄 수식(\centerline)은 좁은 낱장 폭에서 넘치므로 폭에 맞춰 줄이는 \dispeq 로 바꾼다.
-  const item = { ...rawItem, body: String(rawItem.body ?? "").replace(/\\centerline\{/g, "\\dispeq{") };
+  const item = { ...rawItem, body: placeTrailingConditions(String(rawItem.body ?? "").replace(/\\centerline\{/g, "\\dispeq{")) };
   // 출처 배지: 쪽-번호 id 는 「책 12쪽 13번」, 책 전체 번호 id(RPM)는 「책 0013번 · 9쪽」.
   const badgeText = bank.id_style === "number"
     ? `${bank.book} ${id}번${item.page ? ` · ${item.page}쪽` : ""}`
-    : `${bank.book} ${id.split("-")[0]}쪽 ${id.split("-")[1]}번`;
+    : `${bank.book} ${id.split("-")[0]}쪽 ${kindLabel(id.split("-")[1])}`;
   // 배지는 sty 가 첫 줄 위 5mm 에 띄우는데 첫 줄에 분수·cases 가 오면 닿는다 — 첫 줄 키에 따라 더 올린다(sty 수정 없이).
   // 올린 만큼 문항 앞 간격도 벌려(book.tex 쪽) 앞 문항과 겹치지 않게 한다.
   const badge = `\\smash{\\raisebox{${badgeRaiseMm(item)}mm}{\\dmkichul{${badgeText}${item.tag ? ` · ${item.tag}` : ""}}}}`;
@@ -131,20 +194,36 @@ function renderItemBody(id, rawItem, group, bank) {
     const [bodyMain, bodyWide] = cut >= 0 ? [item.body.slice(0, cut), item.body.slice(cut)] : [item.body, ""];
     parts.push(`\\noindent\\begin{minipage}[t]{0.58\\linewidth}\\vspace{0pt}\\raggedright ${bodyMain}\\end{minipage}\\hfill\\begin{minipage}[t]{0.4\\linewidth}\\vspace{0pt}\\centering ${renderFigure(item.figure, "0.92\\linewidth")}\\end{minipage}\\par`);
     if (bodyWide) parts.push(`\\noindent ${bodyWide}`);
+  } else if (item.figure && figurePlacement(item) === "end") {
+    // 「end」: 그림을 문항 맨 아래(소문항·보기·힌트 뒤)에 둔다 — 원문이 시행 상자·보기 다음에 그림을 놓은 문항(개념원리 확통 73-151).
+    parts.push(item.body);
   } else if (item.figure) {
-    // 표·자료 상자처럼 넓은 그림은 본문 아래 가운데.
-    parts.push(item.body, `\\par\\smallskip\\begin{center}${renderFigure(item.figure, "\\linewidth")}\\end{center}`);
+    // 표·자료 상자처럼 넓은 그림은 본문 아래 가운데. 발문 뒤에 보기 상자(\bogi)·조건 상자(\exprbox)가 붙어 있으면 원문 순서대로
+    // 「발문 → 그림 → 보기 상자」(RPM 중3-2 0627 상자그림 문항에서 그림이 보기 뒤로 밀리던 것).
+    const cut = item.body.search(/\\bogi\{|\\exprbox\{/);
+    const [bodyMain, bodyWide] = cut > 0 ? [item.body.slice(0, cut), item.body.slice(cut)] : [item.body, ""];
+    parts.push(bodyMain, `\\par\\smallskip\\begin{center}${renderFigure(item.figure, "\\linewidth")}\\end{center}`);
+    if (bodyWide) parts.push(`\\noindent ${bodyWide}`);
   } else {
     parts.push(item.body);
   }
   // 둘째 그림(풀이 과정 상자·자료 표처럼 본문 아래 오는 것)은 항상 본문 아래 가운데.
   if (item.figure_extra) parts.push(`\\par\\smallskip\\begin{center}${renderFigure(item.figure_extra, "\\linewidth")}\\end{center}`);
-  if (item.subs) parts.push(item.subs.map((sub, index) => `\\dmsubprob{${index + 1}} ${sub}`).join("\n"));
+  if (item.subs) parts.push(item.subs.map((sub, index) => `\\dmsubprob{${index + 1}} ${placeTrailingConditions(sub)}`).join("\n"));
   if (item.choices) {
-    const env = item.choices_layout === "v" ? "choicesv" : item.choices_layout === "ii" ? "choicesii" : "choices32";
     // 분수(dfrac)·근호 보기는 키가 커 두 줄 배치에서 위아래 행이 맞닿는다 — 보이지 않는 지주(strut)로 행 높이를 벌린다(sty 수정 없이).
     const strut = item.choices.some((choice) => /\\dfrac|\\sqrt/.test(choice)) ? "\\rule[-3ex]{0pt}{8ex}" : "";
-    if (env === "choicesv" && item.choices.some((choice) => choice.replace(/\$[^$]*\$/g, "M").length > 26)) {
+    // 수식은 글자 수보다 넓게 찍히므로 수식 길이의 절반을 더해 잰다(라이트쎈 공통수학2 1381 ④ 처럼 한글 24자 + 긴 수식이 잘리던 것).
+    const visualLength = (choice) => choice.replace(/\$[^$]*\$/g, (math) => "M".repeat(Math.max(1, Math.round((math.length - 2) / 2)))).length;
+    // 배치가 지정되지 않은 짧은 보기 5개(시각 길이 ≤ ONE_LINE_MAX_VISUAL · 줄바꿈·환경·그림 없음)는 원본처럼 한 줄 5칸 후보로 두고, 실제 폭은
+    // TeX 이 재서(\dmchoicesauto) 낱장 폭을 넘으면 choices32 로 되돌린다. choices_layout 이 있으면 그 값("i" = 한 줄 강제)을 따른다.
+    const oneLineCandidate = item.choices.length === 5 && item.choices.every((choice) => visualLength(choice) <= ONE_LINE_MAX_VISUAL && !/\\\\|\\begin\{|\\includegraphics|\\par\b/.test(choice));
+    const layout = item.choices_layout ?? (oneLineCandidate ? "auto" : "32");
+    const env = layout === "v" ? "choicesv" : layout === "ii" ? "choicesii" : "choices32";
+    if (layout === "i" || layout === "auto") {
+      const args = item.choices.map((choice) => `{${choice}}`).join("");
+      parts.push(layout === "i" ? `\\dmchoicesi${args}` : `\\dmchoicesauto{${strut}}${args}`);
+    } else if (env === "choicesv" && item.choices.some((choice) => visualLength(choice) > 26)) {
       // 긴 한글 보기(문장형)는 choicesv 의 \mbox 안에서 줄이 안 바뀌어 잘린다 — 문단으로 하나씩 놓는다.
       parts.push(`\\par\\medskip${item.choices.map((choice, index) => `\\par\\noindent\\hangindent=1.4em\\hangafter=1 {\\small ${CIRCLED[index]}}\\ ${choice}`).join("")}\\par\\medskip`);
     } else {
@@ -152,16 +231,21 @@ function renderItemBody(id, rawItem, group, bank) {
     }
   }
   if (item.hint) parts.push(`\\dmhint{${item.hint}}`);
+  if (item.figure && figurePlacement(item) === "end") parts.push(`\\par\\smallskip\\begin{center}${renderFigure(item.figure, "\\linewidth")}\\end{center}`);
   // dm-editorial 의 번호 칸(9mm)은 세 자리까지다. 1000번 이상은 「1013.」 이 2.6pt 넘치므로 본문을 그만큼 오른쪽으로 민다(sty 수정 없이).
   if (bookNumber(id) >= 1000) return `\\hspace*{2mm}\\begin{minipage}[t]{\\dimexpr\\linewidth-2mm\\relax}\\vspace{0pt}${parts.join("\n")}\\end{minipage}`;
   return parts.join("\n");
 }
 
 async function compile(xelatex, dir, file) {
-  const run = () => execFileAsync(xelatex, ["-interaction=nonstopmode", "-halt-on-error", "-output-directory=build", file], { cwd: dir, maxBuffer: 64 * 1024 * 1024, windowsHide: true });
+  // timeout: 낱장 하나가 2시간 넘게 멈춘 사례(RPM 중3-1 0522 · MiKTeX 프로세스가 응답 없음)가 있어 3분 안에 안 끝나면 죽이고 한 번 더 시도한다.
+  const run = () => execFileAsync(xelatex, ["-interaction=nonstopmode", "-halt-on-error", "-output-directory=build", file], { cwd: dir, maxBuffer: 64 * 1024 * 1024, windowsHide: true, timeout: 180_000, killSignal: "SIGKILL" });
+  const runWithRetry = async () => {
+    try { await run(); } catch (error) { if (error.killed || error.signal) { console.log(`  ${file}: xelatex 응답 없음(3분) → 다시 시도`); await run(); } else throw error; }
+  };
   try {
-    await run();
-    await run();
+    await runWithRetry();
+    await runWithRetry();
   } catch (error) {
     const log = await readFile(path.join(dir, "build", file.replace(/\.tex$/, ".log")), "utf8").catch(() => "");
     const firstError = log.split("\n").find((line) => line.startsWith("!"));
@@ -176,8 +260,22 @@ async function main() {
     process.exit(2);
   }
   const dir = path.resolve(args.bank);
-  const bank = JSON.parse(await readFile(path.join(dir, "items.json"), "utf8"));
-  cropSizes = JSON.parse(await readFile(path.join(dir, "figures", "crops.json"), "utf8").catch(() => "{}"));
+  // 수식 안의 `\,`(원소 나열 `\{1,\,2,\,5\}`)는 math glue 라 줄바꿈 지점이 된다 — 좁은 낱장에서 `5}` 가 다음 줄로 밀려 잘린다(라이트쎈 공통수학2 0678).
+  // 같은 폭의 kern(`\mkern3mu`)으로 바꿔 수식 안에서 줄이 안 바뀌게 한다(binoppenalty 규약과 같은 취지). 원천 items.json 은 그대로 둔다.
+  const bank = JSON.parse(await readFile(path.join(dir, "items.json"), "utf8"), (key, value) =>
+    // 쉼표(mathpunct) 뒤에도 TeX 이 자동으로 glue 를 넣어 줄이 바뀔 수 있으므로 `,\,` 는 `{,}`(Ord) + kern 으로 바꾼다.
+    typeof value === "string"
+      ? value
+          // 쉼표 뒤 `\mathopen{}`: 다음 `-3` 이 이항 연산자로 잡혀 「, − 3」 처럼 벌어지지 않게(Open 뒤의 Bin 은 Ord 가 된다 · 개념원리 219-u4).
+          .replace(/\$([^$]*)\$/g, (math) => math.replace(/,\\,/g, "{,}\\mkern3mu\\mathopen{}").replace(/\\,/g, "\\mkern3mu "))
+          // 배점 「[5점]」 이 줄 끝에서 「[5」「점]」 로 갈라지지 않게(100발100중 서술형). 앞 낱말과도 붙인다(「[6점]」 홀로 둘째 줄).
+          .replace(/ \[(\d+)점\]/g, "~\\mbox{[$1점]}")
+          .replace(/\[(\d+)점\]/g, "\\mbox{[$1점]}")
+          // 「(정답 2개)」 가 「(정답」「2개)」 로 갈라지지 않게(RPM 중3-2 0515 · 개념원리 101-02).
+          .replace(/\(정답 (\d+)개\)/g, "\\mbox{(정답 $1개)}")
+      : value
+  );
+  cropSizes =JSON.parse(await readFile(path.join(dir, "figures", "crops.json"), "utf8").catch(() => "{}"));
   const xelatex = await findXelatex();
   await mkdir(path.join(dir, "items"), { recursive: true });
   await mkdir(path.join(dir, "build"), { recursive: true });
@@ -202,7 +300,9 @@ async function main() {
         "% 이 파일은 build.mjs 가 items.json 에서 만든다. 고칠 때는 items.json 을 고친다."
       ].filter(Boolean);
       // 첨자·지수 자리의 빈칸 상자(\blank)는 본문 크기로 찍혀 원문(작은 상자)과 어긋난다 — 첨자 안에서는 작은 상자로 바꾼다.
-      const itemTex = renderItemBody(id, item, group, bank).replace(/([_^])\{\\blank(\[[^\]]*\])?\}/g, "$1{\\text{\\scriptsize\\blank[0.8em]}}").replace(/([_^])\\blank(?![\[\w])/g, "$1{\\text{\\scriptsize\\blank[0.8em]}}");
+      // \blank[0.8em] 을 \text 안에 그대로 쓰면 세로로 길고 좁은 상자가 된다(개념원리 78-18) — 첨자용은 fboxsep 을 줄인 작은 정사각형으로 따로 그린다.
+      const supBlank = "$1{\\text{\\scriptsize\\setlength{\\fboxsep}{1.5pt}\\framebox[1.5em]{\\rule{0pt}{1.6ex}}}}";
+      const itemTex = renderItemBody(id, item, group, bank).replace(/([_^])\{\\blank(\[[^\]]*\])?\}/g, supBlank).replace(/([_^])\\blank(?![\[\w])/g, supBlank);
       await writeFile(path.join(dir, "items", `${id}.tex`), `${header.join("\n")}\n${itemTex}\n`, "utf8");
     }
   }
@@ -215,6 +315,7 @@ async function main() {
 \\newcommand{\\pt}[1]{\\mathrm{#1}}
 \\newcommand{\\seg}[1]{\\overline{\\mathrm{#1}}}
 \\newcommand{\\arc}[1]{\\overset{\\frown}{\\mathrm{#1}}}
+\\newcommand{\\vecAB}[1]{\\overrightarrow{\\mathrm{#1}}}
 \\newcommand{\\exprbox}[1]{\\par\\smallskip\\noindent\\begin{center}\\fbox{\\begin{minipage}{0.9\\linewidth}\\centering\\vspace{1.5mm}#1\\vspace{1.5mm}\\end{minipage}}\\end{center}}
 % 여집합 · 「보기」 상자(ㄱ·ㄴ·ㄷ 참거짓 문항 — 줄바꿈은 \\\\)
 \\newcommand{\\comp}[1]{{#1}^{\\mathrm{c}}}
@@ -224,15 +325,39 @@ async function main() {
 \\newcommand{\\blank}[1][1.5em]{\\raisebox{-0.15ex}{\\framebox[#1]{\\rule{0pt}{1.4ex}}}}
 \\newcommand{\\dmhint}[1]{\\par\\smallskip\\begin{tcolorbox}[enhanced,colback=dm-navylight!60,colframe=dm-navy!40,boxrule=0.3pt,sharp corners,left=3mm,right=3mm,top=2mm,bottom=2mm,boxsep=0mm]\\small\\setlength{\\parskip}{1mm}#1\\end{tcolorbox}}
 % 구역 제목·공통 지시문은 뒤에 문항 한 개는 붙을 자리가 있어야 찍는다(쪽 끝 고아 방지).
-\\newcommand{\\dmsection}[1]{\\par\\needspace{10\\baselineskip}\\vspace{3mm}\\noindent{\\color{dm-navy}\\hrule height 0.6pt}\\vspace{1.2mm}\\noindent{\\dmheadingfont\\bfseries\\fontsize{11}{13}\\selectfont\\color{dm-navy}#1}\\par\\vspace{2mm}}
+\\newcommand{\\dmsection}[1]{\\par\\needspace{10\\baselineskip}\\vspace{3mm}\\noindent{\\color{dm-navy}\\hrule height 0.6pt}\\vspace{1.2mm}\\noindent{\\dmheadingfont\\bfseries\\fontsize{11}{13}\\selectfont\\color{dm-navy}#1}\\par\\vspace{4mm}}
 % 지시문 뒤 4mm: 다음 문항의 출처 배지가 5mm 위로 올라오므로 긴 지시문 줄과 겹치지 않게 한다.
 \\newcommand{\\dmpassage}[1]{\\par\\needspace{8\\baselineskip}\\medskip\\noindent{\\dmheadingfont\\bfseries\\color{dm-navy}#1}\\par\\vspace{4mm}}
 % 줄바꿈 규약(프로토타입 mathbook-problems.sty · style.sty 와 같음): 수식 안에서는 줄을 바꾸지 않고, 「(단, …)」·「x축」은 한 덩어리.
 \\binoppenalty=10000 \\relpenalty=10000
+\\newlength{\\dmfigw}
+% 수식을 안 끊는 대신, 긴 수식 앞에서 줄을 바꾸면 앞 줄이 많이 비는 경우(RPM 중3-1 1022 지시문·0979)에 overfull 로 잘리지 않도록
+% 비상 늘임 폭을 준다 — tolerance 안에서 조판되는 문단에는 영향이 없다.
+\\emergencystretch=2em
 \\newcommand{\\nob}[1]{\\mbox{#1}}
 % 「(단, …)」 은 한 덩어리가 원칙이지만 그림 옆 좁은 폭(0.58)에서 긴 조건이 그림 뒤로 넘어가 잘리므로(RPM 공통수학2 0151),
 % 「(단,」 만 첫 낱말에 붙이고 안쪽 낱말 사이에서는 줄을 바꿀 수 있게 둔다(수식 안은 여전히 안 끊긴다).
 \\newcommand{\\cond}[1]{\\mbox{(단,}\\nobreakspace#1)}
+% 본문 끝의 「(단, …)」(build 가 \\cond 를 \\dmcondfill{조건}{배점 상자} 로 바꾼 것): 같은 줄에 들어가면 그 줄 오른쪽 끝, 안 들어가면 다음 줄 오른쪽 끝에 두고
+% 앞 줄은 fill 로 채워 어간이 벌어지지 않게 한다(TeXbook 의 증명 끝 기호 배치 · 검수 지적 개념원리 미적분Ⅱ 185-e19·106-e1 ⑴). 조건이 줄 폭(-2em)보다 넓으면
+% (그림 옆 0.58 폭의 긴 조건) 예전처럼 「(단,」 만 앞 낱말에 붙이고 안쪽에서 줄을 바꾼다.
+\\newlength{\\dmcondw}
+\\newcommand{\\dmcondfill}[2]{%
+  \\settowidth{\\dmcondw}{\\mbox{(단,~#1)#2}}%
+  \\ifdim\\dmcondw<\\dimexpr\\linewidth-2em\\relax
+    \\unskip\\nobreak\\hfill\\penalty0\\hskip1.5em\\hbox{}\\nobreak\\hfill\\mbox{(단,~#1)#2}%
+  \\else
+    \\cond{#1}#2%
+  \\fi}
+% 짧은 5지선다 한 줄 배치(원본이 보기 5개를 한 줄에 둔 것 · 검수 지적). \\dmchoicesi 는 한 줄 5칸(칸 사이 fill · choices_layout "i" 강제).
+% \\dmchoicesauto{지주}{①}…{⑤} 는 build 가 시각 길이로 고른 후보를 TeX 이 실제 폭으로 재서, 칸 사이 최소 1.5em 으로 낱장 본문 폭(110mm 낱장 여백 6mm·번호 9mm
+% 를 뺀 89mm · 현재 줄 폭이 더 좁으면 그 폭) 안에 들어가면 한 줄, 아니면 choices32(3+2 · 분수 지주 포함)로 되돌린다. 번호 기호는 sty 환경과 같은 \\small.
+\\newlength{\\dmchoicesw}\\newlength{\\dmchoiceslim}
+\\newcommand{\\dmchoicesi}[5]{\\par\\medskip\\noindent\\mbox{\\small ①\\ #1}\\hfill\\mbox{\\small ②\\ #2}\\hfill\\mbox{\\small ③\\ #3}\\hfill\\mbox{\\small ④\\ #4}\\hfill\\mbox{\\small ⑤\\ #5}\\par\\medskip}
+\\newcommand{\\dmchoicesauto}[6]{%
+  \\settowidth{\\dmchoicesw}{\\mbox{\\small ①\\ #2}\\hskip1.5em\\mbox{\\small ②\\ #3}\\hskip1.5em\\mbox{\\small ③\\ #4}\\hskip1.5em\\mbox{\\small ④\\ #5}\\hskip1.5em\\mbox{\\small ⑤\\ #6}}%
+  \\setlength{\\dmchoiceslim}{\\linewidth}\\ifdim\\dmchoiceslim>89mm \\setlength{\\dmchoiceslim}{89mm}\\fi
+  \\ifdim\\dmchoicesw<\\dmchoiceslim \\dmchoicesi{#2}{#3}{#4}{#5}{#6}\\else\\begin{choices32}{#1#2}{#1#3}{#1#4}{#1#5}{#1#6}\\end{choices32}\\fi}
 \\raggedbottom
 `;
   const lines = [preamble, "\\begin{document}"];
@@ -247,12 +372,15 @@ async function main() {
         lastSection = group.section;
       }
       if (group.passage) lines.push(`\\dmpassage{${group.passage}}`);
-      if (group.figure) lines.push(`\\begin{center}${renderFigure(group.figure)}\\end{center}`);
-      // 문항 사이 최소 6mm(출처 배지가 1.5mm 올라가 있어 위 문항의 상자·그림 아래변에 닿지 않게). dmpnum 의 fill 은 그 위에 더해진다.
+      // 그룹 그림(공통 표·그림) 뒤 4mm: 첫 문항의 출처 배지가 5mm 위로 올라가 표 아래 행에 겹치지 않게 한다(쎈 중3-2 0124).
+      if (group.figure) lines.push(`\\begin{center}${renderFigure(group.figure)}\\end{center}\\vspace{4mm}`);
+      // 문항 사이 최소 8mm(출처 배지가 1.5mm 올라가 있어 위 문항의 상자·그림 아래변에 닿지 않게 6mm + 배지 높이만큼 2mm: 앞 문항의 마지막 줄이
+      // 꽉 차면 다음 문항 배지 윗변이 그 줄 끝에 닿던 것 · 개념원리 공통수학2 45-92·46-94·258-604). dmpnum 의 fill 은 그 위에 더해진다.
+      // 낱장 렌더(review/export)에는 앞 문항이 없으므로 이 간격은 book.pdf 에만 쓰인다.
       // 문항 번호는 책에 찍힌 번호(id 의 뒤 두 자리 · 쪽마다 다시 시작)와 같게 카운터를 맞춘다.
       for (const id of group.items) {
         const extra = badgeRaiseMm(bank.items[id]) - 1.5;
-        lines.push(`${extra > 0 ? `\\vspace{${extra}mm}` : ""}\\setcounter{dmproblemcount}{${bookNumber(id) - 1}}\\dmpnum{${id}}{\\input{items/${id}}}\\vspace{6mm}`);
+        lines.push(`${extra > 0 ? `\\vspace{${extra}mm}` : ""}\\setcounter{dmproblemcount}{${bookNumber(id) - 1}}\\dmpnum{${id}}{\\input{items/${id}}}\\vspace{8mm}`);
       }
     }
   }
@@ -284,10 +412,13 @@ async function main() {
         for (const id of group.items) {
           if (byLabel.has(id)) continue;
           const [pageText, numberText] = id.split("-");
-          const printedPage = Number(pageText);
+          const bookNumbered = bank.id_style === "number";
+          const printedPage = bookNumbered ? Number(bank.items[id]?.page ?? 0) : Number(pageText);
+          // 「30-e1」(쪽-예제 번호)은 숫자 부분만 번호로(예제는 같은 번호 문항보다 앞).
+          const numberSort = bookNumbered ? Number(id) : printedPage * 100 + Number(String(numberText).replace(/\D/g, "")) - (String(numberText).startsWith("e") ? 0.5 : 0);
           const unitIndex = manifest.units.findIndex((entry) => entry.code === unit.code);
           const synthesized = {
-            item_id: `${manifest.book.book_id}-${id}`, number_label: id, number_sort: printedPage * 100 + Number(numberText), printed_page: printedPage, pdf_page: printedPage,
+            item_id: `${manifest.book.book_id}-${id}`, number_label: id, number_sort: numberSort, printed_page: printedPage, pdf_page: printedPage,
             column: 0, layout: "column", type_label: group.section, tags: [], unit_index: unitIndex >= 0 ? unitIndex : 0, has_shared_passage: false, group_key: null,
             review_status: "ai_checked", review_note: "스캔 크롭에 없어 전사본(쪽 렌더)으로 추가한 문항", regions: []
           };
@@ -302,36 +433,51 @@ async function main() {
       console.log(`bank-only: 전사본 기준 문항 ${manifest.items.length}개 (추가 ${added} · 제외 ${before - manifest.items.length})`);
     }
     if (args.review) await mkdir(path.join(dir, "review"), { recursive: true });
-    if (exportDir) {
+    const only = typeof args.only === "string" ? new Set(args.only.split(",").map((s) => s.trim()).filter(Boolean)) : null;
+    // --only + --export = 패치: 이미 export 된 패키지에서 지정 문항의 png·manifest 항목만 바꾼다(나머지 파일은 건드리지 않는다).
+    const patchExport = Boolean(exportDir && only);
+    if (patchExport && !(await readFile(path.join(exportDir, "manifest.json")).catch(() => null))) throw new Error(`--only 패치는 export 된 manifest 가 있어야 한다: ${exportDir}`);
+    if (exportDir && !patchExport) {
       await rm(path.join(exportDir, "items"), { recursive: true, force: true });
       await mkdir(path.join(exportDir, "items"), { recursive: true });
     }
     const exported = [];
 
     /** 문항 하나를 낱장(110mm 폭)으로 조판해 잉크 범위만 남긴 캔버스로 돌려준다. 번호는 책 번호. */
-    const renderSingle = async (id, group, dpi) => {
-      const single = `${preamble}\\usepackage{multicol}\\geometry{paperwidth=110mm,paperheight=200mm,margin=6mm,headheight=0pt,headsep=0pt,footskip=0pt}\\pagestyle{empty}\\begin{document}\\setcounter{dmproblemcount}{${bookNumber(id) - 1}}
-${group.passage ? `\\dmpassage{${group.passage}}` : ""}${group.figure ? `\\begin{center}${renderFigure(group.figure)}\\end{center}` : ""}
+    // 낱장 조판은 worker 마다 다른 임시 파일(_single-<k>.tex)을 써서 동시에 돌린다(문항 1400개 × xelatex 2회 · 순차 4.5초/문항 → 16코어에서 수 분).
+    // 낱장 높이는 200mm 로 시작하고, 증명 상자 + 세로 보기처럼 한 쪽을 넘치는 문항(RPM 대수 1117)은 2쪽이 생기므로 더 긴 낱장으로 다시 조판한다(첫 쪽만 쓰면 보기가 잘린다).
+    const renderSingle = async (id, group, dpi, slot = 0) => {
+      const heights = [200, 300, 420];
+      for (const [attempt, paperHeight] of heights.entries()) {
+        const single = `${preamble}\\usepackage{multicol}\\geometry{paperwidth=110mm,paperheight=${paperHeight}mm,margin=6mm,headheight=0pt,headsep=0pt,footskip=0pt}\\pagestyle{empty}\\begin{document}\\setcounter{dmproblemcount}{${bookNumber(id) - 1}}\\vspace*{${badgeRaiseMm(bank.items[id]) + 1}mm}
+${group.passage ? `\\dmpassage{${group.passage}}${badgeRaiseMm(bank.items[id]) > 1.5 ? `\\vspace{${badgeRaiseMm(bank.items[id]) - 1.5}mm}` : ""}` : ""}${group.figure ? `\\begin{center}${renderFigure(group.figure)}\\end{center}\\vspace{4mm}` : ""}
 \\dmpnum{${id}}{\\input{items/${id}}}\\end{document}`;
-      await writeFile(path.join(dir, "_single.tex"), single, "utf8");
-      await compile(xelatex, dir, "_single.tex");
-      const pdfBytes = await readFile(path.join(dir, "build", "_single.pdf"));
-      const doc = await pdfjs.getDocument({ data: new Uint8Array(pdfBytes), verbosity: 0 }).promise;
-      const page = await doc.getPage(1);
-      const { canvas: rendered, context } = await renderPage(page, dpi / 72);
-      const trimmed = trimToInk(rendered, context);
-      page.cleanup();
-      return trimmed;
+        const texName = `_single-${slot}.tex`;
+        await writeFile(path.join(dir, texName), single, "utf8");
+        await compile(xelatex, dir, texName);
+        const pdfBytes = await readFile(path.join(dir, "build", texName.replace(/\.tex$/, ".pdf")));
+        const doc = await pdfjs.getDocument({ data: new Uint8Array(pdfBytes), verbosity: 0 }).promise;
+        if (doc.numPages > 1 && attempt < heights.length - 1) { await doc.destroy(); continue; }
+        if (doc.numPages > 1) console.log(`  ${id}: 낱장 ${paperHeight}mm 로도 ${doc.numPages}쪽 — 첫 쪽만 사용`);
+        else if (attempt > 0) console.log(`  ${id}: 낱장 ${paperHeight}mm 로 조판(200mm 초과)`);
+        const page = await doc.getPage(1);
+        const { canvas: rendered, context } = await renderPage(page, dpi / 72);
+        const trimmed = trimToInk(rendered, context);
+        page.cleanup();
+        await doc.destroy();
+        return trimmed;
+      }
     };
 
-    for (const { group } of unitGroups) {
-      for (const id of group.items) {
+    // --only 0526,1022 : 검수 뒤 고친 문항만 다시 렌더할 때. --review 는 그 id 의 review png 만, --export 는 export 된 패키지의 그 id 만 패치한다.
+    const jobs = unitGroups.flatMap(({ group }) => group.items.filter((id) => !only || only.has(id)).map((id) => ({ id, group })));
+    const renderOne = async ({ id, group }, slot) => {
         let typeset;
         try {
-          typeset = await renderSingle(id, group, 200);
+          typeset = await renderSingle(id, group, 200, slot);
         } catch (error) {
           console.log(`  ${id}: ${error.message}`);
-          continue;
+          return;
         }
         const source = byLabel.get(id);
         if (exportDir && source) {
@@ -344,11 +490,13 @@ ${group.passage ? `\\dmpassage{${group.passage}}` : ""}${group.figure ? `\\begin
             regions: [{ kind: "body", position: 0, pdf_page: body?.pdf_page ?? null, bbox_normalized: body?.bbox_normalized ?? null, file, width: typeset.width, height: typeset.height }],
             // 구역·유형 라벨은 사람이 확정한 전사본(그룹 section)이 원천이다. 스캔 OCR 이 읽은 라벨은 회색 유형 쪽에서 자주 어긋난다.
             type_label: group.section,
+            // 인쇄 쪽도 전사본이 원천이다 — 스캔 manifest 는 pdf 쪽 + 고정 offset 이라 간지가 빠진 스캔에서는 뒤로 갈수록 어긋난다(쎈 중3-2: 33쪽부터 1~4쪽 차이).
+            ...(Number.isInteger(bank.items[id]?.page) ? { printed_page: bank.items[id].page } : {}),
             has_shared_passage: false,
             review_note: [source.review_note, `latex 조판본(latex-bank/${path.basename(dir)}/items/${id}.tex)`].filter(Boolean).join(" · ")
           });
         }
-        if (!args.review) continue;
+        if (!args.review) return;
         // review 시트: 왼쪽 원본 크롭(들), 오른쪽 조판본
         const crops = [];
         for (const region of source?.regions ?? []) {
@@ -376,12 +524,29 @@ ${group.passage ? `\\dmpassage{${group.passage}}` : ""}${group.figure ? `\\begin
         }
         context.drawImage(shown, cropWidth + 20, 34);
         await writeFile(path.join(dir, "review", `${id}.png`), await sheet.encode("png"));
+    };
+    // 동시 실행: --jobs N(기본 CPU 절반 · 최대 8). 순서는 결과에 영향이 없다(exported 는 item_id 로 찾는다).
+    const workers = Math.max(1, Math.min(8, Number(args.jobs) || Math.floor(os.cpus().length / 2)));
+    let cursor = 0;
+    await Promise.all(Array.from({ length: workers }, async (_, slot) => {
+      while (cursor < jobs.length) {
+        const job = jobs[cursor++];
+        await renderOne(job, slot);
       }
-    }
-    await rm(path.join(dir, "_single.tex"), { force: true });
+    }));
+    // 잠긴 임시 파일(백신·색인 · EBUSY)은 지우지 못해도 export 를 멈추지 않는다(RPM 확통 재-export 에서 cleanup 단계 실패).
+    for (let slot = 0; slot < workers; slot++) await rm(path.join(dir, `_single-${slot}.tex`), { force: true }).catch((error) => console.log(`  _single-${slot}.tex 삭제 실패(${error.code}) — 무시`));
     if (args.review) console.log(`review/: ${(await readdir(path.join(dir, "review"))).length}장`);
 
-    if (exportDir) {
+    if (patchExport) {
+      const existing = JSON.parse(await readFile(path.join(exportDir, "manifest.json"), "utf8"));
+      const typesetIds = new Set(existing.items.filter((item) => String(item.review_note ?? "").includes("latex 조판본")).map((item) => item.item_id));
+      for (const entry of exported) typesetIds.add(entry.item_id);
+      existing.items = existing.items.map((item) => exported.find((entry) => entry.item_id === item.item_id) ?? item);
+      existing.typeset = { ...(existing.typeset ?? {}), items: typesetIds.size };
+      await writeFile(path.join(exportDir, "manifest.json"), JSON.stringify(existing, null, 2), "utf8");
+      console.log(`export 패치: ${exported.length}문항 갱신 → ${exportDir} (조판본 ${typesetIds.size}문항)`);
+    } else if (exportDir) {
       // manifest: 문항 목록은 조판본이 있는 것만 바꾸고, 나머지(수행평가 등)는 원본 크롭을 그대로 복사한다.
       const exportedIds = new Set(exported.map((item) => item.item_id));
       const rest = manifest.items.filter((item) => !exportedIds.has(item.item_id));

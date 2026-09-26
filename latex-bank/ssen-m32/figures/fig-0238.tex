@@ -1,0 +1,24 @@
+% 0238(본책 47쪽) — 평행사변형 ABCD(∠B=30°, BC=20 cm, CD=16 cm), BC·CD 의 중점 M·N(같은 변 표시), △AMN 색칠. 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (1.35,0.78); \coordinate (B) at (0,0); \coordinate (C) at (1.95,0); \coordinate (D) at (3.3,0.78); \coordinate (M) at (0.975,0); \coordinate (N) at (2.625,0.39);
+  \fill[gray!30] (A) -- (M) -- (N) -- cycle;
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (A) -- (M) -- (N) -- cycle;
+  % 같은 변 표시(BM=MC 두 줄, CN=ND 한 줄)
+  \draw[line width=0.4pt] (0.46,-0.05) -- (0.46,0.05) (0.52,-0.05) -- (0.52,0.05);
+  \draw[line width=0.4pt] (1.43,-0.05) -- (1.43,0.05) (1.49,-0.05) -- (1.49,0.05);
+  \draw[line width=0.4pt] ($(C)!0.5!(N)+(-0.03,0.05)$) -- ($(C)!0.5!(N)+(0.03,-0.05)$);
+  \draw[line width=0.4pt] ($(N)!0.5!(D)+(-0.03,0.05)$) -- ($(N)!0.5!(D)+(0.03,-0.05)$);
+  \draw[line width=0.4pt] (0.4,0) arc[start angle=0, end angle=30, radius=0.4];
+  \node[font=\small] at (0.35,0.42) {$30^\circ$};
+  \draw[dashed, line width=0.4pt] (B) to[bend right=20] (C);
+  \node[font=\small] at (0.75,-0.38) {$20\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (C) to[bend right=25] (D);
+  \node[font=\small] at (3.05,0.05) {$16\,\mathrm{cm}$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, below] at (2.0,-0.02) {C};
+  \node[font=\small, above] at (D) {D};
+  \node[font=\small, below] at (0.975,-0.04) {M};
+  \node[font=\small, above] at (2.68,0.4) {N};
+\end{tikzpicture}

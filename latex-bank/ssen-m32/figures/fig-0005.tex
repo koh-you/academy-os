@@ -1,0 +1,12 @@
+% 0005~0006 공통 그림(본책 9쪽) — 직각삼각형 ABC(∠C=90°), 빗변 AB=9. 스캔 삽화를 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(9 · 꼭짓점 · 직각 표시). AC · BC 의 길이(답)는 적지 않는다.
+\begin{tikzpicture}[scale=0.42, line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (6.7,0); \coordinate (A) at (6.7,6);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] (6.0,0) -- (6.0,0.7) -- (6.7,0.7);
+  \draw[dashed, line width=0.3pt] (B) to[bend left=22] (A);
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small] at (2.6,3.4) {$9$};
+\end{tikzpicture}

@@ -1,0 +1,17 @@
+% 0265(본책 53쪽) — 반지름 9 cm 인 원 O, 현 AB 에 내린 수선의 발 H, OH=4 cm, OB=9 cm. 답(HB·AB)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.985,-0.490) -- (0.985,-0.490);
+  \draw (0.000,0.000) -- (0.000,-0.490);
+  \draw (0.000,0.000) -- (0.985,-0.490);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (0.120,-0.490) -- (0.120,-0.370) -- (0.000,-0.370);
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend right=25] (0.000,-0.490);
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.350,-0.220) {$4\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend left=25] (0.985,-0.490);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.620,-0.080) {$9\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.000,0.200) {O};
+  \node[font=\small, inner sep=1.5pt] at (-1.164,-0.579) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.164,-0.579) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.000,-0.680) {H};
+\end{tikzpicture}

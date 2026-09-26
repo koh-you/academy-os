@@ -1,0 +1,13 @@
+{ "range": "79-167~103-e8", "checked": 68, "ok": 58, "red": 0, "yellow": 10,
+  "findings": [
+    { "id": "88-186", "severity": "yellow", "where": "layout", "note": "첫 줄이 양끝 맞춤으로 크게 벌어짐(P(A) = 1/2, P(B) = 2/5 사이 공백 과다 · 인라인 수식이 줄바꿈되지 않음)" },
+    { "id": "88-188", "severity": "yellow", "where": "layout", "note": "첫 줄이 양끝 맞춤으로 크게 벌어짐(P(A) = 0.2, P(B) = 0.6 사이 공백 과다)" },
+    { "id": "89-e1", "severity": "yellow", "where": "subs", "note": "소문항 (1) 줄이 크게 벌어지고 마지막 P(A | B)만 다음 줄로 넘어감 · 내용은 일치" },
+    { "id": "89-190", "severity": "yellow", "where": "layout", "note": "첫 줄이 압축되어 「두 사건」 띄어쓰기와 P(A∩B) 주변 간격이 거의 없음 · 내용은 일치" },
+    { "id": "89-192", "severity": "yellow", "where": "layout", "note": "첫 줄이 양끝 맞춤으로 크게 벌어짐(P(A | B) 안 공백 과다)" },
+    { "id": "90-e2", "severity": "yellow", "where": "figure", "note": "표 크롭(안경 착용 여부)이 원문보다 작게 들어가 글자가 작고, 본문이 좁은 폭으로 8줄 · 표 값(16/4/20 · 9/21/30 · 25/25/50)은 일치" },
+    { "id": "90-195", "severity": "yellow", "where": "layout", "note": "표 옆 좁은 폭으로 본문 10줄이 이어지고 표 아래에서도 폭이 복구되지 않음 · 표 값(5/x · 20/10)과 본문은 일치" },
+    { "id": "94-202", "severity": "yellow", "where": "layout", "note": "첫 줄이 양끝 맞춤으로 크게 벌어짐(P(A) = 0.3, P(B) = 0.2 사이 공백 과다)" },
+    { "id": "99-216", "severity": "yellow", "where": "hint", "note": "㈎㈏㈐ 빈칸 상자가 원문의 넓은 상자보다 좁음(라벨만 든 작은 fbox) · 증명 과정·식 구조는 일치" },
+    { "id": "102-222", "severity": "yellow", "where": "layout", "note": "첫 줄이 양끝 맞춤으로 크게 벌어짐(P(A ∩ B) = 2/15 주변 공백 과다)" }
+  ] }

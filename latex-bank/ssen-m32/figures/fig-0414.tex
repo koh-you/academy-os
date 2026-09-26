@@ -1,0 +1,24 @@
+% 0414(본책 76쪽) — 원 O, 현 EA·EB·DB·DC, OA·OC, ∠AOC=106°, ∠BDC=28°, ∠AEB=x. 답(x)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.707,0.843) -- (-1.034,-0.376);
+  \draw (-0.707,0.843) -- (-0.096,-1.096);
+  \draw (0.000,0.000) -- (-1.034,-0.376);
+  \draw (0.000,0.000) -- (1.034,-0.376);
+  \draw (0.707,0.843) -- (-0.096,-1.096);
+  \draw (0.707,0.843) -- (1.034,-0.376);
+  \fill (0.000,0.000) circle (1.2pt);
+  \fill[green!15] (-0.707,0.843) -- (-0.785,0.553) arc (255.0:287.5:0.300) -- cycle;
+  \draw[line width=0.4pt] (-0.785,0.553) arc (255.0:287.5:0.300);
+  \draw[line width=0.4pt] (-0.263,-0.096) arc (200.0:340.0:0.280);
+  \draw[line width=0.4pt] (0.585,0.547) arc (247.5:285.0:0.320);
+  \node[font=\small, inner sep=0.5pt] at (-0.696,0.343) {$x$};
+  \node[font=\small, inner sep=0.5pt] at (-0.000,-0.550) {$106^\circ$};
+  \node[font=\small, inner sep=0.5pt] at (0.667,0.224) {$28^\circ$};
+  \node[font=\small, inner sep=1.5pt] at (-0.836,0.996) {E};
+  \node[font=\small, inner sep=1.5pt] at (0.836,0.996) {D};
+  \node[font=\small, inner sep=1.5pt] at (-1.222,-0.445) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.222,-0.445) {C};
+  \node[font=\small, inner sep=1.5pt] at (-0.113,-1.295) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.000,0.200) {O};
+\end{tikzpicture}

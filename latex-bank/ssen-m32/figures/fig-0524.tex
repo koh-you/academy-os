@@ -1,0 +1,20 @@
+% 0524(본책 94쪽) — 원, P 에서 두 직선 PAB·PCD, AC·BD, ∠P=25°, ∠B=80°, ∠PAC=x(색칠). 다시 그림.
+\begin{tikzpicture}[scale=0.94, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-3.020,-0.550) -- (0.376,1.034);
+  \draw (-3.020,-0.550) -- (0.953,-0.550);
+  \draw (-1.034,0.376) -- (-0.953,-0.550);
+  \draw (0.376,1.034) -- (0.953,-0.550);
+  \draw[line width=0.4pt] (-2.520,-0.550) arc[start angle=-0.000, end angle=25.000, radius=0.500];
+  \node[font=\small, inner sep=0.5pt] at (-2.248,-0.659) {$25^\circ$};
+  \draw[line width=0.4pt] (0.086,0.898) arc[start angle=-155.000, end angle=-70.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (0.139,0.461) {$80^\circ$};
+  \fill[green!15] (-1.034,0.376) -- (-1.269,0.266) arc[start angle=-155.000, end angle=-85.000, radius=0.260] -- cycle;
+  \draw[line width=0.4pt] (-1.269,0.266) arc[start angle=-155.000, end angle=-85.000, radius=0.260];
+  \node[font=\small, inner sep=0.5pt] at (-1.259,-0.013) {$x$};
+  \node[font=\small, inner sep=1.5pt] at (-3.220,-0.550) {P};
+  \node[font=\small, inner sep=1.5pt] at (-1.134,0.549) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.476,1.207) {B};
+  \node[font=\small, inner sep=1.5pt] at (-0.843,-0.741) {C};
+  \node[font=\small, inner sep=1.5pt] at (1.153,-0.550) {D};
+\end{tikzpicture}

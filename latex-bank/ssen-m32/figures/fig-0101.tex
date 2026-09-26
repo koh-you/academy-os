@@ -1,0 +1,23 @@
+% 0101(본책 22쪽) — 반지름 1 인 사분원(중심 O, 호 E~B), 호 위의 D, D 에서 OB 에 내린 수선의 발 A, B 에서 세운 접선과 OD 의 연장선의 교점 C. 각 x(∠DOA), 직각 표시 A·B, 1(OD) 파선 호. 라벨: O·A·B·C·D·E·x·1. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1, line width=0.6pt]
+  \coordinate (O) at (0,0); \coordinate (B) at (2.2,0); \coordinate (E) at (0,2.2); \coordinate (D) at (1.556,1.556); \coordinate (A) at (1.556,0); \coordinate (C) at (2.2,2.2);
+  \draw (E) -- (O) -- (B) -- (C);
+  \draw (B) arc[start angle=0, end angle=90, radius=2.2cm];
+  \draw (O) -- (C);
+  \draw (D) -- (A);
+  % 직각 표시
+  \draw[line width=0.4pt] (1.396,0) -- (1.396,0.16) -- (1.556,0.16);
+  \draw[line width=0.4pt] (2.04,0) -- (2.04,0.16) -- (2.2,0.16);
+  % 각 x
+  \draw[line width=0.4pt] (0.45,0) arc[start angle=0, end angle=45, radius=0.45cm];
+  \node[font=\small, anchor=west, inner sep=1pt] at (0.48,0.2) {$x$};
+  % 1(OD 파선 호)
+  \draw[dashed, line width=0.4pt] (O) to[bend left=25] (D);
+  \node[font=\small] at (0.6,1.08) {$1$};
+  \node[font=\small, below left, inner sep=1pt] at (O) {O};
+  \node[font=\small, below] at (A) {A};
+  \node[font=\small, below] at (B) {B};
+  \node[font=\small, above] at (C) {C};
+  \node[font=\small, above left, inner sep=1pt] at (D) {D};
+  \node[font=\small, left] at (E) {E};
+\end{tikzpicture}

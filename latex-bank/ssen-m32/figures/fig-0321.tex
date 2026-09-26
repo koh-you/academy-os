@@ -1,0 +1,17 @@
+% 0321(본책 61쪽) — 점 P 에서 원 O 에 그은 두 접선의 접점 T, T', ∠TPT'=70°, OT=9 cm. 답(호 TT' 의 길이)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (-1.743,0.000) -- (-0.246,1.049);
+  \draw (-1.743,0.000) -- (-0.246,-1.049);
+  \draw (0.000,0.000) -- (-0.574,0.819);
+  \draw (0.000,0.000) -- (-0.574,-0.819);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-1.539,-0.143) arc (-35.000:35.000:0.250);
+  \node[font=\small, inner sep=1.5pt] at (-1.250,0.000) {$70^\circ$};
+  \draw[dashed, line width=0.4pt] (-0.574,0.819) to[bend left=30] (0.000,0.000);
+  \node[font=\small, inner sep=1.5pt] at (0.050,0.550) {$9\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-1.903,0.000) {P};
+  \node[font=\small, inner sep=1.5pt] at (-0.674,0.979) {T};
+  \node[font=\small, inner sep=1.5pt] at (-0.674,-0.999) {T$'$};
+  \node[font=\small, inner sep=1.5pt] at (0.170,0.000) {O};
+\end{tikzpicture}

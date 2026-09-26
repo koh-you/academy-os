@@ -1,0 +1,26 @@
+% 0576(본책 103쪽) — 점 P 에서 외접하는 두 원 O·O', 직선 APC·BPD, BC 는 원 O' 의 접선(접점 C), ∠DBC=20°, ∠BDC=45°, ∠x(∠BAP). 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.1, line width=0.6pt]
+  \draw (-1.000,0.000) circle (1.000);
+  \draw (0.650,0.000) circle (0.650);
+  \fill (-1.000,0.000) circle (1.2pt);
+  \fill (0.650,0.000) circle (1.2pt);
+  \draw (-1.000,1.000) -- (0.650,-0.650);
+  \draw (-1.760,-0.650) -- (1.144,0.423);
+  \draw (-1.760,-0.650) -- (0.650,-0.650);
+  \draw (-1.000,1.000) -- (-1.760,-0.650);
+  \draw (1.144,0.423) -- (0.650,-0.650);
+  \draw[line width=0.4pt] (-1.410,-0.650) arc[start angle=0.000, end angle=20.271, radius=0.350];
+  \node[font=\small, inner sep=1pt] at (-1.169,-0.544) {$20^\circ$};
+  \draw[line width=0.4pt] (0.909,0.336) arc[start angle=-159.729, end angle=-114.729, radius=0.250];
+  \node[font=\small, inner sep=1pt] at (0.814,0.117) {$45^\circ$};
+  \fill[yellow!35] (-1.000,1.000) -- ++(-114.729:0.220) arc[start angle=-114.729, end angle=-45.000, radius=0.220] -- cycle;
+  \draw[line width=0.4pt] (-1.092,0.800) arc[start angle=-114.729, end angle=-45.000, radius=0.220];
+  \node[font=\small, inner sep=1pt] at (-0.930,0.606) {$x$};
+  \node[font=\small, anchor=south, inner sep=1.5pt] at (-1.000,1.030) {A};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-1.760,-0.650) {B};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (0.650,-0.700) {C};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (1.144,0.423) {D};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (-1.000,-0.050) {O};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (0.650,-0.050) {O$'$};
+  \node[font=\small, anchor=south east, inner sep=1.5pt] at (-0.050,0.030) {P};
+\end{tikzpicture}

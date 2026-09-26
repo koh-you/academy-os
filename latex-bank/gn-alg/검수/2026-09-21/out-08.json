@@ -1,0 +1,14 @@
+{ "range": "160-380~186-433 (ids-08, 68문항)", "checked": 68, "ok": 57,
+  "findings": [
+    { "id": "160-382", "severity": "yellow", "where": "subs", "note": "(4) 점근선 빈칸 뒤 「(n은 정수)이다.」가 줄 끝에 걸려 「이 / 다.」로 음절이 갈라짐. 내용은 일치", "fix": "(4) 의 \\blank[5em] 을 \\blank[4.5em] 으로 줄이거나 「이다.」를 \\mbox{} 로 묶기" },
+    { "id": "165-e5", "severity": "yellow", "where": "layout", "note": "본문 1·3행이 양끝 정렬로 크게 벌어짐(인라인 $y=\\frac12\\sin(2x+1)-1$·$y=\\frac12\\sin(ax+b)+c$ 가 못 끊겨서). 내용은 일치" },
+    { "id": "174-408", "severity": "yellow", "where": "hint", "note": "(1) 마지막 값 빈칸이 원본은 분수용 세로로 큰 상자, 조판본은 한 줄 높이 \\blank (69-148 과 같은 sty 수준). 구조·빈칸 개수는 일치" },
+    { "id": "174-409", "severity": "yellow", "where": "hint", "note": "(1) 두 빈칸이 원본은 세로로 큰 상자(π/6 · 값), 조판본은 한 줄 높이 \\blank. 구조는 일치" },
+    { "id": "174-410", "severity": "yellow", "where": "hint", "note": "(1)·(2) 값 빈칸이 원본은 세로로 큰 상자, 조판본은 한 줄 높이 \\blank. 구조·빈칸 개수는 일치" },
+    { "id": "177-419", "severity": "yellow", "where": "layout", "note": "별행 분수식 뒤 「를 간단히 하시오.」가 「를 간단 / 히 하시오.」로 단어 중간에서 갈라짐. 내용은 일치", "fix": "「간단히」를 \\mbox{간단히} 로 묶거나 수식 뒤에 \\par 를 두어 「를 간단히 하시오.」를 새 줄로" },
+    { "id": "178-423", "severity": "yellow", "where": "choices", "note": "보기 ㄷ 「tan5°×tan10°×…×tan85°=1」이 보기 상자 폭을 넘어 「= 1」이 오른쪽 테두리와 겹침. 내용은 일치", "fix": "ㄷ 를 「\\cdots\\times\\tan 80^\\circ」 뒤에서 \\\\ 로 두 줄로 나누기" },
+    { "id": "180-426", "severity": "yellow", "where": "figure", "note": "그래프가 원본은 과정 상자 안 「㉡의 범위에서 … 오른쪽 그림과 같으므로」 옆에 있는데, 조판본은 상자 밖 발문 오른쪽에 붙고 상자와 발문 사이 여백이 큼. 내용·빈칸 개수는 일치", "fix": "186-431 처럼 figure 를 빼고 exprbox 안에서 minipage 두 단으로 그림을 「㉡의 범위에서…」 옆에 두기" },
+    { "id": "180-427", "severity": "yellow", "where": "figure", "note": "180-426 과 같음 — 그래프가 과정 상자 밖 발문 옆에 놓임", "fix": "180-426 과 동일하게 조정" },
+    { "id": "186-431", "severity": "yellow", "where": "hint", "note": "「x=□ 또는 x=□」 빈칸이 원본은 세로로 큰 상자(π/3 · π), 조판본은 한 줄 높이 \\blank. 구조·그림은 일치" },
+    { "id": "186-433", "severity": "yellow", "where": "hint", "note": "교점 x좌표·해 빈칸 4개가 원본은 세로로 큰 상자, 조판본은 한 줄 높이 \\blank. 구조·그림은 일치" }
+  ] }

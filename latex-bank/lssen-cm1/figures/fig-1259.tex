@@ -1,0 +1,7 @@
+% 1259(본책 175쪽) — 원 위의 점 5개(맨 위 1, 좌우 1씩, 아래 2). 라벨 없음. 스캔 그림을 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=0.55, line width=0.5pt]
+  \draw (0,0) circle (1.8);
+  \foreach \a in {90, 162, 234, 306, 18} {
+    \fill (\a:1.8) circle (2.2pt);
+  }
+\end{tikzpicture}

@@ -1,0 +1,10 @@
+{ "range": "12-e1~35-55", "checked": 68, "ok": 61,
+  "findings": [
+    { "id": "18-e4", "severity": "yellow", "where": "subs", "note": "(2) 수식이 한 줄에 다 안 들어가 오른쪽 여백을 넘어 잘림 — 조판본 이미지에서 「}^3(1^2+」 뒤가 안 보임(낱장 110mm 폭 초과)", "fix": "subs[1]을 두 줄로: `\\right\\}^3$` 뒤에서 `\\\\ \\mbox{}\\qquad` 로 끊고 `$(1^2+2^2+3^2+\\cdots+n^2)$` 를 다음 줄로 (27-37 처럼)" },
+    { "id": "24-e9", "severity": "yellow", "where": "subs", "note": "(1) 첫 줄 「수열 {a_n}이 모든 자연수 n에 대하여 부등식」의 글자·단어 간격이 크게 벌어짐(부등식 한 덩어리가 통째로 둘째 줄로 밀림) — 내용은 일치, 확인 필요" },
+    { "id": "24-21", "severity": "yellow", "where": "layout", "note": "첫 줄 「수열 {a_n}이 모든 자연수 n에 대하여 부등식」 간격이 크게 벌어짐(부등식이 통째로 둘째 줄로 밀림) — 내용은 일치", "fix": "부등식을 `\\par\\smallskip\\centerline{$\\dfrac{3n^2}{n+1}<a_n<\\dfrac{3n^2+2n}{n+1}$}\\par\\smallskip\\noindent 을 만족시킬 때, …` 로 분리(16-8 패턴)" },
+    { "id": "25-24", "severity": "yellow", "where": "layout", "note": "첫 줄 「a_n = 2 + 12/n^2」 사이 간격이 심하게 벌어지고 마지막 줄에 「오.」 한 글자만 남음 — 내용은 일치", "fix": "`$a_n=2+\\dfrac{12}{n^2}$, $b_n=1-\\dfrac{1}{n(n^2+1)}$` 를 `\\par\\smallskip\\centerline{…}\\par\\smallskip\\noindent 일 때,` 로 분리(16-8 패턴)" },
+    { "id": "26-30", "severity": "yellow", "where": "layout", "note": "첫 줄 「= −1일 때,」 앞뒤 간격이 크게 벌어짐 — 내용은 일치", "fix": "첫 극한 조건을 `\\par\\smallskip\\centerline{$\\displaystyle\\lim_{n\\to\\infty}\\dfrac{-3a_n+1}{5a_n-4}=-1$}\\par\\smallskip\\noindent 일 때,` 로 분리(16-8 패턴)" },
+    { "id": "27-36", "severity": "yellow", "where": "layout", "note": "보기 상자 안 ㄱ 첫 줄 간격이 심하게 벌어지고, ㄴ 의 「이다.」·ㄷ 의 「lim b_n=α이다.」가 다음 줄 왼쪽 끝에 홀로 남음 — 내용은 일치", "fix": "ㄱ·ㄴ·ㄷ 각각 「이면」 뒤에서 `\\\\ \\hspace*{1.2em}` 로 줄바꿈해 두 줄로 고정 (또는 보기 안 `\\displaystyle` 제거) — 확인 필요" },
+    { "id": "27-39", "severity": "yellow", "where": "layout", "note": "첫 줄 「두 수열 {a_n}, {b_n}에 대하여 lim a_n = ∞,」 간격이 심하게 벌어지고 마지막 줄에 「오.」만 남음 — 내용은 일치", "fix": "두 극한 조건을 `\\par\\smallskip\\centerline{$\\displaystyle\\lim_{n\\to\\infty}a_n=\\infty$, $\\displaystyle\\lim_{n\\to\\infty}(a_n-2b_n)=-6$}\\par\\smallskip\\noindent 일 때,` 로 분리(16-8 패턴)" }
+  ] }

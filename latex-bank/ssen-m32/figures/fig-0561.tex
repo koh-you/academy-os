@@ -1,0 +1,16 @@
+% 0561(본책 101쪽) — 원에 내접하는 □ABCD, 접선 AT(접점 A), ∠BCD=121°, 호 AB:AD=7:4, ∠DAT 표시. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.000);
+  \draw (0.643,0.766) -- (-0.914,-0.407) -- (-0.087,-0.996) -- (0.788,-0.616) -- cycle;
+  \draw (0.260,1.087) -- (1.409,0.123);
+  \fill (1.256,0.252) circle (1.2pt);
+  \draw[line width=0.4pt] (0.096,-0.916) arc[start angle=23.500, end angle=144.500, radius=0.200];
+  \node[font=\small, inner sep=1pt] at (-0.043,-0.578) {$121^\circ$};
+  \fill[yellow!35] (0.643,0.766) -- ++(-84.000:0.200) arc[start angle=-84.000, end angle=-40.000, radius=0.200] -- cycle;
+  \draw[line width=0.4pt] (0.664,0.567) arc[start angle=-84.000, end angle=-40.000, radius=0.200];
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.623,0.816) {A};
+  \node[font=\small, anchor=east, inner sep=1.5pt] at (-0.914,-0.407) {B};
+  \node[font=\small, anchor=north, inner sep=1.5pt] at (-0.087,-1.056) {C};
+  \node[font=\small, anchor=west, inner sep=1.5pt] at (0.768,-0.656) {D};
+  \node[font=\small, anchor=south, inner sep=1.5pt] at (1.256,0.312) {T};
+\end{tikzpicture}

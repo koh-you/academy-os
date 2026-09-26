@@ -1,0 +1,13 @@
+% 0238(본책 39쪽) — y축에 접하는 원(중심 (-6,9)·접점 (0,9)) 그림. 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 O·x·y 와 눈금 9·-6 만. 원의 방정식(답)은 적지 않는다.
+\begin{tikzpicture}[scale=0.19, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-15.5,0) -- (4,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.2) -- (0,17.5) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (-6,9) circle (6);
+  \fill (-6,9) circle (2.2pt);
+  \draw[dashed, line width=0.4pt] (-6,9) -- (0,9);
+  \draw[dashed, line width=0.4pt] (-6,0) -- (-6,9);
+  \node[below right=-1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[right=1pt, font=\small] at (0,9) {$9$};
+  \node[below=1pt, font=\small] at (-6,0) {$-6$};
+\end{tikzpicture}

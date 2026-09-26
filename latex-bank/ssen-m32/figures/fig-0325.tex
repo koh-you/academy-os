@@ -1,0 +1,18 @@
+% 0325(본책 62쪽) — 중심 O 가 같은 두 원, 큰 원의 현 AB 가 작은 원에 Q 에서 접함, OQ=PQ(OP 는 큰 원의 반지름), 큰 원 반지름 6 cm. 답(AB)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (0.000,0.000) circle (0.550);
+  \draw (0.550,0.953) -- (0.550,-0.953);
+  \draw (0.000,0.000) -- (1.100,0.000);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (0.550,0.120) -- (0.430,0.120) -- (0.430,0.000);
+  \draw[line width=0.4pt] (0.250,-0.060) -- (0.250,0.060);
+  \draw[line width=0.4pt] (0.300,-0.060) -- (0.300,0.060);
+  \draw[line width=0.4pt] (0.800,-0.060) -- (0.800,0.060);
+  \draw[line width=0.4pt] (0.850,-0.060) -- (0.850,0.060);
+  \node[font=\small, inner sep=1.5pt] at (0.000,-0.170) {O};
+  \node[font=\small, inner sep=1.5pt] at (0.670,-0.150) {Q};
+  \node[font=\small, inner sep=1.5pt] at (1.260,0.000) {P};
+  \node[font=\small, inner sep=1.5pt] at (0.550,1.113) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.550,-1.123) {B};
+\end{tikzpicture}

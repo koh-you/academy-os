@@ -1,0 +1,27 @@
+% 0146(본책 30쪽) — 직각삼각형 세 개(ABC·ACD·ADE)가 A 를 공유, ∠B=∠ACD=∠ADE=90°, ∠CAB=∠DAC=∠EAD=30°, AE=8 cm(파선 호), △ABC 색칠. 라벨 A~E·30°×3·직각 표시(B·C·D). 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)은 적지 않는다.
+\begin{tikzpicture}[scale=0.4, line width=0.6pt]
+  \coordinate (A) at (0,0); \coordinate (B) at (5.196,0); \coordinate (C) at (5.196,3); \coordinate (D) at (3.464,6); \coordinate (E) at (0,8);
+  \fill[orange!30] (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (A) -- (D) -- (C);
+  \draw (A) -- (E) -- (D);
+  % 직각 표시(B·C·D)
+  \draw[line width=0.4pt] (4.6,0) -- (4.6,0.6) -- (5.196,0.6);
+  \draw[line width=0.4pt] ($(C)+(120:0.6)$) -- ($(C)+(120:0.6)+(210:0.6)$) -- ($(C)+(210:0.6)$);
+  \draw[line width=0.4pt] ($(D)+(150:0.6)$) -- ($(D)+(150:0.6)+(240:0.6)$) -- ($(D)+(240:0.6)$);
+  % 각 30°×3(A)
+  \draw[line width=0.4pt] (2.2,0) arc[start angle=0, end angle=30, radius=2.2];
+  \draw[line width=0.4pt] ($(A)+(30:2.8)$) arc[start angle=30, end angle=60, radius=2.8];
+  \draw[line width=0.4pt] ($(A)+(60:3.4)$) arc[start angle=60, end angle=90, radius=3.4];
+  \node[font=\small] at (2.9,0.55) {$30^\circ$};
+  \node[font=\small] at (2.6,2.0) {$30^\circ$};
+  \node[font=\small] at (1.35,3.2) {$30^\circ$};
+  % AE=8 cm(파선 호)
+  \draw[dashed, line width=0.4pt] (A) to[bend left=25] (E);
+  \node[font=\small] at (-1.6,4) {$8\,\mathrm{cm}$};
+  \node[font=\small, below] at (A) {A};
+  \node[font=\small, below right] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, above right] at (D) {D};
+  \node[font=\small, above] at (E) {E};
+\end{tikzpicture}

@@ -1,0 +1,18 @@
+% 0668(본책 119쪽) — 4명(선환·준형·응남·아람)의 5회 과학 수행 평가 등급 표(단위: 등급). 스캔 표를 tabular 로 옮김(대각선 머리 칸은 tikz). 본문 중간에 \input 으로 넣는다.
+{\renewcommand{\arraystretch}{1.35}\small
+\begin{tabular}{@{}r@{}}
+{\footnotesize (단위: 등급)} \\[1pt]
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\begin{tikzpicture}[baseline=(c.base)]
+  \node[inner sep=0pt, minimum width=1.5cm, minimum height=0.8cm] (c) {};
+  \draw[line width=0.3pt] (c.north west) -- (c.south east);
+  \node[font=\small, anchor=north east, inner sep=1.5pt] at (c.north east) {회};
+  \node[font=\small, anchor=south west, inner sep=1.5pt] at (c.south west) {학생};
+\end{tikzpicture} & $1$ & $2$ & $3$ & $4$ & $5$ \\ \hline
+선환 & C & B & C & C & C \\ \hline
+준형 & D & C & D & C & D \\ \hline
+응남 & A & C & C & B & B \\ \hline
+아람 & B & C & D & D & E \\ \hline
+\end{tabular}
+\end{tabular}}

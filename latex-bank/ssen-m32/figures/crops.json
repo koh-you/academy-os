@@ -1,0 +1,134 @@
+{
+ "fig-0055.jpg": {
+  "width_pt": 70.4,
+  "height_pt": 64.7,
+  "pdf_page": 8,
+  "note": "crop-figure 600dpi 587x539px"
+ },
+ "fig-0211.jpg": {
+  "width_pt": 99.4,
+  "height_pt": 70.1,
+  "pdf_page": 35,
+  "note": "crop-figure 600dpi 828x584px"
+ },
+ "fig-0182.jpg": {
+  "width_pt": 96.2,
+  "height_pt": 76.0,
+  "pdf_page": 30,
+  "note": "crop-figure 600dpi 802x633px"
+ },
+ "fig-0183.jpg": {
+  "width_pt": 97.9,
+  "height_pt": 54.6,
+  "pdf_page": 31,
+  "note": "crop-figure 600dpi 816x455px"
+ },
+ "fig-0184.jpg": {
+  "width_pt": 110.4,
+  "height_pt": 86.0,
+  "pdf_page": 31,
+  "note": "crop-figure 600dpi 920x717px"
+ },
+ "fig-0185.jpg": {
+  "width_pt": 97.9,
+  "height_pt": 83.8,
+  "pdf_page": 31,
+  "note": "crop-figure 600dpi 816x698px"
+ },
+ "fig-0186.jpg": {
+  "width_pt": 104.2,
+  "height_pt": 64.4,
+  "pdf_page": 31,
+  "note": "crop-figure 600dpi 868x537px"
+ },
+ "fig-0187.jpg": {
+  "width_pt": 104.2,
+  "height_pt": 104.3,
+  "pdf_page": 31,
+  "note": "crop-figure 600dpi 868x869px"
+ },
+ "fig-0188.jpg": {
+  "width_pt": 146.4,
+  "height_pt": 48.7,
+  "pdf_page": 31,
+  "note": "crop-figure 600dpi 1220x406px"
+ },
+ "fig-0194.jpg": {
+  "width_pt": 77.9,
+  "height_pt": 97.9,
+  "pdf_page": 32,
+  "note": "crop-figure 600dpi 649x816px"
+ },
+ "fig-0198.jpg": {
+  "width_pt": 87.0,
+  "height_pt": 85.6,
+  "pdf_page": 33,
+  "note": "crop-figure 600dpi 725x713px"
+ },
+ "fig-0199.jpg": {
+  "width_pt": 103.8,
+  "height_pt": 63.7,
+  "pdf_page": 33,
+  "note": "crop-figure 600dpi 865x531px"
+ },
+ "fig-0202.jpg": {
+  "width_pt": 95.6,
+  "height_pt": 73.3,
+  "pdf_page": 34,
+  "note": "crop-figure 600dpi 797x611px"
+ },
+ "fig-0203.jpg": {
+  "width_pt": 110.8,
+  "height_pt": 55.6,
+  "pdf_page": 34,
+  "note": "crop-figure 600dpi 923x463px"
+ },
+ "fig-0244.jpg": {
+  "width_pt": 87.7,
+  "height_pt": 87.1,
+  "pdf_page": 41,
+  "note": "crop-figure 600dpi 731x726px"
+ },
+ "fig-0245.jpg": {
+  "width_pt": 96.6,
+  "height_pt": 103.2,
+  "pdf_page": 41,
+  "note": "crop-figure 600dpi 805x860px"
+ },
+ "fig-0247.jpg": {
+  "width_pt": 91.8,
+  "height_pt": 84.4,
+  "pdf_page": 41,
+  "note": "crop-figure 600dpi 765x703px"
+ },
+ "fig-0255.jpg": {
+  "width_pt": 62.3,
+  "height_pt": 97.0,
+  "pdf_page": 43,
+  "note": "crop-figure 600dpi 519x808px"
+ },
+ "fig-0303.jpg": {
+  "width_pt": 80.4,
+  "height_pt": 65.8,
+  "pdf_page": 50,
+  "note": "crop-figure 600dpi 670x548px"
+ },
+ "fig-0339.jpg": {
+  "width_pt": 67.4,
+  "height_pt": 97.8,
+  "pdf_page": 56,
+  "note": "crop-figure 600dpi 562x815px"
+ },
+ "fig-0472.jpg": {
+  "width_pt": 122.6,
+  "height_pt": 96.0,
+  "pdf_page": 77,
+  "note": "crop-figure 600dpi 1022x800px"
+ },
+ "fig-0479.jpg": {
+  "width_pt": 95.3,
+  "height_pt": 98.5,
+  "pdf_page": 78,
+  "note": "crop-figure 600dpi 794x821px"
+ }
+}

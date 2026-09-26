@@ -1,0 +1,15 @@
+% 0494(본책 76쪽) — 원 (x-6)^2+(y+3)^2=4 위의 점 P, x축 위의 점 Q, 점 A(0,-5), 꺾은선 A-Q-P. 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·P·Q·O·x·y·원의 방정식 만. Q·P 의 좌표(답 관련)는 적지 않는다.
+\begin{tikzpicture}[scale=0.42, line width=0.5pt]
+  \coordinate (A) at (0,-5); \coordinate (Q) at (2.7,0); \coordinate (P) at (4.55,-1.6); \coordinate (C) at (6,-3);
+  \draw[->, >=stealth, line width=0.7pt] (-1.0,0) -- (9.4,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-6.4) -- (0,1.4) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (C) circle (2);
+  \draw[line width=0.6pt] (A) -- (Q) -- (P);
+  \fill (A) circle (2.2pt); \fill (Q) circle (2.2pt); \fill (P) circle (2.2pt);
+  \node[left=1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[above=1pt, font=\small] at (Q) {$\mathrm{Q}$};
+  \node[font=\small] at (4.0,-2.1) {$\mathrm{P}$};
+  \node[below left=-2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[below=1pt, font=\small] at (6,-5.1) {$(x-6)^2+(y+3)^2=4$};
+\end{tikzpicture}

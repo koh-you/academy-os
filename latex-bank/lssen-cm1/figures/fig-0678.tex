@@ -1,0 +1,11 @@
+% 0678(본책 94쪽) — 밑변 20 m·높이 10 m 인 직각삼각형 땅과 그 안의 직사각형 꽃밭(연노랑 채움 · 원문의 꽃무늬 대신 단색). 라벨은 원문의 10 m·20 m 뿐. 스캔 그림이라 TikZ 로 다시 그림.
+% 직사각형의 크기는 답(최대 넓이)이 읽히지 않게 임의로 둠.
+\begin{tikzpicture}[scale=1, line width=0.5pt]
+  \fill[yellow!45!orange!35] (0,0) rectangle (1.8,0.6);
+  \draw[line width=0.6pt] (0,0) -- (3,0) -- (0,1.5) -- cycle;
+  \draw[line width=0.6pt] (0,0) rectangle (1.8,0.6);
+  \draw (0,0.6) ++(0.12,0) -- ++(0,-0.12) -- ++(-0.12,0);
+  \draw (1.8,0) ++(-0.12,0) -- ++(0,0.12) -- ++(0.12,0);
+  \node[left, font=\small, inner sep=2pt] at (0,0.75) {$10\,\mathrm{m}$};
+  \node[below, font=\small, inner sep=2pt] at (1.5,0) {$20\,\mathrm{m}$};
+\end{tikzpicture}

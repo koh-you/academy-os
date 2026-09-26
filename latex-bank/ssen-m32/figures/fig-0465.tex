@@ -1,0 +1,22 @@
+% 0465(본책 84쪽) — △ABC 의 외심 O, AB·AC 에 내린 수선의 발 M·N, OM=ON(표시), ∠ABC=72°, 호 AC=14π. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (0.000,1.100) -- (-0.647,-0.890) -- (0.647,-0.890) -- cycle;
+  \draw (0.000,0.000) -- (-0.323,0.105);
+  \draw (0.000,0.000) -- (0.323,0.105);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.280,0.238) -- (-0.147,0.195) -- (-0.190,0.062);
+  \draw[line width=0.4pt] (0.280,0.238) -- (0.147,0.195) -- (0.190,0.062);
+  \draw[line width=0.4pt] (-0.140,0.119) -- (-0.183,-0.014);
+  \draw[line width=0.4pt] (0.183,-0.014) -- (0.140,0.119);
+  \draw[line width=0.4pt] (-0.347,-0.890) arc (-0.0:72.0:0.300);
+  \node[font=\small, inner sep=0.5pt] at (-0.242,-0.596) {$72^\circ$};
+  \draw[line width=0.4pt, <->] (0.723,-0.995) arc (306.0:450.0:1.230);
+  \node[font=\small, inner sep=0.5pt] at (1.446,0.470) {$14\pi$};
+  \node[font=\small, inner sep=1pt] at (0.000,1.300) {A};
+  \node[font=\small, inner sep=1pt] at (-0.764,-1.052) {B};
+  \node[font=\small, inner sep=1pt] at (0.764,-1.052) {C};
+  \node[font=\small, inner sep=1pt] at (-0.496,0.205) {M};
+  \node[font=\small, inner sep=1pt] at (0.496,0.205) {N};
+  \node[font=\small, inner sep=1pt] at (0.000,-0.200) {O};
+\end{tikzpicture}

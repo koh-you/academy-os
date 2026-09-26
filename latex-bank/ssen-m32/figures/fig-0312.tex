@@ -1,0 +1,21 @@
+% 0312(본책 59쪽) — 지름 12 cm 인 원 O, AB=CD=8 cm, AB∥CD(평행 표시), BC 는 지름. 답(거리)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.096,1.096) -- (-0.997,-0.465);
+  \draw (0.997,0.465) -- (0.096,-1.096);
+  \draw (-0.997,-0.465) -- (0.997,0.465);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.625,0.280) -- (-0.546,0.315) -- (-0.538,0.230);
+  \draw[line width=0.4pt] (0.468,-0.351) -- (0.546,-0.315) -- (0.555,-0.401);
+  \draw[dashed, line width=0.4pt] (-0.096,1.096) to[bend right=22] (-0.997,-0.465);
+  \node[font=\small, fill=white, inner sep=1pt] at (-1.000,0.750) {$8\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (0.997,0.465) to[bend left=22] (0.096,-1.096);
+  \node[font=\small, fill=white, inner sep=1pt] at (1.050,-0.750) {$8\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (-0.997,-0.465) to[bend right=15] (0.997,0.465);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.200,-0.280) {$12\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-0.050,0.200) {O};
+  \node[font=\small, inner sep=1.5pt] at (-0.113,1.295) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.178,-0.549) {B};
+  \node[font=\small, inner sep=1.5pt] at (1.178,0.549) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.113,-1.295) {D};
+\end{tikzpicture}

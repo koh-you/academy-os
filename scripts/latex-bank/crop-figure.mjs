@@ -36,6 +36,31 @@ const y0 = Math.round(iy0 + rel[1] * ih);
 const x1 = Math.round(ix0 + rel[2] * iw);
 const y1 = Math.round(iy0 + rel[3] * ih);
 const cut = createCanvas(x1 - x0, y1 - y0);
-cut.getContext("2d").drawImage(canvas, x0, y0, x1 - x0, y1 - y0, 0, 0, x1 - x0, y1 - y0);
+const cutContext = cut.getContext("2d");
+cutContext.drawImage(canvas, x0, y0, x1 - x0, y1 - y0, 0, 0, x1 - x0, y1 - y0);
+if (args["whiten-gray"]) {
+  // prepare-text-pdf-bank 의 --whiten-gray 와 같은 규칙: 연회색 워터마크(무채색·밝음)를 흰색으로. 채도 있는 채움은 남는다.
+  const whitenMin = Number(args["whiten-min"]) || 232;
+  const image = cutContext.getImageData(0, 0, x1 - x0, y1 - y0);
+  const px = image.data;
+  for (let i = 0; i < px.length; i += 4) {
+    const max = Math.max(px[i], px[i + 1], px[i + 2]);
+    const min = Math.min(px[i], px[i + 1], px[i + 2]);
+    if (max - min < 10 && min > whitenMin) { px[i] = 255; px[i + 1] = 255; px[i + 2] = 255; }
+  }
+  cutContext.putImageData(image, 0, 0);
+}
 await writeFile(args.out, await cut.encode(args.out.endsWith(".png") ? "png" : "jpeg", 92));
 console.log(`${path.basename(args.out)} ${x1 - x0}x${y1 - y0}px @${dpi}dpi`);
+
+// 같은 폴더에 crops.json(prepare-text-pdf-bank 산출 · 원문 크기 pt)이 있으면 이 크롭의 크기를 적어 둔다 —
+// build.mjs 가 크롭을 원문 크기로 놓으므로, 자동 크롭을 사람이 다시 만들었을 때 옛 크기가 남아 있으면 그림이 커지거나 낱장을 넘친다.
+const cropsPath = path.join(path.dirname(args.out), "crops.json");
+try {
+  const crops = JSON.parse(await readFile(cropsPath, "utf8"));
+  const scale = 72 / dpi;
+  crops[path.basename(args.out)] = { ...(crops[path.basename(args.out)] ?? {}), width_pt: Number(((x1 - x0) * scale).toFixed(1)), height_pt: Number(((y1 - y0) * scale).toFixed(1)), pdf_page: Number(args.page), manual: true };
+  await writeFile(cropsPath, JSON.stringify(crops, null, 1), "utf8");
+} catch {
+  // crops.json 이 없는 은행(스캔 경로)은 상대 폭으로 놓이므로 기록하지 않는다.
+}

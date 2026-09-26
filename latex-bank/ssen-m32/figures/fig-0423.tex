@@ -1,0 +1,18 @@
+% 0423(본책 77쪽) — 반지름 5 cm 인 원 O, 현 BA·BC, OA·OC, ∠ABC=144°, 부채꼴 AOC 를 뺀 부분 색칠(원문 주황). 답(넓이)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \fill[orange!30] (0.000,0.000) -- (0.647,-0.890) arc (306.0:594.0:1.100) -- cycle;
+  \draw (0.000,0.000) circle (1.100);
+  \draw (0.000,0.000) -- (-0.647,-0.890);
+  \draw (0.000,0.000) -- (0.647,-0.890);
+  \draw (-0.000,-1.100) -- (-0.647,-0.890);
+  \draw (-0.000,-1.100) -- (0.647,-0.890);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (0.238,-1.023) arc (18.0:162.0:0.250);
+  \draw[dashed, line width=0.4pt] (0.000,0.000) to[bend right=20] (-0.647,-0.890);
+  \node[font=\small, inner sep=0.5pt] at (-0.000,-0.600) {$144^\circ$};
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.566,-0.269) {$5\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (-0.788,-1.031) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.788,-1.031) {C};
+  \node[font=\small, inner sep=1.5pt] at (-0.000,-1.300) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.000,0.200) {O};
+\end{tikzpicture}

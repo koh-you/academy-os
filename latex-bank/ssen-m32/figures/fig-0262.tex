@@ -1,0 +1,18 @@
+% 0262(본책 53쪽) — 원 O, 현 AB(M 은 중점, OM⊥AB, AM=MB 같은 변 표시), AM=11 cm, AB=x cm. 답(x)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.034,0.376) -- (0.550,0.953);
+  \draw (0.000,0.000) -- (-0.242,0.664);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.129,0.705) -- (-0.088,0.593) -- (-0.201,0.552);
+  \draw[line width=0.4pt] (-0.658,0.577) -- (-0.617,0.464);
+  \draw[line width=0.4pt] (0.134,0.865) -- (0.175,0.752);
+  \draw[dashed, line width=0.4pt] (-1.034,0.376) to[bend right=22] (0.550,0.953);
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.550,1.050) {$x\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (-1.034,0.376) to[bend left=18] (-0.242,0.664);
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.550,0.350) {$11\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.000,-0.200) {O};
+  \node[font=\small, inner sep=1.5pt] at (-1.222,0.445) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.650,1.126) {B};
+  \node[font=\small, inner sep=1.5pt] at (-0.022,0.544) {M};
+\end{tikzpicture}

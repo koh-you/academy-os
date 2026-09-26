@@ -1,0 +1,4 @@
+{ "range": "13-07~136-18", "checked": 73, "ok": 72,
+  "findings": [
+    { "id": "130-71", "severity": "red", "where": "choices", "note": "원본 보기는 5개(①②③④⑤, 3+2 배치)인데 조판본에는 ③ 그래프가 통째로 빠지고 ①②④⑤ 4개만 있음. figures/fig-130-71-6.png(원문 ③ 그래프, 원 안에 ③ 번호까지 포함)가 존재하지만 items/130-71.tex 11행에서 include 되지 않음. 참고: 파일명과 실제 원 번호가 다름(-5.png=①, -3.png=②, -2.png=④, -4.png=⑤, -6.png=③).", "fix": "items/130-71.tex 11행 \\includegraphics{figures/fig-130-71-5.png}\\hspace{1em}\\includegraphics{figures/fig-130-71-3.png} 다음(또는 원본 배치대로 1행 3개)에 \\includegraphics{figures/fig-130-71-6.png} 추가해 ③을 넣고 2행은 ④⑤ 유지" }
+  ] }

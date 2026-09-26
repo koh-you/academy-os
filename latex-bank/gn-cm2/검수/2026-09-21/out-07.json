@@ -1,0 +1,11 @@
+{ "range": "141-338~161-390 (ids-07)", "checked": 68, "ok": 60,
+  "findings": [
+    { "id": "142-e2", "severity": "yellow", "where": "choices", "note": "④ 「$n$은 자연수」가 줄 끝에서 n / 은 으로 분리됨(집합 기호 안에서 줄 바뀜 · 내용은 일치)" },
+    { "id": "142-341", "severity": "yellow", "where": "choices", "note": "choices32 기본 배치에서 ③ $(A\\cup B)\\cap C=\\{3\\}$ 이 오른쪽 여백 밖으로 넘쳐 잘림", "fix": "choices_layout 을 \"ii\" 로" },
+    { "id": "147-357", "severity": "yellow", "where": "layout", "note": "1~2행 낱말 간격이 눈에 띄게 넓음(U = {…}, A = {…}, B = {…} 사이가 크게 벌어짐 · 내용은 일치)" },
+    { "id": "149-368", "severity": "yellow", "where": "passage", "note": "조건 상자에서 ㈐ 표지만 첫 줄 끝에 남고 $S(B)<S(\\comp{B})$ 가 다음 줄 가운데로 넘어감", "fix": "\\exprbox{\\begin{minipage}{0.96\\linewidth}\\raggedright ㈎ …\\\\ ㈏ …\\\\ ㈐ …\\end{minipage}} 로 세 줄 나열(rpm-cm2 0366 패턴)" },
+    { "id": "153-e10", "severity": "yellow", "where": "layout", "note": "2행의 긴 수식 $\\{(\\comp{A}\\cup\\comp{B})\\cap(A\\cup\\comp{B})\\}\\cap A=\\varnothing$ 이 안 끊겨 1행 낱말 간격이 눈에 띄게 넓음", "fix": "긴 수식을 \\centerline 별도 줄로 빼면 해소(확실치 않음)" },
+    { "id": "153-373", "severity": "yellow", "where": "layout", "note": "2행의 긴 수식 $(A\\cup B)\\cap\\comp{(B-A)}=A\\cap B$ 이 안 끊겨 1~2행 낱말 간격이 눈에 띄게 넓음", "fix": "긴 수식을 \\centerline 별도 줄로 빼면 해소(확실치 않음)" },
+    { "id": "157-378", "severity": "yellow", "where": "body", "note": "「$n(A\\cap B)=8$일 때」가 줄 끝에서 8 / 일 때 로 분리됨(내용은 일치)" },
+    { "id": "160-385", "severity": "yellow", "where": "body", "note": "「$n(A\\cap B)\\ge 7$일 때」가 줄 끝에서 7 / 일 때 로 분리됨(내용은 일치)" }
+  ] }

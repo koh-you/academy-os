@@ -1,0 +1,17 @@
+% 0487(본책 88쪽) — 좌표평면, 원점 O 를 지나는 원 C, x축과 A(2, 0), y축과 B 에서 만남, 원 위의 점 P, ∠OPA=45°, 색칠 부분(y축 왼쪽 활꼴). 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=0.75, line width=0.6pt]
+  \fill[yellow!45] (0.000,0.000) arc (225:135:1.414) -- cycle;
+  \draw[->, line width=0.5pt] (-1.0,0) -- (3.1,0) node[font=\small, below left] {$x$};
+  \draw[->, line width=0.5pt] (0,-1.0) -- (0,2.9) node[font=\small, below left] {$y$};
+  \draw (1.000,1.000) circle (1.414);
+  \fill (1.000,1.000) circle (1.2pt);
+  \draw (0.000,0.000) -- (2.329,1.484);
+  \draw (2.000,0.000) -- (2.329,1.484);
+  \draw[line width=0.4pt] (1.992,1.269) arc (-147.5:-102.5:0.400);
+  \node[font=\small, inner sep=0.5pt] at (1.973,0.976) {$45^\circ$};
+  \node[font=\small, inner sep=1pt] at (-0.198,-0.198) {O};
+  \node[font=\small, inner sep=1pt] at (2.150,-0.260) {A};
+  \node[font=\small, inner sep=1pt] at (-0.280,2.000) {B};
+  \node[font=\small, inner sep=1pt] at (1.000,1.260) {C};
+  \node[font=\small, inner sep=1pt] at (2.592,1.579) {P};
+\end{tikzpicture}

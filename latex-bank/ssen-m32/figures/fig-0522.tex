@@ -1,0 +1,22 @@
+% 0522(본책 94쪽) — 원에 내접하는 □ABCD, 호 위의 점 E, BE·CE, P=AD∩BE, 호 AE=호 DE 표시, ∠BCE=65°, ∠APE=x(색칠). 다시 그림.
+\begin{tikzpicture}[scale=1.40, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.778,0.778) -- (-0.843,-0.707) -- (0.843,-0.707) -- (0.778,0.778) -- cycle;
+  \draw (-0.843,-0.707) -- (0.000,1.100);
+  \draw (0.843,-0.707) -- (0.000,1.100);
+  \draw[line width=0.4pt] (-0.357,0.966) -- (-0.406,1.097);
+  \draw[line width=0.4pt] (-0.430,0.936) -- (-0.489,1.063);
+  \draw[line width=0.4pt] (0.430,0.936) -- (0.489,1.063);
+  \draw[line width=0.4pt] (0.357,0.966) -- (0.406,1.097);
+  \draw[line width=0.4pt] (0.707,-0.417) arc[start angle=115.000, end angle=180.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (0.337,-0.385) {$65^\circ$};
+  \fill[green!15] (-0.150,0.778) -- (-0.057,0.977) arc[start angle=65.000, end angle=180.000, radius=0.220] -- cycle;
+  \draw[line width=0.4pt] (-0.057,0.977) arc[start angle=65.000, end angle=180.000, radius=0.220];
+  \node[font=\small, inner sep=0.5pt] at (-0.376,1.132) {$x$};
+  \node[font=\small, inner sep=1.5pt] at (-0.951,0.878) {A};
+  \node[font=\small, inner sep=1.5pt] at (-0.996,-0.836) {B};
+  \node[font=\small, inner sep=1.5pt] at (0.996,-0.836) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.951,0.878) {D};
+  \node[font=\small, inner sep=1.5pt] at (0.000,1.300) {E};
+  \node[font=\small, inner sep=1.5pt] at (-0.150,0.578) {P};
+\end{tikzpicture}

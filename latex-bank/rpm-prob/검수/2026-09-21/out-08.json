@@ -1,0 +1,16 @@
+{ "range": "0526~0596", "checked": 71, "ok": 58,
+  "findings": [
+    { "id": "0532", "severity": "yellow", "where": "layout", "note": "표(5줄)보다 본문이 길어 표 아래까지 좁은 폭으로 3줄 더 이어짐 · 표 밑 빈 공간(내용·표 값은 일치)" },
+    { "id": "0534", "severity": "yellow", "where": "layout", "note": "표(5줄) 아래로 본문이 좁은 폭으로 3줄 더 이어져 표 밑 빈 공간(내용은 일치)" },
+    { "id": "0537", "severity": "yellow", "where": "layout", "note": "표(5줄) 아래로 본문이 좁은 폭으로 5줄 더 이어짐 · 빈 공간 큼(내용은 일치)" },
+    { "id": "0540", "severity": "yellow", "where": "layout", "note": "표(5줄) 아래로 본문이 좁은 폭으로 4줄 더 이어져 표 밑 빈 공간(내용은 일치)" },
+    { "id": "0541", "severity": "yellow", "where": "layout", "note": "표(4줄) 아래로 본문이 좁은 폭으로 5줄 더 이어짐(내용은 일치)" },
+    { "id": "0545", "severity": "yellow", "where": "layout", "note": "표(4줄) 아래로 본문이 좁은 폭으로 4줄 더 이어짐(내용·보기는 일치)" },
+    { "id": "0554", "severity": "yellow", "where": "layout", "note": "표(5줄) 아래로 본문이 좁은 폭으로 5줄 더 이어짐(내용은 일치)" },
+    { "id": "0572", "severity": "yellow", "where": "layout", "note": "\bogi 상자 안 ㄱ·ㄴ·ㄷ 문장이 줄바꿈될 때 내어쓰기 없이 「ㄱ.」 아래로 나옴(원문은 내어쓰기 · 내용은 일치 · 경미)" },
+    { "id": "0578", "severity": "yellow", "where": "layout", "note": "표(5줄) 아래로 본문이 좁은 폭으로 4줄 더 이어짐(내용은 일치)" },
+    { "id": "0579", "severity": "yellow", "where": "layout", "note": "표(5줄) 아래로 본문이 좁은 폭으로 6줄 더 이어짐(내용·보기는 일치)" },
+    { "id": "0581", "severity": "yellow", "where": "layout", "note": "표(5줄) 아래로 본문이 좁은 폭으로 7줄 더 이어짐(내용은 일치)" },
+    { "id": "0591", "severity": "yellow", "where": "figure", "note": "원문은 표가 첫 문장 「…다음 표와 같다.」 바로 뒤(본문 중간)에 있는데 조판본은 본문 전체 뒤에 표가 옴(표 값·본문은 일치 · 경미)" },
+    { "id": "0592", "severity": "yellow", "where": "layout", "note": "표(5줄) 아래로 본문이 좁은 폭으로 3줄 더 이어짐(내용은 일치)" }
+  ] }

@@ -1,0 +1,15 @@
+% 0234(본책 46쪽) — 평행사변형 ABCD(AB=9 cm, BC=10 cm), ∠B 에 각 표시(둔각). 스캔 삽화를 TikZ 로 다시 그림. 답(∠B)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (0,1.1); \coordinate (B) at (0.93,0); \coordinate (C) at (2.53,0); \coordinate (D) at (1.6,1.1);
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \fill[green!25] (B) -- ++(0.2,0) arc[start angle=0, end angle=130, radius=0.2] -- cycle;
+  \draw[line width=0.4pt] ($(B)+(0.2,0)$) arc[start angle=0, end angle=130, radius=0.2];
+  \draw[dashed, line width=0.4pt] (A) to[bend right=25] (B);
+  \node[font=\small] at (0.25,0.42) {$9\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (B) to[bend right=18] (C);
+  \node[font=\small] at (1.75,-0.3) {$10\,\mathrm{cm}$};
+  \node[font=\small, left] at (A) {A};
+  \node[font=\small, below] at (0.88,-0.02) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small, above] at (D) {D};
+\end{tikzpicture}

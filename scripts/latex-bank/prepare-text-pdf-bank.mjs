@@ -28,6 +28,10 @@ const whitenGray = Boolean(args["whiten-gray"]);
 const bankDir = path.resolve(args.bank);
 const packageDir = path.resolve(args.package);
 const manifest = JSON.parse(await readFile(path.join(packageDir, "manifest.json"), "utf8"));
+// OCR 판(ingest-text-pdf --ocr · 글꼴 윤곽선화 PDF): 글자 레이어가 없으므로 ingest 가 저장한 tesseract 토큰을 글자 상자로 쓴다.
+const ocrTokensPath = path.join(packageDir, "ocr-tokens.json");
+const ocrPages = existsSync(ocrTokensPath) ? JSON.parse(await readFile(ocrTokensPath, "utf8")).pages : null;
+if (ocrPages) console.log("OCR 토큰 사용(글자 레이어 없음): 윤곽선 글자 path 는 그림 뼈대에서 뺀다");
 await mkdir(path.join(bankDir, "figures"), { recursive: true });
 await mkdir(path.join(bankDir, "draft", "figures-qa"), { recursive: true });
 
@@ -64,7 +68,9 @@ for (const pageNumber of pages) {
   const page = await doc.getPage(pageNumber);
   const viewport = page.getViewport({ scale: 1 });
   const paths = await pagePathBoxes(page);
-  const allTokens = textBoxesOf(await page.getTextContent(), viewport);
+  const allTokens = ocrPages
+    ? (ocrPages[String(pageNumber)] ?? []).map((token) => ({ x0: token.x, x1: token.x + token.w, y0: token.y - token.h, y1: token.y + token.h * 0.25, h: token.h, str: token.str }))
+    : textBoxesOf(await page.getTextContent(), viewport);
   const renderScale = dpi / 72;
   const { canvas, context } = await renderPage(page, renderScale);
   // 숨은 글자(흰색·투명 렌더 — 교사용 답)는 렌더에 잉크가 없다. 그림 상자를 넓히거나 힌트 줄에 섞이지 않게 따로 둔다.
@@ -127,7 +133,7 @@ for (const pageNumber of pages) {
     const memberRegions = pageItems.filter((item) => group.members.includes(item.number_label)).map((item) => toPt(item.regions.find((region) => region.kind === "body").bbox_normalized, viewport));
     // 지시문 영역의 그림 덩어리 가운데 구성 문항 하나의 본문 영역 안에 완전히 든 것은 그 문항의 그림이다. 나머지가 그룹 그림.
     // (문항 본문 영역이 그림 자리까지 넓게 잡혀 있어도 라벨·호가 잘리지 않게 path·글자는 모두 쓴다.)
-    const clusters = findFigureClusters(paths, group.region, tokens).filter((cluster) => !memberRegions.some((region) => insideRegion(cluster, region, 3)));
+    const clusters = findFigureClusters(paths, group.region, tokens, { glyphPaths: Boolean(ocrPages) }).filter((cluster) => !memberRegions.some((region) => insideRegion(cluster, region, 3)));
     const freeTokens = tokens.filter((token) => !memberRegions.some((region) => insideRegion(token, region, 1)));
     const entry = { members: group.members, pdf_page: pageNumber, hint: textHint(freeTokens, group.region, clusters), clusters: clusters.length };
     // 그룹 그림도 사람 지정 상자를 받는다: figure-overrides.json 의 키 "g<시작>-<끝>" (예 "g0775-0776").
@@ -150,7 +156,7 @@ for (const pageNumber of pages) {
     // 번호 배지(13pt 굵은 숫자 · 영역 위쪽)의 윗변 위에서 시작하는 path 는 구역 머리띠 장식이다.
     const badge = tokens.filter((token) => insideRegion(token, region, 2) && token.h >= 12 && token.y0 < region.y0 + 30);
     const topLimit = badge.length ? Math.min(...badge.map((token) => token.y0)) : region.y0;
-    const clusters = findFigureClusters(paths, region, tokens, { topLimit });
+    const clusters = findFigureClusters(paths, region, tokens, { topLimit, glyphPaths: Boolean(ocrPages) });
     const entry = {
       pdf_page: pageNumber,
       printed_page: item.printed_page,
@@ -191,7 +197,13 @@ for (const pageNumber of pages) {
       // 덩어리가 여럿이면(보기 ①~⑤ 가 그림인 문항 · 표 + 도형) 한 상자로 합친다. 다만 합친 상자가 본문 글줄을 삼키면
       // (그림 사이에 발문이 있는 경우) 합치지 않고 큰 덩어리를 대표 그림으로, 나머지는 fig-<id>-2.png … 로 따로 둔다.
       const union = clusters.reduce(unionBox);
-      const swallows = tokens.some((token) => token.h >= 9.5 && token.str.trim().length >= 4 && insideRegion(token, union, 1) && !clusters.some((cluster) => insideRegion(token, cluster, 1)));
+      // OCR 판은 글자 토큰이 한두 글자로 잘게 쪼개지므로(「유」「리」「함수」) 덩어리 밖 본문 글자 수를 합쳐 6자 이상이면 본문이 낀 것으로 본다.
+      const between = tokens.filter((token) => insideRegion(token, union, 1) && !clusters.some((cluster) => insideRegion(token, cluster, 2)));
+      // 보기 라벨(ㄱ. ㄴ. · ①~⑤ · ⑴~⑸)은 그림 사이 글자여도 본문이 아니다 — 보기 그래프 넷을 한 상자로 합칠 때 갈라지지 않게.
+      const isLabel = (token) => /^[ㄱ-ㅎ]\.?$|^[①②③④⑤⑴⑵⑶⑷⑸⑹]$|^\(\d\)$/.test(token.str.trim());
+      const swallows = ocrPages
+        ? between.filter((token) => token.h >= 8 && !isLabel(token)).reduce((sum, token) => sum + token.str.trim().length, 0) >= 6
+        : between.some((token) => token.h >= 9.5 && token.str.trim().length >= 4);
       const area = (box) => (box.x1 - box.x0) * (box.y1 - box.y0);
       const ordered = [...clusters].sort((a, b) => area(b) - area(a));
       const main = clusters.length > 1 && swallows ? ordered[0] : union;
@@ -229,7 +241,9 @@ if (!existsSync(itemsPath)) {
     const pagesOf = manifest.items.filter((item) => item.unit_index === index).map((item) => item.printed_page);
     return { code: String(index + 1).padStart(2, "0"), title: unit.title, pages: pagesOf.length ? `${Math.min(...pagesOf)}~${Math.max(...pagesOf)}` : "", groups: [] };
   });
-  await writeFile(itemsPath, JSON.stringify({ book: args.book, source_package: path.basename(packageDir), id_style: "number", variant_level: 0, units, items: {} }, null, 1), "utf8");
+  // id 꼴: RPM 은 책 전체 네 자리(number) · 개념원리·100발100중은 「쪽-번호」(page-number).
+  const idStyle = manifest.items.some((item) => item.number_label.includes("-")) ? "page-number" : "number";
+  await writeFile(itemsPath, JSON.stringify({ book: args.book, source_package: path.basename(packageDir), id_style: idStyle, variant_level: 0, units, items: {} }, null, 1), "utf8");
   console.log(`items.json 뼈대: 단원 ${units.length}`);
 }
 console.log(`그림 크롭 ${figureCount}개 → ${path.join(bankDir, "figures")} · 힌트 ${Object.keys(draft.items).length}문항 → draft/draft.json · 확인 이미지 draft/figures-qa/`);

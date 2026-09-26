@@ -1,0 +1,16 @@
+% 0463(본책 84쪽) — 원 O, 원 위의 점 P·A·B, 현 PA·PB·AB, OA·OB, 큰 각 ∠AOB=210°, ∠PAB 표시. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (1.083,0.191) -- (-1.034,0.376) -- (-0.376,1.034) -- cycle;
+  \draw (0.000,0.000) -- (1.083,0.191);
+  \draw (0.000,0.000) -- (-1.034,0.376);
+  \fill (0.000,0.000) circle (1.2pt);
+  \fill[green!15] (1.083,0.191) -- (0.789,0.361) arc (150.0:175.0:0.340) -- cycle;
+  \draw[line width=0.4pt] (0.789,0.361) arc (150.0:175.0:0.340);
+  \draw[line width=0.4pt] (-0.226,0.082) arc (160.0:370.0:0.240);
+  \node[font=\small, inner sep=0.5pt] at (-0.044,-0.498) {$210^\circ$};
+  \node[font=\small, inner sep=1pt] at (1.280,0.226) {A};
+  \node[font=\small, inner sep=1pt] at (-1.222,0.445) {B};
+  \node[font=\small, inner sep=1pt] at (-0.445,1.222) {P};
+  \node[font=\small, inner sep=1pt] at (-0.038,0.217) {O};
+\end{tikzpicture}

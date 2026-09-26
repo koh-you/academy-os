@@ -1,0 +1,24 @@
+% 0421(본책 77쪽) — 원 O, 현 AB·AD·CB·CD, OB·OD, ∠BCD=128°, ∠BAD=x, 큰 각 ∠BOD=y. 답은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (0.000,1.100) -- (-0.901,-0.631);
+  \draw (0.000,1.100) -- (0.901,-0.631);
+  \draw (0.000,0.000) -- (-0.901,-0.631);
+  \draw (0.000,0.000) -- (0.901,-0.631);
+  \draw (-0.000,-1.100) -- (-0.901,-0.631);
+  \draw (-0.000,-1.100) -- (0.901,-0.631);
+  \fill (0.000,0.000) circle (1.2pt);
+  \fill[green!15] (0.000,1.100) -- (-0.139,0.834) arc (242.5:297.5:0.300) -- cycle;
+  \draw[line width=0.4pt] (-0.139,0.834) arc (242.5:297.5:0.300);
+  \fill[yellow!30] (0.000,0.000) -- (0.180,-0.126) arc (325.0:575.0:0.220) -- cycle;
+  \draw[line width=0.4pt] (0.180,-0.126) arc (325.0:575.0:0.220);
+  \draw[line width=0.4pt] (0.222,-0.985) arc (27.5:152.5:0.250);
+  \node[font=\small, inner sep=0.5pt] at (-0.000,0.600) {$x$};
+  \node[font=\small, inner sep=0.5pt] at (0.000,0.420) {$y$};
+  \node[font=\small, inner sep=0.5pt] at (-0.000,-0.600) {$128^\circ$};
+  \node[font=\small, inner sep=1.5pt] at (0.000,1.300) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.065,-0.746) {B};
+  \node[font=\small, inner sep=1.5pt] at (1.065,-0.746) {D};
+  \node[font=\small, inner sep=1.5pt] at (-0.000,-1.300) {C};
+  \node[font=\small, inner sep=1.5pt] at (-0.000,-0.200) {O};
+\end{tikzpicture}

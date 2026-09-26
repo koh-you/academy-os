@@ -1,0 +1,8 @@
+{ "range": "137-05~149-01", "checked": 74, "ok": 69,
+  "findings": [
+    { "id": "138-10", "severity": "yellow", "where": "layout", "note": "배점 표시 \"[3점]\"이 줄바꿈으로 \"[3\"과 \"점]\"으로 갈라짐" },
+    { "id": "140-21", "severity": "yellow", "where": "layout", "note": "배점 표시 \"[5점]\"이 줄바꿈으로 \"[5\"와 \"점]\"으로 갈라짐" },
+    { "id": "140-22", "severity": "yellow", "where": "layout", "note": "배점 표시 \"[7점]\"이 줄바꿈으로 \"[7\"과 \"점]\"으로 갈라짐" },
+    { "id": "140-23", "severity": "yellow", "where": "layout", "note": "배점 표시 \"[5점]\"이 줄바꿈으로 \"[5\"와 \"점]\"으로 갈라짐" },
+    { "id": "145-01", "severity": "yellow", "where": "layout", "note": "배점 표시 \"[3점]\"이 줄바꿈으로 \"[3\"과 \"점]\"으로 갈라짐" }
+  ] }

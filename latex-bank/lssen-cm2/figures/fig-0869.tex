@@ -1,0 +1,15 @@
+% 0869(본책 119쪽) — 전체집합 U 안의 두 집합 P·Q 벤 다이어그램: 영역마다 원소 a(P만)·b(P∩Q)·c(Q만)·d·e(바깥 좌·우). 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 U·P·Q·a·b·c·d·e 만. 색칠 없음. 답(c)은 표시하지 않는다.
+\begin{tikzpicture}[scale=0.8, line width=0.5pt, every node/.style={font=\small}]
+  \draw[line width=0.6pt, rounded corners=3pt] (-2.4,-1.5) rectangle (2.4,1.5);
+  \node[fill=white, inner sep=1.5pt] at (-1.9,1.5) {$U$};
+  \draw[line width=0.6pt] (-0.55,0) circle (1.05);
+  \draw[line width=0.6pt] (0.55,0) circle (1.05);
+  \node at (-0.75,1.25) {$P$};
+  \node at (0.75,1.25) {$Q$};
+  \node at (-1.05,0) {$a$};
+  \node at (0,0) {$b$};
+  \node at (1.05,0) {$c$};
+  \node at (-1.95,0.35) {$d$};
+  \node at (1.95,0.35) {$e$};
+\end{tikzpicture}

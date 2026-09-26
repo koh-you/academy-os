@@ -1,0 +1,16 @@
+% 0455(본책 82쪽) — 원, 원 위의 점 A·B·C·D, AB=BC(호 표시), 현 DA·DB·DC·AC·AB·BC, E=AC∩BD. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.034,-0.376) -- (0.000,1.100) -- (1.034,-0.376) -- cycle;
+  \draw (0.000,1.100) -- (-0.000,-1.100);
+  \draw (-1.034,-0.376) -- (-0.000,-1.100);
+  \draw (-0.000,-1.100) -- (1.034,-0.376);
+  \draw (-1.034,-0.376) -- (1.034,-0.376);
+  \draw[line width=0.4pt] (-0.591,-0.844) -- (-0.671,-0.958);
+  \draw[line width=0.4pt] (0.591,-0.844) -- (0.671,-0.958);
+  \node[font=\small, inner sep=1pt] at (-1.231,-0.411) {A};
+  \node[font=\small, inner sep=1pt] at (-0.000,-1.300) {B};
+  \node[font=\small, inner sep=1pt] at (1.231,-0.411) {C};
+  \node[font=\small, inner sep=1pt] at (0.000,1.300) {D};
+  \node[font=\small, inner sep=1pt] at (0.141,-0.235) {E};
+\end{tikzpicture}

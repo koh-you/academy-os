@@ -1,0 +1,24 @@
+% 0480(본책 74쪽) — 직사각형 OABC(색칠)와 그것을 x축 방향 6·y축 방향 5 만큼 평행이동한 직사각형 O'A'B'C', B→O' 화살표, C'·A' 에서 축까지의 파선. 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 O·A·B·C·O'·A'·B'·C'·x·y·8·11 만. A·B·C 의 좌표(답 관련)는 적지 않는다.
+\begin{tikzpicture}[scale=0.32, line width=0.5pt]
+  \coordinate (O) at (0,0); \coordinate (A) at (5,0); \coordinate (B) at (5,3); \coordinate (C) at (0,3);
+  \coordinate (Op) at (6,5); \coordinate (Ap) at (11,5); \coordinate (Bp) at (11,8); \coordinate (Cp) at (6,8);
+  \fill[yellow!35] (O) -- (A) -- (B) -- (C) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-1.4,0) -- (13.4,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.4) -- (0,10.2) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (O) -- (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.6pt] (Op) -- (Ap) -- (Bp) -- (Cp) -- cycle;
+  \draw[->, >=stealth, line width=0.5pt] (B) -- (Op);
+  \draw[dashed, line width=0.4pt] (Cp) -- (0,8);
+  \draw[dashed, line width=0.4pt] (Ap) -- (11,0);
+  \node[below left=-2pt, font=\small] at (O) {$\mathrm{O}$};
+  \node[below=1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[right=1pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[left=1pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[left=1pt, font=\small] at (Op) {$\mathrm{O}'$};
+  \node[right=1pt, font=\small] at (Ap) {$\mathrm{A}'$};
+  \node[right=1pt, font=\small] at (Bp) {$\mathrm{B}'$};
+  \node[above=1pt, font=\small] at (Cp) {$\mathrm{C}'$};
+  \node[left=1pt, font=\small] at (0,8) {$8$};
+  \node[below=1pt, font=\small] at (11,0) {$11$};
+\end{tikzpicture}

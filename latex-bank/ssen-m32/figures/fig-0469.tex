@@ -1,0 +1,14 @@
+% 0469(본책 85쪽) — 원에 내접하는 △ABC, ∠BAC=a°, ∠ABC=b°, ∠BCA=c°. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-0.191,1.083) -- (-1.100,0.000) -- (0.550,-0.953) -- cycle;
+  \draw[line width=0.4pt] (-0.384,0.853) arc (-130.0:-70.0:0.300);
+  \node[font=\small, inner sep=0.5pt] at (-0.278,0.591) {$a^\circ$};
+  \draw[line width=0.4pt] (-0.840,-0.150) arc (-30.0:50.0:0.300);
+  \node[font=\small, inner sep=0.5pt] at (-0.608,0.087) {$b^\circ$};
+  \draw[line width=0.4pt] (0.434,-0.633) arc (110.0:150.0:0.340);
+  \node[font=\small, inner sep=0.5pt] at (0.190,-0.524) {$c^\circ$};
+  \node[font=\small, inner sep=1pt] at (-0.226,1.280) {A};
+  \node[font=\small, inner sep=1pt] at (-1.300,0.000) {B};
+  \node[font=\small, inner sep=1pt] at (0.650,-1.126) {C};
+\end{tikzpicture}

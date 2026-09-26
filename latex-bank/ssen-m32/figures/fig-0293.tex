@@ -1,0 +1,19 @@
+% 0293(본책 56쪽) — 원 O, 지름 AB=10 cm, 현 CD=4 cm, △COD 색칠. 답(넓이)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \fill[green!25] (-0.686,0.860) -- (0.000,0.000) -- (0.164,1.088) -- cycle;
+  \draw (0.000,0.000) circle (1.100);
+  \draw (-1.100,0.000) -- (1.100,0.000);
+  \draw (-0.686,0.860) -- (0.164,1.088);
+  \draw (0.000,0.000) -- (-0.686,0.860);
+  \draw (0.000,0.000) -- (0.164,1.088);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (-1.100,0.000) to[bend right=15] (1.100,0.000);
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.150,-0.340) {$10\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (-0.686,0.860) to[bend right=22] (0.164,1.088);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.450,0.620) {$4\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.200,0.160) {O};
+  \node[font=\small, inner sep=1.5pt] at (-1.300,0.000) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.300,0.000) {B};
+  \node[font=\small, inner sep=1.5pt] at (-0.811,1.016) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.194,1.285) {D};
+\end{tikzpicture}

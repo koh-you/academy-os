@@ -1,0 +1,16 @@
+% 0001~0002 공통 그림(본책 9쪽) — 직각삼각형 ABC(∠C=90°), AB=13 · BC=5 · AC=12. 스캔 삽화를 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(세 변의 길이·꼭짓점 A, B, C·직각 표시). 답(삼각비 값)은 적지 않는다.
+\begin{tikzpicture}[scale=0.28, line width=0.6pt]
+  \coordinate (A) at (0,0); \coordinate (B) at (12,5); \coordinate (C) at (12,0);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] (11.2,0) -- (11.2,0.8) -- (12,0.8);
+  \draw[dashed, line width=0.3pt] (A) to[bend left=18] (B);
+  \draw[dashed, line width=0.3pt] (A) to[bend right=18] (C);
+  \draw[dashed, line width=0.3pt] (B) to[bend left=35] (C);
+  \node[font=\small, left] at (A) {A};
+  \node[font=\small, above] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+  \node[font=\small] at (5.6,3.6) {$13$};
+  \node[font=\small] at (6,-1.4) {$12$};
+  \node[font=\small] at (13.4,2.5) {$5$};
+\end{tikzpicture}

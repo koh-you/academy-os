@@ -1,0 +1,19 @@
+% 0485(본책 87쪽) — 원, 호 AB·BC·CA 의 중점 D·E·F, 현 AB·AC·DE·EF, ∠DEF=58°, ∠BAC=x. 스캔 삽화를 TikZ 로 다시 그림. 답은 적지 않는다.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (0.376,1.034) -- (-1.099,-0.038);
+  \draw (0.376,1.034) -- (0.707,-0.843);
+  \draw (-0.647,0.890) -- (-0.447,-1.005);
+  \draw (-0.447,-1.005) -- (1.083,0.191);
+  \fill[yellow!40] (0.376,1.034) -- (0.134,0.857) arc (-144.0:-80.0:0.300) -- cycle;
+  \draw[line width=0.4pt] (0.134,0.857) arc (-144.0:-80.0:0.300);
+  \node[font=\small, inner sep=0.5pt] at (0.189,0.570) {$x$};
+  \draw[line width=0.4pt] (-0.211,-0.820) arc (38.0:96.0:0.300);
+  \node[font=\small, inner sep=0.5pt] at (-0.229,-0.489) {$58^\circ$};
+  \node[font=\small, inner sep=1pt] at (0.445,1.222) {A};
+  \node[font=\small, inner sep=1pt] at (-1.299,-0.045) {B};
+  \node[font=\small, inner sep=1pt] at (0.836,-0.996) {C};
+  \node[font=\small, inner sep=1pt] at (-0.764,1.052) {D};
+  \node[font=\small, inner sep=1pt] at (-0.529,-1.188) {E};
+  \node[font=\small, inner sep=1pt] at (1.280,0.226) {F};
+\end{tikzpicture}

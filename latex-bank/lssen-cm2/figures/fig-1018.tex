@@ -1,0 +1,14 @@
+% 1018(본책 141쪽) — 모눈 좌표평면(x·y 각 −5~5, 눈금 라벨 −4·−2·2·4) 위의 직선 y=−(1/2)x 와 y=x. 역함수 그래프(답)는 그리지 않는다. 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 x·y·O·눈금·y=x·y=−(1/2)x 만.
+\begin{tikzpicture}[scale=0.32, line width=0.5pt, every node/.style={font=\scriptsize}]
+  \draw[gray!60, line width=0.3pt] (-5,-5) grid (5,5);
+  \draw[->, >=stealth, line width=0.7pt] (-5,0) -- (5.5,0) node[below left=-1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-5) -- (0,5.6) node[left=-1pt] {$y$};
+  \node[below left=-2pt] at (0,0) {$\mathrm{O}$};
+  \foreach \x in {-4,-2,2,4} \node[below=-1pt] at (\x,0) {$\x$};
+  \foreach \y in {-4,-2,2,4} \node[left=-1pt] at (0,\y) {$\y$};
+  \draw[line width=0.6pt] (-5,-5) -- (5,5);
+  \draw[line width=0.6pt] (-5,2.5) -- (5,-2.5);
+  \node[right=0pt] at (5,5) {$y=x$};
+  \node[right=-1pt] at (5,-3.2) {$y=-\dfrac{1}{2}x$};
+\end{tikzpicture}

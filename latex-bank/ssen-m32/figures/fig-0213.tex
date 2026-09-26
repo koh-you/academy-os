@@ -1,0 +1,12 @@
+% 0213(본책 43쪽) — △ABC(∠C=30°, BC=12 cm). 스캔 삽화를 TikZ 로 다시 그림. 답(AC)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (C) at (2.3,0); \coordinate (A) at (0.32,1.15);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] (1.85,0) arc[start angle=180, end angle=150, radius=0.45];
+  \node[font=\small] at (1.62,0.2) {$30^\circ$};
+  \draw[dashed, line width=0.4pt] (B) to[bend right=12] (C);
+  \node[font=\small, fill=white, inner sep=1pt] at (1.15,-0.22) {$12\,\mathrm{cm}$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, right] at (C) {C};
+\end{tikzpicture}

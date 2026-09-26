@@ -1,0 +1,23 @@
+% 0104(본책 23쪽) — 반지름 r·중심각 a 부채꼴 AOB, A 에서 OB 에 내린 수선의 발 H, B 에서 세운 접선 위의 점 T(OA 의 연장선과 만남). 라벨 O·A·B·H·T·r(파선 호)·a, 직각 표시(H·B). 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=2.6, line width=0.6pt]
+  \coordinate (O) at (0,0); \coordinate (B) at (1,0); \coordinate (A) at (0.7660,0.6428); \coordinate (H) at (0.7660,0); \coordinate (T) at (1,0.8391);
+  \draw (O) -- (B);
+  \draw (O) -- (T);
+  \draw (A) -- (H);
+  \draw (B) -- (T);
+  \draw (B) arc[start angle=0, end angle=40, radius=1];
+  % 직각 표시
+  \draw[line width=0.4pt] (0.7660,0.06) -- (0.7060,0.06) -- (0.7060,0);
+  \draw[line width=0.4pt] (1,0.06) -- (0.94,0.06) -- (0.94,0);
+  % 중심각 a
+  \draw[line width=0.4pt] (0.2,0) arc[start angle=0, end angle=40, radius=0.2];
+  \node[font=\small] at (0.3,0.1) {$a$};
+  % 반지름 r(파선 호)
+  \draw[dashed, line width=0.4pt] (O) to[bend left=22] (A);
+  \node[font=\small] at (0.3,0.42) {$r$};
+  \node[font=\small, below left] at (O) {O};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, below] at (H) {H};
+  \node[font=\small, below right] at (B) {B};
+  \node[font=\small, above] at (T) {T};
+\end{tikzpicture}

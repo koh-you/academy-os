@@ -1,0 +1,22 @@
+% 0273(본책 53쪽) — 원 O, 현 AB=16 cm 와 중심에서 AB 까지 x cm, 현 CD 와 중심에서 CD 까지 7 cm, C 에서 CD 의 중점까지 8 cm. 답(x)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (0.191,1.083) -- (-1.063,-0.285);
+  \draw (-0.465,-0.997) -- (1.034,-0.376);
+  \draw (0.000,0.000) -- (-0.436,0.399);
+  \draw (0.000,0.000) -- (0.284,-0.687);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (-0.355,0.488) -- (-0.266,0.407) -- (-0.347,0.318);
+  \draw[line width=0.4pt] (0.395,-0.641) -- (0.349,-0.530) -- (0.238,-0.576);
+  \draw[dashed, line width=0.4pt] (0.191,1.083) to[bend right=25] (-1.063,-0.285);
+  \node[font=\small, fill=white, inner sep=1pt] at (-0.950,0.850) {$16\,\mathrm{cm}$};
+  \node[font=\small, fill=white, inner sep=1pt] at (0.120,0.420) {$x\,\mathrm{cm}$};
+  \node[font=\small, fill=white, inner sep=1pt] at (0.300,-0.350) {$7\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (-0.465,-0.997) to[bend right=25] (0.284,-0.687);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.050,-1.000) {$8\,\mathrm{cm}$};
+  \node[font=\small, inner sep=1.5pt] at (0.180,0.020) {O};
+  \node[font=\small, inner sep=1.5pt] at (0.226,1.280) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.256,-0.336) {B};
+  \node[font=\small, inner sep=1.5pt] at (-0.549,-1.178) {C};
+  \node[font=\small, inner sep=1.5pt] at (1.222,-0.445) {D};
+\end{tikzpicture}

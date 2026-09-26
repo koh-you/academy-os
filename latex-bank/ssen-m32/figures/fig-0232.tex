@@ -1,0 +1,14 @@
+% 0232(본책 46쪽) — 한 변 8 cm 인 마름모 ABCD(∠B=45°). 스캔 삽화를 TikZ 로 다시 그림. 답(넓이)은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (B) at (0,0); \coordinate (A) at (0.96,0.4); \coordinate (D) at (1.92,0); \coordinate (C) at (0.96,-0.4);
+  \fill[yellow!40] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[line width=0.4pt] ($(B)+(-22.5:0.3)$) arc[start angle=-22.5, end angle=22.5, radius=0.3];
+  \node[font=\small] at (0.5,0) {$45^\circ$};
+  \draw[dashed, line width=0.4pt] (B) to[bend left=25] (A);
+  \node[font=\small] at (0.35,0.42) {$8\,\mathrm{cm}$};
+  \node[font=\small, above] at (A) {A};
+  \node[font=\small, left] at (B) {B};
+  \node[font=\small, below] at (C) {C};
+  \node[font=\small, right] at (D) {D};
+\end{tikzpicture}

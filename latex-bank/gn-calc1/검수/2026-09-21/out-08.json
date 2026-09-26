@@ -1,0 +1,19 @@
+{ "range": "188-381~213-436", "checked": 68, "ok": 53,
+  "findings": [
+    { "id": "189-382", "severity": "yellow", "where": "layout", "note": "둘째 줄 글자 사이가 크게 벌어짐(양쪽 정렬 늘어짐)(내용은 일치)" },
+    { "id": "189-383", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 사이가 크게 벌어짐(양쪽 정렬 늘어짐)(내용은 일치)" },
+    { "id": "194-e10", "severity": "yellow", "where": "subs", "note": "⑴⑵ 첫 줄 글자 사이가 크게 벌어짐(양쪽 정렬 늘어짐)(내용은 일치)" },
+    { "id": "194-397", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 사이가 크게 벌어짐(양쪽 정렬 늘어짐)(내용은 일치)" },
+    { "id": "195-e11", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 사이가 크게 벌어짐(양쪽 정렬 늘어짐)(내용은 일치)" },
+    { "id": "195-398", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 사이가 크게 벌어짐(양쪽 정렬 늘어짐)(내용은 일치)" },
+    { "id": "195-399", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 사이가 크게 벌어짐(양쪽 정렬 늘어짐)(내용은 일치)" },
+    { "id": "199-406", "severity": "yellow", "where": "body", "note": "낱장(110mm) 조판에서 첫 줄 인라인 수식이 22.6pt overfull — 끝의 「}²」 지수 2가 쪽 밖으로 나가 review·export 그림에서 안 보임(_single 재조판으로 확인 · book.pdf 전폭에서는 정상 · items.json 내용은 원본과 일치)", "fix": "body 를 「함수 $f(x)$에 대하여 \\par\\smallskip\\noindent\\hspace*{1.5em}$f(x)=\\dfrac{12}{7}x^2-2x\\displaystyle\\int_{1}^{2}f(t)\\,dt+\\left\\{\\int_{1}^{2}f(t)\\,dt\\right\\}^2$\\par\\smallskip\\noindent 일 때, $f(7)$의 값을 구하시오.」 로 바꿔 407·408 처럼 수식을 별도 줄에 둔다(원본도 「일 때」가 둘째 줄)" },
+    { "id": "200-413", "severity": "yellow", "where": "body", "note": "조건 상자에서 ㈎㈏를 \\qquad 로 한 줄에 두어 좁은 낱장 폭에서 「㈏」 표시만 첫 줄 끝에 남고 그 수식은 다음 줄로 밀림(내용은 일치)", "fix": "exprbox 안의 「 \\qquad ㈏ 」 를 「\\\\[1mm] ㈏ 」 로 바꿔 390·391 처럼 ㈏를 둘째 줄에 둔다" },
+    { "id": "201-420", "severity": "yellow", "where": "layout", "note": "첫 줄 글자·수식 사이가 벌어짐(양쪽 정렬 늘어짐 · 정도 약함)(내용은 일치)" },
+    { "id": "207-422", "severity": "yellow", "where": "layout", "note": "그림 옆 0.58 폭 본문에서 「$x$축으로」가 「x」/「축으로」로 줄이 갈라짐(내용은 일치)", "fix": "body 의 「$x$축으로」 를 「\\mbox{$x$축}으로」 로(rpm-alg 의 \\mbox{$x$축} 선례)" },
+    { "id": "207-423", "severity": "yellow", "where": "body", "note": "과정 상자 안 「교점의 $x$좌표는」이 「x」/「좌표는」으로 줄이 갈라짐(정도 약함 · 내용은 일치)", "fix": "exprbox 안의 「$x$좌표는」 을 「\\mbox{$x$좌표}는」 으로" },
+    { "id": "207-424", "severity": "yellow", "where": "body", "note": "과정 상자 안 「교점의 $x$좌표는」이 「x」/「좌표는」으로 줄이 갈라짐(정도 약함 · 내용은 일치)", "fix": "exprbox 안의 「$x$좌표는」 을 「\\mbox{$x$좌표}는」 으로" },
+    { "id": "211-432", "severity": "yellow", "where": "layout", "note": "첫 줄에 2단 cases 가 있어 번호 「432.」가 본문 기준선보다 반 줄쯤 위에 찍힘(내용은 일치 · build 단계)" },
+    { "id": "212-433", "severity": "yellow", "where": "layout", "note": "「$y$축으로」가 첫 줄 끝 「y」/둘째 줄 「축으로」로 갈라짐(내용은 일치)", "fix": "body 의 「$y$축으로」 를 「\\mbox{$y$축}으로」 로" }
+  ],
+  "notes": "red 없음. 68문항 모두 원본 크롭(수치·부호·적분 구간·조건·보기·소문항 수·빈칸 상자 수·그림)과 조판본 내용이 일치. 예제(e9~e14, e1~e6)는 상자 발문만 전사된 것이 정상이며 설명·풀이·KEY Point·RPM 안내는 대상 아님. 태그(교육청·수능·평가원 기출 · 확인체크)와 STEP 띠(p190 실력 UP · p189/p200/p201 STEP 2·실력 UP 전환)도 쪽 이미지와 일치. yellow 중 벌어짐·번호 기준선(382·383·e10·397·e11·398·399·420·432)은 build 단계(한글 양쪽 정렬 + 줄바꿈 안 되는 인라인 수식) 문제로 items.json 수정 대상 아님. 406(지수 잘림)·413(㈏ 고아)·422/423/424/433(x축·y축·x좌표 줄 갈라짐)은 fix 대로 items.json 을 고치면 해결. 381·385·405 등 첫 줄 적분·lim 으로 번호가 약간 위에 찍히는 경미한 경우와, 5지선다 391·415·421 의 3+2 보기 배치(build 기본 choices32)는 개별 기록하지 않음. 401·417·e2·427·435 의 크롭 그림은 원본과 같음." }

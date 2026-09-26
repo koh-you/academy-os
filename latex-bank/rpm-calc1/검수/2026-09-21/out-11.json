@@ -1,0 +1,20 @@
+{ "range": "0741~0814", "checked": 74, "ok": 62,
+  "findings": [
+    { "id": "0741", "severity": "yellow", "where": "layout", "note": "2·3째 줄 단어 간격이 벌어짐(「f(-x)  =  -f(x),  g(-x)  =  g(x) 를」) · 내용은 일치", "fix": "f(-x)=-f(x), g(-x)=g(x) 를 \\par\\smallskip\\noindent\\hspace*{1.5em}$…$\\par\\smallskip\\noindent 로 별도 줄에 놓기(원문도 별도 줄)" },
+    { "id": "0744", "severity": "yellow", "where": "body", "note": "첫 줄 수식이 오른쪽 여백을 넘어 「{∫f(t)dt}²」의 지수 2 가 잘림 · 내용은 일치", "fix": "body 의 f(x)=… 등식을 \\par\\smallskip\\noindent\\hspace*{1.5em}$…$\\par\\smallskip\\noindent 로 별도 줄에 놓기(원문도 별도 줄)" },
+    { "id": "0751", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 간격이 크게 벌어짐(「다 항 함 수  f(x) 가  모 든  실 수」) · 내용은 일치", "fix": "xf(x)=… 등식을 \\par\\smallskip\\noindent\\hspace*{1.5em}$…$\\par\\smallskip\\noindent 로 별도 줄에 놓기(원문도 별도 줄)" },
+    { "id": "0752", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 간격이 크게 벌어지고 ∫ 아래첨자 a 가 셋째 줄 「때」와 겹침 · 내용은 일치", "fix": "∫ 등식을 \\par\\smallskip\\noindent\\hspace*{1.5em}$…$\\par\\smallskip\\noindent 로 별도 줄에 놓기(원문도 별도 줄)" },
+    { "id": "0753", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 간격이 크게 벌어짐 · 내용은 일치", "fix": "∫ 등식을 별도 줄로(0752 와 같은 방식)" },
+    { "id": "0755", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 간격이 크게 벌어지고 ∫ 아래첨자 2 가 셋째 줄 「수」와 겹침 · 내용은 일치", "fix": "∫ 등식을 별도 줄로(0752 와 같은 방식)" },
+    { "id": "0757", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 간격이 크게 벌어짐(「함 수  f(x)  =  x³  +  5x  +  a 에」) · 내용은 일치", "fix": "lim 식 앞에 \\par\\smallskip\\noindent\\hspace*{1.5em} 를 넣어 둘째 줄부터 시작(원문 배치)" },
+    { "id": "0759", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 간격이 벌어짐 · 내용은 일치", "fix": "lim 식 앞에 \\par\\smallskip\\noindent\\hspace*{1.5em}(0757 과 같은 방식)" },
+    { "id": "0770", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 간격이 크게 벌어지고 ∫ 아래첨자 1 이 셋째 줄과 겹침 · 내용은 일치", "fix": "∫ 등식을 별도 줄로(0752 와 같은 방식)" },
+    { "id": "0772", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 간격이 크게 벌어짐 · 내용은 일치", "fix": "f(x)=… 등식을 별도 줄로(0752 와 같은 방식)" },
+    { "id": "0773", "severity": "yellow", "where": "layout", "note": "첫 줄 글자 간격이 크게 벌어지고 ∫ 아래첨자 0 이 셋째 줄과 겹침 · 내용은 일치", "fix": "∫ 등식을 별도 줄로(0752 와 같은 방식)" },
+    { "id": "0799", "severity": "yellow", "where": "layout", "note": "셋째 줄 단어 간격이 벌어짐(「함수  h(x)  =  f(x)g(x) 에  대하여」) · 내용은 일치" }
+  ],
+  "notes": [
+    "0764: review 크롭 없음 → qa/p117.jpg(ids 목록의 p116 이 아니라 p117) 와 해설 solution-p106 으로 대조, 적분 구간 -1~2 · -1~11 일치",
+    "0768: review 크롭이 왼쪽 반쪽만 잘린 불량 크롭 → qa/p117.jpg 로 대조, 일치",
+    "0792: review 크롭이 보기 위에서 잘림 → qa/p120.jpg 로 보기 ①-2 ②-1 ③0 ④1 ⑤2 대조, 일치"
+  ] }

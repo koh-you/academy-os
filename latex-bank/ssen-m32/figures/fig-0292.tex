@@ -1,0 +1,17 @@
+% 0292(본책 56쪽) — 중심이 O 로 같은 두 원, 큰 원의 현 AB=24 cm 와 같은 직선 위의 작은 원의 현 CD=14 cm. 답(AC)은 적지 않는다. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (0.000,0.000) circle (0.720);
+  \draw (-1.017,-0.420) -- (1.017,-0.420);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[dashed, line width=0.4pt] (-1.017,-0.420) to[bend left=15] (1.017,-0.420);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.000,-0.220) {$24\,\mathrm{cm}$};
+  \draw[dashed, line width=0.4pt] (-0.585,-0.420) to[bend right=22] (0.585,-0.420);
+  \node[font=\small, fill=white, inner sep=1pt] at (0.880,-0.950) {$14\,\mathrm{cm}$};
+  \draw[line width=0.4pt] (0.08,-0.54) -- (0.55,-0.86);
+  \node[font=\small, inner sep=1.5pt] at (0.000,0.200) {O};
+  \node[font=\small, inner sep=1.5pt] at (-1.217,-0.420) {A};
+  \node[font=\small, inner sep=1.5pt] at (1.217,-0.420) {B};
+  \node[font=\small, inner sep=1.5pt] at (-0.535,-0.580) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.535,-0.580) {D};
+\end{tikzpicture}

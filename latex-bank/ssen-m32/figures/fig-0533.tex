@@ -1,0 +1,22 @@
+% 0533(본책 96쪽) — 원 O 에 내접하는 오각형 ABCDE, OA·OB, ∠AOB=72°, ∠C=x·∠E=y(색칠). 다시 그림.
+\begin{tikzpicture}[scale=1.39, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (0.000,1.100) -- (-1.046,0.340) -- (-0.647,-0.890) -- (0.647,-0.890) -- (1.046,0.340) -- cycle;
+  \draw (0.000,0.000) -- (0.000,1.100);
+  \draw (0.000,0.000) -- (-1.046,0.340);
+  \fill (0.000,0.000) circle (1.2pt);
+  \draw[line width=0.4pt] (0.000,0.320) arc[start angle=90.000, end angle=162.000, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (-0.353,0.485) {$72^\circ$};
+  \fill[green!15] (-0.647,-0.890) -- (-0.407,-0.890) arc[start angle=-0.000, end angle=108.000, radius=0.240] -- cycle;
+  \draw[line width=0.4pt] (-0.407,-0.890) arc[start angle=-0.000, end angle=108.000, radius=0.240];
+  \node[font=\small, inner sep=0.5pt] at (-0.388,-0.534) {$x$};
+  \fill[yellow!30] (1.046,0.340) -- (0.852,0.481) arc[start angle=144.000, end angle=252.000, radius=0.240] -- cycle;
+  \draw[line width=0.4pt] (0.852,0.481) arc[start angle=144.000, end angle=252.000, radius=0.240];
+  \node[font=\small, inner sep=0.5pt] at (0.628,0.204) {$y$};
+  \node[font=\small, inner sep=1.5pt] at (0.000,1.300) {A};
+  \node[font=\small, inner sep=1.5pt] at (-1.236,0.402) {B};
+  \node[font=\small, inner sep=1.5pt] at (-0.764,-1.052) {C};
+  \node[font=\small, inner sep=1.5pt] at (0.764,-1.052) {D};
+  \node[font=\small, inner sep=1.5pt] at (1.236,0.402) {E};
+  \node[font=\small, inner sep=1.5pt] at (-0.000,-0.200) {O};
+\end{tikzpicture}

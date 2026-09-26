@@ -1,0 +1,17 @@
+% 0201(본책 41쪽) — △ABC(∠A=35°, ∠B=70°, AB=10), CH⊥AB. 스캔 삽화를 TikZ 로 다시 그림.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (0,0); \coordinate (B) at (3,0); \coordinate (H) at (2.39,0); \coordinate (C) at (2.39,1.674);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (C) -- (H);
+  \draw[line width=0.4pt] (2.17,0) -- (2.17,0.22) -- (2.39,0.22);
+  \draw[line width=0.4pt] (0.55,0) arc[start angle=0, end angle=35, radius=0.55];
+  \node[font=\small] at (0.9,0.28) {$35^\circ$};
+  \draw[line width=0.4pt] (2.65,0) arc[start angle=180, end angle=110, radius=0.35];
+  \node[font=\small] at (3.05,0.7) {$70^\circ$};
+  \draw[dashed, line width=0.4pt] (A) to[bend right=15] (B);
+  \node[font=\small] at (1.5,-0.45) {$10$};
+  \node[font=\small, above] at (C) {C};
+  \node[font=\small, left] at (A) {A};
+  \node[font=\small, right] at (B) {B};
+  \node[font=\small, below] at (H) {H};
+\end{tikzpicture}

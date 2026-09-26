@@ -1,0 +1,18 @@
+% 0493(본책 91쪽) — 네 점 A·B·C·D, AB·AC·DB·DC(AC 와 BD 가 교차), ∠BAC=75°, 교점에서 ∠BXC=95°, ∠ACD=x(색칠). 다시 그림.
+\begin{tikzpicture}[scale=1.40, line width=0.6pt]
+  \draw (-0.096,1.096) -- (-1.100,0.000);
+  \draw (-0.096,1.096) -- (0.953,-0.550);
+  \draw (0.631,0.901) -- (-1.100,0.000);
+  \draw (0.631,0.901) -- (0.953,-0.550);
+  \draw[line width=0.4pt] (-0.312,0.860) arc[start angle=-132.500, end angle=-57.500, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (-0.148,0.498) {$75^\circ$};
+  \draw[line width=0.4pt] (-0.017,0.564) arc[start angle=-152.500, end angle=-57.500, radius=0.220];
+  \node[font=\small, inner sep=0.5pt] at (0.049,0.182) {$95^\circ$};
+  \fill[green!15] (0.953,-0.550) -- (0.883,-0.238) arc[start angle=102.500, end angle=122.500, radius=0.320] -- cycle;
+  \draw[line width=0.4pt] (0.883,-0.238) arc[start angle=102.500, end angle=122.500, radius=0.320];
+  \node[font=\small, inner sep=0.5pt] at (0.761,-0.088) {$x$};
+  \node[font=\small, inner sep=1.5pt] at (-0.096,1.296) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.631,1.101) {D};
+  \node[font=\small, inner sep=1.5pt] at (-1.241,-0.141) {B};
+  \node[font=\small, inner sep=1.5pt] at (1.053,-0.723) {C};
+\end{tikzpicture}

@@ -1,0 +1,18 @@
+% 0185(본책 32쪽) — 점 A(-3,4)에서 직선 x-3y+5=0 에 내린 수선의 발 H. 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·H·O·x·y·눈금 4·-3·직선의 식만. H 의 좌표(답)는 적지 않는다.
+\begin{tikzpicture}[scale=0.42, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-5.6,0) -- (1.8,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.4) -- (0,5.2) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (-5.9,-0.3) -- (1.6,2.2);
+  \draw[dashed, line width=0.4pt] (-3,4) -- (0,4);
+  \draw[dashed, line width=0.4pt] (-3,4) -- (-3,0);
+  \draw (-3,4) -- (-2,1);
+  \draw[line width=0.4pt] (-2,1) ++(-0.19,0.57) -- ++(-0.57,-0.19) -- ++(0.19,-0.57);
+  \fill (-3,4) circle (2.2pt);
+  \node[above=1pt, font=\small] at (-3,4) {$\mathrm{A}$};
+  \node[right=1pt, font=\small] at (-1.9,1.25) {$\mathrm{H}$};
+  \node[below left=-1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[right=1pt, font=\small] at (0,4) {$4$};
+  \node[below=1pt, font=\small] at (-3,-0.05) {$-3$};
+  \node[below=1pt, font=\small] at (-4.4,-0.9) {$x-3y+5=0$};
+\end{tikzpicture}

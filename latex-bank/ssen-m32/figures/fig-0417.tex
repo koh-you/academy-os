@@ -1,0 +1,12 @@
+% 0417(본책 76쪽) — 원 위 세 점 A·B·C, 현 CA·CB·AB, ∠ACB=30°. 답(AB)은 적지 않는다. 원본 PDF 렌더를 TikZ 로 다시 그림.
+\begin{tikzpicture}[scale=1.4, line width=0.6pt]
+  \draw (0.000,0.000) circle (1.100);
+  \draw (0.843,0.707) -- (-0.997,-0.465);
+  \draw (0.843,0.707) -- (0.550,-0.953);
+  \draw (-0.997,-0.465) -- (0.550,-0.953);
+  \draw[line width=0.4pt] (0.547,0.519) arc (212.5:260.0:0.350);
+  \node[font=\small, inner sep=0.5pt] at (0.465,0.142) {$30^\circ$};
+  \node[font=\small, inner sep=1.5pt] at (0.996,0.836) {C};
+  \node[font=\small, inner sep=1.5pt] at (-1.178,-0.549) {A};
+  \node[font=\small, inner sep=1.5pt] at (0.650,-1.126) {B};
+\end{tikzpicture}

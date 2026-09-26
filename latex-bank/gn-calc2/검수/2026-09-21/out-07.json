@@ -1,0 +1,7 @@
+{ "range": "167-334~192-e23", "checked": 68, "ok": 64,
+  "findings": [
+    { "id": "167-334", "severity": "yellow", "where": "layout", "note": "⑴⑵ 과정 상자 마지막 줄 「x=□에서 극솟값 □」의 끝 빈칸이 홀로 다음 줄로 밀려 「□ / 를 갖는다」로 갈라짐(내용·빈칸 수·표는 원문과 일치)" },
+    { "id": "185-e19", "severity": "yellow", "where": "layout", "note": "본문 한 줄이 짧아 cond 매크로 「(단, 0≤x≤2π)」가 통째로 다음 줄로 밀리며 첫 줄 어간이 크게 벌어짐(양끝 맞춤). 내용은 일치 — items.json 수정 사항 아님, cond(mbox) 줄바꿈 허용 등 템플릿 쪽 문제" },
+    { "id": "185-368", "severity": "yellow", "where": "layout", "note": "185-e19 와 같은 현상 — cond 「(단, 0≤x≤π)」가 다음 줄로 밀려 첫 줄 어간이 크게 벌어짐. 내용 일치" },
+    { "id": "185-369", "severity": "yellow", "where": "layout", "note": "185-e19 와 같은 현상 — cond 「(단, 0≤x≤2π)」가 다음 줄로 밀려 첫 줄 어간이 크게 벌어짐. 내용 일치" }
+  ] }

@@ -1,0 +1,6 @@
+{ "range": "0297~0370", "checked": 74, "ok": 71,
+  "findings": [
+    { "id": "0301", "severity": "yellow", "where": "layout", "note": "review 왼쪽 크롭(items/pbk_82ca5424b9-0301.jpg)이 왼쪽 가장자리 세로 띠만 잘려 판독 불가 — 쪽 p046 렌더로 대조해 본문·보기 5개·난이도(중하) 일치. 크롭 파일만 오염, items.json 수정 없음" },
+    { "id": "0318", "severity": "yellow", "where": "layout", "note": "cases 둘째 행 분수 ln(ax+b−1)/x 의 분모 x 가 다음 줄(합에서 연속일 때, 양수 …)과 겹침. 내용은 일치" },
+    { "id": "0355", "severity": "yellow", "where": "layout", "note": "cases 상자(둘째 행 (x>1/2) 분수 포함)가 줄 높이보다 커서 아래 줄(미분가능할 때, 상수 …)과 거의 닿음. 내용은 일치" }
+  ] }

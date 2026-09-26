@@ -1,0 +1,134 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage{../sty/dm-editorial}
+\usepackage{fontspec}
+\usepackage{multicol}
+% 문항 전사용 보조 매크로(dm-editorial 매크로를 덮어쓰지 않는다)
+\newcommand{\pt}[1]{\mathrm{#1}}
+\newcommand{\seg}[1]{\overline{\mathrm{#1}}}
+\newcommand{\arc}[1]{\overset{\frown}{\mathrm{#1}}}
+\newcommand{\exprbox}[1]{\par\smallskip\noindent\begin{center}\fbox{\begin{minipage}{0.9\linewidth}\centering\vspace{1.5mm}#1\vspace{1.5mm}\end{minipage}}\end{center}}
+% 여집합 · 「보기」 상자(ㄱ·ㄴ·ㄷ 참거짓 문항 — 줄바꿈은 \\)
+\newcommand{\comp}[1]{{#1}^{\mathrm{c}}}
+% 별도 줄 수식(원문의 가운데 줄): 좁은 낱장 폭보다 넓으면 폭에 맞게 줄인다(전사본의 \centerline 을 build 가 이것으로 바꾼다).
+\newcommand{\dispeq}[1]{\centerline{\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{#1}}}
+\newcommand{\bogi}[1]{\par\smallskip\noindent\begin{center}\fbox{\begin{minipage}{0.9\linewidth}\vspace{1mm}{\small\bfseries 보기}\par\smallskip\setlength{\parskip}{0.6mm}#1\vspace{1mm}\end{minipage}}\end{center}}
+\newcommand{\blank}[1][1.5em]{\raisebox{-0.15ex}{\framebox[#1]{\rule{0pt}{1.4ex}}}}
+\newcommand{\dmhint}[1]{\par\smallskip\begin{tcolorbox}[enhanced,colback=dm-navylight!60,colframe=dm-navy!40,boxrule=0.3pt,sharp corners,left=3mm,right=3mm,top=2mm,bottom=2mm,boxsep=0mm]\small\setlength{\parskip}{1mm}#1\end{tcolorbox}}
+% 구역 제목·공통 지시문은 뒤에 문항 한 개는 붙을 자리가 있어야 찍는다(쪽 끝 고아 방지).
+\newcommand{\dmsection}[1]{\par\needspace{10\baselineskip}\vspace{3mm}\noindent{\color{dm-navy}\hrule height 0.6pt}\vspace{1.2mm}\noindent{\dmheadingfont\bfseries\fontsize{11}{13}\selectfont\color{dm-navy}#1}\par\vspace{2mm}}
+% 지시문 뒤 4mm: 다음 문항의 출처 배지가 5mm 위로 올라오므로 긴 지시문 줄과 겹치지 않게 한다.
+\newcommand{\dmpassage}[1]{\par\needspace{8\baselineskip}\medskip\noindent{\dmheadingfont\bfseries\color{dm-navy}#1}\par\vspace{4mm}}
+% 줄바꿈 규약(프로토타입 mathbook-problems.sty · style.sty 와 같음): 수식 안에서는 줄을 바꾸지 않고, 「(단, …)」·「x축」은 한 덩어리.
+\binoppenalty=10000 \relpenalty=10000
+\newcommand{\nob}[1]{\mbox{#1}}
+% 「(단, …)」 은 한 덩어리가 원칙이지만 그림 옆 좁은 폭(0.58)에서 긴 조건이 그림 뒤로 넘어가 잘리므로(RPM 공통수학2 0151),
+% 「(단,」 만 첫 낱말에 붙이고 안쪽 낱말 사이에서는 줄을 바꿀 수 있게 둔다(수식 안은 여전히 안 끊긴다).
+\newcommand{\cond}[1]{\mbox{(단,}\nobreakspace#1)}
+\raggedbottom
+
+\begin{document}
+\renewcommand{\dmchapunit}{01 평면좌표·직선·원·도형의 이동}
+\dmchapter{01}{평면좌표·직선·원·도형의 이동}
+\setcounter{dmproblemcount}{0}
+\dmsection{p1}
+\setcounter{dmproblemcount}{0}\dmpnum{01}{\input{items/01}}\vspace{6mm}
+\setcounter{dmproblemcount}{1}\dmpnum{02}{\input{items/02}}\vspace{6mm}
+\setcounter{dmproblemcount}{2}\dmpnum{03}{\input{items/03}}\vspace{6mm}
+\dmsection{p2}
+\setcounter{dmproblemcount}{3}\dmpnum{04}{\input{items/04}}\vspace{6mm}
+\setcounter{dmproblemcount}{4}\dmpnum{05}{\input{items/05}}\vspace{6mm}
+\setcounter{dmproblemcount}{5}\dmpnum{06}{\input{items/06}}\vspace{6mm}
+\setcounter{dmproblemcount}{6}\dmpnum{07}{\input{items/07}}\vspace{6mm}
+\dmsection{p3}
+\vspace{2mm}\setcounter{dmproblemcount}{7}\dmpnum{08}{\input{items/08}}\vspace{6mm}
+\setcounter{dmproblemcount}{8}\dmpnum{09}{\input{items/09}}\vspace{6mm}
+\dmsection{p4}
+\setcounter{dmproblemcount}{9}\dmpnum{10}{\input{items/10}}\vspace{6mm}
+\setcounter{dmproblemcount}{10}\dmpnum{11}{\input{items/11}}\vspace{6mm}
+\setcounter{dmproblemcount}{11}\dmpnum{12}{\input{items/12}}\vspace{6mm}
+\dmsection{p5}
+\vspace{2mm}\setcounter{dmproblemcount}{12}\dmpnum{13}{\input{items/13}}\vspace{6mm}
+\setcounter{dmproblemcount}{13}\dmpnum{14}{\input{items/14}}\vspace{6mm}
+\setcounter{dmproblemcount}{14}\dmpnum{15}{\input{items/15}}\vspace{6mm}
+\setcounter{dmproblemcount}{15}\dmpnum{16}{\input{items/16}}\vspace{6mm}
+\dmsection{p6}
+\vspace{2mm}\setcounter{dmproblemcount}{16}\dmpnum{17}{\input{items/17}}\vspace{6mm}
+\setcounter{dmproblemcount}{17}\dmpnum{18}{\input{items/18}}\vspace{6mm}
+\dmsection{p7}
+\setcounter{dmproblemcount}{18}\dmpnum{19}{\input{items/19}}\vspace{6mm}
+\setcounter{dmproblemcount}{19}\dmpnum{20}{\input{items/20}}\vspace{6mm}
+\setcounter{dmproblemcount}{20}\dmpnum{21}{\input{items/21}}\vspace{6mm}
+\setcounter{dmproblemcount}{21}\dmpnum{22}{\input{items/22}}\vspace{6mm}
+\dmsection{p8}
+\setcounter{dmproblemcount}{22}\dmpnum{23}{\input{items/23}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{23}\dmpnum{24}{\input{items/24}}\vspace{6mm}
+\dmsection{p9}
+\setcounter{dmproblemcount}{24}\dmpnum{25}{\input{items/25}}\vspace{6mm}
+\setcounter{dmproblemcount}{25}\dmpnum{26}{\input{items/26}}\vspace{6mm}
+\setcounter{dmproblemcount}{26}\dmpnum{27}{\input{items/27}}\vspace{6mm}
+\dmsection{p10}
+\setcounter{dmproblemcount}{27}\dmpnum{28}{\input{items/28}}\vspace{6mm}
+\setcounter{dmproblemcount}{28}\dmpnum{29}{\input{items/29}}\vspace{6mm}
+\setcounter{dmproblemcount}{29}\dmpnum{30}{\input{items/30}}\vspace{6mm}
+\dmsection{p11}
+\setcounter{dmproblemcount}{30}\dmpnum{31}{\input{items/31}}\vspace{6mm}
+\setcounter{dmproblemcount}{31}\dmpnum{32}{\input{items/32}}\vspace{6mm}
+\dmsection{p12}
+\setcounter{dmproblemcount}{32}\dmpnum{33}{\input{items/33}}\vspace{6mm}
+\setcounter{dmproblemcount}{33}\dmpnum{34}{\input{items/34}}\vspace{6mm}
+\setcounter{dmproblemcount}{34}\dmpnum{35}{\input{items/35}}\vspace{6mm}
+\setcounter{dmproblemcount}{35}\dmpnum{36}{\input{items/36}}\vspace{6mm}
+\dmsection{p13}
+\setcounter{dmproblemcount}{36}\dmpnum{37}{\input{items/37}}\vspace{6mm}
+\setcounter{dmproblemcount}{37}\dmpnum{38}{\input{items/38}}\vspace{6mm}
+\vspace{2mm}\setcounter{dmproblemcount}{38}\dmpnum{39}{\input{items/39}}\vspace{6mm}
+\dmsection{p14}
+\setcounter{dmproblemcount}{39}\dmpnum{40}{\input{items/40}}\vspace{6mm}
+\setcounter{dmproblemcount}{40}\dmpnum{41}{\input{items/41}}\vspace{6mm}
+\vspace*{0pt plus 1filll}
+\clearpage
+\dmsection{정답}
+\begin{multicols}{2}\small
+\noindent\textbf{01}\ ③\par
+\noindent\textbf{02}\ ②\par
+\noindent\textbf{03}\ ④\par
+\noindent\textbf{04}\ ②\par
+\noindent\textbf{05}\ ⑤\par
+\noindent\textbf{06}\ $8$\par
+\noindent\textbf{07}\ ③\par
+\noindent\textbf{08}\ ④\par
+\noindent\textbf{09}\ $80$\par
+\noindent\textbf{10}\ ②\par
+\noindent\textbf{11}\ ⑤\par
+\noindent\textbf{12}\ ②\par
+\noindent\textbf{13}\ $7$\par
+\noindent\textbf{14}\ ④\par
+\noindent\textbf{15}\ ②\par
+\noindent\textbf{16}\ ④\par
+\noindent\textbf{17}\ ⑤\par
+\noindent\textbf{18}\ ①\par
+\noindent\textbf{19}\ $160$\par
+\noindent\textbf{20}\ ③\par
+\noindent\textbf{21}\ ④\par
+\noindent\textbf{22}\ ③\par
+\noindent\textbf{23}\ ③\par
+\noindent\textbf{24}\ ④\par
+\noindent\textbf{25}\ $71$\par
+\noindent\textbf{26}\ $10$\par
+\noindent\textbf{27}\ $7$\par
+\noindent\textbf{28}\ ③\par
+\noindent\textbf{29}\ $11$\par
+\noindent\textbf{30}\ ③\par
+\noindent\textbf{31}\ $7$\par
+\noindent\textbf{32}\ $36$\par
+\noindent\textbf{33}\ ③\par
+\noindent\textbf{34}\ ④\par
+\noindent\textbf{35}\ ③\par
+\noindent\textbf{36}\ ③\par
+\noindent\textbf{37}\ ②\par
+\noindent\textbf{38}\ ④\par
+\noindent\textbf{39}\ ②\par
+\noindent\textbf{40}\ ③\par
+\noindent\textbf{41}\ ③\par
+\end{multicols}
+\end{document}

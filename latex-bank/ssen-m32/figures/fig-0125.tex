@@ -1,0 +1,25 @@
+% 0125(본책 26쪽) — 중심 O·반지름 1 사분원(E 위 끝·D 오른 끝), 반직선 OC 위의 원 위 점 A, B 는 A 의 수선의 발, C 는 D 에서 세운 접선 위. 라벨 O·A·B·C·D·E·1(파선 호)·0.7986(OB), 직각 표시(B·D). 스캔 삽화를 TikZ 로 다시 그림. 답(AB+CD)은 적지 않는다.
+\begin{tikzpicture}[scale=2.6, line width=0.6pt]
+  \coordinate (O) at (0,0); \coordinate (D) at (1,0); \coordinate (E) at (0,1); \coordinate (A) at (0.7986,0.6018); \coordinate (B) at (0.7986,0); \coordinate (C) at (1,0.7536);
+  \draw (O) -- (D);
+  \draw (O) -- (E);
+  \draw (O) -- (C);
+  \draw (A) -- (B);
+  \draw (D) -- (C);
+  \draw (D) arc[start angle=0, end angle=90, radius=1];
+  % 직각 표시
+  \draw[line width=0.4pt] (0.7986,0.06) -- (0.7386,0.06) -- (0.7386,0);
+  \draw[line width=0.4pt] (1,0.06) -- (0.94,0.06) -- (0.94,0);
+  % 반지름 1(파선 호)
+  \draw[dashed, line width=0.4pt] (O) to[bend left=22] (E);
+  \node[font=\small] at (-0.14,0.5) {$1$};
+  % OB=0.7986(파선 호)
+  \draw[dashed, line width=0.4pt] (O) to[bend right=15] (B);
+  \node[font=\small] at (0.4,-0.13) {$0.7986$};
+  \node[font=\small, below left] at (O) {O};
+  \node[font=\small, above left] at (A) {A};
+  \node[font=\small, below] at (B) {B};
+  \node[font=\small, above] at (C) {C};
+  \node[font=\small, below right] at (D) {D};
+  \node[font=\small, left] at (E) {E};
+\end{tikzpicture}
