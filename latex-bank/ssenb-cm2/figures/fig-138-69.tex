@@ -1,0 +1,17 @@
+% 138-69(138쪽) — 함수 y=f(x) 의 그래프: 점근선 x=-3(점선)·y=-3(파선), x절편 -2(지시선), y절편 -2.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 y·x·O·-2·-3 와 y=f(x) 뿐이고, f^{1024}(-2) 의 값(답)은 적지 않는다.
+\begin{tikzpicture}[xscale=0.24, yscale=0.24, line width=0.5pt]
+  \draw[dashed, line width=0.5pt] (-7.6,-3) -- (5.2,-3);
+  \draw[dotted, line width=0.7pt] (-3,-7.2) -- (-3,4.4);
+  \draw[->, >=stealth, line width=0.7pt] (-7.6,0) -- (5.5,0) node[below left=-1pt and -2pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-7.4) -- (0,4.6) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt, smooth, samples=80, domain=-2.6:5.2] plot (\x, {3/(\x+3)-3});
+  \draw[line width=0.6pt, smooth, samples=80, domain=-7.4:-3.72] plot (\x, {3/(\x+3)-3});
+  \draw[->, >=stealth, line width=0.4pt] (-4.3,1.15) to[bend left=15] (-2.12,0.2);
+  \node[above left=-2pt and -1pt, font=\small] at (-4.3,1.15) {$-2$};
+  \node[below left=-1pt and 0pt, font=\small] at (-3,0) {$-3$};
+  \node[above right=-2pt and 0pt, font=\small] at (0,-2) {$-2$};
+  \node[below right=-2pt and 0pt, font=\small] at (0,-3) {$-3$};
+  \node[above right=-2pt and 0pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[left=1pt, font=\small] at (-5.2,-5.6) {$y=f(x)$};
+\end{tikzpicture}

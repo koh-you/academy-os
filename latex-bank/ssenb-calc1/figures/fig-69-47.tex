@@ -1,0 +1,21 @@
+% 69-47(69쪽) — 함수 f(x)의 도함수 y=f'(x) 그래프(꺾은선 · x=0 에서 x축을 지나 1~3 에서 수평 · x=4 에서 x축에 닿았다가 x=5 에서 꼭짓점 · x=6 에서 다시 x축을 지남). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨·점선은 원문 그대로(-1, 1, 3, 4, 5, 6, 7, O, x, y, y=f'(x))만 — 함숫값은 적지 않는다.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.4,0) -- (8.0,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.7) -- (0,2.4) node[left=1pt] {$y$};
+  \draw[line width=0.6pt] (-1.85,-1.58) -- (1,0.85) -- (3,0.85) -- (4,0) -- (5,1.7) -- (7.35,-2.3);
+  \draw[densely dotted, line width=0.4pt] (-1,0) -- (-1,-0.86);
+  \draw[densely dotted, line width=0.4pt] (1,0) -- (1,0.85);
+  \draw[densely dotted, line width=0.4pt] (3,0) -- (3,0.85);
+  \draw[densely dotted, line width=0.4pt] (5,0) -- (5,1.7);
+  \draw[densely dotted, line width=0.4pt] (7,0) -- (7,-1.7);
+  \node[above=1pt, font=\small] at (-1,0) {$-1$};
+  \node[below left=-1pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below right=-1pt and -3pt, font=\small] at (1,0) {$1$};
+  \node[below=1pt, font=\small] at (3,0) {$3$};
+  \node[below=1pt, font=\small] at (4,0) {$4$};
+  \node[below=1pt, font=\small] at (5,0) {$5$};
+  \node[below=1pt, font=\small] at (6,0) {$6$};
+  \node[above=1pt, font=\small] at (7,0) {$7$};
+  \node[anchor=west, font=\small] at (3.3,2.2) {$y=f'(x)$};
+\end{tikzpicture}

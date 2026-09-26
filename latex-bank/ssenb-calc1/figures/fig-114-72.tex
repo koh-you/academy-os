@@ -1,0 +1,11 @@
+% 114-72(114쪽) — 함수 y=f(t) 의 그래프(t축과 음수인 한 점, t=2, t=4 에서 만나는 삼차함수 꼴). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: t축 눈금 2, 4 · 라벨 y=f(t), O, t, y. 극값·정적분 값은 그림에서 읽히지 않게 적지 않는다.
+\begin{tikzpicture}[x=0.36cm, y=0.30cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.65,0) -- (5.35,0) node[below] {$t$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.95) -- (0,4.45) node[left] {$y$};
+  \draw[line width=0.6pt, domain=-1.15:4.60, samples=110, smooth] plot (\x, {0.45*(\x+0.7)*(\x-2)*(\x-4)});
+  \node[below left=-2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below left=-2pt, font=\small] at (2,0) {$2$};
+  \node[below right=-2pt, font=\small] at (4,0) {$4$};
+  \node[anchor=east, font=\small] at (4.25,3.95) {$y=f(t)$};
+\end{tikzpicture}

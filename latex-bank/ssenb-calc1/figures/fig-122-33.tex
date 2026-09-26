@@ -1,0 +1,15 @@
+% 122-33(122쪽) — 곡선 y=x^2+k (k<0) 와 x축·직선 x=-1 이 둘러싼 부분 A, 이 곡선과 x축이 둘러싼 부분 B. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 y·x·O·A·B·y=x^2+k·x=-1 만. 꼭짓점의 높이는 원문처럼 개략 위치라 k 값을 그림에서 잴 수 없다.
+\begin{tikzpicture}[scale=1.15, line width=0.5pt]
+  \fill[orange!25] (-1,0) -- plot[domain=-1:-0.7416, samples=30] (\x, {\x*\x-0.55}) -- cycle;
+  \fill[cyan!22] plot[domain=-0.7416:0.7416, samples=50] (\x, {\x*\x-0.55}) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-1.65,0) -- (1.9,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.0) -- (0,1.5) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (-1,-0.85) -- (-1,1.25);
+  \draw[line width=0.6pt, domain=-1.32:1.35, samples=90] plot (\x, {\x*\x-0.55});
+  \node[above left=-2pt, font=\small, inner sep=1pt] at (0,0) {$\mathrm{O}$};
+  \node[font=\small] at (-0.88,0.16) {$A$};
+  \node[font=\small] at (0.3,-0.31) {$B$};
+  \node[font=\small] at (1.0,1.28) {$y=x^2+k$};
+  \node[below, font=\small, inner sep=2pt] at (-1,-0.85) {$x=-1$};
+\end{tikzpicture}

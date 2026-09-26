@@ -1,0 +1,24 @@
+% 82-57 ④(82쪽) — 보기 벤 다이어그램(그림 자체가 보기): 전체집합 U 안 세 집합 A·B·C · 한 원에만 속하는 세 자리와 가운데를 색칠(두 원씩만 겹치는 자리는 비운다).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 U·A·B·C 만.
+\begin{tikzpicture}[scale=0.5, line width=0.5pt, every node/.style={font=\small}, baseline=(current bounding box.center)]
+  \path (-2.1,-1.85) rectangle (2.1,2.35); % 보기 행 사이 여백
+  \begin{scope}
+    \clip (0,0.72) circle (0.95) (-0.6235,-0.36) circle (0.95) (0.6235,-0.36) circle (0.95);
+    \fill[cyan!22] (-1.95,-1.70) rectangle (1.95,2.05);
+  \end{scope}
+  \begin{scope}\clip (0,0.72) circle (0.95); \fill[white] (-0.6235,-0.36) circle (0.95);\end{scope}
+  \begin{scope}\clip (0,0.72) circle (0.95); \fill[white] (0.6235,-0.36) circle (0.95);\end{scope}
+  \begin{scope}\clip (-0.6235,-0.36) circle (0.95); \fill[white] (0.6235,-0.36) circle (0.95);\end{scope}
+  \begin{scope}
+    \clip (0,0.72) circle (0.95); \clip (-0.6235,-0.36) circle (0.95);
+    \fill[cyan!22] (0.6235,-0.36) circle (0.95);
+  \end{scope}
+  \draw[line width=0.6pt, rounded corners=3pt] (-1.95,-1.70) rectangle (1.95,2.05);
+  \node[fill=white, inner sep=1.5pt] at (-1.45,2.05) {$U$};
+  \draw[line width=0.6pt] (0,0.72) circle (0.95);
+  \draw[line width=0.6pt] (-0.6235,-0.36) circle (0.95);
+  \draw[line width=0.6pt] (0.6235,-0.36) circle (0.95);
+  \node[fill=white, inner sep=1pt] at (0,1.72) {$A$};
+  \node[fill=white, inner sep=1pt] at (-1.504,-1.099) {$B$};
+  \node[fill=white, inner sep=1pt] at (1.504,-1.099) {$C$};
+\end{tikzpicture}

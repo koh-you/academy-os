@@ -1,0 +1,14 @@
+% 121-28(121쪽) — 삼차함수 y=f(x) 의 그래프와 점 (2, f(2)) 에서의 접선 y=g(x), 두 그래프로 둘러싸인 색칠 부분. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 y·x·O·2·y=f(x)·y=g(x) 와 접점으로 내린 원문의 점선만. 최고차항의 계수나 넓이를 그림에서 잴 수 없게 눈금은 넣지 않았다.
+\begin{tikzpicture}[xscale=1.05, yscale=0.42, line width=0.5pt]
+  \fill[yellow!45] plot[domain=0:2, samples=60] (\x, {3*\x*\x*\x-12*\x*\x+11.45*\x}) -- plot[domain=2:0, samples=40] (\x, {-0.55*\x}) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-1.0,0) -- (3.4,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.5) -- (0,4.5) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (-0.62,0.34) -- (3.05,-1.68);
+  \draw[line width=0.6pt, domain=-0.22:2.78, samples=110] plot (\x, {3*\x*\x*\x-12*\x*\x+11.45*\x});
+  \draw[dotted, line width=0.5pt] (2,0) -- (2,-1.1);
+  \node[below left=-2pt, font=\small, inner sep=1pt] at (0,0) {$\mathrm{O}$};
+  \node[above, font=\small, inner sep=2pt] at (2,0.08) {$2$};
+  \node[font=\small] at (2.05,4.1) {$y=f(x)$};
+  \node[font=\small] at (1.15,-2.75) {$y=g(x)$};
+\end{tikzpicture}

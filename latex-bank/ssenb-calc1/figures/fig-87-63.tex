@@ -1,0 +1,19 @@
+% 87-63(87쪽) — 수직선 위를 움직이는 점 P의 속도 v(t)의 그래프. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문의 라벨 v(t)·t·O·a·b·c·d·e 와 점선(t=a, c, e)만 옮겼다. 눈금·속도의 값은 원문에 없다.
+% t=d 에서 그래프가 t축에 접하는 것, t=b 에서 부호가 바뀌는 것은 원문 그대로다.
+\begin{tikzpicture}[xscale=0.56, yscale=0.5, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.45,0) -- (5.6,0) node[below left=-1pt, font=\small] {$t$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.3) -- (0,2.8) node[left=1pt, font=\small] {$v(t)$};
+  \node[font=\small, anchor=north east, inner sep=1pt] at (-0.02,-0.02) {$\mathrm{O}$};
+  \draw[dotted, line width=0.5pt] (0.8,0) -- (0.8,-1);
+  \draw[dotted, line width=0.5pt] (2.5,0) -- (2.5,0.96);
+  \draw[dotted, line width=0.5pt] (4.7,0) -- (4.7,0.9);
+  \draw[line width=0.6pt] plot[smooth, tension=0.6] coordinates
+    {(0,0) (0.35,-0.72) (0.8,-1) (1.25,-0.72) (1.7,0) (2.1,0.71) (2.5,0.96) (2.9,0.71)
+     (3.35,0.29) (3.75,0) (4.15,0.29) (4.45,0.55) (4.7,0.9) (4.95,1.6) (5.1,2.35)};
+  \node[font=\small, anchor=south, inner sep=2pt] at (0.8,0.02) {$a$};
+  \node[font=\small, anchor=north, inner sep=2pt] at (1.7,0) {$b$};
+  \node[font=\small, anchor=north, inner sep=2pt] at (2.5,0) {$c$};
+  \node[font=\small, anchor=north, inner sep=2pt] at (3.75,0) {$d$};
+  \node[font=\small, anchor=north, inner sep=2pt] at (4.7,0) {$e$};
+\end{tikzpicture}

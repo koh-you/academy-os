@@ -1,0 +1,13 @@
+% 64-22(64쪽) — 두 집합 A, B 의 벤 다이어그램. 원 B 안에 원 A 가 들어 있고 B 에만 1·2·3, A 안에 4·5 가 있다. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B 와 원소 다섯 개만 둔다. 보기 ①~⑤ 의 참·거짓(답)은 그림에 적지 않는다.
+\begin{tikzpicture}[scale=0.8, line width=0.5pt, every node/.style={font=\small}]
+  \draw[line width=0.6pt] (0,0) circle (1.45);
+  \draw[line width=0.6pt] (-0.12,-0.15) circle (0.72);
+  \node[fill=white, inner sep=1.2pt] at (0,1.45) {$B$};
+  \node[fill=white, inner sep=1.2pt] at (-0.12,0.57) {$A$};
+  \node at (-0.84,0.62) {$1$};
+  \node at (-0.84,-0.92) {$2$};
+  \node at (0.98,-0.15) {$3$};
+  \node at (-0.40,-0.20) {$4$};
+  \node at (0.18,-0.20) {$5$};
+\end{tikzpicture}

@@ -1,0 +1,15 @@
+% 122-91(122쪽) — 모눈 위에 함수 y=f(x) 의 그래프 일부로 찍힌 세 점 (2,3) · (3,1) · (5,4).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문 그대로 모눈(1~5) · 두 축 눈금 1~5 · O · x · y 만 두었다(나머지 두 점은 원문에도 없다).
+\begin{tikzpicture}[scale=0.46, line width=0.5pt]
+  \draw[line width=0.4pt, gray] (-0.8,-0.9) rectangle (6.2,6.1);
+  \foreach \x in {1,2,3,4,5} { \draw[line width=0.4pt, gray] (\x,-0.9) -- (\x,6.1); }
+  \foreach \y in {1,2,3,4,5} { \draw[line width=0.4pt, gray] (-0.8,\y) -- (6.2,\y); }
+  \draw[->, >=stealth, line width=0.7pt] (-0.8,0) -- (6.1,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.9) -- (0,6.0) node[left=1pt, font=\small] {$y$};
+  \foreach \x in {1,2,3,4,5} { \node[below=1pt, font=\small] at (\x,0) {$\x$}; }
+  \foreach \y in {1,2,3,4,5} { \node[left=1pt, font=\small] at (0,\y) {$\y$}; }
+  \node[below left=0pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \fill (2,3) circle (2.2pt);
+  \fill (3,1) circle (2.2pt);
+  \fill (5,4) circle (2.2pt);
+\end{tikzpicture}

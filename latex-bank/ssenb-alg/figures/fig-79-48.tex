@@ -1,0 +1,19 @@
+% 79-48(79쪽) — 원에 내접하는 사각형 ABCD 와 ∠DAB=α, ∠DCB=β. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(A · B · C · D · α · β)만 두고, cos α 값이나 구하는 값은 적지 않는다.
+\begin{tikzpicture}[scale=1.35, line width=0.5pt]
+  % 원 위의 네 점(중심각 A 180°, D 60°, C 22°, B -14°) — 원문 그림과 같은 배치
+  \coordinate (A) at (180:1.4);
+  \coordinate (B) at (-14:1.4);
+  \coordinate (C) at (22:1.4);
+  \coordinate (D) at (60:1.4);
+  \draw[line width=0.6pt] (0,0) circle (1.4);
+  \draw[line width=0.6pt] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[line width=0.35pt] ($(A)+(-7:0.45)$) arc (-7:30:0.45);
+  \draw[line width=0.35pt] ($(C)+(274:0.42)$) arc (274:131:0.42);
+  \node[font=\small] at (-0.80,0.13) {$\alpha$};
+  \node[font=\small] at (0.72,0.29) {$\beta$};
+  \node[font=\small, left=2pt] at (A) {$\mathrm{A}$};
+  \node[font=\small, right=2pt] at (B) {$\mathrm{B}$};
+  \node[font=\small, right=2pt] at (C) {$\mathrm{C}$};
+  \node[font=\small, above right=-1pt and -1pt] at (D) {$\mathrm{D}$};
+\end{tikzpicture}

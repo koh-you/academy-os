@@ -1,0 +1,14 @@
+% 33-16(33쪽) — 감소하는 지수함수 $y=f(x)$ 의 그래프와 $f(c)=16$, $f(b)=4$ 를 잇는 안내 점선. 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨·점선만 · 눈금은 만들지 않음).
+\begin{tikzpicture}[line width=0.6pt, x=0.62cm, y=0.145cm]
+  \draw[->, >=stealth, line width=0.7pt] (-5.2,0) -- (1.95,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.6) -- (0,21) node[left=1pt] {$y$};
+  \draw[densely dotted, line width=0.4pt] (-4,0) -- (-4,16) -- (0,16);
+  \draw[densely dotted, line width=0.4pt] (-2,0) -- (-2,4) -- (0,4);
+  \draw[domain=-4.35:1.8, samples=100, smooth] plot (\x, {exp(-0.6931*\x)});
+  \node[right=2pt, font=\small] at (0,16) {$16$};
+  \node[right=2pt, font=\small] at (0,4) {$4$};
+  \node[below=1pt, font=\small] at (-4,0) {$c$};
+  \node[below=1pt, font=\small] at (-2,0) {$b$};
+  \node[below right=-1pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=east, font=\small] at (-4.5,19.5) {$y=f(x)$};
+\end{tikzpicture}

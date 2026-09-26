@@ -1,0 +1,21 @@
+% 96-42(96쪽) — AB=4, AC=2, ∠A=120° 인 삼각형 ABC 와 ∠A 의 이등분선이 BC 와 만나는 점 D.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로(A·B·C·D·4·2·이등분 표시 점)만 두고 AD 의 길이(답)는 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt]
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (3.2,0);
+  \coordinate (A) at (2.28,0.79);
+  \coordinate (D) at (2.13,0);
+  \draw[line width=0.6pt] (B) -- (C);
+  \draw[line width=0.6pt] (B) -- (A) -- (C);
+  \draw[line width=0.5pt] (A) -- (D);
+  \draw[dashed, line width=0.3pt] (B) to[bend left=22] (A);
+  \draw[dashed, line width=0.3pt] (A) to[bend left=22] (C);
+  \fill (2.083,0.564) circle (1.1pt);
+  \fill (2.379,0.507) circle (1.1pt);
+  \node[font=\small] at (1.00,0.62) {$4$};
+  \node[font=\small] at (2.98,0.60) {$2$};
+  \node[font=\small, left=2pt] at (B) {$\mathrm{B}$};
+  \node[font=\small, right=2pt] at (C) {$\mathrm{C}$};
+  \node[font=\small, above=2pt] at (A) {$\mathrm{A}$};
+  \node[font=\small, below=2pt] at (D) {$\mathrm{D}$};
+\end{tikzpicture}

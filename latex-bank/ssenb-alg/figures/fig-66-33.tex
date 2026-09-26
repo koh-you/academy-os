@@ -1,0 +1,24 @@
+% 66-33(66쪽) — 두 동심원 x^2+y^2=8, x^2+y^2=20 과 직선 y=2 의 교점 P·Q, x축 위의 점 A, 동경 OP·OQ 가 나타내는 각 α·β. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 P·Q·A·O·α·β·y=2·x^2+y^2=8·x^2+y^2=20 만. 좌표값·각의 크기 등 원문 그림에 없는 값은 적지 않는다.
+\begin{tikzpicture}[scale=0.4, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-5.6,0) -- (6.4,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-5.6) -- (0,6.2) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (0,0) circle (2.828);
+  \draw[line width=0.6pt] (0,0) circle (4.472);
+  \draw[line width=0.7pt] (-5.4,2) -- (5.6,2);
+  \node[font=\small] at (5.4,2.85) {$y=2$};
+  \coordinate (P) at (-2,2); \coordinate (Q) at (-4,2); \coordinate (A) at (4.472,0);
+  \draw (0,0) -- (P);
+  \draw (0,0) -- (Q);
+  \draw[->, >=stealth, line width=0.4pt] (0.8,0) arc (0:135:0.8);
+  \draw[->, >=stealth, line width=0.4pt] (1.15,0) arc (0:153.4:1.15);
+  \node[font=\small] at (1.35,0.42) {$\alpha$};
+  \node[font=\small] at (0.6,1.35) {$\beta$};
+  \node[above=1pt, font=\small] at (P) {$\pt{P}$};
+  \node[above left=0pt and -3pt, font=\small] at (Q) {$\pt{Q}$};
+  \node[below left=-1pt and -2pt, font=\small] at (4.25,0) {$\pt{A}$};
+  \node[below left=0pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \draw[line width=0.35pt] (-2.75,-4.5) to[bend left=25] (-2.0,-2.0);
+  \node[anchor=east, font=\small] at (-0.35,-5.1) {$x^2+y^2=8$};
+  \node[anchor=west, font=\small] at (0.35,-5.1) {$x^2+y^2=20$};
+\end{tikzpicture}

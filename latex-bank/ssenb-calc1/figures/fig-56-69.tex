@@ -1,0 +1,13 @@
+% 56-69(56쪽) — 곡선 y=x^3+x-1 과 점 (1, 1)에서 접하고 중심이 y축 위에 있는 원. 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨 1·1·-1·O·곡선식과 점선만 · 반지름·넓이는 적지 않음).
+\begin{tikzpicture}[scale=0.85,line width=0.6pt]
+  \draw[line width=0.7pt,->] (-1.55,0) -- (2.05,0) node[below=1pt] {$x$};
+  \draw[line width=0.7pt,->] (0,-2.9) -- (0,3.2) node[left=1pt] {$y$};
+  \draw (0,1.25) circle (1.03078);
+  \draw[domain=-0.95:1.32,samples=100,smooth,line width=0.5pt] plot (\x,{\x*\x*\x+\x-1});
+  \draw[densely dotted,line width=0.4pt] (0,1) -- (1,1) -- (1,0);
+  \node[left=1pt] at (0,1) {$1$};
+  \node[below=1pt] at (1,0) {$1$};
+  \node[right=1pt] at (0,-1) {$-1$};
+  \node[below left=-2pt] at (0,0) {$\pt{O}$};
+  \node[anchor=west] at (0.2,3.05) {$y=x^3+x-1$};
+\end{tikzpicture}

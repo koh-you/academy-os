@@ -1,0 +1,17 @@
+% 48-23(48쪽) — 곡선 y=x^3-5x+6 과 점 P(1,2) 에서의 접선. 접선이 곡선과 다시 만나는 점이 Q, x축과 만나는 점이 R. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨·점선은 원문 그대로(6, 2, 1, O, P, Q, R, y=x^3-5x+6)만 옮겼고, 원문에 없는 눈금은 넣지 않았다.
+\begin{tikzpicture}[x=0.4cm, y=0.19cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.4,0) -- (3.75,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-6.2) -- (0,12.8) node[left] {$y$};
+  \node[below left=-3pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt, domain=-2.95:2.45, samples=150, smooth] plot (\x,{\x*\x*\x-5*\x+6});
+  \draw[line width=0.5pt] (-2.6,9.2) -- (2.85,-1.7);
+  \draw[densely dotted, line width=0.4pt] (0,2) -- (1,2) -- (1,0);
+  \node[left, font=\small, inner sep=2pt] at (0,6) {$6$};
+  \node[left, font=\small, inner sep=2pt] at (0,2) {$2$};
+  \node[below, font=\small, inner sep=1.5pt] at (1,0) {$1$};
+  \node[above right=-3pt and -2pt, font=\small] at (1,2) {$\mathrm{P}$};
+  \node[anchor=east, font=\small, inner sep=1pt] at (-2.15,7.3) {$\mathrm{Q}$};
+  \node[above right=-3pt and -2pt, font=\small] at (2,0) {$\mathrm{R}$};
+  \node[anchor=south west, font=\small, inner sep=1pt] at (0.4,10.6) {$y=x^3-5x+6$};
+\end{tikzpicture}

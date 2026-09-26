@@ -1,0 +1,15 @@
+% 58-82(58쪽) — y=f(x) 의 그래프(α, β 표시 · 양 끝은 점선, x=α 와 x=β 에 세로 점선). 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨 α·β·O·y=f(x) 만 · 눈금은 만들지 않음).
+\begin{tikzpicture}[scale=0.4,line width=0.6pt]
+  \draw[line width=0.7pt,->] (-2.7,0) -- (7.3,0) node[below=1pt] {$x$};
+  \draw[line width=0.7pt,->] (0,-2.1) -- (0,5.8) node[left=1pt] {$y$};
+  \draw[densely dotted,line width=0.4pt] (-1.7,0) -- (-1.7,3.1);
+  \draw[densely dotted,line width=0.4pt] (5.75,0) -- (5.75,-0.8);
+  \draw[densely dotted,line width=0.6pt,smooth,tension=0.7] plot coordinates {(-2.45,1.5) (-2.1,2.3) (-1.7,3.1)};
+  \draw[smooth,tension=0.7,line width=0.6pt] plot coordinates
+    {(-1.7,3.1) (-1.35,3.8) (-1.0,4.05) (-0.5,3.3) (0.05,2.7) (0.7,3.6) (1.75,5.1) (2.6,4.2) (4.0,0) (4.6,-1.0) (5.05,-1.4) (5.4,-1.15) (5.75,-0.8)};
+  \draw[densely dotted,line width=0.6pt,smooth,tension=0.7] plot coordinates {(5.75,-0.8) (6.3,0.8) (6.8,2.4)};
+  \node[below=1pt] at (-1.7,0) {$\alpha$};
+  \node[above=1pt] at (5.75,0) {$\beta$};
+  \node[below right=-2pt] at (0,0) {$\pt{O}$};
+  \node[anchor=west] at (3.6,3.3) {$y=f(x)$};
+\end{tikzpicture}

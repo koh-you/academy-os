@@ -1,0 +1,28 @@
+% 21-11(21쪽) — y=f(x) 의 그래프(x<-1 에서 y=2 · x=-1 의 점 · -1<x<1 곡선 · x=1 의 점 · x>1 직선). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨·점선은 원문 그대로(-1, 1, 2, 1, 2, O, x, y, y=f(x))만. 합성함수의 연속·불연속 판정은 그림에 적지 않는다.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.5,0) -- (3.0,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.5) -- (0,2.9) node[left] {$y$};
+  \node[below left=-2pt and -4pt, font=\small] at (0,0) {$\mathrm{O}$};
+  % x<-1 : y=2
+  \draw[line width=0.6pt] (-2.3,2) -- (-1,2);
+  % -1<x<1 : 원점에서 최소인 곡선((-1,2) 에서 내려와 (1,1) 로 올라간다)
+  \draw[line width=0.6pt, domain=-1:0, samples=40, smooth] plot (\x, {2*\x*\x});
+  \draw[line width=0.6pt, domain=0:1, samples=40, smooth] plot (\x, {\x*\x});
+  % x>1 : y=-2x+4
+  \draw[line width=0.6pt] (1,2) -- (2.55,-1.1);
+  \draw[dotted, line width=0.5pt] (-1,2) -- (-1,0);
+  \draw[dotted, line width=0.5pt] (-1,2) -- (1,2);
+  \draw[dotted, line width=0.5pt] (-1,1) -- (1,1);
+  \draw[dotted, line width=0.5pt] (1,2) -- (1,0);
+  \draw[fill=white, line width=0.5pt] (-1,2) circle (2.2pt);
+  \draw[fill=white, line width=0.5pt] (1,1) circle (2.2pt);
+  \fill (-1,1) circle (2.2pt);
+  \fill (1,2) circle (2.2pt);
+  \node[below, font=\small] at (-1,0) {$-1$};
+  \node[below, font=\small] at (1,0) {$1$};
+  \node[below, font=\small] at (2,0) {$2$};
+  \node[left, font=\small] at (0,1) {$1$};
+  \node[left, font=\small] at (0,2) {$2$};
+  \node[right, font=\small] at (0.3,2.5) {$y=f(x)$};
+\end{tikzpicture}

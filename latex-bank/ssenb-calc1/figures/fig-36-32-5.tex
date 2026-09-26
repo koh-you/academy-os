@@ -1,0 +1,12 @@
+% 36-32 ⑤(36쪽) — 보기 그래프: 꼭짓점이 x=a 인 위로 볼록한 포물선. 스캔 화질이 낮아 TikZ 로 다시 그림(그림 자체가 보기).
+% 라벨은 원문 그대로 O · a · y=f(x) 만.
+\begin{tikzpicture}[scale=0.5, line width=0.5pt, baseline=(current bounding box.center)]
+  \path (-1.9,-1.9) rectangle (3.0,2.9);
+  \draw[->, >=stealth, line width=0.7pt] (-1.7,0) -- (2.9,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.1) -- (0,2.3) node[right=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt, domain=-1.0:2.35, samples=70, smooth] plot (\x, {1.15-0.511*(\x-0.7)*(\x-0.7)});
+  \draw[densely dotted, line width=0.4pt] (0.7,0) -- (0.7,1.15);
+  \node[below left=-2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[below=1pt, font=\small] at (0.7,0) {$a$};
+  \node[font=\small, anchor=west] at (0.4,1.85) {$y=f(x)$};
+\end{tikzpicture}

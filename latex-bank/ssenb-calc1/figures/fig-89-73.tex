@@ -1,0 +1,28 @@
+% 89-73(89쪽) — AB=8, BC=9, ∠B=45° 인 삼각형 ABC 와 변 AB 위의 점 P, 변 BC 위의 점 Q(삼각형 PBQ 색칠).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문의 라벨 A·B·C·P·Q·8·9·45° 와 두 점이 움직이는 방향 화살표만 옮겼다.
+% P, Q 의 자리는 원문 그림과 같은 비율로 두고 BP·BQ 의 길이는 적지 않았다.
+\begin{tikzpicture}[scale=0.72, line width=0.5pt]
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (4.6,0);
+  \coordinate (A) at (2.76,2.76);
+  \coordinate (P) at (2,2);
+  \coordinate (Q) at (2.75,0);
+  \fill[magenta!12] (B) -- (P) -- (Q) -- cycle;
+  \draw[line width=0.6pt] (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.6pt] (P) -- (Q);
+  \draw[dashed, line width=0.4pt] (0,0) .. controls (0.49,1.05) and (1.71,2.27) .. (2.76,2.76);
+  \draw[dashed, line width=0.4pt] (0,0) .. controls (1.29,-0.8) and (3.31,-0.8) .. (4.6,0);
+  \node[font=\small, fill=white, inner sep=1pt] at (1.03,1.45) {$8$};
+  \node[font=\small, fill=white, inner sep=1pt] at (2.3,-0.6) {$9$};
+  \draw[line width=0.4pt] (0.5,0) arc (0:45:0.5);
+  \node[font=\small, inner sep=0pt] at (0.78,0.3) {$45^\circ$};
+  \fill (P) circle (2.2pt);
+  \fill (Q) circle (2.2pt);
+  \node[font=\small, anchor=south, inner sep=2pt] at (A) {$\mathrm{A}$};
+  \node[font=\small, anchor=east, inner sep=3pt] at (B) {$\mathrm{B}$};
+  \node[font=\small, anchor=west, inner sep=3pt] at (C) {$\mathrm{C}$};
+  \node[font=\small, anchor=south east, inner sep=1pt] at (2.02,2.04) {$\mathrm{P}$};
+  \node[font=\small, anchor=north, inner sep=3pt] at (Q) {$\mathrm{Q}$};
+  \draw[->, >=stealth, line width=0.4pt] (2.76,2.48) -- (2.31,2.03);
+  \draw[->, >=stealth, line width=0.4pt] (1.05,-0.17) -- (1.75,-0.17);
+\end{tikzpicture}

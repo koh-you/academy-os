@@ -1,0 +1,14 @@
+% 7-05(7쪽) — 좌표평면 위 점 A(0, 10)이 y축을 따라 아래로, 점 B(원점)가 x축을 따라 오른쪽으로 움직이는 그림. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 10·A·B·O·x·y 와 움직이는 방향 화살표만. 거리의 최솟값(답)은 그림에 나타내지 않는다.
+\begin{tikzpicture}[scale=0.3, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.2,0) -- (9.0,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.6) -- (0,12.6) node[left=-1pt, font=\small] {$y$};
+  \fill (0,10) circle (2.2pt);
+  \fill (0,0) circle (2.2pt);
+  \draw[->, >=stealth, line width=0.7pt, red!55!black] (0,9.0) -- (0,6.8);
+  \draw[->, >=stealth, line width=0.7pt, red!55!black] (0.7,0) -- (2.9,0);
+  \node[left=1pt, font=\small] at (0,10) {$10$};
+  \node[right=2pt, font=\small] at (0,10) {$\mathrm{A}$};
+  \node[above right=0pt and 2pt, font=\small] at (0,0) {$\mathrm{B}$};
+  \node[below left=0pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+\end{tikzpicture}

@@ -1,0 +1,10 @@
+% 106-22(106쪽) — 가로줄·세로줄에 있는 세 수가 각각 등차수열을 이루는 3×3 표(a, 0, b / c, d, −2 / 8, e, f).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 칸의 값은 원문 그대로만 두고, 구하는 값(답)은 넣지 않는다.
+\begin{tikzpicture}[line width=0.5pt]
+  \draw[black!80, step=0.72] (0,0) grid (2.16,2.16);
+  \foreach \yc/\aa/\bb/\cc in {1.80/a/0/b, 1.08/c/d/{-2}, 0.36/8/e/f}{
+    \node[font=\small] at (0.36,\yc) {$\aa$};
+    \node[font=\small] at (1.08,\yc) {$\bb$};
+    \node[font=\small] at (1.80,\yc) {$\cc$};
+  }
+\end{tikzpicture}

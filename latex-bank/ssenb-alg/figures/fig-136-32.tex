@@ -1,0 +1,19 @@
+% 136-32(136쪽) — 길이 125인 끈을 오등분하여 가운데 부분과 양 끝 부분을 버리는 시행: 처음 끈 · 1회 후 남은 2개 · 2회 후 남은 4개.
+% 스캔 화질이 낮아 TikZ 로 다시 그림(원문과 같은 배치 · 라벨은 원문의 125 하나뿐이고 남은 길이는 적지 않아 답이 그림에서 읽히지 않게 했다).
+\begin{tikzpicture}[line width=0.5pt]
+  % 처음 끈(길이 125)
+  \filldraw[fill=orange!25, draw=black!70] (0,0) rectangle (5.0,0.34);
+  \draw[dashed, dash pattern=on 1.2pt off 1.2pt, line width=0.35pt]
+    (0.05,0.42) .. controls (0.9,0.78) and (1.5,0.86) .. (2.10,0.88);
+  \draw[dashed, dash pattern=on 1.2pt off 1.2pt, line width=0.35pt]
+    (2.90,0.88) .. controls (3.5,0.86) and (4.1,0.78) .. (4.95,0.42);
+  \node[font=\footnotesize] at (2.5,0.88) {$125$};
+  % 1회 시행 후 남은 2개(둘째·넷째 등분)
+  \filldraw[fill=orange!25, draw=black!70] (1.0,-0.78) rectangle (2.0,-0.44);
+  \filldraw[fill=orange!25, draw=black!70] (3.0,-0.78) rectangle (4.0,-0.44);
+  % 2회 시행 후 남은 4개
+  \foreach \x in {1.2,1.6,3.2,3.6}{
+    \filldraw[fill=orange!25, draw=black!70] (\x,-1.52) rectangle (\x+0.2,-1.18);
+  }
+  \node[font=\footnotesize] at (2.5,-1.95) {$\vdots$};
+\end{tikzpicture}

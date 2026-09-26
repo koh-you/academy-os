@@ -1,0 +1,14 @@
+% 121-31(121쪽) — 두 곡선 y=x^2(x-4) 와 y=ax(x-4) 가 둘러싸는 두 색칠 부분. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 y·x·O·4·y=ax(x-4)·y=x^2(x-4) 만. 포물선의 벌어진 정도는 원문처럼 개략적이라 두 넓이가 같아지는 a 값을 그림에서 잴 수 없다.
+\begin{tikzpicture}[xscale=0.5, yscale=0.17, line width=0.5pt]
+  \fill[olive!25] plot[domain=0:2.6, samples=50] (\x, {\x*\x*(\x-4)}) -- plot[domain=2.6:0, samples=50] (\x, {2.6*\x*(\x-4)}) -- cycle;
+  \fill[olive!25] plot[domain=2.6:4, samples=40] (\x, {\x*\x*(\x-4)}) -- plot[domain=4:2.6, samples=40] (\x, {2.6*\x*(\x-4)}) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-1.5,0) -- (5.6,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-11.8) -- (0,8.4) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt, domain=-1.0:4.35, samples=110] plot (\x, {\x*\x*(\x-4)});
+  \draw[line width=0.6pt, domain=-0.6:4.6, samples=110] plot (\x, {2.6*\x*(\x-4)});
+  \node[above right=-2pt, font=\small, inner sep=1pt] at (0,0) {$\mathrm{O}$};
+  \node[below, font=\small, inner sep=2pt] at (4,0) {$4$};
+  \node[font=\small] at (2.85,7.6) {$y=ax(x-4)$};
+  \node[font=\small] at (2.55,-11.2) {$y=x^2(x-4)$};
+\end{tikzpicture}

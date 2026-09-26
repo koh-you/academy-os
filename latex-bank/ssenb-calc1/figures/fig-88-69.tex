@@ -1,0 +1,18 @@
+% 88-69(88쪽) — 좌표평면 위의 직선 y=2x 와 y축 위의 점 Q, x축 위의 점 P, 선분 PQ 와 직선의 교점 R.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문의 라벨 y·x·O·P·Q·R·y=2x 와 두 점의 움직이는 방향 화살표만 옮겼다.
+% 좌표값은 원문 그림에 없으므로 넣지 않았다(길이가 그림에서 읽히지 않게).
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1,0) -- (4.5,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.35) -- (0,2.55) node[left=1pt, font=\small] {$y$};
+  \node[font=\small, anchor=north east, inner sep=1pt] at (-0.03,-0.03) {$\mathrm{O}$};
+  \draw[line width=0.55pt] (-0.62,-1.24) -- (1.16,2.32);
+  \node[font=\small, anchor=south west, inner sep=2pt] at (1.2,2.12) {$y=2x$};
+  \draw[line width=0.6pt] (0,1.4) -- (3.2,0);
+  \fill (0,1.4) circle (2.2pt);
+  \fill (3.2,0) circle (2.2pt);
+  \node[font=\small, anchor=east, inner sep=3pt] at (0,1.4) {$\mathrm{Q}$};
+  \node[font=\small, anchor=north, inner sep=3pt] at (3.2,0) {$\mathrm{P}$};
+  \node[font=\small, anchor=north west, inner sep=1pt] at (0.6,1.1) {$\mathrm{R}$};
+  \draw[->, >=stealth, line width=0.5pt] (-0.2,0.3) -- (-0.2,0.85);
+  \draw[->, >=stealth, line width=0.5pt] (1.7,-0.35) -- (2.45,-0.35);
+\end{tikzpicture}

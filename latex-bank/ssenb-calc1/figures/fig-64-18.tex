@@ -1,0 +1,20 @@
+% 64-18(64쪽) — 사차함수 y=f(x) 의 그래프(x축과 a·c·e·g 에서 만나고 b·f 에서 극소, d 에서 극대). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 a~g·O·y=f(x) 만 두고 눈금·함숫값은 넣지 않는다(증가 구간을 그림에서 읽는 문항이므로 답이 읽히지 않게).
+\begin{tikzpicture}[scale=0.45, line width=0.5pt, every node/.style={font=\small}]
+  \draw[->, >=stealth, line width=0.7pt] (-5.2,0) -- (5.8,0) node[below left=-1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.9) -- (0,3.5) node[left=-1pt] {$y$};
+  \node[below left=-2pt, inner sep=1.5pt] at (0,0) {$\mathrm{O}$};
+  \draw[densely dashed, line width=0.4pt] (-2.51,0) -- (-2.51,-2.35);
+  \draw[densely dashed, line width=0.4pt] (0.79,0) -- (0.79,1.5);
+  \draw[densely dashed, line width=0.4pt] (3.04,0) -- (3.04,-1.35);
+  \draw[line width=0.6pt] plot[smooth] coordinates
+    {(-4.6,3.2) (-4.01,0) (-2.51,-2.35) (-0.56,0) (0.79,1.5) (1.99,0) (3.04,-1.35) (4.17,0) (4.85,2.6)};
+  \node[left, inner sep=1.5pt] at (4.9,2.95) {$y=f(x)$};
+  \node[below, inner sep=2pt] at (-4.2,0) {$a$};
+  \node[above, inner sep=2pt] at (-2.51,0) {$b$};
+  \node[above, inner sep=2pt] at (-0.56,0) {$c$};
+  \node[below, inner sep=2pt] at (0.79,0) {$d$};
+  \node[below, inner sep=2pt] at (1.99,0) {$e$};
+  \node[above, inner sep=2pt] at (3.04,0) {$f$};
+  \node[below, inner sep=2pt] at (4.35,0) {$g$};
+\end{tikzpicture}

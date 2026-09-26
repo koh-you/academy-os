@@ -1,0 +1,26 @@
+% 93-27(93쪽) — 정육각형 ABCDEF 와 변 AB 의 중점 M, 선분 MF. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C·D·E·F·M 과 θ(∠AMF)·중점 표시만. cos θ 의 값과 한 변의 길이는 적지 않는다.
+\begin{tikzpicture}[scale=0.82, line width=0.6pt]
+  \coordinate (A) at (-0.875,1.515);
+  \coordinate (F) at (0.875,1.515);
+  \coordinate (E) at (1.75,0);
+  \coordinate (D) at (0.875,-1.515);
+  \coordinate (C) at (-0.875,-1.515);
+  \coordinate (B) at (-1.75,0);
+  \coordinate (M) at (-1.3125,0.7575);
+  \draw (A) -- (F) -- (E) -- (D) -- (C) -- (B) -- cycle;
+  \draw (M) -- (F);
+  \draw[line width=0.45pt] (-1.2252,1.1486) -- (-1.0174,1.0286);
+  \draw[line width=0.45pt] (-1.1701,1.2439) -- (-0.9623,1.1239);
+  \draw[line width=0.45pt] (-1.6627,0.3911) -- (-1.4549,0.2711);
+  \draw[line width=0.45pt] (-1.6076,0.4864) -- (-1.3998,0.3664);
+  \draw (M) ++(19.1:0.5) arc (19.1:60:0.5);
+  \node[above=1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[above=1pt, font=\small] at (F) {$\mathrm{F}$};
+  \node[right=1pt, font=\small] at (E) {$\mathrm{E}$};
+  \node[below=2pt, font=\small] at (D) {$\mathrm{D}$};
+  \node[below=2pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[left=1pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[left=3pt, font=\small] at (M) {$\mathrm{M}$};
+  \node[font=\small] at (-0.70,1.20) {$\theta$};
+\end{tikzpicture}

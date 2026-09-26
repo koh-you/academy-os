@@ -1,0 +1,17 @@
+% 114-73(114쪽) — x>=0 에서 y=F(x) 의 그래프(원점에서 출발해 x=b 에서 극대, x=c 에서 x축을 지나 x=d 에서 극소, x=e 에서 다시 x축을 지난다). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 문자 눈금 a, b, c, d, e · b 와 d 의 점선, a 의 짧은 점선 표시 · 라벨 y=F(x), O, x, y. 수치 눈금은 원문에 없으므로 만들지 않는다.
+\begin{tikzpicture}[x=0.44cm, y=0.30cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.75,0) -- (6.35,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.05) -- (0,3.10) node[left] {$y$};
+  \draw[densely dotted, line width=0.5pt] (0.30,0) -- (0.30,0.52);
+  \draw[densely dotted, line width=0.5pt] (1.069,0) -- (1.069,1.94);
+  \draw[densely dotted, line width=0.5pt] (4.13,0) -- (4.13,-2.36);
+  \draw[line width=0.6pt, domain=0:5.70, samples=120, smooth] plot (\x, {0.3*\x*(\x-2.5)*(\x-5.3)});
+  \node[below left=-2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below, font=\small] at (0.30,0) {$a$};
+  \node[below, font=\small] at (1.069,0) {$b$};
+  \node[above, font=\small] at (2.28,0) {$c$};
+  \node[above, font=\small] at (4.13,0) {$d$};
+  \node[above, font=\small] at (4.95,0) {$e$};
+  \node[anchor=east, font=\small] at (5.60,2.90) {$y=F(x)$};
+\end{tikzpicture}

@@ -1,0 +1,9 @@
+% 123-99(123쪽) — 함수 y=f(x) 의 그래프: 기울기가 일정한 꺾은선 (-2,-1.5)-(-1,0)-(0,1.5)-(1,0)-(2,1.5)-(3,0)-(4,-1.5).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문에 있는 O·x·y·y=f(x) 뿐이고 눈금 수치는 원문에도 없다.
+\begin{tikzpicture}[scale=0.52, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.8,0) -- (4.8,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.9) -- (0,2.3) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (-2,-1.5) -- (-1,0) -- (0,1.5) -- (1,0) -- (2,1.5) -- (3,0) -- (4,-1.5);
+  \node[font=\small] at (2.9,2.0) {$y=f(x)$};
+  \node[below left=0pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+\end{tikzpicture}

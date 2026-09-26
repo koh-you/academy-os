@@ -1,0 +1,18 @@
+% 74-23(74쪽) — $y=\tan(ax+b)$ 의 그래프(점근선이 $x=-\frac{\pi}{4}$, $x=0$($y$축), $x=\frac{\pi}{4}$, $x=\frac{\pi}{2}$). 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨·점근선 점선만 · $y$축 눈금은 원문에 없다).
+\begin{tikzpicture}[line width=0.6pt, x=0.85cm, y=0.37cm]
+  \draw[dotted, line width=0.5pt] (-0.7854,-3.2) -- (-0.7854,3.2);
+  \draw[dotted, line width=0.5pt] (0.7854,-3.2) -- (0.7854,3.2);
+  \draw[dotted, line width=0.5pt] (1.5708,-3.2) -- (1.5708,3.2);
+  \draw[->, >=stealth, line width=0.7pt] (-1.45,0) -- (2.5,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.3) -- (0,3.4) node[right=1pt] {$y$};
+  \draw[domain=-1.30:-0.8654, samples=60, smooth] plot (\x, {tan(229.1831*\x+90)});
+  \draw[domain=-0.7051:-0.0801, samples=60, smooth] plot (\x, {tan(229.1831*\x+90)});
+  \draw[domain=0.0803:0.7054, samples=60, smooth] plot (\x, {tan(229.1831*\x+90)});
+  \draw[domain=0.8657:1.4908, samples=60, smooth] plot (\x, {tan(229.1831*\x+90)});
+  \draw[domain=1.6511:2.25, samples=60, smooth] plot (\x, {tan(229.1831*\x+90)});
+  \node[anchor=north east, font=\small] at (-0.80,-0.1) {$-\dfrac{\pi}{4}$};
+  \node[anchor=north east, font=\small] at (0.77,-0.1) {$\dfrac{\pi}{4}$};
+  \node[anchor=north east, font=\small] at (1.555,-0.1) {$\dfrac{\pi}{2}$};
+  \node[anchor=north east, font=\small] at (-0.03,-0.1) {$\pt{O}$};
+  \node[anchor=north west, font=\small] at (0.05,-2.5) {$y=\tan (ax+b)$};
+\end{tikzpicture}

@@ -1,0 +1,22 @@
+% 89-06(89쪽) — 원 위의 네 점 A, B, C, D 와 현 DA·DB·DC·CA·BA. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C·D 와 3(CD)·4(BD) 의 점선 안내만. 구하는 sin 값은 적지 않는다.
+\begin{tikzpicture}[scale=0.82, line width=0.6pt]
+  \draw (0,0) circle (2.1);
+  \coordinate (D) at (-0.543,2.028);
+  \coordinate (C) at (-2.068,0.365);
+  \coordinate (B) at (-1.720,-1.204);
+  \coordinate (A) at (1.350,-1.609);
+  \draw (D) -- (C);
+  \draw (D) -- (B);
+  \draw (D) -- (A);
+  \draw (C) -- (A);
+  \draw (B) -- (A);
+  \draw[dashed, line width=0.4pt] (D) to[bend right=26] (C);
+  \draw[dashed, line width=0.4pt] (D) to[bend left=22] (B);
+  \node[above=1pt, font=\small] at (D) {$\mathrm{D}$};
+  \node[left=1pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[below left=-1pt and 0pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[below right=-1pt and 0pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[fill=white, inner sep=1pt, font=\small] at (-1.49,1.37) {$3$};
+  \node[fill=white, inner sep=1pt, font=\small] at (-0.82,0.30) {$4$};
+\end{tikzpicture}

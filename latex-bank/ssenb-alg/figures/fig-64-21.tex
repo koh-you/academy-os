@@ -1,0 +1,34 @@
+% 64-21(64쪽) — 반지름 10, 중심각 3/5 π 인 부채꼴 AOB 와, 반지름이 차례로 절반이 되는 부채꼴 COD·EOF·GOH 를
+% 겹쳐 그린 원문 그림(색칠한 부분). 스캔 화질이 낮아 TikZ 로 다시 그림 — 라벨은 원문 그대로(A~H·O·10·3/5 π)만 둔다.
+\begin{tikzpicture}[scale=0.30, line width=0.6pt]
+  % 부채꼴 AOB(반지름 10, 36°~144°)
+  \fill[cyan!12] (0,0) -- (144:10) arc (144:36:10) -- cycle;
+  % 부채꼴 COD(반지름 5, 144°~216°)
+  \fill[cyan!12] (0,0) -- (144:5) arc (144:216:5) -- cycle;
+  % 부채꼴 EOF(반지름 2.5, 216°~324°)
+  \fill[cyan!12] (0,0) -- (216:2.5) arc (216:324:2.5) -- cycle;
+  % 부채꼴 GOH(반지름 1.25, 324°~396°)
+  \fill[cyan!12] (0,0) -- (324:1.25) arc (324:396:1.25) -- cycle;
+  \draw (144:10) arc (144:36:10);
+  \draw (144:5) arc (144:216:5);
+  \draw (216:2.5) arc (216:324:2.5);
+  \draw (324:1.25) arc (324:396:1.25);
+  \draw (144:10) -- (324:2.5);
+  \draw (36:10) -- (216:5);
+  % 반지름 10 을 나타내는 점선
+  \draw[densely dotted, line width=0.45pt] (144:9.6) to[bend left=20] (0,0);
+  \node[font=\small] at (-3.3,4.25) {$10$};
+  % 중심각
+  \draw[line width=0.4pt] (36:0.85) arc (36:144:0.85);
+  \node[font=\small] at (80:2.45) {$\dfrac{3}{5}\pi$};
+  \node[anchor=east, font=\small] at (144:10.3) {$\pt{A}$};
+  \node[anchor=west, font=\small] at (36:10.3) {$\pt{B}$};
+  \node[anchor=east, font=\small] at (-4.35,2.8) {$\pt{C}$};
+  \node[below=1pt, font=\small] at (216:5.3) {$\pt{D}$};
+  \node[below=1pt, font=\small] at (216:2.8) {$\pt{E}$};
+  \node[anchor=west, font=\small] at (324:2.75) {$\pt{F}$};
+  \node[anchor=west, font=\small] at (36:1.55) {$\pt{H}$};
+  \node[below=1pt, font=\small] at (-0.35,-0.75) {$\pt{O}$};
+  \node[font=\small] at (2.6,-3.6) {$\pt{G}$};
+  \draw[line width=0.35pt] (2.35,-3.25) to[bend left=25] (324:1.3);
+\end{tikzpicture}

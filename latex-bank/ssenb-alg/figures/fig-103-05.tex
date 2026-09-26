@@ -1,0 +1,29 @@
+% 103-05(103쪽) — 전체 좌석이 96개인 비행기의 좌석 번호 배치도. 앞(기수) 쪽이 왼쪽이고 통로를 사이에 두고 위 3줄·아래 3줄,
+% 왼쪽부터 1~6 · 7~12 · … · 91~96 이 적혀 있다. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(앞 · 오른쪽 창가 · 왼쪽 창가)만 두고, 구하는 좌석 번호(답)는 넣지 않는다.
+\begin{tikzpicture}[line width=0.5pt]
+  \filldraw[fill=red!15, draw=black!70]
+    (3.45,2.60) -- (-0.40,2.60)
+      .. controls (-1.35,2.52) and (-1.80,1.78) .. (-1.85,1.08)
+      .. controls (-1.80,0.38) and (-1.35,-0.36) .. (-0.40,-0.44)
+    -- (3.45,-0.44) -- cycle;
+  \fill[white] (0,1.14) rectangle (3.10,2.16);
+  \fill[white] (0,0) rectangle (3.10,1.02);
+  \draw[black!80] (0,1.14) rectangle (3.10,2.16);
+  \draw[black!80] (0,0) rectangle (3.10,1.02);
+  \foreach \x in {0.50,1.00,2.45}{
+    \draw[black!80] (\x,1.14) -- (\x,2.16);
+    \draw[black!80] (\x,0) -- (\x,1.02);
+  }
+  \foreach \y in {1.48,1.82}{\draw[black!80] (0,\y) -- (3.10,\y);}
+  \foreach \y in {0.34,0.68}{\draw[black!80] (0,\y) -- (3.10,\y);}
+  \foreach \yc/\aa/\bb/\cc in {1.99/6/12/96, 1.65/5/11/95, 1.31/4/10/94, 0.85/3/9/93, 0.51/2/8/92, 0.17/1/7/91}{
+    \node[font=\scriptsize] at (0.25,\yc) {$\aa$};
+    \node[font=\scriptsize] at (0.75,\yc) {$\bb$};
+    \node[font=\scriptsize] at (1.725,\yc) {$\cdots$};
+    \node[font=\scriptsize] at (2.775,\yc) {$\cc$};
+  }
+  \node[font=\footnotesize\bfseries] at (-0.95,1.08) {앞};
+  \node[font=\scriptsize\bfseries] at (1.55,2.38) {오른쪽 창가};
+  \node[font=\scriptsize\bfseries] at (1.55,-0.22) {왼쪽 창가};
+\end{tikzpicture}

@@ -1,0 +1,22 @@
+% 42-78(42쪽) — 원 x^2+y^2=8 위의 점 A 와 직선 y=-x-6 위의 두 점 B, C 를 꼭짓점으로 하는 정삼각형 ABC.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 x^2+y^2=8 · y=-x-6 · A · B · C · O · x · y · -6(두 곳)만 둔다.
+% 넓이의 비(답)는 그림에 나타내지 않는다.
+\begin{tikzpicture}[scale=0.32, line width=0.5pt]
+  \coordinate (A) at (-2,-2); \coordinate (B) at (-3.577,-2.423); \coordinate (C) at (-2.423,-3.577);
+  \draw[->, >=stealth, line width=0.7pt] (-7.8,0) -- (3.4,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-7.6) -- (0,3.6) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (0,0) circle (2.8284);
+  \draw[line width=0.6pt] (-7.2,1.2) -- (1.4,-7.4);
+  \fill[yellow!35] (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.6pt] (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.4pt] (-3.5,2.5) -- (-2.15,1.9);
+  \node[left=1pt, font=\small] at (-3.5,2.5) {$x^2+y^2=8$};
+  \draw[line width=0.4pt] (-2.8,-6.1) -- (-1.4,-5.0);
+  \node[left=1pt, font=\small] at (-2.8,-6.1) {$y=-x-6$};
+  \node[above right=-3pt and -2pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[left=1pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[below=1pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[below right=-2pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[below=1pt, font=\small] at (-6,0) {$-6$};
+  \node[right=1pt, font=\small] at (0,-6) {$-6$};
+\end{tikzpicture}

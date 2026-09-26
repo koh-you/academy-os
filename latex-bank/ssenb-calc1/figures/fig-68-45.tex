@@ -1,0 +1,21 @@
+% 68-45(68쪽) — 함수 f(x)의 도함수 y=f'(x) 그래프(x=0, 2, 5 에서 x축과 만나고 x=1 에서 극소 · x=4 에서 극대인 물결 모양). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 점선·눈금 라벨은 원문 그대로(-1, 1, 2, 3, 4, 5, 6, O)만 — 함숫값은 적지 않는다(답이 그림에서 읽히지 않게).
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.3,0) -- (7.3,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.5) -- (0,2.6) node[left=1pt] {$y$};
+  \draw[line width=0.6pt] plot[smooth, tension=0.65] coordinates {(-1.8,2.15) (-1.0,1.62) (-0.45,0.85) (0,0) (0.5,-0.62) (1,-0.8) (1.5,-0.5) (2,0) (2.5,0.72) (3,1.25) (3.55,1.65) (4,1.78) (4.5,1.45) (5,0) (5.5,-1.15) (6,-1.7) (6.7,-1.95)};
+  \draw[densely dotted, line width=0.4pt] (-1,0) -- (-1,1.62);
+  \draw[densely dotted, line width=0.4pt] (1,0) -- (1,-0.8);
+  \draw[densely dotted, line width=0.4pt] (3,0) -- (3,1.25);
+  \draw[densely dotted, line width=0.4pt] (4,0) -- (4,1.78);
+  \draw[densely dotted, line width=0.4pt] (6,0) -- (6,-1.7);
+  \node[below=1pt, font=\small] at (-1,0) {$-1$};
+  \node[below left=-1pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[above=1pt, font=\small] at (1,0) {$1$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[below=1pt, font=\small] at (3,0) {$3$};
+  \node[below=1pt, font=\small] at (4,0) {$4$};
+  \node[below left=-1pt and -3pt, font=\small] at (5,0) {$5$};
+  \node[above=1pt, font=\small] at (6,0) {$6$};
+  \node[anchor=west, font=\small] at (2.55,2.35) {$y=f'(x)$};
+\end{tikzpicture}

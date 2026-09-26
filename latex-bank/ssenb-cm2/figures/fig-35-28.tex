@@ -1,0 +1,13 @@
+% 35-28(35쪽) — 점 (6, 3)을 지나고 x축·y축에 동시에 접하는 두 원. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 O·x·y 와 눈금 3(y축)·6(x축) 만. 두 원의 중심 사이의 거리(답)는 그림에 나타내지 않는다.
+\begin{tikzpicture}[scale=0.1, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.5,0) -- (33,0) node[below left=1pt and -2pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-6) -- (0,32) node[left=-1pt, font=\small] {$y$};
+  \draw (3,3) circle (3);
+  \draw (15,15) circle (15);
+  \draw[dotted, line width=0.5pt] (0,3) -- (6,3);
+  \draw[line width=0.5pt] (6,-0.9) -- (6,0.9);
+  \node[left=1pt, font=\small] at (0,3) {$3$};
+  \node[below=1pt, font=\small] at (6,0) {$6$};
+  \node[below left=0pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+\end{tikzpicture}

@@ -1,0 +1,12 @@
+% 128-71(128쪽) — 점 P 의 속도 v(t) 의 그래프(t=0, 2, 4 에서 0 이고 t=6 뒤로 올라가는 곡선). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 곡선 모양은 원문 그림에서 읽은 점들을 그대로 이었다. 원문 라벨만: v(t) · t · O · 2 · 4 · 6 과 t=6 의 파선. 넓이·거리 값은 적지 않는다.
+\begin{tikzpicture}[x=0.42cm, y=0.38cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.7,0) -- (7.4,0) node[below] {$t$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.1) -- (0,4.5) node[left] {$v(t)$};
+  \node[below left=-2pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[dashed, line width=0.4pt] (6,0) -- (6,3.12);
+  \draw[line width=0.6pt] plot[smooth] coordinates {(0,0) (0.85,2.0) (1.19,1.75) (1.58,0.94) (2,0) (2.5,-0.81) (3.0,-1.19) (3.35,-1.06) (4,0) (4.65,0.81) (5.42,2.38) (6,3.12) (6.7,3.62)};
+  \node[below, font=\small, inner sep=1.5pt, xshift=-2pt] at (2,0) {$2$};
+  \node[below, font=\small, inner sep=1.5pt, xshift=2pt] at (4,0) {$4$};
+  \node[below, font=\small, inner sep=1.5pt] at (6,0) {$6$};
+\end{tikzpicture}

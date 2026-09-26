@@ -1,0 +1,30 @@
+% 63-19(63쪽) — 자동차 와이퍼가 부채꼴 모양으로 쓸고 간 유리창. 중심 O 에서 A, B 로 간 두 반지름과 호 AB(48π cm),
+% 와이퍼(60 cm)와 고무판(50 cm), 중심각 θ. 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨만 · 넓이를 읽을 수 있는 수치는 넣지 않는다).
+\begin{tikzpicture}[scale=0.42, line width=0.6pt]
+  % 중심 O 는 원점, 반지름 6(=60 cm), 호는 12°~168°
+  \fill[cyan!12] (0,0) -- (168:6) arc (168:12:6) -- cycle;
+  \draw (0,0) -- (168:6);
+  \draw (0,0) -- (12:6);
+  \draw (168:6) arc (168:12:6);
+  % 호의 길이를 나타내는 바깥 치수 호(48π cm)
+  \draw[line width=0.4pt] (168:6.6) arc (168:107:6.6);
+  \draw[line width=0.4pt] (73:6.6) arc (73:12:6.6);
+  \node[font=\small] at (0,7.2) {$48\pi\,\mathrm{cm}$};
+  % 와이퍼: 중심에서 A 까지 60 cm, 그중 바깥 50 cm 가 고무판
+  \draw[line width=0.45pt] (0,0) -- (168:1);
+  \draw[line width=1.6pt] (168:1) -- (168:5.9);
+  % 치수선(점선) — 고무판 50 cm
+  \draw[densely dotted, line width=0.4pt] (168:5.3) -- (0.35,2.25);
+  \node[anchor=west, font=\small] at (0.45,2.25) {$50\,\mathrm{cm}$};
+  \draw[densely dotted, line width=0.4pt] (0.7,1.85) -- (168:1.15);
+  % 치수선(점선) — 와이퍼 60 cm
+  \draw[densely dotted, line width=0.4pt] (168:5.6) -- (-3.6,-1.05) -- (-2.9,-1.75);
+  \node[anchor=east, font=\small] at (-3.0,-1.75) {$60\,\mathrm{cm}$};
+  \draw[densely dotted, line width=0.4pt] (-2.9,-1.75) -- (-0.35,-1.05) -- (0,0);
+  % 중심각 θ
+  \draw[line width=0.4pt] (12:1.15) arc (12:168:1.15);
+  \node[font=\small] at (0.3,0.42) {$\theta$};
+  \fill (0,0) circle (2.2pt);
+  \node[anchor=east, font=\small] at (168:6.05) {$\pt{A}$};
+  \node[anchor=west, font=\small] at (12:6.05) {$\pt{B}$};
+\end{tikzpicture}

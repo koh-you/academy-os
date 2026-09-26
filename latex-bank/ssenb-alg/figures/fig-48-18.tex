@@ -1,0 +1,15 @@
+% 48-18(48쪽) — y=log_3 x 의 그래프 위의 점 A 와 x축 위의 두 점 B, C 로 이루어진 정사각형 ABCD.
+% 스캔 화질이 낮아 TikZ 로 다시 그림(원문도 축척에 맞지 않는 개념도라 정사각형으로 보이도록 그렸다).
+% 라벨은 원문 그대로(y=log_3 x · A · B · C · D · O · x · y)만. 한 변의 길이나 D 의 좌표는 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt, x=0.44cm, y=0.44cm]
+  \draw[->, >=stealth, line width=0.7pt] (-0.8,0) -- (7.1,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.7) -- (0,2.2) node[left=1pt, font=\small] {$y$};
+  \draw[domain=0.28:6.4, samples=140, smooth] plot (\x, {ln(\x)/ln(3)});
+  \draw[line width=0.55pt] (4,0) -- (4,1.262) -- (5.262,1.262) -- (5.262,0) -- cycle;
+  \node[above=1pt, font=\small] at (4,1.262) {$\mathrm{A}$};
+  \node[right=1pt, font=\small] at (5.262,1.262) {$\mathrm{D}$};
+  \node[below=1pt, font=\small] at (4,0) {$\mathrm{B}$};
+  \node[below=1pt, font=\small] at (5.262,0) {$\mathrm{C}$};
+  \node[below left=-1pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[anchor=east, font=\small] at (3.55,1.35) {$y=\log_3 x$};
+\end{tikzpicture}

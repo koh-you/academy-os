@@ -1,0 +1,26 @@
+% 117-60(117쪽) — 두 함수 y=f(x)(증가하며 위로 볼록한 곡선)와 y=x 의 그래프 · x축 위의 점 a<b<c<d<e 와
+% x축·y축에 평행한 점선. 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 a·b·c·d·e·O·x·y·y=x·y=f(x) 뿐이고
+% 함숫값(답)은 숫자로 적지 않는다.
+\begin{tikzpicture}[scale=0.40, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.9,0) -- (9.6,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.9) -- (0,7.4) node[left=-1pt, font=\small] {$y$};
+  \draw[densely dotted, line width=0.4pt] (2.05,0) -- (2.05,2.05);
+  \draw[densely dotted, line width=0.4pt] (2.75,0) -- (2.75,2.75);
+  \draw[densely dotted, line width=0.4pt] (3.40,0) -- (3.40,3.40);
+  \draw[densely dotted, line width=0.4pt] (4.30,0) -- (4.30,4.30);
+  \draw[densely dotted, line width=0.4pt] (5.75,0) -- (5.75,5.75);
+  \draw[densely dotted, line width=0.4pt] (0,2.05) -- (2.75,2.05);
+  \draw[densely dotted, line width=0.4pt] (0,2.75) -- (3.40,2.75);
+  \draw[densely dotted, line width=0.4pt] (0,3.40) -- (4.30,3.40);
+  \draw[densely dotted, line width=0.4pt] (0,4.30) -- (5.75,4.30);
+  \draw[line width=0.6pt] (-1.6,-1.6) -- (6.5,6.5) node[above right=-3pt and -2pt, font=\small] {$y=x$};
+  \draw[line width=0.6pt, smooth, tension=0.7] plot coordinates
+    {(0.70,-0.75) (0.90,-0.40) (1.15,0) (1.50,0.50) (2.05,1.20) (2.75,2.05) (3.40,2.75) (4.30,3.40) (5.00,3.85) (5.75,4.30) (7.00,4.95) (8.70,5.60)};
+  \node[right=1pt, font=\small] at (8.20,5.15) {$y=f(x)$};
+  \node[below=1pt, font=\small] at (2.05,0) {$a$};
+  \node[below=1pt, font=\small] at (2.75,0) {$b$};
+  \node[below=1pt, font=\small] at (3.40,0) {$c$};
+  \node[below=1pt, font=\small] at (4.30,0) {$d$};
+  \node[below=1pt, font=\small] at (5.75,0) {$e$};
+  \node[above left=-2pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+\end{tikzpicture}

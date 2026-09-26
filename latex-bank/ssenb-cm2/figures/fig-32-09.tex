@@ -1,0 +1,14 @@
+% 32-09(32쪽) — 중심이 직선 y=(1/2)x 위에 있고 원점 O 를 지나는 원 · x축·y축과 만나는 점 A, B. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 O·A·B·x·y·y=(1/2)x 만. 반지름의 길이(답)는 그림에 나타내지 않는다(원문도 눈금이 없다).
+\begin{tikzpicture}[scale=0.55, line width=0.5pt]
+  \coordinate (C) at (2,1); \coordinate (A) at (4,0); \coordinate (B) at (0,2);
+  \draw[->, >=stealth, line width=0.7pt] (-1.5,0) -- (6.3,0) node[below left=1pt and -2pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.6) -- (0,4.2) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (C) circle (2.2361);
+  \draw[line width=0.6pt] (-1.2,-0.6) -- (5.4,2.7);
+  \node[above right=-1pt and 0pt, font=\small] at (5.4,2.7) {$y=\dfrac{1}{2}x$};
+  \fill (C) circle (2.2pt);
+  \node[below right=0pt and 1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[left=1pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[below left=0pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+\end{tikzpicture}

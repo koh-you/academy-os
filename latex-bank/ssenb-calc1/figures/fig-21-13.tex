@@ -1,0 +1,49 @@
+% 21-13(21쪽) — 0≤x≤4 에서 정의된 두 함수 y=f(x), y=g(x) 의 그래프. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문처럼 왼쪽 f, 오른쪽 g 를 나란히 둔다. 라벨·점선은 원문 그대로(1, 2, 3, 4, 1, 2, O, x, y, y=f(x), y=g(x))만.
+\begin{tikzpicture}[scale=0.55, line width=0.5pt]
+  % 왼쪽: y=f(x)
+  \begin{scope}
+    \draw[->, >=stealth, line width=0.7pt] (-0.7,0) -- (5.4,0) node[below] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-0.9) -- (0,3.1) node[left] {$y$};
+    \node[below left=-2pt and -4pt, font=\small] at (0,0) {$\mathrm{O}$};
+    \draw[line width=0.6pt] (0,0) -- (1,1) -- (3,1) -- (4,2);
+    \draw[dotted, line width=0.5pt] (0,1) -- (1,1);
+    \draw[dotted, line width=0.5pt] (0,2) -- (4,2);
+    \draw[dotted, line width=0.5pt] (1,0) -- (1,1);
+    \draw[dotted, line width=0.5pt] (2,0) -- (2,1);
+    \draw[dotted, line width=0.5pt] (3,0) -- (3,1);
+    \draw[dotted, line width=0.5pt] (4,0) -- (4,2);
+    \fill (0,0) circle (2.2pt);
+    \fill (4,2) circle (2.2pt);
+    \node[below, font=\small] at (1,0) {$1$};
+    \node[below, font=\small] at (2,0) {$2$};
+    \node[below, font=\small] at (3,0) {$3$};
+    \node[below, font=\small] at (4,0) {$4$};
+    \node[left, font=\small] at (0,1) {$1$};
+    \node[left, font=\small] at (0,2) {$2$};
+    \node[font=\small] at (3.1,2.75) {$y=f(x)$};
+  \end{scope}
+  % 오른쪽: y=g(x)
+  \begin{scope}[shift={(8.2,0)}]
+    \draw[->, >=stealth, line width=0.7pt] (-0.7,0) -- (5.4,0) node[below] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-0.9) -- (0,3.1) node[left] {$y$};
+    \node[below left=-2pt and -4pt, font=\small] at (0,0) {$\mathrm{O}$};
+    \draw[line width=0.6pt] (0,1) -- (1,0) -- (2,1);
+    \draw[line width=0.6pt] (2,2) -- (4,0);
+    \draw[dotted, line width=0.5pt] (0,1) -- (2,1);
+    \draw[dotted, line width=0.5pt] (0,2) -- (2,2);
+    \draw[dotted, line width=0.5pt] (2,0) -- (2,2);
+    \draw[dotted, line width=0.5pt] (3,0) -- (3,1);
+    \draw[fill=white, line width=0.5pt] (2,2) circle (2.2pt);
+    \fill (0,1) circle (2.2pt);
+    \fill (2,1) circle (2.2pt);
+    \fill (4,0) circle (2.2pt);
+    \node[below, font=\small] at (1,0) {$1$};
+    \node[below, font=\small] at (2,0) {$2$};
+    \node[below, font=\small] at (3,0) {$3$};
+    \node[below, font=\small] at (4,0) {$4$};
+    \node[left, font=\small] at (0,1) {$1$};
+    \node[left, font=\small] at (0,2) {$2$};
+    \node[font=\small] at (3.1,2.75) {$y=g(x)$};
+  \end{scope}
+\end{tikzpicture}

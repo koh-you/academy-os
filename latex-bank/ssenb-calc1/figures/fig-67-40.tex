@@ -1,0 +1,15 @@
+% 67-40(67쪽) — 도함수 y=f'(x) 의 그래프(구간 [a, b] 안에서 x축을 여러 번 지나며 오르내린다). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 부호가 바뀌는 자리·개수가 문항의 조건이므로 원문의 오르내림을 그대로 옮겼다. 라벨은 원문 그대로 a·b·O·x·y·y=f'(x) 뿐이고 극대·극소의 개수는 적지 않는다.
+\begin{tikzpicture}[scale=0.42, line width=0.5pt, every node/.style={font=\small}]
+  \draw[->, >=stealth, line width=0.7pt] (-6.2,0) -- (6.2,0) node[below left=-1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.6) -- (0,2.6) node[left=-1pt] {$y$};
+  \node[below right=-2pt, inner sep=1.5pt] at (0,0) {$\mathrm{O}$};
+  \draw[densely dotted, line width=0.4pt] (-5.4,0) -- (-5.4,-1.95);
+  \draw[densely dotted, line width=0.4pt] (5.08,0) -- (5.08,1.6);
+  \draw[line width=0.6pt] plot[smooth] coordinates
+    {(-5.48,-2.12) (-4.88,0) (-4.36,0.06) (-4.04,0) (-3.48,-1.28) (-3.0,0) (-2.48,1.12) (-2.08,0)
+     (-1.24,-2.12) (-0.6,0) (0.2,1.88) (1.0,0) (1.32,-0.07) (1.56,0) (2.08,0.88) (2.6,0) (3.88,-1.4) (4.64,0) (5.2,2.08)};
+  \node[above, inner sep=1.5pt] at (4.2,2.05) {$y=f'(x)$};
+  \node[above, inner sep=2pt] at (-5.4,0) {$a$};
+  \node[below, inner sep=2pt] at (5.08,0) {$b$};
+\end{tikzpicture}

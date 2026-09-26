@@ -1,0 +1,15 @@
+% 36-32 ②(36쪽) — 보기 그래프: x=a 에서 뛰어 있는(채운 점 아래·빈 점 위) 그래프. 스캔 화질이 낮아 TikZ 로 다시 그림(그림 자체가 보기).
+% 라벨은 원문 그대로 O · a · y=f(x) 만.
+\begin{tikzpicture}[scale=0.5, line width=0.5pt, baseline=(current bounding box.center)]
+  \path (-1.9,-1.9) rectangle (3.0,2.9);
+  \draw[->, >=stealth, line width=0.7pt] (-1.7,0) -- (2.8,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.8) -- (0,2.1) node[right=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (-0.85,-1.63) -- (1,0);
+  \draw[line width=0.6pt] (1,1.15) -- (2.55,1.15);
+  \draw[densely dotted, line width=0.4pt] (1,0) -- (1,1.15);
+  \filldraw (1,0) circle (0.13);
+  \filldraw[fill=white, line width=0.5pt] (1,1.15) circle (0.13);
+  \node[below left=-2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[below right=-2pt, font=\small] at (1,0) {$a$};
+  \node[font=\small, anchor=west] at (1.1,1.85) {$y=f(x)$};
+\end{tikzpicture}

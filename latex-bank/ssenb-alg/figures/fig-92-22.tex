@@ -1,0 +1,28 @@
+% 92-22(92쪽) — 한 변의 길이가 6 인 정사각형 ABCD 와 한 변의 길이가 2 인 정사각형 CEFG, 선분 DG·BE. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C·D·E·F·G 와 6(AB)·2(EF)·θ(∠DCG) 만. DG·BE 의 값은 적지 않는다.
+\begin{tikzpicture}[scale=0.82, line width=0.6pt]
+  \coordinate (A) at (-1.576,1.419);
+  \coordinate (D) at (1.419,1.576);
+  \coordinate (C) at (1.576,-1.419);
+  \coordinate (B) at (-1.419,-1.576);
+  \coordinate (G) at (2.497,-1.028);
+  \coordinate (F) at (2.888,-1.949);
+  \coordinate (E) at (1.967,-2.340);
+  \draw (A) -- (D) -- (C) -- (B) -- cycle;
+  \draw (C) -- (G) -- (F) -- (E) -- cycle;
+  \draw (D) -- (G);
+  \draw (B) -- (E);
+  \draw (C) ++(23:0.52) arc (23:93:0.52);
+  \draw[dashed, line width=0.4pt] (A) to[bend right=16] (B);
+  \draw[dashed, line width=0.4pt] (E) to[bend right=26] (F);
+  \node[above left=-2pt and -2pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[above=1pt, font=\small] at (D) {$\mathrm{D}$};
+  \node[left=1pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[below left=-1pt and -2pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[right=1pt, font=\small] at (G) {$\mathrm{G}$};
+  \node[right=1pt, font=\small] at (F) {$\mathrm{F}$};
+  \node[below=2pt, font=\small] at (E) {$\mathrm{E}$};
+  \node[font=\small] at (-2.16,-0.06) {$6$};
+  \node[font=\small] at (2.52,-2.62) {$2$};
+  \node[font=\small] at (2.02,-0.74) {$\theta$};
+\end{tikzpicture}

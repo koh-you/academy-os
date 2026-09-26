@@ -1,0 +1,14 @@
+% 65-25(65쪽) — 반지름 4 인 원 모양의 종이를 원주 위의 한 점이 중심 O 에 겹치도록 접은 그림.
+% 접히기 전의 호는 점선, 접힌 활꼴의 호는 실선으로 O 를 지난다. 스캔 화질이 낮아 TikZ 로 다시 그림
+% (원문 라벨 O 만 두고, 접은 호의 길이를 읽을 수 있는 수치·각은 넣지 않는다).
+\begin{tikzpicture}[scale=0.62, line width=0.6pt]
+  % 원 O(반지름 4) — 접는 선은 x=2 인 현
+  \fill[violet!10] (60:4) arc (60:300:4) -- cycle;
+  \draw (60:4) arc (60:300:4);
+  \draw[densely dotted, line width=0.5pt] (-60:4) arc (-60:60:4);
+  \draw (2,3.4641) -- (2,-3.4641);
+  % 접힌 활꼴의 호 — 중심이 (4,0) 인 반지름 4 의 호가 O 를 지난다
+  \draw ([shift={(4,0)}]120:4) arc (120:240:4);
+  \fill (0,0) circle (2.2pt);
+  \node[anchor=east, font=\small] at (-0.3,0.05) {$\pt{O}$};
+\end{tikzpicture}

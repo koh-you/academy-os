@@ -1,0 +1,36 @@
+% 111-54(111쪽) — 직선 l 위에 같은 간격으로 잡은 점 P1, P2, P3, …, P20 과 직선 m 에 내린 수선의 발 Q1, Q2, Q3, …, Q20.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로(l · m · P · Q · 7 · 13)만 두고, 구하는 합은 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt]
+  % 세로 길이는 원문 수치 비율(P1Q1=7 · P20Q20=13)에 맞춘다.
+  \coordinate (Q1) at (0.80,0);
+  \coordinate (Q2) at (1.35,0);
+  \coordinate (Q3) at (1.90,0);
+  \coordinate (Q20) at (4.30,0);
+  \coordinate (P1) at (0.80,0.835);
+  \coordinate (P2) at (1.35,0.947);
+  \coordinate (P3) at (1.90,1.059);
+  \coordinate (P20) at (4.30,1.550);
+  \draw[line width=0.6pt] (0.35,0.743) -- (4.78,1.648);
+  \draw[line width=0.6pt] (0.30,0) -- (4.85,0);
+  \foreach \p/\q in {P1/Q1,P2/Q2,P3/Q3,P20/Q20} \draw[line width=0.45pt] (\p) -- (\q);
+  \foreach \x in {0.80,1.35,1.90} \draw[line width=0.35pt] (\x,0) -- (\x+0.11,0) -- (\x+0.11,0.11) -- (\x,0.11);
+  \draw[line width=0.35pt] (4.30,0) -- (4.19,0) -- (4.19,0.11) -- (4.30,0.11);
+  % 원문의 점선 호(치수 표시)
+  \draw[line width=0.35pt, dotted] (P1) .. controls (0.52,0.60) and (0.52,0.25) .. (Q1);
+  \draw[line width=0.35pt, dotted] (P20) .. controls (4.64,1.10) and (4.64,0.45) .. (Q20);
+  \node[font=\scriptsize] at (0.44,0.30) {$7$};
+  \node[font=\scriptsize] at (4.78,0.82) {$13$};
+  \node[font=\scriptsize] at (2.95,1.45) {$\cdots$};
+  \node[font=\scriptsize] at (3.10,0.50) {$\cdots$};
+  \node[font=\scriptsize] at (3.10,-0.26) {$\cdots$};
+  \node[font=\scriptsize, above left=-1pt and -3pt] at (P1) {$\mathrm{P}_1$};
+  \node[font=\scriptsize, above left=-1pt and -3pt] at (P2) {$\mathrm{P}_2$};
+  \node[font=\scriptsize, above left=-1pt and -3pt] at (P3) {$\mathrm{P}_3$};
+  \node[font=\scriptsize, above left=-1pt and -3pt] at (P20) {$\mathrm{P}_{20}$};
+  \node[font=\scriptsize, below=1pt] at (Q1) {$\mathrm{Q}_1$};
+  \node[font=\scriptsize, below=1pt] at (Q2) {$\mathrm{Q}_2$};
+  \node[font=\scriptsize, below=1pt] at (Q3) {$\mathrm{Q}_3$};
+  \node[font=\scriptsize, below=1pt] at (Q20) {$\mathrm{Q}_{20}$};
+  \node[font=\small] at (4.95,1.72) {$l$};
+  \node[font=\small] at (5.00,0.02) {$m$};
+\end{tikzpicture}

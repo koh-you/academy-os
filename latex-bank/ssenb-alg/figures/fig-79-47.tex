@@ -1,0 +1,27 @@
+% 79-47(79쪽) — 원 x^2+y^2=1 위의 점 P 와 x축에 내린 수선의 발 A · ∠POA=α, ∠OPA=β · 삼각형 POA. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(x · y · 1 · -1 · O · A · P · α · β · x^2+y^2=1)만 두고, 삼각형의 넓이(답)는 적지 않는다.
+\begin{tikzpicture}[scale=1.5, line width=0.5pt]
+  \coordinate (O) at (0,0);
+  \coordinate (P) at (0.6157,0.7880);
+  \coordinate (A) at (0.6157,0);
+  \fill[black!8] (O) -- (A) -- (P) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-1.45,0) -- (1.55,0) node[below right=0pt and -1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.45) -- (0,1.55) node[above left=-2pt and 0pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (0,0) circle (1);
+  \draw[line width=0.6pt] (O) -- (P) -- (A);
+  \fill (P) circle (1.8pt);
+  % A 의 직각 표시
+  \draw[line width=0.35pt] (0.52,0) -- (0.52,0.096) -- (0.6157,0.096);
+  \draw[line width=0.35pt] (0.30,0) arc (0:52:0.30);
+  \draw[line width=0.35pt] ($(P)+(232:0.24)$) arc (232:270:0.24);
+  \node[font=\small, anchor=south east, inner sep=0.5pt] at (0.42,0.07) {$\alpha$};
+  \node[font=\small, inner sep=0pt] at (0.537,0.468) {$\beta$};
+  \node[font=\small, above right=-2pt and 0pt] at (P) {$\mathrm{P}$};
+  \node[font=\small, below=2pt] at (A) {$\mathrm{A}$};
+  \node[font=\small, below left=0pt and -2pt] at (O) {$\mathrm{O}$};
+  \node[font=\small, left=2pt] at (0,1) {$1$};
+  \node[font=\small, left=2pt] at (0,-1) {$-1$};
+  \node[font=\small, below=2pt] at (1.08,0) {$1$};
+  \node[font=\small, below=2pt] at (-1,0) {$-1$};
+  \node[font=\small, anchor=west] at (0.34,-1.22) {$x^2+y^2=1$};
+\end{tikzpicture}

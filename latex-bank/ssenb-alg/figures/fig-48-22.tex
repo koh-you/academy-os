@@ -1,0 +1,23 @@
+% 48-22(48쪽) — y=log_a x 와 y=log_b x 의 그래프, 직선 y=1 과의 교점 A, B, 직선 y=2 와의 교점 C, D.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로(두 곡선의 식 · y=1 · y=2 · A · B · C · D · O · 1 · 2 · x · y)만.
+% AB 의 중점·길이나 CD 의 길이(답)는 그림에서 읽히지 않도록 개념도로 그렸다.
+\begin{tikzpicture}[line width=0.6pt, x=0.42cm, y=0.62cm]
+  \draw[->, >=stealth, line width=0.7pt] (-0.7,0) -- (10.0,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.85) -- (0,3.8) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.55pt] (-0.45,1) -- (9.4,1);
+  \draw[line width=0.55pt] (-0.45,2) -- (9.4,2);
+  % y=log_a x (a=1.75 · 왼쪽) · y=log_b x (b=2.6 · 오른쪽)
+  \draw[domain=0.6:4.6, samples=140, smooth] plot (\x, {ln(\x)/ln(1.75)});
+  \draw[domain=0.45:9.1, samples=140, smooth] plot (\x, {ln(\x)/ln(2.6)});
+  \node[above left=-2pt and -3pt, font=\small] at (1.75,1) {$\mathrm{A}$};
+  \node[above right=-2pt and -1pt, font=\small] at (2.6,1) {$\mathrm{B}$};
+  \node[above left=-2pt and -3pt, font=\small] at (3.0625,2) {$\mathrm{C}$};
+  \node[above left=-2pt and -3pt, font=\small] at (6.76,2) {$\mathrm{D}$};
+  \node[left=1pt, font=\small] at (0,1) {$1$};
+  \node[left=1pt, font=\small] at (0,2) {$2$};
+  \node[below left=-1pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[anchor=east, font=\small] at (9.4,1.7) {$y=2$};
+  \node[anchor=east, font=\small] at (9.4,0.7) {$y=1$};
+  \node[anchor=west, font=\small] at (4.8,3.3) {$y=\log_a x$};
+  \node[anchor=west, font=\small] at (7.2,2.62) {$y=\log_b x$};
+\end{tikzpicture}

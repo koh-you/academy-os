@@ -1,0 +1,17 @@
+% 121-30(121쪽) — 곡선 y=9-x^2 (x>=0) 과 y축·직선 y=k·직선 x=3 으로 나뉘는 두 색칠 부분. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 y·x·O·9·3·y=k·x=3·y=9-x^2 만. 직선 y=k 의 높이는 원문처럼 개략 위치라 두 넓이가 같아지는 k 값을 그림에서 잴 수 없다.
+\begin{tikzpicture}[xscale=0.42, yscale=0.21, line width=0.5pt]
+  \fill[red!12] plot[domain=0:2.1213, samples=40] (\x, {9-\x*\x}) -- (2.1213,4.5) -- (0,4.5) -- cycle;
+  \fill[red!12] plot[domain=2.1213:3, samples=40] (\x, {9-\x*\x}) -- (3,4.5) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-1.5,0) -- (6.2,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-4.0) -- (0,11.2) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (-1.15,4.5) -- (5.3,4.5);
+  \draw[line width=0.6pt] (3,-3.4) -- (3,10.4);
+  \draw[line width=0.6pt, domain=0:3.55, samples=80] plot (\x, {9-\x*\x});
+  \node[below left=-2pt, font=\small, inner sep=1pt] at (0,0) {$\mathrm{O}$};
+  \node[below left=-1pt, font=\small, inner sep=2pt] at (3,0) {$3$};
+  \node[left, font=\small, inner sep=2pt] at (0,9) {$9$};
+  \node[right, font=\small, inner sep=2pt] at (5.3,4.5) {$y=k$};
+  \node[above, font=\small, inner sep=2pt] at (3,10.4) {$x=3$};
+  \node[right, font=\small, inner sep=2pt] at (3.3,-3.2) {$y=9-x^2$};
+\end{tikzpicture}

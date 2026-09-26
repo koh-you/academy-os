@@ -1,0 +1,10 @@
+% 88-66(88쪽) — 삼차식 x(t) 의 그래프(t축과 t=0, 1, 4 에서 만나는 아래로 향하는 삼차곡선). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문의 라벨 x(t)·t·O·1·4 만 옮겼다. 극대·극소의 위치나 값은 원문에 표시가 없으므로 넣지 않았다.
+\begin{tikzpicture}[xscale=0.6, yscale=0.27, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.75,0) -- (5.4,0) node[below left=-1pt, font=\small] {$t$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-6.4) -- (0,7.9) node[left=1pt, font=\small] {$x(t)$};
+  \node[font=\small, anchor=north east, inner sep=1pt] at (-0.03,-0.05) {$\mathrm{O}$};
+  \draw[line width=0.6pt, domain=-0.14:4.32, samples=120] plot (\x, {-(\x)*(\x-1)*(\x-4)});
+  \node[font=\small, anchor=north west, inner sep=1pt] at (1.02,-0.05) {$1$};
+  \node[font=\small, anchor=north east, inner sep=1pt] at (3.98,-0.05) {$4$};
+\end{tikzpicture}

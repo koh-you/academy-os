@@ -1,0 +1,32 @@
+% 9-15(9쪽) — $y=f(x)$ 의 그래프(선분 두 조각 · 곡선 두 조각 · 닫힌 점·빈 점·안내 점선). 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨·점선만 · 눈금은 만들지 않음).
+\begin{tikzpicture}[scale=0.62, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.2,0) -- (3.5,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.1) -- (0,3.2) node[left=1pt] {$y$};
+  \draw[densely dotted, line width=0.4pt] (-1,1) -- (-1,-1);
+  \draw[densely dotted, line width=0.4pt] (-1,1) -- (0,1);
+  \draw[densely dotted, line width=0.4pt] (-1,-1) -- (1,-1) -- (1,0);
+  \draw[densely dotted, line width=0.4pt] (0,2) -- (2,2) -- (2,0);
+  \draw (-2,0) -- (-1,1);
+  \draw[smooth, tension=0.7] plot coordinates {(-1,-1) (-0.8,-1.47) (-0.55,-1.78) (-0.3,-1.94) (0,-2)};
+  \draw (0,0) -- (1,-1);
+  \draw[smooth, tension=0.7] plot coordinates {(1,0) (1.12,0.5) (1.3,1.05) (1.58,1.6) (2,2)};
+  \fill (-2,0) circle (2.2pt);
+  \draw[fill=white] (-1,1) circle (2.2pt);
+  \fill (-1,0) circle (2.2pt);
+  \draw[fill=white] (-1,-1) circle (2.2pt);
+  \fill (0,-2) circle (2.2pt);
+  \draw[fill=white] (0,0) circle (2.2pt);
+  \fill (1,-1) circle (2.2pt);
+  \draw[fill=white] (1,0) circle (2.2pt);
+  \fill (2,2) circle (2.2pt);
+  \node[left=2pt, font=\small] at (0,2) {$2$};
+  \node[right=2pt, font=\small] at (0,1) {$1$};
+  \node[below right=-1pt and 2pt, font=\small] at (0,-1) {$-1$};
+  \node[right=3pt, font=\small] at (0,-2) {$-2$};
+  \node[below=1pt, font=\small] at (-2,0) {$-2$};
+  \node[below=1pt, font=\small] at (-1,0) {$-1$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[below left=-1pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[font=\small] at (1.5,2.9) {$y=f(x)$};
+\end{tikzpicture}

@@ -1,0 +1,17 @@
+% 115-82(115쪽) — 한 변의 길이가 6인 정삼각형에서 각 변의 중점을 이어 만든 가운데 정삼각형을 오려 낸 1회 시행 후의 모양.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 한 변의 길이 6 만 두고, 남아 있는 넓이(답)는 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (A) at (0,0);
+  \coordinate (B) at (2.4,0);
+  \coordinate (C) at (1.2,2.078);
+  \coordinate (Mab) at (1.2,0);
+  \coordinate (Mbc) at (1.8,1.039);
+  \coordinate (Mca) at (0.6,1.039);
+  \fill[yellow!30] (A) -- (Mab) -- (Mca) -- cycle;
+  \fill[yellow!30] (Mab) -- (B) -- (Mbc) -- cycle;
+  \fill[yellow!30] (Mca) -- (Mbc) -- (C) -- cycle;
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (Mab) -- (Mbc) -- (Mca) -- cycle;
+  \draw[densely dotted, line width=0.4pt] (A) to[bend left=22] (C);
+  \node[font=\small] at (0.28,1.02) {$6$};
+\end{tikzpicture}

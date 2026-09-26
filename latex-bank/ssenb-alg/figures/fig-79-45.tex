@@ -1,0 +1,24 @@
+% 79-45(79쪽) — 선분 AB 를 지름으로 하는 원 O 와 원 위의 점 C · AC=2, BC=√5 · ∠CAB=α, ∠CBA=β. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(A · B · C · O · 2 · √5 · α · β)만 두고, 구하는 값은 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt]
+  % 지름 AB=3 인 원(반지름 1.5) · AC=2, BC=√5 이므로 C=(-1/6, √20/3)
+  \coordinate (A) at (-1.5,0);
+  \coordinate (B) at (1.5,0);
+  \coordinate (C) at (-0.1667,1.4907);
+  \draw[line width=0.6pt] (0,0) circle (1.5);
+  \draw[line width=0.6pt] (A) -- (B);
+  \draw[line width=0.6pt] (A) -- (C) -- (B);
+  \fill (0,0) circle (1.6pt);
+  \draw[line width=0.4pt] ($(A)+(0:0.45)$) arc (0:48.2:0.45);
+  \draw[line width=0.4pt] ($(B)+(180:0.45)$) arc (180:138.2:0.45);
+  % √5 는 원문처럼 원 밖에 두고 지시선으로 BC 를 가리킨다.
+  \draw[line width=0.35pt] (0.79,0.72) -- (1.24,1.22);
+  \node[font=\small, anchor=south east, inner sep=1pt] at (-0.97,0.86) {$2$};
+  \node[font=\small, anchor=south west, inner sep=1pt] at (1.20,1.22) {$\sqrt{5}$};
+  \node[font=\small] at (-0.93,0.26) {$\alpha$};
+  \node[font=\small] at (0.93,0.26) {$\beta$};
+  \node[font=\small, left=2pt] at (A) {$\mathrm{A}$};
+  \node[font=\small, right=2pt] at (B) {$\mathrm{B}$};
+  \node[font=\small, above=2pt] at (C) {$\mathrm{C}$};
+  \node[font=\small, below=2pt] at (0,0) {$\mathrm{O}$};
+\end{tikzpicture}

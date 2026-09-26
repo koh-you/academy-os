@@ -1,0 +1,14 @@
+% 123-41(123쪽) — 곡선 y=-x^2+kx 와 x축 및 직선 x=4 로 둘러싸인 두 부분(색칠). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문 라벨만: y · x · O · k · 4 · 곡선 식. k 는 원문 그림처럼 4 보다 왼쪽(여기서는 3)에 잡았고 넓이 값은 적지 않는다.
+\begin{tikzpicture}[x=0.72cm, y=0.3cm, line width=0.5pt]
+  \fill[yellow!45] plot[domain=0:3, samples=60] (\x, {-\x*\x+3*\x}) -- cycle;
+  \fill[yellow!45] plot[domain=3:4, samples=30] (\x, {-\x*\x+3*\x}) -- (4,0) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-1.1,0) -- (4.9,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-6.2) -- (0,3.4) node[left] {$y$};
+  \node[below left=-2pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt, domain=-0.62:4.3, samples=80, smooth] plot (\x, {-\x*\x+3*\x});
+  \draw[line width=0.6pt] (4,0) -- (4,-4);
+  \node[below, font=\small, inner sep=1.5pt, xshift=-2pt] at (3,0) {$k$};
+  \node[above, font=\small, inner sep=1.5pt] at (4,0) {$4$};
+  \node[font=\small] at (2.9,3.1) {$y=-x^2+kx$};
+\end{tikzpicture}

@@ -1,0 +1,12 @@
+% 113-69(113쪽) — 이차함수 y=f(x) 의 그래프(위로 볼록 · 원점과 x=4 에서 x축과 만나고 최댓값 2). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: y축 눈금 2 와 꼭짓점까지의 점선 · x축 눈금 4 · 라벨 y=f(x), O, x, y. 없는 눈금은 만들지 않는다.
+\begin{tikzpicture}[x=0.40cm, y=0.44cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.55,0) -- (6.20,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.95) -- (0,3.20) node[left] {$y$};
+  \draw[line width=0.6pt, domain=-1.0:5.0, samples=90, smooth] plot (\x, {-0.5*\x*\x+2*\x});
+  \draw[densely dotted, line width=0.5pt] (0,2) -- (2,2);
+  \node[left, font=\small] at (0,2) {$2$};
+  \node[below right=-2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below left=-2pt, font=\small] at (4,0) {$4$};
+  \node[anchor=west, font=\small] at (2.25,2.75) {$y=f(x)$};
+\end{tikzpicture}

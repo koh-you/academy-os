@@ -1,0 +1,19 @@
+% 125-54(125쪽) — 함수 y=f(x) 와 그 역함수 y=g(x) 의 그래프가 두 점 (2,2), (6,6) 에서 만나고 그 사이가 색칠된 그림. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 두 곡선은 직선 y=x 에 대칭인 한 쌍으로 그렸다(원문은 손그림이라 대칭이 정확하지 않다). 원문 라벨만: y · x · O · 2 · 6 · y=f(x) · y=g(x) 와 두 교점의 파선. 색칠된 넓이 값은 적지 않는다.
+\begin{tikzpicture}[x=0.42cm, y=0.42cm, line width=0.5pt]
+  \fill[yellow!45] plot[domain=2:6, samples=60] (\x, {2+4*((\x-2)/4)/(0.3+0.7*(\x-2)/4)})
+    -- plot[domain=6:2, samples=60] (\x, {2+4*(0.3*(\x-2)/4)/(1-0.7*(\x-2)/4)}) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-1.0,0) -- (8.4,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.4) -- (0,8.8) node[left] {$y$};
+  \node[below left=-2pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[dashed, line width=0.4pt] (0,2) -- (2,2) -- (2,0);
+  \draw[dashed, line width=0.4pt] (0,6) -- (6,6) -- (6,0);
+  \draw[line width=0.6pt, domain=0.2:6.35, samples=90, smooth] plot (\x, {2+4*(0.3*(\x-2)/4)/(1-0.7*(\x-2)/4)});
+  \draw[line width=0.6pt, domain=1.62:6.6, samples=90, smooth] plot (\x, {2+4*((\x-2)/4)/(0.3+0.7*(\x-2)/4)});
+  \node[below, font=\small, inner sep=1.5pt] at (2,0) {$2$};
+  \node[below, font=\small, inner sep=1.5pt] at (6,0) {$6$};
+  \node[left, font=\small, inner sep=1.5pt] at (0,2) {$2$};
+  \node[left, font=\small, inner sep=1.5pt] at (0,6) {$6$};
+  \node[font=\small] at (4.3,8.3) {$y=f(x)$};
+  \node[right, font=\small] at (6.5,5.0) {$y=g(x)$};
+\end{tikzpicture}

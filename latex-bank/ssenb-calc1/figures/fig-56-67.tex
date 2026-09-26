@@ -1,0 +1,12 @@
+% 56-67(56쪽) — 중심이 원점인 원 C 와 곡선 y=x^2-4 가 서로 다른 두 점에서 접하는 그림. 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨 C·O·-4·곡선식만 · 반지름 값은 적지 않음).
+\begin{tikzpicture}[scale=0.52,line width=0.6pt]
+  \draw[line width=0.7pt,->] (-2.9,0) -- (3.1,0) node[below=1pt] {$x$};
+  \draw[line width=0.7pt,->] (0,-4.9) -- (0,3.9) node[left=1pt] {$y$};
+  \draw[domain=-2.55:2.55,samples=100,smooth,line width=0.5pt] plot (\x,{\x*\x-4});
+  \draw (0,0) circle (1.9365);
+  \fill (0,0) circle (2.2pt);
+  \node[below left=-2pt] at (0,0) {$\pt{O}$};
+  \node[above left=-1pt] at (-1.55,1.15) {$C$};
+  \node[left=1pt] at (0,-4) {$-4$};
+  \node[anchor=west,font=\small] at (0.6,3.5) {$y=x^2-4$};
+\end{tikzpicture}

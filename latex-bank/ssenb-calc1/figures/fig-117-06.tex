@@ -1,0 +1,23 @@
+% 117-06(117쪽) — 곡선 y=f(x)=x^2-5x+4 와 x축·y축·직선 x=k 로 나뉘는 세 부분 S_1, S_2, S_3. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 y·x·O·1·4·4(y절편)·S_1·S_2·S_3·y=f(x)·x=k 만. 직선 x=k 는 원문처럼 4 보다 오른쪽에 둔 개략 위치이고
+% 세 넓이가 등차수열이 되는 실제 k 값과는 다르게 그렸다(답이 그림에서 읽히지 않게).
+\begin{tikzpicture}[xscale=0.52, yscale=0.28, line width=0.5pt]
+  \fill[red!14] plot[domain=0:1, samples=40] (\x, {\x*\x-5*\x+4}) -- (0,0) -- cycle;
+  \fill[cyan!18] plot[domain=1:4, samples=60] (\x, {\x*\x-5*\x+4}) -- cycle;
+  \fill[yellow!45] plot[domain=4:5.5, samples=40] (\x, {\x*\x-5*\x+4}) -- (5.5,0) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-1.2,0) -- (6.9,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.6) -- (0,7.6) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (5.5,-2.8) -- (5.5,5.6);
+  \draw[line width=0.6pt, domain=-0.75:5.85, samples=110] plot (\x, {\x*\x-5*\x+4});
+  \node[below left=-2pt, font=\small, inner sep=1pt] at (0,0) {$\mathrm{O}$};
+  \node[below, font=\small, inner sep=2pt] at (1,0) {$1$};
+  \node[below, font=\small, inner sep=2pt] at (4,0) {$4$};
+  \node[left, font=\small, inner sep=2pt] at (0,4) {$4$};
+  \node[font=\small] at (1.75,1.9) {$S_1$};
+  % 원문의 S_1 지시선 — 라벨 왼쪽에서 색칠 영역(0<=x<=1) 안으로 들어가는 짧은 곡선.
+  \draw[->, >=stealth, line width=0.35pt] (1.42,1.96) .. controls (1.0,1.72) .. (0.42,1.02);
+  \node[font=\small] at (2.5,-1.2) {$S_2$};
+  \node[font=\small] at (4.95,1.5) {$S_3$};
+  \node[font=\small] at (3.05,5.6) {$y=f(x)$};
+  \node[below, font=\small, inner sep=2pt] at (5.5,-2.8) {$x=k$};
+\end{tikzpicture}

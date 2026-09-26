@@ -1,0 +1,17 @@
+% 55-67(55쪽) — 위로 볼록한 이차함수 y=f(x) 의 그래프와 직선 y=x+2 가 x=-2, x=3 에서 만나는 그림. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(y=f(x) · y=x+2 · -2 · 2 · 3 · 5 · O 와 x=3 의 점선)만 두고, 부등식의 해나 정수 x 의 합(답)은 적지 않는다.
+\begin{tikzpicture}[scale=0.5, line width=0.5pt]
+  % f(x)=-0.5(x+2)(x-5) — x절편 -2, 5 · 직선 y=x+2 와의 교점 x=-2, 3 (원문 그림과 같다)
+  \draw[->, >=stealth, line width=0.7pt] (-5.0,0) -- (7.4,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.0) -- (0,8.4) node[left] {$y$};
+  \node[below left=0pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt, domain=-2.9:6.05, samples=90, smooth] plot (\x, {-0.5*(\x+2)*(\x-5)});
+  \draw[line width=0.6pt] (-4.7,-2.7) -- (4.95,6.95);
+  \draw[dotted, line width=0.5pt] (3,0) -- (3,5);
+  \node[above=1pt, font=\small, anchor=south east] at (-2.05,0.1) {$-2$};
+  \node[right=2pt, font=\small] at (0,2.1) {$2$};
+  \node[below, font=\small] at (3,0) {$3$};
+  \node[below, font=\small] at (5.1,0) {$5$};
+  \node[font=\small, anchor=west] at (3.3,7.6) {$y=x+2$};
+  \node[font=\small, anchor=east] at (-0.9,4.4) {$y=f(x)$};
+\end{tikzpicture}

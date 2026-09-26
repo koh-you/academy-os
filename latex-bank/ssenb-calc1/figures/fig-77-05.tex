@@ -1,0 +1,13 @@
+% 77-05(77쪽) — 사차함수 f(x)의 도함수 y=f'(x)의 그래프. x축과 α, β, γ(α<β<γ)에서 만나고 최고차항이 음수인 삼차곡선. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 y=f'(x), O, α, β, γ 만. 눈금·좌표값은 원문에 없으므로 넣지 않았고, f 의 값(답)은 그림에서 읽히지 않는다.
+\begin{tikzpicture}[scale=1.2, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.95,0) -- (1.75,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.95) -- (0,2.05) node[left] {$y$};
+  \node[font=\small, anchor=north west] at (0.06,-0.05) {$\mathrm{O}$};
+  \draw[line width=0.6pt, domain=-2.55:1.15, samples=100, smooth]
+    plot (\x, {-0.8*(\x+2.25)*(\x+0.44)*(\x-0.75)});
+  \node[font=\small, anchor=north east] at (-2.32,-0.05) {$\alpha$};
+  \node[font=\small, anchor=north east] at (-0.62,-0.05) {$\beta$};
+  \node[font=\small, anchor=north east] at (0.68,-0.05) {$\gamma$};
+  \node[font=\small, anchor=west] at (0.35,1.30) {$y=f'(x)$};
+\end{tikzpicture}

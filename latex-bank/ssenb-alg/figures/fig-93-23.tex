@@ -1,0 +1,22 @@
+% 93-23(93쪽) — 삼각형 ABC 와 변 BC 위의 점 D(선분 AD). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C·D 와 4(AB)·6(AC)·5(BD)·3(DC) 의 점선 안내만. AD 의 길이는 적지 않는다.
+\begin{tikzpicture}[scale=0.82, line width=0.6pt]
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (6.5,0);
+  \coordinate (A) at (2.35,2.0);
+  \coordinate (D) at (4.06,0);
+  \draw (B) -- (A) -- (C) -- (B);
+  \draw (A) -- (D);
+  \draw[dashed, line width=0.4pt] (B) to[bend left=15] (A);
+  \draw[dashed, line width=0.4pt] (A) to[bend left=15] (C);
+  \draw[dashed, line width=0.4pt] (B) to[bend right=15] (D);
+  \draw[dashed, line width=0.4pt] (D) to[bend right=15] (C);
+  \node[above=1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[left=1pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[right=1pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[below=2pt, font=\small] at (D) {$\mathrm{D}$};
+  \node[font=\small] at (0.80,1.34) {$4$};
+  \node[font=\small] at (4.80,1.30) {$6$};
+  \node[font=\small] at (2.00,-0.56) {$5$};
+  \node[font=\small] at (5.30,-0.54) {$3$};
+\end{tikzpicture}

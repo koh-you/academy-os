@@ -1,0 +1,19 @@
+% 67-41(67쪽) — 삼차함수 f(x) 의 도함수 y=f'(x)(아래로 볼록한 포물선)와 사차함수 g(x) 의 도함수 y=g'(x)(삼차곡선). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 a·b·c·O·d·e 와 두 그래프 이름만. a·c·e 는 두 그래프가 만나는 점(점선), b·d 는 포물선이 x축과 만나는 점으로 원문과 같게 두었다.
+\begin{tikzpicture}[scale=0.38, line width=0.5pt, every node/.style={font=\small}]
+  \draw[->, >=stealth, line width=0.7pt] (-5.5,0) -- (3.8,0) node[below left=-1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.6) -- (0,3.7) node[left=-1pt] {$y$};
+  \node[above right=-3pt, inner sep=1pt] at (0,0) {$\mathrm{O}$};
+  \draw[densely dotted, line width=0.4pt] (-4.02,0) -- (-4.02,0.95);
+  \draw[densely dotted, line width=0.4pt] (-1.43,0) -- (-1.43,-1.47);
+  \draw[densely dotted, line width=0.4pt] (1.57,0) -- (1.57,1.27);
+  \draw[line width=0.6pt, domain=-5.1:2.3, samples=70] plot (\x, {0.33*(\x+3.42)*(\x-0.8)});
+  \draw[line width=0.6pt, domain=-4.52:3.05, samples=80] plot (\x, {-0.1457*(\x+3.75)*(\x+0.31)*(\x-2.45)});
+  \node[inner sep=1.5pt] at (2.45,3.4) {$y=f'(x)$};
+  \node[right, inner sep=1.5pt] at (1.2,-2.2) {$y=g'(x)$};
+  \node[below, inner sep=2pt] at (-4.02,0) {$a$};
+  \node[above, inner sep=2pt] at (-3.42,0) {$b$};
+  \node[above, inner sep=2pt] at (-1.43,0) {$c$};
+  \node[below, inner sep=2pt] at (0.8,0) {$d$};
+  \node[below, inner sep=2pt] at (1.57,0) {$e$};
+\end{tikzpicture}

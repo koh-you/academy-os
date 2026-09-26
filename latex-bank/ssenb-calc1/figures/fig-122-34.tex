@@ -1,0 +1,15 @@
+% 122-34(122쪽) — 곡선 y=x^3-6x+k (k>0) 와 x축·y축이 x>=0 에서 둘러싸는 S_1, 이 곡선과 x축이 둘러싸는 S_2. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 y·x·O·S_1·S_2·y=x^3-6x+k 와 원문의 지시선만. y절편의 높이는 원문처럼 개략 위치라 k 값을 그림에서 잴 수 없다.
+\begin{tikzpicture}[xscale=0.55, yscale=0.26, line width=0.5pt]
+  \fill[olive!22] (0,0) -- plot[domain=0:0.3399, samples=30] (\x, {\x*\x*\x-6*\x+2}) -- cycle;
+  \fill[olive!22] plot[domain=0.3399:2.2618, samples=50] (\x, {\x*\x*\x-6*\x+2}) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-3.35,0) -- (3.75,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-4.8) -- (0,8.8) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt, domain=-2.85:2.82, samples=130] plot (\x, {\x*\x*\x-6*\x+2});
+  \node[below left=-2pt, font=\small, inner sep=1pt] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.4pt] (-0.78,1.45) -- (0.1,0.85);
+  \node[left, font=\small, inner sep=1pt] at (-0.78,1.5) {$S_1$};
+  \draw[line width=0.4pt] (2.1,-4.15) -- (1.55,-2.75);
+  \node[below, font=\small, inner sep=1pt] at (2.2,-4.15) {$S_2$};
+  \node[right, font=\small, inner sep=2pt] at (0.35,8.1) {$y=x^3-6x+k$};
+\end{tikzpicture}

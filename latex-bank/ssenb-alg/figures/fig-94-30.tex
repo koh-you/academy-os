@@ -1,0 +1,17 @@
+% 94-30(94쪽) — AB=6, AC=4, A=60° 인 삼각형 ABC. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C 와 6(AB)·4(AC) 의 점선 안내·60°(∠A) 만. 외접원의 반지름의 길이는 적지 않는다.
+\begin{tikzpicture}[scale=0.82, line width=0.6pt]
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (4.6,0.05);
+  \coordinate (A) at (4.15,2.55);
+  \draw (B) -- (A) -- (C) -- (B);
+  \draw[dashed, line width=0.4pt] (B) to[bend left=13] (A);
+  \draw[dashed, line width=0.4pt] (A) to[bend left=22] (C);
+  \draw (A) ++(211.6:0.62) arc (211.6:280.2:0.62);
+  \node[above=1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[left=1pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[right=1pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[font=\small] at (1.43,1.62) {$6$};
+  \node[font=\small] at (4.92,1.36) {$4$};
+  \node[font=\small] at (3.74,1.72) {$60^\circ$};
+\end{tikzpicture}

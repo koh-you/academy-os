@@ -1,0 +1,21 @@
+% 48-21(48쪽) — f(x)=log_a x, g(x)=log_b x, h(x)=-log_a x 의 그래프와 직선 x=4 의 교점 A, B, C.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로(y=f(x) · y=g(x) · y=h(x) · A · B · C · O · 1 · 4 · x=4 · x · y)만.
+% AB : BC 나 h(b) 의 값(답)은 그림에서 읽히지 않도록 개념도로 그렸다.
+\begin{tikzpicture}[line width=0.6pt, x=0.40cm, y=0.40cm]
+  \draw[->, >=stealth, line width=0.7pt] (-1.5,0) -- (8.2,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.6) -- (0,3.7) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.55pt] (4,-3.4) -- (4,3.4);
+  \draw[domain=0.10:6.2, samples=140, smooth] plot (\x, {1.5*ln(\x)});
+  \draw[domain=0.03:7.4, samples=140, smooth] plot (\x, {0.78*ln(\x)});
+  \draw[domain=0.10:6.2, samples=140, smooth] plot (\x, {-1.5*ln(\x)});
+  \node[above left=-2pt and -2pt, font=\small] at (4,2.079) {$\mathrm{A}$};
+  \node[above left=-2pt and -2pt, font=\small] at (4,1.081) {$\mathrm{B}$};
+  \node[below left=-2pt and -2pt, font=\small] at (4,-2.079) {$\mathrm{C}$};
+  \node[below left=1pt and 0pt, font=\small] at (4,0) {$4$};
+  \node[below right=1pt and -2pt, font=\small] at (1,0) {$1$};
+  \node[below=1pt, font=\small] at (4,-3.4) {$x=4$};
+  \node[below left=-1pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[anchor=west, font=\small] at (4.3,3.25) {$y=f(x)$};
+  \node[anchor=west, font=\small] at (4.6,1.02) {$y=g(x)$};
+  \node[anchor=west, font=\small] at (4.9,-1.75) {$y=h(x)$};
+\end{tikzpicture}

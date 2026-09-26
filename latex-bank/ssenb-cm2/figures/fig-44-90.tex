@@ -1,0 +1,19 @@
+% 44-90(44쪽) — 원 x^2+y^2=1 위의 점 P(a, b)에서의 접선이 x축, y축과 만나는 점 Q, R.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 P · Q · R · O · x · y 와 눈금 1 · -1 만 둔다.
+% ab 의 값(답)은 그림에 나타내지 않고, 접점 P 도 대칭 위치가 아닌 일반 위치에 둔다.
+\begin{tikzpicture}[scale=0.78, line width=0.5pt]
+  \coordinate (P) at (0.7431,0.6691); \coordinate (Q) at (1.3457,0); \coordinate (R) at (0,1.4946);
+  \draw[->, >=stealth, line width=0.7pt] (-1.7,0) -- (2.3,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.7) -- (0,2.2) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (0,0) circle (1);
+  \draw[line width=0.6pt] (-0.42,1.968) -- (2.0,-0.727);
+  \fill (P) circle (2.2pt);
+  \node[above right=-2pt and 0pt, font=\small] at (P) {$\mathrm{P}$};
+  \node[above right=0pt and 0pt, font=\small] at (Q) {$\mathrm{Q}$};
+  \node[right=2pt, font=\small] at (R) {$\mathrm{R}$};
+  \node[below left=-2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[left=1pt, font=\small] at (0,1) {$1$};
+  \node[left=1pt, font=\small] at (0,-1) {$-1$};
+  \node[below left=-1pt, font=\small] at (-1,0) {$-1$};
+  \node[below right=-1pt, font=\small] at (1,0) {$1$};
+\end{tikzpicture}

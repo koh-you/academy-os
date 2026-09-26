@@ -1,0 +1,14 @@
+% 75-82(75쪽) — 곡선 y=-x^2+9 와 x축의 두 교점 A, B · 선분 AB 를 아랫변으로 하고 곡선에 내접하는 사다리꼴(색칠). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(9, A, B, O, x, y, y=-x^2+9)만. 사다리꼴 높이는 원문 그림과 같은 어림 위치로 두고 수치를 적지 않는다(답이 그림에서 읽히지 않게).
+\begin{tikzpicture}[xscale=0.62, yscale=0.305, line width=0.5pt]
+  \fill[red!16] (-3,0) -- (3,0) -- (1.64,6.3) -- (-1.64,6.3) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-4.0,0) -- (4.2,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.8) -- (0,10.8) node[left=1pt] {$y$};
+  \draw[line width=0.6pt, domain=-3.4:3.4, samples=90, smooth] plot (\x, {9-\x*\x});
+  \draw[line width=0.5pt] (-3,0) -- (-1.64,6.3) -- (1.64,6.3) -- (3,0);
+  \node[below left=-1pt and -2pt, font=\small] at (-3,0) {$\pt{A}$};
+  \node[below right=-1pt and -2pt, font=\small] at (3,0) {$\pt{B}$};
+  \node[below left=-1pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[left=1pt, font=\small] at (0,9) {$9$};
+  \node[anchor=west, font=\small] at (0.3,9.9) {$y=-x^2+9$};
+\end{tikzpicture}

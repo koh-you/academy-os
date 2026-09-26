@@ -1,0 +1,17 @@
+% 119-13(119쪽) — 곡선 y=-x^2+3x 와 x축이 둘러싼 도형을 직선 y=x 로 나눈 두 부분 S_1, S_2. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 y·x·O·3·S_1·S_2·y=-x^2+3x·y=x 만. 교점의 좌표는 원문 그림에 없으므로 적지 않았다.
+\begin{tikzpicture}[xscale=0.95, yscale=0.62, line width=0.5pt]
+  \fill[yellow!55] plot[domain=0:2, samples=50] (\x, {-\x*\x+3*\x}) -- (0,0) -- cycle;
+  \fill[green!22] (0,0) -- (2,2) -- plot[domain=2:3, samples=40] (\x, {-\x*\x+3*\x}) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-0.85,0) -- (4.15,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.35) -- (0,3.65) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (-0.55,-0.55) -- (2.95,2.95);
+  \draw[line width=0.6pt, domain=-0.35:3.45, samples=90] plot (\x, {-\x*\x+3*\x});
+  \node[below left=-2pt, font=\small, inner sep=1pt] at (0,0) {$\mathrm{O}$};
+  \node[below, font=\small, inner sep=2pt] at (3,0) {$3$};
+  \node[font=\small] at (1.15,1.72) {$S_1$};
+  \node[font=\small] at (1.75,0.62) {$S_2$};
+  \draw[line width=0.4pt] (1.15,3.15) -- (0.95,2.4);
+  \node[above, font=\small, inner sep=1pt] at (1.55,3.15) {$y=-x^2+3x$};
+  \node[above right=-2pt, font=\small] at (2.9,2.9) {$y=x$};
+\end{tikzpicture}

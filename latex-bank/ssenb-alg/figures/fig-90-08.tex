@@ -1,0 +1,15 @@
+% 90-08(90쪽) — 외접원 위의 삼각형 ABC(중심 점 표시)와 BC=√3. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C 와 √3(BC 의 점선 안내)만. 외접원의 반지름의 길이는 적지 않는다.
+\begin{tikzpicture}[scale=0.82, line width=0.6pt]
+  \draw (0,0) circle (1.9);
+  \coordinate (A) at (0.803,1.722);
+  \coordinate (B) at (-1.722,-0.803);
+  \coordinate (C) at (1.645,-0.95);
+  \draw (A) -- (B) -- (C) -- (A);
+  \fill (0,0) circle (1.6pt);
+  \draw[dashed, line width=0.4pt] (B) to[bend right=18] (C);
+  \node[above=1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[below left=-1pt and 0pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[below right=-1pt and 0pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[fill=white, inner sep=1pt, font=\small] at (-0.04,-1.18) {$\sqrt{3}$};
+\end{tikzpicture}

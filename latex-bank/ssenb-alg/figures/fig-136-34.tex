@@ -1,0 +1,40 @@
+% 136-34(136쪽) — 대각선을 모두 그은 사각형·오각형·육각형과 원문 라벨 a_4=2, a_5=5, a_6=9.
+% 스캔 화질이 낮아 TikZ 로 다시 그림(원문과 같은 배치·같은 라벨 · f(20) 등 답이 될 값은 적지 않는다).
+\begin{tikzpicture}[line width=0.5pt]
+  % 사각형
+  \begin{scope}[shift={(0,0)}]
+    \foreach \a/\n in {45/1, 135/2, 225/3, 315/4}{\coordinate (Q\n) at (\a:0.80);}
+    \draw[line width=0.6pt] (Q1) -- (Q2) -- (Q3) -- (Q4) -- cycle;
+    \draw[line width=0.4pt] (Q1) -- (Q3);
+    \draw[line width=0.4pt] (Q2) -- (Q4);
+    \node[font=\footnotesize] at (0,-1.20) {$a_4=2$};
+  \end{scope}
+  % 오각형
+  \begin{scope}[shift={(2.35,0)}]
+    \foreach \a/\n in {90/1, 162/2, 234/3, 306/4, 18/5}{\coordinate (P\n) at (\a:0.85);}
+    \draw[line width=0.6pt] (P1) -- (P2) -- (P3) -- (P4) -- (P5) -- cycle;
+    \draw[line width=0.4pt] (P1) -- (P3);
+    \draw[line width=0.4pt] (P1) -- (P4);
+    \draw[line width=0.4pt] (P2) -- (P4);
+    \draw[line width=0.4pt] (P2) -- (P5);
+    \draw[line width=0.4pt] (P3) -- (P5);
+    \node[font=\footnotesize] at (0,-1.20) {$a_5=5$};
+  \end{scope}
+  % 육각형
+  \begin{scope}[shift={(4.70,0)}]
+    \foreach \a/\n in {90/1, 150/2, 210/3, 270/4, 330/5, 30/6}{\coordinate (H\n) at (\a:0.85);}
+    \draw[line width=0.6pt] (H1) -- (H2) -- (H3) -- (H4) -- (H5) -- (H6) -- cycle;
+    \draw[line width=0.4pt] (H1) -- (H3);
+    \draw[line width=0.4pt] (H1) -- (H4);
+    \draw[line width=0.4pt] (H1) -- (H5);
+    \draw[line width=0.4pt] (H2) -- (H4);
+    \draw[line width=0.4pt] (H2) -- (H5);
+    \draw[line width=0.4pt] (H2) -- (H6);
+    \draw[line width=0.4pt] (H3) -- (H5);
+    \draw[line width=0.4pt] (H3) -- (H6);
+    \draw[line width=0.4pt] (H4) -- (H6);
+    \node[font=\footnotesize] at (0,-1.20) {$a_6=9$};
+  \end{scope}
+  \node[font=\footnotesize] at (6.15,0) {$\cdots$};
+  \node[font=\footnotesize] at (6.15,-1.20) {$\cdots$};
+\end{tikzpicture}

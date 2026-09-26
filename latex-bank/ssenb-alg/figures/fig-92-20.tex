@@ -1,0 +1,29 @@
+% 92-20(92쪽) — 한 직선 위의 세 점 B, C, D 와 수선 AB·ED, 선분 AC·CE·AE. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C·D·E 와 3(AB)·5(ED)·30°(∠ACB·∠ECD)·직각 표시만. AE 의 길이는 적지 않는다.
+\begin{tikzpicture}[scale=0.82, line width=0.6pt]
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (2.4,0);
+  \coordinate (D) at (6.6,0);
+  \coordinate (A) at (0,1.2);
+  \coordinate (E) at (6.6,2.0);
+  \draw (B) -- (D);
+  \draw (A) -- (B);
+  \draw (E) -- (D);
+  \draw (A) -- (C) -- (E);
+  \draw (A) -- (E);
+  \draw[line width=0.45pt] (0.26,0) -- (0.26,0.26) -- (0,0.26);
+  \draw[line width=0.45pt] (6.34,0) -- (6.34,0.26) -- (6.6,0.26);
+  \draw (C) ++(153.4:0.75) arc (153.4:180:0.75);
+  \draw (C) ++(0:0.75) arc (0:25.5:0.75);
+  \draw[dashed, line width=0.4pt] (B) to[bend left=20] (A);
+  \draw[dashed, line width=0.4pt] (D) to[bend right=20] (E);
+  \node[above left=-2pt and -1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[below left=-1pt and -2pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[below=2pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[below right=-1pt and -2pt, font=\small] at (D) {$\mathrm{D}$};
+  \node[above=2pt, font=\small] at (E) {$\mathrm{E}$};
+  \node[font=\small] at (-0.44,0.60) {$3$};
+  \node[font=\small] at (7.06,1.00) {$5$};
+  \node[font=\small] at (1.24,0.30) {$30^\circ$};
+  \node[font=\small] at (3.70,0.30) {$30^\circ$};
+\end{tikzpicture}

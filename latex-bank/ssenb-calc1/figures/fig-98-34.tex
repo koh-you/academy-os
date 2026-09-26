@@ -1,0 +1,13 @@
+% 98-34(98쪽) — 연속함수 f(x) 의 도함수 y=f'(x) 의 그래프(x<1 에서 기울기 -2 인 직선, x>1 에서 y=2 인 반직선). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: y축 눈금 4, 2 · x축 눈금 1 · 꺾인점까지의 점선 · 라벨 y=f'(x), O, x, y. 없는 눈금은 만들지 않는다.
+\begin{tikzpicture}[x=0.85cm, y=0.70cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.15,0) -- (3.3,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.85) -- (0,6.3) node[left] {$y$};
+  \node[below left=-1pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt] (-0.75,5.5) -- (1,2) -- (2.85,2);
+  \draw[dotted, line width=0.5pt] (0,2) -- (1,2) -- (1,0);
+  \node[left, font=\small] at (0,4) {$4$};
+  \node[left, font=\small] at (0,2) {$2$};
+  \node[below, font=\small] at (1,0) {$1$};
+  \node[above, font=\small] at (2.05,2.1) {$y=f'(x)$};
+\end{tikzpicture}

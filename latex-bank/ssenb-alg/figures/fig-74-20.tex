@@ -1,0 +1,15 @@
+% 74-20(74쪽) — $y=a\cos(bx+c)$ 의 그래프(진폭 3 · $x$축과 $-\frac{5}{12}\pi$, $\frac{\pi}{12}$, $\frac{7}{12}\pi$ 에서 만난다). 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨·점선만 · 눈금은 만들지 않음).
+\begin{tikzpicture}[line width=0.6pt, x=0.47cm, y=0.27cm]
+  \draw[dotted, line width=0.5pt] (-2.8,3) -- (4.55,3);
+  \draw[dotted, line width=0.5pt] (-2.8,-3) -- (4.55,-3);
+  \draw[->, >=stealth, line width=0.7pt] (-2.95,0) -- (4.95,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-4.1) -- (0,4.7) node[left=1pt] {$y$};
+  \draw[domain=-2.72:4.45, samples=160, smooth] plot (\x, {3*cos(114.5916*\x+60)});
+  \node[anchor=south east, font=\small] at (-1.35,0.05) {$-\dfrac{5}{12}\pi$};
+  \node[anchor=south west, font=\small] at (0.3,0.05) {$\dfrac{\pi}{12}$};
+  \node[anchor=north west, font=\small] at (1.88,-0.05) {$\dfrac{7}{12}\pi$};
+  \node[anchor=north east, font=\small] at (-0.08,-0.15) {$\pt{O}$};
+  \node[anchor=south east, font=\small] at (-0.08,2.95) {$3$};
+  \node[anchor=north east, font=\small] at (-0.08,-3.05) {$-3$};
+  \node[anchor=south west, font=\small] at (0.12,3.0) {$y=a\cos (bx+c)$};
+\end{tikzpicture}

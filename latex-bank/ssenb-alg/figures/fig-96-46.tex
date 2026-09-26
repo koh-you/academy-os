@@ -1,0 +1,22 @@
+% 96-46(96쪽) — AB=12, AC=7, ∠A=60° 인 삼각형 ABC 와 변 AB, AC 위의 점 P, Q(선분 PQ).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로(A·B·C·P·Q·12·7·60°)만 두고 PQ 의 최솟값(답)은 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt]
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (2.6,0);
+  \coordinate (A) at (2.45,1.75);
+  \coordinate (P) at (1.03,0.735);
+  \coordinate (Q) at (2.50,1.14);
+  \draw[line width=0.6pt] (B) -- (C) -- (A) -- cycle;
+  \draw[line width=0.5pt] (P) -- (Q);
+  \draw[dashed, line width=0.3pt] (B) to[bend left=14] (A);
+  \draw[dashed, line width=0.3pt] (A) to[bend left=18] (C);
+  \draw[line width=0.35pt] ($(A)+(215.5:0.45)$) arc (215.5:275:0.45);
+  \node[font=\small] at (0.95,1.22) {$12$};
+  \node[font=\small] at (3.30,0.98) {$7$};
+  \node[font=\small] at (2.12,1.23) {$60^\circ$};
+  \node[font=\small, left=2pt] at (B) {$\mathrm{B}$};
+  \node[font=\small, below right=-1pt and -1pt] at (C) {$\mathrm{C}$};
+  \node[font=\small, above=2pt] at (A) {$\mathrm{A}$};
+  \node[font=\small, left=2pt] at (P) {$\mathrm{P}$};
+  \node[font=\small, right=1pt] at (Q) {$\mathrm{Q}$};
+\end{tikzpicture}

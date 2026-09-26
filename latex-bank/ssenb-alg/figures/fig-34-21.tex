@@ -1,0 +1,21 @@
+% 34-21(34쪽) — $y=4^{x}$, $y=a^{x}$ 의 그래프와 직선 $y=k$ · 삼각형 ACB(분홍)와 삼각형 ADC(하늘색). 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨·색칠만 · 눈금은 만들지 않음).
+\begin{tikzpicture}[line width=0.6pt, x=1.15cm, y=0.7cm]
+  \fill[orange!25] (0,1) -- (0,3) -- (0.7925,3) -- cycle;
+  \fill[cyan!20] (0,1) -- (0.7925,3) -- (1.0567,3) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-1.5,0) -- (2.1,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.8) -- (0,4.35) node[left=1pt] {$y$};
+  \draw[domain=-1.45:0.96, samples=90, smooth] plot (\x, {exp(1.3863*\x)});
+  \draw[domain=-1.45:1.22, samples=90, smooth] plot (\x, {exp(1.0397*\x)});
+  \draw[line width=0.5pt] (-1.25,3) -- (1.85,3);
+  \draw[line width=0.5pt] (0,1) -- (0.7925,3);
+  \draw[line width=0.5pt] (0,1) -- (1.0567,3);
+  \draw[line width=0.5pt] (0,1) -- (0,3);
+  \node[left=2pt, font=\small] at (0,3) {$\pt{B}$};
+  \node[above=1pt, font=\small] at (0.76,3) {$\pt{C}$};
+  \node[above=1pt, font=\small] at (1.09,3) {$\pt{D}$};
+  \node[left=2pt, font=\small] at (0,1) {$\pt{A}$};
+  \node[anchor=north, font=\small] at (1.6,2.88) {$y=k$};
+  \node[anchor=south west, font=\small] at (0.12,3.95) {$y=4^{x}$};
+  \node[anchor=south west, font=\small] at (1.32,3.95) {$y=a^{x}$};
+  \node[below right=-1pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+\end{tikzpicture}

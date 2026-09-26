@@ -1,0 +1,14 @@
+% 67-37(67쪽) — 삼차함수 y=f(x) 의 그래프(x=α 에서 극대, x=β 에서 극소 · y절편 -3). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 α·β·-3·O·x·y·y=f(x) 뿐이고 그 밖의 눈금은 넣지 않는다.
+\begin{tikzpicture}[scale=0.55, line width=0.5pt, every node/.style={font=\small}]
+  \draw[->, >=stealth, line width=0.7pt] (-3.25,0) -- (2.45,0) node[below left=-1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.2) -- (0,2.3) node[left=-1pt] {$y$};
+  \node[above left=-2pt, inner sep=1.5pt] at (0,0) {$\mathrm{O}$};
+  \draw[densely dotted, line width=0.4pt] (-1.689,0) -- (-1.689,1.573);
+  \draw[densely dashed, line width=0.4pt] (0.736,0) -- (0.736,-1.795);
+  \draw[line width=0.6pt, domain=-2.87:1.95, samples=70] plot (\x, {0.472*(\x+2.55)*(\x+0.53)*(\x-1.65)});
+  \node[right, inner sep=1.5pt] at (1.0,1.95) {$y=f(x)$};
+  \node[below, inner sep=2pt] at (-1.689,0) {$\alpha$};
+  \node[above, inner sep=2pt] at (0.736,0) {$\beta$};
+  \node[left, inner sep=1.5pt] at (0,-1.05) {$-3$};
+\end{tikzpicture}

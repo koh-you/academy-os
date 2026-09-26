@@ -1,0 +1,16 @@
+% 17-68(17쪽) — 포물선 y=½x² 위의 점 P(t, ½t²), 직선 OP 와 P 에서 그은 수직인 직선(직각 표시), 그 직선이 y축과 만나는 점 f(t). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문 라벨(y=½x²·f(t)·P(t, ½t²)·O)만 옮기고 없는 눈금은 만들지 않는다. t 는 일반 위치라 답(t→0 극한값)이 그림에서 읽히지 않는다.
+\begin{tikzpicture}[x=0.78cm, y=0.78cm, line width=0.6pt]
+  \draw[line width=0.7pt, ->] (-2.95,0) -- (3.25,0) node[right, font=\small, inner sep=1.5pt] {$x$};
+  \draw[line width=0.7pt, ->] (0,-0.95) -- (0,4.15) node[above, font=\small, inner sep=1.5pt] {$y$};
+  \draw[line width=0.55pt, domain=-2.72:2.72, smooth, samples=80] plot (\x,{0.5*\x*\x});
+  \draw[line width=0.5pt] (-0.95,-0.76) -- (2.95,2.36);
+  \draw[line width=0.5pt] (-0.6,4.03) -- (2.95,-0.41);
+  \draw[line width=0.4pt] (1.444,1.155) -- (1.319,1.311) -- (1.475,1.436);
+  \fill (1.6,1.28) circle (2.2pt);
+  \fill (0,3.28) circle (2.2pt);
+  \node[font=\small, inner sep=3pt, left] at (0,3.28) {$f(t)$};
+  \node[font=\small, inner sep=5pt, right] at (1.6,1.28) {$\pt{P}\Big(t,\,\frac{1}{2}t^2\Big)$};
+  \node[font=\small, inner sep=1pt] at (1.2,3.62) {$y=\frac{1}{2}x^2$};
+  \node[font=\small, inner sep=2.5pt, below right] at (0,0) {$\pt{O}$};
+\end{tikzpicture}

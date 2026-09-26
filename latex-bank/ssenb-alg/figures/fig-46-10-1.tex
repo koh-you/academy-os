@@ -1,0 +1,11 @@
+% 46-10 ①(46쪽) — 보기 그래프: 감소하고 $x$절편이 1보다 큰 로그함수의 개형(점선은 $x=1$ 에서 곡선까지 위로).
+% 그림 자체가 보기라 TikZ 로 다시 그림. 라벨은 원문 그대로 O·1·x·y 만.
+\begin{tikzpicture}[scale=0.5, line width=0.5pt, baseline=(current bounding box.center)]
+  \path (-0.9,-2.5) rectangle (3.6,2.5); % 보기 행 사이 여백
+  \draw[->, >=stealth, line width=0.7pt] (-0.6,0) -- (3.45,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.2) -- (0,2.25) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt, domain=0.348:3.4, samples=120, smooth] plot (\x, {-ln(\x/1.6)/ln(2)});
+  \draw[densely dotted, line width=0.4pt] (1,0) -- (1,0.678);
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[below left=-2pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+\end{tikzpicture}

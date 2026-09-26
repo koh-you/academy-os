@@ -1,0 +1,15 @@
+% 135-52(135쪽) — 네 함수 y=a/x, y=b/x, y=c/x, y=d/x 의 그래프의 일부(x축 아래 가지만 보인다).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 y·x·O 와 네 식뿐이고, a·b·c·d 의 대소(답)는 적지 않는다.
+\begin{tikzpicture}[xscale=0.28, yscale=0.34, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.8,0) -- (4.0,0) node[above left=-2pt and -1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-4.2) -- (0,2.0) node[right=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt, smooth, samples=70, domain=-3.6:-0.55] plot (\x, {2/\x});
+  \draw[line width=0.6pt, smooth, samples=70, domain=-3.6:-1.5] plot (\x, {6/\x});
+  \draw[line width=0.6pt, smooth, samples=70, domain=0.55:3.6] plot (\x, {-2/\x});
+  \draw[line width=0.6pt, smooth, samples=70, domain=1.5:3.6] plot (\x, {-6/\x});
+  \node[above left=-3pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[left=1pt, font=\small] at (-3.6,-0.56) {$y=\dfrac{a}{x}$};
+  \node[right=1pt, font=\small] at (3.6,-0.56) {$y=\dfrac{d}{x}$};
+  \node[left=1pt, font=\small] at (-2.5,-2.8) {$y=\dfrac{b}{x}$};
+  \node[right=1pt, font=\small] at (2.5,-2.8) {$y=\dfrac{c}{x}$};
+\end{tikzpicture}

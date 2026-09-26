@@ -1,0 +1,11 @@
+% 32-11(32쪽) — $y=4^{x+a}+b$ 의 그래프($y$절편 $2$ · 점근선 $y=-2$ 는 점선). 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨만 · 눈금은 만들지 않음).
+\begin{tikzpicture}[line width=0.6pt, x=0.85cm, y=0.34cm]
+  \draw[->, >=stealth, line width=0.7pt] (-2.6,0) -- (1.6,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.5) -- (0,4.8) node[left=1pt] {$y$};
+  \draw[densely dashed, line width=0.4pt] (-2.5,-2) -- (1.45,-2);
+  \draw[domain=-2.5:0.22, samples=90, smooth] plot (\x, {exp((\x+1)*1.3863)-2});
+  \node[left=2pt, font=\small] at (0,2) {$2$};
+  \node[below left=-1pt and 1pt, font=\small] at (0,-2) {$-2$};
+  \node[below right=-1pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=west, font=\small] at (0.18,4.1) {$y=4^{x+a}+b$};
+\end{tikzpicture}

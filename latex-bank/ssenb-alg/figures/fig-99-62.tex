@@ -1,0 +1,23 @@
+% 99-62(99쪽) — 두 대각선의 길이가 6, 10 이고 두 대각선이 이루는 각의 크기가 θ 인 사각형 ABCD.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로(A·B·C·D·6·10·θ)만 두고 넓이(답)는 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt]
+  \coordinate (A) at (0,1.20);
+  \coordinate (B) at (0.57,0);
+  \coordinate (C) at (2.03,0.30);
+  \coordinate (D) at (3.47,1.64);
+  \fill[red!10] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[line width=0.6pt] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[line width=0.5pt] (A) -- (C);
+  \draw[line width=0.5pt] (B) -- (D);
+  \draw[dashed, line width=0.3pt] (A) to[bend left=8] (C);
+  \draw[dashed, line width=0.3pt] (B) to[bend right=8] (D);
+  \coordinate (X) at (1.509,0.531);
+  \draw[line width=0.35pt] ($(X)+(-23.9:0.32)$) arc (-23.9:29.5:0.32);
+  \node[font=\small] at (0.85,0.66) {$6$};
+  \node[font=\small] at (1.92,1.16) {$10$};
+  \node[font=\small] at (2.12,0.55) {$\theta$};
+  \node[font=\small, above left=-2pt and -1pt] at (A) {$\mathrm{A}$};
+  \node[font=\small, below=2pt] at (B) {$\mathrm{B}$};
+  \node[font=\small, below right=-2pt and -2pt] at (C) {$\mathrm{C}$};
+  \node[font=\small, right=2pt] at (D) {$\mathrm{D}$};
+\end{tikzpicture}

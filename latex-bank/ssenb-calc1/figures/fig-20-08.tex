@@ -1,0 +1,30 @@
+% 20-08(20쪽) — 두 함수 y=f(x)(계단꼴), y=g(x)(원점에서 갈라지는 두 반직선)의 그래프. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문처럼 왼쪽 f, 오른쪽 g 를 나란히 둔다. 라벨은 원문 그대로(1, -1, O, x, y, y=f(x), y=g(x))만.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  % 왼쪽: y=f(x)
+  \begin{scope}
+    \draw[->, >=stealth, line width=0.7pt] (-2.1,0) -- (2.1,0) node[below] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-2.2) -- (0,1.8) node[left] {$y$};
+    \node[below left=-2pt and -4pt, font=\small] at (0,0) {$\mathrm{O}$};
+    \draw[line width=0.6pt] (-1.9,1) -- (0,1);
+    \draw[line width=0.6pt] (0,-1) -- (1.9,-1);
+    \draw[fill=white, line width=0.5pt] (0,1) circle (2.2pt);
+    \draw[fill=white, line width=0.5pt] (0,-1) circle (2.2pt);
+    \fill (0,0) circle (2.2pt);
+    \node[right, font=\small] at (0.05,1) {$1$};
+    \node[left, font=\small] at (0,-1) {$-1$};
+    \node[font=\small] at (1.2,-1.6) {$y=f(x)$};
+  \end{scope}
+  % 오른쪽: y=g(x)
+  \begin{scope}[shift={(6.2,0)}]
+    \draw[->, >=stealth, line width=0.7pt] (-2.1,0) -- (2.1,0) node[below] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-2.5) -- (0,0.9) node[left] {$y$};
+    \node[above left=-2pt and -4pt, font=\small] at (0,0) {$\mathrm{O}$};
+    \draw[line width=0.6pt] (-1.75,-1.75) -- (0,0);
+    \draw[line width=0.6pt] (0,0) -- (1.75,-1.75);
+    \draw[fill=white, line width=0.5pt] (0,0) circle (2.2pt);
+    \fill (0,-1) circle (2.2pt);
+    \node[left, font=\small] at (0,-1) {$-1$};
+    \node[font=\small] at (1.0,-2.15) {$y=g(x)$};
+  \end{scope}
+\end{tikzpicture}

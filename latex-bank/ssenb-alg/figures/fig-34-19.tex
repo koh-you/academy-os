@@ -1,0 +1,14 @@
+% 34-19(34쪽) — $y=\left(\frac{1}{9}\right)^{x}$ 와 $y=3^{x}$ 의 그래프 · 원점에서 그래프 위의 점 P 까지 그은 선분. 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨만 · 눈금은 만들지 않음).
+\begin{tikzpicture}[line width=0.6pt, x=0.95cm, y=0.6cm]
+  \draw[->, >=stealth, line width=0.7pt] (-1.8,0) -- (1.9,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.8) -- (0,4.0) node[left=1pt] {$y$};
+  \draw[domain=-1.75:1.18, samples=90, smooth] plot (\x, {exp(1.0986*\x)});
+  \draw[domain=-0.62:1.8, samples=90, smooth] plot (\x, {exp(-2.1972*\x)});
+  \draw[line width=0.45pt] (0,0) -- (0.6,1.933);
+  \fill (0.6,1.933) circle (2.2pt);
+  \node[right=2pt, font=\small] at (0.6,1.933) {$\pt{P}$};
+  \node[left=2pt, font=\small] at (0,1) {$1$};
+  \node[below right=-1pt and 0pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=east, font=\small] at (-0.68,3.5) {$y=\left(\dfrac{1}{9}\right)^{x}$};
+  \node[anchor=west, font=\small] at (1.12,3.5) {$y=3^{x}$};
+\end{tikzpicture}

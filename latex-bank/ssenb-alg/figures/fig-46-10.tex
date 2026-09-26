@@ -1,0 +1,12 @@
+% 46-10(46쪽) — 주어진 그래프: 감소하는 로그함수 y=log_a bx 의 개형($x$절편이 1보다 작다). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(y=log_a bx · 1 · O · x · y)만. 보기 ①~⑤ 는 따로 fig-46-10-1 ~ fig-46-10-5 로 그린다.
+\begin{tikzpicture}[line width=0.6pt, x=0.85cm, y=0.42cm]
+  \draw[->, >=stealth, line width=0.7pt] (-0.35,0) -- (3.35,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.95) -- (0,2.15) node[left=1pt, font=\small] {$y$};
+  % y=log_{1/4}(2x): 감소하고 x절편이 0.5 — 원문과 같은 개형
+  \draw[domain=0.031:3.2, samples=120, smooth] plot (\x, {-ln(2*\x)/ln(4)});
+  \draw[densely dotted, line width=0.4pt] (1,0) -- (1,-0.5);
+  \node[above=1pt, font=\small] at (1,0) {$1$};
+  \node[below left=-1pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[anchor=west, font=\small] at (0.42,1.75) {$y=\log_a bx$};
+\end{tikzpicture}

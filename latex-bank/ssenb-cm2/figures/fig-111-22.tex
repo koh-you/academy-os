@@ -1,0 +1,53 @@
+% 111-22(111쪽) 보기 — 함수의 그래프 후보 여섯 개(ㄱ 기울기 음수 직선 · ㄴ 왼쪽이 평평한 감소 곡선 · ㄷ 감소 꺾은선 ·
+% ㄹ 위로 볼록한 포물선 · ㅁ 증가하는 S자 곡선 · ㅂ 극대·극소가 있는 삼차 곡선). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문 배치 그대로 2열 3행. 라벨은 원문에 있는 ㄱ~ㅂ 과 O·x·y 만 두고 눈금·수치는 원문에도 없다(개수를 세는 문항이라 답이 드러나지 않는다).
+\begin{tikzpicture}[scale=0.40, line width=0.5pt]
+  % ㄱ. 기울기가 음수인 직선
+  \begin{scope}
+    \node[font=\small] at (-3.2,2.1) {ㄱ.};
+    \draw[->, >=stealth, line width=0.6pt] (-2.4,0) -- (2.6,0) node[below=1pt, font=\small] {$x$};
+    \draw[->, >=stealth, line width=0.6pt] (0,-1.5) -- (0,2.8) node[left=1pt, font=\small] {$y$};
+    \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\mathrm{O}$};
+    \draw[line width=0.6pt] (-0.95,2.7) -- (2.15,-1.4);
+  \end{scope}
+  % ㄴ. 왼쪽이 평평하고 오른쪽으로 급히 내려가는 감소 곡선
+  \begin{scope}[shift={(8.8,0)}]
+    \node[font=\small] at (-3.2,2.1) {ㄴ.};
+    \draw[->, >=stealth, line width=0.6pt] (-2.4,0) -- (2.6,0) node[below=1pt, font=\small] {$x$};
+    \draw[->, >=stealth, line width=0.6pt] (0,-2.8) -- (0,2.4) node[left=1pt, font=\small] {$y$};
+    \node[above left=-2pt and -3pt, font=\small] at (0,0) {$\mathrm{O}$};
+    \draw[line width=0.6pt, smooth, samples=80, domain=-2.2:1.9] plot ({\x},{-0.12-0.28*exp(1.05*\x)});
+  \end{scope}
+  % ㄷ. 원점을 지나는 감소 꺾은선
+  \begin{scope}[shift={(0,-6.8)}]
+    \node[font=\small] at (-3.2,2.1) {ㄷ.};
+    \draw[->, >=stealth, line width=0.6pt] (-2.4,0) -- (2.6,0) node[below=1pt, font=\small] {$x$};
+    \draw[->, >=stealth, line width=0.6pt] (0,-2.6) -- (0,2.6) node[left=1pt, font=\small] {$y$};
+    \node[below left=-2pt and -3pt, font=\small] at (0,0) {$\mathrm{O}$};
+    \draw[line width=0.6pt] (-1.95,2.4) -- (-1.35,0.8) -- (1.05,-0.72) -- (1.4,-2.3);
+  \end{scope}
+  % ㄹ. 원점이 꼭짓점인 위로 볼록한 포물선
+  \begin{scope}[shift={(8.8,-6.8)}]
+    \node[font=\small] at (-3.2,2.1) {ㄹ.};
+    \draw[->, >=stealth, line width=0.6pt] (-2.4,0) -- (2.6,0) node[below=1pt, font=\small] {$x$};
+    \draw[->, >=stealth, line width=0.6pt] (0,-2.6) -- (0,2.4) node[left=1pt, font=\small] {$y$};
+    \node[above left=-2pt and -3pt, font=\small] at (0,0) {$\mathrm{O}$};
+    \draw[line width=0.6pt, smooth, samples=60, domain=-1.55:1.55] plot ({\x},{-0.92*\x*\x});
+  \end{scope}
+  % ㅁ. 원점을 지나는 증가하는 S자 곡선
+  \begin{scope}[shift={(0,-13.6)}]
+    \node[font=\small] at (-3.2,2.1) {ㅁ.};
+    \draw[->, >=stealth, line width=0.6pt] (-2.4,0) -- (2.6,0) node[below=1pt, font=\small] {$x$};
+    \draw[->, >=stealth, line width=0.6pt] (0,-2.6) -- (0,2.6) node[left=1pt, font=\small] {$y$};
+    \node[below right=-2pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+    \draw[line width=0.6pt, smooth] plot coordinates {(-2.0,-1.95) (-1.5,-1.55) (-1.0,-1.15) (-0.5,-0.7) (0,0) (0.45,0.75) (0.9,1.2) (1.4,1.6) (1.95,2.0)};
+  \end{scope}
+  % ㅂ. 극소·극대가 있는 삼차 곡선(최고차항 음수)
+  \begin{scope}[shift={(8.8,-13.6)}]
+    \node[font=\small] at (-3.2,2.1) {ㅂ.};
+    \draw[->, >=stealth, line width=0.6pt] (-2.4,0) -- (2.6,0) node[below=1pt, font=\small] {$x$};
+    \draw[->, >=stealth, line width=0.6pt] (0,-2.6) -- (0,2.6) node[left=1pt, font=\small] {$y$};
+    \node[below right=-2pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+    \draw[line width=0.6pt, smooth, samples=90, domain=-2.1:1.6] plot ({\x},{-0.75*(\x+1.7)*(\x+0.35)*(\x-1.1)});
+  \end{scope}
+\end{tikzpicture}

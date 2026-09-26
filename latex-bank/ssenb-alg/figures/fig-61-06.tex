@@ -1,0 +1,68 @@
+% 61-06(61쪽) — 보기 ①~⑤ 의 좌표평면 다섯 개(직선 y=x 와 45° 각, 색칠한 영역). 보기 자체가 그림이라 본문 아래 전폭에 둔다.
+% 스캔 화질이 낮아 TikZ 로 다시 그림 — 라벨은 원문 그대로(45°·O·x·y)만 두고 어느 것이 답인지 드러나는 글자는 넣지 않는다.
+\begin{tikzpicture}[scale=0.52, line width=0.6pt]
+  % ① 0°~45° 영역만
+  \begin{scope}
+    \fill[orange!20] (0,0) -- (1.5,0) -- (1.5,1.5) -- cycle;
+    \draw[->, >=stealth, line width=0.7pt] (-1.5,0) -- (1.8,0) node[below=1pt, font=\small] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-1.25) -- (0,1.55) node[left=1pt, font=\small] {$y$};
+    \draw (0,0) -- (1.5,1.5);
+    \draw[line width=0.4pt] (0.4,0) arc (0:45:0.4);
+    \node[font=\scriptsize] at (0.92,0.3) {$45^\circ$};
+    \node[below left=-2pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+    \node[font=\small] at (-2.0,1.2) {①};
+  \end{scope}
+  % ② 225°~270° 영역만
+  \begin{scope}[shift={(5.2,0)}]
+    \fill[orange!20] (0,0) -- (0,-1.4) -- (-1.4,-1.4) -- cycle;
+    \draw[->, >=stealth, line width=0.7pt] (-1.5,0) -- (1.8,0) node[below=1pt, font=\small] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-1.45) -- (0,1.55) node[left=1pt, font=\small] {$y$};
+    \draw (0,0) -- (-1.45,-1.45);
+    \draw[line width=0.4pt] (-0.28,-0.28) arc (225:270:0.4);
+    \node[font=\scriptsize] at (-0.48,-0.92) {$45^\circ$};
+    \node[below right=-2pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+    \node[font=\small] at (-2.0,1.2) {②};
+  \end{scope}
+  % ③ 45°~90° 와 180°~225°
+  \begin{scope}[shift={(0,-3.3)}]
+    \fill[orange!20] (0,0) -- (0,1.5) -- (1.5,1.5) -- cycle;
+    \fill[orange!20] (0,0) -- (-1.4,0) -- (-1.4,-1.4) -- cycle;
+    \draw[->, >=stealth, line width=0.7pt] (-1.5,0) -- (1.8,0) node[below=1pt, font=\small] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-1.45) -- (0,1.55) node[left=1pt, font=\small] {$y$};
+    \draw (-1.45,-1.45) -- (1.5,1.5);
+    \draw[line width=0.4pt] (0.28,0.28) arc (45:90:0.4);
+    \draw[line width=0.4pt] (-0.4,0) arc (180:225:0.4);
+    \node[font=\scriptsize] at (0.33,0.92) {$45^\circ$};
+    \node[font=\scriptsize] at (-1.02,-0.3) {$45^\circ$};
+    \node[below right=-2pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+    \node[font=\small] at (-2.0,1.2) {③};
+  \end{scope}
+  % ④ 0°~45° 와 225°~270°
+  \begin{scope}[shift={(5.2,-3.3)}]
+    \fill[orange!20] (0,0) -- (1.5,0) -- (1.5,1.5) -- cycle;
+    \fill[orange!20] (0,0) -- (0,-1.4) -- (-1.4,-1.4) -- cycle;
+    \draw[->, >=stealth, line width=0.7pt] (-1.5,0) -- (1.8,0) node[below=1pt, font=\small] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-1.45) -- (0,1.55) node[left=1pt, font=\small] {$y$};
+    \draw (-1.45,-1.45) -- (1.5,1.5);
+    \draw[line width=0.4pt] (0.4,0) arc (0:45:0.4);
+    \draw[line width=0.4pt] (-0.28,-0.28) arc (225:270:0.4);
+    \node[font=\scriptsize] at (0.92,0.3) {$45^\circ$};
+    \node[font=\scriptsize] at (-0.48,-0.92) {$45^\circ$};
+    \node[below right=-2pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+    \node[font=\small] at (-2.0,1.2) {④};
+  \end{scope}
+  % ⑤ 45°~90° 와 225°~270°
+  \begin{scope}[shift={(0,-6.6)}]
+    \fill[orange!20] (0,0) -- (0,1.5) -- (1.5,1.5) -- cycle;
+    \fill[orange!20] (0,0) -- (0,-1.4) -- (-1.4,-1.4) -- cycle;
+    \draw[->, >=stealth, line width=0.7pt] (-1.5,0) -- (1.8,0) node[below=1pt, font=\small] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-1.45) -- (0,1.55) node[left=1pt, font=\small] {$y$};
+    \draw (-1.45,-1.45) -- (1.5,1.5);
+    \draw[line width=0.4pt] (0.28,0.28) arc (45:90:0.4);
+    \draw[line width=0.4pt] (-0.28,-0.28) arc (225:270:0.4);
+    \node[font=\scriptsize] at (0.33,0.92) {$45^\circ$};
+    \node[font=\scriptsize] at (-0.48,-0.92) {$45^\circ$};
+    \node[below right=-2pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+    \node[font=\small] at (-2.0,1.2) {⑤};
+  \end{scope}
+\end{tikzpicture}

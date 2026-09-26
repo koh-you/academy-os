@@ -1,0 +1,20 @@
+% 17-69(17쪽) — 두 곡선 y=√(3x)·y=√x 와 직선 x=k 의 교점 A·B, 선분 OA·OB. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문 라벨(x=k·y=√(3x)·y=√x·A·B·k·O)만 옮기고 없는 눈금은 만들지 않는다. k 는 일반 위치라 답이 그림에서 읽히지 않는다.
+\begin{tikzpicture}[x=0.8cm, y=0.8cm, line width=0.6pt]
+  \draw[line width=0.7pt, ->] (-0.5,0) -- (4.65,0) node[right, font=\small, inner sep=1.5pt] {$x$};
+  \draw[line width=0.7pt, ->] (0,-0.6) -- (0,4.05) node[above, font=\small, inner sep=1.5pt] {$y$};
+  \draw[line width=0.55pt, domain=0:4.35, smooth, samples=90] plot (\x,{sqrt(3*\x)});
+  \draw[line width=0.55pt, domain=0:4.35, smooth, samples=90] plot (\x,{sqrt(\x)});
+  \draw[line width=0.5pt] (3,-0.42) -- (3,3.85);
+  \draw[line width=0.5pt] (0,0) -- (3,3);
+  \draw[line width=0.5pt] (0,0) -- (3,1.7321);
+  \fill (3,3) circle (2.2pt);
+  \fill (3,1.7321) circle (2.2pt);
+  \node[font=\small, inner sep=2.5pt, above left] at (3,3) {$\pt{A}$};
+  \node[font=\small, inner sep=2.5pt, below right] at (3,1.7321) {$\pt{B}$};
+  \node[font=\small, inner sep=2.5pt, below left] at (0,0) {$\pt{O}$};
+  \node[font=\small, inner sep=2.5pt, below left] at (3,0) {$k$};
+  \node[font=\small, inner sep=1pt] at (2.3,4.0) {$x=k$};
+  \node[font=\small, inner sep=1pt] at (4.05,4.0) {$y=\sqrt{3x}$};
+  \node[font=\small, inner sep=1pt] at (4.15,2.5) {$y=\sqrt{x}$};
+\end{tikzpicture}

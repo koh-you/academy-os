@@ -1,0 +1,10 @@
+% 55-51(55쪽) — 방정식 f(x, y)=0 이 나타내는 도형(꼭짓점 (0,1)·(1,1)·(1,0) 인 삼각형). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 1(y축)·1(x축)·O·x·y 만. 보기(답)는 따로 fig-55-51-1~5 에 있다.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.7,0) -- (2.1,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.7) -- (0,2.1) node[left] {$y$};
+  \node[below left=-2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt] (0,1) -- (1,1) -- (1,0) -- cycle;
+  \node[left=1pt, font=\small] at (0,1) {$1$};
+  \node[below, font=\small] at (1,0) {$1$};
+\end{tikzpicture}

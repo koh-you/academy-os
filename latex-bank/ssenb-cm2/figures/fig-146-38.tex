@@ -1,0 +1,14 @@
+% 146-38(146쪽) — 유리함수 y=(ax+b)/(x+c) 의 그래프: 점근선 x=1(세로 점선)·y=2(가로 점선)이고 y축을 4에서 지난다.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 4·2·1·O·x·y 만. 무리함수가 지나는 사분면(답)은 그림에 나타내지 않는다.
+\begin{tikzpicture}[xscale=0.36, yscale=0.26, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.6,0) -- (5.2,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.2) -- (0,7.2) node[left=-1pt, font=\small] {$y$};
+  \draw[dashed, line width=0.5pt] (-3.3,2) -- (4.9,2);
+  \draw[dotted, line width=0.6pt] (1,-3.0) -- (1,7.0);
+  \draw[line width=0.6pt, smooth, samples=90, domain=-3.3:0.5] plot (\x, {2-2/(\x-1)});
+  \draw[line width=0.6pt, smooth, samples=90, domain=1.45:4.9] plot (\x, {2-2/(\x-1)});
+  \node[right=1pt, font=\small] at (0,4) {$4$};
+  \node[left=1pt, font=\small] at (0,2) {$2$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[below left=0pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+\end{tikzpicture}

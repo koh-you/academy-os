@@ -1,0 +1,11 @@
+% 67-39(67쪽) — 도함수 y=f'(x) 의 그래프(아래로 볼록한 포물선 · x축과 x=-3, x=1 에서 만난다). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 -3·O·1·x·y·y=f'(x) 뿐이다.
+\begin{tikzpicture}[scale=0.45, line width=0.5pt, every node/.style={font=\small}]
+  \draw[->, >=stealth, line width=0.7pt] (-4.6,0) -- (2.7,0) node[below left=-1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.1) -- (0,2.7) node[left=-1pt] {$y$};
+  \node[below left=-2pt, inner sep=1.5pt] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt, domain=-4.15:2.15, samples=60] plot (\x, {0.4*(\x+3)*(\x-1)});
+  \node[above, inner sep=1.5pt] at (-2.65,2.25) {$y=f'(x)$};
+  \node[below, inner sep=2pt] at (-3,0) {$-3$};
+  \node[below, inner sep=2pt] at (1,0) {$1$};
+\end{tikzpicture}

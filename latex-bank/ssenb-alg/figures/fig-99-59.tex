@@ -1,0 +1,17 @@
+% 99-59(99쪽) — AB=5, BC=6 인 평행사변형 ABCD.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로(A·B·C·D·5·6)만 두고 ∠A 의 크기(답)는 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt]
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (1.75,0);
+  \coordinate (A) at (0.95,0.85);
+  \coordinate (D) at (2.70,0.85);
+  \draw[line width=0.6pt] (A) -- (D) -- (C) -- (B) -- cycle;
+  \draw[dashed, line width=0.3pt] (B) to[bend left=18] (A);
+  \draw[dashed, line width=0.3pt] (B) to[bend right=14] (C);
+  \node[font=\small] at (0.24,0.64) {$5$};
+  \node[font=\small] at (0.88,-0.40) {$6$};
+  \node[font=\small, above=2pt] at (A) {$\mathrm{A}$};
+  \node[font=\small, right=2pt] at (D) {$\mathrm{D}$};
+  \node[font=\small, left=2pt] at (B) {$\mathrm{B}$};
+  \node[font=\small, below right=-2pt and -2pt] at (C) {$\mathrm{C}$};
+\end{tikzpicture}

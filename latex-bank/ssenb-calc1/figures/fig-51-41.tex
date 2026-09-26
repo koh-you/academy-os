@@ -1,0 +1,27 @@
+% 51-41(51쪽) — 포물선 y=2x^2-6x+7, 직선 y=2x-6 위의 두 점 A(4,2)·B(6,6), 곡선 위의 점 P 와 색칠한 삼각형 ABP. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨·점선은 원문 그대로(7, 6, 2, 4, 6, O, A, B, P). 점 P 는 원문처럼 임의의 자리에 두어 넓이가 최소가 되는 위치(답)가 그림에서 읽히지 않게 했다.
+\begin{tikzpicture}[x=0.3cm, y=0.3cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.0,0) -- (8.0,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.0) -- (0,9.4) node[left] {$y$};
+  \node[below left=-3pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \fill[red!12] (2.25,3.625) -- (4,2) -- (6,6) -- cycle;
+  \draw[line width=0.6pt, domain=-0.25:3.15, samples=90, smooth] plot (\x,{2*\x*\x-6*\x+7});
+  \draw[line width=0.6pt] (2.3,-1.4) -- (6.6,7.2);
+  \draw[line width=0.45pt] (2.25,3.625) -- (4,2);
+  \draw[line width=0.45pt] (2.25,3.625) -- (6,6);
+  \draw[densely dotted, line width=0.4pt] (0,2) -- (4,2) -- (4,0);
+  \draw[densely dotted, line width=0.4pt] (0,6) -- (6,6) -- (6,0);
+  \fill (4,2) circle (2.2pt);
+  \fill (6,6) circle (2.2pt);
+  \fill (2.25,3.625) circle (2.2pt);
+  \node[right, font=\small, inner sep=2.5pt] at (4,2) {$\mathrm{A}$};
+  \node[right, font=\small, inner sep=2.5pt] at (6,6) {$\mathrm{B}$};
+  \node[left, font=\small, inner sep=2.5pt] at (2.25,3.625) {$\mathrm{P}$};
+  \node[right, font=\small, inner sep=2pt] at (0,7) {$7$};
+  \node[left, font=\small, inner sep=2pt] at (0,6) {$6$};
+  \node[left, font=\small, inner sep=2pt] at (0,2) {$2$};
+  \node[below, font=\small, inner sep=1.5pt] at (4,0) {$4$};
+  \node[below, font=\small, inner sep=1.5pt] at (6,0) {$6$};
+  \node[anchor=south west, font=\small, inner sep=1pt] at (0.95,8.35) {$y=2x^2-6x+7$};
+  \node[anchor=south west, font=\small, inner sep=1pt] at (4.6,7.45) {$y=2x-6$};
+\end{tikzpicture}

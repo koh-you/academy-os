@@ -1,0 +1,27 @@
+% 92-18(92쪽) — 높이 5 cm 인 원기둥 모양의 컵과 원의 둘레 위의 세 점 A, B, C 를 꼭짓점으로 하는 삼각형 ABC. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C 와 3 cm(AB)·5 cm(높이)·85°(∠A)·65°(∠B) 만. 컵의 부피·밑면의 반지름은 적지 않는다.
+\begin{tikzpicture}[scale=0.82, line width=0.6pt]
+  \fill[red!6] (-2,1.15) -- (-2,-1.05) arc (180:360:2 and 0.72) -- (2,1.15) arc (0:180:2 and 0.72) -- cycle;
+  \draw[dashed, line width=0.45pt] (2,-1.05) arc (0:180:2 and 0.72);
+  \draw (2,-1.05) arc (0:-180:2 and 0.72);
+  \draw (-2,1.15) -- (-2,-1.05);
+  \draw (2,1.15) -- (2,-1.05);
+  \draw (0,1.15) ellipse (2 and 0.72);
+  \coordinate (A) at (-1.532,1.613);
+  \coordinate (B) at (-1.638,0.737);
+  \coordinate (C) at (1.992,1.087);
+  \draw (A) -- (B) -- (C) -- (A);
+  \draw[dashed, line width=0.4pt] (A) to[bend right=35] (B);
+  \draw (A) ++(263.1:0.5) arc (263.1:351.5:0.5);
+  \draw (B) ++(5.5:0.5) arc (5.5:83.1:0.5);
+  \node[above=1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[font=\small] at (-1.88,0.44) {$\mathrm{B}$};
+  \node[right=1pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[font=\small] at (0.16,2.38) {$85^\circ$};
+  \draw[->, >=stealth, line width=0.35pt] (-0.06,2.22) to[bend left=18] (-1.06,1.42);
+  \node[font=\small] at (-0.86,1.10) {$65^\circ$};
+  \node[font=\small] at (-2.92,1.62) {$3\,\mathrm{cm}$};
+  \draw[->, >=stealth, line width=0.35pt] (-2.32,1.52) -- (-1.82,1.22);
+  \draw[dashed, line width=0.4pt] (-2.0,1.15) to[bend right=22] (-2.0,-1.05);
+  \node[font=\small] at (-3.10,0.05) {$5\,\mathrm{cm}$};
+\end{tikzpicture}

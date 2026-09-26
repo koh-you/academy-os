@@ -1,0 +1,9 @@
+% 67-38(67쪽) — 삼차함수 y=f(x) 의 그래프(y축 바로 오른쪽에서 극소, 그 뒤 극대 · x축과 세 점에서 만나고 y절편은 음수). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에는 눈금도 좌표도 없고 라벨은 O·x·y·y=f(x) 뿐이다(계수의 부호를 그림에서 읽는 문항이라 그대로 둔다).
+\begin{tikzpicture}[scale=0.52, line width=0.5pt, every node/.style={font=\small}]
+  \draw[->, >=stealth, line width=0.7pt] (-1.65,0) -- (4.45,0) node[below left=-1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.3) -- (0,2.3) node[left=-1pt] {$y$};
+  \node[below right=-2pt, inner sep=1.5pt] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt, domain=-1.21:3.9, samples=70] plot (\x, {-0.31*(\x+0.69)*(\x-1.31)*(\x-3.37)});
+  \node[above, inner sep=1.5pt] at (1.9,1.25) {$y=f(x)$};
+\end{tikzpicture}

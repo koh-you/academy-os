@@ -1,0 +1,12 @@
+% 80-45(80쪽) — 전체집합 U 안 두 집합 A·B 의 벤 다이어그램 · 교집합만 남기고 나머지 전부를 색칠(원문 색칠 그대로).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 U·A·B 만 두고 답이 되는 집합 기호는 적지 않는다.
+\begin{tikzpicture}[scale=0.6, line width=0.5pt, every node/.style={font=\small}]
+  \fill[yellow!40, rounded corners=3pt] (-1.8,-1.32) rectangle (1.8,1.32);
+  \begin{scope}\clip (-0.575,0) circle (0.95); \fill[white] (0.575,0) circle (0.95);\end{scope}
+  \draw[line width=0.6pt, rounded corners=3pt] (-1.8,-1.32) rectangle (1.8,1.32);
+  \node[fill=white, inner sep=1.5pt] at (-1.35,1.32) {$U$};
+  \draw[line width=0.6pt] (-0.575,0) circle (0.95);
+  \draw[line width=0.6pt] (0.575,0) circle (0.95);
+  \node[fill=yellow!40, inner sep=1pt] at (-0.451,0.942) {$A$};
+  \node[fill=yellow!40, inner sep=1pt] at (0.451,0.942) {$B$};
+\end{tikzpicture}

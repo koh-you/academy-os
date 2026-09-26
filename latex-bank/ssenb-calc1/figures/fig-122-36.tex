@@ -1,0 +1,16 @@
+% 122-36(122쪽) — 두 곡선 y=x^4-x^2 과 y=-x^4-x 가 -1<=x<=0 에서 둘러싸는 색칠 부분, 그 안을 지나는 곡선 y=kx(x+1). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 y·x·O·-1·y=x^4-x^2·y=-x^4-x·y=kx(x+1) 만. 가운데 곡선의 높이는 원문처럼 개략 위치라 넓이를 이등분하는 k 값을 그림에서 잴 수 없다.
+\begin{tikzpicture}[xscale=1.7, yscale=1.4, line width=0.5pt]
+  \fill[red!16] plot[domain=-1:0, samples=50] (\x, {-\x*\x*\x*\x-\x}) -- plot[domain=0:-1, samples=50] (\x, {\x*\x*\x*\x-\x*\x}) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-1.75,0) -- (0.78,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.0) -- (0,1.25) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt, domain=-1.23:0.4, samples=110] plot (\x, {\x*\x*\x*\x-\x*\x});
+  \draw[line width=0.6pt, domain=-1.23:0.4, samples=110] plot (\x, {-\x*\x*\x*\x-\x});
+  \draw[line width=0.6pt, domain=-1:0, samples=50] plot (\x, {-0.7*\x*(\x+1)});
+  \node[below right=-2pt, font=\small, inner sep=1pt] at (0,0) {$\mathrm{O}$};
+  \node[above left=-1pt, font=\small, inner sep=1pt] at (-1,0.02) {$-1$};
+  \node[font=\small] at (-1.08,1.05) {$y=x^4-x^2$};
+  \node[font=\small] at (-1.0,-0.85) {$y=-x^4-x$};
+  \draw[line width=0.4pt] (-0.52,0.62) -- (-0.5,0.21);
+  \node[font=\small] at (-0.5,0.72) {$y=kx(x+1)$};
+\end{tikzpicture}

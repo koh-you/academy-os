@@ -1,0 +1,11 @@
+% 117-04(117쪽) — 삼차함수 y=f(x) 의 그래프(x=-3 에서 x축과 만나고 원점에서 x축에 접함)와 곡선·x축으로 둘러싸인 색칠 부분. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 y·x·O·-3·y=f(x) 만. 눈금과 세로 수치는 원문에 없으므로 넣지 않았다(넓이 9 와 f(x) 의 계수가 그림에서 읽히지 않게).
+\begin{tikzpicture}[xscale=0.75, yscale=0.32, line width=0.5pt]
+  \fill[red!12] (-3,0) -- plot[domain=-3:0, samples=60] (\x, {\x*\x*(\x+3)}) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-3.85,0) -- (1.7,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.4) -- (0,6.0) node[left=1pt, font=\small] {$y$};
+  \node[below right=-2pt, font=\small, inner sep=1pt] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt, domain=-3.32:1.12, samples=100] plot (\x, {\x*\x*(\x+3)});
+  \node[below, font=\small, inner sep=2pt] at (-3,0) {$-3$};
+  \node[right, font=\small, inner sep=2pt] at (0.22,5.4) {$y=f(x)$};
+\end{tikzpicture}

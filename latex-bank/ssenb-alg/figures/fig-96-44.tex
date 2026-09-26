@@ -1,0 +1,22 @@
+% 96-44(96쪽) — AD∥BC, AD=2, BC=4 인 사다리꼴 ABCD 와 대각선 AC · ∠BAC=α, ∠ACD=β.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로(A·B·C·D·2·4·α·β)만 둔다.
+\begin{tikzpicture}[line width=0.5pt]
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (2.8,0);
+  \coordinate (A) at (0.45,2.2);
+  \coordinate (D) at (1.85,2.2);
+  \draw[line width=0.6pt] (A) -- (D) -- (C) -- (B) -- cycle;
+  \draw[line width=0.5pt] (A) -- (C);
+  \draw[dashed, line width=0.3pt] (A) to[bend left=16] (D);
+  \draw[dashed, line width=0.3pt] (B) to[bend right=12] (C);
+  \draw[line width=0.35pt] ($(A)+(258.4:0.42)$) arc (258.4:316.9:0.42);
+  \draw[line width=0.35pt] ($(C)+(113.4:0.75)$) arc (113.4:136.9:0.75);
+  \node[font=\small] at (1.15,2.62) {$2$};
+  \node[font=\small] at (1.40,-0.45) {$4$};
+  \node[font=\small] at (0.64,1.61) {$\alpha$};
+  \node[font=\small] at (2.11,1.02) {$\beta$};
+  \node[font=\small, above left=-2pt and -1pt] at (A) {$\mathrm{A}$};
+  \node[font=\small, above right=-2pt and -1pt] at (D) {$\mathrm{D}$};
+  \node[font=\small, below left=-2pt and -1pt] at (B) {$\mathrm{B}$};
+  \node[font=\small, below right=-2pt and -1pt] at (C) {$\mathrm{C}$};
+\end{tikzpicture}

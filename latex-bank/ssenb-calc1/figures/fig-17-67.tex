@@ -1,0 +1,21 @@
+% 17-67(17쪽) — 곡선 y=√(x−1) 위의 두 점 A(2, 1)·P, P 에서 x축에 내린 수선의 발 H, A 에서 선분 PH 에 내린 수선의 발 Q(직각 표시 2개). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 라벨(y=√(x−1)·A(2, 1)·P·Q·H·1·O)만 옮기고 없는 눈금은 만들지 않는다. P 는 일반 위치라 답(AQ/PQ 의 극한)이 그림에서 읽히지 않는다.
+\begin{tikzpicture}[x=0.82cm, y=0.82cm, line width=0.6pt]
+  \draw[line width=0.7pt, ->] (-0.5,0) -- (4.7,0) node[right, font=\small, inner sep=1.5pt] {$x$};
+  \draw[line width=0.7pt, ->] (0,-0.55) -- (0,2.35) node[above, font=\small, inner sep=1.5pt] {$y$};
+  \draw[line width=0.55pt, domain=1:4.45, smooth, samples=70] plot (\x,{sqrt(\x-1)});
+  \draw[line width=0.5pt] (3.6,1.6125) -- (3.6,0);
+  \draw[line width=0.5pt] (2,1) -- (3.6,1);
+  \draw[line width=0.4pt] (3.42,1) -- (3.42,0.82) -- (3.6,0.82);
+  \draw[line width=0.4pt] (3.42,0) -- (3.42,0.18) -- (3.6,0.18);
+  \fill (2,1) circle (2.2pt);
+  \fill (3.6,1.6125) circle (2.2pt);
+  \draw[line width=0.35pt] (3.78,2.08) -- (4.16,1.83);
+  \node[font=\small, inner sep=2.5pt, below left] at (0,0) {$\pt{O}$};
+  \node[font=\small, inner sep=2.5pt, below] at (1,0) {$1$};
+  \node[font=\small, inner sep=2.5pt, below] at (3.6,0) {$\pt{H}$};
+  \node[font=\small, inner sep=2.5pt, right] at (3.6,1) {$\pt{Q}$};
+  \node[font=\small, inner sep=2pt, above left] at (3.6,1.6125) {$\pt{P}$};
+  \node[font=\small, inner sep=2pt, above left] at (2,1) {$\pt{A}(2,\,1)$};
+  \node[font=\small, inner sep=1pt] at (3.05,2.3) {$y=\sqrt{x-1}$};
+\end{tikzpicture}

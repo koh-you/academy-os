@@ -1,0 +1,18 @@
+% 97-47(97쪽) — 삼각형 ABC 의 세 변 AB, BC, CA 를 2:1 로 내분하는 점 P, Q, R 과 삼각형 PQR.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로(A·B·C·P·Q·R)만 두고 넓이의 비(답)는 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt]
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (2.9,0);
+  \coordinate (A) at (1.85,2.2);
+  \coordinate (P) at (0.617,0.733);
+  \coordinate (Q) at (1.933,0);
+  \coordinate (R) at (2.2,1.467);
+  \draw[line width=0.6pt] (A) -- (B) -- (C) -- cycle;
+  \draw[line width=0.5pt] (P) -- (Q) -- (R) -- cycle;
+  \node[font=\small, above=2pt] at (A) {$\mathrm{A}$};
+  \node[font=\small, left=2pt] at (B) {$\mathrm{B}$};
+  \node[font=\small, right=2pt] at (C) {$\mathrm{C}$};
+  \node[font=\small, left=2pt] at (P) {$\mathrm{P}$};
+  \node[font=\small, below=2pt] at (Q) {$\mathrm{Q}$};
+  \node[font=\small, above right=-2pt and -1pt] at (R) {$\mathrm{R}$};
+\end{tikzpicture}

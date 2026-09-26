@@ -1,0 +1,12 @@
+% 100-51(100쪽) — 도함수 y=f'(x) 의 그래프인 위로 볼록한 포물선(꼭짓점 (-1/2, 1/2), 원점을 지난다). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: 꼭짓점까지의 점선과 눈금 -1/2, 1/2 · 라벨 y=f'(x), O, x, y. 다른 눈금은 만들지 않는다.
+\begin{tikzpicture}[x=1.9cm, y=1.8cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.5,0) -- (0.6,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.95) -- (0,0.9) node[left] {$y$};
+  \node[below left=-1pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt, domain=-1.28:0.32, samples=70, smooth] plot (\x, {-2*\x*(\x+1)});
+  \draw[dotted, line width=0.5pt] (-0.5,0) -- (-0.5,0.5) -- (0,0.5);
+  \node[below, font=\small] at (-0.5,-0.04) {$-\dfrac{1}{2}$};
+  \node[right, font=\small] at (0,0.5) {$\dfrac{1}{2}$};
+  \node[left, font=\small] at (-0.6,0.62) {$y=f'(x)$};
+\end{tikzpicture}

@@ -1,0 +1,22 @@
+% 20-12(20쪽) — 삼각형 ABC 와 BC∥DE 인 점 D(변 AB 위)·E(변 AC 위) · 주어진 길이 2(AD)·3(DB)·log_2 x(DE)·log_2 y^2(BC).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 A·B·C·D·E 와 2·3·log_2 x·log_2 y^2 만 두고, 상수 k(답)는 넣지 않는다.
+\begin{tikzpicture}[scale=0.85, line width=0.6pt]
+  \coordinate (A) at (0.3,2.5); \coordinate (B) at (-1.7,0); \coordinate (C) at (1.9,0);
+  \coordinate (D) at (-0.5,1.5); \coordinate (E) at (0.94,1.5);
+  \draw (A) -- (B) -- (C) -- cycle;
+  \draw (D) -- (E);
+  \draw[->, >=stealth] (D) -- ($(D)!0.62!(E)$);
+  \draw[->, >=stealth] (B) -- ($(B)!0.56!(C)$);
+  \draw[dotted, line width=0.5pt] (A) to[bend right=30] (D);
+  \draw[dotted, line width=0.5pt] (D) to[bend right=30] (B);
+  \draw[dotted, line width=0.5pt] (B) to[bend right=22] (C);
+  \node[above=1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[left=1pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[right=1pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[left=1pt, font=\small] at (D) {$\mathrm{D}$};
+  \node[right=1pt, font=\small] at (E) {$\mathrm{E}$};
+  \node[font=\small] at (-0.66,2.08) {$2$};
+  \node[font=\small] at (-1.48,0.95) {$3$};
+  \node[below=1pt, font=\small] at (0.22,1.5) {$\log_2 x$};
+  \node[font=\small] at (0.1,-0.62) {$\log_2 y^2$};
+\end{tikzpicture}

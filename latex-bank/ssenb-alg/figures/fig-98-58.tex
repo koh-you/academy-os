@@ -1,0 +1,21 @@
+% 98-58(98쪽) — AB=8, BC=7 인 평행사변형 ABCD 와 대각선 AC=13.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로(A·B·C·D·8·7·13)만 두고 넓이(답)는 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt]
+  \coordinate (A) at (0,1.62);
+  \coordinate (D) at (1.89,1.62);
+  \coordinate (B) at (0.9,0);
+  \coordinate (C) at (2.79,0);
+  \fill[cyan!20] (A) -- (D) -- (C) -- (B) -- cycle;
+  \draw[line width=0.6pt] (A) -- (D) -- (C) -- (B) -- cycle;
+  \draw[line width=0.5pt] (A) -- (C);
+  \draw[dashed, line width=0.3pt] (A) to[bend right=12] (B);
+  \draw[dashed, line width=0.3pt] (B) to[bend right=12] (C);
+  \draw[dashed, line width=0.3pt] (A) to[bend left=20] (C);
+  \node[font=\small] at (0.16,0.66) {$8$};
+  \node[font=\small] at (1.84,-0.36) {$7$};
+  \node[font=\small] at (1.45,0.86) {$13$};
+  \node[font=\small, left=2pt] at (A) {$\mathrm{A}$};
+  \node[font=\small, right=2pt] at (D) {$\mathrm{D}$};
+  \node[font=\small, below left=-2pt and -2pt] at (B) {$\mathrm{B}$};
+  \node[font=\small, right=2pt] at (C) {$\mathrm{C}$};
+\end{tikzpicture}

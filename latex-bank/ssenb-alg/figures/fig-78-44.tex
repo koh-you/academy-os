@@ -1,0 +1,23 @@
+% 78-44(78쪽) — 사분원을 10등분한 점 A_1, A_2, …, A_9 와 각 θ(=∠AOA_1). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(O · A · A_1 · A_2 · A_9 · θ)만. 각의 크기나 구하는 값은 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt]
+  \def\R{2.3}
+  % 사분원(90°를 10등분하므로 한 칸이 9°) — 원문처럼 A_1, A_2, A_9 의 반지름만 긋고 나머지는 점으로 줄인다.
+  \draw[line width=0.6pt] (0,0) -- (\R,0);
+  \draw[line width=0.6pt] (0,0) -- (90:\R);
+  \draw[line width=0.6pt] (90:\R) arc (90:0:\R);
+  \draw (0,0) -- (9:\R);
+  \draw (0,0) -- (18:\R);
+  \draw (0,0) -- (81:\R);
+  % O 의 직각 표시
+  \draw[line width=0.4pt] (0.16,0) -- (0.16,0.16) -- (0,0.16);
+  % θ = ∠AOA_1
+  \draw[line width=0.4pt] (0.95,0) arc (0:9:0.95);
+  \node[font=\small, below] at (9:1.02) {$\theta$};
+  \node[font=\small, rotate=45] at (48:1.25) {$\cdots$};
+  \node[font=\small, below left=-1pt and -1pt] at (0,0) {$\mathrm{O}$};
+  \node[font=\small, right=1pt] at (\R,0) {$\mathrm{A}$};
+  \node[font=\small, right=1pt] at (9:\R) {$\mathrm{A}_1$};
+  \node[font=\small, right=1pt] at (18:\R) {$\mathrm{A}_2$};
+  \node[font=\small, above=1pt] at (81:\R) {$\mathrm{A}_9$};
+\end{tikzpicture}

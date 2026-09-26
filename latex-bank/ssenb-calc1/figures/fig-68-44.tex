@@ -1,0 +1,12 @@
+% 68-44(68쪽) — 삼차함수의 도함수 y=f'(x) 그래프(위로 볼록한 포물선 · x=-3, x=1 에서 x축과 만나고 y절편 3). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(-3, 1, 3, O, x, y, y=f'(x))만 — 극댓값·극솟값은 적지 않는다.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-4.1,0) -- (2.1,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.8) -- (0,4.8) node[right=1pt] {$y$};
+  \draw[line width=0.6pt, domain=-3.55:1.55, samples=80, smooth] plot (\x, {(\x+3)*(1-\x)});
+  \node[below=1pt, font=\small] at (-3,0) {$-3$};
+  \node[below right=-1pt and -2pt, font=\small] at (1,0) {$1$};
+  \node[below left=-1pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[right=1pt, font=\small] at (0,3) {$3$};
+  \node[anchor=east, font=\small] at (-1.5,4.3) {$y=f'(x)$};
+\end{tikzpicture}

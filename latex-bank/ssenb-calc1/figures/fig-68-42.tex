@@ -1,0 +1,12 @@
+% 68-42(68쪽) — 삼차함수의 도함수 y=f'(x) 그래프(아래로 볼록한 포물선 · x=0, x=2 에서 x축과 만남 · x=1 이 꼭짓점). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨·점선은 원문 그대로(1, 2, O, x, y, y=f'(x))만 — 극값·함숫값은 적지 않는다(답이 그림에서 읽히지 않게).
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.1,0) -- (3.3,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.7) -- (0,3.2) node[left=1pt] {$y$};
+  \draw[line width=0.6pt, domain=-0.56:2.56, samples=70, smooth] plot (\x, {2.2*\x*(\x-2)});
+  \draw[densely dotted, line width=0.4pt] (1,0) -- (1,-2.2);
+  \node[above=1pt, font=\small] at (1,0) {$1$};
+  \node[below right=-1pt and -2pt, font=\small] at (2,0) {$2$};
+  \node[below left=-1pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=west, font=\small] at (0.9,3.45) {$y=f'(x)$};
+\end{tikzpicture}

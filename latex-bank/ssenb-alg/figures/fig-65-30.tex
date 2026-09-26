@@ -1,0 +1,17 @@
+% 65-30(65쪽) — 좌표평면 위 제2사분면의 점 P 와 동경 OP, 동경이 나타내는 각 θ, 선분 OP 의 길이 r.
+% 스캔 화질이 낮아 TikZ 로 다시 그림 — 라벨은 원문 그대로(P(-√3/2, a)·r·θ·O·x·y)만 두고 눈금은 넣지 않는다.
+\begin{tikzpicture}[scale=0.62, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.7,0) -- (1.7,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.25) -- (0,3.3) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.7pt] (0,0) -- (-1.35,2.34);
+  \fill (-1.35,2.34) circle (2.2pt);
+  % 선분 OP 의 길이를 나타내는 점선
+  \draw[densely dotted, line width=0.45pt] (-1.5,2.15) -- (-1.95,1.35);
+  \draw[densely dotted, line width=0.45pt] (-2.2,0.85) -- (-0.15,-0.05);
+  \node[font=\small] at (-2.25,1.18) {$r$};
+  % 동경이 나타내는 각
+  \draw[line width=0.4pt] (0.85,0) arc (0:120:0.85);
+  \node[font=\small] at (0.62,0.9) {$\theta$};
+  \node[below right=-1pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=south east, font=\small] at (-0.95,2.85) {$\pt{P}\!\left(-\dfrac{\sqrt{3}}{2},\ a\right)$};
+\end{tikzpicture}

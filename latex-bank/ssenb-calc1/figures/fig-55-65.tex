@@ -1,0 +1,15 @@
+% 55-65(55쪽) — 정사각형 ABCD(A, C 는 y축 · B, D 는 x축 위)와 곡선 y=-2x^2+7/8. 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨 A·B·C·D·O·7/8·곡선식만).
+\begin{tikzpicture}[scale=1.35,line width=0.6pt]
+  \fill[red!15] (0,1) -- (1,0) -- (0,-1) -- (-1,0) -- cycle;
+  \draw[line width=0.7pt,->] (-1.4,0) -- (1.5,0) node[below=1pt] {$x$};
+  \draw[line width=0.7pt,->] (0,-1.7) -- (0,1.5) node[left=1pt] {$y$};
+  \draw (0,1) -- (1,0) -- (0,-1) -- (-1,0) -- cycle;
+  \draw[domain=-1.08:1.08,samples=100,smooth,line width=0.5pt] plot (\x,{-2*\x*\x+0.875});
+  \node[above right=-2pt] at (0,1) {$\pt{A}$};
+  \node[above left=-2pt] at (-1,0) {$\pt{B}$};
+  \node[above right=-2pt] at (1,0) {$\pt{D}$};
+  \node[below right=-2pt] at (0,-1) {$\pt{C}$};
+  \node[below left=-2pt] at (0,0) {$\pt{O}$};
+  \node[left=1pt] at (0,0.42) {$\frac{7}{8}$};
+  \node[anchor=west,font=\small] at (0.3,-1.6) {$y=-2x^2+\frac{7}{8}$};
+\end{tikzpicture}

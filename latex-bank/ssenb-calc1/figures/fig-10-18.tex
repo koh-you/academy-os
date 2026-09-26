@@ -1,0 +1,26 @@
+% 10-18(10쪽) — $y=f(x)$ 의 그래프(직선 두 조각 · 곡선 · 수평 선분 · 닫힌 점·빈 점·안내 점선). 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨·점선만 · 눈금은 만들지 않음).
+\begin{tikzpicture}[scale=0.62, line width=0.6pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.7,0) -- (5.5,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.3) -- (0,4.5) node[left=1pt] {$y$};
+  \draw[densely dotted, line width=0.4pt] (0,3) -- (2,3);
+  \draw[densely dotted, line width=0.4pt] (2,0) -- (2,3);
+  \draw[densely dotted, line width=0.4pt] (0,2) -- (2,2);
+  \draw[densely dotted, line width=0.4pt] (3,0) -- (3,3);
+  \draw (-1.3,3.8) -- (0,2);
+  \draw[smooth, tension=0.7] plot coordinates {(0,1) (0.35,0.35) (0.62,0.05) (0.9,0) (1.2,0.2) (1.5,0.78) (1.76,1.36) (2,2)};
+  \draw (2,3) -- (3,3);
+  \draw (3,3) -- (4.5,0.95);
+  \draw[fill=white] (0,2) circle (2.2pt);
+  \fill (0,1) circle (2.2pt);
+  \draw[fill=white] (2,2) circle (2.2pt);
+  \fill (2,3) circle (2.2pt);
+  \draw[fill=white] (3,3) circle (2.2pt);
+  \fill (3,0) circle (2.2pt);
+  \node[left=2pt, font=\small] at (0,3) {$3$};
+  \node[left=2pt, font=\small] at (0,2) {$2$};
+  \node[left=2pt, font=\small] at (0,1) {$1$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[below=1pt, font=\small] at (3,0) {$3$};
+  \node[below left=-1pt and -1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=west, font=\small] at (1.5,4.1) {$y=f(x)$};
+\end{tikzpicture}

@@ -1,0 +1,21 @@
+% 89-03(89쪽) — 삼각형 ABC 와 변 BC 위의 점 P(선분 AP). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C·P 와 3√2(AB 의 점선 안내)·105°(∠A)·45°(∠B) 만. 구하는 최솟값은 적지 않는다.
+\begin{tikzpicture}[scale=0.82, line width=0.6pt]
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (6.6,0);
+  \coordinate (A) at (2.6,1.95);
+  \coordinate (P) at (4.5,0);
+  \draw (B) -- (A) -- (C) -- (B);
+  \draw (A) -- (P);
+  \draw[dashed, line width=0.4pt] (B) to[bend right=16] (A);
+  \draw (A) ++(216.9:0.45) arc (216.9:334:0.45);
+  \draw (B) ++(0:0.66) arc (0:36.9:0.66);
+  \fill (P) circle (2.2pt);
+  \node[above=1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[left=1pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[right=1pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[below=2pt, font=\small] at (P) {$\mathrm{P}$};
+  \node[font=\small] at (0.72,1.24) {$3\sqrt{2}$};
+  \node[font=\small] at (2.98,1.30) {$105^\circ$};
+  \node[font=\small] at (1.08,0.26) {$45^\circ$};
+\end{tikzpicture}

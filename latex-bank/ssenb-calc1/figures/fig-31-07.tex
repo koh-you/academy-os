@@ -1,0 +1,22 @@
+% 31-07(31쪽) — y=f(x)의 그래프(왼쪽 극소 · 가운데 극대 · 오른쪽 극소)와 x축 위의 네 점 a, b, c, d. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문의 점선(a, b, c, d 에서 그래프까지 내린 세로 점선 · f(c)=f(d) 높이의 가로 점선)만 옮기고 눈금·좌표값은 넣지 않는다.
+\begin{tikzpicture}[scale=0.43, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.55,0) -- (4.15,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.1) -- (0,1.75) node[right=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] plot[smooth, tension=0.75] coordinates {
+    (-3.15,1.55) (-2.76,0) (-2.45,-0.52) (-2.16,-0.72) (-1.95,-0.82)
+    (-1.6,-0.78) (-1.16,-0.5) (-0.63,0) (-0.2,0.62) (0.05,0.76)
+    (0.4,0.66) (1.08,0) (1.5,-0.85) (1.84,-1.2) (2.3,-1.45)
+    (2.79,-1.2) (3.2,0) (3.5,1.0)};
+  \draw[densely dotted, line width=0.4pt] (-2.16,0) -- (-2.16,-0.72);
+  \draw[densely dotted, line width=0.4pt] (-1.16,0) -- (-1.16,-0.5);
+  \draw[densely dotted, line width=0.4pt] (1.84,0) -- (1.84,-1.2);
+  \draw[densely dotted, line width=0.4pt] (2.79,0) -- (2.79,-1.2);
+  \draw[densely dotted, line width=0.4pt] (0,-1.2) -- (2.79,-1.2);
+  \node[above=0pt, font=\small] at (-2.16,0) {$a$};
+  \node[above=0pt, font=\small] at (-1.16,0) {$b$};
+  \node[above=0pt, font=\small] at (1.84,0) {$c$};
+  \node[above=0pt, font=\small] at (2.79,0) {$d$};
+  \node[below left=-2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[font=\small] at (2.6,1.4) {$y=f(x)$};
+\end{tikzpicture}

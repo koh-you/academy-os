@@ -1,0 +1,11 @@
+% 68-43(68쪽) — 삼차함수 f(x)=ax^3+bx^2+cx+d 의 도함수 y=f'(x) 그래프(아래로 볼록한 포물선 · x=-1, x=1 에서 x축과 만남). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(-1, 1, O, x, y, y=f'(x))만 — 극댓값·극솟값은 그림에 적지 않는다.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.1,0) -- (2.4,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.9) -- (0,3.1) node[left=1pt] {$y$};
+  \draw[line width=0.6pt, domain=-1.55:1.55, samples=70, smooth] plot (\x, {2.3*(\x*\x-1)});
+  \node[below left=-1pt and -2pt, font=\small] at (-1,0) {$-1$};
+  \node[below right=-1pt and -2pt, font=\small] at (1,0) {$1$};
+  \node[below right=-1pt and -2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=west, font=\small] at (0.35,3.35) {$y=f'(x)$};
+\end{tikzpicture}

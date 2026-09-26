@@ -1,0 +1,8 @@
+% 123-99 ③(123쪽) — 보기 그림: 꺾은선 (-2,1.5)-(-1,0)-(0,1.5)-(1,0)-(2,1.5)-(3,0)-(4,1.5).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 O·x·y 만.
+\begin{tikzpicture}[scale=0.40, line width=0.5pt, baseline=(current bounding box.center)]
+  \draw[->, >=stealth, line width=0.7pt] (-2.4,0) -- (4.3,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.7) -- (0,2.0) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (-2,1.5) -- (-1,0) -- (0,1.5) -- (1,0) -- (2,1.5) -- (3,0) -- (4,1.5);
+  \node[below left=0pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+\end{tikzpicture}

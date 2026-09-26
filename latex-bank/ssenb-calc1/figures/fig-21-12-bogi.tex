@@ -1,0 +1,46 @@
+% 21-12(21쪽) 보기 — y=g(x) 후보 세 그래프(ㄱ 직선 · ㄴ 꺾은선 · ㄷ 사다리꼴 꺾은선). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문처럼 ㄱ·ㄴ 을 윗줄에, ㄷ 을 아랫줄에 둔다. 라벨·점선은 원문 그대로(-1, 1, 1, 2, -1, O, x, y, y=g(x))만.
+\begin{tikzpicture}[scale=0.58, line width=0.5pt]
+  % ㄱ. y=-x+1
+  \begin{scope}
+    \node[font=\small] at (-2.6,2.5) {ㄱ.};
+    \draw[->, >=stealth, line width=0.7pt] (-2.0,0) -- (2.3,0) node[below] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-1.1) -- (0,2.9) node[left] {$y$};
+    \node[below left=-2pt and -4pt, font=\small] at (0,0) {$\mathrm{O}$};
+    \draw[line width=0.6pt] (-1.55,2.55) -- (1.85,-0.85);
+    \draw[dotted, line width=0.5pt] (-1,2) -- (-1,0);
+    \draw[dotted, line width=0.5pt] (-1,2) -- (0,2);
+    \node[below, font=\small] at (-1,0) {$-1$};
+    \node[below, font=\small] at (1,0) {$1$};
+    \node[right, font=\small] at (0.05,2) {$2$};
+    \node[left, font=\small] at (0,0.82) {$1$};
+    \node[right, font=\small] at (0.35,1.05) {$y=g(x)$};
+  \end{scope}
+  % ㄴ. x<-1 직선 · -1≤x≤0 에서 y=1 · 0≤x≤1 직선 · x≥1 직선
+  \begin{scope}[shift={(8.0,0)}]
+    \node[font=\small] at (-2.6,2.5) {ㄴ.};
+    \draw[->, >=stealth, line width=0.7pt] (-2.1,0) -- (2.5,0) node[below] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-0.9) -- (0,2.6) node[left] {$y$};
+    \node[below left=-2pt and -4pt, font=\small] at (0,0) {$\mathrm{O}$};
+    \draw[line width=0.6pt] (-1.9,1.9) -- (-1,1) -- (0,1) -- (1,0) -- (2.15,1.15);
+    \draw[dotted, line width=0.5pt] (-1,1) -- (-1,0);
+    \node[below, font=\small] at (-1,0) {$-1$};
+    \node[below, font=\small] at (1,0) {$1$};
+    \node[left, font=\small] at (0.02,1.35) {$1$};
+    \node[right, font=\small] at (0.3,1.9) {$y=g(x)$};
+  \end{scope}
+  % ㄷ. x≤-1 직선 · -1≤x≤1 에서 y=-1 · x≥1 직선
+  \begin{scope}[shift={(0,-5.2)}]
+    \node[font=\small] at (-3.3,1.0) {ㄷ.};
+    \draw[->, >=stealth, line width=0.7pt] (-2.6,0) -- (2.7,0) node[below] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-1.9) -- (0,2.0) node[left] {$y$};
+    \node[below right=-2pt and 0pt, font=\small] at (0,0) {$\mathrm{O}$};
+    \draw[line width=0.6pt] (-2.35,0.35) -- (-1,-1) -- (1,-1) -- (2.35,0.35);
+    \draw[dotted, line width=0.5pt] (-1,0) -- (-1,-1);
+    \draw[dotted, line width=0.5pt] (1,0) -- (1,-1);
+    \node[above, font=\small] at (-1,0.05) {$-1$};
+    \node[above, font=\small] at (1,0.05) {$1$};
+    \node[below left=1pt and 0pt, font=\small] at (0,-1) {$-1$};
+    \node[right, font=\small] at (0.25,1.35) {$y=g(x)$};
+  \end{scope}
+\end{tikzpicture}

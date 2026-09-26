@@ -1,0 +1,22 @@
+% 128-69(128쪽) — 물체의 속도 v(t) 의 그래프(꺾은선). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 꼭짓점은 원문대로 (0,0)·(1,1)·(2,1)·(3,0)·(4,-2)·(5,0)·(6,1)·(7,1). 원문 라벨만: v(t) · t · O · 1 · -2 · 1, 2, 3, 4, 5, 6 과 점선.
+\begin{tikzpicture}[x=0.42cm, y=0.32cm, line width=0.5pt]
+  \draw[dotted, line width=0.4pt] (0,1) -- (7,1);
+  \draw[dotted, line width=0.4pt] (0,-2) -- (4,-2);
+  \draw[dotted, line width=0.4pt] (1,0) -- (1,1);
+  \draw[dotted, line width=0.4pt] (2,0) -- (2,1);
+  \draw[dotted, line width=0.4pt] (4,0) -- (4,-2);
+  \draw[dotted, line width=0.4pt] (6,0) -- (6,1);
+  \draw[->, >=stealth, line width=0.7pt] (-0.8,0) -- (8.0,0) node[below] {$t$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.1) -- (0,2.3) node[left] {$v(t)$};
+  \node[below left=-2pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt] (0,0) -- (1,1) -- (2,1) -- (3,0) -- (4,-2) -- (5,0) -- (6,1) -- (7.3,1);
+  \node[left, font=\small, inner sep=1.5pt] at (0,1) {$1$};
+  \node[left, font=\small, inner sep=1.5pt] at (0,-2) {$-2$};
+  \node[below, font=\small, inner sep=1.5pt] at (1,0) {$1$};
+  \node[below, font=\small, inner sep=1.5pt] at (2,0) {$2$};
+  \node[above, font=\small, inner sep=1.5pt] at (3,0) {$3$};
+  \node[above, font=\small, inner sep=1.5pt] at (4,0) {$4$};
+  \node[below, font=\small, inner sep=1.5pt, xshift=2pt] at (5,0) {$5$};
+  \node[below, font=\small, inner sep=1.5pt] at (6,0) {$6$};
+\end{tikzpicture}

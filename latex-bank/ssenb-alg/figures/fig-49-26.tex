@@ -1,0 +1,19 @@
+% 49-26(49쪽) — y=log_2 x 의 그래프와 그 역함수 y=g(x) 의 그래프, y축 위의 점 A 와 두 곡선 위의 점 B, C, D,
+% 그리고 삼각형 BCD(연한 채색). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(y=g(x) · y=log_2 x · A · B · C · D · O · x · y)만. 삼각형의 넓이(답)는 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt, x=0.26cm, y=0.44cm]
+  \fill[black!8] (2,1) -- (2,4) -- (16,4) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-1.8,0) -- (18.6,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.35) -- (0,5.8) node[left=1pt, font=\small] {$y$};
+  \draw[domain=0.45:17.8, samples=160, smooth] plot (\x, {ln(\x)/ln(2)});
+  \draw[domain=-1.7:2.42, samples=120, smooth] plot (\x, {exp(0.6931*\x)});
+  \draw[line width=0.55pt] (0,1) -- (2,1) -- (2,4) -- (16,4);
+  \draw[line width=0.55pt] (2,1) -- (16,4);
+  \node[left=1pt, font=\small] at (0,1) {$\mathrm{A}$};
+  \node[below right=0pt and 0pt, font=\small] at (2,1) {$\mathrm{B}$};
+  \node[left=1pt, font=\small] at (2,4) {$\mathrm{C}$};
+  \node[below right=-1pt and 0pt, font=\small] at (16,4) {$\mathrm{D}$};
+  \node[below left=-1pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[anchor=west, font=\small] at (2.4,5.4) {$y=g(x)$};
+  \node[anchor=west, font=\small] at (9.6,4.6) {$y=\log_2 x$};
+\end{tikzpicture}

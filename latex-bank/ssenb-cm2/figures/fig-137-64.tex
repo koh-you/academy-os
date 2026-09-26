@@ -1,0 +1,22 @@
+% 137-64(137쪽) — 함수 y=10/x 의 그래프 위의 두 점 P(제1사분면)·Q(제3사분면)와 수선의 발 A, B, C, D, 색칠한 육각형 APBCQD.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 y·x·O·P·Q·A·B·C·D 와 곡선의 식뿐이고, 넓이의 최솟값(답)은 적지 않는다.
+\begin{tikzpicture}[xscale=0.28, yscale=0.19, line width=0.5pt]
+  \fill[cyan!20] (1.8,0) -- (1.8,5.56) -- (0,5.56) -- (-1.8,0) -- (-1.8,-5.56) -- (0,-5.56) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-4.8,0) -- (5.0,0) node[below left=-1pt and -2pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-8.8) -- (0,8.6) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt, smooth, samples=80, domain=1.25:4.8] plot (\x, {10/\x});
+  \draw[line width=0.6pt, smooth, samples=80, domain=-4.8:-1.25] plot (\x, {10/\x});
+  \draw[line width=0.5pt] (1.8,0) -- (1.8,5.56) -- (0,5.56) -- (-1.8,0) -- (-1.8,-5.56) -- (0,-5.56) -- cycle;
+  \draw[line width=0.4pt] (0.4,5.56) -- (0.4,4.97) -- (0,4.97);
+  \draw[line width=0.4pt] (2.2,0) -- (2.2,0.59) -- (1.8,0.59);
+  \draw[line width=0.4pt] (-2.2,0) -- (-2.2,-0.59) -- (-1.8,-0.59);
+  \draw[line width=0.4pt] (-0.4,-5.56) -- (-0.4,-4.97) -- (0,-4.97);
+  \node[above right=-2pt and 0pt, font=\small] at (1.8,5.56) {$\mathrm{P}$};
+  \node[above left=-2pt and 0pt, font=\small] at (0,5.56) {$\mathrm{B}$};
+  \node[below right=-2pt and -1pt, font=\small] at (1.8,0) {$\mathrm{A}$};
+  \node[above left=-2pt and 0pt, font=\small] at (-1.8,0) {$\mathrm{C}$};
+  \node[below left=-2pt and -1pt, font=\small] at (-1.8,-5.56) {$\mathrm{Q}$};
+  \node[below right=-2pt and -1pt, font=\small] at (0,-5.56) {$\mathrm{D}$};
+  \node[below left=-2pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[right=1pt, font=\small] at (2.9,7.9) {$y=\dfrac{10}{x}$};
+\end{tikzpicture}

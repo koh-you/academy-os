@@ -1,0 +1,33 @@
+% 36-33(36쪽) — 구간 (-3, 3)에서 정의된 y=f(x)의 그래프. x=-1, x=2 에서 끊어져 있고(빈 점·채운 점) x=1 에서 뾰족하다.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문의 빈 점·채운 점·세로 점선과 눈금 -3, -2, -1, 1, 2, 3 만 옮긴다.
+\begin{tikzpicture}[scale=0.58, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.7,0) -- (4.0,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.9) -- (0,4.1) node[right=-1pt, font=\small] {$y$};
+  \draw[densely dotted, line width=0.4pt] (-3,0) -- (-3,2.30);
+  \draw[densely dotted, line width=0.4pt] (-2,0) -- (-2,3.20);
+  \draw[densely dotted, line width=0.4pt] (-1,0) -- (-1,3.20);
+  \draw[densely dotted, line width=0.4pt] (2,0) -- (2,1.84);
+  \draw[densely dotted, line width=0.4pt] (3,0) -- (3,3.22);
+  \draw[line width=0.6pt] plot[smooth, tension=0.75] coordinates {
+    (-3,2.30) (-2.7,2.72) (-2.4,3.00) (-2.05,3.19) (-1.7,3.28) (-1.35,3.26) (-1,3.20)};
+  \draw[line width=0.6pt] plot[smooth, tension=0.75] coordinates {
+    (-1,3.20) (-0.6,2.85) (-0.2,2.35) (0.2,1.80) (0.55,1.22) (0.8,0.70) (1,0)};
+  \draw[line width=0.6pt] plot[smooth, tension=0.75] coordinates {
+    (1,0) (1.15,0.42) (1.3,0.62) (1.5,0.79) (1.75,0.92) (2,0.97)};
+  \draw[line width=0.6pt] plot[smooth, tension=0.75] coordinates {
+    (2,1.84) (2.25,2.35) (2.5,2.73) (2.75,3.03) (3,3.22)};
+  \filldraw[fill=white, line width=0.5pt] (-3,2.30) circle (0.11);
+  \filldraw[fill=white, line width=0.5pt] (-1,3.20) circle (0.11);
+  \filldraw[fill=white, line width=0.5pt] (2,1.84) circle (0.11);
+  \filldraw[fill=white, line width=0.5pt] (3,3.22) circle (0.11);
+  \filldraw (-1,1.43) circle (0.11);
+  \filldraw (2,0.97) circle (0.11);
+  \node[below=1pt, font=\small] at (-3,0) {$-3$};
+  \node[below=1pt, font=\small] at (-2,0) {$-2$};
+  \node[below=1pt, font=\small] at (-1,0) {$-1$};
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[below=1pt, font=\small] at (2,0) {$2$};
+  \node[below=1pt, font=\small] at (3,0) {$3$};
+  \node[below left=-2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[font=\small] at (2.35,3.95) {$y=f(x)$};
+\end{tikzpicture}

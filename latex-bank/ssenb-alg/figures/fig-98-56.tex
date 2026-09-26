@@ -1,0 +1,24 @@
+% 98-56(98쪽) — AB=2√3, BC=4, CD=2, ∠B=30°, ∠D=45° 인 사각형 ABCD.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로(A·B·C·D·2√3·4·2·30°·45°)만 두고 넓이(답)는 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt]
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (2.0,0);
+  \coordinate (A) at (1.05,0.72);
+  \coordinate (D) at (2.75,0.42);
+  \fill[green!18] (A) -- (D) -- (C) -- (B) -- cycle;
+  \draw[line width=0.6pt] (A) -- (D) -- (C) -- (B) -- cycle;
+  \draw[dashed, line width=0.3pt] (B) to[bend left=18] (A);
+  \draw[dashed, line width=0.3pt] (B) to[bend right=12] (C);
+  \draw[dashed, line width=0.3pt] (C) to[bend right=20] (D);
+  \draw[line width=0.35pt] ($(B)+(0:0.45)$) arc (0:34.4:0.45);
+  \draw[line width=0.35pt] ($(D)+(170:0.42)$) arc (170:209.2:0.42);
+  \node[font=\small] at (0.36,0.62) {$2\sqrt{3}$};
+  \node[font=\small] at (1.00,-0.40) {$4$};
+  \node[font=\small] at (2.62,-0.14) {$2$};
+  \node[font=\small] at (0.78,0.20) {$30^\circ$};
+  \node[font=\small] at (2.15,0.33) {$45^\circ$};
+  \node[font=\small, above=2pt] at (A) {$\mathrm{A}$};
+  \node[font=\small, left=2pt] at (B) {$\mathrm{B}$};
+  \node[font=\small, below=2pt] at (C) {$\mathrm{C}$};
+  \node[font=\small, right=2pt] at (D) {$\mathrm{D}$};
+\end{tikzpicture}

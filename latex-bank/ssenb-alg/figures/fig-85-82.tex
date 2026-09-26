@@ -1,0 +1,19 @@
+% 85-82(85쪽) — 빛이 공기 중에서 물로 들어갈 때, 물과 공기의 경계면에 수직인 직선(법선)과 빛이 이루는 각 theta_1, theta_2 를 나타낸 그림.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로(빛·공기·물·M·theta_1·theta_2)만 두고, theta_1 의 값의 범위(답)는 넣지 않는다.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \fill[cyan!22] (-1.75,-1.15) rectangle (1.2,0);
+  \draw[cyan!55!blue, line width=1.1pt] (-1.75,0.02) -- (1.2,0.02);
+  \draw[black!75, line width=0.5pt] (-1.75,0) -- (1.2,0);
+  \draw[black!75, line width=0.5pt] (0,-1.85) -- (0,1.7);
+  \draw[red!45!black, line width=0.6pt] (-1.6,1.7) -- (0,0);
+  \draw[red!45!black, line width=0.6pt, ->, >=stealth] (0,0) -- (1.0,-1.9);
+  \draw[black!75, line width=0.4pt] (0.19,0) -- (0.19,0.19) -- (0,0.19);
+  \draw[black!75, line width=0.4pt] (0,0.40) arc (90:133:0.40);
+  \draw[black!75, line width=0.4pt] (0,-0.46) arc (270:298:0.46);
+  \node[font=\small] at (-0.44,0.72) {$\theta_1$};
+  \node[font=\small] at (0.20,-0.90) {$\theta_2$};
+  \node[font=\small] at (-0.34,-0.39) {$\mathrm{M}$};
+  \node[font=\small] at (-1.08,1.46) {빛};
+  \node[font=\small] at (0.66,1.42) {공기};
+  \node[font=\small] at (0.86,-0.4) {물};
+\end{tikzpicture}

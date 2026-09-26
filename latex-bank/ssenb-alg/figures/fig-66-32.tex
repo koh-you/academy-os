@@ -1,0 +1,17 @@
+% 66-32(66쪽) — 원 x^2+y^2=4 에 내접한 직사각형 ABCD(가로 2√3 · 세로 2)와 대각선 BD(동경 OB·OD). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C·D·O·x·y·x^2+y^2=4 만. 각 α·β 의 크기나 좌표값 등 원문 그림에 없는 값은 적지 않는다.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-2.75,0) -- (2.95,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.75) -- (0,2.95) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (0,0) circle (2);
+  \coordinate (A) at (-1.732,1); \coordinate (D) at (1.732,1);
+  \coordinate (B) at (-1.732,-1); \coordinate (C) at (1.732,-1);
+  \draw (A) -- (D) -- (C) -- (B) -- cycle;
+  \draw (B) -- (D);
+  \node[above left=-2pt and -1pt, font=\small] at (A) {$\pt{A}$};
+  \node[above right=-2pt and -1pt, font=\small] at (D) {$\pt{D}$};
+  \node[below left=-2pt and -1pt, font=\small] at (B) {$\pt{B}$};
+  \node[below right=-2pt and -1pt, font=\small] at (C) {$\pt{C}$};
+  \node[below right=0pt and 1pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[anchor=west, font=\small] at (0.55,-2.45) {$x^2+y^2=4$};
+\end{tikzpicture}

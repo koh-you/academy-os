@@ -1,0 +1,22 @@
+% 87-64(87쪽) — 수직선 위를 움직이는 점 P의 위치 x(t)의 그래프. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문의 라벨 x(t)·t·O·4·-3·a·b·c·d·e 와 점선(x=4, x=-3, t=a, t=c, t=e)만 옮겼다. 다른 눈금은 원문에 없다.
+\begin{tikzpicture}[xscale=0.55, yscale=0.27, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.45,0) -- (5.75,0) node[below left=-1pt, font=\small] {$t$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-5.2) -- (0,5.4) node[left=1pt, font=\small] {$x(t)$};
+  \node[font=\small, anchor=north east, inner sep=1pt] at (-0.02,-0.05) {$\mathrm{O}$};
+  \draw[dotted, line width=0.5pt] (0,4) -- (3.2,4);
+  \draw[dotted, line width=0.5pt] (3.2,4) -- (3.2,0);
+  \draw[dotted, line width=0.5pt] (0,-3) -- (4.75,-3);
+  \draw[dotted, line width=0.5pt] (0.85,0) -- (0.85,-3);
+  \draw[dotted, line width=0.5pt] (4.75,0) -- (4.75,-3);
+  \draw[line width=0.6pt] plot[smooth, tension=0.6] coordinates
+    {(0,0) (0.3,-1.75) (0.55,-2.65) (0.85,-3) (1.15,-2.65) (1.45,-1.9) (1.9,0)
+     (2.4,2.1) (2.85,3.45) (3.2,4) (3.55,3.45) (3.9,2.3) (4.2,0) (4.5,-1.7) (4.75,-3) (5.05,-4.6)};
+  \node[font=\small, anchor=east, inner sep=2pt] at (0,4) {$4$};
+  \node[font=\small, anchor=east, inner sep=2pt] at (0,-3) {$-3$};
+  \node[font=\small, anchor=south, inner sep=2pt] at (0.85,0.05) {$a$};
+  \node[font=\small, anchor=north, inner sep=2pt] at (1.9,0) {$b$};
+  \node[font=\small, anchor=north, inner sep=2pt] at (3.2,0) {$c$};
+  \node[font=\small, anchor=north, inner sep=2pt] at (4.2,0) {$d$};
+  \node[font=\small, anchor=south, inner sep=2pt] at (4.75,0.05) {$e$};
+\end{tikzpicture}

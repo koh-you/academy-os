@@ -1,0 +1,9 @@
+% 147-39 ⑤(147쪽) — 보기 개형(수치 없음): 왼쪽 아래에서 올라와 제4사분면의 점에서 끝나는 무리함수 그래프(끝점에서 접선이 세로).
+% 점선은 끝점에서 x축·y축으로 내린 것. 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 O·x·y 만.
+\begin{tikzpicture}[scale=0.42, line width=0.5pt, baseline=(current bounding box.center)]
+  \draw[->, >=stealth, line width=0.6pt] (-2.4,0) -- (2.8,0) node[below left=-1pt, font=\footnotesize] {$x$};
+  \draw[->, >=stealth, line width=0.6pt] (0,-3.0) -- (0,1.0) node[left=-1pt, font=\footnotesize] {$y$};
+  \draw[dotted, line width=0.5pt] (1.4,0) -- (1.4,-0.6) -- (0,-0.6);
+  \draw[line width=0.6pt, smooth, samples=70, domain=-2.0:1.4] plot (\x, {-0.6-1.1*sqrt(1.4-\x)});
+  \node[below left=-1pt and -1pt, font=\footnotesize] at (0,0) {$\mathrm{O}$};
+\end{tikzpicture}

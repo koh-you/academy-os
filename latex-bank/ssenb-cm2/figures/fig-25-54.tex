@@ -1,0 +1,18 @@
+% 25-54(25쪽) — 점 A(5, 5)에서 직선 2x+y-5=0 에 내린 수선의 발 H · 좌표를 잇는 점선.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 y·5·A·H·O·5/2·5·x·2x+y-5=0 만 — 점 H 의 좌표(답)는 적지 않는다.
+\begin{tikzpicture}[scale=0.42, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.3,0) -- (7.0,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.4) -- (0,6.8) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (-0.7,6.4) -- (3.5,-2.0);
+  \draw[line width=0.6pt] (1,3) -- (5,5);
+  \draw[line width=0.5pt] (1.224,2.553) -- (1.671,2.777) -- (1.447,3.224);
+  \draw[dotted, line width=0.6pt] (0,5) -- (5,5) -- (5,0);
+  \fill (5,5) circle (2.2pt);
+  \node[left=1pt, font=\small] at (0,5) {$5$};
+  \node[above right=-2pt and 2pt, font=\small] at (5,5) {$\mathrm{A}$};
+  \node[left=2pt, font=\small] at (1,3) {$\mathrm{H}$};
+  \node[below left=0pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[below=1pt, font=\small] at (2.5,0) {$\dfrac{5}{2}$};
+  \node[below=1pt, font=\small] at (5,0) {$5$};
+  \node[below right=1pt and -12pt, font=\small] at (3.5,-2.0) {$2x+y-5=0$};
+\end{tikzpicture}

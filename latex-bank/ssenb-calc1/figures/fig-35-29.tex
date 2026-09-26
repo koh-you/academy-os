@@ -1,0 +1,17 @@
+% 35-29(35쪽) — 원점을 지나며 위로 볼록하게 증가하는 y=f(x)의 그래프와 직선 y=2x, x축 위의 두 점 a, b(그래프까지 세로 점선).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 눈금·좌표값은 원문에 없다.
+\begin{tikzpicture}[scale=0.8, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.85,0) -- (3.15,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.72) -- (0,2.45) node[right=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (-0.3,-0.6) -- (1.09,2.18);
+  \draw[line width=0.6pt] plot[smooth, tension=0.75] coordinates {
+    (0,0) (0.2,0.259) (0.4,0.455) (0.7,0.673) (1.0,0.833)
+    (1.4,0.991) (1.86,1.121) (2.3,1.215) (2.72,1.285)};
+  \draw[densely dotted, line width=0.4pt] (1.0,0) -- (1.0,0.833);
+  \draw[densely dotted, line width=0.4pt] (1.86,0) -- (1.86,1.121);
+  \node[below=1pt, font=\small] at (1.0,0) {$a$};
+  \node[below=1pt, font=\small] at (1.86,0) {$b$};
+  \node[below right=-2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[font=\small] at (1.25,2.3) {$y=2x$};
+  \node[font=\small] at (2.25,1.62) {$y=f(x)$};
+\end{tikzpicture}

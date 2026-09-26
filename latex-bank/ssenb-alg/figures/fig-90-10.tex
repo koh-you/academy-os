@@ -1,0 +1,27 @@
+% 90-10(90쪽) — 원에 내접하는 사각형 ABCD 와 두 대각선 AC·BD. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C·D 와 25°(∠BAC)·20°(∠DBC)·70°(∠ACD)·6√2(AC 의 점선 안내)만. BD 의 길이는 적지 않는다.
+\begin{tikzpicture}[scale=0.82, line width=0.6pt]
+  \draw (0,0) circle (2.2);
+  \coordinate (A) at (-0.930,1.994);
+  \coordinate (B) at (-0.752,-2.067);
+  \coordinate (C) at (0.930,-1.994);
+  \coordinate (D) at (2.125,-0.569);
+  \draw (A) -- (B) -- (C) -- (D) -- (A);
+  \draw (A) -- (C);
+  \draw (B) -- (D);
+  \draw[dashed, line width=0.4pt] (A) to[bend left=6] (C);
+  \draw (A) ++(272.5:1.05) arc (272.5:295:1.05);
+  \draw (B) ++(2.5:1.15) arc (2.5:27.5:1.15);
+  \draw (C) ++(50:0.62) arc (50:115:0.62);
+  \node[above=1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[below left=-1pt and 0pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[below=2pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[right=1pt, font=\small] at (D) {$\mathrm{D}$};
+  \node[font=\small] at (-1.62,0.74) {$25^\circ$};
+  \draw[->, >=stealth, line width=0.35pt] (-1.24,0.90) -- (-0.98,1.40);
+  \node[font=\small] at (0.36,-2.86) {$20^\circ$};
+  \draw[->, >=stealth, line width=0.35pt] (0.26,-2.66) -- (0.20,-2.02);
+  \node[font=\small] at (1.98,-2.32) {$70^\circ$};
+  \node[font=\small] at (1.24,1.14) {$6\sqrt{2}$};
+  \draw[->, >=stealth, line width=0.35pt] (1.06,0.88) to[bend right=22] (0.30,0.05);
+\end{tikzpicture}

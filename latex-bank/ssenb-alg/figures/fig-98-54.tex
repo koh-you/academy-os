@@ -1,0 +1,25 @@
+% 98-54(98쪽) — 원에 내접하는 사각형 ABCD(AB=4, BC=2, CD=4, AD=6, ∠A=60°).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로(A·B·C·D·4·2·4·6·60°)만 두고 넓이(답)는 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt]
+  \coordinate (A) at (-1.477,0.260);
+  \coordinate (B) at (0.312,-1.467);
+  \coordinate (C) at (1.410,-0.513);
+  \coordinate (D) at (1.272,0.795);
+  \fill[red!8] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[line width=0.6pt] (0,0) circle (1.5);
+  \draw[line width=0.6pt] (A) -- (B) -- (C) -- (D) -- cycle;
+  \draw[dashed, line width=0.3pt] (A) to[bend left=14] (D);
+  \draw[dashed, line width=0.3pt] (A) to[bend right=14] (B);
+  \draw[dashed, line width=0.3pt] (B) to[bend right=16] (C);
+  \draw[dashed, line width=0.3pt] (C) to[bend right=18] (D);
+  \draw[line width=0.35pt] ($(A)+(-44:0.42)$) arc (-44:11:0.42);
+  \node[font=\small] at (-0.60,0.02) {$60^\circ$};
+  \node[font=\small] at (-0.26,0.92) {$6$};
+  \node[font=\small] at (-0.87,-0.90) {$4$};
+  \node[font=\small] at (0.72,-0.80) {$2$};
+  \node[font=\small] at (1.72,0.16) {$4$};
+  \node[font=\small, left=2pt] at (A) {$\mathrm{A}$};
+  \node[font=\small, below=2pt] at (B) {$\mathrm{B}$};
+  \node[font=\small, below right=-2pt and -1pt] at (C) {$\mathrm{C}$};
+  \node[font=\small, above right=-2pt and -1pt] at (D) {$\mathrm{D}$};
+\end{tikzpicture}

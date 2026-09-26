@@ -1,0 +1,22 @@
+% 64-22(64쪽) — 중심이 O, 중심각이 π/4 인 부채꼴 AOB 와 점 B 에서 선분 OA 에 내린 수선의 발 C, 점 C 를 지나는
+% 원이 선분 OB 와 만나는 점 D. 두 호 AB·CD 와 두 선분 AC·BD 로 둘러싸인 부분을 색칠했다.
+% 스캔 화질이 낮아 TikZ 로 다시 그림 — 라벨은 원문 그대로(A·B·C·D·O·π/4)만 두고 넓이를 읽을 수 있는 수치는 넣지 않는다.
+\begin{tikzpicture}[scale=0.55, line width=0.6pt]
+  % O 를 원점에 두고 OA 는 180° 방향, OB 는 135° 방향(중심각 π/4), 반지름 5
+  \fill[orange!22] (180:5) arc (180:135:5) -- (135:3.5355) arc (135:180:3.5355) -- cycle;
+  \draw (0,0) -- (180:5);
+  \draw (0,0) -- (135:5);
+  \draw (180:5) arc (180:135:5);
+  \draw (180:3.5355) arc (180:135:3.5355);
+  \draw (135:5) -- (-3.5355,0);
+  % 직각 표시
+  \draw[line width=0.4pt] (-3.5355,0.42) -- (-3.1155,0.42) -- (-3.1155,0);
+  % 중심각
+  \draw[line width=0.4pt] (180:1.5) arc (180:135:1.5);
+  \node[font=\small] at (158:2.35) {$\dfrac{\pi}{4}$};
+  \node[below left=-1pt and -2pt, font=\small] at (180:5) {$\pt{A}$};
+  \node[above=1pt, font=\small] at (135:5) {$\pt{B}$};
+  \node[below=1pt, font=\small] at (-3.5355,0) {$\pt{C}$};
+  \node[above right=-1pt and 0pt, font=\small] at (135:3.5355) {$\pt{D}$};
+  \node[anchor=west, font=\small] at (0.15,-0.15) {$\pt{O}$};
+\end{tikzpicture}

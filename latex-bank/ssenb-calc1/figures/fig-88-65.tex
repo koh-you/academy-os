@@ -1,0 +1,18 @@
+% 88-65(88쪽) — 수직선 위를 움직이는 점 P의 위치 x(t)의 그래프. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문의 라벨 x(t)·t·O·a·b·c·d·e 와 점선(t=a, t=c)만 옮겼다. 눈금·좌표값은 원문에 없다.
+% 출발할 때의 위치가 양수인 것, t축과 b·d·e 에서 만나는 것은 원문 그대로다.
+\begin{tikzpicture}[xscale=0.48, yscale=0.5, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.55,0) -- (6.7,0) node[below left=-1pt, font=\small] {$t$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.4) -- (0,2.4) node[left=1pt, font=\small] {$x(t)$};
+  \node[font=\small, anchor=north east, inner sep=1pt] at (-0.02,-0.02) {$\mathrm{O}$};
+  \draw[dotted, line width=0.5pt] (0.65,0) -- (0.65,1.86);
+  \draw[dotted, line width=0.5pt] (2.65,0) -- (2.65,-1.7);
+  \draw[line width=0.6pt] plot[smooth, tension=0.6] coordinates
+    {(0,1) (0.35,1.72) (0.65,1.86) (0.95,1.72) (1.3,1.1) (1.8,0) (2.2,-1.2) (2.35,-1.45)
+     (2.65,-1.7) (2.95,-1.45) (3.35,-0.8) (3.8,0) (4.2,0.85) (4.6,1.15) (5,0.85) (5.5,0) (6.05,-1.6)};
+  \node[font=\small, anchor=north, inner sep=2pt] at (0.65,0) {$a$};
+  \node[font=\small, anchor=south east, inner sep=1pt] at (1.72,0.02) {$b$};
+  \node[font=\small, anchor=south, inner sep=2pt] at (2.65,0.02) {$c$};
+  \node[font=\small, anchor=north, inner sep=2pt] at (3.8,0) {$d$};
+  \node[font=\small, anchor=south east, inner sep=1pt] at (5.42,0.02) {$e$};
+\end{tikzpicture}

@@ -1,0 +1,31 @@
+% 20-07(20쪽) — y=f(x) 의 그래프(x<-2 에서 y=2 · x=-2 의 점 · -2<x<0 직선 · x=0 의 점 · x>0 직선). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨·점선은 원문 그대로(-3, -2, 1, 2, 1, 2, -2, O, x, y, y=f(x))만. 조건 ㈎㈏㈐ 의 답(a, b)은 그림에 적지 않는다.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-4.5,0) -- (3.1,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.3) -- (0,2.9) node[left] {$y$};
+  \node[below left=-2pt and -4pt, font=\small] at (0,0) {$\mathrm{O}$};
+  % x<-2 : y=2
+  \draw[line width=0.6pt] (-4.15,2) -- (-2,2);
+  % -2<x<0 : y=-x/2+1
+  \draw[line width=0.6pt] (-2,2) -- (0,1);
+  % x>0 : y=-2x+2
+  \draw[line width=0.6pt] (0,2) -- (2.45,-2.9);
+  \draw[dotted, line width=0.5pt] (-3,2) -- (-3,0);
+  \draw[dotted, line width=0.5pt] (-2,2) -- (-2,0);
+  \draw[dotted, line width=0.5pt] (-2,2) -- (0,2);
+  \draw[dotted, line width=0.5pt] (-2,1) -- (0,1);
+  \draw[dotted, line width=0.5pt] (0,-2) -- (2,-2);
+  \draw[dotted, line width=0.5pt] (2,0) -- (2,-2);
+  \draw[fill=white, line width=0.5pt] (-2,2) circle (2.2pt);
+  \draw[fill=white, line width=0.5pt] (0,1) circle (2.2pt);
+  \fill (-2,1) circle (2.2pt);
+  \fill (0,2) circle (2.2pt);
+  \node[below, font=\small] at (-3,0) {$-3$};
+  \node[below, font=\small] at (-2,0) {$-2$};
+  \node[below, font=\small] at (1,0) {$1$};
+  \node[above, font=\small] at (2,0.05) {$2$};
+  \node[left, font=\small] at (0,0.82) {$1$};
+  \node[right, font=\small] at (0.05,2) {$2$};
+  \node[left, font=\small] at (0,-2) {$-2$};
+  \node[right, font=\small] at (0.55,1.1) {$y=f(x)$};
+\end{tikzpicture}

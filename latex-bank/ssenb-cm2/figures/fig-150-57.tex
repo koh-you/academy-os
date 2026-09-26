@@ -1,0 +1,13 @@
+% 150-57(150쪽) — y=f^{-1}(x) 의 그래프: 왼쪽 위에서 내려와 x축을 -1 에서 지나 점 (1, -2)에서 끝난다(포물선의 일부).
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 -1·1·-2·O·x·y 와 y=f^{-1}(x) 만. a+b+c 의 값(답)은 그림에 적지 않는다.
+\begin{tikzpicture}[xscale=0.42, yscale=0.32, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.0,0) -- (3.6,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.4) -- (0,4.6) node[left=-1pt, font=\small] {$y$};
+  \draw[dotted, line width=0.6pt] (1,0) -- (1,-2) -- (0,-2);
+  \draw[line width=0.6pt, smooth, samples=80, domain=-2.5:1] plot (\x, {0.5*(\x-1)*(\x-1)-2});
+  \node[below left=0pt and -2pt, font=\small] at (-1,0) {$-1$};
+  \node[below right=0pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[above=1pt, font=\small] at (1,0) {$1$};
+  \node[left=1pt, font=\small] at (0,-2) {$-2$};
+  \node[below right=0pt and -2pt, font=\small] at (1,-2) {$y=f^{-1}(x)$};
+\end{tikzpicture}

@@ -1,0 +1,14 @@
+% 94-34(94쪽) — 외접원 위의 삼각형 ABC 와 ∠A=60°. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C 와 60°(∠A) 만. AB:AC 의 비·외접원의 반지름·AB 의 길이는 적지 않는다.
+\begin{tikzpicture}[scale=0.82, line width=0.6pt]
+  \draw (0,0) circle (1.95);
+  \coordinate (A) at (-0.824,1.767);
+  \coordinate (B) at (-1.884,-0.505);
+  \coordinate (C) at (1.920,-0.339);
+  \draw (A) -- (B) -- (C) -- (A);
+  \draw (A) ++(245:0.55) arc (245:322.5:0.55);
+  \node[above=1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[left=1pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[right=1pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[font=\small] at (-0.56,0.84) {$60^\circ$};
+\end{tikzpicture}

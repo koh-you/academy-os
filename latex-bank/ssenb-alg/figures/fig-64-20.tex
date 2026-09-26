@@ -1,0 +1,39 @@
+% 64-20(64쪽) — 반지름 8, 중심각 θ 인 부채꼴 APB 가 반지름 4 인 원 O 에 접하면서 굴러가는 모습.
+% 처음 위치는 실선, 굴러간 세 위치는 점선으로 겹쳐 그린 원문 그림. 스캔 화질이 낮아 TikZ 로 다시 그림
+% (원문 라벨 A·B·P·O·8·θ 만 두고, θ 의 값을 읽을 수 있는 눈금·수치는 넣지 않는다).
+\begin{tikzpicture}[scale=0.33, line width=0.6pt]
+  % 굴러간 위치(점선) — 꼭짓점 P 를 중심으로 돌린 왼쪽·오른쪽, 호가 닿은 아래쪽
+  \draw[densely dotted, line width=0.5pt] (0,4) -- ++(227:7.6) arc (227:169:7.6) -- cycle;
+  \draw[densely dotted, line width=0.5pt] (0,4) -- ++(15:7.6) arc (15:-43:7.6) -- cycle;
+  \draw[densely dotted, line width=0.5pt] (3.3,-10.85) -- ++(139.4:7.6) arc (139.4:76.8:7.6) -- cycle;
+  % 원 O
+  \draw[line width=0.7pt] (0,0) circle (4);
+  \fill (0,0) circle (2.2pt);
+  \node[below=1pt, font=\small] at (0,-0.35) {$\pt{O}$};
+  % 처음 위치의 부채꼴 APB(실선)
+  \draw[line width=0.7pt] (0,4) -- ++(119:7.6) arc (119:61:7.6) -- cycle;
+  \draw[line width=0.4pt] (0,4) ++(119:1.5) arc (119:61:1.5);
+  \node[font=\small] at (-0.22,5.15) {$\theta$};
+  \node[font=\small] at (-2.6,6.35) {$8$};
+  \draw[densely dotted, ->, >=stealth, line width=0.45pt] (-4.7,5.4) -- (-3.3,6.15);
+  % 라벨 — 처음 위치
+  \node[anchor=east, font=\small] at (-3.85,10.75) {$\pt{A}$};
+  \node[anchor=west, font=\small] at (3.85,10.75) {$\pt{B}$};
+  \node[font=\small] at (0,2.75) {$\pt{P}$};
+  % 라벨 — 왼쪽 점선 위치
+  \node[anchor=east, font=\small] at (-7.65,5.6) {$\pt{B}$};
+  \node[anchor=east, font=\small] at (-5.3,-1.95) {$\pt{A}$};
+  \node[font=\small] at (-2.7,4.6) {$\pt{P}$};
+  % 라벨 — 오른쪽 점선 위치
+  \node[anchor=west, font=\small] at (7.55,6.1) {$\pt{A}$};
+  \node[anchor=west, font=\small] at (5.75,-1.55) {$\pt{B}$};
+  \node[font=\small] at (1.6,5.0) {$\pt{P}$};
+  % 라벨 — 아래 점선 위치
+  \node[anchor=east, font=\small] at (-2.6,-6.25) {$\pt{A}$};
+  \node[anchor=west, font=\small] at (5.2,-3.45) {$\pt{B}$};
+  \node[below=1pt, font=\small] at (3.3,-11.2) {$\pt{P}$};
+  % 굴러가는 방향을 나타낸 점선 화살표
+  \draw[densely dotted, ->, >=stealth, line width=0.45pt] (3.4,7.1) to[bend left=25] (5.2,6.0);
+  \draw[densely dotted, ->, >=stealth, line width=0.45pt] (7.1,-3.4) to[bend left=25] (8.0,-4.9);
+  \draw[densely dotted, ->, >=stealth, line width=0.45pt] (-4.2,-6.2) to[bend left=25] (-5.6,-4.9);
+\end{tikzpicture}

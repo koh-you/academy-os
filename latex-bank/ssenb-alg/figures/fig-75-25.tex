@@ -1,0 +1,29 @@
+% 75-25(75쪽) — 주기가 같은 두 삼각함수 $y=f(x)$(최댓값 10 · $x=0$ 에서 최대)와 $y=g(x)$(최댓값 4 · $x=4$ 에서 최대)의 그래프. 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨·점선·화살표만).
+\begin{tikzpicture}[line width=0.6pt, x=0.14cm, y=0.14cm]
+  \draw[dotted, line width=0.5pt] (0,10) -- (22,10);
+  \draw[dotted, line width=0.5pt] (0,4) -- (25,4);
+  \draw[dotted, line width=0.5pt] (-13,-4) -- (16,-4);
+  \draw[dotted, line width=0.5pt] (-12,-10) -- (12,-10);
+  \draw[->, >=stealth, line width=0.7pt] (-15.5,0) -- (29,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-12.6) -- (0,13.6) node[left=1pt] {$y$};
+  \draw[domain=-14:21.6, samples=200, smooth] plot (\x, {10*cos(15*\x)});
+  \draw[domain=-14:24.5, samples=200, smooth] plot (\x, {4*cos(15*(\x-4))});
+  \draw[dotted, line width=0.5pt] (-12,0) -- (-12,-10);
+  \draw[dotted, line width=0.5pt] (-8,0) -- (-8,-4);
+  \draw[dotted, line width=0.5pt] (4,0) -- (4,4);
+  \draw[dotted, line width=0.5pt] (12,0) -- (12,-10);
+  \draw[dotted, line width=0.5pt] (16,0) -- (16,-4);
+  \node[anchor=south east, font=\small] at (-0.6,10.1) {$10$};
+  \node[anchor=south east, font=\small] at (-0.6,3.6) {$4$};
+  \node[anchor=north east, font=\small] at (-0.6,-3.6) {$-4$};
+  \node[anchor=north east, font=\small] at (-0.6,-9.6) {$-10$};
+  \node[anchor=south east, font=\small] at (-12.6,0.6) {$-12$};
+  \node[anchor=south west, font=\small] at (1.2,0.6) {$\pt{O}$};
+  \node[anchor=north east, font=\small] at (4.6,-0.6) {$4$};
+  \node[anchor=south east, font=\small] at (11.6,0.6) {$12$};
+  \node[anchor=south east, font=\small] at (16.6,0.6) {$16$};
+  \node[font=\small] (mm8) at (-10.8,6.6) {$-8$};
+  \draw[->, >=stealth, line width=0.4pt] (mm8.south east) to[bend left=25] (-8.2,0.8);
+  \node[anchor=south west, font=\small] at (2.2,10.4) {$y=f(x)$};
+  \node[anchor=north west, font=\small] at (17.2,-4.4) {$y=g(x)$};
+\end{tikzpicture}

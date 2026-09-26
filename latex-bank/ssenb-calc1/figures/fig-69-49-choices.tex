@@ -1,0 +1,70 @@
+% 69-49 보기(69쪽) — 보기 ①~⑤ 의 y=f(x) 그래프 다섯 개(원문처럼 2열 + 마지막 한 개를 왼쪽에). 보기 자체가 그래프라 본문 아래 전폭에 둔다. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨·점선은 원문 그대로(a, b, c, O, x, y)만 — 어느 것이 답인지 읽히는 수치는 넣지 않는다.
+\begin{tikzpicture}[scale=0.45, line width=0.6pt]
+  % (1) x=a 에서 멈춤 · x=b 에서 극소 · x=c 에서 극대
+  \begin{scope}
+    \node[font=\small] at (-3.6,2.6) {①};
+    \draw[->, >=stealth, line width=0.7pt] (-2.8,0) -- (3.3,0) node[below=1pt] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-1.1) -- (0,3.4) node[left=1pt] {$y$};
+    \draw plot[smooth, tension=0.6] coordinates {(-2.35,2.85) (-2.0,2.3) (-1.7,1.95) (-1.5,1.88) (-1.15,1.72) (-0.75,1.35) (-0.3,0.95) (0.15,0.8) (0.5,0.78) (0.9,0.98) (1.3,1.65) (1.7,2.45) (2.0,2.8) (2.35,2.35) (2.65,1.3) (2.9,-0.35)};
+    \draw[densely dotted, line width=0.4pt] (-1.5,0) -- (-1.5,1.88);
+    \draw[densely dotted, line width=0.4pt] (0.5,0) -- (0.5,0.78);
+    \draw[densely dotted, line width=0.4pt] (2.0,0) -- (2.0,2.8);
+    \node[below=1pt, font=\small] at (-1.5,0) {$a$};
+    \node[above left=-1pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+    \node[below=1pt, font=\small] at (0.5,0) {$b$};
+    \node[below=1pt, font=\small] at (2.0,0) {$c$};
+  \end{scope}
+  % (2) x=a 에서 극소 · x=b 에서 멈춤 · x=c 에서 극대
+  \begin{scope}[shift={(9.6,0)}]
+    \node[font=\small] at (-3.6,2.6) {②};
+    \draw[->, >=stealth, line width=0.7pt] (-2.8,0) -- (3.4,0) node[below=1pt] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-1.7) -- (0,3.4) node[left=1pt] {$y$};
+    \draw plot[smooth, tension=0.6] coordinates {(-2.3,2.95) (-2.0,1.9) (-1.75,0.85) (-1.6,0) (-1.3,-0.75) (-1.0,-0.95) (-0.6,-0.75) (-0.25,-0.3) (0,0) (0.35,0.35) (0.6,0.5) (0.9,0.62) (1.25,1.15) (1.6,1.75) (1.9,1.95) (2.25,1.55) (2.55,0.6) (2.75,0) (2.95,-0.75)};
+    \draw[densely dotted, line width=0.4pt] (-1.0,0) -- (-1.0,-0.95);
+    \draw[densely dotted, line width=0.4pt] (0.6,0) -- (0.6,0.5);
+    \draw[densely dotted, line width=0.4pt] (1.6,0) -- (1.6,1.75);
+    \node[above=1pt, font=\small] at (-1.0,0) {$a$};
+    \node[above right=-1pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+    \node[below=1pt, font=\small] at (0.6,0) {$b$};
+    \node[below=1pt, font=\small] at (1.6,0) {$c$};
+  \end{scope}
+  % (3) x=a 에서 극대 · x=b 에서 멈춤 · x=c 에서 극소(x축에 닿음)
+  \begin{scope}[shift={(0,-7.4)}]
+    \node[font=\small] at (-3.6,2.6) {③};
+    \draw[->, >=stealth, line width=0.7pt] (-2.9,0) -- (3.1,0) node[below=1pt] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-1.4) -- (0,3.2) node[left=1pt] {$y$};
+    \draw plot[smooth, tension=0.6] coordinates {(-2.5,-0.85) (-2.35,0) (-2.05,0.9) (-1.75,1.5) (-1.5,1.65) (-1.2,1.45) (-0.85,1.05) (-0.5,0.7) (-0.1,0.55) (0.35,0.5) (0.75,0.35) (1.05,0.12) (1.35,0) (1.6,0.15) (1.9,0.75) (2.2,1.75) (2.4,2.7)};
+    \draw[densely dotted, line width=0.4pt] (-1.5,0) -- (-1.5,1.65);
+    \draw[densely dotted, line width=0.4pt] (0.35,0) -- (0.35,0.5);
+    \node[below=1pt, font=\small] at (-1.5,0) {$a$};
+    \node[above left=-1pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+    \node[below=1pt, font=\small] at (0.45,0) {$b$};
+    \node[below=1pt, font=\small] at (1.35,0) {$c$};
+  \end{scope}
+  % (4) x=a 에서 극대 · x=b 에서 극소 · x=c 에서 멈춤
+  \begin{scope}[shift={(9.6,-7.4)}]
+    \node[font=\small] at (-3.6,2.6) {④};
+    \draw[->, >=stealth, line width=0.7pt] (-2.9,0) -- (3.1,0) node[below=1pt] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-1.4) -- (0,3.2) node[left=1pt] {$y$};
+    \draw plot[smooth, tension=0.6] coordinates {(-2.45,-0.85) (-2.3,0) (-2.0,0.95) (-1.7,1.75) (-1.4,2.0) (-1.05,1.75) (-0.65,1.2) (-0.2,0.75) (0.2,0.55) (0.5,0.5) (0.85,0.65) (1.2,0.95) (1.6,1.1) (1.95,1.25) (2.25,1.75) (2.5,2.6)};
+    \draw[densely dotted, line width=0.4pt] (-1.4,0) -- (-1.4,2.0);
+    \draw[densely dotted, line width=0.4pt] (0.5,0) -- (0.5,0.5);
+    \draw[densely dotted, line width=0.4pt] (1.6,0) -- (1.6,1.1);
+    \node[below=1pt, font=\small] at (-1.4,0) {$a$};
+    \node[above left=-1pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+    \node[below=1pt, font=\small] at (0.5,0) {$b$};
+    \node[below=1pt, font=\small] at (1.6,0) {$c$};
+  \end{scope}
+  % (5) x=a, x=c 에서 x축을 지나고 x=b 에서 x축에 닿는 두 봉우리
+  \begin{scope}[shift={(0,-14.6)}]
+    \node[font=\small] at (-3.6,2.4) {⑤};
+    \draw[->, >=stealth, line width=0.7pt] (-2.7,0) -- (3.2,0) node[below=1pt] {$x$};
+    \draw[->, >=stealth, line width=0.7pt] (0,-1.5) -- (0,3.0) node[left=1pt] {$y$};
+    \draw plot[smooth, tension=0.6] coordinates {(-1.7,-1.15) (-1.55,0) (-1.25,0.95) (-0.95,1.5) (-0.7,1.6) (-0.35,1.3) (0,0.75) (0.25,0.25) (0.45,0) (0.65,0.3) (0.95,1.2) (1.25,1.95) (1.45,2.1) (1.7,1.8) (1.95,1.0) (2.2,0) (2.35,-1.0)};
+    \node[below left=-1pt and -3pt, font=\small] at (-1.55,0) {$a$};
+    \node[below right=-1pt and -3pt, font=\small] at (0,0) {$\pt{O}$};
+    \node[below=1pt, font=\small] at (0.48,0) {$b$};
+    \node[below right=-1pt and -3pt, font=\small] at (2.2,0) {$c$};
+  \end{scope}
+\end{tikzpicture}

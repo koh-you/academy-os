@@ -1,0 +1,19 @@
+% 89-04(89쪽) — AB=2√6, AC=4, B=45°, C=60° 인 삼각형 ABC. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C 와 2√6·4(점선 안내)·45°·60° 만. sin 75° 의 값은 적지 않는다.
+\begin{tikzpicture}[scale=0.82, line width=0.6pt]
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (5.2,0);
+  \coordinate (A) at (2.4,2.1);
+  \draw (B) -- (A) -- (C) -- (B);
+  \draw[dashed, line width=0.4pt] (B) to[bend right=16] (A);
+  \draw[dashed, line width=0.4pt] (A) to[bend right=16] (C);
+  \draw (B) ++(0:0.72) arc (0:41.2:0.72);
+  \draw (C) ++(180:0.72) arc (180:143.1:0.72);
+  \node[above=1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[left=1pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[right=1pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[font=\small] at (0.72,1.34) {$2\sqrt{6}$};
+  \node[font=\small] at (4.28,1.34) {$4$};
+  \node[font=\small] at (1.18,0.28) {$45^\circ$};
+  \node[font=\small] at (4.04,0.28) {$60^\circ$};
+\end{tikzpicture}

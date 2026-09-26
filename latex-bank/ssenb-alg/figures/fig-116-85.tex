@@ -1,0 +1,32 @@
+% 116-85(116쪽) — 점 P_1(0, √2)에서 직선 y=x, x축, 직선 y=-x, y축에 차례로 수선의 발을 내려 얻은 점 P_1 ~ P_6.
+% 스캔 화질이 낮아 TikZ 로 다시 그림(원문과 같은 배치·같은 라벨). 선분의 길이는 적지 않아 답이 그림에서 읽히지 않게 했다.
+\begin{tikzpicture}[scale=1.5, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.20,0) -- (1.70,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.00) -- (0,1.85) node[left=1pt, font=\small] {$y$};
+  \draw (-0.95,-0.95) -- (1.30,1.30);
+  \draw (-0.95,0.95) -- (0.95,-0.95);
+  \node[font=\small, anchor=west] at (1.16,1.38) {$y=x$};
+  \node[font=\small, anchor=east] at (-0.70,0.86) {$y=-x$};
+  \draw[line width=0.6pt] (0,1.4142) -- (0.7071,0.7071) -- (0.7071,0) -- (0.3536,-0.3536) -- (0,-0.3536) -- (-0.1768,-0.1768);
+  \coordinate (Pa) at (0,1.4142);
+  \coordinate (Pb) at (0.7071,0.7071);
+  \coordinate (Pc) at (0.7071,0);
+  \coordinate (Pd) at (0.3536,-0.3536);
+  \coordinate (Pe) at (0,-0.3536);
+  \coordinate (Pf) at (-0.1768,-0.1768);
+  \draw[line width=0.35pt] ($(Pb)+(135:0.11)$) -- ($(Pb)+(180:0.156)$) -- ($(Pb)+(225:0.11)$);
+  \draw[line width=0.35pt] ($(Pc)+(90:0.11)$) -- ($(Pc)+(135:0.156)$) -- ($(Pc)+(180:0.11)$);
+  \draw[line width=0.35pt] ($(Pd)+(45:0.10)$) -- ($(Pd)+(90:0.141)$) -- ($(Pd)+(135:0.10)$);
+  \draw[line width=0.35pt] ($(Pe)+(0:0.09)$) -- ($(Pe)+(45:0.127)$) -- ($(Pe)+(90:0.09)$);
+  \draw[line width=0.35pt] ($(Pf)+(-45:0.08)$) -- ($(Pf)+(0:0.113)$) -- ($(Pf)+(45:0.08)$);
+  \fill (-0.46,-0.08) circle (0.016);
+  \fill (-0.53,-0.15) circle (0.016);
+  \fill (-0.60,-0.22) circle (0.016);
+  \node[font=\small, left=1pt] at (Pa) {$\mathrm{P_1}$};
+  \node[font=\small, above left=1pt and 1pt] at (Pb) {$\mathrm{P_2}$};
+  \node[font=\small, above right=-3pt and -1pt] at (Pc) {$\mathrm{P_3}$};
+  \node[font=\small, right=1pt] at (Pd) {$\mathrm{P_4}$};
+  \node[font=\small, below=1pt] at (Pe) {$\mathrm{P_5}$};
+  \node[font=\small, below left=-3pt and -2pt] at (Pf) {$\mathrm{P_6}$};
+  \node[font=\small, below right=-2pt and -1pt] at (0,0) {$\mathrm{O}$};
+\end{tikzpicture}

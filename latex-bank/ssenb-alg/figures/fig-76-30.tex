@@ -1,0 +1,21 @@
+% 76-30(76쪽) — $-\pi<x<3\pi$ 에서 $y=\tan\frac{1}{2}x$ 의 그래프와 두 직선 $y=2k$, $y=-k$ 로 둘러싸인 도형(분홍). 스캔 화질이 낮아 TikZ 로 다시 그림(원문 라벨·점근선 점선·색칠만 · $k$ 의 값은 적지 않는다).
+\begin{tikzpicture}[line width=0.6pt, x=0.23cm, y=0.38cm]
+  \fill[red!9] plot[domain=-1.5708:2.2143, samples=60, smooth] (\x, {tan(28.6479*\x)}) -- plot[domain=8.4973:4.7124, samples=60, smooth] (\x, {tan(28.6479*\x)}) -- cycle;
+  \draw[dotted, line width=0.5pt] (-3.1416,-2.95) -- (-3.1416,2.95);
+  \draw[dotted, line width=0.5pt] (3.1416,-2.95) -- (3.1416,2.95);
+  \draw[dotted, line width=0.5pt] (9.4248,-2.95) -- (9.4248,2.95);
+  \draw[line width=0.5pt] (-6.0,2) -- (16.0,2);
+  \draw[line width=0.5pt] (-6.0,-1) -- (16.0,-1);
+  \draw[->, >=stealth, line width=0.7pt] (-6.0,0) -- (15.4,0) node[below=1pt] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.1) -- (0,3.1) node[left=1pt] {$y$};
+  \draw[domain=-2.4556:2.4556, samples=80, smooth] plot (\x, {tan(28.6479*\x)});
+  \draw[domain=3.8276:8.7388, samples=80, smooth] plot (\x, {tan(28.6479*\x)});
+  \node[anchor=north east, font=\small] at (-3.3,-0.08) {$-\pi$};
+  \node[anchor=north west, font=\small] at (0.3,-0.08) {$\pt{O}$};
+  \node[anchor=north west, font=\small] at (3.3,-0.08) {$\pi$};
+  \node[anchor=north west, font=\small] at (6.7,-0.08) {$2\pi$};
+  \node[anchor=north west, font=\small] at (9.6,-0.08) {$3\pi$};
+  \node[anchor=south east, font=\small] at (16.0,2.1) {$y=2k$};
+  \node[anchor=north east, font=\small] at (16.0,-1.15) {$y=-k$};
+  \node[anchor=north, font=\small] at (5.1,-3.0) {$y=\tan\dfrac{1}{2}x$};
+\end{tikzpicture}

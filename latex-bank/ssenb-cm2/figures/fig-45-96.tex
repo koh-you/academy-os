@@ -1,0 +1,19 @@
+% 45-96(45쪽) — 두 원 O: x^2+y^2=4, O': (x+8)^2+(y-4)^2=r^2 에 동시에 접하는 접선과 두 접점 A, B.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 O · O' · A · B · x · y 와 중심을 가리키는 -8 · 4 만 둔다.
+% r 의 값(답)은 그림에 적지 않는다(원문도 반지름 길이를 적지 않고 그림만 보여 준다).
+\begin{tikzpicture}[scale=0.2, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-14.4,0) -- (4.6,0) node[below left=-1pt, font=\footnotesize] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-6.6) -- (0,10.4) node[left=-1pt, font=\footnotesize] {$y$};
+  \draw[line width=0.6pt] (-8,4) circle (5);
+  \draw[line width=0.6pt] (0,0) circle (2);
+  \draw[line width=0.6pt] (-3.95,9) -- (-0.78,-6);
+  \draw[dotted, line width=0.5pt] (-8,4) -- (0,4);
+  \draw[dotted, line width=0.5pt] (-8,4) -- (-8,0);
+  \fill (-8,4) circle (2.2pt);
+  \node[above=2pt, font=\footnotesize] at (-8,4) {$\mathrm{O}'$};
+  \node[right=1pt, font=\footnotesize] at (0,4) {$4$};
+  \node[left=1pt, font=\footnotesize] at (-8,0.9) {$-8$};
+  \node[font=\footnotesize] at (1.9,-2.9) {$\mathrm{O}$};
+  \node[below left=-2pt and -1pt, font=\footnotesize] at (-1.957,-0.414) {$\mathrm{A}$};
+  \node[above right=-2pt and 0pt, font=\footnotesize] at (-3.108,5.034) {$\mathrm{B}$};
+\end{tikzpicture}

@@ -1,0 +1,11 @@
+% 113-68(113쪽) — 이차함수 y=F(x) 의 그래프(아래로 볼록 · x축과 x=-2, x=1 에서 만난다). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: x축 눈금 -2, 1 · 라벨 y=F(x), O, x, y. 꼭짓점·y절편 값은 원문 그림에 없으므로 적지 않는다.
+\begin{tikzpicture}[x=0.60cm, y=0.44cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-3.05,0) -- (2.20,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-2.75) -- (0,1.85) node[left] {$y$};
+  \draw[line width=0.6pt, domain=-2.32:1.32, samples=80, smooth] plot (\x, {(\x+2)*(\x-1)});
+  \node[below left=-2pt, font=\small] at (0,0) {$\pt{O}$};
+  \node[below left=-2pt, font=\small] at (-2,0) {$-2$};
+  \node[below right=-2pt, font=\small] at (1,0) {$1$};
+  \node[anchor=west, font=\small] at (0.35,1.6) {$y=F(x)$};
+\end{tikzpicture}

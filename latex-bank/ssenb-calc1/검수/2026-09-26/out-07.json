@@ -1,0 +1,11 @@
+{ "range": "80-23~94-12", "checked": 66, "ok": 63,
+  "findings": [
+    { "id": "80-23", "severity": "ok", "where": "layout", "note": "크롭에 배지·연계번호 줄만 담기고 본문이 없음 — 쪽 이미지 p080 으로 대조해 일치" },
+    { "id": "80-24", "severity": "ok", "where": "layout", "note": "크롭 어긋남(왼쪽 원본은 23번 본문 + 유형 05 상자) — 쪽 이미지 p080 으로 대조해 24번 본문·보기 ①2~⑤6 일치" },
+    { "id": "82-36", "severity": "yellow", "where": "layout", "note": "본문 첫 줄 낱말 간격이 두 배 가까이 벌어짐 — 긴 인라인 부등식이 줄바꿈되지 않아 생긴 stretch(원문은 부등식을 별도 줄에 둠)", "fix": "items['82-36'].body 의 부등식 x^4+2ax^2-4(a+1)x+a^2-5>=0 을 centerline 별도 줄(83-38·85-52 와 같은 par/smallskip/centerline 꼴)로 빼기" },
+    { "id": "83-41", "severity": "yellow", "where": "layout", "note": "「이라 하자. 모든 실수 x에 대하여 부등식」과 다음 줄의 낱말 간격이 벌어짐 — 인라인 f(x)<=-4x+k<=g(x) 가 줄바꿈되지 않아 생긴 stretch(내용은 원문과 일치)" },
+    { "id": "84-46", "severity": "ok", "where": "layout", "note": "크롭이 첫 줄만 담음(나머지는 84-23 조각) — 쪽 이미지 p084 로 본문·식 f(t)-g(t)=t^3+at^2+24t+b·(단, a, b는 상수이다.) 대조해 일치" },
+    { "id": "93-01", "severity": "ok", "where": "layout", "note": "크롭 없음(검은 배지) — 쪽 이미지 p093 으로 대조해 본문·적분식·(단, C는 적분상수이다.) 일치" },
+    { "id": "93-05", "severity": "ok", "where": "layout", "note": "크롭 없음 — 쪽 이미지 p093 으로 대조해 F(x)=x^3+2x^2-x+3, G(1)=2 와 G(-1) 질문 일치" },
+    { "id": "94-10", "severity": "yellow", "where": "layout", "note": "본문 첫 줄 낱말 간격이 벌어짐(「함 수 … 에 대 하 여」) — 인라인 적분식이 줄바꿈되지 않아 생긴 stretch(내용은 원문과 일치)" }
+  ] }

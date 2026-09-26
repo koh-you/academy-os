@@ -1,0 +1,18 @@
+% 74-10(74쪽) — 전체집합 U 상자 안 두 부분집합 A, B 의 벤 다이어그램 · A 에만 a, b · 교집합에 c, d
+% · B 에만 e · 두 원 밖에 f, g. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 U·A·B 와 원소 a~g 만 둔다(구하는 집합은 그림에 표시하지 않는다).
+\begin{tikzpicture}[scale=0.5, line width=0.6pt]
+  \draw[rounded corners=4pt] (-2.27,-2.14) rectangle (4.23,2.45);
+  \draw (0,0) circle (1.5);
+  \draw (1.97,0) circle (1.5);
+  \node[fill=white, inner sep=0.6pt, font=\small] at (-1.27,2.45) {$U$};
+  \node[fill=white, inner sep=0.6pt, font=\small] at (0,1.5) {$A$};
+  \node[fill=white, inner sep=0.6pt, font=\small] at (1.97,1.5) {$B$};
+  \node[font=\small] at (-0.43,0.55) {$a$};
+  \node[font=\small] at (-0.43,-0.50) {$b$};
+  \node[font=\small] at (0.89,0.55) {$c$};
+  \node[font=\small] at (0.89,-0.50) {$d$};
+  \node[font=\small] at (2.43,-0.05) {$e$};
+  \node[font=\small] at (-1.77,-1.50) {$f$};
+  \node[font=\small] at (3.64,-1.64) {$g$};
+\end{tikzpicture}

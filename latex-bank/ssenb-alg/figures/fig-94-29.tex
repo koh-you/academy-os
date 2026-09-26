@@ -1,0 +1,17 @@
+% 94-29(94쪽) — 서로 외접하는 세 원 A, B, C 와 세 중심을 이은 삼각형 ABC. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 세 중심 A·B·C 만(반지름·넓이의 비는 적지 않는다). cos B 의 값은 그림에서 읽히지 않는다.
+\begin{tikzpicture}[scale=0.82, line width=0.6pt]
+  \coordinate (B) at (0,0);
+  \coordinate (A) at (1.412,0.514);
+  \coordinate (C) at (2.215,-1.807);
+  \draw (B) circle (0.9526);
+  \draw (A) circle (0.55);
+  \draw (C) circle (1.9053);
+  \draw (A) -- (B) -- (C) -- (A);
+  \fill (A) circle (2.2pt);
+  \fill (B) circle (2.2pt);
+  \fill (C) circle (2.2pt);
+  \node[right=2pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[below left=0pt and 0pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[below=3pt, font=\small] at (C) {$\mathrm{C}$};
+\end{tikzpicture}

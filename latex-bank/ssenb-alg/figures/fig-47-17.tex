@@ -1,0 +1,24 @@
+% 47-17(47쪽) — y=log_2 x 의 그래프와 직선 y=x, 그리고 x축의 a → b → c → d 로 이어지는 점선 계단.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 원문 그림도 축척에 맞지 않는 개념도라, 계단이 맞물리도록 로그 모양의 곡선을 매끄럽게 이어 그렸다.
+% 라벨은 원문 그대로(y=x · y=log_2 x · O · 1 · a · b · c · d)만. 답이 되는 식은 적지 않는다.
+\begin{tikzpicture}[line width=0.6pt, x=0.42cm, y=0.42cm]
+  \draw[->, >=stealth, line width=0.7pt] (-0.7,0) -- (7.9,0) node[below=1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.7) -- (0,4.9) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (-0.35,-0.35) -- (4.35,4.35);
+  \draw[line width=0.6pt, smooth] plot coordinates
+    {(0.45,-1.4) (0.6,-0.9) (0.8,-0.4) (1,0) (1.25,0.5) (1.9,1.25) (2.4,1.6) (3.0,1.9) (4.5,2.55) (6.3,3.0) (7.5,3.25)};
+  % 계단: (a,0)→(a,a)→(b,a)→(b,b)→(c,b)→(c,c)→(d,c)→(d,0)
+  \draw[densely dotted, line width=0.45pt] (1.25,0) -- (1.25,1.25) -- (1.9,1.25);
+  \draw[densely dotted, line width=0.45pt] (1.9,0) -- (1.9,1.9) -- (3.0,1.9);
+  \draw[densely dotted, line width=0.45pt] (3.0,0) -- (3.0,3.0) -- (6.3,3.0);
+  \draw[densely dotted, line width=0.45pt] (6.3,0) -- (6.3,3.0);
+  \node[below=1pt, font=\small] at (1,0) {$1$};
+  \node[below=1pt, font=\small] at (1.95,0) {$b$};
+  \node[below=1pt, font=\small] at (3.05,0) {$c$};
+  \node[below=1pt, font=\small] at (6.3,0) {$d$};
+  \draw[->, >=stealth, line width=0.4pt] (1.85,-1.35) to[out=180, in=-100] (1.27,-0.12);
+  \node[font=\small] at (2.05,-1.5) {$a$};
+  \node[below left=-1pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[anchor=west, font=\small] at (3.5,4.55) {$y=x$};
+  \node[anchor=west, font=\small] at (4.2,3.75) {$y=\log_2 x$};
+\end{tikzpicture}

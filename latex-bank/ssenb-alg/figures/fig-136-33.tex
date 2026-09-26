@@ -1,0 +1,23 @@
+% 136-33(136쪽) — 성냥개비로 만든 정삼각형 도형의 [1단계]·[2단계]·[3단계](각 단계의 작은 삼각형은 꼭짓점에서만 맞닿는다).
+% 스캔 화질이 낮아 TikZ 로 다시 그림(성냥개비 수·배치는 원문 그대로, 성냥 머리는 양 끝의 점으로 나타냈다 · 개수 a_n 은 적지 않는다).
+\begin{tikzpicture}[line width=0.5pt]
+  \def\sd{0.60}
+  \pgfmathsetmacro{\hh}{0.60*0.8660254}
+  \foreach \S/\X in {1/0.45, 2/2.00, 3/4.15}{
+    \foreach \i in {1,...,\S}{
+      \foreach \j in {1,...,\i}{
+        \pgfmathsetmacro{\ax}{\X+(\j-1-(\i-1)/2)*\sd}
+        \pgfmathsetmacro{\ay}{(\S-\i+1)*\hh}
+        \draw[orange!70!yellow!90!black, line width=1.1pt, line cap=round]
+          (\ax,\ay) -- ({\ax-\sd/2},{\ay-\hh}) -- ({\ax+\sd/2},{\ay-\hh}) -- cycle;
+        \fill[red!60!black] (\ax,\ay) circle (0.045);
+        \fill[red!60!black] ({\ax-\sd/2},{\ay-\hh}) circle (0.045);
+        \fill[red!60!black] ({\ax+\sd/2},{\ay-\hh}) circle (0.045);
+      }
+    }
+  }
+  \node[font=\footnotesize] at (5.55,0.80) {$\cdots$};
+  \node[font=\footnotesize] at (0.45,-0.42) {[1단계]};
+  \node[font=\footnotesize] at (2.00,-0.42) {[2단계]};
+  \node[font=\footnotesize] at (4.15,-0.42) {[3단계]};
+\end{tikzpicture}

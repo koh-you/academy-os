@@ -1,0 +1,12 @@
+% 127-67(127쪽) — 속도 v(t) 의 그래프(위로 볼록한 이차함수 · t=2 에서 40 · t=0, 4 에서 0). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문 라벨만: v(t) · t · O · 40 · 2 · 4 와 최고점의 점선. 넓이(거리) 값은 적지 않는다.
+\begin{tikzpicture}[x=0.62cm, y=0.042cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-0.9,0) -- (5.2,0) node[below] {$t$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-14) -- (0,52) node[left] {$v(t)$};
+  \node[below left=-2pt and -1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[dashed, line width=0.4pt] (0,40) -- (2,40) -- (2,0);
+  \draw[line width=0.6pt, domain=-0.25:4.25, samples=80, smooth] plot (\x, {10*\x*(4-\x)});
+  \node[left, font=\small, inner sep=1.5pt] at (0,40) {$40$};
+  \node[below, font=\small, inner sep=1.5pt] at (2,0) {$2$};
+  \node[below, font=\small, inner sep=1.5pt, xshift=-2.5pt] at (4,0) {$4$};
+\end{tikzpicture}

@@ -1,0 +1,14 @@
+% 17-70(17쪽) — 포물선 y=2x² 와, 원점 O 및 곡선 위의 점 P 를 지나고 중심 C 가 y축 위에 있는 원. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문 라벨(y=2x²·P·C·O)만 옮기고 없는 눈금은 만들지 않는다. P 는 일반 위치라 답(C 가 가까워지는 y좌표)이 그림에서 읽히지 않는다.
+\begin{tikzpicture}[x=1.15cm, y=1.15cm, line width=0.6pt]
+  \draw[line width=0.7pt, ->] (-1.85,0) -- (1.98,0) node[right, font=\small, inner sep=1.5pt] {$x$};
+  \draw[line width=0.7pt, ->] (0,-0.5) -- (0,3.55) node[above, font=\small, inner sep=1.5pt] {$y$};
+  \draw[line width=0.55pt] (0,1.3525) circle (1.3525);
+  \draw[line width=0.55pt, domain=-1.28:1.3, smooth, samples=70] plot (\x,{2*\x*\x});
+  \fill (0,1.3525) circle (2.2pt);
+  \fill (1.05,2.205) circle (2.2pt);
+  \node[font=\small, inner sep=3pt, left] at (0,1.3525) {$\pt{C}$};
+  \node[font=\small, inner sep=2pt, above right] at (1.05,2.205) {$\pt{P}$};
+  \node[font=\small, inner sep=2.5pt, below left] at (0,0) {$\pt{O}$};
+  \node[font=\small, inner sep=1pt] at (1.6,3.4) {$y=2x^2$};
+\end{tikzpicture}

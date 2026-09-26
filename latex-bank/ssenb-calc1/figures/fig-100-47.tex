@@ -1,0 +1,10 @@
+% 100-47(100쪽) — 도함수 y=f'(x) 의 그래프인 아래로 볼록한 포물선(x축과 x=-1, 원점에서 만난다). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문에 있는 것만: x축 눈금 -1 · 라벨 y=f'(x), O, x, y. 극값·꼭짓점 좌표는 원문 그림에 없으므로 적지 않는다.
+\begin{tikzpicture}[x=1.15cm, y=1.45cm, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-1.55,0) -- (0.75,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.25) -- (0,0.95) node[left] {$y$};
+  \node[below right=-1pt and 0pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \draw[line width=0.6pt, domain=-1.16:0.16, samples=70, smooth] plot (\x, {4*\x*(\x+1)});
+  \node[below, font=\small] at (-1.22,0) {$-1$};
+  \node[left, font=\small] at (-1.26,0.76) {$y=f'(x)$};
+\end{tikzpicture}

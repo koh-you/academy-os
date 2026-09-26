@@ -1,0 +1,16 @@
+% 118-11(118쪽) — 곡선 y=4x^3 과 x축·두 직선 x=a(a<0), x=b(b>0) 로 둘러싸인 두 도형 S_1, S_2. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 y·x·O·a·b·S_1·S_2·y=4x^3 만. a 와 b 의 위치는 원문처럼 개략적으로 잡았고 |a|=\frac{1}{2}b 를 눈금으로 읽을 수 없게 두었다.
+\begin{tikzpicture}[xscale=1.55, yscale=0.155, line width=0.5pt]
+  \fill[red!12] plot[domain=-0.7:0, samples=40] (\x, {4*\x*\x*\x}) -- (-0.7,0) -- cycle;
+  \fill[red!12] plot[domain=0:1.5, samples=50] (\x, {4*\x*\x*\x}) -- (1.5,0) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-1.35,0) -- (2.0,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-12.5) -- (0,16.5) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt] (1.5,0) -- (1.5,13.5);
+  \draw[line width=0.6pt, domain=-1.28:1.55, samples=110] plot (\x, {4*\x*\x*\x});
+  \node[below right=-1pt, font=\small, inner sep=1pt] at (0,0) {$\mathrm{O}$};
+  \node[above, font=\small, inner sep=2pt] at (-0.68,0.4) {$a$};
+  \node[below, font=\small, inner sep=2pt] at (1.5,0) {$b$};
+  \node[font=\small] at (-1.0,-1.9) {$S_1$};
+  \node[font=\small] at (1.18,3.6) {$S_2$};
+  \node[font=\small] at (1.08,15.2) {$y=4x^3$};
+\end{tikzpicture}

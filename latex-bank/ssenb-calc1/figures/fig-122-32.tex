@@ -1,0 +1,16 @@
+% 122-32(122쪽) — 두 곡선 y=x(x-a)(x-1) 과 y=-x(x-b)(x-1) 이 둘러싸는 두 색칠 부분. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 y·x·O·a·b·1·y=x(x-a)(x-1)·y=-x(x-b)(x-1) 만. a, b 의 자리는 원문처럼 0 과 1 사이의 개략 위치다(a+b 를 그림에서 잴 수 없게).
+\begin{tikzpicture}[xscale=2.3, yscale=5.6, line width=0.5pt]
+  \fill[red!14] plot[domain=0:0.52, samples=40] (\x, {\x*(\x-0.42)*(\x-1)}) -- plot[domain=0.52:0, samples=40] (\x, {-\x*(\x-0.62)*(\x-1)}) -- cycle;
+  \fill[red!14] plot[domain=0.52:1, samples=40] (\x, {\x*(\x-0.42)*(\x-1)}) -- plot[domain=1:0.52, samples=40] (\x, {-\x*(\x-0.62)*(\x-1)}) -- cycle;
+  \draw[->, >=stealth, line width=0.7pt] (-0.34,0) -- (1.45,0) node[below left=-1pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-0.26) -- (0,0.29) node[left=1pt, font=\small] {$y$};
+  \draw[line width=0.6pt, domain=-0.2:1.2, samples=110] plot (\x, {\x*(\x-0.42)*(\x-1)});
+  \draw[line width=0.6pt, domain=-0.2:1.2, samples=110] plot (\x, {-\x*(\x-0.62)*(\x-1)});
+  \node[below left=-2pt, font=\small, inner sep=1pt] at (0,0) {$\mathrm{O}$};
+  \node[above, font=\small, inner sep=1.5pt] at (0.42,0.004) {$a$};
+  \node[above, font=\small, inner sep=1.5pt] at (0.62,0.004) {$b$};
+  \node[below, font=\small, inner sep=2pt] at (1,0) {$1$};
+  \node[font=\small] at (0.72,0.255) {$y=x(x-a)(x-1)$};
+  \node[font=\small] at (0.85,-0.23) {$y=-x(x-b)(x-1)$};
+\end{tikzpicture}

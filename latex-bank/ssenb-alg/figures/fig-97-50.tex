@@ -1,0 +1,33 @@
+% 97-50(97쪽) — AB=2√2, BC=2√2, BF=1 인 직육면체 ABCD-EFGH 와 그 안의 삼각형 AFC.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로(A~H·2√2·2√2·1)만 두고 삼각형 AFC 의 넓이(답)는 적지 않는다.
+\begin{tikzpicture}[line width=0.5pt]
+  \coordinate (A) at (0,0.62);
+  \coordinate (B) at (2.8,0.62);
+  \coordinate (E) at (0,0);
+  \coordinate (F) at (2.8,0);
+  \coordinate (D) at (0.85,1.32);
+  \coordinate (C) at (3.65,1.32);
+  \coordinate (H) at (0.85,0.70);
+  \coordinate (G) at (3.65,0.70);
+  \fill[cyan!22] (A) -- (F) -- (C) -- cycle;
+  \draw[line width=0.6pt] (A) -- (B) -- (F) -- (E) -- cycle;
+  \draw[line width=0.6pt] (A) -- (D) -- (C) -- (B);
+  \draw[line width=0.6pt] (F) -- (G) -- (C);
+  \draw[dashed, line width=0.4pt] (D) -- (H) -- (E);
+  \draw[dashed, line width=0.4pt] (H) -- (G);
+  \draw[line width=0.5pt] (A) -- (F) -- (C) -- cycle;
+  \draw[line width=0.3pt] (-0.03,1.00) -- (0.36,0.93);
+  \draw[line width=0.3pt] (3.70,1.02) -- (3.34,0.94);
+  \draw[line width=0.3pt] (3.12,0.15) -- (2.86,0.30);
+  \node[font=\small, anchor=east, inner sep=1pt] at (-0.05,1.00) {$2\sqrt{2}$};
+  \node[font=\small, anchor=west, inner sep=1pt] at (3.72,1.04) {$2\sqrt{2}$};
+  \node[font=\small, anchor=west, inner sep=1pt] at (3.14,0.13) {$1$};
+  \node[font=\small, left=2pt] at (A) {$\mathrm{A}$};
+  \node[font=\small, below left=-2pt and -1pt] at (B) {$\mathrm{B}$};
+  \node[font=\small, left=2pt] at (E) {$\mathrm{E}$};
+  \node[font=\small, below=2pt] at (F) {$\mathrm{F}$};
+  \node[font=\small, above=2pt] at (D) {$\mathrm{D}$};
+  \node[font=\small, above=2pt] at (C) {$\mathrm{C}$};
+  \node[font=\small, anchor=south west, inner sep=0.5pt] at (0.95,0.83) {$\mathrm{H}$};
+  \node[font=\small, below right=-2pt and -1pt] at (G) {$\mathrm{G}$};
+\end{tikzpicture}

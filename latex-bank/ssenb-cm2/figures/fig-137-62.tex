@@ -1,0 +1,20 @@
+% 137-62(137쪽) — 함수 y=4/(x+3)+2 (x>-3) 의 그래프 위의 점 P 와 두 점근선에 내린 수선의 발 Q, R.
+% 스캔 화질이 낮아 TikZ 로 다시 그림. 라벨은 원문 그대로 y·x·O·-3·2·P·Q·R 와 곡선의 식뿐이고, PQ+PR 의 최솟값(답)은 적지 않는다.
+% 곡선의 식 라벨은 원문에서 곡선 오른쪽에 붙어 있는데, 다시 그린 폭에서는 곡선과 겹쳐 조금 위로 올리고 \scriptsize 로 줄였다.
+\begin{tikzpicture}[xscale=0.29, yscale=0.26, line width=0.5pt]
+  \draw[dotted, line width=0.7pt] (-3,-1.7) -- (-3,7.3);
+  \draw[dotted, line width=0.7pt] (-4.6,2) -- (5.4,2);
+  \draw[->, >=stealth, line width=0.7pt] (-4.6,0) -- (5.6,0) node[below left=-1pt and -2pt, font=\small] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-1.9) -- (0,7.5) node[left=-1pt, font=\small] {$y$};
+  \draw[line width=0.6pt, smooth, samples=80, domain=-2.2:5.4] plot (\x, {4/(\x+3)+2});
+  \draw[line width=0.5pt] (-3,4) -- (-1,4) -- (-1,2);
+  \draw[line width=0.4pt] (-3,4.45) -- (-2.6,4.45) -- (-2.6,4);
+  \draw[line width=0.4pt] (-1,2.45) -- (-0.6,2.45) -- (-0.6,2);
+  \node[above=1pt, font=\small] at (-1,4) {$\mathrm{P}$};
+  \node[left=1pt, font=\small] at (-3,4) {$\mathrm{R}$};
+  \node[below left=-1pt and -2pt, font=\small] at (-1,2) {$\mathrm{Q}$};
+  \node[below right=-1pt and -1pt, font=\small] at (0,2) {$2$};
+  \node[below left=-1pt and 0pt, font=\small] at (-3,0) {$-3$};
+  \node[below left=-1pt and -2pt, font=\small] at (0,0) {$\mathrm{O}$};
+  \node[right=1pt, font=\scriptsize] at (0.6,5.0) {$y=\dfrac{4}{x+3}+2$};
+\end{tikzpicture}

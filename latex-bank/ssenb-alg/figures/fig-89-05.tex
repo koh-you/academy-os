@@ -1,0 +1,30 @@
+% 89-05(89쪽) — A=90° 인 삼각형 ABC 와 변 AB 위의 점 D·변 BC 위의 점 E(선분 DE·DC). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A·B·C·D·E 와 4(CD 의 점선 안내)·30°(∠DCE)·직각 표시(∠A·∠CDE)·AD=BE 의 같음 표시만. BD 의 길이는 적지 않는다.
+\begin{tikzpicture}[scale=0.82, line width=0.6pt]
+  \coordinate (B) at (0,0);
+  \coordinate (C) at (6.3,0.05);
+  \coordinate (A) at (4.35,2.75);
+  \coordinate (D) at (2.70,1.71);
+  \coordinate (E) at (1.92,0.015);
+  \draw (B) -- (A) -- (C) -- (B);
+  \draw (D) -- (E);
+  \draw (D) -- (C);
+  \draw[dashed, line width=0.4pt] (D) to[bend left=9] (C);
+  % 직각 표시 ∠A
+  \draw[line width=0.45pt] (4.1133,2.6001) -- (4.2770,2.3729) -- (4.5137,2.5228);
+  % 직각 표시 ∠CDE
+  \draw[line width=0.45pt] (2.5915,1.4737) -- (2.8277,1.3651) -- (2.9362,1.6014);
+  % AD 와 BE 의 같음 표시
+  \draw[line width=0.45pt] (3.5065,2.3720) -- (3.6451,2.1520);
+  \draw[line width=0.45pt] (3.4049,2.3080) -- (3.5435,2.0880);
+  \draw[line width=0.45pt] (1.02,0.13) -- (1.02,-0.13);
+  \draw[line width=0.45pt] (0.90,0.13) -- (0.90,-0.13);
+  \draw (C) ++(155.3:1.15) arc (155.3:180.5:1.15);
+  \node[above=1pt, font=\small] at (A) {$\mathrm{A}$};
+  \node[left=1pt, font=\small] at (B) {$\mathrm{B}$};
+  \node[right=1pt, font=\small] at (C) {$\mathrm{C}$};
+  \node[above left=-1pt and 0pt, font=\small] at (D) {$\mathrm{D}$};
+  \node[below=2pt, font=\small] at (E) {$\mathrm{E}$};
+  \node[font=\small] at (4.66,1.24) {$4$};
+  \node[font=\small] at (4.80,0.42) {$30^\circ$};
+\end{tikzpicture}
