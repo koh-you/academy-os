@@ -16,6 +16,7 @@ import {
   buildFolderTree,
   computeBoardMetrics,
   computeItemStats,
+  countBooksInFolder,
   findFolderNode,
   groupItemsByUnit,
   listTypeLabels,
@@ -355,7 +356,7 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
             <li key={folder.path.join("/")}>
               <button className="problemBankFolderItem" onClick={() => setFolderPath(folder.path)} type="button">
                 <strong>📁 {folder.name}</strong>
-                <small>{countBooks(folder)}개 교재</small>
+                <small>{countBooksInFolder(folder)}개 교재</small>
               </button>
             </li>
           ))}
@@ -695,10 +696,4 @@ export function BookWrongAnswerBoard({ students = [], mode = "student", studentI
       ) : null}
     </section>
   );
-}
-
-function countBooks(folder) {
-  let count = folder.books.length;
-  for (const child of folder.folders.values()) count += countBooks(child);
-  return count;
 }

@@ -137,6 +137,7 @@
     "test:problem-bank-route-registry": "node scripts/test-problem-bank-route-registry.mjs",
     "test:problem-bank-store": "node scripts/test-problem-bank-store.mjs",
     "test:problem-bank-exam-model": "node scripts/test-problem-bank-exam-model.mjs",
+    "test:problem-bank-folder-rules": "node scripts/test-problem-bank-folder-rules.mjs",
     "test:test-paper-file-route-registry": "node scripts/test-test-paper-file-route-registry.mjs",
     "watermark-test-papers": "node scripts/watermark-test-papers.mjs",
     "test:exam-prep-schedule": "node scripts/test-exam-prep-schedule-plan.mjs && node scripts/test-exam-prep-schedule-api.mjs && node scripts/test-exam-prep-student-content.mjs && node scripts/test-generated-lesson-plan-builder-exam-prep-content.mjs",

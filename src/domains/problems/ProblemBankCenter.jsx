@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ConfirmDialog } from "../../shared/components/ConfirmDialog.jsx";
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
 import { HelpTip } from "../../shared/components/HelpTip.jsx";
@@ -13,9 +13,11 @@ import {
   importProblemBankAnswers,
   importProblemBankManifest,
   readFileAsDataUrl,
+  updateProblemBankBook,
   uploadProblemBankImages,
   wakeProblemBankApi
 } from "./problemBankApi.js";
+import { buildFolderTree, countBooksInFolder, findFolderNode } from "./problemBankModel.js";
 import "./problemBank.css";
 
 const imageBatchSize = 40;
@@ -149,8 +151,15 @@ export function ProblemBankCenter() {
   const [answerUpload, setAnswerUpload] = useState(emptyAnswerUpload);
   const [audit, setAudit] = useState({ stage: "idle", message: "", missing: [] });
   const [reviewFilter, setReviewFilter] = useState("all");
+  // 교재 목록을 폴더로 나눠 본다. 오답관리와 같은 folderPath(" / " 로 나뉜 경로)를 쓴다.
+  const [folderPath, setFolderPath] = useState([]);
+  const [folderDraft, setFolderDraft] = useState("");
+  const [folderBusy, setFolderBusy] = useState(false);
   const folderInputRef = useRef(null);
   const answerFolderInputRef = useRef(null);
+
+  const folderTree = useMemo(() => buildFolderTree(books), [books]);
+  const folderNode = useMemo(() => findFolderNode(folderTree, folderPath), [folderTree, folderPath]);
 
   async function reloadBooks() {
     try {
@@ -168,6 +177,31 @@ export function ProblemBankCenter() {
     reloadBooks();
   }, []);
 
+  /**
+   * 교재의 폴더를 바꾼다. 빈 값이면 폴더 없음(루트)으로 되돌린다.
+   * 저장 뒤에는 목록·상세를 서버에서 다시 읽어 화면값이 아니라 저장된 값을 보여준다.
+   */
+  async function saveFolder() {
+    if (!detail) return;
+    const next = folderDraft.split("/").map((part) => part.trim()).filter(Boolean).join(" / ");
+    if (next === (detail.book.folderPath ?? "")) {
+      setEditMessage("폴더가 그대로입니다.");
+      return;
+    }
+    setFolderBusy(true);
+    try {
+      await updateProblemBankBook(detail.book.bookId, { folderPath: next });
+      const [, saved] = await Promise.all([reloadBooks(), fetchProblemBankBook(detail.book.bookId)]);
+      setDetail(saved);
+      setFolderDraft(saved.book.folderPath ?? "");
+      setEditMessage(saved.book.folderPath ? `폴더를 "${saved.book.folderPath}" 로 옮겼습니다.` : "폴더를 비웠습니다.");
+    } catch (error) {
+      setEditMessage(error.message || "폴더를 바꾸지 못했습니다.");
+    } finally {
+      setFolderBusy(false);
+    }
+  }
+
   useEffect(() => {
     if (!selectedBookId) {
       setDetail(null);
@@ -180,6 +214,7 @@ export function ProblemBankCenter() {
         setDetail(result);
         setDetailError("");
         setEditMessage("");
+        setFolderDraft(result.book.folderPath ?? "");
         setDeleteArmed(false);
         setAnswerUpload(emptyAnswerUpload);
         setAudit({ stage: "idle", message: "", missing: [] });
@@ -446,10 +481,31 @@ export function ProblemBankCenter() {
 
         <div className="panel problemBankListPanel">
           <h2>등록된 교재</h2>
+          <nav aria-label="교재 폴더 경로" className="problemBankBreadcrumb">
+            <button onClick={() => setFolderPath([])} type="button">전체 {books.length}</button>
+            {folderPath.map((segment, index) => (
+              <button key={`${segment}-${index}`} onClick={() => setFolderPath(folderPath.slice(0, index + 1))} type="button">
+                / {segment}
+              </button>
+            ))}
+          </nav>
+          {folderPath.length > 0 ? (
+            <button className="problemBankUpButton" onClick={() => setFolderPath(folderPath.slice(0, -1))} type="button">
+              ← 상위 폴더
+            </button>
+          ) : null}
           {listError ? <p className="problemBankError">{listError}</p> : null}
           {books.length === 0 && !listError ? <EmptyState className="emptyState">아직 등록된 교재가 없습니다.</EmptyState> : null}
-          <ul className="problemBankBookList">
-            {books.map((book) => (
+          <ul className="problemBankFolderList">
+            {[...folderNode.folders.values()].map((folder) => (
+              <li key={folder.path.join("/")}>
+                <button className="problemBankFolderItem" onClick={() => setFolderPath(folder.path)} type="button">
+                  <strong>📁 {folder.name}</strong>
+                  <small>{countBooksInFolder(folder)}개 교재</small>
+                </button>
+              </li>
+            ))}
+            {folderNode.books.map((book) => (
               <li key={book.bookId}>
                 <button
                   aria-pressed={book.bookId === selectedBookId}
@@ -458,10 +514,13 @@ export function ProblemBankCenter() {
                   type="button"
                 >
                   <strong>{book.title}</strong>
-                  <small>{book.folderPath || "폴더 없음"} · {book.units.length}단원 · {book.itemCount}문제 · {book.sourceKind}</small>
+                  <small>{book.units.length}단원 · {book.itemCount}문제 · {book.sourceKind}</small>
                 </button>
               </li>
             ))}
+            {books.length > 0 && folderNode.folders.size === 0 && folderNode.books.length === 0 ? (
+              <li><EmptyState className="emptyState">이 폴더에는 교재가 없습니다.</EmptyState></li>
+            ) : null}
           </ul>
         </div>
 
@@ -473,7 +532,23 @@ export function ProblemBankCenter() {
             <>
               <dl className="problemBankInfo">
                 <div><dt>제목</dt><dd>{detail.book.title}</dd></div>
-                <div><dt>폴더</dt><dd>{detail.book.folderPath || "폴더 없음"}</dd></div>
+                <div>
+                  <dt>폴더</dt>
+                  <dd className="problemBankFolderEdit">
+                    <input
+                      aria-label="교재 폴더"
+                      disabled={folderBusy}
+                      onChange={(event) => setFolderDraft(event.target.value)}
+                      onKeyDown={(event) => { if (event.key === "Enter") saveFolder(); }}
+                      placeholder="예: 공통수학1 (하위 폴더는 공통수학1 / RPM)"
+                      type="text"
+                      value={folderDraft}
+                    />
+                    <button className="softButton" disabled={folderBusy} onClick={saveFolder} type="button">
+                      {folderBusy ? "옮기는 중" : "폴더 저장"}
+                    </button>
+                  </dd>
+                </div>
                 <div><dt>학년 · 과목</dt><dd>{[detail.book.grade, detail.book.subject].filter(Boolean).join(" · ") || "—"}</dd></div>
                 <div><dt>문항</dt><dd>{detail.items.length}개 · 해설 {solutionItems}개 · 빠른정답 {answerItems}개</dd></div>
               </dl>
