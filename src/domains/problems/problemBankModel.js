@@ -57,6 +57,13 @@ export function buildFolderTree(books) {
   return root;
 }
 
+/** 폴더와 그 하위 폴더에 든 교재 수. 오답관리·교재관리가 같은 수를 보여주려고 공유한다. */
+export function countBooksInFolder(folder) {
+  let count = folder.books.length;
+  for (const child of folder.folders.values()) count += countBooksInFolder(child);
+  return count;
+}
+
 /** 트리에서 경로(세그먼트 배열)에 해당하는 폴더 노드. 없으면 루트. */
 export function findFolderNode(root, path) {
   let node = root;

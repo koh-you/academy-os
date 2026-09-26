@@ -223,7 +223,11 @@ test("교재관리: 교재 상세·검토 목록·누락 검사를 보고 교재
   await expect(navigation.getByRole("button", { name: /자료함/ })).toHaveCount(0);
   await navigation.getByRole("button", { name: /교재관리/ }).click();
   await expect(page.getByRole("heading", { name: "교재관리" })).toBeVisible();
-  await page.locator(".problemBankBookList .problemBankBookItem").first().click();
+  // 교재는 folderPath("중3 / RPM")를 따라 폴더 안에 있다.
+  const bookList = page.locator(".problemBankListPanel");
+  await bookList.getByRole("button", { name: /📁 중3/ }).click();
+  await bookList.getByRole("button", { name: /📁 RPM/ }).click();
+  await bookList.locator(".problemBankBookItem").first().click();
   await expect(page.locator(".problemBankUnitRow:not(.head)")).toHaveCount(2);
   // 교재 상세는 정보 표시(수정 폼 없음), 도구는 한 줄.
   await expect(page.locator(".problemBankInfo")).toContainText("해설 10개 · 빠른정답 10개");
@@ -247,6 +251,8 @@ test("교재관리: 교재 상세·검토 목록·누락 검사를 보고 교재
   await expect(deleteDialog.getByRole("button", { name: "취소" })).toBeFocused();
   await deleteDialog.getByRole("button", { name: "교재 삭제" }).click();
   await expect(deleteDialog).toHaveCount(0);
-  await expect(page.locator(".problemBankBookList .problemBankBookItem")).toHaveCount(0);
+  // 마지막 교재가 사라지면 그 교재를 담던 폴더도 함께 사라진다.
+  await expect(page.locator(".problemBankListPanel .problemBankBookItem")).toHaveCount(0);
+  await expect(page.locator(".problemBankListPanel .problemBankFolderItem")).toHaveCount(0);
   expect(pageErrors).toEqual([]);
 });
