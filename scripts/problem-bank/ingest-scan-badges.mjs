@@ -196,7 +196,12 @@ async function main() {
   // --numbering book: 문항 번호가 책 전체 4자리(0001~)인 판(라이트쎈·쎈). 배지는 네 자리, id 는 그 번호, 정렬·연속성도 번호 그대로.
   // 기본(page)은 베이직쎈처럼 쪽마다 01 부터 다시 시작하는 두 자리 배지 — id 「쪽-번호」.
   const bookNumbering = String(args.numbering ?? "page") === "book";
-  const badgePattern = bookNumbering ? /^\d{4}$/ : /^\d{2}$/;
+  // --badge3: 문항 번호가 중단원마다 1 부터 다시 시작하되 세 자리까지 가는 판(쎈B).
+  //   기본 판정은 「세 자리 = 유형 라벨」인데, 쎈B 는 뒷단원 문항이 「033」처럼 세 자리라 통째로
+  //   유형 라벨로 먹혀 단원 하나가 3문항만 잡혔다. 이 모드에서는 자릿수 대신 왼쪽 「유형」 꼬리표
+  //   상자(hasTagLeft)와 연한 초록 글자로 라벨을 가른다 — 문항 번호 왼쪽은 비어 있다.
+  const wideBadge = args.badge3 === true || String(args.badge3 ?? "") === "true";
+  const badgePattern = bookNumbering ? /^\d{4}$/ : (wideBadge ? /^\d{2,3}$/ : /^\d{2}$/);
   const badgeMinH = bookNumbering ? 8 : 9.5;
   const renderScale = dpi / 72;
   const previewScale = 100 / 72;
@@ -372,7 +377,11 @@ async function main() {
     };
     // 3자리는 유형 라벨뿐이다(문항 배지는 두 자리까지). 앞의 0 이 떨어져 두 자리로 읽힌 라벨은 연한 초록 글자로 안다.
     // 「018」을 「O18」로 읽은 것(앞 0 이 알파벳 O)도 세 글자라 라벨이다 — 회색 유형 쪽에서 배지로 잘못 잡혀 뒤 번호가 밀렸다(32쪽).
-    const isTypeLabelToken = (token) => !bookNumbering && (/^[0O]?\d{3}$/.test(token.text) || /^O\d{2}$/.test(token.text) || isGreenGlyph(token));
+    const isTypeLabelToken = (token) => !bookNumbering && (wideBadge
+      // 쎈B: 문항 번호도 세 자리라 자릿수로는 못 가른다. 「유형」 꼬리표 상자가 왼쪽에 붙어 있거나
+      // 연한 초록 글자면 라벨이다(문항 번호 왼쪽은 비어 있고 글자는 주황·보라).
+      ? (hasTagLeft(token) || isGreenGlyph(token))
+      : (/^[0O]?\d{3}$/.test(token.text) || /^O\d{2}$/.test(token.text) || isGreenGlyph(token)));
     const ringColored = isTypeLabelToken;
     let typeProbe = typeCounter;
     // 유형 라벨: 본문(위 14% 아래)의 색 상자 위 굵은 숫자. OCR 이 「001」을 「01」「1」로 읽어도 라벨이다.
