@@ -1,0 +1,17 @@
+% 45-21(45쪽) — 한 변의 길이가 3 인 정사각형 ABCD(A 왼쪽 위 · D 오른쪽 위 · B 왼쪽 아래 · C 오른쪽 아래)와 변 AD 위의 점 P · 변 CD 위의 점 Q 로 만든 정삼각형 PBQ. 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문의 A·B·C·D·P·Q 와 아래 「3」 만. PD 는 답이므로 치수를 적지 않고 P·Q 위치도 눈금으로 읽히지 않게 대략 비율로 둔다.
+\begin{tikzpicture}[scale=1, line width=0.5pt]
+  \def\S{2.5}\def\r{0.3}
+  \draw[line width=0.7pt] (0,0) rectangle (\S,\S);
+  \draw[line width=0.5pt] (0,0) -- (\r*\S,\S);
+  \draw[line width=0.5pt] (\r*\S,\S) -- (\S,\r*\S);
+  \draw[line width=0.5pt] (0,0) -- (\S,\r*\S);
+  \node[font=\small, above left, inner sep=1pt] at (0,\S) {$\mathrm{A}$};
+  \node[font=\small, below left, inner sep=1pt] at (0,0) {$\mathrm{B}$};
+  \node[font=\small, below right, inner sep=1pt] at (\S,0) {$\mathrm{C}$};
+  \node[font=\small, above right, inner sep=1pt] at (\S,\S) {$\mathrm{D}$};
+  \node[font=\small, above, inner sep=2pt] at (\r*\S,\S) {$\mathrm{P}$};
+  \node[font=\small, right, inner sep=2pt] at (\S,\r*\S) {$\mathrm{Q}$};
+  \draw[densely dotted, line width=0.4pt] (0,0) .. controls (\S*0.2,-0.3) and (\S*0.8,-0.3) .. (\S,0);
+  \node[below, font=\small, inner sep=1pt] at (\S/2,-0.26) {$3$};
+\end{tikzpicture}

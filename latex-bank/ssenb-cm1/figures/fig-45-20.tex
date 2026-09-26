@@ -1,0 +1,18 @@
+% 45-20(45쪽) — 가로 36 m · 세로 30 m 인 직사각형 땅에 폭이 일정한 I자 모양의 길(노란 띠: 위·아래 가로 띠와 가운데 세로 띠). 스캔 삽화라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 둘(왼쪽 「30 m」 · 아래 「36 m」). 길의 폭은 답이므로 치수를 적지 않고 비율도 눈금으로 읽히지 않게 둔다.
+\begin{tikzpicture}[scale=1, line width=0.5pt]
+  \def\W{3.2}\def\H{2.6}\def\t{0.32}
+  \fill[yellow!45!orange!45] (0,\H-\t) rectangle (\W,\H);
+  \fill[yellow!45!orange!45] (0,0) rectangle (\W,\t);
+  \fill[yellow!45!orange!45] ({(\W-\t)/2},\t) rectangle ({(\W+\t)/2},{\H-\t});
+  \draw[line width=0.45pt] (0,\H-\t) -- (\W,\H-\t);
+  \draw[line width=0.45pt] (0,\t) -- ({(\W-\t)/2},\t);
+  \draw[line width=0.45pt] ({(\W+\t)/2},\t) -- (\W,\t);
+  \draw[line width=0.45pt] ({(\W-\t)/2},\t) -- ({(\W-\t)/2},{\H-\t});
+  \draw[line width=0.45pt] ({(\W+\t)/2},\t) -- ({(\W+\t)/2},{\H-\t});
+  \draw[line width=0.7pt] (0,0) rectangle (\W,\H);
+  \draw[densely dotted, line width=0.4pt] (0,\H) .. controls (-0.3,\H*0.75) and (-0.3,\H*0.25) .. (0,0);
+  \node[left, font=\small, inner sep=1pt] at (-0.3,\H/2) {$30\,\mathrm{m}$};
+  \draw[densely dotted, line width=0.4pt] (0,0) .. controls (\W*0.2,-0.3) and (\W*0.8,-0.3) .. (\W,0);
+  \node[below, font=\small, inner sep=1pt] at (\W/2,-0.26) {$36\,\mathrm{m}$};
+\end{tikzpicture}

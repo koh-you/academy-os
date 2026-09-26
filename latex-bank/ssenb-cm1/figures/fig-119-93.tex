@@ -1,0 +1,8 @@
+% 119-93(119쪽) — 가로 방향 평행한 직선 4개와 세로 방향 평행한 직선 5개가 수직으로 만나는 격자(간격 1). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 간격을 나타내는 1 두 개만.
+\begin{tikzpicture}[scale=0.62, line width=0.6pt]
+  \foreach \y in {0,1,2,3} { \draw (-0.5,\y) -- (4.5,\y); }
+  \foreach \x in {0,1,2,3,4} { \draw (\x,-0.5) -- (\x,3.5); }
+  \node[font=\small] at (0.5,3.3) {$1$};
+  \node[font=\small] at (-0.3,2.5) {$1$};
+\end{tikzpicture}

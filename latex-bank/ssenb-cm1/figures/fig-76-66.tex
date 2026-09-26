@@ -1,0 +1,22 @@
+% 76-66(76쪽) — 한 변의 길이가 6 인 두 정사각형 ABCD, EFGH 를 직사각형 IFJD 가 생기도록 겹쳐 놓고 대각선 BH 를 그은 그림. 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로(A~J 와 두 변의 6). 겹친 직사각형의 변의 길이는 답이므로 적지 않고 원문처럼 대략 그린다.
+\begin{tikzpicture}[scale=0.42, line width=0.5pt]
+  \def\ss{6}\def\dx{4.6}\def\dy{1.4}
+  \draw[line width=0.6pt] (0,0) rectangle (\ss,\ss);
+  \draw[line width=0.6pt] (\dx,\dy) rectangle (\dx+\ss,\dy+\ss);
+  \draw[line width=0.5pt] (0,0) -- (\dx+\ss,\dy+\ss);
+  \node[font=\small, above left, inner sep=1pt] at (0,\ss) {$\mathrm{A}$};
+  \node[font=\small, below left, inner sep=1pt] at (0,0) {$\mathrm{B}$};
+  \node[font=\small, below, inner sep=2pt] at (\ss,0) {$\mathrm{C}$};
+  \node[font=\small, above right, inner sep=1pt] at (\ss,\ss) {$\mathrm{D}$};
+  \node[font=\small, above left, inner sep=1pt] at (\dx,\dy+\ss) {$\mathrm{E}$};
+  \node[font=\small, below left, inner sep=1pt] at (\dx,\dy) {$\mathrm{F}$};
+  \node[font=\small, below right, inner sep=1pt] at (\dx+\ss,\dy) {$\mathrm{G}$};
+  \node[font=\small, above right, inner sep=1pt] at (\dx+\ss,\dy+\ss) {$\mathrm{H}$};
+  \node[font=\small, below left, inner sep=1pt] at (\dx,\ss) {$\mathrm{I}$};
+  \node[font=\small, above right, inner sep=1pt] at (\ss,\dy) {$\mathrm{J}$};
+  \draw[densely dotted, line width=0.4pt] (0,\ss) to[bend right=16] (0,0);
+  \node[font=\small, left, inner sep=2pt] at (-0.5,\ss/2) {$6$};
+  \draw[densely dotted, line width=0.4pt] (\dx+\ss,\dy+\ss) to[bend left=16] (\dx+\ss,\dy);
+  \node[font=\small, right, inner sep=2pt] at (\dx+\ss+0.5,\dy+\ss/2) {$6$};
+\end{tikzpicture}

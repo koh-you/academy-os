@@ -212,7 +212,17 @@ function renderItemBody(id, rawItem, group, bank) {
   if (item.subs) parts.push(item.subs.map((sub, index) => `\\dmsubprob{${index + 1}} ${placeTrailingConditions(sub)}`).join("\n"));
   if (item.choices) {
     // 분수(dfrac)·근호 보기는 키가 커 두 줄 배치에서 위아래 행이 맞닿는다 — 보이지 않는 지주(strut)로 행 높이를 벌린다(sty 수정 없이).
-    const strut = item.choices.some((choice) => /\\dfrac|\\sqrt/.test(choice)) ? "\\rule[-3ex]{0pt}{8ex}" : "";
+    // 세로 한 줄씩 놓는 choicesv 는 위아래 행이 맞닿지 않으므로 지주를 넣지 않는다 — 넣으면 줄 간격이 두 배로 벌어져
+    // 보기 하나가 한 쪽을 다 먹는다(검수 지적 쎈B 공통수학1 44-15).
+    // 행렬 보기(pmatrix·array)도 키가 커 위아래 괄호가 맞닿는다(검수 지적 쎈B 공통수학1 125-04 2×2 · 125-05 3×3) — 행 수에 맞춰 지주를 키운다.
+    const matrixRows = (choice) => {
+      const body = /\\begin\{(?:(?:p|b|v|B|V)?matrix|array)\}(?:\{[^}]*\})?([\s\S]*?)\\end\{/.exec(choice);
+      return body ? body[1].split("\\\\").length : 0;
+    };
+    const rows = Math.max(0, ...item.choices.map(matrixRows));
+    // 2행이면 기존 분수·근호와 같은 8ex, 한 행 늘 때마다 2.6ex 씩(본문 행간 실측).
+    const strutSize = rows >= 2 ? `\\rule[-${(3 + (rows - 2) * 1.3).toFixed(1)}ex]{0pt}{${(8 + (rows - 2) * 2.6).toFixed(1)}ex}` : "\\rule[-3ex]{0pt}{8ex}";
+    const strut = item.choices_layout !== "v" && (rows >= 2 || item.choices.some((choice) => /\\dfrac|\\sqrt/.test(choice))) ? strutSize : "";
     // 수식은 글자 수보다 넓게 찍히므로 수식 길이의 절반을 더해 잰다(라이트쎈 공통수학2 1381 ④ 처럼 한글 24자 + 긴 수식이 잘리던 것).
     const visualLength = (choice) => choice.replace(/\$[^$]*\$/g, (math) => "M".repeat(Math.max(1, Math.round((math.length - 2) / 2)))).length;
     // 배치가 지정되지 않은 짧은 보기 5개(시각 길이 ≤ ONE_LINE_MAX_VISUAL · 줄바꿈·환경·그림 없음)는 원본처럼 한 줄 5칸 후보로 두고, 실제 폭은
@@ -223,7 +233,8 @@ function renderItemBody(id, rawItem, group, bank) {
     if (layout === "i" || layout === "auto") {
       const args = item.choices.map((choice) => `{${choice}}`).join("");
       parts.push(layout === "i" ? `\\dmchoicesi${args}` : `\\dmchoicesauto{${strut}}${args}`);
-    } else if (env === "choicesv" && item.choices.some((choice) => visualLength(choice) > 26)) {
+    // 기준은 26 이상(초과 아님) — 시각 길이가 정확히 26 인 보기가 \mbox 안에서 잘린 사례(쎈B 공통수학1 26-63 ⑤ 의 끝 「a)」)가 있다.
+    } else if (env === "choicesv" && item.choices.some((choice) => visualLength(choice) >= 26)) {
       // 긴 한글 보기(문장형)는 choicesv 의 \mbox 안에서 줄이 안 바뀌어 잘린다 — 문단으로 하나씩 놓는다.
       parts.push(`\\par\\medskip${item.choices.map((choice, index) => `\\par\\noindent\\hangindent=1.4em\\hangafter=1 {\\small ${CIRCLED[index]}}\\ ${choice}`).join("")}\\par\\medskip`);
     } else {
@@ -330,6 +341,10 @@ async function main() {
 \\newcommand{\\dmpassage}[1]{\\par\\needspace{8\\baselineskip}\\medskip\\noindent{\\dmheadingfont\\bfseries\\color{dm-navy}#1}\\par\\vspace{4mm}}
 % 줄바꿈 규약(프로토타입 mathbook-problems.sty · style.sty 와 같음): 수식 안에서는 줄을 바꾸지 않고, 「(단, …)」·「x축」은 한 덩어리.
 \\binoppenalty=10000 \\relpenalty=10000
+% 수식 안 글루는 늘이지 않는다. 낱장 폭(110mm)에서 긴 수식이 한 덩어리로 묶이면 남은 늘임이 \\medmuskip·\\thickmuskip 으로
+% 들어가 「y  =  2x^2  -  3x」 처럼 연산자 둘레가 벌어진다(검수 지적 쎈B 공통수학1 95-42·95-44·130-35·136-67·26-68 등).
+% 늘임은 낱말 사이로만 보낸다.
+\\thinmuskip=3mu \\medmuskip=4mu \\thickmuskip=5mu
 \\newlength{\\dmfigw}
 % 수식을 안 끊는 대신, 긴 수식 앞에서 줄을 바꾸면 앞 줄이 많이 비는 경우(RPM 중3-1 1022 지시문·0979)에 overfull 로 잘리지 않도록
 % 비상 늘임 폭을 준다 — tolerance 안에서 조판되는 문단에는 영향이 없다.

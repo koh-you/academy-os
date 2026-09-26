@@ -1,0 +1,12 @@
+% 13-41(13쪽) — 다항식 x^3+2x^2-9 를 x-2 로 나누는 세로셈 과정 상자. 스캔 상자를 tabular 로 다시 조판(원문 칸 내용·미지수 a, b, c, d 그대로 · 둥근 테두리도 원문처럼).
+\tikz\node[draw=black!55,line width=0.4pt,rounded corners=2pt,inner sep=3.2mm]{%
+\begin{tabular}{r@{\hspace{0.6mm}}r@{\hspace{0.2mm}}r@{\hspace{0.2mm}}r@{\hspace{0.2mm}}l}
+ & \multicolumn{3}{l}{$x^2+ax+8$} & \\ \cline{2-5}
+$x-2\,\big)$ & $x^3$ & $+2x^2$ & & $-9$ \\
+ & $x^3$ & $-2x^2$ & & \\ \cline{2-5}
+ & & $bx^2$ & & \\
+ & & $4x^2$ & $-8x$ & \\ \cline{2-5}
+ & & & $8x$ & $-c$ \\
+ & & & $8x$ & $-16$ \\ \cline{2-5}
+ & & & & \multicolumn{1}{r}{$d$} \\
+\end{tabular}};

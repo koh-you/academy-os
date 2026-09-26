@@ -1,0 +1,31 @@
+{
+  "range": "126-09~136-69",
+  "checked": 61,
+  "ok": 59,
+  "findings": [
+    { "id": "126-11", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 배지) — p126 쪽 이미지로 대조해 일치" },
+    { "id": "127-17", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 배지) — p127 쪽 이미지·16번 크롭 하단으로 대조해 일치" },
+    { "id": "128-20", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 배지) — p128 쪽 이미지로 대조해 일치" },
+    { "id": "129-25", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 배지) — p129 쪽 이미지로 대조해 일치" },
+    { "id": "129-28", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 배지) — p129 쪽 이미지로 대조해 일치" },
+    { "id": "130-32", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 배지) — p130 쪽 이미지·31번 크롭 하단으로 대조해 일치" },
+    { "id": "130-35", "severity": "yellow", "where": "layout", "note": "첫 줄이 인라인 행렬 때문에 과하게 늘어나 '행렬 A =' 사이 간격이 벌어지고 끝의 '구하시오'가 '구하시/오.'로 끊김" },
+    { "id": "132-40", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 배지) — p132 쪽 이미지로 대조해 일치(보기 5개 행렬 성분·부호 포함)" },
+    { "id": "132-43", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 배지) — p132 쪽 이미지로 대조해 일치" },
+    { "id": "133-46", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 배지) — p133 쪽 이미지로 대조해 일치" },
+    { "id": "133-48", "severity": "ok", "where": "body", "note": "지수 확인 필요 구간이라 p133을 4배 확대해 대조: 원문도 AB^2A+A^2B^4A^2+A^3B^6A^3 로 일치" },
+    { "id": "133-50", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 배지) — p133 쪽 이미지로 대조해 일치" },
+    { "id": "133-51", "severity": "ok", "where": "layout", "note": "크롭 없음 — p133 쪽 이미지로 대조해 일치" },
+    { "id": "134-52", "severity": "ok", "where": "layout", "note": "크롭 없음 — p134 쪽 이미지로 대조해 일치(보기 5개 열행렬 성분·부호 포함)" },
+    { "id": "134-53", "severity": "ok", "where": "layout", "note": "크롭 없음 — p134 쪽 이미지로 대조해 일치" },
+    { "id": "134-54", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 배지) — p134 쪽 이미지로 대조해 일치" },
+    { "id": "134-57", "severity": "ok", "where": "layout", "note": "크롭 없음 — p134 쪽 이미지·56번 크롭 하단으로 대조해 일치" },
+    { "id": "135-63", "severity": "ok", "where": "layout", "note": "크롭 없음(대표 문제 배지) — p135 쪽 이미지로 대조해 보기 ㄱㄴㄷ·선택지 일치" },
+    { "id": "136-64", "severity": "ok", "where": "layout", "note": "크롭 어긋남(크롭 왼쪽은 65번) — p136 쪽 이미지로 대조해 64번 내용과 일치" },
+    { "id": "136-65", "severity": "ok", "where": "layout", "note": "크롭 어긋남(크롭 왼쪽은 66번) — p136 쪽 이미지로 대조해 65번 내용과 일치" },
+    { "id": "136-66", "severity": "ok", "where": "layout", "note": "크롭 어긋남(크롭 왼쪽은 68번) — p136 쪽 이미지로 대조해 66번 내용과 일치" },
+    { "id": "136-67", "severity": "yellow", "where": "layout", "note": "첫 줄이 인라인 행렬 때문에 늘어나 '행렬 A =' 사이 간격이 과하게 벌어짐" },
+    { "id": "136-68", "severity": "ok", "where": "layout", "note": "크롭 없음 — p136 쪽 이미지·66번 크롭(실제 68번)으로 대조해 일치" },
+    { "id": "136-69", "severity": "ok", "where": "layout", "note": "크롭 없음 — p136 쪽 이미지·67번 크롭 하단으로 대조해 일치" }
+  ]
+}

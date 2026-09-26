@@ -1,0 +1,20 @@
+% 89-02(89쪽) — 위로 볼록한 y=ax^2+bx+c 의 그래프와 직선 y=mx+n. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 원문 그대로: 포물선은 x축과 -6, 3 에서 만나고 직선과는 x=-3, x=5 에서 만나며 그 두 자리를 점선으로 표시한다.
+% 라벨은 원문의 -6, -3, 3, 5, O 와 두 그래프 이름만.
+\begin{tikzpicture}[scale=0.24, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-8.6,0) -- (6.9,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-5.1) -- (0,4.9) node[left] {$y$};
+  \node[below right=-1pt and 0pt, font=\small] at (0,0) {$\mathrm{O}$};
+  % y=ax^2+bx+c : 위로 볼록 · x축과 -6, 3 에서 만난다(세로는 1.5배로 그렸다)
+  \draw[line width=0.6pt, domain=-7.65:4.75, samples=110, smooth] plot (\x, {-0.18*(\x+6)*(\x-3)});
+  % y=mx+n : 포물선과 x=-3, x=5 에서 만나는 직선
+  \draw[line width=0.6pt] (-4.6,4.68) -- (5.5,-4.41);
+  \draw[dotted, line width=0.5pt] (-3,0) -- (-3,3.24);
+  \draw[dotted, line width=0.5pt] (5,0) -- (5,-3.96);
+  \node[above left=-1pt and -4pt, font=\small] at (-6,0) {$-6$};
+  \node[below left=0pt and -5pt, font=\small] at (-3,0) {$-3$};
+  \node[above left=-1pt and -4pt, font=\small] at (3,0) {$3$};
+  \node[above right=-1pt and -4pt, font=\small] at (5,0) {$5$};
+  \node[anchor=south east, font=\small] at (-4.3,4.7) {$y=mx+n$};
+  \node[anchor=north west, font=\small] at (-8.4,-4.3) {$y=ax^2+bx+c$};
+\end{tikzpicture}

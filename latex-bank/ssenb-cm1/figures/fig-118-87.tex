@@ -1,0 +1,8 @@
+% 118-87(118쪽) — 평행한 두 직선 l, m 위에 각각 3개, 5개의 점. 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 l, m 만.
+\begin{tikzpicture}[scale=0.62, line width=0.6pt]
+  \draw (-0.4,1.15) -- (2.4,1.15) node[right, font=\small] {$l$};
+  \draw (-0.4,0) -- (2.4,0) node[right, font=\small] {$m$};
+  \foreach \x in {0,1,2} { \fill (\x,1.15) circle (2.2pt); }
+  \foreach \x in {0,0.5,1,1.5,2} { \fill (\x,0) circle (2.2pt); }
+\end{tikzpicture}

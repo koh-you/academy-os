@@ -1,0 +1,15 @@
+% 92-22(92쪽) — 아래로 볼록한 y=f(x) 의 그래프와 꼭짓점 A·y축과의 교점 B 를 지나는 직선 y=g(x). 스캔 화질이 낮아 TikZ 로 다시 그림.
+% 라벨은 원문의 A, B, O 와 두 그래프 이름만. 원문에 눈금·수치가 없으므로 넣지 않고, k 값이 그림에서 읽히지 않게 개략도로 그린다.
+\begin{tikzpicture}[scale=0.42, line width=0.5pt]
+  \draw[->, >=stealth, line width=0.7pt] (-5.2,0) -- (1.95,0) node[below] {$x$};
+  \draw[->, >=stealth, line width=0.7pt] (0,-3.3) -- (0,5.4) node[left] {$y$};
+  \node[below right=-1pt and 1pt, font=\small] at (0,0) {$\mathrm{O}$};
+  % y=f(x): 아래로 볼록 · 꼭짓점 A(y축 왼쪽 · x축 아래), y축과의 교점 B
+  \draw[line width=0.6pt, domain=-4.57:0.57, samples=100, smooth] plot (\x, {(\x+2)*(\x+2)-2});
+  % y=g(x): 두 점 A, B 를 지나는 직선
+  \draw[line width=0.6pt] (-2.95,-3.9) -- (1.27,4.54);
+  \node[below right=-1pt and 0pt, font=\small] at (-2,-2) {$\mathrm{A}$};
+  \node[below right=-2pt and 1pt, font=\small] at (0,2) {$\mathrm{B}$};
+  \node[anchor=south, font=\small] at (-4.3,4.75) {$y=f(x)$};
+  \node[anchor=north, font=\small] at (-2.35,-4.0) {$y=g(x)$};
+\end{tikzpicture}

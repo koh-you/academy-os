@@ -1,0 +1,14 @@
+% 108-23(108쪽) — 직사각형을 5개의 영역 A, B, C, D, E 로 나눈 그림. 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 A~E 만 적고, 영역의 인접 관계(A-B, B-C, B-D, C-D, A-E, B-E, D-E)는 원문 그림과 같게 둔다.
+\begin{tikzpicture}[scale=0.62, line width=0.5pt]
+  \draw[line width=0.7pt] (0,0) rectangle (4.4,3.46);
+  \draw (0,1.89) -- (4.4,1.04);
+  \draw (1.10,3.46) -- (0.74,1.89);
+  \draw (2.57,3.46) -- (2.91,2.29) -- (3.05,1.36);
+  \draw (2.91,2.29) -- (4.4,2.56);
+  \node[font=\small] at (0.44,2.73) {$\mathrm{A}$};
+  \node[font=\small] at (1.84,2.36) {$\mathrm{B}$};
+  \node[font=\small] at (3.52,2.90) {$\mathrm{C}$};
+  \node[font=\small] at (3.69,1.75) {$\mathrm{D}$};
+  \node[font=\small] at (2.20,0.71) {$\mathrm{E}$};
+\end{tikzpicture}

@@ -1,0 +1,21 @@
+% 99-69(99쪽) — 가로 10 m · 세로 6 m 인 직사각형 화단(연두)과 그 둘레에 두른 폭 x m 인 길(연주황). 스캔 그림이라 TikZ 로 다시 그림.
+% 라벨은 원문 그대로 6 m · 10 m · x m 만. 길의 폭은 답이 읽히지 않도록 원문처럼 축척을 맞추지 않고 임의의 비율로 그렸다.
+\begin{tikzpicture}[scale=0.30, line width=0.5pt]
+  \def\ww{10}
+  \def\hh{6}
+  \def\pp{1.5}
+  \fill[orange!25] (-\pp,-\pp) rectangle (\ww+\pp,\hh+\pp);
+  \fill[green!20] (0,0) rectangle (\ww,\hh);
+  \draw[line width=0.6pt] (-\pp,-\pp) rectangle (\ww+\pp,\hh+\pp);
+  \draw[line width=0.6pt] (0,0) rectangle (\ww,\hh);
+  % 원문의 점선 호 — 세로 6 m · 가로 10 m
+  \draw[densely dotted, line width=0.4pt] (0.45,0.55) .. controls (1.7,2) and (1.7,4) .. (0.45,5.45);
+  \draw[densely dotted, line width=0.4pt] (0.55,0.45) .. controls (3,1.5) and (7,1.5) .. (9.45,0.45);
+  \node[right, font=\small, inner sep=2pt] at (1.45,3) {$6\,\mathrm{m}$};
+  \node[font=\small, fill=green!20, inner sep=1pt] at (5,1.15) {$10\,\mathrm{m}$};
+  % 길의 폭 x m — 오른쪽 띠와 아래쪽 띠
+  \draw[<->, >=stealth, line width=0.4pt] (\ww+0.06,\hh-1.7) -- (\ww+\pp-0.06,\hh-1.7);
+  \node[above left, font=\small, inner sep=2pt] at (\ww-0.15,\hh-1.6) {$x\,\mathrm{m}$};
+  \draw[<->, >=stealth, line width=0.4pt] (4.6,-\pp+0.06) -- (4.6,-0.06);
+  \node[right, font=\small, inner sep=2pt] at (4.7,-0.75) {$x\,\mathrm{m}$};
+\end{tikzpicture}

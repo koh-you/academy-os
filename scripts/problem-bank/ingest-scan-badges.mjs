@@ -201,6 +201,12 @@ async function main() {
   //   유형 라벨로 먹혀 단원 하나가 3문항만 잡혔다. 이 모드에서는 자릿수 대신 왼쪽 「유형」 꼬리표
   //   상자(hasTagLeft)와 연한 초록 글자로 라벨을 가른다 — 문항 번호 왼쪽은 비어 있다.
   const wideBadge = args.badge3 === true || String(args.badge3 ?? "") === "true";
+  // --no-green-type: 「연한 초록 글자 = 유형 라벨」 추정을 끈다(--badge3 모드에서만 쓰인다).
+  //   쎈B 공통수학2 의 II 집합과 명제(05·06·07)는 문항 배지 글자 자체가 초록(≈161,171,125 · 평균 152)이라
+  //   기본 임계값 140 을 넘어 배지가 통째로 유형 라벨로 먹힌다(p91 문항 7개 → 검출 0개).
+  //   그 판의 진짜 유형 라벨은 색 알약 안 흰 글자라 OCR 에 안 잡히므로 hasTagLeft 만으로 충분하다.
+  //   배지가 주황·파랑인 단원에서는 켜고 끈 결과가 같았다(쎈B 공통수학2 p31–35·p108–112 실측).
+  const noGreenType = args["no-green-type"] === true || String(args["no-green-type"] ?? "") === "true";
   const badgePattern = bookNumbering ? /^\d{4}$/ : (wideBadge ? /^\d{2,3}$/ : /^\d{2}$/);
   const badgeMinH = bookNumbering ? 8 : 9.5;
   const renderScale = dpi / 72;
@@ -380,7 +386,7 @@ async function main() {
     const isTypeLabelToken = (token) => !bookNumbering && (wideBadge
       // 쎈B: 문항 번호도 세 자리라 자릿수로는 못 가른다. 「유형」 꼬리표 상자가 왼쪽에 붙어 있거나
       // 연한 초록 글자면 라벨이다(문항 번호 왼쪽은 비어 있고 글자는 주황·보라).
-      ? (hasTagLeft(token) || isGreenGlyph(token))
+      ? (hasTagLeft(token) || (!noGreenType && isGreenGlyph(token)))
       : (/^[0O]?\d{3}$/.test(token.text) || /^O\d{2}$/.test(token.text) || isGreenGlyph(token)));
     const ringColored = isTypeLabelToken;
     let typeProbe = typeCounter;

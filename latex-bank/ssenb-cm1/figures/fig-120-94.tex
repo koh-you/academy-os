@@ -1,0 +1,12 @@
+% 120-94(120쪽) — 마주 보는 두 변을 각각 5등분·4등분한 평행사변형(5×4 칸)과 색칠한 부분. 스캔 그림이라 TikZ 로 다시 그림.
+% 칸 나눔·색칠 자리(왼쪽에서 넷째 칸줄의 위에서 둘째·셋째 칸)는 원문 그대로. 치수·라벨은 원문에 없어 넣지 않는다.
+\begin{tikzpicture}[scale=0.55, line width=0.5pt]
+  % u = 한 칸(가로 5등분) · v = 한 칸(세로 4등분). 원문처럼 살짝 기울어진 평행사변형.
+  \def\ux{1.0}\def\uy{-0.085}
+  \def\vx{-0.21}\def\vy{-0.54}
+  \newcommand{\gp}[2]{({#1*\ux+#2*\vx},{#1*\uy+#2*\vy})}
+  \fill[violet!22] \gp{3}{1} -- \gp{4}{1} -- \gp{4}{3} -- \gp{3}{3} -- cycle;
+  \foreach \j in {1,2,3} { \draw[line width=0.45pt] \gp{0}{\j} -- \gp{5}{\j}; }
+  \foreach \i in {1,2,3,4} { \draw[line width=0.45pt] \gp{\i}{0} -- \gp{\i}{4}; }
+  \draw[line width=0.7pt] \gp{0}{0} -- \gp{5}{0} -- \gp{5}{4} -- \gp{0}{4} -- cycle;
+\end{tikzpicture}

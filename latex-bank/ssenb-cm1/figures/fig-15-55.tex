@@ -1,0 +1,17 @@
+% 15-55(15쪽) — 밑면의 가로 a+1, 세로 a+2 인 직육면체. 스캔 그림을 TikZ 로 다시 그림(보이는 모서리 실선·숨은 모서리 점선 · 높이는 원문에 라벨이 없다).
+\begin{tikzpicture}[line width=0.6pt]
+  \coordinate (a1) at (0,0);
+  \coordinate (b1) at (2,0);
+  \coordinate (c1) at (2,2.45);
+  \coordinate (d1) at (0,2.45);
+  \coordinate (a2) at (1.05,1.15);
+  \coordinate (b2) at (3.05,1.15);
+  \coordinate (c2) at (3.05,3.6);
+  \coordinate (d2) at (1.05,3.6);
+  \draw[dashed,line width=0.45pt] (a1) -- (a2) (a2) -- (b2) (a2) -- (d2);
+  \draw (a1) -- (b1) -- (c1) -- (d1) -- cycle;
+  \draw (d1) -- (d2) -- (c2) -- (c1);
+  \draw (c2) -- (b2) -- (b1);
+  \node[below] at (1,0) {$a+1$};
+  \node[below right] at (2.5,0.5) {$a+2$};
+\end{tikzpicture}
