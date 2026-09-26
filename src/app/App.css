@@ -5036,6 +5036,11 @@ button:disabled {
   overflow: hidden;
 }
 
+/* 2026-09-26 · Modal footer 슬롯을 쓰면 본문만 스크롤하고 푸터는 카드 바닥에 고정된다. */
+.modalCard.modalScrollable.modalHasFooter {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
 .modalScrollBody {
   display: grid;
   gap: 20px;
@@ -7634,12 +7639,6 @@ button:disabled {
   font-weight: 800;
 }
 
-.modalCard.lessonModal {
-  gap: 18px;
-  max-width: 640px;
-  padding: 30px;
-}
-
 .modalCard.studentDeleteModal {
   gap: 18px;
   max-width: 520px;
@@ -7792,10 +7791,6 @@ button:disabled {
   gap: 10px;
   justify-items: stretch;
   text-align: left;
-}
-
-.lessonModalSection {
-  gap: 12px;
 }
 
 .typeTabs {
@@ -7992,14 +7987,6 @@ button:disabled {
   word-break: break-word;
 }
 
-.lessonModalFields {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.lessonModalFields label:first-child {
-  grid-column: 1 / -1;
-}
-
 label,
 .wideLabel {
   color: var(--academy-text-strong, #475569);
@@ -8023,28 +8010,6 @@ textarea {
   gap: 8px;
 }
 
-.lessonStudentSearchRow {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: minmax(0, 1fr) auto;
-}
-
-.lessonStudentGroups {
-  display: grid;
-  gap: 12px;
-}
-
-.lessonStudentGroup {
-  display: grid;
-  gap: 8px;
-}
-
-.lessonStudentGroup > div:first-child {
-  align-items: center;
-  display: flex;
-  gap: 8px;
-}
-
 .lessonStudentChip {
   background: var(--academy-surface, #ffffff);
   border: 1px solid var(--academy-border, #d8e3f8);
@@ -8059,31 +8024,6 @@ textarea {
   background: var(--academy-text, #0f172a);
   border-color: var(--academy-text, #0f172a);
   color: var(--academy-surface, #ffffff);
-}
-
-.lessonModalActions {
-  align-items: center;
-  display: grid;
-  gap: 12px;
-  grid-template-columns: minmax(0, 1fr) auto;
-  padding-top: 6px;
-}
-
-.lessonModalSaveStatus {
-  align-items: center;
-  background: var(--academy-surface-muted, #f8fafc);
-  border: 1px solid var(--status-neutral-border, #e2e8f0);
-  border-radius: 8px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 10px 12px;
-}
-
-.lessonModalSaveStatus > span {
-  color: var(--academy-text-strong, #475569);
-  font-size: 13px;
-  font-weight: 800;
 }
 
 .closureJournalNotice {

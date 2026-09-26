@@ -46,7 +46,9 @@ assert.equal(injectedModalCount, 14, "unexpected injected common Modal surface c
 // 23 -> 24: 학사일정 등록/수정 모달 푸터 [일정 삭제][취소][등록] 이 schoolEventFormActions div 대신 ModalFooter 를 쓴다(2026-09-19 U9).
 // 24 -> 25: 공용 ConfirmDialog 의 [취소][확정] 푸터(2026-09-19 U11).
 // 25 -> 26: SNS 스튜디오 Chat 결과 가져오기 모달의 [가져오기 취소][가져오기 미리보기][반영] 푸터(2026-09-19 U13).
-assert.equal(modalFooterCount, 26, "unexpected common ModalFooter count");
+// 26 -> 27: 수업 등록/수정 모달의 [수업 취소][저장 상태바][취소][✅ 수업 등록] 푸터가
+// lessonModalActions/lessonModalSaveStatus div 대신 ModalFooter 를 쓴다(2026-09-26 수업등록 개편).
+assert.equal(modalFooterCount, 27, "unexpected common ModalFooter count");
 assert.equal(modalActionCount, 2, "unexpected legacy modalActions wrapper count");
 assert.deepEqual(
   rawDialogEntries.map((entry) => entry.path),
@@ -62,7 +64,11 @@ for (const contract of [
   'aria-busy={closeDisabled || undefined}',
   'closeAriaLabel = "창 닫기"',
   "aria-label={closeAriaLabel}",
-  "export function ModalFooter"
+  "export function ModalFooter",
+  // 2026-09-26 · footer 슬롯은 본문 스크롤 밖에 그려져 저장 버튼이 항상 보이게 한다.
+  "footer = null",
+  'footer ? "modalHasFooter" : ""',
+  "{footer}"
 ]) {
   assert.ok(sharedModalSource.includes(contract), `missing common modal contract: ${contract}`);
 }

@@ -1,34 +1,72 @@
-.lessonModalActions.hasDeleteAction {
-  grid-template-columns: auto minmax(24px, 1fr) auto minmax(160px, 1fr);
+/* 2026-09-26 · 수업 등록/수정 모달의 고정 푸터(상태바 + 액션).
+   Modal 의 footer 슬롯에 들어가므로 본문을 스크롤해도 항상 보인다.
+   순서는 [수업 취소(파괴적)] [저장 경계 상태바] [취소] [✅ 수업 등록]. */
+
+.lessonModalFooter {
+  gap: 10px 14px;
+  justify-content: flex-start;
 }
 
-.lessonModalActions.hasDeleteAction .lessonModalDeleteButton {
-  grid-column: 1;
+.lessonModalFooter .lessonModalDeleteButton {
+  min-height: var(--academy-touch-target, 44px);
 }
 
-.lessonModalActions.hasDeleteAction .lessonModalCancelButton {
-  grid-column: 3;
+.lessonModalSaveStatus {
+  align-items: center;
+  background: var(--academy-surface-muted, #f8fafc);
+  border: 1px solid var(--status-neutral-border, #e2e8f0);
+  border-radius: 8px;
+  display: flex;
+  flex: 1 1 260px;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px 12px;
 }
 
-.lessonModalActions.hasDeleteAction .primaryButton {
-  grid-column: 4;
+.lessonModalSaveStatus > span {
+  color: var(--academy-text-strong, #475569);
+  font-size: 13px;
+  font-weight: 800;
 }
 
-@media (max-width: 560px) {
-  .lessonModalActions.hasDeleteAction {
-    grid-template-columns: auto minmax(0, 1fr);
+.lessonModalSaveStatus > span.lessonModalEmptyRosterNotice {
+  color: var(--status-pending-text, #b45309);
+}
+
+.lessonModalActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* 2026-09-26 · 취소 431px / 등록 137px 로 뒤집혀 있던 폭을 바로잡는다.
+   확정 버튼이 취소보다 작지 않고, 세 버튼 모두 터치 타깃 이상이다. */
+.lessonModalActions .lessonModalCancelButton {
+  min-height: var(--academy-touch-target, 44px);
+  min-width: 108px;
+}
+
+.lessonModalActions .lessonModalSaveButton {
+  min-height: var(--academy-touch-target, 44px);
+  min-width: 180px;
+}
+
+@media (max-width: 640px) {
+  .lessonModalFooter .lessonModalDeleteButton {
+    order: 3;
+    width: 100%;
   }
 
-  .lessonModalActions.hasDeleteAction .lessonModalDeleteButton {
-    grid-column: 1 / -1;
-    justify-self: start;
+  .lessonModalActions {
+    flex: 1 1 100%;
   }
 
-  .lessonModalActions.hasDeleteAction .lessonModalCancelButton {
-    grid-column: 1;
-  }
-
-  .lessonModalActions.hasDeleteAction .primaryButton {
-    grid-column: 2;
+  .lessonModalActions .lessonModalCancelButton,
+  .lessonModalActions .lessonModalSaveButton {
+    flex: 1 1 140px;
+    min-width: 0;
   }
 }

@@ -22,13 +22,11 @@ for (const requiredSource of [
   "isLessonTypeChoiceDisabled(value)",
   "onLessonTypeChange(value)",
   "{children}",
-  "큰 수업 틀",
-  '<option value="">직접 입력 일정</option>',
-  "templates.map",
+  // 2026-09-26 · 「큰 수업 틀」 select 은 포함 학생 영역의 「반 불러오기」 로 옮겨졌다(LessonModalStudentPicker).
+  // 이 컴포넌트는 이제 유형·색상·기본 필드만 가진다.
   "lessonColorOptions.map",
   "isLessonTypeChoiceDisabled(item.lessonType)",
   "onColorOptionClick(item)",
-  "onClassTemplateChange(event.target.value)",
   "onNameChange(event.target.value)",
   "onDateChange(event.target.value)",
   "onStartTimeChange(event.target.value)",
@@ -42,11 +40,19 @@ for (const requiredSource of [
 
 const typeTabsIndex = basicsSource.indexOf('className="typeTabs"');
 const childrenIndex = basicsSource.indexOf("{children}");
-const templateIndex = basicsSource.indexOf("큰 수업 틀");
+const colorPaletteIndex = basicsSource.indexOf('className="lessonColorPalette"');
 assert.ok(
-  typeTabsIndex < childrenIndex && childrenIndex < templateIndex,
-  "closure children must remain between type tabs and the template fields"
+  typeTabsIndex < childrenIndex && childrenIndex < colorPaletteIndex,
+  "closure children must remain between type tabs and the colour/field block"
 );
+// 2026-09-26 · 반 선택(수업명·시간·색상·명단 일괄 채우기)은 학생 선택 바로 옆에서만 노출한다.
+for (const movedSource of ["큰 수업 틀", "onClassTemplateChange", "templates.map"]) {
+  assert.equal(
+    basicsSource.includes(movedSource),
+    false,
+    `class template entry point must not come back to the basics form: ${movedSource}`
+  );
+}
 
 for (const forbiddenSource of [
   "useState",
@@ -79,11 +85,10 @@ assert.ok(
 for (const modalOwnedSource of [
   "lessonType={lessonType}",
   "onLessonTypeChange={handleLessonTypeChange}",
-  "onClassTemplateChange={handleTemplateChange}",
   "onColorOptionClick={handleColorOptionClick}",
   "onDateChange={handleDateChange}",
   "onNameChange={setName}",
-  "onStartTimeChange={setStartTime}",
+  "onStartTimeChange={handleStartTimeChange}",
   "onEndTimeChange={setEndTime}"
 ]) {
   assert.ok(

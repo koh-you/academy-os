@@ -7,6 +7,7 @@ export function Modal({
   className = "",
   closeAriaLabel = "창 닫기",
   closeDisabled = false,
+  footer = null,
   hideCloseButton = false,
   hideHeader = false,
   onClose,
@@ -44,7 +45,7 @@ export function Modal({
         aria-labelledby={!hideHeader && title ? titleId : undefined}
         aria-modal="true"
         aria-busy={closeDisabled || undefined}
-        className={["modalCard", scrollable ? "modalScrollable" : "", className].filter(Boolean).join(" ")}
+        className={["modalCard", scrollable ? "modalScrollable" : "", footer ? "modalHasFooter" : "", className].filter(Boolean).join(" ")}
         role="dialog"
       >
         {hideHeader ? null : (
@@ -62,6 +63,7 @@ export function Modal({
           </div>
         )}
         {scrollable ? <div className="modalScrollBody">{children}</div> : children}
+        {footer}
       </section>
     </div>
   );

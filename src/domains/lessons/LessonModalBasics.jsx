@@ -1,7 +1,6 @@
 
 export function LessonModalBasics({
   children,
-  classTemplateId,
   color,
   date,
   endTime,
@@ -10,15 +9,13 @@ export function LessonModalBasics({
   lessonColorOptions,
   lessonType,
   name,
-  onClassTemplateChange,
   onColorOptionClick,
   onDateChange,
   onEndTimeChange,
   onLessonTypeChange,
   onNameChange,
   onStartTimeChange,
-  startTime,
-  templates
+  startTime
 }) {
   return (
     <>
@@ -49,27 +46,6 @@ export function LessonModalBasics({
       </div>
 
       {children}
-
-      <div className="modalSection lessonModalSection">
-        <label>
-          큰 수업 틀
-          <select
-            disabled={isFormLocked}
-            value={classTemplateId}
-            onChange={(event) => onClassTemplateChange(event.target.value)}
-          >
-            <option value="">직접 입력 일정</option>
-            {templates.map((template) => (
-              <option
-                key={template.classTemplateId}
-                value={template.classTemplateId}
-              >
-                {template.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
 
       <div className="modalSection lessonModalSection">
         <label>달력 색상</label>
@@ -129,6 +105,10 @@ export function LessonModalBasics({
           />
         </label>
       </div>
+      {/* 2026-09-26 · 시작 시간을 바꾸면 종료가 +3시간으로 따라온다(사용자가 종료를 직접 고치면 그 값이 남는다). */}
+      <small className="muted lessonModalFieldHint">
+        시작 시간을 바꾸면 종료 시간이 3시간 뒤로 맞추어집니다. 종료 시간은 직접 고칠 수 있습니다.
+      </small>
     </>
   );
 }

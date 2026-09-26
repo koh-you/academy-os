@@ -1,25 +1,68 @@
 import { EmptyState } from "../../shared/components/EmptyState.jsx";
+import { HelpTip } from "../../shared/components/HelpTip.jsx";
 import { SearchField } from "../../shared/components/SearchField.jsx";
 import { SectionHeader } from "../../shared/components/SectionHeader.jsx";
 
 export function LessonModalStudentPicker({
   activeStudentCount,
+  classTemplateId,
   filteredStudents,
   groupedStudents,
   initialStudentCount,
   isClosureConversion,
   isRosterLocked,
-  onDeselectGroup,
+  onClassTemplateChange,
+  onClearAll,
   onSearchChange,
-  onSelectGroup,
+  onSelectAll,
   onSelectVisible,
   onToggleStudent,
   search,
-  selectedStudentIds
+  selectedStudentIds,
+  templates
 }) {
+  // 2026-09-26 · 「전체 선택/전체 해제」는 학년 그룹마다 두지 않고 이 헤더의 토글 하나로 모은다(docs/ui-row-actions.md R1).
+  const isEverySelected = activeStudentCount > 0 && selectedStudentIds.length >= activeStudentCount;
+
   return (
-    <div className="modalSection lessonModalSection">
+    <div className="modalSection lessonModalSection lessonStudentPicker">
       <SectionHeader
+        actions={(
+          <div className="lessonRosterHeaderActions">
+            {/* 2026-09-26 · 옛 「큰 수업 틀」 select 를 여기로 옮겼다. 고르면 수업명·시간·색상과 그 반 명단이 한 번에 채워진다. */}
+            <label className="lessonRosterTemplatePicker">
+              <span>반 불러오기</span>
+              <select
+                aria-label="반 불러오기"
+                disabled={isRosterLocked}
+                value={classTemplateId}
+                onChange={(event) => onClassTemplateChange(event.target.value)}
+              >
+                <option value="">직접 입력 일정</option>
+                {templates.map((template) => (
+                  <option
+                    key={template.classTemplateId}
+                    value={template.classTemplateId}
+                  >
+                    {template.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <HelpTip
+              label="반 불러오기"
+              text="반을 고르면 수업명·시작/종료 시간·달력 색상과 그 반에 배정된 학생 명단이 한 번에 채워집니다. 채워진 뒤에도 학생은 하나씩 켜고 끌 수 있습니다."
+            />
+            <button
+              className="softButton compact lessonRosterSelectAllButton"
+              disabled={isRosterLocked}
+              onClick={isEverySelected ? onClearAll : onSelectAll}
+              type="button"
+            >
+              {isEverySelected ? "전체 해제" : "전체 선택"}
+            </button>
+          </div>
+        )}
         meta={<span className="muted">선택 {selectedStudentIds.length}명</span>}
         title="포함 학생"
         titleAs="strong"
@@ -33,14 +76,17 @@ export function LessonModalStudentPicker({
           result={`${filteredStudents.length}명`}
           value={search}
         />
-        <button
-          className="softButton"
-          disabled={isRosterLocked}
-          onClick={onSelectVisible}
-          type="button"
-        >
-          보이는 학생 선택
-        </button>
+        {/* 2026-09-26 · 검색 중일 때만 렌더한다. 검색어가 없으면 이 버튼은 헤더의 「전체 선택」과 같은 일을 한다. */}
+        {search.trim() ? (
+          <button
+            className="softButton"
+            disabled={isRosterLocked}
+            onClick={onSelectVisible}
+            type="button"
+          >
+            검색 결과 {filteredStudents.length}명만 선택
+          </button>
+        ) : null}
       </div>
       <small className="muted">
         {isClosureConversion
@@ -70,22 +116,7 @@ export function LessonModalStudentPicker({
           <div className="lessonStudentGroup" key={group.grade}>
             <div>
               <strong>{group.grade}</strong>
-              <button
-                className="softButton mini"
-                disabled={isRosterLocked}
-                onClick={() => onSelectGroup(group.students)}
-                type="button"
-              >
-                전체 선택
-              </button>
-              <button
-                className="softButton mini"
-                disabled={isRosterLocked}
-                onClick={() => onDeselectGroup(group.students)}
-                type="button"
-              >
-                전체 해제
-              </button>
+              <span className="muted">{group.students.length}명</span>
             </div>
             <div className="studentChips">
               {group.students.map((student) => {

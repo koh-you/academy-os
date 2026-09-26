@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   createLessonModalColorOptions,
   createLessonModalDateChangePatch,
+  createLessonModalStartTimeChangePatch,
   createLessonModalTemplateChangePatch,
   createLessonModalTypeChangePatch
 } from "../src/domains/lessons/lessonModalDraftTransitions.js";
@@ -156,6 +157,48 @@ assert.deepEqual(
     startTime: "10:00"
   },
   "a manually touched closure makeup date must be preserved"
+);
+
+// 2026-09-26 · 사용자가 시작 시간을 직접 바꾸면 종료는 기본 +3시간이다.
+assert.deepEqual(
+  createLessonModalStartTimeChangePatch({ nextStartTime: "16:00" }),
+  { endTime: "19:00", startTime: "16:00" }
+);
+assert.deepEqual(
+  createLessonModalStartTimeChangePatch({ nextStartTime: "09:30" }),
+  { endTime: "12:30", startTime: "09:30" }
+);
+
+// 종료를 손으로 고친 뒤에 시작을 다시 바꾸면 다시 +3시간으로 맞춘다 — 패치가 순수함수라
+// 이전 종료값과 무관하게 같은 결과가 나온다(예측 가능함을 우선한 선택).
+assert.deepEqual(
+  createLessonModalStartTimeChangePatch({ nextStartTime: "14:00" }),
+  { endTime: "17:00", startTime: "14:00" }
+);
+
+// 자정을 넘기는 시간은 23:59 로 묶는다. 저장 계약이 endTime > startTime 을 요구하므로
+// 01:30 을 그대로 두면 사용자가 고칠 수 없는 검증 실패가 된다.
+assert.deepEqual(
+  createLessonModalStartTimeChangePatch({ nextStartTime: "22:30" }),
+  { endTime: "23:59", startTime: "22:30" }
+);
+assert.deepEqual(
+  createLessonModalStartTimeChangePatch({ nextStartTime: "21:00" }),
+  { endTime: "23:59", startTime: "21:00" }
+);
+assert.deepEqual(
+  createLessonModalStartTimeChangePatch({ nextStartTime: "20:59" }),
+  { endTime: "23:59", startTime: "20:59" }
+);
+
+// 시간이 비어 있거나 망가졌으면 종료를 건드리지 않는다(입력 중인 값을 덮지 않는다).
+assert.deepEqual(createLessonModalStartTimeChangePatch({ nextStartTime: "" }), { startTime: "" });
+assert.deepEqual(createLessonModalStartTimeChangePatch({ nextStartTime: "abc" }), { startTime: "abc" });
+
+// 길이는 주입 가능하다 — 기본값 180분은 상수로 고정되지 않는다.
+assert.deepEqual(
+  createLessonModalStartTimeChangePatch({ lessonMinutes: 90, nextStartTime: "16:00" }),
+  { endTime: "17:30", startTime: "16:00" }
 );
 
 console.log("lesson modal draft transition model passed");

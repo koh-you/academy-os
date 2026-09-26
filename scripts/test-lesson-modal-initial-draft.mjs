@@ -50,7 +50,8 @@ assert.deepEqual(newLessonDraft, {
   lessonType: "class",
   name: "월수금 4-7",
   startTime: "16:00",
-  studentIds: ["student-a", "student-b"]
+  // 2026-09-26 · 신규 등록은 아무도 선택되지 않은 상태로 시작한다(전원 선택 시드 제거).
+  studentIds: []
 });
 
 const existingLesson = {
@@ -85,6 +86,7 @@ assert.deepEqual(existingLessonDraft, {
   lessonType: "closure",
   name: "기존 수업",
   startTime: "17:00",
+  // 기존 수업 편집은 그 수업의 명단을 그대로 유지한다(퇴원생만 걱러낸다).
   studentIds: ["student-b"]
 });
 

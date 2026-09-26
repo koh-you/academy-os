@@ -1,3 +1,27 @@
+import { addMinutesToAttendanceTime, normalizeTimeInput } from "./attendance.js";
+
+// 2026-09-26 · 사용자가 시작 시간을 직접 바꿀 때 종료 시간이 따라가는 기본 수업 길이.
+export const lessonModalDefaultLessonMinutes = 180;
+
+// 시작 시간 변경 패치. 종료는 기본 +3시간이고, 그날 자정을 넘기면 23:59 로 묶는다.
+// 저장 계약(getLessonModalValidationError)은 endTime > startTime 을 요구하므로 다음 날 시각을 그대로 두면
+// 사용자가 고칠 수 없는 저장 실패가 된다. 하루를 넘는 수업은 종료를 사람이 직접 정한다.
+export function createLessonModalStartTimeChangePatch({
+  lessonMinutes = lessonModalDefaultLessonMinutes,
+  nextStartTime
+}) {
+  const normalizedStartTime = normalizeTimeInput(nextStartTime);
+  if (!normalizedStartTime) return { startTime: nextStartTime };
+  const [startHour, startMinute] = normalizedStartTime.split(":").map(Number);
+  const endMinutes = startHour * 60 + startMinute + lessonMinutes;
+  return {
+    endTime: endMinutes >= 24 * 60
+      ? "23:59"
+      : addMinutesToAttendanceTime(normalizedStartTime, lessonMinutes),
+    startTime: nextStartTime
+  };
+}
+
 export function createLessonModalColorOptions({
   getRegularLessonColor,
   lessonCalendarColors,

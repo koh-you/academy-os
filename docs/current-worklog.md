@@ -1,5 +1,15 @@
 # Academy OS Current Worklog
 
+## 2026-09-26 수업 등록 모달 개편
+
+- 「삭제하거나 감춰주세요」 를 그대로 따랐으면 기능이 사라졌다. `큰 수업 틀` select 은 메타데이터 입력이 아니라 `lessonModalDraftTransitions.js` 의 패치 하나로 수업명·시간·색상·명단을 동시에 바꾼다. 사용자가 지우라고 한 것은 「폼 위쪽에 맥락 없이 놓인 드롭다운」 이지 「반 단위로 채우는 기능」 이 아니어서, 패치는 그대로 두고 진입점만 명단 옆으로 옮겼다.
+- 고정 푸터를 sticky 로 풀지 않고 공용 `Modal` 에 `footer` 슬롯을 넣은 이유: `.modalScrollBody` 가 `gap: 20px` 그리드라 sticky 로 두면 푸터 위 20px 틈으로 본문이 비친다. 그리드 행을 `auto minmax(0,1fr) auto` 로 두는 쪽이 저장바 있는 다른 모달에도 그대로 쓸 수 있다.
+- 오른쪽 열의 자체 스크롤은 열에 `overflow-y:auto` 를 걸지 않고 `.lessonStudentGroups` 에 `max-height: min(40dvh, 340px)` 로 준다. 모달이 스크롤 모드라 열 높이가 확정적이지 않아 열에 건 overflow 는 동작하지 않는다. 이 방식은 1열로 접힐 때도 그대로 쓴다.
+- `getByLabel("반 불러오기", { exact: true })` 가 안 잡혔다. 감싸는 `<label>` 의 텍스트에 `<select>` 의 선택된 option 글자까지 들어가 접근성 이름이 「반 불러오기직접 입력 일정」 이 된다. select 에 `aria-label` 을 명시해 고정했다(예전 코드는 `getByLabel` 을 부분일치로 써서 드러나지 않았다).
+- 자정 넘김은 `addMinutesToAttendanceTime` 가 24시간으로 돌아 22:30 → 01:30 을 주는데, 저장 검증은 `endTime > startTime` 을 요구해 저장이 막힌다. 사용자가 고칠 수 없는 실패를 만들지 않도록 23:59 로 묶고 단위 테스트로 잠갔다.
+- 보이는 것만 측정하면 틀린다: 처음엔 `document.documentElement.scrollHeight` 로 세로 넘침을 재려다 실패했는데, 그건 모달 뒤 달력 페이지 높이였다. 모달이 뷰포트에 들어가는지는 `.modalBackdrop` 의 `scrollHeight > clientHeight` 로 봐야 한다.
+- 공용 `SectionHeader` 의 aside 는 `flex: 0 0 auto` 라 좁은 열에 넣으면 제목을 한 글자씩 짓눌렀다. 좌측 열에서만 `flex-wrap: wrap` + `margin-left: 0` 으로 풀었다(공용 규칙은 그대로).
+
 ## 2026-09-26 설명 문구 정리 (HelpTip 전환)
 
 - 스캔은 두 번에 걸쳤다. JSX 앵커(텍스트 노드·description 류 prop)만 보는 1차로 215건을 잡았는데 **모델 파일이 만드는 문구**(휴강 보충 보라색 박스 같은 것)를 놓쳐, 모든 문자열 리터럴을 훑는 2차로 64건을 보강해 275건이 됐다. 알림톡 발송 본문·샘플 데이터·에러 메시지는 컨텍스트 키워드로 걸러냈다.

@@ -1,4 +1,5 @@
 import { InlineSaveStatus } from "../../shared/components/InlineSaveStatus.jsx";
+import { ModalFooter } from "../../shared/components/Modal.jsx";
 
 export function LessonModalActions({
   closureMakeupEnabled,
@@ -11,7 +12,8 @@ export function LessonModalActions({
   onDelete = null,
   onSave,
   saveMessage,
-  saveState
+  saveState,
+  selectedStudentCount = 0
 }) {
   const saveButtonLabel = isSaving
     ? "저장 중..."
@@ -26,26 +28,35 @@ export function LessonModalActions({
                 ? "신입생 보강 등록 후 알림톡 예약"
                 : "수업 등록"
         }`;
+  // 2026-09-26 · 기본 선택이 전원에서 0명으로 바뀌었다. 저장 자체는 기존 계약 그대로 허용하고(휴강처럼 명단 없는 수업이 있다),
+  // 명단이 비어 있다는 사실만 저장 경계 문구 옆에 알린다. 1명 이상이 필요한 유형은 getLessonModalValidationError 가 그대로 막는다.
+  const emptyRosterNotice = !isSaving && !isSaved && selectedStudentCount === 0
+    ? "포함 학생 0명으로 저장됩니다."
+    : "";
 
+  // 2026-09-26 · 상태바와 액션을 공용 ModalFooter 하나로 묶어 모달 하단에 고정한다(본문만 스크롤).
+  // 순서는 docs/ui-principles.md §3: [파괴적 왼쪽 끝] … [soft 취소] [primary 확정].
   return (
-    <>
+    <ModalFooter className="lessonModalFooter">
+      {onDelete ? (
+        <button
+          className="dangerSoftButton lessonModalDeleteButton"
+          disabled={isSaving}
+          onClick={onDelete}
+          type="button"
+        >
+          수업 취소
+        </button>
+      ) : null}
+
       <div className="lessonModalSaveStatus" aria-live="polite">
         {/* 2026-09-19 · 이 모달이 저장하는 건 수업 일정(lessons)이다. 수업일지(학생 기록)와 용어를 구분한다. */}
         <InlineSaveStatus label="수업 일정" saveState={saveState} />
         <span>{saveMessage}</span>
+        {emptyRosterNotice ? <span className="lessonModalEmptyRosterNotice">{emptyRosterNotice}</span> : null}
       </div>
 
-      <div className={`lessonModalActions${onDelete ? " hasDeleteAction" : ""}`}>
-        {onDelete ? (
-          <button
-            className="dangerSoftButton lessonModalDeleteButton"
-            disabled={isSaving}
-            onClick={onDelete}
-            type="button"
-          >
-            수업 취소
-          </button>
-        ) : null}
+      <div className="lessonModalActions">
         <button
           className="softButton lessonModalCancelButton"
           disabled={isSaving}
@@ -55,7 +66,7 @@ export function LessonModalActions({
           {isSaved ? "달력에서 확인" : "취소"}
         </button>
         <button
-          className="primaryButton full"
+          className="primaryButton lessonModalSaveButton"
           disabled={isSaving || isSaved}
           onClick={onSave}
           type="button"
@@ -63,6 +74,6 @@ export function LessonModalActions({
           {saveButtonLabel}
         </button>
       </div>
-    </>
+    </ModalFooter>
   );
 }
