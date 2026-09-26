@@ -345,6 +345,7 @@
   "scripts/test-lesson-modal-save-controller.mjs",
   "scripts/test-lesson-roster-cleanup-virtual-gate.mjs",
   "scripts/test-canceled-lesson-retention-sweep.mjs",
+  "scripts/test-notification-dispatch-tenant-fanout.mjs",
   "scripts/test-lesson-roster-selectors.mjs",
   "scripts/test-lesson-bulk-roster-cleanup.mjs",
   "scripts/test-lesson-hub-closeout-boundary.mjs",
